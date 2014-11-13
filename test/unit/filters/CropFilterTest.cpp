@@ -36,7 +36,7 @@
 
 #include <boost/cstdint.hpp>
 
-#include <pdal/drivers/faux/Reader.hpp>
+#include <FauxReader.hpp>
 #include <pdal/filters/Reprojection.hpp>
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/filters/Crop.hpp>
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(test_crop)
     opts.add("bounds", srcBounds);
     opts.add("num_points", 1000);
     opts.add("mode", "ramp");
-    drivers::faux::Reader reader;
+    FauxReader reader;
     reader.setOptions(opts);
 
     // crop the window to 1/3rd the size in each dimension

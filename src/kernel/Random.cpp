@@ -92,7 +92,7 @@ Stage* Random::makeReader(Options readerOptions)
     }
 
     StageFactory factory;
-    Stage* reader_stage = factory.createReader("drivers.faux.reader");
+    Stage* reader_stage = factory.createReader("readers.faux");
     reader_stage->setOptions(readerOptions);
 
     return reader_stage;

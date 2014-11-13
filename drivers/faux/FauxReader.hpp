@@ -38,10 +38,6 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace faux
-{
 
 enum Mode
 {
@@ -81,13 +77,13 @@ enum Mode
 // activated by passing a numeric value as "number_of_returns" to the
 // reader constructor.
 //
-class PDAL_DLL Reader : public pdal::Reader
+class PDAL_DLL FauxReader : public pdal::Reader
 {
 public:
-    SET_STAGE_NAME("drivers.faux.reader", "Faux Reader")
+    SET_STAGE_NAME("readers.faux", "Faux Reader")
     SET_STAGE_ENABLED(true)
 
-    Reader();
+    FauxReader();
 
     static Dimension::IdList getDefaultDimensions();
 
@@ -120,11 +116,8 @@ private:
     virtual bool eof()
         { return false; }
 
-    Reader& operator=(const Reader&); // not implemented
-    Reader(const Reader&); // not implemented
+    FauxReader& operator=(const FauxReader&); // not implemented
+    FauxReader(const FauxReader&); // not implemented
 };
 
-} // namespace faux
-} // namespace drivers
 } // namespace pdal
-

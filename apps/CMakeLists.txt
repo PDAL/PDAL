@@ -13,7 +13,9 @@ set(PDAL_SOURCE_DIR ../src)
 
 include_directories(
     .
-    ../include)
+    ../include
+    ${PROJECT_SOURCE_DIR}/drivers/faux
+)
 
 #------------------------------------------------------------------------------
 # Collect programs to build

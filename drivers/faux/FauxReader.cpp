@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/drivers/faux/Reader.hpp>
+#include <FauxReader.hpp>
 
 #include <ctime>
 
@@ -41,10 +41,6 @@
 #include <boost/algorithm/string.hpp>
 
 namespace pdal
-{
-namespace drivers
-{
-namespace faux
 {
 
 static Mode string2mode(const std::string& str)
@@ -58,14 +54,14 @@ static Mode string2mode(const std::string& str)
 }
 
 
-Reader::Reader()
+FauxReader::FauxReader()
     : pdal::Reader()
 {
     m_count = 0;
 }
 
 
-void Reader::processOptions(const Options& options)
+void FauxReader::processOptions(const Options& options)
 {
     BOX3D bounds = options.getValueOrDefault<BOX3D>("bounds",
         BOX3D(0, 0, 0, 1, 1, 1));
@@ -93,7 +89,7 @@ void Reader::processOptions(const Options& options)
 }
 
 
-void Reader::addDimensions(PointContextRef ctx)
+void FauxReader::addDimensions(PointContextRef ctx)
 {
     ctx.registerDims(getDefaultDimensions());
     if (m_numReturns > 0)
@@ -104,7 +100,7 @@ void Reader::addDimensions(PointContextRef ctx)
 }
 
 
-Dimension::IdList Reader::getDefaultDimensions()
+Dimension::IdList FauxReader::getDefaultDimensions()
 {
     Dimension::IdList ids;
 
@@ -116,7 +112,7 @@ Dimension::IdList Reader::getDefaultDimensions()
 }
 
 
-point_count_t Reader::read(PointBuffer& buf, point_count_t count)
+point_count_t FauxReader::read(PointBuffer& buf, point_count_t count)
 {
     const double numDeltas = (double)count - 1.0;
     const double delX = (m_maxX - m_minX) / numDeltas;
@@ -181,7 +177,4 @@ point_count_t Reader::read(PointBuffer& buf, point_count_t count)
     return count;
 }
 
-} // namespace faux
-} // namespace drivers
 } // namespace pdal
-

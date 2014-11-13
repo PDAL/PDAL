@@ -35,7 +35,7 @@
 #include "UnitTest.hpp"
 
 #include <pdal/PointBuffer.hpp>
-#include <pdal/drivers/faux/Reader.hpp>
+#include <FauxReader.hpp>
 #include <pdal/filters/Decimation.hpp>
 
 #include "../StageTester.hpp"
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test1)
     ops.add("bounds", srcBounds);
     ops.add("mode", "random");
     ops.add("num_points", 30);
-    drivers::faux::Reader reader;
+    FauxReader reader;
     reader.setOptions(ops);
 
     Options decimationOps;

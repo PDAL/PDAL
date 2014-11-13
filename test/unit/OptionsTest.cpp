@@ -42,7 +42,7 @@
 #include <pdal/Bounds.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/filters/Crop.hpp>
-#include <pdal/drivers/faux/Reader.hpp>
+#include <FauxReader.hpp>
 
 #include <boost/property_tree/xml_parser.hpp>
 
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(test_static_options)
     using namespace pdal;
 
     Options ops;
-    drivers::faux::Reader reader;
+    FauxReader reader;
     reader.setOptions(ops);
     filters::Crop crop;
     crop.setOptions(ops);
