@@ -66,7 +66,7 @@ MAKE_READER_CREATOR(FauxReader, pdal::FauxReader)
 MAKE_READER_CREATOR(LasReader, pdal::drivers::las::Reader)
 MAKE_READER_CREATOR(BpfReader, pdal::BpfReader)
 MAKE_READER_CREATOR(BufferReader, drivers::buffer::BufferReader)
-MAKE_READER_CREATOR(QfitReader, pdal::drivers::qfit::Reader)
+MAKE_READER_CREATOR(QfitReader, pdal::QfitReader)
 MAKE_READER_CREATOR(TerrasolidReader, pdal::drivers::terrasolid::Reader)
 MAKE_READER_CREATOR(SbetReader, pdal::SbetReader)
 
@@ -126,7 +126,7 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
     drivers["bin"] = "drivers.terrasolid.reader";
     if (f.getReaderCreator("drivers.greyhound.reader"))
         drivers["greyhound"] = "drivers.greyhound.reader";
-    drivers["qi"] = "drivers.qfit.reader";
+    drivers["qi"] = "readers.qfit";
     if (f.getReaderCreator("drivers.nitf.reader"))
     {
         drivers["nitf"] = "drivers.nitf.reader";
@@ -312,7 +312,7 @@ void StageFactory::registerKnownReaders()
     REGISTER_READER(BufferReader, pdal::drivers::buffer::BufferReader);
     REGISTER_READER(LasReader, pdal::drivers::las::Reader);
 
-    REGISTER_READER(QfitReader, pdal::drivers::qfit::Reader);
+    REGISTER_READER(QfitReader, pdal::QfitReader);
     REGISTER_READER(TerrasolidReader, pdal::drivers::terrasolid::Reader);
     REGISTER_READER(BpfReader, pdal::BpfReader);
     REGISTER_READER(SbetReader, pdal::SbetReader);
