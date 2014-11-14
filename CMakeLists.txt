@@ -493,6 +493,7 @@ set(PDAL_TARGET_OBJECTS "")
 
 add_subdirectory(io)
 add_subdirectory(filters)
+add_subdirectory(kernels)
 add_subdirectory(src)
 
 if(WITH_TESTS)
@@ -517,6 +518,9 @@ else()
       "CTest support requested but WITH_TESTS option not specified to build of PDAL unit tests")
   endif()
 endif()
+
+# PDAL_TARGET_OBJECTS is used to collect the driver object libraries
+set(PDAL_TARGET_OBJECTS "")
 
 add_subdirectory(plugins)
 

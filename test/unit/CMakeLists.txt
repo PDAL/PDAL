@@ -130,6 +130,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/filters/ferry
     ${PROJECT_SOURCE_DIR}/filters/mortonorder
     ${PROJECT_SOURCE_DIR}/filters/splitter
+    ${PROJECT_SOURCE_DIR}/kernels/info
 )
 set(deps ${PDAL_LIB_NAME})
 PDAL_ADD_TEST(pdal_test "${PDAL_UNITTEST_SRCS}" "${deps}")

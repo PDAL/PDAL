@@ -41,12 +41,12 @@ available subject to having the required include directories pathed:
 
 * `#include <pdal/Drivers.hpp>`
 * `#include <pdal/Filters.hpp>`
-* `#include <pdal/Kernel.hpp>`
+* `#include <pdal/Kernels.hpp>`
 
 
 .. note::
 
-    Drivers, Filters, and Kernel bring in *all* of the respective sub includes
+    Drivers, Filters, and Kernels bring in *all* of the respective sub includes
     for those sections of the source tree. You are not required to include
     everything if you don't need it, however, and it is still possible to
     selectively include the classes you need as shown in the example below.
