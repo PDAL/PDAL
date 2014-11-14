@@ -43,21 +43,17 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace text
-{
 
 typedef std::shared_ptr<std::ostream> FileStreamPtr;
 
-class PDAL_DLL Writer : public pdal::Writer
+class PDAL_DLL TextWriter : public pdal::Writer
 {
 public:
-    SET_STAGE_NAME("drivers.text.writer", "Text Writer")
-    SET_STAGE_LINK("http://pdal.io/stages/drivers.text.writer.html")
+    SET_STAGE_NAME("writers.text", "Text Writer")
+    SET_STAGE_LINK("http://pdal.io/stages/writers.text.html")
     SET_STAGE_ENABLED(true)
 
-    Writer() : pdal::Writer()
+    TextWriter() : pdal::Writer()
     {}
 
     static Options getDefaultOptions();
@@ -91,11 +87,8 @@ private:
     FileStreamPtr m_stream;
     Dimension::IdList m_dims;
 
-    Writer& operator=(const Writer&); // not implemented
-    Writer(const Writer&); // not implemented
+    TextWriter& operator=(const TextWriter&); // not implemented
+    TextWriter(const TextWriter&); // not implemented
 };
 
-} // namespace text
-} // namespace drivers
 } // namespace pdal
-

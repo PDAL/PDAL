@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/drivers/text/Writer.hpp>
+#include <TextWriter.hpp>
 #include <pdal/Algorithm.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/pdal_internal.hpp>
@@ -48,10 +48,6 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace text
-{
 
 struct FileStreamDeleter
 {
@@ -65,7 +61,7 @@ struct FileStreamDeleter
 };
 
 
-Options Writer::getDefaultOptions()
+Options TextWriter::getDefaultOptions()
 {
     Options options;
 
@@ -79,7 +75,7 @@ Options Writer::getDefaultOptions()
 }
 
 
-void Writer::processOptions(const Options& ops)
+void TextWriter::processOptions(const Options& ops)
 {
     m_filename = ops.getValueOrThrow<std::string>("filename");
     m_stream = FileStreamPtr(FileUtils::createFile(m_filename, true),
@@ -100,7 +96,7 @@ void Writer::processOptions(const Options& ops)
 }
 
 
-void Writer::ready(PointContextRef ctx)
+void TextWriter::ready(PointContextRef ctx)
 {
     m_stream->precision(m_precision);
     *m_stream << std::fixed;
@@ -139,7 +135,7 @@ void Writer::ready(PointContextRef ctx)
 }
 
 
-void Writer::writeHeader(PointContextRef ctx)
+void TextWriter::writeHeader(PointContextRef ctx)
 {
     log()->get(LogLevel::Debug) << "Writing header to filename: " <<
         m_filename << std::endl;
@@ -150,7 +146,7 @@ void Writer::writeHeader(PointContextRef ctx)
 }
 
 
-void Writer::writeFooter()
+void TextWriter::writeFooter()
 {
     if (m_outputType == "GEOJSON")
     {
@@ -162,7 +158,7 @@ void Writer::writeFooter()
 }
 
 
-void Writer::writeGeoJSONHeader()
+void TextWriter::writeGeoJSONHeader()
 {
     if (m_callback.size())
         *m_stream << m_callback <<"(";
@@ -170,7 +166,7 @@ void Writer::writeGeoJSONHeader()
 }
 
 
-void Writer::writeCSVHeader(PointContextRef ctx)
+void TextWriter::writeCSVHeader(PointContextRef ctx)
 {
     for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
     {
@@ -185,7 +181,7 @@ void Writer::writeCSVHeader(PointContextRef ctx)
     *m_stream << m_newline;
 }
 
-void Writer::writeCSVBuffer(const PointBuffer& data)
+void TextWriter::writeCSVBuffer(const PointBuffer& data)
 {
     boost::uint32_t pointIndex(0);
 
@@ -201,7 +197,7 @@ void Writer::writeCSVBuffer(const PointBuffer& data)
     }
 }
 
-void Writer::writeGeoJSONBuffer(const PointBuffer& data)
+void TextWriter::writeGeoJSONBuffer(const PointBuffer& data)
 {
     using namespace Dimension;
 
@@ -233,7 +229,7 @@ void Writer::writeGeoJSONBuffer(const PointBuffer& data)
     }
 }
 
-void Writer::write(const PointBuffer& data)
+void TextWriter::write(const PointBuffer& data)
 {
     if (m_outputType == "CSV")
         writeCSVBuffer(data);
@@ -242,11 +238,9 @@ void Writer::write(const PointBuffer& data)
 }
 
 
-void Writer::done(PointContextRef ctx)
+void TextWriter::done(PointContextRef ctx)
 {
     writeFooter();
 }
 
-}
-}
-} // namespaces
+} // namespace pdal

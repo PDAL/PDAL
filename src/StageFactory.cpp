@@ -97,7 +97,7 @@ MAKE_FILTER_CREATOR(Programmable, pdal::filters::Programmable)
 //
 MAKE_WRITER_CREATOR(LasWriter, pdal::drivers::las::Writer)
 MAKE_WRITER_CREATOR(SbetWriter, pdal::SbetWriter)
-MAKE_WRITER_CREATOR(TextWriter, pdal::drivers::text::Writer)
+MAKE_WRITER_CREATOR(TextWriter, pdal::TextWriter)
 
 StageFactory::StageFactory()
 {
@@ -169,10 +169,10 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
     if (f.getWriterCreator("drivers.pclvisualizer.writer"))
         drivers["pclviz"] = "drivers.pclvisualizer.writer";
     drivers["sbet"] = "writers.sbet";
-    drivers["csv"] = "drivers.text.writer";
-    drivers["json"] = "drivers.text.writer";
-    drivers["xyz"] = "drivers.text.writer";
-    drivers["txt"] = "drivers.text.writer";
+    drivers["csv"] = "writers.text";
+    drivers["json"] = "writers.text";
+    drivers["xyz"] = "writers.text";
+    drivers["txt"] = "writers.text";
     if (f.getWriterCreator("drivers.nitf.writer"))
         drivers["ntf"] = "drivers.nitf.writer";
     drivers["sqlite"] = "drivers.sqlite.writer";
@@ -346,7 +346,7 @@ void StageFactory::registerKnownWriters()
 {
     REGISTER_WRITER(LasWriter, pdal::drivers::las::Writer);
     REGISTER_WRITER(SbetWriter, pdal::SbetWriter);
-    REGISTER_WRITER(TextWriter, pdal::drivers::text::Writer);
+    REGISTER_WRITER(TextWriter, pdal::TextWriter);
 }
 
 void StageFactory::loadPlugins()

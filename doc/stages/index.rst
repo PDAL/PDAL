@@ -29,7 +29,7 @@ Readers & Writers
    drivers.qfit.reader
    drivers.rxp.reader
    readers.sbet
-   drivers.text.writer
+   writers.text
 
 
 Filters
