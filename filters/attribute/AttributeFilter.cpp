@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/filters/Attribute.hpp>
+#include <AttributeFilter.hpp>
 #include <pdal/GlobalEnvironment.hpp>
 
 #include <pdal/QuadIndex.hpp>
@@ -42,8 +42,6 @@
 #include <geos_c.h>
 
 namespace pdal
-{
-namespace filters
 {
 
 struct OGRDataSourceDeleter
@@ -77,13 +75,13 @@ struct OGRFeatureDeleter
     }
 };
 
-void Attribute::initialize()
+void AttributeFilter::initialize()
 {
     GlobalEnvironment::get().getGDALEnvironment();
 }
 
 
-Options Attribute::getDefaultOptions()
+Options AttributeFilter::getDefaultOptions()
 {
     Options options;
 
@@ -107,7 +105,7 @@ Options Attribute::getDefaultOptions()
 }
 
 
-void Attribute::processOptions(const Options& options)
+void AttributeFilter::processOptions(const Options& options)
 {
     std::vector<Option> dimensions = options.getOptions("dimension");
     for (auto i = dimensions.begin(); i != dimensions.end(); ++i)
@@ -144,7 +142,7 @@ void Attribute::processOptions(const Options& options)
     }
 }
 
-void Attribute::ready(PointContext ctx)
+void AttributeFilter::ready(PointContext ctx)
 {
     m_gdal_debug = boost::shared_ptr<pdal::gdal::Debug>(
         new pdal::gdal::Debug(isDebug(), log()));
@@ -226,7 +224,7 @@ GEOSGeometry* createGEOSPoint(GEOSContextHandle_t ctx, double x, double y, doubl
     return p;
 }
 
-void Attribute::UpdateGEOSBuffer(PointBuffer& buffer, AttributeInfo& info)
+void AttributeFilter::UpdateGEOSBuffer(PointBuffer& buffer, AttributeInfo& info)
 {
     QuadIndex idx(buffer);
     idx.build();
@@ -329,7 +327,7 @@ void Attribute::UpdateGEOSBuffer(PointBuffer& buffer, AttributeInfo& info)
     }
 }
 
-void Attribute::filter(PointBuffer& buffer)
+void AttributeFilter::filter(PointBuffer& buffer)
 {
 
     for (auto& dim_par: m_dimensions)
@@ -350,10 +348,8 @@ void Attribute::filter(PointBuffer& buffer)
 }
 
 
-void Attribute::done(PointContext ctx)
+void AttributeFilter::done(PointContext ctx)
 {
 }
 
-} // namespace filters
 } // namespace pdal
-

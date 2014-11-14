@@ -181,7 +181,6 @@ set(PDAL_FILTERS_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_FILTERS_PATH}")
 set(PDAL_FILTERS_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_FILTERS_PATH}")
 
 set(PDAL_FILTERS_HPP
-  "${PDAL_FILTERS_HEADERS}/Attribute.hpp"
   "${PDAL_FILTERS_HEADERS}/ByteSwap.hpp"
   "${PDAL_FILTERS_HEADERS}/Cache.hpp"
   "${PDAL_FILTERS_HEADERS}/Chipper.hpp"
@@ -199,7 +198,6 @@ set(PDAL_FILTERS_HPP
 )
 
 set (PDAL_FILTERS_CPP
-  "${PDAL_FILTERS_SRC}/Attribute.cpp"
   "${PDAL_FILTERS_SRC}/Chipper.cpp"
   "${PDAL_FILTERS_SRC}/Crop.cpp"
   "${PDAL_FILTERS_SRC}/Decimation.cpp"
@@ -353,6 +351,7 @@ include_directories(${PROJECT_SOURCE_DIR}/drivers/faux)
 include_directories(${PROJECT_SOURCE_DIR}/drivers/qfit)
 include_directories(${PROJECT_SOURCE_DIR}/drivers/sbet)
 include_directories(${PROJECT_SOURCE_DIR}/drivers/text)
+include_directories(${PROJECT_SOURCE_DIR}/filters/attribute)
 
 set(PDAL_SOURCES
   ${PDAL_HPP}
