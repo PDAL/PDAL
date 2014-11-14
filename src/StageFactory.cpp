@@ -375,15 +375,15 @@ void StageFactory::loadPlugins()
     {
         if (!boost::filesystem::is_directory(pluginPath))
             continue;
-        directory_iterator dir(pluginPath);
+        directory_iterator dir(pluginPath), it, end;
 
         std::map<path, path> pluginFilenames;
 
         // Collect candidate filenames in the above form. Prefer symlink files
         // over hard files if their basenames are the same.
-        for (auto it : dir)
+        for (it = dir; it != end; ++it)
         {
-            path p = it.path();
+            path p = it->path();
 
             if (boost::algorithm::istarts_with(p.filename().string(), "libpdal_plugin"))
             {
@@ -423,7 +423,7 @@ void StageFactory::loadPlugins()
                         // we are going to presume that a symlink'd file is more
                         // cannonical than a hard file of the same name.
                         std::map<path, path>::iterator i = pluginFilenames.find(basename);
-                        if (it.symlink_status().type() == symlink_file)
+                        if (it->symlink_status().type() == symlink_file)
                         {
                             // Take the symlink over a hard SO
                             i->second = p;
