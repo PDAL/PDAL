@@ -10,7 +10,7 @@
         <Option name="offset_y">4703909.84</Option>
         <Option name="scale_z">0.01</Option>
         <Option name="offset_z">7.385474</Option>
-        <Reader type="drivers.bpf.reader">
+        <Reader type="readers.bpf">
             <Option name="filename">
                 utm15.bpf
             </Option>

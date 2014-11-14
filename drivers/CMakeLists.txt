@@ -1,3 +1,4 @@
+add_subdirectory(bpf)
 add_subdirectory(faux)
 add_subdirectory(sbet)
 
