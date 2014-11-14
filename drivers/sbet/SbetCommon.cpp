@@ -32,41 +32,41 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
-
-#include <pdal/drivers/sbet/Common.hpp>
-#include <pdal/OStream.hpp>
-#include <pdal/Writer.hpp>
+#include <SbetCommon.hpp>
 
 namespace pdal
 {
-namespace drivers
+
+Dimension::IdList fileDimensions()
 {
-namespace sbet
-{
+    Dimension::IdList ids;
 
-class PDAL_DLL SbetWriter : public pdal::Writer
-{
-public:
-    SET_STAGE_NAME("drivers.sbet.writer", "SBET Writer")
-    SET_STAGE_LINK("http://pdal.io/stages/drivers.sbet.writer.html")
+    // Data for each point is in the source file in the order these dimensions
+    // are listed, I would suppose.  Would be really nice to have a reference
+    // to the file spec.  I searched the Internet and found that it is from
+    // some company called Applanix (Trimble), but I can't find anything
+    // describing the file format on their website.
 
-    SbetWriter() : pdal::Writer()
-        {}
+    using namespace Dimension;
+    ids.push_back(Id::GpsTime);
+    ids.push_back(Id::Y);
+    ids.push_back(Id::X);
+    ids.push_back(Id::Z);
+    ids.push_back(Id::XVelocity);
+    ids.push_back(Id::YVelocity);
+    ids.push_back(Id::ZVelocity);
+    ids.push_back(Id::Roll);
+    ids.push_back(Id::Pitch);
+    ids.push_back(Id::PlatformHeading);
+    ids.push_back(Id::WanderAngle);
+    ids.push_back(Id::XBodyAccel);
+    ids.push_back(Id::YBodyAccel);
+    ids.push_back(Id::ZBodyAccel);
+    ids.push_back(Id::XBodyAngRate);
+    ids.push_back(Id::YBodyAngRate);
+    ids.push_back(Id::ZBodyAngRate);
 
-    static Dimension::IdList getDefaultDimensions()
-        { return fileDimensions(); }
+    return ids;
+}
 
-private:
-    std::unique_ptr<OLeStream> m_stream;
-    std::string m_filename;
-
-    virtual void processOptions(const Options& options);
-    virtual void ready(PointContextRef ctx);
-    virtual void write(const PointBuffer& buf);
-};
-
-} // namespace sbet
-} // namespace drivers
 } // namespace pdal
-

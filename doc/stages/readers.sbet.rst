@@ -1,7 +1,7 @@
-.. _drivers.sbet.reader:
+.. _readers.sbet:
 
-drivers.sbet.reader
-===================
+readers.sbet
+============
 
 The **SBET reader** read from files in the SBET format, used for exchange data from interital measurement units (IMUs).
 
@@ -15,7 +15,7 @@ Example
   <Pipeline version="1.0">
     <Writer type="drivers.las.writer">
       <Option name="filename">output.las</Option>
-      <Reader type="drivers.sbet.reader">
+      <Reader type="readers.sbet">
         <Option name="filename">
           sbetfile.sbet
         </Option>

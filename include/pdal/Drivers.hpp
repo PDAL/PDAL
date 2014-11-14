@@ -44,7 +44,8 @@
 
 #include <pdal/drivers/bpf/BpfReader.hpp>
 
-#include <pdal/drivers/sbet/Reader.hpp>
+#include <SbetReader.hpp>
+#include <SbetWriter.hpp>
 
 #ifdef PDAL_HAVE_CARIS
 #include <pdal/drivers/caris/CloudReader.hpp>

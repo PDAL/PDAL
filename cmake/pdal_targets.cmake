@@ -135,12 +135,13 @@ endmacro(PDAL_ADD_TEST)
 # _name The driver name.
 # _srcs The list of source files to add.
 # _incs The list of includes to add.
-macro(PDAL_ADD_DRIVER _type _name _srcs _incs)
+macro(PDAL_ADD_DRIVER _type _name _srcs _incs _objs)
     source_group("Header Files\\${_type}\\${_name}" FILES ${_incs})
     source_group("Source Files\\${_type}\\${_name}" FILES ${_srcs})
 
     set(libname ${_type}_${_name})
-    set(PDAL_TARGET_OBJECTS ${PDAL_TARGET_OBJECTS} $<TARGET_OBJECTS:${libname}> PARENT_SCOPE)
+    #set(PDAL_TARGET_OBJECTS ${PDAL_TARGET_OBJECTS} $<TARGET_OBJECTS:${libname}> PARENT_SCOPE)
+    set(${_objs} $<TARGET_OBJECTS:${libname}>)
     add_definitions("-fPIC")
     add_library(${libname} OBJECT ${_srcs} ${_incs})
 
