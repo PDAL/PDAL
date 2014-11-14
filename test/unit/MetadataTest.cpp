@@ -142,6 +142,26 @@ BOOST_AUTO_TEST_CASE(test_construction)
     }
 }
 
+BOOST_AUTO_TEST_CASE(typed_value)
+{
+    MetadataNode m;
+    MetadataNode m2 = m.add("name", 127);
+
+    BOOST_CHECK_EQUAL(127, m2.value<int>());
+
+    double d = 123.45;
+    MetadataNode m3 = m.addEncoded("name", (unsigned char *)&d, sizeof(d));
+    BOOST_CHECK_CLOSE(d, m3.value<double>(), .00001);
+    BOOST_CHECK_EQUAL("zczMzMzcXkA=", m3.value());
+
+    MetadataNode m4 = m.add("name", "65539");
+    BOOST_CHECK_EQUAL(65539, m4.value<unsigned>());
+
+    auto ctx = Utils::redirect(std::cerr);
+    BOOST_CHECK_EQUAL(0, m4.value<unsigned short>());
+    Utils::restore(std::cerr, ctx);
+}
+
 
 BOOST_AUTO_TEST_CASE(test_construction_with_srs)
 {

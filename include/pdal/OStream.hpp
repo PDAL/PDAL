@@ -39,6 +39,7 @@
 #include <fstream>
 
 #include <pdal/portable_endian.hpp>
+#include <pdal/pdal_internal.hpp>
 
 namespace pdal
 {
@@ -92,7 +93,7 @@ protected:
 
 /// Stream wrapper for output of binary data that converts from host ordering
 /// to little endian format
-class OLeStream : public OStream
+class PDAL_DLL OLeStream : public OStream
 {
 public:
     OLeStream()

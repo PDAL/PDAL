@@ -106,6 +106,12 @@ OLeStream& operator<<(OLeStream& out, const ExtVariableLengthRecord& v)
     return out;
 }
 
+    void VariableLengthRecord::write(OLeStream& out, uint16_t recordSig)
+    {
+        m_recordSig = recordSig;
+        out << *this;
+    }
+
 } // namespace las
 } // namespace drivers
 } // namespace pdal

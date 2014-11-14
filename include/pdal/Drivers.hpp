@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_DRIVERS_HPP
-#define INCLUDED_PDAL_DRIVERS_HPP
+#pragma once
 
 #include <pdal/pdal_config.hpp>
 
@@ -47,68 +46,10 @@
 
 #include <pdal/drivers/sbet/Reader.hpp>
 
-#ifdef PDAL_HAVE_HDF5
-#include <pdal/drivers/icebridge/Reader.hpp>
-#endif
-
-#ifdef PDAL_HAVE_ORACLE
-#ifndef USE_PDAL_PLUGIN_OCI
-#include <pdal/drivers/oci/OciReader.hpp>
-#endif
-#endif
-
 #ifdef PDAL_HAVE_CARIS
-#ifndef USE_PDAL_PLUGIN_CARIS
 #include <pdal/drivers/caris/CloudReader.hpp>
-#endif
-#endif
-
-#ifdef PDAL_HAVE_MRSID
-#ifndef USE_PDAL_PLUGIN_MRSID
-#include <pdal/drivers/mrsid/Reader.hpp>
-#endif
 #endif
 
 #include <pdal/drivers/qfit/Reader.hpp>
 #include <pdal/drivers/terrasolid/Reader.hpp>
 #include <pdal/drivers/text/Writer.hpp>
-
-#ifdef PDAL_HAVE_ORACLE
-#ifndef USE_PDAL_PLUGIN_OCI
-#include <pdal/drivers/oci/Writer.hpp>
-#endif
-#endif
-
-#ifdef PDAL_HAVE_NITRO
-#ifndef USE_PDAL_PLUGIN_NITF
-#include <pdal/drivers/nitf/Writer.hpp>
-#endif
-#endif
-
-#ifdef PDAL_HAVE_NITRO
-#include <pdal/drivers/nitf/Reader.hpp>
-#endif
-
-#ifdef PDAL_HAVE_P2G
-#include <pdal/drivers/p2g/P2gWriter.hpp>
-#endif
-
-#ifdef PDAL_HAVE_HDF5
-#include <pdal/drivers/icebridge/Reader.hpp>
-#endif
-
-#ifdef PDAL_HAVE_SQLITE
-#ifndef USE_PDAL_PLUGIN_SQLITE
-#include <pdal/drivers/sqlite/SQLiteReader.hpp>
-#include <pdal/drivers/sqlite/SQLiteWriter.hpp>
-#endif
-#endif
-
-#ifdef PDAL_HAVE_POSTGRESQL
-#ifndef USE_PDAL_PLUGIN_PGPOINTCLOUD
-#include <pdal/drivers/pgpointcloud/PgReader.hpp>
-#include <pdal/drivers/pgpointcloud/Writer.hpp>
-#endif
-#endif
-
-#endif

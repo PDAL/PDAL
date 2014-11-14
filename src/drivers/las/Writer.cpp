@@ -382,40 +382,6 @@ void Writer::addVlr(const std::string& userId, uint16_t recordId,
     }
 }
 
-/// Find the approriate value for the specified header field.
-/// \param  name - Name of header field.
-/// \return  Value of header field.
-template<typename T>
-T Writer::headerVal(const std::string& name)
-{
-    // The header values either come from options, or are overriden in
-    // the metadata for options which had the value FORWARD.  For those,
-    // grab the value from metadata if it exists, or use the default value,
-    // which was stuck on following the FORWARD value when processing options.
-    auto pred = [name](MetadataNode n)
-    {
-        return n.name() == name;
-    };
-
-    std::string val = m_headerVals[name];
-    if (val.find("FORWARD") == 0)
-    {
-        MetadataNode m = m_metadata.findChild(pred);
-        val = m.empty() ? val.substr(strlen("FORWARD")) : m.value();
-    }
-    try
-    {
-        return boost::lexical_cast<T>(val);
-    }
-    catch (boost::bad_lexical_cast ex)
-    {
-        std::stringstream out;
-        out << "Couldn't convert option \"" << name << "\" with value \"" <<
-            val << "\" from string as necessary.";
-        throw pdal_error(out.str());
-    }
-}
-
 
 /// Fill the LAS header with values as provided in options or forwarded
 /// metadata.
@@ -431,37 +397,12 @@ void Writer::fillHeader(PointContextRef ctx)
     m_lasHeader.setPointFormat((uint8_t)headerVal<unsigned>("format"));
     m_lasHeader.setPointLen(m_lasHeader.basePointLen());
     m_lasHeader.setVersionMinor((uint8_t)headerVal<unsigned>("minor_version"));
-    m_lasHeader.setCreationDOY(headerVal<uint16_t>("creation_year"));
+    m_lasHeader.setCreationYear(headerVal<uint16_t>("creation_year"));
     m_lasHeader.setCreationDOY(headerVal<uint16_t>("creation_doy"));
     m_lasHeader.setSoftwareId(headerVal<std::string>("software_id"));
     m_lasHeader.setSystemId(headerVal<std::string>("system_id"));
     m_lasHeader.setProjectId(headerVal<boost::uuids::uuid>("project_id"));
-
-    uint16_t reserved(0);
-
-    try
-    {
-        reserved = headerVal<uint16_t>("global_encoding");
-    } catch (boost::bad_lexical_cast&)
-    {
-        // Try decoding base64
-        std::string global_encoding_data = headerVal<std::string>("global_encoding");
-        std::vector<uint8_t> data = Utils::base64_decode(global_encoding_data);
-        if (data.size() == 0)
-            ;
-        else if (data.size() == 1 )
-            reserved = data[0];
-        else if (data.size() == 2 )
-            memcpy(&reserved, data.data(), data.size());
-        else
-        {
-            std::ostringstream oss;
-            oss << "size of global_encoding bytes should == 2, not " <<
-                data.size();
-            throw pdal_error(oss.str());
-        }
-    }
-    m_lasHeader.setGlobalEncoding(reserved);
+    m_lasHeader.setGlobalEncoding(headerVal<uint16_t>("global_encoding"));
     m_lasHeader.setFileSourceId(headerVal<uint16_t>("filesource_id"));
 
     if (!m_lasHeader.pointFormatSupported())

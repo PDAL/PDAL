@@ -47,7 +47,7 @@ namespace pdal
 namespace kernel
 {
 
-class app_usage_error : public pdal::pdal_error
+class PDAL_DLL app_usage_error : public pdal::pdal_error
 {
 public:
     app_usage_error(std::string const& msg)
@@ -56,7 +56,7 @@ public:
 };
 
 
-class app_runtime_error : public pdal::pdal_error
+class PDAL_DLL app_runtime_error : public pdal::pdal_error
 {
 public:
     app_runtime_error(std::string const& msg)
@@ -66,7 +66,7 @@ public:
 
 
 // this is a static class with some helper functions the cmd line apps need
-class AppSupport
+class PDAL_DLL AppSupport
 {
 public:
     // makes a reader/stage, from just the filename and some other options
@@ -83,7 +83,7 @@ private:
 };
 
 
-class PercentageCallback : public pdal::UserCallback
+class PDAL_DLL PercentageCallback : public pdal::UserCallback
 {
 public:
     PercentageCallback(double major = 10.0, double minor = 2.0);
@@ -96,7 +96,7 @@ protected:
 };
 
 
-class HeartbeatCallback : public pdal::UserCallback
+class PDAL_DLL HeartbeatCallback : public pdal::UserCallback
 {
 public:
     virtual void callback()
@@ -104,7 +104,7 @@ public:
 };
 
 
-class ShellScriptCallback : public PercentageCallback
+class PDAL_DLL ShellScriptCallback : public PercentageCallback
 {
 public:
     ShellScriptCallback(const std::vector<std::string>& command);

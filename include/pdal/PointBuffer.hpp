@@ -220,6 +220,65 @@ public:
     Dimension::IdList dims() const
         { return m_context.dims(); }
 
+    std::ostream& getBytes(std::ostream& strm, PointId start, PointId end) const
+    {
+        char buf[sizeof(double)];
+        for (PointId i = start; i < end; ++i)
+        {
+            for (const auto& dim : m_context.m_dims->m_used)
+            {
+                getFieldInternal(dim, i, buf);
+                strm.write(buf, m_context.dimSize(dim));
+            }
+        }
+        return strm;
+    }
+    std::vector<uint8_t> getBytes() const
+    {
+        return getBytes(0, size());
+    }
+
+    std::vector<uint8_t> getBytes(PointId start, PointId end) const
+    {
+        std::vector<uint8_t> output;
+
+        size_t byteCount = PointBuffer::size() * m_context.pointSize();
+        output.reserve(byteCount);
+        output.resize(byteCount);
+
+        if (end == 0) end = PointBuffer::size();
+
+        uint8_t* pos = &(output.front());
+        for (PointId i = start; i < end; ++i)
+        {
+            for (const auto& dim : m_context.m_dims->m_used)
+            {
+                getFieldInternal(dim, i, pos);
+                pos += m_context.dimSize(dim);
+            }
+        }
+        return output;
+    }
+
+    PointBuffer(const std::vector<uint8_t>& bytes, PointContextRef ctx) : m_context(ctx)
+    {
+
+        size_t pointCount = bytes.size() / ctx.pointSize();
+        if (bytes.size() % ctx.pointSize())
+            throw pdal_error("byte count is not a multiple of point size!");
+
+//         assert(ctx.m_dims->m_used.size() == ctx.m_dims->m_detail.size());
+        const uint8_t* pos = &(bytes[0]);
+        for (PointId i = 0; i < pointCount; ++i)
+        {
+            for (const auto& dim : ctx.m_dims->m_used)
+            {
+                setFieldInternal(dim, i, pos);
+                pos += m_context.dimSize(dim);
+            }
+        }
+    }
+
 protected:
     PointContextRef m_context;
     std::vector<PointId> m_index;

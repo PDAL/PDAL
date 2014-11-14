@@ -45,16 +45,36 @@ auxiliary classes is necessary to effectively create a new stage.
 Dimension
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Point cloud formats support varying data elements.  In order to be useful, all
+Point cloud formats support various data elements.  In order to be useful, all
 formats must provide some notion of location for points (X, Y and perhaps Z),
 but beyond that, the data collected in formats may or may not have common data
 fields.  Some formats predefine the elements that make up a point.  Other
 formats provide this information in a header or preamble.  PDAL calls each of
 the elements that make up a point a dimension.  PDAL predefines the dimensions
 that are in common use by the formats that it currently supports.  Readers may
-register their use of an existing dimension or may have PDAL create a dimension
-with a name and type as requested.  Dimensions are referenced using items in the
-enumeration Dimension::Id::Enum.
+register their use of a predefined dimension or may have PDAL create a
+dimension with a name and type as requested.  Dimensions are described by the
+enumeration pdal::Dimension::Id::Enum and associated functions in
+Dimension.hpp.
+
+PDAL has a default type (Double, Float, Signed32, etc.) for each of its
+predefined dimensions which is believed to be sufficient to accurately
+hold the necessary data.  Only when the default data type is deemed
+insufficient should a request be made to "upgrade" a storage datatype.  There
+is no facility to "downsize" a dimension type to save memory.  Dimension.hpp
+can be examined to determine the default storage type of each predefined
+dimension.  In most cases knowledge of the storage data type for
+a dimension isn't required.  PDAL properly converts data to and from the
+internal storage type transparently.  Invalid conversion raise an exception.
+
+When a storage type is explicitly requested for a dimension, PDAL examines the
+existing storage type and requested type and chooses the storage type so
+that it can hold both types.  In some cases this results in a storage type
+different from either the existing or requested storage type.  For instance,
+if the current storage type is a 16 bit signed integer (Signed16) and the
+requested type is a 16 bit unsigned integer (Unsigned16), PDAL will use a
+32 bit signed integer as the storage type for the dimension so that both
+16 bit storage types can be successfully accommodated.
 
 Point Context
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
