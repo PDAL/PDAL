@@ -45,10 +45,6 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace terrasolid
-{
 
 
 enum TERRASOLID_Format_Type
@@ -96,13 +92,13 @@ public:
     {}
 };
 
-class PDAL_DLL Reader : public pdal::Reader
+class PDAL_DLL TerrasolidReader : public pdal::Reader
 {
 public:
-    SET_STAGE_NAME("drivers.terrasolid.reader", "TerraSolid Reader")
+    SET_STAGE_NAME("readers.terrasolid", "TerraSolid Reader")
     SET_STAGE_ENABLED(true)
 
-    Reader() : pdal::Reader(),
+    TerrasolidReader() : pdal::Reader(),
         m_format(TERRASOLID_Format_Unknown)
     {}
 
@@ -133,11 +129,8 @@ private:
     virtual bool eof()
         { return m_index >= getNumPoints(); }
 
-    Reader& operator=(const Reader&); // not implemented
-    Reader(const Reader&); // not implemented
+    TerrasolidReader& operator=(const TerrasolidReader&); // not implemented
+    TerrasolidReader(const TerrasolidReader&); // not implemented
 };
 
-} // namespace terrasolid
-} // namespace drivers
 } // namespace pdal
-

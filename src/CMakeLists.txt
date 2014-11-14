@@ -231,24 +231,6 @@ set (PDAL_DRIVERS_QFIT_CPP
 list (APPEND PDAL_CPP ${PDAL_DRIVERS_QFIT_CPP} )
 list (APPEND PDAL_HPP ${PDAL_DRIVERS_QFIT_HPP} )
 
-#
-# drivers/terrasolid
-#
-set(PDAL_TERRASOLID_PATH drivers/terrasolid)
-set(PDAL_TERRASOLID_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_TERRASOLID_PATH}")
-set(PDAL_TERRASOLID_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_TERRASOLID_PATH}")
-
-set(PDAL_DRIVERS_TERRASOLID_HPP
-  "${PDAL_TERRASOLID_HEADERS}/Reader.hpp"
-)
-
-set (PDAL_DRIVERS_TERRASOLID_CPP
-  "${PDAL_TERRASOLID_SRC}/Reader.cpp"
-)
-
-list (APPEND PDAL_CPP ${PDAL_DRIVERS_TERRASOLID_CPP} )
-list (APPEND PDAL_HPP ${PDAL_DRIVERS_TERRASOLID_HPP} )
-
 
 #
 # drivers/text
@@ -425,7 +407,6 @@ source_group("Header Files\\config" FILES ${PDAL_CONFIG_HPP})
 source_group("Header Files\\drivers\\caris" FILES ${PDAL_DRIVERS_CARIS_HPP})
 source_group("Header Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_HPP})
 source_group("Header Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_HPP})
-source_group("Header Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_HPP})
 source_group("Header Files\\drivers\\text" FILES ${PDAL_DRIVERS_TEXT_HPP})
 source_group("Header Files\\filters" FILES ${PDAL_FILTERS_HPP})
 source_group("Header Files\\plang" FILES ${PDAL_PLANG_HPP})
@@ -435,7 +416,6 @@ source_group("Source Files\\config" FILES ${PDAL_CONFIG_CPP})
 source_group("Source Files\\drivers\\caris" FILES ${PDAL_DRIVERS_CARIS_CPP})
 source_group("Source Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_CPP})
 source_group("Source Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_CPP})
-source_group("Source Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_CPP})
 source_group("Source Files\\drivers\\text" FILES ${PDAL_DRIVERS_TEXT_CPP})
 source_group("Source Files\\filters" FILES ${PDAL_FILTERS_CPP})
 source_group("Source Files\\plang" FILES ${PDAL_PLANG_CPP})
@@ -449,6 +429,7 @@ include_directories(../include)
 
 include_directories(${PROJECT_SOURCE_DIR}/drivers/faux)
 include_directories(${PROJECT_SOURCE_DIR}/drivers/sbet)
+include_directories(${PROJECT_SOURCE_DIR}/drivers/terrasolid)
 
 set(PDAL_SOURCES
   ${PDAL_HPP}

@@ -38,7 +38,7 @@
 
 #include <pdal/Options.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/drivers/terrasolid/Reader.hpp>
+#include <TerrasolidReader.hpp>
 #include "Support.hpp"
 
 #include <iostream>
@@ -106,11 +106,11 @@ BOOST_AUTO_TEST_CASE(test_tsolid)
     // options.add(debug);
     // options.add(verbose);
     options.add(fname);
-    pdal::drivers::terrasolid::Reader reader(options);
+    TerrasolidReader reader(options);
     reader.prepare();
 
     BOOST_CHECK(reader.getDescription() == "TerraSolid Reader");
-    BOOST_CHECK_EQUAL(reader.getName(), "drivers.terrasolid.reader");
+    BOOST_CHECK_EQUAL(reader.getName(), "readers.terrasolid");
     BOOST_CHECK_EQUAL(reader.getNumPoints(), 1000u);
 
     const Schema& schema = reader.getSchema();

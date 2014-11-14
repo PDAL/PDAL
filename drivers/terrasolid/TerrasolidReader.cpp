@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/drivers/terrasolid/Reader.hpp>
+#include <TerrasolidReader.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/FileUtils.hpp>
 
@@ -40,12 +40,8 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace terrasolid
-{
 
-void Reader::initialize()
+void TerrasolidReader::initialize()
 {
     std::istream* stream = FileUtils::openFile(m_filename);
 
@@ -84,7 +80,7 @@ void Reader::initialize()
 }
 
 
-void Reader::addDimensions(PointContextRef ctx)
+void TerrasolidReader::addDimensions(PointContextRef ctx)
 {
     m_size = 0;
     ctx.registerDim(Dimension::Id::Classification);
@@ -121,7 +117,7 @@ void Reader::addDimensions(PointContextRef ctx)
 }
 
 
-Dimension::IdList Reader::getDefaultDimensions()
+Dimension::IdList TerrasolidReader::getDefaultDimensions()
 {
     using namespace Dimension;
 
@@ -145,7 +141,7 @@ Dimension::IdList Reader::getDefaultDimensions()
 }
 
 
-void Reader::ready(PointContextRef ctx)
+void TerrasolidReader::ready(PointContextRef ctx)
 {
     m_istream = FileUtils::openFile(m_filename);
     // Skip to the beginning of points.
@@ -154,7 +150,7 @@ void Reader::ready(PointContextRef ctx)
 }
 
 
-point_count_t Reader::read(PointBuffer& data, point_count_t count)
+point_count_t TerrasolidReader::read(PointBuffer& data, point_count_t count)
 {
     count = std::min(count, getNumPoints() - m_index);
 
@@ -269,12 +265,9 @@ point_count_t Reader::read(PointBuffer& data, point_count_t count)
 }
 
 
-void Reader::done(PointContextRef ctx)
+void TerrasolidReader::done(PointContextRef ctx)
 {
     FileUtils::closeFile(m_istream);
 }
 
-} // namespace terrasolid
-} // namespace drivers
 } // namespace pdal
-
