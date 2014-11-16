@@ -41,13 +41,28 @@
 
 #include <pdal/FileUtils.hpp>
 #include <pdal/drivers/faux/Reader.hpp>
-#include <pdal/drivers/las/Writer.hpp>
+#include <pdal/drivers/las/Header.hpp>
 #include <pdal/drivers/las/Reader.hpp>
+#include <pdal/drivers/las/Writer.hpp>
 
 #include <pdal/PointBuffer.hpp>
 
 #include "StageTester.hpp"
 #include "Support.hpp"
+
+namespace pdal
+{
+
+//ABELL - Should probably be moved to its own file.
+class LasTester
+{
+public:
+    template <typename T>
+    static T headerVal(drivers::las::Writer& w, const std::string& s)
+        { return w.headerVal<T>(s); }
+};
+
+} // namespace pdal
 
 using namespace pdal;
 
@@ -100,6 +115,47 @@ BOOST_AUTO_TEST_CASE(auto_offset)
     FileUtils::deleteFile(FILENAME);
 }
 
+BOOST_AUTO_TEST_CASE(metadata_options)
+{
+    Options ops;
+
+    Option metadataOp("metadata", "");
+
+    Options metadataOps;
+    metadataOps.add("format", 4);
+    metadataOps.add("software_id", "MySoftwareId");
+    metadataOps.add("system_id", "FORWARD");
+    metadataOps.add("minor_version", "forward");
+    metadataOp.setOptions(metadataOps);
+    ops.add(metadataOp);
+
+    drivers::las::Writer writer;
+    writer.setOptions(ops);
+
+    PointContext ctx;
+    writer.prepare(ctx);
+
+    MetadataNode m = writer.getMetadata();
+    m.add("minor_version", 56);
+
+    uint8_t format = 
+        (uint8_t)LasTester::headerVal<unsigned>(writer, "format");
+    BOOST_CHECK_EQUAL(format, 4);
+    std::string softwareId =
+        LasTester::headerVal<std::string>(writer, "software_id");
+    BOOST_CHECK_EQUAL(softwareId, "MySoftwareId");
+    std::string systemId =
+        LasTester::headerVal<std::string>(writer, "system_id");
+
+    // Since the option specifies forward and there is not associated
+    // metadata, the value should be the default.
+    BOOST_CHECK_EQUAL(systemId, drivers::las::LasHeader::SYSTEM_IDENTIFIER);
+
+    // In this case, we should have metadata to override the default.
+    uint8_t minorVersion =
+        (uint8_t)LasTester::headerVal<unsigned>(writer, "minor_version");
+    BOOST_CHECK_EQUAL(minorVersion, 56);
+}
 
 //ABELL
 /**

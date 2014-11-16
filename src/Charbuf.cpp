@@ -40,7 +40,7 @@ namespace pdal
 {
 
 
-void Charbuf::initialize(char *buf, size_t count, pos_type bufOffset)
+void Charbuf::initialize(char *buf, size_t count, std::ios::pos_type bufOffset)
 {
     m_bufOffset = bufOffset;
     m_buf = buf;
@@ -49,7 +49,7 @@ void Charbuf::initialize(char *buf, size_t count, pos_type bufOffset)
 }
 
 
-Charbuf::pos_type Charbuf::seekpos(pos_type pos, std::ios_base::openmode which)
+std::ios::pos_type Charbuf::seekpos(std::ios::pos_type pos, std::ios_base::openmode which)
 {
     pos -= m_bufOffset;
     if (which & std::ios_base::in)
@@ -69,11 +69,11 @@ Charbuf::pos_type Charbuf::seekpos(pos_type pos, std::ios_base::openmode which)
     return pos;
 }
 
-Charbuf::pos_type
-Charbuf::seekoff(off_type off, std::ios_base::seekdir dir,
+std::ios::pos_type
+Charbuf::seekoff(std::ios::off_type off, std::ios_base::seekdir dir,
     std::ios_base::openmode which)
 {
-    Charbuf::pos_type pos;
+    std::ios::pos_type pos;
     char *cpos = nullptr;
     if (which & std::ios_base::in)
     {

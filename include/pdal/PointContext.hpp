@@ -206,6 +206,14 @@ public:
     size_t dimSize(Dimension::Id::Enum id) const
         { return dimDetail(id)->size(); }
 
+    size_t pointSize() const
+    {
+        size_t size(0);
+        for (auto d: m_dims->m_detail)
+            size += d.size();
+        return size;
+    }
+
 private:
     Dimension::Detail *dimDetail(Dimension::Id::Enum id) const
         { return &(m_dims->m_detail[(size_t)id]); }

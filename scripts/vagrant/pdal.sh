@@ -14,7 +14,7 @@ cd build
 cmake   -G "Unix Makefiles"  \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/usr \
-        -DWITH_PCL=ON \
+        -DBUILD_PLUGIN_PCL=ON \
         ..
 
 make -j $NUMTHREADS

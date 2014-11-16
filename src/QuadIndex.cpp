@@ -60,9 +60,9 @@ struct Point
     const double y;
 };
 
-struct PointRef
+struct PtRef
 {
-    PointRef(const Point& point, std::size_t pbIndex)
+    PtRef(const Point& point, std::size_t pbIndex)
         : point(point)
         , pbIndex(pbIndex)
     { }
@@ -137,7 +137,7 @@ namespace pdal
 // Recursive quadtree implementation.
 struct Tree
 {
-    Tree(BBox bbox, const PointRef* data = 0)
+    Tree(BBox bbox, const PtRef* data = 0)
         : bbox(bbox)
         , data(data)
         , nw()
@@ -149,7 +149,7 @@ struct Tree
     void getFills(std::vector<std::size_t>& fills, std::size_t level = 0) const;
 
     // Returns depth resulting from the insertion of this point.
-    std::size_t addPoint(const PointRef* toAdd, std::size_t curDepth = 0);
+    std::size_t addPoint(const PtRef* toAdd, std::size_t curDepth = 0);
 
     void getPoints(
             std::vector<std::size_t>& results,
@@ -200,7 +200,7 @@ struct Tree
     }
 
     const BBox bbox;
-    const PointRef* data;
+    const PtRef* data;
 
     std::unique_ptr<Tree> nw;
     std::unique_ptr<Tree> ne;
@@ -233,7 +233,7 @@ private:
             std::size_t curDepth) const;
 };
 
-std::size_t Tree::addPoint(const PointRef* toAdd, const std::size_t curDepth)
+std::size_t Tree::addPoint(const PtRef* toAdd, const std::size_t curDepth)
 {
     if (data)
     {
@@ -589,7 +589,7 @@ struct QuadIndex::QImpl
             std::size_t depthEnd) const;
 
     const PointBuffer& m_pointBuffer;
-    std::vector<std::unique_ptr<PointRef> > m_pointRefVec;
+    std::vector<std::unique_ptr<PtRef> > m_pointRefVec;
     std::unique_ptr<Tree> m_tree;
     std::size_t m_depth;
     std::vector<std::size_t> m_fills;
@@ -616,13 +616,13 @@ void QuadIndex::QImpl::build()
     for (std::size_t i(0); i < m_pointBuffer.size(); ++i)
     {
         m_pointRefVec[i].reset(
-                new PointRef(
+                new PtRef(
                     Point(
                         m_pointBuffer.getFieldAs<double>(Dimension::Id::X, i),
                         m_pointBuffer.getFieldAs<double>(Dimension::Id::Y, i)),
                 i));
 
-        const PointRef* pointRef(m_pointRefVec[i].get());
+        const PtRef* pointRef(m_pointRefVec[i].get());
         if (pointRef->point.x < xMin) xMin = pointRef->point.x;
         if (pointRef->point.x > xMax) xMax = pointRef->point.x;
         if (pointRef->point.y < yMin) yMin = pointRef->point.y;

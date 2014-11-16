@@ -121,25 +121,55 @@ void PointBuffer::dump(std::ostream& ostr) const
             switch (dd->type())
             {
             case Dimension::Type::Signed8:
-                ostr << (int)(getFieldInternal<int8_t>(d, idx));
+                {
+                    ostr << (int)(getFieldInternal<int8_t>(d, idx));
+                    break;
+                }
             case Dimension::Type::Signed16:
-                ostr << getFieldInternal<int16_t>(d, idx);
+                {
+                    ostr << getFieldInternal<int16_t>(d, idx);
+                    break;
+                }
             case Dimension::Type::Signed32:
-                ostr << getFieldInternal<int32_t>(d, idx);
+                {
+                    ostr << getFieldInternal<int32_t>(d, idx);
+                    break;
+                }
             case Dimension::Type::Signed64:
-                ostr << getFieldInternal<int64_t>(d, idx);
+                {
+                    ostr << getFieldInternal<int64_t>(d, idx);
+                    break;
+                }
             case Dimension::Type::Unsigned8:
-                ostr << (unsigned)(getFieldInternal<uint8_t>(d, idx));
+                {
+                    ostr << (unsigned)(getFieldInternal<uint8_t>(d, idx));
+                    break;
+                }
             case Dimension::Type::Unsigned16:
-                ostr << getFieldInternal<uint16_t>(d, idx);
+                {
+                    ostr << getFieldInternal<uint16_t>(d, idx);
+                    break;
+                }
             case Dimension::Type::Unsigned32:
-                ostr << getFieldInternal<uint32_t>(d, idx);
+                {
+                    ostr << getFieldInternal<uint32_t>(d, idx);
+                    break;
+                }
             case Dimension::Type::Unsigned64:
-                ostr << getFieldInternal<uint64_t>(d, idx);
+                {
+                    ostr << getFieldInternal<uint64_t>(d, idx);
+                    break;
+                }
             case Dimension::Type::Float:
-                ostr << getFieldInternal<float>(d, idx);
+                {
+                    ostr << getFieldInternal<float>(d, idx);
+                    break;
+                }
             case Dimension::Type::Double:
-                ostr << getFieldInternal<double>(d, idx);
+                {
+                    ostr << getFieldInternal<double>(d, idx);
+                    break;
+                }
             default:
                 throw;
             }

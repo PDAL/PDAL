@@ -31,6 +31,7 @@
 #cmakedefine PDAL_HAVE_HDF5
 #cmakedefine PDAL_HAVE_HEXER
 #cmakedefine PDAL_HAVE_LASZIP
+#cmakedefine PDAL_HAVE_LAZPERF
 #cmakedefine PDAL_HAVE_LIBXML2
 #cmakedefine PDAL_HAVE_LIBGEOTIFF
 #cmakedefine PDAL_HAVE_MRSID
@@ -40,7 +41,6 @@
 #cmakedefine PDAL_HAVE_PYTHON
 #cmakedefine PDAL_HAVE_SQLITE
 #cmakedefine PDAL_HAVE_POSTGRESQL
-
 
 /*
  * plugins

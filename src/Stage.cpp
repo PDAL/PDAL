@@ -111,9 +111,6 @@ PointBufferSet Stage::execute(PointContextRef ctx )
 void Stage::l_initialize(PointContextRef ctx)
 {
     m_metadata = ctx.metadata().add(getName());
-    if (m_inputs.size()) {
-        Stage& prevStage = *m_inputs[0];
-    }
 }
 
 
@@ -193,7 +190,10 @@ void Stage::setSpatialReference(MetadataNode& m,
 
     MetadataNode spatialNode = m.findChild(pred);
     if (spatialNode.empty())
-        m.add("spatialreference", spatialRef, "SRS of this stage");
+    {
+        m.add("spatialreference", spatialRef.getWKT(SpatialReference::eHorizontalOnly, false), "SRS of this stage");
+        m.add("comp_spatialreference", spatialRef.getWKT(SpatialReference::eCompoundOK, false), "SRS of this stage");
+    }
 }
 
 std::vector<Stage*> Stage::findStage(std::string name)
