@@ -19,7 +19,7 @@ set PDAL_DIR=.
 
 :: Where is your OSGeo4W installed (recommended basic way to satisfy dependent libs)
 set OSGEO4W_DIR=C:\OSGeo4W64
-set BOOST=c:\boost\1.55
+set BOOST=%OSGEO4W_DIR%
 
 :: Where is boost installed?
 REM set PDAL_EMBED_BOOST=ON
@@ -79,9 +79,9 @@ if EXIST CMakeCache.txt del CMakeCache.txt
 del /S /Q CMakeFiles
 cd %PDAL_DIR%/build
 cmake -G %GENERATOR% ^
-    -DBOOST_INCLUDEDIR=%BOOST% ^
+	-DBOOST_INCLUDEDIR=%BOOST%\include\boost-1_56  -DCMAKE_INSTALL_PREFIX=C:\dev\PDAL\build ^
+	-DBOOST_LIBRARYDIR=%BOOST%\lib -DCMAKE_BUILD_TYPE=Release  -DBoost_DEBUG=OFF   -DBoost_COMPILER="-vc110" ^
     -DWITH_GDAL=%GDAL_ENABLED% ^
-    -DCMAKE_INSTALL_PREFIX=c:\dev\PDAL\package ^
     -DWITH_GEOTIFF=%GEOTIFF_ENABLED% ^
     -DWITH_ORACLE=%ORACLE_ENABLED% ^
     -DWITH_PGPOINTCLOUD=ON ^
@@ -95,11 +95,12 @@ cmake -G %GENERATOR% ^
 	-DPYTHON_INCLUDE_DIR=%OSGEO4W_DIR%\apps\python27\include ^
 	-DPYTHON_LIBRARY=%OSGEO4W_DIR%\apps\python27\libs\python27.lib ^
 	-DNUMPY_INCLUDE_DIR=%OSGEO4W_DIR%\apps\python27\lib\site-packages\numpy\core\include ^
-	-DNUMPY_VERSION=1.5.1 ^
+	-DNUMPY_VERSION=1.8.1 ^
     -DCMAKE_BUILD_TYPE=%BUILD_TYPE% ^
     -DCMAKE_VERBOSE_MAKEFILE=OFF ^
 	-DWITH_SQLITE=ON ^
     ..
+cd ..
     
 rem    -DBOOST_INCLUDEDIR=%BOOST_DIR% ^
 rem 	-DNUMPY_INCLUDE_DIR=%OSGEO4W_DIR%\apps\python27\lib\site-packages\numpy\core\include ^

@@ -170,6 +170,8 @@ if(WIN32)
       add_definitions(-D_CRT_NONSTDC_NO_WARNING)
       add_definitions(-D_SCL_SECURE_NO_WARNINGS)
 	  add_definitions(-DNOMINMAX)
+	  add_definitions(-DBOOST_LIB_TOOLSET="vc110")
+	  add_definitions(-DBOOST_ALL_DYN_LINK)	  	  
     endif()
 
     if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
