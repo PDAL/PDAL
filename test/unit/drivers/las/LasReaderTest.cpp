@@ -196,6 +196,47 @@ BOOST_AUTO_TEST_CASE(test_different_formats)
 }
 
 
+BOOST_AUTO_TEST_CASE(inspect)
+{
+    Options ops;
+    ops.add("filename", Support::datapath("las/epsg_4326.las"));
+
+    drivers::las::Reader reader;
+    reader.setOptions(ops);
+
+    QuickInfo qi = reader.preview();
+
+    std::string testWkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"unretrievable - using WGS84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
+    BOOST_CHECK_EQUAL(qi.m_srs.getWKT(), testWkt);
+
+    BOOST_CHECK_EQUAL(qi.m_pointCount, 5380);
+
+    BOX3D bounds(-94.683465399999989, 31.0367341, 39.081000199999998,
+        -94.660631099999989, 31.047329099999999, 78.119000200000002);
+    BOOST_CHECK_EQUAL(qi.m_bounds, bounds);
+
+    std::vector<std::string> dims =
+    {
+        "Classification",
+        "EdgeOfFlightLine",
+        "Intensity",
+        "NumberOfReturns",
+        "PointSourceId",
+        "ReturnNumber",
+        "ScanAngleRank",
+        "ScanDirectionFlag",
+        "UserData",
+        "X",
+        "Y",
+        "Z"
+    };
+
+    std::sort(qi.m_dimNames.begin(), qi.m_dimNames.end());
+    BOOST_CHECK_EQUAL_COLLECTIONS(qi.m_dimNames.begin(), qi.m_dimNames.end(),
+        dims.begin(), dims.end());
+}
+
+
 //ABELL - Find another way to do this.
 /**
 BOOST_AUTO_TEST_CASE(test_vlr)

@@ -43,6 +43,7 @@
 #include <pdal/drivers/las/ZipPoint.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/IStream.hpp>
+#include <pdal/QuickInfo.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Metadata.hpp>
 
@@ -54,6 +55,25 @@ namespace drivers
 {
 namespace las
 {
+
+QuickInfo Reader::inspect()
+{
+    QuickInfo qi;
+    PointContext ctx;
+
+    addDimensions(ctx);
+    initialize();
+
+    Dimension::IdList dims = ctx.dims();
+    for (auto di = dims.begin(); di != dims.end(); ++di)
+        qi.m_dimNames.push_back(ctx.dimName(*di));
+    qi.m_pointCount =
+        Utils::saturation_cast<point_count_t>(m_lasHeader.pointCount());
+    qi.m_bounds = m_lasHeader.getBounds();
+    qi.m_srs = getSrsFromVlrs();
+    return qi;
+}
+
 
 void Reader::initialize()
 {

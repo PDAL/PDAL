@@ -42,15 +42,15 @@
 #include <boost/property_tree/ptree.hpp>
 
 #include <pdal/Bounds.hpp>
-#include <pdal/IStream.hpp>
-#include <pdal/OStream.hpp>
-#include <pdal/SpatialReference.hpp>
 #include <pdal/pdal_config.hpp>
 #include <pdal/gitsha.h>
 #include <pdal/drivers/las/VariableLengthRecord.hpp>
 
 namespace pdal
 {
+class OLeStream;
+class ILeStream;
+
 namespace drivers
 {
 namespace las

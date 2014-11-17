@@ -97,6 +97,7 @@ private:
     SpatialReference getSrsFromGeotiffVlr();
     void extractHeaderMetadata(MetadataNode& m);
     void extractVlrMetadata(MetadataNode& m);
+    virtual QuickInfo inspect();
     virtual void ready(PointContextRef ctx)
         { ready(ctx, m_metadata); }
     virtual void ready(PointContextRef ctx, MetadataNode& m);
