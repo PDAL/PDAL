@@ -495,6 +495,12 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
 # subdirectory controls
 #------------------------------------------------------------------------------
 
+# PDAL_TARGET_OBJECTS is used to collect the driver object libraries
+set(PDAL_TARGET_OBJECTS "")
+
+add_subdirectory(drivers)
+add_subdirectory(src)
+
 if(WITH_TESTS)
   message(STATUS "Building with PDAL unit tests")
   enable_testing()
@@ -518,11 +524,6 @@ else()
   endif()
 endif()
 
-# PDAL_TARGET_OBJECTS is used to collect the driver object libraries
-set(PDAL_TARGET_OBJECTS "")
-
-add_subdirectory(drivers)
-add_subdirectory(src)
 add_subdirectory(plugins)
 
 if(WITH_APPS)
