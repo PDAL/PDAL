@@ -45,8 +45,11 @@
 BOOST_AUTO_TEST_SUITE(ReprojectionFilterTest)
 
 
-static void getPoint(const pdal::PointBuffer& data,
-    double& x, double& y, double& z)
+namespace
+{
+
+#if defined(PDAL_HAVE_GEOS) && defined(PDAL_HAVE_GEOTIFF)
+void getPoint(const pdal::PointBuffer& data, double& x, double& y, double& z)
 {
     using namespace pdal;
 
@@ -54,9 +57,12 @@ static void getPoint(const pdal::PointBuffer& data,
     y = data.getFieldAs<double>(Dimension::Id::Y, 0);
     z = data.getFieldAs<double>(Dimension::Id::Z, 0);
 }
+#endif
+
+} // unnamed namespace
 
 
-#ifdef PDAL_HAVE_GEOS
+#if defined(PDAL_HAVE_GEOS) && defined(PDAL_HAVE_GEOTIFF)
 // Test reprojecting UTM 15 to DD with a filter
 BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
 {
@@ -151,8 +157,7 @@ BOOST_AUTO_TEST_CASE(InPlaceReprojectionFilterTest_test_2)
         FilterTester::filter(&reprojectionFilter, buffer);
 
         double x, y, z;
-        getPoint(buffer, x, y, z);
-
+        getPoint(buffer, x, y, z); 
         BOOST_CHECK_CLOSE(x, postX, 0.1);
         BOOST_CHECK_CLOSE(y, postY, 0.1);
         BOOST_CHECK_CLOSE(z, postZ, 0.1);

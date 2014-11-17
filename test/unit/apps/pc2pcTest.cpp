@@ -147,6 +147,8 @@ BOOST_AUTO_TEST_CASE(pc2pc_test_switches)
     BOOST_CHECK(!fileIsCompressed(outputLas));
 #ifdef PDAL_HAVE_LIBGEOTIFF
     BOOST_CHECK(!fileHasSrs(outputLas));
+#else
+    (void)fileHasSrs(outputLas);
 #endif
 
 #ifdef PDAL_HAVE_LASZIP
