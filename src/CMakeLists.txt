@@ -127,22 +127,6 @@ set(PDAL_DRIVERS_READER_HPP
 
 list (APPEND PDAL_HPP ${PDAL_DRIVERS_READER_HPP} )
 
-#
-# drivers/faux
-#
-set(PDAL_FAUX_PATH drivers/faux)
-set(PDAL_FAUX_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_FAUX_PATH}")
-set(PDAL_FAUX_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_FAUX_PATH}")
-set(PDAL_DRIVERS_FAUX_HPP
-  "${PDAL_FAUX_HEADERS}/Reader.hpp"
-)
-
-set (PDAL_DRIVERS_FAUX_CPP
-  "${PDAL_FAUX_SRC}/Reader.cpp"
-)
-list (APPEND PDAL_CPP ${PDAL_DRIVERS_FAUX_CPP} )
-list (APPEND PDAL_HPP ${PDAL_DRIVERS_FAUX_HPP} )
-
 
 #
 # drivers/las
@@ -461,7 +445,6 @@ source_group("CMake Files" FILES CMakeLists.txt)
 
 source_group("Header Files" FILES ${PDAL_BASE_HPP})
 source_group("Header Files\\config" FILES ${PDAL_CONFIG_HPP})
-source_group("Header Files\\drivers\\faux" FILES ${PDAL_DRIVERS_FAUX_HPP})
 source_group("Header Files\\drivers\\caris" FILES ${PDAL_DRIVERS_CARIS_HPP})
 source_group("Header Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_HPP})
 source_group("Header Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_HPP})
@@ -473,7 +456,6 @@ source_group("Header Files\\plang" FILES ${PDAL_PLANG_HPP})
 
 source_group("Source Files" FILES ${PDAL_BASE_CPP})
 source_group("Source Files\\config" FILES ${PDAL_CONFIG_CPP})
-source_group("Source Files\\drivers\\faux" FILES ${PDAL_DRIVERS_FAUX_CPP})
 source_group("Source Files\\drivers\\caris" FILES ${PDAL_DRIVERS_CARIS_CPP})
 source_group("Source Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_CPP})
 source_group("Source Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_CPP})
@@ -490,9 +472,13 @@ include_directories(../include)
 ###############################################################################
 # Targets settings
 
+include_directories(${PROJECT_SOURCE_DIR}/drivers/faux)
+
 set(PDAL_SOURCES
   ${PDAL_HPP}
-  ${PDAL_CPP})
+  ${PDAL_CPP}
+  ${PDAL_TARGET_OBJECTS}
+)
 
 # see https://github.com/PDAL/PDAL/issues/108 for discussion on this
 #SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "../pdal_defines.h;../include/pdal/pdal_defines.h")

@@ -59,7 +59,7 @@ namespace pdal
 //
 // define the functions to create the readers
 //
-MAKE_READER_CREATOR(FauxReader, pdal::drivers::faux::Reader)
+MAKE_READER_CREATOR(FauxReader, pdal::FauxReader)
 MAKE_READER_CREATOR(LasReader, pdal::drivers::las::Reader)
 MAKE_READER_CREATOR(BpfReader, pdal::BpfReader)
 MAKE_READER_CREATOR(BufferReader, drivers::buffer::BufferReader)
@@ -303,7 +303,7 @@ void StageFactory::registerWriter(const std::string& type, WriterCreator* f)
 
 void StageFactory::registerKnownReaders()
 {
-    REGISTER_READER(FauxReader, pdal::drivers::faux::Reader);
+    REGISTER_READER(FauxReader, pdal::FauxReader);
     REGISTER_READER(BufferReader, pdal::drivers::buffer::BufferReader);
     REGISTER_READER(LasReader, pdal::drivers::las::Reader);
 
