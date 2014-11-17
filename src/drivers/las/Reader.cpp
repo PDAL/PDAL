@@ -38,10 +38,10 @@
 #include <string.h>
 
 #include <pdal/Charbuf.hpp>
-#include <pdal/FileUtils.hpp>
 #include <pdal/drivers/las/Header.hpp>
 #include <pdal/drivers/las/VariableLengthRecord.hpp>
 #include <pdal/drivers/las/ZipPoint.hpp>
+#include <pdal/FileUtils.hpp>
 #include <pdal/IStream.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Metadata.hpp>
@@ -267,11 +267,19 @@ void Reader::setSrsFromVlrs(MetadataNode& m)
 {
     // If the user is already overriding this by setting it on the stage, we'll
     // take their overridden value
-    const SpatialReference& srs = getSpatialReference();
+    SpatialReference srs = getSpatialReference();
 
     if (srs.getWKT(pdal::SpatialReference::eCompoundOK).empty())
-        if (!setSrsFromWktVlr(m))
-            setSrsFromGeotiffVlr(m);
+        setSpatialReference(m, getSrsFromVlrs());
+}
+
+
+SpatialReference Reader::getSrsFromVlrs()
+{
+    SpatialReference srs = getSrsFromWktVlr();
+    if (srs.empty())
+        srs = getSrsFromGeotiffVlr();
+    return srs;
 }
 
 
@@ -288,19 +296,15 @@ VariableLengthRecord *Reader::findVlr(const std::string& userId,
 }
 
 
-bool Reader::setSrsFromWktVlr(MetadataNode& m)
+SpatialReference Reader::getSrsFromWktVlr()
 {
+    SpatialReference srs;
+
     VariableLengthRecord *vlr = findVlr(TRANSFORM_USER_ID, WKT_RECORD_ID);
     if (!vlr)
         vlr = findVlr(LIBLAS_USER_ID, WKT_RECORD_ID);
-    if (!vlr)
-        return false;
-
-    SpatialReference srs;
-
-    // Per spec, should never happen, but prevents errors below.
-    if (vlr->dataLen() == 0)
-        return false;
+    if (!vlr || vlr->dataLen() == 0)
+        return srs;
 
     // There is supposed to be a NULL byte at the end of the data,
     // but sometimes there isn't because some people don't follow the
@@ -312,13 +316,14 @@ bool Reader::setSrsFromWktVlr(MetadataNode& m)
         len--;
     std::string wkt(vlr->data(), len);
     srs.setWKT(wkt);
-    setSpatialReference(m, srs);
-    return true;
+    return srs;
 }
 
 
-bool Reader::setSrsFromGeotiffVlr(MetadataNode& m)
+SpatialReference Reader::getSrsFromGeotiffVlr()
 {
+    SpatialReference srs;
+
 #ifdef PDAL_HAVE_LIBGEOTIFF
     GeotiffSupport geotiff;
     geotiff.resetTags();
@@ -328,7 +333,7 @@ bool Reader::setSrsFromGeotiffVlr(MetadataNode& m)
     vlr = findVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID);
     // We must have a directory entry.
     if (!vlr)
-        return false;
+        return srs;
     geotiff.setKey(vlr->recordId(), (void *)vlr->data(), vlr->dataLen(),
         STT_SHORT);
 
@@ -341,14 +346,10 @@ bool Reader::setSrsFromGeotiffVlr(MetadataNode& m)
         geotiff.setKey(vlr->recordId(), (void *)vlr->data(), vlr->dataLen(),
             STT_ASCII);
 
-    SpatialReference srs;
     geotiff.setTags();
     srs.setFromUserInput(geotiff.getWkt(false, false));
-    setSpatialReference(m, srs);
-    return true;
-#else
-    return false;
 #endif
+    return srs;
 }
 
 
