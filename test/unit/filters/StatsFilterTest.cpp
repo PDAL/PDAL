@@ -34,7 +34,7 @@
 
 #include "UnitTest.hpp"
 
-#include <pdal/drivers/faux/Reader.hpp>
+#include <FauxReader.hpp>
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/filters/Reprojection.hpp>
 #include <pdal/filters/Stats.hpp>
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(StatsFilterTest_test1)
     ops.add("bounds", bounds);
     ops.add("count", 1000);
     ops.add("mode", "constant");
-    drivers::faux::Reader reader;
+    FauxReader reader;
     reader.setOptions(ops);
 
     filters::Stats filter;

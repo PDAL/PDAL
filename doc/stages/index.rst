@@ -16,8 +16,7 @@ Readers & Writers
    drivers.las.writer
    drivers.pgpointcloud.reader
    drivers.pgpointcloud.writer
-   drivers.faux.reader
-   drivers.faux.writer
+   readers.faux
    drivers.csardb.reader
    drivers.csar.reader
    drivers.nitf.reader

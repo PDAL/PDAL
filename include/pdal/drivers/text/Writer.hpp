@@ -86,6 +86,7 @@ private:
     std::string m_delimiter;
     bool m_quoteHeader;
     bool m_packRgb;
+    int m_precision;
 
     FileStreamPtr m_stream;
     Dimension::IdList m_dims;

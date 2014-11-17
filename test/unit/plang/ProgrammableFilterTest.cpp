@@ -38,7 +38,7 @@
 
 #include <pdal/filters/Programmable.hpp>
 #include <pdal/filters/Stats.hpp>
-#include <pdal/drivers/faux/Reader.hpp>
+#include <FauxReader.hpp>
 
 #include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(ProgrammableFilterTest_test1)
     ops.add("num_points", 10);
     ops.add("mode", "ramp");
 
-    drivers::faux::Reader reader;
+    FauxReader reader;
     reader.setOptions(ops);
 
     Option source("source", "import numpy as np\n"
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE(add_dimension)
     ops.add("num_points", 10);
     ops.add("mode", "ramp");
 
-    drivers::faux::Reader reader;
+    FauxReader reader;
     reader.setOptions(ops);
 
     Option source("source", "import numpy\n"

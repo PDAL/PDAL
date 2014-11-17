@@ -96,11 +96,15 @@ void Writer::processOptions(const Options& ops)
         m_delimiter = " ";
     m_quoteHeader = ops.getValueOrDefault<bool>("quote_header", true);
     m_packRgb = ops.getValueOrDefault<bool>("pack_rgb", true);
+    m_precision = ops.getValueOrDefault<int>("precision", 3);
 }
 
 
 void Writer::ready(PointContextRef ctx)
 {
+    m_stream->precision(m_precision);
+    *m_stream << std::fixed;
+
     typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
 
     // Find the dimensions listed and put them on the id list.
