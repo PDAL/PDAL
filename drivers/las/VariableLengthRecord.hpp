@@ -44,10 +44,6 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace las
-{
 
 static const int WKT_RECORD_ID = 2112;
 static const uint16_t GEOTIFF_DIRECTORY_RECORD_ID = 34735;
@@ -123,7 +119,4 @@ public:
         const ExtVariableLengthRecord& v);
 };
 
-} // namespace las
-} // namespace drivers
 } // namespace pdal
-

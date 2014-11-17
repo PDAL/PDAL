@@ -37,34 +37,25 @@
 #include <pdal/Reader.hpp>
 
 #include <pdal/StreamFactory.hpp>
-#include <pdal/drivers/las/Header.hpp>
-#include <pdal/drivers/las/ZipPoint.hpp>
+#include <LasHeader.hpp>
+#include <ZipPoint.hpp>
 
 namespace pdal
 {
-namespace drivers
-{
 
-namespace nitf
-{
-    class NitfReader;
-}
-
-namespace las
-{
-
+class NitfReader;
 class LasHeader;
 class PointDimensions;
 
-class PDAL_DLL Reader : public pdal::Reader
+class PDAL_DLL LasReader : public pdal::Reader
 {
-    friend class nitf::NitfReader;
+    friend class NitfReader;
 public:
-    SET_STAGE_NAME("drivers.las.reader", "Las Reader")
-    SET_STAGE_LINK("http://pdal.io/stages/drivers.las.reader.html")
+    SET_STAGE_NAME("readers.las", "Las Reader")
+    SET_STAGE_LINK("http://pdal.io/stages/readers.las.html")
     SET_STAGE_ENABLED(true)
 
-    Reader() : pdal::Reader(), m_index(0),
+    LasReader() : pdal::Reader(), m_index(0),
             m_istream(NULL)
         {}
 
@@ -109,11 +100,8 @@ private:
     void loadPointV10(PointBuffer& data, char *buf, size_t bufsize);
     void loadPointV14(PointBuffer& data, char *buf, size_t bufsize);
 
-    Reader& operator=(const Reader&); // not implemented
-    Reader(const Reader&); // not implemented
+    LasReader& operator=(const LasReader&); // not implemented
+    LasReader(const LasReader&); // not implemented
 };
 
-} // namespace las
-} // namespace drivers
 } // namespace pdal
-

@@ -119,6 +119,7 @@ include_directories(
     ${GDAL_INCLUDE_DIR}
     ${GEOTIFF_INCLUDE_DIR}
     ${PROJECT_SOURCE_DIR}/drivers/faux
+    ${PROJECT_SOURCE_DIR}/drivers/las
     ${PROJECT_SOURCE_DIR}/drivers/sbet
 )
 set(deps ${PDAL_LIB_NAME})

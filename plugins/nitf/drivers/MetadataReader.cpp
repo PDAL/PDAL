@@ -45,10 +45,6 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace nitf
-{
 
 
 MetadataReader::MetadataReader(::nitf::Record& record,
@@ -418,6 +414,4 @@ void MetadataReader::doComments(const std::string& key,
 }
     
 
-}
-}
 } // namespaces

@@ -77,7 +77,7 @@
           </Option>        
         <Filter type="filters.stats">
            <Option name="exact_dimensions">Classification</Option>
-           <Option name="dimensions">drivers.las.reader.X, drivers.las.reader.Y, drivers.las.reader.Z, Classification</Option>        
+           <Option name="dimensions">readers.las.X, readers.las.Y, readers.las.Z, Classification</Option>        
             <!-- <Filter type="filters.inplacereprojection">
                 <Option name="out_srs">
                     EPSG:26910
@@ -99,7 +99,7 @@
                         <Option name="max_cache_blocks">
                             1
                         </Option>
-                        <Reader type="drivers.las.reader">
+                        <Reader type="readers.las">
                                 <Option name="filename">
                                     ../autzen-dd-pf0.las
                                 </Option>

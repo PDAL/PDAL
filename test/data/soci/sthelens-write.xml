@@ -39,7 +39,7 @@
                         <Option name="max_cache_blocks">
                             1
                         </Option>
-                        <Reader type="drivers.las.reader">
+                        <Reader type="readers.las">
                                 <Option name="filename">
                                     /Users/hobu/dev/git/pdal/test/data/local/mtsthelens/st-helens.las
                                 </Option>

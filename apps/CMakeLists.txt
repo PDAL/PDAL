@@ -15,6 +15,7 @@ include_directories(
     .
     ../include
     ${PROJECT_SOURCE_DIR}/drivers/faux
+    ${PROJECT_SOURCE_DIR}/drivers/las
 )
 
 #------------------------------------------------------------------------------

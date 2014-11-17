@@ -36,7 +36,7 @@
 #include <vector>
 
 #include "NitfWriter.hpp"
-#include <pdal/drivers/las/Writer.hpp>
+#include <LasWriter.hpp>
 #include <pdal/pdal_macros.hpp>
 
 #include <pdal/PointBuffer.hpp>
@@ -77,15 +77,10 @@
 // syntactically, how do we name all the LAS writer options that we will pass to the las writer?
 //
 
-CREATE_WRITER_PLUGIN(nitf, pdal::drivers::nitf::NitfWriter)
+CREATE_WRITER_PLUGIN(nitf, pdal::NitfWriter)
 
 namespace pdal
 {
-namespace drivers
-{
-namespace nitf
-{
-
 
 
 BOX3D reprojectBoxToDD(const SpatialReference& reference, const BOX3D& box)
@@ -133,14 +128,14 @@ BOX3D reprojectBoxToDD(const SpatialReference& reference, const BOX3D& box)
     return output;
 }
 
-NitfWriter::NitfWriter() :  las::Writer(&m_oss)
+NitfWriter::NitfWriter() :  LasWriter(&m_oss)
 {
     register_tre_plugins();
 }
 
 void NitfWriter::processOptions(const Options& options)
 {
-    las::Writer::processOptions(options);
+    LasWriter::processOptions(options);
     m_cLevel = options.getValueOrDefault<std::string>("CLEVEL","03");
     m_sType = options.getValueOrDefault<std::string>("STYPE","BF01");
     m_oStationId = options.getValueOrDefault<std::string>("OSTAID","PDAL");
@@ -172,12 +167,12 @@ void NitfWriter::write(const PointBuffer& buffer)
 {
     m_bounds.grow(buffer.calculateBounds(true));
 
-    drivers::las::Writer::write(buffer);
+    LasWriter::write(buffer);
 }
 
 void NitfWriter::done(PointContextRef ctx)
 {
-    las::Writer::done(ctx);
+    LasWriter::done(ctx);
 
     try
     {
@@ -343,7 +338,4 @@ void NitfWriter::done(PointContextRef ctx)
     }
 }
 
-
-}
-}
 } // namespaces

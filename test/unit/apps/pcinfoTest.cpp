@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(test_pipe_file_input)
 
     int stat = Utils::run_shell_command(cmd, output);
     BOOST_CHECK_EQUAL(stat, 0);
-    cmd = "grep -c drivers.las.reader.X " + outfile;
+    cmd = "grep -c readers.las.X " + outfile;
     stat = Utils::run_shell_command(cmd, output);
     BOOST_CHECK_EQUAL(stat, 0);
     // Strip off newline

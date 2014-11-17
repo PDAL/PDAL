@@ -39,8 +39,8 @@
 #include <pdal/drivers/buffer/BufferReader.hpp>
 #include <FauxReader.hpp>
 
-#include <pdal/drivers/las/Reader.hpp>
-#include <pdal/drivers/las/Writer.hpp>
+#include <LasReader.hpp>
+#include <LasWriter.hpp>
 
 #include <pdal/drivers/bpf/BpfReader.hpp>
 

@@ -37,7 +37,7 @@
 
 #include <pdal/filters/Reprojection.hpp>
 #include <pdal/filters/Ferry.hpp>
-#include <pdal/drivers/las/Reader.hpp>
+#include <LasReader.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/PipelineManager.hpp>
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(test_ferry_invalid)
 
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
-    drivers::las::Reader reader;
+    LasReader reader;
     reader.setOptions(ops1);
 
     Options options;

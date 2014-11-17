@@ -41,7 +41,7 @@
 #include <pdal/PointBuffer.hpp>
 
 #include <pdal/drivers/nitf/Reader.hpp>
-#include <pdal/drivers/las/Reader.hpp>
+#include LasReader.hpp>
 #include <pdal/filters/Chipper.hpp>
 #include <pdal/drivers/pipeline/Reader.hpp>
 

@@ -1,7 +1,7 @@
-.. _drivers.las.writer:
+.. _writers.las:
 
-drivers.las.writer
-==================
+writers.las
+===========
 
 The **LAS Writer** supports writing to `LAS format`_ files, the standard interchange file format for LIDAR data.
 
@@ -12,10 +12,10 @@ Example
 
   <?xml version="1.0" encoding="utf-8"?>
   <Pipeline version="1.0">
-    <Writer type="drivers.las.writer">
+    <Writer type="writers.las">
       <Option name="filename">outputfile.las</Option>
       
-      <Reader type="drivers.las.reader">
+      <Reader type="readers.las">
         <Option name="filename">inputfile.las</Option>
       </Reader>
     </Writer>

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <Pipeline version="1.0">
-    <Writer type="drivers.las.writer">
+    <Writer type="writers.las">
         <Option name="filename">
             crop-wkt.las
         </Option>
@@ -33,8 +33,8 @@
             <Option name="outside">
                 false
             </Option>
-            <Option name="x_dim">drivers.las.reader.X</Option>
-            <Reader type="drivers.las.reader">
+            <Option name="x_dim">readers.las.X</Option>
+            <Reader type="readers.las">
                 <!-- <Option name="filename">
                     ../autzen-colorized-1.2-3.las
                 </Option> -->

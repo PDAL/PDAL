@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <Pipeline version="1.0">
-  <Writer type="drivers.las.writer">
+  <Writer type="writers.las">
     <Option name="filename">qfit-foo.las</Option>
     <Reader type="drivers.qfit.reader">
       <Option name="flip_coordinates">true</Option>

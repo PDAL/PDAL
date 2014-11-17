@@ -247,7 +247,7 @@ void Kernel::collectExtraOptions()
         if (!(option_split.size() == 2))
         {
             std::ostringstream oss;
-            oss << "option '" << o << "' did not split correctly. Is it in the form --drivers.las.reader.option=foo?";
+            oss << "option '" << o << "' did not split correctly. Is it in the form --readers.las.option=foo?";
             throw kernel::app_usage_error(oss.str());
         }
 

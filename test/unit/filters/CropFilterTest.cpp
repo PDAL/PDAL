@@ -38,7 +38,7 @@
 
 #include <FauxReader.hpp>
 #include <pdal/filters/Reprojection.hpp>
-#include <pdal/drivers/las/Reader.hpp>
+#include <LasReader.hpp>
 #include <pdal/filters/Crop.hpp>
 #include <pdal/filters/Stats.hpp>
 #include <pdal/FileUtils.hpp>
@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon)
 #ifdef PDAL_HAVE_GEOS
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
-    drivers::las::Reader reader;
+    LasReader reader;
     reader.setOptions(ops1);
 
     Options options;
@@ -164,11 +164,11 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon_reprojection)
 
     Option in_srs("spatialreference",Support::datapath("autzen/autzen-srs.wkt"), "Input SRS");
     Option out_srs("out_srs","EPSG:4326", "Output SRS to reproject to");
-    Option x_dim("x_dim", std::string("drivers.las.reader.X"),
+    Option x_dim("x_dim", std::string("readers.las.X"),
         "Dimension name to use for 'X' data");
-    pdal::Option y_dim("y_dim", std::string("drivers.las.reader.Y"),
+    pdal::Option y_dim("y_dim", std::string("readers.las.Y"),
         "Dimension name to use for 'Y' data");
-    pdal::Option z_dim("z_dim", std::string("drivers.las.reader.Z"),
+    pdal::Option z_dim("z_dim", std::string("readers.las.Z"),
         "Dimension name to use for 'Z' data");
     pdal::Option x_scale("scale_x", 0.0000001f, "Scale for output X data "
         "in the case when 'X' dimension data are to be scaled.  Defaults "
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon_reprojection)
     Option polygon("polygon", wkt, "");
     options.add(polygon);
 
-    drivers::las::Reader reader;
+    LasReader reader;
     reader.setOptions(options);
     filters::Reprojection reprojection;
     reprojection.setOptions(options);

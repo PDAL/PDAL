@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Hobu Inc. (hobu@hobu.co)
+* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -32,87 +32,45 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <cassert>
-#include <sstream>
+#pragma once
 
-#include <pdal/drivers/las/VariableLengthRecord.hpp>
+#include <ostream>
+#include <array>
+
+#include <pdal/pdal_internal.hpp>
+#include <pdal/Bounds.hpp>
+#include <LasHeader.hpp>
 
 namespace pdal
 {
-namespace drivers
+
+class PDAL_DLL SummaryData
 {
-namespace las
-{
+public:
+    SummaryData();
 
-const uint16_t VariableLengthRecord::MAX_DATA_SIZE =
-    (std::numeric_limits<uint16_t>::max)();
+    void addPoint(double x, double y, double z, int returnNumber);
+    uint32_t getTotalNumPoints() const
+        { return m_totalNumPoints; }
+    BOX3D getBounds() const;
+    point_count_t getReturnCount(int returnNumber) const;
 
-ILeStream& operator>>(ILeStream& in, VariableLengthRecord& v)
-{
-    uint16_t reserved;
-    uint16_t dataLen;
+    void dump(std::ostream&) const;
 
-    in >> reserved;
-    in.get(v.m_userId, 16);
-    in >> v.m_recordId >> dataLen;
-    in.get(v.m_description, 32);
-    v.m_data.resize(dataLen);
-    in.get(v.m_data);
+private:
+    double m_minX;
+    double m_minY;
+    double m_minZ;
+    double m_maxX;
+    double m_maxY;
+    double m_maxZ;
+    std::array<point_count_t, LasHeader::RETURN_COUNT> m_returnCounts;
+    point_count_t m_totalNumPoints;
 
-    return in;
-}
+    SummaryData& operator=(const SummaryData&); // not implemented
+    SummaryData(const SummaryData&); // not implemented
+};
 
+PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const SummaryData&);
 
-OLeStream& operator<<(OLeStream& out, const VariableLengthRecord& v)
-{
-    uint16_t dataLen;
-
-    out << v.m_recordSig;
-    out.put(v.m_userId, 16);
-    out << v.m_recordId << (uint16_t)v.dataLen();
-    out.put(v.m_description, 32);
-    out.put(v.data(), v.dataLen());
-
-    return out;
-}
-
-
-ILeStream& operator>>(ILeStream& in, ExtVariableLengthRecord& v)
-{
-    uint64_t dataLen;
-
-    in >> v.m_recordSig;
-    in.get(v.m_userId, 16);
-    in >> v.m_recordId >> dataLen;
-    in.get(v.m_description, 32);
-    v.m_data.resize(dataLen);
-    in.get(v.m_data);
-
-    return in;
-}
-
-
-OLeStream& operator<<(OLeStream& out, const ExtVariableLengthRecord& v)
-{
-    uint16_t reserved;
-    uint64_t dataLen;
-
-    out << (uint16_t)0;
-    out.put(v.userId(), 16);
-    out << v.recordId() << v.dataLen();
-    out.put(v.description(), 32);
-    out.put(v.data(), v.dataLen());
-
-    return out;
-}
-
-    void VariableLengthRecord::write(OLeStream& out, uint16_t recordSig)
-    {
-        m_recordSig = recordSig;
-        out << *this;
-    }
-
-} // namespace las
-} // namespace drivers
 } // namespace pdal
-
