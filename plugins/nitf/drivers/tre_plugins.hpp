@@ -36,9 +36,13 @@
 
 #include <pdal/pdal_internal.hpp>
 
+#define IMPORT_NITRO_API
+#include <nitro/c++/import/nitf.hpp>
+#include <nitro/c++/except/Trace.h>
 
 namespace pdal { namespace drivers { namespace nitf {
 
+void register_tre_handler(NITF_PLUGIN_INIT_FUNCTION init, NITF_PLUGIN_TRE_HANDLER_FUNCTION handler);
 
 void register_tre_plugins();
 
