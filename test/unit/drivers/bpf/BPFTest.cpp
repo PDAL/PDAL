@@ -45,13 +45,13 @@
 
 BOOST_AUTO_TEST_SUITE(BPFTest)
 
+using namespace pdal;
+
 namespace
 {
 
 void test_file_type(const std::string& filename)
 {
-    using namespace pdal;
-
     PointContext context;
 
     Options ops;
@@ -138,5 +138,45 @@ BOOST_AUTO_TEST_CASE(test_byte_major_zlib)
     test_file_type("bpf/autzen-utm-chipped-25-v3-deflate-segregated.bpf");
 }
 
+BOOST_AUTO_TEST_CASE(inspect)
+{
+    Options ops;
+    ops.add("filename", Support::datapath("bpf/autzen-dd.bpf"));
+
+    BpfReader reader;
+    reader.setOptions(ops);
+
+    QuickInfo qi = reader.preview();
+
+    std::string testWkt = "PROJCS[\"WGS 84 / SCAR IMW ST05-08\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],PROJECTION[\"Lambert_Conformal_Conic_2SP\"],PARAMETER[\"standard_parallel_1\",-76.66666666666667],PARAMETER[\"standard_parallel_2\",-79.33333333333333],PARAMETER[\"latitude_of_origin\",-90],PARAMETER[\"central_meridian\",-144],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],AUTHORITY[\"EPSG\",\"3261\"]]";
+    BOOST_CHECK_EQUAL(qi.m_srs.getWKT(), testWkt);
+
+    BOOST_CHECK_EQUAL(qi.m_pointCount, 1065);
+
+    BOX3D bounds(
+        -13676090.610841721296, 4894836.9556098170578, 123.93000030517578125,
+        -13674705.011110275984, 4896224.6888861842453, 178.7299957275390625);
+    BOOST_CHECK_EQUAL(qi.m_bounds, bounds);
+
+    std::vector<std::string> dims =
+    {
+        "Blue",
+        "Classification",
+        "GPSTime",
+        "Green",
+        "Intensity",
+        "Number of Returns",
+        "Red",
+        "Return Information",
+        "Return Number",
+        "X",
+        "Y",
+        "Z"
+    };
+
+    std::sort(qi.m_dimNames.begin(), qi.m_dimNames.end());
+    BOOST_CHECK_EQUAL_COLLECTIONS(qi.m_dimNames.begin(), qi.m_dimNames.end(),
+        dims.begin(), dims.end());
+}
 
 BOOST_AUTO_TEST_SUITE_END()

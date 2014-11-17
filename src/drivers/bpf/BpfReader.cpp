@@ -50,6 +50,37 @@ void BpfReader::processOptions(const Options&)
 }
 
 
+QuickInfo BpfReader::inspect()
+{
+    QuickInfo qi;
+
+    initialize();
+    qi.m_pointCount = m_header.m_numPts;
+    qi.m_srs = getSpatialReference();
+    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+    {
+        BpfDimension& dim = *di;
+        qi.m_dimNames.push_back(dim.m_label);
+        if (dim.m_label == "X")
+        {
+            qi.m_bounds.minx = dim.m_min;
+            qi.m_bounds.maxx = dim.m_max;
+        }
+        if (dim.m_label == "Y")
+        {
+            qi.m_bounds.miny = dim.m_min;
+            qi.m_bounds.maxy = dim.m_max;
+        }
+        if (dim.m_label == "Z")
+        {
+            qi.m_bounds.minz = dim.m_min;
+            qi.m_bounds.maxz = dim.m_max;
+        }
+    }
+    return qi;
+}
+
+
 // When the stage is intialized, the schema needs to be populated with the
 // dimensions in order to allow subsequent stages to be aware of or append to
 // the dimensions in the PointBuffer.

@@ -76,6 +76,7 @@ private:
     Charbuf m_charbuf;
 
     virtual void processOptions(const Options& options);
+    virtual QuickInfo inspect();
     virtual void initialize();
     virtual void addDimensions(PointContextRef ctx);
     virtual void ready(PointContextRef ctx);
