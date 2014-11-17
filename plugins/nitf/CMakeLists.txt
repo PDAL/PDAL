@@ -37,6 +37,7 @@ if(NITRO_FOUND)
     set(PDAL_LAS_SRCS
         ${PDAL_GTIFF_SRCS}
         ${PDAL_LASZIP_SRCS}
+        "${PROJECT_SOURCE_DIR}/src/gitsha.cpp"
         "${PDAL_LAS_SRC}/Header.cpp"
         "${PDAL_LAS_SRC}/Reader.cpp"
         "${PDAL_LAS_SRC}/SummaryData.cpp"
@@ -47,6 +48,7 @@ if(NITRO_FOUND)
     set(PDAL_LAS_INCS
         ${PDAL_GTIFF_INCS}
         ${PDAL_LASZIP_INCS}
+        "${PROJECT_SOURCE_DIR}/include/pdal/gitsha.h"
         "${PDAL_LAS_HEADERS}/Header.hpp"
 	"${PDAL_LAS_HEADERS}/Reader.hpp"
 	"${PDAL_LAS_HEADERS}/SummaryData.hpp"
