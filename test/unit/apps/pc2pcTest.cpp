@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_SUITE(pc2pcTest)
 
 static std::string appName()
 {
-    return Support::binpath(Support::exename("pdal translate"));
+    return Support::binpath(Support::exename("pdal") + " translate");
 }
 
 
