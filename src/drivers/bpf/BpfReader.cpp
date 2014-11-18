@@ -166,10 +166,13 @@ bool BpfReader::readUlemFiles()
 /// \return  Whether the stream is still valid.
 bool BpfReader::readHeaderExtraData()
 {
-    std::streampos size = m_header.m_len - m_stream.position();
-    std::vector<uint8_t> buf(size);
-    m_stream.get(buf);
-    m_metadata.addEncoded("header_data", buf.data(), buf.size());
+    if (m_stream.position() < m_header.m_len)
+    {
+        std::streampos size = m_header.m_len - m_stream.position();
+        std::vector<uint8_t> buf(size);
+        m_stream.get(buf);
+        m_metadata.addEncoded("header_data", buf.data(), buf.size());
+    }
     return (bool)m_stream;
 }
 
