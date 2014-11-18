@@ -158,7 +158,7 @@ BOOST_AUTO_TEST_CASE(inspect)
         -13674705.011110275984, 4896224.6888861842453, 178.7299957275390625);
     BOOST_CHECK_EQUAL(qi.m_bounds, bounds);
 
-    std::vector<std::string> dims =
+    const char *dims[] = 
     {
         "Blue",
         "Classification",
@@ -176,7 +176,7 @@ BOOST_AUTO_TEST_CASE(inspect)
 
     std::sort(qi.m_dimNames.begin(), qi.m_dimNames.end());
     BOOST_CHECK_EQUAL_COLLECTIONS(qi.m_dimNames.begin(), qi.m_dimNames.end(),
-        dims.begin(), dims.end());
+      std::begin(dims), std::end(dims));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

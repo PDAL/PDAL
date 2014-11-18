@@ -217,7 +217,7 @@ BOOST_AUTO_TEST_CASE(inspect)
         -94.660631099999989, 31.047329099999999, 78.119000200000002);
     BOOST_CHECK_EQUAL(qi.m_bounds, bounds);
 
-    std::vector<std::string> dims =
+    const char *dims[] =
     {
         "Classification",
         "EdgeOfFlightLine",
@@ -235,7 +235,7 @@ BOOST_AUTO_TEST_CASE(inspect)
 
     std::sort(qi.m_dimNames.begin(), qi.m_dimNames.end());
     BOOST_CHECK_EQUAL_COLLECTIONS(qi.m_dimNames.begin(), qi.m_dimNames.end(),
-        dims.begin(), dims.end());
+        std::begin(dims), std::end(dims));
 }
 
 
