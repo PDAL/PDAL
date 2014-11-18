@@ -86,6 +86,11 @@ endif(WIN32)
 #------------------------------------------------------------------------------
 # misc user options
 #------------------------------------------------------------------------------
+if(DEFINED ENV{ORACLE_HOME})
+    set(DEFINED_ORACLE_HOME TRUE)
+else(DEFINED ENV{ORACLE_HOME})
+    set(DEFINED_ORACLE_HOME FALSE)
+endif(DEFINED ENV{ORACLE_HOME})
 
 # Choose package components
 option(WITH_APPS "Choose if PDAL utilities should be built" TRUE)
@@ -94,7 +99,7 @@ option(BUILD_PLUGIN_HEXBIN "Whether or not HexBin filter is built" FALSE)
 option(BUILD_PLUGIN_ICEBRIDGE "Choose if Icebridge support should be built" FALSE)
 option(BUILD_PLUGIN_MRSID "Choose if MrSID/LiDAR support should be built" FALSE)
 option(BUILD_PLUGIN_NITF "Choose if NITF support should be built (only install supported is from http://github.com/hobu/nitro)" FALSE)
-option(BUILD_PLUGIN_OCI "Choose if OCI support should be built" TRUE)
+option(BUILD_PLUGIN_OCI "Choose if OCI support should be built" ${DEFINED_ORACLE_HOME})
 option(BUILD_PLUGIN_P2G "Choose if Points2Grid support should be built" FALSE)
 option(BUILD_PLUGIN_PCL "Choose if PCL support should be built" FALSE)
 option(BUILD_PLUGIN_PGPOINTCLOUD "Choose if PostgreSQL PointCloud support should be built" TRUE)
@@ -490,6 +495,12 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
 # subdirectory controls
 #------------------------------------------------------------------------------
 
+# PDAL_TARGET_OBJECTS is used to collect the driver object libraries
+set(PDAL_TARGET_OBJECTS "")
+
+add_subdirectory(drivers)
+add_subdirectory(src)
+
 if(WITH_TESTS)
   message(STATUS "Building with PDAL unit tests")
   enable_testing()
@@ -513,8 +524,6 @@ else()
   endif()
 endif()
 
-
-add_subdirectory(src)
 add_subdirectory(plugins)
 
 if(WITH_APPS)

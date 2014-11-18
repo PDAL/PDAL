@@ -33,6 +33,8 @@
  ****************************************************************************/
 
 #pragma once
+#include <iomanip>
+
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Utils.hpp>
 

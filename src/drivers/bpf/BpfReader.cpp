@@ -50,6 +50,37 @@ void BpfReader::processOptions(const Options&)
 }
 
 
+QuickInfo BpfReader::inspect()
+{
+    QuickInfo qi;
+
+    initialize();
+    qi.m_pointCount = m_header.m_numPts;
+    qi.m_srs = getSpatialReference();
+    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+    {
+        BpfDimension& dim = *di;
+        qi.m_dimNames.push_back(dim.m_label);
+        if (dim.m_label == "X")
+        {
+            qi.m_bounds.minx = dim.m_min;
+            qi.m_bounds.maxx = dim.m_max;
+        }
+        if (dim.m_label == "Y")
+        {
+            qi.m_bounds.miny = dim.m_min;
+            qi.m_bounds.maxy = dim.m_max;
+        }
+        if (dim.m_label == "Z")
+        {
+            qi.m_bounds.minz = dim.m_min;
+            qi.m_bounds.maxz = dim.m_max;
+        }
+    }
+    return qi;
+}
+
+
 // When the stage is intialized, the schema needs to be populated with the
 // dimensions in order to allow subsequent stages to be aware of or append to
 // the dimensions in the PointBuffer.
@@ -82,6 +113,9 @@ void BpfReader::initialize()
             return;
         readPolarData();
     }
+
+    // Read thing after the standard header as metadata.
+    readHeaderExtraData();
 
     // Fast forward file to end of header as reported by base header.
     std::streampos pos = m_stream.position();
@@ -117,6 +151,7 @@ bool BpfReader::readUlemData()
     return (bool)m_stream;
 }
 
+
 bool BpfReader::readUlemFiles()
 {
     BpfUlemFile file;
@@ -125,6 +160,19 @@ bool BpfReader::readUlemFiles()
             (const unsigned char *)file.m_buf.data(), file.m_len);
     return (bool)m_stream;
 }
+
+
+/// Encode all data that follows the headers as metadata.
+/// \return  Whether the stream is still valid.
+bool BpfReader::readHeaderExtraData()
+{
+    std::streampos size = m_header.m_len - m_stream.position();
+    std::vector<uint8_t> buf(size);
+    m_stream.get(buf);
+    m_metadata.addEncoded("header_data", buf.data(), buf.size());
+    return (bool)m_stream;
+}
+
 
 bool BpfReader::readPolarData()
 {

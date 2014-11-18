@@ -38,7 +38,7 @@
 
 #include <pdal/filters/Predicate.hpp>
 #include <pdal/filters/Stats.hpp>
-#include <pdal/drivers/faux/Reader.hpp>
+#include <FauxReader.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
 
@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test1)
     readerOps.add("bounds", bounds);
     readerOps.add("num_points", 1000);
     readerOps.add("mode", "ramp");
-    drivers::faux::Reader reader;
+    FauxReader reader;
     reader.setOptions(readerOps);
 
     // keep all points where x less than 1.0
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test2)
     readerOps.add("num_points", 1000);
     readerOps.add("mode", "ramp");
 
-    drivers::faux::Reader reader;
+    FauxReader reader;
     reader.setOptions(readerOps);
 
     Option source("source",
@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test3)
     readerOpts.add("bounds", bounds);
     readerOpts.add("num_points", 1000);
     readerOpts.add("mode", "ramp");
-    drivers::faux::Reader reader;
+    FauxReader reader;
     reader.setOptions(readerOpts);
 
     // keep all points where x less than 1.0
@@ -253,7 +253,7 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test4)
     readerOpts.add("bounds", bounds);
     readerOpts.add("num_points", 1000);
     readerOpts.add("mode", "ramp");
-    drivers::faux::Reader reader;
+    FauxReader reader;
     reader.setOptions(readerOpts);
 
     const Option source("source",
@@ -306,7 +306,7 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test5)
     readerOpts.add("bounds", bounds);
     readerOpts.add("num_points", 1000);
     readerOpts.add("mode", "ramp");
-    drivers::faux::Reader reader;
+    FauxReader reader;
     reader.setOptions(readerOpts);
 
     const Option source("source",

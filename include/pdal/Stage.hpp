@@ -41,6 +41,7 @@
 #include <pdal/Metadata.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/PointBuffer.hpp>
+#include <pdal/QuickInfo.hpp>
 #include <pdal/SpatialReference.hpp>
 
 #include <boost/property_tree/ptree.hpp>
@@ -69,6 +70,12 @@ public:
     void setInput(Stage *input)
         { m_inputs.push_back(input); }
 
+    QuickInfo preview()
+    {
+        l_processOptions(m_options);
+        processOptions(m_options);
+        return inspect();
+    }
     void prepare(PointContextRef ctx);
     PointBufferSet execute(PointContextRef ctx);
 
@@ -149,6 +156,8 @@ private:
         {}
     void l_initialize(PointContextRef ctx);
     void l_done(PointContextRef ctx);
+    virtual QuickInfo inspect()
+        { return QuickInfo(); }
     virtual void initialize()
         {}
     virtual void addDimensions(PointContextRef ctx)

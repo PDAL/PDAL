@@ -262,7 +262,7 @@ or :ref:`pipeline` for more information.
 ------------------------------------------------------------------------------
 
 The *random* command is used to create a random point cloud. It uses
-:ref:`drivers.faux.reader` to create a point cloud containing *count* points
+:ref:`readers.faux` to create a point cloud containing *count* points
 drawn randomly from either a uniform or normal distribution. For the uniform
 distribution, the bounds can be specified (they default to a unit cube). For
 the normal distribution, the mean and standard deviation can both be set for

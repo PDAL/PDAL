@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2014, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -32,51 +32,31 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#pragma once
 
-#include <pdal/PointBuffer.hpp>
-#include <FauxReader.hpp>
-#include <pdal/filters/Decimation.hpp>
+#include <vector>
 
-#include "../StageTester.hpp"
+#include <pdal/Bounds.hpp>
+#include <pdal/SpatialReference.hpp>
 
-using namespace pdal;
-
-BOOST_AUTO_TEST_SUITE(DecimationFilterTest)
-
-BOOST_AUTO_TEST_CASE(DecimationFilterTest_test1)
+namespace pdal
 {
-    BOX3D srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
 
-    Options ops;
-    ops.add("bounds", srcBounds);
-    ops.add("mode", "random");
-    ops.add("num_points", 30);
-    FauxReader reader;
-    reader.setOptions(ops);
+struct QuickInfo
+{
+public:
+    BOX3D m_bounds;   
+    SpatialReference m_srs;
+    point_count_t m_pointCount;
+    std::vector<std::string> m_dimNames;
+    bool m_valid;
 
-    Options decimationOps;
-    decimationOps.add("step", 10);
-    filters::Decimation filter;
-    filter.setOptions(decimationOps);
-    filter.setInput(&reader);
-    BOOST_CHECK(filter.getDescription() == "Decimation Filter");
+    QuickInfo() : m_pointCount(0), m_valid(false)
+        {}
 
-    PointContext ctx;
+    bool valid() const
+        { return m_valid; }
+};
 
-    filter.prepare(ctx);
-    PointBufferSet pbSet = filter.execute(ctx);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
-    PointBufferPtr buf = *pbSet.begin();
-    BOOST_CHECK_EQUAL(buf->size(), 3);
+} // namespace pdal
 
-    uint64_t t0 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 0);
-    uint64_t t1 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 1);
-    uint64_t t2 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 2);
-
-    BOOST_CHECK_EQUAL(t0, 0);
-    BOOST_CHECK_EQUAL(t1, 10);
-    BOOST_CHECK_EQUAL(t2, 20);
-}
-
-BOOST_AUTO_TEST_SUITE_END()

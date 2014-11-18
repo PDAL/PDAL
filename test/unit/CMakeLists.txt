@@ -93,6 +93,7 @@ set(PDAL_UNITTEST_SRCS
     ${PDAL_UNITTEST_DRIVERS_SRCS}
     ${PDAL_UNITTEST_FILTERS_SRCS}
     ${PDAL_PLANG_TEST_SRC}
+    ${PDAL_TARGET_OBJECTS}
 )
 
 #
@@ -119,6 +120,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/include
     ${GDAL_INCLUDE_DIR}
     ${GEOTIFF_INCLUDE_DIR}
+    ${PROJECT_SOURCE_DIR}/drivers/faux
 )
 set(deps ${PDAL_LIB_NAME})
 PDAL_ADD_TEST(pdal_test "${PDAL_UNITTEST_SRCS}" "${deps}")

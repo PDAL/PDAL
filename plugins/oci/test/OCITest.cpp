@@ -38,7 +38,7 @@
 #include <boost/property_tree/ptree.hpp>
 
 #include <pdal/StageFactory.hpp>
-#include <pdal/drivers/faux/Reader.hpp>
+#include "../../drivers/faux/FauxReader.hpp"
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/drivers/las/Writer.hpp>
 #include <pdal/filters/Cache.hpp>

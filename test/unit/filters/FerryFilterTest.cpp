@@ -35,7 +35,6 @@
 #include "UnitTest.hpp"
 #include <boost/cstdint.hpp>
 
-#include <pdal/drivers/faux/Reader.hpp>
 #include <pdal/filters/Reprojection.hpp>
 #include <pdal/filters/Ferry.hpp>
 #include <pdal/drivers/las/Reader.hpp>
