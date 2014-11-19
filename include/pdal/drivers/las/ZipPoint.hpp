@@ -53,7 +53,7 @@ namespace las
 
 class VariableLengthRecord;
 
-class ZipPoint
+class PDAL_DLL ZipPoint
 {
 public:
     ZipPoint(VariableLengthRecord *lasHeader);
