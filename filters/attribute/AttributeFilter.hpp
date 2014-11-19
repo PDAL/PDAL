@@ -56,9 +56,6 @@ namespace gdal
 }
 
 
-namespace filters
-{
-
 typedef boost::shared_ptr<void> OGRDSPtr;
 typedef boost::shared_ptr<void> OGRFeaturePtr;
 typedef boost::shared_ptr<void> OGRGeometryPtr;
@@ -113,14 +110,14 @@ public:
 typedef std::map< std::string, AttributeInfo> AttributeInfoMap;
 
 
-class PDAL_DLL Attribute : public Filter
+class PDAL_DLL AttributeFilter : public Filter
 {
 public:
     SET_STAGE_NAME("filters.attribute", "Data attribute filter")
     SET_STAGE_LINK("http://pdal.io/stages/filters.attribute.html")
     SET_STAGE_ENABLED(true)
 
-    Attribute() : Filter(), m_geosEnvironment(0) {};
+    AttributeFilter() : Filter(), m_geosEnvironment(0) {};
     static Options getDefaultOptions();
 
 private:
@@ -130,8 +127,8 @@ private:
     virtual void filter(PointBuffer& buffer);
     virtual void done(PointContext ctx);
 
-    Attribute& operator=(const Attribute&); // not implemented
-    Attribute(const Attribute&); // not implemented
+    AttributeFilter& operator=(const AttributeFilter&); // not implemented
+    AttributeFilter(const AttributeFilter&); // not implemented
 
     typedef boost::shared_ptr<void> OGRDSPtr;
 
@@ -142,6 +139,4 @@ private:
 
 };
 
-} // namespace filters
 } // namespace pdal
-

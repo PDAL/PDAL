@@ -35,7 +35,7 @@
 #include "UnitTest.hpp"
 
 #include <pdal/FileUtils.hpp>
-#include <pdal/drivers/las/Reader.hpp>
+#include <LasReader.hpp>
 
 #include "Support.hpp"
 
@@ -98,7 +98,7 @@ static bool fileIsCompressed(const std::string& name)
 
     Options ops;
     ops.add("filename", name);
-    drivers::las::Reader reader;
+    LasReader reader;
     reader.setOptions(ops);
     reader.prepare(ctx);
     return reader.header().compressed();
@@ -111,7 +111,7 @@ static bool fileHasSrs(const std::string& name)
 
     Options ops;
     ops.add("filename", name);
-    drivers::las::Reader reader;
+    LasReader reader;
     reader.setOptions(ops);
     reader.prepare(ctx);
     reader.execute(ctx);

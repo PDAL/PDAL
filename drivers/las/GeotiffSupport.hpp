@@ -34,50 +34,54 @@
 
 #pragma once
 
-#include <ostream>
-#include <array>
-
 #include <pdal/pdal_internal.hpp>
-#include <pdal/Bounds.hpp>
-#include <pdal/drivers/las/Header.hpp>
+
+// See http://lists.osgeo.org/pipermail/gdal-dev/2013-November/037429.html
+#define CPL_SERV_H_INCLUDED
+
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+
+#ifdef PDAL_HAVE_LIBGEOTIFF
+#include <geo_simpletags.h>
+#include <cpl_conv.h>
+#endif
+
+// Fake out the compiler if we don't have libgeotiff includes already
+#if !defined(__geotiff_h_)
+typedef struct GTIFS *GTIF;
+#endif
+#if !defined(__geo_simpletags_h_)
+typedef struct ST_TIFFS *ST_TIFF;
+#endif
+
+#include <string>
+#include <stdexcept>
 
 namespace pdal
 {
-namespace drivers
-{
-namespace las
-{
 
-class PDAL_DLL SummaryData
+class PDAL_DLL GeotiffSupport
 {
 public:
-    SummaryData();
+    GeotiffSupport() : m_gtiff(0), m_tiff(0)
+    {}
+    ~GeotiffSupport();
+    
+    void resetTags();
+    int setKey(int tag, void *data, int size, int type);
+    size_t getKey(int tag, int *count, void **data_ptr) const;
+    void setTags();
 
-    void addPoint(double x, double y, double z, int returnNumber);
-    uint32_t getTotalNumPoints() const
-        { return m_totalNumPoints; }
-    BOX3D getBounds() const;
-    point_count_t getReturnCount(int returnNumber) const;
+    std::string getWkt(bool horizOnly, bool pretty) const;
+    void setWkt(const std::string&);
 
-    void dump(std::ostream&) const;
+    std::string getText() const;
 
 private:
-    double m_minX;
-    double m_minY;
-    double m_minZ;
-    double m_maxX;
-    double m_maxY;
-    double m_maxZ;
-    std::array<point_count_t, LasHeader::RETURN_COUNT> m_returnCounts;
-    point_count_t m_totalNumPoints;
+    void rebuildGTIF();
 
-    SummaryData& operator=(const SummaryData&); // not implemented
-    SummaryData(const SummaryData&); // not implemented
+    GTIF* m_gtiff;
+    ST_TIFF* m_tiff;
 };
 
-PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const SummaryData&);
-
-} // namespace las
-} // namespace drivers
 } // namespace pdal
-

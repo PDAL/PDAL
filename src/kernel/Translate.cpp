@@ -83,7 +83,7 @@ void Translate::validateSwitches()
     //     if (! (option_split.size() == 2))
     //     {
     //         std::ostringstream oss;
-    //         oss << "option '" << o << "' did not split correctly. Is it in the form --drivers.las.reader.option=foo?";
+    //         oss << "option '" << o << "' did not split correctly. Is it in the form --readers.las.option=foo?";
     //         throw app_usage_error(oss.str());
     //     }
     //

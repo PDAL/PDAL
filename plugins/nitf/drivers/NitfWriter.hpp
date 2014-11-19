@@ -35,17 +35,13 @@
 #pragma once
 
 #include <pdal/StageFactory.hpp>
-#include <pdal/drivers/las/Writer.hpp>
+#include <LasWriter.hpp>
 
 namespace pdal
 {
-namespace drivers
-{
-namespace nitf
-{
 
 
-class PDAL_DLL NitfWriter : public las::Writer
+class PDAL_DLL NitfWriter : public LasWriter
 {
 public:
     SET_STAGE_NAME("drivers.nitf.writer", "NITF Writer")
@@ -83,7 +79,4 @@ private:
     NitfWriter(const NitfWriter&); // not implemented
 };
 
-} // namespace nitf
-} // namespace drivers
 } // namespace pdal
-

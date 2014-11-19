@@ -41,8 +41,8 @@
 #include <pdal/PipelineReader.hpp>
 #include <pdal/StageFactory.hpp>
 
-#include <pdal/drivers/las/Reader.hpp>
-#include <pdal/drivers/las/Writer.hpp>
+#include <LasReader.hpp>
+#include <LasWriter.hpp>
 #include <pdal/filters/Chipper.hpp>
 
 #include "Support.hpp"
@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE(test_one)
         las_opts.add("filename", Support::datapath("nitf/autzen-utm10.las"));
 
         PointContext ctx2;
-        drivers::las::Reader las_reader;
+        LasReader las_reader;
         las_reader.setOptions(las_opts);
         las_reader.prepare(ctx2);
         PointBufferSet pbSet2 = las_reader.execute(ctx2);
@@ -172,7 +172,7 @@ BOOST_AUTO_TEST_CASE(optionSrs)
 
         Options lasOpts;
         lasOpts.add("filename", "/dev/null");
-        drivers::las::Writer lasWriter;
+        LasWriter lasWriter;
         lasWriter.setInput(nitfReader);
         lasWriter.setOptions(lasOpts);;
 

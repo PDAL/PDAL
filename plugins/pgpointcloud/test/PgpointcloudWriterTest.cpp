@@ -36,7 +36,7 @@
 
 #include <pdal/Writer.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/drivers/las/Reader.hpp>
+#include <LasReader.hpp>
 
 #include "Support.hpp"
 #include "Pgtest-Support.hpp"
@@ -144,7 +144,7 @@ BOOST_AUTO_TEST_CASE(testWrite)
         const std::string file(Support::datapath("las/1.2-with-color.las"));
 
         const pdal::Option opt_filename("filename", file);
-        pdal::drivers::las::Reader reader;
+        LasReader reader;
         pdal::Options options;
         options.add(opt_filename);
         reader.setOptions(options);
@@ -182,7 +182,7 @@ BOOST_AUTO_TEST_CASE(testNoPointcloudExtension)
         const std::string file(Support::datapath("las/1.2-with-color.las"));
 
         const pdal::Option opt_filename("filename", file);
-        pdal::drivers::las::Reader reader;
+        LasReader reader;
         pdal::Options options;
         options.add(opt_filename);
         reader.setOptions(options);

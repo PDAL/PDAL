@@ -39,7 +39,7 @@
 #include <iostream>
 #include <string>
 
-#include <pdal/drivers/las/Reader.hpp>
+#include <LasReader.hpp>
 #include <pdal/Metadata.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
@@ -313,7 +313,7 @@ BOOST_AUTO_TEST_CASE(test_metadata_stage)
 
     PointContext ctx;
 
-    drivers::las::Reader reader(Support::datapath("interesting.las"));
+    LasReader reader(Support::datapath("interesting.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
     reader.prepare(ctx);
 

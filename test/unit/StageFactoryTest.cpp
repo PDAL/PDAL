@@ -41,8 +41,8 @@
 #include <pdal/Filter.hpp>
 #include <pdal/Writer.hpp>
 #include <pdal/Options.hpp>
-#include <pdal/drivers/las/Reader.hpp>
-#include <pdal/drivers/las/Writer.hpp>
+#include LasReader.hpp>
+#include LasWriter.hpp>
 #include <pdal/filters/Crop.hpp>
 #include <pdal/filters/Mosaic.hpp>
 
@@ -59,8 +59,8 @@ BOOST_AUTO_TEST_CASE(StageFactoryTest_test1)
 
     Options optsR;
     optsR.add("filename", Support::datapath("las/1.2-with-color.las"));
-    Reader* reader = factory.createReader("drivers.las.reader", optsR);
-    BOOST_CHECK(reader->getName() == "drivers.las.reader");
+    Reader* reader = factory.createReader("readers.las", optsR);
+    BOOST_CHECK(reader->getName() == "readers.las");
 
     Options optsF;
     optsF.add("bounds", Bounds<double>(0,0,0,1000000,1000000,1000000));
@@ -75,8 +75,8 @@ BOOST_AUTO_TEST_CASE(StageFactoryTest_test1)
 
     Options optsW;
     optsW.add("filename", "temp.las", "file to write to");
-    Writer* writer = factory.createWriter("drivers.las.writer", *filter, optsW);
-    BOOST_CHECK(writer->getName() == "drivers.las.writer");
+    Writer* writer = factory.createWriter("writers.las", *filter, optsW);
+    BOOST_CHECK(writer->getName() == "writers.las");
     writer->prepare();
 
     const boost::uint64_t np = writer->write(reader->getNumPoints());
@@ -101,7 +101,7 @@ static Reader* demoReaderCreator(const Options& options)
 
     Options optsR;
     optsR.add("filename", Support::datapath("las/1.2-with-color.las"), "file to read from");
-    Reader* reader = new pdal::drivers::las::Reader(optsR);
+    Reader* reader = new pdal::LasReader(optsR);
     return reader;
 }
 
@@ -135,7 +135,7 @@ Writer* demoWriterCreator(Stage& prev, const Options& options)
 
     Options optsW;
     optsW.add("filename", "temp.las", "file to write to");
-    Writer* writer = new pdal::drivers::las::Writer(optsW);
+    Writer* writer = new pdal::LasWriter(optsW);
     writer->setInput(&prev);
     return writer;
 }
@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE(StageFactoryTest_test2)
     Options optsR;
     optsR.add("flag",11,"my flag");
     Stage* reader = factory.createReader("demoR", optsR);
-    BOOST_CHECK(reader->getName() == "drivers.las.reader");
+    BOOST_CHECK(reader->getName() == "readers.las");
     BOOST_CHECK(s_demoflag == 11);
 
     s_demoflag = 0;
@@ -179,7 +179,7 @@ BOOST_AUTO_TEST_CASE(StageFactoryTest_test2)
     Options optsW;
     optsW.add("flag",44,"my flag");
     Writer* writer = factory.createWriter("demoW", *reader, optsW);
-    BOOST_CHECK(writer->getName() == "drivers.las.writer");
+    BOOST_CHECK(writer->getName() == "writers.las");
     writer->prepare();
     BOOST_CHECK(s_demoflag == 44);
 

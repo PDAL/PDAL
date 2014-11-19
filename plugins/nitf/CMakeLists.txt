@@ -4,6 +4,7 @@
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/plugins/nitf)
+include_directories(${PROJECT_SOURCE_DIR}/drivers/las)
 
 find_package(Nitro 2.6 REQUIRED)
 if(NITRO_FOUND)
@@ -20,40 +21,38 @@ if(NITRO_FOUND)
 	add_definitions("-D__POSIX")
     endif()
 
-    set(PDAL_LAS_PATH drivers/las)
-    set(PDAL_LAS_HEADERS "${PROJECT_SOURCE_DIR}/include/pdal/${PDAL_LAS_PATH}")
-    set(PDAL_LAS_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_LAS_PATH}")
+    set(PDAL_LAS_PATH "${PROJECT_SOURCE_DIR}/drivers/las")
 
     if ((GEOTIFF_FOUND) AND (GDAL_FOUND))
-        set(PDAL_GTIFF_SRCS "${PDAL_LAS_SRC}/GeotiffSupport.cpp")
-	set(PDAL_GTIFF_INCS "${PDAL_LAS_SRC}/GeotiffSupport.hpp")
+        set(PDAL_GTIFF_SRCS "${PDAL_LAS_PATH}/GeotiffSupport.cpp")
+        set(PDAL_GTIFF_INCS "${PDAL_LAS_PATH}/GeotiffSupport.hpp")
     endif()
 
     if (LASZIP_FOUND)
-        set(PDAL_LASZIP_SRCS "${PDAL_LAS_SRC}/ZipPoint.cpp")
-	set(PDAL_LASZIP_INCS "${PDAL_LAS_HEADERS}/ZipPoint.hpp")
+        set(PDAL_LASZIP_SRCS "${PDAL_LAS_PATH}/ZipPoint.cpp")
+        set(PDAL_LASZIP_INCS "${PDAL_LAS_PATH}/ZipPoint.hpp")
     endif()
 
     set(PDAL_LAS_SRCS
         ${PDAL_GTIFF_SRCS}
         ${PDAL_LASZIP_SRCS}
         "${PROJECT_SOURCE_DIR}/src/gitsha.cpp"
-        "${PDAL_LAS_SRC}/Header.cpp"
-        "${PDAL_LAS_SRC}/Reader.cpp"
-        "${PDAL_LAS_SRC}/SummaryData.cpp"
-        "${PDAL_LAS_SRC}/VariableLengthRecord.cpp"
-        "${PDAL_LAS_SRC}/Writer.cpp"
+	"${PDAL_LAS_PATH}/LasHeader.cpp"
+	"${PDAL_LAS_PATH}/LasReader.cpp"
+        "${PDAL_LAS_PATH}/SummaryData.cpp"
+        "${PDAL_LAS_PATH}/VariableLengthRecord.cpp"
+	"${PDAL_LAS_PATH}/LasWriter.cpp"
     )
 
     set(PDAL_LAS_INCS
         ${PDAL_GTIFF_INCS}
         ${PDAL_LASZIP_INCS}
         "${PROJECT_SOURCE_DIR}/include/pdal/gitsha.h"
-        "${PDAL_LAS_HEADERS}/Header.hpp"
-	"${PDAL_LAS_HEADERS}/Reader.hpp"
-	"${PDAL_LAS_HEADERS}/SummaryData.hpp"
-	"${PDAL_LAS_HEADERS}/VariableLengthRecord.hpp"
-	"${PDAL_LAS_HEADERS}/Writer.hpp"
+	"${PDAL_LAS_PATH}/LasHeader.hpp"
+	"${PDAL_LAS_PATH}/LasReader.hpp"
+	"${PDAL_LAS_PATH}/SummaryData.hpp"
+	"${PDAL_LAS_PATH}/VariableLengthRecord.hpp"
+	"${PDAL_LAS_PATH}/LasWriter.hpp"
     )
 
     #

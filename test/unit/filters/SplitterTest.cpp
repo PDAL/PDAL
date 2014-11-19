@@ -35,7 +35,7 @@
 #include "UnitTest.hpp"
 
 #include <pdal/filters/Splitter.hpp>
-#include <pdal/drivers/las/Reader.hpp>
+#include <LasReader.hpp>
 
 #include "../StageTester.hpp"
 #include "Support.hpp"
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(test_tile_filter)
     // create the reader
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
-    drivers::las::Reader r;
+    LasReader r;
     r.setOptions(ops1);
 
     Options o;

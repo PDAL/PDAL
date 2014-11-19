@@ -4,6 +4,7 @@
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/plugins/pgpointcloud)
+include_directories(${PROJECT_SOURCE_DIR}/drivers/las)
 
 find_package(PostgreSQL)
 if (POSTGRESQL_FOUND)

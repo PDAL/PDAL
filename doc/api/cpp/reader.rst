@@ -32,7 +32,7 @@ The OCI reader provides `Oracle Point Cloud`_ support to PDAL.
 
 .. _`Oracle Point Cloud`: http://docs.oracle.com/cd/B28359_01/appdev.111/b28400/sdo_pc_pkg_ref.htm
 
-.. doxygenclass:: pdal::drivers::oci::Reader
+.. doxygenclass:: pdal::drivers::oci::OciReader
    :members:
 
 QFIT Reader
@@ -41,7 +41,7 @@ QFIT Reader
  
 .. _`QFIT`: http://nsidc.org/data/ilatm1b.html
 
-.. doxygenclass:: pdal::drivers::qfit::Reader
+.. doxygenclass:: pdal::QfitReader
   :members:
 
 TerraSolid Reader

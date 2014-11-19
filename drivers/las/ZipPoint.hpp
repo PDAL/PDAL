@@ -34,61 +34,50 @@
 
 #pragma once
 
-#include <pdal/pdal_internal.hpp>
+#include <vector>
 
-// See http://lists.osgeo.org/pipermail/gdal-dev/2013-November/037429.html
-#define CPL_SERV_H_INCLUDED
-
-#pragma GCC diagnostic ignored "-Wfloat-equal"
-
-#ifdef PDAL_HAVE_LIBGEOTIFF
-#include <geo_simpletags.h>
-#include <cpl_conv.h>
+#ifdef PDAL_HAVE_LASZIP
+#include <laszip/laszip.hpp>
+#include <laszip/lasunzipper.hpp>
+#include <laszip/laszipper.hpp>
 #endif
-
-// Fake out the compiler if we don't have libgeotiff includes already
-#if !defined(__geotiff_h_)
-typedef struct GTIFS *GTIF;
-#endif
-#if !defined(__geo_simpletags_h_)
-typedef struct ST_TIFFS *ST_TIFF;
-#endif
-
-#include <string>
-#include <stdexcept>
 
 namespace pdal
 {
-namespace drivers
-{
-namespace las
-{
 
-class PDAL_DLL GeotiffSupport
+#ifdef PDAL_HAVE_LASZIP
+
+class VariableLengthRecord;
+
+class ZipPoint
 {
 public:
-    GeotiffSupport() : m_gtiff(0), m_tiff(0)
-    {}
-    ~GeotiffSupport();
+    ZipPoint(VariableLengthRecord *lasHeader);
+    ZipPoint(uint8_t format, uint16_t pointLen);
+    ~ZipPoint();
+
+    std::vector<uint8_t> vlrData() const;
+    LASzip* GetZipper() const
+        { return m_zip.get(); }
     
-    void resetTags();
-    int setKey(int tag, void *data, int size, int type);
-    size_t getKey(int tag, int *count, void **data_ptr) const;
-    void setTags();
+private:
+    std::unique_ptr<LASzip> m_zip;
 
-    std::string getWkt(bool horizOnly, bool pretty) const;
-    void setWkt(const std::string&);
-
-    std::string getText() const;
+//ABELL - This block should be made private.
+public:
+    unsigned char** m_lz_point;
+    unsigned int m_lz_point_size;
+    std::vector<uint8_t> m_lz_point_data;
 
 private:
-    void rebuildGTIF();
-
-    GTIF* m_gtiff;
-    ST_TIFF* m_tiff;
+    void ConstructItems();
 };
+#else // PDAL_HAVE_LASZIP
+// The types here just need to be something suitable for a smart pointer.
+// They aren't ever used beyond testing for NULL.
+typedef char LASzipper;
+typedef char LASunzipper;
+typedef char ZipPoint;
+#endif
 
-} // namespace las
-} // namespace drivers
 } // namespace pdal
-

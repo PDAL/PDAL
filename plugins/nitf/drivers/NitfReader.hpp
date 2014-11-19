@@ -34,26 +34,22 @@
 
 #pragma once
 
-#include <pdal/drivers/las/Reader.hpp>
+#include <LasReader.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/StreamFactory.hpp>
 
 namespace pdal
 {
-namespace drivers
-{
-namespace nitf
-{
 
 
-class PDAL_DLL NitfReader : public las::Reader
+class PDAL_DLL NitfReader : public LasReader
 {
 public:
     SET_STAGE_NAME("drivers.nitf.reader", "NITF Reader")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.nitf.reader.html")
     SET_STAGE_ENABLED(true)
 
-    NitfReader() : las::Reader()
+    NitfReader() : LasReader()
         {}
 
 private:
@@ -72,6 +68,4 @@ private:
     NitfReader(const NitfReader&); // not implemented
 };
 
-} // namespace nitf
-} // namespace drivers
 } // namespace pdal

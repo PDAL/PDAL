@@ -392,7 +392,7 @@ public:
     template<typename T>
     boost::optional<T> getMetadataOption(std::string const& name) const
     {
-        // <Reader type="drivers.las.writer">
+        // <Reader type="writers.las">
         //     <Option name="metadata">
         //         <Options>
         //             <Option name="dataformatid">

@@ -41,7 +41,7 @@
 
 #include <pdal/FileUtils.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/drivers/las/Reader.hpp>
+#include <LasReader.hpp>
 #include <pdal/filters/Cache.hpp>
 #include <pdal/filters/Chipper.hpp>
 #include <pdal/filters/InPlaceReprojection.hpp>
@@ -153,7 +153,7 @@ BOOST_AUTO_TEST_CASE(SqliteTest_test_simple_las)
     std::string temp_filename = getSQLITEOptions().getValueOrThrow<std::string>("connection");
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
-    drivers::las::Reader reader;
+    LasReader reader;
     reader.setOptions(ops1);
 
     Options sqliteOptions = getSQLITEOptions();
@@ -175,11 +175,11 @@ BOOST_AUTO_TEST_CASE(SqliteTest_test_simple_las)
         std::string temp_filename = sqliteOptions.getValueOrThrow<std::string>("connection");
         Options ops1;
         ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
-        drivers::las::Reader reader;
+        LasReader reader;
         reader.setOptions(ops1);
 
         {
-            pdal::drivers::las::Reader writer_reader;
+            LasReader writer_reader;
             writer_reader.setOptions(sqliteOptions);
             std::unique_ptr<Writer> writer_writer(wc());
             writer_writer->setOptions(sqliteOptions);

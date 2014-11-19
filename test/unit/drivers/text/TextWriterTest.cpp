@@ -37,7 +37,7 @@
 #include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/filters/Selector.hpp>
-#include <pdal/drivers/las/Reader.hpp>
+#include <LasReader.hpp>
 #include <TextWriter.hpp>
 
 #include <pdal/Utils.hpp>
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(TextWriterTest_geojson)
     options.add(ignore);
 
 
-    pdal::drivers::las::Reader reader(options);
+    pdal::LasReader reader(options);
     pdal::filters::Selector filter(options);
     filter.setInput(&reader);
 

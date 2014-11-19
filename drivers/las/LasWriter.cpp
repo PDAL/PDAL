@@ -35,8 +35,8 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <iostream>
 
-#include <pdal/drivers/las/Writer.hpp>
-#include <pdal/drivers/las/ZipPoint.hpp>
+#include <LasWriter.hpp>
+#include <ZipPoint.hpp>
 #include <pdal/Charbuf.hpp>
 #include <pdal/OStream.hpp>
 #include <pdal/PointBuffer.hpp>
@@ -46,12 +46,8 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace las
-{
 
-void Writer::construct()
+void LasWriter::construct()
 {
     m_xXform.m_scale = .01;
     m_yXform.m_scale = .01;
@@ -61,7 +57,7 @@ void Writer::construct()
 }
 
 
-void Writer::flush()
+void LasWriter::flush()
 {
 #ifdef PDAL_HAVE_LASZIP
     if (m_lasHeader.compressed())
@@ -74,7 +70,7 @@ void Writer::flush()
 }
 
 
-Options Writer::getDefaultOptions()
+Options LasWriter::getDefaultOptions()
 {
     Options options;
 
@@ -107,7 +103,7 @@ Options Writer::getDefaultOptions()
 }
 
 
-void Writer::processOptions(const Options& options)
+void LasWriter::processOptions(const Options& options)
 {
     if (options.hasOption("a_srs"))
         setSpatialReference(options.getValueOrDefault("a_srs", std::string()));
@@ -122,7 +118,7 @@ void Writer::processOptions(const Options& options)
 
 // Get header info from options and store in map for processing with
 // metadata.
-void Writer::getHeaderOptions(const Options &options)
+void LasWriter::getHeaderOptions(const Options &options)
 {
     typedef boost::optional<std::string> OpString;
     auto metaOptionValue = [this, options](const std::string& name,
@@ -166,7 +162,7 @@ void Writer::getHeaderOptions(const Options &options)
 
 /// Get VLR-specific options and store for processing with metadata.
 /// \param opts  Options to check for VLR info.
-void Writer::getVlrOptions(const Options& opts)
+void LasWriter::getVlrOptions(const Options& opts)
 {
     std::vector<pdal::Option> options = opts.getOptions("vlr");
     for (auto o = options.begin(); o != options.end(); ++o)
@@ -197,7 +193,7 @@ void Writer::getVlrOptions(const Options& opts)
 }
 
 
-void Writer::ready(PointContextRef ctx)
+void LasWriter::ready(PointContextRef ctx)
 {
     const SpatialReference& srs = getSpatialReference().empty() ?
         ctx.spatialRef() : getSpatialReference();
@@ -237,7 +233,7 @@ void Writer::ready(PointContextRef ctx)
 /// \param  node - Top-level node to use for metadata search.
 /// \param  recordId - Record ID to match.
 /// \param  userId - User ID to match.
-MetadataNode Writer::findVlrMetadata(MetadataNode node,
+MetadataNode LasWriter::findVlrMetadata(MetadataNode node,
     uint16_t recordId, const std::string& userId)
 {
     std::string sRecordId = std::to_string(recordId);
@@ -266,7 +262,7 @@ MetadataNode Writer::findVlrMetadata(MetadataNode node,
 
 /// Set VLRs from metadata for forwarded info, or from option-provided data
 /// otherwise.
-void Writer::setVlrsFromMetadata()
+void LasWriter::setVlrsFromMetadata()
 {
     std::vector<uint8_t> data;
 
@@ -292,7 +288,7 @@ void Writer::setVlrsFromMetadata()
 
 /// Set VLRs from the active spatial reference.
 /// \param  srs - Active spatial reference.
-void Writer::setVlrsFromSpatialRef(const SpatialReference& srs)
+void LasWriter::setVlrsFromSpatialRef(const SpatialReference& srs)
 {
     VlrList vlrs;
 
@@ -319,7 +315,7 @@ void Writer::setVlrsFromSpatialRef(const SpatialReference& srs)
 /// \param  recordId - Record ID associated with the VLR/Geotiff ref.
 /// \param  description - Description to use with the VLR
 /// \return  Whether the VLR was added.
-bool Writer::addGeotiffVlr(GeotiffSupport& geotiff, uint16_t recordId,
+bool LasWriter::addGeotiffVlr(GeotiffSupport& geotiff, uint16_t recordId,
     const std::string& description)
 {
 #ifdef PDAL_HAVE_LIBGEOTIFF
@@ -343,7 +339,7 @@ bool Writer::addGeotiffVlr(GeotiffSupport& geotiff, uint16_t recordId,
 /// Add a Well-known Text VLR associated with the spatial reference.
 /// \param  srs - Associated spatial reference.
 /// \return  Whether the VLR was added.
-bool Writer::addWktVlr(const SpatialReference& srs)
+bool LasWriter::addWktVlr(const SpatialReference& srs)
 {
     std::string wkt = srs.getWKT(SpatialReference::eCompoundOK);
     if (wkt.empty())
@@ -369,7 +365,7 @@ bool Writer::addWktVlr(const SpatialReference& srs)
 /// \param  recordId - VLR record ID
 /// \param  description - VLR description
 /// \param  data - Raw VLR data
-void Writer::addVlr(const std::string& userId, uint16_t recordId,
+void LasWriter::addVlr(const std::string& userId, uint16_t recordId,
    const std::string& description, std::vector<uint8_t>& data)
 {
     if (data.size() > VariableLengthRecord::MAX_DATA_SIZE)
@@ -387,7 +383,7 @@ void Writer::addVlr(const std::string& userId, uint16_t recordId,
 
 /// Fill the LAS header with values as provided in options or forwarded
 /// metadata.
-void Writer::fillHeader(PointContextRef ctx)
+void LasWriter::fillHeader(PointContextRef ctx)
 {
     m_lasHeader.setScale(m_xXform.m_scale, m_yXform.m_scale,
         m_zXform.m_scale);
@@ -417,7 +413,7 @@ void Writer::fillHeader(PointContextRef ctx)
 }
 
 
-void Writer::readyCompression()
+void LasWriter::readyCompression()
 {
 #ifdef PDAL_HAVE_LASZIP
     m_zipPoint.reset(new ZipPoint(m_lasHeader.pointFormat(),
@@ -433,7 +429,7 @@ void Writer::readyCompression()
 
 /// Prepare the compressor to write points.
 /// \param  pointFormat - Formt of points we're writing.
-void Writer::openCompression()
+void LasWriter::openCompression()
 {
 #ifdef PDAL_HAVE_LASZIP
     if (!m_zipper->open(*m_ostream, m_zipPoint->GetZipper()))
@@ -451,7 +447,7 @@ void Writer::openCompression()
 #endif
 }
 
-void Writer::setAutoOffset(const PointBuffer& pointBuffer)
+void LasWriter::setAutoOffset(const PointBuffer& pointBuffer)
 {
     if (pointBuffer.empty())
         return;
@@ -480,7 +476,7 @@ void Writer::setAutoOffset(const PointBuffer& pointBuffer)
 }
 
 
-void Writer::write(const PointBuffer& pointBuffer)
+void LasWriter::write(const PointBuffer& pointBuffer)
 {
     uint32_t numValidPoints = 0;
 
@@ -644,7 +640,7 @@ void Writer::write(const PointBuffer& pointBuffer)
 }
 
 
-void Writer::done(PointContextRef ctx)
+void LasWriter::done(PointContextRef ctx)
 {
     //ABELL - The zipper has to be closed right after all the points
     // are written or bad things happen since this call expects the
@@ -680,7 +676,4 @@ void Writer::done(PointContextRef ctx)
     out.seek(m_lasHeader.pointOffset());
 }
 
-} // namespace las
-} // namespace drivers
 } // namespace pdal
-

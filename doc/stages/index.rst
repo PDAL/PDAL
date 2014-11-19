@@ -12,8 +12,8 @@ Readers & Writers
    :maxdepth: 1
 
    readers.buffer
-   drivers.las.reader
-   drivers.las.writer
+   readers.las
+   writers.las
    drivers.pgpointcloud.reader
    drivers.pgpointcloud.writer
    readers.faux

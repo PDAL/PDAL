@@ -32,14 +32,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/drivers/las/SummaryData.hpp>
+#include <SummaryData.hpp>
 
 
 namespace pdal
-{
-namespace drivers
-{
-namespace las
 {
 
 SummaryData::SummaryData() :
@@ -113,7 +109,4 @@ std::ostream& operator<<(std::ostream& ostr, const SummaryData& data)
     return ostr;
 }
 
-} // namespace las
-} // namespace drivers
 } // namespace pdal
-

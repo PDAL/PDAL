@@ -35,7 +35,7 @@
 #include "UnitTest.hpp"
 
 #include <pdal/SpatialReference.hpp>
-#include <pdal/drivers/las/Reader.hpp>
+#include <LasReader.hpp>
 #include <pdal/filters/Reprojection.hpp>
 #include <pdal/PointBuffer.hpp>
 
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
 
         Options ops1;
         ops1.add("filename", Support::datapath("las/utm15.las"));
-        drivers::las::Reader reader;
+        LasReader reader;
         reader.setOptions(ops1);
 
         Options options;
@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE(InPlaceReprojectionFilterTest_test_2)
         options.add(out_srs);
         options.add(filename);
 
-        drivers::las::Reader reader(options);
+        LasReader reader(options);
         filters::Reprojection reprojectionFilter(options);
         reprojectionFilter.setInput(&reader);
         reprojectionFilter.prepare(ctx);
