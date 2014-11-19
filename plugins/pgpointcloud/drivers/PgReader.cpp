@@ -194,10 +194,6 @@ void PgReader::addDimensions(PointContextRef ctx)
 {
     log()->get(LogLevel::Debug) << "Fetching schema object" << std::endl;
 
-    // Need this before we can fetchPcid() below
-    if (!m_session)
-        m_session = pg_connect(m_connection);
-
     uint32_t pcid = fetchPcid();
 
     std::ostringstream oss;
@@ -250,9 +246,6 @@ void PgReader::ready(PointContextRef ctx)
     m_cur_nrows = 0;
     m_cur_result = NULL;
 
-    if (!m_session)
-        m_session = pg_connect(m_connection);
-
     if (getSpatialReference().empty())
         setSpatialReference(fetchSpatialReference());
 
@@ -274,6 +267,15 @@ void PgReader::done(PointContextRef ctx)
     if (m_cur_result)
         PQclear(m_cur_result);
 }
+
+void PgReader::initialize()
+{
+    // First thing we do, is set up a connection
+    if (!m_session)
+        m_session = pg_connect(m_connection);
+
+}
+
 
 
 void PgReader::CursorSetup()
