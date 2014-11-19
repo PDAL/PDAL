@@ -94,7 +94,7 @@ void Ferry::addDimensions(PointContextRef ctx)
 {
     for(auto dim_par: m_name_map)
     {
-        Dimension::Id::Enum id = ctx.registerOrAssignDim(dim_par.second, Dimension::Type::Double);
+        ctx.registerOrAssignDim(dim_par.second, Dimension::Type::Double);
     }
 }
 
