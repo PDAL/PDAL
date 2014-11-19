@@ -489,6 +489,7 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
 set(PDAL_TARGET_OBJECTS "")
 
 add_subdirectory(drivers)
+add_subdirectory(filters)
 add_subdirectory(src)
 
 if(WITH_TESTS)
