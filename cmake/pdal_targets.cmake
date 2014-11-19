@@ -142,7 +142,9 @@ macro(PDAL_ADD_DRIVER _type _name _srcs _incs _objs)
     set(libname ${_type}_${_name})
     #set(PDAL_TARGET_OBJECTS ${PDAL_TARGET_OBJECTS} $<TARGET_OBJECTS:${libname}> PARENT_SCOPE)
     set(${_objs} $<TARGET_OBJECTS:${libname}>)
-    add_definitions("-fPIC")
+	if (NOT WIN32)
+		add_definitions("-fPIC")
+	endif()
     add_library(${libname} OBJECT ${_srcs} ${_incs})
 
     install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
