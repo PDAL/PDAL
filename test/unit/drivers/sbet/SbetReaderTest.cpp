@@ -39,7 +39,7 @@
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PointBuffer.hpp>
 
-#include <pdal/drivers/sbet/Reader.hpp>
+#include <SbetReader.hpp>
 
 #include "../../StageTester.hpp"
 #include "Support.hpp"
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(testRead)
 {
     Option filename("filename", Support::datapath("sbet/2-points.sbet"), "");
     Options options(filename);
-    drivers::sbet::SbetReader reader;
+    SbetReader reader;
     reader.setOptions(options);
 
     PointContext ctx;
@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE(testBadFile)
 {
     Option filename("filename", Support::datapath("sbet/badfile.sbet"), "");
     Options options(filename);
-    drivers::sbet::SbetReader reader;
+    SbetReader reader;
     reader.setOptions(options);
     PointContext ctx;
     reader.prepare(ctx);

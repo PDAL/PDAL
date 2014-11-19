@@ -32,52 +32,70 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/drivers/sbet/Writer.hpp>
-
-#include <pdal/drivers/sbet/Common.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <SbetReader.hpp>
 
 namespace pdal
 {
-namespace drivers
-{
-namespace sbet
-{
 
-void SbetWriter::processOptions(const Options& options)
+Options SbetReader::getDefaultOptions()
 {
-    m_filename = options.getOption("filename").getValue<std::string>();
+    Options options;
+    return options;
 }
 
 
-void SbetWriter::ready(PointContextRef ctx)
+void SbetReader::addDimensions(PointContextRef ctx)
 {
-    m_stream.reset(new OLeStream(m_filename));
+    ctx.registerDims(getDefaultDimensions());
 }
 
 
-void SbetWriter::write(const PointBuffer& buf)
+void SbetReader::ready(PointContextRef ctx)
 {
-    m_callback->setTotal(buf.size());
-    m_callback->invoke(0);
+    size_t fileSize = FileUtils::fileSize(m_filename);
+    size_t pointSize = getDefaultDimensions().size() * sizeof(double);
+    if (fileSize % pointSize != 0)
+        throw pdal_error("invalid sbet file size");
+    m_numPts = fileSize / pointSize;
+    m_index = 0;
+    m_stream.reset(new ILeStream(m_filename));
+}
 
+
+point_count_t SbetReader::read(PointBuffer& buf, point_count_t count)
+{
+    PointId nextId = buf.size();
+    PointId idx = m_index;
+    point_count_t numRead = 0;
+    seek(idx);
     Dimension::IdList dims = getDefaultDimensions();
-    for (PointId idx = 0; idx < buf.size(); ++idx)
+    while (numRead < count && idx < m_numPts)
     {
         for (auto di = dims.begin(); di != dims.end(); ++di)
         {
-            // If a dimension doesn't exist, write 0.
+            double d;
+            *m_stream >> d;
             Dimension::Id::Enum dim = *di;
-            *m_stream << (buf.hasDim(dim) ?
-                buf.getFieldAs<double>(dim, idx) : 0.0);
+            buf.setField(dim, nextId, d);
         }
-        if (idx % 100 == 0)
-            m_callback->invoke(idx + 1);
+        idx++;
+        nextId++;
+        numRead++;
     }
-    m_callback->invoke(buf.size());
+    m_index = idx;
+    return numRead;
 }
 
-} // namespace sbet
-} // namespace drivers
-} // namespace pdal
 
+bool SbetReader::eof()
+{
+    return m_index >= m_numPts;
+}
+
+
+void SbetReader::seek(PointId idx)
+{
+    m_stream->seek(idx * sizeof(double) * getDefaultDimensions().size());
+}
+
+} // namespace pdal

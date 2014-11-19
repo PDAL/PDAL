@@ -68,7 +68,7 @@ MAKE_READER_CREATOR(BpfReader, pdal::BpfReader)
 MAKE_READER_CREATOR(BufferReader, drivers::buffer::BufferReader)
 MAKE_READER_CREATOR(QfitReader, pdal::drivers::qfit::Reader)
 MAKE_READER_CREATOR(TerrasolidReader, pdal::drivers::terrasolid::Reader)
-MAKE_READER_CREATOR(SbetReader, pdal::drivers::sbet::SbetReader)
+MAKE_READER_CREATOR(SbetReader, pdal::SbetReader)
 
 //
 // define the functions to create the filters
@@ -96,6 +96,7 @@ MAKE_FILTER_CREATOR(Programmable, pdal::filters::Programmable)
 // define the functions to create the writers
 //
 MAKE_WRITER_CREATOR(LasWriter, pdal::drivers::las::Writer)
+MAKE_WRITER_CREATOR(SbetWriter, pdal::SbetWriter)
 MAKE_WRITER_CREATOR(TextWriter, pdal::drivers::text::Writer)
 
 StageFactory::StageFactory()
@@ -133,7 +134,7 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
         drivers["nsf"] = "drivers.nitf.reader";
     }
     drivers["bpf"] = "drivers.bpf.reader";
-    drivers["sbet"] = "drivers.sbet.reader";
+    drivers["sbet"] = "readers.sbet";
     drivers["icebridge"] = "drivers.icebridge.reader";
     drivers["sqlite"] = "drivers.sqlite.reader";
 
@@ -167,6 +168,7 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
         drivers["pcd"] = "drivers.pcd.writer";
     if (f.getWriterCreator("drivers.pclvisualizer.writer"))
         drivers["pclviz"] = "drivers.pclvisualizer.writer";
+    drivers["sbet"] = "writers.sbet";
     drivers["csv"] = "drivers.text.writer";
     drivers["json"] = "drivers.text.writer";
     drivers["xyz"] = "drivers.text.writer";
@@ -313,7 +315,7 @@ void StageFactory::registerKnownReaders()
     REGISTER_READER(QfitReader, pdal::drivers::qfit::Reader);
     REGISTER_READER(TerrasolidReader, pdal::drivers::terrasolid::Reader);
     REGISTER_READER(BpfReader, pdal::BpfReader);
-    REGISTER_READER(SbetReader, pdal::drivers::sbet::SbetReader);
+    REGISTER_READER(SbetReader, pdal::SbetReader);
 }
 
 
@@ -343,6 +345,7 @@ void StageFactory::registerKnownFilters()
 void StageFactory::registerKnownWriters()
 {
     REGISTER_WRITER(LasWriter, pdal::drivers::las::Writer);
+    REGISTER_WRITER(SbetWriter, pdal::SbetWriter);
     REGISTER_WRITER(TextWriter, pdal::drivers::text::Writer);
 }
 

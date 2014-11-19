@@ -34,18 +34,40 @@
 
 #pragma once
 
-#include <pdal/Dimension.hpp>
+#include <pdal/IStream.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/Reader.hpp>
+#include <SbetCommon.hpp>
 
 namespace pdal
 {
-namespace drivers
-{
-namespace sbet
-{
 
-PDAL_DLL Dimension::IdList fileDimensions();
+class PDAL_DLL SbetReader : public pdal::Reader
+{
+public:
+    SET_STAGE_NAME("readers.sbet", "SBET Reader")
+    SET_STAGE_LINK("http://pdal.io/stages/readers.sbet.html")
+    SET_STAGE_ENABLED(true)
 
-} // namespace sbet
-} // namespace drivers
+    SbetReader() : Reader()
+        {}
+
+    static Options getDefaultOptions();
+    static Dimension::IdList getDefaultDimensions()
+        { return fileDimensions(); }
+
+private:
+    std::unique_ptr<ILeStream> m_stream;
+    // Number of points in the file.
+    point_count_t m_numPts;
+    point_count_t m_index;
+
+    virtual void addDimensions(PointContextRef ctx);
+    virtual void ready(PointContextRef ctx);
+    virtual point_count_t read(PointBuffer& buf, point_count_t count);
+    virtual bool eof();
+
+    void seek(PointId idx);
+};
+
 } // namespace pdal
-

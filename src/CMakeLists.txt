@@ -270,29 +270,6 @@ list (APPEND PDAL_HPP ${PDAL_DRIVERS_TEXT_HPP} )
 
 
 #
-# drivers/sbet
-#
-set(PDAL_SBET_PATH drivers/sbet)
-set(PDAL_SBET_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_SBET_PATH}")
-set(PDAL_SBET_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_SBET_PATH}")
-
-set(PDAL_DRIVERS_SBET_HPP
-    "${PDAL_SBET_HEADERS}/Common.hpp"
-    "${PDAL_SBET_HEADERS}/Reader.hpp"
-    "${PDAL_SBET_HEADERS}/Writer.hpp"
-)
-
-set (PDAL_DRIVERS_SBET_CPP
-    "${PDAL_SBET_SRC}/Common.cpp"
-    "${PDAL_SBET_SRC}/Reader.cpp"
-    "${PDAL_SBET_SRC}/Writer.cpp"
-)
-
-list (APPEND PDAL_CPP ${PDAL_DRIVERS_SBET_CPP} )
-list (APPEND PDAL_HPP ${PDAL_DRIVERS_SBET_HPP} )
-
-
-#
 # filters
 #
 set(PDAL_FILTERS_PATH filters)
@@ -448,7 +425,6 @@ source_group("Header Files\\config" FILES ${PDAL_CONFIG_HPP})
 source_group("Header Files\\drivers\\caris" FILES ${PDAL_DRIVERS_CARIS_HPP})
 source_group("Header Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_HPP})
 source_group("Header Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_HPP})
-source_group("Header Files\\drivers\\sbet" FILES ${PDAL_DRIVERS_SBET_HPP})
 source_group("Header Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_HPP})
 source_group("Header Files\\drivers\\text" FILES ${PDAL_DRIVERS_TEXT_HPP})
 source_group("Header Files\\filters" FILES ${PDAL_FILTERS_HPP})
@@ -459,7 +435,6 @@ source_group("Source Files\\config" FILES ${PDAL_CONFIG_CPP})
 source_group("Source Files\\drivers\\caris" FILES ${PDAL_DRIVERS_CARIS_CPP})
 source_group("Source Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_CPP})
 source_group("Source Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_CPP})
-source_group("Source Files\\drivers\\sbet" FILES ${PDAL_DRIVERS_SBET_CPP})
 source_group("Source Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_CPP})
 source_group("Source Files\\drivers\\text" FILES ${PDAL_DRIVERS_TEXT_CPP})
 source_group("Source Files\\filters" FILES ${PDAL_FILTERS_CPP})
@@ -473,6 +448,7 @@ include_directories(../include)
 # Targets settings
 
 include_directories(${PROJECT_SOURCE_DIR}/drivers/faux)
+include_directories(${PROJECT_SOURCE_DIR}/drivers/sbet)
 
 set(PDAL_SOURCES
   ${PDAL_HPP}
