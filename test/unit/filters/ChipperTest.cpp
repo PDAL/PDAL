@@ -38,7 +38,6 @@
 
 #include <pdal/filters/Chipper.hpp>
 #include <LasWriter.hpp>
-#include <pdal/filters/Cache.hpp>
 #include <LasReader.hpp>
 #include <pdal/Options.hpp>
 
@@ -142,10 +141,9 @@ BOOST_AUTO_TEST_CASE(test_ordering)
     options.add(capacity);
 
     pdal::LasReader candidate_reader(options);
-    pdal::filters::Cache cache(options);
     cache.setInput(&candidate_reader);
     pdal::filters::Chipper chipper(options);
-    chipper.setInput(&cache);
+    chipper.setInput(&candidate_reader);
     chipper.prepare();
 
     Option& query = options.getOptionByRef("filename");

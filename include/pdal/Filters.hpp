@@ -35,22 +35,17 @@
 #pragma once
 
 #include <AttributeFilter.hpp>
-#include <pdal/filters/ByteSwap.hpp>
-#include <pdal/filters/Cache.hpp>
 #include <pdal/filters/Chipper.hpp>
 #include <pdal/filters/Colorization.hpp>
 #include <pdal/filters/Crop.hpp>
 #include <pdal/filters/Decimation.hpp>
 #include <pdal/filters/Ferry.hpp>
-#include <pdal/filters/InPlaceReprojection.hpp>
 #include <pdal/filters/Merge.hpp>
 #ifdef PDAL_HAVE_PYTHON
 #include <pdal/filters/Predicate.hpp>
 #include <pdal/filters/Programmable.hpp>
 #endif
 #include <pdal/filters/Reprojection.hpp>
-#include <pdal/filters/Scaling.hpp>
-#include <pdal/filters/Selector.hpp>
 #include <pdal/filters/Sort.hpp>
 #include <pdal/filters/Splitter.hpp>
 #include <pdal/filters/Stats.hpp>
