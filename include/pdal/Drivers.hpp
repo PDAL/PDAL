@@ -48,5 +48,5 @@
 #include <SbetWriter.hpp>
 
 #include <QfitReader.hpp>
-#include <TerraSolidReader.hpp>
+#include <TerrasolidReader.hpp>
 #include <TextWriter.hpp>

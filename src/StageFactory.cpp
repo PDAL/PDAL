@@ -68,6 +68,7 @@ MAKE_READER_CREATOR(BpfReader, pdal::BpfReader)
 MAKE_READER_CREATOR(BufferReader, pdal::BufferReader)
 MAKE_READER_CREATOR(QfitReader, pdal::QfitReader)
 MAKE_READER_CREATOR(SbetReader, pdal::SbetReader)
+MAKE_READER_CREATOR(TerrasolidReader, pdal::TerrasolidReader)
 
 //
 // define the functions to create the filters
@@ -312,7 +313,7 @@ void StageFactory::registerKnownReaders()
     REGISTER_READER(LasReader, pdal::LasReader);
 
     REGISTER_READER(QfitReader, pdal::QfitReader);
-    REGISTER_READER(TerraSolidReader, pdal::TerrasolidReader);
+    REGISTER_READER(TerrasolidReader, pdal::TerrasolidReader);
     REGISTER_READER(BpfReader, pdal::BpfReader);
     REGISTER_READER(SbetReader, pdal::SbetReader);
 }
