@@ -57,9 +57,11 @@ SummaryData::SummaryData() :
 
 void SummaryData::addPoint(double x, double y, double z, int returnNumber)
 {
-    // The las.Reader does not *increment* the return number on the way out
-    // so why do we decrement it here?
-    // returnNumber--;
+    // Only decrement returnNumber if it's positive, this effectively treats
+    // 0 as the same as 1 in the summary.
+    if ( returnNumber > 0)
+        returnNumber--;
+
     if (returnNumber < 0 || (size_t)returnNumber > m_returnCounts.size())
         throw invalid_point_data("addPoint: returnNumber is out "
             "of range", 0);
