@@ -4,14 +4,14 @@
 pdal::Dimension
 ******************************************************************************
 
+.. doxygenfunction:: pdal::Dimension::description
 
-.. doxygenclass:: pdal::Dimension
-   :members:
+.. doxygenfunction:: pdal::Dimension::id
 
-.. doxygentypedef:: pdal::dimension::id
+.. doxygenfunction:: pdal::Dimension::name
 
-.. doxygentypedef:: pdal::dimension::size_type
+.. doxygenfunction:: pdal::Dimension::defaultType
 
-.. doxygenenum:: pdal::dimension::Flags
+.. doxygenfunction:: pdal::Dimension::interpretationName
 
-.. doxygenenum:: pdal::dimension::Interpretation
+.. doxygenfunction:: pdal::Dimension::type
