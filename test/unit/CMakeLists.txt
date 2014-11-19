@@ -15,8 +15,7 @@ if (PDAL_HAVE_LAZPERF)
     SET(PDAL_LAZPERF_SRC CompressionTest.cpp)
 endif()
 
-SET(PDAL_UNITTEST_TEST_SRC
-=======
+SET(PDAL_UNITTEST_TEST_SRC "")
 #
 # sources for the base library
 #
@@ -40,7 +39,6 @@ set(PDAL_UNITTEST_BASE_SRCS
     UtilsTest.cpp
     ${PDAL_UNITTEST_XMLSCHEMA_TEST}
     ${PDAL_LAZPERF_SRC}
-    )
 )
 
 #
@@ -49,7 +47,6 @@ set(PDAL_UNITTEST_BASE_SRCS
 set(PDAL_UNITTEST_DRIVERS_SRCS
     drivers/bpf/BPFTest.cpp
     drivers/buffer/BufferTest.cpp
-#    drivers/caris/CarisReaderTest.cpp
     drivers/faux/FauxReaderTest.cpp
     drivers/las/LasReaderTest.cpp
     drivers/las/LasWriterTest.cpp
@@ -120,7 +117,12 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/include
     ${GDAL_INCLUDE_DIR}
     ${GEOTIFF_INCLUDE_DIR}
+    ${PROJECT_SOURCE_DIR}/drivers/bpf
+    ${PROJECT_SOURCE_DIR}/drivers/buffer
     ${PROJECT_SOURCE_DIR}/drivers/faux
+    ${PROJECT_SOURCE_DIR}/drivers/qfit
+    ${PROJECT_SOURCE_DIR}/drivers/sbet
+    ${PROJECT_SOURCE_DIR}/drivers/text
 )
 set(deps ${PDAL_LIB_NAME})
 PDAL_ADD_TEST(pdal_test "${PDAL_UNITTEST_SRCS}" "${deps}")

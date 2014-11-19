@@ -15,7 +15,7 @@ C++ API
    option
    options
    pointbuffer
+   pointcontext
    reader
-   schema
    stage
    writer

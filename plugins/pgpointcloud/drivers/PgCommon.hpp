@@ -81,9 +81,9 @@ inline PGconn* pg_connect(std::string const& connection)
 
     /* connect to database */
     conn = PQconnectdb(connection.c_str());
-    if ( (!conn) || (PQstatus(conn) != CONNECTION_OK) )
+    if ( PQstatus(conn) != CONNECTION_OK )
     {
-        throw pdal_error("unable to connect to database");
+        throw pdal_error(PQerrorMessage(conn));
     }
 
     return conn;

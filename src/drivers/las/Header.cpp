@@ -49,7 +49,6 @@ namespace las
 {
 
 const std::string LasHeader::FILE_SIGNATURE("LASF");
-const std::string LasHeader::SYSTEM_IDENTIFIER("PDAL");
 #ifndef WIN32
 const size_t LasHeader::LEGACY_RETURN_COUNT;
 const size_t LasHeader::RETURN_COUNT;
@@ -68,7 +67,7 @@ std::string GetDefaultSoftwareId()
 }
 
 LasHeader::LasHeader() : m_fileSig(FILE_SIGNATURE), m_sourceId(0),
-    m_globalEncoding(0), m_versionMinor(2), m_systemId(SYSTEM_IDENTIFIER),
+    m_globalEncoding(0), m_versionMinor(2), m_systemId(getSystemIdentifier()),
     m_createDOY(0), m_createYear(0), m_vlrOffset(0), m_pointOffset(0),
     m_vlrCount(0), m_pointFormat(0), m_pointLen(0), m_pointCount(0),
     m_isCompressed(false), m_eVlrOffset(0), m_eVlrCount(0)

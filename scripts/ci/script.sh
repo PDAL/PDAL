@@ -30,7 +30,6 @@ cmake \
     -DBUILD_PLUGIN_SQLITE=OFF \
     -DENABLE_CTEST=OFF \
     -DWITH_APPS=ON \
-    -DWITH_CARIS=OFF \
     -DWITH_GEOTIFF=$OPTIONAL_COMPONENT_SWITCH \
     -DWITH_ICONV=$OPTIONAL_COMPONENT_SWITCH \
     -DWITH_LASZIP=$OPTIONAL_COMPONENT_SWITCH \
@@ -50,5 +49,5 @@ fi
 # Don't use ninja's default number of threads becuase it can
 # saturate Travis's available memory.
 ${MAKECMD} -j ${NUMTHREADS} && \
-    LD_LIBRARY_PATH=./lib ./bin/pdal_test "../test/data" "--catch_system_errors=no" && \
+    LD_LIBRARY_PATH=./lib ctest -V && \
     sudo ${MAKECMD} install

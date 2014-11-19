@@ -149,6 +149,29 @@ public:
             compression::CompressionType::Lazperf, 0, buffer.size());
     }
 
+    void setBytes(const std::vector<uint8_t>& data)
+        {
+            buf = data;
+        }
+
+    const std::vector<uint8_t>& getBytes() const
+        {
+            return buf;
+        }
+    void decompress()
+        {
+            PointBufferPtr b = compression::Decompress<Patch>(m_ctx, *this, count, compression::CompressionType::Lazperf);
+            buf.resize(m_ctx.pointSize() * b->size());
+            Charbuf cbuf((char*)buf.data(), buf.size());
+            std::ostream strm(&cbuf);
+            b->getBytes(strm, 0, b->size());
+//             buf = b->getBytes();
+        }
+
+    inline void compress(const PointBuffer& buffer)
+        {
+            compression::Compress<Patch>(m_ctx, buffer, *this, compression::CompressionType::Lazperf, 0, buffer.size());
+        }
     size_t byte_size()
         { return buf.size(); }
 
