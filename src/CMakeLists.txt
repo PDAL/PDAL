@@ -123,18 +123,6 @@ set(PDAL_TERRASOLID_PATH drivers/terrasolid)
 set(PDAL_TERRASOLID_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_TERRASOLID_PATH}")
 set(PDAL_TERRASOLID_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_TERRASOLID_PATH}")
 
-set(PDAL_DRIVERS_TERRASOLID_HPP
-  "${PDAL_TERRASOLID_HEADERS}/Reader.hpp"
-)
-
-set (PDAL_DRIVERS_TERRASOLID_CPP
-  "${PDAL_TERRASOLID_SRC}/Reader.cpp"
-)
-
-list (APPEND PDAL_CPP ${PDAL_DRIVERS_TERRASOLID_CPP} )
-list (APPEND PDAL_HPP ${PDAL_DRIVERS_TERRASOLID_HPP} )
-
-
 #
 # filters
 #
@@ -314,6 +302,7 @@ include_directories(${PROJECT_SOURCE_DIR}/drivers/las)
 include_directories(${PROJECT_SOURCE_DIR}/drivers/qfit)
 include_directories(${PROJECT_SOURCE_DIR}/drivers/sbet)
 include_directories(${PROJECT_SOURCE_DIR}/drivers/text)
+include_directories(${PROJECT_SOURCE_DIR}/drivers/terrasolid)
 include_directories(${PROJECT_SOURCE_DIR}/filters/attribute)
 
 set(PDAL_SOURCES

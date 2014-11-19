@@ -48,5 +48,5 @@
 #include <SbetWriter.hpp>
 
 #include <QfitReader.hpp>
-#include <pdal/drivers/terrasolid/Reader.hpp>
+#include <TerrasolidReader.hpp>
 #include <TextWriter.hpp>
