@@ -264,7 +264,7 @@ find_package(Threads)
 # on windows in the compilation documentation.
 if(WIN32)
   if (MSVC)
-    set(Boost_USE_STATIC_LIBS   ON)
+    set(Boost_USE_STATIC_LIBS   OFF)
     set(Boost_USE_MULTITHREADED ON)
 
     if (PDAL_USE_STATIC_RUNTIME)
