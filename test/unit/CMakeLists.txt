@@ -126,6 +126,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/drivers/text
     ${PROJECT_SOURCE_DIR}/drivers/terrasolid
     ${PROJECT_SOURCE_DIR}/filters/attribute
+    ${PROJECT_SOURCE_DIR}/filters/chipper
 )
 set(deps ${PDAL_LIB_NAME})
 PDAL_ADD_TEST(pdal_test "${PDAL_UNITTEST_SRCS}" "${deps}")
