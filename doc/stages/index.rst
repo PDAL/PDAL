@@ -11,7 +11,7 @@ Readers & Writers
 .. toctree::
    :maxdepth: 1
 
-   drivers.buffer.reader
+   readers.buffer
    drivers.las.reader
    drivers.las.writer
    drivers.pgpointcloud.reader

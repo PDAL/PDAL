@@ -116,17 +116,6 @@ set(PDAL_BASE_CPP
 list (APPEND PDAL_CPP ${PDAL_BASE_CPP} )
 list (APPEND PDAL_HPP ${PDAL_BASE_HPP} )
 
-#
-# drivers/buffer
-#
-set(PDAL_READER_PATH drivers/buffer)
-set(PDAL_READER_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_READER_PATH}")
-set(PDAL_DRIVERS_READER_HPP
-  "${PDAL_READER_HEADERS}/BufferReader.hpp"
-)
-
-list (APPEND PDAL_HPP ${PDAL_DRIVERS_READER_HPP} )
-
 
 #
 # drivers/las
@@ -388,6 +377,7 @@ include_directories(../include)
 # Targets settings
 
 include_directories(${PROJECT_SOURCE_DIR}/drivers/bpf)
+include_directories(${PROJECT_SOURCE_DIR}/drivers/buffer)
 include_directories(${PROJECT_SOURCE_DIR}/drivers/faux)
 include_directories(${PROJECT_SOURCE_DIR}/drivers/qfit)
 include_directories(${PROJECT_SOURCE_DIR}/drivers/sbet)
