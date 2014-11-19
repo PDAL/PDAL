@@ -251,25 +251,6 @@ list (APPEND PDAL_HPP ${PDAL_DRIVERS_TERRASOLID_HPP} )
 
 
 #
-# drivers/text
-#
-set(PDAL_TEXT_PATH drivers/text)
-set(PDAL_TEXT_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_TEXT_PATH}")
-set(PDAL_TEXT_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_TEXT_PATH}")
-
-set(PDAL_DRIVERS_TEXT_HPP
-  "${PDAL_TEXT_HEADERS}/Writer.hpp"
-)
-
-set (PDAL_DRIVERS_TEXT_CPP
-  ${PDAL_TEXT_SRC}/Writer.cpp
-)
-
-list (APPEND PDAL_CPP ${PDAL_DRIVERS_TEXT_CPP} )
-list (APPEND PDAL_HPP ${PDAL_DRIVERS_TEXT_HPP} )
-
-
-#
 # filters
 #
 set(PDAL_FILTERS_PATH filters)
@@ -449,6 +430,7 @@ include_directories(../include)
 
 include_directories(${PROJECT_SOURCE_DIR}/drivers/faux)
 include_directories(${PROJECT_SOURCE_DIR}/drivers/sbet)
+include_directories(${PROJECT_SOURCE_DIR}/drivers/text)
 
 set(PDAL_SOURCES
   ${PDAL_HPP}

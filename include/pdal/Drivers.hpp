@@ -53,4 +53,4 @@
 
 #include <pdal/drivers/qfit/Reader.hpp>
 #include <pdal/drivers/terrasolid/Reader.hpp>
-#include <pdal/drivers/text/Writer.hpp>
+#include <TextWriter.hpp>
