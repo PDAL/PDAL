@@ -1,7 +1,7 @@
-.. _drivers.qfit.reader:
+.. _readers.qfit:
 
-drivers.qfit.reader
-===================
+readers.qfit
+============
 
 The **QFIT reader** read from files in the `QFIT format`_ originated for the Airborne Topographic Mapper (ATM) project at NASA Goddard Space Flight Center.
 
@@ -15,7 +15,7 @@ Example
   <Pipeline version="1.0">
     <Writer type="drivers.las.writer">
       <Option name="filename">output.las</Option>
-      <Reader type="drivers.qfit.reader">
+      <Reader type="readers.qfit">
         <Option name="filename">
           qfitfile.qi
         </Option>

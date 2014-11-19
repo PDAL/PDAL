@@ -65,10 +65,6 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace qfit
-{
 
 enum QFIT_Format_Type
 {
@@ -87,14 +83,14 @@ public:
     {}
 };
 
-class PDAL_DLL Reader : public pdal::Reader
+class PDAL_DLL QfitReader : public pdal::Reader
 {
 public:
-    SET_STAGE_NAME("drivers.qfit.reader", "QFIT Reader")
-    SET_STAGE_LINK("http://pdal.io/stages/drivers.qfit.reader.html")
+    SET_STAGE_NAME("readers.qfit", "QFIT Reader")
+    SET_STAGE_LINK("http://pdal.io/stages/readers.qfit.html")
     SET_STAGE_ENABLED(true)
 
-    Reader();
+    QfitReader();
 
     static Options getDefaultOptions();
     static Dimension::IdList getDefaultDimensions();
@@ -133,11 +129,8 @@ private:
     virtual point_count_t read(PointBuffer& buf, point_count_t count);
     virtual void done(PointContextRef ctx);
 
-    Reader& operator=(const Reader&); // not implemented
-    Reader(const Reader&); // not implemented
+    QfitReader& operator=(const QfitReader&); // not implemented
+    QfitReader(const QfitReader&); // not implemented
 };
 
-} // namespace qfit
-} // namespace drivers
 } // namespace pdal
-

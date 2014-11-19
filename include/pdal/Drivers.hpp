@@ -51,6 +51,6 @@
 #include <pdal/drivers/caris/CloudReader.hpp>
 #endif
 
-#include <pdal/drivers/qfit/Reader.hpp>
+#include <QfitReader.hpp>
 #include <pdal/drivers/terrasolid/Reader.hpp>
 #include <TextWriter.hpp>

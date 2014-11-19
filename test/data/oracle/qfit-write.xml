@@ -63,7 +63,7 @@
                 <Option name="cache_block_size">
                     50
                 </Option>
-                <Reader type="drivers.qfit.reader">
+                <Reader type="readers.qfit">
                     <Option name="filename">
                         ../qfit/14-word.qi
                     </Option>
