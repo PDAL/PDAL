@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <Pipeline version="1.0">
-  <Writer type="drivers.text.writer">
+  <Writer type="writers.text">
     <Option name="delimiter">,</Option>
     <Option name="write_header">false</Option>
     <Option name="filename">junk</Option>

@@ -34,7 +34,7 @@
 
 #include <pdal/kernel/Sort.hpp>
 
-#include <pdal/drivers/buffer/BufferReader.hpp>
+#include <BufferReader.hpp>
 #include <pdal/filters/MortonOrder.hpp>
 #include <pdal/kernel/Support.hpp>
 #include <pdal/StageFactory.hpp>
@@ -122,7 +122,7 @@ int Sort::execute()
     // the input PointBufferSet will be used to populate a BufferReader that is
     // consumed by the processing pipeline
     PointBufferPtr input_buffer = *pbSetIn.begin();
-    drivers::buffer::BufferReader bufferReader;
+    BufferReader bufferReader;
     bufferReader.setOptions(readerOptions);
     bufferReader.addBuffer(input_buffer);
 

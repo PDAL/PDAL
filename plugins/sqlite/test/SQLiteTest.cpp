@@ -48,6 +48,7 @@
 #include <pdal/filters/Selector.hpp>
 
 #include <pdal/PointBuffer.hpp>
+#include <pdal/pdal_defines.h>
 
 #include "Support.hpp"
 
@@ -71,10 +72,10 @@ Options getSQLITEOptions()
     options.add(connection);
 
     Option debug("debug", true, "debug");
-    options.add(debug);
+//     options.add(debug);
 
     Option verbose("verbose", 7, "verbose");
-    options.add(verbose);
+//     options.add(verbose);
 
     Option block_table_name("block_table_name", "PDAL_TEST_BLOCKS", "block_table_name");
     options.add(block_table_name);
@@ -171,7 +172,7 @@ BOOST_AUTO_TEST_CASE(SqliteTest_test_simple_las)
         BOOST_CHECK(rc);
 
         // remove file from earlier run, if needed
-        std::string temp_filename = getSQLITEOptions().getValueOrThrow<std::string>("connection");
+        std::string temp_filename = sqliteOptions.getValueOrThrow<std::string>("connection");
         Options ops1;
         ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
         drivers::las::Reader reader;
@@ -179,9 +180,9 @@ BOOST_AUTO_TEST_CASE(SqliteTest_test_simple_las)
 
         {
             pdal::drivers::las::Reader writer_reader;
-            writer_reader.setOptions(getSQLITEOptions());
+            writer_reader.setOptions(sqliteOptions);
             std::unique_ptr<Writer> writer_writer(wc());
-            writer_writer->setOptions(getSQLITEOptions());
+            writer_writer->setOptions(sqliteOptions);
             writer_writer->setInput(&writer_reader);
 
             PointContext ctx;
@@ -198,7 +199,7 @@ BOOST_AUTO_TEST_CASE(SqliteTest_test_simple_las)
 
 //             pdal::drivers::sqlite::SQLiteReader reader;
             std::unique_ptr<Reader> reader(rc());
-            reader->setOptions(getSQLITEOptions());
+            reader->setOptions(sqliteOptions);
             PointContext ctx;
             reader->prepare(ctx);
 

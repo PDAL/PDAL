@@ -36,21 +36,17 @@
 
 #include <pdal/pdal_config.hpp>
 
-#include <pdal/drivers/buffer/BufferReader.hpp>
+#include <BufferReader.hpp>
 #include <FauxReader.hpp>
 
 #include <LasReader.hpp>
 #include <LasWriter.hpp>
 
-#include <pdal/drivers/bpf/BpfReader.hpp>
+#include <BpfReader.hpp>
 
 #include <SbetReader.hpp>
 #include <SbetWriter.hpp>
 
-#ifdef PDAL_HAVE_CARIS
-#include <pdal/drivers/caris/CloudReader.hpp>
-#endif
-
-#include <pdal/drivers/qfit/Reader.hpp>
+#include <QfitReader.hpp>
 #include <pdal/drivers/terrasolid/Reader.hpp>
-#include <pdal/drivers/text/Writer.hpp>
+#include <TextWriter.hpp>

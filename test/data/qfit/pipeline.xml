@@ -2,7 +2,7 @@
 <Pipeline version="1.0">
   <Writer type="writers.las">
     <Option name="filename">qfit-foo.las</Option>
-    <Reader type="drivers.qfit.reader">
+    <Reader type="readers.qfit">
       <Option name="flip_coordinates">true</Option>
       <Option name="scale_z">0.001</Option>
       <Option name="spatialreference">EPSG:4919+3855</Option>

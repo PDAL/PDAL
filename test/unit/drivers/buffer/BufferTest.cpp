@@ -35,7 +35,7 @@
 #include "UnitTest.hpp"
 
 #include <pdal/PointBuffer.hpp>
-#include <pdal/drivers/buffer/BufferReader.hpp>
+#include <BufferReader.hpp>
 #include <pdal/filters/Stats.hpp>
 
 #include "Support.hpp"
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(test_basic)
     }
 
     Options ops;
-    drivers::buffer::BufferReader r;
+    BufferReader r;
     r.setOptions(ops);
     r.addBuffer(buf);
 

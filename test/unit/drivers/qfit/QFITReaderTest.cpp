@@ -36,7 +36,7 @@
 
 #include <pdal/Options.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/drivers/qfit/Reader.hpp>
+#include <QfitReader.hpp>
 #include "Support.hpp"
 
 #include <iostream>
@@ -80,10 +80,10 @@ BOOST_AUTO_TEST_CASE(test_10_word)
     options.add("scale_z", 0.001f, "Z scale from mm to m");
     options.add("count", 3);
 
-    drivers::qfit::Reader reader;
+    QfitReader reader;
     reader.setOptions(options);
     BOOST_CHECK(reader.getDescription() == "QFIT Reader");
-    BOOST_CHECK_EQUAL(reader.getName(), "drivers.qfit.reader");
+    BOOST_CHECK_EQUAL(reader.getName(), "readers.qfit");
 
     PointContext ctx;
     reader.prepare(ctx);
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(test_14_word)
     options.add("count", 3);
 
     PointContext ctx;
-    drivers::qfit::Reader reader;
+    QfitReader reader;
     reader.setOptions(options);
     reader.prepare(ctx);
     PointBufferSet pbSet = reader.execute(ctx);

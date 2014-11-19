@@ -39,16 +39,12 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace buffer
-{
 
 class PDAL_DLL BufferReader : public pdal::Reader
 {
 public:
-    SET_STAGE_NAME("drivers.buffer.reader", "PointBuffer Reader")
-    SET_STAGE_LINK("http://pdal.io/stages/drivers.buffer.reader.html")
+    SET_STAGE_NAME("readers.buffer", "PointBuffer Reader")
+    SET_STAGE_LINK("http://pdal.io/stages/readers.buffer.html")
     SET_STAGE_ENABLED(true)
 
     BufferReader() : Reader()
@@ -63,7 +59,4 @@ private:
         { return m_buffers; }
 };
 
-} // namespace buffer
-} // namespace drivers
 } // namespace pdal
-

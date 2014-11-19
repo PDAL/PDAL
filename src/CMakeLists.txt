@@ -116,84 +116,43 @@ set(PDAL_BASE_CPP
 list (APPEND PDAL_CPP ${PDAL_BASE_CPP} )
 list (APPEND PDAL_HPP ${PDAL_BASE_HPP} )
 
+
 #
-# drivers/buffer
+# drivers/las
 #
-set(PDAL_READER_PATH drivers/buffer)
-set(PDAL_READER_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_READER_PATH}")
-set(PDAL_DRIVERS_READER_HPP
-  "${PDAL_READER_HEADERS}/BufferReader.hpp"
+set(PDAL_LAS_PATH drivers/las)
+set(PDAL_LAS_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_LAS_PATH}")
+set(PDAL_LAS_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_LAS_PATH}")
+set (PDAL_DRIVERS_LAS_HPP
+  "${PDAL_LAS_SRC}/GeotiffSupport.hpp"
+  "${PDAL_LAS_HEADERS}/Header.hpp"
+  "${PDAL_LAS_HEADERS}/Reader.hpp"
+  "${PDAL_LAS_HEADERS}/SummaryData.hpp"
+  "${PDAL_LAS_HEADERS}/Writer.hpp"
+  "${PDAL_LAS_HEADERS}/ZipPoint.hpp"
+  "${PDAL_LAS_HEADERS}/VariableLengthRecord.hpp"
 )
 
-list (APPEND PDAL_HPP ${PDAL_DRIVERS_READER_HPP} )
-
-
-#
-# drivers/bpf
-#
-set(PDAL_BPF_PATH drivers/bpf)
-set(PDAL_BPF_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_BPF_PATH}")
-set(PDAL_BPF_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_BPF_PATH}")
-
-set(PDAL_DRIVERS_BPF_HPP
-    "${PDAL_BPF_HEADERS}/BpfReader.hpp"
-    "${PDAL_BPF_HEADERS}/BpfHeader.hpp"
-)
-
-set(PDAL_DRIVERS_BPF_CPP
-    "${PDAL_BPF_SRC}/BpfHeader.cpp"
-    "${PDAL_BPF_SRC}/BpfReader.cpp"
-)
-
-list (APPEND PDAL_CPP ${PDAL_DRIVERS_BPF_CPP} )
-list (APPEND PDAL_HPP ${PDAL_DRIVERS_BPF_HPP} )
-
-
-
-#
-# drivers/caris
-#
-set(PDAL_CARIS_PATH drivers/caris)
-set(PDAL_CARIS_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_CARIS_PATH}")
-set(PDAL_CARIS_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_CARIS_PATH}")
-
-set(PDAL_DRIVERS_CARIS_HPP
-  "${PDAL_CARIS_HEADERS}/CloudReader.hpp"
-  "${PDAL_CARIS_SRC}/Utils.hpp"
-  "${PDAL_CARIS_SRC}/config.h"
-  "${PDAL_CARIS_SRC}/caris/caris_pc_wrapper.h"
-)
-
-set (PDAL_DRIVERS_CARIS_CPP
-  "${PDAL_CARIS_SRC}/CloudReader.cpp"
-  "${PDAL_CARIS_SRC}/pdal_csar.cpp"
-  "${PDAL_CARIS_SRC}/Utils.cpp"
-  "${PDAL_CARIS_SRC}/caris/caris_pc_wrapper.c"
-)
-
-if (CARIS_FOUND)
-    list (APPEND PDAL_CPP ${PDAL_DRIVERS_CARIS_CPP} )
-    list (APPEND PDAL_HPP ${PDAL_DRIVERS_CARIS_HPP} )
+if ((GEOTIFF_FOUND) AND (GDAL_FOUND))
+    set (PDAL_DRIVERS_LAS_GTIFF "${PDAL_LAS_SRC}/GeotiffSupport.cpp")
 endif()
 
+if (LASZIP_FOUND)
+    set(PDAL_DRIVERS_LAS_LASZIP "${PDAL_LAS_SRC}/ZipPoint.cpp")
+endif()
 
-#
-# drivers/qfit
-#
-set(PDAL_QFIT_PATH drivers/qfit)
-set(PDAL_QFIT_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_QFIT_PATH}")
-set(PDAL_QFIT_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_QFIT_PATH}")
-
-set(PDAL_DRIVERS_QFIT_HPP
-  "${PDAL_QFIT_HEADERS}/Reader.hpp"
+set (PDAL_DRIVERS_LAS_CPP
+  ${PDAL_DRIVERS_LAS_GTIFF}
+  ${PDAL_DRIVERS_LAS_LASZIP}
+  "${PDAL_LAS_SRC}/Header.cpp"
+  "${PDAL_LAS_SRC}/Reader.cpp"
+  "${PDAL_LAS_SRC}/SummaryData.cpp"
+  "${PDAL_LAS_SRC}/VariableLengthRecord.cpp"
+  "${PDAL_LAS_SRC}/Writer.cpp"
 )
+list (APPEND PDAL_CPP ${PDAL_DRIVERS_LAS_CPP} )
+list (APPEND PDAL_HPP ${PDAL_DRIVERS_LAS_HPP} )
 
-set (PDAL_DRIVERS_QFIT_CPP
-  "${PDAL_QFIT_SRC}/Reader.cpp"
-)
-
-list (APPEND PDAL_CPP ${PDAL_DRIVERS_QFIT_CPP} )
-list (APPEND PDAL_HPP ${PDAL_DRIVERS_QFIT_HPP} )
 
 #
 # drivers/terrasolid
@@ -212,25 +171,6 @@ set (PDAL_DRIVERS_TERRASOLID_CPP
 
 list (APPEND PDAL_CPP ${PDAL_DRIVERS_TERRASOLID_CPP} )
 list (APPEND PDAL_HPP ${PDAL_DRIVERS_TERRASOLID_HPP} )
-
-
-#
-# drivers/text
-#
-set(PDAL_TEXT_PATH drivers/text)
-set(PDAL_TEXT_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_TEXT_PATH}")
-set(PDAL_TEXT_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_TEXT_PATH}")
-
-set(PDAL_DRIVERS_TEXT_HPP
-  "${PDAL_TEXT_HEADERS}/Writer.hpp"
-)
-
-set (PDAL_DRIVERS_TEXT_CPP
-  ${PDAL_TEXT_SRC}/Writer.cpp
-)
-
-list (APPEND PDAL_CPP ${PDAL_DRIVERS_TEXT_CPP} )
-list (APPEND PDAL_HPP ${PDAL_DRIVERS_TEXT_HPP} )
 
 
 #
@@ -386,8 +326,7 @@ source_group("CMake Files" FILES CMakeLists.txt)
 
 source_group("Header Files" FILES ${PDAL_BASE_HPP})
 source_group("Header Files\\config" FILES ${PDAL_CONFIG_HPP})
-source_group("Header Files\\drivers\\caris" FILES ${PDAL_DRIVERS_CARIS_HPP})
-source_group("Header Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_HPP})
+source_group("Header Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_HPP})
 source_group("Header Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_HPP})
 source_group("Header Files\\drivers\\text" FILES ${PDAL_DRIVERS_TEXT_HPP})
 source_group("Header Files\\filters" FILES ${PDAL_FILTERS_HPP})
@@ -395,8 +334,7 @@ source_group("Header Files\\plang" FILES ${PDAL_PLANG_HPP})
 
 source_group("Source Files" FILES ${PDAL_BASE_CPP})
 source_group("Source Files\\config" FILES ${PDAL_CONFIG_CPP})
-source_group("Source Files\\drivers\\caris" FILES ${PDAL_DRIVERS_CARIS_CPP})
-source_group("Source Files\\drivers\\qfit" FILES ${PDAL_DRIVERS_QFIT_CPP})
+source_group("Source Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_CPP})
 source_group("Source Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_CPP})
 source_group("Source Files\\drivers\\text" FILES ${PDAL_DRIVERS_TEXT_CPP})
 source_group("Source Files\\filters" FILES ${PDAL_FILTERS_CPP})
@@ -409,9 +347,12 @@ include_directories(../include)
 ###############################################################################
 # Targets settings
 
+include_directories(${PROJECT_SOURCE_DIR}/drivers/bpf)
+include_directories(${PROJECT_SOURCE_DIR}/drivers/buffer)
 include_directories(${PROJECT_SOURCE_DIR}/drivers/faux)
-include_directories(${PROJECT_SOURCE_DIR}/drivers/las)
+include_directories(${PROJECT_SOURCE_DIR}/drivers/qfit)
 include_directories(${PROJECT_SOURCE_DIR}/drivers/sbet)
+include_directories(${PROJECT_SOURCE_DIR}/drivers/text)
 
 set(PDAL_SOURCES
   ${PDAL_HPP}
