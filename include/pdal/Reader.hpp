@@ -61,7 +61,7 @@ private:
         return pbSet;
     }
     virtual void readerProcessOptions(const Options& options);
-    virtual point_count_t read(PointBuffer& buf, point_count_t num)
+    virtual point_count_t read(PointBuffer& /*buf*/, point_count_t /*num*/)
         { return 0; }
     virtual boost::property_tree::ptree serializePipeline() const;
 };
