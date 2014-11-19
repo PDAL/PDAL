@@ -63,10 +63,6 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace nitf
-{
 
 // these are all the ones listed in nitro's c/nitf/shared/ directory
 NITF_TRE_STATIC_HANDLER_REF(ACCHZB);
@@ -256,7 +252,4 @@ void register_tre_plugins()
 }
 
 
-}
-}
 } // namespaces
-

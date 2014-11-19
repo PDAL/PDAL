@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Pipeline version="1.0">
-    <Writer type="drivers.las.writer">
+    <Writer type="writers.las">
         <Option name="filename">
             out2.las
         </Option>
         <Option name="debug">
             true
         </Option>
-        <Reader type="drivers.qfit.reader">
+        <Reader type="readers.qfit">
             <Option name="filename">
                 ../20101120_000244.ATM4BT2.qi
             </Option>

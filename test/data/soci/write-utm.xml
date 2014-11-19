@@ -39,7 +39,7 @@
                         <Option name="cache_block_size">
                             80000
                         </Option>
-                        <Reader type="drivers.las.reader">
+                        <Reader type="readers.las">
                                 <Option name="filename">
                                     /Users/howardbutler/dev/git/pdal/test/data/local/sthelens/st-helens.las
                                 </Option>

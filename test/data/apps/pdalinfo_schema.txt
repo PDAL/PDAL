@@ -7,32 +7,32 @@ point-oriented schema has 16 dimensions and a total size of 37 bytes.
 ===================================== ========== ========== ========= ========= 
                               Name      Scale     Offset      Type      Size
 ===================================== ========== ========== ========= ========= 
-drivers.las.reader.X                        0.01         -0   int32_t         4
-drivers.las.reader.Y                        0.01         -0   int32_t         4
-drivers.las.reader.Z                        0.01         -0   int32_t         4
-drivers.las.reader.Intensity                   1          0  uint16_t         2
-drivers.las.reader.ReturnNumber                1          0   uint8_t         1
-drivers.las.reader.NumberOfReturns             1          0   uint8_t         1
-drivers.las.reader.ScanDirectionFlag           1          0   uint8_t         1
-drivers.las.reader.EdgeOfFlightLine            1          0   uint8_t         1
-drivers.las.reader.Classification              1          0   uint8_t         1
-drivers.las.reader.ScanAngleRank               1          0    int8_t         1
-drivers.las.reader.UserData                    1          0   uint8_t         1
-drivers.las.reader.PointSourceId               1          0  uint16_t         2
-drivers.las.reader.Time                        1          0    double         8
-drivers.las.reader.Red                         1          0  uint16_t         2
-drivers.las.reader.Green                       1          0  uint16_t         2
-drivers.las.reader.Blue                        1          0  uint16_t         2
+readers.las.X                        0.01         -0   int32_t         4
+readers.las.Y                        0.01         -0   int32_t         4
+readers.las.Z                        0.01         -0   int32_t         4
+readers.las.Intensity                   1          0  uint16_t         2
+readers.las.ReturnNumber                1          0   uint8_t         1
+readers.las.NumberOfReturns             1          0   uint8_t         1
+readers.las.ScanDirectionFlag           1          0   uint8_t         1
+readers.las.EdgeOfFlightLine            1          0   uint8_t         1
+readers.las.Classification              1          0   uint8_t         1
+readers.las.ScanAngleRank               1          0    int8_t         1
+readers.las.UserData                    1          0   uint8_t         1
+readers.las.PointSourceId               1          0  uint16_t         2
+readers.las.Time                        1          0    double         8
+readers.las.Red                         1          0  uint16_t         2
+readers.las.Green                       1          0  uint16_t         2
+readers.las.Blue                        1          0  uint16_t         2
 ===================================== ========== ========== ========= ========= 
 
-drivers.las.reader.X
+readers.las.X
 ................................................................................
 
 ================================ ======================================== 
 Name                                                           Value
 ================================ ======================================== 
 Name                                                                    X
-Namespace                                              drivers.las.reader
+Namespace                                              readers.las
 Position                                                                0
 ByteSize                                                                4
 Ignored?                                                                0
@@ -49,14 +49,14 @@ Description                      X coordinate as a long integer. You must
                                  value.                                   
 ================================ ======================================== 
 
-drivers.las.reader.Y
+readers.las.Y
 ................................................................................
 
 ================================ ======================================== 
 Name                                                           Value
 ================================ ======================================== 
 Name                                                                    Y
-Namespace                                              drivers.las.reader
+Namespace                                              readers.las
 Position                                                                1
 ByteSize                                                                4
 Ignored?                                                                0
@@ -73,14 +73,14 @@ Description                      Y coordinate as a long integer. You must
                                  value.                                   
 ================================ ======================================== 
 
-drivers.las.reader.Z
+readers.las.Z
 ................................................................................
 
 ================================ ======================================== 
 Name                                                           Value
 ================================ ======================================== 
 Name                                                                    Z
-Namespace                                              drivers.las.reader
+Namespace                                              readers.las
 Position                                                                2
 ByteSize                                                                4
 Ignored?                                                                0
@@ -97,14 +97,14 @@ Description                      Z coordinate as a long integer. You must
                                  value.                                   
 ================================ ======================================== 
 
-drivers.las.reader.Intensity
+readers.las.Intensity
 ................................................................................
 
 ================================ ======================================== 
 Name                                                           Value
 ================================ ======================================== 
 Name                                                            Intensity
-Namespace                                              drivers.las.reader
+Namespace                                              readers.las
 Position                                                                3
 ByteSize                                                                2
 Ignored?                                                                0
@@ -122,14 +122,14 @@ Description                      The intensity value is the integer
                                  always be included if available.         
 ================================ ======================================== 
 
-drivers.las.reader.ReturnNumber
+readers.las.ReturnNumber
 ................................................................................
 
 ================================ ======================================== 
 Name                                                           Value
 ================================ ======================================== 
 Name                                                         ReturnNumber
-Namespace                                              drivers.las.reader
+Namespace                                              readers.las
 Position                                                                4
 ByteSize                                                                1
 Ignored?                                                                0
@@ -150,14 +150,14 @@ Description                      Return Number: The Return Number is the
                                  so on up to five returns.                
 ================================ ======================================== 
 
-drivers.las.reader.NumberOfReturns
+readers.las.NumberOfReturns
 ................................................................................
 
 ================================ ======================================== 
 Name                                                           Value
 ================================ ======================================== 
 Name                                                      NumberOfReturns
-Namespace                                              drivers.las.reader
+Namespace                                              readers.las
 Position                                                                5
 ByteSize                                                                1
 Ignored?                                                                0
@@ -176,14 +176,14 @@ Description                      Number of Returns (for this emitted
                                  a total number of five returns.          
 ================================ ======================================== 
 
-drivers.las.reader.ScanDirectionFlag
+readers.las.ScanDirectionFlag
 ................................................................................
 
 ================================ ======================================== 
 Name                                                           Value
 ================================ ======================================== 
 Name                                                    ScanDirectionFlag
-Namespace                                              drivers.las.reader
+Namespace                                              readers.las
 Position                                                                6
 ByteSize                                                                1
 Ignored?                                                                0
@@ -206,14 +206,14 @@ Description                      The Scan Direction Flag denotes the
                                  the opposite).                           
 ================================ ======================================== 
 
-drivers.las.reader.EdgeOfFlightLine
+readers.las.EdgeOfFlightLine
 ................................................................................
 
 ================================ ======================================== 
 Name                                                           Value
 ================================ ======================================== 
 Name                                                     EdgeOfFlightLine
-Namespace                                              drivers.las.reader
+Namespace                                              readers.las
 Position                                                                7
 ByteSize                                                                1
 Ignored?                                                                0
@@ -231,14 +231,14 @@ Description                      The Edge of Flight Line data bit has a
                                  direction.                               
 ================================ ======================================== 
 
-drivers.las.reader.Classification
+readers.las.Classification
 ................................................................................
 
 ================================ ======================================== 
 Name                                                           Value
 ================================ ======================================== 
 Name                                                       Classification
-Namespace                                              drivers.las.reader
+Namespace                                              readers.las
 Position                                                                8
 ByteSize                                                                1
 Ignored?                                                                0
@@ -265,14 +265,14 @@ Description                      Classification in LAS 1.0 was
                                  used for flags.                          
 ================================ ======================================== 
 
-drivers.las.reader.ScanAngleRank
+readers.las.ScanAngleRank
 ................................................................................
 
 ================================ ======================================== 
 Name                                                           Value
 ================================ ======================================== 
 Name                                                        ScanAngleRank
-Namespace                                              drivers.las.reader
+Namespace                                              readers.las
 Position                                                                9
 ByteSize                                                                1
 Ignored?                                                                0
@@ -298,14 +298,14 @@ Description                      The Scan Angle Rank is a signed one-byte
                                  direction of flight.                     
 ================================ ======================================== 
 
-drivers.las.reader.UserData
+readers.las.UserData
 ................................................................................
 
 ================================ ======================================== 
 Name                                                           Value
 ================================ ======================================== 
 Name                                                             UserData
-Namespace                                              drivers.las.reader
+Namespace                                              readers.las
 Position                                                               10
 ByteSize                                                                1
 Ignored?                                                                0
@@ -320,14 +320,14 @@ Description                      This field may be used at the users
                                  discretion                               
 ================================ ======================================== 
 
-drivers.las.reader.PointSourceId
+readers.las.PointSourceId
 ................................................................................
 
 ================================ ======================================== 
 Name                                                           Value
 ================================ ======================================== 
 Name                                                        PointSourceId
-Namespace                                              drivers.las.reader
+Namespace                                              readers.las
 Position                                                               11
 ByteSize                                                                2
 Ignored?                                                                0
@@ -355,14 +355,14 @@ Description                      This value indicates the file from which
                                  during processing.                       
 ================================ ======================================== 
 
-drivers.las.reader.Time
+readers.las.Time
 ................................................................................
 
 ================================ ======================================== 
 Name                                                           Value
 ================================ ======================================== 
 Name                                                                 Time
-Namespace                                              drivers.las.reader
+Namespace                                              readers.las
 Position                                                               12
 ByteSize                                                                8
 Ignored?                                                                0
@@ -383,14 +383,14 @@ Description                      The GPS Time is the double floating
                                  description).                            
 ================================ ======================================== 
 
-drivers.las.reader.Red
+readers.las.Red
 ................................................................................
 
 ================================ ======================================== 
 Name                                                           Value
 ================================ ======================================== 
 Name                                                                  Red
-Namespace                                              drivers.las.reader
+Namespace                                              readers.las
 Position                                                               13
 ByteSize                                                                2
 Ignored?                                                                0
@@ -405,14 +405,14 @@ Description                      The red image channel value associated
                                  with this point                          
 ================================ ======================================== 
 
-drivers.las.reader.Green
+readers.las.Green
 ................................................................................
 
 ================================ ======================================== 
 Name                                                           Value
 ================================ ======================================== 
 Name                                                                Green
-Namespace                                              drivers.las.reader
+Namespace                                              readers.las
 Position                                                               14
 ByteSize                                                                2
 Ignored?                                                                0
@@ -427,14 +427,14 @@ Description                      The green image channel value associated
                                  with this point                          
 ================================ ======================================== 
 
-drivers.las.reader.Blue
+readers.las.Blue
 ................................................................................
 
 ================================ ======================================== 
 Name                                                           Value
 ================================ ======================================== 
 Name                                                                 Blue
-Namespace                                              drivers.las.reader
+Namespace                                              readers.las
 Position                                                               15
 ByteSize                                                                2
 Ignored?                                                                0

@@ -34,7 +34,7 @@
 
 #include <pdal/kernel/Translate.hpp>
 
-#include <pdal/drivers/buffer/BufferReader.hpp>
+#include <BufferReader.hpp>
 #include <pdal/filters/Crop.hpp>
 #include <pdal/filters/Decimation.hpp>
 #include <pdal/filters/Reprojection.hpp>
@@ -83,7 +83,7 @@ void Translate::validateSwitches()
     //     if (! (option_split.size() == 2))
     //     {
     //         std::ostringstream oss;
-    //         oss << "option '" << o << "' did not split correctly. Is it in the form --drivers.las.reader.option=foo?";
+    //         oss << "option '" << o << "' did not split correctly. Is it in the form --readers.las.option=foo?";
     //         throw app_usage_error(oss.str());
     //     }
     //
@@ -342,7 +342,7 @@ int Translate::execute()
     // the input PointBufferSet will be used to populate a BufferReader that is
     // consumed by the processing pipeline
     PointBufferPtr input_buffer = *pbSetIn.begin();
-    drivers::buffer::BufferReader bufferReader;
+    BufferReader bufferReader;
     bufferReader.setOptions(readerOptions);
     bufferReader.addBuffer(input_buffer);
 

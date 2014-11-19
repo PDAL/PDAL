@@ -36,7 +36,7 @@
 
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/drivers/las/Reader.hpp>
+#include <LasReader.hpp>
 #include "Support.hpp"
 
 using namespace pdal;
@@ -49,11 +49,11 @@ static void compare_contents(const std::string& las_file, const std::string& ntf
     //
     // read the LAS file
     //
-    pdal::Option las_opt("filename", las_file);
-    pdal::Options las_opts;
+    Option las_opt("filename", las_file);
+    Options las_opts;
     las_opts.add(las_opt);
 
-    pdal::drivers::las::Reader las_reader(las_opts);
+    LasReader las_reader(las_opts);
     las_reader.prepare();
     const Schema& las_schema = las_reader.getSchema();
     PointBuffer las_data(las_schema, 750);
@@ -63,11 +63,11 @@ static void compare_contents(const std::string& las_file, const std::string& ntf
     //
     // read the NITF file
     //
-    pdal::Option ntf_opt("filename", ntf_file);
-    pdal::Options ntf_opts;
+    Option ntf_opt("filename", ntf_file);
+    Options ntf_opts;
     ntf_opts.add(ntf_opt);
 
-    pdal::drivers::nitf::Reader ntf_reader(ntf_opts);
+    drivers::nitf::Reader ntf_reader(ntf_opts);
     ntf_reader.prepare();
     const Schema& ntf_schema = ntf_reader.getSchema();
     PointBuffer ntf_data(ntf_schema, 750);
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE(test1)
         // writer_opts.add(verbose);
         writer_opts.add(writer_opt1);
 
-        pdal::drivers::las::Reader reader;
+        LasReader reader;
         reader.setOptions(reader_opts);
         StageFactory f;
         StageFactory::WriterCreator* wc = f.getWriterCreator("drivers.nitf.writer");

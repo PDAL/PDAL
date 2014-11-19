@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Pipeline version="1.0">
-    <Writer type="drivers.las.writer">
+    <Writer type="writers.las">
         <Option name="filename">
             hexbin.las
         </Option>
@@ -15,7 +15,7 @@
             5000
         </Option>
         <Option name="x_dim">
-            drivers.las.reader.X
+            readers.las.X
         </Option>
         <Option name="y_dim">
             Y
@@ -23,7 +23,7 @@
         <Option name="precision">
             4
         </Option>
-        <Reader type="drivers.las.reader">
+        <Reader type="readers.las">
             <Option name="filename">
                 ../las/1.2-with-color.las
             </Option>

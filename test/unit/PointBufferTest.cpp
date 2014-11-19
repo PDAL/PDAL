@@ -40,7 +40,7 @@
 
 #include <pdal/PointBuffer.hpp>
 #include <pdal/PointBufferIter.hpp>
-#include <pdal/drivers/las/Reader.hpp>
+#include <LasReader.hpp>
 #include <pdal/PDALUtils.hpp>
 #include "Support.hpp"
 
@@ -308,7 +308,7 @@ BOOST_AUTO_TEST_CASE(bigfile)
 /**
 BOOST_AUTO_TEST_CASE(kdindex)
 {
-    drivers::las::Reader reader(Support::datapath("1.2-with-color.las"));
+    LasReader reader(Support::datapath("1.2-with-color.las"));
     BOOST_CHECK(reader.getDescription() == "Las Reader");
     reader.prepare();
 

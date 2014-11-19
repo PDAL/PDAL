@@ -36,9 +36,9 @@
 
 #include <pdal/SpatialReference.hpp>
 #include <pdal/FileUtils.hpp>
-#include <pdal/drivers/las/VariableLengthRecord.hpp>
-#include <pdal/drivers/las/Writer.hpp>
-#include <pdal/drivers/las/Reader.hpp>
+#include <VariableLengthRecord.hpp>
+#include <LasWriter.hpp>
+#include <LasReader.hpp>
 
 #include "Support.hpp"
 
@@ -128,13 +128,11 @@ BOOST_AUTO_TEST_CASE(test_userstring_roundtrip)
 // Test fetching SRS from an existing file
 BOOST_AUTO_TEST_CASE(test_read_srs)
 {
-    using namespace pdal::drivers;
-
     PointContext ctx;
 
     Options ops;
     ops.add("filename", Support::datapath("las/utm17.las"));
-    las::Reader reader;
+    LasReader reader;
     reader.setOptions(ops);
     reader.prepare(ctx);
     reader.execute(ctx);
@@ -162,8 +160,6 @@ BOOST_AUTO_TEST_CASE(test_read_srs)
 // WKT with the geoidgrids (from the WKT VLR).
 BOOST_AUTO_TEST_CASE(test_vertical_datums)
 {
-    using namespace pdal::drivers;
-
     std::string tmpfile(Support::temppath("tmp_srs.las"));
     FileUtils::deleteFile(tmpfile);
 
@@ -178,14 +174,14 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
     // Write a very simple file with our SRS and one point.
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
-    las::Reader reader;
+    LasReader reader;
     reader.setOptions(ops1);
 
     // need to scope the writer, so that's it dtor can use the stream
     Options opts;
     opts.add("filename", tmpfile);
 
-    las::Writer writer;
+    LasWriter writer;
     writer.setOptions(opts);
     writer.setInput(&reader);
     writer.setSpatialReference(ref);
@@ -195,7 +191,7 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
 
     // Reopen and check contents.
     PointContext ctx2;
-    las::Reader reader2;
+    LasReader reader2;
     reader2.setOptions(opts);
     reader2.prepare(ctx2);
     reader2.execute(ctx2);
@@ -216,8 +212,6 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
 // file still works ok.
 BOOST_AUTO_TEST_CASE(test_writing_vlr)
 {
-    using namespace pdal::drivers;
-
     std::string tmpfile(Support::temppath("tmp_srs_9.las"));
     SpatialReference ref;
 
@@ -232,7 +226,7 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
         FileUtils::deleteFile(tmpfile);
 
         PointContext ctx;
-        drivers::las::Reader readerx;
+        LasReader readerx;
         Options readerOpts;
 
         readerOpts.add("filename",
@@ -240,7 +234,7 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
         readerx.setOptions(readerOpts);
 
         Options writerOpts;
-        las::Writer writer;
+        LasWriter writer;
 
         writerOpts.add("filename", tmpfile);
         writer.setOptions(writerOpts);
@@ -255,7 +249,7 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
         PointContext ctx;
         Options ops;
         ops.add("filename", tmpfile);
-        las::Reader reader;
+        LasReader reader;
         reader.setOptions(ops);
         reader.prepare(ctx);
         reader.execute(ctx);

@@ -11,14 +11,12 @@ Readers & Writers
 .. toctree::
    :maxdepth: 1
 
-   drivers.buffer.reader
-   drivers.las.reader
-   drivers.las.writer
+   readers.buffer
+   readers.las
+   writers.las
    drivers.pgpointcloud.reader
    drivers.pgpointcloud.writer
    readers.faux
-   drivers.csardb.reader
-   drivers.csar.reader
    drivers.nitf.reader
    drivers.nitf.writer
    drivers.oci.reader
@@ -26,10 +24,10 @@ Readers & Writers
    drivers.p2g.writer
    drivers.pcd.reader
    drivers.pcd.writer
-   drivers.qfit.reader
+   readers.qfit
    drivers.rxp.reader
    readers.sbet
-   drivers.text.writer
+   writers.text
 
 
 Filters

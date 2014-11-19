@@ -12,7 +12,7 @@ def myfunc(ins,outs):
     return True
 </Option>
 
-                <Reader type="drivers.las.reader">
+                <Reader type="readers.las">
                     <Option name="filename">
                         ../autzen/autzen-utm.las
                     </Option>

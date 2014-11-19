@@ -70,7 +70,8 @@ namespace pdal
 }
 
 
-namespace pdal { namespace drivers { namespace nitf {
+namespace pdal
+{
 
 //
 // all the processing that is NITF-file specific goes in here
@@ -106,4 +107,4 @@ private:
 };
 
 
-} } } // namespaces
+} // namespaces

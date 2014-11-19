@@ -44,7 +44,7 @@
 
 #include <pdal/pdal_config.hpp>
 
-#include <pdal/drivers/buffer/BufferReader.hpp>
+#include <BufferReader.hpp>
 
 #include <vector>
 
@@ -247,7 +247,7 @@ void Kernel::collectExtraOptions()
         if (!(option_split.size() == 2))
         {
             std::ostringstream oss;
-            oss << "option '" << o << "' did not split correctly. Is it in the form --drivers.las.reader.option=foo?";
+            oss << "option '" << o << "' did not split correctly. Is it in the form --readers.las.option=foo?";
             throw kernel::app_usage_error(oss.str());
         }
 
@@ -371,7 +371,7 @@ void Kernel::visualize(PointBufferPtr buffer) const
     StageFactory f;
     if (f.getWriterCreator("drivers.pclvisualizer.writer"))
     {
-          drivers::buffer::BufferReader bufferReader;
+          BufferReader bufferReader;
           bufferReader.addBuffer(buffer);
 
           std::unique_ptr<Writer> writer(kernel::AppSupport::makeWriter("foo.pclviz", &bufferReader));

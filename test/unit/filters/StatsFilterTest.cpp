@@ -35,7 +35,7 @@
 #include "UnitTest.hpp"
 
 #include <FauxReader.hpp>
-#include <pdal/drivers/las/Reader.hpp>
+#include <LasReader.hpp>
 #include <pdal/filters/Reprojection.hpp>
 #include <pdal/filters/Stats.hpp>
 
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(test_multiple_dims_same_name)
     options.add(filename);
     options.add(ignore);
 
-    drivers::las::Reader reader;
+    LasReader reader;
     reader.setOptions(options);
     filters::Reprojection reprojectionFilter;
     reprojectionFilter.setOptions(options);
@@ -154,7 +154,7 @@ BOOST_AUTO_TEST_CASE(test_specified_stats)
     options.add(filename);
     options.add(ignore);
 
-    drivers::las::Reader reader;
+    LasReader reader;
     reader.setOptions(options);
 
     Options stats1ops;
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE(test_pointbuffer_stats)
 
     Options options;
 
-    Option dimensions("dimensions", "X,drivers.las.reader.Y Z filters.inplacereprojection.X, Classification", "");
+    Option dimensions("dimensions", "X,readers.las.Y Z filters.inplacereprojection.X, Classification", "");
     Option exact_dimensions("exact_dimensions", "Classification, X", "");
 
     pdal::Option debug("debug", true, "");
@@ -231,7 +231,7 @@ BOOST_AUTO_TEST_CASE(test_pointbuffer_stats)
     options.add(dimensions);
     options.add(exact_dimensions);
 
-    drivers::las::Reader reader;
+    LasReader reader;
     reader.setOptions(options);
 
     filters::Reprojection reprojectionFilter;

@@ -4,6 +4,7 @@
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/plugins/sqlite)
+include_directories(${PROJECT_SOURCE_DIR}/drivers/las)
 
 find_package(SQLite3)
 if (SQLITE3_FOUND)

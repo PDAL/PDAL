@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Pipeline version="1.0">
-    <Writer type="drivers.las.writer">
+    <Writer type="writers.las">
         <Option name="metadata">
             <Options/>
           </Option>
@@ -15,13 +15,13 @@
         </Option>        
         <Filter type="filters.stats">
             <Option name="exact_dimensions">Classification</Option>
-            <Option name="dimensions">drivers.las.reader.X, drivers.las.reader.Y, drivers.las.reader.Z, Classification</Option>
+            <Option name="dimensions">readers.las.X, readers.las.Y, readers.las.Z, Classification</Option>
                    
         <Filter type="filters.crop">
             <Option name="bounds">
                 ([0,1000000],[0,1000000],[0,1000000])
             </Option>
-            <Reader type="drivers.las.reader">
+            <Reader type="readers.las">
                 <Option name="filename">
                     ../1.2-with-color.las
                 </Option>

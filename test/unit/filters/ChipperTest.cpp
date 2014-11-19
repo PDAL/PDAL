@@ -37,9 +37,8 @@
 #include <boost/cstdint.hpp>
 
 #include <pdal/filters/Chipper.hpp>
-#include <pdal/drivers/las/Writer.hpp>
-#include <pdal/filters/Cache.hpp>
-#include <pdal/drivers/las/Reader.hpp>
+#include <LasWriter.hpp>
+#include <LasReader.hpp>
 #include <pdal/Options.hpp>
 
 #include "StageTester.hpp"
@@ -61,7 +60,7 @@ BOOST_AUTO_TEST_CASE(test_construction)
     Options ops1;
     std::string filename(Support::datapath("las/1.2-with-color.las"));
     ops1.add("filename", filename);
-    drivers::las::Reader reader;
+    LasReader reader;
     reader.setOptions(ops1);
 
     {
@@ -141,17 +140,16 @@ BOOST_AUTO_TEST_CASE(test_ordering)
     Option capacity("capacity", 25,"capacity");
     options.add(capacity);
 
-    pdal::drivers::las::Reader candidate_reader(options);
-    pdal::filters::Cache cache(options);
+    pdal::LasReader candidate_reader(options);
     cache.setInput(&candidate_reader);
     pdal::filters::Chipper chipper(options);
-    chipper.setInput(&cache);
+    chipper.setInput(&candidate_reader);
     chipper.prepare();
 
     Option& query = options.getOptionByRef("filename");
     query.setValue<std::string>(source_filename);
 
-    pdal::drivers::las::Reader source_reader(options);
+    pdal::LasReader source_reader(options);
     source_reader.prepare();
 
     BOOST_CHECK_EQUAL(chipper.getNumPoints(), source_reader.getNumPoints());

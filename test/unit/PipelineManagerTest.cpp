@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test1)
 
         Options optsR;
         optsR.add("filename", Support::datapath("las/1.2-with-color.las"));
-        Reader* reader = mgr.addReader("drivers.las.reader");
+        Reader* reader = mgr.addReader("readers.las");
         reader->setOptions(optsR);
 
         Options optsF;
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test1)
 
         Options optsW;
         optsW.add("filename", "temp.las", "file to write to");
-        Writer* writer = mgr.addWriter("drivers.las.writer", filter);
+        Writer* writer = mgr.addWriter("writers.las", filter);
         writer->setOptions(optsW);
 
         point_count_t np = mgr.execute();
@@ -85,11 +85,11 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test2)
 
         Options optsR1;
         optsR1.add("filename", Support::datapath("1.2-with-color.las"));
-        Reader* reader1 = mgr.addReader("drivers.las.reader", optsR1);
+        Reader* reader1 = mgr.addReader("readers.las", optsR1);
 
         Options optsR2;
         optsR2.add("filename", Support::datapath("1.2-with-color.las"));
-        Reader* reader2 = mgr.addReader("drivers.las.reader", optsR2);
+        Reader* reader2 = mgr.addReader("readers.las", optsR2);
 
         Options optsMF;
         std::vector<Stage*> vec;
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test2)
 
         Options optsW;
         optsW.add("filename", "temp.las", "file to write to");
-        Writer* writer = mgr.addWriter("drivers.las.writer", *filter, optsW);
+        Writer* writer = mgr.addWriter("writers.las", *filter, optsW);
         point_count_t np = mgr.execute();
 
         BOOST_CHECK(np == 1065 * 2);
