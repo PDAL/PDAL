@@ -48,8 +48,8 @@ namespace pdal
 class PDAL_DLL BpfReader : public Reader
 {
 public:
-    SET_STAGE_NAME("drivers.bpf.reader", "Bpf Reader")
-    SET_STAGE_LINK("http://pdal.io/stages/drivers.bpf.reader.html")
+    SET_STAGE_NAME("readers.bpf", "Bpf Reader")
+    SET_STAGE_LINK("http://pdal.io/stages/readers.bpf.html")
     SET_STAGE_ENABLED(true)
 
     BpfReader() : Reader(), m_header(log())

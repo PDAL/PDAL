@@ -164,7 +164,11 @@ public:
     void decompress()
         {
             PointBufferPtr b = compression::Decompress<Patch>(m_ctx, *this, count, compression::CompressionType::Lazperf);
-            buf = b->getBytes();
+            buf.resize(m_ctx.pointSize() * b->size());
+            Charbuf cbuf((char*)buf.data(), buf.size());
+            std::ostream strm(&cbuf);
+            b->getBytes(strm, 0, b->size());
+//             buf = b->getBytes();
         }
 
     inline void compress(const PointBuffer& buffer)

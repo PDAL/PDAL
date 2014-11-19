@@ -233,49 +233,29 @@ public:
         }
         return strm;
     }
-    std::vector<uint8_t> getBytes() const
+
+    PointBuffer( std::istream& strm, PointContextRef ctx, PointId start, PointId end) : m_context(ctx)
     {
-        return getBytes(0, size());
-    }
 
-    std::vector<uint8_t> getBytes(PointId start, PointId end) const
-    {
-        std::vector<uint8_t> output;
+        size_t pointSize = ctx.pointSize();
 
-        size_t byteCount = PointBuffer::size() * m_context.pointSize();
-        output.reserve(byteCount);
-        output.resize(byteCount);
-
-        if (end == 0) end = PointBuffer::size();
-
-        uint8_t* pos = &(output.front());
+        std::vector<char> bytes;
+        bytes.resize(pointSize);
+        char* start_pos = bytes.data();
         for (PointId i = start; i < end; ++i)
         {
-            for (const auto& dim : m_context.m_dims->m_used)
+            char* pos = start_pos;
+            strm.read(pos, pointSize);
+            if (strm.eof() )
             {
-                getFieldInternal(dim, i, pos);
-                pos += m_context.dimSize(dim);
+                break; // done
             }
-        }
-        return output;
-    }
-
-    PointBuffer(const std::vector<uint8_t>& bytes, PointContextRef ctx) : m_context(ctx)
-    {
-
-        size_t pointCount = bytes.size() / ctx.pointSize();
-        if (bytes.size() % ctx.pointSize())
-            throw pdal_error("byte count is not a multiple of point size!");
-
-//         assert(ctx.m_dims->m_used.size() == ctx.m_dims->m_detail.size());
-        const uint8_t* pos = &(bytes[0]);
-        for (PointId i = 0; i < pointCount; ++i)
-        {
             for (const auto& dim : ctx.m_dims->m_used)
             {
                 setFieldInternal(dim, i, pos);
                 pos += m_context.dimSize(dim);
             }
+
         }
     }
 

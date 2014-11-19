@@ -213,12 +213,6 @@ std::string getPDALDebugInformation()
     os << std::setw(name_column-step_back) << "Name" << std::setw(url_column-step_back) << "URL"  << std::setw(special_column-step_back) << "Version" << std::endl;
     os << thdr.str() << std::endl ;
 
-#ifdef PDAL_HAVE_CARIS
-    os << std::left
-              << std::setw(name_column) << "CARIS" << std::right
-              << std::setw(url_column) << "http://www.caris.com/"
-              << std::setw(special_column) << ""  << std::endl;
-#endif
 #ifdef PDAL_HAVE_GEOS
     os << std::left
               << std::setw(name_column) << "GEOS" << std::right

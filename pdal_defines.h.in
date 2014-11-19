@@ -22,11 +22,9 @@
 /* (note this will look yucky until we get to major>=1) */
 #define PDAL_VERSION_INTEGER ((PDAL_VERSION_MAJOR*100*100)+(PDAL_VERSION_MINOR*100)+PDAL_VERSION_PATCH)
 
-
 /*
  * availability of 3rd-party libraries
  */
-#cmakedefine PDAL_HAVE_CARIS
 #cmakedefine PDAL_HAVE_GEOS
 #cmakedefine PDAL_HAVE_HDF5
 #cmakedefine PDAL_HAVE_HEXER
@@ -41,17 +39,6 @@
 #cmakedefine PDAL_HAVE_PYTHON
 #cmakedefine PDAL_HAVE_SQLITE
 #cmakedefine PDAL_HAVE_POSTGRESQL
-
-/*
- * plugins
- */
-#cmakedefine USE_PDAL_PLUGIN_TEXT
-#cmakedefine USE_PDAL_PLUGIN_SQLITE
-#cmakedefine USE_PDAL_PLUGIN_OCI
-#cmakedefine USE_PDAL_PLUGIN_MRSID
-#cmakedefine USE_PDAL_PLUGIN_CARIS
-#cmakedefine USE_PDAL_PLUGIN_PGPOINTCLOUD
-
 
 /*
  * platform endianness
@@ -72,7 +59,6 @@
  * platform compiler
  */
 #cmakedefine PDAL_COMPILER_MSVC
-
 #cmakedefine PDAL_COMPILER_VC12
 #cmakedefine PDAL_COMPILER_VC11
 #cmakedefine PDAL_COMPILER_VC10

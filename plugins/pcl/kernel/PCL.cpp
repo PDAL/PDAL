@@ -36,7 +36,7 @@
 #include "../filters/PCLBlock.hpp"
 #include <pdal/kernel/KernelFactory.hpp>
 
-#include <pdal/drivers/buffer/BufferReader.hpp>
+#include "../drivers/buffer/BufferReader.hpp"
 
 CREATE_KERNEL_PLUGIN(pcl, pdal::kernel::PCL)
 
@@ -131,7 +131,7 @@ int PCL::execute()
     // the input PointBufferSet will be used to populate a BufferReader that is
     // consumed by the processing pipeline
     PointBufferPtr input_buffer = *pbSetIn.begin();
-    drivers::buffer::BufferReader bufferReader;
+    BufferReader bufferReader;
     bufferReader.addBuffer(input_buffer);
 
     Options pclOptions;

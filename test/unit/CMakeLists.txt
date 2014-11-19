@@ -47,7 +47,6 @@ set(PDAL_UNITTEST_BASE_SRCS
 set(PDAL_UNITTEST_DRIVERS_SRCS
     drivers/bpf/BPFTest.cpp
     drivers/buffer/BufferTest.cpp
-#    drivers/caris/CarisReaderTest.cpp
     drivers/faux/FauxReaderTest.cpp
     drivers/las/LasReaderTest.cpp
     drivers/las/LasWriterTest.cpp
@@ -118,8 +117,12 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/include
     ${GDAL_INCLUDE_DIR}
     ${GEOTIFF_INCLUDE_DIR}
+    ${PROJECT_SOURCE_DIR}/drivers/bpf
+    ${PROJECT_SOURCE_DIR}/drivers/buffer
     ${PROJECT_SOURCE_DIR}/drivers/faux
+    ${PROJECT_SOURCE_DIR}/drivers/qfit
     ${PROJECT_SOURCE_DIR}/drivers/sbet
+    ${PROJECT_SOURCE_DIR}/drivers/text
     ${PROJECT_SOURCE_DIR}/drivers/terrasolid
 )
 set(deps ${PDAL_LIB_NAME})

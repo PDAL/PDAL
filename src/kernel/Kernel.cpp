@@ -44,7 +44,7 @@
 
 #include <pdal/pdal_config.hpp>
 
-#include <pdal/drivers/buffer/BufferReader.hpp>
+#include <BufferReader.hpp>
 
 #include <vector>
 
@@ -371,7 +371,7 @@ void Kernel::visualize(PointBufferPtr buffer) const
     StageFactory f;
     if (f.getWriterCreator("drivers.pclvisualizer.writer"))
     {
-          drivers::buffer::BufferReader bufferReader;
+          BufferReader bufferReader;
           bufferReader.addBuffer(buffer);
 
           std::unique_ptr<Writer> writer(kernel::AppSupport::makeWriter("foo.pclviz", &bufferReader));

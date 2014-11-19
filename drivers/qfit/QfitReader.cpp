@@ -169,7 +169,7 @@ Word #       Content
 #include <algorithm>
 #include <map>
 
-#include <pdal/drivers/qfit/Reader.hpp>
+#include <QfitReader.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/Utils.hpp>
@@ -181,17 +181,13 @@ Word #       Content
 
 namespace pdal
 {
-namespace drivers
-{
-namespace qfit
-{
 
-Reader::Reader() : pdal::Reader(),
+QfitReader::QfitReader() : pdal::Reader(),
     m_format(QFIT_Format_Unknown), m_size(0), m_littleEndian(false)
 {}
 
 
-void Reader::initialize()
+void QfitReader::initialize()
 {
     std::istream* str = FileUtils::openFile(m_filename);
     if (str == 0)
@@ -257,7 +253,7 @@ void Reader::initialize()
 }
 
 
-Options Reader::getDefaultOptions()
+Options QfitReader::getDefaultOptions()
 {
     Options options;
     Option filename("filename", "", "file to read from");
@@ -275,14 +271,14 @@ Options Reader::getDefaultOptions()
 }
 
 
-void Reader::processOptions(const Options& ops)
+void QfitReader::processOptions(const Options& ops)
 {
     m_flip_x = ops.getValueOrDefault("flip_coordinates", true);
     m_scale_z = ops.getValueOrDefault("scale_z", 0.001);
 }
 
 
-void Reader::addDimensions(PointContextRef ctx)
+void QfitReader::addDimensions(PointContextRef ctx)
 {
     using namespace Dimension;
 
@@ -316,7 +312,7 @@ void Reader::addDimensions(PointContextRef ctx)
 }
 
 
-void Reader::ready(PointContextRef ctx)
+void QfitReader::ready(PointContextRef ctx)
 {
     m_numPoints = m_point_bytes / m_size;
     if (m_point_bytes % m_size)
@@ -332,7 +328,7 @@ void Reader::ready(PointContextRef ctx)
 }
 
 
-point_count_t Reader::read(PointBuffer& data, point_count_t count)
+point_count_t QfitReader::read(PointBuffer& data, point_count_t count)
 {
     if (!m_istream->good())
     {
@@ -461,7 +457,7 @@ point_count_t Reader::read(PointBuffer& data, point_count_t count)
 }
 
 
-Dimension::IdList Reader::getDefaultDimensions()
+Dimension::IdList QfitReader::getDefaultDimensions()
 {
     Dimension::IdList ids;
 
@@ -485,12 +481,9 @@ Dimension::IdList Reader::getDefaultDimensions()
 }
 
 
-void Reader::done(PointContextRef ctx)
+void QfitReader::done(PointContextRef ctx)
 {
     FileUtils::closeFile(m_istream);
 }
 
-} // namespace qfit
-} // namespace drivers
 } // namespace pdal
-

@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2012, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2014, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Consulting LLC nor the
+*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -32,38 +32,31 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
-
-#include <boost/cstdint.hpp>
-
-#include <boost/uuid/uuid_io.hpp>
+#pragma once
 
 #include <pdal/PointBuffer.hpp>
+#include <pdal/Reader.hpp>
 
-#include <pdal/drivers/nitf/Reader.hpp>
-#include <pdal/drivers/las/Reader.hpp>
-#include <pdal/filters/Chipper.hpp>
-#include <pdal/drivers/pipeline/Reader.hpp>
-
-#include "Support.hpp"
-
-#include <iostream>
-
-#ifdef PDAL_COMPILER_GCC
-#pragma GCC diagnostic ignored "-Wfloat-equal"
-#pragma GCC diagnostic ignored "-Wsign-compare"
-#endif
-
-#include <boost/property_tree/xml_parser.hpp>
-
-using namespace pdal;
-
-BOOST_AUTO_TEST_SUITE(CarisReaderTest)
-
-BOOST_AUTO_TEST_CASE(test_one)
+namespace pdal
 {
-}
 
+class PDAL_DLL BufferReader : public pdal::Reader
+{
+public:
+    SET_STAGE_NAME("readers.buffer", "PointBuffer Reader")
+    SET_STAGE_LINK("http://pdal.io/stages/readers.buffer.html")
+    SET_STAGE_ENABLED(true)
 
+    BufferReader() : Reader()
+        {}
+    void addBuffer(const PointBufferPtr& buffer)
+        { m_buffers.insert(buffer); }
 
-BOOST_AUTO_TEST_SUITE_END()
+private:
+    PointBufferSet m_buffers;
+
+    virtual PointBufferSet run(PointBufferPtr buf)
+        { return m_buffers; }
+};
+
+} // namespace pdal
