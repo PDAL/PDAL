@@ -4,15 +4,10 @@
         <Option name="filename">
             out2.las
         </Option>
-        <Filter type="filters.inplacereprojection">
-            <Option name="out_srs">
-                EPSG:4326
-            </Option>
             <Reader type="readers.las">
                 <Option name="filename">
                     ../utm15.las
                 </Option>              
             </Reader>
-        </Filter>
     </Writer>
 </Pipeline>

@@ -4,22 +4,6 @@
         <Option name="filename">
             out2.las
         </Option>
-            <Filter type="filters.inplacereprojection">
-                <Option name="out_srs">
-                    EPSG:4326+4326
-                </Option>
-                <Option name="scale_x">
-                    0.0000001
-                </Option>
-                <Option name="scale_y">
-                    0.0000001
-                </Option>
-                <Option name="debug">
-                    true
-                </Option>
-                <Option name="verbose">
-                    6
-                </Option>
                 <Filter type="filters.predicate">
                     <Option name="function">filter</Option>
                     <Option name="source">
@@ -58,6 +42,5 @@ def filter(ins,outs):
                     </Option>
                 </Reader>
         </Filter>
-    </Filter>
     </Writer>
 </Pipeline>

@@ -40,22 +40,6 @@
         <!-- <Option name="output_format">
             grid
         </Option>     -->
-            <Filter type="filters.inplacereprojection">
-                <Option name="out_srs">
-                    EPSG:26910
-                </Option>
-                <Option name="scale_x">
-                    0.01
-                </Option>
-                <Option name="scale_y">
-                    0.01
-                </Option>
-                <Option name="debug">
-                    true
-                </Option>
-                <Option name="verbose">
-                    6
-                </Option>
                 <Reader type="readers.las">
                     <Option name="filename">
                         ../las/1.2-with-color.las
@@ -70,6 +54,5 @@
                         6
                     </Option>
                 </Reader>
-        </Filter>
     </Writer>
 </Pipeline>

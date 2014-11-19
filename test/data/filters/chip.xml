@@ -8,16 +8,11 @@
             <Option name="capacity">
                 25
             </Option>
-            <Filter type="filters.cache">
-                <Option name="max_cache_blocks">
-                    1
+            <Reader type="readers.las">
+                <Option name="filename">
+                    ../autzen-utm.las
                 </Option>
-                <Reader type="readers.las">
-                        <Option name="filename">
-                            ../autzen-utm.las
-                        </Option>
-                </Reader>
-            </Filter>            
+            </Reader>
         </Filter>
     </Writer>
 </Pipeline>

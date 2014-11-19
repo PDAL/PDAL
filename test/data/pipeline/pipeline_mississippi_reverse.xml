@@ -5,21 +5,10 @@
         <Option name="filename">
             out3.las
         </Option>
-            <Filter type="filters.inplacereprojection">
-                <Option name="out_srs">
-                    ../mvk-thin.las.wkt
-                </Option>
-                <Option name="scale_x">
-                    0.001
-                </Option>
-                <Option name="scale_y">
-                    0.001
-                </Option>
                 <Reader type="readers.las">
                     <Option name="filename">
                         out2.las
                     </Option>
                 </Reader>
-        </Filter>
     </Writer>
 </Pipeline>
