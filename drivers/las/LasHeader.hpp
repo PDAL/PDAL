@@ -44,17 +44,12 @@
 #include <pdal/Bounds.hpp>
 #include <pdal/pdal_config.hpp>
 #include <pdal/gitsha.h>
-#include <pdal/drivers/las/VariableLengthRecord.hpp>
+#include <VariableLengthRecord.hpp>
 
 namespace pdal
 {
 class OLeStream;
 class ILeStream;
-
-namespace drivers
-{
-namespace las
-{
 
 typedef uint8_t PointFormat;
 std::string GetDefaultSoftwareId();
@@ -399,7 +394,4 @@ private:
     static void put(OLeStream& in, boost::uuids::uuid uuid);
 };
 
-} // namespace las
-} // namespace drivers
 } // namespace pdal
-

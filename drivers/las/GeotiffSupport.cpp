@@ -64,10 +64,6 @@ PDAL_C_END
 
 namespace pdal
 {
-namespace drivers
-{
-namespace las
-{
 
 GeotiffSupport::~GeotiffSupport()
 {
@@ -328,6 +324,4 @@ std::string GeotiffSupport::getText() const
     return s;
 }
 
-} // namespace las
-} // namespace drivers
 } // namespace pdal

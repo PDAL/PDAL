@@ -45,7 +45,7 @@
                 </Option>
             </Options>
         </Option>
-        <Reader type="drivers.las.reader">
+        <Reader type="readers.las">
             <Option name="filename">
                 /Users/acbell/pdal/test/data/las/utm15.las
             </Option>

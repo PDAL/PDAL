@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <Pipeline version="1.0">
-    <Writer type="drivers.las.writer">
+    <Writer type="writers.las">
         <Option name="filename">
             crop-wkt-2d-classification.las
         </Option>
@@ -35,7 +35,7 @@ def filter(ins,outs):
             <Option name="outside">
                 false
             </Option>
-            <Reader type="drivers.las.reader">
+            <Reader type="readers.las">
                 <!-- <Option name="filename">
                     ../autzen-colorized-1.2-3.las
                 </Option> -->

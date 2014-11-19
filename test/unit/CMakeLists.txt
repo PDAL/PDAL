@@ -120,6 +120,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/drivers/bpf
     ${PROJECT_SOURCE_DIR}/drivers/buffer
     ${PROJECT_SOURCE_DIR}/drivers/faux
+    ${PROJECT_SOURCE_DIR}/drivers/las
     ${PROJECT_SOURCE_DIR}/drivers/qfit
     ${PROJECT_SOURCE_DIR}/drivers/sbet
     ${PROJECT_SOURCE_DIR}/drivers/text

@@ -57,11 +57,6 @@ static const bool REQUIRE_LIDAR_SEGMENTS = true;
 
 namespace pdal
 {
-namespace drivers
-{
-namespace nitf
-{
-
 
 
 NitfFile::NitfFile(const std::string& filename) :
@@ -263,6 +258,4 @@ bool NitfFile::locateLidarDataSegment()
 }
 
 
-}
-}
 } // namespaces

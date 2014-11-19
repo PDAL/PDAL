@@ -1,7 +1,7 @@
-.. _drivers.las.reader:
+.. _readers.las:
 
-drivers.las.reader
-==================
+readers.las
+===========
 
 The **LAS Reader** supports reading from `LAS format`_ files, the standard interchange format for LIDAR data.
 
@@ -14,7 +14,7 @@ Example
   <Pipeline version="1.0">
     <Writer type="drivers.text.writer">
       <Option name="filename">outputfile.txt</Option>
-      <Reader type="drivers.las.reader">
+      <Reader type="readers.las">
         <Option name="filename">inputfile.las</Option>
       </Reader>
     </Writer>

@@ -35,25 +35,14 @@
 #pragma once
 
 #include <pdal/Writer.hpp>
-#include <pdal/drivers/las/Header.hpp>
-#include <pdal/drivers/las/SummaryData.hpp>
-#include <pdal/drivers/las/ZipPoint.hpp>
+#include <LasHeader.hpp>
+#include <SummaryData.hpp>
+#include <ZipPoint.hpp>
 
 namespace pdal
 {
 class LasTester;
-
-namespace drivers
-{
-
-namespace nitf
-{
-    class NitfWriter;
-}
-
-namespace las
-{
-
+class NitfWriter;
 class GeotiffSupport;
 
 struct VlrOptionInfo
@@ -65,18 +54,18 @@ struct VlrOptionInfo
     std::string m_description;
 };
 
-class PDAL_DLL Writer : public pdal::Writer
+class PDAL_DLL LasWriter : public pdal::Writer
 {
-    friend class pdal::LasTester;
-    friend class nitf::NitfWriter;
+    friend class LasTester;
+    friend class NitfWriter;
 public:
-    SET_STAGE_NAME("drivers.las.writer", "Las Writer")
-    SET_STAGE_LINK("http://pdal.io/stages/drivers.las.writer.html")
+    SET_STAGE_NAME("writers.las", "Las Writer")
+    SET_STAGE_LINK("http://pdal.io/stages/writers.las.html")
     SET_STAGE_ENABLED(true)
 
-    Writer() : m_ostream(NULL)
+    LasWriter() : m_ostream(NULL)
          { construct(); }
-    Writer(std::ostream *stream) : m_ostream(stream)
+    LasWriter(std::ostream *stream) : m_ostream(stream)
         { construct(); }
 
     static Options getDefaultOptions();
@@ -121,15 +110,15 @@ private:
         const std::string& description);
     bool addWktVlr(const SpatialReference& srs);
 
-    Writer& operator=(const Writer&); // not implemented
-    Writer(const Writer&); // not implemented
+    LasWriter& operator=(const LasWriter&); // not implemented
+    LasWriter(const LasWriter&); // not implemented
 };
 
 // Find the approriate value for the specified header field.
 /// \param  name - Name of header field.
 /// \return  Value of header field.
 template<typename T>
-T Writer::headerVal(const std::string& name)
+T LasWriter::headerVal(const std::string& name)
 {
     // The header values either come from options, or are overriden in
     // the metadata for options which had the value FORWARD.  For those,
@@ -161,7 +150,4 @@ T Writer::headerVal(const std::string& name)
     }
 }
 
-} // namespace las
-} // namespace drivers
 } // namespace pdal
-

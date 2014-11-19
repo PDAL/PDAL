@@ -42,7 +42,7 @@
 #include <pdal/Options.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/drivers/las/Reader.hpp>
+#include <LasReader.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/Compression.hpp>
 
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE(test_compress_file)
     pdal::Options opts;
     opts.add(opt_filename);
 
-    pdal::drivers::las::Reader reader;
+    pdal::LasReader reader;
     reader.setOptions(opts);
 
     PointContext ctx;

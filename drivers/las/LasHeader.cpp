@@ -33,19 +33,15 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <pdal/drivers/las/Header.hpp>
+#include <LasHeader.hpp>
 
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
-#include <pdal/drivers/las/SummaryData.hpp>
+#include <SummaryData.hpp>
 
 
 namespace pdal
-{
-namespace drivers
-{
-namespace las
 {
 
 const std::string LasHeader::FILE_SIGNATURE("LASF");
@@ -399,7 +395,4 @@ std::ostream& operator<<(std::ostream& out, const LasHeader& h)
     return out;
 }
 
-} // namespace las
-} // namespace drivers
 } // namespace pdal
-

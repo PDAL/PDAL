@@ -41,9 +41,9 @@
 
 #include <pdal/FileUtils.hpp>
 //#include <FauxReader.hpp>
-#include <pdal/drivers/las/Header.hpp>
-#include <pdal/drivers/las/Reader.hpp>
-#include <pdal/drivers/las/Writer.hpp>
+#include <LasHeader.hpp>
+#include <LasReader.hpp>
+#include <LasWriter.hpp>
 
 #include <pdal/PointBuffer.hpp>
 
@@ -58,7 +58,7 @@ class LasTester
 {
 public:
     template <typename T>
-    static T headerVal(drivers::las::Writer& w, const std::string& s)
+    static T headerVal(LasWriter& w, const std::string& s)
         { return w.headerVal<T>(s); }
 };
 
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(auto_offset)
     writerOps.add("filename", FILENAME);
     writerOps.add("offset_x", "auto");
 
-    drivers::las::Writer writer;
+    LasWriter writer;
     writer.setOptions(writerOps);
 
     writer.prepare(ctx);
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE(auto_offset)
 
     PointContext readCtx;
 
-    drivers::las::Reader reader;
+    LasReader reader;
     reader.setOptions(readerOps);
 
     reader.prepare(readCtx);
@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE(metadata_options)
     metadataOp.setOptions(metadataOps);
     ops.add(metadataOp);
 
-    drivers::las::Writer writer;
+    LasWriter writer;
     writer.setOptions(ops);
 
     PointContext ctx;
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE(metadata_options)
 
     // Since the option specifies forward and there is not associated
     // metadata, the value should be the default.
-    drivers::las::LasHeader header;
+    LasHeader header;
     BOOST_CHECK_EQUAL(systemId, header.getSystemIdentifier());
 
     // In this case, we should have metadata to override the default.
@@ -177,10 +177,10 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_las)
     writerOpts.add("creation_doy", 0);
     writerOpts.add("software_id", "TerraScan");
 
-    drivers::las::Reader reader;
+    LasReader reader;
     std::ostream* ofs = FileUtils::createFile(Support::temppath(temp_filename));
 
-    drivers::las::Writer writer(ofs);
+    LasWriter writer(ofs);
     writer.setOptions(writerOpts);
     writer.setInput(&reader);
     BOOST_CHECK_EQUAL(writer.getDescription(), "Las Writer");
@@ -215,13 +215,13 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
     // remove file from earlier run, if needed
     FileUtils::deleteFile("laszip/LasWriterTest_test_simple_laz.laz");
 
-    drivers::las::Reader reader(Support::datapath("laszip/basefile.las"));
+    LasReader reader(Support::datapath("laszip/basefile.las"));
 
     std::ostream* ofs = FileUtils::createFile(
         Support::temppath("LasWriterTest_test_simple_laz.laz"));
 
     // need to scope the writer, so that's it dtor can use the stream
-    drivers::las::Writer writer(ofs);
+    LasWriter writer(ofs);
     writer.setOptions(writer);
     writer.setInput(&reader);
 
@@ -231,7 +231,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
     FileUtils::closeFile(ofs);
 
     {
-        pdal::drivers::las::Reader reader(
+        pdal::LasReader reader(
             Support::temppath("LasWriterTest_test_simple_laz.laz"));
     }
 
@@ -263,7 +263,7 @@ static void test_a_format(const std::string& refFile, uint8_t majorVersion,
     Options readerOpts;
     readerOpts.add("filename", Support::datapath(directory + "1.2_3.las"));
 
-    drivers::las::Reader reader;
+    LasReader reader;
     reader.setOptions(readerOpts);
 
     Options writerOpts;
@@ -280,7 +280,7 @@ static void test_a_format(const std::string& refFile, uint8_t majorVersion,
     std::ostream* ofs = FileUtils::createFile(Support::temppath("temp.las"));
 
     // need to scope the writer, so that's it dtor can use the stream
-    drivers::las::Writer writer(ofs);
+    LasWriter writer(ofs);
     writer.setOptions(writerOpts);
     writer.setInput(&reader);
     BOOST_CHECK_EQUAL(writer.getDescription(), "Las Writer");
@@ -329,7 +329,7 @@ BOOST_AUTO_TEST_CASE(version1_2)
 /**
 BOOST_AUTO_TEST_CASE(test_summary_data_add_point)
 {
-    drivers::las::SummaryData summaryData;
+    SummaryData summaryData;
 
     summaryData.addPoint(-95.329381929535259, 29.71948951835612,
         -17.515486778166398, 0);
@@ -372,7 +372,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_drop_extra_returns)
     writerOptions.add("system_id", "");
     writerOptions.add("software_id", "TerraScan");
 
-    drivers::las::Writer writer(ofs);
+    LasWriter writer(ofs);
     writer.setOptions(writerOptions);
     writer.setInput(&reader);
     writer.prepare(ctx);
@@ -382,7 +382,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_drop_extra_returns)
     readerOptions.add("filename", Support::temppath(temp_filename));
     readerOptions.add("count", 6);
 
-    drivers::las::Reader reader2;
+    LasReader reader2;
     reader2.setOptions(readerOptions);
 
     PointContext ctx2;

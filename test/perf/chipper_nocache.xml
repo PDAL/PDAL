@@ -5,7 +5,7 @@
             <Option name="capacity">
                 100
             </Option>
-            <Reader type="drivers.las.reader">
+            <Reader type="readers.las">
                 <Option name="filename">
                     ../data/autzen-thin.las
                 </Option>

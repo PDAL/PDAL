@@ -1,5 +1,6 @@
 add_subdirectory(bpf)
 add_subdirectory(faux)
+add_subdirectory(las)
 add_subdirectory(qfit)
 add_subdirectory(sbet)
 add_subdirectory(text)

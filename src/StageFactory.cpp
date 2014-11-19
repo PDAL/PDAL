@@ -63,7 +63,7 @@ namespace pdal
 // define the functions to create the readers
 //
 MAKE_READER_CREATOR(FauxReader, pdal::FauxReader)
-MAKE_READER_CREATOR(LasReader, pdal::drivers::las::Reader)
+MAKE_READER_CREATOR(LasReader, pdal::LasReader)
 MAKE_READER_CREATOR(BpfReader, pdal::BpfReader)
 MAKE_READER_CREATOR(BufferReader, pdal::BufferReader)
 MAKE_READER_CREATOR(QfitReader, pdal::QfitReader)
@@ -95,7 +95,7 @@ MAKE_FILTER_CREATOR(Programmable, pdal::filters::Programmable)
 //
 // define the functions to create the writers
 //
-MAKE_WRITER_CREATOR(LasWriter, pdal::drivers::las::Writer)
+MAKE_WRITER_CREATOR(LasWriter, pdal::LasWriter)
 MAKE_WRITER_CREATOR(SbetWriter, pdal::SbetWriter)
 MAKE_WRITER_CREATOR(TextWriter, pdal::TextWriter)
 
@@ -121,8 +121,8 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
 
     std::string ext = boost::filesystem::extension(filename);
     std::map<std::string, std::string> drivers;
-    drivers["las"] = "drivers.las.reader";
-    drivers["laz"] = "drivers.las.reader";
+    drivers["las"] = "readers.las";
+    drivers["laz"] = "readers.las";
     drivers["bin"] = "drivers.terrasolid.reader";
     if (f.getReaderCreator("drivers.greyhound.reader"))
         drivers["greyhound"] = "drivers.greyhound.reader";
@@ -161,8 +161,8 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
     boost::to_lower(ext);
 
     std::map<std::string, std::string> drivers;
-    drivers["las"] = "drivers.las.writer";
-    drivers["laz"] = "drivers.las.writer";
+    drivers["las"] = "writers.las";
+    drivers["laz"] = "writers.las";
     StageFactory f;
     if (f.getWriterCreator("drivers.pcd.writer"))
         drivers["pcd"] = "drivers.pcd.writer";
@@ -310,7 +310,7 @@ void StageFactory::registerKnownReaders()
 {
     REGISTER_READER(FauxReader, pdal::FauxReader);
     REGISTER_READER(BufferReader, pdal::BufferReader);
-    REGISTER_READER(LasReader, pdal::drivers::las::Reader);
+    REGISTER_READER(LasReader, pdal::LasReader);
 
     REGISTER_READER(QfitReader, pdal::QfitReader);
     REGISTER_READER(TerrasolidReader, pdal::drivers::terrasolid::Reader);
@@ -344,7 +344,7 @@ void StageFactory::registerKnownFilters()
 
 void StageFactory::registerKnownWriters()
 {
-    REGISTER_WRITER(LasWriter, pdal::drivers::las::Writer);
+    REGISTER_WRITER(LasWriter, pdal::LasWriter);
     REGISTER_WRITER(SbetWriter, pdal::SbetWriter);
     REGISTER_WRITER(TextWriter, pdal::TextWriter);
 }

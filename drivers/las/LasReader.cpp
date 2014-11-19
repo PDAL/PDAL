@@ -32,16 +32,16 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/drivers/las/Reader.hpp>
+#include <LasReader.hpp>
 
 #include <sstream>
 #include <string.h>
 
 #include <pdal/Charbuf.hpp>
-#include <pdal/drivers/las/Header.hpp>
-#include <pdal/drivers/las/VariableLengthRecord.hpp>
-#include <pdal/drivers/las/ZipPoint.hpp>
 #include <pdal/FileUtils.hpp>
+#include <LasHeader.hpp>
+#include <VariableLengthRecord.hpp>
+#include <ZipPoint.hpp>
 #include <pdal/IStream.hpp>
 #include <pdal/QuickInfo.hpp>
 #include <pdal/PointBuffer.hpp>
@@ -51,12 +51,8 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace las
-{
 
-QuickInfo Reader::inspect()
+QuickInfo LasReader::inspect()
 {
     QuickInfo qi;
     PointContext ctx;
@@ -75,7 +71,7 @@ QuickInfo Reader::inspect()
 }
 
 
-void Reader::initialize()
+void LasReader::initialize()
 {
     m_streamFactory = createFactory();
     m_istream = &(m_streamFactory->allocate());
@@ -116,7 +112,7 @@ void Reader::initialize()
 }
 
 
-void Reader::ready(PointContext ctx, MetadataNode& m)
+void LasReader::ready(PointContext ctx, MetadataNode& m)
 {
     m_index = 0;
 
@@ -154,7 +150,7 @@ void Reader::ready(PointContext ctx, MetadataNode& m)
 }
 
 
-Options Reader::getDefaultOptions()
+Options LasReader::getDefaultOptions()
 {
     Option option1("filename", "", "file to read from");
     Options options(option1);
@@ -162,7 +158,7 @@ Options Reader::getDefaultOptions()
 }
 
 
-void Reader::extractHeaderMetadata(MetadataNode& m)
+void LasReader::extractHeaderMetadata(MetadataNode& m)
 {
     m.add<bool>("compressed", m_lasHeader.compressed(),
         "true if this LAS file is compressed");
@@ -250,7 +246,7 @@ void Reader::extractHeaderMetadata(MetadataNode& m)
 }
 
 
-void Reader::fixupVlrs()
+void LasReader::fixupVlrs()
 {
     const size_t KEY_SIZE = 8;
     char zeros[8] = {};
@@ -283,7 +279,7 @@ void Reader::fixupVlrs()
 }
 
 
-void Reader::setSrsFromVlrs(MetadataNode& m)
+void LasReader::setSrsFromVlrs(MetadataNode& m)
 {
     // If the user is already overriding this by setting it on the stage, we'll
     // take their overridden value
@@ -294,7 +290,7 @@ void Reader::setSrsFromVlrs(MetadataNode& m)
 }
 
 
-SpatialReference Reader::getSrsFromVlrs()
+SpatialReference LasReader::getSrsFromVlrs()
 {
     SpatialReference srs = getSrsFromWktVlr();
     if (srs.empty())
@@ -303,7 +299,7 @@ SpatialReference Reader::getSrsFromVlrs()
 }
 
 
-VariableLengthRecord *Reader::findVlr(const std::string& userId,
+VariableLengthRecord *LasReader::findVlr(const std::string& userId,
     uint16_t recordId)
 {
     for (auto vi = m_vlrs.begin(); vi != m_vlrs.end(); ++vi)
@@ -316,7 +312,7 @@ VariableLengthRecord *Reader::findVlr(const std::string& userId,
 }
 
 
-SpatialReference Reader::getSrsFromWktVlr()
+SpatialReference LasReader::getSrsFromWktVlr()
 {
     SpatialReference srs;
 
@@ -340,7 +336,7 @@ SpatialReference Reader::getSrsFromWktVlr()
 }
 
 
-SpatialReference Reader::getSrsFromGeotiffVlr()
+SpatialReference LasReader::getSrsFromGeotiffVlr()
 {
     SpatialReference srs;
 
@@ -373,7 +369,7 @@ SpatialReference Reader::getSrsFromGeotiffVlr()
 }
 
 
-void Reader::extractVlrMetadata(MetadataNode& m)
+void LasReader::extractVlrMetadata(MetadataNode& m)
 {
     static const size_t DATA_LEN_MAX = 1000000;
 
@@ -399,7 +395,7 @@ void Reader::extractVlrMetadata(MetadataNode& m)
 }
 
 
-void Reader::addDimensions(PointContextRef ctx)
+void LasReader::addDimensions(PointContextRef ctx)
 {
     using namespace Dimension;
     Id::Enum ids[] = { Id::X, Id::Y, Id::Z, Id::Intensity, Id::ReturnNumber,
@@ -422,7 +418,7 @@ void Reader::addDimensions(PointContextRef ctx)
 }
 
 
-point_count_t Reader::read(PointBuffer& data, point_count_t count)
+point_count_t LasReader::read(PointBuffer& data, point_count_t count)
 {
     size_t pointByteCount = m_lasHeader.pointLen();
     count = std::min(count, getNumPoints() - m_index);
@@ -448,7 +444,7 @@ point_count_t Reader::read(PointBuffer& data, point_count_t count)
 #else
         boost::ignore_unused_variable_warning(m_unzipper);
         throw pdal_error("LASzip is not enabled for this "
-            "pdal::drivers::las::Reader::processBuffer");
+            "LasReader::processBuffer");
 #endif
     }
     else
@@ -473,7 +469,7 @@ point_count_t Reader::read(PointBuffer& data, point_count_t count)
 }
 
 
-void Reader::loadPoint(PointBuffer& data, char *buf, size_t bufsize)
+void LasReader::loadPoint(PointBuffer& data, char *buf, size_t bufsize)
 {
     if (m_lasHeader.versionAtLeast(1, 4))
         loadPointV14(data, buf, bufsize);
@@ -482,7 +478,7 @@ void Reader::loadPoint(PointBuffer& data, char *buf, size_t bufsize)
 }
 
 
-void Reader::loadPointV10(PointBuffer& data, char *buf, size_t bufsize)
+void LasReader::loadPointV10(PointBuffer& data, char *buf, size_t bufsize)
 {
     // Turn a raw buffer (array of bytes) into a stream buf.
     Charbuf charstreambuf(buf, bufsize, 0);
@@ -549,7 +545,7 @@ void Reader::loadPointV10(PointBuffer& data, char *buf, size_t bufsize)
     }
 }
 
-void Reader::loadPointV14(PointBuffer& data, char *buf, size_t bufsize)
+void LasReader::loadPointV14(PointBuffer& data, char *buf, size_t bufsize)
 {
     // Turn a raw buffer (array of bytes) into a stream buf.
     Charbuf charstreambuf(buf, bufsize, 0);
@@ -625,7 +621,7 @@ void Reader::loadPointV14(PointBuffer& data, char *buf, size_t bufsize)
 }
 
 
-void Reader::done(PointContextRef ctx)
+void LasReader::done(PointContextRef ctx)
 {
 #ifdef PDAL_HAVE_LASZIP
     m_zipPoint.reset();
@@ -635,6 +631,4 @@ void Reader::done(PointContextRef ctx)
         m_streamFactory->deallocate(*m_istream);
 }
 
-} // namespace las
-} // namespace drivers
 } // namespace pdal

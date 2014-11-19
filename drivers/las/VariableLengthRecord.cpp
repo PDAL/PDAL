@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2014, Hobu Inc. (hobu@hobu.co)
 *
 * All rights reserved.
 *
@@ -32,59 +32,80 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <cassert>
+#include <sstream>
 
-#include <vector>
-
-#ifdef PDAL_HAVE_LASZIP
-#include <laszip/laszip.hpp>
-#include <laszip/lasunzipper.hpp>
-#include <laszip/laszipper.hpp>
-#endif
+#include <VariableLengthRecord.hpp>
 
 namespace pdal
 {
-namespace drivers
+
+const uint16_t VariableLengthRecord::MAX_DATA_SIZE =
+    (std::numeric_limits<uint16_t>::max)();
+
+ILeStream& operator>>(ILeStream& in, VariableLengthRecord& v)
 {
-namespace las
+    uint16_t reserved;
+    uint16_t dataLen;
+
+    in >> reserved;
+    in.get(v.m_userId, 16);
+    in >> v.m_recordId >> dataLen;
+    in.get(v.m_description, 32);
+    v.m_data.resize(dataLen);
+    in.get(v.m_data);
+
+    return in;
+}
+
+
+OLeStream& operator<<(OLeStream& out, const VariableLengthRecord& v)
 {
+    uint16_t dataLen;
 
-#ifdef PDAL_HAVE_LASZIP
+    out << v.m_recordSig;
+    out.put(v.m_userId, 16);
+    out << v.m_recordId << (uint16_t)v.dataLen();
+    out.put(v.m_description, 32);
+    out.put(v.data(), v.dataLen());
 
-class VariableLengthRecord;
+    return out;
+}
 
-class ZipPoint
+
+ILeStream& operator>>(ILeStream& in, ExtVariableLengthRecord& v)
 {
-public:
-    ZipPoint(VariableLengthRecord *lasHeader);
-    ZipPoint(uint8_t format, uint16_t pointLen);
-    ~ZipPoint();
+    uint64_t dataLen;
 
-    std::vector<uint8_t> vlrData() const;
-    LASzip* GetZipper() const
-        { return m_zip.get(); }
-    
-private:
-    std::unique_ptr<LASzip> m_zip;
+    in >> v.m_recordSig;
+    in.get(v.m_userId, 16);
+    in >> v.m_recordId >> dataLen;
+    in.get(v.m_description, 32);
+    v.m_data.resize(dataLen);
+    in.get(v.m_data);
 
-//ABELL - This block should be made private.
-public:
-    unsigned char** m_lz_point;
-    unsigned int m_lz_point_size;
-    std::vector<uint8_t> m_lz_point_data;
+    return in;
+}
 
-private:
-    void ConstructItems();
-};
-#else // PDAL_HAVE_LASZIP
-// The types here just need to be something suitable for a smart pointer.
-// They aren't ever used beyond testing for NULL.
-typedef char LASzipper;
-typedef char LASunzipper;
-typedef char ZipPoint;
-#endif
 
-} // namespace las
-} // namespace drivers
+OLeStream& operator<<(OLeStream& out, const ExtVariableLengthRecord& v)
+{
+    uint16_t reserved;
+    uint64_t dataLen;
+
+    out << (uint16_t)0;
+    out.put(v.userId(), 16);
+    out << v.recordId() << v.dataLen();
+    out.put(v.description(), 32);
+    out.put(v.data(), v.dataLen());
+
+    return out;
+}
+
+    void VariableLengthRecord::write(OLeStream& out, uint16_t recordSig)
+    {
+        m_recordSig = recordSig;
+        out << *this;
+    }
+
 } // namespace pdal
-

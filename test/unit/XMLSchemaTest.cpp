@@ -41,7 +41,7 @@
 
 #include <pdal/XMLSchema.hpp>
 #include <pdal/Metadata.hpp>
-#include <pdal/drivers/las/Reader.hpp>
+#include <LasReader.hpp>
 #include <pdal/FileUtils.hpp>
 
 #include "Support.hpp"

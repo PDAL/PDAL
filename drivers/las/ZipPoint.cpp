@@ -39,14 +39,10 @@
 
 #ifdef PDAL_HAVE_LASZIP
 
-#include <pdal/drivers/las/VariableLengthRecord.hpp>
-#include <pdal/drivers/las/ZipPoint.hpp>
+#include <VariableLengthRecord.hpp>
+#include <ZipPoint.hpp>
 
 namespace pdal
-{
-namespace drivers
-{
-namespace las
 {
 
 // Read-mode ctor.
@@ -122,10 +118,6 @@ std::vector<uint8_t> ZipPoint::vlrData() const
     return std::vector<uint8_t>(data, data + num);
 }
 
-} // namespace las
-} // namespace drivers
 } // namespace pdal
 
 #endif // PDAL_HAVE_LASZIP
-
-
