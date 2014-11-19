@@ -57,7 +57,15 @@ SummaryData::SummaryData() :
 
 void SummaryData::addPoint(double x, double y, double z, int returnNumber)
 {
-    returnNumber--;
+--- a/src/drivers/las/SummaryData.cpp
++++ b/src/drivers/las/SummaryData.cpp
+@@ -57,7 +57,9 @@ SummaryData::SummaryData() :
+ 
+ void SummaryData::addPoint(double x, double y, double z, int returnNumber)
+ {
+    // The las.Reader does not *increment* the return number on the way out
+    // so why do we decrement it here?
+    // returnNumber--;
     if (returnNumber < 0 || (size_t)returnNumber > m_returnCounts.size())
         throw invalid_point_data("addPoint: returnNumber is out "
             "of range", 0);
