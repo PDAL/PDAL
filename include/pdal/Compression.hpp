@@ -51,7 +51,7 @@
 #include <pdal/PointContext.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Compression.hpp>
-
+#include <pdal/Charbuf.hpp>
 
 
 
@@ -207,15 +207,22 @@ template <typename CompressionStream> inline void Compress(PointContextRef ctx,
 
     }
 
-    std::vector<uint8_t> bytes = buffer.getBytes();
     size_t pointSize = ctx.pointSize();
-    uint8_t* pos = &(bytes.front())+ (pointSize * start);
     if (end == 0) // Set to max
         end = buffer.size();
-    uint8_t* end_pos = &(bytes.front())+ (pointSize * end);
+    std::vector<char> bytes;
+    bytes.resize(pointSize * (end - start));
+
+    const char* pos = bytes.data() + (pointSize * start);
+
+    Charbuf buf(bytes);
+    std::ostream strm(&buf);
+    buffer.getBytes(strm, start, end);
+
+    char* end_pos = bytes.data() + (pointSize * end);
     while (pos != end_pos)
     {
-        compressor->compress((const char*)pos);
+        compressor->compress(pos);
         pos += pointSize;
     }
 
@@ -230,7 +237,7 @@ template <typename CompressionStream> inline PointBufferPtr Decompress(PointCont
                                                                        size_t howMany,
                                                                        CompressionType::Enum ctype)
 {
-    std::vector<uint8_t> output;
+    std::vector<char> output;
 #ifdef PDAL_HAVE_LAZPERF
     using namespace laszip;
     using namespace laszip::formats;
@@ -353,20 +360,25 @@ template <typename CompressionStream> inline PointBufferPtr Decompress(PointCont
     }
 
 
-    output.resize(howMany * ctx.pointSize());
-    uint8_t* pos = &(output[0]);
     size_t point_size = ctx.pointSize();
+    size_t byte_len = howMany * point_size;
+    output.resize(byte_len);
 
-    uint8_t* end_pos = pos + (point_size * howMany);
+    char* pos = output.data();
+
+    char* end_pos = pos + (byte_len);
     while (pos != end_pos)
     {
-        decompressor->decompress((char*)pos);
+        decompressor->decompress(pos);
         pos+=point_size;
     }
 
 #endif
-    PointBufferPtr b = PointBufferPtr(new PointBuffer(output, ctx));
 
+    Charbuf charstreambuf(output, output.size());
+    std::istream istrm(&charstreambuf);
+
+    PointBufferPtr b = PointBufferPtr(new PointBuffer(istrm, ctx, 0, howMany));
     return b;
 
 
