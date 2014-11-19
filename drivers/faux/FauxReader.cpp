@@ -122,8 +122,6 @@ point_count_t FauxReader::read(PointBuffer& buf, point_count_t count)
     log()->get(LogLevel::Debug5) << "Reading a point buffer of " <<
         count << " points." << std::endl;
 
-    boost::uint64_t time = count;
-
     boost::uint32_t seed = static_cast<boost::uint32_t>(std::time(NULL));
 
     for (PointId idx = 0; idx < count; ++idx)
