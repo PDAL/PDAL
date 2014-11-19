@@ -143,18 +143,13 @@ set(PDAL_FILTERS_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_FILTERS_PATH}")
 set(PDAL_FILTERS_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_FILTERS_PATH}")
 
 set(PDAL_FILTERS_HPP
-  "${PDAL_FILTERS_HEADERS}/ByteSwap.hpp"
-  "${PDAL_FILTERS_HEADERS}/Cache.hpp"
   "${PDAL_FILTERS_HEADERS}/Chipper.hpp"
   "${PDAL_FILTERS_HEADERS}/Crop.hpp"
   "${PDAL_FILTERS_HEADERS}/Decimation.hpp"
   "${PDAL_FILTERS_HEADERS}/Ferry.hpp"
-  "${PDAL_FILTERS_HEADERS}/InPlaceReprojection.hpp"
   "${PDAL_FILTERS_HEADERS}/Merge.hpp"
   "${PDAL_FILTERS_HEADERS}/MortonOrder.hpp"
   "${PDAL_FILTERS_HEADERS}/Reprojection.hpp"
-  "${PDAL_FILTERS_HEADERS}/Scaling.hpp"
-  "${PDAL_FILTERS_HEADERS}/Selector.hpp"
   "${PDAL_FILTERS_HEADERS}/Splitter.hpp"
   "${PDAL_FILTERS_HEADERS}/Stats.hpp"
 )

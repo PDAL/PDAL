@@ -74,8 +74,6 @@ MAKE_READER_CREATOR(SbetReader, pdal::SbetReader)
 // define the functions to create the filters
 //
 MAKE_FILTER_CREATOR(Attribute, pdal::AttributeFilter)
-MAKE_FILTER_CREATOR(ByteSwap, pdal::filters::ByteSwap)
-MAKE_FILTER_CREATOR(Cache, pdal::filters::Cache)
 MAKE_FILTER_CREATOR(Chipper, pdal::filters::Chipper)
 MAKE_FILTER_CREATOR(Colorization, pdal::filters::Colorization)
 MAKE_FILTER_CREATOR(Crop, pdal::filters::Crop)
@@ -322,8 +320,6 @@ void StageFactory::registerKnownReaders()
 void StageFactory::registerKnownFilters()
 {
     REGISTER_FILTER(Attribute, pdal::AttributeFilter);
-    REGISTER_FILTER(ByteSwap, pdal::filters::ByteSwap);
-    REGISTER_FILTER(Cache, pdal::filters::Cache);
     REGISTER_FILTER(Chipper, pdal::filters::Chipper);
     REGISTER_FILTER(Colorization, pdal::filters::Colorization);
     REGISTER_FILTER(Crop, pdal::filters::Crop);
