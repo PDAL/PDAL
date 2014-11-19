@@ -35,7 +35,7 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <iostream>
 
-#include <LAsWriter.hpp>
+#include <LasWriter.hpp>
 #include <ZipPoint.hpp>
 #include <pdal/Charbuf.hpp>
 #include <pdal/OStream.hpp>
