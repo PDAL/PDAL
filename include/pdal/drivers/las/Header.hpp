@@ -66,7 +66,7 @@ public:
     static const size_t LEGACY_RETURN_COUNT = 5;
     static const size_t RETURN_COUNT = 15;
     static const std::string FILE_SIGNATURE;
-    static const std::string SYSTEM_IDENTIFIER;
+    inline std::string getSystemIdentifier() const { return "PDAL"; }
 
     LasHeader();
 
