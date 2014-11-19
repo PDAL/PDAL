@@ -47,10 +47,6 @@
 #include <SbetReader.hpp>
 #include <SbetWriter.hpp>
 
-#ifdef PDAL_HAVE_CARIS
-#include <pdal/drivers/caris/CloudReader.hpp>
-#endif
-
 #include <QfitReader.hpp>
 #include <pdal/drivers/terrasolid/Reader.hpp>
 #include <TextWriter.hpp>

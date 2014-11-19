@@ -47,7 +47,6 @@ set(PDAL_UNITTEST_BASE_SRCS
 set(PDAL_UNITTEST_DRIVERS_SRCS
     drivers/bpf/BPFTest.cpp
     drivers/buffer/BufferTest.cpp
-#    drivers/caris/CarisReaderTest.cpp
     drivers/faux/FauxReaderTest.cpp
     drivers/las/LasReaderTest.cpp
     drivers/las/LasWriterTest.cpp

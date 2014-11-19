@@ -155,33 +155,6 @@ list (APPEND PDAL_HPP ${PDAL_DRIVERS_LAS_HPP} )
 
 
 #
-# drivers/caris
-#
-set(PDAL_CARIS_PATH drivers/caris)
-set(PDAL_CARIS_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_CARIS_PATH}")
-set(PDAL_CARIS_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_CARIS_PATH}")
-
-set(PDAL_DRIVERS_CARIS_HPP
-  "${PDAL_CARIS_HEADERS}/CloudReader.hpp"
-  "${PDAL_CARIS_SRC}/Utils.hpp"
-  "${PDAL_CARIS_SRC}/config.h"
-  "${PDAL_CARIS_SRC}/caris/caris_pc_wrapper.h"
-)
-
-set (PDAL_DRIVERS_CARIS_CPP
-  "${PDAL_CARIS_SRC}/CloudReader.cpp"
-  "${PDAL_CARIS_SRC}/pdal_csar.cpp"
-  "${PDAL_CARIS_SRC}/Utils.cpp"
-  "${PDAL_CARIS_SRC}/caris/caris_pc_wrapper.c"
-)
-
-if (CARIS_FOUND)
-    list (APPEND PDAL_CPP ${PDAL_DRIVERS_CARIS_CPP} )
-    list (APPEND PDAL_HPP ${PDAL_DRIVERS_CARIS_HPP} )
-endif()
-
-
-#
 # drivers/terrasolid
 #
 set(PDAL_TERRASOLID_PATH drivers/terrasolid)
@@ -353,7 +326,6 @@ source_group("CMake Files" FILES CMakeLists.txt)
 
 source_group("Header Files" FILES ${PDAL_BASE_HPP})
 source_group("Header Files\\config" FILES ${PDAL_CONFIG_HPP})
-source_group("Header Files\\drivers\\caris" FILES ${PDAL_DRIVERS_CARIS_HPP})
 source_group("Header Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_HPP})
 source_group("Header Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_HPP})
 source_group("Header Files\\drivers\\text" FILES ${PDAL_DRIVERS_TEXT_HPP})
@@ -362,7 +334,6 @@ source_group("Header Files\\plang" FILES ${PDAL_PLANG_HPP})
 
 source_group("Source Files" FILES ${PDAL_BASE_CPP})
 source_group("Source Files\\config" FILES ${PDAL_CONFIG_CPP})
-source_group("Source Files\\drivers\\caris" FILES ${PDAL_DRIVERS_CARIS_CPP})
 source_group("Source Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_CPP})
 source_group("Source Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_CPP})
 source_group("Source Files\\drivers\\text" FILES ${PDAL_DRIVERS_TEXT_CPP})

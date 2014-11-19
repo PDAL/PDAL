@@ -26,7 +26,6 @@
 /*
  * availability of 3rd-party libraries
  */
-#cmakedefine PDAL_HAVE_CARIS
 #cmakedefine PDAL_HAVE_GEOS
 #cmakedefine PDAL_HAVE_HDF5
 #cmakedefine PDAL_HAVE_HEXER
@@ -49,7 +48,6 @@
 #cmakedefine USE_PDAL_PLUGIN_SQLITE
 #cmakedefine USE_PDAL_PLUGIN_OCI
 #cmakedefine USE_PDAL_PLUGIN_MRSID
-#cmakedefine USE_PDAL_PLUGIN_CARIS
 #cmakedefine USE_PDAL_PLUGIN_PGPOINTCLOUD
 
 

@@ -17,8 +17,6 @@ Readers & Writers
    drivers.pgpointcloud.reader
    drivers.pgpointcloud.writer
    readers.faux
-   drivers.csardb.reader
-   drivers.csar.reader
    drivers.nitf.reader
    drivers.nitf.writer
    drivers.oci.reader
