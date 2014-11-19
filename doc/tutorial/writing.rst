@@ -57,7 +57,7 @@ available subject to having the required include directories pathed:
 
     #include <pdal/pdal.hpp>
     #include <pdal/PointBuffer.hpp>
-    #include <pdal/drivers/buffer/BufferReader.hpp>
+    #include <BufferReader.hpp>
     #include <pdal/drivers/las/Writer.hpp>
 
     #include <vector>
@@ -123,7 +123,7 @@ available subject to having the required include directories pathed:
 
             fillBuffer(buffer, data);
 
-            pdal::drivers::buffer::BufferReader reader(options);
+            pda::BufferReader reader(options);
             reader.addBuffer(buffer);
             pdal::drivers::las::Writer writer(options);
             writer.setInput(&reader);

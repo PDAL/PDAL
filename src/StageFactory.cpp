@@ -65,10 +65,10 @@ namespace pdal
 MAKE_READER_CREATOR(FauxReader, pdal::FauxReader)
 MAKE_READER_CREATOR(LasReader, pdal::drivers::las::Reader)
 MAKE_READER_CREATOR(BpfReader, pdal::BpfReader)
-MAKE_READER_CREATOR(BufferReader, drivers::buffer::BufferReader)
-MAKE_READER_CREATOR(QfitReader, pdal::drivers::qfit::Reader)
+MAKE_READER_CREATOR(BufferReader, pdal::BufferReader)
+MAKE_READER_CREATOR(QfitReader, pdal::QfitReader)
 MAKE_READER_CREATOR(TerrasolidReader, pdal::drivers::terrasolid::Reader)
-MAKE_READER_CREATOR(SbetReader, pdal::drivers::sbet::SbetReader)
+MAKE_READER_CREATOR(SbetReader, pdal::SbetReader)
 
 //
 // define the functions to create the filters
@@ -96,7 +96,8 @@ MAKE_FILTER_CREATOR(Programmable, pdal::filters::Programmable)
 // define the functions to create the writers
 //
 MAKE_WRITER_CREATOR(LasWriter, pdal::drivers::las::Writer)
-MAKE_WRITER_CREATOR(TextWriter, pdal::drivers::text::Writer)
+MAKE_WRITER_CREATOR(SbetWriter, pdal::SbetWriter)
+MAKE_WRITER_CREATOR(TextWriter, pdal::TextWriter)
 
 StageFactory::StageFactory()
 {
@@ -125,15 +126,15 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
     drivers["bin"] = "drivers.terrasolid.reader";
     if (f.getReaderCreator("drivers.greyhound.reader"))
         drivers["greyhound"] = "drivers.greyhound.reader";
-    drivers["qi"] = "drivers.qfit.reader";
+    drivers["qi"] = "readers.qfit";
     if (f.getReaderCreator("drivers.nitf.reader"))
     {
         drivers["nitf"] = "drivers.nitf.reader";
         drivers["ntf"] = "drivers.nitf.reader";
         drivers["nsf"] = "drivers.nitf.reader";
     }
-    drivers["bpf"] = "drivers.bpf.reader";
-    drivers["sbet"] = "drivers.sbet.reader";
+    drivers["bpf"] = "readers.bpf";
+    drivers["sbet"] = "readers.sbet";
     drivers["icebridge"] = "drivers.icebridge.reader";
     drivers["sqlite"] = "drivers.sqlite.reader";
 
@@ -167,10 +168,11 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
         drivers["pcd"] = "drivers.pcd.writer";
     if (f.getWriterCreator("drivers.pclvisualizer.writer"))
         drivers["pclviz"] = "drivers.pclvisualizer.writer";
-    drivers["csv"] = "drivers.text.writer";
-    drivers["json"] = "drivers.text.writer";
-    drivers["xyz"] = "drivers.text.writer";
-    drivers["txt"] = "drivers.text.writer";
+    drivers["sbet"] = "writers.sbet";
+    drivers["csv"] = "writers.text";
+    drivers["json"] = "writers.text";
+    drivers["xyz"] = "writers.text";
+    drivers["txt"] = "writers.text";
     if (f.getWriterCreator("drivers.nitf.writer"))
         drivers["ntf"] = "drivers.nitf.writer";
     drivers["sqlite"] = "drivers.sqlite.writer";
@@ -307,13 +309,13 @@ void StageFactory::registerWriter(const std::string& type, WriterCreator* f)
 void StageFactory::registerKnownReaders()
 {
     REGISTER_READER(FauxReader, pdal::FauxReader);
-    REGISTER_READER(BufferReader, pdal::drivers::buffer::BufferReader);
+    REGISTER_READER(BufferReader, pdal::BufferReader);
     REGISTER_READER(LasReader, pdal::drivers::las::Reader);
 
-    REGISTER_READER(QfitReader, pdal::drivers::qfit::Reader);
+    REGISTER_READER(QfitReader, pdal::QfitReader);
     REGISTER_READER(TerrasolidReader, pdal::drivers::terrasolid::Reader);
     REGISTER_READER(BpfReader, pdal::BpfReader);
-    REGISTER_READER(SbetReader, pdal::drivers::sbet::SbetReader);
+    REGISTER_READER(SbetReader, pdal::SbetReader);
 }
 
 
@@ -343,7 +345,8 @@ void StageFactory::registerKnownFilters()
 void StageFactory::registerKnownWriters()
 {
     REGISTER_WRITER(LasWriter, pdal::drivers::las::Writer);
-    REGISTER_WRITER(TextWriter, pdal::drivers::text::Writer);
+    REGISTER_WRITER(SbetWriter, pdal::SbetWriter);
+    REGISTER_WRITER(TextWriter, pdal::TextWriter);
 }
 
 void StageFactory::loadPlugins()

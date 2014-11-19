@@ -85,7 +85,8 @@ Options Writer::getDefaultOptions()
     Option minor_version("minor_version", 2, "LAS Minor version");
     Option day_of_year("creation_doy", 0, "Day of Year for file");
     Option year("creation_year", 2011, "4-digit year value for file");
-    Option system_id("system_id", LasHeader::SYSTEM_IDENTIFIER,
+    LasHeader header;
+    Option system_id("system_id", header.getSystemIdentifier(),
         "System ID for this file");
     Option software_id("software_id", GetDefaultSoftwareId(),
         "Software ID for this file");
@@ -155,7 +156,8 @@ void Writer::getHeaderOptions(const Options &options)
     metaOptionValue("creation_year", std::to_string(year));
     metaOptionValue("creation_doy", std::to_string(doy));
     metaOptionValue("software_id", GetDefaultSoftwareId());
-    metaOptionValue("system_id", LasHeader::SYSTEM_IDENTIFIER);
+    LasHeader header;
+    metaOptionValue("system_id", header.getSystemIdentifier());
     metaOptionValue("project_id",
         boost::lexical_cast<std::string>(boost::uuids::uuid()));
     metaOptionValue("global_encoding", "0");

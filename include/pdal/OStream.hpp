@@ -60,7 +60,7 @@ public:
     {
         if (m_stream)
             return -1;
-        m_stream = m_fstream = new std::ofstream(filename);
+        m_stream = m_fstream = new std::ofstream(filename, std::ios_base::out | std::ios_base::binary);
         return 0;
     }
     operator bool ()

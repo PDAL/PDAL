@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Pipeline version="1.0">
-    <Reader type="drivers.qfit.reader">
+    <Reader type="readers.qfit">
         <Option name="filename">
             ../qfit/14-word.qi
         </Option>
