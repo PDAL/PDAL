@@ -133,7 +133,7 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
         drivers["ntf"] = "drivers.nitf.reader";
         drivers["nsf"] = "drivers.nitf.reader";
     }
-    drivers["bpf"] = "drivers.bpf.reader";
+    drivers["bpf"] = "readers.bpf";
     drivers["sbet"] = "readers.sbet";
     drivers["icebridge"] = "drivers.icebridge.reader";
     drivers["sqlite"] = "drivers.sqlite.reader";

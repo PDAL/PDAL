@@ -118,6 +118,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/include
     ${GDAL_INCLUDE_DIR}
     ${GEOTIFF_INCLUDE_DIR}
+    ${PROJECT_SOURCE_DIR}/drivers/bpf
     ${PROJECT_SOURCE_DIR}/drivers/faux
     ${PROJECT_SOURCE_DIR}/drivers/sbet
     ${PROJECT_SOURCE_DIR}/drivers/text

@@ -36,7 +36,7 @@
 
 #include <zlib.h>
 
-#include <pdal/drivers/bpf/BpfReader.hpp>
+#include <BpfReader.hpp>
 #include <pdal/Options.hpp>
 
 

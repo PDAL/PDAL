@@ -36,7 +36,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <pdal/drivers/bpf/BpfHeader.hpp>
+#include <BpfHeader.hpp>
 #include <pdal/IStream.hpp>
 
 namespace pdal

@@ -42,7 +42,7 @@
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/drivers/las/Writer.hpp>
 
-#include <pdal/drivers/bpf/BpfReader.hpp>
+#include <BpfReader.hpp>
 
 #include <SbetReader.hpp>
 #include <SbetWriter.hpp>

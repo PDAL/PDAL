@@ -164,27 +164,6 @@ set (PDAL_DRIVERS_LAS_CPP
 list (APPEND PDAL_CPP ${PDAL_DRIVERS_LAS_CPP} )
 list (APPEND PDAL_HPP ${PDAL_DRIVERS_LAS_HPP} )
 
-#
-# drivers/bpf
-#
-set(PDAL_BPF_PATH drivers/bpf)
-set(PDAL_BPF_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_BPF_PATH}")
-set(PDAL_BPF_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_BPF_PATH}")
-
-set(PDAL_DRIVERS_BPF_HPP
-    "${PDAL_BPF_HEADERS}/BpfReader.hpp"
-    "${PDAL_BPF_HEADERS}/BpfHeader.hpp"
-)
-
-set(PDAL_DRIVERS_BPF_CPP
-    "${PDAL_BPF_SRC}/BpfHeader.cpp"
-    "${PDAL_BPF_SRC}/BpfReader.cpp"
-)
-
-list (APPEND PDAL_CPP ${PDAL_DRIVERS_BPF_CPP} )
-list (APPEND PDAL_HPP ${PDAL_DRIVERS_BPF_HPP} )
-
-
 
 #
 # drivers/caris
@@ -428,6 +407,7 @@ include_directories(../include)
 ###############################################################################
 # Targets settings
 
+include_directories(${PROJECT_SOURCE_DIR}/drivers/bpf)
 include_directories(${PROJECT_SOURCE_DIR}/drivers/faux)
 include_directories(${PROJECT_SOURCE_DIR}/drivers/sbet)
 include_directories(${PROJECT_SOURCE_DIR}/drivers/text)
