@@ -65,7 +65,7 @@ namespace pdal
 MAKE_READER_CREATOR(FauxReader, pdal::FauxReader)
 MAKE_READER_CREATOR(LasReader, pdal::drivers::las::Reader)
 MAKE_READER_CREATOR(BpfReader, pdal::BpfReader)
-MAKE_READER_CREATOR(BufferReader, drivers::buffer::BufferReader)
+MAKE_READER_CREATOR(BufferReader, pdal::BufferReader)
 MAKE_READER_CREATOR(QfitReader, pdal::QfitReader)
 MAKE_READER_CREATOR(TerrasolidReader, pdal::drivers::terrasolid::Reader)
 MAKE_READER_CREATOR(SbetReader, pdal::SbetReader)
@@ -309,7 +309,7 @@ void StageFactory::registerWriter(const std::string& type, WriterCreator* f)
 void StageFactory::registerKnownReaders()
 {
     REGISTER_READER(FauxReader, pdal::FauxReader);
-    REGISTER_READER(BufferReader, pdal::drivers::buffer::BufferReader);
+    REGISTER_READER(BufferReader, pdal::BufferReader);
     REGISTER_READER(LasReader, pdal::drivers::las::Reader);
 
     REGISTER_READER(QfitReader, pdal::QfitReader);

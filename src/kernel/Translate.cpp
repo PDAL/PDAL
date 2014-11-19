@@ -34,7 +34,7 @@
 
 #include <pdal/kernel/Translate.hpp>
 
-#include <pdal/drivers/buffer/BufferReader.hpp>
+#include <BufferReader.hpp>
 #include <pdal/filters/Crop.hpp>
 #include <pdal/filters/Decimation.hpp>
 #include <pdal/filters/Reprojection.hpp>
@@ -342,7 +342,7 @@ int Translate::execute()
     // the input PointBufferSet will be used to populate a BufferReader that is
     // consumed by the processing pipeline
     PointBufferPtr input_buffer = *pbSetIn.begin();
-    drivers::buffer::BufferReader bufferReader;
+    BufferReader bufferReader;
     bufferReader.setOptions(readerOptions);
     bufferReader.addBuffer(input_buffer);
 
