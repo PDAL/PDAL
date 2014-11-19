@@ -36,7 +36,7 @@
 #include <boost/cstdint.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/drivers/faux/Reader.hpp>
+#include <FauxReader.hpp>
 #include <pdal/filters/Programmable.hpp>
 #include "Support.hpp"
 
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(test_one)
     {
         PointContext ctx;
 
-        pdal::drivers::faux::Reader reader;
+        pdal::FauxReader reader;
         reader.setOptions(opts);
         reader.prepare(ctx);
 
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE(test_two_a)
     }
 
     {
-        drivers::faux::Reader reader;
+        FauxReader reader;
         reader.setOptions(reader_opts);
         filters::Programmable xfilter;
         xfilter.setOptions(xfilter_opts);
@@ -230,7 +230,7 @@ BOOST_AUTO_TEST_CASE(test_two_b)
     }
 
     {
-        drivers::faux::Reader reader;
+        FauxReader reader;
         reader.setOptions(reader_opts);
         filters::Programmable xfilter;
         xfilter.setOptions(xfilter_opts);
@@ -315,7 +315,7 @@ BOOST_AUTO_TEST_CASE(test_three)
     }
 
     {
-        drivers::faux::Reader reader;
+        FauxReader reader;
         reader.setOptions(reader_opts);
         filters::Programmable xfilter;
         xfilter.setOptions(xfilter_opts);

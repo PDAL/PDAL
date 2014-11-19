@@ -126,5 +126,27 @@ macro(PDAL_ADD_TEST _name _srcs _deps)
     endif()
     target_link_libraries(${_name} ${PDAL_LINKAGE} ${PDAL_LIB_NAME})
     target_link_libraries(${_name} ${PDAL_LINKAGE} ${_deps})
-    add_test(${_name} "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${_name}" "${PROJECT_SOURCE_DIR}/test/data" --catch_system_errors=no)
+    add_test(NAME ${_name} COMMAND "${PROJECT_BINARY_DIR}/bin/${_name}" "${PROJECT_SOURCE_DIR}/test/data" --catch_system_errors=no WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/..")
 endmacro(PDAL_ADD_TEST)
+
+###############################################################################
+# Add a driver. Creates object library and adds files to source_group for windows IDE.
+# _type The driver type (e.g., driver, filter, kernel).
+# _name The driver name.
+# _srcs The list of source files to add.
+# _incs The list of includes to add.
+macro(PDAL_ADD_DRIVER _type _name _srcs _incs _objs)
+    source_group("Header Files\\${_type}\\${_name}" FILES ${_incs})
+    source_group("Source Files\\${_type}\\${_name}" FILES ${_srcs})
+
+    set(libname ${_type}_${_name})
+    #set(PDAL_TARGET_OBJECTS ${PDAL_TARGET_OBJECTS} $<TARGET_OBJECTS:${libname}> PARENT_SCOPE)
+    set(${_objs} $<TARGET_OBJECTS:${libname}>)
+    add_definitions("-fPIC")
+    add_library(${libname} OBJECT ${_srcs} ${_incs})
+
+    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
+        DESTINATION "${PDAL_INCLUDE_DIR}"
+        FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
+    )
+endmacro(PDAL_ADD_DRIVER)

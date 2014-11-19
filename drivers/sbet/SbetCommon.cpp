@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2014, Peter J. Gadomski (pete.gadomski@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,51 +32,41 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include <SbetCommon.hpp>
 
-#include <pdal/PointBuffer.hpp>
-#include <FauxReader.hpp>
-#include <pdal/filters/Decimation.hpp>
-
-#include "../StageTester.hpp"
-
-using namespace pdal;
-
-BOOST_AUTO_TEST_SUITE(DecimationFilterTest)
-
-BOOST_AUTO_TEST_CASE(DecimationFilterTest_test1)
+namespace pdal
 {
-    BOX3D srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
 
-    Options ops;
-    ops.add("bounds", srcBounds);
-    ops.add("mode", "random");
-    ops.add("num_points", 30);
-    FauxReader reader;
-    reader.setOptions(ops);
+Dimension::IdList fileDimensions()
+{
+    Dimension::IdList ids;
 
-    Options decimationOps;
-    decimationOps.add("step", 10);
-    filters::Decimation filter;
-    filter.setOptions(decimationOps);
-    filter.setInput(&reader);
-    BOOST_CHECK(filter.getDescription() == "Decimation Filter");
+    // Data for each point is in the source file in the order these dimensions
+    // are listed, I would suppose.  Would be really nice to have a reference
+    // to the file spec.  I searched the Internet and found that it is from
+    // some company called Applanix (Trimble), but I can't find anything
+    // describing the file format on their website.
 
-    PointContext ctx;
+    using namespace Dimension;
+    ids.push_back(Id::GpsTime);
+    ids.push_back(Id::Y);
+    ids.push_back(Id::X);
+    ids.push_back(Id::Z);
+    ids.push_back(Id::XVelocity);
+    ids.push_back(Id::YVelocity);
+    ids.push_back(Id::ZVelocity);
+    ids.push_back(Id::Roll);
+    ids.push_back(Id::Pitch);
+    ids.push_back(Id::PlatformHeading);
+    ids.push_back(Id::WanderAngle);
+    ids.push_back(Id::XBodyAccel);
+    ids.push_back(Id::YBodyAccel);
+    ids.push_back(Id::ZBodyAccel);
+    ids.push_back(Id::XBodyAngRate);
+    ids.push_back(Id::YBodyAngRate);
+    ids.push_back(Id::ZBodyAngRate);
 
-    filter.prepare(ctx);
-    PointBufferSet pbSet = filter.execute(ctx);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
-    PointBufferPtr buf = *pbSet.begin();
-    BOOST_CHECK_EQUAL(buf->size(), 3);
-
-    uint64_t t0 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 0);
-    uint64_t t1 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 1);
-    uint64_t t2 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 2);
-
-    BOOST_CHECK_EQUAL(t0, 0);
-    BOOST_CHECK_EQUAL(t1, 10);
-    BOOST_CHECK_EQUAL(t2, 20);
+    return ids;
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+} // namespace pdal

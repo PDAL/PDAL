@@ -92,10 +92,12 @@ private:
     void fixupVlrs();
     VariableLengthRecord *findVlr(const std::string& userId, uint16_t recordId);
     void setSrsFromVlrs(MetadataNode& m);
-    bool setSrsFromWktVlr(MetadataNode& m);
-    bool setSrsFromGeotiffVlr(MetadataNode& m);
+    SpatialReference getSrsFromVlrs();
+    SpatialReference getSrsFromWktVlr();
+    SpatialReference getSrsFromGeotiffVlr();
     void extractHeaderMetadata(MetadataNode& m);
     void extractVlrMetadata(MetadataNode& m);
+    virtual QuickInfo inspect();
     virtual void ready(PointContextRef ctx)
         { ready(ctx, m_metadata); }
     virtual void ready(PointContextRef ctx, MetadataNode& m);

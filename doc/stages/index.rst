@@ -16,8 +16,7 @@ Readers & Writers
    drivers.las.writer
    drivers.pgpointcloud.reader
    drivers.pgpointcloud.writer
-   drivers.faux.reader
-   drivers.faux.writer
+   readers.faux
    drivers.csardb.reader
    drivers.csar.reader
    drivers.nitf.reader
@@ -29,7 +28,7 @@ Readers & Writers
    drivers.pcd.writer
    drivers.qfit.reader
    drivers.rxp.reader
-   drivers.sbet.reader
+   readers.sbet
    drivers.text.writer
 
 

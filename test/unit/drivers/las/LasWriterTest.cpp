@@ -40,7 +40,7 @@
 #include <boost/concept_check.hpp>
 
 #include <pdal/FileUtils.hpp>
-#include <pdal/drivers/faux/Reader.hpp>
+//#include <FauxReader.hpp>
 #include <pdal/drivers/las/Header.hpp>
 #include <pdal/drivers/las/Reader.hpp>
 #include <pdal/drivers/las/Writer.hpp>
@@ -149,7 +149,8 @@ BOOST_AUTO_TEST_CASE(metadata_options)
 
     // Since the option specifies forward and there is not associated
     // metadata, the value should be the default.
-    BOOST_CHECK_EQUAL(systemId, drivers::las::LasHeader::SYSTEM_IDENTIFIER);
+    drivers::las::LasHeader header;
+    BOOST_CHECK_EQUAL(systemId, header.getSystemIdentifier());
 
     // In this case, we should have metadata to override the default.
     uint8_t minorVersion =
@@ -358,7 +359,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_drop_extra_returns)
     ops.add("num_points", 100);
     ops.add("mode", "constant");
     ops.add("number_of_returns", 10);
-    drivers::faux::Reader reader;
+    FauxReader reader;
     reader.setOptions(ops);
 
     std::ostream* ofs = FileUtils::createFile(Support::temppath(temp_filename));

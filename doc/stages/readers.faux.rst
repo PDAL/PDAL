@@ -1,7 +1,7 @@
-.. _drivers.faux.reader:
+.. _readers.faux:
 
-drivers.faux.reader
-===================
+readers.faux
+============
 
 The "**faux reader**" is used for testing pipelines. It does not read from a
 file or database, but generates synthetic data to feed into the pipeline.
@@ -15,7 +15,7 @@ Example
   <Pipeline version="1.0">
     <Writer type="drivers.text.writer">
       <Option name="filename">outputfile.txt</Option>
-      <Reader type="drivers.faux.reader">
+      <Reader type="readers.faux">
         <Option name="bounds">([0,1000000],[0,1000000],[0,100])</Option>
         <Option name="num_points">10000</Option>
         <Option name="mode">random</Option>

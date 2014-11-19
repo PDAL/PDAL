@@ -34,39 +34,40 @@
 
 #pragma once
 
-#include <pdal/drivers/sbet/Common.hpp>
-#include <pdal/OStream.hpp>
-#include <pdal/Writer.hpp>
+#include <pdal/IStream.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/Reader.hpp>
+#include <SbetCommon.hpp>
 
 namespace pdal
 {
-namespace drivers
-{
-namespace sbet
-{
 
-class PDAL_DLL SbetWriter : public pdal::Writer
+class PDAL_DLL SbetReader : public pdal::Reader
 {
 public:
-    SET_STAGE_NAME("drivers.sbet.writer", "SBET Writer")
-    SET_STAGE_LINK("http://pdal.io/stages/drivers.sbet.writer.html")
+    SET_STAGE_NAME("readers.sbet", "SBET Reader")
+    SET_STAGE_LINK("http://pdal.io/stages/readers.sbet.html")
+    SET_STAGE_ENABLED(true)
 
-    SbetWriter() : pdal::Writer()
+    SbetReader() : Reader()
         {}
 
+    static Options getDefaultOptions();
     static Dimension::IdList getDefaultDimensions()
         { return fileDimensions(); }
 
 private:
-    std::unique_ptr<OLeStream> m_stream;
-    std::string m_filename;
+    std::unique_ptr<ILeStream> m_stream;
+    // Number of points in the file.
+    point_count_t m_numPts;
+    point_count_t m_index;
 
-    virtual void processOptions(const Options& options);
+    virtual void addDimensions(PointContextRef ctx);
     virtual void ready(PointContextRef ctx);
-    virtual void write(const PointBuffer& buf);
+    virtual point_count_t read(PointBuffer& buf, point_count_t count);
+    virtual bool eof();
+
+    void seek(PointId idx);
 };
 
-} // namespace sbet
-} // namespace drivers
 } // namespace pdal
-

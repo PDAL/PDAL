@@ -38,14 +38,7 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace sbet
-{
 
 PDAL_DLL Dimension::IdList fileDimensions();
 
-} // namespace sbet
-} // namespace drivers
 } // namespace pdal
-

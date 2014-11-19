@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Peter J. Gadomski (pete.gadomski@gmail.com)
+* Copyright (c) 2014, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -34,47 +34,29 @@
 
 #pragma once
 
-#include <pdal/IStream.hpp>
-#include <pdal/PointBuffer.hpp>
-#include <pdal/Reader.hpp>
-#include <pdal/drivers/sbet/Common.hpp>
+#include <vector>
+
+#include <pdal/Bounds.hpp>
+#include <pdal/SpatialReference.hpp>
 
 namespace pdal
 {
-namespace drivers
-{
-namespace sbet
-{
 
-class PDAL_DLL SbetReader : public pdal::Reader
+struct QuickInfo
 {
 public:
-    SET_STAGE_NAME("drivers.sbet.reader", "SBET Reader")
-    SET_STAGE_LINK("http://pdal.io/stages/drivers.sbet.reader.html")
-    SET_STAGE_ENABLED(true)
+    BOX3D m_bounds;   
+    SpatialReference m_srs;
+    point_count_t m_pointCount;
+    std::vector<std::string> m_dimNames;
+    bool m_valid;
 
-    SbetReader() : Reader()
+    QuickInfo() : m_pointCount(0), m_valid(false)
         {}
 
-    static Options getDefaultOptions();
-    static Dimension::IdList getDefaultDimensions()
-        { return fileDimensions(); }
-
-private:
-    std::unique_ptr<ILeStream> m_stream;
-    // Number of points in the file.
-    point_count_t m_numPts;
-    point_count_t m_index;
-
-    virtual void addDimensions(PointContextRef ctx);
-    virtual void ready(PointContextRef ctx);
-    virtual point_count_t read(PointBuffer& buf, point_count_t count);
-    virtual bool eof();
-
-    void seek(PointId idx);
+    bool valid() const
+        { return m_valid; }
 };
 
-} // namespace sbet
-} // namespace drivers
 } // namespace pdal
 

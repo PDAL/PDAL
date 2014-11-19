@@ -137,7 +137,6 @@ struct BpfUlemFrame
     bool read(ILeStream& stream);
 };
 
-// For now we don't actually store the file, just its name and length.
 struct BpfUlemFile
 {
     uint32_t m_len;

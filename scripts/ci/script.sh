@@ -25,7 +25,7 @@ fi
 cmake \
     -DBUILD_PLUGIN_ICEBRIDGE=OFF \
     -DBUILD_PLUGIN_NITF=OFF \
-    -DBUILD_PLUGIN_OCI=$OPTIONAL_COMPONENT_SWITCH \
+    -DBUILD_PLUGIN_OCI=OFF \
     -DBUILD_PLUGIN_PGPOINTCLOUD=OFF\
     -DBUILD_PLUGIN_SQLITE=OFF \
     -DENABLE_CTEST=OFF \
@@ -42,12 +42,13 @@ cmake \
 
 if [[ $PDAL_CMAKE_GENERATOR == "Unix Makefiles" ]]
 then
-    make -j ${NUMTHREADS}
+    MAKECMD=make
 else
-    # Don't use ninja's default number of threads becuase it can
-    # saturate Travis's available memory.
-    ninja -j ${NUMTHREADS}
+    MAKECMD=ninja
 fi
 
-#LD_LIBRARY_PATH=./lib ctest -V --output-on-failure .
-LD_LIBRARY_PATH=./lib ./bin/pdal_test "../test/data" "--catch_system_errors=no"
+# Don't use ninja's default number of threads becuase it can
+# saturate Travis's available memory.
+${MAKECMD} -j ${NUMTHREADS} && \
+    LD_LIBRARY_PATH=./lib ctest -V && \
+    sudo ${MAKECMD} install

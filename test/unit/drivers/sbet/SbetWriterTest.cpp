@@ -34,8 +34,8 @@
 
 #include "UnitTest.hpp"
 
-#include <pdal/drivers/sbet/Reader.hpp>
-#include <pdal/drivers/sbet/Writer.hpp>
+#include <SbetReader.hpp>
+#include <SbetWriter.hpp>
 
 #include "Support.hpp"
 
@@ -63,14 +63,14 @@ BOOST_AUTO_TEST_SUITE(SbetWriterTest)
 
 BOOST_AUTO_TEST_CASE(testConstructor)
 {
-    drivers::sbet::SbetReader reader;
+    SbetReader reader;
     reader.setOptions(makeReaderOptions());
-    drivers::sbet::SbetWriter writer;
+    SbetWriter writer;
     writer.setOptions(makeWriterOptions());
     writer.setInput(&reader);
 
     BOOST_CHECK(writer.getDescription() == "SBET Writer");
-    BOOST_CHECK_EQUAL(writer.getName(), "drivers.sbet.writer");
+    BOOST_CHECK_EQUAL(writer.getName(), "writers.sbet");
 }
 
 BOOST_AUTO_TEST_CASE(testWrite)
@@ -80,9 +80,9 @@ BOOST_AUTO_TEST_CASE(testWrite)
     // Scope forces the writer's buffer to get written to the file.  Otherwise
     // the output file will show a file size of zero and no contents.
     {
-        drivers::sbet::SbetReader reader;
+        SbetReader reader;
         reader.setOptions(makeReaderOptions());
-        drivers::sbet::SbetWriter writer;
+        SbetWriter writer;
         writer.setOptions(makeWriterOptions());
         writer.setInput(&reader);
 
