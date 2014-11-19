@@ -44,7 +44,7 @@
 namespace pdal
 {
 
-class OStream
+class PDAL_DLL OStream
 {
 public:
     OStream() : m_stream(NULL), m_fstream(NULL)
