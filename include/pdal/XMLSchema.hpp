@@ -119,7 +119,7 @@ public:
 };
 
 
-// We're going to put all of our libxml2 primatives into shared_ptrs
+// We're going to put all of our libxml2 primitives into shared_ptrs
 // that have custom deleters that clean up after themselves so we
 // have a good chance at having clean exception-safe code
 typedef boost::shared_ptr<void> DocPtr;
@@ -130,18 +130,11 @@ typedef boost::shared_ptr<void> TextWriterPtr;
 typedef boost::shared_ptr<void> BufferPtr;
 typedef boost::shared_ptr<void> CharPtr;
 
-struct Scale
-{
-    Scale() : m_scale(1.0), m_offset(0.0) {};
-    double m_scale;
-    double m_offset;
-};
-
 struct XYZScale
 {
-    Scale m_x;
-    Scale m_y;
-    Scale m_z;
+    XForm m_x;
+    XForm m_y;
+    XForm m_z;
 };
 
 struct DimInfo

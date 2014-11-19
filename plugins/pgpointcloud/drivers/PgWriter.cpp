@@ -66,11 +66,7 @@ namespace pgpointcloud
 {
 
 PgWriter::PgWriter()
-    : pdal::Writer()
-    , m_session(0)
-    , m_schema_name("")
-    , m_table_name("")
-    , m_column_name("")
+    : m_session(0)
     , m_patch_compression_type(compression::CompressionType::None)
     , m_patch_capacity(400)
     , m_srid(0)
@@ -79,8 +75,7 @@ PgWriter::PgWriter()
     , m_create_index(true)
     , m_overwrite(true)
     , m_schema_is_initialized(false)
-{
-}
+{}
 
 
 PgWriter::~PgWriter()
@@ -116,22 +111,6 @@ void PgWriter::processOptions(const Options& options)
     m_pack = options.getValueOrDefault<bool>("pack_ignored_fields", true);
     m_pre_sql = getOptions().getValueOrDefault<std::string>("pre_sql", "");
 }
-
-
-void PgWriter::ready(PointContextRef ctx)
-{
-    m_pointSize = 0;
-    m_dims = ctx.dims();
-    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-    {
-        Dimension::Type::Enum type = Dimension::defaultType(*di);
-        if (type == Dimension::Type::None)
-            type = Dimension::Type::Float;
-        m_types.push_back(type);
-        m_pointSize += Dimension::size(type);
-    }
-}
-
 
 //
 // Called from PDAL core during start-up. Do everything
@@ -468,67 +447,6 @@ void PgWriter::CreateIndex(std::string const& schema_name,
 }
 
 
-namespace
-{
-
-void fillBuf(const PointBuffer& buf, char *pos, Dimension::Id::Enum d,
-    Dimension::Type::Enum type, PointId id)
-{
-    union
-    {
-        float f;
-        double d;
-        int8_t s8;
-        int16_t s16;
-        int32_t s32;
-        int64_t s64;
-        uint8_t u8;
-        uint16_t u16;
-        uint32_t u32;
-        uint64_t u64;
-    } e;  // e - for Everything.
-
-    switch (type)
-    {
-    case Dimension::Type::Float:
-        e.f = buf.getFieldAs<float>(d, id);
-        break;
-    case Dimension::Type::Double:
-        e.d = buf.getFieldAs<double>(d, id);
-        break;
-    case Dimension::Type::Signed8:
-        e.s8 = buf.getFieldAs<int8_t>(d, id);
-        break;
-    case Dimension::Type::Signed16:
-        e.s16 = buf.getFieldAs<int16_t>(d, id);
-        break;
-    case Dimension::Type::Signed32:
-        e.s32 = buf.getFieldAs<int32_t>(d, id);
-        break;
-    case Dimension::Type::Signed64:
-        e.s64 = buf.getFieldAs<int64_t>(d, id);
-        break;
-    case Dimension::Type::Unsigned8:
-        e.u8 = buf.getFieldAs<uint8_t>(d, id);
-        break;
-    case Dimension::Type::Unsigned16:
-        e.u16 = buf.getFieldAs<uint16_t>(d, id);
-        break;
-    case Dimension::Type::Unsigned32:
-        e.u32 = buf.getFieldAs<uint32_t>(d, id);
-        break;
-    case Dimension::Type::Unsigned64:
-        e.u64 = buf.getFieldAs<uint64_t>(d, id);
-        break;
-    case Dimension::Type::None:
-        break;
-    }
-    memcpy(pos, &e, Dimension::size(type));
-}
-
-} // anonymous namespace.
-
-
 void PgWriter::writeTile(PointBuffer const& buffer)
 {
     if (buffer.size() > m_patch_capacity)
@@ -539,37 +457,16 @@ void PgWriter::writeTile(PointBuffer const& buffer)
         throw pdal_error(oss.str());
     }
 
-    size_t outbufSize = m_pointSize * buffer.size();
-    std::unique_ptr<char> outbuf(new char[outbufSize]);
-    char *pos = outbuf.get();
-    size_t clicks = 0;
-    size_t interrupt = m_dims.size() * 100;
-
-    for (PointId id = 0; id < buffer.size(); ++id)
-    {
-        auto ti = m_types.begin();
-        for (auto di = m_dims.begin(); di != m_dims.end(); ++di, ++ti)
-        {
-            fillBuf(buffer, pos, *di, *ti, id);
-            pos += Dimension::size(*ti);
-        }
-        if (id % 100 == 0)
-            m_callback->invoke(id);
-    }
-
-    m_callback->invoke(buffer.size());
-
+    std::vector<char> buf = buffer.getPoints(m_dimTypes, 0, buffer.size());
 
     /* We are always getting uncompressed bytes off the block_data */
     /* so we always used compression type 0 (uncompressed) in writing our WKB */
-
-
     static char syms[] = "0123456789ABCDEF";
-    m_hex.resize(outbufSize * 2);
-    for (unsigned i = 0; i != outbufSize; i++)
+    m_hex.resize(buf.size() * 2);
+    for (size_t i = 0; i != buf.size(); i++)
     {
-        m_hex[i * 2]   = syms[((outbuf.get()[i] >> 4) & 0xf)];
-        m_hex[i * 2 + 1] = syms[outbuf.get()[i] & 0xf];
+        m_hex[i * 2]   = syms[((buf[i] >> 4) & 0xf)];
+        m_hex[i * 2 + 1] = syms[buf[i] & 0xf];
     }
 
     m_insert.clear();

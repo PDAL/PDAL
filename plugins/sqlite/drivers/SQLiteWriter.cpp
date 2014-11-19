@@ -55,7 +55,6 @@ namespace drivers
 namespace sqlite
 {
 
-
 SQLiteWriter::SQLiteWriter()
     : pdal::Writer()
     , m_doCreateIndex(false)
@@ -92,7 +91,7 @@ void SQLiteWriter::processOptions(const Options& options)
     m_modulename =
         options.getValueOrDefault<std::string>("module", "");
     m_srid =
-        m_options.getValueOrDefault<boost::uint32_t>("srid", 4326);
+        m_options.getValueOrDefault<uint32_t>("srid", 4326);
     m_is3d = m_options.getValueOrDefault<bool>("is3d", false);
     m_doCompression = m_options.getValueOrDefault<bool>("compression", false);
 }
@@ -128,22 +127,14 @@ void SQLiteWriter::initialize()
     m_patch = PatchPtr(new Patch());
 }
 
+
 void SQLiteWriter::ready(PointContextRef ctx)
 {
     m_context = ctx;
-    m_dims = ctx.dims();
-    // Determine types for the dimensions.  We use the default types when
-    // they exist, float otherwise.
-    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-    {
-        Dimension::Type::Enum type = Dimension::defaultType(*di);
-        if (type == Dimension::Type::None)
-            type = Dimension::Type::Float;
-        m_types.push_back(type);
-        m_pointSize += Dimension::size(type);
-    }
     m_patch->m_ctx = ctx;
+    DbWriter::ready(ctx);
 }
+
 
 void SQLiteWriter::write(const PointBuffer& buffer)
 {
@@ -302,7 +293,7 @@ void SQLiteWriter::CreateCloudTable()
                          << boost::to_lower_copy(m_cloud_table)
                          << "'" <<std::endl;
 
-    boost::uint32_t nDim = 2;
+    uint32_t nDim = 2;
 
     oss.str("");
     oss << "SELECT AddGeometryColumn('"
@@ -511,13 +502,13 @@ void SQLiteWriter::CreateCloud()
 }
 
 
-void SQLiteWriter::writeTile(PointBuffer const& buffer)
+void SQLiteWriter::writeTile(const PointBuffer& buffer)
 {
     using namespace std;
 
-    boost::uint8_t* point_data(0);
-    boost::uint32_t point_data_length(0);
-    boost::uint32_t schema_byte_size(0);
+    uint8_t* point_data(0);
+    uint32_t point_data_length(0);
+    uint32_t schema_byte_size(0);
 
     size_t bufferSize = buffer.size() * m_context.pointSize();
 
@@ -528,27 +519,29 @@ void SQLiteWriter::writeTile(PointBuffer const& buffer)
         size_t newSize = m_patch->getBytes().size();
         double percent = (double) newSize/(double) bufferSize;
         percent = percent * 100;
-        log()->get(LogLevel::Debug3) << "Compressing tile by "
-                                     << boost::str(boost::format("%.2f") % (100- percent))
-                                     <<"%" << std::endl;
+        log()->get(LogLevel::Debug3) << "Compressing tile by " <<
+            boost::str(boost::format("%.2f") % (100- percent)) <<
+            "%" << std::endl;
     }
     else
     {
         std::vector<uint8_t> bytes;
         bytes.resize(bufferSize);
-        Charbuf charstreambuf((char*)&bytes[0], bufferSize, 0);
+        Charbuf charstreambuf((char*)bytes, bufferSize, 0);
         std::ostream o(&charstreambuf);
         buffer.getBytes(o, 0, buffer.size());
 
-        log()->get(LogLevel::Debug3) << "uncompressed size: " << bytes.size() << std::endl;
+        log()->get(LogLevel::Debug3) << "uncompressed size: " <<
+            bytes.size() << std::endl;
         m_patch->setBytes(bytes);
-        log()->get(LogLevel::Debug3) << "uncompressed size: " << m_patch->getBytes().size() << std::endl;
+        log()->get(LogLevel::Debug3) << "uncompressed size: " <<
+            m_patch->getBytes().size() << std::endl;
     }
 
     records rs;
     row r;
 
-    boost::uint32_t precision(9);
+    uint32_t precision(9);
     BOX3D b = buffer.calculateBounds(true);
     std::string bounds = b.toWKT(precision); // polygons are only 2d, not cubes
 

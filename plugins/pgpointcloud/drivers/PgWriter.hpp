@@ -35,7 +35,7 @@
 
 #pragma once
 
-#include <pdal/Writer.hpp>
+#include <pdal/DbWriter.hpp>
 #include <pdal/StageFactory.hpp>
 #include "PgCommon.hpp"
 
@@ -47,7 +47,7 @@ namespace pgpointcloud
 {
 
 
-class PDAL_DLL PgWriter : public pdal::Writer
+class PDAL_DLL PgWriter : public DbWriter
 {
 public:
     SET_STAGE_NAME("drivers.pgpointcloud.writer", "PostgresSQL Pointcloud Database Writer")
@@ -59,13 +59,11 @@ public:
 
     static Options getDefaultOptions();
 
-
 private:
     PgWriter& operator=(const PgWriter&); // not implemented
     PgWriter(const PgWriter&); // not implemented
 
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContextRef ctx);
     virtual void write(const PointBuffer& pointBuffer);
     virtual void done(PointContextRef ctx);
     virtual void initialize();
@@ -106,12 +104,9 @@ private:
     bool m_overwrite;
     std::string m_insert;
     std::string m_hex;
-    size_t m_pointSize;
     Orientation::Enum m_orientation;
     bool m_pack;
     std::string m_pre_sql;
-    Dimension::IdList m_dims;
-    std::vector<Dimension::Type::Enum> m_types;
 
     // lose this
     bool m_schema_is_initialized;

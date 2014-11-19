@@ -116,61 +116,39 @@ typedef std::vector<row> records;
 class Patch
 {
 public:
-    Patch() : count(0), remaining(0), m_isCompressed(false), m_compVersion(""), idx(0)
-    {
-    };
+    Patch() : count(0), remaining(0), m_isCompressed(false), idx(0)
+    {}
 
     point_count_t count;
     point_count_t remaining;
 
-    pdal::schema::XMLSchema m_schema;
+    schema::XMLSchema m_schema;
     PointContextRef m_ctx;
     MetadataNode m_metadata;
-//     compression::CompressionStream m_compStream;
     bool m_isCompressed;
     std::string m_compVersion;
     std::vector<unsigned char> buf;
     size_t idx;
 
-    void putBytes(const unsigned char* b, size_t len) {
-        while(len --) {
-            buf.push_back(*b++);
-        }
-    }
-
-    void putByte(const unsigned char b) {
-        buf.push_back(b);
-    }
-
-    unsigned char getByte() {
-        return buf[idx++];
-    }
-
-    void getBytes(unsigned char *b, int len) {
-        for (int i = 0 ; i < len ; i ++) {
-            b[i] = getByte();
-        }
-    }
-
     void setBytes(const std::vector<uint8_t>& data)
-        {
-            buf = data;
-        }
+        { buf = data; }
 
     const std::vector<uint8_t>& getBytes() const
-        {
-            return buf;
-        }
-    void decompress()
-        {
-            PointBufferPtr b = compression::Decompress<Patch>(m_ctx, *this, count, compression::CompressionType::Lazperf);
-            buf = b->getBytes();
-        }
+        { return buf; }
 
-    inline void compress(const PointBuffer& buffer)
-        {
-            compression::Compress<Patch>(m_ctx, buffer, *this, compression::CompressionType::Lazperf, 0, buffer.size());
-        }
+    void decompress()
+    {
+        PointBufferPtr b = compression::Decompress<Patch>(m_ctx, *this,
+            count, compression::CompressionType::Lazperf);
+        buf = b->getBytes();
+    }
+
+    void compress(const PointBuffer& buffer)
+    {
+        compression::Compress<Patch>(m_ctx, buffer, *this,
+            compression::CompressionType::Lazperf, 0, buffer.size());
+    }
+
     size_t byte_size()
         { return buf.size(); }
 
@@ -216,7 +194,6 @@ public:
     }
 
 };
-
 typedef boost::shared_ptr<Patch> PatchPtr;
 
 

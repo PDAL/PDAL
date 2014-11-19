@@ -56,10 +56,8 @@ namespace drivers
 namespace oci
 {
 
-
 OciWriter::OciWriter()
-    : pdal::Writer()
-    , m_createIndex(false)
+    : m_createIndex(false)
     , m_bDidCreateBlockTable(false)
     , m_pc_id(0)
     , m_srid(0)
@@ -71,10 +69,6 @@ OciWriter::OciWriter()
     , m_streamChunks(false)
     , m_orientation(Orientation::PointMajor)
 {}
-
-OciWriter::~OciWriter()
-{
-}
 
 
 void OciWriter::initialize()
@@ -798,18 +792,7 @@ void OciWriter::ready(PointContextRef ctx)
 
     m_pcExtent.clear();
     m_lastBlockId = 0;
-    m_pointSize = 0;
-    m_dims = ctx.dims();
-    // Determine types for the dimensions.  We use the default types when
-    // they exist, float otherwise.
-    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-    {
-        Dimension::Type::Enum type = Dimension::defaultType(*di);
-        if (type == Dimension::Type::None)
-            type = Dimension::Type::Float;
-        m_types.push_back(type);
-        m_pointSize += Dimension::size(type);
-    }
+    DbWriter::ready(ctx);
 }
 
 

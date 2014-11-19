@@ -1,6 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
-*
+* Copyright (c) 2014,  Hobu Inc., hobu@hobu.co
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -13,10 +12,9 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
-*       names of its contributors may be used to endorse or promote
-*       products derived from this software without specific prior
-*       written permission.
+*     * Neither the name of Hobu, Inc. nor the names of its contributors
+*       may be used to endorse or promote products derived from this
+*       software without specific prior written permission.
 *
 * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -32,67 +30,48 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
-
-#include <stdint.h>
-#include <vector>
-
-#include <pdal/pdal_internal.hpp>
+#include <pdal/DbWriter.hpp>
 
 namespace pdal
 {
 
-typedef std::vector<uint8_t>::size_type PointId;
-typedef std::vector<PointId>::size_type point_count_t;
-
-struct XForm
+void DbWriter::ready(PointContextRef ctx)
 {
-public:
-    XForm() : m_scale(1.0), m_autoScale(false), m_offset(0.0),
-        m_autoOffset(false)
-    {}
+    using namespace Dimension;
 
-    XForm(double scale, double offset) : m_scale(scale), m_autoScale(false),
-        m_offset(offset), m_autoOffset(false)
-    {}
+    m_pointSize = 0;
+    // Temp.
+    m_dimTypes = ctx.dimTypes();
+    m_dims = ctx.dims();
 
-    double m_scale;
-    // Whether a scale value should be determined by examining the data.
-    bool m_autoScale;
-    double m_offset;
-    // Whether an offset value should be determined by examining the data.
-    bool m_autoOffset;
+    // If we find an X, Y or Z, remove it and stick it at the end.  This allows
+    // the buffer that we build based on the dimensions to be modified from
+    // source type (doubles) to 
 
-    bool nonstandard() const
+    // Determine types for the dimensions.  We use the default types when
+    // they exist, float otherwise.
+    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
     {
-        return m_autoScale || m_autoOffset || m_scale != 1.0 || m_offset != 0.0;
+        Type::Enum type = ctx.dimType(*di);
+
+        m_types.push_back(type);
+        m_pointSize += size(type);
     }
-};
+}
 
-namespace LogLevel
+/// Determine if X, Y and Z values should be written as Signed32 along with
+/// a scale factor and offset instead of being written as Double.
+///
+/// \return  Whether X,Y and Z values should be scaled.
+bool DbWriter::locationScaling() const
 {
-enum Enum
-{
-    Error = 0,
-    Warning,
-    Info,
-    Debug,
-    Debug1,
-    Debug2,
-    Debug3,
-    Debug4,
-    Debug5
-};
-} // namespace LogLevel
+    return (m_xXform.nonstandard() || m_yXform.nonstandard() ||
+        m_zXform.nonstandard());
+}
 
-namespace Orientation
-{
-enum Enum
-{
-    PointMajor,
-    DimensionMajor
-};
-} // namespace Orientation
+/**
+        if (id == Id::X || id == Id::Y || id == Id::Z && locationScaling())
+            type = Type::Signed32;
+**/
 
 } // namespace pdal
-

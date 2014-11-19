@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include <pdal/Writer.hpp>
+#include <pdal/DbWriter.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/GDALUtils.hpp>
 
@@ -49,33 +49,17 @@ namespace drivers
 namespace oci
 {
 
-class PDAL_DLL OciWriter : public pdal::Writer
+class PDAL_DLL OciWriter : public DbWriter
 {
 public:
     SET_STAGE_NAME("drivers.oci.writer", "OCI Writer")
     SET_STAGE_LINK("http://pdal.io/stages/drivers.oci.writer.html")
     SET_STAGE_ENABLED(true)
     OciWriter();
-    ~OciWriter();
 
     static Options getDefaultOptions();
 
-protected:
-    virtual void writeBegin(boost::uint64_t targetNumPointsToWrite)
-    {}
-    virtual void writeBufferBegin(PointBuffer const&)
-    {}
-
-    virtual boost::uint32_t writeBuffer(const PointBuffer&)
-    { return 0; }
-
-    virtual void writeEnd(boost::uint64_t actualNumPointsWritten)
-    {}
-
 private:
-    OciWriter& operator=(const OciWriter&); // not implemented
-    OciWriter(const OciWriter&); // not implemented
-
     template<typename T>
     T getDefaultedOption(const Options& options,
         const std::string& option_name) const
@@ -103,7 +87,7 @@ private:
     std::string createPCElemInfo();
     bool blockTableExists();
     void runFileSQL(std::string const& filename);
-    bool isGeographic(boost::int32_t srid);
+    bool isGeographic(int32_t srid);
     std::string loadSQLData(std::string const& filename);
     void setOrdinates(Statement statement, OCIArray* ordinates,
         const BOX3D& extent);
@@ -113,7 +97,6 @@ private:
     void turnOn_SDO_PC_Trigger(std::string trigger_name);
     bool isValidWKT(std::string const& wkt);
 
-    size_t m_pointSize;
     long m_lastBlockId;
     BOX3D m_bounds; // Bounds of the entire point cloud
     Connection m_connection;
@@ -133,8 +116,6 @@ private:
     bool m_overwrite;
     bool m_trace;
     bool m_pack;
-    Dimension::IdList m_dims;
-    std::vector<Dimension::Type::Enum> m_types;
 
     std::string m_baseTableName;
     std::string m_cloudColumnName;
@@ -153,6 +134,10 @@ private:
     bool m_streamChunks;
     Orientation::Enum m_orientation;
     std::string m_connSpec;
+
+    OciWriter& operator=(const OciWriter&); // not implemented
+    OciWriter(const OciWriter&); // not implemented
+
 };
 
 } // namespace oci

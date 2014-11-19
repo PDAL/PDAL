@@ -748,5 +748,13 @@ inline Type::Enum type(std::string s)
 }
 
 } // namespace Dimension
+
+struct DimType
+{
+    Dimension::Type::Enum m_type;
+    Dimension::Id::Enum m_id;
+};
+typedef std::vector<DimType> DimTypeList;
+
 } // namespace pdal
 

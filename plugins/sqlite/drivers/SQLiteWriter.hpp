@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include <pdal/Writer.hpp>
+#include <pdal/DbWriter.hpp>
 #include <pdal/Compression.hpp>
 #include <pdal/StageFactory.hpp>
 #include "SQLiteCommon.hpp"
@@ -47,7 +47,7 @@ namespace sqlite
 {
 
 
-class PDAL_DLL SQLiteWriter : public pdal::Writer
+class PDAL_DLL SQLiteWriter : public DbWriter
 {
 public:
     SET_STAGE_NAME("drivers.sqlite.writer", "SQLite Writer")
@@ -86,14 +86,11 @@ private:
     BOX3D m_bounds; // Bounds of the entire point cloud
     bool m_sdo_pc_is_initialized;
 	std::ostringstream m_block_insert_query;
-	boost::int32_t m_obj_id;
-	boost::int32_t m_block_id;
-	boost::uint32_t m_srid;
-	boost::int64_t m_num_points;
-    size_t m_pointSize;
+	int32_t m_obj_id;
+	int32_t m_block_id;
+	uint32_t m_srid;
+	int64_t m_num_points;
     Orientation::Enum m_orientation;
-    Dimension::IdList m_dims;
-    std::vector<Dimension::Type::Enum> m_types;
     bool m_pack;
     std::string m_block_table;
     std::string m_cloud_table;
@@ -104,7 +101,6 @@ private:
     bool m_doCompression;;
     PatchPtr m_patch;
     PointContextRef m_context;
-
 };
 
 }

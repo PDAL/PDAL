@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2014, Hobu Inc. (hobu@hobu.co)
 *
 * All rights reserved.
 *
@@ -13,10 +13,9 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
-*       names of its contributors may be used to endorse or promote
-*       products derived from this software without specific prior
-*       written permission.
+*     * Neither the name of Hobu, Inc. nor the names of its contributors
+*       may be used to endorse or promote products derived from this
+*       software without specific prior written permission.
 *
 * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,65 +33,52 @@
 
 #pragma once
 
-#include <stdint.h>
-#include <vector>
+#include <pdal/Writer.hpp>
 
-#include <pdal/pdal_internal.hpp>
+#include <string>
 
 namespace pdal
 {
 
-typedef std::vector<uint8_t>::size_type PointId;
-typedef std::vector<PointId>::size_type point_count_t;
-
-struct XForm
+namespace drivers
 {
-public:
-    XForm() : m_scale(1.0), m_autoScale(false), m_offset(0.0),
-        m_autoOffset(false)
+namespace sqlite
+{
+class SQLiteWriter;
+}
+namespace pgpointcloud
+{
+class PgWriter;
+}
+namespace oci
+{
+class OciWriter;
+}
+
+}
+
+class PDAL_DLL DbWriter : public Writer
+{
+    friend class drivers::sqlite::SQLiteWriter;
+    friend class drivers::pgpointcloud::PgWriter;
+    friend class drivers::oci::OciWriter;
+protected:
+    DbWriter()
     {}
 
-    XForm(double scale, double offset) : m_scale(scale), m_autoScale(false),
-        m_offset(offset), m_autoOffset(false)
-    {}
+    bool locationScaling() const;
 
-    double m_scale;
-    // Whether a scale value should be determined by examining the data.
-    bool m_autoScale;
-    double m_offset;
-    // Whether an offset value should be determined by examining the data.
-    bool m_autoOffset;
+    Dimension::IdList m_dims;
+    std::vector<Dimension::Type::Enum> m_types;
+    size_t m_pointSize;
+    DimTypeList m_dimTypes;
 
-    bool nonstandard() const
-    {
-        return m_autoScale || m_autoOffset || m_scale != 1.0 || m_offset != 0.0;
-    }
+private:
+    virtual void ready(PointContextRef ctx);
+
+    DbWriter& operator=(const DbWriter&); // not implemented
+    DbWriter(const DbWriter&); // not implemented
 };
-
-namespace LogLevel
-{
-enum Enum
-{
-    Error = 0,
-    Warning,
-    Info,
-    Debug,
-    Debug1,
-    Debug2,
-    Debug3,
-    Debug4,
-    Debug5
-};
-} // namespace LogLevel
-
-namespace Orientation
-{
-enum Enum
-{
-    PointMajor,
-    DimensionMajor
-};
-} // namespace Orientation
 
 } // namespace pdal
 

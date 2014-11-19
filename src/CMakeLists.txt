@@ -32,6 +32,7 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/Bounds.hpp"
   "${PDAL_HEADERS_DIR}/Charbuf.hpp"
   "${PDAL_HEADERS_DIR}/Compression.hpp"
+  "${PDAL_HEADERS_DIR}/DbWriter.hpp"
   "${PDAL_HEADERS_DIR}/Dimension.hpp"
   "${PDAL_HEADERS_DIR}/Drivers.hpp"
   "${PDAL_HEADERS_DIR}/FileUtils.hpp"
@@ -82,6 +83,7 @@ endif()
 set(PDAL_BASE_CPP
   Bounds.cpp
   Charbuf.cpp
+  DbWriter.cpp
   FileUtils.cpp
   Filter.cpp
   gitsha.cpp
