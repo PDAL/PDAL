@@ -252,12 +252,13 @@ private:
         return static_cast<char*>(static_cast<void*>(&data));
     }
 
-    /**
+    template<typename T>
     static inline char* as_buffer(T* data)
     {
         return static_cast<char*>(static_cast<void*>(data));
     }
 
+    /**
     template<typename T>
     static inline char const* as_bytes(T const& data)
     {
