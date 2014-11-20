@@ -36,7 +36,6 @@
 
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
-#include <LasReader.hpp>
 #include <pdal/StageFactory.hpp>
 
 #include "Support.hpp"
@@ -76,6 +75,7 @@ static void test_filter(const std::string& jsonFile,
                         size_t expectedPointCount,
                         bool useThin=false)
 {
+    StageFactory f;
     Options options;
 
     const std::string& autzenThick = "autzen/autzen-point-format-3.las";
@@ -90,32 +90,37 @@ static void test_filter(const std::string& jsonFile,
     options.add(debug);
     options.add(verbose);
 
-    LasReader reader;
-    reader.setOptions(options);
-
-    Option fname("filename", Support::datapath(jsonFile));
-    Options filter_options;
-    filter_options.add(fname);
-
-    StageFactory f;
-    StageFactory::FilterCreator* fc = f.getFilterCreator("filters.pclblock");
-    if (fc)
+    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
+    if (rc)
     {
-        BOOST_CHECK(fc);
+        BOOST_CHECK(rc);
 
-        Stage* pcl_block = fc();
-        pcl_block->setOptions(filter_options);
-        pcl_block->setInput(&reader);
+        Stage* reader = rc();
+        reader->setOptions(options);
 
-        PointContext ctx;
-        pcl_block->prepare(ctx);
-        PointBufferSet pbSet = pcl_block->execute(ctx);
+        Option fname("filename", Support::datapath(jsonFile));
+        Options filter_options;
+        filter_options.add(fname);
 
-        BOOST_CHECK_EQUAL(pbSet.size(), 1);
-        PointBufferPtr buf = *pbSet.begin();
-        BOOST_CHECK_EQUAL(buf->size(), expectedPointCount);
+        StageFactory::FilterCreator* fc = f.getFilterCreator("filters.pclblock");
+        if (fc)
+        {
+            BOOST_CHECK(fc);
+
+            Stage* pcl_block = fc();
+            pcl_block->setOptions(filter_options);
+            pcl_block->setInput(reader);
+
+            PointContext ctx;
+            pcl_block->prepare(ctx);
+            PointBufferSet pbSet = pcl_block->execute(ctx);
+
+            BOOST_CHECK_EQUAL(pbSet.size(), 1);
+            PointBufferPtr buf = *pbSet.begin();
+            BOOST_CHECK_EQUAL(buf->size(), expectedPointCount);
+        }
+        BOOST_WARN_MESSAGE(fc, "PCLBlock Filter appears to be missing. Is it installed, with PDAL_DRIVER_PATH set?");
     }
-    BOOST_WARN_MESSAGE(fc, "PCLBlock Filter appears to be missing. Is it installed, with PDAL_DRIVER_PATH set?");
 }
 
 
