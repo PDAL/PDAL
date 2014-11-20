@@ -114,45 +114,6 @@ BOOST_AUTO_TEST_CASE(test_comparators)
 }
 
 
-BOOST_AUTO_TEST_CASE(test_buffer_read_write)
-{
-    const char buf[] = "quick brown fox";
-    std::string bufstr(buf);
-
-    std::ostringstream ostr;
-    Utils::write_n(ostr, buf, 15);
-
-    BOOST_CHECK(memcmp(buf, ostr.str().c_str(), 15) == 0);
-
-    std::istringstream istr;
-    istr.str(bufstr);
-    boost::uint8_t tmp[30];
-    Utils::read_n(tmp, istr, 15);
-    BOOST_CHECK(memcmp(buf, tmp, 15) == 0);
-}
-
-
-BOOST_AUTO_TEST_CASE(test_field_read_write)
-{
-    boost::uint8_t buffer[100];
-    boost::uint8_t* p = buffer;
-
-    boost::uint8_t one = 1;
-    double two = 2.0;
-
-    Utils::write_field<boost::uint8_t>(p, one);
-    Utils::write_field<double>(p, two);
-
-    p = buffer;
-
-    boost::uint8_t x = Utils::read_field<boost::uint8_t>(p);
-    double y = Utils::read_field<double>(p);
-
-    BOOST_CHECK(x==one);
-    BOOST_CHECK(Utils::compare_approx(y, two, std::numeric_limits<double>::min()) == true);
-}
-
-
 BOOST_AUTO_TEST_CASE(test_base64)
 {
     std::vector<boost::uint8_t> data;

@@ -36,7 +36,6 @@
 
 #include <pdal/SpatialReference.hpp>
 #include <pdal/StageFactory.hpp>
-#include <LasReader.hpp>
 #include <pdal/PointBuffer.hpp>
 
 #include "Support.hpp"
@@ -71,35 +70,43 @@ BOOST_AUTO_TEST_CASE(HexbinFilterTest_test_1)
         "use in situations where you do not want to estimate based on "
         "a sample");
 
-    LasReader reader;
-    reader.setOptions(options);
     StageFactory f;
-    StageFactory::FilterCreator* fc = f.getFilterCreator("filters.hexbin");
-    if(fc)
+    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
+
+    if (rc)
     {
-        BOOST_CHECK(fc);
+        BOOST_CHECK(rc);
 
-        std::unique_ptr<Filter> hexbin(fc());
-        hexbin->setOptions(options);
-        hexbin->setInput(&reader);
+        Stage* reader = rc();
+        reader->setOptions(options);
+        StageFactory f;
+        StageFactory::FilterCreator* fc = f.getFilterCreator("filters.hexbin");
+        if(fc)
+        {
+            BOOST_CHECK(fc);
 
-        PointContext ctx;
+            std::unique_ptr<Filter> hexbin(fc());
+            hexbin->setOptions(options);
+            hexbin->setInput(reader);
 
-        hexbin->prepare(ctx);
-        hexbin->execute(ctx);
+            PointContext ctx;
 
-        MetadataNode m = ctx.metadata();
-        m = m.findChild(hexbin->getName());
+            hexbin->prepare(ctx);
+            hexbin->execute(ctx);
 
-        std::string filename = Support::temppath("hexbin.txt");
-        std::ofstream out(filename);
-        printChildren(out, m);
-        out.close();
+            MetadataNode m = ctx.metadata();
+            m = m.findChild(hexbin->getName());
 
-        BOOST_CHECK(Support::compare_text_files(filename,
-            Support::datapath("filters/hexbin.txt")));
+            std::string filename = Support::temppath("hexbin.txt");
+            std::ofstream out(filename);
+            printChildren(out, m);
+            out.close();
 
-        FileUtils::deleteFile(filename);
+            BOOST_CHECK(Support::compare_text_files(filename,
+                Support::datapath("filters/hexbin.txt")));
+
+            FileUtils::deleteFile(filename);
+        }
     }
 }
 

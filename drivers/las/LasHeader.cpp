@@ -40,6 +40,8 @@
 
 #include <SummaryData.hpp>
 
+#include <pdal/pdal_config.hpp>
+
 
 namespace pdal
 {
@@ -55,7 +57,7 @@ std::string GetDefaultSoftwareId()
     std::string ver(PDAL_VERSION_STRING);
     std::stringstream oss;
     std::ostringstream revs;
-    revs << g_GIT_SHA1;
+    revs << GetSHA1();
 
 
     oss << "PDAL " << ver << " (" << revs.str().substr(0, 6) <<")";

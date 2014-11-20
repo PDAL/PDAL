@@ -36,7 +36,6 @@
 
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
-#include <LasReader.hpp>
 #include "Support.hpp"
 
 using namespace pdal;
@@ -149,28 +148,35 @@ BOOST_AUTO_TEST_CASE(test1)
         // writer_opts.add(verbose);
         writer_opts.add(writer_opt1);
 
-        LasReader reader;
-        reader.setOptions(reader_opts);
         StageFactory f;
-        StageFactory::WriterCreator* wc = f.getWriterCreator("drivers.nitf.writer");
-        if(wc)
+        StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
+        if (rc)
         {
-            BOOST_CHECK(wc);
+            BOOST_CHECK(rc);
 
-            std::unique_ptr<Writer> writer(wc());
-            writer->setOptions(writer_opts);
-            writer->setInput(&reader);
+            Stage* reader = rc();
+            reader->setOptions(reader_opts);
+
+            StageFactory::WriterCreator* wc = f.getWriterCreator("drivers.nitf.writer");
+            if(wc)
             {
-                // writer.setCompressed(false);
-                // // writer.setDate(0, 0);
-                // // writer.setPointFormat(::pdal::drivers::las::PointFormat3);
-                // // writer.setSystemIdentifier("");
-                // writer.setGeneratingSoftware("PDAL-NITF");
-                // writer.setChunkSize(100);
+                BOOST_CHECK(wc);
+
+                std::unique_ptr<Writer> writer(wc());
+                writer->setOptions(writer_opts);
+                writer->setInput(reader);
+                {
+                    // writer.setCompressed(false);
+                    // // writer.setDate(0, 0);
+                    // // writer.setPointFormat(::pdal::drivers::las::PointFormat3);
+                    // // writer.setSystemIdentifier("");
+                    // writer.setGeneratingSoftware("PDAL-NITF");
+                    // writer.setChunkSize(100);
+                }
+                PointContext ctx;
+                writer->prepare(ctx);
+                writer->execute(ctx);
             }
-            PointContext ctx;
-            writer->prepare(ctx);
-            writer->execute(ctx);
         }
     }
 

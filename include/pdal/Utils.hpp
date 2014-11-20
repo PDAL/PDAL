@@ -80,13 +80,6 @@ public:
         return diff <= std::abs((double) tolerance);
     }
 
-    // Copy v into *t and increment dest by the sizeof v
-    template<class T>
-    static inline void write_field(boost::uint8_t*& dest, T v)
-    {
-        *(T*)(void*)dest = v;
-        dest += sizeof(T);
-    }
 
     // Return a 'T' from a stream and increment src by the sizeof 'T'
     template<class T>
@@ -95,16 +88,6 @@ public:
         T tmp = *(T*)(void*)src;
         src += sizeof(T);
         return tmp;
-    }
-
-    // Copy data from dest to src and increment dest by the copied size.
-    template<class T>
-    static inline void read_array_field(boost::uint8_t*& src, T* dest,
-        std::size_t count)
-    {
-        memcpy((boost::uint8_t*)dest, (boost::uint8_t*)(T*)src,
-            sizeof(T)*count);
-        src += sizeof(T) * count;
     }
 
     // Read 'num' items from the source stream to the dest location
@@ -122,22 +105,7 @@ public:
         assert(check_stream_state(src));
     }
 
-    template <typename T>
-    static inline void write_n(std::ostream& dest, T const& src,
-        std::streamsize const& num)
-    {
-        if (!dest.good())
-            throw std::runtime_error("pdal::Utils::write_n<T>: output stream "
-                "is not writable");
-
-        T& tmp = const_cast<T&>(src);
-
-        char const* p = as_bytes(tmp);
-        dest.rdbuf()->sputn(p, num);
-
-        assert(check_stream_state(dest));
-    }
-
+    //
     // From http://stackoverflow.com/questions/485525/round-for-float-in-c
     static inline double sround(double r)
     {
@@ -220,13 +188,7 @@ public:
     // then return false
     static bool eatcharacter(std::istream& s, char x);
 
-    static boost::uint32_t getStreamPrecision(double scale);
-
-    static boost::uint32_t safeconvert64to32(boost::uint64_t x64);
-
-    // Generates a random temporary filename
-    static std::string generate_filename();
-    static std::string generate_tempfile();
+    static uint32_t getStreamPrecision(double scale);
 
     static void* getDLLSymbol(std::string const& library,
        std::string const& name);
@@ -296,6 +258,7 @@ private:
         return static_cast<char*>(static_cast<void*>(data));
     }
 
+    /**
     template<typename T>
     static inline char const* as_bytes(T const& data)
     {
@@ -307,6 +270,7 @@ private:
     {
         return static_cast<char const*>(static_cast<void const*>(data));
     }
+    **/
 
     template <typename C, typename T>
     static inline bool check_stream_state(std::basic_ios<C, T>& srtm)

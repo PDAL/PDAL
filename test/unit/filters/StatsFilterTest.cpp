@@ -34,8 +34,7 @@
 
 #include "UnitTest.hpp"
 
-#include <FauxReader.hpp>
-#include <LasReader.hpp>
+#include <pdal/StageFactory.hpp>
 #include <pdal/filters/Reprojection.hpp>
 #include <pdal/filters/Stats.hpp>
 
@@ -53,37 +52,45 @@ BOOST_AUTO_TEST_CASE(StatsFilterTest_test1)
     ops.add("bounds", bounds);
     ops.add("count", 1000);
     ops.add("mode", "constant");
-    FauxReader reader;
-    reader.setOptions(ops);
 
-    filters::Stats filter;
-    filter.setInput(&reader);
-    BOOST_CHECK_EQUAL(filter.getName(), "filters.stats");
-    BOOST_CHECK_EQUAL(filter.getDescription(), "Statistics Filter");
+    StageFactory f;
+    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.faux");
+    if (rc)
+    {
+        BOOST_CHECK(rc);
 
-    PointContext ctx;
-    filter.prepare(ctx);
-    filter.execute(ctx);
+        Stage* reader = rc();
+        reader->setOptions(ops);
 
-    const filters::stats::Summary& statsX = filter.getStats(Dimension::Id::X);
-    const filters::stats::Summary& statsY = filter.getStats(Dimension::Id::Y);
-    const filters::stats::Summary& statsZ = filter.getStats(Dimension::Id::Z);
+        filters::Stats filter;
+        filter.setInput(reader);
+        BOOST_CHECK_EQUAL(filter.getName(), "filters.stats");
+        BOOST_CHECK_EQUAL(filter.getDescription(), "Statistics Filter");
 
-    BOOST_CHECK_EQUAL(statsX.count(), 1000u);
-    BOOST_CHECK_EQUAL(statsY.count(), 1000u);
-    BOOST_CHECK_EQUAL(statsZ.count(), 1000u);
+        PointContext ctx;
+        filter.prepare(ctx);
+        filter.execute(ctx);
 
-    BOOST_CHECK_CLOSE(statsX.minimum(), 1.0, 0.0001);
-    BOOST_CHECK_CLOSE(statsY.minimum(), 2.0, 0.0001);
-    BOOST_CHECK_CLOSE(statsZ.minimum(), 3.0, 0.0001);
+        const filters::stats::Summary& statsX = filter.getStats(Dimension::Id::X);
+        const filters::stats::Summary& statsY = filter.getStats(Dimension::Id::Y);
+        const filters::stats::Summary& statsZ = filter.getStats(Dimension::Id::Z);
 
-    BOOST_CHECK_CLOSE(statsX.maximum(), 1.0, 0.0001);
-    BOOST_CHECK_CLOSE(statsY.maximum(), 2.0, 0.0001);
-    BOOST_CHECK_CLOSE(statsZ.maximum(), 3.0, 0.0001);
+        BOOST_CHECK_EQUAL(statsX.count(), 1000u);
+        BOOST_CHECK_EQUAL(statsY.count(), 1000u);
+        BOOST_CHECK_EQUAL(statsZ.count(), 1000u);
 
-    BOOST_CHECK_CLOSE(statsX.average(), 1.0, 0.0001);
-    BOOST_CHECK_CLOSE(statsY.average(), 2.0, 0.0001);
-    BOOST_CHECK_CLOSE(statsZ.average(), 3.0, 0.0001);
+        BOOST_CHECK_CLOSE(statsX.minimum(), 1.0, 0.0001);
+        BOOST_CHECK_CLOSE(statsY.minimum(), 2.0, 0.0001);
+        BOOST_CHECK_CLOSE(statsZ.minimum(), 3.0, 0.0001);
+
+        BOOST_CHECK_CLOSE(statsX.maximum(), 1.0, 0.0001);
+        BOOST_CHECK_CLOSE(statsY.maximum(), 2.0, 0.0001);
+        BOOST_CHECK_CLOSE(statsZ.maximum(), 3.0, 0.0001);
+
+        BOOST_CHECK_CLOSE(statsX.average(), 1.0, 0.0001);
+        BOOST_CHECK_CLOSE(statsY.average(), 2.0, 0.0001);
+        BOOST_CHECK_CLOSE(statsZ.average(), 3.0, 0.0001);
+    }
 }
 
 
@@ -100,7 +107,7 @@ BOOST_AUTO_TEST_CASE(test_multiple_dims_same_name)
     // options.add(verbose);
     Option out_srs("out_srs",out_ref.getWKT(), "Output SRS to reproject to");
     Option spatialreference("spatialreference","EPSG:2993",
-        "Output SRS to reproject to");
+                            "Output SRS to reproject to");
 
     Option filename("filename", Support::datapath("las/1.2-with-color.las"), "");
     Option ignore("ignore_old_dimensions", false, "");
@@ -109,26 +116,34 @@ BOOST_AUTO_TEST_CASE(test_multiple_dims_same_name)
     options.add(filename);
     options.add(ignore);
 
-    LasReader reader;
-    reader.setOptions(options);
-    filters::Reprojection reprojectionFilter;
-    reprojectionFilter.setOptions(options);
-    reprojectionFilter.setInput(&reader);
-    filters::Stats filter;
-    filter.setOptions(options);
-    filter.setInput(&reprojectionFilter);
+    StageFactory f;
+    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
 
-    PointContext ctx;
-    filter.prepare(ctx);
-    filter.execute(ctx);
+    if (rc)
+    {
+        BOOST_CHECK(rc);
 
-    const filters::stats::Summary& statsX = filter.getStats(Dimension::Id::X);
-    const filters::stats::Summary& statsY = filter.getStats(Dimension::Id::Y);
-    const filters::stats::Summary& statsZ = filter.getStats(Dimension::Id::Z);
+        Stage* reader = rc();
+        reader->setOptions(options);
+        filters::Reprojection reprojectionFilter;
+        reprojectionFilter.setOptions(options);
+        reprojectionFilter.setInput(reader);
+        filters::Stats filter;
+        filter.setOptions(options);
+        filter.setInput(&reprojectionFilter);
 
-    BOOST_CHECK_EQUAL(statsX.count(), 1065u);
-    BOOST_CHECK_EQUAL(statsY.count(), 1065u);
-    BOOST_CHECK_EQUAL(statsZ.count(), 1065u);
+        PointContext ctx;
+        filter.prepare(ctx);
+        filter.execute(ctx);
+
+        const filters::stats::Summary& statsX = filter.getStats(Dimension::Id::X);
+        const filters::stats::Summary& statsY = filter.getStats(Dimension::Id::Y);
+        const filters::stats::Summary& statsZ = filter.getStats(Dimension::Id::Z);
+
+        BOOST_CHECK_EQUAL(statsX.count(), 1065u);
+        BOOST_CHECK_EQUAL(statsY.count(), 1065u);
+        BOOST_CHECK_EQUAL(statsZ.count(), 1065u);
+    }
 }
 
 
@@ -145,7 +160,7 @@ BOOST_AUTO_TEST_CASE(test_specified_stats)
     // options.add(verbose);
     Option out_srs("out_srs",out_ref.getWKT(), "Output SRS to reproject to");
     Option spatialreference("spatialreference", "EPSG:2993",
-        "Output SRS to reproject to");
+                            "Output SRS to reproject to");
 
     Option filename("filename", Support::datapath("las/1.2-with-color.las"), "");
     Option ignore("ignore_old_dimensions", false, "");
@@ -154,39 +169,47 @@ BOOST_AUTO_TEST_CASE(test_specified_stats)
     options.add(filename);
     options.add(ignore);
 
-    LasReader reader;
-    reader.setOptions(options);
+    StageFactory f;
+    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
 
-    Options stats1ops;
-    stats1ops.add("dimensions", "Y");
-    filters::Stats filter1;
-    filter1.setOptions(stats1ops);
-    filter1.setInput(&reader);
+    if (rc)
+    {
+        BOOST_CHECK(rc);
 
-    filters::Reprojection reprojectionFilter;
-    reprojectionFilter.setOptions(options);
-    reprojectionFilter.setInput(&filter1);
+        Stage* reader = rc();
+        reader->setOptions(options);
 
-    Options stats2ops;
-    stats2ops.add("dimensions", "X Z");
-    filters::Stats filter2;
-    filter2.setOptions(stats2ops);
-    filter2.setInput(&reprojectionFilter);
+        Options stats1ops;
+        stats1ops.add("dimensions", "Y");
+        filters::Stats filter1;
+        filter1.setOptions(stats1ops);
+        filter1.setInput(reader);
 
-    PointContext ctx;
-    filter2.prepare(ctx);
-    filter2.execute(ctx);
+        filters::Reprojection reprojectionFilter;
+        reprojectionFilter.setOptions(options);
+        reprojectionFilter.setInput(&filter1);
 
-    const filters::stats::Summary& statsX = filter2.getStats(Dimension::Id::X);
-    const filters::stats::Summary& statsY = filter1.getStats(Dimension::Id::Y);
-    const filters::stats::Summary& statsZ = filter2.getStats(Dimension::Id::Z);
+        Options stats2ops;
+        stats2ops.add("dimensions", "X Z");
+        filters::Stats filter2;
+        filter2.setOptions(stats2ops);
+        filter2.setInput(&reprojectionFilter);
 
-    BOOST_CHECK_EQUAL(statsX.count(), 1065u);
-    BOOST_CHECK_EQUAL(statsY.count(), 1065u);
-    BOOST_CHECK_EQUAL(statsZ.count(), 1065u);
+        PointContext ctx;
+        filter2.prepare(ctx);
+        filter2.execute(ctx);
 
-    BOOST_CHECK_CLOSE(statsX.minimum(), -117.2686466233, 0.0001);
-    BOOST_CHECK_CLOSE(statsY.minimum(), 848899.700, 0.0001);
+        const filters::stats::Summary& statsX = filter2.getStats(Dimension::Id::X);
+        const filters::stats::Summary& statsY = filter1.getStats(Dimension::Id::Y);
+        const filters::stats::Summary& statsZ = filter2.getStats(Dimension::Id::Z);
+
+        BOOST_CHECK_EQUAL(statsX.count(), 1065u);
+        BOOST_CHECK_EQUAL(statsY.count(), 1065u);
+        BOOST_CHECK_EQUAL(statsZ.count(), 1065u);
+
+        BOOST_CHECK_CLOSE(statsX.minimum(), -117.2686466233, 0.0001);
+        BOOST_CHECK_CLOSE(statsY.minimum(), 848899.700, 0.0001);
+    }
 }
 
 
@@ -207,16 +230,16 @@ BOOST_AUTO_TEST_CASE(test_pointbuffer_stats)
     // options.add(verbose);
     Option out_srs("out_srs",out_ref.getWKT(), "Output SRS to reproject to");
     Option spatialreference("spatialreference","EPSG:2993",
-        "Output SRS to reproject to");
+                            "Output SRS to reproject to");
     Option x_dim("x_dim", "X", "Dimension name to use for 'X' data");
     Option y_dim("y_dim", "Y", "Dimension name to use for 'Y' data");
     Option z_dim("z_dim", "Z", "Dimension name to use for 'Z' data");
     Option x_scale("scale_x", 0.0000001f, "Scale for output X data in the "
-        "case when 'X' dimension data are to be scaled.  Defaults to '1.0'.  "
-        "If not set, the Dimensions's scale will be used");
+                   "case when 'X' dimension data are to be scaled.  Defaults to '1.0'.  "
+                   "If not set, the Dimensions's scale will be used");
     Option y_scale("scale_y", 0.0000001f, "Scale for output Y data in the "
-        "case when 'Y' dimension data are to be scaled.  Defaults to '1.0'.  "
-        "If not set, the Dimensions's scale will be used");
+                   "case when 'Y' dimension data are to be scaled.  Defaults to '1.0'.  "
+                   "If not set, the Dimensions's scale will be used");
     Option filename("filename", Support::datapath("las/1.2-with-color.las"));
     Option ignore("ignore_old_dimensions", false);
     options.add(out_srs);
@@ -231,26 +254,34 @@ BOOST_AUTO_TEST_CASE(test_pointbuffer_stats)
     options.add(dimensions);
     options.add(exact_dimensions);
 
-    LasReader reader;
-    reader.setOptions(options);
+    StageFactory f;
+    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
 
-    filters::Reprojection reprojectionFilter;
-    reprojectionFilter.setOptions(options);
-    reprojectionFilter.setInput(&reader);
+    if (rc)
+    {
+        BOOST_CHECK(rc);
 
-    Options statsOptions = options;
-    options.add("num_points", 1000);
-    pdal::filters::Stats filter;
-    filter.setOptions(options);
-    filter.setInput(&reprojectionFilter);
+        Stage* reader = rc();
+        reader->setOptions(options);
 
-    PointContext ctx;
-    filter.prepare(ctx);
-    filter.execute(ctx);
+        filters::Reprojection reprojectionFilter;
+        reprojectionFilter.setOptions(options);
+        reprojectionFilter.setInput(reader);
 
-    MetadataNode m = ctx.metadata();
-    m = m.findChild("filters.stats:statistic:counts:count-1:count");
-    BOOST_CHECK_EQUAL(m.value(), "737");
+        Options statsOptions = options;
+        options.add("num_points", 1000);
+        pdal::filters::Stats filter;
+        filter.setOptions(options);
+        filter.setInput(&reprojectionFilter);
+
+        PointContext ctx;
+        filter.prepare(ctx);
+        filter.execute(ctx);
+
+        MetadataNode m = ctx.metadata();
+        m = m.findChild("filters.stats:statistic:counts:count-1:count");
+        BOOST_CHECK_EQUAL(m.value(), "737");
+    }
 }
 
 
