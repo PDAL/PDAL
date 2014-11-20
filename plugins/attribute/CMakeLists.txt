@@ -17,11 +17,11 @@ if (GEOS_FOUND AND GDAL_FOUND)
     # Attribute Filter
     #
     set(srcs
-	AttributeFilter.cpp
+	filters/AttributeFilter.cpp
     )
 
     set(incs
-	AttributeFilter.hpp
+	filters/AttributeFilter.hpp
     )
 
     set(deps ${GEOS_LIBRARY} ${GDAL_LIBRARY})

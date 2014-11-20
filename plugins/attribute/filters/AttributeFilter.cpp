@@ -32,9 +32,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <AttributeFilter.hpp>
+#include "AttributeFilter.hpp"
 #include <pdal/GlobalEnvironment.hpp>
 
+#include <pdal/StageFactory.hpp>
 #include <pdal/QuadIndex.hpp>
 #include <pdal/GDALUtils.hpp>
 
