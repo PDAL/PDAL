@@ -45,24 +45,19 @@
 #include <ogr_spatialref.h>
 #include <pdal/GDALUtils.hpp>
 
-namespace pdal
-{
-class PointBuffer;
-namespace gdal
-{
-class GlobalDebug;
-}
-}
 
 namespace pdal
 {
-namespace filters
-{
+
+class PointBuffer;
+
+namespace gdal
+{ class GlobalDebug; }
 
 // Provides GDAL-based raster overlay that places output data in
 // specified dimensions. It also supports scaling the data by a multiplier
 // on a per-dimension basis.
-class PDAL_DLL Colorization : public Filter
+class PDAL_DLL ColorizationFilter : public Filter
 {
 
 struct BandInfo
@@ -82,7 +77,7 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/filters.colorization.html")
     SET_STAGE_ENABLED(true)
 
-    Colorization() : Filter()
+    ColorizationFilter() : Filter()
         {}
 
     static Options getDefaultOptions();
@@ -106,9 +101,8 @@ private:
 
     GDALDatasetH m_ds;
 
-    Colorization& operator=(const Colorization&); // not implemented
-    Colorization(const Colorization&); // not implemented
+    ColorizationFilter& operator=(const ColorizationFilter&); // not implemented
+    ColorizationFilter(const ColorizationFilter&); // not implemented
 };
 
-} // namespace filters
 } // namespace pdal

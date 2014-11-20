@@ -37,6 +37,7 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/FileUtils.hpp"
   "${PDAL_HEADERS_DIR}/Filter.hpp"
   "${PDAL_HEADERS_DIR}/Filters.hpp"
+  "${PDAL_HEADERS_DIR}/GDALUtils.hpp"
   "${PDAL_HEADERS_DIR}/GlobalEnvironment.hpp"
   "${PDAL_HEADERS_DIR}/gitsha.h"
   "${PDAL_HEADERS_DIR}/IStream.hpp"
@@ -85,6 +86,7 @@ set(PDAL_BASE_CPP
   FileUtils.cpp
   Filter.cpp
   gitsha.cpp
+  GDALUtils.cpp
   GlobalEnvironment.cpp
   KDIndex.cpp
   Log.cpp
@@ -157,23 +159,6 @@ if (WITH_PYTHON)
     list(APPEND PDAL_HPP ${PDAL_PYTHON_HPP})
     list(APPEND PDAL_CPP ${PDAL_PYTHON_CPP})
 endif (WITH_PYTHON)
-
-
-#
-# Core components that depend on GDAL
-#
-set(PDAL_GDAL_HPP
-    "${PDAL_HEADERS_DIR}/GDALUtils.hpp"
-    "${PDAL_FILTERS_HEADERS}/Colorization.hpp"
-    )
-
-set(PDAL_GDAL_CPP
-    GDALUtils.cpp
-    "${PDAL_FILTERS_SRC}/Colorization.cpp"
-    )
-
-list(APPEND PDAL_HPP ${PDAL_GDAL_HPP})
-list(APPEND PDAL_CPP ${PDAL_GDAL_CPP})
 
 
 #
@@ -277,6 +262,7 @@ include_directories(${PROJECT_SOURCE_DIR}/io/sbet)
 include_directories(${PROJECT_SOURCE_DIR}/io/text)
 include_directories(${PROJECT_SOURCE_DIR}/io/terrasolid)
 include_directories(${PROJECT_SOURCE_DIR}/filters/chipper)
+include_directories(${PROJECT_SOURCE_DIR}/filters/colorization)
 include_directories(${PROJECT_SOURCE_DIR}/filters/decimation)
 include_directories(${PROJECT_SOURCE_DIR}/filters/ferry)
 include_directories(${PROJECT_SOURCE_DIR}/filters/mortonorder)
