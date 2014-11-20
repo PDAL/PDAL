@@ -41,6 +41,8 @@
 #include <ogr_geometry.h>
 #include <geos_c.h>
 
+CREATE_FILTER_PLUGIN(attribute, pdal::AttributeFilter)
+
 namespace pdal
 {
 
