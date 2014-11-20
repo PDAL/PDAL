@@ -43,7 +43,6 @@
 
 #include <LasReader.hpp>
 #include <LasWriter.hpp>
-#include <pdal/filters/Chipper.hpp>
 
 #include "Support.hpp"
 
