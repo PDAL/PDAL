@@ -202,46 +202,6 @@ boost::uint32_t Utils::getStreamPrecision(double scale)
     return abs(floorl(log10(frac)));
 }
 
-boost::uint32_t Utils::safeconvert64to32(boost::uint64_t x64)
-{
-    if (x64 > (numeric_limits<boost::uint32_t>::max)())
-    {
-        throw pdal_error("cannot support seek offsets greater than 32-bits");
-    }
-
-    const boost::uint32_t x32 = static_cast<boost::uint32_t>(x64);
-    return x32;
-}
-
-string Utils::generate_filename()
-{
-    boost::filesystem::path path =
-        boost::filesystem::unique_path("%%%%%%%%%%%%%%%%");
-
-    ostringstream oss;
-    boost::filesystem::path fullpath = path;
-    oss << fullpath;
-    string output(oss.str());
-
-    boost::algorithm::erase_all(output, "\"");
-    return output;
-}
-
-string Utils::generate_tempfile()
-{
-    boost::filesystem::path path =
-        boost::filesystem::unique_path("%%%%%%%%%%%%%%%%");
-    boost::filesystem::path tempdir = boost::filesystem::temp_directory_path();
-
-    ostringstream oss;
-    boost::filesystem::path fullpath = tempdir/path;
-    oss << fullpath;
-    string output(oss.str());
-
-    boost::algorithm::erase_all(output, "\"");
-    return output;
-}
-
 void* Utils::getDLLSymbol(string const& library, string const& name)
 {
     // Completely stolen from GDAL.
