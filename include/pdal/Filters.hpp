@@ -34,7 +34,6 @@
 
 #pragma once
 
-#include <AttributeFilter.hpp>
 #include <pdal/filters/Chipper.hpp>
 #include <pdal/filters/Colorization.hpp>
 #include <pdal/filters/Crop.hpp>

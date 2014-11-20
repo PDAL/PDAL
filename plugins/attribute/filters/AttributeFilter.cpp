@@ -32,14 +32,17 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <AttributeFilter.hpp>
+#include "AttributeFilter.hpp"
 #include <pdal/GlobalEnvironment.hpp>
 
+#include <pdal/StageFactory.hpp>
 #include <pdal/QuadIndex.hpp>
 #include <pdal/GDALUtils.hpp>
 
 #include <ogr_geometry.h>
 #include <geos_c.h>
+
+CREATE_FILTER_PLUGIN(attribute, pdal::AttributeFilter)
 
 namespace pdal
 {
