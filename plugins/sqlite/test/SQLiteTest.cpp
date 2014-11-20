@@ -42,7 +42,6 @@
 #include <pdal/FileUtils.hpp>
 #include <pdal/StageFactory.hpp>
 #include <LasReader.hpp>
-#include <pdal/filters/Chipper.hpp>
 
 #include <pdal/PointBuffer.hpp>
 #include <pdal/pdal_defines.h>
