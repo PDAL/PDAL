@@ -53,7 +53,8 @@ set(PDAL_UNITTEST_DRIVERS_SRCS
     drivers/qfit/QFITReaderTest.cpp
     drivers/sbet/SbetReaderTest.cpp
     drivers/sbet/SbetWriterTest.cpp
-#    drivers/terrasolid/TerraSolidReaderTest.cpp
+        "${PROJECT_SOURCE_DIR}/src/gitsha.cpp"
+	#    drivers/terrasolid/TerraSolidReaderTest.cpp
 #    drivers/text/TextWriterTest.cpp
 )
 
