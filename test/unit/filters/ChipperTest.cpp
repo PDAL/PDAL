@@ -36,7 +36,7 @@
 
 #include <boost/cstdint.hpp>
 
-#include <pdal/filters/Chipper.hpp>
+#include <ChipperFilter.hpp>
 #include <LasWriter.hpp>
 #include <LasReader.hpp>
 #include <pdal/Options.hpp>
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(test_construction)
         pdal::Option capacity("capacity", 15, "capacity");
         options.add(capacity);
 
-        pdal::filters::Chipper chipper;
+        ChipperFilter chipper;
         chipper.setInput(&reader);
         chipper.setOptions(options);
         chipper.prepare(ctx);
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(empty_buffer)
 
     Options ops;
 
-    filters::Chipper chipper;
+    ChipperFilter chipper;
     chipper.prepare(ctx);
     StageTester::ready(&chipper, ctx);
     PointBufferSet pbSet = StageTester::run(&chipper, buf);
@@ -141,8 +141,7 @@ BOOST_AUTO_TEST_CASE(test_ordering)
     options.add(capacity);
 
     pdal::LasReader candidate_reader(options);
-    cache.setInput(&candidate_reader);
-    pdal::filters::Chipper chipper(options);
+    ChipperFilter chipper(options);
     chipper.setInput(&candidate_reader);
     chipper.prepare();
 

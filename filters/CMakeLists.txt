@@ -1,3 +1,3 @@
-add_subdirectory(attribute)
+add_subdirectory(chipper)
 
 set(PDAL_TARGET_OBJECTS ${PDAL_TARGET_OBJECTS} PARENT_SCOPE)
