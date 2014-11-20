@@ -41,9 +41,7 @@
 #include "../../drivers/faux/FauxReader.hpp"
 #include <../../drivers/las/LasReader.hpp>
 #include <../../drivers/las/LasWriter.hpp>
-#include <pdal/filters/Cache.hpp>
 #include <pdal/filters/Chipper.hpp>
-#include <pdal/filters/InPlaceReprojection.hpp>
 
 #include "../drivers/OciCommon.hpp"
 #include "Support.hpp"

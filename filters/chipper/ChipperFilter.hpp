@@ -54,11 +54,8 @@ namespace pdal
 
 class Stage;
 
-namespace filters
 
-{
-
-class PDAL_DLL Chipper;
+class PDAL_DLL ChipperFilter;
 
 enum Direction
 {
@@ -71,7 +68,7 @@ enum Direction
 class PDAL_DLL ChipPtRef
 {
     friend class ChipRefList;
-    friend class Chipper;
+    friend class ChipperFilter;
 
 private:
     double m_pos;
@@ -88,7 +85,7 @@ public:
 
 class PDAL_DLL ChipRefList
 {
-    friend class Chipper;
+    friend class ChipperFilter;
 
 private:
     std::vector<ChipPtRef> m_vec;
@@ -136,14 +133,14 @@ private:
 };
 
 
-class PDAL_DLL Chipper : public pdal::Filter
+class PDAL_DLL ChipperFilter : public pdal::Filter
 {
 public:
-    SET_STAGE_NAME("filters.chipper", "Chipper")
+    SET_STAGE_NAME("filters.chipper", "Chipper Filter")
     SET_STAGE_LINK("http://pdal.io/stages/filters.chipper.html")
     SET_STAGE_ENABLED(true)
 
-    Chipper() : Filter(),
+    ChipperFilter() : Filter(),
         m_xvec(DIR_X), m_yvec(DIR_Y), m_spare(DIR_NONE)
     {}
 
@@ -173,10 +170,8 @@ private:
     ChipRefList m_yvec;
     ChipRefList m_spare;
 
-    Chipper& operator=(const Chipper&); // not implemented
-    Chipper(const Chipper&); // not implemented
+    ChipperFilter& operator=(const ChipperFilter&); // not implemented
+    ChipperFilter(const ChipperFilter&); // not implemented
 };
 
-} // namespace filters
-} // namespace liblas
-
+} // namespace pdal

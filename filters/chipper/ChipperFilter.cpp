@@ -31,7 +31,7 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <pdal/filters/Chipper.hpp>
+#include <ChipperFilter.hpp>
 
 #include <boost/scoped_ptr.hpp>
 
@@ -70,17 +70,15 @@ be stored.
 
 namespace pdal
 {
-namespace filters
-{
 
 
-void Chipper::processOptions(const Options& options)
+void ChipperFilter::processOptions(const Options& options)
 {
     m_threshold = options.getValueOrDefault<boost::uint32_t>("capacity", 5000u);
 }
 
 
-Options Chipper::getDefaultOptions()
+Options ChipperFilter::getDefaultOptions()
 {
     Options options;
     Option capacity("capacity", 5000u, "Tile capacity");
@@ -89,7 +87,7 @@ Options Chipper::getDefaultOptions()
 }
 
 
-PointBufferSet Chipper::run(PointBufferPtr buffer)
+PointBufferSet ChipperFilter::run(PointBufferPtr buffer)
 {
     if (buffer->size() == 0)
         return m_buffers;
@@ -102,7 +100,7 @@ PointBufferSet Chipper::run(PointBufferPtr buffer)
 }
 
 
-void Chipper::load(PointBuffer& buffer, ChipRefList& xvec, ChipRefList& yvec,
+void ChipperFilter::load(PointBuffer& buffer, ChipRefList& xvec, ChipRefList& yvec,
     ChipRefList& spare)
 {
     boost::uint32_t idx;
@@ -146,7 +144,7 @@ void Chipper::load(PointBuffer& buffer, ChipRefList& xvec, ChipRefList& yvec,
 
 // Build a list of partitions.  The partition is the size of each block in
 // the x and y directions in number of points.
-void Chipper::partition(point_count_t size)
+void ChipperFilter::partition(point_count_t size)
 {
     size_t num_partitions;
 
@@ -169,7 +167,7 @@ void Chipper::partition(point_count_t size)
 }
 
 
-void Chipper::decideSplit(ChipRefList& v1, ChipRefList& v2, ChipRefList& spare,
+void ChipperFilter::decideSplit(ChipRefList& v1, ChipRefList& v2, ChipRefList& spare,
     PointId pleft, PointId pright)
 {
     double v1range;
@@ -187,7 +185,7 @@ void Chipper::decideSplit(ChipRefList& v1, ChipRefList& v2, ChipRefList& spare,
         split(v2, v1, spare, pleft, pright);
 }
 
-void Chipper::split(ChipRefList& wide, ChipRefList& narrow, ChipRefList& spare,
+void ChipperFilter::split(ChipRefList& wide, ChipRefList& narrow, ChipRefList& spare,
     PointId pleft, PointId pright)
 {
     PointId lstart;
@@ -248,7 +246,7 @@ void Chipper::split(ChipRefList& wide, ChipRefList& narrow, ChipRefList& spare,
 // In this case the wide array is like we want it.  The narrow array is
 // ordered, but not for our split, so we have to find the max/min entries
 // for each partition in the final split.
-void Chipper::finalSplit(ChipRefList& wide, ChipRefList& narrow,
+void ChipperFilter::finalSplit(ChipRefList& wide, ChipRefList& narrow,
     PointId pleft, PointId pright)
 {
 
@@ -316,7 +314,7 @@ void Chipper::finalSplit(ChipRefList& wide, ChipRefList& narrow,
          right2);
 }
 
-void Chipper::emit(ChipRefList& wide, PointId widemin, PointId widemax,
+void ChipperFilter::emit(ChipRefList& wide, PointId widemin, PointId widemax,
     ChipRefList& narrow, PointId narrowmin, PointId narrowmax)
 {
     PointBufferPtr buf = m_inbuf->makeNew();
@@ -337,6 +335,4 @@ void Chipper::emit(ChipRefList& wide, PointId widemin, PointId widemax,
     m_buffers.insert(buf);
 }
 
-
-} // namespace filters
 } // namespace pdal
