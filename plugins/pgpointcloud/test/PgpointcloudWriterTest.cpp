@@ -36,7 +36,6 @@
 
 #include <pdal/Writer.hpp>
 #include <pdal/StageFactory.hpp>
-#include <LasReader.hpp>
 
 #include "Support.hpp"
 #include "Pgtest-Support.hpp"
@@ -144,27 +143,34 @@ BOOST_AUTO_TEST_CASE(testWrite)
         const std::string file(Support::datapath("las/1.2-with-color.las"));
 
         const pdal::Option opt_filename("filename", file);
-        LasReader reader;
-        pdal::Options options;
-        options.add(opt_filename);
-        reader.setOptions(options);
-        std::unique_ptr<Writer> writer(wc());
-        writer->setOptions(getWriterOptions());
-        writer->setInput(&reader);
-
-        PointContext ctx;
-        writer->prepare(ctx);
-
-        PointBufferSet written = writer->execute(ctx);
-
-        point_count_t count(0);
-        for(auto i = written.begin(); i != written.end(); ++i)
+        
+        StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
+        if (rc)
         {
-            count += (*i)->size();
+            BOOST_CHECK(rc);
+
+            Stage* reader = rc();
+            pdal::Options options;
+            options.add(opt_filename);
+            reader->setOptions(options);
+            std::unique_ptr<Writer> writer(wc());
+            writer->setOptions(getWriterOptions());
+            writer->setInput(reader);
+
+            PointContext ctx;
+            writer->prepare(ctx);
+
+            PointBufferSet written = writer->execute(ctx);
+
+            point_count_t count(0);
+            for(auto i = written.begin(); i != written.end(); ++i)
+            {
+                count += (*i)->size();
+            }
+            BOOST_CHECK_EQUAL(written.size(), 1);
+            // BOOST_CHECK_EQUAL(count, 0);
+            BOOST_CHECK_EQUAL(count, 1065);
         }
-        BOOST_CHECK_EQUAL(written.size(), 1);
-        // BOOST_CHECK_EQUAL(count, 0);
-        BOOST_CHECK_EQUAL(count, 1065);
     }
 }
 
@@ -182,18 +188,25 @@ BOOST_AUTO_TEST_CASE(testNoPointcloudExtension)
         const std::string file(Support::datapath("las/1.2-with-color.las"));
 
         const pdal::Option opt_filename("filename", file);
-        LasReader reader;
-        pdal::Options options;
-        options.add(opt_filename);
-        reader.setOptions(options);
-        std::unique_ptr<Writer> writer(wc());
-        writer->setOptions(getWriterOptions());
-        writer->setInput(&reader);
 
-        PointContext ctx;
-        writer->prepare(ctx);
+        StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
+        if (rc)
+        {
+            BOOST_CHECK(rc);
 
-        BOOST_CHECK_THROW(writer->execute(ctx), pdal::pdal_error);
+            Stage* reader = rc();
+            pdal::Options options;
+            options.add(opt_filename);
+            reader->setOptions(options);
+            std::unique_ptr<Writer> writer(wc());
+            writer->setOptions(getWriterOptions());
+            writer->setInput(reader);
+
+            PointContext ctx;
+            writer->prepare(ctx);
+
+            BOOST_CHECK_THROW(writer->execute(ctx), pdal::pdal_error);
+        }
     }
 }
 
