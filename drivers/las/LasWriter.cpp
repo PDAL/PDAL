@@ -113,6 +113,7 @@ void LasWriter::processOptions(const Options& options)
 
     getHeaderOptions(options);
     getVlrOptions(options);
+    m_error.setFilename(m_filename);
 }
 
 
@@ -492,9 +493,7 @@ void LasWriter::write(const PointBuffer& pointBuffer)
     m_callback->setTotal(pointBuffer.size());
     m_callback->invoke(0);
 
-    static const size_t returnCount = m_lasHeader.versionAtLeast(1, 4) ?
-        LasHeader::RETURN_COUNT :
-        LasHeader::LEGACY_RETURN_COUNT;
+    static const size_t maxReturnCount = m_lasHeader.maxReturnCount();
     for (PointId idx = 0; idx < pointBuffer.size(); idx++)
     {
         Charbuf charstreambuf(buf.data(), buf.size());
@@ -510,17 +509,28 @@ void LasWriter::write(const PointBuffer& pointBuffer)
         uint8_t returnNumber(1);
         uint8_t numberOfReturns(1);
         if (pointBuffer.hasDim(Id::ReturnNumber))
+        {
             returnNumber = pointBuffer.getFieldAs<uint8_t>(Id::ReturnNumber,
                 idx);
+            if (returnNumber < 1 || returnNumber > maxReturnCount)
+                m_error.returnNumWarning(returnNumber);
+        }
         if (pointBuffer.hasDim(Id::NumberOfReturns))
             numberOfReturns = pointBuffer.getFieldAs<uint8_t>(
                 Id::NumberOfReturns, idx);
-        if (m_discardHighReturnNumbers && numberOfReturns > returnCount)
+        if (numberOfReturns == 0)
+            m_error.numReturnsWarning(0);
+        if (numberOfReturns > maxReturnCount)
         {
-            // If this return number is too high, pitch the point.
-            if (returnNumber > returnCount)
-                continue;
-            numberOfReturns = returnCount;
+            if (m_discardHighReturnNumbers)
+            {
+                // If this return number is too high, pitch the point.
+                if (returnNumber > maxReturnCount)
+                    continue;
+                numberOfReturns = maxReturnCount;
+            }
+            else
+                m_error.numReturnsWarning(numberOfReturns);
         }
 
         double x = pointBuffer.getFieldAs<double>(Id::X, idx);

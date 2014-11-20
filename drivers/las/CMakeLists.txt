@@ -23,6 +23,7 @@ set (srcs
 
 set(incs
   GeotiffSupport.hpp
+  LasError.hpp
   LasHeader.hpp
   SummaryData.hpp
   VariableLengthRecord.hpp

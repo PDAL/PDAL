@@ -222,6 +222,10 @@ namespace Utils
     std::string typeidName()
         { return Utils::demangle(typeid(T).name()); }
 
+    template<typename COLLECTION, typename VALUE>
+    bool contains(COLLECTION c, VALUE v)
+        { return (std::find(c.begin(), c.end(), v) != c.end()); }
+
     struct RedirectCtx
     {
         std::ofstream *m_out;

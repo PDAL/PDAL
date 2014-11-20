@@ -244,6 +244,9 @@ public:
     uint64_t pointCountByReturn(std::size_t index)
         { return m_pointCountByReturn[index]; }
 
+    size_t maxReturnCount() const
+        { return (versionAtLeast(1, 4) ? RETURN_COUNT : LEGACY_RETURN_COUNT); }
+
     /// Get scale factor for X coordinate.
     double scaleX() const
         { return m_scales[0]; }

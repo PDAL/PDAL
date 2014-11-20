@@ -53,19 +53,18 @@ SummaryData::SummaryData() :
 
 void SummaryData::addPoint(double x, double y, double z, int returnNumber)
 {
-    returnNumber--;
-    if (returnNumber < 0 || (size_t)returnNumber > m_returnCounts.size())
-        throw invalid_point_data("addPoint: returnNumber is out "
-            "of range", 0);
-
+    ++m_totalNumPoints;
     m_minX = (std::min)(m_minX, x);
     m_minY = (std::min)(m_minY, y);
     m_minZ = (std::min)(m_minZ, z);
     m_maxX = (std::max)(m_maxX, x);
     m_maxY = (std::max)(m_maxY, y);
     m_maxZ = (std::max)(m_maxZ, z);
-    m_returnCounts[returnNumber]++;
-    ++m_totalNumPoints;
+
+    // Returns numbers are indexed from one, but the array indexes from 0.
+    returnNumber--;
+    if (returnNumber >= 0 && (size_t)returnNumber < m_returnCounts.size())
+        m_returnCounts[returnNumber]++;
 }
 
 
