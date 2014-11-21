@@ -515,6 +515,12 @@ void LasReader::loadPointV10(PointBuffer& data, char *buf, size_t bufsize)
     uint8_t scanDirFlag = (flags >> 6) & 0x01;
     uint8_t flight = (flags >> 7) & 0x01;
 
+    if (returnNum == 0 || returnNum > 5)
+        m_error.returnNumWarning(returnNum);
+
+    if (numReturns == 0 || numReturns > 5)
+        m_error.numReturnsWarning(numReturns);
+
     data.setField(Dimension::Id::X, nextId, x);
     data.setField(Dimension::Id::Y, nextId, y);
     data.setField(Dimension::Id::Z, nextId, z);
@@ -585,7 +591,7 @@ void LasReader::loadPointV14(PointBuffer& data, char *buf, size_t bufsize)
     uint8_t scanChannel = (flags >> 4) & 0x03;
     uint8_t scanDirFlag = (flags >> 6) & 0x01;
     uint8_t flight = (flags >> 7) & 0x01;
-            
+
     //ABELL - Need to do something with the classFlags;
     data.setField(Dimension::Id::X, nextId, x);
     data.setField(Dimension::Id::Y, nextId, y);

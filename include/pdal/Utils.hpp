@@ -52,38 +52,56 @@
 namespace pdal
 {
 
-class PDAL_DLL Utils
+namespace Utils
 {
-public:
-    static void random_seed(unsigned int seed);
-    static double random(double minimum, double maximum);
-    static double uniform(const double& minimum=0.0f,
-        const double& maximum=1.0f, boost::uint32_t seed=0);
-    static double normal(const double& mean=0.0f, const double& sigma=1.0f,
-        boost::uint32_t seed=0);
+    template<typename T>
+    char *as_buffer(T& data)
+        { return static_cast<char*>(static_cast<void*>(&data)); }
 
-    // compares two values to within the datatype's epsilon
-    template<class T>
-    static bool compare_distance(const T& actual, const T& expected)
+    template<typename T>
+    char *as_buffer(T* data)
+        { return static_cast<char*>(static_cast<void*>(data)); }
+
+    template <typename C, typename T>
+    bool check_stream_state(std::basic_ios<C, T>& srtm)
     {
-        const T epsilon = std::numeric_limits<T>::epsilon();
-        return compare_approx<T>(actual, expected, epsilon);
+        // Test stream state bits
+        if (srtm.eof())
+            throw std::out_of_range("end of file encountered");
+        else if (srtm.fail())
+            throw std::runtime_error("non-fatal I/O error occured");
+        else if (srtm.bad())
+            throw std::runtime_error("fatal I/O error occured");
+        return true;
     }
+
+    PDAL_DLL void random_seed(unsigned int seed);
+    PDAL_DLL double random(double minimum, double maximum);
+    PDAL_DLL double uniform(const double& minimum=0.0f,
+        const double& maximum=1.0f, boost::uint32_t seed=0);
+    PDAL_DLL double normal(const double& mean=0.0f, const double& sigma=1.0f,
+        boost::uint32_t seed=0);
 
     // compares two values to within a given tolerance
     // the value |tolerance| is compared to |actual - expected|
     template<class T>
-    static bool compare_approx(const T& actual, const T& expected,
-        const T& tolerance)
+    bool compare_approx(const T& actual, const T& expected, const T& tolerance)
     {
         double diff = std::abs((double)actual - (double)expected);
         return diff <= std::abs((double) tolerance);
     }
 
+    // compares two values to within the datatype's epsilon
+    template<class T>
+    bool compare_distance(const T& actual, const T& expected)
+    {
+        const T epsilon = std::numeric_limits<T>::epsilon();
+        return compare_approx<T>(actual, expected, epsilon);
+    }
 
     // Return a 'T' from a stream and increment src by the sizeof 'T'
     template<class T>
-    static inline T read_field(boost::uint8_t*& src)
+    T read_field(boost::uint8_t*& src)
     {
         T tmp = *(T*)(void*)src;
         src += sizeof(T);
@@ -92,27 +110,21 @@ public:
 
     // Read 'num' items from the source stream to the dest location
     template <typename T>
-    static inline void read_n(T& dest, std::istream& src,
-        std::streamsize const& num)
+    void read_n(T& dest, std::istream& src, std::streamsize const& num)
     {
         if (!src.good())
             throw pdal::invalid_stream("pdal::Utils::read_n<T> input stream is "
                 "not readable");
 
-        char* p = as_buffer(dest);
-        src.read(p, num);
-
+        src.read(as_buffer(dest), num);
         assert(check_stream_state(src));
     }
 
-    //
     // From http://stackoverflow.com/questions/485525/round-for-float-in-c
-    static inline double sround(double r)
-    {
-        return (r > 0.0) ? floor(r + 0.5) : ceil(r - 0.5);
-    }
+    inline double sround(double r)
+        { return (r > 0.0) ? floor(r + 0.5) : ceil(r - 0.5); }
 
-    static inline std::vector<boost::uint8_t>hex_string_to_binary(
+    inline std::vector<boost::uint8_t>hex_string_to_binary(
         std::string const& source)
     {
         // Stolen from http://stackoverflow.com/questions/7363774/  ...
@@ -132,7 +144,7 @@ public:
         return retval;
     }
 
-    static inline void binary_to_hex_stream(unsigned char* source,
+    inline void binary_to_hex_stream(unsigned char* source,
         std::ostream& destination, int start, int end )
     {
         static char syms[] = "0123456789ABCDEF";
@@ -141,7 +153,7 @@ public:
                            syms[source[i] & 0xf];
     }
 
-    static inline std::string binary_to_hex_string(
+    inline std::string binary_to_hex_string(
         const std::vector<unsigned char>& source)
     {
         static char syms[] = "0123456789ABCDEF";
@@ -154,7 +166,7 @@ public:
     }
 
     template<typename Target, typename Source>
-    static inline Target saturation_cast(Source const& src)
+    Target saturation_cast(Source const& src)
     {
         try
         {
@@ -170,50 +182,49 @@ public:
         }
     }
 
-    static void* registerPlugin( void* stageFactoryPtr,
-                                std::string const& filename,
-                                std::string const& registerMethodName,
-                                std::string const& versionMethodName);
+    PDAL_DLL void *registerPlugin(void *stageFactoryPtr,
+        std::string const& filename, std::string const& registerMethodName,
+        std::string const& versionMethodName);
 
-    static char* getenv(const char* env);
-    static std::string getenv(std::string const& name);
-    static int putenv(const char* env);
+    PDAL_DLL char *getenv(const char *env);
+    PDAL_DLL std::string getenv(std::string const& name);
+    PDAL_DLL int putenv(const char *env);
 
     // aid to operator>> parsers
-    static void eatwhitespace(std::istream& s);
-    static void removeTrailingBlanks(std::string& s);
+    PDAL_DLL void eatwhitespace(std::istream& s);
+    PDAL_DLL void removeTrailingBlanks(std::string& s);
 
     // aid to operator>> parsers
     // if char found, eats it and returns true; otherwise, don't eat it and
     // then return false
-    static bool eatcharacter(std::istream& s, char x);
-
-    static uint32_t getStreamPrecision(double scale);
-
-    static void* getDLLSymbol(std::string const& library,
-       std::string const& name);
-    static std::string base64_encode(std::vector<uint8_t> const& bytes)
+    PDAL_DLL bool eatcharacter(std::istream& s, char x);
+    PDAL_DLL uint32_t getStreamPrecision(double scale);
+    PDAL_DLL void *getDLLSymbol(std::string const& library,
+        std::string const& name);
+    PDAL_DLL std::string base64_encode(const unsigned char *buf, size_t size);
+    inline std::string base64_encode(std::vector<uint8_t> const& bytes)
         { return base64_encode(bytes.data(), bytes.size()); }
-    static std::string base64_encode(const unsigned char *buf, size_t size);
-    static std::vector<boost::uint8_t> base64_decode(std::string const& input);
+    PDAL_DLL std::vector<boost::uint8_t>
+    base64_decode(std::string const& input);
 
-    static FILE* portable_popen(const std::string& command,
+    PDAL_DLL FILE* portable_popen(const std::string& command,
         const std::string& mode);
-    static int portable_pclose(FILE* fp);
-    static int run_shell_command(const std::string& cmd, std::string& output);
-
-    static std::string replaceAll(std::string result,
-                                  const std::string& replaceWhat,
-                                  const std::string& replaceWithWhat);
-    static void wordWrap(std::string const& inputString,
-                         std::vector<std::string>& outputString,
-                         unsigned int lineLength);
-    static std::string escapeJSON(const std::string &s);
-    static std::string demangle(const std::string& s);
+    PDAL_DLL int portable_pclose(FILE* fp);
+    PDAL_DLL int run_shell_command(const std::string& cmd, std::string& output);
+    PDAL_DLL std::string replaceAll(std::string result,
+        const std::string& replaceWhat, const std::string& replaceWithWhat);
+    PDAL_DLL void wordWrap(std::string const& inputString,
+        std::vector<std::string>& outputString, unsigned int lineLength);
+    PDAL_DLL std::string escapeJSON(const std::string &s);
+    PDAL_DLL std::string demangle(const std::string& s);
 
     template<typename T>
-    static std::string typeidName()
+    std::string typeidName()
         { return Utils::demangle(typeid(T).name()); }
+
+    template<typename COLLECTION, typename VALUE>
+    bool contains(COLLECTION c, VALUE v)
+        { return (std::find(c.begin(), c.end(), v) != c.end()); }
 
     struct RedirectCtx
     {
@@ -225,7 +236,7 @@ public:
     /// \param[in] out   Stream to redirect.
     /// \param[in] file  Name of file where stream should be redirected.
     /// \return  Context for stream restoration (see restore()).
-    static RedirectCtx redirect(std::ostream& out,
+    inline RedirectCtx redirect(std::ostream& out,
         const std::string& file = "/dev/null")
     {
         RedirectCtx ctx;
@@ -239,50 +250,10 @@ public:
     /// Restore a stream redirected with redirect().
     /// \param[in] out  Stream to be restored.
     /// \param[in] ctx  Context returned from corresponding redirect() call.
-    static void restore(std::ostream& out, RedirectCtx ctx)
+    inline void restore(std::ostream& out, RedirectCtx ctx)
     {
         out.rdbuf(ctx.m_buf);
         ctx.m_out->close();
-    }
-
-private:
-    template<typename T>
-    static inline char* as_buffer(T& data)
-    {
-        return static_cast<char*>(static_cast<void*>(&data));
-    }
-
-    template<typename T>
-    static inline char* as_buffer(T* data)
-    {
-        return static_cast<char*>(static_cast<void*>(data));
-    }
-
-    /**
-    template<typename T>
-    static inline char const* as_bytes(T const& data)
-    {
-        return static_cast<char const*>(static_cast<void const*>(&data));
-    }
-
-    template<typename T>
-    static inline char const* as_bytes(T const* data)
-    {
-        return static_cast<char const*>(static_cast<void const*>(data));
-    }
-    **/
-
-    template <typename C, typename T>
-    static inline bool check_stream_state(std::basic_ios<C, T>& srtm)
-    {
-        // Test stream state bits
-        if (srtm.eof())
-            throw std::out_of_range("end of file encountered");
-        else if (srtm.fail())
-            throw std::runtime_error("non-fatal I/O error occured");
-        else if (srtm.bad())
-            throw std::runtime_error("fatal I/O error occured");
-        return true;
     }
 };
 

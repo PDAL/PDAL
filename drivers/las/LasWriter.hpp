@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pdal/Writer.hpp>
+#include <LasError.hpp>
 #include <LasHeader.hpp>
 #include <SummaryData.hpp>
 #include <ZipPoint.hpp>
@@ -73,6 +74,7 @@ public:
     void flush();
 
 private:
+    LasError m_error;
     LasHeader m_lasHeader;
     boost::uint32_t m_numPointsWritten;
     SummaryData m_summaryData;
