@@ -132,7 +132,6 @@ set(PDAL_FILTERS_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_FILTERS_PATH}")
 
 set(PDAL_FILTERS_HPP
   "${PDAL_FILTERS_HEADERS}/Crop.hpp"
-  "${PDAL_FILTERS_HEADERS}/Decimation.hpp"
   "${PDAL_FILTERS_HEADERS}/Ferry.hpp"
   "${PDAL_FILTERS_HEADERS}/Merge.hpp"
   "${PDAL_FILTERS_HEADERS}/MortonOrder.hpp"
@@ -143,7 +142,6 @@ set(PDAL_FILTERS_HPP
 
 set (PDAL_FILTERS_CPP
   "${PDAL_FILTERS_SRC}/Crop.cpp"
-  "${PDAL_FILTERS_SRC}/Decimation.cpp"
   "${PDAL_FILTERS_SRC}/Ferry.cpp"
   "${PDAL_FILTERS_SRC}/MortonOrder.cpp"
   "${PDAL_FILTERS_SRC}/Reprojection.cpp"
@@ -296,8 +294,8 @@ include_directories(${PROJECT_SOURCE_DIR}/drivers/qfit)
 include_directories(${PROJECT_SOURCE_DIR}/drivers/sbet)
 include_directories(${PROJECT_SOURCE_DIR}/drivers/text)
 include_directories(${PROJECT_SOURCE_DIR}/drivers/terrasolid)
-include_directories(${PROJECT_SOURCE_DIR}/filters/attribute)
 include_directories(${PROJECT_SOURCE_DIR}/filters/chipper)
+include_directories(${PROJECT_SOURCE_DIR}/filters/decimation)
 
 set(PDAL_SOURCES
   ${PDAL_HPP}
