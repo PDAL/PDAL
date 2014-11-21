@@ -130,6 +130,26 @@ public:
     std::vector<unsigned char> buf;
     size_t idx;
 
+    void putBytes(const unsigned char* b, size_t len) {
+        while(len --) {
+            buf.push_back(*b++);
+        }
+    }
+
+    void putByte(const unsigned char b) {
+        buf.push_back(b);
+    }
+
+    unsigned char getByte() {
+        return buf[idx++];
+    }
+
+    void getBytes(unsigned char *b, int len) {
+        for (int i = 0 ; i < len ; i ++) {
+            b[i] = getByte();
+        }
+    }
+
     void setBytes(const std::vector<uint8_t>& data)
         { buf = data; }
 
