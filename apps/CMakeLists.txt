@@ -43,7 +43,6 @@ endif()
 if(PDAL_UTILITY)
     set(srcs
         pdal.cpp
-	${PDAL_TARGET_OBJECTS}
     )
 
     list(APPEND PDAL_UTILITIES ${PDAL_UTILITY})
