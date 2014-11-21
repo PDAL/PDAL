@@ -32,11 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/filters/Crop.hpp>
+#include "CropFilter.hpp"
 
 #include <pdal/PointBuffer.hpp>
+#include <pdal/StageFactory.hpp>
 #include <sstream>
 #include <cstdarg>
+
+CREATE_FILTER_PLUGIN(crop, pdal::CropFilter)
 
 namespace pdal
 {
@@ -71,10 +74,7 @@ static void _GEOSWarningHandler(const char *fmt, ...)
 } // geos
 #endif
 
-namespace filters
-{
-
-Crop::Crop() : pdal::Filter()
+CropFilter::CropFilter() : pdal::Filter()
 {
     m_cropOutside = false;
     m_geosEnvironment = 0;
@@ -83,7 +83,7 @@ Crop::Crop() : pdal::Filter()
 }
 
 
-void Crop::processOptions(const Options& options)
+void CropFilter::processOptions(const Options& options)
 {
     m_bounds =
         options.getValueOrDefault<BOX3D>("bounds", BOX3D());
@@ -97,7 +97,7 @@ void Crop::processOptions(const Options& options)
 }
 
 
-void Crop::ready(PointContext ctx)
+void CropFilter::ready(PointContext ctx)
 {
 #ifdef PDAL_HAVE_GEOS
     if (!m_poly.empty())
@@ -146,7 +146,7 @@ void Crop::ready(PointContext ctx)
 }
 
 
-Options Crop::getDefaultOptions()
+Options CropFilter::getDefaultOptions()
 {
     Options options;
     Option bounds("bounds",BOX3D(),"bounds to crop to");
@@ -163,7 +163,7 @@ Options Crop::getDefaultOptions()
 }
 
 
-BOX3D Crop::computeBounds(GEOSGeometry const *geometry)
+BOX3D CropFilter::computeBounds(GEOSGeometry const *geometry)
 {
     uint32_t numInputDims;
     BOX3D output;
@@ -200,7 +200,7 @@ BOX3D Crop::computeBounds(GEOSGeometry const *geometry)
 }
 
 
-PointBufferSet Crop::run(PointBufferPtr buffer)
+PointBufferSet CropFilter::run(PointBufferPtr buffer)
 {
     PointBufferSet pbSet;
     PointBufferPtr output = buffer->makeNew();
@@ -210,7 +210,7 @@ PointBufferSet Crop::run(PointBufferPtr buffer)
 }
 
 
-void Crop::crop(PointBuffer& input, PointBuffer& output)
+void CropFilter::crop(PointBuffer& input, PointBuffer& output)
 {
     bool logOutput = (log()->getLevel() > LogLevel::Debug4);
     if (logOutput)
@@ -270,7 +270,7 @@ void Crop::crop(PointBuffer& input, PointBuffer& output)
 }
 
 
-void Crop::done(PointContext ctx)
+void CropFilter::done(PointContext ctx)
 {
 #ifdef PDAL_HAVE_GEOS
     if (m_geosPreparedGeometry)
@@ -285,5 +285,4 @@ void Crop::done(PointContext ctx)
 }
 
 
-} // namespace filters
 } // namespace pdal

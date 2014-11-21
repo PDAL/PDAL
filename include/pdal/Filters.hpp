@@ -36,7 +36,6 @@
 
 #include <ChipperFilter.hpp>
 #include <ColorizationFilter.hpp>
-#include <pdal/filters/Crop.hpp>
 #include <DecimationFilter.hpp>
 #include <FerryFilter.hpp>
 #include <MergeFilter.hpp>

@@ -2,6 +2,10 @@ if(BUILD_PLUGIN_ATTRIBUTE)
     add_subdirectory(attribute)
 endif()
 
+if(BUILD_PLUGIN_CROP)
+    add_subdirectory(crop)
+endif()
+
 if(BUILD_PLUGIN_GREYHOUND)
     add_subdirectory(greyhound)
 endif()

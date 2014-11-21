@@ -81,7 +81,6 @@ PDAL_ADD_TEST(pdal_io_test "${srcs}" ${PDAL_LIB_NAME})
 set(srcs
     filters/ChipperTest.cpp
     filters/ColorizationFilterTest.cpp
-    filters/CropFilterTest.cpp
     filters/DecimationFilterTest.cpp
     filters/FerryFilterTest.cpp
     filters/MergeTest.cpp

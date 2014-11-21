@@ -75,7 +75,6 @@ MAKE_READER_CREATOR(TerrasolidReader, pdal::TerrasolidReader)
 //
 MAKE_FILTER_CREATOR(Chipper, pdal::ChipperFilter)
 MAKE_FILTER_CREATOR(Colorization, pdal::ColorizationFilter)
-MAKE_FILTER_CREATOR(Crop, pdal::filters::Crop)
 MAKE_FILTER_CREATOR(Decimation, pdal::DecimationFilter)
 MAKE_FILTER_CREATOR(Ferry, pdal::FerryFilter)
 MAKE_FILTER_CREATOR(Merge, pdal::MergeFilter)
@@ -321,7 +320,6 @@ void StageFactory::registerKnownFilters()
 {
     REGISTER_FILTER(Chipper, pdal::ChipperFilter);
     REGISTER_FILTER(Colorization, pdal::ColorizationFilter);
-    REGISTER_FILTER(Crop, pdal::filters::Crop);
     REGISTER_FILTER(Decimation, pdal::DecimationFilter);
     REGISTER_FILTER(Ferry, pdal::FerryFilter);
     REGISTER_FILTER(Merge, pdal::MergeFilter);
