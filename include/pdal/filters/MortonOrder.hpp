@@ -53,7 +53,7 @@ public:
     static Options getDefaultOptions();
 
 private:
-    virtual void processOptions(const Options& options) {};
+    virtual void processOptions(const Options& ) {};
     virtual PointBufferSet run(PointBufferPtr buf);
 
     MortonOrder& operator=(const MortonOrder&); // not implemented

@@ -140,7 +140,7 @@ public:
         { return PointRef(m_buf, m_id); }
     pointer operator->() const
         { return NULL; }
-    PointRef operator[](const difference_type& n) const
+    PointRef operator[](const difference_type& /*n*/) const
         { return PointRef(m_buf, m_id); }
 };
 

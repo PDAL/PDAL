@@ -41,9 +41,6 @@
 #include <pdal/PipelineReader.hpp>
 #include <pdal/StageFactory.hpp>
 
-#include <LasReader.hpp>
-#include <LasWriter.hpp>
-
 #include "Support.hpp"
 
 #include <iostream>
@@ -98,31 +95,38 @@ BOOST_AUTO_TEST_CASE(test_one)
         las_opts.add("filename", Support::datapath("nitf/autzen-utm10.las"));
 
         PointContext ctx2;
-        LasReader las_reader;
-        las_reader.setOptions(las_opts);
-        las_reader.prepare(ctx2);
-        PointBufferSet pbSet2 = las_reader.execute(ctx2);
-        BOOST_CHECK_EQUAL(pbSet2.size(), 1);
-        PointBufferPtr buf2 = *pbSet.begin();
-        //
-        //
-        // compare the two buffers
-        //
-        BOOST_CHECK_EQUAL(buf->size(), buf2->size());
 
-        for (PointId i = 0; i < buf2->size(); i++)
+        StageFactory::ReaderCreator* rc2 = f.getReaderCreator("readers.las");
+        if (rc2)
         {
-            int32_t nitf_x = buf->getFieldAs<int32_t>(Dimension::Id::X, i);
-            int32_t nitf_y = buf->getFieldAs<int32_t>(Dimension::Id::Y, i);
-            int32_t nitf_z = buf->getFieldAs<int32_t>(Dimension::Id::Z, i);
+            BOOST_CHECK(rc2);
 
-            int32_t las_x = buf2->getFieldAs<int32_t>(Dimension::Id::X, i);
-            int32_t las_y = buf2->getFieldAs<int32_t>(Dimension::Id::Y, i);
-            int32_t las_z = buf2->getFieldAs<int32_t>(Dimension::Id::Z, i);
+            Stage* las_reader = rc2();
+            las_reader->setOptions(las_opts);
+            las_reader->prepare(ctx2);
+            PointBufferSet pbSet2 = las_reader->execute(ctx2);
+            BOOST_CHECK_EQUAL(pbSet2.size(), 1);
+            PointBufferPtr buf2 = *pbSet.begin();
+            //
+            //
+            // compare the two buffers
+            //
+            BOOST_CHECK_EQUAL(buf->size(), buf2->size());
 
-            BOOST_CHECK_EQUAL(nitf_x, las_x);
-            BOOST_CHECK_EQUAL(nitf_y, las_y);
-            BOOST_CHECK_EQUAL(nitf_z, las_z);
+            for (PointId i = 0; i < buf2->size(); i++)
+            {
+                int32_t nitf_x = buf->getFieldAs<int32_t>(Dimension::Id::X, i);
+                int32_t nitf_y = buf->getFieldAs<int32_t>(Dimension::Id::Y, i);
+                int32_t nitf_z = buf->getFieldAs<int32_t>(Dimension::Id::Z, i);
+
+                int32_t las_x = buf2->getFieldAs<int32_t>(Dimension::Id::X, i);
+                int32_t las_y = buf2->getFieldAs<int32_t>(Dimension::Id::Y, i);
+                int32_t las_z = buf2->getFieldAs<int32_t>(Dimension::Id::Z, i);
+
+                BOOST_CHECK_EQUAL(nitf_x, las_x);
+                BOOST_CHECK_EQUAL(nitf_y, las_y);
+                BOOST_CHECK_EQUAL(nitf_z, las_z);
+            }
         }
     }
 }
@@ -171,16 +175,23 @@ BOOST_AUTO_TEST_CASE(optionSrs)
 
         Options lasOpts;
         lasOpts.add("filename", "/dev/null");
-        LasWriter lasWriter;
-        lasWriter.setInput(nitfReader);
-        lasWriter.setOptions(lasOpts);;
 
-        lasWriter.prepare(ctx);
-        PointBufferSet pbSet = lasWriter.execute(ctx);
+        StageFactory::WriterCreator* wc = f.getWriterCreator("writers.las");
+        if (wc)
+        {
+            BOOST_CHECK(wc);
 
-        BOOST_CHECK_EQUAL(sr, nitfReader->getSpatialReference().getWKT());
-        BOOST_CHECK_EQUAL("", lasWriter.getSpatialReference().getWKT());
-        BOOST_CHECK_EQUAL(sr, ctx.spatialRef().getWKT());
+            Stage* lasWriter = wc();
+            lasWriter->setInput(nitfReader);
+            lasWriter->setOptions(lasOpts);;
+
+            lasWriter->prepare(ctx);
+            PointBufferSet pbSet = lasWriter->execute(ctx);
+
+            BOOST_CHECK_EQUAL(sr, nitfReader->getSpatialReference().getWKT());
+            BOOST_CHECK_EQUAL("", lasWriter->getSpatialReference().getWKT());
+            BOOST_CHECK_EQUAL(sr, ctx.spatialRef().getWKT());
+        }
     }
 }
 

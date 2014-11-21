@@ -75,7 +75,7 @@ private:
     Filter(const Filter&); // not implemented
 };
 
-class MultiFilter : public Filter
+class PDAL_DLL MultiFilter : public Filter
 {
 public:
     MultiFilter() : Filter()

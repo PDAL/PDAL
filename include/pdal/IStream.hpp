@@ -42,6 +42,7 @@
 #include <vector>
 
 #include <pdal/portable_endian.hpp>
+#include <pdal/pdal_export.hpp>
 
 namespace pdal
 {
@@ -49,7 +50,7 @@ namespace pdal
 class IStreamMarker;
 
 /// Stream wrapper for input of binary data.
-class IStream
+class PDAL_DLL IStream
 {
     friend class IStreamMarker;
 
@@ -123,6 +124,7 @@ protected:
 
 private:
     std::stack<std::istream *> m_streams;
+	IStream(const IStream&);	
 };
 
 /// Stream wrapper for input of binary data that converts from little-endian
@@ -225,6 +227,8 @@ public:
 private:
     std::streampos m_pos;
     IStream& m_stream;
+	IStreamMarker(const IStreamMarker&);
+    IStreamMarker& operator=(const IStreamMarker&); // not implemented	
 };
 
 } // namespace pdal

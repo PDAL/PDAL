@@ -59,6 +59,7 @@ PDAL_DLL bool IsLasZipEnabled();
 PDAL_DLL std::string GetFullVersionString();
 PDAL_DLL std::string GetVersionString();
 PDAL_DLL int GetVersionInteger();
+PDAL_DLL std::string GetSHA1();
 PDAL_DLL int GetVersionMajor();
 PDAL_DLL int GetVersionMinor();
 PDAL_DLL int GetVersionPatch();
