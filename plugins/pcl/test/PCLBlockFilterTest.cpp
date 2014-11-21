@@ -36,7 +36,7 @@
 
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
-#include <pdal/drivers/las/Reader.hpp>
+#include <LasReader.hpp>
 #include <pdal/StageFactory.hpp>
 
 #include "Support.hpp"
@@ -90,7 +90,7 @@ static void test_filter(const std::string& jsonFile,
     options.add(debug);
     options.add(verbose);
 
-    drivers::las::Reader reader;
+    LasReader reader;
     reader.setOptions(options);
 
     Option fname("filename", Support::datapath(jsonFile));

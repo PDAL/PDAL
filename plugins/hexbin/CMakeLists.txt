@@ -4,6 +4,7 @@
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/plugins/hexbin)
+include_directories(${PROJECT_SOURCE_DIR}/drivers/las)
 
 find_package(Hexer)
 if (HEXER_FOUND)

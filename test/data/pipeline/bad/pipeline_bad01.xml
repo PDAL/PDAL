@@ -2,7 +2,7 @@
 <Pipeline version="1.0">
     <Writer>
         <!-- bad: no Type element -->
-        <!-- <Type>drivers.las.writer</Type> -->
+        <!-- <Type>writers.las</Type> -->
         <Option name="filename">
             out.las
         </Option>
@@ -10,7 +10,7 @@
             <Option name="bounds">
                 ([0,1000000],[0,1000000],[0,1000000])
             </Option>
-            <Reader type="drivers.las.reader">
+            <Reader type="readers.las">
                 <Option name="filename">
                     ../las/1.2-with-color.las
                 </Option>

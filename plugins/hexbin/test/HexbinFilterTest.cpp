@@ -36,7 +36,7 @@
 
 #include <pdal/SpatialReference.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/drivers/las/Reader.hpp>
+#include <LasReader.hpp>
 #include <pdal/PointBuffer.hpp>
 
 #include "Support.hpp"
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(HexbinFilterTest_test_1)
         "use in situations where you do not want to estimate based on "
         "a sample");
 
-    drivers::las::Reader reader;
+    LasReader reader;
     reader.setOptions(options);
     StageFactory f;
     StageFactory::FilterCreator* fc = f.getFilterCreator("filters.hexbin");

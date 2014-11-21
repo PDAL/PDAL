@@ -36,10 +36,9 @@
 
 #include <boost/cstdint.hpp>
 
-#include <pdal/filters/Chipper.hpp>
-#include <pdal/drivers/las/Writer.hpp>
-#include <pdal/filters/Cache.hpp>
-#include <pdal/drivers/las/Reader.hpp>
+#include <ChipperFilter.hpp>
+#include <LasWriter.hpp>
+#include <LasReader.hpp>
 #include <pdal/Options.hpp>
 
 #include "StageTester.hpp"
@@ -61,7 +60,7 @@ BOOST_AUTO_TEST_CASE(test_construction)
     Options ops1;
     std::string filename(Support::datapath("las/1.2-with-color.las"));
     ops1.add("filename", filename);
-    drivers::las::Reader reader;
+    LasReader reader;
     reader.setOptions(ops1);
 
     {
@@ -71,7 +70,7 @@ BOOST_AUTO_TEST_CASE(test_construction)
         pdal::Option capacity("capacity", 15, "capacity");
         options.add(capacity);
 
-        pdal::filters::Chipper chipper;
+        ChipperFilter chipper;
         chipper.setInput(&reader);
         chipper.setOptions(options);
         chipper.prepare(ctx);
@@ -118,7 +117,7 @@ BOOST_AUTO_TEST_CASE(empty_buffer)
 
     Options ops;
 
-    filters::Chipper chipper;
+    ChipperFilter chipper;
     chipper.prepare(ctx);
     StageTester::ready(&chipper, ctx);
     PointBufferSet pbSet = StageTester::run(&chipper, buf);
@@ -141,17 +140,15 @@ BOOST_AUTO_TEST_CASE(test_ordering)
     Option capacity("capacity", 25,"capacity");
     options.add(capacity);
 
-    pdal::drivers::las::Reader candidate_reader(options);
-    pdal::filters::Cache cache(options);
-    cache.setInput(&candidate_reader);
-    pdal::filters::Chipper chipper(options);
-    chipper.setInput(&cache);
+    pdal::LasReader candidate_reader(options);
+    ChipperFilter chipper(options);
+    chipper.setInput(&candidate_reader);
     chipper.prepare();
 
     Option& query = options.getOptionByRef("filename");
     query.setValue<std::string>(source_filename);
 
-    pdal::drivers::las::Reader source_reader(options);
+    pdal::LasReader source_reader(options);
     source_reader.prepare();
 
     BOOST_CHECK_EQUAL(chipper.getNumPoints(), source_reader.getNumPoints());

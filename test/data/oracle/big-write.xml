@@ -82,7 +82,7 @@
                         <Option name="cache_block_size">
                             25000
                         </Option>
-                        <Reader type="drivers.las.reader">
+                        <Reader type="readers.las">
                             <Option name="filename">
                                 ../local/autzen/autzen-colorized-1.2.3-hole.laz
                             </Option>

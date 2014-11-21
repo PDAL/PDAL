@@ -35,13 +35,9 @@
 #include "NitfFile.hpp"
 #include "NitfReader.hpp"
 
-CREATE_READER_PLUGIN(nitf, pdal::drivers::nitf::NitfReader)
+CREATE_READER_PLUGIN(nitf, pdal::NitfReader)
 
 namespace pdal
-{
-namespace drivers
-{
-namespace nitf
 {
 
 //
@@ -104,7 +100,7 @@ void NitfReader::initialize()
     m_metadata.add("DESDATA_LENGTH", m_length);
 
     nitf.close();
-    las::Reader::initialize();
+    LasReader::initialize();
 }
 
 
@@ -123,10 +119,8 @@ void NitfReader::ready(PointContextRef ctx)
     }
 #endif
     // Initialize the LAS stuff with its own metadata node.
-    MetadataNode lasNode = m_metadata.add(las::Reader::getName());
-    las::Reader::ready(ctx, lasNode);
+    MetadataNode lasNode = m_metadata.add(LasReader::getName());
+    LasReader::ready(ctx, lasNode);
 }
 
-} // namespace nitf
-} // namespace drivers
 } // namespace pdal

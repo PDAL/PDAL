@@ -35,7 +35,7 @@
 #include "UnitTest.hpp"
 
 #include <pdal/SpatialReference.hpp>
-#include <pdal/drivers/las/Reader.hpp>
+#include <LasReader.hpp>
 #include <pdal/filters/Colorization.hpp>
 #include <pdal/PointBuffer.hpp>
 
@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(ColorizationFilterTest_test_1)
 
     Options ops1;
     ops1.add("filename", Support::datapath("autzen/autzen-point-format-3.las"));
-    drivers::las::Reader reader;
+    LasReader reader;
     reader.setOptions(ops1);
 
     Options options;

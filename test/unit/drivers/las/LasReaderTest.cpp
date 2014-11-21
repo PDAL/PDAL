@@ -37,7 +37,7 @@
 #include <boost/cstdint.hpp>
 
 #include <pdal/PointBuffer.hpp>
-#include <pdal/drivers/las/Reader.hpp>
+#include <LasReader.hpp>
 #include "Support.hpp"
 
 using namespace pdal;
@@ -49,39 +49,39 @@ BOOST_AUTO_TEST_CASE(test_base_options)
 {
     const std::string file(Support::datapath("las/1.2-with-color.las"));
 
-    const pdal::Option opt_filename("filename", file);
-    const pdal::Option opt_verbose_string("verbose", "99");
-    const pdal::Option opt_verbose_uint8("verbose", 99);
-    const pdal::Option opt_debug_string("debug", "true");
-    const pdal::Option opt_debug_bool("debug", true);
+    const Option opt_filename("filename", file);
+    const Option opt_verbose_string("verbose", "99");
+    const Option opt_verbose_uint8("verbose", 99);
+    const Option opt_debug_string("debug", "true");
+    const Option opt_debug_bool("debug", true);
 
     {
-        pdal::Options opts;
+        Options opts;
         opts.add(opt_filename);
 
-        pdal::drivers::las::Reader reader;
+        LasReader reader;
         reader.setOptions(opts);
         BOOST_CHECK(reader.getVerboseLevel() == 0);
         BOOST_CHECK(reader.isDebug() == false);
     }
 
     {
-        pdal::Options opts;
+        Options opts;
         opts.add(opt_filename);
         opts.add(opt_verbose_string);
         opts.add(opt_debug_string);
-        pdal::drivers::las::Reader reader;
+        LasReader reader;
         reader.setOptions(opts);
         BOOST_CHECK(reader.getVerboseLevel() == 99);
         BOOST_CHECK(reader.isDebug() == true);
     }
 
     {
-        pdal::Options opts;
+        Options opts;
         opts.add(opt_filename);
         opts.add(opt_verbose_uint8);
         opts.add(opt_debug_bool);
-        pdal::drivers::las::Reader reader;
+        LasReader reader;
         reader.setOptions(opts);
         BOOST_CHECK(reader.getVerboseLevel() == 99);
         BOOST_CHECK(reader.isDebug() == true);
@@ -94,12 +94,12 @@ BOOST_AUTO_TEST_CASE(header)
     PointContext ctx;
     Options ops;
     ops.add("filename", Support::datapath("las/simple.las"));
-    pdal::drivers::las::Reader reader;
+    LasReader reader;
     reader.setOptions(ops);
 
     reader.prepare(ctx);
     // This tests the copy ctor, too.
-    drivers::las::LasHeader h = reader.header();
+    LasHeader h = reader.header();
 
     BOOST_CHECK_EQUAL(h.fileSignature(), "LASF");
     BOOST_CHECK_EQUAL(h.fileSourceId(), 0);
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE(test_sequential)
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
     ops1.add("count", 103);
-    pdal::drivers::las::Reader reader;
+    LasReader reader;
     reader.setOptions(ops1);
 
     BOOST_CHECK(reader.getDescription() == "Las Reader");
@@ -165,7 +165,7 @@ static void test_a_format(const std::string& file, boost::uint8_t majorVersion, 
     Options ops1;
     ops1.add("filename", Support::datapath(file));
     ops1.add("count", 1);
-    pdal::drivers::las::Reader reader;
+    LasReader reader;
     reader.setOptions(ops1);
     reader.prepare(ctx);
 
@@ -201,7 +201,7 @@ BOOST_AUTO_TEST_CASE(inspect)
     Options ops;
     ops.add("filename", Support::datapath("las/epsg_4326.las"));
 
-    drivers::las::Reader reader;
+    LasReader reader;
     reader.setOptions(ops);
 
     QuickInfo qi = reader.preview();
@@ -247,7 +247,7 @@ BOOST_AUTO_TEST_CASE(test_vlr)
 
     Options ops1;
     ops1.add("filename", Support::datapath("las/lots_of_vlr.las"));
-    pdal::drivers::las::Reader reader;
+    LasReader reader;
     reader.setOptions(ops1);
     reader.prepare(ctx);
     reader.execute(ctx);
@@ -263,7 +263,7 @@ BOOST_AUTO_TEST_CASE(testInvalidFileSignature)
 
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las.wkt"));
-    pdal::drivers::las::Reader reader;
+    LasReader reader;
     reader.setOptions(ops1);
 
     BOOST_CHECK(reader.header().valid());

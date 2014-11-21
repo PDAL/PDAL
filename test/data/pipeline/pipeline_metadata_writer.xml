@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <Pipeline version="1.0">
-    <Writer type="drivers.las.writer">
+    <Writer type="writers.las">
         <Option name="filename">
             metadata-output.las
         </Option>
@@ -45,7 +45,7 @@
                 </Option>
             </Options>
         </Option>    
-        <Reader type="drivers.las.reader">
+        <Reader type="readers.las">
             <Option name="filename">
                 ../interesting.las
             </Option>

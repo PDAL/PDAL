@@ -12,7 +12,7 @@
                 <Option name="cache_block_size">
                     25000
                 </Option>
-                <Reader type="drivers.las.reader">
+                <Reader type="readers.las">
                     <Option name="filename">
                         ../data/autzen-thin.las
                     </Option>

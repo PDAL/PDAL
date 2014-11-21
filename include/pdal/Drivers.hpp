@@ -39,8 +39,8 @@
 #include <BufferReader.hpp>
 #include <FauxReader.hpp>
 
-#include <pdal/drivers/las/Reader.hpp>
-#include <pdal/drivers/las/Writer.hpp>
+#include <LasReader.hpp>
+#include <LasWriter.hpp>
 
 #include <BpfReader.hpp>
 
@@ -48,5 +48,5 @@
 #include <SbetWriter.hpp>
 
 #include <QfitReader.hpp>
-#include <pdal/drivers/terrasolid/Reader.hpp>
+#include <TerrasolidReader.hpp>
 #include <TextWriter.hpp>

@@ -118,62 +118,12 @@ set(PDAL_BASE_CPP
 list (APPEND PDAL_CPP ${PDAL_BASE_CPP} )
 list (APPEND PDAL_HPP ${PDAL_BASE_HPP} )
 
-
-#
-# drivers/las
-#
-set(PDAL_LAS_PATH drivers/las)
-set(PDAL_LAS_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_LAS_PATH}")
-set(PDAL_LAS_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_LAS_PATH}")
-set (PDAL_DRIVERS_LAS_HPP
-  "${PDAL_LAS_SRC}/GeotiffSupport.hpp"
-  "${PDAL_LAS_HEADERS}/Header.hpp"
-  "${PDAL_LAS_HEADERS}/Reader.hpp"
-  "${PDAL_LAS_HEADERS}/SummaryData.hpp"
-  "${PDAL_LAS_HEADERS}/Writer.hpp"
-  "${PDAL_LAS_HEADERS}/ZipPoint.hpp"
-  "${PDAL_LAS_HEADERS}/VariableLengthRecord.hpp"
-)
-
-if ((GEOTIFF_FOUND) AND (GDAL_FOUND))
-    set (PDAL_DRIVERS_LAS_GTIFF "${PDAL_LAS_SRC}/GeotiffSupport.cpp")
-endif()
-
-if (LASZIP_FOUND)
-    set(PDAL_DRIVERS_LAS_LASZIP "${PDAL_LAS_SRC}/ZipPoint.cpp")
-endif()
-
-set (PDAL_DRIVERS_LAS_CPP
-  ${PDAL_DRIVERS_LAS_GTIFF}
-  ${PDAL_DRIVERS_LAS_LASZIP}
-  "${PDAL_LAS_SRC}/Header.cpp"
-  "${PDAL_LAS_SRC}/Reader.cpp"
-  "${PDAL_LAS_SRC}/SummaryData.cpp"
-  "${PDAL_LAS_SRC}/VariableLengthRecord.cpp"
-  "${PDAL_LAS_SRC}/Writer.cpp"
-)
-list (APPEND PDAL_CPP ${PDAL_DRIVERS_LAS_CPP} )
-list (APPEND PDAL_HPP ${PDAL_DRIVERS_LAS_HPP} )
-
-
 #
 # drivers/terrasolid
 #
 set(PDAL_TERRASOLID_PATH drivers/terrasolid)
 set(PDAL_TERRASOLID_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_TERRASOLID_PATH}")
 set(PDAL_TERRASOLID_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_TERRASOLID_PATH}")
-
-set(PDAL_DRIVERS_TERRASOLID_HPP
-  "${PDAL_TERRASOLID_HEADERS}/Reader.hpp"
-)
-
-set (PDAL_DRIVERS_TERRASOLID_CPP
-  "${PDAL_TERRASOLID_SRC}/Reader.cpp"
-)
-
-list (APPEND PDAL_CPP ${PDAL_DRIVERS_TERRASOLID_CPP} )
-list (APPEND PDAL_HPP ${PDAL_DRIVERS_TERRASOLID_HPP} )
-
 
 #
 # filters
@@ -183,26 +133,17 @@ set(PDAL_FILTERS_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_FILTERS_PATH}")
 set(PDAL_FILTERS_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_FILTERS_PATH}")
 
 set(PDAL_FILTERS_HPP
-  "${PDAL_FILTERS_HEADERS}/Attribute.hpp"
-  "${PDAL_FILTERS_HEADERS}/ByteSwap.hpp"
-  "${PDAL_FILTERS_HEADERS}/Cache.hpp"
-  "${PDAL_FILTERS_HEADERS}/Chipper.hpp"
   "${PDAL_FILTERS_HEADERS}/Crop.hpp"
   "${PDAL_FILTERS_HEADERS}/Decimation.hpp"
   "${PDAL_FILTERS_HEADERS}/Ferry.hpp"
-  "${PDAL_FILTERS_HEADERS}/InPlaceReprojection.hpp"
   "${PDAL_FILTERS_HEADERS}/Merge.hpp"
   "${PDAL_FILTERS_HEADERS}/MortonOrder.hpp"
   "${PDAL_FILTERS_HEADERS}/Reprojection.hpp"
-  "${PDAL_FILTERS_HEADERS}/Scaling.hpp"
-  "${PDAL_FILTERS_HEADERS}/Selector.hpp"
   "${PDAL_FILTERS_HEADERS}/Splitter.hpp"
   "${PDAL_FILTERS_HEADERS}/Stats.hpp"
 )
 
 set (PDAL_FILTERS_CPP
-  "${PDAL_FILTERS_SRC}/Attribute.cpp"
-  "${PDAL_FILTERS_SRC}/Chipper.cpp"
   "${PDAL_FILTERS_SRC}/Crop.cpp"
   "${PDAL_FILTERS_SRC}/Decimation.cpp"
   "${PDAL_FILTERS_SRC}/Ferry.cpp"
@@ -352,9 +293,13 @@ include_directories(../include)
 include_directories(${PROJECT_SOURCE_DIR}/drivers/bpf)
 include_directories(${PROJECT_SOURCE_DIR}/drivers/buffer)
 include_directories(${PROJECT_SOURCE_DIR}/drivers/faux)
+include_directories(${PROJECT_SOURCE_DIR}/drivers/las)
 include_directories(${PROJECT_SOURCE_DIR}/drivers/qfit)
 include_directories(${PROJECT_SOURCE_DIR}/drivers/sbet)
 include_directories(${PROJECT_SOURCE_DIR}/drivers/text)
+include_directories(${PROJECT_SOURCE_DIR}/drivers/terrasolid)
+include_directories(${PROJECT_SOURCE_DIR}/filters/attribute)
+include_directories(${PROJECT_SOURCE_DIR}/filters/chipper)
 
 set(PDAL_SOURCES
   ${PDAL_HPP}

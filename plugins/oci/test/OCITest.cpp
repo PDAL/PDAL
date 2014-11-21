@@ -39,11 +39,8 @@
 
 #include <pdal/StageFactory.hpp>
 #include "../../drivers/faux/FauxReader.hpp"
-#include <pdal/drivers/las/Reader.hpp>
-#include <pdal/drivers/las/Writer.hpp>
-#include <pdal/filters/Cache.hpp>
-#include <pdal/filters/Chipper.hpp>
-#include <pdal/filters/InPlaceReprojection.hpp>
+#include <../../drivers/las/LasReader.hpp>
+#include <../../drivers/las/LasWriter.hpp>
 
 #include "../drivers/OciCommon.hpp"
 #include "Support.hpp"
@@ -240,7 +237,7 @@ bool WriteUnprojectedData()
 
     PointContext ctx;
 
-    pdal::drivers::las::Reader reader;
+    LasReader reader;
     reader.setOptions(options);
     // pdal::filters::Chipper chipper(options);
     // chipper.setInput(&reader);
@@ -302,7 +299,7 @@ void compareAgainstSourceBuffer(PointBuffer const& candidate,
     options.add(f);
 
     PointContext tc;
-    pdal::drivers::las::Reader reader;
+    LasReader reader;
     reader.setOptions(options);
 
     reader.prepare(tc);

@@ -168,21 +168,15 @@ uint32_t PgReader::fetchPcid() const
 
     char *pcid_str = pg_query_once(m_session, oss.str());
 
-    if (! pcid_str)
+    uint32_t pcid = 0;
+    if (pcid_str)
     {
-        std::ostringstream oss;
-        oss << "Unable to fetch pcid with column '"
-            << m_column_name <<"' and  table '"
-            << m_table_name <<"'";
-        throw pdal_error(oss.str());
+       pcid = atoi(pcid_str);
+       free(pcid_str);
     }
 
-    uint32_t pcid = atoi(pcid_str);
-    free(pcid_str);
-
-    if (!pcid)
+    if (!pcid) // Are pcid == 0 valid?
     {
-        // Are pcid == 0 valid?
         std::ostringstream oss;
         oss << "Unable to fetch pcid with column '"
             << m_column_name <<"' and  table '"
@@ -252,8 +246,6 @@ void PgReader::ready(PointContextRef ctx)
     m_cur_nrows = 0;
     m_cur_result = NULL;
 
-    m_session = pg_connect(m_connection);
-
     if (getSpatialReference().empty())
         setSpatialReference(fetchSpatialReference());
 
@@ -275,6 +267,15 @@ void PgReader::done(PointContextRef ctx)
     if (m_cur_result)
         PQclear(m_cur_result);
 }
+
+void PgReader::initialize()
+{
+    // First thing we do, is set up a connection
+    if (!m_session)
+        m_session = pg_connect(m_connection);
+
+}
+
 
 
 void PgReader::CursorSetup()

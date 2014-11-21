@@ -5,7 +5,7 @@
             <Option name="bounds">
                 ([0,1000000],[0,1000000],[0,1000000])
             </Option>
-            <Reader type="drivers.las.reader">
+            <Reader type="readers.las">
                 <Option name="filename">
                     ../1.2-with-color.las
                 </Option>

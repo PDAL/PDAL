@@ -8,7 +8,18 @@ message(STATUS "Building with Oracle support")
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/plugins/oci)
 include_directories(${ORACLE_INCLUDE_DIR})
-
+include_directories(
+    ${PROJECT_SOURCE_DIR}/include
+    ${GDAL_INCLUDE_DIR}
+    ${GEOTIFF_INCLUDE_DIR}
+    ${PROJECT_SOURCE_DIR}/drivers/bpf
+    ${PROJECT_SOURCE_DIR}/drivers/buffer
+    ${PROJECT_SOURCE_DIR}/drivers/faux
+    ${PROJECT_SOURCE_DIR}/drivers/las
+    ${PROJECT_SOURCE_DIR}/drivers/qfit
+    ${PROJECT_SOURCE_DIR}/drivers/sbet
+    ${PROJECT_SOURCE_DIR}/drivers/text
+)
 #
 # OCI Reader
 #

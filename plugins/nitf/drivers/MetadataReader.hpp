@@ -70,7 +70,8 @@ namespace pdal
 }
 
 
-namespace pdal { namespace drivers { namespace nitf {
+namespace pdal
+{
 
 //
 // helper class for processing all the metadata fields
@@ -130,4 +131,4 @@ private:
 };
 
 
-} } } // namespaces
+} // namespaces
