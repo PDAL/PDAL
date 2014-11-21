@@ -3,7 +3,7 @@
 #
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories(${PROJECT_SOURCE_DIR}/drivers/sbet)
+include_directories(${PROJECT_SOURCE_DIR}/io/sbet)
 
 set(objs "")
 

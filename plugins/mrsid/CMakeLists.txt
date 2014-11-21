@@ -17,11 +17,11 @@ if(MRSID_FOUND)
     # MrSID Reader
     #
     set(srcs
-        drivers/MrsidReader.cpp
+        io/MrsidReader.cpp
     )
 
     set(incs
-        drivers/MrsidReader.hpp
+        io/MrsidReader.hpp
     )
 
     set(deps ${MRSID_LIBRARY})

@@ -23,14 +23,14 @@ if(JSONCPP_FOUND AND WEBSOCKETPP_FOUND)
     # Greyhound Reader
     #
     set(srcs
-	drivers/GreyhoundReader.cpp
-	drivers/WebSocketClient.cpp
+	io/GreyhoundReader.cpp
+	io/WebSocketClient.cpp
     )
 
     set(incs
-	drivers/Exchanges.hpp
-	drivers/GreyhoundReader.hpp
-	drivers/WebSocketClient.hpp
+	io/Exchanges.hpp
+	io/GreyhoundReader.hpp
+	io/WebSocketClient.hpp
     )
 
     set(deps ${JSONCPP_LIBRARY})

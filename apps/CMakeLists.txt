@@ -14,8 +14,8 @@ set(PDAL_SOURCE_DIR ../src)
 include_directories(
     .
     ../include
-    ${PROJECT_SOURCE_DIR}/drivers/faux
-    ${PROJECT_SOURCE_DIR}/drivers/las
+    ${PROJECT_SOURCE_DIR}/io/faux
+    ${PROJECT_SOURCE_DIR}/io/las
 )
 
 #------------------------------------------------------------------------------

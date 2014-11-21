@@ -37,7 +37,7 @@
 #include "../filters/PCLBlock.hpp"
 #include <pdal/kernel/KernelFactory.hpp>
 
-#include "../drivers/buffer/BufferReader.hpp"
+#include "../io/buffer/BufferReader.hpp"
 
 CREATE_KERNEL_PLUGIN(ground, pdal::kernel::Ground)
 

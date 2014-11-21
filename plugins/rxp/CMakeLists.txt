@@ -9,11 +9,11 @@ include_directories(${RiVLib_INCLUDE_DIRS})
 message(STATUS "Found RiVLib at: ${RiVLib_INCLUDE_DIRS}")
 
 set(incs
-    drivers/RxpReader.hpp
+    io/RxpReader.hpp
     )
 
 set(srcs
-    drivers/RxpReader.cpp
+    io/RxpReader.cpp
     )
 
 set(deps

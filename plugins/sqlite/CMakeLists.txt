@@ -4,7 +4,7 @@
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/plugins/sqlite)
-include_directories(${PROJECT_SOURCE_DIR}/drivers/las)
+include_directories(${PROJECT_SOURCE_DIR}/io/las)
 
 find_package(SQLite3)
 if (SQLITE3_FOUND)
@@ -18,12 +18,12 @@ if (SQLITE3_FOUND)
     # SQLite Reader
     #
     set(srcs
-	drivers/SQLiteReader.cpp
+	io/SQLiteReader.cpp
     )
 
     set(incs
-        drivers/SQLiteCommon.hpp
-	drivers/SQLiteReader.hpp
+        io/SQLiteCommon.hpp
+	io/SQLiteReader.hpp
     )
 
     set(deps ${SQLITE3_LIBRARY})
@@ -33,12 +33,12 @@ if (SQLITE3_FOUND)
     # SQLite Writer
     #
     set(srcs
-        drivers/SQLiteWriter.cpp
+        io/SQLiteWriter.cpp
     )
 
     set(incs
-        drivers/SQLiteCommon.hpp
-	drivers/SQLiteWriter.hpp
+        io/SQLiteCommon.hpp
+	io/SQLiteWriter.hpp
     )
 
     set(deps ${SQLITE3_LIBRARY})

@@ -12,27 +12,27 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/include
     ${GDAL_INCLUDE_DIR}
     ${GEOTIFF_INCLUDE_DIR}
-    ${PROJECT_SOURCE_DIR}/drivers/bpf
-    ${PROJECT_SOURCE_DIR}/drivers/buffer
-    ${PROJECT_SOURCE_DIR}/drivers/faux
-    ${PROJECT_SOURCE_DIR}/drivers/las
-    ${PROJECT_SOURCE_DIR}/drivers/qfit
-    ${PROJECT_SOURCE_DIR}/drivers/sbet
-    ${PROJECT_SOURCE_DIR}/drivers/text
+    ${PROJECT_SOURCE_DIR}/io/bpf
+    ${PROJECT_SOURCE_DIR}/io/buffer
+    ${PROJECT_SOURCE_DIR}/io/faux
+    ${PROJECT_SOURCE_DIR}/io/las
+    ${PROJECT_SOURCE_DIR}/io/qfit
+    ${PROJECT_SOURCE_DIR}/io/sbet
+    ${PROJECT_SOURCE_DIR}/io/text
 )
 #
 # OCI Reader
 #
 set(srcs
-drivers/OciCommon.cpp
-drivers/OciReader.cpp
-drivers/OciWrapper.cpp
+io/OciCommon.cpp
+io/OciReader.cpp
+io/OciWrapper.cpp
 )
 
 set(incs
-drivers/OciCommon.hpp
-drivers/OciReader.hpp
-drivers/OciWrapper.h
+io/OciCommon.hpp
+io/OciReader.hpp
+io/OciWrapper.h
 )
 
 set(deps ${ORACLE_LIBRARY})
@@ -42,15 +42,15 @@ PDAL_ADD_PLUGIN(oci_reader_lib_name reader oci "${srcs}" "${incs}" "${deps}")
 # OCI Writer
 #
 set(srcs
-drivers/OciCommon.cpp
-drivers/OciWrapper.cpp
-drivers/OciWriter.cpp
+io/OciCommon.cpp
+io/OciWrapper.cpp
+io/OciWriter.cpp
 )
 
 set(incs
-drivers/OciCommon.hpp
-drivers/OciWrapper.h
-drivers/OciWriter.hpp
+io/OciCommon.hpp
+io/OciWrapper.h
+io/OciWriter.hpp
 )
 
 set(deps ${ORACLE_LIBRARY})

@@ -116,12 +116,6 @@ set(PDAL_BASE_CPP
 list (APPEND PDAL_CPP ${PDAL_BASE_CPP} )
 list (APPEND PDAL_HPP ${PDAL_BASE_HPP} )
 
-#
-# drivers/terrasolid
-#
-set(PDAL_TERRASOLID_PATH drivers/terrasolid)
-set(PDAL_TERRASOLID_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_TERRASOLID_PATH}")
-set(PDAL_TERRASOLID_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_TERRASOLID_PATH}")
 
 #
 # filters
@@ -261,17 +255,11 @@ source_group("CMake Files" FILES CMakeLists.txt)
 
 source_group("Header Files" FILES ${PDAL_BASE_HPP})
 source_group("Header Files\\config" FILES ${PDAL_CONFIG_HPP})
-source_group("Header Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_HPP})
-source_group("Header Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_HPP})
-source_group("Header Files\\drivers\\text" FILES ${PDAL_DRIVERS_TEXT_HPP})
 source_group("Header Files\\filters" FILES ${PDAL_FILTERS_HPP})
 source_group("Header Files\\plang" FILES ${PDAL_PLANG_HPP})
 
 source_group("Source Files" FILES ${PDAL_BASE_CPP})
 source_group("Source Files\\config" FILES ${PDAL_CONFIG_CPP})
-source_group("Source Files\\drivers\\las" FILES ${PDAL_DRIVERS_LAS_CPP})
-source_group("Source Files\\drivers\\terrasolid" FILES ${PDAL_DRIVERS_TERRASOLID_CPP})
-source_group("Source Files\\drivers\\text" FILES ${PDAL_DRIVERS_TEXT_CPP})
 source_group("Source Files\\filters" FILES ${PDAL_FILTERS_CPP})
 source_group("Source Files\\plang" FILES ${PDAL_PLANG_CPP})
 
@@ -282,14 +270,14 @@ include_directories(../include)
 ###############################################################################
 # Targets settings
 
-include_directories(${PROJECT_SOURCE_DIR}/drivers/bpf)
-include_directories(${PROJECT_SOURCE_DIR}/drivers/buffer)
-include_directories(${PROJECT_SOURCE_DIR}/drivers/faux)
-include_directories(${PROJECT_SOURCE_DIR}/drivers/las)
-include_directories(${PROJECT_SOURCE_DIR}/drivers/qfit)
-include_directories(${PROJECT_SOURCE_DIR}/drivers/sbet)
-include_directories(${PROJECT_SOURCE_DIR}/drivers/text)
-include_directories(${PROJECT_SOURCE_DIR}/drivers/terrasolid)
+include_directories(${PROJECT_SOURCE_DIR}/io/bpf)
+include_directories(${PROJECT_SOURCE_DIR}/io/buffer)
+include_directories(${PROJECT_SOURCE_DIR}/io/faux)
+include_directories(${PROJECT_SOURCE_DIR}/io/las)
+include_directories(${PROJECT_SOURCE_DIR}/io/qfit)
+include_directories(${PROJECT_SOURCE_DIR}/io/sbet)
+include_directories(${PROJECT_SOURCE_DIR}/io/text)
+include_directories(${PROJECT_SOURCE_DIR}/io/terrasolid)
 include_directories(${PROJECT_SOURCE_DIR}/filters/chipper)
 include_directories(${PROJECT_SOURCE_DIR}/filters/decimation)
 include_directories(${PROJECT_SOURCE_DIR}/filters/ferry)

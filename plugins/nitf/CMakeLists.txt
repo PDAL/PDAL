@@ -4,7 +4,7 @@
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/plugins/nitf)
-include_directories(${PROJECT_SOURCE_DIR}/drivers/las)
+include_directories(${PROJECT_SOURCE_DIR}/io/las)
 
 find_package(Nitro 2.6 REQUIRED)
 if(NITRO_FOUND)
@@ -21,7 +21,7 @@ if(NITRO_FOUND)
 	add_definitions("-D__POSIX")
     endif()
 
-    set(PDAL_LAS_PATH "${PROJECT_SOURCE_DIR}/drivers/las")
+    set(PDAL_LAS_PATH "${PROJECT_SOURCE_DIR}/io/las")
 
     if ((GEOTIFF_FOUND) AND (GDAL_FOUND))
         set(PDAL_GTIFF_SRCS "${PDAL_LAS_PATH}/GeotiffSupport.cpp")
@@ -60,18 +60,18 @@ if(NITRO_FOUND)
     #
     set(srcs
         ${PDAL_LAS_SRCS}
-	drivers/NitfFile.cpp
-	drivers/MetadataReader.cpp
-	drivers/tre_plugins.cpp
-	drivers/NitfReader.cpp
+	io/NitfFile.cpp
+	io/MetadataReader.cpp
+	io/tre_plugins.cpp
+	io/NitfReader.cpp
     )
 
     set(incs
         ${PDAL_LAS_INCS}
-	drivers/NitfFile.hpp
-	drivers/MetadataReader.hpp
-	drivers/tre_plugins.hpp
-	drivers/NitfReader.hpp
+	io/NitfFile.hpp
+	io/MetadataReader.hpp
+	io/tre_plugins.hpp
+	io/NitfReader.hpp
     )
 
     set(deps ${NITRO_LIBRARIES})
@@ -82,14 +82,14 @@ if(NITRO_FOUND)
     #
     set(srcs
         ${PDAL_LAS_SRCS}
-	drivers/NitfWriter.cpp
-	drivers/tre_plugins.cpp
+	io/NitfWriter.cpp
+	io/tre_plugins.cpp
     )
 
     set(incs
         ${PDAL_LAS_INCS}
-	drivers/NitfWriter.hpp
-	drivers/tre_plugins.hpp
+	io/NitfWriter.hpp
+	io/tre_plugins.hpp
     )
 
     set(deps ${NITRO_LIBRARIES})
