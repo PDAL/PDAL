@@ -34,9 +34,7 @@
 
 #include "UnitTest.hpp"
 
-#include <pdal/filters/Splitter.hpp>
-#include <LasReader.hpp>
-
+#include <pdal/StageFactory.hpp>
 #include "../StageTester.hpp"
 #include "Support.hpp"
 
@@ -46,57 +44,71 @@ BOOST_AUTO_TEST_SUITE(SplitterTest)
 
 BOOST_AUTO_TEST_CASE(test_tile_filter)
 {
+    StageFactory f;
+
     // create the reader
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
-    LasReader r;
-    r.setOptions(ops1);
-
-    Options o;
-    Option length("length", 1000, "length");
-    o.add(length);
-
-    // create the tile filter and prepare
-    pdal::filters::Splitter s;
-    s.setOptions(o);
-    s.setInput(&r);
-
-    PointContext ctx;
-    PointBufferPtr buf(new PointBuffer(ctx));
-    s.prepare(ctx);
-
-    StageTester::ready(&r, ctx);
-    PointBufferSet pbSet = StageTester::run(&r, buf);
-    StageTester::done(&r, ctx);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
-    buf = *pbSet.begin();
-
-    StageTester::ready(&s, ctx);
-    pbSet = StageTester::run(&s, buf);
-    StageTester::done(&s, ctx);
-
-    std::vector<PointBufferPtr> buffers;
-    for (auto it = pbSet.begin(); it != pbSet.end(); ++it)
-        buffers.push_back(*it);
-
-    auto sorter = [](PointBufferPtr p1, PointBufferPtr p2)
+    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
+    if (rc)
     {
-        BOX3D b1 = p1->calculateBounds();
-        BOX3D b2 = p2->calculateBounds();
+        BOOST_CHECK(rc);
 
-        return b1.minx < b2.minx ?  true :
-            b1.minx > b2.minx ? false :
-            b1.miny < b2.miny;
-    };
-    std::sort(buffers.begin(), buffers.end(), sorter);
+        Stage* r = rc();
+        r->setOptions(ops1);
 
-    BOOST_CHECK_EQUAL(buffers.size(), 15);
-    int counts[] = {24, 27, 26, 27, 10, 166, 142, 76, 141, 132, 63, 70, 67,
-        34, 60 };
-    for (size_t i = 0; i < buffers.size(); ++i)
-    {
-        PointBufferPtr& buf = buffers[i];
-        BOOST_CHECK_EQUAL(buf->size(), counts[i]);
+        Options o;
+        Option length("length", 1000, "length");
+        o.add(length);
+
+        // create the tile filter and prepare
+        StageFactory::FilterCreator* fc = f.getFilterCreator("filters.splitter");
+        if (fc)
+        {
+            BOOST_CHECK(fc);
+
+            Stage* s = fc();
+            s->setOptions(o);
+            s->setInput(r);
+
+            PointContext ctx;
+            PointBufferPtr buf(new PointBuffer(ctx));
+            s->prepare(ctx);
+
+            StageTester::ready(r, ctx);
+            PointBufferSet pbSet = StageTester::run(r, buf);
+            StageTester::done(r, ctx);
+            BOOST_CHECK_EQUAL(pbSet.size(), 1);
+            buf = *pbSet.begin();
+
+            StageTester::ready(s, ctx);
+            pbSet = StageTester::run(s, buf);
+            StageTester::done(s, ctx);
+
+            std::vector<PointBufferPtr> buffers;
+            for (auto it = pbSet.begin(); it != pbSet.end(); ++it)
+                buffers.push_back(*it);
+
+            auto sorter = [](PointBufferPtr p1, PointBufferPtr p2)
+            {
+                BOX3D b1 = p1->calculateBounds();
+                BOX3D b2 = p2->calculateBounds();
+
+                return b1.minx < b2.minx ?  true :
+                    b1.minx > b2.minx ? false :
+                    b1.miny < b2.miny;
+            };
+            std::sort(buffers.begin(), buffers.end(), sorter);
+
+            BOOST_CHECK_EQUAL(buffers.size(), 15);
+            int counts[] = {24, 27, 26, 27, 10, 166, 142, 76, 141, 132, 63, 70, 67,
+                34, 60 };
+            for (size_t i = 0; i < buffers.size(); ++i)
+            {
+                PointBufferPtr& buf = buffers[i];
+                BOOST_CHECK_EQUAL(buf->size(), counts[i]);
+            }
+        }
     }
 }
 

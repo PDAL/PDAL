@@ -81,7 +81,7 @@ MAKE_FILTER_CREATOR(Ferry, pdal::FerryFilter)
 MAKE_FILTER_CREATOR(Merge, pdal::filters::Merge)
 MAKE_FILTER_CREATOR(Reprojection, pdal::filters::Reprojection)
 MAKE_FILTER_CREATOR(Sort, pdal::filters::Sort)
-MAKE_FILTER_CREATOR(Splitter, pdal::filters::Splitter)
+MAKE_FILTER_CREATOR(Splitter, pdal::SplitterFilter)
 MAKE_FILTER_CREATOR(Stats, pdal::filters::Stats)
 
 #ifdef PDAL_HAVE_PYTHON
@@ -326,7 +326,7 @@ void StageFactory::registerKnownFilters()
     REGISTER_FILTER(Merge, pdal::filters::Merge);
     REGISTER_FILTER(Reprojection, pdal::filters::Reprojection);
     REGISTER_FILTER(Sort, pdal::filters::Sort);
-    REGISTER_FILTER(Splitter, pdal::filters::Splitter);
+    REGISTER_FILTER(Splitter, pdal::SplitterFilter);
     REGISTER_FILTER(Stats, pdal::filters::Stats);
 
 #ifdef PDAL_HAVE_PYTHON

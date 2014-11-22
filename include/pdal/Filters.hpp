@@ -46,5 +46,5 @@
 #endif
 #include <pdal/filters/Reprojection.hpp>
 #include <pdal/filters/Sort.hpp>
-#include <pdal/filters/Splitter.hpp>
+#include <SplitterFilter.hpp>
 #include <pdal/filters/Stats.hpp>
