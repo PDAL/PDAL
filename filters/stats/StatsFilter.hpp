@@ -53,8 +53,6 @@
 
 namespace pdal
 {
-namespace filters
-{
 namespace stats
 {
 
@@ -136,14 +134,14 @@ typedef boost::shared_ptr<stats::Summary> SummaryPtr;
 
 // This is just a pass-thorugh filter, which collects some stats about
 // the points that are fed through it
-class PDAL_DLL Stats : public Filter
+class PDAL_DLL StatsFilter : public Filter
 {
 public:
     SET_STAGE_NAME("filters.stats", "Statistics Filter")
     SET_STAGE_LINK("http://pdal.io/stages/filters.stats.html")
     SET_STAGE_ENABLED(true)
 
-    Stats() : Filter()
+    StatsFilter() : Filter()
         {}
 
     static Options getDefaultOptions();
@@ -153,8 +151,8 @@ public:
     void reset();
 
 private:
-    Stats& operator=(const Stats&); // not implemented
-    Stats(const Stats&); // not implemented
+    StatsFilter& operator=(const StatsFilter&); // not implemented
+    StatsFilter(const StatsFilter&); // not implemented
     virtual void processOptions(const Options& options);
     virtual void initialize();
     virtual void ready(PointContext ctx);
@@ -175,6 +173,4 @@ private:
     std::map<Dimension::Id::Enum, SummaryPtr> m_stats;
 };
 
-} // namespace filters
 } // namespace pdal
-

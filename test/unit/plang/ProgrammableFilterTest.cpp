@@ -35,7 +35,7 @@
 #include "gtest/gtest.h"
 
 #include <pdal/filters/Programmable.hpp>
-#include <pdal/filters/Stats.hpp>
+#include <StatsFilter.hpp>
 #include <FauxReader.hpp>
 
 #include <pdal/PipelineReader.hpp>
@@ -84,7 +84,7 @@ TEST(ProgrammableFilterTest, ProgrammableFilterTest_test1)
     filter.setInput(&reader);
     EXPECT_TRUE(filter.getDescription() == "Programmable Filter");
 
-    filters::Stats stats;
+    StatsFilter stats;
     stats.setInput(&filter);
 
     PointContext ctx;
@@ -94,9 +94,9 @@ TEST(ProgrammableFilterTest, ProgrammableFilterTest_test1)
     EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
 
-    const filters::stats::Summary& statsX = stats.getStats(Dimension::Id::X);
-    const filters::stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
-    const filters::stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
+    const stats::Summary& statsX = stats.getStats(Dimension::Id::X);
+    const stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
+    const stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
 
     EXPECT_FLOAT_EQ(statsX.minimum(), 10.0);
     EXPECT_FLOAT_EQ(statsX.maximum(), 11.0);

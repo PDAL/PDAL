@@ -48,4 +48,4 @@
 #include <ReprojectionFilter.hpp>
 #include <SortFilter.hpp>
 #include <SplitterFilter.hpp>
-#include <pdal/filters/Stats.hpp>
+#include <StatsFilter.hpp>

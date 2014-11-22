@@ -36,7 +36,7 @@
 
 #include <pdal/StageFactory.hpp>
 #include <ReprojectionFilter.hpp>
-#include <pdal/filters/Stats.hpp>
+#include <StatsFilter.hpp>
 
 #include "Support.hpp"
 
@@ -59,7 +59,7 @@ TEST(StatsFilterTest, StatsFilterTest_test1)
         Stage* reader = rc();
         reader->setOptions(ops);
 
-        filters::Stats filter;
+        StatsFilter filter;
         filter.setInput(reader);
         EXPECT_EQ(filter.getName(), "filters.stats");
         EXPECT_EQ(filter.getDescription(), "Statistics Filter");
@@ -68,9 +68,9 @@ TEST(StatsFilterTest, StatsFilterTest_test1)
         filter.prepare(ctx);
         filter.execute(ctx);
 
-        const filters::stats::Summary& statsX = filter.getStats(Dimension::Id::X);
-        const filters::stats::Summary& statsY = filter.getStats(Dimension::Id::Y);
-        const filters::stats::Summary& statsZ = filter.getStats(Dimension::Id::Z);
+        const stats::Summary& statsX = filter.getStats(Dimension::Id::X);
+        const stats::Summary& statsY = filter.getStats(Dimension::Id::Y);
+        const stats::Summary& statsZ = filter.getStats(Dimension::Id::Z);
 
         EXPECT_EQ(statsX.count(), 1000u);
         EXPECT_EQ(statsY.count(), 1000u);
@@ -125,7 +125,8 @@ TEST(StatsFilterTest, test_multiple_dims_same_name)
         ReprojectionFilter reprojectionFilter;
         reprojectionFilter.setOptions(options);
         reprojectionFilter.setInput(reader);
-        filters::Stats filter;
+
+        StatsFilter filter;
         filter.setOptions(options);
         filter.setInput(&reprojectionFilter);
 
@@ -133,9 +134,9 @@ TEST(StatsFilterTest, test_multiple_dims_same_name)
         filter.prepare(ctx);
         filter.execute(ctx);
 
-        const filters::stats::Summary& statsX = filter.getStats(Dimension::Id::X);
-        const filters::stats::Summary& statsY = filter.getStats(Dimension::Id::Y);
-        const filters::stats::Summary& statsZ = filter.getStats(Dimension::Id::Z);
+        const stats::Summary& statsX = filter.getStats(Dimension::Id::X);
+        const stats::Summary& statsY = filter.getStats(Dimension::Id::Y);
+        const stats::Summary& statsZ = filter.getStats(Dimension::Id::Z);
 
         EXPECT_EQ(statsX.count(), 1065u);
         EXPECT_EQ(statsY.count(), 1065u);
@@ -178,7 +179,8 @@ TEST(StatsFilterTest, test_specified_stats)
 
         Options stats1ops;
         stats1ops.add("dimensions", "Y");
-        filters::Stats filter1;
+
+        StatsFilter filter1;
         filter1.setOptions(stats1ops);
         filter1.setInput(reader);
 
@@ -188,7 +190,8 @@ TEST(StatsFilterTest, test_specified_stats)
 
         Options stats2ops;
         stats2ops.add("dimensions", "X Z");
-        filters::Stats filter2;
+
+        StatsFilter filter2;
         filter2.setOptions(stats2ops);
         filter2.setInput(&reprojectionFilter);
 
@@ -196,9 +199,9 @@ TEST(StatsFilterTest, test_specified_stats)
         filter2.prepare(ctx);
         filter2.execute(ctx);
 
-        const filters::stats::Summary& statsX = filter2.getStats(Dimension::Id::X);
-        const filters::stats::Summary& statsY = filter1.getStats(Dimension::Id::Y);
-        const filters::stats::Summary& statsZ = filter2.getStats(Dimension::Id::Z);
+        const stats::Summary& statsX = filter2.getStats(Dimension::Id::X);
+        const stats::Summary& statsY = filter1.getStats(Dimension::Id::Y);
+        const stats::Summary& statsZ = filter2.getStats(Dimension::Id::Z);
 
         EXPECT_EQ(statsX.count(), 1065u);
         EXPECT_EQ(statsY.count(), 1065u);
@@ -267,7 +270,8 @@ TEST(StatsFilterTest, test_pointbuffer_stats)
 
         Options statsOptions = options;
         options.add("num_points", 1000);
-        filters::Stats filter;
+
+        StatsFilter filter;
         filter.setOptions(options);
         filter.setInput(&reprojectionFilter);
 
