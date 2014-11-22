@@ -32,38 +32,39 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
-
-#include <pdal/Filter.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <DecimationFilter.hpp>
 
 namespace pdal
 {
-namespace filters
+
+DecimationFilter::DecimationFilter() : pdal::Filter()
+{}
+
+
+void DecimationFilter::processOptions(const Options& options)
 {
+    m_step = options.getValueOrDefault<uint32_t>("step", 1);
+    m_offset = options.getValueOrDefault<uint32_t>("offset", 0);
+    m_limit = options.getValueOrDefault<point_count_t>("limit", 0);
+}
 
-// we keep only 1 out of every step points; if step=100, we get 1% of the file
-class PDAL_DLL Decimation : public Filter
+
+PointBufferSet DecimationFilter::run(PointBufferPtr buffer)
 {
-public:
-    SET_STAGE_NAME("filters.decimation", "Decimation Filter")
-    SET_STAGE_LINK("http://pdal.io/stages/filters.decimation.html")
-    SET_STAGE_ENABLED(true)
+    PointBufferSet pbSet;
+    PointBufferPtr output = buffer->makeNew();
+    decimate(*buffer, *output);
+    pbSet.insert(output);
+    return pbSet;
+}
 
-    Decimation();
 
-private:
-    uint32_t m_step;
-    uint32_t m_offset;
-    point_count_t m_limit;
+void DecimationFilter::decimate(PointBuffer& input, PointBuffer& output)
+{
+    PointId last_idx = (m_limit > 0) ? m_limit : input.size();
+    for (PointId idx = m_offset; idx < last_idx; idx += m_step)
+        output.appendPoint(input, idx);
+}
 
-    virtual void processOptions(const Options& options);
-    PointBufferSet run(PointBufferPtr buffer);
-    void decimate(PointBuffer& input, PointBuffer& output);
-
-    Decimation& operator=(const Decimation&); // not implemented
-    Decimation(const Decimation&); // not implemented
-};
-
-} // filters
 } // pdal
-

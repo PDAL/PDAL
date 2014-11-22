@@ -37,7 +37,7 @@
 #include <ChipperFilter.hpp>
 #include <pdal/filters/Colorization.hpp>
 #include <pdal/filters/Crop.hpp>
-#include <pdal/filters/Decimation.hpp>
+#include <DecimationFilter.hpp>
 #include <pdal/filters/Ferry.hpp>
 #include <pdal/filters/Merge.hpp>
 #ifdef PDAL_HAVE_PYTHON

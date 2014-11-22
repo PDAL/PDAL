@@ -36,7 +36,6 @@
 
 #include <BufferReader.hpp>
 #include <pdal/filters/Crop.hpp>
-#include <pdal/filters/Decimation.hpp>
 #include <pdal/filters/Reprojection.hpp>
 #include <pdal/kernel/Support.hpp>
 #include <pdal/StageFactory.hpp>
@@ -311,7 +310,9 @@ Stage* Translate::makeTranslate(Options translateOptions, Stage* reader_stage)
         decimationOptions.add("step", m_decimation_step);
         decimationOptions.add("offset", m_decimation_offset);
         decimationOptions.add("limit", m_decimation_limit);
-        Stage *decimation_stage = new filters::Decimation();
+        StageFactory f;
+        StageFactory::FilterCreator* fc = f.getFilterCreator("filters.decimation");
+        Stage *decimation_stage = fc();
         decimation_stage->setInput(final_stage);
         decimation_stage->setOptions(decimationOptions);
         final_stage = decimation_stage;
