@@ -129,6 +129,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/filters/chipper
     ${PROJECT_SOURCE_DIR}/filters/decimation
     ${PROJECT_SOURCE_DIR}/filters/ferry
+    ${PROJECT_SOURCE_DIR}/filters/mortonorder
     ${PROJECT_SOURCE_DIR}/filters/splitter
 )
 set(deps ${PDAL_LIB_NAME})

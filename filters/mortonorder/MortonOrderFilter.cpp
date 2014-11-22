@@ -32,7 +32,7 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <pdal/filters/MortonOrder.hpp>
+#include <MortonOrderFilter.hpp>
 
 #include <boost/scoped_ptr.hpp>
 
@@ -42,11 +42,9 @@
 
 namespace pdal
 {
-namespace filters
-{
 
 
-Options MortonOrder::getDefaultOptions()
+Options MortonOrderFilter::getDefaultOptions()
 {
     Options options;
     return options;
@@ -87,7 +85,7 @@ public:
 };
 }
 
-PointBufferSet MortonOrder::run(PointBufferPtr buf)
+PointBufferSet MortonOrderFilter::run(PointBufferPtr buf)
 {
     PointBufferSet pbSet;
     if (!buf->size())
@@ -118,6 +116,4 @@ PointBufferSet MortonOrder::run(PointBufferPtr buf)
     return pbSet;
 }
 
-} // filters
 } // pdal
-

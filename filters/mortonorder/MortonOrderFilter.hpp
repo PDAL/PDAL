@@ -38,17 +38,15 @@
 
 namespace pdal
 {
-namespace filters
-{
 
-class PDAL_DLL MortonOrder : public pdal::Filter
+class PDAL_DLL MortonOrderFilter : public pdal::Filter
 {
 public:
     SET_STAGE_NAME("filters.mortonorder", "MortonOrder")
     SET_STAGE_LINK("http://pdal.io/stages/filters.morton.html")
     SET_STAGE_ENABLED(true)
 
-    MortonOrder() : Filter() {}
+    MortonOrderFilter() : Filter() {}
 
     static Options getDefaultOptions();
 
@@ -56,10 +54,8 @@ private:
     virtual void processOptions(const Options& ) {};
     virtual PointBufferSet run(PointBufferPtr buf);
 
-    MortonOrder& operator=(const MortonOrder&); // not implemented
-    MortonOrder(const MortonOrder&); // not implemented
+    MortonOrderFilter& operator=(const MortonOrderFilter&); // not implemented
+    MortonOrderFilter(const MortonOrderFilter&); // not implemented
 };
 
-} // namespace filters
 } // namespace pdal
-
