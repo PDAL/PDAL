@@ -39,7 +39,7 @@
 
 #include "Support.hpp"
 #include "Pgtest-Support.hpp"
-#include "../drivers/PgCommon.hpp"
+#include "../io/PgCommon.hpp"
 
 
 using namespace pdal;
@@ -143,7 +143,7 @@ BOOST_AUTO_TEST_CASE(testWrite)
         const std::string file(Support::datapath("las/1.2-with-color.las"));
 
         const pdal::Option opt_filename("filename", file);
-        
+
         StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
         if (rc)
         {
