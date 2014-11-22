@@ -36,10 +36,9 @@
 #include <boost/cstdint.hpp>
 
 #include <pdal/filters/Reprojection.hpp>
-#include <pdal/filters/Ferry.hpp>
-#include <LasReader.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
+#include <pdal/StageFactory.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
 #include "Support.hpp"
@@ -88,25 +87,38 @@ BOOST_AUTO_TEST_CASE(test_ferry_invalid)
 
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
-    LasReader reader;
-    reader.setOptions(ops1);
+    StageFactory f;
+    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
+    if (rc)
+    {
+        BOOST_CHECK(rc);
 
-    Options options;
+        Stage* reader = rc();
+        reader->setOptions(ops1);
 
-    Option x("dimension", "X", "");
-    Option toX("to","X", "");
-    Options xO;
-    xO.add(toX);
-    x.setOptions(xO);
-    options.add(x);
+        Options options;
 
-    filters::Ferry ferry;
-    ferry.setInput(&reader);
-    ferry.setOptions(options);
+        Option x("dimension", "X", "");
+        Option toX("to","X", "");
+        Options xO;
+        xO.add(toX);
+        x.setOptions(xO);
+        options.add(x);
 
-    PointContext ctx;
+        StageFactory::FilterCreator* fc = f.getFilterCreator("filters.ferry");
+        if (fc)
+        {
+            BOOST_CHECK(fc);
 
-    BOOST_CHECK_THROW(ferry.prepare(ctx), pdal::pdal_error );
+            Stage* ferry = fc();
+            ferry->setInput(reader);
+            ferry->setOptions(options);
+
+            PointContext ctx;
+
+            BOOST_CHECK_THROW(ferry->prepare(ctx), pdal::pdal_error );
+        }
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
