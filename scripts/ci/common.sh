@@ -8,7 +8,7 @@ fi
 tmstamp() { echo -n "[$(date '+%H:%M:%S')]" ; }
 
 # Environment
-NUMTHREADS=1
+NUMTHREADS=2
 
 # if [[ -f /sys/devices/system/cpu/online ]]; then
 # if [[ "$CXX" == "g++" ]]; then
