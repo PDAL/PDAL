@@ -32,21 +32,19 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/filters/Ferry.hpp>
+#include <FerryFilter.hpp>
 
 namespace pdal
 {
-namespace filters
-{
 
 
 
-void Ferry::initialize()
+void FerryFilter::initialize()
 {
 }
 
 
-Options Ferry::getDefaultOptions()
+Options FerryFilter::getDefaultOptions()
 {
     Options options;
 
@@ -64,7 +62,7 @@ Options Ferry::getDefaultOptions()
 }
 
 
-void Ferry::processOptions(const Options& options)
+void FerryFilter::processOptions(const Options& options)
 {
     std::vector<Option> dimensions = options.getOptions("dimension");
     for (auto i = dimensions.begin(); i != dimensions.end(); ++i)
@@ -90,7 +88,7 @@ void Ferry::processOptions(const Options& options)
         m_name_map.insert(std::make_pair(name, to_dim));
     }
 }
-void Ferry::addDimensions(PointContextRef ctx)
+void FerryFilter::addDimensions(PointContextRef ctx)
 {
     for(auto dim_par: m_name_map)
     {
@@ -98,7 +96,7 @@ void Ferry::addDimensions(PointContextRef ctx)
     }
 }
 
-void Ferry::ready(PointContext ctx)
+void FerryFilter::ready(PointContext ctx)
 {
     for (auto dim_par: m_name_map)
     {
@@ -109,7 +107,7 @@ void Ferry::ready(PointContext ctx)
 }
 
 
-void Ferry::filter(PointBuffer& buffer)
+void FerryFilter::filter(PointBuffer& buffer)
 {
     for (PointId id = 0; id < buffer.size(); ++id)
     {
@@ -121,10 +119,8 @@ void Ferry::filter(PointBuffer& buffer)
     }
 }
 
-void Ferry::done(PointContext ctx)
+void FerryFilter::done(PointContext ctx)
 {
 }
 
-} // namespace filters
 } // namespace pdal
-

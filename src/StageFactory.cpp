@@ -77,7 +77,7 @@ MAKE_FILTER_CREATOR(Chipper, pdal::ChipperFilter)
 MAKE_FILTER_CREATOR(Colorization, pdal::filters::Colorization)
 MAKE_FILTER_CREATOR(Crop, pdal::filters::Crop)
 MAKE_FILTER_CREATOR(Decimation, pdal::DecimationFilter)
-MAKE_FILTER_CREATOR(Ferry, pdal::filters::Ferry)
+MAKE_FILTER_CREATOR(Ferry, pdal::FerryFilter)
 MAKE_FILTER_CREATOR(Merge, pdal::filters::Merge)
 MAKE_FILTER_CREATOR(Reprojection, pdal::filters::Reprojection)
 MAKE_FILTER_CREATOR(Sort, pdal::filters::Sort)
@@ -322,7 +322,7 @@ void StageFactory::registerKnownFilters()
     REGISTER_FILTER(Colorization, pdal::filters::Colorization);
     REGISTER_FILTER(Crop, pdal::filters::Crop);
     REGISTER_FILTER(Decimation, pdal::DecimationFilter);
-    REGISTER_FILTER(Ferry, pdal::filters::Ferry);
+    REGISTER_FILTER(Ferry, pdal::FerryFilter);
     REGISTER_FILTER(Merge, pdal::filters::Merge);
     REGISTER_FILTER(Reprojection, pdal::filters::Reprojection);
     REGISTER_FILTER(Sort, pdal::filters::Sort);
