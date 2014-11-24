@@ -22,7 +22,7 @@ Readers & Writers
    readers.oci
    writers.oci
    writers.p2g
-   readres.pcd
+   readers.pcd
    writers.pcd
    readers.qfit
    readers.rxp
