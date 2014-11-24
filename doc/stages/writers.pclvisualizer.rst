@@ -1,7 +1,7 @@
-.. _drivers.pclvisualizer.writer:
+.. _writers.pclvisualizer:
 
-drivers.pclvisualizer.writer
-============================
+writers.pclvisualizer
+=====================
 
 The **PCLVisualizer Writer** enables use of the `Point Cloud Library (PCL)`_
 PCLVisualizer. This is primarily used by :ref:`pdal view <view_command>`.

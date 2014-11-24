@@ -1,7 +1,7 @@
-.. _drivers.pgpointcloud.reader:
+.. _readers.pgpointcloud:
 
-drivers.pgpointcloud.reader
-===========================
+readers.pgpointcloud
+====================
 
 The **PostgreSQL Pointcloud Reader** allows you to read from a PostgreSQL database that the `PostgreSQL Pointcloud`_ extension enabled. The Pointcloud extension stores point cloud data in tables that contain rows of patches. Each patch in turn contains a large number of spatially nearby points.
 
@@ -14,10 +14,10 @@ Example
 
   <?xml version="1.0" encoding="utf-8"?>
   <Pipeline version="1.0">
-    <Writer type="drivers.text.writer">
+    <Writer type="writers.text">
       <Option name="filename">output.txt</Option>
       <Option name="spatialreference">EPSG:26910</Option>
-      <Reader type="drivers.pgpointcloud.reader">
+      <Reader type="readers.pgpointcloud">
         <Option name="connection">dbname='lidar' user='user'</Option>
         <Option name="table">lidar</Option>
         <Option name="column">pa</Option>

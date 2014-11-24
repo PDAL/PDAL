@@ -7,7 +7,7 @@
         <Option name="compression">
             false
         </Option>
-        <Reader type="drivers.soci.reader">
+        <Reader type="readers.soci">
             <Option name="query">
                 select  cloud.cloud_id, 
                         cloud.schema, 

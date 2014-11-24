@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Pipeline version="1.0">
-    <Writer type="drivers.nitf.writer">
+    <Writer type="writers.nitf">
         <Option name="filename">
             output.ntf
         </Option>

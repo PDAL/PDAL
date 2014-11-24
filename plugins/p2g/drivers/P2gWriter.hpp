@@ -68,8 +68,8 @@ class CoreInterp;
 class PDAL_DLL P2gWriter : public pdal::Writer
 {
 public:
-    SET_STAGE_NAME("drivers.p2g.writer", "Points2Grid Writer")
-    SET_STAGE_LINK("http://pdal.io/stages/drivers.p2g.writer.html")
+    SET_STAGE_NAME("writers.p2g", "Points2Grid Writer")
+    SET_STAGE_LINK("http://pdal.io/stages/writers.p2g.html")
     SET_STAGE_ENABLED(true)
 
     P2gWriter() : Writer(), m_outputTypes(0), m_outputFormat(OUTPUT_FORMAT_ARC_ASCII) {};

@@ -136,7 +136,7 @@ BOOST_FIXTURE_TEST_SUITE(PgpointcloudWriterTest, PgpointcloudWriterTestFixture)
 BOOST_AUTO_TEST_CASE(testWrite)
 {
     StageFactory f;
-    StageFactory::WriterCreator* wc = f.getWriterCreator("drivers.pgpointcloud.writer");
+    StageFactory::WriterCreator* wc = f.getWriterCreator("writers.pgpointcloud");
     if (wc)
     {
         BOOST_CHECK(wc);
@@ -178,7 +178,7 @@ BOOST_AUTO_TEST_CASE(testWrite)
 BOOST_AUTO_TEST_CASE(testNoPointcloudExtension)
 {
     StageFactory f;
-    StageFactory::WriterCreator* wc = f.getWriterCreator("drivers.pgpointcloud.writer");
+    StageFactory::WriterCreator* wc = f.getWriterCreator("writers.pgpointcloud");
     if (wc)
     {
         BOOST_CHECK(wc);

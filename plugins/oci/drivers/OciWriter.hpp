@@ -52,8 +52,8 @@ namespace oci
 class PDAL_DLL OciWriter : public pdal::Writer
 {
 public:
-    SET_STAGE_NAME("drivers.oci.writer", "OCI Writer")
-    SET_STAGE_LINK("http://pdal.io/stages/drivers.oci.writer.html")
+    SET_STAGE_NAME("writers.oci", "OCI Writer")
+    SET_STAGE_LINK("http://pdal.io/stages/writers.oci.html")
     SET_STAGE_ENABLED(true)
     OciWriter();
     ~OciWriter();

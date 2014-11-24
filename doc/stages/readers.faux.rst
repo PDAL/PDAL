@@ -13,7 +13,7 @@ Example
 
   <?xml version="1.0" encoding="utf-8"?>
   <Pipeline version="1.0">
-    <Writer type="drivers.text.writer">
+    <Writer type="writers.text">
       <Option name="filename">outputfile.txt</Option>
       <Reader type="readers.faux">
         <Option name="bounds">([0,1000000],[0,1000000],[0,100])</Option>

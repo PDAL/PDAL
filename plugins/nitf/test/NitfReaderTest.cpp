@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(test_one)
 
     PointContext ctx;
     StageFactory f;
-    StageFactory::ReaderCreator* rc = f.getReaderCreator("drivers.nitf.reader");
+    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.nitf");
     if(rc)
     {
         BOOST_CHECK(rc);
@@ -165,7 +165,7 @@ BOOST_AUTO_TEST_CASE(optionSrs)
 
     PointContext ctx;
     StageFactory f;
-    StageFactory::ReaderCreator* rc = f.getReaderCreator("drivers.nitf.reader");
+    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.nitf");
     if (rc)
     {
         BOOST_CHECK(rc);

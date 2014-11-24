@@ -12,11 +12,11 @@ Example
 
   <?xml version="1.0" encoding="utf-8"?>
   <Pipeline version="1.0">
-    <Writer type="drivers.las.writer">
+    <Writer type="writers.las">
       <Option name="filename">smaller.las</Option>
       <Filter type="filters.decimation">
         <Option name="step">10</Option>
-        <Reader type="drivers.las.reader">
+        <Reader type="readers.las">
             <Option name="filename">larger.las</Option>
         </Reader>
       </Filter>

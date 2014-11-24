@@ -52,7 +52,7 @@ namespace sqlite
 class PDAL_DLL SQLiteReader : public pdal::Reader
 {
 public:
-    SET_STAGE_NAME("drivers.sqlite.reader", "SQLite3 Reader")
+    SET_STAGE_NAME("readers.sqlite", "SQLite3 Reader")
     SET_STAGE_ENABLED(true)
 
     SQLiteReader();

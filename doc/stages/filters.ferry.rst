@@ -24,7 +24,7 @@ processing, can then operate on these data.
 
     <?xml version="1.0" encoding="utf-8"?>
     <Pipeline version="1.0">
-        <Writer type="drivers.las.writer">
+        <Writer type="writers.las">
             <Option name="filename">
                 colorized.las
             </Option>
@@ -55,7 +55,7 @@ processing, can then operate on these data.
                             </Option>
                         </Options>
                     </Option>
-                    <Reader type="drivers.las.reader">
+                    <Reader type="readers.las">
                         <Option name="filename">
                             ../las/1.2-with-color.las
                         </Option>

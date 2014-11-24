@@ -44,7 +44,7 @@
             <Option name="raster">
                 ../autzen.jpg
             </Option>
-            <Reader type="drivers.oci.reader">
+            <Reader type="readers.oci">
                 <Option name="query">
                     SELECT CLOUD FROM SIMPLE_CLOUD
                 </Option>

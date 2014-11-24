@@ -1,7 +1,7 @@
-.. _drivers.oci.writer:
+.. _writers.oci:
 
-drivers.oci.writer
-==================
+writers.oci
+===========
 
 The OCI writer is used to write data to `Oracle point cloud`_ databases.
 
@@ -13,7 +13,7 @@ Example
 
   <?xml version="1.0" encoding="utf-8"?>
   <Pipeline version="1.0">
-    <Writer type="drivers.oci.writer">
+    <Writer type="writers.oci">
       <Option name="connection">
         lidar/lidar@oracle.hobu.biz/lidar
       </Option>
@@ -55,7 +55,7 @@ Example
           <Option name="cache_block_size">
             50000000
           </Option>
-          <Reader type="drivers.las.reader">
+          <Reader type="readers.las">
             <Option name="filename">
               file.las
             </Option>

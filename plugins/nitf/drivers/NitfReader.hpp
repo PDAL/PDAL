@@ -45,8 +45,8 @@ namespace pdal
 class PDAL_DLL NitfReader : public LasReader
 {
 public:
-    SET_STAGE_NAME("drivers.nitf.reader", "NITF Reader")
-    SET_STAGE_LINK("http://pdal.io/stages/drivers.nitf.reader.html")
+    SET_STAGE_NAME("readers.nitf", "NITF Reader")
+    SET_STAGE_LINK("http://pdal.io/stages/readers.nitf.html")
     SET_STAGE_ENABLED(true)
 
     NitfReader() : LasReader()

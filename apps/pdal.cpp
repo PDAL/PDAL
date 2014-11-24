@@ -54,7 +54,7 @@ void outputVersion()
     std::cout << "  available actions: " << std::endl;
     std::cout << "     - delta" << std::endl;
     std::cout << "     - diff" << std::endl;
-    if (f.getKernelCreator("drivers.ground.kernel"))
+    if (f.getKernelCreator("drivers.kernel.ground"))
         std::cout << "     - ground" << std::endl;
     std::cout << "     - info" << std::endl;
     if (f.getKernelCreator("drivers.pcl.kernel"))
@@ -141,7 +141,7 @@ int main(int argc, char* argv[])
 
     if (boost::iequals(action, "ground"))
     {
-        std::unique_ptr<Kernel> app(f.createKernel("drivers.ground.kernel"));
+        std::unique_ptr<Kernel> app(f.createKernel("drivers.kernel.ground"));
         return app->run(count, args, "ground");
     }
     

@@ -56,15 +56,15 @@ Example
 
   <?xml version="1.0" encoding="utf-8"?>
   <Pipeline version="1.0">
-    <Writer type="drivers.las.writer">
+    <Writer type="writers.las">
       <Option name="filename">
         file-output.las
       </Option>
       <Filter type="filters.hexbin">
-        <Option name="x_dim">drivers.las.reader.X</Option>
-        <Option name="y_dim">drivers.las.reader.Y</Option>
+        <Option name="x_dim">readers.las.X</Option>
+        <Option name="y_dim">readers.las.Y</Option>
         <Option name="threshold">10</Option>
-        <Reader type="drivers.las.reader">
+        <Reader type="readers.las">
           <Option name="filename">
             file-input.las
           </Option>

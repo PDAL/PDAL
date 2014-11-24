@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE(testConstructor)
     pdal::drivers::rxp::RxpReader reader;
     reader.setOptions(options);
     BOOST_CHECK(reader.getDescription() == "RXP Reader");
-    BOOST_CHECK_EQUAL(reader.getName(), "drivers.rxp.reader");
+    BOOST_CHECK_EQUAL(reader.getName(), "readers.rxp");
 }
 
 

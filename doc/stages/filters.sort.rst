@@ -14,7 +14,7 @@ Example
 
   <?xml version="1.0" encoding="utf-8"?>
   <Pipeline version="1.0">
-    <Writer type="drivers.las.writer">
+    <Writer type="writers.las">
       <Option name="filename">
         sorted.las
       </Option>
@@ -22,7 +22,7 @@ Example
         <Option name="dimension">
           X
         </Option>
-        <Reader type="drivers.las.reader">
+        <Reader type="readers.las">
           <Option name="filename">
             unsorted.las
           </Option>

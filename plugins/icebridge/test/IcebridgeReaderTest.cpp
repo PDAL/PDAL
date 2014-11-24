@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_SUITE(IcebridgeReaderTest)
 BOOST_AUTO_TEST_CASE(testRead)
 {
     StageFactory f;
-    StageFactory::ReaderCreator* rc = f.getReaderCreator("drivers.icebridge.reader");
+    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.icebridge");
     if (rc)
     {
         BOOST_CHECK(rc);

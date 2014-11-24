@@ -86,7 +86,7 @@ is shown below.
 
     <?xml version="1.0" encoding="utf-8"?>
     <Pipeline version="1.0">
-        <Writer type="drivers.las.writer">
+        <Writer type="writers.las">
             <Option name="filename">
                 ../../../temp/foo.las
             </Option>
@@ -94,7 +94,7 @@ is shown below.
                 <Option name="filename">
                     ./passthrough.json
                 </Option>
-                <Reader type="drivers.las.reader">
+                <Reader type="readers.las">
                     <Option name="filename">
                         ../../autzen/autzen-point-format-3.las
                     </Option>
@@ -138,7 +138,7 @@ When run, it should produce output similar to this:
           Field name: z
           Limits: 410.000000, 440.000000
 
-    76(drivers.las.writer DEBUG: 3): Wrote 81 points to the LAS file
+    76(writers.las DEBUG: 3): Wrote 81 points to the LAS file
     .100
 
 
@@ -199,7 +199,7 @@ This should produce the output
           Field name: z
           Limits: 410.000000, 440.000000
 
-    76(drivers.las.writer DEBUG: 3): Wrote 81 points to the LAS file
+    76(writers.las DEBUG: 3): Wrote 81 points to the LAS file
     .100
 
 

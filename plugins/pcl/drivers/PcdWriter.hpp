@@ -51,8 +51,8 @@ namespace pcd
 class PDAL_DLL PcdWriter : public pdal::Writer
 {
 public:
-    SET_STAGE_NAME("drivers.pcd.writer", "PCD Writer")
-    SET_STAGE_LINK("http://pdal.io/stages/drivers.pcd.writer.html")
+    SET_STAGE_NAME("writers.pcd", "PCD Writer")
+    SET_STAGE_LINK("http://pdal.io/stages/writers.pcd.html")
     SET_STAGE_ENABLED(true)
 
     PcdWriter() : pdal::Writer() {};

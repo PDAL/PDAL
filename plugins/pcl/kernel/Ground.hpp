@@ -47,8 +47,8 @@ namespace kernel
 class PDAL_DLL Ground : public Kernel
 {
 public:
-    SET_KERNEL_NAME("drivers.ground.kernel", "Ground Kernel")
-    SET_KERNEL_LINK("http://pdal.io/kernels/drivers.ground.kernel.html")
+    SET_KERNEL_NAME("drivers.kernel.ground", "Ground Kernel")
+    SET_KERNEL_LINK("http://pdal.io/kernels/drivers.kernel.ground.html")
     SET_KERNEL_ENABLED(true)
 
     Ground();

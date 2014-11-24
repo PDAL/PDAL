@@ -1,7 +1,7 @@
-.. _drivers.pcd.writer:
+.. _writers.pcd:
 
-drivers.pcd.writer
-==================
+writers.pcd
+===========
 
 The **PCD Writer** supports writing to `Point Cloud Data (PCD)`_ formatted
 files, which are used by the `Point Cloud Library (PCL)`_.
@@ -17,10 +17,10 @@ Example
 
   <?xml version="1.0" encoding="utf-8"?>
   <Pipeline version="1.0">
-    <Writer type="drivers.pcd.writer">
+    <Writer type="writers.pcd">
       <Option name="filename">outputfile.pcd</Option>
       
-      <Reader type="drivers.pcd.reader">
+      <Reader type="readers.pcd">
         <Option name="filename">inputfile.pcd</Option>
       </Reader>
     </Writer>

@@ -1,7 +1,7 @@
-.. _drivers.pgpointcloud.writer:
+.. _writers.pgpointcloud:
 
-drivers.pgpointcloud.writer
-===========================
+writers.pgpointcloud
+====================
 
 The **PostgreSQL Pointcloud Writer** allows you to write to PostgreSQL database that have the `PostgreSQL Pointcloud`_ extension enabled. The Pointcloud extension stores point cloud data in tables that contain rows of patches. Each patch in turn contains a large number of spatially nearby points.
 
@@ -16,7 +16,7 @@ Example
 
   <?xml version="1.0" encoding="utf-8"?>
   <Pipeline version="1.0">
-    <Writer type="drivers.pgpointcloud.writer">
+    <Writer type="writers.pgpointcloud">
       <Option name="connection">
         host='localhost' dbname='lidar' user='pramsey'
       </Option>
@@ -25,7 +25,7 @@ Example
       <Option name="srid">26916</Option>
       <Filter type="filters.chipper">
         <Option name="capacity">400</Option>
-        <Reader type="drivers.las.reader">
+        <Reader type="readers.las">
             <Option name="filename">example.las</Option>
             <Option name="spatialreference">EPSG:26916</Option>
         </Reader>

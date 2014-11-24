@@ -1,7 +1,7 @@
-.. _drivers.nitf.reader:
+.. _readers.nitf:
 
-drivers.nitf.reader
-===================
+readers.nitf
+============
 
 The `NITF`_ format is used primarily by the US Department of Defence and
 supports many kinds of data inside a generic wrapper. The `NITF 2.1`_ version
@@ -23,9 +23,9 @@ Example
 
   <?xml version="1.0" encoding="utf-8"?>
   <Pipeline version="1.0">
-    <Writer type="drivers.las.writer">
+    <Writer type="writers.las">
       <Option name="filename">outputfile.las</Option>
-      <Reader type="drivers.nitf.reader">
+      <Reader type="readers.nitf">
         <Option name="filename">mynitf.nitf</Option>
       </Reader>
     </Writer>

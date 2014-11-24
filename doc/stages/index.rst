@@ -14,18 +14,18 @@ Readers & Writers
    readers.buffer
    readers.las
    writers.las
-   drivers.pgpointcloud.reader
-   drivers.pgpointcloud.writer
+   readers.pgpointcloud
+   writers.pgpointcloud
    readers.faux
-   drivers.nitf.reader
-   drivers.nitf.writer
-   drivers.oci.reader
-   drivers.oci.writer
-   drivers.p2g.writer
-   drivers.pcd.reader
-   drivers.pcd.writer
+   readers.nitf
+   writers.nitf
+   readers.oci
+   writers.oci
+   writers.p2g
+   readers.pcd
+   writers.pcd
    readers.qfit
-   drivers.rxp.reader
+   readers.rxp
    readers.sbet
    writers.text
 
