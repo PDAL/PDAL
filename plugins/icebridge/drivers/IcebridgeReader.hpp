@@ -59,8 +59,8 @@ public:
 class PDAL_DLL IcebridgeReader : public pdal::Reader
 {
 public:
-    SET_STAGE_NAME("drivers.icebridge.reader", "Icebridge Reader")
-    SET_STAGE_LINK("http://pdal.io/stages/drivers.icebridge.reader.html")
+    SET_STAGE_NAME("readers.icebridge", "Icebridge Reader")
+    SET_STAGE_LINK("http://pdal.io/stages/readers.icebridge.html")
     SET_STAGE_ENABLED(true)
 
     IcebridgeReader() : pdal::Reader()

@@ -50,7 +50,7 @@ namespace sqlite
 class PDAL_DLL SQLiteWriter : public pdal::Writer
 {
 public:
-    SET_STAGE_NAME("drivers.sqlite.writer", "SQLite Writer")
+    SET_STAGE_NAME("writers.sqlite", "SQLite Writer")
     SET_STAGE_ENABLED(true)
     SQLiteWriter();
 

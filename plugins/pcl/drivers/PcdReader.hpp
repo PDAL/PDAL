@@ -50,8 +50,8 @@ namespace pcd
 class PDAL_DLL PcdReader : public pdal::Reader
 {
 public:
-    SET_STAGE_NAME("drivers.pcd.reader", "PCD Reader")
-    SET_STAGE_LINK("http://pdal.io/stages/drivers.pcd.reader.html")
+    SET_STAGE_NAME("readres.pcd", "PCD Reader")
+    SET_STAGE_LINK("http://pdal.io/stages/readers.pcd.html")
     SET_STAGE_ENABLED(true)
 
     PcdReader() : Reader() {};

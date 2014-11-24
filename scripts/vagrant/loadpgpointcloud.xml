@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Pipeline version="1.0">
-    <Writer type="drivers.pgpointcloud.writer">
+    <Writer type="writers.pgpointcloud">
         <Option name="connection">dbname='points'</Option>
         <Option name="table">sthsm</Option>
         <Option name="srid">26910</Option>

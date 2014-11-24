@@ -75,7 +75,7 @@ A more interesting metadata tree might come from the
 .. code-block:: javascript
 
     {
-        "name": "drivers.las.reader",
+        "name": "readers.las",
         "type": "blank",
         "value": "",
         "metadata":
@@ -164,11 +164,11 @@ little bit flatter...
 ::
 
     <?xml version="1.0" encoding="utf-8"?>
-    <Reader type="drivers.las.reader">
+    <Reader type="readers.las">
       <Option name="debug">false</Option>
       <Option name="filename">test/data/interesting.las</Option>
       <Option name="verbose">0</Option>
-      <Metadata name="drivers.las.reader" type="blank">
+      <Metadata name="writers.las" type="blank">
         <Metadata name="compressed" type="boolean">false</Metadata>
         <Metadata name="dataformatid" type="nonNegativeInteger">3</Metadata>
         <Metadata name="version_major" type="nonNegativeInteger">1</Metadata>

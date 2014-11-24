@@ -27,11 +27,11 @@ Example
 
   <?xml version="1.0" encoding="utf-8"?>
   <Pipeline version="1.0">
-    <Writer type="drivers.pgpointcloud.writer">
+    <Writer type="writers.pgpointcloud">
       <Option name="connection">dbname='lidar' user='user'</Option>
       <Filter type="filters.chipper">
         <Option name="capacity">400</Option>
-        <Reader type="drivers.las.reader">
+        <Reader type="readers.las">
             <Option name="filename">example.las</Option>
         </Reader>
       </Filter>

@@ -97,11 +97,11 @@ Let's start with the following basic example:
 
     <?xml version="1.0" encoding="utf-8"?>
     <Pipeline version="1.0">
-        <Writer type="drivers.las.writer">
+        <Writer type="writers.las">
             <Option name="filename">
                 output.las
             </Option>
-            <Reader type="drivers.las.reader">
+            <Reader type="readers.las">
                 <Option name="filename">
                     ./path/to/my/file.las
                 </Option>
@@ -132,7 +132,7 @@ that we are going to have as the endpoint of our pipeline (see more about this
 in `Stage Types`_). After that, we have an Option element, which provides the 
 filename that the Writer is going to use when outputting the file. Then we 
 have the final doll in our Matryoshka set, the Reader, which has a stage 
-type of `drivers.las.reader` with its own Option giving a filename to use 
+type of `readers.las` with its own Option giving a filename to use 
 to read the file.
 
 
@@ -142,9 +142,9 @@ Stage Types
 
 :cpp:class:`pdal::Reader`, :cpp:class:`pdal::Writer`, and
 :cpp:class:`pdal::Filter` are the C++ classes that define the stage types in
-PDAL. Readers follow the pattern of ``drivers.las.reader`` or
-``drivers.oci.reader``, Writers follow the pattern of ``drivers.las.writer`` or
-``drivers.oci.reader``, with Filters using ``filters.inplacereprojection`` or
+PDAL. Readers follow the pattern of ``readers.las`` or
+``readers.oci``, Writers follow the pattern of ``writers.las`` or
+``readers.oci``, with Filters using ``filters.inplacereprojection`` or
 ``filters.crop``.
 
 .. note::
@@ -186,7 +186,7 @@ dimensions it must operate on.
             </Option>
             <!-- <Option name="debug">true</Option>
             <Option name="verbose">7</Option>    -->  
-            <Reader type="drivers.las.reader">
+            <Reader type="readers.las">
                 <Option name="filename">
                     ../1.2-with-color.las
                 </Option>
@@ -234,7 +234,7 @@ Syntax Specification
     * attributes:
         * the "type" attribute must appear exactly once; the value of this
           attribute shall be the string corresponding to the name of
-          the Writer stage type, e.g. "drivers.las.writer"
+          the Writer stage type, e.g. "writers.las"
 
 * <Reader> :cpp:class:`pdal::Reader`
     * indicates a reader stage
@@ -243,7 +243,7 @@ Syntax Specification
     * attributes:
         * the "type" attribute must appear exactly once; the value of this
           attribute shall be the string corresponding to the name of
-          the Reader stage type, e.g. "drivers.las.reader"
+          the Reader stage type, e.g. "readers.las"
 
 * <Filter> :cpp:class:`pdal::Filter`
     * indicates a filter stage

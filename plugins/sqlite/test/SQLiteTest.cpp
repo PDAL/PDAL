@@ -165,8 +165,8 @@ BOOST_AUTO_TEST_CASE(SqliteTest_test_simple_las)
         sqliteOptions.add(compression);
 #endif
 
-        StageFactory::WriterCreator* wc = f.getWriterCreator("drivers.sqlite.writer");
-        StageFactory::ReaderCreator* rc = f.getReaderCreator("drivers.sqlite.reader");
+        StageFactory::WriterCreator* wc = f.getWriterCreator("writers.sqlite");
+        StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.sqlite");
         if (wc)
         {
             BOOST_CHECK(wc);

@@ -44,8 +44,8 @@ namespace pdal
 class PDAL_DLL NitfWriter : public LasWriter
 {
 public:
-    SET_STAGE_NAME("drivers.nitf.writer", "NITF Writer")
-    SET_STAGE_LINK("http://pdal.io/stages/drivers.nitf.writer.html")
+    SET_STAGE_NAME("writers.nitf", "NITF Writer")
+    SET_STAGE_LINK("http://pdal.io/stages/writers.nitf.html")
     SET_STAGE_ENABLED(true)
 
     NitfWriter() ;

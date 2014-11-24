@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Pipeline version="1.0">
-    <Reader type="drivers.oci.reader">
+    <Reader type="readers.oci">
         <Option name="query">
             SELECT CLOUD FROM QFIT_CLOUD where ID=1
         </Option>

@@ -1,7 +1,7 @@
-.. _drivers.oci.reader:
+.. _readers.oci:
 
-drivers.oci.reader
-==================
+readers.oci
+===========
 
 The OCI reader is used to read data from `Oracle point cloud`_ databases.
 
@@ -13,9 +13,9 @@ Example
 
   <?xml version="1.0" encoding="utf-8"?>
   <Pipeline version="1.0">
-    <Writer type="drivers.las.writer">
+    <Writer type="writers.las">
       <Option name="filename">outputfile.las</Option>
-      <Reader type="drivers.oci.reader">
+      <Reader type="readers.oci">
         <Option name="query">
           SELECT 
             l."OBJ_ID", l."BLK_ID", l."BLK_EXTENT", 

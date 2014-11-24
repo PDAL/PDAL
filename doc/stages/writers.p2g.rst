@@ -1,7 +1,7 @@
-.. _drivers.p2g.writer:
+.. _writers.p2g:
 
-drivers.p2g.writer
-==================
+writers.p2g
+===========
 
 The **points to grid writer** takes in a stream of point data and writes out gridded summaries of the stream. Each cell in the output grids can give one of the: minimum value, maximum value, average value, average value, inverse distance weighted interpolation (for sparse points), or density. The points to grid writer supports creating multiple output grids simultaneously, so it is possible to generate all grid variants in one pass.
 
@@ -12,7 +12,7 @@ Example
 
   <?xml version="1.0" encoding="utf-8"?>
   <Pipeline version="1.0">
-    <Writer type="drivers.p2g.writer">
+    <Writer type="writers.p2g">
       <Option name="grid_dist_x">
         6.0
       </Option>
@@ -53,7 +53,7 @@ Example
           <Option name="scale_y">
             0.01
           </Option>
-          <Reader type="drivers.las.reader">
+          <Reader type="readers.las">
             <Option name="filename">
               ../1.2-with-color.las
             </Option>

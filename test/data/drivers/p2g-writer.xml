@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Pipeline version="1.0">
-    <Writer type="drivers.p2g.writer">
+    <Writer type="writers.p2g">
         <Option name="filename">
             autzen_grid
         </Option>

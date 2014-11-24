@@ -1,7 +1,7 @@
-.. _drivers.rxp.reader:
+.. _readers.rxp:
 
-drivers.rxp.reader
-==================
+readers.rxp
+===========
 
 The **RXP reader** read from files in the RXP format, the in-house streaming format used by `RIEGL Laser Measurement Systems`_.
 
@@ -31,7 +31,7 @@ Only points with a valid gps time, as determined by a pps pulse, are read from t
 
     <?xml version="1.0" encoding="utf-8"?>
     <Pipeline version="1.0">
-        <Writer type="drivers.las.writer">
+        <Writer type="writers.las">
             <Option name="filename">output.las</Option>
             <Option name="discard_high_return_numbers">true</Option>
             <Filter type="filters.scaling">
@@ -69,7 +69,7 @@ Only points with a valid gps time, as determined by a pps pulse, are read from t
                     <Option name="function">reflectance_to_intensity</Option>
                     <Option name="module">pyrxp</Option>
                     <Option name="add_dimension">Intensity</Option>
-                    <Reader type="drivers.rxp.reader">
+                    <Reader type="readers.rxp">
                         <Option name="filename">120304_204030.rxp</Option>
                         <Option name="sync_to_pps">true</Option>
                     </Reader>

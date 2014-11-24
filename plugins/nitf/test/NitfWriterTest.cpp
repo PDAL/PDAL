@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE(test1)
             Stage* reader = rc();
             reader->setOptions(reader_opts);
 
-            StageFactory::WriterCreator* wc = f.getWriterCreator("drivers.nitf.writer");
+            StageFactory::WriterCreator* wc = f.getWriterCreator("writers.nitf");
             if(wc)
             {
                 BOOST_CHECK(wc);

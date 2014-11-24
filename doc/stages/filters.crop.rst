@@ -12,7 +12,7 @@ Example
 
   <?xml version="1.0" encoding="utf-8"?>
   <Pipeline version="1.0">
-    <Writer type="drivers.las.writer">
+    <Writer type="writers.las">
       <Option name="filename">
         file-cropped.las
       </Option>
@@ -20,7 +20,7 @@ Example
         <Option name="bounds">
           ([0,1000000],[0,1000000],[0,1000000])
         </Option>
-        <Reader type="drivers.las.reader">
+        <Reader type="readers.las">
           <Option name="filename">
             file-input.las
           </Option>

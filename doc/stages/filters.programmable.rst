@@ -32,7 +32,7 @@ Example
 
   <?xml version="1.0" encoding="utf-8"?>
   <Pipeline version="1.0">
-    <Writer type="drivers.las.writer">
+    <Writer type="writers.las">
       <Option name="filename">
         file-filtered.las
       </Option>
@@ -40,7 +40,7 @@ Example
         <Option name="script">multiply_z.py</Option>
         <Option name="function">multiply_z</Option>
         <Option name="module">anything</Option>  
-        <Reader type="drivers.las.reader">
+        <Reader type="readers.las">
           <Option name="filename">
             file-input.las
           </Option>

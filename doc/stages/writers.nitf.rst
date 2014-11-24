@@ -1,7 +1,7 @@
-.. _drivers.nitf.writer:
+.. _writers.nitf:
 
-drivers.nitf.writer
-===================
+writers.nitf
+============
 
 The `NITF`_ format is used primarily by the US Department of Defence and supports many kinds of data inside a generic wrapper. The `NITF 2.1`_ version added support for LIDAR point cloud data, and the **NITF file writing** supports reading that data.
 
@@ -14,11 +14,11 @@ Example
 
   <?xml version="1.0" encoding="utf-8"?>
   <Pipeline version="1.0">
-    <Writer type="drivers.nitf.writer">
+    <Writer type="writers.nitf">
       <Option name="filename">mynitf.nitf</Option>
       <Option name="ONAME">James Alexander</Option>
       <Option name="OPHONE">646-322-3123</Option>
-      <Reader type="drivers.las.reader">
+      <Reader type="readers.las">
         <Option name="filename">inputfile.las</Option>
       </Reader>
     </Writer>

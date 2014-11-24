@@ -17,7 +17,7 @@ The bands of the raster to apply to each are selected using the "band" option, a
 
   <?xml version="1.0" encoding="utf-8"?>
   <Pipeline version="1.0">
-    <Writer type="drivers.las.writer">
+    <Writer type="writers.las">
       <Option name="filename">colorized.las</Option>
       <Filter type="filters.colorization">
         <Option name="dimension">
@@ -42,7 +42,7 @@ The bands of the raster to apply to each are selected using the "band" option, a
           </Options>
         </Option>
         <Option name="raster">aerial.tif</Option>
-        <Reader type="drivers.las.reader">
+        <Reader type="readers.las">
           <Option name="filename">uncolored.las</Option>
         </Reader>
       </Filter>

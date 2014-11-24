@@ -50,8 +50,8 @@ namespace pgpointcloud
 class PDAL_DLL PgWriter : public pdal::Writer
 {
 public:
-    SET_STAGE_NAME("drivers.pgpointcloud.writer", "PostgresSQL Pointcloud Database Writer")
-    SET_STAGE_LINK("http://pdal.io/stages/drivers.pgpointcloud.writer.html")
+    SET_STAGE_NAME("writers.pgpointcloud", "PostgresSQL Pointcloud Database Writer")
+    SET_STAGE_LINK("http://pdal.io/stages/writers.pgpointcloud.html")
     SET_STAGE_ENABLED(true)
 
     PgWriter();

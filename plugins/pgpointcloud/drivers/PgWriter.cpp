@@ -534,7 +534,7 @@ void PgWriter::writeTile(PointBuffer const& buffer)
     if (buffer.size() > m_patch_capacity)
     {
         std::ostringstream oss;
-        oss << "drivers.pgpointcloud.writer buffer size (" << buffer.size()
+        oss << "writers.pgpointcloud buffer size (" << buffer.size()
             << ") is greater than capacity (" << m_patch_capacity << ")";
         throw pdal_error(oss.str());
     }

@@ -40,7 +40,7 @@
             <Option name="scale_y">
                 0.0000001
             </Option> -->
-        <Reader type="drivers.oci.reader">
+        <Reader type="readers.oci">
             <Option name="query">
                             
                 SELECT l."OBJ_ID", l."BLK_ID", l."BLK_EXTENT", l."BLK_DOMAIN",

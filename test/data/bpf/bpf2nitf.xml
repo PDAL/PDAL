@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Pipeline version="1.0">
-    <Writer type="drivers.nitf.writer">
+    <Writer type="writers.nitf">
         <Option name="filename">
             output.ntf
         </Option>
@@ -45,7 +45,7 @@
                 </Option>
             </Options>
         </Option>
-        <Reader type="drivers.bpf.reader">
+        <Reader type="readers.bpf">
             <Option name="filename">
                 utm15.bpf
             </Option>

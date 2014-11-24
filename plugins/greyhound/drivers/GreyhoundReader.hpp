@@ -60,8 +60,8 @@ struct DimData
 class PDAL_DLL GreyhoundReader : public pdal::Reader
 {
 public:
-    SET_STAGE_NAME("drivers.greyhound.reader", "Greyhound Reader")
-    SET_STAGE_LINK("http://pdal.io/stages/drivers.greyhound.reader.html")
+    SET_STAGE_NAME("readers.greyhound", "Greyhound Reader")
+    SET_STAGE_LINK("http://pdal.io/stages/readers.greyhound.html")
     SET_STAGE_ENABLED(true)
 
     GreyhoundReader();

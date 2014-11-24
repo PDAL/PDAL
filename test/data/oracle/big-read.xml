@@ -29,7 +29,7 @@
                 <Option name="verbose">
                     6
                 </Option>        
-        <Reader type="drivers.oci.reader">
+        <Reader type="readers.oci">
             <Option name="query">
                 select l."OBJ_ID", l."BLK_ID", l."BLK_EXTENT", l."BLK_DOMAIN", l."PCBLK_MIN_RES", l."PCBLK_MAX_RES", l."NUM_POINTS", l."NUM_UNSORTED_POINTS", l."PT_SORT_DIM", l."POINTS", b.cloud from AUTZEN_COPY_CLOUD b, autzen_COPY_blocks l 
                                 where b.cloud.pc_id = l.obj_id

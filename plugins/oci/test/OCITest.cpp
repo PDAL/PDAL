@@ -245,7 +245,7 @@ bool WriteUnprojectedData()
         reader->setOptions(options);
         // pdal::filters::Chipper chipper(options);
         // chipper.setInput(&reader);
-        StageFactory::WriterCreator* wc = f.getWriterCreator("drivers.oci.writer");
+        StageFactory::WriterCreator* wc = f.getWriterCreator("writers.oci");
         if (wc)
         {
             BOOST_CHECK(wc);
@@ -387,7 +387,7 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
     verbose.setValue<std::string>( "7");
 
     StageFactory f;
-    StageFactory::ReaderCreator* rc = f.getReaderCreator("drivers.oci.reader");
+    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.oci");
     if (rc)
     {
         BOOST_CHECK(rc);
@@ -448,9 +448,9 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
 //     // offset_y.setValue<float>( 0.0f);
 //
 //
-//     pdal::Option x_dim("x_dim", std::string("drivers.oci.reader.X"), "Dimension name to use for 'X' data");
-//     pdal::Option y_dim("y_dim", std::string("drivers.oci.reader.Y"), "Dimension name to use for 'Y' data");
-//     pdal::Option z_dim("z_dim", std::string("drivers.oci.reader.Z"), "Dimension name to use for 'Z' data");
+//     pdal::Option x_dim("x_dim", std::string("readers.oci.X"), "Dimension name to use for 'X' data");
+//     pdal::Option y_dim("y_dim", std::string("readers.oci.Y"), "Dimension name to use for 'Y' data");
+//     pdal::Option z_dim("z_dim", std::string("readers.oci.Z"), "Dimension name to use for 'Z' data");
 //
 //     options.add(x_dim);
 //     options.add(y_dim);

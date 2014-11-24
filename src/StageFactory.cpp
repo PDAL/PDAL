@@ -113,33 +113,33 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
 
     // filename may actually be a greyhound uri + pipelineId
     std::string http = filename.substr(0, 4);
-    if (boost::iequals(http, "http") && f.getReaderCreator("drivers.greyhound.reader"))
-        return "drivers.greyhound.reader";
+    if (boost::iequals(http, "http") && f.getReaderCreator("readers.greyhound"))
+        return "readers.greyhound";
 
     std::string ext = boost::filesystem::extension(filename);
     std::map<std::string, std::string> drivers;
     drivers["las"] = "readers.las";
     drivers["laz"] = "readers.las";
     drivers["bin"] = "readers.terrasolid";
-    if (f.getReaderCreator("drivers.greyhound.reader"))
-        drivers["greyhound"] = "drivers.greyhound.reader";
+    if (f.getReaderCreator("readers.greyhound"))
+        drivers["greyhound"] = "readers.greyhound";
     drivers["qi"] = "readers.qfit";
-    if (f.getReaderCreator("drivers.nitf.reader"))
+    if (f.getReaderCreator("readers.nitf"))
     {
-        drivers["nitf"] = "drivers.nitf.reader";
-        drivers["ntf"] = "drivers.nitf.reader";
-        drivers["nsf"] = "drivers.nitf.reader";
+        drivers["nitf"] = "readers.nitf";
+        drivers["ntf"] = "readers.nitf";
+        drivers["nsf"] = "readers.nitf";
     }
     drivers["bpf"] = "readers.bpf";
     drivers["sbet"] = "readers.sbet";
-    drivers["icebridge"] = "drivers.icebridge.reader";
-    drivers["sqlite"] = "drivers.sqlite.reader";
+    drivers["icebridge"] = "readers.icebridge";
+    drivers["sqlite"] = "readers.sqlite";
 
-    if (f.getReaderCreator("drivers.rxp.reader"))
-        drivers["rxp"] = "drivers.rxp.reader";
+    if (f.getReaderCreator("readers.rxp"))
+        drivers["rxp"] = "readers.rxp";
 
-    if (f.getReaderCreator("drivers.pcd.reader"))
-        drivers["pcd"] = "drivers.pcd.reader";
+    if (f.getReaderCreator("readers.pcd"))
+        drivers["pcd"] = "readers.pcd";
 
     if (ext == "") return "";
     ext = ext.substr(1, ext.length()-1);
@@ -161,18 +161,18 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
     drivers["las"] = "writers.las";
     drivers["laz"] = "writers.las";
     StageFactory f;
-    if (f.getWriterCreator("drivers.pcd.writer"))
-        drivers["pcd"] = "drivers.pcd.writer";
-    if (f.getWriterCreator("drivers.pclvisualizer.writer"))
-        drivers["pclviz"] = "drivers.pclvisualizer.writer";
+    if (f.getWriterCreator("writers.pcd"))
+        drivers["pcd"] = "writers.pcd";
+    if (f.getWriterCreator("writers.pclvisualizer"))
+        drivers["pclviz"] = "writers.pclvisualizer";
     drivers["sbet"] = "writers.sbet";
     drivers["csv"] = "writers.text";
     drivers["json"] = "writers.text";
     drivers["xyz"] = "writers.text";
     drivers["txt"] = "writers.text";
-    if (f.getWriterCreator("drivers.nitf.writer"))
-        drivers["ntf"] = "drivers.nitf.writer";
-    drivers["sqlite"] = "drivers.sqlite.writer";
+    if (f.getWriterCreator("writers.nitf"))
+        drivers["ntf"] = "writers.nitf";
+    drivers["sqlite"] = "writers.sqlite";
 
     if (boost::algorithm::iequals(filename, "STDOUT"))
     {
@@ -201,7 +201,7 @@ pdal::Options StageFactory::inferWriterOptionsChanges(const std::string& filenam
     }
 
     StageFactory f;
-    if (boost::algorithm::iequals(ext,".pcd") && f.getWriterCreator("drivers.pcd.writer"))
+    if (boost::algorithm::iequals(ext,".pcd") && f.getWriterCreator("writers.pcd"))
     {
         options.add("format","PCD");
     }
