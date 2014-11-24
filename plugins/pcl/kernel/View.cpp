@@ -42,6 +42,83 @@ namespace pdal
 namespace kernel
 {
 
+// Support for parsing point numbers.  Points can be specified singly or as
+// dash-separated ranges.  i.e. 6-7,8,19-20
+namespace {
+
+using namespace std;
+
+vector<string> tokenize(const string s, char c)
+{
+    string::const_iterator begin;
+    string::const_iterator end;
+    vector<string> strings;
+    begin = s.begin();
+    while (true)
+    {
+        end = find(begin, s.end(), c);
+        strings.push_back(string(begin, end));
+        if (end == s.end())
+            break;
+        begin = end + 1;
+    }
+    return strings;
+}
+
+uint32_t parseInt(const string& s)
+{
+    try
+    {
+        return boost::lexical_cast<uint32_t>(s);
+    }
+    catch (boost::bad_lexical_cast)
+    {
+        throw app_runtime_error(string("Invalid integer: ") + s);
+    }
+}
+
+
+void addSingle(const string& s, vector<uint32_t>& points)
+{
+    points.push_back(parseInt(s));
+}
+
+
+void addRange(const string& begin, const string& end,
+    vector<uint32_t>& points)
+{
+    uint32_t low = parseInt(begin);
+    uint32_t high = parseInt(end);
+    if (low > high)
+        throw app_runtime_error(string("Range invalid: ") + begin + "-" + end);
+    while (low <= high)
+        points.push_back(low++);
+}
+
+
+vector<boost::uint32_t> getListOfPoints(std::string p)
+{
+    vector<boost::uint32_t> output;
+
+    //Remove whitespace from string with awful remove/erase idiom.
+    p.erase(remove_if(p.begin(), p.end(), ::isspace), p.end());
+
+    vector<string> ranges = tokenize(p, ',');
+    for (string s : ranges)
+    {
+        vector<string> limits = tokenize(s, '-');
+        if (limits.size() == 1)
+            addSingle(limits[0], output);
+        else if (limits.size() == 2)
+            addRange(limits[0], limits[1], output);
+        else
+            throw app_runtime_error(string("Invalid point range: ") + s);
+    }
+    return output;
+}
+
+} //namespace
+
 View::View()
     : Kernel()
     , m_inputFile("")
@@ -67,6 +144,7 @@ void View::addSwitches()
 
     file_options->add_options()
     ("input,i", po::value<std::string>(&m_inputFile)->default_value(""), "input file name")
+    ("point,p", po::value<std::string >(&m_pointIndexes), "point to dump")
     ;
 
     addSwitchSet(file_options);
@@ -106,8 +184,20 @@ int View::execute()
     PointContext ctx;
     readerStage->prepare(ctx);
     PointBufferSet pbSetIn = readerStage->execute(ctx);
-    visualize(*pbSetIn.begin());
+    //visualize(*pbSetIn.begin());
 
+    PointBufferPtr buf = *pbSetIn.begin();
+    PointBufferPtr outbuf = buf->makeNew();
+
+    std::vector<uint32_t> points = getListOfPoints(m_pointIndexes);
+    for (size_t i = 0; i < points.size(); ++i)
+    {
+        PointId id = (PointId)points[i];
+        if (id < buf->size())
+            outbuf->appendPoint(*buf, id);
+    }
+
+    visualize(outbuf);
     return 0;
 }
 
