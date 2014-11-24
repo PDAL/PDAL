@@ -103,37 +103,10 @@ int View::execute()
     readerOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
 
     std::unique_ptr<Stage> readerStage = makeReader(readerOptions);
-
-    Options writerOptions;
-    setCommonOptions(writerOptions);
-
-    std::unique_ptr<Writer> writer(AppSupport::makeWriter("foo.pclviz",readerStage.get()));
-
-    std::vector<std::string> cmd = getProgressShellCommand();
-    UserCallback *callback =
-        cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
-        (UserCallback *)new HeartbeatCallback();
-
     PointContext ctx;
-    writer->setUserCallback(callback);
-
-    for (auto pi: getExtraStageOptions())
-    {
-        std::string name = pi.first;
-        Options options = pi.second;
-        std::vector<Stage*> stages = writer->findStage(name);
-        for (auto s: stages)
-        {
-            Options opts = s->getOptions();
-            for (auto o: options.getOptions())
-                opts.add(o);
-            s->setOptions(opts);
-        }
-    }
-
-    writer->setOptions(writerOptions);
-    writer->prepare(ctx);
-    writer->execute(ctx);
+    readerStage->prepare(ctx);
+    PointBufferSet pbSetIn = readerStage->execute(ctx);
+    visualize(*pbSetIn.begin());
 
     return 0;
 }
