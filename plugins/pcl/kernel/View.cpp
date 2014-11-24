@@ -187,17 +187,25 @@ int View::execute()
     //visualize(*pbSetIn.begin());
 
     PointBufferPtr buf = *pbSetIn.begin();
-    PointBufferPtr outbuf = buf->makeNew();
 
-    std::vector<uint32_t> points = getListOfPoints(m_pointIndexes);
-    for (size_t i = 0; i < points.size(); ++i)
+    if (m_pointIndexes.size())
     {
-        PointId id = (PointId)points[i];
-        if (id < buf->size())
-            outbuf->appendPoint(*buf, id);
-    }
+        PointBufferPtr outbuf = buf->makeNew();
 
-    visualize(outbuf);
+        std::vector<uint32_t> points = getListOfPoints(m_pointIndexes);
+        for (size_t i = 0; i < points.size(); ++i)
+        {
+            PointId id = (PointId)points[i];
+            if (id < buf->size())
+                outbuf->appendPoint(*buf, id);
+        }
+
+        visualize(outbuf);
+    }
+    else
+    {
+        visualize(buf);
+    }
     return 0;
 }
 
