@@ -32,7 +32,7 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <pdal/filters/Splitter.hpp>
+#include <SplitterFilter.hpp>
 
 #include <boost/scoped_ptr.hpp>
 
@@ -41,16 +41,14 @@
 
 namespace pdal
 {
-namespace filters
-{
 
-void Splitter::processOptions(const Options& options)
+void SplitterFilter::processOptions(const Options& options)
 {
     m_length = options.getValueOrDefault<uint32_t>("length", 1000);
 }
 
 
-Options Splitter::getDefaultOptions()
+Options SplitterFilter::getDefaultOptions()
 {
     Options options;
     Option length("length", 1000, "Splitter length");
@@ -77,7 +75,7 @@ public:
 };
 }
 
-PointBufferSet Splitter::run(PointBufferPtr buf)
+PointBufferSet SplitterFilter::run(PointBufferPtr buf)
 {
     PointBufferSet pbSet;
     if (!buf->size())
@@ -113,6 +111,4 @@ PointBufferSet Splitter::run(PointBufferPtr buf)
     return pbSet;
 }
 
-} // filters
 } // pdal
-

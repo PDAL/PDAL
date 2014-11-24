@@ -38,17 +38,15 @@
 
 namespace pdal
 {
-namespace filters
-{
 
-class PDAL_DLL Splitter : public pdal::Filter
+class PDAL_DLL SplitterFilter : public pdal::Filter
 {
 public:
     SET_STAGE_NAME("filters.splitter", "Splitter")
     SET_STAGE_LINK("http://pdal.io/stages/filters.splitter.html")
     SET_STAGE_ENABLED(true)
 
-    Splitter() : Filter()
+    SplitterFilter() : Filter()
         {}
 
     static Options getDefaultOptions();
@@ -59,10 +57,8 @@ private:
     virtual void processOptions(const Options& options);
     virtual PointBufferSet run(PointBufferPtr buf);
 
-    Splitter& operator=(const Splitter&); // not implemented
-    Splitter(const Splitter&); // not implemented
+    SplitterFilter& operator=(const SplitterFilter&); // not implemented
+    SplitterFilter(const SplitterFilter&); // not implemented
 };
 
-} // namespace filters
 } // namespace pdal
-
