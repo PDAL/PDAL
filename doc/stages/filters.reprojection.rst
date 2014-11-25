@@ -6,7 +6,7 @@ filters.reprojection
 The reprojection filter converts the X, Y and/or Z dimensions to a new spatial
 reference system. The old coordinates are replaced by the new ones,
 if you want to preserve the old coordinates for future processing, use a
-`filters.ferry`_ to create a new dimension and stuff them there.
+:ref:`filters.ferry` to create a new dimension and stuff them there.
 
 .. note::
 

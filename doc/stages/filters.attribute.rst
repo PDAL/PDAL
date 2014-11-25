@@ -1,4 +1,4 @@
-.. _filters.attribute
+.. _filters.attribute:
 
 filters.attribute
 ===================
