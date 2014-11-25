@@ -8,17 +8,18 @@ fi
 tmstamp() { echo -n "[$(date '+%H:%M:%S')]" ; }
 
 # Environment
-NUMTHREADS=4
+NUMTHREADS=2
 
-if [[ -f /sys/devices/system/cpu/online ]]; then
-if [[ "$CXX" == "g++" ]]; then
-    factor = 1000
-else
-    factor = 1500
-fi
-	# Calculates 1.5 times physical threads
-	NUMTHREADS=$(( ( $(cut -f 2 -d '-' /sys/devices/system/cpu/online) + 1 ) * $factor / 1000  ))
-fi
+# if [[ -f /sys/devices/system/cpu/online ]]; then
+# if [[ "$CXX" == "g++" ]]; then
+#     factor = 1000
+# else
+#     factor = 1500
+# fi
+# 	# Calculates 1.5 times physical threads
+# 	NUMTHREADS=$(( ( $(cut -f 2 -d '-' /sys/devices/system/cpu/online) + 1 ) * $factor / 1000  ))
+# fi
+
 echo "NUMTHREADS = $NUMTHREADS"
 #NUMTHREADS=1 # disable MP
 export NUMTHREADS

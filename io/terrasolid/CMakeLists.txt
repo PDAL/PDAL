@@ -3,7 +3,7 @@
 #
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories(${PROJECT_SOURCE_DIR}/drivers/terrasolid)
+include_directories(${PROJECT_SOURCE_DIR}/io/terrasolid)
 
 #
 # Terrasolid Reader

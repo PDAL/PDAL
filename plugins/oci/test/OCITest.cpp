@@ -39,7 +39,7 @@
 
 #include <pdal/StageFactory.hpp>
 
-#include "../drivers/OciCommon.hpp"
+#include "../io/OciCommon.hpp"
 #include "Support.hpp"
 #include "TestConfig.hpp"
 

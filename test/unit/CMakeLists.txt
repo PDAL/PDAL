@@ -42,20 +42,19 @@ set(PDAL_UNITTEST_BASE_SRCS
 )
 
 #
-# sources for the native drivers
+# sources for the native io
 #
 set(PDAL_UNITTEST_DRIVERS_SRCS
-    drivers/bpf/BPFTest.cpp
-    drivers/buffer/BufferTest.cpp
-    drivers/faux/FauxReaderTest.cpp
-    drivers/las/LasReaderTest.cpp
-    drivers/las/LasWriterTest.cpp
-    drivers/qfit/QFITReaderTest.cpp
-    drivers/sbet/SbetReaderTest.cpp
-    drivers/sbet/SbetWriterTest.cpp
-        "${PROJECT_SOURCE_DIR}/src/gitsha.cpp"
-	#    drivers/terrasolid/TerraSolidReaderTest.cpp
-#    drivers/text/TextWriterTest.cpp
+    io/bpf/BPFTest.cpp
+    io/buffer/BufferTest.cpp
+    io/faux/FauxReaderTest.cpp
+    io/las/LasReaderTest.cpp
+    io/las/LasWriterTest.cpp
+    io/qfit/QFITReaderTest.cpp
+    io/sbet/SbetReaderTest.cpp
+    io/sbet/SbetWriterTest.cpp
+#    io/terrasolid/TerraSolidReaderTest.cpp
+#    io/text/TextWriterTest.cpp
 )
 
 #
@@ -118,14 +117,14 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/include
     ${GDAL_INCLUDE_DIR}
     ${GEOTIFF_INCLUDE_DIR}
-    ${PROJECT_SOURCE_DIR}/drivers/bpf
-    ${PROJECT_SOURCE_DIR}/drivers/buffer
-    ${PROJECT_SOURCE_DIR}/drivers/faux
-    ${PROJECT_SOURCE_DIR}/drivers/las
-    ${PROJECT_SOURCE_DIR}/drivers/qfit
-    ${PROJECT_SOURCE_DIR}/drivers/sbet
-    ${PROJECT_SOURCE_DIR}/drivers/text
-    ${PROJECT_SOURCE_DIR}/drivers/terrasolid
+    ${PROJECT_SOURCE_DIR}/io/bpf
+    ${PROJECT_SOURCE_DIR}/io/buffer
+    ${PROJECT_SOURCE_DIR}/io/faux
+    ${PROJECT_SOURCE_DIR}/io/las
+    ${PROJECT_SOURCE_DIR}/io/qfit
+    ${PROJECT_SOURCE_DIR}/io/sbet
+    ${PROJECT_SOURCE_DIR}/io/text
+    ${PROJECT_SOURCE_DIR}/io/terrasolid
     ${PROJECT_SOURCE_DIR}/filters/chipper
     ${PROJECT_SOURCE_DIR}/filters/decimation
     ${PROJECT_SOURCE_DIR}/filters/ferry
