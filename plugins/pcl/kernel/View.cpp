@@ -184,10 +184,8 @@ int View::execute()
     PointContext ctx;
     readerStage->prepare(ctx);
     PointBufferSet pbSetIn = readerStage->execute(ctx);
-    //visualize(*pbSetIn.begin());
-
+    
     PointBufferPtr buf = *pbSetIn.begin();
-
     if (m_pointIndexes.size())
     {
         PointBufferPtr outbuf = buf->makeNew();
