@@ -67,11 +67,16 @@ protected:
     {}
 
     bool locationScaling() const;
+    DimTypeList dbDimTypes() const;
+    size_t readPoint(const PointBuffer& pb, PointId idx,
+        std::vector<char>& buf);
 
-    Dimension::IdList m_dims;
-    std::vector<Dimension::Type::Enum> m_types;
     size_t m_pointSize;
     DimTypeList m_dimTypes;
+    int m_xPackedOffset;
+    int m_yPackedOffset;
+    int m_zPackedOffset;
+    size_t m_packedPointSize;
 
 private:
     virtual void ready(PointContextRef ctx);

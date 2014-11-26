@@ -577,7 +577,7 @@ void OciWriter::createPCEntry()
         s_geom << "," << bounds.maxy;
     s_geom << "))";
 
-    schema::Writer writer(m_dims, m_types, m_orientation);
+    schema::Writer writer(m_dimTypes, m_orientation);
     std::string schemaData = writer.getXML();
 
     oss << "declare\n"
@@ -598,7 +598,8 @@ void OciWriter::createPCEntry()
         << s_geom.str() <<
         ",  -- Extent\n"
         "     0.5, -- Tolerance for point cloud\n"
-        "           " << m_dims.size() << ", -- Total number of dimensions\n"
+        "           " << m_dimTypes.size() <<
+        ", -- Total number of dimensions\n"
         "           NULL,"
         "            NULL,"
         "            " << s_schema.str() << ");\n"
@@ -958,16 +959,15 @@ void OciWriter::writeTile(PointBuffer const& buffer)
     if (m_orientation == Orientation::DimensionMajor)
     {
         size_t clicks = 0;
-        size_t interrupt = m_dims.size() * 100;
-        auto ti = m_types.begin();
-        for (auto di = m_dims.begin(); di != m_dims.end(); ++di, ++ti)
+        size_t interrupt = m_dimTypes.size() * 100;
+        for (auto di = m_dimTypes.begin(); di != m_dimTypes.end(); ++di)
         {
             for (PointId id = 0; id < buffer.size(); ++id)
             {
-                fillBuf(buffer, pos, *di, *ti, id);
-                pos += Dimension::size(*ti);
+                fillBuf(buffer, pos, di->m_id, di->m_type, id);
+                pos += Dimension::size(di->m_type);
                 if (clicks++ % interrupt == 0)
-                    m_callback->invoke(clicks / m_dims.size());
+                    m_callback->invoke(clicks / m_dimTypes.size());
             }
         }
     }
@@ -975,11 +975,10 @@ void OciWriter::writeTile(PointBuffer const& buffer)
     {
         for (PointId id = 0; id < buffer.size(); ++id)
         {
-            auto ti = m_types.begin();
-            for (auto di = m_dims.begin(); di != m_dims.end(); ++di, ++ti)
+            for (auto di = m_dimTypes.begin(); di != m_dimTypes.end(); ++di)
             {
-                fillBuf(buffer, pos, *di, *ti, id);
-                pos += Dimension::size(*ti);
+                fillBuf(buffer, pos, di->m_id, di->m_type, id);
+                pos += Dimension::size(di->m_type);
             }
             if (id % 100 == 0)
                 m_callback->invoke(id);

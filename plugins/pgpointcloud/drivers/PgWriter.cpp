@@ -104,10 +104,9 @@ void PgWriter::processOptions(const Options& options)
 
     // Read other preferences
     m_overwrite = options.getValueOrDefault<bool>("overwrite", true);
-    m_patch_capacity =
-        options.getValueOrDefault<boost::uint32_t>("capacity", 400);
-    m_srid = options.getValueOrDefault<boost::uint32_t>("srid", 4326);
-    m_pcid = options.getValueOrDefault<boost::uint32_t>("pcid", 0);
+    m_patch_capacity = options.getValueOrDefault<uint32_t>("capacity", 400);
+    m_srid = options.getValueOrDefault<uint32_t>("srid", 4326);
+    m_pcid = options.getValueOrDefault<uint32_t>("pcid", 0);
     m_pack = options.getValueOrDefault<bool>("pack_ignored_fields", true);
     m_pre_sql = getOptions().getValueOrDefault<std::string>("pre_sql", "");
 }
@@ -263,7 +262,7 @@ uint32_t PgWriter::SetupSchema(uint32_t srid)
     }
 
     // Do we have any existing schemas in the POINTCLOUD_FORMATS table?
-    boost::uint32_t pcid = 0;
+    uint32_t pcid = 0;
     oss << "SELECT Count(pcid) FROM pointcloud_formats";
     char *schema_count_str = pg_query_once(m_session, oss.str());
     if (!schema_count_str)
@@ -274,7 +273,7 @@ uint32_t PgWriter::SetupSchema(uint32_t srid)
     oss.str("");
 
     // Create an XML output schema.
-    schema::Writer writer(m_dims, m_types);
+    schema::Writer writer(dbDimTypes());
     std::string compression;
     /* If the writer specifies a compression, we should set that */
     if (m_patch_compression_type == compression::CompressionType::Dimensional)
@@ -288,6 +287,7 @@ uint32_t PgWriter::SetupSchema(uint32_t srid)
 
     writer.setMetadata(m);
     std::string xml = writer.getXML();
+std::cerr << "XML = " << xml << "!\n";
 
     // Do any of the existing schemas match the one we want to use?
     if (schema_count > 0)
@@ -415,7 +415,7 @@ bool PgWriter::CheckTableExists(std::string const& name)
 
 void PgWriter::CreateTable(std::string const& schema_name,
     std::string const& table_name, std::string const& column_name,
-    boost::uint32_t pcid)
+    uint32_t pcid)
 {
     std::ostringstream oss;
     oss << "CREATE TABLE ";
@@ -457,35 +457,36 @@ void PgWriter::writeTile(PointBuffer const& buffer)
         throw pdal_error(oss.str());
     }
 
-    std::vector<char> buf = buffer.getPoints(m_dimTypes, 0, buffer.size());
-
-    /* We are always getting uncompressed bytes off the block_data */
-    /* so we always used compression type 0 (uncompressed) in writing our WKB */
-    static char syms[] = "0123456789ABCDEF";
-    m_hex.resize(buf.size() * 2);
-    for (size_t i = 0; i != buf.size(); i++)
-    {
-        m_hex[i * 2]   = syms[((buf[i] >> 4) & 0xf)];
-        m_hex[i * 2 + 1] = syms[buf[i] & 0xf];
-    }
+    std::vector<char> storage(m_packedPointSize);
+    std::string hexrep;
+    hexrep.resize(m_packedPointSize * buffer.size() * 2);
 
     m_insert.clear();
-    std::string::size_type position(0);
-    std::string::size_type string_size = m_hex.size() + 3000;
-    if (m_insert.capacity() < string_size)
-        m_insert.reserve(string_size);
-    m_insert.resize(string_size);
+    m_insert.reserve(hexrep.size() + 3000);
+
+    size_t pos = 0;
+    std::cerr << "Buffer size = " << buffer.size() << "!\n";
+    for (PointId idx = 0; idx < buffer.size(); ++idx)
+    {
+        size_t written = readPoint(buffer, idx, storage);
+
+        /* We are always getting uncompressed bytes off the block_data */
+        /* so we always used compression type 0 (uncompressed) in writing */
+        /* our WKB */
+        static char syms[] = "0123456789ABCDEF";
+        for (size_t i = 0; i != written; i++)
+        {
+            hexrep[pos++] = syms[((storage[i] >> 4) & 0xf)];
+            hexrep[pos++] = syms[storage[i] & 0xf];
+        }
+    }
+
     std::string insert_into("INSERT INTO ");
     std::string values(" (pa) VALUES ('");
 
-    m_insert.insert(position, insert_into);
-    position += insert_into.size();
-
-    m_insert.insert(position, m_table_name);
-    position += m_table_name.size();
-
-    m_insert.insert(position, values);
-    position += values.size();
+    m_insert.append(insert_into);
+    m_insert.append(m_table_name);
+    m_insert.append(values);
 
     std::ostringstream options;
 
@@ -512,14 +513,9 @@ void PgWriter::writeTile(PointBuffer const& buffer)
     // needs to be 4 bytes
     options << boost::format("%08x") % num_points;
 
-    m_insert.insert(position, options.str());
-    position += options.str().size();
-
-    m_insert.insert(position, m_hex);
-    position += m_hex.size();
-
-    std::string tail("')");
-    m_insert.insert(position, tail);
+    m_insert.append(options.str());
+    m_insert.append(hexrep);
+    m_insert.append("')");
 
     pg_execute(m_session, m_insert);
 }

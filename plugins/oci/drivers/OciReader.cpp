@@ -259,14 +259,11 @@ void OciReader::addDimensions(PointContextRef ctx)
     ctx.registerDim(Dimension::Id::Z);    
 
     for (auto di = dims.begin(); di != dims.end(); ++di)
-    {
         di->m_id = ctx.registerOrAssignDim(di->m_name, di->m_type);
-    }
 
     if (m_schemaFile.size())
     {
-        schema::Writer writer(m_block->m_schema.dims(),
-            m_block->m_schema.types());
+        schema::Writer writer(m_block->m_schema.dimTypes());
         std::string pcSchema = writer.getXML();
         std::ostream* out = FileUtils::createFile(m_schemaFile);
         out->write(pcSchema.c_str(), pcSchema.size());
@@ -313,35 +310,36 @@ point_count_t OciReader::readDimMajor(PointBuffer& buffer, BlockPtr block,
     for (auto di = dims.begin(); di != dims.end(); ++di)
     {
         schema::DimInfo& d = *di;
+        Dimension::Id::Enum id = d.m_id;
+        Dimension::Type::Enum type = d.m_type;
         PointId nextId = startId;
         char *pos = seekDimMajor(d, block);
         blockRemaining = numRemaining;
         numRead = 0;
         while (numRead < numPts && blockRemaining > 0)
         {
-            buffer.setField(d.m_id, d.m_type, nextId, pos);
-            pos += Dimension::size(d.m_type);
+            buffer.setField(id, type, nextId, pos);
+            pos += Dimension::size(type);
 
-            if (d.m_id == Dimension::Id::PointSourceId && m_updatePointSourceId)
-            {
-                buffer.setField(Dimension::Id::PointSourceId, nextId, block->obj_id);
-            }
+            if (id == Dimension::Id::PointSourceId && m_updatePointSourceId)
+                buffer.setField(Dimension::Id::PointSourceId, nextId,
+                    block->obj_id);
 
-            if (d.m_id == Dimension::Id::X)
+            if (id == Dimension::Id::X)
             {
                 double v = buffer.getFieldAs<double>(Dimension::Id::X, nextId);
                 v = v * block->xScale() + block->xOffset();
                 buffer.setField(Dimension::Id::X, nextId, v);
             }
 
-            if (d.m_id == Dimension::Id::Y)
+            if (id == Dimension::Id::Y)
             {
                 double v = buffer.getFieldAs<double>(Dimension::Id::Y, nextId);
                 v = v * block->yScale() + block->yOffset();
                 buffer.setField(Dimension::Id::Y, nextId, v);
             }
 
-            if (d.m_id == Dimension::Id::Z)
+            if (id == Dimension::Id::Z)
             {
                 double v = buffer.getFieldAs<double>(Dimension::Id::Z, nextId);
                 v = v * block->zScale() + block->zOffset();

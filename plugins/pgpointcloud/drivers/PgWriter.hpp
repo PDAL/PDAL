@@ -103,7 +103,6 @@ private:
     bool m_create_index;
     bool m_overwrite;
     std::string m_insert;
-    std::string m_hex;
     Orientation::Enum m_orientation;
     bool m_pack;
     std::string m_pre_sql;

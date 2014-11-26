@@ -322,44 +322,6 @@ Reader::Reader(std::string xml, std::string xsd)
 }
 
 
-Reader::Reader(std::istream* xml, std::istream *xsd) :
-    m_doc_options(XML_PARSE_NONET)
-{
-    if (!xml)
-        throw schema_generic_error("pdal::schema::Reader: xml istream pointer "
-            "was null!");
-
-    std::istream::pos_type size;
-
-    std::vector<char> data;
-    xml->seekg(0, std::ios::end);
-    size = xml->tellg();
-    data.resize(static_cast<std::vector<char>::size_type>(size));
-    xml->seekg(0, std::ios::beg);
-    xml->read(&data.front(), size);
-    xml->seekg(0, std::ios::beg);
-
-    m_xml = std::string(&data[0], data.size());
-
-    if (xsd)
-    {
-        std::istream::pos_type size;
-
-        std::vector<char> data;
-        xsd->seekg(0, std::ios::end);
-        size = xsd->tellg();
-        data.resize(static_cast<std::vector<char>::size_type>(size));
-        xsd->seekg(0, std::ios::beg);
-        xsd->read(&data.front(), size);
-        xsd->seekg(0, std::ios::end);
-
-        m_xsd = std::string(&data[0], data.size());
-    }
-
-    Initialize();
-    Load();
-}
-
 Reader::~Reader()
 {
 #ifdef PDAL_HAVE_LIBXML2
@@ -402,7 +364,7 @@ std::string Reader::remapOldNames(std::string const& input)
 MetadataNode Reader::LoadMetadata(xmlNode* startNode, MetadataNode& input)
 {
 //     Expect metadata in the following form
-//     We are going to skipp the root element because we are
+//     We are going to skip the root element because we are
 //     expecting to be given one with our input
 //     <pc:metadata>
 //         <Metadata name="root" type="">
@@ -683,11 +645,8 @@ void Writer::writeSchema(TextWriterPtr writer)
     xmlTextWriterPtr w = static_cast<xmlTextWriterPtr>(writer.get());
 
     int pos = 0;
-    auto ti = m_types.begin();
-    for (auto di = m_dims.begin(); di != m_dims.end(); ++di, ++ti, ++pos)
+    for (auto di = m_dimTypes.begin(); di != m_dimTypes.end(); ++di, ++pos)
     {
-        Dimension::Id::Enum d = *di;
-
         xmlTextWriterStartElementNS(w, (const xmlChar*)"pc",
             (const xmlChar*)"dimension", NULL);
 
@@ -698,24 +657,24 @@ void Writer::writeSchema(TextWriterPtr writer)
             (const xmlChar*)position.str().c_str());
 
         std::ostringstream size;
-        size << Dimension::size(*ti);
+        size << Dimension::size(di->m_type);
         xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc",
             (const xmlChar*)"size", NULL, (const xmlChar*)size.str().c_str());
 
-        std::string description = Dimension::description(d);
+        std::string description = Dimension::description(di->m_id);
         if (description.size())
             xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc",
                 (const xmlChar*)"description", NULL,
                 (const xmlChar*)description.c_str());
 
-        std::string name = Dimension::name(d);
+        std::string name = Dimension::name(di->m_id);
         if (name.size())
             xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc",
                 (const xmlChar*)"name", NULL, (const xmlChar*)name.c_str());
 
         xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc",
             (const xmlChar*)"interpretation", NULL,
-            (const xmlChar*) Dimension::interpretationName(*ti).c_str());
+            (const xmlChar*) Dimension::interpretationName(di->m_type).c_str());
 
         xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc",
             (const xmlChar*)"active", NULL, (const xmlChar*)"true");
@@ -728,7 +687,9 @@ void Writer::writeSchema(TextWriterPtr writer)
         orientation << "point";
     if (m_orientation == Orientation::DimensionMajor)
         orientation << "dimension";
-    xmlTextWriterWriteElementNS(w, (const xmlChar*) "pc", (const xmlChar*) "orientation", NULL, (const xmlChar*) orientation.str().c_str());
+    xmlTextWriterWriteElementNS(w, (const xmlChar*) "pc",
+        (const xmlChar*)"orientation", NULL,
+        (const xmlChar*)orientation.str().c_str());
 
     if (!m_metadata.empty())
     {

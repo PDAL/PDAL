@@ -39,7 +39,6 @@
 
 #include <string>
 #include <stdarg.h>
-//#include <functional>
 #include <vector>
 
 #ifdef PDAL_HAVE_LIBXML2
@@ -143,11 +142,11 @@ struct DimInfo
     std::string m_name;
     std::string m_description;
     uint32_t m_position;
-    Dimension::Type::Enum m_type;
     double m_min;
     double m_max;
     double m_scale;
     double m_offset;
+    Dimension::Type::Enum m_type;
     Dimension::Id::Enum m_id;
 };
 typedef std::vector<DimInfo> DimInfoList;
@@ -161,22 +160,19 @@ struct XMLSchema
     DimInfoList m_dims;
     XYZScale m_scale;  // To support quick access.
 
-    Dimension::IdList dims() const
+    DimTypeList dimTypes() const
     {
-        Dimension::IdList ids;
+        DimTypeList dimTypes;
+
         for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
         {
-            assert(di->m_id != Dimension::Id::Unknown);
-            ids.push_back(di->m_id);
+            DimType dimType;
+
+            dimType.m_id = di->m_id;
+            dimType.m_type = di->m_type;
+            dimTypes.push_back(dimType);
         }
-        return ids;
-    }
-    std::vector<Dimension::Type::Enum> types() const
-    {
-        std::vector<Dimension::Type::Enum> types;
-        for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-            types.push_back(di->m_type);
-        return types;
+        return dimTypes;
     }
 };
 
@@ -184,7 +180,6 @@ class PDAL_DLL Reader
 {
 public:
     Reader(std::string xml, std::string xsd = "");
-    Reader(std::istream* xml, std::istream* xsd);
     ~Reader();
 
     XMLSchema schema() const
@@ -226,10 +221,9 @@ private:
 class PDAL_DLL Writer
 {
 public:
-    Writer(const Dimension::IdList& ids,
-        const std::vector<Dimension::Type::Enum>& types,
-        Orientation::Enum orientation= Orientation::PointMajor) :
-            m_dims(ids), m_types(types), m_orientation(orientation)
+    Writer(const DimTypeList& dimTypes,
+        Orientation::Enum orientation = Orientation::PointMajor) :
+            m_dimTypes(dimTypes), m_orientation(orientation)
         {}
     void setMetadata(MetadataNode& m)
         { m_metadata = m; }
@@ -240,8 +234,7 @@ private:
     void writeSchema(TextWriterPtr w);
 
     void* m_global_context;
-    Dimension::IdList m_dims;
-    std::vector<Dimension::Type::Enum> m_types;
+    DimTypeList m_dimTypes;
     MetadataNode m_metadata;
     Orientation::Enum m_orientation;
 

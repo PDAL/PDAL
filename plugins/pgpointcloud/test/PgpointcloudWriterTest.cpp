@@ -148,6 +148,7 @@ BOOST_AUTO_TEST_CASE(testWrite)
         pdal::Options options;
         options.add(opt_filename);
         reader.setOptions(options);
+
         std::unique_ptr<Writer> writer(wc());
         writer->setOptions(getWriterOptions());
         writer->setInput(&reader);
@@ -158,10 +159,8 @@ BOOST_AUTO_TEST_CASE(testWrite)
         PointBufferSet written = writer->execute(ctx);
 
         point_count_t count(0);
-        for(auto i = written.begin(); i != written.end(); ++i)
-        {
+        for (auto i = written.begin(); i != written.end(); ++i)
             count += (*i)->size();
-        }
         BOOST_CHECK_EQUAL(written.size(), 1);
         // BOOST_CHECK_EQUAL(count, 0);
         BOOST_CHECK_EQUAL(count, 1065);

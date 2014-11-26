@@ -39,24 +39,115 @@ void DbWriter::ready(PointContextRef ctx)
 {
     using namespace Dimension;
 
-    m_pointSize = 0;
-    // Temp.
     m_dimTypes = ctx.dimTypes();
-    m_dims = ctx.dims();
 
-    // If we find an X, Y or Z, remove it and stick it at the end.  This allows
-    // the buffer that we build based on the dimensions to be modified from
-    // source type (doubles) to 
-
-    // Determine types for the dimensions.  We use the default types when
-    // they exist, float otherwise.
-    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+    auto cmp = [](const DimType& d1, const DimType& d2) -> bool
     {
-        Type::Enum type = ctx.dimType(*di);
+        long id1 = d1.m_id;
+        long id2 = d2.m_id;
 
-        m_types.push_back(type);
-        m_pointSize += size(type);
+        // Put X, Y and Z at the end of the list.
+        if (id1 == Id::X || id1 == Id::Y || id1 == Id::Z)
+            id1 += 1000000;
+        if (id2 == Id::X || id2 == Id::Y || id2 == Id::Z)
+            id2 += 1000000;
+        return id1 < id2;
+    };
+
+    // Sorting messes up the offsets in the DimType objects.
+    std::sort(m_dimTypes.begin(), m_dimTypes.end(), cmp);
+
+    // Now store away the offset of X, Y and Z if they exist.
+    m_xPackedOffset = -1;
+    m_yPackedOffset = -1;
+    m_zPackedOffset = -1;
+    int offset = 0;
+    for (auto di = m_dimTypes.begin(); di != m_dimTypes.end(); ++di)
+    {
+        if (di->m_id == Id::X)
+            m_xPackedOffset = offset;
+        else if (di->m_id == Id::Y)
+            m_yPackedOffset = offset;
+        else if (di->m_id == Id::Z)
+            m_zPackedOffset = offset;
+        offset += Dimension::size(di->m_type);
     }
+    m_packedPointSize = offset;
+}
+
+
+/// Get a dimension type list for the storage schema.
+/// \return  Storage dimension types.
+DimTypeList DbWriter::dbDimTypes() const
+{
+    using namespace Dimension;
+
+    if (!locationScaling())
+        return m_dimTypes;
+
+    DimTypeList dimTypes(m_dimTypes);
+    for (auto di = dimTypes.begin(); di != dimTypes.end(); ++di)
+        if (di->m_id == Id::X || di->m_id == Id::Y || di->m_id == Id::Z)
+            di->m_type = Type::Signed32;
+    return dimTypes;
+}
+
+
+/// Read a point's data packed into a buffer.
+/// \param[in] idx  Index of point to read.
+/// \param[in] buf  Buffer to fill with data.
+/// \return  Number of bytes written to buffer.
+size_t DbWriter::readPoint(const PointBuffer& pb, PointId idx,
+   std::vector<char>& outbuf)
+{
+    pb.getPackedPoint(m_dimTypes, idx, outbuf.data());
+    
+    auto iconvert = [](const XForm& xform, const char *inpos, char *outpos)
+    {
+        double d;
+        int i;
+
+        memcpy(&d, inpos, sizeof(double));
+        d = (d - xform.m_offset) / xform.m_scale;
+        i = boost::numeric_cast<int32_t>(lround(d));
+        memcpy(outpos, &i, sizeof(i));
+    };
+
+    if (locationScaling())
+    {
+        int outOffset;
+
+        if (m_xPackedOffset >= 0)
+            outOffset = m_xPackedOffset;
+        else if (m_yPackedOffset >= 0)
+            outOffset = m_yPackedOffset;
+        else if (m_zPackedOffset >= 0)
+            outOffset = m_zPackedOffset;
+        else
+            outOffset = m_packedPointSize;  //So we return the proper size.
+
+        if (m_xPackedOffset >= 0)
+        {
+            iconvert(m_xXform, outbuf.data() + m_xPackedOffset,
+                outbuf.data() + outOffset);
+            outOffset += sizeof(int);
+        }
+        if (m_yPackedOffset >= 0)
+        {
+            iconvert(m_yXform, outbuf.data() + m_yPackedOffset,
+                outbuf.data() + outOffset);
+            outOffset += sizeof(int);
+        }
+        if (m_zPackedOffset >= 0)
+        {
+            iconvert(m_zXform, outbuf.data() + m_zPackedOffset,
+                outbuf.data() + outOffset);
+            outOffset += sizeof(int);
+        }
+        return outOffset;
+    }
+    else
+        return m_packedPointSize;
 }
 
 /// Determine if X, Y and Z values should be written as Signed32 along with
@@ -68,10 +159,5 @@ bool DbWriter::locationScaling() const
     return (m_xXform.nonstandard() || m_yXform.nonstandard() ||
         m_zXform.nonstandard());
 }
-
-/**
-        if (id == Id::X || id == Id::Y || id == Id::Z && locationScaling())
-            type = Type::Signed32;
-**/
 
 } // namespace pdal

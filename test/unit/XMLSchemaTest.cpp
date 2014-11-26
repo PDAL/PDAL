@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(test_schema_read)
     MetadataNode m1prime = m.add("m1prime", "Some other metadata");
     m1.add("uuid", boost::uuids::nil_uuid());
 
-    pdal::schema::Writer writer(s1.dims(), s1.types());
+    pdal::schema::Writer writer(s1.dimTypes());
     writer.setMetadata(m);
     std::string xml_output = writer.getXML();
 

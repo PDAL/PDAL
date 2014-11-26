@@ -171,27 +171,17 @@ public:
     Dimension::IdList dims() const
         { return m_context.dims(); }
 
-    std::vector<char> getPoints(const DimTypeList& dims,
-        PointId start, PointId end) const
+    /// Fill a buffer with point data specified by the dimension list.
+    /// \param[in] dims  List of dimensions/types to retrieve.
+    /// \param[in] idx   Index of point to get.
+    /// \param[in] buf   Pointer to buffer to fill.
+    void getPackedPoint(const DimTypeList& dims, PointId idx, char *buf) const
     {
-        // The error case (end > start) is written this way so as not to
-        // lose return-value optimization.
-        size_t size = 0;
-        if (end > start)
-            for (auto di = dims.begin(); di != dims.end(); ++di)
-                size += Dimension::size(di->m_type);
-
-        std::vector<char> v(size);
-        char *c = v.data(); 
-        for (PointId idx = start; idx < end; ++idx)
+        for (auto di = dims.begin(); di != dims.end(); ++di)
         {
-           for (auto di = dims.begin(); di != dims.end(); ++di)
-           {
-               getField(c, di->m_id, di->m_type, idx); 
-               c += Dimension::size(di->m_type);
-           }
+            getField(buf, di->m_id, di->m_type, idx); 
+            buf += Dimension::size(di->m_type);
         }
-        return v;
     }
 
     std::ostream& getBytes(std::ostream& strm, PointId start, PointId end) const
