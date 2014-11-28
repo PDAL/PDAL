@@ -87,6 +87,12 @@ public:
     template<class T>
     T getFieldAs(Dimension::Id::Enum dim, PointId pointIndex) const;
 
+    /// Formerly private getFieldInternal(dim, idx) but useful to external code when type
+    /// desired matches the native stored type. This avoids calling getFieldAs()
+    //  unnecessarily in time-critical app since type is already known.
+    template<class T>
+    T getField(Dimension::Id::Enum dim, PointId pointIndex) const;
+
     template<typename T>
     void setField(Dimension::Id::Enum dim, PointId idx, T val);
 
@@ -148,7 +154,7 @@ public:
     template <typename T>
     bool compare(Dimension::Id::Enum dim, PointId id1, PointId id2)
     {
-        return (getFieldInternal<T>(dim, id1) < getFieldInternal<T>(dim, id2));
+        return (getField<T>(dim, id1) < getField<T>(dim, id2));
     }
 
     bool compare(Dimension::Id::Enum dim, PointId id1, PointId id2)
@@ -269,15 +275,14 @@ private:
 
     inline void setFieldInternal(Dimension::Id::Enum dim, PointId pointIndex,
         const void *value);
-    template<class T>
-    T getFieldInternal(Dimension::Id::Enum dim, PointId pointIndex) const;
+
     inline void getFieldInternal(Dimension::Id::Enum dim, PointId pointIndex,
         void *value) const;
 };
 
 
 template <class T>
-T PointBuffer::getFieldInternal(Dimension::Id::Enum dim, PointId id) const
+T PointBuffer::getField(Dimension::Id::Enum dim, PointId id) const
 {
     T t;
 
@@ -297,34 +302,34 @@ inline T PointBuffer::getFieldAs(Dimension::Id::Enum dim,
     switch (dd->type())
     {
     case Dimension::Type::Float:
-        val = getFieldInternal<float>(dim, pointIndex);
+        val = getField<float>(dim, pointIndex);
         break;
     case Dimension::Type::Double:
-        val = getFieldInternal<double>(dim, pointIndex);
+        val = getField<double>(dim, pointIndex);
         break;
     case Dimension::Type::Signed8:
-        val = getFieldInternal<int8_t>(dim, pointIndex);
+        val = getField<int8_t>(dim, pointIndex);
         break;
     case Dimension::Type::Signed16:
-        val = getFieldInternal<int16_t>(dim, pointIndex);
+        val = getField<int16_t>(dim, pointIndex);
         break;
     case Dimension::Type::Signed32:
-        val = getFieldInternal<int32_t>(dim, pointIndex);
+        val = getField<int32_t>(dim, pointIndex);
         break;
-    case Dimension::Type::Signed64:
-        val = static_cast<double>(getFieldInternal<int64_t>(dim, pointIndex));
+    case Dimension::Type::Signed64: // Why is this not cast to a long int?
+        val = static_cast<double>(getField<int64_t>(dim, pointIndex));
         break;
     case Dimension::Type::Unsigned8:
-        val = getFieldInternal<uint8_t>(dim, pointIndex);
+        val = getField<uint8_t>(dim, pointIndex);
         break;
     case Dimension::Type::Unsigned16:
-        val = getFieldInternal<uint16_t>(dim, pointIndex);
+        val = getField<uint16_t>(dim, pointIndex);
         break;
     case Dimension::Type::Unsigned32:
-        val = getFieldInternal<uint32_t>(dim, pointIndex);
+        val = getField<uint32_t>(dim, pointIndex);
         break;
     case Dimension::Type::Unsigned64:
-        val = static_cast<double>(getFieldInternal<uint64_t>(dim, pointIndex));
+        val = static_cast<double>(getField<uint64_t>(dim, pointIndex));
         break;
     case Dimension::Type::None:
     default:
