@@ -37,7 +37,7 @@
 #include <BufferReader.hpp>
 #include <pdal/filters/Crop.hpp>
 #include <pdal/filters/Reprojection.hpp>
-#include <pdal/kernel/Support.hpp>
+#include "KernelSupport.hpp"
 #include <pdal/StageFactory.hpp>
 
 namespace pdal
