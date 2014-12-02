@@ -23,6 +23,11 @@ set(PDAL_KERNEL_PATH kernel)
 set(PDAL_KERNEL_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_KERNEL_PATH}")
 set(PDAL_KERNEL_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_KERNEL_PATH}")
 
+if (PDAL_HAVE_LIBXML2)
+    SET (PDAL_XML_HEADER ${PDAL_HEADERS_DIR}/XMLSchema.hpp)
+    SET (PDAL_XML_SRC XMLSchema.cpp)
+endif()
+
 #
 # base
 #
@@ -64,7 +69,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/UserCallback.hpp"
   "${PDAL_HEADERS_DIR}/Utils.hpp"
   "${PDAL_HEADERS_DIR}/Writer.hpp"
-  "${PDAL_HEADERS_DIR}/XMLSchema.hpp"
   "${PDAL_HEADERS_DIR}/third/nanoflann.hpp"
   "${PDAL_HEADERS_DIR}/third/md5-pdal.h"
   "${PDAL_HEADERS_DIR}/third/string_ref.hpp"
@@ -74,11 +78,8 @@ set(PDAL_BASE_HPP
     ${PDAL_KERNEL_HEADERS}/KernelInfo.hpp
     ${PDAL_KERNEL_HEADERS}/Kernels.hpp
     ${PDAL_KERNEL_HEADERS}/Support.hpp
+    ${PDAL_XML_HEADER}
 )
-
-if (PDAL_HAVE_LIBXML2)
-  SET (PDAL_XML_SRC XMLSchema.cpp)
-endif()
 
 set(PDAL_BASE_CPP
   Bounds.cpp

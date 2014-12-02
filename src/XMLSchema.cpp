@@ -53,7 +53,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-
 namespace
 {
 
@@ -76,11 +75,8 @@ void print_element_names(xmlNode * a_node)
 
 } // anonymous namespace
 
-
 namespace pdal
 {
-
-#ifdef PDAL_HAVE_LIBXML2
 
 void OCISchemaStructuredErrorHandler
 (void * userData, xmlErrorPtr error)
@@ -177,14 +173,11 @@ void OCISchemaGenericErrorHandler
 
     std::cerr << "Generic error: '" << error << "'" << std::endl;
 }
-#endif
 
 
 XMLSchema::~XMLSchema()
 {
-#ifdef PDAL_HAVE_LIBXML2
     xmlCleanupParser();
-#endif
 }
 
 
@@ -219,7 +212,6 @@ xmlDocPtr XMLSchema::init(const std::string& xml, const std::string& xsd)
 {
     xmlParserOption parserOption(XML_PARSE_NONET);
 
-#ifdef PDAL_HAVE_LIBXML2
     LIBXML_TEST_VERSION
 
     xmlSetGenericErrorFunc(m_global_context,
@@ -261,7 +253,6 @@ bool XMLSchema::validate(xmlDocPtr doc, const std::string& xsd)
     xmlSchemaFreeValidCtxt(validCtxt);
 
     return valid;
-#endif
 }
 
 
@@ -278,7 +269,7 @@ std::string XMLSchema::remapOldNames(const std::string& input)
     return input;
 }
 
-#ifdef PDAL_HAVE_LIBXML2
+
 bool XMLSchema::loadMetadata(xmlNode *startNode, MetadataNode& input)
 {
 //     Expect metadata in the following form
@@ -322,13 +313,10 @@ bool XMLSchema::loadMetadata(xmlNode *startNode, MetadataNode& input)
     }
     return true;
 }
-#endif
 
 
 bool XMLSchema::load(xmlDocPtr doc)
 {
-#ifdef PDAL_HAVE_LIBXML2
-
     xmlNode* root = xmlDocGetRootElement(doc);
     // print_element_names(root);
 
@@ -446,15 +434,12 @@ bool XMLSchema::load(xmlDocPtr doc)
         m_dims.push_back(dim);
     }
     std::sort(m_dims.begin(), m_dims.end());
-#endif
     return true;
 }
 
 
 std::string XMLSchema::getXML(const DimTypeList& dims, MetadataNode m)
 {
-#ifdef PDAL_HAVE_LIBXML2
-
     xmlBuffer *b = xmlBufferCreate();
     xmlTextWriterPtr w = xmlNewTextWriterMemory(b, 0);
 
@@ -479,9 +464,6 @@ std::string XMLSchema::getXML(const DimTypeList& dims, MetadataNode m)
     xmlBufferFree(b);
 
     return output;
-#else
-    return std::string();
-#endif
 }
 
 
@@ -510,8 +492,6 @@ const XMLDim& XMLSchema::xmlDim(Dimension::Id::Enum id) const
 void XMLSchema::write(xmlTextWriterPtr w, const DimTypeList& dims,
     MetadataNode m)
 {
-#ifdef PDAL_HAVE_LIBXML2
-
     int pos = 0;
     for (auto di = dims.begin(); di != dims.end(); ++di, ++pos)
     {
@@ -579,8 +559,6 @@ void XMLSchema::write(xmlTextWriterPtr w, const DimTypeList& dims,
 
     xmlTextWriterEndElement(w);
     xmlTextWriterFlush(w);
-
-#endif
 }
 
 } // namespace pdal

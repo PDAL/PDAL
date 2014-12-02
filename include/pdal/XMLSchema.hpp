@@ -34,6 +34,12 @@
 
 #pragma once
 
+#include <pdal/pdal_internal.hpp>
+
+#ifndef PDAL_HAVE_LIBXML2
+#error "Including XMLSchema.hpp without libxml2 - build problem."
+#endif
+
 #include <pdal/Dimension.hpp>
 #include <pdal/Metadata.hpp>
 
@@ -41,7 +47,6 @@
 #include <stdarg.h>
 #include <vector>
 
-#ifdef PDAL_HAVE_LIBXML2
 #include <libxml/parser.h>
 #include <libxml/xmlschemas.h>
 
@@ -51,22 +56,12 @@
 #include <libxml/xmlIO.h>
 #include <libxml/encoding.h>
 #include <libxml/xmlwriter.h>
-#endif
 
 namespace pdal
 {
 
-#ifdef PDAL_HAVE_LIBXML2
 void OCISchemaGenericErrorHandler(void * ctx, const char* message, ...);
 void OCISchemaStructuredErrorHandler(void * userData, xmlErrorPtr error);
-#endif
-
-struct XYZScale
-{
-    XForm m_x;
-    XForm m_y;
-    XForm m_z;
-};
 
 struct XMLDim
 {
@@ -116,7 +111,6 @@ public:
 private:
     Orientation::Enum m_orientation;
     XMLDimList m_dims;
-    XYZScale m_scale;  // To support quick access.
     void* m_global_context;
     MetadataNode m_metadata;
 
@@ -129,7 +123,6 @@ private:
     bool load(xmlDocPtr doc);
     void write(xmlTextWriterPtr w, const DimTypeList& dims, MetadataNode m);
 };
-
 
 } // namespace pdal
 
