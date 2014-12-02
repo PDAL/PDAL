@@ -134,7 +134,7 @@ private:
     mutable uint32_t m_pcid;
     mutable point_count_t m_cached_point_count;
     mutable point_count_t m_cached_max_points;
-    schema::XMLSchema m_schema;
+    XMLSchema m_schema;
 
     bool m_atEnd;
     size_t m_point_size;

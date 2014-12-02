@@ -203,10 +203,10 @@ void PgReader::addDimensions(PointContextRef ctx)
     if (!xml_str)
         throw pdal_error("Unable to fetch schema from `pointcloud_formats`");
 
-    m_schema = schema::Reader(xml_str).schema();
+    m_schema.read(xml_str);
     free(xml_str);
 
-    schema::DimInfoList& dims = m_schema.m_dims;
+    XMLDimList dims = m_schema.dims();
     for (auto di = dims.begin(); di != dims.end(); ++di)
         di->m_id = ctx.registerOrAssignDim(di->m_name, di->m_type);
 }
@@ -250,7 +250,7 @@ void PgReader::ready(PointContextRef ctx)
         setSpatialReference(fetchSpatialReference());
 
     m_point_size = 0;
-    schema::DimInfoList& dims = m_schema.m_dims;
+    XMLDimList dims = m_schema.dims();
     for (auto di = dims.begin(); di != dims.end(); ++di)
         m_point_size += Dimension::size(di->m_type);
 
@@ -307,12 +307,12 @@ point_count_t PgReader::readPgPatch(PointBuffer& buffer, point_count_t numPts)
     size_t offset = ((m_patch.count - m_patch.remaining) * m_point_size);
     uint8_t *pos = &(m_patch.binary.front()) + offset;
 
-    schema::DimInfoList& dims = m_schema.m_dims;
+    XMLDimList dims = m_schema.dims();
     while (numRead < numPts && numRemaining > 0)
     {
         for (auto di = dims.begin(); di != dims.end(); ++di)
         {
-            schema::DimInfo& d = *di;
+            XMLDim& d = *di;
             buffer.setField(d.m_id, d.m_type, nextId, pos);
             pos += Dimension::size(d.m_type);
         }

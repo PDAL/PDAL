@@ -53,81 +53,13 @@
 #include <libxml/xmlwriter.h>
 #endif
 
-#include <boost/shared_ptr.hpp>
-//#include <boost/concept_check.hpp>
-//#include <boost/function.hpp>
-
 namespace pdal
-{
-namespace schema
 {
 
 #ifdef PDAL_HAVE_LIBXML2
-
 void OCISchemaGenericErrorHandler(void * ctx, const char* message, ...);
 void OCISchemaStructuredErrorHandler(void * userData, xmlErrorPtr error);
 #endif
-
-class schema_error : public pdal_error
-{
-public:
-    schema_error(std::string const& msg)
-        : pdal_error(msg)
-    {}
-};
-
-class schema_loading_error : public schema_error
-{
-public:
-    schema_loading_error(std::string const& msg)
-        : schema_error(msg)
-    {}
-};
-
-class schema_writing_error : public schema_error
-{
-public:
-    schema_writing_error(std::string const& msg)
-        : schema_error(msg)
-    {}
-};
-
-
-class schema_validation_error : public schema_error
-{
-public:
-    schema_validation_error(std::string const& msg)
-        : schema_error(msg)
-    {}
-};
-
-class schema_parsing_error : public schema_error
-{
-public:
-    schema_parsing_error(std::string const& msg)
-        : schema_error(msg)
-    {}
-};
-
-class schema_generic_error : public schema_error
-{
-public:
-    schema_generic_error(std::string const& msg)
-        : schema_error(msg)
-    {}
-};
-
-
-// We're going to put all of our libxml2 primitives into shared_ptrs
-// that have custom deleters that clean up after themselves so we
-// have a good chance at having clean exception-safe code
-typedef boost::shared_ptr<void> DocPtr;
-typedef boost::shared_ptr<void> SchemaParserCtxtPtr;
-typedef boost::shared_ptr<void> SchemaPtr;
-typedef boost::shared_ptr<void> SchemaValidCtxtPtr;
-typedef boost::shared_ptr<void> TextWriterPtr;
-typedef boost::shared_ptr<void> BufferPtr;
-typedef boost::shared_ptr<void> CharPtr;
 
 struct XYZScale
 {
@@ -136,112 +68,68 @@ struct XYZScale
     XForm m_z;
 };
 
-struct DimInfo
+struct XMLDim
 {
-    DimInfo() : m_min(0.0), m_max(0.0), m_scale(1.0), m_offset(0.0) {};
+    XMLDim() : m_min(0.0), m_max(0.0)
+    {}
+
     std::string m_name;
     std::string m_description;
     uint32_t m_position;
     double m_min;
     double m_max;
-    double m_scale;
-    double m_offset;
+    XForm m_xform;
     Dimension::Type::Enum m_type;
     Dimension::Id::Enum m_id;
 };
-typedef std::vector<DimInfo> DimInfoList;
-inline bool operator < (const DimInfo& d1, const DimInfo& d2)
+typedef std::vector<XMLDim> XMLDimList;
+inline bool operator < (const XMLDim& d1, const XMLDim& d2)
     { return d1.m_position < d2.m_position; }
 
-struct XMLSchema
-{
-    XMLSchema() : m_orientation(Orientation::PointMajor) {};
-    Orientation::Enum m_orientation;
-    DimInfoList m_dims;
-    XYZScale m_scale;  // To support quick access.
-
-    DimTypeList dimTypes() const
-    {
-        DimTypeList dimTypes;
-
-        for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-        {
-            DimType dimType;
-
-            dimType.m_id = di->m_id;
-            dimType.m_type = di->m_type;
-            dimTypes.push_back(dimType);
-        }
-        return dimTypes;
-    }
-};
-
-class PDAL_DLL Reader
+class XMLSchema
 {
 public:
-    Reader(std::string xml, std::string xsd = "");
-    ~Reader();
+    XMLSchema(Orientation::Enum orientation = Orientation::PointMajor) :
+        m_orientation(orientation)
+    {}
+    ~XMLSchema();
 
-    XMLSchema schema() const
-        { return m_schema; }
+    void read(std::string xml, std::string xsd = "");
+    DimTypeList dimTypes() const;
+    XMLDimList dims() const
+        { return m_dims; }
+
     MetadataNode getMetadata() const
         { return m_metadata;}
-
-protected:
-    void Initialize();
-    void Load();
-
-private:
-#ifdef PDAL_HAVE_LIBXML2
-    pdal::MetadataNode LoadMetadata(xmlNode* node, pdal::MetadataNode& input);
-    std::string remapOldNames(std::string const& input);
-
-    DocPtr m_doc;
-    DocPtr m_schema_doc;
-
-    SchemaParserCtxtPtr m_schema_parser_ctx;
-    SchemaPtr m_schema_ptr;
-    SchemaValidCtxtPtr m_schema_valid_ctx;
-
-    xmlParserOption m_doc_options;
-#endif
-
-    void *m_global_context;
-    std::string m_xml;
-    std::string m_xsd;
-    uint32_t m_field_position;
-    XMLSchema m_schema;
-    MetadataNode m_metadata;
-
-    Reader& operator=(const Reader&); // not implemented
-    Reader(const Reader&); // not implemented;
-};
-
-
-class PDAL_DLL Writer
-{
-public:
-    Writer(const DimTypeList& dimTypes,
-        Orientation::Enum orientation = Orientation::PointMajor) :
-            m_dimTypes(dimTypes), m_orientation(orientation)
-        {}
-    void setMetadata(MetadataNode& m)
-        { m_metadata = m; }
+    std::string getXML(const DimTypeList& dims,
+            MetadataNode m = MetadataNode());
     std::string getXML();
+    void setXForm(Dimension::Id::Enum id, XForm xform)
+        { xmlDim(id).m_xform = xform; }
+    XForm xForm(Dimension::Id::Enum id) const
+        { return xmlDim(id).m_xform; }
+    void setOrientation(Orientation::Enum orientation)
+        { m_orientation = orientation; }
+    Orientation::Enum orientation() const
+        { return m_orientation; }
 
 private:
-    void write(TextWriterPtr w);
-    void writeSchema(TextWriterPtr w);
-
-    void* m_global_context;
-    DimTypeList m_dimTypes;
-    MetadataNode m_metadata;
     Orientation::Enum m_orientation;
+    XMLDimList m_dims;
+    XYZScale m_scale;  // To support quick access.
+    void* m_global_context;
+    MetadataNode m_metadata;
 
-    Writer& operator=(const Writer&); // not implemented
-    Writer(const Writer&); // not implemented;
+    XMLDim& xmlDim(Dimension::Id::Enum id);
+    const XMLDim& xmlDim(Dimension::Id::Enum id) const;
+    xmlDocPtr init(const std::string& xml, const std::string& xsd);
+    bool validate(xmlDocPtr doc, const std::string& xsd);
+    std::string remapOldNames(const std::string& input);
+    bool loadMetadata(xmlNode *startNode, MetadataNode& input);
+    bool load(xmlDocPtr doc);
+    void write(xmlTextWriterPtr w, const DimTypeList& dims, MetadataNode m);
 };
 
-} // namespace schema
+
 } // namespace pdal
 

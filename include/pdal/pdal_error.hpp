@@ -283,14 +283,6 @@ public:
     {}
 };
 
-class schema_error : public std::runtime_error
-{
-public:
-    schema_error(std::string const& msg)
-        : std::runtime_error(msg)
-    {}
-};
-
 class buffer_error : public std::runtime_error
 {
 public:

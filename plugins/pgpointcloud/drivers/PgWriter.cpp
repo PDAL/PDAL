@@ -273,7 +273,6 @@ uint32_t PgWriter::SetupSchema(uint32_t srid)
     oss.str("");
 
     // Create an XML output schema.
-    schema::Writer writer(dbDimTypes());
     std::string compression;
     /* If the writer specifies a compression, we should set that */
     if (m_patch_compression_type == compression::CompressionType::Dimensional)
@@ -285,8 +284,8 @@ uint32_t PgWriter::SetupSchema(uint32_t srid)
     MetadataNode m = metadata.getNode();
     m.add("compression", compression);
 
-    writer.setMetadata(m);
-    std::string xml = writer.getXML();
+    XMLSchema schema;
+    std::string xml = schema.getXML(dbDimTypes(), m);
 std::cerr << "XML = " << xml << "!\n";
 
     // Do any of the existing schemas match the one we want to use?

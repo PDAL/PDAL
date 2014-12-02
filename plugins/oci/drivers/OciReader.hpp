@@ -81,10 +81,10 @@ private:
         point_count_t numPts);
     point_count_t readPointMajor(PointBuffer& buffer, BlockPtr block,
         point_count_t numPts);
-    char *seekDimMajor(const schema::DimInfo& d, BlockPtr block);
+    char *seekDimMajor(const XMLDim& d, BlockPtr block);
     char *seekPointMajor(BlockPtr block);
     bool readOci(Statement stmt, BlockPtr block);
-    schema::XMLSchema *findSchema(Statement stmt, BlockPtr block);
+    XMLSchema *findSchema(Statement stmt, BlockPtr block);
 
     Connection m_connection;
     Statement m_stmt;
@@ -95,7 +95,7 @@ private:
     bool m_updatePointSourceId;
     boost::optional<SpatialReference> m_spatialRef;
     bool m_atEnd;
-    std::map<int32_t, schema::XMLSchema> m_schemas;
+    std::map<int32_t, XMLSchema> m_schemas;
 
     OciReader& operator=(const OciReader&); // not implemented
     OciReader(const OciReader&); // not implemented
