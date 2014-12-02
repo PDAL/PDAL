@@ -39,7 +39,6 @@
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/filters/Stats.hpp>
-#include <pdal/XMLSchema.hpp>
 
 #include <boost/property_tree/xml_parser.hpp>
 
