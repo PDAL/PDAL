@@ -31,5 +31,8 @@ set(incs
   KernelSupport.hpp
 )
 
+if (NOT WIN32)
+    add_definitions("-fPIC")
+endif()
 add_library(kernelcommon OBJECT ${srcs} ${incs})
 set(PDAL_TARGET_OBJECTS ${PDAL_TARGET_OBJECTS} $<TARGET_OBJECTS:kernelcommon> PARENT_SCOPE)
