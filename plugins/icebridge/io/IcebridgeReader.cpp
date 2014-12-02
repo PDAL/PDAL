@@ -38,7 +38,7 @@
 
 #include <map>
 
-CREATE_READER_PLUGIN(icebridge, pdal::drivers::icebridge::IcebridgeReader)
+CREATE_READER_PLUGIN(icebridge, pdal::IcebridgeReader)
 
 namespace
 {
@@ -60,10 +60,6 @@ namespace
 }
 
 namespace pdal
-{
-namespace drivers
-{
-namespace icebridge
 {
 
 Options IcebridgeReader::getDefaultOptions()
@@ -185,7 +181,4 @@ bool IcebridgeReader::eof()
     return m_index >= m_hdf5Handler.getNumPoints();
 }
 
-} // namespace icebridge
-} // namespace drivers
 } // namespace pdal
-

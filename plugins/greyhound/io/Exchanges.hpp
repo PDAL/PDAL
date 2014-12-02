@@ -44,10 +44,6 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace greyhound
-{
 namespace exchanges
 {
 
@@ -337,7 +333,4 @@ public:
 };
 
 } // namespace exchanges
-} // namespace greyhound
-} // namespace drivers
 } // namespace pdal
-

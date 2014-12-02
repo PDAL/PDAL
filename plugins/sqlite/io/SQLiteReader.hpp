@@ -44,10 +44,6 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace sqlite
-{
 
 class PDAL_DLL SQLiteReader : public pdal::Reader
 {
@@ -90,7 +86,4 @@ private:
     SQLiteReader(const SQLiteReader&); // not implemented
 };
 
-} // namespace sqlite
-} // namespace drivers
 } // namespace pdal
-

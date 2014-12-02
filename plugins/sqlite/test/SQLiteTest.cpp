@@ -199,7 +199,7 @@ BOOST_AUTO_TEST_CASE(SqliteTest_test_simple_las)
             {
                 // Read the data
 
-    //             pdal::drivers::sqlite::SQLiteReader reader;
+    //             pdal::SQLiteReader reader;
                 std::unique_ptr<Reader> reader(rc());
                 reader->setOptions(sqliteOptions);
                 PointContext ctx;

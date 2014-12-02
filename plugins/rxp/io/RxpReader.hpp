@@ -50,10 +50,6 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace rxp
-{
 
 
 struct Inclination
@@ -179,6 +175,4 @@ private:
 };
 
 
-}
-}
-} // namespace pdal::drivers::rxp
+} // namespace pdal

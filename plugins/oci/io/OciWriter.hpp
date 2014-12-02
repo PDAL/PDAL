@@ -44,10 +44,6 @@ pdal::Writer* createOciWriter();
 
 namespace pdal
 {
-namespace drivers
-{
-namespace oci
-{
 
 class PDAL_DLL OciWriter : public pdal::Writer
 {
@@ -155,7 +151,4 @@ private:
     std::string m_connSpec;
 };
 
-} // namespace oci
-} // namespace drivers
 } // namespace pdal
-

@@ -48,7 +48,7 @@ Options getWriterOptions()
 {
     Options options;
 
-    options.add(pdal::Option("connection", drivers::pgpointcloud::testDbTempConn));
+    options.add(pdal::Option("connection", testDbTempConn));
     options.add(Option("table", "pdal_test_table"));
     options.add(Option("srid", "4326"));
     options.add(Option("capacity", "10000"));
@@ -62,8 +62,8 @@ struct PgpointcloudWriterTestFixture
 {
     PgpointcloudWriterTestFixture()
         : m_masterConnection(
-                pdal::drivers::pgpointcloud::pg_connect(
-                    pdal::drivers::pgpointcloud::testDbConn))
+                pdal::pg_connect(
+                    pdal::testDbConn))
         , m_testConnection(NULL)
     {
         // Silence those pesky notices
@@ -73,17 +73,17 @@ struct PgpointcloudWriterTestFixture
 
         std::stringstream createDbSql;
         createDbSql << "CREATE DATABASE " <<
-            pdal::drivers::pgpointcloud::testDbTempname << " TEMPLATE template0";
+            pdal::testDbTempname << " TEMPLATE template0";
         executeOnMasterDb(createDbSql.str());
-        m_testConnection = pdal::drivers::pgpointcloud::pg_connect(
-                pdal::drivers::pgpointcloud::testDbTempConn);
+        m_testConnection = pdal::pg_connect(
+                pdal::testDbTempConn);
 
         executeOnTestDb("CREATE EXTENSION pointcloud");
     }
 
     void executeOnTestDb(const std::string& sql)
     {
-        pdal::drivers::pgpointcloud::pg_execute(m_testConnection, sql);
+        pdal::pg_execute(m_testConnection, sql);
     }
 
     ~PgpointcloudWriterTestFixture()
@@ -103,14 +103,14 @@ private:
 
     void executeOnMasterDb(const std::string& sql)
     {
-        pdal::drivers::pgpointcloud::pg_execute(m_masterConnection, sql);
+        pdal::pg_execute(m_masterConnection, sql);
     }
 
     void execute(PGconn* connection, const std::string& sql)
     {
         if (connection)
         {
-            pdal::drivers::pgpointcloud::pg_execute(connection, sql);
+            pdal::pg_execute(connection, sql);
         }
         else
         {
@@ -121,7 +121,7 @@ private:
     void dropTestDb()
     {
         std::stringstream dropDbSql;
-        dropDbSql << "DROP DATABASE IF EXISTS " << pdal::drivers::pgpointcloud::testDbTempname;
+        dropDbSql << "DROP DATABASE IF EXISTS " << pdal::testDbTempname;
         executeOnMasterDb(dropDbSql.str());
     }
 

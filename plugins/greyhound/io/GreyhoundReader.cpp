@@ -36,13 +36,9 @@
 
 #include "Exchanges.hpp"
 
-CREATE_READER_PLUGIN(greyhound, pdal::drivers::greyhound::GreyhoundReader)
+CREATE_READER_PLUGIN(greyhound, pdal::GreyhoundReader)
 
 namespace pdal
-{
-namespace drivers
-{
-namespace greyhound
 {
 
 GreyhoundReader::GreyhoundReader()
@@ -174,7 +170,4 @@ point_count_t GreyhoundReader::setPoints(
     return numRead;
 }
 
-} // namespace greyhound
-} // namespace drivers
 } // namespace pdal
-

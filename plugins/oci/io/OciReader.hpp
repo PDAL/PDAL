@@ -44,11 +44,6 @@
 namespace pdal
 {
 
-namespace drivers
-{
-namespace oci
-{
-
 class PDAL_DLL OciReader : public pdal::Reader
 {
 public:
@@ -101,7 +96,4 @@ private:
     OciReader(const OciReader&); // not implemented
 };
 
-} // namespace oci
-} // namespace drivers
 } // namespace pdal
-

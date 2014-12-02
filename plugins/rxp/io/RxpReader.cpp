@@ -43,14 +43,10 @@
 #include <pdal/StageFactory.hpp>
 
 
-CREATE_READER_PLUGIN(rxp, pdal::drivers::rxp::RxpReader)
+CREATE_READER_PLUGIN(rxp, pdal::RxpReader)
 
 
 namespace pdal
-{
-namespace drivers
-{
-namespace rxp
 {
 
 
@@ -392,6 +388,4 @@ Inclination movingAverage(const InclinationVector& incl,
 }
 
 
-}
-}
-} // namespace pdal::drivers::rxp
+} // namespace pdal

@@ -42,8 +42,6 @@
 
 namespace pdal
 {
-namespace filters
-{
 
 class PDAL_DLL HexBin : public Filter
 {
@@ -73,6 +71,4 @@ private:
     HexBin(const HexBin&); // not implemented
 };
 
-} // namespace filters
 } // namespace pdal
-

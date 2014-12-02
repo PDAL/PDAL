@@ -43,10 +43,6 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace pcd
-{
 
 class PDAL_DLL PcdWriter : public pdal::Writer
 {
@@ -71,7 +67,4 @@ private:
     PcdWriter(const PcdWriter&); // not implemented
 };
 
-}
-}
 } // namespaces
-

@@ -29,9 +29,8 @@ if (BUILD_RIVLIB_TESTS)
         "${CMAKE_CURRENT_BINARY_DIR}/test/Config.hpp"
         )
 
-    include_directories(
-        "${CMAKE_CURRENT_BINARY_DIR}/test"
-        )
+    include_directories("${CMAKE_CURRENT_BINARY_DIR}/test")
+    include_directories(${PROJECT_SOURCE_DIR}/plugin/rxp/io)
 
     set(test_srcs
         test/RxpReaderTest.cpp

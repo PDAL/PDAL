@@ -39,17 +39,13 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/visualization/pcl_visualizer.h>
 
-#include "../PCLConversions.hpp"
+#include "PCLConversions.hpp"
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
 
-CREATE_WRITER_PLUGIN(pclvisualizer, pdal::drivers::pclvisualizer::PclVisualizer)
+CREATE_WRITER_PLUGIN(pclvisualizer, pdal::PclVisualizer)
 
 namespace pdal
-{
-namespace drivers
-{
-namespace pclvisualizer
 {
 
 
@@ -82,6 +78,4 @@ void PclVisualizer::write(const PointBuffer& data)
 }
 
 
-}
-}
 } // namespaces

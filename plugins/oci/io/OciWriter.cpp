@@ -47,13 +47,9 @@
 
 #include <ogr_api.h>
 
-CREATE_WRITER_PLUGIN(oci, pdal::drivers::oci::OciWriter)
+CREATE_WRITER_PLUGIN(oci, pdal::OciWriter)
 
 namespace pdal
-{
-namespace drivers
-{
-namespace oci
 {
 
 
@@ -1179,6 +1175,4 @@ void OciWriter::updatePCExtent()
 }
 
 
-}
-}
-} // namespace pdal::driver::oci
+} // namespace pdal

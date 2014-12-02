@@ -42,10 +42,6 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace pcd
-{
 
 class PDAL_DLL PcdReader : public pdal::Reader
 {
@@ -69,7 +65,4 @@ private:
     virtual point_count_t read(PointBuffer& buf, point_count_t count);
 };
 
-} // namespace pcd
-} // namespace drivers
 } // namespace pdal
-
