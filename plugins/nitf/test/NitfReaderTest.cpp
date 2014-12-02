@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <boost/uuid/uuid_io.hpp>
 
@@ -54,9 +54,7 @@
 
 using namespace pdal;
 
-BOOST_AUTO_TEST_SUITE(NitfReaderTest)
-
-BOOST_AUTO_TEST_CASE(test_one)
+TEST(NitfReaderTest, test_one)
 {
     Options nitf_opts;
     nitf_opts.add("filename", Support::datapath("nitf/autzen-utm10.ntf"));
@@ -67,30 +65,30 @@ BOOST_AUTO_TEST_CASE(test_one)
     StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.nitf");
     if(rc)
     {
-        BOOST_CHECK(rc);
+        EXPECT_TRUE(rc);
 
         std::unique_ptr<Reader> nitf_reader(rc());
         nitf_reader->setOptions(nitf_opts);
         nitf_reader->prepare(ctx);
         PointBufferSet pbSet = nitf_reader->execute(ctx);
-        BOOST_CHECK_EQUAL(nitf_reader->getDescription(), "NITF Reader");
-        BOOST_CHECK_EQUAL(pbSet.size(), 1);
+        EXPECT_EQ(nitf_reader->getDescription(), "NITF Reader");
+        EXPECT_EQ(pbSet.size(), 1);
         PointBufferPtr buf = *pbSet.begin();
 
         // check metadata
     //ABELL
     /**
         {
-            pdal::Metadata metadata = nitf_reader.getMetadata();
-            /////////////////////////////////////////////////BOOST_CHECK_EQUAL(metadatums.size(), 80u);
-            BOOST_CHECK_EQUAL(metadata.toPTree().get<std::string>("metadata.FH_FDT.value"), "20120323002946");
+            Metadata metadata = nitf_reader.getMetadata();
+            /////////////////////////////////////////////////EXPECT_EQ(metadatums.size(), 80u);
+            EXPECT_EQ(metadata.toPTree().get<std::string>("metadata.FH_FDT.value"), "20120323002946");
         }
     **/
 
         //
         // read LAS
         //
-        pdal::Options las_opts;
+        Options las_opts;
         las_opts.add("count", 750);
         las_opts.add("filename", Support::datapath("nitf/autzen-utm10.las"));
 
@@ -99,19 +97,19 @@ BOOST_AUTO_TEST_CASE(test_one)
         StageFactory::ReaderCreator* rc2 = f.getReaderCreator("readers.las");
         if (rc2)
         {
-            BOOST_CHECK(rc2);
+            EXPECT_TRUE(rc2);
 
             Stage* las_reader = rc2();
             las_reader->setOptions(las_opts);
             las_reader->prepare(ctx2);
             PointBufferSet pbSet2 = las_reader->execute(ctx2);
-            BOOST_CHECK_EQUAL(pbSet2.size(), 1);
+            EXPECT_EQ(pbSet2.size(), 1);
             PointBufferPtr buf2 = *pbSet.begin();
             //
             //
             // compare the two buffers
             //
-            BOOST_CHECK_EQUAL(buf->size(), buf2->size());
+            EXPECT_EQ(buf->size(), buf2->size());
 
             for (PointId i = 0; i < buf2->size(); i++)
             {
@@ -123,19 +121,19 @@ BOOST_AUTO_TEST_CASE(test_one)
                 int32_t las_y = buf2->getFieldAs<int32_t>(Dimension::Id::Y, i);
                 int32_t las_z = buf2->getFieldAs<int32_t>(Dimension::Id::Z, i);
 
-                BOOST_CHECK_EQUAL(nitf_x, las_x);
-                BOOST_CHECK_EQUAL(nitf_y, las_y);
-                BOOST_CHECK_EQUAL(nitf_z, las_z);
+                EXPECT_EQ(nitf_x, las_x);
+                EXPECT_EQ(nitf_y, las_y);
+                EXPECT_EQ(nitf_z, las_z);
             }
         }
     }
 }
 
 
-BOOST_AUTO_TEST_CASE(test_chipper)
+TEST(NitfReaderTest, test_chipper)
 {
-    pdal::Option option("filename", Support::datapath("nitf/chipper.xml"));
-    pdal::Options options(option);
+    Option option("filename", Support::datapath("nitf/chipper.xml"));
+    Options options(option);
 
     PointContext ctx;
 
@@ -147,14 +145,14 @@ BOOST_AUTO_TEST_CASE(test_chipper)
     mgr.execute();
     StageSequentialIterator* iter = reader.createSequentialIterator(data);
     const uint32_t num_read = iter->read(data);
-    BOOST_CHECK_EQUAL(num_read, 13u);
+    EXPECT_EQ(num_read, 13u);
 
     uint32_t num_blocks = chipper->GetBlockCount();
-    BOOST_CHECK_EQUAL(num_blocks, 8u);
+    EXPECT_EQ(num_blocks, 8u);
     **/
 }
 
-BOOST_AUTO_TEST_CASE(optionSrs)
+TEST(NitfReaderTest, optionSrs)
 {
     Options nitfOpts;
     nitfOpts.add("filename", Support::datapath("nitf/autzen-utm10.ntf"));
@@ -168,7 +166,7 @@ BOOST_AUTO_TEST_CASE(optionSrs)
     StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.nitf");
     if (rc)
     {
-        BOOST_CHECK(rc);
+        EXPECT_TRUE(rc);
 
         Stage* nitfReader = rc();
         nitfReader->setOptions(nitfOpts);
@@ -179,7 +177,7 @@ BOOST_AUTO_TEST_CASE(optionSrs)
         StageFactory::WriterCreator* wc = f.getWriterCreator("writers.las");
         if (wc)
         {
-            BOOST_CHECK(wc);
+            EXPECT_TRUE(wc);
 
             Stage* lasWriter = wc();
             lasWriter->setInput(nitfReader);
@@ -188,11 +186,9 @@ BOOST_AUTO_TEST_CASE(optionSrs)
             lasWriter->prepare(ctx);
             PointBufferSet pbSet = lasWriter->execute(ctx);
 
-            BOOST_CHECK_EQUAL(sr, nitfReader->getSpatialReference().getWKT());
-            BOOST_CHECK_EQUAL("", lasWriter->getSpatialReference().getWKT());
-            BOOST_CHECK_EQUAL(sr, ctx.spatialRef().getWKT());
+            EXPECT_EQ(sr, nitfReader->getSpatialReference().getWKT());
+            EXPECT_EQ("", lasWriter->getSpatialReference().getWKT());
+            EXPECT_EQ(sr, ctx.spatialRef().getWKT());
         }
     }
 }
-
-BOOST_AUTO_TEST_SUITE_END()

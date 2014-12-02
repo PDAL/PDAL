@@ -32,15 +32,13 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <pdal/SpatialReference.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/PointBuffer.hpp>
 
 #include "Support.hpp"
-
-BOOST_AUTO_TEST_SUITE(HexbinFilterTest)
 
 using namespace pdal;
 
@@ -57,7 +55,7 @@ void printChildren(std::ostream& out, MetadataNode m, int depth = 0)
     }
 }
 
-BOOST_AUTO_TEST_CASE(HexbinFilterTest_test_1)
+TEST(HexbinFilterTest, HexbinFilterTest_test_1)
 {
     Options options;
     options.add("filename", Support::datapath("las/hextest.las"));
@@ -75,7 +73,7 @@ BOOST_AUTO_TEST_CASE(HexbinFilterTest_test_1)
 
     if (rc)
     {
-        BOOST_CHECK(rc);
+        EXPECT_TRUE(rc);
 
         Stage* reader = rc();
         reader->setOptions(options);
@@ -83,7 +81,7 @@ BOOST_AUTO_TEST_CASE(HexbinFilterTest_test_1)
         StageFactory::FilterCreator* fc = f.getFilterCreator("filters.hexbin");
         if(fc)
         {
-            BOOST_CHECK(fc);
+            EXPECT_TRUE(fc);
 
             std::unique_ptr<Filter> hexbin(fc());
             hexbin->setOptions(options);
@@ -102,12 +100,10 @@ BOOST_AUTO_TEST_CASE(HexbinFilterTest_test_1)
             printChildren(out, m);
             out.close();
 
-            BOOST_CHECK(Support::compare_text_files(filename,
+            EXPECT_TRUE(Support::compare_text_files(filename,
                 Support::datapath("filters/hexbin.txt")));
 
             FileUtils::deleteFile(filename);
         }
     }
 }
-
-BOOST_AUTO_TEST_SUITE_END()

@@ -32,24 +32,18 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
-#include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
 #include "Support.hpp"
-#include "../StageTester.hpp"
 
 using namespace pdal;
 
-BOOST_AUTO_TEST_SUITE(FerryFilterTest)
-
-
-BOOST_AUTO_TEST_CASE(test_ferry_copy)
+TEST(FerryFilterTest, test_ferry_copy)
 {
-    using namespace pdal;
     PipelineManager mgr;
     PipelineReader specReader(mgr);
     specReader.readPipeline(Support::datapath("filters/ferry.xml"));
@@ -60,9 +54,9 @@ BOOST_AUTO_TEST_CASE(test_ferry_copy)
 
     PointBufferSet pbSet = mgr.buffers();
 
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1);
     PointBufferPtr buf = *pbSet.begin();
-    BOOST_CHECK_EQUAL(buf->size(), 1065u);
+    EXPECT_EQ(buf->size(), 1065u);
 
     Dimension::Id::Enum state_plane_x = ctx.findDim("StatePlaneX");
     Dimension::Id::Enum state_plane_y = ctx.findDim("StatePlaneY");
@@ -73,23 +67,21 @@ BOOST_AUTO_TEST_CASE(test_ferry_copy)
     double x = buf->getFieldAs<double>(state_plane_x, 0);
     double y = buf->getFieldAs<double>(state_plane_y, 0);
 
-    BOOST_CHECK_CLOSE(-117.2501328350574, lon, 0.0001);
-    BOOST_CHECK_CLOSE(49.341077824192915, lat, 0.0001);
-    BOOST_CHECK_CLOSE(637012.24, x, 0.0001);
-    BOOST_CHECK_CLOSE(849028.31, y, 0.0001);
+    EXPECT_FLOAT_EQ(-117.2501328350574, lon);
+    EXPECT_FLOAT_EQ(49.341077824192915, lat);
+    EXPECT_FLOAT_EQ(637012.24, x);
+    EXPECT_FLOAT_EQ(849028.31, y);
 }
 
-BOOST_AUTO_TEST_CASE(test_ferry_invalid)
+TEST(FerryFilterTest, test_ferry_invalid)
 {
-    using namespace pdal;
-
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
     StageFactory f;
     StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
     if (rc)
     {
-        BOOST_CHECK(rc);
+        EXPECT_TRUE(rc);
 
         Stage* reader = rc();
         reader->setOptions(ops1);
@@ -106,7 +98,7 @@ BOOST_AUTO_TEST_CASE(test_ferry_invalid)
         StageFactory::FilterCreator* fc = f.getFilterCreator("filters.ferry");
         if (fc)
         {
-            BOOST_CHECK(fc);
+            EXPECT_TRUE(fc);
 
             Stage* ferry = fc();
             ferry->setInput(reader);
@@ -114,9 +106,7 @@ BOOST_AUTO_TEST_CASE(test_ferry_invalid)
 
             PointContext ctx;
 
-            BOOST_CHECK_THROW(ferry->prepare(ctx), pdal::pdal_error );
+            EXPECT_THROW(ferry->prepare(ctx), pdal_error );
         }
     }
 }
-
-BOOST_AUTO_TEST_SUITE_END()

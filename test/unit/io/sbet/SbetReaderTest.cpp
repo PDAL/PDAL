@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <pdal/Options.hpp>
 #include <pdal/PipelineReader.hpp>
@@ -41,7 +41,7 @@
 
 #include <SbetReader.hpp>
 
-#include "../../StageTester.hpp"
+#include "StageTester.hpp"
 #include "Support.hpp"
 
 using namespace pdal;
@@ -57,7 +57,7 @@ void checkPoint(PointContext ctx, const PointBuffer& data,
         double expected)
     {
         double actual = data.getFieldAs<double>(dim, index);
-        BOOST_CHECK_CLOSE(expected, actual, 0.0000001);
+        EXPECT_FLOAT_EQ(expected, actual);
     };
 
     checkDimension(Dimension::Id::GpsTime, time);
@@ -79,10 +79,7 @@ void checkPoint(PointContext ctx, const PointBuffer& data,
     checkDimension(Dimension::Id::ZBodyAngRate, zangrate);
 }
 
-
-BOOST_AUTO_TEST_SUITE(SbetReaderTest)
-
-BOOST_AUTO_TEST_CASE(testRead)
+TEST(SbetReaderTest, testRead)
 {
     Option filename("filename", Support::datapath("sbet/2-points.sbet"), "");
     Options options(filename);
@@ -93,10 +90,10 @@ BOOST_AUTO_TEST_CASE(testRead)
 
     reader.prepare(ctx);
     PointBufferSet pbSet = reader.execute(ctx);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1);
     PointBufferPtr buf = *pbSet.begin();
 
-    BOOST_CHECK_EQUAL(buf->size(), 2);
+    EXPECT_EQ(buf->size(), 2);
 
     checkPoint(ctx, *buf, 0, 1.516310028360710e+05, 5.680211852972264e-01,
                -2.041654392303940e+00, 1.077152953296560e+02,
@@ -118,7 +115,7 @@ BOOST_AUTO_TEST_CASE(testRead)
                7.179027672314571e-02);
 }
 
-BOOST_AUTO_TEST_CASE(testBadFile)
+TEST(SbetReaderTest, testBadFile)
 {
     Option filename("filename", Support::datapath("sbet/badfile.sbet"), "");
     Options options(filename);
@@ -126,18 +123,16 @@ BOOST_AUTO_TEST_CASE(testBadFile)
     reader.setOptions(options);
     PointContext ctx;
     reader.prepare(ctx);
-    BOOST_CHECK_THROW(reader.execute(ctx), pdal_error);
+    EXPECT_THROW(reader.execute(ctx), pdal_error);
 }
 
-BOOST_AUTO_TEST_CASE(testPipeline)
+TEST(SbetReaderTest, testPipeline)
 {
     PipelineManager manager;
     PipelineReader reader(manager);
     reader.readPipeline(Support::datapath("sbet/pipeline.xml"));
 
     point_count_t numPoints = manager.execute();
-    BOOST_CHECK_EQUAL(numPoints, 2);
+    EXPECT_EQ(numPoints, 2);
     FileUtils::deleteFile(Support::datapath("sbet/outfile.txt"));
 }
-
-BOOST_AUTO_TEST_SUITE_END()

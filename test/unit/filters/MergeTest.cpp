@@ -32,16 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
 
 #include "Support.hpp"
 
-BOOST_AUTO_TEST_SUITE(MergeTest)
-
-BOOST_AUTO_TEST_CASE(test1)
+TEST(MergeTest, test1)
 {
     using namespace pdal;
 
@@ -52,9 +50,7 @@ BOOST_AUTO_TEST_CASE(test1)
 
     PointBufferSet pbSet = mgr.buffers();
 
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1);
     PointBufferPtr buf = *pbSet.begin();
-    BOOST_CHECK_EQUAL(buf->size(), 2130);
+    EXPECT_EQ(buf->size(), 2130);
 }
-
-BOOST_AUTO_TEST_SUITE_END()

@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <SbetReader.hpp>
 #include <SbetWriter.hpp>
@@ -58,10 +58,7 @@ Options makeWriterOptions()
     return options;
 }
 
-
-BOOST_AUTO_TEST_SUITE(SbetWriterTest)
-
-BOOST_AUTO_TEST_CASE(testConstructor)
+TEST(SbetWriterTest, testConstructor)
 {
     SbetReader reader;
     reader.setOptions(makeReaderOptions());
@@ -69,11 +66,11 @@ BOOST_AUTO_TEST_CASE(testConstructor)
     writer.setOptions(makeWriterOptions());
     writer.setInput(&reader);
 
-    BOOST_CHECK(writer.getDescription() == "SBET Writer");
-    BOOST_CHECK_EQUAL(writer.getName(), "writers.sbet");
+    EXPECT_TRUE(writer.getDescription() == "SBET Writer");
+    EXPECT_EQ(writer.getName(), "writers.sbet");
 }
 
-BOOST_AUTO_TEST_CASE(testWrite)
+TEST(SbetWriterTest, testWrite)
 {
     FileUtils::deleteFile(Support::temppath("SbetWriterTest.sbet"));
 
@@ -93,10 +90,8 @@ BOOST_AUTO_TEST_CASE(testWrite)
 
     //ABELL - Write of a read file is no longer identical.
     /**
-    BOOST_CHECK(Support::compare_files(
+    EXPECT_TRUE(Support::compare_files(
         Support::temppath("SbetWriterTest.sbet"),
         Support::datapath("sbet/2-points.sbet")));
     **/
 }
-
-BOOST_AUTO_TEST_SUITE_END()

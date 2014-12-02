@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <pdal/Options.hpp>
 #include <pdal/PointBuffer.hpp>
@@ -47,13 +47,7 @@
 
 using namespace pdal;
 
-BOOST_AUTO_TEST_SUITE(QFITReaderTest)
-
-
-#define Compare(x,y)    BOOST_CHECK_CLOSE(x,y,0.00001);
-
-
-void Check_Point(const pdal::PointBuffer& data,
+void Check_Point(const PointBuffer& data,
                  std::size_t index,
                  double xref, double yref, double zref,
                  int32_t tref)
@@ -63,13 +57,13 @@ void Check_Point(const pdal::PointBuffer& data,
     double z = data.getFieldAs<double>(Dimension::Id::Z, index);
     int32_t t = data.getFieldAs<int32_t>(Dimension::Id::OffsetTime, index);
 
-    Compare(x, xref);
-    Compare(y, yref);
-    Compare(z, zref);
-    BOOST_CHECK_EQUAL(t, tref);
+    EXPECT_FLOAT_EQ(x, xref);
+    EXPECT_FLOAT_EQ(y, yref);
+    EXPECT_FLOAT_EQ(z, zref);
+    EXPECT_EQ(t, tref);
 }
 
-BOOST_AUTO_TEST_CASE(test_10_word)
+TEST(QFITReaderTest, test_10_word)
 {
     Options options;
 
@@ -82,22 +76,22 @@ BOOST_AUTO_TEST_CASE(test_10_word)
 
     QfitReader reader;
     reader.setOptions(options);
-    BOOST_CHECK(reader.getDescription() == "QFIT Reader");
-    BOOST_CHECK_EQUAL(reader.getName(), "readers.qfit");
+    EXPECT_TRUE(reader.getDescription() == "QFIT Reader");
+    EXPECT_EQ(reader.getName(), "readers.qfit");
 
     PointContext ctx;
     reader.prepare(ctx);
     PointBufferSet pbSet = reader.execute(ctx);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1);
     PointBufferPtr buf = *pbSet.begin();
-    BOOST_CHECK_EQUAL(buf->size(), 3);
+    EXPECT_EQ(buf->size(), 3);
 
     Check_Point(*buf, 0, 221.826822, 59.205160, 32.0900, 0);
     Check_Point(*buf, 1, 221.826740, 59.205161, 32.0190, 0);
     Check_Point(*buf, 2, 221.826658, 59.205164, 32.0000, 0);
 }
 
-BOOST_AUTO_TEST_CASE(test_14_word)
+TEST(QFITReaderTest, test_14_word)
 {
     Options options;
 
@@ -113,13 +107,11 @@ BOOST_AUTO_TEST_CASE(test_14_word)
     reader.setOptions(options);
     reader.prepare(ctx);
     PointBufferSet pbSet = reader.execute(ctx);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1);
     PointBufferPtr buf = *pbSet.begin();
-    BOOST_CHECK_EQUAL(buf->size(), 3);
+    EXPECT_EQ(buf->size(), 3);
 
     Check_Point(*buf, 0, 244.306337, 35.623317, 1056.830000000, 903);
     Check_Point(*buf, 1, 244.306260, 35.623280, 1056.409000000, 903);
     Check_Point(*buf, 2, 244.306204, 35.623257, 1056.483000000, 903);
 }
-
-BOOST_AUTO_TEST_SUITE_END()

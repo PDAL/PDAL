@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <FauxReader.hpp>
 #include <ReprojectionFilter.hpp>
@@ -42,13 +42,10 @@
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 #include "Support.hpp"
-#include "../StageTester.hpp"
 
 using namespace pdal;
 
-BOOST_AUTO_TEST_SUITE(CropFilterTest)
-
-BOOST_AUTO_TEST_CASE(test_crop)
+TEST(CropFilterTest, test_crop)
 {
     BOX3D srcBounds(0.0, 0.0, 0.0, 10.0, 100.0, 1000.0);
     Options opts;
@@ -66,7 +63,7 @@ BOOST_AUTO_TEST_CASE(test_crop)
     filters::Crop filter;
     filter.setOptions(cropOpts);
     filter.setInput(&reader);
-    BOOST_CHECK(filter.getDescription() == "Crop Filter");
+    EXPECT_TRUE(filter.getDescription() == "Crop Filter");
 
     Options statOpts;
     filters::Stats stats;
@@ -76,13 +73,13 @@ BOOST_AUTO_TEST_CASE(test_crop)
     PointContext ctx;
     stats.prepare(ctx);
     PointBufferSet pbSet = stats.execute(ctx);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1);
     PointBufferPtr buf = *pbSet.begin();
 
     const filters::stats::Summary& statsX = stats.getStats(Dimension::Id::X);
     const filters::stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
     const filters::stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
-    BOOST_CHECK_EQUAL(buf->size(), 333);
+    EXPECT_EQ(buf->size(), 333);
 
     const double minX = statsX.minimum();
     const double minY = statsY.minimum();
@@ -98,22 +95,20 @@ BOOST_AUTO_TEST_CASE(test_crop)
     const double delY = 100.0 / 999.0 * 100.0;
     const double delZ = 1000.0 / 999.0 * 100.0;
 
-    BOOST_CHECK_CLOSE(minX, 3.33333, delX);
-    BOOST_CHECK_CLOSE(minY, 33.33333, delY);
-    BOOST_CHECK_CLOSE(minZ, 333.33333, delZ);
-    BOOST_CHECK_CLOSE(maxX, 6.66666, delX);
-    BOOST_CHECK_CLOSE(maxY, 66.66666, delY);
-    BOOST_CHECK_CLOSE(maxZ, 666.66666, delZ);
-    BOOST_CHECK_CLOSE(avgX, 5.00000, delX);
-    BOOST_CHECK_CLOSE(avgY, 50.00000, delY);
-    BOOST_CHECK_CLOSE(avgZ, 500.00000, delZ);
+    EXPECT_NEAR(minX, 3.33333, delX);
+    EXPECT_NEAR(minY, 33.33333, delY);
+    EXPECT_NEAR(minZ, 333.33333, delZ);
+    EXPECT_NEAR(maxX, 6.66666, delX);
+    EXPECT_NEAR(maxY, 66.66666, delY);
+    EXPECT_NEAR(maxZ, 666.66666, delZ);
+    EXPECT_NEAR(avgX, 5.00000, delX);
+    EXPECT_NEAR(avgY, 50.00000, delY);
+    EXPECT_NEAR(avgZ, 500.00000, delZ);
 }
 
 
-BOOST_AUTO_TEST_CASE(test_crop_polygon)
+TEST(CropFilterTest, test_crop_polygon)
 {
-    using namespace pdal;
-
 #ifdef PDAL_HAVE_GEOS
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
@@ -145,18 +140,16 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon)
 
     crop.prepare(ctx);
     PointBufferSet pbSet = crop.execute(ctx);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1);
     PointBufferPtr buffer = *pbSet.begin();
-    BOOST_CHECK_EQUAL(buffer->size(), 47u);
+    EXPECT_EQ(buffer->size(), 47u);
 
     FileUtils::closeFile(wkt_stream);
 #endif
 }
 
-BOOST_AUTO_TEST_CASE(test_crop_polygon_reprojection)
+TEST(CropFilterTest, test_crop_polygon_reprojection)
 {
-    using namespace pdal;
-
 #ifdef PDAL_HAVE_GEOS
     Options options;
 
@@ -164,19 +157,19 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon_reprojection)
     Option out_srs("out_srs","EPSG:4326", "Output SRS to reproject to");
     Option x_dim("x_dim", std::string("readers.las.X"),
         "Dimension name to use for 'X' data");
-    pdal::Option y_dim("y_dim", std::string("readers.las.Y"),
+    Option y_dim("y_dim", std::string("readers.las.Y"),
         "Dimension name to use for 'Y' data");
-    pdal::Option z_dim("z_dim", std::string("readers.las.Z"),
+    Option z_dim("z_dim", std::string("readers.las.Z"),
         "Dimension name to use for 'Z' data");
-    pdal::Option x_scale("scale_x", 0.0000001f, "Scale for output X data "
+    Option x_scale("scale_x", 0.0000001f, "Scale for output X data "
         "in the case when 'X' dimension data are to be scaled.  Defaults "
         "to '1.0'.  If not set, the Dimensions's scale will be used");
-    pdal::Option y_scale("scale_y", 0.0000001f, "Scale for output Y data "
+    Option y_scale("scale_y", 0.0000001f, "Scale for output Y data "
         "in the case when 'Y' dimension data are to be scaled.  Defaults "
         "to '1.0'.  If not set, the Dimensions's scale will be used");
-    pdal::Option filename("filename", Support::datapath("las/1.2-with-color.las"));
-    pdal::Option debug("debug", true, "");
-    pdal::Option verbose("verbose", 9, "");
+    Option filename("filename", Support::datapath("las/1.2-with-color.las"));
+    Option debug("debug", true, "");
+    Option verbose("verbose", 9, "");
     // options.add(debug);
     // options.add(verbose);
     options.add(in_srs);
@@ -209,13 +202,11 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon_reprojection)
     PointBufferPtr buffer(new PointBuffer(ctx));
     crop.prepare(ctx);
     PointBufferSet pbSet = crop.execute(ctx);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1);
     buffer = *pbSet.begin();
-    BOOST_CHECK_EQUAL(buffer->size(), 47u);
+    EXPECT_EQ(buffer->size(), 47u);
 
     FileUtils::closeFile(wkt_stream);
 
 #endif
 }
-
-BOOST_AUTO_TEST_SUITE_END()

@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 #include <boost/property_tree/ptree.hpp>
 
 #include <boost/uuid/uuid_generators.hpp>
@@ -43,7 +43,6 @@
 #include <LasReader.hpp>
 #include <pdal/FileUtils.hpp>
 
-#include "Support.hpp"
 #include "TestConfig.hpp"
 
 #include <fstream>
@@ -80,13 +79,7 @@ std::string ReadXML(std::string filename)
 
 }
 
-
-BOOST_AUTO_TEST_SUITE(XMLSchemaTest)
-
-
-
-
-BOOST_AUTO_TEST_CASE(test_schema_read)
+TEST(XMLSchemaTest, test_schema_read)
 {
     using namespace pdal;
 
@@ -111,14 +104,14 @@ BOOST_AUTO_TEST_CASE(test_schema_read)
     MetadataNode m1prime = m.add("m1prime", "Some other metadata");
     m1.add("uuid", boost::uuids::nil_uuid());
 
-    pdal::schema::Writer writer(s1.dims(), s1.types());
+    schema::Writer writer(s1.dims(), s1.types());
     writer.setMetadata(m);
     std::string xml_output = writer.getXML();
 
-    pdal::schema::Reader reader2(xml_output, xsd);
+    schema::Reader reader2(xml_output, xsd);
     schema::XMLSchema s2 = reader2.schema();
 
-    BOOST_CHECK_EQUAL(s1.m_dims.size(), s2.m_dims.size());
+    EXPECT_EQ(s1.m_dims.size(), s2.m_dims.size());
 
     auto di1 = s1.m_dims.begin();
     auto di2 = s2.m_dims.begin();
@@ -127,11 +120,9 @@ BOOST_AUTO_TEST_CASE(test_schema_read)
         schema::DimInfo& dim1 = *di1;
         schema::DimInfo& dim2 = *di2;
 
-        BOOST_CHECK_EQUAL(dim1.m_name, dim2.m_name);
-        BOOST_CHECK_EQUAL(dim1.m_type, dim2.m_type);
+        EXPECT_EQ(dim1.m_name, dim2.m_name);
+        EXPECT_EQ(dim1.m_type, dim2.m_type);
         di1++;
         di2++;
     }
 }
-
-BOOST_AUTO_TEST_SUITE_END()

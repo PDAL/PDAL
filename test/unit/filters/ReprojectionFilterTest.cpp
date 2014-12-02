@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <pdal/SpatialReference.hpp>
 #include <LasReader.hpp>
@@ -40,19 +40,15 @@
 #include <pdal/PointBuffer.hpp>
 
 #include "Support.hpp"
-#include "../StageTester.hpp"
 
-BOOST_AUTO_TEST_SUITE(ReprojectionFilterTest)
-
+using namespace pdal;
 
 namespace
 {
 
 #if defined(PDAL_HAVE_GEOS) && defined(PDAL_HAVE_GEOTIFF)
-void getPoint(const pdal::PointBuffer& data, double& x, double& y, double& z)
+void getPoint(const PointBuffer& data, double& x, double& y, double& z)
 {
-    using namespace pdal;
-
     x = data.getFieldAs<double>(Dimension::Id::X, 0);
     y = data.getFieldAs<double>(Dimension::Id::Y, 0);
     z = data.getFieldAs<double>(Dimension::Id::Z, 0);
@@ -64,10 +60,8 @@ void getPoint(const pdal::PointBuffer& data, double& x, double& y, double& z)
 
 #if defined(PDAL_HAVE_GEOS) && defined(PDAL_HAVE_GEOTIFF)
 // Test reprojecting UTM 15 to DD with a filter
-BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
+TEST(ReprojectionFilterTest, ReprojectionFilterTest_test_1)
 {
-    using namespace pdal;
-
     const char* epsg4326_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
 
     PointContext ctx;
@@ -97,15 +91,15 @@ BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
 
         reprojectionFilter.prepare(ctx);
         PointBufferSet pbSet = reprojectionFilter.execute(ctx);
-        BOOST_CHECK_EQUAL(pbSet.size(), 1);
+        EXPECT_EQ(pbSet.size(), 1);
         PointBufferPtr buffer = *pbSet.begin();
 
         double x, y, z;
         getPoint(*buffer, x, y, z);
 
-        BOOST_CHECK_CLOSE(x, postX, 0.1);
-        BOOST_CHECK_CLOSE(y, postY, 0.1);
-        BOOST_CHECK_CLOSE(z, postZ, 0.1);
+        EXPECT_FLOAT_EQ(x, postX);
+        EXPECT_FLOAT_EQ(y, postY);
+        EXPECT_FLOAT_EQ(z, postZ);
     }
 }
 #endif
@@ -116,7 +110,7 @@ BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
  exceeds an integer.
 
 // Test reprojecting UTM 15 to DD with a filter randomly
-BOOST_AUTO_TEST_CASE(InPlaceReprojectionFilterTest_test_2)
+TEST(ReprojectionFilterTest, InPlaceReprojectionFilterTest_test_2)
 {
     const char* epsg4326_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
 
@@ -125,8 +119,6 @@ BOOST_AUTO_TEST_CASE(InPlaceReprojectionFilterTest_test_2)
     const double postZ = 131.570;
 
     {
-        using namespace pdal;
-
         PointContext ctx;
 
         const SpatialReference out_ref(epsg4326_wkt);
@@ -151,20 +143,17 @@ BOOST_AUTO_TEST_CASE(InPlaceReprojectionFilterTest_test_2)
         StageSequentialIterator* iter = reader.createSequentialIterator();
 
         point_count_t numRead = iter->read(buffer, 1);
-        BOOST_CHECK(numRead == 1);
+        EXPECT_TRUE(numRead == 1);
 
         FilterTester::ready(&reprojectionFilter, ctx);
         FilterTester::filter(&reprojectionFilter, buffer);
 
         double x, y, z;
         getPoint(buffer, x, y, z); 
-        BOOST_CHECK_CLOSE(x, postX, 0.1);
-        BOOST_CHECK_CLOSE(y, postY, 0.1);
-        BOOST_CHECK_CLOSE(z, postZ, 0.1);
+        EXPECT_FLOAT_EQ(x, postX);
+        EXPECT_FLOAT_EQ(y, postY);
+        EXPECT_FLOAT_EQ(z, postZ);
         delete iter;
     }
 }
 **/
-
-
-BOOST_AUTO_TEST_SUITE_END()

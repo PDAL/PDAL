@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <pdal/Options.hpp>
 #include <pdal/PointBuffer.hpp>
@@ -50,7 +50,7 @@ void checkDimension(const PointBuffer& data, std::size_t index,
     Dimension::Id::Enum dim, T expected)
 {
     float actual = data.getFieldAs<T>(dim, index);
-    BOOST_CHECK_CLOSE(expected, actual, 0.000001);
+    EXPECT_FLOAT_EQ(expected, actual);
 }
 
 void checkPoint(
@@ -89,15 +89,13 @@ std::string getFilePath()
     return Support::datapath("icebridge/twoPoints.h5");
 }
 
-BOOST_AUTO_TEST_SUITE(IcebridgeReaderTest)
-
-BOOST_AUTO_TEST_CASE(testRead)
+TEST(IcebridgeReaderTest, testRead)
 {
     StageFactory f;
     StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.icebridge");
     if (rc)
     {
-        BOOST_CHECK(rc);
+        EXPECT_TRUE(rc);
 
         Option filename("filename", getFilePath(), "");
         Options options(filename);
@@ -107,9 +105,9 @@ BOOST_AUTO_TEST_CASE(testRead)
         PointContext ctx;
         reader->prepare(ctx);
         PointBufferSet pbSet = reader->execute(ctx);
-        BOOST_CHECK_EQUAL(pbSet.size(), 1);
+        EXPECT_EQ(pbSet.size(), 1);
         PointBufferPtr buf = *pbSet.begin();
-        BOOST_CHECK_EQUAL(buf->size(), 2);
+        EXPECT_EQ(buf->size(), 2);
 
         checkPoint(
                 *buf,
@@ -145,19 +143,16 @@ BOOST_AUTO_TEST_CASE(testRead)
     }
 }
 
-BOOST_AUTO_TEST_CASE(testPipeline)
+TEST(IcebridgeReaderTest, testPipeline)
 {
     PipelineManager manager;
     PipelineReader reader(manager);
 
     bool isWriter =
         reader.readPipeline(Support::datapath("icebridge/pipeline.xml"));
-    BOOST_CHECK(isWriter);
+    EXPECT_TRUE(isWriter);
 
     point_count_t numPoints = manager.execute();
-    BOOST_CHECK_EQUAL(numPoints, 2);
+    EXPECT_EQ(numPoints, 2);
     FileUtils::deleteFile(Support::datapath("icebridge/outfile.txt"));
 }
-
-
-BOOST_AUTO_TEST_SUITE_END()

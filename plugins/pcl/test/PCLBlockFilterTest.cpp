@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
@@ -42,18 +42,15 @@
 
 #undef RUN_SLOW_TESTS
 
-BOOST_AUTO_TEST_SUITE(PCLBlockFilterTest)
-
 using namespace pdal;
 
-
-BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_passthrough_xml)
+TEST(PCLBlockFilterTest, PCLBlockFilterTest_example_passthrough_xml)
 {
     StageFactory f;
     StageFactory::FilterCreator* fc = f.getFilterCreator("filters.pclblock");
     if (fc)
     {
-        BOOST_CHECK(fc);
+        EXPECT_TRUE(fc);
 
         PipelineManager pipeline;
         PipelineReader pipelineReader(pipeline);
@@ -63,11 +60,10 @@ BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_passthrough_xml)
         PointContext ctx = pipeline.context();
 
         PointBufferSet pbSet = pipeline.buffers();
-        BOOST_CHECK_EQUAL(pbSet.size(), 1);
+        EXPECT_EQ(pbSet.size(), 1);
         PointBufferPtr buf = *pbSet.begin();
-        BOOST_CHECK_EQUAL(buf->size(), 81);
+        EXPECT_EQ(buf->size(), 81);
     }
-    BOOST_WARN_MESSAGE(fc, "PCLBlock Filter appears to be missing. Is it installed, with PDAL_DRIVER_PATH set?");
 }
 
 
@@ -93,7 +89,7 @@ static void test_filter(const std::string& jsonFile,
     StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
     if (rc)
     {
-        BOOST_CHECK(rc);
+        EXPECT_TRUE(rc);
 
         Stage* reader = rc();
         reader->setOptions(options);
@@ -105,7 +101,7 @@ static void test_filter(const std::string& jsonFile,
         StageFactory::FilterCreator* fc = f.getFilterCreator("filters.pclblock");
         if (fc)
         {
-            BOOST_CHECK(fc);
+            EXPECT_TRUE(fc);
 
             Stage* pcl_block = fc();
             pcl_block->setOptions(filter_options);
@@ -115,33 +111,32 @@ static void test_filter(const std::string& jsonFile,
             pcl_block->prepare(ctx);
             PointBufferSet pbSet = pcl_block->execute(ctx);
 
-            BOOST_CHECK_EQUAL(pbSet.size(), 1);
+            EXPECT_EQ(pbSet.size(), 1);
             PointBufferPtr buf = *pbSet.begin();
-            BOOST_CHECK_EQUAL(buf->size(), expectedPointCount);
+            EXPECT_EQ(buf->size(), expectedPointCount);
         }
-        BOOST_WARN_MESSAGE(fc, "PCLBlock Filter appears to be missing. Is it installed, with PDAL_DRIVER_PATH set?");
     }
 }
 
 
-BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_PassThrough_1)
+TEST(PCLBlockFilterTest, PCLBlockFilterTest_example_PassThrough_1)
 {
     test_filter("filters/pcl/example_PassThrough_1.json", 81);
 }
 
 
-BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_PassThrough_2)
+TEST(PCLBlockFilterTest, PCLBlockFilterTest_example_PassThrough_2)
 {
     test_filter("filters/pcl/example_PassThrough_2.json", 50);
 }
 
-BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_PMF_1)
+TEST(PCLBlockFilterTest, PCLBlockFilterTest_example_PMF_1)
 {
     test_filter("filters/pcl/example_PMF_1.json", 93);
 }
 
 
-BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_PMF_2)
+TEST(PCLBlockFilterTest, PCLBlockFilterTest_example_PMF_2)
 {
     test_filter("filters/pcl/example_PMF_2.json", 94);
 }
@@ -152,7 +147,7 @@ BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_example_PMF_2)
 // default).
 //
 
-BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_APMF)
+TEST(PCLBlockFilterTest, PCLBlockFilterTest_filter_APMF)
 {
     // BUG: tests still to be developed (seems to either hang or crash inside
     // Eigen)
@@ -161,7 +156,7 @@ BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_APMF)
 }
 
 /*
-BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_ConditionalRemoval)
+TEST(PCLBlockFilterTest, PCLBlockFilterTest_filter_ConditionalRemoval)
 {
     // NormalEstimation: KSearch 0, RadiusSearch 50
     // ConditionalRemoval: (0.0, 0.087156)
@@ -173,13 +168,13 @@ BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_ConditionalRemoval)
 }
 */
 
-BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_GridMinimum)
+TEST(PCLBlockFilterTest, PCLBlockFilterTest_filter_GridMinimum)
 {
     test_filter("filters/pcl/filter_GridMinimum.json", 19);
 }
 
 /*
-BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_NormalEstimation)
+TEST(PCLBlockFilterTest, PCLBlockFilterTest_filter_NormalEstimation)
 {
     // NormalEstimation: KSearch default (0), RadiusSearch 50
     test_filter("filters/pcl/filter_NormalEstimation_1.json", 158, true);
@@ -191,7 +186,7 @@ BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_NormalEstimation)
 }
 */
 
-BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_PassThrough)
+TEST(PCLBlockFilterTest, PCLBlockFilterTest_filter_PassThrough)
 {
     // test FilterLimits for Z
     test_filter("filters/pcl/filter_PassThrough_1.json", 81);
@@ -200,7 +195,7 @@ BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_PassThrough)
     test_filter("filters/pcl/filter_PassThrough_2.json", 33);
 }
 
-BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_PMF)
+TEST(PCLBlockFilterTest, PCLBlockFilterTest_filter_PMF)
 {
     // explicitly with all defaults
     // (with the default autzen file, this isn't a meaningful test: it will just
@@ -237,7 +232,7 @@ BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_PMF)
 #endif
 }
 
-BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_RadiusOutlierRemoval)
+TEST(PCLBlockFilterTest, PCLBlockFilterTest_filter_RadiusOutlierRemoval)
 {
     // test MinNeighbors=1 and RadiusSearch=200
     test_filter("filters/pcl/filter_RadiusOutlierRemoval_1.json", 60);
@@ -246,7 +241,7 @@ BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_RadiusOutlierRemoval)
     test_filter("filters/pcl/filter_RadiusOutlierRemoval_2.json", 3);
 }
 
-BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_StatisticalOutlierRemoval)
+TEST(PCLBlockFilterTest, PCLBlockFilterTest_filter_StatisticalOutlierRemoval)
 {
     // test StdDev=2, MeanK=1.5
     test_filter("filters/pcl/filter_StatisticalOutlierRemoval_1.json", 96);
@@ -255,10 +250,8 @@ BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_StatisticalOutlierRemoval)
     test_filter("filters/pcl/filter_StatisticalOutlierRemoval_2.json", 63);
 }
 
-BOOST_AUTO_TEST_CASE(PCLBlockFilterTest_filter_VoxelGrid)
+TEST(PCLBlockFilterTest, PCLBlockFilterTest_filter_VoxelGrid)
 {
     // test LeafSize
     test_filter("filters/pcl/filter_VoxelGrid.json", 81);
 }
-
-BOOST_AUTO_TEST_SUITE_END()

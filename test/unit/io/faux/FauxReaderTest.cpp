@@ -32,16 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <FauxReader.hpp>
 #include <pdal/Bounds.hpp>
 
-BOOST_AUTO_TEST_SUITE(FauxReaderTest)
-
 using namespace pdal;
 
-BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
+TEST(FauxReaderTest, test_constant_mode_sequential_iter)
 {
     Options ops;
 
@@ -54,11 +52,11 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
 
     PointContext ctx;
     reader.prepare(ctx);
-    BOOST_CHECK_EQUAL(reader.getDescription(), "Faux Reader");
+    EXPECT_EQ(reader.getDescription(), "Faux Reader");
     PointBufferSet pbSet = reader.execute(ctx);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1);
     PointBufferPtr buf = *pbSet.begin();
-    BOOST_CHECK_EQUAL(buf->size(), 750);
+    EXPECT_EQ(buf->size(), 750);
     for (point_count_t i = 0; i < buf->size(); i++)
     {
         double x = buf->getFieldAs<double>(Dimension::Id::X, i);
@@ -66,15 +64,15 @@ BOOST_AUTO_TEST_CASE(test_constant_mode_sequential_iter)
         double z = buf->getFieldAs<double>(Dimension::Id::Z, i);
         uint64_t t = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, i);
 
-        BOOST_CHECK_CLOSE(x, 1.0, 0.00001);
-        BOOST_CHECK_CLOSE(y, 2.0, 0.00001);
-        BOOST_CHECK_CLOSE(z, 3.0, 0.00001);
-        BOOST_CHECK_EQUAL(t, i);
+        EXPECT_FLOAT_EQ(x, 1.0);
+        EXPECT_FLOAT_EQ(y, 2.0);
+        EXPECT_FLOAT_EQ(z, 3.0);
+        EXPECT_EQ(t, i);
     }
 }
 
 
-BOOST_AUTO_TEST_CASE(test_random_mode)
+TEST(FauxReaderTest, test_random_mode)
 {
     BOX3D bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     Options ops;
@@ -87,9 +85,9 @@ BOOST_AUTO_TEST_CASE(test_random_mode)
     PointContext ctx;
     reader.prepare(ctx);
     PointBufferSet pbSet = reader.execute(ctx);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1);
     PointBufferPtr buf = *pbSet.begin();
-    BOOST_CHECK_EQUAL(buf->size(), 750);
+    EXPECT_EQ(buf->size(), 750);
 
     for (point_count_t i = 0; i < buf->size(); ++i)
     {
@@ -98,24 +96,22 @@ BOOST_AUTO_TEST_CASE(test_random_mode)
         double z = buf->getFieldAs<double>(Dimension::Id::Z, i);
         uint64_t t = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, i);
 
-        BOOST_CHECK_GE(x, 1.0);
-        BOOST_CHECK_LE(x, 101.0);
+        EXPECT_GE(x, 1.0);
+        EXPECT_LE(x, 101.0);
 
-        BOOST_CHECK_GE(y, 2.0);
-        BOOST_CHECK_LE(y, 102.0);
+        EXPECT_GE(y, 2.0);
+        EXPECT_LE(y, 102.0);
 
-        BOOST_CHECK_GE(z, 3.0);
-        BOOST_CHECK_LE(z, 103.0);
+        EXPECT_GE(z, 3.0);
+        EXPECT_LE(z, 103.0);
 
-        BOOST_CHECK_EQUAL(t, i);
+        EXPECT_EQ(t, i);
     }
 }
 
 
-BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
+TEST(FauxReaderTest, test_ramp_mode_1)
 {
-    using namespace pdal;
-
     BOX3D bounds(0, 0, 0, 4, 4, 4);
     Options ops;
     ops.add("bounds", bounds);
@@ -128,9 +124,9 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
     PointContext ctx;
     reader.prepare(ctx);
     PointBufferSet pbSet = reader.execute(ctx);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1);
     PointBufferPtr buf = *pbSet.begin();
-    BOOST_CHECK_EQUAL(buf->size(), 2);
+    EXPECT_EQ(buf->size(), 2);
 
     double x0 = buf->getFieldAs<double>(Dimension::Id::X, 0);
     double y0 = buf->getFieldAs<double>(Dimension::Id::Y, 0);
@@ -142,22 +138,20 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_1)
     double z1 = buf->getFieldAs<double>(Dimension::Id::Z, 1);
     uint64_t t1 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 1);
 
-    BOOST_CHECK_CLOSE(x0, 0.0, 0.00001);
-    BOOST_CHECK_CLOSE(y0, 0.0, 0.00001);
-    BOOST_CHECK_CLOSE(z0, 0.0, 0.00001);
-    BOOST_CHECK_EQUAL(t0, 0u);
+    EXPECT_FLOAT_EQ(x0, 0.0);
+    EXPECT_FLOAT_EQ(y0, 0.0);
+    EXPECT_FLOAT_EQ(z0, 0.0);
+    EXPECT_EQ(t0, 0u);
 
-    BOOST_CHECK_CLOSE(x1, 4.0, 0.00001);
-    BOOST_CHECK_CLOSE(y1, 4.0, 0.00001);
-    BOOST_CHECK_CLOSE(z1, 4.0, 0.00001);
-    BOOST_CHECK_EQUAL(t1, 1u);
+    EXPECT_FLOAT_EQ(x1, 4.0);
+    EXPECT_FLOAT_EQ(y1, 4.0);
+    EXPECT_FLOAT_EQ(z1, 4.0);
+    EXPECT_EQ(t1, 1u);
 }
 
 
-BOOST_AUTO_TEST_CASE(test_ramp_mode_2)
+TEST(FauxReaderTest, test_ramp_mode_2)
 {
-    using namespace pdal;
-
     BOX3D bounds(1.0, 2.0, 3.0, 101.0, 152.0, 203.0);
     Options ops;
     ops.add("bounds", bounds);
@@ -169,9 +163,9 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_2)
     PointContext ctx;
     reader.prepare(ctx);
     PointBufferSet pbSet = reader.execute(ctx);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1);
     PointBufferPtr buf = *pbSet.begin();
-    BOOST_CHECK_EQUAL(buf->size(), 750);
+    EXPECT_EQ(buf->size(), 750);
 
     double delX = (101.0 - 1.0) / (750.0 - 1.0);
     double delY = (152.0 - 2.0) / (750.0 - 1.0);
@@ -184,18 +178,16 @@ BOOST_AUTO_TEST_CASE(test_ramp_mode_2)
         double z = buf->getFieldAs<double>(Dimension::Id::Z, i);
         uint64_t t = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, i);
 
-        BOOST_CHECK_CLOSE(x, 1.0 + delX * i, 0.00001);
-        BOOST_CHECK_CLOSE(y, 2.0 + delY * i, 0.00001);
-        BOOST_CHECK_CLOSE(z, 3.0 + delZ * i, 0.00001);
-        BOOST_CHECK_EQUAL(t, i);
+        EXPECT_FLOAT_EQ(x, 1.0 + delX * i);
+        EXPECT_FLOAT_EQ(y, 2.0 + delY * i);
+        EXPECT_FLOAT_EQ(z, 3.0 + delZ * i);
+        EXPECT_EQ(t, i);
     }
 }
 
 
-BOOST_AUTO_TEST_CASE(test_return_number)
+TEST(FauxReaderTest, test_return_number)
 {
-    using namespace pdal;
-
     Options ops;
 
     BOX3D bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
@@ -209,9 +201,9 @@ BOOST_AUTO_TEST_CASE(test_return_number)
     PointContext ctx;
     reader.prepare(ctx);
     PointBufferSet pbSet = reader.execute(ctx);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1);
     PointBufferPtr buf = *pbSet.begin();
-    BOOST_CHECK_EQUAL(buf->size(), 100);
+    EXPECT_EQ(buf->size(), 100);
 
     for (point_count_t i = 0; i < buf->size(); i++)
     {
@@ -220,9 +212,7 @@ BOOST_AUTO_TEST_CASE(test_return_number)
         uint8_t numberOfReturns =
             buf->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, i);
 
-        BOOST_CHECK_EQUAL(returnNumber, (i % 9) + 1);
-        BOOST_CHECK_EQUAL(numberOfReturns, 9);
+        EXPECT_EQ(returnNumber, (i % 9) + 1);
+        EXPECT_EQ(numberOfReturns, 9);
     }
 }
-
-BOOST_AUTO_TEST_SUITE_END()

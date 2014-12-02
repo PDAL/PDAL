@@ -274,7 +274,7 @@ if(WIN32)
   endif(MSVC)
 endif(WIN32)
 
-find_package(Boost 1.53 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random REQUIRED)
+find_package(Boost 1.53 COMPONENTS program_options thread iostreams filesystem system random REQUIRED)
 
 if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})
@@ -498,7 +498,9 @@ add_subdirectory(src)
 
 if(WITH_TESTS)
   message(STATUS "Building with PDAL unit tests")
+  add_subdirectory(vendor/gtest-1.7.0)
   enable_testing()
+  include_directories(vendor/gtest-1.7.0/include vendor/gtest-1.7.0)
 
   if(ENABLE_CTEST)
     message(STATUS

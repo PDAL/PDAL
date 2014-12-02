@@ -32,21 +32,19 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <random>
 
 #include <SortFilter.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
-#include "../StageTester.hpp"
-#include "../Support.hpp"
+#include "Support.hpp"
+#include "StageTester.hpp"
 
 using namespace pdal;
 
-BOOST_AUTO_TEST_SUITE(SortFilterTest)
-
-BOOST_AUTO_TEST_CASE(simple)
+TEST(SortFilterTest, simple)
 {
     Options opts;
 
@@ -75,11 +73,11 @@ BOOST_AUTO_TEST_CASE(simple)
     {
         double d1 = buf.getFieldAs<double>(Dimension::Id::X, i - 1);
         double d2 = buf.getFieldAs<double>(Dimension::Id::X, i);
-        BOOST_CHECK(d1 <= d2);
+        EXPECT_TRUE(d1 <= d2);
     }
 }
 
-BOOST_AUTO_TEST_CASE(pipeline)
+TEST(SortFilterTest, pipeline)
 {
     PipelineManager mgr;
     PipelineReader reader(mgr);
@@ -89,15 +87,13 @@ BOOST_AUTO_TEST_CASE(pipeline)
 
     PointBufferSet pbSet = mgr.buffers();
 
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1);
     PointBufferPtr buf = *pbSet.begin();
 
     for (PointId i = 1; i < buf->size(); ++i)
     {
         double d1 = buf->getFieldAs<double>(Dimension::Id::X, i - 1);
         double d2 = buf->getFieldAs<double>(Dimension::Id::X, i);
-        BOOST_CHECK(d1 <= d2);
+        EXPECT_TRUE(d1 <= d2);
     }
 }
-
-BOOST_AUTO_TEST_SUITE_END()

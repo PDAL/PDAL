@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <pdal/FileUtils.hpp>
 #include <pdal/Utils.hpp>
@@ -40,10 +40,7 @@
 
 using namespace pdal;
 
-BOOST_AUTO_TEST_SUITE(FileUtilsTest)
-
-
-BOOST_AUTO_TEST_CASE(test_file_ops)
+TEST(FileUtilsTest, test_file_ops)
 {
     std::string tmp1 = "unittest1.tmp";
     std::string tmp2 = "unittest2.tmp";
@@ -51,58 +48,55 @@ BOOST_AUTO_TEST_CASE(test_file_ops)
     // first, clean up from any previous test run
     FileUtils::deleteFile(tmp1);
     FileUtils::deleteFile(tmp2);
-    BOOST_CHECK(FileUtils::fileExists(tmp1)==false);
-    BOOST_CHECK(FileUtils::fileExists(tmp2)==false);
+    EXPECT_TRUE(FileUtils::fileExists(tmp1)==false);
+    EXPECT_TRUE(FileUtils::fileExists(tmp2)==false);
 
     // write test
     std::ostream* ostr = FileUtils::createFile(tmp1);
     *ostr << "yow";
     FileUtils::closeFile(ostr);
 
-    BOOST_CHECK(FileUtils::fileExists(tmp1)==true);
-    BOOST_CHECK(FileUtils::fileSize(tmp1)==3);
+    EXPECT_TRUE(FileUtils::fileExists(tmp1)==true);
+    EXPECT_TRUE(FileUtils::fileSize(tmp1)==3);
 
     // rename test
     FileUtils::renameFile(tmp2,tmp1);
-    BOOST_CHECK(FileUtils::fileExists(tmp1)==false);
-    BOOST_CHECK(FileUtils::fileExists(tmp2)==true);
+    EXPECT_TRUE(FileUtils::fileExists(tmp1)==false);
+    EXPECT_TRUE(FileUtils::fileExists(tmp2)==true);
 
     // read test
     std::istream* istr = FileUtils::openFile(tmp2);
     std::string yow;
     *istr >> yow;
     FileUtils::closeFile(istr);
-    BOOST_CHECK(yow=="yow");
+    EXPECT_TRUE(yow=="yow");
 
     // delete test
     FileUtils::deleteFile(tmp2);
-    BOOST_CHECK(FileUtils::fileExists(tmp2)==false);
+    EXPECT_TRUE(FileUtils::fileExists(tmp2)==false);
 }
 
-
-BOOST_AUTO_TEST_CASE(test_readFileIntoString)
+TEST(FileUtilsTest, test_readFileIntoString)
 {
     const std::string filename = Support::datapath("text/text.txt");
-    BOOST_CHECK(FileUtils::fileExists(filename));
+    EXPECT_TRUE(FileUtils::fileExists(filename));
 
     std::string source = FileUtils::readFileIntoString(filename);
 
     std::string ref = "This is a file that allows us to test that we "
         "can read a text file into a string through the file utils.\n";
 
-    BOOST_CHECK(source == ref);
+    EXPECT_TRUE(source == ref);
 }
 
-
-BOOST_AUTO_TEST_CASE(test_getcwd)
+TEST(FileUtilsTest, test_getcwd)
 {
 #if 0
     // this is hardcoded for mpg's environment
     const std::string cwd = FileUtils::getcwd();
-    BOOST_CHECK(cwd == "D:/dev/pdal/test/unit/");
+    EXPECT_TRUE(cwd == "D:/dev/pdal/test/unit/");
 #endif
 }
-
 
 #ifdef PDAL_PLATFORM_WIN32
 static const std::string drive = "A:";
@@ -117,11 +111,10 @@ static std::string normalize(const std::string p)
 
 static void compare_paths(const std::string a, const std::string b)
 {
-    BOOST_CHECK_EQUAL(normalize(a), normalize(b));
+    EXPECT_EQ(normalize(a), normalize(b));
 }
 
-
-BOOST_AUTO_TEST_CASE(test_toAbsolutePath)
+TEST(FileUtilsTest, test_toAbsolutePath)
 {
     using namespace std;
 
@@ -148,8 +141,7 @@ BOOST_AUTO_TEST_CASE(test_toAbsolutePath)
     compare_paths(e, drive + "/baz/foo.txt");
 }
 
-
-BOOST_AUTO_TEST_CASE(test_getDirectory)
+TEST(FileUtilsTest, test_getDirectory)
 {
     // test absolute case
     const std::string a = FileUtils::getDirectory(drive + "/a/b/foo.txt");
@@ -160,17 +152,13 @@ BOOST_AUTO_TEST_CASE(test_getDirectory)
     compare_paths(b, "a/b/");
 }
 
-
-BOOST_AUTO_TEST_CASE(test_isAbsolute)
+TEST(FileUtilsTest, test_isAbsolute)
 {
     // test absolute case
     const bool a = FileUtils::isAbsolutePath(drive + "/a/b/foo.txt");
-    BOOST_CHECK(a);
+    EXPECT_TRUE(a);
 
     // test relative case
     const bool b = FileUtils::isAbsolutePath("a/b/foo.txt");
-    BOOST_CHECK(!b);
+    EXPECT_TRUE(!b);
 }
-
-
-BOOST_AUTO_TEST_SUITE_END()

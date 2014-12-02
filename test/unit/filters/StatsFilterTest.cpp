@@ -32,20 +32,17 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <pdal/StageFactory.hpp>
 #include <ReprojectionFilter.hpp>
 #include <pdal/filters/Stats.hpp>
 
-#include "../StageTester.hpp"
 #include "Support.hpp"
 
 using namespace pdal;
 
-BOOST_AUTO_TEST_SUITE(StatsFilterTest)
-
-BOOST_AUTO_TEST_CASE(StatsFilterTest_test1)
+TEST(StatsFilterTest, StatsFilterTest_test1)
 {
     BOX3D bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     Options ops;
@@ -57,15 +54,15 @@ BOOST_AUTO_TEST_CASE(StatsFilterTest_test1)
     StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.faux");
     if (rc)
     {
-        BOOST_CHECK(rc);
+        EXPECT_TRUE(rc);
 
         Stage* reader = rc();
         reader->setOptions(ops);
 
         filters::Stats filter;
         filter.setInput(reader);
-        BOOST_CHECK_EQUAL(filter.getName(), "filters.stats");
-        BOOST_CHECK_EQUAL(filter.getDescription(), "Statistics Filter");
+        EXPECT_EQ(filter.getName(), "filters.stats");
+        EXPECT_EQ(filter.getDescription(), "Statistics Filter");
 
         PointContext ctx;
         filter.prepare(ctx);
@@ -75,26 +72,26 @@ BOOST_AUTO_TEST_CASE(StatsFilterTest_test1)
         const filters::stats::Summary& statsY = filter.getStats(Dimension::Id::Y);
         const filters::stats::Summary& statsZ = filter.getStats(Dimension::Id::Z);
 
-        BOOST_CHECK_EQUAL(statsX.count(), 1000u);
-        BOOST_CHECK_EQUAL(statsY.count(), 1000u);
-        BOOST_CHECK_EQUAL(statsZ.count(), 1000u);
+        EXPECT_EQ(statsX.count(), 1000u);
+        EXPECT_EQ(statsY.count(), 1000u);
+        EXPECT_EQ(statsZ.count(), 1000u);
 
-        BOOST_CHECK_CLOSE(statsX.minimum(), 1.0, 0.0001);
-        BOOST_CHECK_CLOSE(statsY.minimum(), 2.0, 0.0001);
-        BOOST_CHECK_CLOSE(statsZ.minimum(), 3.0, 0.0001);
+        EXPECT_FLOAT_EQ(statsX.minimum(), 1.0);
+        EXPECT_FLOAT_EQ(statsY.minimum(), 2.0);
+        EXPECT_FLOAT_EQ(statsZ.minimum(), 3.0);
 
-        BOOST_CHECK_CLOSE(statsX.maximum(), 1.0, 0.0001);
-        BOOST_CHECK_CLOSE(statsY.maximum(), 2.0, 0.0001);
-        BOOST_CHECK_CLOSE(statsZ.maximum(), 3.0, 0.0001);
+        EXPECT_FLOAT_EQ(statsX.maximum(), 1.0);
+        EXPECT_FLOAT_EQ(statsY.maximum(), 2.0);
+        EXPECT_FLOAT_EQ(statsZ.maximum(), 3.0);
 
-        BOOST_CHECK_CLOSE(statsX.average(), 1.0, 0.0001);
-        BOOST_CHECK_CLOSE(statsY.average(), 2.0, 0.0001);
-        BOOST_CHECK_CLOSE(statsZ.average(), 3.0, 0.0001);
+        EXPECT_FLOAT_EQ(statsX.average(), 1.0);
+        EXPECT_FLOAT_EQ(statsY.average(), 2.0);
+        EXPECT_FLOAT_EQ(statsZ.average(), 3.0);
     }
 }
 
 
-BOOST_AUTO_TEST_CASE(test_multiple_dims_same_name)
+TEST(StatsFilterTest, test_multiple_dims_same_name)
 {
     const char* epsg4326_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
     const SpatialReference out_ref(epsg4326_wkt);
@@ -121,7 +118,7 @@ BOOST_AUTO_TEST_CASE(test_multiple_dims_same_name)
 
     if (rc)
     {
-        BOOST_CHECK(rc);
+        EXPECT_TRUE(rc);
 
         Stage* reader = rc();
         reader->setOptions(options);
@@ -140,14 +137,14 @@ BOOST_AUTO_TEST_CASE(test_multiple_dims_same_name)
         const filters::stats::Summary& statsY = filter.getStats(Dimension::Id::Y);
         const filters::stats::Summary& statsZ = filter.getStats(Dimension::Id::Z);
 
-        BOOST_CHECK_EQUAL(statsX.count(), 1065u);
-        BOOST_CHECK_EQUAL(statsY.count(), 1065u);
-        BOOST_CHECK_EQUAL(statsZ.count(), 1065u);
+        EXPECT_EQ(statsX.count(), 1065u);
+        EXPECT_EQ(statsY.count(), 1065u);
+        EXPECT_EQ(statsZ.count(), 1065u);
     }
 }
 
 
-BOOST_AUTO_TEST_CASE(test_specified_stats)
+TEST(StatsFilterTest, test_specified_stats)
 {
     const char* epsg4326_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
     const SpatialReference out_ref(epsg4326_wkt);
@@ -174,7 +171,7 @@ BOOST_AUTO_TEST_CASE(test_specified_stats)
 
     if (rc)
     {
-        BOOST_CHECK(rc);
+        EXPECT_TRUE(rc);
 
         Stage* reader = rc();
         reader->setOptions(options);
@@ -203,17 +200,17 @@ BOOST_AUTO_TEST_CASE(test_specified_stats)
         const filters::stats::Summary& statsY = filter1.getStats(Dimension::Id::Y);
         const filters::stats::Summary& statsZ = filter2.getStats(Dimension::Id::Z);
 
-        BOOST_CHECK_EQUAL(statsX.count(), 1065u);
-        BOOST_CHECK_EQUAL(statsY.count(), 1065u);
-        BOOST_CHECK_EQUAL(statsZ.count(), 1065u);
+        EXPECT_EQ(statsX.count(), 1065u);
+        EXPECT_EQ(statsY.count(), 1065u);
+        EXPECT_EQ(statsZ.count(), 1065u);
 
-        BOOST_CHECK_CLOSE(statsX.minimum(), -117.2686466233, 0.0001);
-        BOOST_CHECK_CLOSE(statsY.minimum(), 848899.700, 0.0001);
+        EXPECT_FLOAT_EQ(statsX.minimum(), -117.2686466233);
+        EXPECT_FLOAT_EQ(statsY.minimum(), 848899.700);
     }
 }
 
 
-BOOST_AUTO_TEST_CASE(test_pointbuffer_stats)
+TEST(StatsFilterTest, test_pointbuffer_stats)
 {
 
     const char* epsg4326_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
@@ -224,8 +221,8 @@ BOOST_AUTO_TEST_CASE(test_pointbuffer_stats)
     Option dimensions("dimensions", "X,readers.las.Y Z filters.inplacereprojection.X, Classification", "");
     Option exact_dimensions("exact_dimensions", "Classification, X", "");
 
-    pdal::Option debug("debug", true, "");
-    pdal::Option verbose("verbose", 5, "");
+    Option debug("debug", true, "");
+    Option verbose("verbose", 5, "");
     // options.add(debug);
     // options.add(verbose);
     Option out_srs("out_srs",out_ref.getWKT(), "Output SRS to reproject to");
@@ -259,7 +256,7 @@ BOOST_AUTO_TEST_CASE(test_pointbuffer_stats)
 
     if (rc)
     {
-        BOOST_CHECK(rc);
+        EXPECT_TRUE(rc);
 
         Stage* reader = rc();
         reader->setOptions(options);
@@ -270,7 +267,7 @@ BOOST_AUTO_TEST_CASE(test_pointbuffer_stats)
 
         Options statsOptions = options;
         options.add("num_points", 1000);
-        pdal::filters::Stats filter;
+        filters::Stats filter;
         filter.setOptions(options);
         filter.setInput(&reprojectionFilter);
 
@@ -280,9 +277,6 @@ BOOST_AUTO_TEST_CASE(test_pointbuffer_stats)
 
         MetadataNode m = ctx.metadata();
         m = m.findChild("filters.stats:statistic:counts:count-1:count");
-        BOOST_CHECK_EQUAL(m.value(), "737");
+        EXPECT_EQ(m.value(), "737");
     }
 }
-
-
-BOOST_AUTO_TEST_SUITE_END()

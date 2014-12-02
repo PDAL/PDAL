@@ -34,11 +34,11 @@
 
 #include "TestConfig.hpp"
 
-#include "UnitTest.hpp"
-
 std::string TestConfig::g_data_path = UNITTEST_TESTCONFIG_DATA_PATH;
+std::string TestConfig::g_binary_path = UNITTEST_TESTCONFIG_BINARY_PATH;
 std::string TestConfig::g_oracle_connection = "";
 
+/*
 TestConfig::TestConfig()
 {
     int argc = ::boost::unit_test::framework::master_test_suite().argc;
@@ -52,3 +52,4 @@ TestConfig::TestConfig()
     if (g_data_path[g_data_path.size() - 1] != '/')
         g_data_path += "/";
 }
+*/

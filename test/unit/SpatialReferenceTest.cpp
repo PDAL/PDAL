@@ -32,45 +32,42 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <pdal/SpatialReference.hpp>
 #include <pdal/FileUtils.hpp>
-#include <VariableLengthRecord.hpp>
 #include <LasWriter.hpp>
 #include <LasReader.hpp>
 
 #include "Support.hpp"
 
-BOOST_AUTO_TEST_SUITE(SpatialReferenceTest)
-
 using namespace pdal;
 
-BOOST_AUTO_TEST_CASE(test_env_vars)
+TEST(SpatialReferenceTest, test_env_vars)
 {
 
 #ifdef _MSC_VER
     const char* gdal_data = getenv("GDAL_DATA");
     const char* proj_lib = getenv("PROJ_LIB");
 
-    BOOST_CHECK(FileUtils::fileExists(gdal_data));
-    BOOST_CHECK(FileUtils::fileExists(proj_lib));
+    EXPECT_TRUE(FileUtils::fileExists(gdal_data));
+    EXPECT_TRUE(FileUtils::fileExists(proj_lib));
 #endif
 }
 
 
-BOOST_AUTO_TEST_CASE(test_ctor)
+TEST(SpatialReferenceTest, test_ctor)
 {
     SpatialReference srs;
 
-    BOOST_CHECK(srs.getProj4() == "");
-    BOOST_CHECK(srs.getWKT() == "");
-    BOOST_CHECK(srs.empty());
+    EXPECT_TRUE(srs.getProj4() == "");
+    EXPECT_TRUE(srs.getWKT() == "");
+    EXPECT_TRUE(srs.empty());
 }
 
 
 // Test round-tripping proj.4 string
-BOOST_AUTO_TEST_CASE(test_proj4_roundtrip)
+TEST(SpatialReferenceTest, test_proj4_roundtrip)
 {
     std::string proj4 = "+proj=utm +zone=15 +datum=WGS84 +units=m +no_defs";
     std::string proj4_ellps =
@@ -82,30 +79,30 @@ BOOST_AUTO_TEST_CASE(test_proj4_roundtrip)
     {
         SpatialReference ref;
         ref.setProj4(proj4);
-        BOOST_CHECK(!ref.empty());
+        EXPECT_TRUE(!ref.empty());
         const std::string ret = ref.getProj4();
-        BOOST_CHECK(ret == proj4_out);
+        EXPECT_TRUE(ret == proj4_out);
     }
 
     {
         SpatialReference ref;
         ref.setProj4(proj4_ellps);
         const std::string ret = ref.getProj4();
-        //BOOST_CHECK(ret == proj4);
-        BOOST_CHECK(ret == proj4_out);
+        //EXPECT_TRUE(ret == proj4);
+        EXPECT_TRUE(ret == proj4_out);
     }
 
     {
         SpatialReference ref;
         ref.setProj4(proj4_out);
         const std::string ret = ref.getProj4();
-        BOOST_CHECK(ret == proj4_out);
+        EXPECT_TRUE(ret == proj4_out);
     }
 }
 
 
 // Test setting EPSG:4326 from User string
-BOOST_AUTO_TEST_CASE(test_userstring_roundtrip)
+TEST(SpatialReferenceTest, test_userstring_roundtrip)
 {
     SpatialReference ref;
 
@@ -119,14 +116,14 @@ BOOST_AUTO_TEST_CASE(test_userstring_roundtrip)
     std::string ret_proj = ref.getProj4();
     std::string ret_wkt = ref.getWKT();
 
-    BOOST_CHECK(ret_proj == proj4);
-    BOOST_CHECK(ret_wkt == wkt);
+    EXPECT_TRUE(ret_proj == proj4);
+    EXPECT_TRUE(ret_wkt == wkt);
 }
 
 
 #if defined(PDAL_HAVE_GEOS) && defined(PDAL_HAVE_LIBGEOTIFF)
 // Test fetching SRS from an existing file
-BOOST_AUTO_TEST_CASE(test_read_srs)
+TEST(SpatialReferenceTest, test_read_srs)
 {
     PointContext ctx;
 
@@ -144,10 +141,10 @@ BOOST_AUTO_TEST_CASE(test_read_srs)
 
     const std::string wkt = "PROJCS[\"WGS 84 / UTM zone 17N\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-81],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AUTHORITY[\"EPSG\",\"32617\"]]";
 
-    BOOST_CHECK(ret_wkt == wkt);
+    EXPECT_TRUE(ret_wkt == wkt);
 
     std::string proj4 = "+proj=utm +zone=17 +datum=WGS84 +units=m +no_defs";
-    BOOST_CHECK(ret_proj4 == proj4);
+    EXPECT_TRUE(ret_proj4 == proj4);
 }
 #endif
 
@@ -158,7 +155,7 @@ BOOST_AUTO_TEST_CASE(test_read_srs)
 
 // Try writing a compound coordinate system to file and ensure we get back
 // WKT with the geoidgrids (from the WKT VLR).
-BOOST_AUTO_TEST_CASE(test_vertical_datums)
+TEST(SpatialReferenceTest, test_vertical_datums)
 {
     std::string tmpfile(Support::temppath("tmp_srs.las"));
     FileUtils::deleteFile(tmpfile);
@@ -168,7 +165,7 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
     SpatialReference ref;
     ref.setFromUserInput(wkt);
     const std::string wktCheck = ref.getWKT(SpatialReference::eCompoundOK);
-    BOOST_CHECK(wkt == wktCheck); // just to make sure
+    EXPECT_TRUE(wkt == wktCheck); // just to make sure
 
     PointContext ctx;
     // Write a very simple file with our SRS and one point.
@@ -199,7 +196,7 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
     const SpatialReference ref2 = reader2.getSpatialReference();
     const std::string wkt2 = ref2.getWKT(SpatialReference::eCompoundOK);
 
-    BOOST_CHECK(wkt == wkt2);
+    EXPECT_TRUE(wkt == wkt2);
 
     // Cleanup
     FileUtils::deleteFile(tmpfile);
@@ -210,7 +207,7 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
 #if defined(PDAL_HAVE_GEOS) && defined(PDAL_HAVE_LIBGEOTIFF)
 // Try writing only the WKT VLR to a file, and see if the resulting
 // file still works ok.
-BOOST_AUTO_TEST_CASE(test_writing_vlr)
+TEST(SpatialReferenceTest, test_writing_vlr)
 {
     std::string tmpfile(Support::temppath("tmp_srs_9.las"));
     SpatialReference ref;
@@ -219,7 +216,7 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
 
     ref.setFromUserInput("EPSG:4326");
     std::string wkt = ref.getWKT();
-    BOOST_CHECK(wkt == reference_wkt);
+    EXPECT_TRUE(wkt == reference_wkt);
 
     // Write a very simple file with our SRS and one point.
     {
@@ -256,9 +253,9 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
 
         SpatialReference result_ref = reader.getSpatialReference();
 
-        BOOST_CHECK_EQUAL(reader.header().vlrCount(), 4);
+        EXPECT_EQ(reader.header().vlrCount(), 4);
         std::string wkt = result_ref.getWKT();
-        BOOST_CHECK_EQUAL(wkt, reference_wkt);
+        EXPECT_EQ(wkt, reference_wkt);
     }
 
     // Cleanup
@@ -267,7 +264,7 @@ BOOST_AUTO_TEST_CASE(test_writing_vlr)
 #endif
 
 
-BOOST_AUTO_TEST_CASE(test_io)
+TEST(SpatialReferenceTest, test_io)
 {
     const std::string wkt = "COMPD_CS[\"WGS 84 + VERT_CS\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],VERT_CS[\"NAVD88 height\",VERT_DATUM[\"North American Vertical Datum 1988\",2005,AUTHORITY[\"EPSG\",\"5103\"],EXTENSION[\"PROJ4_GRIDS\",\"g2003conus.gtx\"]],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Up\",UP],AUTHORITY[\"EPSG\",\"5703\"]]]";
 
@@ -281,10 +278,10 @@ BOOST_AUTO_TEST_CASE(test_io)
     SpatialReference ref2;
     ss >> ref2;
 
-    BOOST_CHECK(ref == ref2);
+    EXPECT_TRUE(ref == ref2);
 }
 
-BOOST_AUTO_TEST_CASE(test_vertical_and_horizontal)
+TEST(SpatialReferenceTest, test_vertical_and_horizontal)
 {
 
     const std::string wkt = "COMPD_CS[\"WGS 84 + VERT_CS\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],VERT_CS[\"NAVD88 height\",VERT_DATUM[\"North American Vertical Datum 1988\",2005,AUTHORITY[\"EPSG\",\"5103\"],EXTENSION[\"PROJ4_GRIDS\",\"g2003conus.gtx\"]],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Up\",UP],AUTHORITY[\"EPSG\",\"5703\"]]]";
@@ -295,9 +292,7 @@ BOOST_AUTO_TEST_CASE(test_vertical_and_horizontal)
     std::string horizontal = srs.getHorizontal();
     std::string vertical = srs.getVertical();
 
-    BOOST_CHECK_EQUAL(horiz, horizontal);
-    BOOST_CHECK_EQUAL(vert, vertical);
+    EXPECT_EQ(horiz, horizontal);
+    EXPECT_EQ(vert, vertical);
 
 }
-
-BOOST_AUTO_TEST_SUITE_END()
