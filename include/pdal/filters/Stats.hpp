@@ -90,7 +90,7 @@ public:
         { return (boost::accumulators::max)(m_summary); }
     double average() const
         { return boost::accumulators::mean(m_summary); }
-    boost::uint64_t count() const
+    uint64_t count() const
         { return boost::accumulators::count(m_summary); }
 
     virtual boost::property_tree::ptree toPTree(PointContext ctx) const;

@@ -83,11 +83,11 @@ std::unique_ptr<Stage> SortKernel::makeReader(Options readerOptions)
     if (isDebug())
     {
         readerOptions.add<bool>("debug", true);
-        boost::uint32_t verbosity(getVerboseLevel());
+        uint32_t verbosity(getVerboseLevel());
         if (!verbosity)
             verbosity = 1;
 
-        readerOptions.add<boost::uint32_t>("verbose", verbosity);
+        readerOptions.add<uint32_t>("verbose", verbosity);
         readerOptions.add<std::string>("log", "STDERR");
     }
 
@@ -125,7 +125,7 @@ int SortKernel::execute()
 
     Options sortOptions;
     sortOptions.add<bool>("debug", isDebug());
-    sortOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
+    sortOptions.add<uint32_t>("verbose", getVerboseLevel());
 
     StageFactory f;
     StageFactory::FilterCreator* fc = f.getFilterCreator("filters.mortonorder");

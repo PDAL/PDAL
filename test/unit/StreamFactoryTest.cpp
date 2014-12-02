@@ -37,7 +37,6 @@
 #include <sstream>
 #include <iostream>
 
-#include <boost/cstdint.hpp>
 #include <iostream>
 
 #include <pdal/StreamFactory.hpp>

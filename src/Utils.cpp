@@ -87,7 +87,7 @@ double Utils::random(double minimum, double maximum)
     return t;
 }
 
-double Utils::uniform(const double& minimum, const double& maximum, boost::uint32_t seed)
+double Utils::uniform(const double& minimum, const double& maximum, uint32_t seed)
 {
     boost::random::mt19937 gen(seed);
     boost::random::uniform_real_distribution<double> dist(minimum, maximum);
@@ -95,7 +95,7 @@ double Utils::uniform(const double& minimum, const double& maximum, boost::uint3
     return dist(gen);
 }
 
-double Utils::normal(const double& mean, const double& sigma, boost::uint32_t seed)
+double Utils::normal(const double& mean, const double& sigma, uint32_t seed)
 {
     boost::random::mt19937 gen(seed);
     boost::random::normal_distribution<double> dist(mean, sigma);
@@ -193,7 +193,7 @@ bool Utils::eatcharacter(istream& s, char x)
     return true;
 }
 
-boost::uint32_t Utils::getStreamPrecision(double scale)
+uint32_t Utils::getStreamPrecision(double scale)
 {
     double frac = 0;
     double integer = 0;
@@ -348,8 +348,8 @@ string Utils::base64_encode(const unsigned char *bytes_to_encode, size_t in_len)
     string ret;
     int i = 0;
     int j = 0;
-    boost::uint8_t char_array_3[3];
-    boost::uint8_t char_array_4[4];
+    uint8_t char_array_3[3];
+    uint8_t char_array_4[4];
 
     while (in_len--)
     {

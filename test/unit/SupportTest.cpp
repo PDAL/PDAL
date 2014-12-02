@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE(test_paths)
 
 BOOST_AUTO_TEST_CASE(test_diff_file)
 {
-    boost::uint32_t diffs = 0;
+    uint32_t diffs = 0;
     bool same = false;
 
     diffs = Support::diff_files(Support::datapath("misc/data1.dat"), Support::datapath("misc/data0.dat"));
@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(test_diff_file)
 
 BOOST_AUTO_TEST_CASE(test_diff_file_ignorable)
 {
-    boost::uint32_t diffs = 0;
+    uint32_t diffs = 0;
 
     // no ignorable region
     {
@@ -136,32 +136,32 @@ BOOST_AUTO_TEST_CASE(test_diff_file_ignorable)
 
     // treat whole file as ignorable
     {
-        boost::uint32_t start[1] = {0};
-        boost::uint32_t len[1] = {100};
+        uint32_t start[1] = {0};
+        uint32_t len[1] = {100};
         diffs = Support::diff_files(Support::datapath("misc/data4a.dat"), Support::datapath("misc/data4b.dat"), start, len, 1);
         BOOST_CHECK(diffs == 0);
     }
 
     // just ignore the first region
     {
-        boost::uint32_t start[1] = {3};
-        boost::uint32_t len[1] = {4};
+        uint32_t start[1] = {3};
+        uint32_t len[1] = {4};
         diffs = Support::diff_files(Support::datapath("misc/data4a.dat"), Support::datapath("misc/data4b.dat"), start, len, 1);
         BOOST_CHECK(diffs == 2);
     }
 
     // ignore the first and second regions
     {
-        boost::uint32_t start[2] = {3, 23};
-        boost::uint32_t len[2] = {4, 2};
+        uint32_t start[2] = {3, 23};
+        uint32_t len[2] = {4, 2};
         diffs = Support::diff_files(Support::datapath("misc/data4a.dat"), Support::datapath("misc/data4b.dat"), start, len, 2);
         BOOST_CHECK(diffs == 0);
     }
 
     // ignore first and part of second region
     {
-        boost::uint32_t start[2] = {3, 22};
-        boost::uint32_t len[2] = {4, 2};
+        uint32_t start[2] = {3, 22};
+        uint32_t len[2] = {4, 2};
         diffs = Support::diff_files(Support::datapath("misc/data4a.dat"), Support::datapath("misc/data4b.dat"), start, len, 2);
         BOOST_CHECK(diffs == 1);
     }
@@ -170,7 +170,7 @@ BOOST_AUTO_TEST_CASE(test_diff_file_ignorable)
 
 BOOST_AUTO_TEST_CASE(test_diff_text_file)
 {
-    boost::uint32_t diffs = 0;
+    uint32_t diffs = 0;
     bool same = false;
 
     diffs = Support::diff_text_files(Support::datapath("misc/data1.txt"), Support::datapath("misc/data0.txt"));

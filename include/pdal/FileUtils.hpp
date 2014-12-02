@@ -65,7 +65,7 @@ public:
     static bool deleteFile(const std::string& filename);
     static void renameFile(const std::string& dest, const std::string& src);
     static bool fileExists(const std::string& filename);
-    static boost::uintmax_t fileSize(const std::string& filename);
+    static uintmax_t fileSize(const std::string& filename);
 
     // reads a file into a text string for you
     static std::string readFileIntoString(const std::string& filename);

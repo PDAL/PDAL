@@ -528,7 +528,7 @@ void Reader::Load()
                 if (s < 1)
                     throw schema_loading_error("Dimension size is < 1!");
                 xmlFree(n);
-                size = static_cast<boost::uint32_t>(s);
+                size = static_cast<uint32_t>(s);
             }
             **/
 
@@ -541,7 +541,7 @@ void Reader::Load()
                 if (p < 1)
                     throw schema_loading_error("Dimension position is < 1!");
                 xmlFree(n);
-                info.m_position = static_cast<boost::uint32_t>(p);
+                info.m_position = static_cast<uint32_t>(p);
             }
             if (boost::iequals((const char*)properties->name, "description"))
             {

@@ -177,7 +177,7 @@ void DeltaKernel::outputDetail(PointBuffer& source_data, PointBuffer& candidate_
         double yd = sy - cy;
         double zd = sz - cz;
         boost::property_tree::ptree pt;
-        pt.put<boost::int32_t>("i", i);
+        pt.put<int32_t>("i", i);
         pt.put<float>("xd", xd);
         pt.put<float>("yd", yd);
         if (m_3d)
@@ -200,7 +200,7 @@ void DeltaKernel::outputDetail(PointBuffer& source_data, PointBuffer& candidate_
 
         for (auto b = output.begin(); b != output.end(); ++b)
         {
-            ostr << b->second.get<boost::int32_t>("i")  << ",";
+            ostr << b->second.get<int32_t>("i")  << ",";
             uint32_t precision = 12;
             ostr.setf(std::ios_base::fixed, std::ios_base::floatfield);
             ostr.precision(precision);
@@ -275,7 +275,7 @@ int DeltaKernel::execute()
     {
         sourceOptions.add<std::string>("filename", m_sourceFile);
         sourceOptions.add<bool>("debug", isDebug());
-        sourceOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
+        sourceOptions.add<uint32_t>("verbose", getVerboseLevel());
     }
     std::unique_ptr<Stage> source(KernelSupport::makeReader(m_sourceFile));
     source->setOptions(sourceOptions);
@@ -290,7 +290,7 @@ int DeltaKernel::execute()
     {
         candidateOptions.add<std::string>("filename", m_candidateFile);
         candidateOptions.add<bool>("debug", isDebug());
-        candidateOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
+        candidateOptions.add<uint32_t>("verbose", getVerboseLevel());
     }
 
     std::unique_ptr<Stage> candidate(KernelSupport::makeReader(m_candidateFile));

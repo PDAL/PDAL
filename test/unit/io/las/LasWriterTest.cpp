@@ -34,7 +34,6 @@
 
 #include "UnitTest.hpp"
 
-#include <boost/cstdint.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/concept_check.hpp>
@@ -237,7 +236,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
 
     // these two files only differ by the description string in the VLR.
     // This now skips the entire LASzip VLR for comparison.
-    const boost::uint32_t numdiffs =Support::diff_files(
+    const uint32_t numdiffs =Support::diff_files(
         Support::temppath("LasWriterTest_test_simple_laz.laz"),
         Support::datapath("laszip/laszip-generated.laz"),
         227, 106);

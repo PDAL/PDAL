@@ -111,7 +111,7 @@ private:
 class PDAL_DLL FilenameSubsetStreamFactory : public StreamFactory
 {
 public:
-    FilenameSubsetStreamFactory(const std::string& file, boost::uint64_t offset, boost::uint64_t length);
+    FilenameSubsetStreamFactory(const std::string& file, uint64_t offset, uint64_t length);
     virtual ~FilenameSubsetStreamFactory();
 
     virtual std::istream& allocate();
@@ -119,13 +119,13 @@ public:
 
 private:
     const std::string m_filename;
-    const boost::uint64_t m_offset;
-    const boost::uint64_t m_length;
+    const uint64_t m_offset;
+    const uint64_t m_length;
 
     struct StreamSet
     {
     public:
-        StreamSet(const std::string& filename, boost::uint64_t offset, boost::uint64_t length);
+        StreamSet(const std::string& filename, uint64_t offset, uint64_t length);
         ~StreamSet();
         std::istream* stream()
         {

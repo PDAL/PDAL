@@ -76,7 +76,7 @@ public:
 private:
     LasError m_error;
     LasHeader m_lasHeader;
-    boost::uint32_t m_numPointsWritten;
+    uint32_t m_numPointsWritten;
     SummaryData m_summaryData;
     std::unique_ptr<LASzipper> m_zipper;
     std::unique_ptr<ZipPoint> m_zipPoint;

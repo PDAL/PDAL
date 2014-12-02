@@ -256,7 +256,7 @@ void Stats::ready(PointContext ctx)
 void Stats::extractMetadata(PointContext ctx)
 {
 
-    boost::uint32_t position(0);
+    uint32_t position(0);
     
     // MetadataNode stat = m_metadata.add("statistic");
     for (auto di = m_stats.begin(); di != m_stats.end(); ++di)
@@ -279,7 +279,7 @@ boost::property_tree::ptree Stats::toPTree(PointContext ctx) const
     tree.push_back(ptree::value_type("stats", ptree()));
     auto& p = tree.get_child("stats");
     
-    boost::uint32_t position(0);
+    uint32_t position(0);
     for (auto di = m_stats.begin(); di != m_stats.end(); ++di)
     {
         Dimension::Id::Enum d = di->first;

@@ -33,7 +33,6 @@
 ****************************************************************************/
 
 #include "UnitTest.hpp"
-#include <boost/cstdint.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <FauxReader.hpp>

@@ -180,7 +180,7 @@ BOOST_AUTO_TEST_CASE(PLangTest_ins)
     Script script(source, "MyTest", "yow");
     Invocation meth(script);
     meth.compile();
-    meth.insertArgument("X", (boost::uint8_t*)data, Dimension::Type::Double, 5);
+    meth.insertArgument("X", (uint8_t*)data, Dimension::Type::Double, 5);
     meth.execute();
 }
 

@@ -144,7 +144,7 @@ int DiffKernel::execute()
     {
         sourceOptions.add<std::string>("filename", m_sourceFile);
         sourceOptions.add<bool>("debug", isDebug());
-        sourceOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
+        sourceOptions.add<uint32_t>("verbose", getVerboseLevel());
     }
     std::unique_ptr<Stage> source(KernelSupport::makeReader(m_sourceFile));
     source->setOptions(sourceOptions);
@@ -158,7 +158,7 @@ int DiffKernel::execute()
     {
         candidateOptions.add<std::string>("filename", m_candidateFile);
         candidateOptions.add<bool>("debug", isDebug());
-        candidateOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
+        candidateOptions.add<uint32_t>("verbose", getVerboseLevel());
     }
 
     std::unique_ptr<Stage> candidate(KernelSupport::makeReader(m_candidateFile));

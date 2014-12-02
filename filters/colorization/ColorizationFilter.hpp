@@ -90,8 +90,8 @@ private:
     virtual void done(PointContext ctx);
 
     bool getPixelAndLinePosition(double x, double y,
-        boost::array<double, 6> const& inverse, boost::int32_t& pixel,
-        boost::int32_t& line, void *ds);
+        boost::array<double, 6> const& inverse, int32_t& pixel,
+        int32_t& line, void *ds);
 
     std::string m_rasterFilename;
     std::vector<BandInfo> m_bands;

@@ -38,7 +38,6 @@
 #include "H5cpp.h"
 
 #include <boost/scoped_ptr.hpp>
-#include <boost/cstdint.hpp>
 
 #include <pdal/pdal_error.hpp>
 
@@ -82,13 +81,13 @@ public:
             const std::vector<hdf5::Hdf5ColumnData>& columns);
     void close();
 
-    boost::uint64_t getNumPoints() const;
+    uint64_t getNumPoints() const;
 
     void getColumnEntries(
             void* data,
             const std::string& dataSetName,
-            boost::uint64_t numEntries,
-            boost::uint64_t offset) const;
+            uint64_t numEntries,
+            uint64_t offset) const;
 
 private:
     struct ColumnData
@@ -117,7 +116,7 @@ private:
     const ColumnData& getColumnData(const std::string& dataSetName) const;
 
     boost::scoped_ptr<H5::H5File> m_h5File;
-    boost::uint64_t m_numPoints;
+    uint64_t m_numPoints;
 
     std::map<std::string, ColumnData> m_columnDataMap;
 };

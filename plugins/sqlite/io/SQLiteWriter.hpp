@@ -82,10 +82,10 @@ private:
     BOX3D m_bounds; // Bounds of the entire point cloud
     bool m_sdo_pc_is_initialized;
 	std::ostringstream m_block_insert_query;
-	boost::int32_t m_obj_id;
-	boost::int32_t m_block_id;
-	boost::uint32_t m_srid;
-	boost::int64_t m_num_points;
+	int32_t m_obj_id;
+	int32_t m_block_id;
+	uint32_t m_srid;
+	int64_t m_num_points;
     size_t m_pointSize;
     Orientation::Enum m_orientation;
     Dimension::IdList m_dims;

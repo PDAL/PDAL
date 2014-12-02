@@ -34,8 +34,6 @@
 
 #include "UnitTest.hpp"
 
-#include <boost/cstdint.hpp>
-
 #include <ChipperFilter.hpp>
 #include <LasWriter.hpp>
 #include <LasReader.hpp>
@@ -157,7 +155,7 @@ BOOST_AUTO_TEST_CASE(test_ordering)
     pdal::PointBuffer patch(chipper.getSchema(), chipper.getNumPoints());
 
     pdal::StageSequentialIterator* iter_c = chipper.createSequentialIterator(patch);
-    boost::uint64_t numRead(0);
+    uint64_t numRead(0);
 
     while (true)
     {
@@ -206,21 +204,21 @@ BOOST_AUTO_TEST_CASE(test_ordering)
     //
     for (unsigned i = 0; i < candidate.getNumPoints(); ++i)
     {
-        boost::int32_t sx = source.getField<boost::int32_t>(sdimX, i);
-        boost::int32_t sy = source.getField<boost::int32_t>(sdimY, i);
-        boost::int32_t sz = source.getField<boost::int32_t>(sdimZ, i);
-        boost::uint16_t sintensity = source.getField<boost::uint16_t>(sdimIntensity, i);
-        boost::uint16_t sred = source.getField<boost::uint16_t>(sdimRed, i);
-        boost::uint16_t sgreen = source.getField<boost::uint16_t>(sdimGreen, i);
-        boost::uint16_t sblue = source.getField<boost::uint16_t>(sdimBlue, i);
+        int32_t sx = source.getField<int32_t>(sdimX, i);
+        int32_t sy = source.getField<int32_t>(sdimY, i);
+        int32_t sz = source.getField<int32_t>(sdimZ, i);
+        uint16_t sintensity = source.getField<uint16_t>(sdimIntensity, i);
+        uint16_t sred = source.getField<uint16_t>(sdimRed, i);
+        uint16_t sgreen = source.getField<uint16_t>(sdimGreen, i);
+        uint16_t sblue = source.getField<uint16_t>(sdimBlue, i);
 
-        boost::int32_t cx = candidate.getField<boost::int32_t>(cdimX, i);
-        boost::int32_t cy = candidate.getField<boost::int32_t>(cdimY, i);
-        boost::int32_t cz = candidate.getField<boost::int32_t>(cdimZ, i);
-        boost::uint16_t cintensity = candidate.getField<boost::uint16_t>(cdimIntensity, i);
-        boost::uint16_t cred = candidate.getField<boost::uint16_t>(cdimRed, i);
-        boost::uint16_t cgreen = candidate.getField<boost::uint16_t>(cdimGreen, i);
-        boost::uint16_t cblue = candidate.getField<boost::uint16_t>(cdimBlue, i);
+        int32_t cx = candidate.getField<int32_t>(cdimX, i);
+        int32_t cy = candidate.getField<int32_t>(cdimY, i);
+        int32_t cz = candidate.getField<int32_t>(cdimZ, i);
+        uint16_t cintensity = candidate.getField<uint16_t>(cdimIntensity, i);
+        uint16_t cred = candidate.getField<uint16_t>(cdimRed, i);
+        uint16_t cgreen = candidate.getField<uint16_t>(cdimGreen, i);
+        uint16_t cblue = candidate.getField<uint16_t>(cdimBlue, i);
 
 
         BOOST_CHECK_EQUAL(sx, cx);

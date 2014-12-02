@@ -145,8 +145,8 @@ void NitfFile::close()
 }
 
 
-void NitfFile::getLasOffset(boost::uint64_t& offset,
-                            boost::uint64_t& length)
+void NitfFile::getLasOffset(uint64_t& offset,
+                            uint64_t& length)
 {
     if (!m_validLidarSegments)
     {

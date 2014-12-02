@@ -34,8 +34,6 @@
 
 #include "UnitTest.hpp"
 
-#include <boost/cstdint.hpp>
-
 #include <pdal/pdal_internal.hpp>
 #include <pdal/pdal_config.hpp>
 

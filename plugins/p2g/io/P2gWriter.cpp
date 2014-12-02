@@ -53,7 +53,7 @@ void P2gWriter::processOptions(const Options& options)
     m_GRID_DIST_Y = options.getValueOrDefault<double>("grid_dist_y", 6.0);
     m_RADIUS_SQ = options.getValueOrDefault<double>("radius",
         8.4852813742385713);
-    m_fill_window_size = options.getValueOrDefault<boost::uint32_t>(
+    m_fill_window_size = options.getValueOrDefault<uint32_t>(
         "fill_window_size", 3);
     m_filename = options.getValueOrThrow<std::string>("filename");
 
