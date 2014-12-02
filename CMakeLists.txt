@@ -519,9 +519,6 @@ else()
   endif()
 endif()
 
-# PDAL_TARGET_OBJECTS is used to collect the driver object libraries
-set(PDAL_TARGET_OBJECTS "")
-
 add_subdirectory(plugins)
 
 if(WITH_APPS)
