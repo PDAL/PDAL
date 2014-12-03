@@ -5,7 +5,7 @@
 
 cmake_minimum_required(VERSION 2.8.6)
 
-project(PDAL)
+project(PDAL CXX C)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 
 #------------------------------------------------------------------------------

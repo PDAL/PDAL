@@ -44,6 +44,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include <map>
+#include <memory>
 #include <vector>
 
 
