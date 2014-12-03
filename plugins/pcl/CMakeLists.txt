@@ -24,6 +24,7 @@
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/plugins/pcl)
 include_directories(${PROJECT_SOURCE_DIR}/io/las)
+include_directories(${PROJECT_SOURCE_DIR}/kernels)
 
 find_package(PCL 1.7)
 if(PCL_FOUND)
@@ -60,11 +61,11 @@ if(PCL_FOUND)
         # View Kernel
         #
         set(srcs
-            kernel/View.cpp
+            kernel/ViewKernel.cpp
         )
 
         set(incs
-            kernel/View.hpp
+            kernel/ViewKernel.hpp
         )
 
         set(deps ${PCL_LIBRARIES})
@@ -131,11 +132,11 @@ if(PCL_FOUND)
     # PCL Kernel
     #
     set(srcs
-        kernel/PCL.cpp
+        kernel/PCLKernel.cpp
     )
 
     set(incs
-        kernel/PCL.hpp
+        kernel/PCLKernel.hpp
     )
 
     set(deps ${PCL_LIBRARIES} ${pclblock_filter_lib_name})
@@ -145,11 +146,11 @@ if(PCL_FOUND)
     # Ground Kernel
     #
     set(srcs
-        kernel/Ground.cpp
+        kernel/GroundKernel.cpp
     )
 
     set(incs
-        kernel/Ground.hpp
+        kernel/GroundKernel.hpp
     )
 
     set(deps ${PCL_LIBRARIES} ${pclblock_filter_lib_name})
@@ -159,11 +160,11 @@ if(PCL_FOUND)
     # Smooth Kernel
     #
     set(srcs
-        kernel/Smooth.cpp
+        kernel/SmoothKernel.cpp
     )
 
     set(incs
-        kernel/Smooth.hpp
+        kernel/SmoothKernel.hpp
     )
 
     set(deps ${PCL_LIBRARIES} ${pclblock_filter_lib_name})

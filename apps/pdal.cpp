@@ -33,8 +33,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/kernel/Kernels.hpp>
-#include <pdal/kernel/KernelFactory.hpp>
+//#include <pdal/Kernels.hpp>
+#include "KernelFactory.hpp"
 #include <pdal/pdal_config.hpp>
 
 #include <boost/algorithm/string.hpp>
@@ -54,18 +54,18 @@ void outputVersion()
     std::cout << "  available actions: " << std::endl;
     std::cout << "     - delta" << std::endl;
     std::cout << "     - diff" << std::endl;
-    if (f.getKernelCreator("drivers.kernel.ground"))
+    if (f.getKernelCreator("kernels.ground"))
         std::cout << "     - ground" << std::endl;
     std::cout << "     - info" << std::endl;
-    if (f.getKernelCreator("drivers.pcl.kernel"))
+    if (f.getKernelCreator("kernels.pcl"))
         std::cout << "     - pcl" << std::endl;
     std::cout << "     - pipeline" << std::endl;
     std::cout << "     - random" << std::endl;
     std::cout << "     - sort" << std::endl;
-    if (f.getKernelCreator("drivers.smooth.kernel"))
+    if (f.getKernelCreator("kernels.smooth"))
         std::cout << "     - smooth" << std::endl;
     std::cout << "     - translate" << std::endl;
-    if (f.getKernelCreator("drivers.view.kernel"))
+    if (f.getKernelCreator("kernels.view"))
         std::cout << "     - view" << std::endl;
     std::cout << std::endl;
     std::cout << "See http://pdal.io/apps.html for more detail";
@@ -129,68 +129,68 @@ int main(int argc, char* argv[])
 
     if (boost::iequals(action, "translate"))
     {
-        kernel::Translate app;
-        return app.run(count, args, "translate");
+        std::unique_ptr<Kernel> app(f.createKernel("kernels.translate"));
+        return app->run(count, args, "translate");
     }
 
     if (boost::iequals(action, "info"))
     {
-        kernel::Info app;
-        return app.run(count, args, "info");
+        std::unique_ptr<Kernel> app(f.createKernel("kernels.info"));
+        return app->run(count, args, "info");
     }
 
     if (boost::iequals(action, "ground"))
     {
-        std::unique_ptr<Kernel> app(f.createKernel("drivers.kernel.ground"));
+        std::unique_ptr<Kernel> app(f.createKernel("kernels.ground"));
         return app->run(count, args, "ground");
     }
     
     if (boost::iequals(action, "pcl"))
     {
-        std::unique_ptr<Kernel> app(f.createKernel("drivers.pcl.kernel"));
+        std::unique_ptr<Kernel> app(f.createKernel("kernels.pcl"));
         return app->run(count, args, "pcl");
     }
 
     if (boost::iequals(action, "smooth"))
     {
-        std::unique_ptr<Kernel> app(f.createKernel("drivers.smooth.kernel"));
+        std::unique_ptr<Kernel> app(f.createKernel("kernels.smooth"));
         return app->run(count, args, "smooth");
     }
  
     if (boost::iequals(action, "view"))
     {
-        std::unique_ptr<Kernel> app(f.createKernel("drivers.view.kernel"));
+        std::unique_ptr<Kernel> app(f.createKernel("kernels.view"));
         return app->run(count, args, "view");
     }
 
     if (boost::iequals(action, "sort"))
     {
-      kernel::Sort app;
-      return app.run(count, args, "sort");
+        std::unique_ptr<Kernel> app(f.createKernel("kernels.sort"));
+        return app->run(count, args, "sort");
     }
 
     if (boost::iequals(action, "pipeline"))
     {
-        kernel::Pipeline app;
-        return app.run(count, args, "pipeline");
+        std::unique_ptr<Kernel> app(f.createKernel("kernels.pipeline"));
+        return app->run(count, args, "pipeline");
     }
 
     if (boost::iequals(action, "delta"))
     {
-        kernel::Delta app;
-        return app.run(count, args, "delta");
+        std::unique_ptr<Kernel> app(f.createKernel("kernels.delta"));
+        return app->run(count, args, "delta");
     }
     
     if (boost::iequals(action, "diff"))
     {
-        kernel::Diff app;
-        return app.run(count, args, "diff");
+        std::unique_ptr<Kernel> app(f.createKernel("kernels.diff"));
+        return app->run(count, args, "diff");
     }
 
     if (boost::iequals(action, "random"))
     {
-        kernel::Random app;
-        return app.run(count, args, "random");
+        std::unique_ptr<Kernel> app(f.createKernel("kernels.random"));
+        return app->run(count, args, "random");
     }
 
     std::cerr << "Action '" << action <<"' not recognized" << std::endl << std::endl;

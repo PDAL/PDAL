@@ -19,10 +19,6 @@ set(PDAL_HEADERS_DIR "${PROJECT_SOURCE_DIR}/include/pdal")
 set(PDAL_HPP "")
 set(PDAL_CPP "")
 
-set(PDAL_KERNEL_PATH kernel)
-set(PDAL_KERNEL_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_KERNEL_PATH}")
-set(PDAL_KERNEL_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_KERNEL_PATH}")
-
 #
 # base
 #
@@ -69,11 +65,7 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/third/md5-pdal.h"
   "${PDAL_HEADERS_DIR}/third/string_ref.hpp"
   "${PDAL_HEADERS_DIR}/third/string_ref_fwd.hpp"
-    ${PDAL_KERNEL_HEADERS}/Kernel.hpp
-    ${PDAL_KERNEL_HEADERS}/KernelFactory.hpp
-    ${PDAL_KERNEL_HEADERS}/KernelInfo.hpp
-    ${PDAL_KERNEL_HEADERS}/Kernels.hpp
-    ${PDAL_KERNEL_HEADERS}/Support.hpp
+  "${PDAL_HEADERS_DIR}/Kernels.hpp"
 )
 
 if (PDAL_HAVE_LIBXML2)
@@ -109,10 +101,6 @@ set(PDAL_BASE_CPP
   third/md5-pdal.c
   ${PDAL_XML_SRC}
   ${PDAL_LAZPERF_SRC}
-    ${PDAL_KERNEL_SRC}/Kernel.cpp
-    ${PDAL_KERNEL_SRC}/KernelFactory.cpp
-    ${PDAL_KERNEL_SRC}/KernelInfo.cpp
-    ${PDAL_KERNEL_SRC}/Support.cpp
 )
 
 list (APPEND PDAL_CPP ${PDAL_BASE_CPP} )
@@ -206,29 +194,6 @@ set (PDAL_CONFIG_CPP
 list (APPEND PDAL_CPP ${PDAL_CONFIG_CPP} )
 list (APPEND PDAL_HPP ${PDAL_CONFIG_HPP} )
 
-set(PDAL_KERNEL_HPP
-    ${PDAL_KERNEL_HEADERS}/Diff.hpp
-    ${PDAL_KERNEL_HEADERS}/Info.hpp
-    ${PDAL_KERNEL_HEADERS}/Pipeline.hpp
-    ${PDAL_KERNEL_HEADERS}/Delta.hpp
-    ${PDAL_KERNEL_HEADERS}/Random.hpp
-    ${PDAL_KERNEL_HEADERS}/Sort.hpp
-    ${PDAL_KERNEL_HEADERS}/Translate.hpp
-)
-
-set(PDAL_KERNEL_CPP
-    ${PDAL_KERNEL_SRC}/Diff.cpp
-    ${PDAL_KERNEL_SRC}/Info.cpp
-    ${PDAL_KERNEL_SRC}/Pipeline.cpp
-    ${PDAL_KERNEL_SRC}/Delta.cpp
-    ${PDAL_KERNEL_SRC}/Random.cpp
-    ${PDAL_KERNEL_SRC}/Sort.cpp
-    ${PDAL_KERNEL_SRC}/Translate.cpp
-)
-
-list (APPEND PDAL_CPP ${PDAL_KERNEL_CPP} )
-list (APPEND PDAL_HPP ${PDAL_KERNEL_HPP} )
-
 
 #
 # Group source files for IDE source explorers (e.g. Visual Studio)
@@ -267,6 +232,7 @@ include_directories(${PROJECT_SOURCE_DIR}/filters/decimation)
 include_directories(${PROJECT_SOURCE_DIR}/filters/ferry)
 include_directories(${PROJECT_SOURCE_DIR}/filters/mortonorder)
 include_directories(${PROJECT_SOURCE_DIR}/filters/splitter)
+include_directories(${PROJECT_SOURCE_DIR}/kernels/info)
 
 set(PDAL_SOURCES
   ${PDAL_HPP}

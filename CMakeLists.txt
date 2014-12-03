@@ -493,6 +493,7 @@ set(PDAL_TARGET_OBJECTS "")
 
 add_subdirectory(io)
 add_subdirectory(filters)
+add_subdirectory(kernels)
 add_subdirectory(src)
 
 if(WITH_TESTS)
