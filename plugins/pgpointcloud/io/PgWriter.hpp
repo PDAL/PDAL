@@ -41,10 +41,6 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace pgpointcloud
-{
 
 
 class PDAL_DLL PgWriter : public pdal::Writer
@@ -117,7 +113,4 @@ private:
     bool m_schema_is_initialized;
 };
 
-} // namespace pgpointcloud
-} // namespace drivers
 } // namespace pdal
-

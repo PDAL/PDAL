@@ -46,13 +46,9 @@
 #include <gdal.h>
 #include <ogr_api.h>
 
-CREATE_WRITER_PLUGIN(sqlite, pdal::drivers::sqlite::SQLiteWriter)
+CREATE_WRITER_PLUGIN(sqlite, pdal::SQLiteWriter)
 
 namespace pdal
-{
-namespace drivers
-{
-namespace sqlite
 {
 
 
@@ -569,6 +565,4 @@ void SQLiteWriter::writeTile(PointBuffer const& buffer)
 
 }
 
-}
-}
 } // namespaces

@@ -41,10 +41,6 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace sqlite
-{
 
 
 class PDAL_DLL SQLiteWriter : public pdal::Writer
@@ -107,7 +103,4 @@ private:
 
 };
 
-}
-}
 } // namespaces
-

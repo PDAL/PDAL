@@ -47,10 +47,6 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace p2g
-{
 
 
 class p2g_error : public pdal_error
@@ -106,7 +102,4 @@ private:
     std::vector<boost::tuple<double, double, double> > m_coordinates;
 };
 
-}
-}
 } // namespaces
-

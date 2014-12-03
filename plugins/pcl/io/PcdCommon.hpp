@@ -38,14 +38,7 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace pcd
-{
 
 PDAL_DLL Dimension::IdList fileDimensions();
 
-} // namespace pcd
-} // namespace drivers
 } // namespace pdal
-

@@ -35,13 +35,9 @@
 #include "SQLiteReader.hpp"
 #include <pdal/PointBuffer.hpp>
 
-CREATE_READER_PLUGIN(sqlite, pdal::drivers::sqlite::SQLiteReader)
+CREATE_READER_PLUGIN(sqlite, pdal::SQLiteReader)
 
 namespace pdal
-{
-namespace drivers
-{
-namespace sqlite
 {
 
 SQLiteReader::SQLiteReader() : pdal::Reader()
@@ -372,6 +368,4 @@ point_count_t SQLiteReader::read(PointBuffer& buffer, point_count_t count)
 
 }
 
-} // namespace sqlite
-} // namespace drivers
 } // namespace pdal

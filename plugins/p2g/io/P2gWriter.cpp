@@ -41,13 +41,9 @@
 #include <boost/algorithm/string.hpp>
 #include <points2grid/Interpolation.hpp>
 
-CREATE_WRITER_PLUGIN(p2g, pdal::drivers::p2g::P2gWriter)
+CREATE_WRITER_PLUGIN(p2g, pdal::P2gWriter)
 
 namespace pdal
-{
-namespace drivers
-{
-namespace p2g
 {
 
 
@@ -219,6 +215,4 @@ void P2gWriter::write(const PointBuffer& buf)
 
 
 
-}
-}
 } // namespaces

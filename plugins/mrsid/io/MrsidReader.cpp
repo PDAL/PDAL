@@ -39,13 +39,9 @@
 #include <boost/algorithm/string.hpp>
 
 
-CREATE_READER_PLUGIN(mrsid, pdal::drivers::mrsid::MrsidReader)
+CREATE_READER_PLUGIN(mrsid, pdal::MrsidReader)
 
 namespace pdal
-{
-namespace drivers
-{
-namespace mrsid
 {
 
 
@@ -114,7 +110,7 @@ Options MrsidReader::getDefaultOptions()
 
 pdal::StageSequentialIterator* MrsidReader::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::drivers::mrsid::iterators::sequential::MrsidReader(*this, buffer, getNumPoints());
+    return new pdal::iterators::sequential::MrsidReader(*this, buffer, getNumPoints());
 }
 
 int MrsidReader::SchemaToPointInfo(const Schema &schema, LizardTech::PointInfo &pointInfo) const
@@ -403,7 +399,7 @@ namespace sequential
 {
 
 
-MrsidReader::MrsidReader(const pdal::drivers::mrsid::MrsidReader& reader, PointBuffer& buffer, boost::uint32_t numPoints)
+MrsidReader::MrsidReader(const pdal::MrsidReader& reader, PointBuffer& buffer, boost::uint32_t numPoints)
     : pdal::ReaderSequentialIterator(buffer)
     , m_numPoints(numPoints)
     , m_reader(reader)
@@ -436,6 +432,4 @@ boost::uint32_t MrsidReader::readBufferImpl(PointBuffer& data)
 
 } // iterators
 
-}
-}
 } // namespaces

@@ -47,10 +47,6 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace sqlite
-{
 
 
     class sqlite_driver_error : public pdal_error
@@ -607,7 +603,4 @@ private:
 
 };
 
-}
-}
-} // namespace pdal::driver::soci
-
+} // namespace pdal

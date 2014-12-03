@@ -39,11 +39,9 @@
 
 using namespace hexer;
 
-CREATE_FILTER_PLUGIN(hexbin, pdal::filters::HexBin)
+CREATE_FILTER_PLUGIN(hexbin, pdal::HexBin)
 
 namespace pdal
-{
-namespace filters
 {
 
 void HexBin::processOptions(const Options& options)
@@ -135,6 +133,4 @@ void HexBin::done(PointContext ctx)
         "Boundary MULTIPOLYGON of domain");
 }
 
-} // namespace filters
 } // namespace pdal
-

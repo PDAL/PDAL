@@ -45,8 +45,6 @@
 
 using namespace pdal;
 
-// using namespace pdal::drivers::oci;
-
 static unsigned chunk_size = 25;
 
 bool ShouldRunTest()
@@ -133,10 +131,10 @@ struct OracleTestFixture
 {
     OracleTestFixture() :
         m_options(getOCIOptions())
-        , m_connection(pdal::drivers::oci::Connection())
+        , m_connection(Connection())
     {
         if (!ShouldRunTest()) return;
-        pdal::drivers::oci::Connection connection = connect();
+        Connection connection = connect();
 
         std::string base_table_name = m_options.getValueOrThrow<std::string>("base_table_name");
         std::string create_pc_table("CREATE TABLE " + base_table_name +" (id number, CLOUD SDO_PC, DESCRIPTION VARCHAR2(20), HEADER BLOB, BOUNDARY SDO_GEOMETRY)");
@@ -148,32 +146,32 @@ struct OracleTestFixture
 
     }
 
-    pdal::drivers::oci::Connection connect()
+    Connection connect()
     {
         if (!m_connection.get())
         {
            std::string connSpec =
                 m_options.getValueOrThrow<std::string>("connection");
-            m_connection = pdal::drivers::oci::connect(connSpec);
+            m_connection = connect(connSpec);
         }
         return m_connection;
 
     }
 
-    void run(pdal::drivers::oci::Connection connection, std::string sql)
+    void run(Connection connection, std::string sql)
     {
-        pdal::drivers::oci::Statement statement = pdal::drivers::oci::Statement(connection->CreateStatement(sql.c_str()));
+        Statement statement = Statement(connection->CreateStatement(sql.c_str()));
         statement->Execute();
     }
 
     pdal::Options m_options;
-    pdal::drivers::oci::Connection m_connection;
+    Connection m_connection;
 
     ~OracleTestFixture()
     {
         if (!ShouldRunTest())
             return;
-        pdal::drivers::oci::Connection connection = connect();
+        Connection connection = connect();
 
         std::string base_table_name =
             m_options.getValueOrThrow<std::string>("base_table_name");
@@ -462,7 +460,7 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
 //     Option& verbose = options.getOptionByRef("verbose");
 //     verbose.setValue<std::string>( "7");
 //
-//     pdal::drivers::oci::Reader reader_reader(options);
+//     pdal::OciReader reader_reader(options);
 //     // pdal::filters::InPlaceReprojection reproj(reader_reader, options);
 //     reader_reader.prepare();
 //
@@ -496,7 +494,7 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
 //     Options options = getOCIOptions();
 //     Option& query = options.getOptionByRef("query");
 //     query.setValue<std::string>(oss.str());
-//     pdal::drivers::oci::Reader reader_reader(options);
+//     pdal::OciReader reader_reader(options);
 //     reader_reader.prepare();
 //
 //     pdal::PointBuffer data(reader_reader.getSchema(), 2500);
@@ -546,7 +544,7 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
 //     Options options = getOCIOptions();
 //     Option& query = options.getOptionByRef("query");
 //     query.setValue<std::string>(oss.str());
-//     pdal::drivers::oci::Reader reader_reader(options);
+//     pdal::OciReader reader_reader(options);
 //     reader_reader.prepare();
 //
 //     pdal::PointBuffer data(reader_reader.getSchema(), chunk_size+30);

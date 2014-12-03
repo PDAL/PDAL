@@ -41,15 +41,11 @@
 #include <pcl/io/impl/pcd_io.hpp>
 
 #include <pdal/PointBuffer.hpp>
-#include "../PCLConversions.hpp"
+#include "PCLConversions.hpp"
 
-CREATE_READER_PLUGIN(pcd, pdal::drivers::pcd::PcdReader)
+CREATE_READER_PLUGIN(pcd, pdal::PcdReader)
 
 namespace pdal
-{
-namespace drivers
-{
-namespace pcd
 {
 
 void PcdReader::ready(PointContextRef ctx)
@@ -79,6 +75,4 @@ point_count_t PcdReader::read(PointBuffer& data, point_count_t count)
     return cloud->points.size();
 }
 
-} // namespace pcd
-} // namespace drivers
 } // namespace pdal

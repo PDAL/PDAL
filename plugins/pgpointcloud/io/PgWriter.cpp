@@ -43,7 +43,7 @@
 #include <pdal/Endian.hpp>
 #include <pdal/XMLSchema.hpp>
 
-CREATE_WRITER_PLUGIN(pgpointcloud, pdal::drivers::pgpointcloud::PgWriter)
+CREATE_WRITER_PLUGIN(pgpointcloud, pdal::PgWriter)
 
 // TO DO:
 // - change INSERT into COPY
@@ -59,10 +59,6 @@ CREATE_WRITER_PLUGIN(pgpointcloud, pdal::drivers::pgpointcloud::PgWriter)
 
 
 namespace pdal
-{
-namespace drivers
-{
-namespace pgpointcloud
 {
 
 PgWriter::PgWriter()
@@ -627,7 +623,4 @@ void PgWriter::writeTile(PointBuffer const& buffer)
     pg_execute(m_session, m_insert);
 }
 
-} // namespace pgpointcloud
-} // namespace drivers
 } // namespace pdal
-

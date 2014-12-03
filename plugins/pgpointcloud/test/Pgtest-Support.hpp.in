@@ -32,15 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef UNITTEST_DRIVERS_PGPOINTCLOUD_SUPPORT_INCLUDED
-#define UNITTEST_DRIVERS_PGPOINTCLOUD_SUPPORT_INCLUDED
-
+#pragma once
 
 namespace pdal
-{
-namespace drivers
-{
-namespace pgpointcloud
 {
 
 
@@ -63,8 +57,4 @@ static const std::string testDbTempConn(std::string("dbname='@PGPOINTCLOUD_TEST_
 //    return m_stage->serializePipeline(ctx);
 //}
 
-}
-}
-} // namespace pdal::drivers::pgpointcloud
-
-#endif // UNITTEST_DRIVERS_PGPOINTCLOUD_SUPPORT_INCLUDED
+} // namespace pdal

@@ -66,7 +66,7 @@ static void compare_contents(const std::string& las_file, const std::string& ntf
     Options ntf_opts;
     ntf_opts.add(ntf_opt);
 
-    drivers::nitf::Reader ntf_reader(ntf_opts);
+    NitfReader ntf_reader(ntf_opts);
     ntf_reader.prepare();
     const Schema& ntf_schema = ntf_reader.getSchema();
     PointBuffer ntf_data(ntf_schema, 750);

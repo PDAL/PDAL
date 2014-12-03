@@ -52,10 +52,6 @@ class PointSource;
 
 namespace pdal
 {
-namespace drivers
-{
-namespace mrsid
-{
 
 
 // The MrSIDReader wraps LT's PointSource abstraction
@@ -100,7 +96,7 @@ namespace sequential
 class MrsidReader : public pdal::ReaderSequentialIterator
 {
 public:
-    MrsidReader(const pdal::drivers::mrsid::MrsidReader& reader, PointBuffer& buffer, boost::uint32_t numPoints);
+    MrsidReader(const pdal::MrsidReader& reader, PointBuffer& buffer, boost::uint32_t numPoints);
 
 private:
     boost::uint64_t skipImpl(boost::uint64_t);
@@ -108,7 +104,7 @@ private:
     bool atEndImpl() const;
     boost::uint32_t m_numPoints;
 
-    const pdal::drivers::mrsid::MrsidReader& m_reader;
+    const pdal::MrsidReader& m_reader;
 };
 
 } // sequential
@@ -119,7 +115,7 @@ namespace random
 class MrsidReader : public pdal::ReaderRandomIterator
 {
 public:
-    MrsidReader(const pdal::drivers::mrsid::MrsidReader& reader,
+    MrsidReader(const pdal::MrsidReader& reader,
            PointBuffer& buffer, boost::uint32_t numPoints);
 
 private:
@@ -136,6 +132,4 @@ private:
 } // iterators
 
 
-}
-}
 } // namespaces

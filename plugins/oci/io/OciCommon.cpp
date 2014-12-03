@@ -44,10 +44,6 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace oci
-{
 
 Connection connect(std::string connSpec)
 {
@@ -195,7 +191,4 @@ void Block::update(schema::XMLSchema *s)
     }
 }
 
-} // namespace oci
-} // namespace drivers
 } // namespace pdal
-
