@@ -35,7 +35,7 @@
 #pragma once
 
 #include <ChipperFilter.hpp>
-#include <pdal/filters/Colorization.hpp>
+#include <ColorizationFilter.hpp>
 #include <pdal/filters/Crop.hpp>
 #include <DecimationFilter.hpp>
 #include <FerryFilter.hpp>

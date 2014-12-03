@@ -34,7 +34,7 @@
 
 #include <array>
 
-#include <pdal/filters/Colorization.hpp>
+#include <ColorizationFilter.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/GlobalEnvironment.hpp>
 
@@ -43,8 +43,6 @@
 #include <pdal/GDALUtils.hpp>
 
 namespace pdal
-{
-namespace filters
 {
 
 
@@ -58,14 +56,14 @@ struct GDALSourceDeleter
 };
 
 
-void Colorization::initialize()
+void ColorizationFilter::initialize()
 {
     GlobalEnvironment::get().getGDALEnvironment();
     GlobalEnvironment::get().getGDALDebug()->addLog(log());
 }
 
 
-Options Colorization::getDefaultOptions()
+Options ColorizationFilter::getDefaultOptions()
 {
     Options options;
 
@@ -106,7 +104,7 @@ Options Colorization::getDefaultOptions()
 }
 
 
-void Colorization::processOptions(const Options& options)
+void ColorizationFilter::processOptions(const Options& options)
 {
     m_rasterFilename = options.getValueOrThrow<std::string>("raster");
     std::vector<Option> dimensions = options.getOptions("dimension");
@@ -139,7 +137,7 @@ void Colorization::processOptions(const Options& options)
 }
 
 
-void Colorization::ready(PointContext ctx)
+void ColorizationFilter::ready(PointContext ctx)
 {
     m_forward_transform.assign(0.0);
     m_inverse_transform.assign(0.0);
@@ -168,7 +166,7 @@ void Colorization::ready(PointContext ctx)
 }
 
 
-void Colorization::filter(PointBuffer& buffer)
+void ColorizationFilter::filter(PointBuffer& buffer)
 {
     int32_t pixel(0);
     int32_t line(0);
@@ -204,7 +202,7 @@ void Colorization::filter(PointBuffer& buffer)
 
 // Determines the pixel/line position given an x/y.
 // No reprojection is done at this time.
-bool Colorization::getPixelAndLinePosition(double x, double y,
+bool ColorizationFilter::getPixelAndLinePosition(double x, double y,
     boost::array<double, 6> const& inverse, int32_t& pixel,
     int32_t& line, void *ds)
 {
@@ -229,7 +227,7 @@ bool Colorization::getPixelAndLinePosition(double x, double y,
 }
 
 
-void Colorization::done(PointContext ctx)
+void ColorizationFilter::done(PointContext ctx)
 {
     if (m_ds != 0)
     {
@@ -238,5 +236,4 @@ void Colorization::done(PointContext ctx)
     }
 }
 
-} // namespace filters
 } // namespace pdal

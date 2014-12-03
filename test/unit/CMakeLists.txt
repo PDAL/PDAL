@@ -126,6 +126,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/io/text
     ${PROJECT_SOURCE_DIR}/io/terrasolid
     ${PROJECT_SOURCE_DIR}/filters/chipper
+    ${PROJECT_SOURCE_DIR}/filters/colorization
     ${PROJECT_SOURCE_DIR}/filters/decimation
     ${PROJECT_SOURCE_DIR}/filters/ferry
     ${PROJECT_SOURCE_DIR}/filters/mortonorder
