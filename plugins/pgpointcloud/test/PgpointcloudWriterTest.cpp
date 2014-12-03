@@ -36,12 +36,10 @@
 
 #include <pdal/Writer.hpp>
 #include <pdal/StageFactory.hpp>
-#include <LasReader.hpp>
 
 #include "Support.hpp"
 #include "Pgtest-Support.hpp"
-#include "../drivers/PgCommon.hpp"
-
+#include "../io/PgCommon.hpp"
 
 using namespace pdal;
 
@@ -49,12 +47,11 @@ Options getWriterOptions()
 {
     Options options;
 
-    options.add(pdal::Option("connection", drivers::pgpointcloud::testDbTempConn));
+    options.add(pdal::Option("connection",
+        drivers::pgpointcloud::testDbTempConn));
     options.add(Option("table", "pdal_test_table"));
     options.add(Option("srid", "4326"));
     options.add(Option("capacity", "10000"));
-    // options.add(Option("debug", true));
-    // options.add(Option("verbose", 7));
 
     return options;
 }
@@ -137,21 +134,27 @@ BOOST_FIXTURE_TEST_SUITE(PgpointcloudWriterTest, PgpointcloudWriterTestFixture)
 BOOST_AUTO_TEST_CASE(testWrite)
 {
     StageFactory f;
-    StageFactory::WriterCreator* wc = f.getWriterCreator("drivers.pgpointcloud.writer");
+    StageFactory::WriterCreator* wc =
+        f.getWriterCreator("writers.pgpointcloud");
     if (wc)
     {
         BOOST_CHECK(wc);
         const std::string file(Support::datapath("las/1.2-with-color.las"));
 
         const pdal::Option opt_filename("filename", file);
-        LasReader reader;
-        pdal::Options options;
-        options.add(opt_filename);
-        reader.setOptions(options);
 
+        StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
+        if (!rc)
+            return;
+        BOOST_CHECK(rc);
+
+        Stage* reader = rc();
+        Options options;
+        options.add(opt_filename);
+        reader->setOptions(options);
         std::unique_ptr<Writer> writer(wc());
         writer->setOptions(getWriterOptions());
-        writer->setInput(&reader);
+        writer->setInput(reader);
 
         PointContext ctx;
         writer->prepare(ctx);
@@ -159,10 +162,9 @@ BOOST_AUTO_TEST_CASE(testWrite)
         PointBufferSet written = writer->execute(ctx);
 
         point_count_t count(0);
-        for (auto i = written.begin(); i != written.end(); ++i)
+        for(auto i = written.begin(); i != written.end(); ++i)
             count += (*i)->size();
         BOOST_CHECK_EQUAL(written.size(), 1);
-        // BOOST_CHECK_EQUAL(count, 0);
         BOOST_CHECK_EQUAL(count, 1065);
     }
 }
@@ -171,7 +173,8 @@ BOOST_AUTO_TEST_CASE(testWrite)
 BOOST_AUTO_TEST_CASE(testNoPointcloudExtension)
 {
     StageFactory f;
-    StageFactory::WriterCreator* wc = f.getWriterCreator("drivers.pgpointcloud.writer");
+    StageFactory::WriterCreator* wc =
+        f.getWriterCreator("writers.pgpointcloud");
     if (wc)
     {
         BOOST_CHECK(wc);
@@ -181,13 +184,19 @@ BOOST_AUTO_TEST_CASE(testNoPointcloudExtension)
         const std::string file(Support::datapath("las/1.2-with-color.las"));
 
         const pdal::Option opt_filename("filename", file);
-        LasReader reader;
+
+        StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
+        if (!rc)
+            return;
+        BOOST_CHECK(rc);
+
+        Stage* reader = rc();
         pdal::Options options;
         options.add(opt_filename);
-        reader.setOptions(options);
+        reader->setOptions(options);
         std::unique_ptr<Writer> writer(wc());
         writer->setOptions(getWriterOptions());
-        writer->setInput(&reader);
+        writer->setInput(reader);
 
         PointContext ctx;
         writer->prepare(ctx);

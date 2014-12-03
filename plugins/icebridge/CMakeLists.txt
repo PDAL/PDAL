@@ -17,13 +17,13 @@ if (HDF5_FOUND)
     # Icebridge Reader
     #
     set(srcs
-	drivers/IcebridgeReader.cpp
-	drivers/Hdf5Handler.cpp
+	io/IcebridgeReader.cpp
+	io/Hdf5Handler.cpp
     )
 
     set(incs
-	drivers/IcebridgeReader.hpp
-	drivers/Hdf5Handler.hpp
+	io/IcebridgeReader.hpp
+	io/Hdf5Handler.hpp
     )
 
     set(deps ${HDF5_LIBRARIES})

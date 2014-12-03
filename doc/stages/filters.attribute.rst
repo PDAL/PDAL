@@ -1,4 +1,4 @@
-.. _filters.attribute
+.. _filters.attribute:
 
 filters.attribute
 ===================
@@ -48,7 +48,7 @@ candidate point is inside a polygon with that polygon's attribute.
 
     <?xml version="2.0" encoding="utf-8"?>
     <Pipeline version="1.0">
-        <Writer type="drivers.las.writer">
+        <Writer type="writers.las">
             <Option name="filename">
                 attributed.las
             </Option>
@@ -95,7 +95,7 @@ candidate point is inside a polygon with that polygon's attribute.
                         </Option>
                     </Options>
                 </Option>
-                <Reader type="drivers.las.reader">
+                <Reader type="readers.las">
                     <Option name="filename">
                         ../autzen/autzen-dd.las
                     </Option>

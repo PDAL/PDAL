@@ -1,7 +1,7 @@
-.. _drivers.text.writer:
+.. _writers.text:
 
-drivers.text.writer
-===================
+writers.text
+============
 
 The **text writer** writes out to a text file. This is useful for debugging or getting smaller files into an easily parseable format.  The text writer supports both `GeoJson`_ and `CSV`_ output.
 
@@ -13,12 +13,12 @@ Example
 
   <?xml version="1.0" encoding="utf-8"?>
   <Pipeline version="1.0">
-    <Writer type="drivers.text.writer">
+    <Writer type="writers.text">
       <Option name="filename">output.js</Option>
       <Option name="format">geojson</Option>
       <Option name="order">X,Y,Z</Option>
       <Option name="keep_unspecified">false</Option>
-      <Reader type="drivers.qfit.reader">
+      <Reader type="readers.qfit">
         <Option name="filename">qfitfile.qi</Option>
         <Option name="flip_coordinates">false</Option>
         <Option name="scale_z">1.0</Option>

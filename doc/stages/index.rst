@@ -5,30 +5,36 @@ Stage Reference
 ******************************************************************************
 
 
-Readers & Writers
-=================
+Readers
+=======
 
 .. toctree::
    :maxdepth: 1
 
    readers.buffer
-   readers.las
-   writers.las
-   drivers.pgpointcloud.reader
-   drivers.pgpointcloud.writer
    readers.faux
-   drivers.nitf.reader
-   drivers.nitf.writer
-   drivers.oci.reader
-   drivers.oci.writer
-   drivers.p2g.writer
-   drivers.pcd.reader
-   drivers.pcd.writer
+   readers.las
+   readers.nitf
+   readers.oci
+   readers.pcd
+   readers.pgpointcloud
    readers.qfit
-   drivers.rxp.reader
+   readers.rxp
    readers.sbet
-   writers.text
 
+Writers
+=======
+
+.. toctree::
+   :maxdepth: 1
+
+   writers.las
+   writers.nitf
+   writers.oci
+   writers.pcd
+   writers.pgpointcloud
+   writers.p2g
+   writers.text
 
 Filters
 =======

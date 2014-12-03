@@ -311,7 +311,7 @@ Reader* PipelineReader::parseElement_Reader(const ptree& tree)
 Filter* PipelineReader::parseElement_Filter(const ptree& tree)
 {
     Options options(m_baseOptions);
-    Stage* prevStage = NULL;
+//    Stage* prevStage = NULL;
 
     StageParserContext context;
 

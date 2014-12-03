@@ -6,7 +6,7 @@ filters.reprojection
 The reprojection filter converts the X, Y and/or Z dimensions to a new spatial
 reference system. The old coordinates are replaced by the new ones,
 if you want to preserve the old coordinates for future processing, use a
-`filters.ferry`_ to create a new dimension and stuff them there.
+:ref:`filters.ferry` to create a new dimension and stuff them there.
 
 .. note::
 
@@ -28,7 +28,7 @@ Example
 
   <?xml version="1.0" encoding="utf-8"?>
   <Pipeline version="1.0">
-    <Writer type="drivers.las.writer">
+    <Writer type="writers.las">
     <Option name="filename">example-geog.las</Option>
     <Option name="scale_x">0.0000001</Option>
     <Option name="scale_y">0.0000001</Option>
@@ -40,7 +40,7 @@ Example
       <Filter type="filters.reprojection">
         <Option name="in_srs">EPSG:26916</Option>
         <Option name="out_srs">EPSG:4326</Option>
-        <Reader type="drivers.las.reader">
+        <Reader type="readers.las">
           <Option name="filename">example-utm.las</Option>
           <Option name="spatialreference">EPSG:26916</Option>
         </Reader>

@@ -65,22 +65,22 @@ or HTML (using `rst2html`_) as part of a processing pipeline.
     =================== ======================================= ===================
                 Name                                Value        Namespace
     =================== ======================================= ===================
-    X                                        637012.23999999999  drivers.las.reader
-    Y                                        849028.31000000006  drivers.las.reader
-    Z                                        431.66000000000003  drivers.las.reader
-    Intensity                                               143  drivers.las.reader
-    ReturnNumber                                              1  drivers.las.reader
-    NumberOfReturns                                           1  drivers.las.reader
-    ScanDirectionFlag                                         1  drivers.las.reader
-    EdgeOfFlightLine                                          0  drivers.las.reader
-    Classification                                            1  drivers.las.reader
-    ScanAngleRank                                            -9  drivers.las.reader
-    UserData                                                132  drivers.las.reader
-    PointSourceId                                          7326  drivers.las.reader
-    Time                                     245380.78254962614  drivers.las.reader
-    Red                                                      68  drivers.las.reader
-    Green                                                    77  drivers.las.reader
-    Blue                                                     88  drivers.las.reader
+    X                                        637012.23999999999  readers.las
+    Y                                        849028.31000000006  readers.las
+    Z                                        431.66000000000003  readers.las
+    Intensity                                               143  readers.las
+    ReturnNumber                                              1  readers.las
+    NumberOfReturns                                           1  readers.las
+    ScanDirectionFlag                                         1  readers.las
+    EdgeOfFlightLine                                          0  readers.las
+    Classification                                            1  readers.las
+    ScanAngleRank                                            -9  readers.las
+    UserData                                                132  readers.las
+    PointSourceId                                          7326  readers.las
+    Time                                     245380.78254962614  readers.las
+    Red                                                      68  readers.las
+    Green                                                    77  readers.las
+    Blue                                                     88  readers.las
     =================== ======================================= ===================
 
 JavaScript output
@@ -245,11 +245,11 @@ The following XML document defines a :ref:`pipeline` that takes the ``file.las``
 
     <?xml version="1.0" encoding="utf-8"?>
     <Pipeline version="1.0">
-        <Writer type="drivers.las.writer">
+        <Writer type="writers.las">
             <Option name="filename">
                 output.las
             </Option>
-            <Reader type="drivers.las.reader">
+            <Reader type="readers.las">
                 <Option name="filename">
                     ./path/to/my/file.las
                 </Option>

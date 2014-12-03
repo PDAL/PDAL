@@ -46,7 +46,7 @@ class Stage(PipelineComponent):
 
 class Reader(Stage):
     tag = 'Reader'
-    typeformat = 'drivers.%s.reader'
+    typeformat = 'readers.%s'
 
 
 class Filter(Stage):
@@ -60,4 +60,4 @@ class MultiFilter(Filter):
 
 class Writer(PipelineComponent):
     tag = 'Writer'
-    typeformat = 'drivers.%s.writer'
+    typeformat = 'writers.%s'

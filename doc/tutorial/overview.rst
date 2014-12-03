@@ -128,8 +128,8 @@ be hooked into the PDAL infrastructure:
 
     name:  A character array (string) constant that will be used to reference
     the stage from the command line.  Typically, readers are named
-    “drivers.<something>.reader”, filters are “filters.<something>” and writers
-    are ”drivers.<something>.writer”.
+    “readers.<something>”, filters are “filters.<something>” and writers
+    are ”writers.<something>”.
 
     description: A character array (string) constant that may be more meaningful
     than the name.  It appears in some debug and informational output.

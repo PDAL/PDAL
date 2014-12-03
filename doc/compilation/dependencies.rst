@@ -55,7 +55,7 @@ GDAL
 ------------------------------------------------------------------------------
 
 PDAL uses GDAL for spatial reference system description manipulation, and image
-reading supporting for the NITF driver, and :ref:`drivers.oci.writer` support. In conjunction with GeoTIFF_,
+reading supporting for the NITF driver, and :ref:`writers.oci` support. In conjunction with GeoTIFF_,
 GDAL is used to convert GeoTIFF keys and OGC WKT SRS description strings into
 formats required by specific drivers. While PDAL can be built without GDAL
 support, if you want SRS manipulation and description ability, you must have
@@ -115,7 +115,7 @@ Obtain the `Oracle Instant Client`_ and install in a location on your system.
 Be sure to install both the "Basic" and the "SDK" modules. Set your
 ``ORACLE_HOME`` environment variable system- or user-wide to point to this
 location so the CMake configuration can find your install. OCI is used by
-both :ref:`drivers.oci.writer` and :ref:`drivers.oci.reader` for Oracle
+both :ref:`writers.oci` and :ref:`readers.oci` for Oracle
 Point Cloud read/write support.
 
 .. warning::
@@ -139,7 +139,7 @@ Points2Grid
 `Points2Grid`_ is a library with a simple `CMake`-based build system that
 provides simple, out-of-process interpolation of large point sets using
 Boost_. It can be obtained via github.com at https://github.com/CRREL/points2grid
-It is used by :ref:`drivers.p2g.writer` to output point cloud interpolation.
+It is used by :ref:`writers.p2g` to output point cloud interpolation.
 
 Hexer
 ------------------------------------------------------------------------------
@@ -154,7 +154,7 @@ Nitro
 ------------------------------------------------------------------------------
 
 Nitro is a library that provides `NITF`_ support for PDAL to write LAS-in-NITF
-files for :ref:`drivers.nitf.writer`. PDAL can only use a fork of Nitro located at http://github.com/hobu/nitro instead
+files for :ref:`writers.nitf`. PDAL can only use a fork of Nitro located at http://github.com/hobu/nitro instead
 of the mainline tree for two reasons:
 
 1) The fork contains a simple `CMake`-based build system
@@ -169,7 +169,7 @@ LASzip
 
 `LASzip`_ is a library with a simple `CMake`-based build system that
 provides periodic compression of `ASPRS LAS`_ data. It is used by the
-:ref:`drivers.las.writer` and :ref:`drivers.las.reader` to provide
+:ref:`writers.las` and :ref:`readers.las` to provide
 compressed LAS support.
 
 
@@ -177,7 +177,7 @@ PCL
 ------------------------------------------------------------------------------
 
 The `Point Cloud Library (PCL)`_ is used by the :ref:`ground_command`,
-:ref:`pcl_command`, :ref:`drivers.pcd.writer`, :ref:`drivers.pcd.reader`, and
+:ref:`pcl_command`, :ref:`writers.pcd`, :ref:`readers.pcd`, and
 :ref:`filters.pclblock` to provide support for various PCL-related operations.
 
 At the moment, PCL must be built from the `pipeline branch`_, which is not

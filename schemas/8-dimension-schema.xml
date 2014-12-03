@@ -212,7 +212,7 @@
     <pc:parent_uuid>e74b5e41-95e6-4cf2-86ad-e3f5a996da5d</pc:parent_uuid>
   </pc:dimension>
   <pc:metadata>
-    <Reader type="drivers.pipeline.reader">
+    <Reader type="readers.pipeline">
       <Option name="debug">false</Option>
       <Option name="filename">pipeline_reproject.xml</Option>
       <Option name="verbose">0</Option>

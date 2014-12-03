@@ -369,7 +369,7 @@ bool Kernel::isVisualize() const
 void Kernel::visualize(PointBufferPtr buffer) const
 {
     StageFactory f;
-    if (f.getWriterCreator("drivers.pclvisualizer.writer"))
+    if (f.getWriterCreator("writers.pclvisualizer"))
     {
           BufferReader bufferReader;
           bufferReader.addBuffer(buffer);

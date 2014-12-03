@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Pipeline version="1.0">
-    <Writer type="drivers.faux.writer">
+    <Writer type="writers.faux">
         <Filter type="filters.chipper">
             <Option name="capacity">
                 25000

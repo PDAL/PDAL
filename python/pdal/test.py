@@ -11,12 +11,12 @@ class TestXML(unittest.TestCase):
         xml = p.xml()
         self.assertEqual(xml.getroot().attrib['version'], version.as_string())
         self.assertEqual(xml.find('Reader').attrib['type'],
-                         'drivers.foo.reader')
+                         'readers.foo')
 
     def test_writer(self):
         xml = pxml.Writer('bar').xml()
         self.assertEqual(xml.tag, 'Writer')
-        self.assertEqual(xml.attrib['type'], 'drivers.bar.writer')
+        self.assertEqual(xml.attrib['type'], 'writers.bar')
 
     def test_pipeline_version(self):
         xml = pxml.Pipeline('custom version').xml()

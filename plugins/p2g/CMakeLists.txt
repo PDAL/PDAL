@@ -16,11 +16,11 @@ if (P2G_FOUND)
     # Points2grid Writer
     #
     set(srcs
-	drivers/P2gWriter.cpp
+	io/P2gWriter.cpp
     )
 
     set(incs
-	drivers/P2gWriter.hpp
+	io/P2gWriter.hpp
     )
 
     set(deps ${P2G_LIBRARY})

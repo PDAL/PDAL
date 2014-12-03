@@ -36,8 +36,6 @@
 
 #include <pdal/FileUtils.hpp>
 #include <pdal/kernel/Kernel.hpp>
-#include <FauxReader.hpp>
-#include <LasWriter.hpp>
 
 #include <pdal/Bounds.hpp>
 

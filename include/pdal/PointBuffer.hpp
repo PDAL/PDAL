@@ -385,7 +385,7 @@ inline T PointBuffer::getFieldAs(Dimension::Id::Enum dim,
         val = getFieldInternal<int32_t>(dim, pointIndex);
         break;
     case Dimension::Type::Signed64:
-        val = getFieldInternal<int64_t>(dim, pointIndex);
+        val = static_cast<double>(getFieldInternal<int64_t>(dim, pointIndex));
         break;
     case Dimension::Type::Unsigned8:
         val = getFieldInternal<uint8_t>(dim, pointIndex);
@@ -397,14 +397,18 @@ inline T PointBuffer::getFieldAs(Dimension::Id::Enum dim,
         val = getFieldInternal<uint32_t>(dim, pointIndex);
         break;
     case Dimension::Type::Unsigned64:
-        val = getFieldInternal<uint64_t>(dim, pointIndex);
+        val = static_cast<double>(getFieldInternal<uint64_t>(dim, pointIndex));
         break;
     case Dimension::Type::None:
     default:
         val = 0;
         break;
     }
-
+#ifdef PDAL_COMPILER_MSVC
+// warning C4127: conditional expression is constant
+#pragma warning(push)
+#pragma warning(disable:4127)
+#endif
     try
     {
 

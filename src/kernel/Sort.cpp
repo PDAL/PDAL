@@ -34,10 +34,9 @@
 
 #include <pdal/kernel/Sort.hpp>
 
-#include <BufferReader.hpp>
-#include <pdal/filters/MortonOrder.hpp>
 #include <pdal/kernel/Support.hpp>
 #include <pdal/StageFactory.hpp>
+#include <BufferReader.hpp>
 
 namespace pdal
 {
@@ -130,7 +129,9 @@ int Sort::execute()
     sortOptions.add<bool>("debug", isDebug());
     sortOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
 
-    std::unique_ptr<Stage> sortStage(new filters::MortonOrder());
+    StageFactory f;
+    StageFactory::FilterCreator* fc = f.getFilterCreator("filters.mortonorder");
+    Stage* sortStage = fc();
     sortStage->setInput(&bufferReader);
     sortStage->setOptions(sortOptions);
 
@@ -148,7 +149,7 @@ int Sort::execute()
         cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
         (UserCallback *)new HeartbeatCallback();
 
-    std::unique_ptr<Writer> writer(AppSupport::makeWriter(m_outputFile, sortStage.get()));
+    std::unique_ptr<Writer> writer(AppSupport::makeWriter(m_outputFile, sortStage));
 
     // Some options are inferred by makeWriter based on filename
     // (compression, driver type, etc).

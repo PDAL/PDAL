@@ -37,14 +37,15 @@
 #include <ChipperFilter.hpp>
 #include <pdal/filters/Colorization.hpp>
 #include <pdal/filters/Crop.hpp>
-#include <pdal/filters/Decimation.hpp>
-#include <pdal/filters/Ferry.hpp>
+#include <DecimationFilter.hpp>
+#include <FerryFilter.hpp>
 #include <pdal/filters/Merge.hpp>
+#include <MortonOrderFilter.hpp>
 #ifdef PDAL_HAVE_PYTHON
 #include <pdal/filters/Predicate.hpp>
 #include <pdal/filters/Programmable.hpp>
 #endif
 #include <pdal/filters/Reprojection.hpp>
 #include <pdal/filters/Sort.hpp>
-#include <pdal/filters/Splitter.hpp>
+#include <SplitterFilter.hpp>
 #include <pdal/filters/Stats.hpp>

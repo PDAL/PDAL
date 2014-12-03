@@ -35,8 +35,8 @@
 #include "UnitTest.hpp"
 
 #include <pdal/PointBuffer.hpp>
-#include <FauxReader.hpp>
-#include <pdal/filters/Decimation.hpp>
+#include <pdal/StageFactory.hpp>
+#include <DecimationFilter.hpp>
 
 #include "../StageTester.hpp"
 
@@ -52,31 +52,45 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test1)
     ops.add("bounds", srcBounds);
     ops.add("mode", "random");
     ops.add("num_points", 30);
-    FauxReader reader;
-    reader.setOptions(ops);
+    StageFactory f;
+    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.faux");
+    if (rc)
+    {
+        BOOST_CHECK(rc);
 
-    Options decimationOps;
-    decimationOps.add("step", 10);
-    filters::Decimation filter;
-    filter.setOptions(decimationOps);
-    filter.setInput(&reader);
-    BOOST_CHECK(filter.getDescription() == "Decimation Filter");
+        Stage* reader = rc();
+        reader->setOptions(ops);
 
-    PointContext ctx;
+        Options decimationOps;
+        decimationOps.add("step", 10);
+        
+        StageFactory::FilterCreator* fc = f.getFilterCreator("filters.decimation");
+        if (fc)
+        {
+            BOOST_CHECK(fc);
 
-    filter.prepare(ctx);
-    PointBufferSet pbSet = filter.execute(ctx);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
-    PointBufferPtr buf = *pbSet.begin();
-    BOOST_CHECK_EQUAL(buf->size(), 3);
+            Stage* filter = fc();
+            filter->setOptions(decimationOps);
+            filter->setInput(reader);
+            BOOST_CHECK(filter->getDescription() == "Decimation Filter");
 
-    uint64_t t0 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 0);
-    uint64_t t1 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 1);
-    uint64_t t2 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 2);
+            PointContext ctx;
 
-    BOOST_CHECK_EQUAL(t0, 0);
-    BOOST_CHECK_EQUAL(t1, 10);
-    BOOST_CHECK_EQUAL(t2, 20);
+            filter->prepare(ctx);
+            PointBufferSet pbSet = filter->execute(ctx);
+            BOOST_CHECK_EQUAL(pbSet.size(), 1);
+            PointBufferPtr buf = *pbSet.begin();
+            BOOST_CHECK_EQUAL(buf->size(), 3);
+
+            uint64_t t0 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 0);
+            uint64_t t1 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 1);
+            uint64_t t2 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 2);
+
+            BOOST_CHECK_EQUAL(t0, 0);
+            BOOST_CHECK_EQUAL(t1, 10);
+            BOOST_CHECK_EQUAL(t2, 20);
+        }
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

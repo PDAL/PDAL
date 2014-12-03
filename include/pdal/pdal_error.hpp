@@ -44,13 +44,19 @@
 #define PDAL_EXCEPTION_HPP_INCLUDED
 
 #include <stdexcept>
+#include <pdal/pdal_export.hpp>
 
 namespace pdal
 {
 
+#ifdef PDAL_COMPILER_MSVC
+#  pragma warning(push)
+#  pragma warning(disable: 4290)
+#  pragma warning(disable: 4275)
+#endif
 
 // base class for all pdal exceptions
-class pdal_error : public std::runtime_error
+class PDAL_DLL pdal_error : public std::runtime_error
 {
 public:
     pdal_error(std::string const& msg)
@@ -307,6 +313,9 @@ public:
     {}
 };
 
+#ifdef PDAL_COMPILER_MSVC
+#  pragma warning(pop)
+#endif
 
 } // namespace pdal
 

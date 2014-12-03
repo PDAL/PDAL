@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(test_userstring_roundtrip)
 }
 
 
-#ifdef PDAL_HAVE_GEOS
+#if defined(PDAL_HAVE_GEOS) && defined(PDAL_HAVE_LIBGEOTIFF)
 // Test fetching SRS from an existing file
 BOOST_AUTO_TEST_CASE(test_read_srs)
 {
@@ -207,7 +207,7 @@ BOOST_AUTO_TEST_CASE(test_vertical_datums)
 #endif //PDAL_HAVE_LIBGEOTIFF
 
 
-#ifdef PDAL_HAVE_GEOS
+#if defined(PDAL_HAVE_GEOS) && defined(PDAL_HAVE_LIBGEOTIFF)
 // Try writing only the WKT VLR to a file, and see if the resulting
 // file still works ok.
 BOOST_AUTO_TEST_CASE(test_writing_vlr)

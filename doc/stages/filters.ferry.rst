@@ -1,4 +1,4 @@
-.. _filters.ferry.
+.. _filters.ferry:
 
 filters.ferry
 ============
@@ -6,7 +6,7 @@ filters.ferry
 The ferry filter is used to stash intermediate veriables as part of
 processing data. For example, a common scenario is to keep both the
 original value and the reprojected X and Y variables in a
-scenario that uses the `filters.reprojection`_ filter. In the
+scenario that uses the :ref:`filters.reprojection` filter. In the
 normal case, the X and Y data would be overwritten with the new
 longitude and latitude values as part of the reprojection. The
 ferry filter will allow you to keep this around for later use.
@@ -24,7 +24,7 @@ processing, can then operate on these data.
 
     <?xml version="1.0" encoding="utf-8"?>
     <Pipeline version="1.0">
-        <Writer type="drivers.las.writer">
+        <Writer type="writers.las">
             <Option name="filename">
                 colorized.las
             </Option>
@@ -55,7 +55,7 @@ processing, can then operate on these data.
                             </Option>
                         </Options>
                     </Option>
-                    <Reader type="drivers.las.reader">
+                    <Reader type="readers.las">
                         <Option name="filename">
                             ../las/1.2-with-color.las
                         </Option>

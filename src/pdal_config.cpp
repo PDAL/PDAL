@@ -127,6 +127,11 @@ int GetVersionInteger()
     return PDAL_VERSION_INTEGER;
 }
 
+std::string GetSHA1()
+{
+	return g_GIT_SHA1;
+}
+
 
 /// Tell the user a bit about PDAL's compilation
 std::string GetFullVersionString()
@@ -156,7 +161,7 @@ std::string GetFullVersionString()
     os << "PDAL " << PDAL_VERSION_STRING;
 
     std::ostringstream revs;
-    revs << g_GIT_SHA1;
+    revs << GetSHA1();
 
     os << " (" << revs.str().substr(0, 6) <<")";
 

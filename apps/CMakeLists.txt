@@ -14,8 +14,8 @@ set(PDAL_SOURCE_DIR ../src)
 include_directories(
     .
     ../include
-    ${PROJECT_SOURCE_DIR}/drivers/faux
-    ${PROJECT_SOURCE_DIR}/drivers/las
+    ${PROJECT_SOURCE_DIR}/io/faux
+    ${PROJECT_SOURCE_DIR}/io/las
 )
 
 #------------------------------------------------------------------------------
@@ -41,11 +41,15 @@ if(APPLE)
 endif()
 
 if(PDAL_UTILITY)
+    set(srcs
+        pdal.cpp
+    )
+
     list(APPEND PDAL_UTILITIES ${PDAL_UTILITY})
     if (APPLE AND PDAL_BUNDLE)
-        add_executable(${PDAL_UTILITY} MACOSX_BUNDLE pdal.cpp)
+        add_executable(${PDAL_UTILITY} MACOSX_BUNDLE ${srcs})
     else (APPLE AND PDAL_BUNDLE)
-        add_executable(${PDAL_UTILITY} pdal.cpp)
+        add_executable(${PDAL_UTILITY} ${srcs})
     endif(APPLE AND PDAL_BUNDLE)
     target_link_libraries(${PDAL_UTILITY} ${PDAL_LINKAGE} ${PDAL_LIB_NAME})
 endif()

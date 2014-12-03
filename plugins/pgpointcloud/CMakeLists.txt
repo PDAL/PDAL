@@ -4,7 +4,7 @@
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/plugins/pgpointcloud)
-include_directories(${PROJECT_SOURCE_DIR}/drivers/las)
+include_directories(${PROJECT_SOURCE_DIR}/io/las)
 
 find_package(PostgreSQL)
 if (POSTGRESQL_FOUND)
@@ -18,12 +18,12 @@ if (POSTGRESQL_FOUND)
     # PgPointCloud Reader
     #
     set(srcs
-	drivers/PgReader.cpp
+	io/PgReader.cpp
     )
 
     set(incs
-	drivers/PgCommon.hpp
-	drivers/PgReader.hpp
+	io/PgCommon.hpp
+	io/PgReader.hpp
     )
 
     set(deps ${POSTGRESQL_LIBRARIES})
@@ -33,12 +33,12 @@ if (POSTGRESQL_FOUND)
     # PgPointCloud Writer
     #
     set(srcs
-	drivers/PgWriter.cpp
+	io/PgWriter.cpp
     )
 
     set(incs
-	drivers/PgCommon.hpp
-	drivers/PgWriter.hpp
+	io/PgCommon.hpp
+	io/PgWriter.hpp
     )
 
     set(deps ${POSTGRESQL_LIBRARIES})
