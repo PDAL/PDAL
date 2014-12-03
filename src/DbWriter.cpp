@@ -93,14 +93,58 @@ DimTypeList DbWriter::dbDimTypes() const
 }
 
 
-/// Read a point's data packed into a buffer.
-/// \param[in] idx  Index of point to read.
-/// \param[in] buf  Buffer to fill with data.
-/// \return  Number of bytes written to buffer.
-size_t DbWriter::readPoint(const PointBuffer& pb, PointId idx,
-   std::vector<char>& outbuf)
+size_t DbWriter::readField(const PointBuffer& pb, char *pos, DimType dimType,
+    PointId idx)
 {
-    pb.getPackedPoint(m_dimTypes, idx, outbuf.data());
+    using namespace Dimension;
+
+    size_t size = Dimension::size(dimType.m_type);
+
+    pb.getField(pos, dimType.m_id, dimType.m_type, idx);
+
+    auto iconvert = [pos](const XForm& xform)
+    {
+        double d;
+        int32_t i;
+
+        memcpy(&d, pos, sizeof(double));
+        d = (d - xform.m_offset) / xform.m_scale;
+        i = boost::numeric_cast<int32_t>(lround(d));
+        memcpy(pos, &i, sizeof(int32_t));
+    };
+
+    if (locationScaling())
+    {
+        // For X, Y or Z.
+        size = sizeof(int32_t);
+        if (dimType.m_id == Id::X)
+        {
+            iconvert(m_xXform);
+            size = sizeof(int32_t);
+        }
+        else if (dimType.m_id == Id::Y)
+        {
+            iconvert(m_yXform);
+            size = sizeof(int32_t);
+        }
+        else if (dimType.m_id == Id::Z)
+        {
+            iconvert(m_zXform);
+            size = sizeof(int32_t);
+        }
+    }
+    return size;
+}
+
+
+/// Read a point's data packed into a buffer.
+/// \param[in] pb  Point buffer to read from.
+/// \param[in] idx  Index of point to read.
+/// \param[in] outbuf  Buffer to write to.
+/// \return  Number of bytes written to buffer.
+size_t DbWriter::readPoint(const PointBuffer& pb, PointId idx, char *outbuf)
+{
+    pb.getPackedPoint(m_dimTypes, idx, outbuf);
     
     auto iconvert = [](const XForm& xform, const char *inpos, char *outpos)
     {
@@ -128,20 +172,17 @@ size_t DbWriter::readPoint(const PointBuffer& pb, PointId idx,
 
         if (m_xPackedOffset >= 0)
         {
-            iconvert(m_xXform, outbuf.data() + m_xPackedOffset,
-                outbuf.data() + outOffset);
+            iconvert(m_xXform, outbuf + m_xPackedOffset, outbuf + outOffset);
             outOffset += sizeof(int);
         }
         if (m_yPackedOffset >= 0)
         {
-            iconvert(m_yXform, outbuf.data() + m_yPackedOffset,
-                outbuf.data() + outOffset);
+            iconvert(m_yXform, outbuf + m_yPackedOffset, outbuf + outOffset);
             outOffset += sizeof(int);
         }
         if (m_zPackedOffset >= 0)
         {
-            iconvert(m_zXform, outbuf.data() + m_zPackedOffset,
-                outbuf.data() + outOffset);
+            iconvert(m_zXform, outbuf + m_zPackedOffset, outbuf + outOffset);
             outOffset += sizeof(int);
         }
         return outOffset;

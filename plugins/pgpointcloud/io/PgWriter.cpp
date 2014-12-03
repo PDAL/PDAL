@@ -464,10 +464,9 @@ void PgWriter::writeTile(PointBuffer const& buffer)
     m_insert.reserve(hexrep.size() + 3000);
 
     size_t pos = 0;
-    std::cerr << "Buffer size = " << buffer.size() << "!\n";
     for (PointId idx = 0; idx < buffer.size(); ++idx)
     {
-        size_t written = readPoint(buffer, idx, storage);
+        size_t written = readPoint(buffer, idx, storage.data());
 
         /* We are always getting uncompressed bytes off the block_data */
         /* so we always used compression type 0 (uncompressed) in writing */

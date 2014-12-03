@@ -68,10 +68,10 @@ protected:
 
     bool locationScaling() const;
     DimTypeList dbDimTypes() const;
-    size_t readPoint(const PointBuffer& pb, PointId idx,
-        std::vector<char>& buf);
+    size_t readField(const PointBuffer& pb, char *pos, DimType dimType,
+        PointId idx);
+    size_t readPoint(const PointBuffer& pb, PointId idx, char *outbuf);
 
-    size_t m_pointSize;
     DimTypeList m_dimTypes;
     int m_xPackedOffset;
     int m_yPackedOffset;
