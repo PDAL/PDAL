@@ -24,8 +24,16 @@ set(PDAL_KERNEL_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_KERNEL_PATH}")
 set(PDAL_KERNEL_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_KERNEL_PATH}")
 
 if (PDAL_HAVE_LIBXML2)
-    SET (PDAL_XML_HEADER ${PDAL_HEADERS_DIR}/XMLSchema.hpp)
-    SET (PDAL_XML_SRC XMLSchema.cpp)
+    set(PDAL_XML_HEADER ${PDAL_HEADERS_DIR}/XMLSchema.hpp)
+    set(DB_DRIVER_HEADERS
+        "${PDAL_HEADERS_DIR}/DbReader.hpp"
+        "${PDAL_HEADERS_DIR}/DbWriter.hpp"
+    )
+    set(PDAL_XML_SRC XMLSchema.cpp)
+    set(DB_DRIVER_SRCS
+        DbReader.cpp
+        DbWriter.cpp
+    )
 endif()
 
 #
@@ -37,7 +45,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/Bounds.hpp"
   "${PDAL_HEADERS_DIR}/Charbuf.hpp"
   "${PDAL_HEADERS_DIR}/Compression.hpp"
-  "${PDAL_HEADERS_DIR}/DbWriter.hpp"
   "${PDAL_HEADERS_DIR}/Dimension.hpp"
   "${PDAL_HEADERS_DIR}/Drivers.hpp"
   "${PDAL_HEADERS_DIR}/FileUtils.hpp"
@@ -79,12 +86,12 @@ set(PDAL_BASE_HPP
     ${PDAL_KERNEL_HEADERS}/Kernels.hpp
     ${PDAL_KERNEL_HEADERS}/Support.hpp
     ${PDAL_XML_HEADER}
+    ${DB_DRIVER_HEADERS}
 )
 
 set(PDAL_BASE_CPP
   Bounds.cpp
   Charbuf.cpp
-  DbWriter.cpp
   FileUtils.cpp
   Filter.cpp
   gitsha.cpp
@@ -110,6 +117,7 @@ set(PDAL_BASE_CPP
   third/md5-pdal.c
   ${PDAL_XML_SRC}
   ${PDAL_LAZPERF_SRC}
+  ${DB_DRIVER_SRCS}
     ${PDAL_KERNEL_SRC}/Kernel.cpp
     ${PDAL_KERNEL_SRC}/KernelFactory.cpp
     ${PDAL_KERNEL_SRC}/KernelInfo.cpp

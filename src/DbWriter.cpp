@@ -105,12 +105,12 @@ size_t DbWriter::readPoint(const PointBuffer& pb, PointId idx,
     auto iconvert = [](const XForm& xform, const char *inpos, char *outpos)
     {
         double d;
-        int i;
+        int32_t i;
 
         memcpy(&d, inpos, sizeof(double));
         d = (d - xform.m_offset) / xform.m_scale;
         i = boost::numeric_cast<int32_t>(lround(d));
-        memcpy(outpos, &i, sizeof(i));
+        memcpy(outpos, &i, sizeof(int32_t));
     };
 
     if (locationScaling())

@@ -65,7 +65,8 @@ void OCISchemaStructuredErrorHandler(void * userData, xmlErrorPtr error);
 
 struct XMLDim
 {
-    XMLDim() : m_min(0.0), m_max(0.0)
+    XMLDim() : m_min(0.0), m_max(0.0), m_type(Dimension::Type::None),
+        m_id(Dimension::Id::Unknown)
     {}
 
     std::string m_name;
