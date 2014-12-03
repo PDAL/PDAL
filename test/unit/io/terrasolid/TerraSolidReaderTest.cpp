@@ -34,8 +34,6 @@
 
 #include "UnitTest.hpp"
 
-#include <boost/cstdint.hpp>
-
 #include <pdal/Options.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <TerrasolidReader.hpp>
@@ -68,15 +66,15 @@ void Check_Point(const pdal::PointBuffer& data,
     pdal::Dimension const& dimZ = schema.getDimension("Z");
     pdal::Dimension const& dimTime = schema.getDimension("Time");
 
-    boost::int32_t x = data.getField<boost::int32_t>(dimX, index);
-    boost::int32_t y = data.getField<boost::int32_t>(dimY, index);
-    boost::int32_t z = data.getField<boost::int32_t>(dimZ, index);
-    boost::uint32_t t = data.getField<boost::uint32_t>(dimTime, index);
+    int32_t x = data.getField<int32_t>(dimX, index);
+    int32_t y = data.getField<int32_t>(dimY, index);
+    int32_t z = data.getField<int32_t>(dimZ, index);
+    uint32_t t = data.getField<uint32_t>(dimTime, index);
 
-    double x0 = dimX.applyScaling<boost::int32_t>(x);
-    double y0 = dimY.applyScaling<boost::int32_t>(y);
-    double z0 = dimZ.applyScaling<boost::int32_t>(z);
-    double t0 = dimTime.applyScaling<boost::uint32_t>(t);
+    double x0 = dimX.applyScaling<int32_t>(x);
+    double y0 = dimY.applyScaling<int32_t>(y);
+    double z0 = dimZ.applyScaling<int32_t>(z);
+    double t0 = dimTime.applyScaling<uint32_t>(t);
 
 
     // std::cout.setf(std::ios_base::fixed, std::ios_base::floatfield);
@@ -120,7 +118,7 @@ BOOST_AUTO_TEST_CASE(test_tsolid)
     pdal::StageSequentialIterator* iter = reader.createSequentialIterator(data);
 
     {
-        boost::uint32_t numRead = iter->read(data);
+        uint32_t numRead = iter->read(data);
         BOOST_CHECK_EQUAL(numRead, 3u);
     }
 

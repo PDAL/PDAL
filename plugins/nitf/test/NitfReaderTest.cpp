@@ -146,10 +146,10 @@ BOOST_AUTO_TEST_CASE(test_chipper)
     /**
     mgr.execute();
     StageSequentialIterator* iter = reader.createSequentialIterator(data);
-    const boost::uint32_t num_read = iter->read(data);
+    const uint32_t num_read = iter->read(data);
     BOOST_CHECK_EQUAL(num_read, 13u);
 
-    boost::uint32_t num_blocks = chipper->GetBlockCount();
+    uint32_t num_blocks = chipper->GetBlockCount();
     BOOST_CHECK_EQUAL(num_blocks, 8u);
     **/
 }

@@ -65,7 +65,7 @@ private:
 
     std::string m_outputFile;
     bool m_bCompress;
-    boost::uint64_t m_numPointsToWrite;
+    uint64_t m_numPointsToWrite;
     BOX3D m_bounds;
     std::string m_distribution;
     std::string m_means;

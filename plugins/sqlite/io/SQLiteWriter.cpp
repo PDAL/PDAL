@@ -88,7 +88,7 @@ void SQLiteWriter::processOptions(const Options& options)
     m_modulename =
         options.getValueOrDefault<std::string>("module", "");
     m_srid =
-        m_options.getValueOrDefault<boost::uint32_t>("srid", 4326);
+        m_options.getValueOrDefault<uint32_t>("srid", 4326);
     m_is3d = m_options.getValueOrDefault<bool>("is3d", false);
     m_doCompression = m_options.getValueOrDefault<bool>("compression", false);
 }
@@ -298,7 +298,7 @@ void SQLiteWriter::CreateCloudTable()
                          << boost::to_lower_copy(m_cloud_table)
                          << "'" <<std::endl;
 
-    boost::uint32_t nDim = 2;
+    uint32_t nDim = 2;
 
     oss.str("");
     oss << "SELECT AddGeometryColumn('"
@@ -511,9 +511,9 @@ void SQLiteWriter::writeTile(PointBuffer const& buffer)
 {
     using namespace std;
 
-    boost::uint8_t* point_data(0);
-    boost::uint32_t point_data_length(0);
-    boost::uint32_t schema_byte_size(0);
+    uint8_t* point_data(0);
+    uint32_t point_data_length(0);
+    uint32_t schema_byte_size(0);
 
     size_t bufferSize = buffer.size() * m_context.pointSize();
 
@@ -544,7 +544,7 @@ void SQLiteWriter::writeTile(PointBuffer const& buffer)
     records rs;
     row r;
 
-    boost::uint32_t precision(9);
+    uint32_t precision(9);
     BOX3D b = buffer.calculateBounds(true);
     std::string bounds = b.toWKT(precision); // polygons are only 2d, not cubes
 

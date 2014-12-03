@@ -103,9 +103,9 @@ std::string StageInfo::optionsToRST() const
     strm << headings << std::endl;
     strm << tablehead << std::endl;
     
-    boost::uint32_t default_column(15);
-    boost::uint32_t name_column(32);
-    boost::uint32_t description_column(40);
+    uint32_t default_column(15);
+    uint32_t name_column(32);
+    uint32_t description_column(40);
     for (std::vector<Option>::const_iterator it = options.begin();
         it != options.end();
         ++it)

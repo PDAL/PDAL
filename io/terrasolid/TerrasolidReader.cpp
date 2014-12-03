@@ -220,7 +220,7 @@ point_count_t TerrasolidReader::read(PointBuffer& data, point_count_t count)
             uint8_t flag = Utils::read_field<uint8_t>(p);
             data.setField(Dimension::Id::Flag, nextId, flag);
 
-            boost::uint8_t mark = Utils::read_field<uint8_t>(p);
+            uint8_t mark = Utils::read_field<uint8_t>(p);
             data.setField(Dimension::Id::Mark, nextId, mark);
 
             uint16_t flight_line = Utils::read_field<uint16_t>(p);

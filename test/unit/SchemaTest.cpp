@@ -34,7 +34,6 @@
 
 #include "UnitTest.hpp"
 
-#include <boost/cstdint.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
 #include <boost/algorithm/string.hpp>
@@ -161,7 +160,7 @@ BOOST_AUTO_TEST_CASE(SchemaTest_pack)
 
     Dimension x("X", dimension::SignedInteger, 4);
     Dimension y("Y", dimension::SignedInteger, 4);
-    boost::uint32_t flags = y.getFlags();
+    uint32_t flags = y.getFlags();
     y.setFlags(flags | dimension::IsIgnored);
     Schema s;
     s.appendDimension(x);

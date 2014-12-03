@@ -78,9 +78,9 @@ namespace Utils
     PDAL_DLL void random_seed(unsigned int seed);
     PDAL_DLL double random(double minimum, double maximum);
     PDAL_DLL double uniform(const double& minimum=0.0f,
-        const double& maximum=1.0f, boost::uint32_t seed=0);
+        const double& maximum=1.0f, uint32_t seed=0);
     PDAL_DLL double normal(const double& mean=0.0f, const double& sigma=1.0f,
-        boost::uint32_t seed=0);
+        uint32_t seed=0);
 
     // compares two values to within a given tolerance
     // the value |tolerance| is compared to |actual - expected|
@@ -101,7 +101,7 @@ namespace Utils
 
     // Return a 'T' from a stream and increment src by the sizeof 'T'
     template<class T>
-    T read_field(boost::uint8_t*& src)
+    T read_field(uint8_t*& src)
     {
         T tmp = *(T*)(void*)src;
         src += sizeof(T);
@@ -124,7 +124,7 @@ namespace Utils
     inline double sround(double r)
         { return (r > 0.0) ? floor(r + 0.5) : ceil(r - 0.5); }
 
-    inline std::vector<boost::uint8_t>hex_string_to_binary(
+    inline std::vector<uint8_t>hex_string_to_binary(
         std::string const& source)
     {
         // Stolen from http://stackoverflow.com/questions/7363774/  ...
@@ -204,7 +204,7 @@ namespace Utils
     PDAL_DLL std::string base64_encode(const unsigned char *buf, size_t size);
     inline std::string base64_encode(std::vector<uint8_t> const& bytes)
         { return base64_encode(bytes.data(), bytes.size()); }
-    PDAL_DLL std::vector<boost::uint8_t>
+    PDAL_DLL std::vector<uint8_t>
     base64_decode(std::string const& input);
 
     PDAL_DLL FILE* portable_popen(const std::string& command,

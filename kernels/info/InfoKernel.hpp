@@ -89,8 +89,8 @@ private:
     bool m_computeBoundary;
     pdal::Options m_options;
     std::string m_pointIndexes;
-    boost::uint32_t m_seed;
-    boost::uint32_t m_sample_size;
+    uint32_t m_seed;
+    uint32_t m_sample_size;
     bool m_useXML;
     bool m_useJSON;
     bool m_useRST;

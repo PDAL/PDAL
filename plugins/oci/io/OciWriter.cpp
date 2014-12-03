@@ -731,7 +731,7 @@ void OciWriter::processOptions(const Options& options)
         getDefaultedOption<std::string>(options, "base_table_boundary_wkt");
 
     m_chunkCount =
-        options.getValueOrDefault<boost::uint32_t>("blob_chunk_count", 16);
+        options.getValueOrDefault<uint32_t>("blob_chunk_count", 16);
     m_streamChunks = options.getValueOrDefault<bool>("stream_chunks", false);
 
     bool dimInterleaved =

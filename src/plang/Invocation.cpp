@@ -151,7 +151,7 @@ void Invocation::resetArguments()
 
 
 void Invocation::insertArgument(std::string const& name, 
-                                boost::uint8_t* data,
+                                uint8_t* data,
                                 Dimension::Type::Enum t,
                                 point_count_t count)
 {

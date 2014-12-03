@@ -57,15 +57,15 @@ public:
     static Options getDefaultOptions();
 
 protected:
-    virtual void writeBegin(boost::uint64_t targetNumPointsToWrite)
+    virtual void writeBegin(uint64_t targetNumPointsToWrite)
     {}
     virtual void writeBufferBegin(PointBuffer const&)
     {}
 
-    virtual boost::uint32_t writeBuffer(const PointBuffer&)
+    virtual uint32_t writeBuffer(const PointBuffer&)
     { return 0; }
 
-    virtual void writeEnd(boost::uint64_t actualNumPointsWritten)
+    virtual void writeEnd(uint64_t actualNumPointsWritten)
     {}
 
 private:
@@ -99,7 +99,7 @@ private:
     std::string createPCElemInfo();
     bool blockTableExists();
     void runFileSQL(std::string const& filename);
-    bool isGeographic(boost::int32_t srid);
+    bool isGeographic(int32_t srid);
     std::string loadSQLData(std::string const& filename);
     void setOrdinates(Statement statement, OCIArray* ordinates,
         const BOX3D& extent);

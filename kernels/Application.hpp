@@ -37,7 +37,6 @@
 
 #include <pdal/pdal_error.hpp>
 #include <pdal/PDALUtils.hpp>
-#include <boost/cstdint.hpp>
 #include <cstdarg>
 
 #include "Support.hpp"

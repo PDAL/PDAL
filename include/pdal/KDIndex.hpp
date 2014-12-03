@@ -120,7 +120,7 @@ public:
             double const& y,
             double const& z,
             double distance,
-            boost::uint32_t count = 1) const;
+            uint32_t count = 1) const;
 
     void build(bool b3d = true);
 

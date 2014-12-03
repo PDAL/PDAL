@@ -195,9 +195,9 @@ std::string getPDALDebugInformation()
     os << "Enabled libraries" << std::endl;
     os << headline << std::endl << std::endl;
 
-    boost::uint32_t special_column(32);
-    boost::uint32_t name_column(20);
-    boost::uint32_t url_column(40);
+    uint32_t special_column(32);
+    uint32_t name_column(20);
+    uint32_t url_column(40);
 
     std::ostringstream thdr;
     for (unsigned i = 0; i < name_column-1; ++i)

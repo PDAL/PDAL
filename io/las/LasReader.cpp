@@ -191,7 +191,7 @@ void LasReader::extractHeaderMetadata(MetadataNode& m)
         "Day is computed as the Greenwich Mean Time (GMT) day. January 1 is "
         "considered day 1.");
     m.add<uint32_t>("creation_year",
-        static_cast<boost::uint32_t>(m_lasHeader.creationYear()),
+        static_cast<uint32_t>(m_lasHeader.creationYear()),
         "The year, expressed as a four digit number, in which the file was "
         "created.");
     m.add<uint32_t>("header_size",
@@ -199,7 +199,7 @@ void LasReader::extractHeaderMetadata(MetadataNode& m)
         "The size, in bytes, of the header block, including any extension "
         "by specific software.");
     m.add<uint32_t>("dataoffset",
-        static_cast<boost::uint32_t>(m_lasHeader.pointOffset()),
+        static_cast<uint32_t>(m_lasHeader.pointOffset()),
         "The actual number of bytes from the beginning of the file to the "
         "first field of the first point record data field. This data offset "
         "must be updated if any software adds data from the Public Header "

@@ -79,8 +79,8 @@ void checkPoint(const pdal::PointBuffer& data, std::size_t index,
                 float x, float y, float z,
                 double time, double echoRange, float amplitude,
                 float reflectance, float deviation,
-                bool isPpsLocked, boost::uint8_t returnNumber,
-                boost::uint8_t numberOfReturns
+                bool isPpsLocked, uint8_t returnNumber,
+                uint8_t numberOfReturns
                 )
 {
     using namespace pdal::Dimension;

@@ -37,7 +37,6 @@
 #include <pdal/pdal_internal.hpp>
 #include <pdal/pdal_error.hpp>
 #include <pdal/PDALUtils.hpp>
-#include <boost/cstdint.hpp>
 #include <cstdarg>
 
 #include "KernelSupport.hpp"
@@ -69,7 +68,7 @@ public:
     int run(int argc, const char* argv[], const std::string& appName);
 
     bool isDebug() const;
-    boost::uint32_t getVerboseLevel() const;
+    uint32_t getVerboseLevel() const;
     bool isVisualize() const;
     void visualize(PointBufferPtr buffer) const;
     //void visualize(PointBufferPtr input_buffer, PointBufferPtr output_buffer) const;
@@ -149,7 +148,7 @@ private:
     int do_shutdown();
 
     bool m_isDebug;
-    boost::uint32_t m_verboseLevel;
+    uint32_t m_verboseLevel;
     bool m_showHelp;
     bool m_showDrivers;
     std::string m_showOptions;
