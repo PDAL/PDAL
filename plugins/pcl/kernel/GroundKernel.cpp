@@ -104,11 +104,11 @@ std::unique_ptr<Stage> GroundKernel::makeReader(Options readerOptions)
     if (isDebug())
     {
         readerOptions.add<bool>("debug", true);
-        boost::uint32_t verbosity(getVerboseLevel());
+        uint32_t verbosity(getVerboseLevel());
         if (!verbosity)
             verbosity = 1;
 
-        readerOptions.add<boost::uint32_t>("verbose", verbosity);
+        readerOptions.add<uint32_t>("verbose", verbosity);
         readerOptions.add<std::string>("log", "STDERR");
     }
 
@@ -127,7 +127,7 @@ int GroundKernel::execute()
     Options readerOptions;
     readerOptions.add<std::string>("filename", m_inputFile);
     readerOptions.add<bool>("debug", isDebug());
-    readerOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
+    readerOptions.add<uint32_t>("verbose", getVerboseLevel());
 
     std::unique_ptr<Stage> readerStage = makeReader(readerOptions);
 
@@ -163,7 +163,7 @@ int GroundKernel::execute()
     std::string json = ss.str();
     groundOptions.add<std::string>("json", json);
     groundOptions.add<bool>("debug", isDebug());
-    groundOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
+    groundOptions.add<uint32_t>("verbose", getVerboseLevel());
 
     std::unique_ptr<Stage> groundStage(new filters::PCLBlock());
     groundStage->setInput(&bufferReader);

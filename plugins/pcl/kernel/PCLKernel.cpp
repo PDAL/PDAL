@@ -93,11 +93,11 @@ std::unique_ptr<Stage> PCLKernel::makeReader(Options readerOptions)
     if (isDebug())
     {
         readerOptions.add<bool>("debug", true);
-        boost::uint32_t verbosity(getVerboseLevel());
+        uint32_t verbosity(getVerboseLevel());
         if (!verbosity)
             verbosity = 1;
 
-        readerOptions.add<boost::uint32_t>("verbose", verbosity);
+        readerOptions.add<uint32_t>("verbose", verbosity);
         readerOptions.add<std::string>("log", "STDERR");
     }
 
@@ -116,7 +116,7 @@ int PCLKernel::execute()
     Options readerOptions;
     readerOptions.add<std::string>("filename", m_inputFile);
     readerOptions.add<bool>("debug", isDebug());
-    readerOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
+    readerOptions.add<uint32_t>("verbose", getVerboseLevel());
 
     std::unique_ptr<Stage> readerStage = makeReader(readerOptions);
 
@@ -135,7 +135,7 @@ int PCLKernel::execute()
     Options pclOptions;
     pclOptions.add<std::string>("filename", m_pclFile);
     pclOptions.add<bool>("debug", isDebug());
-    pclOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
+    pclOptions.add<uint32_t>("verbose", getVerboseLevel());
 
     std::unique_ptr<Stage> pclStage(new filters::PCLBlock());
     pclStage->setInput(&bufferReader);

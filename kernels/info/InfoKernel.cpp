@@ -205,9 +205,9 @@ void addRange(const string& begin, const string& end,
 }
 
 
-vector<boost::uint32_t> getListOfPoints(std::string p)
+vector<uint32_t> getListOfPoints(std::string p)
 {
-    vector<boost::uint32_t> output;
+    vector<uint32_t> output;
 
     //Remove whitespace from string with awful remove/erase idiom.
     p.erase(remove_if(p.begin(), p.end(), ::isspace), p.end());

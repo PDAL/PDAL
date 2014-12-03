@@ -124,13 +124,13 @@ BOOST_AUTO_TEST_CASE(test_compress_file)
     BOOST_CHECK_EQUAL(b->size(), 11);
     BOOST_CHECK_EQUAL(getBytes(*b, ctx).size(), 52 * 11);
 
-    boost::uint16_t r = b->getFieldAs<boost::uint16_t>(Dimension::Id::Red, 10);
+    uint16_t r = b->getFieldAs<uint16_t>(Dimension::Id::Red, 10);
     BOOST_CHECK_EQUAL(r, 64u);
-    boost::int32_t x = b->getFieldAs<boost::int32_t>(Dimension::Id::X, 10);
+    int32_t x = b->getFieldAs<int32_t>(Dimension::Id::X, 10);
     BOOST_CHECK_EQUAL(x, 636038);
     double xd = b->getFieldAs<double>(Dimension::Id::X, 10);
     BOOST_CHECK_CLOSE(xd, 636037.53, 0.001);
-    boost::int32_t y = b->getFieldAs<boost::int32_t>(Dimension::Id::Y, 10);
+    int32_t y = b->getFieldAs<int32_t>(Dimension::Id::Y, 10);
     BOOST_CHECK_EQUAL(y, 849338);
 }
 
@@ -169,9 +169,9 @@ BOOST_AUTO_TEST_CASE(test_compress_file)
 //     s2.buf = s.buf;
 //     PointBufferPtr b = compression::Decompress<SQLiteTestStream>(ctx, s2, 11, compression::CompressionType::Lazperf);
 //
-//     boost::int32_t y = b->getFieldAs<boost::int32_t>(Dimension::Id::Y, 10);
+//     int32_t y = b->getFieldAs<int32_t>(Dimension::Id::Y, 10);
 //     BOOST_CHECK_EQUAL(y, 849338);
-//     boost::int32_t x = b->getFieldAs<boost::int32_t>(Dimension::Id::X, 10);
+//     int32_t x = b->getFieldAs<int32_t>(Dimension::Id::X, 10);
 //     BOOST_CHECK_EQUAL(x, 636038);
 //     double xd = b->getFieldAs<double>(Dimension::Id::X, 10);
 //     BOOST_CHECK_CLOSE(xd, 636037.53, 0.001);
@@ -228,7 +228,7 @@ BOOST_AUTO_TEST_CASE(test_compress_file)
 //     s2.buf = s.buf;
 //     PointBufferPtr b = compression::Decompress<SQLiteTestStream>(ctx, s2, 11, compression::CompressionType::Lazperf);
 // //     std::cout << *b << std::endl;
-//     boost::uint16_t r = b->getFieldAs<boost::uint16_t>(Dimension::Id::Red, 10);
+//     uint16_t r = b->getFieldAs<uint16_t>(Dimension::Id::Red, 10);
 //     BOOST_CHECK_EQUAL(r, 26u);
 // }
 BOOST_AUTO_TEST_SUITE_END()

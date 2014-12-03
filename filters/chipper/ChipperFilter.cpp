@@ -74,7 +74,7 @@ namespace pdal
 
 void ChipperFilter::processOptions(const Options& options)
 {
-    m_threshold = options.getValueOrDefault<boost::uint32_t>("capacity", 5000u);
+    m_threshold = options.getValueOrDefault<uint32_t>("capacity", 5000u);
 }
 
 
@@ -103,7 +103,7 @@ PointBufferSet ChipperFilter::run(PointBufferPtr buffer)
 void ChipperFilter::load(PointBuffer& buffer, ChipRefList& xvec, ChipRefList& yvec,
     ChipRefList& spare)
 {
-    boost::uint32_t idx;
+    uint32_t idx;
     std::vector<ChipPtRef>::iterator it;
 
     xvec.reserve(buffer.size());
@@ -172,8 +172,8 @@ void ChipperFilter::decideSplit(ChipRefList& v1, ChipRefList& v2, ChipRefList& s
 {
     double v1range;
     double v2range;
-    boost::uint32_t left = m_partitions[pleft];
-    boost::uint32_t right = m_partitions[pright] - 1;
+    uint32_t left = m_partitions[pleft];
+    uint32_t right = m_partitions[pright] - 1;
 
     // Decide the wider direction of the block, and split in that direction
     // to maintain squareness.
@@ -250,24 +250,24 @@ void ChipperFilter::finalSplit(ChipRefList& wide, ChipRefList& narrow,
     PointId pleft, PointId pright)
 {
 
-    boost::int64_t left1 = -1;
-    boost::int64_t left2 = -1;
-    boost::int64_t right1 = -1;
-    boost::int64_t right2 = -1;
+    int64_t left1 = -1;
+    int64_t left2 = -1;
+    int64_t right1 = -1;
+    int64_t right2 = -1;
 
     // It appears we're using int64_t here because we're using -1 as
     // an indicator.  I'm not 100% sure that i ends up <0, but I don't
     // think so.  These casts will at least shut up the compiler, but
-    // I think this code should be revisited to use std::vector<boost::uint32_t>::const_iterator
-    // or std::vector<boost::uint32_t>::size_type instead of this int64_t stuff -- hobu 11/15/10
-    boost::int64_t left = m_partitions[pleft];
-    boost::int64_t right = static_cast<boost::int64_t>(m_partitions[pright] - 1);
-    boost::int64_t center = static_cast<boost::int64_t>(m_partitions[pright - 1]);
+    // I think this code should be revisited to use std::vector<uint32_t>::const_iterator
+    // or std::vector<uint32_t>::size_type instead of this int64_t stuff -- hobu 11/15/10
+    int64_t left = m_partitions[pleft];
+    int64_t right = static_cast<int64_t>(m_partitions[pright] - 1);
+    int64_t center = static_cast<int64_t>(m_partitions[pright - 1]);
 
     // Find left values for the partitions.
-    for (boost::int64_t i = left; i <= right; ++i)
+    for (int64_t i = left; i <= right; ++i)
     {
-        boost::int64_t idx = static_cast<boost::int64_t>(narrow[static_cast<boost::uint32_t>(i)].m_oindex);
+        int64_t idx = static_cast<int64_t>(narrow[static_cast<uint32_t>(i)].m_oindex);
         if (left1 < 0 && (idx < center))
         {
             left1 = i;
@@ -282,9 +282,9 @@ void ChipperFilter::finalSplit(ChipRefList& wide, ChipRefList& narrow,
         }
     }
     // Find right values for the partitions.
-    for (boost::int64_t i = right; i >= left; --i)
+    for (int64_t i = right; i >= left; --i)
     {
-        boost::int64_t idx = static_cast<boost::int64_t>(narrow[static_cast<boost::uint32_t>(i)].m_oindex);
+        int64_t idx = static_cast<int64_t>(narrow[static_cast<uint32_t>(i)].m_oindex);
         if (right1 < 0 && (idx < center))
         {
             right1 = i;

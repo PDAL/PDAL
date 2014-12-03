@@ -66,7 +66,7 @@ public:
     double x;
     double y;
     double z;
-    boost::uint64_t id;
+    uint64_t id;
     
     Point(double x, double y, double z, uint64_t id = 0) :
            x(x), y(y),z(z), id(id)

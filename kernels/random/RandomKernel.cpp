@@ -63,7 +63,7 @@ void RandomKernel::addSwitches()
     file_options->add_options()
     ("output,o", po::value<std::string>(&m_outputFile)->default_value(""), "output file name")
     ("compress,z", po::value<bool>(&m_bCompress)->zero_tokens()->implicit_value(true), "Compress output data (if supported by output format)")
-    ("count", po::value<boost::uint64_t>(&m_numPointsToWrite)->default_value(0), "How many points should we write?")
+    ("count", po::value<uint64_t>(&m_numPointsToWrite)->default_value(0), "How many points should we write?")
     ("bounds", po::value<BOX3D>(&m_bounds), "Extent (in XYZ to clip output to)")
     ("mean", po::value< std::string >(&m_means), "A comma-separated or quoted, space-separated list of means (normal mode): \n--mean 0.0,0.0,0.0\n--mean \"0.0 0.0 0.0\"")
     ("stdev", po::value< std::string >(&m_stdevs), "A comma-separated or quoted, space-separated list of standard deviations (normal mode): \n--stdev 0.0,0.0,0.0\n--stdev \"0.0 0.0 0.0\"")
@@ -81,11 +81,11 @@ Stage* RandomKernel::makeReader(Options readerOptions)
     if (isDebug())
     {
         readerOptions.add<bool>("debug", true);
-        boost::uint32_t verbosity(getVerboseLevel());
+        uint32_t verbosity(getVerboseLevel());
         if (!verbosity)
             verbosity = 1;
 
-        readerOptions.add<boost::uint32_t>("verbose", verbosity);
+        readerOptions.add<uint32_t>("verbose", verbosity);
         readerOptions.add<std::string>("log", "STDERR");
     }
 
@@ -142,7 +142,7 @@ int RandomKernel::execute()
             throw pdal_error("invalid distribution: " + m_distribution);
         readerOptions.add<int>("num_points", m_numPointsToWrite);
         readerOptions.add<bool>("debug", isDebug());
-        readerOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
+        readerOptions.add<uint32_t>("verbose", getVerboseLevel());
     }
 
     Options writerOptions;

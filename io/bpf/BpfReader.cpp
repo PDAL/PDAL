@@ -237,8 +237,8 @@ point_count_t BpfReader::read(PointBuffer& data, point_count_t count)
 
 size_t BpfReader::readBlock(std::vector<char>& outBuf, size_t index)
 {
-    boost::uint32_t finalBytes;
-    boost::uint32_t compressBytes;
+    uint32_t finalBytes;
+    uint32_t compressBytes;
 
     m_stream >> finalBytes;
     m_stream >> compressBytes;

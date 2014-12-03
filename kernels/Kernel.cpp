@@ -354,7 +354,7 @@ bool Kernel::isDebug() const
 }
 
 
-boost::uint32_t Kernel::getVerboseLevel() const
+uint32_t Kernel::getVerboseLevel() const
 {
     return m_verboseLevel;
 }
@@ -598,7 +598,7 @@ void Kernel::addBasicSwitchSet()
     ("debug,d", po::value<bool>(&m_isDebug)->zero_tokens()->implicit_value(true), "Enable debug mode")
     ("report-debug", po::value<bool>(&m_reportDebug)->zero_tokens()->implicit_value(true), "Report PDAL compilation DEBUG status")
     ("developer-debug", po::value<bool>(&m_hardCoreDebug)->zero_tokens()->implicit_value(true), "Enable developer debug mode (don't trap exceptions so segfaults are thrown)")
-    ("verbose,v", po::value<boost::uint32_t>(&m_verboseLevel)->default_value(0), "Set verbose message level")
+    ("verbose,v", po::value<uint32_t>(&m_verboseLevel)->default_value(0), "Set verbose message level")
     ("version", po::value<bool>(&m_showVersion)->zero_tokens()->implicit_value(true), "Show version info")
     ("visualize", po::value<bool>(&m_visualize)->zero_tokens()->implicit_value(true), "Visualize result")
     ("timer", po::value<bool>(&m_showTime)->zero_tokens()->implicit_value(true), "Show execution time")

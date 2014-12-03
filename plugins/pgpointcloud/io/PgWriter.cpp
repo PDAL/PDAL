@@ -106,9 +106,9 @@ void PgWriter::processOptions(const Options& options)
     // Read other preferences
     m_overwrite = options.getValueOrDefault<bool>("overwrite", true);
     m_patch_capacity =
-        options.getValueOrDefault<boost::uint32_t>("capacity", 400);
-    m_srid = options.getValueOrDefault<boost::uint32_t>("srid", 4326);
-    m_pcid = options.getValueOrDefault<boost::uint32_t>("pcid", 0);
+        options.getValueOrDefault<uint32_t>("capacity", 400);
+    m_srid = options.getValueOrDefault<uint32_t>("srid", 4326);
+    m_pcid = options.getValueOrDefault<uint32_t>("pcid", 0);
     m_pack = options.getValueOrDefault<bool>("pack_ignored_fields", true);
     m_pre_sql = getOptions().getValueOrDefault<std::string>("pre_sql", "");
 }
@@ -280,7 +280,7 @@ uint32_t PgWriter::SetupSchema(uint32_t srid)
     }
 
     // Do we have any existing schemas in the POINTCLOUD_FORMATS table?
-    boost::uint32_t pcid = 0;
+    uint32_t pcid = 0;
     oss << "SELECT Count(pcid) FROM pointcloud_formats";
     char *schema_count_str = pg_query_once(m_session, oss.str());
     if (!schema_count_str)
@@ -432,7 +432,7 @@ bool PgWriter::CheckTableExists(std::string const& name)
 
 void PgWriter::CreateTable(std::string const& schema_name,
     std::string const& table_name, std::string const& column_name,
-    boost::uint32_t pcid)
+    uint32_t pcid)
 {
     std::ostringstream oss;
     oss << "CREATE TABLE ";

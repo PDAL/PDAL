@@ -34,7 +34,6 @@
 
 #include "UnitTest.hpp"
 
-#include <boost/cstdint.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/concept_check.hpp>
@@ -189,7 +188,7 @@ BOOST_AUTO_TEST_CASE(SqliteTest_test_simple_las)
 
                 PointContext ctx;
                 writer_writer->prepare(ctx);
-  //              boost::uint64_t numPointsToRead = writer_reader->getNumPoints();
+  //              uint64_t numPointsToRead = writer_reader->getNumPoints();
 
 //                BOOST_CHECK_EQUAL(numPointsToRead, 1065u);
 
@@ -210,9 +209,9 @@ BOOST_AUTO_TEST_CASE(SqliteTest_test_simple_las)
 
                 PointBufferPtr buffer = *pbSet.begin();
 
-                boost::uint16_t r = buffer->getFieldAs<boost::uint16_t>(Dimension::Id::Red, 10);
+                uint16_t r = buffer->getFieldAs<uint16_t>(Dimension::Id::Red, 10);
                 BOOST_CHECK_EQUAL(r, 64u);
-                boost::int32_t x = buffer->getFieldAs<boost::int32_t>(Dimension::Id::X, 10);
+                int32_t x = buffer->getFieldAs<int32_t>(Dimension::Id::X, 10);
                 BOOST_CHECK_EQUAL(x, 636038);
                 double xd = buffer->getFieldAs<double>(Dimension::Id::X, 10);
                 BOOST_CHECK_CLOSE(xd, 636037.53, 0.001);

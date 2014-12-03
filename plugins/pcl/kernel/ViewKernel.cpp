@@ -94,9 +94,9 @@ void addRange(const string& begin, const string& end,
 }
 
 
-vector<boost::uint32_t> getListOfPoints(std::string p)
+vector<uint32_t> getListOfPoints(std::string p)
 {
-    vector<boost::uint32_t> output;
+    vector<uint32_t> output;
 
     //Remove whitespace from string with awful remove/erase idiom.
     p.erase(remove_if(p.begin(), p.end(), ::isspace), p.end());
@@ -155,11 +155,11 @@ std::unique_ptr<Stage> ViewKernel::makeReader(Options readerOptions)
     if (isDebug())
     {
         readerOptions.add<bool>("debug", true);
-        boost::uint32_t verbosity(getVerboseLevel());
+        uint32_t verbosity(getVerboseLevel());
         if (!verbosity)
             verbosity = 1;
 
-        readerOptions.add<boost::uint32_t>("verbose", verbosity);
+        readerOptions.add<uint32_t>("verbose", verbosity);
         readerOptions.add<std::string>("log", "STDERR");
     }
 
@@ -176,7 +176,7 @@ int ViewKernel::execute()
     Options readerOptions;
     readerOptions.add<std::string>("filename", m_inputFile);
     readerOptions.add<bool>("debug", isDebug());
-    readerOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
+    readerOptions.add<uint32_t>("verbose", getVerboseLevel());
 
     std::unique_ptr<Stage> readerStage = makeReader(readerOptions);
     PointContext ctx;

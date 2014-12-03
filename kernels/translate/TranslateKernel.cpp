@@ -288,7 +288,7 @@ Stage* TranslateKernel::makeTranslate(Options translateOptions, Stage* reader_st
             std::string json = ss.str();
             decimationOptions.add<std::string>("json", json);
             decimationOptions.add<bool>("debug", isDebug());
-            decimationOptions.add<boost::uint32_t>("verbose", getVerboseLevel());
+            decimationOptions.add<uint32_t>("verbose", getVerboseLevel());
             decimation_stage->setOptions(decimationOptions);
             decimation_stage->setInput(final_stage);
             final_stage = decimation_stage;

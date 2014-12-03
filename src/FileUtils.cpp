@@ -149,7 +149,7 @@ bool FileUtils::fileExists(const string& name)
         boost::algorithm::iequals(name, "STDIN");
 }
 
-boost::uintmax_t FileUtils::fileSize(const string& file)
+uintmax_t FileUtils::fileSize(const string& file)
 {
     return boost::filesystem::file_size(file);
 }

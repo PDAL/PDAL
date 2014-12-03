@@ -59,5 +59,6 @@ fi
 # Don't use ninja's default number of threads becuase it can
 # saturate Travis's available memory.
 ${MAKECMD} -j ${NUMTHREADS} && \
-    LD_LIBRARY_PATH=./lib ctest -V && \
+    LD_LIBRARY_PATH=./lib && \
+    sudo ctest -V && \
     sudo ${MAKECMD} install

@@ -72,8 +72,8 @@ class PDAL_DLL ChipPtRef
 
 private:
     double m_pos;
-    boost::uint32_t m_ptindex;
-    boost::uint32_t m_oindex;
+    uint32_t m_ptindex;
+    uint32_t m_oindex;
 
 public:
     bool operator < (const ChipPtRef& pt) const
@@ -117,7 +117,7 @@ private:
     {
         return m_vec.end();
     }
-    ChipPtRef& operator[](boost::uint32_t pos)
+    ChipPtRef& operator[](uint32_t pos)
     {
         return m_vec[pos];
     }

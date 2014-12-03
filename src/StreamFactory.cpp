@@ -132,7 +132,7 @@ void FilenameStreamFactory::deallocate(std::istream& stream)
 
 // --------------------------------------------------------------------
 
-FilenameSubsetStreamFactory::StreamSet::StreamSet(const std::string& filename, boost::uint64_t offset, boost::uint64_t length)
+FilenameSubsetStreamFactory::StreamSet::StreamSet(const std::string& filename, uint64_t offset, uint64_t length)
 {
     namespace io = boost::iostreams;
 
@@ -166,7 +166,7 @@ FilenameSubsetStreamFactory::StreamSet::~StreamSet()
 }
 
 
-FilenameSubsetStreamFactory::FilenameSubsetStreamFactory(const std::string& name, boost::uint64_t offset, boost::uint64_t length)
+FilenameSubsetStreamFactory::FilenameSubsetStreamFactory(const std::string& name, uint64_t offset, uint64_t length)
     : StreamFactory()
     , m_filename(name)
     , m_offset(offset)

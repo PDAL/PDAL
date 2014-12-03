@@ -130,7 +130,7 @@ private:
 
 
 PipelineReader::PipelineReader(PipelineManager& manager, bool isDebug,
-        boost::uint32_t verboseLevel) :
+        uint32_t verboseLevel) :
     m_manager(manager) , m_isDebug(isDebug) , m_verboseLevel(verboseLevel)
 {
     if (m_isDebug)

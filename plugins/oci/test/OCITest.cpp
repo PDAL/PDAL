@@ -34,7 +34,6 @@
 
 #include "UnitTest.hpp"
 
-#include <boost/cstdint.hpp>
 #include <boost/property_tree/ptree.hpp>
 
 #include <pdal/StageFactory.hpp>
@@ -108,7 +107,7 @@ Options getOCIOptions()
     Option max_cache_blocks("max_cache_blocks", 1, "");
     options.add(max_cache_blocks);
 
-    // Option cache_block_size("cache_block_size", capacity.getValue<boost::uint32_t>(), "");
+    // Option cache_block_size("cache_block_size", capacity.getValue<uint32_t>(), "");
     // options.add(cache_block_size);
 
     Option filename("filename", Support::datapath("autzen/autzen-utm.las"), "");
@@ -467,7 +466,7 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
 //     pdal::PointBuffer data(reader_reader.getSchema(), chunk_size+30);
 //     pdal::StageSequentialIterator* iter = reader_reader.createSequentialIterator(data);
 //
-//     boost::uint32_t numRead(0);
+//     uint32_t numRead(0);
 //
 //     numRead = iter->read(data);
 //
@@ -501,7 +500,7 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
 //     boost::scoped_ptr<pdal::StageSequentialIterator> iter(reader_reader.createSequentialIterator(data));
 //
 //
-//     boost::uint32_t numRead = iter->read(data);
+//     uint32_t numRead = iter->read(data);
 //
 //     BOOST_CHECK_EQUAL(numRead, 2130u);
 //
@@ -512,11 +511,11 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
 //     pdal::Dimension const& dimIntensity = schema.getDimension("Intensity");
 //     pdal::Dimension const& dimRed = schema.getDimension("Red");
 //
-//     boost::int32_t x = data.getFieldAs<boost::int32_t>(dimX, 0);
-//     boost::int32_t y = data.getFieldAs<boost::int32_t>(dimY, 0);
-//     boost::int32_t z = data.getFieldAs<boost::int32_t>(dimZ, 0);
-//     boost::uint16_t intensity = data.getFieldAs<boost::uint16_t>(dimIntensity, 6);
-//     boost::uint16_t red = data.getFieldAs<boost::uint16_t>(dimRed, 6);
+//     int32_t x = data.getFieldAs<int32_t>(dimX, 0);
+//     int32_t y = data.getFieldAs<int32_t>(dimY, 0);
+//     int32_t z = data.getFieldAs<int32_t>(dimZ, 0);
+//     uint16_t intensity = data.getFieldAs<uint16_t>(dimIntensity, 6);
+//     uint16_t red = data.getFieldAs<uint16_t>(dimRed, 6);
 //
 //     BOOST_CHECK_EQUAL(x, -1250367506);
 //     BOOST_CHECK_EQUAL(y, 492519663);
@@ -551,8 +550,8 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
 //     boost::scoped_ptr<pdal::StageSequentialIterator> iter(reader_reader.createSequentialIterator(data));
 //
 //
-//     boost::uint32_t numTotal(0);
-//     boost::uint32_t numRead(0);
+//     uint32_t numTotal(0);
+//     uint32_t numRead(0);
 //
 //     pdal::PointBuffer data3(reader_reader.getSchema(), 100);
 //     numRead = iter->read(data3);

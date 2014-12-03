@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE(StageFactoryTest_test1)
     BOOST_CHECK(writer->getName() == "writers.las");
     writer->prepare();
 
-    const boost::uint64_t np = writer->write(reader->getNumPoints());
+    const uint64_t np = writer->write(reader->getNumPoints());
     BOOST_CHECK(np == 1065);
 
     delete writer;

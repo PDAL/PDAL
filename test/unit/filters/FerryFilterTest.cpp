@@ -33,7 +33,6 @@
 ****************************************************************************/
 
 #include "UnitTest.hpp"
-#include <boost/cstdint.hpp>
 
 #include <pdal/filters/Reprojection.hpp>
 #include <pdal/FileUtils.hpp>

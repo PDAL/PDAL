@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(test_wrapped_vsifile_read)
     srand(17);
 
     // compute the "true" values, and store into test file
-    boost::uint8_t truth[FILESIZE];
+    uint8_t truth[FILESIZE];
     {
         FILE* fp = fopen(tempfile.c_str(), "wb");
         for (int i=0; i<FILESIZE; i++)
@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE(test_wrapped_vsifile_read)
         int pos = rand()%FILESIZE;
         i.seekg(pos, std::iostream::beg);
 
-        boost::uint8_t c;
+        uint8_t c;
         i.read((char*)&c, 1);
 
         // did we get the correct value?
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE(GDALUtilsTest_test_vsifile_write)
     pdal::FileUtils::deleteFile(tempfile_b);
 
     // compute the "true" values, and store into test file
-    boost::uint8_t truth[FILESIZE];
+    uint8_t truth[FILESIZE];
     {
         FILE* fp_a = fopen(tempfile_a.c_str(), "wb");
         VSILFILE* fp_b = VSIFOpenL(tempfile_b.c_str(), "wb");
@@ -181,7 +181,7 @@ BOOST_AUTO_TEST_CASE(test_wrapped_vsifile_subsequence)
     // seek to a random spot and read a point
     str.seekg(5, std::iostream::beg);
 
-    boost::uint8_t c;
+    uint8_t c;
 
     str.read((char*)&c, 1);
     BOOST_CHECK(c == 15);

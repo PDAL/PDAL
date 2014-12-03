@@ -94,9 +94,9 @@ public:
         }
     bool isVerbose() const
         { return (getVerboseLevel() != 0 ); }
-    boost::uint32_t getVerboseLevel() const
+    uint32_t getVerboseLevel() const
         {
-            return m_options.getValueOrDefault<boost::uint32_t>("verbose", 0);
+            return m_options.getValueOrDefault<uint32_t>("verbose", 0);
         }
     virtual std::string getName() const = 0;
     virtual std::string getDescription() const = 0;
@@ -139,7 +139,7 @@ protected:
 
 private:
     bool m_debug;
-    boost::uint32_t m_verbose;
+    uint32_t m_verbose;
     std::vector<Stage *> m_inputs;
     LogPtr m_log;
     SpatialReference m_spatialReference;

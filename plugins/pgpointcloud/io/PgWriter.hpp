@@ -77,7 +77,7 @@ private:
     void CreateTable(std::string const& schema_name,
                      std::string const& table_name,
                      std::string const& column_name,
-                     boost::uint32_t pcid);
+                     uint32_t pcid);
 
     void DeleteTable(std::string const& schema_name,
                      std::string const& table_name);

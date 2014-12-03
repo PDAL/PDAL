@@ -233,7 +233,7 @@ void RxpPointcloud::on_echo_transformed(echo_type echo)
 
     using namespace Dimension;
 
-    boost::uint32_t idx = m_buf->size();
+    uint32_t idx = m_buf->size();
     unsigned int returnNumber = 1;
     for (auto t : targets)
     {
