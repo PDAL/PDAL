@@ -44,10 +44,6 @@ pdal::Writer* createOciWriter();
 
 namespace pdal
 {
-namespace drivers
-{
-namespace oci
-{
 
 class PDAL_DLL OciWriter : public DbWriter
 {
@@ -140,7 +136,4 @@ private:
 
 };
 
-} // namespace oci
-} // namespace drivers
 } // namespace pdal
-

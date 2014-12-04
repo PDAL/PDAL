@@ -36,7 +36,7 @@
 
 #include <pdal/SpatialReference.hpp>
 #include <LasReader.hpp>
-#include <pdal/filters/Colorization.hpp>
+#include <ColorizationFilter.hpp>
 #include <pdal/PointBuffer.hpp>
 
 #include "Support.hpp"
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(ColorizationFilterTest_test_1)
     reader_options.add(blue);
     reader_options.add(datasource);
 
-    filters::Colorization filter;
+    ColorizationFilter filter;
     filter.setOptions(reader_options);
     filter.setInput(&reader);
 

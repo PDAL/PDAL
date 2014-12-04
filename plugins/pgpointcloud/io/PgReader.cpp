@@ -39,13 +39,9 @@
 
 #include <iostream>
 
-CREATE_READER_PLUGIN(pgpointcloud, pdal::drivers::pgpointcloud::PgReader)
+CREATE_READER_PLUGIN(pgpointcloud, pdal::PgReader)
 
 namespace pdal
-{
-namespace drivers
-{
-namespace pgpointcloud
 {
 
 PgReader::PgReader() : m_session(NULL), m_pcid(0), m_cached_point_count(0),
@@ -369,7 +365,4 @@ point_count_t PgReader::read(PointBuffer& buffer, point_count_t count)
     return totalNumRead;
 }
 
-} // pgpointcloud
-} // drivers
 } // pdal
-

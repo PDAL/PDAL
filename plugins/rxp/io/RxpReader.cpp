@@ -43,14 +43,10 @@
 #include <pdal/StageFactory.hpp>
 
 
-CREATE_READER_PLUGIN(rxp, pdal::drivers::rxp::RxpReader)
+CREATE_READER_PLUGIN(rxp, pdal::RxpReader)
 
 
 namespace pdal
-{
-namespace drivers
-{
-namespace rxp
 {
 
 
@@ -237,7 +233,7 @@ void RxpPointcloud::on_echo_transformed(echo_type echo)
 
     using namespace Dimension;
 
-    boost::uint32_t idx = m_buf->size();
+    uint32_t idx = m_buf->size();
     unsigned int returnNumber = 1;
     for (auto t : targets)
     {
@@ -392,6 +388,4 @@ Inclination movingAverage(const InclinationVector& incl,
 }
 
 
-}
-}
-} // namespace pdal::drivers::rxp
+} // namespace pdal

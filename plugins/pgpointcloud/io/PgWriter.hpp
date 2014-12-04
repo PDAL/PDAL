@@ -41,10 +41,6 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace pgpointcloud
-{
 
 
 class PDAL_DLL PgWriter : public DbWriter
@@ -79,7 +75,7 @@ private:
     void CreateTable(std::string const& schema_name,
                      std::string const& table_name,
                      std::string const& column_name,
-                     boost::uint32_t pcid);
+                     uint32_t pcid);
 
     void DeleteTable(std::string const& schema_name,
                      std::string const& table_name);
@@ -111,7 +107,4 @@ private:
     bool m_schema_is_initialized;
 };
 
-} // namespace pgpointcloud
-} // namespace drivers
 } // namespace pdal
-

@@ -5,7 +5,7 @@
 
 cmake_minimum_required(VERSION 2.8.6)
 
-project(PDAL)
+project(PDAL CXX C)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 
 #------------------------------------------------------------------------------
@@ -493,6 +493,7 @@ set(PDAL_TARGET_OBJECTS "")
 
 add_subdirectory(io)
 add_subdirectory(filters)
+add_subdirectory(kernels)
 add_subdirectory(src)
 
 if(WITH_TESTS)

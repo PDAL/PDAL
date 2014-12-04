@@ -52,10 +52,6 @@ class PointSource;
 
 namespace pdal
 {
-namespace drivers
-{
-namespace mrsid
-{
 
 
 // The MrSIDReader wraps LT's PointSource abstraction
@@ -78,7 +74,7 @@ public:
         createSequentialIterator(PointBuffer& buffer) const;
 
     // this is called by the stage's iterator
-    boost::uint32_t processBuffer(PointBuffer& data, boost::uint64_t index) const;
+    uint32_t processBuffer(PointBuffer& data, uint64_t index) const;
 
 private:
     LizardTech::PointSource *m_PS;
@@ -100,15 +96,15 @@ namespace sequential
 class MrsidReader : public pdal::ReaderSequentialIterator
 {
 public:
-    MrsidReader(const pdal::drivers::mrsid::MrsidReader& reader, PointBuffer& buffer, boost::uint32_t numPoints);
+    MrsidReader(const pdal::MrsidReader& reader, PointBuffer& buffer, uint32_t numPoints);
 
 private:
-    boost::uint64_t skipImpl(boost::uint64_t);
+    uint64_t skipImpl(uint64_t);
     point_count_t readBufferImpl(PointBuffer&);
     bool atEndImpl() const;
-    boost::uint32_t m_numPoints;
+    uint32_t m_numPoints;
 
-    const pdal::drivers::mrsid::MrsidReader& m_reader;
+    const pdal::MrsidReader& m_reader;
 };
 
 } // sequential
@@ -119,15 +115,15 @@ namespace random
 class MrsidReader : public pdal::ReaderRandomIterator
 {
 public:
-    MrsidReader(const pdal::drivers::mrsid::MrsidReader& reader,
-           PointBuffer& buffer, boost::uint32_t numPoints);
+    MrsidReader(const pdal::MrsidReader& reader,
+           PointBuffer& buffer, uint32_t numPoints);
 
 private:
-    boost::uint64_t seekImpl(boost::uint64_t);
-    boost::uint32_t readBufferImpl(PointBuffer&);
+    uint64_t seekImpl(uint64_t);
+    uint32_t readBufferImpl(PointBuffer&);
 
     const pdal::drivers::mrsid::MrsidReader& m_reader;
-    boost::uint32_t m_numPoints;
+    uint32_t m_numPoints;
 
 };
 
@@ -136,6 +132,4 @@ private:
 } // iterators
 
 
-}
-}
 } // namespaces

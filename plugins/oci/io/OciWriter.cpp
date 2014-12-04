@@ -47,13 +47,9 @@
 
 #include <ogr_api.h>
 
-CREATE_WRITER_PLUGIN(oci, pdal::drivers::oci::OciWriter)
+CREATE_WRITER_PLUGIN(oci, pdal::OciWriter)
 
 namespace pdal
-{
-namespace drivers
-{
-namespace oci
 {
 
 OciWriter::OciWriter()
@@ -704,7 +700,7 @@ void OciWriter::processOptions(const Options& options)
         getDefaultedOption<std::string>(options, "base_table_boundary_wkt");
 
     m_chunkCount =
-        options.getValueOrDefault<boost::uint32_t>("blob_chunk_count", 16);
+        options.getValueOrDefault<uint32_t>("blob_chunk_count", 16);
     m_streamChunks = options.getValueOrDefault<bool>("stream_chunks", false);
 
     bool dimInterleaved =
@@ -824,67 +820,6 @@ void OciWriter::setOrdinates(Statement statement, OCIArray* ordinates,
     if (m_3d)
         statement->AddElement(ordinates, extent.maxz);
 }
-
-
-namespace
-{
-
-void fillBuf(const PointBuffer& buf, char *pos, Dimension::Id::Enum d,
-    Dimension::Type::Enum type, PointId id)
-{
-    union
-    {
-        float f;
-        double d;
-        int8_t s8;
-        int16_t s16;
-        int32_t s32;
-        int64_t s64;
-        uint8_t u8;
-        uint16_t u16;
-        uint32_t u32;
-        uint64_t u64;
-    } e;  // e - for Everything.
-
-    switch (type)
-    {
-    case Dimension::Type::Float:
-        e.f = buf.getFieldAs<float>(d, id);
-        break;
-    case Dimension::Type::Double:
-        e.d = buf.getFieldAs<double>(d, id);
-        break;
-    case Dimension::Type::Signed8:
-        e.s8 = buf.getFieldAs<int8_t>(d, id);
-        break;
-    case Dimension::Type::Signed16:
-        e.s16 = buf.getFieldAs<int16_t>(d, id);
-        break;
-    case Dimension::Type::Signed32:
-        e.s32 = buf.getFieldAs<int32_t>(d, id);
-        break;
-    case Dimension::Type::Signed64:
-        e.s64 = buf.getFieldAs<int64_t>(d, id);
-        break;
-    case Dimension::Type::Unsigned8:
-        e.u8 = buf.getFieldAs<uint8_t>(d, id);
-        break;
-    case Dimension::Type::Unsigned16:
-        e.u16 = buf.getFieldAs<uint16_t>(d, id);
-        break;
-    case Dimension::Type::Unsigned32:
-        e.u32 = buf.getFieldAs<uint32_t>(d, id);
-        break;
-    case Dimension::Type::Unsigned64:
-        e.u64 = buf.getFieldAs<uint64_t>(d, id);
-        break;
-    case Dimension::Type::None:
-        break;
-    }
-    memcpy(pos, &e, Dimension::size(type));
-}
-
-} // anonymous namespace.
 
 
 void OciWriter::writeTile(PointBuffer const& buffer)
@@ -1138,6 +1073,4 @@ void OciWriter::updatePCExtent()
 }
 
 
-}
-}
-} // namespace pdal::driver::oci
+} // namespace pdal

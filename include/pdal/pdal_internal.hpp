@@ -45,9 +45,6 @@
 #include <pdal/pdal_error.hpp>
 #include <pdal/pdal_macros.hpp>
 
-
-// we use explicitly-sized types everywhere, so include this here
-#include <boost/cstdint.hpp>
 #include <boost/version.hpp>
 
 // See http://stackoverflow.com/questions/1814548/boostsystem-category-defined-but-not-used

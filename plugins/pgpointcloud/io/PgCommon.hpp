@@ -44,10 +44,6 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace pgpointcloud
-{
 
 inline pdal::compression::CompressionType::Enum getCompressionType(
     std::string const& compression_type)
@@ -151,7 +147,4 @@ inline PGresult* pg_query_result(PGconn* session, std::string const& sql)
 
 
 
-} // pgpointcloud
-} // drivers
 } // pdal
-

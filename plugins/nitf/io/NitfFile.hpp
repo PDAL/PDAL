@@ -85,7 +85,7 @@ public:
     void open();
     void close();
 
-    void getLasOffset(boost::uint64_t& offset, boost::uint64_t& length);
+    void getLasOffset(uint64_t& offset, uint64_t& length);
 
     void extractMetadata(MetadataNode& metadata);
 

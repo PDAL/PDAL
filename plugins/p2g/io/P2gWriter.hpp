@@ -47,10 +47,6 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace p2g
-{
 
 
 class p2g_error : public pdal_error
@@ -87,17 +83,17 @@ private:
     virtual void initialize() {};
 
     boost::scoped_ptr<OutCoreInterp> m_interpolator;
-    boost::uint64_t m_pointCount;
+    uint64_t m_pointCount;
 
-    boost::uint32_t m_GRID_SIZE_X;
-    boost::uint32_t m_GRID_SIZE_Y;
+    uint32_t m_GRID_SIZE_X;
+    uint32_t m_GRID_SIZE_Y;
 
     double m_GRID_DIST_X;
     double m_GRID_DIST_Y;
 
     double m_RADIUS_SQ;
     unsigned int m_outputTypes;
-    boost::uint32_t m_fill_window_size;
+    uint32_t m_fill_window_size;
     BOX3D m_bounds;
 
     std::string m_filename;
@@ -106,7 +102,4 @@ private:
     std::vector<boost::tuple<double, double, double> > m_coordinates;
 };
 
-}
-}
 } // namespaces
-

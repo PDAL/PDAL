@@ -36,10 +36,6 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace pcd
-{
 
 Dimension::IdList fileDimensions()
 {
@@ -57,7 +53,4 @@ Dimension::IdList fileDimensions()
     return ids;
 }
 
-} // namespace pcd
-} // namespace drivers
 } // namespace pdal
-

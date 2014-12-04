@@ -45,10 +45,6 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace pgpointcloud
-{
 
 class PDAL_DLL PgReader : public DbReader
 {
@@ -146,7 +142,4 @@ private:
     PgReader(const PgReader&); // not implemented
 };
 
-} // pgpointcloud
-} // driver
 } // pdal
-

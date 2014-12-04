@@ -313,7 +313,7 @@ BOOST_AUTO_TEST_CASE(kdindex)
     reader.prepare();
 
     const Schema& schema = reader.getSchema();
-    boost::uint32_t capacity(1000);
+    uint32_t capacity(1000);
     PointBuffer data(schema, capacity);
 
     StageSequentialIterator* iter = reader.createSequentialIterator(data);

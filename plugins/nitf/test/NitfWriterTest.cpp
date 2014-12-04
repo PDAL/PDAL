@@ -57,7 +57,7 @@ static void compare_contents(const std::string& las_file, const std::string& ntf
     const Schema& las_schema = las_reader.getSchema();
     PointBuffer las_data(las_schema, 750);
     StageSequentialIterator* las_iter = las_reader.createSequentialIterator(las_data);
-    const boost::uint32_t las_numRead = las_iter->read(las_data);
+    const uint32_t las_numRead = las_iter->read(las_data);
 
     //
     // read the NITF file
@@ -66,12 +66,12 @@ static void compare_contents(const std::string& las_file, const std::string& ntf
     Options ntf_opts;
     ntf_opts.add(ntf_opt);
 
-    drivers::nitf::Reader ntf_reader(ntf_opts);
+    NitfReader ntf_reader(ntf_opts);
     ntf_reader.prepare();
     const Schema& ntf_schema = ntf_reader.getSchema();
     PointBuffer ntf_data(ntf_schema, 750);
     StageSequentialIterator* ntf_iter = ntf_reader.createSequentialIterator(ntf_data);
-    const boost::uint32_t ntf_numRead = ntf_iter->read(ntf_data);
+    const uint32_t ntf_numRead = ntf_iter->read(ntf_data);
 
     //
     // compare the two buffers
@@ -86,7 +86,7 @@ static void compare_contents(const std::string& las_file, const std::string& ntf
     Dimension const& las_dimY = las_schema.getDimension("Y");
     Dimension const& las_dimZ = las_schema.getDimension("Z");
 
-    for (boost::uint32_t i=0; i<las_numRead; i++)
+    for (uint32_t i=0; i<las_numRead; i++)
     {
         const double ntf_x = ntf_data.getField<double>(ntf_dimX, i);
         const double ntf_y = ntf_data.getField<double>(ntf_dimY, i);

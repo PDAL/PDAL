@@ -41,10 +41,6 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace greyhound
-{
 
 struct DimData
 {
@@ -90,7 +86,4 @@ private:
             const point_count_t pointsToRead) const;
 };
 
-} // namespace greyhound
-} // namespace drivers
 } // namespace pdal
-

@@ -34,8 +34,6 @@
 
 #include "UnitTest.hpp"
 
-#include <boost/cstdint.hpp>
-
 #include <pdal/PointBuffer.hpp>
 #include <LasReader.hpp>
 #include "Support.hpp"
@@ -157,8 +155,8 @@ BOOST_AUTO_TEST_CASE(test_sequential)
 }
 
 
-static void test_a_format(const std::string& file, boost::uint8_t majorVersion, boost::uint8_t minorVersion, int pointFormat,
-                          double xref, double yref, double zref, double tref, boost::uint16_t rref,  boost::uint16_t gref,  boost::uint16_t bref)
+static void test_a_format(const std::string& file, uint8_t majorVersion, uint8_t minorVersion, int pointFormat,
+                          double xref, double yref, double zref, double tref, uint16_t rref,  uint16_t gref,  boost::uint16_t bref)
 {
     PointContext ctx;
 

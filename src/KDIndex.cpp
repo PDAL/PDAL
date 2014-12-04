@@ -67,7 +67,7 @@ std::vector<size_t> KDIndex::radius(double const& x, double const& y,
 }
 
 std::vector<size_t> KDIndex::neighbors(double const& x, double const& y,
-    double const& z, double distance, boost::uint32_t k) const
+    double const& z, double distance, uint32_t k) const
 {
     std::vector<size_t> output(k);
     std::vector<double> out_dist_sqr(k);

@@ -33,7 +33,6 @@
 ****************************************************************************/
 
 #include "UnitTest.hpp"
-#include <boost/cstdint.hpp>
 #include <boost/property_tree/ptree.hpp>
 
 #include <boost/uuid/uuid_generators.hpp>

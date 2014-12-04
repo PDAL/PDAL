@@ -39,13 +39,9 @@
 #include <boost/algorithm/string.hpp>
 
 
-CREATE_READER_PLUGIN(mrsid, pdal::drivers::mrsid::MrsidReader)
+CREATE_READER_PLUGIN(mrsid, pdal::MrsidReader)
 
 namespace pdal
-{
-namespace drivers
-{
-namespace mrsid
 {
 
 
@@ -114,7 +110,7 @@ Options MrsidReader::getDefaultOptions()
 
 pdal::StageSequentialIterator* MrsidReader::createSequentialIterator(PointBuffer& buffer) const
 {
-    return new pdal::drivers::mrsid::iterators::sequential::MrsidReader(*this, buffer, getNumPoints());
+    return new pdal::iterators::sequential::MrsidReader(*this, buffer, getNumPoints());
 }
 
 int MrsidReader::SchemaToPointInfo(const Schema &schema, LizardTech::PointInfo &pointInfo) const
@@ -171,15 +167,15 @@ int MrsidReader::SchemaToPointInfo(const Schema &schema, LizardTech::PointInfo &
 }
 
 
-boost::uint32_t MrsidReader::processBuffer(PointBuffer& data, boost::uint64_t index) const
+uint32_t MrsidReader::processBuffer(PointBuffer& data, uint64_t index) const
 {
     const Schema& schema = data.getSchema();
 
     // how many are they asking for?
-    boost::uint64_t numPointsWanted = data.getCapacity();
+    uint64_t numPointsWanted = data.getCapacity();
 
     // we can only give them as many as we have left
-    boost::uint64_t numPointsAvailable = getNumPoints() - index;
+    uint64_t numPointsAvailable = getNumPoints() - index;
     if (numPointsAvailable < numPointsWanted)
         numPointsWanted = numPointsAvailable;
 
@@ -189,12 +185,12 @@ boost::uint32_t MrsidReader::processBuffer(PointBuffer& data, boost::uint64_t in
     points.init(m_PS->getPointInfo(), (size_t)numPointsWanted);
     size_t count = m_iter->getNextPoints(points);
 
-    boost::uint32_t cnt = 0;
+    uint32_t cnt = 0;
     data.setNumPoints(0);
 
     schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();
 
-    for (boost::uint32_t pointIndex=0; pointIndex<count; pointIndex++)
+    for (uint32_t pointIndex=0; pointIndex<count; pointIndex++)
     {
         ++cnt;
 
@@ -211,8 +207,8 @@ boost::uint32_t MrsidReader::processBuffer(PointBuffer& data, boost::uint64_t in
             else if (d.getName() == "X" && d.getInterpretation() == dimension::SignedInteger && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_X))
             {
                 double *pData = static_cast<double*>(points.getChannel(CHANNEL_NAME_X)->getData());
-                boost::int32_t value = static_cast<boost::int32_t>(pData[pointIndex]);
-                data.setField<boost::int32_t>(d, pointIndex, value);
+                int32_t value = static_cast<int32_t>(pData[pointIndex]);
+                data.setField<int32_t>(d, pointIndex, value);
             }
             else if (d.getName() == "Y" && d.getInterpretation() == dimension::Float && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_Y))
             {
@@ -223,8 +219,8 @@ boost::uint32_t MrsidReader::processBuffer(PointBuffer& data, boost::uint64_t in
             else if (d.getName() == "Y" && d.getInterpretation() == dimension::SignedInteger && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_Y))
             {
                 double *pData = static_cast<double*>(points.getChannel(CHANNEL_NAME_Y)->getData());
-                boost::int32_t value = static_cast<boost::int32_t>(pData[pointIndex]);
-                data.setField<boost::int32_t>(d, pointIndex, value);
+                int32_t value = static_cast<int32_t>(pData[pointIndex]);
+                data.setField<int32_t>(d, pointIndex, value);
             }
             else if (d.getName() == "Z" && d.getInterpretation() == dimension::Float && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_Z))
             {
@@ -235,68 +231,68 @@ boost::uint32_t MrsidReader::processBuffer(PointBuffer& data, boost::uint64_t in
             else if (d.getName() == "Z" && d.getInterpretation() == dimension::SignedInteger && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_Z))
             {
                 double *pData = static_cast<double*>(points.getChannel(CHANNEL_NAME_Z)->getData());
-                boost::int32_t value = static_cast<boost::int32_t>(pData[pointIndex]);
-                data.setField<boost::int32_t>(d, pointIndex, value);
+                int32_t value = static_cast<int32_t>(pData[pointIndex]);
+                data.setField<int32_t>(d, pointIndex, value);
             }
             else if (d.getName() == "Time" && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_GPSTime))
             {
                 double *pData = static_cast<double*>(points.getChannel(CHANNEL_NAME_GPSTime)->getData());
-                boost::uint64_t  value = static_cast<boost::uint64_t>(pData[pointIndex]);
-                data.setField<boost::uint64_t>(d, pointIndex, value);
+                uint64_t  value = static_cast<uint64_t>(pData[pointIndex]);
+                data.setField<uint64_t>(d, pointIndex, value);
             }
             else if (d.getName() == "Intensity" && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_Intensity))
             {
                 uint16_t *pData = static_cast<uint16_t*>(points.getChannel(CHANNEL_NAME_Intensity)->getData());
-                boost::uint16_t value = static_cast<boost::uint16_t>(pData[pointIndex]);
-                data.setField<boost::uint16_t>(d, pointIndex, value);
+                uint16_t value = static_cast<uint16_t>(pData[pointIndex]);
+                data.setField<uint16_t>(d, pointIndex, value);
             }
             else if (d.getName() == "ReturnNumber" && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_ReturnNum))
             {
                 uint8_t *pData = static_cast<uint8_t*>(points.getChannel(CHANNEL_NAME_ReturnNum)->getData());
-                boost::uint8_t value = static_cast<boost::uint8_t>(pData[pointIndex]);
-                data.setField<boost::uint8_t>(d, pointIndex, value);
+                uint8_t value = static_cast<uint8_t>(pData[pointIndex]);
+                data.setField<uint8_t>(d, pointIndex, value);
             }
             else if (d.getName() == "NumberOfReturns" && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_NumReturns))
             {
                 uint8_t *pData = static_cast<uint8_t*>(points.getChannel(CHANNEL_NAME_NumReturns)->getData());
-                boost::uint8_t value = static_cast<boost::uint8_t>(pData[pointIndex]);
-                data.setField<boost::uint8_t>(d, pointIndex, value);
+                uint8_t value = static_cast<uint8_t>(pData[pointIndex]);
+                data.setField<uint8_t>(d, pointIndex, value);
             }
             else if (d.getName() == "ScanDirectionFlag" && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_ScanDir))
             {
                 uint8_t *pData = static_cast<uint8_t*>(points.getChannel(CHANNEL_NAME_NumReturns)->getData());
-                boost::uint8_t value = static_cast<boost::uint8_t>(pData[pointIndex]);
-                data.setField<boost::uint8_t>(d, pointIndex, value);
+                uint8_t value = static_cast<uint8_t>(pData[pointIndex]);
+                data.setField<uint8_t>(d, pointIndex, value);
             }
             else if (d.getName() == "ScanAngleRank" && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_ScanAngle))
             {
-                boost::int8_t *pData = static_cast<int8_t*>(points.getChannel(CHANNEL_NAME_NumReturns)->getData());
-                boost::int8_t value = static_cast<boost::int8_t>(pData[pointIndex]);
-                data.setField<boost::int8_t>(d, pointIndex, value);
+                int8_t *pData = static_cast<int8_t*>(points.getChannel(CHANNEL_NAME_NumReturns)->getData());
+                int8_t value = static_cast<int8_t>(pData[pointIndex]);
+                data.setField<int8_t>(d, pointIndex, value);
             }
             else if (d.getName() == "EdgeOfFlightLine" && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_EdgeFlightLine))
             {
                 uint8_t *pData = static_cast<uint8_t*>(points.getChannel(CHANNEL_NAME_NumReturns)->getData());
-                boost::uint8_t value = static_cast<boost::uint8_t>(pData[pointIndex]);
-                data.setField<boost::uint8_t>(d, pointIndex, value);
+                uint8_t value = static_cast<uint8_t>(pData[pointIndex]);
+                data.setField<uint8_t>(d, pointIndex, value);
             }
             else if (d.getName() == "Classification" && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_ClassId))
             {
                 uint8_t *pData = static_cast<uint8_t*>(points.getChannel(CHANNEL_NAME_NumReturns)->getData());
-                boost::uint8_t value = static_cast<boost::uint8_t>(pData[pointIndex]);
-                data.setField<boost::uint8_t>(d, pointIndex, value);
+                uint8_t value = static_cast<uint8_t>(pData[pointIndex]);
+                data.setField<uint8_t>(d, pointIndex, value);
             }
             else if (d.getName() == "UserData" && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_UserData))
             {
                 uint8_t *pData = static_cast<uint8_t*>(points.getChannel(CHANNEL_NAME_NumReturns)->getData());
-                boost::uint8_t value = static_cast<boost::uint8_t>(pData[pointIndex]);
-                data.setField<boost::uint8_t>(d, pointIndex, value);
+                uint8_t value = static_cast<uint8_t>(pData[pointIndex]);
+                data.setField<uint8_t>(d, pointIndex, value);
             }
             else if (d.getName() == "PointSourceId" && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_SourceId))
             {
                 uint16_t *pData = static_cast<uint16_t*>(points.getChannel(CHANNEL_NAME_NumReturns)->getData());
-                boost::uint16_t value = static_cast<boost::uint16_t>(pData[pointIndex]);
-                data.setField<boost::uint16_t>(d, pointIndex, value);
+                uint16_t value = static_cast<uint16_t>(pData[pointIndex]);
+                data.setField<uint16_t>(d, pointIndex, value);
             }
 
 
@@ -403,7 +399,7 @@ namespace sequential
 {
 
 
-MrsidReader::MrsidReader(const pdal::drivers::mrsid::MrsidReader& reader, PointBuffer& buffer, boost::uint32_t numPoints)
+MrsidReader::MrsidReader(const pdal::MrsidReader& reader, PointBuffer& buffer, uint32_t numPoints)
     : pdal::ReaderSequentialIterator(buffer)
     , m_numPoints(numPoints)
     , m_reader(reader)
@@ -412,7 +408,7 @@ MrsidReader::MrsidReader(const pdal::drivers::mrsid::MrsidReader& reader, PointB
 }
 
 
-boost::uint64_t MrsidReader::skipImpl(boost::uint64_t count)
+uint64_t MrsidReader::skipImpl(uint64_t count)
 {
     return count;
 }
@@ -420,13 +416,13 @@ boost::uint64_t MrsidReader::skipImpl(boost::uint64_t count)
 
 bool MrsidReader::atEndImpl() const
 {
-    // const boost::uint64_t numPoints = getStage().getNumPoints();
-    const boost::uint64_t currPoint = getIndex();
+    // const uint64_t numPoints = getStage().getNumPoints();
+    const uint64_t currPoint = getIndex();
     return currPoint >= m_numPoints;
 }
 
 
-boost::uint32_t MrsidReader::readBufferImpl(PointBuffer& data)
+uint32_t MrsidReader::readBufferImpl(PointBuffer& data)
 {
     return m_reader.processBuffer(data, getIndex());
 }
@@ -436,6 +432,4 @@ boost::uint32_t MrsidReader::readBufferImpl(PointBuffer& data)
 
 } // iterators
 
-}
-}
 } // namespaces

@@ -35,13 +35,9 @@
 #include "SQLiteReader.hpp"
 #include <pdal/PointBuffer.hpp>
 
-CREATE_READER_PLUGIN(sqlite, pdal::drivers::sqlite::SQLiteReader)
+CREATE_READER_PLUGIN(sqlite, pdal::SQLiteReader)
 
 namespace pdal
-{
-namespace drivers
-{
-namespace sqlite
 {
 
 SQLiteReader::SQLiteReader() : pdal::Reader()
@@ -115,7 +111,7 @@ SQLiteReader::fetchSpatialReference(std::string const& query) const
 
     // ::soci::row r;
     // ::soci::indicator ind = ::soci::i_null;
-    boost::int64_t srid(0);
+    int64_t srid(0);
     // ::soci::statement clouds =
    //      (m_session->prepare << query, ::soci::into(r, ind));
    //  clouds.execute();
@@ -125,7 +121,7 @@ SQLiteReader::fetchSpatialReference(std::string const& query) const
    //
    //  bool bDidRead = clouds.fetch();
    //
-   //  srid = (boost::int64_t)r.get<boost::int32_t>("srid");
+   //  srid = (int64_t)r.get<int32_t>("srid");
    //
    //  if (!bDidRead)
    //      return pdal::SpatialReference();
@@ -372,6 +368,4 @@ point_count_t SQLiteReader::read(PointBuffer& buffer, point_count_t count)
 
 }
 
-} // namespace sqlite
-} // namespace drivers
 } // namespace pdal

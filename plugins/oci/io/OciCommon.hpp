@@ -44,11 +44,6 @@
 namespace pdal
 {
 
-namespace drivers
-{
-namespace oci
-{
-
 typedef std::shared_ptr<OWConnection> Connection;
 typedef std::shared_ptr<OWStatement> Statement;
 
@@ -126,7 +121,4 @@ typedef std::shared_ptr<Block> BlockPtr;
 PDAL_DLL Connection connect(std::string connSpec);
 PDAL_DLL XMLSchema fetchSchema(Statement stmt, BlockPtr block);
 
-} // namespace oci
-} // namespace drivers
 } // namespace pdal
-

@@ -44,10 +44,6 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace icebridge
-{
 
 class icebridge_error : public pdal_error
 {
@@ -83,7 +79,4 @@ private:
     IcebridgeReader(const IcebridgeReader&);              // Not implemented.
 };
 
-} // namespace icebridge
-} // namespace drivers
 } // namespace pdal
-

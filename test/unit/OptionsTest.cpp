@@ -80,10 +80,10 @@ BOOST_AUTO_TEST_CASE(test_option_writing)
     std::ostringstream ostr_s;
     const std::string ref_s = xml_header + xml_str_ref;
 
-    const pdal::Option option_i("my_int", (boost::uint16_t)17, "This is my integral option.");
+    const pdal::Option option_i("my_int", (uint16_t)17, "This is my integral option.");
     BOOST_CHECK(option_i.getName() == "my_int");
     BOOST_CHECK(option_i.getDescription() == "This is my integral option.");
-    BOOST_CHECK(option_i.getValue<boost::uint16_t>() == 17);
+    BOOST_CHECK(option_i.getValue<uint16_t>() == 17);
     BOOST_CHECK(option_i.getValue<std::string>() == "17");
 
     const pdal::Option option_s("my_string", "Yow.", "This is my stringy option.");

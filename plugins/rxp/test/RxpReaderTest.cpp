@@ -39,7 +39,7 @@
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PointBuffer.hpp>
 
-#include "../drivers/RxpReader.hpp"
+#include "RxpReader.hpp"
 #include "Config.hpp"
 
 
@@ -47,7 +47,7 @@ pdal::Options defaultRxpReaderOptions()
 {
     pdal::Options options;
     pdal::Option filename("filename",
-        pdal::drivers::rxp::testDataPath() + "130501_232206_cut.rxp", "");
+        pdal::testDataPath() + "130501_232206_cut.rxp", "");
     options.add(filename);
     return options;
 }
@@ -79,8 +79,8 @@ void checkPoint(const pdal::PointBuffer& data, std::size_t index,
                 float x, float y, float z,
                 double time, double echoRange, float amplitude,
                 float reflectance, float deviation,
-                bool isPpsLocked, boost::uint8_t returnNumber,
-                boost::uint8_t numberOfReturns
+                bool isPpsLocked, uint8_t returnNumber,
+                uint8_t numberOfReturns
                 )
 {
     using namespace pdal::Dimension;
@@ -89,7 +89,7 @@ void checkPoint(const pdal::PointBuffer& data, std::size_t index,
     checkDimensionClose(data, index, Id::Z, z);
     checkDimensionClose(data,
                         index,
-                        pdal::drivers::rxp::getTimeDimensionId(isPpsLocked),
+                        pdal::getTimeDimensionId(isPpsLocked),
                         time);
     checkDimensionClose(data, index, Id::EchoRange, echoRange);
     checkDimensionClose(data, index, Id::Amplitude, amplitude);
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_SUITE(RxpReaderTest)
 BOOST_AUTO_TEST_CASE(testConstructor)
 {
     pdal::Options options = defaultRxpReaderOptions();
-    pdal::drivers::rxp::RxpReader reader;
+    pdal::RxpReader reader;
     reader.setOptions(options);
     BOOST_CHECK(reader.getDescription() == "RXP Reader");
     BOOST_CHECK_EQUAL(reader.getName(), "readers.rxp");
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(testConstructor)
 BOOST_AUTO_TEST_CASE(testRead)
 {
     pdal::Options options = defaultRxpReaderOptions();
-    pdal::drivers::rxp::RxpReader reader;
+    pdal::RxpReader reader;
     reader.setOptions(options);
 
     pdal::PointContext ctx;
@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE(testNoPpsSync)
     pdal::Options options = defaultRxpReaderOptions();
     pdal::Option syncToPps("sync_to_pps", "false", "");
     options.add(syncToPps);
-    pdal::drivers::rxp::RxpReader reader;
+    pdal::RxpReader reader;
     reader.setOptions(options);
 
     pdal::PointContext ctx;
@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE(testInclFix)
     pdal::Options options = defaultRxpReaderOptions();
     options.add("inclination_fix", "true", "");
     options.add("inclination_fix_window", "2", "");
-    pdal::drivers::rxp::RxpReader reader;
+    pdal::RxpReader reader;
     reader.setOptions(options);
 
     pdal::PointContext ctx;
@@ -179,7 +179,7 @@ BOOST_AUTO_TEST_CASE(testInclFix)
 
 BOOST_AUTO_TEST_CASE(testRotatePoint)
 {
-    using namespace pdal::drivers::rxp;
+    using namespace pdal;
 
     Point p{1, 2, 3};
 
@@ -197,7 +197,7 @@ BOOST_AUTO_TEST_CASE(testRotatePoint)
 
 BOOST_AUTO_TEST_CASE(testMovingAverage)
 {
-    using namespace pdal::drivers::rxp;
+    using namespace pdal;
 
     InclinationVector incl;
     incl.push_back(Inclination{0, 1, 2});
@@ -212,7 +212,7 @@ BOOST_AUTO_TEST_CASE(testMovingAverage)
 
 BOOST_AUTO_TEST_CASE(testURILogic)
 {
-    using namespace pdal::drivers::rxp;
+    using namespace pdal;
 
     pdal::Option fileOption("filename", "foobar", "");
     pdal::Options fileOptions(fileOption);

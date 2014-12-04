@@ -40,10 +40,6 @@
 
 namespace pdal
 {
-namespace drivers
-{
-namespace pclvisualizer
-{
 
 class PDAL_DLL PclVisualizer : public pdal::Writer
 {
@@ -63,7 +59,4 @@ private:
     PclVisualizer(const PclVisualizer&); // not implemented
 };
 
-}
-}
 } // namespaces
-

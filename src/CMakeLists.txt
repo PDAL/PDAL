@@ -50,6 +50,7 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/FileUtils.hpp"
   "${PDAL_HEADERS_DIR}/Filter.hpp"
   "${PDAL_HEADERS_DIR}/Filters.hpp"
+  "${PDAL_HEADERS_DIR}/GDALUtils.hpp"
   "${PDAL_HEADERS_DIR}/GlobalEnvironment.hpp"
   "${PDAL_HEADERS_DIR}/gitsha.h"
   "${PDAL_HEADERS_DIR}/IStream.hpp"
@@ -80,11 +81,7 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/third/md5-pdal.h"
   "${PDAL_HEADERS_DIR}/third/string_ref.hpp"
   "${PDAL_HEADERS_DIR}/third/string_ref_fwd.hpp"
-    ${PDAL_KERNEL_HEADERS}/Kernel.hpp
-    ${PDAL_KERNEL_HEADERS}/KernelFactory.hpp
-    ${PDAL_KERNEL_HEADERS}/KernelInfo.hpp
-    ${PDAL_KERNEL_HEADERS}/Kernels.hpp
-    ${PDAL_KERNEL_HEADERS}/Support.hpp
+  "${PDAL_HEADERS_DIR}/Kernels.hpp"
     ${PDAL_XML_HEADER}
     ${DB_DRIVER_HEADERS}
 )
@@ -95,6 +92,7 @@ set(PDAL_BASE_CPP
   FileUtils.cpp
   Filter.cpp
   gitsha.cpp
+  GDALUtils.cpp
   GlobalEnvironment.cpp
   KDIndex.cpp
   Log.cpp
@@ -118,10 +116,6 @@ set(PDAL_BASE_CPP
   ${PDAL_XML_SRC}
   ${PDAL_LAZPERF_SRC}
   ${DB_DRIVER_SRCS}
-    ${PDAL_KERNEL_SRC}/Kernel.cpp
-    ${PDAL_KERNEL_SRC}/KernelFactory.cpp
-    ${PDAL_KERNEL_SRC}/KernelInfo.cpp
-    ${PDAL_KERNEL_SRC}/Support.cpp
 )
 
 list (APPEND PDAL_CPP ${PDAL_BASE_CPP} )
@@ -171,23 +165,6 @@ endif (WITH_PYTHON)
 
 
 #
-# Core components that depend on GDAL
-#
-set(PDAL_GDAL_HPP
-    "${PDAL_HEADERS_DIR}/GDALUtils.hpp"
-    "${PDAL_FILTERS_HEADERS}/Colorization.hpp"
-    )
-
-set(PDAL_GDAL_CPP
-    GDALUtils.cpp
-    "${PDAL_FILTERS_SRC}/Colorization.cpp"
-    )
-
-list(APPEND PDAL_HPP ${PDAL_GDAL_HPP})
-list(APPEND PDAL_CPP ${PDAL_GDAL_CPP})
-
-
-#
 # plang parser
 #
 
@@ -232,29 +209,6 @@ set (PDAL_CONFIG_CPP
 list (APPEND PDAL_CPP ${PDAL_CONFIG_CPP} )
 list (APPEND PDAL_HPP ${PDAL_CONFIG_HPP} )
 
-set(PDAL_KERNEL_HPP
-    ${PDAL_KERNEL_HEADERS}/Diff.hpp
-    ${PDAL_KERNEL_HEADERS}/Info.hpp
-    ${PDAL_KERNEL_HEADERS}/Pipeline.hpp
-    ${PDAL_KERNEL_HEADERS}/Delta.hpp
-    ${PDAL_KERNEL_HEADERS}/Random.hpp
-    ${PDAL_KERNEL_HEADERS}/Sort.hpp
-    ${PDAL_KERNEL_HEADERS}/Translate.hpp
-)
-
-set(PDAL_KERNEL_CPP
-    ${PDAL_KERNEL_SRC}/Diff.cpp
-    ${PDAL_KERNEL_SRC}/Info.cpp
-    ${PDAL_KERNEL_SRC}/Pipeline.cpp
-    ${PDAL_KERNEL_SRC}/Delta.cpp
-    ${PDAL_KERNEL_SRC}/Random.cpp
-    ${PDAL_KERNEL_SRC}/Sort.cpp
-    ${PDAL_KERNEL_SRC}/Translate.cpp
-)
-
-list (APPEND PDAL_CPP ${PDAL_KERNEL_CPP} )
-list (APPEND PDAL_HPP ${PDAL_KERNEL_HPP} )
-
 
 #
 # Group source files for IDE source explorers (e.g. Visual Studio)
@@ -288,10 +242,12 @@ include_directories(${PROJECT_SOURCE_DIR}/io/sbet)
 include_directories(${PROJECT_SOURCE_DIR}/io/text)
 include_directories(${PROJECT_SOURCE_DIR}/io/terrasolid)
 include_directories(${PROJECT_SOURCE_DIR}/filters/chipper)
+include_directories(${PROJECT_SOURCE_DIR}/filters/colorization)
 include_directories(${PROJECT_SOURCE_DIR}/filters/decimation)
 include_directories(${PROJECT_SOURCE_DIR}/filters/ferry)
 include_directories(${PROJECT_SOURCE_DIR}/filters/mortonorder)
 include_directories(${PROJECT_SOURCE_DIR}/filters/splitter)
+include_directories(${PROJECT_SOURCE_DIR}/kernels/info)
 
 set(PDAL_SOURCES
   ${PDAL_HPP}

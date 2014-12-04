@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE(TextWriterTest_test_1)
     pdal::PipelineReader reader(manager, false, 0);
     reader.readPipeline(option.getValue<std::string>());
 
-    const boost::uint64_t np = manager.execute();
+    const uint64_t np = manager.execute();
 
 
     BOOST_CHECK_EQUAL(np, 106u);

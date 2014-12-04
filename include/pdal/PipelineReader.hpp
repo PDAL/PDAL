@@ -54,7 +54,7 @@ private:
 
 public:
     PipelineReader(PipelineManager&, bool debug=false,
-        boost::uint32_t verbose = 0);
+        uint32_t verbose = 0);
 
     // Use this to fill in a pipeline manager with an XML file that
     // contains a <Writer> as the last pipeline stage.
@@ -82,7 +82,7 @@ private:
 private:
     PipelineManager& m_manager;
     bool m_isDebug;
-    boost::uint32_t m_verboseLevel;
+    uint32_t m_verboseLevel;
     Options m_baseOptions;
     std::string m_inputXmlFile;
 

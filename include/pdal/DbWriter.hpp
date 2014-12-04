@@ -40,28 +40,15 @@
 namespace pdal
 {
 
-namespace drivers
-{
-namespace sqlite
-{
 class SQLiteWriter;
-}
-namespace pgpointcloud
-{
 class PgWriter;
-}
-namespace oci
-{
 class OciWriter;
-}
-
-}
 
 class PDAL_DLL DbWriter : public Writer
 {
-    friend class drivers::sqlite::SQLiteWriter;
-    friend class drivers::pgpointcloud::PgWriter;
-    friend class drivers::oci::OciWriter;
+    friend class SQLiteWriter;
+    friend class PgWriter;
+    friend class OciWriter;
 protected:
     DbWriter()
     {}

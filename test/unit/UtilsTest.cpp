@@ -37,7 +37,6 @@
 #include <sstream>
 
 #include <pdal/Utils.hpp>
-#include <boost/cstdint.hpp>
 
 #include <vector>
 
@@ -116,20 +115,20 @@ BOOST_AUTO_TEST_CASE(test_comparators)
 
 BOOST_AUTO_TEST_CASE(test_base64)
 {
-    std::vector<boost::uint8_t> data;
-    for (int i=0; i<2; i++) data.push_back((boost::uint8_t)i);
+    std::vector<uint8_t> data;
+    for (int i=0; i<2; i++) data.push_back((uint8_t)i);
 
-    boost::uint32_t begin_size(0);
-    for (std::vector<boost::uint8_t>::size_type i = 0; i < data.size(); ++i)
+    uint32_t begin_size(0);
+    for (std::vector<uint8_t>::size_type i = 0; i < data.size(); ++i)
     {
         begin_size = begin_size + data[i];
     }
 
     std::string encoded = Utils::base64_encode(data);
-    std::vector<boost::uint8_t> decoded = Utils::base64_decode(encoded);
+    std::vector<uint8_t> decoded = Utils::base64_decode(encoded);
 
-    boost::uint32_t size(0);
-    for (std::vector<boost::uint8_t>::size_type i = 0; i < decoded.size(); ++i)
+    uint32_t size(0);
+    for (std::vector<uint8_t>::size_type i = 0; i < decoded.size(); ++i)
     {
         size = size + decoded[i];
     }

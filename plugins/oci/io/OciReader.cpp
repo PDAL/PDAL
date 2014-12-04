@@ -38,13 +38,9 @@
 #include <pdal/GlobalEnvironment.hpp>
 #include "OciReader.hpp"
 
-CREATE_READER_PLUGIN(oci, pdal::drivers::oci::OciReader)
+CREATE_READER_PLUGIN(oci, pdal::OciReader)
 
 namespace pdal
-{
-namespace drivers
-{
-namespace oci
 {
 
 void OciReader::processOptions(const Options& options)
@@ -70,7 +66,7 @@ void OciReader::initialize()
 
     if (m_query.empty())
         throw pdal_error("'query' statement is empty. No data can be read "
-            "from pdal::drivers::oci::Reader");
+            "from pdal::OciReader");
 
     m_stmt = Statement(m_connection->CreateStatement(m_query.c_str()));
     m_stmt->Execute(0);
@@ -458,7 +454,4 @@ XMLSchema *OciReader::findSchema(Statement stmt, BlockPtr block)
     return &(si->second);
 }
 
-} // namespace oci
-} // namespace drivers
 } // namespace pdal
-
