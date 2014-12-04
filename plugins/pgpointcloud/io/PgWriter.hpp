@@ -42,11 +42,11 @@
 namespace pdal
 {
 
-
 class PDAL_DLL PgWriter : public DbWriter
 {
 public:
-    SET_STAGE_NAME("writers.pgpointcloud", "PostgresSQL Pointcloud Database Writer")
+    SET_STAGE_NAME("writers.pgpointcloud",
+        "PostgresSQL Pointcloud Database Writer")
     SET_STAGE_LINK("http://pdal.io/stages/writers.pgpointcloud.html")
     SET_STAGE_ENABLED(true)
 

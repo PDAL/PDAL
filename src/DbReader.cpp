@@ -39,10 +39,41 @@ void DbReader::loadSchema(PointContextRef ctx, const std::string& schemaString)
 {
     XMLSchema schema;
     schema.read(schemaString);
+    loadSchema(ctx, schema);
+}
 
+void DbReader::loadSchema(PointContextRef ctx, const XMLSchema& schema)
+{
     m_dims = schema.dims();
+
+    // Override XYZ to doubles and use those going forward
+    // we will apply any scaling set before handing it off
+    // to PDAL.
+    ctx.registerDim(Dimension::Id::X);
+    ctx.registerDim(Dimension::Id::Y);
+    ctx.registerDim(Dimension::Id::Z);
+
     for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
         di->m_id = ctx.registerOrAssignDim(di->m_name, di->m_type);
+}
+
+
+void DbReader::writeField(PointBuffer& pb, const char *pos, XMLDim dim,
+    PointId idx)
+{
+    using namespace Dimension;
+
+    if (dim.m_type == Type::Signed32 &&
+        (dim.m_id == Id::X || dim.m_id == Id::Y || dim.m_id == Id::Z))
+    {
+        int32_t i;
+
+        memcpy(&i, pos, sizeof(int32_t));
+        double d = (i * dim.m_xform.m_scale) + dim.m_xform.m_offset;
+        pb.setField(dim.m_id, idx, d);
+    }
+    else
+        pb.setField(dim.m_id, dim.m_type, idx, pos);
 }
 
 

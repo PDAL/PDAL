@@ -36,7 +36,7 @@
 
 #include <vector>
 
-#include <pdal/Reader.hpp>
+#include <pdal/DbReader.hpp>
 #include <pdal/StageFactory.hpp>
 
 #include "OciCommon.hpp"
@@ -44,14 +44,14 @@
 namespace pdal
 {
 
-class PDAL_DLL OciReader : public pdal::Reader
+class PDAL_DLL OciReader : public DbReader
 {
 public:
     SET_STAGE_NAME("readers.oci", "OCI Reader")
     SET_STAGE_LINK("http://pdal.io/stages/readers.oci.html")
     SET_STAGE_ENABLED(true)
 
-    OciReader() : pdal::Reader()
+    OciReader()
     {}
 
     static Options getDefaultOptions();

@@ -245,17 +245,7 @@ void OciReader::addDimensions(PointContextRef ctx)
 
     m_block->m_ctx = ctx;
     m_block->m_schema = fetchSchema(m_stmt, m_block);
-    XMLDimList dims = m_block->m_schema.dims();
-
-    // Override XYZ to doubles and use those going forward
-    // we will apply any scaling set before handing it off 
-    // to PDAL.
-    ctx.registerDim(Dimension::Id::X);
-    ctx.registerDim(Dimension::Id::Y);
-    ctx.registerDim(Dimension::Id::Z);    
-
-    for (auto di = dims.begin(); di != dims.end(); ++di)
-        di->m_id = ctx.registerOrAssignDim(di->m_name, di->m_type);
+    loadSchema(ctx, m_block->m_schema);
 
     if (m_schemaFile.size())
     {
@@ -297,6 +287,8 @@ point_count_t OciReader::read(PointBuffer& buffer, point_count_t count)
 point_count_t OciReader::readDimMajor(PointBuffer& buffer, BlockPtr block,
     point_count_t numPts)
 {
+    using namespace Dimension;
+
     point_count_t numRemaining = block->numRemaining();
     PointId startId = buffer.size();
     point_count_t blockRemaining;
@@ -305,30 +297,17 @@ point_count_t OciReader::readDimMajor(PointBuffer& buffer, BlockPtr block,
     XMLDimList dims = block->m_schema.dims();
     for (auto di = dims.begin(); di != dims.end(); ++di)
     {
-        XMLDim& d = *di;
-        Dimension::Id::Enum id = d.m_id;
-        Dimension::Type::Enum type = d.m_type;
         PointId nextId = startId;
-        char *pos = seekDimMajor(d, block);
+        char *pos = seekDimMajor(*di, block);
         blockRemaining = numRemaining;
         numRead = 0;
         while (numRead < numPts && blockRemaining > 0)
         {
-            buffer.setField(id, type, nextId, pos);
-            pos += Dimension::size(type);
+            writeField(buffer, pos, *di, nextId);
+            pos += Dimension::size(di->m_type);
 
-            if (id == Dimension::Id::PointSourceId && m_updatePointSourceId)
-                buffer.setField(Dimension::Id::PointSourceId, nextId,
-                    block->obj_id);
-
-            if (id == Dimension::Id::X || id == Dimension::Id::Y ||
-                id == Dimension::Id::Z)
-            {
-                double v = buffer.getFieldAs<double>(id, nextId);
-                XForm xform = block->m_schema.xForm(id);
-                v = v * xform.m_scale + xform.m_offset;
-                buffer.setField(id, nextId, v);
-            }
+            if (di->m_id == Id::PointSourceId && m_updatePointSourceId)
+                buffer.setField(Id::PointSourceId, nextId, block->obj_id);
             nextId++;
             numRead++;
             blockRemaining--;
@@ -342,14 +321,6 @@ point_count_t OciReader::readDimMajor(PointBuffer& buffer, BlockPtr block,
 point_count_t OciReader::readPointMajor(PointBuffer& buffer,
     BlockPtr block, point_count_t numPts)
 {
-    auto doScale = [&buffer, &block](Dimension::Id::Enum id, PointId nextId)
-    {
-        double v = buffer.getFieldAs<double>(id, nextId);
-        XForm xform = block->m_schema.xForm(id);
-        v = v * xform.m_scale + xform.m_offset;
-        buffer.setField(id, nextId, v);
-    };
-
     size_t numRemaining = block->numRemaining();
     PointId nextId = buffer.size();
     point_count_t numRead = 0;
@@ -358,17 +329,7 @@ point_count_t OciReader::readPointMajor(PointBuffer& buffer,
     char *pos = seekPointMajor(block);
     while (numRead < numPts && numRemaining > 0)
     {
-        for (auto di = dims.begin(); di != dims.end(); ++di)
-        {
-            XMLDim& d = *di;
-            buffer.setField(d.m_id, d.m_type, nextId, pos);
-            pos += Dimension::size(d.m_type);
-        }
-
-        // Scale X, Y and Z
-        doScale(Dimension::Id::X, nextId);
-        doScale(Dimension::Id::Y, nextId);
-        doScale(Dimension::Id::Z, nextId);
+        writePoint(buffer, nextId, pos);
 
         numRemaining--;
         nextId++;
@@ -412,6 +373,7 @@ bool OciReader::readOci(Statement stmt, BlockPtr block)
     // Read the points from the blob in the row.
     readBlob(stmt, block);
     XMLSchema *s = findSchema(stmt, block);
+    m_dims = s->dims();
     block->update(s);
     block->clearFetched();
     return true;
