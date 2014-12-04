@@ -113,7 +113,7 @@ void SQLiteWriter::initialize()
         }
 
     }
-    catch (sqlite::sqlite_driver_error const& e)
+    catch (sqlite_driver_error const& e)
     {
         std::stringstream oss;
         oss << "Unable to connect to database with error '" << e.what() << "'";
