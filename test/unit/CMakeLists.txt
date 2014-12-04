@@ -52,10 +52,20 @@ set(srcs
     UserCallbackTest.cpp
     UtilsTest.cpp
 )
+
+if(WIN32)
+    list(APPEND srcs ${PDAL_TARGET_OBJECTS})
+endif()
+
 PDAL_ADD_TEST(pdal_base_test "${srcs}" ${PDAL_LIB_NAME})
 
 if (PDAL_HAVE_LAZPERF)
     set(srcs CompressionTest.cpp)
+
+    if(WIN32)
+        list(APPEND srcs ${PDAL_TARGET_OBJECTS})
+    endif()
+	
     PDAL_ADD_TEST(lazperf_test "${srcs}" ${PDAL_LIB_NAME})
 endif()
 
@@ -74,6 +84,11 @@ set(srcs
 #    io/terrasolid/TerraSolidReaderTest.cpp
 #    io/text/TextWriterTest.cpp
 )
+
+if(WIN32)
+    list(APPEND srcs ${PDAL_TARGET_OBJECTS})
+endif()
+
 PDAL_ADD_TEST(pdal_io_test "${srcs}" ${PDAL_LIB_NAME})
 
 #
@@ -91,6 +106,11 @@ set(srcs
     filters/SplitterTest.cpp
     filters/StatsFilterTest.cpp
 )
+
+if(WIN32)
+    list(APPEND srcs ${PDAL_TARGET_OBJECTS})
+endif()
+
 PDAL_ADD_TEST(pdal_filters_test "${srcs}" ${PDAL_LIB_NAME})
 
 #
@@ -102,6 +122,11 @@ if (PDAL_HAVE_PYTHON)
         plang/PredicateFilterTest.cpp
         plang/ProgrammableFilterTest.cpp
     )
+
+    if(WIN32)
+        list(APPEND srcs ${PDAL_TARGET_OBJECTS})
+    endif()
+
     PDAL_ADD_TEST(pdal_plang_test "${srcs}" ${PDAL_LIB_NAME})
 endif()
 
@@ -120,10 +145,20 @@ if(WITH_APPS)
 #        apps/pcpipelineTest.cpp
 #    )
     set(srcs apps/pc2pcTest.cpp)
+
+    if(WIN32)
+        list(APPEND srcs ${PDAL_TARGET_OBJECTS})
+    endif()
+
     PDAL_ADD_TEST(pc2pc_test "${srcs}" ${PDAL_LIB_NAME})
 endif(WITH_APPS)
 
 if(LIBXML2_FOUND)
     set(srcs XMLSchemaTest.cpp)
+
+    if(WIN32)
+        list(APPEND srcs ${PDAL_TARGET_OBJECTS})
+    endif()
+
     PDAL_ADD_TEST(xml_schema_test "${srcs}" ${PDAL_LIB_NAME})
 endif()

@@ -57,12 +57,17 @@ if(PCL_FOUND)
         set(deps ${PCL_LIBRARIES})
         PDAL_ADD_PLUGIN(pclvisualizer_writer_lib_name writer pclvisualizer "${srcs}" "${incs}" "${deps}")
 
-	#
+        #
         # View Kernel
         #
         set(srcs
             kernel/ViewKernel.cpp
+            ${PDAL_TARGET_OBJECTS}
         )
+
+        if(WIN32)
+            list(APPEND srcs ${PDAL_TARGET_OBJECTS})
+	endif()
 
         set(incs
             kernel/ViewKernel.hpp
@@ -133,7 +138,13 @@ if(PCL_FOUND)
     #
     set(srcs
         kernel/PCLKernel.cpp
+        ${PDAL_TARGET_OBJECTS}
     )
+
+    if(WIN32)
+        list(APPEND srcs ${PDAL_TARGET_OBJECTS})
+    endif()
+
 
     set(incs
         kernel/PCLKernel.hpp
@@ -147,7 +158,12 @@ if(PCL_FOUND)
     #
     set(srcs
         kernel/GroundKernel.cpp
+        ${PDAL_TARGET_OBJECTS}
     )
+
+    if(WIN32)
+        list(APPEND srcs ${PDAL_TARGET_OBJECTS})
+    endif()
 
     set(incs
         kernel/GroundKernel.hpp
@@ -161,7 +177,12 @@ if(PCL_FOUND)
     #
     set(srcs
         kernel/SmoothKernel.cpp
+        ${PDAL_TARGET_OBJECTS}
     )
+
+    if(WIN32)
+        list(APPEND srcs ${PDAL_TARGET_OBJECTS})
+    endif()
 
     set(incs
         kernel/SmoothKernel.hpp
