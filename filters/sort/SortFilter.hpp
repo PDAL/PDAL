@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Hobu Inc., hobu.inc@gmail.com
+* Copyright (c) 2014, Hobu Inc. (hobu@hobu.co)
 *
 * All rights reserved.
 *
@@ -35,41 +35,46 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
+#include <pdal/PointBufferIter.hpp>
 
 namespace pdal
 {
-namespace filters
-{
 
-class PDAL_DLL Merge : public MultiFilter
+class PDAL_DLL SortFilter : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.merge", "Merge Filter")
-    SET_STAGE_LINK("http://pdal.io/stages/filters.merge.html")
+    SET_STAGE_NAME("filters.sort", "Sort Filter")
+    SET_STAGE_LINK("http://www.pdal.io/stages/filters.sort.html")
     SET_STAGE_ENABLED(true)
 
-    Merge() : MultiFilter()
-        {}
+    SortFilter()
+    {}
 
 private:
-    PointBufferPtr m_buf;
+    // Dimension on which to sort.
+    Dimension::Id::Enum m_dim;
+    // Dimension name.
+    std::string m_dimName;
+
+    virtual void processOptions(const Options& options)
+        { m_dimName = options.getValueOrThrow<std::string>("dimension"); }
 
     virtual void ready(PointContext ctx)
-        { m_buf.reset(new PointBuffer(ctx)); }
+        { m_dim = ctx.findDim(m_dimName); }
 
-    virtual PointBufferSet run(PointBufferPtr buf)
+    virtual void filter(PointBuffer& buf)
     {
-        PointBufferSet pbSet;
+        if (m_dim == Dimension::Id::Unknown)
+            return;
 
-        m_buf->append(*buf);
-        pbSet.insert(m_buf);
-        return pbSet;
+        auto cmp = [this](const PointRef& p1, const PointRef& p2)
+            { return p1.compare(m_dim, p2); };
+
+        std::sort(buf.begin(), buf.end(), cmp);
     }
 
-    Merge& operator=(const Merge&); // not implemented
-    Merge(const Merge&); // not implemented
+    SortFilter& operator=(const SortFilter&); // not implemented
+    SortFilter(const SortFilter&); // not implemented
 };
 
-} // namespace filters
 } // namespace pdal
-

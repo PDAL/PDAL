@@ -39,13 +39,13 @@
 #include <pdal/filters/Crop.hpp>
 #include <DecimationFilter.hpp>
 #include <FerryFilter.hpp>
-#include <pdal/filters/Merge.hpp>
+#include <MergeFilter.hpp>
 #include <MortonOrderFilter.hpp>
 #ifdef PDAL_HAVE_PYTHON
 #include <pdal/filters/Predicate.hpp>
 #include <pdal/filters/Programmable.hpp>
 #endif
 #include <pdal/filters/Reprojection.hpp>
-#include <pdal/filters/Sort.hpp>
+#include <SortFilter.hpp>
 #include <SplitterFilter.hpp>
 #include <pdal/filters/Stats.hpp>

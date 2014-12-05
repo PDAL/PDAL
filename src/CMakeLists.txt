@@ -116,7 +116,6 @@ set(PDAL_FILTERS_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_FILTERS_PATH}")
 
 set(PDAL_FILTERS_HPP
   "${PDAL_FILTERS_HEADERS}/Crop.hpp"
-  "${PDAL_FILTERS_HEADERS}/Merge.hpp"
   "${PDAL_FILTERS_HEADERS}/Reprojection.hpp"
   "${PDAL_FILTERS_HEADERS}/Stats.hpp"
 )
@@ -230,7 +229,9 @@ include_directories(${PROJECT_SOURCE_DIR}/filters/chipper)
 include_directories(${PROJECT_SOURCE_DIR}/filters/colorization)
 include_directories(${PROJECT_SOURCE_DIR}/filters/decimation)
 include_directories(${PROJECT_SOURCE_DIR}/filters/ferry)
+include_directories(${PROJECT_SOURCE_DIR}/filters/merge)
 include_directories(${PROJECT_SOURCE_DIR}/filters/mortonorder)
+include_directories(${PROJECT_SOURCE_DIR}/filters/sort)
 include_directories(${PROJECT_SOURCE_DIR}/filters/splitter)
 include_directories(${PROJECT_SOURCE_DIR}/kernels/info)
 
