@@ -38,6 +38,10 @@ if(BUILD_PLUGIN_PGPOINTCLOUD)
     add_subdirectory(pgpointcloud)
 endif()
 
+if(BUILD_PLUGIN_PYTHON)
+    add_subdirectory(python)
+endif()
+
 if(BUILD_PLUGIN_SQLITE)
     add_subdirectory(sqlite)
 endif()

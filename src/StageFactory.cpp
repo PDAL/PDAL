@@ -85,11 +85,6 @@ MAKE_FILTER_CREATOR(Sort, pdal::SortFilter)
 MAKE_FILTER_CREATOR(Splitter, pdal::SplitterFilter)
 MAKE_FILTER_CREATOR(Stats, pdal::StatsFilter)
 
-#ifdef PDAL_HAVE_PYTHON
-MAKE_FILTER_CREATOR(Predicate, pdal::filters::Predicate)
-MAKE_FILTER_CREATOR(Programmable, pdal::filters::Programmable)
-#endif
-
 //
 // define the functions to create the writers
 //
@@ -330,11 +325,6 @@ void StageFactory::registerKnownFilters()
     REGISTER_FILTER(Sort, pdal::SortFilter);
     REGISTER_FILTER(Splitter, pdal::SplitterFilter);
     REGISTER_FILTER(Stats, pdal::StatsFilter);
-
-#ifdef PDAL_HAVE_PYTHON
-    REGISTER_FILTER(Predicate, pdal::filters::Predicate);
-    REGISTER_FILTER(Programmable, pdal::filters::Programmable);
-#endif
 }
 
 

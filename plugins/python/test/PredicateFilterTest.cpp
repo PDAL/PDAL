@@ -34,11 +34,10 @@
 
 #include "gtest/gtest.h"
 
-#include <pdal/filters/Predicate.hpp>
 #include <StatsFilter.hpp>
-#include <FauxReader.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
+#include <pdal/StageFactory.hpp>
 
 #include "StageTester.hpp"
 #include "Support.hpp"
@@ -47,13 +46,16 @@ using namespace pdal;
 
 TEST(PredicateFilterTest, PredicateFilterTest_test1)
 {
+    StageFactory f;
+
     BOX3D bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
     Options readerOps;
     readerOps.add("bounds", bounds);
     readerOps.add("num_points", 1000);
     readerOps.add("mode", "ramp");
-    FauxReader reader;
-    reader.setOptions(readerOps);
+
+    std::unique_ptr<Reader> reader(f.createReader("readers.faux"));
+    reader->setOptions(readerOps);
 
     // keep all points where x less than 1.0
     const Option source("source",
@@ -74,15 +76,15 @@ TEST(PredicateFilterTest, PredicateFilterTest_test1)
     opts.add(module);
     opts.add(function);
 
-    filters::Predicate filter;
-    filter.setOptions(opts);
-    filter.setInput(&reader);
-    EXPECT_TRUE(filter.getDescription() == "Predicate Filter");
+    std::unique_ptr<Filter> filter(f.createFilter("filters.predicate"));
+    filter->setOptions(opts);
+    filter->setInput(reader.get());
+    EXPECT_TRUE(filter->getDescription() == "Predicate Filter");
 
     Options statOpts;
     StatsFilter stats;
     stats.setOptions(statOpts);
-    stats.setInput(&filter);
+    stats.setInput(filter.get());
 
     PointContext ctx;
 
@@ -102,9 +104,9 @@ TEST(PredicateFilterTest, PredicateFilterTest_test1)
     EXPECT_TRUE(Utils::compare_approx<double>(statsZ.maximum(), 1.0, 0.01));
 }
 
-
 TEST(PredicateFilterTest, PredicateFilterTest_test2)
 {
+    StageFactory f;
     // same as above, but with 'Y >' instead of 'X <'
 
     BOX3D bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
@@ -113,8 +115,8 @@ TEST(PredicateFilterTest, PredicateFilterTest_test2)
     readerOps.add("num_points", 1000);
     readerOps.add("mode", "ramp");
 
-    FauxReader reader;
-    reader.setOptions(readerOps);
+    std::unique_ptr<Reader> reader(f.createReader("readers.faux"));
+    reader->setOptions(readerOps);
 
     Option source("source",
         // "Y > 1.0"
@@ -133,15 +135,15 @@ TEST(PredicateFilterTest, PredicateFilterTest_test2)
     opts.add(module);
     opts.add(function);
 
-    filters::Predicate filter;
-    filter.setOptions(opts);
-    filter.setInput(&reader);
-    EXPECT_TRUE(filter.getDescription() == "Predicate Filter");
+    std::unique_ptr<Filter> filter(f.createFilter("filters.predicate"));
+    filter->setOptions(opts);
+    filter->setInput(reader.get());
+    EXPECT_TRUE(filter->getDescription() == "Predicate Filter");
 
     Options statOpts;
     StatsFilter stats;
     stats.setOptions(statOpts);
-    stats.setInput(&filter);
+    stats.setInput(filter.get());
 
     PointContext ctx;
 
@@ -163,6 +165,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test2)
 
 TEST(PredicateFilterTest, PredicateFilterTest_test3)
 {
+    StageFactory f;
     // can we make a pipeline with TWO python filters in it?
 
     BOX3D bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
@@ -170,8 +173,9 @@ TEST(PredicateFilterTest, PredicateFilterTest_test3)
     readerOpts.add("bounds", bounds);
     readerOpts.add("num_points", 1000);
     readerOpts.add("mode", "ramp");
-    FauxReader reader;
-    reader.setOptions(readerOpts);
+
+    std::unique_ptr<Reader> reader(f.createReader("readers.faux"));
+    reader->setOptions(readerOpts);
 
     // keep all points where x less than 1.0
     const Option source1("source",
@@ -192,9 +196,9 @@ TEST(PredicateFilterTest, PredicateFilterTest_test3)
     opts1.add(module1);
     opts1.add(function1);
 
-    filters::Predicate filter1;
-    filter1.setOptions(opts1);
-    filter1.setInput(&reader);
+    std::unique_ptr<Filter> filter1(f.createFilter("filters.predicate"));
+    filter1->setOptions(opts1);
+    filter1->setInput(reader.get());
 
     // keep all points where y greater than 0.5
     const Option source2("source",
@@ -215,14 +219,14 @@ TEST(PredicateFilterTest, PredicateFilterTest_test3)
     opts2.add(module2);
     opts2.add(function2);
 
-    filters::Predicate filter2;
-    filter2.setOptions(opts2);
-    filter2.setInput(&filter1);
+    std::unique_ptr<Filter> filter2(f.createFilter("filters.predicate"));
+    filter2->setOptions(opts2);
+    filter2->setInput(filter1.get());
 
     Options statOpts;
     StatsFilter stats;
     stats.setOptions(statOpts);
-    stats.setInput(&filter2);
+    stats.setInput(filter2.get());
 
     PointContext ctx;
     stats.prepare(ctx);
@@ -242,6 +246,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test3)
 
 TEST(PredicateFilterTest, PredicateFilterTest_test4)
 {
+    StageFactory f;
     // test the point counters in the Predicate's iterator
 
     BOX3D bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
@@ -249,8 +254,9 @@ TEST(PredicateFilterTest, PredicateFilterTest_test4)
     readerOpts.add("bounds", bounds);
     readerOpts.add("num_points", 1000);
     readerOpts.add("mode", "ramp");
-    FauxReader reader;
-    reader.setOptions(readerOpts);
+
+    std::unique_ptr<Reader> reader(f.createReader("readers.faux"));
+    reader->setOptions(readerOpts);
 
     const Option source("source",
         // "Y > 0.5"
@@ -269,25 +275,25 @@ TEST(PredicateFilterTest, PredicateFilterTest_test4)
     opts.add(module);
     opts.add(function);
 
-    filters::Predicate filter;
-    filter.setOptions(opts);
-    filter.setInput(&reader);
+    std::unique_ptr<Filter> filter(f.createFilter("filters.predicate"));
+    filter->setOptions(opts);
+    filter->setInput(reader.get());
 
     PointContext ctx;
     PointBufferPtr buf(new PointBuffer(ctx));
 
-    filter.prepare(ctx);
+    filter->prepare(ctx);
 
-    StageTester::ready(&reader, ctx);
-    PointBufferSet pbSet = StageTester::run(&reader, buf);
-    StageTester::done(&reader, ctx);
+    StageTester::ready(reader.get(), ctx);
+    PointBufferSet pbSet = StageTester::run(reader.get(), buf);
+    StageTester::done(reader.get(), ctx);
     EXPECT_EQ(pbSet.size(), 1u);
     buf = *pbSet.begin();
     EXPECT_EQ(buf->size(), 1000u);
 
-    StageTester::ready(&filter, ctx);
-    pbSet = StageTester::run(&filter, buf);
-    StageTester::done(&filter, ctx);
+    StageTester::ready(filter.get(), ctx);
+    pbSet = StageTester::run(filter.get(), buf);
+    StageTester::done(filter.get(), ctx);
     EXPECT_EQ(pbSet.size(), 1u);
     buf = *pbSet.begin();
     EXPECT_EQ(buf->size(), 750u);
@@ -295,6 +301,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test4)
 
 TEST(PredicateFilterTest, PredicateFilterTest_test5)
 {
+    StageFactory f;
     // test error handling if missing Mask
 
     BOX3D bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
@@ -302,8 +309,9 @@ TEST(PredicateFilterTest, PredicateFilterTest_test5)
     readerOpts.add("bounds", bounds);
     readerOpts.add("num_points", 1000);
     readerOpts.add("mode", "ramp");
-    FauxReader reader;
-    reader.setOptions(readerOpts);
+
+    std::unique_ptr<Reader> reader(f.createReader("readers.faux"));
+    reader->setOptions(readerOpts);
 
     const Option source("source",
         // "Y > 0.5"
@@ -322,14 +330,14 @@ TEST(PredicateFilterTest, PredicateFilterTest_test5)
     opts.add(module);
     opts.add(function);
 
-    filters::Predicate filter;
-    filter.setOptions(opts);
-    filter.setInput(&reader);
+    std::unique_ptr<Filter> filter(f.createFilter("filters.predicate"));
+    filter->setOptions(opts);
+    filter->setInput(reader.get());
 
     PointContext ctx;
-    filter.prepare(ctx);
+    filter->prepare(ctx);
 
-    ASSERT_THROW(filter.execute(ctx), python_error);
+    ASSERT_THROW(filter->execute(ctx), python_error);
 }
 
 TEST(PredicateFilterTest, PredicateFilterTest_Pipeline)

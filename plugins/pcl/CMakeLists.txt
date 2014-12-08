@@ -64,12 +64,7 @@ if(PCL_FOUND)
         #
         set(srcs
             kernel/ViewKernel.cpp
-            ${PDAL_TARGET_OBJECTS}
         )
-
-        if(WIN32)
-            list(APPEND srcs ${PDAL_TARGET_OBJECTS})
-	endif()
 
         set(incs
             kernel/ViewKernel.hpp
@@ -140,13 +135,7 @@ if(PCL_FOUND)
     #
     set(srcs
         kernel/PCLKernel.cpp
-        ${PDAL_TARGET_OBJECTS}
     )
-
-    if(WIN32)
-        list(APPEND srcs ${PDAL_TARGET_OBJECTS})
-    endif()
-
 
     set(incs
         kernel/PCLKernel.hpp
@@ -160,12 +149,7 @@ if(PCL_FOUND)
     #
     set(srcs
         kernel/GroundKernel.cpp
-        ${PDAL_TARGET_OBJECTS}
     )
-
-    if(WIN32)
-        list(APPEND srcs ${PDAL_TARGET_OBJECTS})
-    endif()
 
     set(incs
         kernel/GroundKernel.hpp
@@ -179,12 +163,7 @@ if(PCL_FOUND)
     #
     set(srcs
         kernel/SmoothKernel.cpp
-        ${PDAL_TARGET_OBJECTS}
     )
-
-    if(WIN32)
-        list(APPEND srcs ${PDAL_TARGET_OBJECTS})
-    endif()
 
     set(incs
         kernel/SmoothKernel.hpp

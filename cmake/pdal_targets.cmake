@@ -94,6 +94,11 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname _srcs _incs _deps)
     else()
         set(${_name} "pdal_plugin_${_type}_${_shortname}")
     endif()
+
+    if (WIN32)
+	    list(APPEND ${_srcs} ${PDAL_TARGET_OBJECTS})
+    endif()
+
     add_library(${${_name}} SHARED ${_srcs} ${_incs})
     target_link_libraries(${${_name}} ${PDAL_LINKAGE} ${PDAL_LIB_NAME} ${_deps})
 
@@ -113,6 +118,9 @@ macro(PDAL_ADD_TEST _name _srcs)
         ${PROJECT_SOURCE_DIR}/test/unit/Support.cpp
 	${PROJECT_SOURCE_DIR}/test/unit/TestConfig.cpp
     )
+    if (WIN32)
+	    list(APPEND ${_srcs} ${PDAL_TARGET_OBJECTS})
+    endif()
     add_executable(${_name} ${_srcs} ${common_srcs})
     set_target_properties(${_name} PROPERTIES COMPILE_DEFINITIONS PDAL_DLL_IMPORT)
     if(WIN32)

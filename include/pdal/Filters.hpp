@@ -41,10 +41,6 @@
 #include <FerryFilter.hpp>
 #include <MergeFilter.hpp>
 #include <MortonOrderFilter.hpp>
-#ifdef PDAL_HAVE_PYTHON
-#include <pdal/filters/Predicate.hpp>
-#include <pdal/filters/Programmable.hpp>
-#endif
 #include <ReprojectionFilter.hpp>
 #include <SortFilter.hpp>
 #include <SplitterFilter.hpp>

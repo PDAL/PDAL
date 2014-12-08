@@ -33,101 +33,67 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/kernels/info
 )
 
-set(srcs
-    BoundsTest.cpp
-    ConfigTest.cpp
-    EnvironmentTest.cpp
-    FileUtilsTest.cpp
-    GDALUtilsTest.cpp
-    LogTest.cpp
-    MetadataTest.cpp
-    OptionsTest.cpp
-    PipelineManagerTest.cpp
-    PointBufferTest.cpp
-    PointContextTest.cpp
-    SpatialReferenceTest.cpp
-    #StageFactoryTest.cpp # this has been disabled for quite a while, is it OBE?
-    StreamFactoryTest.cpp
-    SupportTest.cpp
-    UserCallbackTest.cpp
-    UtilsTest.cpp
-)
-
-if(WIN32)
-    list(APPEND srcs ${PDAL_TARGET_OBJECTS})
-endif()
-
-PDAL_ADD_TEST(pdal_base_test "${srcs}")
+PDAL_ADD_TEST(pdal_bounds_test BoundsTest.cpp ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_config_test ConfigTest.cpp ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_environment_test EnvironmentTest.cpp ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_file_utils_test FileUtilsTest.cpp ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_gdal_utils_test GDALUtilsTest.cpp ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_log_test LogTest.cpp ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_metadata_test MetadataTest.cpp ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_options_test OptionsTest.cpp ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_pipeline_manager_test PipelineManagerTest.cpp ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_point_buffer_test PointBufferTest.cpp ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_point_context_test PointContextTest.cpp ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_spatial_reference_test SpatialReferenceTest.cpp ${PDAL_LIB_NAME})
+#PDAL_ADD_TEST(pdal_stage_factory_test StageFactoryTest.cpp ${PDAL_LIB_NAME}) # this one has been disabled for a while, can it go?
+PDAL_ADD_TEST(pdal_stream_factory_test StreamFactoryTest.cpp ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_support_test SupportTest.cpp ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_user_callback_test UserCallbackTest.cpp ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_utils_test UtilsTest.cpp ${PDAL_LIB_NAME})
 
 if (PDAL_HAVE_LAZPERF)
-    set(srcs CompressionTest.cpp)
-
-    if(WIN32)
-        list(APPEND srcs ${PDAL_TARGET_OBJECTS})
-    endif()
-	
-    PDAL_ADD_TEST(lazperf_test "${srcs}")
+    PDAL_ADD_TEST(pdal_lazperf_test CompressionTest.cpp ${PDAL_LIB_NAME})
 endif()
 
 #
 # sources for the native io
 #
+PDAL_ADD_TEST(pdal_io_bpf_test io/bpf/BPFTest.cpp ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_io_buffer_test io/buffer/BufferTest.cpp ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_io_faux_test io/faux/FauxReaderTest.cpp ${PDAL_LIB_NAME})
 set(srcs
-    io/bpf/BPFTest.cpp
-    io/buffer/BufferTest.cpp
-    io/faux/FauxReaderTest.cpp
     io/las/LasReaderTest.cpp
     io/las/LasWriterTest.cpp
-    io/qfit/QFITReaderTest.cpp
+)
+PDAL_ADD_TEST(pdal_io_las_test "${srcs}" ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_io_qfit_test io/qfit/QFITReaderTest.cpp ${PDAL_LIB_NAME})
+set(srcs
     io/sbet/SbetReaderTest.cpp
     io/sbet/SbetWriterTest.cpp
-#    io/terrasolid/TerraSolidReaderTest.cpp
-#    io/text/TextWriterTest.cpp
 )
-
-if(WIN32)
-    list(APPEND srcs ${PDAL_TARGET_OBJECTS})
-endif()
-
-PDAL_ADD_TEST(pdal_io_test "${srcs}")
+PDAL_ADD_TEST(pdal_io_sbet_test "${srcs}" ${PDAL_LIB_NAME})
+#PDAL_ADD_TEST(pdal_io_terrasolid_test io/terrasolid/TerraSolidReaderTest.cpp ${PDAL_LIB_NAME})
+#PDAL_ADD_TEST(pdal_io_text_test io/text/TextWriterTest.cpp ${PDAL_LIB_NAME})
 
 #
 # sources for the native filters
 #
-set(srcs
-    filters/ChipperTest.cpp
-    filters/ColorizationFilterTest.cpp
-    filters/CropFilterTest.cpp
-    filters/DecimationFilterTest.cpp
-    filters/FerryFilterTest.cpp
-    filters/MergeTest.cpp
-    filters/ReprojectionFilterTest.cpp
-#    filters/SortFilterTest.cpp
-    filters/SplitterTest.cpp
-    filters/StatsFilterTest.cpp
-)
-
-if(WIN32)
-    list(APPEND srcs ${PDAL_TARGET_OBJECTS})
-endif()
-
-PDAL_ADD_TEST(pdal_filters_test "${srcs}")
+PDAL_ADD_TEST(pdal_filters_chipper_test filters/ChipperTest.cpp ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_filters_colorization_test filters/ColorizationFilterTest.cpp ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_filters_crop_test filters/CropFilterTest.cpp ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_filters_decimation_test filters/DecimationFilterTest.cpp ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_filters_ferry_test filters/FerryFilterTest.cpp ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_filters_merge_test filters/MergeTest.cpp ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_filters_reprojection_test filters/ReprojectionFilterTest.cpp ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_filters_sort_test filters/SortFilterTest.cpp ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_filters_splitter_test filters/SplitterTest.cpp ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_filters_stats_test filters/StatsFilterTest.cpp ${PDAL_LIB_NAME})
 
 #
 # sources for plang
 #
 if (PDAL_HAVE_PYTHON)
-    set(srcs
-        plang/PLangTest.cpp
-        plang/PredicateFilterTest.cpp
-        plang/ProgrammableFilterTest.cpp
-    )
-
-    if(WIN32)
-        list(APPEND srcs ${PDAL_TARGET_OBJECTS})
-    endif()
-
-    PDAL_ADD_TEST(pdal_plang_test "${srcs}")
+    PDAL_ADD_TEST(pdal_plang_test plang/PLangTest.cpp ${PDAL_LIB_NAME})
 endif()
 
 #
@@ -135,30 +101,13 @@ endif()
 #
 if(WITH_APPS)
 #    if(LIBXML2_FOUND)
-#        list(APPEND PDAL_UNITTEST_SRCS
-#            apps/pcinfoTest.cpp
-#        )
+#        PDAL_ADD_TEST(pcinfo_test apps/pcinfoTest.cpp ${PDAL_LIB_NAME})
 #    endif(LIBXML2_FOUND)
 
-#    list(APPEND PDAL_UNITTEST_SRCS
-#        apps/pc2pcTest.cpp
-#        apps/pcpipelineTest.cpp
-#    )
-    set(srcs apps/pc2pcTest.cpp)
-
-    if(WIN32)
-        list(APPEND srcs ${PDAL_TARGET_OBJECTS})
-    endif()
-
-    PDAL_ADD_TEST(pc2pc_test "${srcs}")
+    PDAL_ADD_TEST(pc2pc_test apps/pc2pcTest.cpp ${PDAL_LIB_NAME})
+    #PDAL_ADD_TEST(pcpipeline_test apps/pcpipelineTest.cpp ${PDAL_LIB_NAME})
 endif(WITH_APPS)
 
 if(LIBXML2_FOUND)
-    set(srcs XMLSchemaTest.cpp)
-
-    if(WIN32)
-        list(APPEND srcs ${PDAL_TARGET_OBJECTS})
-    endif()
-
-    PDAL_ADD_TEST(xml_schema_test "${srcs}")
+    PDAL_ADD_TEST(xml_schema_test XMLSchemaTest.cpp ${PDAL_LIB_NAME})
 endif()

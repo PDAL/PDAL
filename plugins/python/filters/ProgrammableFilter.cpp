@@ -33,31 +33,17 @@
 ****************************************************************************/
 
 #include <pdal/pdal_internal.hpp>
-#ifdef PDAL_HAVE_PYTHON
-
-#include <pdal/filters/Predicate.hpp>
-
 #include <pdal/GlobalEnvironment.hpp>
+#include "ProgrammableFilter.hpp"
 #include <pdal/PointBuffer.hpp>
+#include <pdal/StageFactory.hpp>
+
+CREATE_FILTER_PLUGIN(programmable, pdal::ProgrammableFilter)
 
 namespace pdal
 {
-namespace filters
-{
 
-
-void Predicate::processOptions(const Options& options)
-{
-    m_source = options.getValueOrDefault<std::string>("source", "");
-    if (m_source.empty())
-        m_source = FileUtils::readFileIntoString(
-            options.getValueOrThrow<std::string>("filename"));
-    m_module = options.getValueOrThrow<std::string>("module");
-    m_function = options.getValueOrThrow<std::string>("function");
-}
-
-
-Options Predicate::getDefaultOptions()
+Options ProgrammableFilter::getDefaultOptions()
 {
     Options options;
     options.add("script", "");
@@ -67,7 +53,33 @@ Options Predicate::getDefaultOptions()
 }
 
 
-void Predicate::ready(PointContext ctx)
+void ProgrammableFilter::processOptions(const Options& options)
+{
+    m_source = options.getValueOrDefault<std::string>("source", "");
+    if (m_source.empty())
+        m_source = FileUtils::readFileIntoString(
+            options.getValueOrThrow<std::string>("filename"));
+    m_module = options.getValueOrThrow<std::string>("module");
+    m_function = options.getValueOrThrow<std::string>("function");
+
+    auto addDims = options.getOptions("add_dimension");
+    for (auto it = addDims.cbegin(); it != addDims.cend(); ++it)
+    {
+        m_addDimensions.push_back(Dimension::id(it->getValue<std::string>()));
+    }
+}
+
+
+void ProgrammableFilter::addDimensions(PointContext ctx)
+{
+    for (auto it = m_addDimensions.cbegin(); it != m_addDimensions.cend(); ++it)
+    {
+        ctx.registerDim(*it);
+    }
+}
+
+
+void ProgrammableFilter::ready(PointContext ctx)
 {
     m_script = new plang::Script(m_source, m_module, m_function);
     m_pythonMethod = new plang::BufferedInvocation(*m_script);
@@ -77,39 +89,22 @@ void Predicate::ready(PointContext ctx)
 }
 
 
-PointBufferSet Predicate::run(PointBufferPtr buf)
+void ProgrammableFilter::filter(PointBuffer& buf)
 {
+    log()->get(LogLevel::Debug5) << "Python script " << *m_script <<
+        " processing " << buf.size() << " points." << std::endl;
     m_pythonMethod->resetArguments();
-    m_pythonMethod->begin(*buf);
+    m_pythonMethod->begin(buf);
     m_pythonMethod->execute();
-
-    if (!m_pythonMethod->hasOutputVariable("Mask"))
-        throw python_error("Mask variable not set in predicate "
-            "filter function");
-
-    PointBufferPtr outbuf = buf->makeNew();
-
-    void *pydata =
-        m_pythonMethod->extractResult("Mask", Dimension::Type::Unsigned8);
-    char *ok = (char *)pydata;
-    for (PointId idx = 0; idx < buf->size(); ++idx)
-        if (*ok++)
-            outbuf->appendPoint(*buf, idx);
-
-    PointBufferSet pbSet;
-    pbSet.insert(outbuf);
-    return pbSet;
+    m_pythonMethod->end(buf);
 }
 
 
-void Predicate::done(PointContext ctx)
+void ProgrammableFilter::done(PointContext ctx)
 {
     GlobalEnvironment::get().getPythonEnvironment().reset_stdout();
     delete m_pythonMethod;
     delete m_script;
 }
 
-} // namespace filters
 } // namespace pdal
-
-#endif
