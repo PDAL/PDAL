@@ -35,7 +35,7 @@
 #include "UnitTest.hpp"
 
 #include <pdal/StageFactory.hpp>
-#include <pdal/filters/Reprojection.hpp>
+#include <ReprojectionFilter.hpp>
 #include <pdal/filters/Stats.hpp>
 
 #include "../StageTester.hpp"
@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(test_multiple_dims_same_name)
 
         Stage* reader = rc();
         reader->setOptions(options);
-        filters::Reprojection reprojectionFilter;
+        ReprojectionFilter reprojectionFilter;
         reprojectionFilter.setOptions(options);
         reprojectionFilter.setInput(reader);
         filters::Stats filter;
@@ -185,7 +185,7 @@ BOOST_AUTO_TEST_CASE(test_specified_stats)
         filter1.setOptions(stats1ops);
         filter1.setInput(reader);
 
-        filters::Reprojection reprojectionFilter;
+        ReprojectionFilter reprojectionFilter;
         reprojectionFilter.setOptions(options);
         reprojectionFilter.setInput(&filter1);
 
@@ -264,7 +264,7 @@ BOOST_AUTO_TEST_CASE(test_pointbuffer_stats)
         Stage* reader = rc();
         reader->setOptions(options);
 
-        filters::Reprojection reprojectionFilter;
+        ReprojectionFilter reprojectionFilter;
         reprojectionFilter.setOptions(options);
         reprojectionFilter.setInput(reader);
 

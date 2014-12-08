@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/filters/Reprojection.hpp>
+#include <ReprojectionFilter.hpp>
 
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
 
@@ -43,12 +43,8 @@
 #include <ogr_spatialref.h>
 #include <pdal/GDALUtils.hpp>
 
-
 namespace pdal
 {
-namespace filters
-{
-
 
 struct OGRSpatialReferenceDeleter
 {
@@ -79,18 +75,18 @@ struct GDALSourceDeleter
 };
 
 
-Reprojection::Reprojection()
+ReprojectionFilter::ReprojectionFilter()
     : pdal::Filter(), m_inferInputSRS(true)
 {}
 
 
-Reprojection::Reprojection(const SpatialReference& outSRS)
+ReprojectionFilter::ReprojectionFilter(const SpatialReference& outSRS)
     : m_outSRS(outSRS)
     , m_inferInputSRS(true)
 {}
 
 
-Reprojection::Reprojection(const SpatialReference& inSRS,
+ReprojectionFilter::ReprojectionFilter(const SpatialReference& inSRS,
         const SpatialReference& outSRS)
     : m_inSRS(inSRS)
     , m_outSRS(outSRS)
@@ -98,7 +94,7 @@ Reprojection::Reprojection(const SpatialReference& inSRS,
 {}
 
 
-void Reprojection::processOptions(const Options& options)
+void ReprojectionFilter::processOptions(const Options& options)
 {
     m_outSRS = options.getValueOrThrow<pdal::SpatialReference>("out_srs");
     if (options.hasOption("in_srs"))
@@ -109,7 +105,7 @@ void Reprojection::processOptions(const Options& options)
 }
 
 
-void Reprojection::ready(PointContext ctx)
+void ReprojectionFilter::ready(PointContext ctx)
 {
     if (m_inferInputSRS)
         m_inSRS = ctx.spatialRef();
@@ -160,7 +156,7 @@ void Reprojection::ready(PointContext ctx)
 }
 
 
-void Reprojection::transform(double& x, double& y, double& z)
+void ReprojectionFilter::transform(double& x, double& y, double& z)
 {
     int ret = OCTTransform(m_transform_ptr.get(), 1, &x, &y, &z);
     if (ret == 0)
@@ -173,7 +169,7 @@ void Reprojection::transform(double& x, double& y, double& z)
 }
 
 
-void Reprojection::filter(PointBuffer& data)
+void ReprojectionFilter::filter(PointBuffer& data)
 {
     for (PointId id = 0; id < data.size(); ++id)
     {
@@ -188,7 +184,5 @@ void Reprojection::filter(PointBuffer& data)
         data.setField(Dimension::Id::Z, id, z);
     }
 }
-
-} // namespace filter
 
 } // namespace pdal

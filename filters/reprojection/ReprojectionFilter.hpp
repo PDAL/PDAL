@@ -46,19 +46,16 @@ namespace gdal
 class Debug;
 }
 
-namespace filters
-{
-
-class PDAL_DLL Reprojection : public Filter
+class PDAL_DLL ReprojectionFilter : public Filter
 {
 public:
     SET_STAGE_NAME("filters.reprojection", "Reprojection Filter")
     SET_STAGE_LINK("http://www.pdal.io/stages/filters.reprojection.html")
     SET_STAGE_ENABLED(true)
 
-    Reprojection();
-    Reprojection(const SpatialReference& outSRS);
-    Reprojection(const SpatialReference& inSRS, const SpatialReference& outSRS);
+    ReprojectionFilter();
+    ReprojectionFilter(const SpatialReference& outSRS);
+    ReprojectionFilter(const SpatialReference& inSRS, const SpatialReference& outSRS);
 
 private:
     virtual void processOptions(const Options& options);
@@ -79,9 +76,8 @@ private:
     TransformPtr m_transform_ptr;
     boost::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
 
-    Reprojection& operator=(const Reprojection&); // not implemented
-    Reprojection(const Reprojection&); // not implemented
+    ReprojectionFilter& operator=(const ReprojectionFilter&); // not implemented
+    ReprojectionFilter(const ReprojectionFilter&); // not implemented
 };
 
-} // namespace filter
 } // namespace pdal
