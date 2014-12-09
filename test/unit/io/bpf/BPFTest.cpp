@@ -82,9 +82,9 @@ void test_file_type(const std::string& filename)
     reader.prepare(context);
     PointBufferSet pbSet = reader.execute(context);
 
-    EXPECT_EQ(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 506);
+    EXPECT_EQ(buf->size(), 506u);
 
     struct PtData
     {
@@ -169,7 +169,7 @@ TEST(BPFTest, inspect)
     std::string testWkt = "PROJCS[\"WGS 84 / SCAR IMW ST05-08\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],PROJECTION[\"Lambert_Conformal_Conic_2SP\"],PARAMETER[\"standard_parallel_1\",-76.66666666666667],PARAMETER[\"standard_parallel_2\",-79.33333333333333],PARAMETER[\"latitude_of_origin\",-90],PARAMETER[\"central_meridian\",-144],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],AUTHORITY[\"EPSG\",\"3261\"]]";
     EXPECT_EQ(qi.m_srs.getWKT(), testWkt);
 
-    EXPECT_EQ(qi.m_pointCount, 1065);
+    EXPECT_EQ(qi.m_pointCount, 1065u);
 
     BOX3D bounds(
         -13676090.610841721296, 4894836.9556098170578, 123.93000030517578125,

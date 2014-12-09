@@ -87,7 +87,7 @@ TEST(SortFilterTest, pipeline)
 
     PointBufferSet pbSet = mgr.buffers();
 
-    EXPECT_EQ(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
 
     for (PointId i = 1; i < buf->size(); ++i)

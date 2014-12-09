@@ -60,9 +60,9 @@ TEST(PCLBlockFilterTest, PCLBlockFilterTest_example_passthrough_xml)
         PointContext ctx = pipeline.context();
 
         PointBufferSet pbSet = pipeline.buffers();
-        EXPECT_EQ(pbSet.size(), 1);
+        EXPECT_EQ(pbSet.size(), 1u);
         PointBufferPtr buf = *pbSet.begin();
-        EXPECT_EQ(buf->size(), 81);
+        EXPECT_EQ(buf->size(), 81u);
     }
 }
 
@@ -111,7 +111,7 @@ static void test_filter(const std::string& jsonFile,
             pcl_block->prepare(ctx);
             PointBufferSet pbSet = pcl_block->execute(ctx);
 
-            EXPECT_EQ(pbSet.size(), 1);
+            EXPECT_EQ(pbSet.size(), 1u);
             PointBufferPtr buf = *pbSet.begin();
             EXPECT_EQ(buf->size(), expectedPointCount);
         }

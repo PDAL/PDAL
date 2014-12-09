@@ -127,13 +127,13 @@ TEST(LasReaderTest, header)
     EXPECT_EQ(h.creationYear(), 0);
     EXPECT_EQ(h.vlrOffset(), 227);
     EXPECT_EQ(h.pointFormat(), 3);
-    EXPECT_EQ(h.pointCount(), 1065);
-    EXPECT_EQ(h.scaleX(), .01);
-    EXPECT_EQ(h.scaleY(), .01);
-    EXPECT_EQ(h.scaleZ(), .01);
-    EXPECT_EQ(h.offsetX(), 0);
-    EXPECT_EQ(h.offsetY(), 0);
-    EXPECT_EQ(h.offsetZ(), 0);
+    EXPECT_EQ(h.pointCount(), 1065u);
+    EXPECT_FLOAT_EQ(h.scaleX(), .01);
+    EXPECT_FLOAT_EQ(h.scaleY(), .01);
+    EXPECT_FLOAT_EQ(h.scaleZ(), .01);
+    EXPECT_FLOAT_EQ(h.offsetX(), 0);
+    EXPECT_FLOAT_EQ(h.offsetY(), 0);
+    EXPECT_FLOAT_EQ(h.offsetZ(), 0);
     EXPECT_FLOAT_EQ(h.maxX(), 638982.55);
     EXPECT_FLOAT_EQ(h.maxY(), 853535.43);
     EXPECT_FLOAT_EQ(h.maxZ(), 586.38);
@@ -142,11 +142,11 @@ TEST(LasReaderTest, header)
     EXPECT_FLOAT_EQ(h.minZ(), 406.59);
     EXPECT_EQ(h.compressed(), false);
     EXPECT_EQ(h.compressionInfo(), "");
-    EXPECT_EQ(h.pointCountByReturn(0), 925);
-    EXPECT_EQ(h.pointCountByReturn(1), 114);
-    EXPECT_EQ(h.pointCountByReturn(2), 21);
-    EXPECT_EQ(h.pointCountByReturn(3), 5);
-    EXPECT_EQ(h.pointCountByReturn(4), 0);
+    EXPECT_EQ(h.pointCountByReturn(0), 925u);
+    EXPECT_EQ(h.pointCountByReturn(1), 114u);
+    EXPECT_EQ(h.pointCountByReturn(2), 21u);
+    EXPECT_EQ(h.pointCountByReturn(3), 5u);
+    EXPECT_EQ(h.pointCountByReturn(4), 0u);
 }
 
 
@@ -163,7 +163,7 @@ TEST(LasReaderTest, test_sequential)
     EXPECT_TRUE(reader.getDescription() == "Las Reader");
     reader.prepare(ctx);
     PointBufferSet pbSet = reader.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
     Support::check_p0_p1_p2(*buf);
     PointBufferPtr buf2 = buf->makeNew();
@@ -191,9 +191,9 @@ static void test_a_format(const std::string& file, uint8_t majorVersion, uint8_t
     EXPECT_EQ(reader.header().versionMinor(), minorVersion);
 
     PointBufferSet pbSet = reader.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 1);
+    EXPECT_EQ(buf->size(), 1u);
 
     Support::check_pN(*buf, 0, xref, yref, zref, tref, rref, gref, bref);
 }
@@ -228,7 +228,7 @@ TEST(LasReaderTest, inspect)
     EXPECT_EQ(qi.m_srs.getWKT(), testWkt);
 #endif // PDAL_HAVE_LIBGEOTIFF
 
-    EXPECT_EQ(qi.m_pointCount, 5380);
+    EXPECT_EQ(qi.m_pointCount, 5380u);
 
     BOX3D bounds(-94.683465399999989, 31.0367341, 39.081000199999998,
         -94.660631099999989, 31.047329099999999, 78.119000200000002);

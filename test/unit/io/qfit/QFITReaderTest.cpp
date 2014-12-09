@@ -82,9 +82,9 @@ TEST(QFITReaderTest, test_10_word)
     PointContext ctx;
     reader.prepare(ctx);
     PointBufferSet pbSet = reader.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 3);
+    EXPECT_EQ(buf->size(), 3u);
 
     Check_Point(*buf, 0, 221.826822, 59.205160, 32.0900, 0);
     Check_Point(*buf, 1, 221.826740, 59.205161, 32.0190, 0);
@@ -107,9 +107,9 @@ TEST(QFITReaderTest, test_14_word)
     reader.setOptions(options);
     reader.prepare(ctx);
     PointBufferSet pbSet = reader.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 3);
+    EXPECT_EQ(buf->size(), 3u);
 
     Check_Point(*buf, 0, 244.306337, 35.623317, 1056.830000000, 903);
     Check_Point(*buf, 1, 244.306260, 35.623280, 1056.409000000, 903);

@@ -65,7 +65,7 @@ PointBuffer* makeTestBuffer(PointContext ctx)
         data->setField(Dimension::Id::X, i, y);
         data->setField(Dimension::Id::Y, i, z);
     }
-    EXPECT_TRUE(data->size() == 17);
+    EXPECT_EQ(data->size(), 17u);
     return data;
 }
 
@@ -80,7 +80,7 @@ static void verifyTestBuffer(const PointBuffer& data)
         const int32_t y = data.getFieldAs<uint32_t>(Dimension::Id::X, i);
         const double z = data.getFieldAs<double>(Dimension::Id::Y, i);
 
-        EXPECT_EQ(x, i + 1);
+        EXPECT_EQ(x, i + 1u);
         EXPECT_EQ(y, i * 10);
         EXPECT_TRUE(Utils::compare_approx(z, static_cast<double>(i) * 100.0,
             (std::numeric_limits<double>::min)()));
@@ -107,9 +107,9 @@ TEST(PointBufferTest, getAsUint8)
         uint8_t y = data->getFieldAs<uint8_t>(Dimension::Id::X, i);
         uint8_t z = data->getFieldAs<uint8_t>(Dimension::Id::Y, i);
 
-        EXPECT_EQ(x, i + 1);
-        EXPECT_EQ(y, i * 10);
-        EXPECT_EQ(z, i * 100);
+        EXPECT_EQ(x, i + 1u);
+        EXPECT_EQ(y, i * 10u);
+        EXPECT_EQ(z, i * 100u);
     }
 
     // read the data back out
@@ -119,8 +119,8 @@ TEST(PointBufferTest, getAsUint8)
         uint8_t y = data->getFieldAs<uint8_t>(Dimension::Id::X, i);
         EXPECT_THROW(data->getFieldAs<uint8_t>(Dimension::Id::Y, i),
             pdal_error);
-        EXPECT_TRUE(x == i + 1);
-        EXPECT_TRUE(y == i * 10);
+        EXPECT_EQ(x, i + 1u);
+        EXPECT_EQ(y, i * 10u);
     }
     delete data;
 }
@@ -179,7 +179,7 @@ TEST(PointBufferTest, copy)
             data->getFieldAs<uint8_t>(Dimension::Id::Classification, 0));
         EXPECT_EQ(d2.getFieldAs<int32_t>(Dimension::Id::X, 0),
             data->getFieldAs<int32_t>(Dimension::Id::X, 0));
-        EXPECT_EQ(d2.getFieldAs<double>(Dimension::Id::Y, 0),
+        EXPECT_FLOAT_EQ(d2.getFieldAs<double>(Dimension::Id::Y, 0),
             data->getFieldAs<double>(Dimension::Id::Y, 0));
     }
 
@@ -189,7 +189,7 @@ TEST(PointBufferTest, copy)
         int32_t y = d2.getFieldAs<int32_t>(Dimension::Id::X, i);
         double z = d2.getFieldAs<double>(Dimension::Id::Y, i);
 
-        EXPECT_EQ(x, i + 1);
+        EXPECT_EQ(x, i + 1u);
         EXPECT_EQ(y, i * 10);
         EXPECT_TRUE(Utils::compare_approx(z, i * 100.0,
             (std::numeric_limits<double>::min)()));

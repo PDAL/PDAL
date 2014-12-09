@@ -102,9 +102,9 @@ TEST(LasWriterTest, auto_offset)
     reader.prepare(readCtx);
     EXPECT_FLOAT_EQ(reader.header().offsetX(), 74529.00);
     PointBufferSet pbSet = reader.execute(readCtx);
-    EXPECT_EQ(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 3);
+    EXPECT_EQ(buf->size(), 3u);
     EXPECT_FLOAT_EQ(buf->getFieldAs<double>(Id::X, 0), 125000.00);
     EXPECT_FLOAT_EQ(buf->getFieldAs<double>(Id::X, 1), 74529.00);
     EXPECT_FLOAT_EQ(buf->getFieldAs<double>(Id::X, 2), 523523.02);
@@ -136,7 +136,7 @@ TEST(LasWriterTest, metadata_options)
 
     uint8_t format = 
         (uint8_t)LasTester::headerVal<unsigned>(writer, "format");
-    EXPECT_EQ(format, 4);
+    EXPECT_EQ(format, 4u);
     std::string softwareId =
         LasTester::headerVal<std::string>(writer, "software_id");
     EXPECT_EQ(softwareId, "MySoftwareId");
@@ -151,7 +151,7 @@ TEST(LasWriterTest, metadata_options)
     // In this case, we should have metadata to override the default.
     uint8_t minorVersion =
         (uint8_t)LasTester::headerVal<unsigned>(writer, "minor_version");
-    EXPECT_EQ(minorVersion, 56);
+    EXPECT_EQ(minorVersion, 56u);
 }
 
 //ABELL
@@ -237,7 +237,7 @@ TEST(LasWriterTest, LasWriterTest_test_simple_laz)
         Support::temppath("LasWriterTest_test_simple_laz.laz"),
         Support::datapath("laszip/laszip-generated.laz"),
         227, 106);
-    EXPECT_EQ(numdiffs, 0);
+    EXPECT_EQ(numdiffs, 0u);
 
     if (numdiffs == 0)
         FileUtils::deleteFile(
@@ -385,17 +385,17 @@ TEST(LasWriterTest, LasWriterTest_test_drop_extra_returns)
 
     reader2.prepare(ctx2);
     PointBufferSet pbSet = reader2.execute(ctx2);
-    EXPECT_EQ(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
 
     uint8_t r1 = buf->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, 0);
-    EXPECT_EQ(r1, 1);
+    EXPECT_EQ(r1, 1u);
     uint8_t r2 = buf->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, 5);
-    EXPECT_EQ(r2, 1);
+    EXPECT_EQ(r2, 1u);
     uint8_t n1 = buf->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, 0);
-    EXPECT_EQ(n1, 5);
+    EXPECT_EQ(n1, 5u);
     uint8_t n2 = buf->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, 5);
-    EXPECT_EQ(n1, 5);
+    EXPECT_EQ(n1, 5u);
 
     FileUtils::closeFile(ofs);
     FileUtils::deleteFile(Support::temppath(temp_filename));

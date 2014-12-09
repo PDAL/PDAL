@@ -91,7 +91,7 @@ TEST(ProgrammableFilterTest, ProgrammableFilterTest_test1)
 
     stats.prepare(ctx);
     PointBufferSet pbSet = stats.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
 
     const filters::stats::Summary& statsX = stats.getStats(Dimension::Id::X);
@@ -116,7 +116,7 @@ TEST(ProgrammableFilterTest, pipeline)
     reader.readPipeline(Support::datapath("plang/programmable-update-y-dims.xml"));
     manager.execute();
     PointBufferSet pbSet = manager.buffers();
-    EXPECT_EQ(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
 
     for (PointId idx = 0; idx < 10; ++idx)
@@ -163,12 +163,12 @@ TEST(ProgrammableFilterTest, add_dimension)
     PointContext ctx;
     filter.prepare(ctx);
     PointBufferSet pbSet = filter.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
 
     for (unsigned int i = 0; i < buf->size(); ++i)
     {
-        EXPECT_EQ(buf->getFieldAs<uint16_t>(Dimension::Id::Intensity, i), 1);
-        EXPECT_EQ(buf->getFieldAs<uint16_t>(Dimension::Id::PointSourceId, i), 2);
+        EXPECT_EQ(buf->getFieldAs<uint16_t>(Dimension::Id::Intensity, i), 1u);
+        EXPECT_EQ(buf->getFieldAs<uint16_t>(Dimension::Id::PointSourceId, i), 2u);
     }
 }

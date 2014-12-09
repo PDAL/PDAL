@@ -70,7 +70,7 @@ TEST(ChipperTest, test_construction)
         chipper.setOptions(options);
         chipper.prepare(ctx);
         PointBufferSet pbSet = chipper.execute(ctx);
-        EXPECT_TRUE(pbSet.size() == 71);
+        EXPECT_EQ(pbSet.size(), 71u);
 
         std::vector<PointBufferPtr> buffers;
         for (auto it = pbSet.begin(); it != pbSet.end(); ++it)
@@ -98,7 +98,7 @@ TEST(ChipperTest, test_construction)
         EXPECT_NEAR(bounds.maxy, 849427.07, 0.05);
 
         for (size_t i = 0; i < buffers.size(); ++i)
-            EXPECT_TRUE(buffers[i]->size() == 15);
+            EXPECT_EQ(buffers[i]->size(), 15u);
     }
 }
 
@@ -117,7 +117,7 @@ TEST(ChipperTest, empty_buffer)
     PointBufferSet pbSet = StageTester::run(&chipper, buf);
     StageTester::done(&chipper, ctx);
 
-    EXPECT_EQ(pbSet.size(), 0);
+    EXPECT_EQ(pbSet.size(), 0u);
 }
 
 //ABELL

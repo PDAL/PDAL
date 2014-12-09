@@ -312,7 +312,7 @@ void Support::check_pN(const PointBuffer& data, size_t index,
     if (data.hasDim(Dimension::Id::GpsTime))
     {
         double t0 = data.getFieldAs<double>(Dimension::Id::GpsTime, index);
-        EXPECT_EQ(t0, tref);
+        EXPECT_FLOAT_EQ(t0, tref);
     }
 
     if (data.hasDim(Dimension::Id::Red))

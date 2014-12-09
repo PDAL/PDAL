@@ -92,7 +92,7 @@ TEST(ColorizationFilterTest, ColorizationFilterTest_test_1)
 
     filter.prepare(ctx);
     PointBufferSet pbSet = filter.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
 
     uint16_t r = buf->getFieldAs<uint16_t>(Dimension::Id::Red, 0);

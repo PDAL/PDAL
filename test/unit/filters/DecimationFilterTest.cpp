@@ -74,17 +74,17 @@ TEST(DecimationFilterTest, DecimationFilterTest_test1)
 
             filter->prepare(ctx);
             PointBufferSet pbSet = filter->execute(ctx);
-            EXPECT_EQ(pbSet.size(), 1);
+            EXPECT_EQ(pbSet.size(), 1u);
             PointBufferPtr buf = *pbSet.begin();
-            EXPECT_EQ(buf->size(), 3);
+            EXPECT_EQ(buf->size(), 3u);
 
             uint64_t t0 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 0);
             uint64_t t1 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 1);
             uint64_t t2 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 2);
 
-            EXPECT_EQ(t0, 0);
-            EXPECT_EQ(t1, 10);
-            EXPECT_EQ(t2, 20);
+            EXPECT_EQ(t0, 0u);
+            EXPECT_EQ(t1, 10u);
+            EXPECT_EQ(t2, 20u);
         }
     }
 }

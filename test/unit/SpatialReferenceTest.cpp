@@ -253,7 +253,7 @@ TEST(SpatialReferenceTest, test_writing_vlr)
 
         SpatialReference result_ref = reader.getSpatialReference();
 
-        EXPECT_EQ(reader.header().vlrCount(), 4);
+        EXPECT_EQ(reader.header().vlrCount(), 4u);
         std::string wkt = result_ref.getWKT();
         EXPECT_EQ(wkt, reference_wkt);
     }

@@ -90,10 +90,10 @@ TEST(SbetReaderTest, testRead)
 
     reader.prepare(ctx);
     PointBufferSet pbSet = reader.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
 
-    EXPECT_EQ(buf->size(), 2);
+    EXPECT_EQ(buf->size(), 2u);
 
     checkPoint(ctx, *buf, 0, 1.516310028360710e+05, 5.680211852972264e-01,
                -2.041654392303940e+00, 1.077152953296560e+02,
@@ -133,6 +133,6 @@ TEST(SbetReaderTest, testPipeline)
     reader.readPipeline(Support::datapath("sbet/pipeline.xml"));
 
     point_count_t numPoints = manager.execute();
-    EXPECT_EQ(numPoints, 2);
+    EXPECT_EQ(numPoints, 2u);
     FileUtils::deleteFile(Support::datapath("sbet/outfile.txt"));
 }

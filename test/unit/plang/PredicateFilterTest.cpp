@@ -88,7 +88,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test1)
 
     stats.prepare(ctx);
     PointBufferSet pbSet = stats.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
 
     const filters::stats::Summary& statsX = stats.getStats(Dimension::Id::X);
     const filters::stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
@@ -147,7 +147,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test2)
 
     stats.prepare(ctx);
     PointBufferSet pbSet = stats.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
 
     const filters::stats::Summary& statsX = stats.getStats(Dimension::Id::X);
     const filters::stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
@@ -281,16 +281,16 @@ TEST(PredicateFilterTest, PredicateFilterTest_test4)
     StageTester::ready(&reader, ctx);
     PointBufferSet pbSet = StageTester::run(&reader, buf);
     StageTester::done(&reader, ctx);
-    EXPECT_EQ(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 1000);
+    EXPECT_EQ(buf->size(), 1000u);
 
     StageTester::ready(&filter, ctx);
     pbSet = StageTester::run(&filter, buf);
     StageTester::done(&filter, ctx);
-    EXPECT_EQ(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 750);
+    EXPECT_EQ(buf->size(), 750u);
 }
 
 TEST(PredicateFilterTest, PredicateFilterTest_test5)
@@ -339,7 +339,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_Pipeline)
 
     reader.readPipeline(Support::datapath("plang/from-module.xml"));
     point_count_t cnt = mgr.execute();
-    EXPECT_EQ(cnt, 1);
+    EXPECT_EQ(cnt, 1u);
 }
 
 TEST(PredicateFilterTest, PredicateFilterTest_Embed)
@@ -349,5 +349,5 @@ TEST(PredicateFilterTest, PredicateFilterTest_Embed)
 
     reader.readPipeline(Support::datapath("plang/predicate-embed.xml"));
     point_count_t cnt = mgr.execute();
-    EXPECT_EQ(cnt, 1);
+    EXPECT_EQ(cnt, 1u);
 }

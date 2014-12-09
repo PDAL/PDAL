@@ -54,9 +54,9 @@ TEST(FauxReaderTest, test_constant_mode_sequential_iter)
     reader.prepare(ctx);
     EXPECT_EQ(reader.getDescription(), "Faux Reader");
     PointBufferSet pbSet = reader.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 750);
+    EXPECT_EQ(buf->size(), 750u);
     for (point_count_t i = 0; i < buf->size(); i++)
     {
         double x = buf->getFieldAs<double>(Dimension::Id::X, i);
@@ -85,9 +85,9 @@ TEST(FauxReaderTest, test_random_mode)
     PointContext ctx;
     reader.prepare(ctx);
     PointBufferSet pbSet = reader.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 750);
+    EXPECT_EQ(buf->size(), 750u);
 
     for (point_count_t i = 0; i < buf->size(); ++i)
     {
@@ -124,9 +124,9 @@ TEST(FauxReaderTest, test_ramp_mode_1)
     PointContext ctx;
     reader.prepare(ctx);
     PointBufferSet pbSet = reader.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 2);
+    EXPECT_EQ(buf->size(), 2u);
 
     double x0 = buf->getFieldAs<double>(Dimension::Id::X, 0);
     double y0 = buf->getFieldAs<double>(Dimension::Id::Y, 0);
@@ -163,9 +163,9 @@ TEST(FauxReaderTest, test_ramp_mode_2)
     PointContext ctx;
     reader.prepare(ctx);
     PointBufferSet pbSet = reader.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 750);
+    EXPECT_EQ(buf->size(), 750u);
 
     double delX = (101.0 - 1.0) / (750.0 - 1.0);
     double delY = (152.0 - 2.0) / (750.0 - 1.0);
@@ -201,9 +201,9 @@ TEST(FauxReaderTest, test_return_number)
     PointContext ctx;
     reader.prepare(ctx);
     PointBufferSet pbSet = reader.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 100);
+    EXPECT_EQ(buf->size(), 100u);
 
     for (point_count_t i = 0; i < buf->size(); i++)
     {

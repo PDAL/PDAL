@@ -73,13 +73,13 @@ TEST(CropFilterTest, test_crop)
     PointContext ctx;
     stats.prepare(ctx);
     PointBufferSet pbSet = stats.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
 
     const filters::stats::Summary& statsX = stats.getStats(Dimension::Id::X);
     const filters::stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
     const filters::stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
-    EXPECT_EQ(buf->size(), 333);
+    EXPECT_EQ(buf->size(), 333u);
 
     const double minX = statsX.minimum();
     const double minY = statsY.minimum();
@@ -140,7 +140,7 @@ TEST(CropFilterTest, test_crop_polygon)
 
     crop.prepare(ctx);
     PointBufferSet pbSet = crop.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buffer = *pbSet.begin();
     EXPECT_EQ(buffer->size(), 47u);
 
@@ -202,7 +202,7 @@ TEST(CropFilterTest, test_crop_polygon_reprojection)
     PointBufferPtr buffer(new PointBuffer(ctx));
     crop.prepare(ctx);
     PointBufferSet pbSet = crop.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     buffer = *pbSet.begin();
     EXPECT_EQ(buffer->size(), 47u);
 

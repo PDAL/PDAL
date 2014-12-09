@@ -46,57 +46,57 @@ TEST(PointContextTest, resolveType)
 
     // Start with a default-defined dimension.
     ctx.registerDim(Id::X);
-    EXPECT_EQ(ctx.dimSize(Id::X), 8);
+    EXPECT_EQ(ctx.dimSize(Id::X), 8u);
     EXPECT_EQ(ctx.dimType(Id::X), Type::Double);
 
     ctx.registerDim(Id::X, Type::Signed32);
-    EXPECT_EQ(ctx.dimSize(Id::X), 8);
+    EXPECT_EQ(ctx.dimSize(Id::X), 8u);
     EXPECT_EQ(ctx.dimType(Id::X), Type::Double);
 
     ctx.registerDim(Dimension::Id::X, Type::Unsigned8);
-    EXPECT_EQ(ctx.dimSize(Id::X), 8);
+    EXPECT_EQ(ctx.dimSize(Id::X), 8u);
     EXPECT_EQ(ctx.dimType(Id::X), Type::Double);
 
     /// Build as we go.
     ctx.registerDim(Id::Y, Type::Unsigned8);
-    EXPECT_EQ(ctx.dimSize(Id::Y), 1);
+    EXPECT_EQ(ctx.dimSize(Id::Y), 1u);
     EXPECT_EQ(ctx.dimType(Id::Y), Type::Unsigned8);
 
     ctx.registerDim(Id::Y, Type::Unsigned8);
-    EXPECT_EQ(ctx.dimSize(Id::Y), 1);
+    EXPECT_EQ(ctx.dimSize(Id::Y), 1u);
     EXPECT_EQ(ctx.dimType(Id::Y), Type::Unsigned8);
 
     ctx.registerDim(Id::Y, Type::Signed8);
     // Signed 8 and Unsigned 8 should yeild signed 16.
-    EXPECT_EQ(ctx.dimSize(Id::Y), 2);
+    EXPECT_EQ(ctx.dimSize(Id::Y), 2u);
     EXPECT_EQ(ctx.dimType(Id::Y), Type::Signed16);
 
     ctx.registerDim(Id::Y, Type::Signed16);
-    EXPECT_EQ(ctx.dimSize(Id::Y), 2);
+    EXPECT_EQ(ctx.dimSize(Id::Y), 2u);
     EXPECT_EQ(ctx.dimType(Id::Y), Type::Signed16);
 
     ctx.registerDim(Id::Y, Type::Float);
-    EXPECT_EQ(ctx.dimSize(Id::Y), 4);
+    EXPECT_EQ(ctx.dimSize(Id::Y), 4u);
     EXPECT_EQ(ctx.dimType(Id::Y), Type::Float);
 
     ctx.registerDim(Id::Y, Type::Double);
-    EXPECT_EQ(ctx.dimSize(Id::Y), 8);
+    EXPECT_EQ(ctx.dimSize(Id::Y), 8u);
     EXPECT_EQ(ctx.dimType(Id::Y), Type::Double);
 
     ///
     ctx.registerDim(Id::Z, Type::Unsigned16);
-    EXPECT_EQ(ctx.dimSize(Id::Z), 2);
+    EXPECT_EQ(ctx.dimSize(Id::Z), 2u);
     EXPECT_EQ(ctx.dimType(Id::Z), Type::Unsigned16);
 
     ctx.registerDim(Id::Z, Type::Signed8);
-    EXPECT_EQ(ctx.dimSize(Id::Z), 4);
+    EXPECT_EQ(ctx.dimSize(Id::Z), 4u);
     EXPECT_EQ(ctx.dimType(Id::Z), Type::Signed32);
 
     ctx.registerDim(Id::Z, Type::Signed16);
-    EXPECT_EQ(ctx.dimSize(Id::Z), 4);
+    EXPECT_EQ(ctx.dimSize(Id::Z), 4u);
     EXPECT_EQ(ctx.dimType(Id::Z), Type::Signed32);
 
     ctx.registerDim(Id::Z, Type::Double);
-    EXPECT_EQ(ctx.dimSize(Id::Z), 8);
+    EXPECT_EQ(ctx.dimSize(Id::Z), 8u);
     EXPECT_EQ(ctx.dimType(Id::Z), Type::Double);
 }

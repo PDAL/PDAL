@@ -152,10 +152,10 @@ TEST(MetadataTest, typed_value)
     EXPECT_EQ("zczMzMzcXkA=", m3.value());
 
     MetadataNode m4 = m.add("name", "65539");
-    EXPECT_EQ(65539, m4.value<unsigned>());
+    EXPECT_EQ(65539u, m4.value<unsigned>());
 
     auto ctx = Utils::redirect(std::cerr);
-    EXPECT_EQ(0, m4.value<unsigned short>());
+    EXPECT_EQ(0u, m4.value<unsigned short>());
     Utils::restore(std::cerr, ctx);
 }
 
@@ -202,7 +202,7 @@ TEST(MetadataTest, test_metadata_set)
     MetadataNode mm(m);
 
     std::vector<MetadataNode> ms = mm.children();
-    EXPECT_EQ(ms.size(), 3);
+    EXPECT_EQ(ms.size(), 3u);
 
     class Predicate
     {

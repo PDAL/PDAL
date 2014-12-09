@@ -54,7 +54,7 @@ TEST(FerryFilterTest, test_ferry_copy)
 
     PointBufferSet pbSet = mgr.buffers();
 
-    EXPECT_EQ(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
     EXPECT_EQ(buf->size(), 1065u);
 

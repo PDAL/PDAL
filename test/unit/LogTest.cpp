@@ -68,9 +68,9 @@ TEST(LogTest, test_one)
         EXPECT_EQ(reader.log()->getLevel(), LogLevel::Debug5);
 
         PointBufferSet pbSet = reader.execute(ctx);
-        EXPECT_EQ(pbSet.size(), 1);
+        EXPECT_EQ(pbSet.size(), 1u);
         PointBufferPtr buf = *pbSet.begin();
-        EXPECT_EQ(buf->size(), 750);
+        EXPECT_EQ(buf->size(), 750u);
     }
     bool ok = Support::compare_text_files(
         Support::temppath("mylog_one.txt"),
@@ -153,9 +153,9 @@ TEST(LogTest, test_two_a)
         yfilter.log()->setLevel(LogLevel::Debug5);
 
         PointBufferSet pbSet = yfilter.execute(ctx);
-        EXPECT_EQ(pbSet.size(), 1);
+        EXPECT_EQ(pbSet.size(), 1u);
         PointBufferPtr buf = *pbSet.begin();
-        EXPECT_EQ(buf->size(), 750);
+        EXPECT_EQ(buf->size(), 750u);
     }
 
     bool ok1 = Support::compare_text_files(
@@ -243,9 +243,9 @@ TEST(LogTest, test_two_b)
         yfilter.log()->setLevel(LogLevel::Debug5);
 
         PointBufferSet pbSet = yfilter.execute(ctx);
-        EXPECT_EQ(pbSet.size(), 1);
+        EXPECT_EQ(pbSet.size(), 1u);
         PointBufferPtr buf = *pbSet.begin();
-        EXPECT_EQ(buf->size(), 750);
+        EXPECT_EQ(buf->size(), 750u);
     }
 
     bool ok1 = Support::compare_text_files(
@@ -320,9 +320,9 @@ TEST(LogTest, test_three)
         PointContext ctx;
         xfilter.prepare(ctx);
         PointBufferSet pbSet = xfilter.execute(ctx);
-        EXPECT_EQ(pbSet.size(), 1);
+        EXPECT_EQ(pbSet.size(), 1u);
         PointBufferPtr buf = *pbSet.begin();
-        EXPECT_EQ(buf->size(), 750);
+        EXPECT_EQ(buf->size(), 750u);
     }
 
     bool ok = Support::compare_text_files(

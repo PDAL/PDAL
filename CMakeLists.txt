@@ -226,7 +226,7 @@ else()
   # Recommended C++ compilation flags
   # -Weffc++
   set(PDAL_COMMON_CXX_FLAGS
-      "-Wextra -Wall -Wno-unused-parameter -Wno-unused-variable -Wpointer-arith -Wcast-align -Wcast-qual -Wfloat-equal -Wredundant-decls -Wno-long-long")
+    "-Wextra -Wall -Wno-unused-parameter -Wno-unused-variable -Wpointer-arith -Wcast-align -Wcast-qual -Wfloat-equal -Wredundant-decls -Wno-long-long")
 
     if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PDAL_COMMON_CXX_FLAGS}")
@@ -237,7 +237,7 @@ else()
         set(PDAL_COMPILER_GCC 1)
     elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" OR
             "${CMAKE_CXX_COMPILER}" MATCHES "clang")
-         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PDAL_COMMON_CXX_FLAGS}")
+         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PDAL_COMMON_CXX_FLAGS} -Qunused-arguments")
          set(PDAL_COMPILER_CLANG 1)
          set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
          set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -isystem /usr/local/include")

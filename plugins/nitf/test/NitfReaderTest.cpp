@@ -72,7 +72,7 @@ TEST(NitfReaderTest, test_one)
         nitf_reader->prepare(ctx);
         PointBufferSet pbSet = nitf_reader->execute(ctx);
         EXPECT_EQ(nitf_reader->getDescription(), "NITF Reader");
-        EXPECT_EQ(pbSet.size(), 1);
+        EXPECT_EQ(pbSet.size(), 1u);
         PointBufferPtr buf = *pbSet.begin();
 
         // check metadata
@@ -103,7 +103,7 @@ TEST(NitfReaderTest, test_one)
             las_reader->setOptions(las_opts);
             las_reader->prepare(ctx2);
             PointBufferSet pbSet2 = las_reader->execute(ctx2);
-            EXPECT_EQ(pbSet2.size(), 1);
+            EXPECT_EQ(pbSet2.size(), 1u);
             PointBufferPtr buf2 = *pbSet.begin();
             //
             //

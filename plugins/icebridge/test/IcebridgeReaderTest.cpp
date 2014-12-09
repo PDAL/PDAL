@@ -105,9 +105,9 @@ TEST(IcebridgeReaderTest, testRead)
         PointContext ctx;
         reader->prepare(ctx);
         PointBufferSet pbSet = reader->execute(ctx);
-        EXPECT_EQ(pbSet.size(), 1);
+        EXPECT_EQ(pbSet.size(), 1u);
         PointBufferPtr buf = *pbSet.begin();
-        EXPECT_EQ(buf->size(), 2);
+        EXPECT_EQ(buf->size(), 2u);
 
         checkPoint(
                 *buf,
@@ -153,6 +153,6 @@ TEST(IcebridgeReaderTest, testPipeline)
     EXPECT_TRUE(isWriter);
 
     point_count_t numPoints = manager.execute();
-    EXPECT_EQ(numPoints, 2);
+    EXPECT_EQ(numPoints, 2u);
     FileUtils::deleteFile(Support::datapath("icebridge/outfile.txt"));
 }

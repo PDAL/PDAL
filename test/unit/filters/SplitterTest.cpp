@@ -76,7 +76,7 @@ TEST(SplitterTest, test_tile_filter)
             StageTester::ready(r, ctx);
             PointBufferSet pbSet = StageTester::run(r, buf);
             StageTester::done(r, ctx);
-            EXPECT_EQ(pbSet.size(), 1);
+            EXPECT_EQ(pbSet.size(), 1u);
             buf = *pbSet.begin();
 
             StageTester::ready(s, ctx);
@@ -98,8 +98,8 @@ TEST(SplitterTest, test_tile_filter)
             };
             std::sort(buffers.begin(), buffers.end(), sorter);
 
-            EXPECT_EQ(buffers.size(), 15);
-            int counts[] = {24, 27, 26, 27, 10, 166, 142, 76, 141, 132, 63, 70, 67,
+            EXPECT_EQ(buffers.size(), 15u);
+            size_t counts[] = {24, 27, 26, 27, 10, 166, 142, 76, 141, 132, 63, 70, 67,
                 34, 60 };
             for (size_t i = 0; i < buffers.size(); ++i)
             {
