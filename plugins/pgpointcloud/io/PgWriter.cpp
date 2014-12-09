@@ -63,7 +63,7 @@ namespace pdal
 
 PgWriter::PgWriter()
     : m_session(0)
-    , m_patch_compression_type(compression::CompressionType::None)
+    , m_patch_compression_type(CompressionType::None)
     , m_patch_capacity(400)
     , m_srid(0)
     , m_pcid(0)
@@ -271,9 +271,9 @@ uint32_t PgWriter::SetupSchema(uint32_t srid)
     // Create an XML output schema.
     std::string compression;
     /* If the writer specifies a compression, we should set that */
-    if (m_patch_compression_type == compression::CompressionType::Dimensional)
+    if (m_patch_compression_type == CompressionType::Dimensional)
         compression = "dimensional";
-    else if (m_patch_compression_type == compression::CompressionType::Ght)
+    else if (m_patch_compression_type == CompressionType::Ght)
         compression = "ght";
 
     Metadata metadata;
@@ -486,7 +486,7 @@ void PgWriter::writeTile(PointBuffer const& buffer)
 
     uint32_t num_points = buffer.size();
     int32_t pcid = m_pcid;
-    compression::CompressionType::Enum compression_v = compression::CompressionType::None;
+    CompressionType::Enum compression_v = CompressionType::None;
     uint32_t compression = static_cast<uint32_t>(compression_v);
 
 #ifdef BOOST_LITTLE_ENDIAN

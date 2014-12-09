@@ -186,13 +186,7 @@ DimTypeList XMLSchema::dimTypes() const
     DimTypeList dimTypes;
 
     for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-    {
-        DimType dimType;
-
-        dimType.m_id = di->m_id;
-        dimType.m_type = di->m_type;
-        dimTypes.push_back(dimType);
-    }
+        dimTypes.push_back(DimType(di->m_id, di->m_type));
     return dimTypes;
 }
 
@@ -336,10 +330,12 @@ bool XMLSchema::load(xmlDocPtr doc)
         {
             xmlChar* n = xmlNodeListGetString(doc, dimension->children, 1);
             if (!n)
+            {
                 std::cerr << "Unable to fetch orientation.\n";
+                return false;
+            }
             std::string orientation = std::string((const char*)n);
             xmlFree(n);
-            return false;
 
             if (boost::iequals(orientation, "dimension"))
                 m_orientation = Orientation::DimensionMajor;
@@ -351,6 +347,7 @@ bool XMLSchema::load(xmlDocPtr doc)
         if (boost::equals((const char*)dimension->name, "metadata"))
         {
             m_metadata = MetadataNode("root");
+            std::cerr << "Found metadata node!\n";
             if (!loadMetadata(dimension, m_metadata))
                 return false;
             continue;
@@ -371,64 +368,78 @@ bool XMLSchema::load(xmlDocPtr doc)
             {
                 xmlChar *n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n)
+                {
                     std::cerr << "Unable to fetch name from XML node.";
+                    return false;
+                }
                 dim.m_name = remapOldNames(std::string((const char*)n));
                 xmlFree(n);
-                return false;
             }
             if (boost::iequals((const char*)properties->name, "description"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n)
+                {
                     std::cerr << "Unable to fetch description.\n";
+                    return false;
+                }
                 dim.m_description = std::string((const char*)n);
                 xmlFree(n);
-                return false;
             }
             if (boost::iequals((const char*)properties->name, "interpretation"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n)
+                {
                     std::cerr << "Unable to fetch interpretation.\n";
+                    return false;
+                }
                 dim.m_type = Dimension::type((const char*)n);
                 xmlFree(n);
-                return false;
             }
             if (boost::iequals((const char*)properties->name, "minimum"))
             {
                 xmlChar* n = xmlGetProp(properties, (const xmlChar*) "value");
                 if (!n)
+                {
+                    return false;
                     std::cerr << "Unable to fetch minimum value.\n";
+                }
                 dim.m_min = std::atof((const char*)n);
                 xmlFree(n);
-                return false;
             }
             if (boost::iequals((const char*)properties->name, "maximum"))
             {
                 xmlChar* n = xmlGetProp(properties, (const xmlChar*) "value");
                 if (!n)
+                {
                     std::cerr << "Unable to fetch maximum value.\n";
+                    return false;
+                }
                 dim.m_max = std::atof((const char*)n);
                 xmlFree(n);
-                return false;
             }
             if (boost::iequals((const char*)properties->name, "offset"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n)
+                {
                     std::cerr << "Unable to fetch offset value!";
+                    return false;
+                }
                 dim.m_xform.m_offset = std::atof((const char*)n);
                 xmlFree(n);
-                return false;
             }
             if (boost::iequals((const char*)properties->name, "scale"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n)
+                {
                     std::cerr << "Unable to fetch scale value!";
+                    return false;
+                }
                 dim.m_xform.m_scale = std::atof((const char*)n);
                 xmlFree(n);
-                return false;
             }
         }
         m_dims.push_back(dim);

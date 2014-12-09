@@ -161,6 +161,7 @@ size_t DbWriter::readPoint(const PointBuffer& pb, PointId idx, char *outbuf)
     {
         int outOffset;
 
+
         if (m_xPackedOffset >= 0)
             outOffset = m_xPackedOffset;
         else if (m_yPackedOffset >= 0)

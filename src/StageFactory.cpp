@@ -363,9 +363,7 @@ void StageFactory::loadPlugins()
     // If we don't have a driver path, we'll default to /usr/local/lib and lib
 
     if (pluginDir.size() == 0)
-    {
-        pluginDir = "/usr/local/lib:./lib";
-    }
+        pluginDir = "/usr/local/lib:./lib:../lib";
 
     std::vector<std::string> pluginPathVec;
     boost::algorithm::split(pluginPathVec, pluginDir, boost::algorithm::is_any_of(":"), boost::algorithm::token_compress_on);

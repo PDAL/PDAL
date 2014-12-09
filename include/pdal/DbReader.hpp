@@ -43,10 +43,12 @@ class PDAL_DLL DbReader : public Reader
 {
 protected:
     XMLDimList m_dims;
+    size_t m_packedPointSize;
 
     DbReader()
     {}
 
+    DimTypeList dbDimTypes() const;
     void loadSchema(PointContextRef ctx, const std::string& schemaString);
     void loadSchema(PointContextRef ctx, const XMLSchema& schema);
     void writeField(PointBuffer& pb, const char *pos, XMLDim dim,

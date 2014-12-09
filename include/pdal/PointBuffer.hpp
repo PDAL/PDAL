@@ -184,6 +184,20 @@ public:
         }
     }
 
+    /// Load the point buffer from memory whose arrangement is specified
+    /// by the dimension list.
+    /// \param[in] dims  Dimension/types of data in packed order
+    /// \param[in] idx   Index of point to write.
+    /// \param[in] buf   Packed data buffer.
+    void setPackedPoint(const DimTypeList& dims, PointId idx, const char *buf)
+    {
+        for (auto di = dims.begin(); di != dims.end(); ++di)
+        {
+            setField(di->m_id, di->m_type, idx, (const void *)buf);
+            buf += Dimension::size(di->m_type);
+        }
+    }
+
     std::ostream& getBytes(std::ostream& strm, PointId start, PointId end) const
     {
         char buf[sizeof(double)];

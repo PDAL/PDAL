@@ -46,7 +46,10 @@
 #include <pdal/PDALUtils.hpp>
 #include <pdal/Compression.hpp>
 
-struct SQLiteTestStream {
+using namespace pdal;
+
+struct SQLiteTestStream
+{
     SQLiteTestStream() : buf(), idx(0) {}
 
     void putBytes(const unsigned char* b, size_t len) {
@@ -73,10 +76,9 @@ struct SQLiteTestStream {
     size_t idx;
 };
 
-std::vector<char> getBytes(pdal::PointBuffer buffer, pdal::PointContextRef ctx)
+std::vector<char> getBytes(PointBuffer buffer, PointContextRef ctx)
 {
-    std::vector<char> bytes;
-    bytes.resize(ctx.pointSize() * buffer.size());
+    std::vector<char> bytes(ctx.pointSize() * buffer.size());
 
     pdal::Charbuf buf(bytes);
     std::ostream strm(&buf);
@@ -88,12 +90,8 @@ std::vector<char> getBytes(pdal::PointBuffer buffer, pdal::PointContextRef ctx)
 
 BOOST_AUTO_TEST_SUITE(CompressionTest)
 
-
-
 BOOST_AUTO_TEST_CASE(test_compress_file)
 {
-    using namespace pdal;
-
     const std::string file(Support::datapath("las/1.2-with-color.las"));
 
     const pdal::Option opt_filename("filename", file);
@@ -106,31 +104,53 @@ BOOST_AUTO_TEST_CASE(test_compress_file)
     PointContext ctx;
     reader.prepare(ctx);
     PointBufferSet buffers = reader.execute(ctx);
+
     PointBufferPtr buffer = *buffers.begin();
 
     BOOST_CHECK_EQUAL(ctx.pointSize(), 52);
     SQLiteTestStream s;
-    compression::Compress<SQLiteTestStream>(ctx, *buffer, s, compression::CompressionType::Lazperf, 0, 0);
 
+    LazPerfCompressor<SQLiteTestStream> compressor(s, ctx.dimTypes());
 
+    DimTypeList dims = ctx.dimTypes();
+    std::vector<char> tmpbuf(compressor.pointSize());
+    for (PointId idx = 0; idx < buffer->size(); ++idx)
+    {
+        buffer->getPackedPoint(dims, idx, tmpbuf.data());
+        compressor.compress(tmpbuf.data(), compressor.pointSize());
+    }
+    compressor.done();
 
-    BOOST_CHECK_EQUAL(getBytes(*buffer, ctx).size(), 55380);
+    BOOST_CHECK_EQUAL(buffer->size() * compressor.pointSize(), 55380);
     BOOST_CHECK_EQUAL(s.buf.size(), 30945);
 
     SQLiteTestStream s2;
     s2.buf = s.buf;
-    PointBufferPtr b = compression::Decompress<SQLiteTestStream>(ctx, s2, 11, compression::CompressionType::Lazperf);
 
-    BOOST_CHECK_EQUAL(b->size(), 11);
-    BOOST_CHECK_EQUAL(getBytes(*b, ctx).size(), 52 * 11);
+    LazPerfDecompressor<SQLiteTestStream> decompressor(s2, ctx.dimTypes());
 
-    uint16_t r = b->getFieldAs<uint16_t>(Dimension::Id::Red, 10);
+    size_t outbufSize = decompressor.pointSize() * buffer->size();
+    std::vector<char> outbuf(outbufSize);
+    decompressor.decompress(outbuf.data(), outbufSize);
+
+    PointBuffer b(ctx);
+
+    char *pos = outbuf.data();
+    for (PointId nextId = 0; nextId < 11; nextId++)
+    {
+        b.setPackedPoint(dims, nextId, pos);
+        pos += decompressor.pointSize();
+    }
+    BOOST_CHECK_EQUAL(b.size(), 11);
+    BOOST_CHECK_EQUAL(getBytes(b, ctx).size(), 52 * 11);
+
+    uint16_t r = b.getFieldAs<uint16_t>(Dimension::Id::Red, 10);
     BOOST_CHECK_EQUAL(r, 64u);
-    int32_t x = b->getFieldAs<int32_t>(Dimension::Id::X, 10);
+    int32_t x = b.getFieldAs<int32_t>(Dimension::Id::X, 10);
     BOOST_CHECK_EQUAL(x, 636038);
-    double xd = b->getFieldAs<double>(Dimension::Id::X, 10);
+    double xd = b.getFieldAs<double>(Dimension::Id::X, 10);
     BOOST_CHECK_CLOSE(xd, 636037.53, 0.001);
-    int32_t y = b->getFieldAs<int32_t>(Dimension::Id::Y, 10);
+    int32_t y = b.getFieldAs<int32_t>(Dimension::Id::Y, 10);
     BOOST_CHECK_EQUAL(y, 849338);
 }
 

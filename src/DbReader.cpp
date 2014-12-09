@@ -35,7 +35,8 @@
 namespace pdal
 {
 
-void DbReader::loadSchema(PointContextRef ctx, const std::string& schemaString)
+void DbReader::loadSchema(PointContextRef ctx,
+    const std::string& schemaString)
 {
     XMLSchema schema;
     schema.read(schemaString);
@@ -53,8 +54,22 @@ void DbReader::loadSchema(PointContextRef ctx, const XMLSchema& schema)
     ctx.registerDim(Dimension::Id::Y);
     ctx.registerDim(Dimension::Id::Z);
 
+    m_packedPointSize = 0;
     for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+    {
         di->m_id = ctx.registerOrAssignDim(di->m_name, di->m_type);
+        m_packedPointSize += Dimension::size(di->m_type);
+    }
+}
+
+
+DimTypeList DbReader::dbDimTypes() const
+{
+    DimTypeList dimTypes;
+
+    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+        dimTypes.push_back(DimType(di->m_id, di->m_type));
+    return dimTypes;
 }
 
 
