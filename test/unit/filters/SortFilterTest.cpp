@@ -36,7 +36,7 @@
 
 #include <random>
 
-#include <pdal/filters/Sort.hpp>
+#include <SortFilter.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
 #include "../StageTester.hpp"
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(simple)
 
     opts.add("dimension", "X");
 
-    filters::Sort filter;
+    SortFilter filter;
     filter.setOptions(opts);
 
     PointContext ctx;

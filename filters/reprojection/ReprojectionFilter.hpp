@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Hobu Inc., hobu.inc@gmail.com
+* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -36,40 +36,48 @@
 
 #include <pdal/Filter.hpp>
 
+#include <boost/shared_ptr.hpp>
+
 namespace pdal
 {
-namespace filters
+class PointBuffer;
+namespace gdal
 {
+class Debug;
+}
 
-class PDAL_DLL Merge : public MultiFilter
+class PDAL_DLL ReprojectionFilter : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.merge", "Merge Filter")
-    SET_STAGE_LINK("http://pdal.io/stages/filters.merge.html")
+    SET_STAGE_NAME("filters.reprojection", "Reprojection Filter")
+    SET_STAGE_LINK("http://www.pdal.io/stages/filters.reprojection.html")
     SET_STAGE_ENABLED(true)
 
-    Merge() : MultiFilter()
-        {}
+    ReprojectionFilter();
+    ReprojectionFilter(const SpatialReference& outSRS);
+    ReprojectionFilter(const SpatialReference& inSRS, const SpatialReference& outSRS);
 
 private:
-    PointBufferPtr m_buf;
+    virtual void processOptions(const Options& options);
+    virtual void ready(PointContext ctx);
+    virtual void filter(PointBuffer& buffer);
 
-    virtual void ready(PointContext ctx)
-        { m_buf.reset(new PointBuffer(ctx)); }
+    void updateBounds();
+    void transform(double& x, double& y, double& z);
 
-    virtual PointBufferSet run(PointBufferPtr buf)
-    {
-        PointBufferSet pbSet;
+    SpatialReference m_inSRS;
+    SpatialReference m_outSRS;
+    bool m_inferInputSRS;
 
-        m_buf->append(*buf);
-        pbSet.insert(m_buf);
-        return pbSet;
-    }
+    typedef boost::shared_ptr<void> ReferencePtr;
+    typedef boost::shared_ptr<void> TransformPtr;
+    ReferencePtr m_in_ref_ptr;
+    ReferencePtr m_out_ref_ptr;
+    TransformPtr m_transform_ptr;
+    boost::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
 
-    Merge& operator=(const Merge&); // not implemented
-    Merge(const Merge&); // not implemented
+    ReprojectionFilter& operator=(const ReprojectionFilter&); // not implemented
+    ReprojectionFilter(const ReprojectionFilter&); // not implemented
 };
 
-} // namespace filters
 } // namespace pdal
-

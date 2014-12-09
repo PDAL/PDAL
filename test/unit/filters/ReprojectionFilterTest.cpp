@@ -36,7 +36,7 @@
 
 #include <pdal/SpatialReference.hpp>
 #include <LasReader.hpp>
-#include <pdal/filters/Reprojection.hpp>
+#include <ReprojectionFilter.hpp>
 #include <pdal/PointBuffer.hpp>
 
 #include "Support.hpp"
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(ReprojectionFilterTest_test_1)
             "Output SRS to reproject to");
         options.add(out_srs);
 
-        filters::Reprojection reprojectionFilter;
+        ReprojectionFilter reprojectionFilter;
         reprojectionFilter.setOptions(options);
         reprojectionFilter.setInput(&reader);
 
@@ -143,7 +143,7 @@ BOOST_AUTO_TEST_CASE(InPlaceReprojectionFilterTest_test_2)
         options.add(filename);
 
         LasReader reader(options);
-        filters::Reprojection reprojectionFilter(options);
+        ReprojectionFilter reprojectionFilter(options);
         reprojectionFilter.setInput(&reader);
         reprojectionFilter.prepare(ctx);
 

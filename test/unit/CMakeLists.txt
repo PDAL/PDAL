@@ -130,6 +130,8 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/filters/decimation
     ${PROJECT_SOURCE_DIR}/filters/ferry
     ${PROJECT_SOURCE_DIR}/filters/mortonorder
+    ${PROJECT_SOURCE_DIR}/filters/reprojection
+    ${PROJECT_SOURCE_DIR}/filters/sort
     ${PROJECT_SOURCE_DIR}/filters/splitter
     ${PROJECT_SOURCE_DIR}/kernels/info
 )

@@ -34,7 +34,6 @@
 
 #include "UnitTest.hpp"
 
-#include <pdal/filters/Reprojection.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>

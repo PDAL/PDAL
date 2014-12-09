@@ -533,7 +533,7 @@ inline std::string name(Id::Enum id)
     case Id::YVelocity:
         return "YVelocity";
     case Id::ZVelocity:
-        return "YVelocity";
+        return "ZVelocity";
     case Id::PlatformHeading:
         return "PlatformHeading";
     case Id::WanderAngle:

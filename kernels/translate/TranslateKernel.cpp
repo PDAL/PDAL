@@ -36,7 +36,7 @@
 
 #include <BufferReader.hpp>
 #include <pdal/filters/Crop.hpp>
-#include <pdal/filters/Reprojection.hpp>
+#include <ReprojectionFilter.hpp>
 #include "KernelSupport.hpp"
 #include <pdal/StageFactory.hpp>
 
@@ -209,14 +209,14 @@ Stage* TranslateKernel::makeTranslate(Options translateOptions, Stage* reader_st
         {
             translateOptions.add("out_srs", m_output_srs.getWKT());
             reprojection_stage =
-                new filters::Reprojection();
+                new ReprojectionFilter();
             reprojection_stage->setInput(next_stage);
             reprojection_stage->setOptions(readerOptions);
             next_stage = reprojection_stage;
         } else if (bHaveReprojection)
         {
             reprojection_stage =
-                new filters::Reprojection();
+                new ReprojectionFilter();
             reprojection_stage->setInput(next_stage);
             reprojection_stage->setOptions(extra_opts.find("filters.reprojection")->second);
             next_stage = reprojection_stage;

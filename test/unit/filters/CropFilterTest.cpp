@@ -35,7 +35,7 @@
 #include "UnitTest.hpp"
 
 #include <FauxReader.hpp>
-#include <pdal/filters/Reprojection.hpp>
+#include <ReprojectionFilter.hpp>
 #include <LasReader.hpp>
 #include <pdal/filters/Crop.hpp>
 #include <pdal/filters/Stats.hpp>
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon_reprojection)
 
     LasReader reader;
     reader.setOptions(options);
-    filters::Reprojection reprojection;
+    ReprojectionFilter reprojection;
     reprojection.setOptions(options);
     reprojection.setInput(&reader);
     filters::Crop crop;

@@ -40,17 +40,14 @@
 namespace pdal
 {
 
-namespace filters
-{
-
-class PDAL_DLL Sort : public Filter
+class PDAL_DLL SortFilter : public Filter
 {
 public:
     SET_STAGE_NAME("filters.sort", "Sort Filter")
     SET_STAGE_LINK("http://www.pdal.io/stages/filters.sort.html")
     SET_STAGE_ENABLED(true)
 
-    Sort()
+    SortFilter()
     {}
 
 private:
@@ -76,9 +73,8 @@ private:
         std::sort(buf.begin(), buf.end(), cmp);
     }
 
-    Sort& operator=(const Sort&); // not implemented
-    Sort(const Sort&); // not implemented
+    SortFilter& operator=(const SortFilter&); // not implemented
+    SortFilter(const SortFilter&); // not implemented
 };
 
-} // namespace filters
 } // namespace pdal
