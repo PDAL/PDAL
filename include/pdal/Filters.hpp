@@ -45,7 +45,7 @@
 #include <pdal/filters/Predicate.hpp>
 #include <pdal/filters/Programmable.hpp>
 #endif
-#include <pdal/filters/Reprojection.hpp>
+#include <ReprojectionFilter.hpp>
 #include <SortFilter.hpp>
 #include <SplitterFilter.hpp>
 #include <pdal/filters/Stats.hpp>
