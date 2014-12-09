@@ -133,7 +133,7 @@ TEST(GDALUtilsTest, GDALUtilsTest_test_vsifile_write)
 
         long pos_a = (long)ftell(fp_a);
         long pos_b = (long)VSIFTellL(fp_b);
-        EXPECT_TRUE(pos_a = pos_b);
+        EXPECT_EQ(pos_a, pos_b);
 
         fclose(fp_a);
         VSIFCloseL(fp_b);
