@@ -63,12 +63,12 @@ void DbReader::loadSchema(PointContextRef ctx, const XMLSchema& schema)
 }
 
 
-DimTypeList DbReader::dbDimTypes() const
+ExtDimTypeList DbReader::dbDimTypes() const
 {
-    DimTypeList dimTypes;
+    ExtDimTypeList dimTypes;
 
     for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-        dimTypes.push_back(DimType(di->m_id, di->m_type));
+        dimTypes.push_back(ExtDimType(di->m_id, di->m_type, di->m_xform));
     return dimTypes;
 }
 

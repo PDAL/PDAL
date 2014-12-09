@@ -110,7 +110,11 @@ BOOST_AUTO_TEST_CASE(test_compress_file)
     BOOST_CHECK_EQUAL(ctx.pointSize(), 52);
     SQLiteTestStream s;
 
-    LazPerfCompressor<SQLiteTestStream> compressor(s, ctx.dimTypes());
+    ExtDimTypeList extDimTypes;
+    DimTypeList dimTypes = ctx.dimTypes();
+    for (auto di = dimTypes.begin(); di != dimTypes.end(); ++di)
+        extDimTypes.push_back(ExtDimType(*di, XForm()));
+    LazPerfCompressor<SQLiteTestStream> compressor(s, extDimTypes);
 
     DimTypeList dims = ctx.dimTypes();
     std::vector<char> tmpbuf(compressor.pointSize());
@@ -127,7 +131,7 @@ BOOST_AUTO_TEST_CASE(test_compress_file)
     SQLiteTestStream s2;
     s2.buf = s.buf;
 
-    LazPerfDecompressor<SQLiteTestStream> decompressor(s2, ctx.dimTypes());
+    LazPerfDecompressor<SQLiteTestStream> decompressor(s2, extDimTypes);
 
     size_t outbufSize = decompressor.pointSize() * buffer->size();
     std::vector<char> outbuf(outbufSize);

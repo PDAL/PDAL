@@ -191,6 +191,16 @@ DimTypeList XMLSchema::dimTypes() const
 }
 
 
+ExtDimTypeList XMLSchema::extDimTypes() const
+{
+    ExtDimTypeList extDimTypes;
+
+    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+        extDimTypes.push_back(ExtDimType(di->m_id, di->m_type, di->m_xform));
+    return extDimTypes;
+}
+
+
 void XMLSchema::read(std::string xml, std::string xsd)
 {
     xmlDocPtr doc = init(xml, xsd);
@@ -347,7 +357,6 @@ bool XMLSchema::load(xmlDocPtr doc)
         if (boost::equals((const char*)dimension->name, "metadata"))
         {
             m_metadata = MetadataNode("root");
-            std::cerr << "Found metadata node!\n";
             if (!loadMetadata(dimension, m_metadata))
                 return false;
             continue;
@@ -449,7 +458,7 @@ bool XMLSchema::load(xmlDocPtr doc)
 }
 
 
-std::string XMLSchema::getXML(const DimTypeList& dims, MetadataNode m)
+std::string XMLSchema::getXML(const ExtDimTypeList& dims, MetadataNode m)
 {
     xmlBuffer *b = xmlBufferCreate();
     xmlTextWriterPtr w = xmlNewTextWriterMemory(b, 0);
@@ -500,7 +509,7 @@ const XMLDim& XMLSchema::xmlDim(Dimension::Id::Enum id) const
 }
 
 
-void XMLSchema::write(xmlTextWriterPtr w, const DimTypeList& dims,
+void XMLSchema::write(xmlTextWriterPtr w, const ExtDimTypeList& dims,
     MetadataNode m)
 {
     int pos = 0;
@@ -525,6 +534,17 @@ void XMLSchema::write(xmlTextWriterPtr w, const DimTypeList& dims,
             xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc",
                 (const xmlChar*)"description", NULL,
                 (const xmlChar*)description.c_str());
+
+        XForm xform = di->m_xform;
+        if (xform.nonstandard())
+        {
+            xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc",
+                (const xmlChar *)"scale", NULL,
+                (const xmlChar *)std::to_string(xform.m_scale).c_str());
+            xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc",
+                (const xmlChar *)"offset", NULL,
+                (const xmlChar *)std::to_string(xform.m_offset).c_str());
+        }
 
         std::string name = Dimension::name(di->m_id);
         if (name.size())

@@ -547,8 +547,8 @@ void OciWriter::createPCEntry()
         s_geom << "," << bounds.maxy;
     s_geom << "))";
 
-    XMLSchema schema(m_orientation);;
-    std::string schemaData = schema.getXML(m_dimTypes);
+    XMLSchema schema(m_orientation);
+    std::string schemaData = schema.getXML(dbDimTypes());
 
     oss << "declare\n"
         "  pc_id NUMBER := :" << nPCPos << ";\n"

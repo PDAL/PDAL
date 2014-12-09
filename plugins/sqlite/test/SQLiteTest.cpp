@@ -48,94 +48,49 @@
 
 using namespace pdal;
 
-static unsigned chunk_size = 15;
-
 Options getSQLITEOptions()
 {
     Options options;
 
-
-    Option capacity("capacity", chunk_size,"capacity");
-    options.add(capacity);
-
-    Option overwrite("overwrite", true,"overwrite");
-    options.add(overwrite);
-
-    std::string temp_filename(Support::temppath("temp-SqliteWriterTest_test_simple_las.sqlite"));
-    Option connection("connection",temp_filename, "connection");
-    options.add(connection);
-
-    Option block_table_name("block_table_name", "PDAL_TEST_BLOCKS", "block_table_name");
-    options.add(block_table_name);
-
-    Option base_table_name("cloud_table_name", "PDAL_TEST_BASE" , "");
-    options.add(base_table_name);
-
-    Option is3d("is3d", false,"");
-    options.add(is3d);
-
-    Option srid("srid",4326,"");
-    options.add(srid);
-
+    options.add("capacity", 15U, "capacity");
+    options.add("overwrite", true, "overwrite");
+    options.add("connection",
+        Support::temppath("temp-SqliteWriterTest_test_simple_las.sqlite"),
+        "connection");
+    options.add("block_table_name", "PDAL_TEST_BLOCKS", "block_table_name");
+    options.add("cloud_table_name", "PDAL_TEST_BASE");
+    options.add("is3d", false);
+    options.add("srid", 4326);
     options.add("out_srs", "EPSG:4269");
-/**
-    options.add("scale_x", 0.0000001f);
-    options.add("scale_y", 0.0000001f);
-**/
-
     options.add("filename", Support::datapath("las/1.2-with-color.las"));
-
-    Option query("query", "                SELECT b.schema, l.cloud, l.block_id, l.num_points, l.bbox, l.extent, l.points, b.cloud FROM PDAL_TEST_BLOCKS l, PDAL_TEST_BASE b "
-                 "WHERE l.cloud = b.cloud and l.cloud in (1) "
-                "order by l.cloud", "");
-    options.add(query);
-
-    Option a_srs("spatialreference", "EPSG:2926", "");
-    options.add(a_srs);
-
-    Option pack("pack_ignored_fields", true, "");
-    options.add(pack);
-
-
-    Option cloud_column("cloud_column_name", "CLOUD", "");
-    options.add(cloud_column);
-
-    Option xml_schema_dump("xml_schema_dump", "sqlite-xml-schema-dump.xml", "");
-    options.add(xml_schema_dump);
-
-    Option con_type("type", "sqlite", "");
-    options.add(con_type);
+    options.add("query", "SELECT b.schema, l.cloud, l.block_id, "
+        "l.num_points, l.bbox, l.extent, l.points, b.cloud "
+        "FROM PDAL_TEST_BLOCKS l, PDAL_TEST_BASE b "
+        "WHERE l.cloud = b.cloud and l.cloud in (1) "
+        "order by l.cloud", "");
+    options.add("spatialreference", "EPSG:2926");
+    options.add("pack_ignored_fields", true);
+    options.add("cloud_column_name", "CLOUD");
+    options.add("xml_schema_dump", "sqlite-xml-schema-dump.xml");
+    options.add("type", "sqlite");
 
     return options;
 }
 
-
-struct SQLiteTestFixture
-{
-    SQLiteTestFixture() : m_options(getSQLITEOptions())
-    {}
-
-    ~SQLiteTestFixture()
-    {
-        std::string temp_filename =
-            m_options.getValueOrThrow<std::string>("connection");
-        FileUtils::deleteFile(temp_filename);
-    }
-
-    pdal::Options m_options;
-};
-
-
 void testReadWrite(bool compression, bool scaling)
 {
     // remove file from earlier run, if needed
-    std::string tempFilename =
+    std::string tempFilename = 
         getSQLITEOptions().getValueOrThrow<std::string>("connection");
 
     StageFactory f;
 
     Options sqliteOptions = getSQLITEOptions();
-
+    if (scaling)
+    {
+        sqliteOptions.add("scale_x", 0.01);
+        sqliteOptions.add("scale_y", 0.01);
+    }
     sqliteOptions.add("compression", compression, "");
 
     StageFactory::ReaderCreator *lasRc = f.getReaderCreator("readers.las");
@@ -191,9 +146,11 @@ void testReadWrite(bool compression, bool scaling)
     BOOST_CHECK_EQUAL(x, 636038);
     double xd = buffer->getFieldAs<double>(Id::X, 10);
     BOOST_CHECK_CLOSE(xd, 636037.53, 0.001);
+
+   FileUtils::deleteFile(tempFilename);
 }
 
-BOOST_FIXTURE_TEST_SUITE(SQLiteTest, SQLiteTestFixture)
+BOOST_AUTO_TEST_SUITE(SQLiteTest)
 
 BOOST_AUTO_TEST_CASE(readWrite)
 {
@@ -204,6 +161,18 @@ BOOST_AUTO_TEST_CASE(readWrite)
 BOOST_AUTO_TEST_CASE(readWriteCompress)
 {
     testReadWrite(true, false);
+}
+#endif
+
+BOOST_AUTO_TEST_CASE(readWriteScale)
+{
+    testReadWrite(false, true);
+}
+
+#ifdef PDAL_HAVE_LAZPERF
+BOOST_AUTO_TEST_CASE(readWriteCompressScale)
+{
+    testReadWrite(true, true);
 }
 #endif
 

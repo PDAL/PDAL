@@ -78,17 +78,36 @@ void DbWriter::ready(PointContextRef ctx)
 
 /// Get a dimension type list for the storage schema.
 /// \return  Storage dimension types.
-DimTypeList DbWriter::dbDimTypes() const
+ExtDimTypeList DbWriter::dbDimTypes() const
 {
     using namespace Dimension;
 
-    if (!locationScaling())
-        return m_dimTypes;
+    ExtDimTypeList dimTypes;
+    for (auto di = m_dimTypes.begin(); di != m_dimTypes.end(); ++di)
+        dimTypes.push_back(ExtDimType(*di, XForm()));
 
-    DimTypeList dimTypes(m_dimTypes);
+    if (!locationScaling())
+        return dimTypes;
+
     for (auto di = dimTypes.begin(); di != dimTypes.end(); ++di)
-        if (di->m_id == Id::X || di->m_id == Id::Y || di->m_id == Id::Z)
+    {
+        if (di->m_id == Id::X)
+        {
+            di->m_xform = m_xXform;
             di->m_type = Type::Signed32;
+        }
+        if (di->m_id == Id::Y)
+        {
+            di->m_xform = m_yXform;
+            di->m_type = Type::Signed32;
+        }
+        if (di->m_id == Id::Z)
+        {
+            di->m_xform = m_zXform;
+            di->m_type = Type::Signed32;
+        }
+    }
+
     return dimTypes;
 }
 
@@ -160,7 +179,6 @@ size_t DbWriter::readPoint(const PointBuffer& pb, PointId idx, char *outbuf)
     if (locationScaling())
     {
         int outOffset;
-
 
         if (m_xPackedOffset >= 0)
             outOffset = m_xPackedOffset;

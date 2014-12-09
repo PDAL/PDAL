@@ -62,7 +62,7 @@ namespace
 {
 
 template<typename LasZipEngine>
-size_t addFields(LasZipEngine& engine, const DimTypeList& dims)
+size_t addFields(LasZipEngine& engine, const ExtDimTypeList& dims)
 {
     using namespace Dimension;
 
@@ -129,7 +129,7 @@ template<typename OutputStream>
 class LazPerfCompressor
 {
 public:
-    LazPerfCompressor(OutputStream& output, const DimTypeList& dims) :
+    LazPerfCompressor(OutputStream& output, const ExtDimTypeList& dims) :
         m_encoder(output),
         m_compressor(laszip::formats::make_dynamic_compressor(m_encoder)),
         m_pointSize(0)
@@ -170,7 +170,7 @@ template<typename InputStream>
 class LazPerfDecompressor
 {
 public:
-    LazPerfDecompressor(InputStream& input, const DimTypeList& dims) :
+    LazPerfDecompressor(InputStream& input, const ExtDimTypeList& dims) :
         m_decoder(input),
         m_decompressor(laszip::formats::make_dynamic_decompressor(m_decoder))
     { m_pointSize = addFields(m_decompressor, dims); }

@@ -282,7 +282,6 @@ uint32_t PgWriter::SetupSchema(uint32_t srid)
 
     XMLSchema schema;
     std::string xml = schema.getXML(dbDimTypes(), m);
-std::cerr << "XML = " << xml << "!\n";
 
     // Do any of the existing schemas match the one we want to use?
     if (schema_count > 0)

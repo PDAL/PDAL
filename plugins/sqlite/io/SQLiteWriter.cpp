@@ -96,12 +96,14 @@ void SQLiteWriter::initialize()
 {
     try
     {
-        log()->get(LogLevel::Debug) << "Connection: '" << m_connection << "'" << std::endl;
+        log()->get(LogLevel::Debug) << "Connection: '" << m_connection << 
+            "'" << std::endl;
         m_session = std::unique_ptr<SQLite>(new SQLite(m_connection, log()));
         m_session->connect(true);
         log()->get(LogLevel::Debug) << "Connected to database" << std::endl;
         bool bHaveSpatialite = m_session->doesTableExist("geometry_columns");
-        log()->get(LogLevel::Debug) << "Have spatialite?: " << bHaveSpatialite << std::endl;
+        log()->get(LogLevel::Debug) << "Have spatialite?: " <<
+            bHaveSpatialite << std::endl;
         m_session->spatialite(m_modulename);
 
         if (!bHaveSpatialite)
@@ -188,7 +190,8 @@ void SQLiteWriter::writeInit()
         }
     }
 
-    std::string pre_sql = m_options.getValueOrDefault<std::string>("pre_sql", "");
+    std::string pre_sql =
+        m_options.getValueOrDefault<std::string>("pre_sql", "");
     if (pre_sql.size())
     {
         std::string sql = FileUtils::readFileAsString(pre_sql);
@@ -268,10 +271,8 @@ void SQLiteWriter::DeleteBlockTable()
 
     oss << "DROP TABLE " << boost::to_lower_copy(m_block_table);
     m_session->execute(oss.str());
-    log()->get(LogLevel::Debug) << "Dropped block table '"
-                         << boost::to_lower_copy(m_block_table)
-                         << "'" <<std::endl;
-
+    log()->get(LogLevel::Debug) << "Dropped block table '" <<
+        boost::to_lower_copy(m_block_table) << "'" <<std::endl;
 }
 
 
@@ -533,8 +534,7 @@ void SQLiteWriter::writeTile(const PointBuffer& buffer)
         for (PointId idx = 0; idx < buffer.size(); idx++)
         {
             size_t size = readPoint(buffer, idx, storage.data());
-            m_patch->putBytes((const unsigned char *)storage.data(),
-                m_packedPointSize);
+            m_patch->putBytes((const unsigned char *)storage.data(), size);
         }
         log()->get(LogLevel::Debug3) << "uncompressed size: " <<
             m_patch->getBytes().size() << std::endl;

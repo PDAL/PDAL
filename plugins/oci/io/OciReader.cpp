@@ -250,7 +250,7 @@ void OciReader::addDimensions(PointContextRef ctx)
     if (m_schemaFile.size())
     {
         std::string pcSchema =
-            m_block->m_schema.getXML(m_block->m_schema.dimTypes());
+            m_block->m_schema.getXML(m_block->m_schema.extDimTypes());
         std::ostream *out = FileUtils::createFile(m_schemaFile);
         out->write(pcSchema.c_str(), pcSchema.size());
         FileUtils::closeFile(out);

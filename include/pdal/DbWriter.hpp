@@ -53,20 +53,20 @@ protected:
     DbWriter()
     {}
 
-    bool locationScaling() const;
-    DimTypeList dbDimTypes() const;
+    ExtDimTypeList dbDimTypes() const;
     size_t readField(const PointBuffer& pb, char *pos, DimType dimType,
         PointId idx);
     size_t readPoint(const PointBuffer& pb, PointId idx, char *outbuf);
+
+private:
+    virtual void ready(PointContextRef ctx);
+    bool locationScaling() const;
 
     DimTypeList m_dimTypes;
     int m_xPackedOffset;
     int m_yPackedOffset;
     int m_zPackedOffset;
     size_t m_packedPointSize;
-
-private:
-    virtual void ready(PointContextRef ctx);
 
     DbWriter& operator=(const DbWriter&); // not implemented
     DbWriter(const DbWriter&); // not implemented

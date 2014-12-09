@@ -84,8 +84,6 @@ std::string ReadXML(std::string filename)
 BOOST_AUTO_TEST_SUITE(XMLSchemaTest)
 
 
-
-
 BOOST_AUTO_TEST_CASE(test_schema_read)
 {
     using namespace pdal;
@@ -113,7 +111,7 @@ BOOST_AUTO_TEST_CASE(test_schema_read)
     m1.add("uuid", boost::uuids::nil_uuid());
 
     XMLSchema s2;
-    std::string xml_output = s2.getXML(s1.dimTypes(), m);
+    std::string xml_output = s2.getXML(s1.extDimTypes(), m);
 
     XMLSchema s3;
     s3.read(xml_output, xsd);
