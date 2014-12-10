@@ -5,9 +5,9 @@
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/filters/stats)
 
-find_package(GEOS 3.3)
-if (GEOS_FOUND)
-    message(STATUS "Building with Crop support")
+#find_package(GEOS 3.3)
+#if (GEOS_FOUND)
+#    message(STATUS "Building with Crop support")
 
     include_directories(${GEOS_INCLUDE_DIR})
 
@@ -33,6 +33,6 @@ if (GEOS_FOUND)
     )
 
     PDAL_ADD_TEST(croptest "${srcs}" ${crop_filter_lib_name})
-else()
-    message(STATUS "Building without Crop support")
-endif()
+    #else()
+    #message(STATUS "Building without Crop support")
+    #endif()
