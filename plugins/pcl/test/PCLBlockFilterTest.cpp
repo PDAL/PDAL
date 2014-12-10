@@ -47,23 +47,20 @@ using namespace pdal;
 TEST(PCLBlockFilterTest, PCLBlockFilterTest_example_passthrough_xml)
 {
     StageFactory f;
-    StageFactory::FilterCreator* fc = f.getFilterCreator("filters.pclblock");
-    if (fc)
-    {
-        EXPECT_TRUE(fc);
+    std::unique_ptr<Filter> filter(f.createFilter("filters.pclblock"));
+    EXPECT_TRUE(filter.get());
 
-        PipelineManager pipeline;
-        PipelineReader pipelineReader(pipeline);
-        pipelineReader.readPipeline(Support::datapath("filters/pcl/passthrough.xml"));
+    PipelineManager pipeline;
+    PipelineReader pipelineReader(pipeline);
+    pipelineReader.readPipeline(Support::datapath("filters/pcl/passthrough.xml"));
 
-        pipeline.execute();
-        PointContext ctx = pipeline.context();
+    pipeline.execute();
+    PointContext ctx = pipeline.context();
 
-        PointBufferSet pbSet = pipeline.buffers();
-        EXPECT_EQ(pbSet.size(), 1u);
-        PointBufferPtr buf = *pbSet.begin();
-        EXPECT_EQ(buf->size(), 81u);
-    }
+    PointBufferSet pbSet = pipeline.buffers();
+    EXPECT_EQ(pbSet.size(), 1u);
+    PointBufferPtr buf = *pbSet.begin();
+    EXPECT_EQ(buf->size(), 81u);
 }
 
 
@@ -86,36 +83,26 @@ static void test_filter(const std::string& jsonFile,
     options.add(debug);
     options.add(verbose);
 
-    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
-    if (rc)
-    {
-        EXPECT_TRUE(rc);
+    std::unique_ptr<Reader> reader(f.createReader("readers.las"));
+    EXPECT_TRUE(reader.get());
+    reader->setOptions(options);
 
-        Stage* reader = rc();
-        reader->setOptions(options);
+    Option fname("filename", Support::datapath(jsonFile));
+    Options filter_options;
+    filter_options.add(fname);
 
-        Option fname("filename", Support::datapath(jsonFile));
-        Options filter_options;
-        filter_options.add(fname);
+    std::unique_ptr<Filter> pcl_block(f.createFilter("filters.pclblock"));
+    EXPECT_TRUE(pcl_block.get());
+    pcl_block->setOptions(filter_options);
+    pcl_block->setInput(reader.get());
 
-        StageFactory::FilterCreator* fc = f.getFilterCreator("filters.pclblock");
-        if (fc)
-        {
-            EXPECT_TRUE(fc);
+    PointContext ctx;
+    pcl_block->prepare(ctx);
+    PointBufferSet pbSet = pcl_block->execute(ctx);
 
-            Stage* pcl_block = fc();
-            pcl_block->setOptions(filter_options);
-            pcl_block->setInput(reader);
-
-            PointContext ctx;
-            pcl_block->prepare(ctx);
-            PointBufferSet pbSet = pcl_block->execute(ctx);
-
-            EXPECT_EQ(pbSet.size(), 1u);
-            PointBufferPtr buf = *pbSet.begin();
-            EXPECT_EQ(buf->size(), expectedPointCount);
-        }
-    }
+    EXPECT_EQ(pbSet.size(), 1u);
+    PointBufferPtr buf = *pbSet.begin();
+    EXPECT_EQ(buf->size(), expectedPointCount);
 }
 
 

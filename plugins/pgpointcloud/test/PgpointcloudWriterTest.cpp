@@ -129,24 +129,20 @@ private:
 TEST_F(PgpointcloudWriterTest, testWrite)
 {
     StageFactory f;
-    StageFactory::WriterCreator* wc =
-        f.getWriterCreator("writers.pgpointcloud");
-    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
+    std::unique_ptr<Writer> writer(f.createWriter("writers.pgpointcloud"));
+    std::unique_ptr<Reader> reader(f.createReader("readers.las"));
 
-    EXPECT_TRUE(wc);
-    EXPECT_TRUE(rc);
-    if (!wc || !rc)
+    EXPECT_TRUE(writer.get());
+    EXPECT_TRUE(reader.get());
+    if (!writer.get() || !reader.get())
         return;
-
-    Stage* reader = rc();
 
     const std::string file(Support::datapath("las/1.2-with-color.las"));
     Options options;
     options.add("filename", file);
     reader->setOptions(options);
-    std::unique_ptr<Writer> writer(wc());
     writer->setOptions(getWriterOptions());
-    writer->setInput(reader);
+    writer->setInput(reader.get());
 
     PointContext ctx;
     writer->prepare(ctx);
@@ -164,34 +160,25 @@ TEST_F(PgpointcloudWriterTest, testWrite)
 TEST_F(PgpointcloudWriterTest, testNoPointcloudExtension)
 {
     StageFactory f;
-    StageFactory::WriterCreator* wc =
-        f.getWriterCreator("writers.pgpointcloud");
-    if (wc)
-    {
-        EXPECT_TRUE(wc);
+    std::unique_ptr<Writer> writer(f.createWriter("writers.pgpointcloud"));
+    EXPECT_TRUE(writer.get());
 
-        executeOnTestDb("DROP EXTENSION pointcloud");
+    executeOnTestDb("DROP EXTENSION pointcloud");
 
-        const std::string file(Support::datapath("las/1.2-with-color.las"));
+    const std::string file(Support::datapath("las/1.2-with-color.las"));
 
-        const Option opt_filename("filename", file);
+    const Option opt_filename("filename", file);
 
-        StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
-        if (!rc)
-            return;
-        EXPECT_TRUE(rc);
+    std::unique_ptr<Reader> reader(f.createReader("readers.las"));
+    EXPECT_TRUE(reader.get());
+    Options options;
+    options.add(opt_filename);
+    reader->setOptions(options);
+    writer->setOptions(getWriterOptions());
+    writer->setInput(reader.get());
 
-        Stage* reader = rc();
-        pdal::Options options;
-        options.add(opt_filename);
-        reader->setOptions(options);
-        std::unique_ptr<Writer> writer(wc());
-        writer->setOptions(getWriterOptions());
-        writer->setInput(reader);
+    PointContext ctx;
+    writer->prepare(ctx);
 
-        PointContext ctx;
-        writer->prepare(ctx);
-
-        EXPECT_THROW(writer->execute(ctx), pdal::pdal_error);
-    }
+    EXPECT_THROW(writer->execute(ctx), pdal_error);
 }

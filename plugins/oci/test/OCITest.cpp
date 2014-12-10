@@ -222,31 +222,21 @@ bool WriteUnprojectedData()
     PointContext ctx;
 
     StageFactory f;
-    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
+    std::unique_ptr<Reader> reader(f.createReader("readers.las"));
+    EXPECT_TRUE(reader.get());
+    reader->setOptions(options);
+    // filters::Chipper chipper(options);
+    // chipper.setInput(&reader);
+    std::unique_ptr<Writer> writer(f.createWriter("writers.oci"));
+    EXPECT_TRUE(writer.get());
+    writer->setOptions(options);
+    writer->setInput(reader.get());
 
-    if (rc)
-    {
-        EXPECT_TRUE(rc);
+    writer->prepare(ctx);
+    writer->execute(ctx);
 
-        Stage* reader = rc();
-        reader->setOptions(options);
-        // filters::Chipper chipper(options);
-        // chipper.setInput(&reader);
-        StageFactory::WriterCreator* wc = f.getWriterCreator("writers.oci");
-        if (wc)
-        {
-            EXPECT_TRUE(wc);
-
-            std::unique_ptr<Writer> writer(wc());
-            writer->setOptions(options);
-            writer->setInput(reader);
-
-            writer->prepare(ctx);
-            writer->execute(ctx);
-
-            //ABELL - This test doesn't test anything anymore.  Perhaps it should.
-        }
-    }
+    //ABELL - This test doesn't test anything anymore.  Perhaps it should.
+}
     return true;
 }
 
@@ -291,60 +281,55 @@ void compareAgainstSourceBuffer(PointBuffer const& candidate,
 
     PointContext tc;
     StageFactory f;
-    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
-    if (rc)
+    std::unique_ptr<Reader> reader(f.createReader("readers.las"));
+    EXPECT_TRUE(reader.get());
+    reader->setOptions(options);
+
+    reader->prepare(tc);
+
+    //EXPECT_EQ(candidate.size(), reader->getNumPoints());
+
+    PointBufferSet pbSet = reader->execute(tc);
+    EXPECT_EQ(pbSet.size(), 1u);
+    PointBufferPtr source = *pbSet.begin();
+
+  // EXPECT_EQ(source->size(), reader->getNumPoints());
+
+    // int X[] = { 49405730, 49413382, 49402110, 494192890, 49418622, 49403411 };
+    // int Y[] = { 487743335, 487743982, 487743983, 487744219, 487744254, 487745019 };
+    // int Z[] = { 13063, 13044, 13046, 13050, 13049, 13066 };
+    // int I[] = { 134, 75, 153, 93, 67, 167 };
+    // int R[] = { 142, 152, 146, 104, 113, 163 };
+    // int G[] = { 102, 108, 104, 96, 97, 118 };
+    // int B[] = { 137, 134, 140, 120, 123, 150 };
+    //
+    for (unsigned i = 0; i < 6; ++i)
     {
-        EXPECT_TRUE(rc);
+        int32_t sx = source->getFieldAs<int32_t>(Dimension::Id::X, i);
+        int32_t sy = source->getFieldAs<int32_t>(Dimension::Id::Y, i);
+        int32_t sz = source->getFieldAs<int32_t>(Dimension::Id::Z, i);
+        uint16_t sintensity = source->getFieldAs<uint16_t>(
+            Dimension::Id::Intensity, i);
+        uint16_t sred = source->getFieldAs<uint16_t>(Dimension::Id::Red, i);
+        uint16_t sgreen = source->getFieldAs<uint16_t>(Dimension::Id::Green, i);
+        uint16_t sblue = source->getFieldAs<uint16_t>(Dimension::Id::Blue, i);
 
-        Stage* reader = rc();
-        reader->setOptions(options);
+        int32_t cx = candidate.getFieldAs<int32_t>(Dimension::Id::X, i);
+        int32_t cy = candidate.getFieldAs<int32_t>(Dimension::Id::Y, i);
+        int32_t cz = candidate.getFieldAs<int32_t>(Dimension::Id::Z, i);
+        uint16_t cintensity =
+            candidate.getFieldAs<uint16_t>(Dimension::Id::Intensity, i);
+        uint16_t cred = candidate.getFieldAs<uint16_t>(Dimension::Id::Red, i);
+        uint16_t cgreen = candidate.getFieldAs<uint16_t>(Dimension::Id::Green, i);
+        uint16_t cblue = candidate.getFieldAs<uint16_t>(Dimension::Id::Blue, i);
 
-        reader->prepare(tc);
-
-        //EXPECT_EQ(candidate.size(), reader->getNumPoints());
-
-        PointBufferSet pbSet = reader->execute(tc);
-        EXPECT_EQ(pbSet.size(), 1u);
-        PointBufferPtr source = *pbSet.begin();
-
-      // EXPECT_EQ(source->size(), reader->getNumPoints());
-
-        // int X[] = { 49405730, 49413382, 49402110, 494192890, 49418622, 49403411 };
-        // int Y[] = { 487743335, 487743982, 487743983, 487744219, 487744254, 487745019 };
-        // int Z[] = { 13063, 13044, 13046, 13050, 13049, 13066 };
-        // int I[] = { 134, 75, 153, 93, 67, 167 };
-        // int R[] = { 142, 152, 146, 104, 113, 163 };
-        // int G[] = { 102, 108, 104, 96, 97, 118 };
-        // int B[] = { 137, 134, 140, 120, 123, 150 };
-        //
-        for (unsigned i = 0; i < 6; ++i)
-        {
-            int32_t sx = source->getFieldAs<int32_t>(Dimension::Id::X, i);
-            int32_t sy = source->getFieldAs<int32_t>(Dimension::Id::Y, i);
-            int32_t sz = source->getFieldAs<int32_t>(Dimension::Id::Z, i);
-            uint16_t sintensity = source->getFieldAs<uint16_t>(
-                Dimension::Id::Intensity, i);
-            uint16_t sred = source->getFieldAs<uint16_t>(Dimension::Id::Red, i);
-            uint16_t sgreen = source->getFieldAs<uint16_t>(Dimension::Id::Green, i);
-            uint16_t sblue = source->getFieldAs<uint16_t>(Dimension::Id::Blue, i);
-
-            int32_t cx = candidate.getFieldAs<int32_t>(Dimension::Id::X, i);
-            int32_t cy = candidate.getFieldAs<int32_t>(Dimension::Id::Y, i);
-            int32_t cz = candidate.getFieldAs<int32_t>(Dimension::Id::Z, i);
-            uint16_t cintensity =
-                candidate.getFieldAs<uint16_t>(Dimension::Id::Intensity, i);
-            uint16_t cred = candidate.getFieldAs<uint16_t>(Dimension::Id::Red, i);
-            uint16_t cgreen = candidate.getFieldAs<uint16_t>(Dimension::Id::Green, i);
-            uint16_t cblue = candidate.getFieldAs<uint16_t>(Dimension::Id::Blue, i);
-
-            EXPECT_EQ(sx, cx);
-            EXPECT_EQ(sy, cy);
-            EXPECT_EQ(sz, cz);
-            EXPECT_EQ(sintensity, cintensity);
-            EXPECT_EQ(sred, cred);
-            EXPECT_EQ(sgreen, cgreen);
-            EXPECT_EQ(sblue, cblue);
-        }
+        EXPECT_EQ(sx, cx);
+        EXPECT_EQ(sy, cy);
+        EXPECT_EQ(sz, cz);
+        EXPECT_EQ(sintensity, cintensity);
+        EXPECT_EQ(sred, cred);
+        EXPECT_EQ(sgreen, cgreen);
+        EXPECT_EQ(sblue, cblue);
     }
 }
 
@@ -374,26 +359,21 @@ TEST_F(OCITest, read_unprojected_data)
     verbose.setValue<std::string>( "7");
 
     StageFactory f;
-    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.oci");
-    if (rc)
-    {
-        EXPECT_TRUE(rc);
+    std::unique_ptr<Reader> reader(f.createReader("readers.oci"));
+    EXPECT_TRUE(reader.get());
 
-        std::unique_ptr<Reader> reader(rc());
+    reader->setOptions(options);
+    PointContext ctx;
+    reader->prepare(ctx);
+    PointBufferSet pbSet = reader->execute(ctx);
+    EXPECT_EQ(pbSet.size(), 1u);
+    PointBufferPtr buf = *pbSet.begin();
+    EXPECT_EQ(buf->size(), 1065u);
 
-        reader->setOptions(options);
-        PointContext ctx;
-        reader->prepare(ctx);
-        PointBufferSet pbSet = reader->execute(ctx);
-        EXPECT_EQ(pbSet.size(), 1u);
-        PointBufferPtr buf = *pbSet.begin();
-        EXPECT_EQ(buf->size(), 1065u);
+    // checkUnProjectedPoints(*buf);
 
-        // checkUnProjectedPoints(*buf);
-
-        // compareAgainstSourceBuffer(*buf,  Support::datapath("autzen-utm-chipped-25.las"));
-        compareAgainstSourceBuffer(*buf, Support::datapath("autzen/autzen-utm.las"));
-    }
+    // compareAgainstSourceBuffer(*buf,  Support::datapath("autzen-utm-chipped-25.las"));
+    compareAgainstSourceBuffer(*buf, Support::datapath("autzen/autzen-utm.las"));
 }
 
 

@@ -106,6 +106,7 @@ static void compare_contents(const std::string& las_file, const std::string& ntf
 
 TEST(NitfWriterTest, test1)
 {
+    StageFactory f;
 
     const std::string las_input(Support::datapath("las/1.2-with-color.las"));
     const std::string nitf_output(Support::temppath("temp_nitf.ntf"));
@@ -146,36 +147,25 @@ TEST(NitfWriterTest, test1)
         // writer_opts.add(verbose);
         writer_opts.add(writer_opt1);
 
-        StageFactory f;
-        StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
-        if (rc)
+        std::unique_ptr<Reader> reader(f.createReader("readers.las"));
+        EXPECT_TRUE(reader.get());
+        reader->setOptions(reader_opts);
+
+        std::unique_ptr<Writer> writer(f.createWriter("writers.nitf"));
+        EXPECT_TRUE(writer.get());
+        writer->setOptions(writer_opts);
+        writer->setInput(reader.get());
         {
-            EXPECT_TRUE(rc);
-
-            Stage* reader = rc();
-            reader->setOptions(reader_opts);
-
-            StageFactory::WriterCreator* wc = f.getWriterCreator("writers.nitf");
-            if(wc)
-            {
-                EXPECT_TRUE(wc);
-
-                std::unique_ptr<Writer> writer(wc());
-                writer->setOptions(writer_opts);
-                writer->setInput(reader);
-                {
-                    // writer.setCompressed(false);
-                    // // writer.setDate(0, 0);
-                    // // writer.setPointFormat(::drivers::las::PointFormat3);
-                    // // writer.setSystemIdentifier("");
-                    // writer.setGeneratingSoftware("PDAL-NITF");
-                    // writer.setChunkSize(100);
-                }
-                PointContext ctx;
-                writer->prepare(ctx);
-                writer->execute(ctx);
-            }
+            // writer.setCompressed(false);
+            // // writer.setDate(0, 0);
+            // // writer.setPointFormat(::drivers::las::PointFormat3);
+            // // writer.setSystemIdentifier("");
+            // writer.setGeneratingSoftware("PDAL-NITF");
+            // writer.setChunkSize(100);
         }
+        PointContext ctx;
+        writer->prepare(ctx);
+        writer->execute(ctx);
     }
 
     FileUtils::deleteFile(nitf_output);

@@ -368,17 +368,16 @@ bool Kernel::isVisualize() const
 
 void Kernel::visualize(PointBufferPtr buffer) const
 {
-    StageFactory f;
-    if (f.getWriterCreator("writers.pclvisualizer"))
-    {
-          BufferReader bufferReader;
-          bufferReader.addBuffer(buffer);
+    BufferReader bufferReader;
+    bufferReader.addBuffer(buffer);
 
-          std::unique_ptr<Writer> writer(KernelSupport::makeWriter("foo.pclviz", &bufferReader));
-          PointContext ctx;
-          writer->prepare(ctx);
-          writer->execute(ctx);
-    }
+    StageFactory f;
+    std::unique_ptr<Writer> writer(f.createWriter("writers.pclvisualizer"));
+    writer->setInput(&bufferReader);
+
+    PointContext ctx;
+    writer->prepare(ctx);
+    writer->execute(ctx);
 }
 
 /*
