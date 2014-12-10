@@ -32,158 +32,146 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
-#include <boost/cstdint.hpp>
-
-#include <pdal/filters/Reprojection.hpp>
-#include <pdal/filters/Stats.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
+#include <StatsFilter.hpp>
 #include "Support.hpp"
-#include "StageTester.hpp"
 
 using namespace pdal;
 
-BOOST_AUTO_TEST_SUITE(CropFilterTest)
+namespace
+{
+using namespace std;
 
-BOOST_AUTO_TEST_CASE(test_crop)
+Stage* getReader(string const& reader)
+{
+    StageFactory f;
+    StageFactory::ReaderCreator* rc = f.getReaderCreator(reader);
+    return rc ? rc() : NULL;
+}
+
+Stage* getFilter(string const& filter)
+{
+    StageFactory f;
+    StageFactory::FilterCreator* fc = f.getFilterCreator(filter);
+    return fc ? fc() : NULL;
+}
+
+}
+
+TEST(CropFilterTest, test_crop)
 {
     BOX3D srcBounds(0.0, 0.0, 0.0, 10.0, 100.0, 1000.0);
     Options opts;
     opts.add("bounds", srcBounds);
     opts.add("num_points", 1000);
     opts.add("mode", "ramp");
-    StageFactory f;
-    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.faux");
-    if (rc)
-    {
-        BOOST_CHECK(rc);
+    Stage* reader = getReader("readers.faux");
+    EXPECT_TRUE(reader);
+    reader->setOptions(opts);
 
-        Stage* reader = rc();
-        reader->setOptions(opts);
+    // crop the window to 1/3rd the size in each dimension
+    BOX3D dstBounds(3.33333, 33.33333, 333.33333, 6.66666, 66.66666, 666.66666);
+    Options cropOpts;
+    cropOpts.add("bounds", dstBounds);
 
-        // crop the window to 1/3rd the size in each dimension
-        BOX3D dstBounds(3.33333, 33.33333, 333.33333, 6.66666, 66.66666, 666.66666);
-        Options cropOpts;
-        cropOpts.add("bounds", dstBounds);
+    Stage* filter = getFilter("filters.crop");
+    EXPECT_TRUE(filter);
+    filter->setOptions(cropOpts);
+    filter->setInput(reader);
+    EXPECT_TRUE(filter->getDescription() == "Crop Filter");
 
-        StageFactory::FilterCreator* fc = f.getFilterCreator("filters.crop");
-        if (fc)
-        {
-            BOOST_CHECK(fc);
+    Options statOpts;
 
-            Stage* filter = fc();
-            filter->setOptions(cropOpts);
-            filter->setInput(reader);
-            BOOST_CHECK(filter->getDescription() == "Crop Filter");
+    StatsFilter stats;
+    stats.setOptions(statOpts);
+    stats.setInput(filter);
 
-            Options statOpts;
-            filters::Stats stats;
-            stats.setOptions(statOpts);
-            stats.setInput(filter);
+    PointContext ctx;
+    stats.prepare(ctx);
+    PointBufferSet pbSet = stats.execute(ctx);
+    EXPECT_EQ(pbSet.size(), 1u);
+    PointBufferPtr buf = *pbSet.begin();
 
-            PointContext ctx;
-            stats.prepare(ctx);
-            PointBufferSet pbSet = stats.execute(ctx);
-            BOOST_CHECK_EQUAL(pbSet.size(), 1);
-            PointBufferPtr buf = *pbSet.begin();
+    const stats::Summary& statsX = stats.getStats(Dimension::Id::X);
+    const stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
+    const stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
+    EXPECT_EQ(buf->size(), 333u);
 
-            const filters::stats::Summary& statsX = stats.getStats(Dimension::Id::X);
-            const filters::stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
-            const filters::stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
-            BOOST_CHECK_EQUAL(buf->size(), 333);
+    const double minX = statsX.minimum();
+    const double minY = statsY.minimum();
+    const double minZ = statsZ.minimum();
+    const double maxX = statsX.maximum();
+    const double maxY = statsY.maximum();
+    const double maxZ = statsZ.maximum();
+    const double avgX = statsX.average();
+    const double avgY = statsY.average();
+    const double avgZ = statsZ.average();
 
-            const double minX = statsX.minimum();
-            const double minY = statsY.minimum();
-            const double minZ = statsZ.minimum();
-            const double maxX = statsX.maximum();
-            const double maxY = statsY.maximum();
-            const double maxZ = statsZ.maximum();
-            const double avgX = statsX.average();
-            const double avgY = statsY.average();
-            const double avgZ = statsZ.average();
+    const double delX = 10.0 / 999.0 * 100.0;
+    const double delY = 100.0 / 999.0 * 100.0;
+    const double delZ = 1000.0 / 999.0 * 100.0;
 
-            const double delX = 10.0 / 999.0 * 100.0;
-            const double delY = 100.0 / 999.0 * 100.0;
-            const double delZ = 1000.0 / 999.0 * 100.0;
-
-            BOOST_CHECK_CLOSE(minX, 3.33333, delX);
-            BOOST_CHECK_CLOSE(minY, 33.33333, delY);
-            BOOST_CHECK_CLOSE(minZ, 333.33333, delZ);
-            BOOST_CHECK_CLOSE(maxX, 6.66666, delX);
-            BOOST_CHECK_CLOSE(maxY, 66.66666, delY);
-            BOOST_CHECK_CLOSE(maxZ, 666.66666, delZ);
-            BOOST_CHECK_CLOSE(avgX, 5.00000, delX);
-            BOOST_CHECK_CLOSE(avgY, 50.00000, delY);
-            BOOST_CHECK_CLOSE(avgZ, 500.00000, delZ);
-        }
-    }
+    EXPECT_NEAR(minX, 3.33333, delX);
+    EXPECT_NEAR(minY, 33.33333, delY);
+    EXPECT_NEAR(minZ, 333.33333, delZ);
+    EXPECT_NEAR(maxX, 6.66666, delX);
+    EXPECT_NEAR(maxY, 66.66666, delY);
+    EXPECT_NEAR(maxZ, 666.66666, delZ);
+    EXPECT_NEAR(avgX, 5.00000, delX);
+    EXPECT_NEAR(avgY, 50.00000, delY);
+    EXPECT_NEAR(avgZ, 500.00000, delZ);
 }
 
 
-BOOST_AUTO_TEST_CASE(test_crop_polygon)
+TEST(CropFilterTest, test_crop_polygon)
 {
-    using namespace pdal;
-
 #ifdef PDAL_HAVE_GEOS
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
+    Stage* reader = getReader("readers.las");
+    EXPECT_TRUE(reader);
+    reader->setOptions(ops1);
 
-    StageFactory f;
-    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
-    if (rc)
-    {
-        BOOST_CHECK(rc);
+    Options options;
+    Option debug("debug", true, "");
+    Option verbose("verbose", 9, "");
+    // options.add(debug);
+    // options.add(verbose);
 
-        Stage* reader = rc();
-        reader->setOptions(ops1);
+    std::istream* wkt_stream =
+        FileUtils::openFile(Support::datapath("autzen/autzen-selection.wkt"));
 
-        Options options;
-        Option debug("debug", true, "");
-        Option verbose("verbose", 9, "");
-        // options.add(debug);
-        // options.add(verbose);
+    std::stringstream strbuf;
+    strbuf << wkt_stream->rdbuf();
 
-        std::istream* wkt_stream =
-            FileUtils::openFile(Support::datapath("autzen/autzen-selection.wkt"));
+    std::string wkt(strbuf.str());
 
-        std::stringstream strbuf;
-        strbuf << wkt_stream->rdbuf();
+    Option polygon("polygon", wkt, "");
+    options.add(polygon);
 
-        std::string wkt(strbuf.str());
+    Stage* crop = getFilter("filters.crop");
+    EXPECT_TRUE(crop);
+    crop->setInput(reader);
+    crop->setOptions(options);
 
-        Option polygon("polygon", wkt, "");
-        options.add(polygon);
+    PointContext ctx;
 
-        StageFactory::FilterCreator* fc = f.getFilterCreator("filters.crop");
-        if (fc)
-        {
-            BOOST_CHECK(fc);
+    crop->prepare(ctx);
+    PointBufferSet pbSet = crop->execute(ctx);
+    EXPECT_EQ(pbSet.size(), 1u);
+    PointBufferPtr buffer = *pbSet.begin();
+    EXPECT_EQ(buffer->size(), 47u);
 
-            Stage* crop = fc();
-            crop->setInput(reader);
-            crop->setOptions(options);
-
-            PointContext ctx;
-
-            crop->prepare(ctx);
-            PointBufferSet pbSet = crop->execute(ctx);
-            BOOST_CHECK_EQUAL(pbSet.size(), 1);
-            PointBufferPtr buffer = *pbSet.begin();
-            BOOST_CHECK_EQUAL(buffer->size(), 47u);
-
-            FileUtils::closeFile(wkt_stream);
-        }
-    }
+    FileUtils::closeFile(wkt_stream);
 #endif
 }
 
-BOOST_AUTO_TEST_CASE(test_crop_polygon_reprojection)
+TEST(CropFilterTest, test_crop_polygon_reprojection)
 {
-    using namespace pdal;
-
 #ifdef PDAL_HAVE_GEOS
     Options options;
 
@@ -191,19 +179,19 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon_reprojection)
     Option out_srs("out_srs","EPSG:4326", "Output SRS to reproject to");
     Option x_dim("x_dim", std::string("readers.las.X"),
         "Dimension name to use for 'X' data");
-    pdal::Option y_dim("y_dim", std::string("readers.las.Y"),
+    Option y_dim("y_dim", std::string("readers.las.Y"),
         "Dimension name to use for 'Y' data");
-    pdal::Option z_dim("z_dim", std::string("readers.las.Z"),
+    Option z_dim("z_dim", std::string("readers.las.Z"),
         "Dimension name to use for 'Z' data");
-    pdal::Option x_scale("scale_x", 0.0000001f, "Scale for output X data "
+    Option x_scale("scale_x", 0.0000001f, "Scale for output X data "
         "in the case when 'X' dimension data are to be scaled.  Defaults "
         "to '1.0'.  If not set, the Dimensions's scale will be used");
-    pdal::Option y_scale("scale_y", 0.0000001f, "Scale for output Y data "
+    Option y_scale("scale_y", 0.0000001f, "Scale for output Y data "
         "in the case when 'Y' dimension data are to be scaled.  Defaults "
         "to '1.0'.  If not set, the Dimensions's scale will be used");
-    pdal::Option filename("filename", Support::datapath("las/1.2-with-color.las"));
-    pdal::Option debug("debug", true, "");
-    pdal::Option verbose("verbose", 9, "");
+    Option filename("filename", Support::datapath("las/1.2-with-color.las"));
+    Option debug("debug", true, "");
+    Option verbose("verbose", 9, "");
     // options.add(debug);
     // options.add(verbose);
     options.add(in_srs);
@@ -223,40 +211,29 @@ BOOST_AUTO_TEST_CASE(test_crop_polygon_reprojection)
     Option polygon("polygon", wkt, "");
     options.add(polygon);
 
-    StageFactory f;
-    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
-    if (rc)
-    {
-        BOOST_CHECK(rc);
+    Stage* reader = getReader("readers.las");
+    EXPECT_TRUE(reader);
+    reader->setOptions(options);
 
-        Stage* reader = rc();
-        reader->setOptions(options);
-        filters::Reprojection reprojection;
-        reprojection.setOptions(options);
-        reprojection.setInput(reader);
+    Stage* reprojection = getFilter("filters.reprojection");
+    EXPECT_TRUE(reprojection);
+    reprojection->setOptions(options);
+    reprojection->setInput(reader);
 
-        StageFactory::FilterCreator* fc = f.getFilterCreator("filters.crop");
-        if (fc)
-        {
-            BOOST_CHECK(fc);
+    Stage* crop = getFilter("filters.crop");
+    EXPECT_TRUE(crop);
+    crop->setOptions(options);
+    crop->setInput(reprojection);
 
-            Stage* crop = fc();
-            crop->setOptions(options);
-            crop->setInput(&reprojection);
+    PointContext ctx;
+    PointBufferPtr buffer(new PointBuffer(ctx));
+    crop->prepare(ctx);
+    PointBufferSet pbSet = crop->execute(ctx);
+    EXPECT_EQ(pbSet.size(), 1u);
+    buffer = *pbSet.begin();
+    EXPECT_EQ(buffer->size(), 47u);
 
-            PointContext ctx;
-            PointBufferPtr buffer(new PointBuffer(ctx));
-            crop->prepare(ctx);
-            PointBufferSet pbSet = crop->execute(ctx);
-            BOOST_CHECK_EQUAL(pbSet.size(), 1);
-            buffer = *pbSet.begin();
-            BOOST_CHECK_EQUAL(buffer->size(), 47u);
-
-            FileUtils::closeFile(wkt_stream);
-        }
-    }
+    FileUtils::closeFile(wkt_stream);
 
 #endif
 }
-
-BOOST_AUTO_TEST_SUITE_END()

@@ -3,7 +3,7 @@
 #
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories(${PROJECT_SOURCE_DIR}/filters/crop)
+include_directories(${PROJECT_SOURCE_DIR}/filters/stats)
 
 find_package(GEOS 3.3)
 if (GEOS_FOUND)
