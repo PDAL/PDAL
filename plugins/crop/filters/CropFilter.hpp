@@ -43,22 +43,18 @@
 
 namespace pdal
 {
-
 class PointBuffer;
-
-namespace filters
-{
 
 // removes any points outside of the given range
 // updates the header accordingly
-class PDAL_DLL Crop : public Filter
+class PDAL_DLL CropFilter : public Filter
 {
 public:
     SET_STAGE_NAME("filters.crop", "Crop Filter")
     SET_STAGE_LINK("http://pdal.io/stages/filters.crop.html")
     SET_STAGE_ENABLED(true)
 
-    Crop();
+    CropFilter();
 
     static Options getDefaultOptions();
 
@@ -87,10 +83,8 @@ private:
     void crop(PointBuffer& input, PointBuffer& output);
     BOX3D computeBounds(GEOSGeometry const *geometry);
 
-    Crop& operator=(const Crop&); // not implemented
-    Crop(const Crop&); // not implemented
+    CropFilter& operator=(const CropFilter&); // not implemented
+    CropFilter(const CropFilter&); // not implemented
 };
 
-} // namespace filters
 } // namespace pdal
-

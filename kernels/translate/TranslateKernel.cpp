@@ -35,7 +35,6 @@
 #include "TranslateKernel.hpp"
 
 #include <BufferReader.hpp>
-#include <pdal/filters/Crop.hpp>
 #include <ReprojectionFilter.hpp>
 #include "KernelSupport.hpp"
 #include <pdal/StageFactory.hpp>
@@ -225,7 +224,9 @@ Stage* TranslateKernel::makeTranslate(Options translateOptions, Stage* reader_st
         if ((!m_bounds.empty() && m_wkt.empty()))
         {
             readerOptions.add("bounds", m_bounds);
-            crop_stage = new pdal::filters::Crop();
+            StageFactory f;
+            StageFactory::FilterCreator* fc = f.getFilterCreator("filters.crop");
+            Stage* crop_stage = fc();
             crop_stage->setInput(next_stage);
             crop_stage->setOptions(readerOptions);
             next_stage = crop_stage;
@@ -249,13 +250,17 @@ Stage* TranslateKernel::makeTranslate(Options translateOptions, Stage* reader_st
                 // was likely actually wkt, leave it alone
             }
             readerOptions.add("polygon", m_wkt);
-            crop_stage = new pdal::filters::Crop();
+            StageFactory f;
+            StageFactory::FilterCreator* fc = f.getFilterCreator("filters.crop");
+            Stage* crop_stage = fc();
             crop_stage->setInput(next_stage);
             crop_stage->setOptions(readerOptions);
             next_stage = crop_stage;
         } else if (bHaveCrop)
         {
-            crop_stage = new pdal::filters::Crop();
+            StageFactory f;
+            StageFactory::FilterCreator* fc = f.getFilterCreator("filters.crop");
+            Stage* crop_stage = fc();
             crop_stage->setInput(next_stage);
             crop_stage->setOptions(extra_opts.find("filters.crop")->second);
             next_stage = crop_stage;

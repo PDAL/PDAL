@@ -35,9 +35,8 @@
 #include "gtest/gtest.h"
 
 #include <pdal/Options.hpp>
+#include <pdal/StageFactory.hpp>
 #include <pdal/PDALUtils.hpp>
-#include <pdal/filters/Crop.hpp>
-#include <FauxReader.hpp>
 
 #include <boost/property_tree/xml_parser.hpp>
 
@@ -47,20 +46,54 @@ static std::string xml_str_ref = "<Name>my_string</Name><Value>Yow.</Value><Desc
 
 using namespace pdal;
 
+namespace
+{
+    using namespace std;
+
+    static bool hasOption(vector<Option> const& opts, string const& name)
+    {
+        bool found = false;
+        for (auto o : opts)
+            if (o.getName() == name)
+                found = true;
+        return found;
+    }
+}
+
 TEST(OptionsTest, test_static_options)
 {
     Options ops;
-    FauxReader reader;
-    reader.setOptions(ops);
-    filters::Crop crop;
-    crop.setOptions(ops);
-    crop.setInput(&reader);
-    const Options& opts = crop.getDefaultOptions();
 
-    EXPECT_TRUE(opts.hasOption("bounds"));
-    EXPECT_TRUE(!opts.hasOption("metes"));
-    const boost::property_tree::ptree& pt = utils::toPTree(opts);
-    EXPECT_TRUE(pt.size() == 3);
+    StageFactory f;
+    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.faux");
+    if (rc)
+    {
+        EXPECT_TRUE(rc);
+
+        Stage* reader = rc();
+        reader->setOptions(ops);
+        StageFactory::FilterCreator* fc = f.getFilterCreator("filters.crop");
+        if (fc)
+        {
+            EXPECT_TRUE(fc);
+
+            Stage* crop = fc();
+            crop->setOptions(ops);
+            crop->setInput(reader);
+            std::map<std::string, pdal::StageInfo> const& drivers = f.getStageInfos();
+            typedef std::map<std::string, pdal::StageInfo>::const_iterator Iterator;
+            Iterator i = drivers.find("filters.crop");
+            if (i != drivers.end())
+            {
+              const std::vector<Option> opts = i->second.getProvidedOptions();
+              EXPECT_EQ(opts.size(), 3u);
+              EXPECT_TRUE(hasOption(opts, "bounds"));
+              EXPECT_TRUE(hasOption(opts, "inside"));
+              EXPECT_TRUE(hasOption(opts, "polygon"));
+              EXPECT_FALSE(hasOption(opts, "metes"));
+            }
+        }
+    }
 }
 
 TEST(OptionsTest, test_option_writing)
