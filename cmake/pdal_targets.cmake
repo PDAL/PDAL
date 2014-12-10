@@ -124,7 +124,7 @@ macro(PDAL_ADD_TEST _name _srcs _deps)
     target_link_libraries(${_name} ${PDAL_LINKAGE} ${PDAL_LIB_NAME})
     target_link_libraries(${_name} ${PDAL_LINKAGE} gtest gtest_main)
     target_link_libraries(${_name} ${PDAL_LINKAGE} ${_deps})
-    add_test(NAME ${_name} COMMAND "${PROJECT_BINARY_DIR}/bin/${_name}")
+    add_test(NAME ${_name} COMMAND "${PROJECT_BINARY_DIR}/bin/${_name}" WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/..")
 endmacro(PDAL_ADD_TEST)
 
 ###############################################################################
