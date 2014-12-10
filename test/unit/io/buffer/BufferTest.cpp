@@ -35,8 +35,9 @@
 #include "gtest/gtest.h"
 
 #include <pdal/PointBuffer.hpp>
+#include <pdal/StageFactory.hpp>
 #include <BufferReader.hpp>
-#include <pdal/filters/Stats.hpp>
+#include <StatsFilter.hpp>
 
 using namespace pdal;
 
@@ -65,7 +66,7 @@ TEST(BufferTest, test_basic)
     r.setOptions(ops);
     r.addBuffer(buf);
 
-    filters::Stats s;
+    StatsFilter s;
     s.setOptions(ops);
     s.setInput(&r);
 
@@ -75,19 +76,19 @@ TEST(BufferTest, test_basic)
     buf = *pbSet.begin();
     EXPECT_EQ(buf->size(), 20u);
 
-    filters::stats::Summary xSummary = s.getStats(Dimension::Id::X);
+    stats::Summary xSummary = s.getStats(Dimension::Id::X);
     EXPECT_FLOAT_EQ(xSummary.minimum(), 0);
     EXPECT_FLOAT_EQ(xSummary.maximum(), 19);
     EXPECT_EQ(xSummary.count(), 20u);
     EXPECT_FLOAT_EQ(xSummary.average(), 9.5);
 
-    filters::stats::Summary ySummary = s.getStats(Dimension::Id::Y);
+    stats::Summary ySummary = s.getStats(Dimension::Id::Y);
     EXPECT_FLOAT_EQ(ySummary.minimum(), 0);
     EXPECT_FLOAT_EQ(ySummary.maximum(), 38);
     EXPECT_EQ(ySummary.count(), 20u);
     EXPECT_FLOAT_EQ(ySummary.average(), 19);
 
-    filters::stats::Summary zSummary = s.getStats(Dimension::Id::Z);
+    stats::Summary zSummary = s.getStats(Dimension::Id::Z);
     EXPECT_FLOAT_EQ(zSummary.minimum(), -19);
     EXPECT_FLOAT_EQ(zSummary.maximum(), 0);
     EXPECT_EQ(zSummary.count(), 20u);

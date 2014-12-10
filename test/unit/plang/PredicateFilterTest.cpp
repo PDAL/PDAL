@@ -35,7 +35,7 @@
 #include "gtest/gtest.h"
 
 #include <pdal/filters/Predicate.hpp>
-#include <pdal/filters/Stats.hpp>
+#include <StatsFilter.hpp>
 #include <FauxReader.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
@@ -80,7 +80,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test1)
     EXPECT_TRUE(filter.getDescription() == "Predicate Filter");
 
     Options statOpts;
-    filters::Stats stats;
+    StatsFilter stats;
     stats.setOptions(statOpts);
     stats.setInput(&filter);
 
@@ -90,9 +90,9 @@ TEST(PredicateFilterTest, PredicateFilterTest_test1)
     PointBufferSet pbSet = stats.execute(ctx);
     EXPECT_EQ(pbSet.size(), 1u);
 
-    const filters::stats::Summary& statsX = stats.getStats(Dimension::Id::X);
-    const filters::stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
-    const filters::stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
+    const stats::Summary& statsX = stats.getStats(Dimension::Id::X);
+    const stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
+    const stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
 
     EXPECT_TRUE(Utils::compare_approx<double>(statsX.minimum(), 0.0, 0.01));
     EXPECT_TRUE(Utils::compare_approx<double>(statsY.minimum(), 0.0, 0.01));
@@ -139,7 +139,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test2)
     EXPECT_TRUE(filter.getDescription() == "Predicate Filter");
 
     Options statOpts;
-    filters::Stats stats;
+    StatsFilter stats;
     stats.setOptions(statOpts);
     stats.setInput(&filter);
 
@@ -149,9 +149,9 @@ TEST(PredicateFilterTest, PredicateFilterTest_test2)
     PointBufferSet pbSet = stats.execute(ctx);
     EXPECT_EQ(pbSet.size(), 1u);
 
-    const filters::stats::Summary& statsX = stats.getStats(Dimension::Id::X);
-    const filters::stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
-    const filters::stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
+    const stats::Summary& statsX = stats.getStats(Dimension::Id::X);
+    const stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
+    const stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
 
     EXPECT_TRUE(Utils::compare_approx<double>(statsX.minimum(), 1.0, 0.01));
     EXPECT_TRUE(Utils::compare_approx<double>(statsY.minimum(), 1.0, 0.01));
@@ -220,7 +220,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test3)
     filter2.setInput(&filter1);
 
     Options statOpts;
-    filters::Stats stats;
+    StatsFilter stats;
     stats.setOptions(statOpts);
     stats.setInput(&filter2);
 
@@ -228,9 +228,9 @@ TEST(PredicateFilterTest, PredicateFilterTest_test3)
     stats.prepare(ctx);
     stats.execute(ctx);
 
-    const filters::stats::Summary& statsX = stats.getStats(Dimension::Id::X);
-    const filters::stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
-    const filters::stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
+    const stats::Summary& statsX = stats.getStats(Dimension::Id::X);
+    const stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
+    const stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
 
     EXPECT_TRUE(Utils::compare_approx<double>(statsX.minimum(), 0.5, 0.01));
     EXPECT_TRUE(Utils::compare_approx<double>(statsY.minimum(), 0.5, 0.01));

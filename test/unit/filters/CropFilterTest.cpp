@@ -38,9 +38,10 @@
 #include <ReprojectionFilter.hpp>
 #include <LasReader.hpp>
 #include <pdal/filters/Crop.hpp>
-#include <pdal/filters/Stats.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
+#include <pdal/StageFactory.hpp>
+#include <StatsFilter.hpp>
 #include "Support.hpp"
 
 using namespace pdal;
@@ -66,7 +67,8 @@ TEST(CropFilterTest, test_crop)
     EXPECT_TRUE(filter.getDescription() == "Crop Filter");
 
     Options statOpts;
-    filters::Stats stats;
+
+    StatsFilter stats;
     stats.setOptions(statOpts);
     stats.setInput(&filter);
 
@@ -76,9 +78,9 @@ TEST(CropFilterTest, test_crop)
     EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
 
-    const filters::stats::Summary& statsX = stats.getStats(Dimension::Id::X);
-    const filters::stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
-    const filters::stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
+    const stats::Summary& statsX = stats.getStats(Dimension::Id::X);
+    const stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
+    const stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
     EXPECT_EQ(buf->size(), 333u);
 
     const double minX = statsX.minimum();

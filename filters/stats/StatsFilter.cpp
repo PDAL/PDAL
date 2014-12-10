@@ -32,15 +32,13 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/filters/Stats.hpp>
+#include <StatsFilter.hpp>
 #include <pdal/Utils.hpp>
 
 #include <pdal/PointBuffer.hpp>
 #include <boost/algorithm/string.hpp>
 
 namespace pdal
-{
-namespace filters
 {
 namespace stats
 {
@@ -110,7 +108,7 @@ boost::property_tree::ptree Summary::toPTree(PointContext ctx) const
 } // namespace stats
 
 
-Options Stats::getDefaultOptions()
+Options StatsFilter::getDefaultOptions()
 {
     Options options;
     options.add("sample_size", 1000, "Number of points to return for "
@@ -127,7 +125,7 @@ Options Stats::getDefaultOptions()
 }
 
 
-void Stats::filter(PointBuffer& buffer)
+void StatsFilter::filter(PointBuffer& buffer)
 {
     point_count_t limit = (std::min)(buffer.size(), m_numPoints);
     for (PointId idx = 0; idx < limit; ++idx)
@@ -142,12 +140,12 @@ void Stats::filter(PointBuffer& buffer)
 }
 
 
-void Stats::done(PointContext ctx)
+void StatsFilter::done(PointContext ctx)
 {
     extractMetadata(ctx);
 }
 
-void Stats::processOptions(const Options& options)
+void StatsFilter::processOptions(const Options& options)
 {
     m_exact_dim_opt = m_options.getValueOrDefault<std::string>(
         "exact_dimensions", "");
@@ -168,7 +166,7 @@ void Stats::processOptions(const Options& options)
 }
 
 
-void Stats::initialize()
+void StatsFilter::initialize()
 {
     m_metadata.add("sample_size", m_sample_size);
     m_metadata.add("seed", m_seed);
@@ -177,7 +175,7 @@ void Stats::initialize()
 }
 
 
-void Stats::ready(PointContext ctx)
+void StatsFilter::ready(PointContext ctx)
 {
     using namespace std;
 
@@ -253,7 +251,7 @@ void Stats::ready(PointContext ctx)
 }
 
 
-void Stats::extractMetadata(PointContext ctx)
+void StatsFilter::extractMetadata(PointContext ctx)
 {
 
     uint32_t position(0);
@@ -271,7 +269,7 @@ void Stats::extractMetadata(PointContext ctx)
 }
 
 
-boost::property_tree::ptree Stats::toPTree(PointContext ctx) const
+boost::property_tree::ptree StatsFilter::toPTree(PointContext ctx) const
 {
     using namespace boost::property_tree ;
     ptree tree;
@@ -293,7 +291,7 @@ boost::property_tree::ptree Stats::toPTree(PointContext ctx) const
 }
 
 
-stats::Summary const& Stats::getStats(Dimension::Id::Enum dim) const
+stats::Summary const& StatsFilter::getStats(Dimension::Id::Enum dim) const
 {
     for (auto di = m_stats.begin(); di != m_stats.end(); ++di)
     {
@@ -304,5 +302,4 @@ stats::Summary const& Stats::getStats(Dimension::Id::Enum dim) const
     throw pdal_error("Dimension not found");
 }
 
-} // namespace filters
 } // namespace pdal

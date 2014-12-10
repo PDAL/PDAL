@@ -83,7 +83,7 @@ MAKE_FILTER_CREATOR(MortonOrder, pdal::MortonOrderFilter)
 MAKE_FILTER_CREATOR(Reprojection, pdal::ReprojectionFilter)
 MAKE_FILTER_CREATOR(Sort, pdal::SortFilter)
 MAKE_FILTER_CREATOR(Splitter, pdal::SplitterFilter)
-MAKE_FILTER_CREATOR(Stats, pdal::filters::Stats)
+MAKE_FILTER_CREATOR(Stats, pdal::StatsFilter)
 
 #ifdef PDAL_HAVE_PYTHON
 MAKE_FILTER_CREATOR(Predicate, pdal::filters::Predicate)
@@ -329,7 +329,7 @@ void StageFactory::registerKnownFilters()
     REGISTER_FILTER(Reprojection, pdal::ReprojectionFilter);
     REGISTER_FILTER(Sort, pdal::SortFilter);
     REGISTER_FILTER(Splitter, pdal::SplitterFilter);
-    REGISTER_FILTER(Stats, pdal::filters::Stats);
+    REGISTER_FILTER(Stats, pdal::StatsFilter);
 
 #ifdef PDAL_HAVE_PYTHON
     REGISTER_FILTER(Predicate, pdal::filters::Predicate);
