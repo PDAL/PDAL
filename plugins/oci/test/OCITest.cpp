@@ -304,7 +304,7 @@ void compareAgainstSourceBuffer(PointBuffer const& candidate,
         //EXPECT_EQ(candidate.size(), reader->getNumPoints());
 
         PointBufferSet pbSet = reader->execute(tc);
-        EXPECT_EQ(pbSet.size(), 1);
+        EXPECT_EQ(pbSet.size(), 1u);
         PointBufferPtr source = *pbSet.begin();
 
       // EXPECT_EQ(source->size(), reader->getNumPoints());
@@ -385,9 +385,9 @@ TEST_F(OCITest, read_unprojected_data)
         PointContext ctx;
         reader->prepare(ctx);
         PointBufferSet pbSet = reader->execute(ctx);
-        EXPECT_EQ(pbSet.size(), 1);
+        EXPECT_EQ(pbSet.size(), 1u);
         PointBufferPtr buf = *pbSet.begin();
-        EXPECT_EQ(buf->size(), 1065);
+        EXPECT_EQ(buf->size(), 1065u);
 
         // checkUnProjectedPoints(*buf);
 

@@ -201,7 +201,7 @@ TEST_F(SQLiteTest, SqliteTest_test_simple_las)
                 reader->prepare(ctx);
 
                 PointBufferSet pbSet = reader->execute(ctx);
-                EXPECT_EQ(pbSet.size(), 1);
+                EXPECT_EQ(pbSet.size(), 1u);
 
                 PointBufferPtr buffer = *pbSet.begin();
 

@@ -71,12 +71,12 @@ struct SQLiteTestStream {
     size_t idx;
 };
 
-std::vector<char> getBytes(PointBuffer buffer, PointContextRef ctx)
+std::vector<char> getBytes(pdal::PointBuffer buffer, pdal::PointContextRef ctx)
 {
     std::vector<char> bytes;
     bytes.resize(ctx.pointSize() * buffer.size());
 
-    Charbuf buf(bytes);
+    pdal::Charbuf buf(bytes);
     std::ostream strm(&buf);
     buffer.getBytes(strm, 0, buffer.size());
 
@@ -101,19 +101,19 @@ TEST(CompressionTest, test_compress_file)
     PointBufferSet buffers = reader.execute(ctx);
     PointBufferPtr buffer = *buffers.begin();
 
-    EXPECT_EQ(ctx.pointSize(), 52);
+    EXPECT_EQ(ctx.pointSize(), 52u);
     SQLiteTestStream s;
     compression::Compress<SQLiteTestStream>(ctx, *buffer, s, compression::CompressionType::Lazperf, 0, 0);
 
-    EXPECT_EQ(getBytes(*buffer, ctx).size(), 55380);
-    EXPECT_EQ(s.buf.size(), 30945);
+    EXPECT_EQ(getBytes(*buffer, ctx).size(), 55380u);
+    EXPECT_EQ(s.buf.size(), 30945u);
 
     SQLiteTestStream s2;
     s2.buf = s.buf;
     PointBufferPtr b = compression::Decompress<SQLiteTestStream>(ctx, s2, 11, compression::CompressionType::Lazperf);
 
-    EXPECT_EQ(b->size(), 11);
-    EXPECT_EQ(getBytes(*b, ctx).size(), 52 * 11);
+    EXPECT_EQ(b->size(), 11u);
+    EXPECT_EQ(getBytes(*b, ctx).size(), 52u * 11u);
 
     uint16_t r = b->getFieldAs<uint16_t>(Dimension::Id::Red, 10);
     EXPECT_EQ(r, 64u);
