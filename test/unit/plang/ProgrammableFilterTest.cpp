@@ -32,9 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
-
-#ifdef PDAL_HAVE_PYTHON
+#include "gtest/gtest.h"
 
 #include <pdal/filters/Programmable.hpp>
 #include <pdal/filters/Stats.hpp>
@@ -45,11 +43,9 @@
 
 #include "Support.hpp"
 
-BOOST_AUTO_TEST_SUITE(ProgrammableFilterTest)
-
 using namespace pdal;
 
-BOOST_AUTO_TEST_CASE(ProgrammableFilterTest_test1)
+TEST(ProgrammableFilterTest, ProgrammableFilterTest_test1)
 {
     BOX3D bounds(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
 
@@ -86,7 +82,7 @@ BOOST_AUTO_TEST_CASE(ProgrammableFilterTest_test1)
     filters::Programmable filter;
     filter.setOptions(opts);
     filter.setInput(&reader);
-    BOOST_CHECK(filter.getDescription() == "Programmable Filter");
+    EXPECT_TRUE(filter.getDescription() == "Programmable Filter");
 
     filters::Stats stats;
     stats.setInput(&filter);
@@ -95,24 +91,24 @@ BOOST_AUTO_TEST_CASE(ProgrammableFilterTest_test1)
 
     stats.prepare(ctx);
     PointBufferSet pbSet = stats.execute(ctx);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
 
     const filters::stats::Summary& statsX = stats.getStats(Dimension::Id::X);
     const filters::stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
     const filters::stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
 
-    BOOST_CHECK_CLOSE(statsX.minimum(), 10.0, 0.001);
-    BOOST_CHECK_CLOSE(statsX.maximum(), 11.0, 0.001);
+    EXPECT_FLOAT_EQ(statsX.minimum(), 10.0);
+    EXPECT_FLOAT_EQ(statsX.maximum(), 11.0);
 
-    BOOST_CHECK_CLOSE(statsY.minimum(), 0.0, 0.001);
-    BOOST_CHECK_CLOSE(statsY.maximum(), 1.0, 0.001);
+    EXPECT_FLOAT_EQ(statsY.minimum(), 0.0);
+    EXPECT_FLOAT_EQ(statsY.maximum(), 1.0);
 
-    BOOST_CHECK_CLOSE(statsZ.minimum(), 3.14, 0.001);
-    BOOST_CHECK_CLOSE(statsZ.maximum(), 3.14, 0.001);
+    EXPECT_FLOAT_EQ(statsZ.minimum(), 3.14);
+    EXPECT_FLOAT_EQ(statsZ.maximum(), 3.14);
 }
 
-BOOST_AUTO_TEST_CASE(pipeline)
+TEST(ProgrammableFilterTest, pipeline)
 {
     PipelineManager manager;
     PipelineReader reader(manager);
@@ -120,18 +116,18 @@ BOOST_AUTO_TEST_CASE(pipeline)
     reader.readPipeline(Support::datapath("plang/programmable-update-y-dims.xml"));
     manager.execute();
     PointBufferSet pbSet = manager.buffers();
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
 
     for (PointId idx = 0; idx < 10; ++idx)
     {
         int32_t y = buf->getFieldAs<int32_t>(Dimension::Id::Y, idx);
-        BOOST_CHECK_EQUAL(y, 314);
+        EXPECT_EQ(y, 314);
     }
 }
 
 
-BOOST_AUTO_TEST_CASE(add_dimension)
+TEST(ProgrammableFilterTest, add_dimension)
 {
     BOX3D bounds(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
 
@@ -167,17 +163,12 @@ BOOST_AUTO_TEST_CASE(add_dimension)
     PointContext ctx;
     filter.prepare(ctx);
     PointBufferSet pbSet = filter.execute(ctx);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
 
     for (unsigned int i = 0; i < buf->size(); ++i)
     {
-        BOOST_CHECK_EQUAL(buf->getFieldAs<uint16_t>(Dimension::Id::Intensity, i), 1);
-        BOOST_CHECK_EQUAL(buf->getFieldAs<uint16_t>(Dimension::Id::PointSourceId, i), 2);
+        EXPECT_EQ(buf->getFieldAs<uint16_t>(Dimension::Id::Intensity, i), 1u);
+        EXPECT_EQ(buf->getFieldAs<uint16_t>(Dimension::Id::PointSourceId, i), 2u);
     }
 }
-
-
-BOOST_AUTO_TEST_SUITE_END()
-
-#endif  // PDAL_HAVE_PYTHON

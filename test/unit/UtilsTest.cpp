@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <sstream>
 
@@ -42,9 +42,7 @@
 
 using namespace pdal;
 
-BOOST_AUTO_TEST_SUITE(UtilsTest)
-
-BOOST_AUTO_TEST_CASE(test_random)
+TEST(UtilsTest, test_random)
 {
     const double rangeMin = 0.0;
     const double rangeMax = 100.0;
@@ -58,62 +56,62 @@ BOOST_AUTO_TEST_CASE(test_random)
     for (int i=0; i<iters; i++)
     {
         const double x = Utils::random(rangeMin, rangeMax);
-        BOOST_CHECK(x >= rangeMin);
-        BOOST_CHECK(x <= rangeMax);
+        EXPECT_TRUE(x >= rangeMin);
+        EXPECT_TRUE(x <= rangeMax);
 
         sum += x;
     }
 
     sum = sum / iters;
 
-    BOOST_CHECK(sum <= avg + 0.1*avg);
-    BOOST_CHECK(sum >= avg - 0.1*avg);
+    EXPECT_TRUE(sum <= avg + 0.1*avg);
+    EXPECT_TRUE(sum >= avg - 0.1*avg);
 }
 
 
-BOOST_AUTO_TEST_CASE(test_comparators)
+TEST(UtilsTest, test_comparators)
 {
     bool ok;
 
     {
         ok = Utils::compare_distance<float>(1.000001f, 1.0f);
-        BOOST_CHECK(!ok);
+        EXPECT_TRUE(!ok);
 
         ok = Utils::compare_distance<float>(1.0000001f, 1.0f);
-        BOOST_CHECK(ok);
+        EXPECT_TRUE(ok);
 
         ok = Utils::compare_distance<float>(1.00000001f, 1.0f);
-        BOOST_CHECK(ok);
+        EXPECT_TRUE(ok);
     }
 
     {
         ok = Utils::compare_approx<float>(1.001f, 1.0f, 0.0001f);
-        BOOST_CHECK(!ok);
+        EXPECT_TRUE(!ok);
 
         ok = Utils::compare_approx<float>(1.001f, 1.0f, 0.001f);
-        BOOST_CHECK(!ok);
+        EXPECT_TRUE(!ok);
 
         ok = Utils::compare_approx<float>(1.001f, 1.0f, 0.01f);
-        BOOST_CHECK(ok);
+        EXPECT_TRUE(ok);
 
         ok = Utils::compare_approx<float>(1.001f, 1.0f, 0.1f);
-        BOOST_CHECK(ok);
+        EXPECT_TRUE(ok);
     }
 
     {
         ok = Utils::compare_approx<unsigned int>(10, 12, 2);
-        BOOST_CHECK(ok);
+        EXPECT_TRUE(ok);
 
         ok = Utils::compare_approx<unsigned int>(10, 12, 3);
-        BOOST_CHECK(ok);
+        EXPECT_TRUE(ok);
 
         ok = Utils::compare_approx<unsigned int>(10, 12, 1);
-        BOOST_CHECK(!ok);
+        EXPECT_TRUE(!ok);
     }
 }
 
 
-BOOST_AUTO_TEST_CASE(test_base64)
+TEST(UtilsTest, test_base64)
 {
     std::vector<uint8_t> data;
     for (int i=0; i<2; i++) data.push_back((uint8_t)i);
@@ -133,10 +131,6 @@ BOOST_AUTO_TEST_CASE(test_base64)
         size = size + decoded[i];
     }
 
-    BOOST_CHECK_EQUAL(decoded.size(), data.size());
-    BOOST_CHECK_EQUAL(size, begin_size);
+    EXPECT_EQ(decoded.size(), data.size());
+    EXPECT_EQ(size, begin_size);
 }
-
-
-
-BOOST_AUTO_TEST_SUITE_END()

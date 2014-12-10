@@ -32,15 +32,13 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
 #include "Support.hpp"
 
 using namespace pdal;
-
-BOOST_AUTO_TEST_SUITE(NitfWriterTest)
 
 #if 0
 static void compare_contents(const std::string& las_file, const std::string& ntf_file)
@@ -76,7 +74,7 @@ static void compare_contents(const std::string& las_file, const std::string& ntf
     //
     // compare the two buffers
     //
-    BOOST_CHECK_EQUAL(las_numRead, ntf_numRead);
+    EXPECT_EQ(las_numRead, ntf_numRead);
 
     Dimension const& ntf_dimX = ntf_schema.getDimension("X");
     Dimension const& ntf_dimY = ntf_schema.getDimension("Y");
@@ -96,9 +94,9 @@ static void compare_contents(const std::string& las_file, const std::string& ntf
         const double las_y = las_data.getField<double>(las_dimY, i);
         const double las_z = las_data.getField<double>(las_dimZ, i);
 
-        BOOST_CHECK_CLOSE(ntf_x, las_x, 0.00001);
-        BOOST_CHECK_CLOSE(ntf_y, las_y, 0.00001);
-        BOOST_CHECK_CLOSE(ntf_z, las_z, 0.00001);
+        EXPECT_FLOAT_EQ(ntf_x, las_x);
+        EXPECT_FLOAT_EQ(ntf_y, las_y);
+        EXPECT_FLOAT_EQ(ntf_z, las_z);
     }
 
     delete ntf_iter;
@@ -106,7 +104,7 @@ static void compare_contents(const std::string& las_file, const std::string& ntf
 }
 #endif
 
-BOOST_AUTO_TEST_CASE(test1)
+TEST(NitfWriterTest, test1)
 {
 
     const std::string las_input(Support::datapath("las/1.2-with-color.las"));
@@ -152,7 +150,7 @@ BOOST_AUTO_TEST_CASE(test1)
         StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
         if (rc)
         {
-            BOOST_CHECK(rc);
+            EXPECT_TRUE(rc);
 
             Stage* reader = rc();
             reader->setOptions(reader_opts);
@@ -160,7 +158,7 @@ BOOST_AUTO_TEST_CASE(test1)
             StageFactory::WriterCreator* wc = f.getWriterCreator("writers.nitf");
             if(wc)
             {
-                BOOST_CHECK(wc);
+                EXPECT_TRUE(wc);
 
                 std::unique_ptr<Writer> writer(wc());
                 writer->setOptions(writer_opts);
@@ -168,7 +166,7 @@ BOOST_AUTO_TEST_CASE(test1)
                 {
                     // writer.setCompressed(false);
                     // // writer.setDate(0, 0);
-                    // // writer.setPointFormat(::pdal::drivers::las::PointFormat3);
+                    // // writer.setPointFormat(::drivers::las::PointFormat3);
                     // // writer.setSystemIdentifier("");
                     // writer.setGeneratingSoftware("PDAL-NITF");
                     // writer.setChunkSize(100);
@@ -187,7 +185,7 @@ BOOST_AUTO_TEST_CASE(test1)
     // check the generated NITF
     //
     bool filesSame = Support::compare_files(nitf_output, reference_output);
-    BOOST_CHECK(filesSame);
+    EXPECT_TRUE(filesSame);
 
     //
     // check the LAS contents against the source image
@@ -203,5 +201,3 @@ BOOST_AUTO_TEST_CASE(test1)
     }
 #endif
 }
-
-BOOST_AUTO_TEST_SUITE_END()

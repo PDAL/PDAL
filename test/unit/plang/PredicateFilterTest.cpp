@@ -32,9 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
-
-#ifdef PDAL_HAVE_PYTHON
+#include "gtest/gtest.h"
 
 #include <pdal/filters/Predicate.hpp>
 #include <pdal/filters/Stats.hpp>
@@ -42,14 +40,12 @@
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
 
-#include "../StageTester.hpp"
+#include "StageTester.hpp"
 #include "Support.hpp"
-
-BOOST_AUTO_TEST_SUITE(PredicateFilterTest)
 
 using namespace pdal;
 
-BOOST_AUTO_TEST_CASE(PredicateFilterTest_test1)
+TEST(PredicateFilterTest, PredicateFilterTest_test1)
 {
     BOX3D bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
     Options readerOps;
@@ -60,7 +56,7 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test1)
     reader.setOptions(readerOps);
 
     // keep all points where x less than 1.0
-    const pdal::Option source("source",
+    const Option source("source",
         // "X < 1.0"
         "import numpy as np\n"
         "def yow1(ins,outs):\n"
@@ -81,7 +77,7 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test1)
     filters::Predicate filter;
     filter.setOptions(opts);
     filter.setInput(&reader);
-    BOOST_CHECK(filter.getDescription() == "Predicate Filter");
+    EXPECT_TRUE(filter.getDescription() == "Predicate Filter");
 
     Options statOpts;
     filters::Stats stats;
@@ -92,22 +88,22 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test1)
 
     stats.prepare(ctx);
     PointBufferSet pbSet = stats.execute(ctx);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
 
     const filters::stats::Summary& statsX = stats.getStats(Dimension::Id::X);
     const filters::stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
     const filters::stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
 
-    BOOST_CHECK(Utils::compare_approx<double>(statsX.minimum(), 0.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(statsY.minimum(), 0.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(statsZ.minimum(), 0.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(statsX.maximum(), 1.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(statsY.maximum(), 1.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(statsZ.maximum(), 1.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx<double>(statsX.minimum(), 0.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx<double>(statsY.minimum(), 0.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx<double>(statsZ.minimum(), 0.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx<double>(statsX.maximum(), 1.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx<double>(statsY.maximum(), 1.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx<double>(statsZ.maximum(), 1.0, 0.01));
 }
 
 
-BOOST_AUTO_TEST_CASE(PredicateFilterTest_test2)
+TEST(PredicateFilterTest, PredicateFilterTest_test2)
 {
     // same as above, but with 'Y >' instead of 'X <'
 
@@ -140,7 +136,7 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test2)
     filters::Predicate filter;
     filter.setOptions(opts);
     filter.setInput(&reader);
-    BOOST_CHECK(filter.getDescription() == "Predicate Filter");
+    EXPECT_TRUE(filter.getDescription() == "Predicate Filter");
 
     Options statOpts;
     filters::Stats stats;
@@ -151,21 +147,21 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test2)
 
     stats.prepare(ctx);
     PointBufferSet pbSet = stats.execute(ctx);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
 
     const filters::stats::Summary& statsX = stats.getStats(Dimension::Id::X);
     const filters::stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
     const filters::stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
 
-    BOOST_CHECK(Utils::compare_approx<double>(statsX.minimum(), 1.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(statsY.minimum(), 1.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(statsZ.minimum(), 1.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(statsX.maximum(), 2.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(statsY.maximum(), 2.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(statsZ.maximum(), 2.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx<double>(statsX.minimum(), 1.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx<double>(statsY.minimum(), 1.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx<double>(statsZ.minimum(), 1.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx<double>(statsX.maximum(), 2.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx<double>(statsY.maximum(), 2.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx<double>(statsZ.maximum(), 2.0, 0.01));
 }
 
-BOOST_AUTO_TEST_CASE(PredicateFilterTest_test3)
+TEST(PredicateFilterTest, PredicateFilterTest_test3)
 {
     // can we make a pipeline with TWO python filters in it?
 
@@ -236,15 +232,15 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test3)
     const filters::stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
     const filters::stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
 
-    BOOST_CHECK(Utils::compare_approx<double>(statsX.minimum(), 0.5, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(statsY.minimum(), 0.5, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(statsZ.minimum(), 0.5, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(statsX.maximum(), 1.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(statsY.maximum(), 1.0, 0.01));
-    BOOST_CHECK(Utils::compare_approx<double>(statsZ.maximum(), 1.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx<double>(statsX.minimum(), 0.5, 0.01));
+    EXPECT_TRUE(Utils::compare_approx<double>(statsY.minimum(), 0.5, 0.01));
+    EXPECT_TRUE(Utils::compare_approx<double>(statsZ.minimum(), 0.5, 0.01));
+    EXPECT_TRUE(Utils::compare_approx<double>(statsX.maximum(), 1.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx<double>(statsY.maximum(), 1.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx<double>(statsZ.maximum(), 1.0, 0.01));
 }
 
-BOOST_AUTO_TEST_CASE(PredicateFilterTest_test4)
+TEST(PredicateFilterTest, PredicateFilterTest_test4)
 {
     // test the point counters in the Predicate's iterator
 
@@ -285,19 +281,19 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test4)
     StageTester::ready(&reader, ctx);
     PointBufferSet pbSet = StageTester::run(&reader, buf);
     StageTester::done(&reader, ctx);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     buf = *pbSet.begin();
-    BOOST_CHECK_EQUAL(buf->size(), 1000);
+    EXPECT_EQ(buf->size(), 1000u);
 
     StageTester::ready(&filter, ctx);
     pbSet = StageTester::run(&filter, buf);
     StageTester::done(&filter, ctx);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     buf = *pbSet.begin();
-    BOOST_CHECK_EQUAL(buf->size(), 750);
+    EXPECT_EQ(buf->size(), 750u);
 }
 
-BOOST_AUTO_TEST_CASE(PredicateFilterTest_test5)
+TEST(PredicateFilterTest, PredicateFilterTest_test5)
 {
     // test error handling if missing Mask
 
@@ -333,29 +329,25 @@ BOOST_AUTO_TEST_CASE(PredicateFilterTest_test5)
     PointContext ctx;
     filter.prepare(ctx);
 
-    BOOST_REQUIRE_THROW(filter.execute(ctx), pdal::python_error);
+    ASSERT_THROW(filter.execute(ctx), python_error);
 }
 
-BOOST_AUTO_TEST_CASE(PredicateFilterTest_Pipeline)
+TEST(PredicateFilterTest, PredicateFilterTest_Pipeline)
 {
     PipelineManager mgr;
     PipelineReader reader(mgr);
 
     reader.readPipeline(Support::datapath("plang/from-module.xml"));
     point_count_t cnt = mgr.execute();
-    BOOST_CHECK_EQUAL(cnt, 1);
+    EXPECT_EQ(cnt, 1u);
 }
 
-BOOST_AUTO_TEST_CASE(PredicateFilterTest_Embed)
+TEST(PredicateFilterTest, PredicateFilterTest_Embed)
 {
     PipelineManager mgr;
     PipelineReader reader(mgr);
 
     reader.readPipeline(Support::datapath("plang/predicate-embed.xml"));
     point_count_t cnt = mgr.execute();
-    BOOST_CHECK_EQUAL(cnt, 1);
+    EXPECT_EQ(cnt, 1u);
 }
-
-BOOST_AUTO_TEST_SUITE_END()
-
-#endif  // PDAL_HAVE_PYTHON

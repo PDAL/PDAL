@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 #include <pdal/Options.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <FauxReader.hpp>
@@ -41,9 +41,7 @@
 
 using namespace pdal;
 
-BOOST_AUTO_TEST_SUITE(LogTest)
-
-BOOST_AUTO_TEST_CASE(test_one)
+TEST(LogTest, test_one)
 {
     BOX3D bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
 
@@ -61,24 +59,23 @@ BOOST_AUTO_TEST_CASE(test_one)
     {
         PointContext ctx;
 
-        pdal::FauxReader reader;
+        FauxReader reader;
         reader.setOptions(opts);
         reader.prepare(ctx);
 
-        BOOST_CHECK_EQUAL(reader.log()->getLevel(), LogLevel::Error);
+        EXPECT_EQ(reader.log()->getLevel(), LogLevel::Error);
         reader.log()->setLevel(LogLevel::Debug5);
-        BOOST_CHECK_EQUAL(reader.log()->getLevel(), LogLevel::Debug5);
+        EXPECT_EQ(reader.log()->getLevel(), LogLevel::Debug5);
 
         PointBufferSet pbSet = reader.execute(ctx);
-        BOOST_CHECK_EQUAL(pbSet.size(), 1);
+        EXPECT_EQ(pbSet.size(), 1u);
         PointBufferPtr buf = *pbSet.begin();
-        BOOST_CHECK_EQUAL(buf->size(), 750);
+        EXPECT_EQ(buf->size(), 750u);
     }
-
     bool ok = Support::compare_text_files(
         Support::temppath("mylog_one.txt"),
         Support::datapath("logs/logtest.txt"));
-    BOOST_CHECK(ok);
+    EXPECT_TRUE(ok);
 
     if (ok)
         FileUtils::deleteFile(Support::temppath("mylog_one.txt"));
@@ -86,7 +83,7 @@ BOOST_AUTO_TEST_CASE(test_one)
 
 #ifdef PDAL_HAVE_PYTHON
 
-BOOST_AUTO_TEST_CASE(test_two_a)
+TEST(LogTest, test_two_a)
 {
     Options reader_opts;
     {
@@ -104,7 +101,7 @@ BOOST_AUTO_TEST_CASE(test_two_a)
 
     Options xfilter_opts;
     {
-        const pdal::Option source("source",
+        const Option source("source",
             "import numpy as np\n"
             "def xfunc(ins,outs):\n"
             "  X = ins['X']\n"
@@ -113,8 +110,8 @@ BOOST_AUTO_TEST_CASE(test_two_a)
             "  outs['X'] = X\n"
             "  return True\n"
             );
-        const pdal::Option module("module", "xModule");
-        const pdal::Option function("function", "xfunc");
+        const Option module("module", "xModule");
+        const Option function("function", "xfunc");
         xfilter_opts.add(source);
         xfilter_opts.add(module);
         xfilter_opts.add(function);
@@ -122,7 +119,7 @@ BOOST_AUTO_TEST_CASE(test_two_a)
 
     Options yfilter_opts;
     {
-        const pdal::Option source("source",
+        const Option source("source",
             "import numpy as np\n"
             "def yfunc(ins,outs):\n"
             "  Y = ins['Y']\n"
@@ -131,8 +128,8 @@ BOOST_AUTO_TEST_CASE(test_two_a)
             "  outs['Y'] = Y\n"
             "  return True\n"
             );
-        const pdal::Option module("module", "yModule");
-        const pdal::Option function("function", "yfunc");
+        const Option module("module", "yModule");
+        const Option function("function", "yfunc");
         yfilter_opts.add(source);
         yfilter_opts.add(module);
         yfilter_opts.add(function);
@@ -156,21 +153,21 @@ BOOST_AUTO_TEST_CASE(test_two_a)
         yfilter.log()->setLevel(LogLevel::Debug5);
 
         PointBufferSet pbSet = yfilter.execute(ctx);
-        BOOST_CHECK_EQUAL(pbSet.size(), 1);
+        EXPECT_EQ(pbSet.size(), 1u);
         PointBufferPtr buf = *pbSet.begin();
-        BOOST_CHECK_EQUAL(buf->size(), 750);
+        EXPECT_EQ(buf->size(), 750u);
     }
 
     bool ok1 = Support::compare_text_files(
          Support::temppath("logtest_123.txt"),
          Support::datapath("logs/logtest_123.txt"));
-    BOOST_CHECK(ok1);
+    EXPECT_TRUE(ok1);
     if (ok1)
         FileUtils::deleteFile(Support::temppath("logtest_123.txt"));
 }
 
 
-BOOST_AUTO_TEST_CASE(test_two_b)
+TEST(LogTest, test_two_b)
 {
     Options reader_opts;
     {
@@ -188,7 +185,7 @@ BOOST_AUTO_TEST_CASE(test_two_b)
 
     Options xfilter_opts;
     {
-        const pdal::Option source("source",
+        const Option source("source",
             "import numpy as np\n"
             "def xfunc(ins,outs):\n"
             "  X = ins['X']\n"
@@ -197,8 +194,8 @@ BOOST_AUTO_TEST_CASE(test_two_b)
             "  outs['X'] = X\n"
             "  return True\n"
             );
-        const pdal::Option module("module", "xModule");
-        const pdal::Option function("function", "xfunc");
+        const Option module("module", "xModule");
+        const Option function("function", "xfunc");
         xfilter_opts.add(source);
         xfilter_opts.add(module);
         xfilter_opts.add(function);
@@ -209,7 +206,7 @@ BOOST_AUTO_TEST_CASE(test_two_b)
 
     Options yfilter_opts;
     {
-        const pdal::Option source("source",
+        const Option source("source",
             "import numpy as np\n"
             "def yfunc(ins,outs):\n"
             "  Y = ins['Y']\n"
@@ -218,8 +215,8 @@ BOOST_AUTO_TEST_CASE(test_two_b)
             "  outs['Y'] = Y\n"
             "  return True\n"
             );
-        const pdal::Option module("module", "yModule");
-        const pdal::Option function("function", "yfunc");
+        const Option module("module", "yModule");
+        const Option function("function", "yfunc");
         yfilter_opts.add(source);
         yfilter_opts.add(module);
         yfilter_opts.add(function);
@@ -246,23 +243,23 @@ BOOST_AUTO_TEST_CASE(test_two_b)
         yfilter.log()->setLevel(LogLevel::Debug5);
 
         PointBufferSet pbSet = yfilter.execute(ctx);
-        BOOST_CHECK_EQUAL(pbSet.size(), 1);
+        EXPECT_EQ(pbSet.size(), 1u);
         PointBufferPtr buf = *pbSet.begin();
-        BOOST_CHECK_EQUAL(buf->size(), 750);
+        EXPECT_EQ(buf->size(), 750u);
     }
 
     bool ok1 = Support::compare_text_files(
         Support::temppath("logtest_test_two_b_1.txt"),
         Support::datapath("logs/logtest_1.txt"));
-    BOOST_CHECK(ok1);
+    EXPECT_TRUE(ok1);
     bool ok2 = Support::compare_text_files(
         Support::temppath("logtest_test_two_b_2.txt"),
         Support::datapath("logs/logtest_2.txt"));
-    BOOST_CHECK(ok2);
+    EXPECT_TRUE(ok2);
     bool ok3 = Support::compare_text_files(
         Support::temppath("logtest_test_two_b_3.txt"),
         Support::datapath("logs/logtest_3.txt"));
-    BOOST_CHECK(ok3);
+    EXPECT_TRUE(ok3);
 
     if (ok1)
         FileUtils::deleteFile(Support::temppath("logtest_test_two_b_1.txt"));
@@ -275,7 +272,7 @@ BOOST_AUTO_TEST_CASE(test_two_b)
 }
 
 
-BOOST_AUTO_TEST_CASE(test_three)
+TEST(LogTest, test_three)
 {
     // verify we can redirect the stdout inside the python script
 
@@ -296,7 +293,7 @@ BOOST_AUTO_TEST_CASE(test_three)
 
     Options xfilter_opts;
     {
-        const pdal::Option source("source",
+        const Option source("source",
             "import numpy as np\n"
             "def xfunc(ins,outs):\n"
             "  X = ins['X']\n"
@@ -305,8 +302,8 @@ BOOST_AUTO_TEST_CASE(test_three)
             "  outs['X'] = X\n"
             "  return True\n"
             );
-        const pdal::Option module("module", "xModule");
-        const pdal::Option function("function", "xfunc");
+        const Option module("module", "xModule");
+        const Option function("function", "xfunc");
         xfilter_opts.add("log", Support::temppath("mylog_three.txt"));
         xfilter_opts.add(source);
         xfilter_opts.add(module);
@@ -323,20 +320,18 @@ BOOST_AUTO_TEST_CASE(test_three)
         PointContext ctx;
         xfilter.prepare(ctx);
         PointBufferSet pbSet = xfilter.execute(ctx);
-        BOOST_CHECK_EQUAL(pbSet.size(), 1);
+        EXPECT_EQ(pbSet.size(), 1u);
         PointBufferPtr buf = *pbSet.begin();
-        BOOST_CHECK_EQUAL(buf->size(), 750);
+        EXPECT_EQ(buf->size(), 750u);
     }
 
     bool ok = Support::compare_text_files(
         Support::temppath("mylog_three.txt"),
         Support::datapath("logs/log_py.txt"));
-    BOOST_CHECK(ok);
+    EXPECT_TRUE(ok);
 
     if (ok)
         FileUtils::deleteFile(Support::temppath("mylog_three.txt"));
 }
 
 #endif
-
-BOOST_AUTO_TEST_SUITE_END()

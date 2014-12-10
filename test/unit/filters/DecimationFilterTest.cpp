@@ -32,19 +32,15 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
 #include <DecimationFilter.hpp>
 
-#include "../StageTester.hpp"
-
 using namespace pdal;
 
-BOOST_AUTO_TEST_SUITE(DecimationFilterTest)
-
-BOOST_AUTO_TEST_CASE(DecimationFilterTest_test1)
+TEST(DecimationFilterTest, DecimationFilterTest_test1)
 {
     BOX3D srcBounds(0.0, 0.0, 0.0, 100.0, 100.0, 100.0);
 
@@ -56,7 +52,7 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test1)
     StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.faux");
     if (rc)
     {
-        BOOST_CHECK(rc);
+        EXPECT_TRUE(rc);
 
         Stage* reader = rc();
         reader->setOptions(ops);
@@ -67,30 +63,28 @@ BOOST_AUTO_TEST_CASE(DecimationFilterTest_test1)
         StageFactory::FilterCreator* fc = f.getFilterCreator("filters.decimation");
         if (fc)
         {
-            BOOST_CHECK(fc);
+            EXPECT_TRUE(fc);
 
             Stage* filter = fc();
             filter->setOptions(decimationOps);
             filter->setInput(reader);
-            BOOST_CHECK(filter->getDescription() == "Decimation Filter");
+            EXPECT_TRUE(filter->getDescription() == "Decimation Filter");
 
             PointContext ctx;
 
             filter->prepare(ctx);
             PointBufferSet pbSet = filter->execute(ctx);
-            BOOST_CHECK_EQUAL(pbSet.size(), 1);
+            EXPECT_EQ(pbSet.size(), 1u);
             PointBufferPtr buf = *pbSet.begin();
-            BOOST_CHECK_EQUAL(buf->size(), 3);
+            EXPECT_EQ(buf->size(), 3u);
 
             uint64_t t0 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 0);
             uint64_t t1 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 1);
             uint64_t t2 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 2);
 
-            BOOST_CHECK_EQUAL(t0, 0);
-            BOOST_CHECK_EQUAL(t1, 10);
-            BOOST_CHECK_EQUAL(t2, 20);
+            EXPECT_EQ(t0, 0u);
+            EXPECT_EQ(t1, 10u);
+            EXPECT_EQ(t2, 20u);
         }
     }
 }
-
-BOOST_AUTO_TEST_SUITE_END()

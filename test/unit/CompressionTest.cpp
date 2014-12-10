@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <sstream>
 #include <iostream>
@@ -40,10 +40,8 @@
 
 #include "Support.hpp"
 #include <pdal/Options.hpp>
-#include <pdal/Bounds.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <LasReader.hpp>
-#include <pdal/PDALUtils.hpp>
 #include <pdal/Compression.hpp>
 
 struct SQLiteTestStream {
@@ -85,22 +83,17 @@ std::vector<char> getBytes(pdal::PointBuffer buffer, pdal::PointContextRef ctx)
     return bytes;
 }
 
-
-BOOST_AUTO_TEST_SUITE(CompressionTest)
-
-
-
-BOOST_AUTO_TEST_CASE(test_compress_file)
+TEST(CompressionTest, test_compress_file)
 {
     using namespace pdal;
 
     const std::string file(Support::datapath("las/1.2-with-color.las"));
 
-    const pdal::Option opt_filename("filename", file);
-    pdal::Options opts;
+    const Option opt_filename("filename", file);
+    Options opts;
     opts.add(opt_filename);
 
-    pdal::LasReader reader;
+    LasReader reader;
     reader.setOptions(opts);
 
     PointContext ctx;
@@ -108,43 +101,41 @@ BOOST_AUTO_TEST_CASE(test_compress_file)
     PointBufferSet buffers = reader.execute(ctx);
     PointBufferPtr buffer = *buffers.begin();
 
-    BOOST_CHECK_EQUAL(ctx.pointSize(), 52);
+    EXPECT_EQ(ctx.pointSize(), 52u);
     SQLiteTestStream s;
     compression::Compress<SQLiteTestStream>(ctx, *buffer, s, compression::CompressionType::Lazperf, 0, 0);
 
-
-
-    BOOST_CHECK_EQUAL(getBytes(*buffer, ctx).size(), 55380);
-    BOOST_CHECK_EQUAL(s.buf.size(), 30945);
+    EXPECT_EQ(getBytes(*buffer, ctx).size(), 55380u);
+    EXPECT_EQ(s.buf.size(), 30945u);
 
     SQLiteTestStream s2;
     s2.buf = s.buf;
     PointBufferPtr b = compression::Decompress<SQLiteTestStream>(ctx, s2, 11, compression::CompressionType::Lazperf);
 
-    BOOST_CHECK_EQUAL(b->size(), 11);
-    BOOST_CHECK_EQUAL(getBytes(*b, ctx).size(), 52 * 11);
+    EXPECT_EQ(b->size(), 11u);
+    EXPECT_EQ(getBytes(*b, ctx).size(), 52u * 11u);
 
     uint16_t r = b->getFieldAs<uint16_t>(Dimension::Id::Red, 10);
-    BOOST_CHECK_EQUAL(r, 64u);
+    EXPECT_EQ(r, 64u);
     int32_t x = b->getFieldAs<int32_t>(Dimension::Id::X, 10);
-    BOOST_CHECK_EQUAL(x, 636038);
+    EXPECT_EQ(x, 636038);
     double xd = b->getFieldAs<double>(Dimension::Id::X, 10);
-    BOOST_CHECK_CLOSE(xd, 636037.53, 0.001);
+    EXPECT_FLOAT_EQ(xd, 636037.53);
     int32_t y = b->getFieldAs<int32_t>(Dimension::Id::Y, 10);
-    BOOST_CHECK_EQUAL(y, 849338);
+    EXPECT_EQ(y, 849338);
 }
 
 //
-// BOOST_AUTO_TEST_CASE(test_compress_copied_buffer)
+// TEST(CompressionTest, test_compress_copied_buffer)
 // {
 //     using namespace pdal;
 //
 //
 //     const std::string file(Support::datapath("las/1.2-with-color.las"));
-//     const pdal::Option opt_filename("filename", file);
-//     pdal::Options opts;
+//     const Option opt_filename("filename", file);
+//     Options opts;
 //     opts.add(opt_filename);
-//     pdal::drivers::las::Reader reader;
+//     drivers::las::Reader reader;
 //     reader.setOptions(opts);
 //     PointContext fctx;
 //     reader.prepare(fctx);
@@ -170,17 +161,17 @@ BOOST_AUTO_TEST_CASE(test_compress_file)
 //     PointBufferPtr b = compression::Decompress<SQLiteTestStream>(ctx, s2, 11, compression::CompressionType::Lazperf);
 //
 //     int32_t y = b->getFieldAs<int32_t>(Dimension::Id::Y, 10);
-//     BOOST_CHECK_EQUAL(y, 849338);
+//     EXPECT_EQ(y, 849338);
 //     int32_t x = b->getFieldAs<int32_t>(Dimension::Id::X, 10);
-//     BOOST_CHECK_EQUAL(x, 636038);
+//     EXPECT_EQ(x, 636038);
 //     double xd = b->getFieldAs<double>(Dimension::Id::X, 10);
-//     BOOST_CHECK_CLOSE(xd, 636037.53, 0.001);
+//     EXPECT_FLOAT_EQ(xd, 636037.53);
 //
 // }
 //
 //
 //
-// BOOST_AUTO_TEST_CASE(test_compress_simple_buffer)
+// TEST(CompressionTest, test_compress_simple_buffer)
 // {
 //     using namespace pdal;
 //
@@ -229,7 +220,5 @@ BOOST_AUTO_TEST_CASE(test_compress_file)
 //     PointBufferPtr b = compression::Decompress<SQLiteTestStream>(ctx, s2, 11, compression::CompressionType::Lazperf);
 // //     std::cout << *b << std::endl;
 //     uint16_t r = b->getFieldAs<uint16_t>(Dimension::Id::Red, 10);
-//     BOOST_CHECK_EQUAL(r, 26u);
+//     EXPECT_EQ(r, 26u);
 // }
-BOOST_AUTO_TEST_SUITE_END()
-

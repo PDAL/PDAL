@@ -32,7 +32,7 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <pdal/PointBuffer.hpp>
 #include <LasReader.hpp>
@@ -40,10 +40,29 @@
 
 using namespace pdal;
 
-BOOST_AUTO_TEST_SUITE(LasReaderTest)
+namespace {
+template<typename LeftIter, typename RightIter>
+::testing::AssertionResult CheckEqualCollections(LeftIter left_begin, LeftIter left_end, RightIter right_begin)
+{
+  bool equal(true);
+  std::string message;
+  size_t index(0);
+  while (left_begin != left_end)
+  {
+    if (*left_begin++ != *right_begin++)
+    {
+      equal = false;
+      message += "\n\tMismatch at index " + std::to_string(index);
+    }
+    ++index;
+  }
+  if (message.size())
+    message += "\n\t";
+  return equal ? ::testing::AssertionSuccess() : ::testing::AssertionFailure() << message;
+}
+}
 
-
-BOOST_AUTO_TEST_CASE(test_base_options)
+TEST(LasReaderTest, test_base_options)
 {
     const std::string file(Support::datapath("las/1.2-with-color.las"));
 
@@ -59,8 +78,8 @@ BOOST_AUTO_TEST_CASE(test_base_options)
 
         LasReader reader;
         reader.setOptions(opts);
-        BOOST_CHECK(reader.getVerboseLevel() == 0);
-        BOOST_CHECK(reader.isDebug() == false);
+        EXPECT_TRUE(reader.getVerboseLevel() == 0);
+        EXPECT_TRUE(reader.isDebug() == false);
     }
 
     {
@@ -70,8 +89,8 @@ BOOST_AUTO_TEST_CASE(test_base_options)
         opts.add(opt_debug_string);
         LasReader reader;
         reader.setOptions(opts);
-        BOOST_CHECK(reader.getVerboseLevel() == 99);
-        BOOST_CHECK(reader.isDebug() == true);
+        EXPECT_TRUE(reader.getVerboseLevel() == 99);
+        EXPECT_TRUE(reader.isDebug() == true);
     }
 
     {
@@ -81,13 +100,13 @@ BOOST_AUTO_TEST_CASE(test_base_options)
         opts.add(opt_debug_bool);
         LasReader reader;
         reader.setOptions(opts);
-        BOOST_CHECK(reader.getVerboseLevel() == 99);
-        BOOST_CHECK(reader.isDebug() == true);
+        EXPECT_TRUE(reader.getVerboseLevel() == 99);
+        EXPECT_TRUE(reader.isDebug() == true);
     }
 }
 
 
-BOOST_AUTO_TEST_CASE(header)
+TEST(LasReaderTest, header)
 {
     PointContext ctx;
     Options ops;
@@ -99,39 +118,39 @@ BOOST_AUTO_TEST_CASE(header)
     // This tests the copy ctor, too.
     LasHeader h = reader.header();
 
-    BOOST_CHECK_EQUAL(h.fileSignature(), "LASF");
-    BOOST_CHECK_EQUAL(h.fileSourceId(), 0);
-    BOOST_CHECK(h.projectId().is_nil());
-    BOOST_CHECK_EQUAL(h.versionMajor(), 1);
-    BOOST_CHECK_EQUAL(h.versionMinor(), 2);
-    BOOST_CHECK_EQUAL(h.creationDOY(), 0);
-    BOOST_CHECK_EQUAL(h.creationYear(), 0);
-    BOOST_CHECK_EQUAL(h.vlrOffset(), 227);
-    BOOST_CHECK_EQUAL(h.pointFormat(), 3);
-    BOOST_CHECK_EQUAL(h.pointCount(), 1065);
-    BOOST_CHECK_EQUAL(h.scaleX(), .01);
-    BOOST_CHECK_EQUAL(h.scaleY(), .01);
-    BOOST_CHECK_EQUAL(h.scaleZ(), .01);
-    BOOST_CHECK_EQUAL(h.offsetX(), 0);
-    BOOST_CHECK_EQUAL(h.offsetY(), 0);
-    BOOST_CHECK_EQUAL(h.offsetZ(), 0);
-    BOOST_CHECK_CLOSE(h.maxX(), 638982.55, .01);
-    BOOST_CHECK_CLOSE(h.maxY(), 853535.43, .01);
-    BOOST_CHECK_CLOSE(h.maxZ(), 586.38, .01);
-    BOOST_CHECK_CLOSE(h.minX(), 635619.85, .01);
-    BOOST_CHECK_CLOSE(h.minY(), 848899.70, .01);
-    BOOST_CHECK_CLOSE(h.minZ(), 406.59, .01);
-    BOOST_CHECK_EQUAL(h.compressed(), false);
-    BOOST_CHECK_EQUAL(h.compressionInfo(), "");
-    BOOST_CHECK_EQUAL(h.pointCountByReturn(0), 925);
-    BOOST_CHECK_EQUAL(h.pointCountByReturn(1), 114);
-    BOOST_CHECK_EQUAL(h.pointCountByReturn(2), 21);
-    BOOST_CHECK_EQUAL(h.pointCountByReturn(3), 5);
-    BOOST_CHECK_EQUAL(h.pointCountByReturn(4), 0);
+    EXPECT_EQ(h.fileSignature(), "LASF");
+    EXPECT_EQ(h.fileSourceId(), 0);
+    EXPECT_TRUE(h.projectId().is_nil());
+    EXPECT_EQ(h.versionMajor(), 1);
+    EXPECT_EQ(h.versionMinor(), 2);
+    EXPECT_EQ(h.creationDOY(), 0);
+    EXPECT_EQ(h.creationYear(), 0);
+    EXPECT_EQ(h.vlrOffset(), 227);
+    EXPECT_EQ(h.pointFormat(), 3);
+    EXPECT_EQ(h.pointCount(), 1065u);
+    EXPECT_FLOAT_EQ(h.scaleX(), .01);
+    EXPECT_FLOAT_EQ(h.scaleY(), .01);
+    EXPECT_FLOAT_EQ(h.scaleZ(), .01);
+    EXPECT_FLOAT_EQ(h.offsetX(), 0);
+    EXPECT_FLOAT_EQ(h.offsetY(), 0);
+    EXPECT_FLOAT_EQ(h.offsetZ(), 0);
+    EXPECT_FLOAT_EQ(h.maxX(), 638982.55);
+    EXPECT_FLOAT_EQ(h.maxY(), 853535.43);
+    EXPECT_FLOAT_EQ(h.maxZ(), 586.38);
+    EXPECT_FLOAT_EQ(h.minX(), 635619.85);
+    EXPECT_FLOAT_EQ(h.minY(), 848899.70);
+    EXPECT_FLOAT_EQ(h.minZ(), 406.59);
+    EXPECT_EQ(h.compressed(), false);
+    EXPECT_EQ(h.compressionInfo(), "");
+    EXPECT_EQ(h.pointCountByReturn(0), 925u);
+    EXPECT_EQ(h.pointCountByReturn(1), 114u);
+    EXPECT_EQ(h.pointCountByReturn(2), 21u);
+    EXPECT_EQ(h.pointCountByReturn(3), 5u);
+    EXPECT_EQ(h.pointCountByReturn(4), 0u);
 }
 
 
-BOOST_AUTO_TEST_CASE(test_sequential)
+TEST(LasReaderTest, test_sequential)
 {
     PointContext ctx;
 
@@ -141,10 +160,10 @@ BOOST_AUTO_TEST_CASE(test_sequential)
     LasReader reader;
     reader.setOptions(ops1);
 
-    BOOST_CHECK(reader.getDescription() == "Las Reader");
+    EXPECT_TRUE(reader.getDescription() == "Las Reader");
     reader.prepare(ctx);
     PointBufferSet pbSet = reader.execute(ctx);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
     Support::check_p0_p1_p2(*buf);
     PointBufferPtr buf2 = buf->makeNew();
@@ -167,19 +186,19 @@ static void test_a_format(const std::string& file, uint8_t majorVersion, uint8_t
     reader.setOptions(ops1);
     reader.prepare(ctx);
 
-    BOOST_CHECK_EQUAL(reader.header().pointFormat(), pointFormat);
-    BOOST_CHECK_EQUAL(reader.header().versionMajor(), majorVersion);
-    BOOST_CHECK_EQUAL(reader.header().versionMinor(), minorVersion);
+    EXPECT_EQ(reader.header().pointFormat(), pointFormat);
+    EXPECT_EQ(reader.header().versionMajor(), majorVersion);
+    EXPECT_EQ(reader.header().versionMinor(), minorVersion);
 
     PointBufferSet pbSet = reader.execute(ctx);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
-    BOOST_CHECK_EQUAL(buf->size(), 1);
+    EXPECT_EQ(buf->size(), 1u);
 
     Support::check_pN(*buf, 0, xref, yref, zref, tref, rref, gref, bref);
 }
 
-BOOST_AUTO_TEST_CASE(test_different_formats)
+TEST(LasReaderTest, test_different_formats)
 {
     test_a_format("las/permutations/1.0_0.las", 1, 0, 0, 470692.440000, 4602888.900000, 16.000000, 0, 0, 0, 0);
     test_a_format("las/permutations/1.0_1.las", 1, 0, 1, 470692.440000, 4602888.900000, 16.000000, 1205902800.000000, 0, 0, 0);
@@ -194,7 +213,7 @@ BOOST_AUTO_TEST_CASE(test_different_formats)
 }
 
 
-BOOST_AUTO_TEST_CASE(inspect)
+TEST(LasReaderTest, inspect)
 {
     Options ops;
     ops.add("filename", Support::datapath("las/epsg_4326.las"));
@@ -206,14 +225,14 @@ BOOST_AUTO_TEST_CASE(inspect)
 
     std::string testWkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"unretrievable - using WGS84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
 #ifdef PDAL_HAVE_LIBGEOTIFF
-    BOOST_CHECK_EQUAL(qi.m_srs.getWKT(), testWkt);
+    EXPECT_EQ(qi.m_srs.getWKT(), testWkt);
 #endif // PDAL_HAVE_LIBGEOTIFF
 
-    BOOST_CHECK_EQUAL(qi.m_pointCount, 5380);
+    EXPECT_EQ(qi.m_pointCount, 5380u);
 
     BOX3D bounds(-94.683465399999989, 31.0367341, 39.081000199999998,
         -94.660631099999989, 31.047329099999999, 78.119000200000002);
-    BOOST_CHECK_EQUAL(qi.m_bounds, bounds);
+    EXPECT_EQ(qi.m_bounds, bounds);
 
     const char *dims[] =
     {
@@ -232,14 +251,13 @@ BOOST_AUTO_TEST_CASE(inspect)
     };
 
     std::sort(qi.m_dimNames.begin(), qi.m_dimNames.end());
-    BOOST_CHECK_EQUAL_COLLECTIONS(qi.m_dimNames.begin(), qi.m_dimNames.end(),
-        std::begin(dims), std::end(dims));
+    EXPECT_TRUE(CheckEqualCollections(qi.m_dimNames.begin(), qi.m_dimNames.end(), std::begin(dims)));
 }
 
 
 //ABELL - Find another way to do this.
 /**
-BOOST_AUTO_TEST_CASE(test_vlr)
+TEST(LasReaderTest, test_vlr)
 {
     PointContext ctx;
 
@@ -250,12 +268,12 @@ BOOST_AUTO_TEST_CASE(test_vlr)
     reader.prepare(ctx);
     reader.execute(ctx);
 
-    BOOST_CHECK_EQUAL(reader.header().getVLRs().getAll().size(), 390);
+    EXPECT_EQ(reader.header().getVLRs().getAll().size(), 390);
 }
 **/
 
 
-BOOST_AUTO_TEST_CASE(testInvalidFileSignature)
+TEST(LasReaderTest, testInvalidFileSignature)
 {
     PointContext ctx;
 
@@ -264,7 +282,5 @@ BOOST_AUTO_TEST_CASE(testInvalidFileSignature)
     LasReader reader;
     reader.setOptions(ops1);
 
-    BOOST_CHECK(reader.header().valid());
+    EXPECT_TRUE(reader.header().valid());
 }
-
-BOOST_AUTO_TEST_SUITE_END()

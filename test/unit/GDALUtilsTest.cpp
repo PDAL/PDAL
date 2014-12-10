@@ -32,7 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+//#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <pdal/GDALUtils.hpp>
 #include <pdal/FileUtils.hpp>
@@ -47,17 +48,16 @@
 #  pragma warning(pop)
 #endif
 
-BOOST_AUTO_TEST_SUITE(GDALUtilsTest)
+using namespace pdal;
 
-
-BOOST_AUTO_TEST_CASE(test_wrapped_vsifile_read)
+TEST(GDALUtilsTest, test_wrapped_vsifile_read)
 {
     const int FILESIZE = 10000;  // size of file to use
     const int NUMREPS = 10000; // number of points to check
 
     const std::string tempfile = Support::datapath("vsilfile_test.dat");
 
-    pdal::FileUtils::deleteFile(tempfile);
+    FileUtils::deleteFile(tempfile);
 
     srand(17);
 
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(test_wrapped_vsifile_read)
 
     // open the test file
     VSILFILE* fp = VSIFOpenL/*fopen*/(tempfile.c_str(), "rb");
-    boost::iostreams::stream<pdal::gdal::VSILFileBuffer> i(fp);
+    boost::iostreams::stream<gdal::VSILFileBuffer> i(fp);
 
     for (int reps=0; reps<NUMREPS; reps++)
     {
@@ -87,25 +87,25 @@ BOOST_AUTO_TEST_CASE(test_wrapped_vsifile_read)
         i.read((char*)&c, 1);
 
         // did we get the correct value?
-        BOOST_CHECK(c == truth[pos]);
+        EXPECT_TRUE(c == truth[pos]);
     }
 
     i.close();
     VSIFCloseL/*fclose*/(fp);
 
-    pdal::FileUtils::deleteFile(tempfile);
+    FileUtils::deleteFile(tempfile);
 }
 
 
-BOOST_AUTO_TEST_CASE(GDALUtilsTest_test_vsifile_write)
+TEST(GDALUtilsTest, GDALUtilsTest_test_vsifile_write)
 {
     const int FILESIZE = 10000;  // size of file to use
 
     const std::string tempfile_a = Support::datapath("vsilfile_test_a.dat");
     const std::string tempfile_b = Support::datapath("vsilfile_test_b.dat");
 
-    pdal::FileUtils::deleteFile(tempfile_a);
-    pdal::FileUtils::deleteFile(tempfile_b);
+    FileUtils::deleteFile(tempfile_a);
+    FileUtils::deleteFile(tempfile_b);
 
     // compute the "true" values, and store into test file
     uint8_t truth[FILESIZE];
@@ -133,25 +133,25 @@ BOOST_AUTO_TEST_CASE(GDALUtilsTest_test_vsifile_write)
 
         long pos_a = (long)ftell(fp_a);
         long pos_b = (long)VSIFTellL(fp_b);
-        BOOST_CHECK(pos_a = pos_b);
+        EXPECT_EQ(pos_a, pos_b);
 
         fclose(fp_a);
         VSIFCloseL(fp_b);
     }
 
     const bool ok = Support::compare_files(tempfile_a, tempfile_b);
-    BOOST_CHECK(ok);
+    EXPECT_TRUE(ok);
 
-    pdal::FileUtils::deleteFile(tempfile_a);
-    pdal::FileUtils::deleteFile(tempfile_b);
+    FileUtils::deleteFile(tempfile_a);
+    FileUtils::deleteFile(tempfile_b);
 }
 
 
-BOOST_AUTO_TEST_CASE(test_wrapped_vsifile_subsequence)
+TEST(GDALUtilsTest, test_wrapped_vsifile_subsequence)
 {
     const std::string tempfile = Support::datapath("vsilfile_test.dat");
 
-    pdal::FileUtils::deleteFile(tempfile);
+    FileUtils::deleteFile(tempfile);
 
     // create a test file
     {
@@ -170,11 +170,11 @@ BOOST_AUTO_TEST_CASE(test_wrapped_vsifile_subsequence)
     VSILFILE* vsi_file = VSIFOpenL/*fopen*/(tempfile.c_str(), "rb");
 
     // wrap it with an iostream
-    io::stream<pdal::gdal::VSILFileBuffer> full_stream(vsi_file);
+    io::stream<gdal::VSILFileBuffer> full_stream(vsi_file);
 
     // and make a subset view
-    io::restriction<io::stream<pdal::gdal::VSILFileBuffer> > restricted_dev(full_stream, 10, 20);
-    io::stream<io::restriction<io::stream<pdal::gdal::VSILFileBuffer> > > restricted_str(restricted_dev);
+    io::restriction<io::stream<gdal::VSILFileBuffer> > restricted_dev(full_stream, 10, 20);
+    io::stream<io::restriction<io::stream<gdal::VSILFileBuffer> > > restricted_str(restricted_dev);
 
     std::istream& str(restricted_str);
 
@@ -184,18 +184,18 @@ BOOST_AUTO_TEST_CASE(test_wrapped_vsifile_subsequence)
     uint8_t c;
 
     str.read((char*)&c, 1);
-    BOOST_CHECK(c == 15);
+    EXPECT_TRUE(c == 15);
 
     str.read((char*)&c, 1);
-    BOOST_CHECK(c == 16);
+    EXPECT_TRUE(c == 16);
 
     str.seekg(4, std::iostream::cur);
     str.read((char*)&c, 1);
-    BOOST_CHECK(c == 21);
+    EXPECT_TRUE(c == 21);
 
     str.seekg(-5, std::iostream::end);
     str.read((char*)&c, 1);
-    BOOST_CHECK(c == 25);
+    EXPECT_TRUE(c == 25);
 
     restricted_str.close();
     restricted_dev.close();
@@ -203,8 +203,5 @@ BOOST_AUTO_TEST_CASE(test_wrapped_vsifile_subsequence)
 
     VSIFCloseL/*fclose*/(vsi_file);
 
-    pdal::FileUtils::deleteFile(tempfile);
+    FileUtils::deleteFile(tempfile);
 }
-
-
-BOOST_AUTO_TEST_SUITE_END()

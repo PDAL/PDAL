@@ -32,21 +32,13 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
  
-#include "UnitTest.hpp"
-
-#include <boost/uuid/string_generator.hpp>
-#include <boost/uuid/random_generator.hpp>
-#include <boost/uuid/uuid_io.hpp>
-#include <boost/random/mersenne_twister.hpp>
+#include "gtest/gtest.h"
 
 #include <pdal/GlobalEnvironment.hpp>
-#include "Support.hpp"
 
 using namespace pdal;
 
-BOOST_AUTO_TEST_SUITE(EnvironmentTest)
-
-BOOST_AUTO_TEST_CASE(EnvironmentTest_1)
+TEST(EnvironmentTest, EnvironmentTest_1)
 {
     GlobalEnvironment& pdal_env = ::pdal::GlobalEnvironment::get();
 
@@ -56,5 +48,3 @@ BOOST_AUTO_TEST_CASE(EnvironmentTest_1)
     (void)python_env;
 #endif
 }
-
-BOOST_AUTO_TEST_SUITE_END()

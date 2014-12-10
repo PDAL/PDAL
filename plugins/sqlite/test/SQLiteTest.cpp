@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -120,28 +120,24 @@ Options getSQLITEOptions()
 }
 
 
-struct SQLiteTestFixture
+class SQLiteTest : public testing::Test
 {
-    SQLiteTestFixture() :
-        m_options(getSQLITEOptions())
+  protected:
+    virtual void SetUp()
     {
-
+        m_options = getSQLITEOptions();
     }
 
-    ~SQLiteTestFixture()
+    virtual void TearDown()
     {
         std::string temp_filename = m_options.getValueOrThrow<std::string>("connection");
         FileUtils::deleteFile(temp_filename);
     }
 
-    pdal::Options m_options;
+    Options m_options;
 };
 
-
-
-BOOST_FIXTURE_TEST_SUITE(SQLiteTest, SQLiteTestFixture)
-
-BOOST_AUTO_TEST_CASE(SqliteTest_test_simple_las)
+TEST_F(SQLiteTest, SqliteTest_test_simple_las)
 {
     // remove file from earlier run, if needed
     std::string temp_filename = getSQLITEOptions().getValueOrThrow<std::string>("connection");
@@ -152,7 +148,7 @@ BOOST_AUTO_TEST_CASE(SqliteTest_test_simple_las)
     StageFactory::ReaderCreator* las_reader_creator = f.getReaderCreator("readers.las");
     if (las_reader_creator)
     {
-        BOOST_CHECK(las_reader_creator);
+        EXPECT_TRUE(las_reader_creator);
 
         Stage* reader = las_reader_creator();
         reader->setOptions(ops1);
@@ -168,8 +164,8 @@ BOOST_AUTO_TEST_CASE(SqliteTest_test_simple_las)
         StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.sqlite");
         if (wc)
         {
-            BOOST_CHECK(wc);
-            BOOST_CHECK(rc);
+            EXPECT_TRUE(wc);
+            EXPECT_TRUE(rc);
 
             // remove file from earlier run, if needed
             std::string temp_filename = sqliteOptions.getValueOrThrow<std::string>("connection");
@@ -190,7 +186,7 @@ BOOST_AUTO_TEST_CASE(SqliteTest_test_simple_las)
                 writer_writer->prepare(ctx);
   //              uint64_t numPointsToRead = writer_reader->getNumPoints();
 
-//                BOOST_CHECK_EQUAL(numPointsToRead, 1065u);
+//                EXPECT_EQ(numPointsToRead, 1065u);
 
                 writer_writer->execute(ctx);
             }
@@ -198,28 +194,24 @@ BOOST_AUTO_TEST_CASE(SqliteTest_test_simple_las)
             {
                 // Read the data
 
-    //             pdal::SQLiteReader reader;
+    //             SQLiteReader reader;
                 std::unique_ptr<Reader> reader(rc());
                 reader->setOptions(sqliteOptions);
                 PointContext ctx;
                 reader->prepare(ctx);
 
                 PointBufferSet pbSet = reader->execute(ctx);
-                BOOST_CHECK_EQUAL(pbSet.size(), 1);
+                EXPECT_EQ(pbSet.size(), 1u);
 
                 PointBufferPtr buffer = *pbSet.begin();
 
                 uint16_t r = buffer->getFieldAs<uint16_t>(Dimension::Id::Red, 10);
-                BOOST_CHECK_EQUAL(r, 64u);
+                EXPECT_EQ(r, 64u);
                 int32_t x = buffer->getFieldAs<int32_t>(Dimension::Id::X, 10);
-                BOOST_CHECK_EQUAL(x, 636038);
+                EXPECT_EQ(x, 636038);
                 double xd = buffer->getFieldAs<double>(Dimension::Id::X, 10);
-                BOOST_CHECK_CLOSE(xd, 636037.53, 0.001);
+                EXPECT_FLOAT_EQ(xd, 636037.53);
             }
         }
     }
 }
-
-
-
-BOOST_AUTO_TEST_SUITE_END()

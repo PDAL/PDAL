@@ -32,22 +32,18 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <pdal/PointBuffer.hpp>
 #include <BufferReader.hpp>
 #include <pdal/filters/Stats.hpp>
-
-#include "Support.hpp"
-
-BOOST_AUTO_TEST_SUITE(BufferTest)
 
 using namespace pdal;
 
 namespace
 {
 
-BOOST_AUTO_TEST_CASE(test_basic)
+TEST(BufferTest, test_basic)
 {
     PointContext ctx;
 
@@ -75,29 +71,27 @@ BOOST_AUTO_TEST_CASE(test_basic)
 
     s.prepare(ctx);
     PointBufferSet pbSet = s.execute(ctx);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     buf = *pbSet.begin();
-    BOOST_CHECK_EQUAL(buf->size(), 20);
+    EXPECT_EQ(buf->size(), 20u);
 
     filters::stats::Summary xSummary = s.getStats(Dimension::Id::X);
-    BOOST_CHECK_CLOSE(xSummary.minimum(), 0, .0001);
-    BOOST_CHECK_CLOSE(xSummary.maximum(), 19, .0001);
-    BOOST_CHECK_EQUAL(xSummary.count(), 20);
-    BOOST_CHECK_CLOSE(xSummary.average(), 9.5, .0001);
+    EXPECT_FLOAT_EQ(xSummary.minimum(), 0);
+    EXPECT_FLOAT_EQ(xSummary.maximum(), 19);
+    EXPECT_EQ(xSummary.count(), 20u);
+    EXPECT_FLOAT_EQ(xSummary.average(), 9.5);
 
     filters::stats::Summary ySummary = s.getStats(Dimension::Id::Y);
-    BOOST_CHECK_CLOSE(ySummary.minimum(), 0, .0001);
-    BOOST_CHECK_CLOSE(ySummary.maximum(), 38, .0001);
-    BOOST_CHECK_EQUAL(ySummary.count(), 20);
-    BOOST_CHECK_CLOSE(ySummary.average(), 19, .0001);
+    EXPECT_FLOAT_EQ(ySummary.minimum(), 0);
+    EXPECT_FLOAT_EQ(ySummary.maximum(), 38);
+    EXPECT_EQ(ySummary.count(), 20u);
+    EXPECT_FLOAT_EQ(ySummary.average(), 19);
 
     filters::stats::Summary zSummary = s.getStats(Dimension::Id::Z);
-    BOOST_CHECK_CLOSE(zSummary.minimum(), -19, .0001);
-    BOOST_CHECK_CLOSE(zSummary.maximum(), 0, .0001);
-    BOOST_CHECK_EQUAL(zSummary.count(), 20);
-    BOOST_CHECK_CLOSE(zSummary.average(), -9.5, .0001);
+    EXPECT_FLOAT_EQ(zSummary.minimum(), -19);
+    EXPECT_FLOAT_EQ(zSummary.maximum(), 0);
+    EXPECT_EQ(zSummary.count(), 20u);
+    EXPECT_FLOAT_EQ(zSummary.average(), -9.5);
 }
 
 }
-
-BOOST_AUTO_TEST_SUITE_END()

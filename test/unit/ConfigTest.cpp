@@ -32,51 +32,46 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
-#include <pdal/pdal_internal.hpp>
 #include <pdal/pdal_config.hpp>
 
 using namespace pdal;
 
-BOOST_AUTO_TEST_SUITE(ConfigTest)
-
-BOOST_AUTO_TEST_CASE(test_3rdparty_libs)
+TEST(ConfigTest, test_3rdparty_libs)
 {
     bool geotiff = IsLibGeoTIFFEnabled();
     bool laszip = IsLasZipEnabled();
 
 #ifdef PDAL_HAVE_LIBGEOTIFF
-    BOOST_CHECK(geotiff);
+    EXPECT_TRUE(geotiff);
 #else
-    BOOST_CHECK(!geotiff);
+    EXPECT_TRUE(!geotiff);
 #endif
 
 #ifdef PDAL_HAVE_LASZIP
-    BOOST_CHECK(laszip);
+    EXPECT_TRUE(laszip);
 #else
-    BOOST_CHECK(!laszip);
+    EXPECT_TRUE(!laszip);
 #endif
 }
 
-BOOST_AUTO_TEST_CASE(test_version)
+TEST(ConfigTest, test_version)
 {
     // just verify these functions can be called, don't worry about the values
 
     std::string version = GetVersionString();
-    BOOST_CHECK(!version.empty());
+    EXPECT_TRUE(!version.empty());
     std::string fullVersion = GetFullVersionString();
-    BOOST_CHECK(!fullVersion.empty());
+    EXPECT_TRUE(!fullVersion.empty());
 
     int major = GetVersionMajor();
-    BOOST_CHECK(major >= 0);
+    EXPECT_TRUE(major >= 0);
     int minor = GetVersionMinor();
-    BOOST_CHECK(minor >= 0);
+    EXPECT_TRUE(minor >= 0);
     int patch = GetVersionPatch();
-    BOOST_CHECK(patch >= 0);
+    EXPECT_TRUE(patch >= 0);
 
     int bignum = GetVersionInteger();
-    BOOST_CHECK(bignum > 0);
+    EXPECT_TRUE(bignum > 0);
 }
-
-BOOST_AUTO_TEST_SUITE_END()

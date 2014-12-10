@@ -32,79 +32,73 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
+
 #include <boost/property_tree/xml_parser.hpp>
 
 #include <pdal/Bounds.hpp>
 #include <pdal/PDALUtils.hpp>
-#include <iostream>
-#include <sstream>
-#include <iostream>
-#include <string>
 
 using namespace pdal;
 
-BOOST_AUTO_TEST_SUITE(BoundsTest)
-
-BOOST_AUTO_TEST_CASE(test_ctor)
+TEST(BoundsTest, test_ctor)
 {
     BOX3D b1;
-    BOOST_CHECK(b1.empty());
+    EXPECT_TRUE(b1.empty());
 
     b1.clear();
     BOX3D b2;
-    BOOST_CHECK_EQUAL(b1, b2);
+    EXPECT_EQ(b1, b2);
 }
 
-BOOST_AUTO_TEST_CASE(test_equals)
+TEST(BoundsTest, test_equals)
 {
     BOX3D b1(1,2,3,4);
     BOX3D b2(1,2,3,4);
     BOX3D b3(1,2,32,4);
     BOX3D b4(1,2,3,4,5,6);
 
-    BOOST_CHECK(b1 == b1);
-    BOOST_CHECK(b1 == b2);
-    BOOST_CHECK(b2 == b1);
-    BOOST_CHECK(b1 != b3);
-    BOOST_CHECK(b3 != b1);
-    BOOST_CHECK(b1 != b4);
-    BOOST_CHECK(b1 != b4);
-    BOOST_CHECK(b4 != b1);
+    EXPECT_TRUE(b1 == b1);
+    EXPECT_TRUE(b1 == b2);
+    EXPECT_TRUE(b2 == b1);
+    EXPECT_TRUE(b1 != b3);
+    EXPECT_TRUE(b3 != b1);
+    EXPECT_TRUE(b1 != b4);
+    EXPECT_TRUE(b1 != b4);
+    EXPECT_TRUE(b4 != b1);
 }
 
-BOOST_AUTO_TEST_CASE(test_copy)
+TEST(BoundsTest, test_copy)
 {
     BOX3D b1(1,2,3,4);
     BOX3D b2(b1);
-    BOOST_CHECK(b1==b2);
+    EXPECT_TRUE(b1==b2);
 }
 
-BOOST_AUTO_TEST_CASE(test_accessor)
+TEST(BoundsTest, test_accessor)
 {
     BOX3D b2(1,2,3,4,5,6);
-    BOOST_CHECK_CLOSE(b2.minx, 1, 0.01);
-    BOOST_CHECK_CLOSE(b2.miny, 2, 0.01);
-    BOOST_CHECK_CLOSE(b2.minz, 3, 0.01);
-    BOOST_CHECK_CLOSE(b2.maxx, 4, 0.01);
-    BOOST_CHECK_CLOSE(b2.maxy, 5, 0.01);
-    BOOST_CHECK_CLOSE(b2.maxz, 6, 0.01);
-
+    EXPECT_FLOAT_EQ(b2.minx, 1);
+    EXPECT_FLOAT_EQ(b2.miny, 2);
+    EXPECT_FLOAT_EQ(b2.minz, 3);
+    EXPECT_FLOAT_EQ(b2.maxx, 4);
+    EXPECT_FLOAT_EQ(b2.maxy, 5);
+    EXPECT_FLOAT_EQ(b2.maxz, 6);
 }
 
-BOOST_AUTO_TEST_CASE(test_clip)
+TEST(BoundsTest, test_clip)
 {
     BOX3D r1(0,0,10,10);
     BOX3D r2(1,1,11,11);
     r1.clip(r2);
 
     BOX3D r3(1,1,10,10);
-    BOOST_CHECK(r1==r3);
+    EXPECT_TRUE(r1==r3);
 
     BOX3D r4(2,4,6,8);
     r1.clip(r4);
 
-    BOOST_CHECK(r1==r4);
+    EXPECT_TRUE(r1==r4);
 
     BOX3D r5(20,40,60,80);
     r1.clip(r5);
@@ -113,35 +107,33 @@ BOOST_AUTO_TEST_CASE(test_clip)
     // .clip() can make an invalid bounds, this should be fixed.
     BOX3D r6(20,6, 40,8);
 
-    BOOST_CHECK_CLOSE(r1.minx, 20, 0.01);
-    BOOST_CHECK_CLOSE(r1.maxx, 6, 0.01);
-    BOOST_CHECK_CLOSE(r1.miny, 40, 0.01);
-    BOOST_CHECK_CLOSE(r1.maxy, 8, 0.01);
+    EXPECT_FLOAT_EQ(r1.minx, 20);
+    EXPECT_FLOAT_EQ(r1.maxx, 6);
+    EXPECT_FLOAT_EQ(r1.miny, 40);
+    EXPECT_FLOAT_EQ(r1.maxy, 8);
 }
 
-BOOST_AUTO_TEST_CASE(test_intersect)
+TEST(BoundsTest, test_intersect)
 {
     BOX3D r1(0,0,10,10);
     BOX3D r2(1,1,11,11);
     BOX3D r3(100,100,101,101);
     BOX3D r4(2,4,6,8);
 
-    BOOST_CHECK(r1.overlaps(r1));
+    EXPECT_TRUE(r1.overlaps(r1));
 
-    BOOST_CHECK(r1.overlaps(r2));
-    BOOST_CHECK(r2.overlaps(r1));
+    EXPECT_TRUE(r1.overlaps(r2));
+    EXPECT_TRUE(r2.overlaps(r1));
 
-    BOOST_CHECK(!r1.overlaps(r3));
-    BOOST_CHECK(!r3.overlaps(r1));
+    EXPECT_TRUE(!r1.overlaps(r3));
+    EXPECT_TRUE(!r3.overlaps(r1));
 
-    BOOST_CHECK(r1.contains(r1));
-    BOOST_CHECK(!r1.contains(r2));
-    BOOST_CHECK(r1.contains(r4));
-
+    EXPECT_TRUE(r1.contains(r1));
+    EXPECT_TRUE(!r1.contains(r2));
+    EXPECT_TRUE(r1.contains(r4));
 }
 
-
-BOOST_AUTO_TEST_CASE(test_grow)
+TEST(BoundsTest, test_grow)
 {
     BOX3D r1(50,51,100,101);
     BOX3D r2(0,1,10,201);
@@ -149,33 +141,28 @@ BOOST_AUTO_TEST_CASE(test_grow)
     r1.grow(r2);
 
     BOX3D r3(0,1,100,201);
-    BOOST_CHECK(r1 == r3);
+    EXPECT_TRUE(r1 == r3);
 }
 
-
-BOOST_AUTO_TEST_CASE(test_static)
+TEST(BoundsTest, test_static)
 {
     BOX3D t = BOX3D::getDefaultSpatialExtent();
     double mind =  (std::numeric_limits<double>::lowest)();
     double maxd =  (std::numeric_limits<double>::max)();
-    double epsilon = std::numeric_limits<double>::epsilon();
-    BOOST_CHECK_CLOSE(t.minx, mind, epsilon);
-    BOOST_CHECK_CLOSE(t.maxx, maxd, epsilon);
+    EXPECT_FLOAT_EQ(t.minx, mind);
+    EXPECT_FLOAT_EQ(t.maxx, maxd);
 }
 
-
-BOOST_AUTO_TEST_CASE(test_invalid)
+TEST(BoundsTest, test_invalid)
 {
     BOX3D t;
     double mind =  (std::numeric_limits<double>::lowest)();
     double maxd =  (std::numeric_limits<double>::max)();
-    double epsilon = std::numeric_limits<double>::epsilon();
-    BOOST_CHECK_CLOSE(t.minx, maxd, epsilon);
-    BOOST_CHECK_CLOSE(t.maxx, mind, epsilon);
+    EXPECT_FLOAT_EQ(t.minx, maxd);
+    EXPECT_FLOAT_EQ(t.maxx, mind);
 }
 
-
-BOOST_AUTO_TEST_CASE(test_output)
+TEST(BoundsTest, test_output)
 {
     const BOX3D b2(1,2,101,102);
     const BOX3D b3(1.1,2.2,3.3,101.1,102.2,103.3);
@@ -189,12 +176,11 @@ BOOST_AUTO_TEST_CASE(test_output)
     const std::string out2 = ss2.str();
     const std::string out3 = ss3.str();
 
-    BOOST_CHECK_EQUAL(out2, "([1, 101], [2, 102])");
-    BOOST_CHECK_EQUAL(out3, "([1.1, 101.1], [2.2, 102.2], [3.3, 103.3])");
+    EXPECT_EQ(out2, "([1, 101], [2, 102])");
+    EXPECT_EQ(out3, "([1.1, 101.1], [2.2, 102.2], [3.3, 103.3])");
 }
 
-
-BOOST_AUTO_TEST_CASE(BoundsTest_ptree)
+TEST(BoundsTest, BoundsTest_ptree)
 {
     const BOX3D b2(1,2,101,102);
 
@@ -208,39 +194,35 @@ BOOST_AUTO_TEST_CASE(BoundsTest_ptree)
     static std::string xml_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
     const std::string ref = xml_header + "<0><minimum>1</minimum><maximum>101</maximum></0><1><minimum>2</minimum><maximum>102</maximum></1>";
 
-    BOOST_CHECK_EQUAL(ref, out1);
+    EXPECT_EQ(ref, out1);
 }
 
-
-BOOST_AUTO_TEST_CASE(test_input)
+TEST(BoundsTest, test_input)
 {
     std::stringstream empty2_s("", std::stringstream::in | std::stringstream::out);
     BOX3D empty2;
     empty2_s >> empty2;
-    BOOST_CHECK_EQUAL(true, empty2.empty());
+    EXPECT_EQ(true, empty2.empty());
 
     std::stringstream ss("([1.1, 101.1], [2.2, 102.2], [3.3, 103.3])", std::stringstream::in | std::stringstream::out);
 
     BOX3D rr;
     ss >> rr;
     BOX3D r(1.1,2.2,3.3,101.1,102.2,103.3);
-    BOOST_CHECK(r == rr);
+    EXPECT_TRUE(r == rr);
 
 }
 
-
-BOOST_AUTO_TEST_CASE(test_lexicalcast_whitespace)
+TEST(BoundsTest, test_lexicalcast_whitespace)
 {
     const BOX3D b1 = boost::lexical_cast< BOX3D >("([1,101],[2,102],[3,103])");
     const BOX3D b2 = boost::lexical_cast< BOX3D >("([1, 101], [2, 102], [3, 103])");
 
-    BOOST_CHECK_EQUAL(b1, b2);
+    EXPECT_EQ(b1, b2);
 }
 
-BOOST_AUTO_TEST_CASE(test_wkt)
+TEST(BoundsTest, test_wkt)
 {
     const BOX3D b(1.1,2.2,3.3,101.1,102.2,103.3);
-    BOOST_CHECK_EQUAL(b.toWKT(1), "POLYGON ((1.1 2.2, 1.1 102.2, 101.1 102.2, 101.1 2.2, 1.1 2.2))");
+    EXPECT_EQ(b.toWKT(1), "POLYGON ((1.1 2.2, 1.1 102.2, 101.1 102.2, 101.1 2.2, 1.1 2.2))");
 }
-
-BOOST_AUTO_TEST_SUITE_END()

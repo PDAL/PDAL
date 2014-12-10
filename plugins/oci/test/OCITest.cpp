@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <boost/property_tree/ptree.hpp>
 
@@ -54,7 +54,6 @@ bool ShouldRunTest()
 Options getOCIOptions()
 {
     Options options;
-
 
     Option capacity("capacity", chunk_size,"capacity");
     options.add(capacity);
@@ -89,17 +88,11 @@ Options getOCIOptions()
     // Option scale_x("scale_x", 0.0000001, "");
     // options.add(scale_x);
 
-
-
     // Option offset_x("offset_x", 493994.875f, "");
     // options.add(offset_x);
     //
     // Option offset_y("offset_y", 4877429.62f, "");
     // options.add(offset_y);
-
-
-
-
 
     Option disable_cloud_trigger("disable_cloud_trigger", true, "");
     options.add(disable_cloud_trigger);
@@ -122,16 +115,17 @@ Options getOCIOptions()
     Option xml_schema_dump("xml_schema_dump", "pcs-oracle-xml-schema-dump.xml", "");
     options.add(xml_schema_dump);
 
-
     return options;
 }
 
-struct OracleTestFixture
+class OCITest : public testing::Test
 {
-    OracleTestFixture() :
-        m_options(getOCIOptions())
-        , m_connection(Connection())
+  protected:
+    virtual void SetUp()
     {
+        m_options = getOCIOptions();
+        m_connection = Connection();
+
         if (!ShouldRunTest()) return;
         Connection connection = connect();
 
@@ -142,7 +136,6 @@ struct OracleTestFixture
         std::string block_table_name = m_options.getValueOrThrow<std::string>("block_table_name");
         std::string create_block_table = "CREATE TABLE " + block_table_name + " AS SELECT * FROM MDSYS.SDO_PC_BLK_TABLE";
         run(connection, create_block_table);
-
     }
 
     Connection connect()
@@ -163,10 +156,10 @@ struct OracleTestFixture
         statement->Execute();
     }
 
-    pdal::Options m_options;
+    Options m_options;
     Connection m_connection;
 
-    ~OracleTestFixture()
+    virtual void TearDown()
     {
         if (!ShouldRunTest())
             return;
@@ -186,9 +179,6 @@ struct OracleTestFixture
         run(connection, cleanup_metadata);
     }
 };
-
-BOOST_FIXTURE_TEST_SUITE(OCITest, OracleTestFixture)
-
 
 bool WriteUnprojectedData()
 {
@@ -236,16 +226,16 @@ bool WriteUnprojectedData()
 
     if (rc)
     {
-        BOOST_CHECK(rc);
+        EXPECT_TRUE(rc);
 
         Stage* reader = rc();
         reader->setOptions(options);
-        // pdal::filters::Chipper chipper(options);
+        // filters::Chipper chipper(options);
         // chipper.setInput(&reader);
         StageFactory::WriterCreator* wc = f.getWriterCreator("writers.oci");
         if (wc)
         {
-            BOOST_CHECK(wc);
+            EXPECT_TRUE(wc);
 
             std::unique_ptr<Writer> writer(wc());
             writer->setOptions(options);
@@ -281,13 +271,13 @@ void checkUnProjectedPoints(PointBuffer const& data)
         uint16_t green = data.getFieldAs<uint16_t>(Dimension::Id::Green, i);
         uint16_t blue = data.getFieldAs<uint16_t>(Dimension::Id::Blue, i);
 
-        BOOST_CHECK_EQUAL(x, X[i]);
-        BOOST_CHECK_EQUAL(y, Y[i]);
-        BOOST_CHECK_EQUAL(z, Z[i]);
-        BOOST_CHECK_EQUAL(intensity, I[i]);
-        BOOST_CHECK_EQUAL(red, R[i]);
-        BOOST_CHECK_EQUAL(green, G[i]);
-        BOOST_CHECK_EQUAL(blue, B[i]);
+        EXPECT_EQ(x, X[i]);
+        EXPECT_EQ(y, Y[i]);
+        EXPECT_EQ(z, Z[i]);
+        EXPECT_EQ(intensity, I[i]);
+        EXPECT_EQ(red, R[i]);
+        EXPECT_EQ(green, G[i]);
+        EXPECT_EQ(blue, B[i]);
     }
 }
 
@@ -295,8 +285,8 @@ void checkUnProjectedPoints(PointBuffer const& data)
 void compareAgainstSourceBuffer(PointBuffer const& candidate,
     std::string filename)
 {
-    pdal::Options options;
-    pdal::Option fn("filename", filename);
+    Options options;
+    Option fn("filename", filename);
     options.add(fn);
 
     PointContext tc;
@@ -304,20 +294,20 @@ void compareAgainstSourceBuffer(PointBuffer const& candidate,
     StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
     if (rc)
     {
-        BOOST_CHECK(rc);
+        EXPECT_TRUE(rc);
 
         Stage* reader = rc();
         reader->setOptions(options);
 
         reader->prepare(tc);
 
-        //BOOST_CHECK_EQUAL(candidate.size(), reader->getNumPoints());
+        //EXPECT_EQ(candidate.size(), reader->getNumPoints());
 
         PointBufferSet pbSet = reader->execute(tc);
-        BOOST_CHECK_EQUAL(pbSet.size(), 1);
+        EXPECT_EQ(pbSet.size(), 1u);
         PointBufferPtr source = *pbSet.begin();
 
-      // BOOST_CHECK_EQUAL(source->size(), reader->getNumPoints());
+      // EXPECT_EQ(source->size(), reader->getNumPoints());
 
         // int X[] = { 49405730, 49413382, 49402110, 494192890, 49418622, 49403411 };
         // int Y[] = { 487743335, 487743982, 487743983, 487744219, 487744254, 487745019 };
@@ -347,19 +337,19 @@ void compareAgainstSourceBuffer(PointBuffer const& candidate,
             uint16_t cgreen = candidate.getFieldAs<uint16_t>(Dimension::Id::Green, i);
             uint16_t cblue = candidate.getFieldAs<uint16_t>(Dimension::Id::Blue, i);
 
-            BOOST_CHECK_EQUAL(sx, cx);
-            BOOST_CHECK_EQUAL(sy, cy);
-            BOOST_CHECK_EQUAL(sz, cz);
-            BOOST_CHECK_EQUAL(sintensity, cintensity);
-            BOOST_CHECK_EQUAL(sred, cred);
-            BOOST_CHECK_EQUAL(sgreen, cgreen);
-            BOOST_CHECK_EQUAL(sblue, cblue);
+            EXPECT_EQ(sx, cx);
+            EXPECT_EQ(sy, cy);
+            EXPECT_EQ(sz, cz);
+            EXPECT_EQ(sintensity, cintensity);
+            EXPECT_EQ(sred, cred);
+            EXPECT_EQ(sgreen, cgreen);
+            EXPECT_EQ(sblue, cblue);
         }
     }
 }
 
 
-BOOST_AUTO_TEST_CASE(read_unprojected_data)
+TEST_F(OCITest, read_unprojected_data)
 {
     if (!ShouldRunTest()) return;
 
@@ -387,7 +377,7 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
     StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.oci");
     if (rc)
     {
-        BOOST_CHECK(rc);
+        EXPECT_TRUE(rc);
 
         std::unique_ptr<Reader> reader(rc());
 
@@ -395,9 +385,9 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
         PointContext ctx;
         reader->prepare(ctx);
         PointBufferSet pbSet = reader->execute(ctx);
-        BOOST_CHECK_EQUAL(pbSet.size(), 1);
+        EXPECT_EQ(pbSet.size(), 1u);
         PointBufferPtr buf = *pbSet.begin();
-        BOOST_CHECK_EQUAL(buf->size(), 1065);
+        EXPECT_EQ(buf->size(), 1065u);
 
         // checkUnProjectedPoints(*buf);
 
@@ -409,7 +399,7 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
 
 //
 //
-// BOOST_AUTO_TEST_CASE(read_view_reproj)
+// TEST_F(OCITest, read_view_reproj)
 // {
 //     if (!ShouldRunTest()) return;
 //
@@ -445,9 +435,9 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
 //     // offset_y.setValue<float>( 0.0f);
 //
 //
-//     pdal::Option x_dim("x_dim", std::string("readers.oci.X"), "Dimension name to use for 'X' data");
-//     pdal::Option y_dim("y_dim", std::string("readers.oci.Y"), "Dimension name to use for 'Y' data");
-//     pdal::Option z_dim("z_dim", std::string("readers.oci.Z"), "Dimension name to use for 'Z' data");
+//     Option x_dim("x_dim", std::string("readers.oci.X"), "Dimension name to use for 'X' data");
+//     Option y_dim("y_dim", std::string("readers.oci.Y"), "Dimension name to use for 'Y' data");
+//     Option z_dim("z_dim", std::string("readers.oci.Z"), "Dimension name to use for 'Z' data");
 //
 //     options.add(x_dim);
 //     options.add(y_dim);
@@ -459,19 +449,19 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
 //     Option& verbose = options.getOptionByRef("verbose");
 //     verbose.setValue<std::string>( "7");
 //
-//     pdal::OciReader reader_reader(options);
-//     // pdal::filters::InPlaceReprojection reproj(reader_reader, options);
+//     OciReader reader_reader(options);
+//     // filters::InPlaceReprojection reproj(reader_reader, options);
 //     reader_reader.prepare();
 //
-//     pdal::PointBuffer data(reader_reader.getSchema(), chunk_size+30);
-//     pdal::StageSequentialIterator* iter = reader_reader.createSequentialIterator(data);
+//     PointBuffer data(reader_reader.getSchema(), chunk_size+30);
+//     StageSequentialIterator* iter = reader_reader.createSequentialIterator(data);
 //
 //     uint32_t numRead(0);
 //
 //     numRead = iter->read(data);
 //
-//     BOOST_CHECK_EQUAL(numRead, chunk_size+30u);
-//     BOOST_CHECK_EQUAL(data.getNumPoints(), chunk_size+30u);
+//     EXPECT_EQ(numRead, chunk_size+30u);
+//     EXPECT_EQ(data.getNumPoints(), chunk_size+30u);
 //
 //     checkPoints(data);
 //
@@ -480,7 +470,7 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
 // }
 
 //
-// BOOST_AUTO_TEST_CASE(read_all)
+// TEST_F(OCITest, read_all)
 // {
 //     if (!ShouldRunTest()) return;
 //
@@ -493,23 +483,23 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
 //     Options options = getOCIOptions();
 //     Option& query = options.getOptionByRef("query");
 //     query.setValue<std::string>(oss.str());
-//     pdal::OciReader reader_reader(options);
+//     OciReader reader_reader(options);
 //     reader_reader.prepare();
 //
-//     pdal::PointBuffer data(reader_reader.getSchema(), 2500);
-//     boost::scoped_ptr<pdal::StageSequentialIterator> iter(reader_reader.createSequentialIterator(data));
+//     PointBuffer data(reader_reader.getSchema(), 2500);
+//     boost::scoped_ptr<StageSequentialIterator> iter(reader_reader.createSequentialIterator(data));
 //
 //
 //     uint32_t numRead = iter->read(data);
 //
-//     BOOST_CHECK_EQUAL(numRead, 2130u);
+//     EXPECT_EQ(numRead, 2130u);
 //
-//     pdal::Schema const& schema = data.getSchema();
-//     pdal::Dimension const& dimX = schema.getDimension("X");
-//     pdal::Dimension const& dimY = schema.getDimension("Y");
-//     pdal::Dimension const& dimZ = schema.getDimension("Z");
-//     pdal::Dimension const& dimIntensity = schema.getDimension("Intensity");
-//     pdal::Dimension const& dimRed = schema.getDimension("Red");
+//     Schema const& schema = data.getSchema();
+//     Dimension const& dimX = schema.getDimension("X");
+//     Dimension const& dimY = schema.getDimension("Y");
+//     Dimension const& dimZ = schema.getDimension("Z");
+//     Dimension const& dimIntensity = schema.getDimension("Intensity");
+//     Dimension const& dimRed = schema.getDimension("Red");
 //
 //     int32_t x = data.getFieldAs<int32_t>(dimX, 0);
 //     int32_t y = data.getFieldAs<int32_t>(dimY, 0);
@@ -517,16 +507,16 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
 //     uint16_t intensity = data.getFieldAs<uint16_t>(dimIntensity, 6);
 //     uint16_t red = data.getFieldAs<uint16_t>(dimRed, 6);
 //
-//     BOOST_CHECK_EQUAL(x, -1250367506);
-//     BOOST_CHECK_EQUAL(y, 492519663);
-//     BOOST_CHECK_EQUAL(z, 12931);
-//     BOOST_CHECK_EQUAL(intensity, 67);
-//     BOOST_CHECK_EQUAL(red, 113);
+//     EXPECT_EQ(x, -1250367506);
+//     EXPECT_EQ(y, 492519663);
+//     EXPECT_EQ(z, 12931);
+//     EXPECT_EQ(intensity, 67);
+//     EXPECT_EQ(red, 113);
 //
 // }
 //
 
-// BOOST_AUTO_TEST_CASE(read_view)
+// TEST_F(OCITest, read_view)
 // {
 //     if (!ShouldRunTest()) return;
 //
@@ -543,19 +533,19 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
 //     Options options = getOCIOptions();
 //     Option& query = options.getOptionByRef("query");
 //     query.setValue<std::string>(oss.str());
-//     pdal::OciReader reader_reader(options);
+//     OciReader reader_reader(options);
 //     reader_reader.prepare();
 //
-//     pdal::PointBuffer data(reader_reader.getSchema(), chunk_size+30);
-//     boost::scoped_ptr<pdal::StageSequentialIterator> iter(reader_reader.createSequentialIterator(data));
+//     PointBuffer data(reader_reader.getSchema(), chunk_size+30);
+//     boost::scoped_ptr<StageSequentialIterator> iter(reader_reader.createSequentialIterator(data));
 //
 //
 //     uint32_t numTotal(0);
 //     uint32_t numRead(0);
 //
-//     pdal::PointBuffer data3(reader_reader.getSchema(), 100);
+//     PointBuffer data3(reader_reader.getSchema(), 100);
 //     numRead = iter->read(data3);
-//     BOOST_CHECK_EQUAL(numRead, 100u);
+//     EXPECT_EQ(numRead, 100u);
 //     numTotal = numRead + numTotal;
 //
 //     while (numRead !=0)
@@ -565,9 +555,7 @@ BOOST_AUTO_TEST_CASE(read_unprojected_data)
 //
 //     }
 //
-//     BOOST_CHECK_EQUAL(numRead, 0u);
-//     BOOST_CHECK_EQUAL(numTotal, 1065u);
+//     EXPECT_EQ(numRead, 0u);
+//     EXPECT_EQ(numTotal, 1065u);
 //
 // }
-
-BOOST_AUTO_TEST_SUITE_END()

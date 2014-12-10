@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <pdal/UserCallback.hpp>
 
@@ -41,8 +41,6 @@
 #endif
 
 using namespace pdal;
-
-BOOST_AUTO_TEST_SUITE(UserCallbackTest)
 
 // our implementation will be that we will request an interrupt
 // when we are more than half done
@@ -83,7 +81,7 @@ private:
 };
 
 
-BOOST_AUTO_TEST_CASE(test1)
+TEST(UserCallbackTest, test1)
 {
     MyUserCallback cb;
 
@@ -94,10 +92,10 @@ BOOST_AUTO_TEST_CASE(test1)
     for (int i = 0; i < 50; i++)
     {
         ok = worker.doWork();
-        BOOST_CHECK(ok);
+        EXPECT_TRUE(ok);
         uint32_t hb = 3 * (i + 1);
-        BOOST_CHECK_EQUAL(cb.getHeartbeats(), hb);
-        BOOST_CHECK_CLOSE(cb.getPercentComplete(), (double)(i + 1), 0.001);
+        EXPECT_EQ(cb.getHeartbeats(), hb);
+        EXPECT_FLOAT_EQ(cb.getPercentComplete(), (double)(i + 1));
     }
 
     // to 51%...
@@ -106,12 +104,10 @@ BOOST_AUTO_TEST_CASE(test1)
         ok = true;
         ok = worker.doWork();
     }
-    catch (pdal::pipeline_interrupt intr)
+    catch (pipeline_interrupt intr)
     {
         ok = false;
     }
-    BOOST_CHECK(!ok);
-    BOOST_CHECK_CLOSE(cb.getPercentComplete(), 50.333333, 0.001);
+    EXPECT_TRUE(!ok);
+    EXPECT_FLOAT_EQ(cb.getPercentComplete(), 50.333333);
 }
-
-BOOST_AUTO_TEST_SUITE_END()

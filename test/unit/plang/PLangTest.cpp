@@ -32,18 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
-
-#ifdef PDAL_HAVE_PYTHON
+#include "gtest/gtest.h"
 
 #include <pdal/plang/Invocation.hpp>
 
 using namespace pdal;
 using namespace pdal::plang;
 
-BOOST_AUTO_TEST_SUITE(PLangTest)
-
-BOOST_AUTO_TEST_CASE(PLangTest_basic)
+TEST(PLangTest, PLangTest_basic)
 {
     const char* source =
         "import numpy as np\n"
@@ -64,7 +60,7 @@ BOOST_AUTO_TEST_CASE(PLangTest_basic)
 //
 //---------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(PLangTest_compile_error)
+TEST(PLangTest, PLangTest_compile_error)
 {
     const char* source =
         "import numpy as np\n"
@@ -74,11 +70,11 @@ BOOST_AUTO_TEST_CASE(PLangTest_compile_error)
     Script script(source, "MyTest", "yow");
     Invocation meth(script);
 
-    BOOST_REQUIRE_THROW(meth.compile(), python_error);
+    ASSERT_THROW(meth.compile(), python_error);
 }
 
 
-BOOST_AUTO_TEST_CASE(PLangTest_runtime_error)
+TEST(PLangTest, PLangTest_runtime_error)
 {
     const char* source =
         "import numpy as np\n"
@@ -90,11 +86,11 @@ BOOST_AUTO_TEST_CASE(PLangTest_runtime_error)
     Invocation meth(script);
     meth.compile();
 
-    BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
+    ASSERT_THROW(meth.execute(), python_error);
 }
 
 
-BOOST_AUTO_TEST_CASE(PLangTest_toofewinputs)
+TEST(PLangTest, PLangTest_toofewinputs)
 {
     const char* source =
         "import numpy as np\n"
@@ -106,11 +102,11 @@ BOOST_AUTO_TEST_CASE(PLangTest_toofewinputs)
     Invocation meth(script);
     meth.compile();
 
-    BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
+    ASSERT_THROW(meth.execute(), python_error);
 }
 
 
-BOOST_AUTO_TEST_CASE(PLangTest_toomanyinputs)
+TEST(PLangTest, PLangTest_toomanyinputs)
 {
     const char* source =
         "import numpy as np\n"
@@ -122,11 +118,11 @@ BOOST_AUTO_TEST_CASE(PLangTest_toomanyinputs)
     Invocation meth(script);
     meth.compile();
 
-    BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
+    ASSERT_THROW(meth.execute(), python_error);
 }
 
 
-BOOST_AUTO_TEST_CASE(PLangTest_returnvoid)
+TEST(PLangTest, PLangTest_returnvoid)
 {
     const char* source =
         "import numpy as np\n"
@@ -138,11 +134,11 @@ BOOST_AUTO_TEST_CASE(PLangTest_returnvoid)
     Invocation meth(script);
     meth.compile();
 
-    BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
+    ASSERT_THROW(meth.execute(), python_error);
 }
 
 
-BOOST_AUTO_TEST_CASE(PLangTest_returnint)
+TEST(PLangTest, PLangTest_returnint)
 {
     const char* source =
         "import numpy as np\n"
@@ -154,7 +150,7 @@ BOOST_AUTO_TEST_CASE(PLangTest_returnint)
     Invocation meth(script);
     meth.compile();
 
-    BOOST_REQUIRE_THROW(meth.execute(), pdal::python_error);
+    ASSERT_THROW(meth.execute(), python_error);
 }
 
 
@@ -165,7 +161,7 @@ BOOST_AUTO_TEST_CASE(PLangTest_returnint)
 //---------------------------------------------------------------------------
 
 
-BOOST_AUTO_TEST_CASE(PLangTest_ins)
+TEST(PLangTest, PLangTest_ins)
 {
     double data[5] = {1.0, 2.0, 3.0, 4.0, 5.0};
 
@@ -185,7 +181,7 @@ BOOST_AUTO_TEST_CASE(PLangTest_ins)
 }
 
 
-BOOST_AUTO_TEST_CASE(PLangTest_outs)
+TEST(PLangTest, PLangTest_outs)
 {
     const char* source =
         "import numpy as np\n"
@@ -201,19 +197,19 @@ BOOST_AUTO_TEST_CASE(PLangTest_outs)
     Invocation meth(script);
     meth.compile();
     meth.execute();
-    BOOST_CHECK(meth.hasOutputVariable("X"));
+    EXPECT_TRUE(meth.hasOutputVariable("X"));
     void *output = meth.extractResult("X", Dimension::Type::Double);
 
     double *d = (double *)output;
-    BOOST_CHECK_CLOSE(*d++, 1.0, 0.00001);
-    BOOST_CHECK_CLOSE(*d++, 1.0, 0.00001);
-    BOOST_CHECK_CLOSE(*d++, 1.0, 0.00001);
-    BOOST_CHECK_CLOSE(*d++, 1.0, 0.00001);
-    BOOST_CHECK_CLOSE(*d++, 1.0, 0.00001);
+    EXPECT_FLOAT_EQ(*d++, 1.0);
+    EXPECT_FLOAT_EQ(*d++, 1.0);
+    EXPECT_FLOAT_EQ(*d++, 1.0);
+    EXPECT_FLOAT_EQ(*d++, 1.0);
+    EXPECT_FLOAT_EQ(*d++, 1.0);
 }
 
 
-BOOST_AUTO_TEST_CASE(PLangTest_aliases)
+TEST(PLangTest, PLangTest_aliases)
 {
     const char* source =
         "import numpy as np\n"
@@ -254,37 +250,37 @@ BOOST_AUTO_TEST_CASE(PLangTest_aliases)
     meth.execute();
 
     {
-        BOOST_CHECK(meth.hasOutputVariable("Y"));
-        BOOST_CHECK(meth.hasOutputVariable("prefix.Y"));
+        EXPECT_TRUE(meth.hasOutputVariable("Y"));
+        EXPECT_TRUE(meth.hasOutputVariable("prefix.Y"));
 
         void *output = meth.extractResult("Y", Dimension::Type::Double);
         double *d = (double *)output;
-        BOOST_CHECK_CLOSE(*d++, 2.0, 0.00001);
-        BOOST_CHECK_CLOSE(*d++, 4.0, 0.00001);
-        BOOST_CHECK_CLOSE(*d++, 6.0, 0.00001);
-        BOOST_CHECK_CLOSE(*d++, 8.0, 0.00001);
-        BOOST_CHECK_CLOSE(*d++, 10.0, 0.00001);
+        EXPECT_FLOAT_EQ(*d++, 2.0);
+        EXPECT_FLOAT_EQ(*d++, 4.0);
+        EXPECT_FLOAT_EQ(*d++, 6.0);
+        EXPECT_FLOAT_EQ(*d++, 8.0);
+        EXPECT_FLOAT_EQ(*d++, 10.0);
 
         output = meth.extractResult("prefix.Y", Dimension::Type::Double);
         d = (double *)output;
-        BOOST_CHECK_CLOSE(*d++, 2.0, 0.00001);
-        BOOST_CHECK_CLOSE(*d++, 4.0, 0.00001);
-        BOOST_CHECK_CLOSE(*d++, 6.0, 0.00001);
-        BOOST_CHECK_CLOSE(*d++, 8.0, 0.00001);
-        BOOST_CHECK_CLOSE(*d++, 10.0, 0.00001);
+        EXPECT_FLOAT_EQ(*d++, 2.0);
+        EXPECT_FLOAT_EQ(*d++, 4.0);
+        EXPECT_FLOAT_EQ(*d++, 6.0);
+        EXPECT_FLOAT_EQ(*d++, 8.0);
+        EXPECT_FLOAT_EQ(*d++, 10.0);
     }
 
     {
         std::vector<std::string> names;
         meth.getOutputNames(names);
-        BOOST_CHECK(names.size() == 2);
-        BOOST_CHECK(names[0] == "Y");
-        BOOST_CHECK(names[1] == "prefix.Y");
+        EXPECT_TRUE(names.size() == 2);
+        EXPECT_TRUE(names[0] == "Y");
+        EXPECT_TRUE(names[1] == "prefix.Y");
     }
 }
 
 
-BOOST_AUTO_TEST_CASE(PLangTest_returntrue)
+TEST(PLangTest, PLangTest_returntrue)
 {
     const char* source =
         "import numpy as np\n"
@@ -296,11 +292,11 @@ BOOST_AUTO_TEST_CASE(PLangTest_returntrue)
     meth.compile();
 
     bool sts = meth.execute();
-    BOOST_CHECK(sts);
+    EXPECT_TRUE(sts);
 }
 
 
-BOOST_AUTO_TEST_CASE(PLangTest_returnfalse)
+TEST(PLangTest, PLangTest_returnfalse)
 {
     const char* source =
         "import numpy as np\n"
@@ -312,7 +308,7 @@ BOOST_AUTO_TEST_CASE(PLangTest_returnfalse)
     meth.compile();
 
     bool sts = meth.execute();
-    BOOST_CHECK(!sts);
+    EXPECT_TRUE(!sts);
 }
 
 
@@ -322,7 +318,7 @@ BOOST_AUTO_TEST_CASE(PLangTest_returnfalse)
 //
 //---------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(PLangTest_reentry)
+TEST(PLangTest, PLangTest_reentry)
 {
     const char* source =
         "import numpy as np\n"
@@ -344,11 +340,11 @@ BOOST_AUTO_TEST_CASE(PLangTest_reentry)
         void *output = meth.extractResult("Y", Dimension::Type::Double);
 
         double *d = (double *)output;
-        BOOST_CHECK_CLOSE(*d++, 1.0, 0.00001);
-        BOOST_CHECK_CLOSE(*d++, 2.0, 0.00001);
-        BOOST_CHECK_CLOSE(*d++, 3.0, 0.00001);
-        BOOST_CHECK_CLOSE(*d++, 4.0, 0.00001);
-        BOOST_CHECK_CLOSE(*d++, 5.0, 0.00001);
+        EXPECT_FLOAT_EQ(*d++, 1.0);
+        EXPECT_FLOAT_EQ(*d++, 2.0);
+        EXPECT_FLOAT_EQ(*d++, 3.0);
+        EXPECT_FLOAT_EQ(*d++, 4.0);
+        EXPECT_FLOAT_EQ(*d++, 5.0);
     }
 
     {
@@ -358,14 +354,10 @@ BOOST_AUTO_TEST_CASE(PLangTest_reentry)
         void *output = meth.extractResult("Y", Dimension::Type::Double);
 
         double *d = (double *)output;
-        BOOST_CHECK_CLOSE(*d++, 11.0, 0.00001);
-        BOOST_CHECK_CLOSE(*d++, 21.0, 0.00001);
-        BOOST_CHECK_CLOSE(*d++, 31.0, 0.00001);
-        BOOST_CHECK_CLOSE(*d++, 41.0, 0.00001);
-        BOOST_CHECK_CLOSE(*d++, 51.0, 0.00001);
+        EXPECT_FLOAT_EQ(*d++, 11.0);
+        EXPECT_FLOAT_EQ(*d++, 21.0);
+        EXPECT_FLOAT_EQ(*d++, 31.0);
+        EXPECT_FLOAT_EQ(*d++, 41.0);
+        EXPECT_FLOAT_EQ(*d++, 51.0);
     }
 }
-
-BOOST_AUTO_TEST_SUITE_END()
-
-#endif

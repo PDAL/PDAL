@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
@@ -43,12 +43,30 @@
 
 #include "Support.hpp"
 
-BOOST_AUTO_TEST_SUITE(BPFTest)
-
 using namespace pdal;
 
 namespace
 {
+
+template<typename LeftIter, typename RightIter>
+::testing::AssertionResult CheckEqualCollections(LeftIter left_begin, LeftIter left_end, RightIter right_begin)
+{
+  bool equal(true);
+  std::string message;
+  size_t index(0);
+  while (left_begin != left_end)
+  {
+    if (*left_begin++ != *right_begin++)
+    {
+      equal = false;
+      message += "\n\tMismatch at index " + std::to_string(index);
+    }
+    ++index;
+  }
+  if (message.size())
+    message += "\n\t";
+  return equal ? ::testing::AssertionSuccess() : ::testing::AssertionFailure() << message;
+}
 
 void test_file_type(const std::string& filename)
 {
@@ -64,9 +82,9 @@ void test_file_type(const std::string& filename)
     reader.prepare(context);
     PointBufferSet pbSet = reader.execute(context);
 
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
-    BOOST_CHECK_EQUAL(buf->size(), 506);
+    EXPECT_EQ(buf->size(), 506u);
 
     struct PtData
     {
@@ -85,9 +103,9 @@ void test_file_type(const std::string& filename)
         float y = buf->getFieldAs<float>(Dimension::Id::Y, i);
         float z = buf->getFieldAs<float>(Dimension::Id::Z, i);
 
-        BOOST_CHECK_CLOSE(x, pts2[i].x, 0.001);
-        BOOST_CHECK_CLOSE(y, pts2[i].y, 0.001);
-        BOOST_CHECK_CLOSE(z, pts2[i].z, 0.001);
+        EXPECT_FLOAT_EQ(x, pts2[i].x);
+        EXPECT_FLOAT_EQ(y, pts2[i].y);
+        EXPECT_FLOAT_EQ(z, pts2[i].z);
     }
 
     PtData pts[3] = { {494915.25, 4878096.5, 128.220001},
@@ -100,45 +118,45 @@ void test_file_type(const std::string& filename)
         float y = buf->getFieldAs<float>(Dimension::Id::Y, i);
         float z = buf->getFieldAs<float>(Dimension::Id::Z, i);
 
-        BOOST_CHECK_CLOSE(x, pts[i].x, 0.001);
-        BOOST_CHECK_CLOSE(y, pts[i].y, 0.001);
-        BOOST_CHECK_CLOSE(z, pts[i].z, 0.001);
+        EXPECT_FLOAT_EQ(x, pts[i].x);
+        EXPECT_FLOAT_EQ(y, pts[i].y);
+        EXPECT_FLOAT_EQ(z, pts[i].z);
     }
 }
 
 } //namespace
 
-BOOST_AUTO_TEST_CASE(test_point_major)
+TEST(BPFTest, test_point_major)
 {
     test_file_type("bpf/autzen-utm-chipped-25-v3-interleaved.bpf");
 }
 
-BOOST_AUTO_TEST_CASE(test_dim_major)
+TEST(BPFTest, test_dim_major)
 {
     test_file_type("bpf/autzen-utm-chipped-25-v3.bpf");
 }
 
-BOOST_AUTO_TEST_CASE(test_byte_major)
+TEST(BPFTest, test_byte_major)
 {
     test_file_type("bpf/autzen-utm-chipped-25-v3-segregated.bpf");
 }
 
-BOOST_AUTO_TEST_CASE(test_point_major_zlib)
+TEST(BPFTest, test_point_major_zlib)
 {
     test_file_type("bpf/autzen-utm-chipped-25-v3-deflate-interleaved.bpf");
 }
 
-BOOST_AUTO_TEST_CASE(test_dim_major_zlib)
+TEST(BPFTest, test_dim_major_zlib)
 {
     test_file_type("bpf/autzen-utm-chipped-25-v3-deflate.bpf");
 }
 
-BOOST_AUTO_TEST_CASE(test_byte_major_zlib)
+TEST(BPFTest, test_byte_major_zlib)
 {
     test_file_type("bpf/autzen-utm-chipped-25-v3-deflate-segregated.bpf");
 }
 
-BOOST_AUTO_TEST_CASE(inspect)
+TEST(BPFTest, inspect)
 {
     Options ops;
     ops.add("filename", Support::datapath("bpf/autzen-dd.bpf"));
@@ -149,14 +167,14 @@ BOOST_AUTO_TEST_CASE(inspect)
     QuickInfo qi = reader.preview();
 
     std::string testWkt = "PROJCS[\"WGS 84 / SCAR IMW ST05-08\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],PROJECTION[\"Lambert_Conformal_Conic_2SP\"],PARAMETER[\"standard_parallel_1\",-76.66666666666667],PARAMETER[\"standard_parallel_2\",-79.33333333333333],PARAMETER[\"latitude_of_origin\",-90],PARAMETER[\"central_meridian\",-144],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],AUTHORITY[\"EPSG\",\"3261\"]]";
-    BOOST_CHECK_EQUAL(qi.m_srs.getWKT(), testWkt);
+    EXPECT_EQ(qi.m_srs.getWKT(), testWkt);
 
-    BOOST_CHECK_EQUAL(qi.m_pointCount, 1065);
+    EXPECT_EQ(qi.m_pointCount, 1065u);
 
     BOX3D bounds(
         -13676090.610841721296, 4894836.9556098170578, 123.93000030517578125,
         -13674705.011110275984, 4896224.6888861842453, 178.7299957275390625);
-    BOOST_CHECK_EQUAL(qi.m_bounds, bounds);
+    EXPECT_EQ(qi.m_bounds, bounds);
 
     const char *dims[] = 
     {
@@ -175,8 +193,5 @@ BOOST_AUTO_TEST_CASE(inspect)
     };
 
     std::sort(qi.m_dimNames.begin(), qi.m_dimNames.end());
-    BOOST_CHECK_EQUAL_COLLECTIONS(qi.m_dimNames.begin(), qi.m_dimNames.end(),
-      std::begin(dims), std::end(dims));
+    EXPECT_TRUE(CheckEqualCollections(qi.m_dimNames.begin(), qi.m_dimNames.end(), std::begin(dims)));
 }
-
-BOOST_AUTO_TEST_SUITE_END()

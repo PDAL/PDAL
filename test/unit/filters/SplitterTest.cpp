@@ -32,17 +32,15 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <pdal/StageFactory.hpp>
-#include "../StageTester.hpp"
 #include "Support.hpp"
+#include "StageTester.hpp"
 
 using namespace pdal;
 
-BOOST_AUTO_TEST_SUITE(SplitterTest)
-
-BOOST_AUTO_TEST_CASE(test_tile_filter)
+TEST(SplitterTest, test_tile_filter)
 {
     StageFactory f;
 
@@ -52,7 +50,7 @@ BOOST_AUTO_TEST_CASE(test_tile_filter)
     StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
     if (rc)
     {
-        BOOST_CHECK(rc);
+        EXPECT_TRUE(rc);
 
         Stage* r = rc();
         r->setOptions(ops1);
@@ -65,7 +63,7 @@ BOOST_AUTO_TEST_CASE(test_tile_filter)
         StageFactory::FilterCreator* fc = f.getFilterCreator("filters.splitter");
         if (fc)
         {
-            BOOST_CHECK(fc);
+            EXPECT_TRUE(fc);
 
             Stage* s = fc();
             s->setOptions(o);
@@ -78,7 +76,7 @@ BOOST_AUTO_TEST_CASE(test_tile_filter)
             StageTester::ready(r, ctx);
             PointBufferSet pbSet = StageTester::run(r, buf);
             StageTester::done(r, ctx);
-            BOOST_CHECK_EQUAL(pbSet.size(), 1);
+            EXPECT_EQ(pbSet.size(), 1u);
             buf = *pbSet.begin();
 
             StageTester::ready(s, ctx);
@@ -100,16 +98,14 @@ BOOST_AUTO_TEST_CASE(test_tile_filter)
             };
             std::sort(buffers.begin(), buffers.end(), sorter);
 
-            BOOST_CHECK_EQUAL(buffers.size(), 15);
-            int counts[] = {24, 27, 26, 27, 10, 166, 142, 76, 141, 132, 63, 70, 67,
+            EXPECT_EQ(buffers.size(), 15u);
+            size_t counts[] = {24, 27, 26, 27, 10, 166, 142, 76, 141, 132, 63, 70, 67,
                 34, 60 };
             for (size_t i = 0; i < buffers.size(); ++i)
             {
                 PointBufferPtr& buf = buffers[i];
-                BOOST_CHECK_EQUAL(buf->size(), counts[i]);
+                EXPECT_EQ(buf->size(), counts[i]);
             }
         }
     }
 }
-
-BOOST_AUTO_TEST_SUITE_END()
