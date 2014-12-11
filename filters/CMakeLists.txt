@@ -1,5 +1,6 @@
 add_subdirectory(chipper)
 add_subdirectory(colorization)
+add_subdirectory(crop)
 add_subdirectory(decimation)
 add_subdirectory(ferry)
 add_subdirectory(merge)
