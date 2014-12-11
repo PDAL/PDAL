@@ -39,8 +39,6 @@
 #include <sstream>
 #include <cstdarg>
 
-CREATE_FILTER_PLUGIN(crop, pdal::CropFilter)
-
 namespace pdal
 {
 
