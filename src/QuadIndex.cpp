@@ -154,63 +154,6 @@ struct Tree
     void getPoints(
             std::vector<std::size_t>& results,
             std::size_t depthBegin,
-            std::size_t depthEnd) const
-    {
-        getPoints(results, depthBegin, depthEnd, 0);
-    }
-
-    void getPoints(
-            std::vector<std::size_t>& results,
-            std::size_t rasterize,
-            double xBegin,
-            double xEnd,
-            double xStep,
-            double yBegin,
-            double yEnd,
-            double yStep) const
-    {
-        getPoints(
-                results,
-                rasterize,
-                xBegin,
-                xEnd,
-                xStep,
-                yBegin,
-                yEnd,
-                yStep,
-                0);
-    }
-
-    void getPoints(
-            std::vector<std::size_t>& results,
-            double xBegin,
-            double xEnd,
-            double xStep,
-            double yBegin,
-            double yEnd,
-            double yStep) const;
-
-    void getPoints(
-            std::vector<std::size_t>& results,
-            const BBox& query,
-            std::size_t depthBegin,
-            std::size_t depthEnd) const
-    {
-        getPoints(results, query, depthBegin, depthEnd, 0);
-    }
-
-    const BBox bbox;
-    const PtRef* data;
-
-    std::unique_ptr<Tree> nw;
-    std::unique_ptr<Tree> ne;
-    std::unique_ptr<Tree> se;
-    std::unique_ptr<Tree> sw;
-
-private:
-    void getPoints(
-            std::vector<std::size_t>& results,
-            std::size_t depthBegin,
             std::size_t depthEnd,
             std::size_t curDepth) const;
 
@@ -227,10 +170,27 @@ private:
 
     void getPoints(
             std::vector<std::size_t>& results,
+            double xBegin,
+            double xEnd,
+            double xStep,
+            double yBegin,
+            double yEnd,
+            double yStep) const;
+
+    void getPoints(
+            std::vector<std::size_t>& results,
             const BBox& query,
             std::size_t depthBegin,
             std::size_t depthEnd,
             std::size_t curDepth) const;
+
+    const BBox bbox;
+    const PtRef* data;
+
+    std::unique_ptr<Tree> nw;
+    std::unique_ptr<Tree> ne;
+    std::unique_ptr<Tree> se;
+    std::unique_ptr<Tree> sw;
 };
 
 std::size_t Tree::addPoint(const PtRef* toAdd, const std::size_t curDepth)
@@ -394,10 +354,8 @@ void Tree::getPoints(
             results.at(index) = data->pbIndex;
         }
     }
-    else
+    else if (++curDepth <= rasterize)
     {
-        ++curDepth;
-
         if (nw) nw->getPoints(
                 results,
                 rasterize,
@@ -529,7 +487,10 @@ void Tree::getPoints(
         return;
     }
 
-    if (data && query.contains(data->point) && curDepth >= depthBegin)
+    if (data &&
+        query.contains(data->point) &&
+        curDepth >= depthBegin &&
+        (curDepth < depthEnd || depthEnd == 0))
     {
         results.push_back(data->pbIndex);
     }
@@ -545,9 +506,10 @@ void Tree::getPoints(
 
 struct QuadIndex::QImpl
 {
-    QImpl(const PointBuffer& pointBuffer);
+    QImpl(const PointBuffer& pointBuffer, std::size_t topLevel);
 
     void build();
+    void build(double xMin, double yMin, double xMax, double yMax);
 
     bool getBounds(
             double& xMin,
@@ -591,14 +553,16 @@ struct QuadIndex::QImpl
             std::size_t depthEnd) const;
 
     const PointBuffer& m_pointBuffer;
+    std::size_t m_topLevel;
     std::vector<std::unique_ptr<PtRef> > m_pointRefVec;
     std::unique_ptr<Tree> m_tree;
     std::size_t m_depth;
     std::vector<std::size_t> m_fills;
 };
 
-QuadIndex::QImpl::QImpl(const PointBuffer& pointBuffer)
+QuadIndex::QImpl::QImpl(const PointBuffer& pointBuffer, std::size_t topLevel)
     : m_pointBuffer(pointBuffer)
+    , m_topLevel(topLevel)
     , m_pointRefVec()
     , m_tree()
     , m_depth(0)
@@ -608,7 +572,6 @@ QuadIndex::QImpl::QImpl(const PointBuffer& pointBuffer)
 void QuadIndex::QImpl::build()
 {
     m_pointRefVec.resize(m_pointBuffer.size());
-
 
     double xMin(std::numeric_limits<double>::max());
     double yMin(std::numeric_limits<double>::max());
@@ -629,6 +592,28 @@ void QuadIndex::QImpl::build()
         if (pointRef->point.x > xMax) xMax = pointRef->point.x;
         if (pointRef->point.y < yMin) yMin = pointRef->point.y;
         if (pointRef->point.y > yMax) yMax = pointRef->point.y;
+    }
+
+    m_tree.reset(new Tree(BBox(Point(xMin, yMin), Point(xMax, yMax))));
+
+    for (std::size_t i = 0; i < m_pointRefVec.size(); ++i)
+    {
+        m_depth = std::max(m_tree->addPoint(m_pointRefVec[i].get()), m_depth);
+    }
+}
+
+void QuadIndex::QImpl::build(double xMin, double yMin, double xMax, double yMax)
+{
+    m_pointRefVec.resize(m_pointBuffer.size());
+
+    for (std::size_t i(0); i < m_pointBuffer.size(); ++i)
+    {
+        m_pointRefVec[i].reset(
+                new PtRef(
+                    Point(
+                        m_pointBuffer.getFieldAs<double>(Dimension::Id::X, i),
+                        m_pointBuffer.getFieldAs<double>(Dimension::Id::Y, i)),
+                i));
     }
 
     m_tree.reset(new Tree(BBox(Point(xMin, yMin), Point(xMax, yMax))));
@@ -687,7 +672,7 @@ std::vector<std::size_t> QuadIndex::QImpl::getPoints(
 
     if (m_tree)
     {
-        m_tree->getPoints(results, minDepth, maxDepth);
+        m_tree->getPoints(results, minDepth, maxDepth, m_topLevel);
     }
 
     return results;
@@ -727,7 +712,8 @@ std::vector<std::size_t> QuadIndex::QImpl::getPoints(
                 xStep,
                 yBegin,
                 yEnd,
-                yStep);
+                yStep,
+                m_topLevel);
     }
 
     return results;
@@ -781,14 +767,15 @@ std::vector<std::size_t> QuadIndex::QImpl::getPoints(
                     Point(std::min(xMin, xMax), std::min(yMin, yMax)),
                     Point(std::max(xMin, xMax), std::max(yMin, yMax))),
                 minDepth,
-                maxDepth);
+                maxDepth,
+                m_topLevel);
     }
 
     return results;
 }
 
-QuadIndex::QuadIndex(const PointBuffer& pointBuffer)
-    : m_qImpl(new QImpl(pointBuffer))
+QuadIndex::QuadIndex(const PointBuffer& pointBuffer, std::size_t topLevel)
+    : m_qImpl(new QImpl(pointBuffer, topLevel))
 { }
 
 QuadIndex::~QuadIndex()
@@ -797,6 +784,11 @@ QuadIndex::~QuadIndex()
 void QuadIndex::build()
 {
     m_qImpl->build();
+}
+
+void QuadIndex::build(double xMin, double yMin, double xMax, double yMax)
+{
+    m_qImpl->build(xMin, yMin, xMax, yMax);
 }
 
 bool QuadIndex::getBounds(

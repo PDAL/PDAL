@@ -47,11 +47,12 @@ class PointBuffer;
 class PDAL_DLL QuadIndex
 {
 public:
-    QuadIndex(const PointBuffer& pointBuffer);
+    QuadIndex(const PointBuffer& pointBuffer, std::size_t topLevel = 0);
     ~QuadIndex();
 
     // Build the quadtree index.  Could throw a runtime_error.
     void build();
+    void build(double xMin, double yMin, double xMax, double yMax);
 
     // Get bounds of the quad tree.  Return false if the tree has not been
     // built.
