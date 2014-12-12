@@ -364,7 +364,7 @@ void StageFactory::loadPlugins()
 
     if (pluginDir.size() == 0)
     {
-        pluginDir = "/usr/local/lib:./lib:../lib";
+        pluginDir = "/usr/local/lib:../lib:../bin";
     }
 
     std::vector<std::string> pluginPathVec;
