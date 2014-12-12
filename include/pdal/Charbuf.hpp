@@ -36,6 +36,7 @@
 
 #include <pdal/pdal_export.hpp>
 #include <streambuf>
+#include <iostream>
 #include <vector>
 
 namespace pdal
