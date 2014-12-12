@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <ChipperFilter.hpp>
 #include <LasWriter.hpp>
@@ -48,10 +48,7 @@
 
 using namespace pdal;
 
-BOOST_AUTO_TEST_SUITE(ChipperTest)
-
-
-BOOST_AUTO_TEST_CASE(test_construction)
+TEST(ChipperTest, test_construction)
 {
     PointContext ctx;
 
@@ -64,8 +61,8 @@ BOOST_AUTO_TEST_CASE(test_construction)
     {
         // need to scope the writer, so that's it dtor can use the stream
 
-        pdal::Options options;
-        pdal::Option capacity("capacity", 15, "capacity");
+        Options options;
+        Option capacity("capacity", 15, "capacity");
         options.add(capacity);
 
         ChipperFilter chipper;
@@ -73,7 +70,7 @@ BOOST_AUTO_TEST_CASE(test_construction)
         chipper.setOptions(options);
         chipper.prepare(ctx);
         PointBufferSet pbSet = chipper.execute(ctx);
-        BOOST_CHECK(pbSet.size() == 71);
+        EXPECT_EQ(pbSet.size(), 71u);
 
         std::vector<PointBufferPtr> buffers;
         for (auto it = pbSet.begin(); it != pbSet.end(); ++it)
@@ -95,20 +92,19 @@ BOOST_AUTO_TEST_CASE(test_construction)
         auto buffer = buffers[2];
         auto bounds = buffer->calculateBounds();
 
-
-        BOOST_CHECK_CLOSE(bounds.minx, 635674.0, 0.05);
-        BOOST_CHECK_CLOSE(bounds.maxx, 635994.0, 0.05);
-        BOOST_CHECK_CLOSE(bounds.miny, 848992.0, 0.05);
-        BOOST_CHECK_CLOSE(bounds.maxy, 849427.0, 0.05);
+        EXPECT_NEAR(bounds.minx, 635674.05, 0.05);
+        EXPECT_NEAR(bounds.maxx, 635993.93, 0.05);
+        EXPECT_NEAR(bounds.miny, 848992.45, 0.05);
+        EXPECT_NEAR(bounds.maxy, 849427.07, 0.05);
 
         for (size_t i = 0; i < buffers.size(); ++i)
-            BOOST_CHECK(buffers[i]->size() == 15);
+            EXPECT_EQ(buffers[i]->size(), 15u);
     }
 }
 
 
 // Make sure things don't crash if the point buffer is empty.
-BOOST_AUTO_TEST_CASE(empty_buffer)
+TEST(ChipperTest, empty_buffer)
 {
     PointContext ctx;
     PointBufferPtr buf(new PointBuffer(ctx));
@@ -121,24 +117,24 @@ BOOST_AUTO_TEST_CASE(empty_buffer)
     PointBufferSet pbSet = StageTester::run(&chipper, buf);
     StageTester::done(&chipper, ctx);
 
-    BOOST_CHECK_EQUAL(pbSet.size(), 0);
+    EXPECT_EQ(pbSet.size(), 0u);
 }
 
 //ABELL
 /**
-BOOST_AUTO_TEST_CASE(test_ordering)
+TEST(ChipperTest, test_ordering)
 {
     std::string candidate_filename(Support::datapath("autzen-utm.las"));
     std::string source_filename(Support::datapath("autzen-utm-chipped-25.las"));
 
-    pdal::Options options;
+    Options options;
     Option filename("filename", source_filename, "");
     options.add(filename);
 
     Option capacity("capacity", 25,"capacity");
     options.add(capacity);
 
-    pdal::LasReader candidate_reader(options);
+    LasReader candidate_reader(options);
     ChipperFilter chipper(options);
     chipper.setInput(&candidate_reader);
     chipper.prepare();
@@ -146,15 +142,15 @@ BOOST_AUTO_TEST_CASE(test_ordering)
     Option& query = options.getOptionByRef("filename");
     query.setValue<std::string>(source_filename);
 
-    pdal::LasReader source_reader(options);
+    LasReader source_reader(options);
     source_reader.prepare();
 
-    BOOST_CHECK_EQUAL(chipper.getNumPoints(), source_reader.getNumPoints());
+    EXPECT_EQ(chipper.getNumPoints(), source_reader.getNumPoints());
 
-    pdal::PointBuffer candidate(chipper.getSchema(), chipper.getNumPoints());
-    pdal::PointBuffer patch(chipper.getSchema(), chipper.getNumPoints());
+    PointBuffer candidate(chipper.getSchema(), chipper.getNumPoints());
+    PointBuffer patch(chipper.getSchema(), chipper.getNumPoints());
 
-    pdal::StageSequentialIterator* iter_c = chipper.createSequentialIterator(patch);
+    StageSequentialIterator* iter_c = chipper.createSequentialIterator(patch);
     uint64_t numRead(0);
 
     while (true)
@@ -165,34 +161,34 @@ BOOST_AUTO_TEST_CASE(test_ordering)
         candidate.copyPointsFast(candidate.getNumPoints(), 0, patch, patch.getNumPoints());
         candidate.setNumPoints(candidate.getNumPoints() + patch.getNumPoints());
     }
-    BOOST_CHECK_EQUAL(candidate.getNumPoints(), chipper.getNumPoints());
+    EXPECT_EQ(candidate.getNumPoints(), chipper.getNumPoints());
 
-    pdal::PointBuffer source(source_reader.getSchema(), source_reader.getNumPoints());
+    PointBuffer source(source_reader.getSchema(), source_reader.getNumPoints());
 
-    pdal::StageSequentialIterator* iter_s = source_reader.createSequentialIterator(source);
+    StageSequentialIterator* iter_s = source_reader.createSequentialIterator(source);
     numRead = iter_s->read(source);
-    BOOST_CHECK_EQUAL(numRead, source_reader.getNumPoints());
+    EXPECT_EQ(numRead, source_reader.getNumPoints());
 
 
 
-    pdal::Schema const& cs = candidate.getSchema();
-    pdal::Schema const& ss = source.getSchema();
+    Schema const& cs = candidate.getSchema();
+    Schema const& ss = source.getSchema();
 
-    pdal::Dimension const& sdimX = ss.getDimension("X");
-    pdal::Dimension const& sdimY = ss.getDimension("Y");
-    pdal::Dimension const& sdimZ = ss.getDimension("Z");
-    pdal::Dimension const& sdimIntensity = ss.getDimension("Intensity");
-    pdal::Dimension const& sdimRed = ss.getDimension("Red");
-    pdal::Dimension const& sdimGreen = ss.getDimension("Green");
-    pdal::Dimension const& sdimBlue = ss.getDimension("Blue");
+    Dimension const& sdimX = ss.getDimension("X");
+    Dimension const& sdimY = ss.getDimension("Y");
+    Dimension const& sdimZ = ss.getDimension("Z");
+    Dimension const& sdimIntensity = ss.getDimension("Intensity");
+    Dimension const& sdimRed = ss.getDimension("Red");
+    Dimension const& sdimGreen = ss.getDimension("Green");
+    Dimension const& sdimBlue = ss.getDimension("Blue");
 
-    pdal::Dimension const& cdimX = cs.getDimension("X");
-    pdal::Dimension const& cdimY = cs.getDimension("Y");
-    pdal::Dimension const& cdimZ = cs.getDimension("Z");
-    pdal::Dimension const& cdimIntensity = cs.getDimension("Intensity");
-    pdal::Dimension const& cdimRed = cs.getDimension("Red");
-    pdal::Dimension const& cdimGreen = cs.getDimension("Green");
-    pdal::Dimension const& cdimBlue = cs.getDimension("Blue");
+    Dimension const& cdimX = cs.getDimension("X");
+    Dimension const& cdimY = cs.getDimension("Y");
+    Dimension const& cdimZ = cs.getDimension("Z");
+    Dimension const& cdimIntensity = cs.getDimension("Intensity");
+    Dimension const& cdimRed = cs.getDimension("Red");
+    Dimension const& cdimGreen = cs.getDimension("Green");
+    Dimension const& cdimBlue = cs.getDimension("Blue");
     //
     // int X[] = { 49405730, 49413382, 49402110, 494192890, 49418622, 49403411 };
     // int Y[] = { 487743335, 487743982, 487743983, 487744219, 487744254, 487745019 };
@@ -221,18 +217,16 @@ BOOST_AUTO_TEST_CASE(test_ordering)
         uint16_t cblue = candidate.getField<uint16_t>(cdimBlue, i);
 
 
-        BOOST_CHECK_EQUAL(sx, cx);
-        BOOST_CHECK_EQUAL(sy, cy);
-        BOOST_CHECK_EQUAL(sz, cz);
-        BOOST_CHECK_EQUAL(sintensity, cintensity);
-        BOOST_CHECK_EQUAL(sred, cred);
-        BOOST_CHECK_EQUAL(sgreen, cgreen);
-        BOOST_CHECK_EQUAL(sblue, cblue);
+        EXPECT_EQ(sx, cx);
+        EXPECT_EQ(sy, cy);
+        EXPECT_EQ(sz, cz);
+        EXPECT_EQ(sintensity, cintensity);
+        EXPECT_EQ(sred, cred);
+        EXPECT_EQ(sgreen, cgreen);
+        EXPECT_EQ(sblue, cblue);
     }
     delete iter_c;
     delete iter_s;
 
 }
 **/
-
-BOOST_AUTO_TEST_SUITE_END()

@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <random>
 
@@ -40,13 +40,11 @@
 
 #include <pdal/PointBuffer.hpp>
 #include <pdal/PointBufferIter.hpp>
-#include <LasReader.hpp>
+//#include <LasReader.hpp>
 #include <pdal/PDALUtils.hpp>
-#include "Support.hpp"
+//#include "Support.hpp"
 
 using namespace pdal;
-
-BOOST_AUTO_TEST_SUITE(PointBufferTest)
 
 PointBuffer* makeTestBuffer(PointContext ctx)
 {
@@ -67,7 +65,7 @@ PointBuffer* makeTestBuffer(PointContext ctx)
         data->setField(Dimension::Id::X, i, y);
         data->setField(Dimension::Id::Y, i, z);
     }
-    BOOST_CHECK(data->size() == 17);
+    EXPECT_EQ(data->size(), 17u);
     return data;
 }
 
@@ -82,14 +80,14 @@ static void verifyTestBuffer(const PointBuffer& data)
         const int32_t y = data.getFieldAs<uint32_t>(Dimension::Id::X, i);
         const double z = data.getFieldAs<double>(Dimension::Id::Y, i);
 
-        BOOST_CHECK_EQUAL(x, i + 1);
-        BOOST_CHECK_EQUAL(y, i * 10);
-        BOOST_CHECK(Utils::compare_approx(z, static_cast<double>(i) * 100.0,
+        EXPECT_EQ(x, i + 1u);
+        EXPECT_EQ(y, i * 10);
+        EXPECT_TRUE(Utils::compare_approx(z, static_cast<double>(i) * 100.0,
             (std::numeric_limits<double>::min)()));
     }
 }
 
-BOOST_AUTO_TEST_CASE(getSet)
+TEST(PointBufferTest, getSet)
 {
     PointContext ctx;
     PointBuffer* data = makeTestBuffer(ctx);
@@ -97,7 +95,7 @@ BOOST_AUTO_TEST_CASE(getSet)
     delete data;
 }
 
-BOOST_AUTO_TEST_CASE(getAsUint8)
+TEST(PointBufferTest, getAsUint8)
 {
     PointContext ctx;
     PointBuffer* data = makeTestBuffer(ctx);
@@ -109,9 +107,9 @@ BOOST_AUTO_TEST_CASE(getAsUint8)
         uint8_t y = data->getFieldAs<uint8_t>(Dimension::Id::X, i);
         uint8_t z = data->getFieldAs<uint8_t>(Dimension::Id::Y, i);
 
-        BOOST_CHECK_EQUAL(x, i + 1);
-        BOOST_CHECK_EQUAL(y, i * 10);
-        BOOST_CHECK_EQUAL(z, i * 100);
+        EXPECT_EQ(x, i + 1u);
+        EXPECT_EQ(y, i * 10u);
+        EXPECT_EQ(z, i * 100u);
     }
 
     // read the data back out
@@ -119,15 +117,15 @@ BOOST_AUTO_TEST_CASE(getAsUint8)
     {
         uint8_t x = data->getFieldAs<uint8_t>(Dimension::Id::Classification, i);
         uint8_t y = data->getFieldAs<uint8_t>(Dimension::Id::X, i);
-        BOOST_CHECK_THROW(data->getFieldAs<uint8_t>(Dimension::Id::Y, i),
+        EXPECT_THROW(data->getFieldAs<uint8_t>(Dimension::Id::Y, i),
             pdal_error);
-        BOOST_CHECK(x == i + 1);
-        BOOST_CHECK(y == i * 10);
+        EXPECT_EQ(x, i + 1u);
+        EXPECT_EQ(y, i * 10u);
     }
     delete data;
 }
 
-BOOST_AUTO_TEST_CASE(getAsInt32)
+TEST(PointBufferTest, getAsInt32)
 {
     PointContext ctx;
     PointBuffer* data = makeTestBuffer(ctx);
@@ -139,15 +137,15 @@ BOOST_AUTO_TEST_CASE(getAsInt32)
         int32_t y = data->getFieldAs<int32_t>(Dimension::Id::X, i);
         int32_t z = data->getFieldAs<int32_t>(Dimension::Id::Y, i);
 
-        BOOST_CHECK_EQUAL(x, i + 1);
-        BOOST_CHECK_EQUAL(y, i * 10);
-        BOOST_CHECK_EQUAL(z, i * 100);
+        EXPECT_EQ(x, i + 1);
+        EXPECT_EQ(y, i * 10);
+        EXPECT_EQ(z, i * 100);
     }
     delete data;
 }
 
 
-BOOST_AUTO_TEST_CASE(getFloat)
+TEST(PointBufferTest, getFloat)
 {
     PointContext ctx;
     PointBuffer* data = makeTestBuffer(ctx);
@@ -159,15 +157,15 @@ BOOST_AUTO_TEST_CASE(getFloat)
         float y = data->getFieldAs<float>(Dimension::Id::X, i);
         float z = data->getFieldAs<float>(Dimension::Id::Y, i);
 
-        BOOST_CHECK_CLOSE(x, i + 1.0f, std::numeric_limits<float>::min());
-        BOOST_CHECK_CLOSE(y, i * 10.0f, std::numeric_limits<float>::min());
-        BOOST_CHECK_CLOSE(z, i * 100.0f, std::numeric_limits<float>::min());
+        EXPECT_FLOAT_EQ(x, i + 1.0f);
+        EXPECT_FLOAT_EQ(y, i * 10.0f);
+        EXPECT_FLOAT_EQ(z, i * 100.0f);
     }
     delete data;
 }
 
 
-BOOST_AUTO_TEST_CASE(copy)
+TEST(PointBufferTest, copy)
 {
     PointContext ctx;
     PointBuffer* data = makeTestBuffer(ctx);
@@ -176,12 +174,12 @@ BOOST_AUTO_TEST_CASE(copy)
 
     // read the data back out
     {
-        BOOST_CHECK_EQUAL(
+        EXPECT_EQ(
             d2.getFieldAs<uint8_t>(Dimension::Id::Classification, 0),
             data->getFieldAs<uint8_t>(Dimension::Id::Classification, 0));
-        BOOST_CHECK_EQUAL(d2.getFieldAs<int32_t>(Dimension::Id::X, 0),
+        EXPECT_EQ(d2.getFieldAs<int32_t>(Dimension::Id::X, 0),
             data->getFieldAs<int32_t>(Dimension::Id::X, 0));
-        BOOST_CHECK_EQUAL(d2.getFieldAs<double>(Dimension::Id::Y, 0),
+        EXPECT_FLOAT_EQ(d2.getFieldAs<double>(Dimension::Id::Y, 0),
             data->getFieldAs<double>(Dimension::Id::Y, 0));
     }
 
@@ -191,17 +189,17 @@ BOOST_AUTO_TEST_CASE(copy)
         int32_t y = d2.getFieldAs<int32_t>(Dimension::Id::X, i);
         double z = d2.getFieldAs<double>(Dimension::Id::Y, i);
 
-        BOOST_CHECK_EQUAL(x, i + 1);
-        BOOST_CHECK_EQUAL(y, i * 10);
-        BOOST_CHECK(Utils::compare_approx(z, i * 100.0,
+        EXPECT_EQ(x, i + 1u);
+        EXPECT_EQ(y, i * 10);
+        EXPECT_TRUE(Utils::compare_approx(z, i * 100.0,
             (std::numeric_limits<double>::min)()));
     }
-    BOOST_CHECK_EQUAL(data->size(), d2.size());
+    EXPECT_EQ(data->size(), d2.size());
 
     delete data;
 }
 
-BOOST_AUTO_TEST_CASE(copyCtor)
+TEST(PointBufferTest, copyCtor)
 {
     PointContext ctx;
     PointBuffer* data = makeTestBuffer(ctx);
@@ -211,7 +209,7 @@ BOOST_AUTO_TEST_CASE(copyCtor)
     delete data;
 }
 
-BOOST_AUTO_TEST_CASE(assignment)
+TEST(PointBufferTest, assignment)
 {
     PointContext ctx;
     PointBuffer* data = makeTestBuffer(ctx);
@@ -222,13 +220,13 @@ BOOST_AUTO_TEST_CASE(assignment)
 }
 
 
-BOOST_AUTO_TEST_CASE(ptree)
+TEST(PointBufferTest, ptree)
 {
     PointContext ctx;
     PointBuffer* data = makeTestBuffer(ctx);
 
     std::stringstream ss1(std::stringstream::in | std::stringstream::out);
-    boost::property_tree::ptree tree = pdal::utils::toPTree(*data);
+    boost::property_tree::ptree tree = utils::toPTree(*data);
     delete data;
 
     boost::property_tree::write_xml(ss1, tree);
@@ -236,11 +234,11 @@ BOOST_AUTO_TEST_CASE(ptree)
     std::string xml_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
     std::string ref = xml_header + "<0><X>0</X><Y>0</Y><Classification>1</Classification></0><1><X>10</X><Y>100</Y><Classification>2</Classification></1>";
 
-    BOOST_CHECK_EQUAL(ref, out1.substr(0, ref.length()));
+    EXPECT_EQ(ref, out1.substr(0, ref.length()));
 }
 
 
-BOOST_AUTO_TEST_CASE(bigfile)
+TEST(PointBufferTest, bigfile)
 {
     PointContext ctx;
 
@@ -260,11 +258,11 @@ BOOST_AUTO_TEST_CASE(bigfile)
 
     for (PointId id = 0; id < NUM_PTS; ++id)
     {
-        BOOST_CHECK_EQUAL(
+        EXPECT_EQ(
             buf.getFieldAs<PointId>(Dimension::Id::X, id), id);
-        BOOST_CHECK_EQUAL(
+        EXPECT_EQ(
             buf.getFieldAs<PointId>(Dimension::Id::Y, id), id * 2);
-        BOOST_CHECK_EQUAL(
+        EXPECT_EQ(
             buf.getFieldAs<int>(Dimension::Id::Z, id), -(int)id);
     }
 
@@ -294,11 +292,11 @@ BOOST_AUTO_TEST_CASE(bigfile)
     for (PointId idx = 0; idx < NUM_PTS; ++idx)
     {
         PointId id = ids[idx];
-        BOOST_CHECK_EQUAL(
+        EXPECT_EQ(
             buf.getFieldAs<PointId>(Dimension::Id::X, id), idx);
-        BOOST_CHECK_EQUAL(
+        EXPECT_EQ(
             buf.getFieldAs<PointId>(Dimension::Id::Y, id), idx * 2);
-        BOOST_CHECK_EQUAL(
+        EXPECT_EQ(
             buf.getFieldAs<int>(Dimension::Id::Z, id), -(int)idx);
     }
 }
@@ -306,10 +304,10 @@ BOOST_AUTO_TEST_CASE(bigfile)
 
 //ABELL - Move to KdIndex
 /**
-BOOST_AUTO_TEST_CASE(kdindex)
+TEST(PointBufferTest, kdindex)
 {
     LasReader reader(Support::datapath("1.2-with-color.las"));
-    BOOST_CHECK(reader.getDescription() == "Las Reader");
+    EXPECT_TRUE(reader.getDescription() == "Las Reader");
     reader.prepare();
 
     const Schema& schema = reader.getSchema();
@@ -320,16 +318,16 @@ BOOST_AUTO_TEST_CASE(kdindex)
 
     {
         uint32_t numRead = iter->read(data);
-        BOOST_CHECK_EQUAL(numRead, capacity);
+        EXPECT_EQ(numRead, capacity);
     }
 
-    BOOST_CHECK_EQUAL(data.getCapacity(), capacity);
-    BOOST_CHECK_EQUAL(data.getSchema(), schema);
+    EXPECT_EQ(data.getCapacity(), capacity);
+    EXPECT_EQ(data.getSchema(), schema);
 
 
     IndexedPointBuffer idata(data);
-    BOOST_CHECK_EQUAL(idata.getCapacity(), capacity);
-    BOOST_CHECK_EQUAL(idata.getSchema(), schema);
+    EXPECT_EQ(idata.getCapacity(), capacity);
+    EXPECT_EQ(idata.getSchema(), schema);
 
     idata.build();
 
@@ -337,30 +335,30 @@ BOOST_AUTO_TEST_CASE(kdindex)
 
     // If the query distance is 0, just return the k nearest neighbors
     std::vector<size_t> ids = idata.neighbors(636199, 849238, 428.05, 0.0, k);
-    BOOST_CHECK_EQUAL(ids.size(), k);
-    BOOST_CHECK_EQUAL(ids[0], 8u);
-    BOOST_CHECK_EQUAL(ids[1], 7u);
-    BOOST_CHECK_EQUAL(ids[2], 9u);
-    BOOST_CHECK_EQUAL(ids[3], 42u);
-    BOOST_CHECK_EQUAL(ids[4], 40u);
+    EXPECT_EQ(ids.size(), k);
+    EXPECT_EQ(ids[0], 8u);
+    EXPECT_EQ(ids[1], 7u);
+    EXPECT_EQ(ids[2], 9u);
+    EXPECT_EQ(ids[3], 42u);
+    EXPECT_EQ(ids[4], 40u);
 
     std::vector<size_t> dist_ids = idata.neighbors(636199, 849238, 428.05, 100.0, 3);
 
-    BOOST_CHECK_EQUAL(dist_ids.size(), 3u);
-    BOOST_CHECK_EQUAL(dist_ids[0], 8u);
+    EXPECT_EQ(dist_ids.size(), 3u);
+    EXPECT_EQ(dist_ids[0], 8u);
 
     std::vector<size_t> nids = idata.neighbors(636199, 849238, 428.05, 0.0, k);
 
-    BOOST_CHECK_EQUAL(nids.size(), k);
-    BOOST_CHECK_EQUAL(nids[0], 8u);
-    BOOST_CHECK_EQUAL(nids[1], 7u);
-    BOOST_CHECK_EQUAL(nids[2], 9u);
-    BOOST_CHECK_EQUAL(nids[3], 42u);
-    BOOST_CHECK_EQUAL(nids[4], 40u);
+    EXPECT_EQ(nids.size(), k);
+    EXPECT_EQ(nids[0], 8u);
+    EXPECT_EQ(nids[1], 7u);
+    EXPECT_EQ(nids[2], 9u);
+    EXPECT_EQ(nids[3], 42u);
+    EXPECT_EQ(nids[4], 40u);
 
     std::vector<size_t> rids = idata.radius(637012.24, 849028.31,
         431.66, 100000);
-    BOOST_CHECK_EQUAL(rids.size(), 11u);
+    EXPECT_EQ(rids.size(), 11u);
 
     delete iter;
 }
@@ -372,17 +370,16 @@ static void check_bounds(const BOX3D& box,
                          double miny, double maxy,
                          double minz, double maxz)
 {
-    const double eps = std::numeric_limits<double>::epsilon();
-    BOOST_CHECK_CLOSE(box.minx, minx, eps);
-    BOOST_CHECK_CLOSE(box.maxx, maxx, eps);
-    BOOST_CHECK_CLOSE(box.miny, miny, eps);
-    BOOST_CHECK_CLOSE(box.maxy, maxy, eps);
-    BOOST_CHECK_CLOSE(box.minz, minz, eps);
-    BOOST_CHECK_CLOSE(box.maxz, maxz, eps);
+    EXPECT_FLOAT_EQ(box.minx, minx);
+    EXPECT_FLOAT_EQ(box.maxx, maxx);
+    EXPECT_FLOAT_EQ(box.miny, miny);
+    EXPECT_FLOAT_EQ(box.maxy, maxy);
+    EXPECT_FLOAT_EQ(box.minz, minz);
+    EXPECT_FLOAT_EQ(box.maxz, maxz);
 }
 
 
-BOOST_AUTO_TEST_CASE(calcBounds)
+TEST(PointBufferTest, calcBounds)
 {
     auto set_points = [](PointBufferPtr buf, PointId i, double x, double y,
         double z)
@@ -425,7 +422,7 @@ BOOST_AUTO_TEST_CASE(calcBounds)
     check_bounds(box_bs, 0.0, 3.0, 0.0, 3.0, 0.0, 3.0);
 }
 
-BOOST_AUTO_TEST_CASE(sort)
+TEST(PointBufferTest, sort)
 {
     PointContext ctx;
     PointBuffer buf(ctx);
@@ -449,8 +446,6 @@ BOOST_AUTO_TEST_CASE(sort)
     {
         double d1 = buf.getFieldAs<double>(Dimension::Id::X, i - 1);
         double d2 = buf.getFieldAs<double>(Dimension::Id::X, i);
-        BOOST_CHECK(d1 <= d2);
+        EXPECT_TRUE(d1 <= d2);
     }
 }
-
-BOOST_AUTO_TEST_SUITE_END()

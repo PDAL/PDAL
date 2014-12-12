@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <pdal/Writer.hpp>
 #include <pdal/StageFactory.hpp>
@@ -55,14 +55,14 @@ Options getWriterOptions()
     return options;
 }
 
-struct PgpointcloudWriterTestFixture
+class PgpointcloudWriterTest : public testing::Test
 {
-    PgpointcloudWriterTestFixture()
-        : m_masterConnection(
-                pdal::pg_connect(
-                    pdal::testDbConn))
-        , m_testConnection(NULL)
+  protected:
+    virtual void SetUp()
     {
+        m_masterConnection = pg_connect(testDbConn);
+        m_testConnection = NULL;
+
         // Silence those pesky notices
         executeOnMasterDb("SET client_min_messages TO WARNING");
 
@@ -70,20 +70,20 @@ struct PgpointcloudWriterTestFixture
 
         std::stringstream createDbSql;
         createDbSql << "CREATE DATABASE " <<
-            pdal::testDbTempname << " TEMPLATE template0";
+            testDbTempname << " TEMPLATE template0";
         executeOnMasterDb(createDbSql.str());
-        m_testConnection = pdal::pg_connect(
-                pdal::testDbTempConn);
+        m_testConnection = pg_connect(
+                testDbTempConn);
 
         executeOnTestDb("CREATE EXTENSION pointcloud");
     }
 
     void executeOnTestDb(const std::string& sql)
     {
-        pdal::pg_execute(m_testConnection, sql);
+        pg_execute(m_testConnection, sql);
     }
 
-    ~PgpointcloudWriterTestFixture()
+    virtual void TearDown()
     {
         if (m_testConnection)
         {
@@ -100,14 +100,14 @@ private:
 
     void executeOnMasterDb(const std::string& sql)
     {
-        pdal::pg_execute(m_masterConnection, sql);
+        pg_execute(m_masterConnection, sql);
     }
 
     void execute(PGconn* connection, const std::string& sql)
     {
         if (connection)
         {
-            pdal::pg_execute(connection, sql);
+            pg_execute(connection, sql);
         }
         else
         {
@@ -118,34 +118,30 @@ private:
     void dropTestDb()
     {
         std::stringstream dropDbSql;
-        dropDbSql << "DROP DATABASE IF EXISTS " << pdal::testDbTempname;
+        dropDbSql << "DROP DATABASE IF EXISTS " << testDbTempname;
         executeOnMasterDb(dropDbSql.str());
     }
 
     PGconn* m_masterConnection;
     PGconn* m_testConnection;
-
 };
 
-BOOST_FIXTURE_TEST_SUITE(PgpointcloudWriterTest, PgpointcloudWriterTestFixture)
-
-
-BOOST_AUTO_TEST_CASE(testWrite)
+TEST_F(PgpointcloudWriterTest, testWrite)
 {
     StageFactory f;
     StageFactory::WriterCreator* wc =
         f.getWriterCreator("writers.pgpointcloud");
     if (wc)
     {
-        BOOST_CHECK(wc);
+        EXPECT_TRUE(wc);
         const std::string file(Support::datapath("las/1.2-with-color.las"));
 
-        const pdal::Option opt_filename("filename", file);
+        const Option opt_filename("filename", file);
 
         StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
         if (!rc)
             return;
-        BOOST_CHECK(rc);
+        EXPECT_TRUE(rc);
 
         Stage* reader = rc();
         Options options;
@@ -163,31 +159,31 @@ BOOST_AUTO_TEST_CASE(testWrite)
         point_count_t count(0);
         for(auto i = written.begin(); i != written.end(); ++i)
             count += (*i)->size();
-        BOOST_CHECK_EQUAL(written.size(), 1);
-        BOOST_CHECK_EQUAL(count, 1065);
+        EXPECT_EQ(written.size(), 1);
+        EXPECT_EQ(count, 1065);
     }
 }
 
 
-BOOST_AUTO_TEST_CASE(testNoPointcloudExtension)
+TEST_F(PgpointcloudWriterTest, testNoPointcloudExtension)
 {
     StageFactory f;
     StageFactory::WriterCreator* wc =
         f.getWriterCreator("writers.pgpointcloud");
     if (wc)
     {
-        BOOST_CHECK(wc);
+        EXPECT_TRUE(wc);
 
         executeOnTestDb("DROP EXTENSION pointcloud");
 
         const std::string file(Support::datapath("las/1.2-with-color.las"));
 
-        const pdal::Option opt_filename("filename", file);
+        const Option opt_filename("filename", file);
 
         StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
         if (!rc)
             return;
-        BOOST_CHECK(rc);
+        EXPECT_TRUE(rc);
 
         Stage* reader = rc();
         pdal::Options options;
@@ -200,9 +196,6 @@ BOOST_AUTO_TEST_CASE(testNoPointcloudExtension)
         PointContext ctx;
         writer->prepare(ctx);
 
-        BOOST_CHECK_THROW(writer->execute(ctx), pdal::pdal_error);
+        EXPECT_THROW(writer->execute(ctx), pdal::pdal_error);
     }
 }
-
-
-BOOST_AUTO_TEST_SUITE_END()

@@ -32,23 +32,18 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
-#include <pdal/SpatialReference.hpp>
 #include <LasReader.hpp>
 #include <ColorizationFilter.hpp>
 #include <pdal/PointBuffer.hpp>
 
 #include "Support.hpp"
-#include "../StageTester.hpp"
 
-BOOST_AUTO_TEST_SUITE(ColorizationFilterTest)
+using namespace pdal;
 
-
-BOOST_AUTO_TEST_CASE(ColorizationFilterTest_test_1)
+TEST(ColorizationFilterTest, ColorizationFilterTest_test_1)
 {
-    using namespace pdal;
-
     Options ops1;
     ops1.add("filename", Support::datapath("autzen/autzen-point-format-3.las"));
     LasReader reader;
@@ -97,17 +92,15 @@ BOOST_AUTO_TEST_CASE(ColorizationFilterTest_test_1)
 
     filter.prepare(ctx);
     PointBufferSet pbSet = filter.execute(ctx);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
 
     uint16_t r = buf->getFieldAs<uint16_t>(Dimension::Id::Red, 0);
     uint16_t g = buf->getFieldAs<uint16_t>(Dimension::Id::Green, 0);
     uint16_t b = buf->getFieldAs<uint16_t>(Dimension::Id::Blue, 0);
 
-    BOOST_CHECK_EQUAL(r, 210u);
-    BOOST_CHECK_EQUAL(g, 205u);
+    EXPECT_EQ(r, 210u);
+    EXPECT_EQ(g, 205u);
     // We scaled this up to 16bit by multiplying by 255
-    BOOST_CHECK_EQUAL(b, 47175u);
+    EXPECT_EQ(b, 47175u);
 }
-
-BOOST_AUTO_TEST_SUITE_END()

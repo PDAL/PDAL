@@ -113,7 +113,6 @@ macro(PDAL_ADD_TEST _name _srcs _deps)
     include_directories(${PROJECT_SOURCE_DIR}/test/unit)
     include_directories(${PROJECT_BINARY_DIR}/test/unit)
     set(common_srcs
-        ${PROJECT_SOURCE_DIR}/test/unit/main.cpp
         ${PROJECT_SOURCE_DIR}/test/unit/Support.cpp
 	${PROJECT_SOURCE_DIR}/test/unit/TestConfig.cpp
     )
@@ -121,12 +120,11 @@ macro(PDAL_ADD_TEST _name _srcs _deps)
     set_target_properties(${_name} PROPERTIES COMPILE_DEFINITIONS PDAL_DLL_IMPORT)
     if(WIN32)
         add_definitions("-DPDAL_DLL_EXPORT=1")
-    else()
-        add_definitions("-DBOOST_TEST_DYN_LINK")
     endif()
     target_link_libraries(${_name} ${PDAL_LINKAGE} ${PDAL_LIB_NAME})
+    target_link_libraries(${_name} ${PDAL_LINKAGE} gtest gtest_main)
     target_link_libraries(${_name} ${PDAL_LINKAGE} ${_deps})
-    add_test(NAME ${_name} COMMAND "${PROJECT_BINARY_DIR}/bin/${_name}" "${PROJECT_SOURCE_DIR}/test/data" --catch_system_errors=no WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/..")
+    add_test(NAME ${_name} COMMAND "${PROJECT_BINARY_DIR}/bin/${_name}" WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/..")
 endmacro(PDAL_ADD_TEST)
 
 ###############################################################################

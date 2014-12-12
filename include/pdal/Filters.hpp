@@ -36,7 +36,7 @@
 
 #include <ChipperFilter.hpp>
 #include <ColorizationFilter.hpp>
-#include <pdal/filters/Crop.hpp>
+#include <CropFilter.hpp>
 #include <DecimationFilter.hpp>
 #include <FerryFilter.hpp>
 #include <MergeFilter.hpp>
@@ -48,4 +48,4 @@
 #include <ReprojectionFilter.hpp>
 #include <SortFilter.hpp>
 #include <SplitterFilter.hpp>
-#include <pdal/filters/Stats.hpp>
+#include <StatsFilter.hpp>

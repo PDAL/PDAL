@@ -226,7 +226,7 @@ else()
   # Recommended C++ compilation flags
   # -Weffc++
   set(PDAL_COMMON_CXX_FLAGS
-      "-Wextra -Wall -Wno-unused-parameter -Wno-unused-variable -Wpointer-arith -Wcast-align -Wcast-qual -Wfloat-equal -Wredundant-decls -Wno-long-long")
+    "-Wextra -Wall -Wno-unused-parameter -Wno-unused-variable -Wpointer-arith -Wcast-align -Wcast-qual -Wfloat-equal -Wredundant-decls -Wno-long-long")
 
     if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PDAL_COMMON_CXX_FLAGS}")
@@ -237,7 +237,7 @@ else()
         set(PDAL_COMPILER_GCC 1)
     elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" OR
             "${CMAKE_CXX_COMPILER}" MATCHES "clang")
-         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PDAL_COMMON_CXX_FLAGS}")
+         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PDAL_COMMON_CXX_FLAGS} -Qunused-arguments")
          set(PDAL_COMPILER_CLANG 1)
          set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
          set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -isystem /usr/local/include")
@@ -274,7 +274,7 @@ if(WIN32)
   endif(MSVC)
 endif(WIN32)
 
-find_package(Boost 1.53 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random REQUIRED)
+find_package(Boost 1.53 COMPONENTS program_options thread iostreams filesystem system random REQUIRED)
 
 if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})
@@ -313,7 +313,6 @@ if (GEOS_FOUND)
     if ("${GEOS_VERSION_H}" STREQUAL "GEOS_VERSION_H-NOTFOUND")
         set(GEOS_LIBRARY "")
         set(GEOS_FOUND FALSE)
-        set(WITH_GEOS FALSE)
     else()
         include_directories("${GEOS_INCLUDE_DIR}")
         set(PDAL_HAVE_GEOS 1)
@@ -498,7 +497,18 @@ add_subdirectory(src)
 
 if(WITH_TESTS)
   message(STATUS "Building with PDAL unit tests")
+
+  # This is fixed in trunk
+  # https://code.google.com/p/googletest/source/detail?r=675
+  # but for now, we need this fix
+  # http://stackoverflow.com/questions/12558327/google-test-in-visual-studio-2012
+  if (MSVC AND MSVC_VERSION EQUAL 1700)
+    add_definitions(/D _VARIADIC_MAX=10)
+  endif()
+
+  add_subdirectory(vendor/gtest-1.7.0)
   enable_testing()
+  include_directories(vendor/gtest-1.7.0/include vendor/gtest-1.7.0)
 
   if(ENABLE_CTEST)
     message(STATUS

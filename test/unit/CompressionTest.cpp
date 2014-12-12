@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <sstream>
 #include <iostream>
@@ -40,10 +40,8 @@
 
 #include "Support.hpp"
 #include <pdal/Options.hpp>
-#include <pdal/Bounds.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <LasReader.hpp>
-#include <pdal/PDALUtils.hpp>
 #include <pdal/Compression.hpp>
 
 using namespace pdal;
@@ -52,24 +50,22 @@ struct SQLiteTestStream
 {
     SQLiteTestStream() : buf(), idx(0) {}
 
-    void putBytes(const unsigned char* b, size_t len) {
-        while(len --) {
+    void putBytes(const unsigned char* b, size_t len)
+    {
+        while(len--)
             buf.push_back(*b++);
-        }
     }
 
-    void putByte(const unsigned char b) {
-        buf.push_back(b);
-    }
+    void putByte(const unsigned char b)
+        { buf.push_back(b); }
 
-    unsigned char getByte() {
-        return buf[idx++];
-    }
+    unsigned char getByte()
+        { return buf[idx++]; }
 
-    void getBytes(unsigned char *b, int len) {
-        for (int i = 0 ; i < len ; i ++) {
+    void getBytes(unsigned char *b, int len)
+    {
+        for (int i = 0 ; i < len; i++)
             b[i] = getByte();
-        }
     }
 
     std::vector<unsigned char> buf;
@@ -88,9 +84,7 @@ std::vector<char> getBytes(PointBuffer buffer, PointContextRef ctx)
 }
 
 
-BOOST_AUTO_TEST_SUITE(CompressionTest)
-
-BOOST_AUTO_TEST_CASE(test_compress_file)
+TEST(Compression, Simple)
 {
     const std::string file(Support::datapath("las/1.2-with-color.las"));
 
@@ -98,16 +92,15 @@ BOOST_AUTO_TEST_CASE(test_compress_file)
     pdal::Options opts;
     opts.add(opt_filename);
 
-    pdal::LasReader reader;
+    LasReader reader;
     reader.setOptions(opts);
 
     PointContext ctx;
     reader.prepare(ctx);
     PointBufferSet buffers = reader.execute(ctx);
-
     PointBufferPtr buffer = *buffers.begin();
 
-    BOOST_CHECK_EQUAL(ctx.pointSize(), 52);
+    EXPECT_EQ(ctx.pointSize(), 52U);
     SQLiteTestStream s;
 
     ExtDimTypeList extDimTypes;
@@ -125,8 +118,8 @@ BOOST_AUTO_TEST_CASE(test_compress_file)
     }
     compressor.done();
 
-    BOOST_CHECK_EQUAL(buffer->size() * compressor.pointSize(), 55380);
-    BOOST_CHECK_EQUAL(s.buf.size(), 30945);
+    EXPECT_EQ(buffer->size() * compressor.pointSize(), 55380U);
+    EXPECT_EQ(s.buf.size(), 30945U);
 
     SQLiteTestStream s2;
     s2.buf = s.buf;
@@ -145,17 +138,17 @@ BOOST_AUTO_TEST_CASE(test_compress_file)
         b.setPackedPoint(dims, nextId, pos);
         pos += decompressor.pointSize();
     }
-    BOOST_CHECK_EQUAL(b.size(), 11);
-    BOOST_CHECK_EQUAL(getBytes(b, ctx).size(), 52 * 11);
+    EXPECT_EQ(b.size(), 11U);
+    EXPECT_EQ(getBytes(b, ctx).size(), (size_t)(52 * 11));
 
     uint16_t r = b.getFieldAs<uint16_t>(Dimension::Id::Red, 10);
-    BOOST_CHECK_EQUAL(r, 64u);
+    EXPECT_EQ(r, 64U);
     int32_t x = b.getFieldAs<int32_t>(Dimension::Id::X, 10);
-    BOOST_CHECK_EQUAL(x, 636038);
+    EXPECT_EQ(x, 636038);
     double xd = b.getFieldAs<double>(Dimension::Id::X, 10);
-    BOOST_CHECK_CLOSE(xd, 636037.53, 0.001);
+    EXPECT_FLOAT_EQ(xd, 636037.53);
     int32_t y = b.getFieldAs<int32_t>(Dimension::Id::Y, 10);
-    BOOST_CHECK_EQUAL(y, 849338);
+    EXPECT_EQ(y, 849338);
 }
 
 //
@@ -255,5 +248,4 @@ BOOST_AUTO_TEST_CASE(test_compress_file)
 //     uint16_t r = b->getFieldAs<uint16_t>(Dimension::Id::Red, 10);
 //     BOOST_CHECK_EQUAL(r, 26u);
 // }
-BOOST_AUTO_TEST_SUITE_END()
 

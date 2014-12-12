@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <pdal/FileUtils.hpp>
 #include <LasReader.hpp>
@@ -43,10 +43,7 @@
 #include <sstream>
 #include <string>
 
-
 using namespace pdal;
-
-BOOST_AUTO_TEST_SUITE(pc2pcTest)
 
 static std::string appName()
 {
@@ -55,30 +52,30 @@ static std::string appName()
 
 
 #ifdef PDAL_COMPILER_MSVC
-BOOST_AUTO_TEST_CASE(pc2pcTest_test_no_input)
+TEST(pc2pcTest, pc2pcTest_test_no_input)
 {
     std::string cmd = appName();
 
     std::string output;
-    int stat = pdal::Utils::run_shell_command(cmd, output);
-    BOOST_CHECK_EQUAL(stat, 1);
+    int stat = Utils::run_shell_command(cmd, output);
+    EXPECT_EQ(stat, 1);
 
     const std::string expected = "Usage error: --input";
-    BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
+    EXPECT_EQ(output.substr(0, expected.length()), expected);
 }
 #endif
 
 
-BOOST_AUTO_TEST_CASE(pc2pcTest_test_common_opts)
+TEST(pc2pcTest, pc2pcTest_test_common_opts)
 {
     std::string cmd = appName();
 
     std::string output;
     int stat = Utils::run_shell_command(cmd + " -h", output);
-    BOOST_CHECK_EQUAL(stat, 0);
+    EXPECT_EQ(stat, 0);
 
     stat = Utils::run_shell_command(cmd + " --version", output);
-    BOOST_CHECK_EQUAL(stat, 0);
+    EXPECT_EQ(stat, 0);
 }
 
 
@@ -119,7 +116,7 @@ static bool fileHasSrs(const std::string& name)
 }
 
 
-BOOST_AUTO_TEST_CASE(pc2pc_test_switches)
+TEST(pc2pcTest, pc2pc_test_switches)
 {
     std::string cmd = appName();
 
@@ -142,11 +139,11 @@ BOOST_AUTO_TEST_CASE(pc2pc_test_switches)
     std::string fullCmd = cmd + " --input=" + inputLas + " --output=" +
         outputLas;
     stat = Utils::run_shell_command(fullCmd, output);
-    BOOST_CHECK_EQUAL(stat, 0);
-    BOOST_CHECK(fileIsOkay(outputLas));
-    BOOST_CHECK(!fileIsCompressed(outputLas));
+    EXPECT_EQ(stat, 0);
+    EXPECT_TRUE(fileIsOkay(outputLas));
+    EXPECT_TRUE(!fileIsCompressed(outputLas));
 #ifdef PDAL_HAVE_LIBGEOTIFF
-    BOOST_CHECK(!fileHasSrs(outputLas));
+    EXPECT_TRUE(!fileHasSrs(outputLas));
 #else
     (void)fileHasSrs(outputLas);
 #endif
@@ -155,32 +152,30 @@ BOOST_AUTO_TEST_CASE(pc2pc_test_switches)
     // does --compress make a compressed file?
     stat = Utils::run_shell_command(cmd + " --input=" + inputLas +
         " --output=" + outputLas + " --compress", output);
-    BOOST_CHECK_EQUAL(stat, 0);
-    BOOST_CHECK(fileIsOkay(outputLas));
-    BOOST_CHECK(fileIsCompressed(outputLas));
+    EXPECT_EQ(stat, 0);
+    EXPECT_TRUE(fileIsOkay(outputLas));
+    EXPECT_TRUE(fileIsCompressed(outputLas));
 #endif
 
 #ifdef PDAL_HAVE_LASZIP
     // does "--output foo.laz" make a compressed output?
     stat = Utils::run_shell_command(cmd + " --input=" + inputLas +
         " --output=" + outputLaz, output);
-    BOOST_CHECK_EQUAL(stat, 0);
-    BOOST_CHECK(fileIsOkay(outputLaz));
-    BOOST_CHECK(fileIsCompressed(outputLaz));
+    EXPECT_EQ(stat, 0);
+    EXPECT_TRUE(fileIsOkay(outputLaz));
+    EXPECT_TRUE(fileIsCompressed(outputLaz));
 #endif
 
     // does --a_srs add an SRS?
     fullCmd = cmd + " --input=" + inputLas + " --output=" + outputLas +
         " --a_srs=epsg:4326";
     stat = Utils::run_shell_command(fullCmd, output);
-    BOOST_CHECK_EQUAL(stat, 0);
-    BOOST_CHECK(fileIsOkay(outputLas));
+    EXPECT_EQ(stat, 0);
+    EXPECT_TRUE(fileIsOkay(outputLas));
 #ifdef PDAL_HAVE_LIBGEOTIFF
-    BOOST_CHECK(fileHasSrs(outputLas));
+    EXPECT_TRUE(fileHasSrs(outputLas));
 #endif
 
     FileUtils::deleteFile(outputLas);
     FileUtils::deleteFile(outputLaz);
 }
-
-BOOST_AUTO_TEST_SUITE_END()

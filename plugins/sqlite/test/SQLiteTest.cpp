@@ -32,11 +32,13 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
+/**
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/concept_check.hpp>
+**/
 
 #include <pdal/FileUtils.hpp>
 #include <pdal/StageFactory.hpp>
@@ -99,9 +101,9 @@ void testReadWrite(bool compression, bool scaling)
     StageFactory::ReaderCreator* sqliteRc =
         f.getReaderCreator("readers.sqlite");
 
-    BOOST_CHECK(lasRc);
-    BOOST_CHECK(sqliteWc);
-    BOOST_CHECK(sqliteRc);
+    EXPECT_TRUE(lasRc);
+    EXPECT_TRUE(sqliteWc);
+    EXPECT_TRUE(sqliteRc);
     if (!lasRc || !sqliteWc || !sqliteRc)
         return;
 
@@ -131,7 +133,7 @@ void testReadWrite(bool compression, bool scaling)
     PointContext ctx2;
     sqliteReader->prepare(ctx2);
     PointBufferSet pbSet = sqliteReader->execute(ctx2);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1U);
     PointBufferPtr buffer = *pbSet.begin();
 
     using namespace Dimension;
@@ -140,40 +142,37 @@ void testReadWrite(bool compression, bool scaling)
     for (PointId idx = 0; idx < 11; idx++)
     {
         uint16_t r = buffer->getFieldAs<uint16_t>(Id::Red, idx);
-        BOOST_CHECK_EQUAL(r, reds[idx]);
+        EXPECT_EQ(r, reds[idx]);
     }
     int32_t x = buffer->getFieldAs<int32_t>(Id::X, 10);
-    BOOST_CHECK_EQUAL(x, 636038);
+    EXPECT_EQ(x, 636038);
     double xd = buffer->getFieldAs<double>(Id::X, 10);
-    BOOST_CHECK_CLOSE(xd, 636037.53, 0.001);
+    EXPECT_FLOAT_EQ(xd, 636037.53);
 
    FileUtils::deleteFile(tempFilename);
 }
 
-BOOST_AUTO_TEST_SUITE(SQLiteTest)
 
-BOOST_AUTO_TEST_CASE(readWrite)
+TEST(SQLiteTest, readWrite)
 {
     testReadWrite(false, false);
 }
 
 #ifdef PDAL_HAVE_LAZPERF
-BOOST_AUTO_TEST_CASE(readWriteCompress)
+TEST(SQLiteTest, readWriteCompress)
 {
     testReadWrite(true, false);
 }
 #endif
 
-BOOST_AUTO_TEST_CASE(readWriteScale)
+TEST(SQLiteTest, readWriteScale)
 {
     testReadWrite(false, true);
 }
 
 #ifdef PDAL_HAVE_LAZPERF
-BOOST_AUTO_TEST_CASE(readWriteCompressScale)
+TEST(SQLiteTest, readWriteCompressScale)
 {
     testReadWrite(true, true);
 }
 #endif
-
-BOOST_AUTO_TEST_SUITE_END()

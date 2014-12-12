@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include "Support.hpp"
 
@@ -41,10 +41,7 @@
 
 using namespace pdal;
 
-BOOST_AUTO_TEST_SUITE(PipelineManagerTest)
-
-
-BOOST_AUTO_TEST_CASE(PipelineManagerTest_test1)
+TEST(PipelineManagerTest, PipelineManagerTest_test1)
 {
     FileUtils::deleteFile("temp.las");
 
@@ -67,7 +64,7 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test1)
         writer->setOptions(optsW);
 
         point_count_t np = mgr.execute();
-        BOOST_CHECK(np == 1065);
+        EXPECT_TRUE(np == 1065);
     }
 
     FileUtils::deleteFile("temp.las");
@@ -76,7 +73,7 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test1)
 
 //ABELL - Mosaic
 /**
-BOOST_AUTO_TEST_CASE(PipelineManagerTest_test2)
+TEST(PipelineManagerTest, PipelineManagerTest_test2)
 {
     FileUtils::deleteFile("temp.las");
 
@@ -106,7 +103,7 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test2)
         Writer* writer = mgr.addWriter("writers.las", *filter, optsW);
         point_count_t np = mgr.execute();
 
-        BOOST_CHECK(np == 1065 * 2);
+        EXPECT_TRUE(np == 1065 * 2);
 
         std::vector<Stage *> reader1_inputs = reader1->getInputs();
         std::vector<Stage *> reader2_inputs = reader2->getInputs();
@@ -114,19 +111,16 @@ BOOST_AUTO_TEST_CASE(PipelineManagerTest_test2)
         std::vector<Stage *> filter_inputs = filter->getInputs();
         std::vector<Stage *> writer_inputs = writer->getInputs();
 
-        BOOST_CHECK(reader1_inputs.size() == 0);
-        BOOST_CHECK(reader2_inputs.size() == 0);
-        BOOST_CHECK(multifilter_inputs.size() == 2);
-        BOOST_CHECK(multifilter_inputs[0] == reader1);
-        BOOST_CHECK(multifilter_inputs[1] == reader2);
-        BOOST_CHECK(filter_inputs.size() == 1);
-        BOOST_CHECK(filter_inputs[0] == multifilter);
-        BOOST_CHECK(writer_inputs.size() == 1);
-        BOOST_CHECK(writer_inputs[0] == filter);
+        EXPECT_TRUE(reader1_inputs.size() == 0);
+        EXPECT_TRUE(reader2_inputs.size() == 0);
+        EXPECT_TRUE(multifilter_inputs.size() == 2);
+        EXPECT_TRUE(multifilter_inputs[0] == reader1);
+        EXPECT_TRUE(multifilter_inputs[1] == reader2);
+        EXPECT_TRUE(filter_inputs.size() == 1);
+        EXPECT_TRUE(filter_inputs[0] == multifilter);
+        EXPECT_TRUE(writer_inputs.size() == 1);
     }
 
     FileUtils::deleteFile("temp.las");
 }
 **/
-
-BOOST_AUTO_TEST_SUITE_END()

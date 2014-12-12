@@ -129,19 +129,6 @@ set(PDAL_FILTERS_PATH filters)
 set(PDAL_FILTERS_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_FILTERS_PATH}")
 set(PDAL_FILTERS_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_FILTERS_PATH}")
 
-set(PDAL_FILTERS_HPP
-  "${PDAL_FILTERS_HEADERS}/Crop.hpp"
-  "${PDAL_FILTERS_HEADERS}/Stats.hpp"
-)
-
-set (PDAL_FILTERS_CPP
-  "${PDAL_FILTERS_SRC}/Crop.cpp"
-  "${PDAL_FILTERS_SRC}/Stats.cpp"
-)
-
-list (APPEND PDAL_CPP ${PDAL_FILTERS_CPP} )
-list (APPEND PDAL_HPP ${PDAL_FILTERS_HPP} )
-
 #
 # Core components that depend on Python
 #
@@ -240,6 +227,7 @@ include_directories(${PROJECT_SOURCE_DIR}/io/text)
 include_directories(${PROJECT_SOURCE_DIR}/io/terrasolid)
 include_directories(${PROJECT_SOURCE_DIR}/filters/chipper)
 include_directories(${PROJECT_SOURCE_DIR}/filters/colorization)
+include_directories(${PROJECT_SOURCE_DIR}/filters/crop)
 include_directories(${PROJECT_SOURCE_DIR}/filters/decimation)
 include_directories(${PROJECT_SOURCE_DIR}/filters/ferry)
 include_directories(${PROJECT_SOURCE_DIR}/filters/merge)
@@ -247,6 +235,7 @@ include_directories(${PROJECT_SOURCE_DIR}/filters/mortonorder)
 include_directories(${PROJECT_SOURCE_DIR}/filters/reprojection)
 include_directories(${PROJECT_SOURCE_DIR}/filters/sort)
 include_directories(${PROJECT_SOURCE_DIR}/filters/splitter)
+include_directories(${PROJECT_SOURCE_DIR}/filters/stats)
 include_directories(${PROJECT_SOURCE_DIR}/kernels/info)
 
 set(PDAL_SOURCES

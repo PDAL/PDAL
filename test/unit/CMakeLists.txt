@@ -6,112 +6,7 @@
 #
 ###############################################################################
 
-configure_file(
-    TestConfig.hpp.in
-    "${CMAKE_CURRENT_BINARY_DIR}/TestConfig.hpp"
-)
-
-if (PDAL_HAVE_LAZPERF)
-    SET(PDAL_LAZPERF_SRC CompressionTest.cpp)
-endif()
-
-SET(PDAL_UNITTEST_TEST_SRC "")
-#
-# sources for the base library
-#
-set(PDAL_UNITTEST_BASE_SRCS
-    BoundsTest.cpp
-    ConfigTest.cpp
-    EnvironmentTest.cpp
-    FileUtilsTest.cpp
-    GDALUtilsTest.cpp
-    LogTest.cpp
-    MetadataTest.cpp
-    OptionsTest.cpp
-    PipelineManagerTest.cpp
-    PointBufferTest.cpp
-    PointContextTest.cpp
-    SpatialReferenceTest.cpp
-#    StageFactoryTest.cpp
-    StreamFactoryTest.cpp
-    SupportTest.cpp
-    UserCallbackTest.cpp
-    UtilsTest.cpp
-    ${PDAL_UNITTEST_XMLSCHEMA_TEST}
-    ${PDAL_LAZPERF_SRC}
-)
-
-#
-# sources for the native io
-#
-set(PDAL_UNITTEST_DRIVERS_SRCS
-    io/bpf/BPFTest.cpp
-    io/buffer/BufferTest.cpp
-    io/faux/FauxReaderTest.cpp
-    io/las/LasReaderTest.cpp
-    io/las/LasWriterTest.cpp
-    io/qfit/QFITReaderTest.cpp
-    io/sbet/SbetReaderTest.cpp
-    io/sbet/SbetWriterTest.cpp
-#    io/terrasolid/TerraSolidReaderTest.cpp
-#    io/text/TextWriterTest.cpp
-)
-
-#
-# sources for the native filters
-#
-set(PDAL_UNITTEST_FILTERS_SRCS
-    filters/ChipperTest.cpp
-    filters/ColorizationFilterTest.cpp
-    filters/CropFilterTest.cpp
-    filters/DecimationFilterTest.cpp
-    filters/FerryFilterTest.cpp
-    filters/MergeTest.cpp
-    filters/ReprojectionFilterTest.cpp
-    filters/SortFilterTest.cpp
-    filters/SplitterTest.cpp
-    filters/StatsFilterTest.cpp
-)
-
-#
-# sources for plang
-#
-set(PDAL_PLANG_TEST_SRC
-    plang/PLangTest.cpp
-    plang/PredicateFilterTest.cpp
-    plang/ProgrammableFilterTest.cpp
-)
-
-#
-# the combined test sources
-#
-set(PDAL_UNITTEST_SRCS
-    ${PDAL_UNITTEST_BASE_SRCS}
-    ${PDAL_UNITTEST_DRIVERS_SRCS}
-    ${PDAL_UNITTEST_FILTERS_SRCS}
-    ${PDAL_PLANG_TEST_SRC}
-    ${PDAL_TARGET_OBJECTS}
-)
-
-#
-# conditionally append apps/libxml2 sources
-#
-if(WITH_APPS)
-    if(LIBXML2_FOUND)
-        list(APPEND PDAL_UNITTEST_SRCS
-#            apps/pcinfoTest.cpp
-        )
-    endif(LIBXML2_FOUND)
-
-    list(APPEND PDAL_UNITTEST_SRCS
-        apps/pc2pcTest.cpp
-#        apps/pcpipelineTest.cpp
-    )
-endif(WITH_APPS)
-
-if(LIBXML2_FOUND)
-    list(APPEND PDAL_UNITTEST_SRCS XMLSchemaTest.cpp)
-endif()
+configure_file(TestConfig.hpp.in "${CMAKE_CURRENT_BINARY_DIR}/TestConfig.hpp")
 
 include_directories(
     ${PROJECT_SOURCE_DIR}/include
@@ -127,13 +22,108 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/io/terrasolid
     ${PROJECT_SOURCE_DIR}/filters/chipper
     ${PROJECT_SOURCE_DIR}/filters/colorization
+    ${PROJECT_SOURCE_DIR}/filters/crop
     ${PROJECT_SOURCE_DIR}/filters/decimation
     ${PROJECT_SOURCE_DIR}/filters/ferry
     ${PROJECT_SOURCE_DIR}/filters/mortonorder
     ${PROJECT_SOURCE_DIR}/filters/reprojection
     ${PROJECT_SOURCE_DIR}/filters/sort
     ${PROJECT_SOURCE_DIR}/filters/splitter
+    ${PROJECT_SOURCE_DIR}/filters/stats
     ${PROJECT_SOURCE_DIR}/kernels/info
 )
-set(deps ${PDAL_LIB_NAME})
-PDAL_ADD_TEST(pdal_test "${PDAL_UNITTEST_SRCS}" "${deps}")
+
+set(srcs
+    BoundsTest.cpp
+    ConfigTest.cpp
+    EnvironmentTest.cpp
+    FileUtilsTest.cpp
+    GDALUtilsTest.cpp
+    LogTest.cpp
+    MetadataTest.cpp
+    OptionsTest.cpp
+    PipelineManagerTest.cpp
+    PointBufferTest.cpp
+    PointContextTest.cpp
+    SpatialReferenceTest.cpp
+    #StageFactoryTest.cpp # this has been disabled for quite a while, is it OBE?
+    StreamFactoryTest.cpp
+    SupportTest.cpp
+    UserCallbackTest.cpp
+    UtilsTest.cpp
+)
+PDAL_ADD_TEST(pdal_base_test "${srcs}" ${PDAL_LIB_NAME})
+
+if (PDAL_HAVE_LAZPERF)
+    set(srcs CompressionTest.cpp)
+    PDAL_ADD_TEST(lazperf_test "${srcs}" ${PDAL_LIB_NAME})
+endif()
+
+#
+# sources for the native io
+#
+set(srcs
+    io/bpf/BPFTest.cpp
+    io/buffer/BufferTest.cpp
+    io/faux/FauxReaderTest.cpp
+    io/las/LasReaderTest.cpp
+    io/las/LasWriterTest.cpp
+    io/qfit/QFITReaderTest.cpp
+    io/sbet/SbetReaderTest.cpp
+    io/sbet/SbetWriterTest.cpp
+#    io/terrasolid/TerraSolidReaderTest.cpp
+#    io/text/TextWriterTest.cpp
+)
+PDAL_ADD_TEST(pdal_io_test "${srcs}" ${PDAL_LIB_NAME})
+
+#
+# sources for the native filters
+#
+set(srcs
+    filters/ChipperTest.cpp
+    filters/ColorizationFilterTest.cpp
+    filters/CropFilterTest.cpp
+    filters/DecimationFilterTest.cpp
+    filters/FerryFilterTest.cpp
+    filters/MergeTest.cpp
+    filters/ReprojectionFilterTest.cpp
+    filters/SortFilterTest.cpp
+    filters/SplitterTest.cpp
+    filters/StatsFilterTest.cpp
+)
+PDAL_ADD_TEST(pdal_filters_test "${srcs}" ${PDAL_LIB_NAME})
+
+#
+# sources for plang
+#
+if (PDAL_HAVE_PYTHON)
+    set(srcs
+        plang/PLangTest.cpp
+        plang/PredicateFilterTest.cpp
+        plang/ProgrammableFilterTest.cpp
+    )
+    PDAL_ADD_TEST(pdal_plang_test "${srcs}" ${PDAL_LIB_NAME})
+endif()
+
+#
+# conditionally append apps/libxml2 sources
+#
+if(WITH_APPS)
+#    if(LIBXML2_FOUND)
+#        list(APPEND PDAL_UNITTEST_SRCS
+#            apps/pcinfoTest.cpp
+#        )
+#    endif(LIBXML2_FOUND)
+
+#    list(APPEND PDAL_UNITTEST_SRCS
+#        apps/pc2pcTest.cpp
+#        apps/pcpipelineTest.cpp
+#    )
+    set(srcs apps/pc2pcTest.cpp)
+    PDAL_ADD_TEST(pc2pc_test "${srcs}" ${PDAL_LIB_NAME})
+endif(WITH_APPS)
+
+if(LIBXML2_FOUND)
+    set(srcs XMLSchemaTest.cpp)
+    PDAL_ADD_TEST(xml_schema_test "${srcs}" ${PDAL_LIB_NAME})
+endif()

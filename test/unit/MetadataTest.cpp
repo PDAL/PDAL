@@ -32,28 +32,25 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <boost/algorithm/string.hpp>
-#include <sstream>
-#include <iostream>
-#include <string>
+//#include <sstream>
+//#include <iostream>
+//#include <string>
 
-#include <LasReader.hpp>
+//#include <LasReader.hpp>
 #include <pdal/Metadata.hpp>
-#include <pdal/PipelineManager.hpp>
-#include <pdal/PipelineReader.hpp>
-#include "Support.hpp"
+//#include <pdal/PipelineManager.hpp>
+//#include <pdal/PipelineReader.hpp>
+//#include "Support.hpp"
 
-#include <boost/property_tree/xml_parser.hpp>
-#include <boost/property_tree/json_parser.hpp>
-
-
-BOOST_AUTO_TEST_SUITE(MetadataTest)
+//#include <boost/property_tree/xml_parser.hpp>
+//#include <boost/property_tree/json_parser.hpp>
 
 using namespace pdal;
 
-BOOST_AUTO_TEST_CASE(test_construction)
+TEST(MetadataTest, test_construction)
 {
     uint32_t u32(32u);
     int32_t i32(-32);
@@ -71,106 +68,106 @@ BOOST_AUTO_TEST_CASE(test_construction)
 
         MetadataNode m;
         MetadataNode m2 = m.addEncoded("name", v.data(), v.size());
-        BOOST_CHECK_EQUAL(m2.type(), "base64Binary");
+        EXPECT_EQ(m2.type(), "base64Binary");
 
         std::string base64("AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiYw==");
-        BOOST_CHECK_EQUAL(m2.value(), base64);
+        EXPECT_EQ(m2.value(), base64);
     }
 
 
     {
         MetadataNode m;
         MetadataNode m2 = m.add<int8_t>("name", i8);
-        BOOST_CHECK_EQUAL(m2.value(), "-8");
-        BOOST_CHECK_EQUAL(m2.type(), "integer");
+        EXPECT_EQ(m2.value(), "-8");
+        EXPECT_EQ(m2.type(), "integer");
     }
 
     {
         MetadataNode m;
         MetadataNode m2 = m.add("name", i16);
-        BOOST_CHECK_EQUAL(m2.value(), "-16");
-        BOOST_CHECK_EQUAL(m2.type(), "integer");
+        EXPECT_EQ(m2.value(), "-16");
+        EXPECT_EQ(m2.type(), "integer");
     }
 
     {
         MetadataNode m;
         MetadataNode m2 = m.add("name", i32);
-        BOOST_CHECK_EQUAL(m2.value(), "-32");
-        BOOST_CHECK_EQUAL(m2.type(), "integer");
+        EXPECT_EQ(m2.value(), "-32");
+        EXPECT_EQ(m2.type(), "integer");
     }
 
     {
         MetadataNode m;
         MetadataNode m2 = m.add("name", i64);
-        BOOST_CHECK_EQUAL(m2.value(), "-64");
-        BOOST_CHECK_EQUAL(m2.type(), "integer");
+        EXPECT_EQ(m2.value(), "-64");
+        EXPECT_EQ(m2.type(), "integer");
     }
 
     {
         MetadataNode m;
         MetadataNode m2 = m.add("name", i64);
-        BOOST_CHECK_EQUAL(m2.value(), "-64");
-        BOOST_CHECK_EQUAL(m2.type(), "integer");
+        EXPECT_EQ(m2.value(), "-64");
+        EXPECT_EQ(m2.type(), "integer");
     }
 
     {
         MetadataNode m;
         MetadataNode m2 = m.add<uint8_t>("name", u8);
-        BOOST_CHECK_EQUAL(m2.value(), "8");
-        BOOST_CHECK_EQUAL(m2.type(), "nonNegativeInteger");
+        EXPECT_EQ(m2.value(), "8");
+        EXPECT_EQ(m2.type(), "nonNegativeInteger");
     }
 
     {
         MetadataNode m;
         MetadataNode m2 = m.add("name", u16);
-        BOOST_CHECK_EQUAL(m2.value(), "16");
-        BOOST_CHECK_EQUAL(m2.type(), "nonNegativeInteger");
+        EXPECT_EQ(m2.value(), "16");
+        EXPECT_EQ(m2.type(), "nonNegativeInteger");
     }
 
     {
         MetadataNode m;
         MetadataNode m2 = m.add("name", u32);
-        BOOST_CHECK_EQUAL(m2.value(), "32");
-        BOOST_CHECK_EQUAL(m2.type(), "nonNegativeInteger");
+        EXPECT_EQ(m2.value(), "32");
+        EXPECT_EQ(m2.type(), "nonNegativeInteger");
     }
 
     {
         MetadataNode m;
         MetadataNode m2 = m.add("name", u64);
-        BOOST_CHECK_EQUAL(m2.value(), "64");
-        BOOST_CHECK_EQUAL(m2.type(), "nonNegativeInteger");
+        EXPECT_EQ(m2.value(), "64");
+        EXPECT_EQ(m2.type(), "nonNegativeInteger");
     }
 }
 
-BOOST_AUTO_TEST_CASE(typed_value)
+TEST(MetadataTest, typed_value)
 {
     MetadataNode m;
     MetadataNode m2 = m.add("name", 127);
 
-    BOOST_CHECK_EQUAL(127, m2.value<int>());
+    EXPECT_EQ(127, m2.value<int>());
 
     double d = 123.45;
     MetadataNode m3 = m.addEncoded("name", (unsigned char *)&d, sizeof(d));
-    BOOST_CHECK_CLOSE(d, m3.value<double>(), .00001);
-    BOOST_CHECK_EQUAL("zczMzMzcXkA=", m3.value());
+    EXPECT_FLOAT_EQ(d, m3.value<double>());
+    EXPECT_EQ("zczMzMzcXkA=", m3.value());
 
     MetadataNode m4 = m.add("name", "65539");
-    BOOST_CHECK_EQUAL(65539, m4.value<unsigned>());
+    EXPECT_EQ(65539u, m4.value<unsigned>());
 
     auto ctx = Utils::redirect(std::cerr);
-    BOOST_CHECK_EQUAL(0, m4.value<unsigned short>());
+    EXPECT_EQ(0u, m4.value<unsigned short>());
     Utils::restore(std::cerr, ctx);
 }
 
 
-BOOST_AUTO_TEST_CASE(test_construction_with_srs)
+TEST(MetadataTest, test_construction_with_srs)
 {
     MetadataNode m;
     SpatialReference ref("EPSG:4326");
     MetadataNode m2 = m.add("spatialreference", ref);
-    BOOST_CHECK_EQUAL(m2.type(), "spatialreference");
+    EXPECT_EQ(m2.type(), "spatialreference");
 
-    //pdal::SpatialReference ref2 = m.getValue<pdal::SpatialReference>();
+    //SpatialReference ref2 = m.getValue<SpatialReference>();
     // std::string ref_text("GEOGCS[\"WGS 84\","
     //     DATUM[\"WGS_1984\","
     //         SPHEROID[\"WGS 84\",6378137,298.257223563,
@@ -182,19 +179,19 @@ BOOST_AUTO_TEST_CASE(test_construction_with_srs)
     //         AUTHORITY[\"EPSG\",\"9122\"]],
     //     AUTHORITY[\"EPSG\",\"4326\"]]");
 
-    // std::cout << boost::lexical_cast<std::string>(m.getValue<pdal::SpatialReference>());
+    // std::cout << boost::lexical_cast<std::string>(m.getValue<SpatialReference>());
 }
 
 
-BOOST_AUTO_TEST_CASE(test_metadata_copy)
+TEST(MetadataTest, test_metadata_copy)
 {
     MetadataNode m;
     MetadataNode m2 = m.add("val", 2u);
     uint32_t t = boost::lexical_cast<uint32_t>(m2.value());
-    BOOST_CHECK_EQUAL(t, 2u);
+    EXPECT_EQ(t, 2u);
 }
 
-BOOST_AUTO_TEST_CASE(test_metadata_set)
+TEST(MetadataTest, test_metadata_set)
 {
     MetadataNode m;
 
@@ -205,7 +202,7 @@ BOOST_AUTO_TEST_CASE(test_metadata_set)
     MetadataNode mm(m);
 
     std::vector<MetadataNode> ms = mm.children();
-    BOOST_CHECK_EQUAL(ms.size(), 3);
+    EXPECT_EQ(ms.size(), 3u);
 
     class Predicate
     {
@@ -220,19 +217,17 @@ BOOST_AUTO_TEST_CASE(test_metadata_set)
     };
 
     MetadataNode node = mm.findChild(Predicate("m1"));
-    BOOST_CHECK_EQUAL(node.value(), "1");
+    EXPECT_EQ(node.value(), "1");
     node = mm.find(Predicate("m2"));
-    BOOST_CHECK_EQUAL(node.value(), "2");
+    EXPECT_EQ(node.value(), "2");
     node = mm.find(Predicate("m1prime"));
-    BOOST_CHECK_EQUAL(node.value(), "Some other metadata");
+    EXPECT_EQ(node.value(), "Some other metadata");
     node = mm.find(Predicate("foo"));
-    BOOST_CHECK_EQUAL(node.value(), "");
+    EXPECT_EQ(node.value(), "");
 }
 
-BOOST_AUTO_TEST_CASE(test_vlr_metadata)
+TEST(MetadataTest, test_vlr_metadata)
 {
-    using namespace pdal;
-
     MetadataNode m;
 
     MetadataNode bogusvlr = m.add("vlr1", "VLR1VALUE", "VLR1DESC");
@@ -261,12 +256,12 @@ BOOST_AUTO_TEST_CASE(test_vlr_metadata)
     };
 
     MetadataNode found = m.find(pred);
-    BOOST_CHECK_EQUAL(found.name(), "vlr2");
-    BOOST_CHECK_EQUAL(found.value(), "VLR2VALUE");
-    BOOST_CHECK_EQUAL(found.description(), "VLR2DESC");
+    EXPECT_EQ(found.name(), "vlr2");
+    EXPECT_EQ(found.value(), "VLR2VALUE");
+    EXPECT_EQ(found.description(), "VLR2DESC");
 }
 
-BOOST_AUTO_TEST_CASE(find_child_string)
+TEST(MetadataTest, find_child_string)
 {
     MetadataNode top;
     MetadataNode m = top.add("level1");
@@ -276,19 +271,19 @@ BOOST_AUTO_TEST_CASE(find_child_string)
     l22.add("220", "220");
 
     MetadataNode n = top.findChild("level1:level2:210");
-    BOOST_CHECK_EQUAL(n.value(), "210");
+    EXPECT_EQ(n.value(), "210");
     n = top.findChild("level1:level2:220");
-    BOOST_CHECK_EQUAL(n.value(), "220");
+    EXPECT_EQ(n.value(), "220");
 }
 
-BOOST_AUTO_TEST_CASE(sanitize)
+TEST(MetadataTest, sanitize)
 {
     MetadataNode top(" Test;semicolon:colon space'apostrophe\"quote:");
-    BOOST_CHECK_EQUAL(top.name(),
+    EXPECT_EQ(top.name(),
         "_Test_semicolon_colon_space_apostrophe_quote_");
 }
 
-BOOST_AUTO_TEST_CASE(toJSON)
+TEST(MetadataTest, toJSON)
 {
 /**
     MetadataNode top("stats");
@@ -305,21 +300,19 @@ BOOST_AUTO_TEST_CASE(toJSON)
 **/
 }
 
-BOOST_AUTO_TEST_CASE(test_metadata_stage)
+TEST(MetadataTest, test_metadata_stage)
 {
 //ABELL
 /**
-    using namespace pdal;
-
     PointContext ctx;
 
     LasReader reader(Support::datapath("interesting.las"));
-    BOOST_CHECK(reader.getDescription() == "Las Reader");
+    EXPECT_TRUE(reader.getDescription() == "Las Reader");
     reader.prepare(ctx);
 
     MetadataNode file_metadata = ctx.metadata();
 
-    BOOST_CHECK_EQUAL(file_metadata.toPTree().get_child("metadata").size(),
+    EXPECT_EQ(file_metadata.toPTree().get_child("metadata").size(),
         32);
 
     PointContext readerCtx;
@@ -331,10 +324,7 @@ BOOST_AUTO_TEST_CASE(test_metadata_stage)
 
     stage->prepare(readerCtx);
     MetadataNode pipeline_metadata = readerCtx.metadata();
-    BOOST_CHECK_EQUAL(
+    EXPECT_EQ(
         pipeline_metadata.toPTree().get_child("metadata").size(), 32);
 **/
 }
-
-
-BOOST_AUTO_TEST_SUITE_END()

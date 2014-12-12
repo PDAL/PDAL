@@ -32,14 +32,13 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/concept_check.hpp>
 
 #include <pdal/FileUtils.hpp>
-//#include <FauxReader.hpp>
 #include <LasHeader.hpp>
 #include <LasReader.hpp>
 #include <LasWriter.hpp>
@@ -65,9 +64,7 @@ public:
 
 using namespace pdal;
 
-BOOST_AUTO_TEST_SUITE(LasWriterTest)
-
-BOOST_AUTO_TEST_CASE(auto_offset)
+TEST(LasWriterTest, auto_offset)
 {
     using namespace Dimension;
 
@@ -103,18 +100,18 @@ BOOST_AUTO_TEST_CASE(auto_offset)
     reader.setOptions(readerOps);
 
     reader.prepare(readCtx);
-    BOOST_CHECK_CLOSE(reader.header().offsetX(), 74529.00, .0001);
+    EXPECT_FLOAT_EQ(reader.header().offsetX(), 74529.00);
     PointBufferSet pbSet = reader.execute(readCtx);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     buf = *pbSet.begin();
-    BOOST_CHECK_EQUAL(buf->size(), 3);
-    BOOST_CHECK_CLOSE(buf->getFieldAs<double>(Id::X, 0), 125000.00, .0001);
-    BOOST_CHECK_CLOSE(buf->getFieldAs<double>(Id::X, 1), 74529.00, .0001);
-    BOOST_CHECK_CLOSE(buf->getFieldAs<double>(Id::X, 2), 523523.02, .0001);
+    EXPECT_EQ(buf->size(), 3u);
+    EXPECT_FLOAT_EQ(buf->getFieldAs<double>(Id::X, 0), 125000.00);
+    EXPECT_FLOAT_EQ(buf->getFieldAs<double>(Id::X, 1), 74529.00);
+    EXPECT_FLOAT_EQ(buf->getFieldAs<double>(Id::X, 2), 523523.02);
     FileUtils::deleteFile(FILENAME);
 }
 
-BOOST_AUTO_TEST_CASE(metadata_options)
+TEST(LasWriterTest, metadata_options)
 {
     Options ops;
 
@@ -139,27 +136,27 @@ BOOST_AUTO_TEST_CASE(metadata_options)
 
     uint8_t format = 
         (uint8_t)LasTester::headerVal<unsigned>(writer, "format");
-    BOOST_CHECK_EQUAL(format, 4);
+    EXPECT_EQ(format, 4u);
     std::string softwareId =
         LasTester::headerVal<std::string>(writer, "software_id");
-    BOOST_CHECK_EQUAL(softwareId, "MySoftwareId");
+    EXPECT_EQ(softwareId, "MySoftwareId");
     std::string systemId =
         LasTester::headerVal<std::string>(writer, "system_id");
 
     // Since the option specifies forward and there is not associated
     // metadata, the value should be the default.
     LasHeader header;
-    BOOST_CHECK_EQUAL(systemId, header.getSystemIdentifier());
+    EXPECT_EQ(systemId, header.getSystemIdentifier());
 
     // In this case, we should have metadata to override the default.
     uint8_t minorVersion =
         (uint8_t)LasTester::headerVal<unsigned>(writer, "minor_version");
-    BOOST_CHECK_EQUAL(minorVersion, 56);
+    EXPECT_EQ(minorVersion, 56u);
 }
 
 //ABELL
 /**
-BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_las)
+TEST(LasWriterTest, LasWriterTest_test_simple_las)
 {
     PointContext ctx;
 
@@ -182,7 +179,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_las)
     LasWriter writer(ofs);
     writer.setOptions(writerOpts);
     writer.setInput(&reader);
-    BOOST_CHECK_EQUAL(writer.getDescription(), "Las Writer");
+    EXPECT_EQ(writer.getDescription(), "Las Writer");
     writer.prepare(ctx);
     writer.execute(ctx);
 
@@ -190,7 +187,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_las)
 
     bool filesSame = Support::compare_files(Support::temppath(temp_filename),
         Support::datapath("simple.las"));
-    BOOST_CHECK_EQUAL(filesSame, true);
+    EXPECT_EQ(filesSame, true);
 
     if (filesSame)
         FileUtils::deleteFile(Support::temppath(temp_filename));
@@ -199,7 +196,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_las)
 
 //ABELL
 /**
-BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
+TEST(LasWriterTest, LasWriterTest_test_simple_laz)
 {
     PointContext ctx;
 
@@ -230,7 +227,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
     FileUtils::closeFile(ofs);
 
     {
-        pdal::LasReader reader(
+        LasReader reader(
             Support::temppath("LasWriterTest_test_simple_laz.laz"));
     }
 
@@ -240,7 +237,7 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_simple_laz)
         Support::temppath("LasWriterTest_test_simple_laz.laz"),
         Support::datapath("laszip/laszip-generated.laz"),
         227, 106);
-    BOOST_CHECK_EQUAL(numdiffs, 0);
+    EXPECT_EQ(numdiffs, 0u);
 
     if (numdiffs == 0)
         FileUtils::deleteFile(
@@ -282,14 +279,14 @@ static void test_a_format(const std::string& refFile, uint8_t majorVersion,
     LasWriter writer(ofs);
     writer.setOptions(writerOpts);
     writer.setInput(&reader);
-    BOOST_CHECK_EQUAL(writer.getDescription(), "Las Writer");
+    EXPECT_EQ(writer.getDescription(), "Las Writer");
 
     writer.prepare(ctx);
     writer.execute(ctx);
 
     bool filesSame = Support::compare_files("temp.las",
         Support::datapath(directory + refFile));
-    BOOST_CHECK(filesSame);
+    EXPECT_TRUE(filesSame);
     if (filesSame)
         FileUtils::deleteFile(Support::temppath("temp.las"));
     else
@@ -300,21 +297,21 @@ static void test_a_format(const std::string& refFile, uint8_t majorVersion,
 
 //ABELL
 /**
-BOOST_AUTO_TEST_CASE(version1_0)
+TEST(LasWriterTest, version1_0)
 {
     test_a_format("1.0_0.las", 1, 0, 0);
     test_a_format("1.0_1.las", 1, 0, 1);
 }
 
 
-BOOST_AUTO_TEST_CASE(version1_1)
+TEST(LasWriterTest, version1_1)
 {
     test_a_format("1.1_0.las", 1, 1, 0);
     test_a_format("1.1_1.las", 1, 1, 1);
 }
 
 
-BOOST_AUTO_TEST_CASE(version1_2)
+TEST(LasWriterTest, version1_2)
 {
     test_a_format("1.2_0.las", 1, 2, 0);
     test_a_format("1.2_1.las", 1, 2, 1);
@@ -326,22 +323,22 @@ BOOST_AUTO_TEST_CASE(version1_2)
 
 //ABELL
 /**
-BOOST_AUTO_TEST_CASE(test_summary_data_add_point)
+TEST(LasWriterTest, test_summary_data_add_point)
 {
     SummaryData summaryData;
 
     summaryData.addPoint(-95.329381929535259, 29.71948951835612,
         -17.515486778166398, 0);
     BOX3D b = summaryData.getBounds();
-    BOOST_CHECK_EQUAL(b.minx, b.maxx);
-    BOOST_CHECK_EQUAL(b.minz, b.maxz);
+    EXPECT_EQ(b.minx, b.maxx);
+    EXPECT_EQ(b.minz, b.maxz);
 }
 **/
 
 
 //ABELL
 /**
-BOOST_AUTO_TEST_CASE(LasWriterTest_test_drop_extra_returns)
+TEST(LasWriterTest, LasWriterTest_test_drop_extra_returns)
 {
     using namespace pdal;
 
@@ -388,21 +385,19 @@ BOOST_AUTO_TEST_CASE(LasWriterTest_test_drop_extra_returns)
 
     reader2.prepare(ctx2);
     PointBufferSet pbSet = reader2.execute(ctx2);
-    BOOST_CHECK_EQUAL(pbSet.size(), 1);
+    EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
 
     uint8_t r1 = buf->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, 0);
-    BOOST_CHECK_EQUAL(r1, 1);
+    EXPECT_EQ(r1, 1u);
     uint8_t r2 = buf->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, 5);
-    BOOST_CHECK_EQUAL(r2, 1);
+    EXPECT_EQ(r2, 1u);
     uint8_t n1 = buf->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, 0);
-    BOOST_CHECK_EQUAL(n1, 5);
+    EXPECT_EQ(n1, 5u);
     uint8_t n2 = buf->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, 5);
-    BOOST_CHECK_EQUAL(n1, 5);
+    EXPECT_EQ(n1, 5u);
 
     FileUtils::closeFile(ofs);
     FileUtils::deleteFile(Support::temppath(temp_filename));
 }
 **/
-
-BOOST_AUTO_TEST_SUITE_END()

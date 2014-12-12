@@ -60,10 +60,10 @@ PDAL_ADD_PLUGIN(oci_writer_lib_name writer oci "${srcs}" "${incs}" "${deps}")
 # OCI tests
 #
 if(BUILD_OCI_TESTS)
-set(srcs
-    test/OCITest.cpp
-)
+    set(srcs
+        test/OCITest.cpp
+    )
 
     set(deps ${oci_reader_lib_name} ${oci_writer_lib_name})
-PDAL_ADD_TEST(ocitest "${srcs}" "${deps}")
+    PDAL_ADD_TEST(ocitest "${srcs}" "${deps}")
 endif()

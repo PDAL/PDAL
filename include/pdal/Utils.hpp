@@ -36,6 +36,7 @@
 
 #include <pdal/pdal_internal.hpp>
 
+#include <algorithm>
 #include <string>
 #include <cassert>
 #include <stdexcept>

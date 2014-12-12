@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 #include <boost/property_tree/ptree.hpp>
 
 #include <boost/uuid/uuid_generators.hpp>
@@ -43,7 +43,6 @@
 #include <LasReader.hpp>
 #include <pdal/FileUtils.hpp>
 
-#include "Support.hpp"
 #include "TestConfig.hpp"
 
 #include <fstream>
@@ -80,11 +79,7 @@ std::string ReadXML(std::string filename)
 
 }
 
-
-BOOST_AUTO_TEST_SUITE(XMLSchemaTest)
-
-
-BOOST_AUTO_TEST_CASE(test_schema_read)
+TEST(XMLSchemaTest, test_schema_read)
 {
     using namespace pdal;
 
@@ -117,7 +112,7 @@ BOOST_AUTO_TEST_CASE(test_schema_read)
     s3.read(xml_output, xsd);
     XMLDimList dims3 = s3.dims();
 
-    BOOST_CHECK_EQUAL(dims.size(), dims3.size());
+    EXPECT_EQ(dims.size(), dims3.size());
 
     auto di1 = dims.begin();
     auto di3 = dims3.begin();
@@ -126,11 +121,9 @@ BOOST_AUTO_TEST_CASE(test_schema_read)
         XMLDim& dim1 = *di1;
         XMLDim& dim3 = *di3;
 
-        BOOST_CHECK_EQUAL(dim1.m_name, dim3.m_name);
-        BOOST_CHECK_EQUAL(dim1.m_type, dim3.m_type);
+        EXPECT_EQ(dim1.m_name, dim3.m_name);
+        EXPECT_EQ(dim1.m_type, dim3.m_type);
         di1++;
         di3++;
     }
 }
-
-BOOST_AUTO_TEST_SUITE_END()

@@ -75,7 +75,7 @@ MAKE_READER_CREATOR(TerrasolidReader, pdal::TerrasolidReader)
 //
 MAKE_FILTER_CREATOR(Chipper, pdal::ChipperFilter)
 MAKE_FILTER_CREATOR(Colorization, pdal::ColorizationFilter)
-MAKE_FILTER_CREATOR(Crop, pdal::filters::Crop)
+MAKE_FILTER_CREATOR(Crop, pdal::CropFilter)
 MAKE_FILTER_CREATOR(Decimation, pdal::DecimationFilter)
 MAKE_FILTER_CREATOR(Ferry, pdal::FerryFilter)
 MAKE_FILTER_CREATOR(Merge, pdal::MergeFilter)
@@ -83,7 +83,7 @@ MAKE_FILTER_CREATOR(MortonOrder, pdal::MortonOrderFilter)
 MAKE_FILTER_CREATOR(Reprojection, pdal::ReprojectionFilter)
 MAKE_FILTER_CREATOR(Sort, pdal::SortFilter)
 MAKE_FILTER_CREATOR(Splitter, pdal::SplitterFilter)
-MAKE_FILTER_CREATOR(Stats, pdal::filters::Stats)
+MAKE_FILTER_CREATOR(Stats, pdal::StatsFilter)
 
 #ifdef PDAL_HAVE_PYTHON
 MAKE_FILTER_CREATOR(Predicate, pdal::filters::Predicate)
@@ -321,7 +321,7 @@ void StageFactory::registerKnownFilters()
 {
     REGISTER_FILTER(Chipper, pdal::ChipperFilter);
     REGISTER_FILTER(Colorization, pdal::ColorizationFilter);
-    REGISTER_FILTER(Crop, pdal::filters::Crop);
+    REGISTER_FILTER(Crop, pdal::CropFilter);
     REGISTER_FILTER(Decimation, pdal::DecimationFilter);
     REGISTER_FILTER(Ferry, pdal::FerryFilter);
     REGISTER_FILTER(Merge, pdal::MergeFilter);
@@ -329,7 +329,7 @@ void StageFactory::registerKnownFilters()
     REGISTER_FILTER(Reprojection, pdal::ReprojectionFilter);
     REGISTER_FILTER(Sort, pdal::SortFilter);
     REGISTER_FILTER(Splitter, pdal::SplitterFilter);
-    REGISTER_FILTER(Stats, pdal::filters::Stats);
+    REGISTER_FILTER(Stats, pdal::StatsFilter);
 
 #ifdef PDAL_HAVE_PYTHON
     REGISTER_FILTER(Predicate, pdal::filters::Predicate);
@@ -363,10 +363,11 @@ void StageFactory::loadPlugins()
     // If we don't have a driver path, we'll default to /usr/local/lib and lib
 
     if (pluginDir.size() == 0)
-        pluginDir = "/usr/local/lib:./lib:../lib";
+        pluginDir = "/usr/local/lib:./lib:../lib:../bin";
 
     std::vector<std::string> pluginPathVec;
-    boost::algorithm::split(pluginPathVec, pluginDir, boost::algorithm::is_any_of(":"), boost::algorithm::token_compress_on);
+    boost::algorithm::split(pluginPathVec, pluginDir,
+        boost::algorithm::is_any_of(":"), boost::algorithm::token_compress_on);
 
     for (auto pluginPath : pluginPathVec)
     {
@@ -382,12 +383,13 @@ void StageFactory::loadPlugins()
         {
             path p = it->path();
 
-            if (boost::algorithm::istarts_with(p.filename().string(), "libpdal_plugin"))
+            if (boost::algorithm::istarts_with(p.filename().string(),
+                 "libpdal_plugin"))
             {
                 path extension = p.extension();
                 if (boost::algorithm::iends_with(extension.string(), "DLL") ||
-                        boost::algorithm::iends_with(extension.string(), "DYLIB") ||
-                        boost::algorithm::iends_with(extension.string(), "SO"))
+                    boost::algorithm::iends_with(extension.string(), "DYLIB") ||
+                    boost::algorithm::iends_with(extension.string(), "SO"))
                 {
                     std::string basename;
 

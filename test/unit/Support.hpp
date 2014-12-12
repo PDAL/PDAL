@@ -37,6 +37,7 @@
 // support functions for unit testing
 
 #include <pdal/Bounds.hpp>
+#include <boost/cstdint.hpp>
 #include <pdal/Utils.hpp>
 
 namespace pdal
@@ -45,6 +46,7 @@ namespace pdal
     class Stage;
 }
 
+#include <boost/cstdint.hpp>
 #include <string>
 
 class Support
@@ -72,20 +74,20 @@ public:
     static std::string exename(const std::string& name);
 
     // returns number of bytes different for two binary files (or maxint if a file doesn't exist)
-    static uint32_t diff_files(const std::string& file1, const std::string& file2);
+    static boost::uint32_t diff_files(const std::string& file1, const std::string& file2);
 
     // same as diff_files, but allows for a region of the file be to be ignored
     // (region is specified with a starting offset and a length)
-    static uint32_t diff_files(const std::string& file1, const std::string& file2,
-                                      uint32_t ignorable_start, uint32_t ignorable_length);
+    static boost::uint32_t diff_files(const std::string& file1, const std::string& file2,
+                                      boost::uint32_t ignorable_start, boost::uint32_t ignorable_length);
 
     // same as above diff_files with ignorable region, but for multiple regions
-    static uint32_t diff_files(const std::string& file1, const std::string& file2,
-                                      uint32_t* ignorable_start, uint32_t* ignorable_length, boost::uint32_t num_ignorables);
+    static boost::uint32_t diff_files(const std::string& file1, const std::string& file2,
+                                      boost::uint32_t* ignorable_start, boost::uint32_t* ignorable_length, boost::uint32_t num_ignorables);
 
     // returns number of lines different for two text files (or maxint if a file doesn't exist)
     // if ignoreLine is not -1, that line will be "ignored" when comparing the two files
-    static uint32_t diff_text_files(const std::string& file1, const std::string& file2, int32_t ignoreLine1=-1);
+    static boost::uint32_t diff_text_files(const std::string& file1, const std::string& file2, boost::int32_t ignoreLine1=-1);
 
     // returns true iff the two (binary or ascii) files are the same,
     // using the above diff_files/diff_text_files functions

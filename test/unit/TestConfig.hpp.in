@@ -35,7 +35,8 @@
 #ifndef UNITTEST_TESTCONFIG_INCLUDED
 #define UNITTEST_TESTCONFIG_INCLUDED
 
-#define UNITTEST_TESTCONFIG_DATA_PATH "@CMAKE_SOURCE_DIR@/test/data"
+#define UNITTEST_TESTCONFIG_DATA_PATH "@CMAKE_SOURCE_DIR@/test/data/"
+#define UNITTEST_TESTCONFIG_BINARY_PATH "@CMAKE_BINARY_DIR@/bin/"
 
 #include <string>
 
@@ -43,6 +44,7 @@ struct TestConfig
 {
     TestConfig();
     static std::string g_data_path;
+    static std::string g_binary_path;
     static std::string g_oracle_connection;
 };
 

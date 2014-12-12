@@ -32,11 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <sstream>
-#include <iostream>
-
 #include <iostream>
 
 #include <pdal/StreamFactory.hpp>
@@ -46,28 +44,26 @@
 
 using namespace pdal;
 
-BOOST_AUTO_TEST_SUITE(StreamFactoryTest)
-
-BOOST_AUTO_TEST_CASE(test1)
+TEST(StreamFactoryTest, test1)
 {
     const std::string wfilename = "temp.txt";
 
     // filename, writing
     {
         FileUtils::deleteFile(wfilename);
-        BOOST_CHECK(!FileUtils::fileExists(wfilename));
+        EXPECT_TRUE(!FileUtils::fileExists(wfilename));
 
         {
-            pdal::OutputStreamManager wfile(wfilename);
+            OutputStreamManager wfile(wfilename);
             wfile.open();
 
-            BOOST_CHECK(FileUtils::fileExists(wfilename));
+            EXPECT_TRUE(FileUtils::fileExists(wfilename));
             wfile.close();
         }
 
         // cleanup
         FileUtils::deleteFile(wfilename);
-        BOOST_CHECK(!FileUtils::fileExists(wfilename));
+        EXPECT_TRUE(!FileUtils::fileExists(wfilename));
     }
 
     // stream, writing
@@ -75,9 +71,9 @@ BOOST_AUTO_TEST_CASE(test1)
         std::ostream* ostreamname = FileUtils::createFile(wfilename);
 
         {
-            pdal::OutputStreamManager ostream(ostreamname);
+            OutputStreamManager ostream(ostreamname);
             ostream.open();
-            BOOST_CHECK(&(ostream.ostream()) == ostreamname);
+            EXPECT_TRUE(&(ostream.ostream()) == ostreamname);
             ostream.close();
         }
 
@@ -91,9 +87,9 @@ static void check_contents_sub(std::istream& s)
 {
     std::string buf;
     s >> buf;
-    BOOST_CHECK_EQUAL(buf, "allows");
+    EXPECT_EQ(buf, "allows");
     s.get();
-    BOOST_CHECK(s.eof());
+    EXPECT_TRUE(s.eof());
 }
 
 
@@ -103,17 +99,17 @@ static void check_contents(std::istream& s)
 
     std::string buf;
     s >> buf;
-    BOOST_CHECK_EQUAL(buf, "This");
+    EXPECT_EQ(buf, "This");
     s.seekg(-7, std::ios_base::end);
     s >> buf;
-    BOOST_CHECK_EQUAL(buf, "utils.");
+    EXPECT_EQ(buf, "utils.");
     s.get();
-    BOOST_CHECK(s.get() == -1);
-    BOOST_CHECK(s.eof());
+    EXPECT_TRUE(s.get() == -1);
+    EXPECT_TRUE(s.eof());
 }
 
 
-BOOST_AUTO_TEST_CASE(test2)
+TEST(StreamFactoryTest, test2)
 {
     {
         const std::string nam = Support::datapath("text/text.txt");
@@ -139,7 +135,7 @@ BOOST_AUTO_TEST_CASE(test2)
 
         std::istream& s1 = f.allocate();
 
-        BOOST_REQUIRE_THROW(f.allocate(), pdal_error);
+        ASSERT_THROW(f.allocate(), pdal_error);
 
         check_contents(s1);
 
@@ -164,5 +160,3 @@ BOOST_AUTO_TEST_CASE(test2)
         // f.deallocate(s2);   // let the dtor do it for us
     }
 }
-
-BOOST_AUTO_TEST_SUITE_END()
