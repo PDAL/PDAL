@@ -256,7 +256,6 @@ set(PDAL_SOURCES
 #endif()
 
 if(WIN32)
-    add_definitions("-DPDAL_DLL_EXPORT=1")
     if (NOT WITH_STATIC_LASZIP)
         add_definitions("-DLASZIP_DLL_IMPORT=1")
     endif()
