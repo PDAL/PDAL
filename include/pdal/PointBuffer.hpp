@@ -219,6 +219,10 @@ public:
         { return m_context.dimName(id); }
     Dimension::IdList dims() const
         { return m_context.dims(); }
+    std::size_t pointSize() const
+        { return m_context.pointSize(); }
+    std::size_t dimSize(Dimension::Id::Enum id) const
+        { return m_context.dimSize(id); }
 
     std::ostream& getBytes(std::ostream& strm, PointId start, PointId end) const
     {

@@ -65,6 +65,8 @@ public:
 
     std::vector<std::size_t> getFills() const;
 
+    const PointBuffer& pointBuffer() const;
+
     // All getPoints queries will return an empty vector if the tree has not
     // been successfully built prior to the getPoints call.
 

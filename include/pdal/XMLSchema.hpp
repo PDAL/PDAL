@@ -178,6 +178,12 @@ struct XMLSchema
         }
         return ids;
     }
+
+    DimInfoList dimInfoList() const
+    {
+        return m_dims;
+    }
+
     std::vector<Dimension::Type::Enum> types() const
     {
         std::vector<Dimension::Type::Enum> types;

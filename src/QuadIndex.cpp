@@ -559,6 +559,8 @@ struct QuadIndex::QImpl
 
     std::vector<std::size_t> getFills();
 
+    const PointBuffer& pointBuffer() const;
+
     std::vector<std::size_t> getPoints(
             std::size_t depthBegin,
             std::size_t depthEnd) const;
@@ -670,6 +672,11 @@ std::vector<std::size_t> QuadIndex::QImpl::getFills()
     }
 
     return m_fills;
+}
+
+const PointBuffer& QuadIndex::QImpl::pointBuffer() const
+{
+    return m_pointBuffer;
 }
 
 std::vector<std::size_t> QuadIndex::QImpl::getPoints(
@@ -809,6 +816,11 @@ std::size_t QuadIndex::getDepth() const
 std::vector<std::size_t> QuadIndex::getFills() const
 {
     return m_qImpl->getFills();
+}
+
+const PointBuffer& QuadIndex::pointBuffer() const
+{
+    return m_qImpl->pointBuffer();
 }
 
 std::vector<std::size_t> QuadIndex::getPoints(
