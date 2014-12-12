@@ -95,11 +95,13 @@ if(NITRO_FOUND)
     set(deps ${NITRO_LIBRARIES})
     PDAL_ADD_PLUGIN(nitf_writer_lib_name writer nitf "${srcs}" "${incs}" "${deps}")
 
-    set(srcs
-        test/NitfReaderTest.cpp
-        test/NitfWriterTest.cpp
-    )
+    if (WITH_TESTS)
+	set(srcs
+	    test/NitfReaderTest.cpp
+	    test/NitfWriterTest.cpp
+	)
 
-    set(deps ${nitf_reader_lib_name} ${nitf_writer_lib_name})
-    PDAL_ADD_TEST(nitftest "${srcs}" "${deps}")
+	set(deps ${nitf_reader_lib_name} ${nitf_writer_lib_name})
+	PDAL_ADD_TEST(nitftest "${srcs}" "${deps}")
+    endif()
 endif()
