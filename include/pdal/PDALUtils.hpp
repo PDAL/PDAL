@@ -228,7 +228,7 @@ namespace reST
 
 std::ostream& toRST(const ptree&, std::ostream& os);
 
-void write_rst(std::ostream& ost,
+void PDAL_DLL write_rst(std::ostream& ost,
                const boost::property_tree::ptree& pt,
                int level=0);
 

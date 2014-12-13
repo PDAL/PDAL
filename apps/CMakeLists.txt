@@ -49,9 +49,11 @@ if(APPLE)
 endif()
 
 if(PDAL_UTILITY)
-    set(srcs
-        pdal.cpp
-    )
+    set(srcs pdal.cpp)
+
+    if(WIN32)
+        list(APPEND srcs ${PDAL_TARGET_OBJECTS})
+    endif()
 
     list(APPEND PDAL_UTILITIES ${PDAL_UTILITY})
     if (APPLE AND PDAL_BUNDLE)
