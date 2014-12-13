@@ -40,7 +40,6 @@
 
 #include <pdal/XMLSchema.hpp>
 #include <pdal/Metadata.hpp>
-#include <LasReader.hpp>
 #include <pdal/FileUtils.hpp>
 
 #include "TestConfig.hpp"
