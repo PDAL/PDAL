@@ -82,7 +82,7 @@ typedef std::vector<XMLDim> XMLDimList;
 inline bool operator < (const XMLDim& d1, const XMLDim& d2)
     { return d1.m_position < d2.m_position; }
 
-class XMLSchema
+class PDAL_DLL XMLSchema
 {
 public:
     XMLSchema(Orientation::Enum orientation = Orientation::PointMajor) :
