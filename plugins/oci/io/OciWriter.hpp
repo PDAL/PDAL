@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include <pdal/Writer.hpp>
+#include <pdal/DbWriter.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/GDALUtils.hpp>
 
@@ -45,33 +45,17 @@ pdal::Writer* createOciWriter();
 namespace pdal
 {
 
-class PDAL_DLL OciWriter : public pdal::Writer
+class PDAL_DLL OciWriter : public DbWriter
 {
 public:
     SET_STAGE_NAME("writers.oci", "OCI Writer")
     SET_STAGE_LINK("http://pdal.io/stages/writers.oci.html")
     SET_STAGE_ENABLED(true)
     OciWriter();
-    ~OciWriter();
 
     static Options getDefaultOptions();
 
-protected:
-    virtual void writeBegin(uint64_t targetNumPointsToWrite)
-    {}
-    virtual void writeBufferBegin(PointBuffer const&)
-    {}
-
-    virtual uint32_t writeBuffer(const PointBuffer&)
-    { return 0; }
-
-    virtual void writeEnd(uint64_t actualNumPointsWritten)
-    {}
-
 private:
-    OciWriter& operator=(const OciWriter&); // not implemented
-    OciWriter(const OciWriter&); // not implemented
-
     template<typename T>
     T getDefaultedOption(const Options& options,
         const std::string& option_name) const
@@ -109,7 +93,6 @@ private:
     void turnOn_SDO_PC_Trigger(std::string trigger_name);
     bool isValidWKT(std::string const& wkt);
 
-    size_t m_pointSize;
     long m_lastBlockId;
     BOX3D m_bounds; // Bounds of the entire point cloud
     Connection m_connection;
@@ -129,8 +112,6 @@ private:
     bool m_overwrite;
     bool m_trace;
     bool m_pack;
-    Dimension::IdList m_dims;
-    std::vector<Dimension::Type::Enum> m_types;
 
     std::string m_baseTableName;
     std::string m_cloudColumnName;
@@ -149,6 +130,10 @@ private:
     bool m_streamChunks;
     Orientation::Enum m_orientation;
     std::string m_connSpec;
+
+    OciWriter& operator=(const OciWriter&); // not implemented
+    OciWriter(const OciWriter&); // not implemented
+
 };
 
 } // namespace pdal

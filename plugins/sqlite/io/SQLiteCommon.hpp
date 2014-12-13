@@ -112,17 +112,14 @@ typedef std::vector<row> records;
 class Patch
 {
 public:
-    Patch() : count(0), remaining(0), m_isCompressed(false), m_compVersion(""), idx(0)
-    {
-    };
+    Patch() : count(0), remaining(0), m_isCompressed(false), idx(0)
+    {}
 
     point_count_t count;
     point_count_t remaining;
 
-    pdal::schema::XMLSchema m_schema;
     PointContextRef m_ctx;
     MetadataNode m_metadata;
-//     compression::CompressionStream m_compStream;
     bool m_isCompressed;
     std::string m_compVersion;
     std::vector<unsigned char> buf;
@@ -149,74 +146,14 @@ public:
     }
 
     void setBytes(const std::vector<uint8_t>& data)
-        {
-            buf = data;
-        }
+        { buf = data; }
 
     const std::vector<uint8_t>& getBytes() const
-        {
-            return buf;
-        }
-    void decompress()
-        {
-            PointBufferPtr b = compression::Decompress<Patch>(m_ctx, *this, count, compression::CompressionType::Lazperf);
-            buf.resize(m_ctx.pointSize() * b->size());
-            Charbuf cbuf((char*)buf.data(), buf.size());
-            std::ostream strm(&cbuf);
-            b->getBytes(strm, 0, b->size());
-//             buf = b->getBytes();
-        }
+        { return buf; }
 
-    inline void compress(const PointBuffer& buffer)
-        {
-            compression::Compress<Patch>(m_ctx, buffer, *this, compression::CompressionType::Lazperf, 0, buffer.size());
-        }
     size_t byte_size()
         { return buf.size(); }
-
-    double xOffset() const
-        { return m_schema.m_scale.m_x.m_offset; }
-    double yOffset() const
-        { return m_schema.m_scale.m_y.m_offset; }
-    double zOffset() const
-        { return m_schema.m_scale.m_z.m_offset; }
-    double xScale() const
-        { return m_schema.m_scale.m_x.m_scale; }
-    double yScale() const
-        { return m_schema.m_scale.m_y.m_scale; }
-    double zScale() const
-        { return m_schema.m_scale.m_z.m_scale; }
-
-    void update(pdal::schema::XMLSchema *s)
-    {
-        using namespace pdal;
-
-        remaining = count;
-        m_schema.m_orientation = s->m_orientation;
-        for (auto di = s->m_dims.begin(); di != s->m_dims.end(); ++di)
-        {
-            schema::DimInfo& d = *di;
-            Dimension::Id::Enum id = m_ctx.findDim(d.m_name);
-            if (id == Dimension::Id::X)
-            {
-                m_schema.m_scale.m_x.m_scale = d.m_scale;
-                m_schema.m_scale.m_x.m_offset = d.m_offset;
-            }
-            if (id == Dimension::Id::Y)
-            {
-                m_schema.m_scale.m_y.m_scale = d.m_scale;
-                m_schema.m_scale.m_y.m_offset = d.m_offset;
-            }
-            if (id == Dimension::Id::Z)
-            {
-                m_schema.m_scale.m_z.m_scale = d.m_scale;
-                m_schema.m_scale.m_z.m_offset = d.m_offset;
-            }
-        }
-    }
-
 };
-
 typedef boost::shared_ptr<Patch> PatchPtr;
 
 
@@ -304,9 +241,6 @@ public:
             oss << errmsg <<" '" << sql << "'";
             throw sqlite_driver_error(oss.str());
         }
-
-
-
     }
 
     void begin()
@@ -444,7 +378,8 @@ public:
                                   static_cast<int>(statement.size()),
                                   &m_statement,
                                   0);
-        m_log->get(LogLevel::Debug3) << "Inserting '" << statement <<"'"<< std::endl;
+        m_log->get(LogLevel::Debug3) << "Inserting '" << statement << "'"<<
+            std::endl;
 
         if (res != SQLITE_OK)
         {
@@ -477,9 +412,8 @@ public:
                 else
                 {
                     didBind = sqlite3_bind_text(m_statement, pos+1,
-                                                c.data.c_str(),
-                                                static_cast<int>(c.data.length()),
-                                                SQLITE_STATIC);
+                        c.data.c_str(), static_cast<int>(c.data.length()),
+                        SQLITE_STATIC);
                 }
 
                 if (SQLITE_OK != didBind)
@@ -493,19 +427,12 @@ public:
 
             res = sqlite3_step(m_statement);
 
-            if (SQLITE_DONE == res)
-            {
-            }
-            else if (SQLITE_ROW == res)
-            {
-            }
-            else
+            if (res != SQLITE_DONE && res != SQLITE_ROW)
             {
                 char const* zErrMsg = sqlite3_errmsg(m_session);
 
                 std::ostringstream ss;
-                ss << "sqlite insert failure: "
-                   << zErrMsg;
+                ss << "sqlite insert failure: " << zErrMsg;
                 throw sqlite_driver_error(ss.str());
             }
         }

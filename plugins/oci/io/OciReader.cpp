@@ -245,26 +245,13 @@ void OciReader::addDimensions(PointContextRef ctx)
 
     m_block->m_ctx = ctx;
     m_block->m_schema = fetchSchema(m_stmt, m_block);
-    schema::DimInfoList& dims = m_block->m_schema.m_dims;
-
-    // Override XYZ to doubles and use those going forward
-    // we will apply any scaling set before handing it off 
-    // to PDAL.
-    ctx.registerDim(Dimension::Id::X);
-    ctx.registerDim(Dimension::Id::Y);
-    ctx.registerDim(Dimension::Id::Z);    
-
-    for (auto di = dims.begin(); di != dims.end(); ++di)
-    {
-        di->m_id = ctx.registerOrAssignDim(di->m_name, di->m_type);
-    }
+    loadSchema(ctx, m_block->m_schema);
 
     if (m_schemaFile.size())
     {
-        schema::Writer writer(m_block->m_schema.dims(),
-            m_block->m_schema.types());
-        std::string pcSchema = writer.getXML();
-        std::ostream* out = FileUtils::createFile(m_schemaFile);
+        std::string pcSchema =
+            m_block->m_schema.getXML(m_block->m_schema.extDimTypes());
+        std::ostream *out = FileUtils::createFile(m_schemaFile);
         out->write(pcSchema.c_str(), pcSchema.size());
         FileUtils::closeFile(out);
     }
@@ -284,11 +271,11 @@ point_count_t OciReader::read(PointBuffer& buffer, point_count_t count)
                 return totalNumRead;
         PointId bufBegin = buffer.size();
 
-        Orientation::Enum orientation = m_block->orientation();
+        Orientation::Enum orientation = m_block->m_schema.orientation();
         point_count_t numRead = 0;
-        if (m_block->orientation() == Orientation::DimensionMajor)
+        if (orientation == Orientation::DimensionMajor)
             numRead = readDimMajor(buffer, m_block, count - totalNumRead);
-        else if (m_block->orientation() == Orientation::PointMajor)
+        else if (orientation == Orientation::PointMajor)
             numRead = readPointMajor(buffer, m_block, count - totalNumRead);
         PointId bufEnd = bufBegin + numRead;
         totalNumRead += numRead;
@@ -300,50 +287,27 @@ point_count_t OciReader::read(PointBuffer& buffer, point_count_t count)
 point_count_t OciReader::readDimMajor(PointBuffer& buffer, BlockPtr block,
     point_count_t numPts)
 {
+    using namespace Dimension;
+
     point_count_t numRemaining = block->numRemaining();
     PointId startId = buffer.size();
     point_count_t blockRemaining;
     point_count_t numRead = 0;
 
-    schema::DimInfoList& dims = block->m_schema.m_dims;
+    XMLDimList dims = block->m_schema.dims();
     for (auto di = dims.begin(); di != dims.end(); ++di)
     {
-        schema::DimInfo& d = *di;
         PointId nextId = startId;
-        char *pos = seekDimMajor(d, block);
+        char *pos = seekDimMajor(*di, block);
         blockRemaining = numRemaining;
         numRead = 0;
         while (numRead < numPts && blockRemaining > 0)
         {
-            buffer.setField(d.m_id, d.m_type, nextId, pos);
-            pos += Dimension::size(d.m_type);
+            writeField(buffer, pos, *di, nextId);
+            pos += Dimension::size(di->m_type);
 
-            if (d.m_id == Dimension::Id::PointSourceId && m_updatePointSourceId)
-            {
-                buffer.setField(Dimension::Id::PointSourceId, nextId, block->obj_id);
-            }
-
-            if (d.m_id == Dimension::Id::X)
-            {
-                double v = buffer.getFieldAs<double>(Dimension::Id::X, nextId);
-                v = v * block->xScale() + block->xOffset();
-                buffer.setField(Dimension::Id::X, nextId, v);
-            }
-
-            if (d.m_id == Dimension::Id::Y)
-            {
-                double v = buffer.getFieldAs<double>(Dimension::Id::Y, nextId);
-                v = v * block->yScale() + block->yOffset();
-                buffer.setField(Dimension::Id::Y, nextId, v);
-            }
-
-            if (d.m_id == Dimension::Id::Z)
-            {
-                double v = buffer.getFieldAs<double>(Dimension::Id::Z, nextId);
-                v = v * block->zScale() + block->zOffset();
-                buffer.setField(Dimension::Id::Z, nextId, v);
-            }
-
+            if (di->m_id == Id::PointSourceId && m_updatePointSourceId)
+                buffer.setField(Id::PointSourceId, nextId, block->obj_id);
             nextId++;
             numRead++;
             blockRemaining--;
@@ -361,30 +325,11 @@ point_count_t OciReader::readPointMajor(PointBuffer& buffer,
     PointId nextId = buffer.size();
     point_count_t numRead = 0;
 
-
-    schema::DimInfoList& dims = block->m_schema.m_dims;
+    XMLDimList dims = block->m_schema.dims();
     char *pos = seekPointMajor(block);
     while (numRead < numPts && numRemaining > 0)
     {
-        for (auto di = dims.begin(); di != dims.end(); ++di)
-        {
-            schema::DimInfo& d = *di;
-            buffer.setField(d.m_id, d.m_type, nextId, pos);
-            pos += Dimension::size(d.m_type);
-        }
-
-        // Scale X, Y and Z
-        double v = buffer.getFieldAs<double>(Dimension::Id::X, nextId);
-        v = v * block->xScale() + block->xOffset();
-        buffer.setField(Dimension::Id::X, nextId, v);
-
-        v = buffer.getFieldAs<double>(Dimension::Id::Y, nextId);
-        v = v * block->yScale() + block->yOffset();
-        buffer.setField(Dimension::Id::Y, nextId, v);
-
-        v = buffer.getFieldAs<double>(Dimension::Id::Z, nextId);
-        v = v * block->zScale() + block->zOffset();
-        buffer.setField(Dimension::Id::Z, nextId, v);
+        writePoint(buffer, nextId, pos);
 
         numRemaining--;
         nextId++;
@@ -395,10 +340,10 @@ point_count_t OciReader::readPointMajor(PointBuffer& buffer,
 }
 
 
-char *OciReader::seekDimMajor(const schema::DimInfo& d, BlockPtr block)
+char *OciReader::seekDimMajor(const XMLDim& d, BlockPtr block)
 {
     size_t size = 0;
-    schema::DimInfoList dims = block->m_schema.m_dims;
+    XMLDimList dims = block->m_schema.dims();
     for (auto di = dims.begin(); di->m_id != d.m_id; ++di)
         size += Dimension::size(di->m_type);
     return block->data() +
@@ -427,7 +372,8 @@ bool OciReader::readOci(Statement stmt, BlockPtr block)
     }
     // Read the points from the blob in the row.
     readBlob(stmt, block);
-    schema::XMLSchema *s = findSchema(stmt, block);
+    XMLSchema *s = findSchema(stmt, block);
+    m_dims = s->dims();
     block->update(s);
     block->clearFetched();
     return true;
@@ -453,13 +399,17 @@ void OciReader::readBlob(Statement stmt, BlockPtr block)
 // Store it away so that it can be applied later if necessary.
 // HOBU -- nope. Each Block/cloud combo could potentially have a different
 // schema, with same names but different composition.
-schema::XMLSchema* OciReader::findSchema(Statement stmt, BlockPtr block)
+// ABELL -- the setup doesn't allow this.  Dimensions and order is all stored
+// when the first block is read.  We don't have any facility for modifying
+// dimensions as blocks are read.  If this were to actually happen, things
+// would break.  Should we do something about it?
+XMLSchema *OciReader::findSchema(Statement stmt, BlockPtr block)
 {
     int32_t cloudId = stmt->GetInteger(&block->pc->pc_id);
     auto si = m_schemas.find(cloudId);
     if (si == m_schemas.end())
     {
-        schema::XMLSchema s = fetchSchema(stmt, block);
+        XMLSchema s = fetchSchema(stmt, block);
         auto i = m_schemas.insert(std::make_pair(cloudId, s));
         si = i.first;
     }

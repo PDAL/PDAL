@@ -44,37 +44,37 @@
 #include <LasReader.hpp>
 #include <pdal/Compression.hpp>
 
-struct SQLiteTestStream {
+using namespace pdal;
+
+struct SQLiteTestStream
+{
     SQLiteTestStream() : buf(), idx(0) {}
 
-    void putBytes(const unsigned char* b, size_t len) {
-        while(len --) {
+    void putBytes(const unsigned char* b, size_t len)
+    {
+        while(len--)
             buf.push_back(*b++);
-        }
     }
 
-    void putByte(const unsigned char b) {
-        buf.push_back(b);
-    }
+    void putByte(const unsigned char b)
+        { buf.push_back(b); }
 
-    unsigned char getByte() {
-        return buf[idx++];
-    }
+    unsigned char getByte()
+        { return buf[idx++]; }
 
-    void getBytes(unsigned char *b, int len) {
-        for (int i = 0 ; i < len ; i ++) {
+    void getBytes(unsigned char *b, int len)
+    {
+        for (int i = 0 ; i < len; i++)
             b[i] = getByte();
-        }
     }
 
     std::vector<unsigned char> buf;
     size_t idx;
 };
 
-std::vector<char> getBytes(pdal::PointBuffer buffer, pdal::PointContextRef ctx)
+std::vector<char> getBytes(PointBuffer buffer, PointContextRef ctx)
 {
-    std::vector<char> bytes;
-    bytes.resize(ctx.pointSize() * buffer.size());
+    std::vector<char> bytes(ctx.pointSize() * buffer.size());
 
     pdal::Charbuf buf(bytes);
     std::ostream strm(&buf);
@@ -83,14 +83,13 @@ std::vector<char> getBytes(pdal::PointBuffer buffer, pdal::PointContextRef ctx)
     return bytes;
 }
 
-TEST(CompressionTest, test_compress_file)
-{
-    using namespace pdal;
 
+TEST(Compression, Simple)
+{
     const std::string file(Support::datapath("las/1.2-with-color.las"));
 
-    const Option opt_filename("filename", file);
-    Options opts;
+    const pdal::Option opt_filename("filename", file);
+    pdal::Options opts;
     opts.add(opt_filename);
 
     LasReader reader;
@@ -101,41 +100,68 @@ TEST(CompressionTest, test_compress_file)
     PointBufferSet buffers = reader.execute(ctx);
     PointBufferPtr buffer = *buffers.begin();
 
-    EXPECT_EQ(ctx.pointSize(), 52u);
+    EXPECT_EQ(ctx.pointSize(), 52U);
     SQLiteTestStream s;
-    compression::Compress<SQLiteTestStream>(ctx, *buffer, s, compression::CompressionType::Lazperf, 0, 0);
 
-    EXPECT_EQ(getBytes(*buffer, ctx).size(), 55380u);
-    EXPECT_EQ(s.buf.size(), 30945u);
+    ExtDimTypeList extDimTypes;
+    DimTypeList dimTypes = ctx.dimTypes();
+    for (auto di = dimTypes.begin(); di != dimTypes.end(); ++di)
+        extDimTypes.push_back(ExtDimType(*di, XForm()));
+    LazPerfCompressor<SQLiteTestStream> compressor(s, extDimTypes);
+
+    DimTypeList dims = ctx.dimTypes();
+    std::vector<char> tmpbuf(compressor.pointSize());
+    for (PointId idx = 0; idx < buffer->size(); ++idx)
+    {
+        buffer->getPackedPoint(dims, idx, tmpbuf.data());
+        compressor.compress(tmpbuf.data(), compressor.pointSize());
+    }
+    compressor.done();
+
+    EXPECT_EQ(buffer->size() * compressor.pointSize(), 55380U);
+    EXPECT_EQ(s.buf.size(), 30945U);
 
     SQLiteTestStream s2;
     s2.buf = s.buf;
-    PointBufferPtr b = compression::Decompress<SQLiteTestStream>(ctx, s2, 11, compression::CompressionType::Lazperf);
 
-    EXPECT_EQ(b->size(), 11u);
-    EXPECT_EQ(getBytes(*b, ctx).size(), 52u * 11u);
+    LazPerfDecompressor<SQLiteTestStream> decompressor(s2, extDimTypes);
 
-    uint16_t r = b->getFieldAs<uint16_t>(Dimension::Id::Red, 10);
-    EXPECT_EQ(r, 64u);
-    int32_t x = b->getFieldAs<int32_t>(Dimension::Id::X, 10);
+    size_t outbufSize = decompressor.pointSize() * buffer->size();
+    std::vector<char> outbuf(outbufSize);
+    decompressor.decompress(outbuf.data(), outbufSize);
+
+    PointBuffer b(ctx);
+
+    char *pos = outbuf.data();
+    for (PointId nextId = 0; nextId < 11; nextId++)
+    {
+        b.setPackedPoint(dims, nextId, pos);
+        pos += decompressor.pointSize();
+    }
+    EXPECT_EQ(b.size(), 11U);
+    EXPECT_EQ(getBytes(b, ctx).size(), (size_t)(52 * 11));
+
+    uint16_t r = b.getFieldAs<uint16_t>(Dimension::Id::Red, 10);
+    EXPECT_EQ(r, 64U);
+    int32_t x = b.getFieldAs<int32_t>(Dimension::Id::X, 10);
     EXPECT_EQ(x, 636038);
-    double xd = b->getFieldAs<double>(Dimension::Id::X, 10);
+    double xd = b.getFieldAs<double>(Dimension::Id::X, 10);
     EXPECT_FLOAT_EQ(xd, 636037.53);
-    int32_t y = b->getFieldAs<int32_t>(Dimension::Id::Y, 10);
+    int32_t y = b.getFieldAs<int32_t>(Dimension::Id::Y, 10);
     EXPECT_EQ(y, 849338);
 }
 
 //
-// TEST(CompressionTest, test_compress_copied_buffer)
+// BOOST_AUTO_TEST_CASE(test_compress_copied_buffer)
 // {
 //     using namespace pdal;
 //
 //
 //     const std::string file(Support::datapath("las/1.2-with-color.las"));
-//     const Option opt_filename("filename", file);
-//     Options opts;
+//     const pdal::Option opt_filename("filename", file);
+//     pdal::Options opts;
 //     opts.add(opt_filename);
-//     drivers::las::Reader reader;
+//     pdal::drivers::las::Reader reader;
 //     reader.setOptions(opts);
 //     PointContext fctx;
 //     reader.prepare(fctx);
@@ -161,17 +187,17 @@ TEST(CompressionTest, test_compress_file)
 //     PointBufferPtr b = compression::Decompress<SQLiteTestStream>(ctx, s2, 11, compression::CompressionType::Lazperf);
 //
 //     int32_t y = b->getFieldAs<int32_t>(Dimension::Id::Y, 10);
-//     EXPECT_EQ(y, 849338);
+//     BOOST_CHECK_EQUAL(y, 849338);
 //     int32_t x = b->getFieldAs<int32_t>(Dimension::Id::X, 10);
-//     EXPECT_EQ(x, 636038);
+//     BOOST_CHECK_EQUAL(x, 636038);
 //     double xd = b->getFieldAs<double>(Dimension::Id::X, 10);
-//     EXPECT_FLOAT_EQ(xd, 636037.53);
+//     BOOST_CHECK_CLOSE(xd, 636037.53, 0.001);
 //
 // }
 //
 //
 //
-// TEST(CompressionTest, test_compress_simple_buffer)
+// BOOST_AUTO_TEST_CASE(test_compress_simple_buffer)
 // {
 //     using namespace pdal;
 //
@@ -220,5 +246,6 @@ TEST(CompressionTest, test_compress_file)
 //     PointBufferPtr b = compression::Decompress<SQLiteTestStream>(ctx, s2, 11, compression::CompressionType::Lazperf);
 // //     std::cout << *b << std::endl;
 //     uint16_t r = b->getFieldAs<uint16_t>(Dimension::Id::Red, 10);
-//     EXPECT_EQ(r, 26u);
+//     BOOST_CHECK_EQUAL(r, 26u);
 // }
+

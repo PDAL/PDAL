@@ -86,14 +86,15 @@ TEST(XMLSchemaTest, test_schema_read)
     std::string xml =
         ReadXML(TestConfig::g_data_path+"../../schemas/8-dimension-schema.xml");
     std::string xsd = ReadXML(TestConfig::g_data_path+"../../schemas/LAS.xsd");
-    schema::Reader reader(xml, xsd);
 
-    schema::XMLSchema s1 = reader.schema();
+    XMLSchema s1;
+    s1.read(xml, xsd);
 
     PointContext ctx;
-    for (auto di = s1.m_dims.begin(); di != s1.m_dims.end(); ++di)
+    XMLDimList dims = s1.dims();
+    for (auto di = dims.begin(); di != dims.end(); ++di)
     {
-        schema::DimInfo& dim = *di;
+        XMLDim& dim = *di;
         dim.m_id = ctx.registerOrAssignDim(dim.m_name, dim.m_type);
     }
 
@@ -104,25 +105,25 @@ TEST(XMLSchemaTest, test_schema_read)
     MetadataNode m1prime = m.add("m1prime", "Some other metadata");
     m1.add("uuid", boost::uuids::nil_uuid());
 
-    schema::Writer writer(s1.dims(), s1.types());
-    writer.setMetadata(m);
-    std::string xml_output = writer.getXML();
+    XMLSchema s2;
+    std::string xml_output = s2.getXML(s1.extDimTypes(), m);
 
-    schema::Reader reader2(xml_output, xsd);
-    schema::XMLSchema s2 = reader2.schema();
+    XMLSchema s3;
+    s3.read(xml_output, xsd);
+    XMLDimList dims3 = s3.dims();
 
-    EXPECT_EQ(s1.m_dims.size(), s2.m_dims.size());
+    EXPECT_EQ(dims.size(), dims3.size());
 
-    auto di1 = s1.m_dims.begin();
-    auto di2 = s2.m_dims.begin();
-    while (di1 != s1.m_dims.end() && di2 != s2.m_dims.end())
+    auto di1 = dims.begin();
+    auto di3 = dims3.begin();
+    while (di1 != dims.end() && di3 != dims3.end())
     {
-        schema::DimInfo& dim1 = *di1;
-        schema::DimInfo& dim2 = *di2;
+        XMLDim& dim1 = *di1;
+        XMLDim& dim3 = *di3;
 
-        EXPECT_EQ(dim1.m_name, dim2.m_name);
-        EXPECT_EQ(dim1.m_type, dim2.m_type);
+        EXPECT_EQ(dim1.m_name, dim3.m_name);
+        EXPECT_EQ(dim1.m_type, dim3.m_type);
         di1++;
-        di2++;
+        di3++;
     }
 }

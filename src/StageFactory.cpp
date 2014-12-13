@@ -363,12 +363,11 @@ void StageFactory::loadPlugins()
     // If we don't have a driver path, we'll default to /usr/local/lib and lib
 
     if (pluginDir.size() == 0)
-    {
-        pluginDir = "/usr/local/lib:../lib:../bin";
-    }
+        pluginDir = "/usr/local/lib:./lib:../lib:../bin";
 
     std::vector<std::string> pluginPathVec;
-    boost::algorithm::split(pluginPathVec, pluginDir, boost::algorithm::is_any_of(":"), boost::algorithm::token_compress_on);
+    boost::algorithm::split(pluginPathVec, pluginDir,
+        boost::algorithm::is_any_of(":"), boost::algorithm::token_compress_on);
 
     for (auto pluginPath : pluginPathVec)
     {
@@ -384,12 +383,13 @@ void StageFactory::loadPlugins()
         {
             path p = it->path();
 
-            if (boost::algorithm::istarts_with(p.filename().string(), "libpdal_plugin"))
+            if (boost::algorithm::istarts_with(p.filename().string(),
+                 "libpdal_plugin"))
             {
                 path extension = p.extension();
                 if (boost::algorithm::iends_with(extension.string(), "DLL") ||
-                        boost::algorithm::iends_with(extension.string(), "DYLIB") ||
-                        boost::algorithm::iends_with(extension.string(), "SO"))
+                    boost::algorithm::iends_with(extension.string(), "DYLIB") ||
+                    boost::algorithm::iends_with(extension.string(), "SO"))
                 {
                     std::string basename;
 

@@ -170,7 +170,6 @@ void BpfHeader::dump()
 bool BpfDimension::read(ILeStream& stream, std::vector<BpfDimension>& dims,
     size_t start)
 {
-
     for (size_t d = start; d < dims.size(); ++d)
         stream >> dims[d].m_offset;
     for (size_t d = start; d < dims.size(); ++d)

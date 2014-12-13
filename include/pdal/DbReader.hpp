@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Howard Butler (howard@hobu.co)
+* Copyright (c) 2014, Hobu Inc. (hobu@hobu.co)
 *
 * All rights reserved.
 *
@@ -13,10 +13,9 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
-*       names of its contributors may be used to endorse or promote
-*       products derived from this software without specific prior
-*       written permission.
+*     * Neither the name of Hobu, Inc. nor the names of its contributors
+*       may be used to endorse or promote products derived from this
+*       software without specific prior written permission.
 *
 * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -31,4 +30,35 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
+
+#pragma once
+
+#include <pdal/Reader.hpp>
+#include <pdal/XMLSchema.hpp>
+
+namespace pdal
+{
+
+class PDAL_DLL DbReader : public Reader
+{
+protected:
+    XMLDimList m_dims;
+    size_t m_packedPointSize;
+
+    DbReader()
+    {}
+
+    ExtDimTypeList dbDimTypes() const;
+    void loadSchema(PointContextRef ctx, const std::string& schemaString);
+    void loadSchema(PointContextRef ctx, const XMLSchema& schema);
+    void writeField(PointBuffer& pb, const char *pos, XMLDim dim,
+        PointId idx);
+    void writePoint(PointBuffer& pb, PointId idx, const char *buf);
+
+private:
+    DbReader& operator=(const DbReader&); // not implemented
+    DbReader(const DbReader&); // not implemented
+};
+
+} // namespace pdal
 

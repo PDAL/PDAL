@@ -62,12 +62,8 @@ namespace pdal
 {
 
 PgWriter::PgWriter()
-    : pdal::Writer()
-    , m_session(0)
-    , m_schema_name("")
-    , m_table_name("")
-    , m_column_name("")
-    , m_patch_compression_type(compression::CompressionType::None)
+    : m_session(0)
+    , m_patch_compression_type(CompressionType::None)
     , m_patch_capacity(400)
     , m_srid(0)
     , m_pcid(0)
@@ -75,8 +71,7 @@ PgWriter::PgWriter()
     , m_create_index(true)
     , m_overwrite(true)
     , m_schema_is_initialized(false)
-{
-}
+{}
 
 
 PgWriter::~PgWriter()
@@ -105,29 +100,12 @@ void PgWriter::processOptions(const Options& options)
 
     // Read other preferences
     m_overwrite = options.getValueOrDefault<bool>("overwrite", true);
-    m_patch_capacity =
-        options.getValueOrDefault<uint32_t>("capacity", 400);
+    m_patch_capacity = options.getValueOrDefault<uint32_t>("capacity", 400);
     m_srid = options.getValueOrDefault<uint32_t>("srid", 4326);
     m_pcid = options.getValueOrDefault<uint32_t>("pcid", 0);
     m_pack = options.getValueOrDefault<bool>("pack_ignored_fields", true);
     m_pre_sql = getOptions().getValueOrDefault<std::string>("pre_sql", "");
 }
-
-
-void PgWriter::ready(PointContextRef ctx)
-{
-    m_pointSize = 0;
-    m_dims = ctx.dims();
-    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-    {
-        Dimension::Type::Enum type = Dimension::defaultType(*di);
-        if (type == Dimension::Type::None)
-            type = Dimension::Type::Float;
-        m_types.push_back(type);
-        m_pointSize += Dimension::size(type);
-    }
-}
-
 
 //
 // Called from PDAL core during start-up. Do everything
@@ -291,20 +269,19 @@ uint32_t PgWriter::SetupSchema(uint32_t srid)
     oss.str("");
 
     // Create an XML output schema.
-    schema::Writer writer(m_dims, m_types);
     std::string compression;
     /* If the writer specifies a compression, we should set that */
-    if (m_patch_compression_type == compression::CompressionType::Dimensional)
+    if (m_patch_compression_type == CompressionType::Dimensional)
         compression = "dimensional";
-    else if (m_patch_compression_type == compression::CompressionType::Ght)
+    else if (m_patch_compression_type == CompressionType::Ght)
         compression = "ght";
 
     Metadata metadata;
     MetadataNode m = metadata.getNode();
     m.add("compression", compression);
 
-    writer.setMetadata(m);
-    std::string xml = writer.getXML();
+    XMLSchema schema;
+    std::string xml = schema.getXML(dbDimTypes(), m);
 
     // Do any of the existing schemas match the one we want to use?
     if (schema_count > 0)
@@ -464,67 +441,6 @@ void PgWriter::CreateIndex(std::string const& schema_name,
 }
 
 
-namespace
-{
-
-void fillBuf(const PointBuffer& buf, char *pos, Dimension::Id::Enum d,
-    Dimension::Type::Enum type, PointId id)
-{
-    union
-    {
-        float f;
-        double d;
-        int8_t s8;
-        int16_t s16;
-        int32_t s32;
-        int64_t s64;
-        uint8_t u8;
-        uint16_t u16;
-        uint32_t u32;
-        uint64_t u64;
-    } e;  // e - for Everything.
-
-    switch (type)
-    {
-    case Dimension::Type::Float:
-        e.f = buf.getFieldAs<float>(d, id);
-        break;
-    case Dimension::Type::Double:
-        e.d = buf.getFieldAs<double>(d, id);
-        break;
-    case Dimension::Type::Signed8:
-        e.s8 = buf.getFieldAs<int8_t>(d, id);
-        break;
-    case Dimension::Type::Signed16:
-        e.s16 = buf.getFieldAs<int16_t>(d, id);
-        break;
-    case Dimension::Type::Signed32:
-        e.s32 = buf.getFieldAs<int32_t>(d, id);
-        break;
-    case Dimension::Type::Signed64:
-        e.s64 = buf.getFieldAs<int64_t>(d, id);
-        break;
-    case Dimension::Type::Unsigned8:
-        e.u8 = buf.getFieldAs<uint8_t>(d, id);
-        break;
-    case Dimension::Type::Unsigned16:
-        e.u16 = buf.getFieldAs<uint16_t>(d, id);
-        break;
-    case Dimension::Type::Unsigned32:
-        e.u32 = buf.getFieldAs<uint32_t>(d, id);
-        break;
-    case Dimension::Type::Unsigned64:
-        e.u64 = buf.getFieldAs<uint64_t>(d, id);
-        break;
-    case Dimension::Type::None:
-        break;
-    }
-    memcpy(pos, &e, Dimension::size(type));
-}
-
-} // anonymous namespace.
-
-
 void PgWriter::writeTile(PointBuffer const& buffer)
 {
     if (buffer.size() > m_patch_capacity)
@@ -535,62 +451,41 @@ void PgWriter::writeTile(PointBuffer const& buffer)
         throw pdal_error(oss.str());
     }
 
-    size_t outbufSize = m_pointSize * buffer.size();
-    std::unique_ptr<char> outbuf(new char[outbufSize]);
-    char *pos = outbuf.get();
-    size_t clicks = 0;
-    size_t interrupt = m_dims.size() * 100;
-
-    for (PointId id = 0; id < buffer.size(); ++id)
-    {
-        auto ti = m_types.begin();
-        for (auto di = m_dims.begin(); di != m_dims.end(); ++di, ++ti)
-        {
-            fillBuf(buffer, pos, *di, *ti, id);
-            pos += Dimension::size(*ti);
-        }
-        if (id % 100 == 0)
-            m_callback->invoke(id);
-    }
-
-    m_callback->invoke(buffer.size());
-
-
-    /* We are always getting uncompressed bytes off the block_data */
-    /* so we always used compression type 0 (uncompressed) in writing our WKB */
-
-
-    static char syms[] = "0123456789ABCDEF";
-    m_hex.resize(outbufSize * 2);
-    for (unsigned i = 0; i != outbufSize; i++)
-    {
-        m_hex[i * 2]   = syms[((outbuf.get()[i] >> 4) & 0xf)];
-        m_hex[i * 2 + 1] = syms[outbuf.get()[i] & 0xf];
-    }
+    std::vector<char> storage(m_packedPointSize);
+    std::string hexrep;
+    hexrep.resize(m_packedPointSize * buffer.size() * 2);
 
     m_insert.clear();
-    std::string::size_type position(0);
-    std::string::size_type string_size = m_hex.size() + 3000;
-    if (m_insert.capacity() < string_size)
-        m_insert.reserve(string_size);
-    m_insert.resize(string_size);
+    m_insert.reserve(hexrep.size() + 3000);
+
+    size_t pos = 0;
+    for (PointId idx = 0; idx < buffer.size(); ++idx)
+    {
+        size_t written = readPoint(buffer, idx, storage.data());
+
+        /* We are always getting uncompressed bytes off the block_data */
+        /* so we always used compression type 0 (uncompressed) in writing */
+        /* our WKB */
+        static char syms[] = "0123456789ABCDEF";
+        for (size_t i = 0; i != written; i++)
+        {
+            hexrep[pos++] = syms[((storage[i] >> 4) & 0xf)];
+            hexrep[pos++] = syms[storage[i] & 0xf];
+        }
+    }
+
     std::string insert_into("INSERT INTO ");
     std::string values(" (pa) VALUES ('");
 
-    m_insert.insert(position, insert_into);
-    position += insert_into.size();
-
-    m_insert.insert(position, m_table_name);
-    position += m_table_name.size();
-
-    m_insert.insert(position, values);
-    position += values.size();
+    m_insert.append(insert_into);
+    m_insert.append(m_table_name);
+    m_insert.append(values);
 
     std::ostringstream options;
 
     uint32_t num_points = buffer.size();
     int32_t pcid = m_pcid;
-    compression::CompressionType::Enum compression_v = compression::CompressionType::None;
+    CompressionType::Enum compression_v = CompressionType::None;
     uint32_t compression = static_cast<uint32_t>(compression_v);
 
 #ifdef BOOST_LITTLE_ENDIAN
@@ -611,14 +506,9 @@ void PgWriter::writeTile(PointBuffer const& buffer)
     // needs to be 4 bytes
     options << boost::format("%08x") % num_points;
 
-    m_insert.insert(position, options.str());
-    position += options.str().size();
-
-    m_insert.insert(position, m_hex);
-    position += m_hex.size();
-
-    std::string tail("')");
-    m_insert.insert(position, tail);
+    m_insert.append(options.str());
+    m_insert.append(hexrep);
+    m_insert.append("')");
 
     pg_execute(m_session, m_insert);
 }

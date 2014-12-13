@@ -52,10 +52,8 @@ CREATE_WRITER_PLUGIN(oci, pdal::OciWriter)
 namespace pdal
 {
 
-
 OciWriter::OciWriter()
-    : pdal::Writer()
-    , m_createIndex(false)
+    : m_createIndex(false)
     , m_bDidCreateBlockTable(false)
     , m_pc_id(0)
     , m_srid(0)
@@ -67,10 +65,6 @@ OciWriter::OciWriter()
     , m_streamChunks(false)
     , m_orientation(Orientation::PointMajor)
 {}
-
-OciWriter::~OciWriter()
-{
-}
 
 
 void OciWriter::initialize()
@@ -85,114 +79,88 @@ Options OciWriter::getDefaultOptions()
 {
     Options options;
 
-    Option is3d("is3d",  false,"Should we use 3D objects for SDO_PC PC_EXTENT, \
-                                       BLK_EXTENT, and indexing");
-
-    Option solid("solid",false,"Define the point cloud's PC_EXTENT geometry \
-                                       gtype as (1,1007,3) instead of the normal \
-                                       (1,1003,3), and use gtype 3008/2008 vs \
-                                       3003/2003 for BLK_EXTENT geometry values.");
-
-    Option overwrite("overwrite",false,"Wipe the block table and recreate it before loading data");
-    Option verbose("verbose",false,"Wipe the block table and recreate it before loading data");
-    Option srid("srid", 0, "The Oracle numerical SRID value to use \
-                                             for PC_EXTENT, BLK_EXTENT, and indexing");
-    Option stream_output_precision("stream_output_precision",
-                                   8,
-                                   "The number of digits past the decimal place for \
-                                                    outputting floats/doubles to streams. This is used \
-                                                    for creating the SDO_PC object and adding the \
-                                                    index entry to the USER_SDO_GEOM_METADATA for the \
-                                                    block table");
-
-    Option cloud_id("cloud_id",
-                    -1,
-                    "The point cloud id that links the point cloud \
-                                    object to the entries in the block table.");
-
-    Option connection("connection",
-                      "",
-                      "Oracle connection string to connect to database");
-
-    Option block_table_name("block_table_name",
-                            "output",
-                            "The table in which block data for the created SDO_PC will be placed");
-
-    Option block_table_partition_column("block_table_partition_column",
-                                        "",
-                                        "The column name for which 'block_table_partition_value' \
-                                                     will be placed in the 'block_table_name'");
-    Option block_table_partition_value("block_table_partition_value",
-                                       0,
-                                       "Integer value to use to assing partition \
-                                                        IDs in the block table. Used in conjunction \
-                                                        with 'block_table_partition_column'");
-    Option base_table_name("base_table_name",
-                           "hobu",
-                           "The name of the table which will contain the SDO_PC object");
-
-    Option cloud_column_name("cloud_column_name",
-                             "CLOUD",
-                             "The column name in 'base_table_name' that will hold the SDO_PC object");
-
-    Option base_table_aux_columns("base_table_aux_columns",
-                                  "",
-                                  "Quoted, comma-separated list of columns to \
-                                                add to the SQL that gets executed as part of \
-                                                the point cloud insertion into the \
-                                                'base_table_name' table");
-    Option base_table_aux_values("base_table_aux_values",
-                                 "",
-                                 "Quoted, comma-separated values that correspond \
-                                              to 'base_table_aux_columns', entries that will \
-                                              get inserted as part of the creation of the \
-                                              SDO_PC entry in the 'base_table_name' table");
-
-    Option base_table_boundary_column("base_table_boundary_column",
-                                      "",
-                                      "The SDO_GEOMETRY column in 'base_table_name' in which \
-                                                   to insert the WKT in 'base_table_boundary_wkt' representing \
-                                                   a boundary for the SDO_PC object. Note this is not \
-                                                   the same as the 'base_table_bounds', which is just \
-                                                   a bounding box that is placed on the SDO_PC object itself.");
-    Option base_table_boundary_wkt("base_table_boundary_wkt",
-                                   "",
-                                   "WKT, in the form of a string or a file location, to insert \
-                                                into the SDO_GEOMTRY column defined by 'base_table_boundary_column'");
-
-    Option pre_block_sql("pre_block_sql",
-                         "",
-                         "SQL, in the form of a string or file location, that is executed \
-                                      after the SDO_PC object has been created but before the block \
-                                      data in 'block_table_name' are inserted into the database");
-
-    Option pre_sql("pre_sql",
-                   "",
-                   "SQL, in the form of a string or file location, that is executed \
-                                before the SDO_PC object is created.");
-
-    Option post_block_sql("post_block_sql",
-                          "",
-                          "SQL, in the form of a string or file location, that is executed \
-                                       after the block data in 'block_table_name' have been inserted");
-
-    Option base_table_bounds("base_table_bounds",
-                             BOX3D(),
-                             "A bounding box, given in the Oracle SRID specified in 'srid' \
-                                                    to set on the PC_EXTENT object of the SDO_PC. If none is specified, \
-                                                    the cumulated bounds of all of the block data are used.");
-
+    Option is3d("is3d",  false,
+        "Should we use 3D objects for SDO_PC PC_EXTENT, BLK_EXTENT, "
+        "and indexing");
+    Option solid("solid", false,
+        "Define the point cloud's PC_EXTENT geometry gtype as (1,1007,3) "
+        "instead of the normal (1,1003,3), and use gtype 3008/2008 vs "
+        " 3003/2003 for BLK_EXTENT geometry values.");
+    Option overwrite("overwrite", false,
+        "Wipe the block table and recreate it before loading data");
+    Option srid("srid", 0,
+        "The Oracle numerical SRID value to use for PC_EXTENT, "
+        "BLK_EXTENT, and indexing");
+    Option stream_output_precision("stream_output_precision", 8,
+        "The number of digits past the decimal place for outputting "
+        "floats/doubles to streams. This is used for creating the SDO_PC "
+        "object and adding the index entry to the USER_SDO_GEOM_METADATA "
+        "for the block table");
+    Option cloud_id("cloud_id", -1,
+       "The point cloud id that links the point cloud object to the "
+       "entries in the block table.");
+    Option connection("connection", "",
+        "Oracle connection string to connect to database");
+    Option block_table_name("block_table_name", "output",
+        "The table in which block data for the created SDO_PC will be placed");
+    Option block_table_partition_column("block_table_partition_column", "",
+        "The column name for which 'block_table_partition_value' will "
+        "be placed in the 'block_table_name'");
+    Option block_table_partition_value("block_table_partition_value", 0,
+        "Integer value to use to assing partition IDs in the block table. "
+        "Used in conjunction with 'block_table_partition_column'");
+    Option base_table_name("base_table_name", "hobu",
+        "The name of the table which will contain the SDO_PC object");
+    Option cloud_column_name("cloud_column_name", "CLOUD",
+        "The column name in 'base_table_name' that will hold the SDO_PC "
+        "object");
+    Option base_table_aux_columns("base_table_aux_columns", "",
+        "Quoted, comma-separated list of columns to add to the SQL that "
+        "gets executed as part of the point cloud insertion into the "
+        "'base_table_name' table");
+    Option base_table_aux_values("base_table_aux_values", "",
+        "Quoted, comma-separated values that correspond to "
+        "'base_table_aux_columns', entries that will get inserted as part "
+        "of the creation of the SDO_PC entry in the 'base_table_name' table");
+    Option base_table_boundary_column("base_table_boundary_column", "",
+        "The SDO_GEOMETRY column in 'base_table_name' in which to insert "
+        "the WKT in 'base_table_boundary_wkt' representing a boundary for "
+        "the SDO_PC object. Note this is not the same as the "
+        "'base_table_bounds', which is just a bounding box that is placed "
+        "on the SDO_PC object itself.");
+    Option base_table_boundary_wkt("base_table_boundary_wkt", "",
+        "WKT, in the form of a string or a file location, to insert into "
+        "the SDO_GEOMTRY column defined by 'base_table_boundary_column'");
+    Option pre_block_sql("pre_block_sql", "",
+        "SQL, in the form of a string or file location, that is executed "
+        "after the SDO_PC object has been created but before the block data "
+        "in 'block_table_name' are inserted into the database");
+    Option pre_sql("pre_sql", "",
+        "SQL, in the form of a string or file location, that is executed "
+        "before the SDO_PC object is created.");
+    Option post_block_sql("post_block_sql", "",
+        "SQL, in the form of a string or file location, that is executed "
+        "after the block data in 'block_table_name' have been inserted");
+    Option base_table_bounds("base_table_bounds", BOX3D(),
+        "A bounding box, given in the Oracle SRID specified in 'srid' to "
+        "set on the PC_EXTENT object of the SDO_PC. If none is specified, "
+        "the cumulated bounds of all of the block data are used.");
     Option pc_id("pc_id", -1, "Point Cloud id");
-
-    Option pack("pack_ignored_fields", true, "Pack ignored dimensions out of the data buffer that is written");
-    Option do_trace("do_trace", false, "turn on server-side binds/waits tracing -- needs ALTER SESSION privs");
-    Option stream_chunks("stream_chunks", false, "Stream block data chunk-wise by the DB's chunk size rather than as an entire blob");
-    Option blob_chunk_count("blob_chunk_count", 16, "When streaming, the number of chunks per write to use");
-    Option store_dimensional_orientation("store_dimensional_orientation", false, "Store the points oriented in DIMENSION_INTERLEAVED instead of POINT_INTERLEAVED orientation");
+    Option pack("pack_ignored_fields", true,
+        "Pack ignored dimensions out of the data buffer that is written");
+    Option do_trace("do_trace", false,
+        "turn on server-side binds/waits tracing -- needs ALTER SESSION privs");
+    Option stream_chunks("stream_chunks", false,
+        "Stream block data chunk-wise by the DB's chunk size rather than "
+        "as an entire blob");
+    Option blob_chunk_count("blob_chunk_count", 16,
+        "When streaming, the number of chunks per write to use");
+    Option store_dimensional_orientation("store_dimensional_orientation", false,
+        "Store the points oriented in DIMENSION_INTERLEAVED instead of "
+        "POINT_INTERLEAVED orientation");
     options.add(is3d);
     options.add(solid);
     options.add(overwrite);
-    options.add(verbose);
     options.add(srid);
     options.add(stream_output_precision);
     options.add(cloud_id);
@@ -579,8 +547,8 @@ void OciWriter::createPCEntry()
         s_geom << "," << bounds.maxy;
     s_geom << "))";
 
-    schema::Writer writer(m_dims, m_types, m_orientation);
-    std::string schemaData = writer.getXML();
+    XMLSchema schema(m_orientation);
+    std::string schemaData = schema.getXML(dbDimTypes());
 
     oss << "declare\n"
         "  pc_id NUMBER := :" << nPCPos << ";\n"
@@ -600,7 +568,8 @@ void OciWriter::createPCEntry()
         << s_geom.str() <<
         ",  -- Extent\n"
         "     0.5, -- Tolerance for point cloud\n"
-        "           " << m_dims.size() << ", -- Total number of dimensions\n"
+        "           " << m_dimTypes.size() <<
+        ", -- Total number of dimensions\n"
         "           NULL,"
         "            NULL,"
         "            " << s_schema.str() << ");\n"
@@ -794,18 +763,7 @@ void OciWriter::ready(PointContextRef ctx)
 
     m_pcExtent.clear();
     m_lastBlockId = 0;
-    m_pointSize = 0;
-    m_dims = ctx.dims();
-    // Determine types for the dimensions.  We use the default types when
-    // they exist, float otherwise.
-    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-    {
-        Dimension::Type::Enum type = Dimension::defaultType(*di);
-        if (type == Dimension::Type::None)
-            type = Dimension::Type::Float;
-        m_types.push_back(type);
-        m_pointSize += Dimension::size(type);
-    }
+    DbWriter::ready(ctx);
 }
 
 
@@ -864,67 +822,6 @@ void OciWriter::setOrdinates(Statement statement, OCIArray* ordinates,
 }
 
 
-namespace
-{
-
-void fillBuf(const PointBuffer& buf, char *pos, Dimension::Id::Enum d,
-    Dimension::Type::Enum type, PointId id)
-{
-    union
-    {
-        float f;
-        double d;
-        int8_t s8;
-        int16_t s16;
-        int32_t s32;
-        int64_t s64;
-        uint8_t u8;
-        uint16_t u16;
-        uint32_t u32;
-        uint64_t u64;
-    } e;  // e - for Everything.
-
-    switch (type)
-    {
-    case Dimension::Type::Float:
-        e.f = buf.getFieldAs<float>(d, id);
-        break;
-    case Dimension::Type::Double:
-        e.d = buf.getFieldAs<double>(d, id);
-        break;
-    case Dimension::Type::Signed8:
-        e.s8 = buf.getFieldAs<int8_t>(d, id);
-        break;
-    case Dimension::Type::Signed16:
-        e.s16 = buf.getFieldAs<int16_t>(d, id);
-        break;
-    case Dimension::Type::Signed32:
-        e.s32 = buf.getFieldAs<int32_t>(d, id);
-        break;
-    case Dimension::Type::Signed64:
-        e.s64 = buf.getFieldAs<int64_t>(d, id);
-        break;
-    case Dimension::Type::Unsigned8:
-        e.u8 = buf.getFieldAs<uint8_t>(d, id);
-        break;
-    case Dimension::Type::Unsigned16:
-        e.u16 = buf.getFieldAs<uint16_t>(d, id);
-        break;
-    case Dimension::Type::Unsigned32:
-        e.u32 = buf.getFieldAs<uint32_t>(d, id);
-        break;
-    case Dimension::Type::Unsigned64:
-        e.u64 = buf.getFieldAs<uint64_t>(d, id);
-        break;
-    case Dimension::Type::None:
-        break;
-    }
-    memcpy(pos, &e, Dimension::size(type));
-}
-
-} // anonymous namespace.
-
-
 void OciWriter::writeTile(PointBuffer const& buffer)
 {
     bool usePartition = (m_blockTablePartitionColumn.size() != 0);
@@ -963,52 +860,53 @@ void OciWriter::writeTile(PointBuffer const& buffer)
 
 
     // :4
-    size_t outbufSize = m_pointSize * buffer.size();
-    std::unique_ptr<char> outbuf(new char[outbufSize]);
-    char *pos = outbuf.get();
+    size_t totalSize = 0;
+    std::vector<char> outbuf(m_packedPointSize * buffer.size());
+    char *pos = outbuf.data();
     m_callback->setTotal(buffer.size());
     m_callback->invoke(0);
     if (m_orientation == Orientation::DimensionMajor)
     {
         size_t clicks = 0;
-        size_t interrupt = m_dims.size() * 100;
-        auto ti = m_types.begin();
-        for (auto di = m_dims.begin(); di != m_dims.end(); ++di, ++ti)
+        size_t interrupt = m_dimTypes.size() * 100;
+        for (auto di = m_dimTypes.begin(); di != m_dimTypes.end(); ++di)
         {
-            for (PointId id = 0; id < buffer.size(); ++id)
+            for (PointId idx = 0; idx < buffer.size(); ++idx)
             {
-                fillBuf(buffer, pos, *di, *ti, id);
-                pos += Dimension::size(*ti);
+                size_t size = readField(buffer, pos, *di, idx);
+                pos += size;
+                totalSize += size;
                 if (clicks++ % interrupt == 0)
-                    m_callback->invoke(clicks / m_dims.size());
+                    m_callback->invoke(clicks / m_dimTypes.size());
             }
         }
     }
     else if (m_orientation == Orientation::PointMajor)
     {
-        for (PointId id = 0; id < buffer.size(); ++id)
+        std::vector<char> storage(m_packedPointSize);
+
+        for (PointId idx = 0; idx < buffer.size(); ++idx)
         {
-            auto ti = m_types.begin();
-            for (auto di = m_dims.begin(); di != m_dims.end(); ++di, ++ti)
-            {
-                fillBuf(buffer, pos, *di, *ti, id);
-                pos += Dimension::size(*ti);
-            }
-            if (id % 100 == 0)
-                m_callback->invoke(id);
+            size_t size = readPoint(buffer, idx, storage.data());
+            memcpy(pos, storage.data(), size);
+            totalSize += size;
+            if (idx % 100 == 0)
+                m_callback->invoke(idx);
+            pos += size;
+            totalSize += size;
         }
     }
     m_callback->invoke(buffer.size());
 
-    log()->get(LogLevel::Debug4) << "Blob size " << outbufSize << std::endl;
+    log()->get(LogLevel::Debug4) << "Blob size " << totalSize << std::endl;
     OCILobLocator* locator;
     if (m_streamChunks)
     {
-        statement->WriteBlob(&locator, outbuf.get(), outbufSize, m_chunkCount);
+        statement->WriteBlob(&locator, outbuf.data(), totalSize, m_chunkCount);
         statement->BindBlob(&locator);
     }
     else
-        statement->Bind(outbuf.get(), (long)outbufSize);
+        statement->Bind(outbuf.data(), (long)totalSize);
 
     // :5
     long long_gtype = static_cast<long>(m_gtype);

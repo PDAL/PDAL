@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Howard Butler, howard@hobu.co
+* Copyright (c) 2014, Hobu Inc. (hobu@hobu.co)
 *
 * All rights reserved.
 *
@@ -13,10 +13,9 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
-*       names of its contributors may be used to endorse or promote
-*       products derived from this software without specific prior
-*       written permission.
+*     * Neither the name of Hobu, Inc. nor the names of its contributors
+*       may be used to endorse or promote products derived from this
+*       software without specific prior written permission.
 *
 * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,57 +33,44 @@
 
 #pragma once
 
-#include <pdal/DbReader.hpp>
-#include <pdal/StageFactory.hpp>
-#include <pdal/XMLSchema.hpp>
+#include <pdal/Writer.hpp>
 
-#include "SQLiteCommon.hpp"
-
-#include <vector>
+#include <string>
 
 namespace pdal
 {
 
-class PDAL_DLL SQLiteReader : public DbReader
-{
-public:
-    SET_STAGE_NAME("readers.sqlite", "SQLite3 Reader")
-    SET_STAGE_ENABLED(true)
+class SQLiteWriter;
+class PgWriter;
+class OciWriter;
 
-    SQLiteReader()
+class PDAL_DLL DbWriter : public Writer
+{
+    friend class SQLiteWriter;
+    friend class PgWriter;
+    friend class OciWriter;
+protected:
+    DbWriter()
     {}
 
-    static Options getDefaultOptions();
-    SpatialReference fetchSpatialReference(std::string const& query) const;
-    SQLite& getSession()
-        { return *m_session.get(); }
+    ExtDimTypeList dbDimTypes() const;
+    size_t readField(const PointBuffer& pb, char *pos, DimType dimType,
+        PointId idx);
+    size_t readPoint(const PointBuffer& pb, PointId idx, char *outbuf);
 
 private:
-    std::unique_ptr<SQLite> m_session;
-    std::string m_query;
-    std::string m_schemaFile;
-    std::string m_connection;
-    std::string m_modulename;
-    boost::optional<SpatialReference> m_spatialRef;
-    PatchPtr m_patch;
-
-    bool m_at_end;
-    bool b_doneQuery;
-
-    virtual void initialize();
-    virtual void processOptions(const Options& options);
-    virtual void addDimensions(PointContextRef ctx);
     virtual void ready(PointContextRef ctx);
-    point_count_t read(PointBuffer& buf, point_count_t count);
-    bool eof()
-        { return m_at_end; }
+    bool locationScaling() const;
 
-    void validateQuery() const;
-    point_count_t readPatch(PointBuffer& buffer, point_count_t count);
-    bool NextBuffer();
+    DimTypeList m_dimTypes;
+    int m_xPackedOffset;
+    int m_yPackedOffset;
+    int m_zPackedOffset;
+    size_t m_packedPointSize;
 
-    SQLiteReader& operator=(const SQLiteReader&); // not implemented
-    SQLiteReader(const SQLiteReader&); // not implemented
+    DbWriter& operator=(const DbWriter&); // not implemented
+    DbWriter(const DbWriter&); // not implemented
 };
 
 } // namespace pdal
+

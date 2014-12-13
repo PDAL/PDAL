@@ -144,7 +144,7 @@ class OCITest : public testing::Test
         {
            std::string connSpec =
                 m_options.getValueOrThrow<std::string>("connection");
-            m_connection = ::connect(connSpec);
+            m_connection = pdal::connect(connSpec);
         }
         return m_connection;
 

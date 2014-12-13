@@ -87,23 +87,9 @@ public:
         { return num_points - m_num_remaining; }
     point_count_t numPoints() const
         { return num_points; }
-    double xOffset() const
-        { return m_schema.m_scale.m_x.m_offset; }
-    double yOffset() const
-        { return m_schema.m_scale.m_y.m_offset; }
-    double zOffset() const
-        { return m_schema.m_scale.m_z.m_offset; }
-    double xScale() const
-        { return m_schema.m_scale.m_x.m_scale; }
-    double yScale() const
-        { return m_schema.m_scale.m_y.m_scale; }
-    double zScale() const
-        { return m_schema.m_scale.m_z.m_scale; }
     char *data() const
         { return (char *)chunk.data(); }
-    Orientation::Enum orientation() const
-        { return m_schema.m_orientation; }
-    void update(schema::XMLSchema *s);
+    void update(XMLSchema *s);
     bool fetched() const
         { return m_fetched; }
     void setFetched()
@@ -126,13 +112,13 @@ public:
     sdo_pc* pc;
     int32_t m_num_remaining;
     PointContextRef m_ctx;
-    schema::XMLSchema m_schema;
+    XMLSchema m_schema;
     size_t m_point_size;
     bool m_fetched;  // Set when fetched but not initialized
 };
 typedef std::shared_ptr<Block> BlockPtr;
 
 PDAL_DLL Connection connect(std::string connSpec);
-PDAL_DLL schema::XMLSchema fetchSchema(Statement stmt, BlockPtr block);
+PDAL_DLL XMLSchema fetchSchema(Statement stmt, BlockPtr block);
 
 } // namespace pdal

@@ -748,5 +748,31 @@ inline Type::Enum type(std::string s)
 }
 
 } // namespace Dimension
+
+struct DimType
+{
+    DimType(Dimension::Id::Enum id, Dimension::Type::Enum type) :
+        m_id(id), m_type(type), m_offset(0)
+    {}
+
+    Dimension::Id::Enum m_id;
+    Dimension::Type::Enum m_type;
+    size_t m_offset;
+};
+typedef std::vector<DimType> DimTypeList;
+
+struct ExtDimType: public DimType
+{
+    ExtDimType(Dimension::Id::Enum id, Dimension::Type::Enum type,
+        XForm xform) : DimType(id, type), m_xform(xform)
+    {}
+    ExtDimType(DimType dimType, XForm xform) :
+        DimType(dimType), m_xform(xform)
+    {}
+
+    XForm m_xform;
+};
+typedef std::vector<ExtDimType> ExtDimTypeList;
+
 } // namespace pdal
 

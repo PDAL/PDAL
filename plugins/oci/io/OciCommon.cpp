@@ -94,7 +94,7 @@ Connection connect(std::string connSpec)
 }
 
 
-schema::XMLSchema fetchSchema(Statement stmt, BlockPtr block)
+XMLSchema fetchSchema(Statement stmt, BlockPtr block)
 {
     // Fetch the XML that defines the schema for this point cloud
     std::ostringstream schemaQuery;
@@ -133,7 +133,9 @@ schema::XMLSchema fetchSchema(Statement stmt, BlockPtr block)
 //         std::ostream* out = FileUtils::createFile(fname.str());
 //         out->write(pc_schema_xml.c_str(), pc_schema_xml.size());
 //         FileUtils::closeFile(out);
-    return schema::Reader(pc_schema_xml).schema();
+    XMLSchema schema;
+    schema.read(pc_schema_xml);
+    return schema;
 }
 
 
@@ -162,31 +164,19 @@ Block::~Block()
 }
 
 
-void Block::update(schema::XMLSchema *s)
+void Block::update(XMLSchema *s)
 {
+    using namespace Dimension;
+
     m_point_size = 0; // Wipe the size to reset
     m_num_remaining = num_points;
-    m_schema.m_orientation = s->m_orientation;
-    for (auto di = s->m_dims.begin(); di != s->m_dims.end(); ++di)
+    m_schema.setOrientation(s->orientation());
+    XMLDimList dims = s->dims();
+    for (auto di = dims.begin(); di != dims.end(); ++di)
     {
-        schema::DimInfo& d = *di;
-        Dimension::Id::Enum id = m_ctx.findDim(d.m_name);
-        if (id == Dimension::Id::X)
-        {
-            m_schema.m_scale.m_x.m_scale = d.m_scale;
-            m_schema.m_scale.m_x.m_offset = d.m_offset;
-        }
-        if (id == Dimension::Id::Y)
-        {
-            m_schema.m_scale.m_y.m_scale = d.m_scale;
-            m_schema.m_scale.m_y.m_offset = d.m_offset;
-        }
-        if (id == Dimension::Id::Z)
-        {
-            m_schema.m_scale.m_z.m_scale = d.m_scale;
-            m_schema.m_scale.m_z.m_offset = d.m_offset;
-        }
-
+        Id::Enum id = m_ctx.findDim(di->m_name);
+        if (id == Id::X || id == Id::Y || id == Id::Z)
+            m_schema.setXForm(id, di->m_xform);
         m_point_size += Dimension::size(di->m_type);
     }
 }

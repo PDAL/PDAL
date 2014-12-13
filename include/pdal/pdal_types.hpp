@@ -62,6 +62,14 @@ public:
     double m_offset;
     // Whether an offset value should be determined by examining the data.
     bool m_autoOffset;
+
+    bool nonstandard() const
+    {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+        return m_autoScale || m_autoOffset || m_scale != 1.0 || m_offset != 0.0;
+#pragma GCC diagnostic pop
+    }
 };
 
 namespace LogLevel

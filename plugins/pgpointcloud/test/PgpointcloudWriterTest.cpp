@@ -51,8 +51,6 @@ Options getWriterOptions()
     options.add(Option("table", "pdal_test_table"));
     options.add(Option("srid", "4326"));
     options.add(Option("capacity", "10000"));
-    // options.add(Option("debug", true));
-    // options.add(Option("verbose", 7));
 
     return options;
 }
@@ -131,7 +129,8 @@ private:
 TEST_F(PgpointcloudWriterTest, testWrite)
 {
     StageFactory f;
-    StageFactory::WriterCreator* wc = f.getWriterCreator("writers.pgpointcloud");
+    StageFactory::WriterCreator* wc =
+        f.getWriterCreator("writers.pgpointcloud");
     if (wc)
     {
         EXPECT_TRUE(wc);
@@ -140,32 +139,28 @@ TEST_F(PgpointcloudWriterTest, testWrite)
         const Option opt_filename("filename", file);
 
         StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
-        if (rc)
-        {
-            EXPECT_TRUE(rc);
+        if (!rc)
+            return;
+        EXPECT_TRUE(rc);
 
-            Stage* reader = rc();
-            Options options;
-            options.add(opt_filename);
-            reader->setOptions(options);
-            std::unique_ptr<Writer> writer(wc());
-            writer->setOptions(getWriterOptions());
-            writer->setInput(reader);
+        Stage* reader = rc();
+        Options options;
+        options.add(opt_filename);
+        reader->setOptions(options);
+        std::unique_ptr<Writer> writer(wc());
+        writer->setOptions(getWriterOptions());
+        writer->setInput(reader);
 
-            PointContext ctx;
-            writer->prepare(ctx);
+        PointContext ctx;
+        writer->prepare(ctx);
 
-            PointBufferSet written = writer->execute(ctx);
+        PointBufferSet written = writer->execute(ctx);
 
-            point_count_t count(0);
-            for(auto i = written.begin(); i != written.end(); ++i)
-            {
-                count += (*i)->size();
-            }
-            EXPECT_EQ(written.size(), 1);
-            // EXPECT_EQ(count, 0);
-            EXPECT_EQ(count, 1065);
-        }
+        point_count_t count(0);
+        for(auto i = written.begin(); i != written.end(); ++i)
+            count += (*i)->size();
+        EXPECT_EQ(written.size(), 1);
+        EXPECT_EQ(count, 1065);
     }
 }
 
@@ -173,7 +168,8 @@ TEST_F(PgpointcloudWriterTest, testWrite)
 TEST_F(PgpointcloudWriterTest, testNoPointcloudExtension)
 {
     StageFactory f;
-    StageFactory::WriterCreator* wc = f.getWriterCreator("writers.pgpointcloud");
+    StageFactory::WriterCreator* wc =
+        f.getWriterCreator("writers.pgpointcloud");
     if (wc)
     {
         EXPECT_TRUE(wc);
@@ -185,22 +181,21 @@ TEST_F(PgpointcloudWriterTest, testNoPointcloudExtension)
         const Option opt_filename("filename", file);
 
         StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
-        if (rc)
-        {
-            EXPECT_TRUE(rc);
+        if (!rc)
+            return;
+        EXPECT_TRUE(rc);
 
-            Stage* reader = rc();
-            Options options;
-            options.add(opt_filename);
-            reader->setOptions(options);
-            std::unique_ptr<Writer> writer(wc());
-            writer->setOptions(getWriterOptions());
-            writer->setInput(reader);
+        Stage* reader = rc();
+        pdal::Options options;
+        options.add(opt_filename);
+        reader->setOptions(options);
+        std::unique_ptr<Writer> writer(wc());
+        writer->setOptions(getWriterOptions());
+        writer->setInput(reader);
 
-            PointContext ctx;
-            writer->prepare(ctx);
+        PointContext ctx;
+        writer->prepare(ctx);
 
-            EXPECT_THROW(writer->execute(ctx), pdal_error);
-        }
+        EXPECT_THROW(writer->execute(ctx), pdal::pdal_error);
     }
 }

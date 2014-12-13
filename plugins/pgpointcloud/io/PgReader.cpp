@@ -44,15 +44,14 @@ CREATE_READER_PLUGIN(pgpointcloud, pdal::PgReader)
 namespace pdal
 {
 
-PgReader::PgReader()
-    : pdal::Reader(), m_session(NULL), m_pcid(0),
-    m_cached_point_count(0), m_cached_max_points(0)
+PgReader::PgReader() : m_session(NULL), m_pcid(0), m_cached_point_count(0),
+    m_cached_max_points(0)
 {}
 
 
 PgReader::~PgReader()
 {
-    //ABELL - Do bad things if we don't do this?  Already in done().
+    //ABELL - Do bad things happen if we don't do this?  Already in done().
     if (m_session)
         PQfinish(m_session);
 }
@@ -195,16 +194,12 @@ void PgReader::addDimensions(PointContextRef ctx)
     std::ostringstream oss;
     oss << "SELECT schema FROM pointcloud_formats WHERE pcid = " << pcid;
 
-    char *xml_str = pg_query_once(m_session, oss.str());
-    if (!xml_str)
+    char *xmlStr = pg_query_once(m_session, oss.str());
+    if (!xmlStr)
         throw pdal_error("Unable to fetch schema from `pointcloud_formats`");
 
-    m_schema = schema::Reader(xml_str).schema();
-    free(xml_str);
-
-    schema::DimInfoList& dims = m_schema.m_dims;
-    for (auto di = dims.begin(); di != dims.end(); ++di)
-        di->m_id = ctx.registerOrAssignDim(di->m_name, di->m_type);
+    loadSchema(ctx, xmlStr);
+    free(xmlStr);
 }
 
 
@@ -246,8 +241,7 @@ void PgReader::ready(PointContextRef ctx)
         setSpatialReference(fetchSpatialReference());
 
     m_point_size = 0;
-    schema::DimInfoList& dims = m_schema.m_dims;
-    for (auto di = dims.begin(); di != dims.end(); ++di)
+    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
         m_point_size += Dimension::size(di->m_type);
 
     CursorSetup();
@@ -271,7 +265,6 @@ void PgReader::initialize()
         m_session = pg_connect(m_connection);
 
 }
-
 
 
 void PgReader::CursorSetup()
@@ -301,17 +294,12 @@ point_count_t PgReader::readPgPatch(PointBuffer& buffer, point_count_t numPts)
     point_count_t numRead = 0;
 
     size_t offset = ((m_patch.count - m_patch.remaining) * m_point_size);
-    uint8_t *pos = &(m_patch.binary.front()) + offset;
+    char *pos = (char *)(m_patch.binary.data() + offset);
 
-    schema::DimInfoList& dims = m_schema.m_dims;
     while (numRead < numPts && numRemaining > 0)
     {
-        for (auto di = dims.begin(); di != dims.end(); ++di)
-        {
-            schema::DimInfo& d = *di;
-            buffer.setField(d.m_id, d.m_type, nextId, pos);
-            pos += Dimension::size(d.m_type);
-        }
+        writePoint(buffer, nextId, pos);
+        pos += m_point_size;
         numRemaining--;
         nextId++;
         numRead++;

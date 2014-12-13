@@ -35,18 +35,18 @@
 
 #pragma once
 
-#include <pdal/Writer.hpp>
+#include <pdal/DbWriter.hpp>
 #include <pdal/StageFactory.hpp>
 #include "PgCommon.hpp"
 
 namespace pdal
 {
 
-
-class PDAL_DLL PgWriter : public pdal::Writer
+class PDAL_DLL PgWriter : public DbWriter
 {
 public:
-    SET_STAGE_NAME("writers.pgpointcloud", "PostgresSQL Pointcloud Database Writer")
+    SET_STAGE_NAME("writers.pgpointcloud",
+        "PostgresSQL Pointcloud Database Writer")
     SET_STAGE_LINK("http://pdal.io/stages/writers.pgpointcloud.html")
     SET_STAGE_ENABLED(true)
 
@@ -55,13 +55,11 @@ public:
 
     static Options getDefaultOptions();
 
-
 private:
     PgWriter& operator=(const PgWriter&); // not implemented
     PgWriter(const PgWriter&); // not implemented
 
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContextRef ctx);
     virtual void write(const PointBuffer& pointBuffer);
     virtual void done(PointContextRef ctx);
     virtual void initialize();
@@ -93,7 +91,7 @@ private:
     std::string m_table_name;
     std::string m_column_name;
     std::string m_connection;
-    compression::CompressionType::Enum m_patch_compression_type;
+    CompressionType::Enum m_patch_compression_type;
     uint32_t m_patch_capacity;
     uint32_t m_srid;
     uint32_t m_pcid;
@@ -101,13 +99,9 @@ private:
     bool m_create_index;
     bool m_overwrite;
     std::string m_insert;
-    std::string m_hex;
-    size_t m_pointSize;
     Orientation::Enum m_orientation;
     bool m_pack;
     std::string m_pre_sql;
-    Dimension::IdList m_dims;
-    std::vector<Dimension::Type::Enum> m_types;
 
     // lose this
     bool m_schema_is_initialized;

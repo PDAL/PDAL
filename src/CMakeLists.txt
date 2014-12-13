@@ -19,6 +19,23 @@ set(PDAL_HEADERS_DIR "${PROJECT_SOURCE_DIR}/include/pdal")
 set(PDAL_HPP "")
 set(PDAL_CPP "")
 
+set(PDAL_KERNEL_PATH kernel)
+set(PDAL_KERNEL_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_KERNEL_PATH}")
+set(PDAL_KERNEL_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_KERNEL_PATH}")
+
+if (PDAL_HAVE_LIBXML2)
+    set(PDAL_XML_HEADER ${PDAL_HEADERS_DIR}/XMLSchema.hpp)
+    set(DB_DRIVER_HEADERS
+        "${PDAL_HEADERS_DIR}/DbReader.hpp"
+        "${PDAL_HEADERS_DIR}/DbWriter.hpp"
+    )
+    set(PDAL_XML_SRC XMLSchema.cpp)
+    set(DB_DRIVER_SRCS
+        DbReader.cpp
+        DbWriter.cpp
+    )
+endif()
+
 #
 # base
 #
@@ -60,17 +77,14 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/UserCallback.hpp"
   "${PDAL_HEADERS_DIR}/Utils.hpp"
   "${PDAL_HEADERS_DIR}/Writer.hpp"
-  "${PDAL_HEADERS_DIR}/XMLSchema.hpp"
   "${PDAL_HEADERS_DIR}/third/nanoflann.hpp"
   "${PDAL_HEADERS_DIR}/third/md5-pdal.h"
   "${PDAL_HEADERS_DIR}/third/string_ref.hpp"
   "${PDAL_HEADERS_DIR}/third/string_ref_fwd.hpp"
   "${PDAL_HEADERS_DIR}/Kernels.hpp"
+    ${PDAL_XML_HEADER}
+    ${DB_DRIVER_HEADERS}
 )
-
-if (PDAL_HAVE_LIBXML2)
-  SET (PDAL_XML_SRC XMLSchema.cpp)
-endif()
 
 set(PDAL_BASE_CPP
   Bounds.cpp
@@ -101,6 +115,7 @@ set(PDAL_BASE_CPP
   third/md5-pdal.c
   ${PDAL_XML_SRC}
   ${PDAL_LAZPERF_SRC}
+  ${DB_DRIVER_SRCS}
 )
 
 list (APPEND PDAL_CPP ${PDAL_BASE_CPP} )
