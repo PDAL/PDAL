@@ -37,10 +37,6 @@ set(PDAL_UTILITY pdal)
 # Configure build targets
 #------------------------------------------------------------------------------
 
-if(WIN32)
-    add_definitions("-DPDAL_DLL_EXPORT=1")
-endif()
-
 link_directories(${Boost_LIBRARY_DIRS})
 
 if(APPLE)
