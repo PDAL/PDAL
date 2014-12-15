@@ -284,11 +284,9 @@ target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE}
     "${ZLIB_LIBRARIES}"
 )
 
-message(STATUS "Using boost lib: ${Boost_LIBRARIES}")
-
-target_link_libraries(${PDAL_LIB_NAME}
-                       ${BOOST_LINKAGE} ${Boost_LIBRARIES})
-
+target_link_libraries(${PDAL_LIB_NAME} ${BOOST_LINKAGE}
+    ${Boost_LIBRARIES}
+)
 
 set_target_properties(${PDAL_LIB_NAME}
   PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )

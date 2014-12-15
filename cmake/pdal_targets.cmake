@@ -58,9 +58,6 @@ endmacro(PDAL_ADD_INCLUDES)
 macro(PDAL_ADD_LIBRARY _name)
     add_library(${_name} ${PDAL_LIB_TYPE} ${ARGN})
     
-    # must link explicitly against boost.
-    target_link_libraries(${_name} ${BOOST_LINKAGE} ${Boost_LIBRARIES})
-
     install(TARGETS ${_name}
         RUNTIME DESTINATION ${PDAL_BIN_DIR}
         LIBRARY DESTINATION ${PDAL_LIB_DIR}
@@ -109,7 +106,7 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname _srcs _incs _deps)
         ARCHIVE DESTINATION ${PDAL_LIB_DIR})
 endmacro(PDAL_ADD_PLUGIN)
 
-macro(PDAL_ADD_TEST _name _srcs _deps)
+macro(PDAL_ADD_TEST _name _srcs)
     include_directories(${PROJECT_SOURCE_DIR}/test/unit)
     include_directories(${PROJECT_BINARY_DIR}/test/unit)
     set(common_srcs
@@ -122,9 +119,20 @@ macro(PDAL_ADD_TEST _name _srcs _deps)
         add_definitions("-DPDAL_DLL_EXPORT=1")
     endif()
     target_link_libraries(${_name} ${PDAL_LINKAGE} ${PDAL_LIB_NAME})
-    target_link_libraries(${_name} ${PDAL_LINKAGE} gtest gtest_main)
-    target_link_libraries(${_name} ${PDAL_LINKAGE} ${_deps})
-    add_test(NAME ${_name} COMMAND "${PROJECT_BINARY_DIR}/bin/${_name}" WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/..")
+    target_link_libraries(${_name} ${PDAL_LINKAGE} gtest_main)
+
+    # Add dependent libraries if provided
+    set(extra_args ${ARGN})
+    list(LENGTH extra_args extra_args_cnt)
+    while (extra_args_cnt GREATER 0)
+        list(GET extra_args 0 dep)
+        target_link_libraries(${_name} ${PDAL_LINKAGE} ${dep})
+        list(REMOVE_AT extra_args 0)
+        list(LENGTH extra_args extra_args_cnt)
+    endwhile()
+
+    add_test(NAME ${_name} COMMAND "${PROJECT_BINARY_DIR}/bin/${_name}"
+        WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/..")
 endmacro(PDAL_ADD_TEST)
 
 ###############################################################################

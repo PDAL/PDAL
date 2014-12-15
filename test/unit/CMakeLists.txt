@@ -57,7 +57,7 @@ if(WIN32)
     list(APPEND srcs ${PDAL_TARGET_OBJECTS})
 endif()
 
-PDAL_ADD_TEST(pdal_base_test "${srcs}" ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_base_test "${srcs}")
 
 if (PDAL_HAVE_LAZPERF)
     set(srcs CompressionTest.cpp)
@@ -66,7 +66,7 @@ if (PDAL_HAVE_LAZPERF)
         list(APPEND srcs ${PDAL_TARGET_OBJECTS})
     endif()
 	
-    PDAL_ADD_TEST(lazperf_test "${srcs}" ${PDAL_LIB_NAME})
+    PDAL_ADD_TEST(lazperf_test "${srcs}")
 endif()
 
 #
@@ -89,7 +89,7 @@ if(WIN32)
     list(APPEND srcs ${PDAL_TARGET_OBJECTS})
 endif()
 
-PDAL_ADD_TEST(pdal_io_test "${srcs}" ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_io_test "${srcs}")
 
 #
 # sources for the native filters
@@ -102,7 +102,7 @@ set(srcs
     filters/FerryFilterTest.cpp
     filters/MergeTest.cpp
     filters/ReprojectionFilterTest.cpp
-    filters/SortFilterTest.cpp
+#    filters/SortFilterTest.cpp
     filters/SplitterTest.cpp
     filters/StatsFilterTest.cpp
 )
@@ -111,7 +111,7 @@ if(WIN32)
     list(APPEND srcs ${PDAL_TARGET_OBJECTS})
 endif()
 
-PDAL_ADD_TEST(pdal_filters_test "${srcs}" ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_filters_test "${srcs}")
 
 #
 # sources for plang
@@ -127,7 +127,7 @@ if (PDAL_HAVE_PYTHON)
         list(APPEND srcs ${PDAL_TARGET_OBJECTS})
     endif()
 
-    PDAL_ADD_TEST(pdal_plang_test "${srcs}" ${PDAL_LIB_NAME})
+    PDAL_ADD_TEST(pdal_plang_test "${srcs}")
 endif()
 
 #
@@ -150,7 +150,7 @@ if(WITH_APPS)
         list(APPEND srcs ${PDAL_TARGET_OBJECTS})
     endif()
 
-    PDAL_ADD_TEST(pc2pc_test "${srcs}" ${PDAL_LIB_NAME})
+    PDAL_ADD_TEST(pc2pc_test "${srcs}")
 endif(WITH_APPS)
 
 if(LIBXML2_FOUND)
@@ -160,5 +160,5 @@ if(LIBXML2_FOUND)
         list(APPEND srcs ${PDAL_TARGET_OBJECTS})
     endif()
 
-    PDAL_ADD_TEST(xml_schema_test "${srcs}" ${PDAL_LIB_NAME})
+    PDAL_ADD_TEST(xml_schema_test "${srcs}")
 endif()

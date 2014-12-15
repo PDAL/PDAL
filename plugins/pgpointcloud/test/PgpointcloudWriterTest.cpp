@@ -131,37 +131,33 @@ TEST_F(PgpointcloudWriterTest, testWrite)
     StageFactory f;
     StageFactory::WriterCreator* wc =
         f.getWriterCreator("writers.pgpointcloud");
-    if (wc)
-    {
-        EXPECT_TRUE(wc);
-        const std::string file(Support::datapath("las/1.2-with-color.las"));
+    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
 
-        const Option opt_filename("filename", file);
+    EXPECT_TRUE(wc);
+    EXPECT_TRUE(rc);
+    if (!wc || !rc)
+        return;
 
-        StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
-        if (!rc)
-            return;
-        EXPECT_TRUE(rc);
+    Stage* reader = rc();
 
-        Stage* reader = rc();
-        Options options;
-        options.add(opt_filename);
-        reader->setOptions(options);
-        std::unique_ptr<Writer> writer(wc());
-        writer->setOptions(getWriterOptions());
-        writer->setInput(reader);
+    const std::string file(Support::datapath("las/1.2-with-color.las"));
+    Options options;
+    options.add("filename", file);
+    reader->setOptions(options);
+    std::unique_ptr<Writer> writer(wc());
+    writer->setOptions(getWriterOptions());
+    writer->setInput(reader);
 
-        PointContext ctx;
-        writer->prepare(ctx);
+    PointContext ctx;
+    writer->prepare(ctx);
 
-        PointBufferSet written = writer->execute(ctx);
+    PointBufferSet written = writer->execute(ctx);
 
-        point_count_t count(0);
-        for(auto i = written.begin(); i != written.end(); ++i)
-            count += (*i)->size();
-        EXPECT_EQ(written.size(), 1U);
-        EXPECT_EQ(count, 1065U);
-    }
+    point_count_t count(0);
+    for(auto i = written.begin(); i != written.end(); ++i)
+	    count += (*i)->size();
+    EXPECT_EQ(written.size(), 1U);
+    EXPECT_EQ(count, 1065U);
 }
 
 

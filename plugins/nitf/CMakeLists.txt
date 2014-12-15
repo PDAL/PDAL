@@ -21,45 +21,10 @@ if(NITRO_FOUND)
 	add_definitions("-D__POSIX")
     endif()
 
-    set(PDAL_LAS_PATH "${PROJECT_SOURCE_DIR}/io/las")
-
-    if ((GEOTIFF_FOUND) AND (GDAL_FOUND))
-        set(PDAL_GTIFF_SRCS "${PDAL_LAS_PATH}/GeotiffSupport.cpp")
-        set(PDAL_GTIFF_INCS "${PDAL_LAS_PATH}/GeotiffSupport.hpp")
-    endif()
-
-    if (LASZIP_FOUND)
-        set(PDAL_LASZIP_SRCS "${PDAL_LAS_PATH}/ZipPoint.cpp")
-        set(PDAL_LASZIP_INCS "${PDAL_LAS_PATH}/ZipPoint.hpp")
-    endif()
-
-    set(PDAL_LAS_SRCS
-        ${PDAL_GTIFF_SRCS}
-        ${PDAL_LASZIP_SRCS}
-        "${PROJECT_SOURCE_DIR}/src/gitsha.cpp"
-	"${PDAL_LAS_PATH}/LasHeader.cpp"
-	"${PDAL_LAS_PATH}/LasReader.cpp"
-        "${PDAL_LAS_PATH}/SummaryData.cpp"
-        "${PDAL_LAS_PATH}/VariableLengthRecord.cpp"
-	"${PDAL_LAS_PATH}/LasWriter.cpp"
-    )
-
-    set(PDAL_LAS_INCS
-        ${PDAL_GTIFF_INCS}
-        ${PDAL_LASZIP_INCS}
-        "${PROJECT_SOURCE_DIR}/include/pdal/gitsha.h"
-	"${PDAL_LAS_PATH}/LasHeader.hpp"
-	"${PDAL_LAS_PATH}/LasReader.hpp"
-	"${PDAL_LAS_PATH}/SummaryData.hpp"
-	"${PDAL_LAS_PATH}/VariableLengthRecord.hpp"
-	"${PDAL_LAS_PATH}/LasWriter.hpp"
-    )
-
     #
     # NITF Reader
     #
     set(srcs
-        ${PDAL_LAS_SRCS}
 	io/NitfFile.cpp
 	io/MetadataReader.cpp
 	io/tre_plugins.cpp
@@ -67,7 +32,6 @@ if(NITRO_FOUND)
     )
 
     set(incs
-        ${PDAL_LAS_INCS}
 	io/NitfFile.hpp
 	io/MetadataReader.hpp
 	io/tre_plugins.hpp
@@ -81,13 +45,11 @@ if(NITRO_FOUND)
     # NITF Writer
     #
     set(srcs
-        ${PDAL_LAS_SRCS}
 	io/NitfWriter.cpp
 	io/tre_plugins.cpp
     )
 
     set(incs
-        ${PDAL_LAS_INCS}
 	io/NitfWriter.hpp
 	io/tre_plugins.hpp
     )

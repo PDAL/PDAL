@@ -40,9 +40,7 @@
 
 #include <pdal/PointBuffer.hpp>
 #include <pdal/PointBufferIter.hpp>
-//#include <LasReader.hpp>
 #include <pdal/PDALUtils.hpp>
-//#include "Support.hpp"
 
 using namespace pdal;
 
@@ -422,6 +420,7 @@ TEST(PointBufferTest, calcBounds)
     check_bounds(box_bs, 0.0, 3.0, 0.0, 3.0, 0.0, 3.0);
 }
 
+/**
 TEST(PointBufferTest, sort)
 {
     PointContext ctx;
@@ -449,3 +448,5 @@ TEST(PointBufferTest, sort)
         EXPECT_TRUE(d1 <= d2);
     }
 }
+**/
+
