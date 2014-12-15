@@ -13,19 +13,12 @@ if (GEOS_FOUND AND GDAL_FOUND)
     include_directories(${GEOS_INCLUDE_DIR})
     include_directories(${GDAL_INCLUDE_DIR})
 
-    #
-    # Attribute Filter
-    #
-    set(srcs
-	filters/AttributeFilter.cpp
-    )
+    set(srcs filters/AttributeFilter.cpp)
+    set(incs filters/AttributeFilter.hpp)
 
-    set(incs
-	filters/AttributeFilter.hpp
-    )
-
-    set(deps ${GEOS_LIBRARY} ${GDAL_LIBRARY})
-    PDAL_ADD_PLUGIN(attribute_filter_lib_name filter attribute "${srcs}" "${incs}" "${deps}")
+    PDAL_ADD_PLUGIN(libname filter attribute
+        FILES "${srcs}" "${incs}"
+        LINK_WITH ${GEOS_LIBRARY} ${GDAL_LIBRARY})
 else()
     message(STATUS "Building without Attribute support")
 endif()

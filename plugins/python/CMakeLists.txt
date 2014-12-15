@@ -18,30 +18,23 @@ if(PYTHONLIBS_FOUND)
     #
     # Predicate Filter
     #
-    set(srcs
-	filters/PredicateFilter.cpp
-    )
+    set(srcs filters/PredicateFilter.cpp)
+    set(incs filters/PredicateFilter.hpp)
 
-    set(incs
-	filters/PredicateFilter.hpp
-    )
-
-    set(deps ${PYTHON_LIBRARY})
-    PDAL_ADD_PLUGIN(predicate_filter_lib_name filter predicate "${srcs}" "${incs}" "${deps}")
+    PDAL_ADD_PLUGIN(predicate_libname filter predicate
+        FILES "${srcs}" "${incs}"
+        LINK_WITH ${PYTHON_LIBRARY})
 
     #
     # Programmable Filter
     #
-    set(srcs
-	filters/ProgrammableFilter.cpp
-    )
-
-    set(incs
-	filters/ProgrammableFilter.hpp
-    )
+    set(srcs filters/ProgrammableFilter.cpp)
+    set(incs filters/ProgrammableFilter.hpp)
 
     set(deps ${PYTHON_LIBRARY})
-    PDAL_ADD_PLUGIN(programmable_filter_lib_name filter programmable "${srcs}" "${incs}" "${deps}")
+    PDAL_ADD_PLUGIN(programmable_libname filter programmable
+        FILES "${srcs}" "${incs}"
+        LINK_WITH ${PYTHON_LIBRARY})
 
     if (WITH_TESTS)
         include_directories(${PROJECT_SOURCE_DIR}/filters/stats)
@@ -51,13 +44,10 @@ if(PYTHONLIBS_FOUND)
 	    test/ProgrammableFilterTest.cpp
 	)
 
-	set(deps
-	    ${predicate_filter_lib_name}
-	    ${programmable_filter_lib_name}
-	)
-
 	include_directories(${PDAL_INCLUDE_DIR}/test/unit)
-	PDAL_ADD_TEST(pythontest FILES "${srcs}" LINK_WITH "${deps}")
+	PDAL_ADD_TEST(pythontest
+            FILES "${srcs}"
+            LINK_WITH ${predicate_libname} ${programmable_libname})
     endif()
 else()
     message(STATUS "Building with Python support")
