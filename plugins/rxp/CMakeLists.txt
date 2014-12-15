@@ -32,14 +32,5 @@ if (BUILD_RIVLIB_TESTS)
     include_directories("${CMAKE_CURRENT_BINARY_DIR}/test")
     include_directories(${PROJECT_SOURCE_DIR}/plugin/rxp/io)
 
-    set(test_srcs
-        test/RxpReaderTest.cpp
-        )
-
-    set(test_deps
-        ${libname}
-        )
-
-    PDAL_ADD_TEST(${RXP_TEST_NAME} ${test_srcs} ${rxp_reader_lib_name})
-
+    PDAL_ADD_TEST(${RXP_TEST_NAME} FILES  test/RxpReaderTest.cpp LINK_WITH ${rxp_reader_lib_name})
 endif (BUILD_RIVLIB_TESTS)

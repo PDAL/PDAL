@@ -28,14 +28,7 @@ if (HEXER_FOUND)
     PDAL_ADD_PLUGIN(hexbin_filter_lib_name filter hexbin "${srcs}" "${incs}" "${deps}")
 
     if (WITH_TESTS)
-        #
-        # HexBin tests
-        #
-        set(srcs
-            test/HexbinFilterTest.cpp
-        )
-
-        PDAL_ADD_TEST(hexbintest "${srcs}" ${hexbin_filter_lib_name})
+        PDAL_ADD_TEST(hexbintest FILES test/HexbinFilterTest.cpp LINK_WITH ${hexbin_filter_lib_name})
     endif()
 else()
     message(STATUS "Building without Hexer support")

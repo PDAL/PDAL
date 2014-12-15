@@ -46,9 +46,6 @@ if(PYTHONLIBS_FOUND)
     if (WITH_TESTS)
         include_directories(${PROJECT_SOURCE_DIR}/filters/stats)
 
-        #
-	# Python tests
-	#
 	set(srcs
 	    test/PredicateFilterTest.cpp
 	    test/ProgrammableFilterTest.cpp
@@ -60,7 +57,7 @@ if(PYTHONLIBS_FOUND)
 	)
 
 	include_directories(${PDAL_INCLUDE_DIR}/test/unit)
-	PDAL_ADD_TEST(pythontest "${srcs}" "${deps}")
+	PDAL_ADD_TEST(pythontest FILES "${srcs}" LINK_WITH "${deps}")
     endif()
 else()
     message(STATUS "Building with Python support")

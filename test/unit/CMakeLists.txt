@@ -33,67 +33,67 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/kernels/info
 )
 
-PDAL_ADD_TEST(pdal_bounds_test BoundsTest.cpp ${PDAL_LIB_NAME})
-PDAL_ADD_TEST(pdal_config_test ConfigTest.cpp ${PDAL_LIB_NAME})
-PDAL_ADD_TEST(pdal_environment_test EnvironmentTest.cpp ${PDAL_LIB_NAME})
-PDAL_ADD_TEST(pdal_file_utils_test FileUtilsTest.cpp ${PDAL_LIB_NAME})
-PDAL_ADD_TEST(pdal_gdal_utils_test GDALUtilsTest.cpp ${PDAL_LIB_NAME})
-PDAL_ADD_TEST(pdal_log_test LogTest.cpp ${PDAL_LIB_NAME})
-PDAL_ADD_TEST(pdal_metadata_test MetadataTest.cpp ${PDAL_LIB_NAME})
-PDAL_ADD_TEST(pdal_options_test OptionsTest.cpp ${PDAL_LIB_NAME})
-PDAL_ADD_TEST(pdal_pipeline_manager_test PipelineManagerTest.cpp ${PDAL_LIB_NAME})
-PDAL_ADD_TEST(pdal_point_buffer_test PointBufferTest.cpp ${PDAL_LIB_NAME})
-PDAL_ADD_TEST(pdal_point_context_test PointContextTest.cpp ${PDAL_LIB_NAME})
-PDAL_ADD_TEST(pdal_spatial_reference_test SpatialReferenceTest.cpp ${PDAL_LIB_NAME})
-#PDAL_ADD_TEST(pdal_stage_factory_test StageFactoryTest.cpp ${PDAL_LIB_NAME}) # this one has been disabled for a while, can it go?
-PDAL_ADD_TEST(pdal_stream_factory_test StreamFactoryTest.cpp ${PDAL_LIB_NAME})
-PDAL_ADD_TEST(pdal_support_test SupportTest.cpp ${PDAL_LIB_NAME})
-PDAL_ADD_TEST(pdal_user_callback_test UserCallbackTest.cpp ${PDAL_LIB_NAME})
-PDAL_ADD_TEST(pdal_utils_test UtilsTest.cpp ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_bounds_test FILES BoundsTest.cpp)
+PDAL_ADD_TEST(pdal_config_test FILES ConfigTest.cpp)
+PDAL_ADD_TEST(pdal_environment_test FILES EnvironmentTest.cpp)
+PDAL_ADD_TEST(pdal_file_utils_test FILES FileUtilsTest.cpp)
+PDAL_ADD_TEST(pdal_gdal_utils_test FILES GDALUtilsTest.cpp)
+PDAL_ADD_TEST(pdal_log_test FILES LogTest.cpp)
+PDAL_ADD_TEST(pdal_metadata_test FILES MetadataTest.cpp)
+PDAL_ADD_TEST(pdal_options_test FILES OptionsTest.cpp)
+PDAL_ADD_TEST(pdal_pipeline_manager_test FILES PipelineManagerTest.cpp)
+PDAL_ADD_TEST(pdal_point_buffer_test FILES PointBufferTest.cpp)
+PDAL_ADD_TEST(pdal_point_context_test FILES PointContextTest.cpp)
+PDAL_ADD_TEST(pdal_spatial_reference_test FILES SpatialReferenceTest.cpp)
+#PDAL_ADD_TEST(pdal_stage_factory_test FILES StageFactoryTest.cpp) # this one has been disabled for a while, can it go?
+PDAL_ADD_TEST(pdal_stream_factory_test FILES StreamFactoryTest.cpp)
+PDAL_ADD_TEST(pdal_support_test FILES SupportTest.cpp)
+PDAL_ADD_TEST(pdal_user_callback_test FILES UserCallbackTest.cpp)
+PDAL_ADD_TEST(pdal_utils_test FILES UtilsTest.cpp)
 
 if (PDAL_HAVE_LAZPERF)
-    PDAL_ADD_TEST(pdal_lazperf_test CompressionTest.cpp ${PDAL_LIB_NAME})
+    PDAL_ADD_TEST(pdal_lazperf_test FILES CompressionTest.cpp)
 endif()
 
 #
 # sources for the native io
 #
-PDAL_ADD_TEST(pdal_io_bpf_test io/bpf/BPFTest.cpp ${PDAL_LIB_NAME})
-PDAL_ADD_TEST(pdal_io_buffer_test io/buffer/BufferTest.cpp ${PDAL_LIB_NAME})
-PDAL_ADD_TEST(pdal_io_faux_test io/faux/FauxReaderTest.cpp ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_io_bpf_test FILES io/bpf/BPFTest.cpp)
+PDAL_ADD_TEST(pdal_io_buffer_test FILES io/buffer/BufferTest.cpp)
+PDAL_ADD_TEST(pdal_io_faux_test FILES io/faux/FauxReaderTest.cpp)
 set(srcs
     io/las/LasReaderTest.cpp
     io/las/LasWriterTest.cpp
 )
-PDAL_ADD_TEST(pdal_io_las_test "${srcs}" ${PDAL_LIB_NAME})
-PDAL_ADD_TEST(pdal_io_qfit_test io/qfit/QFITReaderTest.cpp ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_io_las_test FILES "${srcs}")
+PDAL_ADD_TEST(pdal_io_qfit_test FILES io/qfit/QFITReaderTest.cpp)
 set(srcs
     io/sbet/SbetReaderTest.cpp
     io/sbet/SbetWriterTest.cpp
 )
-PDAL_ADD_TEST(pdal_io_sbet_test "${srcs}" ${PDAL_LIB_NAME})
-#PDAL_ADD_TEST(pdal_io_terrasolid_test io/terrasolid/TerraSolidReaderTest.cpp ${PDAL_LIB_NAME})
-#PDAL_ADD_TEST(pdal_io_text_test io/text/TextWriterTest.cpp ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_io_sbet_test FILES "${srcs}")
+#PDAL_ADD_TEST(pdal_io_terrasolid_test FILES io/terrasolid/TerraSolidReaderTest.cpp)
+#PDAL_ADD_TEST(pdal_io_text_test FILES io/text/TextWriterTest.cpp)
 
 #
 # sources for the native filters
 #
-PDAL_ADD_TEST(pdal_filters_chipper_test filters/ChipperTest.cpp ${PDAL_LIB_NAME})
-PDAL_ADD_TEST(pdal_filters_colorization_test filters/ColorizationFilterTest.cpp ${PDAL_LIB_NAME})
-PDAL_ADD_TEST(pdal_filters_crop_test filters/CropFilterTest.cpp ${PDAL_LIB_NAME})
-PDAL_ADD_TEST(pdal_filters_decimation_test filters/DecimationFilterTest.cpp ${PDAL_LIB_NAME})
-PDAL_ADD_TEST(pdal_filters_ferry_test filters/FerryFilterTest.cpp ${PDAL_LIB_NAME})
-PDAL_ADD_TEST(pdal_filters_merge_test filters/MergeTest.cpp ${PDAL_LIB_NAME})
-PDAL_ADD_TEST(pdal_filters_reprojection_test filters/ReprojectionFilterTest.cpp ${PDAL_LIB_NAME})
-PDAL_ADD_TEST(pdal_filters_sort_test filters/SortFilterTest.cpp ${PDAL_LIB_NAME})
-PDAL_ADD_TEST(pdal_filters_splitter_test filters/SplitterTest.cpp ${PDAL_LIB_NAME})
-PDAL_ADD_TEST(pdal_filters_stats_test filters/StatsFilterTest.cpp ${PDAL_LIB_NAME})
+PDAL_ADD_TEST(pdal_filters_chipper_test FILES filters/ChipperTest.cpp)
+PDAL_ADD_TEST(pdal_filters_colorization_test FILES filters/ColorizationFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_crop_test FILES filters/CropFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_decimation_test FILES filters/DecimationFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_ferry_test FILES filters/FerryFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_merge_test FILES filters/MergeTest.cpp)
+PDAL_ADD_TEST(pdal_filters_reprojection_test FILES filters/ReprojectionFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_sort_test FILES filters/SortFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_splitter_test FILES filters/SplitterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_stats_test FILES filters/StatsFilterTest.cpp)
 
 #
 # sources for plang
 #
 if (PDAL_HAVE_PYTHON)
-    PDAL_ADD_TEST(pdal_plang_test plang/PLangTest.cpp ${PDAL_LIB_NAME})
+    PDAL_ADD_TEST(pdal_plang_test FILES plang/PLangTest.cpp)
 endif()
 
 #
@@ -101,13 +101,13 @@ endif()
 #
 if(WITH_APPS)
 #    if(LIBXML2_FOUND)
-#        PDAL_ADD_TEST(pcinfo_test apps/pcinfoTest.cpp ${PDAL_LIB_NAME})
+#        PDAL_ADD_TEST(pcinfo_test FILES apps/pcinfoTest.cpp)
 #    endif(LIBXML2_FOUND)
 
-    PDAL_ADD_TEST(pc2pc_test apps/pc2pcTest.cpp ${PDAL_LIB_NAME})
-    #PDAL_ADD_TEST(pcpipeline_test apps/pcpipelineTest.cpp ${PDAL_LIB_NAME})
+    PDAL_ADD_TEST(pc2pc_test FILES apps/pc2pcTest.cpp)
+    #PDAL_ADD_TEST(pcpipeline_test FILES apps/pcpipelineTest.cpp)
 endif(WITH_APPS)
 
 if(LIBXML2_FOUND)
-    PDAL_ADD_TEST(xml_schema_test XMLSchemaTest.cpp ${PDAL_LIB_NAME})
+    PDAL_ADD_TEST(xml_schema_test FILES XMLSchemaTest.cpp)
 endif()

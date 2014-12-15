@@ -64,6 +64,6 @@ if(NITRO_FOUND)
 	)
 
 	set(deps ${nitf_reader_lib_name} ${nitf_writer_lib_name})
-	PDAL_ADD_TEST(nitftest "${srcs}" "${deps}")
+	PDAL_ADD_TEST(nitftest FILES "${srcs}" LINK_WITH "${deps}")
     endif()
 endif()

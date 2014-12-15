@@ -173,13 +173,6 @@ if(PCL_FOUND)
     PDAL_ADD_PLUGIN(smooth_kernel_lib_name kernel smooth "${srcs}" "${incs}" "${deps}")
 
     if (WITH_TESTS)
-        #
-        # PCL tests
-        #
-	set(srcs
-	    test/PCLBlockFilterTest.cpp
-	)
-
 	set(deps
 	    ${pclvisualizer_lib_name}
 	    ${pcd_reader_lib_name}
@@ -189,7 +182,7 @@ if(PCL_FOUND)
 	    ${ground_kernel_lib_name}
 	    ${smooth_kernel_lib_name}
 	)
-	PDAL_ADD_TEST(pcltest "${srcs}" "${deps}")
+        PDAL_ADD_TEST(pcltest FILES test/PCLBlockFilterTest.cpp LINK_WITH "${deps}")
     endif()
 else()
     message(STATUS "Building without PCL support")
