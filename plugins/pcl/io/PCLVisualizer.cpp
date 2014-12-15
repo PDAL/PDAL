@@ -36,14 +36,95 @@
 
 #include <boost/thread/thread.hpp>
 
+#include <pcl/conversions.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/visualization/pcl_visualizer.h>
+#include <pcl/visualization/impl/pcl_visualizer.hpp>
+#include <pcl/visualization/point_cloud_handlers.h>
+#include <pcl/visualization/impl/point_cloud_handlers.hpp>
 
 #include "PCLConversions.hpp"
+#include "point_types.hpp"
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
 
 CREATE_WRITER_PLUGIN(pclvisualizer, pdal::PclVisualizer)
+
+bool
+isValidFieldName(const std::string &field)
+{
+    if (field == "_")
+        return (false);
+
+    return (true);
+}
+
+namespace pcl
+{
+namespace visualization
+{
+template <typename PointT>
+class PointCloudColorHandlerIntensity : public PointCloudColorHandler<PointT>
+{
+    using PointCloudColorHandler<PointT>::capable_;
+    using PointCloudColorHandler<PointT>::cloud_;
+
+    typedef typename PointCloudColorHandler<PointT>::PointCloud::ConstPtr PointCloudConstPtr;
+
+public:
+    typedef boost::shared_ptr<PointCloudColorHandlerIntensity<PointT> > Ptr;
+    typedef boost::shared_ptr<const PointCloudColorHandlerIntensity<PointT> > ConstPtr;
+
+    PointCloudColorHandlerIntensity(const PointCloudConstPtr& cloud) :
+        PointCloudColorHandler<PointT> (cloud)
+    {
+        capable_ = true;
+    }
+
+    virtual bool
+    getColor(vtkSmartPointer<vtkDataArray> &scalars) const
+    {
+        if (!capable_ || !cloud_)
+            return (false);
+
+        if (!scalars)
+            scalars = vtkSmartPointer<vtkUnsignedCharArray>::New();
+        scalars->SetNumberOfComponents(3);
+
+        vtkIdType nr_points = cloud_->width * cloud_->height;
+        reinterpret_cast<vtkUnsignedCharArray*>(&(*scalars))->SetNumberOfTuples(nr_points);
+        unsigned char* colors = reinterpret_cast<vtkUnsignedCharArray*>(&(*scalars))->GetPointer(0);
+
+        int int_idx = pcl::getFieldIndex(*cloud_, "intensity");
+
+        if (int_idx != -1)
+        {
+            float int_data;
+            int int_point_offset = cloud_->fields[int_idx].offset;
+            for (vtkIdType cp = 0; cp < nr_points; ++cp, int_point_offset += cloud_->point_step)
+            {
+                int idx = cp * 3;
+                memcpy(&int_data, &cloud_->data[int_point_offset], sizeof(float));
+                colors[idx + 0] = int_data * 255;
+                colors[idx + 1] = int_data * 255;
+                colors[idx + 2] = int_data * 255;
+            }
+        }
+        return (true);
+    }
+
+private:
+    virtual std::string getFieldName() const
+    {
+        return ("intensity");
+    }
+    virtual inline std::string getName() const
+    {
+        return ("PointCloudColorHandlerIntensity");
+    }
+};
+}
+}
 
 namespace pdal
 {
@@ -54,8 +135,10 @@ void PclVisualizer::write(const PointBuffer& data)
     // Determine XYZ bounds
     BOX3D const& buffer_bounds = data.calculateBounds();
 
+    typedef XYZIRGBA PointType;
+
     // Convert PointBuffer to a PCL PointCloud
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<PointType>::Ptr cloud(new pcl::PointCloud<PointType>);
     pclsupport::PDALtoPCD(const_cast<PointBuffer&>(data), *cloud, buffer_bounds);
 
     // Create PCLVisualizer
@@ -64,11 +147,31 @@ void PclVisualizer::write(const PointBuffer& data)
     // Set background to black
     p->setBackgroundColor(0, 0, 0);
 
-    // Use Z dimension to colorize points
-    pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZ> color(cloud, "z");
+    pcl::PCLPointCloud2::Ptr cloud_blob(new pcl::PCLPointCloud2);
+    toPCLPointCloud2(*cloud, *cloud_blob);
 
-    // Add point cloud to the viewer with the Z dimension color handler
-    p->addPointCloud<pcl::PointXYZ> (cloud, color, "cloud");
+    typedef pcl::visualization::PointCloudColorHandler<pcl::PCLPointCloud2> ColorHandler;
+    typedef ColorHandler::Ptr ColorHandlerPtr;
+    ColorHandlerPtr color_handler;
+    for (size_t f = 0; f < cloud_blob->fields.size(); ++f)
+    {
+        if (cloud_blob->fields[f].name == "rgb" || cloud_blob->fields[f].name == "rgba")
+        {
+            color_handler.reset(new pcl::visualization::PointCloudColorHandlerRGBField<pcl::PCLPointCloud2> (cloud_blob));
+        }
+        else if (cloud_blob->fields[f].name == "intensity")
+        {
+            color_handler.reset(new pcl::visualization::PointCloudColorHandlerIntensity<pcl::PCLPointCloud2> (cloud_blob));
+        }
+        else
+        {
+            if (!isValidFieldName(cloud_blob->fields[f].name))
+                continue;
+            color_handler.reset(new pcl::visualization::PointCloudColorHandlerGenericField<pcl::PCLPointCloud2> (cloud_blob, cloud_blob->fields[f].name));
+        }
+        p->addPointCloud(cloud_blob, color_handler, cloud->sensor_origin_, cloud->sensor_orientation_);
+    }
+    p->updateColorHandlerIndex("cloud", 2);
 
     while (!p->wasStopped())
     {
