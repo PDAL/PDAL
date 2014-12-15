@@ -509,6 +509,7 @@ void SQLiteWriter::writeTile(const PointBuffer& buffer)
 
     if (m_doCompression)
     {
+#ifdef PDAL_HAVE_LAZPERF
         LazPerfCompressor<Patch> compressor(*m_patch, dbDimTypes());
 
         std::vector<char> outbuf(m_packedPointSize);
@@ -519,6 +520,9 @@ void SQLiteWriter::writeTile(const PointBuffer& buffer)
             compressor.compress(outbuf.data(), size);
         }
         compressor.done();
+#else
+        throw pdal_error("Can't compress without LAZperf.");
+#endif
 
         size_t bufferSize = buffer.size() * m_context.pointSize();
         double percent = (double) m_patch->byte_size()/(double) bufferSize;

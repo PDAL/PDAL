@@ -38,9 +38,10 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
-#include <pdal/XMLSchema.hpp>
-#include <pdal/Metadata.hpp>
 #include <pdal/FileUtils.hpp>
+#include <pdal/Metadata.hpp>
+#include <pdal/PointContext.hpp>
+#include <pdal/XMLSchema.hpp>
 
 #include "TestConfig.hpp"
 
@@ -50,32 +51,22 @@ using namespace pdal;
 
 std::string ReadXML(std::string filename)
 {
-
     std::istream* infile = FileUtils::openFile(filename);
     std::ifstream::pos_type size;
-    // char* data;
     std::vector<char> data;
     if (infile->good())
     {
         infile->seekg(0, std::ios::end);
         size = infile->tellg();
         data.resize(static_cast<std::vector<char>::size_type>(size));
-        // data = new char [size];
         infile->seekg(0, std::ios::beg);
         infile->read(&data.front(), size);
-        // infile->close();
 
-        // delete[] data;
         delete infile;
         return std::string(&data[0], data.size());
-        // return data;
     }
     else
-    {
         throw pdal_error("unable to open file!");
-        // return data;
-    }
-
 }
 
 TEST(XMLSchemaTest, test_schema_read)

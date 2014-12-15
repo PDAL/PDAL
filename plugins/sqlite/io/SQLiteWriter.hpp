@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/DbWriter.hpp>
-#include <pdal/Compression.hpp>
 #include <pdal/StageFactory.hpp>
 #include "SQLiteCommon.hpp"
 
