@@ -39,6 +39,7 @@
 #include <string>
 
 #include "Support.hpp"
+#include <pdal/Charbuf.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <LasReader.hpp>

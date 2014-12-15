@@ -50,7 +50,6 @@
 #include <pdal/PointContext.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Compression.hpp>
-#include <pdal/Charbuf.hpp>
 
 #include <map>
 #include <vector>
@@ -125,6 +124,7 @@ enum Enum
 } // namespace CompressionType
 
 
+#ifdef PDAL_HAVE_LAZPERF
 template<typename OutputStream>
 class LazPerfCompressor
 {
@@ -199,6 +199,7 @@ private:
     Decompressor m_decompressor;
     size_t m_pointSize;
 };
+#endif  // PDAL_HAVE_LAZPERF
 
 } // namespace pdal
 

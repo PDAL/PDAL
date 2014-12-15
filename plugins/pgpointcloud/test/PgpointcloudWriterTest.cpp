@@ -159,8 +159,8 @@ TEST_F(PgpointcloudWriterTest, testWrite)
         point_count_t count(0);
         for(auto i = written.begin(); i != written.end(); ++i)
             count += (*i)->size();
-        EXPECT_EQ(written.size(), 1);
-        EXPECT_EQ(count, 1065);
+        EXPECT_EQ(written.size(), 1U);
+        EXPECT_EQ(count, 1065U);
     }
 }
 

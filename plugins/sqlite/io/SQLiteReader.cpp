@@ -248,6 +248,7 @@ point_count_t SQLiteReader::readPatch(PointBuffer& buffer, point_count_t numPts)
     PointId nextId = buffer.size();
     if (m_patch->m_isCompressed)
     {
+#ifdef PDAL_HAVE_LAZPERF
         LazPerfDecompressor<Patch> decompressor(*m_patch, dbDimTypes());
 
         // Set the data into the patch.
@@ -262,6 +263,9 @@ point_count_t SQLiteReader::readPatch(PointBuffer& buffer, point_count_t numPts)
             numRead++;
             count--;
         }
+#else
+        throw pdal_error("Can't decompress without LAZperf.");
+#endif
 
         log()->get(LogLevel::Debug3) << "Compressed byte size: " <<
             m_patch->byte_size() << std::endl;
