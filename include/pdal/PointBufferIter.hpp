@@ -146,3 +146,12 @@ public:
 
 } // namespace pdal
 
+namespace std
+{
+template<>
+inline void iter_swap(pdal::PointBufferIter a, pdal::PointBufferIter b)
+{
+    swap(*a, *b);
+}
+}
+
