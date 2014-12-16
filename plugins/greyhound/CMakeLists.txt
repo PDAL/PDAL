@@ -17,6 +17,7 @@ if(JSONCPP_FOUND AND WEBSOCKETPP_FOUND)
     # add WEBSOCKETPP stuff
     include_directories(${WEBSOCKETPP_INCLUDE_DIR})
     add_definitions(-D_WEBSOCKETPP_NULLPTR_TOKEN_=0)
+    add_definitions(-D_WEBSOCKETPP_CPP11_RANDOM_DEVICE_=1)
     add_definitions(-DHAVE_WEBSOCKETPP=1)
 
     set(srcs

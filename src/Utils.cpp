@@ -34,15 +34,13 @@
 
 #include <boost/algorithm/string/erase.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_real_distribution.hpp>
-#include <boost/random/normal_distribution.hpp>
 
 #include <pdal/Utils.hpp>
 
 #include <cassert>
 #include <cstdlib>
 #include <cctype>
+#include <random>
 
 #ifndef PDAL_PLATFORM_WIN32
 #include <cxxabi.h>
@@ -89,16 +87,16 @@ double Utils::random(double minimum, double maximum)
 
 double Utils::uniform(const double& minimum, const double& maximum, uint32_t seed)
 {
-    boost::random::mt19937 gen(seed);
-    boost::random::uniform_real_distribution<double> dist(minimum, maximum);
+    std::mt19937 gen(seed);
+    std::uniform_real_distribution<double> dist(minimum, maximum);
 
     return dist(gen);
 }
 
 double Utils::normal(const double& mean, const double& sigma, uint32_t seed)
 {
-    boost::random::mt19937 gen(seed);
-    boost::random::normal_distribution<double> dist(mean, sigma);
+    std::mt19937 gen(seed);
+    std::normal_distribution<double> dist(mean, sigma);
 
     return dist(gen);
 }

@@ -48,8 +48,7 @@
 #include <boost/accumulators/statistics/count.hpp>
 #include <boost/accumulators/statistics/density.hpp>
 
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_int_distribution.hpp>
+#include <random>
 
 namespace pdal
 {
@@ -121,8 +120,8 @@ private:
     summary_accumulator m_summary;
     std::vector<double> m_sample;
     uint32_t m_sample_size;
-    boost::random::mt19937 m_rng;
-    boost::random::uniform_int_distribution<> m_distribution;
+    std::mt19937 m_rng;
+    std::uniform_int_distribution<> m_distribution;
     std::map<int32_t, uint32_t> m_counts;
     bool m_doExact;
     bool m_doSample;

@@ -163,7 +163,7 @@ pdal::gdal::GlobalDebug* GlobalEnvironment::getGDALDebug()
 
 boost::uuids::uuid GlobalEnvironment::generateUUID()
 {
-    boost::uuids::basic_random_generator<boost::mt19937> gen(&m_rng);
+    boost::uuids::basic_random_generator<std::mt19937> gen(&m_rng);
     return gen();
 }
 
