@@ -92,55 +92,51 @@ std::string getFilePath()
 TEST(IcebridgeReaderTest, testRead)
 {
     StageFactory f;
-    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.icebridge");
-    if (rc)
-    {
-        EXPECT_TRUE(rc);
+    std::unique_ptr<Reader> reader(f.createReader("readers.icebridge"));
+    EXPECT_TRUE(reader.get());
 
-        Option filename("filename", getFilePath(), "");
-        Options options(filename);
-        std::unique_ptr<Reader> reader(rc());
-        reader->setOptions(options);
+    Option filename("filename", getFilePath(), "");
+    Options options(filename);
+    reader->setOptions(options);
 
-        PointContext ctx;
-        reader->prepare(ctx);
-        PointBufferSet pbSet = reader->execute(ctx);
-        EXPECT_EQ(pbSet.size(), 1u);
-        PointBufferPtr buf = *pbSet.begin();
-        EXPECT_EQ(buf->size(), 2u);
+    PointContext ctx;
+    reader->prepare(ctx);
+    PointBufferSet pbSet = reader->execute(ctx);
+    EXPECT_EQ(pbSet.size(), 1u);
+    PointBufferPtr buf = *pbSet.begin();
+    EXPECT_EQ(buf->size(), 2u);
 
-        checkPoint(
-                *buf,
-                0,
-                141437548,     // time
-                82.605319,      // latitude
-                301.406196,     // longitude
-                18.678,         // elevation
-                2408,           // xmtSig
-                181,            // rcvSig
-                49.91,          // azimuth
-                -4.376,         // pitch
-                0.608,          // roll
-                2.9,            // gpsPdop
-                20.0,           // pulseWidth
-                0.0);           // relTime
+    checkPoint(
+            *buf,
+            0,
+            141437548,     // time
+            82.605319,      // latitude
+            301.406196,     // longitude
+            18.678,         // elevation
+            2408,           // xmtSig
+            181,            // rcvSig
+            49.91,          // azimuth
+            -4.376,         // pitch
+            0.608,          // roll
+            2.9,            // gpsPdop
+            20.0,           // pulseWidth
+            0.0);           // relTime
 
-        checkPoint(
-                *buf,
-                1,
-                141437548,     // time
-                82.605287,      // latitude
-                301.404862,     // longitude
-                18.688,         // elevation
-                2642,           // xmtSig
-                173,            // rcvSig
-                52.006,         // azimuth
-                -4.376,         // pitch
-                0.609,          // roll
-                2.9,            // gpsPdop
-                17.0,           // pulseWidth
-                0.0);           // relTime
-    }
+    checkPoint(
+            *buf,
+            1,
+            141437548,     // time
+            82.605287,      // latitude
+            301.404862,     // longitude
+            18.688,         // elevation
+            2642,           // xmtSig
+            173,            // rcvSig
+            52.006,         // azimuth
+            -4.376,         // pitch
+            0.609,          // roll
+            2.9,            // gpsPdop
+            17.0,           // pulseWidth
+            0.0);           // relTime
 }
 
 TEST(IcebridgeReaderTest, testPipeline)

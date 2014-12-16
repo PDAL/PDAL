@@ -51,43 +51,38 @@ TEST(StatsFilterTest, StatsFilterTest_test1)
     ops.add("mode", "constant");
 
     StageFactory f;
-    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.faux");
-    if (rc)
-    {
-        EXPECT_TRUE(rc);
+    std::unique_ptr<Reader> reader(f.createReader("readers.faux"));
+    EXPECT_TRUE(reader.get());
+    reader->setOptions(ops);
 
-        Stage* reader = rc();
-        reader->setOptions(ops);
+    StatsFilter filter;
+    filter.setInput(reader.get());
+    EXPECT_EQ(filter.getName(), "filters.stats");
+    EXPECT_EQ(filter.getDescription(), "Statistics Filter");
 
-        StatsFilter filter;
-        filter.setInput(reader);
-        EXPECT_EQ(filter.getName(), "filters.stats");
-        EXPECT_EQ(filter.getDescription(), "Statistics Filter");
+    PointContext ctx;
+    filter.prepare(ctx);
+    filter.execute(ctx);
 
-        PointContext ctx;
-        filter.prepare(ctx);
-        filter.execute(ctx);
+    const stats::Summary& statsX = filter.getStats(Dimension::Id::X);
+    const stats::Summary& statsY = filter.getStats(Dimension::Id::Y);
+    const stats::Summary& statsZ = filter.getStats(Dimension::Id::Z);
 
-        const stats::Summary& statsX = filter.getStats(Dimension::Id::X);
-        const stats::Summary& statsY = filter.getStats(Dimension::Id::Y);
-        const stats::Summary& statsZ = filter.getStats(Dimension::Id::Z);
+    EXPECT_EQ(statsX.count(), 1000u);
+    EXPECT_EQ(statsY.count(), 1000u);
+    EXPECT_EQ(statsZ.count(), 1000u);
 
-        EXPECT_EQ(statsX.count(), 1000u);
-        EXPECT_EQ(statsY.count(), 1000u);
-        EXPECT_EQ(statsZ.count(), 1000u);
+    EXPECT_FLOAT_EQ(statsX.minimum(), 1.0);
+    EXPECT_FLOAT_EQ(statsY.minimum(), 2.0);
+    EXPECT_FLOAT_EQ(statsZ.minimum(), 3.0);
 
-        EXPECT_FLOAT_EQ(statsX.minimum(), 1.0);
-        EXPECT_FLOAT_EQ(statsY.minimum(), 2.0);
-        EXPECT_FLOAT_EQ(statsZ.minimum(), 3.0);
+    EXPECT_FLOAT_EQ(statsX.maximum(), 1.0);
+    EXPECT_FLOAT_EQ(statsY.maximum(), 2.0);
+    EXPECT_FLOAT_EQ(statsZ.maximum(), 3.0);
 
-        EXPECT_FLOAT_EQ(statsX.maximum(), 1.0);
-        EXPECT_FLOAT_EQ(statsY.maximum(), 2.0);
-        EXPECT_FLOAT_EQ(statsZ.maximum(), 3.0);
-
-        EXPECT_FLOAT_EQ(statsX.average(), 1.0);
-        EXPECT_FLOAT_EQ(statsY.average(), 2.0);
-        EXPECT_FLOAT_EQ(statsZ.average(), 3.0);
-    }
+    EXPECT_FLOAT_EQ(statsX.average(), 1.0);
+    EXPECT_FLOAT_EQ(statsY.average(), 2.0);
+    EXPECT_FLOAT_EQ(statsZ.average(), 3.0);
 }
 
 
@@ -114,34 +109,28 @@ TEST(StatsFilterTest, test_multiple_dims_same_name)
     options.add(ignore);
 
     StageFactory f;
-    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
+    std::unique_ptr<Reader> reader(f.createReader("readers.las"));
+    EXPECT_TRUE(reader.get());
+    reader->setOptions(options);
+    ReprojectionFilter reprojectionFilter;
+    reprojectionFilter.setOptions(options);
+    reprojectionFilter.setInput(reader.get());
 
-    if (rc)
-    {
-        EXPECT_TRUE(rc);
+    StatsFilter filter;
+    filter.setOptions(options);
+    filter.setInput(&reprojectionFilter);
 
-        Stage* reader = rc();
-        reader->setOptions(options);
-        ReprojectionFilter reprojectionFilter;
-        reprojectionFilter.setOptions(options);
-        reprojectionFilter.setInput(reader);
+    PointContext ctx;
+    filter.prepare(ctx);
+    filter.execute(ctx);
 
-        StatsFilter filter;
-        filter.setOptions(options);
-        filter.setInput(&reprojectionFilter);
+    const stats::Summary& statsX = filter.getStats(Dimension::Id::X);
+    const stats::Summary& statsY = filter.getStats(Dimension::Id::Y);
+    const stats::Summary& statsZ = filter.getStats(Dimension::Id::Z);
 
-        PointContext ctx;
-        filter.prepare(ctx);
-        filter.execute(ctx);
-
-        const stats::Summary& statsX = filter.getStats(Dimension::Id::X);
-        const stats::Summary& statsY = filter.getStats(Dimension::Id::Y);
-        const stats::Summary& statsZ = filter.getStats(Dimension::Id::Z);
-
-        EXPECT_EQ(statsX.count(), 1065u);
-        EXPECT_EQ(statsY.count(), 1065u);
-        EXPECT_EQ(statsZ.count(), 1065u);
-    }
+    EXPECT_EQ(statsX.count(), 1065u);
+    EXPECT_EQ(statsY.count(), 1065u);
+    EXPECT_EQ(statsZ.count(), 1065u);
 }
 
 
@@ -168,48 +157,42 @@ TEST(StatsFilterTest, test_specified_stats)
     options.add(ignore);
 
     StageFactory f;
-    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
+    std::unique_ptr<Reader> reader(f.createReader("readers.las"));
+    EXPECT_TRUE(reader.get());
+    reader->setOptions(options);
 
-    if (rc)
-    {
-        EXPECT_TRUE(rc);
+    Options stats1ops;
+    stats1ops.add("dimensions", "Y");
 
-        Stage* reader = rc();
-        reader->setOptions(options);
+    StatsFilter filter1;
+    filter1.setOptions(stats1ops);
+    filter1.setInput(reader.get());
 
-        Options stats1ops;
-        stats1ops.add("dimensions", "Y");
+    ReprojectionFilter reprojectionFilter;
+    reprojectionFilter.setOptions(options);
+    reprojectionFilter.setInput(&filter1);
 
-        StatsFilter filter1;
-        filter1.setOptions(stats1ops);
-        filter1.setInput(reader);
+    Options stats2ops;
+    stats2ops.add("dimensions", "X Z");
 
-        ReprojectionFilter reprojectionFilter;
-        reprojectionFilter.setOptions(options);
-        reprojectionFilter.setInput(&filter1);
+    StatsFilter filter2;
+    filter2.setOptions(stats2ops);
+    filter2.setInput(&reprojectionFilter);
 
-        Options stats2ops;
-        stats2ops.add("dimensions", "X Z");
+    PointContext ctx;
+    filter2.prepare(ctx);
+    filter2.execute(ctx);
 
-        StatsFilter filter2;
-        filter2.setOptions(stats2ops);
-        filter2.setInput(&reprojectionFilter);
+    const stats::Summary& statsX = filter2.getStats(Dimension::Id::X);
+    const stats::Summary& statsY = filter1.getStats(Dimension::Id::Y);
+    const stats::Summary& statsZ = filter2.getStats(Dimension::Id::Z);
 
-        PointContext ctx;
-        filter2.prepare(ctx);
-        filter2.execute(ctx);
+    EXPECT_EQ(statsX.count(), 1065u);
+    EXPECT_EQ(statsY.count(), 1065u);
+    EXPECT_EQ(statsZ.count(), 1065u);
 
-        const stats::Summary& statsX = filter2.getStats(Dimension::Id::X);
-        const stats::Summary& statsY = filter1.getStats(Dimension::Id::Y);
-        const stats::Summary& statsZ = filter2.getStats(Dimension::Id::Z);
-
-        EXPECT_EQ(statsX.count(), 1065u);
-        EXPECT_EQ(statsY.count(), 1065u);
-        EXPECT_EQ(statsZ.count(), 1065u);
-
-        EXPECT_FLOAT_EQ(statsX.minimum(), -117.2686466233);
-        EXPECT_FLOAT_EQ(statsY.minimum(), 848899.700);
-    }
+    EXPECT_FLOAT_EQ(statsX.minimum(), -117.2686466233);
+    EXPECT_FLOAT_EQ(statsY.minimum(), 848899.700);
 }
 
 
@@ -255,32 +238,26 @@ TEST(StatsFilterTest, test_pointbuffer_stats)
     options.add(exact_dimensions);
 
     StageFactory f;
-    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
+    std::unique_ptr<Reader> reader(f.createReader("readers.las"));
+    EXPECT_TRUE(reader.get());
+    reader->setOptions(options);
 
-    if (rc)
-    {
-        EXPECT_TRUE(rc);
+    ReprojectionFilter reprojectionFilter;
+    reprojectionFilter.setOptions(options);
+    reprojectionFilter.setInput(reader.get());
 
-        Stage* reader = rc();
-        reader->setOptions(options);
+    Options statsOptions = options;
+    options.add("num_points", 1000);
 
-        ReprojectionFilter reprojectionFilter;
-        reprojectionFilter.setOptions(options);
-        reprojectionFilter.setInput(reader);
+    StatsFilter filter;
+    filter.setOptions(options);
+    filter.setInput(&reprojectionFilter);
 
-        Options statsOptions = options;
-        options.add("num_points", 1000);
+    PointContext ctx;
+    filter.prepare(ctx);
+    filter.execute(ctx);
 
-        StatsFilter filter;
-        filter.setOptions(options);
-        filter.setInput(&reprojectionFilter);
-
-        PointContext ctx;
-        filter.prepare(ctx);
-        filter.execute(ctx);
-
-        MetadataNode m = ctx.metadata();
-        m = m.findChild("filters.stats:statistic:counts:count-1:count");
-        EXPECT_EQ(m.value(), "737");
-    }
+    MetadataNode m = ctx.metadata();
+    m = m.findChild("filters.stats:statistic:counts:count-1:count");
+    EXPECT_EQ(m.value(), "737");
 }
