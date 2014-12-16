@@ -236,7 +236,6 @@ bool WriteUnprojectedData()
     writer->execute(ctx);
 
     //ABELL - This test doesn't test anything anymore.  Perhaps it should.
-}
     return true;
 }
 
