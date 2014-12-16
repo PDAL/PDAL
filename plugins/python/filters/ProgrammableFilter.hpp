@@ -35,30 +35,22 @@
 #pragma once
 
 #include <pdal/pdal_internal.hpp>
-#ifdef PDAL_HAVE_PYTHON
-
 #include <pdal/Filter.hpp>
 #include <pdal/plang/BufferedInvocation.hpp>
 
 namespace pdal
 {
-namespace filters
-{
 
 class ProgrammableFilterSequentialIterator;
 
-class PDAL_DLL Programmable : public Filter
+class PDAL_DLL ProgrammableFilter : public Filter
 {
 public:
     SET_STAGE_NAME("filters.programmable", "Programmable Filter")
     SET_STAGE_LINK("http://pdal.io/stages/filters.programmable.html")
-#ifdef PDAL_HAVE_PYTHON
     SET_STAGE_ENABLED(true)
-#else
-    SET_STAGE_ENABLED(false)
-#endif
 
-    Programmable() : Filter(), m_script(NULL)
+    ProgrammableFilter() : Filter(), m_script(NULL)
         {}
 
     static Options getDefaultOptions();
@@ -77,12 +69,8 @@ private:
     virtual void filter(PointBuffer& buf);
     virtual void done(PointContext ctx);
 
-    Programmable& operator=(const Programmable&); // not implemented
-    Programmable(const Programmable&); // not implemented
+    ProgrammableFilter& operator=(const ProgrammableFilter&); // not implemented
+    ProgrammableFilter(const ProgrammableFilter&); // not implemented
 };
 
-} // namespace filters
 } // namespace pdal
-
-#endif // HAVE_PYTHON
-

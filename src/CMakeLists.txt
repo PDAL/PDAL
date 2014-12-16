@@ -130,25 +130,6 @@ set(PDAL_FILTERS_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_FILTERS_PATH}")
 set(PDAL_FILTERS_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_FILTERS_PATH}")
 
 #
-# Core components that depend on Python
-#
-set(PDAL_PYTHON_HPP
-    ${PDAL_FILTERS_HEADERS}/Predicate.hpp
-    ${PDAL_FILTERS_HEADERS}/Programmable.hpp
-    )
-
-set(PDAL_PYTHON_CPP
-    ${PDAL_FILTERS_SRC}/Predicate.cpp
-    ${PDAL_FILTERS_SRC}/Programmable.cpp
-    )
-
-if (WITH_PYTHON)
-    list(APPEND PDAL_HPP ${PDAL_PYTHON_HPP})
-    list(APPEND PDAL_CPP ${PDAL_PYTHON_CPP})
-endif (WITH_PYTHON)
-
-
-#
 # plang parser
 #
 

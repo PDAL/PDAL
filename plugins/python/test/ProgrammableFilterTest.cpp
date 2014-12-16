@@ -34,12 +34,10 @@
 
 #include "gtest/gtest.h"
 
-#include <pdal/filters/Programmable.hpp>
 #include <StatsFilter.hpp>
-#include <FauxReader.hpp>
-
 #include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
+#include <pdal/StageFactory.hpp>
 
 #include "Support.hpp"
 
@@ -47,6 +45,8 @@ using namespace pdal;
 
 TEST(ProgrammableFilterTest, ProgrammableFilterTest_test1)
 {
+    StageFactory f;
+
     BOX3D bounds(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
 
     Options ops;
@@ -54,8 +54,8 @@ TEST(ProgrammableFilterTest, ProgrammableFilterTest_test1)
     ops.add("num_points", 10);
     ops.add("mode", "ramp");
 
-    FauxReader reader;
-    reader.setOptions(ops);
+    std::unique_ptr<Reader> reader(f.createReader("readers.faux"));
+    reader->setOptions(ops);
 
     Option source("source", "import numpy as np\n"
         "def myfunc(ins,outs):\n"
@@ -79,13 +79,13 @@ TEST(ProgrammableFilterTest, ProgrammableFilterTest_test1)
     opts.add(module);
     opts.add(function);
 
-    filters::Programmable filter;
-    filter.setOptions(opts);
-    filter.setInput(&reader);
-    EXPECT_TRUE(filter.getDescription() == "Programmable Filter");
+    std::unique_ptr<Filter> filter(f.createFilter("filters.programmable"));
+    filter->setOptions(opts);
+    filter->setInput(reader.get());
+    EXPECT_TRUE(filter->getDescription() == "Programmable Filter");
 
     StatsFilter stats;
-    stats.setInput(&filter);
+    stats.setInput(filter.get());
 
     PointContext ctx;
 
@@ -129,6 +129,8 @@ TEST(ProgrammableFilterTest, pipeline)
 
 TEST(ProgrammableFilterTest, add_dimension)
 {
+    StageFactory f;
+
     BOX3D bounds(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
 
     Options ops;
@@ -136,8 +138,8 @@ TEST(ProgrammableFilterTest, add_dimension)
     ops.add("num_points", 10);
     ops.add("mode", "ramp");
 
-    FauxReader reader;
-    reader.setOptions(ops);
+    std::unique_ptr<Reader> reader(f.createReader("readers.faux"));
+    reader->setOptions(ops);
 
     Option source("source", "import numpy\n"
         "def myfunc(ins,outs):\n"
@@ -156,13 +158,13 @@ TEST(ProgrammableFilterTest, add_dimension)
     opts.add(intensity);
     opts.add(scanDirection);
 
-    filters::Programmable filter;
-    filter.setOptions(opts);
-    filter.setInput(&reader);
+    std::unique_ptr<Filter> filter(f.createFilter("filters.programmable"));
+    filter->setOptions(opts);
+    filter->setInput(reader.get());
 
     PointContext ctx;
-    filter.prepare(ctx);
-    PointBufferSet pbSet = filter.execute(ctx);
+    filter->prepare(ctx);
+    PointBufferSet pbSet = filter->execute(ctx);
     EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
 

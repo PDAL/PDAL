@@ -35,30 +35,20 @@
 #pragma once
 
 #include <pdal/pdal_internal.hpp>
-#ifdef PDAL_HAVE_PYTHON
-
 #include <pdal/Filter.hpp>
-
 #include <pdal/plang/BufferedInvocation.hpp>
-
 
 namespace pdal
 {
-namespace filters
-{
 
-class PDAL_DLL Predicate : public Filter
+class PDAL_DLL PredicateFilter : public Filter
 {
 public:
     SET_STAGE_NAME("filters.predicate", "Predicate Filter")
     SET_STAGE_LINK("http://pdal.io/stages/filters.predicate.html")
-#ifdef PDAL_HAVE_PYTHON
     SET_STAGE_ENABLED(true)
-#else
-    SET_STAGE_ENABLED(false)
-#endif
 
-    Predicate() : Filter(), m_script(NULL)
+    PredicateFilter() : Filter(), m_script(NULL)
         {}
 
     static Options getDefaultOptions();
@@ -75,11 +65,8 @@ private:
     virtual PointBufferSet run(PointBufferPtr buf);
     virtual void done(PointContext ctx);
 
-    Predicate& operator=(const Predicate&); // not implemented
-    Predicate(const Predicate&); // not implemented
+    PredicateFilter& operator=(const PredicateFilter&); // not implemented
+    PredicateFilter(const PredicateFilter&); // not implemented
 };
 
-} // namespace filters
 } // namespace pdal
-
-#endif // PDAL_HAVE_PYTHON

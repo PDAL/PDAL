@@ -64,12 +64,7 @@ if(PCL_FOUND)
         #
         set(srcs
             kernel/ViewKernel.cpp
-            ${PDAL_TARGET_OBJECTS}
         )
-
-        if(WIN32)
-            list(APPEND srcs ${PDAL_TARGET_OBJECTS})
-	endif()
 
         set(incs
             kernel/ViewKernel.hpp
@@ -140,13 +135,7 @@ if(PCL_FOUND)
     #
     set(srcs
         kernel/PCLKernel.cpp
-        ${PDAL_TARGET_OBJECTS}
     )
-
-    if(WIN32)
-        list(APPEND srcs ${PDAL_TARGET_OBJECTS})
-    endif()
-
 
     set(incs
         kernel/PCLKernel.hpp
@@ -160,12 +149,7 @@ if(PCL_FOUND)
     #
     set(srcs
         kernel/GroundKernel.cpp
-        ${PDAL_TARGET_OBJECTS}
     )
-
-    if(WIN32)
-        list(APPEND srcs ${PDAL_TARGET_OBJECTS})
-    endif()
 
     set(incs
         kernel/GroundKernel.hpp
@@ -179,12 +163,7 @@ if(PCL_FOUND)
     #
     set(srcs
         kernel/SmoothKernel.cpp
-        ${PDAL_TARGET_OBJECTS}
     )
-
-    if(WIN32)
-        list(APPEND srcs ${PDAL_TARGET_OBJECTS})
-    endif()
 
     set(incs
         kernel/SmoothKernel.hpp
@@ -194,13 +173,6 @@ if(PCL_FOUND)
     PDAL_ADD_PLUGIN(smooth_kernel_lib_name kernel smooth "${srcs}" "${incs}" "${deps}")
 
     if (WITH_TESTS)
-        #
-        # PCL tests
-        #
-	set(srcs
-	    test/PCLBlockFilterTest.cpp
-	)
-
 	set(deps
 	    ${pclvisualizer_lib_name}
 	    ${pcd_reader_lib_name}
@@ -210,7 +182,7 @@ if(PCL_FOUND)
 	    ${ground_kernel_lib_name}
 	    ${smooth_kernel_lib_name}
 	)
-	PDAL_ADD_TEST(pcltest "${srcs}" "${deps}")
+        PDAL_ADD_TEST(pcltest FILES test/PCLBlockFilterTest.cpp LINK_WITH "${deps}")
     endif()
 else()
     message(STATUS "Building without PCL support")

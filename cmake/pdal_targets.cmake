@@ -94,6 +94,11 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname _srcs _incs _deps)
     else()
         set(${_name} "pdal_plugin_${_type}_${_shortname}")
     endif()
+
+    if (WIN32)
+	    list(APPEND ${_srcs} ${PDAL_TARGET_OBJECTS})
+    endif()
+
     add_library(${${_name}} SHARED ${_srcs} ${_incs})
     target_link_libraries(${${_name}} ${PDAL_LINKAGE} ${PDAL_LIB_NAME} ${_deps})
 
@@ -106,33 +111,31 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname _srcs _incs _deps)
         ARCHIVE DESTINATION ${PDAL_LIB_DIR})
 endmacro(PDAL_ADD_PLUGIN)
 
-macro(PDAL_ADD_TEST _name _srcs)
+###############################################################################
+# Add a test target.
+# _name The driver name.
+# ARGN :
+#    FILES the source files for the test
+#    LINK_WITH link test executable with libraries
+macro(PDAL_ADD_TEST _name)
+    set(options)
+    set(oneValueArgs)
+    set(multiValueArgs FILES LINK_WITH)
+    cmake_parse_arguments(PDAL_ADD_TEST "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     include_directories(${PROJECT_SOURCE_DIR}/test/unit)
     include_directories(${PROJECT_BINARY_DIR}/test/unit)
     set(common_srcs
         ${PROJECT_SOURCE_DIR}/test/unit/Support.cpp
 	${PROJECT_SOURCE_DIR}/test/unit/TestConfig.cpp
     )
-    add_executable(${_name} ${_srcs} ${common_srcs})
-    set_target_properties(${_name} PROPERTIES COMPILE_DEFINITIONS PDAL_DLL_IMPORT)
-    if(WIN32)
+    if (WIN32)
+        list(APPEND ${PDAL_ADD_TEST_FILES} ${PDAL_TARGET_OBJECTS})
         add_definitions("-DPDAL_DLL_EXPORT=1")
     endif()
-    target_link_libraries(${_name} ${PDAL_LINKAGE} ${PDAL_LIB_NAME})
-    target_link_libraries(${_name} ${PDAL_LINKAGE} gtest_main)
-
-    # Add dependent libraries if provided
-    set(extra_args ${ARGN})
-    list(LENGTH extra_args extra_args_cnt)
-    while (extra_args_cnt GREATER 0)
-        list(GET extra_args 0 dep)
-        target_link_libraries(${_name} ${PDAL_LINKAGE} ${dep})
-        list(REMOVE_AT extra_args 0)
-        list(LENGTH extra_args extra_args_cnt)
-    endwhile()
-
-    add_test(NAME ${_name} COMMAND "${PROJECT_BINARY_DIR}/bin/${_name}"
-        WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/..")
+    add_executable(${_name} ${PDAL_ADD_TEST_FILES} ${common_srcs})
+    set_target_properties(${_name} PROPERTIES COMPILE_DEFINITIONS PDAL_DLL_IMPORT)
+    target_link_libraries(${_name} ${PDAL_LIB_NAME} gtest gtest_main ${PDAL_ADD_TEST_LINK_WITH})
+    add_test(NAME ${_name} COMMAND "${PROJECT_BINARY_DIR}/bin/${_name}" WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/..")
 endmacro(PDAL_ADD_TEST)
 
 ###############################################################################

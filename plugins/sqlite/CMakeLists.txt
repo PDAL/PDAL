@@ -48,12 +48,8 @@ if (SQLITE3_FOUND)
     # SQLite tests
     #
     if(BUILD_SQLITE_TESTS)
-	set(srcs
-    test/SQLiteTest.cpp
-	)
-
         set(deps ${sqlite_reader_lib_name} ${sqlite_writer_lib_name})
-	PDAL_ADD_TEST(sqlitetest "${srcs}" "${deps}")
+	PDAL_ADD_TEST(sqlitetest FILES test/SQLiteTest.cpp LINK_WITH "${deps}")
     endif()
 else()
     message(STATUS "Building without SQLite support")

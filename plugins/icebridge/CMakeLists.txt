@@ -30,14 +30,7 @@ if (HDF5_FOUND)
     PDAL_ADD_PLUGIN(icebridge_reader_lib_name reader icebridge "${srcs}" "${incs}" "${deps}")
 
     if (WITH_TESTS)
-	#
-	# Icebridge tests
-	#
-	set(srcs
-	    test/IcebridgeReaderTest.cpp
-	)
-
-	PDAL_ADD_TEST(icetest "${srcs}" ${icebridge_reader_lib_name})
+        PDAL_ADD_TEST(icetest FILES test/IcebridgeReaderTest.cpp LINK_WITH ${icebridge_reader_lib_name})
     endif()
 else()
     message(STATUS "Building without Icebridge support")
