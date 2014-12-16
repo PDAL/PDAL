@@ -39,7 +39,7 @@ if(PCL_FOUND)
     endif()
 
     # PCL's configuration clobbers Boost find_package - do it again
-    find_package(Boost 1.52 COMPONENTS program_options thread iostreams filesystem system unit_test_framework random)
+    find_package(Boost 1.52 COMPONENTS program_options thread iostreams filesystem system random)
 
     if (PCL_VISUALIZATION_FOUND)
         message(STATUS "Building with PCL Visualization support")
