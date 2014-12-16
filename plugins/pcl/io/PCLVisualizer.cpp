@@ -34,7 +34,8 @@
 
 #include "PCLVisualizer.hpp"
 
-#include <boost/thread/thread.hpp>
+#include <chrono>
+#include <thread>
 
 #include <pcl/conversions.h>
 #include <pcl/io/pcd_io.h>
@@ -176,7 +177,7 @@ void PclVisualizer::write(const PointBuffer& data)
     while (!p->wasStopped())
     {
         p->spinOnce(100);
-        boost::this_thread::sleep(boost::posix_time::microseconds(100000));
+        std::this_thread::sleep_for(std::chrono::microseconds(100000));
     }
 }
 

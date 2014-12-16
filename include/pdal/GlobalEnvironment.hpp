@@ -39,7 +39,6 @@
 #include <pdal/plang/PythonEnvironment.hpp>
 
 #include <boost/random/mersenne_twister.hpp>
-#include <boost/thread/once.hpp>
 #include <boost/uuid/uuid.hpp>
 
 namespace pdal
