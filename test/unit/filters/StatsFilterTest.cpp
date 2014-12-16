@@ -51,7 +51,7 @@ TEST(StatsFilterTest, StatsFilterTest_test1)
     ops.add("mode", "constant");
 
     StageFactory f;
-    std::unique_ptr<Reader> reader(f.createReader("readers.faux"));
+    ReaderPtr reader(f.createReader("readers.faux"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(ops);
 
@@ -109,7 +109,7 @@ TEST(StatsFilterTest, test_multiple_dims_same_name)
     options.add(ignore);
 
     StageFactory f;
-    std::unique_ptr<Reader> reader(f.createReader("readers.las"));
+    ReaderPtr reader(f.createReader("readers.las"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(options);
     ReprojectionFilter reprojectionFilter;
@@ -157,7 +157,7 @@ TEST(StatsFilterTest, test_specified_stats)
     options.add(ignore);
 
     StageFactory f;
-    std::unique_ptr<Reader> reader(f.createReader("readers.las"));
+    ReaderPtr reader(f.createReader("readers.las"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(options);
 
@@ -238,7 +238,7 @@ TEST(StatsFilterTest, test_pointbuffer_stats)
     options.add(exact_dimensions);
 
     StageFactory f;
-    std::unique_ptr<Reader> reader(f.createReader("readers.las"));
+    ReaderPtr reader(f.createReader("readers.las"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(options);
 

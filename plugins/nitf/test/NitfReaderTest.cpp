@@ -64,7 +64,7 @@ TEST(NitfReaderTest, test_one)
 
     PointContext ctx;
     
-    std::unique_ptr<Reader> nitf_reader(f.createReader("readers.nitf"));
+    ReaderPtr nitf_reader(f.createReader("readers.nitf"));
     EXPECT_TRUE(nitf_reader.get());
     nitf_reader->setOptions(nitf_opts);
     nitf_reader->prepare(ctx);
@@ -92,7 +92,7 @@ TEST(NitfReaderTest, test_one)
 
     PointContext ctx2;
 
-    std::unique_ptr<Reader> las_reader(f.createReader("readers.las"));
+    ReaderPtr las_reader(f.createReader("readers.las"));
     EXPECT_TRUE(las_reader.get());
     las_reader->setOptions(las_opts);
     las_reader->prepare(ctx2);
@@ -157,14 +157,14 @@ TEST(NitfReaderTest, optionSrs)
 
     PointContext ctx;
 
-    std::unique_ptr<Reader> nitfReader(f.createReader("readers.nitf"));
+    ReaderPtr nitfReader(f.createReader("readers.nitf"));
     EXPECT_TRUE(nitfReader.get());
     nitfReader->setOptions(nitfOpts);
 
     Options lasOpts;
     lasOpts.add("filename", "/dev/null");
 
-    std::unique_ptr<Writer> lasWriter(f.createWriter("writers.las"));
+    WriterPtr lasWriter(f.createWriter("writers.las"));
     EXPECT_TRUE(lasWriter.get());
     lasWriter->setInput(nitfReader.get());
     lasWriter->setOptions(lasOpts);;

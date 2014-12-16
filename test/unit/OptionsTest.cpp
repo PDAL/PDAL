@@ -65,10 +65,10 @@ TEST(OptionsTest, test_static_options)
     Options ops;
 
     StageFactory f;
-    std::unique_ptr<Reader> reader(f.createReader("readers.faux"));
+    ReaderPtr reader(f.createReader("readers.faux"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(ops);
-    std::unique_ptr<Filter> crop(f.createFilter("filters.crop"));
+    FilterPtr crop(f.createFilter("filters.crop"));
     EXPECT_TRUE(crop.get());
     crop->setOptions(ops);
     crop->setInput(reader.get());

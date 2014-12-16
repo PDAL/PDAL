@@ -44,6 +44,10 @@
 namespace pdal
 {
 
+class Writer;
+
+typedef std::unique_ptr<Writer> WriterPtr;
+
 class PointBuffer;
 class UserCallback;
 

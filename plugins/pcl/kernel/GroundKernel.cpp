@@ -177,7 +177,7 @@ int GroundKernel::execute()
     writerOptions.add<std::string>("filename", m_outputFile);
     setCommonOptions(writerOptions);
 
-    std::unique_ptr<Writer> writer(KernelSupport::makeWriter(m_outputFile, groundStage.get()));
+    WriterPtr writer(KernelSupport::makeWriter(m_outputFile, groundStage.get()));
     writer->setOptions(writerOptions);
 
     std::vector<std::string> cmd = getProgressShellCommand();

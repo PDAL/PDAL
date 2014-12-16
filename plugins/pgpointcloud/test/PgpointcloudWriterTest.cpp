@@ -129,8 +129,8 @@ private:
 TEST_F(PgpointcloudWriterTest, testWrite)
 {
     StageFactory f;
-    std::unique_ptr<Writer> writer(f.createWriter("writers.pgpointcloud"));
-    std::unique_ptr<Reader> reader(f.createReader("readers.las"));
+    WriterPtr writer(f.createWriter("writers.pgpointcloud"));
+    ReaderPtr reader(f.createReader("readers.las"));
 
     EXPECT_TRUE(writer.get());
     EXPECT_TRUE(reader.get());
@@ -160,7 +160,7 @@ TEST_F(PgpointcloudWriterTest, testWrite)
 TEST_F(PgpointcloudWriterTest, testNoPointcloudExtension)
 {
     StageFactory f;
-    std::unique_ptr<Writer> writer(f.createWriter("writers.pgpointcloud"));
+    WriterPtr writer(f.createWriter("writers.pgpointcloud"));
     EXPECT_TRUE(writer.get());
 
     executeOnTestDb("DROP EXTENSION pointcloud");
@@ -169,7 +169,7 @@ TEST_F(PgpointcloudWriterTest, testNoPointcloudExtension)
 
     const Option opt_filename("filename", file);
 
-    std::unique_ptr<Reader> reader(f.createReader("readers.las"));
+    ReaderPtr reader(f.createReader("readers.las"));
     EXPECT_TRUE(reader.get());
     Options options;
     options.add(opt_filename);

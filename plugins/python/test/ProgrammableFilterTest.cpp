@@ -54,7 +54,7 @@ TEST(ProgrammableFilterTest, ProgrammableFilterTest_test1)
     ops.add("num_points", 10);
     ops.add("mode", "ramp");
 
-    std::unique_ptr<Reader> reader(f.createReader("readers.faux"));
+    ReaderPtr reader(f.createReader("readers.faux"));
     reader->setOptions(ops);
 
     Option source("source", "import numpy as np\n"
@@ -79,7 +79,7 @@ TEST(ProgrammableFilterTest, ProgrammableFilterTest_test1)
     opts.add(module);
     opts.add(function);
 
-    std::unique_ptr<Filter> filter(f.createFilter("filters.programmable"));
+    FilterPtr filter(f.createFilter("filters.programmable"));
     filter->setOptions(opts);
     filter->setInput(reader.get());
     EXPECT_TRUE(filter->getDescription() == "Programmable Filter");
@@ -138,7 +138,7 @@ TEST(ProgrammableFilterTest, add_dimension)
     ops.add("num_points", 10);
     ops.add("mode", "ramp");
 
-    std::unique_ptr<Reader> reader(f.createReader("readers.faux"));
+    ReaderPtr reader(f.createReader("readers.faux"));
     reader->setOptions(ops);
 
     Option source("source", "import numpy\n"
@@ -158,7 +158,7 @@ TEST(ProgrammableFilterTest, add_dimension)
     opts.add(intensity);
     opts.add(scanDirection);
 
-    std::unique_ptr<Filter> filter(f.createFilter("filters.programmable"));
+    FilterPtr filter(f.createFilter("filters.programmable"));
     filter->setOptions(opts);
     filter->setInput(reader.get());
 

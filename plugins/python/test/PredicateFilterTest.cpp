@@ -54,7 +54,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test1)
     readerOps.add("num_points", 1000);
     readerOps.add("mode", "ramp");
 
-    std::unique_ptr<Reader> reader(f.createReader("readers.faux"));
+    ReaderPtr reader(f.createReader("readers.faux"));
     reader->setOptions(readerOps);
 
     // keep all points where x less than 1.0
@@ -76,7 +76,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test1)
     opts.add(module);
     opts.add(function);
 
-    std::unique_ptr<Filter> filter(f.createFilter("filters.predicate"));
+    FilterPtr filter(f.createFilter("filters.predicate"));
     filter->setOptions(opts);
     filter->setInput(reader.get());
     EXPECT_TRUE(filter->getDescription() == "Predicate Filter");
@@ -115,7 +115,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test2)
     readerOps.add("num_points", 1000);
     readerOps.add("mode", "ramp");
 
-    std::unique_ptr<Reader> reader(f.createReader("readers.faux"));
+    ReaderPtr reader(f.createReader("readers.faux"));
     reader->setOptions(readerOps);
 
     Option source("source",
@@ -135,7 +135,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test2)
     opts.add(module);
     opts.add(function);
 
-    std::unique_ptr<Filter> filter(f.createFilter("filters.predicate"));
+    FilterPtr filter(f.createFilter("filters.predicate"));
     filter->setOptions(opts);
     filter->setInput(reader.get());
     EXPECT_TRUE(filter->getDescription() == "Predicate Filter");
@@ -174,7 +174,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test3)
     readerOpts.add("num_points", 1000);
     readerOpts.add("mode", "ramp");
 
-    std::unique_ptr<Reader> reader(f.createReader("readers.faux"));
+    ReaderPtr reader(f.createReader("readers.faux"));
     reader->setOptions(readerOpts);
 
     // keep all points where x less than 1.0
@@ -196,7 +196,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test3)
     opts1.add(module1);
     opts1.add(function1);
 
-    std::unique_ptr<Filter> filter1(f.createFilter("filters.predicate"));
+    FilterPtr filter1(f.createFilter("filters.predicate"));
     filter1->setOptions(opts1);
     filter1->setInput(reader.get());
 
@@ -219,7 +219,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test3)
     opts2.add(module2);
     opts2.add(function2);
 
-    std::unique_ptr<Filter> filter2(f.createFilter("filters.predicate"));
+    FilterPtr filter2(f.createFilter("filters.predicate"));
     filter2->setOptions(opts2);
     filter2->setInput(filter1.get());
 
@@ -255,7 +255,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test4)
     readerOpts.add("num_points", 1000);
     readerOpts.add("mode", "ramp");
 
-    std::unique_ptr<Reader> reader(f.createReader("readers.faux"));
+    ReaderPtr reader(f.createReader("readers.faux"));
     reader->setOptions(readerOpts);
 
     const Option source("source",
@@ -275,7 +275,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test4)
     opts.add(module);
     opts.add(function);
 
-    std::unique_ptr<Filter> filter(f.createFilter("filters.predicate"));
+    FilterPtr filter(f.createFilter("filters.predicate"));
     filter->setOptions(opts);
     filter->setInput(reader.get());
 
@@ -310,7 +310,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test5)
     readerOpts.add("num_points", 1000);
     readerOpts.add("mode", "ramp");
 
-    std::unique_ptr<Reader> reader(f.createReader("readers.faux"));
+    ReaderPtr reader(f.createReader("readers.faux"));
     reader->setOptions(readerOpts);
 
     const Option source("source",
@@ -330,7 +330,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test5)
     opts.add(module);
     opts.add(function);
 
-    std::unique_ptr<Filter> filter(f.createFilter("filters.predicate"));
+    FilterPtr filter(f.createFilter("filters.predicate"));
     filter->setOptions(opts);
     filter->setInput(reader.get());
 

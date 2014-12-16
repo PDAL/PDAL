@@ -49,14 +49,14 @@ TEST(DecimationFilterTest, DecimationFilterTest_test1)
     ops.add("mode", "random");
     ops.add("num_points", 30);
     StageFactory f;
-    std::unique_ptr<Reader> reader(f.createReader("readers.faux"));
+    ReaderPtr reader(f.createReader("readers.faux"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(ops);
 
     Options decimationOps;
     decimationOps.add("step", 10);
     
-    std::unique_ptr<Filter> filter(f.createFilter("filters.decimation"));
+    FilterPtr filter(f.createFilter("filters.decimation"));
     EXPECT_TRUE(filter.get());
     filter->setOptions(decimationOps);
     filter->setInput(reader.get());

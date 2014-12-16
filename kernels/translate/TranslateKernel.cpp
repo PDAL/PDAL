@@ -225,7 +225,7 @@ Stage* TranslateKernel::makeTranslate(Options translateOptions, Stage* reader_st
         {
             readerOptions.add("bounds", m_bounds);
             StageFactory f;
-            std::unique_ptr<Filter> crop_stage(f.createFilter("filters.crop"));
+            FilterPtr crop_stage(f.createFilter("filters.crop"));
             crop_stage->setInput(next_stage);
             crop_stage->setOptions(readerOptions);
             next_stage = crop_stage.get();
@@ -250,14 +250,14 @@ Stage* TranslateKernel::makeTranslate(Options translateOptions, Stage* reader_st
             }
             readerOptions.add("polygon", m_wkt);
             StageFactory f;
-            std::unique_ptr<Filter> crop_stage(f.createFilter("filters.crop"));
+            FilterPtr crop_stage(f.createFilter("filters.crop"));
             crop_stage->setInput(next_stage);
             crop_stage->setOptions(readerOptions);
             next_stage = crop_stage.get();
         } else if (bHaveCrop)
         {
             StageFactory f;
-            std::unique_ptr<Filter> crop_stage(f.createFilter("filters.crop"));
+            FilterPtr crop_stage(f.createFilter("filters.crop"));
             crop_stage->setInput(next_stage);
             crop_stage->setOptions(extra_opts.find("filters.crop")->second);
             next_stage = crop_stage.get();
@@ -268,7 +268,7 @@ Stage* TranslateKernel::makeTranslate(Options translateOptions, Stage* reader_st
     if (boost::iequals(m_decimation_method, "VoxelGrid"))
     {
         StageFactory f;
-        std::unique_ptr<Filter> decimation_stage(f.createFilter("filters.pclblock"));
+        FilterPtr decimation_stage(f.createFilter("filters.pclblock"));
             
         Options decimationOptions;
         std::ostringstream ss;
@@ -301,7 +301,7 @@ Stage* TranslateKernel::makeTranslate(Options translateOptions, Stage* reader_st
         decimationOptions.add("offset", m_decimation_offset);
         decimationOptions.add("limit", m_decimation_limit);
         StageFactory f;
-        std::unique_ptr<Filter> decimation_stage(f.createFilter("filters.decimation"));
+        FilterPtr decimation_stage(f.createFilter("filters.decimation"));
         decimation_stage->setInput(final_stage);
         decimation_stage->setOptions(decimationOptions);
         final_stage = decimation_stage.get();
@@ -356,7 +356,7 @@ int TranslateKernel::execute()
         cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
         (UserCallback *)new HeartbeatCallback();
 
-    std::unique_ptr<Writer> writer( KernelSupport::makeWriter(m_outputFile, finalStage));
+    WriterPtr writer( KernelSupport::makeWriter(m_outputFile, finalStage));
     if (!m_output_srs.empty())
         writer->setSpatialReference(m_output_srs);
 

@@ -60,7 +60,7 @@ TEST(LogTest, test_one)
     {
         PointContext ctx;
 
-        std::unique_ptr<Reader> reader(f.createReader("readers.faux"));
+        ReaderPtr reader(f.createReader("readers.faux"));
         reader->setOptions(opts);
         reader->prepare(ctx);
 
@@ -140,14 +140,14 @@ TEST(LogTest, test_two_a)
     }
 
     {
-        std::unique_ptr<Reader> reader(f.createReader("readers.faux"));
+        ReaderPtr reader(f.createReader("readers.faux"));
         reader->setOptions(reader_opts);
 
-        std::unique_ptr<Filter> xfilter(f.createFilter("filters.programmable"));
+        FilterPtr xfilter(f.createFilter("filters.programmable"));
         xfilter->setOptions(xfilter_opts);
         xfilter->setInput(reader.get());
 
-        std::unique_ptr<Filter> yfilter(f.createFilter("filters.programmable"));
+        FilterPtr yfilter(f.createFilter("filters.programmable"));
         yfilter->setOptions(yfilter_opts);
         yfilter->setInput(xfilter.get());
 
@@ -239,14 +239,14 @@ TEST(LogTest, test_two_b)
     }
 
     {
-        std::unique_ptr<Reader> reader(f.createReader("readers.faux"));
+        ReaderPtr reader(f.createReader("readers.faux"));
         reader->setOptions(reader_opts);
 
-        std::unique_ptr<Filter> xfilter(f.createFilter("filters.programmable"));
+        FilterPtr xfilter(f.createFilter("filters.programmable"));
         xfilter->setOptions(xfilter_opts);
         xfilter->setInput(reader.get());
 
-        std::unique_ptr<Filter> yfilter(f.createFilter("filters.programmable"));
+        FilterPtr yfilter(f.createFilter("filters.programmable"));
         yfilter->setOptions(yfilter_opts);
         yfilter->setInput(xfilter.get());
 
@@ -328,10 +328,10 @@ TEST(LogTest, test_three)
     }
 
     {
-        std::unique_ptr<Reader> reader(f.createReader("readers.faux"));
+        ReaderPtr reader(f.createReader("readers.faux"));
         reader->setOptions(reader_opts);
 
-        std::unique_ptr<Filter> xfilter(f.createFilter("filters.programmable"));
+        FilterPtr xfilter(f.createFilter("filters.programmable"));
         xfilter->setOptions(xfilter_opts);
         xfilter->setInput(reader.get());
 

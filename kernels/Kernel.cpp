@@ -373,7 +373,7 @@ void Kernel::visualize(PointBufferPtr buffer) const
     bufferReader.addBuffer(buffer);
 
     StageFactory f;
-    std::unique_ptr<Writer> writer(f.createWriter("writers.pclvisualizer"));
+    WriterPtr writer(f.createWriter("writers.pclvisualizer"));
     writer->setInput(&bufferReader);
 
     PointContext ctx;

@@ -78,7 +78,7 @@ TEST(FerryFilterTest, test_ferry_invalid)
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
     StageFactory f;
-    std::unique_ptr<Reader> reader(f.createReader("readers.las"));
+    ReaderPtr reader(f.createReader("readers.las"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(ops1);
 
@@ -91,7 +91,7 @@ TEST(FerryFilterTest, test_ferry_invalid)
     x.setOptions(xO);
     options.add(x);
 
-    std::unique_ptr<Filter> ferry(f.createFilter("filters.ferry"));
+    FilterPtr ferry(f.createFilter("filters.ferry"));
     EXPECT_TRUE(ferry.get());
     ferry->setInput(reader.get());
     ferry->setOptions(options);
