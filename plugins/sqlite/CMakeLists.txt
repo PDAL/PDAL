@@ -17,39 +17,36 @@ if (SQLITE3_FOUND)
     #
     # SQLite Reader
     #
-    set(srcs
-	io/SQLiteReader.cpp
-    )
-
+    set(srcs io/SQLiteReader.cpp)
     set(incs
         io/SQLiteCommon.hpp
-	io/SQLiteReader.hpp
+        io/SQLiteReader.hpp
     )
 
-    set(deps ${SQLITE3_LIBRARY})
-    PDAL_ADD_PLUGIN(sqlite_reader_lib_name reader sqlite "${srcs}" "${incs}" "${deps}")
+    PDAL_ADD_PLUGIN(reader_libname reader sqlite
+        FILES "${srcs}" "${incs}"
+        LINK_WITH ${SQLITE3_LIBRARY})
 
     #
     # SQLite Writer
     #
-    set(srcs
-        io/SQLiteWriter.cpp
-    )
-
+    set(srcs io/SQLiteWriter.cpp)
     set(incs
         io/SQLiteCommon.hpp
-	io/SQLiteWriter.hpp
+        io/SQLiteWriter.hpp
     )
 
-    set(deps ${SQLITE3_LIBRARY})
-    PDAL_ADD_PLUGIN(sqlite_writer_lib_name writer sqlite "${srcs}" "${incs}" "${deps}")
+    PDAL_ADD_PLUGIN(writer_libname writer sqlite
+        FILES "${srcs}" "${incs}"
+        LINK_WITH ${SQLITE3_LIBRARY})
 
     #
     # SQLite tests
     #
     if(BUILD_SQLITE_TESTS)
-        set(deps ${sqlite_reader_lib_name} ${sqlite_writer_lib_name})
-	PDAL_ADD_TEST(sqlitetest FILES test/SQLiteTest.cpp LINK_WITH "${deps}")
+	PDAL_ADD_TEST(sqlitetest
+            FILES test/SQLiteTest.cpp
+            LINK_WITH ${reader_libname} ${writer_libname})
     endif()
 else()
     message(STATUS "Building without SQLite support")

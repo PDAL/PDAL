@@ -13,19 +13,12 @@ if(MRSID_FOUND)
     include_directories(${MRSID_INCLUDE_DIR})
     add_definitions(-DHAVE_MRSID=1)
 
-    #
-    # MrSID Reader
-    #
-    set(srcs
-        io/MrsidReader.cpp
-    )
+    set(srcs io/MrsidReader.cpp)
+    set(incs io/MrsidReader.hpp)
 
-    set(incs
-        io/MrsidReader.hpp
-    )
-
-    set(deps ${MRSID_LIBRARY})
-    PDAL_ADD_PLUGIN(mrsid_reader_lib_name reader mrsid "${srcs}" "${incs}" "${deps}")
+    PDAL_ADD_PLUGIN(libname reader mrsid
+        FILES "${srcs}" "${incs}"
+        LINK_WITH ${MRSID_LIBRARY})
 else()
     message(STATUS "Building without MrSID support")
 endif()

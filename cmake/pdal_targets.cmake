@@ -84,11 +84,14 @@ endmacro(PDAL_ADD_EXECUTABLE)
 ###############################################################################
 # Add a plugin target.
 # _name The plugin name.
-# ARGN the source files for the plugin.
-#
-# Todo: handle windows/unix variants of the plugin name
-# Todo: accept deps for target_link_libraries
-macro(PDAL_ADD_PLUGIN _name _type _shortname _srcs _incs _deps)
+# ARGN :
+#    FILES the srouce files for the plugin
+#    LINK_WITH link plugin with libraries
+macro(PDAL_ADD_PLUGIN _name _type _shortname)
+    set(options)
+    set(oneValueArgs)
+    set(multiValueArgs FILES LINK_WITH)
+    cmake_parse_arguments(PDAL_ADD_PLUGIN "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
     if(WIN32)
         set(${_name} "libpdal_plugin_${_type}_${_shortname}")
     else()
@@ -96,14 +99,13 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname _srcs _incs _deps)
     endif()
 
     if (WIN32)
-	    list(APPEND ${_srcs} ${PDAL_TARGET_OBJECTS})
+	    list(APPEND ${PDAL_ADD_PLUGIN_FILES} ${PDAL_TARGET_OBJECTS})
     endif()
 
-    add_library(${${_name}} SHARED ${_srcs} ${_incs})
-    target_link_libraries(${${_name}} ${PDAL_LINKAGE} ${PDAL_LIB_NAME} ${_deps})
+    add_library(${${_name}} SHARED ${PDAL_ADD_PLUGIN_FILES})
+    target_link_libraries(${${_name}} ${PDAL_LINKAGE} ${PDAL_LIB_NAME} ${PDAL_ADD_PLUGIN_LINK_WITH})
 
-    source_group("Header Files\\${_type}\\${_shortname}" FILES ${_incs})
-    source_group("Source Files\\${_type}\\${_shortname}" FILES ${_srcs})
+    set_target_properties(${${_name}} PROPERTIES FOLDER "${_type}_${_shortname}")
 
     install(TARGETS ${${_name}}
         RUNTIME DESTINATION ${PDAL_BIN_DIR}

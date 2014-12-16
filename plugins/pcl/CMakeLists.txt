@@ -43,35 +43,29 @@ if(PCL_FOUND)
 
     if (PCL_VISUALIZATION_FOUND)
         message(STATUS "Building with PCL Visualization support")
-	
-	#
-	# PCLVisualizer Writer
-	#
-	set(srcs
-	    io/PCLVisualizer.cpp
-	)
+    
+        #
+        # PCLVisualizer Writer
+        #
+        set(srcs io/PCLVisualizer.cpp)
+        set(incs
+            io/PCLVisualizer.hpp
+            PCLConversions.hpp
+        )
 
-	set(incs
-	    io/PCLVisualizer.hpp
-	    PCLConversions.hpp
-	)
-
-        set(deps ${PCL_LIBRARIES})
-        PDAL_ADD_PLUGIN(pclvisualizer_writer_lib_name writer pclvisualizer "${srcs}" "${incs}" "${deps}")
+        PDAL_ADD_PLUGIN(pclvisualizer_libname writer pclvisualizer
+            FILES "${srcs}" "${incs}"
+            LINK_WITH ${PCL_LIBRARIES})
 
         #
         # View Kernel
         #
-        set(srcs
-            kernel/ViewKernel.cpp
-        )
+        set(srcs kernel/ViewKernel.cpp)
+        set(incs kernel/ViewKernel.hpp)
 
-        set(incs
-            kernel/ViewKernel.hpp
-        )
-
-        set(deps ${PCL_LIBRARIES})
-        PDAL_ADD_PLUGIN(view_kernel_lib_name kernel view "${srcs}" "${incs}" "${deps}")
+        PDAL_ADD_PLUGIN(view_libname kernel view
+            FILES "${srcs}" "${incs}"
+            LINK_WITH ${PCL_LIBRARIES})
     else()
         message(STATUS "..building without PCL Visualization")
     endif()
@@ -80,37 +74,39 @@ if(PCL_FOUND)
     # PCD Reader
     #
     set(srcs
-	io/PcdCommon.cpp
-	io/PcdReader.cpp
+        io/PcdCommon.cpp
+        io/PcdReader.cpp
     )
 
     set(incs
-	io/PcdCommon.hpp
-	io/PcdReader.hpp
-	io/point_types.hpp
-	PCLConversions.hpp
+        io/PcdCommon.hpp
+        io/PcdReader.hpp
+        io/point_types.hpp
+        PCLConversions.hpp
     )
 
-    set(deps ${PCL_LIBRARIES})
-    PDAL_ADD_PLUGIN(pcd_reader_lib_name reader pcd "${srcs}" "${incs}" "${deps}")
+    PDAL_ADD_PLUGIN(pcd_reader_libname reader pcd
+        FILES "${srcs}" "${incs}"
+        LINK_WITH ${PCL_LIBRARIES})
 
     #
     # PCD Writer
     #
     set(srcs
-	io/PcdCommon.cpp
-	io/PcdWriter.cpp
+        io/PcdCommon.cpp
+        io/PcdWriter.cpp
     )
 
     set(incs
-	io/PcdCommon.hpp
-	io/PcdWriter.hpp
-	io/point_types.hpp
-	PCLConversions.hpp
+        io/PcdCommon.hpp
+        io/PcdWriter.hpp
+        io/point_types.hpp
+        PCLConversions.hpp
     )
 
-    set(deps ${PCL_LIBRARIES})
-    PDAL_ADD_PLUGIN(pcd_writer_lib_name writer pcd "${srcs}" "${incs}" "${deps}")
+    PDAL_ADD_PLUGIN(pcd_writer_libname writer pcd
+        FILES "${srcs}" "${incs}"
+        LINK_WITH ${PCL_LIBRARIES})
 
     #
     # PCLBlock Filter
@@ -127,62 +123,47 @@ if(PCL_FOUND)
         PCLConversions.hpp
     )
 
-    set(deps ${PCL_LIBRARIES})
-    PDAL_ADD_PLUGIN(pclblock_filter_lib_name filter pclblock "${srcs}" "${incs}" "${deps}")
+    PDAL_ADD_PLUGIN(pclblock_libname filter pclblock
+        FILES "${srcs}" "${incs}"
+        LINK_WITH ${PCL_LIBRARIES})
 
     #
     # PCL Kernel
     #
-    set(srcs
-        kernel/PCLKernel.cpp
-    )
+    set(srcs kernel/PCLKernel.cpp)
+    set(incs kernel/PCLKernel.hpp)
 
-    set(incs
-        kernel/PCLKernel.hpp
-    )
-
-    set(deps ${PCL_LIBRARIES} ${pclblock_filter_lib_name})
-    PDAL_ADD_PLUGIN(pcl_kernel_lib_name kernel pcl "${srcs}" "${incs}" "${deps}")
+    PDAL_ADD_PLUGIN(pcl_libname kernel pcl
+        FILES "${srcs}" "${incs}"
+        LINK_WITH ${PCL_LIBRARIES} ${pclblock_libname})
 
     #
     # Ground Kernel
     #
-    set(srcs
-        kernel/GroundKernel.cpp
-    )
+    set(srcs kernel/GroundKernel.cpp)
+    set(incs kernel/GroundKernel.hpp)
 
-    set(incs
-        kernel/GroundKernel.hpp
-    )
-
-    set(deps ${PCL_LIBRARIES} ${pclblock_filter_lib_name})
-    PDAL_ADD_PLUGIN(ground_kernel_lib_name kernel ground "${srcs}" "${incs}" "${deps}")
+    PDAL_ADD_PLUGIN(ground_libname kernel ground
+        FILES "${srcs}" "${incs}"
+        LINK_WITH ${PCL_LIBRARIES} ${pclblock_libname})
 
     #
     # Smooth Kernel
     #
-    set(srcs
-        kernel/SmoothKernel.cpp
-    )
+    set(srcs kernel/SmoothKernel.cpp)
+    set(incs kernel/SmoothKernel.hpp)
 
-    set(incs
-        kernel/SmoothKernel.hpp
-    )
-
-    set(deps ${PCL_LIBRARIES} ${pclblock_filter_lib_name})
-    PDAL_ADD_PLUGIN(smooth_kernel_lib_name kernel smooth "${srcs}" "${incs}" "${deps}")
+    PDAL_ADD_PLUGIN(smooth_libname kernel smooth
+        FILES "${srcs}" "${incs}"
+        LINK_WITH ${PCL_LIBRARIES} ${pclblock_libname})
 
     if (WITH_TESTS)
-	set(deps
-	    ${pclvisualizer_lib_name}
-	    ${pcd_reader_lib_name}
-	    ${pcd_writer_lib_name}
-	    ${pclblock_filter_lib_name}
-	    ${pcl_kernel_lib_name}
-	    ${ground_kernel_lib_name}
-	    ${smooth_kernel_lib_name}
-	)
-        PDAL_ADD_TEST(pcltest FILES test/PCLBlockFilterTest.cpp LINK_WITH "${deps}")
+        PDAL_ADD_TEST(pcltest
+            FILES test/PCLBlockFilterTest.cpp
+            LINK_WITH ${pclvisualizer_libname} ${pcd_reader_libname}
+                      ${pcd_writer_libname} ${pclblock_libname}
+                      ${pcl_libname} ${ground_libname} ${smooth_libname}
+        )
     endif()
 else()
     message(STATUS "Building without PCL support")
