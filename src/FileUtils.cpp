@@ -168,7 +168,7 @@ string FileUtils::readFileIntoString(const string& filename)
 
 string FileUtils::addTrailingSlash(string path)
 {
-    if (path[path.size() - 1] != '/')
+    if (path[path.size() - 1] != '/' && path[path.size() - 1] != '\\')
         path += "/";
     return path;
 }

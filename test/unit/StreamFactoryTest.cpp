@@ -46,7 +46,7 @@ using namespace pdal;
 
 TEST(StreamFactoryTest, test1)
 {
-    const std::string wfilename = "temp.txt";
+    const std::string wfilename(Support::temppath("temp.txt"));
 
     // filename, writing
     {
