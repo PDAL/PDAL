@@ -38,6 +38,7 @@
 #include <pdal/Bounds.hpp>
 #include <pdal/PointContext.hpp>
 
+#include <memory>
 #include <queue>
 #include <set>
 #include <vector>

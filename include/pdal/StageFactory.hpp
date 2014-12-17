@@ -40,7 +40,6 @@
 #include <pdal/Filter.hpp>
 #include <pdal/Writer.hpp>
 #include <pdal/StageInfo.hpp>
-#include <boost/shared_ptr.hpp>
 
 #include <vector>
 #include <map>

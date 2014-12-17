@@ -39,9 +39,9 @@
 
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/device/null.hpp>
-#include <boost/shared_ptr.hpp>
 #include <pdal/FileUtils.hpp>
 #include <iosfwd>
+#include <memory>
 
 typedef boost::iostreams::null_sink sink;
 typedef boost::iostreams::stream<sink> null_stream;
@@ -135,7 +135,7 @@ private:
     std::string m_leader;
 };
 
-typedef boost::shared_ptr<Log> LogPtr;
+typedef std::shared_ptr<Log> LogPtr;
 
 
 } // namespace pdal

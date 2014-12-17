@@ -46,6 +46,7 @@
 
 #include <BufferReader.hpp>
 
+#include <memory>
 #include <vector>
 
 #include <boost/tokenizer.hpp>
@@ -398,7 +399,7 @@ void Kernel::visualize(PointBufferPtr input_buffer, PointBufferPtr output_buffer
     pclsupport::PDALtoPCD(const_cast<PointBuffer&>(*output_buffer), *output_cloud, output_bounds);
 
     // Create PCLVisualizer
-    boost::shared_ptr<pcl::visualization::PCLVisualizer> p(new pcl::visualization::PCLVisualizer("3D Viewer"));
+    std::shared_ptr<pcl::visualization::PCLVisualizer> p(new pcl::visualization::PCLVisualizer("3D Viewer"));
 
     // Set background to black
     p->setBackgroundColor(0, 0, 0);
@@ -434,7 +435,7 @@ void Kernel::visualize(PointBufferPtr input_buffer, PointBufferPtr output_buffer
       pclsupport::PDALtoPCD(const_cast<PointBuffer&>(*output_buffer), *output_cloud, output_bounds);
 
       // Create PCLVisualizer
-      boost::shared_ptr<pcl::visualization::PCLVisualizer> p(new pcl::visualization::PCLVisualizer("3D Viewer"));
+      std::shared_ptr<pcl::visualization::PCLVisualizer> p(new pcl::visualization::PCLVisualizer("3D Viewer"));
 
       // Set background to black
       p->setBackgroundColor(0, 0, 0);

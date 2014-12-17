@@ -37,12 +37,12 @@
 
 #include <pdal/pdal_internal.hpp>
 
-#include <boost/shared_ptr.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/optional.hpp>
 
 #include <map>
+#include <memory>
 #include <vector>
 
 namespace pdal
@@ -54,7 +54,7 @@ class Option;
 namespace options
 {
 typedef std::multimap<std::string, Option> map_t;
-typedef boost::shared_ptr<Options> OptionsPtr;
+typedef std::shared_ptr<Options> OptionsPtr;
 }
 
 /*!

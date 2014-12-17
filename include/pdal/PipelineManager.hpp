@@ -37,8 +37,6 @@
 #include <pdal/pdal_internal.hpp>
 #include <pdal/StageFactory.hpp>
 
-#include <boost/shared_ptr.hpp>
-
 #include <vector>
 #include <string>
 

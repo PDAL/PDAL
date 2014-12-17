@@ -35,6 +35,7 @@
 #include "PCLVisualizer.hpp"
 
 #include <chrono>
+#include <memory>
 #include <thread>
 
 #include <pcl/conversions.h>
@@ -73,8 +74,8 @@ class PointCloudColorHandlerIntensity : public PointCloudColorHandler<PointT>
     typedef typename PointCloudColorHandler<PointT>::PointCloud::ConstPtr PointCloudConstPtr;
 
 public:
-    typedef boost::shared_ptr<PointCloudColorHandlerIntensity<PointT> > Ptr;
-    typedef boost::shared_ptr<const PointCloudColorHandlerIntensity<PointT> > ConstPtr;
+    typedef std::shared_ptr<PointCloudColorHandlerIntensity<PointT> > Ptr;
+    typedef std::shared_ptr<const PointCloudColorHandlerIntensity<PointT> > ConstPtr;
 
     PointCloudColorHandlerIntensity(const PointCloudConstPtr& cloud) :
         PointCloudColorHandler<PointT> (cloud)
@@ -143,7 +144,7 @@ void PclVisualizer::write(const PointBuffer& data)
     pclsupport::PDALtoPCD(const_cast<PointBuffer&>(data), *cloud, buffer_bounds);
 
     // Create PCLVisualizer
-    boost::shared_ptr<pcl::visualization::PCLVisualizer> p(new pcl::visualization::PCLVisualizer("3D Viewer"));
+    std::shared_ptr<pcl::visualization::PCLVisualizer> p(new pcl::visualization::PCLVisualizer("3D Viewer"));
 
     // Set background to black
     p->setBackgroundColor(0, 0, 0);

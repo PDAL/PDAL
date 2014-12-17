@@ -36,6 +36,8 @@
 
 #include "OciWrapper.h"
 
+#include <memory>
+
 #include <cpl_port.h>
 
 #include <pdal/PointContext.hpp>

@@ -39,6 +39,7 @@
 #include <pdal/PointBuffer.hpp>
 
 #include <iostream>
+#include <memory>
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
 #include <boost/accumulators/statistics/mean.hpp>
@@ -129,7 +130,7 @@ private:
 };
 
 } // namespace stats
-typedef boost::shared_ptr<stats::Summary> SummaryPtr;
+typedef std::shared_ptr<stats::Summary> SummaryPtr;
 
 // This is just a pass-thorugh filter, which collects some stats about
 // the points that are fed through it

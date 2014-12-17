@@ -34,6 +34,8 @@
 
 #include <ReprojectionFilter.hpp>
 
+#include <memory>
+
 #include <boost/concept_check.hpp> // ignore_unused_variable_warning
 
 #include <pdal/PointBuffer.hpp>
@@ -110,7 +112,7 @@ void ReprojectionFilter::ready(PointContext ctx)
     if (m_inferInputSRS)
         m_inSRS = ctx.spatialRef();
 
-    m_gdal_debug = boost::shared_ptr<pdal::gdal::Debug>(
+    m_gdal_debug = std::shared_ptr<pdal::gdal::Debug>(
         new pdal::gdal::Debug(isDebug(), log()));
 
     m_in_ref_ptr = ReferencePtr(OSRNewSpatialReference(0),

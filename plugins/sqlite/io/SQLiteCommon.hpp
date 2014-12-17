@@ -43,6 +43,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include <sqlite3.h>
+#include <memory>
 #include <sstream>
 
 namespace pdal
@@ -154,7 +155,7 @@ public:
     size_t byte_size()
         { return buf.size(); }
 };
-typedef boost::shared_ptr<Patch> PatchPtr;
+typedef std::shared_ptr<Patch> PatchPtr;
 
 
 class SQLite
