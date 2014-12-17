@@ -35,6 +35,7 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 
 #include <pdal/pdal_export.hpp>
 #include <pdal/Bounds.hpp>
