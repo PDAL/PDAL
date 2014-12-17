@@ -44,13 +44,14 @@
 
 using namespace pdal;
 
-TEST(SortFilterTest, simple)
+namespace
+{
+
+void doSort(point_count_t count)
 {
     Options opts;
 
     opts.add("dimension", "X");
-
-    point_count_t count = 10000;
 
     SortFilter filter;
     filter.setOptions(opts);
@@ -71,12 +72,22 @@ TEST(SortFilterTest, simple)
     FilterTester::filter(&filter, buf);
     FilterTester::done(&filter, ctx);
 
+    EXPECT_EQ(count, buf.size());
     for (PointId i = 1; i < count; ++i)
     {
         double d1 = buf.getFieldAs<double>(Dimension::Id::X, i - 1);
         double d2 = buf.getFieldAs<double>(Dimension::Id::X, i);
         EXPECT_TRUE(d1 <= d2);
     }
+}
+
+} // unnamed namespace
+
+TEST(SortFilterTest, simple)
+{
+    point_count_t inc = 1;
+    for (point_count_t count = 3; count < 100000; count += inc, inc *= 2)
+        doSort(count);
 }
 
 TEST(SortFilterTest, pipeline)

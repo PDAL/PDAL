@@ -38,6 +38,7 @@
 #include <pdal/Bounds.hpp>
 #include <pdal/PointContext.hpp>
 
+#include <queue>
 #include <set>
 #include <vector>
 
@@ -60,23 +61,49 @@ class PDAL_DLL PointBuffer
     friend class plang::BufferedInvocation;
     friend class PointRef;
 public:
-    PointBuffer();
-    PointBuffer(PointContextRef context) : m_context(context)
+    PointBuffer(PointContextRef context) : m_context(context), m_size(0)
     {}
+    PointBuffer(std::istream& strm, PointContextRef ctx, PointId start,
+        PointId end) : m_context(ctx)
+    {
+        size_t pointSize = ctx.pointSize();
+
+        std::vector<char> bytes;
+        bytes.resize(pointSize);
+        char* start_pos = bytes.data();
+        for (PointId i = start; i < end; ++i)
+        {
+            char* pos = start_pos;
+            strm.read(pos, pointSize);
+            if (strm.eof() )
+                break; // done
+            for (const auto& dim : ctx.m_dims->m_used)
+            {
+                setFieldInternal(dim, i, pos);
+                pos += m_context.dimSize(dim);
+            }
+        }
+    }
 
     PointBufferIter begin();
     PointBufferIter end();
 
     point_count_t size() const
-        { return m_index.size(); }
+        { return m_size; }
 
     bool empty() const
-        { return m_index.size() == 0; }
+        { return m_size == 0; }
 
     inline void appendPoint(const PointBuffer& buffer, PointId id);
     void append(const PointBuffer& buf)
     {
-        m_index.insert(m_index.end(), buf.m_index.begin(), buf.m_index.end());
+        // We use size() instead of the index end because temp points
+        // might have been placed at the end of the buffer.
+        auto thisEnd = m_index.begin() + size();
+        auto bufEnd = buf.m_index.begin() + buf.size();
+        m_index.insert(thisEnd, buf.m_index.begin(), bufEnd);
+        m_size += buf.size();
+        clearTemps();
     }
 
     /// Return a new point buffer with the same point context as this
@@ -212,34 +239,13 @@ public:
         return strm;
     }
 
-    PointBuffer( std::istream& strm, PointContextRef ctx, PointId start, PointId end) : m_context(ctx)
-    {
-
-        size_t pointSize = ctx.pointSize();
-
-        std::vector<char> bytes;
-        bytes.resize(pointSize);
-        char* start_pos = bytes.data();
-        for (PointId i = start; i < end; ++i)
-        {
-            char* pos = start_pos;
-            strm.read(pos, pointSize);
-            if (strm.eof() )
-            {
-                break; // done
-            }
-            for (const auto& dim : ctx.m_dims->m_used)
-            {
-                setFieldInternal(dim, i, pos);
-                pos += m_context.dimSize(dim);
-            }
-
-        }
-    }
-
 protected:
     PointContextRef m_context;
     std::vector<PointId> m_index;
+    // The index might be larger than the size to support temporary point
+    // references.
+    size_t m_size;
+    std::queue<PointId> m_temps;
 
 private:
     template<typename T_IN, typename T_OUT>
@@ -251,6 +257,18 @@ private:
     T getFieldInternal(Dimension::Id::Enum dim, PointId pointIndex) const;
     inline void getFieldInternal(Dimension::Id::Enum dim, PointId pointIndex,
         void *value) const;
+    inline PointId getTemp(PointId id);
+    void freeTemp(PointId id)
+        { m_temps.push(id); }
+
+    // The standard idiom is swapping with a stack-created empty queue, but
+    // that invokes the ctor and probably allocates.  We've probably only got
+    // one or two things in our queue, so just pop until we're empty.
+    void clearTemps()
+    {
+        while (!m_temps.empty())
+            m_temps.pop();
+    }
 };
 
 
@@ -538,13 +556,15 @@ inline void PointBuffer::setFieldInternal(Dimension::Id::Enum dim,
     PointId id, const void *value)
 {
     PointId rawId = 0;
-    if (id == m_index.size())
+    if (id == size())
     {
         rawId = m_context.rawPtBuf()->addPoint();
         m_index.resize(id + 1);
         m_index[id] = rawId;
+        m_size++;
+        clearTemps();
     }
-    else if (id > m_index.size())
+    else if (id > size())
     {
         std::cerr << "Point index must increment.\n";
         //error - throw?
@@ -554,7 +574,6 @@ inline void PointBuffer::setFieldInternal(Dimension::Id::Enum dim,
     {
         rawId = m_index[id];
     }
-
     m_context.rawPtBuf()->setField(m_context.dimDetail(dim), rawId, value);
 }
 
@@ -563,11 +582,31 @@ inline void PointBuffer::appendPoint(const PointBuffer& buffer, PointId id)
 {
     // Invalid 'id' is a programmer error.
     PointId rawId = buffer.m_index[id];
-    point_count_t newid = m_index.size();
+    point_count_t newid = size();
     m_index.resize(newid + 1);
     m_index[newid] = rawId;
+    m_size++;
+    clearTemps();
 }
 
+
+// Make a temporary copy of a point by adding an entry to the index.
+inline PointId PointBuffer::getTemp(PointId id)
+{
+    PointId newid;
+    if (m_temps.size())
+    {
+        newid = m_temps.front();
+        m_temps.pop();
+    }
+    else
+    {
+        newid = m_index.size();
+        m_index.resize(newid + 1);
+    }
+    m_index[newid] = m_index[id];
+    return newid;
+}
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const PointBuffer&);
 
