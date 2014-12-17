@@ -37,7 +37,6 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
-#include <boost/concept_check.hpp> // ignore_unused_variable_warning
 #include <boost/optional.hpp>
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string.hpp>

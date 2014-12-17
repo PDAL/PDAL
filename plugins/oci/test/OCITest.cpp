@@ -466,7 +466,7 @@ TEST_F(OCITest, read_unprojected_data)
 //     reader_reader.prepare();
 //
 //     PointBuffer data(reader_reader.getSchema(), 2500);
-//     boost::scoped_ptr<StageSequentialIterator> iter(reader_reader.createSequentialIterator(data));
+//     std::unique_ptr<StageSequentialIterator> iter(reader_reader.createSequentialIterator(data));
 //
 //
 //     uint32_t numRead = iter->read(data);
@@ -516,7 +516,7 @@ TEST_F(OCITest, read_unprojected_data)
 //     reader_reader.prepare();
 //
 //     PointBuffer data(reader_reader.getSchema(), chunk_size+30);
-//     boost::scoped_ptr<StageSequentialIterator> iter(reader_reader.createSequentialIterator(data));
+//     std::unique_ptr<StageSequentialIterator> iter(reader_reader.createSequentialIterator(data));
 //
 //
 //     uint32_t numTotal(0);

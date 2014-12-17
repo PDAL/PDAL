@@ -43,11 +43,11 @@
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
 #include <boost/accumulators/statistics/mean.hpp>
-#include <boost/accumulators/statistics/moment.hpp>
+//#include <boost/accumulators/statistics/moment.hpp>
 #include <boost/accumulators/statistics/max.hpp>
 #include <boost/accumulators/statistics/min.hpp>
 #include <boost/accumulators/statistics/count.hpp>
-#include <boost/accumulators/statistics/density.hpp>
+//#include <boost/accumulators/statistics/density.hpp>
 
 #include <random>
 
@@ -57,11 +57,11 @@ namespace stats
 {
 
 typedef boost::iterator_range<std::vector<std::pair<double, double> >::iterator > histogram_type;
-#ifndef PDAL_COMPILER_MSVC  // See boost ticket 6535:  https://svn.boost.org/trac/boost/ticket/6535
-typedef boost::accumulators::accumulator_set<double, boost::accumulators::features< boost::accumulators::droppable<boost::accumulators::tag::density> > > density_accumulator;
-#else
-typedef boost::accumulators::accumulator_set<double, boost::accumulators::features< boost::accumulators::tag::density > > density_accumulator ;
-#endif
+//#ifndef PDAL_COMPILER_MSVC  // See boost ticket 6535:  https://svn.boost.org/trac/boost/ticket/6535
+//typedef boost::accumulators::accumulator_set<double, boost::accumulators::features< boost::accumulators::droppable<boost::accumulators::tag::density> > > density_accumulator;
+//#else
+//typedef boost::accumulators::accumulator_set<double, boost::accumulators::features< boost::accumulators::tag::density > > density_accumulator ;
+//#endif
 typedef boost::accumulators::accumulator_set<double, boost::accumulators::features<     boost::accumulators::droppable<boost::accumulators::tag::mean>,
         boost::accumulators::droppable<boost::accumulators::tag::max>,
         boost::accumulators::droppable<boost::accumulators::tag::min>,

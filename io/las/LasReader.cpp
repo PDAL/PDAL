@@ -442,7 +442,6 @@ point_count_t LasReader::read(PointBuffer& data, point_count_t count)
                 pointByteCount);
         }
 #else
-        boost::ignore_unused_variable_warning(m_unzipper);
         throw pdal_error("LASzip is not enabled for this "
             "LasReader::processBuffer");
 #endif

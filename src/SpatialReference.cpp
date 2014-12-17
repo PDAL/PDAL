@@ -35,9 +35,6 @@
 #include <pdal/SpatialReference.hpp>
 #include <pdal/PDALUtils.hpp>
 
-#include <boost/concept_check.hpp>
-#include <boost/concept_check.hpp> // ignore_unused_variable_warning
-
 #include <boost/algorithm/string/trim.hpp>
 
 // gdal

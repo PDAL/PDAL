@@ -40,9 +40,6 @@
 
 #include <sstream>
 
-#include <boost/concept_check.hpp>
-
-
 PDAL_C_START
 #ifdef __geotiff_h_
 
@@ -290,10 +287,8 @@ struct geotiff_dir_printer
         return m_oss.str().size();
     }
 
-    void operator()(char* data, void* aux)
+    void operator()(char* data, void* /*aux*/)
     {
-        ::boost::ignore_unused_variable_warning(aux);
-
         if (0 != data)
         {
             m_oss << data;

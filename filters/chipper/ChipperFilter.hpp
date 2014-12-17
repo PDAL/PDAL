@@ -47,8 +47,6 @@
 #include <pdal/Bounds.hpp>
 #include <pdal/PointBuffer.hpp>
 
-#include <boost/scoped_ptr.hpp>
-
 namespace pdal
 {
 

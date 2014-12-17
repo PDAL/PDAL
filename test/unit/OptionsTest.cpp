@@ -96,7 +96,7 @@ TEST(OptionsTest, test_option_writing)
     const Option option_i("my_int", (uint16_t)17, "This is my integral option.");
     EXPECT_TRUE(option_i.getName() == "my_int");
     EXPECT_TRUE(option_i.getDescription() == "This is my integral option.");
-    EXPECT_TRUE(option_i.getValue<boost::uint16_t>() == 17);
+    EXPECT_TRUE(option_i.getValue<uint16_t>() == 17);
     EXPECT_TRUE(option_i.getValue<std::string>() == "17");
 
     const Option option_s("my_string", "Yow.", "This is my stringy option.");

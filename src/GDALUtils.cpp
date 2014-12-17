@@ -34,8 +34,8 @@
 
 #include <pdal/GDALUtils.hpp>
 #include <pdal/Utils.hpp>
-#include <boost/bind/placeholders.hpp>
 
+#include <functional>
 #include <map>
 
 #ifdef PDAL_COMPILER_MSVC
@@ -58,11 +58,11 @@ Debug::Debug(bool isDebug, pdal::LogPtr log)
         {
             pdal::Utils::putenv("CPL_DEBUG=ON");
         }
-        m_gdal_callback = boost::bind(&Debug::log, this, _1, _2, _3);
+        m_gdal_callback = std::bind(&Debug::log, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
     }
     else
     {
-        m_gdal_callback = boost::bind(&Debug::error, this, _1, _2, _3);
+        m_gdal_callback = std::bind(&Debug::error, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
     }
 
     CPLPushErrorHandlerEx(&Debug::trampoline, this);
@@ -110,7 +110,7 @@ GlobalDebug::GlobalDebug()
     {
         pdal::Utils::putenv("CPL_DEBUG=ON");
     }
-    m_gdal_callback = boost::bind(&GlobalDebug::log, this, _1, _2, _3);
+    m_gdal_callback = std::bind(&GlobalDebug::log, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
 
     CPLPushErrorHandlerEx(&GlobalDebug::trampoline, this);
 }

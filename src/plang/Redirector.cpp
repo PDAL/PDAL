@@ -15,6 +15,7 @@
 #  pragma warning(disable: 4127)  // conditional expression is constant
 #endif
 
+#include <functional>
 #include <Python.h>
 
 namespace pdal
@@ -178,7 +179,7 @@ static void my2argwriterfunction(std::ostream* ostr, const std::string& mssg)
 
 void Redirector::set_stdout(std::ostream* ostr)
 {
-    stdout_write_type my1argwriterfunction = boost::bind(&my2argwriterfunction, ostr, _1);
+    stdout_write_type my1argwriterfunction = std::bind(&my2argwriterfunction, ostr, std::placeholders::_1);
     this->set_stdout(my1argwriterfunction);
 
     return;
