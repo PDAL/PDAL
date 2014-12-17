@@ -96,7 +96,7 @@ TEST(XMLSchemaTest, test_schema_read)
     m1.add("uuid", boost::uuids::nil_uuid());
 
     XMLSchema s2;
-    std::string xml_output = s2.getXML(s1.extDimTypes(), m);
+    std::string xml_output = s2.getXML(s1.dimTypes(), m);
 
     XMLSchema s3;
     s3.read(xml_output, xsd);

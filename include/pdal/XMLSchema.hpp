@@ -92,13 +92,12 @@ public:
 
     void read(std::string xml, std::string xsd = "");
     DimTypeList dimTypes() const;
-    ExtDimTypeList extDimTypes() const;
     XMLDimList dims() const
         { return m_dims; }
 
     MetadataNode getMetadata() const
         { return m_metadata;}
-    std::string getXML(const ExtDimTypeList& dims,
+    std::string getXML(const DimTypeList& dims,
             MetadataNode m = MetadataNode());
     std::string getXML();
     void setXForm(Dimension::Id::Enum id, XForm xform)
@@ -123,7 +122,7 @@ private:
     std::string remapOldNames(const std::string& input);
     bool loadMetadata(xmlNode *startNode, MetadataNode& input);
     bool load(xmlDocPtr doc);
-    void write(xmlTextWriterPtr w, const ExtDimTypeList& dims, MetadataNode m);
+    void write(xmlTextWriterPtr w, const DimTypeList& dims, MetadataNode m);
 };
 
 } // namespace pdal

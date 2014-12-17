@@ -104,17 +104,14 @@ TEST(Compression, Simple)
     EXPECT_EQ(ctx.pointSize(), 52U);
     SQLiteTestStream s;
 
-    ExtDimTypeList extDimTypes;
-    DimTypeList dimTypes = ctx.dimTypes();
-    for (auto di = dimTypes.begin(); di != dimTypes.end(); ++di)
-        extDimTypes.push_back(ExtDimType(*di, XForm()));
-    LazPerfCompressor<SQLiteTestStream> compressor(s, extDimTypes);
 
-    DimTypeList dims = ctx.dimTypes();
+    DimTypeList dimTypes = ctx.dimTypes();
+    LazPerfCompressor<SQLiteTestStream> compressor(s, dimTypes);
+
     std::vector<char> tmpbuf(compressor.pointSize());
     for (PointId idx = 0; idx < buffer->size(); ++idx)
     {
-        buffer->getPackedPoint(dims, idx, tmpbuf.data());
+        buffer->getPackedPoint(dimTypes, idx, tmpbuf.data());
         compressor.compress(tmpbuf.data(), compressor.pointSize());
     }
     compressor.done();
@@ -125,7 +122,7 @@ TEST(Compression, Simple)
     SQLiteTestStream s2;
     s2.buf = s.buf;
 
-    LazPerfDecompressor<SQLiteTestStream> decompressor(s2, extDimTypes);
+    LazPerfDecompressor<SQLiteTestStream> decompressor(s2, dimTypes);
 
     size_t outbufSize = decompressor.pointSize() * buffer->size();
     std::vector<char> outbuf(outbufSize);
@@ -136,7 +133,7 @@ TEST(Compression, Simple)
     char *pos = outbuf.data();
     for (PointId nextId = 0; nextId < 11; nextId++)
     {
-        b.setPackedPoint(dims, nextId, pos);
+        b.setPackedPoint(dimTypes, nextId, pos);
         pos += decompressor.pointSize();
     }
     EXPECT_EQ(b.size(), 11U);

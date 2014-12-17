@@ -186,18 +186,8 @@ DimTypeList XMLSchema::dimTypes() const
     DimTypeList dimTypes;
 
     for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-        dimTypes.push_back(DimType(di->m_id, di->m_type));
+        dimTypes.push_back(DimType(di->m_id, di->m_type, di->m_xform));
     return dimTypes;
-}
-
-
-ExtDimTypeList XMLSchema::extDimTypes() const
-{
-    ExtDimTypeList extDimTypes;
-
-    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-        extDimTypes.push_back(ExtDimType(di->m_id, di->m_type, di->m_xform));
-    return extDimTypes;
 }
 
 
@@ -458,7 +448,7 @@ bool XMLSchema::load(xmlDocPtr doc)
 }
 
 
-std::string XMLSchema::getXML(const ExtDimTypeList& dims, MetadataNode m)
+std::string XMLSchema::getXML(const DimTypeList& dims, MetadataNode m)
 {
     xmlBuffer *b = xmlBufferCreate();
     xmlTextWriterPtr w = xmlNewTextWriterMemory(b, 0);
@@ -509,7 +499,7 @@ const XMLDim& XMLSchema::xmlDim(Dimension::Id::Enum id) const
 }
 
 
-void XMLSchema::write(xmlTextWriterPtr w, const ExtDimTypeList& dims,
+void XMLSchema::write(xmlTextWriterPtr w, const DimTypeList& dims,
     MetadataNode m)
 {
     int pos = 0;

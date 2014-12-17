@@ -78,13 +78,13 @@ void DbWriter::ready(PointContextRef ctx)
 
 /// Get a dimension type list for the storage schema.
 /// \return  Storage dimension types.
-ExtDimTypeList DbWriter::dbDimTypes() const
+DimTypeList DbWriter::dbDimTypes() const
 {
     using namespace Dimension;
 
-    ExtDimTypeList dimTypes;
+    DimTypeList dimTypes;
     for (auto di = m_dimTypes.begin(); di != m_dimTypes.end(); ++di)
-        dimTypes.push_back(ExtDimType(*di, XForm()));
+        dimTypes.push_back(DimType(di->m_id, di->m_type, XForm()));
 
     if (!locationScaling())
         return dimTypes;
@@ -107,7 +107,6 @@ ExtDimTypeList DbWriter::dbDimTypes() const
             di->m_type = Type::Signed32;
         }
     }
-
     return dimTypes;
 }
 

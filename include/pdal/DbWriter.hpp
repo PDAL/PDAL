@@ -53,7 +53,7 @@ protected:
     DbWriter()
     {}
 
-    ExtDimTypeList dbDimTypes() const;
+    DimTypeList dbDimTypes() const;
     size_t readField(const PointBuffer& pb, char *pos, DimType dimType,
         PointId idx);
     size_t readPoint(const PointBuffer& pb, PointId idx, char *outbuf);
