@@ -58,8 +58,7 @@ TEST(PipelineManagerTest, basic)
     writer->setOptions(optsW);
 
     point_count_t np = mgr.execute();
-    std::cerr << "Count = " << np << "!\n";
-    EXPECT_TRUE(np == 1065);
+    EXPECT_TRUE(np == 1065U);
 
     FileUtils::deleteFile("temp.las");
 }
