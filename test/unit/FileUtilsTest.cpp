@@ -42,8 +42,8 @@ using namespace pdal;
 
 TEST(FileUtilsTest, test_file_ops)
 {
-    std::string tmp1 = "unittest1.tmp";
-    std::string tmp2 = "unittest2.tmp";
+    std::string tmp1(Support::temppath("unittest1.tmp"));
+    std::string tmp2(Support::temppath("unittest2.tmp"));
 
     // first, clean up from any previous test run
     FileUtils::deleteFile(tmp1);
