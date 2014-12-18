@@ -751,6 +751,8 @@ inline Type::Enum type(std::string s)
 
 struct DimType
 {
+    DimType() : m_id(Dimension::Id::Unknown), m_type(Dimension::Type::None)
+    {}
     DimType(Dimension::Id::Enum id, Dimension::Type::Enum type) :
         m_id(id), m_type(type)
     {}

@@ -51,7 +51,7 @@ protected:
     DimTypeList dbDimTypes() const;
     void loadSchema(PointContextRef ctx, const std::string& schemaString);
     void loadSchema(PointContextRef ctx, const XMLSchema& schema);
-    void writeField(PointBuffer& pb, const char *pos, XMLDim dim,
+    void writeField(PointBuffer& pb, const char *pos, const DimType& dim,
         PointId idx);
     void writePoint(PointBuffer& pb, PointId idx, const char *buf);
 

@@ -249,8 +249,7 @@ void OciReader::addDimensions(PointContextRef ctx)
 
     if (m_schemaFile.size())
     {
-        std::string pcSchema =
-            m_block->m_schema.getXML(m_block->m_schema.dimTypes());
+        std::string pcSchema = m_block->m_schema.xml();
         std::ostream *out = FileUtils::createFile(m_schemaFile);
         out->write(pcSchema.c_str(), pcSchema.size());
         FileUtils::closeFile(out);
@@ -294,7 +293,7 @@ point_count_t OciReader::readDimMajor(PointBuffer& buffer, BlockPtr block,
     point_count_t blockRemaining;
     point_count_t numRead = 0;
 
-    XMLDimList dims = block->m_schema.dims();
+    DimTypeList dims = block->m_schema.dimTypes();
     for (auto di = dims.begin(); di != dims.end(); ++di)
     {
         PointId nextId = startId;
@@ -325,7 +324,6 @@ point_count_t OciReader::readPointMajor(PointBuffer& buffer,
     PointId nextId = buffer.size();
     point_count_t numRead = 0;
 
-    XMLDimList dims = block->m_schema.dims();
     char *pos = seekPointMajor(block);
     while (numRead < numPts && numRemaining > 0)
     {
@@ -340,10 +338,10 @@ point_count_t OciReader::readPointMajor(PointBuffer& buffer,
 }
 
 
-char *OciReader::seekDimMajor(const XMLDim& d, BlockPtr block)
+char *OciReader::seekDimMajor(const DimType& d, BlockPtr block)
 {
     size_t size = 0;
-    XMLDimList dims = block->m_schema.dims();
+    DimTypeList dims = block->m_schema.dimTypes();
     for (auto di = dims.begin(); di->m_id != d.m_id; ++di)
         size += Dimension::size(di->m_type);
     return block->data() +
@@ -373,7 +371,7 @@ bool OciReader::readOci(Statement stmt, BlockPtr block)
     // Read the points from the blob in the row.
     readBlob(stmt, block);
     XMLSchema *s = findSchema(stmt, block);
-    m_dims = s->dims();
+    m_dims = s->xmlDims();
     block->update(s);
     block->clearFetched();
     return true;

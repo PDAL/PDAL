@@ -63,10 +63,14 @@ namespace pdal
 void OCISchemaGenericErrorHandler(void * ctx, const char* message, ...);
 void OCISchemaStructuredErrorHandler(void * userData, xmlErrorPtr error);
 
+class XMLSchema;
+
 struct XMLDim
 {
-    XMLDim() : m_min(0.0), m_max(0.0), m_type(Dimension::Type::None),
-        m_id(Dimension::Id::Unknown)
+    friend class XMLSchema;
+
+public:
+    XMLDim() : m_min(0.0), m_max(0.0)
     {}
 
     std::string m_name;
@@ -74,9 +78,7 @@ struct XMLDim
     uint32_t m_position;
     double m_min;
     double m_max;
-    XForm m_xform;
-    Dimension::Type::Enum m_type;
-    Dimension::Id::Enum m_id;
+    DimType m_dimType;
 };
 typedef std::vector<XMLDim> XMLDimList;
 inline bool operator < (const XMLDim& d1, const XMLDim& d2)
@@ -85,25 +87,29 @@ inline bool operator < (const XMLDim& d1, const XMLDim& d2)
 class PDAL_DLL XMLSchema
 {
 public:
-    XMLSchema(Orientation::Enum orientation = Orientation::PointMajor) :
-        m_orientation(orientation)
+    XMLSchema(std::string xml, std::string xsd = "",
+        Orientation::Enum orientation = Orientation::PointMajor);
+    XMLSchema(const DimTypeList& dims, MetadataNode m = MetadataNode(),
+        Orientation::Enum orientation = Orientation::PointMajor);
+    XMLSchema() : m_orientation(Orientation::PointMajor)
     {}
-    ~XMLSchema();
 
-    void read(std::string xml, std::string xsd = "");
+    ~XMLSchema()
+        { xmlCleanupParser(); }
+
+    std::string xml() const;
     DimTypeList dimTypes() const;
-    XMLDimList dims() const
+    XMLDimList xmlDims() const
         { return m_dims; }
 
     MetadataNode getMetadata() const
         { return m_metadata;}
-    std::string getXML(const DimTypeList& dims,
-            MetadataNode m = MetadataNode());
-    std::string getXML();
+    void setId(const std::string& name, Dimension::Id::Enum id)
+        { xmlDim(name).m_dimType.m_id = id; }
     void setXForm(Dimension::Id::Enum id, XForm xform)
-        { xmlDim(id).m_xform = xform; }
+        { xmlDim(id).m_dimType.m_xform = xform; }
     XForm xForm(Dimension::Id::Enum id) const
-        { return xmlDim(id).m_xform; }
+        { return xmlDim(id).m_dimType.m_xform; }
     void setOrientation(Orientation::Enum orientation)
         { m_orientation = orientation; }
     Orientation::Enum orientation() const
@@ -117,12 +123,13 @@ private:
 
     XMLDim& xmlDim(Dimension::Id::Enum id);
     const XMLDim& xmlDim(Dimension::Id::Enum id) const;
+    XMLDim& xmlDim(const std::string& name);
     xmlDocPtr init(const std::string& xml, const std::string& xsd);
     bool validate(xmlDocPtr doc, const std::string& xsd);
     std::string remapOldNames(const std::string& input);
     bool loadMetadata(xmlNode *startNode, MetadataNode& input);
     bool load(xmlDocPtr doc);
-    void write(xmlTextWriterPtr w, const DimTypeList& dims, MetadataNode m);
+    void writeXml(xmlTextWriterPtr w) const;
 };
 
 } // namespace pdal

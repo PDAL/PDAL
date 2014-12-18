@@ -280,8 +280,8 @@ uint32_t PgWriter::SetupSchema(uint32_t srid)
     MetadataNode m = metadata.getNode();
     m.add("compression", compression);
 
-    XMLSchema schema;
-    std::string xml = schema.getXML(dbDimTypes(), m);
+    XMLSchema schema(dbDimTypes(), m);
+    std::string xml = schema.xml();
 
     // Do any of the existing schemas match the one we want to use?
     if (schema_count > 0)
@@ -314,8 +314,6 @@ uint32_t PgWriter::SetupSchema(uint32_t srid)
                 "`pointcloud_formats`");
         pcid = atoi(pcid_str);
     }
-
-
 
     const char* paramValues = xml.c_str();
     oss << "INSERT INTO pointcloud_formats (pcid, srid, schema) "

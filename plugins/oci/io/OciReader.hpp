@@ -76,7 +76,7 @@ private:
         point_count_t numPts);
     point_count_t readPointMajor(PointBuffer& buffer, BlockPtr block,
         point_count_t numPts);
-    char *seekDimMajor(const XMLDim& d, BlockPtr block);
+    char *seekDimMajor(const DimType& d, BlockPtr block);
     char *seekPointMajor(BlockPtr block);
     bool readOci(Statement stmt, BlockPtr block);
     XMLSchema *findSchema(Statement stmt, BlockPtr block);

@@ -242,7 +242,7 @@ void PgReader::ready(PointContextRef ctx)
 
     m_point_size = 0;
     for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-        m_point_size += Dimension::size(di->m_type);
+        m_point_size += Dimension::size(di->m_dimType.m_type);
 
     CursorSetup();
 }

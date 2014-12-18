@@ -129,13 +129,7 @@ XMLSchema fetchSchema(Statement stmt, BlockPtr block)
     }
     std::ostringstream fname;
     int cloudId = stmt->GetInteger(&(block->pc->pc_id)) ;
-//     fname << "schema-" << cloudId <<".xml";
-//         std::ostream* out = FileUtils::createFile(fname.str());
-//         out->write(pc_schema_xml.c_str(), pc_schema_xml.size());
-//         FileUtils::closeFile(out);
-    XMLSchema schema;
-    schema.read(pc_schema_xml);
-    return schema;
+    return XMLSchema(pc_schema_xml);
 }
 
 
@@ -171,12 +165,11 @@ void Block::update(XMLSchema *s)
     m_point_size = 0; // Wipe the size to reset
     m_num_remaining = num_points;
     m_schema.setOrientation(s->orientation());
-    XMLDimList dims = s->dims();
+    DimTypeList dims = s->dimTypes();
     for (auto di = dims.begin(); di != dims.end(); ++di)
     {
-        Id::Enum id = m_ctx.findDim(di->m_name);
-        if (id == Id::X || id == Id::Y || id == Id::Z)
-            m_schema.setXForm(id, di->m_xform);
+        if (di->m_id == Id::X || di->m_id == Id::Y || di->m_id == Id::Z)
+            m_schema.setXForm(di->m_id, di->m_xform);
         m_point_size += Dimension::size(di->m_type);
     }
 }

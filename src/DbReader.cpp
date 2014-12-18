@@ -38,14 +38,13 @@ namespace pdal
 void DbReader::loadSchema(PointContextRef ctx,
     const std::string& schemaString)
 {
-    XMLSchema schema;
-    schema.read(schemaString);
+    XMLSchema schema(schemaString);
     loadSchema(ctx, schema);
 }
 
 void DbReader::loadSchema(PointContextRef ctx, const XMLSchema& schema)
 {
-    m_dims = schema.dims();
+    m_dims = schema.xmlDims();
 
     // Override XYZ to doubles and use those going forward
     // we will apply any scaling set before handing it off
@@ -57,8 +56,9 @@ void DbReader::loadSchema(PointContextRef ctx, const XMLSchema& schema)
     m_packedPointSize = 0;
     for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
     {
-        di->m_id = ctx.registerOrAssignDim(di->m_name, di->m_type);
-        m_packedPointSize += Dimension::size(di->m_type);
+        di->m_dimType.m_id =
+            ctx.registerOrAssignDim(di->m_name, di->m_dimType.m_type);
+        m_packedPointSize += Dimension::size(di->m_dimType.m_type);
     }
 }
 
@@ -68,12 +68,12 @@ DimTypeList DbReader::dbDimTypes() const
     DimTypeList dimTypes;
 
     for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-        dimTypes.push_back(DimType(di->m_id, di->m_type, di->m_xform));
+        dimTypes.push_back(di->m_dimType);
     return dimTypes;
 }
 
 
-void DbReader::writeField(PointBuffer& pb, const char *pos, XMLDim dim,
+void DbReader::writeField(PointBuffer& pb, const char *pos, const DimType& dim,
     PointId idx)
 {
     using namespace Dimension;
@@ -102,20 +102,22 @@ void DbReader::writePoint(PointBuffer& pb, PointId idx, const char *buf)
 
     for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
     {
+        DimType dimType = di->m_dimType;
         // If we read X, Y or Z as a signed 32, apply the transform and write
         // the transformed value (double).
-        if (di->m_type == Type::Signed32 &&
-            (di->m_id == Id::X || di->m_id == Id::Y || di->m_id == Id::Z))
+        if (dimType.m_type == Type::Signed32 &&
+            (dimType.m_id == Id::X || dimType.m_id == Id::Y ||
+             dimType.m_id == Id::Z))
         {
             int32_t i;
 
             memcpy(&i, buf, sizeof(int32_t));
-            double d = (i * di->m_xform.m_scale) + di->m_xform.m_offset;
-            pb.setField(di->m_id, idx, d);
+            double d = (i * dimType.m_xform.m_scale) + dimType.m_xform.m_offset;
+            pb.setField(dimType.m_id, idx, d);
         }
         else
-            pb.setField(di->m_id, di->m_type, idx, buf);
-        buf += Dimension::size(di->m_type);
+            pb.setField(dimType.m_id, dimType.m_type, idx, buf);
+        buf += Dimension::size(dimType.m_type);
     }
 }
 

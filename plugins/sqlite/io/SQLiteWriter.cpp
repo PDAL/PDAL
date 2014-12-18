@@ -455,8 +455,8 @@ void SQLiteWriter::CreateCloud()
         m.add("compression", "lazperf");
         m.add("version", "1.0");
     }
-    XMLSchema schema;
-    std::string xml = schema.getXML(dbDimTypes(), m);
+    XMLSchema schema(dbDimTypes(), m);
+    std::string xml = schema.xml();
 
     records rs;
     row r;

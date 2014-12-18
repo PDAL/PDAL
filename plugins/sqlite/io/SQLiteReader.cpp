@@ -191,8 +191,7 @@ void SQLiteReader::addDimensions(PointContextRef ctx)
         FileUtils::closeFile(out);
     }
 
-    XMLSchema schema;
-    schema.read(s.data);
+    XMLSchema schema(s.data);
     m_patch->m_metadata = schema.getMetadata();
     m_patch->m_ctx = ctx;
 

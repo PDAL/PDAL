@@ -162,10 +162,56 @@ void OCISchemaGenericErrorHandler
     std::cerr << "Generic error: '" << error << "'" << std::endl;
 }
 
-
-XMLSchema::~XMLSchema()
+XMLSchema::XMLSchema(std::string xml, std::string xsd,
+    Orientation::Enum orientation) : m_orientation(orientation)
 {
-    xmlCleanupParser();
+    xmlDocPtr doc = init(xml, xsd);
+    if (doc)
+    {
+        load(doc);
+        xmlFreeDoc(doc);
+    }
+}
+
+
+XMLSchema::XMLSchema(const DimTypeList& dims, MetadataNode m,
+    Orientation::Enum orientation) : m_orientation(orientation), m_metadata(m)
+{
+    for (auto di = dims.begin(); di != dims.end(); ++di)
+    {
+        XMLDim dim;
+        dim.m_dimType = *di;
+        m_dims.push_back(dim);
+    }
+}
+
+
+std::string XMLSchema::xml() const
+{
+    xmlBuffer *b = xmlBufferCreate();
+    xmlTextWriterPtr w = xmlNewTextWriterMemory(b, 0);
+
+    xmlTextWriterSetIndent(w, 1);
+    xmlTextWriterStartDocument(w, NULL, "utf-8", NULL);
+    xmlTextWriterStartElementNS(w, (const xmlChar*)"pc",
+        (const xmlChar*)"PointCloudSchema", NULL);
+    xmlTextWriterWriteAttributeNS(w, (const xmlChar*) "xmlns",
+        (const xmlChar*)"pc", NULL,
+        (const xmlChar*)"http://pointcloud.org/schemas/PC/");
+    xmlTextWriterWriteAttributeNS(w, (const xmlChar*)"xmlns",
+        (const xmlChar*)"xsi", NULL,
+        (const xmlChar*)"http://www.w3.org/2001/XMLSchema-instance");
+
+    writeXml(w);
+
+    xmlTextWriterEndElement(w);
+    xmlTextWriterEndDocument(w);
+
+    std::string output((const char *)b->content, b->use);
+    xmlFreeTextWriter(w);
+    xmlBufferFree(b);
+
+    return output;
 }
 
 
@@ -174,19 +220,8 @@ DimTypeList XMLSchema::dimTypes() const
     DimTypeList dimTypes;
 
     for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-        dimTypes.push_back(DimType(di->m_id, di->m_type, di->m_xform));
+        dimTypes.push_back(di->m_dimType);
     return dimTypes;
-}
-
-
-void XMLSchema::read(std::string xml, std::string xsd)
-{
-    xmlDocPtr doc = init(xml, xsd);
-    if (doc)
-    {
-        load(doc);
-        xmlFreeDoc(doc);
-    }
 }
 
 
@@ -381,7 +416,7 @@ bool XMLSchema::load(xmlDocPtr doc)
                     std::cerr << "Unable to fetch interpretation.\n";
                     return false;
                 }
-                dim.m_type = Dimension::type((const char*)n);
+                dim.m_dimType.m_type = Dimension::type((const char*)n);
                 xmlFree(n);
             }
             if (boost::iequals((const char*)properties->name, "minimum"))
@@ -414,7 +449,7 @@ bool XMLSchema::load(xmlDocPtr doc)
                     std::cerr << "Unable to fetch offset value!";
                     return false;
                 }
-                dim.m_xform.m_offset = std::atof((const char*)n);
+                dim.m_dimType.m_xform.m_offset = std::atof((const char*)n);
                 xmlFree(n);
             }
             if (boost::iequals((const char*)properties->name, "scale"))
@@ -425,7 +460,7 @@ bool XMLSchema::load(xmlDocPtr doc)
                     std::cerr << "Unable to fetch scale value!";
                     return false;
                 }
-                dim.m_xform.m_scale = std::atof((const char*)n);
+                dim.m_dimType.m_xform.m_scale = std::atof((const char*)n);
                 xmlFree(n);
             }
         }
@@ -436,41 +471,12 @@ bool XMLSchema::load(xmlDocPtr doc)
 }
 
 
-std::string XMLSchema::getXML(const DimTypeList& dims, MetadataNode m)
-{
-    xmlBuffer *b = xmlBufferCreate();
-    xmlTextWriterPtr w = xmlNewTextWriterMemory(b, 0);
-
-    xmlTextWriterSetIndent(w, 1);
-    xmlTextWriterStartDocument(w, NULL, "utf-8", NULL);
-    xmlTextWriterStartElementNS(w, (const xmlChar*)"pc",
-        (const xmlChar*)"PointCloudSchema", NULL);
-    xmlTextWriterWriteAttributeNS(w, (const xmlChar*) "xmlns",
-        (const xmlChar*)"pc", NULL,
-        (const xmlChar*)"http://pointcloud.org/schemas/PC/");
-    xmlTextWriterWriteAttributeNS(w, (const xmlChar*)"xmlns",
-        (const xmlChar*)"xsi", NULL,
-        (const xmlChar*)"http://www.w3.org/2001/XMLSchema-instance");
-
-    write(w, dims, m);
-
-    xmlTextWriterEndElement(w);
-    xmlTextWriterEndDocument(w);
-
-    std::string output((const char *)b->content, b->use);
-    xmlFreeTextWriter(w);
-    xmlBufferFree(b);
-
-    return output;
-}
-
-
 XMLDim& XMLSchema::xmlDim(Dimension::Id::Enum id)
 {
     static XMLDim nullDim;
 
     for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-        if (di->m_id == id)
+        if (di->m_dimType.m_id == id)
             return *di;
     return nullDim;
 }
@@ -481,17 +487,27 @@ const XMLDim& XMLSchema::xmlDim(Dimension::Id::Enum id) const
     static XMLDim nullDim;
 
     for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-        if (di->m_id == id)
+        if (di->m_dimType.m_id == id)
             return *di;
     return nullDim;
 }
 
 
-void XMLSchema::write(xmlTextWriterPtr w, const DimTypeList& dims,
-    MetadataNode m)
+XMLDim& XMLSchema::xmlDim(const std::string& name)
+{
+    static XMLDim nullDim;
+
+    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+        if (di->m_name == name)
+            return *di;
+    return nullDim;
+}
+
+
+void XMLSchema::writeXml(xmlTextWriterPtr w) const
 {
     int pos = 0;
-    for (auto di = dims.begin(); di != dims.end(); ++di, ++pos)
+    for (auto di = m_dims.begin(); di != m_dims.end(); ++di, ++pos)
     {
         xmlTextWriterStartElementNS(w, (const xmlChar*)"pc",
             (const xmlChar*)"dimension", NULL);
@@ -503,17 +519,17 @@ void XMLSchema::write(xmlTextWriterPtr w, const DimTypeList& dims,
             (const xmlChar*)position.str().c_str());
 
         std::ostringstream size;
-        size << Dimension::size(di->m_type);
+        size << Dimension::size(di->m_dimType.m_type);
         xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc",
             (const xmlChar*)"size", NULL, (const xmlChar*)size.str().c_str());
 
-        std::string description = Dimension::description(di->m_id);
+        std::string description = Dimension::description(di->m_dimType.m_id);
         if (description.size())
             xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc",
                 (const xmlChar*)"description", NULL,
                 (const xmlChar*)description.c_str());
 
-        XForm xform = di->m_xform;
+        XForm xform = di->m_dimType.m_xform;
         if (xform.nonstandard())
         {
             xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc",
@@ -524,14 +540,15 @@ void XMLSchema::write(xmlTextWriterPtr w, const DimTypeList& dims,
                 (const xmlChar *)std::to_string(xform.m_offset).c_str());
         }
 
-        std::string name = Dimension::name(di->m_id);
+        std::string name = Dimension::name(di->m_dimType.m_id);
         if (name.size())
             xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc",
                 (const xmlChar*)"name", NULL, (const xmlChar*)name.c_str());
 
         xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc",
             (const xmlChar*)"interpretation", NULL,
-            (const xmlChar*) Dimension::interpretationName(di->m_type).c_str());
+            (const xmlChar*)
+                Dimension::interpretationName(di->m_dimType.m_type).c_str());
 
         xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc",
             (const xmlChar*)"active", NULL, (const xmlChar*)"true");
@@ -548,13 +565,13 @@ void XMLSchema::write(xmlTextWriterPtr w, const DimTypeList& dims,
         (const xmlChar*)"orientation", NULL,
         (const xmlChar*)orientation.str().c_str());
 
-    if (!m.empty())
+    if (!m_metadata.empty())
     {
         xmlTextWriterStartElementNS(w, (const xmlChar*) "pc",
             (const xmlChar*) "metadata", NULL);
 
         boost::property_tree::ptree output;
-        PipelineWriter::writeMetadata(output, m);
+        PipelineWriter::writeMetadata(output, m_metadata);
         std::ostringstream oss;
         boost::property_tree::xml_parser::write_xml(oss, output);
         std::string xml = oss.str();
