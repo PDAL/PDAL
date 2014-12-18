@@ -161,7 +161,7 @@ void P2gWriter::write(const PointBuffer& buf)
     log()->get(LogLevel::Debug) << "Y grid distance: " << m_GRID_DIST_Y << std::endl;
     log()->clearFloat();
 
-    boost::scoped_ptr<OutCoreInterp> p(new OutCoreInterp(m_GRID_DIST_X,
+    std::unique_ptr<OutCoreInterp> p(new OutCoreInterp(m_GRID_DIST_X,
                                        m_GRID_DIST_Y,
                                        m_GRID_SIZE_X,
                                        m_GRID_SIZE_Y,

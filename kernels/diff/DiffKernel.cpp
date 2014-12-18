@@ -33,12 +33,13 @@
 ****************************************************************************/
 
 #include "DiffKernel.hpp"
+
+#include <memory>
+
 #include <pdal/PDALUtils.hpp>
 
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/xml_parser.hpp>
-
-#include <boost/scoped_ptr.hpp>
 
 using boost::property_tree::ptree;
 

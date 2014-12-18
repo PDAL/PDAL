@@ -175,7 +175,7 @@ TEST(LasReaderTest, test_sequential)
 
 
 static void test_a_format(const std::string& file, uint8_t majorVersion, uint8_t minorVersion, int pointFormat,
-                          double xref, double yref, double zref, double tref, uint16_t rref,  uint16_t gref,  boost::uint16_t bref)
+                          double xref, double yref, double zref, double tref, uint16_t rref,  uint16_t gref,  uint16_t bref)
 {
     PointContext ctx;
 

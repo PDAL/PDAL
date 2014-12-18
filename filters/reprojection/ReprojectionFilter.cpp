@@ -36,8 +36,6 @@
 
 #include <memory>
 
-#include <boost/concept_check.hpp> // ignore_unused_variable_warning
-
 #include <pdal/PointBuffer.hpp>
 
 #pragma GCC diagnostic ignored "-Wfloat-equal"

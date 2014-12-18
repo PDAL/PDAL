@@ -34,8 +34,6 @@
 
 #include <SplitterFilter.hpp>
 
-#include <boost/scoped_ptr.hpp>
-
 #include <iostream>
 #include <limits>
 

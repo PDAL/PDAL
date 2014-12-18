@@ -34,12 +34,6 @@
 
 #include "gtest/gtest.h"
 
-/**
-#include <boost/lexical_cast.hpp>
-#include <boost/uuid/uuid_io.hpp>
-#include <boost/concept_check.hpp>
-**/
-
 #include <pdal/FileUtils.hpp>
 #include <pdal/StageFactory.hpp>
 

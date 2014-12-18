@@ -37,10 +37,9 @@
 
 #include "H5cpp.h"
 
-#include <boost/scoped_ptr.hpp>
-
 #include <pdal/pdal_error.hpp>
 
+#include <memory>
 #include <vector>
 #include <string>
 #include <map>
@@ -115,7 +114,7 @@ private:
     unsigned long long getColumnNumEntries(const std::string& dataSetName) const;
     const ColumnData& getColumnData(const std::string& dataSetName) const;
 
-    boost::scoped_ptr<H5::H5File> m_h5File;
+    std::unique_ptr<H5::H5File> m_h5File;
     uint64_t m_numPoints;
 
     std::map<std::string, ColumnData> m_columnDataMap;

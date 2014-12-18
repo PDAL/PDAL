@@ -44,8 +44,7 @@ namespace pdal
 using namespace hdf5;
 
 Hdf5Handler::Hdf5Handler()
-    : m_h5File(0)
-    , m_numPoints(0)
+    : m_numPoints(0)
     , m_columnDataMap()
 { }
 

@@ -34,8 +34,6 @@
 
 #include "PipelineKernel.hpp"
 
-#include <boost/scoped_ptr.hpp>
-
 namespace pdal
 {
     

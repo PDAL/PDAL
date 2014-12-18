@@ -79,10 +79,8 @@ namespace pdal
 {
 
 void OCISchemaStructuredErrorHandler
-(void * userData, xmlErrorPtr error)
+(void * /*userData*/, xmlErrorPtr error)
 {
-    boost::ignore_unused_variable_warning(userData);
-
     std::ostringstream oss;
 
     oss << "XML error: '" << error->message <<"' ";
@@ -106,28 +104,22 @@ void OCISchemaStructuredErrorHandler
 }
 
 void OCISchemaParserStructuredErrorHandler
-(void * userData, xmlErrorPtr error)
+(void * /*userData*/, xmlErrorPtr error)
 {
-    boost::ignore_unused_variable_warning(userData);
-
     std::cerr << "Schema parsing error: '" << error->message << "' " <<
         "on line " << error->line << std::endl;
 }
 
 void OCISchemaValidationStructuredErrorHandler
-(void * userData, xmlErrorPtr error)
+(void * /*userData*/, xmlErrorPtr error)
 {
-    boost::ignore_unused_variable_warning(userData);
-
     std::cerr << "Schema validation error: '" << error->message << "' " <<
         "on line " << error->line << std::endl;
 }
 
 void OCISchemaValidityError
-(void * ctx, const char* message, ...)
+(void * /*ctx*/, const char* message, ...)
 {
-    boost::ignore_unused_variable_warning(ctx);
-
     const int ERROR_MESSAGE_SIZE = 256;
     char error[ERROR_MESSAGE_SIZE];
     va_list arg_ptr;
@@ -140,10 +132,8 @@ void OCISchemaValidityError
 }
 
 void OCISchemaValidityDebug
-(void * ctx, const char* message, ...)
+(void * /*ctx*/, const char* message, ...)
 {
-    boost::ignore_unused_variable_warning(ctx);
-
     const int ERROR_MESSAGE_SIZE = 256;
     char error[ERROR_MESSAGE_SIZE];
     va_list arg_ptr;
@@ -157,10 +147,8 @@ void OCISchemaValidityDebug
 
 
 void OCISchemaGenericErrorHandler
-(void * ctx, const char* message, ...)
+(void * /*ctx*/, const char* message, ...)
 {
-    boost::ignore_unused_variable_warning(ctx);
-
     const int ERROR_MESSAGE_SIZE = 256;
     char error[ERROR_MESSAGE_SIZE];
     va_list arg_ptr;

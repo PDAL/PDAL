@@ -32,8 +32,6 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <boost/scoped_ptr.hpp>
-
 #include <pdal/Writer.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/PointBuffer.hpp>

@@ -37,10 +37,10 @@
 #include <pdal/Reader.hpp>
 #include <pdal/Options.hpp>
 
+#include <memory>
 #include <vector>
 
 #include <boost/detail/endian.hpp>
-#include <boost/scoped_ptr.hpp>
 
 
 namespace pdal
@@ -82,7 +82,7 @@ struct TerraSolidHeader
     int32_t Color;
 };
 
-typedef boost::scoped_ptr<TerraSolidHeader> TerraSolidHeaderPtr;
+typedef std::unique_ptr<TerraSolidHeader> TerraSolidHeaderPtr;
 class terrasolid_error : public pdal_error
 {
 public:
