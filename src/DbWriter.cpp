@@ -39,6 +39,10 @@ void DbWriter::ready(PointContextRef ctx)
 {
     using namespace Dimension;
 
+    // Determine if X, Y and Z values should be written as Signed32 along with
+    // a scale factor and offset instead of being written as Double.
+    m_locationScaling = (m_xXform.nonstandard() || m_yXform.nonstandard() ||
+        m_zXform.nonstandard());
     m_dimTypes = ctx.dimTypes();
 
     auto cmp = [](const DimType& d1, const DimType& d2) -> bool
@@ -86,7 +90,7 @@ DimTypeList DbWriter::dbDimTypes() const
     for (auto di = m_dimTypes.begin(); di != m_dimTypes.end(); ++di)
         dimTypes.push_back(DimType(di->m_id, di->m_type, XForm()));
 
-    if (!locationScaling())
+    if (!m_locationScaling)
         return dimTypes;
 
     for (auto di = dimTypes.begin(); di != dimTypes.end(); ++di)
@@ -131,7 +135,7 @@ size_t DbWriter::readField(const PointBuffer& pb, char *pos, DimType dimType,
         memcpy(pos, &i, sizeof(int32_t));
     };
 
-    if (locationScaling())
+    if (m_locationScaling)
     {
         // For X, Y or Z.
         size = sizeof(int32_t);
@@ -175,7 +179,7 @@ size_t DbWriter::readPoint(const PointBuffer& pb, PointId idx, char *outbuf)
         memcpy(outpos, &i, sizeof(int32_t));
     };
 
-    if (locationScaling())
+    if (m_locationScaling)
     {
         int outOffset;
 
@@ -207,16 +211,6 @@ size_t DbWriter::readPoint(const PointBuffer& pb, PointId idx, char *outbuf)
     }
     else
         return m_packedPointSize;
-}
-
-/// Determine if X, Y and Z values should be written as Signed32 along with
-/// a scale factor and offset instead of being written as Double.
-///
-/// \return  Whether X,Y and Z values should be scaled.
-bool DbWriter::locationScaling() const
-{
-    return (m_xXform.nonstandard() || m_yXform.nonstandard() ||
-        m_zXform.nonstandard());
 }
 
 } // namespace pdal

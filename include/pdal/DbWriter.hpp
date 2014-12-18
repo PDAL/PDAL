@@ -60,13 +60,13 @@ protected:
 
 private:
     virtual void ready(PointContextRef ctx);
-    bool locationScaling() const;
 
     DimTypeList m_dimTypes;
     int m_xPackedOffset;
     int m_yPackedOffset;
     int m_zPackedOffset;
     size_t m_packedPointSize;
+    bool m_locationScaling;
 
     DbWriter& operator=(const DbWriter&); // not implemented
     DbWriter(const DbWriter&); // not implemented
