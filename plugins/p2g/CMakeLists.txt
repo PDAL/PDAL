@@ -7,8 +7,6 @@ include_directories(${PROJECT_SOURCE_DIR}/plugins/p2g)
 
 find_package(Points2Grid)
 if (P2G_FOUND)
-    message(STATUS "Building with Points2grid support")
-
     include_directories(${P2G_INCLUDE_DIR})
     add_definitions(-DHAVE_P2G=1)
 
@@ -18,6 +16,4 @@ if (P2G_FOUND)
     PDAL_ADD_PLUGIN(libname writer p2g
         FILES "${srcs}" "${incs}"
         LINK_WITH ${P2G_LIBRARY})
-else()
-    message(STATUS "Building without Points2grid support")
 endif()

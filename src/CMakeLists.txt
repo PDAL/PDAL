@@ -179,17 +179,17 @@ list (APPEND PDAL_HPP ${PDAL_CONFIG_HPP} )
 # Group source files for IDE source explorers (e.g. Visual Studio)
 #
 
-source_group("CMake Files" FILES CMakeLists.txt)
+#source_group("CMake Files" FILES CMakeLists.txt)
 
-source_group("Header Files" FILES ${PDAL_BASE_HPP})
-source_group("Header Files\\config" FILES ${PDAL_CONFIG_HPP})
-source_group("Header Files\\filters" FILES ${PDAL_FILTERS_HPP})
-source_group("Header Files\\plang" FILES ${PDAL_PLANG_HPP})
+#source_group("Header Files" FILES ${PDAL_BASE_HPP})
+#source_group("Header Files\\config" FILES ${PDAL_CONFIG_HPP})
+#source_group("Header Files\\filters" FILES ${PDAL_FILTERS_HPP})
+#source_group("Header Files\\plang" FILES ${PDAL_PLANG_HPP})
 
-source_group("Source Files" FILES ${PDAL_BASE_CPP})
-source_group("Source Files\\config" FILES ${PDAL_CONFIG_CPP})
-source_group("Source Files\\filters" FILES ${PDAL_FILTERS_CPP})
-source_group("Source Files\\plang" FILES ${PDAL_PLANG_CPP})
+#source_group("Source Files" FILES ${PDAL_BASE_CPP})
+#source_group("Source Files\\config" FILES ${PDAL_CONFIG_CPP})
+#source_group("Source Files\\filters" FILES ${PDAL_FILTERS_CPP})
+#source_group("Source Files\\plang" FILES ${PDAL_PLANG_CPP})
 
 
 # Standard include directory of PDAL library
@@ -245,33 +245,29 @@ endif()
 PDAL_ADD_LIBRARY(${PDAL_LIB_NAME} ${PDAL_SOURCES})
 
 if (WITH_LASZIP)
-    target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} "${LASZIP_LIBRARY}")
+    target_link_libraries(${PDAL_LIB_NAME} ${LASZIP_LIBRARY})
 endif()
 
 if (WITH_PYTHON)
-    target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} "${PYTHON_LIBRARY}")
+    target_link_libraries(${PDAL_LIB_NAME} ${PYTHON_LIBRARY})
 endif()
 
 if (WITH_LIBXML2)
-    target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${LIBXML2_LIBRARIES})
+    target_link_libraries(${PDAL_LIB_NAME} ${LIBXML2_LIBRARIES})
 endif()
 
-target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE}
-    "${CMAKE_THREAD_LIBS_INIT}"
-    "${CMAKE_DL_LIBS}"
-    "${GEOTIFF_LIBRARY}"
-    "${GDAL_LIBRARY}"
-    "${GEOS_LIBRARY}"
-    "${ZLIB_LIBRARIES}"
+target_link_libraries(${PDAL_LIB_NAME} 
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${GEOTIFF_LIBRARY}
+    ${GDAL_LIBRARY}
+    ${GEOS_LIBRARY}
+    ${ZLIB_LIBRARIES}
 )
 
-target_link_libraries(${PDAL_LIB_NAME} ${BOOST_LINKAGE}
-    ${Boost_LIBRARIES}
-)
+target_link_libraries(${PDAL_LIB_NAME} ${Boost_LIBRARIES})
 
 set_target_properties(${PDAL_LIB_NAME}
   PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
-
 
 ###############################################################################
 # Targets installation

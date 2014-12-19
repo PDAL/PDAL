@@ -7,15 +7,13 @@
 # Redistribution and use is allowed according to the terms of the BSD license.
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 
-MESSAGE(STATUS "Searching for NumPy library")
-
 IF (NUMPY_INCLUDE_DIR)
   SET(NUMPY_FIND_QUIETLY TRUE)
 endif (NUMPY_INCLUDE_DIR)
 
 # To set the variables PYTHON_EXECUTABLE
-FIND_PACKAGE(PythonInterp REQUIRED)
-FIND_PACKAGE(PythonLibs REQUIRED)
+FIND_PACKAGE(PythonInterp QUIET REQUIRED)
+FIND_PACKAGE(PythonLibs QUIET REQUIRED)
 
 # Look for the include path
 # WARNING: The variable PYTHON_EXECUTABLE is defined by the script FindPythonInterp.cmake
@@ -33,5 +31,4 @@ INCLUDE(FindPackageHandleStandardArgs)
 
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(NumPy DEFAULT_MSG NUMPY_VERSION NUMPY_INCLUDE_DIR)
 
-MESSAGE(STATUS "Found NumPy at ${NUMPY_INCLUDE_DIR}")
 MARK_AS_ADVANCED(NUMPY_INCLUDE_DIR)
