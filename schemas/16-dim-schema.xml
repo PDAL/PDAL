@@ -176,41 +176,6 @@
     <pc:uuid>5c1a99c8-1829-4d5b-8735-4f6f393a7970</pc:uuid>
     <pc:parent_uuid>00000000-0000-0000-0000-000000000000</pc:parent_uuid>
   </pc:dimension>
-  <pc:dimension>
-    <pc:position>17</pc:position>
-    <pc:size>4</pc:size>
-    <pc:description>X coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.</pc:description>
-    <pc:name>X</pc:name>
-    <pc:interpretation>int32_t</pc:interpretation>
-    <pc:scale>0.0000001</pc:scale>
-    <pc:offset>-125.300328603644</pc:offset>
-    <pc:active>true</pc:active>
-    <pc:uuid>20963cd1-c9b2-4d58-a4dd-04fca514855c</pc:uuid>
-    <pc:parent_uuid>2ee118d1-119e-4906-99c3-42934203f872</pc:parent_uuid>
-  </pc:dimension>
-  <pc:dimension>
-    <pc:position>18</pc:position>
-    <pc:size>4</pc:size>
-    <pc:description>Y coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.</pc:description>
-    <pc:name>Y</pc:name>
-    <pc:interpretation>int32_t</pc:interpretation>
-    <pc:scale>0.0000001</pc:scale>
-    <pc:offset>41.644766671927</pc:offset>
-    <pc:active>true</pc:active>
-    <pc:uuid>22d087e8-4afd-4c1a-972f-f5d6c43f1f31</pc:uuid>
-    <pc:parent_uuid>87707eee-2f30-4979-9987-8ef747e30275</pc:parent_uuid>
-  </pc:dimension>
-  <pc:dimension>
-    <pc:position>19</pc:position>
-    <pc:size>4</pc:size>
-    <pc:description>Z coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.</pc:description>
-    <pc:name>Z</pc:name>
-    <pc:interpretation>int32_t</pc:interpretation>
-    <pc:scale>0.01</pc:scale>
-    <pc:active>true</pc:active>
-    <pc:uuid>24da1c38-8e57-4257-8e88-f71dae6ff68b</pc:uuid>
-    <pc:parent_uuid>e74b5e41-95e6-4cf2-86ad-e3f5a996da5d</pc:parent_uuid>
-  </pc:dimension>
   <pc:metadata>
     <Reader type="readers.pipeline">
       <Option name="debug">false</Option>

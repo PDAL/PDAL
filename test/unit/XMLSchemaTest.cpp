@@ -69,12 +69,77 @@ std::string ReadXML(std::string filename)
         throw pdal_error("unable to open file!");
 }
 
-TEST(XMLSchemaTest, test_schema_read)
+TEST(XMLSchemaTest, read)
+{
+    auto getDim = [](XMLDimList& dims, const std::string& name)
+    {
+        for (auto di = dims.begin(); di != dims.end(); ++di)
+        {
+            if (di->m_name == name)
+                return *di;
+        }
+        return XMLDim();
+    };
+
+    std::string xml =
+        ReadXML(TestConfig::g_data_path+"../../schemas/6-dim-schema.xml");
+    std::string xsd = ReadXML(TestConfig::g_data_path+"../../schemas/LAS.xsd");
+
+    XMLSchema s(xml, xsd);
+    XMLDimList dims = s.xmlDims();
+
+    EXPECT_EQ(dims.size(), 6U);
+
+    XMLDim dim = getDim(dims, "X");
+    DimType dt = dim.m_dimType;
+    EXPECT_EQ(dim.m_name,  "X");
+    EXPECT_FLOAT_EQ(dt.m_xform.m_scale, .01);
+    EXPECT_FLOAT_EQ(dt.m_xform.m_offset, 0.0);
+    EXPECT_EQ(dt.m_type, Dimension::Type::Signed32);
+
+    dim = getDim(dims, "Y");
+    dt = dim.m_dimType;
+    EXPECT_EQ(dim.m_name, "Y");
+    EXPECT_FLOAT_EQ(dt.m_xform.m_scale, .01);
+    EXPECT_FLOAT_EQ(dt.m_xform.m_offset, 0.0);
+    EXPECT_EQ(dt.m_type, Dimension::Type::Signed32);
+    
+    dim = getDim(dims, "Z");
+    dt = dim.m_dimType;
+    EXPECT_EQ(dim.m_name, "Z");
+    EXPECT_FLOAT_EQ(dt.m_xform.m_scale, .01);
+    EXPECT_FLOAT_EQ(dt.m_xform.m_offset, 0.0);
+    EXPECT_EQ(dt.m_type, Dimension::Type::Signed32);
+
+    dim = getDim(dims, "Intensity");
+    dt = dim.m_dimType;
+    EXPECT_EQ(dim.m_name, "Intensity");
+    EXPECT_FLOAT_EQ(dt.m_xform.m_scale, 1.0);
+    EXPECT_FLOAT_EQ(dt.m_xform.m_offset, 0.0);
+    EXPECT_EQ(dt.m_type, Dimension::Type::Unsigned16);
+
+    dim = getDim(dims, "ReturnNumber");
+    dt = dim.m_dimType;
+    EXPECT_EQ(dim.m_name, "ReturnNumber");
+    EXPECT_FLOAT_EQ(dt.m_xform.m_scale, 1.0);
+    EXPECT_FLOAT_EQ(dt.m_xform.m_offset, 0.0);
+    EXPECT_EQ(dt.m_type, Dimension::Type::Unsigned8);
+
+    dim = getDim(dims, "NumberOfReturns");
+    dt = dim.m_dimType;
+    EXPECT_EQ(dim.m_name, "NumberOfReturns");
+    EXPECT_FLOAT_EQ(dt.m_xform.m_scale, 1.0);
+    EXPECT_FLOAT_EQ(dt.m_xform.m_offset, 0.0);
+    EXPECT_EQ(dt.m_type, Dimension::Type::Unsigned8);
+}
+
+
+TEST(XMLSchemaTest, copy)
 {
     using namespace pdal;
 
-    std::string xml =
-        ReadXML(TestConfig::g_data_path+"../../schemas/8-dimension-schema.xml");
+    std::string xml = ReadXML(TestConfig::g_data_path +
+        "../../schemas/16-dim-schema.xml");
     std::string xsd = ReadXML(TestConfig::g_data_path+"../../schemas/LAS.xsd");
 
     XMLSchema s1(xml, xsd);
@@ -95,7 +160,7 @@ TEST(XMLSchemaTest, test_schema_read)
     MetadataNode m1prime = m.add("m1prime", "Some other metadata");
     m1.add("uuid", boost::uuids::nil_uuid());
 
-    XMLSchema s2(s1.dimTypes(), m);;
+    XMLSchema s2(s1.dimTypes(), m);
     std::string xml_output = s2.xml();
 
     XMLSchema s3(xml_output, xsd);

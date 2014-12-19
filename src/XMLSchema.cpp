@@ -181,6 +181,7 @@ XMLSchema::XMLSchema(const DimTypeList& dims, MetadataNode m,
     {
         XMLDim dim;
         dim.m_dimType = *di;
+        dim.m_name = Dimension::name(di->m_id);
         m_dims.push_back(dim);
     }
 }
@@ -262,7 +263,7 @@ bool XMLSchema::validate(xmlDocPtr doc, const std::string& xsd)
     xmlSchemaValidCtxtPtr validCtxt = xmlSchemaNewValidCtxt(schema);
     xmlSchemaSetValidErrors(validCtxt, &OCISchemaValidityError,
         &OCISchemaValidityDebug, m_global_context);
-    bool valid = xmlSchemaValidateDoc(validCtxt, doc);
+    bool valid = (xmlSchemaValidateDoc(validCtxt, doc) == 0);
 
     xmlFreeDoc(schemaDoc);
     xmlSchemaFreeParserCtxt(parserCtxt);
