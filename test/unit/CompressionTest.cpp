@@ -34,9 +34,11 @@
 
 #include "gtest/gtest.h"
 
+#include <iterator>
 #include <sstream>
 #include <iostream>
 #include <string>
+#include <random>
 
 #include "Support.hpp"
 #include <pdal/Charbuf.hpp>
@@ -147,6 +149,62 @@ TEST(Compression, Simple)
     EXPECT_FLOAT_EQ(xd, 636037.53);
     int32_t y = b.getFieldAs<int32_t>(Dimension::Id::Y, 10);
     EXPECT_EQ(y, 849338);
+}
+
+
+TEST(Compression, types)
+{
+    using namespace Dimension;
+    Type::Enum types[] = {
+        Type::Unsigned8, Type::Unsigned16, Type::Unsigned32, Type::Unsigned64,
+        Type::Signed8, Type::Signed16, Type::Signed32, Type::Signed64,
+        Type::Float, Type::Double
+    };
+    // Size is 42.
+    
+    std::default_random_engine generator;
+    std::uniform_int_distribution<int> dist(std::numeric_limits<int>::min());
+    char pts[3][42];
+
+    // Fill three "points" with some random data.
+    char *c = &pts[0][0];
+    for (size_t i = 0; i < 3 * 42; ++i)
+    {
+        int v = dist(generator);
+        memcpy(c++, &v, sizeof(char));
+    }
+
+    DimTypeList dimTypes;
+    for (auto ti = std::begin(types); ti != std::end(types); ++ti)
+        dimTypes.push_back(DimType(Dimension::Id::Unknown, *ti));
+
+    SQLiteTestStream s;
+    LazPerfCompressor<SQLiteTestStream> compressor(s, dimTypes);
+    for (size_t i = 0; i < 50; i++)
+    {
+        compressor.compress(pts[0], 42);
+        compressor.compress(pts[1], 42);
+        compressor.compress(pts[2], 42);
+    }
+    compressor.done();
+
+    SQLiteTestStream s2;
+    s2.buf = s.buf;
+
+    LazPerfDecompressor<SQLiteTestStream> decompressor(s2, dimTypes);
+    char oPts[3][42];
+    for (size_t i = 0; i < 50; ++i)
+    {
+        decompressor.decompress(oPts[0], 42);
+        decompressor.decompress(oPts[1], 42);
+        decompressor.decompress(oPts[2], 42);
+        EXPECT_EQ(memcmp(pts[0], oPts[0], 42), 0);
+        EXPECT_EQ(memcmp(pts[1], oPts[1], 42), 0);
+        EXPECT_EQ(memcmp(pts[2], oPts[2], 42), 0);
+        memset(oPts[0], 0, 42);
+        memset(oPts[1], 0, 42);
+        memset(oPts[2], 0, 42);
+    }
 }
 
 //
