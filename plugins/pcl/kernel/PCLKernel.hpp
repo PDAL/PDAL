@@ -42,7 +42,7 @@ namespace pdal
 class PDAL_DLL PCLKernel : public Kernel
 {
 public:
-    SET_KERNEL_NAME("kernels.pcl", "PCL Kernel")
+    SET_KERNEL_NAME("pcl", "PCL Kernel")
     SET_KERNEL_LINK("http://pdal.io/kernels/kernels.pcl.html")
     SET_KERNEL_ENABLED(true)
 
