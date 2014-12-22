@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="writers.las">
+        <Option name="filename">
+            @CMAKE_SOURCE_DIR@/test/temp/nitf.las
+        </Option>
+            <Reader type="readers.nitf">
+                <Option name="filename">
+                    @CMAKE_SOURCE_DIR@/test/data/nitf/autzen-utm10.ntf
+                </Option>
+            </Reader>
+    </Writer>
+</Pipeline>

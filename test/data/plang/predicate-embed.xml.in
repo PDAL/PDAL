@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<Pipeline version="1.0">
+    <Filter type="filters.predicate">
+        <Option name="module">anything</Option>
+        <Option name="function">fff</Option>
+        <Option name="source">
+import numpy as np
+
+def fff(ins,outs):
+    X = ins['X']
+    Result = np.equal(X, 637501.67)
+    #print X
+    #print Mask
+    outs['Mask'] = Result
+    return True
+        </Option>
+        <Reader type="readers.las">
+            <Option name="filename">
+                @CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las
+            </Option>
+        </Reader>
+    </Filter>
+</Pipeline>

@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<Pipeline version="1.0">
+    <Writer type="writers.las">
+        <Option name="filename">
+            @CMAKE_SOURCE_DIR@/test/temp/metadata-output.las
+        </Option>
+        <Option name="metadata">
+            <Options>
+                <Option name="software_id">
+                    forward
+                </Option>
+                <Option name="system_id">
+                    SOMEVALUE
+                </Option>
+                <Option name="creation_doy">
+                    forward
+                </Option>            
+                <Option name="creation_year">
+                    forward
+                </Option>            
+                <Option name="vlr">
+                    forward
+                    <Options>
+                        <Option name="record_id">
+                            1234
+                        </Option>
+                        <Option name="user_id">
+                            hobu
+                        </Option>                
+                    </Options>
+                </Option>
+                <Option name="vlr">
+                    dGhpcyBpcyBzb21lIG5ldyB2bHIgdGV4dA==
+                    <Options>
+                        <Option name="record_id">
+                            4321
+                        </Option>
+                        <Option name="user_id">
+                            new VLR
+                        </Option>                
+                        <Option name="description">
+                            a description of a new VLR
+                        </Option>                
+                    </Options>
+                </Option>
+            </Options>
+        </Option>    
+        <Reader type="readers.las">
+            <Option name="filename">
+                @CMAKE_SOURCE_DIR@/test/data/las/interesting.las
+            </Option>
+        </Reader>
+    </Writer>
+</Pipeline>

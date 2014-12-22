@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This file is Mississippi data that has different vertical units (ft) -->
+<Pipeline version="1.0">
+    <Writer type="writers.las">
+        <Option name="filename">
+            @CMAKE_SOURCE_DIR@/test/temp/out2.las
+        </Option>
+        <Reader type="readers.las">
+            <Option name="filename">
+                @CMAKE_SOURCE_DIR@/test/data/las/mvk-thin.las
+            </Option>
+        </Reader>
+    </Writer>
+</Pipeline>

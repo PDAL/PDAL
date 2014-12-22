@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="writers.text">
+        <Option name="filename">
+            STDOUT
+        </Option>
+        <Option name="delimiter"> </Option>
+        <Option name="write_header">true</Option>
+        <Option name="order">X,Y,Z,Red,Green,Blue</Option>
+        <Option name="keep_unspecified">true</Option>
+        <Reader type="readers.las">
+            <Option name="filename">
+                @CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las
+            </Option>
+            <Option name="spatialreference">
+                EPSG:2993
+	    </Option>
+        </Reader>
+    </Writer>
+</Pipeline>
