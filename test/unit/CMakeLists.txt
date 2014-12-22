@@ -18,6 +18,7 @@ foreach(infileName ${inFiles})
     #message(STATUS "Configure ${CMAKE_SOURCE_DIR}/${infileName} as ${CMAKE_BINARY_DIR}/${outfileName}")
     configure_file("${CMAKE_SOURCE_DIR}/${infileName}" "${CMAKE_BINARY_DIR}/${outfileName}")
 endforeach()
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 include_directories(
     ${PROJECT_SOURCE_DIR}/include
@@ -118,7 +119,6 @@ if(WITH_APPS)
     PDAL_ADD_TEST(pc2pc_test FILES apps/pc2pcTest.cpp)
 
     if(BUILD_PIPELINE_TESTS)
-        include_directories(${CMAKE_CURRENT_BINARY_DIR})
         PDAL_ADD_TEST(pcpipeline_test FILES apps/pcpipelineTest.cpp)
     endif()
 endif(WITH_APPS)

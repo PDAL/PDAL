@@ -12,7 +12,7 @@
         <Option name="offset_z">7.385474</Option>
         <Reader type="readers.bpf">
             <Option name="filename">
-                @CMAKe_SOURCE_DIR@/test/data/bpf/utm15.bpf
+                @CMAKE_SOURCE_DIR@/test/data/bpf/utm15.bpf
             </Option>
         </Reader>
 </Writer>

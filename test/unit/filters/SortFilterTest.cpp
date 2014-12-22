@@ -95,7 +95,7 @@ TEST(SortFilterTest, pipeline)
     PipelineManager mgr;
     PipelineReader reader(mgr);
 
-    reader.readPipeline(Support::datapath("filters/sort.xml"));
+    reader.readPipeline(Support::configuredpath("filters/sort.xml"));
     mgr.execute();
 
     PointBufferSet pbSet = mgr.buffers();
