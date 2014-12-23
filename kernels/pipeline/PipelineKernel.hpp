@@ -47,7 +47,7 @@ namespace pdal
 class PDAL_DLL PipelineKernel : public Kernel
 {
 public:
-    SET_KERNEL_NAME ("kernels.pipeline", "Pipeline Kernel")
+    SET_KERNEL_NAME ("pipeline", "Pipeline Kernel")
     SET_KERNEL_LINK ("http://pdal.io/kernels/kernels.pipeline.html")
     SET_KERNEL_ENABLED (true)
 

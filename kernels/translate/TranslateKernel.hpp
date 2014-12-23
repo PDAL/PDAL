@@ -42,7 +42,7 @@ namespace pdal
 class PDAL_DLL TranslateKernel : public Kernel
 {
 public:
-    SET_KERNEL_NAME ("kernels.translate", "Translate Kernel")
+    SET_KERNEL_NAME ("translate", "Translate Kernel")
     SET_KERNEL_LINK ("http://pdal.io/kernels/kernels.translate.html")
     SET_KERNEL_ENABLED (true)
  

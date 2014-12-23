@@ -530,6 +530,12 @@ configure_file(
   "${PROJECT_SOURCE_DIR}/gitsha.cpp.in"
   "${PROJECT_SOURCE_DIR}/src/gitsha.cpp")
 
+# needs to come before configuration of pdal_defines
+if(APPLE)
+    option(PDAL_BUNDLE "Create PDAL as Application Bundle on OSX" FALSE)
+    set(PDAL_APP_BUNDLE 1)
+endif()
+
 set(pdal_defines_h_in "${CMAKE_CURRENT_SOURCE_DIR}/pdal_defines.h.in")
 set(pdal_defines_h "${CMAKE_CURRENT_BINARY_DIR}/include/pdal/pdal_defines.h")
 configure_file(${pdal_defines_h_in} ${pdal_defines_h})
