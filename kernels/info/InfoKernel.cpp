@@ -56,7 +56,6 @@ InfoKernel::InfoKernel()
     , m_useJSON(false)
     , m_useRST(false)
     , m_QueryDistance(0.0)
-    , m_showSample(false)
     , m_showSummary(false)
 {}
 
@@ -134,14 +133,6 @@ void InfoKernel::addSwitches()
          "dump JSON")
         ("rst", po::value<bool>(&m_useRST)->zero_tokens()->implicit_value(true),
          "dump RST")
-        ("sample",
-         po::value<bool>(&m_showSample)->zero_tokens()->implicit_value(true),
-         "randomly sample dimension for stats")
-        ("seed", po::value<uint32_t>(&m_seed)->default_value(0),
-         "Seed value for random sample")
-        ("sample_size",
-         po::value<uint32_t>(&m_sample_size)->default_value(1000),
-         "Sample size for random sample")
         ("summary",
          po::value<bool>(&m_showSummary)->zero_tokens()->implicit_value(true),
         "dump summary of the info")
@@ -157,23 +148,6 @@ namespace {
 
 using namespace std;
 
-vector<string> tokenize(const string s, char c)
-{
-    string::const_iterator begin;
-    string::const_iterator end;
-    vector<string> strings;
-    begin = s.begin();
-    while (true)
-    {
-        end = find(begin, s.end(), c);
-        strings.push_back(string(begin, end));
-        if (end == s.end())
-            break;
-        begin = end + 1;
-    }
-    return strings;
-}
-
 uint32_t parseInt(const string& s)
 {
     try
@@ -184,12 +158,6 @@ uint32_t parseInt(const string& s)
     {
         throw app_runtime_error(string("Invalid integer: ") + s);
     }
-}
-
-
-void addSingle(const string& s, vector<uint32_t>& points)
-{
-    points.push_back(parseInt(s));
 }
 
 
@@ -212,12 +180,12 @@ vector<uint32_t> getListOfPoints(std::string p)
     //Remove whitespace from string with awful remove/erase idiom.
     p.erase(remove_if(p.begin(), p.end(), ::isspace), p.end());
 
-    vector<string> ranges = tokenize(p, ',');
+    vector<string> ranges = Utils::split2(p, ',');
     for (string s : ranges)
     {
-        vector<string> limits = tokenize(s, '-');
+        vector<string> limits = Utils::split(s, '-');
         if (limits.size() == 1)
-            addSingle(limits[0], output);
+            output.push_back(parseInt(limits[0]));
         else if (limits.size() == 2)
             addRange(limits[0], limits[1], output);
         else
@@ -475,24 +443,8 @@ int InfoKernel::execute()
     m_manager = std::unique_ptr<PipelineManager>(
         KernelSupport::makePipeline(readerOptions));
 
-    if (m_seed != 0)
-    {
-        Option seed_option("seed", m_seed, "seed value");
-        m_options.add(seed_option);
-    }
-
-    m_options.add("sample_size", m_sample_size,
-        "sample size for random sample");
-    m_options.add("exact_count", "Classification",
-        "use exact counts for classification stats");
-    m_options.add("exact_count", "ReturnNumber",
-        "use exact counts for ReturnNumber stats");
-    m_options.add("exact_count", "NumberOfReturns",
-        "use exact counts for ReturnNumber stats");
-    m_options.add("do_sample", m_showSample, "Don't do sampling");
     if (m_Dimensions.size())
-        m_options.add("dimensions", m_Dimensions,
-            "Use explicit list of dimensions");
+        m_options.add("dimensions", m_Dimensions, "List of dimensions");
 
     Options options = m_options + readerOptions;
 

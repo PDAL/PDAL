@@ -87,8 +87,6 @@ private:
     bool m_computeBoundary;
     pdal::Options m_options;
     std::string m_pointIndexes;
-    uint32_t m_seed;
-    uint32_t m_sample_size;
     bool m_useXML;
     bool m_useJSON;
     bool m_useRST;
@@ -96,7 +94,6 @@ private:
     std::string m_QueryPoint;
     double m_QueryDistance;
     std::string m_pipelineFile;
-    bool m_showSample;
     bool m_showSummary;
 
     std::unique_ptr<boost::property_tree::ptree> m_tree;
