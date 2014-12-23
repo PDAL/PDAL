@@ -268,6 +268,21 @@ namespace Utils
         return result;
     }
 
+    inline PDAL_DLL std::vector<std::string>
+    split(const std::string& s, char tChar)
+    {
+        auto pred = [tChar](char c){ return(c == tChar); };
+        return split(s, pred);
+    }
+
+
+    inline PDAL_DLL std::vector<std::string>
+    split2(const std::string& s, char tChar)
+    {
+        auto pred = [tChar](char c){ return(c == tChar); };
+        return split2(s, pred);
+    }
+
     template<typename T>
     std::string typeidName()
         { return Utils::demangle(typeid(T).name()); }
