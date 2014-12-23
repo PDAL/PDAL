@@ -35,9 +35,6 @@
 #include <StatsFilter.hpp>
 #include <pdal/Utils.hpp>
 
-#include <pdal/PointBuffer.hpp>
-#include <boost/algorithm/string.hpp>
-
 namespace pdal
 {
 namespace stats
@@ -51,25 +48,6 @@ void Summary::extractMetadata(MetadataNode &m) const
     m.add("maximum", maximum(), "maximum");
     m.add("average", average(), "average");
     m.add("name", m_name, "name");
-
-    std::ostringstream sample;
-    for (std::vector<double>::size_type i = 0; i < m_sample.size(); ++i)
-        sample << m_sample[i] << " ";
-
-    m.add("sample", sample.str(), "sample");
-
-    if (m_doExact)
-    {
-        MetadataNode countsNode = m.add("counts");
-        for (auto i = m_counts.begin(); i != m_counts.end(); ++i)
-        {
-            std::ostringstream binname;
-            binname << "count-" << i->first;
-            MetadataNode binNode = countsNode.add(binname.str());
-            binNode.add("value", i->first);
-            binNode.add("count", i->second);
-        }
-    }
 }
 
 
@@ -82,53 +60,16 @@ boost::property_tree::ptree Summary::toPTree(PointContext ctx) const
     tree.put("minimum", minimum());
     tree.put("maximum", maximum());
     tree.put("average", average());
-
-    std::ostringstream sample;
-    for (size_t i = 0; i < m_sample.size(); ++i)
-        sample << m_sample[i] << " ";
-    tree.add("sample", sample.str());
-
-    if (m_doExact == true)
-    {
-        boost::property_tree::ptree counts;
-        for (auto i = m_counts.begin(); i != m_counts.end(); ++i)
-        {
-            boost::property_tree::ptree bin;
-            bin.add("value", i->first);
-            bin.add("count", i->second);
-            std::ostringstream binname;
-            binname << "count-" <<i->first;
-            counts.add_child(binname.str(), bin);
-        }
-        tree.add_child("counts", counts);
-    }
+    tree.put("name", name());
     return tree;
 }
 
 } // namespace stats
 
 
-Options StatsFilter::getDefaultOptions()
-{
-    Options options;
-    options.add("sample_size", 1000, "Number of points to return for "
-        "uniform random 'sample'");
-    options.add("num_bins", 20, "Number of bins to use for histogram");
-    options.add("stats_cache_size", 100000, "Number of points "
-        "to use for histogram bin determination. Defaults to total number "
-        "of points read if no option is specified.");
-    options.add("seed", 0, "Seed to use for repeatable random sample. A "
-        "seed value of 0 means no seed is used");
-    options.add("num_points", 0, "Total number of points to be processed. "
-        "(0 indicates all points will be processed).");
-    return options;
-}
-
-
 void StatsFilter::filter(PointBuffer& buffer)
 {
-    point_count_t limit = (std::min)(buffer.size(), m_numPoints);
-    for (PointId idx = 0; idx < limit; ++idx)
+    for (PointId idx = 0; idx < buffer.size(); ++idx)
     {
         for (auto p = m_stats.begin(); p != m_stats.end(); ++p)
         {
@@ -147,31 +88,7 @@ void StatsFilter::done(PointContext ctx)
 
 void StatsFilter::processOptions(const Options& options)
 {
-    m_exact_dim_opt = m_options.getValueOrDefault<std::string>(
-        "exact_dimensions", "");
-    m_dim_opt = m_options.getValueOrDefault<std::string>("dimensions", "");
-    m_cache_size = m_options.getValueOrDefault<uint32_t>(
-        "stats_cache_size", 1000);
-    m_sample_size = m_options.getValueOrDefault<uint32_t>(
-        "sample_size", 100000);
-    m_seed = m_options.getValueOrDefault<uint32_t>("seed", 0);
-    m_bin_count = m_options.getValueOrDefault<uint32_t>("num_bins", 20);
-    m_numPoints = m_options.getValueOrDefault<point_count_t>("num_points", 0);
-    if (m_numPoints == 0)
-        m_numPoints = (std::numeric_limits<point_count_t>::max)();
-    if (m_options.hasOption("do_sample"))
-        m_do_sample = m_options.getValueOrThrow<bool>("do_sample");
-    else
-        m_do_sample = !m_exact_dim_opt.size() && !m_dim_opt.size();
-}
-
-
-void StatsFilter::initialize()
-{
-    m_metadata.add("sample_size", m_sample_size);
-    m_metadata.add("seed", m_seed);
-    m_metadata.add("num_bins", m_bin_count);
-    m_metadata.add("stats_cache_size", m_cache_size);
+    m_dimNames = m_options.getValueOrDefault<std::string>("dimensions", "");
 }
 
 
@@ -179,75 +96,30 @@ void StatsFilter::ready(PointContext ctx)
 {
     using namespace std;
 
-    log()->get(LogLevel::Debug) << "Calculating histogram statistics for "
-        "exact names '" << m_exact_dim_opt << "'"<< std::endl;
-
-    vector<string> dims;
-    boost::split(dims, m_exact_dim_opt, boost::is_any_of(" ,"));
-
-    std::map<std::string, bool> exact_dimensions;
-    for (auto di = dims.begin(); di != dims.end(); ++di)
+    std::vector<Dimension::Id::Enum> dims;
+    std::vector<std::string> dimNames;
+    if (m_dimNames.empty())
     {
-        string dimName = *di;
-        boost::trim(dimName);
-        if (dimName.size())
-        {
-            log()->get(LogLevel::Debug) << "adding '" << dimName <<
-                "' as exact dimension name to cumulate stats for" << std::endl;
-            m_exact_dimension_names.insert(dimName);
-            m_dimension_names.insert(dimName);
-            exact_dimensions[dimName] = true;
-        }
-    }
-
-    dims.clear();
-    boost::split(dims, m_dim_opt, boost::is_any_of(" ,"));
-    for (auto di = dims.begin(); di != dims.end(); ++di)
-    {
-        string dimName = *di;
-        boost::trim(dimName);
-        if (dimName.size())
-            m_dimension_names.insert(dimName);
-    }
-
-    if (m_dimension_names.size())
-    {
-        log()->get(LogLevel::Debug2) << "Explicit dimension size:" <<
-            m_dimension_names.size() << std::endl;
-
-        for (auto i = m_dimension_names.begin();
-                i != m_dimension_names.end(); i++)
-        {
-            std::string const& name = *i;
-            log()->get(LogLevel::Debug2) << "Requested to cumulate stats for "
-                "dimension with name '" << name <<"'"<< std::endl;
-            Dimension::Id::Enum d = ctx.findDim(name);
-            if (d == Dimension::Id::Unknown)
-                continue;
-            log()->get(LogLevel::Debug2) << "Found dimension with name '" <<
-                name << "'"<< std::endl;
-            log()->get(LogLevel::Debug2) << "Cumulating stats for dimension " <<
-                name << std::endl;
-
-            bool doExact =
-                (exact_dimensions.find(name) != exact_dimensions.end());
-
-            m_stats[d] = SummaryPtr(new stats::Summary(*i, m_bin_count,
-                m_sample_size, m_cache_size, m_seed, doExact, m_do_sample));
-        }
+        dims = ctx.dims();
+        for (auto di = dims.begin(); di != dims.end(); ++di)
+            dimNames.push_back(ctx.dimName(*di));
     }
     else
     {
-        Dimension::IdList dims = ctx.dims();
-        for (auto di = dims.begin(); di != dims.end(); ++di)
+        auto splits = [](char c)
+            { return c == ' ' || c == ','; };
+        dimNames = Utils::split2(m_dimNames, splits);
+        for (auto di = dimNames.begin(); di != dimNames.end(); ++di)
         {
-            Dimension::Id::Enum d = *di;
-            log()->get(LogLevel::Debug2) << "Cumulating stats for dimension " <<
-                ctx.dimName(d) << std::endl;
-            m_stats[d] = SummaryPtr(new stats::Summary(ctx.dimName(*di) ,m_bin_count,
-                m_sample_size, m_cache_size, m_seed, false, m_do_sample));
+            auto dim = ctx.findDim(*di);
+            if (dim != Dimension::Id::Unknown)
+                dims.push_back(dim);
         }
     }
+
+    auto ni = dimNames.begin();
+    for (auto di = dims.begin(); di != dims.end(); ++di, ++ni)
+        m_stats[*di] = SummaryPtr(new stats::Summary(*ni));
 }
 
 
@@ -256,7 +128,6 @@ void StatsFilter::extractMetadata(PointContext ctx)
 
     uint32_t position(0);
     
-    // MetadataNode stat = m_metadata.add("statistic");
     for (auto di = m_stats.begin(); di != m_stats.end(); ++di)
     {
         Dimension::Id::Enum d = di->first;
