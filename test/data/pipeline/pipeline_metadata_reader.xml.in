@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<Pipeline version="1.0">
+    <Reader type="readers.las">
+        <Option name="filename">
+	    @CMAKE_SOURCE_DIR@/test/data/las/interesting.las
+        </Option>
+    </Reader>
+</Pipeline>

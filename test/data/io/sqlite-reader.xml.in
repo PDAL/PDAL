@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="writers.las">
+        <Option name="filename">
+            @CMAKE_SOURCE_DIR@/test/temp/written-from-sqlite.las
+        </Option>
+        <Option name="compression">
+            false
+        </Option>
+        <Reader type="readers.sqlite">
+            <Option name="query">
+                SELECT b.schema, l.cloud, l.block_id, l.num_points, l.bbox, l.extent, l.points, b.cloud
+                  FROM simple_blocks l, simple_cloud b
+                 WHERE l.cloud = b.cloud and l.cloud in (1)
+                order by l.cloud
+            </Option>
+            <Option name="connection">
+                /Users/hobu/dev/git/pdal/test/data/autzen-dd.sqlite
+            </Option>
+        </Reader>
+    </Writer>
+</Pipeline>

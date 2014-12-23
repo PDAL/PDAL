@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="writers.las">
+        <Option name="filename">
+            @CMAKE_SOURCE_DIR@/test/temp/colorized.las
+        </Option>
+        <Filter type="filters.colorization">
+            <Option name="dimension">
+                Red
+                <Options>
+                    <Option name="band">
+                        1
+                    </Option>
+                    <Option name="scale">
+                        1.0
+                    </Option>
+                </Options>
+            </Option>
+            <Option name="dimension">
+                Green
+                <Options>
+                    <Option name="band">
+                        2
+                    </Option>
+                    <Option name="scale">
+                        1.0
+                    </Option>
+                </Options>
+            </Option>
+            <Option name="dimension">
+                Blue
+                <Options>
+                    <Option name="band">
+                        3
+                    </Option>
+                    <Option name="scale">
+                        256
+                    </Option>
+                </Options>
+            </Option>
+            <Option name="raster">
+                @CMAKE_SOURCE_DIR@/test/data/autzen/autzen.jpg
+            </Option>
+            <Reader type="readers.las">
+                <Option name="filename">
+                    @CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las
+                </Option>
+            </Reader>
+        </Filter>
+    </Writer>
+</Pipeline>

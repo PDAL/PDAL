@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<Pipeline version="1.0">
+    <Writer type="writers.text">
+        <Option name="filename">@CMAKE_SOURCE_DIR@/test/temp/outfile.txt</Option>
+        <Reader type="readers.sbet">
+            <Option name="filename">@CMAKE_SOURCE_DIR@/test/data/sbet/2-points.sbet</Option>
+        </Reader>
+    </Writer>
+</Pipeline>

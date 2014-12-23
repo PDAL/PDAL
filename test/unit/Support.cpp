@@ -68,6 +68,16 @@ std::string Support::datapath(const std::string& file)
     return datapath() + file;
 }
 
+string Support::configuredpath()
+{
+    return TestConfig::g_configured_path;
+}
+
+std::string Support::configuredpath(const std::string& file)
+{
+    return configuredpath() + file;
+}
+
 std::string Support::temppath()
 {
     return TestConfig::g_data_path + "../temp/";

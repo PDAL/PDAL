@@ -345,7 +345,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_Pipeline)
     PipelineManager mgr;
     PipelineReader reader(mgr);
 
-    reader.readPipeline(Support::datapath("plang/from-module.xml"));
+    reader.readPipeline(Support::configuredpath("plang/from-module.xml"));
     point_count_t cnt = mgr.execute();
     EXPECT_EQ(cnt, 1u);
 }
@@ -355,7 +355,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_Embed)
     PipelineManager mgr;
     PipelineReader reader(mgr);
 
-    reader.readPipeline(Support::datapath("plang/predicate-embed.xml"));
+    reader.readPipeline(Support::configuredpath("plang/predicate-embed.xml"));
     point_count_t cnt = mgr.execute();
     EXPECT_EQ(cnt, 1u);
 }

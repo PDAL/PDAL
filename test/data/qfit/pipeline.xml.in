@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<Pipeline version="1.0">
+    <Writer type="writers.las">
+        <Option name="filename">@CMAKE_SOURCE_DIR@/test/temp/qfit-foo.las</Option>
+        <Reader type="readers.qfit">
+            <Option name="flip_coordinates">true</Option>
+            <Option name="scale_z">0.001</Option>
+            <Option name="spatialreference">EPSG:4919+3855</Option>
+            <Option name="filename">@CMAKE_SOURCE_DIR@/test/data/qfit/20100515_152839.atm4bT2.qi</Option>
+        </Reader>
+    </Writer>
+</Pipeline>
