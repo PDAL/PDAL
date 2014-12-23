@@ -16,7 +16,6 @@
 # # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 # #
 # ###############################################################################
-MESSAGE(STATUS "Searching for Nitro ${Nitro_FIND_VERSION}+ library")
 
 IF(NITRO_INCLUDE_DIR)
   # Already in cache, be silent

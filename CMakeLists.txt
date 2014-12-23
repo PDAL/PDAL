@@ -13,6 +13,8 @@ string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 #------------------------------------------------------------------------------
 
 set(CMAKE_COLOR_MAKEFILE ON)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+include(FeatureSummary)
 
 # Allow advanced users to generate Makefiles printing detailed commands
 mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
@@ -95,22 +97,56 @@ endif(DEFINED ENV{ORACLE_HOME})
 
 # Choose package components
 option(WITH_APPS "Choose if PDAL utilities should be built" TRUE)
+add_feature_info("PDAL application" WITH_APPS
+    "the PDAL command line application")
+
 option(BUILD_PLUGIN_ATTRIBUTE "Choose if Attribute filter is built" FALSE)
+add_feature_info("Attribute plugin" BUILD_PLUGIN_ATTRIBUTE
+    "apply attributes to a subset of points")
+
 option(BUILD_PLUGIN_GREYHOUND "Choose if Greyhound support should be built" FALSE)
+add_feature_info("Greyhound plugin" BUILD_PLUGIN_GREYHOUND
+    "read points from a Greyhound server")
+
 option(BUILD_PLUGIN_HEXBIN "Whether or not HexBin filter is built" FALSE)
+add_feature_info("Hexbin plugin" BUILD_PLUGIN_HEXBIN
+    "determine boundary and density of a point cloud")
+
 option(BUILD_PLUGIN_ICEBRIDGE "Choose if Icebridge support should be built" FALSE)
+add_feature_info("Icebridge plugin" BUILD_PLUGIN_ICEBRIDGE
+    "read data in the Icebridge format")
+
 option(BUILD_PLUGIN_MRSID "Choose if MrSID/LiDAR support should be built" FALSE)
+add_feature_info("MrSID plugin" BUILD_PLUGIN_MRSID
+    "read data in the MrSID format")
+
 option(BUILD_PLUGIN_NITF "Choose if NITF support should be built (only install supported is from http://github.com/hobu/nitro)" FALSE)
+add_feature_info("NITF plugin" BUILD_PLUGIN_NITF
+    "read/write LAS data wrapped in NITF")
+
 option(BUILD_PLUGIN_OCI "Choose if OCI support should be built" ${DEFINED_ORACLE_HOME})
 option(BUILD_PLUGIN_P2G "Choose if Points2Grid support should be built" FALSE)
 option(BUILD_PLUGIN_PCL "Choose if PCL support should be built" FALSE)
+add_feature_info("PCL plugin" BUILD_PLUGIN_PCL
+    "provides PCL-based readers, writers, filters, and kernels")
+
 option(BUILD_PLUGIN_PGPOINTCLOUD "Choose if PostgreSQL PointCloud support should be built" TRUE)
+add_feature_info("PostgreSQL PointCloud plugin" BUILD_PLUGIN_PGPOINTCLOUD
+    "read/write PostgreSQL PointCloud objects")
+
 option(BUILD_PLUGIN_SQLITE "Choose if SQLite database support should be built" FALSE)
+add_feature_info("SQLite plugin" BUILD_PLUGIN_SQLITE
+    "read/write SQLite objects")
+
 option(BUILD_PLUGIN_RIVLIB "Choose if RiVLib support should be built" FALSE)
-option(WITH_TESTS "Choose if PDAL unit tests should be built" TRUE)
+add_feature_info("RiVLib plugin" BUILD_PLUGIN_RIVLIB
+    "read data in the RXP format")
 
 # Choose to use pkg-config or not
 option(WITH_PKGCONFIG "Choose whether a pkgconfig file (PDAL.pc) should be installed" TRUE)
+
+option(WITH_TESTS "Choose if PDAL unit tests should be built" TRUE)
+add_feature_info("Unit tests" WITH_TESTS "PDAL unit tests")
 
 # Choose dependent options
 cmake_dependent_option(BUILD_PGPOINTCLOUD_TESTS "Choose if PostgreSQL PointCloud tests should be built" ON "BUILD_PLUGIN_PGPOINTCLOUD; WITH_TESTS" OFF)
@@ -260,6 +296,8 @@ endif(APPLE)
 #------------------------------------------------------------------------------
 
 find_package(Threads)
+set_package_properties(Threads PROPERTIES DESCRIPTION "The thread library of the system"
+    TYPE REQUIRED)
 
 # Default to using static, multithreaded libraries for
 # linking under MSVC.  This is because we show users how to
@@ -276,7 +314,9 @@ if(WIN32)
   endif(MSVC)
 endif(WIN32)
 
-find_package(Boost 1.53 COMPONENTS program_options iostreams filesystem system REQUIRED)
+find_package(Boost QUIET 1.53 COMPONENTS program_options iostreams filesystem system)
+set_package_properties(Boost PROPERTIES TYPE REQUIRED
+    PURPOSE "Provides convenience, e.g., program_options, filesytem")
 
 if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})
@@ -295,12 +335,13 @@ endif(Boost_FOUND)
 #
 # GDAL/OGR support (required)
 #
-find_package(GDAL 1.9.0)
+find_package(GDAL QUIET 1.9.0)
+set_package_properties(GDAL PROPERTIES TYPE REQUIRED
+    PURPOSE "Provides general purpose raster, vector, and reference system support")
 if (GDAL_FOUND)
     include_directories("${GDAL_INCLUDE_DIR}")
     mark_as_advanced(CLEAR GDAL_INCLUDE_DIR)
     mark_as_advanced(CLEAR GDAL_LIBRARY)
-    message(STATUS "...building with GDAL")
 else()
     message(FATAL_ERROR "GDAL support is required")
 endif()
@@ -309,7 +350,9 @@ endif()
 #
 # GEOS (optional)
 #
-find_package(GEOS 3.3)
+find_package(GEOS QUIET 3.3)
+set_package_properties(GEOS PROPERTIES TYPE OPTIONAL
+    PURPOSE "Provides general purpose geometry support")
 if (GEOS_FOUND)
     find_file(GEOS_VERSION_H version.h "${GEOS_INCLUDE_DIR}/geos")
     if ("${GEOS_VERSION_H}" STREQUAL "GEOS_VERSION_H-NOTFOUND")
@@ -318,7 +361,6 @@ if (GEOS_FOUND)
     else()
         include_directories("${GEOS_INCLUDE_DIR}")
         set(PDAL_HAVE_GEOS 1)
-        message(STATUS "...building with GEOS")
     endif()
 else()
     set(GEOS_LIBRARY "")
@@ -330,7 +372,8 @@ endif()
 #
 option(WITH_GEOTIFF "Choose if GeoTIFF support should be built" TRUE)
 if(WITH_GEOTIFF)
-    find_package(GeoTIFF 1.3.0)
+    find_package(GeoTIFF QUIET 1.3.0)
+    set_package_properties(GeoTIFF PROPERTIES TYPE OPTIONAL)
     if(GEOTIFF_FOUND)
         include_directories("${GEOTIFF_INCLUDE_DIR}")
         set(PDAL_HAVE_LIBGEOTIFF 1)
@@ -354,6 +397,7 @@ endif()
 option(WITH_ICONV "Choose if IConv support should be built" TRUE)
 if(WITH_ICONV)
     find_package(ICONV)
+    set_package_properties(ICONV PROPERTIES TYPE OPTIONAL)
     if (ICONV_FOUND)
         mark_as_advanced(CLEAR ICONV_INCLUDE_DIR)
         mark_as_advanced(CLEAR ICONV_LIBRARIES)
@@ -371,7 +415,9 @@ option(WITH_STATIC_LASZIP "Choose if LASzip should be statically linked" FALSE)
 mark_as_advanced(WITH_STATIC_LASZIP)
 
 if(WITH_LASZIP)
-    find_package(LASzip 1.0.1)
+    find_package(LASzip QUIET 1.0.1)
+    set_package_properties(LASzip PROPERTIES TYPE RECOMMENDED
+        PURPOSE "Provides LASzip compression")
     if(LASZIP_FOUND)
         set(CMAKE_REQUIRED_LIBRARIES "${LASZIP_LIBRARY}")
         include_directories(${LASZIP_INCLUDE_DIR})
@@ -388,6 +434,7 @@ endif()
 option(WITH_COMPRESSION "Choose to use laz-perf compression for database drivers" FALSE)
 if (WITH_COMPRESSION)
     find_package(Lazperf)
+    set_package_properties(Lazperf PROPERTIES TYPE OPTIONAL)
     if (LAZPERF_FOUND)
         include_directories(${LAZPERF_INCLUDE_DIR})
         set(PDAL_HAVE_LAZPERF 1)
@@ -399,7 +446,9 @@ endif()
 #
 # ZLIB support - required
 #
-find_package(ZLIB REQUIRED)
+find_package(ZLIB)
+set_package_properties(ZLIB PROPERTIES TYPE REQUIRED
+    PURPOSE "Compression support in BPF")
 if(ZLIB_FOUND)
     set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} "${ZLIB_LIBRARY}")
 	include_directories(${ZLIB_INCLUDE_DIR})
@@ -414,15 +463,17 @@ endif()
 #
 option(WITH_PYTHON "Choose if Python support (for PLang filters) should be built" TRUE)
 if(WITH_PYTHON)
-    FIND_PACKAGE(PythonInterp)
-    find_package(PythonLibs 2.4)
+	find_package(PythonInterp QUIET)
+    set_package_properties(PythonInterp PROPERTIES TYPE OPTIONAL)
+    find_package(PythonLibs QUIET 2.4)
+    set_package_properties(PythonLibs PROPERTIES TYPE OPTIONAL)
     if(PYTHONLIBS_FOUND)
         set(CMAKE_REQUIRED_LIBRARIES "${PYTHON_LIBRARY}")
         include_directories(SYSTEM ${PYTHON_INCLUDE_DIR})
         add_definitions(-DHAVE_PYTHON=1)
         set(PDAL_HAVE_PYTHON 1)
 
-        find_package(NumPy 1.5 REQUIRED)
+	find_package(NumPy QUIET 1.5 REQUIRED)
         include_directories(SYSTEM ${NUMPY_INCLUDE_DIR})
         message(STATUS "Found Python: ${PYTHON_LIBRARY}")
     else()
@@ -447,6 +498,7 @@ endif()
 
 if(WITH_LIBXML2)
     find_package(LibXml2)
+    set_package_properties(LibXml2 PROPERTIES TYPE OPTIONAL)
     if(LIBXML2_FOUND)
         mark_as_advanced(CLEAR LIBXML2_INCLUDE_DIR)
         mark_as_advanced(CLEAR LIBXML2_LIBRARIES)
@@ -457,7 +509,6 @@ if(WITH_LIBXML2)
         set(LIBXML2_LIBRARIES "")
     endif()
 endif()
-
 
 #------------------------------------------------------------------------------
 # installation commands
@@ -498,8 +549,6 @@ add_subdirectory(kernels)
 add_subdirectory(src)
 
 if(WITH_TESTS)
-  message(STATUS "Building with PDAL unit tests")
-
   # This is fixed in trunk
   # https://code.google.com/p/googletest/source/detail?r=675
   # but for now, we need this fix
@@ -578,3 +627,5 @@ list(APPEND CPACK_SOURCE_IGNORE_FILES "import-pdal-boost.sh")
 include(CPack)
 
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
+
+feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES)
