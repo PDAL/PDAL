@@ -130,7 +130,7 @@ TEST(SbetReaderTest, testPipeline)
 {
     PipelineManager manager;
     PipelineReader reader(manager);
-    reader.readPipeline(Support::datapath("sbet/pipeline.xml"));
+    reader.readPipeline(Support::configuredpath("sbet/pipeline.xml"));
 
     point_count_t numPoints = manager.execute();
     EXPECT_EQ(numPoints, 2u);

@@ -8,8 +8,6 @@ include_directories(${PROJECT_SOURCE_DIR}/plugins/icebridge)
 set (HDF5_FIND_COMPONENTS "CXX")
 find_package(HDF5 COMPONENTS CXX REQUIRED)
 if (HDF5_FOUND)
-    message(STATUS "Building with Icebridge support")
-
     include_directories(${HDF5_INCLUDE_DIR})
     add_definitions(-DHAVE_HDF5=1)
 
@@ -32,6 +30,4 @@ if (HDF5_FOUND)
             FILES test/IcebridgeReaderTest.cpp
             LINK_WITH ${libname})
     endif()
-else()
-    message(STATUS "Building without Icebridge support")
 endif()

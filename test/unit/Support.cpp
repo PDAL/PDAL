@@ -68,6 +68,16 @@ std::string Support::datapath(const std::string& file)
     return datapath() + file;
 }
 
+string Support::configuredpath()
+{
+    return TestConfig::g_configured_path;
+}
+
+std::string Support::configuredpath(const std::string& file)
+{
+    return configuredpath() + file;
+}
+
 std::string Support::temppath()
 {
     return TestConfig::g_data_path + "../temp/";
@@ -80,14 +90,10 @@ std::string Support::temppath(const std::string& file)
 
 std::string Support::binpath()
 {
-    //string argv0 = boost::unit_test::framework::master_test_suite().argv[0];
-    //string argv0 = boost::filesystem::current_path().string();
-    //string path = pdal::FileUtils::toAbsolutePath(argv0);
-    //std::string binpath = pdal::FileUtils::getDirectory(path);
     std::string binpath = TestConfig::g_binary_path;
 
 #ifdef PDAL_APP_BUNDLE
-    return binpath + "/pdal.app/Contents/MacOS";
+    return binpath + "/pdal.app/Contents/MacOS/";
 #else
     return binpath;
 #endif

@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<Pipeline version="1.0">
+    <Writer type="writers.text">
+        <Option name="filename">@CMAKE_SOURCE_DIR@/test/temp/outfile.txt</Option>
+        <Reader type="readers.icebridge">
+            <Option name="filename">@CMAKE_SOURCE_DIR@/test/data/icebridge/twoPoints.h5</Option>
+        </Reader>
+    </Writer>
+</Pipeline>

@@ -7,6 +7,18 @@
 ###############################################################################
 
 configure_file(TestConfig.hpp.in "${CMAKE_CURRENT_BINARY_DIR}/TestConfig.hpp")
+#configure_file(../data/filters/merge.xml.in "${CMAKE_BINARY_DIR}/test/data/filters/merge.xml")
+#configure_file(../data/nitf/chipper.xml.in "${CMAKE_BINARY_DIR}/test/data/nitf/chipper.xml")
+#configure_file(../data/pipeline/pipeline_metadata_reader.xml.in "${CMAKE_BINARY_DIR}/test/data/pipeline/pipeline_metadata_reader.xml")
+
+file(GLOB_RECURSE inFiles RELATIVE "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/test/data/*.in")
+#message(STATUS "GLOBBING!!!!!!!!! ${inFiles}")
+foreach(infileName ${inFiles})
+    string(REGEX REPLACE ".in\$" "" outfileName "${infileName}")
+    #message(STATUS "Configure ${CMAKE_SOURCE_DIR}/${infileName} as ${CMAKE_BINARY_DIR}/${outfileName}")
+    configure_file("${CMAKE_SOURCE_DIR}/${infileName}" "${CMAKE_BINARY_DIR}/${outfileName}")
+endforeach()
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 include_directories(
     ${PROJECT_SOURCE_DIR}/include
@@ -105,7 +117,10 @@ if(WITH_APPS)
 #    endif(LIBXML2_FOUND)
 
     PDAL_ADD_TEST(pc2pc_test FILES apps/pc2pcTest.cpp)
-    #PDAL_ADD_TEST(pcpipeline_test FILES apps/pcpipelineTest.cpp)
+
+    if(BUILD_PIPELINE_TESTS)
+        PDAL_ADD_TEST(pcpipeline_test FILES apps/pcpipelineTest.cpp)
+    endif()
 endif(WITH_APPS)
 
 if(LIBXML2_FOUND)

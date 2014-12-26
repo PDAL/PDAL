@@ -58,7 +58,7 @@ namespace pdal
 class PDAL_DLL InfoKernel : public Kernel
 {
 public:
-    SET_KERNEL_NAME ("kernels.info", "Info Kernel")
+    SET_KERNEL_NAME ("info", "Info Kernel")
     SET_KERNEL_LINK ("http://pdal.io/kernels/kernels.info.html")
     SET_KERNEL_ENABLED (true)
  

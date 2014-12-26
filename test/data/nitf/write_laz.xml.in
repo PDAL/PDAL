@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="writers.nitf">
+        <Option name="filename">
+            @CMAKE_SOURCE_DIR@/test/temp/pdal-compressed.ntf
+        </Option>
+        <Option name="compression">
+            true
+        </Option>
+        <Option name="FSCLASS">
+            U
+        </Option>
+        <Option name="OPHONE">
+            5159664628
+        </Option>
+        <Option name="ONAME">
+            Howard Butler
+        </Option>
+        <Option name="IDATIM">
+            20110516183337
+        </Option>
+        <Option name="FTITLE">
+            This is the title
+        </Option>
+        <Reader type="readers.las">
+            <Option name="filename">
+                @CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las
+            </Option>
+        </Reader>
+    </Writer>
+</Pipeline>

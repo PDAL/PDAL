@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="writers.nitf">
+        <Option name="filename">
+            @CMAKE_SOURCE_DIR@/test/temp/output.ntf
+        </Option>
+        <Option name="scale_x">0.01</Option>
+        <Option name="offset_x">311898.23</Option>
+        <Option name="scale_y">0.01</Option>
+        <Option name="offset_y">4703909.84</Option>
+        <Option name="scale_z">0.01</Option>
+        <Option name="offset_z">7.385474</Option>
+        <Option name="FSCLAS">U</Option>
+        <Option name="IDATIM" type="string">20131206140713</Option>
+        <Option name="FSCLTX" type="string">SIC:0 CH_FO</Option>
+        <Option name="FTITLE" type="string">output.ntf</Option>
+        <Option name="GEOLOB" type="string">GEOLOB00048017898386021508996+063.7163336371+034.</Option>
+        <Option name="metadata">
+            <Options>
+                <Option name="software_id">
+                    forward
+                </Option>
+                <Option name="system_id">
+                    PDAL2NTF
+                </Option>
+                <Option name="creation_doy">
+                    forward
+                </Option>
+                <Option name="creation_year">
+                    forward
+                </Option>
+                <Option name="vlr">
+                    dGhpcyBpcyBzb21lIG5ldyB2bHIgdGV4dA==
+                    <Options>
+                        <Option name="record_id">
+                            4321
+                        </Option>
+                        <Option name="user_id">
+                            new VLR
+                        </Option>
+                        <Option name="description">
+                            a description of a new VLR
+                        </Option>
+                    </Options>
+                </Option>
+            </Options>
+        </Option>
+        <Reader type="readers.las">
+            <Option name="filename">
+                @CMAKE_SOURCE_DIR@/test/data/las/utm15.las
+            </Option>
+        </Reader>
+    </Writer>
+</Pipeline>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="writers.las">
+        <Option name="filename">
+            @CMAKE_SOURCE_DIR@/test/temp/autzen-utm-chipped-25.las
+        </Option>
+        <Filter type="filters.chipper">
+            <Option name="capacity">
+                25
+            </Option>
+            <Reader type="readers.las">
+                <Option name="filename">
+                    @CMAKE_SOURCE_DIR@/test/data/autzen/autzen-utm.las
+                </Option>
+            </Reader>
+        </Filter>
+    </Writer>
+</Pipeline>

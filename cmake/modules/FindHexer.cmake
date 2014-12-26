@@ -16,7 +16,6 @@
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 #
 ###############################################################################
-MESSAGE(STATUS "Searching for Hexer ${Hexer_FIND_VERSION}+ library")
 
 IF(HEXER_INCLUDE_DIR)
   # Already in cache, be silent
@@ -82,10 +81,7 @@ IF(HEXER_INCLUDE_DIR)
     SET(HEXER_VERSION "${HEXER_VERSION_MAJOR}.${HEXER_VERSION_MINOR}.${HEXER_VERSION_PATCH}"
       CACHE INTERNAL "The version string for Hexer library")
 
-    IF (HEXER_VERSION VERSION_EQUAL Hexer_FIND_VERSION OR
-        HEXER_VERSION VERSION_GREATER Hexer_FIND_VERSION)
-      MESSAGE(STATUS "Found Hexer version: ${HEXER_VERSION}")
-    ELSE()
+    IF (HEXER_VERSION VERSION_LESS Hexer_FIND_VERSION)
       MESSAGE(FATAL_ERROR "Hexer version check failed. Version ${HEXER_VERSION} was found, at least version ${Hexer_FIND_VERSION} is required")
     ENDIF()
   ELSE()

@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<Pipeline version="1.0">
+    <Writer type="writers.las">
+        <Option name="filename">
+            @CMAKE_SOURCE_DIR/test/temp/hole.las
+        </Option>
+        <Option name="compression">
+            false
+        </Option>    
+        <Filter type="filters.crop">
+            <Option name="polygon">
+                POLYGON ((-123.070497025496451 44.058766662574463,-123.065624990686828 44.058248360998967,-123.068009177934087 44.057108097532883,-123.066350612892521 44.056486135642295,-123.066661593837807 44.054101948395022,-123.070289704866255 44.054412929340323,-123.070497025496451 44.058766662574463))
+            </Option>
+            <Option name="outside">
+                true
+            </Option>
+            <Reader type="readers.las">
+                <Option name="filename">
+                    @CMAKE_SOURCE_DIR@/test/data/hole/spurious.las
+                </Option>
+            </Reader>
+        </Filter>
+    </Writer>
+</Pipeline>

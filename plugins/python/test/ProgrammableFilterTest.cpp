@@ -113,7 +113,7 @@ TEST(ProgrammableFilterTest, pipeline)
     PipelineManager manager;
     PipelineReader reader(manager);
 
-    reader.readPipeline(Support::datapath("plang/programmable-update-y-dims.xml"));
+    reader.readPipeline(Support::configuredpath("plang/programmable-update-y-dims.xml"));
     manager.execute();
     PointBufferSet pbSet = manager.buffers();
     EXPECT_EQ(pbSet.size(), 1u);

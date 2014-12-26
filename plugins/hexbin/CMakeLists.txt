@@ -8,8 +8,6 @@ include_directories(${PROJECT_SOURCE_DIR}/io/las)
 
 find_package(Hexer)
 if (HEXER_FOUND)
-    message(STATUS "Building with Hexer support")
-
     include_directories(${HEXER_INCLUDE_DIR})
     add_definitions(-DHAVE_HEXER=1)
 
@@ -25,6 +23,4 @@ if (HEXER_FOUND)
             FILES test/HexbinFilterTest.cpp
             LINK_WITH ${libname})
     endif()
-else()
-    message(STATUS "Building without Hexer support")
 endif()

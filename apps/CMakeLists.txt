@@ -39,11 +39,6 @@ set(PDAL_UTILITY pdal)
 
 link_directories(${Boost_LIBRARY_DIRS})
 
-if(APPLE)
-    option(PDAL_BUNDLE "Create PDAL as Application Bundle on OSX" FALSE)
-    set(PDAL_APP_BUNDLE 1)
-endif()
-
 if(PDAL_UTILITY)
     set(srcs pdal.cpp)
 
@@ -57,7 +52,7 @@ if(PDAL_UTILITY)
     else (APPLE AND PDAL_BUNDLE)
         add_executable(${PDAL_UTILITY} ${srcs})
     endif(APPLE AND PDAL_BUNDLE)
-    target_link_libraries(${PDAL_UTILITY} ${PDAL_LINKAGE} ${PDAL_LIB_NAME})
+    target_link_libraries(${PDAL_UTILITY} ${PDAL_LIB_NAME})
 endif()
 
 #------------------------------------------------------------------------------

@@ -8,8 +8,6 @@ include_directories(${PROJECT_SOURCE_DIR}/plugins/greyhound)
 find_package(JSONCPP)
 find_package(WEBSOCKETPP)
 if(JSONCPP_FOUND AND WEBSOCKETPP_FOUND)
-    message(STATUS "Building with Greyhound support")
-
     # add JSONCPP stuff
     include_directories(${JSONCPP_INCLUDE_DIR})
     add_definitions(-DHAVE_JSONCPP=1)
@@ -34,6 +32,4 @@ if(JSONCPP_FOUND AND WEBSOCKETPP_FOUND)
     PDAL_ADD_PLUGIN(libname reader greyhound
         FILES "${srcs}" "${incs}"
         LINK_WITH ${JSONCPP_LIBRARY})
-else()
-    message(STATUS "Building without Greyhound support")
 endif()

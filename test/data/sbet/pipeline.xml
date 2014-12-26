@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<Pipeline version="1.0">
-  <Writer type="writers.text">
-    <Option name="filename">outfile.txt</Option>
-    <Reader type="readers.sbet">
-      <Option name="filename">2-points.sbet</Option>
-    </Reader>
-  </Writer>
-</Pipeline>

@@ -56,34 +56,26 @@
             <Option name="capacity">
                 50
             </Option>
-            <Filter type="filters.cache">
-                <Option name="max_cache_blocks">
-                    1
-                </Option>
-                <Option name="cache_block_size">
-                    50
-                </Option>
-                <Reader type="readers.qfit">
-                    <Option name="filename">
-                        ../qfit/14-word.qi
-                    </Option>
-                    <Option name="debug">
-                        true
-                    </Option>
-                    <Option name="verbose">
-                        1
-                    </Option>
-                    <Option name="flip_coordinates">
-                        true
-                    </Option>
-                    <Option name="convert_z_units">
-                        true
-                    </Option>
-                    <Option name="spatialreference">
-                        EPSG:4269+3855
-                    </Option>
-                </Reader>
-            </Filter>
+	    <Reader type="readers.qfit">
+		<Option name="filename">
+		    ../qfit/14-word.qi
+		</Option>
+		<Option name="debug">
+		    true
+		</Option>
+		<Option name="verbose">
+		    1
+		</Option>
+		<Option name="flip_coordinates">
+		    true
+		</Option>
+		<Option name="convert_z_units">
+		    true
+		</Option>
+		<Option name="spatialreference">
+		    EPSG:4269+3855
+		</Option>
+	    </Reader>
         </Filter>
     </Writer>
 </Pipeline>

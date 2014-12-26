@@ -136,7 +136,7 @@ void KernelFactory::loadPlugins()
 
     if (pluginDir.size() == 0)
     {
-        pluginDir = "/usr/local/lib:../lib:../bin";
+        pluginDir = "/usr/local/lib:./lib:../lib:../bin";
     }
 
     std::vector<std::string> pluginPathVec;
