@@ -222,21 +222,21 @@ private:
 };
 
 template <>
-inline void MetadataNodeImpl::setValue<bool>(const bool& b)
+inline void MetadataNodeImpl::setValue(const bool& b)
 {
     m_type = "boolean";
     m_value = b ? "true" : "false";
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<std::string>(const std::string& s)
+inline void MetadataNodeImpl::setValue(const std::string& s)
 {
     m_type = "string";
     m_value = s;
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<const char *>(const char * const & c)
+inline void MetadataNodeImpl::setValue(const char * const & c)
 {
     m_type = "string";
     m_value = c;
@@ -250,7 +250,7 @@ inline void MetadataNodeImpl::setValue(const char(& c)[N])
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<float>(const float& f)
+inline void MetadataNodeImpl::setValue(const float& f)
 {
     m_type = "float";
     m_value = boost::lexical_cast<std::string>(f);
@@ -303,7 +303,7 @@ inline void MetadataNodeImpl::setValue(const unsigned int& u)
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<unsigned long>(const unsigned long& u)
+inline void MetadataNodeImpl::setValue(const unsigned long& u)
 {
     m_type = "nonNegativeInteger";
     m_value = boost::lexical_cast<std::string>(u);
@@ -317,7 +317,7 @@ inline void MetadataNodeImpl::setValue(const unsigned long long& u)
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<char>(const char& i)
+inline void MetadataNodeImpl::setValue(const char& i)
 {
     m_type = "integer";
     m_value = boost::lexical_cast<std::string>((int)i);
@@ -352,7 +352,7 @@ inline void MetadataNodeImpl::setValue(const long& l)
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<int64_t>(const long long& l)
+inline void MetadataNodeImpl::setValue(const long long& l)
 {
     m_type = "integer";
     m_value = boost::lexical_cast<std::string>(l);
