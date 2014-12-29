@@ -236,10 +236,7 @@ uint32_t Support::diff_files(std::istream& str1, std::istream& str2,
         if (!str1 || !str2)
         {
             if (!str1 != !str2)
-            {
-                std::cerr << "Numdiffs on stream state!\n";
                 numdiffs++;
-            }
             break;
         }
         if (p == q)
