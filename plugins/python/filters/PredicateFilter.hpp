@@ -44,7 +44,7 @@ namespace pdal
 class PDAL_DLL PredicateFilter : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.predicate", "Predicate Filter")
+    SET_STAGE_NAME("filters.predicate", "Filter data using inline Python expressions.")
     SET_STAGE_LINK("http://pdal.io/stages/filters.predicate.html")
     SET_STAGE_ENABLED(true)
 

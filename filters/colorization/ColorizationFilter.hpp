@@ -39,11 +39,12 @@
 #include <map>
 #include <boost/array.hpp>
 
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wfloat-equal"
 #include <gdal.h>
 #include <ogr_spatialref.h>
 #include <pdal/GDALUtils.hpp>
-
+#pragma GCC diagnostic pop
 
 namespace pdal
 {
@@ -71,8 +72,10 @@ struct BandInfo
     double m_scale;
 };
 
+#define COLORIZATIONDOC "Fetch and assign RGB color information from a GDAL-readable " \
+                        "datasource. "
 public:
-    SET_STAGE_NAME("filters.colorization", "Fetch color information from a GDAL datasource")
+    SET_STAGE_NAME("filters.colorization", COLORIZATIONDOC)
     SET_STAGE_LINK("http://pdal.io/stages/filters.colorization.html")
     SET_STAGE_ENABLED(true)
 

@@ -49,7 +49,7 @@ class Debug;
 class PDAL_DLL ReprojectionFilter : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.reprojection", "Reprojection Filter")
+    SET_STAGE_NAME("filters.reprojection", "Reproject data using GDAL from one coordinate system to another.")
     SET_STAGE_LINK("http://www.pdal.io/stages/filters.reprojection.html")
     SET_STAGE_ENABLED(true)
 

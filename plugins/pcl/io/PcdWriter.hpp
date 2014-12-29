@@ -47,7 +47,7 @@ namespace pdal
 class PDAL_DLL PcdWriter : public pdal::Writer
 {
 public:
-    SET_STAGE_NAME("writers.pcd", "PCD Writer")
+    SET_STAGE_NAME("writers.pcd", "Write data in Point Cloud Library (PCL) format.")
     SET_STAGE_LINK("http://pdal.io/stages/writers.pcd.html")
     SET_STAGE_ENABLED(true)
 

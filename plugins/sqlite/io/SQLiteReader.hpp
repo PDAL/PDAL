@@ -48,7 +48,7 @@ namespace pdal
 class PDAL_DLL SQLiteReader : public DbReader
 {
 public:
-    SET_STAGE_NAME("readers.sqlite", "SQLite3 Reader")
+    SET_STAGE_NAME("readers.sqlite", "Read data from SQLite3 database files.")
     SET_STAGE_ENABLED(true)
 
     SQLiteReader()

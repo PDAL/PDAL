@@ -45,12 +45,14 @@ namespace pdal
 {
 class PointBuffer;
 
+#define CROPFILTERDOCS "Filter points inside or outside a bounding box or \n" \
+                       "a polygon if PDAL was built with GEOS support."
 // removes any points outside of the given range
 // updates the header accordingly
 class PDAL_DLL CropFilter : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.crop", "Crop Filter")
+    SET_STAGE_NAME("filters.crop", CROPFILTERDOCS)
     SET_STAGE_LINK("http://pdal.io/stages/filters.crop.html")
     SET_STAGE_ENABLED(true)
 

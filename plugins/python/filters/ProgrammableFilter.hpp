@@ -46,7 +46,7 @@ class ProgrammableFilterSequentialIterator;
 class PDAL_DLL ProgrammableFilter : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.programmable", "Programmable Filter")
+    SET_STAGE_NAME("filters.programmable", "Manipulate data using inline Python")
     SET_STAGE_LINK("http://pdal.io/stages/filters.programmable.html")
     SET_STAGE_ENABLED(true)
 

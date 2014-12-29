@@ -56,6 +56,22 @@ void outputVersion()
     std::cout << std::endl;
 }
 
+void outputDrivers()
+{
+    pdal::StageFactory factory;
+    std::map<std::string, pdal::StageInfo> const& drivers = factory.getStageInfos();
+    std::string headline("------------------------------------------------------------------------------------------");
+
+    std::cout << headline << std::endl;
+    std::cout << "PDAL Drivers" << " (" << pdal::GetFullVersionString() << ")" <<std::endl;
+    std::cout << headline << std::endl << std::endl;
+
+    for (auto i = drivers.begin(); i != drivers.end(); ++i)
+    {
+        std::cout << i->second.toRST() << std::endl;
+    }
+}
+
 
 
 int main(int argc, char* argv[])
@@ -72,7 +88,7 @@ int main(int argc, char* argv[])
         ("version", po::value<bool>()->zero_tokens()->implicit_value(true), "Show version info")
         ("help,h", po::value<bool>()->zero_tokens()->implicit_value(true), "Print help message")
             ;
-        
+
     if (argc < 2)
     {
         std::cerr << "Action not specified!" << std::endl << std::endl;
@@ -82,7 +98,7 @@ int main(int argc, char* argv[])
     try
     {
         po::store(po::command_line_parser(2, argv).
-            options(options).positional(positional).run(), 
+            options(options).positional(positional).run(),
             variables);
     }
     catch (boost::program_options::unknown_option& e)
@@ -100,8 +116,8 @@ int main(int argc, char* argv[])
 
     int count(argc - 1); // remove the 1st argument
     const char** args = const_cast<const char**>(&argv[1]);
-    
-    
+
+
     if (variables.count("version") || variables.count("help") || !variables.count("action"))
     {
         outputVersion();
@@ -117,6 +133,16 @@ int main(int argc, char* argv[])
         if (boost::iequals(action, i->second.getName()))
         {
             isValidKernel = true;
+        }
+        if (boost::iequals(action, "debug"))
+        {
+            std::cerr << getPDALDebugInformation() << std::endl;
+            return 0;
+        }
+        if (boost::iequals(action, "drivers"))
+        {
+            outputDrivers() ;
+            return 0;
         }
     }
 

@@ -39,10 +39,12 @@
 namespace pdal
 {
 
+#define MORTONDOCS "Morton or z-order sorting of points. See \n" \
+                   "http://en.wikipedia.org/wiki/Z-order_curve for more detail."
 class PDAL_DLL MortonOrderFilter : public pdal::Filter
 {
 public:
-    SET_STAGE_NAME("filters.mortonorder", "MortonOrder")
+    SET_STAGE_NAME("filters.mortonorder", MORTONDOCS)
     SET_STAGE_LINK("http://pdal.io/stages/filters.morton.html")
     SET_STAGE_ENABLED(true)
 

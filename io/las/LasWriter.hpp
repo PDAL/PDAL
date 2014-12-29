@@ -55,12 +55,15 @@ struct VlrOptionInfo
     std::string m_description;
 };
 
+#define LASWRITERDOC "ASPRS LAS 1.0 - 1.4 writer. LASzip support is also \n" \
+                     "available if enabled at compile-time. Note that LAZ \n" \
+                     "does not provide LAS 1.4 support at this time."
 class PDAL_DLL LasWriter : public pdal::Writer
 {
     friend class LasTester;
     friend class NitfWriter;
 public:
-    SET_STAGE_NAME("writers.las", "Las Writer")
+    SET_STAGE_NAME("writers.las", LASWRITERDOC)
     SET_STAGE_LINK("http://pdal.io/stages/writers.las.html")
     SET_STAGE_ENABLED(true)
 

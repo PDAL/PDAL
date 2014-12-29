@@ -35,6 +35,7 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DBUILD_PLUGIN_MRSID=OFF \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
         -DBUILD_PLUGIN_PCL=ON \
+        -DBUILD_PLUGIN_ATTRIBUTE=ON \
         -DWITH_COMPRESSION=ON \
         -DMRSID_INCLUDE_DIR=/Users/hobu/dev/release/mrsid/Lidar_DSDK/include \
         -DMRSID_LIBRARY=/Users/hobu/dev/release/mrsid/Lidar_DSDK/lib/liblti_lidar_dsdk.dylib \

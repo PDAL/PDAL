@@ -94,7 +94,7 @@ typedef std::shared_ptr<stats::Summary> SummaryPtr;
 class PDAL_DLL StatsFilter : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.stats", "Statistics Filter")
+    SET_STAGE_NAME("filters.stats", "Compute statistics about each dimension (mean, min, max, etc.)")
     SET_STAGE_LINK("http://pdal.io/stages/filters.stats.html")
     SET_STAGE_ENABLED(true)
 

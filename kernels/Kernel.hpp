@@ -135,7 +135,6 @@ protected:
 private:
     int innerRun();
     void parseSwitches();
-    void outputDrivers();
     void outputHelp();
     void outputVersion();
     void addBasicSwitchSet();
@@ -149,7 +148,6 @@ private:
     bool m_isDebug;
     uint32_t m_verboseLevel;
     bool m_showHelp;
-    bool m_showDrivers;
     std::string m_showOptions;
     bool m_showVersion;
     bool m_showTime;

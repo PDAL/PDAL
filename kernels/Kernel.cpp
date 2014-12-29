@@ -63,7 +63,6 @@ Kernel::Kernel()
     , m_isDebug(false)
     , m_verboseLevel(0)
     , m_showHelp(false)
-    , m_showDrivers(false)
     , m_showOptions("")
     , m_showVersion(false)
     , m_showTime(false)
@@ -303,11 +302,6 @@ int Kernel::innerRun()
         return 0;
     }
 
-    if (m_showDrivers)
-    {
-        outputDrivers();
-        return 0;
-    }
     if (!m_showOptions.empty())
     {
         pdal::StageFactory factory;
@@ -537,22 +531,6 @@ void Kernel::addPositionalSwitch(const char* name, int max_count)
     m_positionalOptions.add(name, max_count);
 }
 
-void Kernel::outputDrivers()
-{
-    pdal::StageFactory factory;
-    std::map<std::string, pdal::StageInfo> const& drivers = factory.getStageInfos();
-    std::string headline("------------------------------------------------------------------------------------------");
-
-    std::cout << headline << std::endl;
-    std::cout << "PDAL Drivers" << " (" << pdal::GetFullVersionString() << ")" <<std::endl;
-    std::cout << headline << std::endl << std::endl;
-
-    for (auto i = drivers.begin(); i != drivers.end(); ++i)
-    {
-        std::cout << i->second.toRST() << std::endl;
-    }
-}
-
 void Kernel::outputHelp()
 {
     outputVersion();
@@ -593,7 +571,6 @@ void Kernel::addBasicSwitchSet()
 
     basic_options->add_options()
     ("help,h", po::value<bool>(&m_showHelp)->zero_tokens()->implicit_value(true), "Print help message")
-    ("drivers", po::value<bool>(&m_showDrivers)->zero_tokens()->implicit_value(true), "Show currently registered drivers (including dynamic with PDAL_DRIVER_PATH)")
     ("options", po::value<std::string>(&m_showOptions)->implicit_value("all"), "Show available options for a driver")
     ("debug,d", po::value<bool>(&m_isDebug)->zero_tokens()->implicit_value(true), "Enable debug mode")
     ("report-debug", po::value<bool>(&m_reportDebug)->zero_tokens()->implicit_value(true), "Report PDAL compilation DEBUG status")

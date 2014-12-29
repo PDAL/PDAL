@@ -40,10 +40,16 @@
 
 #include <pcl/conversions.h>
 #include <pcl/io/pcd_io.h>
+
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+
 #include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/visualization/impl/pcl_visualizer.hpp>
 #include <pcl/visualization/point_cloud_handlers.h>
 #include <pcl/visualization/impl/point_cloud_handlers.hpp>
+#pragma GCC diagnostic pop
 
 #include "PCLConversions.hpp"
 #include "point_types.hpp"

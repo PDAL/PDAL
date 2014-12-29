@@ -52,10 +52,11 @@ public:
     { }
 };
 
+#define ICEBRIDGEDOCS "NASA HDF5-based IceBridge ATM reader. \nSee http://nsidc.org/data/docs/daac/icebridge/ilatm1b/index.html for more information."
 class PDAL_DLL IcebridgeReader : public pdal::Reader
 {
 public:
-    SET_STAGE_NAME("readers.icebridge", "Icebridge Reader")
+    SET_STAGE_NAME("readers.icebridge", ICEBRIDGEDOCS)
     SET_STAGE_LINK("http://pdal.io/stages/readers.icebridge.html")
     SET_STAGE_ENABLED(true)
 
