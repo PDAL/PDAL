@@ -95,27 +95,27 @@ TEST(SupportTest, test_diff_file)
 
     diffs = Support::diff_files(Support::datapath("misc/data1.dat"), Support::datapath("misc/data1.dat"));
     same = Support::compare_files(Support::datapath("misc/data1.dat"), Support::datapath("misc/data1.dat"));
-    EXPECT_TRUE(diffs == 0);
+    EXPECT_EQ(diffs, 0U);
     EXPECT_TRUE(same == true);
 
     diffs = Support::diff_files(Support::datapath("misc/data1.dat"), Support::datapath("misc/data2.dat"));
     same = Support::compare_files(Support::datapath("misc/data1.dat"), Support::datapath("misc/data2.dat"));
-    EXPECT_TRUE(diffs == 1);
+    EXPECT_EQ(diffs, 1U);
     EXPECT_TRUE(same == false);
 
     diffs = Support::diff_files(Support::datapath("misc/data2.dat"), Support::datapath("misc/data1.dat"));
     same = Support::compare_files(Support::datapath("misc/data2.dat"), Support::datapath("misc/data1.dat"));
-    EXPECT_TRUE(diffs == 1);
+    EXPECT_EQ(diffs, 1U);
     EXPECT_TRUE(same == false);
 
     diffs = Support::diff_files(Support::datapath("misc/data1.dat"), Support::datapath("misc/data3.dat"));
     same = Support::compare_files(Support::datapath("misc/data1.dat"), Support::datapath("misc/data3.dat"));
-    EXPECT_TRUE(diffs == 2);
+    EXPECT_EQ(diffs, 1U);
     EXPECT_TRUE(same == false);
 
     diffs = Support::diff_files(Support::datapath("misc/data3.dat"), Support::datapath("misc/data1.dat"));
     same = Support::compare_files(Support::datapath("misc/data3.dat"), Support::datapath("misc/data1.dat"));
-    EXPECT_TRUE(diffs == 2);
+    EXPECT_EQ(diffs, 1U);
     EXPECT_TRUE(same == false);
 }
 
@@ -127,7 +127,7 @@ TEST(SupportTest, test_diff_file_ignorable)
     // no ignorable region
     {
         diffs = Support::diff_files(Support::datapath("misc/data4a.dat"), Support::datapath("misc/data4b.dat"));
-        EXPECT_TRUE(diffs == 6);
+        EXPECT_TRUE(diffs == 6U);
         EXPECT_TRUE(Support::compare_files(Support::datapath("misc/data4a.dat"), Support::datapath("misc/data4b.dat")) == false);
     }
 
@@ -136,7 +136,7 @@ TEST(SupportTest, test_diff_file_ignorable)
         uint32_t start[1] = {0};
         uint32_t len[1] = {100};
         diffs = Support::diff_files(Support::datapath("misc/data4a.dat"), Support::datapath("misc/data4b.dat"), start, len, 1);
-        EXPECT_TRUE(diffs == 0);
+        EXPECT_EQ(diffs, 0U);
     }
 
     // just ignore the first region
@@ -144,7 +144,7 @@ TEST(SupportTest, test_diff_file_ignorable)
         uint32_t start[1] = {3};
         uint32_t len[1] = {4};
         diffs = Support::diff_files(Support::datapath("misc/data4a.dat"), Support::datapath("misc/data4b.dat"), start, len, 1);
-        EXPECT_TRUE(diffs == 2);
+        EXPECT_EQ(diffs, 2U);
     }
 
     // ignore the first and second regions
@@ -152,15 +152,16 @@ TEST(SupportTest, test_diff_file_ignorable)
         uint32_t start[2] = {3, 23};
         uint32_t len[2] = {4, 2};
         diffs = Support::diff_files(Support::datapath("misc/data4a.dat"), Support::datapath("misc/data4b.dat"), start, len, 2);
-        EXPECT_TRUE(diffs == 0);
+        EXPECT_EQ(diffs, 0U);
     }
 
     // ignore first and part of second region
     {
         uint32_t start[2] = {3, 22};
         uint32_t len[2] = {4, 2};
-        diffs = Support::diff_files(Support::datapath("misc/data4a.dat"), Support::datapath("misc/data4b.dat"), start, len, 2);
-        EXPECT_TRUE(diffs == 1);
+        diffs = Support::diff_files(Support::datapath("misc/data4a.dat"),
+            Support::datapath("misc/data4b.dat"), start, len, 2);
+        EXPECT_EQ(diffs, 1U);
     }
 }
 
@@ -169,7 +170,6 @@ TEST(SupportTest, test_diff_text_file)
 {
     uint32_t diffs = 0;
     bool same = false;
-
     diffs = Support::diff_text_files(Support::datapath("misc/data1.txt"), Support::datapath("misc/data0.txt"));
     same = Support::compare_text_files(Support::datapath("misc/data1.txt"), Support::datapath("misc/data0.txt"));
     EXPECT_TRUE(diffs > 0);

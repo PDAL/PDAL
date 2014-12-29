@@ -109,25 +109,35 @@ std::string Support::exename(const std::string& name)
 
 
 // do a comparison by line of two (text) files, ignoring CRLF differences
-uint32_t Support::diff_text_files(const std::string& file1, const std::string& file2, int32_t ignoreLine1)
+uint32_t Support::diff_text_files(const std::string& file1,
+    const std::string& file2, int32_t ignoreLine1)
 {
     if (!pdal::FileUtils::fileExists(file1) ||
             !pdal::FileUtils::fileExists(file2))
-        return std::numeric_limits<uint32_t>::max();
+        return (std::numeric_limits<uint32_t>::max)();
 
     std::istream* str1 = pdal::FileUtils::openFile(file1, false);
     std::istream* str2 = pdal::FileUtils::openFile(file2, false);
-    EXPECT_TRUE(str1);
-    EXPECT_TRUE(str2);
 
+    int32_t diffs = diff_text_files(*str1, *str2, ignoreLine1);
+
+    pdal::FileUtils::closeFile(str1);
+    pdal::FileUtils::closeFile(str2);
+    return diffs;
+}
+
+uint32_t Support::diff_text_files(std::istream& str1, std::istream& str2,
+    int32_t ignoreLine1)
+{
     uint32_t numdiffs = 0;
     int32_t currLine = 1;
-    while (!str1->eof() && !str2->eof())
+
+    while (!str1.eof() && !str2.eof())
     {
         std::string buf1;
         std::string buf2;
-        std::getline(*str1, buf1);
-        std::getline(*str2, buf2);
+        std::getline(str1, buf1);
+        std::getline(str2, buf2);
 
         if (currLine == ignoreLine1)
         {
@@ -135,45 +145,40 @@ uint32_t Support::diff_text_files(const std::string& file1, const std::string& f
             continue;
         }
 
-        if (str1->eof() && str2->eof())
+        if (str1.eof() && str2.eof())
         {
             // hit end on both together
             break;
         }
-        else if (str1->eof() && !str2->eof())
+        else if (str1.eof() && !str2.eof())
         {
             // str1 ended, but str2 still going
-            while (!str2->eof())
+            while (!str2.eof())
             {
-                std::getline(*str2, buf2);
+                std::getline(str2, buf2);
                 ++numdiffs;
             }
             break;
         }
-        else if (!str1->eof() && str2->eof())
+        else if (!str1.eof() && str2.eof())
         {
             // str2 ended, but str1 still going
-            while (!str1->eof())
+            while (!str1.eof())
             {
-                std::getline(*str1, buf1);
+                std::getline(str1, buf1);
                 ++numdiffs;
             }
             break;
         }
 
         if (buf1 != buf2)
-        {
             ++numdiffs;
-        }
 
         ++currLine;
     }
 
-    assert(str1->eof());
-    assert(str2->eof());
-
-    pdal::FileUtils::closeFile(str1);
-    pdal::FileUtils::closeFile(str2);
+    assert(str1.eof());
+    assert(str2.eof());
 
     return numdiffs;
 }
@@ -196,7 +201,7 @@ uint32_t Support::diff_files(const std::string& file1,
 {
     if (!pdal::FileUtils::fileExists(file1) ||
             !pdal::FileUtils::fileExists(file2))
-        return std::numeric_limits<uint32_t>::max();
+        return (std::numeric_limits<uint32_t>::max)();
 
     uintmax_t len1x = pdal::FileUtils::fileSize(file1);
     uintmax_t len2x = pdal::FileUtils::fileSize(file2);
@@ -205,67 +210,57 @@ uint32_t Support::diff_files(const std::string& file1,
 
     std::istream* str1 = pdal::FileUtils::openFile(file1);
     std::istream* str2 = pdal::FileUtils::openFile(file2);
-    EXPECT_TRUE(str1);
-    EXPECT_TRUE(str2);
 
-    char* buf1 = new char[len1];
-    char* buf2 = new char[len2];
+    return diff_files(*str1, *str2, ignorable_start, ignorable_length,
+        num_ignorables);
+}
 
-    str1->read(buf1,len1);
-    str2->read(buf2,len2);
 
-    pdal::FileUtils::closeFile(str1);
-    pdal::FileUtils::closeFile(str2);
-
-    char* p = buf1;
-    char* q = buf2;
-
+uint32_t Support::diff_files(std::istream& str1, std::istream& str2,
+    uint32_t* ignorable_start, uint32_t* ignorable_length,
+    uint32_t num_ignorables)
+{
     uint32_t numdiffs = 0;
-    const size_t minlen = (len1 < len2) ? len1 : len2;
-    const size_t maxlen = (len1 > len2) ? len1 : len2;
-    for (size_t i=0; i<minlen; i++)
+    char p, q;
+
+    for (uint32_t i = 0; true; ++i)
     {
-        if (*p != *q)
+        str1.get(p);
+        str2.get(q);
+        if (!str1 || !str2)
         {
-            if (num_ignorables == 0)
+            if (!str1 != !str2)
             {
-                ++numdiffs;
+                std::cerr << "Numdiffs on stream state!\n";
+                numdiffs++;
             }
-            else
-            {
-                // only count the difference if we are NOT in an ignorable
-                // region
-                bool is_ignorable = false;
-                for (uint32_t region=0; region<num_ignorables; region++)
-                {
-                    uint32_t start = ignorable_start[region];
-                    uint32_t end = start + ignorable_length[region];
-                    if (i >= start && i < end)
-                    {
-                        // we are in an ignorable region!
-                        is_ignorable = true;
-                        break;
-                    }
-                }
-                if (is_ignorable == false)
-                {
-                    ++numdiffs;
-                }
-            }
+            break;
         }
+        if (p == q)
+            continue;
 
-        ++p;
-        ++q;
+        if (num_ignorables == 0)
+            ++numdiffs;
+        else
+        {
+            // only count the difference if we are NOT in an ignorable
+            // region
+            bool is_ignorable = false;
+            for (uint32_t region = 0; region < num_ignorables; region++)
+            {
+                uint32_t start = ignorable_start[region];
+                uint32_t end = start + ignorable_length[region];
+                if (i >= start && i < end)
+                {
+                    // we are in an ignorable region!
+                    is_ignorable = true;
+                    break;
+                }
+            }
+            if (!is_ignorable)
+                ++numdiffs;
+        }
     }
-
-    if (minlen != maxlen)
-    {
-        numdiffs += (maxlen - minlen);
-    }
-
-    delete[] buf1;
-    delete[] buf2;
-
     return numdiffs;
 }
 
@@ -276,18 +271,25 @@ uint32_t Support::diff_files(const std::string& file1,
     return diff_files(file1, file2, NULL, NULL, 0);
 }
 
+uint32_t Support::diff_files(std::istream& str1, std::istream& str2)
+{
+    return diff_files(str1, str2, NULL, NULL, 0);
+}
 
 bool Support::compare_files(const std::string& file1, const std::string& file2)
 {
-    const uint32_t numdiffs = diff_files(file1, file2);
-    return (numdiffs == 0);
+    return diff_files(file1, file2) == 0;
 }
 
-
-bool Support::compare_text_files(const std::string& file1, const std::string& file2)
+bool Support::compare_text_files(const std::string& file1,
+    const std::string& file2)
 {
-    uint32_t numdiffs = diff_text_files(file1, file2);
-    return (numdiffs == 0);
+    return diff_text_files(file1, file2) == 0;
+}
+
+bool Support::compare_text_files(std::istream& str1, std::istream& str2)
+{
+    return diff_text_files(str1, str2) == 0;
 }
 
 void Support::check_pN(const pdal::PointBuffer& data, std::size_t index,
