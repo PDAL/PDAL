@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="writers.p2g">
+        <Option name="grid_dist_x">
+            6.0
+        </Option>
+        <Option name="grid_dist_y">
+            6.0
+        </Option>
+        <Option name="radius">
+            8.4852813742385713
+        </Option>
+        <Option name="chunk_size">
+            1234
+        </Option>
+        <Option name="filename">
+            @CMAKE_SOURCE_DIR@/test/temp/autzen_grid
+        </Option>
+        <Option name="output_type">
+            min
+        </Option>
+        <Option name="output_type">
+            max
+        </Option>
+        <Option name="output_type">
+            mean
+        </Option>
+        <Option name="output_type">
+            idw
+        </Option>
+        <Option name="output_type">
+            den
+        </Option>
+        <!-- <Option name="output_type">
+            all
+        </Option> -->
+        <Option name="output_format">
+            asc
+        </Option> -->
+        <!-- <Option name="output_format">
+            grid
+        </Option>     -->
+        <Reader type="readers.las">
+            <Option name="filename">
+                @CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las
+            </Option>
+            <Option name="spatialreference">
+                @CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las.wkt
+            </Option>
+            <Option name="debug">
+                true
+            </Option>
+            <Option name="verbose">
+                6
+            </Option>
+        </Reader>
+    </Writer>
+</Pipeline>

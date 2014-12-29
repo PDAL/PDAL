@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<Pipeline version="1.0">
+    <Filter type="filters.programmable">
+        <Option name="function">myfunc</Option>
+        <Option name="module">derive</Option>
+        <Option name="source">
+import numpy as np
+def myfunc(ins,outs):
+    X = ins['Y']
+    X1 = np.zeros(X.size, dtype=type(X[0])) + 314
+    outs['Y'] = X1
+    return True
+        </Option>
+        <Reader type="readers.las">
+            <Option name="filename">
+                @CMAKE_SOURCE_DIR@/test/data/autzen/autzen-utm.las
+            </Option>
+        </Reader>
+    </Filter>
+</Pipeline>

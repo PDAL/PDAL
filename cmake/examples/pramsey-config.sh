@@ -25,7 +25,6 @@ fi
 cmake   -G "$CONFIG" \
         -DCMAKE_BUILD_TYPE=RelWithDebInfo \
         -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} \
-        -DPDAL_EMBED_BOOST=ON \
         -DWITH_GDAL=ON \
         -DWITH_ICONV=ON \
         -DWITH_ORACLE=OFF \
@@ -33,7 +32,6 @@ cmake   -G "$CONFIG" \
         -DWITH_LASZIP=OFF \
         -DWITH_LIBXML2=ON \
         -DWITH_PYTHON=ON \
-        -DWITH_FLANN=OFF \
         -DWITH_P2G=OFF \
         -DWITH_SOCI=OFF \
         -DWITH_PGPOINTCLOUD=ON \

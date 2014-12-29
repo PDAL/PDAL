@@ -58,18 +58,3 @@ else(PDAL_BUILD_STATIC)
   endif(WIN32)
 endif(PDAL_BUILD_STATIC)
 mark_as_advanced(PDAL_BUILD_STATIC)
-
-if (CMAKE_VERSION VERSION_GREATER 2.8.10)
-    if (CMAKE_VERSION VERSION_GREATER 2.8.12)
-        set(PDAL_LINKAGE "PUBLIC;general")
-    else()
-        set(PDAL_LINKAGE "LINK_PUBLIC;general")
-    endif()
-
-    set(BOOST_LINKAGE "LINK_PUBLIC;general")
-
-else()
-    set(PDAL_LINKAGE "")
-    set(BOOST_LINKAGE "")
-endif()
-

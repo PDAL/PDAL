@@ -8,7 +8,7 @@ PDAL Applications
 :Contact: hobu.inc at gmail dot com
 :Date: 9/1/2014
 
-PDAL contains a single `git`_-style application, called *pdal*. The `pdal` 
+PDAL contains a single `git`_-style application, called *pdal*. The `pdal`
 application currently contains six commands:
 
 * :ref:`delta <delta_command>`
@@ -21,7 +21,7 @@ application currently contains six commands:
 * :ref:`translate <translate_command>`
 * :ref:`view <view_command>`
 
-Applications are run by invoking the *pdal* application along with the 
+Applications are run by invoking the *pdal* application along with the
 command name:
 
 ::
@@ -31,12 +31,12 @@ command name:
     $ pdal pipeline --stdin < myxml.xml
 
 .. note::
-    
+
     The :ref:`ground <ground_command>`, :ref:`pcl <pcl_command>`, and
     :ref:`view <view_command>` commands are only available if PCL is linked.
 
-Help about each command can be retrieved via the ``--help`` switch. 
-The ``--drivers`` and ``--options`` switches can tell you more about 
+Help about each command can be retrieved via the ``--help`` switch.
+The ``--drivers`` and ``--options`` switches can tell you more about
 particular drivers and their options:
 
 ::
@@ -45,9 +45,9 @@ particular drivers and their options:
     $ pdal translate --drivers
     $ pdal pipeline --options writers.las
 
-Additional, driver-specific options may be specified by using a 
-namespace-prefixed option name. For example, it is possible to 
-set the LAS day of year at translation time with the following 
+Additional, driver-specific options may be specified by using a
+namespace-prefixed option name. For example, it is possible to
+set the LAS day of year at translation time with the following
 option:
 
 ::
@@ -59,9 +59,9 @@ option:
 
 .. note::
 
-        Driver specific options can be identified using the 
+        Driver specific options can be identified using the
         ``pdal info --options`` invocation.
-        
+
 .. _`git`: http://git-scm.com/
 
 
@@ -119,18 +119,18 @@ A simple CSV-style text is output with delta information:
 
 .. _diff_command:
 
-``diff`` command 
+``diff`` command
 ------------------------------------------------------------------------------
 
-The *diff* command is used for executing a simple contextual difference 
-between two sources. 
+The *diff* command is used for executing a simple contextual difference
+between two sources.
 
 ::
 
     $ pdal diff test/data/1.2-with-color.las test/data/1.2-with-color-clipped.las
-    
-It will output JSON if there are any differences. It will output nothing 
-and return 0 if there are no differences. At this time it supports 
+
+It will output JSON if there are any differences. It will output nothing
+and return 0 if there are no differences. At this time it supports
 checking the following:
 
 * Different schema
@@ -181,7 +181,7 @@ Dumps information about a point cloud file, such as:
 
 * summary statistics about the points
 
-* the plain text format should be reStructured text if possible to allow 
+* the plain text format should be reStructured text if possible to allow
   a user to retransform the output into whatever they want with ease
 
 ::
@@ -203,7 +203,7 @@ Print three selected points of the file as `reStructuredText`_
 
 .. _`reStructuredText`: http://docutils.sourceforge.net/docs/user/rst/quickref.html
 
-:: 
+::
 
     -p [ --point ] [=arg(=0)] point to dump
     --query arg               A 2d or 3d point query point
@@ -243,7 +243,7 @@ The *pcl* command is only available when PDAL is build with PCL support.
 ``pipeline`` command
 ------------------------------------------------------------------------------
 
-The *pipeline* command is used to execute :ref:`pipeline` XML. See :ref:`reading` 
+The *pipeline* command is used to execute :ref:`pipeline` XML. See :ref:`reading`
 or :ref:`pipeline` for more information.
 
 ::
@@ -255,6 +255,17 @@ or :ref:`pipeline` for more information.
     --count arg (=0)             How many points should we write?
     --skip arg (=0)              How many points should we skip?
 
+.. note::
+
+    The `pipeline` command can accept option substitutions, but they
+    do not replace existing options that are specified in the XML. For example,
+    to set the output and input LAS files for a pipeline that does a translation,
+    construct XML that does not containe `filename` options for each, and then
+    issue the command with the following arguments:
+
+    ::
+
+        pdal pipeline -i translate.xml --writers.las.filename=output.laz --readers.las.filename=input.las
 
 .. _random_command:
 
@@ -288,11 +299,11 @@ each of the x, y, and z dimensions.
 
 .. _translate_command:
 
-``translate`` command 
+``translate`` command
 ------------------------------------------------------------------------------
 
-The *translate* command is used for simple conversion of files based on their 
-file extensions. Use the :ref:`pipeline_command` for more significant 
+The *translate* command is used for simple conversion of files based on their
+file extensions. Use the :ref:`pipeline_command` for more significant
 translation operations.
 
 ::
@@ -321,8 +332,8 @@ translation operations.
     -m [ --metadata ] [=arg(=1)] Forward metadata (VLRs, header entries, etc)
                                from previous stages
 
-The translate command can be augmented by specifying full-path options at the 
-command line invocation. For example, the following invocation will translate 
+The translate command can be augmented by specifying full-path options at the
+command line invocation. For example, the following invocation will translate
 `1.2-with-color.las` to `output.laz` while doing the following:
 
 * Setting the creation day of year to 42

@@ -26,11 +26,13 @@ include_directories(${PROJECT_SOURCE_DIR}/plugins/pcl)
 include_directories(${PROJECT_SOURCE_DIR}/io/las)
 include_directories(${PROJECT_SOURCE_DIR}/kernels)
 
-find_package(PCL 1.7)
-if(PCL_FOUND)
-    message(STATUS "Building with PCL support")
+find_package(PCL QUIET 1.7)
 
-    set(PCL_LINKAGE "LINK_PUBLIC;general")
+set_package_properties(PCL PROPERTIES DESCRIPTION "Point Cloud Library"
+    URL "http://pointclouds.org" TYPE RECOMMENDED
+    PURPOSE "Enables PCD reader/writer, PCLVisualizer, PCLBlock filter, and ground, pcl, smooth, and view kernels")
+
+if(PCL_FOUND)
     include_directories(${PCL_INCLUDE_DIRS})
     link_directories(${PCL_LIBRARY_DIRS})
     add_definitions(${PCL_DEFINITIONS})
@@ -39,11 +41,9 @@ if(PCL_FOUND)
     endif()
 
     # PCL's configuration clobbers Boost find_package - do it again
-    find_package(Boost 1.52 COMPONENTS program_options iostreams filesystem system)
+    find_package(Boost QUIET 1.52 COMPONENTS program_options iostreams filesystem system)
 
     if (PCL_VISUALIZATION_FOUND)
-        message(STATUS "Building with PCL Visualization support")
-    
         #
         # PCLVisualizer Writer
         #
@@ -67,7 +67,7 @@ if(PCL_FOUND)
             FILES "${srcs}" "${incs}"
             LINK_WITH ${PCL_LIBRARIES})
     else()
-        message(STATUS "..building without PCL Visualization")
+        message(STATUS "PCLVisualizer disabled because PCL_VISUALIZATION was not found")
     endif()
 
     #
@@ -165,6 +165,4 @@ if(PCL_FOUND)
                       ${pcl_libname} ${ground_libname} ${smooth_libname}
         )
     endif()
-else()
-    message(STATUS "Building without PCL support")
 endif()

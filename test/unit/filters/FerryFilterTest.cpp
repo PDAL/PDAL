@@ -46,7 +46,7 @@ TEST(FerryFilterTest, test_ferry_copy)
 {
     PipelineManager mgr;
     PipelineReader specReader(mgr);
-    specReader.readPipeline(Support::datapath("filters/ferry.xml"));
+    specReader.readPipeline(Support::configuredpath("filters/ferry.xml"));
 
     Stage *stage = mgr.getStage();
     mgr.execute();

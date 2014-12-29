@@ -56,6 +56,13 @@ public:
     // returns "datapath + / + file"
     static std::string datapath(const std::string& file);
 
+    // this is where the reference files (input data) live
+    static std::string configuredpath();
+
+    // returns "configuredpath + / + file"
+    static std::string configuredpath(const std::string& file);
+
+
     // this is where the temporary output files go
     static std::string temppath();
 

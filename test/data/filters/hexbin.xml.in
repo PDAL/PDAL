@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="writers.las">
+        <Option name="filename">
+            @CMAKE_SOURCE_DIR@/test/temp/hexbin.las
+        </Option>
+        <Filter type="filters.hexbin">
+            <Option name="edge_size">
+                0.0
+            </Option>
+            <Option name="threshold">
+                10
+            </Option>
+            <Option name="sample_size">
+                5000
+            </Option>
+            <Option name="x_dim">
+                readers.las.X
+            </Option>
+            <Option name="y_dim">
+                Y
+            </Option>
+            <Option name="precision">
+                4
+            </Option>
+            <Reader type="readers.las">
+                <Option name="filename">
+                    @CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las
+                </Option>
+            </Reader>
+        </Filter>
+    </Writer>
+</Pipeline>

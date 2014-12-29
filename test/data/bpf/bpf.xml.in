@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="writers.las">
+        <Option name="filename">
+            @CMAKE_SOURCE_DIR@/test/temp/out2.las
+        </Option>
+        <Option name="scale_x">0.01</Option>
+        <Option name="offset_x">311898.23</Option>
+        <Option name="scale_y">0.01</Option>
+        <Option name="offset_y">4703909.84</Option>
+        <Option name="scale_z">0.01</Option>
+        <Option name="offset_z">7.385474</Option>
+        <Reader type="readers.bpf">
+            <Option name="filename">
+                @CMAKE_SOURCE_DIR@/test/data/bpf/utm15.bpf
+            </Option>
+        </Reader>
+</Writer>
+</Pipeline>

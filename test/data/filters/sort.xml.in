@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<Pipeline version="1.0">
+    <Filter type="filters.sort">
+        <Option name="dimension">
+            X
+        </Option>
+        <Reader type="readers.las">
+            <Option name="filename">
+                @CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las
+            </Option>
+        </Reader>
+    </Filter>
+</Pipeline>

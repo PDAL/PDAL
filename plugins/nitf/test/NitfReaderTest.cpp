@@ -124,14 +124,14 @@ TEST(NitfReaderTest, test_one)
 
 TEST(NitfReaderTest, test_chipper)
 {
-    Option option("filename", Support::datapath("nitf/chipper.xml"));
+    Option option("filename", Support::configuredpath("nitf/chipper.xml"));
     Options options(option);
 
     PointContext ctx;
 
     PipelineManager mgr;
     PipelineReader specReader(mgr);
-    specReader.readPipeline(Support::datapath("nitf/chipper.xml"));
+    specReader.readPipeline(Support::configuredpath("nitf/chipper.xml"));
     //ABELL - need faux writer or something.
     /**
     mgr.execute();

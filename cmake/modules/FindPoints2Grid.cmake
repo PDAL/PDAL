@@ -18,7 +18,6 @@
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 #
 ###############################################################################
-MESSAGE(STATUS "Searching for Points2Grid ${P2G_FIND_VERSION}+ library")
 
 IF(P2G_INCLUDE_DIR)
   # Already in cache, be silent
@@ -95,10 +94,7 @@ IF(P2G_INCLUDE_DIR)
     SET(P2G_VERSION "${P2G_VERSION_MAJOR}.${P2G_VERSION_MINOR}.${P2G_VERSION_PATCH}"
       CACHE INTERNAL "The version string for Points2Grid library")
 
-    IF (P2G_VERSION VERSION_EQUAL Points2Grid_FIND_VERSION OR
-        P2G_VERSION VERSION_GREATER Points2Grid_FIND_VERSION)
-      MESSAGE(STATUS "Found Points2Grid version: ${P2G_VERSION}")
-    ELSE()
+    IF (P2G_VERSION VERSION_LESS Points2Grid_FIND_VERSION)
       MESSAGE(FATAL_ERROR "Points2Grid version check failed. Version ${P2G_VERSION} was found, at least version ${Points2Grid_FIND_VERSION} is required")
     ENDIF()
   ELSE()

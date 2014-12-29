@@ -67,11 +67,11 @@ TEST(SupportTest, test_paths)
     EXPECT_TRUE(!FileUtils::fileExists(temp_file));
 
     // does binpath (and exename) work?
-    string this_bin = Support::exename("pdal_bounds_test");
+    string this_bin = Support::exename("pdal");
 #ifdef PDAL_PLATFORM_WIN32
-    EXPECT_EQ(this_bin, "pdal_bounds_test.exe");
+    EXPECT_EQ(this_bin, "pdal.exe");
 #else
-    EXPECT_EQ(this_bin, "pdal_bounds_test");
+    EXPECT_EQ(this_bin, "pdal");
 #endif
     this_bin = Support::binpath(this_bin);
     EXPECT_TRUE(FileUtils::fileExists(this_bin));

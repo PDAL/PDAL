@@ -45,7 +45,7 @@ namespace pdal
 class PDAL_DLL SmoothKernel : public Kernel
 {
 public:
-    SET_KERNEL_NAME("kernels.smooth", "Smooth Kernel")
+    SET_KERNEL_NAME("smooth", "Smooth Kernel")
     SET_KERNEL_LINK("http://pdal.io/kernels/kernels.smooth.html")
     SET_KERNEL_ENABLED(true)
 

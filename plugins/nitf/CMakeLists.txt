@@ -6,10 +6,12 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/plugins/nitf)
 include_directories(${PROJECT_SOURCE_DIR}/io/las)
 
-find_package(Nitro 2.6 REQUIRED)
-if(NITRO_FOUND)
-    message(STATUS "Building with NITF support")
+find_package(Nitro QUIET 2.6)
 
+set_package_properties(Nitro PROPERTIES DESCRIPTION "Nitro" URL "http://foo"
+    TYPE OPTIONAL PURPOSE "Enables NITF reader/writer")
+
+if(NITRO_FOUND)
     include_directories(${NITRO_INCLUDE_DIR})
     include_directories("${NITRO_INCLUDE_DIR}/nitro/c++")
     include_directories("${NITRO_INCLUDE_DIR}/nitro/c")

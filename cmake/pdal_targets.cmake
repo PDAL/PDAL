@@ -57,6 +57,7 @@ endmacro(PDAL_ADD_INCLUDES)
 # ARGN The source files for the library.
 macro(PDAL_ADD_LIBRARY _name)
     add_library(${_name} ${PDAL_LIB_TYPE} ${ARGN})
+    set_property(TARGET ${_name} PROPERTY FOLDER "Libraries")
     
     install(TARGETS ${_name}
         RUNTIME DESTINATION ${PDAL_BIN_DIR}
@@ -74,7 +75,7 @@ macro(PDAL_ADD_EXECUTABLE _name)
     add_executable(${_name} ${ARGN})
 
     # must link explicitly against boost.
-    target_link_libraries(${_name} ${BOOST_LINKAGE} ${Boost_LIBRARIES})
+    target_link_libraries(${_name} ${Boost_LIBRARIES})
     
     set(PDAL_EXECUTABLES ${PDAL_EXECUTABLES} ${_name})
     install(TARGETS ${_name} RUNTIME DESTINATION ${PDAL_BIN_DIR})
@@ -103,9 +104,9 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
     endif()
 
     add_library(${${_name}} SHARED ${PDAL_ADD_PLUGIN_FILES})
-    target_link_libraries(${${_name}} ${PDAL_LINKAGE} ${PDAL_LIB_NAME} ${PDAL_ADD_PLUGIN_LINK_WITH})
+    target_link_libraries(${${_name}} ${PDAL_LIB_NAME} ${PDAL_ADD_PLUGIN_LINK_WITH})
 
-    set_target_properties(${${_name}} PROPERTIES FOLDER "${_type}_${_shortname}")
+    set_property(TARGET ${${_name}} PROPERTY FOLDER "Plugins/${_type}")
 
     install(TARGETS ${${_name}}
         RUNTIME DESTINATION ${PDAL_BIN_DIR}
@@ -136,6 +137,7 @@ macro(PDAL_ADD_TEST _name)
     endif()
     add_executable(${_name} ${PDAL_ADD_TEST_FILES} ${common_srcs})
     set_target_properties(${_name} PROPERTIES COMPILE_DEFINITIONS PDAL_DLL_IMPORT)
+    set_property(TARGET ${_name} PROPERTY FOLDER "Tests")
     target_link_libraries(${_name} ${PDAL_LIB_NAME} gtest gtest_main ${PDAL_ADD_TEST_LINK_WITH})
     add_test(NAME ${_name} COMMAND "${PROJECT_BINARY_DIR}/bin/${_name}" WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/..")
 endmacro(PDAL_ADD_TEST)
@@ -157,6 +159,7 @@ macro(PDAL_ADD_DRIVER _type _name _srcs _incs _objs)
 		add_definitions("-fPIC")
 	endif()
     add_library(${libname} OBJECT ${_srcs} ${_incs})
+    set_property(TARGET ${libname} PROPERTY FOLDER "Drivers/${_type}")
 
     install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
         DESTINATION "${PDAL_INCLUDE_DIR}"

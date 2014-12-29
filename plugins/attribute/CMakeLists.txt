@@ -5,11 +5,13 @@
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/filters/attribute)
 
-find_package(GEOS 3.3)
-find_package(GDAL 1.9.0)
-if (GEOS_FOUND AND GDAL_FOUND)
-    message(STATUS "Building with Attribute support")
+find_package(GEOS QUIET 3.3)
+set_package_properties(GEOS PROPERTIES PURPOSE "Enables attribute filter")
 
+find_package(GDAL QUIET 1.9.0)
+set_package_properties(GDAL PROPERTIES PURPOSE "Enables attribute filter")
+
+if (GEOS_FOUND AND GDAL_FOUND)
     include_directories(${GEOS_INCLUDE_DIR})
     include_directories(${GDAL_INCLUDE_DIR})
 
@@ -20,5 +22,5 @@ if (GEOS_FOUND AND GDAL_FOUND)
         FILES "${srcs}" "${incs}"
         LINK_WITH ${GEOS_LIBRARY} ${GDAL_LIBRARY})
 else()
-    message(STATUS "Building without Attribute support")
+    message(STATUS "BUILD_PLUGIN_ATTRIBUTE disabled because GEOS and/or GDAL was not found")
 endif()

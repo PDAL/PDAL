@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "UnitTest.hpp"
+#include "gtest/gtest.h"
 
 #include <pdal/FileUtils.hpp>
 #include "Support.hpp"
@@ -41,43 +41,239 @@
 #include <sstream>
 #include <string>
 
-
-BOOST_AUTO_TEST_SUITE(pcpipelineTest)
-
-
 static std::string appName()
 {
-    const std::string app = Support::binpath(Support::exename("pdal pipeline"));
+    const std::string app = Support::binpath(Support::exename("pdal") + " pipeline");
     return app;
 }
 
+// most pipelines (those with a writer) will be invoked via `pdal pipeline`
+static void run_pipeline(std::string const& pipeline)
+{
+    const std::string cmd = Support::binpath(Support::exename("pdal") + " pipeline");
+
+    std::string output;
+    std::string file(Support::configuredpath(pipeline));
+    int stat = pdal::Utils::run_shell_command(cmd + " " + file, output);
+    EXPECT_EQ(0, stat);
+    if (stat)
+        std::cerr << output << std::endl;
+}
+
+// pipeines with no writer will be invoked via `pdal info`
+static void run_info(std::string const& pipeline)
+{
+    const std::string cmd = Support::binpath(Support::exename("pdal") + " info");
+
+    std::string output;
+    std::string file(Support::configuredpath(pipeline));
+    int stat = pdal::Utils::run_shell_command(cmd + " -s < " + file, output);
+    EXPECT_EQ(0, stat);
+    if (stat)
+        std::cerr << output << std::endl;
+}
 
 #ifdef PDAL_COMPILER_MSVC
-BOOST_AUTO_TEST_CASE(pcpipelineTest_no_input)
+TEST(pipelineBaseTest, no_input)
 {
     const std::string cmd = appName();
 
     std::string output;
     int stat = pdal::Utils::run_shell_command(cmd, output);
-    BOOST_CHECK_EQUAL(stat, 1);
+    EXPECT_EQ(stat, 1);
 
     const std::string expected = "Usage error: input file name required";
-    BOOST_CHECK_EQUAL(output.substr(0, expected.length()), expected);
+    EXPECT_EQ(output.substr(0, expected.length()), expected);
 }
 #endif
 
 
-BOOST_AUTO_TEST_CASE(pcpipelineTest_test_common_opts)
+TEST(pipelineBaseTest, common_opts)
 {
     const std::string cmd = appName();
 
     std::string output;
     int stat = pdal::Utils::run_shell_command(cmd + " -h", output);
-    BOOST_CHECK_EQUAL(stat, 0);
+    EXPECT_EQ(stat, 0);
 
     stat = pdal::Utils::run_shell_command(cmd + " --version", output);
-    BOOST_CHECK_EQUAL(stat, 0);
+    EXPECT_EQ(stat, 0);
 }
 
+TEST(pipelineBaseTest, drop_color)
+{ run_pipeline("pipeline/drop_color.xml"); }
 
-BOOST_AUTO_TEST_SUITE_END()
+TEST(pipelineBaseTest, interpolate)
+{ run_pipeline("pipeline/pipeline_interpolate.xml"); }
+
+TEST(pipelineBaseTest, DISABLED_metadata_reader)
+{ run_info("pipeline/pipeline_metadata_reader.xml"); }
+
+TEST(pipelineBaseTest, metadata_writer)
+{ run_pipeline("pipeline/pipeline_metadata_writer.xml"); }
+
+TEST(pipelineBaseTest, mississippi)
+{ run_pipeline("pipeline/pipeline_mississippi.xml"); }
+
+TEST(pipelineBaseTest, mississippi_reverse)
+{ run_pipeline("pipeline/pipeline_mississippi_reverse.xml"); }
+
+TEST(pipelineBaseTest, multioptions)
+{ run_info("pipeline/pipeline_multioptions.xml"); }
+
+TEST(pipelineBaseTest, read)
+{ run_info("pipeline/pipeline_read.xml"); }
+
+TEST(pipelineBaseTest, read_notype)
+{ run_info("pipeline/pipeline_read_notype.xml"); }
+
+TEST(pipelineBaseTest, readcomments)
+{ run_info("pipeline/pipeline_readcomments.xml"); }
+
+TEST(pipelineBaseTest, write)
+{ run_pipeline("pipeline/pipeline_write.xml"); }
+
+TEST(pipelineBaseTest, write2)
+{ run_pipeline("pipeline/pipeline_write2.xml"); }
+
+TEST(pipelineBaseTest, pipeline_writecomments)
+{ run_pipeline("pipeline/pipeline_writecomments.xml"); }
+
+TEST(pipelineBpfTest, bpf)
+{ run_pipeline("bpf/bpf.xml"); }
+
+TEST(pipelineBpfTest, bpf2nitf)
+{ run_pipeline("bpf/bpf2nitf.xml"); }
+
+TEST(pipelineFiltersTest, DISABLED_attribute)
+{ run_pipeline("filters/attribute.xml"); }
+
+TEST(pipelineFiltersTest, chip)
+{ run_pipeline("filters/chip.xml"); }
+
+TEST(pipelineFiltersTest, chipper)
+{ run_pipeline("filters/chipper.xml"); }
+
+TEST(pipelineFiltersTest, DISABLED_colorize_multi)
+{ run_pipeline("filters/colorize-multi.xml"); }
+
+TEST(pipelineFiltersTest, colorize)
+{ run_pipeline("filters/colorize.xml"); }
+
+TEST(pipelineFiltersTest, DISABLED_crop_reproject)
+{ run_pipeline("filters/crop_reproject.xml"); }
+
+TEST(pipelineFiltersTest, crop_wkt)
+{ run_pipeline("filters/crop_wkt.xml"); }
+
+TEST(pipelineFiltersTest, crop_wkt_2d)
+{ run_pipeline("filters/crop_wkt_2d.xml"); }
+
+TEST(pipelineFiltersTest, crop_wkt_2d_classification)
+{ run_pipeline("filters/crop_wkt_2d_classification.xml"); }
+
+TEST(pipelineFiltersTest, DISABLED_decimate)
+{ run_pipeline("filters/decimate.xml"); }
+
+TEST(pipelineFiltersTest, ferry)
+{ run_pipeline("filters/ferry.xml"); }
+
+TEST(pipelineFiltersTest, hexbin_info)
+{ run_info("filters/hexbin-info.xml"); }
+
+TEST(pipelineFiltersTest, hexbin)
+{ run_pipeline("filters/hexbin.xml"); }
+
+TEST(pipelineFiltersTest, merge)
+{ run_info("filters/merge.xml"); }
+
+TEST(pipelineFiltersTest, reproject)
+{ run_pipeline("filters/reproject.xml"); }
+
+TEST(pipelineFiltersTest, DISABLED_sort)
+{ run_info("filters/sort.xml"); }
+
+TEST(pipelineFiltersTest, splitter)
+{ run_pipeline("filters/splitter.xml"); }
+
+TEST(pipelineFiltersTest, stats)
+{ run_pipeline("filters/stats.xml"); }
+
+TEST(pipelineHoleTest, crop)
+{ run_pipeline("hole/crop.xml"); }
+
+TEST(pipelineIcebridgeTest, icebridge)
+{ run_pipeline("icebridge/pipeline.xml"); }
+
+TEST(pipelineNitfTest, chipper)
+{ run_info("nitf/chipper.xml"); }
+
+TEST(pipelineNitfTest, conversion)
+{ run_pipeline("nitf/conversion.xml"); }
+
+TEST(pipelineNitfTest, las2nitf)
+{ run_pipeline("nitf/las2nitf.xml"); }
+
+TEST(pipelineNitfTest, DISABLED_reader)
+{ run_info("nitf/reader.xml"); }
+
+TEST(pipelineNitfTest, write_laz)
+{ run_pipeline("nitf/write_laz.xml"); }
+
+TEST(pipelineNitfTest, write_options)
+{ run_pipeline("nitf/write_options.xml"); }
+
+// skip oracle tests for now
+
+TEST(pipelineP2gTest, writer)
+{ run_pipeline("io/p2g-writer.xml"); }
+
+TEST(pipelinePLangTest, DISABLED_from_module)
+{ run_info("plang/from-module.xml"); }
+
+TEST(pipelinePLangTest, DISABLED_predicate_embed)
+{ run_info("plang/predicate-embed.xml"); }
+
+TEST(pipelinePLangTest, predicate_keep_ground_and_unclass)
+{ run_pipeline("plang/predicate-keep-ground-and-unclass.xml"); }
+
+TEST(pipelinePLangTest, predicate_keep_last_return)
+{ run_pipeline("plang/predicate-keep-last-return.xml"); }
+
+TEST(pipelinePLangTest, predicate_keep_specified_returns)
+{ run_pipeline("plang/predicate-keep-specified-returns.xml"); }
+
+TEST(pipelinePLangTest, DISABLED_programmabled_update_y_dims)
+{ run_info("plang/programmable-update-y-dims.xml"); }
+
+TEST(pipelineQfitTest, DISABLED_conversion)
+{ run_pipeline("qfit/conversion.xml"); }
+
+TEST(pipelineQfitTest, DISABLED_little_endian_conversion)
+{ run_pipeline("qfit/little-endian-conversion.xml"); }
+
+TEST(pipelineQfitTest, DISABLED_pipeline)
+{ run_pipeline("qfit/pipeline.xml"); }
+
+TEST(pipelineQfitTest, DISABLED_reader)
+{ run_info("qfit/reader.xml"); }
+
+TEST(pipelineSbetTest, pipeline)
+{ run_pipeline("sbet/pipeline.xml"); }
+
+// skip soci tests for now
+
+TEST(pipelineSQLiteTest, DISABLED_reader)
+{ run_pipeline("io/sqlite-reader.xml"); }
+
+TEST(pipelineSQLiteTest, DISABLED_writer)
+{ run_pipeline("io/sqlite-writer.xml"); }
+
+TEST(pipelineTextTest, csv_writer)
+{ run_pipeline("io/text-writer-csv.xml"); }
+
+TEST(pipelineTextTest, geojson_writer)
+{ run_pipeline("io/text-writer-geojson.xml"); }
+
+TEST(pipelineTextTest, space_delimited_writer)
+{ run_pipeline("io/text-writer-space-delimited.xml"); }

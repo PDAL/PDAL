@@ -5,13 +5,10 @@
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/plugins/python)
 
-find_package(PythonInterp)
-find_package(PythonLibs 2.4)
-find_package(NumPy 1.5 REQUIRED)
+find_package(PythonInterp QUIET)
+find_package(PythonLibs QUIET 2.4)
+find_package(NumPy QUIET 1.5 REQUIRED)
 if(PYTHONLIBS_FOUND)
-    message(STATUS "Building with Python support")
-    message(STATUS "Found Python: ${PYTHON_LIBRARY}")
-
     include_directories(SYSTEM ${PYTHON_INCLUDE_DIR})
     include_directories(SYSTEM ${NUMPY_INCLUDE_DIR})
 
@@ -49,6 +46,4 @@ if(PYTHONLIBS_FOUND)
             FILES "${srcs}"
             LINK_WITH ${predicate_libname} ${programmable_libname})
     endif()
-else()
-    message(STATUS "Building with Python support")
 endif()

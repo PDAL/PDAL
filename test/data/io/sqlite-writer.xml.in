@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="writers.sqlite">
+        <Option name="connection">
+            autzen-dd.sqlite
+        </Option>
+        <Option name="cloud_table_name">
+            SIMPLE_CLOUD
+        </Option>
+        <Option name="block_table_name">
+            SIMPLE_BLOCKS
+        </Option>
+        
+        <Option name="cloud_column_name">
+            CLOUD
+        </Option>
+        <Option name="is3d">
+            false
+        </Option>
+        <Option name="overwrite">
+            true
+        </Option>
+        <Option name="srid">
+            4326
+        </Option>
+        <Option name="base_table_boundary_wkt">
+        </Option>
+        <Option name="pre_block_sql">
+        </Option>
+        <Option name="pre_sql">
+        </Option>
+        <Option name="post_block_sql">
+        </Option>
+        <Option name="capacity">
+            50
+        </Option>
+        <Option name="stream_output_precision">
+            8
+        </Option>
+        <Option name="pack_ignored_fields">
+            true
+        </Option>
+  
+        <Filter type="filters.chipper">
+        <Option name="capacity">
+            50
+        </Option>
+            <Option name="max_cache_blocks">
+                1
+            </Option>
+            <Reader type="readers.las">
+                <Option name="filename">
+                    @CMAKE_SOURCE_DIR@/test/data/autzen/autzen-dd.las
+                </Option>
+                <Option name="spatialreference">
+                    EPSG:4326
+                </Option>
+            </Reader>
+        </Filter>
+    </Writer>
+</Pipeline>

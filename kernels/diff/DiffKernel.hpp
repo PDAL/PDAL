@@ -48,7 +48,7 @@ namespace pdal
 class PDAL_DLL DiffKernel : public Kernel
 {
 public:
-    SET_KERNEL_NAME ("kernels.diff", "Diff Kernel")
+    SET_KERNEL_NAME ("diff", "Diff Kernel")
     SET_KERNEL_LINK ("http://pdal.io/kernels/kernels.diff.html")
     SET_KERNEL_ENABLED (true)
  

@@ -1,0 +1,58 @@
+<?xml version="2.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="writers.las">
+        <Option name="filename">
+            @CMAKE_SOURCE_DIR@/test/temp/attributed.las
+        </Option>
+        <Option name="scale_x">
+            0.0000001
+        </Option>
+        <Option name="scale_y">
+            0.0000001
+        </Option>
+        <Filter type="filters.attribute">
+            <Option name="dimension">
+                Classification
+                <Options>
+                    <Option name="datasource">
+                        @CMAKE_SOURCE_DIR@/test/data/autzen/attributes.shp
+                    </Option>
+                    <Option name="layer">
+                        attributes
+                    </Option>
+                    <Option name="column">
+                        CLS
+                    </Option>
+                </Options>
+            </Option>
+            <Option name="dimension">
+                Intensity
+                <Options>
+                    <Option name="datasource">
+                        @CMAKE_SOURCE_DIR@/test/data/autzen/attributes.shp
+                    </Option>
+                    <Option name="query">
+                        SELECT CLS FROM attributes where cls!=6
+                    </Option>
+                    <Option name="column">
+                        CLS
+                    </Option>
+                </Options>
+            </Option>
+            <Option name="dimension">
+                PointSourceId
+                <Options>
+                    <Option name="value">
+                        26
+                    </Option>
+                </Options>
+            </Option>
+            <Reader type="readers.las">
+                <Option name="filename">
+                    @CMAKE_SOURCE_DIR@/test/data/autzen/autzen-dd.las
+                </Option>
+            </Reader>
+        </Filter>
+    </Writer>
+</Pipeline>
+

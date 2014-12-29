@@ -45,7 +45,7 @@ namespace pdal
 class PDAL_DLL ViewKernel : public Kernel
 {
 public:
-    SET_KERNEL_NAME("kernels.view", "View Kernel")
+    SET_KERNEL_NAME("view", "View Kernel")
     SET_KERNEL_LINK("http://pdal.io/kernels/kernels.view.html")
     SET_KERNEL_ENABLED(true)
 

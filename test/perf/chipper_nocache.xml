@@ -7,7 +7,7 @@
             </Option>
             <Reader type="readers.las">
                 <Option name="filename">
-                    ../data/autzen-thin.las
+                    ../las/autzen-thin.las
                 </Option>
             </Reader>
         </Filter>
