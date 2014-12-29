@@ -44,10 +44,8 @@
 namespace pdal
 {
 
-PipelineManager* KernelSupport::makePipeline(pdal::Options& options)
+PipelineManager* KernelSupport::makePipeline(const std::string& inputFile)
 {
-    std::string inputFile = options.getValueOrThrow<std::string>("filename");
-
     if (!pdal::FileUtils::fileExists(inputFile))
         throw app_runtime_error("file not found: " + inputFile);
 
@@ -67,6 +65,7 @@ PipelineManager* KernelSupport::makePipeline(pdal::Options& options)
     {
         StageFactory factory;
         std::string driver = factory.inferReaderDriver(inputFile);
+
         if (driver.empty())
             throw app_runtime_error("Cannot determine input file type of " +
                 inputFile);

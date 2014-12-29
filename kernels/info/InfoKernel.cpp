@@ -50,13 +50,12 @@ InfoKernel::InfoKernel()
     , m_showSchema(false)
     , m_showStage(false)
     , m_showMetadata(false)
-    , m_showSDOPCMetadata(false)
     , m_computeBoundary(false)
     , m_useXML(false)
     , m_useJSON(false)
     , m_useRST(false)
-    , m_QueryDistance(0.0)
     , m_showSummary(false)
+    , m_statsStage(NULL)
 {}
 
 
@@ -66,17 +65,16 @@ void InfoKernel::validateSwitches()
         m_showStats ||
         m_showSchema ||
         m_showMetadata ||
-        m_showSDOPCMetadata ||
         m_computeBoundary ||
         m_showStage ||
         m_showSummary ||
         m_QueryPoint.size() > 0 ||
         m_pointIndexes.size() > 0;
+
     if (!got_something)
     {
         m_showStats = true;
         m_showSchema = true;
-
     }
 }
 
@@ -102,7 +100,6 @@ void InfoKernel::addSwitches()
         ("point,p", po::value<std::string >(&m_pointIndexes), "point to dump")
         ("query", po::value< std::string>(&m_QueryPoint),
          "A 2d or 3d point query point")
-        ("distance", po::value< double>(&m_QueryDistance), "A query distance")
         ("stats",
          po::value<bool>(&m_showStats)->zero_tokens()->implicit_value(true),
          "dump stats on all points (reads entire dataset)")
@@ -110,17 +107,13 @@ void InfoKernel::addSwitches()
          po::value<bool>(&m_computeBoundary)->zero_tokens()->implicit_value(true),
          "compute a hexagonal hull/boundary of dataset")
         ("dimensions", po::value<std::string >(&m_Dimensions),
-         "dump stats on all points (reads entire dataset)")
+         "dimensions on which to compute statistics")
         ("schema",
          po::value<bool>(&m_showSchema)->zero_tokens()->implicit_value(true),
          "dump the schema")
         ("metadata,m",
          po::value<bool>(&m_showMetadata)->zero_tokens()->implicit_value(true),
          "dump the metadata")
-        ("sdo_pc",
-         po::value<bool>(&m_showSDOPCMetadata)->zero_tokens()->
-             implicit_value(true),
-         "dump the SDO_PC Oracle Metadata")
         ("stage,r",
          po::value<bool>(&m_showStage)->zero_tokens()->implicit_value(true),
          "dump the stage info")
@@ -161,11 +154,10 @@ uint32_t parseInt(const string& s)
 }
 
 
-void addRange(const string& begin, const string& end,
-    vector<uint32_t>& points)
+void addRange(const string& begin, const string& end, vector<PointId>& points)
 {
-    uint32_t low = parseInt(begin);
-    uint32_t high = parseInt(end);
+    PointId low = parseInt(begin);
+    PointId high = parseInt(end);
     if (low > high)
         throw app_runtime_error(string("Range invalid: ") + begin + "-" + end);
     while (low <= high)
@@ -173,9 +165,9 @@ void addRange(const string& begin, const string& end,
 }
 
 
-vector<uint32_t> getListOfPoints(std::string p)
+vector<PointId> getListOfPoints(std::string p)
 {
-    vector<uint32_t> output;
+    vector<PointId> output;
 
     //Remove whitespace from string with awful remove/erase idiom.
     p.erase(remove_if(p.begin(), p.end(), ::isspace), p.end());
@@ -196,11 +188,13 @@ vector<uint32_t> getListOfPoints(std::string p)
 
 } //namespace
 
-void InfoKernel::dumpPoints(PointBufferPtr buf) const
+MetadataNode InfoKernel::dumpPoints(PointBufferPtr buf) const
 {
+    MetadataNode root;
     PointBufferPtr outbuf = buf->makeNew();
 
-    std::vector<uint32_t> points = getListOfPoints(m_pointIndexes);
+    // Stick points in a buffer.
+    std::vector<PointId> points = getListOfPoints(m_pointIndexes);
     for (size_t i = 0; i < points.size(); ++i)
     {
         PointId id = (PointId)points[i];
@@ -208,181 +202,82 @@ void InfoKernel::dumpPoints(PointBufferPtr buf) const
             outbuf->appendPoint(*buf, id);
     }
 
-    boost::property_tree::ptree buffer_tree = pdal::utils::toPTree(*outbuf);
+    MetadataNode tree = utils::toMetadata(*outbuf);
+    std::string prefix("point ");
     for (size_t i = 0; i < outbuf->size(); ++i)
     {
-        std::string name = (std::string)"point " +
-            boost::lexical_cast<std::string>(points[i]);
-        std::string key = boost::lexical_cast<std::string>(i);
-        m_tree->add_child(name, buffer_tree.get_child(key));
+        MetadataNode n = tree.findChild(std::to_string(i));
+        root.add(n.clone(prefix + std::to_string(points[i])));
     }
+    return root;
 }
 
 
-void InfoKernel::dumpStats()
+MetadataNode InfoKernel::dumpSummary()
 {
-    PipelineWriter* writer = NULL;
+    QuickInfo qi = m_reader->preview();
 
-    if (m_pipelineFile.size() > 0)
-        writer = new pdal::PipelineWriter(*m_manager);
+    MetadataNode summary("summary");
+    summary.add("num_points", qi.m_pointCount);
+    summary.add("spatial_reference", qi.m_srs.getWKT());
+    MetadataNode bounds = summary.add("bounds");
+    MetadataNode x = bounds.add("X");
+    x.add("min", qi.m_bounds.minx);
+    x.add("max", qi.m_bounds.maxx);
+    MetadataNode y = bounds.add("Y");
+    y.add("min", qi.m_bounds.miny);
+    y.add("max", qi.m_bounds.maxy);
+    MetadataNode z = bounds.add("Z");
+    z.add("min", qi.m_bounds.minz);
+    z.add("max", qi.m_bounds.maxz);
 
-    MetadataNode statsNode("stats");
-
-    statsNode.add(m_manager->getMetadata());
-
-    boost::property_tree::ptree stats;
-    std::stringstream strm;
-    strm << statsNode.toJSON();
-    boost::property_tree::read_json(strm, stats);
-    m_tree->add_child("stats", stats);
-
-    if (m_pipelineFile.size() > 0)
-        writer->writePipeline(m_pipelineFile);
-    delete writer;
-}
-
-
-// return a ptree containing min/max for X,Y,Z,
-// based on the stats filter metadata
-static boost::property_tree::ptree getSummaryBounds(MetadataNode root)
-{
-    boost::property_tree::ptree pt;
-
-    if (root.empty()) return pt;
-
-    MetadataNode m = root.findChild("filters.stats");
-    if (m.empty()) return pt;
-
-    std::vector<MetadataNode> ms = m.children("statistic");
-    for (auto dataNode: ms)
+    std::string dims;
+    auto di = qi.m_dimNames.begin();
+    while (di != qi.m_dimNames.end())
     {
-        if (dataNode.empty()) continue;
-
-        MetadataNode nameNode = dataNode.findChild("name");
-        if (nameNode.empty()) continue;
-
-        const std::string& name = nameNode.value();
-        if (name=="X" || name=="Y" || name=="Z")
-        {
-            MetadataNode minNode = dataNode.findChild("minimum");
-            MetadataNode maxNode = dataNode.findChild("maximum");
-            if (minNode.empty()) continue;
-            if (maxNode.empty()) continue;
-
-            boost::property_tree::ptree stats;
-            stats.put("min", minNode.value());
-            stats.put("max", maxNode.value());
-            pt.add_child(name, stats);
-        }
+        dims += *di;
+        ++di;
+        if (di != qi.m_dimNames.end())
+           dims += ", ";
     }
-
-    return pt;
-}
-
-
-// return a ptree containing list of dimensions
-// based on the stats filter metadata
-static boost::property_tree::ptree getSummaryDimensions(MetadataNode root)
-{
-    boost::property_tree::ptree pt;
-
-    if (root.empty()) return pt;
-
-    MetadataNode m = root.findChild("filters.stats");
-    if (m.empty()) return pt;
-
-    std::vector<MetadataNode> ms = m.children("statistic");
-    for (auto dataNode: ms)
-    {
-        if (dataNode.empty()) continue;
-
-        MetadataNode nameNode = dataNode.findChild("name");
-        if (nameNode.empty()) continue;
-
-        const std::string& name = nameNode.value();
-        boost::property_tree::ptree item;
-        pt.put(name, "");
-        //pt.add_child("dim", item);
-    }
-
-    return pt;
-}
-
-
-void InfoKernel::dumpSummary(PointContext ctx, PointBufferPtr buf)
-{
-    Stage* stage = m_manager->getStage();
-    assert(stage->getName() == "filters.stats");
-
-    MetadataNode metaNode = m_manager->getMetadata();
-
-    {
-        boost::property_tree::ptree pt;
-        pt.put("NumPoints", buf->size());
-        pt.put("NumDimensions", ctx.dims().size());
-        pt.put("WKT", ctx.spatialRef().getWKT());
-        m_tree->add_child("Summary", pt);
-    }
-
-    {
-        boost::property_tree::ptree pt = getSummaryBounds(metaNode);
-        m_tree->add_child("Bounds", pt);
-    }
-
-    {
-        boost::property_tree::ptree pt = getSummaryDimensions(metaNode);
-        m_tree->add_child("Dimensions", pt);
-    }
+    summary.add("dimensions", dims);
+    return summary;
 }
 
 
 void InfoKernel::dump(PointContext ctx, PointBufferPtr buf)
 {
     if (m_showStats)
-    {
-        dumpStats();
-    }
+        m_statsStage->getMetadata();
+
+    if (m_pipelineFile.size() > 0)
+        PipelineWriter(*m_manager).writePipeline(m_pipelineFile);
 
     if (m_pointIndexes.size())
-    {
         dumpPoints(buf);
-    }
 
     if (m_showSchema)
-    {
-        boost::property_tree::ptree dims(pdal::utils::toPTree(ctx));
-        m_tree->add_child("schema", dims);
-    }
-
-    if (m_showSDOPCMetadata)
-    {
-        boost::property_tree::ptree metadata =
-            m_manager->getStage()->serializePipeline();
-
-        boost::property_tree::ptree output;
-        m_tree->add_child("stage", output);
-    }
+        MetadataNode root = utils::toMetadata(ctx);
 
     if (m_QueryPoint.size())
-    {
         dumpQuery(buf);
-    }
 
     if (m_showSummary)
-    {
-        dumpSummary(ctx, buf);
-    }
+        dumpSummary();
+
+    if (m_computeBoundary)
+        m_hexbinStage->getMetadata();
 }
 
 
-void InfoKernel::dumpQuery(PointBufferPtr buf) const
+MetadataNode InfoKernel::dumpQuery(PointBufferPtr buf) const
 {
-#define SEPARATORS ",| "
-    boost::char_separator<char> sep(SEPARATORS);
-    tokenizer tokens(m_QueryPoint, sep);
+    auto seps = [](char c){ return (c == ',' || c == '|' || c == ' '); };
+
+    std::vector<std::string> tokens = Utils::split2(m_QueryPoint, seps);
     std::vector<double> values;
-    for (tokenizer::iterator t = tokens.begin(); t != tokens.end(); ++t)
-        values.push_back(boost::lexical_cast<double>(*t));
+    for (auto ti = tokens.begin(); ti != tokens.end(); ++ti)
+        values.push_back(boost::lexical_cast<double>(*ti));
 
     if (values.size() != 2 && values.size() != 3)
         throw app_runtime_error("--points must be two or three values");
@@ -401,18 +296,8 @@ void InfoKernel::dumpQuery(PointBufferPtr buf) const
     for (auto i = ids.begin(); i != ids.end(); ++i)
         outbuf->appendPoint(*buf, *i);
 
-    boost::property_tree::ptree tree = pdal::utils::toPTree(*outbuf);
-    m_tree->add_child("point", tree);
+    return utils::toMetadata(*outbuf);
 }
-
-
-void InfoKernel::dumpSDO_PCMetadata(PointContext ctx, const Stage& stage) const
-{
-    std::ostream& ostr = std::cout;
-    // std::string xml = pdal::Schema::to_xml(*ctx.schema(), stage.getMetadata());
-    // ostr << xml;
-}
-
 
 
 void InfoKernel::dumpMetadata(PointContext ctx, const Stage& stage) const
@@ -432,43 +317,35 @@ void InfoKernel::dumpMetadata(PointContext ctx, const Stage& stage) const
 int InfoKernel::execute()
 {
     Options readerOptions;
-    {
-        if (m_usestdin)
-            m_inputFile = "STDIN";
-        readerOptions.add<std::string>("filename", m_inputFile);
-        readerOptions.add<bool>("debug", isDebug());
-        readerOptions.add<uint32_t>("verbose", getVerboseLevel());
-    }
+    bool preview = true;
+
+    std::string filename = m_usestdin ? std::string("STDIN") : m_inputFile;
+    readerOptions.add("filename", filename);
 
     m_manager = std::unique_ptr<PipelineManager>(
-        KernelSupport::makePipeline(readerOptions));
+        KernelSupport::makePipeline(filename));
+    m_reader = static_cast<Reader *>(m_manager->getStage());
+    Stage *stage = m_reader;
 
     if (m_Dimensions.size())
         m_options.add("dimensions", m_Dimensions, "List of dimensions");
 
     Options options = m_options + readerOptions;
-
-    Stage* stage = m_manager->getStage();
-    stage->setOptions(options);
-    if (m_showStats || m_showSummary)
+    m_reader->setOptions(options);
+    if (m_showStats)
     {
-        if (m_showSummary)
-        {
-            // we need exact dimensions for the bbox, so we need to visit
-            // all the points, alas
-            options.add<point_count_t>("num_points", 0);
-        }
-        stage = m_manager->addFilter("filters.stats", stage);
-        stage->setOptions(options);
+        m_statsStage = m_manager->addFilter("filters.stats", stage);
+        m_statsStage->setOptions(options);
+        stage = m_statsStage;
+        preview = false;
     }
     if (m_computeBoundary)
     {
-        stage = m_manager->addFilter("filters.hexbin", stage);
+        m_hexbinStage = m_manager->addFilter("filters.hexbin", stage);
         stage->setOptions(options);
+        stage = m_hexbinStage;
+        preview = false;
     }
-
-    m_tree = std::unique_ptr<boost::property_tree::ptree>(
-        new boost::property_tree::ptree);
 
     std::ostream& ostr = std::cout;
     m_manager->execute();
@@ -476,12 +353,15 @@ int InfoKernel::execute()
     assert(pbSet.size() == 1);
     dump(m_manager->context(), *pbSet.begin());
 
+//ABELL
+/**
     if (m_useXML)
         write_xml(ostr, *m_tree);
     else if (m_useRST)
         pdal::utils::reST::write_rst(ostr, *m_tree);
     else
         write_json(ostr, *m_tree);
+**/
 
     return 0;
 }

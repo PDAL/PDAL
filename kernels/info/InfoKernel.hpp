@@ -34,8 +34,9 @@
 
 #pragma once
 
-#include <pdal/Stage.hpp>
 #include "Kernel.hpp"
+
+#include <pdal/Stage.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 
@@ -71,10 +72,11 @@ private:
 
     void dump(PointContext ctx, PointBufferPtr buf);
 
-    void dumpPoints(PointBufferPtr buf) const;
-    void dumpStats();
-    void dumpSummary(PointContext ctx, PointBufferPtr buf);
-    void dumpQuery(PointBufferPtr buf) const;
+    MetadataNode dumpPoints(PointBufferPtr buf) const;
+    MetadataNode dumpStats() const;
+    void dumpPipeline() const;
+    MetadataNode dumpSummary();
+    MetadataNode dumpQuery(PointBufferPtr buf) const;
     void dumpMetadata(PointContext ctx, const Stage&) const;
     void dumpSDO_PCMetadata(PointContext ctx, Stage const&) const;
 
@@ -96,7 +98,11 @@ private:
     std::string m_pipelineFile;
     bool m_showSummary;
 
-    std::unique_ptr<boost::property_tree::ptree> m_tree;
+    Stage *m_statsStage;
+    Stage *m_hexbinStage;
+    Reader *m_reader;
+
+    MetadataNode m_tree;
     std::unique_ptr<PipelineManager> m_manager;
 };
 

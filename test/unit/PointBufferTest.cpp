@@ -41,10 +41,11 @@
 #include <pdal/PointBuffer.hpp>
 #include <pdal/PointBufferIter.hpp>
 #include <pdal/PDALUtils.hpp>
+#include "Support.hpp"
 
 using namespace pdal;
 
-PointBuffer* makeTestBuffer(PointContext ctx)
+PointBuffer* makeTestBuffer(PointContext ctx, point_count_t cnt = 17)
 {
     ctx.registerDim(Dimension::Id::Classification);
     ctx.registerDim(Dimension::Id::X);
@@ -53,7 +54,7 @@ PointBuffer* makeTestBuffer(PointContext ctx)
     PointBuffer* data = new PointBuffer(ctx);
 
     // write the data into the buffer
-    for (uint32_t i = 0; i < 17; i++)
+    for (PointId i = 0; i < cnt; i++)
     {
         const uint8_t x = (uint8_t)(i + 1);
         const int32_t y = i * 10;
@@ -63,23 +64,23 @@ PointBuffer* makeTestBuffer(PointContext ctx)
         data->setField(Dimension::Id::X, i, y);
         data->setField(Dimension::Id::Y, i, z);
     }
-    EXPECT_EQ(data->size(), 17u);
+    EXPECT_EQ(data->size(), cnt);
     return data;
 }
 
 
-static void verifyTestBuffer(const PointBuffer& data)
+static void verifyTestBuffer(const PointBuffer& data, point_count_t cnt = 17)
 {
     // read the data back out
-    for (int i = 0; i < 17; i++)
+    for (PointId i = 0; i < cnt; i++)
     {
-        const uint8_t x = data.getFieldAs<uint8_t>(
+        uint8_t x = data.getFieldAs<uint8_t>(
             Dimension::Id::Classification, i);
-        const int32_t y = data.getFieldAs<uint32_t>(Dimension::Id::X, i);
-        const double z = data.getFieldAs<double>(Dimension::Id::Y, i);
+        int32_t y = data.getFieldAs<uint32_t>(Dimension::Id::X, i);
+        double z = data.getFieldAs<double>(Dimension::Id::Y, i);
 
-        EXPECT_EQ(x, i + 1u);
-        EXPECT_EQ(y, i * 10);
+        EXPECT_EQ(x, (uint8_t)(i + 1));
+        EXPECT_EQ(y, (int32_t)(i * 10));
         EXPECT_TRUE(Utils::compare_approx(z, static_cast<double>(i) * 100.0,
             (std::numeric_limits<double>::min)()));
     }
@@ -218,21 +219,19 @@ TEST(PointBufferTest, assignment)
 }
 
 
-TEST(PointBufferTest, ptree)
+TEST(PointBufferTest, metadata)
 {
     PointContext ctx;
-    PointBuffer* data = makeTestBuffer(ctx);
+    PointBuffer* data = makeTestBuffer(ctx, 2);
 
     std::stringstream ss1(std::stringstream::in | std::stringstream::out);
-    boost::property_tree::ptree tree = utils::toPTree(*data);
+    MetadataNode tree = utils::toMetadata(*data);
     delete data;
 
-    boost::property_tree::write_xml(ss1, tree);
-    std::string out1 = ss1.str();
-    std::string xml_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-    std::string ref = xml_header + "<0><X>0</X><Y>0</Y><Classification>1</Classification></0><1><X>10</X><Y>100</Y><Classification>2</Classification></1>";
-
-    EXPECT_EQ(ref, out1.substr(0, ref.length()));
+    std::ifstream str1(Support::datapath("pointbuffer/metadata.txt"));
+    std::string json = tree.toJSON();
+    std::istringstream str2(tree.toJSON());
+    EXPECT_TRUE(Support::compare_text_files(str1, str2));
 }
 
 

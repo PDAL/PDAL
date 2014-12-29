@@ -125,7 +125,6 @@ void StatsFilter::ready(PointContext ctx)
 
 void StatsFilter::extractMetadata(PointContext ctx)
 {
-
     uint32_t position(0);
     
     for (auto di = m_stats.begin(); di != m_stats.end(); ++di)

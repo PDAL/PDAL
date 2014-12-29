@@ -46,7 +46,7 @@
 #include <map>
 #include <memory>
 #include <vector>
-
+#include <stdint.h>
 
 namespace
 {
@@ -96,7 +96,7 @@ class MetadataNodeImpl
 private:
     MetadataNodeImpl(const std::string& name) : m_kind(MetadataType::Instance)
     {
-      m_name = sanitize(name);
+        m_name = sanitize(name);
     }
 
     MetadataNodeImpl() : m_kind(MetadataType::Instance)
@@ -264,8 +264,7 @@ inline void MetadataNodeImpl::setValue<double>(const double& d)
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<SpatialReference>(
-    const SpatialReference& ref)
+inline void MetadataNodeImpl::setValue(const SpatialReference& ref)
 {
     std::ostringstream oss;
     oss << ref;
@@ -274,7 +273,7 @@ inline void MetadataNodeImpl::setValue<SpatialReference>(
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<BOX3D>(const BOX3D& b)
+inline void MetadataNodeImpl::setValue(const BOX3D& b)
 {
     std::ostringstream oss;
     oss << b;
@@ -283,64 +282,84 @@ inline void MetadataNodeImpl::setValue<BOX3D>(const BOX3D& b)
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<uint8_t>(const uint8_t& u)
+inline void MetadataNodeImpl::setValue(const unsigned char& u)
 {
     m_type = "nonNegativeInteger";
     m_value = boost::lexical_cast<std::string>((unsigned)u);
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<uint16_t>(const uint16_t& u)
+inline void MetadataNodeImpl::setValue(const unsigned short& u)
 {
     m_type = "nonNegativeInteger";
     m_value = boost::lexical_cast<std::string>(u);
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<uint32_t>(const uint32_t& u)
+inline void MetadataNodeImpl::setValue(const unsigned int& u)
 {
     m_type = "nonNegativeInteger";
     m_value = boost::lexical_cast<std::string>(u);
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<uint64_t>(const uint64_t& u)
+inline void MetadataNodeImpl::setValue<unsigned long>(const unsigned long& u)
 {
     m_type = "nonNegativeInteger";
     m_value = boost::lexical_cast<std::string>(u);
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<int8_t>(const int8_t& i)
+inline void MetadataNodeImpl::setValue(const unsigned long long& u)
+{
+    m_type = "nonNegativeInteger";
+    m_value = boost::lexical_cast<std::string>(u);
+}
+
+template <>
+inline void MetadataNodeImpl::setValue<char>(const char& i)
 {
     m_type = "integer";
     m_value = boost::lexical_cast<std::string>((int)i);
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<int16_t>(const int16_t& i)
+inline void MetadataNodeImpl::setValue(const signed char& i)
+{
+    m_type = "integer";
+    m_value = boost::lexical_cast<std::string>((int)i);
+}
+
+template <>
+inline void MetadataNodeImpl::setValue(const short& s)
+{
+    m_type = "integer";
+    m_value = boost::lexical_cast<std::string>(s);
+}
+
+template <>
+inline void MetadataNodeImpl::setValue(const int& i)
 {
     m_type = "integer";
     m_value = boost::lexical_cast<std::string>(i);
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<int32_t>(const int32_t& i)
+inline void MetadataNodeImpl::setValue(const long& l)
 {
     m_type = "integer";
-    m_value = boost::lexical_cast<std::string>(i);
+    m_value = boost::lexical_cast<std::string>(l);
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<int64_t>(const int64_t& i)
+inline void MetadataNodeImpl::setValue<int64_t>(const long long& l)
 {
     m_type = "integer";
-    m_value = boost::lexical_cast<std::string>(i);
+    m_value = boost::lexical_cast<std::string>(l);
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<boost::uuids::uuid>(
-    const boost::uuids::uuid& u)
+inline void MetadataNodeImpl::setValue(const boost::uuids::uuid& u)
 {
     std::ostringstream oss;
     oss << u;
@@ -369,6 +388,14 @@ public:
 
     MetadataNode addList(const std::string& name)
         { return MetadataNode(m_impl->addList(name)); }
+
+    MetadataNode clone(const std::string& name)
+    {
+        MetadataNode node;
+        node.m_impl.reset(new MetadataNodeImpl(*m_impl));
+        node.m_impl->m_name = name;
+        return node;
+    }
 
     MetadataNode add(MetadataNode node)
         { return MetadataNode(m_impl->add(node.m_impl)); }
@@ -624,9 +651,6 @@ private:
     MetadataNode m_root;
     MetadataNode m_private;
     std::string m_name;
-
-    MetadataNode privateNode() const
-        { return m_private; }
 };
 typedef std::shared_ptr<Metadata> MetadataPtr;
 
