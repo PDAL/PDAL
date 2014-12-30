@@ -611,7 +611,6 @@ SET(CPACK_PACKAGE_VENDOR "PDAL Development Team")
 
 set(CPACK_SOURCE_PACKAGE_FILE_NAME
     "${CMAKE_PROJECT_NAME}-${PDAL_VERSION_STRING}-src")
-set(CPACK_RESOURCE_FILE_LICENSE "LICENSE.txt")
 
 set(CPACK_SOURCE_IGNORE_FILES
 "/\\\\.gitattributes;/\\\\.vagrant;/\\\\.DS_Store;/CVS/;/\\\\.git/;\\\\.swp$;~$;\\\\.\\\\#;/\\\\#")
