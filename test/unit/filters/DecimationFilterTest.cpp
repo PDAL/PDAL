@@ -60,7 +60,6 @@ TEST(DecimationFilterTest, DecimationFilterTest_test1)
     EXPECT_TRUE(filter.get());
     filter->setOptions(decimationOps);
     filter->setInput(reader.get());
-    EXPECT_TRUE(filter->getDescription() == "Decimation Filter");
 
     PointContext ctx;
 

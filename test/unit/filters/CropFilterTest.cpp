@@ -64,7 +64,6 @@ TEST(CropFilterTest, test_crop)
     EXPECT_TRUE(filter.get());
     filter->setOptions(cropOpts);
     filter->setInput(reader.get());
-    EXPECT_TRUE(filter->getDescription() == "Crop Filter");
 
     Options statOpts;
 

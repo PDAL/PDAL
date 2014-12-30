@@ -82,7 +82,6 @@ TEST(ProgrammableFilterTest, ProgrammableFilterTest_test1)
     FilterPtr filter(f.createFilter("filters.programmable"));
     filter->setOptions(opts);
     filter->setInput(reader.get());
-    EXPECT_TRUE(filter->getDescription() == "Programmable Filter");
 
     StatsFilter stats;
     stats.setInput(filter.get());

@@ -57,7 +57,6 @@ TEST(StatsFilterTest, simple)
     StatsFilter filter;
     filter.setInput(reader.get());
     EXPECT_EQ(filter.getName(), "filters.stats");
-    EXPECT_EQ(filter.getDescription(), "Statistics Filter");
 
     PointContext ctx;
     filter.prepare(ctx);
@@ -103,7 +102,6 @@ TEST(StatsFilterTest, dimset)
     filter.setInput(reader.get());
     filter.setOptions(filterOps);
     EXPECT_EQ(filter.getName(), "filters.stats");
-    EXPECT_EQ(filter.getDescription(), "Statistics Filter");
 
     PointContext ctx;
     filter.prepare(ctx);

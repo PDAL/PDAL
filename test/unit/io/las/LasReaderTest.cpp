@@ -160,7 +160,6 @@ TEST(LasReaderTest, test_sequential)
     LasReader reader;
     reader.setOptions(ops1);
 
-    EXPECT_TRUE(reader.getDescription() == "Las Reader");
     reader.prepare(ctx);
     PointBufferSet pbSet = reader.execute(ctx);
     EXPECT_EQ(pbSet.size(), 1u);

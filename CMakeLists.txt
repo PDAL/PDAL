@@ -533,7 +533,9 @@ configure_file(
 # needs to come before configuration of pdal_defines
 if(APPLE)
     option(PDAL_BUNDLE "Create PDAL as Application Bundle on OSX" FALSE)
-    set(PDAL_APP_BUNDLE 1)
+    if (PDAL_BUNDLE)
+        set(PDAL_APP_BUNDLE 1)
+    endif()
 endif()
 
 set(pdal_defines_h_in "${CMAKE_CURRENT_SOURCE_DIR}/pdal_defines.h.in")

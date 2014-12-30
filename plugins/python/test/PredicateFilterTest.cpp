@@ -79,7 +79,6 @@ TEST(PredicateFilterTest, PredicateFilterTest_test1)
     FilterPtr filter(f.createFilter("filters.predicate"));
     filter->setOptions(opts);
     filter->setInput(reader.get());
-    EXPECT_TRUE(filter->getDescription() == "Predicate Filter");
 
     Options statOpts;
     StatsFilter stats;
@@ -138,7 +137,6 @@ TEST(PredicateFilterTest, PredicateFilterTest_test2)
     FilterPtr filter(f.createFilter("filters.predicate"));
     filter->setOptions(opts);
     filter->setInput(reader.get());
-    EXPECT_TRUE(filter->getDescription() == "Predicate Filter");
 
     Options statOpts;
     StatsFilter stats;

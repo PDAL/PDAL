@@ -44,11 +44,8 @@ namespace pdal
 {
 
 InfoKernel::InfoKernel()
-    : Kernel()
-    , m_inputFile("")
-    , m_showStats(false)
+    : m_showStats(false)
     , m_showSchema(false)
-    , m_showStage(false)
     , m_showMetadata(false)
     , m_computeBoundary(false)
     , m_useXML(false)
@@ -61,21 +58,25 @@ InfoKernel::InfoKernel()
 
 void InfoKernel::validateSwitches()
 {
-    const bool got_something =
-        m_showStats ||
-        m_showSchema ||
-        m_showMetadata ||
-        m_computeBoundary ||
-        m_showStage ||
-        m_showSummary ||
-        m_QueryPoint.size() > 0 ||
-        m_pointIndexes.size() > 0;
+    int functions = 0;
 
-    if (!got_something)
-    {
+    if (m_showStats)
+        functions++;
+    if (m_showMetadata)
+        functions++;
+    if (m_computeBoundary)
+        functions++;
+    if (m_showSummary)
+        functions++;
+    if (m_QueryPoint.size())
+        functions++;
+    if (m_pointIndexes.size())
+        functions++;
+
+    if (functions > 1)
+        throw pdal_error("Incompatible options.");
+    else if (functions == 0)
         m_showStats = true;
-        m_showSchema = true;
-    }
 }
 
 
@@ -114,9 +115,6 @@ void InfoKernel::addSwitches()
         ("metadata,m",
          po::value<bool>(&m_showMetadata)->zero_tokens()->implicit_value(true),
          "dump the metadata")
-        ("stage,r",
-         po::value<bool>(&m_showStage)->zero_tokens()->implicit_value(true),
-         "dump the stage info")
         ("pipeline-serialization",
          po::value<std::string>(&m_pipelineFile)->default_value(""), "")
         ("xml", po::value<bool>(&m_useXML)->zero_tokens()->implicit_value(true),
@@ -317,7 +315,6 @@ void InfoKernel::dumpMetadata(PointContext ctx, const Stage& stage) const
 int InfoKernel::execute()
 {
     Options readerOptions;
-    bool preview = true;
 
     std::string filename = m_usestdin ? std::string("STDIN") : m_inputFile;
     readerOptions.add("filename", filename);
@@ -337,14 +334,12 @@ int InfoKernel::execute()
         m_statsStage = m_manager->addFilter("filters.stats", stage);
         m_statsStage->setOptions(options);
         stage = m_statsStage;
-        preview = false;
     }
     if (m_computeBoundary)
     {
         m_hexbinStage = m_manager->addFilter("filters.hexbin", stage);
         stage->setOptions(options);
         stage = m_hexbinStage;
-        preview = false;
     }
 
     std::ostream& ostr = std::cout;
