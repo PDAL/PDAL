@@ -52,7 +52,7 @@ include("${PDAL_SOURCE_DIR}/cmake/pdal_utils.cmake")
 
 # the next line is the ONLY place in the entire pdal system where
 # the version info is hard-coded
-set(PDAL_VERSION_STRING 0.9.9 CACHE STRING "PDAL version")
+set(PDAL_VERSION_STRING 1.0.0.b1 CACHE STRING "PDAL version")
 
 DISSECT_VERSION()
 GET_OS_INFO()
@@ -230,7 +230,7 @@ if(WIN32)
       add_definitions(-D_CRT_NONSTDC_NO_WARNING)
       add_definitions(-D_SCL_SECURE_NO_WARNINGS)
       add_definitions(-DNOMINMAX)
-      add_definitions(-DBOOST_ALL_DYN_LINK)	  	  
+      add_definitions(-DBOOST_ALL_DYN_LINK)
     endif()
 
     if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
