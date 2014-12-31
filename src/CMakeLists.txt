@@ -96,7 +96,6 @@ set(PDAL_BASE_CPP
   GlobalEnvironment.cpp
   KDIndex.cpp
   Log.cpp
-  Metadata.cpp
   Options.cpp
   PDALUtils.cpp
   PipelineManager.cpp
