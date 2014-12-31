@@ -557,7 +557,7 @@ public:
     bool valid() const
         { return !empty(); }
     bool empty() const
-        { return m_impl->m_name.empty(); }
+        { return m_impl->m_name.empty() && !hasChildren(); }
 
     template <typename PREDICATE>
     MetadataNode find(PREDICATE p) const
