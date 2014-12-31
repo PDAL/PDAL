@@ -562,10 +562,6 @@ void XMLSchema::writeXml(xmlTextWriterPtr w) const
         orientation << "point";
     if (m_orientation == Orientation::DimensionMajor)
         orientation << "dimension";
-    xmlTextWriterWriteElementNS(w, (const xmlChar*) "pc",
-        (const xmlChar*)"orientation", NULL,
-        (const xmlChar*)orientation.str().c_str());
-
     if (!m_metadata.empty())
     {
         xmlTextWriterStartElementNS(w, (const xmlChar*) "pc",
@@ -583,6 +579,10 @@ void XMLSchema::writeXml(xmlTextWriterPtr w) const
         xmlTextWriterWriteRawLen(w, (const xmlChar*) xml.c_str(), xml.size());
         xmlTextWriterEndElement(w);
     }
+    xmlTextWriterWriteElementNS(w, (const xmlChar*) "pc",
+        (const xmlChar*)"orientation", NULL,
+        (const xmlChar*)orientation.str().c_str());
+
 
     xmlTextWriterEndElement(w);
     xmlTextWriterFlush(w);
