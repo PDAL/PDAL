@@ -65,7 +65,7 @@ public:
     PointBuffer(PointContextRef context) : m_context(context), m_size(0)
     {}
     PointBuffer(std::istream& strm, PointContextRef ctx, PointId start,
-        PointId end) : m_context(ctx)
+        PointId end) : m_context(ctx), m_size(0)
     {
         size_t pointSize = ctx.pointSize();
 
@@ -207,7 +207,7 @@ public:
     {
         for (auto di = dims.begin(); di != dims.end(); ++di)
         {
-            getField(buf, di->m_id, di->m_type, idx); 
+            getField(buf, di->m_id, di->m_type, idx);
             buf += Dimension::size(di->m_type);
         }
     }
