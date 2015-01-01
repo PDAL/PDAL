@@ -35,6 +35,7 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 
 #include <pdal/pdal_export.hpp>
 #include <pdal/Bounds.hpp>
@@ -47,11 +48,12 @@ class PointBuffer;
 class PDAL_DLL QuadIndex
 {
 public:
-    QuadIndex(const PointBuffer& pointBuffer);
+    QuadIndex(const PointBuffer& pointBuffer, std::size_t topLevel = 0);
     ~QuadIndex();
 
     // Build the quadtree index.  Could throw a runtime_error.
     void build();
+    void build(double xMin, double yMin, double xMax, double yMax);
 
     // Get bounds of the quad tree.  Return false if the tree has not been
     // built.
@@ -64,6 +66,8 @@ public:
     std::size_t getDepth() const;
 
     std::vector<std::size_t> getFills() const;
+
+    const PointBuffer& pointBuffer() const;
 
     // All getPoints queries will return an empty vector if the tree has not
     // been successfully built prior to the getPoints call.

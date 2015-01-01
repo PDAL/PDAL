@@ -198,6 +198,10 @@ public:
         { return m_context.dimName(id); }
     Dimension::IdList dims() const
         { return m_context.dims(); }
+    std::size_t pointSize() const
+        { return m_context.pointSize(); }
+    std::size_t dimSize(Dimension::Id::Enum id) const
+        { return m_context.dimSize(id); }
 
     /// Fill a buffer with point data specified by the dimension list.
     /// \param[in] dims  List of dimensions/types to retrieve.
