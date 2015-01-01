@@ -46,7 +46,7 @@
 #include <map>
 #include <memory>
 #include <vector>
-
+#include <stdint.h>
 
 namespace
 {
@@ -88,6 +88,7 @@ class MetadataNodeImpl;
 typedef std::shared_ptr<MetadataNodeImpl> MetadataNodeImplPtr;
 typedef std::vector<MetadataNodeImplPtr> MetadataImplList;
 typedef std::map<std::string, MetadataImplList> MetadataSubnodes;
+typedef std::vector<MetadataNode> MetadataNodeList;
 
 class MetadataNodeImpl
 {
@@ -96,7 +97,7 @@ class MetadataNodeImpl
 private:
     MetadataNodeImpl(const std::string& name) : m_kind(MetadataType::Instance)
     {
-      m_name = sanitize(name);
+        m_name = sanitize(name);
     }
 
     MetadataNodeImpl() : m_kind(MetadataType::Instance)
@@ -209,10 +210,6 @@ private:
         return MetadataType::Instance;
     }
 
-    std::string toJSON() const;
-    void toJSON(std::ostream& o, int level) const;
-    void subnodesToJSON(std::ostream& o, int level) const;
-
     std::string m_name;
     std::string m_descrip;
     std::string m_type;
@@ -222,21 +219,21 @@ private:
 };
 
 template <>
-inline void MetadataNodeImpl::setValue<bool>(const bool& b)
+inline void MetadataNodeImpl::setValue(const bool& b)
 {
     m_type = "boolean";
     m_value = b ? "true" : "false";
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<std::string>(const std::string& s)
+inline void MetadataNodeImpl::setValue(const std::string& s)
 {
     m_type = "string";
     m_value = s;
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<const char *>(const char * const & c)
+inline void MetadataNodeImpl::setValue(const char * const & c)
 {
     m_type = "string";
     m_value = c;
@@ -250,7 +247,7 @@ inline void MetadataNodeImpl::setValue(const char(& c)[N])
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<float>(const float& f)
+inline void MetadataNodeImpl::setValue(const float& f)
 {
     m_type = "float";
     m_value = boost::lexical_cast<std::string>(f);
@@ -264,8 +261,7 @@ inline void MetadataNodeImpl::setValue<double>(const double& d)
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<SpatialReference>(
-    const SpatialReference& ref)
+inline void MetadataNodeImpl::setValue(const SpatialReference& ref)
 {
     std::ostringstream oss;
     oss << ref;
@@ -274,7 +270,7 @@ inline void MetadataNodeImpl::setValue<SpatialReference>(
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<BOX3D>(const BOX3D& b)
+inline void MetadataNodeImpl::setValue(const BOX3D& b)
 {
     std::ostringstream oss;
     oss << b;
@@ -283,64 +279,84 @@ inline void MetadataNodeImpl::setValue<BOX3D>(const BOX3D& b)
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<uint8_t>(const uint8_t& u)
+inline void MetadataNodeImpl::setValue(const unsigned char& u)
 {
     m_type = "nonNegativeInteger";
     m_value = boost::lexical_cast<std::string>((unsigned)u);
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<uint16_t>(const uint16_t& u)
+inline void MetadataNodeImpl::setValue(const unsigned short& u)
 {
     m_type = "nonNegativeInteger";
     m_value = boost::lexical_cast<std::string>(u);
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<uint32_t>(const uint32_t& u)
+inline void MetadataNodeImpl::setValue(const unsigned int& u)
 {
     m_type = "nonNegativeInteger";
     m_value = boost::lexical_cast<std::string>(u);
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<uint64_t>(const uint64_t& u)
+inline void MetadataNodeImpl::setValue(const unsigned long& u)
 {
     m_type = "nonNegativeInteger";
     m_value = boost::lexical_cast<std::string>(u);
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<int8_t>(const int8_t& i)
+inline void MetadataNodeImpl::setValue(const unsigned long long& u)
+{
+    m_type = "nonNegativeInteger";
+    m_value = boost::lexical_cast<std::string>(u);
+}
+
+template <>
+inline void MetadataNodeImpl::setValue(const char& i)
 {
     m_type = "integer";
     m_value = boost::lexical_cast<std::string>((int)i);
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<int16_t>(const int16_t& i)
+inline void MetadataNodeImpl::setValue(const signed char& i)
+{
+    m_type = "integer";
+    m_value = boost::lexical_cast<std::string>((int)i);
+}
+
+template <>
+inline void MetadataNodeImpl::setValue(const short& s)
+{
+    m_type = "integer";
+    m_value = boost::lexical_cast<std::string>(s);
+}
+
+template <>
+inline void MetadataNodeImpl::setValue(const int& i)
 {
     m_type = "integer";
     m_value = boost::lexical_cast<std::string>(i);
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<int32_t>(const int32_t& i)
+inline void MetadataNodeImpl::setValue(const long& l)
 {
     m_type = "integer";
-    m_value = boost::lexical_cast<std::string>(i);
+    m_value = boost::lexical_cast<std::string>(l);
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<int64_t>(const int64_t& i)
+inline void MetadataNodeImpl::setValue(const long long& l)
 {
     m_type = "integer";
-    m_value = boost::lexical_cast<std::string>(i);
+    m_value = boost::lexical_cast<std::string>(l);
 }
 
 template <>
-inline void MetadataNodeImpl::setValue<boost::uuids::uuid>(
-    const boost::uuids::uuid& u)
+inline void MetadataNodeImpl::setValue(const boost::uuids::uuid& u)
 {
     std::ostringstream oss;
     oss << u;
@@ -369,6 +385,14 @@ public:
 
     MetadataNode addList(const std::string& name)
         { return MetadataNode(m_impl->addList(name)); }
+
+    MetadataNode clone(const std::string& name)
+    {
+        MetadataNode node;
+        node.m_impl.reset(new MetadataNodeImpl(*m_impl));
+        node.m_impl->m_name = name;
+        return node;
+    }
 
     MetadataNode add(MetadataNode node)
         { return MetadataNode(m_impl->add(node.m_impl)); }
@@ -443,13 +467,10 @@ public:
 
     std::string type() const
         { return m_impl->m_type; }
-    std::string kind() const
-        {
-            if (m_impl->m_kind == MetadataType::Array)
-                return "array";
-            else
-                return "instance";
-        }
+
+    MetadataType::Enum kind() const
+        { return m_impl->m_kind; }
+
     std::string name() const
         { return m_impl->m_name; }
 
@@ -489,9 +510,10 @@ public:
 
     std::string description() const
         { return m_impl->m_descrip; }
-    std::vector<MetadataNode> children() const
+
+    MetadataNodeList children() const
     {
-        std::vector<MetadataNode> outnodes;
+        MetadataNodeList outnodes;
 
         const MetadataSubnodes& nodes = m_impl->m_subnodes;
         for (auto si = nodes.begin(); si != nodes.end(); ++si)
@@ -502,9 +524,10 @@ public:
         }
         return outnodes;
     }
-    std::vector<MetadataNode> children(const std::string& name) const
+
+    MetadataNodeList children(const std::string& name) const
     {
-        std::vector<MetadataNode> outnodes;
+        MetadataNodeList outnodes;
 
         auto si = m_impl->m_subnodes.find(name);
         if (si != m_impl->m_subnodes.end())
@@ -515,12 +538,26 @@ public:
         }
         return outnodes;
     }
+
+    bool hasChildren() const
+        { return m_impl->m_subnodes.size(); }
+
+    std::vector<std::string> childNames() const
+    {
+        std::vector<std::string> names;
+
+        MetadataSubnodes& nodes = m_impl->m_subnodes;
+        for (auto si = nodes.begin(); si != nodes.end(); ++si)
+            names.push_back(si->first);
+        return names;
+    }
+
     bool operator ! ()
         { return empty(); }
     bool valid() const
         { return !empty(); }
     bool empty() const
-        { return m_impl->m_name.empty(); }
+        { return m_impl->m_name.empty() && !hasChildren(); }
 
     template <typename PREDICATE>
     MetadataNode find(PREDICATE p) const
@@ -586,8 +623,6 @@ public:
         return MetadataNode();
     }
 
-    std::string toJSON() const;
-
 private:
     MetadataNodeImplPtr m_impl;
 
@@ -624,9 +659,6 @@ private:
     MetadataNode m_root;
     MetadataNode m_private;
     std::string m_name;
-
-    MetadataNode privateNode() const
-        { return m_private; }
 };
 typedef std::shared_ptr<Metadata> MetadataPtr;
 

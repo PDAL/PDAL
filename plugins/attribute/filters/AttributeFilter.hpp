@@ -36,10 +36,8 @@
 
 #include <pdal/Filter.hpp>
 
-
-
-
 #include <map>
+#include <memory>
 #include <string>
 
 typedef struct GEOSContextHandle_HS *GEOSContextHandle_t;
@@ -56,9 +54,9 @@ namespace gdal
 }
 
 
-typedef boost::shared_ptr<void> OGRDSPtr;
-typedef boost::shared_ptr<void> OGRFeaturePtr;
-typedef boost::shared_ptr<void> OGRGeometryPtr;
+typedef std::shared_ptr<void> OGRDSPtr;
+typedef std::shared_ptr<void> OGRFeaturePtr;
+typedef std::shared_ptr<void> OGRGeometryPtr;
 
 class AttributeInfo
 {
@@ -112,8 +110,10 @@ typedef std::map< std::string, AttributeInfo> AttributeInfoMap;
 
 class PDAL_DLL AttributeFilter : public Filter
 {
+#define ATTRIBUTEDOCS "Assign values for a dimension using a specified value, \n" \
+                      "an OGR-readable data source, or an OGR SQL query."
 public:
-    SET_STAGE_NAME("filters.attribute", "Data attribute filter")
+    SET_STAGE_NAME("filters.attribute", ATTRIBUTEDOCS)
     SET_STAGE_LINK("http://pdal.io/stages/filters.attribute.html")
     SET_STAGE_ENABLED(true)
 
@@ -130,11 +130,11 @@ private:
     AttributeFilter& operator=(const AttributeFilter&); // not implemented
     AttributeFilter(const AttributeFilter&); // not implemented
 
-    typedef boost::shared_ptr<void> OGRDSPtr;
+    typedef std::shared_ptr<void> OGRDSPtr;
 
     AttributeInfoMap m_dimensions;
     GEOSContextHandle_t m_geosEnvironment;
-    boost::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
+    std::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
     void UpdateGEOSBuffer(PointBuffer& buffer, AttributeInfo& info);
 
 };

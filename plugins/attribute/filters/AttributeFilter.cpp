@@ -33,6 +33,9 @@
 ****************************************************************************/
 
 #include "AttributeFilter.hpp"
+
+#include <memory>
+
 #include <pdal/GlobalEnvironment.hpp>
 
 #include <pdal/StageFactory.hpp>
@@ -147,7 +150,7 @@ void AttributeFilter::processOptions(const Options& options)
 
 void AttributeFilter::ready(PointContext ctx)
 {
-    m_gdal_debug = boost::shared_ptr<pdal::gdal::Debug>(
+    m_gdal_debug = std::shared_ptr<pdal::gdal::Debug>(
         new pdal::gdal::Debug(isDebug(), log()));
 
     for (auto& dim_par: m_dimensions)

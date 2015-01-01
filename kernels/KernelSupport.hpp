@@ -73,7 +73,7 @@ public:
     // makes a writer, from just the filename and some other
     // options (and the input stage)
     static Writer* makeWriter(const std::string& filename, Stage *stage);
-    static PipelineManager* makePipeline(Options& options);
+    static PipelineManager* makePipeline(const std::string& filename);
 
 private:
     KernelSupport& operator=(const KernelSupport&); // not implemented

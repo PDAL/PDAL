@@ -41,6 +41,10 @@
 namespace pdal
 {
 
+class Filter;
+
+typedef std::unique_ptr<Filter> FilterPtr;
+
 //
 // supported options:
 //   <uint32>id

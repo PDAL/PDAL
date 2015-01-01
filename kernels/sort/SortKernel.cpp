@@ -128,8 +128,7 @@ int SortKernel::execute()
     sortOptions.add<uint32_t>("verbose", getVerboseLevel());
 
     StageFactory f;
-    StageFactory::FilterCreator* fc = f.getFilterCreator("filters.mortonorder");
-    Stage* sortStage = fc();
+    Filter* sortStage = f.createFilter("filters.mortonorder");
     sortStage->setInput(&bufferReader);
     sortStage->setOptions(sortOptions);
 
@@ -147,7 +146,7 @@ int SortKernel::execute()
         cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
         (UserCallback *)new HeartbeatCallback();
 
-    std::unique_ptr<Writer> writer(KernelSupport::makeWriter(m_outputFile, sortStage));
+    WriterPtr writer(KernelSupport::makeWriter(m_outputFile, sortStage));
 
     // Some options are inferred by makeWriter based on filename
     // (compression, driver type, etc).

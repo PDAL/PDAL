@@ -90,10 +90,10 @@ Stage* RandomKernel::makeReader(Options readerOptions)
     }
 
     StageFactory factory;
-    Stage* reader_stage = factory.createReader("readers.faux");
+    ReaderPtr reader_stage(factory.createReader("readers.faux"));
     reader_stage->setOptions(readerOptions);
 
-    return reader_stage;
+    return reader_stage.get();
 }
 
 int RandomKernel::execute()

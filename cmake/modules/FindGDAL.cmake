@@ -85,7 +85,6 @@ MACRO(COMPARE_VERSION_STRINGS a_in b_in result_out)
   SET(${result_out} ${result})
 ENDMACRO(COMPARE_VERSION_STRINGS)
 
-MESSAGE(STATUS "Searching for GDAL ${GDAL_FIND_VERSION}+ library")
 set (GDAL_VERSION_COUNT 3)
 
 SET(GDAL_NAMES gdal)
@@ -195,15 +194,12 @@ ELSEIF(UNIX)
         
         # Check for GDAL version
         if (GDAL_FIND_VERSION)
-        COMPARE_VERSION_STRINGS( "${GDAL_VERSION_STATED}" "${GDAL_FIND_VERSION}" version_result)
-        IF (version_result LESS 0)
-            MESSAGE (FATAL_ERROR "GDAL version is too old (${GDAL_VERSION_STATED}). Use ${GDAL_FIND_VERSION} or higher requested.")
-        else()
-            MESSAGE(STATUS "Found acceptable GDAL version ${GDAL_VERSION_STATED}")
+            COMPARE_VERSION_STRINGS( "${GDAL_VERSION_STATED}" "${GDAL_FIND_VERSION}" version_result)
+            IF (version_result LESS 0)
+                MESSAGE (FATAL_ERROR "GDAL version is too old (${GDAL_VERSION_STATED}). Use ${GDAL_FIND_VERSION} or higher requested.")
+            ENDIF()
             set (GDAL_VERSION_STRING ${GDAL_VERSION_STATED})
-            # set (GDAL_VERSION "1.6")
             set (GDAL_VERSION_COMPATIBLE true)
-        ENDIF()
         endif()
 
         set (GDAL_FOUND TRUE)

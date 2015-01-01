@@ -47,65 +47,55 @@ TEST(SplitterTest, test_tile_filter)
     // create the reader
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
-    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
-    if (rc)
+    ReaderPtr r(f.createReader("readers.las"));
+    EXPECT_TRUE(r.get());
+    r->setOptions(ops1);
+
+    Options o;
+    Option length("length", 1000, "length");
+    o.add(length);
+
+    // create the tile filter and prepare
+    FilterPtr s(f.createFilter("filters.splitter"));
+    EXPECT_TRUE(s.get());
+    s->setOptions(o);
+    s->setInput(r.get());
+
+    PointContext ctx;
+    PointBufferPtr buf(new PointBuffer(ctx));
+    s->prepare(ctx);
+
+    StageTester::ready(r.get(), ctx);
+    PointBufferSet pbSet = StageTester::run(r.get(), buf);
+    StageTester::done(r.get(), ctx);
+    EXPECT_EQ(pbSet.size(), 1u);
+    buf = *pbSet.begin();
+
+    StageTester::ready(s.get(), ctx);
+    pbSet = StageTester::run(s.get(), buf);
+    StageTester::done(s.get(), ctx);
+
+    std::vector<PointBufferPtr> buffers;
+    for (auto it = pbSet.begin(); it != pbSet.end(); ++it)
+        buffers.push_back(*it);
+
+    auto sorter = [](PointBufferPtr p1, PointBufferPtr p2)
     {
-        EXPECT_TRUE(rc);
+        BOX3D b1 = p1->calculateBounds();
+        BOX3D b2 = p2->calculateBounds();
 
-        Stage* r = rc();
-        r->setOptions(ops1);
+        return b1.minx < b2.minx ?  true :
+            b1.minx > b2.minx ? false :
+            b1.miny < b2.miny;
+    };
+    std::sort(buffers.begin(), buffers.end(), sorter);
 
-        Options o;
-        Option length("length", 1000, "length");
-        o.add(length);
-
-        // create the tile filter and prepare
-        StageFactory::FilterCreator* fc = f.getFilterCreator("filters.splitter");
-        if (fc)
-        {
-            EXPECT_TRUE(fc);
-
-            Stage* s = fc();
-            s->setOptions(o);
-            s->setInput(r);
-
-            PointContext ctx;
-            PointBufferPtr buf(new PointBuffer(ctx));
-            s->prepare(ctx);
-
-            StageTester::ready(r, ctx);
-            PointBufferSet pbSet = StageTester::run(r, buf);
-            StageTester::done(r, ctx);
-            EXPECT_EQ(pbSet.size(), 1u);
-            buf = *pbSet.begin();
-
-            StageTester::ready(s, ctx);
-            pbSet = StageTester::run(s, buf);
-            StageTester::done(s, ctx);
-
-            std::vector<PointBufferPtr> buffers;
-            for (auto it = pbSet.begin(); it != pbSet.end(); ++it)
-                buffers.push_back(*it);
-
-            auto sorter = [](PointBufferPtr p1, PointBufferPtr p2)
-            {
-                BOX3D b1 = p1->calculateBounds();
-                BOX3D b2 = p2->calculateBounds();
-
-                return b1.minx < b2.minx ?  true :
-                    b1.minx > b2.minx ? false :
-                    b1.miny < b2.miny;
-            };
-            std::sort(buffers.begin(), buffers.end(), sorter);
-
-            EXPECT_EQ(buffers.size(), 15u);
-            size_t counts[] = {24, 27, 26, 27, 10, 166, 142, 76, 141, 132, 63, 70, 67,
-                34, 60 };
-            for (size_t i = 0; i < buffers.size(); ++i)
-            {
-                PointBufferPtr& buf = buffers[i];
-                EXPECT_EQ(buf->size(), counts[i]);
-            }
-        }
+    EXPECT_EQ(buffers.size(), 15u);
+    size_t counts[] = {24, 27, 26, 27, 10, 166, 142, 76, 141, 132, 63, 70, 67,
+        34, 60 };
+    for (size_t i = 0; i < buffers.size(); ++i)
+    {
+        PointBufferPtr& buf = buffers[i];
+        EXPECT_EQ(buf->size(), counts[i]);
     }
 }

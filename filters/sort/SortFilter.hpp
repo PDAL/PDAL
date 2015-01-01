@@ -43,7 +43,7 @@ namespace pdal
 class PDAL_DLL SortFilter : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.sort", "Sort Filter")
+    SET_STAGE_NAME("filters.sort", "Sort data based on a given dimension.")
     SET_STAGE_LINK("http://www.pdal.io/stages/filters.sort.html")
     SET_STAGE_ENABLED(true)
 
@@ -71,6 +71,7 @@ private:
             { return p1.compare(m_dim, p2); };
 
         std::sort(buf.begin(), buf.end(), cmp);
+//        buf.resetTemps();
     }
 
     SortFilter& operator=(const SortFilter&); // not implemented

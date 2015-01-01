@@ -134,3 +134,113 @@ TEST(UtilsTest, test_base64)
     EXPECT_EQ(decoded.size(), data.size());
     EXPECT_EQ(size, begin_size);
 }
+
+TEST(UtilsTest, split)
+{
+    std::vector<std::string> result;
+
+    std::string input("This is a test");
+    auto pred = [](char c)
+        { return c == ' '; };
+
+    result = Utils::split(input, pred);
+    EXPECT_EQ(result.size(), 4U);
+    EXPECT_EQ(result[0], "This");
+    EXPECT_EQ(result[1], "is");
+    EXPECT_EQ(result[2], "a");
+    EXPECT_EQ(result[3], "test");
+
+    input = "  This  is a test  ";
+
+    result = Utils::split(input, pred);
+    EXPECT_EQ(result.size(), 9U);
+    EXPECT_EQ(result[0], "");
+    EXPECT_EQ(result[1], "");
+    EXPECT_EQ(result[2], "This");
+    EXPECT_EQ(result[3], "");
+    EXPECT_EQ(result[4], "is");
+    EXPECT_EQ(result[5], "a");
+    EXPECT_EQ(result[6], "test");
+    EXPECT_EQ(result[7], "");
+    EXPECT_EQ(result[8], "");
+}
+
+TEST(UtilsTest, splitChar)
+{
+    std::vector<std::string> result;
+
+    std::string input("This is a test");
+
+    result = Utils::split(input, ' ');
+    EXPECT_EQ(result.size(), 4U);
+    EXPECT_EQ(result[0], "This");
+    EXPECT_EQ(result[1], "is");
+    EXPECT_EQ(result[2], "a");
+    EXPECT_EQ(result[3], "test");
+
+    input = "  This  is a test  ";
+
+    result = Utils::split(input, ' ');
+    EXPECT_EQ(result.size(), 9U);
+    EXPECT_EQ(result[0], "");
+    EXPECT_EQ(result[1], "");
+    EXPECT_EQ(result[2], "This");
+    EXPECT_EQ(result[3], "");
+    EXPECT_EQ(result[4], "is");
+    EXPECT_EQ(result[5], "a");
+    EXPECT_EQ(result[6], "test");
+    EXPECT_EQ(result[7], "");
+    EXPECT_EQ(result[8], "");
+}
+
+TEST(UtilsTest, split2)
+{
+    std::vector<std::string> result;
+
+    std::string input("This is a test");
+    auto pred = [](char c)
+        { return c == ' '; };
+
+    result = Utils::split2(input, pred);
+    EXPECT_EQ(result.size(), 4U);
+    EXPECT_EQ(result[0], "This");
+    EXPECT_EQ(result[1], "is");
+    EXPECT_EQ(result[2], "a");
+    EXPECT_EQ(result[3], "test");
+
+    input = "  This  is a test  ";
+
+    result = Utils::split2(input, pred);
+    EXPECT_EQ(result.size(), 4U);
+    EXPECT_EQ(result[0], "This");
+    EXPECT_EQ(result[1], "is");
+    EXPECT_EQ(result[2], "a");
+    EXPECT_EQ(result[3], "test");
+
+    auto pred2 = [](char c)
+        { return c == ' ' || c == ','; };
+
+    input = " , This,is ,a test , ";
+
+    result = Utils::split2(input, pred2);
+    EXPECT_EQ(result.size(), 4U);
+    EXPECT_EQ(result[0], "This");
+    EXPECT_EQ(result[1], "is");
+    EXPECT_EQ(result[2], "a");
+    EXPECT_EQ(result[3], "test");
+}
+
+TEST(UtilsTest, split2Char)
+{
+    std::vector<std::string> result;
+
+    std::string input(",,This,is,,a,test,,,");
+
+    result = Utils::split2(input, ',');
+    EXPECT_EQ(result.size(), 4U);
+    EXPECT_EQ(result[0], "This");
+    EXPECT_EQ(result[1], "is");
+    EXPECT_EQ(result[2], "a");
+    EXPECT_EQ(result[3], "test");
+}
+

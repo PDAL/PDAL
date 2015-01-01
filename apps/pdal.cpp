@@ -47,30 +47,29 @@ std::string headline("----------------------------------------------------------
 void outputVersion()
 {
     KernelFactory f;
-
+    std::map<std::string, KernelInfo> const& kernels = f.getKernelInfos();
     std::cout << headline << std::endl;
     std::cout << "pdal " << "(" << GetFullVersionString() << ")" << std::endl;
-    std::cout << headline << std::endl;
-    std::cout << "  available actions: " << std::endl;
-    std::cout << "     - delta" << std::endl;
-    std::cout << "     - diff" << std::endl;
-    if (f.getKernelCreator("kernels.ground"))
-        std::cout << "     - ground" << std::endl;
-    std::cout << "     - info" << std::endl;
-    if (f.getKernelCreator("kernels.pcl"))
-        std::cout << "     - pcl" << std::endl;
-    std::cout << "     - pipeline" << std::endl;
-    std::cout << "     - random" << std::endl;
-    std::cout << "     - sort" << std::endl;
-    if (f.getKernelCreator("kernels.smooth"))
-        std::cout << "     - smooth" << std::endl;
-    std::cout << "     - translate" << std::endl;
-    if (f.getKernelCreator("kernels.view"))
-        std::cout << "     - view" << std::endl;
-    std::cout << std::endl;
+    for (auto i = kernels.begin(); i != kernels.end(); ++i)
+        std::cout << "    - " << i->second.getName() << std::endl;
     std::cout << "See http://pdal.io/apps.html for more detail";
-    
     std::cout << std::endl;
+}
+
+void outputDrivers()
+{
+    pdal::StageFactory factory;
+    std::map<std::string, pdal::StageInfo> const& drivers = factory.getStageInfos();
+    std::string headline("------------------------------------------------------------------------------------------");
+
+    std::cout << headline << std::endl;
+    std::cout << "PDAL Drivers" << " (" << pdal::GetFullVersionString() << ")" <<std::endl;
+    std::cout << headline << std::endl << std::endl;
+
+    for (auto i = drivers.begin(); i != drivers.end(); ++i)
+    {
+        std::cout << i->second.toRST() << std::endl;
+    }
 }
 
 
@@ -89,7 +88,7 @@ int main(int argc, char* argv[])
         ("version", po::value<bool>()->zero_tokens()->implicit_value(true), "Show version info")
         ("help,h", po::value<bool>()->zero_tokens()->implicit_value(true), "Print help message")
             ;
-        
+
     if (argc < 2)
     {
         std::cerr << "Action not specified!" << std::endl << std::endl;
@@ -99,7 +98,7 @@ int main(int argc, char* argv[])
     try
     {
         po::store(po::command_line_parser(2, argv).
-            options(options).positional(positional).run(), 
+            options(options).positional(positional).run(),
             variables);
     }
     catch (boost::program_options::unknown_option& e)
@@ -117,8 +116,8 @@ int main(int argc, char* argv[])
 
     int count(argc - 1); // remove the 1st argument
     const char** args = const_cast<const char**>(&argv[1]);
-    
-    
+
+
     if (variables.count("version") || variables.count("help") || !variables.count("action"))
     {
         outputVersion();
@@ -127,70 +126,30 @@ int main(int argc, char* argv[])
 
     std::string action = variables["action"].as<std::string>();
 
-    if (boost::iequals(action, "translate"))
+    bool isValidKernel = false;
+    std::map<std::string, KernelInfo> const& kernels = f.getKernelInfos();
+    for (auto i = kernels.begin(); i != kernels.end(); ++i)
     {
-        std::unique_ptr<Kernel> app(f.createKernel("kernels.translate"));
-        return app->run(count, args, "translate");
+        if (boost::iequals(action, i->second.getName()))
+        {
+            isValidKernel = true;
+        }
+        if (boost::iequals(action, "debug"))
+        {
+            std::cerr << getPDALDebugInformation() << std::endl;
+            return 0;
+        }
+        if (boost::iequals(action, "drivers"))
+        {
+            outputDrivers() ;
+            return 0;
+        }
     }
 
-    if (boost::iequals(action, "info"))
+    if (isValidKernel)
     {
-        std::unique_ptr<Kernel> app(f.createKernel("kernels.info"));
-        return app->run(count, args, "info");
-    }
-
-    if (boost::iequals(action, "ground"))
-    {
-        std::unique_ptr<Kernel> app(f.createKernel("kernels.ground"));
-        return app->run(count, args, "ground");
-    }
-    
-    if (boost::iequals(action, "pcl"))
-    {
-        std::unique_ptr<Kernel> app(f.createKernel("kernels.pcl"));
-        return app->run(count, args, "pcl");
-    }
-
-    if (boost::iequals(action, "smooth"))
-    {
-        std::unique_ptr<Kernel> app(f.createKernel("kernels.smooth"));
-        return app->run(count, args, "smooth");
-    }
- 
-    if (boost::iequals(action, "view"))
-    {
-        std::unique_ptr<Kernel> app(f.createKernel("kernels.view"));
-        return app->run(count, args, "view");
-    }
-
-    if (boost::iequals(action, "sort"))
-    {
-        std::unique_ptr<Kernel> app(f.createKernel("kernels.sort"));
-        return app->run(count, args, "sort");
-    }
-
-    if (boost::iequals(action, "pipeline"))
-    {
-        std::unique_ptr<Kernel> app(f.createKernel("kernels.pipeline"));
-        return app->run(count, args, "pipeline");
-    }
-
-    if (boost::iequals(action, "delta"))
-    {
-        std::unique_ptr<Kernel> app(f.createKernel("kernels.delta"));
-        return app->run(count, args, "delta");
-    }
-    
-    if (boost::iequals(action, "diff"))
-    {
-        std::unique_ptr<Kernel> app(f.createKernel("kernels.diff"));
-        return app->run(count, args, "diff");
-    }
-
-    if (boost::iequals(action, "random"))
-    {
-        std::unique_ptr<Kernel> app(f.createKernel("kernels.random"));
-        return app->run(count, args, "random");
+        std::unique_ptr<Kernel> app(f.createKernel(action));
+        return app->run(count, args, action);
     }
 
     std::cerr << "Action '" << action <<"' not recognized" << std::endl << std::endl;

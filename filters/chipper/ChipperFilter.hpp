@@ -47,8 +47,6 @@
 #include <pdal/Bounds.hpp>
 #include <pdal/PointBuffer.hpp>
 
-#include <boost/scoped_ptr.hpp>
-
 namespace pdal
 {
 
@@ -135,8 +133,10 @@ private:
 
 class PDAL_DLL ChipperFilter : public pdal::Filter
 {
+#define CHIPPERDOCS "Organize points into spatially contiguous, squarish, and \n" \
+                    "non-overlapping chips."
 public:
-    SET_STAGE_NAME("filters.chipper", "Chipper Filter")
+    SET_STAGE_NAME("filters.chipper", CHIPPERDOCS)
     SET_STAGE_LINK("http://pdal.io/stages/filters.chipper.html")
     SET_STAGE_ENABLED(true)
 

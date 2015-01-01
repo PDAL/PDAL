@@ -37,8 +37,6 @@
 #include <pdal/pdal_internal.hpp>
 #include <pdal/StageFactory.hpp>
 
-#include <boost/shared_ptr.hpp>
-
 #include <vector>
 #include <string>
 
@@ -70,6 +68,7 @@ public:
     // return the pipeline reader endpoint (or NULL, if not a reader pipeline)
     Stage* getStage() const;
 
+    void prepare() const;
     point_count_t execute();
 
     // Get the resulting point buffers.

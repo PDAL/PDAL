@@ -59,7 +59,6 @@ namespace pdal
 //    --help / -h
 //    --verbose / -v
 //    --version
-//    --timer
 //
 class PDAL_DLL Kernel
 {
@@ -76,7 +75,6 @@ public:
 
 protected:
     // this is protected; your derived class ctor will be the public entry point
-    //Application(int argc, const char* argv[], const std::string& appName);
     Kernel();
 
 public:
@@ -136,7 +134,6 @@ protected:
 private:
     int innerRun();
     void parseSwitches();
-    void outputDrivers();
     void outputHelp();
     void outputVersion();
     void addBasicSwitchSet();
@@ -150,7 +147,6 @@ private:
     bool m_isDebug;
     uint32_t m_verboseLevel;
     bool m_showHelp;
-    bool m_showDrivers;
     std::string m_showOptions;
     bool m_showVersion;
     bool m_showTime;

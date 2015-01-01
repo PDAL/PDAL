@@ -65,34 +65,24 @@ TEST(OptionsTest, test_static_options)
     Options ops;
 
     StageFactory f;
-    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.faux");
-    if (rc)
+    ReaderPtr reader(f.createReader("readers.faux"));
+    EXPECT_TRUE(reader.get());
+    reader->setOptions(ops);
+    FilterPtr crop(f.createFilter("filters.crop"));
+    EXPECT_TRUE(crop.get());
+    crop->setOptions(ops);
+    crop->setInput(reader.get());
+    std::map<std::string, pdal::StageInfo> const& drivers = f.getStageInfos();
+    typedef std::map<std::string, pdal::StageInfo>::const_iterator Iterator;
+    Iterator i = drivers.find("filters.crop");
+    if (i != drivers.end())
     {
-        EXPECT_TRUE(rc);
-
-        Stage* reader = rc();
-        reader->setOptions(ops);
-        StageFactory::FilterCreator* fc = f.getFilterCreator("filters.crop");
-        if (fc)
-        {
-            EXPECT_TRUE(fc);
-
-            Stage* crop = fc();
-            crop->setOptions(ops);
-            crop->setInput(reader);
-            std::map<std::string, pdal::StageInfo> const& drivers = f.getStageInfos();
-            typedef std::map<std::string, pdal::StageInfo>::const_iterator Iterator;
-            Iterator i = drivers.find("filters.crop");
-            if (i != drivers.end())
-            {
-              const std::vector<Option> opts = i->second.getProvidedOptions();
-              EXPECT_EQ(opts.size(), 3u);
-              EXPECT_TRUE(hasOption(opts, "bounds"));
-              EXPECT_TRUE(hasOption(opts, "inside"));
-              EXPECT_TRUE(hasOption(opts, "polygon"));
-              EXPECT_FALSE(hasOption(opts, "metes"));
-            }
-        }
+      const std::vector<Option> opts = i->second.getProvidedOptions();
+      EXPECT_EQ(opts.size(), 3u);
+      EXPECT_TRUE(hasOption(opts, "bounds"));
+      EXPECT_TRUE(hasOption(opts, "inside"));
+      EXPECT_TRUE(hasOption(opts, "polygon"));
+      EXPECT_FALSE(hasOption(opts, "metes"));
     }
 }
 
@@ -106,7 +96,7 @@ TEST(OptionsTest, test_option_writing)
     const Option option_i("my_int", (uint16_t)17, "This is my integral option.");
     EXPECT_TRUE(option_i.getName() == "my_int");
     EXPECT_TRUE(option_i.getDescription() == "This is my integral option.");
-    EXPECT_TRUE(option_i.getValue<boost::uint16_t>() == 17);
+    EXPECT_TRUE(option_i.getValue<uint16_t>() == 17);
     EXPECT_TRUE(option_i.getValue<std::string>() == "17");
 
     const Option option_s("my_string", "Yow.", "This is my stringy option.");

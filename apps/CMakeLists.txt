@@ -37,21 +37,14 @@ set(PDAL_UTILITY pdal)
 # Configure build targets
 #------------------------------------------------------------------------------
 
-if(WIN32)
-    add_definitions("-DPDAL_DLL_EXPORT=1")
-endif()
-
 link_directories(${Boost_LIBRARY_DIRS})
 
-if(APPLE)
-    option(PDAL_BUNDLE "Create PDAL as Application Bundle on OSX" FALSE)
-    set(PDAL_APP_BUNDLE 1)
-endif()
-
 if(PDAL_UTILITY)
-    set(srcs
-        pdal.cpp
-    )
+    set(srcs pdal.cpp)
+
+    if(WIN32)
+        list(APPEND srcs ${PDAL_TARGET_OBJECTS})
+    endif()
 
     list(APPEND PDAL_UTILITIES ${PDAL_UTILITY})
     if (APPLE AND PDAL_BUNDLE)
@@ -59,7 +52,7 @@ if(PDAL_UTILITY)
     else (APPLE AND PDAL_BUNDLE)
         add_executable(${PDAL_UTILITY} ${srcs})
     endif(APPLE AND PDAL_BUNDLE)
-    target_link_libraries(${PDAL_UTILITY} ${PDAL_LINKAGE} ${PDAL_LIB_NAME})
+    target_link_libraries(${PDAL_UTILITY} ${PDAL_LIB_NAME})
 endif()
 
 #------------------------------------------------------------------------------

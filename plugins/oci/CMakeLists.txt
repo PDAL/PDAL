@@ -20,50 +20,50 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/io/sbet
     ${PROJECT_SOURCE_DIR}/io/text
 )
+
 #
 # OCI Reader
 #
 set(srcs
-io/OciCommon.cpp
-io/OciReader.cpp
-io/OciWrapper.cpp
+    io/OciCommon.cpp
+    io/OciReader.cpp
+    io/OciWrapper.cpp
 )
 
 set(incs
-io/OciCommon.hpp
-io/OciReader.hpp
-io/OciWrapper.h
+    io/OciCommon.hpp
+    io/OciReader.hpp
+    io/OciWrapper.h
 )
 
-set(deps ${ORACLE_LIBRARY})
-PDAL_ADD_PLUGIN(oci_reader_lib_name reader oci "${srcs}" "${incs}" "${deps}")
+PDAL_ADD_PLUGIN(reader_libname reader oci
+    FILES "${srcs}" "${incs}"
+    LINK_WITH ${ORACLE_LIBRARY})
 
 #
 # OCI Writer
 #
 set(srcs
-io/OciCommon.cpp
-io/OciWrapper.cpp
-io/OciWriter.cpp
+    io/OciCommon.cpp
+    io/OciWrapper.cpp
+    io/OciWriter.cpp
 )
 
 set(incs
-io/OciCommon.hpp
-io/OciWrapper.h
-io/OciWriter.hpp
+    io/OciCommon.hpp
+    io/OciWrapper.h
+    io/OciWriter.hpp
 )
 
-set(deps ${ORACLE_LIBRARY})
-PDAL_ADD_PLUGIN(oci_writer_lib_name writer oci "${srcs}" "${incs}" "${deps}")
+PDAL_ADD_PLUGIN(writer_libname writer oci
+    FILES "${srcs}" "${incs}"
+    LINK_WITH ${ORACLE_LIBRARY})
 
 #
 # OCI tests
 #
 if(BUILD_OCI_TESTS)
-    set(srcs
-        test/OCITest.cpp
-    )
-
-    set(deps ${oci_reader_lib_name} ${oci_writer_lib_name})
-    PDAL_ADD_TEST(ocitest "${srcs}" "${deps}")
+    PDAL_ADD_TEST(ocitest
+        FILES test/OCITest.cpp
+        LINK_WITH ${reader_libname} ${writer_libname})
 endif()

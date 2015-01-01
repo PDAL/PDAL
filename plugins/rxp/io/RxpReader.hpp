@@ -41,6 +41,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include <riegl/scanlib.hpp>
 
 #include <pdal/PointBuffer.hpp>

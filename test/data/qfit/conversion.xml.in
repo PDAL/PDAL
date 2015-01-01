@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="writers.las">
+        <Option name="filename">
+            @CMAKE_SOURCE_DIR@/test/temp/out2.las
+        </Option>
+        <Option name="debug">
+            true
+        </Option>
+        <Reader type="readers.qfit">
+            <Option name="filename">
+                @CMAKE_SOURCE_DIR@/test/data/qfit/14-word.qi
+            </Option>
+            <Option name="debug">
+                true
+            </Option>
+            <Option name="verbose">
+                1
+            </Option>
+            <Option name="flip_coordinates">
+                true
+            </Option>
+            <Option name="scale_z">
+                0.001
+            </Option>
+            <Option name="spatialreference">
+                EPSG:4269+3855
+            </Option>
+            <Option name="log">
+                stdlog
+            </Option>
+        </Reader>
+    </Writer>
+</Pipeline>

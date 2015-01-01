@@ -191,8 +191,6 @@ BOX3D CropFilter::computeBounds(GEOSGeometry const *geometry)
             GEOSCoordSeq_getOrdinate_r(m_geosEnvironment, coords, i, 2, &z);
         output.grow(x, y, z);
     }
-#else
-    boost::ignore_unused_variable_warning(geometry);
 #endif
     return output;
 }

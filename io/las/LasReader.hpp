@@ -48,11 +48,14 @@ class NitfReader;
 class LasHeader;
 class PointDimensions;
 
+#define LASREADERDOCS "ASPRS LAS 1.0 - 1.4 read support. LASzip support is also \n" \
+                      "enabled through this driver if LASzip was found diring \n" \
+                      "compilation."
 class PDAL_DLL LasReader : public pdal::Reader
 {
     friend class NitfReader;
 public:
-    SET_STAGE_NAME("readers.las", "Las Reader")
+    SET_STAGE_NAME("readers.las", LASREADERDOCS)
     SET_STAGE_LINK("http://pdal.io/stages/readers.las.html")
     SET_STAGE_ENABLED(true)
 

@@ -42,7 +42,7 @@ namespace pdal
 class PDAL_DLL SplitterFilter : public pdal::Filter
 {
 public:
-    SET_STAGE_NAME("filters.splitter", "Splitter")
+    SET_STAGE_NAME("filters.splitter", "Split data based on a X/Y box length.")
     SET_STAGE_LINK("http://pdal.io/stages/filters.splitter.html")
     SET_STAGE_ENABLED(true)
 

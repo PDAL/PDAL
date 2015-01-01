@@ -194,8 +194,6 @@ namespace Utils
     // aid to operator>> parsers
     PDAL_DLL void eatwhitespace(std::istream& s);
     PDAL_DLL void removeTrailingBlanks(std::string& s);
-
-    // aid to operator>> parsers
     // if char found, eats it and returns true; otherwise, don't eat it and
     // then return false
     PDAL_DLL bool eatcharacter(std::istream& s, char x);
@@ -218,6 +216,72 @@ namespace Utils
         std::vector<std::string>& outputString, unsigned int lineLength);
     PDAL_DLL std::string escapeJSON(const std::string &s);
     PDAL_DLL std::string demangle(const std::string& s);
+
+    /// Split a string into substrings.  Characters matching the predicate are
+    ///   discarded.
+    /// \param[in] s  String to split.
+    /// \param[in] p  Predicate returns true if a char in a string is a split
+    ///   location.
+    /// \return  Vector of substrings.
+    template<typename PREDICATE>
+    PDAL_DLL std::vector<std::string> split(const std::string& s, PREDICATE p)
+    {
+        std::vector<std::string> result;
+
+        if (s.empty())
+            return result;
+
+        auto it = s.begin();
+        decltype(it) endIt;
+        do
+        {
+            endIt = std::find_if(it, s.end(), p);
+            result.push_back(std::string(it, endIt));
+            it = endIt + 1;
+        } while (endIt != s.end());
+        return result;
+    }
+
+    /// Split a string into substrings.  Characters matching the predicate are
+    ///   discarded, as are empty strings produced by split().
+    /// \param[in] s  String to split.
+    /// \param[in] p  Predicate returns true if a char in a string is a split
+    ///   location.
+    /// \return  Vector of substrings.
+    template<typename PREDICATE>
+    PDAL_DLL std::vector<std::string> split2(const std::string& s, PREDICATE p)
+    {
+        std::vector<std::string> result;
+
+        if (s.empty())
+            return result;
+
+        auto it = s.begin();
+        decltype(it) endIt;
+        do
+        {
+            endIt = std::find_if(it, s.end(), p);
+            if (it != endIt)
+                result.push_back(std::string(it, endIt));
+            it = endIt + 1;
+        } while (endIt != s.end());
+        return result;
+    }
+
+    inline PDAL_DLL std::vector<std::string>
+    split(const std::string& s, char tChar)
+    {
+        auto pred = [tChar](char c){ return(c == tChar); };
+        return split(s, pred);
+    }
+
+
+    inline PDAL_DLL std::vector<std::string>
+    split2(const std::string& s, char tChar)
+    {
+        auto pred = [tChar](char c){ return(c == tChar); };
+        return split2(s, pred);
+    }
 
     template<typename T>
     std::string typeidName()

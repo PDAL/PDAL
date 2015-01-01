@@ -46,7 +46,7 @@ TEST(FerryFilterTest, test_ferry_copy)
 {
     PipelineManager mgr;
     PipelineReader specReader(mgr);
-    specReader.readPipeline(Support::datapath("filters/ferry.xml"));
+    specReader.readPipeline(Support::configuredpath("filters/ferry.xml"));
 
     Stage *stage = mgr.getStage();
     mgr.execute();
@@ -78,35 +78,25 @@ TEST(FerryFilterTest, test_ferry_invalid)
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
     StageFactory f;
-    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
-    if (rc)
-    {
-        EXPECT_TRUE(rc);
+    ReaderPtr reader(f.createReader("readers.las"));
+    EXPECT_TRUE(reader.get());
+    reader->setOptions(ops1);
 
-        Stage* reader = rc();
-        reader->setOptions(ops1);
+    Options options;
 
-        Options options;
+    Option x("dimension", "X", "");
+    Option toX("to","X", "");
+    Options xO;
+    xO.add(toX);
+    x.setOptions(xO);
+    options.add(x);
 
-        Option x("dimension", "X", "");
-        Option toX("to","X", "");
-        Options xO;
-        xO.add(toX);
-        x.setOptions(xO);
-        options.add(x);
+    FilterPtr ferry(f.createFilter("filters.ferry"));
+    EXPECT_TRUE(ferry.get());
+    ferry->setInput(reader.get());
+    ferry->setOptions(options);
 
-        StageFactory::FilterCreator* fc = f.getFilterCreator("filters.ferry");
-        if (fc)
-        {
-            EXPECT_TRUE(fc);
+    PointContext ctx;
 
-            Stage* ferry = fc();
-            ferry->setInput(reader);
-            ferry->setOptions(options);
-
-            PointContext ctx;
-
-            EXPECT_THROW(ferry->prepare(ctx), pdal_error );
-        }
-    }
+    EXPECT_THROW(ferry->prepare(ctx), pdal_error );
 }

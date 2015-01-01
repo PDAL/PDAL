@@ -36,7 +36,7 @@
 
 #include <pdal/Filter.hpp>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace pdal
 {
@@ -49,7 +49,7 @@ class Debug;
 class PDAL_DLL ReprojectionFilter : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.reprojection", "Reprojection Filter")
+    SET_STAGE_NAME("filters.reprojection", "Reproject data using GDAL from one coordinate system to another.")
     SET_STAGE_LINK("http://www.pdal.io/stages/filters.reprojection.html")
     SET_STAGE_ENABLED(true)
 
@@ -69,12 +69,12 @@ private:
     SpatialReference m_outSRS;
     bool m_inferInputSRS;
 
-    typedef boost::shared_ptr<void> ReferencePtr;
-    typedef boost::shared_ptr<void> TransformPtr;
+    typedef std::shared_ptr<void> ReferencePtr;
+    typedef std::shared_ptr<void> TransformPtr;
     ReferencePtr m_in_ref_ptr;
     ReferencePtr m_out_ref_ptr;
     TransformPtr m_transform_ptr;
-    boost::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
+    std::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
 
     ReprojectionFilter& operator=(const ReprojectionFilter&); // not implemented
     ReprojectionFilter(const ReprojectionFilter&); // not implemented

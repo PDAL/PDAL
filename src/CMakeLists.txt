@@ -19,6 +19,23 @@ set(PDAL_HEADERS_DIR "${PROJECT_SOURCE_DIR}/include/pdal")
 set(PDAL_HPP "")
 set(PDAL_CPP "")
 
+set(PDAL_KERNEL_PATH kernel)
+set(PDAL_KERNEL_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_KERNEL_PATH}")
+set(PDAL_KERNEL_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_KERNEL_PATH}")
+
+if (PDAL_HAVE_LIBXML2)
+    set(PDAL_XML_HEADER ${PDAL_HEADERS_DIR}/XMLSchema.hpp)
+    set(DB_DRIVER_HEADERS
+        "${PDAL_HEADERS_DIR}/DbReader.hpp"
+        "${PDAL_HEADERS_DIR}/DbWriter.hpp"
+    )
+    set(PDAL_XML_SRC XMLSchema.cpp)
+    set(DB_DRIVER_SRCS
+        DbReader.cpp
+        DbWriter.cpp
+    )
+endif()
+
 #
 # base
 #
@@ -60,17 +77,14 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/UserCallback.hpp"
   "${PDAL_HEADERS_DIR}/Utils.hpp"
   "${PDAL_HEADERS_DIR}/Writer.hpp"
-  "${PDAL_HEADERS_DIR}/XMLSchema.hpp"
   "${PDAL_HEADERS_DIR}/third/nanoflann.hpp"
   "${PDAL_HEADERS_DIR}/third/md5-pdal.h"
   "${PDAL_HEADERS_DIR}/third/string_ref.hpp"
   "${PDAL_HEADERS_DIR}/third/string_ref_fwd.hpp"
   "${PDAL_HEADERS_DIR}/Kernels.hpp"
+    ${PDAL_XML_HEADER}
+    ${DB_DRIVER_HEADERS}
 )
-
-if (PDAL_HAVE_LIBXML2)
-  SET (PDAL_XML_SRC XMLSchema.cpp)
-endif()
 
 set(PDAL_BASE_CPP
   Bounds.cpp
@@ -82,7 +96,6 @@ set(PDAL_BASE_CPP
   GlobalEnvironment.cpp
   KDIndex.cpp
   Log.cpp
-  Metadata.cpp
   Options.cpp
   PDALUtils.cpp
   PipelineManager.cpp
@@ -101,6 +114,7 @@ set(PDAL_BASE_CPP
   third/md5-pdal.c
   ${PDAL_XML_SRC}
   ${PDAL_LAZPERF_SRC}
+  ${DB_DRIVER_SRCS}
 )
 
 list (APPEND PDAL_CPP ${PDAL_BASE_CPP} )
@@ -113,25 +127,6 @@ list (APPEND PDAL_HPP ${PDAL_BASE_HPP} )
 set(PDAL_FILTERS_PATH filters)
 set(PDAL_FILTERS_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_FILTERS_PATH}")
 set(PDAL_FILTERS_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_FILTERS_PATH}")
-
-#
-# Core components that depend on Python
-#
-set(PDAL_PYTHON_HPP
-    ${PDAL_FILTERS_HEADERS}/Predicate.hpp
-    ${PDAL_FILTERS_HEADERS}/Programmable.hpp
-    )
-
-set(PDAL_PYTHON_CPP
-    ${PDAL_FILTERS_SRC}/Predicate.cpp
-    ${PDAL_FILTERS_SRC}/Programmable.cpp
-    )
-
-if (WITH_PYTHON)
-    list(APPEND PDAL_HPP ${PDAL_PYTHON_HPP})
-    list(APPEND PDAL_CPP ${PDAL_PYTHON_CPP})
-endif (WITH_PYTHON)
-
 
 #
 # plang parser
@@ -183,17 +178,17 @@ list (APPEND PDAL_HPP ${PDAL_CONFIG_HPP} )
 # Group source files for IDE source explorers (e.g. Visual Studio)
 #
 
-source_group("CMake Files" FILES CMakeLists.txt)
+#source_group("CMake Files" FILES CMakeLists.txt)
 
-source_group("Header Files" FILES ${PDAL_BASE_HPP})
-source_group("Header Files\\config" FILES ${PDAL_CONFIG_HPP})
-source_group("Header Files\\filters" FILES ${PDAL_FILTERS_HPP})
-source_group("Header Files\\plang" FILES ${PDAL_PLANG_HPP})
+#source_group("Header Files" FILES ${PDAL_BASE_HPP})
+#source_group("Header Files\\config" FILES ${PDAL_CONFIG_HPP})
+#source_group("Header Files\\filters" FILES ${PDAL_FILTERS_HPP})
+#source_group("Header Files\\plang" FILES ${PDAL_PLANG_HPP})
 
-source_group("Source Files" FILES ${PDAL_BASE_CPP})
-source_group("Source Files\\config" FILES ${PDAL_CONFIG_CPP})
-source_group("Source Files\\filters" FILES ${PDAL_FILTERS_CPP})
-source_group("Source Files\\plang" FILES ${PDAL_PLANG_CPP})
+#source_group("Source Files" FILES ${PDAL_BASE_CPP})
+#source_group("Source Files\\config" FILES ${PDAL_CONFIG_CPP})
+#source_group("Source Files\\filters" FILES ${PDAL_FILTERS_CPP})
+#source_group("Source Files\\plang" FILES ${PDAL_PLANG_CPP})
 
 
 # Standard include directory of PDAL library
@@ -241,7 +236,6 @@ set(PDAL_SOURCES
 #endif()
 
 if(WIN32)
-    add_definitions("-DPDAL_DLL_EXPORT=1")
     if (NOT WITH_STATIC_LASZIP)
         add_definitions("-DLASZIP_DLL_IMPORT=1")
     endif()
@@ -250,35 +244,29 @@ endif()
 PDAL_ADD_LIBRARY(${PDAL_LIB_NAME} ${PDAL_SOURCES})
 
 if (WITH_LASZIP)
-    target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} "${LASZIP_LIBRARY}")
+    target_link_libraries(${PDAL_LIB_NAME} ${LASZIP_LIBRARY})
 endif()
 
 if (WITH_PYTHON)
-    target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} "${PYTHON_LIBRARY}")
+    target_link_libraries(${PDAL_LIB_NAME} ${PYTHON_LIBRARY})
 endif()
 
 if (WITH_LIBXML2)
-    target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE} ${LIBXML2_LIBRARIES})
+    target_link_libraries(${PDAL_LIB_NAME} ${LIBXML2_LIBRARIES})
 endif()
 
-target_link_libraries(${PDAL_LIB_NAME} ${PDAL_LINKAGE}
-    "${CMAKE_THREAD_LIBS_INIT}"
-    "${CMAKE_DL_LIBS}"
-    "${GEOTIFF_LIBRARY}"
-    "${GDAL_LIBRARY}"
-    "${GEOS_LIBRARY}"
-    "${ZLIB_LIBRARIES}"
+target_link_libraries(${PDAL_LIB_NAME} 
+    ${CMAKE_THREAD_LIBS_INIT}
+    ${GEOTIFF_LIBRARY}
+    ${GDAL_LIBRARY}
+    ${GEOS_LIBRARY}
+    ${ZLIB_LIBRARIES}
 )
 
-message(STATUS "Using boost lib: ${Boost_LIBRARIES}")
-
-target_link_libraries(${PDAL_LIB_NAME}
-                       ${BOOST_LINKAGE} ${Boost_LIBRARIES})
-
+target_link_libraries(${PDAL_LIB_NAME} ${Boost_LIBRARIES})
 
 set_target_properties(${PDAL_LIB_NAME}
   PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
-
 
 ###############################################################################
 # Targets installation

@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<Pipeline version="1.0">
+  <Writer type="writers.text">
+    <Option name="delimiter">,</Option>
+    <Option name="write_header">false</Option>
+    <Option name="filename">@CMAKE_SOURCE_DIR@/test/temp/junk.txt</Option>
+    <Filter type="filters.colorization">
+      <Option name="raster">./autzen.tif</Option>
+      <Option name="dimension">Red<Options><Option name="band">1</Option><Option name="scale">1</Option></Options></Option>
+      <Option name="dimension">Green<Options><Option name="band">2</Option><Option name="scale">1</Option></Options></Option>
+      <Option name="dimension">Blue<Options><Option name="band">3</Option><Option name="scale">1</Option></Options></Option>
+      <Filter type="filters.decimation">
+        <Option name="step">2</Option>
+        <Option name="offset">1</Option>
+        <Reader type="readers.las">
+          <Option name="filename">@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las</Option>
+          <Option name="spatialreference">EPSG:2993</Option>
+        </Reader>
+      </Filter>
+    </Filter>
+  </Writer>
+</Pipeline>

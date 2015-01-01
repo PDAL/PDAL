@@ -44,7 +44,7 @@ namespace pdal
 class PDAL_DLL FerryFilter : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.ferry", "Data ferrying filter")
+    SET_STAGE_NAME("filters.ferry", "Copy data from one dimension to another.")
     SET_STAGE_LINK("http://pdal.io/stages/filters.ferry.html")
     SET_STAGE_ENABLED(true)
 

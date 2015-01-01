@@ -225,11 +225,10 @@ Stage* TranslateKernel::makeTranslate(Options translateOptions, Stage* reader_st
         {
             readerOptions.add("bounds", m_bounds);
             StageFactory f;
-            StageFactory::FilterCreator* fc = f.getFilterCreator("filters.crop");
-            Stage* crop_stage = fc();
+            FilterPtr crop_stage(f.createFilter("filters.crop"));
             crop_stage->setInput(next_stage);
             crop_stage->setOptions(readerOptions);
-            next_stage = crop_stage;
+            next_stage = crop_stage.get();
         }
         else if (m_bounds.empty() && !m_wkt.empty())
         {
@@ -251,19 +250,17 @@ Stage* TranslateKernel::makeTranslate(Options translateOptions, Stage* reader_st
             }
             readerOptions.add("polygon", m_wkt);
             StageFactory f;
-            StageFactory::FilterCreator* fc = f.getFilterCreator("filters.crop");
-            Stage* crop_stage = fc();
+            FilterPtr crop_stage(f.createFilter("filters.crop"));
             crop_stage->setInput(next_stage);
             crop_stage->setOptions(readerOptions);
-            next_stage = crop_stage;
+            next_stage = crop_stage.get();
         } else if (bHaveCrop)
         {
             StageFactory f;
-            StageFactory::FilterCreator* fc = f.getFilterCreator("filters.crop");
-            Stage* crop_stage = fc();
+            FilterPtr crop_stage(f.createFilter("filters.crop"));
             crop_stage->setInput(next_stage);
             crop_stage->setOptions(extra_opts.find("filters.crop")->second);
-            next_stage = crop_stage;
+            next_stage = crop_stage.get();
         }
         final_stage = next_stage;
     }
@@ -271,39 +268,29 @@ Stage* TranslateKernel::makeTranslate(Options translateOptions, Stage* reader_st
     if (boost::iequals(m_decimation_method, "VoxelGrid"))
     {
         StageFactory f;
-        StageFactory::FilterCreator* fc = f.getFilterCreator("filters.pclblock");
-        if (fc)
-        {
-            Stage* decimation_stage = fc();
-
-            Options decimationOptions;
-            std::ostringstream ss;
-            ss << "{";
-            ss << "  \"pipeline\": {";
-            ss << "    \"filters\": [{";
-            ss << "      \"name\": \"VoxelGrid\",";
-            ss << "      \"setLeafSize\": {";
-            ss << "        \"x\": " << m_decimation_leaf_size << ",";
-            ss << "        \"y\": " << m_decimation_leaf_size << ",";
-            ss << "        \"z\": " << m_decimation_leaf_size;
-            ss << "        }";
-            ss << "      }]";
-            ss << "    }";
-            ss << "}";
-            std::string json = ss.str();
-            decimationOptions.add<std::string>("json", json);
-            decimationOptions.add<bool>("debug", isDebug());
-            decimationOptions.add<uint32_t>("verbose", getVerboseLevel());
-            decimation_stage->setOptions(decimationOptions);
-            decimation_stage->setInput(final_stage);
-            final_stage = decimation_stage;
-        }
-        else
-        {
-            std::ostringstream oss;
-            oss << "Unable to create filter for type 'drivers.pclblock.filter'. Does a driver with this type name exist?";
-            throw pdal_error(oss.str());
-        }
+        FilterPtr decimation_stage(f.createFilter("filters.pclblock"));
+            
+        Options decimationOptions;
+        std::ostringstream ss;
+        ss << "{";
+        ss << "  \"pipeline\": {";
+        ss << "    \"filters\": [{";
+        ss << "      \"name\": \"VoxelGrid\",";
+        ss << "      \"setLeafSize\": {";
+        ss << "        \"x\": " << m_decimation_leaf_size << ",";
+        ss << "        \"y\": " << m_decimation_leaf_size << ",";
+        ss << "        \"z\": " << m_decimation_leaf_size;
+        ss << "        }";
+        ss << "      }]";
+        ss << "    }";
+        ss << "}";
+        std::string json = ss.str();
+        decimationOptions.add<std::string>("json", json);
+        decimationOptions.add<bool>("debug", isDebug());
+        decimationOptions.add<uint32_t>("verbose", getVerboseLevel());
+        decimation_stage->setOptions(decimationOptions);
+        decimation_stage->setInput(final_stage);
+        final_stage = decimation_stage.get();
     }
     else if (m_decimation_step > 1 || m_decimation_limit > 0)
     {
@@ -314,11 +301,10 @@ Stage* TranslateKernel::makeTranslate(Options translateOptions, Stage* reader_st
         decimationOptions.add("offset", m_decimation_offset);
         decimationOptions.add("limit", m_decimation_limit);
         StageFactory f;
-        StageFactory::FilterCreator* fc = f.getFilterCreator("filters.decimation");
-        Stage *decimation_stage = fc();
+        FilterPtr decimation_stage(f.createFilter("filters.decimation"));
         decimation_stage->setInput(final_stage);
         decimation_stage->setOptions(decimationOptions);
-        final_stage = decimation_stage;
+        final_stage = decimation_stage.get();
     }
 
     return final_stage;
@@ -370,7 +356,7 @@ int TranslateKernel::execute()
         cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
         (UserCallback *)new HeartbeatCallback();
 
-    std::unique_ptr<Writer> writer( KernelSupport::makeWriter(m_outputFile, finalStage));
+    WriterPtr writer( KernelSupport::makeWriter(m_outputFile, finalStage));
     if (!m_output_srs.empty())
         writer->setSpatialReference(m_output_srs);
 

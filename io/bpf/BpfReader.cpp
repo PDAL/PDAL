@@ -47,6 +47,9 @@ void BpfReader::processOptions(const Options&)
 {
     if (m_filename.empty())
         throw pdal_error("Can't read BPF file without filename.");
+
+    // Logfile doesn't get set until options are processed.
+    m_header.setLog(log());
 }
 
 

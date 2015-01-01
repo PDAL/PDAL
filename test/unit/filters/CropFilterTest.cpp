@@ -42,35 +42,17 @@
 
 using namespace pdal;
 
-namespace
-{
-using namespace std;
-
-Stage* getReader(string const& reader)
-{
-    StageFactory f;
-    StageFactory::ReaderCreator* rc = f.getReaderCreator(reader);
-    return rc ? rc() : NULL;
-}
-
-Stage* getFilter(string const& filter)
-{
-    StageFactory f;
-    StageFactory::FilterCreator* fc = f.getFilterCreator(filter);
-    return fc ? fc() : NULL;
-}
-
-}
-
 TEST(CropFilterTest, test_crop)
 {
+    StageFactory f;
+
     BOX3D srcBounds(0.0, 0.0, 0.0, 10.0, 100.0, 1000.0);
     Options opts;
     opts.add("bounds", srcBounds);
     opts.add("num_points", 1000);
     opts.add("mode", "ramp");
-    Stage* reader = getReader("readers.faux");
-    EXPECT_TRUE(reader);
+    ReaderPtr reader(f.createReader("readers.faux"));
+    EXPECT_TRUE(reader.get());
     reader->setOptions(opts);
 
     // crop the window to 1/3rd the size in each dimension
@@ -78,17 +60,16 @@ TEST(CropFilterTest, test_crop)
     Options cropOpts;
     cropOpts.add("bounds", dstBounds);
 
-    Stage* filter = getFilter("filters.crop");
-    EXPECT_TRUE(filter);
+    FilterPtr filter(f.createFilter("filters.crop"));
+    EXPECT_TRUE(filter.get());
     filter->setOptions(cropOpts);
-    filter->setInput(reader);
-    EXPECT_TRUE(filter->getDescription() == "Crop Filter");
+    filter->setInput(reader.get());
 
     Options statOpts;
 
     StatsFilter stats;
     stats.setOptions(statOpts);
-    stats.setInput(filter);
+    stats.setInput(filter.get());
 
     PointContext ctx;
     stats.prepare(ctx);
@@ -130,10 +111,12 @@ TEST(CropFilterTest, test_crop)
 TEST(CropFilterTest, test_crop_polygon)
 {
 #ifdef PDAL_HAVE_GEOS
+    StageFactory f;
+
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
-    Stage* reader = getReader("readers.las");
-    EXPECT_TRUE(reader);
+    ReaderPtr reader(f.createReader("readers.las"));
+    EXPECT_TRUE(reader.get());
     reader->setOptions(ops1);
 
     Options options;
@@ -153,9 +136,9 @@ TEST(CropFilterTest, test_crop_polygon)
     Option polygon("polygon", wkt, "");
     options.add(polygon);
 
-    Stage* crop = getFilter("filters.crop");
-    EXPECT_TRUE(crop);
-    crop->setInput(reader);
+    FilterPtr crop(f.createFilter("filters.crop"));
+    EXPECT_TRUE(crop.get());
+    crop->setInput(reader.get());
     crop->setOptions(options);
 
     PointContext ctx;
@@ -173,6 +156,8 @@ TEST(CropFilterTest, test_crop_polygon)
 TEST(CropFilterTest, test_crop_polygon_reprojection)
 {
 #ifdef PDAL_HAVE_GEOS
+    StageFactory f;
+
     Options options;
 
     Option in_srs("spatialreference",Support::datapath("autzen/autzen-srs.wkt"), "Input SRS");
@@ -211,19 +196,19 @@ TEST(CropFilterTest, test_crop_polygon_reprojection)
     Option polygon("polygon", wkt, "");
     options.add(polygon);
 
-    Stage* reader = getReader("readers.las");
-    EXPECT_TRUE(reader);
+    ReaderPtr reader(f.createReader("readers.las"));
+    EXPECT_TRUE(reader.get());
     reader->setOptions(options);
 
-    Stage* reprojection = getFilter("filters.reprojection");
-    EXPECT_TRUE(reprojection);
+    FilterPtr reprojection(f.createFilter("filters.reprojection"));
+    EXPECT_TRUE(reprojection.get());
     reprojection->setOptions(options);
-    reprojection->setInput(reader);
+    reprojection->setInput(reader.get());
 
-    Stage* crop = getFilter("filters.crop");
-    EXPECT_TRUE(crop);
+    FilterPtr crop(f.createFilter("filters.crop"));
+    EXPECT_TRUE(crop.get());
     crop->setOptions(options);
-    crop->setInput(reprojection);
+    crop->setInput(reprojection.get());
 
     PointContext ctx;
     PointBufferPtr buffer(new PointBuffer(ctx));

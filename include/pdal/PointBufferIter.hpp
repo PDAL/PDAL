@@ -46,25 +46,37 @@ class PointRef
 private:
     PointBuffer *m_buf;
     PointId m_id;
+    bool m_tmp;
 
 public:
-    PointRef() : m_buf(NULL), m_id(0)
+    PointRef() : m_buf(NULL), m_id(0), m_tmp(false)
     {}
-    PointRef(const PointRef& r) : m_buf(r.m_buf), m_id(r.m_id)
-    {}
-    PointRef(PointBuffer *buf, PointId id) : m_buf(buf), m_id(id)
+    PointRef(const PointRef& r) : m_buf(r.m_buf)
+    {
+        m_id = m_buf->getTemp(r.m_id);
+        m_tmp = true;
+    }
+    // This is the ctor used to make a PointRef from an iterator.
+    PointRef(PointBuffer *buf, PointId id) : m_buf(buf), m_id(id), m_tmp(false)
     {}
 
-    PointId id() const
-        { return m_id; }
-    PointBuffer *buf() const
-        { return m_buf; }
+    ~PointRef()
+    {
+        if (m_tmp)
+            m_buf->freeTemp(m_id);
+    }
 
     PointRef& operator=(const PointRef& r)
     {
         assert(m_buf == NULL || r.m_buf == m_buf);
-        m_buf = r.m_buf;
-        m_buf->m_index[m_id] = m_buf->m_index[r.m_id];
+        if (!m_buf)
+        {
+            m_buf = r.m_buf;
+            m_id = m_buf->getTemp(r.m_id);
+            m_tmp = true;
+        }
+        else
+            m_buf->m_index[m_id] = r.m_buf->m_index[r.m_id];
         return *this;
     }
 
@@ -145,4 +157,15 @@ public:
 };
 
 } // namespace pdal
+
+/**
+namespace std
+{
+template<>
+inline void iter_swap(pdal::PointBufferIter a, pdal::PointBufferIter b)
+{
+    swap(*a, *b);
+}
+}
+**/
 

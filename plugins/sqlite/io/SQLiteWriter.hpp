@@ -34,8 +34,7 @@
 
 #pragma once
 
-#include <pdal/Writer.hpp>
-#include <pdal/Compression.hpp>
+#include <pdal/DbWriter.hpp>
 #include <pdal/StageFactory.hpp>
 #include "SQLiteCommon.hpp"
 
@@ -43,10 +42,10 @@ namespace pdal
 {
 
 
-class PDAL_DLL SQLiteWriter : public pdal::Writer
+class PDAL_DLL SQLiteWriter : public DbWriter
 {
 public:
-    SET_STAGE_NAME("writers.sqlite", "SQLite Writer")
+    SET_STAGE_NAME("writers.sqlite", "Write data to SQLite3 database files.")
     SET_STAGE_ENABLED(true)
     SQLiteWriter();
 
@@ -86,10 +85,7 @@ private:
 	int32_t m_block_id;
 	uint32_t m_srid;
 	int64_t m_num_points;
-    size_t m_pointSize;
     Orientation::Enum m_orientation;
-    Dimension::IdList m_dims;
-    std::vector<Dimension::Type::Enum> m_types;
     bool m_pack;
     std::string m_block_table;
     std::string m_cloud_table;
@@ -100,7 +96,6 @@ private:
     bool m_doCompression;;
     PatchPtr m_patch;
     PointContextRef m_context;
-
 };
 
 } // namespaces

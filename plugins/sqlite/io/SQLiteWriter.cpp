@@ -51,20 +51,18 @@ CREATE_WRITER_PLUGIN(sqlite, pdal::SQLiteWriter)
 namespace pdal
 {
 
-
-SQLiteWriter::SQLiteWriter()
-    : pdal::Writer()
-    , m_doCreateIndex(false)
+SQLiteWriter::SQLiteWriter() : 
+    m_doCreateIndex(false)
     , m_sdo_pc_is_initialized(false)
     , m_obj_id(0)
     , m_block_id(0)
     , m_srid(0)
     , m_num_points(0)
-    , m_pointSize(0)
     , m_orientation(Orientation::PointMajor)
     , m_is3d(false)
     , m_doCompression(false)
 {}
+
 
 void SQLiteWriter::processOptions(const Options& options)
 {
@@ -98,12 +96,14 @@ void SQLiteWriter::initialize()
 {
     try
     {
-        log()->get(LogLevel::Debug) << "Connection: '" << m_connection << "'" << std::endl;
+        log()->get(LogLevel::Debug) << "Connection: '" << m_connection << 
+            "'" << std::endl;
         m_session = std::unique_ptr<SQLite>(new SQLite(m_connection, log()));
         m_session->connect(true);
         log()->get(LogLevel::Debug) << "Connected to database" << std::endl;
         bool bHaveSpatialite = m_session->doesTableExist("geometry_columns");
-        log()->get(LogLevel::Debug) << "Have spatialite?: " << bHaveSpatialite << std::endl;
+        log()->get(LogLevel::Debug) << "Have spatialite?: " <<
+            bHaveSpatialite << std::endl;
         m_session->spatialite(m_modulename);
 
         if (!bHaveSpatialite)
@@ -124,22 +124,14 @@ void SQLiteWriter::initialize()
     m_patch = PatchPtr(new Patch());
 }
 
+
 void SQLiteWriter::ready(PointContextRef ctx)
 {
     m_context = ctx;
-    m_dims = ctx.dims();
-    // Determine types for the dimensions.  We use the default types when
-    // they exist, float otherwise.
-    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-    {
-        Dimension::Type::Enum type = Dimension::defaultType(*di);
-        if (type == Dimension::Type::None)
-            type = Dimension::Type::Float;
-        m_types.push_back(type);
-        m_pointSize += Dimension::size(type);
-    }
     m_patch->m_ctx = ctx;
+    DbWriter::ready(ctx);
 }
+
 
 void SQLiteWriter::write(const PointBuffer& buffer)
 {
@@ -198,7 +190,8 @@ void SQLiteWriter::writeInit()
         }
     }
 
-    std::string pre_sql = m_options.getValueOrDefault<std::string>("pre_sql", "");
+    std::string pre_sql =
+        m_options.getValueOrDefault<std::string>("pre_sql", "");
     if (pre_sql.size())
     {
         std::string sql = FileUtils::readFileAsString(pre_sql);
@@ -243,15 +236,15 @@ void SQLiteWriter::CreateBlockTable()
                          << boost::to_lower_copy(m_block_table)
                          << "'" <<std::endl;
 
-    oss.str("");
     {
-        oss << "SELECT AddGeometryColumn('" << boost::to_lower_copy(m_block_table)
-            << "'," << "'extent'" << ","
+        std::ostringstream oss;
+        oss << "SELECT AddGeometryColumn('" <<
+            boost::to_lower_copy(m_block_table) << "'," << "'extent'" << ","
             << m_srid << ", 'POLYGON', 'XY')";
         m_session->execute(oss.str());
-        log()->get(LogLevel::Debug) << "Added geometry column for block table '"
-                             << boost::to_lower_copy(m_block_table)
-                             <<"'"<< std::endl;
+        log()->get(LogLevel::Debug) <<
+            "Added geometry column for block table '" <<
+            boost::to_lower_copy(m_block_table) <<"'"<< std::endl;
     }
 }
 
@@ -278,10 +271,8 @@ void SQLiteWriter::DeleteBlockTable()
 
     oss << "DROP TABLE " << boost::to_lower_copy(m_block_table);
     m_session->execute(oss.str());
-    log()->get(LogLevel::Debug) << "Dropped block table '"
-                         << boost::to_lower_copy(m_block_table)
-                         << "'" <<std::endl;
-
+    log()->get(LogLevel::Debug) << "Dropped block table '" <<
+        boost::to_lower_copy(m_block_table) << "'" <<std::endl;
 }
 
 
@@ -305,9 +296,10 @@ void SQLiteWriter::CreateCloudTable()
         << boost::to_lower_copy(m_cloud_table)
         << "'," << "'extent'" << "," << m_srid << ", 'POLYGON', 'XY')";
     m_session->execute(oss.str());
-    log()->get(LogLevel::Debug) << "Added geometry column to cloud table '"
-                         << boost::to_lower_copy(m_cloud_table) << "'" <<std::endl;
+    log()->get(LogLevel::Debug) << "Added geometry column to cloud table '" <<
+        boost::to_lower_copy(m_cloud_table) << "'" <<std::endl;
 }
+
 
 void SQLiteWriter::DeleteCloudTable()
 {
@@ -353,11 +345,13 @@ void SQLiteWriter::CreateIndexes(std::string const& table_name,
     oss << "SELECT CreateSpatialIndex('"<< boost::to_lower_copy(table_name) <<
         "', 'extent')";
     m_session->execute(oss.str());
-    log()->get(LogLevel::Debug) << "Created spatial index for'" << table_name << "'" <<std::endl;
+    log()->get(LogLevel::Debug) << "Created spatial index for'" <<
+        table_name << "'" << std::endl;
 }
 
 
-std::string SQLiteWriter::loadGeometryWKT(std::string const& filename_or_wkt) const
+std::string
+SQLiteWriter::loadGeometryWKT(std::string const& filename_or_wkt) const
 {
     std::ostringstream wkt_s;
 
@@ -408,7 +402,8 @@ void SQLiteWriter::done(PointContextRef ctx)
         CreateIndexes(m_block_table, "extent", m_is3d);
     }
 
-    std::string post_sql = m_options.getValueOrDefault<std::string>("post_sql", "");
+    std::string post_sql =
+        m_options.getValueOrDefault<std::string>("post_sql", "");
     if (post_sql.size())
     {
         std::string sql = FileUtils::readFileAsString(post_sql);
@@ -452,18 +447,16 @@ void SQLiteWriter::CreateCloud()
         " block_table, schema) VALUES ('" <<
         boost::to_lower_copy(m_block_table) << "',?) ";
 
-    schema::Writer writer(m_dims, m_types);
-    pdal::Metadata metadata;
+    MetadataNode m;
     if (m_doCompression)
     {
-
         Metadata metadata;
-        MetadataNode m = metadata.getNode();
+        m = metadata.getNode();
         m.add("compression", "lazperf");
         m.add("version", "1.0");
-        writer.setMetadata(m);
     }
-    std::string xml = writer.getXML();
+    XMLSchema schema(dbDimTypes(), m);
+    std::string xml = schema.xml();
 
     records rs;
     row r;
@@ -502,43 +495,53 @@ void SQLiteWriter::CreateCloud()
             boost::to_lower_copy(m_cloud_column) <<"=?";
 
         m_session->insert(oss.str(), rs);
-        log()->get(LogLevel::Debug) << "Inserted boundary wkt into cloud table " << std::endl;
+        log()->get(LogLevel::Debug) <<
+            "Inserted boundary wkt into cloud table " << std::endl;
     }
 }
 
 
-void SQLiteWriter::writeTile(PointBuffer const& buffer)
+void SQLiteWriter::writeTile(const PointBuffer& buffer)
 {
     using namespace std;
 
-    uint8_t* point_data(0);
-    uint32_t point_data_length(0);
-    uint32_t schema_byte_size(0);
-
-    size_t bufferSize = buffer.size() * m_context.pointSize();
+    Patch outpatch;
 
     if (m_doCompression)
     {
-        m_patch->compress(buffer);
+#ifdef PDAL_HAVE_LAZPERF
+        LazPerfCompressor<Patch> compressor(*m_patch, dbDimTypes());
 
-        size_t newSize = m_patch->getBytes().size();
-        double percent = (double) newSize/(double) bufferSize;
+        std::vector<char> outbuf(m_packedPointSize);
+        for (PointId idx = 0; idx < buffer.size(); idx++)
+        {
+            size_t size = readPoint(buffer, idx, outbuf.data());
+            // Read the data and write to the patch.
+            compressor.compress(outbuf.data(), size);
+        }
+        compressor.done();
+#else
+        throw pdal_error("Can't compress without LAZperf.");
+#endif
+
+        size_t bufferSize = buffer.size() * m_context.pointSize();
+        double percent = (double) m_patch->byte_size()/(double) bufferSize;
         percent = percent * 100;
-        log()->get(LogLevel::Debug3) << "Compressing tile by "
-                                     << boost::str(boost::format("%.2f") % (100- percent))
-                                     <<"%" << std::endl;
+        log()->get(LogLevel::Debug3) << "Compressing tile by " <<
+            boost::str(boost::format("%.2f") % (100 - percent)) <<
+            "%" << std::endl;
     }
     else
     {
-        std::vector<uint8_t> bytes;
-        bytes.resize(bufferSize);
-        Charbuf charstreambuf((char*)&bytes[0], bufferSize, 0);
-        std::ostream o(&charstreambuf);
-        buffer.getBytes(o, 0, buffer.size());
+        std::vector<char> storage(m_packedPointSize);
 
-        log()->get(LogLevel::Debug3) << "uncompressed size: " << bytes.size() << std::endl;
-        m_patch->setBytes(bytes);
-        log()->get(LogLevel::Debug3) << "uncompressed size: " << m_patch->getBytes().size() << std::endl;
+        for (PointId idx = 0; idx < buffer.size(); idx++)
+        {
+            size_t size = readPoint(buffer, idx, storage.data());
+            m_patch->putBytes((const unsigned char *)storage.data(), size);
+        }
+        log()->get(LogLevel::Debug3) << "uncompressed size: " <<
+            m_patch->getBytes().size() << std::endl;
     }
 
     records rs;
@@ -555,7 +558,8 @@ void SQLiteWriter::writeTile(PointBuffer const& buffer)
     r.push_back(column(m_obj_id));
     r.push_back(column(m_block_id));
     r.push_back(column(buffer.size()));
-    r.push_back(blob((const char*)(&m_patch->getBytes()[0]), m_patch->getBytes().size()));
+    r.push_back(blob((const char*)(&m_patch->getBytes()[0]),
+        m_patch->getBytes().size()));
     r.push_back(column(bounds));
     r.push_back(column(m_srid));
     r.push_back(column(box));

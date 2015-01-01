@@ -41,31 +41,24 @@
 
 using namespace pdal;
 
-TEST(PipelineManagerTest, PipelineManagerTest_test1)
+TEST(PipelineManagerTest, basic)
 {
     FileUtils::deleteFile("temp.las");
 
-    {
-        PipelineManager mgr;
+    PipelineManager mgr;
 
-        Options optsR;
-        optsR.add("filename", Support::datapath("las/1.2-with-color.las"));
-        Reader* reader = mgr.addReader("readers.las");
-        reader->setOptions(optsR);
+    Options optsR;
+    optsR.add("filename", Support::datapath("las/1.2-with-color.las"));
+    Reader* reader = mgr.addReader("readers.las");
+    reader->setOptions(optsR);
 
-        Options optsF;
-        optsF.add("bounds", BOX3D(0,0,0,1000000,1000000,1000000));
-        Filter* filter = mgr.addFilter("filters.crop", reader);
-        filter->setOptions(optsF);
+    Options optsW;
+    optsW.add("filename", "temp.las", "file to write to");
+    Writer* writer = mgr.addWriter("writers.las", reader);
+    writer->setOptions(optsW);
 
-        Options optsW;
-        optsW.add("filename", "temp.las", "file to write to");
-        Writer* writer = mgr.addWriter("writers.las", filter);
-        writer->setOptions(optsW);
-
-        point_count_t np = mgr.execute();
-        EXPECT_TRUE(np == 1065);
-    }
+    point_count_t np = mgr.execute();
+    EXPECT_TRUE(np == 1065U);
 
     FileUtils::deleteFile("temp.las");
 }

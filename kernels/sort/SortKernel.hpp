@@ -42,7 +42,7 @@ namespace pdal
 class PDAL_DLL SortKernel : public Kernel
 {
 public:
-    SET_KERNEL_NAME ("kernels.sort", "Sort Kernel")
+    SET_KERNEL_NAME ("sort", "Sort Kernel")
     SET_KERNEL_LINK ("http://pdal.io/kernels/kernels.sort.html")
     SET_KERNEL_ENABLED (true)
  

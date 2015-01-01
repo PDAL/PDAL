@@ -158,7 +158,7 @@ int PCLKernel::execute()
         cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
         (UserCallback *)new HeartbeatCallback();
 
-    std::unique_ptr<Writer>
+    WriterPtr
         writer(KernelSupport::makeWriter(m_outputFile, pclStage.get()));
 
     // Some options are inferred by makeWriter based on filename

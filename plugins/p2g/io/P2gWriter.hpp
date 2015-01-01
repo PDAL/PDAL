@@ -37,7 +37,8 @@
 #include <pdal/Writer.hpp>
 #include <pdal/StageFactory.hpp>
 
-#include <boost/scoped_ptr.hpp>
+#include <memory>
+
 #include <boost/tuple/tuple.hpp>
 
 #include <points2grid/config.h>
@@ -82,7 +83,7 @@ private:
     virtual void done(PointContextRef ctx) {};
     virtual void initialize() {};
 
-    boost::scoped_ptr<OutCoreInterp> m_interpolator;
+    std::unique_ptr<OutCoreInterp> m_interpolator;
     uint64_t m_pointCount;
 
     uint32_t m_GRID_SIZE_X;

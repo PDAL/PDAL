@@ -57,6 +57,8 @@ void printChildren(std::ostream& out, MetadataNode m, int depth = 0)
 
 TEST(HexbinFilterTest, HexbinFilterTest_test_1)
 {
+    StageFactory f;
+
     Options options;
     options.add("filename", Support::datapath("las/hextest.las"));
     options.add("sample_size", 5000, "Number of samples to use "
@@ -68,42 +70,30 @@ TEST(HexbinFilterTest, HexbinFilterTest_test_1)
         "use in situations where you do not want to estimate based on "
         "a sample");
 
-    StageFactory f;
-    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.las");
+    ReaderPtr reader(f.createReader("readers.las"));
+    EXPECT_TRUE(reader.get());
+    reader->setOptions(options);
 
-    if (rc)
-    {
-        EXPECT_TRUE(rc);
+    FilterPtr hexbin(f.createFilter("filters.hexbin"));
+    EXPECT_TRUE(hexbin.get());
+    hexbin->setOptions(options);
+    hexbin->setInput(reader.get());
 
-        Stage* reader = rc();
-        reader->setOptions(options);
-        StageFactory f;
-        StageFactory::FilterCreator* fc = f.getFilterCreator("filters.hexbin");
-        if(fc)
-        {
-            EXPECT_TRUE(fc);
+    PointContext ctx;
 
-            std::unique_ptr<Filter> hexbin(fc());
-            hexbin->setOptions(options);
-            hexbin->setInput(reader);
+    hexbin->prepare(ctx);
+    hexbin->execute(ctx);
 
-            PointContext ctx;
+    MetadataNode m = ctx.metadata();
+    m = m.findChild(hexbin->getName());
 
-            hexbin->prepare(ctx);
-            hexbin->execute(ctx);
+    std::string filename = Support::temppath("hexbin.txt");
+    std::ofstream out(filename);
+    printChildren(out, m);
+    out.close();
 
-            MetadataNode m = ctx.metadata();
-            m = m.findChild(hexbin->getName());
+    EXPECT_TRUE(Support::compare_text_files(filename,
+        Support::datapath("filters/hexbin.txt")));
 
-            std::string filename = Support::temppath("hexbin.txt");
-            std::ofstream out(filename);
-            printChildren(out, m);
-            out.close();
-
-            EXPECT_TRUE(Support::compare_text_files(filename,
-                Support::datapath("filters/hexbin.txt")));
-
-            FileUtils::deleteFile(filename);
-        }
-    }
+    FileUtils::deleteFile(filename);
 }

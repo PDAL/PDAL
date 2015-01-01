@@ -35,22 +35,17 @@
                     <Option name="capacity">
                         131072
                     </Option>
-                    <Filter type="filters.cache">
-                        <Option name="max_cache_blocks">
-                            1
-                        </Option>
-                        <Reader type="readers.las">
-                                <Option name="filename">
-                                    /Users/hobu/dev/git/pdal/test/data/local/mtsthelens/st-helens.las
-                                </Option>
-                                <!-- <Option name="spatialreference">
-                                    EPSG:26910
-                                </Option> -->
-                                <!-- <Option name="log">
-                                    oracle-pipeline-write.log
-                                </Option>     -->
-                        </Reader>
-                </Filter>
+		    <Reader type="readers.las">
+			    <Option name="filename">
+				/Users/hobu/dev/git/pdal/test/data/local/mtsthelens/st-helens.las
+			    </Option>
+			    <!-- <Option name="spatialreference">
+				EPSG:26910
+			    </Option> -->
+			    <!-- <Option name="log">
+				oracle-pipeline-write.log
+			    </Option>     -->
+		    </Reader>
             </Filter>
     </Writer>
 </Pipeline>

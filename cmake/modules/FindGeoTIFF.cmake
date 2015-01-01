@@ -18,7 +18,6 @@
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 #
 ###############################################################################
-MESSAGE(STATUS "Searching for GeoTIFF ${GeoTIFF_FIND_VERSION}+ library")
 
 IF(GEOTIFF_INCLUDE_DIR)
   # Already in cache, be silent
@@ -75,10 +74,7 @@ IF(GEOTIFF_INCLUDE_DIR)
     SET(GEOTIFF_VERSION "${GTIFF_VERSION_MAJOR}.${GTIFF_VERSION_MINOR}.${GTIFF_VERSION_PATCH}"
       CACHE INTERNAL "The version string for GeoTIFF library")
 
-    IF (GEOTIFF_VERSION VERSION_EQUAL GeoTIFF_FIND_VERSION OR
-        GEOTIFF_VERSION VERSION_GREATER GeoTIFF_FIND_VERSION)
-      MESSAGE(STATUS "Found GeoTIFF version: ${GEOTIFF_VERSION}")
-    ELSE()
+    IF (GEOTIFF_VERSION VERSION_LESS GeoTIFF_FIND_VERSION)
       MESSAGE(FATAL_ERROR "GeoTIFF version check failed. Version ${GEOTIFF_VERSION} was found, at least version ${GeoTIFF_FIND_VERSION} is required")
     ENDIF()
   ELSE()

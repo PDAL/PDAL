@@ -49,6 +49,7 @@ Filters
    filters.decimation
    filters.ferry
    filters.hexbin
+   filters.mortonorder
    filters.pclblock
    filters.predicate
    filters.programmable

@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<Pipeline version="1.0">
+      <Filter type="filters.chipper">
+        <Option name="capacity">15</Option>
+          <Reader type="readers.nitf">
+            <Option name="spatialreference">EPSG:32610</Option>
+	    <Option name="filename">@CMAKE_SOURCE_DIR@/test/data/nitf/autzen-utm10.ntf</Option>
+            <Option name="debug">true</Option>
+            <Option name="verbose">7</Option>
+          </Reader>
+      </Filter>
+</Pipeline>

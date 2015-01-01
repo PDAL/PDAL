@@ -53,67 +53,24 @@
         <Option name="pack_ignored_fields">
             true
         </Option>
-        <Filter type="filters.selector">
-          <Option name="ignore">
-            <Options>
-              <Option name="dimension">ReturnNumber</Option>
-              <Option name="dimension">NumberOfReturns</Option>
-              <Option name="dimension">ScanDirectionFlag</Option>
-              <Option name="dimension">EdgeOfFlightLine</Option>
-              <Option name="dimension">ScanAngleRank</Option>
-              <Option name="dimension">UserData</Option>
-            </Options>
-          </Option>
-          <Option name="ignore_default">true</Option>
-          <Option name="keep">
-            <Options>
-              <Option name="dimension">X</Option>
-              <Option name="dimension">Y</Option>
-              <Option name="dimension">Z</Option>
-              <Option name="dimension">Intensity</Option>
-              <Option name="dimension">Classification</Option>
-              <Option name="dimension">PointSourceId</Option>
-            </Options>
-          </Option>        
         <Filter type="filters.stats">
            <Option name="exact_dimensions">Classification</Option>
            <Option name="dimensions">readers.las.X, readers.las.Y, readers.las.Z, Classification</Option>        
-            <!-- <Filter type="filters.inplacereprojection">
-                <Option name="out_srs">
-                    EPSG:26910
-                </Option>
-               <Option name="scale_x">
-                    0.01
-                </Option>
-                <Option name="scale_y">
-                    0.01
-                </Option>  -->
-                <!-- <Filter type="filters.scaling">
-                  <Option name="dimension">X<Options><Option name="scale">1e-1</Option></Options></Option>
-                  <Option name="dimension">Y<Options><Option name="scale">1e-1</Option></Options></Option>     -->            
                 <Filter type="filters.chipper">
                     <Option name="capacity">
                         50
                     </Option>
-                    <Filter type="filters.cache">
-                        <Option name="max_cache_blocks">
-                            1
-                        </Option>
-                        <Reader type="readers.las">
-                                <Option name="filename">
-                                    ../autzen-dd-pf0.las
-                                </Option>
-                                <Option name="spatialreference">
-                                    EPSG:4326
-                                </Option>
-                                <!-- <Option name="log">
-                                    oracle-pipeline-write.log
-                                </Option>     -->
-                        </Reader>
-                </Filter>
-            <!-- </Filter> -->
-            </Filter>
-            <!-- </Filter> -->
+		    <Reader type="readers.las">
+			    <Option name="filename">
+				../autzen-dd-pf0.las
+			    </Option>
+			    <Option name="spatialreference">
+				EPSG:4326
+			    </Option>
+			    <!-- <Option name="log">
+				oracle-pipeline-write.log
+			    </Option>     -->
+		    </Reader>
             </Filter>            
         </Filter>
     </Writer>

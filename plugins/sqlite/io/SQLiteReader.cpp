@@ -40,9 +40,6 @@ CREATE_READER_PLUGIN(sqlite, pdal::SQLiteReader)
 namespace pdal
 {
 
-SQLiteReader::SQLiteReader() : pdal::Reader()
-{}
-
 void SQLiteReader::initialize()
 {
     try
@@ -194,19 +191,11 @@ void SQLiteReader::addDimensions(PointContextRef ctx)
         FileUtils::closeFile(out);
     }
 
-    schema::Reader reader(s.data);
-
-    m_patch->m_metadata = reader.getMetadata();
-    m_patch->m_schema = reader.schema();
+    XMLSchema schema(s.data);
+    m_patch->m_metadata = schema.getMetadata();
     m_patch->m_ctx = ctx;
 
-    ctx.registerDim(Dimension::Id::X);
-    ctx.registerDim(Dimension::Id::Y);
-    ctx.registerDim(Dimension::Id::Z);
-
-    schema::DimInfoList& dims = m_patch->m_schema.m_dims;
-    for (auto di = dims.begin(); di != dims.end(); ++di)
-        di->m_id = ctx.registerOrAssignDim(di->m_name, di->m_type);
+    loadSchema(ctx, schema);
 }
 
 
@@ -217,11 +206,6 @@ void SQLiteReader::ready(PointContextRef ctx)
 
     m_session.reset(new SQLite(m_connection, log()));
     m_session->connect(false); // don't connect in write mode
-
-    schema::DimInfoList dims = m_patch->m_schema.m_dims;
-    m_point_size = 0;
-    for (auto di = dims.begin(); di != dims.end(); ++di)
-        m_point_size += Dimension::size(di->m_type);
 }
 
 
@@ -250,7 +234,6 @@ point_count_t SQLiteReader::readPatch(PointBuffer& buffer, point_count_t numPts)
     m_patch->remaining = count;
     m_patch->count = count;
 
-
     log()->get(LogLevel::Debug3) << "patch compression? "
                                  << m_patch->m_isCompressed << std::endl;
 
@@ -259,70 +242,51 @@ point_count_t SQLiteReader::readPatch(PointBuffer& buffer, point_count_t numPts)
                                      << m_patch->m_compVersion << std::endl;
 
     position = columns.find("POINTS")->second;
-    const uint8_t* bytes(0);
 
-    size_t size (0);
+    point_count_t numRead = 0;
+    PointId nextId = buffer.size();
     if (m_patch->m_isCompressed)
     {
+#ifdef PDAL_HAVE_LAZPERF
+        LazPerfDecompressor<Patch> decompressor(*m_patch, dbDimTypes());
+
+        // Set the data into the patch.
         m_patch->setBytes((*r)[position].blobBuf);
-        log()->get(LogLevel::Debug3) << "Compressed byte size: "
-                                     << m_patch->getBytes().size() << std::endl;
-        m_patch->decompress();
-        bytes = &(m_patch->getBytes()[0]);
-        size = m_patch->getBytes().size();
-        if (!size)
-            throw pdal_error("Compressed patch size was 0!");
-        log()->get(LogLevel::Debug3) << "Uncompressed byte size: " << size << std::endl;
-
-    } else
-    {
-        bytes = &((*r)[position].blobBuf[0]);
-        size = (*r)[position].blobLen;
-    }
-
-    log()->get(LogLevel::Debug4) << "fetched patch with "
-                                 << count << " points and "
-                                 << m_patch->getBytes().size()
-                                 << " bytes size: " << size << std::endl;
-
-
-    point_count_t numRemaining = m_patch->remaining;
-    PointId nextId = buffer.size();
-    point_count_t numRead = 0;
-
-    size_t offset = ((m_patch->count - m_patch->remaining) * m_point_size);
-    uint8_t const* pos = bytes + offset;
-
-    schema::DimInfoList& dims = m_patch->m_schema.m_dims;
-    while (numRead < numPts && numRemaining > 0)
-    {
-        for (auto di = dims.begin(); di != dims.end(); ++di)
+        std::vector<char> tmpBuf(decompressor.pointSize());
+        while (numRead < numPts && count > 0)
         {
-            schema::DimInfo& d = *di;
-            buffer.setField(d.m_id, d.m_type, nextId, pos);
-            pos += Dimension::size(d.m_type);
+            decompressor.decompress(tmpBuf.data(), tmpBuf.size());
+            writePoint(buffer, nextId, tmpBuf.data());
+
+            nextId++;
+            numRead++;
+            count--;
         }
+#else
+        throw pdal_error("Can't decompress without LAZperf.");
+#endif
 
-        // Scale X, Y and Z
-        double v = buffer.getFieldAs<double>(Dimension::Id::X, nextId);
-        v = v * m_patch->xScale() + m_patch->xOffset();
-        buffer.setField(Dimension::Id::X, nextId, v);
-
-        v = buffer.getFieldAs<double>(Dimension::Id::Y, nextId);
-        v = v * m_patch->yScale() + m_patch->yOffset();
-        buffer.setField(Dimension::Id::Y, nextId, v);
-
-        v = buffer.getFieldAs<double>(Dimension::Id::Z, nextId);
-        v = v * m_patch->zScale() + m_patch->zOffset();
-        buffer.setField(Dimension::Id::Z, nextId, v);
-
-        numRemaining--;
-        nextId++;
-        numRead++;
+        log()->get(LogLevel::Debug3) << "Compressed byte size: " <<
+            m_patch->byte_size() << std::endl;
+        if (!m_patch->byte_size())
+            throw pdal_error("Compressed patch size was 0!");
+        log()->get(LogLevel::Debug3) << "Uncompressed byte size: " <<
+            (m_patch->count * m_packedPointSize) << std::endl;
     }
+    else
+    {
+        const char *pos = (const char *)&((*r)[position].blobBuf[0]);
+        while (numRead < numPts && count > 0)
+        {
+            writePoint(buffer, nextId, pos);
 
-    m_patch->remaining = numRemaining;
-//     std::cout << buffer << std::endl;
+            pos += m_packedPointSize;
+            nextId++;
+            numRead++;
+            count--;
+        }
+    }
+    m_patch->remaining -= numRead;
     return numRead;
 }
 
@@ -363,9 +327,7 @@ point_count_t SQLiteReader::read(PointBuffer& buffer, point_count_t count)
         totalNumRead += numRead;
         patch_count++;
     }
-
     return totalNumRead;
-
 }
 
 } // namespace pdal

@@ -45,15 +45,16 @@
 namespace pdal
 {
 
+#define BPFREADERDOC "\"Binary Point Format\" (BPF) reader support. BPF is a simple \n" \
+                     "DoD and research format that is used by some sensor and \n" \
+                     "processing chains."
+
 class PDAL_DLL BpfReader : public Reader
 {
 public:
-    SET_STAGE_NAME("readers.bpf", "Bpf Reader")
+    SET_STAGE_NAME("readers.bpf", BPFREADERDOC)
     SET_STAGE_LINK("http://pdal.io/stages/readers.bpf.html")
     SET_STAGE_ENABLED(true)
-
-    BpfReader() : Reader(), m_header(log())
-        {}
 
     virtual point_count_t numPoints() const
         {  return (point_count_t)m_header.m_numPts; }

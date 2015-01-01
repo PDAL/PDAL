@@ -36,7 +36,6 @@
 
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/uuid_io.hpp>
-#include <boost/concept_check.hpp>
 
 #include <pdal/FileUtils.hpp>
 #include <LasHeader.hpp>

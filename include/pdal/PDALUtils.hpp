@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <pdal/Metadata.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/algorithm/string.hpp>
 #include <pdal/Dimension.hpp>
@@ -41,7 +42,6 @@
 #include <pdal/Bounds.hpp>
 #include <pdal/PointContext.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/Metadata.hpp>
 #include <pdal/Options.hpp>
 
 namespace pdal
@@ -64,9 +64,8 @@ inline ptree toPTree(MetadataNode const& node)
 
     for (auto n = node.children().begin(); n != node.children().end(); ++n)
     {
-
         ptree pnode = toPTree(*n);
-        if (boost::algorithm::iequals(node.kind(),"array"))
+        if (node.kind() == MetadataType::Array)
         {
             boost::optional<ptree&> opt =
                 tree.get_child_optional(path(node.name(), '/'));
@@ -87,24 +86,21 @@ inline ptree toPTree(MetadataNode const& node)
 }
 
 
-inline ptree toPTree(PointContextRef ctx)
+inline MetadataNode toMetadata(PointContextRef ctx)
 {
-    ptree tree;
-    ptree dimsTree;
+    MetadataNode root;
 
     for (const auto& id : ctx.dims())
     {
-        ptree dim;
-        dim.put("name", ctx.dimName(id));
+        MetadataNode dim("dimensions");
+        dim.add("name", ctx.dimName(id));
         Dimension::Type::Enum t = ctx.dimType(id);
-        dim.put("type", Dimension::toName(Dimension::base(t)));
-        dim.put("size", ctx.dimSize(id));
-        dimsTree.push_back(std::make_pair("", dim));
+        dim.add("type", Dimension::toName(Dimension::base(t)));
+        dim.add("size", ctx.dimSize(id));
+        root.addList(dim);
     }
 
-    tree.add_child("dimensions", dimsTree);
-
-    return tree;
+    return root;
 }
 
 
@@ -124,27 +120,23 @@ inline ptree toPTree(PointContextRef ctx)
 
     \endverbatim
 */
-inline ptree toPTree(const PointBuffer& buffer)
+inline MetadataNode toMetadata(const PointBuffer& buffer)
 {
-
-    ptree tree;
+    MetadataNode node;
 
     const Dimension::IdList& dims = buffer.dims();
 
     for (PointId idx = 0; idx < buffer.size(); idx++)
     {
-        std::string pointstring = boost::lexical_cast<std::string>(idx) + ".";
-
+        MetadataNode pointnode = node.add(std::to_string(idx));
         for (auto di = dims.begin(); di != dims.end(); ++di)
         {
-            std::string key = pointstring + Dimension::name(*di);
             double v = buffer.getFieldAs<double>(*di, idx);
-            std::string value = boost::lexical_cast<std::string>(v);
-            tree.add(key, value);
+            pointnode.add(Dimension::name(*di), v);
         }
     }
 
-    return tree;
+    return node;
 }
 
 /// Outputs a string-based boost::property_tree::ptree representation
@@ -222,13 +214,15 @@ inline ptree toPTree(const SpatialReference& ref)
     return srs;
 }
 
+std::string toJSON(const MetadataNode& m);
+void toJSON(const MetadataNode& m, std::ostream& o);
 
 namespace reST
 {
 
 std::ostream& toRST(const ptree&, std::ostream& os);
 
-void write_rst(std::ostream& ost,
+void PDAL_DLL write_rst(std::ostream& ost,
                const boost::property_tree::ptree& pt,
                int level=0);
 

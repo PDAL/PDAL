@@ -44,7 +44,10 @@
 
 using namespace pdal;
 
-TEST(SortFilterTest, simple)
+namespace
+{
+
+void doSort(point_count_t count)
 {
     Options opts;
 
@@ -59,9 +62,9 @@ TEST(SortFilterTest, simple)
     ctx.registerDim(Dimension::Id::X);
 
     std::default_random_engine generator;
-    std::uniform_real_distribution<double> dist(0.0, 10000.0);
+    std::uniform_real_distribution<double> dist(0.0, (double)count);
 
-    for (PointId i = 0; i < 10000; ++i)
+    for (PointId i = 0; i < count; ++i)
         buf.setField(Dimension::Id::X, i, dist(generator));
 
     filter.prepare(ctx);
@@ -69,7 +72,8 @@ TEST(SortFilterTest, simple)
     FilterTester::filter(&filter, buf);
     FilterTester::done(&filter, ctx);
 
-    for (PointId i = 1; i < 10000; ++i)
+    EXPECT_EQ(count, buf.size());
+    for (PointId i = 1; i < count; ++i)
     {
         double d1 = buf.getFieldAs<double>(Dimension::Id::X, i - 1);
         double d2 = buf.getFieldAs<double>(Dimension::Id::X, i);
@@ -77,12 +81,21 @@ TEST(SortFilterTest, simple)
     }
 }
 
+} // unnamed namespace
+
+TEST(SortFilterTest, simple)
+{
+    point_count_t inc = 1;
+    for (point_count_t count = 3; count < 100000; count += inc, inc *= 2)
+        doSort(count);
+}
+
 TEST(SortFilterTest, pipeline)
 {
     PipelineManager mgr;
     PipelineReader reader(mgr);
 
-    reader.readPipeline(Support::datapath("filters/sort.xml"));
+    reader.readPipeline(Support::configuredpath("filters/sort.xml"));
     mgr.execute();
 
     PointBufferSet pbSet = mgr.buffers();

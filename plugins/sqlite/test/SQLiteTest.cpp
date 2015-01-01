@@ -34,10 +34,6 @@
 
 #include "gtest/gtest.h"
 
-#include <boost/lexical_cast.hpp>
-#include <boost/uuid/uuid_io.hpp>
-#include <boost/concept_check.hpp>
-
 #include <pdal/FileUtils.hpp>
 #include <pdal/StageFactory.hpp>
 
@@ -48,170 +44,129 @@
 
 using namespace pdal;
 
-static unsigned chunk_size = 15;
-
 Options getSQLITEOptions()
 {
     Options options;
 
-
-    Option capacity("capacity", chunk_size,"capacity");
-    options.add(capacity);
-
-    Option overwrite("overwrite", true,"overwrite");
-    options.add(overwrite);
-
-    std::string temp_filename(Support::temppath("temp-SqliteWriterTest_test_simple_las.sqlite"));
-    Option connection("connection",temp_filename, "connection");
-    options.add(connection);
-
-    Option debug("debug", true, "debug");
-//     options.add(debug);
-
-    Option verbose("verbose", 7, "verbose");
-//     options.add(verbose);
-
-    Option block_table_name("block_table_name", "PDAL_TEST_BLOCKS", "block_table_name");
-    options.add(block_table_name);
-
-    Option base_table_name("cloud_table_name", "PDAL_TEST_BASE" , "");
-    options.add(base_table_name);
-
-    Option is3d("is3d", false,"");
-    options.add(is3d);
-
-    Option srid("srid",4326,"");
-    options.add(srid);
-
-    Option out_srs("out_srs", "EPSG:4269","");
-    options.add(out_srs);
-
-    Option scale_x("scale_x", 0.0000001f, "");
-    options.add(scale_x);
-
-    Option scale_y("scale_y", 0.0000001f, "");
-    options.add(scale_y);
-
-    Option filename("filename", Support::datapath("las/1.2-with-color.las"), "");
-    options.add(filename);
-
-    Option query("query", "                SELECT b.schema, l.cloud, l.block_id, l.num_points, l.bbox, l.extent, l.points, b.cloud FROM PDAL_TEST_BLOCKS l, PDAL_TEST_BASE b "
-                 "WHERE l.cloud = b.cloud and l.cloud in (1) "
-                "order by l.cloud", "");
-    options.add(query);
-
-    Option a_srs("spatialreference", "EPSG:2926", "");
-    options.add(a_srs);
-
-    Option pack("pack_ignored_fields", true, "");
-    options.add(pack);
-
-
-    Option cloud_column("cloud_column_name", "CLOUD", "");
-    options.add(cloud_column);
-
-    Option xml_schema_dump("xml_schema_dump", "sqlite-xml-schema-dump.xml", "");
-    options.add(xml_schema_dump);
-
-    Option con_type("type", "sqlite", "");
-    options.add(con_type);
+    options.add("capacity", 15U, "capacity");
+    options.add("overwrite", true, "overwrite");
+    options.add("connection",
+        Support::temppath("temp-SqliteWriterTest_test_simple_las.sqlite"),
+        "connection");
+    options.add("block_table_name", "PDAL_TEST_BLOCKS", "block_table_name");
+    options.add("cloud_table_name", "PDAL_TEST_BASE");
+    options.add("is3d", false);
+    options.add("srid", 4326);
+    options.add("out_srs", "EPSG:4269");
+    options.add("filename", Support::datapath("las/1.2-with-color.las"));
+    options.add("query", "SELECT b.schema, l.cloud, l.block_id, "
+        "l.num_points, l.bbox, l.extent, l.points, b.cloud "
+        "FROM PDAL_TEST_BLOCKS l, PDAL_TEST_BASE b "
+        "WHERE l.cloud = b.cloud and l.cloud in (1) "
+        "order by l.cloud", "");
+    options.add("spatialreference", "EPSG:2926");
+    options.add("pack_ignored_fields", true);
+    options.add("cloud_column_name", "CLOUD");
+    options.add("xml_schema_dump", "sqlite-xml-schema-dump.xml");
+    options.add("type", "sqlite");
 
     return options;
 }
 
-
-class SQLiteTest : public testing::Test
-{
-  protected:
-    virtual void SetUp()
-    {
-        m_options = getSQLITEOptions();
-    }
-
-    virtual void TearDown()
-    {
-        std::string temp_filename = m_options.getValueOrThrow<std::string>("connection");
-        FileUtils::deleteFile(temp_filename);
-    }
-
-    Options m_options;
-};
-
-TEST_F(SQLiteTest, SqliteTest_test_simple_las)
+void testReadWrite(bool compression, bool scaling)
 {
     // remove file from earlier run, if needed
-    std::string temp_filename = getSQLITEOptions().getValueOrThrow<std::string>("connection");
-    Options ops1;
-    ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
+    std::string tempFilename = 
+        getSQLITEOptions().getValueOrThrow<std::string>("connection");
 
     StageFactory f;
-    StageFactory::ReaderCreator* las_reader_creator = f.getReaderCreator("readers.las");
-    if (las_reader_creator)
+
+    Options sqliteOptions = getSQLITEOptions();
+    if (scaling)
     {
-        EXPECT_TRUE(las_reader_creator);
+        sqliteOptions.add("scale_x", 0.01);
+        sqliteOptions.add("scale_y", 0.01);
+    }
+    sqliteOptions.add("compression", compression, "");
 
-        Stage* reader = las_reader_creator();
-        reader->setOptions(ops1);
+    StageFactory::ReaderCreator *lasRc = f.getReaderCreator("readers.las");
+    StageFactory::WriterCreator* sqliteWc =
+        f.getWriterCreator("writers.sqlite");
+    StageFactory::ReaderCreator* sqliteRc =
+        f.getReaderCreator("readers.sqlite");
 
-        Options sqliteOptions = getSQLITEOptions();
+    EXPECT_TRUE(lasRc);
+    EXPECT_TRUE(sqliteWc);
+    EXPECT_TRUE(sqliteRc);
+    if (!lasRc || !sqliteWc || !sqliteRc)
+        return;
+
+    // remove file from earlier run, if needed
+    std::string temp_filename =
+        sqliteOptions.getValueOrThrow<std::string>("connection");
+
+    Options lasReadOpts;
+    lasReadOpts.add("filename", Support::datapath("las/1.2-with-color.las"));
+    lasReadOpts.add("count", 11);
+
+    ReaderPtr lasReader(lasRc());
+    lasReader->setOptions(lasReadOpts);
+
+    WriterPtr sqliteWriter(sqliteWc());
+    sqliteWriter->setOptions(sqliteOptions);
+    sqliteWriter->setInput(lasReader.get());
+
+    PointContext ctx;
+    sqliteWriter->prepare(ctx);
+    sqliteWriter->execute(ctx);
+
+    // Done - now read back.
+    ReaderPtr sqliteReader(sqliteRc());
+    sqliteReader->setOptions(sqliteOptions);
+
+    PointContext ctx2;
+    sqliteReader->prepare(ctx2);
+    PointBufferSet pbSet = sqliteReader->execute(ctx2);
+    EXPECT_EQ(pbSet.size(), 1U);
+    PointBufferPtr buffer = *pbSet.begin();
+
+    using namespace Dimension;
+
+    uint16_t reds[] = {68, 54, 112, 178, 134, 99, 90, 106, 106, 100, 64};
+    for (PointId idx = 0; idx < 11; idx++)
+    {
+        uint16_t r = buffer->getFieldAs<uint16_t>(Id::Red, idx);
+        EXPECT_EQ(r, reds[idx]);
+    }
+    int32_t x = buffer->getFieldAs<int32_t>(Id::X, 10);
+    EXPECT_EQ(x, 636038);
+    double xd = buffer->getFieldAs<double>(Id::X, 10);
+    EXPECT_FLOAT_EQ(xd, 636037.53);
+
+   FileUtils::deleteFile(tempFilename);
+}
+
+
+TEST(SQLiteTest, readWrite)
+{
+    testReadWrite(false, false);
+}
 
 #ifdef PDAL_HAVE_LAZPERF
-        Option compression("compression", true, "");
-        sqliteOptions.add(compression);
+TEST(SQLiteTest, readWriteCompress)
+{
+    testReadWrite(true, false);
+}
 #endif
 
-        StageFactory::WriterCreator* wc = f.getWriterCreator("writers.sqlite");
-        StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.sqlite");
-        if (wc)
-        {
-            EXPECT_TRUE(wc);
-            EXPECT_TRUE(rc);
-
-            // remove file from earlier run, if needed
-            std::string temp_filename = sqliteOptions.getValueOrThrow<std::string>("connection");
-            Options ops1;
-            ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
-
-            Stage* reader = rc();
-            reader->setOptions(ops1);
-
-            {
-                Stage* writer_reader = las_reader_creator();
-                writer_reader->setOptions(sqliteOptions);
-                std::unique_ptr<Writer> writer_writer(wc());
-                writer_writer->setOptions(sqliteOptions);
-                writer_writer->setInput(writer_reader);
-
-                PointContext ctx;
-                writer_writer->prepare(ctx);
-  //              uint64_t numPointsToRead = writer_reader->getNumPoints();
-
-//                EXPECT_EQ(numPointsToRead, 1065u);
-
-                writer_writer->execute(ctx);
-            }
-
-            {
-                // Read the data
-
-    //             SQLiteReader reader;
-                std::unique_ptr<Reader> reader(rc());
-                reader->setOptions(sqliteOptions);
-                PointContext ctx;
-                reader->prepare(ctx);
-
-                PointBufferSet pbSet = reader->execute(ctx);
-                EXPECT_EQ(pbSet.size(), 1u);
-
-                PointBufferPtr buffer = *pbSet.begin();
-
-                uint16_t r = buffer->getFieldAs<uint16_t>(Dimension::Id::Red, 10);
-                EXPECT_EQ(r, 64u);
-                int32_t x = buffer->getFieldAs<int32_t>(Dimension::Id::X, 10);
-                EXPECT_EQ(x, 636038);
-                double xd = buffer->getFieldAs<double>(Dimension::Id::X, 10);
-                EXPECT_FLOAT_EQ(xd, 636037.53);
-            }
-        }
-    }
+TEST(SQLiteTest, readWriteScale)
+{
+    testReadWrite(false, true);
 }
+
+#ifdef PDAL_HAVE_LAZPERF
+TEST(SQLiteTest, readWriteCompressScale)
+{
+    testReadWrite(true, true);
+}
+#endif

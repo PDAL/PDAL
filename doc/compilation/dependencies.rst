@@ -37,15 +37,12 @@ Boost Packages Used
 
 An unexhaustive list includes:
 
-* Unittest
 * Accumulators
 * Filesystem
 * Program Options
 * Property Tree
-* Random
 * IO Streams
 * System
-* cstdint
 * String Algorithms
 * Endian
 * UUID

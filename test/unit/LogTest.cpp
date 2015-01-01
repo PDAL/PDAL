@@ -35,14 +35,15 @@
 #include "gtest/gtest.h"
 #include <pdal/Options.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <FauxReader.hpp>
-#include <pdal/filters/Programmable.hpp>
+#include <pdal/StageFactory.hpp>
 #include "Support.hpp"
 
 using namespace pdal;
 
 TEST(LogTest, test_one)
 {
+    StageFactory f;
+
     BOX3D bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
 
     Option opt1("bounds", bounds);
@@ -59,15 +60,15 @@ TEST(LogTest, test_one)
     {
         PointContext ctx;
 
-        FauxReader reader;
-        reader.setOptions(opts);
-        reader.prepare(ctx);
+        ReaderPtr reader(f.createReader("readers.faux"));
+        reader->setOptions(opts);
+        reader->prepare(ctx);
 
-        EXPECT_EQ(reader.log()->getLevel(), LogLevel::Error);
-        reader.log()->setLevel(LogLevel::Debug5);
-        EXPECT_EQ(reader.log()->getLevel(), LogLevel::Debug5);
+        EXPECT_EQ(reader->log()->getLevel(), LogLevel::Error);
+        reader->log()->setLevel(LogLevel::Debug5);
+        EXPECT_EQ(reader->log()->getLevel(), LogLevel::Debug5);
 
-        PointBufferSet pbSet = reader.execute(ctx);
+        PointBufferSet pbSet = reader->execute(ctx);
         EXPECT_EQ(pbSet.size(), 1u);
         PointBufferPtr buf = *pbSet.begin();
         EXPECT_EQ(buf->size(), 750u);
@@ -75,16 +76,19 @@ TEST(LogTest, test_one)
     bool ok = Support::compare_text_files(
         Support::temppath("mylog_one.txt"),
         Support::datapath("logs/logtest.txt"));
-    EXPECT_TRUE(ok);
 
     if (ok)
         FileUtils::deleteFile(Support::temppath("mylog_one.txt"));
+    
+    EXPECT_TRUE(ok);
 }
 
 #ifdef PDAL_HAVE_PYTHON
 
 TEST(LogTest, test_two_a)
 {
+    StageFactory f;
+
     Options reader_opts;
     {
         BOX3D bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
@@ -136,39 +140,48 @@ TEST(LogTest, test_two_a)
     }
 
     {
-        FauxReader reader;
-        reader.setOptions(reader_opts);
-        filters::Programmable xfilter;
-        xfilter.setOptions(xfilter_opts);
-        xfilter.setInput(&reader);
-        filters::Programmable yfilter;
-        yfilter.setOptions(yfilter_opts);
-        yfilter.setInput(&xfilter);
+        ReaderPtr reader(f.createReader("readers.faux"));
+        reader->setOptions(reader_opts);
+
+        FilterPtr xfilter(f.createFilter("filters.programmable"));
+        xfilter->setOptions(xfilter_opts);
+        xfilter->setInput(reader.get());
+
+        FilterPtr yfilter(f.createFilter("filters.programmable"));
+        yfilter->setOptions(yfilter_opts);
+        yfilter->setInput(xfilter.get());
 
         PointContext ctx;
-        yfilter.prepare(ctx);
+        yfilter->prepare(ctx);
+        EXPECT_TRUE(true);
 
-        reader.log()->setLevel(LogLevel::Debug5);
-        xfilter.log()->setLevel(LogLevel::Debug5);
-        yfilter.log()->setLevel(LogLevel::Debug5);
+        reader->log()->setLevel(LogLevel::Debug5);
+        xfilter->log()->setLevel(LogLevel::Debug5);
+        yfilter->log()->setLevel(LogLevel::Debug5);
+        EXPECT_TRUE(true);
 
-        PointBufferSet pbSet = yfilter.execute(ctx);
+        PointBufferSet pbSet = yfilter->execute(ctx);
+        EXPECT_TRUE(true);
         EXPECT_EQ(pbSet.size(), 1u);
         PointBufferPtr buf = *pbSet.begin();
         EXPECT_EQ(buf->size(), 750u);
     }
 
     bool ok1 = Support::compare_text_files(
-         Support::temppath("logtest_123.txt"),
-         Support::datapath("logs/logtest_123.txt"));
-    EXPECT_TRUE(ok1);
+        Support::temppath("logtest_123.txt"),
+        Support::datapath("logs/logtest_123.txt"));
+    
     if (ok1)
-        FileUtils::deleteFile(Support::temppath("logtest_123.txt"));
+      FileUtils::deleteFile(Support::temppath("logtest_123.txt"));
+
+    EXPECT_TRUE(ok1);
 }
 
 
 TEST(LogTest, test_two_b)
 {
+    StageFactory f;
+
     Options reader_opts;
     {
         BOX3D bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
@@ -226,23 +239,25 @@ TEST(LogTest, test_two_b)
     }
 
     {
-        FauxReader reader;
-        reader.setOptions(reader_opts);
-        filters::Programmable xfilter;
-        xfilter.setOptions(xfilter_opts);
-        xfilter.setInput(&reader);
-        filters::Programmable yfilter;
-        yfilter.setOptions(yfilter_opts);
-        yfilter.setInput(&xfilter);
+        ReaderPtr reader(f.createReader("readers.faux"));
+        reader->setOptions(reader_opts);
+
+        FilterPtr xfilter(f.createFilter("filters.programmable"));
+        xfilter->setOptions(xfilter_opts);
+        xfilter->setInput(reader.get());
+
+        FilterPtr yfilter(f.createFilter("filters.programmable"));
+        yfilter->setOptions(yfilter_opts);
+        yfilter->setInput(xfilter.get());
 
         PointContext ctx;
-        yfilter.prepare(ctx);
+        yfilter->prepare(ctx);
 
-        reader.log()->setLevel(LogLevel::Debug5);
-        xfilter.log()->setLevel(LogLevel::Debug5);
-        yfilter.log()->setLevel(LogLevel::Debug5);
+        reader->log()->setLevel(LogLevel::Debug5);
+        xfilter->log()->setLevel(LogLevel::Debug5);
+        yfilter->log()->setLevel(LogLevel::Debug5);
 
-        PointBufferSet pbSet = yfilter.execute(ctx);
+        PointBufferSet pbSet = yfilter->execute(ctx);
         EXPECT_EQ(pbSet.size(), 1u);
         PointBufferPtr buf = *pbSet.begin();
         EXPECT_EQ(buf->size(), 750u);
@@ -251,15 +266,12 @@ TEST(LogTest, test_two_b)
     bool ok1 = Support::compare_text_files(
         Support::temppath("logtest_test_two_b_1.txt"),
         Support::datapath("logs/logtest_1.txt"));
-    EXPECT_TRUE(ok1);
     bool ok2 = Support::compare_text_files(
         Support::temppath("logtest_test_two_b_2.txt"),
         Support::datapath("logs/logtest_2.txt"));
-    EXPECT_TRUE(ok2);
     bool ok3 = Support::compare_text_files(
         Support::temppath("logtest_test_two_b_3.txt"),
         Support::datapath("logs/logtest_3.txt"));
-    EXPECT_TRUE(ok3);
 
     if (ok1)
         FileUtils::deleteFile(Support::temppath("logtest_test_two_b_1.txt"));
@@ -269,11 +281,16 @@ TEST(LogTest, test_two_b)
 
     if (ok3)
         FileUtils::deleteFile(Support::temppath("logtest_test_two_b_3.txt"));
+
+    EXPECT_TRUE(ok1);
+    EXPECT_TRUE(ok2);
+    EXPECT_TRUE(ok3);
 }
 
 
 TEST(LogTest, test_three)
 {
+    StageFactory f;
     // verify we can redirect the stdout inside the python script
 
     Options reader_opts;
@@ -311,15 +328,16 @@ TEST(LogTest, test_three)
     }
 
     {
-        FauxReader reader;
-        reader.setOptions(reader_opts);
-        filters::Programmable xfilter;
-        xfilter.setOptions(xfilter_opts);
-        xfilter.setInput(&reader);
+        ReaderPtr reader(f.createReader("readers.faux"));
+        reader->setOptions(reader_opts);
+
+        FilterPtr xfilter(f.createFilter("filters.programmable"));
+        xfilter->setOptions(xfilter_opts);
+        xfilter->setInput(reader.get());
 
         PointContext ctx;
-        xfilter.prepare(ctx);
-        PointBufferSet pbSet = xfilter.execute(ctx);
+        xfilter->prepare(ctx);
+        PointBufferSet pbSet = xfilter->execute(ctx);
         EXPECT_EQ(pbSet.size(), 1u);
         PointBufferPtr buf = *pbSet.begin();
         EXPECT_EQ(buf->size(), 750u);
@@ -328,10 +346,11 @@ TEST(LogTest, test_three)
     bool ok = Support::compare_text_files(
         Support::temppath("mylog_three.txt"),
         Support::datapath("logs/log_py.txt"));
-    EXPECT_TRUE(ok);
 
     if (ok)
         FileUtils::deleteFile(Support::temppath("mylog_three.txt"));
+
+    EXPECT_TRUE(ok);
 }
 
 #endif

@@ -38,8 +38,7 @@
 
 #include <pdal/plang/PythonEnvironment.hpp>
 
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/thread/once.hpp>
+#include <random>
 #include <boost/uuid/uuid.hpp>
 
 namespace pdal
@@ -74,7 +73,7 @@ private:
     plang::PythonEnvironment* m_pythonEnvironment;
     bool m_bIsGDALInitialized;
     pdal::gdal::GlobalDebug* m_gdal_debug;
-    boost::random::mt19937 m_rng;
+    std::mt19937 m_rng;
     
     GlobalEnvironment(const GlobalEnvironment&); // nope
     GlobalEnvironment& operator=(const GlobalEnvironment&); // nope

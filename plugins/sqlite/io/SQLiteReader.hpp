@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include <pdal/Reader.hpp>
+#include <pdal/DbReader.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/XMLSchema.hpp>
 
@@ -45,17 +45,19 @@
 namespace pdal
 {
 
-class PDAL_DLL SQLiteReader : public pdal::Reader
+class PDAL_DLL SQLiteReader : public DbReader
 {
 public:
-    SET_STAGE_NAME("readers.sqlite", "SQLite3 Reader")
+    SET_STAGE_NAME("readers.sqlite", "Read data from SQLite3 database files.")
     SET_STAGE_ENABLED(true)
 
-    SQLiteReader();
+    SQLiteReader()
+    {}
+
     static Options getDefaultOptions();
-    schema::XMLSchema fetchSchema(std::string const& query) const;
     SpatialReference fetchSpatialReference(std::string const& query) const;
-    SQLite& getSession() { return *m_session.get(); }
+    SQLite& getSession()
+        { return *m_session.get(); }
 
 private:
     std::unique_ptr<SQLite> m_session;
@@ -68,7 +70,6 @@ private:
 
     bool m_at_end;
     bool b_doneQuery;
-    int32_t m_point_size;
 
     virtual void initialize();
     virtual void processOptions(const Options& options);

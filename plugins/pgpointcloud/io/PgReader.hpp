@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include <pdal/Reader.hpp>
+#include <pdal/DbReader.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/XMLSchema.hpp>
@@ -46,7 +46,7 @@
 namespace pdal
 {
 
-class PDAL_DLL PgReader : public pdal::Reader
+class PDAL_DLL PgReader : public DbReader
 {
     class Patch
     {
@@ -83,7 +83,7 @@ class PDAL_DLL PgReader : public pdal::Reader
 
 public:
     SET_STAGE_NAME("readers.pgpointcloud",
-        "PostgreSQL Pointcloud Database Reader")
+        "Read data from pgpointcloud format. \"query\" option needs to be a SQL statment selecting the data.")
     SET_STAGE_LINK("http://pdal.io/stages/readers.pgpointcloud.html")
 #ifdef PDAL_HAVE_POSTGRESQL
     SET_STAGE_ENABLED(true)
@@ -130,7 +130,6 @@ private:
     mutable uint32_t m_pcid;
     mutable point_count_t m_cached_point_count;
     mutable point_count_t m_cached_max_points;
-    schema::XMLSchema m_schema;
 
     bool m_atEnd;
     size_t m_point_size;

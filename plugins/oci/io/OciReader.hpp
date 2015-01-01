@@ -36,7 +36,7 @@
 
 #include <vector>
 
-#include <pdal/Reader.hpp>
+#include <pdal/DbReader.hpp>
 #include <pdal/StageFactory.hpp>
 
 #include "OciCommon.hpp"
@@ -44,14 +44,14 @@
 namespace pdal
 {
 
-class PDAL_DLL OciReader : public pdal::Reader
+class PDAL_DLL OciReader : public DbReader
 {
 public:
-    SET_STAGE_NAME("readers.oci", "OCI Reader")
+    SET_STAGE_NAME("readers.oci", "Read point cloud data from Oracle SDO_POINTCLOUD.")
     SET_STAGE_LINK("http://pdal.io/stages/readers.oci.html")
     SET_STAGE_ENABLED(true)
 
-    OciReader() : pdal::Reader()
+    OciReader()
     {}
 
     static Options getDefaultOptions();
@@ -76,10 +76,10 @@ private:
         point_count_t numPts);
     point_count_t readPointMajor(PointBuffer& buffer, BlockPtr block,
         point_count_t numPts);
-    char *seekDimMajor(const schema::DimInfo& d, BlockPtr block);
+    char *seekDimMajor(const DimType& d, BlockPtr block);
     char *seekPointMajor(BlockPtr block);
     bool readOci(Statement stmt, BlockPtr block);
-    schema::XMLSchema *findSchema(Statement stmt, BlockPtr block);
+    XMLSchema *findSchema(Statement stmt, BlockPtr block);
 
     Connection m_connection;
     Statement m_stmt;
@@ -90,7 +90,7 @@ private:
     bool m_updatePointSourceId;
     boost::optional<SpatialReference> m_spatialRef;
     bool m_atEnd;
-    std::map<int32_t, schema::XMLSchema> m_schemas;
+    std::map<int32_t, XMLSchema> m_schemas;
 
     OciReader& operator=(const OciReader&); // not implemented
     OciReader(const OciReader&); // not implemented

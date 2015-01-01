@@ -49,42 +49,31 @@ TEST(DecimationFilterTest, DecimationFilterTest_test1)
     ops.add("mode", "random");
     ops.add("num_points", 30);
     StageFactory f;
-    StageFactory::ReaderCreator* rc = f.getReaderCreator("readers.faux");
-    if (rc)
-    {
-        EXPECT_TRUE(rc);
+    ReaderPtr reader(f.createReader("readers.faux"));
+    EXPECT_TRUE(reader.get());
+    reader->setOptions(ops);
 
-        Stage* reader = rc();
-        reader->setOptions(ops);
+    Options decimationOps;
+    decimationOps.add("step", 10);
+    
+    FilterPtr filter(f.createFilter("filters.decimation"));
+    EXPECT_TRUE(filter.get());
+    filter->setOptions(decimationOps);
+    filter->setInput(reader.get());
 
-        Options decimationOps;
-        decimationOps.add("step", 10);
-        
-        StageFactory::FilterCreator* fc = f.getFilterCreator("filters.decimation");
-        if (fc)
-        {
-            EXPECT_TRUE(fc);
+    PointContext ctx;
 
-            Stage* filter = fc();
-            filter->setOptions(decimationOps);
-            filter->setInput(reader);
-            EXPECT_TRUE(filter->getDescription() == "Decimation Filter");
+    filter->prepare(ctx);
+    PointBufferSet pbSet = filter->execute(ctx);
+    EXPECT_EQ(pbSet.size(), 1u);
+    PointBufferPtr buf = *pbSet.begin();
+    EXPECT_EQ(buf->size(), 3u);
 
-            PointContext ctx;
+    uint64_t t0 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 0);
+    uint64_t t1 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 1);
+    uint64_t t2 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 2);
 
-            filter->prepare(ctx);
-            PointBufferSet pbSet = filter->execute(ctx);
-            EXPECT_EQ(pbSet.size(), 1u);
-            PointBufferPtr buf = *pbSet.begin();
-            EXPECT_EQ(buf->size(), 3u);
-
-            uint64_t t0 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 0);
-            uint64_t t1 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 1);
-            uint64_t t2 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 2);
-
-            EXPECT_EQ(t0, 0u);
-            EXPECT_EQ(t1, 10u);
-            EXPECT_EQ(t2, 20u);
-        }
-    }
+    EXPECT_EQ(t0, 0u);
+    EXPECT_EQ(t1, 10u);
+    EXPECT_EQ(t2, 20u);
 }

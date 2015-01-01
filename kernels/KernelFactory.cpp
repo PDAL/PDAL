@@ -38,7 +38,6 @@
 
 #include <pdal/Utils.hpp>
 
-#include <boost/shared_ptr.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
@@ -137,7 +136,7 @@ void KernelFactory::loadPlugins()
 
     if (pluginDir.size() == 0)
     {
-        pluginDir = "/usr/local/lib:../lib:../bin";
+        pluginDir = "/usr/local/lib:./lib:../lib:../bin";
     }
 
     std::vector<std::string> pluginPathVec;

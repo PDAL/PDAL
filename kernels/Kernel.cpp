@@ -36,7 +36,6 @@
 #include "Kernel.hpp"
 #include <iostream>
 
-#include <boost/timer.hpp>
 #include <boost/algorithm/string.hpp>
 
 #include <pdal/pdal_config.hpp>
@@ -46,6 +45,7 @@
 
 #include <BufferReader.hpp>
 
+#include <memory>
 #include <vector>
 
 #include <boost/tokenizer.hpp>
@@ -62,7 +62,6 @@ Kernel::Kernel()
     , m_isDebug(false)
     , m_verboseLevel(0)
     , m_showHelp(false)
-    , m_showDrivers(false)
     , m_showOptions("")
     , m_showVersion(false)
     , m_showTime(false)
@@ -302,11 +301,6 @@ int Kernel::innerRun()
         return 0;
     }
 
-    if (m_showDrivers)
-    {
-        outputDrivers();
-        return 0;
-    }
     if (!m_showOptions.empty())
     {
         pdal::StageFactory factory;
@@ -327,17 +321,7 @@ int Kernel::innerRun()
         return 1;
     }
 
-    boost::timer timer;
-
-    int status = execute();
-
-    if (status == 0 && m_showTime)
-    {
-        const double t = timer.elapsed();
-        std::cout << "Elapsed time: " << t << " seconds" << std::endl;
-    }
-
-    return status;
+    return execute();
 }
 
 
@@ -368,17 +352,16 @@ bool Kernel::isVisualize() const
 
 void Kernel::visualize(PointBufferPtr buffer) const
 {
-    StageFactory f;
-    if (f.getWriterCreator("writers.pclvisualizer"))
-    {
-          BufferReader bufferReader;
-          bufferReader.addBuffer(buffer);
+    BufferReader bufferReader;
+    bufferReader.addBuffer(buffer);
 
-          std::unique_ptr<Writer> writer(KernelSupport::makeWriter("foo.pclviz", &bufferReader));
-          PointContext ctx;
-          writer->prepare(ctx);
-          writer->execute(ctx);
-    }
+    StageFactory f;
+    WriterPtr writer(f.createWriter("writers.pclvisualizer"));
+    writer->setInput(&bufferReader);
+
+    PointContext ctx;
+    writer->prepare(ctx);
+    writer->execute(ctx);
 }
 
 /*
@@ -399,7 +382,7 @@ void Kernel::visualize(PointBufferPtr input_buffer, PointBufferPtr output_buffer
     pclsupport::PDALtoPCD(const_cast<PointBuffer&>(*output_buffer), *output_cloud, output_bounds);
 
     // Create PCLVisualizer
-    boost::shared_ptr<pcl::visualization::PCLVisualizer> p(new pcl::visualization::PCLVisualizer("3D Viewer"));
+    std::shared_ptr<pcl::visualization::PCLVisualizer> p(new pcl::visualization::PCLVisualizer("3D Viewer"));
 
     // Set background to black
     p->setBackgroundColor(0, 0, 0);
@@ -435,7 +418,7 @@ void Kernel::visualize(PointBufferPtr input_buffer, PointBufferPtr output_buffer
       pclsupport::PDALtoPCD(const_cast<PointBuffer&>(*output_buffer), *output_cloud, output_bounds);
 
       // Create PCLVisualizer
-      boost::shared_ptr<pcl::visualization::PCLVisualizer> p(new pcl::visualization::PCLVisualizer("3D Viewer"));
+      std::shared_ptr<pcl::visualization::PCLVisualizer> p(new pcl::visualization::PCLVisualizer("3D Viewer"));
 
       // Set background to black
       p->setBackgroundColor(0, 0, 0);
@@ -537,22 +520,6 @@ void Kernel::addPositionalSwitch(const char* name, int max_count)
     m_positionalOptions.add(name, max_count);
 }
 
-void Kernel::outputDrivers()
-{
-    pdal::StageFactory factory;
-    std::map<std::string, pdal::StageInfo> const& drivers = factory.getStageInfos();
-    std::string headline("------------------------------------------------------------------------------------------");
-
-    std::cout << headline << std::endl;
-    std::cout << "PDAL Drivers" << " (" << pdal::GetFullVersionString() << ")" <<std::endl;
-    std::cout << headline << std::endl << std::endl;
-
-    for (auto i = drivers.begin(); i != drivers.end(); ++i)
-    {
-        std::cout << i->second.toRST() << std::endl;
-    }
-}
-
 void Kernel::outputHelp()
 {
     outputVersion();
@@ -593,7 +560,6 @@ void Kernel::addBasicSwitchSet()
 
     basic_options->add_options()
     ("help,h", po::value<bool>(&m_showHelp)->zero_tokens()->implicit_value(true), "Print help message")
-    ("drivers", po::value<bool>(&m_showDrivers)->zero_tokens()->implicit_value(true), "Show currently registered drivers (including dynamic with PDAL_DRIVER_PATH)")
     ("options", po::value<std::string>(&m_showOptions)->implicit_value("all"), "Show available options for a driver")
     ("debug,d", po::value<bool>(&m_isDebug)->zero_tokens()->implicit_value(true), "Enable debug mode")
     ("report-debug", po::value<bool>(&m_reportDebug)->zero_tokens()->implicit_value(true), "Report PDAL compilation DEBUG status")
@@ -601,7 +567,6 @@ void Kernel::addBasicSwitchSet()
     ("verbose,v", po::value<uint32_t>(&m_verboseLevel)->default_value(0), "Set verbose message level")
     ("version", po::value<bool>(&m_showVersion)->zero_tokens()->implicit_value(true), "Show version info")
     ("visualize", po::value<bool>(&m_visualize)->zero_tokens()->implicit_value(true), "Visualize result")
-    ("timer", po::value<bool>(&m_showTime)->zero_tokens()->implicit_value(true), "Show execution time")
     ("stdin,s", po::value<bool>(&m_usestdin)->zero_tokens()->implicit_value(true), "Read pipeline XML from stdin")
     ("heartbeat", po::value< std::vector<std::string> >(&m_heartbeat_shell_command), "Shell command to run for every progress heartbeat")
     ("scale", po::value< std::string >(&m_scales),

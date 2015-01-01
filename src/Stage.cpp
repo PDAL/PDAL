@@ -37,6 +37,8 @@
 #include <pdal/SpatialReference.hpp>
 #include <pdal/StageRunner.hpp>
 
+#include <memory>
+
 namespace pdal
 {
 
@@ -127,7 +129,7 @@ void Stage::l_processOptions(const Options& options)
     {
         std::string logname =
             options.getValueOrDefault<std::string>("log", "stdlog");
-        m_log = boost::shared_ptr<pdal::Log>(new Log(getName(), logname));
+        m_log = std::shared_ptr<pdal::Log>(new Log(getName(), logname));
     }
     else
     {
@@ -191,8 +193,12 @@ void Stage::setSpatialReference(MetadataNode& m,
     MetadataNode spatialNode = m.findChild(pred);
     if (spatialNode.empty())
     {
-        m.add("spatialreference", spatialRef.getWKT(SpatialReference::eHorizontalOnly, false), "SRS of this stage");
-        m.add("comp_spatialreference", spatialRef.getWKT(SpatialReference::eCompoundOK, false), "SRS of this stage");
+        m.add("spatialreference",
+           spatialRef.getWKT(SpatialReference::eHorizontalOnly, false),
+           "SRS of this stage");
+        m.add("comp_spatialreference",
+            spatialRef.getWKT(SpatialReference::eCompoundOK, false),
+            "SRS of this stage");
     }
 }
 

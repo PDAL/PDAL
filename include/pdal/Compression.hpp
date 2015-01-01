@@ -33,7 +33,6 @@
 ****************************************************************************/
 #pragma once
 
-
 #include <boost/algorithm/string.hpp>
 
 #ifdef PDAL_HAVE_LAZPERF
@@ -51,9 +50,6 @@
 #include <pdal/PointContext.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Compression.hpp>
-#include <pdal/Charbuf.hpp>
-
-
 
 #include <map>
 #include <vector>
@@ -61,9 +57,56 @@
 namespace pdal
 {
 
-
-namespace compression
+namespace
 {
+
+template<typename LasZipEngine>
+size_t addFields(LasZipEngine& engine, const DimTypeList& dims)
+{
+    using namespace Dimension;
+
+    size_t pointSize = 0;
+    for (auto di = dims.begin(); di != dims.end(); ++di)
+    {
+        switch (di->m_type)
+        {
+        case Type::Signed64:
+            engine->template add_field<int32_t>();
+            engine->template add_field<int32_t>();
+            break;
+        case Type::Signed32:
+        case Type::Float:
+            engine->template add_field<int32_t>();
+            break;
+        case Type::Signed16:
+            engine->template add_field<int16_t>();
+            break;
+        case Type::Signed8:
+            engine->template add_field<int8_t>();
+            break;
+        case Type::Unsigned64:
+        case Type::Double:
+            engine->template add_field<uint32_t>();
+            engine->template add_field<uint32_t>();
+            break;
+        case Type::Unsigned32:
+            engine->template add_field<uint32_t>();
+            break;
+        case Type::Unsigned16:
+            engine->template add_field<uint16_t>();
+            break;
+        case Type::Unsigned8:
+            engine->template add_field<uint8_t>();
+            break;
+        default:
+            return 0;
+        }
+        pointSize += Dimension::size(di->m_type);
+    }
+    return pointSize;
+}
+
+} // anonymous namespace
 
 
 namespace CompressionType
@@ -81,310 +124,82 @@ enum Enum
 } // namespace CompressionType
 
 
-template <typename CompressionStream> inline void Compress(PointContextRef ctx,
-              const PointBuffer& buffer,
-              CompressionStream& output,
-              CompressionType::Enum ctype,
-              PointId start,
-              PointId end)
-{
-
 #ifdef PDAL_HAVE_LAZPERF
-    using namespace laszip;
-    using namespace laszip::formats;
-
-    typedef encoders::arithmetic<CompressionStream> EncoderType;
-
-    EncoderType encoder(output);
-    auto compressor = make_dynamic_compressor(encoder);
-    const Dimension::IdList& dims = ctx.dims();
-//     std::cout << listDims(ctx) << std::endl;
-    for (auto di = dims.begin(); di != dims.end(); ++di)
-    {
-        Dimension::Type::Enum t = ctx.dimType(*di);
-        size_t s = ctx.dimSize(*di);
-        if (t == Dimension::Type::Signed32)
-        {
-            if (s == 4)
-            {
-                compressor->template add_field<int>();
-            }
-            else
-                throw pdal_error("Dimension is type Signed32 but size != 4!");
-        }
-        else if (t == Dimension::Type::Signed16)
-        {
-            if (s == 2)
-            {
-                compressor->template add_field<short>();
-            }
-            else
-                throw pdal_error("Dimension is type Signed16 but size != 2  !");
-        }
-        else if (t == Dimension::Type::Signed8)
-        {
-            if (s == 1)
-            {
-                compressor->template add_field<char>();
-            }
-            else
-                throw pdal_error("Dimension is type Signed8 but size != 1!");
-        }
-        else if (t == Dimension::Type::Signed64)
-        {
-            if (s == 8)
-            {
-                compressor->template add_field<int>();
-                compressor->template add_field<int>();
-            }
-            else
-                throw pdal_error("Dimension is type Signed64 but size != 8!");
-        }
-        else if (t == Dimension::Type::Unsigned32)
-        {
-            if (s == 4)
-            {
-                compressor->template add_field<unsigned int>();
-            }
-            else
-                throw pdal_error("Dimension is type Unsigned32 but size != 4!");
-        }
-        else if (t == Dimension::Type::Unsigned16)
-        {
-            if (s == 2)
-            {
-                compressor->template add_field<unsigned short>();
-            }
-            else
-                throw pdal_error("Dimension is type Unsigned16 but size != 2!");
-        }
-        else if (t == Dimension::Type::Unsigned8)
-        {
-            if (s == 1)
-            {
-                compressor->template add_field<unsigned char>();
-            }
-            else
-                throw pdal_error("Dimension is type Unsigned8 but size != 1!");
-        }
-        else if (t == Dimension::Type::Unsigned64)
-        {
-            if (s == 8)
-            {
-                compressor->template add_field<unsigned int>();
-                compressor->template add_field<unsigned int>();
-            }
-            else
-                throw pdal_error("Dimension is type Unsigned64 but size != 8!");
-        }
-        else if (t == Dimension::Type::Double)
-        {
-            if (s == 8)
-            {
-                compressor->template add_field<unsigned int>();
-                compressor->template add_field<unsigned int>();
-//                 compressor->template add_field<las::gpstime>();
-            }
-            else
-                throw pdal_error("Dimension is type Double but size != 8!");
-        }
-        else if (t == Dimension::Type::Float)
-        {
-            if (s == 4)
-            {
-                compressor->template add_field<int>();
-            }
-            else
-                throw pdal_error("Dimension is type Float but size != 4!");
-        }
-        else
-        {
-
-            std::ostringstream oss;
-            oss << "Unhandled compression for dimension of type '" << Dimension::interpretationName(t) << "' for dimension '" << Dimension::name(*di) << "'";
-            throw pdal_error(oss.str());
-        }
-
-    }
-
-    size_t pointSize = ctx.pointSize();
-    if (end == 0) // Set to max
-        end = buffer.size();
-    std::vector<char> bytes;
-    bytes.resize(pointSize * (end - start));
-
-    const char* pos = bytes.data() + (pointSize * start);
-
-    Charbuf buf(bytes);
-    std::ostream strm(&buf);
-    buffer.getBytes(strm, start, end);
-
-    char* end_pos = bytes.data() + (pointSize * end);
-    while (pos != end_pos)
-    {
-        compressor->compress(pos);
-        pos += pointSize;
-    }
-
-    encoder.done();
-#endif
-}
-
-
-
-template <typename CompressionStream> inline PointBufferPtr Decompress(PointContextRef ctx,
-                                                                       CompressionStream& strm,
-                                                                       size_t howMany,
-                                                                       CompressionType::Enum ctype)
+template<typename OutputStream>
+class LazPerfCompressor
 {
-    std::vector<char> output;
-#ifdef PDAL_HAVE_LAZPERF
-    using namespace laszip;
-    using namespace laszip::formats;
+public:
+    LazPerfCompressor(OutputStream& output, const DimTypeList& dims) :
+        m_encoder(output),
+        m_compressor(laszip::formats::make_dynamic_compressor(m_encoder)),
+        m_pointSize(0)
+    { m_pointSize = addFields(m_compressor, dims); }
 
-    typedef decoders::arithmetic<CompressionStream> DecoderType;
+    ~LazPerfCompressor()
+        { done(); }
 
-
-    DecoderType decoder(strm);
-    auto decompressor = make_dynamic_decompressor(decoder);
-    const Dimension::IdList& dims = ctx.dims();
-
-//     std::cout << listDims(ctx) << std::endl;
-    for (auto di = dims.begin(); di != dims.end(); ++di)
+    size_t pointSize() const
+        { return m_pointSize; }
+    point_count_t compress(char *inbuf, size_t bufsize)
     {
-        Dimension::Type::Enum t = ctx.dimType(*di);
-        size_t s = ctx.dimSize(*di);
-        if (t == Dimension::Type::Signed32)
-        {
-            if (s == 4)
-            {
-                decompressor->template add_field<int>();
-            }
-            else
-                throw pdal_error("Dimension is type Signed32 but size != 4!");
-        }
-        else if (t == Dimension::Type::Signed16)
-        {
-            if (s == 2)
-            {
-                decompressor->template add_field<short>();
-            }
-            else
-                throw pdal_error("Dimension is type Signed16 but size != 2  !");
-        }
-        else if (t == Dimension::Type::Signed8)
-        {
-            if (s == 1)
-            {
-                decompressor->template add_field<char>();
-            }
-            else
-                throw pdal_error("Dimension is type Signed8 but size != 1!");
-        }
-        else if (t == Dimension::Type::Signed64)
-        {
-            if (s == 8)
-            {
-                decompressor->template add_field<int>();
-                decompressor->template add_field<int>();
-            }
-            else
-                throw pdal_error("Dimension is type Signed64 but size != 8!");
-        }
-        else if (t == Dimension::Type::Unsigned32)
-        {
-            if (s == 4)
-            {
-                decompressor->template add_field<unsigned int>();
-            }
-            else
-                throw pdal_error("Dimension is type Unsigned32 but size != 4!");
-        }
-        else if (t == Dimension::Type::Unsigned16)
-        {
-            if (s == 2)
-            {
-                decompressor->template add_field<unsigned short>();
-            }
-            else
-                throw pdal_error("Dimension is type Unsigned16 but size != 2!");
-        }
-        else if (t == Dimension::Type::Unsigned8)
-        {
-            if (s == 1)
-            {
-                decompressor->template add_field<unsigned char>();
-            }
-            else
-                throw pdal_error("Dimension is type Unsigned8 but size != 1!");
-        }
-        else if (t == Dimension::Type::Unsigned64)
-        {
-            if (s == 8)
-            {
-                decompressor->template add_field<unsigned int>();
-                decompressor->template add_field<unsigned int>();
-            }
+        point_count_t numRead = 0;
 
-            else
-                throw pdal_error("Dimension is type Unsigned64 but size != 8!");
-        }
-        else if (t == Dimension::Type::Double)
+        char *end = inbuf + bufsize;
+        while (inbuf + m_pointSize <= end)
         {
-            if (s == 8)
-            {
-                decompressor->template add_field<unsigned int>();
-                decompressor->template add_field<unsigned int>();
-//                 decompressor->template add_field<las::gpstime>();
-            }
-            else
-                throw pdal_error("Dimension is type Double but size != 8!");
+            m_compressor->compress(inbuf);
+            inbuf += m_pointSize;
+            numRead++;
         }
-        else if (t == Dimension::Type::Float)
-        {
-            if (s == 4)
-            {
-                decompressor->template add_field<int>();
-            }
-            else
-                throw pdal_error("Dimension is type Float but size != 4!");
-        }
-        else
-        {
+        return numRead;
+    }
+    void done()
+        { m_encoder.done(); }
 
-            std::ostringstream oss;
-            oss << "Unhandled compression for dimension of type '" << Dimension::interpretationName(t) << "' for dimension '" << Dimension::name(*di) << "'";
-            throw pdal_error(oss.str());
-        }
+private:
+    typedef laszip::encoders::arithmetic<OutputStream> Encoder;
+    Encoder m_encoder;
+    typedef typename laszip::formats::dynamic_field_compressor<Encoder>::ptr
+            Compressor;
+    Compressor m_compressor;
+    size_t m_pointSize;
+};
 
+
+template<typename InputStream>
+class LazPerfDecompressor
+{
+public:
+    LazPerfDecompressor(InputStream& input, const DimTypeList& dims) :
+        m_decoder(input),
+        m_decompressor(laszip::formats::make_dynamic_decompressor(m_decoder))
+    { m_pointSize = addFields(m_decompressor, dims); }
+
+    size_t pointSize() const
+        { return m_pointSize; }
+    point_count_t decompress(char *outbuf, size_t bufsize)
+    {
+        point_count_t numWritten = 0;
+
+        char *end = outbuf + bufsize;
+        while (outbuf + m_pointSize <= end)
+        {
+            m_decompressor->decompress(outbuf);
+            outbuf += m_pointSize;
+            numWritten++;
+        }
+        return numWritten;
     }
 
+private:
+    typedef laszip::decoders::arithmetic<InputStream> Decoder;
+    Decoder m_decoder;
+    typedef typename laszip::formats::dynamic_field_decompressor<Decoder>::ptr
+        Decompressor;
+    Decompressor m_decompressor;
+    size_t m_pointSize;
+};
+#endif  // PDAL_HAVE_LAZPERF
 
-    size_t point_size = ctx.pointSize();
-    size_t byte_len = howMany * point_size;
-    output.resize(byte_len);
-
-    char* pos = output.data();
-
-    char* end_pos = pos + (byte_len);
-    while (pos != end_pos)
-    {
-        decompressor->decompress(pos);
-        pos+=point_size;
-    }
-
-#endif
-
-    Charbuf charstreambuf(output, output.size());
-    std::istream istrm(&charstreambuf);
-
-    PointBufferPtr b = PointBufferPtr(new PointBuffer(istrm, ctx, 0, howMany));
-    return b;
-
-
-}
-
-} // compression
 } // namespace pdal
-
 

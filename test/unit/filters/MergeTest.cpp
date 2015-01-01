@@ -45,7 +45,7 @@ TEST(MergeTest, test1)
 
     PipelineManager mgr;
     PipelineReader specReader(mgr);
-    specReader.readPipeline(Support::datapath("filters/merge.xml"));
+    specReader.readPipeline(Support::configuredpath("filters/merge.xml"));
     mgr.execute();
 
     PointBufferSet pbSet = mgr.buffers();

@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pc:PointCloudSchema xmlns:pc="http://pointcloud.org/schemas/PC/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <pc:dimension>
+    <pc:position>1</pc:position>
+    <pc:size>4</pc:size>
+    <pc:description>X coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.</pc:description>
+    <pc:name>X</pc:name>
+    <pc:interpretation>int32_t</pc:interpretation>
+    <pc:scale>0.01</pc:scale>
+    <pc:active>true</pc:active>
+    <pc:uuid>2ee118d1-119e-4906-99c3-42934203f872</pc:uuid>
+    <pc:parent_uuid>00000000-0000-0000-0000-000000000000</pc:parent_uuid>
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>2</pc:position>
+    <pc:size>4</pc:size>
+    <pc:description>Y coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.</pc:description>
+    <pc:name>Y</pc:name>
+    <pc:interpretation>int32_t</pc:interpretation>
+    <pc:scale>0.01</pc:scale>
+    <pc:active>true</pc:active>
+    <pc:uuid>87707eee-2f30-4979-9987-8ef747e30275</pc:uuid>
+    <pc:parent_uuid>00000000-0000-0000-0000-000000000000</pc:parent_uuid>
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>3</pc:position>
+    <pc:size>4</pc:size>
+    <pc:description>Z coordinate as a long integer. You must use the scale and offset information of the header to determine the double value.</pc:description>
+    <pc:name>Z</pc:name>
+    <pc:interpretation>int32_t</pc:interpretation>
+    <pc:scale>0.01</pc:scale>
+    <pc:active>true</pc:active>
+    <pc:uuid>e74b5e41-95e6-4cf2-86ad-e3f5a996da5d</pc:uuid>
+    <pc:parent_uuid>00000000-0000-0000-0000-000000000000</pc:parent_uuid>
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>4</pc:position>
+    <pc:size>2</pc:size>
+    <pc:description>The intensity value is the integer representation of the pulse return magnitude. This value is optional and system specific. However, it should always be included if available.</pc:description>
+    <pc:name>Intensity</pc:name>
+    <pc:interpretation>uint16_t</pc:interpretation>
+    <pc:scale>1</pc:scale>
+    <pc:active>true</pc:active>
+    <pc:uuid>61e90c9a-42fc-46c7-acd3-20d67bd5626f</pc:uuid>
+    <pc:parent_uuid>00000000-0000-0000-0000-000000000000</pc:parent_uuid>
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>5</pc:position>
+    <pc:size>1</pc:size>
+    <pc:description>Return Number: The Return Number is the pulse return number for a given output pulse. A given output laser pulse can have many returns, and they must be marked in sequence of return. The first return will have a Return Number of one, the second a Return Number of two, and so on up to five returns.</pc:description>
+    <pc:name>ReturnNumber</pc:name>
+    <pc:interpretation>uint8_t</pc:interpretation>
+    <pc:scale>1</pc:scale>
+    <pc:active>true</pc:active>
+    <pc:uuid>ffe5e5f8-4cec-4560-abf0-448008f7b89e</pc:uuid>
+    <pc:parent_uuid>00000000-0000-0000-0000-000000000000</pc:parent_uuid>
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>6</pc:position>
+    <pc:size>1</pc:size>
+    <pc:description>Number of Returns (for this emitted pulse): The Number of Returns is the total number of returns for a given pulse. For example, a laser data point may be return two (Return Number) within a total number of five returns.</pc:description>
+    <pc:name>NumberOfReturns</pc:name>
+    <pc:interpretation>uint8_t</pc:interpretation>
+    <pc:scale>1</pc:scale>
+    <pc:active>true</pc:active>
+    <pc:uuid>7c28bfd4-a9ed-4fb2-b07f-931c076fbaf0</pc:uuid>
+    <pc:parent_uuid>00000000-0000-0000-0000-000000000000</pc:parent_uuid>
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>7</pc:position>
+    <pc:size>1</pc:size>
+    <pc:description>The Scan Direction Flag denotes the direction at which the scanner mirror was traveling at the time of the output pulse. A bit value of 1 is a positive scan direction, and a bit value of 0 is a negative scan direction (where positive scan direction is a scan moving from the left side of the in-track direction to the right side and negative the opposite).</pc:description>
+    <pc:name>ScanDirectionFlag</pc:name>
+    <pc:interpretation>uint8_t</pc:interpretation>
+    <pc:scale>1</pc:scale>
+    <pc:active>true</pc:active>
+    <pc:uuid>13019a2c-cf88-480d-a995-0162055fe5f9</pc:uuid>
+    <pc:parent_uuid>00000000-0000-0000-0000-000000000000</pc:parent_uuid>
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>8</pc:position>
+    <pc:size>1</pc:size>
+    <pc:description>The Edge of Flight Line data bit has a value of 1 only when the point is at the end of a scan. It is the last point on a given scan line before it changes direction.</pc:description>
+    <pc:name>EdgeOfFlightLine</pc:name>
+    <pc:interpretation>uint8_t</pc:interpretation>
+    <pc:scale>1</pc:scale>
+    <pc:active>true</pc:active>
+    <pc:uuid>108c18f2-5cc0-4669-ae9a-f41eb4006ea5</pc:uuid>
+    <pc:parent_uuid>00000000-0000-0000-0000-000000000000</pc:parent_uuid>
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>9</pc:position>
+    <pc:size>1</pc:size>
+    <pc:description>Classification in LAS 1.0 was essentially user defined and optional. LAS 1.1 defines a standard set of ASPRS classifications. In addition, the field is now mandatory. If a point has never been classified, this byte must be set to zero. There are no user defined classes since both point format 0 and point format 1 supply 8 bits per point for user defined operations. Note that the format for classification is a bit encoded field with the lower five bits used for class and the three high bits used for flags.</pc:description>
+    <pc:name>Classification</pc:name>
+    <pc:interpretation>uint8_t</pc:interpretation>
+    <pc:scale>1</pc:scale>
+    <pc:active>true</pc:active>
+    <pc:uuid>b4c67de9-cef1-432c-8909-7c751b2a4e0b</pc:uuid>
+    <pc:parent_uuid>00000000-0000-0000-0000-000000000000</pc:parent_uuid>
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>10</pc:position>
+    <pc:size>1</pc:size>
+    <pc:description>The Scan Angle Rank is a signed one-byte number with a valid range from -90 to +90. The Scan Angle Rank is the angle (rounded to the nearest integer in the absolute value sense) at which the laser point was output from the laser system including the roll of the aircraft. The scan angle is within 1 degree of accuracy from +90 to 90 degrees. The scan angle is an angle based on 0 degrees being nadir, and 90 degrees to the left side of the aircraft in the direction of flight.</pc:description>
+    <pc:name>ScanAngleRank</pc:name>
+    <pc:interpretation>int8_t</pc:interpretation>
+    <pc:scale>1</pc:scale>
+    <pc:active>true</pc:active>
+    <pc:uuid>aaadaf77-e0c9-4df0-81a7-27060794cd69</pc:uuid>
+    <pc:parent_uuid>00000000-0000-0000-0000-000000000000</pc:parent_uuid>
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>11</pc:position>
+    <pc:size>1</pc:size>
+    <pc:description>This field may be used at the users discretion</pc:description>
+    <pc:name>UserData</pc:name>
+    <pc:interpretation>uint8_t</pc:interpretation>
+    <pc:scale>1</pc:scale>
+    <pc:active>true</pc:active>
+    <pc:uuid>70eb558e-63d4-4804-b1db-fc2fd716927c</pc:uuid>
+    <pc:parent_uuid>00000000-0000-0000-0000-000000000000</pc:parent_uuid>
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>12</pc:position>
+    <pc:size>2</pc:size>
+    <pc:description>This value indicates the file from which this point originated. Valid values for this field are 1 to 65,535 inclusive with zero being used for a special case discussed below. The numerical value corresponds to the File Source ID from which this point originated. Zero is reserved as a convenience to system implementers. A Point Source ID of zero implies that this point originated in this file. This implies that processing software should set the Point Source ID equal to the File Source ID of the file containing this point at some time during processing. </pc:description>
+    <pc:name>PointSourceId</pc:name>
+    <pc:interpretation>uint16_t</pc:interpretation>
+    <pc:scale>1</pc:scale>
+    <pc:active>true</pc:active>
+    <pc:uuid>4e42e96a-6af0-4fdd-81cb-6216ff47bf6b</pc:uuid>
+    <pc:parent_uuid>00000000-0000-0000-0000-000000000000</pc:parent_uuid>
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>13</pc:position>
+    <pc:size>8</pc:size>
+    <pc:description>The GPS Time is the double floating point time tag value at which the point was acquired. It is GPS Week Time if the Global Encoding low bit is clear and Adjusted Standard GPS Time if the Global Encoding low bit is set (see Global Encoding in the Public Header Block description).</pc:description>
+    <pc:name>GpsTime</pc:name>
+    <pc:interpretation>double</pc:interpretation>
+    <pc:scale>1</pc:scale>
+    <pc:active>true</pc:active>
+    <pc:uuid>aec43586-2711-4e59-9df0-65aca78a4ffc</pc:uuid>
+    <pc:parent_uuid>00000000-0000-0000-0000-000000000000</pc:parent_uuid>
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>14</pc:position>
+    <pc:size>2</pc:size>
+    <pc:description>The red image channel value associated with this point</pc:description>
+    <pc:name>Red</pc:name>
+    <pc:interpretation>uint16_t</pc:interpretation>
+    <pc:scale>1</pc:scale>
+    <pc:active>true</pc:active>
+    <pc:uuid>a42ce297-6aa2-4a62-bd29-2db19ba862d5</pc:uuid>
+    <pc:parent_uuid>00000000-0000-0000-0000-000000000000</pc:parent_uuid>
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>15</pc:position>
+    <pc:size>2</pc:size>
+    <pc:description>The green image channel value associated with this point</pc:description>
+    <pc:name>Green</pc:name>
+    <pc:interpretation>uint16_t</pc:interpretation>
+    <pc:scale>1</pc:scale>
+    <pc:active>true</pc:active>
+    <pc:uuid>7752759d-5713-48cd-9842-51db350cc979</pc:uuid>
+    <pc:parent_uuid>00000000-0000-0000-0000-000000000000</pc:parent_uuid>
+  </pc:dimension>
+  <pc:dimension>
+    <pc:position>16</pc:position>
+    <pc:size>2</pc:size>
+    <pc:description>The blue image channel value associated with this point</pc:description>
+    <pc:name>Blue</pc:name>
+    <pc:interpretation>uint16_t</pc:interpretation>
+    <pc:scale>1</pc:scale>
+    <pc:active>true</pc:active>
+    <pc:uuid>5c1a99c8-1829-4d5b-8735-4f6f393a7970</pc:uuid>
+    <pc:parent_uuid>00000000-0000-0000-0000-000000000000</pc:parent_uuid>
+  </pc:dimension>
+  <pc:metadata>
+    <Reader type="readers.pipeline">
+      <Option name="debug">false</Option>
+      <Option name="filename">pipeline_reproject.xml</Option>
+      <Option name="verbose">0</Option>
+      <Metadata name="filters.inplacereprojection" type="blank">
+        <Metadata name="spatialreference" type="spatialreference" description="the coordinate system">PROJCS["NAD83(HARN) / Oregon Lambert",
+    GEOGCS["NAD83(HARN)",
+        DATUM["NAD83_High_Accuracy_Reference_Network",
+            SPHEROID["GRS 1980",6378137,298.257222101,
+                AUTHORITY["EPSG","7019"]],
+            TOWGS84[0,0,0,0,0,0,0],
+            AUTHORITY["EPSG","6152"]],
+        PRIMEM["Greenwich",0,
+            AUTHORITY["EPSG","8901"]],
+        UNIT["degree",0.0174532925199433,
+            AUTHORITY["EPSG","9122"]],
+        AUTHORITY["EPSG","4152"]],
+    PROJECTION["Lambert_Conformal_Conic_2SP"],
+    PARAMETER["standard_parallel_1",43],
+    PARAMETER["standard_parallel_2",45.5],
+    PARAMETER["latitude_of_origin",41.75],
+    PARAMETER["central_meridian",-120.5],
+    PARAMETER["false_easting",400000],
+    PARAMETER["false_northing",0],
+    UNIT["metre",1,
+        AUTHORITY["EPSG","9001"]],
+    AXIS["X",EAST],
+    AXIS["Y",NORTH],
+    AUTHORITY["EPSG","2993"]]</Metadata>
+      <Metadata name="a_number" type="integer">32</Metadata>    
+      <Metadata name="a_boolean" type="boolean">true</Metadata>
+      <Metadata name="a_float" type="float">1234.5678</Metadata>
+      <Metadata name="a_double" type="double">1234.5678</Metadata>
+      <Metadata name="a_string" type="string">some string</Metadata>
+      <Metadata name="a_binary" type="base64Binary">true</Metadata>AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0BBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiYw==</Metadata>
+    </Reader>
+  </pc:metadata>
+  <pc:orientation>point</pc:orientation>
+</pc:PointCloudSchema>

@@ -144,7 +144,7 @@ int SmoothKernel::execute()
     writerOptions.add("filename", m_outputFile);
     setCommonOptions(writerOptions);
 
-    std::unique_ptr<Writer> writer(KernelSupport::makeWriter(m_outputFile, smoothStage.get()));
+    WriterPtr writer(KernelSupport::makeWriter(m_outputFile, smoothStage.get()));
     writer->setOptions(writerOptions);
 
     std::vector<std::string> cmd = getProgressShellCommand();

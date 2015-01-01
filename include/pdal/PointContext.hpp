@@ -165,6 +165,16 @@ public:
         return assignDim(name, type);
     }
 
+    DimTypeList dimTypes() const
+    {
+        DimTypeList dimTypes;
+
+        const Dimension::IdList& ids = dims();
+        for (auto ii = ids.begin(); ii != ids.end(); ++ii)
+            dimTypes.push_back(DimType (*ii, dimType(*ii)));
+        return dimTypes;
+    }
+
     Dimension::Id::Enum findDim(const std::string& name) const
     {
         Dimension::Id::Enum id = Dimension::id(name);

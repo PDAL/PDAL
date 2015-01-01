@@ -45,11 +45,11 @@
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
 #include <boost/accumulators/statistics/mean.hpp>
-#include <boost/accumulators/statistics/moment.hpp>
+//#include <boost/accumulators/statistics/moment.hpp>
 #include <boost/accumulators/statistics/max.hpp>
 #include <boost/accumulators/statistics/min.hpp>
 #include <boost/accumulators/statistics/count.hpp>
-#include <boost/accumulators/statistics/density.hpp>
+//#include <boost/accumulators/statistics/density.hpp>
 
 namespace pdal
 {
@@ -99,7 +99,7 @@ public:
 class PDAL_DLL DeltaKernel : public Kernel
 {
 public:
-    SET_KERNEL_NAME ("kernels.delta", "Delta Kernel")
+    SET_KERNEL_NAME ("delta", "Delta Kernel")
     SET_KERNEL_LINK ("http://pdal.io/kernels/kernels.delta.html")
     SET_KERNEL_ENABLED (true)
  

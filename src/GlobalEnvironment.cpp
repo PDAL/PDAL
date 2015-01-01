@@ -32,6 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <mutex>
+
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/string_generator.hpp>
@@ -49,11 +51,11 @@ namespace pdal
 {
 
 static GlobalEnvironment* t = 0;
-static boost::once_flag flag = BOOST_ONCE_INIT;
+static std::once_flag flag;
 
 GlobalEnvironment& GlobalEnvironment::get()
 {
-    boost::call_once(init, flag);
+    std::call_once(flag, init);
     return *t;
 }
 
@@ -161,7 +163,7 @@ pdal::gdal::GlobalDebug* GlobalEnvironment::getGDALDebug()
 
 boost::uuids::uuid GlobalEnvironment::generateUUID()
 {
-    boost::uuids::basic_random_generator<boost::mt19937> gen(&m_rng);
+    boost::uuids::basic_random_generator<std::mt19937> gen(&m_rng);
     return gen();
 }
 

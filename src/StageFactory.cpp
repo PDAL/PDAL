@@ -45,7 +45,6 @@
 #include <pdal/Utils.hpp>
 
 
-#include <boost/shared_ptr.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
@@ -84,11 +83,6 @@ MAKE_FILTER_CREATOR(Reprojection, pdal::ReprojectionFilter)
 MAKE_FILTER_CREATOR(Sort, pdal::SortFilter)
 MAKE_FILTER_CREATOR(Splitter, pdal::SplitterFilter)
 MAKE_FILTER_CREATOR(Stats, pdal::StatsFilter)
-
-#ifdef PDAL_HAVE_PYTHON
-MAKE_FILTER_CREATOR(Predicate, pdal::filters::Predicate)
-MAKE_FILTER_CREATOR(Programmable, pdal::filters::Programmable)
-#endif
 
 //
 // define the functions to create the writers
@@ -330,11 +324,6 @@ void StageFactory::registerKnownFilters()
     REGISTER_FILTER(Sort, pdal::SortFilter);
     REGISTER_FILTER(Splitter, pdal::SplitterFilter);
     REGISTER_FILTER(Stats, pdal::StatsFilter);
-
-#ifdef PDAL_HAVE_PYTHON
-    REGISTER_FILTER(Predicate, pdal::filters::Predicate);
-    REGISTER_FILTER(Programmable, pdal::filters::Programmable);
-#endif
 }
 
 
@@ -363,12 +352,11 @@ void StageFactory::loadPlugins()
     // If we don't have a driver path, we'll default to /usr/local/lib and lib
 
     if (pluginDir.size() == 0)
-    {
-        pluginDir = "/usr/local/lib:../lib:../bin";
-    }
+        pluginDir = "/usr/local/lib:./lib:../lib:../bin";
 
     std::vector<std::string> pluginPathVec;
-    boost::algorithm::split(pluginPathVec, pluginDir, boost::algorithm::is_any_of(":"), boost::algorithm::token_compress_on);
+    boost::algorithm::split(pluginPathVec, pluginDir,
+        boost::algorithm::is_any_of(":"), boost::algorithm::token_compress_on);
 
     for (auto pluginPath : pluginPathVec)
     {
@@ -384,12 +372,13 @@ void StageFactory::loadPlugins()
         {
             path p = it->path();
 
-            if (boost::algorithm::istarts_with(p.filename().string(), "libpdal_plugin"))
+            if (boost::algorithm::istarts_with(p.filename().string(),
+                 "libpdal_plugin"))
             {
                 path extension = p.extension();
                 if (boost::algorithm::iends_with(extension.string(), "DLL") ||
-                        boost::algorithm::iends_with(extension.string(), "DYLIB") ||
-                        boost::algorithm::iends_with(extension.string(), "SO"))
+                    boost::algorithm::iends_with(extension.string(), "DYLIB") ||
+                    boost::algorithm::iends_with(extension.string(), "SO"))
                 {
                     std::string basename;
 

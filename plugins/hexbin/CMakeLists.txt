@@ -8,35 +8,19 @@ include_directories(${PROJECT_SOURCE_DIR}/io/las)
 
 find_package(Hexer)
 if (HEXER_FOUND)
-    message(STATUS "Building with Hexer support")
-
     include_directories(${HEXER_INCLUDE_DIR})
     add_definitions(-DHAVE_HEXER=1)
 
-    #
-    # HexBin filter
-    #
-    set(srcs
-        filters/HexBin.cpp
-    )
+    set(srcs filters/HexBin.cpp)
+    set(incs filters/HexBin.hpp)
 
-    set(incs
-        filters/HexBin.hpp
-    )
-
-    set(deps ${HEXER_LIBRARY})
-    PDAL_ADD_PLUGIN(hexbin_filter_lib_name filter hexbin "${srcs}" "${incs}" "${deps}")
+    PDAL_ADD_PLUGIN(libname filter hexbin
+        FILES "${srcs}" "${incs}"
+        LINK_WITH ${HEXER_LIBRARY})
 
     if (WITH_TESTS)
-        #
-        # HexBin tests
-        #
-        set(srcs
-            test/HexbinFilterTest.cpp
-        )
-
-        PDAL_ADD_TEST(hexbintest "${srcs}" ${hexbin_filter_lib_name})
+        PDAL_ADD_TEST(hexbintest
+            FILES test/HexbinFilterTest.cpp
+            LINK_WITH ${libname})
     endif()
-else()
-    message(STATUS "Building without Hexer support")
 endif()

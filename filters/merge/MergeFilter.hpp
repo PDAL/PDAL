@@ -42,7 +42,7 @@ namespace pdal
 class PDAL_DLL MergeFilter : public MultiFilter
 {
 public:
-    SET_STAGE_NAME("filters.merge", "Merge Filter")
+    SET_STAGE_NAME("filters.merge", "Merge data from two different readers into a single stream.")
     SET_STAGE_LINK("http://pdal.io/stages/filters.merge.html")
     SET_STAGE_ENABLED(true)
 

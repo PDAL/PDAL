@@ -46,7 +46,7 @@ namespace pdal
 class PDAL_DLL HexBin : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.hexbin", "Hexbin implementation")
+    SET_STAGE_NAME("filters.hexbin", "Tessellate the point's X/Y domain and determine point density and/or point boundary.")
     SET_STAGE_LINK("http://pdal.io/stages/filters.hexbin.html")
     SET_STAGE_ENABLED(true)
 

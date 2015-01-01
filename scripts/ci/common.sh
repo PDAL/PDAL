@@ -31,5 +31,4 @@ then
     export PDAL_CMAKE_GENERATOR="Ninja"
 else
     export PDAL_CMAKE_GENERATOR="Unix Makefiles"
-    export PDAL_EMBED_BOOST="OFF"
 fi

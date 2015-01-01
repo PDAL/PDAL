@@ -35,118 +35,71 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-
 #include <pdal/PointBuffer.hpp>
-
-#include <iostream>
-#include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/statistics/stats.hpp>
-#include <boost/accumulators/statistics/mean.hpp>
-#include <boost/accumulators/statistics/moment.hpp>
-#include <boost/accumulators/statistics/max.hpp>
-#include <boost/accumulators/statistics/min.hpp>
-#include <boost/accumulators/statistics/count.hpp>
-#include <boost/accumulators/statistics/density.hpp>
-
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_int_distribution.hpp>
 
 namespace pdal
 {
 namespace stats
 {
 
-typedef boost::iterator_range<std::vector<std::pair<double, double> >::iterator > histogram_type;
-#ifndef PDAL_COMPILER_MSVC  // See boost ticket 6535:  https://svn.boost.org/trac/boost/ticket/6535
-typedef boost::accumulators::accumulator_set<double, boost::accumulators::features< boost::accumulators::droppable<boost::accumulators::tag::density> > > density_accumulator;
-#else
-typedef boost::accumulators::accumulator_set<double, boost::accumulators::features< boost::accumulators::tag::density > > density_accumulator ;
-#endif
-typedef boost::accumulators::accumulator_set<double, boost::accumulators::features<     boost::accumulators::droppable<boost::accumulators::tag::mean>,
-        boost::accumulators::droppable<boost::accumulators::tag::max>,
-        boost::accumulators::droppable<boost::accumulators::tag::min>,
-        boost::accumulators::droppable<boost::accumulators::tag::count> > > summary_accumulator;
-
 class PDAL_DLL Summary
 {
 public:
-    Summary(std::string name, uint32_t num_bins, uint32_t sample_size, uint32_t cache_size,
-        uint32_t seed, bool doExact, bool doSample) :
-        m_sample_size(sample_size), m_distribution(0, cache_size),
-        m_doExact(doExact), m_doSample(doSample), m_name(name)
-    {
-        if (seed && m_doSample)
-        {
-            m_rng.seed(seed);
-            m_distribution.reset();
-        }
-    }
+    Summary(std::string name) : m_name(name)
+    { reset(); }
 
     double minimum() const
-        { return (boost::accumulators::min)(m_summary); }
+        { return m_min; }
     double maximum() const
-        { return (boost::accumulators::max)(m_summary); }
+        { return m_max; }
     double average() const
-        { return boost::accumulators::mean(m_summary); }
-    uint64_t count() const
-        { return boost::accumulators::count(m_summary); }
+        { return m_avg; }
+    point_count_t count() const
+        { return m_cnt; }
+    std::string name() const
+        { return m_name; }
 
-    virtual boost::property_tree::ptree toPTree(PointContext ctx) const;
     void extractMetadata(MetadataNode &m) const;
 
     void reset()
     {
-        m_summary.drop<boost::accumulators::tag::mean>();
-        m_summary.drop<boost::accumulators::tag::count>();
-        m_summary.drop<boost::accumulators::tag::max>();
-        m_summary.drop<boost::accumulators::tag::min>();
-        m_counts.clear();
+        m_max = (std::numeric_limits<double>::lowest)();
+        m_min = (std::numeric_limits<double>::max)();
+        m_cnt = 0;
+        m_avg = 0.0;
     }
 
-    template<class T> inline void insert(T value)
+    void insert(double value)
     {
-        m_summary(static_cast<double>(value));
-        if (m_doSample)
-        {
-            uint32_t sample = (uint32_t)m_distribution(m_rng);
-            if (sample < m_sample_size)
-                m_sample.push_back(static_cast<double>(value));
-        }
-
-        if (m_doExact == true)
-            m_counts[(int32_t)value]++;
+        m_cnt++;
+        m_min = (std::min)(m_min, value);
+        m_max = (std::max)(m_max, value);
+        m_avg += (value - m_avg) / m_cnt;
     }
 
 private:
-    summary_accumulator m_summary;
-    std::vector<double> m_sample;
-    uint32_t m_sample_size;
-    boost::random::mt19937 m_rng;
-    boost::random::uniform_int_distribution<> m_distribution;
-    std::map<int32_t, uint32_t> m_counts;
-    bool m_doExact;
-    bool m_doSample;
+    double m_max;
+    double m_min;
+    double m_avg;
+    point_count_t m_cnt;
     std::string m_name;
 };
 
 } // namespace stats
-typedef boost::shared_ptr<stats::Summary> SummaryPtr;
+typedef std::shared_ptr<stats::Summary> SummaryPtr;
 
 // This is just a pass-thorugh filter, which collects some stats about
 // the points that are fed through it
 class PDAL_DLL StatsFilter : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.stats", "Statistics Filter")
+    SET_STAGE_NAME("filters.stats", "Compute statistics about each dimension (mean, min, max, etc.)")
     SET_STAGE_LINK("http://pdal.io/stages/filters.stats.html")
     SET_STAGE_ENABLED(true)
 
     StatsFilter() : Filter()
         {}
 
-    static Options getDefaultOptions();
-
-    boost::property_tree::ptree toPTree(PointContext ctx) const;
     const stats::Summary& getStats(Dimension::Id::Enum d) const;
     void reset();
 
@@ -154,22 +107,12 @@ private:
     StatsFilter& operator=(const StatsFilter&); // not implemented
     StatsFilter(const StatsFilter&); // not implemented
     virtual void processOptions(const Options& options);
-    virtual void initialize();
     virtual void ready(PointContext ctx);
     virtual void done(PointContext ctx);
     virtual void filter(PointBuffer& data);
     void extractMetadata(PointContext ctx);
 
-    std::string m_exact_dim_opt;
-    std::string m_dim_opt;
-    uint32_t m_cache_size;
-    uint32_t m_sample_size;
-    uint32_t m_seed;
-    uint32_t m_bin_count;
-    bool m_do_sample;
-    point_count_t m_numPoints;
-    std::set<std::string> m_dimension_names;
-    std::set<std::string> m_exact_dimension_names;
+    std::string m_dimNames;
     std::map<Dimension::Id::Enum, SummaryPtr> m_stats;
 };
 

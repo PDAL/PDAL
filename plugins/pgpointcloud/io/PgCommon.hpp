@@ -45,25 +45,24 @@
 namespace pdal
 {
 
-inline pdal::compression::CompressionType::Enum getCompressionType(
+inline pdal::CompressionType::Enum getCompressionType(
     std::string const& compression_type)
 {
     if (boost::iequals(compression_type, "dimensional"))
-        return compression::CompressionType::Dimensional;
+        return CompressionType::Dimensional;
     else if (boost::iequals(compression_type, "ght"))
-        return compression::CompressionType::Ght;
+        return CompressionType::Ght;
     else if (boost::iequals(compression_type, "laszperf"))
-        return compression::CompressionType::Lazperf;
-    return compression::CompressionType::None;
+        return CompressionType::Lazperf;
+    return CompressionType::None;
 }
 
 inline PGconn* pg_connect(std::string const& connection)
 {
     PGconn* conn;
     if ( ! connection.size() )
-    {
-        throw pdal_error("unable to connect to database, no connection string was given!");
-    }
+        throw pdal_error("unable to connect to database, no connection "
+            "string was given!");
 
     /* Validate the connection string and get verbose error (?) */
 #ifdef PQconninfoParse
