@@ -7,15 +7,10 @@
 ###############################################################################
 
 configure_file(TestConfig.hpp.in "${CMAKE_CURRENT_BINARY_DIR}/TestConfig.hpp")
-#configure_file(../data/filters/merge.xml.in "${CMAKE_BINARY_DIR}/test/data/filters/merge.xml")
-#configure_file(../data/nitf/chipper.xml.in "${CMAKE_BINARY_DIR}/test/data/nitf/chipper.xml")
-#configure_file(../data/pipeline/pipeline_metadata_reader.xml.in "${CMAKE_BINARY_DIR}/test/data/pipeline/pipeline_metadata_reader.xml")
 
 file(GLOB_RECURSE inFiles RELATIVE "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/test/data/*.in")
-#message(STATUS "GLOBBING!!!!!!!!! ${inFiles}")
 foreach(infileName ${inFiles})
     string(REGEX REPLACE ".in\$" "" outfileName "${infileName}")
-    #message(STATUS "Configure ${CMAKE_SOURCE_DIR}/${infileName} as ${CMAKE_BINARY_DIR}/${outfileName}")
     configure_file("${CMAKE_SOURCE_DIR}/${infileName}" "${CMAKE_BINARY_DIR}/${outfileName}")
 endforeach()
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
@@ -57,7 +52,6 @@ PDAL_ADD_TEST(pdal_pipeline_manager_test FILES PipelineManagerTest.cpp)
 PDAL_ADD_TEST(pdal_point_buffer_test FILES PointBufferTest.cpp)
 PDAL_ADD_TEST(pdal_point_context_test FILES PointContextTest.cpp)
 PDAL_ADD_TEST(pdal_spatial_reference_test FILES SpatialReferenceTest.cpp)
-#PDAL_ADD_TEST(pdal_stage_factory_test FILES StageFactoryTest.cpp) # this one has been disabled for a while, can it go?
 PDAL_ADD_TEST(pdal_stream_factory_test FILES StreamFactoryTest.cpp)
 PDAL_ADD_TEST(pdal_support_test FILES SupportTest.cpp)
 PDAL_ADD_TEST(pdal_user_callback_test FILES UserCallbackTest.cpp)
@@ -84,8 +78,6 @@ set(srcs
     io/sbet/SbetWriterTest.cpp
 )
 PDAL_ADD_TEST(pdal_io_sbet_test FILES "${srcs}")
-#PDAL_ADD_TEST(pdal_io_terrasolid_test FILES io/terrasolid/TerraSolidReaderTest.cpp)
-#PDAL_ADD_TEST(pdal_io_text_test FILES io/text/TextWriterTest.cpp)
 
 #
 # sources for the native filters
