@@ -37,6 +37,7 @@
 #include <stdint.h>
 
 #include <fstream>
+#include <cstring>
 
 #include <pdal/portable_endian.hpp>
 #include <pdal/pdal_internal.hpp>
@@ -159,14 +160,18 @@ public:
 
     OLeStream& operator << (float v)
     {
-        uint32_t tmp = htole32(*(uint32_t *)(&v));
+        uint32_t tmp(0);
+        std::memcpy(&tmp, &v, sizeof(v));
+        tmp = htole32(tmp);
         m_stream->write((char *)&tmp, sizeof(tmp));
         return *this;
     }
 
     OLeStream& operator << (double v)
     {
-        uint64_t tmp = htole64(*(uint64_t *)(&v));
+        uint64_t tmp(0);
+        std::memcpy(&tmp, &v, sizeof(v));
+        tmp = htole64(tmp);
         m_stream->write((char *)&tmp, sizeof(tmp));
         return *this;
     }
