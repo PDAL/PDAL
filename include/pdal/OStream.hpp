@@ -123,7 +123,7 @@ public:
     }
 
     OLeStream& operator << (int16_t v)
-    { 
+    {
         v = (int16_t)htole16((uint16_t)v);
         m_stream->write((char *)&v, sizeof(v));
         return *this;
@@ -159,14 +159,14 @@ public:
 
     OLeStream& operator << (float v)
     {
-        uint32_t tmp = le32toh(*(uint32_t *)(&v));
+        uint32_t tmp = htole32(*(uint32_t *)(&v));
         m_stream->write((char *)&tmp, sizeof(tmp));
         return *this;
     }
 
     OLeStream& operator << (double v)
     {
-        uint64_t tmp = le64toh(*(uint64_t *)(&v));
+        uint64_t tmp = htole64(*(uint64_t *)(&v));
         m_stream->write((char *)&tmp, sizeof(tmp));
         return *this;
     }
