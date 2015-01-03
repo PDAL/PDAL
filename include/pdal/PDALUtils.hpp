@@ -64,9 +64,8 @@ inline ptree toPTree(MetadataNode const& node)
 
     for (auto n = node.children().begin(); n != node.children().end(); ++n)
     {
-
         ptree pnode = toPTree(*n);
-        if (boost::algorithm::iequals(node.kind(),"array"))
+        if (node.kind() == MetadataType::Array)
         {
             boost::optional<ptree&> opt =
                 tree.get_child_optional(path(node.name(), '/'));
@@ -215,6 +214,8 @@ inline ptree toPTree(const SpatialReference& ref)
     return srs;
 }
 
+std::string toJSON(const MetadataNode& m);
+void toJSON(const MetadataNode& m, std::ostream& o);
 
 namespace reST
 {

@@ -46,8 +46,7 @@ namespace pdal
 InfoKernel::InfoKernel()
     : m_showStats(false)
     , m_showSchema(false)
-    , m_showMetadata(false)
-    , m_computeBoundary(false)
+    , m_boundary(false)
     , m_useXML(false)
     , m_useJSON(false)
     , m_useRST(false)
@@ -62,15 +61,15 @@ void InfoKernel::validateSwitches()
 
     if (m_showStats)
         functions++;
-    if (m_showMetadata)
-        functions++;
-    if (m_computeBoundary)
+    if (m_boundary)
         functions++;
     if (m_showSummary)
         functions++;
     if (m_QueryPoint.size())
         functions++;
     if (m_pointIndexes.size())
+        functions++;
+    if (m_showSchema)
         functions++;
 
     if (functions > 1)
@@ -105,25 +104,24 @@ void InfoKernel::addSwitches()
          po::value<bool>(&m_showStats)->zero_tokens()->implicit_value(true),
          "dump stats on all points (reads entire dataset)")
         ("boundary",
-         po::value<bool>(&m_computeBoundary)->zero_tokens()->implicit_value(true),
+         po::value<bool>(&m_boundary)->zero_tokens()->implicit_value(true),
          "compute a hexagonal hull/boundary of dataset")
         ("dimensions", po::value<std::string >(&m_Dimensions),
          "dimensions on which to compute statistics")
         ("schema",
          po::value<bool>(&m_showSchema)->zero_tokens()->implicit_value(true),
          "dump the schema")
-        ("metadata,m",
-         po::value<bool>(&m_showMetadata)->zero_tokens()->implicit_value(true),
-         "dump the metadata")
         ("pipeline-serialization",
          po::value<std::string>(&m_pipelineFile)->default_value(""), "")
-        ("xml", po::value<bool>(&m_useXML)->zero_tokens()->implicit_value(true),
-         "dump XML")
+/**
         ("json",
          po::value<bool>(&m_useJSON)->zero_tokens()->implicit_value(true),
          "dump JSON")
+        ("xml", po::value<bool>(&m_useXML)->zero_tokens()->implicit_value(true),
+         "dump XML")
         ("rst", po::value<bool>(&m_useRST)->zero_tokens()->implicit_value(true),
          "dump RST")
+**/
         ("summary",
          po::value<bool>(&m_showSummary)->zero_tokens()->implicit_value(true),
         "dump summary of the info")
@@ -211,10 +209,8 @@ MetadataNode InfoKernel::dumpPoints(PointBufferPtr buf) const
 }
 
 
-MetadataNode InfoKernel::dumpSummary()
+MetadataNode InfoKernel::dumpSummary(const QuickInfo& qi)
 {
-    QuickInfo qi = m_reader->preview();
-
     MetadataNode summary("summary");
     summary.add("num_points", qi.m_pointCount);
     summary.add("spatial_reference", qi.m_srs.getWKT());
@@ -243,28 +239,59 @@ MetadataNode InfoKernel::dumpSummary()
 }
 
 
-void InfoKernel::dump(PointContext ctx, PointBufferPtr buf)
+void InfoKernel::dump(std::ostream& o)
 {
+    MetadataNode root;
+
     if (m_showStats)
-        m_statsStage->getMetadata();
+    {
+        m_manager->execute();
+        root = m_statsStage->getMetadata();
+    }
 
     if (m_pipelineFile.size() > 0)
         PipelineWriter(*m_manager).writePipeline(m_pipelineFile);
 
     if (m_pointIndexes.size())
-        dumpPoints(buf);
+    {
+        m_manager->execute();
+        PointBufferSet pbSet = m_manager->buffers();
+        assert(pbSet.size() == 1);
+        root = dumpPoints(*pbSet.begin());
+    }
 
     if (m_showSchema)
-        MetadataNode root = utils::toMetadata(ctx);
+    {
+        m_manager->prepare();
+        root = utils::toMetadata(m_manager->context());
+    }
 
     if (m_QueryPoint.size())
-        dumpQuery(buf);
+    {
+        m_manager->execute();
+        PointBufferSet pbSet = m_manager->buffers();
+        assert(pbSet.size() == 1);
+        root = dumpQuery(*pbSet.begin());
+    }
 
     if (m_showSummary)
-        dumpSummary();
+    {
+        QuickInfo qi = m_reader->preview();
+        root = dumpSummary(qi);
+    }
 
-    if (m_computeBoundary)
-        m_hexbinStage->getMetadata();
+    if (m_boundary)
+    {
+        m_manager->execute();
+        PointBufferSet pbSet = m_manager->buffers();
+        assert(pbSet.size() == 1);
+        root = m_hexbinStage->getMetadata();
+    }
+
+    if (!root.valid())
+        return;
+
+    utils::toJSON(root, o);
 }
 
 
@@ -298,20 +325,6 @@ MetadataNode InfoKernel::dumpQuery(PointBufferPtr buf) const
 }
 
 
-void InfoKernel::dumpMetadata(PointContext ctx, const Stage& stage) const
-{
-    boost::property_tree::ptree tree = stage.serializePipeline();
-    std::ostream& ostr = std::cout;
-
-    if (m_useXML)
-        write_xml(ostr, tree);
-    else if (m_useRST)
-        pdal::utils::reST::write_rst(ostr, tree);
-    else
-        write_json(ostr, tree);
-}
-
-
 int InfoKernel::execute()
 {
     Options readerOptions;
@@ -329,34 +342,21 @@ int InfoKernel::execute()
 
     Options options = m_options + readerOptions;
     m_reader->setOptions(options);
+
     if (m_showStats)
     {
         m_statsStage = m_manager->addFilter("filters.stats", stage);
         m_statsStage->setOptions(options);
         stage = m_statsStage;
     }
-    if (m_computeBoundary)
+    if (m_boundary)
     {
         m_hexbinStage = m_manager->addFilter("filters.hexbin", stage);
         stage->setOptions(options);
         stage = m_hexbinStage;
     }
 
-    std::ostream& ostr = std::cout;
-    m_manager->execute();
-    PointBufferSet pbSet = m_manager->buffers();
-    assert(pbSet.size() == 1);
-    dump(m_manager->context(), *pbSet.begin());
-
-//ABELL
-/**
-    if (m_useXML)
-        write_xml(ostr, *m_tree);
-    else if (m_useRST)
-        pdal::utils::reST::write_rst(ostr, *m_tree);
-    else
-        write_json(ostr, *m_tree);
-**/
+    dump(std::cout);
 
     return 0;
 }

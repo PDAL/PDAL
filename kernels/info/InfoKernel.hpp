@@ -70,23 +70,19 @@ private:
     void addSwitches(); // overrride
     void validateSwitches(); // overrride
 
-    void dump(PointContext ctx, PointBufferPtr buf);
+    void dump(std::ostream& o);
 
     MetadataNode dumpPoints(PointBufferPtr buf) const;
     MetadataNode dumpStats() const;
     void dumpPipeline() const;
-    MetadataNode dumpSummary();
+    MetadataNode dumpSummary(const QuickInfo& qi);
     MetadataNode dumpQuery(PointBufferPtr buf) const;
-    void dumpMetadata(PointContext ctx, const Stage&) const;
-    void dumpSDO_PCMetadata(PointContext ctx, Stage const&) const;
 
     std::string m_inputFile;
     bool m_showStats;
     bool m_showSchema;
     bool m_showStage;
-    bool m_showMetadata;
-    bool m_showSDOPCMetadata;
-    bool m_computeBoundary;
+    bool m_boundary;
     pdal::Options m_options;
     std::string m_pointIndexes;
     bool m_useXML;

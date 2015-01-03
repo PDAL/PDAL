@@ -40,6 +40,7 @@
 #include <memory>
 #include <stack>
 #include <vector>
+#include <cstring>
 
 #include <pdal/portable_endian.hpp>
 #include <pdal/pdal_export.hpp>
@@ -124,7 +125,7 @@ protected:
 
 private:
     std::stack<std::istream *> m_streams;
-	IStream(const IStream&);	
+	IStream(const IStream&);
 };
 
 /// Stream wrapper for input of binary data that converts from little-endian
@@ -197,7 +198,7 @@ public:
     {
         m_stream->read((char *)&v, sizeof(v));
         uint32_t tmp = le32toh(*(uint32_t *)(&v));
-        v = *(float *)(&tmp);
+        std::memcpy(&v, &tmp, sizeof(tmp));
         return *this;
     }
 
@@ -205,7 +206,7 @@ public:
     {
         m_stream->read((char *)&v, sizeof(v));
         uint64_t tmp = le64toh(*(uint64_t *)(&v));
-        v = *(double *)(&tmp);
+        std::memcpy(&v, &tmp, sizeof(tmp));
         return *this;
     }
 };
@@ -228,7 +229,7 @@ private:
     std::streampos m_pos;
     IStream& m_stream;
 	IStreamMarker(const IStreamMarker&);
-    IStreamMarker& operator=(const IStreamMarker&); // not implemented	
+    IStreamMarker& operator=(const IStreamMarker&); // not implemented
 };
 
 } // namespace pdal

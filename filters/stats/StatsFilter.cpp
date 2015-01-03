@@ -50,20 +50,6 @@ void Summary::extractMetadata(MetadataNode &m) const
     m.add("name", m_name, "name");
 }
 
-
-boost::property_tree::ptree Summary::toPTree(PointContext ctx) const
-{
-    boost::property_tree::ptree tree;
-
-    uint32_t cnt = static_cast<uint32_t>(count());
-    tree.put("count", cnt);
-    tree.put("minimum", minimum());
-    tree.put("maximum", maximum());
-    tree.put("average", average());
-    tree.put("name", name());
-    return tree;
-}
-
 } // namespace stats
 
 
@@ -136,28 +122,6 @@ void StatsFilter::extractMetadata(PointContext ctx)
         t.add("position", position++);
         s->extractMetadata(t);
     }
-}
-
-
-boost::property_tree::ptree StatsFilter::toPTree(PointContext ctx) const
-{
-    using namespace boost::property_tree ;
-    ptree tree;
-
-    tree.push_back(ptree::value_type("stats", ptree()));
-    auto& p = tree.get_child("stats");
-    
-    uint32_t position(0);
-    for (auto di = m_stats.begin(); di != m_stats.end(); ++di)
-    {
-        Dimension::Id::Enum d = di->first;
-        const SummaryPtr stat = di->second;
-
-        boost::property_tree::ptree subtree = stat->toPTree(ctx);
-        subtree.add("position", position++);
-        p.add_child("", subtree);
-    }
-    return tree;
 }
 
 

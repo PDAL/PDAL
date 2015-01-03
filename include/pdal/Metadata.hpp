@@ -88,6 +88,7 @@ class MetadataNodeImpl;
 typedef std::shared_ptr<MetadataNodeImpl> MetadataNodeImplPtr;
 typedef std::vector<MetadataNodeImplPtr> MetadataImplList;
 typedef std::map<std::string, MetadataImplList> MetadataSubnodes;
+typedef std::vector<MetadataNode> MetadataNodeList;
 
 class MetadataNodeImpl
 {
@@ -208,10 +209,6 @@ private:
         }
         return MetadataType::Instance;
     }
-
-    std::string toJSON() const;
-    void toJSON(std::ostream& o, int level) const;
-    void subnodesToJSON(std::ostream& o, int level) const;
 
     std::string m_name;
     std::string m_descrip;
@@ -470,13 +467,10 @@ public:
 
     std::string type() const
         { return m_impl->m_type; }
-    std::string kind() const
-        {
-            if (m_impl->m_kind == MetadataType::Array)
-                return "array";
-            else
-                return "instance";
-        }
+
+    MetadataType::Enum kind() const
+        { return m_impl->m_kind; }
+
     std::string name() const
         { return m_impl->m_name; }
 
@@ -516,9 +510,10 @@ public:
 
     std::string description() const
         { return m_impl->m_descrip; }
-    std::vector<MetadataNode> children() const
+
+    MetadataNodeList children() const
     {
-        std::vector<MetadataNode> outnodes;
+        MetadataNodeList outnodes;
 
         const MetadataSubnodes& nodes = m_impl->m_subnodes;
         for (auto si = nodes.begin(); si != nodes.end(); ++si)
@@ -529,9 +524,10 @@ public:
         }
         return outnodes;
     }
-    std::vector<MetadataNode> children(const std::string& name) const
+
+    MetadataNodeList children(const std::string& name) const
     {
-        std::vector<MetadataNode> outnodes;
+        MetadataNodeList outnodes;
 
         auto si = m_impl->m_subnodes.find(name);
         if (si != m_impl->m_subnodes.end())
@@ -542,12 +538,26 @@ public:
         }
         return outnodes;
     }
+
+    bool hasChildren() const
+        { return m_impl->m_subnodes.size(); }
+
+    std::vector<std::string> childNames() const
+    {
+        std::vector<std::string> names;
+
+        MetadataSubnodes& nodes = m_impl->m_subnodes;
+        for (auto si = nodes.begin(); si != nodes.end(); ++si)
+            names.push_back(si->first);
+        return names;
+    }
+
     bool operator ! ()
         { return empty(); }
     bool valid() const
         { return !empty(); }
     bool empty() const
-        { return m_impl->m_name.empty(); }
+        { return m_impl->m_name.empty() && !hasChildren(); }
 
     template <typename PREDICATE>
     MetadataNode find(PREDICATE p) const
@@ -612,8 +622,6 @@ public:
         }
         return MetadataNode();
     }
-
-    std::string toJSON() const;
 
 private:
     MetadataNodeImplPtr m_impl;

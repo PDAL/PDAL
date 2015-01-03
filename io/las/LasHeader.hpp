@@ -330,10 +330,6 @@ public:
         return f == 8;
     }
 
-    /// Returns a property_tree that contains
-    /// all of the header data in a structured format.
-    boost::property_tree::ptree pTree() const;
-
     /// Returns true iff the file is compressed (laszip),
     /// as determined by the high bit in the point type
     bool compressed() const
