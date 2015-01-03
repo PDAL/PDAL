@@ -229,8 +229,7 @@ TEST(PointBufferTest, metadata)
     delete data;
 
     std::ifstream str1(Support::datapath("pointbuffer/metadata.txt"));
-    std::string json = tree.toJSON();
-    std::istringstream str2(tree.toJSON());
+    std::istringstream str2(utils::toJSON(tree));
     EXPECT_TRUE(Support::compare_text_files(str1, str2));
 }
 

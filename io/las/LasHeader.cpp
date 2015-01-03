@@ -143,64 +143,6 @@ uint16_t LasHeader::basePointLen(uint8_t type)
 }
 
 
-boost::property_tree::ptree LasHeader::pTree() const
-{
-    using boost::property_tree::ptree;
-    ptree pt;
-
-    pt.put("filesignature", m_fileSig);
-    pt.put("projectdid", m_projectGuid);
-    pt.put("systemid", m_systemId);
-    pt.put("softwareid", m_softwareId);
-
-    std::ostringstream version;
-    version << 1 << "." << static_cast<int>(m_versionMinor);
-    pt.put("version", version.str());
-
-    pt.put("filesourceid", m_sourceId);
-
-    std::ostringstream date;
-    date << m_createDOY << "/" << m_createYear;
-    pt.put("date", date.str());
-
-    pt.put("size", m_vlrOffset);
-    pt.put("dataoffset", m_pointOffset);
-
-    pt.put("count", m_pointCount);
-    pt.put("pointformat", m_pointFormat);
-    pt.put("datarecordlength", m_pointLen);
-    pt.put("compressed", m_isCompressed);
-
-    ptree return_count;
-    for (size_t i = 0; i < m_pointCountByReturn.size(); ++i)
-    {
-        ptree r;
-        r.put("id", i);
-        r.put("count", m_pointCountByReturn[i]);
-        return_count.add_child("return", r);
-    }
-    pt.add_child("returns", return_count);
-
-    pt.put("scale.x", scaleX());
-    pt.put("scale.y", scaleY());
-    pt.put("scale.z", scaleZ());
-
-    pt.put("offset.x", offsetX());
-    pt.put("offset.y", offsetY());
-    pt.put("offset.z", offsetZ());
-
-    pt.put("minimum.x", minX());
-    pt.put("minimum.y", minY());
-    pt.put("minimum.z", minZ());
-
-    pt.put("maximum.x", maxX());
-    pt.put("maximum.y", maxY());
-    pt.put("maximum.z", maxZ());
-
-    return pt;
-}
-
-
 bool LasHeader::valid() const
 {
     if (m_fileSig != FILE_SIGNATURE)

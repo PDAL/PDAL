@@ -78,9 +78,9 @@ typedef std::vector<BpfDimension> BpfDimensionList;
 
 struct BpfHeader
 {
-    BpfHeader(LogPtr log) : m_version(0), m_len(0), m_numDim(0),
+    BpfHeader() : m_version(0), m_len(0), m_numDim(0),
         m_compression(0), m_numPts(0), m_coordId(0), m_spacing(0.0),
-        m_startTime(0.0), m_endTime(0.0), m_log(log)
+        m_startTime(0.0), m_endTime(0.0)
     {}
 
     int32_t m_version;
@@ -99,6 +99,8 @@ struct BpfHeader
     std::vector<BpfDimension> m_staticDims;
     LogPtr m_log;
 
+    void setLog(const LogPtr& log)
+         { m_log = log; }
     bool read(ILeStream& stream);
     bool readV3(ILeStream& stream);
     bool readV1(ILeStream& stream);

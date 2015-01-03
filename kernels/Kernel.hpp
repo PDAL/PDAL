@@ -59,7 +59,6 @@ namespace pdal
 //    --help / -h
 //    --verbose / -v
 //    --version
-//    --timer
 //
 class PDAL_DLL Kernel
 {

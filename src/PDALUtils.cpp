@@ -38,8 +38,115 @@ using namespace std;
 
 namespace pdal
 {
+
+namespace {
+
+void toJSON(const MetadataNode& m, std::ostream& o, int level);
+
+void subnodesToJSON(const MetadataNode& parent, std::ostream& o, int level)
+{
+    const std::string indent(level * 2, ' ');
+
+    std::vector<std::string> names = parent.childNames();
+
+    for (auto ni = names.begin(); ni != names.end(); ++ni)
+    {
+        MetadataNodeList children = parent.children(*ni);
+
+        MetadataNode& node = *children.begin();
+        if (node.kind() == MetadataType::Array)
+        {
+            o << indent << "\"" << node.name() << "\": [" << std::endl;
+            for (auto ci = children.begin(); ci != children.end(); ++ci)
+            {
+                MetadataNode& m = *ci;
+
+                o << indent << "{" << std::endl;
+                toJSON(m, o, level + 1);
+                o << indent << "}";
+                if (ci != children.rbegin().base() - 1)
+                    o << ",";
+                o << std::endl;
+            }
+            o << indent << "]";
+        }
+        else
+        {
+            o << indent << "\"" << node.name() << "\":" << std::endl;
+            o << indent << "{" << std::endl;
+            toJSON(node, o, level + 1);
+            o << indent << "}";
+        }
+        if (ni != names.rbegin().base() - 1)
+            o << ",";
+        o << std::endl;
+    }
+}
+
+void toJSON(const MetadataNode& m, std::ostream& o, int level)
+{
+    std::string indent(level * 2, ' ');
+    std::string description(Utils::escapeJSON(m.description()));
+    std::string value(Utils::escapeJSON(m.value()));
+    std::string type(m.type());
+    MetadataNodeList children = m.children();
+
+    if (description.size())
+    {
+        o << indent << "\"description\":\"" << description << "\"";
+        if (type.size() || value.size() || children.size())
+            o << ",";
+        o << std::endl;
+    }
+
+    if (type.size())
+    {
+        o << indent << "\"type\":\"" << type << "\"";
+        if (value.size() || children.size())
+            o << ",";
+        o << std::endl;
+    }
+
+    if (value.size())
+    {
+        o << indent << "\"value\":\"" << value << "\"";
+        if (m.hasChildren())
+            o << ",";
+        o << std::endl;
+    }
+    subnodesToJSON(m, o, level);
+}
+
+} // unnamed namespace
+
 namespace utils
 {
+
+std::string toJSON(const MetadataNode& m)
+{
+    std::ostringstream o;
+
+    toJSON(m, o);
+    return o.str();
+}
+
+void toJSON(const MetadataNode& m, std::ostream& o)
+{
+    o << "{" << std::endl;
+
+    if (m.name().empty())
+        subnodesToJSON(m, o, 1);
+    else
+    {
+        o << "  \"" << m.name() << "\":" << std::endl;
+        o << "  {" << std::endl;
+        pdal::toJSON(m, o, 2);
+        o << "  }" << std::endl;
+    }
+
+    o << "}" << std::endl;
+}
+
 namespace reST
 {
     
@@ -83,8 +190,6 @@ std::ostream& toRST(const ptree& pt, std::ostream& os)
     write_rst(os, pt);
     return os;
 }
-
-
 
 } // namespace reST
 } // namespace utils

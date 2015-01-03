@@ -164,9 +164,14 @@ Stage* PipelineManager::getStage() const
 }
 
 
-point_count_t PipelineManager::execute()
+void PipelineManager::prepare() const
 {
     m_lastStage->prepare(m_context);
+}
+
+point_count_t PipelineManager::execute()
+{
+    prepare();
     m_pbSet = m_lastStage->execute(m_context);
     point_count_t cnt = 0;
     for (auto pi = m_pbSet.begin(); pi != m_pbSet.end(); ++pi)

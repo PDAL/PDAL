@@ -56,9 +56,6 @@ public:
     SET_STAGE_LINK("http://pdal.io/stages/readers.bpf.html")
     SET_STAGE_ENABLED(true)
 
-    BpfReader() : Reader(), m_header(log())
-        {}
-
     virtual point_count_t numPoints() const
         {  return (point_count_t)m_header.m_numPts; }
 private:

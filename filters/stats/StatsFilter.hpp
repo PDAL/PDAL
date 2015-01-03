@@ -59,7 +59,6 @@ public:
     std::string name() const
         { return m_name; }
 
-    virtual boost::property_tree::ptree toPTree(PointContext ctx) const;
     void extractMetadata(MetadataNode &m) const;
 
     void reset()
@@ -101,7 +100,6 @@ public:
     StatsFilter() : Filter()
         {}
 
-    boost::property_tree::ptree toPTree(PointContext ctx) const;
     const stats::Summary& getStats(Dimension::Id::Enum d) const;
     void reset();
 
