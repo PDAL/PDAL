@@ -476,6 +476,13 @@ void PgWriter::writeTile(PointBuffer const& buffer)
     std::string values(" (pa) VALUES ('");
 
     m_insert.append(insert_into);
+
+    if (m_schema_name.size())
+    {
+        m_insert.append(m_schema_name);
+        m_insert.append(".");
+    }
+
     m_insert.append(m_table_name);
     m_insert.append(values);
 
