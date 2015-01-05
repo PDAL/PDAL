@@ -568,7 +568,7 @@ void XMLSchema::writeXml(xmlTextWriterPtr w) const
             (const xmlChar*) "metadata", NULL);
 
         boost::property_tree::ptree output;
-        PipelineWriter::writeMetadata(output, m_metadata);
+        PipelineWriter::writeMetadata(output, m_metadata.children());
         std::ostringstream oss;
         boost::property_tree::xml_parser::write_xml(oss, output);
         std::string xml = oss.str();

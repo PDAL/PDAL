@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pc:PointCloudSchema xmlns:pc="http://pointcloud.org/schemas/PC/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <pc:dimension>
+    <pc:position>1</pc:position>
+    <pc:size>4</pc:size>
+    <pc:description>Ég get etið gler án þess að meiða mig.</pc:description>
+    <pc:name>X</pc:name>
+    <pc:interpretation>int32_t</pc:interpretation>
+    <pc:scale>0.01</pc:scale>
+    <pc:active>true</pc:active>
+    <pc:uuid>2ee118d1-119e-4906-99c3-42934203f872</pc:uuid>
+    <pc:parent_uuid>00000000-0000-0000-0000-000000000000</pc:parent_uuid>
+  </pc:dimension>
+  <pc:metadata>
+    <Metadata name="אני יכול לאכול זכוכית וזה לא מזיק לי." type="string">أنا قادر على أكل الزجاج و هذا لا يؤلمني</Metadata>
+  </pc:metadata>
+  <pc:orientation>point</pc:orientation>
+</pc:PointCloudSchema>

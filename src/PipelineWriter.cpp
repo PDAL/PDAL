@@ -124,6 +124,14 @@ void PipelineWriter::writeMetadata(boost::property_tree::ptree& tree,
 }
 
 
+void PipelineWriter::writeMetadata(boost::property_tree::ptree& tree,
+    const MetadataNodeList& input)
+{
+    for (auto mi = input.begin(); mi != input.end(); ++mi)
+        tree.add_child("Metadata", getMetadataEntry(*mi));
+}
+
+
 void PipelineWriter::writePipeline(const std::string& filename) const
 {
     const Stage* stage = m_manager.isWriterPipeline() ?
