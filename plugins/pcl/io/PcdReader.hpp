@@ -48,7 +48,6 @@ class PDAL_DLL PcdReader : public pdal::Reader
 public:
     SET_STAGE_NAME("readers.pcd", "Read data from Point Cloud Library (PCL).")
     SET_STAGE_LINK("http://pdal.io/stages/readers.pcd.html")
-    SET_STAGE_ENABLED(true)
 
     PcdReader() : Reader() {};
 

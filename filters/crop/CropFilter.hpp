@@ -54,7 +54,6 @@ class PDAL_DLL CropFilter : public Filter
 public:
     SET_STAGE_NAME("filters.crop", CROPFILTERDOCS)
     SET_STAGE_LINK("http://pdal.io/stages/filters.crop.html")
-    SET_STAGE_ENABLED(true)
 
     CropFilter();
 

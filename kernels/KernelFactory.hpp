@@ -100,7 +100,6 @@ inline void KernelFactory::registerKernelDriverInfo()
 
     pdal::KernelInfo info(T::s_getName(), T::s_getDescription());
     info.setInfoLink(T::s_getInfoLink());
-    info.setIsEnabled(T::s_isEnabled());
 
     m_driver_info.insert(
         std::pair<std::string, pdal::KernelInfo>(T::s_getName(), info));

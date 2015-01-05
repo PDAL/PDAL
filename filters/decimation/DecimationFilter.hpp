@@ -45,7 +45,6 @@ class PDAL_DLL DecimationFilter : public Filter
 public:
     SET_STAGE_NAME("filters.decimation", "Rank decimation filter. Keep every Nth point.")
     SET_STAGE_LINK("http://pdal.io/stages/filters.decimation.html")
-    SET_STAGE_ENABLED(true)
 
     DecimationFilter();
 

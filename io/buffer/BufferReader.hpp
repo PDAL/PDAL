@@ -45,7 +45,6 @@ class PDAL_DLL BufferReader : public pdal::Reader
 public:
     SET_STAGE_NAME("readers.buffer", "PointBuffer Reader")
     SET_STAGE_LINK("http://pdal.io/stages/readers.buffer.html")
-    SET_STAGE_ENABLED(true)
 
     BufferReader() : Reader()
         {}

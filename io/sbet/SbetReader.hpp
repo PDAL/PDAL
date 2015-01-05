@@ -47,7 +47,6 @@ class PDAL_DLL SbetReader : public pdal::Reader
 public:
     SET_STAGE_NAME("readers.sbet", "SBET Reader")
     SET_STAGE_LINK("http://pdal.io/stages/readers.sbet.html")
-    SET_STAGE_ENABLED(true)
 
     SbetReader() : Reader()
         {}

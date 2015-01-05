@@ -48,11 +48,6 @@ public:
     SET_STAGE_NAME("writers.pgpointcloud",
         "Write points to PostgreSQL pgpointcloud output")
     SET_STAGE_LINK("http://pdal.io/stages/writers.pgpointcloud.html")
-#ifdef PDAL_HAVE_POSTGRESQL
-    SET_STAGE_ENABLED(true)
-#else
-    SET_STAGE_ENABLED(false)
-#endif
 
     PgWriter();
     ~PgWriter();

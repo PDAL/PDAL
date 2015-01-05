@@ -124,10 +124,6 @@ public:
     static std::string s_getInfoLink() { return infolink; }  \
     std::string getInfoLink() const { return infolink; }
 
-#define SET_KERNEL_ENABLED(YES_OR_NO) \
-    static bool s_isEnabled() { return YES_OR_NO; } \
-    bool isEnabled() const { return YES_OR_NO; }
-
 protected:
     bool m_usestdin;
 
