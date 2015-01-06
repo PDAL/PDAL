@@ -101,7 +101,6 @@ class PDAL_DLL DeltaKernel : public Kernel
 public:
     SET_KERNEL_NAME ("delta", "Delta Kernel")
     SET_KERNEL_LINK ("http://pdal.io/kernels/kernels.delta.html")
-    SET_KERNEL_ENABLED (true)
  
     DeltaKernel();
     int execute(); // overrride

@@ -65,7 +65,6 @@ class PDAL_DLL LasWriter : public pdal::Writer
 public:
     SET_STAGE_NAME("writers.las", LASWRITERDOC)
     SET_STAGE_LINK("http://pdal.io/stages/writers.las.html")
-    SET_STAGE_ENABLED(true)
 
     LasWriter() : m_ostream(NULL)
          { construct(); }

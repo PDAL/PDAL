@@ -134,7 +134,6 @@ inline void StageFactory::registerDriverInfo()
 
     pdal::StageInfo info(T::s_getName(), T::s_getDescription());
     info.setInfoLink(T::s_getInfoLink());
-    info.setIsEnabled(T::s_isEnabled());
     info.addProvidedDimensions(T::getDefaultDimensions());
 
     std::vector<Option> options = T::getDefaultOptions().getOptions();

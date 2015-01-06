@@ -88,7 +88,6 @@ class PDAL_DLL QfitReader : public pdal::Reader
 public:
     SET_STAGE_NAME("readers.qfit", "QFIT Reader")
     SET_STAGE_LINK("http://pdal.io/stages/readers.qfit.html")
-    SET_STAGE_ENABLED(true)
 
     QfitReader();
 

@@ -110,16 +110,6 @@ public:
         return m_link;
     }
 
-    inline void setIsEnabled(bool isEnabled)
-    {
-        m_isEnabled = isEnabled;
-    }
-    
-    inline bool getIsEnabled() const
-    {
-        return m_isEnabled;
-    }
-        
     std::string optionsToRST() const;
     
     inline std::string toRST() const
@@ -127,7 +117,7 @@ public:
         std::ostringstream strm;
         std::string link(getInfoLink());
         bool bDoLink = link.size() > 0;
-    
+         
         // strm << headline << std::endl;
         if (bDoLink)
             strm << "`";
@@ -139,14 +129,6 @@ public:
 
         strm << headline << std::endl;
     
-        strm << std::endl;
-        std::string enabled("ENABLED");
-        if (!getIsEnabled())
-        {
-            enabled = std::string ("NOT ENABLED");
-        }
-        
-        strm << "Status: " << enabled << std::endl << std::endl;
         strm << getDescription() << std::endl;
         
         if (bDoLink)
@@ -163,7 +145,6 @@ private:
     Dimension::IdList m_dimensions;
     std::vector<Option> m_options;
     std::string m_link;
-    bool m_isEnabled;
 };
 
 /// Output operator for serialization

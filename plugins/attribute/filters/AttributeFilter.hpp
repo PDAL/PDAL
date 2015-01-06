@@ -115,7 +115,6 @@ class PDAL_DLL AttributeFilter : public Filter
 public:
     SET_STAGE_NAME("filters.attribute", ATTRIBUTEDOCS)
     SET_STAGE_LINK("http://pdal.io/stages/filters.attribute.html")
-    SET_STAGE_ENABLED(true)
 
     AttributeFilter() : Filter(), m_geosEnvironment(0) {};
     static Options getDefaultOptions();

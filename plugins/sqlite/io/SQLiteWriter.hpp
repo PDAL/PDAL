@@ -46,7 +46,6 @@ class PDAL_DLL SQLiteWriter : public DbWriter
 {
 public:
     SET_STAGE_NAME("writers.sqlite", "Write data to SQLite3 database files.")
-    SET_STAGE_ENABLED(true)
     SQLiteWriter();
 
 private:

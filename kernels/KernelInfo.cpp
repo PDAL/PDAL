@@ -52,14 +52,13 @@ std::ostream& operator<<(std::ostream& ostr, const KernelInfo& info)
 }
 
 KernelInfo::KernelInfo(std::string const& name, std::string const& description)
-    : m_name(name), m_description(description), m_isEnabled(false) {}
+    : m_name(name), m_description(description) {}
 
 /// copy constructor
 KernelInfo::KernelInfo(KernelInfo const& other)
     : m_name(other.m_name)
     , m_description(other.m_description)
     , m_link(other.m_link)
-    , m_isEnabled(other.m_isEnabled)
 {
     return;
 }

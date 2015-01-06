@@ -85,11 +85,6 @@ public:
     SET_STAGE_NAME("readers.pgpointcloud",
         "Read data from pgpointcloud format. \"query\" option needs to be a SQL statment selecting the data.")
     SET_STAGE_LINK("http://pdal.io/stages/readers.pgpointcloud.html")
-#ifdef PDAL_HAVE_POSTGRESQL
-    SET_STAGE_ENABLED(true)
-#else
-    SET_STAGE_ENABLED(false)
-#endif
 
     PgReader();
     ~PgReader();

@@ -49,7 +49,6 @@ class PDAL_DLL OciReader : public DbReader
 public:
     SET_STAGE_NAME("readers.oci", "Read point cloud data from Oracle SDO_POINTCLOUD.")
     SET_STAGE_LINK("http://pdal.io/stages/readers.oci.html")
-    SET_STAGE_ENABLED(true)
 
     OciReader()
     {}

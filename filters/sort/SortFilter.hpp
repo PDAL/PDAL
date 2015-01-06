@@ -45,7 +45,6 @@ class PDAL_DLL SortFilter : public Filter
 public:
     SET_STAGE_NAME("filters.sort", "Sort data based on a given dimension.")
     SET_STAGE_LINK("http://www.pdal.io/stages/filters.sort.html")
-    SET_STAGE_ENABLED(true)
 
     SortFilter()
     {}

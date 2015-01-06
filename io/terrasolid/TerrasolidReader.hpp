@@ -96,7 +96,6 @@ class PDAL_DLL TerrasolidReader : public pdal::Reader
 {
 public:
     SET_STAGE_NAME("readers.terrasolid", "TerraSolid Reader")
-    SET_STAGE_ENABLED(true)
 
     TerrasolidReader() : pdal::Reader(),
         m_format(TERRASOLID_Format_Unknown)

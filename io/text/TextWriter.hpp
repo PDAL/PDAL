@@ -52,7 +52,6 @@ class PDAL_DLL TextWriter : public pdal::Writer
 public:
     SET_STAGE_NAME("writers.text", "Text Writer")
     SET_STAGE_LINK("http://pdal.io/stages/writers.text.html")
-    SET_STAGE_ENABLED(true)
 
     TextWriter() : pdal::Writer()
     {}
