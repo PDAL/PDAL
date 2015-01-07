@@ -140,7 +140,10 @@ public:
         strm << headline << std::endl;
     
         strm << getDescription() << std::endl;
-        strm << "Plugin version: " << getPluginVersion() << std::endl;
+
+        std::string version(getPluginVersion());
+        if (version.size())
+            strm << "Plugin version: " << getPluginVersion() << std::endl;
         
         if (bDoLink)
         {
