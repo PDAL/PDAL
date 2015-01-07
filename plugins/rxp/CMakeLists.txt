@@ -1,7 +1,7 @@
 set(RXP_TEST_NAME rxptest)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories(${PROJECT_SOURCE_DIR}/plugin/rxp)
+include_directories(${PROJECT_SOURCE_DIR}/plugins/rxp/io)
 
 find_package(RiVLib COMPONENTS scanlib REQUIRED)
 
