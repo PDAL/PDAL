@@ -110,6 +110,16 @@ public:
         return m_link;
     }
 
+    inline void setPluginVersion(std::string const& version)
+    {
+        m_plugin_version = version;
+    }
+ 
+    inline std::string const& getPluginVersion() const
+    {
+        return m_plugin_version;
+    }
+        
     std::string optionsToRST() const;
     
     inline std::string toRST() const
@@ -130,6 +140,7 @@ public:
         strm << headline << std::endl;
     
         strm << getDescription() << std::endl;
+        strm << "Plugin version: " << getPluginVersion() << std::endl;
         
         if (bDoLink)
         {
@@ -145,6 +156,7 @@ private:
     Dimension::IdList m_dimensions;
     std::vector<Option> m_options;
     std::string m_link;
+    std::string m_plugin_version;
 };
 
 /// Output operator for serialization

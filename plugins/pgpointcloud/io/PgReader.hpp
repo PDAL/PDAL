@@ -85,6 +85,7 @@ public:
     SET_STAGE_NAME("readers.pgpointcloud",
         "Read data from pgpointcloud format. \"query\" option needs to be a SQL statment selecting the data.")
     SET_STAGE_LINK("http://pdal.io/stages/readers.pgpointcloud.html")
+    SET_PLUGIN_VERSION("1.0.0b1")
 
     PgReader();
     ~PgReader();

@@ -47,6 +47,7 @@ class PDAL_DLL PCLBlock : public Filter
 public:
     SET_STAGE_NAME("filters.pclblock", "PCL Block implementation")
     SET_STAGE_LINK("http://www.pdal.io/stages/filters.pclblock.html")
+    SET_PLUGIN_VERSION("1.0.0b1")
 
     PCLBlock() : Filter()
     {}

@@ -48,6 +48,7 @@ class PDAL_DLL ProgrammableFilter : public Filter
 public:
     SET_STAGE_NAME("filters.programmable", "Manipulate data using inline Python")
     SET_STAGE_LINK("http://pdal.io/stages/filters.programmable.html")
+    SET_PLUGIN_VERSION("1.0.0b1")
 
     ProgrammableFilter() : Filter(), m_script(NULL)
         {}

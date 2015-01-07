@@ -49,6 +49,7 @@ class PDAL_DLL PcdWriter : public pdal::Writer
 public:
     SET_STAGE_NAME("writers.pcd", "Write data in Point Cloud Library (PCL) format.")
     SET_STAGE_LINK("http://pdal.io/stages/writers.pcd.html")
+    SET_PLUGIN_VERSION("1.0.0b1")
 
     PcdWriter() : pdal::Writer() {};
 

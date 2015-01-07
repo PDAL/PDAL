@@ -46,6 +46,7 @@ class PDAL_DLL NitfWriter : public LasWriter
 public:
     SET_STAGE_NAME("writers.nitf", "NITF Writer")
     SET_STAGE_LINK("http://pdal.io/stages/writers.nitf.html")
+    SET_PLUGIN_VERSION("1.0.0b1")
 
     NitfWriter() ;
 
