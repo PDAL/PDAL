@@ -46,7 +46,6 @@ class PDAL_DLL MortonOrderFilter : public pdal::Filter
 public:
     SET_STAGE_NAME("filters.mortonorder", MORTONDOCS)
     SET_STAGE_LINK("http://pdal.io/stages/filters.morton.html")
-    SET_STAGE_ENABLED(true)
 
     MortonOrderFilter() : Filter() {}
 

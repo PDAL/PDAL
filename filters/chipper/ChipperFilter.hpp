@@ -138,7 +138,6 @@ class PDAL_DLL ChipperFilter : public pdal::Filter
 public:
     SET_STAGE_NAME("filters.chipper", CHIPPERDOCS)
     SET_STAGE_LINK("http://pdal.io/stages/filters.chipper.html")
-    SET_STAGE_ENABLED(true)
 
     ChipperFilter() : Filter(),
         m_xvec(DIR_X), m_yvec(DIR_Y), m_spare(DIR_NONE)

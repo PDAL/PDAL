@@ -81,7 +81,6 @@ class PDAL_DLL FauxReader : public pdal::Reader
 {
 public:
     SET_STAGE_NAME("readers.faux", "Faux Reader")
-    SET_STAGE_ENABLED(true)
 
     FauxReader();
 

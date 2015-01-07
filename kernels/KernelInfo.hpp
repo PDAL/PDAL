@@ -80,21 +80,10 @@ public:
         return m_link;
     }
 
-    inline void setIsEnabled(bool isEnabled)
-    {
-        m_isEnabled = isEnabled;
-    }
-
-    inline bool getIsEnabled() const
-    {
-        return m_isEnabled;
-    }
-
 private:
     std::string m_name;
     std::string m_description;
     std::string m_link;
-    bool m_isEnabled;
 };
 
 /// Output operator for serialization

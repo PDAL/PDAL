@@ -110,14 +110,14 @@ public:
         return m_link;
     }
 
-    inline void setIsEnabled(bool isEnabled)
+    inline void setPluginVersion(std::string const& version)
     {
-        m_isEnabled = isEnabled;
+        m_plugin_version = version;
     }
-    
-    inline bool getIsEnabled() const
+ 
+    inline std::string const& getPluginVersion() const
     {
-        return m_isEnabled;
+        return m_plugin_version;
     }
         
     std::string optionsToRST() const;
@@ -127,7 +127,7 @@ public:
         std::ostringstream strm;
         std::string link(getInfoLink());
         bool bDoLink = link.size() > 0;
-    
+         
         // strm << headline << std::endl;
         if (bDoLink)
             strm << "`";
@@ -139,15 +139,11 @@ public:
 
         strm << headline << std::endl;
     
-        strm << std::endl;
-        std::string enabled("ENABLED");
-        if (!getIsEnabled())
-        {
-            enabled = std::string ("NOT ENABLED");
-        }
-        
-        strm << "Status: " << enabled << std::endl << std::endl;
         strm << getDescription() << std::endl;
+
+        std::string version(getPluginVersion());
+        if (version.size())
+            strm << "Plugin version: " << getPluginVersion() << std::endl;
         
         if (bDoLink)
         {
@@ -163,7 +159,7 @@ private:
     Dimension::IdList m_dimensions;
     std::vector<Option> m_options;
     std::string m_link;
-    bool m_isEnabled;
+    std::string m_plugin_version;
 };
 
 /// Output operator for serialization

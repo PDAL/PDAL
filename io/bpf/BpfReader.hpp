@@ -54,7 +54,6 @@ class PDAL_DLL BpfReader : public Reader
 public:
     SET_STAGE_NAME("readers.bpf", BPFREADERDOC)
     SET_STAGE_LINK("http://pdal.io/stages/readers.bpf.html")
-    SET_STAGE_ENABLED(true)
 
     virtual point_count_t numPoints() const
         {  return (point_count_t)m_header.m_numPts; }

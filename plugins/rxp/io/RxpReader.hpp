@@ -143,7 +143,7 @@ class PDAL_DLL RxpReader : public pdal::Reader
 public:
     SET_STAGE_NAME("readers.rxp", "RXP Reader")
     SET_STAGE_LINK("http://pdal.io/stages/readers.rxp.html")
-    SET_STAGE_ENABLED(true)
+    SET_PLUGIN_VERSION("1.0.0b1")
 
     RxpReader()
         : pdal::Reader()

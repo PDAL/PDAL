@@ -109,6 +109,8 @@ public:
         { return Dimension::IdList(); }
     static std::string s_getInfoLink()
         { return std::string(); }
+    static std::string s_getPluginVersion()
+        { return std::string(); }
     virtual boost::property_tree::ptree toPTree(PointContextRef ctx) const
         { return boost::property_tree::ptree(); }
 
@@ -122,9 +124,9 @@ public:
     static std::string s_getInfoLink() { return infolink; }  \
     std::string getInfoLink() const { return infolink; }
 
-#define SET_STAGE_ENABLED(YES_OR_NO) \
-    static bool s_isEnabled() { return YES_OR_NO; } \
-    bool isEnabled() const { return YES_OR_NO; }
+#define SET_PLUGIN_VERSION(version) \
+    static std::string s_getPluginVersion() { return version; } \
+    std::string getPluginVersion() { return version; }
 
     virtual StageSequentialIterator* createSequentialIterator() const
         { return NULL; }

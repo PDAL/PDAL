@@ -47,7 +47,6 @@ class PDAL_DLL GroundKernel : public Kernel
 public:
     SET_KERNEL_NAME("ground", "Ground Kernel")
     SET_KERNEL_LINK("http://pdal.io/kernels/kernels.ground.html")
-    SET_KERNEL_ENABLED(true)
 
     GroundKernel();
     int execute();

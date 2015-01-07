@@ -62,6 +62,8 @@ public:
 
     static void writeMetadata(boost::property_tree::ptree& tree,
         const MetadataNode& input);
+    static void writeMetadata(boost::property_tree::ptree& tree,
+        const MetadataNodeList& input);
 
     static boost::property_tree::ptree getMetadataEntry(
         const MetadataNode& input);

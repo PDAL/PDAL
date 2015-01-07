@@ -77,7 +77,6 @@ struct BandInfo
 public:
     SET_STAGE_NAME("filters.colorization", COLORIZATIONDOC)
     SET_STAGE_LINK("http://pdal.io/stages/filters.colorization.html")
-    SET_STAGE_ENABLED(true)
 
     ColorizationFilter() : Filter()
         {}

@@ -57,7 +57,6 @@ class PDAL_DLL LasReader : public pdal::Reader
 public:
     SET_STAGE_NAME("readers.las", LASREADERDOCS)
     SET_STAGE_LINK("http://pdal.io/stages/readers.las.html")
-    SET_STAGE_ENABLED(true)
 
     LasReader() : pdal::Reader(), m_index(0),
             m_istream(NULL)

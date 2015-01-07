@@ -46,7 +46,6 @@ class PDAL_DLL SbetWriter : public pdal::Writer
 public:
     SET_STAGE_NAME("writers.sbet", "SBET Writer")
     SET_STAGE_LINK("http://pdal.io/stages/writers.sbet.html")
-    SET_STAGE_ENABLED(true)
 
     SbetWriter() : pdal::Writer()
         {}

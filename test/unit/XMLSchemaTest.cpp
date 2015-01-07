@@ -43,6 +43,7 @@
 #include <pdal/PointContext.hpp>
 #include <pdal/XMLSchema.hpp>
 
+#include "Support.hpp"
 #include "TestConfig.hpp"
 
 #include <fstream>
@@ -180,4 +181,32 @@ TEST(XMLSchemaTest, copy)
         di1++;
         di3++;
     }
+}
+
+TEST(XMLSchemaTest, utf8)
+{
+    using namespace pdal;
+
+    std::string inFilename(TestConfig::g_data_path +
+        "../../schemas/utf8-schema.xml");
+    std::string inXsdFilename(TestConfig::g_data_path +
+        "../../schemas/LAS.xsd");
+    std::string xml = ReadXML(inFilename);
+    std::string xsd = ReadXML(inXsdFilename);
+
+    XMLSchema s1(xml, xsd);
+
+    std::string descripValue("Ég get etið gler án þess að meiða mig.");
+    std::string metaName("אני יכול לאכול זכוכית וזה לא מזיק לי.");
+    std::string metaValue("أنا قادر على أكل الزجاج و هذا لا يؤلمني");
+
+    XMLDimList dims = s1.xmlDims();
+    EXPECT_EQ(dims.size(), 1U);
+    XMLDim& dim = *dims.begin();
+    EXPECT_EQ(descripValue, dim.m_description);
+    MetadataNodeList mlist = s1.getMetadata().children();
+    EXPECT_EQ(mlist.size(), 1U);
+    MetadataNode& m = *mlist.begin();
+    EXPECT_EQ(m.name(), metaName);
+    EXPECT_EQ(m.value(), metaValue);
 }

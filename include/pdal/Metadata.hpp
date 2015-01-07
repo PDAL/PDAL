@@ -50,6 +50,9 @@
 
 namespace
 {
+    //ABELL - We should either pitch this or add a comment explaining why
+    //  we need to do this.
+    /**
     std::string sanitize(const std::string& name)
     {
         auto ischar = [](char c)
@@ -68,6 +71,7 @@ namespace
         }
         return v;
     }
+    **/
 }
 
 namespace pdal
@@ -97,7 +101,9 @@ class MetadataNodeImpl
 private:
     MetadataNodeImpl(const std::string& name) : m_kind(MetadataType::Instance)
     {
-        m_name = sanitize(name);
+//ABELL
+//        m_name = sanitize(name);
+        m_name = name;
     }
 
     MetadataNodeImpl() : m_kind(MetadataType::Instance)

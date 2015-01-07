@@ -52,7 +52,7 @@ include("${PDAL_SOURCE_DIR}/cmake/pdal_utils.cmake")
 
 # the next line is the ONLY place in the entire pdal system where
 # the version info is hard-coded
-set(PDAL_VERSION_STRING "1.0.0.b1" CACHE STRING "PDAL version")
+set(PDAL_VERSION_STRING "1.0.0.b1" CACHE STRING "PDAL version" FORCE)
 
 DISSECT_VERSION()
 GET_OS_INFO()
@@ -431,15 +431,15 @@ if(WITH_LASZIP)
     endif()
 endif()
 
-option(WITH_COMPRESSION "Choose to use laz-perf compression for database drivers" FALSE)
-if (WITH_COMPRESSION)
+option(WITH_LAZPERF "Choose to use laz-perf compression for database drivers" FALSE)
+if (WITH_LAZPERF)
     find_package(Lazperf)
     set_package_properties(Lazperf PROPERTIES TYPE OPTIONAL)
     if (LAZPERF_FOUND)
         include_directories(${LAZPERF_INCLUDE_DIR})
         set(PDAL_HAVE_LAZPERF 1)
     else()
-        set(WITH_COMPRESSION FALSE)
+        set(WITH_LAZPERF FALSE)
     endif()
 endif()
 

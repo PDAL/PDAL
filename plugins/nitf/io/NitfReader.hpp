@@ -47,7 +47,7 @@ class PDAL_DLL NitfReader : public LasReader
 public:
     SET_STAGE_NAME("readers.nitf", "NITF Reader")
     SET_STAGE_LINK("http://pdal.io/stages/readers.nitf.html")
-    SET_STAGE_ENABLED(true)
+    SET_PLUGIN_VERSION("1.0.0b1")
 
     NitfReader() : LasReader()
         {}

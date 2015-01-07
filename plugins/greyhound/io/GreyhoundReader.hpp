@@ -58,7 +58,7 @@ class PDAL_DLL GreyhoundReader : public pdal::Reader
 public:
     SET_STAGE_NAME("readers.greyhound", "Greyhound Reader")
     SET_STAGE_LINK("http://pdal.io/stages/readers.greyhound.html")
-    SET_STAGE_ENABLED(true)
+    SET_PLUGIN_VERSION("1.0.0b1")
 
     GreyhoundReader();
     ~GreyhoundReader();

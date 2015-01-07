@@ -52,10 +52,8 @@ namespace plang
     class BufferedInvocation;
 }
 
-class DimInfo
+struct DimInfo
 {
-   friend class PointContext;
-public:
     DimInfo() : m_detail(Dimension::COUNT), m_nextFree(Dimension::PROPRIETARY)
         {}
 

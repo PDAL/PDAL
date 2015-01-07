@@ -140,22 +140,6 @@ be hooked into the PDAL infrastructure:
     containing documentation about the stage.  It allows the information to be
     integrated into PDAL’s web site and user information.
 
-    SET_STAGE_ENABLED(<enabled>)
-
-    enabled: A boolean (the constant ‘true’ or ‘false’) that indicates whether
-    the stage is runnable as part of a PDAL build.  Some stages are not runnable
-    if certain prerequisite libraries and systems were not available at the time
-    that PDAL was built.  If this is the case, this macro will normally appear
-    twice:
-
-    ::
-
-        #ifdef HAVE_LIBRARY
-        SET_STAGE_ENABLED(true)
-        #else
-        SET_STAGE_ENABLED(false)
-        #endif
-
 When a pipeline is started, each of its stages is processed in two distinct
 steps.  First, all stages are prepared.
 
