@@ -287,7 +287,7 @@ point_count_t BpfReader::readPointMajor(PointBuffer& data, point_count_t count)
 
 point_count_t BpfReader::readDimMajor(PointBuffer& data, point_count_t count)
 {
-    PointId idx;
+    PointId idx(0);
     PointId startId = data.size();
     point_count_t numRead = 0;
     for (size_t d = 0; d < m_dims.size(); ++d)
@@ -310,7 +310,7 @@ point_count_t BpfReader::readDimMajor(PointBuffer& data, point_count_t count)
 
 point_count_t BpfReader::readByteMajor(PointBuffer& data, point_count_t count)
 {
-    PointId idx;
+    PointId idx(0);
     PointId startId = data.size();
     point_count_t numRead = 0;
 
