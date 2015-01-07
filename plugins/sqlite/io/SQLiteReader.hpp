@@ -49,6 +49,7 @@ class PDAL_DLL SQLiteReader : public DbReader
 {
 public:
     SET_STAGE_NAME("readers.sqlite", "Read data from SQLite3 database files.")
+    SET_PLUGIN_VERSION("1.0.0b1")
 
     SQLiteReader()
     {}

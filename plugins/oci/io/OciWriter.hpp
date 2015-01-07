@@ -50,6 +50,8 @@ class PDAL_DLL OciWriter : public DbWriter
 public:
     SET_STAGE_NAME("writers.oci", "Write data using SDO_PC objects to Oracle.")
     SET_STAGE_LINK("http://pdal.io/stages/writers.oci.html")
+    SET_PLUGIN_VERSION("1.0.0b1")
+
     OciWriter();
 
     static Options getDefaultOptions();

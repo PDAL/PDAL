@@ -61,6 +61,7 @@ StageInfo::StageInfo(StageInfo const& other)
     , m_dimensions(other.m_dimensions)
     , m_options(other.m_options)
     , m_link(other.m_link)
+    , m_plugin_version(other.m_plugin_version)
 {
     return;
 }
@@ -75,6 +76,7 @@ StageInfo& StageInfo::operator=(StageInfo const& rhs)
         m_dimensions = rhs.m_dimensions;
         m_options = rhs.m_options;
         m_link = rhs.m_link;
+        m_plugin_version = rhs.m_plugin_version;
     }
 
     return *this;
