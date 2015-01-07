@@ -105,6 +105,9 @@ std::string StageInfo::optionsToRST() const
     uint32_t default_column(15);
     uint32_t name_column(32);
     uint32_t description_column(40);
+
+    strm << std::left;
+
     for (std::vector<Option>::const_iterator it = options.begin();
         it != options.end();
         ++it)
@@ -128,7 +131,7 @@ std::string StageInfo::optionsToRST() const
             
             strm   << std::setw(name_column) << opt.getName() << " " 
                    << std::setw(default_column) << default_value << " " 
-                   << std::left << std::setw(description_column) << description << std::endl;
+                   << std::setw(description_column) << description << std::endl;
         } else
             strm   << std::setw(name_column) << opt.getName() << " " 
                    << std::setw(default_column) << default_value << " " 
