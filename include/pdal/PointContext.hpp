@@ -217,7 +217,7 @@ public:
     size_t pointSize() const
     {
         size_t size(0);
-        for (auto d: m_dims->m_detail)
+        for (const auto& d : m_dims->m_detail)
             size += d.size();
         return size;
     }

@@ -53,7 +53,7 @@ namespace
     static bool hasOption(vector<Option> const& opts, string const& name)
     {
         bool found = false;
-        for (auto o : opts)
+        for (const auto& o : opts)
             if (o.getName() == name)
                 found = true;
         return found;

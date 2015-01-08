@@ -84,7 +84,7 @@ void GreyhoundReader::addDimensions(PointContextRef pointContext)
 
     m_dimData = schemaExchange.schema();
 
-    for (auto dim : m_dimData)
+    for (const auto& dim : m_dimData)
     {
         pointContext.registerDim(dim.id, dim.type);
         m_pointByteSize += pdal::Dimension::size(dim.type);
@@ -157,7 +157,7 @@ point_count_t GreyhoundReader::setPoints(
 
     while (numRead < pointsToRead)
     {
-        for (auto dim : m_dimData)
+        for (const auto& dim : m_dimData)
         {
             pointBuffer.setField(dim.id, dim.type, nextId, data + dataOffset);
             dataOffset += Dimension::size(dim.type);

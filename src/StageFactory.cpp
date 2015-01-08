@@ -358,7 +358,7 @@ void StageFactory::loadPlugins()
     boost::algorithm::split(pluginPathVec, pluginDir,
         boost::algorithm::is_any_of(":"), boost::algorithm::token_compress_on);
 
-    for (auto pluginPath : pluginPathVec)
+    for (const auto& pluginPath : pluginPathVec)
     {
         if (!boost::filesystem::is_directory(pluginPath))
             continue;

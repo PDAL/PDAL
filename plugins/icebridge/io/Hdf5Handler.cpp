@@ -64,7 +64,7 @@ void Hdf5Handler::initialize(
     try
     {
         // Open each HDF5 DataSet and its corresponding DataSpace.
-        for (auto col : columns)
+        for (const auto& col : columns)
         {
             const std::string dataSetName = col.name;
             const H5::PredType predType = col.predType;
