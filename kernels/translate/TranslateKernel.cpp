@@ -33,11 +33,11 @@
 ****************************************************************************/
 
 #include "TranslateKernel.hpp"
-
-#include <BufferReader.hpp>
-#include <ReprojectionFilter.hpp>
 #include "KernelSupport.hpp"
+
+#include <buffer/BufferReader.hpp>
 #include <pdal/StageFactory.hpp>
+#include <reprojection/ReprojectionFilter.hpp>
 
 namespace pdal
 {

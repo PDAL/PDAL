@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/pdal_internal.hpp>
-#ifdef PDAL_HAVE_PYTHON
 
 #include <pdal/Dimension.hpp>
 #include <pdal/plang/PythonEnvironment.hpp>
@@ -104,9 +103,6 @@ private:
     Invocation& operator=(Invocation const& rhs); // nope
 };
 
-
-}
-} // namespaces
-
-#endif // PDAL_HAVE_PYTHON
+} // namespace plang
+} // namespace pdal
 

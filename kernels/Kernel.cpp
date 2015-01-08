@@ -43,7 +43,7 @@
 
 #include <pdal/pdal_config.hpp>
 
-#include <BufferReader.hpp>
+#include <buffer/BufferReader.hpp>
 
 #include <memory>
 #include <vector>

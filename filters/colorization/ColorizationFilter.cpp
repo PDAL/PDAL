@@ -34,13 +34,14 @@
 
 #include <array>
 
-#include <ColorizationFilter.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/GlobalEnvironment.hpp>
 
 #include <gdal.h>
 #include <ogr_spatialref.h>
 #include <pdal/GDALUtils.hpp>
+
+#include "ColorizationFilter.hpp"
 
 namespace pdal
 {

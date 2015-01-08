@@ -35,13 +35,14 @@
 #pragma once
 
 #include <pdal/pdal_internal.hpp>
-#include <pdal/Bounds.hpp>
-#include <pdal/SpatialReference.hpp>
-#include <pdal/Utils.hpp>
 
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/lexical_cast.hpp>
+
+#include <pdal/Bounds.hpp>
+#include <pdal/Utils.hpp>
+#include <pdal/SpatialReference.hpp>
 
 #include <map>
 #include <memory>

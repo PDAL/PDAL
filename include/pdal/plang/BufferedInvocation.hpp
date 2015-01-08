@@ -32,11 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef PYTHONBUFFEREDINVOCATION_H
-#define PYTHONBUFFEREDINVOCATION_H
-
-#include <pdal/pdal_internal.hpp>
-#ifdef PDAL_HAVE_PYTHON
+#pragma once
 
 #include <pdal/plang/Invocation.hpp>
 #include <pdal/PointBuffer.hpp>
@@ -45,8 +41,6 @@ namespace pdal
 {
 namespace plang
 {
-
-
 
 class PDAL_DLL BufferedInvocation : public Invocation
 {
@@ -61,10 +55,6 @@ private:
     BufferedInvocation& operator=(BufferedInvocation const& rhs); // nope
 };
 
+} // namespace plang
+} // namespace pdal
 
-}
-} // namespaces
-
-#endif
-
-#endif

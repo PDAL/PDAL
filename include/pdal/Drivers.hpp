@@ -34,13 +34,19 @@
 
 #pragma once
 
-#include <BpfReader.hpp>
-#include <BufferReader.hpp>
-#include <FauxReader.hpp>
-#include <LasReader.hpp>
-#include <LasWriter.hpp>
-#include <QfitReader.hpp>
-#include <SbetReader.hpp>
-#include <SbetWriter.hpp>
-#include <TerrasolidReader.hpp>
-#include <TextWriter.hpp>
+#include <pdal/pdal_config.hpp>
+
+#include <buffer/BufferReader.hpp>
+#include <faux/FauxReader.hpp>
+
+#include <las/LasReader.hpp>
+#include <las/LasWriter.hpp>
+
+#include <bpf/BpfReader.hpp>
+
+#include <sbet/SbetReader.hpp>
+#include <sbet/SbetWriter.hpp>
+
+#include <qfit/QfitReader.hpp>
+#include <terrasolid/TerrasolidReader.hpp>
+#include <text/TextWriter.hpp>

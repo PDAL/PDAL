@@ -2,9 +2,6 @@
 # Points2grid plugin CMake configuration
 #
 
-include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories(${PROJECT_SOURCE_DIR}/plugins/p2g)
-
 find_package(P2G)
 if (P2G_FOUND)
     include_directories(${P2G_INCLUDE_DIR})

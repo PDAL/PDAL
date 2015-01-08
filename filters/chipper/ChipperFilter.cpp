@@ -31,7 +31,7 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <ChipperFilter.hpp>
+#include "ChipperFilter.hpp"
 
 #include <iostream>
 #include <limits>

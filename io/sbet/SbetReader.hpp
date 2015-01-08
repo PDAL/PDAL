@@ -37,7 +37,8 @@
 #include <pdal/IStream.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Reader.hpp>
-#include <SbetCommon.hpp>
+
+#include "SbetCommon.hpp"
 
 namespace pdal
 {

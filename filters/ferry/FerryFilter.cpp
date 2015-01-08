@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <FerryFilter.hpp>
+#include "FerryFilter.hpp"
 
 namespace pdal
 {

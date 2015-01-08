@@ -35,10 +35,10 @@
 
 #pragma once
 
-#include <DeltaKernel.hpp>
-#include <DiffKernel.hpp>
-#include <InfoKernel.hpp>
-#include <PipelineKernel.hpp>
-#include <RandomKernel.hpp>
-#include <SortKernel.hpp>
-#include <TranslateKernel.hpp>
+#include <delta/DeltaKernel.hpp>
+#include <diff/DiffKernel.hpp>
+#include <info/InfoKernel.hpp>
+#include <pipeline/PipelineKernel.hpp>
+#include <random/RandomKernel.hpp>
+#include <sort/SortKernel.hpp>
+#include <translate/TranslateKernel.hpp>

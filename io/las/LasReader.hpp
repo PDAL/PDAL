@@ -37,9 +37,9 @@
 #include <pdal/Reader.hpp>
 
 #include <pdal/StreamFactory.hpp>
-#include <LasError.hpp>
-#include <LasHeader.hpp>
-#include <ZipPoint.hpp>
+#include "LasError.hpp"
+#include "LasHeader.hpp"
+#include "ZipPoint.hpp"
 
 namespace pdal
 {

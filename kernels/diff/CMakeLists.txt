@@ -2,10 +2,6 @@
 # Diff kernel CMake configuration
 #
 
-include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories(${PROJECT_SOURCE_DIR}/kernels)
-include_directories(${PROJECT_SOURCE_DIR}/kernels/diff)
-
 #
 # Diff Kernel
 #

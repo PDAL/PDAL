@@ -32,7 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <TerrasolidReader.hpp>
+#include "TerrasolidReader.hpp"
+
 #include <pdal/PointBuffer.hpp>
 #include <pdal/FileUtils.hpp>
 

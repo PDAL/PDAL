@@ -32,17 +32,18 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include "LasWriter.hpp"
+
 #include <boost/uuid/uuid_generators.hpp>
 #include <iostream>
 
-#include <LasWriter.hpp>
-#include <ZipPoint.hpp>
 #include <pdal/Charbuf.hpp>
 #include <pdal/OStream.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Utils.hpp>
 
 #include "GeotiffSupport.hpp"
+#include "ZipPoint.hpp"
 
 namespace pdal
 {
@@ -138,7 +139,7 @@ void LasWriter::getHeaderOptions(const Options &options)
             }
         }
         else
-            value = options.getValueOrDefault<std::string>(name, defVal);
+            value = options.getValueOrDefault(name, defVal);
         m_headerVals[name] = value;
     };
 

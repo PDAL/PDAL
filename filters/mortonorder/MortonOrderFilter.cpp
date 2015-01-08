@@ -32,11 +32,11 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <MortonOrderFilter.hpp>
-
 #include <iostream>
 #include <limits>
 #include <map>
+
+#include "MortonOrderFilter.hpp"
 
 namespace pdal
 {

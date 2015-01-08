@@ -32,10 +32,10 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <SplitterFilter.hpp>
-
 #include <iostream>
 #include <limits>
+
+#include "SplitterFilter.hpp"
 
 namespace pdal
 {

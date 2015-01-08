@@ -169,11 +169,11 @@ Word #       Content
 #include <algorithm>
 #include <map>
 
-#include <QfitReader.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/Utils.hpp>
 
+#include "QfitReader.hpp"
 
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127)  // conditional expression is constant

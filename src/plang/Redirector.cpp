@@ -6,9 +6,6 @@
 //
 // Blog article: http://mateusz.loskot.net/?p=2819
 
-#include <pdal/pdal_internal.hpp>
-#ifdef PDAL_HAVE_PYTHON
-
 #include "Redirector.hpp"
 
 #ifdef PDAL_COMPILER_MSVC
@@ -209,9 +206,6 @@ void Redirector::reset_stdout()
     m_stdout = 0;
 }
 
+} //namespace plang
+} //namespace pdal
 
-
-} //namespaces
-}
-
-#endif

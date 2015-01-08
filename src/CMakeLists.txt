@@ -16,6 +16,7 @@
 #   ...
 
 set(PDAL_HEADERS_DIR "${PROJECT_SOURCE_DIR}/include/pdal")
+set(PDAL_UTIL_DIR "${PROJECT_SOURCE_DIR}/util")
 set(PDAL_HPP "")
 set(PDAL_CPP "")
 
@@ -42,7 +43,6 @@ endif()
 set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/pdal_error.hpp"
   "${PDAL_HEADERS_DIR}/pdal_types.hpp"
-  "${PDAL_HEADERS_DIR}/Bounds.hpp"
   "${PDAL_HEADERS_DIR}/Charbuf.hpp"
   "${PDAL_HEADERS_DIR}/Compression.hpp"
   "${PDAL_HEADERS_DIR}/Dimension.hpp"
@@ -87,7 +87,6 @@ set(PDAL_BASE_HPP
 )
 
 set(PDAL_BASE_CPP
-  Bounds.cpp
   Charbuf.cpp
   FileUtils.cpp
   Filter.cpp
@@ -132,28 +131,30 @@ set(PDAL_FILTERS_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_FILTERS_PATH}")
 # plang parser
 #
 
-set(PDAL_PLANG_PATH plang)
-set(PDAL_PLANG_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_PLANG_PATH}")
-set(PDAL_PLANG_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_PLANG_PATH}")
+if (PDAL_HAVE_PYTHON)
+    set(PDAL_PLANG_PATH plang)
+    set(PDAL_PLANG_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_PLANG_PATH}")
+    set(PDAL_PLANG_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_PLANG_PATH}")
 
-set(PDAL_PLANG_HPP
-  "${PDAL_PLANG_HEADERS}/BufferedInvocation.hpp"
-  "${PDAL_PLANG_HEADERS}/PythonEnvironment.hpp"
-  "${PDAL_PLANG_HEADERS}/Invocation.hpp"
-  "${PDAL_PLANG_SRC}/Redirector.hpp"
-  "${PDAL_PLANG_HEADERS}/Script.hpp"
-)
+    set(PDAL_PLANG_HPP
+      "${PDAL_PLANG_HEADERS}/BufferedInvocation.hpp"
+      "${PDAL_PLANG_HEADERS}/PythonEnvironment.hpp"
+      "${PDAL_PLANG_HEADERS}/Invocation.hpp"
+      "${PDAL_PLANG_SRC}/Redirector.hpp"
+      "${PDAL_PLANG_HEADERS}/Script.hpp"
+    )
 
-set (PDAL_PLANG_CPP
-  "${PDAL_PLANG_SRC}/BufferedInvocation.cpp"
-  "${PDAL_PLANG_SRC}/PythonEnvironment.cpp"
-  "${PDAL_PLANG_SRC}/Invocation.cpp"
-  "${PDAL_PLANG_SRC}/Redirector.cpp"
-  "${PDAL_PLANG_SRC}/Script.cpp"
-)
+    set (PDAL_PLANG_CPP
+      "${PDAL_PLANG_SRC}/BufferedInvocation.cpp"
+      "${PDAL_PLANG_SRC}/PythonEnvironment.cpp"
+      "${PDAL_PLANG_SRC}/Invocation.cpp"
+      "${PDAL_PLANG_SRC}/Redirector.cpp"
+      "${PDAL_PLANG_SRC}/Script.cpp"
+    )
 
-list (APPEND PDAL_CPP ${PDAL_PLANG_CPP} )
-list (APPEND PDAL_HPP ${PDAL_PLANG_HPP} )
+    list (APPEND PDAL_CPP ${PDAL_PLANG_CPP} )
+    list (APPEND PDAL_HPP ${PDAL_PLANG_HPP} )
+endif()
 
 #
 # config
@@ -192,31 +193,9 @@ list (APPEND PDAL_HPP ${PDAL_CONFIG_HPP} )
 
 
 # Standard include directory of PDAL library
-include_directories(../include)
 
 ###############################################################################
 # Targets settings
-
-include_directories(${PROJECT_SOURCE_DIR}/io/bpf)
-include_directories(${PROJECT_SOURCE_DIR}/io/buffer)
-include_directories(${PROJECT_SOURCE_DIR}/io/faux)
-include_directories(${PROJECT_SOURCE_DIR}/io/las)
-include_directories(${PROJECT_SOURCE_DIR}/io/qfit)
-include_directories(${PROJECT_SOURCE_DIR}/io/sbet)
-include_directories(${PROJECT_SOURCE_DIR}/io/text)
-include_directories(${PROJECT_SOURCE_DIR}/io/terrasolid)
-include_directories(${PROJECT_SOURCE_DIR}/filters/chipper)
-include_directories(${PROJECT_SOURCE_DIR}/filters/colorization)
-include_directories(${PROJECT_SOURCE_DIR}/filters/crop)
-include_directories(${PROJECT_SOURCE_DIR}/filters/decimation)
-include_directories(${PROJECT_SOURCE_DIR}/filters/ferry)
-include_directories(${PROJECT_SOURCE_DIR}/filters/merge)
-include_directories(${PROJECT_SOURCE_DIR}/filters/mortonorder)
-include_directories(${PROJECT_SOURCE_DIR}/filters/reprojection)
-include_directories(${PROJECT_SOURCE_DIR}/filters/sort)
-include_directories(${PROJECT_SOURCE_DIR}/filters/splitter)
-include_directories(${PROJECT_SOURCE_DIR}/filters/stats)
-include_directories(${PROJECT_SOURCE_DIR}/kernels/info)
 
 set(PDAL_SOURCES
   ${PDAL_HPP}
@@ -247,11 +226,11 @@ if (WITH_LASZIP)
     target_link_libraries(${PDAL_LIB_NAME} ${LASZIP_LIBRARY})
 endif()
 
-if (WITH_PYTHON)
+if (PDAL_HAVE_PYTHON)
     target_link_libraries(${PDAL_LIB_NAME} ${PYTHON_LIBRARY})
 endif()
 
-if (WITH_LIBXML2)
+if (PDAL_HAVE_LIBXML2)
     target_link_libraries(${PDAL_LIB_NAME} ${LIBXML2_LIBRARIES})
 endif()
 
@@ -261,6 +240,7 @@ target_link_libraries(${PDAL_LIB_NAME}
     ${GDAL_LIBRARY}
     ${GEOS_LIBRARY}
     ${ZLIB_LIBRARIES}
+    PdalUtil
 )
 
 target_link_libraries(${PDAL_LIB_NAME} ${Boost_LIBRARIES})
@@ -272,5 +252,5 @@ set_target_properties(${PDAL_LIB_NAME}
 # Targets installation
 
 install(DIRECTORY "${PDAL_HEADERS_DIR}/"
-  DESTINATION "${PDAL_INCLUDE_DIR}"
+  DESTINATION "${PDAL_INCLUDE_INSTALL_DIR}"
   FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp")

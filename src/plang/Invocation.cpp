@@ -32,10 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/pdal_internal.hpp>
 #include <pdal/GlobalEnvironment.hpp>
-
-#ifdef PDAL_HAVE_PYTHON
 
 #include <pdal/plang/Invocation.hpp>
 
@@ -321,4 +318,3 @@ bool Invocation::execute()
 } // namespace plang
 } // namespace pdal
 
-#endif

@@ -32,8 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <StatsFilter.hpp>
 #include <pdal/Utils.hpp>
+
+#include "StatsFilter.hpp"
 
 namespace pdal
 {

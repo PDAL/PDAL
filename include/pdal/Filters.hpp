@@ -34,14 +34,14 @@
 
 #pragma once
 
-#include <ChipperFilter.hpp>
-#include <ColorizationFilter.hpp>
-#include <CropFilter.hpp>
-#include <DecimationFilter.hpp>
-#include <FerryFilter.hpp>
-#include <MergeFilter.hpp>
-#include <MortonOrderFilter.hpp>
-#include <ReprojectionFilter.hpp>
-#include <SortFilter.hpp>
-#include <SplitterFilter.hpp>
-#include <StatsFilter.hpp>
+#include <chipper/ChipperFilter.hpp>
+#include <colorization/ColorizationFilter.hpp>
+#include <crop/CropFilter.hpp>
+#include <decimation/DecimationFilter.hpp>
+#include <ferry/FerryFilter.hpp>
+#include <merge/MergeFilter.hpp>
+#include <mortonorder/MortonOrderFilter.hpp>
+#include <reprojection/ReprojectionFilter.hpp>
+#include <sort/SortFilter.hpp>
+#include <splitter/SplitterFilter.hpp>
+#include <stats/StatsFilter.hpp>
