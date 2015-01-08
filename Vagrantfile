@@ -136,6 +136,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     "libeigen3-dev",
     "libflann-dev",
     "libglew-dev",
+    "libhdf5-serial-dev",
     "vtk6"
   ];
 
