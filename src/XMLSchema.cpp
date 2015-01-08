@@ -344,6 +344,9 @@ bool XMLSchema::load(xmlDocPtr doc)
         return false;
     }
 
+    const unsigned SENTINEL_POS = 100000;
+    unsigned missingPos = SENTINEL_POS + 1;
+
     xmlNode* dimension = root->children;
     pdal::Metadata metadata;
     for (xmlNode *dimension = root->children; dimension;
@@ -381,6 +384,7 @@ bool XMLSchema::load(xmlDocPtr doc)
             continue;
 
         XMLDim dim;
+        dim.m_position = SENTINEL_POS;
         for (xmlNode *properties = dimension->children; properties;
             properties = properties->next)
         {
@@ -442,6 +446,17 @@ bool XMLSchema::load(xmlDocPtr doc)
                 dim.m_max = std::atof((const char*)n);
                 xmlFree(n);
             }
+            if (boost::iequals((const char*)properties->name, "position"))
+            {
+                xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
+                if (!n)
+                {
+                    std::cerr << "Unable to fetch position value.\n";
+                    return false;
+                }
+                dim.m_position = std::atoi((const char*)n);
+                xmlFree(n);
+            }
             if (boost::iequals((const char*)properties->name, "offset"))
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
@@ -465,9 +480,18 @@ bool XMLSchema::load(xmlDocPtr doc)
                 xmlFree(n);
             }
         }
+        // If we don't have a position, set it to some value larger than all
+        // previous values.
+        if (dim.m_position == SENTINEL_POS)
+            dim.m_position = missingPos++;
         m_dims.push_back(dim);
     }
     std::sort(m_dims.begin(), m_dims.end());
+
+    // Renumber dimension positions to be 1..N
+    for (unsigned pos = 0; pos < m_dims.size(); pos++)
+        m_dims[pos].m_position = pos + 1;
+
     return true;
 }
 
