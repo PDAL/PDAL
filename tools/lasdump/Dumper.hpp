@@ -34,6 +34,7 @@
 
 #include <deque>
 #include <string>
+#include <iostream>
 
 #include "Header.hpp"
 #include "Vlr.hpp"
