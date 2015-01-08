@@ -34,19 +34,13 @@
 
 #pragma once
 
-#include <pdal/pdal_config.hpp>
-
+#include <BpfReader.hpp>
 #include <BufferReader.hpp>
 #include <FauxReader.hpp>
-
 #include <LasReader.hpp>
 #include <LasWriter.hpp>
-
-#include <BpfReader.hpp>
-
+#include <QfitReader.hpp>
 #include <SbetReader.hpp>
 #include <SbetWriter.hpp>
-
-#include <QfitReader.hpp>
 #include <TerrasolidReader.hpp>
 #include <TextWriter.hpp>
