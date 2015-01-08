@@ -69,6 +69,11 @@ set(PDAL_OUTPUT_LIB_DIR "${PDAL_BINARY_DIR}/${PDAL_LIB_DIR}")
 set(PDAL_OUTPUT_BIN_DIR "${PDAL_BINARY_DIR}/${PDAL_BIN_DIR}")
 file(MAKE_DIRECTORY "${PDAL_OUTPUT_LIB_DIR}")
 file(MAKE_DIRECTORY "${PDAL_OUTPUT_BIN_DIR}")
+
+# wipe lib/ drectory on clean. It will have plugins that could be out of date
+# in the next build
+set_directory_properties(PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${PDAL_OUTPUT_LIB_DIR}")
+
 if(WIN32)
   add_definitions("-DPDAL_DLL_EXPORT=1")
   foreach(config ${CMAKE_CONFIGURATION_TYPES})
