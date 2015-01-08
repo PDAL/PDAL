@@ -135,7 +135,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     "vim",
     "libeigen3-dev",
     "libflann-dev",
-    "libglew-dev"
+    "libglew-dev",
+    "vtk6"
   ];
 
   if Dir.glob("#{File.dirname(__FILE__)}/.vagrant/machines/default/*/id").empty?
