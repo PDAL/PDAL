@@ -85,8 +85,8 @@ public:
     void getColumnEntries(
             void* data,
             const std::string& dataSetName,
-            uint64_t numEntries,
-            uint64_t offset) const;
+            const hsize_t numEntries,
+            const hsize_t offset) const;
 
 private:
     struct ColumnData
@@ -111,7 +111,7 @@ private:
         H5::DataSpace dataSpace;
     };
 
-    unsigned long long getColumnNumEntries(const std::string& dataSetName) const;
+    hsize_t getColumnNumEntries(const std::string& dataSetName) const;
     const ColumnData& getColumnData(const std::string& dataSetName) const;
 
     std::unique_ptr<H5::H5File> m_h5File;
