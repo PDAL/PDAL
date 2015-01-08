@@ -444,16 +444,20 @@ public:
     bool spatialite(const std::string& module_name="")
     {
         std::string so_extension;
+        std::string lib_extension;
 #ifdef __APPLE__
         so_extension = "dylib";
+        lib_extension = "mod_";
 #endif
 
 #ifdef __linux__
         so_extension = "so";
+        lib_extension = "lib";
 #endif
 
 #ifdef _WIN32
         so_extension = "dll";
+        lib_extension = "mod_";
 #endif
 
 // #if !defined(sqlite3_enable_load_extension)
@@ -474,7 +478,7 @@ public:
         if (module_name.size())
             oss << module_name;
         else
-            oss << "mod_spatialite" << "." << so_extension;
+            oss << lib_extension << "spatialite" << "." << so_extension;
         oss << "')";
         execute(oss.str());
         oss.str("");
