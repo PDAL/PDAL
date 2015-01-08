@@ -90,7 +90,7 @@ void FerryFilter::processOptions(const Options& options)
 }
 void FerryFilter::addDimensions(PointContextRef ctx)
 {
-    for(auto dim_par: m_name_map)
+    for(const auto& dim_par : m_name_map)
     {
         ctx.registerOrAssignDim(dim_par.second, Dimension::Type::Double);
     }
@@ -98,7 +98,7 @@ void FerryFilter::addDimensions(PointContextRef ctx)
 
 void FerryFilter::ready(PointContext ctx)
 {
-    for (auto dim_par: m_name_map)
+    for (const auto& dim_par : m_name_map)
     {
         Dimension::Id::Enum f = ctx.findDim(dim_par.first);
         Dimension::Id::Enum t = ctx.findDim(dim_par.second);
@@ -111,7 +111,7 @@ void FerryFilter::filter(PointBuffer& buffer)
 {
     for (PointId id = 0; id < buffer.size(); ++id)
     {
-        for (auto dim_par: m_dimensions_map)
+        for (const auto& dim_par : m_dimensions_map)
         {
             double v = buffer.getFieldAs<double>(dim_par.first, id);
             buffer.setField(dim_par.second, id, v);

@@ -226,7 +226,7 @@ int Kernel::run(int argc, const char* argv[], const std::string& appName)
 void Kernel::collectExtraOptions()
 {
 
-    for (auto o: m_extra_options)
+    for (const auto& o : m_extra_options)
     {
 
         typedef boost::tokenizer<boost::char_separator<char>> tokenizer;

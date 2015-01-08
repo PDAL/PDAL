@@ -96,15 +96,15 @@ int PipelineKernel::execute()
 **/
     }
 
-    for (auto pi: getExtraStageOptions())
+    for (const auto& pi : getExtraStageOptions())
     {
         std::string name = pi.first;
         Options options = pi.second;
         std::vector<Stage*> stages = manager.getWriter()->findStage(name);
-        for (auto s: stages)
+        for (const auto& s : stages)
         {
             Options opts = s->getOptions();
-            for (auto o: options.getOptions())
+            for (const auto& o : options.getOptions())
                 opts.add(o);
             s->setOptions(opts);
         }
