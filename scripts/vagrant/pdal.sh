@@ -20,13 +20,13 @@ cmake   -G "Unix Makefiles"  \
         -DWITH_GEOTIFF=ON \
         -DWITH_LAZPERF=ON \
         -DWITH_LIBXML2=ON \
+        -DWITH_PYTHON=ON \
         -DBUILD_PLUGIN_ATTRIBUTE=ON \
         -DBUILD_PLUGIN_HEXBIN=ON \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
         -DBUILD_PLUGIN_NITF=ON \
         -DBUILD_PLUGIN_P2G=ON \
         -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
-        -DBUILD_PLUGIN_PYTHON=ON \
         -DBUILD_PLUGIN_SQLITE=ON \
         -DBUILD_PLUGIN_GREYHOUND=ON \
         -DLAZPERF_INCLUDE_DIR=/home/vagrant/laz-perf \
