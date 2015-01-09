@@ -309,7 +309,7 @@ public:
                     if (sqlite3_column_type(m_statement, v) == SQLITE_BLOB)
                     {
                         int len = sqlite3_column_bytes(m_statement, v);
-                        const char* buf = (char*) sqlite3_column_blob(m_statement, v);
+                        const char* buf = (const char*) sqlite3_column_blob(m_statement, v);
                         c.blobLen = len;
                         c.blobBuf.resize(len);
                         std::copy(buf, buf+len, c.blobBuf.begin());
