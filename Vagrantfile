@@ -137,6 +137,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     "libflann-dev",
     "libglew-dev",
     "libhdf5-serial-dev",
+    "libjsoncpp-dev",
     "vtk6"
   ];
 
@@ -163,6 +164,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       "soci.sh",
       "laszip.sh",
       "pcl.sh",
+      "websocketpp.sh",
       "pdal.sh",
       "pgpointcloud.sh"
     ];

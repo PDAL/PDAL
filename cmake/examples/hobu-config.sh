@@ -3,6 +3,7 @@ USR="/usr"
 TIFF_HOME=$USR_LOCAL
 LASZIP_HOME=$USR_LOCAL
 LIBXML2_HOME=/usr/local/Cellar/libxml2/2.9.2/
+WEBSOCKETPP_HOME=/Users/hobu/dev/git/websocketpp
 GEOTIFF_HOME=$USR_LOCAL
 P2G_HOME=$USR_LOCAL
 HEXER_HOME="/usr/local"
@@ -36,6 +37,7 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
         -DBUILD_PLUGIN_PCL=ON \
         -DBUILD_PLUGIN_ATTRIBUTE=ON \
+        -DBUILD_PLUGIN_GREYHOUND=ON \
         -DWITH_LAZPERF=ON \
         -DMRSID_INCLUDE_DIR=/Users/hobu/dev/release/mrsid/Lidar_DSDK/include \
         -DMRSID_LIBRARY=/Users/hobu/dev/release/mrsid/Lidar_DSDK/lib/liblti_lidar_dsdk.dylib \
@@ -50,6 +52,7 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DLASZIP_LIBRARY=${LASZIP_HOME}/lib/liblaszip.${SO_EXT} \
         -DLIBXML2_INCLUDE_DIR=${LIBXML2_HOME}/include/libxml2 \
         -DLIBXML2_LIBRARIES=${LIBXML2_HOME}/lib/libxml2.${SO_EXT} \
+        -DWEBSOCKETPP_DIR=${WEBSOCKETPP_HOME}/ \
         -DLAZPERF_INCLUDE_DIR=${LAZPERF_HOME}/ \
         -DSQLITE3_INCLUDE_DIR=${SQLITE_HOME}/include \
         -DSQLITE3_LIBRARY=${SQLITE_HOME}/lib/libsqlite3.${SO_EXT}

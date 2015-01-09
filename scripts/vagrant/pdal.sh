@@ -28,6 +28,7 @@ cmake   -G "Unix Makefiles"  \
         -DBUILD_PLUGIN_PGPOINTCLOUD=ON \
         -DBUILD_PLUGIN_PYTHON=ON \
         -DBUILD_PLUGIN_SQLITE=ON \
+        -DBUILD_PLUGIN_GREYHOUND=ON \
         -DLAZPERF_INCLUDE_DIR=/home/vagrant/laz-perf \
         ..
 
