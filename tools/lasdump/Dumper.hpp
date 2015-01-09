@@ -62,8 +62,8 @@ private:
     Header m_header;
     Vlr m_zipVlr;
     int m_error;
-    ofstream m_fout;
-    ostream *m_out;
+    std::ofstream m_fout;
+    std::ostream *m_out;
 
     int processArgs(std::deque<std::string> args);
     void readPoints(ILeStream& in);
