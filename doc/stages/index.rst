@@ -55,4 +55,5 @@ Filters
    filters.programmable
    filters.reprojection
    filters.sort
+   filters.transformation
 
