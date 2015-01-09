@@ -64,8 +64,6 @@ private:
     TransformationFilter& operator=(const TransformationFilter&); // not implemented
     TransformationFilter(const TransformationFilter&); // not implemented
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContext ctx);
-    virtual void done(PointContext ctx);
     virtual void filter(PointBuffer& data);
 
     TransformationMatrix m_matrix;

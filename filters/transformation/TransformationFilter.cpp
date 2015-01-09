@@ -83,14 +83,6 @@ void TransformationFilter::processOptions(const Options& options)
 }
 
 
-void TransformationFilter::ready(PointContext ctx)
-{}
-
-
-void TransformationFilter::done(PointContext ctx)
-{}
-
-
 void TransformationFilter::filter(PointBuffer& data)
 {
     for (PointId idx = 0; idx < data.size(); ++idx)
