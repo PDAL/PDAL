@@ -2,9 +2,6 @@
 # MrSID plugin CMake configuration
 #
 
-include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories(${PROJECT_SOURCE_DIR}/plugins/mrsid)
-
 set(MRSID_ROOT "/Users/hobu/installs/mrsid/Lidar_DSDK" CACHE STRING "Root directory of MrSID install")
 find_package(MrSID)
 if(MRSID_FOUND)

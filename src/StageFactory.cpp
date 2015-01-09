@@ -83,6 +83,7 @@ MAKE_FILTER_CREATOR(Reprojection, pdal::ReprojectionFilter)
 MAKE_FILTER_CREATOR(Sort, pdal::SortFilter)
 MAKE_FILTER_CREATOR(Splitter, pdal::SplitterFilter)
 MAKE_FILTER_CREATOR(Stats, pdal::StatsFilter)
+MAKE_FILTER_CREATOR(Transformation, pdal::TransformationFilter)
 
 //
 // define the functions to create the writers
@@ -324,6 +325,7 @@ void StageFactory::registerKnownFilters()
     REGISTER_FILTER(Sort, pdal::SortFilter);
     REGISTER_FILTER(Splitter, pdal::SplitterFilter);
     REGISTER_FILTER(Stats, pdal::StatsFilter);
+    REGISTER_FILTER(Transformation, pdal::TransformationFilter);
 }
 
 

@@ -2,9 +2,6 @@
 # LAS driver CMake configuration
 #
 
-include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories(${PROJECT_SOURCE_DIR}/io/las)
-
 if ((GEOTIFF_FOUND) AND (GDAL_FOUND))
     set (PDAL_DRIVERS_LAS_GTIFF GeotiffSupport.cpp)
 endif()

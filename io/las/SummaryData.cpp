@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <SummaryData.hpp>
-
+#include "SummaryData.hpp"
 
 namespace pdal
 {

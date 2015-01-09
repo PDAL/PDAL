@@ -32,16 +32,12 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/pdal_internal.hpp>
-#ifdef PDAL_HAVE_PYTHON
-
 #include <pdal/plang/Script.hpp>
 #include <pdal/FileUtils.hpp>
 
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127) // conditional expression is constant
 #endif
-
 
 namespace pdal
 {
@@ -67,7 +63,6 @@ std::ostream& operator<<(std::ostream& os, Script const& script)
     return os;
 }
 
-}
-} //namespaces
+} //namespace plang
+} //namespace pdal
 
-#endif

@@ -33,25 +33,15 @@
  ****************************************************************************/
 
 #pragma once
-#include <iomanip>
 
-#include <pdal/pdal_internal.hpp>
-#include <pdal/Utils.hpp>
-
-#include <cassert>
-#include <vector>
 #include <sstream>
 
-namespace
-{
-    const double LOWEST = (std::numeric_limits<double>::lowest)();
-    const double HIGHEST = (std::numeric_limits<double>::max)();
-}
-
+#ifndef PDAL_DLL
+#define PDAL_DLL
+#endif
 
 namespace pdal
 {
-
 
 /*!
     \verbatim embed:rst
@@ -63,42 +53,33 @@ namespace pdal
     \endverbatim
 */
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+
 class PDAL_DLL BOX3D
 {
+private:
+    static const double LOWEST;
+    static const double HIGHEST;
+    
 public:
 
     BOX3D()
-    : minx(HIGHEST)
-    , maxx(LOWEST)
-    , miny(HIGHEST)
-    , maxy(LOWEST)
-    , minz(HIGHEST)
-    , maxz(LOWEST) {}
+       { clear(); }
 
-    BOX3D( double minx,
-           double miny,
-           double maxx,
-           double maxy)
-    : minx(minx)
-    , maxx(maxx)
-    , miny(miny)
-    , maxy(maxy)
-    , minz(HIGHEST)
-    , maxz(LOWEST)
+    BOX3D(const BOX3D& box) :
+        minx(box.minx), maxx(box.maxx), miny(box.miny), maxy(box.maxy),
+        minz(box.minz), maxz(box.maxz)
     {}
 
-    BOX3D( double minx,
-           double miny,
-           double minz,
-           double maxx,
-           double maxy,
-           double maxz)
-    : minx(minx)
-    , maxx(maxx)
-    , miny(miny)
-    , maxy(maxy)
-    , minz(minz)
-    , maxz(maxz)
+    BOX3D(double minx, double miny, double maxx, double maxy) :
+        minx(minx), maxx(maxx), miny(miny), maxy(maxy),
+        minz(HIGHEST), maxz(LOWEST)
+    {}
+
+    BOX3D(double minx, double miny, double minz, double maxx, double maxy,
+            double maxz) :
+        minx(minx), maxx(maxx), miny(miny), maxy(maxy), minz(minz), maxz(maxz)
     {}
 
     double minx;
@@ -110,10 +91,11 @@ public:
 
     bool empty() const
     {
-        return  Utils::compare_distance(minx, HIGHEST) && Utils::compare_distance(maxx, LOWEST) &&
-                Utils::compare_distance(miny, HIGHEST) && Utils::compare_distance(maxy, LOWEST) &&
-                Utils::compare_distance(minz, HIGHEST) && Utils::compare_distance(maxz, LOWEST);
+        return  minx == HIGHEST && maxx == LOWEST &&
+            miny == HIGHEST && maxy == LOWEST &&
+            minz == HIGHEST && maxz == LOWEST;
     }
+
     bool contains(double x, double y, double z) const
     {
         return minx <= x && x <= maxx &&
@@ -124,26 +106,27 @@ public:
     bool contains(const BOX3D& other) const
     {
         return minx <= other.minx && other.maxx <= maxx &&
-               miny <= other.miny && other.maxy <= maxy &&
-               minz <= other.minz && other.maxz <= maxz;
+            miny <= other.miny && other.maxy <= maxy &&
+            minz <= other.minz && other.maxz <= maxz;
     }
+
     bool equal(const BOX3D& other) const
     {
-        return  Utils::compare_distance(minx, other.minx) && Utils::compare_distance(maxx, other.maxx) &&
-                Utils::compare_distance(miny, other.miny) && Utils::compare_distance(maxy, other.maxy) &&
-                Utils::compare_distance(minz, other.minz) && Utils::compare_distance(maxz, other.maxz);
-
+        return  minx == other.minx && maxx == other.maxx &&
+            miny == other.miny && maxy == other.maxy &&
+            minz == other.minz && maxz == other.maxz;
     }
-    inline bool operator==(BOX3D const& rhs) const
+
+    bool operator==(BOX3D const& rhs) const
     {
         return equal(rhs);
     }
 
-    /// Inequality operator
-    inline bool operator!=(BOX3D const& rhs) const
+    bool operator!=(BOX3D const& rhs) const
     {
         return (!equal(rhs));
     }
+
     void grow(double x, double y, double z=LOWEST)
     {
         if (x < minx) minx = x;
@@ -156,6 +139,7 @@ public:
         if (z > maxz) maxz = z;
 
     }
+
     void grow(const BOX3D& other)
     {
         if (other.minx < minx) minx = other.minx;
@@ -179,6 +163,7 @@ public:
         if (z > maxz) minz = z;
         if (z < maxz) maxz = z;
     }
+
     void clip(const BOX3D& other)
     {
         if (other.minx > minx) minx = other.minx;
@@ -193,20 +178,14 @@ public:
 
     bool is_z_empty() const
     {
-        if (Utils::compare_distance<double>(minz, HIGHEST) &&
-            Utils::compare_distance<double>(maxz, LOWEST) )
-            return true;
-        return false;
+        return ((minz == HIGHEST) && (maxz == LOWEST));
     }
 
     bool overlaps(const BOX3D& other)
     {
         if (is_z_empty())
-        {
             return minx <= other.maxx && maxx >= other.minx &&
                    miny <= other.maxy && maxy >= other.miny;
-        }
-
         return minx <= other.maxx && maxx >= other.minx &&
                miny <= other.maxy && maxy >= other.miny &&
                minz <= other.maxz && maxz >= other.minz;
@@ -218,15 +197,14 @@ public:
         maxx = LOWEST; maxy = LOWEST; maxz = LOWEST;
     }
 
-    std::string toBox(uint32_t precision = 8, uint32_t dimensions=2) const
+    std::string toBox(uint32_t precision = 8, uint32_t dimensions = 2) const
     {
         std::stringstream oss;
 
         oss.precision(precision);
         oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
 
-
-        if (dimensions  == 2)
+        if (dimensions == 2)
         {
             oss << "box(";
             oss << minx << " " << miny << ", ";
@@ -257,33 +235,24 @@ public:
         oss << maxx << " " << maxy << ", ";
         oss << maxx << " " << miny << ", ";
         oss << minx << " " << miny;
+        oss << "))";
 
         // Nothing happens for 3D bounds.
-        // else if (m_ranges.size() == 3 || (dimensions != 0 && dimensions == 3))
-//         {
-//             oss << minx << " " << miny << " " << getMaximum(2) << ", ";
-//             oss << minx << " " << maxy << " " << getMaximum(2) << ", ";
-//             oss << maxx << " " << maxy << " " << getMaximum(2) << ", ";
-//             oss << maxx << " " << miny << " " << getMaximum(2) << ", ";
-//             oss << minx << " " << miny << " " << getMaximum(2);
-//         }
-        oss << "))";
+
         return oss.str();
     }
 
-    /** @name Default extent
-    */
     /// Returns a staticly-allocated Bounds extent that represents infinity
     static const BOX3D& getDefaultSpatialExtent()
     {
-        static BOX3D v(LOWEST,LOWEST,LOWEST,HIGHEST,HIGHEST,HIGHEST);
+        static BOX3D v(LOWEST, LOWEST, LOWEST, HIGHEST, HIGHEST, HIGHEST);
         return v;
     }
 
 
 };
 
-inline std::ostream& operator<<(std::ostream& ostr, const BOX3D& bounds)
+inline std::ostream& operator << (std::ostream& ostr, const BOX3D& bounds)
 {
     if (bounds.empty())
     {
@@ -299,7 +268,9 @@ inline std::ostream& operator<<(std::ostream& ostr, const BOX3D& bounds)
     ostr << ")";
     return ostr;
 }
+
 extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX3D& bounds);
 
-
 } // namespace pdal
+
+#pragma GCC diagnostic pop

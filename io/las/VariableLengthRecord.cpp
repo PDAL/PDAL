@@ -32,10 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <cassert>
-#include <sstream>
-
-#include <VariableLengthRecord.hpp>
+#include "VariableLengthRecord.hpp"
 
 namespace pdal
 {

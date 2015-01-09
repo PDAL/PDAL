@@ -32,10 +32,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <algorithm>
-#include <boost/foreach.hpp>
+#include "InfoKernel.hpp"
 
-#include <InfoKernel.hpp>
+#include <algorithm>
+
 #include <pdal/KDIndex.hpp>
 #include <pdal/PipelineWriter.hpp>
 #include <pdal/PDALUtils.hpp>

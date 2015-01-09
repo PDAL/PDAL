@@ -36,7 +36,8 @@
 
 #include "KernelSupport.hpp"
 #include <pdal/StageFactory.hpp>
-#include <BufferReader.hpp>
+
+#include <buffer/BufferReader.hpp>
 
 namespace pdal
 {

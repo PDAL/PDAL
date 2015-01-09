@@ -2,15 +2,11 @@
 # Icebridge plugin CMake configuration
 #
 
-include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories(${PROJECT_SOURCE_DIR}/plugins/icebridge)
+include (${PDAL_CMAKE_DIR}/hdf5.cmake)
 
-set (HDF5_FIND_COMPONENTS "CXX")
-find_package(HDF5 COMPONENTS CXX REQUIRED)
-if (HDF5_FOUND)
-    include_directories(${HDF5_INCLUDE_DIR})
-    add_definitions(-DHAVE_HDF5=1)
-
+if (NOT PDAL_HAVE_HDF5)
+    message(FATAL "HDF5 not found but is required for Icebridge.")
+else()
     set(srcs
         io/IcebridgeReader.cpp
         io/Hdf5Handler.cpp

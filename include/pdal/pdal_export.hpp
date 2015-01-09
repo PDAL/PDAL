@@ -32,13 +32,10 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef EXPORT_HPP_INCLUDED
-#define EXPORT_HPP_INCLUDED
-
-#include <pdal/pdal_defines.h>
+#pragma once
 
 #ifndef PDAL_DLL
-#if defined(PDAL_COMPILER_MSVC) && !defined(PDAL_DISABLE_DLL)
+#if defined(PDAL_COMPILER_MSVC)
 #if defined(PDAL_DLL_EXPORT)
 #   define PDAL_DLL   __declspec(dllexport)
 #elif defined(PDAL_DLL_IMPORT)
@@ -59,4 +56,3 @@
 #pragma warning(disable:4251)// [templated class] needs to have dll-interface...
 #endif
 
-#endif // PDAL_HPP_INCLUDED

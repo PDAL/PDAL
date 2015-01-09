@@ -2,9 +2,6 @@
 # SBET driver CMake configuration
 #
 
-include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories(${PROJECT_SOURCE_DIR}/io/sbet)
-
 set(objs "")
 
 add_library(sbetcommon OBJECT SbetCommon.cpp SbetCommon.hpp)

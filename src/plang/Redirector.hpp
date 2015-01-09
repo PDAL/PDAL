@@ -6,15 +6,9 @@
 //
 // Blog article: http://mateusz.loskot.net/?p=2819
 
-
 // http://python3porting.com/cextensions.html
 
-
-#ifndef PDAL_PLANG_REDIRECTOR_H
-#define PDAL_PLANG_REDIRECTOR_H
-
-#include <pdal/pdal_internal.hpp>
-#ifdef PDAL_HAVE_PYTHON
+#pragma once
 
 #include <Python.h>
 
@@ -26,7 +20,6 @@ namespace pdal
 namespace plang
 {
 
-    
 PyMODINIT_FUNC redirector_init(void);
 
 class Redirector
@@ -49,10 +42,6 @@ private:
     PyObject* m_stdout_saved;
 };
 
+} // namespace plang
+} // namespace pdal
 
-} // namespaces
-}
-
-#endif
-
-#endif

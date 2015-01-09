@@ -44,7 +44,8 @@
 #include <pdal/Bounds.hpp>
 #include <pdal/pdal_config.hpp>
 #include <pdal/gitsha.h>
-#include <VariableLengthRecord.hpp>
+
+#include "VariableLengthRecord.hpp"
 
 namespace pdal
 {

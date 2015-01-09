@@ -32,21 +32,21 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <LasReader.hpp>
+#include "LasReader.hpp"
 
 #include <sstream>
 #include <string.h>
 
 #include <pdal/Charbuf.hpp>
 #include <pdal/FileUtils.hpp>
-#include <LasHeader.hpp>
-#include <VariableLengthRecord.hpp>
-#include <ZipPoint.hpp>
 #include <pdal/IStream.hpp>
 #include <pdal/QuickInfo.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Metadata.hpp>
 
+#include "LasHeader.hpp"
+#include "VariableLengthRecord.hpp"
+#include "ZipPoint.hpp"
 #include "GeotiffSupport.hpp"
 
 namespace pdal

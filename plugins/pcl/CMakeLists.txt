@@ -21,148 +21,142 @@
 # settings for PCL
 #------------------------------------------------------------------------------
 
-include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories(${PROJECT_SOURCE_DIR}/plugins/pcl)
-include_directories(${PROJECT_SOURCE_DIR}/io/las)
-include_directories(${PROJECT_SOURCE_DIR}/kernels)
-
-find_package(PCL QUIET 1.7)
+find_package(PCL QUIET 1.7 REQUIRED)
 
 set_package_properties(PCL PROPERTIES DESCRIPTION "Point Cloud Library"
     URL "http://pointclouds.org" TYPE RECOMMENDED
     PURPOSE "Enables PCD reader/writer, PCLVisualizer, PCLBlock filter, and ground, pcl, smooth, and view kernels")
 
-if(PCL_FOUND)
-    include_directories(${PCL_INCLUDE_DIRS})
-    link_directories(${PCL_LIBRARY_DIRS})
-    add_definitions(${PCL_DEFINITIONS})
-    if (NOT WIN32)
-        add_definitions("-fvisibility-inlines-hidden")
-    endif()
+include_directories(${PCL_INCLUDE_DIRS})
+include_directories(${CMAKE_CURRENT_LIST_DIR})
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
+if (NOT WIN32)
+    add_definitions("-fvisibility-inlines-hidden")
+endif()
 
-    # PCL's configuration clobbers Boost find_package - do it again
-    find_package(Boost QUIET 1.52 COMPONENTS program_options iostreams filesystem system)
+# PCL's configuration clobbers Boost find_package - do it again
+find_package(Boost QUIET 1.52 COMPONENTS program_options iostreams filesystem system)
 
-    if (PCL_VISUALIZATION_FOUND)
-        #
-        # PCLVisualizer Writer
-        #
-        set(srcs io/PCLVisualizer.cpp)
-        set(incs
-            io/PCLVisualizer.hpp
-            PCLConversions.hpp
-        )
-
-        PDAL_ADD_PLUGIN(pclvisualizer_libname writer pclvisualizer
-            FILES "${srcs}" "${incs}"
-            LINK_WITH ${PCL_LIBRARIES})
-
-        #
-        # View Kernel
-        #
-        set(srcs kernel/ViewKernel.cpp)
-        set(incs kernel/ViewKernel.hpp)
-
-        PDAL_ADD_PLUGIN(view_libname kernel view
-            FILES "${srcs}" "${incs}"
-            LINK_WITH ${PCL_LIBRARIES})
-    else()
-        message(STATUS "PCLVisualizer disabled because PCL_VISUALIZATION was not found")
-    endif()
-
-    #
-    # PCD Reader
-    #
-    set(srcs
-        io/PcdCommon.cpp
-        io/PcdReader.cpp
-    )
-
+if (PCL_VISUALIZATION_FOUND)
+#
+# PCLVisualizer Writer
+#
+    set(srcs io/PCLVisualizer.cpp)
     set(incs
-        io/PcdCommon.hpp
-        io/PcdReader.hpp
-        io/point_types.hpp
+        io/PCLVisualizer.hpp
         PCLConversions.hpp
     )
 
-    PDAL_ADD_PLUGIN(pcd_reader_libname reader pcd
+    PDAL_ADD_PLUGIN(pclvisualizer_libname writer pclvisualizer
         FILES "${srcs}" "${incs}"
         LINK_WITH ${PCL_LIBRARIES})
 
     #
-    # PCD Writer
+    # View Kernel
     #
-    set(srcs
-        io/PcdCommon.cpp
-        io/PcdWriter.cpp
-    )
+    set(srcs kernel/ViewKernel.cpp)
+    set(incs kernel/ViewKernel.hpp)
 
-    set(incs
-        io/PcdCommon.hpp
-        io/PcdWriter.hpp
-        io/point_types.hpp
-        PCLConversions.hpp
-    )
-
-    PDAL_ADD_PLUGIN(pcd_writer_libname writer pcd
+    PDAL_ADD_PLUGIN(view_libname kernel view
         FILES "${srcs}" "${incs}"
         LINK_WITH ${PCL_LIBRARIES})
+else()
+    message(STATUS "PCLVisualizer disabled because PCL_VISUALIZATION was not found")
+endif()
 
-    #
-    # PCLBlock Filter
-    #
-    set(srcs
-        pipeline/PCLPipeline.cpp
-        filters/PCLBlock.cpp
+#
+# PCD Reader
+#
+set(srcs
+    io/PcdCommon.cpp
+    io/PcdReader.cpp
+)
+
+set(incs
+    io/PcdCommon.hpp
+    io/PcdReader.hpp
+    io/point_types.hpp
+    PCLConversions.hpp
+)
+
+PDAL_ADD_PLUGIN(pcd_reader_libname reader pcd
+    FILES "${srcs}" "${incs}"
+    LINK_WITH ${PCL_LIBRARIES})
+
+#
+# PCD Writer
+#
+set(srcs
+    io/PcdCommon.cpp
+    io/PcdWriter.cpp
+)
+
+set(incs
+    io/PcdCommon.hpp
+    io/PcdWriter.hpp
+    io/point_types.hpp
+    PCLConversions.hpp
+)
+
+PDAL_ADD_PLUGIN(pcd_writer_libname writer pcd
+    FILES "${srcs}" "${incs}"
+    LINK_WITH ${PCL_LIBRARIES})
+
+#
+# PCLBlock Filter
+#
+set(srcs
+    pipeline/PCLPipeline.cpp
+    filters/PCLBlock.cpp
+)
+
+set(incs
+   pipeline/PCLPipeline.h
+   pipeline/PCLPipeline.hpp
+   filters/PCLBlock.hpp
+   PCLConversions.hpp
+)
+
+PDAL_ADD_PLUGIN(pclblock_libname filter pclblock
+    FILES "${srcs}" "${incs}"
+    LINK_WITH ${PCL_LIBRARIES})
+
+#
+# PCL Kernel
+#
+set(srcs kernel/PCLKernel.cpp)
+set(incs kernel/PCLKernel.hpp)
+
+PDAL_ADD_PLUGIN(pcl_libname kernel pcl
+    FILES "${srcs}" "${incs}"
+    LINK_WITH ${PCL_LIBRARIES} ${pclblock_libname})
+
+#
+# Ground Kernel
+#
+set(srcs kernel/GroundKernel.cpp)
+set(incs kernel/GroundKernel.hpp)
+
+PDAL_ADD_PLUGIN(ground_libname kernel ground
+    FILES "${srcs}" "${incs}"
+    LINK_WITH ${PCL_LIBRARIES} ${pclblock_libname})
+
+#
+# Smooth Kernel
+#
+set(srcs kernel/SmoothKernel.cpp)
+set(incs kernel/SmoothKernel.hpp)
+
+PDAL_ADD_PLUGIN(smooth_libname kernel smooth
+    FILES "${srcs}" "${incs}"
+    LINK_WITH ${PCL_LIBRARIES} ${pclblock_libname})
+
+if (WITH_TESTS)
+    PDAL_ADD_TEST(pcltest
+    FILES test/PCLBlockFilterTest.cpp
+    LINK_WITH ${pclvisualizer_libname} ${pcd_reader_libname}
+        ${pcd_writer_libname} ${pclblock_libname}
+        ${pcl_libname} ${ground_libname} ${smooth_libname}
     )
-
-    set(incs
-        pipeline/PCLPipeline.h
-        pipeline/PCLPipeline.hpp
-        filters/PCLBlock.hpp
-        PCLConversions.hpp
-    )
-
-    PDAL_ADD_PLUGIN(pclblock_libname filter pclblock
-        FILES "${srcs}" "${incs}"
-        LINK_WITH ${PCL_LIBRARIES})
-
-    #
-    # PCL Kernel
-    #
-    set(srcs kernel/PCLKernel.cpp)
-    set(incs kernel/PCLKernel.hpp)
-
-    PDAL_ADD_PLUGIN(pcl_libname kernel pcl
-        FILES "${srcs}" "${incs}"
-        LINK_WITH ${PCL_LIBRARIES} ${pclblock_libname})
-
-    #
-    # Ground Kernel
-    #
-    set(srcs kernel/GroundKernel.cpp)
-    set(incs kernel/GroundKernel.hpp)
-
-    PDAL_ADD_PLUGIN(ground_libname kernel ground
-        FILES "${srcs}" "${incs}"
-        LINK_WITH ${PCL_LIBRARIES} ${pclblock_libname})
-
-    #
-    # Smooth Kernel
-    #
-    set(srcs kernel/SmoothKernel.cpp)
-    set(incs kernel/SmoothKernel.hpp)
-
-    PDAL_ADD_PLUGIN(smooth_libname kernel smooth
-        FILES "${srcs}" "${incs}"
-        LINK_WITH ${PCL_LIBRARIES} ${pclblock_libname})
-
-    if (WITH_TESTS)
-        PDAL_ADD_TEST(pcltest
-            FILES test/PCLBlockFilterTest.cpp
-            LINK_WITH ${pclvisualizer_libname} ${pcd_reader_libname}
-                      ${pcd_writer_libname} ${pclblock_libname}
-                      ${pcl_libname} ${ground_libname} ${smooth_libname}
-        )
-    endif()
 endif()

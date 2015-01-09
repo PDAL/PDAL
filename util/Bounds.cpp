@@ -32,16 +32,44 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-
-#include <pdal/Bounds.hpp>
 #include <iostream>
+#include <limits>
+#include <vector>
+
+#include "Bounds.hpp"
+
+namespace
+{
+
+template <typename PREDICATE>
+void eat(std::istream& in, PREDICATE p)
+{
+    while (p((char)in.get()))
+        ;
+    if (in.eof())
+        in.clear(in.rdstate() & ~std::ios::failbit);
+    else
+        in.unget();
+}
+
+bool eat(std::istream& in, char c)
+{
+    if ((char)in.get() == c)
+        return true;
+    in.unget();
+    return false;
+}
+
+} // namespace
+
 namespace pdal
 {
-  
+
+const double BOX3D::LOWEST = (std::numeric_limits<double>::lowest)();
+const double BOX3D::HIGHEST = (std::numeric_limits<double>::max)();
+
 std::istream& operator>>(std::istream& istr, BOX3D& bounds)
 {
-
-
     istr.get();
     if (istr.eof())
     {
@@ -50,14 +78,22 @@ std::istream& operator>>(std::istream& istr, BOX3D& bounds)
         return istr;
     }
 
-    if (!istr.good()) throw bounds_error("stream is unreadable, unable to parse BOX3D");
+    if (!istr.good())
+    {
+        istr.setstate(std::ios_base::failbit);
+        return istr;
+    }
 
     istr.unget();
 
     // A really dirty way to check for an empty bounds object right off
     // the bat
     const char left_paren = (char)istr.get();
-    if (!istr.good()) throw bounds_error("stream0 is no good unable to parse BOX3D");
+    if (!istr.good())
+    {
+        istr.setstate(std::ios_base::failbit);
+        return istr;
+    }
     const char right_paren = (char)istr.get();
 
     if (left_paren == '(' && right_paren == ')')
@@ -71,51 +107,56 @@ std::istream& operator>>(std::istream& istr, BOX3D& bounds)
 
     std::vector<double> v;
 
-    Utils::eatwhitespace(istr);
+    eat(istr, isspace);
 
-    if (!Utils::eatcharacter(istr,'('))
-        throw bounds_error("Bounds parser failed at first parentheses");
+    if (!eat(istr,'('))
+    {
+        istr.setstate(std::ios_base::failbit);
+        return istr;
+    }
 
     bool done = false;
     while (!done)
     {
-        Utils::eatwhitespace(istr);
+        eat(istr, isspace);
         double low, high;
 
+        if (!eat(istr,'['))
+        {
+            istr.setstate(std::ios_base::failbit);
+            return istr;
+        }
 
-        if (!Utils::eatcharacter(istr,'['))
-            throw pdal_error("Range parser failed finding expected '[' character");
-
-        Utils::eatwhitespace(istr);
-
+        eat(istr, isspace);
         istr >> low;
+        eat(istr, isspace);
+        if (!eat(istr,','))
+        {
+            istr.setstate(std::ios_base::failbit);
+            return istr;
+        }
 
-        Utils::eatwhitespace(istr);
-
-        if (!Utils::eatcharacter(istr,','))
-            throw pdal_error("Range parser failed finding expected ',' character");
-
-        Utils::eatwhitespace(istr);
-
+        eat(istr, isspace);
         istr >> high;
 
-        if (!Utils::eatcharacter(istr,']'))
-            throw pdal_error("Range parser failed finding expected ']' character");
+        if (!eat(istr,']'))
+        {
+            istr.setstate(std::ios_base::failbit);
+            return istr;
+        }
 
-        Utils::eatwhitespace(istr);
-        if (Utils::eatcharacter(istr,','))
-        {
+        eat(istr, isspace);
+        if (eat(istr,','))
             done = false;
-        }
-        else if (Utils::eatcharacter(istr,')'))
-        {
+        else if (eat(istr,')'))
             done = true;
-        }
         else
         {
-            throw bounds_error("BOX3D parser failed");
+            istr.setstate(std::ios_base::failbit);
+            return istr;
         }
-        v.push_back(low); v.push_back(high);
+        v.push_back(low);
+        v.push_back(high);
     }
 
     BOX3D xxx;
@@ -125,7 +166,8 @@ std::istream& operator>>(std::istream& istr, BOX3D& bounds)
         xxx.maxx = v[1];
         xxx.miny = v[2];
         xxx.maxx = v[3];
-    } else if (v.size() == 6)
+    }
+    else if (v.size() == 6)
     {
         xxx.minx = v[0];
         xxx.maxx = v[1];
@@ -133,16 +175,12 @@ std::istream& operator>>(std::istream& istr, BOX3D& bounds)
         xxx.maxy = v[3];
         xxx.minz = v[4];
         xxx.maxz = v[5];
-    } else
-    {
-        throw bounds_error("Bounds was not of 4 or 6 items!");
     }
-
+    else
+        istr.setstate(std::ios_base::failbit);
+    eat(istr, isspace);
     bounds = xxx;
-
-    Utils::eatwhitespace(istr);
-
     return istr;
 }
 
-} // namespace
+} // namespace pdal

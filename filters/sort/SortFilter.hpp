@@ -70,7 +70,6 @@ private:
             { return p1.compare(m_dim, p2); };
 
         std::sort(buf.begin(), buf.end(), cmp);
-//        buf.resetTemps();
     }
 
     SortFilter& operator=(const SortFilter&); // not implemented

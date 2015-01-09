@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include <LasReader.hpp>
+#include <las/LasReader.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/StreamFactory.hpp>
 

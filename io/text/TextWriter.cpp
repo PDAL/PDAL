@@ -32,7 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <TextWriter.hpp>
+#include "TextWriter.hpp"
+
 #include <pdal/Algorithm.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/pdal_internal.hpp>
