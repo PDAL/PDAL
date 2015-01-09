@@ -159,7 +159,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       "libgeotiff.sh",
       "nitro.sh",
       "hexer.sh",
-      "laz-perf.sh",
+      "lazperf.sh",
       "p2g.sh",
       "soci.sh",
       "laszip.sh",
