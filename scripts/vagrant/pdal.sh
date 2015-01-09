@@ -30,6 +30,7 @@ cmake   -G "Unix Makefiles"  \
         -DBUILD_PLUGIN_SQLITE=ON \
         -DBUILD_PLUGIN_GREYHOUND=ON \
         -DLAZPERF_INCLUDE_DIR=/home/vagrant/laz-perf \
+        -DJSONCPP_ROOT_DIR=/usr/include/jsoncpp \
         ..
 
 make -j $NUMTHREADS
