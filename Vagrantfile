@@ -161,7 +161,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       "hexer.sh",
       "lazperf.sh",
       "p2g.sh",
-      "soci.sh",
       "laszip.sh",
       "pcl.sh",
       "websocketpp.sh",
