@@ -138,7 +138,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     "libglew-dev",
     "libhdf5-serial-dev",
     "libjsoncpp-dev",
-    "vtk6"
+    "vtk6",
+    "libvtk6-dev"
+
   ];
 
   if Dir.glob("#{File.dirname(__FILE__)}/.vagrant/machines/default/*/id").empty?
