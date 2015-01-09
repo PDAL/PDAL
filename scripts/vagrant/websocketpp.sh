@@ -2,5 +2,6 @@
 # Installs websocketpp library
 
 git clone https://github.com/zaphoyd/websocketpp.git
-cmake .
+cd websocketpp
+cmake . -DCMAKE_INSTALL_PREFIX=/usr
 sudo make install
