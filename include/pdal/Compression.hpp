@@ -36,14 +36,14 @@
 #include <boost/algorithm/string.hpp>
 
 #ifdef PDAL_HAVE_LAZPERF
-#include <tlaz/common/common.hpp>
-#include <tlaz/compressor.hpp>
-#include <tlaz/decompressor.hpp>
+#include <laz-perf/common/common.hpp>
+#include <laz-perf/compressor.hpp>
+#include <laz-perf/decompressor.hpp>
 
-#include <tlaz/encoder.hpp>
-#include <tlaz/decoder.hpp>
-#include <tlaz/formats.hpp>
-#include <tlaz/las.hpp>
+#include <laz-perf/encoder.hpp>
+#include <laz-perf/decoder.hpp>
+#include <laz-perf/formats.hpp>
+#include <laz-perf/las.hpp>
 #endif
 
 #include <pdal/Dimension.hpp>
