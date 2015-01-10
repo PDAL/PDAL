@@ -34,11 +34,8 @@
 
 #pragma once
 
+#include <pdal/pdal_export.hpp>
 #include <sstream>
-
-#ifndef PDAL_DLL
-#define PDAL_DLL
-#endif
 
 namespace pdal
 {
@@ -61,7 +58,7 @@ class PDAL_DLL BOX3D
 private:
     static const double LOWEST;
     static const double HIGHEST;
-    
+
 public:
 
     BOX3D()
@@ -242,34 +239,17 @@ public:
         return oss.str();
     }
 
-    /// Returns a staticly-allocated Bounds extent that represents infinity
+    /// Returns a statically-allocated Bounds extent that represents infinity
     static const BOX3D& getDefaultSpatialExtent()
     {
         static BOX3D v(LOWEST, LOWEST, LOWEST, HIGHEST, HIGHEST, HIGHEST);
         return v;
     }
 
-
 };
 
-inline std::ostream& operator << (std::ostream& ostr, const BOX3D& bounds)
-{
-    if (bounds.empty())
-    {
-        ostr << "()";
-        return ostr;
-    }
-
-    ostr << "(";
-    ostr << "[" << bounds.minx << ", " << bounds.maxx << "], "
-         << "[" << bounds.miny << ", " << bounds.maxy <<"]";
-    if (!bounds.is_z_empty())
-         ostr << ", [" <<  bounds.minz << ", " << bounds.maxz << "]";
-    ostr << ")";
-    return ostr;
-}
-
-extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX3D& bounds);
+std::ostream& operator << (std::ostream& ostr, const BOX3D& bounds);
+std::istream& operator >> (std::istream& istr, BOX3D& bounds);
 
 } // namespace pdal
 

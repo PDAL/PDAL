@@ -36,7 +36,7 @@
 #include <limits>
 #include <vector>
 
-#include "Bounds.hpp"
+#include <pdal/Bounds.hpp>
 
 namespace
 {
@@ -67,6 +67,23 @@ namespace pdal
 
 const double BOX3D::LOWEST = (std::numeric_limits<double>::lowest)();
 const double BOX3D::HIGHEST = (std::numeric_limits<double>::max)();
+
+std::ostream& operator << (std::ostream& ostr, const BOX3D& bounds)
+{
+    if (bounds.empty())
+    {
+        ostr << "()";
+        return ostr;
+    }
+
+    ostr << "(";
+    ostr << "[" << bounds.minx << ", " << bounds.maxx << "], "
+         << "[" << bounds.miny << ", " << bounds.maxy <<"]";
+    if (!bounds.is_z_empty())
+         ostr << ", [" <<  bounds.minz << ", " << bounds.maxz << "]";
+    ostr << ")";
+    return ostr;
+}
 
 std::istream& operator>>(std::istream& istr, BOX3D& bounds)
 {
@@ -182,5 +199,4 @@ std::istream& operator>>(std::istream& istr, BOX3D& bounds)
     bounds = xxx;
     return istr;
 }
-
 } // namespace pdal

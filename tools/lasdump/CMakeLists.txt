@@ -12,9 +12,6 @@ if(NOT ROOT_DIR)
 endif()
 include(${ROOT_DIR}/cmake/common.cmake NO_POLICY_SCOPE)
 
-add_subdirectory(${PDAL_UTIL_DIR} "${CMAKE_CURRENT_BINARY_DIR}/util")
-include_directories(${PDAL_UTIL_DIR} ${PDAL_INCLUDE_DIR})
-
 #
 # Add necessary modules.
 #
@@ -39,7 +36,7 @@ if (LASZIP_FOUND)
 
     add_executable(lasdump ${SOURCES} ${HEADERS})
     target_link_libraries(lasdump
-        PdalUtil
+        pdalcpp
         ${LASZIP_LIBRARIES}
     )
 endif()

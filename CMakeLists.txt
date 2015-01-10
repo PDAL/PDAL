@@ -215,7 +215,6 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
 # PDAL_TARGET_OBJECTS is used to collect the driver object libraries
 set(PDAL_TARGET_OBJECTS "")
 
-add_subdirectory(util)
 add_subdirectory(io)
 add_subdirectory(filters)
 add_subdirectory(kernels)
