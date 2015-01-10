@@ -13,7 +13,7 @@ SO_EXT=dylib
 # CXX=/usr/local/bin/g++-4.8
 
 ORACLE_HOME=$HOME/oracle
-LAZPERF_HOME=$HOME/dev/git/laz-perf
+LAZPERF_HOME=$USR_LOCAL
 export ORACLE_HOME
 CONFIG="Unix Makefiles"
 #CONFIG="Ninja"
@@ -37,7 +37,6 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
         -DBUILD_PLUGIN_PCL=ON \
         -DBUILD_PLUGIN_ATTRIBUTE=ON \
-        -DBUILD_PLUGIN_GREYHOUND=ON \
         -DWITH_LAZPERF=ON \
         -DMRSID_INCLUDE_DIR=/Users/hobu/dev/release/mrsid/Lidar_DSDK/include \
         -DMRSID_LIBRARY=/Users/hobu/dev/release/mrsid/Lidar_DSDK/lib/liblti_lidar_dsdk.dylib \
@@ -52,8 +51,8 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DLASZIP_LIBRARY=${LASZIP_HOME}/lib/liblaszip.${SO_EXT} \
         -DLIBXML2_INCLUDE_DIR=${LIBXML2_HOME}/include/libxml2 \
         -DLIBXML2_LIBRARIES=${LIBXML2_HOME}/lib/libxml2.${SO_EXT} \
-        -DWEBSOCKETPP_DIR=${WEBSOCKETPP_HOME}/ \
         -DLazperf_DIR=${LAZPERF_HOME}/ \
+        -DJSONCPP_ROOT_DIR=${USR_LOCAL}/include/jsoncpp \
         -DSQLITE3_INCLUDE_DIR=${SQLITE_HOME}/include \
         -DSQLITE3_LIBRARY=${SQLITE_HOME}/lib/libsqlite3.${SO_EXT}
 
