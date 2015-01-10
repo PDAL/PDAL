@@ -8,6 +8,7 @@ export NUMTHREADS
 
 
 git clone https://github.com/PDAL/PDAL.git pdal
+git checkout laz-perf-vagrant -t
 cd pdal
 mkdir build
 cd build
