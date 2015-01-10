@@ -234,13 +234,13 @@ if (PDAL_HAVE_LIBXML2)
     target_link_libraries(${PDAL_LIB_NAME} ${LIBXML2_LIBRARIES})
 endif()
 
-target_link_libraries(${PDAL_LIB_NAME} 
+target_link_libraries(${PDAL_LIB_NAME}
     ${CMAKE_THREAD_LIBS_INIT}
     ${GEOTIFF_LIBRARY}
     ${GDAL_LIBRARY}
     ${GEOS_LIBRARY}
     ${ZLIB_LIBRARIES}
-    PdalUtil
+    ${PDAL_UTIL_LIB_NAME}
 )
 
 target_link_libraries(${PDAL_LIB_NAME} ${Boost_LIBRARIES})
