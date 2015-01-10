@@ -43,6 +43,7 @@ endif()
 set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/pdal_error.hpp"
   "${PDAL_HEADERS_DIR}/pdal_types.hpp"
+  "${PDAL_HEADERS_DIR}/Bounds.hpp"
   "${PDAL_HEADERS_DIR}/Charbuf.hpp"
   "${PDAL_HEADERS_DIR}/Compression.hpp"
   "${PDAL_HEADERS_DIR}/Dimension.hpp"
@@ -87,6 +88,7 @@ set(PDAL_BASE_HPP
 )
 
 set(PDAL_BASE_CPP
+  Bounds.cpp
   Charbuf.cpp
   FileUtils.cpp
   Filter.cpp
@@ -234,13 +236,12 @@ if (PDAL_HAVE_LIBXML2)
     target_link_libraries(${PDAL_LIB_NAME} ${LIBXML2_LIBRARIES})
 endif()
 
-target_link_libraries(${PDAL_LIB_NAME} 
+target_link_libraries(${PDAL_LIB_NAME}
     ${CMAKE_THREAD_LIBS_INIT}
     ${GEOTIFF_LIBRARY}
     ${GDAL_LIBRARY}
     ${GEOS_LIBRARY}
     ${ZLIB_LIBRARIES}
-    PdalUtil
 )
 
 target_link_libraries(${PDAL_LIB_NAME} ${Boost_LIBRARIES})
