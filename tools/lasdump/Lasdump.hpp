@@ -63,7 +63,7 @@ inline int32_t cksum(const void *c, size_t size)
 {
     int32_t sum = 0;
 
-    int32_t *p = (int32_t *)c;
+    const int32_t *p = static_cast<const int32_t *>(c);
     while (size)
     {
         int32_t val = 0;
@@ -79,12 +79,12 @@ inline int32_t cksum(const void *c, size_t size)
 
 inline int32_t cksum(const std::vector<char>& v)
 {
-    return cksum((const void *)v.data(), v.size());
+    return cksum(static_cast<const void *>(v.data()), v.size());
 }
 
 inline int32_t cksum(const std::vector<unsigned char>& v)
 {
-    return cksum((const void *)v.data(), v.size());
+    return cksum(static_cast<const void *>(v.data()), v.size());
 }
 
 } // namespace lasdump
