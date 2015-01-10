@@ -16,6 +16,7 @@ if(JSONCPP_FOUND AND WEBSOCKETPP_FOUND)
     add_definitions(-DHAVE_WEBSOCKETPP=1)
 
     set(srcs
+        io/Exchanges.cpp
         io/GreyhoundReader.cpp
         io/WebSocketClient.cpp
     )
