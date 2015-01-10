@@ -139,7 +139,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     "libhdf5-serial-dev",
     "libjsoncpp-dev",
     "vtk6",
-    "libvtk6-dev"
+    "libvtk6-dev",
+    "libglew-dev"
 
   ];
 
