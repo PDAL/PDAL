@@ -19,7 +19,7 @@ cmake .. \
     -DCMAKE_INSTALL_PREFIX=/usr \
     -DBUILD_outofcore:BOOL=OFF \
     -DWITH_QT:BOOL=ON \
-    -DWITH_VTK:BOOL=ON \
+    -DWITH_VTK:BOOL=OFF \
     -DWITH_OPENNI:BOOL=OFF \
     -DWITH_CUDA:BOOL=OFF \
     -DWITH_LIBUSB:BOOL=OFF \
