@@ -36,11 +36,16 @@
 
 #include <string>
 #include <vector>
+#include <mutex>
+#include <condition_variable>
+#include <thread>
 
 #include <pdal/Dimension.hpp>
+#include <pdal/Compression.hpp>
 
 #include "WebSocketClient.hpp"
 #include "GreyhoundReader.hpp"
+#include "CompressionStream.hpp"
 
 namespace pdal
 {
@@ -113,28 +118,66 @@ public:
             PointBuffer& pointBuffer,
             const PointContextRef,
             const std::string& sessionId,
-            int offset = 0,
-            int count = -1);
+            bool compress,
+            int offset,
+            int count);
 
-    virtual bool done() const;
     virtual bool check();
-    virtual void handleRx(const message_ptr message);
+    virtual bool done() = 0;
+    virtual void handleRx(const message_ptr message) = 0;
 
     std::size_t numRead() const;
 
-private:
+protected:
     PointBuffer& m_pointBuffer;
     const PointContextRef m_pointContext;
 
     bool m_initialized;
     bool m_error;
-    const bool m_compress;
     std::size_t m_pointsToRead;
     std::size_t m_numBytes;
     std::size_t m_numBytesReceived;
     std::vector<char> m_data;
+};
+
+class ReadUncompressed : public Read
+{
+public:
+    ReadUncompressed(
+            PointBuffer& pointBuffer,
+            const PointContextRef,
+            const std::string& sessionId,
+            int offset = 0,
+            int count = -1);
+
+    virtual bool done();
+    virtual void handleRx(const message_ptr message);
+};
+
+class ReadCompressed : public Read
+{
+public:
+    ReadCompressed(
+            PointBuffer& pointBuffer,
+            const PointContextRef,
+            const std::string& sessionId,
+            int offset = 0,
+            int count = -1);
+
+    virtual bool done();
+    virtual void handleRx(const message_ptr message);
+
+private:
+    std::thread m_decompressionThread;
 
     CompressionStream m_compressionStream;
+    LazPerfDecompressor<CompressionStream> m_decompressor;
+
+    bool m_done;
+    std::condition_variable m_doneCv;
+    std::mutex m_doneMutex;
+
+    std::mutex m_mutex;
 };
 
 class Destroy: public Exchange

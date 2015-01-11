@@ -103,7 +103,11 @@ point_count_t GreyhoundReader::read(
         const point_count_t count)
 {
     // Read data.
-    exchanges::Read readExchange(
+#ifdef PDAL_HAVE_LAZPERF
+    exchanges::ReadCompressed readExchange(
+#else
+    exchanges::ReadUncompressed readExchange(
+#endif
             pointBuffer,
             m_pointContext,
             m_sessionId,

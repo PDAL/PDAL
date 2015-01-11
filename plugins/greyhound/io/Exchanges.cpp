@@ -36,16 +36,6 @@
 
 #include "Exchanges.hpp"
 
-namespace
-{
-    const bool compressionAllowed =
-#ifdef PDAL_HAVE_LAZPERF
-        false; // TODO
-#else
-        false;
-#endif
-}
-
 namespace pdal
 {
 namespace exchanges
@@ -216,6 +206,7 @@ Read::Read(
         PointBuffer& pointBuffer,
         const PointContextRef pointContext,
         const std::string& sessionId,
+        bool compress,
         int offset,
         int count)
     : Exchange("read")
@@ -223,22 +214,15 @@ Read::Read(
     , m_pointContext(pointContext)
     , m_initialized(false)
     , m_error(false)
-    , m_compress(compressionAllowed)
     , m_pointsToRead(0)
     , m_numBytes(0)
     , m_numBytesReceived(0)
     , m_data()
 {
     m_req["session"] = sessionId;
+    m_req["compress"] = compress;
     m_req["start"] = offset;
-    m_req["compress"] = m_compress;
-
     if (count != -1) m_req["count"] = count;
-}
-
-bool Read::done() const
-{
-    return (m_initialized && m_numBytesReceived >= m_numBytes) || m_error;
 }
 
 bool Read::check()
@@ -276,18 +260,31 @@ bool Read::check()
     return valid;
 }
 
-void Read::handleRx(const message_ptr message)
+std::size_t Read::numRead() const
+{
+    return m_pointsToRead;
+}
+
+ReadUncompressed::ReadUncompressed(
+        PointBuffer& pointBuffer,
+        const PointContextRef pointContext,
+        const std::string& sessionId,
+        int offset,
+        int count)
+    : Read(pointBuffer, pointContext, sessionId, false, offset, count)
+{ }
+
+bool ReadUncompressed::done()
+{
+    return (m_initialized && m_numBytesReceived >= m_numBytes) || m_error;
+}
+
+void ReadUncompressed::handleRx(const message_ptr message)
 {
     if (!m_initialized)
     {
-        if (check())
-        {
-            m_initialized = true;
-        }
-        else
-        {
-            m_error = true;
-        }
+        m_initialized = check();
+        if (!m_initialized) m_error = true;
     }
     else
     {
@@ -299,40 +296,33 @@ void Read::handleRx(const message_ptr message)
 
             m_data.insert(m_data.end(), bytes.begin(), bytes.end());
 
-            if (m_compress)
+            const std::size_t wholePoints(m_data.size() / stride);
+
+            PointId nextId(m_pointBuffer.size());
+            const PointId doneId(nextId + wholePoints);
+
+            const char* pos(m_data.data());
+
+            while (nextId < doneId)
             {
-                throw std::runtime_error("Not yet");
-            }
-            else
-            {
-                const std::size_t wholePoints(m_data.size() / stride);
-
-                PointId nextId(m_pointBuffer.size());
-                const PointId doneId(nextId + wholePoints);
-
-                const char* pos(m_data.data());
-
-                while (nextId < doneId)
+                for (const auto& dim : m_pointContext.dims())
                 {
-                    for (const auto& dim : m_pointContext.dims())
-                    {
-                        m_pointBuffer.setField(
-                                dim,
-                                m_pointContext.dimType(dim),
-                                nextId,
-                                pos);
+                    m_pointBuffer.setField(
+                            dim,
+                            m_pointContext.dimType(dim),
+                            nextId,
+                            pos);
 
-                        pos += m_pointContext.dimSize(dim);
-                    }
-
-                    ++nextId;
+                    pos += m_pointContext.dimSize(dim);
                 }
 
-                m_numBytesReceived += rawNumBytes;
-                m_data.assign(
-                        m_data.begin() + wholePoints * stride,
-                        m_data.end());
+                ++nextId;
             }
+
+            m_numBytesReceived += rawNumBytes;
+            m_data.assign(
+                    m_data.begin() + wholePoints * stride,
+                    m_data.end());
         }
         else
         {
@@ -341,9 +331,78 @@ void Read::handleRx(const message_ptr message)
     }
 }
 
-std::size_t Read::numRead() const
+ReadCompressed::ReadCompressed(
+        PointBuffer& pointBuffer,
+        const PointContextRef pointContext,
+        const std::string& sessionId,
+        int offset,
+        int count)
+    : Read(pointBuffer, pointContext, sessionId, true, offset, count)
+    , m_decompressionThread()
+    , m_compressionStream()
+    , m_decompressor(m_compressionStream, pointContext.dimTypes())
+    , m_done(false)
+    , m_doneCv()
+    , m_doneMutex()
+    , m_mutex()
+{ }
+
+bool ReadCompressed::done()
 {
-    return m_pointsToRead;
+    std::unique_lock<std::mutex> lock(m_doneMutex);
+    m_doneCv.wait(lock, [this]()->bool { return m_done; });
+    return true;
+}
+
+void ReadCompressed::handleRx(const message_ptr message)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_initialized)
+    {
+        m_initialized = check();
+        if (!m_initialized) m_error = true;
+
+        m_data.resize(m_numBytes);
+
+        m_decompressionThread = std::thread([this]()->void {
+            m_decompressor.decompress(m_data.data(), m_data.size());
+
+            const char* pos(m_data.data());
+            for (PointId i(0); i < m_pointsToRead; ++i)
+            {
+                for (const auto& dim : m_pointContext.dims())
+                {
+                    m_pointBuffer.setField(
+                            dim,
+                            m_pointContext.dimType(dim),
+                            i,
+                            pos);
+
+                    pos += m_pointContext.dimSize(dim);
+                }
+            }
+
+            m_done = true;
+            m_doneCv.notify_all();
+        });
+
+        m_decompressionThread.detach();
+    }
+    else
+    {
+        if (message->get_opcode() == websocketpp::frame::opcode::binary)
+        {
+            const std::string& bytes(message->get_payload());
+
+            m_compressionStream.putBytes(
+                    reinterpret_cast<const uint8_t*>(bytes.data()),
+                    bytes.size());
+        }
+        else
+        {
+            m_error = true;
+        }
+    }
 }
 
 

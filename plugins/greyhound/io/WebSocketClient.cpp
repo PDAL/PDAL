@@ -107,13 +107,17 @@ void WebSocketClient::exchange(WebSocketExchange& exchange)
         {
             exchange.addResponse(msg);
 
-            if (exchange.done())
-            {
-                std::unique_lock<std::mutex> lock(this->m_mutex);
-                done = true;
-                lock.unlock();
-                this->m_cv.notify_all();
-            }
+            std::thread tDone([this, &exchange, &done]() {
+                if (exchange.done())
+                {
+                    std::unique_lock<std::mutex> lock(this->m_mutex);
+                    done = true;
+                    lock.unlock();
+                    this->m_cv.notify_all();
+                }
+            });
+
+            tDone.detach();
         });
 
         websocketpp::lib::error_code ec;
