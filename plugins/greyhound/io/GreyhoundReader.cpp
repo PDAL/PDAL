@@ -43,7 +43,7 @@ namespace pdal
 
 GreyhoundReader::GreyhoundReader()
     : Reader()
-    , m_uri()
+    , m_url()
     , m_pipelineId()
     , m_sessionId()
     , m_dimData()
@@ -70,10 +70,10 @@ void GreyhoundReader::initialize()
 
 void GreyhoundReader::processOptions(const Options& options)
 {
-    m_uri = options.getValueOrThrow<std::string>("url");
+    m_url = options.getValueOrThrow<std::string>("url");
     m_pipelineId = options.getValueOrThrow<std::string>("pipelineId");
 
-    m_wsClient.initialize(m_uri);
+    m_wsClient.initialize(m_url);
 }
 
 void GreyhoundReader::addDimensions(PointContextRef pointContext)

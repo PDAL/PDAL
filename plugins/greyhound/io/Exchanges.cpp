@@ -165,35 +165,28 @@ bool GetSchema::check()
         jsonReader.parse(res().at(0)->get_payload(), jsonResponse);
 
         if (jsonResponse.isMember("schema") &&
-            jsonResponse["schema"].isString())
+            jsonResponse["schema"].isArray())
         {
-            Json::Value jsonSchema;
-            jsonReader.parse(jsonResponse["schema"].asString(), jsonSchema);
+            Json::Value jsonDimArray(jsonResponse["schema"]);
 
-            if (jsonSchema.isMember("dimensions") &&
-                jsonSchema["dimensions"].isArray())
+            for (std::size_t i(0); i < jsonDimArray.size(); ++i)
             {
-                Json::Value jsonDimArray(jsonSchema["dimensions"]);
+                const Json::Value& jsonDim(
+                        jsonDimArray[static_cast<Json::ArrayIndex>(i)]);
 
-                for (std::size_t i(0); i < jsonDimArray.size(); ++i)
-                {
-                    const Json::Value& jsonDim(
-                            jsonDimArray[static_cast<Json::ArrayIndex>(i)]);
+                const Dimension::Id::Enum id(
+                        Dimension::id(jsonDim["name"].asString()));
 
-                    const Dimension::Id::Enum id(
-                            Dimension::id(jsonDim["name"].asString()));
+                const Dimension::Type::Enum type(
+                    static_cast<Dimension::Type::Enum>(
+                        static_cast<int>(Dimension::fromName(
+                            jsonDim["type"].asString())) |
+                        std::stoi(jsonDim["size"].asString())));
 
-                    const Dimension::Type::Enum type(
-                        static_cast<Dimension::Type::Enum>(
-                            static_cast<int>(Dimension::fromName(
-                                jsonDim["type"].asString())) |
-                            std::stoi(jsonDim["size"].asString())));
-
-                    m_dimData.push_back(DimData(id, type));
-                }
-
-                valid = true;
+                m_dimData.push_back(DimData(id, type));
             }
+
+            valid = true;
         }
     }
 

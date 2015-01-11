@@ -64,7 +64,7 @@ public:
     ~GreyhoundReader();
 
 private:
-    std::string m_uri;
+    std::string m_url;
     std::string m_pipelineId;
     std::string m_sessionId;
     std::vector<DimData> m_dimData;

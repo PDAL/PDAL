@@ -71,7 +71,7 @@ void Stage::prepare(PointContextRef ctx)
 }
 
 
-PointBufferSet Stage::execute(PointContextRef ctx )
+PointBufferSet Stage::execute(PointContextRef ctx)
 {
     PointBufferSet buffers;
     if (m_inputs.empty())
