@@ -57,10 +57,19 @@ Options getWriterOptions()
 
 class PgpointcloudWriterTest : public testing::Test
 {
-  protected:
+public:
+    PgpointcloudWriterTest() : m_testConnection(0), m_masterConnection(0) {};
+protected:
     virtual void SetUp()
     {
-        m_masterConnection = pg_connect(testDbConn);
+        try
+        {
+            m_masterConnection = pg_connect(testDbConn);
+        } catch (pdal::pdal_error&)
+        {
+            m_masterConnection = 0;
+            return;
+        }
         m_testConnection = NULL;
 
         // Silence those pesky notices
@@ -72,19 +81,31 @@ class PgpointcloudWriterTest : public testing::Test
         createDbSql << "CREATE DATABASE " <<
             testDbTempname << " TEMPLATE template0";
         executeOnMasterDb(createDbSql.str());
-        m_testConnection = pg_connect(
-                testDbTempConn);
+
+        try
+        {
+
+            m_testConnection = pg_connect( testDbTempConn);
+        } catch (pdal::pdal_error&)
+        {
+            m_testConnection = 0;
+            return;
+        }
 
         executeOnTestDb("CREATE EXTENSION pointcloud");
     }
 
     void executeOnTestDb(const std::string& sql)
     {
-        pg_execute(m_testConnection, sql);
+        if (m_testConnection)
+            pg_execute(m_testConnection, sql);
+        else
+            throw std::runtime_error("Not connected to test database for testing!");
     }
 
     virtual void TearDown()
     {
+        if (!m_testConnection || !m_masterConnection) return;
         if (m_testConnection)
         {
             PQfinish(m_testConnection);
@@ -100,7 +121,10 @@ private:
 
     void executeOnMasterDb(const std::string& sql)
     {
-        pg_execute(m_masterConnection, sql);
+        if (m_masterConnection)
+            pg_execute(m_masterConnection, sql);
+        else
+            throw std::runtime_error("Not connected to database for testing!");
     }
 
     void execute(PGconn* connection, const std::string& sql)
