@@ -3,7 +3,7 @@
     <Writer type="writers.las">
         <Option name="filename">st-helens-small-out.las</Option>
         <Option name="spatialreference">EPSG:26910</Option>
-        <Reader type="writers.pgpointcloud">
+        <Reader type="readers.pgpointcloud">
             <Option name="connection">dbname='points'</Option>
             <Option name="table">sthsm</Option>
             <Option name="column">pa</Option>
