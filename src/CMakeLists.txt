@@ -78,9 +78,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/Utils.hpp"
   "${PDAL_HEADERS_DIR}/Writer.hpp"
   "${PDAL_HEADERS_DIR}/third/nanoflann.hpp"
-  "${PDAL_HEADERS_DIR}/third/md5-pdal.h"
-  "${PDAL_HEADERS_DIR}/third/string_ref.hpp"
-  "${PDAL_HEADERS_DIR}/third/string_ref_fwd.hpp"
   "${PDAL_HEADERS_DIR}/Kernels.hpp"
     ${PDAL_XML_HEADER}
     ${DB_DRIVER_HEADERS}
@@ -110,7 +107,6 @@ set(PDAL_BASE_CPP
   StreamFactory.cpp
   Utils.cpp
   Writer.cpp
-  third/md5-pdal.c
   ${PDAL_XML_SRC}
   ${PDAL_LAZPERF_SRC}
   ${DB_DRIVER_SRCS}
