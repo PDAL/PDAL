@@ -35,16 +35,14 @@
 #include <mutex>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/uuid/random_generator.hpp>
-#include <boost/uuid/string_generator.hpp>
 
 #include <pdal/GlobalEnvironment.hpp>
+#include <pdal/GDALUtils.hpp>
 
 #ifdef PDAL_HAVE_PYTHON
 #include <pdal/plang/PythonEnvironment.hpp>
 #endif
 
-#include <pdal/GDALUtils.hpp>
 
 
 namespace pdal
@@ -98,10 +96,6 @@ GlobalEnvironment::GlobalEnvironment()
     , m_bIsGDALInitialized(false)
     , m_gdal_debug(0)
 {
-    using namespace boost::posix_time;
-
-    ptime epoch(boost::gregorian::date(1970,1,1));
-    m_rng.seed((uint32_t)((second_clock::local_time() - epoch).ticks()));
 }
 
 
@@ -161,17 +155,5 @@ pdal::gdal::GlobalDebug* GlobalEnvironment::getGDALDebug()
     return m_gdal_debug;
 }
 
-boost::uuids::uuid GlobalEnvironment::generateUUID()
-{
-    boost::uuids::basic_random_generator<std::mt19937> gen(&m_rng);
-    return gen();
-}
-
-
-boost::uuids::uuid GlobalEnvironment::generateUUID(const std::string& s)
-{
-    boost::uuids::string_generator gen;
-    return gen(s);
-}
 
 } //namespaces
