@@ -153,7 +153,7 @@ void AttributeFilter::ready(PointContext ctx)
     m_gdal_debug = std::shared_ptr<pdal::gdal::Debug>(
         new pdal::gdal::Debug(isDebug(), log()));
 
-    for (auto& dim_par: m_dimensions)
+    for (auto& dim_par : m_dimensions)
     {
         Dimension::Id::Enum t = ctx.findDim(dim_par.first);
         dim_par.second.dim = t;
@@ -308,7 +308,7 @@ void AttributeFilter::UpdateGEOSBuffer(PointBuffer& buffer, AttributeInfo& info)
         // point in the bbox against the prepared geometry.
         BOX3D box = computeBounds(m_geosEnvironment, geos_g);
         std::vector<std::size_t> ids = idx.getPoints(box);
-        for (auto i: ids)
+        for (const auto& i : ids)
         {
 
             double x = buffer.getFieldAs<double>(Dimension::Id::X, i);
@@ -336,7 +336,7 @@ void AttributeFilter::UpdateGEOSBuffer(PointBuffer& buffer, AttributeInfo& info)
 void AttributeFilter::filter(PointBuffer& buffer)
 {
 
-    for (auto& dim_par: m_dimensions)
+    for (auto& dim_par : m_dimensions)
     {
         if (dim_par.second.isogr)
         {

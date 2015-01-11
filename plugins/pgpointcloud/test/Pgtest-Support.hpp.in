@@ -44,9 +44,9 @@ static const std::string testDbName("@PGPOINTCLOUD_TEST_DB_NAME@");
 static const std::string testDbTempname("@PGPOINTCLOUD_TEST_DB_TEMPNAME@");
 
 static const std::string testDbConn(std::string("dbname='@PGPOINTCLOUD_TEST_DB_NAME@' ") +
-        "host='@PGPOINTCLOUD_TEST_DB_HOST@' port='@PGPOINTCLOUD_TEST_DB_PORT@'");
+        "user='postgres' host='@PGPOINTCLOUD_TEST_DB_HOST@' port='@PGPOINTCLOUD_TEST_DB_PORT@'");
 static const std::string testDbTempConn(std::string("dbname='@PGPOINTCLOUD_TEST_DB_TEMPNAME@'") +
-        "host='@PGPOINTCLOUD_TEST_DB_HOST@' port='@PGPOINTCLOUD_TEST_DB_PORT@'");
+        "user='postgres' host='@PGPOINTCLOUD_TEST_DB_HOST@' port='@PGPOINTCLOUD_TEST_DB_PORT@'");
 
 
 

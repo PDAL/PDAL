@@ -46,7 +46,7 @@
 # _subdir The sub-directory for these include files.
 # ARGN The include files.
 macro(PDAL_ADD_INCLUDES _subdir)
-    install(FILES ${ARGN} DESTINATION ${PDAL_INCLUDE_DIR}/${_subdir})
+    install(FILES ${ARGN} DESTINATION ${PDAL_INCLUDE_INSTALL_DIR}/${_subdir})
 endmacro(PDAL_ADD_INCLUDES)
 
 
@@ -60,11 +60,10 @@ macro(PDAL_ADD_LIBRARY _name)
     set_property(TARGET ${_name} PROPERTY FOLDER "Libraries")
     
     install(TARGETS ${_name}
-        RUNTIME DESTINATION ${PDAL_BIN_DIR}
-        LIBRARY DESTINATION ${PDAL_LIB_DIR}
-        ARCHIVE DESTINATION ${PDAL_LIB_DIR})
+        RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR}
+        LIBRARY DESTINATION ${PDAL_LIB_INSTALL_DIR}
+        ARCHIVE DESTINATION ${PDAL_LIB_INSTALL_DIR})
 endmacro(PDAL_ADD_LIBRARY)
-
 
 ###############################################################################
 # Add an executable target.
@@ -78,7 +77,7 @@ macro(PDAL_ADD_EXECUTABLE _name)
     target_link_libraries(${_name} ${Boost_LIBRARIES})
     
     set(PDAL_EXECUTABLES ${PDAL_EXECUTABLES} ${_name})
-    install(TARGETS ${_name} RUNTIME DESTINATION ${PDAL_BIN_DIR})
+    install(TARGETS ${_name} RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR})
 endmacro(PDAL_ADD_EXECUTABLE)
 
 
@@ -109,9 +108,9 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
     set_property(TARGET ${${_name}} PROPERTY FOLDER "Plugins/${_type}")
 
     install(TARGETS ${${_name}}
-        RUNTIME DESTINATION ${PDAL_BIN_DIR}
-        LIBRARY DESTINATION ${PDAL_LIB_DIR}
-        ARCHIVE DESTINATION ${PDAL_LIB_DIR})
+        RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR}
+        LIBRARY DESTINATION ${PDAL_LIB_INSTALL_DIR}
+        ARCHIVE DESTINATION ${PDAL_LIB_INSTALL_DIR})
 endmacro(PDAL_ADD_PLUGIN)
 
 ###############################################################################
@@ -162,7 +161,64 @@ macro(PDAL_ADD_DRIVER _type _name _srcs _incs _objs)
     set_property(TARGET ${libname} PROPERTY FOLDER "Drivers/${_type}")
 
     install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
-        DESTINATION "${PDAL_INCLUDE_DIR}"
+        DESTINATION "${PDAL_INCLUDE_INSTALL_DIR}"
         FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
     )
 endmacro(PDAL_ADD_DRIVER)
+
+###############################################################################
+# Get the operating system information. Generally, CMake does a good job of
+# this. Sometimes, though, it doesn't give enough information. This macro will
+# distinguish between the UNIX variants. Otherwise, use the CMake variables
+# such as WIN32 and APPLE and CYGWIN.
+# Sets OS_IS_64BIT if the operating system is 64-bit.
+# Sets LINUX if the operating system is Linux.
+macro(GET_OS_INFO)
+    string(REGEX MATCH "Linux" OS_IS_LINUX ${CMAKE_SYSTEM_NAME})
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(OS_IS_64BIT TRUE)
+    else(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(OS_IS_64BIT FALSE)
+    endif(CMAKE_SIZEOF_VOID_P EQUAL 8)
+endmacro(GET_OS_INFO)
+
+###############################################################################
+# Pull the component parts out of the version number.
+macro(DISSECT_VERSION)
+    # Find version components
+    string(REGEX REPLACE "^([0-9]+).*" "\\1"
+        PDAL_VERSION_MAJOR "${PDAL_VERSION_STRING}")
+    string(REGEX REPLACE "^[0-9]+\\.([0-9]+).*" "\\1"
+        PDAL_VERSION_MINOR "${PDAL_VERSION_STRING}")
+    string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1"
+        PDAL_VERSION_PATCH "${PDAL_VERSION_STRING}")
+    string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.[0-9]+(.*)" "\\1"
+        PDAL_CANDIDATE_VERSION "${PDAL_VERSION_STRING}")
+endmacro(DISSECT_VERSION)
+
+###############################################################################
+# Set the destination directories for installing stuff.
+# Sets PDAL_LIB_INSTALL_DIR. Install libraries here.
+# Sets PDAL_BIN_INSTALL_DIR. Install binaries here.
+# Sets PDAL_INCLUDE_INSTALL_DIR. Install include files here, preferably in a
+# subdirectory named after the library in question (e.g.
+# "registration/blorgle.h")
+macro(SET_INSTALL_DIRS)
+  string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
+  if (NOT DEFINED PDAL_LIB_INSTALL_DIR)
+    set(PDAL_LIB_INSTALL_DIR "lib")
+  endif ()
+    set(PDAL_INCLUDE_INSTALL_ROOT "include/")
+    set(PDAL_INCLUDE_INSTALL_DIR
+        "${PDAL_INCLUDE_INSTALL_ROOT}/${PROJECT_NAME_LOWER}/")
+    set(PDAL_DOC_INCLUDE_DIR
+        "share/doc/${PROJECT_NAME_LOWER}-${PDAL_VERSION_MAJOR}.${PDAL_VERSION_MINOR}")
+    set(PDAL_BIN_INSTALL_DIR "bin")
+    set(PDAL_PKGCFG_DIR "${PDAL_LIB_INSTALL_DIR}/pkgconfig")
+    if(WIN32)
+        set(PDALCONFIG_INSTALL_DIR "cmake")
+    else(WIN32)
+        set(PDALCONFIG_INSTALL_DIR
+            "share/${PROJECT_NAME_LOWER}-${PDAL_VERSION_MAJOR}.${PDAL_VERSION_MINOR}")
+    endif(WIN32)
+endmacro(SET_INSTALL_DIRS)

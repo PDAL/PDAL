@@ -32,9 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <SbetWriter.hpp>
+#include "SbetWriter.hpp"
 
-#include <SbetCommon.hpp>
 #include <pdal/PointBuffer.hpp>
 
 namespace pdal

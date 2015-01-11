@@ -32,12 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef PDAL_PLANG_PYTHON_ENVIRONMENT_H
-#define PDAL_PLANG_PYTHON_ENVIRONMENT_H
-
-#include <pdal/pdal_internal.hpp>
+#pragma once
 
 #include <iostream>
+
+#include <pdal/pdal_internal.hpp>
 
 // forward declare PyObject so we don't need the python headers everywhere
 // see: http://mail.python.org/pipermail/python-dev/2003-August/037601.html
@@ -52,11 +51,6 @@ namespace plang
 {
 
 class Redirector;
-
-
-#ifdef PDAL_HAVE_PYTHON
-
-
 
 std::string getPythonTraceback();
 
@@ -82,17 +76,6 @@ private:
     int m_gilstate; 
 };
 
+} // namespace plang
+} // namespace pdal
 
-#else
-
-typedef struct PythonEnvironmentHS *PythonEnvironment;
-
-#endif
-
-}
-} // namespaces
-
-
-
-
-#endif

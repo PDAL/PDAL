@@ -36,7 +36,7 @@
 #include <vector>
 
 #include "NitfWriter.hpp"
-#include <LasWriter.hpp>
+
 #include <pdal/pdal_macros.hpp>
 
 #include <pdal/PointBuffer.hpp>

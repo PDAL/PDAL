@@ -14,6 +14,7 @@ set(PDAL_SOURCE_DIR ../src)
 include_directories(
     .
     ../include
+    ../util
     ${PROJECT_SOURCE_DIR}/io/faux
     ${PROJECT_SOURCE_DIR}/io/las
     ${PROJECT_SOURCE_DIR}/kernels
@@ -31,7 +32,6 @@ include_directories(
 #------------------------------------------------------------------------------
 
 set(PDAL_UTILITY pdal)
-
 
 #------------------------------------------------------------------------------
 # Configure build targets
@@ -60,9 +60,11 @@ endif()
 #------------------------------------------------------------------------------
 
 if (APPLE AND PDAL_BUNDLE)
-    install(TARGETS ${PDAL_UTILITIES} BUNDLE DESTINATION ${PDAL_BIN_DIR})
+    install(TARGETS ${PDAL_UTILITIES}
+        BUNDLE DESTINATION ${PDAL_BIN_INSTALL_DIR})
 else(APPLE AND PDAL_BUNDLE)
-    install(TARGETS ${PDAL_UTILITIES} RUNTIME DESTINATION ${PDAL_BIN_DIR})
+    install(TARGETS ${PDAL_UTILITIES}
+        RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR})
 endif(APPLE AND PDAL_BUNDLE)
 
 if(UNIX)
@@ -76,9 +78,9 @@ if(UNIX)
 
 
     set(PKGCFG_PREFIX "${CMAKE_INSTALL_PREFIX}")
-    set(PKGCFG_EXEC_PREFIX "${CMAKE_INSTALL_PREFIX}/${PDAL_BIN_DIR}")
-    set(PKGCFG_INC_DIR "${CMAKE_INSTALL_PREFIX}/${PDAL_INCLUDE_DIR}")
-    set(PKGCFG_LIB_DIR "${CMAKE_INSTALL_PREFIX}/${PDAL_LIB_DIR}")
+    set(PKGCFG_EXEC_PREFIX "${CMAKE_INSTALL_PREFIX}/${PDAL_BIN_INSTALL_DIR}")
+    set(PKGCFG_INC_DIR "${CMAKE_INSTALL_PREFIX}/${PDAL_INCLUDE_INSTALL_DIR}")
+    set(PKGCFG_LIB_DIR "${CMAKE_INSTALL_PREFIX}/${PDAL_LIB_INSTALL_DIR}")
     set(PKGCFG_REQUIRES  "")
     set(PKGCFG_VERSION ${PDAL_VERSION_STRING})
     set(PKGCFG_LINK_FLAGS "-lpdalcpp")
@@ -131,7 +133,7 @@ if(UNIX)
       ${CMAKE_CURRENT_BINARY_DIR}/pdal-config @ONLY)
 
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/pdal-config
-      DESTINATION "${CMAKE_INSTALL_PREFIX}/${PDAL_BIN_DIR}"
+      DESTINATION "${CMAKE_INSTALL_PREFIX}/${PDAL_BIN_INSTALL_DIR}"
       PERMISSIONS
       OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 

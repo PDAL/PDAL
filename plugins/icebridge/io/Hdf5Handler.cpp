@@ -64,7 +64,7 @@ void Hdf5Handler::initialize(
     try
     {
         // Open each HDF5 DataSet and its corresponding DataSpace.
-        for (auto col : columns)
+        for (const auto& col : columns)
         {
             const std::string dataSetName = col.name;
             const H5::PredType predType = col.predType;
@@ -77,7 +77,7 @@ void Hdf5Handler::initialize(
 
             // Does not check whether all the columns are the same length.
             m_numPoints =
-                std::max(getColumnNumEntries(dataSetName), m_numPoints);
+                std::max((uint64_t)getColumnNumEntries(dataSetName), m_numPoints);
         }
     }
     catch (const H5::Exception&)
@@ -99,8 +99,8 @@ uint64_t Hdf5Handler::getNumPoints() const
 void Hdf5Handler::getColumnEntries(
         void* data,
         const std::string& dataSetName,
-        const uint64_t numEntries,
-        const uint64_t offset) const
+        const hsize_t numEntries,
+        const hsize_t offset) const
 {
     try
     {
@@ -111,7 +111,7 @@ void Hdf5Handler::getColumnEntries(
                 &numEntries,
                 &offset);
 
-        const uint64_t outOffset = 0;
+        const hsize_t outOffset = 0;
         const H5::DataSpace outSpace(1, &numEntries);
         outSpace.selectHyperslab(H5S_SELECT_SET, &numEntries, &outOffset);
 
@@ -127,14 +127,14 @@ void Hdf5Handler::getColumnEntries(
     }
 }
 
-uint64_t
+hsize_t 
 Hdf5Handler::getColumnNumEntries(const std::string& dataSetName) const
 {
     hsize_t entries = 0;
 
     getColumnData(dataSetName).dataSpace.getSimpleExtentDims(&entries);
 
-    return boost::numeric_cast<uint64_t>(entries);
+    return entries;
 }
 
 const Hdf5Handler::ColumnData&

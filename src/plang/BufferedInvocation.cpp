@@ -32,9 +32,6 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/pdal_internal.hpp>
-#ifdef PDAL_HAVE_PYTHON
-
 #include <pdal/plang/BufferedInvocation.hpp>
 
 #ifdef PDAL_COMPILER_MSVC
@@ -118,7 +115,6 @@ void BufferedInvocation::end(PointBuffer& buffer)
     m_buffers.clear();
 }
 
-}
-} //namespaces
+} //namespace plang
+} //namespace pdal
 
-#endif

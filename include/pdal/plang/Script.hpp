@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/pdal_internal.hpp>
-#ifdef PDAL_HAVE_PYTHON
 
 #include <pdal/Options.hpp>
 
@@ -76,6 +75,4 @@ PDAL_DLL std::ostream& operator<<(std::ostream& os, Script const& d);
 
 } // namespace plang
 } // namespace pdal
-
-#endif // PDAL_HAVE_PYTHON
 

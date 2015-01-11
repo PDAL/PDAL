@@ -33,11 +33,11 @@
 ****************************************************************************/
 
 #include "TranslateKernel.hpp"
-
-#include <BufferReader.hpp>
-#include <ReprojectionFilter.hpp>
 #include "KernelSupport.hpp"
+
+#include <buffer/BufferReader.hpp>
 #include <pdal/StageFactory.hpp>
+#include <reprojection/ReprojectionFilter.hpp>
 
 namespace pdal
 {
@@ -59,7 +59,7 @@ void TranslateKernel::validateSwitches()
     //
     // auto options = getExtraOptions();
     //
-    // for (auto o: options)
+    // for (const auto& o : options)
     // {
     //
     //     typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
@@ -366,15 +366,15 @@ int TranslateKernel::execute()
 
     writer->setUserCallback(callback);
 
-    for (auto pi: getExtraStageOptions())
+    for (const auto& pi : getExtraStageOptions())
     {
         std::string name = pi.first;
         Options options = pi.second;
         std::vector<Stage*> stages = writer->findStage(name);
-        for (auto s: stages)
+        for (const auto& s : stages)
         {
             Options opts = s->getOptions();
-            for (auto o: options.getOptions())
+            for (const auto& o : options.getOptions())
                 opts.add(o);
             s->setOptions(opts);
         }

@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <SbetCommon.hpp>
+#include "SbetCommon.hpp"
 
 namespace pdal
 {

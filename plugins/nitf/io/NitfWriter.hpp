@@ -35,7 +35,7 @@
 #pragma once
 
 #include <pdal/StageFactory.hpp>
-#include <LasWriter.hpp>
+#include <las/LasWriter.hpp>
 
 namespace pdal
 {

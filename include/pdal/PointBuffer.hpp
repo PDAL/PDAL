@@ -34,8 +34,8 @@
 
 #pragma once
 
-#include <pdal/pdal_internal.hpp>
 #include <pdal/Bounds.hpp>
+#include <pdal/pdal_internal.hpp>
 #include <pdal/PointContext.hpp>
 
 #include <memory>

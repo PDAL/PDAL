@@ -235,7 +235,7 @@ void RxpPointcloud::on_echo_transformed(echo_type echo)
 
     uint32_t idx = m_buf->size();
     unsigned int returnNumber = 1;
-    for (auto t : targets)
+    for (const auto& t : targets)
     {
         m_buf->setField(Id::X, idx, t.vertex[0]);
         m_buf->setField(Id::Y, idx, t.vertex[1]);

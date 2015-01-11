@@ -34,9 +34,10 @@
 
 #pragma once
 
-#include <SbetCommon.hpp>
 #include <pdal/OStream.hpp>
 #include <pdal/Writer.hpp>
+
+#include "SbetCommon.hpp"
 
 namespace pdal
 {

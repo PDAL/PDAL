@@ -33,7 +33,8 @@
 ****************************************************************************/
 
 #include <pdal/PointBuffer.hpp>
-#include <DecimationFilter.hpp>
+
+#include "DecimationFilter.hpp"
 
 namespace pdal
 {

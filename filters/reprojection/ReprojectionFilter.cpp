@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <ReprojectionFilter.hpp>
+#include "ReprojectionFilter.hpp"
 
 #include <memory>
 

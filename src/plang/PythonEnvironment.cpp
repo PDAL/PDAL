@@ -32,9 +32,6 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/pdal_internal.hpp>
-#ifdef PDAL_HAVE_PYTHON
-
 #include <pdal/plang/PythonEnvironment.hpp>
 #include <pdal/plang/Invocation.hpp>
 
@@ -203,8 +200,6 @@ std::string getPythonTraceback()
     return mssg.str();
 }
 
+} // namespace plang
+} // namespace pdal
 
-}
-} //namespaces
-
-#endif

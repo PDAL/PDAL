@@ -35,10 +35,11 @@
 #pragma once
 
 #include <pdal/Writer.hpp>
-#include <LasError.hpp>
-#include <LasHeader.hpp>
-#include <SummaryData.hpp>
-#include <ZipPoint.hpp>
+
+#include "LasError.hpp"
+#include "LasHeader.hpp"
+#include "SummaryData.hpp"
+#include "ZipPoint.hpp"
 
 namespace pdal
 {

@@ -36,9 +36,9 @@
 
 #include <zlib.h>
 
-#include <BpfReader.hpp>
 #include <pdal/Options.hpp>
 
+#include "BpfReader.hpp"
 
 namespace pdal
 {

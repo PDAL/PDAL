@@ -2,73 +2,56 @@
 # NITF plugin CMake configuration
 #
 
-include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories(${PROJECT_SOURCE_DIR}/plugins/nitf)
-include_directories(${PROJECT_SOURCE_DIR}/io/las)
+include(${PDAL_CMAKE_DIR}/nitro.cmake)
+if (NOT NITRO_FOUND)
+    message(FATAL_ERROR "Can't find NITRO support required by NITF.")
+endif()
 
-find_package(Nitro QUIET 2.6)
+#
+# NITF Reader
+#
+set(srcs
+    io/NitfFile.cpp
+    io/MetadataReader.cpp
+    io/tre_plugins.cpp
+    io/NitfReader.cpp
+)
 
-set_package_properties(Nitro PROPERTIES DESCRIPTION "Nitro" URL "http://foo"
-    TYPE OPTIONAL PURPOSE "Enables NITF reader/writer")
+set(incs
+    io/NitfFile.hpp
+    io/MetadataReader.hpp
+    io/tre_plugins.hpp
+    io/NitfReader.hpp
+)
 
-if(NITRO_FOUND)
-    include_directories(${NITRO_INCLUDE_DIR})
-    include_directories("${NITRO_INCLUDE_DIR}/nitro/c++")
-    include_directories("${NITRO_INCLUDE_DIR}/nitro/c")
-    add_definitions("-D_REENTRANT")
-    if (WIN32)
-        add_definitions("-DSIZEOF_SIZE_T=4")
-        add_definitions("-DIMPORT_NITRO_API")
-    else()
-        add_definitions("-D__POSIX")
-    endif()
+PDAL_ADD_PLUGIN(reader_libname reader nitf
+    FILES "${srcs}" "${incs}"
+    LINK_WITH ${NITRO_LIBRARIES})
 
-    #
-    # NITF Reader
-    #
-    set(srcs
-        io/NitfFile.cpp
-        io/MetadataReader.cpp
-        io/tre_plugins.cpp
-        io/NitfReader.cpp
-    )
+#
+# NITF Writer
+#
+set(srcs
+    io/NitfWriter.cpp
+    io/tre_plugins.cpp
+)
 
-    set(incs
-        io/NitfFile.hpp
-        io/MetadataReader.hpp
-        io/tre_plugins.hpp
-        io/NitfReader.hpp
-    )
+set(incs
+    io/NitfWriter.hpp
+    io/tre_plugins.hpp
+)
 
-    PDAL_ADD_PLUGIN(reader_libname reader nitf
-        FILES "${srcs}" "${incs}"
-        LINK_WITH ${NITRO_LIBRARIES})
+PDAL_ADD_PLUGIN(writer_libname writer nitf
+    FILES "${srcs}" "${incs}"
+    LINK_WITH ${NITRO_LIBRARIES})
 
-    #
-    # NITF Writer
-    #
-    set(srcs
-        io/NitfWriter.cpp
-        io/tre_plugins.cpp
-    )
-
-    set(incs
-        io/NitfWriter.hpp
-        io/tre_plugins.hpp
-    )
-
-    PDAL_ADD_PLUGIN(writer_libname writer nitf
-        FILES "${srcs}" "${incs}"
-        LINK_WITH ${NITRO_LIBRARIES})
-
-    if (WITH_TESTS)
+if (WITH_TESTS)
 	set(srcs
-            test/NitfReaderTest.cpp
-            test/NitfWriterTest.cpp
-        )
+        test/NitfReaderTest.cpp
+        test/NitfWriterTest.cpp
+    )
 
-        PDAL_ADD_TEST(nitftest
-            FILES "${srcs}"
-            LINK_WITH ${reader_libname} ${writer_libname})
-    endif()
+    PDAL_ADD_TEST(nitftest
+        FILES "${srcs}"
+        LINK_WITH ${reader_libname} ${writer_libname})
 endif()

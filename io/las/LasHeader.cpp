@@ -33,15 +33,15 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include <LasHeader.hpp>
+#include "LasHeader.hpp"
 
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
-#include <SummaryData.hpp>
-
+#include <pdal/Utils.hpp>
 #include <pdal/pdal_config.hpp>
 
+#include "SummaryData.hpp"
 
 namespace pdal
 {

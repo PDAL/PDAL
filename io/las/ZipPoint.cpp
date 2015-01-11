@@ -39,8 +39,8 @@
 
 #ifdef PDAL_HAVE_LASZIP
 
-#include <VariableLengthRecord.hpp>
-#include <ZipPoint.hpp>
+#include "VariableLengthRecord.hpp"
+#include "ZipPoint.hpp"
 
 namespace pdal
 {

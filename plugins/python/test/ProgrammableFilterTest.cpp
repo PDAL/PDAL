@@ -34,10 +34,10 @@
 
 #include "gtest/gtest.h"
 
-#include <StatsFilter.hpp>
 #include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/StageFactory.hpp>
+#include <stats/StatsFilter.hpp>
 
 #include "Support.hpp"
 
