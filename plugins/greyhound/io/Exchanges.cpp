@@ -36,6 +36,16 @@
 
 #include "Exchanges.hpp"
 
+namespace
+{
+    const bool compressionAllowed =
+#ifdef PDAL_HAVE_LAZPERF
+        false; // TODO
+#else
+        false;
+#endif
+}
+
 namespace pdal
 {
 namespace exchanges
@@ -202,10 +212,18 @@ std::vector<DimData> GetSchema::schema() const
 
 // Read exchange
 
-Read::Read(const std::string& sessionId, int offset, int count)
+Read::Read(
+        PointBuffer& pointBuffer,
+        const PointContextRef pointContext,
+        const std::string& sessionId,
+        int offset,
+        int count)
     : Exchange("read")
+    , m_pointBuffer(pointBuffer)
+    , m_pointContext(pointContext)
     , m_initialized(false)
     , m_error(false)
+    , m_compress(compressionAllowed)
     , m_pointsToRead(0)
     , m_numBytes(0)
     , m_numBytesReceived(0)
@@ -213,6 +231,7 @@ Read::Read(const std::string& sessionId, int offset, int count)
 {
     m_req["session"] = sessionId;
     m_req["start"] = offset;
+    m_req["compress"] = m_compress;
 
     if (count != -1) m_req["count"] = count;
 }
@@ -242,7 +261,15 @@ bool Read::check()
             m_numBytes =
                 std::max<int>(jsonResponse["numBytes"].asInt(), 0);
 
-            valid = true;
+            if (m_pointsToRead * m_pointContext.pointSize() != m_numBytes)
+            {
+                valid = false;
+                m_error = true;
+            }
+            else
+            {
+                valid = true;
+            }
         }
     }
 
@@ -266,19 +293,52 @@ void Read::handleRx(const message_ptr message)
     {
         if (message->get_opcode() == websocketpp::frame::opcode::binary)
         {
-            m_data.push_back(&message->get_payload());
-            m_numBytesReceived += message->get_payload().length();
+            const std::string& bytes(message->get_payload());
+            const std::size_t rawNumBytes(bytes.size());
+            const std::size_t stride(m_pointContext.pointSize());
+
+            m_data.insert(m_data.end(), bytes.begin(), bytes.end());
+
+            if (m_compress)
+            {
+                throw std::runtime_error("Not yet");
+            }
+            else
+            {
+                const std::size_t wholePoints(m_data.size() / stride);
+
+                PointId nextId(m_pointBuffer.size());
+                const PointId doneId(nextId + wholePoints);
+
+                const char* pos(m_data.data());
+
+                while (nextId < doneId)
+                {
+                    for (const auto& dim : m_pointContext.dims())
+                    {
+                        m_pointBuffer.setField(
+                                dim,
+                                m_pointContext.dimType(dim),
+                                nextId,
+                                pos);
+
+                        pos += m_pointContext.dimSize(dim);
+                    }
+
+                    ++nextId;
+                }
+
+                m_numBytesReceived += rawNumBytes;
+                m_data.assign(
+                        m_data.begin() + wholePoints * stride,
+                        m_data.end());
+            }
         }
         else
         {
             m_error = true;
         }
     }
-}
-
-std::vector<const std::string*> Read::data() const
-{
-    return m_data;
 }
 
 std::size_t Read::numRead() const
