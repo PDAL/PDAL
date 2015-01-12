@@ -58,7 +58,7 @@ Options getWriterOptions()
 class PgpointcloudWriterTest : public testing::Test
 {
 public:
-    PgpointcloudWriterTest() : m_testConnection(0), m_masterConnection(0) {};
+    PgpointcloudWriterTest() : m_masterConnection(0), m_testConnection(0) {};
 protected:
     virtual void SetUp()
     {
