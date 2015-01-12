@@ -37,7 +37,7 @@
 #include <pdal/Charbuf.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_internal.hpp>
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 #include <boost/format.hpp>
 

@@ -39,7 +39,7 @@
 
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/device/null.hpp>
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <iosfwd>
 #include <memory>
 

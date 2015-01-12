@@ -37,7 +37,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
 
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/PipelineReader.hpp>
 #include <pdal/Utils.hpp>
 

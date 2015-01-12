@@ -34,9 +34,9 @@
 
 #pragma once
 
+#include <algorithm>
+
 namespace pdal
-{
-namespace Algorithm
 {
 
 template<typename CONTAINER, typename VALUE>
@@ -45,6 +45,5 @@ bool contains(const CONTAINER& cont, const VALUE& val)
     return std::find(cont.begin(), cont.end(), val) != cont.end();
 }
 
-} // namespace Algorithm
 } // namespace pdal
 

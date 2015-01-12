@@ -36,7 +36,7 @@
 #include "gtest/gtest.h"
 
 #include <pdal/GDALUtils.hpp>
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include "Support.hpp"
 
 #ifdef PDAL_COMPILER_MSVC

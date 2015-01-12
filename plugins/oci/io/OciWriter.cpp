@@ -33,7 +33,7 @@
 ****************************************************************************/
 
 
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/GlobalEnvironment.hpp>

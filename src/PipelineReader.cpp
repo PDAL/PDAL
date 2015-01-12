@@ -39,7 +39,7 @@
 #include <pdal/Reader.hpp>
 #include <pdal/Writer.hpp>
 #include <pdal/Options.hpp>
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/optional.hpp>

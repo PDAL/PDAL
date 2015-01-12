@@ -43,7 +43,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/Compression.hpp"
   "${PDAL_HEADERS_DIR}/Dimension.hpp"
   "${PDAL_HEADERS_DIR}/Drivers.hpp"
-  "${PDAL_HEADERS_DIR}/FileUtils.hpp"
   "${PDAL_HEADERS_DIR}/Filter.hpp"
   "${PDAL_HEADERS_DIR}/Filters.hpp"
   "${PDAL_HEADERS_DIR}/GDALUtils.hpp"
@@ -80,7 +79,6 @@ set(PDAL_BASE_HPP
 
 set(PDAL_BASE_CPP
   Charbuf.cpp
-  FileUtils.cpp
   Filter.cpp
   gitsha.cpp
   GDALUtils.cpp

@@ -36,7 +36,7 @@
 
 #include <pdal/Stage.hpp>
 #include "Kernel.hpp"
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/KDIndex.hpp>
 
