@@ -331,6 +331,7 @@ void ReadUncompressed::handleRx(const message_ptr message)
     }
 }
 
+#ifdef PDAL_HAVE_LAZPERF
 ReadCompressed::ReadCompressed(
         PointBuffer& pointBuffer,
         const PointContextRef pointContext,
@@ -404,6 +405,7 @@ void ReadCompressed::handleRx(const message_ptr message)
         }
     }
 }
+#endif
 
 
 
