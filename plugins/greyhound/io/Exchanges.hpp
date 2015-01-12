@@ -171,7 +171,10 @@ private:
     std::thread m_decompressionThread;
 
     CompressionStream m_compressionStream;
+
+#ifdef PDAL_HAVE_LAZPERF
     LazPerfDecompressor<CompressionStream> m_decompressor;
+#endif
 
     bool m_done;
     std::condition_variable m_doneCv;
