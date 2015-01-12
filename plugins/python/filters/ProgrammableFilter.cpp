@@ -33,8 +33,9 @@
 ****************************************************************************/
 
 #include <pdal/pdal_internal.hpp>
-#include <pdal/GlobalEnvironment.hpp>
+
 #include "ProgrammableFilter.hpp"
+
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
 
@@ -84,8 +85,10 @@ void ProgrammableFilter::ready(PointContext ctx)
     m_script = new plang::Script(m_source, m_module, m_function);
     m_pythonMethod = new plang::BufferedInvocation(*m_script);
     m_pythonMethod->compile();
+/**
     GlobalEnvironment::get().getPythonEnvironment().set_stdout(
         log()->getLogStream());
+**/
 }
 
 
@@ -102,7 +105,7 @@ void ProgrammableFilter::filter(PointBuffer& buf)
 
 void ProgrammableFilter::done(PointContext ctx)
 {
-    GlobalEnvironment::get().getPythonEnvironment().reset_stdout();
+//    GlobalEnvironment::get().getPythonEnvironment().reset_stdout();
     delete m_pythonMethod;
     delete m_script;
 }

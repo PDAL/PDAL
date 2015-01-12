@@ -35,8 +35,6 @@
 #pragma once
 
 #include <pdal/pdal_internal.hpp>
-#include <pdal/plang/PythonEnvironment.hpp>
-
 
 namespace pdal
 {
@@ -52,10 +50,6 @@ public:
     static void startup();
     static void shutdown();
 
-    void createPythonEnvironment();
-
-    // get the plang (python) environment
-    plang::PythonEnvironment& getPythonEnvironment();
     void getGDALEnvironment();
     gdal::GlobalDebug* getGDALDebug();
 
@@ -65,7 +59,6 @@ private:
 
     static void init();
 
-    plang::PythonEnvironment* m_pythonEnvironment;
     bool m_bIsGDALInitialized;
     pdal::gdal::GlobalDebug* m_gdal_debug;
 

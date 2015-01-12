@@ -33,8 +33,9 @@
 ****************************************************************************/
 
 #include <pdal/pdal_internal.hpp>
+
 #include "PredicateFilter.hpp"
-#include <pdal/GlobalEnvironment.hpp>
+
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
 
@@ -69,8 +70,8 @@ void PredicateFilter::ready(PointContext ctx)
     m_script = new plang::Script(m_source, m_module, m_function);
     m_pythonMethod = new plang::BufferedInvocation(*m_script);
     m_pythonMethod->compile();
-    GlobalEnvironment::get().getPythonEnvironment().set_stdout(
-        log()->getLogStream());
+//    GlobalEnvironment::get().getPythonEnvironment().set_stdout(
+//        log()->getLogStream());
 }
 
 
@@ -101,7 +102,7 @@ PointBufferSet PredicateFilter::run(PointBufferPtr buf)
 
 void PredicateFilter::done(PointContext ctx)
 {
-    GlobalEnvironment::get().getPythonEnvironment().reset_stdout();
+//    GlobalEnvironment::get().getPythonEnvironment().reset_stdout();
     delete m_pythonMethod;
     delete m_script;
 }

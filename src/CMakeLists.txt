@@ -112,35 +112,6 @@ list (APPEND PDAL_HPP ${PDAL_BASE_HPP} )
 
 
 #
-# plang parser
-#
-
-if (PDAL_HAVE_PYTHON)
-    set(PDAL_PLANG_PATH plang)
-    set(PDAL_PLANG_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_PLANG_PATH}")
-    set(PDAL_PLANG_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_PLANG_PATH}")
-
-    set(PDAL_PLANG_HPP
-      "${PDAL_PLANG_HEADERS}/BufferedInvocation.hpp"
-      "${PDAL_PLANG_HEADERS}/PythonEnvironment.hpp"
-      "${PDAL_PLANG_HEADERS}/Invocation.hpp"
-      "${PDAL_PLANG_SRC}/Redirector.hpp"
-      "${PDAL_PLANG_HEADERS}/Script.hpp"
-    )
-
-    set (PDAL_PLANG_CPP
-      "${PDAL_PLANG_SRC}/BufferedInvocation.cpp"
-      "${PDAL_PLANG_SRC}/PythonEnvironment.cpp"
-      "${PDAL_PLANG_SRC}/Invocation.cpp"
-      "${PDAL_PLANG_SRC}/Redirector.cpp"
-      "${PDAL_PLANG_SRC}/Script.cpp"
-    )
-
-    list (APPEND PDAL_CPP ${PDAL_PLANG_CPP} )
-    list (APPEND PDAL_HPP ${PDAL_PLANG_HPP} )
-endif()
-
-#
 # config
 #
 
