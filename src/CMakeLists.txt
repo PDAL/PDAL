@@ -73,7 +73,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/UserCallback.hpp"
   "${PDAL_HEADERS_DIR}/Utils.hpp"
   "${PDAL_HEADERS_DIR}/Writer.hpp"
-  "${PDAL_HEADERS_DIR}/third/nanoflann.hpp"
   "${PDAL_HEADERS_DIR}/Kernels.hpp"
     ${PDAL_XML_HEADER}
     ${DB_DRIVER_HEADERS}

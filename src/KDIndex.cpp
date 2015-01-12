@@ -34,6 +34,8 @@
 
 #include <pdal/KDIndex.hpp>
 
+#include "nanoflann.hpp"
+
 namespace pdal
 {
 

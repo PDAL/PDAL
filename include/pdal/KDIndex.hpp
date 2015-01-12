@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include <pdal/third/nanoflann.hpp>
+#include "nanoflann.hpp"
 
 #include <pdal/PointBuffer.hpp>
 
