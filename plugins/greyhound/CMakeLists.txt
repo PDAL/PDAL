@@ -16,11 +16,14 @@ if(JSONCPP_FOUND AND WEBSOCKETPP_FOUND)
     add_definitions(-DHAVE_WEBSOCKETPP=1)
 
     set(srcs
+        io/CompressionStream.cpp
+        io/Exchanges.cpp
         io/GreyhoundReader.cpp
         io/WebSocketClient.cpp
     )
 
     set(incs
+        io/CompressionStream.hpp
         io/Exchanges.hpp
         io/GreyhoundReader.hpp
         io/WebSocketClient.hpp

@@ -42,17 +42,6 @@
 namespace pdal
 {
 
-struct DimData
-{
-    DimData(Dimension::Id::Enum id, Dimension::Type::Enum type)
-        : id(id)
-        , type(type)
-    { }
-
-    const Dimension::Id::Enum id;
-    const Dimension::Type::Enum type;
-};
-
 class PDAL_DLL GreyhoundReader : public pdal::Reader
 {
 public:
@@ -64,14 +53,13 @@ public:
     ~GreyhoundReader();
 
 private:
-    std::string m_uri;
+    std::string m_url;
     std::string m_pipelineId;
     std::string m_sessionId;
-    std::vector<DimData> m_dimData;
+    PointContextRef m_pointContext;
     WebSocketClient m_wsClient;
     point_count_t m_numPoints;
     point_count_t m_index;
-    std::size_t m_pointByteSize;
 
     virtual void initialize();
     virtual void processOptions(const Options& options);
@@ -79,11 +67,7 @@ private:
     virtual void ready(PointContextRef ctx);
     virtual point_count_t read(PointBuffer& buf, point_count_t count);
     virtual bool eof() const;
-
-    point_count_t setPoints(
-            PointBuffer& pointBuffer,
-            const char* data,
-            const point_count_t pointsToRead) const;
 };
 
 } // namespace pdal
+

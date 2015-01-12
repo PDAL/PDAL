@@ -43,14 +43,12 @@ namespace pdal
 
 GreyhoundReader::GreyhoundReader()
     : Reader()
-    , m_uri()
+    , m_url()
     , m_pipelineId()
     , m_sessionId()
-    , m_dimData()
     , m_wsClient()
     , m_numPoints(0)
     , m_index(0)
-    , m_pointByteSize(0)
 { }
 
 GreyhoundReader::~GreyhoundReader()
@@ -70,10 +68,10 @@ void GreyhoundReader::initialize()
 
 void GreyhoundReader::processOptions(const Options& options)
 {
-    m_uri = options.getValueOrThrow<std::string>("uri");
+    m_url = options.getValueOrThrow<std::string>("url");
     m_pipelineId = options.getValueOrThrow<std::string>("pipelineId");
 
-    m_wsClient.initialize(m_uri);
+    m_wsClient.initialize(m_url);
 }
 
 void GreyhoundReader::addDimensions(PointContextRef pointContext)
@@ -82,13 +80,14 @@ void GreyhoundReader::addDimensions(PointContextRef pointContext)
     exchanges::GetSchema schemaExchange(m_sessionId);
     m_wsClient.exchange(schemaExchange);
 
-    m_dimData = schemaExchange.schema();
+    std::vector<exchanges::DimData> dimData = schemaExchange.schema();
 
-    for (const auto& dim : m_dimData)
+    for (const auto& dim : dimData)
     {
         pointContext.registerDim(dim.id, dim.type);
-        m_pointByteSize += pdal::Dimension::size(dim.type);
     }
+
+    m_pointContext = pointContext;
 }
 
 void GreyhoundReader::ready(PointContextRef)
@@ -104,40 +103,19 @@ point_count_t GreyhoundReader::read(
         const point_count_t count)
 {
     // Read data.
-    exchanges::Read readExchange(m_sessionId, m_index, count);
+#ifdef PDAL_HAVE_LAZPERF
+    exchanges::ReadCompressed readExchange(
+#else
+    exchanges::ReadUncompressed readExchange(
+#endif
+            pointBuffer,
+            m_pointContext,
+            m_sessionId,
+            m_index,
+            count);
+
     m_wsClient.exchange(readExchange);
-    std::vector<const std::string*> data(readExchange.data());
-
-    std::size_t leftover(0);
-    std::size_t offset(0);
-    std::size_t numRead(0);
-
-    for (std::size_t i(0); i < data.size(); ++i)
-    {
-        if (leftover != 0)
-        {
-            const std::string stitchedPoint(
-                    data[i - 1]->substr(data[i - 1]->size() - leftover) +
-                    data[i]->substr(0, offset));
-
-            numRead += setPoints(pointBuffer, stitchedPoint.data(), 1);
-        }
-
-        const point_count_t wholePoints(
-                ((data[i]->size() - offset) / m_pointByteSize));
-
-        const std::size_t pointBoundedSize(wholePoints * m_pointByteSize);
-
-        numRead +=
-                setPoints(pointBuffer, data[i]->data() + offset, wholePoints);
-
-        leftover = (data[i]->size() - offset) - pointBoundedSize;
-        offset = m_pointByteSize - leftover;
-    }
-
-    m_index += numRead;
-
-    return numRead;
+    return readExchange.numRead();
 }
 
 bool GreyhoundReader::eof() const
@@ -145,29 +123,5 @@ bool GreyhoundReader::eof() const
     return m_index >= m_numPoints;
 }
 
-point_count_t GreyhoundReader::setPoints(
-        PointBuffer& pointBuffer,
-        const char* data,
-        const point_count_t pointsToRead) const
-{
-    PointId nextId(pointBuffer.size());
-
-    std::size_t dataOffset(0);
-    point_count_t numRead(0);
-
-    while (numRead < pointsToRead)
-    {
-        for (const auto& dim : m_dimData)
-        {
-            pointBuffer.setField(dim.id, dim.type, nextId, data + dataOffset);
-            dataOffset += Dimension::size(dim.type);
-        }
-
-        ++nextId;
-        ++numRead;
-    }
-
-    return numRead;
-}
-
 } // namespace pdal
+
