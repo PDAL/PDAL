@@ -42,6 +42,8 @@
 
 #include <Python.h>
 
+//#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+
 // This file can only be included once, otherwise we get wierd runtime errors,
 // even if we define NO_IMPORT and stuff, so we include it only here, and
 // provide a backdoor function numpy_init() which gets called from
@@ -79,41 +81,40 @@ Invocation::Invocation(const Script& script)
     , m_scriptResult(NULL)
 {
     resetArguments();
-
-    return;
 }
 
 
 Invocation::~Invocation()
 {
     cleanup();
-    return;
 }
 
 
 void Invocation::compile()
 {
-    m_bytecode = Py_CompileString(m_script.source(), m_script.module(), Py_file_input);
-    if (!m_bytecode) throw python_error(getPythonTraceback());
+    m_bytecode = Py_CompileString(m_script.source(), m_script.module(),
+        Py_file_input);
+    if (!m_bytecode)
+        throw python_error(getPythonTraceback());
 
     Py_INCREF(m_bytecode);
 
-    m_module = PyImport_ExecCodeModule(const_cast<char*>(m_script.module()), m_bytecode);
-    if (!m_module) throw python_error(getPythonTraceback());
+    m_module = PyImport_ExecCodeModule(const_cast<char*>(m_script.module()),
+        m_bytecode);
+    if (!m_module)
+        throw python_error(getPythonTraceback());
 
     m_dictionary = PyModule_GetDict(m_module);
-
     m_function = PyDict_GetItemString(m_dictionary, m_script.function());
     if (!m_function)
     {
         std::ostringstream oss;
-        oss << "unable to find target function '" << m_script.function() << "' in module";
+        oss << "unable to find target function '" << m_script.function() <<
+            "' in module";
         throw python_error(oss.str());
     }
-
-    if (!PyCallable_Check(m_function)) throw python_error(getPythonTraceback());
-
-    return;
+    if (!PyCallable_Check(m_function))
+        throw python_error(getPythonTraceback());
 }
 
 
@@ -121,19 +122,11 @@ void Invocation::cleanup()
 {
     Py_XDECREF(m_varsIn);
     Py_XDECREF(m_varsOut);
-
     Py_XDECREF(m_scriptResult);
-
     Py_XDECREF(m_scriptArgs); // also decrements script and vars
-
-    for (unsigned int i=0; i<m_pyInputArrays.size(); i++)
-    {
-        PyObject* obj = m_pyInputArrays[i];
-        Py_XDECREF(obj);
-    }
-
+    for (size_t i = 0; i < m_pyInputArrays.size(); i++)
+        Py_XDECREF(m_pyInputArrays[i]);
     m_pyInputArrays.clear();
-
     Py_XDECREF(m_bytecode);
 }
 
@@ -141,16 +134,13 @@ void Invocation::cleanup()
 void Invocation::resetArguments()
 {
     cleanup();
-
     m_varsIn = PyDict_New();
     m_varsOut = PyDict_New();
 }
 
 
-void Invocation::insertArgument(std::string const& name, 
-                                uint8_t* data,
-                                Dimension::Type::Enum t,
-                                point_count_t count)
+void Invocation::insertArgument(std::string const& name, uint8_t* data,
+    Dimension::Type::Enum t, point_count_t count)
 {
     npy_intp mydims = count;
     int nd = 1;
@@ -173,14 +163,10 @@ void *Invocation::extractResult(std::string const& name,
 {
     PyObject* xarr = PyDict_GetItemString(m_varsOut, name.c_str());
     if (!xarr)
-    {
         throw python_error("plang output variable '" + name + "' not found");
-    }
     if (!PyArray_Check(xarr))
-    {
         throw python_error("plang output variable  '" + name +
             "' is not a numpy array");
-    }
 
     PyArrayObject* arr = (PyArrayObject*)xarr;
 
@@ -239,8 +225,7 @@ void Invocation::getOutputNames(std::vector<std::string>& names)
     {
         const char* p(0);
 #if PY_MAJOR_VERSION >= 3
-        PyObject* u = PyUnicode_AsUTF8String(key);
-        p = PyBytes_AsString(u);
+        p = PyBytes_AsString(PyUnicode_AsUTF8String(key));
 #else
         p = PyString_AsString(key);
 #endif
