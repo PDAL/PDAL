@@ -135,7 +135,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     "vim",
     "libeigen3-dev",
     "libflann-dev",
+    "libglew-dev",
+    "libhdf5-serial-dev",
+    "libjsoncpp-dev",
+    "vtk6",
+    "libvtk6-dev",
     "libglew-dev"
+
   ];
 
   if Dir.glob("#{File.dirname(__FILE__)}/.vagrant/machines/default/*/id").empty?
@@ -156,10 +162,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       "libgeotiff.sh",
       "nitro.sh",
       "hexer.sh",
+      "lazperf.sh",
       "p2g.sh",
-      "soci.sh",
       "laszip.sh",
       "pcl.sh",
+      "websocketpp.sh",
       "pdal.sh",
       "pgpointcloud.sh"
     ];

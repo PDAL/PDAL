@@ -3,6 +3,7 @@ USR="/usr"
 TIFF_HOME=$USR_LOCAL
 LASZIP_HOME=$USR_LOCAL
 LIBXML2_HOME=/usr/local/Cellar/libxml2/2.9.2/
+WEBSOCKETPP_HOME=/Users/hobu/dev/git/websocketpp
 GEOTIFF_HOME=$USR_LOCAL
 P2G_HOME=$USR_LOCAL
 HEXER_HOME="/usr/local"
@@ -12,7 +13,7 @@ SO_EXT=dylib
 # CXX=/usr/local/bin/g++-4.8
 
 ORACLE_HOME=$HOME/oracle
-LAZPERF_HOME=$HOME/dev/git/laz-perf
+LAZPERF_HOME=$USR_LOCAL
 export ORACLE_HOME
 CONFIG="Unix Makefiles"
 #CONFIG="Ninja"
@@ -50,7 +51,8 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DLASZIP_LIBRARY=${LASZIP_HOME}/lib/liblaszip.${SO_EXT} \
         -DLIBXML2_INCLUDE_DIR=${LIBXML2_HOME}/include/libxml2 \
         -DLIBXML2_LIBRARIES=${LIBXML2_HOME}/lib/libxml2.${SO_EXT} \
-        -DLAZPERF_INCLUDE_DIR=${LAZPERF_HOME}/ \
+        -DLazperf_DIR=${LAZPERF_HOME}/ \
+        -DJSONCPP_ROOT_DIR=${USR_LOCAL}/include/jsoncpp \
         -DSQLITE3_INCLUDE_DIR=${SQLITE_HOME}/include \
         -DSQLITE3_LIBRARY=${SQLITE_HOME}/lib/libsqlite3.${SO_EXT}
 

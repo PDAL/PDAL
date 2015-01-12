@@ -20,10 +20,6 @@ set(PDAL_UTIL_DIR "${PROJECT_SOURCE_DIR}/util")
 set(PDAL_HPP "")
 set(PDAL_CPP "")
 
-set(PDAL_KERNEL_PATH kernel)
-set(PDAL_KERNEL_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_KERNEL_PATH}")
-set(PDAL_KERNEL_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_KERNEL_PATH}")
-
 if (PDAL_HAVE_LIBXML2)
     set(PDAL_XML_HEADER ${PDAL_HEADERS_DIR}/XMLSchema.hpp)
     set(DB_DRIVER_HEADERS
@@ -77,10 +73,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/UserCallback.hpp"
   "${PDAL_HEADERS_DIR}/Utils.hpp"
   "${PDAL_HEADERS_DIR}/Writer.hpp"
-  "${PDAL_HEADERS_DIR}/third/nanoflann.hpp"
-  "${PDAL_HEADERS_DIR}/third/md5-pdal.h"
-  "${PDAL_HEADERS_DIR}/third/string_ref.hpp"
-  "${PDAL_HEADERS_DIR}/third/string_ref_fwd.hpp"
   "${PDAL_HEADERS_DIR}/Kernels.hpp"
     ${PDAL_XML_HEADER}
     ${DB_DRIVER_HEADERS}
@@ -110,7 +102,6 @@ set(PDAL_BASE_CPP
   StreamFactory.cpp
   Utils.cpp
   Writer.cpp
-  third/md5-pdal.c
   ${PDAL_XML_SRC}
   ${PDAL_LAZPERF_SRC}
   ${DB_DRIVER_SRCS}
@@ -119,13 +110,6 @@ set(PDAL_BASE_CPP
 list (APPEND PDAL_CPP ${PDAL_BASE_CPP} )
 list (APPEND PDAL_HPP ${PDAL_BASE_HPP} )
 
-
-#
-# filters
-#
-set(PDAL_FILTERS_PATH filters)
-set(PDAL_FILTERS_HEADERS "${PDAL_HEADERS_DIR}/${PDAL_FILTERS_PATH}")
-set(PDAL_FILTERS_SRC "${PROJECT_SOURCE_DIR}/src/${PDAL_FILTERS_PATH}")
 
 #
 # plang parser
@@ -175,23 +159,6 @@ list (APPEND PDAL_CPP ${PDAL_CONFIG_CPP} )
 list (APPEND PDAL_HPP ${PDAL_CONFIG_HPP} )
 
 
-#
-# Group source files for IDE source explorers (e.g. Visual Studio)
-#
-
-#source_group("CMake Files" FILES CMakeLists.txt)
-
-#source_group("Header Files" FILES ${PDAL_BASE_HPP})
-#source_group("Header Files\\config" FILES ${PDAL_CONFIG_HPP})
-#source_group("Header Files\\filters" FILES ${PDAL_FILTERS_HPP})
-#source_group("Header Files\\plang" FILES ${PDAL_PLANG_HPP})
-
-#source_group("Source Files" FILES ${PDAL_BASE_CPP})
-#source_group("Source Files\\config" FILES ${PDAL_CONFIG_CPP})
-#source_group("Source Files\\filters" FILES ${PDAL_FILTERS_CPP})
-#source_group("Source Files\\plang" FILES ${PDAL_PLANG_CPP})
-
-
 # Standard include directory of PDAL library
 
 ###############################################################################
@@ -234,13 +201,13 @@ if (PDAL_HAVE_LIBXML2)
     target_link_libraries(${PDAL_LIB_NAME} ${LIBXML2_LIBRARIES})
 endif()
 
-target_link_libraries(${PDAL_LIB_NAME} 
+target_link_libraries(${PDAL_LIB_NAME}
     ${CMAKE_THREAD_LIBS_INIT}
     ${GEOTIFF_LIBRARY}
     ${GDAL_LIBRARY}
     ${GEOS_LIBRARY}
     ${ZLIB_LIBRARIES}
-    PdalUtil
+    ${PDAL_UTIL_LIB_NAME}
 )
 
 target_link_libraries(${PDAL_LIB_NAME} ${Boost_LIBRARIES})

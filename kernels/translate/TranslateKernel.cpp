@@ -224,11 +224,9 @@ Stage* TranslateKernel::makeTranslate(Options translateOptions, Stage* reader_st
         if ((!m_bounds.empty() && m_wkt.empty()))
         {
             readerOptions.add("bounds", m_bounds);
-            StageFactory f;
-            FilterPtr crop_stage(f.createFilter("filters.crop"));
             crop_stage->setInput(next_stage);
             crop_stage->setOptions(readerOptions);
-            next_stage = crop_stage.get();
+            next_stage = crop_stage;
         }
         else if (m_bounds.empty() && !m_wkt.empty())
         {
@@ -249,18 +247,14 @@ Stage* TranslateKernel::makeTranslate(Options translateOptions, Stage* reader_st
                 // was likely actually wkt, leave it alone
             }
             readerOptions.add("polygon", m_wkt);
-            StageFactory f;
-            FilterPtr crop_stage(f.createFilter("filters.crop"));
             crop_stage->setInput(next_stage);
             crop_stage->setOptions(readerOptions);
-            next_stage = crop_stage.get();
+            next_stage = crop_stage;
         } else if (bHaveCrop)
         {
-            StageFactory f;
-            FilterPtr crop_stage(f.createFilter("filters.crop"));
             crop_stage->setInput(next_stage);
             crop_stage->setOptions(extra_opts.find("filters.crop")->second);
-            next_stage = crop_stage.get();
+            next_stage = crop_stage;
         }
         final_stage = next_stage;
     }
@@ -268,7 +262,7 @@ Stage* TranslateKernel::makeTranslate(Options translateOptions, Stage* reader_st
     if (boost::iequals(m_decimation_method, "VoxelGrid"))
     {
         StageFactory f;
-        FilterPtr decimation_stage(f.createFilter("filters.pclblock"));
+        Stage* decimation_stage(f.createFilter("filters.pclblock"));
             
         Options decimationOptions;
         std::ostringstream ss;
@@ -290,7 +284,7 @@ Stage* TranslateKernel::makeTranslate(Options translateOptions, Stage* reader_st
         decimationOptions.add<uint32_t>("verbose", getVerboseLevel());
         decimation_stage->setOptions(decimationOptions);
         decimation_stage->setInput(final_stage);
-        final_stage = decimation_stage.get();
+        final_stage = decimation_stage;
     }
     else if (m_decimation_step > 1 || m_decimation_limit > 0)
     {
@@ -301,10 +295,10 @@ Stage* TranslateKernel::makeTranslate(Options translateOptions, Stage* reader_st
         decimationOptions.add("offset", m_decimation_offset);
         decimationOptions.add("limit", m_decimation_limit);
         StageFactory f;
-        FilterPtr decimation_stage(f.createFilter("filters.decimation"));
+        Stage* decimation_stage(f.createFilter("filters.decimation"));
         decimation_stage->setInput(final_stage);
         decimation_stage->setOptions(decimationOptions);
-        final_stage = decimation_stage.get();
+        final_stage = decimation_stage;
     }
 
     return final_stage;

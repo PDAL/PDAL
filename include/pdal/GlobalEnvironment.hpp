@@ -35,11 +35,8 @@
 #pragma once
 
 #include <pdal/pdal_internal.hpp>
-
 #include <pdal/plang/PythonEnvironment.hpp>
 
-#include <random>
-#include <boost/uuid/uuid.hpp>
 
 namespace pdal
 {
@@ -56,13 +53,11 @@ public:
     static void shutdown();
 
     void createPythonEnvironment();
-    
+
     // get the plang (python) environment
     plang::PythonEnvironment& getPythonEnvironment();
     void getGDALEnvironment();
     gdal::GlobalDebug* getGDALDebug();
-    boost::uuids::uuid generateUUID();
-    boost::uuids::uuid generateUUID(const std::string& s);
 
 private:
     GlobalEnvironment();
@@ -73,8 +68,7 @@ private:
     plang::PythonEnvironment* m_pythonEnvironment;
     bool m_bIsGDALInitialized;
     pdal::gdal::GlobalDebug* m_gdal_debug;
-    std::mt19937 m_rng;
-    
+
     GlobalEnvironment(const GlobalEnvironment&); // nope
     GlobalEnvironment& operator=(const GlobalEnvironment&); // nope
 };

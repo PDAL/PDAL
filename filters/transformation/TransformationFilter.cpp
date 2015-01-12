@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Connor Manning (connor@hobu.co)
+* Copyright (c) 2014, Pete Gadomski <pete.gadomski@gmail.com>
 *
 * All rights reserved.
 *
@@ -32,65 +32,69 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include "TransformationFilter.hpp"
 
-#include <condition_variable>
-#include <mutex>
+#include <sstream>
 
-#include <websocketpp/config/asio_no_tls_client.hpp>
-#include <websocketpp/client.hpp>
+#include <pdal/pdal_error.hpp>
 
-#include <json/json.h>
 
 namespace pdal
 {
 
-typedef websocketpp::client<websocketpp::config::asio_client> asioClient;
-typedef websocketpp::config::asio_client::message_type::ptr message_ptr;
 
-class WebSocketExchange
+TransformationMatrix transformationMatrixFromString(const std::string& s)
 {
-public:
-    const Json::Value& req() const { return m_req; }
-    const std::vector<message_ptr>& res() const { return m_res; }
-    void addResponse(message_ptr message)
+    std::istringstream iss(s);        
+    TransformationMatrix matrix;
+    double entry;
+    TransformationMatrix::size_type i = 0;
+    while (iss >> entry)
     {
-        m_res.push_back(message);
-        handleRx(message);
+        if (i + 1 > matrix.size())
+        {
+            std::stringstream msg;
+            msg << "Too many entries in transformation matrix, should be "
+                << matrix.size();
+            throw invalid_format(msg.str());
+        }
+        matrix[i++] = entry;
     }
 
-    virtual bool done() { return true; }
-    virtual bool check() { return true; }
+    if (i != matrix.size())
+    {
+        std::stringstream msg;
+        msg << "Too few entries in transformation matrix: "
+            << i
+            << " (should be "
+            << matrix.size()
+            << ")";
 
-protected:
-    WebSocketExchange() : m_req(), m_res() { }
-    virtual void handleRx(const message_ptr) { }
+        throw invalid_format(msg.str());
+    }
 
-    Json::Value m_req;
+    return matrix;
+}
 
-private:
-    std::vector<message_ptr> m_res;
-};
 
-class WebSocketClient
+void TransformationFilter::processOptions(const Options& options)
 {
-public:
-    WebSocketClient(bool enableLogging = false);
-    WebSocketClient(const std::string& uri, bool enableLogging = false);
+    m_matrix = transformationMatrixFromString(options.getValueOrThrow<std::string>("matrix"));
+}
 
-    void initialize(const std::string& uri);
-    void exchange(WebSocketExchange& exchange);
 
-private:
-    std::string m_uri;
-    asioClient m_client;
-    Json::Reader m_jsonReader;
+void TransformationFilter::filter(PointBuffer& data)
+{
+    for (PointId idx = 0; idx < data.size(); ++idx)
+    {
+        double x = data.getFieldAs<double>(Dimension::Id::X, idx);
+        double y = data.getFieldAs<double>(Dimension::Id::Y, idx);
+        double z = data.getFieldAs<double>(Dimension::Id::Z, idx);
+        data.setField(Dimension::Id::X, idx, x * m_matrix[0] + y * m_matrix[1] + z * m_matrix[2] + m_matrix[3]);
+        data.setField(Dimension::Id::Y, idx, x * m_matrix[4] + y * m_matrix[5] + z * m_matrix[6] + m_matrix[7]);
+        data.setField(Dimension::Id::Z, idx, x * m_matrix[8] + y * m_matrix[9] + z * m_matrix[10] + m_matrix[11]);
+    }
+}
 
-    std::condition_variable m_cv;
-    std::mutex m_mutex;
-
-    bool m_initialized;
-};
 
 } // namespace pdal
-

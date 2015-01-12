@@ -49,6 +49,7 @@ SET(PDAL_C_LIB_SOVERSION ${PDAL_VERSION_MAJOR})
 
 # Name of C++ library
 set(PDAL_LIB_NAME pdalcpp)
+set(PDAL_UTIL_LIB_NAME pdal_util)
 
 set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 
@@ -207,6 +208,8 @@ set(pdal_defines_h "${CMAKE_CURRENT_BINARY_DIR}/include/pdal/pdal_defines.h")
 configure_file(${pdal_defines_h_in} ${pdal_defines_h})
 PDAL_ADD_INCLUDES("" "" ${pdal_defines_h})
 include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
+
+include_directories(vendor/nanoflann-1.1.8)
 
 #------------------------------------------------------------------------------
 # subdirectory controls

@@ -6,6 +6,21 @@ if(EXISTS)
     return()
 endif()
 
-add_library(PdalUtil SHARED Bounds.cpp Bounds.hpp)
+set(PDAL_UTIL_HPP
+    "${PDAL_UTIL_DIR}/Bounds.hpp")
+
+set(PDAL_UTIL_CPP
+    "${PDAL_UTIL_DIR}/Bounds.cpp")
+
+set(PDAL_UTIL_SOURCES
+    ${PDAL_UTIL_CPP}
+    ${PDAL_UTIL_HPP})
+
+PDAL_ADD_LIBRARY(${PDAL_UTIL_LIB_NAME} SHARED ${PDAL_UTIL_SOURCES})
+
+install(DIRECTORY "${PDAL_UTIL_DIR}/"
+  DESTINATION "${PDAL_INCLUDE_INSTALL_DIR}"
+  FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp")
 
 set_property(GLOBAL PROPERTY _UTIL_INCLUDED TRUE)
+

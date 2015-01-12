@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2014, Pete Gadomski <pete.gadomski@gmail.com>
 *
 * All rights reserved.
 *
@@ -34,15 +34,40 @@
 
 #pragma once
 
-#include <chipper/ChipperFilter.hpp>
-#include <colorization/ColorizationFilter.hpp>
-#include <crop/CropFilter.hpp>
-#include <decimation/DecimationFilter.hpp>
-#include <ferry/FerryFilter.hpp>
-#include <merge/MergeFilter.hpp>
-#include <mortonorder/MortonOrderFilter.hpp>
-#include <reprojection/ReprojectionFilter.hpp>
-#include <sort/SortFilter.hpp>
-#include <splitter/SplitterFilter.hpp>
-#include <stats/StatsFilter.hpp>
-#include <transformation/TransformationFilter.hpp>
+#include <array>
+#include <string>
+
+#include <pdal/Filter.hpp>
+
+
+namespace pdal
+{
+
+
+// Transformation matrices are assumed to be stored in row-major order
+typedef std::array<double, 16> TransformationMatrix;
+
+
+TransformationMatrix transformationMatrixFromString(const std::string& s);
+
+
+class PDAL_DLL TransformationFilter : public Filter
+{
+public:
+    SET_STAGE_NAME("filters.transformation", "Transform each point using a 4x4 transformation matrix")
+    SET_STAGE_LINK("http://pdal.io/stages/filters.transformation.html")
+
+    TransformationFilter() : Filter()
+    {}
+
+private:
+    TransformationFilter& operator=(const TransformationFilter&); // not implemented
+    TransformationFilter(const TransformationFilter&); // not implemented
+    virtual void processOptions(const Options& options);
+    virtual void filter(PointBuffer& data);
+
+    TransformationMatrix m_matrix;
+};
+
+
+} // namespace pdal

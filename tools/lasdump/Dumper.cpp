@@ -124,7 +124,7 @@ void Dumper::dump()
 void Dumper::readPoints(ILeStream& in)
 {
     vector<char> buf(m_header.pointLen());
-    
+
     for (uint64_t i = 0; i < m_header.pointCount(); ++i)
     {
         in.get(buf);
@@ -185,7 +185,7 @@ int Dumper::processArgs(deque<string> args)
         }
         args.pop_front();
 
-        m_fout = ofstream(args[0]);
+        m_fout.open(args[0]);
         m_out = &m_fout;
         if (!*m_out)
         {
