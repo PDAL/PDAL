@@ -331,6 +331,7 @@ void ReadUncompressed::handleRx(const message_ptr message)
     }
 }
 
+#ifdef PDAL_HAVE_LAZPERF
 ReadCompressed::ReadCompressed(
         PointBuffer& pointBuffer,
         const PointContextRef pointContext,
@@ -340,9 +341,7 @@ ReadCompressed::ReadCompressed(
     : Read(pointBuffer, pointContext, sessionId, true, offset, count)
     , m_decompressionThread()
     , m_compressionStream()
-#ifdef PDAL_HAVE_LAZPERF
     , m_decompressor(m_compressionStream, pointContext.dimTypes())
-#endif
     , m_done(false)
     , m_doneCv()
     , m_doneMutex()
@@ -361,7 +360,6 @@ void ReadCompressed::handleRx(const message_ptr message)
     std::lock_guard<std::mutex> lock(m_mutex);
     if (!m_initialized)
     {
-#ifdef PDAL_HAVE_LAZPERF
         m_initialized = check();
         if (!m_initialized) m_error = true;
 
@@ -390,7 +388,6 @@ void ReadCompressed::handleRx(const message_ptr message)
         });
 
         m_decompressionThread.detach();
-#endif
     }
     else
     {
@@ -408,6 +405,7 @@ void ReadCompressed::handleRx(const message_ptr message)
         }
     }
 }
+#endif
 
 
 

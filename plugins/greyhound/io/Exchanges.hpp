@@ -154,6 +154,7 @@ public:
     virtual void handleRx(const message_ptr message);
 };
 
+#ifdef PDAL_HAVE_LAZPERF
 class ReadCompressed : public Read
 {
 public:
@@ -172,9 +173,7 @@ private:
 
     CompressionStream m_compressionStream;
 
-#ifdef PDAL_HAVE_LAZPERF
     LazPerfDecompressor<CompressionStream> m_decompressor;
-#endif
 
     bool m_done;
     std::condition_variable m_doneCv;
@@ -182,6 +181,7 @@ private:
 
     std::mutex m_mutex;
 };
+#endif
 
 class Destroy: public Exchange
 {
