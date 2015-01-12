@@ -67,7 +67,7 @@ Options getSQLITEOptions()
     options.add("spatialreference", "EPSG:2926");
     options.add("pack_ignored_fields", true);
     options.add("cloud_column_name", "CLOUD");
-    options.add("xml_schema_dump", "sqlite-xml-schema-dump.xml");
+//     options.add("xml_schema_dump", "sqlite-xml-schema-dump.xml");
     options.add("type", "sqlite");
 
     return options;
@@ -76,7 +76,7 @@ Options getSQLITEOptions()
 void testReadWrite(bool compression, bool scaling)
 {
     // remove file from earlier run, if needed
-    std::string tempFilename = 
+    std::string tempFilename =
         getSQLITEOptions().getValueOrThrow<std::string>("connection");
 
     StageFactory f;
