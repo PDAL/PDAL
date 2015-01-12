@@ -59,7 +59,7 @@ public:
         handleRx(message);
     }
 
-    virtual bool done() const { return true; }
+    virtual bool done() { return true; }
     virtual bool check() { return true; }
 
 protected:
