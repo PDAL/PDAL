@@ -80,13 +80,11 @@ private:
     std::string m_inputFile;
     bool m_showStats;
     bool m_showSchema;
-    bool m_showStage;
+    bool m_showMetadata;
     bool m_boundary;
     pdal::Options m_options;
     std::string m_pointIndexes;
-    bool m_useXML;
     bool m_useJSON;
-    bool m_useRST;
     std::string m_Dimensions;
     std::string m_QueryPoint;
     double m_QueryDistance;

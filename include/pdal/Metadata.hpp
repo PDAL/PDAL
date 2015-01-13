@@ -518,7 +518,8 @@ public:
     std::string jsonValue() const
     {
         std::string val;
-        if (m_impl->m_type == "string" || m_impl->m_type == "base64Binary")
+        if (m_impl->m_type == "string" || m_impl->m_type == "base64Binary" ||
+            m_impl->m_type == "uuid")
         {
             std::string val("\"");
             val += value() + "\"";
