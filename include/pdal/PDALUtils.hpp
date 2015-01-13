@@ -104,22 +104,6 @@ inline MetadataNode toMetadata(PointContextRef ctx)
 }
 
 
-/*! returns a boost::property_tree containing the point records, which is
-    useful for dumping and such.
-    \verbatim embed:rst
-    ::
-
-        0:
-            X: 1.00
-            Y: 2.00
-            Z: 3.00
-        1:
-            X: 1.00
-            Y: 2.00
-            Z: 3.00
-
-    \endverbatim
-*/
 inline MetadataNode toMetadata(const PointBuffer& buffer)
 {
     MetadataNode node;
@@ -216,6 +200,8 @@ inline ptree toPTree(const SpatialReference& ref)
 
 std::string toJSON(const MetadataNode& m);
 void toJSON(const MetadataNode& m, std::ostream& o);
+std::string toJSONExt(const MetadataNode& m);
+void toJSONExt(const MetadataNode& m, std::ostream& o);
 
 namespace reST
 {

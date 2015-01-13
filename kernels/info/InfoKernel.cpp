@@ -203,7 +203,9 @@ MetadataNode InfoKernel::dumpPoints(PointBufferPtr buf) const
     for (size_t i = 0; i < outbuf->size(); ++i)
     {
         MetadataNode n = tree.findChild(std::to_string(i));
-        root.add(n.clone(prefix + std::to_string(points[i])));
+        n.add("PointId", points[i]);
+        //root.add(n.clone(prefix + std::to_string(points[i])));
+        root.add(n.clone("point"));
     }
     return root;
 }

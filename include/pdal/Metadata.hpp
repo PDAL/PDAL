@@ -515,6 +515,18 @@ public:
     std::string value() const
         { return m_impl->m_value; }
 
+    std::string jsonValue() const
+    {
+        std::string val;
+        if (m_impl->m_type == "string" || m_impl->m_type == "base64Binary")
+        {
+            std::string val("\"");
+            val += value() + "\"";
+            return val;
+        }
+        return value();
+    }
+
     std::string description() const
         { return m_impl->m_descrip; }
 
