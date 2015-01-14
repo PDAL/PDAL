@@ -60,6 +60,7 @@ macro(PDAL_ADD_LIBRARY _name)
     set_property(TARGET ${_name} PROPERTY FOLDER "Libraries")
 
     install(TARGETS ${_name}
+        EXPORT PDALTargets
         RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR}
         LIBRARY DESTINATION ${PDAL_LIB_INSTALL_DIR}
         ARCHIVE DESTINATION ${PDAL_LIB_INSTALL_DIR})
@@ -77,7 +78,9 @@ macro(PDAL_ADD_EXECUTABLE _name)
     target_link_libraries(${_name} ${Boost_LIBRARIES})
 
     set(PDAL_EXECUTABLES ${PDAL_EXECUTABLES} ${_name})
-    install(TARGETS ${_name} RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR})
+    install(TARGETS ${_name}
+        EXPORT PDALTargets
+        RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR})
 endmacro(PDAL_ADD_EXECUTABLE)
 
 
