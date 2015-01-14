@@ -43,7 +43,6 @@ include_directories(
 
 PDAL_ADD_TEST(pdal_bounds_test FILES BoundsTest.cpp)
 PDAL_ADD_TEST(pdal_config_test FILES ConfigTest.cpp)
-#PDAL_ADD_TEST(pdal_environment_test FILES EnvironmentTest.cpp)
 PDAL_ADD_TEST(pdal_file_utils_test FILES FileUtilsTest.cpp)
 PDAL_ADD_TEST(pdal_gdal_utils_test FILES GDALUtilsTest.cpp)
 PDAL_ADD_TEST(pdal_log_test FILES LogTest.cpp)

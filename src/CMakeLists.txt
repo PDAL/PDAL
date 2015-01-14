@@ -164,10 +164,6 @@ if (WITH_LASZIP)
     target_link_libraries(${PDAL_LIB_NAME} ${LASZIP_LIBRARY})
 endif()
 
-if (PDAL_HAVE_PYTHON)
-    target_link_libraries(${PDAL_LIB_NAME} ${PYTHON_LIBRARY})
-endif()
-
 if (PDAL_HAVE_LIBXML2)
     target_link_libraries(${PDAL_LIB_NAME} ${LIBXML2_LIBRARIES})
 endif()
