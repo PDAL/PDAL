@@ -46,10 +46,9 @@ namespace pdal
 InfoKernel::InfoKernel()
     : m_showStats(false)
     , m_showSchema(false)
+    , m_showMetadata(false)
     , m_boundary(false)
-    , m_useXML(false)
     , m_useJSON(false)
-    , m_useRST(false)
     , m_showSummary(false)
     , m_statsStage(NULL)
 {}
@@ -70,6 +69,8 @@ void InfoKernel::validateSwitches()
     if (m_pointIndexes.size())
         functions++;
     if (m_showSchema)
+        functions++;
+    if (m_showMetadata)
         functions++;
 
     if (functions > 1)
@@ -113,6 +114,12 @@ void InfoKernel::addSwitches()
          "dump the schema")
         ("pipeline-serialization",
          po::value<std::string>(&m_pipelineFile)->default_value(""), "")
+        ("summary",
+         po::value<bool>(&m_showSummary)->zero_tokens()->implicit_value(true),
+        "dump summary of the info")
+        ("metadata",
+         po::value<bool>(&m_showMetadata)->zero_tokens()->implicit_value(true),
+        "dump file metadata info")
 /**
         ("json",
          po::value<bool>(&m_useJSON)->zero_tokens()->implicit_value(true),
@@ -122,9 +129,6 @@ void InfoKernel::addSwitches()
         ("rst", po::value<bool>(&m_useRST)->zero_tokens()->implicit_value(true),
          "dump RST")
 **/
-        ("summary",
-         po::value<bool>(&m_showSummary)->zero_tokens()->implicit_value(true),
-        "dump summary of the info")
         ;
 
     addSwitchSet(processing_options);
@@ -203,7 +207,8 @@ MetadataNode InfoKernel::dumpPoints(PointBufferPtr buf) const
     for (size_t i = 0; i < outbuf->size(); ++i)
     {
         MetadataNode n = tree.findChild(std::to_string(i));
-        root.add(n.clone(prefix + std::to_string(points[i])));
+        n.add("PointId", points[i]);
+        root.add(n.clone("point"));
     }
     return root;
 }
@@ -211,7 +216,7 @@ MetadataNode InfoKernel::dumpPoints(PointBufferPtr buf) const
 
 MetadataNode InfoKernel::dumpSummary(const QuickInfo& qi)
 {
-    MetadataNode summary("summary");
+    MetadataNode summary;
     summary.add("num_points", qi.m_pointCount);
     summary.add("spatial_reference", qi.m_srs.getWKT());
     MetadataNode bounds = summary.add("bounds");
@@ -246,7 +251,7 @@ void InfoKernel::dump(std::ostream& o)
     if (m_showStats)
     {
         m_manager->execute();
-        root = m_statsStage->getMetadata();
+        root = m_statsStage->getMetadata().clone("");
     }
 
     if (m_pipelineFile.size() > 0)
@@ -280,12 +285,18 @@ void InfoKernel::dump(std::ostream& o)
         root = dumpSummary(qi);
     }
 
+    if (m_showMetadata)
+    {
+        m_manager->execute();
+        root = m_reader->getMetadata().clone("");
+    }
+
     if (m_boundary)
     {
         m_manager->execute();
         PointBufferSet pbSet = m_manager->buffers();
         assert(pbSet.size() == 1);
-        root = m_hexbinStage->getMetadata();
+        root = m_hexbinStage->getMetadata().clone("");
     }
 
     if (!root.valid())
@@ -331,6 +342,8 @@ int InfoKernel::execute()
 
     std::string filename = m_usestdin ? std::string("STDIN") : m_inputFile;
     readerOptions.add("filename", filename);
+    if (m_showMetadata)
+        readerOptions.add("count", 0);
 
     m_manager = std::unique_ptr<PipelineManager>(
         KernelSupport::makePipeline(filename));

@@ -407,8 +407,8 @@ Like a filter, a writer may receive multiple point buffers during processing
 of a pipeline.  This will result in the write() function being called once
 for each of the input point buffers.  Some current writers do not produce
 correct output when provided with multiple point buffers.  Users should
-be warned use a merge filter immediately prior to such writers to avoid
-errors.  As new writers are created, developers should try to make sure
+use a merge filter immediately prior to such writers to avoid errors.
+As new writers are created, developers should try to make sure
 that they behave reasonably if passed multiple point buffers -- they
 correctly handle write() being called multiple times between after a single
 call to ready().

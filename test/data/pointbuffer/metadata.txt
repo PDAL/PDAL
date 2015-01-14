@@ -1,38 +1,14 @@
 {
   "0":
   {
-    "Classification":
-    {
-      "type":"double",
-      "value":"1"
-    },
-    "X":
-    {
-      "type":"double",
-      "value":"0"
-    },
-    "Y":
-    {
-      "type":"double",
-      "value":"0"
-    }
+    "Classification": 1,
+    "X": 0,
+    "Y": 0
   },
   "1":
   {
-    "Classification":
-    {
-      "type":"double",
-      "value":"2"
-    },
-    "X":
-    {
-      "type":"double",
-      "value":"10"
-    },
-    "Y":
-    {
-      "type":"double",
-      "value":"100"
-    }
+    "Classification": 2,
+    "X": 10,
+    "Y": 100
   }
 }
