@@ -1,0 +1,29 @@
+
+set(plang_srcs
+    BufferedInvocation.cpp
+    Invocation.cpp
+    Environment.cpp
+    Redirector.cpp
+    Script.cpp
+)
+
+set(plang_headers
+    BufferedInvocation.hpp
+    Invocation.hpp
+    Environment.hpp
+    Redirector.hpp
+    Script.hpp
+)
+
+add_library(${PLANG_LIB_NAME} SHARED ${plang_srcs} ${plang_headers})
+target_link_libraries(${PLANG_LIB_NAME} ${PYTHON_LIBRARY} ${PDAL_LIB_NAME})
+install(TARGETS ${PLANG_LIB_NAME}
+    RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR}
+    LIBRARY DESTINATION ${PDAL_LIB_INSTALL_DIR}
+    ARCHIVE DESTINATION ${PDAL_LIB_INSTALL_DIR})
+
+if (WITH_TESTS)
+    PDAL_ADD_TEST(plangtest FILES ../test/PLangTest.cpp
+        LINK_WITH ${PLANG_LIB_NAME})
+
+endif()
