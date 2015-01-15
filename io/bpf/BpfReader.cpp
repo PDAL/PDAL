@@ -123,7 +123,7 @@ void BpfReader::initialize()
     // Fast forward file to end of header as reported by base header.
     std::streampos pos = m_stream.position();
     if (pos > m_header.m_len)
-        throw "BPF Header length exceeded that reported by file.";
+        throw pdal_error("BPF Header length exceeded that reported by file.");
     else if (pos < m_header.m_len)
         m_stream.seek(m_header.m_len);
 }

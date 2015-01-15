@@ -37,6 +37,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include <pdal/IStream.hpp>
+#include <pdal/OStream.hpp>
 
 #include "BpfHeader.hpp"
 
@@ -49,6 +50,15 @@ ILeStream& operator >> (ILeStream& stream, BpfMuellerMatrix& m)
         stream >> m.m_vals[i]; 
     return stream;
 }
+
+
+OLeStream& operator << (OLeStream& stream, BpfMuellerMatrix& m)
+{
+    for (size_t i = 0; i < (sizeof(m.m_vals) / sizeof(m.m_vals[0])); ++i)
+        stream << m.m_vals[i]; 
+    return stream;
+}
+
 
 bool BpfHeader::read(ILeStream& stream)
 {
@@ -141,8 +151,31 @@ bool BpfHeader::readV1(ILeStream& stream)
 }
 
 
-bool BpfHeader::readDimensions(ILeStream& stream,
-    std::vector<BpfDimension>& dims)
+bool BpfHeader::write(OLeStream& stream)
+{
+    uint8_t dummyChar = 0;
+    uint8_t numDim;
+
+    try
+    {
+        numDim = boost::numeric_cast<uint8_t>(m_numDim);
+    }
+    catch (boost::numeric::bad_numeric_cast&)
+    {
+        throw pdal_error("Can't write a BPF file of more than 255 dimensions.");
+    }
+
+    stream.put("BPF!");
+    stream.put("0003");
+
+    stream << m_len << numDim << (uint8_t)m_pointFormat << m_compression <<
+        dummyChar << m_numPts << m_coordType << m_coordId << m_spacing <<
+        m_xform << m_startTime << m_endTime;
+    return (bool)stream;
+}
+
+
+bool BpfHeader::readDimensions(ILeStream& stream, BpfDimensionList& dims)
 {
     size_t staticCnt = m_staticDims.size();
 
@@ -151,6 +184,14 @@ bool BpfHeader::readDimensions(ILeStream& stream,
         dims[d] = m_staticDims[d];
     return BpfDimension::read(stream, dims, staticCnt);
 }
+
+
+// This just exists for symmetry.
+void BpfHeader::writeDimensions(OLeStream& stream, BpfDimensionList& dims)
+{
+    BpfDimension::write(stream, dims);
+}
+
 
 void BpfHeader::dump()
 {
@@ -168,8 +209,8 @@ void BpfHeader::dump()
     cerr << "End time: " << m_endTime << "!\n";
 }
 
-bool BpfDimension::read(ILeStream& stream, std::vector<BpfDimension>& dims,
-    size_t start)
+
+bool BpfDimension::read(ILeStream& stream, BpfDimensionList& dims, size_t start)
 {
     for (size_t d = start; d < dims.size(); ++d)
         stream >> dims[d].m_offset;
@@ -181,6 +222,21 @@ bool BpfDimension::read(ILeStream& stream, std::vector<BpfDimension>& dims,
         stream.get(dims[d].m_label, 32);
     return (bool)stream;
 }
+
+
+bool BpfDimension::write(OLeStream& stream, BpfDimensionList& dims)
+{
+    for (size_t d = 0; d < dims.size(); ++d)
+        stream << dims[d].m_offset;
+    for (size_t d = 0; d < dims.size(); ++d)
+        stream << dims[d].m_min;
+    for (size_t d = 0; d < dims.size(); ++d)
+        stream << dims[d].m_max;
+    for (size_t d = 0; d < dims.size(); ++d)
+        stream.put(dims[d].m_label, 32);
+    return (bool)stream;
+}
+
 
 bool BpfUlemHeader::read(ILeStream& stream)
 {

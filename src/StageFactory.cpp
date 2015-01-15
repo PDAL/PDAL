@@ -88,6 +88,7 @@ MAKE_FILTER_CREATOR(Transformation, pdal::TransformationFilter)
 //
 // define the functions to create the writers
 //
+MAKE_WRITER_CREATOR(BpfWriter, pdal::BpfWriter)
 MAKE_WRITER_CREATOR(LasWriter, pdal::LasWriter)
 MAKE_WRITER_CREATOR(SbetWriter, pdal::SbetWriter)
 MAKE_WRITER_CREATOR(TextWriter, pdal::TextWriter)
@@ -154,6 +155,7 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
     boost::to_lower(ext);
 
     std::map<std::string, std::string> drivers;
+    drivers["bpf"] = "writers.bpf";
     drivers["las"] = "writers.las";
     drivers["laz"] = "writers.las";
     StageFactory f;
@@ -331,6 +333,7 @@ void StageFactory::registerKnownFilters()
 
 void StageFactory::registerKnownWriters()
 {
+    REGISTER_WRITER(BpfWriter, pdal::BpfWriter);
     REGISTER_WRITER(LasWriter, pdal::LasWriter);
     REGISTER_WRITER(SbetWriter, pdal::SbetWriter);
     REGISTER_WRITER(TextWriter, pdal::TextWriter);

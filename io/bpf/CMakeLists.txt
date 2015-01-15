@@ -8,11 +8,13 @@
 set(srcs
     BpfHeader.cpp
     BpfReader.cpp
+    BpfWriter.cpp
 )
 
 set(incs
     BpfHeader.hpp
     BpfReader.hpp
+    BpfWriter.hpp
 )
 
 PDAL_ADD_DRIVER(reader bpf "${srcs}" "${incs}" objects)

@@ -61,9 +61,12 @@ public:
     {
         if (m_stream)
             return -1;
-        m_stream = m_fstream = new std::ofstream(filename, std::ios_base::out | std::ios_base::binary);
+        m_stream = m_fstream = new std::ofstream(filename,
+            std::ios_base::out | std::ios_base::binary);
         return 0;
     }
+    void flush()
+        { m_stream->flush(); }
     operator bool ()
         { return (bool)(*m_stream); }
     void seek(std::streampos pos)

@@ -46,12 +46,14 @@ namespace pdal
 {
 
 class ILeStream;
+class OLeStream;
 
 struct BpfMuellerMatrix
 {
     double m_vals[16];
 };
 ILeStream& operator >> (ILeStream& stream, BpfMuellerMatrix& m);
+OLeStream& operator << (OLeStream& stream, BpfMuellerMatrix& m);
 
 namespace BpfFormat
 {
@@ -63,8 +65,36 @@ enum Enum
 };
 }
 
+namespace BpfCoordType
+{
+enum Enum
+{
+    None,
+    UTM,
+    TCR,
+    ENU
+};
+}
+
+namespace BpfCompression
+{
+enum Enum
+{
+    None,
+    QuickLZ,
+    FastLZ,
+    Zlib
+};
+}
+
 struct BpfDimension
 {
+    BpfDimension() : m_offset(0.0),
+        m_min((std::numeric_limits<double>::max)()),
+        m_max(std::numeric_limits<double>::lowest()),
+        m_id(Dimension::Id::Unknown)
+    {}
+
     double m_offset;
     double m_min;
     double m_max;
@@ -73,13 +103,15 @@ struct BpfDimension
 
     static bool read(ILeStream& stream, std::vector<BpfDimension>& dims,
         size_t start);
+    static bool write(OLeStream& stream, std::vector<BpfDimension>& dims);
 };
 typedef std::vector<BpfDimension> BpfDimensionList;
 
 struct BpfHeader
 {
-    BpfHeader() : m_version(0), m_len(0), m_numDim(0),
-        m_compression(0), m_numPts(0), m_coordId(0), m_spacing(0.0),
+    BpfHeader() : m_version(0), m_len(176), m_numDim(0),
+        m_compression(BpfCompression::None), m_numPts(0),
+        m_coordType(BpfCoordType::None), m_coordId(0), m_spacing(0.0),
         m_startTime(0.0), m_endTime(0.0)
     {}
 
@@ -102,9 +134,11 @@ struct BpfHeader
     void setLog(const LogPtr& log)
          { m_log = log; }
     bool read(ILeStream& stream);
+    bool write(OLeStream& stream);
     bool readV3(ILeStream& stream);
     bool readV1(ILeStream& stream);
     bool readDimensions(ILeStream& stream, std::vector<BpfDimension>& dims);
+    void writeDimensions(OLeStream& stream, std::vector<BpfDimension>& dims);
     void dump();
 };
 
