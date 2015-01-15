@@ -36,7 +36,7 @@
 
 #include <pdal/pdal_config.hpp>
 
-#include <buffer/BufferReader.hpp>
+#include <pdal/BufferReader.hpp>
 #include <faux/FauxReader.hpp>
 
 #include <las/LasReader.hpp>
