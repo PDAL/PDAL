@@ -50,7 +50,10 @@ class OLeStream;
 
 struct BpfMuellerMatrix
 {
-    double m_vals[16];
+    double m_vals[16] {1.0, 0.0, 0.0, 0.0,
+                       0.0, 1.0, 0.0, 0.0,
+                       0.0, 0.0, 1.0, 0.0,
+                       0.0, 0.0, 0.0, 1.0};
 };
 ILeStream& operator >> (ILeStream& stream, BpfMuellerMatrix& m);
 OLeStream& operator << (OLeStream& stream, BpfMuellerMatrix& m);

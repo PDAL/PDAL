@@ -182,7 +182,27 @@ bool BpfHeader::readDimensions(ILeStream& stream, BpfDimensionList& dims)
     dims.resize(m_numDim);
     for (size_t d = 0; d < staticCnt; d++)
         dims[d] = m_staticDims[d];
-    return BpfDimension::read(stream, dims, staticCnt);
+    if (!BpfDimension::read(stream, dims, staticCnt))
+        return false;
+
+    // Verify that we have an X, Y and Z, so that we don't have to worry
+    // about it later.
+    bool x = false;
+    bool y = false;
+    bool z = false;
+    for (auto d : dims)
+    {
+        if (d.m_label == "X")
+            x = true;
+        if (d.m_label == "Y")
+            y = true;
+        if (d.m_label == "Z")
+            z = true;
+    }
+    if (!x || !y || !z)
+        throw pdal_error("BPF file missing at least one of X, Y or Z "
+            "dimensions.");
+    return true;
 }
 
 
