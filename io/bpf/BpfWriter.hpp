@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2015, Hobu Inc., hobu@hobu.co
 *
 * All rights reserved.
 *
@@ -34,20 +34,37 @@
 
 #pragma once
 
-#include <pdal/pdal_config.hpp>
+#include <vector>
 
-#include <pdal/BufferReader.hpp>
-#include <faux/FauxReader.hpp>
+#include <pdal/OStream.hpp>
+#include <pdal/Writer.hpp>
 
-#include <las/LasReader.hpp>
-#include <las/LasWriter.hpp>
+#include "BpfHeader.hpp"
 
-#include <bpf/BpfReader.hpp>
-#include <bpf/BpfWriter.hpp>
+namespace pdal
+{
 
-#include <sbet/SbetReader.hpp>
-#include <sbet/SbetWriter.hpp>
+class PDAL_DLL BpfWriter : public Writer
+{
+public:
+    SET_STAGE_NAME("writers.bpf",
+        "\"Binary Point Format\" (BPF) writer support. "
+        "BPF is a simple \n"
+        "DoD and research format that is used by some sensor and \n"
+        "processing chains.");
+    SET_STAGE_LINK("http://pdal.io/stages/writers.bpf.html")
 
-#include <qfit/QfitReader.hpp>
-#include <terrasolid/TerrasolidReader.hpp>
-#include <text/TextWriter.hpp>
+private:
+    OLeStream m_stream;
+    BpfHeader m_header;
+    BpfDimensionList m_dims;
+
+    virtual void processOptions(const Options& options);
+    virtual void ready(PointContextRef ctx);
+    virtual void write(const PointBuffer& buf);
+    virtual void done(PointContextRef ctx);
+
+    void writePointMajor(const PointBuffer& buf);
+};
+
+} // namespace pdal
