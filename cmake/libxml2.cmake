@@ -6,10 +6,6 @@ endif()
 # libxml2
 #
 
-#
-# Depends on iconv
-#
-include(${PDAL_CMAKE_DIR}/iconv.cmake)
 
 find_package(LibXml2)
 set_package_properties(LibXml2 PROPERTIES TYPE OPTIONAL)

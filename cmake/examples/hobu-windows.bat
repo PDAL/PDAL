@@ -1,5 +1,5 @@
 @echo off
- 
+
 :: This configure script is designed for the default Windows world, which means
 :: you have OSGeo4W installed, including Oracle and GDAL and LASzip.
 
@@ -37,13 +37,13 @@ set GDAL_LIBRARY=%OSGEO4W_DIR%\lib\gdal_i.lib
 
 :: LIBTIFF
 set TIFF_ENABLED=ON
-set TIFF_INCLUDE_DIR=%OSGEO4W_DIR%\include 
-set TIFF_LIBRARY=%OSGEO4W_DIR%\lib\libtiff_i.lib 
+set TIFF_INCLUDE_DIR=%OSGEO4W_DIR%\include
+set TIFF_LIBRARY=%OSGEO4W_DIR%\lib\libtiff_i.lib
 
 :: GeoTIFF
 set GEOTIFF_ENABLED=ON
-set GEOTIFF_INCLUDE_DIR=%OSGEO4W_DIR%\include 
-set GEOTIFF_LIBRARY=%OSGEO4W_DIR%\lib\geotiff_i.lib 
+set GEOTIFF_INCLUDE_DIR=%OSGEO4W_DIR%\include
+set GEOTIFF_LIBRARY=%OSGEO4W_DIR%\lib\geotiff_i.lib
 
 :: LASZIP
 set LASZIP_ENABLED=ON
@@ -60,11 +60,6 @@ set ORACLE_OCI_LIBRARY=%ORACLE_HOME%\lib\oci.lib
 set LIBXML2_ENABLED=ON
 set LIBXML2_INCLUDE_DIR=%OSGEO4W_DIR%\include
 set LIBXML2_LIBRARIES=%OSGEO4W_DIR%\lib\libxml2.lib
-
-:: IConv
-set ICONV_ENABLED=ON
-set ICONV_INCLUDE_DIR=%OSGEO4W_DIR%\include
-set ICONV_LIBRARY=%OSGEO4W_DIR%\lib\iconv.lib
 
 :: Python
 set PYTHON_ENABLED=ON
@@ -85,7 +80,6 @@ cmake -G %GENERATOR% ^
     -DBUILD_PLUGIN_PGPOINTCLOUD=ON ^
     -DWITH_LASZIP=%LASZIP_ENABLED% ^
     -DWITH_LIBXML2=%LIBXML2_ENABLED% ^
-    -DWITH_ICONV=%ICONV_ENABLED% ^
 	-DWITH_PYTHON=%PYTHON_ENABLED% ^
 	-DBUILD_PLUGIN_NITF=ON ^
 	-DBUILD_PLUGIN_HEXBIN=ON ^
@@ -100,7 +94,7 @@ cmake -G %GENERATOR% ^
 	-DBUILD_PLUGIN_PCL=ON ^
     ..
 cd ..
-    
+
 rem    -DBOOST_INCLUDEDIR=%BOOST_DIR% ^
 rem 	-DNUMPY_INCLUDE_DIR=%OSGEO4W_DIR%\apps\python27\lib\site-packages\numpy\core\include ^
 rem 	-DPYTHONPATH=%OSGEO4W_DIR%\apps\python27\lib\site-packages ^

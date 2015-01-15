@@ -26,7 +26,6 @@ cmake   -G "$CONFIG" \
         -DCMAKE_BUILD_TYPE=RelWithDebInfo \
         -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} \
         -DWITH_GDAL=ON \
-        -DWITH_ICONV=ON \
         -DWITH_ORACLE=OFF \
         -DWITH_GEOTIFF=ON \
         -DWITH_LASZIP=OFF \
@@ -37,7 +36,6 @@ cmake   -G "$CONFIG" \
         -DWITH_PGPOINTCLOUD=ON \
         -DGEOTIFF_INCLUDE_DIR=${GEOTIFF_HOME}/include \
         -DGEOTIFF_LIBRARY=${GEOTIFF_HOME}/lib/libgeotiff.${SO_EXT} \
-        -DICONV_INCLUDE_DIR=/usr/include \
         -DLIBXML2_INCLUDE_DIR=${LIBXML2_HOME}/include/libxml2 \
         -DLIBXML2_LIBRARIES=${LIBXML2_HOME}/lib/libxml2.${SO_EXT} \
         -DTIFF_INCLUDE_DIR=/${TIFF_HOME}/include \
