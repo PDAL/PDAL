@@ -37,6 +37,7 @@
 #include <array>
 #include <string>
 
+#include <pdal/pdal_export.hpp>
 #include <pdal/Filter.hpp>
 
 
@@ -48,7 +49,7 @@ namespace pdal
 typedef std::array<double, 16> TransformationMatrix;
 
 
-TransformationMatrix transformationMatrixFromString(const std::string& s);
+TransformationMatrix PDAL_DLL transformationMatrixFromString(const std::string& s);
 
 
 class PDAL_DLL TransformationFilter : public Filter

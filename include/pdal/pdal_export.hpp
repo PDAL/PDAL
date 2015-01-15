@@ -34,6 +34,8 @@
 
 #pragma once
 
+#include <pdal/pdal_defines.h>
+
 #ifndef PDAL_DLL
 #if defined(PDAL_COMPILER_MSVC)
 #if defined(PDAL_DLL_EXPORT)

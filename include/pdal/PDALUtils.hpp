@@ -39,6 +39,7 @@
 #include <boost/algorithm/string.hpp>
 #include <pdal/Dimension.hpp>
 #include <pdal/pdal_defines.h>
+#include <pdal/pdal_export.hpp>
 #include <pdal/Bounds.hpp>
 #include <pdal/PointContext.hpp>
 #include <pdal/PointBuffer.hpp>
@@ -198,8 +199,8 @@ inline ptree toPTree(const SpatialReference& ref)
     return srs;
 }
 
-std::string toJSON(const MetadataNode& m);
-void toJSON(const MetadataNode& m, std::ostream& o);
+std::string PDAL_DLL toJSON(const MetadataNode& m);
+void PDAL_DLL toJSON(const MetadataNode& m, std::ostream& o);
 std::string toJSONExt(const MetadataNode& m);
 void toJSONExt(const MetadataNode& m, std::ostream& o);
 
