@@ -54,6 +54,15 @@ struct BpfMuellerMatrix
                        0.0, 1.0, 0.0, 0.0,
                        0.0, 0.0, 1.0, 0.0,
                        0.0, 0.0, 0.0, 1.0};
+
+    void apply(double& x, double& y, double& z)
+    {
+        double w = x * m_vals[3] + y * m_vals[7] + z * m_vals[11] + m_vals[15];
+
+        x = (x * m_vals[0] + y * m_vals[4] + z * m_vals[8]) / w;
+        y = (x * m_vals[1] + y * m_vals[5] + z * m_vals[9]) / w;
+        z = (x * m_vals[2] + y * m_vals[6] + z * m_vals[10]) / w;
+    }
 };
 ILeStream& operator >> (ILeStream& stream, BpfMuellerMatrix& m);
 OLeStream& operator << (OLeStream& stream, BpfMuellerMatrix& m);
