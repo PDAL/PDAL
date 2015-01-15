@@ -93,7 +93,7 @@ void BpfWriter::writePointMajor(const PointBuffer& data)
         {
             float v = data.getFieldAs<float>(bpfDim.m_id, idx);
             bpfDim.m_min = std::min(bpfDim.m_min, bpfDim.m_offset + v);
-            bpfDim.m_max = std::min(bpfDim.m_max, bpfDim.m_offset + v);
+            bpfDim.m_max = std::max(bpfDim.m_max, bpfDim.m_offset + v);
             m_stream << v;
         }
     }
