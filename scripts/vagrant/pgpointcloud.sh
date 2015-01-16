@@ -18,5 +18,5 @@ sudo wget https://raw.github.com/PDAL/PDAL/master/scripts/vagrant/readpgpointclo
 chmod 777 st-helens-small.las
 chmod 777 readpgpointcloud.xml
 chmod 777 loadpgpointcloud.xml
-sudo -u vagrant pdal pipeline --input loadpgpointcloud.xml
-sudo -u vagrant pdal info --input readpgpointcloud.xml -p 0
+sudo -u vagrant PDAL_DRIVER_PATH=/usr/lib pdal pipeline --input loadpgpointcloud.xml
+sudo -u vagrant PDAL_DRIVER_PATH=/usr/lib pdal info --input readpgpointcloud.xml -p 0
