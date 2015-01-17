@@ -39,6 +39,7 @@
 namespace pdal
 {
 
+class PDAL_DLL BOX3D;
 class PDAL_DLL SpatialReference
 {
 public:
@@ -109,6 +110,7 @@ public:
     void dump() const;
 
     bool isGeographic() const;
+    int computeUTMZone(const BOX3D& box) const;
     const std::string& getDescription() const;
     const std::string& getName() const;
 
