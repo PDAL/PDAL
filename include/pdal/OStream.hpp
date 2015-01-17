@@ -38,6 +38,7 @@
 
 #include <fstream>
 #include <cstring>
+#include <stack>
 
 #include <pdal/portable_endian.hpp>
 #include <pdal/pdal_internal.hpp>
@@ -73,26 +74,43 @@ public:
         { m_stream->seekp(pos, std::ostream::beg); }
     void put(const std::string& s)
         { put(s, s.size()); }
-
     void put(const std::string& s, size_t len)
     {
         std::string os = s;
         os.resize(len);
         m_stream->write(os.c_str(), len);
     }
-
     void put(const char *c, size_t len)
         { m_stream->write(c, len); }
-
     void put(const unsigned char *c, size_t len)
         { m_stream->write((const char *)c, len); }
-
     std::streampos position() const
         { return m_stream->tellp(); }
+    std::ostream *stream()
+        { return m_stream; }
+    void pushStream(std::ostream *strm)
+    {
+        m_streams.push(m_stream);
+        m_stream = strm;
+    }
+    std::ostream *popStream()
+    {
+        // Can't pop the last stream for now.
+        if (m_streams.empty())
+            return nullptr;
+        std::ostream *strm = m_stream;
+        m_stream = m_streams.top();
+        m_streams.pop();
+        return strm;
+    }
 
 protected:
     std::ostream *m_stream;
     std::ostream *m_fstream; // Dup of above to facilitate cleanup.
+
+private:
+    std::stack<std::ostream *> m_streams;
+    OStream(const OStream&);
 };
 
 /// Stream wrapper for output of binary data that converts from host ordering
@@ -178,6 +196,24 @@ public:
         m_stream->write((char *)&tmp, sizeof(tmp));
         return *this;
     }
+};
+
+/// Stream position marker with rewinding/reset support.
+class OStreamMarker
+{
+public:
+    OStreamMarker(OStream& stream) : m_stream(stream)
+        { m_pos = m_stream.stream()->tellp(); }
+
+    void rewind()
+        { m_stream.stream()->seekp(m_pos); }
+
+private:
+    std::streampos m_pos;
+    OStream& m_stream;
+        
+    OStreamMarker(const OStreamMarker&);  // not implemented
+    OStreamMarker& operator=(const OStreamMarker&);  // not implemented
 };
 
 } // namespace pdal

@@ -34,41 +34,27 @@
 
 #pragma once
 
-#include <vector>
-
-#include <pdal/OStream.hpp>
-#include <pdal/Writer.hpp>
-
-#include "BpfHeader.hpp"
+#include <ostream>
+#include <zlib.h>
 
 namespace pdal
 {
 
-class PDAL_DLL BpfWriter : public Writer
+class BpfCompressor
 {
 public:
-    SET_STAGE_NAME("writers.bpf",
-        "\"Binary Point Format\" (BPF) writer support. "
-        "BPF is a simple \n"
-        "DoD and research format that is used by some sensor and \n"
-        "processing chains.");
-    SET_STAGE_LINK("http://pdal.io/stages/writers.bpf.html")
-
+    BpfCompressor(std::ostream& out,
+        int compressionLevel = Z_DEFAULT_COMPRESSION);
+    size_t finish();
+    void compress(char *buf, size_t insize);
+   
 private:
-    OLeStream m_stream;
-    BpfHeader m_header;
-    BpfDimensionList m_dims;
-    std::vector<char> m_compressBuf;
+    static const int CHUNKSIZE = 1000000;
 
-    virtual void processOptions(const Options& options);
-    virtual void ready(PointContextRef ctx);
-    virtual void write(const PointBuffer& buf);
-    virtual void done(PointContextRef ctx);
-
-    void writePointMajor(const PointBuffer& buf);
-    void writeDimMajor(const PointBuffer& buf);
-    void writeByteMajor(const PointBuffer& buf);
-    void writeCompressedBlock(char *buf, size_t size);
+    std::ostream& m_out;
+    z_stream m_strm;
+    unsigned char m_tmpbuf[CHUNKSIZE];
+    size_t m_written;
 };
 
 } // namespace pdal

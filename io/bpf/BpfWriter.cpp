@@ -32,21 +32,27 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include "BpfWriter.hpp"
+
 #include <pdal/pdal_internal.hpp>
 
 #include <zlib.h>
 
+#include <pdal/Charbuf.hpp>
 #include <pdal/Options.hpp>
 
-#include "BpfWriter.hpp"
+#include "BpfCompressor.hpp"
 
 namespace pdal
 {
 
-void BpfWriter::processOptions(const Options&)
+void BpfWriter::processOptions(const Options& options)
 {
     if (m_filename.empty())
         throw pdal_error("Can't write BPF file without filename.");
+    bool compression = options.getValueOrDefault("compression", false);
+    m_header.m_compression = compression ? BpfCompression::Zlib :
+        BpfCompression::None;
 }
 
 
@@ -80,28 +86,111 @@ void BpfWriter::ready(PointContextRef ctx)
 
 void BpfWriter::write(const PointBuffer& data)
 {
-    writePointMajor(data);
+    switch (m_header.m_pointFormat)
+    {
+    case BpfFormat::PointMajor:
+        writePointMajor(data);
+        break;
+    case BpfFormat::DimMajor:
+        writeDimMajor(data);
+        break;
+    case BpfFormat::ByteMajor:
+        writeByteMajor(data);
+        break;
+    }
     m_header.m_numPts += data.size();
 }
 
 
 void BpfWriter::writePointMajor(const PointBuffer& data)
 {
-    for (PointId idx = 0; idx < data.size(); ++idx)
+    Charbuf charbuf;
+    size_t blockpoints = data.size();
+
+    // For compression we're going to write to a buffer so that it can be
+    // compressed before it's written to the file stream.
+    if (m_header.m_compression)
     {
-        for (auto & bpfDim : m_dims)
+        // Blocks of 10,000 points will ensure that we're under 16MB, even
+        // for 255 dimensions.
+        blockpoints = std::min(10000UL, data.size());
+        m_compressBuf.resize(blockpoints * sizeof(float) * m_dims.size());
+        charbuf.initialize(m_compressBuf.data(), m_compressBuf.size());
+    }
+    PointId idx = 0;
+    while (idx < data.size())
+    {
+        if (m_header.m_compression)
+            m_stream.pushStream(new std::ostream(&charbuf));
+        size_t blockId;
+        for (blockId = 0; idx < data.size() && blockId < blockpoints;
+            ++idx, ++blockId)
         {
-            float v = data.getFieldAs<float>(bpfDim.m_id, idx);
-            bpfDim.m_min = std::min(bpfDim.m_min, bpfDim.m_offset + v);
-            bpfDim.m_max = std::max(bpfDim.m_max, bpfDim.m_offset + v);
-            m_stream << v;
+            for (auto & bpfDim : m_dims)
+            {
+                float v = data.getFieldAs<float>(bpfDim.m_id, idx);
+                bpfDim.m_min = std::min(bpfDim.m_min, bpfDim.m_offset + v);
+                bpfDim.m_max = std::max(bpfDim.m_max, bpfDim.m_offset + v);
+                m_stream << v;
+            }
+        }
+        if (m_header.m_compression)
+        {
+            m_stream.popStream();
+            writeCompressedBlock(m_compressBuf.data(),
+                blockId * sizeof(float) * m_dims.size());
+            charbuf.initialize(m_compressBuf.data(), m_compressBuf.size());
         }
     }
 }
 
 
+void BpfWriter::writeDimMajor(const PointBuffer& data)
+{
+    (void)data;
+    throw pdal_error("Writing of non-interleaved is not currently supported.");
+}
+
+
+void BpfWriter::writeByteMajor(const PointBuffer& data)
+{
+    (void)data;
+    throw pdal_error("Writing of byte-segregated is not currently supported.");
+}
+
+
+void BpfWriter::writeCompressedBlock(char *buf, size_t size)
+{
+    uint32_t rawSize = (uint32_t)size;
+    uint32_t compressedSize = 0;
+
+    OStreamMarker blockstart(m_stream);
+
+    // Write dummy size and compressed size to properly position the stream.
+    m_stream << rawSize << compressedSize;
+
+    // Have the compressor write to the raw output stream - no byte ordering.
+    //ABELL - Perhaps we should add write() support to the OStream.
+    std::ostream *out = m_stream.stream();
+    BpfCompressor compressor(*out);
+    compressor.compress(buf, size);
+    compressedSize = (uint32_t)compressor.finish();
+
+    OStreamMarker blockend(m_stream);
+
+    // Now rewind to the start of the block and write the size bytes.
+    blockstart.rewind();
+    m_stream << rawSize << compressedSize;
+
+    // Now set the position back at the end of the block.
+    blockend.rewind();
+}
+
+
 void BpfWriter::done(PointContextRef)
 {
+    // Rewrite the header to update the the correct number of points and
+    // statistics.
     m_stream.seek(0);
     m_header.write(m_stream);
     m_header.writeDimensions(m_stream, m_dims);
