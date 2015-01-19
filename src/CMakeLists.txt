@@ -213,9 +213,6 @@ target_link_libraries(${PDAL_LIB_NAME}
 
 target_link_libraries(${PDAL_LIB_NAME} ${Boost_LIBRARIES})
 
-set_target_properties(${PDAL_LIB_NAME}
-  PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
-
 ###############################################################################
 # Targets installation
 

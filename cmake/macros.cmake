@@ -58,11 +58,14 @@ endmacro(PDAL_ADD_INCLUDES)
 macro(PDAL_ADD_LIBRARY _name)
     add_library(${_name} ${PDAL_LIB_TYPE} ${ARGN})
     set_property(TARGET ${_name} PROPERTY FOLDER "Libraries")
-    
+
     install(TARGETS ${_name}
         RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR}
         LIBRARY DESTINATION ${PDAL_LIB_INSTALL_DIR}
         ARCHIVE DESTINATION ${PDAL_LIB_INSTALL_DIR})
+    if (APPLE)
+        set_target_properties(${_name} PROPERTIES INSTALL_NAME_DIR "@executable_path/../lib")
+    endif()
 endmacro(PDAL_ADD_LIBRARY)
 
 ###############################################################################
@@ -75,7 +78,7 @@ macro(PDAL_ADD_EXECUTABLE _name)
 
     # must link explicitly against boost.
     target_link_libraries(${_name} ${Boost_LIBRARIES})
-    
+
     set(PDAL_EXECUTABLES ${PDAL_EXECUTABLES} ${_name})
     install(TARGETS ${_name} RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR})
 endmacro(PDAL_ADD_EXECUTABLE)
@@ -108,9 +111,13 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
     set_property(TARGET ${${_name}} PROPERTY FOLDER "Plugins/${_type}")
 
     install(TARGETS ${${_name}}
-        RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR}
-        LIBRARY DESTINATION ${PDAL_LIB_INSTALL_DIR}
-        ARCHIVE DESTINATION ${PDAL_LIB_INSTALL_DIR})
+        RUNTIME DESTINATION ${PDAL_PLUGIN_INSTALL_DIR}
+        LIBRARY DESTINATION ${PDAL_PLUGIN_INSTALL_DIR}
+        ARCHIVE DESTINATION ${PDAL_PLUGIN_INSTALL_DIR})
+    if (APPLE)
+        set_target_properties(${${_name}} PROPERTIES INSTALL_NAME_DIR "@loader_path/")
+    endif()
+
 endmacro(PDAL_ADD_PLUGIN)
 
 ###############################################################################
@@ -214,6 +221,7 @@ macro(SET_INSTALL_DIRS)
     set(PDAL_DOC_INCLUDE_DIR
         "share/doc/${PROJECT_NAME_LOWER}-${PDAL_VERSION_MAJOR}.${PDAL_VERSION_MINOR}")
     set(PDAL_BIN_INSTALL_DIR "bin")
+    set(PDAL_PLUGIN_INSTALL_DIR "share/pdal/plugins")
     set(PDAL_PKGCFG_DIR "${PDAL_LIB_INSTALL_DIR}/pkgconfig")
     if(WIN32)
         set(PDALCONFIG_INSTALL_DIR "cmake")
