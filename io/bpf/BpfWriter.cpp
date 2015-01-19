@@ -53,6 +53,17 @@ void BpfWriter::processOptions(const Options& options)
     bool compression = options.getValueOrDefault("compression", false);
     m_header.m_compression = compression ? BpfCompression::Zlib :
         BpfCompression::None;
+
+    std::string fileFormat =
+        options.getValueOrDefault<std::string>("format", "POINT");
+    std::transform(fileFormat.begin(), fileFormat.end(), fileFormat.begin(),
+        ::toupper);
+    if (fileFormat.find("POINT") != std::string::npos)
+        m_header.m_pointFormat = BpfFormat::PointMajor;
+    else if (fileFormat.find("BYTE") != std::string::npos)
+        m_header.m_pointFormat = BpfFormat::ByteMajor;
+    else
+        m_header.m_pointFormat = BpfFormat::DimMajor;
 }
 
 
@@ -70,8 +81,6 @@ void BpfWriter::ready(PointContextRef ctx)
     m_stream = FileUtils::createFile(m_filename, true);
     m_header.m_version = 3;
     m_header.m_numDim = dims.size();
-    //ABELL - For now.
-    m_header.m_pointFormat = BpfFormat::PointMajor;
     m_header.m_coordType = BpfCoordType::None;
     m_header.m_coordId = 0;
     m_header.setLog(log());
@@ -115,13 +124,15 @@ void BpfWriter::writePointMajor(const PointBuffer& data)
         // for 255 dimensions.
         blockpoints = std::min(10000UL, data.size());
         m_compressBuf.resize(blockpoints * sizeof(float) * m_dims.size());
-        charbuf.initialize(m_compressBuf.data(), m_compressBuf.size());
     }
     PointId idx = 0;
     while (idx < data.size())
     {
         if (m_header.m_compression)
+        {
+            charbuf.initialize(m_compressBuf.data(), m_compressBuf.size());
             m_stream.pushStream(new std::ostream(&charbuf));
+        }
         size_t blockId;
         for (blockId = 0; idx < data.size() && blockId < blockpoints;
             ++idx, ++blockId)
@@ -139,7 +150,6 @@ void BpfWriter::writePointMajor(const PointBuffer& data)
             m_stream.popStream();
             writeCompressedBlock(m_compressBuf.data(),
                 blockId * sizeof(float) * m_dims.size());
-            charbuf.initialize(m_compressBuf.data(), m_compressBuf.size());
         }
     }
 }
@@ -147,8 +157,32 @@ void BpfWriter::writePointMajor(const PointBuffer& data)
 
 void BpfWriter::writeDimMajor(const PointBuffer& data)
 {
-    (void)data;
-    throw pdal_error("Writing of non-interleaved is not currently supported.");
+    // We're going to pretend for now that we only even have one point buffer.
+    Charbuf charbuf;
+
+    if (m_header.m_compression)
+        m_compressBuf.resize(data.size() * sizeof(float));
+    for (auto & bpfDim : m_dims)
+    {
+        if (m_header.m_compression)
+        {
+            charbuf.initialize(m_compressBuf.data(), m_compressBuf.size());
+            m_stream.pushStream(new std::ostream(&charbuf));
+        }
+        for (PointId idx = 0; idx < data.size(); ++idx)
+        {
+            float v = data.getFieldAs<float>(bpfDim.m_id, idx);
+            bpfDim.m_min = std::min(bpfDim.m_min, bpfDim.m_offset + v);
+            bpfDim.m_max = std::max(bpfDim.m_max, bpfDim.m_offset + v);
+            m_stream << v;
+        }
+        if (m_header.m_compression)
+        {
+            std::cerr << "Writing compressed block!\n";
+            m_stream.popStream();
+            writeCompressedBlock(m_compressBuf.data(), m_compressBuf.size());
+        }
+    }
 }
 
 
