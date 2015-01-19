@@ -47,7 +47,8 @@ void Charbuf::initialize(char *buf, size_t count, std::ios::pos_type bufOffset)
 }
 
 
-std::ios::pos_type Charbuf::seekpos(std::ios::pos_type pos, std::ios_base::openmode which)
+std::ios::pos_type Charbuf::seekpos(std::ios::pos_type pos,
+    std::ios_base::openmode which)
 {
     pos -= m_bufOffset;
     if (which & std::ios_base::in)

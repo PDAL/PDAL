@@ -6,12 +6,14 @@
 # BPF Reader
 #
 set(srcs
+    BpfCompressor.cpp
     BpfHeader.cpp
     BpfReader.cpp
     BpfWriter.cpp
 )
 
 set(incs
+    BpfCompressor.hpp
     BpfHeader.hpp
     BpfReader.hpp
     BpfWriter.hpp

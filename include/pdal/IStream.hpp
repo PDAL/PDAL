@@ -54,8 +54,6 @@ class IStreamMarker;
 /// Stream wrapper for input of binary data.
 class PDAL_DLL IStream
 {
-    friend class IStreamMarker;
-
 public:
     IStream() : m_stream(NULL), m_fstream(NULL)
         {}
@@ -70,7 +68,8 @@ public:
     {
         if (m_stream)
              return -1;
-        m_stream = m_fstream = new std::ifstream(filename, std::ios_base::in | std::ios_base::binary);
+        m_stream = m_fstream = new std::ifstream(filename,
+            std::ios_base::in | std::ios_base::binary);
         return 0;
     }
     operator bool ()
@@ -221,14 +220,10 @@ class IStreamMarker
 {
 public:
     IStreamMarker(IStream& stream) : m_stream(stream)
-    {
-        m_pos = m_stream.m_stream->tellg();
-    }
+        { m_pos = m_stream.stream()->tellg(); }
 
     void rewind()
-    {
-        m_stream.m_stream->seekg(m_pos);
-    }
+        { m_stream.stream()->seekg(m_pos); }
 
 private:
     std::streampos m_pos;

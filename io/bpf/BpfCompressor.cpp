@@ -32,43 +32,59 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include "BpfCompressor.hpp"
 
-#include <vector>
-
-#include <pdal/OStream.hpp>
-#include <pdal/Writer.hpp>
-
-#include "BpfHeader.hpp"
+#include <pdal/pdal_internal.hpp>
 
 namespace pdal
 {
 
-class PDAL_DLL BpfWriter : public Writer
+BpfCompressor::BpfCompressor(std::ostream& out, int compressionLevel) :
+    m_out(out), m_written(0)
 {
-public:
-    SET_STAGE_NAME("writers.bpf",
-        "\"Binary Point Format\" (BPF) writer support. "
-        "BPF is a simple \n"
-        "DoD and research format that is used by some sensor and \n"
-        "processing chains.");
-    SET_STAGE_LINK("http://pdal.io/stages/writers.bpf.html")
+    m_strm.zalloc = Z_NULL;
+    m_strm.zfree = Z_NULL;
+    m_strm.opaque = Z_NULL;
+    if (deflateInit(&m_strm, Z_DEFAULT_COMPRESSION) != Z_OK)
+        throw pdal_error("Could not initialize BPF compressor.");
+}
 
-private:
-    OLeStream m_stream;
-    BpfHeader m_header;
-    BpfDimensionList m_dims;
-    std::vector<char> m_compressBuf;
 
-    virtual void processOptions(const Options& options);
-    virtual void ready(PointContextRef ctx);
-    virtual void write(const PointBuffer& buf);
-    virtual void done(PointContextRef ctx);
+void BpfCompressor::compress(char *buf, size_t insize)
+{
+    m_strm.avail_in = insize;
+    m_strm.next_in = (unsigned char *)buf;
+    m_strm.avail_out = CHUNKSIZE;
+    m_strm.next_out = m_tmpbuf;
 
-    void writePointMajor(const PointBuffer& buf);
-    void writeDimMajor(const PointBuffer& buf);
-    void writeByteMajor(const PointBuffer& buf);
-    void writeCompressedBlock(char *buf, size_t size);
-};
+    while (m_strm.avail_in)
+    {
+        int ret = ::deflate(&m_strm, Z_NO_FLUSH);
+        size_t written = CHUNKSIZE - m_strm.avail_out;
+        m_written += written;
+        m_out.write((const char *)m_tmpbuf, written);
+        m_strm.avail_out = CHUNKSIZE;
+        m_strm.next_out = m_tmpbuf;
+    }
+}
 
+
+size_t BpfCompressor::finish()
+{
+    int ret = Z_OK;
+    while (ret == Z_OK)
+    {
+        ret = ::deflate(&m_strm, Z_FINISH);
+        size_t written = CHUNKSIZE - m_strm.avail_out;
+        m_written += written;
+        m_out.write((const char *)m_tmpbuf, written);
+        m_strm.avail_out = CHUNKSIZE;
+        m_strm.next_out = m_tmpbuf;
+    }
+    if (ret != Z_STREAM_END)
+        throw pdal_error("Couldn't close BPF compression stream.");
+    deflateEnd(&m_strm);
+    return m_written;
+}
+   
 } // namespace pdal
