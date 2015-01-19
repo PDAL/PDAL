@@ -178,7 +178,6 @@ void BpfWriter::writeDimMajor(const PointBuffer& data)
         }
         if (m_header.m_compression)
         {
-            std::cerr << "Writing compressed block!\n";
             m_stream.popStream();
             writeCompressedBlock(m_compressBuf.data(), m_compressBuf.size());
         }
@@ -188,8 +187,38 @@ void BpfWriter::writeDimMajor(const PointBuffer& data)
 
 void BpfWriter::writeByteMajor(const PointBuffer& data)
 {
-    (void)data;
-    throw pdal_error("Writing of byte-segregated is not currently supported.");
+    union
+    {
+        float f;
+        uint32_t u32;
+    } uu;
+
+    // We're going to pretend for now that we only even have one point buffer.
+    Charbuf charbuf;
+
+    if (m_header.m_compression)
+    {
+        m_compressBuf.resize(data.size() * sizeof(float) * m_dims.size());
+        charbuf.initialize(m_compressBuf.data(), m_compressBuf.size());
+        m_stream.pushStream(new std::ostream(&charbuf));
+    }
+    for (auto & bpfDim : m_dims)
+    {
+        for (size_t b = 0; b < sizeof(float); b++)
+        {
+            for (PointId idx = 0; idx < data.size(); ++idx)
+            {
+                uu.f = data.getFieldAs<float>(bpfDim.m_id, idx);
+                uint8_t u8 = (uint8_t)(uu.u32 >> (b * CHAR_BIT));
+                m_stream << u8;
+            }
+        }
+    }
+    if (m_header.m_compression)
+    {
+        m_stream.popStream();
+        writeCompressedBlock(m_compressBuf.data(), m_compressBuf.size());
+    }
 }
 
 
