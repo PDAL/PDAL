@@ -22,7 +22,7 @@
 /* (note this will look yucky until we get to major>=1) */
 #define PDAL_VERSION_INTEGER ((PDAL_VERSION_MAJOR*100*100)+(PDAL_VERSION_MINOR*100)+PDAL_VERSION_PATCH)
 
-#cmakedefine PDAL_DRIVER_INSTALL_PATH "@CMAKE_INSTALL_PREFIX@/share/pdal/plugins"
+#cmakedefine PDAL_PLUGIN_INSTALL_PATH "@PDAL_PLUGIN_INSTALL_PATH@"
 /*
  * availability of 3rd-party libraries
  */
