@@ -359,8 +359,7 @@ void StageFactory::loadPlugins()
     if (pluginDir.size() == 0)
     {
         std::ostringstream oss;
-//         oss << PDAL_DRIVER_INSTALL_PATH << ":/usr/local/lib:./lib:../lib:../bin";
-        oss << PDAL_DRIVER_INSTALL_PATH ;
+         oss << PDAL_DRIVER_INSTALL_PATH << ":/usr/local/lib:./lib:../lib:../bin";
         pluginDir = oss.str();
     }
 
