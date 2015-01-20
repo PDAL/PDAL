@@ -34,7 +34,6 @@
 
 #include <pdal/SpatialReference.hpp>
 #include <pdal/PDALUtils.hpp>
-#include <pdal/Bounds.hpp>
 
 #include <boost/algorithm/string/trim.hpp>
 

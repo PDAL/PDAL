@@ -15,8 +15,7 @@
 #   PDAL_<dirname>_CPP - all the .cpp files for the given subdir/namespace
 #   ...
 
-set(PDAL_HEADERS_DIR "${PROJECT_SOURCE_DIR}/include/pdal")
-set(PDAL_UTIL_DIR "${PROJECT_SOURCE_DIR}/util")
+
 set(PDAL_HPP "")
 set(PDAL_CPP "")
 

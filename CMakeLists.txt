@@ -80,6 +80,8 @@ else(WIN32)
   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PDAL_OUTPUT_LIB_DIR}")
 endif(WIN32)
 
+set(PDAL_HEADERS_DIR "${PROJECT_SOURCE_DIR}/include/pdal")
+set(PDAL_UTIL_DIR "${PROJECT_SOURCE_DIR}/util")
 
 #------------------------------------------------------------------------------
 # misc user options
