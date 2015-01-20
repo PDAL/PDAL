@@ -39,6 +39,7 @@
 #include <pdal/KDIndex.hpp>
 #include <pdal/PipelineWriter.hpp>
 #include <pdal/PDALUtils.hpp>
+#include <pdal/pdal_config.hpp>
 
 namespace pdal
 {
@@ -293,6 +294,7 @@ void InfoKernel::dump(std::ostream& o)
     if (!root.valid())
         return;
 
+    root.add("pdal_version", pdal::GetFullVersionString());
     utils::toJSON(root, o);
 }
 
