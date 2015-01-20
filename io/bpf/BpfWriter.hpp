@@ -64,6 +64,7 @@ private:
     virtual void write(const PointBuffer& buf);
     virtual void done(PointContextRef ctx);
 
+    void loadBpfDimensions(PointContextRef ctx);
     void writePointMajor(const PointBuffer& buf);
     void writeDimMajor(const PointBuffer& buf);
     void writeByteMajor(const PointBuffer& buf);

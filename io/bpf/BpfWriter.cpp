@@ -69,18 +69,10 @@ void BpfWriter::processOptions(const Options& options)
 
 void BpfWriter::ready(PointContextRef ctx)
 {
-    Dimension::IdList dims = ctx.dims(); 
-    for (auto id : dims)
-    {
-        BpfDimension dim;
-        dim.m_id = id;
-        dim.m_label = ctx.dimName(id);
-        m_dims.push_back(dim);
-    }
-
+    loadBpfDimensions(ctx);
     m_stream = FileUtils::createFile(m_filename, true);
     m_header.m_version = 3;
-    m_header.m_numDim = dims.size();
+    m_header.m_numDim = m_dims.size();
     m_header.m_coordType = BpfCoordType::None;
     m_header.m_coordId = 0;
     m_header.setLog(log());
@@ -90,6 +82,29 @@ void BpfWriter::ready(PointContextRef ctx)
     m_header.write(m_stream);
     m_header.writeDimensions(m_stream, m_dims);
     m_header.m_len = m_stream.position();
+}
+
+
+void BpfWriter::loadBpfDimensions(PointContextRef ctx)
+{
+    // Verify that we have X, Y and Z and that they're the first three
+    // dimensions.
+    Dimension::IdList dims = ctx.dims();
+    std::sort(dims.begin(), dims.end());
+    if (dims.size() < 3 || dims[0] != Dimension::Id::X ||
+        dims[1] != Dimension::Id::Y || dims[2] != Dimension::Id::Z)
+    {
+        throw pdal_error("Missing one of dimensions X, Y or Z.  "
+            "Can't write BPF."); 
+    }
+
+    for (auto id : dims)
+    {
+        BpfDimension dim;
+        dim.m_id = id;
+        dim.m_label = ctx.dimName(id);
+        m_dims.push_back(dim);
+    }
 }
 
 
