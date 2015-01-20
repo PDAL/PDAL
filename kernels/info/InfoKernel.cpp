@@ -120,15 +120,6 @@ void InfoKernel::addSwitches()
         ("metadata",
          po::value<bool>(&m_showMetadata)->zero_tokens()->implicit_value(true),
         "dump file metadata info")
-/**
-        ("json",
-         po::value<bool>(&m_useJSON)->zero_tokens()->implicit_value(true),
-         "dump JSON")
-        ("xml", po::value<bool>(&m_useXML)->zero_tokens()->implicit_value(true),
-         "dump XML")
-        ("rst", po::value<bool>(&m_useRST)->zero_tokens()->implicit_value(true),
-         "dump RST")
-**/
         ;
 
     addSwitchSet(processing_options);
