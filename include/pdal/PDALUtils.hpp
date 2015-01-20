@@ -40,7 +40,6 @@
 #include <pdal/Dimension.hpp>
 #include <pdal/pdal_defines.h>
 #include <pdal/pdal_export.hpp>
-#include <pdal/Bounds.hpp>
 #include <pdal/PointContext.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Options.hpp>
@@ -213,7 +212,7 @@ void PDAL_DLL write_rst(std::ostream& ost,
                const boost::property_tree::ptree& pt,
                int level=0);
 
-                      
+
 inline std::ostream& toRST(const PointBuffer& buffer, std::ostream& os)
 {
     const Dimension::IdList& dims = buffer.dims();

@@ -41,7 +41,7 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/property_tree/ptree.hpp>
 
-#include <pdal/Bounds.hpp>
+#include <pdal/util/Bounds.hpp>
 #include <pdal/pdal_config.hpp>
 #include <pdal/gitsha.h>
 
@@ -195,7 +195,7 @@ public:
 
     /// Set number of bytes from the beginning to the first point record.
     /// \param  offset - Offset to start of point data.
-    void setPointOffset(uint32_t offset) 
+    void setPointOffset(uint32_t offset)
           { m_pointOffset = offset; }
 
     /// Set the point format.

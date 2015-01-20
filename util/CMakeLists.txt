@@ -7,7 +7,7 @@ if(EXISTS)
 endif()
 
 set(PDAL_UTIL_HPP
-    "${PDAL_UTIL_DIR}/Bounds.hpp")
+    "${PDAL_HEADERS_DIR}/util/Bounds.hpp")
 
 set(PDAL_UTIL_CPP
     "${PDAL_UTIL_DIR}/Bounds.cpp")

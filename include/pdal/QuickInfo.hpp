@@ -36,7 +36,7 @@
 
 #include <vector>
 
-#include <pdal/Bounds.hpp>
+#include <pdal/util/Bounds.hpp>
 #include <pdal/SpatialReference.hpp>
 
 namespace pdal
@@ -45,7 +45,7 @@ namespace pdal
 struct QuickInfo
 {
 public:
-    BOX3D m_bounds;   
+    BOX3D m_bounds;
     SpatialReference m_srs;
     point_count_t m_pointCount;
     std::vector<std::string> m_dimNames;
