@@ -317,7 +317,6 @@ include(CPack)
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 
 export(TARGETS pdalcpp pdal_util FILE "${PDAL_BINARY_DIR}/PDALTargets.cmake")
-export(TARGETS pdal_util FILE "${PDAL_BINARY_DIR}/PDALTargets.cmake")
 install(EXPORT PDALTargets DESTINATION lib/pdal/cmake)
 include(${PDAL_CMAKE_DIR}/config.cmake)
 
