@@ -54,6 +54,8 @@ public:
         "processing chains.");
     SET_STAGE_LINK("http://pdal.io/stages/writers.bpf.html")
 
+    static Options getDefaultOptions();
+
 private:
     OLeStream m_stream;
     BpfHeader m_header;

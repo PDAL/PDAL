@@ -46,6 +46,20 @@
 namespace pdal
 {
 
+Options BpfWriter::getDefaultOptions()
+{
+    Options ops;
+
+    ops.add("filename", "", "Filename for BPF output");
+    ops.add("compression", false, "Whether zlib compression should be used");
+    ops.add("format", "dimension", "Point output format: "
+        "non-interleaved(\"dimension\"), interleaved(\"point\") or "
+        "byte-segregated(\"byte\")");
+    ops.add("coord_id", 0, "Coordinate ID (UTM zone).");
+    return ops;
+}
+
+
 void BpfWriter::processOptions(const Options& options)
 {
     if (m_filename.empty())
@@ -64,6 +78,16 @@ void BpfWriter::processOptions(const Options& options)
         m_header.m_pointFormat = BpfFormat::ByteMajor;
     else
         m_header.m_pointFormat = BpfFormat::DimMajor;
+    if (options.hasOption("coord_id"))
+    {
+        m_header.m_coordType = BpfCoordType::UTM;
+        m_header.m_coordId = options.getValueOrThrow<int>("coord_id");
+    }
+    else
+    {
+        m_header.m_coordType = BpfCoordType::None;
+        m_header.m_coordId = 0;
+    }
 }
 
 
@@ -73,8 +97,6 @@ void BpfWriter::ready(PointContextRef ctx)
     m_stream = FileUtils::createFile(m_filename, true);
     m_header.m_version = 3;
     m_header.m_numDim = m_dims.size();
-    m_header.m_coordType = BpfCoordType::None;
-    m_header.m_coordId = 0;
     m_header.setLog(log());
 
     // We will re-write the header and dimensions to account for the point

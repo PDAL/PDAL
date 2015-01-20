@@ -86,8 +86,6 @@ public:
         { m_stream->write((const char *)c, len); }
     std::streampos position() const
         { return m_stream->tellp(); }
-    std::ostream *stream()
-        { return m_stream; }
     void pushStream(std::ostream *strm)
     {
         m_streams.push(m_stream);

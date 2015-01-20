@@ -220,10 +220,10 @@ class IStreamMarker
 {
 public:
     IStreamMarker(IStream& stream) : m_stream(stream)
-        { m_pos = m_stream.stream()->tellg(); }
+        { m_pos = m_stream.position(); }
 
     void rewind()
-        { m_stream.stream()->seekg(m_pos); }
+        { m_stream.seek(m_pos); }
 
 private:
     std::streampos m_pos;

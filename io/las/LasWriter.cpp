@@ -75,31 +75,23 @@ Options LasWriter::getDefaultOptions()
 {
     Options options;
 
-    Option filename("filename", "", "file to read from");
-    Option compression("compression", false, "Do we LASzip-compress the data?");
-    Option format("format", 3, "Point format to write");
-    Option major_version("major_version", 1, "LAS Major version");
-    Option minor_version("minor_version", 2, "LAS Minor version");
-    Option day_of_year("creation_doy", 0, "Day of Year for file");
-    Option year("creation_year", 2011, "4-digit year value for file");
+    options.add("filename", "", "Name of the file for LAS/LAZ output.");
+    options.add("compression", false, "Do we LASzip-compress the data?");
+    options.add("format", 3, "Point format to write");
+    options.add("major_version", 1, "LAS Major version");
+    options.add("minor_version", 2, "LAS Minor version");
+    options.add("creation_doy", 0, "Day of Year for file");
+    options.add("creation_year", 2011, "4-digit year value for file");
+
     LasHeader header;
-    Option system_id("system_id", header.getSystemIdentifier(),
+    options.add("system_id", header.getSystemIdentifier(),
         "System ID for this file");
-    Option software_id("software_id", GetDefaultSoftwareId(),
+    options.add("software_id", GetDefaultSoftwareId(),
         "Software ID for this file");
-    Option filesourceid("filesource_id", 0, "File Source ID for this file");
-    Option set_metadata("forward_metadata", false, "forward metadata into "
+    options.add("filesource_id", 0, "File Source ID for this file");
+    options.add("forward_metadata", false, "forward metadata into "
         "the file as necessary");
 
-    options.add(major_version);
-    options.add(minor_version);
-    options.add(day_of_year);
-    options.add(year);
-    options.add(system_id);
-    options.add(software_id);
-    options.add(format);
-    options.add(filename);
-    options.add(compression);
     return options;
 }
 
