@@ -58,7 +58,6 @@ private:
     OLeStream m_stream;
     BpfHeader m_header;
     BpfDimensionList m_dims;
-    std::vector<char> m_compressBuf;
 
     virtual void processOptions(const Options& options);
     virtual void ready(PointContextRef ctx);

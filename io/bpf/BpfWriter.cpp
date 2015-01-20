@@ -113,26 +113,19 @@ void BpfWriter::write(const PointBuffer& data)
 
 void BpfWriter::writePointMajor(const PointBuffer& data)
 {
-    Charbuf charbuf;
-    size_t blockpoints = data.size();
+    // Blocks of 10,000 points will ensure that we're under 16MB, even
+    // for 255 dimensions.
+    size_t blockpoints = std::min(10000UL, data.size());
 
     // For compression we're going to write to a buffer so that it can be
     // compressed before it's written to the file stream.
-    if (m_header.m_compression)
-    {
-        // Blocks of 10,000 points will ensure that we're under 16MB, even
-        // for 255 dimensions.
-        blockpoints = std::min(10000UL, data.size());
-        m_compressBuf.resize(blockpoints * sizeof(float) * m_dims.size());
-    }
+    BpfCompressor compressor(m_stream,
+        blockpoints * sizeof(float) * m_dims.size());
     PointId idx = 0;
     while (idx < data.size())
     {
         if (m_header.m_compression)
-        {
-            charbuf.initialize(m_compressBuf.data(), m_compressBuf.size());
-            m_stream.pushStream(new std::ostream(&charbuf));
-        }
+            compressor.startBlock();
         size_t blockId;
         for (blockId = 0; idx < data.size() && blockId < blockpoints;
             ++idx, ++blockId)
@@ -147,9 +140,8 @@ void BpfWriter::writePointMajor(const PointBuffer& data)
         }
         if (m_header.m_compression)
         {
-            m_stream.popStream();
-            writeCompressedBlock(m_compressBuf.data(),
-                blockId * sizeof(float) * m_dims.size());
+            compressor.compress();
+            compressor.finish();
         }
     }
 }
@@ -158,17 +150,13 @@ void BpfWriter::writePointMajor(const PointBuffer& data)
 void BpfWriter::writeDimMajor(const PointBuffer& data)
 {
     // We're going to pretend for now that we only even have one point buffer.
-    Charbuf charbuf;
+    BpfCompressor compressor(m_stream, data.size() * sizeof(float));
 
-    if (m_header.m_compression)
-        m_compressBuf.resize(data.size() * sizeof(float));
     for (auto & bpfDim : m_dims)
     {
+        
         if (m_header.m_compression)
-        {
-            charbuf.initialize(m_compressBuf.data(), m_compressBuf.size());
-            m_stream.pushStream(new std::ostream(&charbuf));
-        }
+            compressor.startBlock();
         for (PointId idx = 0; idx < data.size(); ++idx)
         {
             float v = data.getFieldAs<float>(bpfDim.m_id, idx);
@@ -178,8 +166,8 @@ void BpfWriter::writeDimMajor(const PointBuffer& data)
         }
         if (m_header.m_compression)
         {
-            m_stream.popStream();
-            writeCompressedBlock(m_compressBuf.data(), m_compressBuf.size());
+            compressor.compress();
+            compressor.finish();
         }
     }
 }
@@ -194,14 +182,12 @@ void BpfWriter::writeByteMajor(const PointBuffer& data)
     } uu;
 
     // We're going to pretend for now that we only even have one point buffer.
-    Charbuf charbuf;
+
+    BpfCompressor compressor(m_stream,
+        data.size() * sizeof(float) * m_dims.size());
 
     if (m_header.m_compression)
-    {
-        m_compressBuf.resize(data.size() * sizeof(float) * m_dims.size());
-        charbuf.initialize(m_compressBuf.data(), m_compressBuf.size());
-        m_stream.pushStream(new std::ostream(&charbuf));
-    }
+        compressor.startBlock();
     for (auto & bpfDim : m_dims)
     {
         for (size_t b = 0; b < sizeof(float); b++)
@@ -216,37 +202,9 @@ void BpfWriter::writeByteMajor(const PointBuffer& data)
     }
     if (m_header.m_compression)
     {
-        m_stream.popStream();
-        writeCompressedBlock(m_compressBuf.data(), m_compressBuf.size());
+        compressor.compress();
+        compressor.finish();
     }
-}
-
-
-void BpfWriter::writeCompressedBlock(char *buf, size_t size)
-{
-    uint32_t rawSize = (uint32_t)size;
-    uint32_t compressedSize = 0;
-
-    OStreamMarker blockstart(m_stream);
-
-    // Write dummy size and compressed size to properly position the stream.
-    m_stream << rawSize << compressedSize;
-
-    // Have the compressor write to the raw output stream - no byte ordering.
-    //ABELL - Perhaps we should add write() support to the OStream.
-    std::ostream *out = m_stream.stream();
-    BpfCompressor compressor(*out);
-    compressor.compress(buf, size);
-    compressedSize = (uint32_t)compressor.finish();
-
-    OStreamMarker blockend(m_stream);
-
-    // Now rewind to the start of the block and write the size bytes.
-    blockstart.rewind();
-    m_stream << rawSize << compressedSize;
-
-    // Now set the position back at the end of the block.
-    blockend.rewind();
 }
 
 

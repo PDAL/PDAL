@@ -203,10 +203,12 @@ class OStreamMarker
 {
 public:
     OStreamMarker(OStream& stream) : m_stream(stream)
-        { m_pos = m_stream.stream()->tellp(); }
+        { m_pos = m_stream.position(); }
 
+    void mark()
+        { m_pos = m_stream.position(); }
     void rewind()
-        { m_stream.stream()->seekp(m_pos); }
+        { m_stream.seek(m_pos); }
 
 private:
     std::streampos m_pos;

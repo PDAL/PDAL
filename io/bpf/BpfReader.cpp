@@ -199,7 +199,6 @@ void BpfReader::ready(PointContextRef ctx)
 {
     m_index = 0;
     m_start = m_stream.position();
-int i = 0;
     if (m_header.m_compression)
     {
         m_deflateBuf.resize(numPoints() * m_dims.size() * sizeof(float));
@@ -207,7 +206,6 @@ int i = 0;
         size_t bytesRead = 0;
         do
         {
-std::cerr << "Reading compressed block = " << ++i << "!\n";
             bytesRead = readBlock(m_deflateBuf, index);
             index += bytesRead;
         } while (bytesRead > 0 && index < m_deflateBuf.size());
