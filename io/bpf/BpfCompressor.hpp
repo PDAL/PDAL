@@ -37,24 +37,35 @@
 #include <ostream>
 #include <zlib.h>
 
+#include <pdal/Charbuf.hpp>
+#include <pdal/OStream.hpp>
+
 namespace pdal
 {
 
 class BpfCompressor
 {
 public:
-    BpfCompressor(std::ostream& out,
-        int compressionLevel = Z_DEFAULT_COMPRESSION);
-    size_t finish();
-    void compress(char *buf, size_t insize);
+    BpfCompressor(OLeStream& out, size_t maxSize,
+            int compressionLevel = Z_DEFAULT_COMPRESSION) :
+        m_out(out), m_inbuf(maxSize), m_blockStart(out), m_rawSize(0),
+        m_compressedSize(0)
+    {}
+    void startBlock();
+    void finish();
+    void compress();
    
 private:
     static const int CHUNKSIZE = 1000000;
 
-    std::ostream& m_out;
+    OLeStream& m_out;
+    Charbuf m_charbuf;
+    std::vector<char> m_inbuf;
     z_stream m_strm;
     unsigned char m_tmpbuf[CHUNKSIZE];
-    size_t m_written;
+    OStreamMarker m_blockStart;
+    size_t m_rawSize;
+    size_t m_compressedSize;
 };
 
 } // namespace pdal
