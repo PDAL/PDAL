@@ -139,6 +139,10 @@ option(BUILD_PLUGIN_RIVLIB "Choose if RiVLib support should be built" FALSE)
 add_feature_info("RiVLib plugin" BUILD_PLUGIN_RIVLIB
     "read data in the RXP format")
 
+option(BUILD_PLUGIN_PYTHON "Choose if Python support should be built" FALSE)
+add_feature_info("Python plugin" BUILD_PLUGIN_PYTHON
+    "add features that depend on python")
+
 # Choose to use pkg-config or not
 option(WITH_PKGCONFIG "Choose whether a pkgconfig file (PDAL.pc) should be installed" TRUE)
 
@@ -154,7 +158,6 @@ cmake_dependent_option(BUILD_SQLITE_TESTS "Choose if SQLite tests should be buil
 cmake_dependent_option(BUILD_OCI_TESTS "Choose if OCI tests should be built" ON "BUILD_PLUGIN_OCI; WITH_TESTS" OFF)
 cmake_dependent_option(BUILD_RIVLIB_TESTS "Choose if RiVLib tests should be built" ON "BUILD_PLUGIN_RIVLIB; WITH_TESTS" OFF)
 cmake_dependent_option(BUILD_PIPELINE_TESTS "Choose if pipeline tests should be built" OFF "WITH_APPS; WITH_TESTS" OFF)
-cmake_dependent_option(BUILD_PLUGIN_PYTHON "Choose if Python support should be built" ON "WITH_PYTHON" OFF)
 
 if(BUILD_PLUGIN_PGPOINTCLOUD OR BUILD_PLUGIN_OCI OR BUILD_PLUGIN_SQLITE)
     include(${PDAL_CMAKE_DIR}/libxml2.cmake)

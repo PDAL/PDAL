@@ -441,41 +441,12 @@ void LasWriter::openCompression()
 #endif
 }
 
-void LasWriter::setAutoOffset(const PointBuffer& pointBuffer)
-{
-    if (pointBuffer.empty())
-        return;
-
-    if (m_xXform.m_autoOffset)
-        m_xXform.m_offset = (std::numeric_limits<double>::max)();
-    if (m_yXform.m_autoOffset)
-        m_yXform.m_offset = (std::numeric_limits<double>::max)();
-    if (m_zXform.m_autoOffset)
-        m_zXform.m_offset = (std::numeric_limits<double>::max)();
-    for (PointId idx = 0; idx < pointBuffer.size(); idx++)
-    {
-        if (m_xXform.m_autoOffset)
-            m_xXform.m_offset =
-                std::min(pointBuffer.getFieldAs<double>(Dimension::Id::X, idx),
-                    m_xXform.m_offset);
-        if (m_yXform.m_autoOffset)
-            m_yXform.m_offset =
-                std::min(pointBuffer.getFieldAs<double>(Dimension::Id::Y, idx),
-                    m_yXform.m_offset);
-        if (m_zXform.m_autoOffset)
-            m_zXform.m_offset =
-                std::min(pointBuffer.getFieldAs<double>(Dimension::Id::Z, idx),
-                    m_zXform.m_offset);
-    }
-}
-
 
 void LasWriter::write(const PointBuffer& pointBuffer)
 {
     uint32_t numValidPoints = 0;
 
-    if (m_xXform.m_autoOffset || m_yXform.m_autoOffset || m_zXform.m_autoOffset)
-        setAutoOffset(pointBuffer);
+    setAutoOffset(pointBuffer);
 
     std::vector<char> buf(m_lasHeader.pointLen());
 

@@ -66,6 +66,8 @@ private:
     virtual void write(const PointBuffer& buf);
     virtual void done(PointContextRef ctx);
 
+    double getAdjustedValue(const PointBuffer& buf, BpfDimension& bpfDim,
+        PointId idx);
     void loadBpfDimensions(PointContextRef ctx);
     void writePointMajor(const PointBuffer& buf);
     void writeDimMajor(const PointBuffer& buf);

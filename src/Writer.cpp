@@ -74,6 +74,38 @@ void Writer::writerProcessOptions(const Options& options)
 }
 
 
+void Writer::setAutoOffset(const PointBuffer& buf)
+{
+   if (!m_xXform.m_autoOffset && !m_yXform.m_autoOffset &&
+       !m_zXform.m_autoOffset)
+       return; 
+   if (buf.empty())
+        return;
+
+    if (m_xXform.m_autoOffset)
+        m_xXform.m_offset = (std::numeric_limits<double>::max)();
+    if (m_yXform.m_autoOffset)
+        m_yXform.m_offset = (std::numeric_limits<double>::max)();
+    if (m_zXform.m_autoOffset)
+        m_zXform.m_offset = (std::numeric_limits<double>::max)();
+    for (PointId idx = 0; idx < buf.size(); idx++)
+    {
+        if (m_xXform.m_autoOffset)
+            m_xXform.m_offset =
+                std::min(buf.getFieldAs<double>(Dimension::Id::X, idx),
+                    m_xXform.m_offset);
+        if (m_yXform.m_autoOffset)
+            m_yXform.m_offset =
+                std::min(buf.getFieldAs<double>(Dimension::Id::Y, idx),
+                    m_yXform.m_offset);
+        if (m_zXform.m_autoOffset)
+            m_zXform.m_offset =
+                std::min(buf.getFieldAs<double>(Dimension::Id::Z, idx),
+                    m_zXform.m_offset);
+    }
+}
+
+
 boost::property_tree::ptree Writer::serializePipeline() const
 {
     boost::property_tree::ptree tree;
