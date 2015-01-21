@@ -167,9 +167,12 @@ TEST(ProgrammableFilterTest, add_dimension)
     EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
 
+    pdal::Dimension::Id::Enum int_id = ctx.findDim("AddedIntensity");
+    pdal::Dimension::Id::Enum psid_id = ctx.findDim("AddedPointSourceId");
+
     for (unsigned int i = 0; i < buf->size(); ++i)
     {
-        EXPECT_EQ(buf->getFieldAs<uint16_t>(Dimension::Id::Intensity, i), 1);
-        EXPECT_EQ(buf->getFieldAs<uint16_t>(Dimension::Id::PointSourceId, i), 2);
+        EXPECT_EQ(buf->getFieldAs<uint16_t>(int_id, i), 1);
+        EXPECT_EQ(buf->getFieldAs<uint16_t>(psid_id, i), 2);
     }
 }
