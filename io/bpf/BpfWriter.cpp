@@ -104,6 +104,10 @@ void BpfWriter::ready(PointContextRef ctx)
     m_header.write(m_stream);
     m_header.writeDimensions(m_stream, m_dims);
     m_header.m_len = m_stream.position();
+    m_header.m_xform.m_vals[0] = m_xXform.m_scale;
+    m_header.m_xform.m_vals[5] = m_yXform.m_scale;
+    m_header.m_xform.m_vals[10] = m_zXform.m_scale;
+std::cerr << "X scale = " << m_xXform.m_scale << "!\n";
 }
 
 
@@ -132,6 +136,13 @@ void BpfWriter::loadBpfDimensions(PointContextRef ctx)
 
 void BpfWriter::write(const PointBuffer& data)
 {
+    setAutoOffset(data);
+
+    // We know that X, Y and Z are dimensions 0, 1 and 2.
+    m_dims[0].m_offset = m_xXform.m_offset;
+    m_dims[1].m_offset = m_yXform.m_offset;
+    m_dims[2].m_offset = m_zXform.m_offset;
+
     switch (m_header.m_pointFormat)
     {
     case BpfFormat::PointMajor:
@@ -169,10 +180,8 @@ void BpfWriter::writePointMajor(const PointBuffer& data)
         {
             for (auto & bpfDim : m_dims)
             {
-                float v = data.getFieldAs<float>(bpfDim.m_id, idx);
-                bpfDim.m_min = std::min(bpfDim.m_min, bpfDim.m_offset + v);
-                bpfDim.m_max = std::max(bpfDim.m_max, bpfDim.m_offset + v);
-                m_stream << v;
+                double d = getAdjustedValue(data, bpfDim, idx);
+                m_stream << (float)d;
             }
         }
         if (m_header.m_compression)
@@ -196,10 +205,8 @@ void BpfWriter::writeDimMajor(const PointBuffer& data)
             compressor.startBlock();
         for (PointId idx = 0; idx < data.size(); ++idx)
         {
-            float v = data.getFieldAs<float>(bpfDim.m_id, idx);
-            bpfDim.m_min = std::min(bpfDim.m_min, bpfDim.m_offset + v);
-            bpfDim.m_max = std::max(bpfDim.m_max, bpfDim.m_offset + v);
-            m_stream << v;
+            double d = getAdjustedValue(data, bpfDim, idx);
+            m_stream << (float)d;
         }
         if (m_header.m_compression)
         {
@@ -231,7 +238,7 @@ void BpfWriter::writeByteMajor(const PointBuffer& data)
         {
             for (PointId idx = 0; idx < data.size(); ++idx)
             {
-                uu.f = data.getFieldAs<float>(bpfDim.m_id, idx);
+                uu.f = (float)getAdjustedValue(data, bpfDim, idx);
                 uint8_t u8 = (uint8_t)(uu.u32 >> (b * CHAR_BIT));
                 m_stream << u8;
             }
@@ -242,6 +249,24 @@ void BpfWriter::writeByteMajor(const PointBuffer& data)
         compressor.compress();
         compressor.finish();
     }
+}
+
+
+double BpfWriter::getAdjustedValue(const PointBuffer& buf,
+    BpfDimension& bpfDim, PointId idx)
+{
+    double d = buf.getFieldAs<double>(bpfDim.m_id, idx);
+    bpfDim.m_min = std::min(bpfDim.m_min, d);
+    bpfDim.m_max = std::max(bpfDim.m_max, d);
+
+    if (bpfDim.m_id == Dimension::Id::X)
+        d /= m_xXform.m_scale;
+    else if (bpfDim.m_id == Dimension::Id::Y)
+        d /= m_yXform.m_scale;
+    else if (bpfDim.m_id == Dimension::Id::Z)
+        d /= m_zXform.m_scale;
+    d -= bpfDim.m_offset;
+    return (d - bpfDim.m_offset);
 }
 
 

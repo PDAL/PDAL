@@ -76,6 +76,8 @@ protected:
     XForm m_yXform;
     XForm m_zXform;
 
+    void setAutoOffset(const PointBuffer& buf);
+
 private:
     virtual PointBufferSet run(PointBufferPtr buffer)
     {
