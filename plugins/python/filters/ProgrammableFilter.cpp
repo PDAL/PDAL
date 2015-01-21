@@ -74,7 +74,7 @@ void ProgrammableFilter::addDimensions(PointContext ctx)
 {
     for (auto it = m_addDimensions.cbegin(); it != m_addDimensions.cend(); ++it)
     {
-        ctx.registerDim(*it);
+        ctx.registerDim(*it, pdal::Dimension::Type::Double);
     }
 }
 

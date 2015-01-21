@@ -107,7 +107,6 @@ void BpfWriter::ready(PointContextRef ctx)
     m_header.m_xform.m_vals[0] = m_xXform.m_scale;
     m_header.m_xform.m_vals[5] = m_yXform.m_scale;
     m_header.m_xform.m_vals[10] = m_zXform.m_scale;
-std::cerr << "X scale = " << m_xXform.m_scale << "!\n";
 }
 
 
