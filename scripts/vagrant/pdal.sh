@@ -21,7 +21,7 @@ cmake   -G "Unix Makefiles"  \
         -DWITH_GEOTIFF=ON \
         -DWITH_LAZPERF=ON \
         -DWITH_LIBXML2=ON \
-        -DWITH_PYTHON=ON \
+        -DBUILD_PLUGIN_PYTHON=ON \
         -DBUILD_PLUGIN_ATTRIBUTE=ON \
         -DBUILD_PLUGIN_HEXBIN=ON \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
