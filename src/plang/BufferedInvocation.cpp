@@ -58,7 +58,7 @@ void BufferedInvocation::begin(PointBuffer& buffer)
 {
     PointContext ctx = buffer.m_context;
     Dimension::IdList const& dims = ctx.dims();
-    
+
     for (auto di = dims.begin(); di != dims.end(); ++di)
     {
         Dimension::Id::Enum d = *di;
@@ -71,7 +71,7 @@ void BufferedInvocation::begin(PointBuffer& buffer)
             buffer.getFieldInternal(d, idx, (void *)p);
             p += dd->size();
         }
-        std::string name = Dimension::name(d);
+        std::string name = ctx.dimName(*di);
         insertArgument(name, (uint8_t *)data, dd->type(), buffer.size());
     }
 }
