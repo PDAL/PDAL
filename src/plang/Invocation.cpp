@@ -173,11 +173,11 @@ void *Invocation::extractResult(std::string const& name,
     npy_intp one = 0;
     const int pyDataType = getPythonDataType(t);
     PyArray_Descr *dtype = PyArray_DESCR(arr);
-    
+
     if (static_cast<uint32_t>(dtype->elsize) != Dimension::size(t))
     {
         std::ostringstream oss;
-        oss << "dtype of array has size " << dtype->elsize 
+        oss << "dtype of array has size " << dtype->elsize
             << " but PDAL dimension '" << name << "' has byte size of "
             << Dimension::size(t) << " bytes";
         throw python_error(oss.str());
@@ -190,7 +190,7 @@ void *Invocation::extractResult(std::string const& name,
         std::ostringstream oss;
         oss << "dtype of array has a signed integer type but the " <<
             "dimension data type of '" << name <<
-            "' is not pdal::Signed"; 
+            "' is not pdal::Signed";
         throw python_error(oss.str());
     }
 
@@ -199,7 +199,7 @@ void *Invocation::extractResult(std::string const& name,
         std::ostringstream oss;
         oss << "dtype of array has a unsigned integer type but the " <<
             "dimension data type of '" << name <<
-            "' is not pdal::Unsigned"; 
+            "' is not pdal::Unsigned";
         throw python_error(oss.str());
     }
 
@@ -207,9 +207,9 @@ void *Invocation::extractResult(std::string const& name,
     {
         std::ostringstream oss;
         oss << "dtype of array has a float type but the " <<
-            "dimension data type of '" << name << "' is not pdal::Floating"; 
+            "dimension data type of '" << name << "' is not pdal::Floating";
         throw python_error(oss.str());
-    }    
+    }
     return PyArray_GetPtr(arr, &one);
 }
 

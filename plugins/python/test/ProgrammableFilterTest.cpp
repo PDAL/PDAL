@@ -142,14 +142,14 @@ TEST(ProgrammableFilterTest, add_dimension)
 
     Option source("source", "import numpy\n"
         "def myfunc(ins,outs):\n"
-        "  outs['Intensity'] = np.zeros(ins['X'].size, dtype=numpy.uint16) + 1\n"
-        "  outs['PointSourceId'] = np.zeros(ins['X'].size, dtype=numpy.uint16) + 2\n"
+        "  outs['AddedIntensity'] = np.zeros(ins['X'].size, dtype=numpy.double) + 1\n"
+        "  outs['AddedPointSourceId'] = np.zeros(ins['X'].size, dtype=numpy.double) + 2\n"
         "  return True\n"
     );
     Option module("module", "MyModule");
     Option function("function", "myfunc");
-    Option intensity("add_dimension", "Intensity");
-    Option scanDirection("add_dimension", "PointSourceId");
+    Option intensity("add_dimension", "AddedIntensity");
+    Option scanDirection("add_dimension", "AddedPointSourceId");
     Options opts;
     opts.add(source);
     opts.add(module);
@@ -169,7 +169,7 @@ TEST(ProgrammableFilterTest, add_dimension)
 
     for (unsigned int i = 0; i < buf->size(); ++i)
     {
-        EXPECT_EQ(buf->getFieldAs<uint16_t>(Dimension::Id::Intensity, i), 1u);
-        EXPECT_EQ(buf->getFieldAs<uint16_t>(Dimension::Id::PointSourceId, i), 2u);
+        EXPECT_EQ(buf->getFieldAs<uint16_t>(Dimension::Id::Intensity, i), 1);
+        EXPECT_EQ(buf->getFieldAs<uint16_t>(Dimension::Id::PointSourceId, i), 2);
     }
 }
