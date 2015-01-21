@@ -15,123 +15,74 @@ interacting with a :ref:`reader stage <stage_index>`.
      pipeline using :ref:`pipeline` and not have to code anything explicit
      yourself.
 
-Compilation
--------------------------------------------------------------------------------
-
-To build this example create a file called `pdal-tutorial.cpp` in the root of your PDAL tree and
-issue a compilation command something like the following:
-
-
-::
-
-    g++ -g -std=c++11 -o pdal-tutorial -I./include -L./lib -lpdalcpp pdal-tutorial.cpp
-
-.. note::
-
-    Refer to :ref:`building` for information on how to build PDAL.
-
-
 Includes
 -------------------------------------------------------------------------------
 
-As of PDAL 1.0.0, there's a couple of include files available for use.  The
-main one, `<pdal/pdal.hpp>`, brings in most of the utility and basic classes
-used throughout the PDAL system. Additionally, the following includes are
-available subject to having the required include directories pathed:
+First, our code.
 
-* `#include <pdal/Drivers.hpp>`
-* `#include <pdal/Filters.hpp>`
-* `#include <pdal/Kernels.hpp>`
+.. literalinclude:: ../../examples/writing/tutorial.cpp
+   :language: cpp
 
+Take a closer look. We will need to include several PDAL headers.
+
+.. literalinclude:: ../../examples/writing/tutorial.cpp
+   :language: cpp
+   :lines: 1-8
+
+`BufferReader` will not be required by all users. Here is it used to populate a
+bare `PointBuffer`. This will often be accomplished by a `Reader` stage.
+
+Instead of directly including headers for individual stages, e.g., `LasWriter`,
+we rely on the `StageFactory` which has the ability to query available stages
+at runtime and return pointers to the created stages.
+
+We proceed by providing a mechanism for generating dummy data for the x, y, and
+z dimensions.
+
+.. literalinclude:: ../../examples/writing/tutorial.cpp
+   :language: cpp
+   :lines: 10-30
+
+.. literalinclude:: ../../examples/writing/tutorial.cpp
+   :language: cpp
+   :lines: 32-41
+
+.. literalinclude:: ../../examples/writing/tutorial.cpp
+   :language: cpp
+   :lines: 43-70
+
+Compiling and running the program
+-------------------------------------------------------------------------------
 
 .. note::
 
-    Drivers, Filters, and Kernels bring in *all* of the respective sub includes
-    for those sections of the source tree. You are not required to include
-    everything if you don't need it, however, and it is still possible to
-    selectively include the classes you need as shown in the example below.
+  Refer to :ref:`building` for information on how to build PDAL.
 
+To build this example, simply copy the files tutorial.cpp and CMakeLists.txt
+from the examples/writing directory of the PDAL source tree.
 
+.. literalinclude:: ../../examples/writing/CMakeLists.txt
+   :language: cmake
 
-.. code-block:: cpp
+.. note::
 
-    #include <pdal/pdal.hpp>
-    #include <pdal/PointBuffer.hpp>
-    #include <BufferReader.hpp>
-    #include <LasWriter.hpp>
+  Refer to :ref:`using` for an explanation of the basic CMakeLists.
 
-    #include <vector>
+Begin by configuring your project using CMake (shown here on Unix) and building
+using make.
 
-    struct Point
-    {
-        double x;
-        double y;
-        double z;
-    };
+.. code-block:: bash
 
-    std::vector<Point> getMyData()
-    {
+  $ cd /PATH/TO/WRITING/TUTORIAL
+  $ mkdir build
+  $ cd build
+  $ cmake ..
+  $ make
 
-        std::vector<Point> output;
-        Point p;
+After the project is built, you can run it by typing:
 
-        for (int i = 0; i < 1000; ++i)
-        {
-            p.x = -93.0 + i*0.001;
-            p.y = 42.0 + i*0.001 ;
-            p.z = 106.0 + i;
-            output.push_back(p);
-        }
-        return output;
-    }
+.. code-block:: bash
 
+  $ ./tutorial
 
-    void fillBuffer(pdal::PointBufferPtr buffer, std::vector<Point> const& data)
-    {
-
-        for (int i = 0; i < data.size(); ++i)
-        {
-            Point const& pt = data[i];
-            buffer->setField<double>(pdal::Dimension::Id::X, i, pt.x);
-            buffer->setField<double>(pdal::Dimension::Id::Y, i, pt.y);
-            buffer->setField<double>(pdal::Dimension::Id::Z, i, pt.z);
-        }
-    }
-
-    int main( int argc, const char* argv[] )
-    {
-
-        pdal::Options options;
-
-        pdal::Option debug("debug", true, "");
-        pdal::Option verbose("verbose", 7, "");
-        // options.add(debug);
-        // options.add(verbose);
-
-        pdal::Option filename("filename", "myfile.las");
-        options.add(filename);
-        pdal::PointContextRef ctx;
-
-        ctx.registerDim(pdal::Dimension::Id::X);
-        ctx.registerDim(pdal::Dimension::Id::Y);
-        ctx.registerDim(pdal::Dimension::Id::Z);
-
-        {
-            pdal::PointBufferPtr buffer = pdal::PointBufferPtr(new pdal::PointBuffer(ctx));
-
-            std::vector<Point> data = getMyData();
-
-            fillBuffer(buffer, data);
-
-            pdal::BufferReader reader(options);
-            reader.addBuffer(buffer);
-            pdal::LasWriter writer(options);
-            writer.setInput(&reader);
-            writer.prepare(ctx);
-            writer.execute(ctx);
-
-
-        }
-
-    }
 

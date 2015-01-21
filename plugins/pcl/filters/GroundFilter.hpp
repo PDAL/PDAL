@@ -38,6 +38,7 @@
 #include <pdal/Stage.hpp>
 
 #include <memory>
+#include <set>
 
 namespace pdal
 {
@@ -47,6 +48,7 @@ class PointBuffer;
 class PointContext;
 
 typedef std::shared_ptr<PointBuffer> PointBufferPtr;
+typedef std::set<PointBufferPtr> PointBufferSet;
 typedef PointContext PointContextRef;
 
 class PDAL_DLL GroundFilter : public Filter
@@ -70,7 +72,6 @@ private:
 
     virtual void addDimensions(PointContextRef ctx);
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContext ctx) {};
     virtual PointBufferSet run(PointBufferPtr buf);
 
     GroundFilter& operator=(const GroundFilter&); // not implemented
