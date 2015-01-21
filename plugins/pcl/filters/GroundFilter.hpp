@@ -1,6 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
-* Copyright (c) 2014-2015, Brad Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2015, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -35,37 +34,32 @@
 
 #pragma once
 
-#include <pdal/FileUtils.hpp>
-#include <pdal/pdal_export.hpp>
-
-#include "Kernel.hpp"
+#include <pdal/Filter.hpp>
+#include <pdal/Stage.hpp>
 
 #include <memory>
-#include <string>
 
 namespace pdal
 {
 
 class Options;
-class Stage;
+class PointBuffer;
+class PointContext;
 
-class PDAL_DLL GroundKernel : public Kernel
+typedef std::shared_ptr<PointBuffer> PointBufferPtr;
+typedef PointContext PointContextRef;
+
+class PDAL_DLL GroundFilter : public Filter
 {
 public:
-    SET_KERNEL_NAME("ground", "Ground Kernel")
-    SET_KERNEL_LINK("http://pdal.io/kernels/kernels.ground.html")
+    SET_STAGE_NAME("filters.ground", "Progressive Morphological Filter")
+    SET_STAGE_LINK("http://www.pdal.io/stages/filters.ground.html")
+    SET_PLUGIN_VERSION("1.0.0b1")
 
-    GroundKernel();
-    int execute();
+    GroundFilter() : Filter()
+    {}
 
 private:
-    void addSwitches();
-    void validateSwitches();
-
-    std::unique_ptr<Stage> makeReader(Options readerOptions);
-
-    std::string m_inputFile;
-    std::string m_outputFile;
     double m_maxWindowSize;
     double m_slope;
     double m_maxDistance;
@@ -73,6 +67,14 @@ private:
     double m_cellSize;
     bool m_classify;
     bool m_extract;
+
+    virtual void addDimensions(PointContextRef ctx);
+    virtual void processOptions(const Options& options);
+    virtual void ready(PointContext ctx) {};
+    virtual PointBufferSet run(PointBufferPtr buf);
+
+    GroundFilter& operator=(const GroundFilter&); // not implemented
+    GroundFilter(const GroundFilter&); // not implemented
 };
 
 } // namespace pdal
