@@ -78,6 +78,10 @@ Environment::Environment()
 
 std::cerr << "Constructed environment!\n";
     Py_Initialize();
+    if (Py_IsInitialized())
+        std::cerr << "Python initialized OK!\n";
+    else
+        std::cerr << "Bad pythong initialization!\n";
     Invocation::numpy_init();
     PyImport_ImportModule("redirector");
 }
