@@ -1,6 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
-* Copyright (c) 2014-2015, Brad Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2015, Hobu Inc., hobu@hobu.co
 *
 * All rights reserved.
 *
@@ -35,45 +34,45 @@
 
 #pragma once
 
-#include <pdal/FileUtils.hpp>
-#include <pdal/pdal_export.hpp>
+#include <vector>
 
-#include "Kernel.hpp"
+#include <pdal/OStream.hpp>
+#include <pdal/Writer.hpp>
 
-#include <memory>
-#include <string>
+#include "BpfHeader.hpp"
 
 namespace pdal
 {
 
-class Options;
-class Stage;
-
-class PDAL_DLL GroundKernel : public Kernel
+class PDAL_DLL BpfWriter : public Writer
 {
 public:
-    SET_KERNEL_NAME("ground", "Ground Kernel")
-    SET_KERNEL_LINK("http://pdal.io/kernels/kernels.ground.html")
+    SET_STAGE_NAME("writers.bpf",
+        "\"Binary Point Format\" (BPF) writer support. "
+        "BPF is a simple \n"
+        "DoD and research format that is used by some sensor and \n"
+        "processing chains.");
+    SET_STAGE_LINK("http://pdal.io/stages/writers.bpf.html")
 
-    GroundKernel();
-    int execute();
+    static Options getDefaultOptions();
 
 private:
-    void addSwitches();
-    void validateSwitches();
+    OLeStream m_stream;
+    BpfHeader m_header;
+    BpfDimensionList m_dims;
 
-    std::unique_ptr<Stage> makeReader(Options readerOptions);
+    virtual void processOptions(const Options& options);
+    virtual void ready(PointContextRef ctx);
+    virtual void write(const PointBuffer& buf);
+    virtual void done(PointContextRef ctx);
 
-    std::string m_inputFile;
-    std::string m_outputFile;
-    double m_maxWindowSize;
-    double m_slope;
-    double m_maxDistance;
-    double m_initialDistance;
-    double m_cellSize;
-    bool m_classify;
-    bool m_extract;
+    double getAdjustedValue(const PointBuffer& buf, BpfDimension& bpfDim,
+        PointId idx);
+    void loadBpfDimensions(PointContextRef ctx);
+    void writePointMajor(const PointBuffer& buf);
+    void writeDimMajor(const PointBuffer& buf);
+    void writeByteMajor(const PointBuffer& buf);
+    void writeCompressedBlock(char *buf, size_t size);
 };
 
 } // namespace pdal
-

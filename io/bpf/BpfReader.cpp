@@ -123,7 +123,7 @@ void BpfReader::initialize()
     // Fast forward file to end of header as reported by base header.
     std::streampos pos = m_stream.position();
     if (pos > m_header.m_len)
-        throw "BPF Header length exceeded that reported by file.";
+        throw pdal_error("BPF Header length exceeded that reported by file.");
     else if (pos < m_header.m_len)
         m_stream.seek(m_header.m_len);
 }
@@ -277,6 +277,16 @@ point_count_t BpfReader::readPointMajor(PointBuffer& data, point_count_t count)
             m_stream >> f;
             data.setField(m_dims[d].m_id, nextId, f + m_dims[d].m_offset);
         }
+
+        // Transformation only applies to X, Y and Z
+        double x = data.getFieldAs<double>(Dimension::Id::X, nextId);
+        double y = data.getFieldAs<double>(Dimension::Id::Y, nextId);
+        double z = data.getFieldAs<double>(Dimension::Id::Z, nextId);
+        m_header.m_xform.apply(x, y, z);
+        data.setField(Dimension::Id::X, nextId, x);
+        data.setField(Dimension::Id::Y, nextId, y);
+        data.setField(Dimension::Id::Z, nextId, z);
+
         idx++;
         numRead++;
         nextId++;
@@ -305,6 +315,19 @@ point_count_t BpfReader::readDimMajor(PointBuffer& data, point_count_t count)
         }
     }
     m_index = idx;
+
+    // Transformation only applies to X, Y and Z
+    for (PointId idx = startId; idx < data.size(); idx++)
+    {
+        double x = data.getFieldAs<double>(Dimension::Id::X, idx);
+        double y = data.getFieldAs<double>(Dimension::Id::Y, idx);
+        double z = data.getFieldAs<double>(Dimension::Id::Z, idx);
+        m_header.m_xform.apply(x, y, z);
+        data.setField(Dimension::Id::X, idx, x);
+        data.setField(Dimension::Id::Y, idx, y);
+        data.setField(Dimension::Id::Z, idx, z);
+    }
+
     return numRead;
 }
 
@@ -351,6 +374,19 @@ point_count_t BpfReader::readByteMajor(PointBuffer& data, point_count_t count)
         }
     }
     m_index = idx;
+
+    // Transformation only applies to X, Y and Z
+    for (PointId idx = startId; idx < data.size(); idx++)
+    {
+        double x = data.getFieldAs<double>(Dimension::Id::X, idx);
+        double y = data.getFieldAs<double>(Dimension::Id::Y, idx);
+        double z = data.getFieldAs<double>(Dimension::Id::Z, idx);
+        m_header.m_xform.apply(x, y, z);
+        data.setField(Dimension::Id::X, idx, x);
+        data.setField(Dimension::Id::Y, idx, y);
+        data.setField(Dimension::Id::Z, idx, z);
+    }
+
     return numRead;
 }
 

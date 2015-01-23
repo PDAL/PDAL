@@ -195,3 +195,48 @@ TEST(BPFTest, inspect)
     std::sort(qi.m_dimNames.begin(), qi.m_dimNames.end());
     EXPECT_TRUE(CheckEqualCollections(qi.m_dimNames.begin(), qi.m_dimNames.end(), std::begin(dims)));
 }
+
+TEST(BPFTest, mueller)
+{
+    BpfMuellerMatrix xform;
+
+    double x = 12.345;
+    double y = 45.345;
+    double z = 999.341;
+
+    double xp = x;
+    double yp = y;
+    double zp = z;
+    xform.apply(xp, yp, zp);
+    EXPECT_DOUBLE_EQ(x, xp);
+    EXPECT_DOUBLE_EQ(y, yp);
+    EXPECT_DOUBLE_EQ(z, zp);
+
+    // Test translation.
+    xp = 1.0;
+    yp = 1.0;
+    zp = 1.0;
+
+    BpfMuellerMatrix translate;
+
+    translate.m_vals[3] = 2.0;
+    translate.m_vals[7] = 2.0;
+    translate.m_vals[11] = 1.0;
+    translate.apply(xp, yp, zp);
+    EXPECT_DOUBLE_EQ(xp, 3.0);
+    EXPECT_DOUBLE_EQ(yp, 3.0);
+    EXPECT_DOUBLE_EQ(zp, 2.0);
+
+    BpfMuellerMatrix scale;
+    xp = 1.0;
+    yp = 1.0;
+    zp = 1.0;
+    scale.m_vals[0] = 2.0;
+    scale.m_vals[5] = 7.0;
+    scale.m_vals[10] = -3.0;
+    scale.apply(xp, yp, zp);
+    EXPECT_DOUBLE_EQ(xp, 2.0);
+    EXPECT_DOUBLE_EQ(yp, 7.0);
+    EXPECT_DOUBLE_EQ(zp, -3.0);
+}
+

@@ -53,6 +53,18 @@ int main(int argc, char *argv[])
         d.dump();
 }
 
+namespace
+{
+
+void usage(const std::string& err = "")
+{
+    if (!err.empty())
+        std::cerr << "Error: " << err << "\n";
+    std::cerr << "Usage: lasdump [-o <output filename>] <las/las file>\n";
+}
+
+}
+
 
 namespace pdal
 {
@@ -168,13 +180,6 @@ void Dumper::readCompressedPoints(ILeStream& in)
 
 int Dumper::processArgs(deque<string> args)
 {
-
-    auto usage = [](const std::string& err = "")
-    {
-        if (!err.empty())
-            std::cerr << "Error: " << err << "\n";
-        std::cerr << "Usage: lasdump [-o <output filename>] <las/las file>\n";
-    };
 
     if (args.size() == 3)
     {

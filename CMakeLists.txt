@@ -22,16 +22,6 @@ include(FeatureSummary)
 # Allow advanced users to generate Makefiles printing detailed commands
 mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
 
-# per http://www.cmake.org/Wiki/CMake_RPATH_handling
-SET(CMAKE_SKIP_BUILD_RPATH FALSE)
-SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
-IF("${isSystemDir}" STREQUAL "-1")
-    SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-ENDIF("${isSystemDir}" STREQUAL "-1")
-
 #------------------------------------------------------------------------------
 # PDAL general settings
 #------------------------------------------------------------------------------
@@ -54,8 +44,22 @@ set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 
 set(PDAL_OUTPUT_LIB_DIR "${PDAL_BINARY_DIR}/${PDAL_LIB_INSTALL_DIR}")
 set(PDAL_OUTPUT_BIN_DIR "${PDAL_BINARY_DIR}/${PDAL_BIN_INSTALL_DIR}")
+set(PDAL_PLUGIN_INSTALL_PATH "${CMAKE_INSTALL_PREFIX}/${PDAL_LIB_INSTALL_DIR}")
 file(MAKE_DIRECTORY "${PDAL_OUTPUT_LIB_DIR}")
 file(MAKE_DIRECTORY "${PDAL_OUTPUT_BIN_DIR}")
+
+# per http://www.cmake.org/Wiki/CMake_RPATH_handling
+SET(CMAKE_SKIP_BUILD_RPATH FALSE )
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+IF (APPLE)
+    SET(MACOSX_RPATH ON)
+    SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+endif()
+LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
+IF("${isSystemDir}" STREQUAL "-1")
+    SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+ENDIF("${isSystemDir}" STREQUAL "-1")
 
 # wipe lib/ drectory on clean. It will have plugins that could be out of date
 # in the next build
@@ -76,6 +80,8 @@ else(WIN32)
   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PDAL_OUTPUT_LIB_DIR}")
 endif(WIN32)
 
+set(PDAL_HEADERS_DIR "${PROJECT_SOURCE_DIR}/include/pdal")
+set(PDAL_UTIL_DIR "${PROJECT_SOURCE_DIR}/util")
 
 #------------------------------------------------------------------------------
 # misc user options
@@ -133,6 +139,10 @@ option(BUILD_PLUGIN_RIVLIB "Choose if RiVLib support should be built" FALSE)
 add_feature_info("RiVLib plugin" BUILD_PLUGIN_RIVLIB
     "read data in the RXP format")
 
+option(BUILD_PLUGIN_PYTHON "Choose if Python support should be built" FALSE)
+add_feature_info("Python plugin" BUILD_PLUGIN_PYTHON
+    "add features that depend on python")
+
 # Choose to use pkg-config or not
 option(WITH_PKGCONFIG "Choose whether a pkgconfig file (PDAL.pc) should be installed" TRUE)
 
@@ -148,7 +158,6 @@ cmake_dependent_option(BUILD_SQLITE_TESTS "Choose if SQLite tests should be buil
 cmake_dependent_option(BUILD_OCI_TESTS "Choose if OCI tests should be built" ON "BUILD_PLUGIN_OCI; WITH_TESTS" OFF)
 cmake_dependent_option(BUILD_RIVLIB_TESTS "Choose if RiVLib tests should be built" ON "BUILD_PLUGIN_RIVLIB; WITH_TESTS" OFF)
 cmake_dependent_option(BUILD_PIPELINE_TESTS "Choose if pipeline tests should be built" OFF "WITH_APPS; WITH_TESTS" OFF)
-cmake_dependent_option(BUILD_PLUGIN_PYTHON "Choose if Python support should be built" ON "WITH_PYTHON" OFF)
 
 if(BUILD_PLUGIN_PGPOINTCLOUD OR BUILD_PLUGIN_OCI OR BUILD_PLUGIN_SQLITE)
     include(${PDAL_CMAKE_DIR}/libxml2.cmake)
@@ -309,5 +318,9 @@ list(APPEND CPACK_SOURCE_IGNORE_FILES "/cmake/examples/")
 include(CPack)
 
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
+
+export(TARGETS pdalcpp pdal_util FILE "${PDAL_BINARY_DIR}/PDALTargets.cmake")
+install(EXPORT PDALTargets DESTINATION lib/pdal/cmake)
+include(${PDAL_CMAKE_DIR}/config.cmake)
 
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES)

@@ -121,6 +121,24 @@ TEST(SpatialReferenceTest, test_userstring_roundtrip)
 }
 
 
+// Test fetching UTM zone
+TEST(SpatialReferenceTest, test_get_utmzone)
+{
+    SpatialReference ref;
+
+    // from test/data/autzen-srs.wkt
+    std::string code = "+proj=lcc +lat_1=43 +lat_2=45.5 +lat_0=41.75 +lon_0=-120.5 +x_0=399999.9999999999 +y_0=0 +ellps=GRS80 +units=ft +no_defs";
+    ref.setFromUserInput(code);
+
+    BOX3D box(635589.01, 848886.45, 638994.75, 853535.43);
+
+    int zone = ref.computeUTMZone(box);
+
+    EXPECT_EQ(zone , 10);
+}
+
+
+
 #if defined(PDAL_HAVE_GEOS) && defined(PDAL_HAVE_LIBGEOTIFF)
 // Test fetching SRS from an existing file
 TEST(SpatialReferenceTest, test_read_srs)

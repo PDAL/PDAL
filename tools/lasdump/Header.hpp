@@ -38,7 +38,7 @@
 
 #include <boost/uuid/uuid_generators.hpp>
 
-#include <pdal/Bounds.hpp>
+#include <pdal/util/Bounds.hpp>
 #include <pdal/IStream.hpp>
 
 namespace pdal
@@ -166,7 +166,7 @@ public:
 
     /// Set number of bytes from the beginning to the first point record.
     /// \param  offset - Offset to start of point data.
-    void setPointOffset(uint32_t offset) 
+    void setPointOffset(uint32_t offset)
           { m_pointOffset = offset; }
 
     /// Set the point format.

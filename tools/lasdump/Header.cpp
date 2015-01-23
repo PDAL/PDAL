@@ -44,8 +44,10 @@ namespace lasdump
 {
 
 const std::string Header::FILE_SIGNATURE("LASF");
+#ifndef WIN32
 const size_t Header::LEGACY_RETURN_COUNT;
 const size_t Header::RETURN_COUNT;
+#endif
 
 Header::Header() : m_sourceId(0), m_globalEncoding(0), m_versionMinor(0),
     m_createDOY(0), m_createYear(0), m_vlrOffset(0), m_pointOffset(0),

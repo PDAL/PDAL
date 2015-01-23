@@ -35,7 +35,7 @@
 #include "TranslateKernel.hpp"
 #include "KernelSupport.hpp"
 
-#include <buffer/BufferReader.hpp>
+#include <pdal/BufferReader.hpp>
 #include <pdal/StageFactory.hpp>
 #include <reprojection/ReprojectionFilter.hpp>
 

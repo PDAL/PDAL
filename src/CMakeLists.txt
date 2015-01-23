@@ -15,8 +15,7 @@
 #   PDAL_<dirname>_CPP - all the .cpp files for the given subdir/namespace
 #   ...
 
-set(PDAL_HEADERS_DIR "${PROJECT_SOURCE_DIR}/include/pdal")
-set(PDAL_UTIL_DIR "${PROJECT_SOURCE_DIR}/util")
+
 set(PDAL_HPP "")
 set(PDAL_CPP "")
 
@@ -39,6 +38,7 @@ endif()
 set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/pdal_error.hpp"
   "${PDAL_HEADERS_DIR}/pdal_types.hpp"
+  "${PDAL_HEADERS_DIR}/BufferReader.hpp"
   "${PDAL_HEADERS_DIR}/Charbuf.hpp"
   "${PDAL_HEADERS_DIR}/Compression.hpp"
   "${PDAL_HEADERS_DIR}/Dimension.hpp"
@@ -178,9 +178,6 @@ target_link_libraries(${PDAL_LIB_NAME}
 )
 
 target_link_libraries(${PDAL_LIB_NAME} ${Boost_LIBRARIES})
-
-set_target_properties(${PDAL_LIB_NAME}
-  PROPERTIES SOVERSION "${PDAL_LIB_SOVERSION}" )
 
 ###############################################################################
 # Targets installation

@@ -19,7 +19,7 @@ if (BUILD_RIVLIB_TESTS)
     )
 
     include_directories("${CMAKE_CURRENT_BINARY_DIR}/test")
-    include_directories(${PROJECT_SOURCE_DIR}/plugin/rxp/io)
+    include_directories(${PROJECT_SOURCE_DIR}/plugins/rxp/io)
 
     PDAL_ADD_TEST(${RXP_TEST_NAME}
         FILES test/RxpReaderTest.cpp

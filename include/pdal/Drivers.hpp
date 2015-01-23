@@ -36,13 +36,14 @@
 
 #include <pdal/pdal_config.hpp>
 
-#include <buffer/BufferReader.hpp>
+#include <pdal/BufferReader.hpp>
 #include <faux/FauxReader.hpp>
 
 #include <las/LasReader.hpp>
 #include <las/LasWriter.hpp>
 
 #include <bpf/BpfReader.hpp>
+#include <bpf/BpfWriter.hpp>
 
 #include <sbet/SbetReader.hpp>
 #include <sbet/SbetWriter.hpp>

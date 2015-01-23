@@ -36,7 +36,7 @@
 #include <limits>
 #include <vector>
 
-#include "Bounds.hpp"
+#include <pdal/util/Bounds.hpp>
 
 namespace
 {

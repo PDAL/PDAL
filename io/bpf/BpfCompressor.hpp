@@ -1,6 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
-* Copyright (c) 2014-2015, Brad Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2015, Hobu Inc., hobu@hobu.co
 *
 * All rights reserved.
 *
@@ -35,45 +34,38 @@
 
 #pragma once
 
-#include <pdal/FileUtils.hpp>
-#include <pdal/pdal_export.hpp>
+#include <ostream>
+#include <zlib.h>
 
-#include "Kernel.hpp"
-
-#include <memory>
-#include <string>
+#include <pdal/Charbuf.hpp>
+#include <pdal/OStream.hpp>
 
 namespace pdal
 {
 
-class Options;
-class Stage;
-
-class PDAL_DLL GroundKernel : public Kernel
+class BpfCompressor
 {
 public:
-    SET_KERNEL_NAME("ground", "Ground Kernel")
-    SET_KERNEL_LINK("http://pdal.io/kernels/kernels.ground.html")
-
-    GroundKernel();
-    int execute();
-
+    BpfCompressor(OLeStream& out, size_t maxSize,
+            int compressionLevel = Z_DEFAULT_COMPRESSION) :
+        m_out(out), m_inbuf(maxSize), m_blockStart(out), m_rawSize(0),
+        m_compressedSize(0)
+    {}
+    void startBlock();
+    void finish();
+    void compress();
+   
 private:
-    void addSwitches();
-    void validateSwitches();
+    static const int CHUNKSIZE = 1000000;
 
-    std::unique_ptr<Stage> makeReader(Options readerOptions);
-
-    std::string m_inputFile;
-    std::string m_outputFile;
-    double m_maxWindowSize;
-    double m_slope;
-    double m_maxDistance;
-    double m_initialDistance;
-    double m_cellSize;
-    bool m_classify;
-    bool m_extract;
+    OLeStream& m_out;
+    Charbuf m_charbuf;
+    std::vector<char> m_inbuf;
+    z_stream m_strm;
+    unsigned char m_tmpbuf[CHUNKSIZE];
+    OStreamMarker m_blockStart;
+    size_t m_rawSize;
+    size_t m_compressedSize;
 };
 
 } // namespace pdal
-

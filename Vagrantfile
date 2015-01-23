@@ -140,6 +140,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     "libjsoncpp-dev",
     "vtk6",
     "libvtk6-dev",
+    "gcc-multilib",
+    "g++-multilib",
     "libglew-dev"
 
   ];

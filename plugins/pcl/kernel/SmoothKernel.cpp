@@ -37,7 +37,7 @@
 #include "../filters/PCLBlock.hpp"
 #include "KernelFactory.hpp"
 
-#include "../io/buffer/BufferReader.hpp"
+#include <pdal/BufferReader.hpp>
 
 CREATE_KERNEL_PLUGIN(smooth, pdal::SmoothKernel)
 

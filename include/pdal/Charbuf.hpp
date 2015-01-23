@@ -56,9 +56,10 @@ public:
     void initialize(char *buf, size_t count, pos_type bufOffset = 0);
 
 protected:
-    std::ios::pos_type seekpos(std::ios::pos_type pos, std::ios_base::openmode which =
-        std::ios_base::in | std::ios_base::out);
-    std::ios::pos_type seekoff(std::ios::off_type off, std::ios_base::seekdir dir,
+    std::ios::pos_type seekpos(std::ios::pos_type pos,
+        std::ios_base::openmode which = std::ios_base::in | std::ios_base::out);
+    std::ios::pos_type seekoff(std::ios::off_type off,
+        std::ios_base::seekdir dir,
         std::ios_base::openmode which = std::ios_base::in | std::ios_base::out);
 
 private:

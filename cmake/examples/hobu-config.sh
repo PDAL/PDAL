@@ -33,6 +33,7 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DBUILD_PLUGIN_HEXBIN=ON \
         -DBUILD_PLUGIN_NITF=ON \
         -DBUILD_PLUGIN_P2G=ON \
+        -DBUILD_PLUGIN_PYTHON=ON \
         -DBUILD_PLUGIN_MRSID=OFF \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
         -DBUILD_PLUGIN_PCL=ON \
@@ -44,7 +45,6 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DHEXER_LIBRARY=${HEXER_HOME}/lib/libhexer.${SO_EXT} \
         -DGEOTIFF_INCLUDE_DIR=${GEOTIFF_HOME}/include/ \
         -DGEOTIFF_LIBRARY=${GEOTIFF_HOME}/lib/libgeotiff.${SO_EXT} \
-        -DICONV_INCLUDE_DIR=/usr/include \
         -DP2G_INCLUDE_DIR=${P2G_HOME}/include \
         -DP2G_LIBRARY=${P2G_HOME}/lib/libpts2grd.${SO_EXT} \
         -DLASZIP_INCLUDE_DIR=${LASZIP_HOME}/include \

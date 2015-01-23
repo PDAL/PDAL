@@ -40,7 +40,7 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include <pdal/Bounds.hpp>
+#include <pdal/util/Bounds.hpp>
 #include <pdal/Utils.hpp>
 #include <pdal/SpatialReference.hpp>
 

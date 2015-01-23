@@ -248,7 +248,112 @@ bool SpatialReference::isGeographic() const
     return output;
 }
 
+int calculateZone(double longitude, double latitude )
+{
 
+    // stolen from https://trac.osgeo.org/gdal/attachment/ticket/3623/getutmzone.cpp
+    double zone(0.0);
+    zone = ( longitude + 186.0 ) / 6.0;
+
+    if( abs(zone - (int) zone - 0.5 ) > 0.00001
+        || longitude < -177.00001
+        || longitude > 177.000001 )
+        return 0.0;
+
+    // return negative zone numbers for UTM South
+    if (latitude < 0) zone = zone * -1;
+
+    return zone;
+}
+
+int SpatialReference::computeUTMZone(const BOX3D& box) const
+{
+
+    // Nothing we can do if we're an empty SRS
+    if (empty()) return 0;
+
+    OGRSpatialReferenceH current =
+        OSRNewSpatialReference(getWKT(eHorizontalOnly, false).c_str());
+    if (! current)
+    {
+        throw std::invalid_argument("could not fetch current SRS as GDAL object!");
+    }
+
+    OGRSpatialReferenceH wgs84 = OSRNewSpatialReference(0);
+
+    int result = OSRSetFromUserInput(wgs84, "EPSG:4326");
+    if (result != OGRERR_NONE)
+    {
+
+        OSRDestroySpatialReference(current);
+        OSRDestroySpatialReference(wgs84);
+        std::ostringstream msg;
+        msg << "Could not import GDAL input spatial reference for WGS84";
+        throw std::runtime_error(msg.str());
+    }
+
+    void* transform = OCTNewCoordinateTransformation(current, wgs84);
+
+    if (! transform)
+    {
+        OSRDestroySpatialReference(current);
+        OSRDestroySpatialReference(wgs84);
+        throw std::invalid_argument("could not comput transform from coordinate system to WGS84");
+    }
+
+    double minx(0.0), miny(0.0), minz(0.0);
+    double maxx(0.0), maxy(0.0), maxz(0.0);
+
+    // OCTTransform modifies values in-place
+    minx = box.minx; miny = box.miny; minz = box.minz;
+    maxx = box.maxx; maxy = box.maxy; maxz = box.maxz;
+
+    int ret = OCTTransform(transform, 1, &minx, &miny, &minz);
+    if (ret == 0)
+    {
+        OCTDestroyCoordinateTransformation(transform);
+        OSRDestroySpatialReference(current);
+        OSRDestroySpatialReference(wgs84);
+        std::ostringstream msg;
+        msg << "Could not project minimum point for computeUTMZone::" << CPLGetLastErrorMsg() << ret;
+        throw pdal_error(msg.str());
+    }
+
+    ret = OCTTransform(transform, 1, &maxx, &maxy, &maxz);
+    if (ret == 0)
+    {
+        OCTDestroyCoordinateTransformation(transform);
+        OSRDestroySpatialReference(current);
+        OSRDestroySpatialReference(wgs84);
+        std::ostringstream msg;
+        msg << "Could not project maximum point for computeUTMZone::" << CPLGetLastErrorMsg() << ret;
+        throw pdal_error(msg.str());
+    }
+
+    int min_zone(0);
+    int max_zone(0);
+    min_zone = calculateZone(minx, miny);
+    max_zone = calculateZone(maxx, maxy);
+
+    if (min_zone != max_zone)
+    {
+        OCTDestroyCoordinateTransformation(transform);
+        OSRDestroySpatialReference(current);
+        OSRDestroySpatialReference(wgs84);
+        std::ostringstream msg;
+        msg << "Minimum zone is " << min_zone <<"' and maximum zone is '" << max_zone
+            << "'. They do not match because they cross a zone boundary";
+        throw pdal_error(msg.str());
+    }
+
+
+    OCTDestroyCoordinateTransformation(transform);
+    OSRDestroySpatialReference(current);
+    OSRDestroySpatialReference(wgs84);
+
+    return min_zone;
+
+}
 void SpatialReference::dump() const
 {
     std::cout << *this;

@@ -29,6 +29,7 @@ set_package_properties(PCL PROPERTIES DESCRIPTION "Point Cloud Library"
 
 include_directories(${PCL_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_LIST_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/filters)
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 if (NOT WIN32)
@@ -123,6 +124,13 @@ PDAL_ADD_PLUGIN(pclblock_libname filter pclblock
     LINK_WITH ${PCL_LIBRARIES})
 
 #
+# Ground Filter
+#
+PDAL_ADD_PLUGIN(ground_filter_libname filter ground
+    FILES filters/GroundFilter.hpp filters/GroundFilter.cpp
+    LINK_WITH ${PCL_LIBRARIES})
+
+#
 # PCL Kernel
 #
 set(srcs kernel/PCLKernel.cpp)
@@ -138,9 +146,9 @@ PDAL_ADD_PLUGIN(pcl_libname kernel pcl
 set(srcs kernel/GroundKernel.cpp)
 set(incs kernel/GroundKernel.hpp)
 
-PDAL_ADD_PLUGIN(ground_libname kernel ground
+PDAL_ADD_PLUGIN(ground_kernel_libname kernel ground
     FILES "${srcs}" "${incs}"
-    LINK_WITH ${PCL_LIBRARIES} ${pclblock_libname})
+    LINK_WITH ${ground_filter_libname})
 
 #
 # Smooth Kernel
@@ -156,7 +164,7 @@ if (WITH_TESTS)
     PDAL_ADD_TEST(pcltest
     FILES test/PCLBlockFilterTest.cpp
     LINK_WITH ${pclvisualizer_libname} ${pcd_reader_libname}
-        ${pcd_writer_libname} ${pclblock_libname}
-        ${pcl_libname} ${ground_libname} ${smooth_libname}
+        ${pcd_writer_libname} ${pclblock_libname} ${ground_filter_libname}
+        ${pcl_libname} ${ground_kernel_libname} ${smooth_libname}
     )
 endif()
