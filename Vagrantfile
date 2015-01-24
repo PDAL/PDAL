@@ -111,7 +111,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   packageList = [
     "git",
     "build-essential",
-    "pkg-config",
     "cmake",
     "libgeos-dev",
     "libgdal-dev",
