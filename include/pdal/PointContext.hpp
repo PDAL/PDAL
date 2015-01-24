@@ -129,8 +129,8 @@ public:
     }
 
     // The type and size are REQUESTS, not absolutes.  If someone else
-    // has already registered with the same name, you get the existing
-    // dimension size/type.
+    // has already registered with the same name, you can only get a
+    // size/type that's larger than the pre-existing one.
     Dimension::Id::Enum assignDim(const std::string& name,
         Dimension::Type::Enum type)
     {
