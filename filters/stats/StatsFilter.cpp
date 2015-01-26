@@ -53,6 +53,7 @@ void Summary::extractMetadata(MetadataNode &m) const
 
 } // namespace stats
 
+using namespace stats;
 
 void StatsFilter::filter(PointBuffer& buffer)
 {
@@ -61,8 +62,8 @@ void StatsFilter::filter(PointBuffer& buffer)
         for (auto p = m_stats.begin(); p != m_stats.end(); ++p)
         {
             Dimension::Id::Enum d = p->first;
-            SummaryPtr c = p->second;
-            c->insert(buffer.getFieldAs<double>(d, idx));
+            Summary& c = p->second;
+            c.insert(buffer.getFieldAs<double>(d, idx));
         }
     }
 }
@@ -106,7 +107,7 @@ void StatsFilter::ready(PointContext ctx)
 
     auto ni = dimNames.begin();
     for (auto di = dims.begin(); di != dims.end(); ++di, ++ni)
-        m_stats[*di] = SummaryPtr(new stats::Summary(*ni));
+        m_stats.emplace(std::make_pair(*di, Summary(*ni)));
 }
 
 
@@ -117,22 +118,22 @@ void StatsFilter::extractMetadata(PointContext ctx)
     for (auto di = m_stats.begin(); di != m_stats.end(); ++di)
     {
         Dimension::Id::Enum d = di->first;
-        const SummaryPtr s = di->second;
+        const Summary& s = di->second;
 
         MetadataNode t = m_metadata.addList("statistic");
         t.add("position", position++);
-        s->extractMetadata(t);
+        s.extractMetadata(t);
     }
 }
 
 
-stats::Summary const& StatsFilter::getStats(Dimension::Id::Enum dim) const
+const Summary& StatsFilter::getStats(Dimension::Id::Enum dim) const
 {
     for (auto di = m_stats.begin(); di != m_stats.end(); ++di)
     {
         Dimension::Id::Enum d = di->first;
         if (d == dim)
-            return *(di->second);
+            return di->second;
     }
     throw pdal_error("Dimension not found");
 }
