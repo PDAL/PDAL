@@ -107,7 +107,6 @@ void BpfWriter::ready(PointContextRef ctx)
     m_header.m_xform.m_vals[0] = m_xXform.m_scale;
     m_header.m_xform.m_vals[5] = m_yXform.m_scale;
     m_header.m_xform.m_vals[10] = m_zXform.m_scale;
-std::cerr << "X scale = " << m_xXform.m_scale << "!\n";
 }
 
 
@@ -121,7 +120,7 @@ void BpfWriter::loadBpfDimensions(PointContextRef ctx)
         dims[1] != Dimension::Id::Y || dims[2] != Dimension::Id::Z)
     {
         throw pdal_error("Missing one of dimensions X, Y or Z.  "
-            "Can't write BPF."); 
+            "Can't write BPF.");
     }
 
     for (auto id : dims)
@@ -200,7 +199,7 @@ void BpfWriter::writeDimMajor(const PointBuffer& data)
 
     for (auto & bpfDim : m_dims)
     {
-        
+
         if (m_header.m_compression)
             compressor.startBlock();
         for (PointId idx = 0; idx < data.size(); ++idx)

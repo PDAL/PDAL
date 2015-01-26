@@ -278,6 +278,7 @@ point_count_t BpfReader::readPointMajor(PointBuffer& data, point_count_t count)
             data.setField(m_dims[d].m_id, nextId, f + m_dims[d].m_offset);
         }
 
+        // Transformation only applies to X, Y and Z
         double x = data.getFieldAs<double>(Dimension::Id::X, nextId);
         double y = data.getFieldAs<double>(Dimension::Id::Y, nextId);
         double z = data.getFieldAs<double>(Dimension::Id::Z, nextId);
@@ -315,6 +316,7 @@ point_count_t BpfReader::readDimMajor(PointBuffer& data, point_count_t count)
     }
     m_index = idx;
 
+    // Transformation only applies to X, Y and Z
     for (PointId idx = startId; idx < data.size(); idx++)
     {
         double x = data.getFieldAs<double>(Dimension::Id::X, idx);
@@ -373,6 +375,7 @@ point_count_t BpfReader::readByteMajor(PointBuffer& data, point_count_t count)
     }
     m_index = idx;
 
+    // Transformation only applies to X, Y and Z
     for (PointId idx = startId; idx < data.size(); idx++)
     {
         double x = data.getFieldAs<double>(Dimension::Id::X, idx);

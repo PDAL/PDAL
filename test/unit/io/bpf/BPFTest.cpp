@@ -223,9 +223,9 @@ TEST(BPFTest, mueller)
     translate.m_vals[7] = 2.0;
     translate.m_vals[11] = 1.0;
     translate.apply(xp, yp, zp);
-    EXPECT_DOUBLE_EQ(xp, 3.0 / 6);
-    EXPECT_DOUBLE_EQ(yp, 3.0 / 6);
-    EXPECT_DOUBLE_EQ(zp, 2.0 / 6);
+    EXPECT_DOUBLE_EQ(xp, 3.0);
+    EXPECT_DOUBLE_EQ(yp, 3.0);
+    EXPECT_DOUBLE_EQ(zp, 2.0);
 
     BpfMuellerMatrix scale;
     xp = 1.0;

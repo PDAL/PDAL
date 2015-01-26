@@ -59,7 +59,7 @@ public:
 
     // creates a Python variable pointing to a (one dimensional) C array
     // adds the new variable to the arguments dictionary
-    void insertArgument(std::string const& name, 
+    void insertArgument(std::string const& name,
                         uint8_t* data,
                         Dimension::Type::Enum t,
                         point_count_t count);

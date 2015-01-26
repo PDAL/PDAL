@@ -65,7 +65,7 @@ void ProgrammableFilter::processOptions(const Options& options)
     auto addDims = options.getOptions("add_dimension");
     for (auto it = addDims.cbegin(); it != addDims.cend(); ++it)
     {
-        m_addDimensions.push_back(Dimension::id(it->getValue<std::string>()));
+        m_addDimensions.push_back(it->getValue<std::string>());
     }
 }
 
@@ -74,7 +74,8 @@ void ProgrammableFilter::addDimensions(PointContext ctx)
 {
     for (auto it = m_addDimensions.cbegin(); it != m_addDimensions.cend(); ++it)
     {
-        ctx.registerDim(*it);
+        Dimension::Id::Enum id = ctx.registerOrAssignDim(*it,
+                                    pdal::Dimension::Type::Double);
     }
 }
 
