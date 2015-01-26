@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include "Kernel.hpp"
+#include <pdal/Kernel.hpp>
 #include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineWriter.hpp>

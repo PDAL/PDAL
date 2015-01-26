@@ -33,7 +33,7 @@
 ****************************************************************************/
 
 #include "ViewKernel.hpp"
-#include "KernelFactory.hpp"
+#include <pdal/KernelFactory.hpp>
 
 CREATE_KERNEL_PLUGIN(view, pdal::ViewKernel)
 

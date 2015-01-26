@@ -32,8 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "KernelFactory.hpp"
-#include "Kernel.hpp"
+#include <pdal/KernelFactory.hpp>
+#include <pdal/Kernel.hpp>
 #include <pdal/Kernels.hpp>
 
 #include <pdal/Utils.hpp>

@@ -42,8 +42,8 @@
 #include <pdal/Stage.hpp>
 #include <pdal/StageFactory.hpp>
 
-#include "KernelFactory.hpp"
-#include "KernelSupport.hpp"
+#include <pdal/KernelFactory.hpp>
+#include <pdal/KernelSupport.hpp>
 
 #include <memory>
 #include <string>

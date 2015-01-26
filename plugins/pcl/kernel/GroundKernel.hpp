@@ -38,7 +38,7 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/pdal_export.hpp>
 
-#include "Kernel.hpp"
+#include <pdal/Kernel.hpp>
 
 #include <memory>
 #include <string>

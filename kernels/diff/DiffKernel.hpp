@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include "Kernel.hpp"
+#include <pdal/Kernel.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
