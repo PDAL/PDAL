@@ -42,6 +42,7 @@
 #include <queue>
 #include <set>
 #include <vector>
+#include <deque>
 
 namespace pdal
 {
@@ -249,7 +250,7 @@ public:
 
 protected:
     PointContextRef m_context;
-    std::vector<PointId> m_index;
+    std::deque<PointId> m_index;
     // The index might be larger than the size to support temporary point
     // references.
     size_t m_size;
@@ -567,8 +568,7 @@ inline void PointBuffer::setFieldInternal(Dimension::Id::Enum dim,
     if (id == size())
     {
         rawId = m_context.rawPtBuf()->addPoint();
-        m_index.resize(id + 1);
-        m_index[id] = rawId;
+        m_index.push_back(rawId);
         m_size++;
         clearTemps();
     }
@@ -591,8 +591,7 @@ inline void PointBuffer::appendPoint(const PointBuffer& buffer, PointId id)
     // Invalid 'id' is a programmer error.
     PointId rawId = buffer.m_index[id];
     point_count_t newid = size();
-    m_index.resize(newid + 1);
-    m_index[newid] = rawId;
+    m_index.push_back(rawId);
     m_size++;
     clearTemps();
 }
@@ -606,13 +605,13 @@ inline PointId PointBuffer::getTemp(PointId id)
     {
         newid = m_temps.front();
         m_temps.pop();
+        m_index[newid] = m_index[id];
     }
     else
     {
         newid = m_index.size();
-        m_index.resize(newid + 1);
+        m_index.push_back(m_index[id]);
     }
-    m_index[newid] = m_index[id];
     return newid;
 }
 
