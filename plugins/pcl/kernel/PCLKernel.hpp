@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include "Kernel.hpp"
+#include <pdal/Kernel.hpp>
 
 namespace pdal
 {

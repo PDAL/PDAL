@@ -33,7 +33,7 @@
 ****************************************************************************/
 
 #include "TranslateKernel.hpp"
-#include "KernelSupport.hpp"
+#include <pdal/KernelSupport.hpp>
 
 #include <pdal/BufferReader.hpp>
 #include <pdal/StageFactory.hpp>

@@ -39,7 +39,7 @@
 #include <pdal/PDALUtils.hpp>
 #include <cstdarg>
 
-#include "KernelSupport.hpp"
+#include <pdal/KernelSupport.hpp>
 
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(push)

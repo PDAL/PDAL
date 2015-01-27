@@ -34,11 +34,11 @@
 
 #pragma once
 
-#include <pdal/Stage.hpp>
-#include "Kernel.hpp"
-#include <pdal/util/FileUtils.hpp>
-#include <pdal/PointBuffer.hpp>
 #include <pdal/KDIndex.hpp>
+#include <pdal/Kernel.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/Stage.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>

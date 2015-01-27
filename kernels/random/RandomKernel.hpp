@@ -34,8 +34,8 @@
 
 #pragma once
 
+#include <pdal/Kernel.hpp>
 #include <pdal/util/FileUtils.hpp>
-#include "Kernel.hpp"
 
 
 #define SEPARATORS ",| "

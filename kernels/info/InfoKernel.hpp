@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include "Kernel.hpp"
+#include <pdal/Kernel.hpp>
 
 #include <pdal/Stage.hpp>
 #include <pdal/util/FileUtils.hpp>
@@ -49,7 +49,7 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/tokenizer.hpp>
 
-#include "KernelSupport.hpp"
+#include <pdal/KernelSupport.hpp>
 
 typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 

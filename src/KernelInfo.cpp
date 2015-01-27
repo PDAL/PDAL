@@ -36,7 +36,7 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include "KernelInfo.hpp"
+#include <pdal/KernelInfo.hpp>
 
 namespace pdal
 {
