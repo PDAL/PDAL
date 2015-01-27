@@ -263,7 +263,7 @@ Stage* TranslateKernel::makeTranslate(Options translateOptions, Stage* reader_st
     {
         StageFactory f;
         Stage* decimation_stage(f.createFilter("filters.pclblock"));
-            
+
         Options decimationOptions;
         std::ostringstream ss;
         ss << "{";
@@ -358,7 +358,7 @@ int TranslateKernel::execute()
     // (compression, driver type, etc).
     writer->setOptions(writerOptions+writer->getOptions());
 
-    writer->setUserCallback(callback);
+//     writer->setUserCallback(callback);
 
     for (const auto& pi : getExtraStageOptions())
     {
