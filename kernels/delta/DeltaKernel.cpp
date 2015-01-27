@@ -249,7 +249,7 @@ void DeltaKernel::outputRST(boost::property_tree::ptree const& tree) const
 
 
     std::cout << " Min        " << fmt % tree.get<float>("min.x") << "            " << fmt % tree.get<float>("min.y") << "            " << fmt % tree.get<float>("min.z")<<std::endl;
-    std::cout << " Min        " << fmt % tree.get<float>("max.x") << "            " << fmt % tree.get<float>("max.y") << "            " << fmt % tree.get<float>("max.z")<<std::endl;
+    std::cout << " Max        " << fmt % tree.get<float>("max.x") << "            " << fmt % tree.get<float>("max.y") << "            " << fmt % tree.get<float>("max.z")<<std::endl;
     std::cout << " Mean       " << fmt % tree.get<float>("mean.x") << "            " << fmt % tree.get<float>("mean.y") << "            " << fmt % tree.get<float>("mean.z")<<std::endl;
     std::cout << thead << std::endl;
 

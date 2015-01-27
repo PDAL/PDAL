@@ -46,7 +46,7 @@ class PDAL_DLL Summary
 {
 public:
     Summary(std::string name) : m_name(name)
-    { reset(); }
+        { reset(); }
 
     double minimum() const
         { return m_min; }
@@ -86,7 +86,6 @@ private:
 };
 
 } // namespace stats
-typedef std::shared_ptr<stats::Summary> SummaryPtr;
 
 // This is just a pass-thorugh filter, which collects some stats about
 // the points that are fed through it
@@ -112,7 +111,7 @@ private:
     void extractMetadata(PointContext ctx);
 
     std::string m_dimNames;
-    std::map<Dimension::Id::Enum, SummaryPtr> m_stats;
+    std::map<Dimension::Id::Enum, stats::Summary> m_stats;
 };
 
 } // namespace pdal

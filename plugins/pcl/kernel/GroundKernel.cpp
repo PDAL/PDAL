@@ -1,6 +1,6 @@
 /******************************************************************************
 * Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
-* Copyright (c) 2014, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2014-2015, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -34,10 +34,20 @@
 ****************************************************************************/
 
 #include "GroundKernel.hpp"
-#include "../filters/PCLBlock.hpp"
-#include "KernelFactory.hpp"
 
-#include <pdal/BufferReader.hpp>
+#include <pdal/Options.hpp>
+#include <pdal/pdal_macros.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/PointContext.hpp>
+#include <pdal/Stage.hpp>
+#include <pdal/StageFactory.hpp>
+
+#include "KernelFactory.hpp"
+#include "KernelSupport.hpp"
+
+#include <memory>
+#include <string>
+#include <vector>
 
 CREATE_KERNEL_PLUGIN(ground, pdal::GroundKernel)
 
@@ -53,12 +63,9 @@ GroundKernel::GroundKernel()
     , m_maxDistance(2.5)
     , m_initialDistance(0.15)
     , m_cellSize(1)
-    , m_base(2)
-    , m_exponential(true)
-{
-    return;
-}
-
+    , m_classify(true)
+    , m_extract(false)
+{}
 
 void GroundKernel::validateSwitches()
 {
@@ -71,10 +78,7 @@ void GroundKernel::validateSwitches()
     {
         throw app_usage_error("--output/-o required");
     }
-
-    return;
 }
-
 
 void GroundKernel::addSwitches()
 {
@@ -83,14 +87,13 @@ void GroundKernel::addSwitches()
     file_options->add_options()
     ("input,i", po::value<std::string>(&m_inputFile)->default_value(""), "input file name")
     ("output,o", po::value<std::string>(&m_outputFile)->default_value(""), "output file name")
-//        ("compress,z", po::value<bool>(&m_bCompress)->zero_tokens()->implicit_value(true), "Compress output data (if supported by output format)")
     ("maxWindowSize", po::value<double>(&m_maxWindowSize)->default_value(33), "max window size")
     ("slope", po::value<double>(&m_slope)->default_value(1), "slope")
     ("maxDistance", po::value<double>(&m_maxDistance)->default_value(2.5), "max distance")
     ("initialDistance", po::value<double>(&m_initialDistance)->default_value(0.15, "0.15"), "initial distance")
     ("cellSize", po::value<double>(&m_cellSize)->default_value(1), "cell size")
-    ("base", po::value<double>(&m_base)->default_value(2), "base")
-    ("exponential", po::value<bool>(&m_exponential)->default_value(true), "exponential?")
+    ("classify", po::bool_switch(&m_classify), "apply classification labels?")
+    ("extract", po::bool_switch(&m_extract), "extract ground returns?")
     ;
 
     addSwitchSet(file_options);
@@ -119,7 +122,6 @@ std::unique_ptr<Stage> GroundKernel::makeReader(Options readerOptions)
     return reader_stage;
 }
 
-
 int GroundKernel::execute()
 {
     PointContext ctx;
@@ -131,48 +133,21 @@ int GroundKernel::execute()
 
     std::unique_ptr<Stage> readerStage = makeReader(readerOptions);
 
-    // go ahead and prepare/execute on reader stage only to grab input
-    // PointBufferSet, this makes the input PointBuffer available to both the
-    // processing pipeline and the visualizer
-    readerStage->prepare(ctx);
-    PointBufferSet pbSetIn = readerStage->execute(ctx);
-
-    // the input PointBufferSet will be used to populate a BufferReader that is
-    // consumed by the processing pipeline
-    PointBufferPtr input_buffer = *pbSetIn.begin();
-    BufferReader bufferReader;
-    bufferReader.setOptions(readerOptions);
-    bufferReader.addBuffer(input_buffer);
-
     Options groundOptions;
-    std::ostringstream ss;
-    ss << "{";
-    ss << "  \"pipeline\": {";
-    ss << "    \"filters\": [{";
-    ss << "      \"name\": \"ProgressiveMorphologicalFilter\",";
-    ss << "      \"setMaxWindowSize\": " << m_maxWindowSize << ",";
-    ss << "      \"setSlope\": " << m_slope << ",";
-    ss << "      \"setMaxDistance\": " << m_maxDistance << ",";
-    ss << "      \"setInitialDistance\": " << m_initialDistance << ",";
-    ss << "      \"setCellSize\": " << m_cellSize << ",";
-    ss << "      \"setBase\": " << m_base << ",";
-    ss << "      \"setExponential\": " << m_exponential;
-    ss << "      }]";
-    ss << "    }";
-    ss << "}";
-    std::string json = ss.str();
-    groundOptions.add<std::string>("json", json);
-    groundOptions.add<bool>("debug", isDebug());
-    groundOptions.add<uint32_t>("verbose", getVerboseLevel());
+    groundOptions.add<double>("maxWindowSize", m_maxWindowSize);
+    groundOptions.add<double>("slope", m_slope);
+    groundOptions.add<double>("maxDistance", m_maxDistance);
+    groundOptions.add<double>("initialDistance", m_initialDistance);
+    groundOptions.add<double>("cellSize", m_cellSize);
+    groundOptions.add<bool>("classify", m_classify);
+    groundOptions.add<bool>("extract", m_extract);
 
-    std::unique_ptr<Stage> groundStage(new filters::PCLBlock());
-    groundStage->setInput(&bufferReader);
+    StageFactory f;
+    std::unique_ptr<Filter> groundStage(f.createFilter("filters.ground"));
     groundStage->setOptions(groundOptions);
+    groundStage->setInput(readerStage.get());
 
-    // the PCLBlock groundStage consumes the BufferReader rather than the
-    // readerStage
-    groundStage->setInput(&bufferReader);
-
+    // setup the Writer and write the results
     Options writerOptions;
     writerOptions.add<std::string>("filename", m_outputFile);
     setCommonOptions(writerOptions);
@@ -214,4 +189,5 @@ int GroundKernel::execute()
     return 0;
 }
 
-} // pdal
+} // namespace pdal
+

@@ -13,6 +13,7 @@
 #endif
 
 #include <functional>
+#include <ostream>
 #include <Python.h>
 
 namespace pdal
@@ -157,7 +158,7 @@ PyObject* Redirector::init()
 #if PY_MAJOR_VERSION >= 3
     PyObject* m = PyModule_Create(&redirectordef);
 #else
-    PyObject* m = Py_InitModule3("redirector", 0, 0);    
+    PyObject* m = Py_InitModule3("redirector", 0, 0);
 #endif
     if (m)
     {

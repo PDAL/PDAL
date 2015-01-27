@@ -87,18 +87,18 @@ void BufferedInvocation::end(PointBuffer& buffer)
     std::vector<std::string> names;
     getOutputNames(names);
 
-    // const Schema& schema = buffer.getSchema();
+    PointContext ctx = buffer.m_context;
+    Dimension::IdList const& dims = ctx.dims();
 
-    for (size_t i = 0; i < names.size(); i++)
+    for (auto di = dims.begin(); di != dims.end(); ++di)
     {
-        PointContext ctx = buffer.m_context;
-        Dimension::Id::Enum d = ctx.findDim(names[i]);
-        if (d == Dimension::Id::Unknown)
-            continue;
-
+        Dimension::Id::Enum d = *di;
         Dimension::Detail *dd = ctx.dimDetail(d);
-        std::string name = Dimension::name(d);
-        assert(name == names[i]);
+        std::string name = ctx.dimName(*di);
+        auto found = std::find(names.begin(), names.end(), name);
+        if (found == names.end()) continue; // didn't have this dim in the names
+
+        assert(name == *found);
         assert(hasOutputVariable(name));
 
         size_t size = dd->size();
