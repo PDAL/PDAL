@@ -34,7 +34,7 @@
 
 #include "gtest/gtest.h"
 
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/Utils.hpp>
 #include "Support.hpp"
 

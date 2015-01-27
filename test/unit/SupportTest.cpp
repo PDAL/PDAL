@@ -35,7 +35,7 @@
 #include "gtest/gtest.h"
 
 #include "Support.hpp"
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 using namespace pdal;
 using namespace std;

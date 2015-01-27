@@ -39,7 +39,7 @@
 
 #include <pdal/Dimension.hpp>
 #include <pdal/Utils.hpp>
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 namespace pdal
 {

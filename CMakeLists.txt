@@ -81,7 +81,6 @@ else(WIN32)
 endif(WIN32)
 
 set(PDAL_HEADERS_DIR "${PROJECT_SOURCE_DIR}/include/pdal")
-set(PDAL_UTIL_DIR "${PROJECT_SOURCE_DIR}/util")
 
 #------------------------------------------------------------------------------
 # misc user options
@@ -231,7 +230,7 @@ include_directories(vendor/nanoflann-1.1.8)
 # PDAL_TARGET_OBJECTS is used to collect the driver object libraries
 set(PDAL_TARGET_OBJECTS "")
 
-add_subdirectory(util)
+add_subdirectory(src/util)
 add_subdirectory(io)
 add_subdirectory(filters)
 add_subdirectory(kernels)

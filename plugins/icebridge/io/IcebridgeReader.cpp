@@ -33,7 +33,7 @@
 ****************************************************************************/
 
 #include "IcebridgeReader.hpp"
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 
 #include <map>

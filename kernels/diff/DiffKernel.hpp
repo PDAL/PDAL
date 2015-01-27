@@ -36,7 +36,7 @@
 
 #include "Kernel.hpp"
 #include <pdal/Stage.hpp>
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 
 #include <boost/property_tree/ptree.hpp>

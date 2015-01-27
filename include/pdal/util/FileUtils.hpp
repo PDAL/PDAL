@@ -32,10 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_FILEUTILS_HPP
-#define INCLUDED_FILEUTILS_HPP
-
-#include <pdal/pdal_internal.hpp>
+#pragma once
 
 #include <string>
 #include <cassert>
@@ -43,6 +40,18 @@
 #include <cmath>
 #include <ostream>
 #include <istream>
+
+#ifndef PDAL_DLL
+#if defined(WIN32)
+#   define PDAL_DLL   __declspec(dllexport)
+#else
+#  if defined(USE_GCC_VISIBILITY_FLAG)
+#    define PDAL_DLL     __attribute__ ((visibility("default")))
+#  else
+#    define PDAL_DLL
+#  endif
+#endif
+#endif
 
 namespace pdal
 {
@@ -105,5 +114,3 @@ private:
 };
 
 } // namespace pdal
-
-#endif

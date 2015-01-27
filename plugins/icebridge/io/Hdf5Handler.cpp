@@ -33,7 +33,7 @@
 ****************************************************************************/
 
 #include "Hdf5Handler.hpp"
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 #include <boost/numeric/conversion/cast.hpp>
 

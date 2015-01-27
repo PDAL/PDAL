@@ -1,4 +1,0 @@
-The "#include" of headers all reference <pdal/something> for installation, but
-for development it's nice to have the headers in the same place as the
-source files, so there is a "pdal" link in this directory that refers
-to itself.

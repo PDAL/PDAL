@@ -35,7 +35,7 @@
 #pragma once
 
 #include <pdal/Writer.hpp>
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/StageFactory.hpp>
 
 #include <vector>

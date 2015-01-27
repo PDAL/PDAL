@@ -34,7 +34,7 @@
 
 #include "TextWriter.hpp"
 
-#include <pdal/Algorithm.hpp>
+#include <pdal/util/Algorithm.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/pdal_internal.hpp>
 
@@ -125,7 +125,7 @@ void TextWriter::ready(PointContextRef ctx)
     {
         Dimension::IdList all = ctx.dims();
         for (auto di = all.begin(); di != all.end(); ++di)
-            if (!Algorithm::contains(m_dims, *di))
+            if (!contains(m_dims, *di))
                 m_dims.push_back(*di);
     }
 

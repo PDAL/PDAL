@@ -33,7 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/plang/Script.hpp>
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127) // conditional expression is constant

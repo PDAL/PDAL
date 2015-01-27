@@ -35,7 +35,7 @@
 #include "gtest/gtest.h"
 
 #include <pdal/SpatialReference.hpp>
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <LasWriter.hpp>
 #include <LasReader.hpp>
 

@@ -38,7 +38,7 @@
 #include <string.h>
 
 #include <pdal/Charbuf.hpp>
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/IStream.hpp>
 #include <pdal/QuickInfo.hpp>
 #include <pdal/PointBuffer.hpp>

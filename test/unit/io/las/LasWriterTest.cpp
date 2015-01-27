@@ -36,7 +36,7 @@
 
 #include <stdlib.h>
 
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <LasHeader.hpp>
 #include <LasReader.hpp>
 #include <LasWriter.hpp>

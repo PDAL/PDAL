@@ -35,7 +35,7 @@
 #include "TerrasolidReader.hpp"
 
 #include <pdal/PointBuffer.hpp>
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 #include <map>
 

@@ -32,7 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
+#include <pdal/pdal_error.hpp>
 
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/stream.hpp>
