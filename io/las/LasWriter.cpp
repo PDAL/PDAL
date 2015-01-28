@@ -37,7 +37,7 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <iostream>
 
-#include <pdal/Charbuf.hpp>
+#include <pdal/Inserter.hpp>
 #include <pdal/OStream.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Utils.hpp>
@@ -460,12 +460,7 @@ void LasWriter::write(const PointBuffer& pointBuffer)
     static const size_t maxReturnCount = m_lasHeader.maxReturnCount();
     for (PointId idx = 0; idx < pointBuffer.size(); idx++)
     {
-        Charbuf charstreambuf(buf.data(), buf.size());
-
-        std::ostream stream(&charstreambuf);
-
-        // Wrap the output stream with byte ordering
-        OLeStream ostream(&stream);
+        LeInserter ostream(buf.data(), buf.size());
 
         // we always write the base fields
         using namespace Dimension;

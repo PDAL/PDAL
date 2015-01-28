@@ -37,7 +37,7 @@
 #include <sstream>
 #include <string.h>
 
-#include <pdal/Charbuf.hpp>
+#include <pdal/Extractor.hpp>
 #include <pdal/FileUtils.hpp>
 #include <pdal/IStream.hpp>
 #include <pdal/QuickInfo.hpp>
@@ -479,14 +479,7 @@ void LasReader::loadPoint(PointBuffer& data, char *buf, size_t bufsize)
 
 void LasReader::loadPointV10(PointBuffer& data, char *buf, size_t bufsize)
 {
-    // Turn a raw buffer (array of bytes) into a stream buf.
-    Charbuf charstreambuf(buf, bufsize, 0);
-
-    // Make an input stream based on the stream buf.
-    std::istream stream(&charstreambuf);
-
-    // Wrap the input stream with byte ordering.
-    ILeStream istream(&stream);
+    LeExtractor istream(buf, bufsize);
 
     PointId nextId = data.size();
 
@@ -552,14 +545,7 @@ void LasReader::loadPointV10(PointBuffer& data, char *buf, size_t bufsize)
 
 void LasReader::loadPointV14(PointBuffer& data, char *buf, size_t bufsize)
 {
-    // Turn a raw buffer (array of bytes) into a stream buf.
-    Charbuf charstreambuf(buf, bufsize, 0);
-
-    // Make an input stream based on the stream buf.
-    std::istream stream(&charstreambuf);
-
-    // Wrap the input stream with byte ordering.
-    ILeStream istream(&stream);
+    LeExtractor istream(buf, bufsize);
 
     PointId nextId = data.size();
 
