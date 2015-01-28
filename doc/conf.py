@@ -56,13 +56,18 @@ def read_version(filename):
 
     token = 'PDAL_VERSION_STRING'
 
+    import string
+    punct = string.punctuation
+    punct = string.punctuation.replace('.', '')
     version = 'None'
     for line in data:
         if str(token) in line:
             import re
-            parts = re.split('[\sd\.d\.d]', line)
+            parts = re.split('[\sd\.d\.d*]', line)
+            parts = [a.translate(None, punct) for a in parts]
             ints = [ int (i) for i in (parts[1], parts[2], parts[3])]
             version = '%d.%d.%d' % (ints[0], ints[1], ints[2])
+            break
     return '%s'%(version)
 
 release = read_version('../CMakeLists.txt')

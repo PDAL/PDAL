@@ -40,7 +40,6 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 
-#include <boost/property_tree/xml_parser.hpp>
 
 #ifdef __clang__
 #pragma GCC diagnostic ignored "-Wtautological-constant-out-of-range-compare"
@@ -61,7 +60,7 @@ class PDAL_DLL InfoKernel : public Kernel
 public:
     SET_KERNEL_NAME ("info", "Info Kernel")
     SET_KERNEL_LINK ("http://pdal.io/kernels/kernels.info.html")
- 
+
     InfoKernel();
     int execute(); // overrride
 
