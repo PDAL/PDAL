@@ -46,7 +46,7 @@ public:
     Extractor(const char *buf, std::size_t size) : m_eback(buf),
         m_egptr(buf + size), m_gptr(buf)
     {}
-    
+
 public:
     operator bool ()
         { return good(); }
@@ -61,7 +61,7 @@ public:
 
     void get(std::string& s, size_t size)
     {
-        s = string(m_gptr, size);
+        s = std::string(m_gptr, size);
         m_gptr += size;
     }
 
@@ -108,13 +108,13 @@ public:
 
     LeExtractor& operator >> (uint8_t& v)
     {
-        v = *(uint8_t *)m_gptr++;
+        v = *(const uint8_t *)m_gptr++;
         return *this;
     }
 
     LeExtractor& operator >> (int8_t& v)
     {
-        v = *(int8_t *)m_gptr++;
+        v = *(const int8_t *)m_gptr++;
         return *this;
     }
 
