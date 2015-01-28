@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <memory>
 #include <pdal/PointBuffer.hpp>
 
 namespace nanoflann
@@ -51,49 +52,17 @@ namespace pdal
 class PDAL_DLL KDIndex
 {
 public:
-    KDIndex(const PointBuffer& buf) : m_buf(buf), m_index(0)
-        { m_3d = buf.hasDim(Dimension::Id::Z); }
-
+    KDIndex(const PointBuffer& buf);
     ~KDIndex();
 
-    size_t kdtree_get_point_count() const
-        { return m_buf.size(); }
+    std::size_t kdtree_get_point_count() const;
 
-    double kdtree_get_pt(const size_t idx, int dim) const
-    {
-        Dimension::Id::Enum id = Dimension::Id::Unknown;
-        switch (dim)
-        {
-        case 0:
-            id = Dimension::Id::X;
-            break;
-        case 1:
-            id = Dimension::Id::Y;
-            break;
-        case 2:
-            id = Dimension::Id::Z;
-            break;
-        }
-        return m_buf.getFieldAs<double>(id, idx);
-    }
+    double kdtree_get_pt(const std::size_t idx, int dim) const;
 
-    double kdtree_distance(const double *p1, const size_t idx_p2,
-        size_t size) const
-    {
-        double d0 = m_buf.getFieldAs<double>(Dimension::Id::X, idx_p2) -
-            m_buf.getFieldAs<double>(Dimension::Id::X, size - 1);
-        double d1 = m_buf.getFieldAs<double>(Dimension::Id::Y, idx_p2) -
-            m_buf.getFieldAs<double>(Dimension::Id::Y, size - 1);
-
-        double output(d0 * d0 + d1 * d1);
-        if (m_3d)
-        {
-            double d2 = m_buf.getFieldAs<double>(Dimension::Id::Z, idx_p2) -
-                m_buf.getFieldAs<double>(Dimension::Id::Z, size - 1);
-            output += d2 * d2;
-        }
-        return output;
-    }
+    double kdtree_distance(
+            const double *p1,
+            const std::size_t idx_p2,
+            std::size_t size) const;
 
     template <class BBOX> bool kdtree_get_bbox(BBOX &bb) const
     {
@@ -101,7 +70,7 @@ public:
         if (bounds.empty())
             return false;
 
-        size_t nDims = m_3d ? 3 : 2;
+        std::size_t nDims = m_3d ? 3 : 2;
         bb[0].low = bounds.minx;
         bb[0].high = bounds.maxx;
         bb[1].low = bounds.miny;
@@ -115,13 +84,13 @@ public:
         return true;
     }
 
-    std::vector<size_t> radius(
+    std::vector<std::size_t> radius(
             double const& x,
             double const& y,
             double const& z,
             double const& r) const;
 
-    std::vector<size_t> neighbors(
+    std::vector<std::size_t> neighbors(
             double const& x,
             double const& y,
             double const& z,
@@ -134,9 +103,13 @@ private:
     const PointBuffer& m_buf;
     bool m_3d;
 
-    typedef nanoflann::KDTreeSingleIndexAdaptor<
-        nanoflann::L2_Adaptor<double, KDIndex, double>, KDIndex, -1, size_t> my_kd_tree_t;
-    my_kd_tree_t* m_index;
+    typedef nanoflann::KDTreeSingleIndexAdaptor<nanoflann::L2_Adaptor<
+        double, KDIndex, double>, KDIndex, -1, std::size_t> my_kd_tree_t;
+
+    std::unique_ptr<my_kd_tree_t> m_index;
+
+    KDIndex(const KDIndex&);
+    KDIndex& operator=(KDIndex&);
 };
 
 } // namespace pdal

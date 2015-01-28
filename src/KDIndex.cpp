@@ -39,24 +39,78 @@
 namespace pdal
 {
 
+KDIndex::KDIndex(const PointBuffer& buf)
+    : m_buf(buf)
+    , m_3d(buf.hasDim(Dimension::Id::Z))
+    , m_index()
+{ }
+
 KDIndex::~KDIndex()
-{ delete m_index; }
+{ }
+
+std::size_t KDIndex::kdtree_get_point_count() const
+{
+    return m_buf.size();
+}
+
+double KDIndex::kdtree_get_pt(const std::size_t idx, int dim) const
+{
+    Dimension::Id::Enum id = Dimension::Id::Unknown;
+    switch (dim)
+    {
+    case 0:
+        id = Dimension::Id::X;
+        break;
+    case 1:
+        id = Dimension::Id::Y;
+        break;
+    case 2:
+        id = Dimension::Id::Z;
+        break;
+    }
+    return m_buf.getFieldAs<double>(id, idx);
+}
+
+double KDIndex::kdtree_distance(
+        const double *p1,
+        const std::size_t idx_p2,
+        std::size_t size) const
+{
+    double d0 = m_buf.getFieldAs<double>(Dimension::Id::X, idx_p2) -
+        m_buf.getFieldAs<double>(Dimension::Id::X, size - 1);
+    double d1 = m_buf.getFieldAs<double>(Dimension::Id::Y, idx_p2) -
+        m_buf.getFieldAs<double>(Dimension::Id::Y, size - 1);
+
+    double output(d0 * d0 + d1 * d1);
+    if (m_3d)
+    {
+        double d2 = m_buf.getFieldAs<double>(Dimension::Id::Z, idx_p2) -
+            m_buf.getFieldAs<double>(Dimension::Id::Z, size - 1);
+        output += d2 * d2;
+    }
+    return output;
+}
 
 void KDIndex::build(bool b3D)
 {
     m_3d = b3D;
-    size_t nDims = m_3d && m_buf.hasDim(Dimension::Id::Z) ? 3 : 2;
-    delete m_index;
-    m_index = new my_kd_tree_t(nDims, *this,
-        nanoflann::KDTreeSingleIndexAdaptorParams(10, nDims));
+    std::size_t nDims = m_3d && m_buf.hasDim(Dimension::Id::Z) ? 3 : 2;
+    m_index.reset(
+            new my_kd_tree_t(
+                nDims,
+                *this,
+                nanoflann::KDTreeSingleIndexAdaptorParams(10, nDims)));
     m_index->buildIndex();
 }
 
-std::vector<size_t> KDIndex::radius(double const& x, double const& y,
-    double const& z, double const& r) const
+std::vector<std::size_t> KDIndex::radius(
+        double const& x,
+        double const& y,
+        double const& z,
+        double const& r) const
 {
-    std::vector<size_t> output;
-    std::vector<std::pair<size_t, double>> ret_matches;
+    std::vector<std::size_t> output;
+    std::vector<std::pair<std::size_t, double>> ret_matches;
     nanoflann::SearchParams params;
     params.sorted = true;
 
@@ -64,15 +118,20 @@ std::vector<size_t> KDIndex::radius(double const& x, double const& y,
     pt.push_back(x);
     pt.push_back(y);
     pt.push_back(z);
-    const size_t count = m_index->radiusSearch(&pt[0], r, ret_matches, params);
+    const std::size_t count(
+            m_index->radiusSearch(&pt[0], r, ret_matches, params));
 
-    for (size_t i = 0; i < count; ++i)
+    for (std::size_t i = 0; i < count; ++i)
         output.push_back(ret_matches[i].first);
     return output;
 }
 
-std::vector<size_t> KDIndex::neighbors(double const& x, double const& y,
-    double const& z, double distance, uint32_t k) const
+std::vector<std::size_t> KDIndex::neighbors(
+        double const& x,
+        double const& y,
+        double const& z,
+        double distance,
+        uint32_t k) const
 {
     std::vector<size_t> output(k);
     std::vector<double> out_dist_sqr(k);
