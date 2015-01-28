@@ -485,10 +485,16 @@ void PointBuffer::convertAndSet(Dimension::Id::Enum dim, PointId idx, T_IN in)
 #pragma warning(push)
 #pragma warning(disable:4127)
 #endif
-    if (std::is_integral<T_OUT>::value == true)
-        out = boost::numeric_cast<T_OUT>(lround(in));
+    // This is an optimization.
+    if (std::is_same<T_IN, T_OUT>::value == true)
+        out = in;
     else
-        out = boost::numeric_cast<T_OUT>(in);
+    {    
+        if (std::is_integral<T_OUT>::value == true)
+            out = boost::numeric_cast<T_OUT>(lround(in));
+        else
+            out = boost::numeric_cast<T_OUT>(in);
+    }
 
 #ifdef PDAL_COMPILER_MSVC
 // warning C4127: conditional expression is constant
