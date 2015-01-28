@@ -467,7 +467,7 @@ void LasWriter::write(const PointBuffer& pointBuffer)
             char *pos = buf.data();
             for (point_count_t i = 0; i < filled; i++)
             {
-                memcpy(&(m_zipPoint->m_lz_point_data), pos, pointLen);
+                memcpy(m_zipPoint->m_lz_point_data.data(), pos, pointLen);
                 if (!m_zipper->write(m_zipPoint->m_lz_point))
                 {
                     std::ostringstream oss;
