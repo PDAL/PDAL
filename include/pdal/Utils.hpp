@@ -288,7 +288,7 @@ namespace Utils
         { return Utils::demangle(typeid(T).name()); }
 
     template<typename COLLECTION, typename VALUE>
-    bool contains(COLLECTION c, VALUE v)
+    bool contains(const COLLECTION& c, const VALUE& v)
         { return (std::find(c.begin(), c.end(), v) != c.end()); }
 
     struct RedirectCtx
