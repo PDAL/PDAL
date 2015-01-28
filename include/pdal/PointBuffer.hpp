@@ -452,11 +452,15 @@ inline T PointBuffer::getFieldAs(Dimension::Id::Enum dim,
 #endif
     try
     {
-
-    	if (std::is_integral<T>::value == true )
-            retval = boost::numeric_cast<T>(lround(val));
+        if (std::is_same<T, double>::value)
+            retval = val;
         else
-            retval = boost::numeric_cast<T>(val);
+        {
+            if (std::is_integral<T>::value == true )
+                retval = boost::numeric_cast<T>(lround(val));
+            else
+                retval = boost::numeric_cast<T>(val);
+        }
     }
     catch (boost::numeric::bad_numeric_cast& )
     {

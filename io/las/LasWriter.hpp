@@ -102,6 +102,8 @@ private:
     template<typename T>
     T headerVal(const std::string& name);
     void fillHeader(PointContextRef ctx);
+    point_count_t fillWriteBuf(const PointBuffer& pointBuffer, PointId startId,
+        std::vector<char>& buf);
     void setVlrsFromMetadata();
     MetadataNode findVlrMetadata(MetadataNode node, uint16_t recordId,
         const std::string& userId);
