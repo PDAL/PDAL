@@ -39,6 +39,9 @@
 namespace pdal
 {
 
+KDIndex::~KDIndex()
+{ delete m_index; }
+
 void KDIndex::build(bool b3D)
 {
     m_3d = b3D;

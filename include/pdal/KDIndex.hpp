@@ -34,9 +34,16 @@
 
 #pragma once
 
-#include "nanoflann.hpp"
-
 #include <pdal/PointBuffer.hpp>
+
+namespace nanoflann
+{
+    template<typename Distance, class DatasetAdaptor, int DIM, typename IndexType>
+    class KDTreeSingleIndexAdaptor;
+
+    template<class T, class DataSource, typename _DistanceType>
+    struct L2_Adaptor;
+}
 
 namespace pdal
 {
@@ -47,8 +54,7 @@ public:
     KDIndex(const PointBuffer& buf) : m_buf(buf), m_index(0)
         { m_3d = buf.hasDim(Dimension::Id::Z); }
 
-    ~KDIndex()
-        { delete m_index; }
+    ~KDIndex();
 
     size_t kdtree_get_point_count() const
         { return m_buf.size(); }
@@ -129,7 +135,7 @@ private:
     bool m_3d;
 
     typedef nanoflann::KDTreeSingleIndexAdaptor<
-        nanoflann::L2_Adaptor<double, KDIndex>, KDIndex> my_kd_tree_t;
+        nanoflann::L2_Adaptor<double, KDIndex, double>, KDIndex, -1, size_t> my_kd_tree_t;
     my_kd_tree_t* m_index;
 };
 
