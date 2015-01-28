@@ -105,7 +105,9 @@ private:
     void loadPoint(PointBuffer& data, char *buf, size_t bufsize);
     void loadPointV10(PointBuffer& data, char *buf, size_t bufsize);
     void loadPointV14(PointBuffer& data, char *buf, size_t bufsize);
-    point_count_t readFileBlock(vector<char>& buf, point_count_t maxPoints);
+    point_count_t readFileBlock(
+            std::vector<char>& buf,
+            point_count_t maxPoints);
 
     LasReader& operator=(const LasReader&); // not implemented
     LasReader(const LasReader&); // not implemented
