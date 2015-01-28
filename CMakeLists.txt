@@ -81,7 +81,6 @@ else(WIN32)
 endif(WIN32)
 
 set(PDAL_HEADERS_DIR "${PROJECT_SOURCE_DIR}/include/pdal")
-set(PDAL_UTIL_DIR "${PROJECT_SOURCE_DIR}/util")
 
 #------------------------------------------------------------------------------
 # misc user options
@@ -142,9 +141,6 @@ add_feature_info("RiVLib plugin" BUILD_PLUGIN_RIVLIB
 option(BUILD_PLUGIN_PYTHON "Choose if Python support should be built" FALSE)
 add_feature_info("Python plugin" BUILD_PLUGIN_PYTHON
     "add features that depend on python")
-
-# Choose to use pkg-config or not
-option(WITH_PKGCONFIG "Choose whether a pkgconfig file (PDAL.pc) should be installed" TRUE)
 
 option(WITH_TESTS "Choose if PDAL unit tests should be built" TRUE)
 add_feature_info("Unit tests" WITH_TESTS "PDAL unit tests")
@@ -231,7 +227,7 @@ include_directories(vendor/nanoflann-1.1.8)
 # PDAL_TARGET_OBJECTS is used to collect the driver object libraries
 set(PDAL_TARGET_OBJECTS "")
 
-add_subdirectory(util)
+add_subdirectory(src/util)
 add_subdirectory(io)
 add_subdirectory(filters)
 add_subdirectory(kernels)

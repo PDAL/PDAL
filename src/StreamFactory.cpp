@@ -33,7 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/StreamFactory.hpp>
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 #include <sstream>
 

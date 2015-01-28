@@ -43,7 +43,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/Compression.hpp"
   "${PDAL_HEADERS_DIR}/Dimension.hpp"
   "${PDAL_HEADERS_DIR}/Drivers.hpp"
-  "${PDAL_HEADERS_DIR}/FileUtils.hpp"
   "${PDAL_HEADERS_DIR}/Filter.hpp"
   "${PDAL_HEADERS_DIR}/Filters.hpp"
   "${PDAL_HEADERS_DIR}/GDALUtils.hpp"
@@ -51,6 +50,10 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/gitsha.h"
   "${PDAL_HEADERS_DIR}/IStream.hpp"
   "${PDAL_HEADERS_DIR}/KDIndex.hpp"
+  "${PDAL_HEADERS_DIR}/KernelFactory.hpp"
+  "${PDAL_HEADERS_DIR}/KernelInfo.hpp"
+  "${PDAL_HEADERS_DIR}/Kernel.hpp"
+  "${PDAL_HEADERS_DIR}/KernelSupport.hpp"
   "${PDAL_HEADERS_DIR}/Log.hpp"
   "${PDAL_HEADERS_DIR}/Metadata.hpp"
   "${PDAL_HEADERS_DIR}/Options.hpp"
@@ -80,12 +83,15 @@ set(PDAL_BASE_HPP
 
 set(PDAL_BASE_CPP
   Charbuf.cpp
-  FileUtils.cpp
   Filter.cpp
   gitsha.cpp
   GDALUtils.cpp
   GlobalEnvironment.cpp
   KDIndex.cpp
+  Kernel.cpp
+  KernelFactory.cpp
+  KernelInfo.cpp
+  KernelSupport.cpp
   Log.cpp
   Options.cpp
   PDALUtils.cpp

@@ -50,7 +50,6 @@
 #pragma GCC diagnostic ignored "-Wsign-compare"
 #endif
 
-#include <boost/property_tree/xml_parser.hpp>
 
 using namespace pdal;
 
@@ -63,7 +62,7 @@ TEST(NitfReaderTest, test_one)
     nitf_opts.add("count", 750);
 
     PointContext ctx;
-    
+
     ReaderPtr nitf_reader(f.createReader("readers.nitf"));
     EXPECT_TRUE(nitf_reader.get());
     nitf_reader->setOptions(nitf_opts);

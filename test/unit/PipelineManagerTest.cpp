@@ -37,7 +37,7 @@
 #include "Support.hpp"
 
 #include <pdal/PipelineManager.hpp>
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 using namespace pdal;
 

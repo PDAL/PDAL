@@ -170,7 +170,7 @@ Word #       Content
 #include <map>
 
 #include <pdal/PointBuffer.hpp>
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/Utils.hpp>
 
 #include "QfitReader.hpp"

@@ -34,7 +34,7 @@
 
 #include "gtest/gtest.h"
 
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
 #include <StatsFilter.hpp>

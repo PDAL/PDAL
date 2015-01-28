@@ -34,7 +34,7 @@
 
 #include "PCLKernel.hpp"
 #include "../filters/PCLBlock.hpp"
-#include "KernelFactory.hpp"
+#include <pdal/KernelFactory.hpp>
 
 #include <pdal/BufferReader.hpp>
 

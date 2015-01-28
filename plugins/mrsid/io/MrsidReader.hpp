@@ -37,7 +37,7 @@
 #include <pdal/Reader.hpp>
 #include <pdal/ReaderIterator.hpp>
 
-#include <pdal/Bounds.hpp>
+#include <pdal/util/Bounds.hpp>
 
 #include <lidar/PointSource.h>
 

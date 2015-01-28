@@ -45,8 +45,8 @@
  * Modified by Caleb Epstein to use <endian.h> with GNU libc and to
  * defined the BOOST_ENDIAN macro.
  ****************************************************************************/
-#ifndef INCLUDED_PDAL_ENDIAN_HPP
-#define INCLUDED_PDAL_ENDIAN_HPP
+
+#pragma once
 
 # define SWAP_BE_TO_LE(p) \
     do { \
@@ -108,4 +108,3 @@
             *last = *first; \
             *first = x; \
         }} while(false)
-#endif

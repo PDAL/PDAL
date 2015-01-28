@@ -35,7 +35,7 @@
 
 #include "SmoothKernel.hpp"
 #include "../filters/PCLBlock.hpp"
-#include "KernelFactory.hpp"
+#include <pdal/KernelFactory.hpp>
 
 #include <pdal/BufferReader.hpp>
 

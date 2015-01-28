@@ -7,16 +7,23 @@ if(EXISTS)
 endif()
 
 set(PDAL_UTIL_HPP
-    "${PDAL_HEADERS_DIR}/util/Bounds.hpp")
+    "${PDAL_INCLUDE_DIR}/pdal/util/Algorithm.hpp"
+    "${PDAL_INCLUDE_DIR}/pdal/util/Bounds.hpp"
+    "${PDAL_INCLUDE_DIR}/pdal/util/Endian.hpp"
+    "${PDAL_INCLUDE_DIR}/pdal/util/FileUtils.hpp"
+    )
 
 set(PDAL_UTIL_CPP
-    "${PDAL_UTIL_DIR}/Bounds.cpp")
+    "${PDAL_UTIL_DIR}/Bounds.cpp"
+    "${PDAL_UTIL_DIR}/FileUtils.cpp"
+    )
 
 set(PDAL_UTIL_SOURCES
     ${PDAL_UTIL_CPP}
     ${PDAL_UTIL_HPP})
 
 PDAL_ADD_LIBRARY(${PDAL_UTIL_LIB_NAME} SHARED ${PDAL_UTIL_SOURCES})
+target_link_libraries(${PDAL_UTIL_LIB_NAME} ${Boost_LIBRARIES})
 
 set_property(GLOBAL PROPERTY _UTIL_INCLUDED TRUE)
 

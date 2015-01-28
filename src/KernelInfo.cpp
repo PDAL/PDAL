@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2012, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2014, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,60 +32,49 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_OBJECT_HPP
-#define INCLUDED_OBJECT_HPP
+#include <iomanip>
 
-#include <pdal/pdal_internal.hpp>
+#include <boost/algorithm/string.hpp>
 
-#include <boost/property_tree/ptree.hpp>
-
+#include <pdal/KernelInfo.hpp>
 
 namespace pdal
 {
 
 
-/// pdal::Object is a base class that provides serialization, allocation, and
-/// deallocation control for all basic objects inside of PDAL.
-
-class PDAL_DLL Object
+std::ostream& operator<<(std::ostream& ostr, const KernelInfo& info)
 {
-public:
+    // boost::property_tree::ptree tree = kernel.toPTree();
+    //
+    // boost::property_tree::write_json(ostr, tree);
 
-    /** @name Constructors
-    */
-    Object(std::string const& type_name) : m_typename(type_name) {};
+    return ostr;
+}
 
-    /** @name Destructor
-    */
-    virtual ~Object() {};
+KernelInfo::KernelInfo(std::string const& name, std::string const& description)
+    : m_name(name), m_description(description) {}
 
-    virtual std::string to_xml() const;
-    virtual std::string to_json() const;
+/// copy constructor
+KernelInfo::KernelInfo(KernelInfo const& other)
+    : m_name(other.m_name)
+    , m_description(other.m_description)
+    , m_link(other.m_link)
+{
+    return;
+}
 
-    virtual boost::property_tree::ptree toPTreeImpl() const
+/// assignment operator
+KernelInfo& KernelInfo::operator=(KernelInfo const& rhs)
+{
+    if (&rhs != this)
     {
-        return boost::property_tree::ptree();
+        m_name = rhs.m_name;
+        m_description = rhs.m_description;
+        m_link = rhs.m_link;
     }
 
-    boost::property_tree::ptree toPTree() const;
-    inline std::string getTypeName() const
-    {
-        return m_typename;
-    }
-    /** @name private attributes
-    */
-
-
-private:
-    Object(const Object&);
-    Object& operator =(const Object&);
-
-    std::string m_typename;
-
-};
-
+    return *this;
+}
 
 
 } // namespace pdal
-
-#endif

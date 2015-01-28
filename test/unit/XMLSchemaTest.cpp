@@ -38,7 +38,7 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/Metadata.hpp>
 #include <pdal/PointContext.hpp>
 #include <pdal/XMLSchema.hpp>

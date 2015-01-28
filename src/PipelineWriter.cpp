@@ -48,7 +48,7 @@
 
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 using namespace boost::property_tree;
 

@@ -34,7 +34,7 @@
 ****************************************************************************/
 
 //#include <pdal/Kernels.hpp>
-#include "KernelFactory.hpp"
+#include <pdal/KernelFactory.hpp>
 #include <pdal/pdal_config.hpp>
 
 #include <boost/algorithm/string.hpp>

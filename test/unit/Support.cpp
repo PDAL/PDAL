@@ -43,7 +43,7 @@
 
 #include <boost/filesystem.hpp>
 
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/PointBuffer.hpp>

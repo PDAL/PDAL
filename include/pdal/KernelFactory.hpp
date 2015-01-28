@@ -35,8 +35,8 @@
 #pragma once
 
 #include <pdal/pdal_internal.hpp>
-#include "Kernel.hpp"
-#include "KernelInfo.hpp"
+#include <pdal/Kernel.hpp>
+#include <pdal/KernelInfo.hpp>
 
 #include <vector>
 #include <map>

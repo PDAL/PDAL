@@ -34,13 +34,12 @@
 
 #pragma once
 
-#include "Kernel.hpp"
+#include <pdal/Kernel.hpp>
 
 #include <pdal/Stage.hpp>
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 
-#include <boost/property_tree/xml_parser.hpp>
 
 #ifdef __clang__
 #pragma GCC diagnostic ignored "-Wtautological-constant-out-of-range-compare"
@@ -49,7 +48,7 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/tokenizer.hpp>
 
-#include "KernelSupport.hpp"
+#include <pdal/KernelSupport.hpp>
 
 typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 
@@ -61,7 +60,7 @@ class PDAL_DLL InfoKernel : public Kernel
 public:
     SET_KERNEL_NAME ("info", "Info Kernel")
     SET_KERNEL_LINK ("http://pdal.io/kernels/kernels.info.html")
- 
+
     InfoKernel();
     int execute(); // overrride
 
