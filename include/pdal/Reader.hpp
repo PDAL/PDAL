@@ -60,6 +60,7 @@ private:
     {
         PointBufferSet pbSet;
 
+        buffer->clearTemps();
         read(*buffer, m_count);
         pbSet.insert(buffer);
         return pbSet;

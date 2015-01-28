@@ -449,14 +449,26 @@ point_count_t LasReader::read(PointBuffer& data, point_count_t count)
     else
     {
         m_istream->seekg(m_lasHeader.pointOffset());
-        std::vector<char> buf(pointByteCount);
+        point_count_t remaining = count;
+
+        // Make a buffer at most a meg.
+        size_t bufsize = std::min((point_count_t)1000000,
+            count * pointByteCount);
+        std::vector<char> buf(bufsize);
         try
         {
-            for (; i < count; ++i)
+            do
             {
-                m_istream->read(buf.data(), pointByteCount);
-                loadPoint(data, buf.data(), pointByteCount);
-            }
+                point_count_t blockPoints = readFileBlock(buf, remaining);
+                remaining -= blockPoints;
+                char *pos = buf.data();
+                while (blockPoints--)
+                {
+                    loadPoint(data, pos, pointByteCount);
+                    pos += pointByteCount;
+                    i++;
+                }
+            } while (remaining);
         }
         catch (std::out_of_range&)
         {}
@@ -465,6 +477,18 @@ point_count_t LasReader::read(PointBuffer& data, point_count_t count)
     }
     m_index += i;
     return (point_count_t)i;
+}
+
+
+point_count_t LasReader::readFileBlock(vector<char>& buf,
+    point_count_t maxpoints)
+{
+    size_t ptLen = m_lasHeader.pointLen();
+    point_count_t blockpoints = buf.size() / ptLen;
+
+    blockpoints = std::min(maxpoints, blockpoints);
+    m_istream->read(buf.data(), blockpoints * ptLen);
+    return blockpoints;
 }
 
 

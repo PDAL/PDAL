@@ -248,6 +248,15 @@ public:
         return strm;
     }
 
+    // The standard idiom is swapping with a stack-created empty queue, but
+    // that invokes the ctor and probably allocates.  We've probably only got
+    // one or two things in our queue, so just pop until we're empty.
+    void clearTemps()
+    {
+        while (!m_temps.empty())
+            m_temps.pop();
+    }
+
 protected:
     PointContextRef m_context;
     std::deque<PointId> m_index;
@@ -269,15 +278,6 @@ private:
     inline PointId getTemp(PointId id);
     void freeTemp(PointId id)
         { m_temps.push(id); }
-
-    // The standard idiom is swapping with a stack-created empty queue, but
-    // that invokes the ctor and probably allocates.  We've probably only got
-    // one or two things in our queue, so just pop until we're empty.
-    void clearTemps()
-    {
-        while (!m_temps.empty())
-            m_temps.pop();
-    }
 };
 
 
@@ -576,7 +576,7 @@ inline void PointBuffer::setFieldInternal(Dimension::Id::Enum dim,
         rawId = m_context.rawPtBuf()->addPoint();
         m_index.push_back(rawId);
         m_size++;
-        clearTemps();
+        assert(m_temps.empty());
     }
     else if (id > size())
     {
@@ -599,7 +599,7 @@ inline void PointBuffer::appendPoint(const PointBuffer& buffer, PointId id)
     point_count_t newid = size();
     m_index.push_back(rawId);
     m_size++;
-    clearTemps();
+    assert(m_temps.empty());
 }
 
 
