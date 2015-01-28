@@ -480,7 +480,7 @@ point_count_t LasReader::read(PointBuffer& data, point_count_t count)
 }
 
 
-point_count_t LasReader::readFileBlock(vector<char>& buf,
+point_count_t LasReader::readFileBlock(std::vector<char>& buf,
     point_count_t maxpoints)
 {
     size_t ptLen = m_lasHeader.pointLen();
@@ -511,7 +511,7 @@ void LasReader::loadPointV10(PointBuffer& data, char *buf, size_t bufsize)
     istream >> xi >> yi >> zi;
 
     const LasHeader& h = m_lasHeader;
-            
+
     double x = xi * h.scaleX() + h.offsetX();
     double y = yi * h.scaleY() + h.offsetY();
     double z = zi * h.scaleZ() + h.offsetZ();
@@ -577,7 +577,7 @@ void LasReader::loadPointV14(PointBuffer& data, char *buf, size_t bufsize)
     istream >> xi >> yi >> zi;
 
     const LasHeader& h = m_lasHeader;
-            
+
     double x = xi * h.scaleX() + h.offsetX();
     double y = yi * h.scaleY() + h.offsetY();
     double z = zi * h.scaleZ() + h.offsetZ();
