@@ -48,26 +48,25 @@ class Options;
 class PDAL_DLL PipelineManager
 {
 public:
-    PipelineManager() : m_lastStage(NULL)
+    PipelineManager()
         {}
 
     ~PipelineManager();
 
     // Use these to manually add stages into the pipeline manager.
     Reader* addReader(const std::string& type);
-    Filter* addFilter(const std::string& type, Stage *stage);
+    Filter* addFilter(const std::string& type, Stage *prevStage);
     Filter* addFilter(const std::string& type,
-        const std::vector<Stage *>& stages);
+        const std::vector<Stage *>& prevStages);
     Writer* addWriter(const std::string& type, Stage *prevStage);
 
-    void removeWriter();
     // returns true if the pipeline endpoint is a writer
     bool isWriterPipeline() const
         { return (bool)dynamic_cast<Writer *>(getStage()); }
 
     // return the pipeline reader endpoint (or NULL, if not a reader pipeline)
     Stage* getStage() const
-        { return m_lastStage; }
+        { return m_stages.empty() ? NULL : m_stages.back(); }
 
     void prepare() const;
     point_count_t execute();
@@ -87,14 +86,8 @@ private:
     PointContext m_context;
     PointBufferSet m_pbSet;
 
-    typedef std::vector<Reader*> ReaderList;
-    typedef std::vector<Filter*> FilterList;
-    typedef std::vector<Writer*> WriterList;
-    ReaderList m_readers;
-    FilterList m_filters;
-    WriterList m_writers;
-
-    Stage* m_lastStage;
+    typedef std::vector<Stage *> StagePtrList;
+    StagePtrList m_stages;
 
     PipelineManager& operator=(const PipelineManager&); // not implemented
     PipelineManager(const PipelineManager&); // not implemented
