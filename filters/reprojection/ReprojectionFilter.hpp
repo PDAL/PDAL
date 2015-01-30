@@ -52,9 +52,8 @@ public:
     SET_STAGE_NAME("filters.reprojection", "Reproject data using GDAL from one coordinate system to another.")
     SET_STAGE_LINK("http://www.pdal.io/stages/filters.reprojection.html")
 
-    ReprojectionFilter();
-    ReprojectionFilter(const SpatialReference& outSRS);
-    ReprojectionFilter(const SpatialReference& inSRS, const SpatialReference& outSRS);
+    ReprojectionFilter() : m_inferInputSRS(true)
+    {}
 
 private:
     virtual void processOptions(const Options& options);

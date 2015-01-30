@@ -75,25 +75,6 @@ struct GDALSourceDeleter
 };
 
 
-ReprojectionFilter::ReprojectionFilter()
-    : pdal::Filter(), m_inferInputSRS(true)
-{}
-
-
-ReprojectionFilter::ReprojectionFilter(const SpatialReference& outSRS)
-    : m_outSRS(outSRS)
-    , m_inferInputSRS(true)
-{}
-
-
-ReprojectionFilter::ReprojectionFilter(const SpatialReference& inSRS,
-        const SpatialReference& outSRS)
-    : m_inSRS(inSRS)
-    , m_outSRS(outSRS)
-    , m_inferInputSRS(false)
-{}
-
-
 void ReprojectionFilter::processOptions(const Options& options)
 {
     m_outSRS = options.getValueOrThrow<pdal::SpatialReference>("out_srs");
