@@ -48,7 +48,9 @@ class Options;
 class PDAL_DLL PipelineManager
 {
 public:
-    PipelineManager();
+    PipelineManager() : m_lastStage(NULL)
+        {}
+
     ~PipelineManager();
 
     // Use these to manually add stages into the pipeline manager.
@@ -60,13 +62,12 @@ public:
 
     void removeWriter();
     // returns true if the pipeline endpoint is a writer
-    bool isWriterPipeline() const;
-
-    // return the pipeline writer endpoint (or NULL, if not a writer pipeline)
-    Writer* getWriter() const;
+    bool isWriterPipeline() const
+        { return (bool)dynamic_cast<Writer *>(getStage()); }
 
     // return the pipeline reader endpoint (or NULL, if not a reader pipeline)
-    Stage* getStage() const;
+    Stage* getStage() const
+        { return m_lastStage; }
 
     void prepare() const;
     point_count_t execute();
@@ -94,13 +95,9 @@ private:
     WriterList m_writers;
 
     Stage* m_lastStage;
-    Writer* m_lastWriter;
-    bool m_isWriterPipeline;
 
     PipelineManager& operator=(const PipelineManager&); // not implemented
     PipelineManager(const PipelineManager&); // not implemented
-
-    void registerPluginIfExists();
 };
 
 

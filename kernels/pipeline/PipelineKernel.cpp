@@ -62,12 +62,18 @@ void PipelineKernel::validateSwitches()
 
 void PipelineKernel::addSwitches()
 {
-    po::options_description* file_options = new po::options_description("file options");
+    po::options_description* file_options =
+        new po::options_description("file options");
 
     file_options->add_options()
-        ("input,i", po::value<std::string>(&m_inputFile)->default_value(""), "input file name")
-        ("pipeline-serialization", po::value<std::string>(&m_pipelineFile)->default_value(""), "")
-        ("validate", po::value<bool>(&m_validate)->zero_tokens()->implicit_value(true), "Validate the pipeline (including serialization), but do not execute writing of points")
+        ("input,i", po::value<std::string>(&m_inputFile)->default_value(""),
+            "input file name")
+        ("pipeline-serialization",
+            po::value<std::string>(&m_pipelineFile)->default_value(""), "")
+        ("validate",
+            po::value<bool>(&m_validate)->zero_tokens()->implicit_value(true),
+            "Validate the pipeline (including serialization), but do not "
+            "execute writing of points")
         ;
 
     addSwitchSet(file_options);
@@ -84,23 +90,14 @@ int PipelineKernel::execute()
     pdal::PipelineReader reader(manager, isDebug(), getVerboseLevel());
     bool isWriter = reader.readPipeline(m_inputFile);
     if (!isWriter)
-        throw app_runtime_error("Pipeline file does not contain a writer. Use 'pdal info' to read the data.");
-    else
-    {
-/**
-    if (!getProgressShellCommand().size())
-        callback = static_cast<pdal::UserCallback*>(new PercentageCallback);
-    else
-        callback = static_cast<pdal::UserCallback*>(new ShellScriptCallback(getProgressShellCommand()));
-    manager.getWriter()->setUserCallback(callback);
-**/
-    }
+        throw app_runtime_error("Pipeline file does not contain a writer. "
+            "Use 'pdal info' to read the data.");
 
     for (const auto& pi : getExtraStageOptions())
     {
         std::string name = pi.first;
         Options options = pi.second;
-        std::vector<Stage*> stages = manager.getWriter()->findStage(name);
+        std::vector<Stage*> stages = manager.getStage()->findStage(name);
         for (const auto& s : stages)
         {
             Options opts = s->getOptions();
@@ -111,8 +108,8 @@ int PipelineKernel::execute()
     }
 
     PointContext ctx;
-    manager.getWriter()->prepare(ctx);
-    manager.getWriter()->execute(ctx);
+    manager.getStage()->prepare(ctx);
+    manager.getStage()->execute(ctx);
     if (m_pipelineFile.size() > 0)
     {
         pdal::PipelineWriter writer(manager);

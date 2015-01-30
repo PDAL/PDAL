@@ -39,21 +39,10 @@
 #include <pdal/Writer.hpp>
 #include <pdal/Utils.hpp>
 
-#include <boost/property_tree/xml_parser.hpp>
-#include <boost/optional.hpp>
+//#include <boost/optional.hpp>
 
 namespace pdal
 {
-
-PipelineManager::PipelineManager()
-    : m_lastStage(NULL)
-    , m_lastWriter(NULL)
-    , m_isWriterPipeline(false)
-{
-
-    return;
-}
-
 
 PipelineManager::~PipelineManager()
 {
@@ -77,8 +66,6 @@ PipelineManager::~PipelineManager()
         m_writers.pop_back();
         delete writer;
     }
-
-    return;
 }
 
 void PipelineManager::removeWriter()
@@ -89,14 +76,10 @@ void PipelineManager::removeWriter()
         m_writers.pop_back();
         delete writer;
     }
-
-    m_lastWriter = 0;
 }
 
 Reader* PipelineManager::addReader(const std::string& type)
 {
-    registerPluginIfExists();
-
     Reader* stage = m_factory.createReader(type);
     m_readers.push_back(stage);
     m_lastStage = stage;
@@ -107,8 +90,6 @@ Reader* PipelineManager::addReader(const std::string& type)
 Filter* PipelineManager::addFilter(const std::string& type,
     const std::vector<Stage *>& prevStages)
 {
-    registerPluginIfExists();
-
     Filter* stage = m_factory.createFilter(type);
     stage->setInput(prevStages);
     m_filters.push_back(stage);
@@ -119,8 +100,6 @@ Filter* PipelineManager::addFilter(const std::string& type,
 
 Filter* PipelineManager::addFilter(const std::string& type, Stage *prevStage)
 {
-    registerPluginIfExists();
-
     Filter* stage = m_factory.createFilter(type);
     stage->setInput(prevStage);
     m_filters.push_back(stage);
@@ -129,38 +108,13 @@ Filter* PipelineManager::addFilter(const std::string& type, Stage *prevStage)
 }
 
 
-void PipelineManager::registerPluginIfExists()
-{
-//     if (options.hasOption("plugin"))
-//     {
-//         m_factory.registerPlugin(options.getValueOrThrow<std::string>("plugin"));
-//     }
-}
-
-
 Writer* PipelineManager::addWriter(const std::string& type, Stage *prevStage)
 {
-    m_isWriterPipeline = true;
-
-    registerPluginIfExists();
-
     Writer* writer = m_factory.createWriter(type);
     writer->setInput(prevStage);
     m_writers.push_back(writer);
-    m_lastWriter = writer;
+    m_lastStage = writer;
     return writer;
-}
-
-
-Writer* PipelineManager::getWriter() const
-{
-    return m_lastWriter;
-}
-
-
-Stage* PipelineManager::getStage() const
-{
-    return m_lastStage;
 }
 
 
@@ -182,11 +136,6 @@ point_count_t PipelineManager::execute()
     return cnt;
 }
 
-
-bool PipelineManager::isWriterPipeline() const
-{
-    return (m_lastWriter != NULL);
-}
 
 MetadataNode PipelineManager::getMetadata() const
 {
