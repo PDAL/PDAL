@@ -147,6 +147,7 @@ Writer* PipelineManager::addWriter(const std::string& type, Stage *prevStage)
     Writer* writer = m_factory.createWriter(type);
     writer->setInput(prevStage);
     m_writers.push_back(writer);
+    m_lastStage = writer;
     m_lastWriter = writer;
     return writer;
 }
