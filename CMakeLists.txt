@@ -99,6 +99,10 @@ option(BUILD_PLUGIN_ATTRIBUTE "Choose if Attribute filter is built" FALSE)
 add_feature_info("Attribute plugin" BUILD_PLUGIN_ATTRIBUTE
     "apply attributes to a subset of points")
 
+option(BUILD_PLUGIN_CPD "Choose if Coherent Point Drift kernel is built" FALSE)
+add_feature_info("CPD plugin" BUILD_PLUGIN_CPD
+    "run Coherent Point Drift on two datasets")
+
 option(BUILD_PLUGIN_GREYHOUND "Choose if Greyhound support should be built" FALSE)
 add_feature_info("Greyhound plugin" BUILD_PLUGIN_GREYHOUND
     "read points from a Greyhound server")
