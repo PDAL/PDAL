@@ -43,7 +43,8 @@ using namespace pdal;
 
 TEST(PipelineManagerTest, basic)
 {
-    FileUtils::deleteFile("temp.las");
+    const char * outfile = "temp.las";
+    FileUtils::deleteFile(outfile);
 
     PipelineManager mgr;
 
@@ -53,14 +54,15 @@ TEST(PipelineManagerTest, basic)
     reader->setOptions(optsR);
 
     Options optsW;
-    optsW.add("filename", "temp.las", "file to write to");
+    optsW.add("filename", outfile, "file to write to");
     Writer* writer = mgr.addWriter("writers.las", reader);
     writer->setOptions(optsW);
 
     point_count_t np = mgr.execute();
     EXPECT_TRUE(np == 1065U);
 
-    FileUtils::deleteFile("temp.las");
+    EXPECT_TRUE(bool(std::ifstream(outfile)));
+    FileUtils::deleteFile(outfile);
 }
 
 
