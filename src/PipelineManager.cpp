@@ -39,141 +39,74 @@
 #include <pdal/Writer.hpp>
 #include <pdal/Utils.hpp>
 
-#include <boost/property_tree/xml_parser.hpp>
-#include <boost/optional.hpp>
+//#include <boost/optional.hpp>
 
 namespace pdal
 {
 
-PipelineManager::PipelineManager()
-    : m_lastStage(NULL)
-    , m_lastWriter(NULL)
-    , m_isWriterPipeline(false)
-{
-
-    return;
-}
-
-
 PipelineManager::~PipelineManager()
 {
-    while (m_readers.size())
+    while (m_stages.size())
     {
-        Reader* reader = m_readers.back();
-        m_readers.pop_back();
-        delete reader;
+        Stage* stage = m_stages.back();
+        m_stages.pop_back();
+        delete stage;
     }
-
-    while (m_filters.size())
-    {
-        Filter* filter = m_filters.back();
-        m_filters.pop_back();
-        delete filter;
-    }
-
-    while (m_writers.size())
-    {
-        Writer* writer = m_writers.back();
-        m_writers.pop_back();
-        delete writer;
-    }
-
-    return;
 }
 
-void PipelineManager::removeWriter()
-{
-    while (m_writers.size())
-    {
-        Writer* writer = m_writers.back();
-        m_writers.pop_back();
-        delete writer;
-    }
-
-    m_lastWriter = 0;
-}
 
 Reader* PipelineManager::addReader(const std::string& type)
 {
-    registerPluginIfExists();
-
-    Reader* stage = m_factory.createReader(type);
-    m_readers.push_back(stage);
-    m_lastStage = stage;
-    return stage;
+    Reader *r = m_factory.createReader(type);
+    m_stages.push_back(r);
+    return r;
 }
 
 
 Filter* PipelineManager::addFilter(const std::string& type,
     const std::vector<Stage *>& prevStages)
 {
-    registerPluginIfExists();
-
     Filter* stage = m_factory.createFilter(type);
     stage->setInput(prevStages);
-    m_filters.push_back(stage);
-    m_lastStage = stage;
+    m_stages.push_back(stage);
     return stage;
 }
 
 
 Filter* PipelineManager::addFilter(const std::string& type, Stage *prevStage)
 {
-    registerPluginIfExists();
-
     Filter* stage = m_factory.createFilter(type);
     stage->setInput(prevStage);
-    m_filters.push_back(stage);
-    m_lastStage = stage;
+    m_stages.push_back(stage);
     return stage;
-}
-
-
-void PipelineManager::registerPluginIfExists()
-{
-//     if (options.hasOption("plugin"))
-//     {
-//         m_factory.registerPlugin(options.getValueOrThrow<std::string>("plugin"));
-//     }
 }
 
 
 Writer* PipelineManager::addWriter(const std::string& type, Stage *prevStage)
 {
-    m_isWriterPipeline = true;
-
-    registerPluginIfExists();
-
     Writer* writer = m_factory.createWriter(type);
     writer->setInput(prevStage);
-    m_writers.push_back(writer);
-    m_lastStage = writer;
-    m_lastWriter = writer;
+    m_stages.push_back(writer);
     return writer;
-}
-
-
-Writer* PipelineManager::getWriter() const
-{
-    return m_lastWriter;
-}
-
-
-Stage* PipelineManager::getStage() const
-{
-    return m_lastStage;
 }
 
 
 void PipelineManager::prepare() const
 {
-    m_lastStage->prepare(m_context);
+    Stage *s = getStage();
+    if (s)
+       s->prepare(m_context);
 }
+
 
 point_count_t PipelineManager::execute()
 {
     prepare();
-    m_pbSet = m_lastStage->execute(m_context);
+
+    Stage *s = getStage();
+    if (!s)
+        return 0;
+    m_pbSet = s->execute(m_context);
     point_count_t cnt = 0;
     for (auto pi = m_pbSet.begin(); pi != m_pbSet.end(); ++pi)
     {
@@ -184,24 +117,14 @@ point_count_t PipelineManager::execute()
 }
 
 
-bool PipelineManager::isWriterPipeline() const
-{
-    return (m_lastWriter != NULL);
-}
-
 MetadataNode PipelineManager::getMetadata() const
 {
     MetadataNode output("stages");
 
-    for (auto ri = m_readers.begin(); ri != m_readers.end(); ++ri)
-        output.add((*ri)->getMetadata());
-
-    for (auto fi = m_filters.begin(); fi != m_filters.end(); ++fi)
-        output.add((*fi)->getMetadata());
-
-    for (auto wi = m_writers.begin(); wi != m_writers.end(); ++wi)
-        output.add((*wi)->getMetadata());
+    for (auto si = m_stages.begin(); si != m_stages.end(); ++si)
+        output.add((*si)->getMetadata());
 
     return output;
 }
+
 } // namespace pdal
