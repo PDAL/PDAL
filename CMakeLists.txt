@@ -129,7 +129,8 @@ option(BUILD_PLUGIN_PCL "Choose if PCL support should be built" FALSE)
 add_feature_info("PCL plugin" BUILD_PLUGIN_PCL
     "provides PCL-based readers, writers, filters, and kernels")
 
-option(BUILD_PLUGIN_PGPOINTCLOUD "Choose if PostgreSQL PointCloud support should be built" TRUE)
+find_package(PostgreSQL QUIET)
+option(BUILD_PLUGIN_PGPOINTCLOUD "Choose if PostgreSQL PointCloud support should be built" ${POSTGRESQL_FOUND})
 add_feature_info("PostgreSQL PointCloud plugin" BUILD_PLUGIN_PGPOINTCLOUD
     "read/write PostgreSQL PointCloud objects")
 
