@@ -37,13 +37,8 @@
 namespace pdal
 {
     
-PipelineKernel::PipelineKernel()
-    : Kernel()
-    , m_inputFile("")
-    , m_validate(false)
-{
-    return;
-}
+PipelineKernel::PipelineKernel() : m_validate(false)
+{}
 
 
 void PipelineKernel::validateSwitches()
@@ -51,12 +46,8 @@ void PipelineKernel::validateSwitches()
     if (m_usestdin)
         m_inputFile = "STDIN";
         
-    if (m_inputFile == "")
-    {
+    if (m_inputFile.empty())
         throw app_usage_error("input file name required");
-    }
-
-    return;
 }
 
 
@@ -85,16 +76,6 @@ int PipelineKernel::execute()
     bool isWriter = reader.readPipeline(m_inputFile);
     if (!isWriter)
         throw app_runtime_error("Pipeline file does not contain a writer. Use 'pdal info' to read the data.");
-    else
-    {
-/**
-    if (!getProgressShellCommand().size())
-        callback = static_cast<pdal::UserCallback*>(new PercentageCallback);
-    else
-        callback = static_cast<pdal::UserCallback*>(new ShellScriptCallback(getProgressShellCommand()));
-    manager.getWriter()->setUserCallback(callback);
-**/
-    }
 
     for (const auto& pi : getExtraStageOptions())
     {

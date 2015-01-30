@@ -153,19 +153,19 @@ int Kernel::do_execution()
     }
     catch (pdal::pdal_error const& e)
     {
-        const std::string s("Caught PDAL exception: ");
+        const std::string s("PDAL: ");
         printError(s + e.what());
         return 1;
     }
     catch (std::exception const& e)
     {
-        const std::string s("Caught exception: ");
+        const std::string s("PDAL: ");
         printError(s + e.what());
         return 1;
     }
     catch (...)
     {
-        printError("Caught unknown exception");
+        printError("PDAL: ");
         return 1;
     }
 

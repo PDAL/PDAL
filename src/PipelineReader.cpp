@@ -492,6 +492,7 @@ bool PipelineReader::readPipeline(std::istream& input)
 {
 
     ptree tree;
+
     xml_parser::read_xml(input, tree, xml_parser::no_comments);
 
     boost::optional<ptree> opt(tree.get_child_optional("Pipeline"));
@@ -519,7 +520,10 @@ bool PipelineReader::readPipeline(const std::string& filename)
     catch (...)
     {
         FileUtils::closeFile(input);
-        throw;
+        std::ostringstream oss;
+        oss << "Unable to process pipeline file \"" << filename << "\"." <<
+            "  XML is invalid.";
+        throw pdal_error(oss.str());
     }
 
     FileUtils::closeFile(input);
