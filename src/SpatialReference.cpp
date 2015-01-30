@@ -116,8 +116,13 @@ void SpatialReference::setFromUserInput(std::string const& v)
     OGRSpatialReference srs(NULL);
     OGRErr err = srs.SetFromUserInput(const_cast<char *>(input));
     if (err != OGRERR_NONE)
-        throw std::invalid_argument("could not import coordinate system "
-            "into OGRSpatialReference SetFromUserInput");
+    {
+
+        std::ostringstream oss;
+        oss << "Could not import coordinate system '" << input << "'";
+        oss << " message '" << CPLGetLastErrorMsg() << "'";
+        throw std::invalid_argument(oss.str());
+    }
 
     srs.exportToWkt(&poWKT);
     std::string tmp(poWKT);
