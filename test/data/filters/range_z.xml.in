@@ -1,0 +1,23 @@
+<?xml version="2.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="writers.las">
+        <Option name="filename">
+            @CMAKE_SOURCE_DIR@/test/temp/only_z_400-500.las
+        </Option>
+        <Filter type="filters.range">
+            <Option name="dimension">
+                Z
+                <Options>
+                    <Option name="min">400</Option>
+                    <Option name="max">500</Option>
+                </Options>
+            </Option>
+            <Reader type="readers.las">
+                <Option name="filename">
+                    @CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las
+                </Option>
+            </Reader>
+        </Filter>
+    </Writer>
+</Pipeline>
+
