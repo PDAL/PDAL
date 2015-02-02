@@ -34,6 +34,8 @@
 
 #include "GeoWaveWriter.hpp"
 
+#include <pdal/util/Algorithm.hpp>
+
 #include <jace/Jace.h>
 using jace::java_cast;
 using jace::java_new;
@@ -105,29 +107,17 @@ using jace::proxy::org::geotools::geometry::jts::JTSFactoryFinder;
 using jace::proxy::org::opengis::feature::simple::SimpleFeature;
 #include "jace/proxy/org/opengis/feature/simple/SimpleFeatureType.h"
 using jace::proxy::org::opengis::feature::simple::SimpleFeatureType;
+#include "jace/proxy/org/opengis/feature/type/AttributeDescriptor.h"
+using jace::proxy::org::opengis::feature::type::AttributeDescriptor;
 
 #include "jace/proxy/mil/nga/giat/geowave/index/ByteArrayId.h"
 using jace::proxy::mil::nga::giat::geowave::index::ByteArrayId;
-#include "jace/proxy/mil/nga/giat/geowave/index/NumericIndexStrategy.h"
-using jace::proxy::mil::nga::giat::geowave::index::NumericIndexStrategy;
-#include "jace/proxy/mil/nga/giat/geowave/index/NumericIndexStrategyFactory.h"
-using jace::proxy::mil::nga::giat::geowave::index::NumericIndexStrategyFactory;
-#include "jace/proxy/mil/nga/giat/geowave/index/NumericIndexStrategyFactory_DataType.h"
-using jace::proxy::mil::nga::giat::geowave::index::NumericIndexStrategyFactory_DataType;
-#include "jace/proxy/mil/nga/giat/geowave/index/NumericIndexStrategyFactory_SpatialFactory.h"
-using jace::proxy::mil::nga::giat::geowave::index::NumericIndexStrategyFactory_SpatialFactory;
 #include "jace/proxy/mil/nga/giat/geowave/vector/adapter/FeatureDataAdapter.h"
 using jace::proxy::mil::nga::giat::geowave::vector::adapter::FeatureDataAdapter;
-#include "jace/proxy/mil/nga/giat/geowave/store/dimension/DimensionField.h"
-using jace::proxy::mil::nga::giat::geowave::store::dimension::DimensionField;
-#include "jace/proxy/mil/nga/giat/geowave/store/dimension/LongitudeField.h"
-using jace::proxy::mil::nga::giat::geowave::store::dimension::LongitudeField;
-#include "jace/proxy/mil/nga/giat/geowave/store/dimension/LatitudeField.h"
-using jace::proxy::mil::nga::giat::geowave::store::dimension::LatitudeField;
 #include "jace/proxy/mil/nga/giat/geowave/store/index/Index.h"
 using jace::proxy::mil::nga::giat::geowave::store::index::Index;
-#include "jace/proxy/mil/nga/giat/geowave/store/index/BasicIndexModel.h"
-using jace::proxy::mil::nga::giat::geowave::store::index::BasicIndexModel;
+#include "jace/proxy/mil/nga/giat/geowave/store/index/IndexType_JaceIndexType.h"
+using jace::proxy::mil::nga::giat::geowave::store::index::IndexType_JaceIndexType;
 #include "jace/proxy/mil/nga/giat/geowave/accumulo/AccumuloOptions.h"
 using jace::proxy::mil::nga::giat::geowave::accumulo::AccumuloOptions;
 #include "jace/proxy/mil/nga/giat/geowave/accumulo/BasicAccumuloOperations.h"
@@ -149,13 +139,15 @@ Options GeoWaveWriter::getDefaultOptions()
     Option instanceName("instanceName", "", "The zookeeper instance name, this will be directly used to instantiate a ZookeeperInstance");
     Option username("username", "", "The username for an account to establish an Accumulo connector");
     Option password("password", "", "The password for the account to establish an Accumulo connector");
-	Option tableNamespace("tableNamespace", "", "An optional string that is prefixed to any of the table names");
+	Option tableNamespace("tableNamespace", "", "The table name to be used when querying GeoWave");
+	Option featureTypeName("featureTypeName", "", "The feature type name to be used when querying GeoWave");
 
     options.add(zookeeperUrl);
     options.add(instanceName);
     options.add(username);
     options.add(password);
 	options.add(tableNamespace);
+	options.add(featureTypeName);
 
     return options;
 }
@@ -166,80 +158,62 @@ void GeoWaveWriter::processOptions(const Options& ops)
 	m_instanceName = ops.getValueOrThrow<std::string>("instanceName");
 	m_username = ops.getValueOrThrow<std::string>("username");
 	m_password = ops.getValueOrThrow<std::string>("password");
-	m_tableNamespace = ops.getValueOrDefault<std::string>("tableNamespace", "");
+	m_tableNamespace = ops.getValueOrThrow<std::string>("tableNamespace");
+	m_featureTypeName = ops.getValueOrDefault<std::string>("featureTypeName", "PDAL_Point");
 }
 
-void GeoWaveWriter::ready(PointContext ctx)
+void GeoWaveWriter::initialize()
 {
 	int status = createJvm();
 	if (status == 0)
 		log()->get(LogLevel::Debug) << "JVM Creation Successful" << std::endl;
 	else
 		log()->get(LogLevel::Error) << "JVM Creation Failed: Error ["  << status << "]" << std::endl;
+}
 
+void GeoWaveWriter::ready(PointContext ctx)
+{
 	// get a list of all the dimensions & their types
     Dimension::IdList all = ctx.dims();
     for (auto di = all.begin(); di != all.end(); ++di)
-        if (!Algorithm::contains(m_dims, *di))
+        if (!contains(m_dims, *di))
             m_dims.push_back(*di);
 }
 
 void GeoWaveWriter::write(const PointBuffer& data)
-{	
-	BasicAccumuloOperations accumuloOperations;
-	AccumuloOptions accumuloOptions;
-	AccumuloDataStore accumuloDataStore;
+{
 
-	try
-	{
-		accumuloOperations = java_new<BasicAccumuloOperations>(
-				java_new<String>(m_zookeeperUrl),
-				java_new<String>(m_instanceName),
-				java_new<String>(m_username),
-				java_new<String>(m_password),
-				java_new<String>(m_tableNamespace));
+	BasicAccumuloOperations accumuloOperations = java_new<BasicAccumuloOperations>(
+			java_new<String>(m_zookeeperUrl),
+			java_new<String>(m_instanceName),
+			java_new<String>(m_username),
+			java_new<String>(m_password),
+			java_new<String>(m_tableNamespace));
 
-		accumuloOptions = java_new<AccumuloOptions>();
+	AccumuloOptions accumuloOptions = java_new<AccumuloOptions>();
 
-		accumuloDataStore = java_new<AccumuloDataStore>(
-			accumuloOperations,
-			accumuloOptions);
-	}	
-	catch (JNIException& jniException)
-	{
-		log()->get(LogLevel::Error) << "An unexpected JNI error has occured: " << jniException.what() << std::endl;
-		return;
-	}
-	catch (std::exception& e)
-	{
-		log()->get(LogLevel::Error) << "An unexpected C++ error has occurred: " << e.what() << std::endl;
-		return;
-	}
+	AccumuloDataStore accumuloDataStore = java_new<AccumuloDataStore>(
+		accumuloOperations,
+		accumuloOptions);
 	
 	using namespace Dimension;
 
 	std::ostringstream os;
 
+	// treat all types as double
 	os << "location:Point:srid=4326";
 	for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
 		os << "," << data.dimName(*di) << ":Double";
 
 	SimpleFeatureType TYPE = DataUtilities::createType(
-		java_new<String>("PDAL_Point"),
+		java_new<String>(m_featureTypeName),
         java_new<String>(os.str()));
 
 	String location = java_new<String>("location");
 
 	FeatureDataAdapter dataAdapter = java_new<FeatureDataAdapter>(TYPE);
 
-	JArray<DimensionField> dimArray(2);
-	dimArray[0] = java_new<LongitudeField>();	
-	dimArray[1] = java_new<LatitudeField>();
-
-	Index index = java_new<Index>(
-		java_new<NumericIndexStrategyFactory_SpatialFactory>().createIndexStrategy(NumericIndexStrategyFactory_DataType::VECTOR()),
-		java_new<BasicIndexModel>(
-			dimArray));
+	Index index = IndexType_JaceIndexType::createSpatialVectorIndex();
 
 	GeometryFactory geometryFactory = JTSFactoryFinder::getGeometryFactory();
 	SimpleFeatureBuilder builder = java_new<SimpleFeatureBuilder>(TYPE);
@@ -279,6 +253,8 @@ int GeoWaveWriter::createJvm()
 		std::string geowaveClasspath = TOSTRING(GEOWAVE_RUNTIME_JAR);
 
 		OptionList options;
+		//options.push_back(CustomOption("-Xdebug"));
+		//options.push_back(CustomOption("-Xrunjdwp:server=y,transport=dt_socket,address=4000,suspend=y"));
 		//options.push_back(CustomOption("-Xcheck:jni"));
 		//options.push_back(Verbose (Verbose::JNI));
 		//options.push_back(Verbose (Verbose::CLASS));

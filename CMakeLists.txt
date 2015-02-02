@@ -196,6 +196,9 @@ include(${PDAL_CMAKE_DIR}/geos.cmake)  # Optional
 include(${PDAL_CMAKE_DIR}/geotiff.cmake)  # Optional
 include(${PDAL_CMAKE_DIR}/lazperf.cmake)  # Optional
 include(${PDAL_CMAKE_DIR}/laszip.cmake)  # Optional
+include(${PDAL_CMAKE_DIR}/JNI.cmake)  # Optional
+include(${PDAL_CMAKE_DIR}/Jace.cmake)  # Optional
+include(${PDAL_CMAKE_DIR}/GeoWave.cmake)  # Optional
 include(${PDAL_CMAKE_DIR}/threads.cmake)
 include(${PDAL_CMAKE_DIR}/zlib.cmake)
 

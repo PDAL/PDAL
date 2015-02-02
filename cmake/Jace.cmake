@@ -3,8 +3,8 @@
 #
 
 # Jace support - optional, default=OFF
-option(WITH_Jace "Choose if JACE support should be built" FALSE)
-if(WITH_Jace)
+option(WITH_JACE "Choose if JACE support should be built" FALSE)
+if(WITH_JACE)
     find_package(Jace)
     if(JACE_FOUND)    
         set(CMAKE_REQUIRED_LIBRARIES "${JACE_LIBRARY}")

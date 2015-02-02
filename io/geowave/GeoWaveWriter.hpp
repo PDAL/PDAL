@@ -51,11 +51,11 @@ public:
     static Options getDefaultOptions();
 
 private:
+	virtual void initialize();
     virtual void processOptions(const Options&);
     virtual void ready(PointContext ctx);
     virtual void write(const PointBuffer& buf);
-    virtual void done(PointContextRef ctx);
-	
+
     int createJvm();
 
 	std::string m_zookeeperUrl;
@@ -63,6 +63,7 @@ private:
 	std::string m_username;
 	std::string m_password;
 	std::string m_tableNamespace;
+	std::string m_featureTypeName;
 	Dimension::IdList m_dims;
 	std::vector<Dimension::Type::Enum> m_dimTypes;
 };

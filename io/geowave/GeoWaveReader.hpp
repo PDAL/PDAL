@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2011, Howard Butler, hobu.inc@gmail.com
 *
 * All rights reserved.
 *
@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pdal/Reader.hpp>
+#include <pdal/util/Bounds.hpp>
 
 #ifdef PDAL_HAVE_GEOS
 #include <geos_c.h>
@@ -52,8 +53,11 @@ public:
     SET_STAGE_NAME("readers.geowave", "Geowave Reader")
 	SET_STAGE_LINK("http://pdal.io/stages/drivers.geowave.reader.html")
 
-private:
+	static Options getDefaultOptions();
+	static Dimension::IdList getDefaultDimensions();
 
+private:
+	virtual void initialize();
     virtual void processOptions(const Options& ops);
     virtual void addDimensions(PointContext ctx);
 	virtual void ready(PointContext ctx);
@@ -68,24 +72,11 @@ private:
 	std::string m_username;
 	std::string m_password;
 	std::string m_tableNamespace;
+	std::string m_featureTypeName;
 
-	Bounds<double> m_bounds;
-	std::string m_poly;
+	BOX3D m_bounds;
 
 	CloseableIterator m_iterator;
-
-#ifdef PDAL_HAVE_GEOS
-	GEOSContextHandle_t m_geosEnvironment;
-    GEOSGeometry* m_geosGeometry; 
-    GEOSPreparedGeometry const* m_geosPreparedGeometry;
-#else   
-    void* m_geosEnvironment;
-    void* m_geosGeometry;
-    void* m_geosPreparedGeometry;
-    typedef struct GEOSGeometry* GEOSGeometryHS;
-#endif
-
-	Bounds <double> computeBounds(GEOSGeometry const *geometry);
 };
 
 } // namespace pdal
