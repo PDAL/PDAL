@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2011, Howard Butler, hobu.inc@gmail.com
 *
 * All rights reserved.
 *
@@ -34,23 +34,37 @@
 
 #pragma once
 
-#include <pdal/pdal_config.hpp>
+#include <pdal/Writer.hpp>
 
-#include <pdal/BufferReader.hpp>
-#include <faux/FauxReader.hpp>
+#include <vector>
+#include <string>
 
-#include <las/LasReader.hpp>
-#include <las/LasWriter.hpp>
+namespace pdal
+{
 
-#include <bpf/BpfReader.hpp>
-#include <bpf/BpfWriter.hpp>
+class PDAL_DLL GeoWaveWriter : public Writer
+{
+public:
+    SET_STAGE_NAME("writers.geowave", "Geowave Writer")
+    SET_STAGE_LINK("http://pdal.io/stages/drivers.geowave.writer.html")
 
-#include <sbet/SbetReader.hpp>
-#include <sbet/SbetWriter.hpp>
+    static Options getDefaultOptions();
 
-#include <qfit/QfitReader.hpp>
-#include <terrasolid/TerrasolidReader.hpp>
-#include <text/TextWriter.hpp>
+private:
+    virtual void processOptions(const Options&);
+    virtual void ready(PointContext ctx);
+    virtual void write(const PointBuffer& buf);
+    virtual void done(PointContextRef ctx);
+	
+    int createJvm();
 
-#include <geowave/GeoWaveReader.hpp>
-#include <geowave/GeoWaveWriter.hpp>
+	std::string m_zookeeperUrl;
+	std::string m_instanceName;
+	std::string m_username;
+	std::string m_password;
+	std::string m_tableNamespace;
+	Dimension::IdList m_dims;
+	std::vector<Dimension::Type::Enum> m_dimTypes;
+};
+
+} // namespace pdal

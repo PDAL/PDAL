@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -34,23 +34,58 @@
 
 #pragma once
 
-#include <pdal/pdal_config.hpp>
+#include <pdal/Reader.hpp>
 
-#include <pdal/BufferReader.hpp>
-#include <faux/FauxReader.hpp>
+#ifdef PDAL_HAVE_GEOS
+#include <geos_c.h>
+#endif
 
-#include <las/LasReader.hpp>
-#include <las/LasWriter.hpp>
+#include "jace/proxy/mil/nga/giat/geowave/store/CloseableIterator.h"
+using jace::proxy::mil::nga::giat::geowave::store::CloseableIterator;
 
-#include <bpf/BpfReader.hpp>
-#include <bpf/BpfWriter.hpp>
+namespace pdal
+{
 
-#include <sbet/SbetReader.hpp>
-#include <sbet/SbetWriter.hpp>
+class PDAL_DLL GeoWaveReader : public Reader
+{
+public:
+    SET_STAGE_NAME("readers.geowave", "Geowave Reader")
+	SET_STAGE_LINK("http://pdal.io/stages/drivers.geowave.reader.html")
 
-#include <qfit/QfitReader.hpp>
-#include <terrasolid/TerrasolidReader.hpp>
-#include <text/TextWriter.hpp>
+private:
 
-#include <geowave/GeoWaveReader.hpp>
-#include <geowave/GeoWaveWriter.hpp>
+    virtual void processOptions(const Options& ops);
+    virtual void addDimensions(PointContext ctx);
+	virtual void ready(PointContext ctx);
+	virtual point_count_t read(PointBuffer& buf, point_count_t count);
+	virtual void done(PointContextRef ctx);
+
+	int createJvm();
+	int createCloseableIterator();
+
+	std::string m_zookeeperUrl;
+	std::string m_instanceName;
+	std::string m_username;
+	std::string m_password;
+	std::string m_tableNamespace;
+
+	Bounds<double> m_bounds;
+	std::string m_poly;
+
+	CloseableIterator m_iterator;
+
+#ifdef PDAL_HAVE_GEOS
+	GEOSContextHandle_t m_geosEnvironment;
+    GEOSGeometry* m_geosGeometry; 
+    GEOSPreparedGeometry const* m_geosPreparedGeometry;
+#else   
+    void* m_geosEnvironment;
+    void* m_geosGeometry;
+    void* m_geosPreparedGeometry;
+    typedef struct GEOSGeometry* GEOSGeometryHS;
+#endif
+
+	Bounds <double> computeBounds(GEOSGeometry const *geometry);
+};
+
+} // namespace pdal
