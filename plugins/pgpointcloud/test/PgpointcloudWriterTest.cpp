@@ -43,11 +43,44 @@
 
 using namespace pdal;
 
+namespace { // anonymous
+
+std::string getTestConnBase()
+{
+  std::string s;
+  if ( ! testDbPort.empty() )
+    s += " port='" + testDbPort + "'";
+  if ( ! testDbHost.empty() )
+    s += " host='" + testDbHost + "'";
+  if ( ! testDbUser.empty() )
+    s += " user='" + testDbUser + "'";
+  return s;
+}
+
+std::string getConnectionString(const std::string& dbname)
+{
+  std::string s = getTestConnBase()
+                + " dbname='" + dbname + "'";
+  return s;
+}
+
+std::string getTestDBTempConn()
+{
+  return getConnectionString(testDbTempname);
+}
+
+std::string getMasterDBConn()
+{
+  return getConnectionString(testDbName);
+}
+
+} // anonymous namespace
+
 Options getWriterOptions()
 {
     Options options;
 
-    options.add(Option("connection", testDbTempConn));
+    options.add(Option("connection", getTestDBTempConn()));
     options.add(Option("table", "pdal_test_table"));
     options.add(Option("srid", "4326"));
     options.add(Option("capacity", "10000"));
@@ -64,7 +97,8 @@ protected:
     {
         try
         {
-            m_masterConnection = pg_connect(testDbConn);
+            std::string connstr = getMasterDBConn();
+            m_masterConnection = pg_connect( connstr );
         } catch (pdal::pdal_error&)
         {
             m_masterConnection = 0;
@@ -84,8 +118,7 @@ protected:
 
         try
         {
-
-            m_testConnection = pg_connect( testDbTempConn);
+            m_testConnection = pg_connect( getTestDBTempConn() );
         } catch (pdal::pdal_error&)
         {
             m_testConnection = 0;
