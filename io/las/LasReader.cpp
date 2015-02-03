@@ -363,7 +363,10 @@ SpatialReference LasReader::getSrsFromGeotiffVlr()
             STT_ASCII);
 
     geotiff.setTags();
-    srs.setFromUserInput(geotiff.getWkt(false, false));
+    std::string wkt(geotiff.getWkt(false, false));
+    if (wkt.size())
+        srs.setFromUserInput(geotiff.getWkt(false, false));
+
 #endif
     return srs;
 }

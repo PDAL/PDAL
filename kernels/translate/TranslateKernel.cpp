@@ -191,14 +191,15 @@ std::unique_ptr<Stage> TranslateKernel::makeReader(Options readerOptions)
 
 Stage* TranslateKernel::makeTranslate(Options translateOptions, Stage* reader_stage)
 {
+    StageFactory f;
     Stage* final_stage = reader_stage;
     Options readerOptions = reader_stage->getOptions();
     std::map<std::string, Options> extra_opts = getExtraStageOptions();
     if (!m_bounds.empty() || !m_wkt.empty() || !m_output_srs.empty() || extra_opts.size() > 0)
     {
         Stage* next_stage = reader_stage;
-        Stage* crop_stage(0);
-        Stage* reprojection_stage(0);
+        Stage* crop_stage = f.createFilter("filters.crop");
+        Stage* reprojection_stage = f.createFilter("filters.reprojection");
 
 
         bool bHaveReprojection = extra_opts.find("filters.reprojection") != extra_opts.end();
@@ -261,7 +262,6 @@ Stage* TranslateKernel::makeTranslate(Options translateOptions, Stage* reader_st
 
     if (boost::iequals(m_decimation_method, "VoxelGrid"))
     {
-        StageFactory f;
         Stage* decimation_stage(f.createFilter("filters.pclblock"));
 
         Options decimationOptions;
@@ -294,7 +294,6 @@ Stage* TranslateKernel::makeTranslate(Options translateOptions, Stage* reader_st
         decimationOptions.add("step", m_decimation_step);
         decimationOptions.add("offset", m_decimation_offset);
         decimationOptions.add("limit", m_decimation_limit);
-        StageFactory f;
         Stage* decimation_stage(f.createFilter("filters.decimation"));
         decimation_stage->setInput(final_stage);
         decimation_stage->setOptions(decimationOptions);

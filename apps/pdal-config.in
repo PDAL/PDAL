@@ -53,7 +53,7 @@ case $1 in
     ;;
     
   --version)
-    echo @VERSION@
+    echo @PDAL_VERSION_STRING@
     ;;
 
   *)
