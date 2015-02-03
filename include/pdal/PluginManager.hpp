@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
+* Copyright (c) 2015, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,37 +32,66 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+// The PluginManager was modeled very closely after the work of Gigi Sayfan in
+// the Dr. Dobbs article:
+// http://www.drdobbs.com/cpp/building-your-own-plugin-framework-part/206503957
+// The original work was released under the Apache License v2.
+
 #pragma once
 
-#include <pdal/Kernel.hpp>
-#include <pdal/PipelineReader.hpp>
-#include <pdal/PipelineManager.hpp>
-#include <pdal/PipelineWriter.hpp>
 #include <pdal/plugin.h>
-#include <pdal/PointBuffer.hpp>
-#include <pdal/util/FileUtils.hpp>
 
-extern "C" int32_t PipelineKernel_ExitFunc();
-extern "C" PF_ExitFunc PipelineKernel_InitPlugin();
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace pdal
 {
-    
-class PDAL_DLL PipelineKernel : public Kernel
+
+class DynamicLibrary;
+
+/*
+ * I think PluginManager can eventually be a private header, only accessible
+ * through the factories, but we'll leave it as public for now.
+ */
+class PluginManager
 {
+    typedef std::map<std::string, std::shared_ptr<DynamicLibrary> > DynamicLibraryMap;
+    typedef std::vector<PF_ExitFunc> ExitFuncVec;
+    typedef std::vector<PF_RegisterParams> RegistrationVec;
+
 public:
-    static void * create();
-    static int32_t destroy(void *);
-    int execute();
+    typedef std::map<std::string, PF_RegisterParams> RegistrationMap;
+
+    static PluginManager & getInstance();
+    static int32_t initializePlugin(PF_InitFunc initFunc);
+    int32_t loadAll(PF_PluginType type);
+    int32_t loadAll(const std::string & pluginDirectory, PF_PluginType type);
+    int32_t guessLoadByPath(const std::string & driverName);
+    int32_t loadByPath(const std::string & path, PF_PluginType type);
+
+    void * createObject(const std::string & objectType);
+
+    int32_t shutdown();
+    static int32_t registerObject(const std::string & objectType, const PF_RegisterParams * params);
+    const RegistrationMap & getRegistrationMap();
 
 private:
-    PipelineKernel();
-    void addSwitches();
-    void validateSwitches();
-    
-    std::string m_inputFile;
-    std::string m_pipelineFile;
-    bool m_validate;
+    ~PluginManager();
+    PluginManager();
+    PluginManager(const PluginManager &);
+
+    DynamicLibrary * loadLibrary(const std::string & path, std::string & errorString);
+
+    bool inInitializePlugin_;
+    DynamicLibraryMap dynamicLibraryMap_;
+    ExitFuncVec exitFuncVec_;
+
+    RegistrationMap tempExactMatchMap_;
+
+    RegistrationMap exactMatchMap_;
 };
 
-} // pdal
+} // namespace pdal
+

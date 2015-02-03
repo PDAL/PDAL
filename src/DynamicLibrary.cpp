@@ -32,50 +32,91 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+// The DynamicLibrary was modeled very closely after the work of Gigi Sayfan in
+// the Dr. Dobbs article:
+// http://www.drdobbs.com/cpp/building-your-own-plugin-framework-part/206503957
+// The original work was released under the Apache License v2.
 
-#include <pdal/Filter.hpp>
-#include <pdal/Stage.hpp>
+#ifdef WIN32
+  #include <Windows.h>
+#else
+  #include <dlfcn.h>
+#endif
 
-#include <memory>
+#include "DynamicLibrary.h"
+#include <sstream>
+#include <iostream>
 
 namespace pdal
 {
 
-class Options;
-class PointBuffer;
-class PointContext;
-
-typedef std::shared_ptr<PointBuffer> PointBufferPtr;
-typedef PointContext PointContextRef;
-
-class PDAL_DLL GroundFilter : public Filter
+DynamicLibrary::DynamicLibrary(void * handle) : handle_(handle)
 {
-public:
-    GroundFilter() : Filter()
-    {}
+}
 
-    static void * create();
-    static int32_t destroy(void *);
-    std::string getName() const;
+DynamicLibrary::~DynamicLibrary()
+{
+  if (handle_)
+  {
+  #ifndef WIN32
+    ::dlclose(handle_);
+  #else
+    ::FreeLibrary((HMODULE)handle_);
+  #endif
+  }
+}
 
-private:
-    double m_maxWindowSize;
-    double m_slope;
-    double m_maxDistance;
-    double m_initialDistance;
-    double m_cellSize;
-    bool m_classify;
-    bool m_extract;
+DynamicLibrary * DynamicLibrary::load(const std::string & name, 
+                                      std::string & errorString)
+{
+  if (name.empty()) 
+  {
+    errorString = "Empty path.";
+    return NULL;
+  }
+  
+  void * handle = NULL;
 
-    virtual void addDimensions(PointContextRef ctx);
-    virtual void processOptions(const Options& options);
-    virtual void ready(PointContext ctx) {};
-    virtual PointBufferSet run(PointBufferPtr buf);
+  #ifdef WIN32
+    handle = ::LoadLibraryA(name.c_str());
+    if (handle == NULL)
+    {
+      DWORD errorCode = ::GetLastError();
+      std::stringstream ss;
+      ss << std::string("LoadLibrary(") << name 
+         << std::string(") Failed. errorCode: ") 
+         << errorCode; 
+      errorString = ss.str();
+    }
+  #else
+    handle = ::dlopen(name.c_str(), RTLD_NOW);
+    if (!handle) 
+    {
+      std::string dlErrorString;
+      const char *zErrorString = ::dlerror();
+      if (zErrorString)
+        dlErrorString = zErrorString;
+      errorString += "Failed to load \"" + name + '"';
+      if(dlErrorString.size())
+        errorString += ": " + dlErrorString;
+      return NULL;
+    }
 
-    GroundFilter& operator=(const GroundFilter&); // not implemented
-    GroundFilter(const GroundFilter&); // not implemented
-};
+  #endif
+  return new DynamicLibrary(handle);
+}
+
+void * DynamicLibrary::getSymbol(const std::string & symbol)
+{
+  if (!handle_)
+    return NULL;
+  
+  #ifdef WIN32
+    return ::GetProcAddress((HMODULE)handle_, symbol.c_str());
+  #else
+    return ::dlsym(handle_, symbol.c_str());
+  #endif
+}
 
 } // namespace pdal
 

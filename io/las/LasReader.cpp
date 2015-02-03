@@ -38,16 +38,16 @@
 #include <string.h>
 
 #include <pdal/Extractor.hpp>
-#include <pdal/util/FileUtils.hpp>
 #include <pdal/IStream.hpp>
-#include <pdal/QuickInfo.hpp>
-#include <pdal/PointBuffer.hpp>
 #include <pdal/Metadata.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/QuickInfo.hpp>
+#include <pdal/util/FileUtils.hpp>
 
+#include "GeotiffSupport.hpp"
 #include "LasHeader.hpp"
 #include "VariableLengthRecord.hpp"
 #include "ZipPoint.hpp"
-#include "GeotiffSupport.hpp"
 
 namespace pdal
 {
@@ -108,6 +108,16 @@ void LasReader::processOptions(const Options& options)
     m_error.setFilename(m_filename);
 }
 
+static PluginInfo const s_info {
+    "readers.las",
+    "ASPRS LAS 1.0 - 1.4 read support. LASzip support is also \n" \
+        "enabled through this driver if LASzip was found diring \n" \
+        "compilation.",
+    "http://pdal.io/stages/readers.las.html" };
+
+CREATE_STATIC_PLUGIN(LasReader, Reader, s_info)
+
+std::string LasReader::getName() const { return s_info.name; }
 
 QuickInfo LasReader::inspect()
 {

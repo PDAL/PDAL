@@ -34,8 +34,17 @@
 
 #include "RandomKernel.hpp"
 
+#include <boost/program_options.hpp>
+
 namespace pdal
 {
+
+static PluginInfo const s_info {
+    "kernels.random",
+    "Random Kernel",
+    "http://pdal.io/kernels/kernels.random.html" };
+
+CREATE_STATIC_PLUGIN(RandomKernel, Kernel, s_info)
 
 RandomKernel::RandomKernel()
     : Kernel()
@@ -90,7 +99,7 @@ Stage* RandomKernel::makeReader(Options readerOptions)
     }
 
     StageFactory factory;
-    ReaderPtr reader_stage(factory.createReader("readers.faux"));
+    std::unique_ptr<Stage> reader_stage(factory.createStage("readers.faux"));
     reader_stage->setOptions(readerOptions);
 
     return reader_stage.get();
@@ -158,7 +167,7 @@ int RandomKernel::execute()
 
     Stage* final_stage = makeReader(readerOptions);
 
-    Writer* writer = KernelSupport::makeWriter(m_outputFile, final_stage);
+    Stage* writer = KernelSupport::makeWriter(m_outputFile, final_stage);
     writer->setOptions(writerOptions);
     PointContext ctx;
 

@@ -35,12 +35,19 @@
 #include "DeltaKernel.hpp"
 
 #include <boost/format.hpp>
-
+#include <boost/program_options.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
 namespace pdal
 {
+
+static PluginInfo const s_info {
+    "kernels.delta",
+    "Delta Kernel",
+    "http://pdal.io/kernels/kernels.delta.html" };
+
+CREATE_STATIC_PLUGIN(DeltaKernel, Kernel, s_info)
 
 DeltaKernel::DeltaKernel()
     : Kernel()

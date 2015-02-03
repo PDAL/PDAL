@@ -35,8 +35,12 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
+#include <pdal/plugin.h>
 
 #include <memory>
+
+extern "C" int32_t ReprojectionFilter_ExitFunc();
+extern "C" PF_ExitFunc ReprojectionFilter_InitPlugin();
 
 namespace pdal
 {
@@ -49,11 +53,12 @@ class Debug;
 class PDAL_DLL ReprojectionFilter : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.reprojection", "Reproject data using GDAL from one coordinate system to another.")
-    SET_STAGE_LINK("http://www.pdal.io/stages/filters.reprojection.html")
-
     ReprojectionFilter() : m_inferInputSRS(true)
     {}
+
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
 private:
     virtual void processOptions(const Options& options);

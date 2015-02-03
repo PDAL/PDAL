@@ -33,14 +33,23 @@
 ****************************************************************************/
 
 #include "TranslateKernel.hpp"
-#include <pdal/KernelSupport.hpp>
 
 #include <pdal/BufferReader.hpp>
+#include <pdal/KernelSupport.hpp>
 #include <pdal/StageFactory.hpp>
 #include <reprojection/ReprojectionFilter.hpp>
 
+#include <boost/program_options.hpp>
+
 namespace pdal
 {
+
+static PluginInfo const s_info {
+    "kernels.translate",
+    "Translate Kernel",
+    "http://pdal.io/kernels/kernels.translate.html" };
+
+CREATE_STATIC_PLUGIN(TranslateKernel, Kernel, s_info)
 
 TranslateKernel::TranslateKernel() :
     Kernel(), m_bCompress(false),
@@ -198,8 +207,8 @@ Stage* TranslateKernel::makeTranslate(Options translateOptions, Stage* reader_st
     if (!m_bounds.empty() || !m_wkt.empty() || !m_output_srs.empty() || extra_opts.size() > 0)
     {
         Stage* next_stage = reader_stage;
-        Stage* crop_stage = f.createFilter("filters.crop");
-        Stage* reprojection_stage = f.createFilter("filters.reprojection");
+        Stage* crop_stage = f.createStage2("filters.crop");
+        Stage* reprojection_stage = f.createStage2("filters.reprojection");
 
 
         bool bHaveReprojection = extra_opts.find("filters.reprojection") != extra_opts.end();
@@ -262,7 +271,7 @@ Stage* TranslateKernel::makeTranslate(Options translateOptions, Stage* reader_st
 
     if (boost::iequals(m_decimation_method, "VoxelGrid"))
     {
-        Stage* decimation_stage(f.createFilter("filters.pclblock"));
+        Stage* decimation_stage(f.createStage2("filters.pclblock"));
 
         Options decimationOptions;
         std::ostringstream ss;
@@ -294,7 +303,7 @@ Stage* TranslateKernel::makeTranslate(Options translateOptions, Stage* reader_st
         decimationOptions.add("step", m_decimation_step);
         decimationOptions.add("offset", m_decimation_offset);
         decimationOptions.add("limit", m_decimation_limit);
-        Stage* decimation_stage(f.createFilter("filters.decimation"));
+        Stage* decimation_stage(f.createStage2("filters.decimation"));
         decimation_stage->setInput(final_stage);
         decimation_stage->setOptions(decimationOptions);
         final_stage = decimation_stage;
@@ -349,7 +358,7 @@ int TranslateKernel::execute()
         cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
         (UserCallback *)new HeartbeatCallback();
 
-    WriterPtr writer( KernelSupport::makeWriter(m_outputFile, finalStage));
+    std::unique_ptr<Stage> writer( KernelSupport::makeWriter(m_outputFile, finalStage));
     if (!m_output_srs.empty())
         writer->setSpatialReference(m_output_srs);
 

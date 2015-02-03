@@ -46,44 +46,24 @@ static std::string xml_str_ref = "<Name>my_string</Name><Value>Yow.</Value><Desc
 
 using namespace pdal;
 
-namespace
-{
-    using namespace std;
-
-    static bool hasOption(vector<Option> const& opts, string const& name)
-    {
-        bool found = false;
-        for (const auto& o : opts)
-            if (o.getName() == name)
-                found = true;
-        return found;
-    }
-}
-
 TEST(OptionsTest, test_static_options)
 {
     Options ops;
 
     StageFactory f;
-    ReaderPtr reader(f.createReader("readers.faux"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(ops);
-    FilterPtr crop(f.createFilter("filters.crop"));
+    std::unique_ptr<Stage> crop(f.createStage("filters.crop"));
     EXPECT_TRUE(crop.get());
     crop->setOptions(ops);
     crop->setInput(reader.get());
-    std::map<std::string, pdal::StageInfo> const& drivers = f.getStageInfos();
-    typedef std::map<std::string, pdal::StageInfo>::const_iterator Iterator;
-    Iterator i = drivers.find("filters.crop");
-    if (i != drivers.end())
-    {
-      const std::vector<Option> opts = i->second.getProvidedOptions();
-      EXPECT_EQ(opts.size(), 3u);
-      EXPECT_TRUE(hasOption(opts, "bounds"));
-      EXPECT_TRUE(hasOption(opts, "inside"));
-      EXPECT_TRUE(hasOption(opts, "polygon"));
-      EXPECT_FALSE(hasOption(opts, "metes"));
-    }
+    auto opts = crop->getDefaultOptions();
+    EXPECT_EQ(opts.getOptions().size(), 3u);
+    EXPECT_TRUE(opts.hasOption("bounds"));
+    EXPECT_TRUE(opts.hasOption("inside"));
+    EXPECT_TRUE(opts.hasOption("polygon"));
+    EXPECT_FALSE(opts.hasOption("metes"));
 }
 
 TEST(OptionsTest, test_option_writing)

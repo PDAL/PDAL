@@ -54,15 +54,15 @@ public:
     ~PipelineManager();
 
     // Use these to manually add stages into the pipeline manager.
-    Reader* addReader(const std::string& type);
-    Filter* addFilter(const std::string& type, Stage *prevStage);
-    Filter* addFilter(const std::string& type,
+    Stage* addReader(const std::string& type);
+    Stage* addFilter(const std::string& type, Stage *prevStage);
+    Stage* addFilter(const std::string& type,
         const std::vector<Stage *>& prevStages);
-    Writer* addWriter(const std::string& type, Stage *prevStage);
+    Stage* addWriter(const std::string& type, Stage *prevStage);
 
     // returns true if the pipeline endpoint is a writer
     bool isWriterPipeline() const
-        { return (bool)dynamic_cast<Writer *>(getStage()); }
+        { return (bool)getStage(); }
 
     // return the pipeline reader endpoint (or NULL, if not a reader pipeline)
     Stage* getStage() const

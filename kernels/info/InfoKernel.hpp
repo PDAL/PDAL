@@ -35,11 +35,11 @@
 #pragma once
 
 #include <pdal/Kernel.hpp>
-
+#include <pdal/KernelSupport.hpp>
+#include <pdal/plugin.h>
+#include <pdal/PointBuffer.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/util/FileUtils.hpp>
-#include <pdal/PointBuffer.hpp>
-
 
 #ifdef __clang__
 #pragma GCC diagnostic ignored "-Wtautological-constant-out-of-range-compare"
@@ -48,9 +48,10 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/tokenizer.hpp>
 
-#include <pdal/KernelSupport.hpp>
-
 typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+
+extern "C" int32_t InfoKernel_ExitFunc();
+extern "C" PF_ExitFunc InfoKernel_InitPlugin();
 
 namespace pdal
 {
@@ -58,13 +59,12 @@ namespace pdal
 class PDAL_DLL InfoKernel : public Kernel
 {
 public:
-    SET_KERNEL_NAME ("info", "Info Kernel")
-    SET_KERNEL_LINK ("http://pdal.io/kernels/kernels.info.html")
-
-    InfoKernel();
+    static void * create();
+    static int32_t destroy(void *);
     int execute(); // overrride
 
 private:
+    InfoKernel();
     void addSwitches(); // overrride
     void validateSwitches(); // overrride
 
@@ -93,7 +93,7 @@ private:
 
     Stage *m_statsStage;
     Stage *m_hexbinStage;
-    Reader *m_reader;
+    Stage *m_reader;
 
     MetadataNode m_tree;
     std::unique_ptr<PipelineManager> m_manager;

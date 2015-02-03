@@ -35,9 +35,9 @@
 
 #pragma once
 
-#include <pdal/util/FileUtils.hpp>
-
 #include <pdal/Kernel.hpp>
+#include <pdal/pdal_export.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 namespace pdal
 {
@@ -45,13 +45,12 @@ namespace pdal
 class PDAL_DLL SmoothKernel : public Kernel
 {
 public:
-    SET_KERNEL_NAME("smooth", "Smooth Kernel")
-    SET_KERNEL_LINK("http://pdal.io/kernels/kernels.smooth.html")
-
-    SmoothKernel() {};
+    static void * create();
+    static int32_t destroy(void *);
     int execute();
 
 private:
+    SmoothKernel() {};
     void addSwitches();
     void validateSwitches();
 

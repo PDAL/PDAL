@@ -50,12 +50,12 @@ TEST(PipelineManagerTest, basic)
 
     Options optsR;
     optsR.add("filename", Support::datapath("las/1.2-with-color.las"));
-    Reader* reader = mgr.addReader("readers.las");
+    Stage* reader = mgr.addReader("readers.las");
     reader->setOptions(optsR);
 
     Options optsW;
     optsW.add("filename", outfile, "file to write to");
-    Writer* writer = mgr.addWriter("writers.las", reader);
+    Stage* writer = mgr.addWriter("writers.las", reader);
     writer->setOptions(optsW);
 
     point_count_t np = mgr.execute();
@@ -77,11 +77,11 @@ TEST(PipelineManagerTest, PipelineManagerTest_test2)
 
         Options optsR1;
         optsR1.add("filename", Support::datapath("1.2-with-color.las"));
-        Reader* reader1 = mgr.addReader("readers.las", optsR1);
+        Stage* reader1 = mgr.addReader("readers.las", optsR1);
 
         Options optsR2;
         optsR2.add("filename", Support::datapath("1.2-with-color.las"));
-        Reader* reader2 = mgr.addReader("readers.las", optsR2);
+        Stage* reader2 = mgr.addReader("readers.las", optsR2);
 
         Options optsMF;
         std::vector<Stage*> vec;
@@ -95,7 +95,7 @@ TEST(PipelineManagerTest, PipelineManagerTest_test2)
 
         Options optsW;
         optsW.add("filename", "temp.las", "file to write to");
-        Writer* writer = mgr.addWriter("writers.las", *filter, optsW);
+        Stage* writer = mgr.addWriter("writers.las", *filter, optsW);
         point_count_t np = mgr.execute();
 
         EXPECT_TRUE(np == 1065 * 2);

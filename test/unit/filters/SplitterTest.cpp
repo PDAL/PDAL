@@ -47,7 +47,7 @@ TEST(SplitterTest, test_tile_filter)
     // create the reader
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
-    ReaderPtr r(f.createReader("readers.las"));
+    std::unique_ptr<Stage> r(f.createStage("readers.las"));
     EXPECT_TRUE(r.get());
     r->setOptions(ops1);
 
@@ -56,7 +56,7 @@ TEST(SplitterTest, test_tile_filter)
     o.add(length);
 
     // create the tile filter and prepare
-    FilterPtr s(f.createFilter("filters.splitter"));
+    std::unique_ptr<Stage> s(f.createStage("filters.splitter"));
     EXPECT_TRUE(s.get());
     s->setOptions(o);
     s->setInput(r.get());

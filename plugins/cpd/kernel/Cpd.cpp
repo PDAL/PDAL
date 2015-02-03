@@ -40,17 +40,15 @@
 #include "chipper/ChipperFilter.hpp"
 #include "crop/CropFilter.hpp"
 
-
-CREATE_KERNEL_PLUGIN(cpd, pdal::CpdKernel)
-
-
 namespace pdal
 {
 
+static PluginInfo const s_info {
+    "kernels.cpd",
+    "CPD Kernel",
+    "http://pdal.io/kernels/kernels.cpd.html" };
 
-CpdKernel::CpdKernel()
-    : Kernel()
-{}
+CREATE_SHARED_PLUGIN(CpdKernel, Kernel, s_info)
 
 
 void CpdKernel::validateSwitches()
@@ -135,7 +133,7 @@ PointBufferPtr CpdKernel::readFile(const std::string& filename, PointContext& ct
         Options boundsOptions;
         boundsOptions.add("bounds", m_bounds);
         StageFactory f;
-        std::shared_ptr<Stage> crop(f.createFilter("filters.crop"));
+        std::shared_ptr<Stage> crop(f.createStage("filters.crop"));
         crop->setInput(source.get());
         crop->setOptions(boundsOptions);
         source = crop;
@@ -249,7 +247,7 @@ int CpdKernel::execute()
     writerOpts.add<bool>("keep_unspecified", false);
     setCommonOptions(writerOpts);
 
-    std::unique_ptr<Writer> writer(KernelSupport::makeWriter(m_output, &reader));
+    std::unique_ptr<Stage> writer(KernelSupport::makeWriter(m_output, &reader));
     writer->setOptions(writerOpts + writer->getOptions());
     writer->prepare(ctxout);
     writer->execute(ctxout);

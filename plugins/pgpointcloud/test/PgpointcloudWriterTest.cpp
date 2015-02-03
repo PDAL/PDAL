@@ -162,8 +162,8 @@ namespace
 void optionsWrite(const Options& writerOps)
 {
     StageFactory f;
-    WriterPtr writer(f.createWriter("writers.pgpointcloud"));
-    ReaderPtr reader(f.createReader("readers.las"));
+    std::unique_ptr<Stage> writer(f.createStage("writers.pgpointcloud"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.las"));
 
     EXPECT_TRUE(writer.get());
     EXPECT_TRUE(reader.get());
@@ -214,7 +214,7 @@ TEST_F(PgpointcloudWriterTest, writeXYZ)
     optionsWrite(ops);
 
     PointContext ctx;
-    ReaderPtr reader(StageFactory().createReader("readers.pgpointcloud"));
+    std::unique_ptr<Stage> reader(StageFactory().createStage("readers.pgpointcloud"));
     reader->setOptions(getDbOptions());
 
     reader->prepare(ctx);
@@ -228,7 +228,7 @@ TEST_F(PgpointcloudWriterTest, writeXYZ)
 TEST_F(PgpointcloudWriterTest, writetNoPointcloudExtension)
 {
     StageFactory f;
-    WriterPtr writer(f.createWriter("writers.pgpointcloud"));
+    std::unique_ptr<Stage> writer(f.createStage("writers.pgpointcloud"));
     EXPECT_TRUE(writer.get());
 
     executeOnTestDb("DROP EXTENSION pointcloud");
@@ -237,7 +237,7 @@ TEST_F(PgpointcloudWriterTest, writetNoPointcloudExtension)
 
     const Option opt_filename("filename", file);
 
-    ReaderPtr reader(f.createReader("readers.las"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.las"));
     EXPECT_TRUE(reader.get());
     Options options;
     options.add(opt_filename);

@@ -34,9 +34,6 @@
 
 #include <pdal/PipelineManager.hpp>
 
-#include <pdal/Filter.hpp>
-#include <pdal/Reader.hpp>
-#include <pdal/Writer.hpp>
 #include <pdal/Utils.hpp>
 
 //#include <boost/optional.hpp>
@@ -55,36 +52,36 @@ PipelineManager::~PipelineManager()
 }
 
 
-Reader* PipelineManager::addReader(const std::string& type)
+Stage* PipelineManager::addReader(const std::string& type)
 {
-    Reader *r = m_factory.createReader(type);
+    Stage *r = m_factory.createStage2(type);
     m_stages.push_back(r);
     return r;
 }
 
 
-Filter* PipelineManager::addFilter(const std::string& type,
+Stage* PipelineManager::addFilter(const std::string& type,
     const std::vector<Stage *>& prevStages)
 {
-    Filter* stage = m_factory.createFilter(type);
+    Stage* stage = m_factory.createStage2(type);
     stage->setInput(prevStages);
     m_stages.push_back(stage);
     return stage;
 }
 
 
-Filter* PipelineManager::addFilter(const std::string& type, Stage *prevStage)
+Stage* PipelineManager::addFilter(const std::string& type, Stage *prevStage)
 {
-    Filter* stage = m_factory.createFilter(type);
+    Stage* stage = m_factory.createStage2(type);
     stage->setInput(prevStage);
     m_stages.push_back(stage);
     return stage;
 }
 
 
-Writer* PipelineManager::addWriter(const std::string& type, Stage *prevStage)
+Stage* PipelineManager::addWriter(const std::string& type, Stage *prevStage)
 {
-    Writer* writer = m_factory.createWriter(type);
+    Stage* writer = m_factory.createStage2(type);
     writer->setInput(prevStage);
     m_stages.push_back(writer);
     return writer;

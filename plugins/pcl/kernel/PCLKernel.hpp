@@ -42,13 +42,12 @@ namespace pdal
 class PDAL_DLL PCLKernel : public Kernel
 {
 public:
-    SET_KERNEL_NAME("pcl", "PCL Kernel")
-    SET_KERNEL_LINK("http://pdal.io/kernels/kernels.pcl.html")
-
-    PCLKernel();
+    static void * create();
+    static int32_t destroy(void *);
     int execute();
 
 private:
+    PCLKernel();
     void addSwitches();
     void validateSwitches();
 

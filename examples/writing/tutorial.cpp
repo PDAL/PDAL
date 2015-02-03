@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
     reader.addBuffer(buffer);
 
     pdal::StageFactory f;
-    pdal::WriterPtr writer(f.createWriter("writers.las"));
+    std::unique_ptr<Stage> writer(f.createStage("writers.las"));
     writer->setInput(&reader);
     writer->setOptions(options);
     writer->prepare(ctx);

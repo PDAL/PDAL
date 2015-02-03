@@ -32,16 +32,26 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <ctime>
+#include "FauxReader.hpp"
 
+#include <pdal/Options.hpp>
 #include <pdal/PointBuffer.hpp>
 
 #include <boost/algorithm/string.hpp>
 
-#include "FauxReader.hpp"
+#include <ctime>
 
 namespace pdal
 {
+
+static PluginInfo const s_info {
+    "readers.faux",
+    "Faux Reader",
+    "http://pdal.io/stages/readers.faux.html" };
+
+CREATE_STATIC_PLUGIN(FauxReader, Reader, s_info)
+
+std::string FauxReader::getName() const { return s_info.name; }
 
 static Mode string2mode(const std::string& str)
 {
@@ -59,7 +69,6 @@ FauxReader::FauxReader()
 {
     m_count = 0;
 }
-
 
 void FauxReader::processOptions(const Options& options)
 {
@@ -86,6 +95,14 @@ void FauxReader::processOptions(const Options& options)
     m_numReturns = options.getValueOrDefault("number_of_returns", 0);
     if (m_numReturns > 10)
         throw pdal_error("faux: number_of_returns option must be 10 or less.");
+}
+
+Options FauxReader::getDefaultOptions()
+{
+    Options options;
+    Option count("num_points", 10, "Number of points");
+    options.add(count);
+    return options;
 }
 
 

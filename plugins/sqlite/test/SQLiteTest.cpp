@@ -109,10 +109,10 @@ void testReadWrite(bool compression, bool scaling)
     lasReadOpts.add("filename", Support::datapath("las/1.2-with-color.las"));
     lasReadOpts.add("count", 11);
 
-    ReaderPtr lasReader(lasRc());
+    std::unique_ptr<Stage> lasReader(lasRc());
     lasReader->setOptions(lasReadOpts);
 
-    WriterPtr sqliteWriter(sqliteWc());
+    std::unique_ptr<Stage> sqliteWriter(sqliteWc());
     sqliteWriter->setOptions(sqliteOptions);
     sqliteWriter->setInput(lasReader.get());
 
@@ -121,7 +121,7 @@ void testReadWrite(bool compression, bool scaling)
     sqliteWriter->execute(ctx);
 
     // Done - now read back.
-    ReaderPtr sqliteReader(sqliteRc());
+    std::unique_ptr<Stage> sqliteReader(sqliteRc());
     sqliteReader->setOptions(sqliteOptions);
 
     PointContext ctx2;

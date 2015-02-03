@@ -39,6 +39,15 @@
 namespace pdal
 {
 
+static PluginInfo const s_info {
+    "writers.sbet",
+    "SBET Writer",
+    "http://pdal.io/stages/writers.sbet.html" };
+
+CREATE_STATIC_PLUGIN(SbetWriter, Writer, s_info)
+
+std::string SbetWriter::getName() const { return s_info.name; }
+
 void SbetWriter::processOptions(const Options& options)
 {
     m_filename = options.getOption("filename").getValue<std::string>();

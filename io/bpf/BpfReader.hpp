@@ -34,26 +34,28 @@
 
 #pragma once
 
-#include <vector>
-
 #include <pdal/Charbuf.hpp>
 #include <pdal/IStream.hpp>
+#include <pdal/pdal_export.hpp>
+#include <pdal/plugin.h>
 #include <pdal/Reader.hpp>
 
 #include "BpfHeader.hpp"
 
+#include <vector>
+
+extern "C" int32_t BpfReader_ExitFunc();
+extern "C" PF_ExitFunc BpfReader_InitPlugin();
+
 namespace pdal
 {
-
-#define BPFREADERDOC "\"Binary Point Format\" (BPF) reader support. BPF is a simple \n" \
-                     "DoD and research format that is used by some sensor and \n" \
-                     "processing chains."
 
 class PDAL_DLL BpfReader : public Reader
 {
 public:
-    SET_STAGE_NAME("readers.bpf", BPFREADERDOC)
-    SET_STAGE_LINK("http://pdal.io/stages/readers.bpf.html")
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
     virtual point_count_t numPoints() const
         {  return (point_count_t)m_header.m_numPts; }

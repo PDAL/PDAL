@@ -60,7 +60,7 @@ TEST(LogTest, test_one)
     {
         PointContext ctx;
 
-        ReaderPtr reader(f.createReader("readers.faux"));
+        std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
         reader->setOptions(opts);
         reader->prepare(ctx);
 
@@ -140,14 +140,14 @@ TEST(LogTest, test_two_a)
     }
 
     {
-        ReaderPtr reader(f.createReader("readers.faux"));
+        std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
         reader->setOptions(reader_opts);
 
-        FilterPtr xfilter(f.createFilter("filters.programmable"));
+        std::unique_ptr<Stage> xfilter(f.createStage("filters.programmable"));
         xfilter->setOptions(xfilter_opts);
         xfilter->setInput(reader.get());
 
-        FilterPtr yfilter(f.createFilter("filters.programmable"));
+        std::unique_ptr<Stage> yfilter(f.createStage("filters.programmable"));
         yfilter->setOptions(yfilter_opts);
         yfilter->setInput(xfilter.get());
 
@@ -239,14 +239,14 @@ TEST(LogTest, test_two_b)
     }
 
     {
-        ReaderPtr reader(f.createReader("readers.faux"));
+        std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
         reader->setOptions(reader_opts);
 
-        FilterPtr xfilter(f.createFilter("filters.programmable"));
+        std::unique_ptr<Stage> xfilter(f.createStage("filters.programmable"));
         xfilter->setOptions(xfilter_opts);
         xfilter->setInput(reader.get());
 
-        FilterPtr yfilter(f.createFilter("filters.programmable"));
+        std::unique_ptr<Stage> yfilter(f.createStage("filters.programmable"));
         yfilter->setOptions(yfilter_opts);
         yfilter->setInput(xfilter.get());
 
@@ -328,10 +328,10 @@ TEST(LogTest, test_three)
     }
 
     {
-        ReaderPtr reader(f.createReader("readers.faux"));
+        std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
         reader->setOptions(reader_opts);
 
-        FilterPtr xfilter(f.createFilter("filters.programmable"));
+        std::unique_ptr<Stage> xfilter(f.createStage("filters.programmable"));
         xfilter->setOptions(xfilter_opts);
         xfilter->setInput(reader.get());
 

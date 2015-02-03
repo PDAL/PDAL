@@ -35,6 +35,10 @@
 #pragma once
 
 #include <pdal/Kernel.hpp>
+#include <pdal/plugin.h>
+
+extern "C" int32_t TranslateKernel_ExitFunc();
+extern "C" PF_ExitFunc TranslateKernel_InitPlugin();
 
 namespace pdal
 {
@@ -42,13 +46,12 @@ namespace pdal
 class PDAL_DLL TranslateKernel : public Kernel
 {
 public:
-    SET_KERNEL_NAME ("translate", "Translate Kernel")
-    SET_KERNEL_LINK ("http://pdal.io/kernels/kernels.translate.html")
- 
-    TranslateKernel();
+    static void * create();
+    static int32_t destroy(void *);
     int execute();
 
 private:
+    TranslateKernel();
     void addSwitches();
     void validateSwitches();
 

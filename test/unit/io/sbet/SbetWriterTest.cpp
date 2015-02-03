@@ -66,7 +66,7 @@ TEST(SbetWriterTest, testConstructor)
     writer.setOptions(makeWriterOptions());
     writer.setInput(&reader);
 
-    EXPECT_TRUE(writer.getDescription() == "SBET Writer");
+    //EXPECT_TRUE(writer.getDescription() == "SBET Writer");
     EXPECT_EQ(writer.getName(), "writers.sbet");
 }
 

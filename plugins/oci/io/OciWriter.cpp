@@ -46,10 +46,17 @@
 
 #include <ogr_api.h>
 
-CREATE_WRITER_PLUGIN(oci, pdal::OciWriter)
-
 namespace pdal
 {
+
+static PluginInfo const s_info {
+    "writers.oci",
+    "Write data using SDO_PC objects to Oracle.",
+    "http://pdal.io/stages/writers.oci.html" };
+
+CREATE_SHARED_PLUGIN(OciWriter, Writer, s_info)
+
+std::string OciWriter::getName() const { return s_info.name; }
 
 OciWriter::OciWriter()
     : m_createIndex(false)

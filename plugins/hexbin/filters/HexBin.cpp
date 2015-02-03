@@ -39,10 +39,15 @@
 
 using namespace hexer;
 
-CREATE_FILTER_PLUGIN(hexbin, pdal::HexBin)
-
 namespace pdal
 {
+
+static PluginInfo const s_info {
+    "filters.hexbin",
+    "Tessellate the point's X/Y domain and determine point density and/or point boundary.",
+    "http://pdal.io/stages/filters.hexbin.html" };
+
+CREATE_SHARED_PLUGIN(HexBin, Filter, s_info)
 
 void HexBin::processOptions(const Options& options)
 {

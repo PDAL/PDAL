@@ -36,7 +36,7 @@
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Options.hpp>
-#include <pdal/UserCallback.hpp>
+//#include <pdal/UserCallback.hpp>
 #include <pdal/Stage.hpp>
 
 #include <string>
@@ -45,8 +45,6 @@ namespace pdal
 {
 
 class Writer;
-
-typedef std::unique_ptr<Writer> WriterPtr;
 
 class PointBuffer;
 class UserCallback;
@@ -58,7 +56,7 @@ class PDAL_DLL Writer : public Stage
 
 public:
     /// Constructs an end-stage consumer of a pipeline of data -- a writer
-    Writer() : m_callback(new UserCallback)
+    Writer() //: m_callback(new UserCallback)
         {}
 
     /// Serialize the pipeline to a boost::property_tree::ptree
@@ -66,11 +64,11 @@ public:
     virtual boost::property_tree::ptree serializePipeline() const;
 
     /// Sets the UserCallback to manage progress/cancel operations
-    void setUserCallback(UserCallback* userCallback)
-        { m_callback.reset(userCallback); }
+//    void setUserCallback(UserCallback* userCallback)
+//        { m_callback.reset(userCallback); }
 
 protected:
-    std::unique_ptr<UserCallback> m_callback;
+//    std::unique_ptr<UserCallback> m_callback;
     std::string m_filename;
     XForm m_xXform;
     XForm m_yXform;
@@ -89,7 +87,7 @@ private:
     }
     virtual void writerProcessOptions(const Options& options);
     virtual void write(const PointBuffer& /*buffer*/)
-        { std::cerr << "Can't write with stage = " << getName() << "!\n"; }
+        { /*std::cerr << "Can't write with stage = " << getName() << "!\n";*/ }
 
     Writer& operator=(const Writer&); // not implemented
     Writer(const Writer&); // not implemented

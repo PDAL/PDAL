@@ -36,6 +36,10 @@
 
 #include <pdal/Filter.hpp>
 #include <pdal/PointBufferIter.hpp>
+#include <pdal/plugin.h>
+
+extern "C" int32_t SortFilter_ExitFunc();
+extern "C" PF_ExitFunc SortFilter_InitPlugin();
 
 namespace pdal
 {
@@ -43,11 +47,12 @@ namespace pdal
 class PDAL_DLL SortFilter : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.sort", "Sort data based on a given dimension.")
-    SET_STAGE_LINK("http://www.pdal.io/stages/filters.sort.html")
-
     SortFilter()
     {}
+
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
 private:
     // Dimension on which to sort.

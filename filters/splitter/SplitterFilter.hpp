@@ -35,6 +35,10 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
+#include <pdal/plugin.h>
+
+extern "C" int32_t SplitterFilter_ExitFunc();
+extern "C" PF_ExitFunc SplitterFilter_InitPlugin();
 
 namespace pdal
 {
@@ -42,13 +46,14 @@ namespace pdal
 class PDAL_DLL SplitterFilter : public pdal::Filter
 {
 public:
-    SET_STAGE_NAME("filters.splitter", "Split data based on a X/Y box length.")
-    SET_STAGE_LINK("http://pdal.io/stages/filters.splitter.html")
-
     SplitterFilter() : Filter()
         {}
 
-    static Options getDefaultOptions();
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+
+    Options getDefaultOptions();
 
 private:
     uint32_t m_length;

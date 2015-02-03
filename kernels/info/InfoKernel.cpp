@@ -41,8 +41,17 @@
 #include <pdal/PDALUtils.hpp>
 #include <pdal/pdal_config.hpp>
 
+#include <boost/program_options.hpp>
+
 namespace pdal
 {
+
+static PluginInfo const s_info {
+    "kernels.info",
+    "Info Kernel",
+    "http://pdal.io/kernels/kernels.info.html" };
+
+CREATE_STATIC_PLUGIN(InfoKernel, Kernel, s_info)
 
 InfoKernel::InfoKernel()
     : m_showStats(false)
@@ -346,7 +355,7 @@ int InfoKernel::execute()
 
     m_manager = std::unique_ptr<PipelineManager>(
         KernelSupport::makePipeline(filename));
-    m_reader = static_cast<Reader *>(m_manager->getStage());
+    m_reader = m_manager->getStage();
     Stage *stage = m_reader;
 
     if (m_Dimensions.size())

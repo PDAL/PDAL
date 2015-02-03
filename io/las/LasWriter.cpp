@@ -48,6 +48,17 @@
 namespace pdal
 {
 
+static PluginInfo const s_info {
+    "writers.las",
+    "ASPRS LAS 1.0 - 1.4 writer. LASzip support is also \n" \
+        "available if enabled at compile-time. Note that LAZ \n" \
+        "does not provide LAS 1.4 support at this time.",
+    "http://pdal.io/stages/writers.las.html" };
+
+CREATE_STATIC_PLUGIN(LasWriter, Writer, s_info)
+
+std::string LasWriter::getName() const { return s_info.name; }
+
 void LasWriter::construct()
 {
     m_xXform.m_scale = .01;

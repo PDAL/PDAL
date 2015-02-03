@@ -54,7 +54,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test1)
     readerOps.add("num_points", 1000);
     readerOps.add("mode", "ramp");
 
-    ReaderPtr reader(f.createReader("readers.faux"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
     reader->setOptions(readerOps);
 
     // keep all points where x less than 1.0
@@ -76,7 +76,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test1)
     opts.add(module);
     opts.add(function);
 
-    FilterPtr filter(f.createFilter("filters.predicate"));
+    std::unique_ptr<Stage> filter(f.createStage("filters.predicate"));
     filter->setOptions(opts);
     filter->setInput(reader.get());
 
@@ -114,7 +114,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test2)
     readerOps.add("num_points", 1000);
     readerOps.add("mode", "ramp");
 
-    ReaderPtr reader(f.createReader("readers.faux"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
     reader->setOptions(readerOps);
 
     Option source("source",
@@ -134,7 +134,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test2)
     opts.add(module);
     opts.add(function);
 
-    FilterPtr filter(f.createFilter("filters.predicate"));
+    std::unique_ptr<Stage> filter(f.createStage("filters.predicate"));
     filter->setOptions(opts);
     filter->setInput(reader.get());
 
@@ -172,7 +172,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test3)
     readerOpts.add("num_points", 1000);
     readerOpts.add("mode", "ramp");
 
-    ReaderPtr reader(f.createReader("readers.faux"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
     reader->setOptions(readerOpts);
 
     // keep all points where x less than 1.0
@@ -194,7 +194,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test3)
     opts1.add(module1);
     opts1.add(function1);
 
-    FilterPtr filter1(f.createFilter("filters.predicate"));
+    std::unique_ptr<Stage> filter1(f.createStage("filters.predicate"));
     filter1->setOptions(opts1);
     filter1->setInput(reader.get());
 
@@ -217,7 +217,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test3)
     opts2.add(module2);
     opts2.add(function2);
 
-    FilterPtr filter2(f.createFilter("filters.predicate"));
+    std::unique_ptr<Stage> filter2(f.createStage("filters.predicate"));
     filter2->setOptions(opts2);
     filter2->setInput(filter1.get());
 
@@ -253,7 +253,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test4)
     readerOpts.add("num_points", 1000);
     readerOpts.add("mode", "ramp");
 
-    ReaderPtr reader(f.createReader("readers.faux"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
     reader->setOptions(readerOpts);
 
     const Option source("source",
@@ -273,7 +273,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test4)
     opts.add(module);
     opts.add(function);
 
-    FilterPtr filter(f.createFilter("filters.predicate"));
+    std::unique_ptr<Stage> filter(f.createStage("filters.predicate"));
     filter->setOptions(opts);
     filter->setInput(reader.get());
 
@@ -308,7 +308,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test5)
     readerOpts.add("num_points", 1000);
     readerOpts.add("mode", "ramp");
 
-    ReaderPtr reader(f.createReader("readers.faux"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
     reader->setOptions(readerOpts);
 
     const Option source("source",
@@ -328,7 +328,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test5)
     opts.add(module);
     opts.add(function);
 
-    FilterPtr filter(f.createFilter("filters.predicate"));
+    std::unique_ptr<Stage> filter(f.createStage("filters.predicate"));
     filter->setOptions(opts);
     filter->setInput(reader.get());
 

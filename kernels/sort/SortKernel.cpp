@@ -34,13 +34,21 @@
 
 #include "SortKernel.hpp"
 
+#include <pdal/BufferReader.hpp>
 #include <pdal/KernelSupport.hpp>
 #include <pdal/StageFactory.hpp>
 
-#include <pdal/BufferReader.hpp>
+#include <boost/program_options.hpp>
 
 namespace pdal
 {
+
+static PluginInfo const s_info {
+    "kernels.sort",
+    "Sort Kernel",
+    "http://pdal.io/kernels/kernels.sort.html" };
+
+CREATE_STATIC_PLUGIN(SortKernel, Kernel, s_info)
 
 SortKernel::SortKernel() :
     Kernel(), m_bCompress(false), m_bForwardMetadata(false)
@@ -129,7 +137,7 @@ int SortKernel::execute()
     sortOptions.add<uint32_t>("verbose", getVerboseLevel());
 
     StageFactory f;
-    Filter* sortStage = f.createFilter("filters.mortonorder");
+    Stage* sortStage = f.createStage2("filters.mortonorder");
     sortStage->setInput(&bufferReader);
     sortStage->setOptions(sortOptions);
 
@@ -147,7 +155,7 @@ int SortKernel::execute()
         cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
         (UserCallback *)new HeartbeatCallback();
 
-    WriterPtr writer(KernelSupport::makeWriter(m_outputFile, sortStage));
+    std::unique_ptr<Stage> writer(KernelSupport::makeWriter(m_outputFile, sortStage));
 
     // Some options are inferred by makeWriter based on filename
     // (compression, driver type, etc).

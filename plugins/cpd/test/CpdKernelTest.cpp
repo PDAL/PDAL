@@ -65,17 +65,17 @@ protected:
 
         Options readerOptions;
         readerOptions.add("filename", m_x);
-        Reader * reader = mrManager.addReader("readers.las");
+        Stage * reader = mrManager.addReader("readers.las");
         reader->setOptions(readerOptions);
 
         Options transformationOptions;
         transformationOptions.add("matrix", "0.36 0.48 -0.8 1\n-0.8 0.6 0.0 2\n0.48 0.64 0.60 3\n0 0 0 1");
-        Filter * filter = mrManager.addFilter("filters.transformation", reader);
+        Stage* filter = mrManager.addFilter("filters.transformation", reader);
         filter->setOptions(transformationOptions);
 
         Options writerOptions;
         writerOptions.add("filename", m_y);
-        Writer * writer = mrManager.addWriter("writers.las", reader);
+        Stage * writer = mrManager.addWriter("writers.las", reader);
         writer->setOptions(writerOptions);
 
         point_count_t np = mrManager.execute();
@@ -94,13 +94,13 @@ protected:
 };
 
 
-}
+} // namespace
 
 
 TEST_F(CpdKernelTest, Execution)
 {
-    KernelFactory kernelFactory;
-    std::unique_ptr<Kernel> cpdKernel = kernelFactory.createKernel("cpd");
+    KernelFactory f;
+    std::unique_ptr<Kernel> cpdKernel = f.createKernel("kernels.cpd");
 
     int argc = 7;
     const char * argv[7] = {
@@ -112,9 +112,11 @@ TEST_F(CpdKernelTest, Execution)
         "-o",
         m_outfile.c_str()
     };
+
     int retval = cpdKernel->run(argc, argv, "cpd");
     EXPECT_EQ(0, retval);
 }
 
 
-}
+} // namespace pdal
+

@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2015, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,68 +32,37 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+// The DynamicLibrary was modeled very closely after the work of Gigi Sayfan in
+// the Dr. Dobbs article:
+// http://www.drdobbs.com/cpp/building-your-own-plugin-framework-part/206503957
+// The original work was released under the Apache License v2.
+
 #pragma once
 
 #include <string>
-#include <vector>
-#include <iosfwd>
-
-#include <pdal/pdal_internal.hpp>
 
 namespace pdal
 {
 
-class Kernel;
-
-class PDAL_DLL KernelInfo
+class DynamicLibrary
 {
-    friend class KernelBase;
 public:
 
-    /// Constructor.
-    ///
-    KernelInfo(std::string const& kernelName, std::string const& kernelDescription="");
-
-    KernelInfo& operator=(const KernelInfo& rhs);
-    KernelInfo(const KernelInfo&);
-
-    /// Destructor.
-    virtual ~KernelInfo() {};
-
-    inline std::string const& getName() const
-    {
-        return m_name;
-    }
-
-    inline std::string const& getDescription() const
-    {
-        return m_description;
-    }
-
-    inline void setInfoLink(std::string const& link)
-    {
-        m_link = link;
-    }
-
-    inline std::string const& getInfoLink() const
-    {
-        return m_link;
-    }
+  static DynamicLibrary * load(const std::string & path, 
+                               std::string &errorString);
+  ~DynamicLibrary();
+  
+  void * getSymbol(const std::string & name);
 
 private:
-    std::string m_name;
-    std::string m_description;
-    std::string m_link;
+  DynamicLibrary();
+  
+  DynamicLibrary(void * handle);
+  DynamicLibrary(const DynamicLibrary &);
+  
+private:
+  void * handle_;  
 };
-
-/// Output operator for serialization
-///
-/// @param ostr    The output stream to write to
-/// @param src     The KernelInfo to be serialized out
-///
-/// @return The output stream
-
-PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const KernelInfo& src);
 
 } // namespace pdal
 

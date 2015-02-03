@@ -38,12 +38,21 @@
 
 #include <pdal/PDALUtils.hpp>
 
+#include <boost/program_options.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
 using boost::property_tree::ptree;
 
-namespace pdal {
+namespace pdal
+{
+
+static PluginInfo const s_info {
+    "kernels.diff",
+    "Diff Kernel",
+    "http://pdal.io/kernels/kernels.diff.html" };
+
+CREATE_STATIC_PLUGIN(DiffKernel, Kernel, s_info)
 
 DiffKernel::DiffKernel()
     : Kernel()
@@ -226,3 +235,4 @@ int DiffKernel::execute()
 }
 
 } // namespace pdal
+

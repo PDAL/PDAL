@@ -51,7 +51,7 @@ TEST(CropFilterTest, test_crop)
     opts.add("bounds", srcBounds);
     opts.add("num_points", 1000);
     opts.add("mode", "ramp");
-    ReaderPtr reader(f.createReader("readers.faux"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(opts);
 
@@ -60,7 +60,7 @@ TEST(CropFilterTest, test_crop)
     Options cropOpts;
     cropOpts.add("bounds", dstBounds);
 
-    FilterPtr filter(f.createFilter("filters.crop"));
+    std::unique_ptr<Stage> filter(f.createStage("filters.crop"));
     EXPECT_TRUE(filter.get());
     filter->setOptions(cropOpts);
     filter->setInput(reader.get());
@@ -115,7 +115,7 @@ TEST(CropFilterTest, test_crop_polygon)
 
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
-    ReaderPtr reader(f.createReader("readers.las"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.las"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(ops1);
 
@@ -136,7 +136,7 @@ TEST(CropFilterTest, test_crop_polygon)
     Option polygon("polygon", wkt, "");
     options.add(polygon);
 
-    FilterPtr crop(f.createFilter("filters.crop"));
+    std::unique_ptr<Stage> crop(f.createStage("filters.crop"));
     EXPECT_TRUE(crop.get());
     crop->setInput(reader.get());
     crop->setOptions(options);
@@ -196,16 +196,16 @@ TEST(CropFilterTest, test_crop_polygon_reprojection)
     Option polygon("polygon", wkt, "");
     options.add(polygon);
 
-    ReaderPtr reader(f.createReader("readers.las"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.las"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(options);
 
-    FilterPtr reprojection(f.createFilter("filters.reprojection"));
+    std::unique_ptr<Stage> reprojection(f.createStage("filters.reprojection"));
     EXPECT_TRUE(reprojection.get());
     reprojection->setOptions(options);
     reprojection->setInput(reader.get());
 
-    FilterPtr crop(f.createFilter("filters.crop"));
+    std::unique_ptr<Stage> crop(f.createStage("filters.crop"));
     EXPECT_TRUE(crop.get());
     crop->setOptions(options);
     crop->setInput(reprojection.get());

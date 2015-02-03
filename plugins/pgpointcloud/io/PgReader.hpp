@@ -82,15 +82,14 @@ class PDAL_DLL PgReader : public DbReader
     };
 
 public:
-    SET_STAGE_NAME("readers.pgpointcloud",
-        "Read data from pgpointcloud format. \"query\" option needs to be a SQL statment selecting the data.")
-    SET_STAGE_LINK("http://pdal.io/stages/readers.pgpointcloud.html")
-    SET_PLUGIN_VERSION("1.0.0b1")
-
     PgReader();
     ~PgReader();
 
-    static Options getDefaultOptions();
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+
+    Options getDefaultOptions();
     virtual point_count_t getNumPoints() const;
     point_count_t getMaxPoints() const;
     std::string getDataQuery() const;

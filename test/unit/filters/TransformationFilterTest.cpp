@@ -48,8 +48,8 @@ public:
 
     TransformationFilterTest()
         : factory()
-        , reader(factory.createReader("readers.faux"))
-        , filter(factory.createFilter("filters.transformation"))
+        , reader(factory.createStage("readers.faux"))
+        , filter(factory.createStage("filters.transformation"))
     {}
 
     virtual void SetUp()
@@ -67,8 +67,8 @@ public:
     }
 
     StageFactory factory;
-    ReaderPtr reader;
-    FilterPtr filter;
+    std::unique_ptr<Stage> reader;
+    std::unique_ptr<Stage> filter;
 
 };
 

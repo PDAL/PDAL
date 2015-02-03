@@ -36,6 +36,7 @@
 
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
+#include <pdal/PluginManager.hpp>
 #include <pdal/StageFactory.hpp>
 
 #include "Support.hpp"
@@ -47,7 +48,18 @@ using namespace pdal;
 TEST(PCLBlockFilterTest, PCLBlockFilterTest_example_passthrough_xml)
 {
     StageFactory f;
-    FilterPtr filter(f.createFilter("filters.pclblock"));
+    //std::vector<std::string> nv = f.getStageNames();
+    //std::cerr << nv.size() << std::endl;
+    //for (auto name : nv)
+    //    std::cout << name << std::endl;
+    std::unique_ptr<Stage> filter(f.createStage("filters.pclblock"));
+
+    //std::unique_ptr<Stage> filter(f.createStage("filters.pclblock"));
+    //PluginManager & pm = PluginManager::getInstance();
+
+    //void * stage = pm.createObject("filters.pclblock");
+    //EXPECT_TRUE(stage);
+    //Filter * filter = (Filter*)stage;
     EXPECT_TRUE(filter.get());
 
     PipelineManager pipeline;
@@ -83,7 +95,7 @@ static void test_filter(const std::string& jsonFile,
     options.add(debug);
     options.add(verbose);
 
-    ReaderPtr reader(f.createReader("readers.las"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.las"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(options);
 
@@ -91,7 +103,7 @@ static void test_filter(const std::string& jsonFile,
     Options filter_options;
     filter_options.add(fname);
 
-    FilterPtr pcl_block(f.createFilter("filters.pclblock"));
+    std::unique_ptr<Stage> pcl_block(f.createStage("filters.pclblock"));
     EXPECT_TRUE(pcl_block.get());
     pcl_block->setOptions(filter_options);
     pcl_block->setInput(reader.get());

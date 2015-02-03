@@ -34,16 +34,21 @@
 ****************************************************************************/
 
 #include "SmoothKernel.hpp"
-#include "../filters/PCLBlock.hpp"
-#include <pdal/KernelFactory.hpp>
+
+#include "PCLBlock.hpp"
 
 #include <pdal/BufferReader.hpp>
-
-CREATE_KERNEL_PLUGIN(smooth, pdal::SmoothKernel)
+#include <pdal/KernelFactory.hpp>
 
 namespace pdal
 {
 
+static PluginInfo const s_info {
+    "kernels.smooth",
+    "Smooth Kernel",
+    "http://pdal.io/kernels/kernels.smooth.html" };
+
+CREATE_SHARED_PLUGIN(SmoothKernel, Kernel, s_info)
 
 void SmoothKernel::validateSwitches()
 {
@@ -136,7 +141,7 @@ int SmoothKernel::execute()
     smoothOptions.add("debug", isDebug());
     smoothOptions.add("verbose", getVerboseLevel());
 
-    std::unique_ptr<Stage> smoothStage(new filters::PCLBlock());
+    std::unique_ptr<Stage> smoothStage(new PCLBlock());
     smoothStage->setOptions(smoothOptions);
     smoothStage->setInput(&bufferReader);
 
@@ -144,7 +149,7 @@ int SmoothKernel::execute()
     writerOptions.add("filename", m_outputFile);
     setCommonOptions(writerOptions);
 
-    WriterPtr writer(KernelSupport::makeWriter(m_outputFile, smoothStage.get()));
+    std::unique_ptr<Stage> writer(KernelSupport::makeWriter(m_outputFile, smoothStage.get()));
     writer->setOptions(writerOptions);
 
     std::vector<std::string> cmd = getProgressShellCommand();

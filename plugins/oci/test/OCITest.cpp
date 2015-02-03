@@ -222,12 +222,12 @@ bool WriteUnprojectedData()
     PointContext ctx;
 
     StageFactory f;
-    ReaderPtr reader(f.createReader("readers.las"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.las"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(options);
     // filters::Chipper chipper(options);
     // chipper.setInput(&reader);
-    WriterPtr writer(f.createWriter("writers.oci"));
+    std::unique_ptr<Stage> writer(f.createStage("writers.oci"));
     EXPECT_TRUE(writer.get());
     writer->setOptions(options);
     writer->setInput(reader.get());
@@ -280,7 +280,7 @@ void compareAgainstSourceBuffer(PointBuffer const& candidate,
 
     PointContext tc;
     StageFactory f;
-    ReaderPtr reader(f.createReader("readers.las"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.las"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(options);
 
@@ -358,7 +358,7 @@ TEST_F(OCITest, read_unprojected_data)
     verbose.setValue<std::string>( "7");
 
     StageFactory f;
-    ReaderPtr reader(f.createReader("readers.oci"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.oci"));
     EXPECT_TRUE(reader.get());
 
     reader->setOptions(options);

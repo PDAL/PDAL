@@ -30,6 +30,7 @@ set_package_properties(PCL PROPERTIES DESCRIPTION "Point Cloud Library"
 include_directories(${PCL_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_LIST_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/filters)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/pipeline)
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 if (NOT WIN32)

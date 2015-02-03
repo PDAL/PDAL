@@ -56,6 +56,16 @@ namespace po = boost::program_options;
 namespace pdal
 {
 
+namespace
+{
+
+static void printError(const std::string& err)
+{
+    std::cout << err << std::endl;
+    std::cout << std::endl;
+}
+
+}
 
 Kernel::Kernel()
     : m_usestdin(false)
@@ -74,7 +84,7 @@ Kernel::Kernel()
 
 std::ostream& operator<<(std::ostream& ostr, const Kernel& kernel)
 {
-    ostr << "  Name: " << kernel.getName() << std::endl;
+    //ostr << "  Name: " << kernel.getName() << std::endl;
 
     return ostr;
 }
@@ -241,8 +251,8 @@ void Kernel::collectExtraOptions()
         // boost::erase_all(o, " "); // Wipe off spaces
         tokenizer option_tokens(o, equal);
         std::vector<std::string> option_split;
-        for (auto ti = option_tokens.begin(); ti != option_tokens.end(); ++ti)
-            option_split.push_back(boost::lexical_cast<std::string>(*ti));
+        for (auto const& ti : option_tokens)
+            option_split.push_back(boost::lexical_cast<std::string>(ti));
         if (!(option_split.size() == 2))
         {
             std::ostringstream oss;
@@ -256,10 +266,8 @@ void Kernel::collectExtraOptions()
 
         tokenizer name_tokens(stage_value, dot);
         std::vector<std::string> stage_values;
-        for (auto ti = name_tokens.begin(); ti != name_tokens.end(); ++ti)
-        {
-            stage_values.push_back(*ti);
-        }
+        for (auto const& ti : name_tokens)
+            stage_values.push_back(ti);
 
         std::string option_name = *stage_values.rbegin();
         std::ostringstream stage_name_ostr;
@@ -303,8 +311,8 @@ int Kernel::innerRun()
 
     if (!m_showOptions.empty())
     {
-        pdal::StageFactory factory;
-        std::cout << factory.toRST(m_showOptions) << std::endl;
+        //pdal::StageFactory factory;
+        //std::cout << factory.toRST(m_showOptions) << std::endl;
         return 0;
     }
     try
@@ -322,13 +330,6 @@ int Kernel::innerRun()
     }
 
     return execute();
-}
-
-
-void Kernel::printError(const std::string& err) const
-{
-    std::cout << err << std::endl;
-    std::cout << std::endl;
 }
 
 
@@ -356,7 +357,7 @@ void Kernel::visualize(PointBufferPtr buffer) const
     bufferReader.addBuffer(buffer);
 
     StageFactory f;
-    WriterPtr writer(f.createWriter("writers.pclvisualizer"));
+    std::unique_ptr<Stage> writer(f.createStage("writers.pclvisualizer"));
     writer->setInput(&bufferReader);
 
     PointContext ctx;
@@ -427,8 +428,8 @@ void Kernel::setCommonOptions(Options &options)
     {
         std::vector<double> scales;
         tokenizer scale_tokens(m_scales, sep);
-        for (auto t = scale_tokens.begin(); t != scale_tokens.end(); ++t)
-            scales.push_back(boost::lexical_cast<double>(*t));
+        for (auto const& t : scale_tokens)
+            scales.push_back(boost::lexical_cast<double>(t));
         if (scales.size())
         {
             if (scales.size() <= 1)
@@ -453,8 +454,8 @@ void Kernel::setCommonOptions(Options &options)
     {
         std::vector<double> offsets;
         tokenizer offset_tokens(m_offsets, sep);
-        for (auto t = offset_tokens.begin(); t != offset_tokens.end(); ++t)
-            offsets.push_back(boost::lexical_cast<double>(*t));
+        for (auto const& t : offset_tokens)
+            offsets.push_back(boost::lexical_cast<double>(t));
         if (offsets.size())
         {
             if (offsets.size() <= 1)
@@ -486,11 +487,9 @@ void Kernel::outputHelp()
 {
     outputVersion();
 
-
-    for (auto iter = m_options.begin(); iter != m_options.end(); ++iter)
+    for (auto const& iter : m_options)
     {
-        const po::options_description* options = *iter;
-        std::cout << *options;
+        std::cout << *iter;
         std::cout << std::endl;
     }
 
@@ -552,13 +551,8 @@ void Kernel::parseSwitches()
 {
     po::options_description options;
 
-    for (auto iter = m_options.begin();
-            iter != m_options.end();
-            ++iter)
-    {
-        po::options_description* sub_options = *iter;
-        options.add(*sub_options);
-    }
+    for (auto const& iter : m_options)
+        options.add(*iter);
 
     try
     {

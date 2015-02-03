@@ -32,12 +32,23 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/Utils.hpp>
-
 #include "StatsFilter.hpp"
+
+#include <pdal/pdal_export.hpp>
+#include <pdal/Utils.hpp>
 
 namespace pdal
 {
+
+static PluginInfo const s_info {
+    "filters.stats",
+    "Compute statistics about each dimension (mean, min, max, etc.)",
+    "http://pdal.io/stages/filters.stats.html" };
+
+CREATE_STATIC_PLUGIN(StatsFilter, Filter, s_info)
+
+std::string StatsFilter::getName() const { return s_info.name; }
+
 namespace stats
 {
 

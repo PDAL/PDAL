@@ -37,6 +37,7 @@
 #include <cpd/nonrigid_lowrank.hpp>
 
 #include <pdal/Kernel.hpp>
+#include <pdal/pdal_export.hpp>
 
 
 namespace pdal
@@ -46,13 +47,12 @@ namespace pdal
 class PDAL_DLL CpdKernel : public Kernel
 {
 public:
-    SET_KERNEL_NAME("cpd", "CPD Kernel")
-    SET_KERNEL_LINK("http://pdal.io/kernels/kernels.cpd.html")
-
-    CpdKernel();
+    static void * create();
+    static int32_t destroy(void *);
     int execute();
 
 private:
+    CpdKernel() {};
     void addSwitches();
     void validateSwitches();
     PointBufferPtr readFile(const std::string& filename, PointContext& ctx, arma::mat& mat);

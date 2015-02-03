@@ -1,5 +1,6 @@
 /******************************************************************************
- * Copyright (c) 2015, Bradley J Chambers (brad.chambers@gmail.com)
+ * Copyright (c) 2014, Hobu Inc., hobu.inc@gmail.com
+ * Copyright (c) 2015, Bradley J Chambers, brad.chambers@gmail.com
  *
  * All rights reserved.
  *
@@ -13,10 +14,9 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided
  *       with the distribution.
- *     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
- *       names of its contributors may be used to endorse or promote
- *       products derived from this software without specific prior
- *       written permission.
+ *     * Neither the name of the Andrew Bell or libLAS nor the names of
+ *       its contributors may be used to endorse or promote products derived
+ *       from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -32,54 +32,19 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#pragma once
-
-#include <pdal/Filter.hpp>
-#include <pdal/plugin.h>
-
-#include <memory>
-#include <map>
-#include <string>
-
-extern "C" int32_t RangeFilter_ExitFunc();
-extern "C" PF_ExitFunc RangeFilter_InitPlugin();
+#include "MergeFilter.hpp"
 
 namespace pdal
 {
 
-class Options;
-class PointBuffer;
-class PointContext;
+static PluginInfo const s_info {
+    "filters.merge",
+    "Merge data from two different readers into a single stream.",
+    "http://pdal.io/stages/filters.merge.html" };
 
-typedef std::shared_ptr<PointBuffer> PointBufferPtr;
-typedef PointContext PointContextRef;
+CREATE_STATIC_PLUGIN(MergeFilter, Filter, s_info)
 
-struct Range
-{
-    double min;
-    double max;
-};
-
-class PDAL_DLL RangeFilter : public pdal::Filter
-{
-public:
-    RangeFilter() : Filter()
-    {}
-
-    static void * create();
-    static int32_t destroy(void *);
-    std::string getName() const;
-
-private:
-    std::map<std::string, Range> m_name_map;
-    std::map<Dimension::Id::Enum, Range> m_dimensions_map;
-
-    virtual void processOptions(const Options&options);
-    virtual void ready(PointContextRef ctx);
-    virtual PointBufferSet run(PointBufferPtr buf);
-
-    RangeFilter& operator=(const RangeFilter&); // not implemented
-    RangeFilter(const RangeFilter&); // not implemented
-};
+std::string MergeFilter::getName() const { return s_info.name; }
 
 } // namespace pdal
+

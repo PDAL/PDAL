@@ -65,14 +65,14 @@ class CoreInterp;
 class PDAL_DLL P2gWriter : public pdal::Writer
 {
 public:
-    SET_STAGE_NAME("writers.p2g", "Points2Grid Writer")
-    SET_STAGE_LINK("http://pdal.io/stages/writers.p2g.html")
-    SET_PLUGIN_VERSION("1.0.0b1")
-
     P2gWriter() : Writer(), m_outputTypes(0), m_outputFormat(OUTPUT_FORMAT_ARC_ASCII) {};
     ~P2gWriter() {};
 
-    static Options getDefaultOptions();
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+
+    Options getDefaultOptions();
 
 private:
     P2gWriter& operator=(const P2gWriter&); // not implemented

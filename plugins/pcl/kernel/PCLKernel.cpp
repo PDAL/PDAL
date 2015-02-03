@@ -33,15 +33,21 @@
  ****************************************************************************/
 
 #include "PCLKernel.hpp"
-#include "../filters/PCLBlock.hpp"
-#include <pdal/KernelFactory.hpp>
+
+#include "PCLBlock.hpp"
 
 #include <pdal/BufferReader.hpp>
-
-CREATE_KERNEL_PLUGIN(pcl, pdal::PCLKernel)
+#include <pdal/KernelFactory.hpp>
 
 namespace pdal
 {
+
+static PluginInfo const s_info {
+    "kernels.pcl",
+    "PCL Kernel",
+    "http://pdal.io/kernels/kernels.pcl.html" };
+
+CREATE_SHARED_PLUGIN(PCLKernel, Kernel, s_info)
 
 PCLKernel::PCLKernel()
     : Kernel()
@@ -137,7 +143,7 @@ int PCLKernel::execute()
     pclOptions.add<bool>("debug", isDebug());
     pclOptions.add<uint32_t>("verbose", getVerboseLevel());
 
-    std::unique_ptr<Stage> pclStage(new filters::PCLBlock());
+    std::unique_ptr<Stage> pclStage(new PCLBlock());
     pclStage->setInput(&bufferReader);
     pclStage->setOptions(pclOptions);
 
@@ -158,7 +164,7 @@ int PCLKernel::execute()
         cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
         (UserCallback *)new HeartbeatCallback();
 
-    WriterPtr
+    std::unique_ptr<Stage>
         writer(KernelSupport::makeWriter(m_outputFile, pclStage.get()));
 
     // Some options are inferred by makeWriter based on filename

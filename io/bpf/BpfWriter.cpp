@@ -34,17 +34,27 @@
 
 #include "BpfWriter.hpp"
 
-#include <pdal/pdal_internal.hpp>
-
-#include <zlib.h>
-
 #include <pdal/Charbuf.hpp>
 #include <pdal/Options.hpp>
+#include <pdal/pdal_export.hpp>
+
+#include <zlib.h>
 
 #include "BpfCompressor.hpp"
 
 namespace pdal
 {
+
+static PluginInfo const s_info {
+    "writers.bpf",
+    "\"Binary Point Format\" (BPF) writer support. BPF is a simple \n" \
+        "DoD and research format that is used by some sensor and \n" \
+        "processing chains.",
+    "http://pdal.io/stages/writers.bpf.html" };
+
+CREATE_STATIC_PLUGIN(BpfWriter, Writer, s_info)
+
+std::string BpfWriter::getName() const { return s_info.name; }
 
 Options BpfWriter::getDefaultOptions()
 {

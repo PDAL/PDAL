@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pdal/Kernel.hpp>
+#include <pdal/plugin.h>
 #include <pdal/util/FileUtils.hpp>
 
 
@@ -43,19 +44,21 @@
 #include <boost/tokenizer.hpp>
 typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 
+extern "C" int32_t RandomKernel_ExitFunc();
+extern "C" PF_ExitFunc RandomKernel_InitPlugin();
+
 namespace pdal
 {
 
 class PDAL_DLL RandomKernel : public Kernel
 {
 public:
-    SET_KERNEL_NAME ("random", "Random Kernel")
-    SET_KERNEL_LINK ("http://pdal.io/kernels/kernels.random.html")
-
-    RandomKernel();
+    static void * create();
+    static int32_t destroy(void *);
     int execute();
 
 private:
+    RandomKernel();
     void addSwitches();
     void validateSwitches();
 

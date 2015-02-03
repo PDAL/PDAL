@@ -35,10 +35,14 @@
 #pragma once
 
 #include <pdal/IStream.hpp>
+#include <pdal/plugin.h>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Reader.hpp>
 
 #include "SbetCommon.hpp"
+
+extern "C" int32_t SbetReader_ExitFunc();
+extern "C" PF_ExitFunc SbetReader_InitPlugin();
 
 namespace pdal
 {
@@ -46,13 +50,14 @@ namespace pdal
 class PDAL_DLL SbetReader : public pdal::Reader
 {
 public:
-    SET_STAGE_NAME("readers.sbet", "SBET Reader")
-    SET_STAGE_LINK("http://pdal.io/stages/readers.sbet.html")
-
     SbetReader() : Reader()
         {}
 
-    static Options getDefaultOptions();
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+
+    Options getDefaultOptions();
     static Dimension::IdList getDefaultDimensions()
         { return fileDimensions(); }
 

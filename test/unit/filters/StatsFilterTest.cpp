@@ -50,7 +50,7 @@ TEST(StatsFilterTest, simple)
     ops.add("mode", "constant");
 
     StageFactory f;
-    ReaderPtr reader(f.createReader("readers.faux"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(ops);
 
@@ -92,7 +92,7 @@ TEST(StatsFilterTest, dimset)
     ops.add("mode", "constant");
 
     StageFactory f;
-    ReaderPtr reader(f.createReader("readers.faux"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(ops);
 
@@ -134,7 +134,7 @@ TEST(StatsFilterTest, metadata)
     ops.add("mode", "constant");
 
     StageFactory f;
-    ReaderPtr reader(f.createReader("readers.faux"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(ops);
 

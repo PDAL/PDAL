@@ -51,7 +51,7 @@ TEST(FauxReaderTest, test_constant_mode_sequential_iter)
 
     PointContext ctx;
     reader.prepare(ctx);
-    EXPECT_EQ(reader.getDescription(), "Faux Reader");
+    //EXPECT_EQ(reader.getDescription(), "Faux Reader");
     PointBufferSet pbSet = reader.execute(ctx);
     EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();

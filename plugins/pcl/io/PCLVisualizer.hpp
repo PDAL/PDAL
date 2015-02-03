@@ -44,11 +44,11 @@ namespace pdal
 class PDAL_DLL PclVisualizer : public pdal::Writer
 {
 public:
-    SET_STAGE_NAME("writers.pclvisualizer", "PCD Writer")
-    SET_STAGE_LINK("http://pdal.io/stages/writers.pclvisualizer.html")
-    SET_PLUGIN_VERSION("1.0.0b1")
-
     PclVisualizer() : pdal::Writer() {};
+
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
 private:
     virtual void processOptions(const Options&) {};

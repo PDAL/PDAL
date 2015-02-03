@@ -87,14 +87,14 @@ Stage *KernelSupport::makeReader(const std::string& inputFile)
         throw app_runtime_error("Cannot determine input file type of " +
             inputFile);
 
-    Stage* stage = factory.createReader(driver);
+    Stage* stage = factory.createStage2(driver);
     if (!stage)
         throw app_runtime_error("reader creation failed");
     return stage;
 }
 
 
-Writer* KernelSupport::makeWriter(const std::string& outputFile, Stage *stage)
+Stage* KernelSupport::makeWriter(const std::string& outputFile, Stage *stage)
 {
     pdal::StageFactory factory;
     std::string driver = factory.inferWriterDriver(outputFile);
@@ -103,7 +103,7 @@ Writer* KernelSupport::makeWriter(const std::string& outputFile, Stage *stage)
             outputFile);
     Options options = factory.inferWriterOptionsChanges(outputFile);
 
-    pdal::Writer* writer = factory.createWriter(driver);
+    Stage* writer = factory.createStage2(driver);
     if (!writer)
         throw app_runtime_error("writer creation failed");
     writer->setInput(stage);

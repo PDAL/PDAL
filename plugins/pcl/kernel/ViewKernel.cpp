@@ -33,12 +33,18 @@
 ****************************************************************************/
 
 #include "ViewKernel.hpp"
-#include <pdal/KernelFactory.hpp>
 
-CREATE_KERNEL_PLUGIN(view, pdal::ViewKernel)
+#include <pdal/KernelFactory.hpp>
 
 namespace pdal
 {
+
+static PluginInfo const s_info {
+    "kernels.view",
+    "View Kernel",
+    "http://pdal.io/kernels/kernels.view.html" };
+
+CREATE_SHARED_PLUGIN(ViewKernel, Kernel, s_info)
 
 // Support for parsing point numbers.  Points can be specified singly or as
 // dash-separated ranges.  i.e. 6-7,8,19-20

@@ -42,13 +42,17 @@
 
 #include <pdal/StageFactory.hpp>
 
-
-CREATE_READER_PLUGIN(rxp, pdal::RxpReader)
-
-
 namespace pdal
 {
 
+static PluginInfo const s_info {
+    "readers.rxp",
+    "RXP Reader",
+    "http://pdal.io/stages/readers.rxp.html" };
+
+CREATE_SHARED_PLUGIN(RxpReader, Reader, s_info)
+
+std::string RxpReader::getName() const { return s_info.name; }
 
 std::string extractRivlibURI(const Options& options)
 {

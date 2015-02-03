@@ -34,9 +34,18 @@
 
 #include "PipelineKernel.hpp"
 
+#include <boost/program_options.hpp>
+
 namespace pdal
 {
-    
+
+static PluginInfo const s_info {
+    "kernels.pipeline",
+    "Pipeline Kernel",
+    "http://pdal.io/kernels/kernels.pipeline.html" };
+
+CREATE_STATIC_PLUGIN(PipelineKernel, Kernel, s_info)
+
 PipelineKernel::PipelineKernel() : m_validate(false)
 {}
 

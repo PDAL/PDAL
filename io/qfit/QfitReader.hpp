@@ -38,6 +38,7 @@
 
 #include <boost/detail/endian.hpp>
 
+#include <pdal/plugin.h>
 #include <pdal/Reader.hpp>
 #include <pdal/Options.hpp>
 
@@ -63,6 +64,9 @@
         }} while(false)
 #endif
 
+extern "C" int32_t QfitReader_ExitFunc();
+extern "C" PF_ExitFunc QfitReader_InitPlugin();
+
 namespace pdal
 {
 
@@ -86,12 +90,13 @@ public:
 class PDAL_DLL QfitReader : public pdal::Reader
 {
 public:
-    SET_STAGE_NAME("readers.qfit", "QFIT Reader")
-    SET_STAGE_LINK("http://pdal.io/stages/readers.qfit.html")
-
     QfitReader();
 
-    static Options getDefaultOptions();
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+
+    Options getDefaultOptions();
     static Dimension::IdList getDefaultDimensions();
 
     std::string getFileName() const;

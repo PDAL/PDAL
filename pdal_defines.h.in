@@ -55,6 +55,8 @@
  * platform OS
  */
 #cmakedefine PDAL_PLATFORM_WIN32
+#cmakedefine PDAL_PLATFORM_OSX
+#cmakedefine PDAL_PLATFORM_LINUX
 
 /*
  * platform compiler

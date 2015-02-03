@@ -40,17 +40,17 @@
 
 using namespace pdal;
 
-TEST(RangeFilterTest, createFilter)
+TEST(RangeFilterTest, createStage)
 {
     StageFactory f;
-    std::unique_ptr<Filter> filter(f.createFilter("filters.range"));
+    std::unique_ptr<Stage> filter(f.createStage("filters.range"));
     EXPECT_TRUE(filter.get());
 }
 
 TEST(RangeFilterTest, noDimension)
 {
     StageFactory f;
-    std::unique_ptr<Filter> filter(f.createFilter("filters.range"));
+    std::unique_ptr<Stage> filter(f.createStage("filters.range"));
 
     PointContext ctx;
     EXPECT_THROW(filter->prepare(ctx), pdal_error);
@@ -62,7 +62,7 @@ TEST(RangeFilterTest, noRange)
     rangeOps.add("dimension", "Z");
     
     StageFactory f;
-    std::unique_ptr<Filter> filter(f.createFilter("filters.range"));
+    std::unique_ptr<Stage> filter(f.createStage("filters.range"));
     filter->setOptions(rangeOps);
 
     PointContext ctx;
@@ -79,7 +79,7 @@ TEST(RangeFilterTest, singleDimension)
     ops.add("num_points", 10);
 
     StageFactory f;
-    std::unique_ptr<Reader> reader(f.createReader("readers.faux"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
     reader->setOptions(ops);
 
     Options range;
@@ -92,7 +92,7 @@ TEST(RangeFilterTest, singleDimension)
     Options rangeOps;
     rangeOps.add(dim);
     
-    std::unique_ptr<Filter> filter(f.createFilter("filters.range"));
+    std::unique_ptr<Stage> filter(f.createStage("filters.range"));
     filter->setOptions(rangeOps);
     filter->setInput(reader.get());
 
@@ -118,7 +118,7 @@ TEST(RangeFilterTest, multipleDimensions)
     ops.add("num_points", 10);
 
     StageFactory f;
-    std::unique_ptr<Reader> reader(f.createReader("readers.faux"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
     reader->setOptions(ops);
 
     Options y_range;
@@ -139,7 +139,7 @@ TEST(RangeFilterTest, multipleDimensions)
     rangeOps.add(y_dim);
     rangeOps.add(z_dim);
     
-    std::unique_ptr<Filter> filter(f.createFilter("filters.range"));
+    std::unique_ptr<Stage> filter(f.createStage("filters.range"));
     filter->setOptions(rangeOps);
     filter->setInput(reader.get());
 
@@ -168,7 +168,7 @@ TEST(RangeFilterTest, onlyMin)
     ops.add("num_points", 10);
 
     StageFactory f;
-    std::unique_ptr<Reader> reader(f.createReader("readers.faux"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
     reader->setOptions(ops);
 
     Options range;
@@ -180,7 +180,7 @@ TEST(RangeFilterTest, onlyMin)
     Options rangeOps;
     rangeOps.add(dim);
     
-    std::unique_ptr<Filter> filter(f.createFilter("filters.range"));
+    std::unique_ptr<Stage> filter(f.createStage("filters.range"));
     filter->setOptions(rangeOps);
     filter->setInput(reader.get());
 
@@ -208,7 +208,7 @@ TEST(RangeFilterTest, onlyMax)
     ops.add("num_points", 10);
 
     StageFactory f;
-    std::unique_ptr<Reader> reader(f.createReader("readers.faux"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
     reader->setOptions(ops);
 
     Options range;
@@ -220,7 +220,7 @@ TEST(RangeFilterTest, onlyMax)
     Options rangeOps;
     rangeOps.add(dim);
     
-    std::unique_ptr<Filter> filter(f.createFilter("filters.range"));
+    std::unique_ptr<Stage> filter(f.createStage("filters.range"));
     filter->setOptions(rangeOps);
     filter->setInput(reader.get());
 
@@ -248,7 +248,7 @@ TEST(RangeFilterTest, equals)
     ops.add("num_points", 10);
 
     StageFactory f;
-    std::unique_ptr<Reader> reader(f.createReader("readers.faux"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
     reader->setOptions(ops);
 
     Options range;
@@ -260,7 +260,7 @@ TEST(RangeFilterTest, equals)
     Options rangeOps;
     rangeOps.add(dim);
     
-    std::unique_ptr<Filter> filter(f.createFilter("filters.range"));
+    std::unique_ptr<Stage> filter(f.createStage("filters.range"));
     filter->setOptions(rangeOps);
     filter->setInput(reader.get());
 
@@ -284,7 +284,7 @@ TEST(RangeFilterTest, negativeValues)
     ops.add("num_points", 21);
 
     StageFactory f;
-    std::unique_ptr<Reader> reader(f.createReader("readers.faux"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
     reader->setOptions(ops);
 
     Options range;
@@ -297,7 +297,7 @@ TEST(RangeFilterTest, negativeValues)
     Options rangeOps;
     rangeOps.add(dim);
     
-    std::unique_ptr<Filter> filter(f.createFilter("filters.range"));
+    std::unique_ptr<Stage> filter(f.createStage("filters.range"));
     filter->setOptions(rangeOps);
     filter->setInput(reader.get());
 

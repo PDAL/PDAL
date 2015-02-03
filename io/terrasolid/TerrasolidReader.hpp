@@ -34,14 +34,17 @@
 
 #pragma once
 
-#include <pdal/Reader.hpp>
 #include <pdal/Options.hpp>
+#include <pdal/plugin.h>
+#include <pdal/Reader.hpp>
+
+#include <boost/detail/endian.hpp>
 
 #include <memory>
 #include <vector>
 
-#include <boost/detail/endian.hpp>
-
+extern "C" int32_t TerrasolidReader_ExitFunc();
+extern "C" PF_ExitFunc TerrasolidReader_InitPlugin();
 
 namespace pdal
 {
@@ -95,11 +98,13 @@ public:
 class PDAL_DLL TerrasolidReader : public pdal::Reader
 {
 public:
-    SET_STAGE_NAME("readers.terrasolid", "TerraSolid Reader")
-
     TerrasolidReader() : pdal::Reader(),
         m_format(TERRASOLID_Format_Unknown)
     {}
+
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
     static Dimension::IdList getDefaultDimensions();
 

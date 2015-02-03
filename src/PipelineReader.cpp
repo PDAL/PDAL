@@ -34,10 +34,8 @@
 
 #include <pdal/PipelineReader.hpp>
 
-#include <pdal/PipelineManager.hpp>
 #include <pdal/Filter.hpp>
-#include <pdal/Reader.hpp>
-#include <pdal/Writer.hpp>
+#include <pdal/PipelineManager.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/util/FileUtils.hpp>
 
@@ -240,7 +238,7 @@ Stage* PipelineReader::parseElement_anystage(const std::string& name,
 }
 
 
-Reader* PipelineReader::parseElement_Reader(const ptree& tree)
+Stage* PipelineReader::parseElement_Reader(const ptree& tree)
 {
     Options options(m_baseOptions);
 
@@ -302,13 +300,13 @@ Reader* PipelineReader::parseElement_Reader(const ptree& tree)
 
     context.validate();
 
-    Reader* reader =m_manager.addReader(type);
+    Stage* reader = m_manager.addReader(type);
     reader->setOptions(options);
     return reader;
 }
 
 
-Filter* PipelineReader::parseElement_Filter(const ptree& tree)
+Stage* PipelineReader::parseElement_Filter(const ptree& tree)
 {
     Options options(m_baseOptions);
 //    Stage* prevStage = NULL;
@@ -355,7 +353,7 @@ Filter* PipelineReader::parseElement_Filter(const ptree& tree)
         context.addType();
     }
 
-    Filter* ptr = m_manager.addFilter(type, prevStages);
+    Stage* ptr = m_manager.addFilter(type, prevStages);
     ptr->setOptions(options);
     if (dynamic_cast<MultiFilter *>(ptr))
         context.setCardinality(StageParserContext::Many);
@@ -387,7 +385,7 @@ void PipelineReader::collect_attributes(map_t& attrs, const ptree& tree)
 }
 
 
-Writer* PipelineReader::parseElement_Writer(const ptree& tree)
+Stage* PipelineReader::parseElement_Writer(const ptree& tree)
 {
     Options options(m_baseOptions);
     Stage* prevStage = NULL;
@@ -433,7 +431,7 @@ Writer* PipelineReader::parseElement_Writer(const ptree& tree)
     }
 
     context.validate();
-    Writer* writer = m_manager.addWriter(type, prevStage);
+    Stage* writer = m_manager.addWriter(type, prevStage);
     writer->setOptions(options);
     return writer;
 }
@@ -442,7 +440,7 @@ Writer* PipelineReader::parseElement_Writer(const ptree& tree)
 bool PipelineReader::parseElement_Pipeline(const ptree& tree)
 {
     Stage* stage = NULL;
-    Writer* writer = NULL;
+    Stage* writer = NULL;
 
     map_t attrs;
     collect_attributes(attrs, tree);
