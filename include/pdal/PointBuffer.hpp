@@ -267,7 +267,7 @@ protected:
 
 private:
     template<typename T_IN, typename T_OUT>
-    void convertAndSet(Dimension::Id::Enum dim, PointId idx, T_IN in);
+    bool convertAndSet(Dimension::Id::Enum dim, PointId idx, T_IN in);
 
     inline void setFieldInternal(Dimension::Id::Enum dim, PointId pointIndex,
         const void *value);
@@ -479,26 +479,54 @@ inline T PointBuffer::getFieldAs(Dimension::Id::Enum dim,
 }
 
 
+
 template<typename T_IN, typename T_OUT>
-void PointBuffer::convertAndSet(Dimension::Id::Enum dim, PointId idx, T_IN in)
+bool PointBuffer::convertAndSet(Dimension::Id::Enum dim, PointId idx, T_IN in)
 {
+// This mess, instead of just using boost::numeric_cast, is here to:
+//   1) Prevent the throwing of exceptions.  The entrance/exit of the try
+//      block seemed somewhat expensive.
+//   2) Round to nearest instead of truncation without rounding before
+//      invoking the converter.
+// 
+    using namespace boost;
+    static bool ok;
+
+    struct RangeHandler
+    {
+        void operator() (numeric::range_check_result r)
+        {
+            ok = (r == numeric::cInRange);
+        }
+    };
+
     T_OUT out;
+
+    typedef numeric::conversion_traits<T_OUT, T_IN> conv_traits;
+    typedef numeric::numeric_cast_traits<T_OUT, T_IN> cast_traits;
+    typedef numeric::converter<
+        T_OUT,
+        T_IN,
+        conv_traits,
+        RangeHandler,
+        numeric::RoundEven<T_IN>,
+        numeric::raw_converter<conv_traits>,
+        typename cast_traits::range_checking_policy>
+            localConverter;
 
 #ifdef PDAL_COMPILER_MSVC
 // warning C4127: conditional expression is constant
 #pragma warning(push)
 #pragma warning(disable:4127)
 #endif
+    ok = true;
     // This is an optimization.
     if (std::is_same<T_IN, T_OUT>::value == true)
         out = in;
     else
-    {    
-        if (std::is_integral<T_OUT>::value == true)
-            out = boost::numeric_cast<T_OUT>(lround(in));
-        else
-            out = boost::numeric_cast<T_OUT>(in);
-    }
+        out = localConverter::convert(in);
+    if (!ok)
+        return false;
 
 #ifdef PDAL_COMPILER_MSVC
 // warning C4127: conditional expression is constant
@@ -506,6 +534,7 @@ void PointBuffer::convertAndSet(Dimension::Id::Enum dim, PointId idx, T_IN in)
 #endif
 
     setFieldInternal(dim, idx, (void *)&out);
+    return true;
 }
 
 
@@ -514,45 +543,44 @@ void PointBuffer::setField(Dimension::Id::Enum dim, PointId idx, T val)
 {
     Dimension::Detail *dd = m_context.dimDetail(dim);
 
-    try {
-        switch (dd->type())
-        {
-        case Dimension::Type::Float:
-            convertAndSet<T, float>(dim, idx, val);
-            break;
-        case Dimension::Type::Double:
-            convertAndSet<T, double>(dim, idx, val);
-            break;
-        case Dimension::Type::Signed8:
-            setFieldInternal(dim, idx, &val);
-            break;
-        case Dimension::Type::Signed16:
-            convertAndSet<T, int16_t>(dim, idx, val);
-            break;
-        case Dimension::Type::Signed32:
-            convertAndSet<T, int32_t>(dim, idx, val);
-            break;
-        case Dimension::Type::Signed64:
-            convertAndSet<T, int64_t>(dim, idx, val);
-            break;
-        case Dimension::Type::Unsigned8:
-            setFieldInternal(dim, idx, &val);
-            break;
-        case Dimension::Type::Unsigned16:
-            convertAndSet<T, uint16_t>(dim, idx, val);
-            break;
-        case Dimension::Type::Unsigned32:
-            convertAndSet<T, uint32_t>(dim, idx, val);
-            break;
-        case Dimension::Type::Unsigned64:
-            convertAndSet<T, uint64_t>(dim, idx, val);
-            break;
-        case Dimension::Type::None:
-            val = 0;
-            break;
-        }
+    bool ok = true;
+    switch (dd->type())
+    {
+    case Dimension::Type::Float:
+        ok = convertAndSet<T, float>(dim, idx, val);
+        break;
+    case Dimension::Type::Double:
+        ok = convertAndSet<T, double>(dim, idx, val);
+        break;
+    case Dimension::Type::Signed8:
+        setFieldInternal(dim, idx, &val);
+        break;
+    case Dimension::Type::Signed16:
+        ok = convertAndSet<T, int16_t>(dim, idx, val);
+        break;
+    case Dimension::Type::Signed32:
+        ok = convertAndSet<T, int32_t>(dim, idx, val);
+        break;
+    case Dimension::Type::Signed64:
+        ok = convertAndSet<T, int64_t>(dim, idx, val);
+        break;
+    case Dimension::Type::Unsigned8:
+        setFieldInternal(dim, idx, &val);
+        break;
+    case Dimension::Type::Unsigned16:
+        ok = convertAndSet<T, uint16_t>(dim, idx, val);
+        break;
+    case Dimension::Type::Unsigned32:
+        ok = convertAndSet<T, uint32_t>(dim, idx, val);
+        break;
+    case Dimension::Type::Unsigned64:
+        ok = convertAndSet<T, uint64_t>(dim, idx, val);
+        break;
+    case Dimension::Type::None:
+        val = 0;
+        break;
     }
-    catch (boost::numeric::bad_numeric_cast& )
+    if (!ok)
     {
         std::ostringstream oss;
         oss << "Unable to set data and convert as requested: ";

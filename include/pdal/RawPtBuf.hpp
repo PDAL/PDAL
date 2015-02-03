@@ -84,6 +84,10 @@ public:
         if (m_numPts != 0)
             throw pdal_error("Can't set point size after points have "
                 "been added.");
+
+        //NOTE - I tried forcing all points to be aligned on 8-byte boundaries
+        // in case this would matter to the optimized memcpy, but it made
+        // no difference.  No sense wasting space for no difference.
         m_pointSize = size;
     }
 
