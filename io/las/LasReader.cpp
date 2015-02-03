@@ -398,18 +398,27 @@ void LasReader::extractVlrMetadata(MetadataNode& m)
 void LasReader::addDimensions(PointContextRef ctx)
 {
     using namespace Dimension;
-    Id::Enum ids[] = { Id::X, Id::Y, Id::Z, Id::Intensity, Id::ReturnNumber,
-        Id::NumberOfReturns, Id::ScanDirectionFlag, Id::EdgeOfFlightLine,
-        Id::Classification, Id::ScanAngleRank, Id::UserData, Id::PointSourceId,
-        Id::Unknown };
-    ctx.registerDims(ids);
+
+    ctx.registerDim(Id::X, Type::Double);
+    ctx.registerDim(Id::Y, Type::Double);
+    ctx.registerDim(Id::Z, Type::Double);
+    ctx.registerDim(Id::Intensity, Type::Unsigned16);
+    ctx.registerDim(Id::ReturnNumber, Type::Unsigned8);
+    ctx.registerDim(Id::NumberOfReturns, Type::Unsigned8);
+    ctx.registerDim(Id::ScanDirectionFlag, Type::Unsigned8);
+    ctx.registerDim(Id::EdgeOfFlightLine, Type::Unsigned8);
+    ctx.registerDim(Id::Classification, Type::Unsigned8);
+    ctx.registerDim(Id::ScanAngleRank, Type::Unsigned8);
+    ctx.registerDim(Id::UserData, Type::Unsigned8);
+    ctx.registerDim(Id::PointSourceId, Type::Unsigned16);
 
     if (m_lasHeader.hasTime())
-        ctx.registerDim(Id::GpsTime);
+        ctx.registerDim(Id::GpsTime, Type::Double);
     if (m_lasHeader.hasColor())
     {
-        Id::Enum ids[] = { Id::Red, Id::Green, Id::Blue, Id::Unknown };
-        ctx.registerDims(ids);
+        ctx.registerDim(Id::Red, Type::Unsigned16);
+        ctx.registerDim(Id::Green, Type::Unsigned16);
+        ctx.registerDim(Id::Blue, Type::Unsigned16);
     }
     if (m_lasHeader.hasInfrared())
         ctx.registerDim(Id::Infrared);
