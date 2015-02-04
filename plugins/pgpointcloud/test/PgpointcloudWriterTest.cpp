@@ -95,15 +95,8 @@ public:
 protected:
     virtual void SetUp()
     {
-        try
-        {
-            std::string connstr = getMasterDBConn();
-            m_masterConnection = pg_connect( connstr );
-        } catch (pdal::pdal_error&)
-        {
-            m_masterConnection = 0;
-            return;
-        }
+        std::string connstr = getMasterDBConn();
+        m_masterConnection = pg_connect( connstr );
         m_testConnection = NULL;
 
         // Silence those pesky notices
@@ -116,24 +109,14 @@ protected:
             testDbTempname << " TEMPLATE template0";
         executeOnMasterDb(createDbSql.str());
 
-        try
-        {
-            m_testConnection = pg_connect( getTestDBTempConn() );
-        } catch (pdal::pdal_error&)
-        {
-            m_testConnection = 0;
-            return;
-        }
+        m_testConnection = pg_connect( getTestDBTempConn() );
 
         executeOnTestDb("CREATE EXTENSION pointcloud");
     }
 
     void executeOnTestDb(const std::string& sql)
     {
-        if (m_testConnection)
-            pg_execute(m_testConnection, sql);
-        else
-            throw std::runtime_error("Not connected to test database for testing!");
+        pg_execute(m_testConnection, sql);
     }
 
     virtual void TearDown()
@@ -154,22 +137,12 @@ private:
 
     void executeOnMasterDb(const std::string& sql)
     {
-        if (m_masterConnection)
-            pg_execute(m_masterConnection, sql);
-        else
-            throw std::runtime_error("Not connected to database for testing!");
+        pg_execute(m_masterConnection, sql);
     }
 
     void execute(PGconn* connection, const std::string& sql)
     {
-        if (connection)
-        {
-            pg_execute(connection, sql);
-        }
-        else
-        {
-            throw std::runtime_error("Not connected to database for testing");
-        }
+        pg_execute(connection, sql);
     }
 
     void dropTestDb()
