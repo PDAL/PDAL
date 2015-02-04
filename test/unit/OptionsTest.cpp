@@ -282,10 +282,10 @@ TEST(OptionsTest, Options_test_add_vs_put)
 
 TEST(OptionsTest, Options_test_bool)
 {
-    Option a("a","true", "");
-    Option b("b","false", "");
-    Option c("c",true);
-    Option d("d",false);
+    Option a("a", "true", "");
+    Option b("b", "false", "");
+    Option c("c", true);
+    Option d("d", false);
 
     bool av = a.getValue<bool>();
     bool bv = b.getValue<bool>();
@@ -297,3 +297,32 @@ TEST(OptionsTest, Options_test_bool)
     EXPECT_EQ(cv, true);
     EXPECT_EQ(dv, false);
 }
+
+TEST(OptionsTest, stringsplit)
+{
+    Option a("a", "This, is,a, test  ,,");
+    std::vector<std::string> slist = a.getValue<std::vector<std::string>>();
+    EXPECT_EQ(slist.size(), (size_t)4);
+    EXPECT_EQ(slist[0], "This");
+    EXPECT_EQ(slist[1], "is");
+    EXPECT_EQ(slist[2], "a");
+    EXPECT_EQ(slist[3], "test");
+}
+
+TEST(OptionsTest, implicitdefault)
+{
+    Options ops;
+    ops.add("a", "This, is,a, test  ,,");
+    ops.add("b", 25);
+
+    int i = ops.getValueOrDefault<int>("c");
+    EXPECT_EQ(i, 0);
+    i = ops.getValueOrDefault<int>("b");
+    EXPECT_EQ(i, 25);
+    std::vector<std::string> slist =
+        ops.getValueOrDefault<std::vector<std::string>>("d");
+    EXPECT_EQ(slist.size(), (size_t)0);
+    slist = ops.getValueOrDefault<std::vector<std::string>>("a");
+    EXPECT_EQ(slist.size(), (size_t)4);
+}
+

@@ -171,13 +171,33 @@ void Utils::eatwhitespace(istream& s)
     return;
 }
 
+
+void Utils::removeLeadingBlanks(std::string& s)
+{
+    size_t pos = 0;
+    // Note, that this should be OK in C++11, which guarantees a NULL.
+    while (isspace(s[pos]))
+        pos++;
+    s = s.substr(pos);
+}
+
+
 void Utils::removeTrailingBlanks(std::string& s)
 {
-    size_t pos = s.size();
-    while (isspace(s[--pos]))
-        ;
-    s = s.substr(0, pos);
+    size_t pos = s.size() - 1;
+    while (isspace(s[pos]))
+    {
+        if (pos == 0)
+        {
+            s.clear();
+            return;
+        }
+        else
+            pos--;
+    }
+    s = s.substr(0, pos + 1);
 }
+
 
 bool Utils::eatcharacter(istream& s, char x)
 {
