@@ -34,12 +34,14 @@ PDAL_ADD_PLUGIN(writer_libname writer pgpointcloud
 # PgPointCloud tests
 #
 if (BUILD_PGPOINTCLOUD_TESTS)
-	set(PGPOINTCLOUD_TEST_DB_HOST localhost CACHE STRING
+	set(PGPOINTCLOUD_TEST_DB_USER $ENV{PGUSER} CACHE STRING
+            "Postgres test database user, must be able to create databases")
+	set(PGPOINTCLOUD_TEST_DB_HOST $ENV{PGHOST} CACHE STRING
             "Postgres test database host")
-	set(PGPOINTCLOUD_TEST_DB_PORT 5432 CACHE STRING
+	set(PGPOINTCLOUD_TEST_DB_PORT $ENV{PGPORT} CACHE STRING
             "Postgres test database port")
-	set(PGPOINTCLOUD_TEST_DB_NAME pdal_test CACHE STRING
-            "Postgres test database name, must exist and must be able to create databases")
+	set(PGPOINTCLOUD_TEST_DB_NAME template1 CACHE STRING
+            "Postgres master database name, must exist")
 	set(PGPOINTCLOUD_TEST_DB_TEMPNAME pdal_test_tmp CACHE STRING
             "Postgres test database temp database name")
 
