@@ -193,6 +193,7 @@ namespace Utils
 
     // aid to operator>> parsers
     PDAL_DLL void eatwhitespace(std::istream& s);
+    PDAL_DLL void removeLeadingBlanks(std::string& s);
     PDAL_DLL void removeTrailingBlanks(std::string& s);
     // if char found, eats it and returns true; otherwise, don't eat it and
     // then return false
