@@ -451,12 +451,12 @@ void PgWriter::writeTile(PointBuffer const& buffer)
 
     std::vector<char> storage(m_packedPointSize);
     std::string hexrep;
-    hexrep.resize(m_packedPointSize * buffer.size() * 2);
+    size_t maxHexrepSize = m_packedPointSize * buffer.size() * 2;
+    hexrep.reserve(maxHexrepSize);
 
     m_insert.clear();
-    m_insert.reserve(hexrep.size() + 3000);
+    m_insert.reserve(maxHexrepSize + 3000);
 
-    size_t pos = 0;
     for (PointId idx = 0; idx < buffer.size(); ++idx)
     {
         size_t written = readPoint(buffer, idx, storage.data());
@@ -467,8 +467,8 @@ void PgWriter::writeTile(PointBuffer const& buffer)
         static char syms[] = "0123456789ABCDEF";
         for (size_t i = 0; i != written; i++)
         {
-            hexrep[pos++] = syms[((storage[i] >> 4) & 0xf)];
-            hexrep[pos++] = syms[storage[i] & 0xf];
+            hexrep.push_back(syms[((storage[i] >> 4) & 0xf)]);
+            hexrep.push_back(syms[storage[i] & 0xf]);
         }
     }
 
