@@ -47,6 +47,7 @@ namespace pdal
 InfoKernel::InfoKernel()
     : m_showStats(false)
     , m_showSchema(false)
+    , m_showAll(false)
     , m_showMetadata(false)
     , m_boundary(false)
     , m_useJSON(false)
@@ -99,6 +100,9 @@ void InfoKernel::addSwitches()
         new po::options_description("processing options");
 
     processing_options->add_options()
+        ("all",
+         po::value<bool>(&m_showAll)->zero_tokens()->implicit_value(true),
+         "dump the schema")
         ("point,p", po::value<std::string >(&m_pointIndexes), "point to dump")
         ("query", po::value< std::string>(&m_QueryPoint),
          "A 2d or 3d point query point")
@@ -236,14 +240,33 @@ MetadataNode InfoKernel::dumpSummary(const QuickInfo& qi)
 }
 
 
-void InfoKernel::dump(std::ostream& o)
+void InfoKernel::dump(std::ostream& o, const std::string& filename)
 {
     MetadataNode root;
+    root.add("filename", filename);
 
-    if (m_showStats)
+    bool bPrepared(false);
+    if (m_showSummary || m_showAll)
     {
-        m_manager->execute();
-        root = m_statsStage->getMetadata().clone("");
+        QuickInfo qi = m_reader->preview();
+        MetadataNode summary = dumpSummary(qi).clone("summary");
+        root.add(summary);
+    }
+    if (m_showSchema || m_showAll)
+    {
+        m_manager->prepare();
+        bPrepared = true;
+        MetadataNode schema = utils::toMetadata(m_manager->context()).clone("schema");
+        root.add(schema);
+    }
+    if (!bPrepared)
+        m_manager->prepare();
+
+    m_manager->execute();
+    if (m_showStats || m_showAll)
+    {
+        MetadataNode stats = m_statsStage->getMetadata().clone("stats");
+        root.add(stats);
     }
 
     if (m_pipelineFile.size() > 0)
@@ -251,46 +274,29 @@ void InfoKernel::dump(std::ostream& o)
 
     if (m_pointIndexes.size())
     {
-        m_manager->execute();
         PointBufferSet pbSet = m_manager->buffers();
         assert(pbSet.size() == 1);
-        root = dumpPoints(*pbSet.begin());
+        MetadataNode points = dumpPoints(*pbSet.begin()).clone("points");
+        root.add(points);
     }
-
-    if (m_showSchema)
-    {
-        m_manager->prepare();
-        root = utils::toMetadata(m_manager->context());
-    }
-
     if (m_QueryPoint.size())
     {
-        m_manager->execute();
         PointBufferSet pbSet = m_manager->buffers();
         assert(pbSet.size() == 1);
         root = dumpQuery(*pbSet.begin());
     }
-
-    if (m_showSummary)
+    if (m_showMetadata || m_showAll)
     {
-        QuickInfo qi = m_reader->preview();
-        root = dumpSummary(qi);
+        MetadataNode metadata = m_reader->getMetadata().clone("metadata");
+        root.add(metadata);
     }
-
-    if (m_showMetadata)
+    if (m_boundary || m_showAll)
     {
-        m_manager->execute();
-        root = m_reader->getMetadata().clone("");
-    }
-
-    if (m_boundary)
-    {
-        m_manager->execute();
         PointBufferSet pbSet = m_manager->buffers();
         assert(pbSet.size() == 1);
-        root = m_hexbinStage->getMetadata().clone("");
+        MetadataNode boundary = m_hexbinStage->getMetadata().clone("boundary");
+        root.add(boundary);
     }
-
     if (!root.valid())
         return;
 
@@ -349,20 +355,20 @@ int InfoKernel::execute()
     Options options = m_options + readerOptions;
     m_reader->setOptions(options);
 
-    if (m_showStats)
+    if (m_showStats || m_showAll)
     {
         m_statsStage = m_manager->addFilter("filters.stats", stage);
         m_statsStage->setOptions(options);
         stage = m_statsStage;
     }
-    if (m_boundary)
+    if (m_boundary || m_showAll)
     {
         m_hexbinStage = m_manager->addFilter("filters.hexbin", stage);
         stage->setOptions(options);
         stage = m_hexbinStage;
     }
 
-    dump(std::cout);
+    dump(std::cout, filename);
 
     return 0;
 }

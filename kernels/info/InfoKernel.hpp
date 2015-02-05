@@ -68,7 +68,7 @@ private:
     void addSwitches(); // overrride
     void validateSwitches(); // overrride
 
-    void dump(std::ostream& o);
+    void dump(std::ostream& o, const std::string& filename);
 
     MetadataNode dumpPoints(PointBufferPtr buf) const;
     MetadataNode dumpStats() const;
@@ -79,6 +79,7 @@ private:
     std::string m_inputFile;
     bool m_showStats;
     bool m_showSchema;
+    bool m_showAll;
     bool m_showMetadata;
     bool m_boundary;
     pdal::Options m_options;
