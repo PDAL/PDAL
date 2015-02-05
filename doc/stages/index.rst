@@ -53,6 +53,7 @@ Filters
    filters.pclblock
    filters.predicate
    filters.programmable
+   filters.range
    filters.reprojection
    filters.sort
    filters.transformation

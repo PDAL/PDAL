@@ -41,6 +41,7 @@
 #include <ferry/FerryFilter.hpp>
 #include <merge/MergeFilter.hpp>
 #include <mortonorder/MortonOrderFilter.hpp>
+#include <range/RangeFilter.hpp>
 #include <reprojection/ReprojectionFilter.hpp>
 #include <sort/SortFilter.hpp>
 #include <splitter/SplitterFilter.hpp>

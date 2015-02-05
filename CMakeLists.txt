@@ -51,6 +51,9 @@ file(MAKE_DIRECTORY "${PDAL_OUTPUT_BIN_DIR}")
 # per http://www.cmake.org/Wiki/CMake_RPATH_handling
 SET(CMAKE_SKIP_BUILD_RPATH FALSE )
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+if (APPLE)
+    SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+endif()
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 IF (APPLE)
     SET(MACOSX_RPATH ON)
@@ -129,7 +132,8 @@ option(BUILD_PLUGIN_PCL "Choose if PCL support should be built" FALSE)
 add_feature_info("PCL plugin" BUILD_PLUGIN_PCL
     "provides PCL-based readers, writers, filters, and kernels")
 
-option(BUILD_PLUGIN_PGPOINTCLOUD "Choose if PostgreSQL PointCloud support should be built" TRUE)
+find_package(PostgreSQL QUIET)
+option(BUILD_PLUGIN_PGPOINTCLOUD "Choose if PostgreSQL PointCloud support should be built" ${POSTGRESQL_FOUND})
 add_feature_info("PostgreSQL PointCloud plugin" BUILD_PLUGIN_PGPOINTCLOUD
     "read/write PostgreSQL PointCloud objects")
 
