@@ -48,6 +48,7 @@ void HexBin::processOptions(const Options& options)
 {
     m_sampleSize = options.getValueOrDefault<uint32_t>("sample_size", 5000);
     m_density = options.getValueOrDefault<uint32_t>("threshold", 15);
+    m_outputTesselation = options.getValueOrDefault<bool>("output_tesselation", false);
 
     if (options.hasOption("edge_length"))
         m_edgeLength = options.getValueOrDefault<double>("edge_length", 0.0);
@@ -79,7 +80,7 @@ void HexBin::filter(PointBuffer& buf)
     }
 }
 
-    
+
 void HexBin::done(PointContext ctx)
 {
     m_grid->processSample();
@@ -107,22 +108,26 @@ void HexBin::done(PointContext ctx)
         "for edge_size if you want to compute one.");
     m_metadata.add("hex_offsets", offsets.str(), "Offset of hex corners from "
         "hex centers.");
-    MetadataNode hexes = m_metadata.add("hexagons");
-    for (HexIter hi = m_grid->hexBegin(); hi != m_grid->hexEnd(); ++hi)
+    if (m_outputTesselation)
     {
-        using namespace boost;
 
-        HexInfo h = *hi;
+        MetadataNode hexes = m_metadata.add("hexagons");
+        for (HexIter hi = m_grid->hexBegin(); hi != m_grid->hexEnd(); ++hi)
+        {
+            using namespace boost;
 
-        MetadataNode hex = hexes.addList("hexagon");
-        hex.add("density", h.density());
+            HexInfo h = *hi;
 
-        hex.add("gridpos", lexical_cast<std::string>(h.xgrid()) + " " +
-            lexical_cast<std::string>(h.ygrid()));
-        std::ostringstream oss;
-        // Using stream limits precision (default 6)
-        oss << "POINT (" << h.x() << " " << h.y() << ")";
-        hex.add("center", oss.str());
+            MetadataNode hex = hexes.addList("hexagon");
+            hex.add("density", h.density());
+
+            hex.add("gridpos", lexical_cast<std::string>(h.xgrid()) + " " +
+                lexical_cast<std::string>(h.ygrid()));
+            std::ostringstream oss;
+            // Using stream limits precision (default 6)
+            oss << "POINT (" << h.x() << " " << h.y() << ")";
+            hex.add("center", oss.str());
+        }
     }
 
     std::ostringstream polygon;
