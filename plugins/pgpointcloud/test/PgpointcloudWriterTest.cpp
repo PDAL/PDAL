@@ -156,7 +156,10 @@ private:
     PGconn* m_testConnection;
 };
 
-TEST_F(PgpointcloudWriterTest, testWrite)
+namespace
+{
+
+void optionsWrite(const Options& writerOps)
 {
     StageFactory f;
     WriterPtr writer(f.createWriter("writers.pgpointcloud"));
@@ -171,7 +174,7 @@ TEST_F(PgpointcloudWriterTest, testWrite)
     Options options;
     options.add("filename", file);
     reader->setOptions(options);
-    writer->setOptions(getWriterOptions());
+    writer->setOptions(writerOps);
     writer->setInput(reader.get());
 
     PointContext ctx;
@@ -186,8 +189,24 @@ TEST_F(PgpointcloudWriterTest, testWrite)
     EXPECT_EQ(count, 1065U);
 }
 
+} // unnamed namespace
 
-TEST_F(PgpointcloudWriterTest, testNoPointcloudExtension)
+TEST_F(PgpointcloudWriterTest, write)
+{
+    optionsWrite(getWriterOptions());
+}
+
+TEST_F(PgpointcloudWriterTest, writeScaled)
+{
+    Options ops = getWriterOptions();
+    ops.add("scale_x", .01);
+    ops.add("scale_y", .01);
+    ops.add("scale_z", .01);
+
+    optionsWrite(ops);
+}
+
+TEST_F(PgpointcloudWriterTest, writetNoPointcloudExtension)
 {
     StageFactory f;
     WriterPtr writer(f.createWriter("writers.pgpointcloud"));
