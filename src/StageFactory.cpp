@@ -79,6 +79,7 @@ MAKE_FILTER_CREATOR(Decimation, pdal::DecimationFilter)
 MAKE_FILTER_CREATOR(Ferry, pdal::FerryFilter)
 MAKE_FILTER_CREATOR(Merge, pdal::MergeFilter)
 MAKE_FILTER_CREATOR(MortonOrder, pdal::MortonOrderFilter)
+MAKE_FILTER_CREATOR(Range, pdal::RangeFilter)
 MAKE_FILTER_CREATOR(Reprojection, pdal::ReprojectionFilter)
 MAKE_FILTER_CREATOR(Sort, pdal::SortFilter)
 MAKE_FILTER_CREATOR(Splitter, pdal::SplitterFilter)
@@ -323,6 +324,7 @@ void StageFactory::registerKnownFilters()
     REGISTER_FILTER(Ferry, pdal::FerryFilter);
     REGISTER_FILTER(Merge, pdal::MergeFilter);
     REGISTER_FILTER(MortonOrder, pdal::MortonOrderFilter);
+    REGISTER_FILTER(Range, pdal::RangeFilter);
     REGISTER_FILTER(Reprojection, pdal::ReprojectionFilter);
     REGISTER_FILTER(Sort, pdal::SortFilter);
     REGISTER_FILTER(Splitter, pdal::SplitterFilter);

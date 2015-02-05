@@ -187,6 +187,15 @@ TEST(pipelineFiltersTest, hexbin)
 TEST(pipelineFiltersTest, merge)
 { run_info("filters/merge.xml"); }
 
+TEST(pipelineFiltersTest, range_z)
+{ run_info("filters/range_z.xml"); }
+
+TEST(pipelineFiltersTest, range_z_classification)
+{ run_info("filters/range_z_classification.xml"); }
+
+TEST(pipelineFiltersTest, range_classification)
+{ run_info("filters/range_classification.xml"); }
+
 TEST(pipelineFiltersTest, reproject)
 { run_pipeline("filters/reproject.xml"); }
 
