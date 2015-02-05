@@ -79,6 +79,7 @@ private:
     std::string m_inputFile;
     bool m_showStats;
     bool m_showSchema;
+    bool m_showAll;
     bool m_showMetadata;
     bool m_boundary;
     pdal::Options m_options;
