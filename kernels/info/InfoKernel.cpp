@@ -240,9 +240,11 @@ MetadataNode InfoKernel::dumpSummary(const QuickInfo& qi)
 }
 
 
-void InfoKernel::dump(std::ostream& o)
+void InfoKernel::dump(std::ostream& o, const std::string& filename)
 {
     MetadataNode root;
+    root.add("filename", filename);
+
     bool bPrepared(false);
     if (m_showSummary || m_showAll)
     {
@@ -259,7 +261,7 @@ void InfoKernel::dump(std::ostream& o)
     }
     if (!bPrepared)
         m_manager->prepare();
-//
+
     m_manager->execute();
     if (m_showStats || m_showAll)
     {
@@ -366,7 +368,7 @@ int InfoKernel::execute()
         stage = m_hexbinStage;
     }
 
-    dump(std::cout);
+    dump(std::cout, filename);
 
     return 0;
 }
