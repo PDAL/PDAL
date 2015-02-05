@@ -68,6 +68,7 @@ void Stage::prepare(PointContextRef ctx)
     l_initialize(ctx);
     initialize();
     addDimensions(ctx);
+    prepared(ctx);
 }
 
 

@@ -35,6 +35,37 @@
 namespace pdal
 {
 
+DimTypeList DbWriter::dimTypes(PointContextRef ctx)
+{
+    using namespace Dimension;
+    
+    if (m_outputDims.empty())
+        return ctx.dimTypes();
+
+    DimTypeList dims;
+    for (std::string& s : m_outputDims)
+    {
+        DimType dt = ctx.findDimType(s);
+        if (dt.m_id == Id::Unknown)
+        {
+            std::ostringstream oss;
+            oss << "Invalid dimension '" << s << "' specified for "
+                "'output_dims' option.";
+            throw pdal_error(oss.str());
+        }
+        dims.push_back(dt);
+    }
+    return dims;
+}
+
+
+// Placing this here allows validation of dimensions before execution begins.
+void DbWriter::prepared(PointContextRef ctx)
+{
+    m_dimTypes = dimTypes(ctx);
+}
+
+
 void DbWriter::ready(PointContextRef ctx)
 {
     using namespace Dimension;
@@ -43,7 +74,6 @@ void DbWriter::ready(PointContextRef ctx)
     // a scale factor and offset instead of being written as Double.
     m_locationScaling = (m_xXform.nonstandard() || m_yXform.nonstandard() ||
         m_zXform.nonstandard());
-    m_dimTypes = ctx.dimTypes();
 
     auto cmp = [](const DimType& d1, const DimType& d2) -> bool
     {

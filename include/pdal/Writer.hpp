@@ -75,6 +75,7 @@ protected:
     XForm m_xXform;
     XForm m_yXform;
     XForm m_zXform;
+    std::vector<std::string> m_outputDims;
 
     void setAutoOffset(const PointBuffer& buf);
 

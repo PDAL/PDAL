@@ -67,8 +67,6 @@ PgWriter::PgWriter()
     , m_patch_capacity(400)
     , m_srid(0)
     , m_pcid(0)
-    , m_have_postgis(false)
-    , m_create_index(true)
     , m_overwrite(true)
     , m_schema_is_initialized(false)
 {}
@@ -88,7 +86,7 @@ void PgWriter::processOptions(const Options& options)
 
     // Schema and column name can be defaulted safely
     m_column_name = options.getValueOrDefault<std::string>("column", "pa");
-    m_schema_name = options.getValueOrDefault<std::string>("schema", "");
+    m_schema_name = options.getValueOrDefault<std::string>("schema");
     //
     // Read compression type and turn into an integer
     std::string compression_str =
@@ -103,8 +101,10 @@ void PgWriter::processOptions(const Options& options)
     m_patch_capacity = options.getValueOrDefault<uint32_t>("capacity", 400);
     m_srid = options.getValueOrDefault<uint32_t>("srid", 4326);
     m_pcid = options.getValueOrDefault<uint32_t>("pcid", 0);
-    m_pack = options.getValueOrDefault<bool>("pack_ignored_fields", true);
-    m_pre_sql = getOptions().getValueOrDefault<std::string>("pre_sql", "");
+    m_pre_sql = options.getValueOrDefault<std::string>("pre_sql");
+    // Post-SQL can be *either* a SQL file to execute, *or* a SQL statement
+    // to execute. We find out which one here.
+    std::string post_sql = options.getValueOrDefault<std::string>("post_sql");
 }
 
 //
@@ -204,23 +204,17 @@ void PgWriter::write(const PointBuffer& buffer)
 
 void PgWriter::done(PointContextRef ctx)
 {
-    if (m_create_index && m_have_postgis)
-    {
-        CreateIndex(m_schema_name, m_table_name, m_column_name);
-    }
+    //CreateIndex(m_schema_name, m_table_name, m_column_name);
 
-    // Post-SQL can be *either* a SQL file to execute, *or* a SQL statement
-    // to execute. We find out which one here.
-    std::string post_sql = getOptions().getValueOrDefault<std::string>("post_sql", "");
-    if (post_sql.size())
+    if (m_post_sql.size())
     {
-        std::string sql = FileUtils::readFileAsString(post_sql);
+        std::string sql = FileUtils::readFileAsString(m_post_sql);
         if (!sql.size())
         {
             // if there was no file to read because the data in post_sql was
             // actually the sql code the user wanted to run instead of the
             // filename to open, we'll use that instead.
-            sql = post_sql;
+            sql = m_post_sql;
         }
         pg_execute(m_session, sql);
     }

@@ -95,13 +95,11 @@ private:
     uint32_t m_patch_capacity;
     uint32_t m_srid;
     uint32_t m_pcid;
-    bool m_have_postgis;
-    bool m_create_index;
     bool m_overwrite;
     std::string m_insert;
     Orientation::Enum m_orientation;
-    bool m_pack;
     std::string m_pre_sql;
+    std::string m_post_sql;
 
     // lose this
     bool m_schema_is_initialized;

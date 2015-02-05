@@ -169,8 +169,14 @@ public:
 
         const Dimension::IdList& ids = dims();
         for (auto ii = ids.begin(); ii != ids.end(); ++ii)
-            dimTypes.push_back(DimType (*ii, dimType(*ii)));
+            dimTypes.push_back(DimType(*ii, dimType(*ii)));
         return dimTypes;
+    }
+
+    DimType findDimType(const std::string& name) const
+    {
+        Dimension::Id::Enum id = findDim(name);
+        return DimType(id, dimType(id));
     }
 
     Dimension::Id::Enum findDim(const std::string& name) const

@@ -164,6 +164,8 @@ private:
         {}
     virtual void addDimensions(PointContextRef ctx)
         { (void)ctx; }
+    virtual void prepared(PointContextRef ctx)
+        { (void)ctx; }
     virtual void ready(PointContextRef ctx)
         { (void)ctx; }
     virtual void done(PointContextRef ctx)

@@ -59,7 +59,9 @@ protected:
     size_t readPoint(const PointBuffer& pb, PointId idx, char *outbuf);
 
 private:
+    virtual void prepared(PointContextRef ctx);
     virtual void ready(PointContextRef ctx);
+    DimTypeList dimTypes(PointContextRef ctx);
 
     DimTypeList m_dimTypes;
     int m_xPackedOffset;
