@@ -76,7 +76,7 @@ std::string getMasterDBConn()
 
 } // anonymous namespace
 
-Options getWriterOptions()
+Options getDbOptions()
 {
     Options options;
 
@@ -193,17 +193,36 @@ void optionsWrite(const Options& writerOps)
 
 TEST_F(PgpointcloudWriterTest, write)
 {
-    optionsWrite(getWriterOptions());
+    optionsWrite(getDbOptions());
 }
 
 TEST_F(PgpointcloudWriterTest, writeScaled)
 {
-    Options ops = getWriterOptions();
+    Options ops = getDbOptions();
     ops.add("scale_x", .01);
     ops.add("scale_y", .01);
     ops.add("scale_z", .01);
 
     optionsWrite(ops);
+}
+
+TEST_F(PgpointcloudWriterTest, writeXYZ)
+{
+    Options ops = getDbOptions();
+    ops.add("output_dims", "X,Y,Z");
+
+    optionsWrite(ops);
+
+    PointContext ctx;
+    ReaderPtr reader(StageFactory().createReader("readers.pgpointcloud"));
+    reader->setOptions(getDbOptions());
+
+    reader->prepare(ctx);
+    Dimension::IdList dims = ctx.dims();
+    EXPECT_EQ(dims.size(), (size_t)3);
+    EXPECT_TRUE(Utils::contains(dims, Dimension::Id::X));
+    EXPECT_TRUE(Utils::contains(dims, Dimension::Id::Y));
+    EXPECT_TRUE(Utils::contains(dims, Dimension::Id::Z));
 }
 
 TEST_F(PgpointcloudWriterTest, writetNoPointcloudExtension)
@@ -223,7 +242,7 @@ TEST_F(PgpointcloudWriterTest, writetNoPointcloudExtension)
     Options options;
     options.add(opt_filename);
     reader->setOptions(options);
-    writer->setOptions(getWriterOptions());
+    writer->setOptions(getDbOptions());
     writer->setInput(reader.get());
 
     PointContext ctx;
