@@ -314,7 +314,7 @@ void StageFactory::registerKnownReaders()
     REGISTER_READER(TerrasolidReader, pdal::TerrasolidReader);
     REGISTER_READER(BpfReader, pdal::BpfReader);
     REGISTER_READER(SbetReader, pdal::SbetReader);
-	REGISTER_READER(GeoWaveReader, pdal::GeoWaveReader);
+    REGISTER_READER(GeoWaveReader, pdal::GeoWaveReader);
 }
 
 
@@ -342,7 +342,7 @@ void StageFactory::registerKnownWriters()
     REGISTER_WRITER(LasWriter, pdal::LasWriter);
     REGISTER_WRITER(SbetWriter, pdal::SbetWriter);
     REGISTER_WRITER(TextWriter, pdal::TextWriter);
-	REGISTER_WRITER(GeoWaveWriter, pdal::GeoWaveWriter);
+    REGISTER_WRITER(GeoWaveWriter, pdal::GeoWaveWriter);
 }
 
 void StageFactory::loadPlugins()

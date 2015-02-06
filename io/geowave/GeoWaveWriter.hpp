@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2015, James W. O'Meara (james.w.omeara@gmail.com)
 *
 * All rights reserved.
 *
@@ -42,30 +42,32 @@
 namespace pdal
 {
 
-class PDAL_DLL GeoWaveWriter : public Writer
-{
-public:
-    SET_STAGE_NAME("writers.geowave", "Geowave Writer")
-    SET_STAGE_LINK("http://pdal.io/stages/drivers.geowave.writer.html")
+    class PDAL_DLL GeoWaveWriter : public Writer
+    {
+    public:
+        SET_STAGE_NAME("writers.geowave", "Geowave Writer")
+        SET_STAGE_LINK("http://pdal.io/stages/drivers.geowave.writer.html")
 
-    static Options getDefaultOptions();
+        static Options getDefaultOptions();
 
-private:
-	virtual void initialize();
-    virtual void processOptions(const Options&);
-    virtual void ready(PointContext ctx);
-    virtual void write(const PointBuffer& buf);
+    private:
+        virtual void initialize();
+        virtual void processOptions(const Options&);
+        virtual void ready(PointContext ctx);
+        virtual void write(const PointBuffer& buf);
 
-    int createJvm();
+        int createJvm();
 
-	std::string m_zookeeperUrl;
-	std::string m_instanceName;
-	std::string m_username;
-	std::string m_password;
-	std::string m_tableNamespace;
-	std::string m_featureTypeName;
-	Dimension::IdList m_dims;
-	std::vector<Dimension::Type::Enum> m_dimTypes;
-};
+        std::string m_zookeeperUrl;
+        std::string m_instanceName;
+        std::string m_username;
+        std::string m_password;
+        std::string m_tableNamespace;
+        std::string m_featureTypeName;
+        bool m_useFeatCollDataAdapter;
+        uint32_t m_pointsPerEntry;
+        Dimension::IdList m_dims;
+        std::vector<Dimension::Type::Enum> m_dimTypes;
+    };
 
 } // namespace pdal

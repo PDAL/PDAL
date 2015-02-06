@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2015, James W. O'Meara (james.w.omeara@gmail.com)
 *
 * All rights reserved.
 *
@@ -47,36 +47,37 @@ using jace::proxy::mil::nga::giat::geowave::store::CloseableIterator;
 namespace pdal
 {
 
-class PDAL_DLL GeoWaveReader : public Reader
-{
-public:
-    SET_STAGE_NAME("readers.geowave", "Geowave Reader")
-	SET_STAGE_LINK("http://pdal.io/stages/drivers.geowave.reader.html")
+    class PDAL_DLL GeoWaveReader : public Reader
+    {
+    public:
+        SET_STAGE_NAME("readers.geowave", "Geowave Reader")
+        SET_STAGE_LINK("http://pdal.io/stages/drivers.geowave.reader.html")
 
-	static Options getDefaultOptions();
-	static Dimension::IdList getDefaultDimensions();
+        static Options getDefaultOptions();
+        static Dimension::IdList getDefaultDimensions();
 
-private:
-	virtual void initialize();
-    virtual void processOptions(const Options& ops);
-    virtual void addDimensions(PointContext ctx);
-	virtual void ready(PointContext ctx);
-	virtual point_count_t read(PointBuffer& buf, point_count_t count);
-	virtual void done(PointContextRef ctx);
+    private:
+        virtual void initialize();
+        virtual void processOptions(const Options& ops);
+        virtual void addDimensions(PointContext ctx);
+        virtual void ready(PointContext ctx);
+        virtual point_count_t read(PointBuffer& buf, point_count_t count);
+        virtual void done(PointContextRef ctx);
 
-	int createJvm();
-	int createCloseableIterator();
+        int createJvm();
 
-	std::string m_zookeeperUrl;
-	std::string m_instanceName;
-	std::string m_username;
-	std::string m_password;
-	std::string m_tableNamespace;
-	std::string m_featureTypeName;
+        std::string m_zookeeperUrl;
+        std::string m_instanceName;
+        std::string m_username;
+        std::string m_password;
+        std::string m_tableNamespace;
+        std::string m_featureTypeName;
+        bool m_useFeatCollDataAdapter;
+        uint32_t m_pointsPerEntry;
 
-	BOX3D m_bounds;
+        BOX3D m_bounds;
 
-	CloseableIterator m_iterator;
-};
+        CloseableIterator m_iterator;
+    };
 
 } // namespace pdal
