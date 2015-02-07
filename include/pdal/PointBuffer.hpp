@@ -107,6 +107,12 @@ public:
         m_size += buf.size();
         clearTemps();
     }
+    point_count_t append()
+    {
+        const PointId rawId(m_context.rawPtBuf()->addPoint());
+        m_index.push_back(rawId);
+        return m_size++;
+    }
 
     /// Return a new point buffer with the same point context as this
     /// point buffer.
@@ -205,6 +211,8 @@ public:
         { return m_context.dimSize(id); }
     DimTypeList dimTypes() const
         { return m_context.dimTypes(); }
+    PointContextRef context() const
+        { return m_context; }
 
 
     /// Fill a buffer with point data specified by the dimension list.
@@ -488,7 +496,7 @@ bool PointBuffer::convertAndSet(Dimension::Id::Enum dim, PointId idx, T_IN in)
 //      block seemed somewhat expensive.
 //   2) Round to nearest instead of truncation without rounding before
 //      invoking the converter.
-// 
+//
     using namespace boost;
     static bool ok;
 

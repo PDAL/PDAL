@@ -79,6 +79,20 @@ public:
         memcpy(value, buf + offset, d->size());
     }
 
+    void setPoint(PointId idx, const void *value)
+    {
+        char *buf = m_blocks[idx / m_blockPtCnt];
+        std::size_t offset = pointsToBytes(idx % m_blockPtCnt);
+        memcpy(buf + offset, value, m_pointSize);
+    }
+
+    void getPoint(PointId idx, void* value)
+    {
+        char *buf = m_blocks[idx / m_blockPtCnt];
+        std::size_t offset = pointsToBytes(idx % m_blockPtCnt);
+        memcpy(value, buf + offset, m_pointSize);
+    }
+
     void setPointSize(size_t size)
     {
         if (m_numPts != 0)
@@ -98,7 +112,7 @@ private:
 
     // The number of points in each memory block.
     static const point_count_t m_blockPtCnt = 65536;
-    
+
     std::size_t pointsToBytes(point_count_t numPts)
         { return m_pointSize * numPts; }
 };

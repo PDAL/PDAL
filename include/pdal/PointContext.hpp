@@ -76,10 +76,15 @@ private:
     RawPtBufPtr m_ptBuf;
     // Metadata storage;
     MetadataPtr m_metadata;
+    // Combined size of all registered dimensions (in bytes).
+    std::size_t m_pointSize;
 
 public:
-    PointContext() : m_dims(new DimInfo()), m_ptBuf(new RawPtBuf()),
-        m_metadata(new Metadata)
+    PointContext()
+        : m_dims(new DimInfo())
+        , m_ptBuf(new RawPtBuf())
+        , m_metadata(new Metadata)
+        , m_pointSize(0)
     {}
 
     RawPtBuf *rawPtBuf() const
@@ -216,10 +221,7 @@ public:
 
     size_t pointSize() const
     {
-        size_t size(0);
-        for (const auto& d : m_dims->m_detail)
-            size += d.size();
-        return size;
+        return m_pointSize;
     }
 
 private:
@@ -248,7 +250,8 @@ private:
             m_dims->m_detail[*ui].m_offset = offset;
             offset += (int)m_dims->m_detail[*ui].size();
         }
-        m_ptBuf->setPointSize((size_t)offset);
+        m_pointSize = static_cast<std::size_t>(offset);
+        m_ptBuf->setPointSize(m_pointSize);
     }
 
     Dimension::Type::Enum resolveType(Dimension::Type::Enum t1,
