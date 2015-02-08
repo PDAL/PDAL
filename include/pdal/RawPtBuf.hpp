@@ -105,6 +105,11 @@ public:
         m_pointSize = size;
     }
 
+    std::size_t pointSize() const
+    {
+        return m_pointSize;
+    }
+
 private:
     std::vector<char *> m_blocks;
     point_count_t m_numPts;
