@@ -110,6 +110,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   packageList = [
     "git",
+    "wget",
     "build-essential",
     "cmake",
     "libgeos-dev",
