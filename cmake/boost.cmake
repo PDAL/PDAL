@@ -13,7 +13,7 @@ if(WIN32)
     endif(MSVC)
 endif(WIN32)
 
-find_package(Boost QUIET 1.53 COMPONENTS program_options iostreams filesystem system)
+find_package(Boost COMPONENTS program_options iostreams filesystem system REQUIRED)
 set_package_properties(Boost PROPERTIES TYPE REQUIRED
         PURPOSE "Provides convenience, e.g., program_options, filesytem")
 if(Boost_FOUND)
