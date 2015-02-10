@@ -68,7 +68,6 @@ MAKE_READER_CREATOR(BufferReader, pdal::BufferReader)
 MAKE_READER_CREATOR(QfitReader, pdal::QfitReader)
 MAKE_READER_CREATOR(SbetReader, pdal::SbetReader)
 MAKE_READER_CREATOR(TerrasolidReader, pdal::TerrasolidReader)
-MAKE_READER_CREATOR(GeoWaveReader, pdal::GeoWaveReader)
 
 //
 // define the functions to create the filters
@@ -94,7 +93,6 @@ MAKE_WRITER_CREATOR(BpfWriter, pdal::BpfWriter)
 MAKE_WRITER_CREATOR(LasWriter, pdal::LasWriter)
 MAKE_WRITER_CREATOR(SbetWriter, pdal::SbetWriter)
 MAKE_WRITER_CREATOR(TextWriter, pdal::TextWriter)
-MAKE_WRITER_CREATOR(GeoWaveWriter, pdal::GeoWaveWriter)
 
 StageFactory::StageFactory()
 {
@@ -314,7 +312,6 @@ void StageFactory::registerKnownReaders()
     REGISTER_READER(TerrasolidReader, pdal::TerrasolidReader);
     REGISTER_READER(BpfReader, pdal::BpfReader);
     REGISTER_READER(SbetReader, pdal::SbetReader);
-    REGISTER_READER(GeoWaveReader, pdal::GeoWaveReader);
 }
 
 
@@ -342,7 +339,6 @@ void StageFactory::registerKnownWriters()
     REGISTER_WRITER(LasWriter, pdal::LasWriter);
     REGISTER_WRITER(SbetWriter, pdal::SbetWriter);
     REGISTER_WRITER(TextWriter, pdal::TextWriter);
-    REGISTER_WRITER(GeoWaveWriter, pdal::GeoWaveWriter);
 }
 
 void StageFactory::loadPlugins()

@@ -32,7 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "GeoWaveReader.hpp"
+#include "GeoWaveWriter.hpp"
+
+#include <pdal/util/Algorithm.hpp>
 
 #include <jace/Jace.h>
 using jace::java_cast;
@@ -64,37 +66,44 @@ using ::jace::UnixVmLoader;
 const std::string os_pathsep(":");
 #endif
 
-#include "jace/proxy/types/JInt.h"
-using jace::proxy::types::JInt;
+#include "jace/proxy/types/JDouble.h"
+using jace::proxy::types::JDouble;
 
 #include "jace/JArray.h"
 using jace::JArray;
 
-#include "jace/proxy/types/JBoolean.h"
-using jace::proxy::types::JBoolean;
-#include "jace/proxy/types/JDouble.h"
-using jace::proxy::types::JDouble;
-
+#include "jace/proxy/java/lang/Object.h"
+using jace::proxy::java::lang::Object;
 #include "jace/proxy/java/lang/Double.h"
 using jace::proxy::java::lang::Double;
 #include "jace/proxy/java/lang/String.h"
 using jace::proxy::java::lang::String;
+#include "jace/proxy/java/util/Iterator.h"
+using jace::proxy::java::util::Iterator;
 #include "jace/proxy/java/util/List.h"
 using jace::proxy::java::util::List;
+#include "jace/proxy/java/util/ArrayList.h"
+using jace::proxy::java::util::ArrayList;
+#include "jace/proxy/java/util/UUID.h"
+using jace::proxy::java::util::UUID;
 
-#include "jace/proxy/org/geotools/data/simple/SimpleFeatureCollection.h"
-using jace::proxy::org::geotools::data::simple::SimpleFeatureCollection;
-#include "jace/proxy/org/geotools/data/simple/SimpleFeatureIterator.h"
-using jace::proxy::org::geotools::data::simple::SimpleFeatureIterator;
-
-#include "jace/proxy/com/vividsolutions/jts/geom/Polygon.h"
-using jace::proxy::com::vividsolutions::jts::geom::Polygon;
 #include "jace/proxy/com/vividsolutions/jts/geom/Coordinate.h"
 using jace::proxy::com::vividsolutions::jts::geom::Coordinate;
 #include "jace/proxy/com/vividsolutions/jts/geom/GeometryFactory.h"
 using jace::proxy::com::vividsolutions::jts::geom::GeometryFactory;
 #include "jace/proxy/com/vividsolutions/jts/geom/Point.h"
 using jace::proxy::com::vividsolutions::jts::geom::Point;
+
+#include "jace/proxy/org/geotools/data/DataUtilities.h"
+using jace::proxy::org::geotools::data::DataUtilities;
+#include "jace/proxy/org/geotools/feature/simple/SimpleFeatureBuilder.h"
+using jace::proxy::org::geotools::feature::simple::SimpleFeatureBuilder;
+#include "jace/proxy/org/geotools/feature/simple/SimpleFeatureTypeBuilder.h"
+using jace::proxy::org::geotools::feature::simple::SimpleFeatureTypeBuilder;
+#include "jace/proxy/org/geotools/feature/DefaultFeatureCollection.h"
+using jace::proxy::org::geotools::feature::DefaultFeatureCollection;
+#include "jace/proxy/org/geotools/geometry/jts/JTSFactoryFinder.h"
+using jace::proxy::org::geotools::geometry::jts::JTSFactoryFinder;
 
 #include "jace/proxy/org/opengis/feature/simple/SimpleFeature.h"
 using jace::proxy::org::opengis::feature::simple::SimpleFeature;
@@ -109,24 +118,22 @@ using jace::proxy::mil::nga::giat::geowave::index::ByteArrayId;
 using jace::proxy::mil::nga::giat::geowave::vector::adapter::FeatureDataAdapter;
 #include "jace/proxy/mil/nga/giat/geowave/vector/adapter/FeatureCollectionDataAdapter.h"
 using jace::proxy::mil::nga::giat::geowave::vector::adapter::FeatureCollectionDataAdapter;
+#include "jace/proxy/mil/nga/giat/geowave/store/adapter/WritableDataAdapter.h"
+using jace::proxy::mil::nga::giat::geowave::store::adapter::WritableDataAdapter;
 #include "jace/proxy/mil/nga/giat/geowave/store/index/Index.h"
 using jace::proxy::mil::nga::giat::geowave::store::index::Index;
 #include "jace/proxy/mil/nga/giat/geowave/store/index/IndexType_JaceIndexType.h"
 using jace::proxy::mil::nga::giat::geowave::store::index::IndexType_JaceIndexType;
-#include "jace/proxy/mil/nga/giat/geowave/store/query/Query.h"
-using jace::proxy::mil::nga::giat::geowave::store::query::Query;
-#include "jace/proxy/mil/nga/giat/geowave/store/query/SpatialQuery.h"
-using jace::proxy::mil::nga::giat::geowave::store::query::SpatialQuery;
-
 #include "jace/proxy/mil/nga/giat/geowave/accumulo/AccumuloOptions.h"
 using jace::proxy::mil::nga::giat::geowave::accumulo::AccumuloOptions;
 #include "jace/proxy/mil/nga/giat/geowave/accumulo/BasicAccumuloOperations.h"
 using jace::proxy::mil::nga::giat::geowave::accumulo::BasicAccumuloOperations;
 #include "jace/proxy/mil/nga/giat/geowave/accumulo/AccumuloDataStore.h"
 using jace::proxy::mil::nga::giat::geowave::accumulo::AccumuloDataStore;
-#include "jace/proxy/mil/nga/giat/geowave/accumulo/metadata/AccumuloAdapterStore.h"
-using jace::proxy::mil::nga::giat::geowave::accumulo::metadata::AccumuloAdapterStore;
+#include "jace/proxy/mil/nga/giat/geowave/accumulo/AccumuloIndexWriter.h"
+using jace::proxy::mil::nga::giat::geowave::accumulo::AccumuloIndexWriter;
 
+CREATE_WRITER_PLUGIN(geowave, pdal::GeoWaveWriter)
 
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
@@ -134,19 +141,18 @@ using jace::proxy::mil::nga::giat::geowave::accumulo::metadata::AccumuloAdapterS
 namespace pdal
 {
 
-    Options GeoWaveReader::getDefaultOptions()
+    Options GeoWaveWriter::getDefaultOptions()
     {
         Options options;
 
-        Option zookeeperUrl("zookeeperUrl", "", "The comma-delimited URLs for all zookeeper servers, this will be directly used to instantiate a ZookeeperInstance");
-        Option instanceName("instanceName", "", "The zookeeper instance name, this will be directly used to instantiate a ZookeeperInstance");
-        Option username("username", "", "The username for an account to establish an Accumulo connector");
-        Option password("password", "", "The password for the account to establish an Accumulo connector");
-        Option tableNamespace("tableNamespace", "", "The table name to be used when querying GeoWave");
-        Option featureTypeName("featureTypeName", "", "The feature type name to be used when querying GeoWave");
-        Option dataAdapter("dataAdapter", "FeatureCollectionDataAdapter", "FeatureCollectionDataAdapter stores multiple points per accumulo entry.  FeatureDataAdapter stores a single point per accumulo entry.");
-        Option pointsPerEntry("pointsPerEntry", 5000u, "Sets the maximum number of points per accumulo entry when using FeatureCollectionDataAdapter.");
-        Option bounds("bounds", "", "The extent of the bounding rectangle to use to query points, expressed as a string, eg: ([xmin, xmax], [ymin, ymax], [zmin, zmax])");
+        Option zookeeperUrl("zookeeperUrl", "", "The comma-delimited URLs for all zookeeper servers, this will be directly used to instantiate a ZookeeperInstance.");
+        Option instanceName("instanceName", "", "The zookeeper instance name, this will be directly used to instantiate a ZookeeperInstance.");
+        Option username("username", "", "The username for the account to establish an Accumulo connector.");
+        Option password("password", "", "The password for the account to establish an Accumulo connector.");
+        Option tableNamespace("tableNamespace", "", "The table name to be used when interacting with GeoWave.");
+        Option featureTypeName("featureTypeName", "PDAL_Point", "The feature type name to be used when interacting with GeoWave.");
+        Option dataAdapter("dataAdapter", "FeatureCollectionDataAdapter", "FeatureCollectionDataAdapter stores multiple points per Accumulo entry.  FeatureDataAdapter stores a single point per Accumulo entry.");
+        Option pointsPerEntry("pointsPerEntry", 5000u, "Sets the maximum number of points per Accumulo entry when using FeatureCollectionDataAdapter.");
 
         options.add(zookeeperUrl);
         options.add(instanceName);
@@ -156,12 +162,23 @@ namespace pdal
         options.add(featureTypeName);
         options.add(dataAdapter);
         options.add(pointsPerEntry);
-        options.add(bounds);
 
         return options;
     }
 
-    void GeoWaveReader::initialize()
+    void GeoWaveWriter::processOptions(const Options& ops)
+    {
+        m_zookeeperUrl = ops.getValueOrThrow<std::string>("zookeeperUrl");
+        m_instanceName = ops.getValueOrThrow<std::string>("instanceName");
+        m_username = ops.getValueOrThrow<std::string>("username");
+        m_password = ops.getValueOrThrow<std::string>("password");
+        m_tableNamespace = ops.getValueOrThrow<std::string>("tableNamespace");
+        m_featureTypeName = ops.getValueOrDefault<std::string>("featureTypeName", "PDAL_Point");
+        m_useFeatCollDataAdapter = !(ops.getValueOrDefault<std::string>("dataAdapter", "FeatureCollectionDataAdapter").compare("FeatureDataAdapter") == 0);
+        m_pointsPerEntry = ops.getValueOrDefault<uint32_t>("pointsPerEntry", 5000u);
+    }
+
+    void GeoWaveWriter::initialize()
     {
         int status = createJvm();
         if (status == 0)
@@ -170,57 +187,21 @@ namespace pdal
             log()->get(LogLevel::Error) << "JVM Creation Failed: Error ["  << status << "]" << std::endl;
     }
 
-    void GeoWaveReader::processOptions(const Options& ops)
+    void GeoWaveWriter::ready(PointContext ctx)
     {
-        m_zookeeperUrl = ops.getValueOrThrow<std::string>("zookeeperUrl");
-        m_instanceName = ops.getValueOrThrow<std::string>("instanceName");
-        m_username = ops.getValueOrThrow<std::string>("username");
-        m_password = ops.getValueOrThrow<std::string>("password");
-        m_tableNamespace = ops.getValueOrThrow<std::string>("tableNamespace");
-        m_featureTypeName =  ops.getValueOrDefault<std::string>("featureTypeName", "PDAL_Point");
-        m_useFeatCollDataAdapter = !(ops.getValueOrDefault<std::string>("dataAdapter", "FeatureCollectionDataAdapter").compare("FeatureDataAdapter") == 0);
-        m_pointsPerEntry = ops.getValueOrDefault<uint32_t>("pointsPerEntry", 5000u);
-        m_bounds = ops.getValueOrDefault<BOX3D>("bounds", BOX3D());
+        // get a list of all the dimensions & their types
+        Dimension::IdList all = ctx.dims();
+        for (auto di = all.begin(); di != all.end(); ++di)
+            if (!contains(m_dims, *di))
+                m_dims.push_back(*di);
     }
 
-    void GeoWaveReader::addDimensions(PointContext ctx)
+    void GeoWaveWriter::write(const PointBuffer& data)
     {
-        ctx.registerDims(getDefaultDimensions());
 
-        BasicAccumuloOperations accumuloOperations = java_new<BasicAccumuloOperations>(
-            java_new<String>(m_zookeeperUrl),
-            java_new<String>(m_instanceName),
-            java_new<String>(m_username),
-            java_new<String>(m_password),
-            java_new<String>(m_tableNamespace));
+        using namespace Dimension;
 
-        AccumuloAdapterStore accumuloAdapterStore = java_new<AccumuloAdapterStore>(accumuloOperations);
-
-        List attribs;
-        if (m_useFeatCollDataAdapter)
-            attribs = java_cast<FeatureCollectionDataAdapter>(accumuloAdapterStore.getAdapter(java_new<ByteArrayId>(std::to_string(m_pointsPerEntry) + m_featureTypeName))).getType().getAttributeDescriptors();
-        else
-            attribs = java_cast<FeatureDataAdapter>(accumuloAdapterStore.getAdapter(java_new<ByteArrayId>(m_featureTypeName))).getType().getAttributeDescriptors();
-
-        for (int i = 0; i < attribs.size(); ++i){
-            std::string name = java_cast<AttributeDescriptor>(attribs.get(i)).getLocalName();
-            if (name.compare("location") != 0 && name.compare("X") != 0 && name.compare("Y") != 0)
-                ctx.registerDim(Dimension::id(name));
-        }
-    }
-
-    Dimension::IdList GeoWaveReader::getDefaultDimensions()
-    {
-        Dimension::IdList ids;
-        ids.push_back(Dimension::Id::X);
-        ids.push_back(Dimension::Id::Y);
-        return ids;
-    }
-
-    void GeoWaveReader::ready(PointContext ctx)
-    {
-        if (m_bounds.empty())
-            return;
+        std::ostringstream os;
 
         BasicAccumuloOperations accumuloOperations = java_new<BasicAccumuloOperations>(
             java_new<String>(m_zookeeperUrl),
@@ -237,87 +218,73 @@ namespace pdal
 
         Index index = IndexType_JaceIndexType::createSpatialVectorIndex();
 
-        GeometryFactory factory = java_new<GeometryFactory>();
+        AccumuloIndexWriter accumuloIndexWriter = java_new<AccumuloIndexWriter>(
+            index,
+            accumuloOperations,
+            accumuloDataStore);
 
-        JDouble lonMin = m_bounds.minx;
-        JDouble lonMax = m_bounds.maxx;
-        JDouble latMin = m_bounds.miny;
-        JDouble latMax = m_bounds.maxy;
+        // treat all types as double
+        os << "location:Point:srid=4326";
+        for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+            os << "," << data.dimName(*di) << ":Double";
 
-        JArray<Coordinate> coordArray(5);
-        coordArray[0] = java_new<Coordinate>(lonMin, latMin);
-        coordArray[1] = java_new<Coordinate>(lonMax, latMin);
-        coordArray[2] = java_new<Coordinate>(lonMax, latMax);
-        coordArray[3] = java_new<Coordinate>(lonMin, latMax);
-        coordArray[4] = java_new<Coordinate>(lonMin, latMin);
-
-        Polygon geom = factory.createPolygon(coordArray);
-        Query query = java_new<SpatialQuery>(geom);
-
-        m_iterator = accumuloDataStore.query(index, query);
-    }
-
-    point_count_t GeoWaveReader::read(PointBuffer& buf, point_count_t count)
-    {
-        using namespace Dimension;
+        SimpleFeatureType TYPE = DataUtilities::createType(
+            java_new<String>(m_featureTypeName),
+            java_new<String>(os.str()));
 
         String location = java_new<String>("location");
-        point_count_t numRead = 0;
+
+        WritableDataAdapter dataAdapter;
+        if (m_useFeatCollDataAdapter)
+            dataAdapter = java_new<FeatureCollectionDataAdapter>(
+            TYPE, 
+            m_pointsPerEntry);
+        else 
+            dataAdapter = java_new<FeatureDataAdapter>(TYPE);
+
+
+        GeometryFactory geometryFactory = JTSFactoryFinder::getGeometryFactory();
+        SimpleFeatureBuilder builder = java_new<SimpleFeatureBuilder>(TYPE);
+
+        DefaultFeatureCollection featureCollection = java_new<DefaultFeatureCollection>(
+            UUID::randomUUID().toString(),
+            TYPE);
+
+        for (PointId idx = 0; idx < data.size(); ++idx)
+        {
+            JDouble X = data.getFieldAs<double>(Id::X, idx);
+            JDouble Y = data.getFieldAs<double>(Id::Y, idx);
+
+            Point point = geometryFactory.createPoint(
+                java_new<Coordinate>(
+                X, 
+                Y));
+
+            builder.set(location, point);
+
+            for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+                if (data.hasDim(*di))
+                    builder.set(java_new<String>(data.dimName(*di)), java_new<Double>(data.getFieldAs<double>(*di, idx)));
+
+            SimpleFeature feature = builder.buildFeature(UUID::randomUUID().toString());
+
+            if (m_useFeatCollDataAdapter)
+                featureCollection.add(feature);
+            else
+                accumuloIndexWriter.write(
+                dataAdapter,
+                feature);
+        }
 
         if (m_useFeatCollDataAdapter)
-        {
-            while (m_iterator.hasNext() && count > 0)
-            {
-                SimpleFeatureCollection featureCollection = java_cast<SimpleFeatureCollection>(m_iterator.next());
-                SimpleFeatureIterator featItr = featureCollection.features();
+            accumuloIndexWriter.write(
+            dataAdapter,
+            featureCollection);
 
-                while (featItr.hasNext() && count-- > 0)
-                {
-                    SimpleFeature simpleFeature = java_cast<SimpleFeature>(featItr.next());
-                    List attribs = simpleFeature.getType().getAttributeDescriptors();
-
-                    Coordinate coord = java_cast<Point>(simpleFeature.getAttribute(location)).getCoordinate();
-
-                    for (int i = 0; i < attribs.size(); ++i){
-                        String name = java_cast<AttributeDescriptor>(attribs.get(i)).getLocalName();
-
-                        if (!name.equals(location))
-                            buf.setField(id(name), numRead, java_cast<Double>(simpleFeature.getAttribute(name)).doubleValue());
-                    }
-
-                    ++numRead;
-                }
-                featItr.close();
-            }
-        }
-        else
-        {
-            while (m_iterator.hasNext() && count-- > 0){
-                SimpleFeature simpleFeature = java_cast<SimpleFeature>(m_iterator.next());
-                List attribs = simpleFeature.getType().getAttributeDescriptors();
-
-                Coordinate coord = java_cast<Point>(simpleFeature.getAttribute(location)).getCoordinate();
-
-                for (int i = 0; i < attribs.size(); ++i){
-                    String name = java_cast<AttributeDescriptor>(attribs.get(i)).getLocalName();
-
-                    if (!name.equals(location))
-                        buf.setField(id(name), numRead, java_cast<Double>(simpleFeature.getAttribute(name)).doubleValue());
-                }
-
-                ++numRead;
-            }
-        }
-
-        return numRead;
+        accumuloIndexWriter.close();
     }
 
-    void GeoWaveReader::done(PointContext ctx)
-    {
-        m_iterator.close();
-    }
-
-    int GeoWaveReader::createJvm()
+    int GeoWaveWriter::createJvm()
     {
         try
         {
@@ -354,4 +321,5 @@ namespace pdal
 
         return 0;
     }
-} // namespace pdal
+
+} // namespaces

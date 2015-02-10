@@ -9,12 +9,12 @@
 ###############################################################################
 MESSAGE(STATUS "Searching for GeoWave")
 
-IF(GeoWave_RUNTIME_JAR)
+IF(GEOWAVE_RUNTIME_JAR)
   # Already in cache, be silent
-  SET(GeoWave_FIND_QUIETLY TRUE)
+  SET(GEOWAVE_FIND_QUIETLY TRUE)
 ENDIF()
 
-FIND_FILE(GeoWave_RUNTIME_JAR
+FIND_FILE(GEOWAVE_RUNTIME_JAR
   geowave-deploy-${GeoWave_FIND_VERSION}-accumulo-singlejar.jar
   PATHS
   /usr/bin
@@ -24,4 +24,4 @@ FIND_FILE(GeoWave_RUNTIME_JAR
 # Handle the QUIETLY and REQUIRED arguments and set GeoWave_FOUND to TRUE
 # if all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(GeoWave DEFAULT_MSG GeoWave_RUNTIME_JAR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(GeoWave DEFAULT_MSG GEOWAVE_RUNTIME_JAR)

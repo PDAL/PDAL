@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pdal/Reader.hpp>
+#include <pdal/StageFactory.hpp>
 #include <pdal/util/Bounds.hpp>
 
 #ifdef PDAL_HAVE_GEOS
@@ -50,8 +51,9 @@ namespace pdal
     class PDAL_DLL GeoWaveReader : public Reader
     {
     public:
-        SET_STAGE_NAME("readers.geowave", "Geowave Reader")
+        SET_STAGE_NAME("readers.geowave", "GeoWave Reader")
         SET_STAGE_LINK("http://pdal.io/stages/drivers.geowave.reader.html")
+        SET_PLUGIN_VERSION("1.0.0")
 
         static Options getDefaultOptions();
         static Dimension::IdList getDefaultDimensions();

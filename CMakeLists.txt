@@ -106,6 +106,10 @@ option(BUILD_PLUGIN_CPD "Choose if Coherent Point Drift kernel is built" FALSE)
 add_feature_info("CPD plugin" BUILD_PLUGIN_CPD
     "run Coherent Point Drift on two datasets")
 
+option(BUILD_PLUGIN_GEOWAVE "Choose if GeoWave support should be built" FALSE)
+add_feature_info("GeoWave plugin" BUILD_PLUGIN_GEOWAVE
+    "Read and Write data using GeoWave")
+
 option(BUILD_PLUGIN_GREYHOUND "Choose if Greyhound support should be built" FALSE)
 add_feature_info("Greyhound plugin" BUILD_PLUGIN_GREYHOUND
     "read points from a Greyhound server")
@@ -196,9 +200,6 @@ include(${PDAL_CMAKE_DIR}/geos.cmake)  # Optional
 include(${PDAL_CMAKE_DIR}/geotiff.cmake)  # Optional
 include(${PDAL_CMAKE_DIR}/lazperf.cmake)  # Optional
 include(${PDAL_CMAKE_DIR}/laszip.cmake)  # Optional
-include(${PDAL_CMAKE_DIR}/JNI.cmake)  # Optional
-include(${PDAL_CMAKE_DIR}/Jace.cmake)  # Optional
-include(${PDAL_CMAKE_DIR}/GeoWave.cmake)  # Optional
 include(${PDAL_CMAKE_DIR}/threads.cmake)
 include(${PDAL_CMAKE_DIR}/zlib.cmake)
 

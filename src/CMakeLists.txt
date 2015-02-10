@@ -199,14 +199,6 @@ if (WITH_LASZIP)
     target_link_libraries(${PDAL_LIB_NAME} ${LASZIP_LIBRARY})
 endif()
 
-if (WITH_JNI)
-    target_link_libraries(${PDAL_LIB_NAME} ${JNI_LIBRARIES})
-endif()
-
-if (WITH_JACE)
-    target_link_libraries(${PDAL_LIB_NAME} ${JACE_LIBRARY})
-endif()
-
 if (PDAL_HAVE_PYTHON)
     target_link_libraries(${PDAL_LIB_NAME} ${PYTHON_LIBRARY})
 endif()

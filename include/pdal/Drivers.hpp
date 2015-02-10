@@ -52,5 +52,3 @@
 #include <terrasolid/TerrasolidReader.hpp>
 #include <text/TextWriter.hpp>
 
-#include <geowave/GeoWaveReader.hpp>
-#include <geowave/GeoWaveWriter.hpp>
