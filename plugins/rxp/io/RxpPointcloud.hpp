@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Peter J. Gadomski (pete.gadomski@gmail.com)
+* Copyright (c) 2015, Peter J. Gadomski (pete.gadomski@gmail.com)
 *
 * All rights reserved.
 *
@@ -41,56 +41,46 @@
 
 #pragma once
 
-#include <memory>
+#include <riegl/scanlib.hpp>
 
+#include <pdal/pdal_macros.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/Reader.hpp>
-#include "RxpPointcloud.hpp"
+#include <pdal/PointContext.hpp>
 
 
 namespace pdal
 {
 
 
-const bool DEFAULT_SYNC_TO_PPS = true;
-const bool DEFAULT_MINIMAL = false;
+Dimension::Id::Enum getTimeDimensionId(bool syncToPps);
 
 
-std::string extractRivlibURI(const Options& options);
-Dimension::IdList getRxpDimensions(bool syncToPps, bool minimal);
-
-
-class PDAL_DLL RxpReader : public pdal::Reader
+class PDAL_DLL RxpPointcloud : public scanlib::pointcloud
 {
 public:
-    SET_STAGE_NAME("readers.rxp", "RXP Reader")
-    SET_STAGE_LINK("http://pdal.io/stages/readers.rxp.html")
-    SET_PLUGIN_VERSION("1.0.0b1")
+    RxpPointcloud(const std::string& uri, bool isSyncToPps, bool m_minimal, PointContext ctx);
+    virtual ~RxpPointcloud();
 
-    RxpReader()
-        : pdal::Reader()
-        , m_uri("")
-        , m_syncToPps(DEFAULT_SYNC_TO_PPS)
-        , m_pointcloud()
-    {}
+    point_count_t read(PointBuffer& buf, point_count_t count);
 
-    static Options getDefaultOptions();
-    static Dimension::IdList getDefaultDimensions()
+    inline bool isSyncToPps() const
     {
-        return getRxpDimensions(DEFAULT_SYNC_TO_PPS, DEFAULT_MINIMAL);
+        return m_syncToPps;
     }
 
-private:
-    virtual void processOptions(const Options& options);
-    virtual void addDimensions(PointContext ctx);
-    virtual void ready(PointContext ctx);
-    virtual point_count_t read(PointBuffer& buf, point_count_t count);
-    virtual void done(PointContext ctx);
+protected:
+    void on_echo_transformed(echo_type echo);
 
-    std::string m_uri;
+private:
+    virtual point_count_t writeSavedPoints(PointBuffer& buf, point_count_t count);
+
+    PointBufferPtr m_buf;
+    point_count_t m_idx;
     bool m_syncToPps;
     bool m_minimal;
-    std::unique_ptr<RxpPointcloud> m_pointcloud;
+    std::shared_ptr<scanlib::basic_rconnection> m_rc;
+    scanlib::decoder_rxpmarker m_dec;
+    scanlib::buffer m_rxpbuf;
 
 };
 

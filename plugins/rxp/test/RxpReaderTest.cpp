@@ -147,52 +147,6 @@ TEST(RxpReaderTest, testNoPpsSync)
             0.14050000667339191, 0.689999998, -14.4898596, 3, false, 1, 1);
 }
 
-TEST(RxpReaderTest, testInclFix)
-{
-    Options options = defaultRxpReaderOptions();
-    options.add("inclination_fix", "true", "");
-    options.add("inclination_fix_window", "2", "");
-    RxpReader reader;
-    reader.setOptions(options);
-
-    PointContext ctx;
-    reader.prepare(ctx);
-
-    PointBufferSet pbSet = reader.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1);
-    PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 136482);
-
-    // TODO can we test any of the motion? Hard to say, that.
-}
-
-TEST(RxpReaderTest, testRotatePoint)
-{
-    Point p{1, 2, 3};
-
-    Point r1 = rotatePoint(p, makeRotationMatrix(0, 0));
-    EXPECT_FLOAT_EQ(r1.x, 1);
-    EXPECT_FLOAT_EQ(r1.y, 2);
-    EXPECT_FLOAT_EQ(r1.z, 3);
-
-    Point r2 = rotatePoint(p, makeRotationMatrix(M_PI / 2, 0));
-    EXPECT_FLOAT_EQ(r2.x, 1);
-    EXPECT_FLOAT_EQ(r2.y, 3);
-    EXPECT_FLOAT_EQ(r2.z, -2);
-}
-
-TEST(RxpReaderTest, testMovingAverage)
-{
-    InclinationVector incl;
-    incl.push_back(Inclination{0, 1, 2});
-    incl.push_back(Inclination{2, 3, 4});
-
-    Inclination i1 = movingAverage(incl, 0, 1);    
-    EXPECT_FLOAT_EQ(i1.time, 1);
-    EXPECT_EQ(i1.roll, 2);
-    EXPECT_EQ(i1.pitch, 3);
-}
-
 TEST(RxpReaderTest, testURILogic)
 {
     Option fileOption("filename", "foobar", "");
