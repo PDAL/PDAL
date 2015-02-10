@@ -87,7 +87,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         config.vm.network "private_network", ip: ipaddr
       end
     else
-      config.vm.network "private_network", ip: "192.168.50.4"
+      config.vm.network "private_network", ip: "192.168.10.4"
     end
 
     # If on a Mac, set PDAL_VAGRANT_DISABLE_NFS to false to disable nfs mounting
@@ -105,48 +105,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   ppaRepos = [
     "ppa:ubuntugis/ubuntugis-unstable",
-    "ppa:boost-latest/ppa"
   ]
 
-  packageList = [
-    "git",
-    "wget",
-    "build-essential",
-    "cmake",
-    "libgeos-dev",
-    "libgdal-dev",
-    "libpq-dev",
-    "python-all-dev",
-    "python-numpy",
-    "libproj-dev",
-    "libtiff4-dev",
-    "libxml2-dev",
-    "libboost-all-dev",
-    "libbz2-dev",
-    "libsqlite0-dev",
-    "cmake-curses-gui",
-    "screen",
-    "postgis",
-    "libcunit1-dev",
-    "postgresql-server-dev-9.3",
-    "postgresql-9.3-postgis-2.1",
-    "libmsgpack-dev",
-    "libgeos++-dev",
-    "vim",
-    "libeigen3-dev",
-    "libflann-dev",
-    "libglew-dev",
-    "libhdf5-serial-dev",
-    "libjsoncpp-dev",
-    "vtk6",
-    "libvtk6-dev",
-    "gcc-multilib",
-    "g++-multilib",
-    "libglew-dev"
-
-  ];
-
-  if Dir.glob("#{File.dirname(__FILE__)}/.vagrant/machines/default/*/id").empty?
 	  pkg_cmd = ""
 
 	  pkg_cmd << "apt-get update -qq; apt-get install -q -y python-software-properties; "
@@ -156,9 +116,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 		  pkg_cmd << "apt-get update -qq; "
 	  end
 
-	  # install packages we need we need
-	  pkg_cmd << "apt-get install -q -y " + packageList.join(" ") << " ; "
 	  config.vm.provision :shell, :inline => pkg_cmd
+      scripts_path = "scripts/linux-install-scripts/"
+      config.vm.provision :shell, :path => scripts_path << "packages.sh"
+      pkg_cmd = ""
+
+	  # install packages we need we need
     scripts = [
       "startup.sh",
       "libgeotiff.sh",
@@ -172,6 +135,5 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       "pdal.sh",
       "pgpointcloud.sh"
     ];
-    scripts.each { |script| config.vm.provision :shell, :path => "scripts/vagrant/" << script }
-  end
+    scripts.each { |script| config.vm.provision :shell, :path => "scripts/linux-install-scripts/" << script }
 end
