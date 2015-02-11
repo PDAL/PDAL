@@ -37,7 +37,7 @@ if (NOT WIN32)
 endif()
 
 # PCL's configuration clobbers Boost find_package - do it again
-find_package(Boost QUIET 1.52 COMPONENTS program_options iostreams filesystem system)
+find_package(Boost QUIET 1.52 COMPONENTS program_options iostreams filesystem system thread)
 
 if (PCL_VISUALIZATION_FOUND)
 #

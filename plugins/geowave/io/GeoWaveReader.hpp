@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2015, James W. O'Meara (james.w.omeara@gmail.com)
 *
 * All rights reserved.
 *
@@ -34,21 +34,52 @@
 
 #pragma once
 
-#include <pdal/pdal_config.hpp>
+#include <pdal/Reader.hpp>
+#include <pdal/StageFactory.hpp>
+#include <pdal/util/Bounds.hpp>
 
-#include <pdal/BufferReader.hpp>
-#include <faux/FauxReader.hpp>
+#ifdef PDAL_HAVE_GEOS
+#include <geos_c.h>
+#endif
 
-#include <las/LasReader.hpp>
-#include <las/LasWriter.hpp>
+#include "jace/proxy/mil/nga/giat/geowave/store/CloseableIterator.h"
+using jace::proxy::mil::nga::giat::geowave::store::CloseableIterator;
 
-#include <bpf/BpfReader.hpp>
-#include <bpf/BpfWriter.hpp>
+namespace pdal
+{
 
-#include <sbet/SbetReader.hpp>
-#include <sbet/SbetWriter.hpp>
+    class PDAL_DLL GeoWaveReader : public Reader
+    {
+    public:
+        SET_STAGE_NAME("readers.geowave", "GeoWave Reader")
+        SET_STAGE_LINK("http://pdal.io/stages/drivers.geowave.reader.html")
+        SET_PLUGIN_VERSION("1.0.0")
 
-#include <qfit/QfitReader.hpp>
-#include <terrasolid/TerrasolidReader.hpp>
-#include <text/TextWriter.hpp>
+        static Options getDefaultOptions();
+        static Dimension::IdList getDefaultDimensions();
 
+    private:
+        virtual void initialize();
+        virtual void processOptions(const Options& ops);
+        virtual void addDimensions(PointContext ctx);
+        virtual void ready(PointContext ctx);
+        virtual point_count_t read(PointBuffer& buf, point_count_t count);
+        virtual void done(PointContextRef ctx);
+
+        int createJvm();
+
+        std::string m_zookeeperUrl;
+        std::string m_instanceName;
+        std::string m_username;
+        std::string m_password;
+        std::string m_tableNamespace;
+        std::string m_featureTypeName;
+        bool m_useFeatCollDataAdapter;
+        uint32_t m_pointsPerEntry;
+
+        BOX3D m_bounds;
+
+        CloseableIterator m_iterator;
+    };
+
+} // namespace pdal

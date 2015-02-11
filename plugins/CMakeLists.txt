@@ -6,6 +6,10 @@ if(BUILD_PLUGIN_CPD)
     add_subdirectory(cpd)
 endif(BUILD_PLUGIN_CPD)
 
+if(BUILD_PLUGIN_GEOWAVE)
+    add_subdirectory(geowave)
+endif(BUILD_PLUGIN_GEOWAVE)
+
 if(BUILD_PLUGIN_GREYHOUND)
     add_subdirectory(greyhound)
 endif()
