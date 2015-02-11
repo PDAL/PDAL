@@ -133,6 +133,13 @@ struct Detail
 {
     Detail() : m_offset(-1), m_type(Type::None)
     {}
+    //NOTE - This is strange, but for some reason things run faster with
+    // this NOOP virtual dtor.  Perhaps it has something to do with
+    // an inlining optimization or perhaps alignment (though a void * doesn't
+    // cause the same performance improvement) It may help on no machine
+    // except mine, but it doesn't hurt anything, either.
+    virtual ~Detail()
+    {}
 
     int m_offset;
     Type::Enum m_type;
