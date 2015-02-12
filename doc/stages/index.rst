@@ -13,6 +13,7 @@ Readers
 
    readers.buffer
    readers.faux
+   readers.geowave
    readers.las
    readers.nitf
    readers.oci
@@ -28,6 +29,7 @@ Writers
 .. toctree::
    :maxdepth: 1
 
+   writers.geowave
    writers.las
    writers.nitf
    writers.oci
