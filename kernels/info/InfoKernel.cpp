@@ -356,7 +356,7 @@ int InfoKernel::execute()
     m_manager = std::unique_ptr<PipelineManager>(
         KernelSupport::makePipeline(filename));
     m_reader = m_manager->getStage();
-    Stage *stage = m_reader;
+    std::shared_ptr<Stage> stage = m_reader;
 
     if (m_Dimensions.size())
         m_options.add("dimensions", m_Dimensions, "List of dimensions");

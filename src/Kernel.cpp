@@ -353,12 +353,12 @@ bool Kernel::isVisualize() const
 
 void Kernel::visualize(PointBufferPtr buffer) const
 {
-    BufferReader bufferReader;
-    bufferReader.addBuffer(buffer);
+    std::shared_ptr<BufferReader> bufferReader(new BufferReader);
+    bufferReader->addBuffer(buffer);
 
     StageFactory f;
-    std::unique_ptr<Stage> writer(f.createStage("writers.pclvisualizer"));
-    writer->setInput(&bufferReader);
+    std::shared_ptr<Stage> writer(f.createStage("writers.pclvisualizer"));
+    writer->setInput(bufferReader);
 
     PointContext ctx;
     writer->prepare(ctx);

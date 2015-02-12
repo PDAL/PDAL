@@ -212,10 +212,10 @@ Option PipelineReader::parseElement_Option(const ptree& tree)
 }
 
 
-Stage* PipelineReader::parseElement_anystage(const std::string& name,
+std::shared_ptr<Stage> PipelineReader::parseElement_anystage(const std::string& name,
     const ptree& subtree)
 {
-    Stage* stage = NULL;
+    std::shared_ptr<Stage> stage = NULL;
 
     if (name == "Filter")
     {
@@ -238,7 +238,7 @@ Stage* PipelineReader::parseElement_anystage(const std::string& name,
 }
 
 
-Stage* PipelineReader::parseElement_Reader(const ptree& tree)
+std::shared_ptr<Stage> PipelineReader::parseElement_Reader(const ptree& tree)
 {
     Options options(m_baseOptions);
 
@@ -300,13 +300,13 @@ Stage* PipelineReader::parseElement_Reader(const ptree& tree)
 
     context.validate();
 
-    Stage* reader = m_manager.addReader(type);
+    std::shared_ptr<Stage> reader(m_manager.addReader(type));
     reader->setOptions(options);
     return reader;
 }
 
 
-Stage* PipelineReader::parseElement_Filter(const ptree& tree)
+std::shared_ptr<Stage> PipelineReader::parseElement_Filter(const ptree& tree)
 {
     Options options(m_baseOptions);
 //    Stage* prevStage = NULL;
@@ -316,7 +316,7 @@ Stage* PipelineReader::parseElement_Filter(const ptree& tree)
     map_t attrs;
     collect_attributes(attrs, tree);
 
-    std::vector<Stage *> prevStages;
+    std::vector<std::shared_ptr<Stage> > prevStages;
     for (auto iter = tree.begin(); iter != tree.end(); ++iter)
     {
         const std::string& name = iter->first;
@@ -353,9 +353,10 @@ Stage* PipelineReader::parseElement_Filter(const ptree& tree)
         context.addType();
     }
 
-    Stage* ptr = m_manager.addFilter(type, prevStages);
+    std::shared_ptr<Stage> ptr(m_manager.addFilter(type, prevStages));
     ptr->setOptions(options);
-    if (dynamic_cast<MultiFilter *>(ptr))
+    //if (dynamic_cast<std::shared_ptr<MultiFilter> >(ptr))
+    if (ptr)
         context.setCardinality(StageParserContext::Many);
     context.validate();
     return ptr;
@@ -385,10 +386,10 @@ void PipelineReader::collect_attributes(map_t& attrs, const ptree& tree)
 }
 
 
-Stage* PipelineReader::parseElement_Writer(const ptree& tree)
+std::shared_ptr<Stage> PipelineReader::parseElement_Writer(const ptree& tree)
 {
     Options options(m_baseOptions);
-    Stage* prevStage = NULL;
+    std::shared_ptr<Stage> prevStage = NULL;
     StageParserContext context;
 
     map_t attrs;
@@ -431,7 +432,7 @@ Stage* PipelineReader::parseElement_Writer(const ptree& tree)
     }
 
     context.validate();
-    Stage* writer = m_manager.addWriter(type, prevStage);
+    std::shared_ptr<Stage> writer(m_manager.addWriter(type, prevStage));
     writer->setOptions(options);
     return writer;
 }
@@ -439,8 +440,8 @@ Stage* PipelineReader::parseElement_Writer(const ptree& tree)
 
 bool PipelineReader::parseElement_Pipeline(const ptree& tree)
 {
-    Stage* stage = NULL;
-    Stage* writer = NULL;
+    std::shared_ptr<Stage> stage = NULL;
+    std::shared_ptr<Stage> writer = NULL;
 
     map_t attrs;
     collect_attributes(attrs, tree);

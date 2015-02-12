@@ -82,7 +82,7 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
 
     // filename may actually be a greyhound uri + pipelineId
     std::string http = filename.substr(0, 4);
-    if (boost::iequals(http, "http") && pm.createObject("readers.greyhound"))
+    if (boost::iequals(http, "http"))
         return "readers.greyhound";
 
     std::string ext = boost::filesystem::extension(filename);
@@ -90,25 +90,17 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
     drivers["las"] = "readers.las";
     drivers["laz"] = "readers.las";
     drivers["bin"] = "readers.terrasolid";
-    if (pm.createObject("readers.greyhound"))
-        drivers["greyhound"] = "readers.greyhound";
+    drivers["greyhound"] = "readers.greyhound";
     drivers["qi"] = "readers.qfit";
-    if (pm.createObject("readers.nitf"))
-    {
-        drivers["nitf"] = "readers.nitf";
-        drivers["ntf"] = "readers.nitf";
-        drivers["nsf"] = "readers.nitf";
-    }
+    drivers["nitf"] = "readers.nitf";
+    drivers["ntf"] = "readers.nitf";
+    drivers["nsf"] = "readers.nitf";
     drivers["bpf"] = "readers.bpf";
     drivers["sbet"] = "readers.sbet";
     drivers["icebridge"] = "readers.icebridge";
     drivers["sqlite"] = "readers.sqlite";
-
-    if (pm.createObject("readers.rxp"))
-        drivers["rxp"] = "readers.rxp";
-
-    if (pm.createObject("readers.pcd"))
-        drivers["pcd"] = "readers.pcd";
+    drivers["rxp"] = "readers.rxp";
+    drivers["pcd"] = "readers.pcd";
 
     if (ext == "") return "";
     ext = ext.substr(1, ext.length()-1);
@@ -132,17 +124,14 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
     drivers["bpf"] = "writers.bpf";
     drivers["las"] = "writers.las";
     drivers["laz"] = "writers.las";
-    if (pm.createObject("writers.pcd"))
-        drivers["pcd"] = "writers.pcd";
-    if (pm.createObject("writers.pclvisualizer"))
-        drivers["pclviz"] = "writers.pclvisualizer";
+    drivers["pcd"] = "writers.pcd";
+    drivers["pclviz"] = "writers.pclvisualizer";
     drivers["sbet"] = "writers.sbet";
     drivers["csv"] = "writers.text";
     drivers["json"] = "writers.text";
     drivers["xyz"] = "writers.text";
     drivers["txt"] = "writers.text";
-    if (pm.createObject("writers.nitf"))
-        drivers["ntf"] = "writers.nitf";
+    drivers["ntf"] = "writers.nitf";
     drivers["sqlite"] = "writers.sqlite";
 
     if (boost::algorithm::iequals(filename, "STDOUT"))

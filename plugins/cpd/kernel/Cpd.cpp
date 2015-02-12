@@ -134,7 +134,7 @@ PointBufferPtr CpdKernel::readFile(const std::string& filename, PointContext& ct
         boundsOptions.add("bounds", m_bounds);
         StageFactory f;
         std::shared_ptr<Stage> crop(f.createStage("filters.crop"));
-        crop->setInput(source.get());
+        crop->setInput(source);
         crop->setOptions(boundsOptions);
         source = crop;
     }
@@ -238,8 +238,8 @@ int CpdKernel::execute()
         }
     }
 
-    BufferReader reader;
-    reader.addBuffer(bufout);
+    std::shared_ptr<BufferReader> reader(new BufferReader);
+    reader->addBuffer(bufout);
 
     Options writerOpts;
     writerOpts.add<std::string>("filename", m_output);
@@ -247,7 +247,7 @@ int CpdKernel::execute()
     writerOpts.add<bool>("keep_unspecified", false);
     setCommonOptions(writerOpts);
 
-    std::unique_ptr<Stage> writer(KernelSupport::makeWriter(m_output, &reader));
+    std::shared_ptr<Stage> writer(KernelSupport::makeWriter(m_output, reader));
     writer->setOptions(writerOpts + writer->getOptions());
     writer->prepare(ctxout);
     writer->execute(ctxout);
@@ -277,11 +277,11 @@ cpd::Registration::ResultPtr CpdKernel::chipThenRegister(const cpd::NonrigidLowr
                                                         const PointBufferPtr& bufX,
                                                         const PointContext& ctx)
 {
-    BufferReader reader;
-    reader.addBuffer(bufX);
+    std::shared_ptr<BufferReader> reader(new BufferReader);
+    reader->addBuffer(bufX);
 
     ChipperFilter chipper;
-    chipper.setInput(&reader);
+    chipper.setInput(reader);
     Options options;
     options.add<int>("capacity", m_chip_capacity);
     chipper.setOptions(options);

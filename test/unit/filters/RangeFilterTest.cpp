@@ -43,14 +43,14 @@ using namespace pdal;
 TEST(RangeFilterTest, createStage)
 {
     StageFactory f;
-    std::unique_ptr<Stage> filter(f.createStage("filters.range"));
+    std::shared_ptr<Stage> filter(f.createStage("filters.range"));
     EXPECT_TRUE(filter.get());
 }
 
 TEST(RangeFilterTest, noDimension)
 {
     StageFactory f;
-    std::unique_ptr<Stage> filter(f.createStage("filters.range"));
+    std::shared_ptr<Stage> filter(f.createStage("filters.range"));
 
     PointContext ctx;
     EXPECT_THROW(filter->prepare(ctx), pdal_error);
@@ -62,7 +62,7 @@ TEST(RangeFilterTest, noRange)
     rangeOps.add("dimension", "Z");
     
     StageFactory f;
-    std::unique_ptr<Stage> filter(f.createStage("filters.range"));
+    std::shared_ptr<Stage> filter(f.createStage("filters.range"));
     filter->setOptions(rangeOps);
 
     PointContext ctx;
@@ -79,7 +79,7 @@ TEST(RangeFilterTest, singleDimension)
     ops.add("num_points", 10);
 
     StageFactory f;
-    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
+    std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
     reader->setOptions(ops);
 
     Options range;
@@ -92,9 +92,9 @@ TEST(RangeFilterTest, singleDimension)
     Options rangeOps;
     rangeOps.add(dim);
     
-    std::unique_ptr<Stage> filter(f.createStage("filters.range"));
+    std::shared_ptr<Stage> filter(f.createStage("filters.range"));
     filter->setOptions(rangeOps);
-    filter->setInput(reader.get());
+    filter->setInput(reader);
 
     PointContext ctx;
     filter->prepare(ctx);
@@ -118,7 +118,7 @@ TEST(RangeFilterTest, multipleDimensions)
     ops.add("num_points", 10);
 
     StageFactory f;
-    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
+    std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
     reader->setOptions(ops);
 
     Options y_range;
@@ -139,9 +139,9 @@ TEST(RangeFilterTest, multipleDimensions)
     rangeOps.add(y_dim);
     rangeOps.add(z_dim);
     
-    std::unique_ptr<Stage> filter(f.createStage("filters.range"));
+    std::shared_ptr<Stage> filter(f.createStage("filters.range"));
     filter->setOptions(rangeOps);
-    filter->setInput(reader.get());
+    filter->setInput(reader);
 
     PointContext ctx;
     filter->prepare(ctx);
@@ -168,7 +168,7 @@ TEST(RangeFilterTest, onlyMin)
     ops.add("num_points", 10);
 
     StageFactory f;
-    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
+    std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
     reader->setOptions(ops);
 
     Options range;
@@ -180,9 +180,9 @@ TEST(RangeFilterTest, onlyMin)
     Options rangeOps;
     rangeOps.add(dim);
     
-    std::unique_ptr<Stage> filter(f.createStage("filters.range"));
+    std::shared_ptr<Stage> filter(f.createStage("filters.range"));
     filter->setOptions(rangeOps);
-    filter->setInput(reader.get());
+    filter->setInput(reader);
 
     PointContext ctx;
     filter->prepare(ctx);
@@ -208,7 +208,7 @@ TEST(RangeFilterTest, onlyMax)
     ops.add("num_points", 10);
 
     StageFactory f;
-    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
+    std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
     reader->setOptions(ops);
 
     Options range;
@@ -220,9 +220,9 @@ TEST(RangeFilterTest, onlyMax)
     Options rangeOps;
     rangeOps.add(dim);
     
-    std::unique_ptr<Stage> filter(f.createStage("filters.range"));
+    std::shared_ptr<Stage> filter(f.createStage("filters.range"));
     filter->setOptions(rangeOps);
-    filter->setInput(reader.get());
+    filter->setInput(reader);
 
     PointContext ctx;
     filter->prepare(ctx);
@@ -248,7 +248,7 @@ TEST(RangeFilterTest, equals)
     ops.add("num_points", 10);
 
     StageFactory f;
-    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
+    std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
     reader->setOptions(ops);
 
     Options range;
@@ -260,9 +260,9 @@ TEST(RangeFilterTest, equals)
     Options rangeOps;
     rangeOps.add(dim);
     
-    std::unique_ptr<Stage> filter(f.createStage("filters.range"));
+    std::shared_ptr<Stage> filter(f.createStage("filters.range"));
     filter->setOptions(rangeOps);
-    filter->setInput(reader.get());
+    filter->setInput(reader);
 
     PointContext ctx;
     filter->prepare(ctx);
@@ -284,7 +284,7 @@ TEST(RangeFilterTest, negativeValues)
     ops.add("num_points", 21);
 
     StageFactory f;
-    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
+    std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
     reader->setOptions(ops);
 
     Options range;
@@ -297,9 +297,9 @@ TEST(RangeFilterTest, negativeValues)
     Options rangeOps;
     rangeOps.add(dim);
     
-    std::unique_ptr<Stage> filter(f.createStage("filters.range"));
+    std::shared_ptr<Stage> filter(f.createStage("filters.range"));
     filter->setOptions(rangeOps);
-    filter->setInput(reader.get());
+    filter->setInput(reader);
 
     PointContext ctx;
     filter->prepare(ctx);

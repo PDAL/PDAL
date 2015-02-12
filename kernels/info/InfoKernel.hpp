@@ -91,9 +91,9 @@ private:
     std::string m_pipelineFile;
     bool m_showSummary;
 
-    Stage *m_statsStage;
-    Stage *m_hexbinStage;
-    Stage *m_reader;
+    std::shared_ptr<Stage> m_statsStage;
+    std::shared_ptr<Stage> m_hexbinStage;
+    std::shared_ptr<Stage> m_reader;
 
     MetadataNode m_tree;
     std::unique_ptr<PipelineManager> m_manager;

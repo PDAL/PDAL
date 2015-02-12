@@ -50,12 +50,12 @@ TEST(PipelineManagerTest, basic)
 
     Options optsR;
     optsR.add("filename", Support::datapath("las/1.2-with-color.las"));
-    Stage* reader = mgr.addReader("readers.las");
+    std::shared_ptr<Stage> reader(mgr.addReader("readers.las"));
     reader->setOptions(optsR);
 
     Options optsW;
     optsW.add("filename", outfile, "file to write to");
-    Stage* writer = mgr.addWriter("writers.las", reader);
+    std::shared_ptr<Stage> writer(mgr.addWriter("writers.las", reader));
     writer->setOptions(optsW);
 
     point_count_t np = mgr.execute();

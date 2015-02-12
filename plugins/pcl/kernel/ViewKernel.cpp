@@ -126,9 +126,7 @@ vector<uint32_t> getListOfPoints(std::string p)
 ViewKernel::ViewKernel()
     : Kernel()
     , m_inputFile("")
-{
-    return;
-}
+{}
 
 
 void ViewKernel::validateSwitches()
@@ -137,8 +135,6 @@ void ViewKernel::validateSwitches()
     {
         throw app_usage_error("--input/-i required");
     }
-
-    return;
 }
 
 
@@ -156,7 +152,7 @@ void ViewKernel::addSwitches()
     addPositionalSwitch("input", 1);
 }
 
-std::unique_ptr<Stage> ViewKernel::makeReader(Options readerOptions)
+std::shared_ptr<Stage> ViewKernel::makeReader(Options readerOptions)
 {
     if (isDebug())
     {
@@ -169,11 +165,10 @@ std::unique_ptr<Stage> ViewKernel::makeReader(Options readerOptions)
         readerOptions.add<std::string>("log", "STDERR");
     }
 
-    Stage* stage = KernelSupport::makeReader(m_inputFile);
+    std::shared_ptr<Stage> stage(KernelSupport::makeReader(m_inputFile));
     stage->setOptions(readerOptions);
-    std::unique_ptr<Stage> reader_stage(stage);
 
-    return reader_stage;
+    return stage;
 }
 
 
@@ -184,7 +179,7 @@ int ViewKernel::execute()
     readerOptions.add<bool>("debug", isDebug());
     readerOptions.add<uint32_t>("verbose", getVerboseLevel());
 
-    std::unique_ptr<Stage> readerStage = makeReader(readerOptions);
+    std::shared_ptr<Stage> readerStage(makeReader(readerOptions));
     PointContext ctx;
     readerStage->prepare(ctx);
     PointBufferSet pbSetIn = readerStage->execute(ctx);

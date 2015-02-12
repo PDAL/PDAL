@@ -284,7 +284,7 @@ int DeltaKernel::execute()
         sourceOptions.add<bool>("debug", isDebug());
         sourceOptions.add<uint32_t>("verbose", getVerboseLevel());
     }
-    std::unique_ptr<Stage> source(KernelSupport::makeReader(m_sourceFile));
+    std::shared_ptr<Stage> source(KernelSupport::makeReader(m_sourceFile));
     source->setOptions(sourceOptions);
     source->prepare(sourceCtx);
     PointBufferSet pbSet = source->execute(sourceCtx);
@@ -300,7 +300,7 @@ int DeltaKernel::execute()
         candidateOptions.add<uint32_t>("verbose", getVerboseLevel());
     }
 
-    std::unique_ptr<Stage> candidate(KernelSupport::makeReader(m_candidateFile));
+    std::shared_ptr<Stage> candidate(KernelSupport::makeReader(m_candidateFile));
     candidate->setOptions(candidateOptions);
     candidate->prepare(candidateCtx);
     pbSet = candidate->execute(candidateCtx);

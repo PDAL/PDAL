@@ -50,21 +50,21 @@ TEST(StatsFilterTest, simple)
     ops.add("mode", "constant");
 
     StageFactory f;
-    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
+    std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(ops);
 
-    StatsFilter filter;
-    filter.setInput(reader.get());
-    EXPECT_EQ(filter.getName(), "filters.stats");
+    std::shared_ptr<StatsFilter> filter(new StatsFilter);
+    filter->setInput(reader);
+    EXPECT_EQ(filter->getName(), "filters.stats");
 
     PointContext ctx;
-    filter.prepare(ctx);
-    filter.execute(ctx);
+    filter->prepare(ctx);
+    filter->execute(ctx);
 
-    const stats::Summary& statsX = filter.getStats(Dimension::Id::X);
-    const stats::Summary& statsY = filter.getStats(Dimension::Id::Y);
-    const stats::Summary& statsZ = filter.getStats(Dimension::Id::Z);
+    const stats::Summary& statsX = filter->getStats(Dimension::Id::X);
+    const stats::Summary& statsY = filter->getStats(Dimension::Id::Y);
+    const stats::Summary& statsZ = filter->getStats(Dimension::Id::Z);
 
     EXPECT_EQ(statsX.count(), 1000u);
     EXPECT_EQ(statsY.count(), 1000u);
@@ -92,24 +92,24 @@ TEST(StatsFilterTest, dimset)
     ops.add("mode", "constant");
 
     StageFactory f;
-    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
+    std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(ops);
 
     Options filterOps;
     filterOps.add("dimensions", " , X, Z ");
-    StatsFilter filter;
-    filter.setInput(reader.get());
-    filter.setOptions(filterOps);
-    EXPECT_EQ(filter.getName(), "filters.stats");
+    std::shared_ptr<StatsFilter> filter(new StatsFilter);
+    filter->setInput(reader);
+    filter->setOptions(filterOps);
+    EXPECT_EQ(filter->getName(), "filters.stats");
 
     PointContext ctx;
-    filter.prepare(ctx);
-    filter.execute(ctx);
+    filter->prepare(ctx);
+    filter->execute(ctx);
 
-    const stats::Summary& statsX = filter.getStats(Dimension::Id::X);
-    EXPECT_THROW(filter.getStats(Dimension::Id::Y), pdal_error);
-    const stats::Summary& statsZ = filter.getStats(Dimension::Id::Z);
+    const stats::Summary& statsX = filter->getStats(Dimension::Id::X);
+    EXPECT_THROW(filter->getStats(Dimension::Id::Y), pdal_error);
+    const stats::Summary& statsZ = filter->getStats(Dimension::Id::Z);
 
     EXPECT_EQ(statsX.count(), 1000u);
     EXPECT_EQ(statsZ.count(), 1000u);
@@ -134,20 +134,20 @@ TEST(StatsFilterTest, metadata)
     ops.add("mode", "constant");
 
     StageFactory f;
-    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
+    std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(ops);
 
     Options filterOps;
     filterOps.add("dimensions", " , X, Z ");
-    StatsFilter filter;
-    filter.setInput(reader.get());
-    filter.setOptions(filterOps);
+    std::shared_ptr<StatsFilter> filter(new StatsFilter);
+    filter->setInput(reader);
+    filter->setOptions(filterOps);
 
     PointContext ctx;
-    filter.prepare(ctx);
-    filter.execute(ctx);
-    MetadataNode m = filter.getMetadata();
+    filter->prepare(ctx);
+    filter->execute(ctx);
+    MetadataNode m = filter->getMetadata();
     std::vector<MetadataNode> children = m.children("statistic");
 
     auto findNode = [](MetadataNode m,

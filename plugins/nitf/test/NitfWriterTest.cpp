@@ -147,14 +147,14 @@ TEST(NitfWriterTest, test1)
         // writer_opts.add(verbose);
         writer_opts.add(writer_opt1);
 
-        std::unique_ptr<Stage> reader(f.createStage("readers.las"));
+        std::shared_ptr<Stage> reader(f.createStage("readers.las"));
         EXPECT_TRUE(reader.get());
         reader->setOptions(reader_opts);
 
-        std::unique_ptr<Stage> writer(f.createStage("writers.nitf"));
+        std::shared_ptr<Stage> writer(f.createStage("writers.nitf"));
         EXPECT_TRUE(writer.get());
         writer->setOptions(writer_opts);
-        writer->setInput(reader.get());
+        writer->setInput(reader);
         {
             // writer.setCompressed(false);
             // // writer.setDate(0, 0);

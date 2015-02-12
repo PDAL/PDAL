@@ -63,12 +63,12 @@ public:
         readerOpts.add("bounds", bounds);
         reader->setOptions(readerOpts);
 
-        filter->setInput(reader.get());
+        filter->setInput(reader);
     }
 
     StageFactory factory;
-    std::unique_ptr<Stage> reader;
-    std::unique_ptr<Stage> filter;
+    std::shared_ptr<Stage> reader;
+    std::shared_ptr<Stage> filter;
 
 };
 

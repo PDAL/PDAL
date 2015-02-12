@@ -99,7 +99,7 @@ Stage* RandomKernel::makeReader(Options readerOptions)
     }
 
     StageFactory factory;
-    std::unique_ptr<Stage> reader_stage(factory.createStage("readers.faux"));
+    std::shared_ptr<Stage> reader_stage(factory.createStage("readers.faux"));
     reader_stage->setOptions(readerOptions);
 
     return reader_stage.get();
@@ -165,9 +165,9 @@ int RandomKernel::execute()
         }
     }
 
-    Stage* final_stage = makeReader(readerOptions);
+    std::shared_ptr<Stage> final_stage(makeReader(readerOptions));
 
-    Stage* writer = KernelSupport::makeWriter(m_outputFile, final_stage);
+    std::shared_ptr<Stage> writer = KernelSupport::makeWriter(m_outputFile, final_stage);
     writer->setOptions(writerOptions);
     PointContext ctx;
 
@@ -182,9 +182,6 @@ int RandomKernel::execute()
 
     if (isVisualize())
         visualize(*pbSet.begin());
-
-    delete writer;
-    delete final_stage;
 
     return 0;
 }

@@ -106,7 +106,7 @@ void GroundKernel::addSwitches()
     addPositionalSwitch("output", 1);
 }
 
-std::unique_ptr<Stage> GroundKernel::makeReader(Options readerOptions)
+std::shared_ptr<Stage> GroundKernel::makeReader(Options readerOptions)
 {
     if (isDebug())
     {
@@ -119,11 +119,10 @@ std::unique_ptr<Stage> GroundKernel::makeReader(Options readerOptions)
         readerOptions.add<std::string>("log", "STDERR");
     }
 
-    Stage* stage = KernelSupport::makeReader(m_inputFile);
+    std::shared_ptr<Stage> stage = KernelSupport::makeReader(m_inputFile);
     stage->setOptions(readerOptions);
-    std::unique_ptr<Stage> reader_stage(stage);
 
-    return reader_stage;
+    return stage;
 }
 
 int GroundKernel::execute()
@@ -135,7 +134,7 @@ int GroundKernel::execute()
     readerOptions.add<bool>("debug", isDebug());
     readerOptions.add<uint32_t>("verbose", getVerboseLevel());
 
-    std::unique_ptr<Stage> readerStage = makeReader(readerOptions);
+    std::shared_ptr<Stage> readerStage = makeReader(readerOptions);
 
     Options groundOptions;
     groundOptions.add<double>("maxWindowSize", m_maxWindowSize);
@@ -147,16 +146,16 @@ int GroundKernel::execute()
     groundOptions.add<bool>("extract", m_extract);
 
     StageFactory f;
-    std::unique_ptr<Stage> groundStage(f.createStage("filters.ground"));
+    std::shared_ptr<Stage> groundStage(f.createStage("filters.ground"));
     groundStage->setOptions(groundOptions);
-    groundStage->setInput(readerStage.get());
+    groundStage->setInput(readerStage);
 
     // setup the Writer and write the results
     Options writerOptions;
     writerOptions.add<std::string>("filename", m_outputFile);
     setCommonOptions(writerOptions);
 
-    std::unique_ptr<Stage> writer(KernelSupport::makeWriter(m_outputFile, groundStage.get()));
+    std::shared_ptr<Stage> writer(KernelSupport::makeWriter(m_outputFile, groundStage));
     writer->setOptions(writerOptions);
 
     std::vector<std::string> cmd = getProgressShellCommand();
@@ -170,7 +169,7 @@ int GroundKernel::execute()
     {
         std::string name = pi.first;
         Options options = pi.second;
-        std::vector<Stage*> stages = writer->findStage(name);
+        std::vector<std::shared_ptr<Stage> > stages = writer->findStage(name);
         for (const auto& s : stages)
         {
             Options opts = s->getOptions();

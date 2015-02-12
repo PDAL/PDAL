@@ -54,7 +54,7 @@ TEST(ProgrammableFilterTest, ProgrammableFilterTest_test1)
     ops.add("num_points", 10);
     ops.add("mode", "ramp");
 
-    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
+    std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
     reader->setOptions(ops);
 
     Option source("source", "import numpy as np\n"
@@ -79,23 +79,23 @@ TEST(ProgrammableFilterTest, ProgrammableFilterTest_test1)
     opts.add(module);
     opts.add(function);
 
-    std::unique_ptr<Stage> filter(f.createStage("filters.programmable"));
+    std::shared_ptr<Stage> filter(f.createStage("filters.programmable"));
     filter->setOptions(opts);
-    filter->setInput(reader.get());
+    filter->setInput(reader);
 
-    StatsFilter stats;
-    stats.setInput(filter.get());
+    std::shared_ptr<StatsFilter> stats(new StatsFilter);
+    stats->setInput(filter);
 
     PointContext ctx;
 
-    stats.prepare(ctx);
-    PointBufferSet pbSet = stats.execute(ctx);
+    stats->prepare(ctx);
+    PointBufferSet pbSet = stats->execute(ctx);
     EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
 
-    const stats::Summary& statsX = stats.getStats(Dimension::Id::X);
-    const stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
-    const stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
+    const stats::Summary& statsX = stats->getStats(Dimension::Id::X);
+    const stats::Summary& statsY = stats->getStats(Dimension::Id::Y);
+    const stats::Summary& statsZ = stats->getStats(Dimension::Id::Z);
 
     EXPECT_FLOAT_EQ(statsX.minimum(), 10.0);
     EXPECT_FLOAT_EQ(statsX.maximum(), 11.0);
@@ -137,7 +137,7 @@ TEST(ProgrammableFilterTest, add_dimension)
     ops.add("num_points", 10);
     ops.add("mode", "ramp");
 
-    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
+    std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
     reader->setOptions(ops);
 
     Option source("source", "import numpy\n"
@@ -157,9 +157,9 @@ TEST(ProgrammableFilterTest, add_dimension)
     opts.add(intensity);
     opts.add(scanDirection);
 
-    std::unique_ptr<Stage> filter(f.createStage("filters.programmable"));
+    std::shared_ptr<Stage> filter(f.createStage("filters.programmable"));
     filter->setOptions(opts);
-    filter->setInput(reader.get());
+    filter->setInput(reader);
 
     PointContext ctx;
     filter->prepare(ctx);

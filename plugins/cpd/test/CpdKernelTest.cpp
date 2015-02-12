@@ -65,17 +65,17 @@ protected:
 
         Options readerOptions;
         readerOptions.add("filename", m_x);
-        Stage * reader = mrManager.addReader("readers.las");
+        std::shared_ptr<Stage> reader(mrManager.addReader("readers.las"));
         reader->setOptions(readerOptions);
 
         Options transformationOptions;
         transformationOptions.add("matrix", "0.36 0.48 -0.8 1\n-0.8 0.6 0.0 2\n0.48 0.64 0.60 3\n0 0 0 1");
-        Stage* filter = mrManager.addFilter("filters.transformation", reader);
+        std::shared_ptr<Stage> filter(mrManager.addFilter("filters.transformation", reader));
         filter->setOptions(transformationOptions);
 
         Options writerOptions;
         writerOptions.add("filename", m_y);
-        Stage * writer = mrManager.addWriter("writers.las", reader);
+        std::shared_ptr<Stage> writer(mrManager.addWriter("writers.las", filter));
         writer->setOptions(writerOptions);
 
         point_count_t np = mrManager.execute();

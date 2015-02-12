@@ -54,7 +54,7 @@ private:
     void addSwitches();
     void validateSwitches();
 
-    std::unique_ptr<Stage> makeReader(Options readerOptions);
+    std::shared_ptr<Stage> makeReader(Options readerOptions);
 
     std::string m_inputFile;
     std::string m_pointIndexes;

@@ -48,7 +48,7 @@ TEST(FerryFilterTest, test_ferry_copy)
     PipelineReader specReader(mgr);
     specReader.readPipeline(Support::configuredpath("filters/ferry.xml"));
 
-    Stage *stage = mgr.getStage();
+    std::shared_ptr<Stage> stage(mgr.getStage());
     mgr.execute();
     PointContext ctx = mgr.context();
 
@@ -78,7 +78,7 @@ TEST(FerryFilterTest, test_ferry_invalid)
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
     StageFactory f;
-    std::unique_ptr<Stage> reader(f.createStage("readers.las"));
+    std::shared_ptr<Stage> reader(f.createStage("readers.las"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(ops1);
 
@@ -91,9 +91,9 @@ TEST(FerryFilterTest, test_ferry_invalid)
     x.setOptions(xO);
     options.add(x);
 
-    std::unique_ptr<Stage> ferry(f.createStage("filters.ferry"));
+    std::shared_ptr<Stage> ferry(f.createStage("filters.ferry"));
     EXPECT_TRUE(ferry.get());
-    ferry->setInput(reader.get());
+    ferry->setInput(reader);
     ferry->setOptions(options);
 
     PointContext ctx;

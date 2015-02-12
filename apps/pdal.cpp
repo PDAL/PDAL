@@ -142,7 +142,7 @@ void outputDrivers()
 void outputOptions(std::string const& n)
 {
     StageFactory f(false);
-    std::unique_ptr<Stage> s = f.createStage(n);
+    std::shared_ptr<Stage> s(f.createStage(n));
 
     if (!s)
     {

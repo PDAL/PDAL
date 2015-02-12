@@ -45,7 +45,7 @@ namespace pdal
 class StageRunner
 {
 public:
-    StageRunner(Stage *s, PointBufferPtr pointBuf) :
+    StageRunner(std::shared_ptr<Stage> s, PointBufferPtr pointBuf) :
         m_stage(s), m_pointBuf(pointBuf)
     {}
 
@@ -57,7 +57,7 @@ public:
         { return m_bufSet; }
 
 private:
-    Stage *m_stage;
+    std::shared_ptr<Stage> m_stage;
     PointBufferPtr m_pointBuf;
     PointBufferSet m_bufSet;
 };

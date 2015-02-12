@@ -147,12 +147,12 @@ TEST(SpatialReferenceTest, test_read_srs)
 
     Options ops;
     ops.add("filename", Support::datapath("las/utm17.las"));
-    LasReader reader;
-    reader.setOptions(ops);
-    reader.prepare(ctx);
-    reader.execute(ctx);
+    std::shared_ptr<LasReader> reader(new LasReader);
+    reader->setOptions(ops);
+    reader->prepare(ctx);
+    reader->execute(ctx);
 
-    const SpatialReference& ref = reader.getSpatialReference();
+    const SpatialReference& ref = reader->getSpatialReference();
 
     const std::string ret_wkt = ref.getWKT();
     const std::string ret_proj4 = ref.getProj4();
@@ -189,29 +189,29 @@ TEST(SpatialReferenceTest, test_vertical_datums)
     // Write a very simple file with our SRS and one point.
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
-    LasReader reader;
-    reader.setOptions(ops1);
+    std::shared_ptr<LasReader> reader(new LasReader);
+    reader->setOptions(ops1);
 
     // need to scope the writer, so that's it dtor can use the stream
     Options opts;
     opts.add("filename", tmpfile);
 
-    LasWriter writer;
-    writer.setOptions(opts);
-    writer.setInput(&reader);
-    writer.setSpatialReference(ref);
-    writer.prepare(ctx);
-    writer.execute(ctx);
-    SpatialReference sr = writer.getSpatialReference();
+    std::shared_ptr<LasWriter> writer(new LasWriter);
+    writer->setOptions(opts);
+    writer->setInput(reader);
+    writer->setSpatialReference(ref);
+    writer->prepare(ctx);
+    writer->execute(ctx);
+    SpatialReference sr = writer->getSpatialReference();
 
     // Reopen and check contents.
     PointContext ctx2;
-    LasReader reader2;
-    reader2.setOptions(opts);
-    reader2.prepare(ctx2);
-    reader2.execute(ctx2);
+    std::shared_ptr<LasReader> reader2(new LasReader);
+    reader2->setOptions(opts);
+    reader2->prepare(ctx2);
+    reader2->execute(ctx2);
 
-    const SpatialReference ref2 = reader2.getSpatialReference();
+    const SpatialReference ref2 = reader2->getSpatialReference();
     const std::string wkt2 = ref2.getWKT(SpatialReference::eCompoundOK);
 
     EXPECT_TRUE(wkt == wkt2);
@@ -241,22 +241,22 @@ TEST(SpatialReferenceTest, test_writing_vlr)
         FileUtils::deleteFile(tmpfile);
 
         PointContext ctx;
-        LasReader readerx;
+        std::shared_ptr<LasReader> readerx(new LasReader);
         Options readerOpts;
 
         readerOpts.add("filename",
             ::Support::datapath("las/1.2-with-color.las"));
-        readerx.setOptions(readerOpts);
+        readerx->setOptions(readerOpts);
 
         Options writerOpts;
-        LasWriter writer;
+        std::shared_ptr<LasWriter> writer(new LasWriter);
 
         writerOpts.add("filename", tmpfile);
-        writer.setOptions(writerOpts);
-        writer.setInput(&readerx);
-        writer.prepare(ctx);
-        writer.setSpatialReference(ref);
-        writer.execute(ctx);
+        writer->setOptions(writerOpts);
+        writer->setInput(readerx);
+        writer->prepare(ctx);
+        writer->setSpatialReference(ref);
+        writer->execute(ctx);
     }
 
     // Reopen and check contents.
@@ -264,14 +264,14 @@ TEST(SpatialReferenceTest, test_writing_vlr)
         PointContext ctx;
         Options ops;
         ops.add("filename", tmpfile);
-        LasReader reader;
-        reader.setOptions(ops);
-        reader.prepare(ctx);
-        reader.execute(ctx);
+        std::shared_ptr<LasReader> reader(new LasReader);
+        reader->setOptions(ops);
+        reader->prepare(ctx);
+        reader->execute(ctx);
 
-        SpatialReference result_ref = reader.getSpatialReference();
+        SpatialReference result_ref = reader->getSpatialReference();
 
-        EXPECT_EQ(reader.header().vlrCount(), 4u);
+        EXPECT_EQ(reader->header().vlrCount(), 4u);
         std::string wkt = result_ref.getWKT();
         EXPECT_EQ(wkt, reference_wkt);
     }

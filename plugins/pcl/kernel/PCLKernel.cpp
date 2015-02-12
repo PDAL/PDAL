@@ -94,7 +94,7 @@ void PCLKernel::addSwitches()
     addPositionalSwitch("pcl", 1);
 }
 
-std::unique_ptr<Stage> PCLKernel::makeReader(Options readerOptions)
+std::shared_ptr<Stage> PCLKernel::makeReader(Options readerOptions)
 {
     if (isDebug())
     {
@@ -107,11 +107,10 @@ std::unique_ptr<Stage> PCLKernel::makeReader(Options readerOptions)
         readerOptions.add<std::string>("log", "STDERR");
     }
 
-    Stage* stage = KernelSupport::makeReader(m_inputFile);
+    std::shared_ptr<Stage> stage = KernelSupport::makeReader(m_inputFile);
     stage->setOptions(readerOptions);
-    std::unique_ptr<Stage> reader_stage(stage);
 
-    return reader_stage;
+    return stage;
 }
 
 
@@ -124,7 +123,7 @@ int PCLKernel::execute()
     readerOptions.add<bool>("debug", isDebug());
     readerOptions.add<uint32_t>("verbose", getVerboseLevel());
 
-    std::unique_ptr<Stage> readerStage = makeReader(readerOptions);
+    std::shared_ptr<Stage> readerStage = makeReader(readerOptions);
 
     // go ahead and prepare/execute on reader stage only to grab input
     // PointBufferSet, this makes the input PointBuffer available to both the
@@ -135,16 +134,16 @@ int PCLKernel::execute()
     // the input PointBufferSet will be used to populate a BufferReader that is
     // consumed by the processing pipeline
     PointBufferPtr input_buffer = *pbSetIn.begin();
-    BufferReader bufferReader;
-    bufferReader.addBuffer(input_buffer);
+    std::shared_ptr<BufferReader> bufferReader(new BufferReader);
+    bufferReader->addBuffer(input_buffer);
 
     Options pclOptions;
     pclOptions.add<std::string>("filename", m_pclFile);
     pclOptions.add<bool>("debug", isDebug());
     pclOptions.add<uint32_t>("verbose", getVerboseLevel());
 
-    std::unique_ptr<Stage> pclStage(new PCLBlock());
-    pclStage->setInput(&bufferReader);
+    std::shared_ptr<Stage> pclStage(new PCLBlock());
+    pclStage->setInput(bufferReader);
     pclStage->setOptions(pclOptions);
 
     // the PCLBlock stage consumes the BufferReader rather than the
@@ -164,8 +163,8 @@ int PCLKernel::execute()
         cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
         (UserCallback *)new HeartbeatCallback();
 
-    std::unique_ptr<Stage>
-        writer(KernelSupport::makeWriter(m_outputFile, pclStage.get()));
+    std::shared_ptr<Stage>
+        writer(KernelSupport::makeWriter(m_outputFile, pclStage));
 
     // Some options are inferred by makeWriter based on filename
     // (compression, driver type, etc).
@@ -177,7 +176,7 @@ int PCLKernel::execute()
     {
         std::string name = pi.first;
         Options options = pi.second;
-        std::vector<Stage*> stages = writer->findStage(name);
+        std::vector<std::shared_ptr<Stage> > stages = writer->findStage(name);
         for (const auto& s : stages)
         {
             Options opts = s->getOptions();

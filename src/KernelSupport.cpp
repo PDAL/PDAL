@@ -76,7 +76,7 @@ PipelineManager* KernelSupport::makePipeline(const std::string& inputFile)
 }
 
 
-Stage *KernelSupport::makeReader(const std::string& inputFile)
+std::shared_ptr<Stage> KernelSupport::makeReader(const std::string& inputFile)
 {
     if (!FileUtils::fileExists(inputFile))
         throw app_runtime_error("file not found: " + inputFile);
@@ -87,14 +87,14 @@ Stage *KernelSupport::makeReader(const std::string& inputFile)
         throw app_runtime_error("Cannot determine input file type of " +
             inputFile);
 
-    Stage* stage = factory.createStage2(driver);
+    std::shared_ptr<Stage> stage(factory.createStage(driver));
     if (!stage)
         throw app_runtime_error("reader creation failed");
     return stage;
 }
 
 
-Stage* KernelSupport::makeWriter(const std::string& outputFile, Stage *stage)
+std::shared_ptr<Stage> KernelSupport::makeWriter(const std::string& outputFile, std::shared_ptr<Stage> stage)
 {
     pdal::StageFactory factory;
     std::string driver = factory.inferWriterDriver(outputFile);
@@ -103,7 +103,7 @@ Stage* KernelSupport::makeWriter(const std::string& outputFile, Stage *stage)
             outputFile);
     Options options = factory.inferWriterOptionsChanges(outputFile);
 
-    Stage* writer = factory.createStage2(driver);
+    std::shared_ptr<Stage> writer(factory.createStage(driver));
     if (!writer)
         throw app_runtime_error("writer creation failed");
     writer->setInput(stage);

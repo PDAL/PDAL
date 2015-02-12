@@ -54,18 +54,18 @@ public:
     ~PipelineManager();
 
     // Use these to manually add stages into the pipeline manager.
-    Stage* addReader(const std::string& type);
-    Stage* addFilter(const std::string& type, Stage *prevStage);
-    Stage* addFilter(const std::string& type,
-        const std::vector<Stage *>& prevStages);
-    Stage* addWriter(const std::string& type, Stage *prevStage);
+    std::shared_ptr<Stage> addReader(const std::string& type);
+    std::shared_ptr<Stage> addFilter(const std::string& type, std::shared_ptr<Stage> prevStage);
+    std::shared_ptr<Stage> addFilter(const std::string& type,
+        const std::vector<std::shared_ptr<Stage> >& prevStages);
+    std::shared_ptr<Stage> addWriter(const std::string& type, std::shared_ptr<Stage> prevStage);
 
     // returns true if the pipeline endpoint is a writer
     bool isWriterPipeline() const
         { return (bool)getStage(); }
 
     // return the pipeline reader endpoint (or NULL, if not a reader pipeline)
-    Stage* getStage() const
+    std::shared_ptr<Stage> getStage() const
         { return m_stages.empty() ? NULL : m_stages.back(); }
 
     void prepare() const;
@@ -86,7 +86,7 @@ private:
     PointContext m_context;
     PointBufferSet m_pbSet;
 
-    typedef std::vector<Stage *> StagePtrList;
+    typedef std::vector<std::shared_ptr<Stage> > StagePtrList;
     StagePtrList m_stages;
 
     PipelineManager& operator=(const PipelineManager&); // not implemented

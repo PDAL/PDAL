@@ -83,13 +83,13 @@ TEST(SbetReaderTest, testRead)
 {
     Option filename("filename", Support::datapath("sbet/2-points.sbet"), "");
     Options options(filename);
-    SbetReader reader;
-    reader.setOptions(options);
+    std::shared_ptr<SbetReader> reader(new SbetReader);
+    reader->setOptions(options);
 
     PointContext ctx;
 
-    reader.prepare(ctx);
-    PointBufferSet pbSet = reader.execute(ctx);
+    reader->prepare(ctx);
+    PointBufferSet pbSet = reader->execute(ctx);
     EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
 
@@ -119,11 +119,11 @@ TEST(SbetReaderTest, testBadFile)
 {
     Option filename("filename", Support::datapath("sbet/badfile.sbet"), "");
     Options options(filename);
-    SbetReader reader;
-    reader.setOptions(options);
+    std::shared_ptr<SbetReader> reader(new SbetReader);
+    reader->setOptions(options);
     PointContext ctx;
-    reader.prepare(ctx);
-    EXPECT_THROW(reader.execute(ctx), pdal_error);
+    reader->prepare(ctx);
+    EXPECT_THROW(reader->execute(ctx), pdal_error);
 }
 
 TEST(SbetReaderTest, testPipeline)

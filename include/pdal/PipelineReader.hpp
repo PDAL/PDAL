@@ -68,11 +68,11 @@ private:
     typedef std::map<std::string, std::string> map_t;
 
     bool parseElement_Pipeline(const boost::property_tree::ptree&);
-    Stage* parseElement_anystage(const std::string& name,
+    std::shared_ptr<Stage> parseElement_anystage(const std::string& name,
         const boost::property_tree::ptree& subtree);
-    Stage* parseElement_Reader(const boost::property_tree::ptree& tree);
-    Stage* parseElement_Filter(const boost::property_tree::ptree& tree);
-    Stage* parseElement_Writer(const boost::property_tree::ptree& tree);
+    std::shared_ptr<Stage> parseElement_Reader(const boost::property_tree::ptree& tree);
+    std::shared_ptr<Stage> parseElement_Filter(const boost::property_tree::ptree& tree);
+    std::shared_ptr<Stage> parseElement_Writer(const boost::property_tree::ptree& tree);
     Option parseElement_Option(const boost::property_tree::ptree& tree);
     void collect_attributes(map_t& attrs,
         const boost::property_tree::ptree& tree);

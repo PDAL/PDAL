@@ -76,11 +76,11 @@ void test_file_type(const std::string& filename)
 
     ops.add("filename", Support::datapath(filename));
     ops.add("count", 506);
-    BpfReader reader;
-    reader.setOptions(ops);
+    std::shared_ptr<BpfReader> reader(new BpfReader);
+    reader->setOptions(ops);
 
-    reader.prepare(context);
-    PointBufferSet pbSet = reader.execute(context);
+    reader->prepare(context);
+    PointBufferSet pbSet = reader->execute(context);
 
     EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();

@@ -82,7 +82,7 @@ void SmoothKernel::addSwitches()
     addPositionalSwitch("output", 1);
 }
 
-std::unique_ptr<Stage> SmoothKernel::makeReader(Options readerOptions)
+std::shared_ptr<Stage> SmoothKernel::makeReader(Options readerOptions)
 {
     if (isDebug())
     {
@@ -95,11 +95,10 @@ std::unique_ptr<Stage> SmoothKernel::makeReader(Options readerOptions)
         readerOptions.add("log", "STDERR");
     }
 
-    Stage* stage = KernelSupport::makeReader(m_inputFile);
+    std::shared_ptr<Stage> stage = KernelSupport::makeReader(m_inputFile);
     stage->setOptions(readerOptions);
-    std::unique_ptr<Stage> reader_stage(stage);
 
-    return reader_stage;
+    return stage;
 }
 
 
@@ -112,7 +111,7 @@ int SmoothKernel::execute()
     readerOptions.add("debug", isDebug());
     readerOptions.add("verbose", getVerboseLevel());
 
-    std::unique_ptr<Stage> readerStage = makeReader(readerOptions);
+    std::shared_ptr<Stage> readerStage = makeReader(readerOptions);
 
     // go ahead and prepare/execute on reader stage only to grab input
     // PointBufferSet, this makes the input PointBuffer available to both the
@@ -123,9 +122,9 @@ int SmoothKernel::execute()
     // the input PointBufferSet will be used to populate a BufferReader that is
     // consumed by the processing pipeline
     PointBufferPtr input_buffer = *pbSetIn.begin();
-    BufferReader bufferReader;
-    bufferReader.setOptions(readerOptions);
-    bufferReader.addBuffer(input_buffer);
+    std::shared_ptr<BufferReader> bufferReader(new BufferReader);
+    bufferReader->setOptions(readerOptions);
+    bufferReader->addBuffer(input_buffer);
 
     Options smoothOptions;
     std::ostringstream ss;
@@ -141,15 +140,15 @@ int SmoothKernel::execute()
     smoothOptions.add("debug", isDebug());
     smoothOptions.add("verbose", getVerboseLevel());
 
-    std::unique_ptr<Stage> smoothStage(new PCLBlock());
+    std::shared_ptr<Stage> smoothStage(new PCLBlock());
     smoothStage->setOptions(smoothOptions);
-    smoothStage->setInput(&bufferReader);
+    smoothStage->setInput(bufferReader);
 
     Options writerOptions;
     writerOptions.add("filename", m_outputFile);
     setCommonOptions(writerOptions);
 
-    std::unique_ptr<Stage> writer(KernelSupport::makeWriter(m_outputFile, smoothStage.get()));
+    std::shared_ptr<Stage> writer(KernelSupport::makeWriter(m_outputFile, smoothStage));
     writer->setOptions(writerOptions);
 
     std::vector<std::string> cmd = getProgressShellCommand();
@@ -165,8 +164,8 @@ int SmoothKernel::execute()
     {
         std::string name = pi->first;
         Options options = pi->second;
-        std::vector<Stage*> stages = writer->findStage(name);
-        std::vector<Stage*>::iterator s;
+        std::vector<std::shared_ptr<Stage> > stages = writer->findStage(name);
+        std::vector<std::shared_ptr<Stage> >::iterator s;
         for (s = stages.begin(); s != stages.end(); ++s)
         {
             Options opts = (*s)->getOptions();

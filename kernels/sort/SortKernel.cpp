@@ -87,7 +87,7 @@ void SortKernel::addSwitches()
     addPositionalSwitch("output", 1);
 }
 
-std::unique_ptr<Stage> SortKernel::makeReader(Options readerOptions)
+std::shared_ptr<Stage> SortKernel::makeReader(Options readerOptions)
 {
     if (isDebug())
     {
@@ -100,11 +100,10 @@ std::unique_ptr<Stage> SortKernel::makeReader(Options readerOptions)
         readerOptions.add<std::string>("log", "STDERR");
     }
 
-    Stage* stage = KernelSupport::makeReader(m_inputFile);
+    std::shared_ptr<Stage> stage(KernelSupport::makeReader(m_inputFile));
     stage->setOptions(readerOptions);
-    std::unique_ptr<Stage> reader_stage(stage);
 
-    return reader_stage;
+    return stage;
 }
 
 
@@ -117,7 +116,7 @@ int SortKernel::execute()
     readerOptions.add("debug", isDebug());
     readerOptions.add("verbose", getVerboseLevel());
 
-    std::unique_ptr<Stage> readerStage = makeReader(readerOptions);
+    std::shared_ptr<Stage> readerStage(makeReader(readerOptions));
 
     // go ahead and prepare/execute on reader stage only to grab input
     // PointBufferSet, this makes the input PointBuffer available to both the
@@ -128,17 +127,17 @@ int SortKernel::execute()
     // the input PointBufferSet will be used to populate a BufferReader that is
     // consumed by the processing pipeline
     PointBufferPtr input_buffer = *pbSetIn.begin();
-    BufferReader bufferReader;
-    bufferReader.setOptions(readerOptions);
-    bufferReader.addBuffer(input_buffer);
+    std::shared_ptr<BufferReader> bufferReader(new BufferReader);
+    bufferReader->setOptions(readerOptions);
+    bufferReader->addBuffer(input_buffer);
 
     Options sortOptions;
     sortOptions.add<bool>("debug", isDebug());
     sortOptions.add<uint32_t>("verbose", getVerboseLevel());
 
     StageFactory f;
-    Stage* sortStage = f.createStage2("filters.mortonorder");
-    sortStage->setInput(&bufferReader);
+    std::shared_ptr<Stage> sortStage(f.createStage("filters.mortonorder"));
+    sortStage->setInput(bufferReader);
     sortStage->setOptions(sortOptions);
 
     Options writerOptions;
@@ -155,7 +154,7 @@ int SortKernel::execute()
         cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
         (UserCallback *)new HeartbeatCallback();
 
-    std::unique_ptr<Stage> writer(KernelSupport::makeWriter(m_outputFile, sortStage));
+    std::shared_ptr<Stage> writer(KernelSupport::makeWriter(m_outputFile, sortStage));
 
     // Some options are inferred by makeWriter based on filename
     // (compression, driver type, etc).
@@ -167,7 +166,7 @@ int SortKernel::execute()
     {
         std::string name = pi.first;
         Options options = pi.second;
-        std::vector<Stage*> stages = writer->findStage(name);
+        std::vector<std::shared_ptr<Stage> > stages = writer->findStage(name);
         for (const auto& s : stages)
         {
             Options opts = s->getOptions();

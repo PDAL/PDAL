@@ -60,14 +60,13 @@ Options makeWriterOptions()
 
 TEST(SbetWriterTest, testConstructor)
 {
-    SbetReader reader;
-    reader.setOptions(makeReaderOptions());
-    SbetWriter writer;
-    writer.setOptions(makeWriterOptions());
-    writer.setInput(&reader);
+    std::shared_ptr<SbetReader> reader(new SbetReader);
+    reader->setOptions(makeReaderOptions());
+    std::shared_ptr<SbetWriter> writer(new SbetWriter);
+    writer->setOptions(makeWriterOptions());
+    writer->setInput(reader);
 
-    //EXPECT_TRUE(writer.getDescription() == "SBET Writer");
-    EXPECT_EQ(writer.getName(), "writers.sbet");
+    EXPECT_EQ(writer->getName(), "writers.sbet");
 }
 
 TEST(SbetWriterTest, testWrite)
@@ -77,15 +76,15 @@ TEST(SbetWriterTest, testWrite)
     // Scope forces the writer's buffer to get written to the file.  Otherwise
     // the output file will show a file size of zero and no contents.
     {
-        SbetReader reader;
-        reader.setOptions(makeReaderOptions());
-        SbetWriter writer;
-        writer.setOptions(makeWriterOptions());
-        writer.setInput(&reader);
+        std::shared_ptr<SbetReader> reader(new SbetReader);
+        reader->setOptions(makeReaderOptions());
+        std::shared_ptr<SbetWriter> writer(new SbetWriter);
+        writer->setOptions(makeWriterOptions());
+        writer->setInput(reader);
 
         PointContext ctx;
-        writer.prepare(ctx);
-        writer.execute(ctx);
+        writer->prepare(ctx);
+        writer->execute(ctx);
     }
 
     //ABELL - Write of a read file is no longer identical.

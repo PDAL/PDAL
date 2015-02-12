@@ -51,13 +51,13 @@ TEST(OptionsTest, test_static_options)
     Options ops;
 
     StageFactory f;
-    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
+    std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(ops);
-    std::unique_ptr<Stage> crop(f.createStage("filters.crop"));
+    std::shared_ptr<Stage> crop(f.createStage("filters.crop"));
     EXPECT_TRUE(crop.get());
     crop->setOptions(ops);
-    crop->setInput(reader.get());
+    crop->setInput(reader);
     auto opts = crop->getDefaultOptions();
     EXPECT_EQ(opts.getOptions().size(), 3u);
     EXPECT_TRUE(opts.hasOption("bounds"));

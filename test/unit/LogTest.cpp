@@ -60,7 +60,7 @@ TEST(LogTest, test_one)
     {
         PointContext ctx;
 
-        std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
+        std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
         reader->setOptions(opts);
         reader->prepare(ctx);
 
@@ -140,16 +140,16 @@ TEST(LogTest, test_two_a)
     }
 
     {
-        std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
+        std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
         reader->setOptions(reader_opts);
 
-        std::unique_ptr<Stage> xfilter(f.createStage("filters.programmable"));
+        std::shared_ptr<Stage> xfilter(f.createStage("filters.programmable"));
         xfilter->setOptions(xfilter_opts);
-        xfilter->setInput(reader.get());
+        xfilter->setInput(reader);
 
-        std::unique_ptr<Stage> yfilter(f.createStage("filters.programmable"));
+        std::shared_ptr<Stage> yfilter(f.createStage("filters.programmable"));
         yfilter->setOptions(yfilter_opts);
-        yfilter->setInput(xfilter.get());
+        yfilter->setInput(xfilter);
 
         PointContext ctx;
         yfilter->prepare(ctx);
@@ -239,16 +239,16 @@ TEST(LogTest, test_two_b)
     }
 
     {
-        std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
+        std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
         reader->setOptions(reader_opts);
 
-        std::unique_ptr<Stage> xfilter(f.createStage("filters.programmable"));
+        std::shared_ptr<Stage> xfilter(f.createStage("filters.programmable"));
         xfilter->setOptions(xfilter_opts);
-        xfilter->setInput(reader.get());
+        xfilter->setInput(reader);
 
-        std::unique_ptr<Stage> yfilter(f.createStage("filters.programmable"));
+        std::shared_ptr<Stage> yfilter(f.createStage("filters.programmable"));
         yfilter->setOptions(yfilter_opts);
-        yfilter->setInput(xfilter.get());
+        yfilter->setInput(xfilter);
 
         PointContext ctx;
         yfilter->prepare(ctx);
@@ -328,12 +328,12 @@ TEST(LogTest, test_three)
     }
 
     {
-        std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
+        std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
         reader->setOptions(reader_opts);
 
-        std::unique_ptr<Stage> xfilter(f.createStage("filters.programmable"));
+        std::shared_ptr<Stage> xfilter(f.createStage("filters.programmable"));
         xfilter->setOptions(xfilter_opts);
-        xfilter->setInput(reader.get());
+        xfilter->setInput(reader);
 
         PointContext ctx;
         xfilter->prepare(ctx);

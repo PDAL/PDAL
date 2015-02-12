@@ -62,33 +62,34 @@ TEST(BufferTest, test_basic)
     }
 
     Options ops;
-    BufferReader r;
-    r.setOptions(ops);
-    r.addBuffer(buf);
+    std::shared_ptr<BufferReader> r(new BufferReader);
+    EXPECT_TRUE(r.get());
+    r->setOptions(ops);
+    r->addBuffer(buf);
 
-    StatsFilter s;
-    s.setOptions(ops);
-    s.setInput(&r);
+    std::shared_ptr<StatsFilter> s(new StatsFilter);
+    s->setOptions(ops);
+    s->setInput(r);
 
-    s.prepare(ctx);
-    PointBufferSet pbSet = s.execute(ctx);
+    s->prepare(ctx);
+    PointBufferSet pbSet = s->execute(ctx);
     EXPECT_EQ(pbSet.size(), 1u);
     buf = *pbSet.begin();
     EXPECT_EQ(buf->size(), 20u);
 
-    stats::Summary xSummary = s.getStats(Dimension::Id::X);
+    stats::Summary xSummary = s->getStats(Dimension::Id::X);
     EXPECT_FLOAT_EQ(xSummary.minimum(), 0);
     EXPECT_FLOAT_EQ(xSummary.maximum(), 19);
     EXPECT_EQ(xSummary.count(), 20u);
     EXPECT_FLOAT_EQ(xSummary.average(), 9.5);
 
-    stats::Summary ySummary = s.getStats(Dimension::Id::Y);
+    stats::Summary ySummary = s->getStats(Dimension::Id::Y);
     EXPECT_FLOAT_EQ(ySummary.minimum(), 0);
     EXPECT_FLOAT_EQ(ySummary.maximum(), 38);
     EXPECT_EQ(ySummary.count(), 20u);
     EXPECT_FLOAT_EQ(ySummary.average(), 19);
 
-    stats::Summary zSummary = s.getStats(Dimension::Id::Z);
+    stats::Summary zSummary = s->getStats(Dimension::Id::Z);
     EXPECT_FLOAT_EQ(zSummary.minimum(), -19);
     EXPECT_FLOAT_EQ(zSummary.maximum(), 0);
     EXPECT_EQ(zSummary.count(), 20u);

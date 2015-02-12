@@ -51,7 +51,7 @@ TEST(CropFilterTest, test_crop)
     opts.add("bounds", srcBounds);
     opts.add("num_points", 1000);
     opts.add("mode", "ramp");
-    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
+    std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(opts);
 
@@ -60,26 +60,26 @@ TEST(CropFilterTest, test_crop)
     Options cropOpts;
     cropOpts.add("bounds", dstBounds);
 
-    std::unique_ptr<Stage> filter(f.createStage("filters.crop"));
+    std::shared_ptr<Stage> filter(f.createStage("filters.crop"));
     EXPECT_TRUE(filter.get());
     filter->setOptions(cropOpts);
-    filter->setInput(reader.get());
+    filter->setInput(reader);
 
     Options statOpts;
 
-    StatsFilter stats;
-    stats.setOptions(statOpts);
-    stats.setInput(filter.get());
+    std::shared_ptr<StatsFilter> stats(new StatsFilter);
+    stats->setOptions(statOpts);
+    stats->setInput(filter);
 
     PointContext ctx;
-    stats.prepare(ctx);
-    PointBufferSet pbSet = stats.execute(ctx);
+    stats->prepare(ctx);
+    PointBufferSet pbSet = stats->execute(ctx);
     EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
 
-    const stats::Summary& statsX = stats.getStats(Dimension::Id::X);
-    const stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
-    const stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
+    const stats::Summary& statsX = stats->getStats(Dimension::Id::X);
+    const stats::Summary& statsY = stats->getStats(Dimension::Id::Y);
+    const stats::Summary& statsZ = stats->getStats(Dimension::Id::Z);
     EXPECT_EQ(buf->size(), 333u);
 
     const double minX = statsX.minimum();
@@ -115,7 +115,7 @@ TEST(CropFilterTest, test_crop_polygon)
 
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
-    std::unique_ptr<Stage> reader(f.createStage("readers.las"));
+    std::shared_ptr<Stage> reader(f.createStage("readers.las"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(ops1);
 
@@ -136,9 +136,9 @@ TEST(CropFilterTest, test_crop_polygon)
     Option polygon("polygon", wkt, "");
     options.add(polygon);
 
-    std::unique_ptr<Stage> crop(f.createStage("filters.crop"));
+    std::shared_ptr<Stage> crop(f.createStage("filters.crop"));
     EXPECT_TRUE(crop.get());
-    crop->setInput(reader.get());
+    crop->setInput(reader);
     crop->setOptions(options);
 
     PointContext ctx;
@@ -196,19 +196,19 @@ TEST(CropFilterTest, test_crop_polygon_reprojection)
     Option polygon("polygon", wkt, "");
     options.add(polygon);
 
-    std::unique_ptr<Stage> reader(f.createStage("readers.las"));
+    std::shared_ptr<Stage> reader(f.createStage("readers.las"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(options);
 
-    std::unique_ptr<Stage> reprojection(f.createStage("filters.reprojection"));
+    std::shared_ptr<Stage> reprojection(f.createStage("filters.reprojection"));
     EXPECT_TRUE(reprojection.get());
     reprojection->setOptions(options);
-    reprojection->setInput(reader.get());
+    reprojection->setInput(reader);
 
-    std::unique_ptr<Stage> crop(f.createStage("filters.crop"));
+    std::shared_ptr<Stage> crop(f.createStage("filters.crop"));
     EXPECT_TRUE(crop.get());
     crop->setOptions(options);
-    crop->setInput(reprojection.get());
+    crop->setInput(reprojection);
 
     PointContext ctx;
     PointBufferPtr buffer(new PointBuffer(ctx));

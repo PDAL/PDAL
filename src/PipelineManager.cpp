@@ -45,43 +45,42 @@ PipelineManager::~PipelineManager()
 {
     while (m_stages.size())
     {
-        Stage* stage = m_stages.back();
+        std::shared_ptr<Stage> stage = m_stages.back();
         m_stages.pop_back();
-        delete stage;
     }
 }
 
 
-Stage* PipelineManager::addReader(const std::string& type)
+std::shared_ptr<Stage> PipelineManager::addReader(const std::string& type)
 {
-    Stage *r = m_factory.createStage2(type);
+    std::shared_ptr<Stage> r(m_factory.createStage(type));
     m_stages.push_back(r);
     return r;
 }
 
 
-Stage* PipelineManager::addFilter(const std::string& type,
-    const std::vector<Stage *>& prevStages)
+std::shared_ptr<Stage> PipelineManager::addFilter(const std::string& type,
+    const std::vector<std::shared_ptr<Stage> >& prevStages)
 {
-    Stage* stage = m_factory.createStage2(type);
+    std::shared_ptr<Stage> stage(m_factory.createStage(type));
     stage->setInput(prevStages);
     m_stages.push_back(stage);
     return stage;
 }
 
 
-Stage* PipelineManager::addFilter(const std::string& type, Stage *prevStage)
+std::shared_ptr<Stage> PipelineManager::addFilter(const std::string& type, std::shared_ptr<Stage> prevStage)
 {
-    Stage* stage = m_factory.createStage2(type);
+    std::shared_ptr<Stage> stage(m_factory.createStage(type));
     stage->setInput(prevStage);
     m_stages.push_back(stage);
     return stage;
 }
 
 
-Stage* PipelineManager::addWriter(const std::string& type, Stage *prevStage)
+std::shared_ptr<Stage> PipelineManager::addWriter(const std::string& type, std::shared_ptr<Stage> prevStage)
 {
-    Stage* writer = m_factory.createStage2(type);
+    std::shared_ptr<Stage> writer(m_factory.createStage(type));
     writer->setInput(prevStage);
     m_stages.push_back(writer);
     return writer;
@@ -90,7 +89,7 @@ Stage* PipelineManager::addWriter(const std::string& type, Stage *prevStage)
 
 void PipelineManager::prepare() const
 {
-    Stage *s = getStage();
+    std::shared_ptr<Stage> s = getStage();
     if (s)
        s->prepare(m_context);
 }
@@ -100,7 +99,7 @@ point_count_t PipelineManager::execute()
 {
     prepare();
 
-    Stage *s = getStage();
+    std::shared_ptr<Stage> s = getStage();
     if (!s)
         return 0;
     m_pbSet = s->execute(m_context);

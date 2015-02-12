@@ -49,17 +49,17 @@ TEST(DecimationFilterTest, DecimationFilterTest_test1)
     ops.add("mode", "random");
     ops.add("num_points", 30);
     StageFactory f;
-    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
+    std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(ops);
 
     Options decimationOps;
     decimationOps.add("step", 10);
     
-    std::unique_ptr<Stage> filter(f.createStage("filters.decimation"));
+    std::shared_ptr<Stage> filter(f.createStage("filters.decimation"));
     EXPECT_TRUE(filter.get());
     filter->setOptions(decimationOps);
-    filter->setInput(reader.get());
+    filter->setInput(reader);
 
     PointContext ctx;
 

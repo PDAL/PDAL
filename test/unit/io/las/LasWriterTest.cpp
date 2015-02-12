@@ -54,10 +54,10 @@ class LasTester
 {
 public:
     template <typename T>
-    static T headerVal(LasWriter& w, const std::string& s)
-        { return w.headerVal<T>(s); }
-    LasHeader *header(LasWriter& w)
-        { return &w.m_lasHeader; }
+    static T headerVal(std::shared_ptr<LasWriter> w, const std::string& s)
+        { return w->headerVal<T>(s); }
+    LasHeader *header(std::shared_ptr<LasWriter> w)
+        { return &w->m_lasHeader; }
 };
 
 } // namespace pdal
@@ -82,26 +82,26 @@ TEST(LasWriterTest, auto_offset)
     writerOps.add("filename", FILENAME);
     writerOps.add("offset_x", "auto");
 
-    LasWriter writer;
-    writer.setOptions(writerOps);
+    std::shared_ptr<LasWriter> writer(new LasWriter);
+    writer->setOptions(writerOps);
 
-    writer.prepare(ctx);
+    writer->prepare(ctx);
 
-    WriterTester::ready(&writer, ctx);
-    WriterTester::write(&writer, *buf);
-    WriterTester::done(&writer, ctx);
+    WriterTester::ready(writer, ctx);
+    WriterTester::write(writer, *buf);
+    WriterTester::done(writer, ctx);
 
     Options readerOps;
     readerOps.add("filename", FILENAME);
 
     PointContext readCtx;
 
-    LasReader reader;
-    reader.setOptions(readerOps);
+    std::shared_ptr<LasReader> reader(new LasReader);
+    reader->setOptions(readerOps);
 
-    reader.prepare(readCtx);
-    EXPECT_FLOAT_EQ(reader.header().offsetX(), 74529.00);
-    PointBufferSet pbSet = reader.execute(readCtx);
+    reader->prepare(readCtx);
+    EXPECT_FLOAT_EQ(reader->header().offsetX(), 74529.00);
+    PointBufferSet pbSet = reader->execute(readCtx);
     EXPECT_EQ(pbSet.size(), 1u);
     buf = *pbSet.begin();
     EXPECT_EQ(buf->size(), 3u);
@@ -116,19 +116,19 @@ TEST(LasWriterTest, extra_dims)
     Options readerOps;
 
     readerOps.add("filename", Support::datapath("las/1.2-with-color.las"));
-    LasReader reader;
-    reader.setOptions(readerOps);
+    std::shared_ptr<LasReader> reader(new LasReader);
+    reader->setOptions(readerOps);
 
     Options writerOps;
     writerOps.add("extra_dims", "Red=int32, Blue = int16, Green = int32_t");
     writerOps.add("filename", Support::temppath("simple.las"));
-    LasWriter writer;
-    writer.setInput(&reader);
-    writer.setOptions(writerOps);
+    std::shared_ptr<LasWriter> writer(new LasWriter);
+    writer->setInput(reader);
+    writer->setOptions(writerOps);
 
     PointContext ctx;
-    writer.prepare(ctx);
-    PointBufferSet pbSet = writer.execute(ctx);
+    writer->prepare(ctx);
+    PointBufferSet pbSet = writer->execute(ctx);
 
     LasTester tester;
     LasHeader *header = tester.header(writer);
@@ -152,12 +152,12 @@ TEST(LasWriterTest, extra_dims)
     Options reader2Ops;
     reader2Ops.add("filename", Support::temppath("simple.las"));
     reader2Ops.add("extra_dims", "R1 =int32, B1= int16 ,G1=int32_t");
-    LasReader reader2;
-    reader2.setOptions(reader2Ops);
+    std::shared_ptr<LasReader> reader2(new LasReader);
+    reader2->setOptions(reader2Ops);
 
     PointContext ctx2;
-    reader2.prepare(ctx2);
-    pbSet = reader2.execute(ctx2);
+    reader2->prepare(ctx2);
+    pbSet = reader2->execute(ctx2);
     pb = *pbSet.begin();
     Dimension::Id::Enum r1 = ctx2.findDim("R1");
     EXPECT_TRUE(r1 != Dimension::Id::Unknown);
@@ -190,13 +190,13 @@ TEST(LasWriterTest, metadata_options)
     metadataOp.setOptions(metadataOps);
     ops.add(metadataOp);
 
-    LasWriter writer;
-    writer.setOptions(ops);
+    std::shared_ptr<LasWriter> writer(new LasWriter);
+    writer->setOptions(ops);
 
     PointContext ctx;
-    writer.prepare(ctx);
+    writer->prepare(ctx);
 
-    MetadataNode m = writer.getMetadata();
+    MetadataNode m = writer->getMetadata();
     m.add("minor_version", 56);
 
     uint8_t format = 
@@ -265,14 +265,14 @@ TEST(LasWriterTest, simple)
     writerOpts.add("creation_year", 2014);
     writerOpts.add("filename", outfile);
 
-    LasReader reader;
-    reader.setOptions(readerOpts);
+    std::shared_ptr<LasReader> reader(new LasReader);
+    reader->setOptions(readerOpts);
 
-    LasWriter writer;
-    writer.setOptions(writerOpts);
-    writer.setInput(&reader);
-    writer.prepare(ctx);
-    writer.execute(ctx);
+    std::shared_ptr<LasWriter> writer(new LasWriter);
+    writer->setOptions(writerOpts);
+    writer->setInput(&reader);
+    writer->prepare(ctx);
+    writer->execute(ctx);
 
     diffdump(infile, outfile);
 }
@@ -301,12 +301,12 @@ TEST(LasWriterTest, LasWriterTest_test_simple_laz)
         Support::temppath("LasWriterTest_test_simple_laz.laz"));
 
     // need to scope the writer, so that's it dtor can use the stream
-    LasWriter writer(ofs);
-    writer.setOptions(writer);
-    writer.setInput(&reader);
+    std::shared_ptr<LasWriter> writer(new LasWriter)(ofs);
+    writer->setOptions(writer);
+    writer->setInput(&reader);
 
-    writer.prepare(ctx);
-    writer.execute(ctx);
+    writer->prepare(ctx);
+    writer->execute(ctx);
 
     FileUtils::closeFile(ofs);
 
@@ -343,8 +343,8 @@ static void test_a_format(const std::string& refFile, uint8_t majorVersion,
     Options readerOpts;
     readerOpts.add("filename", Support::datapath(directory + "1.2_3.las"));
 
-    LasReader reader;
-    reader.setOptions(readerOpts);
+    std::shared_ptr<LasReader> reader(new LasReader);
+    reader->setOptions(readerOpts);
 
     Options writerOpts;
     writerOpts.add("compression", false);
@@ -362,13 +362,13 @@ static void test_a_format(const std::string& refFile, uint8_t majorVersion,
     std::ostream* ofs = FileUtils::createFile(Support::temppath("temp.las"));
 
     // need to scope the writer, so that's it dtor can use the stream
-    LasWriter writer(ofs);
-    writer.setOptions(writerOpts);
-    writer.setInput(&reader);
-    EXPECT_EQ(writer.getDescription(), "Las Writer");
+    std::shared_ptr<LasWriter> writer(new LasWriter)(ofs);
+    writer->setOptions(writerOpts);
+    writer->setInput(&reader);
+    EXPECT_EQ(writer->getDescription(), "Las Writer");
 
-    writer.prepare(ctx);
-    writer.execute(ctx);
+    writer->prepare(ctx);
+    writer->execute(ctx);
 
     bool filesSame = Support::compare_files("temp.las",
         Support::datapath(directory + refFile));
@@ -441,8 +441,8 @@ TEST(LasWriterTest, LasWriterTest_test_drop_extra_returns)
     ops.add("num_points", 100);
     ops.add("mode", "constant");
     ops.add("number_of_returns", 10);
-    FauxReader reader;
-    reader.setOptions(ops);
+    std::shared_ptr<FauxReader> reader(new FauxReader);
+    reader->setOptions(ops);
 
     std::ostream* ofs = FileUtils::createFile(Support::temppath(temp_filename));
 
@@ -454,23 +454,23 @@ TEST(LasWriterTest, LasWriterTest_test_drop_extra_returns)
     writerOptions.add("system_id", "");
     writerOptions.add("software_id", "TerraScan");
 
-    LasWriter writer(ofs);
-    writer.setOptions(writerOptions);
-    writer.setInput(&reader);
-    writer.prepare(ctx);
-    writer.execute(ctx);
+    std::shared_ptr<LasWriter> writer(new LasWriter)(ofs);
+    writer->setOptions(writerOptions);
+    writer->setInput(&reader);
+    writer->prepare(ctx);
+    writer->execute(ctx);
 
     Options readerOptions;
     readerOptions.add("filename", Support::temppath(temp_filename));
     readerOptions.add("count", 6);
 
-    LasReader reader2;
-    reader2.setOptions(readerOptions);
+    std::shared_ptr<LasReader> reader2(new LasReader);
+    reader2->setOptions(readerOptions);
 
     PointContext ctx2;
 
-    reader2.prepare(ctx2);
-    PointBufferSet pbSet = reader2.execute(ctx2);
+    reader2->prepare(ctx2);
+    PointBufferSet pbSet = reader2->execute(ctx2);
     EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
 
