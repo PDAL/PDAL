@@ -3,7 +3,7 @@
 writers.geowave
 ============
 
-The **GeoWave writer** uses `GeoWave`_ to write to Accumulo.  Instructions for configuring the GeoWave plugin can be found `here`_
+The **GeoWave writer** uses `GeoWave`_ to write to Accumulo.  GeoWave entries are stored using EPSG:4326.  Instructions for configuring the GeoWave plugin can be found `here`_
 
 
 Example
@@ -22,11 +22,14 @@ Example
       <Option name="featureTypeName">PDAL_Point</Option>
       <Option name="dataAdapter">FeatureCollectionDataAdapter</Option>
       <Option name="pointsPerEntry">5000u</Option>
-      <Reader type="readers.qfit">
-        <Option name="filename">qfitfile.qi</Option>
-        <Option name="flip_coordinates">false</Option>
-        <Option name="scale_z">1.0</Option>
-      </Reader>
+      <Filter type="filters.reprojection">
+        <Option name="out_srs">EPSG:4326</Option>
+        <Reader type="readers.qfit">
+          <Option name="filename">qfitfile.qi</Option>
+          <Option name="flip_coordinates">false</Option>
+          <Option name="scale_z">1.0</Option>
+        </Reader>
+      </Filter>
     </Writer>
   </Pipeline>
 
