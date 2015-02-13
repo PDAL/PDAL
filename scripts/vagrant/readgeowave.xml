@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="writers.las">
+        <Option name="filename">st-helens-small-out-geowave.las</Option>
+        <Reader type="readers.geowave">
+            <Option name="zookeeperUrl">localhost:2181</Option>
+            <Option name="instanceName">geowave</Option>
+            <Option name="username">root</Option>
+            <Option name="password">password</Option>
+            <Option name="tableNamespace">points</Option>
+            <Option name="dataAdapter">FeatureDataAdapter</Option>
+            <Option name="bounds">([-180,180],[-90,90],[0,0])</Option>
+        </Reader>
+    </Writer>
+</Pipeline>
+

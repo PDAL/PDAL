@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="writers.geowave">
+        <Option name="zookeeperUrl">localhost:2181</Option>
+        <Option name="instanceName">geowave</Option>
+        <Option name="username">root</Option>
+        <Option name="password">password</Option>
+        <Option name="tableNamespace">points</Option>
+        <Option name="dataAdapter">FeatureDataAdapter</Option>
+        <Filter type="filters.reprojection">
+            <Option name="out_srs">EPSG:4326</Option>
+            <Reader type="readers.las">
+                <Option name="filename">/home/vagrant/pointcloud/st-helens-small.las</Option>
+                <Option name="spatialreference">EPSG:26910</Option>
+            </Reader>
+        </Filter>
+    </Writer>
+</Pipeline>
