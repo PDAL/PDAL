@@ -78,8 +78,10 @@ private:
     MetadataPtr m_metadata;
 
 public:
-    PointContext() : m_dims(new DimInfo()), m_ptBuf(new RawPtBuf()),
-        m_metadata(new Metadata)
+    PointContext()
+        : m_dims(new DimInfo())
+        , m_ptBuf(new RawPtBuf())
+        , m_metadata(new Metadata)
     {}
 
     RawPtBuf *rawPtBuf() const
@@ -221,12 +223,7 @@ public:
         { return dimDetail(id)->size(); }
 
     size_t pointSize() const
-    {
-        size_t size(0);
-        for (const auto& d : m_dims->m_detail)
-            size += d.size();
-        return size;
-    }
+        { return m_ptBuf->pointSize(); }
 
 private:
     Dimension::Detail *dimDetail(Dimension::Id::Enum id) const
@@ -254,7 +251,7 @@ private:
             m_dims->m_detail[*ui].m_offset = offset;
             offset += (int)m_dims->m_detail[*ui].size();
         }
-        m_ptBuf->setPointSize((size_t)offset);
+        m_ptBuf->setPointSize(static_cast<std::size_t>(offset));
     }
 
     Dimension::Type::Enum resolveType(Dimension::Type::Enum t1,
