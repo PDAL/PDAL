@@ -219,6 +219,8 @@ public:
     //         with the given id.
     size_t dimSize(Dimension::Id::Enum id) const
         { return dimDetail(id)->size(); }
+    size_t dimOffset(Dimension::Id::Enum id) const
+        { return dimDetail(id)->offset(); }
 
     size_t pointSize() const
     {
