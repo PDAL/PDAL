@@ -51,7 +51,7 @@ void P2gWriter::processOptions(const Options& options)
 {
     m_GRID_DIST_X = options.getValueOrDefault<double>("grid_dist_x", 6.0);
     m_GRID_DIST_Y = options.getValueOrDefault<double>("grid_dist_y", 6.0);
-    m_RADIUS_SQ = options.getValueOrDefault<double>("radius",
+    m_RADIUS = options.getValueOrDefault<double>("radius",
         8.4852813742385713);
     m_fill_window_size = options.getValueOrDefault<uint32_t>(
         "fill_window_size", 3);
@@ -165,7 +165,7 @@ void P2gWriter::write(const PointBuffer& buf)
                                        m_GRID_DIST_Y,
                                        m_GRID_SIZE_X,
                                        m_GRID_SIZE_Y,
-                                       m_RADIUS_SQ,
+                                       m_RADIUS * m_RADIUS,
                                        m_bounds.minx,
                                        m_bounds.maxx,
                                        m_bounds.miny,
