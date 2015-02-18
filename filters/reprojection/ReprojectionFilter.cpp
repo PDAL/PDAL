@@ -37,6 +37,7 @@
 #include <memory>
 
 #include <pdal/PointBuffer.hpp>
+#include <pdal/GlobalEnvironment.hpp>
 
 #pragma GCC diagnostic ignored "-Wfloat-equal"
 #include <gdal.h>
@@ -115,6 +116,10 @@ void ReprojectionFilter::processOptions(const Options& options)
     }
 }
 
+void ReprojectionFilter::initialize()
+{
+    pdal::GlobalEnvironment::get().getGDALDebug()->addLog(log());
+}
 
 void ReprojectionFilter::ready(PointContext ctx)
 {
