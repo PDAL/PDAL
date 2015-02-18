@@ -196,10 +196,10 @@ void P2gWriter::write(const PointBuffer& buf)
     }
 
     double adfGeoTransform[6];
-    adfGeoTransform[0] = m_bounds.minx;
+    adfGeoTransform[0] = m_bounds.minx - 0.5*m_GRID_DIST_X;
     adfGeoTransform[1] = m_GRID_DIST_X;
     adfGeoTransform[2] = 0.0;
-    adfGeoTransform[3] = m_bounds.maxy;
+    adfGeoTransform[3] = m_bounds.maxy + 0.5*m_GRID_DIST_Y;
     adfGeoTransform[4] = 0.0;
     adfGeoTransform[5] = -1 * m_GRID_DIST_Y;
 
