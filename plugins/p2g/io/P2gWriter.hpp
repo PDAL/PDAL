@@ -92,7 +92,7 @@ private:
     double m_GRID_DIST_X;
     double m_GRID_DIST_Y;
 
-    double m_RADIUS_SQ;
+    double m_RADIUS;
     unsigned int m_outputTypes;
     uint32_t m_fill_window_size;
     BOX3D m_bounds;
