@@ -118,7 +118,7 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
         LIBRARY DESTINATION ${PDAL_LIB_INSTALL_DIR}
         ARCHIVE DESTINATION ${PDAL_LIB_INSTALL_DIR})
     if (APPLE)
-        set_target_properties(${${_name}} PROPERTIES INSTALL_NAME_DIR "@loader_path/")
+        set_target_properties(${${_name}} PROPERTIES INSTALL_NAME_DIR "@loader_path/../lib")
     endif()
 endmacro(PDAL_ADD_PLUGIN)
 
