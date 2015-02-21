@@ -1,12 +1,23 @@
 set(RXP_TEST_NAME rxptest)
 
 find_package(RiVLib COMPONENTS scanlib REQUIRED)
+set_package_properties(RiVLib PROPERTIES
+    TYPE REQUIRED
+    PURPOSE "Read data from Riegl sensors"
+    )
 
 include_directories(${RiVLib_INCLUDE_DIRS})
 message(STATUS "Found RiVLib at: ${RiVLib_INCLUDE_DIRS}")
 
-set(incs io/RxpReader.hpp)
-set(srcs io/RxpReader.cpp)
+set(incs
+    io/RxpPointcloud.hpp
+    io/RxpReader.hpp
+    )
+
+set(srcs
+    io/RxpPointcloud.cpp
+    io/RxpReader.cpp
+    )
 
 PDAL_ADD_PLUGIN(libname reader rxp
     FILES "${srcs}" "${incs}"
