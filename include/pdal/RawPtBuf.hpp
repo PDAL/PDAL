@@ -65,19 +65,20 @@ public:
         return m_numPts++;
     }
 
-    void setField(Dimension::Detail *d, PointId idx, const void *value)
+    char *getPoint(PointId idx)
     {
         char *buf = m_blocks[idx / m_blockPtCnt];
-        std::size_t offset = pointsToBytes(idx % m_blockPtCnt) + d->offset();
-        memcpy(buf + offset, value, d->size());
+        return buf + pointsToBytes(idx % m_blockPtCnt);
     }
 
+    char *getDimension(Dimension::Detail *d, PointId idx)
+        { return getPoint(idx) + d->offset(); }
+
+    void setField(Dimension::Detail *d, PointId idx, const void *value)
+       { memcpy(getDimension(d, idx), value, d->size()); }
+
     void getField(Dimension::Detail *d, PointId idx, void *value)
-    {
-        char *buf = m_blocks[idx / m_blockPtCnt];
-        std::size_t offset = pointsToBytes(idx % m_blockPtCnt) + d->offset();
-        memcpy(value, buf + offset, d->size());
-    }
+       { memcpy(value, getDimension(d, idx), d->size()); }
 
     void setPointSize(size_t size)
     {

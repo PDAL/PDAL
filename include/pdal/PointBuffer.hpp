@@ -65,27 +65,6 @@ class PDAL_DLL PointBuffer
 public:
     PointBuffer(PointContextRef context) : m_context(context), m_size(0)
     {}
-    PointBuffer(std::istream& strm, PointContextRef ctx, PointId start,
-        PointId end) : m_context(ctx), m_size(0)
-    {
-        size_t pointSize = ctx.pointSize();
-
-        std::vector<char> bytes;
-        bytes.resize(pointSize);
-        char* start_pos = bytes.data();
-        for (PointId i = start; i < end; ++i)
-        {
-            char* pos = start_pos;
-            strm.read(pos, pointSize);
-            if (strm.eof() )
-                break; // done
-            for (const auto& dim : ctx.m_dims->m_used)
-            {
-                setFieldInternal(dim, i, pos);
-                pos += m_context.dimSize(dim);
-            }
-        }
-    }
 
     PointBufferIter begin();
     PointBufferIter end();
@@ -234,19 +213,11 @@ public:
         }
     }
 
-    std::ostream& getBytes(std::ostream& strm, PointId start, PointId end) const
-    {
-        char buf[sizeof(double)];
-        for (PointId i = start; i < end; ++i)
-        {
-            for (const auto& dim : m_context.m_dims->m_used)
-            {
-                getFieldInternal(dim, i, buf);
-                strm.write(buf, m_context.dimSize(dim));
-            }
-        }
-        return strm;
-    }
+
+    /// Provides access to the memory storing the point data.  Though this
+    /// function is public, other access methods are safer and preferred.
+    char *getPoint(PointId id)
+        { return m_context.rawPtBuf()->getPoint(m_index[id]); }
 
     // The standard idiom is swapping with a stack-created empty queue, but
     // that invokes the ctor and probably allocates.  We've probably only got
