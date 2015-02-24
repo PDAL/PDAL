@@ -65,7 +65,7 @@ ENDIF("${isSystemDir}" STREQUAL "-1")
 
 # wipe lib/ drectory on clean. It will have plugins that could be out of date
 # in the next build
-set_directory_properties(PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${PDAL_OUTPUT_LIB_DIR}")
+set_directory_properties(PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${PDAL_OUTPUT_LIB_DIR}/*")
 
 if(WIN32)
   add_definitions("-DPDAL_DLL_EXPORT=1")
