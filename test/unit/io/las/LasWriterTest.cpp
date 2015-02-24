@@ -56,6 +56,8 @@ public:
     template <typename T>
     static T headerVal(LasWriter& w, const std::string& s)
         { return w.headerVal<T>(s); }
+    LasHeader *header(LasWriter& w)
+        { return &w.m_lasHeader; }
 };
 
 } // namespace pdal
@@ -107,6 +109,71 @@ TEST(LasWriterTest, auto_offset)
     EXPECT_FLOAT_EQ(buf->getFieldAs<double>(Id::X, 1), 74529.00);
     EXPECT_FLOAT_EQ(buf->getFieldAs<double>(Id::X, 2), 523523.02);
     FileUtils::deleteFile(FILENAME);
+}
+
+TEST(LasWriterTest, extra_dims)
+{
+    Options readerOps;
+
+    readerOps.add("filename", Support::datapath("las/1.2-with-color.las"));
+    LasReader reader;
+    reader.setOptions(readerOps);
+
+    Options writerOps;
+    writerOps.add("extra_dims", "Red=int32, Blue = int16, Green = int32_t");
+    writerOps.add("filename", Support::temppath("simple.las"));
+    LasWriter writer;
+    writer.setInput(&reader);
+    writer.setOptions(writerOps);
+
+    PointContext ctx;
+    writer.prepare(ctx);
+    PointBufferSet pbSet = writer.execute(ctx);
+
+    LasTester tester;
+    LasHeader *header = tester.header(writer);
+    EXPECT_EQ(header->pointLen(), header->basePointLen() + 10);
+    PointBufferPtr pb = *pbSet.begin();
+
+    uint16_t colors[][3] = {
+        { 68, 77, 88 },
+        { 92, 100, 110 },
+        { 79, 87, 87 },
+        { 100, 102, 116 },
+        { 162, 114, 145 },
+        { 163, 137, 155 },
+        { 154, 131, 144 },
+        { 104, 111, 126 },
+        { 164, 136, 156 },
+        { 72, 87, 82 },
+        { 117, 117, 136 }
+    };
+
+    Options reader2Ops;
+    reader2Ops.add("filename", Support::temppath("simple.las"));
+    reader2Ops.add("extra_dims", "R1 =int32, B1= int16 ,G1=int32_t");
+    LasReader reader2;
+    reader2.setOptions(reader2Ops);
+
+    PointContext ctx2;
+    reader2.prepare(ctx2);
+    pbSet = reader2.execute(ctx2);
+    pb = *pbSet.begin();
+    Dimension::Id::Enum r1 = ctx2.findDim("R1");
+    EXPECT_TRUE(r1 != Dimension::Id::Unknown);
+    Dimension::Id::Enum b1 = ctx2.findDim("B1");
+    EXPECT_TRUE(b1 != Dimension::Id::Unknown);
+    Dimension::Id::Enum g1 = ctx2.findDim("G1");
+    EXPECT_TRUE(g1 != Dimension::Id::Unknown);
+    EXPECT_EQ(pb->size(), (size_t)1065);
+    size_t j = 0;
+    for (PointId i = 0; i < pb->size(); i += 100)
+    {
+        EXPECT_EQ(pb->getFieldAs<int16_t>(r1, i), colors[j][0]);
+        EXPECT_EQ(pb->getFieldAs<int16_t>(g1, i), colors[j][1]);
+        EXPECT_EQ(pb->getFieldAs<int16_t>(b1, i), colors[j][2]);
+        j++;
+    }
 }
 
 TEST(LasWriterTest, metadata_options)

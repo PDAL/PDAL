@@ -39,6 +39,7 @@
 #include <pdal/StreamFactory.hpp>
 #include "LasError.hpp"
 #include "LasHeader.hpp"
+#include "LasUtils.hpp"
 #include "ZipPoint.hpp"
 
 namespace pdal
@@ -46,6 +47,7 @@ namespace pdal
 
 class NitfReader;
 class LasHeader;
+class LeExtractor;
 class PointDimensions;
 
 #define LASREADERDOCS "ASPRS LAS 1.0 - 1.4 read support. LASzip support is also \n" \
@@ -79,16 +81,17 @@ private:
     point_count_t m_index;
     std::istream* m_istream;
     VlrList m_vlrs;
+    std::vector<ExtraDim> m_extraDims;
 
     virtual StreamFactoryPtr createFactory() const
         { return StreamFactoryPtr(new FilenameStreamFactory(m_filename)); }
-    virtual void processOptions(const Options&)
-        { m_error.setFilename(m_filename); }
+    virtual void processOptions(const Options& options);
     virtual void initialize();
     virtual void addDimensions(PointContextRef ctx);
     void fixupVlrs();
     VariableLengthRecord *findVlr(const std::string& userId, uint16_t recordId);
     void setSrsFromVlrs(MetadataNode& m);
+    void readExtraBytesVlr();
     SpatialReference getSrsFromVlrs();
     SpatialReference getSrsFromWktVlr();
     SpatialReference getSrsFromGeotiffVlr();
@@ -105,6 +108,7 @@ private:
     void loadPoint(PointBuffer& data, char *buf, size_t bufsize);
     void loadPointV10(PointBuffer& data, char *buf, size_t bufsize);
     void loadPointV14(PointBuffer& data, char *buf, size_t bufsize);
+    void loadExtraDims(LeExtractor& istream, PointBuffer& data, PointId nextId);
     point_count_t readFileBlock(
             std::vector<char>& buf,
             point_count_t maxPoints);

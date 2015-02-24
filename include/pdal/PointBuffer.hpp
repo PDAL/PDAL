@@ -293,19 +293,7 @@ T PointBuffer::getFieldInternal(Dimension::Id::Enum dim, PointId id) const
 inline void PointBuffer::getField(char *pos, Dimension::Id::Enum d,
     Dimension::Type::Enum type, PointId id) const
 {
-    union
-    {
-        float f;
-        double d;
-        int8_t s8;
-        int16_t s16;
-        int32_t s32;
-        int64_t s64;
-        uint8_t u8;
-        uint16_t u16;
-        uint32_t u32;
-        uint64_t u64;
-    } e;  // e - for Everything.
+    Everything e;
 
     switch (type)
     {
@@ -348,19 +336,7 @@ inline void PointBuffer::getField(char *pos, Dimension::Id::Enum d,
 inline void PointBuffer::setField(Dimension::Id::Enum dim,
     Dimension::Type::Enum type, PointId idx, const void *val)
 {
-    union
-    {
-        float f;
-        double d;
-        int8_t s8;
-        int16_t s16;
-        int32_t s32;
-        int64_t s64;
-        uint8_t u8;
-        uint16_t u16;
-        uint32_t u32;
-        uint64_t u64;
-    } e;  // e - for Everything.
+    Everything e;
 
     memcpy(&e, val, Dimension::size(type));
     switch (type)

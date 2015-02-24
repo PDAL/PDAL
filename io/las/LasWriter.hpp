@@ -38,6 +38,7 @@
 
 #include "LasError.hpp"
 #include "LasHeader.hpp"
+#include "LasUtils.hpp"
 #include "SummaryData.hpp"
 #include "ZipPoint.hpp"
 
@@ -90,8 +91,11 @@ private:
     std::ostream *m_ostream;
     std::vector<VariableLengthRecord> m_vlrs;
     std::vector<ExtVariableLengthRecord> m_eVlrs;
+    std::vector<ExtraDim> m_extraDims;
+    uint16_t m_extraByteLen;
 
     virtual void processOptions(const Options& options);
+    virtual void prepared(PointContextRef ctx);
     virtual void ready(PointContextRef ctx);
     virtual void write(const PointBuffer& pointBuffer);
     virtual void done(PointContextRef ctx);
@@ -107,6 +111,7 @@ private:
     void setVlrsFromMetadata();
     MetadataNode findVlrMetadata(MetadataNode node, uint16_t recordId,
         const std::string& userId);
+    void setExtraBytesVlr();
     void setVlrsFromSpatialRef(const SpatialReference& srs);
     void readyCompression();
     void openCompression();

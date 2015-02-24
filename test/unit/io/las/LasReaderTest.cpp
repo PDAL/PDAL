@@ -42,25 +42,29 @@ using namespace pdal;
 
 namespace {
 template<typename LeftIter, typename RightIter>
-::testing::AssertionResult CheckEqualCollections(LeftIter left_begin, LeftIter left_end, RightIter right_begin)
+::testing::AssertionResult CheckEqualCollections(LeftIter left_begin,
+    LeftIter left_end, RightIter right_begin)
 {
-  bool equal(true);
-  std::string message;
-  size_t index(0);
-  while (left_begin != left_end)
-  {
-    if (*left_begin++ != *right_begin++)
+    bool equal(true);
+
+    std::string message;
+    size_t index(0);
+    while (left_begin != left_end)
     {
-      equal = false;
-      message += "\n\tMismatch at index " + std::to_string(index);
+        if (*left_begin++ != *right_begin++)
+        {
+            equal = false;
+            message += "\n\tMismatch at index " + std::to_string(index);
+        }
+        ++index;
     }
-    ++index;
-  }
-  if (message.size())
-    message += "\n\t";
-  return equal ? ::testing::AssertionSuccess() : ::testing::AssertionFailure() << message;
+    if (message.size())
+        message += "\n\t";
+    return equal ? ::testing::AssertionSuccess() :
+        ::testing::AssertionFailure() << message;
 }
-}
+
+} // unnamed namespace
 
 TEST(LasReaderTest, test_base_options)
 {
@@ -250,9 +254,9 @@ TEST(LasReaderTest, inspect)
     };
 
     std::sort(qi.m_dimNames.begin(), qi.m_dimNames.end());
-    EXPECT_TRUE(CheckEqualCollections(qi.m_dimNames.begin(), qi.m_dimNames.end(), std::begin(dims)));
-}
-
+    EXPECT_TRUE(CheckEqualCollections(qi.m_dimNames.begin(),
+        qi.m_dimNames.end(), std::begin(dims)));
+} 
 
 //ABELL - Find another way to do this.
 /**
@@ -283,3 +287,74 @@ TEST(LasReaderTest, testInvalidFileSignature)
 
     EXPECT_TRUE(reader.header().valid());
 }
+
+TEST(LasReaderTest, extraBytes)
+{
+    PointContext ctx;
+
+    Options readOps;
+    readOps.add("filename", Support::datapath("las/extrabytes.las"));
+    LasReader reader;
+    reader.setOptions(readOps);
+
+    reader.prepare(ctx);
+
+    DimTypeList dimTypes = ctx.dimTypes();
+    EXPECT_EQ(dimTypes.size(), (size_t)24);
+
+    Dimension::Id::Enum color0 = ctx.findProprietaryDim("Colors0");
+    EXPECT_EQ(ctx.dimType(color0), Dimension::Type::Unsigned16);
+    Dimension::Id::Enum color1 = ctx.findProprietaryDim("Colors1");
+    EXPECT_EQ(ctx.dimType(color1), Dimension::Type::Unsigned16);
+    Dimension::Id::Enum color2 = ctx.findProprietaryDim("Colors2");
+    EXPECT_EQ(ctx.dimType(color2), Dimension::Type::Unsigned16);
+
+    Dimension::Id::Enum flag0 = ctx.findProprietaryDim("Flags0");
+    EXPECT_EQ(ctx.dimType(flag0), Dimension::Type::Signed8);
+    Dimension::Id::Enum flag1 = ctx.findProprietaryDim("Flags1");
+    EXPECT_EQ(ctx.dimType(flag1), Dimension::Type::Signed8);
+
+    Dimension::Id::Enum intense2 = ctx.findProprietaryDim("Intensity");
+    EXPECT_EQ(ctx.dimType(intense2), Dimension::Type::Unsigned32);
+
+    Dimension::Id::Enum time2 = ctx.findProprietaryDim("Time");
+    EXPECT_EQ(ctx.dimType(time2), Dimension::Type::Unsigned64);
+
+    PointBufferSet pbSet = reader.execute(ctx);
+    EXPECT_EQ(pbSet.size(), (size_t)1);
+    PointBufferPtr pb = *pbSet.begin();
+
+    Dimension::Id::Enum red = ctx.findDim("Red");
+    Dimension::Id::Enum green = ctx.findDim("Green");
+    Dimension::Id::Enum blue = ctx.findDim("Blue");
+
+    Dimension::Id::Enum returnNum = ctx.findDim("ReturnNumber");
+    Dimension::Id::Enum numReturns = ctx.findDim("NumberOfReturns");
+
+    Dimension::Id::Enum intensity = ctx.findDim("Intensity");
+    Dimension::Id::Enum time = ctx.findDim("GpsTime");
+
+    for (PointId idx = 0; idx < pb->size(); ++idx)
+    {
+        EXPECT_EQ(pb->getFieldAs<uint16_t>(red, idx),
+            pb->getFieldAs<uint16_t>(color0, idx));
+        EXPECT_EQ(pb->getFieldAs<uint16_t>(green, idx),
+            pb->getFieldAs<uint16_t>(color1, idx));
+        EXPECT_EQ(pb->getFieldAs<uint16_t>(blue, idx),
+            pb->getFieldAs<uint16_t>(color2, idx));
+
+        EXPECT_EQ(pb->getFieldAs<uint16_t>(flag0, idx),
+            pb->getFieldAs<uint16_t>(returnNum, idx));
+        EXPECT_EQ(pb->getFieldAs<uint16_t>(flag1, idx),
+            pb->getFieldAs<uint16_t>(numReturns, idx));
+
+        EXPECT_EQ(pb->getFieldAs<uint16_t>(intensity, idx),
+            pb->getFieldAs<uint16_t>(intense2, idx));
+
+        // Time was written truncated rather than rounded.
+        EXPECT_NEAR(pb->getFieldAs<double>(time, idx),
+            pb->getFieldAs<double>(time2, idx), 1.0);
+
+    }
+}
+

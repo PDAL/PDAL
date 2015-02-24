@@ -182,8 +182,13 @@ public:
     Dimension::Id::Enum findDim(const std::string& name) const
     {
         Dimension::Id::Enum id = Dimension::id(name);
-        if (id != Dimension::Id::Unknown)
+        if (dimType(id) != Dimension::Type::None)
             return id;
+        return findProprietaryDim(name);
+    }
+
+    Dimension::Id::Enum findProprietaryDim(const std::string& name) const
+    {
         auto di = m_dims->m_propIds.find(name);
         return (di != m_dims->m_propIds.end() ? di->second :
             Dimension::Id::Unknown);

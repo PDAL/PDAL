@@ -71,8 +71,7 @@ void Writer::writerProcessOptions(const Options& options)
         m_yXform.m_scale = options.getValueOrThrow<double>("scale_y");
     if (options.hasOption("scale_z"))
         m_zXform.m_scale = options.getValueOrThrow<double>("scale_z");
-    m_outputDims = 
-        options.getValueOrDefault<std::vector<std::string>>("output_dims");
+    m_outputDims = options.getValueOrDefault<StringList>("output_dims");
 }
 
 

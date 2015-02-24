@@ -52,6 +52,63 @@
 namespace pdal
 {
 
+namespace
+{
+
+double toDouble(const Everything& e, Dimension::Type::Enum type)
+{
+    using namespace Dimension::Type;
+
+    double d = 0;
+    switch (type)
+    {
+    case Unsigned8:
+        d = e.u8;
+        break;
+    case Unsigned16:
+        d = e.u16;
+        break;
+    case Unsigned32:
+        d = e.u32;
+        break;
+    case Unsigned64:
+        d = e.u64;
+        break;
+    case Signed8:
+        d = e.s8;
+        break;
+    case Signed16:
+        d = e.s16;
+        break;
+    case Signed32:
+        d = e.s32;
+        break;
+    case Signed64:
+        d = e.s64;
+        break;
+    case Float:
+        d = e.f;
+        break;
+    case Double:
+        d = e.d;
+        break;
+    default:
+        break;
+    }
+    return d;
+}
+
+} // unnamed namespace
+
+void LasReader::processOptions(const Options& options)
+{
+    StringList extraDims = options.getValueOrDefault<StringList>("extra_dims");
+    m_extraDims = LasUtils::parse(extraDims);
+
+    m_error.setFilename(m_filename);
+}
+
+
 QuickInfo LasReader::inspect()
 {
     QuickInfo qi;
@@ -107,6 +164,7 @@ void LasReader::initialize()
             in >> r;
             m_vlrs.push_back(std::move(r));
         }
+        readExtraBytesVlr();
     }
     fixupVlrs();
 }
@@ -152,8 +210,10 @@ void LasReader::ready(PointContext ctx, MetadataNode& m)
 
 Options LasReader::getDefaultOptions()
 {
-    Option option1("filename", "", "file to read from");
-    Options options(option1);
+    Options options;
+    options.add("filename", "", "file to read from");
+    options.add("extra_dims", "", "Extra dimensions not part of the LAS "
+        "point format to be read from each point.");
     return options;
 }
 
@@ -276,6 +336,44 @@ void LasReader::fixupVlrs()
             memcpy((void *)(vlr->data()  + 6), &size, 2);
         }
     }
+}
+
+
+void LasReader::readExtraBytesVlr()
+{
+    VariableLengthRecord *vlr = findVlr(SPEC_USER_ID, EXTRA_BYTES_RECORD_ID);
+    if (!vlr) 
+        return;
+    const char *pos = vlr->data();
+    size_t size = vlr->dataLen();
+    if (size % sizeof(ExtraBytesSpec) != 0)
+    {
+        log()->get(LogLevel::Warning) << "Bad size for extra bytes VLR.  "
+            "Ignoring.";
+        return;
+    }
+    size /= sizeof(ExtraBytesSpec);
+    std::vector<ExtraBytesIf> ebList;
+    while (size--)
+    {
+        ExtraBytesIf eb;
+        eb.readFrom(pos);
+        ebList.push_back(eb);
+        pos += sizeof(ExtraBytesSpec);
+    }
+
+    std::vector<ExtraDim> extraDims;
+    for (ExtraBytesIf& eb : ebList)
+    {
+       std::vector<ExtraDim> eds = eb.toExtraDims();
+       for (auto& ed : eds)
+           extraDims.push_back(std::move(ed));
+    }
+    if (m_extraDims.size() && m_extraDims != extraDims)
+        log()->get(LogLevel::Warning) << "Extra byte dimensions specified "
+            "in pineline and VLR don't match.  Ignoring pipeline-specified "
+            "dimensions";
+    m_extraDims = extraDims;
 }
 
 
@@ -427,6 +525,16 @@ void LasReader::addDimensions(PointContextRef ctx)
         ctx.registerDim(Id::Infrared);
     if (m_lasHeader.versionAtLeast(1, 4))
         ctx.registerDim(Id::ScanChannel);
+
+    for (auto& dim : m_extraDims)
+    {
+        Dimension::Type::Enum type = dim.m_dimType.m_type;
+        if (type == Dimension::Type::None)
+            continue;
+        if (dim.m_dimType.m_xform.nonstandard())
+            type = Dimension::Type::Double;
+        dim.m_dimType.m_id = ctx.assignDim(dim.m_name, type);
+    }
 }
 
 
@@ -506,7 +614,7 @@ point_count_t LasReader::readFileBlock(std::vector<char>& buf,
 
 void LasReader::loadPoint(PointBuffer& data, char *buf, size_t bufsize)
 {
-    if (m_lasHeader.versionAtLeast(1, 4))
+    if (m_lasHeader.has14Format())
         loadPointV14(data, buf, bufsize);
     else
         loadPointV10(data, buf, bufsize);
@@ -577,6 +685,9 @@ void LasReader::loadPointV10(PointBuffer& data, char *buf, size_t bufsize)
         data.setField(Dimension::Id::Green, nextId, green);
         data.setField(Dimension::Id::Blue, nextId, blue);
     }
+
+    if (m_extraDims.size())
+        loadExtraDims(istream, data, nextId);
 }
 
 void LasReader::loadPointV14(PointBuffer& data, char *buf, size_t bufsize)
@@ -644,6 +755,37 @@ void LasReader::loadPointV14(PointBuffer& data, char *buf, size_t bufsize)
 
         istream >> nearInfraRed;
         data.setField(Dimension::Id::Infrared, nextId, nearInfraRed);
+    }
+
+    if (m_extraDims.size())
+        loadExtraDims(istream, data, nextId);
+}
+
+
+void LasReader::loadExtraDims(LeExtractor& istream, PointBuffer& data,
+    PointId nextId)
+{
+    Everything e;
+    for (auto& dim : m_extraDims)
+    {
+        // Dimension type of None is undefined and unprocessed
+        if (dim.m_dimType.m_type == Dimension::Type::None)
+        {
+            istream.skip(dim.m_size);
+            continue;
+        }
+
+        istream.get(dim.m_dimType.m_type, e);
+
+        if (dim.m_dimType.m_xform.nonstandard())
+        {
+            double d = toDouble(e, dim.m_dimType.m_type);
+            d = d * dim.m_dimType.m_xform.m_scale +
+                dim.m_dimType.m_xform.m_offset;
+            data.setField(dim.m_dimType.m_id, nextId, d);
+        }
+        else
+            data.setField(dim.m_dimType.m_id, dim.m_dimType.m_type, nextId, &e);
     }
 }
 

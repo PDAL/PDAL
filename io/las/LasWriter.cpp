@@ -91,6 +91,8 @@ Options LasWriter::getDefaultOptions()
     options.add("filesource_id", 0, "File Source ID for this file");
     options.add("forward_metadata", false, "forward metadata into "
         "the file as necessary");
+    options.add("extra_dims", "", "Extra dimensions not part of the LAS "
+        "point format to be added to each point.");
 
     return options;
 }
@@ -103,10 +105,30 @@ void LasWriter::processOptions(const Options& options)
     m_lasHeader.setCompressed(options.getValueOrDefault("compression", false));
     m_discardHighReturnNumbers = options.getValueOrDefault(
         "discard_high_return_numbers", false);
+    StringList extraDims = options.getValueOrDefault<StringList>("extra_dims");
+    m_extraDims = LasUtils::parse(extraDims);
 
     getHeaderOptions(options);
     getVlrOptions(options);
     m_error.setFilename(m_filename);
+}
+
+
+void LasWriter::prepared(PointContextRef ctx)
+{
+    m_extraByteLen = 0;
+    for (auto& dim : m_extraDims)
+    {
+        dim.m_dimType.m_id = ctx.findDim(dim.m_name);
+        if (dim.m_dimType.m_id == Dimension::Id::Unknown)
+        {
+            std::ostringstream oss;
+            oss << "Dimension '" << dim.m_name << "' specified in "
+                "'extra_dim' option not found.";
+            throw pdal_error(oss.str());
+        }
+        m_extraByteLen += Dimension::size(dim.m_dimType.m_type);
+    }
 }
 
 
@@ -196,6 +218,7 @@ void LasWriter::ready(PointContextRef ctx)
         m_ostream = FileUtils::createFile(m_filename, true);
     setVlrsFromMetadata();
     setVlrsFromSpatialRef(srs);
+    setExtraBytesVlr();
     fillHeader(ctx);
 
     if (m_lasHeader.compressed())
@@ -353,6 +376,22 @@ bool LasWriter::addWktVlr(const SpatialReference& srs)
     return true;
 }
 
+void LasWriter::setExtraBytesVlr()
+{
+    if (m_extraDims.empty())
+        return;
+
+    std::vector<uint8_t> ebBytes;
+    for (auto& dim : m_extraDims)
+    {
+        ExtraBytesIf eb(dim.m_name, dim.m_dimType.m_type,
+            Dimension::description(dim.m_dimType.m_id)); 
+        eb.appendTo(ebBytes);
+    }
+
+    addVlr(SPEC_USER_ID, EXTRA_BYTES_RECORD_ID, "Extra Bytes Record", ebBytes);
+}
+
 
 /// Add a standard or variable-length VLR depending on the data size.
 /// \param  userId - VLR user ID
@@ -387,7 +426,7 @@ void LasWriter::fillHeader(PointContextRef ctx)
     m_lasHeader.setEVlrCount(m_eVlrs.size());
 
     m_lasHeader.setPointFormat((uint8_t)headerVal<unsigned>("format"));
-    m_lasHeader.setPointLen(m_lasHeader.basePointLen());
+    m_lasHeader.setPointLen(m_lasHeader.basePointLen() + m_extraByteLen);
     m_lasHeader.setVersionMinor((uint8_t)headerVal<unsigned>("minor_version"));
     m_lasHeader.setCreationYear(headerVal<uint16_t>("creation_year"));
     m_lasHeader.setCreationDOY(headerVal<uint16_t>("creation_doy"));
@@ -608,6 +647,14 @@ point_count_t LasWriter::fillWriteBuf(const PointBuffer& pointBuffer,
                 blue = pointBuffer.getFieldAs<uint16_t>(Id::Blue, idx);
 
             ostream << red << green << blue;
+        }
+
+        Everything e;
+        for (auto& dim : m_extraDims)
+        {
+            pointBuffer.getField((char *)&e, dim.m_dimType.m_id,
+                dim.m_dimType.m_type, idx);
+            ostream.put(dim.m_dimType.m_type, e);
         }
 
         using namespace Dimension;

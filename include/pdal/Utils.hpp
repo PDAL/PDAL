@@ -193,8 +193,13 @@ namespace Utils
 
     // aid to operator>> parsers
     PDAL_DLL void eatwhitespace(std::istream& s);
-    PDAL_DLL void removeLeadingBlanks(std::string& s);
-    PDAL_DLL void removeTrailingBlanks(std::string& s);
+    PDAL_DLL void trimLeading(std::string& s);
+    PDAL_DLL void trimTrailing(std::string& s);
+    inline void trim(std::string& s)
+    {
+        trimLeading(s);
+        trimTrailing(s);
+    }
     // if char found, eats it and returns true; otherwise, don't eat it and
     // then return false
     PDAL_DLL bool eatcharacter(std::istream& s, char x);
@@ -244,7 +249,7 @@ namespace Utils
     }
 
     /// Split a string into substrings.  Characters matching the predicate are
-    ///   discarded, as are empty strings produced by split().
+    ///   discarded, as are empty strings otherwise produced by split().
     /// \param[in] s  String to split.
     /// \param[in] p  Predicate returns true if a char in a string is a split
     ///   location.

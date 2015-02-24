@@ -296,7 +296,7 @@ bool BpfUlemFile::read(ILeStream& stream)
     }
     stream >> m_len;
     stream.get(m_filename, 32);
-    Utils::removeTrailingBlanks(m_filename);
+    Utils::trimTrailing(m_filename);
     m_buf.resize(m_len);
     stream.get(m_buf);
 

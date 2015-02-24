@@ -41,6 +41,9 @@ namespace pdal
 class PDAL_DLL Inserter
 {
 public:
+    Inserter(unsigned char *buf, std::size_t size) : m_pbase((char *)buf),
+        m_epptr((char *)buf + size), m_pptr((char *)buf)
+    {}
     Inserter(char *buf, std::size_t size) : m_pbase(buf),
         m_epptr(buf + size), m_pptr(buf)
     {}
@@ -62,8 +65,11 @@ public:
         { m_pptr = m_pbase + pos; }
     void put(const std::string& s)
         { put(s, s.size()); }
-    void put(const std::string& s, size_t len)
-        { put(s.data(), len); }
+    void put(std::string s, size_t len)
+    {
+        s.resize(len);
+        put(s.data(), len);
+    }
     void put(const char *c, size_t len)
     {
         memcpy(m_pptr, c, len);
@@ -85,6 +91,50 @@ class PDAL_DLL LeInserter : public Inserter
 public:
     LeInserter(char *buf, std::size_t size) : Inserter(buf, size)
     {}
+    LeInserter(unsigned char *buf, std::size_t size) : Inserter(buf, size)
+    {}
+
+    using Inserter::put;
+    void put(Dimension::Type::Enum type, const Everything& e)
+    {
+       using namespace Dimension::Type;
+
+        switch (type)
+        {
+        case Unsigned8:
+            *this << e.u8;
+            break;
+        case Unsigned16:
+            *this << e.u16;
+            break;
+        case Unsigned32:
+            *this << e.u32;
+            break;
+        case Unsigned64:
+            *this << e.u64;
+            break;
+        case Signed8:
+            *this << e.s8;
+            break;
+        case Signed16:
+            *this << e.s16;
+            break;
+        case Signed32:
+            *this << e.s32;
+            break;
+        case Signed64:
+            *this << e.s64;
+            break;
+        case Float:
+            *this << e.f;
+            break;
+        case Double:
+            *this << e.d;
+            break;
+        case None:
+            break;
+        }
+    }
 
     LeInserter& operator << (uint8_t v)
     {

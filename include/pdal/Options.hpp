@@ -228,14 +228,11 @@ private:
         t = boost::lexical_cast<T>(m_value);
     }
 
-    void getValue(std::vector<std::string>& values) const
+    void getValue(StringList& values) const
     {
         values = Utils::split2(m_value, ',');
         for (std::string& s : values)
-        {
-            Utils::removeTrailingBlanks(s);
-            Utils::removeLeadingBlanks(s);
-        }
+            Utils::trim(s);
     }
 
     void getValue(bool& value) const

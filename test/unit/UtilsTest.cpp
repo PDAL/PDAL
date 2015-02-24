@@ -144,28 +144,28 @@ TEST(UtilsTest, blanks)
     std::string empty;
 
     std::string s = "This is a test  \t  ";
-    Utils::removeTrailingBlanks(s);
+    Utils::trimTrailing(s);
     EXPECT_EQ(s, base);
     s = "";
-    Utils::removeTrailingBlanks(s);
+    Utils::trimTrailing(s);
     EXPECT_EQ(s, empty);
     s = "  \t\t  ";
-    Utils::removeTrailingBlanks(s);
+    Utils::trimTrailing(s);
     EXPECT_EQ(s, empty);
     s = base;
-    Utils::removeTrailingBlanks(s);
+    Utils::trimTrailing(s);
     EXPECT_EQ(s, base);
     s = "  \t This is a test";
-    Utils::removeLeadingBlanks(s);
+    Utils::trimLeading(s);
     EXPECT_EQ(s, base);
     s = "  \t  \t  ";
-    Utils::removeLeadingBlanks(s);
+    Utils::trimLeading(s);
     EXPECT_EQ(s, empty);
     s = "";
-    Utils::removeLeadingBlanks(s);
+    Utils::trimLeading(s);
     EXPECT_EQ(s, empty);
     s = base;
-    Utils::removeLeadingBlanks(s);
+    Utils::trimLeading(s);
     EXPECT_EQ(s, base);
 }
 

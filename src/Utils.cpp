@@ -85,7 +85,8 @@ double Utils::random(double minimum, double maximum)
     return t;
 }
 
-double Utils::uniform(const double& minimum, const double& maximum, uint32_t seed)
+double Utils::uniform(const double& minimum, const double& maximum,
+    uint32_t seed)
 {
     std::mt19937 gen(seed);
     std::uniform_real_distribution<double> dist(minimum, maximum);
@@ -130,7 +131,8 @@ void* Utils::registerPlugin(void* stageFactoryPtr, string const& filename,
     else
     {
         ostringstream oss;
-        oss << "Unable to register shared library '" << filename << "' with method name '" << registerMethod << "'";
+        oss << "Unable to register shared library '" << filename <<
+            "' with method name '" << registerMethod << "'";
         throw pdal_error(oss.str());
     }
 
@@ -172,7 +174,7 @@ void Utils::eatwhitespace(istream& s)
 }
 
 
-void Utils::removeLeadingBlanks(std::string& s)
+void Utils::trimLeading(std::string& s)
 {
     size_t pos = 0;
     // Note, that this should be OK in C++11, which guarantees a NULL.
@@ -182,7 +184,7 @@ void Utils::removeLeadingBlanks(std::string& s)
 }
 
 
-void Utils::removeTrailingBlanks(std::string& s)
+void Utils::trimTrailing(std::string& s)
 {
     size_t pos = s.size() - 1;
     while (isspace(s[pos]))
