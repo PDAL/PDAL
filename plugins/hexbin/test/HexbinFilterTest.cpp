@@ -61,6 +61,7 @@ TEST(HexbinFilterTest, HexbinFilterTest_test_1)
 
     Options options;
     options.add("filename", Support::datapath("las/hextest.las"));
+    options.add("output_tesselation", true);
     options.add("sample_size", 5000, "Number of samples to use "
         "when estimating hexagon edge size. Specify 0.0 for edge_size if "
         "you want to compute one.");
