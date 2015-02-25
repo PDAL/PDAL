@@ -87,7 +87,7 @@ void RandomKernel::addSwitches()
     addPositionalSwitch("output", 1);
 }
 
-Stage* RandomKernel::makeReader(Options readerOptions)
+std::shared_ptr<Stage> RandomKernel::makeReader(Options readerOptions)
 {
     if (isDebug())
     {
@@ -104,7 +104,7 @@ Stage* RandomKernel::makeReader(Options readerOptions)
     std::shared_ptr<Stage> reader_stage(factory.createStage("readers.faux"));
     reader_stage->setOptions(readerOptions);
 
-    return reader_stage.get();
+    return reader_stage;
 }
 
 int RandomKernel::execute()

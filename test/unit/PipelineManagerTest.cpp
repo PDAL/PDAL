@@ -77,14 +77,14 @@ TEST(PipelineManagerTest, PipelineManagerTest_test2)
 
         Options optsR1;
         optsR1.add("filename", Support::datapath("1.2-with-color.las"));
-        Stage* reader1 = mgr.addReader("readers.las", optsR1);
+        std::shared_ptr<Stage> reader1(mgr.addReader("readers.las", optsR1));
 
         Options optsR2;
         optsR2.add("filename", Support::datapath("1.2-with-color.las"));
-        Stage* reader2 = mgr.addReader("readers.las", optsR2);
+        std::shared_ptr<Stage> reader2(mgr.addReader("readers.las", optsR2));
 
         Options optsMF;
-        std::vector<Stage*> vec;
+        std::vector<std::shared_ptr<Stage> > vec;
         vec.push_back(reader1);
         vec.push_back(reader2);
         MultiFilter* multifilter = mgr.addMultiFilter("filters.mosaic", vec, optsMF);
@@ -95,16 +95,16 @@ TEST(PipelineManagerTest, PipelineManagerTest_test2)
 
         Options optsW;
         optsW.add("filename", "temp.las", "file to write to");
-        Stage* writer = mgr.addWriter("writers.las", *filter, optsW);
+        std::shared_ptr<Stage> writer(mgr.addWriter("writers.las", *filter, optsW));
         point_count_t np = mgr.execute();
 
         EXPECT_TRUE(np == 1065 * 2);
 
-        std::vector<Stage *> reader1_inputs = reader1->getInputs();
-        std::vector<Stage *> reader2_inputs = reader2->getInputs();
-        std::vector<Stage *> multifilter_inputs = multifilter->getInputs();
-        std::vector<Stage *> filter_inputs = filter->getInputs();
-        std::vector<Stage *> writer_inputs = writer->getInputs();
+        std::vector<std::shared_ptr<Stage> > reader1_inputs = reader1->getInputs();
+        std::vector<std::shared_ptr<Stage> > reader2_inputs = reader2->getInputs();
+        std::vector<std::shared_ptr<Stage> > multifilter_inputs = multifilter->getInputs();
+        std::vector<std::shared_ptr<Stage> > filter_inputs = filter->getInputs();
+        std::vector<std::shared_ptr<Stage> > writer_inputs = writer->getInputs();
 
         EXPECT_TRUE(reader1_inputs.size() == 0);
         EXPECT_TRUE(reader2_inputs.size() == 0);

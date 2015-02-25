@@ -309,7 +309,7 @@ std::shared_ptr<Stage> PipelineReader::parseElement_Reader(const ptree& tree)
 std::shared_ptr<Stage> PipelineReader::parseElement_Filter(const ptree& tree)
 {
     Options options(m_baseOptions);
-//    Stage* prevStage = NULL;
+//    std::shared_ptr<Stage> prevStage = NULL;
 
     StageParserContext context;
 

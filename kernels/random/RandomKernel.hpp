@@ -63,7 +63,7 @@ private:
     void addSwitches();
     void validateSwitches();
 
-    Stage* makeReader(Options readerOptions);
+    std::shared_ptr<Stage> makeReader(Options readerOptions);
 
     std::string m_outputFile;
     bool m_bCompress;
