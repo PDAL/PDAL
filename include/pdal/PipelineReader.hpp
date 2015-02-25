@@ -34,29 +34,29 @@
 
 #pragma once
 
-#include <pdal/pdal_internal.hpp>
-#include <pdal/StageFactory.hpp>
-
-#include <vector>
+#include <istream>
 #include <string>
+
+#include <pdal/pdal_internal.hpp>
+#include <pdal/Options.hpp>
+#include <pdal/PipelineManager.hpp>
 
 
 namespace pdal
 {
 
-class Options;
+
 class PipelineManager;
+
 
 class PDAL_DLL PipelineReader
 {
-private:
-    class StageParserContext;
-
 public:
-    PipelineReader(PipelineManager&, bool debug=false,
+
+    PipelineReader(PipelineManager& manager, bool debug = false,
         uint32_t verbose = 0);
 
-    // Use this to fill in a pipeline manager with an XML file that
+    // Use this to fill in a pipeline manager with a file that
     // contains a <Writer> as the last pipeline stage.
     //
     // returns true iff the xml file is a writer pipeline (otherwise it is
@@ -65,30 +65,16 @@ public:
     bool readPipeline(std::istream& input);
 
 private:
-    typedef std::map<std::string, std::string> map_t;
 
-    bool parseElement_Pipeline(const boost::property_tree::ptree&);
-    Stage* parseElement_anystage(const std::string& name,
-        const boost::property_tree::ptree& subtree);
-    Reader* parseElement_Reader(const boost::property_tree::ptree& tree);
-    Filter* parseElement_Filter(const boost::property_tree::ptree& tree);
-    Writer* parseElement_Writer(const boost::property_tree::ptree& tree);
-    Option parseElement_Option(const boost::property_tree::ptree& tree);
-    void collect_attributes(map_t& attrs,
-        const boost::property_tree::ptree& tree);
-    void parse_attributes(map_t& attrs,
-        const boost::property_tree::ptree& tree);
-
-private:
     PipelineManager& m_manager;
     bool m_isDebug;
     uint32_t m_verboseLevel;
     Options m_baseOptions;
-    std::string m_inputXmlFile;
 
-    PipelineReader& operator=(const PipelineReader&); // not implemented
-    PipelineReader(const PipelineReader&); // not implemented
+    PipelineReader& operator=(const PipelineReader&) = delete;
+    PipelineReader(const PipelineReader&) = delete;
+
 };
 
-} // namespace pdal
 
+} // namespace pdal
