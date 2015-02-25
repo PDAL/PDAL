@@ -78,6 +78,7 @@ public:
 
     bool isDebug() const;
     uint32_t getVerboseLevel() const;
+    virtual std::string getName() const = 0;
     bool isVisualize() const;
     void visualize(PointBufferPtr buffer) const;
     //void visualize(PointBufferPtr input_buffer, PointBufferPtr output_buffer) const;

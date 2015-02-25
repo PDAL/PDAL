@@ -51,6 +51,8 @@ static PluginInfo const s_info {
 
 CREATE_STATIC_PLUGIN(TranslateKernel, Kernel, s_info)
 
+std::string TranslateKernel::getName() const { return s_info.name; }
+
 TranslateKernel::TranslateKernel() :
     Kernel(), m_bCompress(false),
     m_input_srs(pdal::SpatialReference()),

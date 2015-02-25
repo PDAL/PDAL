@@ -55,6 +55,7 @@ class PDAL_DLL RandomKernel : public Kernel
 public:
     static void * create();
     static int32_t destroy(void *);
+    std::string getName() const;
     int execute();
 
 private:

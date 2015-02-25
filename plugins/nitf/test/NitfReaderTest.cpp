@@ -68,7 +68,6 @@ TEST(NitfReaderTest, test_one)
     nitf_reader->setOptions(nitf_opts);
     nitf_reader->prepare(ctx);
     PointBufferSet pbSet = nitf_reader->execute(ctx);
-    //EXPECT_EQ(nitf_reader->getDescription(), "NITF Reader");
     EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
 

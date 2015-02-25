@@ -365,7 +365,6 @@ static void test_a_format(const std::string& refFile, uint8_t majorVersion,
     std::shared_ptr<LasWriter> writer(new LasWriter)(ofs);
     writer->setOptions(writerOpts);
     writer->setInput(&reader);
-    EXPECT_EQ(writer->getDescription(), "Las Writer");
 
     writer->prepare(ctx);
     writer->execute(ctx);

@@ -50,6 +50,7 @@ static PluginInfo const s_info {
 
 CREATE_SHARED_PLUGIN(CpdKernel, Kernel, s_info)
 
+std::string CpdKernel::getName() const { return s_info.name; }
 
 void CpdKernel::validateSwitches()
 {

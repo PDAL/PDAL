@@ -105,6 +105,7 @@ class PDAL_DLL DeltaKernel : public Kernel
 public:
     static void * create();
     static int32_t destroy(void *);
+    std::string getName() const;
     int execute(); // overrride
     
 private:

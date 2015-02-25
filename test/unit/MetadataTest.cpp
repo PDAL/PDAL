@@ -292,7 +292,6 @@ TEST(MetadataTest, test_metadata_stage)
     PointContext ctx;
 
     LasReader reader(Support::datapath("interesting.las"));
-    EXPECT_TRUE(reader.getDescription() == "Las Reader");
     reader.prepare(ctx);
 
     MetadataNode file_metadata = ctx.metadata();

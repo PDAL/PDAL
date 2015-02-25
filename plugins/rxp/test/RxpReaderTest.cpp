@@ -103,7 +103,6 @@ TEST(RxpReaderTest, testConstructor)
     Options options = defaultRxpReaderOptions();
     RxpReader reader;
     reader.setOptions(options);
-    EXPECT_TRUE(reader.getDescription() == "RXP Reader");
     EXPECT_EQ(reader.getName(), "readers.rxp");
 }
 

@@ -46,6 +46,8 @@ static PluginInfo const s_info {
 
 CREATE_STATIC_PLUGIN(RandomKernel, Kernel, s_info)
 
+std::string RandomKernel::getName() const { return s_info.name; }
+
 RandomKernel::RandomKernel()
     : Kernel()
     , m_outputFile("")

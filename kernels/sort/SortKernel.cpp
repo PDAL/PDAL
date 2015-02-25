@@ -50,6 +50,8 @@ static PluginInfo const s_info {
 
 CREATE_STATIC_PLUGIN(SortKernel, Kernel, s_info)
 
+std::string SortKernel::getName() const { return s_info.name; }
+
 SortKernel::SortKernel() :
     Kernel(), m_bCompress(false), m_bForwardMetadata(false)
 {}

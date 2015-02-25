@@ -49,6 +49,8 @@ static PluginInfo const s_info {
 
 CREATE_SHARED_PLUGIN(PCLKernel, Kernel, s_info)
 
+std::string PCLKernel::getName() const { return s_info.name; }
+
 PCLKernel::PCLKernel()
     : Kernel()
     , m_bCompress(false)

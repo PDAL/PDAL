@@ -53,6 +53,8 @@ static PluginInfo const s_info {
 
 CREATE_STATIC_PLUGIN(InfoKernel, Kernel, s_info)
 
+std::string InfoKernel::getName() const { return s_info.name; }
+
 InfoKernel::InfoKernel()
     : m_showStats(false)
     , m_showSchema(false)

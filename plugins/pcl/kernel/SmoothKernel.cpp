@@ -50,6 +50,8 @@ static PluginInfo const s_info {
 
 CREATE_SHARED_PLUGIN(SmoothKernel, Kernel, s_info)
 
+std::string SmoothKernel::getName() const { return s_info.name; }
+
 void SmoothKernel::validateSwitches()
 {
     if (m_inputFile == "")

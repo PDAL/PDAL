@@ -46,6 +46,8 @@ static PluginInfo const s_info {
 
 CREATE_SHARED_PLUGIN(ViewKernel, Kernel, s_info)
 
+std::string ViewKernel::getName() const { return s_info.name; }
+
 // Support for parsing point numbers.  Points can be specified singly or as
 // dash-separated ranges.  i.e. 6-7,8,19-20
 namespace {

@@ -231,7 +231,7 @@ int main(int argc, char* argv[])
     // No arguments, print basic usage, plugins will be loaded
     if (argc < 2)
     {
-        outputHelp(/*false*/);
+        outputHelp();
         return 1;
     }
 

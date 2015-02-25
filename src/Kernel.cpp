@@ -84,7 +84,7 @@ Kernel::Kernel()
 
 std::ostream& operator<<(std::ostream& ostr, const Kernel& kernel)
 {
-    //ostr << "  Name: " << kernel.getName() << std::endl;
+    ostr << "  Name: " << kernel.getName() << std::endl;
 
     return ostr;
 }

@@ -49,6 +49,8 @@ static PluginInfo const s_info {
 
 CREATE_STATIC_PLUGIN(DeltaKernel, Kernel, s_info)
 
+std::string DeltaKernel::getName() const { return s_info.name; }
+
 DeltaKernel::DeltaKernel()
     : Kernel()
     , m_outputStream(0)

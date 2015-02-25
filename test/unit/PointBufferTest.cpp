@@ -303,7 +303,6 @@ TEST(PointBufferTest, bigfile)
 TEST(PointBufferTest, kdindex)
 {
     LasReader reader(Support::datapath("1.2-with-color.las"));
-    EXPECT_TRUE(reader.getDescription() == "Las Reader");
     reader.prepare();
 
     const Schema& schema = reader.getSchema();

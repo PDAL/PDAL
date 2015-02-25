@@ -46,6 +46,8 @@ static PluginInfo const s_info {
 
 CREATE_STATIC_PLUGIN(PipelineKernel, Kernel, s_info)
 
+std::string PipelineKernel::getName() const { return s_info.name; }
+
 PipelineKernel::PipelineKernel() : m_validate(false)
 {}
 
