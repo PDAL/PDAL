@@ -1,0 +1,5 @@
+readers.las:
+    filename: infile.las
+
+filters.decimation:
+    step: 2

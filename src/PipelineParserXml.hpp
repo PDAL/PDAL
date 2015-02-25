@@ -32,17 +32,12 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/PipelineReader.hpp>
-
-#include <memory>
-
-#include <boost/filesystem.hpp>
-
 #include "PipelineParser.hpp"
-#include "PipelineParserXml.hpp"
 
-#ifdef PDAL_WITH_YAML_PIPELINES
-#include "PipelineParserYaml.hpp"
+#include <map>
+
+#ifndef PDAL_PLATFORM_WIN32
+#include <wordexp.h>
 #endif
 
 
@@ -50,63 +45,60 @@ namespace pdal
 {
 
 
-PipelineReader::PipelineReader(PipelineManager& manager, bool isDebug,
-        uint32_t verboseLevel)
-    : m_manager(manager)
-    , m_isDebug(isDebug)
-    , m_verboseLevel(verboseLevel)
+using namespace boost::property_tree;
+
+
+class StageParserContext
 {
-    if (m_isDebug)
-    {
-        Option opt("debug", true);
-        m_baseOptions.add(opt);
-    }
-    if (m_verboseLevel)
-    {
-        Option opt("verbose", m_verboseLevel);
-        m_baseOptions.add(opt);
-    }
-}
+// ------------------------------------------------------------------------
+
+// this class helps keep tracks of what child nodes we've seen, so we
+// can keep all the error checking in one place
+public:
+
+    enum Cardinality { None, One, Many };
+
+    StageParserContext();
+
+    void setCardinality(Cardinality cardinality);
+    void addType();
+    int getNumTypes();
+    void addStage();
+    void addUnknown(const std::string& name);
+    void validate();
+
+private:
+
+    int m_numTypes;
+    Cardinality m_cardinality; // num child stages allowed
+    int m_numStages;
+
+};
 
 
-bool PipelineReader::readPipeline(std::istream& input, PipelineReader::ParseAs parseAs)
+class PipelineParserXml : public PipelineParser
 {
-    std::unique_ptr<PipelineParser> parser;
-    if (parseAs == PipelineReader::ParseAs::Yaml)
-    {
-#ifdef PDAL_WITH_YAML_PIPELINES
-        parser = std::unique_ptr<PipelineParser>(new PipelineParserYaml(m_manager, m_baseOptions));
-#else
-        throw pdal_error("PDAL not compiled with yaml pipeline support.");
-#endif
-    }
-    else
-    {
-        parser = std::unique_ptr<PipelineParser>(new PipelineParserXml(m_manager, m_baseOptions));
-    }
-    return parser->parse(input);
-}
+public:
 
+    PipelineParserXml(PipelineManager& manager, const Options& baseOptions);
 
-bool PipelineReader::readPipeline(const std::string& filename)
-{
-#ifdef PDAL_WITH_YAML_PIPELINES
-    std::unique_ptr<PipelineParser> parser;
-    std::string ext = boost::filesystem::extension(filename);
-    if (boost::iequals(ext, ".yml"))
-    {
-        parser = std::unique_ptr<PipelineParser>(new PipelineParserYaml(m_manager, m_baseOptions));
-    }
-    else
-    {
-        parser = std::unique_ptr<PipelineParser>(new PipelineParserXml(m_manager, m_baseOptions));
-    }
-    return parser->parse(filename);
-#else
-    PipelineParserXml parser(m_manager, m_baseOptions);
-    return parser.parse(filename);
-#endif
-}
+    virtual bool parse(const std::string& filename);
+    virtual bool parse(std::istream& input);
+
+private:
+
+    typedef std::map<std::string, std::string> map_t;
+
+    Option parseElement_Option(const ptree& tree);
+    Stage* parseElement_anystage(const std::string& name, const ptree& subtree);
+    Reader* parseElement_Reader(const ptree& tree);
+    Filter* parseElement_Filter(const ptree& tree);
+    void parse_attributes(map_t& attrs, const ptree& tree);
+    void collect_attributes(map_t& attrs, const ptree& tree);
+    Writer* parseElement_Writer(const ptree& tree);
+    bool parseElement_Pipeline(const ptree& tree);
+
+};
 
 
 } // namespace pdal
