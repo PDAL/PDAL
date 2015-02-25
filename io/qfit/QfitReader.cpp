@@ -187,7 +187,7 @@ static PluginInfo const s_info {
     "QFIT Reader",
     "http://pdal.io/stages/readers.qfit.html" };
 
-CREATE_STATIC_PLUGIN(QfitReader, Reader, s_info)
+CREATE_STATIC_PLUGIN(1, 0, QfitReader, Reader, s_info)
 
 std::string QfitReader::getName() const { return s_info.name; }
 

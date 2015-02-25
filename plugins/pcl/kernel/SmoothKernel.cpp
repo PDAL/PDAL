@@ -48,7 +48,7 @@ static PluginInfo const s_info {
     "Smooth Kernel",
     "http://pdal.io/kernels/kernels.smooth.html" };
 
-CREATE_SHARED_PLUGIN(SmoothKernel, Kernel, s_info)
+CREATE_SHARED_PLUGIN(1, 0, SmoothKernel, Kernel, s_info)
 
 std::string SmoothKernel::getName() const { return s_info.name; }
 

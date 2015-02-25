@@ -46,7 +46,7 @@ static PluginInfo const s_info {
     "MrSID Reader",
     "http://www.pdal.io/stages/readers.mrsid.html" };
 
-CREATE_SHARED_PLUGIN(MrsidReader, Reader, s_info)
+CREATE_SHARED_PLUGIN(1, 0, MrsidReader, Reader, s_info)
 
 std::string MrsidReader::getName() const { return s_info.name; }
 

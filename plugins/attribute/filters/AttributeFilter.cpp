@@ -54,7 +54,7 @@ static PluginInfo const s_info {
         "an OGR-readable data source, or an OGR SQL query.",
     "http://pdal.io/stages/filters.attribute.html" };
 
-CREATE_SHARED_PLUGIN(AttributeFilter, Filter, s_info)
+CREATE_SHARED_PLUGIN(1, 0, AttributeFilter, Filter, s_info)
 
 struct OGRDataSourceDeleter
 {

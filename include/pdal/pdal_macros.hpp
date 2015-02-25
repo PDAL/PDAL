@@ -48,13 +48,15 @@ typedef struct PluginInfo {
 
 }
 
-#define CREATE_SHARED_PLUGIN(T, type, info) \
+#define CREATE_SHARED_PLUGIN(version_major, version_minor, T, type, info) \
     extern "C" PDAL_DLL int32_t ExitFunc() \
     { return 0; } \
     extern "C" PDAL_DLL PF_ExitFunc PF_initPlugin() \
     { \
         int res = 0; \
         PF_RegisterParams rp; \
+        rp.version.major = version_major; \
+        rp.version.minor = version_minor; \
         rp.createFunc = pdal::T::create; \
         rp.destroyFunc = pdal::T::destroy; \
         strcpy(rp.description, info.description.c_str()); \
@@ -75,13 +77,15 @@ typedef struct PluginInfo {
         return 0; \
     }
 
-#define CREATE_STATIC_PLUGIN(T, type, info) \
+#define CREATE_STATIC_PLUGIN(version_major, version_minor, T, type, info) \
     extern "C" PDAL_DLL int32_t T ## _ExitFunc() \
     { return 0; } \
     extern "C" PDAL_DLL PF_ExitFunc T ## _InitPlugin() \
     { \
         int res = 0; \
         PF_RegisterParams rp; \
+        rp.version.major = version_major; \
+        rp.version.minor = version_minor; \
         rp.createFunc = pdal::T::create; \
         rp.destroyFunc = pdal::T::destroy; \
         strcpy(rp.description, info.description.c_str()); \

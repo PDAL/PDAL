@@ -44,7 +44,7 @@ static PluginInfo const s_info {
     "SBET Writer",
     "http://pdal.io/stages/writers.sbet.html" };
 
-CREATE_STATIC_PLUGIN(SbetWriter, Writer, s_info)
+CREATE_STATIC_PLUGIN(1, 0, SbetWriter, Writer, s_info)
 
 std::string SbetWriter::getName() const { return s_info.name; }
 

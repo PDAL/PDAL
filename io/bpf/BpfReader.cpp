@@ -49,7 +49,7 @@ static PluginInfo const s_info {
         "processing chains.",
     "http://pdal.io/stages/readers.bpf.html" };
 
-CREATE_STATIC_PLUGIN(BpfReader, Reader, s_info)
+CREATE_STATIC_PLUGIN(1, 0, BpfReader, Reader, s_info)
 
 std::string BpfReader::getName() const { return s_info.name; }
 

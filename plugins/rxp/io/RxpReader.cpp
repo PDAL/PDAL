@@ -50,7 +50,7 @@ static PluginInfo const s_info {
     "RXP Reader",
     "http://pdal.io/stages/readers.rxp.html" };
 
-CREATE_SHARED_PLUGIN(RxpReader, Reader, s_info)
+CREATE_SHARED_PLUGIN(1, 0, RxpReader, Reader, s_info)
 
 std::string RxpReader::getName() const { return s_info.name; }
 

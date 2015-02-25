@@ -49,7 +49,7 @@ static PluginInfo const s_info {
     "PCL Block implementation",
     "http://pdal.io/stages/filters.pclblock.html" };
 
-CREATE_SHARED_PLUGIN(PCLBlock, Filter, s_info)
+CREATE_SHARED_PLUGIN(1, 0, PCLBlock, Filter, s_info)
 
 std::string PCLBlock::getName() const { return s_info.name; }
 

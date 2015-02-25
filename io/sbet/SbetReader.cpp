@@ -42,7 +42,7 @@ static PluginInfo const s_info {
     "SBET Reader",
     "http://pdal.io/stages/readers.sbet.html" };
 
-CREATE_STATIC_PLUGIN(SbetReader, Reader, s_info)
+CREATE_STATIC_PLUGIN(1, 0, SbetReader, Reader, s_info)
 
 std::string SbetReader::getName() const { return s_info.name; }
 

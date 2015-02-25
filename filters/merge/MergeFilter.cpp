@@ -42,7 +42,7 @@ static PluginInfo const s_info {
     "Merge data from two different readers into a single stream.",
     "http://pdal.io/stages/filters.merge.html" };
 
-CREATE_STATIC_PLUGIN(MergeFilter, Filter, s_info)
+CREATE_STATIC_PLUGIN(1, 0, MergeFilter, Filter, s_info)
 
 std::string MergeFilter::getName() const { return s_info.name; }
 

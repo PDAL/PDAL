@@ -52,7 +52,7 @@ static PluginInfo const s_info {
     "Diff Kernel",
     "http://pdal.io/kernels/kernels.diff.html" };
 
-CREATE_STATIC_PLUGIN(DiffKernel, Kernel, s_info)
+CREATE_STATIC_PLUGIN(1, 0, DiffKernel, Kernel, s_info)
 
 std::string DiffKernel::getName() const { return s_info.name; }
 

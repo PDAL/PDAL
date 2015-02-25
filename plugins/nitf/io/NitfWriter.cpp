@@ -85,7 +85,7 @@ static PluginInfo const s_info {
     "NITF Writer",
     "http://pdal.io/stages/writers.nitf.html" };
 
-CREATE_SHARED_PLUGIN(NitfWriter, Writer, s_info)
+CREATE_SHARED_PLUGIN(1, 0, NitfWriter, Writer, s_info)
 
 std::string NitfWriter::getName() const { return s_info.name; }
 

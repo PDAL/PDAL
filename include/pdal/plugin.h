@@ -58,11 +58,18 @@ typedef enum PF_PluginType
     PF_PluginType_Writer
 } PF_PluginType;
 
+typedef struct PF_PluginAPI_Version
+{
+    int32_t major;
+    int32_t minor;
+} PF_PluginAPI_Version;
+
 typedef void * (*PF_CreateFunc)();
 typedef int32_t (*PF_DestroyFunc)(void *);
 
 typedef struct PF_RegisterParams
 {
+    PF_PluginAPI_Version version;
     PF_CreateFunc createFunc;
     PF_DestroyFunc destroyFunc;
     char description[PF_MAX_DESCRIPTION_LEN + 1];

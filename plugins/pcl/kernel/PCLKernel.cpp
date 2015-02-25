@@ -47,7 +47,7 @@ static PluginInfo const s_info {
     "PCL Kernel",
     "http://pdal.io/kernels/kernels.pcl.html" };
 
-CREATE_SHARED_PLUGIN(PCLKernel, Kernel, s_info)
+CREATE_SHARED_PLUGIN(1, 0, PCLKernel, Kernel, s_info)
 
 std::string PCLKernel::getName() const { return s_info.name; }
 

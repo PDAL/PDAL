@@ -85,6 +85,7 @@ private:
     DynamicLibrary * loadLibrary(const std::string & path, std::string & errorString);
 
     bool inInitializePlugin_;
+    PF_PluginAPI_Version m_version;
     DynamicLibraryMap dynamicLibraryMap_;
     ExitFuncVec exitFuncVec_;
 

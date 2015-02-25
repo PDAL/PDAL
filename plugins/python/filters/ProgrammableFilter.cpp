@@ -46,7 +46,7 @@ static PluginInfo const s_info {
     "Manipulate data using inline Python",
     "http://pdal.io/stages/filters.programmable.html" };
 
-CREATE_SHARED_PLUGIN(ProgrammableFilter, Filter, s_info)
+CREATE_SHARED_PLUGIN(1, 0, ProgrammableFilter, Filter, s_info)
 
 std::string ProgrammableFilter::getName() const { return s_info.name; }
 

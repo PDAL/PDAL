@@ -48,7 +48,7 @@ static PluginInfo const s_info {
     "CPD Kernel",
     "http://pdal.io/kernels/kernels.cpd.html" };
 
-CREATE_SHARED_PLUGIN(CpdKernel, Kernel, s_info)
+CREATE_SHARED_PLUGIN(1, 0, CpdKernel, Kernel, s_info)
 
 std::string CpdKernel::getName() const { return s_info.name; }
 

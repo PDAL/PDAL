@@ -48,7 +48,7 @@ static PluginInfo const s_info {
     "Sort Kernel",
     "http://pdal.io/kernels/kernels.sort.html" };
 
-CREATE_STATIC_PLUGIN(SortKernel, Kernel, s_info)
+CREATE_STATIC_PLUGIN(1, 0, SortKernel, Kernel, s_info)
 
 std::string SortKernel::getName() const { return s_info.name; }
 

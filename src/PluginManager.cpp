@@ -80,7 +80,9 @@ int32_t PluginManager::registerObject(const std::string & objectType, const PF_R
 
     PluginManager & pm = PluginManager::getInstance();
 
-    // skipped version check for now
+    PF_PluginAPI_Version v = pm.m_version;
+    if (v.major != params->version.major)
+        return -1;
 
     if (pm.exactMatchMap_.find(objectType) != pm.exactMatchMap_.end())
         return -1;
@@ -162,7 +164,10 @@ int32_t PluginManager::initializePlugin(PF_InitFunc initFunc)
 }
 
 PluginManager::PluginManager() : inInitializePlugin_(false)
-{}
+{
+    m_version.major = 1;
+    m_version.minor = 0;
+}
 
 PluginManager::~PluginManager()
 {

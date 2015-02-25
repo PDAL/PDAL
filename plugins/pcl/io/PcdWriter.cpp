@@ -57,7 +57,7 @@ static PluginInfo const s_info {
     "Write data in the Point Cloud Library (PCL) format.",
     "http://pdal.io/stages/writers.pclvisualizer.html" };
 
-CREATE_SHARED_PLUGIN(PcdWriter, Writer, s_info)
+CREATE_SHARED_PLUGIN(1, 0, PcdWriter, Writer, s_info)
 
 std::string PcdWriter::getName() const { return s_info.name; }
 

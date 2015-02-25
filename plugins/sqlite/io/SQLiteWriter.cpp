@@ -54,7 +54,7 @@ static PluginInfo const s_info {
     "Write data to SQLite3 database files.",
     "" };
 
-CREATE_SHARED_PLUGIN(SQLiteWriter, Writer, s_info)
+CREATE_SHARED_PLUGIN(1, 0, SQLiteWriter, Writer, s_info)
 
 std::string SQLiteWriter::getName() const { return s_info.name; }
 

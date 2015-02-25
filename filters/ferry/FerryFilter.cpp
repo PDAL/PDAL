@@ -44,7 +44,7 @@ static PluginInfo const s_info {
     "Copy date from one dimension to another.",
     "http://pdal.io/stages/filters.ferry.html" };
 
-CREATE_STATIC_PLUGIN(FerryFilter, Filter, s_info)
+CREATE_STATIC_PLUGIN(1, 0, FerryFilter, Filter, s_info)
 
 std::string FerryFilter::getName() const { return s_info.name; }
 

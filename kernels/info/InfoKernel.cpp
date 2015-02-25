@@ -51,7 +51,7 @@ static PluginInfo const s_info {
     "Info Kernel",
     "http://pdal.io/kernels/kernels.info.html" };
 
-CREATE_STATIC_PLUGIN(InfoKernel, Kernel, s_info)
+CREATE_STATIC_PLUGIN(1, 0, InfoKernel, Kernel, s_info)
 
 std::string InfoKernel::getName() const { return s_info.name; }
 

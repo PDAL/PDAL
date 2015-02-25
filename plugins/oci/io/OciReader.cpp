@@ -46,7 +46,7 @@ static PluginInfo const s_info {
     "Read point cloud data from Oracle SDO_POINTCLOUD.",
     "http://pdal.io/stages/readers.oci.html" };
 
-CREATE_SHARED_PLUGIN(OciReader, Reader, s_info)
+CREATE_SHARED_PLUGIN(1, 0, OciReader, Reader, s_info)
 
 std::string OciReader::getName() const { return s_info.name; }
 
