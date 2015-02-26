@@ -153,6 +153,9 @@ option(BUILD_PLUGIN_PYTHON "Choose if Python support should be built" FALSE)
 add_feature_info("Python plugin" BUILD_PLUGIN_PYTHON
     "add features that depend on python")
 
+option(WITH_YAML_PIPELINES "Choose if support for YAML pipelines should be built" FALSE)
+add_feature_info("YAML pipelines" WITH_YAML_PIPELINES "read YAML pipeline files")
+
 option(WITH_TESTS "Choose if PDAL unit tests should be built" TRUE)
 add_feature_info("Unit tests" WITH_TESTS "PDAL unit tests")
 
@@ -230,6 +233,10 @@ PDAL_ADD_INCLUDES("" "" ${pdal_defines_h})
 include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
 
 include_directories(vendor/nanoflann-1.1.8)
+
+if (WITH_YAML_PIPELINES)
+    include_directories(vendor/yaml-cpp-0.5.1/include)
+endif()
 
 #------------------------------------------------------------------------------
 # subdirectory controls

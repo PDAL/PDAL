@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2015, Peter J. Gadomski (pete.gadomski@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,56 +32,30 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include "PipelineParser.hpp"
 
-#include <istream>
-#include <string>
-
-#include <pdal/pdal_internal.hpp>
-#include <pdal/Options.hpp>
-#include <pdal/PipelineManager.hpp>
+#include <yaml-cpp/yaml.h>
 
 
 namespace pdal
 {
 
 
-class PipelineManager;
-
-
-class PDAL_DLL PipelineReader
+class PipelineParserYaml : public PipelineParser
 {
 public:
 
-    enum class ParseAs
-    {
-        Xml,
-        Yaml,
-    };
+    PipelineParserYaml(PipelineManager& manager, const Options& baseOptions);
 
-    PipelineReader(PipelineManager& manager, bool debug = false,
-        uint32_t verbose = 0);
-
-    // Use this to fill in a pipeline manager with a file that
-    // contains a <Writer> as the last pipeline stage.
-    //
-    // returns true iff the xml file is a writer pipeline (otherwise it is
-    // assumed to be a reader pipeline)
-    bool readPipeline(const std::string& filename);
-    bool readPipeline(std::istream& input,
-            ParseAs parseAs = ParseAs::Xml);
+    virtual bool parse(std::istream& stream);
+    virtual bool parse(const std::string& filename);
 
 private:
 
-    PipelineManager& m_manager;
-    bool m_isDebug;
-    uint32_t m_verboseLevel;
-    Options m_baseOptions;
-
-    PipelineReader& operator=(const PipelineReader&) = delete;
-    PipelineReader(const PipelineReader&) = delete;
+    bool parseYamlNode(YAML::Node& pipeline);
+    void addOptions(Stage* stage, YAML::Node& node);
 
 };
 
 
-} // namespace pdal
+}

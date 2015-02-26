@@ -63,6 +63,10 @@ if (PDAL_HAVE_LAZPERF)
     PDAL_ADD_TEST(pdal_lazperf_test FILES CompressionTest.cpp)
 endif()
 
+if (WITH_YAML_PIPELINES)
+    PDAL_ADD_TEST(pdal_pipeline_parser_yaml_test FILES PipelineParserYamlTest.cpp)
+endif()
+
 #
 # sources for the native io
 #

@@ -96,6 +96,7 @@ set(PDAL_BASE_CPP
   Options.cpp
   PDALUtils.cpp
   PipelineManager.cpp
+  PipelineParserXml.cpp
   PipelineReader.cpp
   PipelineWriter.cpp
   PointBuffer.cpp
@@ -163,6 +164,20 @@ set (PDAL_CONFIG_CPP
 
 list (APPEND PDAL_CPP ${PDAL_CONFIG_CPP} )
 list (APPEND PDAL_HPP ${PDAL_CONFIG_HPP} )
+
+
+#
+# YAML parser
+#
+if (WITH_YAML_PIPELINES)
+    add_definitions(-DPDAL_WITH_YAML_PIPELINES)
+    file(GLOB YAML_CPP_SRC
+        "${PROJECT_SOURCE_DIR}/vendor/yaml-cpp-0.5.1/src/[a-zA-Z]*.cpp")
+    file(GLOB_RECURSE YAML_CPP_HEADERS
+        "${PROJECT_SOURCE_DIR}/vendor/yaml-cpp-0.5.1/include/yaml-cpp/[a-zA-Z]*.h")
+    list(APPEND PDAL_CPP ${PROJECT_SOURCE_DIR}/src/PipelineParserYaml.cpp ${YAML_CPP_SRC})
+    list(APPEND PDAL_HPP ${YAML_CPP_HEADERS})
+endif()
 
 
 # Standard include directory of PDAL library

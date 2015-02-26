@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2015, Peter J. Gadomski (pete.gadomski@gmail.com)
 *
 * All rights reserved.
 *
@@ -36,9 +36,13 @@
 
 #include <istream>
 #include <string>
+#include <vector>
 
-#include <pdal/pdal_internal.hpp>
+#include <pdal/Filter.hpp>
+#include <pdal/Reader.hpp>
+#include <pdal/Writer.hpp>
 #include <pdal/Options.hpp>
+
 #include <pdal/PipelineManager.hpp>
 
 
@@ -46,42 +50,50 @@ namespace pdal
 {
 
 
-class PipelineManager;
-
-
-class PDAL_DLL PipelineReader
+class PipelineParser
 {
 public:
 
-    enum class ParseAs
+    PipelineParser(PipelineManager& manager, const Options& baseOptions)
+        : m_manager(manager)
+        , m_baseOptions(baseOptions)
+    {}
+
+    virtual bool parse(std::istream& stream) = 0;
+    virtual bool parse(const std::string& filename) = 0;
+
+    std::string getInputFile() const { return m_inputFile; }
+    void setInputFile(const std::string& filename) { m_inputFile = filename; }
+    Options getBaseOptions() const { return m_baseOptions; }
+
+    Reader* addReader(const std::string& type)
     {
-        Xml,
-        Yaml,
-    };
+        return m_manager.addReader(type);
+    }
 
-    PipelineReader(PipelineManager& manager, bool debug = false,
-        uint32_t verbose = 0);
+    Filter* addFilter(const std::string& type, Stage* prevStage)
+    {
+        return m_manager.addFilter(type, prevStage);
+    }
 
-    // Use this to fill in a pipeline manager with a file that
-    // contains a <Writer> as the last pipeline stage.
-    //
-    // returns true iff the xml file is a writer pipeline (otherwise it is
-    // assumed to be a reader pipeline)
-    bool readPipeline(const std::string& filename);
-    bool readPipeline(std::istream& input,
-            ParseAs parseAs = ParseAs::Xml);
+    Filter* addFilter(const std::string& type,
+            const std::vector<Stage*>& prevStages)
+    {
+        return m_manager.addFilter(type, prevStages);
+    }
+
+    Writer* addWriter(const std::string& type, Stage* prevStage)
+    {
+        return m_manager.addWriter(type, prevStage);
+    }
 
 private:
 
+    std::string m_inputFile;
     PipelineManager& m_manager;
-    bool m_isDebug;
-    uint32_t m_verboseLevel;
     Options m_baseOptions;
-
-    PipelineReader& operator=(const PipelineReader&) = delete;
-    PipelineReader(const PipelineReader&) = delete;
 
 };
 
 
-} // namespace pdal
+}
