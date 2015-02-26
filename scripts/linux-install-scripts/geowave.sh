@@ -2,13 +2,12 @@
 # Installs GeoWave library
 git clone https://github.com/ngageoint/geowave.git geowave
 cd geowave
-# TODO: Remove this!
-git checkout GEOWAVE-234
-# git checkout tags/v0.8.3
+git checkout tags/v0.8.3
 mvn clean package -pl geowave-deploy -am -P generate-pdal-proxies,linux-amd64-gcc-release -Dpdal.directory=/home/vagrant/pdal -DskipITs=true -DskipTests=true
 
 # Configure library paths
-sudo ln -s /home/vagrant/geowave/geowave-deploy/target/dependency/jace /usr/lib/libjace.so
+chmod 777 /home/vagrant/geowave/geowave-deploy/target/dependency/jace/libjace.so
+sudo ln -s /home/vagrant/geowave/geowave-deploy/target/dependency/jace/libjace.so /usr/lib/libjace.so
 echo "/usr/lib/jvm/java-7-oracle/jre/lib/amd64" | sudo tee --append /etc/ld.so.conf.d/awt.conf
 echo "/usr/lib/jvm/java-7-oracle/jre/lib/amd64/server" | sudo tee --append /etc/ld.so.conf.d/jvm.conf
 sudo ldconfig

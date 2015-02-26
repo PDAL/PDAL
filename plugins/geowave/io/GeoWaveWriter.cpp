@@ -180,11 +180,14 @@ namespace pdal
 
     void GeoWaveWriter::initialize()
     {
-        int status = createJvm();
-        if (status == 0)
-            log()->get(LogLevel::Debug) << "JVM Creation Successful" << std::endl;
-        else
-            log()->get(LogLevel::Error) << "JVM Creation Failed: Error ["  << status << "]" << std::endl;
+        if (!jace::isRunning())
+        {
+            int status = createJvm();
+            if (status == 0)
+                log()->get(LogLevel::Debug) << "JVM Creation Successful" << std::endl;
+            else
+                log()->get(LogLevel::Error) << "JVM Creation Failed: Error ["  << status << "]" << std::endl;
+        }
     }
 
     void GeoWaveWriter::ready(PointContext ctx)
