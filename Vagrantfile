@@ -25,7 +25,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "trusty64"
 
   config.vm.hostname = "pdal-vagrant"
-  config.vm.box_url = "https://vagrantcloud.com/ubuntu/trusty64/version/1/provider/virtualbox.box"
+  config.vm.box_url = "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box"
   config.vm.host_name = "pdal-vagrant"
 
   # Set the bash environment variable PDAL_VAGRANT_SSH_FORWARD_AGENT to any
