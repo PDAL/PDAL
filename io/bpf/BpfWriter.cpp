@@ -264,7 +264,6 @@ double BpfWriter::getAdjustedValue(const PointBuffer& buf,
         d /= m_yXform.m_scale;
     else if (bpfDim.m_id == Dimension::Id::Z)
         d /= m_zXform.m_scale;
-    d -= bpfDim.m_offset;
     return (d - bpfDim.m_offset);
 }
 
