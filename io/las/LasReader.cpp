@@ -37,17 +37,17 @@
 #include <sstream>
 #include <string.h>
 
-#include <pdal/Extractor.hpp>
-#include <pdal/util/FileUtils.hpp>
-#include <pdal/IStream.hpp>
-#include <pdal/QuickInfo.hpp>
-#include <pdal/PointBuffer.hpp>
 #include <pdal/Metadata.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/QuickInfo.hpp>
+#include <pdal/util/Extractor.hpp>
+#include <pdal/util/FileUtils.hpp>
+#include <pdal/util/IStream.hpp>
 
+#include "GeotiffSupport.hpp"
 #include "LasHeader.hpp"
 #include "VariableLengthRecord.hpp"
 #include "ZipPoint.hpp"
-#include "GeotiffSupport.hpp"
 
 namespace pdal
 {

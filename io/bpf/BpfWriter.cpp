@@ -38,8 +38,8 @@
 
 #include <zlib.h>
 
-#include <pdal/Charbuf.hpp>
 #include <pdal/Options.hpp>
+#include <pdal/util/Charbuf.hpp>
 
 #include "BpfCompressor.hpp"
 

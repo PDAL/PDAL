@@ -36,7 +36,7 @@
 
 #include <vector>
 
-#include <pdal/OStream.hpp>
+#include <pdal/util/OStream.hpp>
 #include <pdal/Writer.hpp>
 
 #include "BpfHeader.hpp"
