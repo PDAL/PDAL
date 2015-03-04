@@ -68,7 +68,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/Stage.hpp"
   "${PDAL_HEADERS_DIR}/StageFactory.hpp"
   "${PDAL_HEADERS_DIR}/StageInfo.hpp"
-  "${PDAL_HEADERS_DIR}/StageRunner.hpp"
   "${PDAL_HEADERS_DIR}/StreamFactory.hpp"
   "${PDAL_HEADERS_DIR}/UserCallback.hpp"
   "${PDAL_HEADERS_DIR}/Utils.hpp"
