@@ -34,9 +34,9 @@
 
 #pragma once
 
-#include <pdal/IStream.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/Reader.hpp>
+#include <pdal/util/IStream.hpp>
 
 #include "SbetCommon.hpp"
 

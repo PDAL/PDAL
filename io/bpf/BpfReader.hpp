@@ -36,9 +36,9 @@
 
 #include <vector>
 
-#include <pdal/Charbuf.hpp>
-#include <pdal/IStream.hpp>
 #include <pdal/Reader.hpp>
+#include <pdal/util/Charbuf.hpp>
+#include <pdal/util/IStream.hpp>
 
 #include "BpfHeader.hpp"
 

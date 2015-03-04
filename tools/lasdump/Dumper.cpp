@@ -35,7 +35,7 @@
 #include <laszip/laszip.hpp>
 #include <laszip/lasunzipper.hpp>
 
-#include <pdal/IStream.hpp>
+#include <pdal/util/IStream.hpp>
 
 #include "Dumper.hpp"
 #include "Lasdump.hpp"

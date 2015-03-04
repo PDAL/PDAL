@@ -9,12 +9,18 @@ endif()
 set(PDAL_UTIL_HPP
     "${PDAL_INCLUDE_DIR}/pdal/util/Algorithm.hpp"
     "${PDAL_INCLUDE_DIR}/pdal/util/Bounds.hpp"
+    "${PDAL_INCLUDE_DIR}/pdal/util/Charbuf.hpp"
     "${PDAL_INCLUDE_DIR}/pdal/util/Endian.hpp"
+    "${PDAL_INCLUDE_DIR}/pdal/util/Extractor.hpp"
     "${PDAL_INCLUDE_DIR}/pdal/util/FileUtils.hpp"
+    "${PDAL_INCLUDE_DIR}/pdal/util/Inserter.hpp"
+    "${PDAL_INCLUDE_DIR}/pdal/util/IStream.hpp"
+    "${PDAL_INCLUDE_DIR}/pdal/util/OStream.hpp"
     )
 
 set(PDAL_UTIL_CPP
     "${PDAL_UTIL_DIR}/Bounds.cpp"
+    "${PDAL_UTIL_DIR}/Charbuf.cpp"
     "${PDAL_UTIL_DIR}/FileUtils.cpp"
     )
 
