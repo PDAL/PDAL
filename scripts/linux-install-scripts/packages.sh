@@ -1,8 +1,11 @@
 sudo apt-get update -qq
 sudo apt-get install -y -q build-essential
-sudo apt-get install -y  software-properties-common python g++ make cmake wget git
+sudo apt-get install -y python-software-properties software-properties-common python g++ make cmake wget git
 sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
+sudo add-apt-repository -y ppa:webupd8team/java
 sudo apt-get update -qq
+echo debconf shared/accepted-oracle-license-v1-1 select true | sudo debconf-set-selections
+echo debconf shared/accepted-oracle-license-v1-1 seen true | sudo debconf-set-selections
 sudo apt-get install -y -q  git \
                            cmake \
                            libgeos-dev \
@@ -34,7 +37,10 @@ sudo apt-get install -y -q  git \
                            libvtk6-dev \
                            gcc-multilib \
                            g++-multilib \
-                           libglew-dev
+                           libglew-dev \
+                           oracle-java7-installer \
+                           maven \
+                           libc6-i386
 
 
 
