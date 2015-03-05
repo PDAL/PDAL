@@ -36,6 +36,7 @@
 #include <vector>
 
 #include <pdal/Reader.hpp>
+#include <pdal/pdal_macros.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/PointContext.hpp>
 #include <pdal/util/Extractor.hpp>
@@ -48,7 +49,7 @@ namespace pdal
 {
 
 
-class OptechReader : public Reader
+class PDAL_DLL OptechReader : public Reader
 {
 public:
     SET_STAGE_NAME("readers.optech", "Optech reader")
