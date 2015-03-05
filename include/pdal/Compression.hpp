@@ -33,6 +33,7 @@
 ****************************************************************************/
 #pragma once
 
+#include <pdal/pdal_internal.hpp>
 #include <boost/algorithm/string.hpp>
 
 #ifdef PDAL_HAVE_LAZPERF
@@ -140,11 +141,11 @@ public:
 
     size_t pointSize() const
         { return m_pointSize; }
-    point_count_t compress(char *inbuf, size_t bufsize)
+    point_count_t compress(const char *inbuf, size_t bufsize)
     {
         point_count_t numRead = 0;
 
-        char *end = inbuf + bufsize;
+        const char *end = inbuf + bufsize;
         while (inbuf + m_pointSize <= end)
         {
             m_compressor->compress(inbuf);
