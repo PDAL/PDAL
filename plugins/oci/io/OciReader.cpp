@@ -149,13 +149,9 @@ Options OciReader::getDefaultOptions()
     Option xml_schema_dump("xml_schema_dump", std::string(),
         "Filename to dump the XML schema to.");
 
-    Option do_normalize_xyz("do_normalize_xyz", true, "Normalize XYZ "
-        "dimensions from selections that have varying scale/offsets");
-
     options.add(connection);
     options.add(query);
     options.add(xml_schema_dump);
-    options.add(do_normalize_xyz);
 
     return options;
 }

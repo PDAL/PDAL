@@ -100,6 +100,9 @@ QuickInfo BpfReader::inspect()
 void BpfReader::initialize()
 {
     m_stream.open(m_filename);
+
+    // Resets the stream position in case it was already open.
+    m_stream.seek(0);
     // In order to know the dimensions we must read the file header.
     if (!m_header.read(m_stream))
         return;
