@@ -42,92 +42,65 @@
 
 namespace
 {
+    using namespace pdal;
 
-// Helper classes for the quadtree implementation.
-
-struct Point
-{
-    Point(double x, double y) : x(x), y(y) { }
-    Point(const Point& other) : x(other.x), y(other.y) { }
-
-    // Calculates the distance-squared to another point.
-    double sqDist(const Point& other) const
+    struct BBox
     {
-        return (x - other.x) * (x - other.x) + (y - other.y) * (y - other.y);
-    }
+        BBox(Point min, Point max)
+            : min(min)
+            , max(max)
+            , center(min.x + (max.x - min.x) / 2, min.y + (max.y - min.y) / 2)
+            , halfWidth(center.x - min.x)
+            , halfHeight(center.y - min.y)
+        { }
 
-    const double x;
-    const double y;
-};
+        BBox(const BBox& other)
+            : min(other.min)
+            , max(other.max)
+            , center(other.center)
+            , halfWidth(other.halfWidth)
+            , halfHeight(other.halfHeight)
+        { }
 
-struct PtRef
-{
-    PtRef(const Point& point, std::size_t pbIndex)
-        : point(point)
-        , pbIndex(pbIndex)
-    { }
+        // Returns true if this BBox shares any area in common with another.
+        bool overlaps(const BBox& other) const
+        {
+            return
+                std::abs(center.x - other.center.x) <
+                    halfWidth + other.halfWidth &&
+                std::abs(center.y - other.center.y) <
+                    halfHeight + other.halfHeight;
+        }
 
-    const Point point;
-    const std::size_t pbIndex;
-};
+        bool overlaps(
+            const double xBegin,
+            const double xEnd,
+            const double yBegin,
+            const double yEnd) const
+        {
+            const BBox other(
+                    Point(xBegin, yBegin),
+                    Point(xEnd, yEnd));
 
-struct BBox
-{
-    BBox(Point min, Point max)
-        : min(min)
-        , max(max)
-        , center(min.x + (max.x - min.x) / 2, min.y + (max.y - min.y) / 2)
-        , halfWidth(center.x - min.x)
-        , halfHeight(center.y - min.y)
-    { }
+            return overlaps(other);
+        }
 
-    BBox(const BBox& other)
-        : min(other.min)
-        , max(other.max)
-        , center(other.center)
-        , halfWidth(other.halfWidth)
-        , halfHeight(other.halfHeight)
-    { }
+        // Returns true if the requested point is contained within this BBox.
+        bool contains(const Point& p) const
+        {
+            return p.x >= min.x && p.y >= min.y && p.x < max.x && p.y < max.y;
+        }
 
-    // Returns true if this BBox shares any area in common with another.
-    bool overlaps(const BBox& other) const
-    {
-        return
-            std::abs(center.x - other.center.x) <
-                halfWidth + other.halfWidth &&
-            std::abs(center.y - other.center.y) <
-                halfHeight + other.halfHeight;
-    }
+        const Point min;
+        const Point max;
 
-    bool overlaps(
-        const double xBegin,
-        const double xEnd,
-        const double yBegin,
-        const double yEnd) const
-    {
-        const BBox other(
-                Point(xBegin, yBegin),
-                Point(xEnd, yEnd));
-
-        return overlaps(other);
-    }
-
-    // Returns true if the requested point is contained within this BBox.
-    bool contains(const Point& p) const
-    {
-        return p.x >= min.x && p.y >= min.y && p.x < max.x && p.y < max.y;
-    }
-
-    const Point min;
-    const Point max;
-
-    // Pre-calculate these properties, rather than exposing functions to
-    // calculate them on-demand, due to the large number of times that
-    // these will be needed when querying the quad tree.
-    const Point center;
-    const double halfWidth;
-    const double halfHeight;
-};
+        // Pre-calculate these properties, rather than exposing functions to
+        // calculate them on-demand, due to the large number of times that
+        // these will be needed when querying the quad tree.
+        const Point center;
+        const double halfWidth;
+        const double halfHeight;
+    };
 
 } // anonymous namespace
 
@@ -137,7 +110,7 @@ namespace pdal
 // Recursive quadtree implementation.
 struct Tree
 {
-    Tree(BBox bbox, const PtRef* data = 0)
+    Tree(BBox bbox, const QuadPointRef* data = 0)
         : bbox(bbox)
         , data(data)
         , nw()
@@ -149,7 +122,7 @@ struct Tree
     void getFills(std::vector<std::size_t>& fills, std::size_t level = 0) const;
 
     // Returns depth resulting from the insertion of this point.
-    std::size_t addPoint(const PtRef* toAdd, std::size_t curDepth = 0);
+    std::size_t addPoint(const QuadPointRef* toAdd, std::size_t curDepth = 0);
 
     void getPoints(
             std::vector<std::size_t>& results,
@@ -185,7 +158,7 @@ struct Tree
             std::size_t curDepth) const;
 
     const BBox bbox;
-    const PtRef* data;
+    const QuadPointRef* data;
 
     std::unique_ptr<Tree> nw;
     std::unique_ptr<Tree> ne;
@@ -193,7 +166,7 @@ struct Tree
     std::unique_ptr<Tree> sw;
 };
 
-std::size_t Tree::addPoint(const PtRef* toAdd, const std::size_t curDepth)
+std::size_t Tree::addPoint(const QuadPointRef* toAdd, const std::size_t curDepth)
 {
     if (data)
     {
@@ -507,11 +480,22 @@ void Tree::getPoints(
 struct QuadIndex::QImpl
 {
     QImpl(const PointBuffer& pointBuffer, std::size_t topLevel);
+    QImpl(
+            const PointBuffer& pointBuffer,
+            double xMin,
+            double yMin,
+            double xMax,
+            double yMax,
+            std::size_t topLevel);
+    QImpl(
+            const std::vector<std::shared_ptr<QuadPointRef> >& points,
+            double xMin,
+            double yMin,
+            double xMax,
+            double yMax,
+            std::size_t topLevel);
 
-    void build();
-    void build(double xMin, double yMin, double xMax, double yMax);
-
-    bool getBounds(
+    void getBounds(
             double& xMin,
             double& yMin,
             double& xMax,
@@ -520,8 +504,6 @@ struct QuadIndex::QImpl
     std::size_t getDepth() const;
 
     std::vector<std::size_t> getFills();
-
-    const PointBuffer& pointBuffer() const;
 
     std::vector<std::size_t> getPoints(
             std::size_t depthBegin,
@@ -552,42 +534,37 @@ struct QuadIndex::QImpl
             std::size_t depthBegin,
             std::size_t depthEnd) const;
 
-    const PointBuffer& m_pointBuffer;
     std::size_t m_topLevel;
-    std::vector<std::unique_ptr<PtRef> > m_pointRefVec;
+    std::vector<std::shared_ptr<QuadPointRef> > m_pointRefVec;
     std::unique_ptr<Tree> m_tree;
     std::size_t m_depth;
     std::vector<std::size_t> m_fills;
 };
 
 QuadIndex::QImpl::QImpl(const PointBuffer& pointBuffer, std::size_t topLevel)
-    : m_pointBuffer(pointBuffer)
-    , m_topLevel(topLevel)
+    : m_topLevel(topLevel)
     , m_pointRefVec()
     , m_tree()
     , m_depth(0)
     , m_fills()
-{ }
-
-void QuadIndex::QImpl::build()
 {
-    m_pointRefVec.resize(m_pointBuffer.size());
+    m_pointRefVec.resize(pointBuffer.size());
 
     double xMin(std::numeric_limits<double>::max());
     double yMin(std::numeric_limits<double>::max());
     double xMax(std::numeric_limits<double>::min());
     double yMax(std::numeric_limits<double>::min());
 
-    for (std::size_t i(0); i < m_pointBuffer.size(); ++i)
+    for (std::size_t i(0); i < pointBuffer.size(); ++i)
     {
         m_pointRefVec[i].reset(
-                new PtRef(
+                new QuadPointRef(
                     Point(
-                        m_pointBuffer.getFieldAs<double>(Dimension::Id::X, i),
-                        m_pointBuffer.getFieldAs<double>(Dimension::Id::Y, i)),
+                        pointBuffer.getFieldAs<double>(Dimension::Id::X, i),
+                        pointBuffer.getFieldAs<double>(Dimension::Id::Y, i)),
                 i));
 
-        const PtRef* pointRef(m_pointRefVec[i].get());
+        const QuadPointRef* pointRef(m_pointRefVec[i].get());
         if (pointRef->point.x < xMin) xMin = pointRef->point.x;
         if (pointRef->point.x > xMax) xMax = pointRef->point.x;
         if (pointRef->point.y < yMin) yMin = pointRef->point.y;
@@ -602,17 +579,28 @@ void QuadIndex::QImpl::build()
     }
 }
 
-void QuadIndex::QImpl::build(double xMin, double yMin, double xMax, double yMax)
+QuadIndex::QImpl::QImpl(
+        const PointBuffer& pointBuffer,
+        double xMin,
+        double yMin,
+        double xMax,
+        double yMax,
+        std::size_t topLevel)
+    : m_topLevel(topLevel)
+    , m_pointRefVec()
+    , m_tree()
+    , m_depth(0)
+    , m_fills()
 {
-    m_pointRefVec.resize(m_pointBuffer.size());
+    m_pointRefVec.resize(pointBuffer.size());
 
-    for (std::size_t i(0); i < m_pointBuffer.size(); ++i)
+    for (std::size_t i(0); i < pointBuffer.size(); ++i)
     {
         m_pointRefVec[i].reset(
-                new PtRef(
+                new QuadPointRef(
                     Point(
-                        m_pointBuffer.getFieldAs<double>(Dimension::Id::X, i),
-                        m_pointBuffer.getFieldAs<double>(Dimension::Id::Y, i)),
+                        pointBuffer.getFieldAs<double>(Dimension::Id::X, i),
+                        pointBuffer.getFieldAs<double>(Dimension::Id::Y, i)),
                 i));
     }
 
@@ -624,7 +612,29 @@ void QuadIndex::QImpl::build(double xMin, double yMin, double xMax, double yMax)
     }
 }
 
-bool QuadIndex::QImpl::getBounds(
+QuadIndex::QImpl::QImpl(
+        const std::vector<std::shared_ptr<QuadPointRef> >& points,
+        double xMin,
+        double yMin,
+        double xMax,
+        double yMax,
+        std::size_t topLevel)
+    : m_topLevel(topLevel)
+    , m_pointRefVec(points.size())
+    , m_tree()
+    , m_depth(0)
+    , m_fills()
+{
+    m_tree.reset(new Tree(BBox(Point(xMin, yMin), Point(xMax, yMax))));
+
+    for (std::size_t i = 0; i < points.size(); ++i)
+    {
+        m_pointRefVec[i] = points[i];
+        m_depth = std::max(m_tree->addPoint(m_pointRefVec[i].get()), m_depth);
+    }
+}
+
+void QuadIndex::QImpl::getBounds(
         double& xMin,
         double& yMin,
         double& xMax,
@@ -636,11 +646,6 @@ bool QuadIndex::QImpl::getBounds(
         yMin = m_tree->bbox.min.y;
         xMax = m_tree->bbox.max.x;
         yMax = m_tree->bbox.max.y;
-        return true;
-    }
-    else
-    {
-        return false;
     }
 }
 
@@ -657,11 +662,6 @@ std::vector<std::size_t> QuadIndex::QImpl::getFills()
     }
 
     return m_fills;
-}
-
-const PointBuffer& QuadIndex::QImpl::pointBuffer() const
-{
-    return m_pointBuffer;
 }
 
 std::vector<std::size_t> QuadIndex::QImpl::getPoints(
@@ -778,26 +778,36 @@ QuadIndex::QuadIndex(const PointBuffer& pointBuffer, std::size_t topLevel)
     : m_qImpl(new QImpl(pointBuffer, topLevel))
 { }
 
+QuadIndex::QuadIndex(
+        const PointBuffer& pointBuffer,
+        double xMin,
+        double yMin,
+        double xMax,
+        double yMax,
+        std::size_t topLevel)
+    : m_qImpl(new QImpl(pointBuffer, xMin, yMin, xMax, yMax, topLevel))
+{ }
+
+QuadIndex::QuadIndex(
+        const std::vector<std::shared_ptr<QuadPointRef> >& points,
+        double xMin,
+        double yMin,
+        double xMax,
+        double yMax,
+        std::size_t topLevel)
+    : m_qImpl(new QImpl(points, xMin, yMin, xMax, yMax, topLevel))
+{ }
+
 QuadIndex::~QuadIndex()
 { }
 
-void QuadIndex::build()
-{
-    m_qImpl->build();
-}
-
-void QuadIndex::build(double xMin, double yMin, double xMax, double yMax)
-{
-    m_qImpl->build(xMin, yMin, xMax, yMax);
-}
-
-bool QuadIndex::getBounds(
+void QuadIndex::getBounds(
         double& xMin,
         double& yMin,
         double& xMax,
         double& yMax) const
 {
-    return m_qImpl->getBounds(xMin, yMin, xMax, yMax);
+    m_qImpl->getBounds(xMin, yMin, xMax, yMax);
 }
 
 std::size_t QuadIndex::getDepth() const
@@ -808,11 +818,6 @@ std::size_t QuadIndex::getDepth() const
 std::vector<std::size_t> QuadIndex::getFills() const
 {
     return m_qImpl->getFills();
-}
-
-const PointBuffer& QuadIndex::pointBuffer() const
-{
-    return m_qImpl->pointBuffer();
 }
 
 std::vector<std::size_t> QuadIndex::getPoints(
