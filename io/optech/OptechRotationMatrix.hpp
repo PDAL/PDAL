@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2015, Peter J. Gadomski <pete.gadomski@gmail.com>
 *
 * All rights reserved.
 *
@@ -34,23 +34,13 @@
 
 #pragma once
 
-#include <pdal/pdal_config.hpp>
+#include <cmath>
 
-#include <pdal/BufferReader.hpp>
-#include <faux/FauxReader.hpp>
+#include <pdal/RotationMatrix.hpp>
 
-#include <las/LasReader.hpp>
-#include <las/LasWriter.hpp>
 
-#include <bpf/BpfReader.hpp>
-#include <bpf/BpfWriter.hpp>
+namespace pdal
+{
 
-#include <optech/OptechReader.hpp>
 
-#include <sbet/SbetReader.hpp>
-#include <sbet/SbetWriter.hpp>
-
-#include <qfit/QfitReader.hpp>
-#include <terrasolid/TerrasolidReader.hpp>
-#include <text/TextWriter.hpp>
-
+}

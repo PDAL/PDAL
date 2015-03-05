@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2015, Peter J. Gadomski <pete.gadomski@gmail.com>
 *
 * All rights reserved.
 *
@@ -32,25 +32,55 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <memory>
+#include <vector>
 
-#include <pdal/pdal_config.hpp>
+#include <pdal/Reader.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/PointContext.hpp>
+#include <pdal/util/Extractor.hpp>
+#include <pdal/util/Georeference.hpp>
+#include <pdal/util/IStream.hpp>
+#include "OptechCommon.hpp"
 
-#include <pdal/BufferReader.hpp>
-#include <faux/FauxReader.hpp>
 
-#include <las/LasReader.hpp>
-#include <las/LasWriter.hpp>
+namespace pdal
+{
 
-#include <bpf/BpfReader.hpp>
-#include <bpf/BpfWriter.hpp>
 
-#include <optech/OptechReader.hpp>
+class OptechReader : public Reader
+{
+public:
+    SET_STAGE_NAME("readers.optech", "Optech reader")
+    SET_STAGE_LINK("http://pdal.io/stages/reader.optech.html")
 
-#include <sbet/SbetReader.hpp>
-#include <sbet/SbetWriter.hpp>
+    static const size_t MaximumNumberOfReturns = 4;
+    static const size_t NumBytesInRecord = 69;
+    static const size_t MaxNumRecordsInBuffer = 1e6 / NumBytesInRecord;
 
-#include <qfit/QfitReader.hpp>
-#include <terrasolid/TerrasolidReader.hpp>
-#include <text/TextWriter.hpp>
+    OptechReader();
 
+    static Dimension::IdList getDefaultDimensions();
+    const CsdHeader& getHeader() const;
+
+private:
+    typedef std::vector<char> buffer_t;
+    typedef buffer_t::size_type buffer_size_t;
+
+    virtual void initialize();
+    virtual void addDimensions(PointContextRef ctx);
+    virtual void ready(PointContextRef ctx);
+    virtual point_count_t read(PointBuffer& buf, point_count_t num);
+    size_t fillBuffer();
+    virtual void done(PointContextRef ctx);
+
+    CsdHeader m_header;
+    georeference::RotationMatrix m_boresightMatrix;
+    std::unique_ptr<IStream> m_istream;
+    buffer_t m_buffer;
+    LeExtractor m_extractor;
+    size_t m_recordIndex;
+    size_t m_returnIndex;
+    CsdPulse m_pulse;
+};
+}

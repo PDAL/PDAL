@@ -23,6 +23,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/io/buffer
     ${PROJECT_SOURCE_DIR}/io/faux
     ${PROJECT_SOURCE_DIR}/io/las
+    ${PROJECT_SOURCE_DIR}/io/optech
     ${PROJECT_SOURCE_DIR}/io/qfit
     ${PROJECT_SOURCE_DIR}/io/sbet
     ${PROJECT_SOURCE_DIR}/io/text
@@ -75,6 +76,7 @@ set(srcs
     io/las/LasWriterTest.cpp
 )
 PDAL_ADD_TEST(pdal_io_las_test FILES "${srcs}")
+PDAL_ADD_TEST(pdal_io_optech_test FILES io/optech/OptechReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_qfit_test FILES io/qfit/QFITReaderTest.cpp)
 set(srcs
     io/sbet/SbetReaderTest.cpp

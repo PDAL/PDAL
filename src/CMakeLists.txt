@@ -45,7 +45,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/Filter.hpp"
   "${PDAL_HEADERS_DIR}/Filters.hpp"
   "${PDAL_HEADERS_DIR}/GDALUtils.hpp"
-  "${PDAL_HEADERS_DIR}/Georeference.hpp"
   "${PDAL_HEADERS_DIR}/GlobalEnvironment.hpp"
   "${PDAL_HEADERS_DIR}/gitsha.h"
   "${PDAL_HEADERS_DIR}/KDIndex.hpp"
@@ -82,7 +81,6 @@ set(PDAL_BASE_CPP
   Filter.cpp
   gitsha.cpp
   GDALUtils.cpp
-  Georeference.cpp
   GlobalEnvironment.cpp
   KDIndex.cpp
   Kernel.cpp
