@@ -37,8 +37,7 @@
 #include <pdal/Options.hpp>
 #include <pdal/plugin.h>
 #include <pdal/Reader.hpp>
-
-#include <boost/detail/endian.hpp>
+#include <pdal/util/IStream.hpp>
 
 #include <memory>
 #include <vector>
@@ -124,7 +123,7 @@ private:
     bool m_haveColor;
     bool m_haveTime;
     uint32_t m_baseTime;
-    std::istream* m_istream;
+    std::unique_ptr<IStream> m_istream;
     point_count_t m_index;
 
     virtual void initialize();
