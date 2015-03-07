@@ -111,6 +111,8 @@ public:
     point_count_t getNumPoints() const
         { return m_header->PntCnt; }
 
+    const TerraSolidHeader& getHeader() const { return *m_header; }
+
     // this is called by the stage's iterator
     uint32_t processBuffer(PointBuffer& PointBuffer, std::istream& stream,
         uint64_t numPointsLeft) const;

@@ -83,6 +83,7 @@ set(srcs
     io/sbet/SbetWriterTest.cpp
 )
 PDAL_ADD_TEST(pdal_io_sbet_test FILES "${srcs}")
+PDAL_ADD_TEST(pdal_io_terrasolid_test FILES io/terrasolid/TerrasolidReaderTest.cpp)
 
 #
 # sources for the native filters
