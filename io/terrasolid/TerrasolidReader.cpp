@@ -99,9 +99,10 @@ void TerrasolidReader::addDimensions(PointContextRef ctx)
     ctx.registerDim(Dimension::Id::X);
     ctx.registerDim(Dimension::Id::Y);
     ctx.registerDim(Dimension::Id::Z);
+    ctx.registerDim(Dimension::Id::ReturnNumber);
+    ctx.registerDim(Dimension::Id::NumberOfReturns);
     if (m_format == TERRASOLID_Format_2)
     {
-        ctx.registerDim(Dimension::Id::ReturnNumber);
         ctx.registerDim(Dimension::Id::Flag);
         ctx.registerDim(Dimension::Id::Mark);
     }
@@ -136,6 +137,7 @@ Dimension::IdList TerrasolidReader::getDefaultDimensions()
     dims.push_back(Id::Classification);
     dims.push_back(Id::PointSourceId);
     dims.push_back(Id::ReturnNumber);
+    dims.push_back(Id::NumberOfReturns);
     dims.push_back(Id::Flag);
     dims.push_back(Id::Mark);
     dims.push_back(Id::Intensity);
@@ -190,7 +192,18 @@ point_count_t TerrasolidReader::read(PointBuffer& data, point_count_t count)
                 flight_line);
 
             uint16_t echo_int = Utils::read_field<uint16_t>(p);
-            data.setField(Dimension::Id::ReturnNumber, nextId, echo_int);
+            switch (echo_int)
+            {
+            case 0: // only echo
+                data.setField(Dimension::Id::ReturnNumber, nextId, 1);
+                data.setField(Dimension::Id::NumberOfReturns, nextId, 1);
+                break;
+            case 1: // first of many echos
+                data.setField(Dimension::Id::ReturnNumber, nextId, 1);
+                break;
+            default: // intermediate echo or last of many echos
+                break;
+            }
 
             int32_t x = Utils::read_field<int32_t>(p);
             data.setField(Dimension::Id::X, nextId,
@@ -223,9 +236,19 @@ point_count_t TerrasolidReader::read(PointBuffer& data, point_count_t count)
             data.setField(Dimension::Id::Classification, nextId,
                 classification);
 
-            uint8_t return_number = Utils::read_field<uint8_t>(p);
-            data.setField(Dimension::Id::ReturnNumber, nextId,
-                return_number);
+            uint8_t echo_int = Utils::read_field<uint8_t>(p);
+            switch (echo_int)
+            {
+            case 0: // only echo
+                data.setField(Dimension::Id::ReturnNumber, nextId, 1);
+                data.setField(Dimension::Id::NumberOfReturns, nextId, 1);
+                break;
+            case 1: // first of many echos
+                data.setField(Dimension::Id::ReturnNumber, nextId, 1);
+                break;
+            default: // intermediate echo or last of many echos
+                break;
+            }
 
             uint8_t flag = Utils::read_field<uint8_t>(p);
             data.setField(Dimension::Id::Flag, nextId, flag);
