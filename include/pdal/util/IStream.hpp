@@ -217,6 +217,114 @@ public:
     }
 };
 
+
+/// Stream wrapper for input of binary data that converts from
+/// either little-endian or big-endian to host ordering,
+/// depending on object settings
+class ISwitchableStream : public IStream
+{
+public:
+    static const bool DefaultIsLittleEndian = true;
+
+    ISwitchableStream()
+        : m_isLittleEndian(DefaultIsLittleEndian)
+    {
+    }
+    ISwitchableStream(const std::string& filename)
+        : IStream(filename)
+        , m_isLittleEndian(DefaultIsLittleEndian)
+    {
+    }
+    ISwitchableStream(std::istream* stream)
+        : IStream(stream)
+        , m_isLittleEndian(DefaultIsLittleEndian)
+    {
+    }
+
+    bool isLittleEndian() const { return m_isLittleEndian; }
+    void switchToLittleEndian() { m_isLittleEndian = true; }
+    void switchToBigEndian() { m_isLittleEndian = false; }
+
+    ISwitchableStream& operator>>(uint8_t& v)
+    {
+        v = (uint8_t)m_stream->get();
+        return *this;
+    }
+
+    ISwitchableStream& operator>>(int8_t& v)
+    {
+        v = (int8_t)m_stream->get();
+        return *this;
+    }
+
+    ISwitchableStream& operator>>(uint16_t& v)
+    {
+        m_stream->read((char*)&v, sizeof(v));
+        v = isLittleEndian() ? le16toh(v) : be16toh(v);
+        return *this;
+    }
+
+    ISwitchableStream& operator>>(int16_t& v)
+    {
+        m_stream->read((char*)&v, sizeof(v));
+        v = isLittleEndian() ? (int16_t)le16toh((uint16_t)v)
+                             : (int16_t)be16toh((uint16_t)v);
+        return *this;
+    }
+
+    ISwitchableStream& operator>>(uint32_t& v)
+    {
+        m_stream->read((char*)&v, sizeof(v));
+        v = isLittleEndian() ? le32toh(v) : be32toh(v);
+        return *this;
+    }
+
+    ISwitchableStream& operator>>(int32_t& v)
+    {
+        m_stream->read((char*)&v, sizeof(v));
+        v = isLittleEndian() ? (int32_t)le32toh((uint32_t)v)
+                             : (int32_t)be32toh((uint32_t)v);
+        return *this;
+    }
+
+    ISwitchableStream& operator>>(uint64_t& v)
+    {
+        m_stream->read((char*)&v, sizeof(v));
+        v = isLittleEndian() ? le64toh(v) : be64toh(v);
+        return *this;
+    }
+
+    ISwitchableStream& operator>>(int64_t& v)
+    {
+        m_stream->read((char*)&v, sizeof(v));
+        v = isLittleEndian() ? (int64_t)le64toh((uint64_t)v)
+                             : (int64_t)be64toh((uint64_t)v);
+        return *this;
+    }
+
+    ISwitchableStream& operator>>(float& v)
+    {
+        m_stream->read((char*)&v, sizeof(v));
+        uint32_t tmp = isLittleEndian() ? le32toh(*(uint32_t*)(&v))
+                                        : be32toh(*(uint32_t*)(&v));
+        std::memcpy(&v, &tmp, sizeof(tmp));
+        return *this;
+    }
+
+    ISwitchableStream& operator>>(double& v)
+    {
+        m_stream->read((char*)&v, sizeof(v));
+        uint64_t tmp = isLittleEndian() ? be64toh(*(uint64_t*)(&v))
+                                        : be64toh(*(uint64_t*)(&v));
+        std::memcpy(&v, &tmp, sizeof(tmp));
+        return *this;
+    }
+
+private:
+    bool m_isLittleEndian;
+};
+
+
 /// Stream position marker with rewinding support.
 class IStreamMarker
 {
