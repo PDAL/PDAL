@@ -267,6 +267,7 @@ point_count_t TerrasolidReader::read(PointBuffer& data, point_count_t count)
             data.setField(Dimension::Id::Alpha, nextId, alpha);
         }
         nextId++;
+        m_index++;
     }
 
     delete[] buf;
