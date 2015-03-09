@@ -62,6 +62,7 @@
 #include <qfit/QfitReader.hpp>
 #include <terrasolid/TerrasolidReader.hpp>
 #include <text/TextWriter.hpp>
+#include <optech/OptechReader.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
@@ -95,6 +96,7 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
     drivers["ntf"] = "readers.nitf";
     drivers["nsf"] = "readers.nitf";
     drivers["bpf"] = "readers.bpf";
+    drivers["cpd"] = "readers.optech";
     drivers["sbet"] = "readers.sbet";
     drivers["icebridge"] = "readers.icebridge";
     drivers["sqlite"] = "readers.sqlite";
@@ -184,6 +186,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(QfitReader_InitPlugin);
     PluginManager::initializePlugin(SbetReader_InitPlugin);
     PluginManager::initializePlugin(TerrasolidReader_InitPlugin);
+    PluginManager::initializePlugin(OptechReader_InitPlugin);
     PluginManager::initializePlugin(ChipperFilter_InitPlugin);
     PluginManager::initializePlugin(ColorizationFilter_InitPlugin);
     PluginManager::initializePlugin(CropFilter_InitPlugin);

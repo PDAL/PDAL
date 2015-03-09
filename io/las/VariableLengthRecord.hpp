@@ -38,9 +38,9 @@
 #include <string>
 #include <vector>
 
-#include <pdal/IStream.hpp>
-#include <pdal/OStream.hpp>
 #include <pdal/SpatialReference.hpp>
+#include <pdal/util/IStream.hpp>
+#include <pdal/util/OStream.hpp>
 
 namespace pdal
 {

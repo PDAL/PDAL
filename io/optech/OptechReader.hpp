@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Peter J. Gadomski (pete.gadomski@gmail.com)
+* Copyright (c) 2015, Peter J. Gadomski <pete.gadomski@gmail.com>
 *
 * All rights reserved.
 *
@@ -32,40 +32,61 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <memory>
+#include <vector>
 
-#include <pdal/util/OStream.hpp>
+#include <pdal/Reader.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/PointContext.hpp>
+#include <pdal/util/Extractor.hpp>
+#include <pdal/util/Georeference.hpp>
+#include <pdal/util/IStream.hpp>
+#include <pdal/pdal_export.hpp>
 #include <pdal/plugin.h>
-#include <pdal/Writer.hpp>
 
-#include "SbetCommon.hpp"
+#include "OptechCommon.hpp"
 
-extern "C" int32_t SbetWriter_ExitFunc();
-extern "C" PF_ExitFunc SbetWriter_InitPlugin();
+extern "C" int32_t OptechReader_ExitFunc();
+extern "C" PF_ExitFunc OptechReader_InitPlugin();
 
 namespace pdal
 {
 
-class PDAL_DLL SbetWriter : public pdal::Writer
+
+class PDAL_DLL OptechReader : public Reader
 {
 public:
-    SbetWriter() : pdal::Writer()
-        {}
-
-    static void * create();
+    static void *create();
     static int32_t destroy(void *);
     std::string getName() const;
 
-    static Dimension::IdList getDefaultDimensions()
-        { return fileDimensions(); }
+    static const size_t MaximumNumberOfReturns = 4;
+    static const size_t NumBytesInRecord = 69;
+    static const size_t MaxNumRecordsInBuffer = 1e6 / NumBytesInRecord;
+
+    OptechReader();
+
+    static Dimension::IdList getDefaultDimensions();
+    const CsdHeader& getHeader() const;
 
 private:
-    std::unique_ptr<OLeStream> m_stream;
-    std::string m_filename;
+    typedef std::vector<char> buffer_t;
+    typedef buffer_t::size_type buffer_size_t;
 
-    virtual void processOptions(const Options& options);
+    virtual void initialize();
+    virtual void addDimensions(PointContextRef ctx);
     virtual void ready(PointContextRef ctx);
-    virtual void write(const PointBuffer& buf);
-};
+    virtual point_count_t read(PointBuffer& buf, point_count_t num);
+    size_t fillBuffer();
+    virtual void done(PointContextRef ctx);
 
-} // namespace pdal
+    CsdHeader m_header;
+    georeference::RotationMatrix m_boresightMatrix;
+    std::unique_ptr<IStream> m_istream;
+    buffer_t m_buffer;
+    LeExtractor m_extractor;
+    size_t m_recordIndex;
+    size_t m_returnIndex;
+    CsdPulse m_pulse;
+};
+}

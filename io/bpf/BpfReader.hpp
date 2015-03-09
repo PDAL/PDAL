@@ -34,11 +34,13 @@
 
 #pragma once
 
-#include <pdal/Charbuf.hpp>
-#include <pdal/IStream.hpp>
+#include <vector>
+
+#include <pdal/Reader.hpp>
+#include <pdal/util/Charbuf.hpp>
+#include <pdal/util/IStream.hpp>
 #include <pdal/pdal_export.hpp>
 #include <pdal/plugin.h>
-#include <pdal/Reader.hpp>
 
 #include "BpfHeader.hpp"
 

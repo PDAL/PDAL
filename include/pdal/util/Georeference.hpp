@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Peter J. Gadomski (pete.gadomski@gmail.com)
+* Copyright (c) 2015, Peter J. Gadomski <pete.gadomski@gmail.com>
 *
 * All rights reserved.
 *
@@ -34,38 +34,58 @@
 
 #pragma once
 
-#include <pdal/util/OStream.hpp>
-#include <pdal/plugin.h>
-#include <pdal/Writer.hpp>
-
-#include "SbetCommon.hpp"
-
-extern "C" int32_t SbetWriter_ExitFunc();
-extern "C" PF_ExitFunc SbetWriter_InitPlugin();
 
 namespace pdal
 {
-
-class PDAL_DLL SbetWriter : public pdal::Writer
+namespace georeference
 {
-public:
-    SbetWriter() : pdal::Writer()
-        {}
 
-    static void * create();
-    static int32_t destroy(void *);
-    std::string getName() const;
 
-    static Dimension::IdList getDefaultDimensions()
-        { return fileDimensions(); }
+struct Xyz
+{
+    Xyz(double x, double y, double z)
+        : X(x)
+        , Y(y)
+        , Z(z)
+    {
+    }
 
-private:
-    std::unique_ptr<OLeStream> m_stream;
-    std::string m_filename;
-
-    virtual void processOptions(const Options& options);
-    virtual void ready(PointContextRef ctx);
-    virtual void write(const PointBuffer& buf);
+    double X;
+    double Y;
+    double Z;
 };
 
-} // namespace pdal
+
+struct RotationMatrix
+{
+    // Row-major
+    RotationMatrix(double m00, double m01, double m02, double m10, double m11,
+                   double m12, double m20, double m21, double m22)
+        : m00(m00)
+        , m01(m01)
+        , m02(m02)
+        , m10(m10)
+        , m11(m11)
+        , m12(m12)
+        , m20(m20)
+        , m21(m21)
+        , m22(m22)
+    {
+    }
+
+    double m00, m01, m02, m10, m11, m12, m20, m21, m22;
+};
+
+
+inline RotationMatrix createIdentityMatrix()
+{
+    return RotationMatrix(1, 0, 0, 0, 1, 0, 0, 0, 1);
+}
+
+
+// Returns Latitude, Longitude, Height triplet with angles in radians
+Xyz georeferenceWgs84(double range, double scanAngle,
+                      const RotationMatrix& boresightMatrix,
+                      const RotationMatrix& imuMatrix, const Xyz& gpsPoint);
+}
+}

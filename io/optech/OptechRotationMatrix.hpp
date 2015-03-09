@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Peter J. Gadomski (pete.gadomski@gmail.com)
+* Copyright (c) 2015, Peter J. Gadomski <pete.gadomski@gmail.com>
 *
 * All rights reserved.
 *
@@ -34,38 +34,13 @@
 
 #pragma once
 
-#include <pdal/util/OStream.hpp>
-#include <pdal/plugin.h>
-#include <pdal/Writer.hpp>
+#include <cmath>
 
-#include "SbetCommon.hpp"
+#include <pdal/RotationMatrix.hpp>
 
-extern "C" int32_t SbetWriter_ExitFunc();
-extern "C" PF_ExitFunc SbetWriter_InitPlugin();
 
 namespace pdal
 {
 
-class PDAL_DLL SbetWriter : public pdal::Writer
-{
-public:
-    SbetWriter() : pdal::Writer()
-        {}
 
-    static void * create();
-    static int32_t destroy(void *);
-    std::string getName() const;
-
-    static Dimension::IdList getDefaultDimensions()
-        { return fileDimensions(); }
-
-private:
-    std::unique_ptr<OLeStream> m_stream;
-    std::string m_filename;
-
-    virtual void processOptions(const Options& options);
-    virtual void ready(PointContextRef ctx);
-    virtual void write(const PointBuffer& buf);
-};
-
-} // namespace pdal
+}

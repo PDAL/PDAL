@@ -34,7 +34,6 @@
 
 #include "BpfWriter.hpp"
 
-#include <pdal/Charbuf.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/pdal_export.hpp>
 

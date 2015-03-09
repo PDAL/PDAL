@@ -34,7 +34,6 @@
 
 #include "SQLiteWriter.hpp"
 #include <pdal/PointBuffer.hpp>
-#include <pdal/Charbuf.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_internal.hpp>
 #include <pdal/util/FileUtils.hpp>

@@ -36,7 +36,7 @@
 
 #include "Lasdump.hpp"
 
-#include <pdal/IStream.hpp>
+#include <pdal/util/IStream.hpp>
 
 namespace pdal
 {

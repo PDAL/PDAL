@@ -39,14 +39,12 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/pdal_error.hpp"
   "${PDAL_HEADERS_DIR}/pdal_types.hpp"
   "${PDAL_HEADERS_DIR}/BufferReader.hpp"
-  "${PDAL_HEADERS_DIR}/Charbuf.hpp"
   "${PDAL_HEADERS_DIR}/Compression.hpp"
   "${PDAL_HEADERS_DIR}/Dimension.hpp"
   "${PDAL_HEADERS_DIR}/Filter.hpp"
   "${PDAL_HEADERS_DIR}/GDALUtils.hpp"
   "${PDAL_HEADERS_DIR}/GlobalEnvironment.hpp"
   "${PDAL_HEADERS_DIR}/gitsha.h"
-  "${PDAL_HEADERS_DIR}/IStream.hpp"
   "${PDAL_HEADERS_DIR}/KDIndex.hpp"
   "${PDAL_HEADERS_DIR}/KernelFactory.hpp"
   "${PDAL_HEADERS_DIR}/Kernel.hpp"
@@ -54,7 +52,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/Log.hpp"
   "${PDAL_HEADERS_DIR}/Metadata.hpp"
   "${PDAL_HEADERS_DIR}/Options.hpp"
-  "${PDAL_HEADERS_DIR}/OStream.hpp"
   "${PDAL_HEADERS_DIR}/PipelineManager.hpp"
   "${PDAL_HEADERS_DIR}/PipelineReader.hpp"
   "${PDAL_HEADERS_DIR}/PipelineWriter.hpp"
@@ -67,7 +64,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/SpatialReference.hpp"
   "${PDAL_HEADERS_DIR}/Stage.hpp"
   "${PDAL_HEADERS_DIR}/StageFactory.hpp"
-  "${PDAL_HEADERS_DIR}/StageRunner.hpp"
   "${PDAL_HEADERS_DIR}/StreamFactory.hpp"
   "${PDAL_HEADERS_DIR}/UserCallback.hpp"
   "${PDAL_HEADERS_DIR}/Utils.hpp"
@@ -77,7 +73,6 @@ set(PDAL_BASE_HPP
 )
 
 set(PDAL_BASE_CPP
-  Charbuf.cpp
   DynamicLibrary.cpp
   Filter.cpp
   gitsha.cpp

@@ -34,8 +34,8 @@
 
 #include "LasUtils.hpp"
 
-#include <pdal/Extractor.hpp>
-#include <pdal/Inserter.hpp>
+#include <pdal/util/Extractor.hpp>
+#include <pdal/util/Inserter.hpp>
 #include <pdal/Utils.hpp>
 
 #include <string>

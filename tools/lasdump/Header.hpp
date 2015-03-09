@@ -39,7 +39,7 @@
 #include <boost/uuid/uuid_generators.hpp>
 
 #include <pdal/util/Bounds.hpp>
-#include <pdal/IStream.hpp>
+#include <pdal/util/IStream.hpp>
 
 namespace pdal
 {

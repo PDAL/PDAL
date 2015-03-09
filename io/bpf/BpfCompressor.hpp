@@ -37,8 +37,8 @@
 #include <ostream>
 #include <zlib.h>
 
-#include <pdal/Charbuf.hpp>
-#include <pdal/OStream.hpp>
+#include <pdal/util/Charbuf.hpp>
+#include <pdal/util/OStream.hpp>
 
 namespace pdal
 {

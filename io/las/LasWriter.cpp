@@ -37,9 +37,9 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <iostream>
 
-#include <pdal/Inserter.hpp>
-#include <pdal/OStream.hpp>
 #include <pdal/PointBuffer.hpp>
+#include <pdal/util/Inserter.hpp>
+#include <pdal/util/OStream.hpp>
 #include <pdal/Utils.hpp>
 
 #include "GeotiffSupport.hpp"

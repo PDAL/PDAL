@@ -239,7 +239,6 @@ GEOSGeometry* createGEOSPoint(GEOSContextHandle_t ctx, double x, double y, doubl
 void AttributeFilter::UpdateGEOSBuffer(PointBuffer& buffer, AttributeInfo& info)
 {
     QuadIndex idx(buffer);
-    idx.build();
 
     if (!info.lyr) // wake up the layer
     {
