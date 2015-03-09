@@ -16,27 +16,27 @@ public:
         s->l_initialize(ctx);
         s->initialize();
     }
-    static void processOptions(std::shared_ptr<Stage> s, const Options& options)
-        { s->processOptions(options); }
-    static void addDimensions(std::shared_ptr<Stage> s, PointContext ctx)
-        { s->addDimensions(ctx); }
-    static void ready(std::shared_ptr<Stage> s, PointContext ctx)
-        { s->ready(ctx); }
-    static void done(std::shared_ptr<Stage> s, PointContext ctx)
+    static void processOptions(Stage& s, const Options& options)
+        { s.processOptions(options); }
+    static void addDimensions(Stage& s, PointContext ctx)
+        { s.addDimensions(ctx); }
+    static void ready(Stage& s, PointContext ctx)
+        { s.ready(ctx); }
+    static void done(Stage& s, PointContext ctx)
     {
-        s->l_done(ctx);
-        s->done(ctx);
+        s.l_done(ctx);
+        s.done(ctx);
     }
-    static PointBufferSet run(std::shared_ptr<Stage> s, PointBufferPtr buffer)
-        { return s->run(buffer); }
+    static PointBufferSet run(Stage& s, PointBufferPtr buffer)
+        { return s.run(buffer); }
 };
 
 // Provide access to private members of Filter.
 class FilterTester : public StageTester
 {
 public:
-    static void filter(std::shared_ptr<Filter> f, PointBuffer& buffer)
-        { f->filter(buffer); }
+    static void filter(Filter& f, PointBuffer& buffer)
+        { f.filter(buffer); }
 };
 
 //
@@ -44,8 +44,8 @@ public:
 class WriterTester : public StageTester
 {
 public:
-    static void write(std::shared_ptr<Writer> w, PointBuffer& buffer)
-        { w->write(buffer); }
+    static void write(Writer& w, PointBuffer& buffer)
+        { w.write(buffer); }
 };
 
 } //namespace pdal

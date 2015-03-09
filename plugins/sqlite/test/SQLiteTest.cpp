@@ -39,6 +39,7 @@
 
 #include <pdal/PointBuffer.hpp>
 #include <pdal/pdal_defines.h>
+#include <las/LasReader.hpp>
 
 #include "Support.hpp"
 
@@ -79,8 +80,6 @@ void testReadWrite(bool compression, bool scaling)
     std::string tempFilename =
         getSQLITEOptions().getValueOrThrow<std::string>("connection");
 
-    StageFactory f;
-
     Options sqliteOptions = getSQLITEOptions();
     if (scaling)
     {
@@ -88,18 +87,6 @@ void testReadWrite(bool compression, bool scaling)
         sqliteOptions.add("scale_y", 0.01);
     }
     sqliteOptions.add("compression", compression, "");
-
-    StageFactory::ReaderCreator *lasRc = f.getReaderCreator("readers.las");
-    StageFactory::WriterCreator* sqliteWc =
-        f.getWriterCreator("writers.sqlite");
-    StageFactory::ReaderCreator* sqliteRc =
-        f.getReaderCreator("readers.sqlite");
-
-    EXPECT_TRUE(lasRc);
-    EXPECT_TRUE(sqliteWc);
-    EXPECT_TRUE(sqliteRc);
-    if (!lasRc || !sqliteWc || !sqliteRc)
-        return;
 
     // remove file from earlier run, if needed
     std::string temp_filename =
@@ -109,19 +96,20 @@ void testReadWrite(bool compression, bool scaling)
     lasReadOpts.add("filename", Support::datapath("las/1.2-with-color.las"));
     lasReadOpts.add("count", 11);
 
-    std::unique_ptr<Stage> lasReader(lasRc());
-    lasReader->setOptions(lasReadOpts);
+    LasReader reader;
+    reader.setOptions(lasReadOpts);
 
-    std::unique_ptr<Stage> sqliteWriter(sqliteWc());
+    StageFactory f;
+    std::unique_ptr<Stage> sqliteWriter(f.createStage("writers.sqlite"));
     sqliteWriter->setOptions(sqliteOptions);
-    sqliteWriter->setInput(lasReader.get());
+    sqliteWriter->setInput(reader);
 
     PointContext ctx;
     sqliteWriter->prepare(ctx);
     sqliteWriter->execute(ctx);
 
     // Done - now read back.
-    std::unique_ptr<Stage> sqliteReader(sqliteRc());
+    std::unique_ptr<Stage> sqliteReader(f.createStage("readers.sqlite"));
     sqliteReader->setOptions(sqliteOptions);
 
     PointContext ctx2;

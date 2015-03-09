@@ -40,6 +40,7 @@
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
 #include <pdal/StageFactory.hpp>
+#include <las/LasWriter.hpp>
 
 #include "Support.hpp"
 
@@ -162,15 +163,14 @@ TEST(NitfReaderTest, optionSrs)
     Options lasOpts;
     lasOpts.add("filename", "/dev/null");
 
-    std::shared_ptr<Stage> lasWriter(f.createStage("writers.las"));
-    EXPECT_TRUE(lasWriter.get());
-    lasWriter->setInput(nitfReader);
-    lasWriter->setOptions(lasOpts);;
+    LasWriter writer;
+    writer.setInput(*nitfReader);
+    writer.setOptions(lasOpts);;
 
-    lasWriter->prepare(ctx);
-    PointBufferSet pbSet = lasWriter->execute(ctx);
+    writer.prepare(ctx);
+    PointBufferSet pbSet = writer.execute(ctx);
 
     EXPECT_EQ(sr, nitfReader->getSpatialReference().getWKT());
-    EXPECT_EQ("", lasWriter->getSpatialReference().getWKT());
+    EXPECT_EQ("", writer.getSpatialReference().getWKT());
     EXPECT_EQ(sr, ctx.spatialRef().getWKT());
 }

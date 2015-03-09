@@ -43,11 +43,10 @@
 namespace pdal
 {
 
-
 class PDAL_DLL CpdKernel : public Kernel
 {
 public:
-    static void * create();
+    static void *create();
     static int32_t destroy(void *);
     std::string getName() const;
     int execute();
@@ -56,11 +55,11 @@ private:
     CpdKernel() {};
     void addSwitches();
     void validateSwitches();
-    PointBufferPtr readFile(const std::string& filename, PointContext& ctx, arma::mat& mat);
-    cpd::Registration::ResultPtr chipThenRegister(const cpd::NonrigidLowrank& reg,
-                                    const arma::mat& X, const arma::mat& Y,
-                                    const PointBufferPtr& bufX,
-                                    const PointContext& ctx);
+    PointBufferPtr readFile(const std::string& filename, PointContext& ctx,
+        arma::mat& mat);
+    cpd::Registration::ResultPtr chipThenRegister(
+        const cpd::NonrigidLowrank& reg, const arma::mat& X, const arma::mat& Y,
+        const PointBufferPtr& bufX, const PointContext& ctx);
 
     std::string m_filex;
     std::string m_filey;
@@ -80,8 +79,6 @@ private:
     int m_chip_capacity;
     float m_chip_buffer;
     float m_sigma2;
-
 };
 
-
-}
+} // namespace pdal

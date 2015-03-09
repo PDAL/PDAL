@@ -57,7 +57,8 @@ class DynamicLibrary;
  */
 class PluginManager
 {
-    typedef std::map<std::string, std::shared_ptr<DynamicLibrary> > DynamicLibraryMap;
+    typedef std::shared_ptr<DynamicLibrary> DynLibPtr;
+    typedef std::map<std::string, std::shared_ptr<DynamicLibrary>> DynamicLibraryMap;
     typedef std::vector<PF_ExitFunc> ExitFuncVec;
     typedef std::vector<PF_RegisterParams> RegistrationVec;
 
@@ -74,24 +75,24 @@ public:
     void * createObject(const std::string & objectType);
 
     int32_t shutdown();
-    static int32_t registerObject(const std::string & objectType, const PF_RegisterParams * params);
-    const RegistrationMap & getRegistrationMap();
+    static int32_t registerObject(const std::string& objectType,
+        const PF_RegisterParams* params);
+    const RegistrationMap& getRegistrationMap();
 
 private:
     ~PluginManager();
     PluginManager();
     PluginManager(const PluginManager &);
 
-    DynamicLibrary * loadLibrary(const std::string & path, std::string & errorString);
+    DynamicLibrary *loadLibrary(const std::string& path,
+        std::string& errorString);
 
-    bool inInitializePlugin_;
+    bool m_inInitializePlugin;
     PF_PluginAPI_Version m_version;
-    DynamicLibraryMap dynamicLibraryMap_;
-    ExitFuncVec exitFuncVec_;
-
-    RegistrationMap tempExactMatchMap_;
-
-    RegistrationMap exactMatchMap_;
+    DynamicLibraryMap m_dynamicLibraryMap;
+    ExitFuncVec m_exitFuncVec;
+    RegistrationMap m_tempExactMatchMap;
+    RegistrationMap m_exactMatchMap;
 };
 
 } // namespace pdal

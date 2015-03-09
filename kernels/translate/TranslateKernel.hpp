@@ -46,7 +46,7 @@ namespace pdal
 class PDAL_DLL TranslateKernel : public Kernel
 {
 public:
-    static void * create();
+    static void *create();
     static int32_t destroy(void *);
     std::string getName() const;
     int execute();
@@ -56,9 +56,9 @@ private:
     void addSwitches();
     void validateSwitches();
 
-    std::shared_ptr<Stage> makeReader(Options readerOptions);
-    std::shared_ptr<Stage> makeTranslate(Options translateOptions, std::shared_ptr<Stage> reader);
-    void forwardMetadata(Options & options, Metadata metadata);
+    Stage& makeReader(Options readerOptions);
+    Stage& makeTranslate(Options translateOptions, Stage& parent);
+    void forwardMetadata(Options& options, Metadata metadata);
 
     std::string m_inputFile;
     std::string m_outputFile;
@@ -73,7 +73,6 @@ private:
     double m_decimation_leaf_size;
     std::string m_decimation_method;
     point_count_t m_decimation_limit;
-
 };
 
 } // namespace pdal

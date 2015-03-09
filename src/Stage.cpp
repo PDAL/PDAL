@@ -62,7 +62,7 @@ void Stage::prepare(PointContextRef ctx)
 {
     for (size_t i = 0; i < m_inputs.size(); ++i)
     {
-        std::shared_ptr<Stage> prev(m_inputs[i]);
+        Stage *prev = m_inputs[i];
         prev->prepare(ctx);
     }
     l_processOptions(m_options);
@@ -85,7 +85,7 @@ PointBufferSet Stage::execute(PointContextRef ctx)
     {
         for (size_t i = 0; i < m_inputs.size(); ++i)
         {
-            std::shared_ptr<Stage> prev(m_inputs[i]);
+            Stage *prev = m_inputs[i];
             PointBufferSet temp = prev->execute(ctx);
             buffers.insert(temp.begin(), temp.end());
         }
@@ -97,7 +97,7 @@ PointBufferSet Stage::execute(PointContextRef ctx)
     ready(ctx);
     for (auto const& it : buffers)
     {
-        StageRunnerPtr runner(new StageRunner(shared_from_this(), it));
+        StageRunnerPtr runner(new StageRunner(this, it));
         runners.push_back(runner);
         runner->run();
     }
@@ -205,11 +205,12 @@ void Stage::setSpatialReference(MetadataNode& m,
     }
 }
 
-std::vector<std::shared_ptr<Stage> > Stage::findStage(std::string name)
+std::vector<Stage *> Stage::findStage(std::string name)
 {
-    std::vector<std::shared_ptr<Stage> > output;
+    std::vector<Stage *> output;
+
     if (boost::iequals(getName(), name))
-        output.push_back(std::shared_ptr<Stage> (this));
+        output.push_back(this);
 
     for (auto const& stage : m_inputs)
     {

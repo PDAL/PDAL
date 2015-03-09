@@ -41,55 +41,39 @@
 namespace pdal
 {
 
-PipelineManager::~PipelineManager()
+Stage& PipelineManager::addReader(const std::string& type)
 {
-    while (m_stages.size())
+    Stage *r = m_factory.createStage(type);
+    if (!r)
     {
-        std::shared_ptr<Stage> stage = m_stages.back();
-        m_stages.pop_back();
+        std::ostringstream ss;
+        ss << "Couldn't create stage for type '" << type << "'.";
+        throw pdal_error(ss.str());
     }
+    m_stages.push_back(std::unique_ptr<Stage>(r));
+    return *r;
 }
 
 
-std::shared_ptr<Stage> PipelineManager::addReader(const std::string& type)
+Stage& PipelineManager::addFilter(const std::string& type)
 {
-    std::shared_ptr<Stage> r(m_factory.createStage(type));
-    m_stages.push_back(r);
-    return r;
+    Stage *stage = m_factory.createStage(type);
+    m_stages.push_back(std::unique_ptr<Stage>(stage));
+    return *stage;
 }
 
 
-std::shared_ptr<Stage> PipelineManager::addFilter(const std::string& type,
-    const std::vector<std::shared_ptr<Stage> >& prevStages)
+Stage& PipelineManager::addWriter(const std::string& type)
 {
-    std::shared_ptr<Stage> stage(m_factory.createStage(type));
-    stage->setInput(prevStages);
-    m_stages.push_back(stage);
-    return stage;
-}
-
-
-std::shared_ptr<Stage> PipelineManager::addFilter(const std::string& type, std::shared_ptr<Stage> prevStage)
-{
-    std::shared_ptr<Stage> stage(m_factory.createStage(type));
-    stage->setInput(prevStage);
-    m_stages.push_back(stage);
-    return stage;
-}
-
-
-std::shared_ptr<Stage> PipelineManager::addWriter(const std::string& type, std::shared_ptr<Stage> prevStage)
-{
-    std::shared_ptr<Stage> writer(m_factory.createStage(type));
-    writer->setInput(prevStage);
-    m_stages.push_back(writer);
-    return writer;
+    Stage *writer = m_factory.createStage(type);
+    m_stages.push_back(std::unique_ptr<Stage>(writer));
+    return *writer;
 }
 
 
 void PipelineManager::prepare() const
 {
-    std::shared_ptr<Stage> s = getStage();
+    Stage *s = getStage();
     if (s)
        s->prepare(m_context);
 }
@@ -99,7 +83,7 @@ point_count_t PipelineManager::execute()
 {
     prepare();
 
-    std::shared_ptr<Stage> s = getStage();
+    Stage *s = getStage();
     if (!s)
         return 0;
     m_pbSet = s->execute(m_context);
@@ -118,8 +102,10 @@ MetadataNode PipelineManager::getMetadata() const
     MetadataNode output("stages");
 
     for (auto si = m_stages.begin(); si != m_stages.end(); ++si)
-        output.add((*si)->getMetadata());
-
+    {
+        Stage *s = si->get();
+        output.add(s->getMetadata());
+    }
     return output;
 }
 

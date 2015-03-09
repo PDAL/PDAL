@@ -286,10 +286,10 @@ int DeltaKernel::execute()
         sourceOptions.add<bool>("debug", isDebug());
         sourceOptions.add<uint32_t>("verbose", getVerboseLevel());
     }
-    std::shared_ptr<Stage> source(KernelSupport::makeReader(m_sourceFile));
-    source->setOptions(sourceOptions);
-    source->prepare(sourceCtx);
-    PointBufferSet pbSet = source->execute(sourceCtx);
+    Stage& source = makeReader(m_sourceFile);
+    source.setOptions(sourceOptions);
+    source.prepare(sourceCtx);
+    PointBufferSet pbSet = source.execute(sourceCtx);
     assert(pbSet.size() == 1);
     PointBufferPtr sourceBuf = *pbSet.begin();
     point_count_t sourceCount = sourceBuf->size();
@@ -297,15 +297,15 @@ int DeltaKernel::execute()
     PointContext candidateCtx;
     Options candidateOptions;
     {
-        candidateOptions.add<std::string>("filename", m_candidateFile);
-        candidateOptions.add<bool>("debug", isDebug());
-        candidateOptions.add<uint32_t>("verbose", getVerboseLevel());
+        candidateOptions.add("filename", m_candidateFile);
+        candidateOptions.add("debug", isDebug());
+        candidateOptions.add("verbose", getVerboseLevel());
     }
 
-    std::shared_ptr<Stage> candidate(KernelSupport::makeReader(m_candidateFile));
-    candidate->setOptions(candidateOptions);
-    candidate->prepare(candidateCtx);
-    pbSet = candidate->execute(candidateCtx);
+    Stage& candidate = makeReader(m_candidateFile);
+    candidate.setOptions(candidateOptions);
+    candidate.prepare(candidateCtx);
+    pbSet = candidate.execute(candidateCtx);
     assert(pbSet.size() == 1);
     PointBufferPtr candidateBuf = *pbSet.begin();
     point_count_t candidateCount = candidateBuf->size();

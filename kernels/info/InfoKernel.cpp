@@ -358,7 +358,7 @@ int InfoKernel::execute()
     m_manager = std::unique_ptr<PipelineManager>(
         KernelSupport::makePipeline(filename));
     m_reader = m_manager->getStage();
-    std::shared_ptr<Stage> stage = m_reader;
+    Stage *stage = m_reader;
 
     if (m_Dimensions.size())
         m_options.add("dimensions", m_Dimensions, "List of dimensions");
@@ -368,14 +368,16 @@ int InfoKernel::execute()
 
     if (m_showStats || m_showAll)
     {
-        m_statsStage = m_manager->addFilter("filters.stats", stage);
+        m_statsStage = &(m_manager->addFilter("filters.stats"));
         m_statsStage->setOptions(options);
+        m_statsStage->setInput(*stage);
         stage = m_statsStage;
     }
     if (m_boundary || m_showAll)
     {
-        m_hexbinStage = m_manager->addFilter("filters.hexbin", stage);
-        stage->setOptions(options);
+        m_hexbinStage = &(m_manager->addFilter("filters.hexbin"));
+        m_hexbinStage->setOptions(options);
+        m_hexbinStage->setInput(*stage);
         stage = m_hexbinStage;
     }
 

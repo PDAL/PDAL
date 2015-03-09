@@ -38,9 +38,18 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
+#include <FerryFilter.hpp>
+#include <LasReader.hpp>
 #include "Support.hpp"
 
 using namespace pdal;
+
+TEST(FerryFilterTest, create)
+{
+    StageFactory f;
+    std::unique_ptr<Stage> filter(f.createStage("filters.ferry"));
+    EXPECT_TRUE(filter.get());
+}
 
 TEST(FerryFilterTest, test_ferry_copy)
 {
@@ -48,7 +57,6 @@ TEST(FerryFilterTest, test_ferry_copy)
     PipelineReader specReader(mgr);
     specReader.readPipeline(Support::configuredpath("filters/ferry.xml"));
 
-    std::shared_ptr<Stage> stage(mgr.getStage());
     mgr.execute();
     PointContext ctx = mgr.context();
 
@@ -77,10 +85,8 @@ TEST(FerryFilterTest, test_ferry_invalid)
 {
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
-    StageFactory f;
-    std::shared_ptr<Stage> reader(f.createStage("readers.las"));
-    EXPECT_TRUE(reader.get());
-    reader->setOptions(ops1);
+    LasReader reader;
+    reader.setOptions(ops1);
 
     Options options;
 
@@ -91,12 +97,12 @@ TEST(FerryFilterTest, test_ferry_invalid)
     x.setOptions(xO);
     options.add(x);
 
-    std::shared_ptr<Stage> ferry(f.createStage("filters.ferry"));
-    EXPECT_TRUE(ferry.get());
-    ferry->setInput(reader);
-    ferry->setOptions(options);
+    FerryFilter ferry;
+    ferry.setInput(reader);
+    ferry.setOptions(options);
 
     PointContext ctx;
 
-    EXPECT_THROW(ferry->prepare(ctx), pdal_error );
+    EXPECT_THROW(ferry.prepare(ctx), pdal_error );
 }
+

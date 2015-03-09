@@ -99,7 +99,7 @@ int PipelineKernel::execute()
     {
         std::string name = pi.first;
         Options options = pi.second;
-        std::vector<std::shared_ptr<Stage> > stages = manager.getStage()->findStage(name);
+        std::vector<Stage *> stages = manager.getStage()->findStage(name);
         for (const auto& s : stages)
         {
             Options opts = s->getOptions();

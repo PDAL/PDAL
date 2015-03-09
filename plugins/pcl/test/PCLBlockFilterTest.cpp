@@ -48,7 +48,7 @@ using namespace pdal;
 TEST(PCLBlockFilterTest, PCLBlockFilterTest_example_passthrough_xml)
 {
     StageFactory f;
-    std::shared_ptr<Stage> filter(f.createStage("filters.pclblock"));
+    std::unique_ptr<Stage> filter(f.createStage("filters.pclblock"));
     EXPECT_TRUE(filter.get());
 
     PipelineManager pipeline;
@@ -84,7 +84,7 @@ static void test_filter(const std::string& jsonFile,
     options.add(debug);
     options.add(verbose);
 
-    std::shared_ptr<Stage> reader(f.createStage("readers.las"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.las"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(options);
 
@@ -95,7 +95,7 @@ static void test_filter(const std::string& jsonFile,
     std::shared_ptr<Stage> pcl_block(f.createStage("filters.pclblock"));
     EXPECT_TRUE(pcl_block.get());
     pcl_block->setOptions(filter_options);
-    pcl_block->setInput(reader);
+    pcl_block->setInput(*reader);
 
     PointContext ctx;
     pcl_block->prepare(ctx);

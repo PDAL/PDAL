@@ -35,8 +35,9 @@
 #include "gtest/gtest.h"
 
 #include <pdal/Options.hpp>
-#include <pdal/StageFactory.hpp>
 #include <pdal/PDALUtils.hpp>
+#include <CropFilter.hpp>
+#include <FauxReader.hpp>
 
 #include <boost/property_tree/xml_parser.hpp>
 
@@ -50,15 +51,13 @@ TEST(OptionsTest, test_static_options)
 {
     Options ops;
 
-    StageFactory f;
-    std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
-    EXPECT_TRUE(reader.get());
-    reader->setOptions(ops);
-    std::shared_ptr<Stage> crop(f.createStage("filters.crop"));
-    EXPECT_TRUE(crop.get());
-    crop->setOptions(ops);
-    crop->setInput(reader);
-    auto opts = crop->getDefaultOptions();
+    FauxReader reader;
+    reader.setOptions(ops);
+
+    CropFilter crop;
+    crop.setOptions(ops);
+    crop.setInput(reader);
+    auto opts = crop.getDefaultOptions();
     EXPECT_EQ(opts.getOptions().size(), 3u);
     EXPECT_TRUE(opts.hasOption("bounds"));
     EXPECT_TRUE(opts.hasOption("inside"));

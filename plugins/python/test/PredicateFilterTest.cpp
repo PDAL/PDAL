@@ -38,6 +38,7 @@
 #include <pdal/PipelineReader.hpp>
 #include <pdal/StageFactory.hpp>
 #include <stats/StatsFilter.hpp>
+#include <faux/FauxReader.hpp>
 
 #include "StageTester.hpp"
 #include "Support.hpp"
@@ -54,8 +55,8 @@ TEST(PredicateFilterTest, PredicateFilterTest_test1)
     readerOps.add("num_points", 1000);
     readerOps.add("mode", "ramp");
 
-    std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
-    reader->setOptions(readerOps);
+    FauxReader reader;
+    reader.setOptions(readerOps);
 
     // keep all points where x less than 1.0
     const Option source("source",
@@ -76,14 +77,14 @@ TEST(PredicateFilterTest, PredicateFilterTest_test1)
     opts.add(module);
     opts.add(function);
 
-    std::shared_ptr<Stage> filter(f.createStage("filters.predicate"));
+    std::unique_ptr<Stage> filter(f.createStage("filters.predicate"));
     filter->setOptions(opts);
     filter->setInput(reader);
 
     Options statOpts;
-    std::shared_ptr<StatsFilter> stats(new StatsFilter);
+    std::unique_ptr<StatsFilter> stats(new StatsFilter);
     stats->setOptions(statOpts);
-    stats->setInput(filter);
+    stats->setInput(*filter);
 
     PointContext ctx;
 
@@ -114,8 +115,8 @@ TEST(PredicateFilterTest, PredicateFilterTest_test2)
     readerOps.add("num_points", 1000);
     readerOps.add("mode", "ramp");
 
-    std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
-    reader->setOptions(readerOps);
+    FauxReader reader;
+    reader.setOptions(readerOps);
 
     Option source("source",
         // "Y > 1.0"
@@ -134,14 +135,14 @@ TEST(PredicateFilterTest, PredicateFilterTest_test2)
     opts.add(module);
     opts.add(function);
 
-    std::shared_ptr<Stage> filter(f.createStage("filters.predicate"));
+    std::unique_ptr<Stage> filter(f.createStage("filters.predicate"));
     filter->setOptions(opts);
     filter->setInput(reader);
 
     Options statOpts;
-    std::shared_ptr<StatsFilter> stats(new StatsFilter);
+    std::unique_ptr<StatsFilter> stats(new StatsFilter);
     stats->setOptions(statOpts);
-    stats->setInput(filter);
+    stats->setInput(*filter);
 
     PointContext ctx;
 
@@ -172,8 +173,8 @@ TEST(PredicateFilterTest, PredicateFilterTest_test3)
     readerOpts.add("num_points", 1000);
     readerOpts.add("mode", "ramp");
 
-    std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
-    reader->setOptions(readerOpts);
+    FauxReader reader;
+    reader.setOptions(readerOpts);
 
     // keep all points where x less than 1.0
     const Option source1("source",
@@ -194,7 +195,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test3)
     opts1.add(module1);
     opts1.add(function1);
 
-    std::shared_ptr<Stage> filter1(f.createStage("filters.predicate"));
+    std::unique_ptr<Stage> filter1(f.createStage("filters.predicate"));
     filter1->setOptions(opts1);
     filter1->setInput(reader);
 
@@ -217,14 +218,14 @@ TEST(PredicateFilterTest, PredicateFilterTest_test3)
     opts2.add(module2);
     opts2.add(function2);
 
-    std::shared_ptr<Stage> filter2(f.createStage("filters.predicate"));
+    std::unique_ptr<Stage> filter2(f.createStage("filters.predicate"));
     filter2->setOptions(opts2);
-    filter2->setInput(filter1);
+    filter2->setInput(*filter1);
 
     Options statOpts;
-    std::shared_ptr<StatsFilter> stats(new StatsFilter);
+    std::unique_ptr<StatsFilter> stats(new StatsFilter);
     stats->setOptions(statOpts);
-    stats->setInput(filter2);
+    stats->setInput(*filter2);
 
     PointContext ctx;
     stats->prepare(ctx);
@@ -253,8 +254,8 @@ TEST(PredicateFilterTest, PredicateFilterTest_test4)
     readerOpts.add("num_points", 1000);
     readerOpts.add("mode", "ramp");
 
-    std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
-    reader->setOptions(readerOpts);
+    FauxReader reader;
+    reader.setOptions(readerOpts);
 
     const Option source("source",
         // "Y > 0.5"
@@ -273,7 +274,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test4)
     opts.add(module);
     opts.add(function);
 
-    std::shared_ptr<Stage> filter(f.createStage("filters.predicate"));
+    std::unique_ptr<Stage> filter(f.createStage("filters.predicate"));
     filter->setOptions(opts);
     filter->setInput(reader);
 
@@ -289,9 +290,9 @@ TEST(PredicateFilterTest, PredicateFilterTest_test4)
     buf = *pbSet.begin();
     EXPECT_EQ(buf->size(), 1000u);
 
-    StageTester::ready(filter, ctx);
-    pbSet = StageTester::run(filter, buf);
-    StageTester::done(filter, ctx);
+    StageTester::ready(*filter, ctx);
+    pbSet = StageTester::run(*filter, buf);
+    StageTester::done(*filter, ctx);
     EXPECT_EQ(pbSet.size(), 1u);
     buf = *pbSet.begin();
     EXPECT_EQ(buf->size(), 750u);
@@ -308,8 +309,8 @@ TEST(PredicateFilterTest, PredicateFilterTest_test5)
     readerOpts.add("num_points", 1000);
     readerOpts.add("mode", "ramp");
 
-    std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
-    reader->setOptions(readerOpts);
+    FauxReader reader;
+    reader.setOptions(readerOpts);
 
     const Option source("source",
         // "Y > 0.5"
@@ -328,7 +329,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test5)
     opts.add(module);
     opts.add(function);
 
-    std::shared_ptr<Stage> filter(f.createStage("filters.predicate"));
+    std::unique_ptr<Stage> filter(f.createStage("filters.predicate"));
     filter->setOptions(opts);
     filter->setInput(reader);
 

@@ -9,62 +9,67 @@
 
 struct Point
 {
-  double x;
-  double y;
-  double z;
+    double x;
+    double y;
+    double z;
 };
 
 std::vector<Point> getMyData()
 {
-  std::vector<Point> output;
-  Point p;
+    std::vector<Point> output;
+    Point p;
 
-  for (int i = 0; i < 1000; ++i)
-  {
-    p.x = -93.0 + i*0.001;
-    p.y = 42.0 + i*0.001;
-    p.z = 106.0 + i;
-    output.push_back(p);
-  }
-  return output;
+    for (int i = 0; i < 1000; ++i)
+    {
+        p.x = -93.0 + i*0.001;
+        p.y = 42.0 + i*0.001;
+        p.z = 106.0 + i;
+        output.push_back(p);
+    }
+    return output;
 }
+
 
 void fillBuffer(pdal::PointBufferPtr buffer, std::vector<Point> const& data)
 {
-  for (int i = 0; i < data.size(); ++i)
-  {
-    Point const& pt = data[i];
-    buffer->setField<double>(pdal::Dimension::Id::X, i, pt.x);
-    buffer->setField<double>(pdal::Dimension::Id::Y, i, pt.y);
-    buffer->setField<double>(pdal::Dimension::Id::Z, i, pt.z);
-  }
+    for (int i = 0; i < data.size(); ++i)
+    {
+        Point const& pt = data[i];
+        buffer->setField<double>(pdal::Dimension::Id::X, i, pt.x);
+        buffer->setField<double>(pdal::Dimension::Id::Y, i, pt.y);
+        buffer->setField<double>(pdal::Dimension::Id::Z, i, pt.z);
+    }
 }
+
 
 int main(int argc, char* argv[])
 {
-  pdal::Options options;
-  options.add("filename", "myfile.las");
-  
-  pdal::PointContextRef ctx;
-  ctx.registerDim(pdal::Dimension::Id::X);
-  ctx.registerDim(pdal::Dimension::Id::Y);
-  ctx.registerDim(pdal::Dimension::Id::Z);
+    using namespace pdal;
+      
+    Options options;
+    options.add("filename", "myfile.las");
 
-  {
-    pdal::PointBufferPtr buffer = pdal::PointBufferPtr(new pdal::PointBuffer(ctx));
+    PointContext ctx;
+    ctx.registerDim(Dimension::Id::X);
+    ctx.registerDim(Dimension::Id::Y);
+    ctx.registerDim(Dimension::Id::Z);
 
-    std::vector<Point> data = getMyData();
+    {
+        PointBufferPtr buffer = PointBufferPtr(new pdal::PointBuffer(ctx));
 
-    fillBuffer(buffer, data);
+        std::vector<Point> data = getMyData();
+        fillBuffer(buffer, data);
 
-    pdal::BufferReader reader;
-    reader.addBuffer(buffer);
+        BufferReader reader;
+        reader.addBuffer(buffer);
 
-    pdal::StageFactory f;
-    std::unique_ptr<Stage> writer(f.createStage("writers.las"));
-    writer->setInput(&reader);
-    writer->setOptions(options);
-    writer->prepare(ctx);
-    writer->execute(ctx);
-  }
+        StageFactory f;
+        
+        std::unique_ptr<Stage> writer(f.createStage("writers.las"));
+
+        writer->setInput(&reader);
+        writer->setOptions(options);
+        writer->prepare(ctx);
+        writer->execute(ctx);
+    }
 }

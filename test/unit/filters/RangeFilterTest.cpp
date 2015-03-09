@@ -36,7 +36,8 @@
 
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
-#include "RangeFilter.hpp"
+#include <FauxReader.hpp>
+#include <RangeFilter.hpp>
 
 using namespace pdal;
 
@@ -49,11 +50,10 @@ TEST(RangeFilterTest, createStage)
 
 TEST(RangeFilterTest, noDimension)
 {
-    StageFactory f;
-    std::shared_ptr<Stage> filter(f.createStage("filters.range"));
+    RangeFilter filter;
 
     PointContext ctx;
-    EXPECT_THROW(filter->prepare(ctx), pdal_error);
+    EXPECT_THROW(filter.prepare(ctx), pdal_error);
 }
 
 TEST(RangeFilterTest, noRange)
@@ -61,12 +61,11 @@ TEST(RangeFilterTest, noRange)
     Options rangeOps;
     rangeOps.add("dimension", "Z");
     
-    StageFactory f;
-    std::shared_ptr<Stage> filter(f.createStage("filters.range"));
-    filter->setOptions(rangeOps);
+    RangeFilter filter;
+    filter.setOptions(rangeOps);
 
     PointContext ctx;
-    EXPECT_THROW(filter->prepare(ctx), pdal_error);
+    EXPECT_THROW(filter.prepare(ctx), pdal_error);
 } 
 
 TEST(RangeFilterTest, singleDimension)
@@ -78,9 +77,8 @@ TEST(RangeFilterTest, singleDimension)
     ops.add("mode", "ramp");
     ops.add("num_points", 10);
 
-    StageFactory f;
-    std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
-    reader->setOptions(ops);
+    FauxReader reader;
+    reader.setOptions(ops);
 
     Options range;
     range.add("min", 4);
@@ -92,13 +90,13 @@ TEST(RangeFilterTest, singleDimension)
     Options rangeOps;
     rangeOps.add(dim);
     
-    std::shared_ptr<Stage> filter(f.createStage("filters.range"));
-    filter->setOptions(rangeOps);
-    filter->setInput(reader);
+    RangeFilter filter;
+    filter.setOptions(rangeOps);
+    filter.setInput(reader);
 
     PointContext ctx;
-    filter->prepare(ctx);
-    PointBufferSet pbSet = filter->execute(ctx);
+    filter.prepare(ctx);
+    PointBufferSet pbSet = filter.execute(ctx);
     PointBufferPtr buf = *pbSet.begin();
 
     EXPECT_EQ(1u, pbSet.size());
@@ -117,9 +115,8 @@ TEST(RangeFilterTest, multipleDimensions)
     ops.add("mode", "ramp");
     ops.add("num_points", 10);
 
-    StageFactory f;
-    std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
-    reader->setOptions(ops);
+    FauxReader reader;
+    reader.setOptions(ops);
 
     Options y_range;
     y_range.add("min", 4);
@@ -139,13 +136,13 @@ TEST(RangeFilterTest, multipleDimensions)
     rangeOps.add(y_dim);
     rangeOps.add(z_dim);
     
-    std::shared_ptr<Stage> filter(f.createStage("filters.range"));
-    filter->setOptions(rangeOps);
-    filter->setInput(reader);
+    RangeFilter filter;
+    filter.setOptions(rangeOps);
+    filter.setInput(reader);
 
     PointContext ctx;
-    filter->prepare(ctx);
-    PointBufferSet pbSet = filter->execute(ctx);
+    filter.prepare(ctx);
+    PointBufferSet pbSet = filter.execute(ctx);
     PointBufferPtr buf = *pbSet.begin();
 
     EXPECT_EQ(1u, pbSet.size());
@@ -167,9 +164,8 @@ TEST(RangeFilterTest, onlyMin)
     ops.add("mode", "ramp");
     ops.add("num_points", 10);
 
-    StageFactory f;
-    std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
-    reader->setOptions(ops);
+    FauxReader reader;
+    reader.setOptions(ops);
 
     Options range;
     range.add("min", 6);
@@ -180,13 +176,13 @@ TEST(RangeFilterTest, onlyMin)
     Options rangeOps;
     rangeOps.add(dim);
     
-    std::shared_ptr<Stage> filter(f.createStage("filters.range"));
-    filter->setOptions(rangeOps);
-    filter->setInput(reader);
+    RangeFilter filter;
+    filter.setOptions(rangeOps);
+    filter.setInput(reader);
 
     PointContext ctx;
-    filter->prepare(ctx);
-    PointBufferSet pbSet = filter->execute(ctx);
+    filter.prepare(ctx);
+    PointBufferSet pbSet = filter.execute(ctx);
     PointBufferPtr buf = *pbSet.begin();
 
     EXPECT_EQ(1u, pbSet.size());
@@ -208,8 +204,8 @@ TEST(RangeFilterTest, onlyMax)
     ops.add("num_points", 10);
 
     StageFactory f;
-    std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
-    reader->setOptions(ops);
+    FauxReader reader;
+    reader.setOptions(ops);
 
     Options range;
     range.add("max", 5);
@@ -220,13 +216,13 @@ TEST(RangeFilterTest, onlyMax)
     Options rangeOps;
     rangeOps.add(dim);
     
-    std::shared_ptr<Stage> filter(f.createStage("filters.range"));
-    filter->setOptions(rangeOps);
-    filter->setInput(reader);
+    RangeFilter filter;
+    filter.setOptions(rangeOps);
+    filter.setInput(reader);
 
     PointContext ctx;
-    filter->prepare(ctx);
-    PointBufferSet pbSet = filter->execute(ctx);
+    filter.prepare(ctx);
+    PointBufferSet pbSet = filter.execute(ctx);
     PointBufferPtr buf = *pbSet.begin();
 
     EXPECT_EQ(1u, pbSet.size());
@@ -238,6 +234,7 @@ TEST(RangeFilterTest, onlyMax)
     EXPECT_FLOAT_EQ(5.0, buf->getFieldAs<double>(Dimension::Id::Z, 4));
 }
 
+
 TEST(RangeFilterTest, equals)
 {
     BOX3D srcBounds(0.0, 0.0, 1.0, 0.0, 0.0, 10.0);
@@ -247,9 +244,8 @@ TEST(RangeFilterTest, equals)
     ops.add("mode", "ramp");
     ops.add("num_points", 10);
 
-    StageFactory f;
-    std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
-    reader->setOptions(ops);
+    FauxReader reader;
+    reader.setOptions(ops);
 
     Options range;
     range.add("equals", 5);
@@ -260,13 +256,13 @@ TEST(RangeFilterTest, equals)
     Options rangeOps;
     rangeOps.add(dim);
     
-    std::shared_ptr<Stage> filter(f.createStage("filters.range"));
-    filter->setOptions(rangeOps);
-    filter->setInput(reader);
+    RangeFilter filter;
+    filter.setOptions(rangeOps);
+    filter.setInput(reader);
 
     PointContext ctx;
-    filter->prepare(ctx);
-    PointBufferSet pbSet = filter->execute(ctx);
+    filter.prepare(ctx);
+    PointBufferSet pbSet = filter.execute(ctx);
     PointBufferPtr buf = *pbSet.begin();
 
     EXPECT_EQ(1u, pbSet.size());
@@ -283,9 +279,8 @@ TEST(RangeFilterTest, negativeValues)
     ops.add("mode", "ramp");
     ops.add("num_points", 21);
 
-    StageFactory f;
-    std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
-    reader->setOptions(ops);
+    FauxReader reader;
+    reader.setOptions(ops);
 
     Options range;
     range.add("min", -1);
@@ -297,13 +292,13 @@ TEST(RangeFilterTest, negativeValues)
     Options rangeOps;
     rangeOps.add(dim);
     
-    std::shared_ptr<Stage> filter(f.createStage("filters.range"));
-    filter->setOptions(rangeOps);
-    filter->setInput(reader);
+    RangeFilter filter;
+    filter.setOptions(rangeOps);
+    filter.setInput(reader);
 
     PointContext ctx;
-    filter->prepare(ctx);
-    PointBufferSet pbSet = filter->execute(ctx);
+    filter.prepare(ctx);
+    PointBufferSet pbSet = filter.execute(ctx);
     PointBufferPtr buf = *pbSet.begin();
 
     EXPECT_EQ(1u, pbSet.size());

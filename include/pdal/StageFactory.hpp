@@ -64,8 +64,7 @@ class Options;
 class PDAL_DLL StageFactory
 {
 public:
-    StageFactory(bool no_plugins=true);
-    virtual ~StageFactory() {};
+    StageFactory(bool no_plugins = true);
 
     // infer the driver to use based on filename extension
     // returns "" if no driver found
@@ -79,9 +78,9 @@ public:
     // e.g. output files ending in .laz should be compressed
     static pdal::Options inferWriterOptionsChanges(const std::string& filename);
 
-    static std::shared_ptr<Stage> createStage(const std::string& type);
+    Stage *createStage(const std::string& type);
 
-    std::vector<std::string> getStageNames();
+    StringList getStageNames();
     std::map<std::string, std::string> getStageMap();
 
 private:

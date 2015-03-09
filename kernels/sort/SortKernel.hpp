@@ -46,7 +46,7 @@ namespace pdal
 class PDAL_DLL SortKernel : public Kernel
 {
 public:
-    static void * create();
+    static void *create();
     static int32_t destroy(void *);
     std::string getName() const;
     int execute();
@@ -56,7 +56,7 @@ private:
     void addSwitches();
     void validateSwitches();
 
-    std::shared_ptr<Stage> makeReader(Options readerOptions);
+    Stage& makeReader(Options readerOptions);
 
     std::string m_inputFile;
     std::string m_outputFile;

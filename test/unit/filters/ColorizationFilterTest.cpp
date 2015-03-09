@@ -46,8 +46,8 @@ TEST(ColorizationFilterTest, ColorizationFilterTest_test_1)
 {
     Options ops1;
     ops1.add("filename", Support::datapath("autzen/autzen-point-format-3.las"));
-    std::shared_ptr<LasReader> reader(new LasReader);
-    reader->setOptions(ops1);
+    LasReader reader;
+    reader.setOptions(ops1);
 
     Options options;
 
@@ -84,14 +84,14 @@ TEST(ColorizationFilterTest, ColorizationFilterTest_test_1)
     reader_options.add(blue);
     reader_options.add(datasource);
 
-    std::shared_ptr<ColorizationFilter> filter(new ColorizationFilter);
-    filter->setOptions(reader_options);
-    filter->setInput(reader);
+    ColorizationFilter filter;
+    filter.setOptions(reader_options);
+    filter.setInput(reader);
 
     PointContext ctx;
 
-    filter->prepare(ctx);
-    PointBufferSet pbSet = filter->execute(ctx);
+    filter.prepare(ctx);
+    PointBufferSet pbSet = filter.execute(ctx);
     EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
 

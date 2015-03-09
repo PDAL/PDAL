@@ -47,31 +47,31 @@ namespace { // anonymous
 
 std::string getTestConnBase()
 {
-  std::string s;
-  if ( ! testDbPort.empty() )
-    s += " port='" + testDbPort + "'";
-  if ( ! testDbHost.empty() )
-    s += " host='" + testDbHost + "'";
-  if ( ! testDbUser.empty() )
-    s += " user='" + testDbUser + "'";
-  return s;
+    std::string s;
+    if ( ! testDbPort.empty() )
+        s += " port='" + testDbPort + "'";
+    if ( ! testDbHost.empty() )
+        s += " host='" + testDbHost + "'";
+    if ( ! testDbUser.empty() )
+        s += " user='" + testDbUser + "'";
+    return s;
 }
+
 
 std::string getConnectionString(const std::string& dbname)
 {
-  std::string s = getTestConnBase()
-                + " dbname='" + dbname + "'";
-  return s;
+    return getTestConnBase() + " dbname='" + dbname + "'";
 }
+
 
 std::string getTestDBTempConn()
 {
-  return getConnectionString(testDbTempname);
+    return getConnectionString(testDbTempname);
 }
 
 std::string getMasterDBConn()
 {
-  return getConnectionString(testDbName);
+    return getConnectionString(testDbName);
 }
 
 } // anonymous namespace
@@ -175,7 +175,7 @@ void optionsWrite(const Options& writerOps)
     options.add("filename", file);
     reader->setOptions(options);
     writer->setOptions(writerOps);
-    writer->setInput(reader.get());
+    writer->setInput(*reader);
 
     PointContext ctx;
     writer->prepare(ctx);
@@ -214,7 +214,8 @@ TEST_F(PgpointcloudWriterTest, writeXYZ)
     optionsWrite(ops);
 
     PointContext ctx;
-    std::unique_ptr<Stage> reader(StageFactory().createStage("readers.pgpointcloud"));
+    std::unique_ptr<Stage> reader(
+        StageFactory().createStage("readers.pgpointcloud"));
     reader->setOptions(getDbOptions());
 
     reader->prepare(ctx);
@@ -243,7 +244,7 @@ TEST_F(PgpointcloudWriterTest, writetNoPointcloudExtension)
     options.add(opt_filename);
     reader->setOptions(options);
     writer->setOptions(getDbOptions());
-    writer->setInput(reader.get());
+    writer->setInput(*reader);
 
     PointContext ctx;
     writer->prepare(ctx);

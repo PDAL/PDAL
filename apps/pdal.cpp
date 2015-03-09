@@ -142,8 +142,8 @@ void outputDrivers()
 void outputOptions(std::string const& n)
 {
     StageFactory f(false);
-    std::shared_ptr<Stage> s(f.createStage(n));
 
+    std::unique_ptr<Stage> s(f.createStage(n));
     if (!s)
     {
         std::cerr << "Unable to create stage " << n << "\n";
@@ -158,8 +158,10 @@ void outputOptions(std::string const& n)
         strm << n << std::endl;
         strm << headline << std::endl;
 
-        std::string tablehead("================================ =============== =========================================");
-        std::string headings ("Name                              Default          Description");
+        std::string tablehead("================================ "
+            "=============== =========================================");
+        std::string headings ("Name                              "
+            "Default          Description");
         
         strm << std::endl;
         strm << tablehead << std::endl;
@@ -175,7 +177,8 @@ void outputOptions(std::string const& n)
         for (auto const& opt : options)
         {
             std::string default_value(opt.getValue<std::string>() );
-            default_value = boost::algorithm::erase_all_copy(default_value, "\n");
+            default_value = boost::algorithm::erase_all_copy(default_value,
+                "\n");
             if (default_value.size() > default_column -1 )
             {
                 default_value = default_value.substr(0, default_column-3);
@@ -188,24 +191,25 @@ void outputOptions(std::string const& n)
             
             Utils::wordWrap(description, lines, description_column-1);
             if (lines.size() == 1)
-            {
-                
+            {    
                 strm   << std::setw(name_column) << opt.getName() << " " 
                        << std::setw(default_column) << default_value << " " 
-                       << std::setw(description_column) << description << std::endl;
-            } else
+                       << std::setw(description_column) << description <<
+                       std::endl;
+            }
+            else
+            {
                 strm   << std::setw(name_column) << opt.getName() << " " 
                        << std::setw(default_column) << default_value << " " 
                        << lines[0] << std::endl;
+            }
             
             std::stringstream blank;
             size_t blanks(49);
             for (size_t i = 0; i < blanks; ++i)
                 blank << " ";
             for (size_t i = 1; i < lines.size(); ++i)
-            {
                 strm << blank.str() <<lines[i] << std::endl;
-            }
         }
         strm << tablehead << std::endl;
         strm << std::endl;
@@ -213,15 +217,14 @@ void outputOptions(std::string const& n)
         std::cout << strm.str() << std::endl;
     }
     else
-    {
         std::cerr << n << " has no options\n";
-    }
 }
+
 
 void outputOptions()
 {
     StageFactory f(false);
-    std::vector<std::string> nv = f.getStageNames();
+    StringList nv = f.getStageNames();
     for (auto const& n : nv)
         outputOptions(n);
 }

@@ -58,7 +58,7 @@ public:
 private:
     template<typename T>
     T getDefaultedOption(const Options& options,
-        const std::string& option_name) const
+        const std::string& option_name)
     {
         T default_value =
             getDefaultOptions().getOption(option_name).getValue<T>();

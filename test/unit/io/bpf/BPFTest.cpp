@@ -145,7 +145,7 @@ void test_roundtrip(Options& writerOps)
     writerOps.add("filename", outfile);
     BpfWriter writer;
     writer.setOptions(writerOps);
-    writer.setInput(&reader);
+    writer.setInput(reader);
 
     FileUtils::deleteFile(outfile);
     writer.prepare(context);

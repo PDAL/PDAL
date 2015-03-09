@@ -53,8 +53,8 @@ void doSort(point_count_t count)
 
     opts.add("dimension", "X");
 
-    std::shared_ptr<SortFilter> filter(new SortFilter);
-    filter->setOptions(opts);
+    SortFilter filter;
+    filter.setOptions(opts);
 
     PointContext ctx;
     PointBuffer buf(ctx);
@@ -67,7 +67,7 @@ void doSort(point_count_t count)
     for (PointId i = 0; i < count; ++i)
         buf.setField(Dimension::Id::X, i, dist(generator));
 
-    filter->prepare(ctx);
+    filter.prepare(ctx);
     FilterTester::ready(filter, ctx);
     FilterTester::filter(filter, buf);
     FilterTester::done(filter, ctx);

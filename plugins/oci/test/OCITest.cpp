@@ -225,12 +225,10 @@ bool WriteUnprojectedData()
     std::unique_ptr<Stage> reader(f.createStage("readers.las"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(options);
-    // filters::Chipper chipper(options);
-    // chipper.setInput(&reader);
     std::unique_ptr<Stage> writer(f.createStage("writers.oci"));
     EXPECT_TRUE(writer.get());
     writer->setOptions(options);
-    writer->setInput(reader.get());
+    writer->setInput(*reader);
 
     writer->prepare(ctx);
     writer->execute(ctx);

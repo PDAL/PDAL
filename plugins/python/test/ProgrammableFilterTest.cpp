@@ -38,6 +38,7 @@
 #include <pdal/PipelineManager.hpp>
 #include <pdal/StageFactory.hpp>
 #include <stats/StatsFilter.hpp>
+#include <faux/FauxReader.hpp>
 
 #include "Support.hpp"
 
@@ -54,8 +55,8 @@ TEST(ProgrammableFilterTest, ProgrammableFilterTest_test1)
     ops.add("num_points", 10);
     ops.add("mode", "ramp");
 
-    std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
-    reader->setOptions(ops);
+    FauxReader reader;
+    reader.setOptions(ops);
 
     Option source("source", "import numpy as np\n"
         "def myfunc(ins,outs):\n"
@@ -79,12 +80,12 @@ TEST(ProgrammableFilterTest, ProgrammableFilterTest_test1)
     opts.add(module);
     opts.add(function);
 
-    std::shared_ptr<Stage> filter(f.createStage("filters.programmable"));
+    std::unique_ptr<Stage> filter(f.createStage("filters.programmable"));
     filter->setOptions(opts);
     filter->setInput(reader);
 
-    std::shared_ptr<StatsFilter> stats(new StatsFilter);
-    stats->setInput(filter);
+    std::unique_ptr<StatsFilter> stats(new StatsFilter);
+    stats->setInput(*filter);
 
     PointContext ctx;
 
@@ -137,8 +138,8 @@ TEST(ProgrammableFilterTest, add_dimension)
     ops.add("num_points", 10);
     ops.add("mode", "ramp");
 
-    std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
-    reader->setOptions(ops);
+    FauxReader reader;
+    reader.setOptions(ops);
 
     Option source("source", "import numpy\n"
         "def myfunc(ins,outs):\n"
@@ -157,7 +158,7 @@ TEST(ProgrammableFilterTest, add_dimension)
     opts.add(intensity);
     opts.add(scanDirection);
 
-    std::shared_ptr<Stage> filter(f.createStage("filters.programmable"));
+    std::unique_ptr<Stage> filter(f.createStage("filters.programmable"));
     filter->setOptions(opts);
     filter->setInput(reader);
 

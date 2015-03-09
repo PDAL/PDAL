@@ -55,8 +55,8 @@ TEST(ChipperTest, test_construction)
     Options ops1;
     std::string filename(Support::datapath("las/1.2-with-color.las"));
     ops1.add("filename", filename);
-    std::shared_ptr<LasReader> reader(new LasReader);
-    reader->setOptions(ops1);
+    LasReader reader;
+    reader.setOptions(ops1);
 
     {
         // need to scope the writer, so that's it dtor can use the stream
@@ -65,11 +65,11 @@ TEST(ChipperTest, test_construction)
         Option capacity("capacity", 15, "capacity");
         options.add(capacity);
 
-        std::shared_ptr<ChipperFilter> chipper(new ChipperFilter);
-        chipper->setInput(reader);
-        chipper->setOptions(options);
-        chipper->prepare(ctx);
-        PointBufferSet pbSet = chipper->execute(ctx);
+        ChipperFilter chipper;
+        chipper.setInput(reader);
+        chipper.setOptions(options);
+        chipper.prepare(ctx);
+        PointBufferSet pbSet = chipper.execute(ctx);
         EXPECT_EQ(pbSet.size(), 71u);
 
         std::vector<PointBufferPtr> buffers;
@@ -111,8 +111,8 @@ TEST(ChipperTest, empty_buffer)
 
     Options ops;
 
-    std::shared_ptr<ChipperFilter> chipper(new ChipperFilter);
-    chipper->prepare(ctx);
+    ChipperFilter chipper;
+    chipper.prepare(ctx);
     StageTester::ready(chipper, ctx);
     PointBufferSet pbSet = StageTester::run(chipper, buf);
     StageTester::done(chipper, ctx);

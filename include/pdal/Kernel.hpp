@@ -73,6 +73,9 @@ typedef std::shared_ptr<PointBuffer> PointBufferPtr;
 class PDAL_DLL Kernel
 {
 public:
+    virtual ~Kernel()
+    {}
+
     // call this, to start the machine
     int run(int argc, const char* argv[], const std::string& appName);
 
@@ -80,14 +83,13 @@ public:
     uint32_t getVerboseLevel() const;
     virtual std::string getName() const = 0;
     bool isVisualize() const;
-    void visualize(PointBufferPtr buffer) const;
-    //void visualize(PointBufferPtr input_buffer, PointBufferPtr output_buffer) const;
-
-    virtual ~Kernel() {};
+    void visualize(PointBufferPtr buffer);
 
 protected:
     // this is protected; your derived class ctor will be the public entry point
     Kernel();
+    Stage& makeReader(const std::string& inputFile);
+    Stage& makeWriter(const std::string& outputFile, Stage& parent);
 
 public:
     // implement this, with calls to addOptionSet()
@@ -120,6 +122,11 @@ public:
     }
 
 protected:
+    Stage& ownStage(Stage *s)
+    {
+        m_stages.push_back(std::unique_ptr<Stage>(s));
+        return *s;
+    }
     bool m_usestdin;
 
 private:
@@ -156,6 +163,7 @@ private:
     po::variables_map m_variablesMap;
     std::vector<std::string> m_extra_options;
     std::map<std::string, Options> m_extra_stage_options;
+    std::vector<std::unique_ptr<Stage>> m_stages;
 
     Kernel& operator=(const Kernel&); // not implemented
     Kernel(const Kernel&); // not implemented

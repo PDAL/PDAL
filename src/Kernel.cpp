@@ -288,9 +288,10 @@ void Kernel::collectExtraOptions()
 
         auto found = m_extra_stage_options.find(stage_name);
         if (found == m_extra_stage_options.end())
-            m_extra_stage_options.insert(std::make_pair(stage_name, Option(option_name, option_value, "")));
+            m_extra_stage_options.insert(
+               std::make_pair(stage_name, Option(option_name, option_value)));
         else
-            found->second.add(Option(option_name, option_value, ""));
+            found->second.add(Option(option_name, option_value));
     }
 }
 
@@ -351,18 +352,18 @@ bool Kernel::isVisualize() const
 }
 
 
-void Kernel::visualize(PointBufferPtr buffer) const
+void Kernel::visualize(PointBufferPtr buffer)
 {
-    std::shared_ptr<BufferReader> bufferReader(new BufferReader);
-    bufferReader->addBuffer(buffer);
+    BufferReader bufferReader;
+    bufferReader.addBuffer(buffer);
 
     StageFactory f;
-    std::shared_ptr<Stage> writer(f.createStage("writers.pclvisualizer"));
-    writer->setInput(bufferReader);
+    Stage& writer = ownStage(f.createStage("writers.pclvisualizer"));
+    writer.setInput(bufferReader);
 
     PointContext ctx;
-    writer->prepare(ctx);
-    writer->execute(ctx);
+    writer.prepare(ctx);
+    writer.execute(ctx);
 }
 
 /*
@@ -574,4 +575,45 @@ void Kernel::parseSwitches()
     return;
 }
 
+
+Stage& Kernel::makeReader(const std::string& inputFile)
+{
+    if (!FileUtils::fileExists(inputFile))
+        throw app_runtime_error("file not found: " + inputFile);
+
+    StageFactory factory;
+    std::string driver = factory.inferReaderDriver(inputFile);
+    if (driver.empty())
+        throw app_runtime_error("Cannot determine input file type of " +
+            inputFile);
+
+    Stage *stage = factory.createStage(driver);
+    if (!stage)
+        throw app_runtime_error("reader creation failed");
+    ownStage(stage);
+    return *stage;
+}
+
+
+Stage& Kernel::makeWriter(const std::string& outputFile, Stage& parent)
+{
+    pdal::StageFactory factory;
+
+    std::string driver = factory.inferWriterDriver(outputFile);
+    if (driver.empty())
+        throw app_runtime_error("Cannot determine output file type of " +
+            outputFile);
+    Options options = factory.inferWriterOptionsChanges(outputFile);
+
+    Stage *writer = factory.createStage(driver);
+    if (!writer)
+        throw app_runtime_error("writer creation failed");
+    ownStage(writer);
+    writer->setInput(parent);
+    writer->setOptions(options + writer->getOptions());
+
+    return *writer;
+}
+
 } // namespace pdal
+

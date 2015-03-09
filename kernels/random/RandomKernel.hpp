@@ -53,8 +53,9 @@ namespace pdal
 class PDAL_DLL RandomKernel : public Kernel
 {
 public:
-    static void * create();
+    static void *create();
     static int32_t destroy(void *);
+
     std::string getName() const;
     int execute();
 
@@ -63,7 +64,7 @@ private:
     void addSwitches();
     void validateSwitches();
 
-    std::shared_ptr<Stage> makeReader(Options readerOptions);
+    Stage& makeReader(Options readerOptions);
 
     std::string m_outputFile;
     bool m_bCompress;

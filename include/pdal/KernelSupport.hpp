@@ -66,12 +66,8 @@ public:
 class PDAL_DLL KernelSupport
 {
 public:
-    // makes a reader/stage, from just the filename and some other options
-    static std::shared_ptr<Stage> makeReader(const std::string& filename);
-
     // makes a writer, from just the filename and some other
     // options (and the input stage)
-    static std::shared_ptr<Stage> makeWriter(const std::string& filename, std::shared_ptr<Stage> stage);
     static PipelineManager* makePipeline(const std::string& filename);
 
 private:

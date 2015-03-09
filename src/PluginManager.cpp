@@ -39,9 +39,7 @@
 
 #include <pdal/PluginManager.hpp>
 
-#include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/tokenizer.hpp>
 
 #include <pdal/pdal_defines.h>
 #include <pdal/util/FileUtils.hpp>
@@ -49,7 +47,6 @@
 
 #include "DynamicLibrary.h"
 
-#include <iostream> //temp
 #include <memory>
 #include <sstream>
 #include <string>
@@ -67,68 +64,70 @@ namespace pdal
 
 static bool isValid(const PF_RegisterParams * params)
 {
-    if (!params || !params->createFunc || !params->destroyFunc)
-        return false;
-
-    return true;
+    return (params && params->createFunc && params->destroyFunc);
 }
 
-int32_t PluginManager::registerObject(const std::string & objectType, const PF_RegisterParams * params)
+
+int32_t PluginManager::registerObject(const std::string& objectType,
+    const PF_RegisterParams* params)
 {
     if (!isValid(params))
         return -1;
 
-    PluginManager & pm = PluginManager::getInstance();
+    PluginManager& pm = PluginManager::getInstance();
 
     PF_PluginAPI_Version v = pm.m_version;
     if (v.major != params->version.major)
         return -1;
 
-    if (pm.exactMatchMap_.find(objectType) != pm.exactMatchMap_.end())
+    if (pm.m_exactMatchMap.find(objectType) != pm.m_exactMatchMap.end())
         return -1;
 
-    pm.exactMatchMap_[objectType] = *params;
+    pm.m_exactMatchMap[objectType] = *params;
     return 0;
 }
 
-PluginManager & PluginManager::getInstance()
+
+PluginManager& PluginManager::getInstance()
 {
     static PluginManager instance;
+
     return instance;
 }
+
 
 int32_t PluginManager::loadAll(PF_PluginType type)
 {
     std::string driver_path("PDAL_DRIVER_PATH");
     std::string pluginDir = Utils::getenv(driver_path);
 
-    // If we don't have a driver path, we'll default to /usr/local/lib and lib
-
+    // If we don't have a driver path, defaults are set.
     if (pluginDir.size() == 0)
     {
         std::ostringstream oss;
-        oss << PDAL_PLUGIN_INSTALL_PATH << ":/usr/local/lib:./lib:../lib:../bin";
+        oss << PDAL_PLUGIN_INSTALL_PATH <<
+            ":/usr/local/lib:./lib:../lib:../bin";
         pluginDir = oss.str();
     }
 
     std::vector<std::string> pluginPathVec;
-    boost::algorithm::split(pluginPathVec, pluginDir,
-        boost::algorithm::is_any_of(":"), boost::algorithm::token_compress_on);
+    pluginPathVec = Utils::split2(pluginDir, ':');
 
     for (const auto& pluginPath : pluginPathVec)
-    {
         loadAll(pluginPath, type);
-    }
 
     return 0;
 }
 
-int32_t PluginManager::loadAll(const std::string & pluginDirectory, PF_PluginType type)
+
+int32_t PluginManager::loadAll(const std::string& pluginDirectory,
+    PF_PluginType type)
 {
     if (pluginDirectory.empty())
         return -1;
 
-    if (!boost::filesystem::exists(pluginDirectory) || !boost::filesystem::is_directory(pluginDirectory))
+    if (!FileUtils::fileExists(pluginDirectory) ||
+        !boost::filesystem::is_directory(pluginDirectory))
         return -1;
 
     boost::filesystem::directory_iterator dir(pluginDirectory), it, end;
@@ -151,33 +150,37 @@ int32_t PluginManager::loadAll(const std::string & pluginDirectory, PF_PluginTyp
     return 0;
 }
 
+
 int32_t PluginManager::initializePlugin(PF_InitFunc initFunc)
 {
-    PluginManager & pm = PluginManager::getInstance();
+    PluginManager& pm = PluginManager::getInstance();
 
     PF_ExitFunc exitFunc = initFunc();
     if (!exitFunc)
         return -1;
 
-    pm.exitFuncVec_.push_back(exitFunc);
+    pm.m_exitFuncVec.push_back(exitFunc);
     return 0;
 }
 
-PluginManager::PluginManager() : inInitializePlugin_(false)
+
+PluginManager::PluginManager() : m_inInitializePlugin(false)
 {
     m_version.major = 1;
     m_version.minor = 0;
 }
+
 
 PluginManager::~PluginManager()
 {
     shutdown();
 }
 
+
 int32_t PluginManager::shutdown()
 {
     int32_t result = 0;
-    for (auto const& func : exitFuncVec_)
+    for (auto const& func : m_exitFuncVec)
     {
         try
         {
@@ -189,46 +192,44 @@ int32_t PluginManager::shutdown()
         }
     }
 
-    dynamicLibraryMap_.clear();
-    exactMatchMap_.clear();
-    exitFuncVec_.clear();
+    m_dynamicLibraryMap.clear();
+    m_exactMatchMap.clear();
+    m_exitFuncVec.clear();
 
     return result;
 }
 
+
 int32_t PluginManager::guessLoadByPath(const std::string& driverName)
 {
-    // parse the driver name into an expected pluginName, e.g., writers.las => libpdal_plugin_writer_las
-    std::vector<std::string> driverNameVec;
-    boost::algorithm::split(driverNameVec, driverName,
-        boost::algorithm::is_any_of("."), boost::algorithm::token_compress_on);
+    // parse the driver name into an expected pluginName, e.g.,
+    // writers.las => libpdal_plugin_writer_las
 
-    std::string pluginName = "libpdal_plugin_" + driverNameVec[0] + "_" + driverNameVec[1];
+    std::vector<std::string> driverNameVec;
+    driverNameVec = Utils::split2(driverName, '.');
+
+    std::string pluginName = "libpdal_plugin_" + driverNameVec[0] + "_" +
+        driverNameVec[1];
 
     std::string driver_path("PDAL_DRIVER_PATH");
     std::string pluginDir = Utils::getenv(driver_path);
 
-    // If we don't have a driver path, we'll default to /usr/local/lib and lib
-
+    // Default path below if not set.
     if (pluginDir.size() == 0)
     {
         std::ostringstream oss;
-        oss << PDAL_PLUGIN_INSTALL_PATH << ":/usr/local/lib:./lib:../lib:../bin";
+        oss << PDAL_PLUGIN_INSTALL_PATH <<
+            ":/usr/local/lib:./lib:../lib:../bin";
         pluginDir = oss.str();
     }
 
-    std::vector<std::string> pluginPathVec;
-    boost::algorithm::split(pluginPathVec, pluginDir,
-        boost::algorithm::is_any_of(":"), boost::algorithm::token_compress_on);
-
+    std::vector<std::string> pluginPathVec = Utils::split2(pluginDir, ':');
     for (const auto& pluginPath : pluginPathVec)
     {
         boost::filesystem::path path(pluginPath);
 
-        if (path.empty())
-            continue;
-
-        if (!boost::filesystem::exists(path) || !boost::filesystem::is_directory(path))
+        if (!FileUtils::fileExists(path.string()) ||
+            !boost::filesystem::is_directory(path))
             continue;
 
         boost::filesystem::directory_iterator dir(path), it, end;
@@ -254,15 +255,18 @@ int32_t PluginManager::guessLoadByPath(const std::string& driverName)
                 type = PF_PluginType_Filter;
             else if (driverNameVec[0] == "writers")
                 type = PF_PluginType_Writer;
+            else
+                type = PF_PluginType_Reader;
 
             loadByPath(full_path.string(), type);
         }
    }
-
     return 0;
 }
 
-int32_t PluginManager::loadByPath(const std::string& pluginPath, PF_PluginType type)
+
+int32_t PluginManager::loadByPath(const std::string& pluginPath,
+    PF_PluginType type)
 {
     // Only filenames that start with libpdal_plugin are candidates to be loaded
     // at runtime.  PDAL plugins are to be named in a specified form:
@@ -274,31 +278,37 @@ int32_t PluginManager::loadByPath(const std::string& pluginPath, PF_PluginType t
     boost::filesystem::path path(pluginPath);
 
     bool isValid = false;
-    if (boost::algorithm::istarts_with(path.filename().string(), "libpdal_plugin_kernel"))
+    std::string pathname = Utils::tolower(path.filename().string());
+    if (Utils::startsWith(pathname, "libpdal_plugin_kernel"))
     {
-        if (type == PF_PluginType_Kernel) { isValid = true; }
+        if (type == PF_PluginType_Kernel)
+            isValid = true;
     }
-    else if (boost::algorithm::istarts_with(path.filename().string(), "libpdal_plugin_filter"))
+    else if (Utils::startsWith(pathname, "libpdal_plugin_filter"))
     {
-        if (type == PF_PluginType_Filter) { isValid = true; }
+        if (type == PF_PluginType_Filter)
+            isValid = true;
     }
-    else if (boost::algorithm::istarts_with(path.filename().string(), "libpdal_plugin_reader"))
+    else if (Utils::startsWith(pathname, "libpdal_plugin_reader"))
     {
-        if (type == PF_PluginType_Reader) { isValid = true; }
+        if (type == PF_PluginType_Reader)
+            isValid = true;
     }
-    else if (boost::algorithm::istarts_with(path.filename().string(), "libpdal_plugin_writer"))
+    else if (Utils::startsWith(pathname, "libpdal_plugin_writer"))
     {
-        if (type == PF_PluginType_Writer) { isValid = true; }
+        if (type == PF_PluginType_Writer)
+            isValid = true;
     }
 
     if (!isValid)
         return -1;
 
-    if (dynamicLibraryMap_.find(path.string()) != dynamicLibraryMap_.end())
+    if (m_dynamicLibraryMap.find(path.string()) != m_dynamicLibraryMap.end())
         return -1;
 
     std::string errorString;
-    DynamicLibrary * d = loadLibrary(boost::filesystem::complete(path).string(), errorString);
+    DynamicLibrary *d =
+        loadLibrary(boost::filesystem::complete(path).string(), errorString);
     if (!d)
         return -1;
 
@@ -306,42 +316,34 @@ int32_t PluginManager::loadByPath(const std::string& pluginPath, PF_PluginType t
     if (!initFunc)
         return -1;
 
-    int32_t res = initializePlugin(initFunc);
-    if (res < 0)
-        return res;
-
-    return 0;
+    return std::max(0, initializePlugin(initFunc));
 }
 
-void * PluginManager::createObject(const std::string & objectType)
+void *PluginManager::createObject(const std::string& objectType)
 {
-    if (exactMatchMap_.find(objectType) != exactMatchMap_.end())
+    if (m_exactMatchMap.find(objectType) != m_exactMatchMap.end())
     {
-        PF_RegisterParams & rp = exactMatchMap_[objectType];
-        void * object = rp.createFunc();
-        if (object)
-        {
-            return object;
-        }
+        PF_RegisterParams & rp = m_exactMatchMap[objectType];
+        return rp.createFunc();
     }
-
     return NULL;
 }
 
-DynamicLibrary * PluginManager::loadLibrary(const std::string & path, std::string & errorString)
-{
-    DynamicLibrary * d = DynamicLibrary::load(path, errorString);
-    if (!d)
-        return NULL;
 
-    dynamicLibraryMap_[boost::filesystem::complete(path).string()] = std::shared_ptr<DynamicLibrary>(d);
+DynamicLibrary *PluginManager::loadLibrary(const std::string& path,
+    std::string & errorString)
+{
+    DynamicLibrary *d = DynamicLibrary::load(path, errorString);
+    if (d)
+        m_dynamicLibraryMap[boost::filesystem::complete(path).string()] =
+            DynLibPtr(d);
     return d;
 }
 
-const PluginManager::RegistrationMap & PluginManager::getRegistrationMap()
+
+const PluginManager::RegistrationMap& PluginManager::getRegistrationMap()
 {
-    return exactMatchMap_;
+    return m_exactMatchMap;
 }
 
 } // namespace pdal
-

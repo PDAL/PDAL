@@ -36,6 +36,7 @@
 #include <pdal/Options.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
+#include <FauxReader.hpp>
 #include "Support.hpp"
 
 using namespace pdal;
@@ -60,15 +61,15 @@ TEST(LogTest, test_one)
     {
         PointContext ctx;
 
-        std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
-        reader->setOptions(opts);
-        reader->prepare(ctx);
+        FauxReader reader;
+        reader.setOptions(opts);
+        reader.prepare(ctx);
 
-        EXPECT_EQ(reader->log()->getLevel(), LogLevel::Error);
-        reader->log()->setLevel(LogLevel::Debug5);
-        EXPECT_EQ(reader->log()->getLevel(), LogLevel::Debug5);
+        EXPECT_EQ(reader.log()->getLevel(), LogLevel::Error);
+        reader.log()->setLevel(LogLevel::Debug5);
+        EXPECT_EQ(reader.log()->getLevel(), LogLevel::Debug5);
 
-        PointBufferSet pbSet = reader->execute(ctx);
+        PointBufferSet pbSet = reader.execute(ctx);
         EXPECT_EQ(pbSet.size(), 1u);
         PointBufferPtr buf = *pbSet.begin();
         EXPECT_EQ(buf->size(), 750u);
@@ -140,22 +141,22 @@ TEST(LogTest, test_two_a)
     }
 
     {
-        std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
-        reader->setOptions(reader_opts);
+        FauxReader reader;
+        reader.setOptions(reader_opts);
 
-        std::shared_ptr<Stage> xfilter(f.createStage("filters.programmable"));
+        std::unique_ptr<Stage> xfilter(f.createStage("filters.programmable"));
         xfilter->setOptions(xfilter_opts);
         xfilter->setInput(reader);
 
-        std::shared_ptr<Stage> yfilter(f.createStage("filters.programmable"));
+        std::unique_ptr<Stage> yfilter(f.createStage("filters.programmable"));
         yfilter->setOptions(yfilter_opts);
-        yfilter->setInput(xfilter);
+        yfilter->setInput(*xfilter);
 
         PointContext ctx;
         yfilter->prepare(ctx);
         EXPECT_TRUE(true);
 
-        reader->log()->setLevel(LogLevel::Debug5);
+        reader.log()->setLevel(LogLevel::Debug5);
         xfilter->log()->setLevel(LogLevel::Debug5);
         yfilter->log()->setLevel(LogLevel::Debug5);
         EXPECT_TRUE(true);
@@ -239,21 +240,21 @@ TEST(LogTest, test_two_b)
     }
 
     {
-        std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
-        reader->setOptions(reader_opts);
+        FauxReader reader;
+        reader.setOptions(reader_opts);
 
-        std::shared_ptr<Stage> xfilter(f.createStage("filters.programmable"));
+        std::unique_ptr<Stage> xfilter(f.createStage("filters.programmable"));
         xfilter->setOptions(xfilter_opts);
         xfilter->setInput(reader);
 
-        std::shared_ptr<Stage> yfilter(f.createStage("filters.programmable"));
+        std::unique_ptr<Stage> yfilter(f.createStage("filters.programmable"));
         yfilter->setOptions(yfilter_opts);
-        yfilter->setInput(xfilter);
+        yfilter->setInput(*xfilter);
 
         PointContext ctx;
         yfilter->prepare(ctx);
 
-        reader->log()->setLevel(LogLevel::Debug5);
+        reader.log()->setLevel(LogLevel::Debug5);
         xfilter->log()->setLevel(LogLevel::Debug5);
         yfilter->log()->setLevel(LogLevel::Debug5);
 
@@ -328,10 +329,10 @@ TEST(LogTest, test_three)
     }
 
     {
-        std::shared_ptr<Stage> reader(f.createStage("readers.faux"));
-        reader->setOptions(reader_opts);
+        FauxReader reader;
+        reader.setOptions(reader_opts);
 
-        std::shared_ptr<Stage> xfilter(f.createStage("filters.programmable"));
+        std::unique_ptr<Stage> xfilter(f.createStage("filters.programmable"));
         xfilter->setOptions(xfilter_opts);
         xfilter->setInput(reader);
 

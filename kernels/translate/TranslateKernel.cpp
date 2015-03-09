@@ -51,13 +51,17 @@ static PluginInfo const s_info {
 
 CREATE_STATIC_PLUGIN(1, 0, TranslateKernel, Kernel, s_info)
 
-std::string TranslateKernel::getName() const { return s_info.name; }
+std::string TranslateKernel::getName() const
+{
+    return s_info.name;
+}
 
 TranslateKernel::TranslateKernel() :
     Kernel(), m_bCompress(false),
     m_input_srs(pdal::SpatialReference()),
     m_output_srs(pdal::SpatialReference()), m_bForwardMetadata(false),
-    m_decimation_step(1), m_decimation_offset(0), m_decimation_leaf_size(1), m_decimation_limit(0)
+    m_decimation_step(1), m_decimation_offset(0),
+    m_decimation_leaf_size(1), m_decimation_limit(0)
 {}
 
 
@@ -179,7 +183,7 @@ void TranslateKernel::addSwitches()
     addPositionalSwitch("output", 1);
 }
 
-std::shared_ptr<Stage> TranslateKernel::makeReader(Options readerOptions)
+Stage& TranslateKernel::makeReader(Options readerOptions)
 {
     if (isDebug())
     {
@@ -192,50 +196,56 @@ std::shared_ptr<Stage> TranslateKernel::makeReader(Options readerOptions)
         readerOptions.add("log", "STDERR");
     }
 
-    std::shared_ptr<Stage> stage(KernelSupport::makeReader(m_inputFile));
-    stage->setOptions(readerOptions);
+    Stage& reader = Kernel::makeReader(m_inputFile);
+    reader.setOptions(readerOptions);
 
-    return stage;
+    return reader;
 }
 
 
-std::shared_ptr<Stage> TranslateKernel::makeTranslate(Options translateOptions, std::shared_ptr<Stage> reader_stage)
+Stage& TranslateKernel::makeTranslate(Options translateOptions, Stage& parent)
 {
     StageFactory f;
-    std::shared_ptr<Stage> final_stage(reader_stage);
-    Options readerOptions = reader_stage->getOptions();
+    Stage *finalStage = &parent;
+    Stage *nextStage = &parent;
+
+    Options readerOptions = parent.getOptions();
     std::map<std::string, Options> extra_opts = getExtraStageOptions();
-    if (!m_bounds.empty() || !m_wkt.empty() || !m_output_srs.empty() || extra_opts.size() > 0)
+    if (!m_bounds.empty() || !m_wkt.empty() || !m_output_srs.empty() ||
+        extra_opts.size() > 0)
     {
-        std::shared_ptr<Stage> next_stage(reader_stage);
-        std::shared_ptr<Stage> crop_stage(f.createStage("filters.crop"));
-        std::shared_ptr<Stage> reprojection_stage(f.createStage("filters.reprojection"));
+        Stage& cropStage = ownStage(f.createStage("filters.crop"));
 
-
-        bool bHaveReprojection = extra_opts.find("filters.reprojection") != extra_opts.end();
-        bool bHaveCrop = extra_opts.find("filters.crop") != extra_opts.end();
+        bool bHaveReprojection =
+            Utils::contains(extra_opts, std::string("filters.reprojection"));
+        bool bHaveCrop =
+            Utils::contains(extra_opts, std::string("filters.crop"));
 
         if (!m_output_srs.empty())
         {
             translateOptions.add("out_srs", m_output_srs.getWKT());
-            std::shared_ptr<Stage> reprojection_stage(f.createStage("filters.reprojection"));
-            reprojection_stage->setInput(next_stage);
-            reprojection_stage->setOptions(readerOptions);
-            next_stage = reprojection_stage;
-        } else if (bHaveReprojection)
+            Stage& reprojectionStage =
+                ownStage(f.createStage("filters.reprojection"));
+            reprojectionStage.setInput(*nextStage);
+            reprojectionStage.setOptions(readerOptions);
+            nextStage = &reprojectionStage;
+        }
+        else if (bHaveReprojection)
         {
-            std::shared_ptr<Stage> reprojection_stage(f.createStage("filters.reprojection"));
-            reprojection_stage->setInput(next_stage);
-            reprojection_stage->setOptions(extra_opts.find("filters.reprojection")->second);
-            next_stage = reprojection_stage;
+            Stage& reprojectionStage =
+                ownStage(f.createStage("filters.reprojection"));
+            reprojectionStage.setInput(*nextStage);
+            reprojectionStage.setOptions(
+                extra_opts.find("filters.reprojection")->second);
+            nextStage = &reprojectionStage;
         }
 
         if ((!m_bounds.empty() && m_wkt.empty()))
         {
             readerOptions.add("bounds", m_bounds);
-            crop_stage->setInput(next_stage);
-            crop_stage->setOptions(readerOptions);
-            next_stage = crop_stage;
+            cropStage.setInput(*nextStage);
+            cropStage.setOptions(readerOptions);
+            nextStage = &cropStage;
         }
         else if (m_bounds.empty() && !m_wkt.empty())
         {
@@ -256,21 +266,22 @@ std::shared_ptr<Stage> TranslateKernel::makeTranslate(Options translateOptions, 
                 // was likely actually wkt, leave it alone
             }
             readerOptions.add("polygon", m_wkt);
-            crop_stage->setInput(next_stage);
-            crop_stage->setOptions(readerOptions);
-            next_stage = crop_stage;
-        } else if (bHaveCrop)
-        {
-            crop_stage->setInput(next_stage);
-            crop_stage->setOptions(extra_opts.find("filters.crop")->second);
-            next_stage = crop_stage;
+            cropStage.setInput(*nextStage);
+            cropStage.setOptions(readerOptions);
+            nextStage = &cropStage;
         }
-        final_stage = next_stage;
+        else if (bHaveCrop)
+        {
+            cropStage.setInput(*nextStage);
+            cropStage.setOptions(extra_opts.find("filters.crop")->second);
+            nextStage = &cropStage;
+        }
+        finalStage = nextStage;
     }
 
     if (boost::iequals(m_decimation_method, "VoxelGrid"))
     {
-        std::shared_ptr<Stage> decimation_stage(f.createStage("filters.pclblock"));
+        Stage& decimationStage = ownStage(f.createStage("filters.pclblock"));
 
         Options decimationOptions;
         std::ostringstream ss;
@@ -287,12 +298,12 @@ std::shared_ptr<Stage> TranslateKernel::makeTranslate(Options translateOptions, 
         ss << "    }";
         ss << "}";
         std::string json = ss.str();
-        decimationOptions.add<std::string>("json", json);
-        decimationOptions.add<bool>("debug", isDebug());
-        decimationOptions.add<uint32_t>("verbose", getVerboseLevel());
-        decimation_stage->setOptions(decimationOptions);
-        decimation_stage->setInput(final_stage);
-        final_stage = decimation_stage;
+        decimationOptions.add("json", json);
+        decimationOptions.add("debug", isDebug());
+        decimationOptions.add("verbose", getVerboseLevel());
+        decimationStage.setOptions(decimationOptions);
+        decimationStage.setInput(*finalStage);
+        finalStage = &decimationStage;
     }
     else if (m_decimation_step > 1 || m_decimation_limit > 0)
     {
@@ -302,14 +313,14 @@ std::shared_ptr<Stage> TranslateKernel::makeTranslate(Options translateOptions, 
         decimationOptions.add("step", m_decimation_step);
         decimationOptions.add("offset", m_decimation_offset);
         decimationOptions.add("limit", m_decimation_limit);
-        std::shared_ptr<Stage> decimation_stage(f.createStage("filters.decimation"));
-        decimation_stage->setInput(final_stage);
-        decimation_stage->setOptions(decimationOptions);
-        final_stage = decimation_stage;
+        Stage& decimationStage = ownStage(f.createStage("filters.decimation"));
+        decimationStage.setInput(*finalStage);
+        decimationStage.setOptions(decimationOptions);
+        finalStage = &decimationStage;
     }
-
-    return final_stage;
+    return *finalStage;
 }
+
 
 int TranslateKernel::execute()
 {
@@ -322,7 +333,7 @@ int TranslateKernel::execute()
     if (!m_input_srs.empty())
         readerOptions.add("spatialreference", m_input_srs.getWKT());
 
-    std::shared_ptr<Stage> readerStage(makeReader(readerOptions));
+    Stage& readerStage = makeReader(readerOptions);
 
     // go ahead and prepare/execute on reader stage only to grab input
     // PointBufferSet, this makes the input PointBuffer available to both the
@@ -338,7 +349,7 @@ int TranslateKernel::execute()
     //bufferReader.addBuffer(input_buffer);
 
     // the translation consumes the BufferReader rather than the readerStage
-    std::shared_ptr<Stage> finalStage(makeTranslate(readerOptions, readerStage));
+    Stage& finalStage = makeTranslate(readerOptions, readerStage);
 
     Options writerOptions;
     writerOptions.add("filename", m_outputFile);
@@ -357,21 +368,21 @@ int TranslateKernel::execute()
         cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
         (UserCallback *)new HeartbeatCallback();
 
-    std::shared_ptr<Stage> writer(KernelSupport::makeWriter(m_outputFile, finalStage));
+    Stage& writer = makeWriter(m_outputFile, finalStage);
     if (!m_output_srs.empty())
-        writer->setSpatialReference(m_output_srs);
+        writer.setSpatialReference(m_output_srs);
 
     // Some options are inferred by makeWriter based on filename
     // (compression, driver type, etc).
-    writer->setOptions(writerOptions+writer->getOptions());
-
-//     writer->setUserCallback(callback);
+    writer.setOptions(writerOptions + writer.getOptions());
 
     for (const auto& pi : getExtraStageOptions())
     {
         std::string name = pi.first;
         Options options = pi.second;
-        std::vector<std::shared_ptr<Stage> > stages = writer->findStage(name);
+
+        //ABELL - What's this?
+        std::vector<Stage *> stages = writer.findStage(name);
         for (const auto& s : stages)
         {
             Options opts = s->getOptions();
@@ -380,16 +391,16 @@ int TranslateKernel::execute()
             s->setOptions(opts);
         }
     }
-    writer->prepare(ctx);
+    writer.prepare(ctx);
 
     // process the data, grabbing the PointBufferSet for visualization of the
-    PointBufferSet pbSetOut = writer->execute(ctx);
+    PointBufferSet pbSetOut = writer.execute(ctx);
 
     if (isVisualize())
         visualize(*pbSetOut.begin());
-    //visualize(*pbSetIn.begin(), *pbSetOut.begin());
 
     return 0;
 }
 
 } // namespace pdal
+

@@ -47,21 +47,21 @@ namespace pdal
 class DynamicLibrary
 {
 public:
+    static DynamicLibrary *load(const std::string &path,
+        std::string &errorString);
 
-  static DynamicLibrary * load(const std::string & path, 
-                               std::string &errorString);
-  ~DynamicLibrary();
-  
-  void * getSymbol(const std::string & name);
+    ~DynamicLibrary();
+    void *getSymbol(const std::string& name);
 
 private:
-  DynamicLibrary();
-  
-  DynamicLibrary(void * handle);
-  DynamicLibrary(const DynamicLibrary &);
+    DynamicLibrary(void *handle) : m_handle(handle)
+    {}
+
+    DynamicLibrary();  // Unimplemented
+    DynamicLibrary(const DynamicLibrary &);  // Unimplemented
   
 private:
-  void * handle_;  
+    void *m_handle;
 };
 
 } // namespace pdal

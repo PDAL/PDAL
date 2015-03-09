@@ -70,7 +70,6 @@
 
 #include <sstream>
 #include <string>
-#include <vector>
 #include <stdio.h> // for funcptr
 
 namespace pdal
@@ -204,26 +203,29 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(TextWriter_InitPlugin);
 }
 
-std::shared_ptr<Stage> StageFactory::createStage(std::string const& stage_name)
+/// Create a stage and return a pointer to the created stage.  Caller takes
+/// ownership and is responsible for stage cleanup.
+///
+/// \param[in] stage_name  Type of stage to by created.
+/// \return  Pointer to created stage.
+///
+Stage *StageFactory::createStage(std::string const& stage_name)
 {
-    PluginManager & pm = PluginManager::getInstance();
+    PluginManager& pm = PluginManager::getInstance();
 
-    void * stage = pm.createObject(stage_name);
+    Stage *stage = (Stage *)pm.createObject(stage_name);
     if (!stage)
-    {
-        int32_t res = pm.guessLoadByPath(stage_name);
-        if (res == 0)
-            stage = pm.createObject(stage_name);
-    }
-
-    return std::shared_ptr<Stage>((Stage*)stage);
+        if (pm.guessLoadByPath(stage_name) == 0)
+            stage = (Stage *)pm.createObject(stage_name);
+    return stage;
 }
 
-std::vector<std::string> StageFactory::getStageNames()
+
+StringList StageFactory::getStageNames()
 {
     PluginManager & pm = PluginManager::getInstance();
     PluginManager::RegistrationMap rm = pm.getRegistrationMap();
-    std::vector<std::string> nv;
+    StringList nv;
     for (auto r : rm)
     {
         if (r.second.pluginType == PF_PluginType_Filter ||
@@ -234,9 +236,10 @@ std::vector<std::string> StageFactory::getStageNames()
     return nv;
 }
 
+
 std::map<std::string, std::string> StageFactory::getStageMap()
 {
-    PluginManager & pm = PluginManager::getInstance();
+    PluginManager& pm = PluginManager::getInstance();
     PluginManager::RegistrationMap rm = pm.getRegistrationMap();
     std::map<std::string, std::string> sm;
     for (auto r : rm)
@@ -248,7 +251,6 @@ std::map<std::string, std::string> StageFactory::getStageMap()
     }
     return sm;
 }
-
 
 } // namespace pdal
 

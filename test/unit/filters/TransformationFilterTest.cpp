@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include "gtest/gtest.h"
+#include <FauxReader.hpp>
 #include <TransformationFilter.hpp>
 
 #include <pdal/StageFactory.hpp>
@@ -45,13 +46,6 @@ namespace pdal
 class TransformationFilterTest : public ::testing::Test
 {
 public:
-
-    TransformationFilterTest()
-        : factory()
-        , reader(factory.createStage("readers.faux"))
-        , filter(factory.createStage("filters.transformation"))
-    {}
-
     virtual void SetUp()
     {
         StageFactory f;
@@ -61,16 +55,21 @@ public:
         readerOpts.add("mode", "constant");
         readerOpts.add("num_points", 3);
         readerOpts.add("bounds", bounds);
-        reader->setOptions(readerOpts);
-
-        filter->setInput(reader);
+        m_reader.setOptions(readerOpts);
+        m_filter.setInput(m_reader);
     }
 
-    StageFactory factory;
-    std::shared_ptr<Stage> reader;
-    std::shared_ptr<Stage> filter;
-
+    FauxReader m_reader;
+    TransformationFilter m_filter;
 };
+
+
+TEST(TransformationMatrix, create)
+{
+    StageFactory f;
+    std::unique_ptr<Stage> filter(f.createStage("filters.transformation"));
+    EXPECT_TRUE(filter.get());
+}
 
 
 TEST(TransformationMatrix, FromString)
@@ -114,11 +113,11 @@ TEST_F(TransformationFilterTest, NoChange)
 {
     Options filterOpts;
     filterOpts.add("matrix", "1 0 0 0\n0 1 0 0\n0 0 1 0\n0 0 0 1");
-    filter->setOptions(filterOpts);
+    m_filter.setOptions(filterOpts);
 
     PointContext ctx;
-    filter->prepare(ctx);
-    PointBufferSet pbSet = filter->execute(ctx);
+    m_filter.prepare(ctx);
+    PointBufferSet pbSet = m_filter.execute(ctx);
     EXPECT_EQ(1u, pbSet.size());
     PointBufferPtr buf = *pbSet.begin();
     EXPECT_EQ(3u, buf->size());
@@ -136,11 +135,11 @@ TEST_F(TransformationFilterTest, Translation)
 {
     Options filterOpts;
     filterOpts.add("matrix", "1 0 0 1\n0 1 0 2\n0 0 1 3\n0 0 0 1");
-    filter->setOptions(filterOpts);
+    m_filter.setOptions(filterOpts);
 
     PointContext ctx;
-    filter->prepare(ctx);
-    PointBufferSet pbSet = filter->execute(ctx);
+    m_filter.prepare(ctx);
+    PointBufferSet pbSet = m_filter.execute(ctx);
     PointBufferPtr buf = *pbSet.begin();
 
     for (point_count_t i = 0; i < buf->size(); ++i)
@@ -156,11 +155,11 @@ TEST_F(TransformationFilterTest, Rotation)
 {
     Options filterOpts;
     filterOpts.add("matrix", "0 1 0 0\n-1 0 0 0\n0 0 1 0\n0 0 0 1");
-    filter->setOptions(filterOpts);
+    m_filter.setOptions(filterOpts);
 
     PointContext ctx;
-    filter->prepare(ctx);
-    PointBufferSet pbSet = filter->execute(ctx);
+    m_filter.prepare(ctx);
+    PointBufferSet pbSet = m_filter.execute(ctx);
     PointBufferPtr buf = *pbSet.begin();
 
     for (point_count_t i = 0; i < buf->size(); ++i)

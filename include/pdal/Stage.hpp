@@ -57,7 +57,7 @@ class StageBlockIterator;
 class StageRunner;
 class StageTester;
 
-class PDAL_DLL Stage : public std::enable_shared_from_this<Stage>
+class PDAL_DLL Stage
 {
     friend class StageTester;
     friend class StageRunner;
@@ -66,10 +66,8 @@ public:
     virtual ~Stage()
         {}
 
-    void setInput(const std::vector<std::shared_ptr<Stage> >& inputs)
-        { m_inputs = inputs; }
-    void setInput(std::shared_ptr<Stage> input)
-        { m_inputs.push_back(input); }
+    void setInput(Stage& input)
+        { m_inputs.push_back(&input); }
 
     QuickInfo preview()
     {
@@ -100,9 +98,9 @@ public:
             return m_options.getValueOrDefault<uint32_t>("verbose", 0);
         }
     virtual std::string getName() const = 0;
-    const std::vector<std::shared_ptr<Stage> >& getInputs() const
+    const std::vector<Stage*>& getInputs() const
         { return m_inputs; }
-    std::vector<std::shared_ptr<Stage> > findStage(std::string name);
+    std::vector<Stage *> findStage(std::string name);
     virtual Options getDefaultOptions()
         { return Options(); }
     static Dimension::IdList getDefaultDimensions()
@@ -133,7 +131,7 @@ protected:
 private:
     bool m_debug;
     uint32_t m_verbose;
-    std::vector<std::shared_ptr<Stage> > m_inputs;
+    std::vector<Stage *> m_inputs;
     LogPtr m_log;
     SpatialReference m_spatialReference;
 
