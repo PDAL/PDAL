@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2015, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,49 +32,69 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <iomanip>
+// plugin.h was modeled very closely after the work of Gigi Sayfan in the Dr.
+// Dobbs article:
+// http://www.drdobbs.com/cpp/building-your-own-plugin-framework-part/206503957
+// The original work was released under the Apache License v2.
 
-#include <boost/algorithm/string.hpp>
+#pragma once
 
-#include <pdal/KernelInfo.hpp>
+#include <pdal/pdal_export.hpp>
 
-namespace pdal
+#include <cstdint>
+
+#define PF_MAX_DESCRIPTION_LEN 128
+#define PF_MAX_LINK_LEN 128
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef enum PF_PluginType
 {
+    PF_PluginType_Kernel,
+    PF_PluginType_Reader,
+    PF_PluginType_Filter,
+    PF_PluginType_Writer
+} PF_PluginType;
 
-
-std::ostream& operator<<(std::ostream& ostr, const KernelInfo& info)
+typedef struct PF_PluginAPI_Version
 {
-    // boost::property_tree::ptree tree = kernel.toPTree();
-    //
-    // boost::property_tree::write_json(ostr, tree);
+    int32_t major;
+    int32_t minor;
+} PF_PluginAPI_Version;
 
-    return ostr;
+typedef void * (*PF_CreateFunc)();
+typedef int32_t (*PF_DestroyFunc)(void *);
+
+typedef struct PF_RegisterParams
+{
+    PF_PluginAPI_Version version;
+    PF_CreateFunc createFunc;
+    PF_DestroyFunc destroyFunc;
+    char description[PF_MAX_DESCRIPTION_LEN + 1];
+    char link[PF_MAX_LINK_LEN + 1];
+    PF_PluginType pluginType;
+} PF_RegisterParams;
+
+typedef int32_t (*PF_ExitFunc)();
+typedef PF_ExitFunc (*PF_InitFunc)();
+
+#ifndef PDAL_DLL
+  #ifdef WIN32
+    #define PDAL_DLL __declspec(dllimport)
+  #else
+    #define PDAL_DLL
+  #endif
+#endif
+
+extern
+#ifdef __cplusplus
+"C"
+#endif
+PDAL_DLL PF_ExitFunc PF_initPlugin();
+
+#ifdef __cplusplus
 }
+#endif
 
-KernelInfo::KernelInfo(std::string const& name, std::string const& description)
-    : m_name(name), m_description(description) {}
-
-/// copy constructor
-KernelInfo::KernelInfo(KernelInfo const& other)
-    : m_name(other.m_name)
-    , m_description(other.m_description)
-    , m_link(other.m_link)
-{
-    return;
-}
-
-/// assignment operator
-KernelInfo& KernelInfo::operator=(KernelInfo const& rhs)
-{
-    if (&rhs != this)
-    {
-        m_name = rhs.m_name;
-        m_description = rhs.m_description;
-        m_link = rhs.m_link;
-    }
-
-    return *this;
-}
-
-
-} // namespace pdal

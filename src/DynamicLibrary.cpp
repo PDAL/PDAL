@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2015, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,68 +32,89 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+// The DynamicLibrary was modeled very closely after the work of Gigi Sayfan in
+// the Dr. Dobbs article:
+// http://www.drdobbs.com/cpp/building-your-own-plugin-framework-part/206503957
+// The original work was released under the Apache License v2.
 
-#include <string>
-#include <vector>
-#include <iosfwd>
+#ifdef WIN32
+  #include <Windows.h>
+#else
+  #include <dlfcn.h>
+#endif
 
-#include <pdal/pdal_internal.hpp>
+#include "DynamicLibrary.h"
+#include <sstream>
+#include <iostream>
 
 namespace pdal
 {
 
-class Kernel;
-
-class PDAL_DLL KernelInfo
+DynamicLibrary::~DynamicLibrary()
 {
-    friend class KernelBase;
-public:
-
-    /// Constructor.
-    ///
-    KernelInfo(std::string const& kernelName, std::string const& kernelDescription="");
-
-    KernelInfo& operator=(const KernelInfo& rhs);
-    KernelInfo(const KernelInfo&);
-
-    /// Destructor.
-    virtual ~KernelInfo() {};
-
-    inline std::string const& getName() const
+    if (m_handle)
     {
-        return m_name;
+#ifndef WIN32
+        ::dlclose(m_handle);
+#else
+        ::FreeLibrary((HMODULE)m_handle);
+#endif
+    }
+}
+
+DynamicLibrary *DynamicLibrary::load(const std::string &name, 
+    std::string &errorString)
+{
+    if (name.empty()) 
+    {
+        errorString = "Empty path.";
+        return NULL;
     }
 
-    inline std::string const& getDescription() const
+    void *handle = NULL;
+
+#ifdef WIN32
+    handle = ::LoadLibraryA(name.c_str());
+    if (handle == NULL)
     {
-        return m_description;
+        DWORD errorCode = ::GetLastError();
+        std::stringstream ss;
+        ss << std::string("LoadLibrary(") << name 
+            << std::string(") Failed. errorCode: ") 
+            << errorCode; 
+        errorString = ss.str();
     }
-
-    inline void setInfoLink(std::string const& link)
+#else
+    handle = ::dlopen(name.c_str(), RTLD_NOW);
+    if (!handle) 
     {
-        m_link = link;
+        std::string dlErrorString;
+        const char *zErrorString = ::dlerror();
+        if (zErrorString)
+            dlErrorString = zErrorString;
+        errorString += "Failed to load \"" + name + '"';
+        if (dlErrorString.size())
+            errorString += ": " + dlErrorString;
+        return NULL;
     }
+#endif
+    return new DynamicLibrary(handle);
+}
 
-    inline std::string const& getInfoLink() const
-    {
-        return m_link;
-    }
 
-private:
-    std::string m_name;
-    std::string m_description;
-    std::string m_link;
-};
+void *DynamicLibrary::getSymbol(const std::string& symbol)
+{
+    if (!m_handle)
+        return NULL;
 
-/// Output operator for serialization
-///
-/// @param ostr    The output stream to write to
-/// @param src     The KernelInfo to be serialized out
-///
-/// @return The output stream
-
-PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const KernelInfo& src);
+    void *sym;
+#ifdef WIN32
+    sym = ::GetProcAddress((HMODULE)m_handle, symbol.c_str());
+#else
+    sym = ::dlsym(m_handle, symbol.c_str());
+#endif
+    return sym;
+}
 
 } // namespace pdal
 

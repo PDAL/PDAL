@@ -35,6 +35,8 @@
 #include "gtest/gtest.h"
 
 #include <pdal/StageFactory.hpp>
+#include <LasReader.hpp>
+#include <SplitterFilter.hpp>
 #include "Support.hpp"
 #include "StageTester.hpp"
 
@@ -47,33 +49,31 @@ TEST(SplitterTest, test_tile_filter)
     // create the reader
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
-    ReaderPtr r(f.createReader("readers.las"));
-    EXPECT_TRUE(r.get());
-    r->setOptions(ops1);
+    LasReader r;
+    r.setOptions(ops1);
 
     Options o;
     Option length("length", 1000, "length");
     o.add(length);
 
     // create the tile filter and prepare
-    FilterPtr s(f.createFilter("filters.splitter"));
-    EXPECT_TRUE(s.get());
-    s->setOptions(o);
-    s->setInput(r.get());
+    SplitterFilter s;
+    s.setOptions(o);
+    s.setInput(r);
 
     PointContext ctx;
     PointBufferPtr buf(new PointBuffer(ctx));
-    s->prepare(ctx);
+    s.prepare(ctx);
 
-    StageTester::ready(r.get(), ctx);
-    PointBufferSet pbSet = StageTester::run(r.get(), buf);
-    StageTester::done(r.get(), ctx);
+    StageTester::ready(r, ctx);
+    PointBufferSet pbSet = StageTester::run(r, buf);
+    StageTester::done(r, ctx);
     EXPECT_EQ(pbSet.size(), 1u);
     buf = *pbSet.begin();
 
-    StageTester::ready(s.get(), ctx);
-    pbSet = StageTester::run(s.get(), buf);
-    StageTester::done(s.get(), ctx);
+    StageTester::ready(s, ctx);
+    pbSet = StageTester::run(s, buf);
+    StageTester::done(s, ctx);
 
     std::vector<PointBufferPtr> buffers;
     for (auto it = pbSet.begin(); it != pbSet.end(); ++it)

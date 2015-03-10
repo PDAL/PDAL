@@ -37,6 +37,7 @@
 #include <pdal/KDIndex.hpp>
 #include <pdal/Kernel.hpp>
 #include <pdal/PointBuffer.hpp>
+#include <pdal/plugin.h>
 #include <pdal/Stage.hpp>
 #include <pdal/util/FileUtils.hpp>
 
@@ -50,6 +51,9 @@
 #include <boost/accumulators/statistics/min.hpp>
 #include <boost/accumulators/statistics/count.hpp>
 //#include <boost/accumulators/statistics/density.hpp>
+
+extern "C" int32_t DeltaKernel_ExitFunc();
+extern "C" PF_ExitFunc DeltaKernel_InitPlugin();
 
 namespace pdal
 {
@@ -99,13 +103,13 @@ public:
 class PDAL_DLL DeltaKernel : public Kernel
 {
 public:
-    SET_KERNEL_NAME ("delta", "Delta Kernel")
-    SET_KERNEL_LINK ("http://pdal.io/kernels/kernels.delta.html")
- 
-    DeltaKernel();
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
     int execute(); // overrride
     
 private:
+    DeltaKernel();
     void addSwitches(); // overrride
     
     std::string m_sourceFile;
@@ -134,4 +138,5 @@ private:
 
 };
 
-} // pdal
+} // namespace pdal
+

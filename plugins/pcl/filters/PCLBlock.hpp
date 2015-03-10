@@ -39,31 +39,27 @@
 
 namespace pdal
 {
-namespace filters
-{
 
 class PDAL_DLL PCLBlock : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.pclblock", "PCL Block implementation")
-    SET_STAGE_LINK("http://www.pdal.io/stages/filters.pclblock.html")
-    SET_PLUGIN_VERSION("1.0.0b1")
-
     PCLBlock() : Filter()
     {}
+
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
 private:
     std::string m_filename;
     std::string m_json;
 
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContext ctx);
     virtual PointBufferSet run(PointBufferPtr buf);
 
     PCLBlock& operator=(const PCLBlock&); // not implemented
     PCLBlock(const PCLBlock&); // not implemented
 };
 
-} // namespace filters
 } // namespace pdal
 

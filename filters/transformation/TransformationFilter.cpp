@@ -34,14 +34,22 @@
 
 #include "TransformationFilter.hpp"
 
-#include <sstream>
-
 #include <pdal/pdal_error.hpp>
+#include <pdal/pdal_export.hpp>
 
+#include <sstream>
 
 namespace pdal
 {
 
+static PluginInfo const s_info {
+    "filters.transformation",
+    "Transform each point using a 4x4 transformation matrix",
+    "http://pdal.io/stages/filters.transformation.html" };
+
+CREATE_STATIC_PLUGIN(1, 0, TransformationFilter, Filter, s_info)
+
+std::string TransformationFilter::getName() const { return s_info.name; }
 
 TransformationMatrix transformationMatrixFromString(const std::string& s)
 {

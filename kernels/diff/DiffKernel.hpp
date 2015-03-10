@@ -37,9 +37,13 @@
 #include <pdal/Kernel.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/plugin.h>
 #include <pdal/PointBuffer.hpp>
 
 #include <boost/property_tree/ptree.hpp>
+
+extern "C" int32_t DiffKernel_ExitFunc();
+extern "C" PF_ExitFunc DiffKernel_InitPlugin();
 
 namespace pdal
 {
@@ -48,14 +52,14 @@ namespace pdal
 class PDAL_DLL DiffKernel : public Kernel
 {
 public:
-    SET_KERNEL_NAME ("diff", "Diff Kernel")
-    SET_KERNEL_LINK ("http://pdal.io/kernels/kernels.diff.html")
- 
-    DiffKernel();
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
     int execute(); // overrride
     
     
 private:
+    DiffKernel();
     void addSwitches(); // overrride
     void validateSwitches(); // overrride
     
@@ -68,4 +72,5 @@ private:
     bool m_useJSON;
 };
 
-} // pdal
+} // namespace pdal
+

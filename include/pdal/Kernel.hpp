@@ -34,12 +34,9 @@
 
 #pragma once
 
-#include <pdal/pdal_internal.hpp>
-#include <pdal/pdal_error.hpp>
-#include <pdal/PDALUtils.hpp>
-#include <cstdarg>
-
 #include <pdal/KernelSupport.hpp>
+#include <pdal/pdal_export.hpp>
+#include <pdal/pdal_error.hpp>
 
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(push)
@@ -50,9 +47,22 @@
 #  pragma warning(pop)
 #endif
 
+#include <cstdint>
+#include <iosfwd>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
+
 namespace po = boost::program_options;
+
 namespace pdal
 {
+
+class Options;
+class PointBuffer;
+
+typedef std::shared_ptr<PointBuffer> PointBufferPtr;
 
 //
 // The application base class gives us these common options:
@@ -63,19 +73,23 @@ namespace pdal
 class PDAL_DLL Kernel
 {
 public:
+    virtual ~Kernel()
+    {}
+
     // call this, to start the machine
     int run(int argc, const char* argv[], const std::string& appName);
 
     bool isDebug() const;
     uint32_t getVerboseLevel() const;
+    virtual std::string getName() const = 0;
     bool isVisualize() const;
-    void visualize(PointBufferPtr buffer) const;
-    //void visualize(PointBufferPtr input_buffer, PointBufferPtr output_buffer) const;
-    void printError(const std::string&) const;
+    void visualize(PointBufferPtr buffer);
 
 protected:
     // this is protected; your derived class ctor will be the public entry point
     Kernel();
+    Stage& makeReader(const std::string& inputFile);
+    Stage& makeWriter(const std::string& outputFile, Stage& parent);
 
 public:
     // implement this, with calls to addOptionSet()
@@ -89,7 +103,7 @@ public:
     // it will be wrapped in a global catch try/block for you
     virtual int execute() = 0;
 
-    void addSwitchSet(boost::program_options::options_description* options);
+    void addSwitchSet(po::options_description* options);
     void addPositionalSwitch(const char* name, int max_count);
     void setCommonOptions(Options &options);
 
@@ -107,24 +121,12 @@ public:
         return m_extra_stage_options;
     }
 
-    virtual std::string getName() const = 0;
-    virtual std::string getDescription() const = 0;
-    static std::string s_getInfoLink()
-    {
-        return std::string();
-    }
-
-#define SET_KERNEL_NAME(name, description)  \
-    static std::string s_getName() { return name; }  \
-    std::string getName() const { return name; }  \
-    static std::string s_getDescription() { return description; }  \
-    std::string getDescription() const { return description; }
-
-#define SET_KERNEL_LINK(infolink) \
-    static std::string s_getInfoLink() { return infolink; }  \
-    std::string getInfoLink() const { return infolink; }
-
 protected:
+    Stage& ownStage(Stage *s)
+    {
+        m_stages.push_back(std::unique_ptr<Stage>(s));
+        return *s;
+    }
     bool m_usestdin;
 
 private:
@@ -156,11 +158,12 @@ private:
     std::string m_offsets;
     bool m_visualize;
 
-    std::vector<boost::program_options::options_description*> m_options;
-    boost::program_options::positional_options_description m_positionalOptions;
-    boost::program_options::variables_map m_variablesMap;
+    std::vector<po::options_description*> m_options;
+    po::positional_options_description m_positionalOptions;
+    po::variables_map m_variablesMap;
     std::vector<std::string> m_extra_options;
     std::map<std::string, Options> m_extra_stage_options;
+    std::vector<std::unique_ptr<Stage>> m_stages;
 
     Kernel& operator=(const Kernel&); // not implemented
     Kernel(const Kernel&); // not implemented
@@ -169,3 +172,4 @@ private:
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const Kernel&);
 
 } // namespace pdal
+

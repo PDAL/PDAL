@@ -32,21 +32,26 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "../PCLConversions.hpp"
 #include "PCLBlock.hpp"
+
+#include "PCLConversions.hpp"
+#include "PCLPipeline.h"
 
 #include <pcl/console/print.h>
 #include <pcl/point_types.h>
 #include <pcl/io/pcd_io.h>
 
-#include "../pipeline/PCLPipeline.h"
-
-CREATE_FILTER_PLUGIN(pclblock, pdal::filters::PCLBlock)
-
 namespace pdal
 {
-namespace filters
-{
+
+static PluginInfo const s_info {
+    "filters.pclblock",
+    "PCL Block implementation",
+    "http://pdal.io/stages/filters.pclblock.html" };
+
+CREATE_SHARED_PLUGIN(1, 0, PCLBlock, Filter, s_info)
+
+std::string PCLBlock::getName() const { return s_info.name; }
 
 /** \brief This method processes the PointBuffer through the given pipeline. */
 
@@ -55,13 +60,6 @@ void PCLBlock::processOptions(const Options& options)
     m_filename = options.getValueOrDefault<std::string>("filename", "");
     m_json = options.getValueOrDefault<std::string>("json", "");
 }
-
-
-void PCLBlock::ready(PointContext ctx)
-{
-
-}
-
 
 PointBufferSet PCLBlock::run(PointBufferPtr input)
 {
@@ -145,5 +143,5 @@ PointBufferSet PCLBlock::run(PointBufferPtr input)
     return pbSet;
 }
 
-} // filters
-} // pdal
+} // namespace pdal
+

@@ -34,17 +34,24 @@
 
 #include "RandomKernel.hpp"
 
+#include <boost/program_options.hpp>
+
 namespace pdal
 {
 
+static PluginInfo const s_info {
+    "kernels.random",
+    "Random Kernel",
+    "http://pdal.io/kernels/kernels.random.html" };
+
+CREATE_STATIC_PLUGIN(1, 0, RandomKernel, Kernel, s_info)
+
+std::string RandomKernel::getName() const { return s_info.name; }
+
 RandomKernel::RandomKernel()
-    : Kernel()
-    , m_outputFile("")
-    , m_bCompress(false)
+    : m_bCompress(false)
     , m_numPointsToWrite(0)
     , m_distribution("uniform")
-    , m_means("")
-    , m_stdevs("")
 {
 }
 
@@ -76,7 +83,8 @@ void RandomKernel::addSwitches()
     addPositionalSwitch("output", 1);
 }
 
-Stage* RandomKernel::makeReader(Options readerOptions)
+
+Stage& RandomKernel::makeReader(Options readerOptions)
 {
     if (isDebug())
     {
@@ -90,11 +98,12 @@ Stage* RandomKernel::makeReader(Options readerOptions)
     }
 
     StageFactory factory;
-    ReaderPtr reader_stage(factory.createReader("readers.faux"));
-    reader_stage->setOptions(readerOptions);
+    Stage& readerStage = ownStage(factory.createStage("readers.faux"));
+    readerStage.setOptions(readerOptions);
 
-    return reader_stage.get();
+    return readerStage;
 }
+
 
 int RandomKernel::execute()
 {
@@ -103,7 +112,8 @@ int RandomKernel::execute()
         boost::char_separator<char> sep(SEPARATORS);
         std::vector<double> means;
         tokenizer mean_tokens(m_means, sep);
-        for (tokenizer::iterator t = mean_tokens.begin(); t != mean_tokens.end(); ++t)
+        for (tokenizer::iterator t = mean_tokens.begin();
+            t != mean_tokens.end(); ++t)
         {
             means.push_back(boost::lexical_cast<double>(*t));
         }
@@ -117,7 +127,8 @@ int RandomKernel::execute()
 
         std::vector<double> stdevs;
         tokenizer stdev_tokens(m_stdevs, sep);
-        for (tokenizer::iterator t = stdev_tokens.begin(); t != stdev_tokens.end(); ++t)
+        for (tokenizer::iterator t = stdev_tokens.begin();
+            t != stdev_tokens.end(); ++t)
         {
             stdevs.push_back(boost::lexical_cast<double>(*t));
         }
@@ -156,28 +167,26 @@ int RandomKernel::execute()
         }
     }
 
-    Stage* final_stage = makeReader(readerOptions);
+    Stage& writer = makeWriter(m_outputFile, makeReader(readerOptions));
+    writer.setOptions(writerOptions);
 
-    Writer* writer = KernelSupport::makeWriter(m_outputFile, final_stage);
-    writer->setOptions(writerOptions);
     PointContext ctx;
 
     UserCallback* callback;
     if (!getProgressShellCommand().size())
-        callback = static_cast<pdal::UserCallback*>(new PercentageCallback);
+        callback = static_cast<UserCallback*>(new PercentageCallback);
     else
-        callback = static_cast<pdal::UserCallback*>(new ShellScriptCallback(getProgressShellCommand()));
-    writer->setUserCallback(callback);
-    writer->prepare(ctx);
-    PointBufferSet pbSet = writer->execute(ctx);
+        callback = static_cast<UserCallback*>(
+            new ShellScriptCallback(getProgressShellCommand()));
+    writer.setUserCallback(callback);
+    writer.prepare(ctx);
+    PointBufferSet pbSet = writer.execute(ctx);
 
     if (isVisualize())
         visualize(*pbSet.begin());
-
-    delete writer;
-    delete final_stage;
 
     return 0;
 }
 
 } // pdal
+

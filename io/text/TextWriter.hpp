@@ -34,29 +34,35 @@
 
 #pragma once
 
-#include <pdal/Writer.hpp>
-#include <pdal/util/FileUtils.hpp>
+#include <pdal/pdal_export.hpp>
+#include <pdal/plugin.h>
 #include <pdal/StageFactory.hpp>
+#include <pdal/util/FileUtils.hpp>
+#include <pdal/Writer.hpp>
 
 #include <memory>
 #include <vector>
 #include <string>
+
+extern "C" int32_t TextWriter_ExitFunc();
+extern "C" PF_ExitFunc TextWriter_InitPlugin();
 
 namespace pdal
 {
 
 typedef std::shared_ptr<std::ostream> FileStreamPtr;
 
-class PDAL_DLL TextWriter : public pdal::Writer
+class PDAL_DLL TextWriter : public Writer
 {
 public:
-    SET_STAGE_NAME("writers.text", "Text Writer")
-    SET_STAGE_LINK("http://pdal.io/stages/writers.text.html")
-
-    TextWriter() : pdal::Writer()
+    TextWriter()
     {}
 
-    static Options getDefaultOptions();
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+
+    Options getDefaultOptions();
 
 private:
     virtual void processOptions(const Options&);

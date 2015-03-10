@@ -41,15 +41,12 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/BufferReader.hpp"
   "${PDAL_HEADERS_DIR}/Compression.hpp"
   "${PDAL_HEADERS_DIR}/Dimension.hpp"
-  "${PDAL_HEADERS_DIR}/Drivers.hpp"
   "${PDAL_HEADERS_DIR}/Filter.hpp"
-  "${PDAL_HEADERS_DIR}/Filters.hpp"
   "${PDAL_HEADERS_DIR}/GDALUtils.hpp"
   "${PDAL_HEADERS_DIR}/GlobalEnvironment.hpp"
   "${PDAL_HEADERS_DIR}/gitsha.h"
   "${PDAL_HEADERS_DIR}/KDIndex.hpp"
   "${PDAL_HEADERS_DIR}/KernelFactory.hpp"
-  "${PDAL_HEADERS_DIR}/KernelInfo.hpp"
   "${PDAL_HEADERS_DIR}/Kernel.hpp"
   "${PDAL_HEADERS_DIR}/KernelSupport.hpp"
   "${PDAL_HEADERS_DIR}/Log.hpp"
@@ -67,17 +64,16 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/SpatialReference.hpp"
   "${PDAL_HEADERS_DIR}/Stage.hpp"
   "${PDAL_HEADERS_DIR}/StageFactory.hpp"
-  "${PDAL_HEADERS_DIR}/StageInfo.hpp"
   "${PDAL_HEADERS_DIR}/StreamFactory.hpp"
   "${PDAL_HEADERS_DIR}/UserCallback.hpp"
   "${PDAL_HEADERS_DIR}/Utils.hpp"
   "${PDAL_HEADERS_DIR}/Writer.hpp"
-  "${PDAL_HEADERS_DIR}/Kernels.hpp"
     ${PDAL_XML_HEADER}
     ${DB_DRIVER_HEADERS}
 )
 
 set(PDAL_BASE_CPP
+  DynamicLibrary.cpp
   Filter.cpp
   gitsha.cpp
   GDALUtils.cpp
@@ -85,7 +81,6 @@ set(PDAL_BASE_CPP
   KDIndex.cpp
   Kernel.cpp
   KernelFactory.cpp
-  KernelInfo.cpp
   KernelSupport.cpp
   Log.cpp
   Options.cpp
@@ -93,13 +88,13 @@ set(PDAL_BASE_CPP
   PipelineManager.cpp
   PipelineReader.cpp
   PipelineWriter.cpp
+  PluginManager.cpp
   PointBuffer.cpp
   QuadIndex.cpp
   Reader.cpp
   SpatialReference.cpp
   Stage.cpp
   StageFactory.cpp
-  StageInfo.cpp
   StreamFactory.cpp
   Utils.cpp
   Writer.cpp

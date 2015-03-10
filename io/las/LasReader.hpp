@@ -34,13 +34,18 @@
 
 #pragma once
 
+#include <pdal/pdal_export.hpp>
+#include <pdal/plugin.h>
 #include <pdal/Reader.hpp>
-
 #include <pdal/StreamFactory.hpp>
+
 #include "LasError.hpp"
 #include "LasHeader.hpp"
 #include "LasUtils.hpp"
 #include "ZipPoint.hpp"
+
+extern "C" int32_t LasReader_ExitFunc();
+extern "C" PF_ExitFunc LasReader_InitPlugin();
 
 namespace pdal
 {
@@ -50,21 +55,19 @@ class LasHeader;
 class LeExtractor;
 class PointDimensions;
 
-#define LASREADERDOCS "ASPRS LAS 1.0 - 1.4 read support. LASzip support is also \n" \
-                      "enabled through this driver if LASzip was found diring \n" \
-                      "compilation."
 class PDAL_DLL LasReader : public pdal::Reader
 {
     friend class NitfReader;
 public:
-    SET_STAGE_NAME("readers.las", LASREADERDOCS)
-    SET_STAGE_LINK("http://pdal.io/stages/readers.las.html")
-
     LasReader() : pdal::Reader(), m_index(0),
             m_istream(NULL)
         {}
 
-    static Options getDefaultOptions();
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+
+    Options getDefaultOptions();
 
     const LasHeader& header() const
         { return m_lasHeader; }

@@ -35,6 +35,7 @@
 #include <pdal/GlobalEnvironment.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/SpatialReference.hpp>
+#include <pdal/UserCallback.hpp>
 
 #include "StageRunner.hpp"
 
@@ -45,6 +46,7 @@ namespace pdal
 
 
 Stage::Stage()
+  : m_callback(new UserCallback)
 {
     Construct();
 }
@@ -94,15 +96,15 @@ PointBufferSet Stage::execute(PointContextRef ctx)
     std::vector<StageRunnerPtr> runners;
 
     ready(ctx);
-    for (auto it = buffers.begin(); it != buffers.end(); ++it)
+    for (auto const& it : buffers)
     {
-        StageRunnerPtr runner(new StageRunner(this, *it));
+        StageRunnerPtr runner(new StageRunner(this, it));
         runners.push_back(runner);
         runner->run();
     }
-    for (auto it = runners.begin(); it != runners.end(); ++it)
+    for (auto const& it : runners)
     {
-        StageRunnerPtr runner(*it);
+        StageRunnerPtr runner(it);
         PointBufferSet temp = runner->wait();
         outBuffers.insert(temp.begin(), temp.end());
     }
@@ -204,15 +206,15 @@ void Stage::setSpatialReference(MetadataNode& m,
     }
 }
 
-std::vector<Stage*> Stage::findStage(std::string name)
+std::vector<Stage *> Stage::findStage(std::string name)
 {
-    std::vector<Stage*> output;
+    std::vector<Stage *> output;
+
     if (boost::iequals(getName(), name))
         output.push_back(this);
 
-    for (auto s = m_inputs.begin(); s != m_inputs.end(); ++s)
+    for (auto const& stage : m_inputs)
     {
-        Stage* stage = (*s);
         if (boost::iequals(stage->getName(), name))
             output.push_back(stage);
         if (stage->getInputs().size())

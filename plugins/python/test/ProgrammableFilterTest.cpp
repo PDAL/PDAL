@@ -38,6 +38,7 @@
 #include <pdal/PipelineManager.hpp>
 #include <pdal/StageFactory.hpp>
 #include <stats/StatsFilter.hpp>
+#include <faux/FauxReader.hpp>
 
 #include "Support.hpp"
 
@@ -54,8 +55,8 @@ TEST(ProgrammableFilterTest, ProgrammableFilterTest_test1)
     ops.add("num_points", 10);
     ops.add("mode", "ramp");
 
-    ReaderPtr reader(f.createReader("readers.faux"));
-    reader->setOptions(ops);
+    FauxReader reader;
+    reader.setOptions(ops);
 
     Option source("source", "import numpy as np\n"
         "def myfunc(ins,outs):\n"
@@ -79,23 +80,23 @@ TEST(ProgrammableFilterTest, ProgrammableFilterTest_test1)
     opts.add(module);
     opts.add(function);
 
-    FilterPtr filter(f.createFilter("filters.programmable"));
+    std::unique_ptr<Stage> filter(f.createStage("filters.programmable"));
     filter->setOptions(opts);
-    filter->setInput(reader.get());
+    filter->setInput(reader);
 
-    StatsFilter stats;
-    stats.setInput(filter.get());
+    std::unique_ptr<StatsFilter> stats(new StatsFilter);
+    stats->setInput(*filter);
 
     PointContext ctx;
 
-    stats.prepare(ctx);
-    PointBufferSet pbSet = stats.execute(ctx);
+    stats->prepare(ctx);
+    PointBufferSet pbSet = stats->execute(ctx);
     EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
 
-    const stats::Summary& statsX = stats.getStats(Dimension::Id::X);
-    const stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
-    const stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
+    const stats::Summary& statsX = stats->getStats(Dimension::Id::X);
+    const stats::Summary& statsY = stats->getStats(Dimension::Id::Y);
+    const stats::Summary& statsZ = stats->getStats(Dimension::Id::Z);
 
     EXPECT_FLOAT_EQ(statsX.minimum(), 10.0);
     EXPECT_FLOAT_EQ(statsX.maximum(), 11.0);
@@ -137,8 +138,8 @@ TEST(ProgrammableFilterTest, add_dimension)
     ops.add("num_points", 10);
     ops.add("mode", "ramp");
 
-    ReaderPtr reader(f.createReader("readers.faux"));
-    reader->setOptions(ops);
+    FauxReader reader;
+    reader.setOptions(ops);
 
     Option source("source", "import numpy\n"
         "def myfunc(ins,outs):\n"
@@ -157,9 +158,9 @@ TEST(ProgrammableFilterTest, add_dimension)
     opts.add(intensity);
     opts.add(scanDirection);
 
-    FilterPtr filter(f.createFilter("filters.programmable"));
+    std::unique_ptr<Stage> filter(f.createStage("filters.programmable"));
     filter->setOptions(opts);
-    filter->setInput(reader.get());
+    filter->setInput(reader);
 
     PointContext ctx;
     filter->prepare(ctx);

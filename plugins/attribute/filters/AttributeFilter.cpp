@@ -45,10 +45,16 @@
 #include <ogr_geometry.h>
 #include <geos_c.h>
 
-CREATE_FILTER_PLUGIN(attribute, pdal::AttributeFilter)
-
 namespace pdal
 {
+
+static PluginInfo const s_info {
+    "filters.attribute",
+    "Assign values for a dimension using a specified value, \n" \
+        "an OGR-readable data source, or an OGR SQL query.",
+    "http://pdal.io/stages/filters.attribute.html" };
+
+CREATE_SHARED_PLUGIN(1, 0, AttributeFilter, Filter, s_info)
 
 struct OGRDataSourceDeleter
 {

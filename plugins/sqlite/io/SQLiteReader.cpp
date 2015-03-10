@@ -35,10 +35,17 @@
 #include "SQLiteReader.hpp"
 #include <pdal/PointBuffer.hpp>
 
-CREATE_READER_PLUGIN(sqlite, pdal::SQLiteReader)
-
 namespace pdal
 {
+
+static PluginInfo const s_info {
+    "readers.sqlite",
+    "Read data from SQLite3 database files.",
+    ""};
+
+CREATE_SHARED_PLUGIN(1, 0, SQLiteReader, Reader, s_info)
+
+std::string SQLiteReader::getName() const { return s_info.name; }
 
 void SQLiteReader::initialize()
 {

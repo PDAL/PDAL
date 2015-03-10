@@ -64,9 +64,8 @@ TEST(SbetWriterTest, testConstructor)
     reader.setOptions(makeReaderOptions());
     SbetWriter writer;
     writer.setOptions(makeWriterOptions());
-    writer.setInput(&reader);
+    writer.setInput(reader);
 
-    EXPECT_TRUE(writer.getDescription() == "SBET Writer");
     EXPECT_EQ(writer.getName(), "writers.sbet");
 }
 
@@ -81,7 +80,7 @@ TEST(SbetWriterTest, testWrite)
         reader.setOptions(makeReaderOptions());
         SbetWriter writer;
         writer.setOptions(makeWriterOptions());
-        writer.setInput(&reader);
+        writer.setInput(reader);
 
         PointContext ctx;
         writer.prepare(ctx);

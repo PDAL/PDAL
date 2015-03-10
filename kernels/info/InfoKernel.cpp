@@ -41,8 +41,19 @@
 #include <pdal/PDALUtils.hpp>
 #include <pdal/pdal_config.hpp>
 
+#include <boost/program_options.hpp>
+
 namespace pdal
 {
+
+static PluginInfo const s_info {
+    "kernels.info",
+    "Info Kernel",
+    "http://pdal.io/kernels/kernels.info.html" };
+
+CREATE_STATIC_PLUGIN(1, 0, InfoKernel, Kernel, s_info)
+
+std::string InfoKernel::getName() const { return s_info.name; }
 
 InfoKernel::InfoKernel()
     : m_showStats(false)
@@ -346,7 +357,7 @@ int InfoKernel::execute()
 
     m_manager = std::unique_ptr<PipelineManager>(
         KernelSupport::makePipeline(filename));
-    m_reader = static_cast<Reader *>(m_manager->getStage());
+    m_reader = m_manager->getStage();
     Stage *stage = m_reader;
 
     if (m_Dimensions.size())
@@ -357,14 +368,16 @@ int InfoKernel::execute()
 
     if (m_showStats || m_showAll)
     {
-        m_statsStage = m_manager->addFilter("filters.stats", stage);
+        m_statsStage = &(m_manager->addFilter("filters.stats"));
         m_statsStage->setOptions(options);
+        m_statsStage->setInput(*stage);
         stage = m_statsStage;
     }
     if (m_boundary || m_showAll)
     {
-        m_hexbinStage = m_manager->addFilter("filters.hexbin", stage);
-        stage->setOptions(options);
+        m_hexbinStage = &(m_manager->addFilter("filters.hexbin"));
+        m_hexbinStage->setOptions(options);
+        m_hexbinStage->setInput(*stage);
         stage = m_hexbinStage;
     }
 

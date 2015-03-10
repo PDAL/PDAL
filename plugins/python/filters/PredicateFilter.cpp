@@ -38,10 +38,17 @@
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
 
-CREATE_FILTER_PLUGIN(predicate, pdal::PredicateFilter)
-
 namespace pdal
 {
+
+static PluginInfo const s_info {
+    "filters.predicate",
+    "Filter data using inline Python expressions.",
+    "http://pdal.io/stages/filters.predicate.html" };
+
+CREATE_SHARED_PLUGIN(1, 0, PredicateFilter, Filter, s_info)
+
+std::string PredicateFilter::getName() const { return s_info.name; }
 
 void PredicateFilter::processOptions(const Options& options)
 {

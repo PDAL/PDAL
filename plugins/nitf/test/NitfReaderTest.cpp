@@ -40,6 +40,7 @@
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
 #include <pdal/StageFactory.hpp>
+#include <las/LasWriter.hpp>
 
 #include "Support.hpp"
 
@@ -63,12 +64,11 @@ TEST(NitfReaderTest, test_one)
 
     PointContext ctx;
 
-    ReaderPtr nitf_reader(f.createReader("readers.nitf"));
+    std::shared_ptr<Stage> nitf_reader(f.createStage("readers.nitf"));
     EXPECT_TRUE(nitf_reader.get());
     nitf_reader->setOptions(nitf_opts);
     nitf_reader->prepare(ctx);
     PointBufferSet pbSet = nitf_reader->execute(ctx);
-    EXPECT_EQ(nitf_reader->getDescription(), "NITF Reader");
     EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
 
@@ -91,7 +91,7 @@ TEST(NitfReaderTest, test_one)
 
     PointContext ctx2;
 
-    ReaderPtr las_reader(f.createReader("readers.las"));
+    std::shared_ptr<Stage> las_reader(f.createStage("readers.las"));
     EXPECT_TRUE(las_reader.get());
     las_reader->setOptions(las_opts);
     las_reader->prepare(ctx2);
@@ -156,22 +156,21 @@ TEST(NitfReaderTest, optionSrs)
 
     PointContext ctx;
 
-    ReaderPtr nitfReader(f.createReader("readers.nitf"));
+    std::shared_ptr<Stage> nitfReader(f.createStage("readers.nitf"));
     EXPECT_TRUE(nitfReader.get());
     nitfReader->setOptions(nitfOpts);
 
     Options lasOpts;
     lasOpts.add("filename", "/dev/null");
 
-    WriterPtr lasWriter(f.createWriter("writers.las"));
-    EXPECT_TRUE(lasWriter.get());
-    lasWriter->setInput(nitfReader.get());
-    lasWriter->setOptions(lasOpts);;
+    LasWriter writer;
+    writer.setInput(*nitfReader);
+    writer.setOptions(lasOpts);;
 
-    lasWriter->prepare(ctx);
-    PointBufferSet pbSet = lasWriter->execute(ctx);
+    writer.prepare(ctx);
+    PointBufferSet pbSet = writer.execute(ctx);
 
     EXPECT_EQ(sr, nitfReader->getSpatialReference().getWKT());
-    EXPECT_EQ("", lasWriter->getSpatialReference().getWKT());
+    EXPECT_EQ("", writer.getSpatialReference().getWKT());
     EXPECT_EQ(sr, ctx.spatialRef().getWKT());
 }

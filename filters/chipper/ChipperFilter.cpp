@@ -69,6 +69,14 @@ be stored.
 namespace pdal
 {
 
+static PluginInfo const s_info {
+    "filters.chipper",
+    "Organize points into spatially contiguous, squarish, and non-overlapping chips.",
+    "http://pdal.io/stages/filters.chipper.html" };
+
+CREATE_STATIC_PLUGIN(1, 0, ChipperFilter, Filter, s_info)
+
+std::string ChipperFilter::getName() const { return s_info.name; }
 
 void ChipperFilter::processOptions(const Options& options)
 {

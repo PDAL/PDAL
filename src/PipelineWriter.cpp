@@ -134,7 +134,7 @@ void PipelineWriter::writeMetadata(boost::property_tree::ptree& tree,
 
 void PipelineWriter::writePipeline(const std::string& filename) const
 {
-    const Stage* stage = m_manager.getStage();
+    Stage *stage = m_manager.getStage();
 
     ptree tree = generateTreeFromStage(*stage);
 #if BOOST_VERSION >= 105600

@@ -34,9 +34,20 @@
 
 #include "PipelineKernel.hpp"
 
+#include <boost/program_options.hpp>
+
 namespace pdal
 {
-    
+
+static PluginInfo const s_info {
+    "kernels.pipeline",
+    "Pipeline Kernel",
+    "http://pdal.io/kernels/kernels.pipeline.html" };
+
+CREATE_STATIC_PLUGIN(1, 0, PipelineKernel, Kernel, s_info)
+
+std::string PipelineKernel::getName() const { return s_info.name; }
+
 PipelineKernel::PipelineKernel() : m_validate(false)
 {}
 
@@ -88,7 +99,7 @@ int PipelineKernel::execute()
     {
         std::string name = pi.first;
         Options options = pi.second;
-        std::vector<Stage*> stages = manager.getStage()->findStage(name);
+        std::vector<Stage *> stages = manager.getStage()->findStage(name);
         for (const auto& s : stages)
         {
             Options opts = s->getOptions();

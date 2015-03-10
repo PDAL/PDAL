@@ -95,10 +95,10 @@ static bool fileIsCompressed(const std::string& name)
 
     Options ops;
     ops.add("filename", name);
-    LasReader reader;
-    reader.setOptions(ops);
-    reader.prepare(ctx);
-    return reader.header().compressed();
+    std::shared_ptr<LasReader> reader(new LasReader);
+    reader->setOptions(ops);
+    reader->prepare(ctx);
+    return reader->header().compressed();
 }
 
 
@@ -108,11 +108,11 @@ static bool fileHasSrs(const std::string& name)
 
     Options ops;
     ops.add("filename", name);
-    LasReader reader;
-    reader.setOptions(ops);
-    reader.prepare(ctx);
-    reader.execute(ctx);
-    return !reader.getSpatialReference().empty();
+    std::shared_ptr<LasReader> reader(new LasReader);
+    reader->setOptions(ops);
+    reader->prepare(ctx);
+    reader->execute(ctx);
+    return !reader->getSpatialReference().empty();
 }
 
 

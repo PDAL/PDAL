@@ -37,7 +37,6 @@
 #include "PCLConversions.hpp"
 
 #include <pdal/Options.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/PointContext.hpp>
 #include <pdal/StageFactory.hpp>
@@ -48,10 +47,17 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/segmentation/progressive_morphological_filter.h>
 
-CREATE_FILTER_PLUGIN(ground, pdal::GroundFilter)
-
 namespace pdal
 {
+
+static PluginInfo const s_info {
+    "filters.ground",
+    "Progressive morphological filter",
+    "http://pdal.io/stages/filters.ground.html" };
+
+CREATE_SHARED_PLUGIN(1, 0, GroundFilter, Filter, s_info)
+
+std::string GroundFilter::getName() const { return s_info.name; }
 
 void GroundFilter::processOptions(const Options& options)
 {

@@ -34,21 +34,29 @@
 
 #include "TextWriter.hpp"
 
-#include <pdal/util/Algorithm.hpp>
+#include <pdal/pdal_export.hpp>
 #include <pdal/PointBuffer.hpp>
-#include <pdal/pdal_internal.hpp>
+#include <pdal/util/Algorithm.hpp>
 
-#include <iostream>
 #include <algorithm>
+#include <iostream>
 #include <map>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/erase.hpp>
 #include <boost/tokenizer.hpp>
 
-
 namespace pdal
 {
+
+static PluginInfo const s_info {
+    "writers.text",
+    "Text Writer",
+    "http://pdal.io/stages/writers.text.html" };
+
+CREATE_STATIC_PLUGIN(1, 0, TextWriter, Writer, s_info)
+
+std::string TextWriter::getName() const { return s_info.name; }
 
 struct FileStreamDeleter
 {

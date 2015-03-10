@@ -39,20 +39,6 @@ main one, `<pdal/pdal.hpp>`, brings in most of the utility and basic classes
 used throughout the PDAL system. Additionally, the following includes are
 available subject to having the required include directories pathed:
 
-* `#include <pdal/Drivers.hpp>`
-* `#include <pdal/Filters.hpp>`
-* `#include <pdal/Kernels.hpp>`
-
-
-.. note::
-
-    Drivers, Filters, and Kernels bring in *all* of the respective sub includes
-    for those sections of the source tree. You are not required to include
-    everything if you don't need it, however, and it is still possible to
-    selectively include the classes you need as shown in the example below.
-
-
-
 .. code-block:: cpp
 
     #include <pdal/pdal.hpp>

@@ -33,12 +33,20 @@
 ****************************************************************************/
 
 #include "ViewKernel.hpp"
-#include <pdal/KernelFactory.hpp>
 
-CREATE_KERNEL_PLUGIN(view, pdal::ViewKernel)
+#include <pdal/KernelFactory.hpp>
 
 namespace pdal
 {
+
+static PluginInfo const s_info {
+    "kernels.view",
+    "View Kernel",
+    "http://pdal.io/kernels/kernels.view.html" };
+
+CREATE_SHARED_PLUGIN(1, 0, ViewKernel, Kernel, s_info)
+
+std::string ViewKernel::getName() const { return s_info.name; }
 
 // Support for parsing point numbers.  Points can be specified singly or as
 // dash-separated ranges.  i.e. 6-7,8,19-20
@@ -120,9 +128,7 @@ vector<uint32_t> getListOfPoints(std::string p)
 ViewKernel::ViewKernel()
     : Kernel()
     , m_inputFile("")
-{
-    return;
-}
+{}
 
 
 void ViewKernel::validateSwitches()
@@ -131,8 +137,6 @@ void ViewKernel::validateSwitches()
     {
         throw app_usage_error("--input/-i required");
     }
-
-    return;
 }
 
 
@@ -150,7 +154,7 @@ void ViewKernel::addSwitches()
     addPositionalSwitch("input", 1);
 }
 
-std::unique_ptr<Stage> ViewKernel::makeReader(Options readerOptions)
+std::shared_ptr<Stage> ViewKernel::makeReader(Options readerOptions)
 {
     if (isDebug())
     {
@@ -163,11 +167,10 @@ std::unique_ptr<Stage> ViewKernel::makeReader(Options readerOptions)
         readerOptions.add<std::string>("log", "STDERR");
     }
 
-    Stage* stage = KernelSupport::makeReader(m_inputFile);
+    std::shared_ptr<Stage> stage(KernelSupport::makeReader(m_inputFile));
     stage->setOptions(readerOptions);
-    std::unique_ptr<Stage> reader_stage(stage);
 
-    return reader_stage;
+    return stage;
 }
 
 
@@ -178,7 +181,7 @@ int ViewKernel::execute()
     readerOptions.add<bool>("debug", isDebug());
     readerOptions.add<uint32_t>("verbose", getVerboseLevel());
 
-    std::unique_ptr<Stage> readerStage = makeReader(readerOptions);
+    std::shared_ptr<Stage> readerStage(makeReader(readerOptions));
     PointContext ctx;
     readerStage->prepare(ctx);
     PointBufferSet pbSetIn = readerStage->execute(ctx);

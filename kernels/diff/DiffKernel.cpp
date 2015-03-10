@@ -38,12 +38,23 @@
 
 #include <pdal/PDALUtils.hpp>
 
+#include <boost/program_options.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
 using boost::property_tree::ptree;
 
-namespace pdal {
+namespace pdal
+{
+
+static PluginInfo const s_info {
+    "kernels.diff",
+    "Diff Kernel",
+    "http://pdal.io/kernels/kernels.diff.html" };
+
+CREATE_STATIC_PLUGIN(1, 0, DiffKernel, Kernel, s_info)
+
+std::string DiffKernel::getName() const { return s_info.name; }
 
 DiffKernel::DiffKernel()
     : Kernel()
@@ -147,10 +158,11 @@ int DiffKernel::execute()
         sourceOptions.add<bool>("debug", isDebug());
         sourceOptions.add<uint32_t>("verbose", getVerboseLevel());
     }
-    std::unique_ptr<Stage> source(KernelSupport::makeReader(m_sourceFile));
-    source->setOptions(sourceOptions);
-    source->prepare(sourceCtx);
-    PointBufferSet sourceSet = source->execute(sourceCtx);
+
+    Stage& source = makeReader(m_sourceFile);
+    source.setOptions(sourceOptions);
+    source.prepare(sourceCtx);
+    PointBufferSet sourceSet = source.execute(sourceCtx);
 
     ptree errors;
 
@@ -162,10 +174,10 @@ int DiffKernel::execute()
         candidateOptions.add<uint32_t>("verbose", getVerboseLevel());
     }
 
-    std::unique_ptr<Stage> candidate(KernelSupport::makeReader(m_candidateFile));
-    candidate->setOptions(candidateOptions);
-    candidate->prepare(candidateCtx);
-    PointBufferSet candidateSet = candidate->execute(candidateCtx);
+    Stage& candidate = makeReader(m_candidateFile);
+    candidate.setOptions(candidateOptions);
+    candidate.prepare(candidateCtx);
+    PointBufferSet candidateSet = candidate.execute(candidateCtx);
 
     assert(sourceSet.size() == 1);
     assert(candidateSet.size() == 1);
@@ -226,3 +238,4 @@ int DiffKernel::execute()
 }
 
 } // namespace pdal
+

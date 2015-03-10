@@ -35,9 +35,9 @@
 
 #pragma once
 
-#include <pdal/util/FileUtils.hpp>
-
 #include <pdal/Kernel.hpp>
+#include <pdal/pdal_export.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 namespace pdal
 {
@@ -45,17 +45,17 @@ namespace pdal
 class PDAL_DLL ViewKernel : public Kernel
 {
 public:
-    SET_KERNEL_NAME("view", "View Kernel")
-    SET_KERNEL_LINK("http://pdal.io/kernels/kernels.view.html")
-
-    ViewKernel();
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
     int execute();
 
 private:
+    ViewKernel();
     void addSwitches();
     void validateSwitches();
 
-    std::unique_ptr<Stage> makeReader(Options readerOptions);
+    std::shared_ptr<Stage> makeReader(Options readerOptions);
 
     std::string m_inputFile;
     std::string m_pointIndexes;

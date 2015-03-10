@@ -166,14 +166,14 @@ Word #       Content
 
 */
 
-#include <algorithm>
-#include <map>
+#include "QfitReader.hpp"
 
 #include <pdal/PointBuffer.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/Utils.hpp>
 
-#include "QfitReader.hpp"
+#include <algorithm>
+#include <map>
 
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127)  // conditional expression is constant
@@ -181,6 +181,15 @@ Word #       Content
 
 namespace pdal
 {
+
+static PluginInfo const s_info {
+    "readers.qfit",
+    "QFIT Reader",
+    "http://pdal.io/stages/readers.qfit.html" };
+
+CREATE_STATIC_PLUGIN(1, 0, QfitReader, Reader, s_info)
+
+std::string QfitReader::getName() const { return s_info.name; }
 
 QfitReader::QfitReader() : pdal::Reader(),
     m_format(QFIT_Format_Unknown), m_size(0), m_littleEndian(false)

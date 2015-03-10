@@ -36,14 +36,18 @@
 #include <vector>
 
 #include <pdal/Reader.hpp>
-#include <pdal/pdal_macros.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/PointContext.hpp>
 #include <pdal/util/Extractor.hpp>
 #include <pdal/util/Georeference.hpp>
 #include <pdal/util/IStream.hpp>
+#include <pdal/pdal_export.hpp>
+#include <pdal/plugin.h>
+
 #include "OptechCommon.hpp"
 
+extern "C" int32_t OptechReader_ExitFunc();
+extern "C" PF_ExitFunc OptechReader_InitPlugin();
 
 namespace pdal
 {
@@ -52,8 +56,9 @@ namespace pdal
 class PDAL_DLL OptechReader : public Reader
 {
 public:
-    SET_STAGE_NAME("readers.optech", "Optech reader")
-    SET_STAGE_LINK("http://pdal.io/stages/reader.optech.html")
+    static void *create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
     static const size_t MaximumNumberOfReturns = 4;
     static const size_t NumBytesInRecord = 69;

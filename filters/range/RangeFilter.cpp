@@ -44,6 +44,14 @@
 namespace pdal
 {
 
+static PluginInfo const s_info {
+    "filters.range",
+    "Pass only points given a dimension/range.",
+    "http://pdal.io/stages/filters.range.html" };
+
+CREATE_STATIC_PLUGIN(1, 0, RangeFilter, Filter, s_info)
+
+std::string RangeFilter::getName() const { return s_info.name; }
 
 void RangeFilter::processOptions(const Options& options)
 {

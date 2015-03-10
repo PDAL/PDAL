@@ -32,16 +32,26 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/pdal_internal.hpp>
+#include "BpfReader.hpp"
 
 #include <zlib.h>
 
 #include <pdal/Options.hpp>
-
-#include "BpfReader.hpp"
+#include <pdal/pdal_export.hpp>
 
 namespace pdal
 {
+
+static PluginInfo const s_info {
+    "readers.bpf",
+    "\"Binary Point Format\" (BPF) reader support. BPF is a simple \n" \
+        "DoD and research format that is used by some sensor and \n" \
+        "processing chains.",
+    "http://pdal.io/stages/readers.bpf.html" };
+
+CREATE_STATIC_PLUGIN(1, 0, BpfReader, Reader, s_info)
+
+std::string BpfReader::getName() const { return s_info.name; }
 
 void BpfReader::processOptions(const Options&)
 {

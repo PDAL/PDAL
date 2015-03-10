@@ -34,12 +34,17 @@
 
 #pragma once
 
+#include "BpfHeader.hpp"
+
+#include <pdal/pdal_export.hpp>
+#include <pdal/plugin.h>
+#include <pdal/Writer.hpp>
+#include <pdal/util/OStream.hpp>
+
 #include <vector>
 
-#include <pdal/util/OStream.hpp>
-#include <pdal/Writer.hpp>
-
-#include "BpfHeader.hpp"
+extern "C" int32_t BpfWriter_ExitFunc();
+extern "C" PF_ExitFunc BpfWriter_InitPlugin();
 
 namespace pdal
 {
@@ -47,14 +52,11 @@ namespace pdal
 class PDAL_DLL BpfWriter : public Writer
 {
 public:
-    SET_STAGE_NAME("writers.bpf",
-        "\"Binary Point Format\" (BPF) writer support. "
-        "BPF is a simple \n"
-        "DoD and research format that is used by some sensor and \n"
-        "processing chains.");
-    SET_STAGE_LINK("http://pdal.io/stages/writers.bpf.html")
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
-    static Options getDefaultOptions();
+    Options getDefaultOptions();
 
 private:
     OLeStream m_stream;

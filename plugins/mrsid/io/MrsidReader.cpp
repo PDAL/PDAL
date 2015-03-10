@@ -38,12 +38,17 @@
 
 #include <boost/algorithm/string.hpp>
 
-
-CREATE_READER_PLUGIN(mrsid, pdal::MrsidReader)
-
 namespace pdal
 {
 
+static PluginInfo const s_info {
+    "readers.mrsid",
+    "MrSID Reader",
+    "http://www.pdal.io/stages/readers.mrsid.html" };
+
+CREATE_SHARED_PLUGIN(1, 0, MrsidReader, Reader, s_info)
+
+std::string MrsidReader::getName() const { return s_info.name; }
 
 MrsidReader::MrsidReader(LizardTech::PointSource *ps)
     : pdal::Reader()

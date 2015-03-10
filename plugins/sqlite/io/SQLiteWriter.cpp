@@ -45,10 +45,17 @@
 #include <gdal.h>
 #include <ogr_api.h>
 
-CREATE_WRITER_PLUGIN(sqlite, pdal::SQLiteWriter)
-
 namespace pdal
 {
+
+static PluginInfo const s_info {
+    "writers.sqlite",
+    "Write data to SQLite3 database files.",
+    "" };
+
+CREATE_SHARED_PLUGIN(1, 0, SQLiteWriter, Writer, s_info)
+
+std::string SQLiteWriter::getName() const { return s_info.name; }
 
 SQLiteWriter::SQLiteWriter() : 
     m_doCreateIndex(false)

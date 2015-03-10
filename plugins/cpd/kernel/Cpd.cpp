@@ -40,18 +40,17 @@
 #include "chipper/ChipperFilter.hpp"
 #include "crop/CropFilter.hpp"
 
-
-CREATE_KERNEL_PLUGIN(cpd, pdal::CpdKernel)
-
-
 namespace pdal
 {
 
+static PluginInfo const s_info {
+    "kernels.cpd",
+    "CPD Kernel",
+    "http://pdal.io/kernels/kernels.cpd.html" };
 
-CpdKernel::CpdKernel()
-    : Kernel()
-{}
+CREATE_SHARED_PLUGIN(1, 0, CpdKernel, Kernel, s_info)
 
+std::string CpdKernel::getName() const { return s_info.name; }
 
 void CpdKernel::validateSwitches()
 {
@@ -125,33 +124,39 @@ PointBufferPtr CpdKernel::readFile(const std::string& filename, PointContext& ct
     opt.add<bool>("debug", isDebug());
     opt.add<boost::uint32_t>("verbose", getVerboseLevel());
 
-    std::shared_ptr<Stage> reader(KernelSupport::makeReader(filename));
-    reader->setOptions(opt);
+    Stage& reader = makeReader(filename);
+    reader.setOptions(opt);
 
-    std::shared_ptr<Stage> source(reader);
-
+    PointBufferSet pbset;
     if (!m_bounds.empty())
     {
         Options boundsOptions;
         boundsOptions.add("bounds", m_bounds);
         StageFactory f;
-        std::shared_ptr<Stage> crop(f.createFilter("filters.crop"));
-        crop->setInput(source.get());
-        crop->setOptions(boundsOptions);
-        source = crop;
+
+        Stage& crop = ownStage(f.createStage("filters.crop"));
+        crop.setInput(reader);
+        crop.setOptions(boundsOptions);
+        crop.prepare(ctx);
+        pbset = crop.execute(ctx);
+    }
+    else
+    {
+        reader.prepare(ctx);
+        pbset = reader.execute(ctx);
     }
 
-    source->prepare(ctx);
-    PointBufferSet pbset = source->execute(ctx);
 
     const arma::uword D = 3;
     for (auto it = pbset.begin(); it != pbset.end(); ++it)
     {
+        PointBufferPtr pb = *it;
+
         point_count_t rowidx;
         if (mat.is_empty())
         {
             rowidx = 0;
-            mat.set_size((*it)->size(), D);
+            mat.set_size(pb->size(), D);
         }
         else
         {
@@ -159,11 +164,11 @@ PointBufferPtr CpdKernel::readFile(const std::string& filename, PointContext& ct
             mat.set_size(mat.n_rows + (*it)->size(), D);
         }
 
-        for (point_count_t bufidx = 0; bufidx < (*it)->size(); ++bufidx, ++rowidx)
+        for (point_count_t bufidx = 0; bufidx < pb->size(); ++bufidx, ++rowidx)
         {
-            mat(rowidx, 0) = (*it)->getFieldAs<double>(Dimension::Id::X, bufidx);
-            mat(rowidx, 1) = (*it)->getFieldAs<double>(Dimension::Id::Y, bufidx);
-            mat(rowidx, 2) = (*it)->getFieldAs<double>(Dimension::Id::Z, bufidx);
+            mat(rowidx, 0) = pb->getFieldAs<double>(Dimension::Id::X, bufidx);
+            mat(rowidx, 1) = pb->getFieldAs<double>(Dimension::Id::Y, bufidx);
+            mat(rowidx, 2) = pb->getFieldAs<double>(Dimension::Id::Z, bufidx);
         }
     }
     // Return a pointer to the first point buffer because we assume
@@ -234,9 +239,12 @@ int CpdKernel::execute()
             bufout->setField<double>(Dimension::Id::X, i, result->Y(i, 0));
             bufout->setField<double>(Dimension::Id::Y, i, result->Y(i, 1));
             bufout->setField<double>(Dimension::Id::Z, i, result->Y(i, 2));
-            bufout->setField<double>(Dimension::Id::XVelocity, i, Y(i, 0) - result->Y(i, 0));
-            bufout->setField<double>(Dimension::Id::YVelocity, i, Y(i, 1) - result->Y(i, 1));
-            bufout->setField<double>(Dimension::Id::ZVelocity, i, Y(i, 2) - result->Y(i, 2));
+            bufout->setField<double>(Dimension::Id::XVelocity, i,
+                Y(i, 0) - result->Y(i, 0));
+            bufout->setField<double>(Dimension::Id::YVelocity, i,
+                Y(i, 1) - result->Y(i, 1));
+            bufout->setField<double>(Dimension::Id::ZVelocity, i,
+                Y(i, 2) - result->Y(i, 2));
         }
     }
 
@@ -249,10 +257,10 @@ int CpdKernel::execute()
     writerOpts.add<bool>("keep_unspecified", false);
     setCommonOptions(writerOpts);
 
-    std::unique_ptr<Writer> writer(KernelSupport::makeWriter(m_output, &reader));
-    writer->setOptions(writerOpts + writer->getOptions());
-    writer->prepare(ctxout);
-    writer->execute(ctxout);
+    Stage& writer = makeWriter(m_output, reader);
+    writer.setOptions(writerOpts + writer.getOptions());
+    writer.prepare(ctxout);
+    writer.execute(ctxout);
 
     return 0;
 }
@@ -274,16 +282,15 @@ arma::mat getChip(const arma::mat& X, const BOX3D& bounds)
 }
 
 
-cpd::Registration::ResultPtr CpdKernel::chipThenRegister(const cpd::NonrigidLowrank& reg,
-                                                        const arma::mat& X, const arma::mat& Y,
-                                                        const PointBufferPtr& bufX,
-                                                        const PointContext& ctx)
+cpd::Registration::ResultPtr CpdKernel::chipThenRegister(
+    const cpd::NonrigidLowrank& reg, const arma::mat& X, const arma::mat& Y,
+    const PointBufferPtr& bufX, const PointContext& ctx)
 {
     BufferReader reader;
     reader.addBuffer(bufX);
 
     ChipperFilter chipper;
-    chipper.setInput(&reader);
+    chipper.setInput(reader);
     Options options;
     options.add<int>("capacity", m_chip_capacity);
     chipper.setOptions(options);
@@ -308,12 +315,14 @@ cpd::Registration::ResultPtr CpdKernel::chipThenRegister(const cpd::NonrigidLowr
         arma::mat Ychip = getChip(Y, chipBounds);
 
         cpd::Registration::ResultPtr tmpresult = reg.run(Xchip, Ychip);
-        result->Y.insert_rows(result->Y.n_rows, getChip(arma::join_horiz(tmpresult->Y, Ychip - tmpresult->Y), bounds));
-        std::cerr << "Done with chip #" << ++count << " of " << pbSet.size() << std::endl;
+        result->Y.insert_rows(result->Y.n_rows, getChip(
+            arma::join_horiz(tmpresult->Y, Ychip - tmpresult->Y), bounds));
+        std::cerr << "Done with chip #" << ++count << " of " <<
+            pbSet.size() << std::endl;
     }
 
     return result;
 }
 
+} // namespace pdal
 
-}

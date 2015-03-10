@@ -35,6 +35,8 @@
 
 #include "GroundKernel.hpp"
 
+#include <pdal/KernelFactory.hpp>
+#include <pdal/KernelSupport.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/PointBuffer.hpp>
@@ -42,17 +44,21 @@
 #include <pdal/Stage.hpp>
 #include <pdal/StageFactory.hpp>
 
-#include <pdal/KernelFactory.hpp>
-#include <pdal/KernelSupport.hpp>
-
 #include <memory>
 #include <string>
 #include <vector>
 
-CREATE_KERNEL_PLUGIN(ground, pdal::GroundKernel)
-
 namespace pdal
 {
+
+static PluginInfo const s_info {
+    "kernels.ground",
+    "Ground Kernel",
+    "http://pdal.io/kernels/kernels.ground.html" };
+
+CREATE_SHARED_PLUGIN(1, 0, GroundKernel, Kernel, s_info)
+
+std::string GroundKernel::getName() const { return s_info.name; }
 
 GroundKernel::GroundKernel()
     : Kernel()
@@ -102,7 +108,7 @@ void GroundKernel::addSwitches()
     addPositionalSwitch("output", 1);
 }
 
-std::unique_ptr<Stage> GroundKernel::makeReader(Options readerOptions)
+std::shared_ptr<Stage> GroundKernel::makeReader(Options readerOptions)
 {
     if (isDebug())
     {
@@ -115,11 +121,10 @@ std::unique_ptr<Stage> GroundKernel::makeReader(Options readerOptions)
         readerOptions.add<std::string>("log", "STDERR");
     }
 
-    Stage* stage = KernelSupport::makeReader(m_inputFile);
+    std::shared_ptr<Stage> stage = KernelSupport::makeReader(m_inputFile);
     stage->setOptions(readerOptions);
-    std::unique_ptr<Stage> reader_stage(stage);
 
-    return reader_stage;
+    return stage;
 }
 
 int GroundKernel::execute()
@@ -143,16 +148,16 @@ int GroundKernel::execute()
     groundOptions.add<bool>("extract", m_extract);
 
     StageFactory f;
-    std::unique_ptr<Filter> groundStage(f.createFilter("filters.ground"));
+    std::unique_ptr<Stage> groundStage(f.createStage("filters.ground"));
     groundStage->setOptions(groundOptions);
-    groundStage->setInput(readerStage.get());
+    groundStage->setInput(*readerStage);
 
     // setup the Writer and write the results
     Options writerOptions;
     writerOptions.add<std::string>("filename", m_outputFile);
     setCommonOptions(writerOptions);
 
-    WriterPtr writer(KernelSupport::makeWriter(m_outputFile, groundStage.get()));
+    std::shared_ptr<Stage> writer(KernelSupport::makeWriter(m_outputFile, groundStage));
     writer->setOptions(writerOptions);
 
     std::vector<std::string> cmd = getProgressShellCommand();
@@ -166,7 +171,7 @@ int GroundKernel::execute()
     {
         std::string name = pi.first;
         Options options = pi.second;
-        std::vector<Stage*> stages = writer->findStage(name);
+        std::vector<std::shared_ptr<Stage> > stages = writer->findStage(name);
         for (const auto& s : stages)
         {
             Options opts = s->getOptions();

@@ -68,7 +68,7 @@ TEST(BufferTest, test_basic)
 
     StatsFilter s;
     s.setOptions(ops);
-    s.setInput(&r);
+    s.setInput(r);
 
     s.prepare(ctx);
     PointBufferSet pbSet = s.execute(ctx);

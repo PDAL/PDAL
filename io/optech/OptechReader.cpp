@@ -40,15 +40,25 @@
 #include <pdal/SpatialReference.hpp>
 #include <pdal/StageFactory.hpp>
 
-
 namespace pdal
 {
 
+static PluginInfo const s_info
+{
+    "readers.optech",
+    "Optech reader support.",
+    "http://pdal.io/stages/readers.optech.html"
+};
+CREATE_STATIC_PLUGIN(1, 0, OptechReader, Reader, s_info);
+
+std::string OptechReader::getName() const
+{
+    return s_info.name;
+}
 
 const size_t OptechReader::MaximumNumberOfReturns;
 const size_t OptechReader::MaxNumRecordsInBuffer;
 const size_t OptechReader::NumBytesInRecord;
-
 
 OptechReader::OptechReader()
     : Reader()

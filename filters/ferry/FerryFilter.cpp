@@ -34,15 +34,19 @@
 
 #include "FerryFilter.hpp"
 
+#include <pdal/pdal_export.hpp>
+
 namespace pdal
 {
 
+static PluginInfo const s_info {
+    "filters.ferry",
+    "Copy date from one dimension to another.",
+    "http://pdal.io/stages/filters.ferry.html" };
 
+CREATE_STATIC_PLUGIN(1, 0, FerryFilter, Filter, s_info)
 
-void FerryFilter::initialize()
-{
-}
-
+std::string FerryFilter::getName() const { return s_info.name; }
 
 Options FerryFilter::getDefaultOptions()
 {
@@ -119,8 +123,5 @@ void FerryFilter::filter(PointBuffer& buffer)
     }
 }
 
-void FerryFilter::done(PointContext ctx)
-{
-}
 
 } // namespace pdal

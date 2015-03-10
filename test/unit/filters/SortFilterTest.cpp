@@ -68,9 +68,9 @@ void doSort(point_count_t count)
         buf.setField(Dimension::Id::X, i, dist(generator));
 
     filter.prepare(ctx);
-    FilterTester::ready(&filter, ctx);
-    FilterTester::filter(&filter, buf);
-    FilterTester::done(&filter, ctx);
+    FilterTester::ready(filter, ctx);
+    FilterTester::filter(filter, buf);
+    FilterTester::done(filter, ctx);
 
     EXPECT_EQ(count, buf.size());
     for (PointId i = 1; i < count; ++i)

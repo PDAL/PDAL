@@ -37,39 +37,46 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
+#include <CropFilter.hpp>
+#include <FauxReader.hpp>
+#include <LasReader.hpp>
+#include <ReprojectionFilter.hpp>
 #include <StatsFilter.hpp>
 #include "Support.hpp"
 
 using namespace pdal;
 
-TEST(CropFilterTest, test_crop)
+TEST(CropFilterTest, create)
 {
     StageFactory f;
+    std::unique_ptr<Stage> filter(f.createStage("filters.crop"));
+    EXPECT_TRUE(filter.get());
+}
 
+TEST(CropFilterTest, test_crop)
+{
     BOX3D srcBounds(0.0, 0.0, 0.0, 10.0, 100.0, 1000.0);
     Options opts;
     opts.add("bounds", srcBounds);
     opts.add("num_points", 1000);
     opts.add("mode", "ramp");
-    ReaderPtr reader(f.createReader("readers.faux"));
-    EXPECT_TRUE(reader.get());
-    reader->setOptions(opts);
+    FauxReader reader;
+    reader.setOptions(opts);
 
     // crop the window to 1/3rd the size in each dimension
     BOX3D dstBounds(3.33333, 33.33333, 333.33333, 6.66666, 66.66666, 666.66666);
     Options cropOpts;
     cropOpts.add("bounds", dstBounds);
 
-    FilterPtr filter(f.createFilter("filters.crop"));
-    EXPECT_TRUE(filter.get());
-    filter->setOptions(cropOpts);
-    filter->setInput(reader.get());
+    CropFilter filter;
+    filter.setOptions(cropOpts);
+    filter.setInput(reader);
 
     Options statOpts;
 
     StatsFilter stats;
     stats.setOptions(statOpts);
-    stats.setInput(filter.get());
+    stats.setInput(filter);
 
     PointContext ctx;
     stats.prepare(ctx);
@@ -111,19 +118,14 @@ TEST(CropFilterTest, test_crop)
 TEST(CropFilterTest, test_crop_polygon)
 {
 #ifdef PDAL_HAVE_GEOS
-    StageFactory f;
-
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
-    ReaderPtr reader(f.createReader("readers.las"));
-    EXPECT_TRUE(reader.get());
-    reader->setOptions(ops1);
+    LasReader reader;
+    reader.setOptions(ops1);
 
     Options options;
     Option debug("debug", true, "");
     Option verbose("verbose", 9, "");
-    // options.add(debug);
-    // options.add(verbose);
 
     std::istream* wkt_stream =
         FileUtils::openFile(Support::datapath("autzen/autzen-selection.wkt"));
@@ -136,15 +138,14 @@ TEST(CropFilterTest, test_crop_polygon)
     Option polygon("polygon", wkt, "");
     options.add(polygon);
 
-    FilterPtr crop(f.createFilter("filters.crop"));
-    EXPECT_TRUE(crop.get());
-    crop->setInput(reader.get());
-    crop->setOptions(options);
+    CropFilter crop;
+    crop.setInput(reader);
+    crop.setOptions(options);
 
     PointContext ctx;
 
-    crop->prepare(ctx);
-    PointBufferSet pbSet = crop->execute(ctx);
+    crop.prepare(ctx);
+    PointBufferSet pbSet = crop.execute(ctx);
     EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buffer = *pbSet.begin();
     EXPECT_EQ(buffer->size(), 47u);
@@ -156,8 +157,6 @@ TEST(CropFilterTest, test_crop_polygon)
 TEST(CropFilterTest, test_crop_polygon_reprojection)
 {
 #ifdef PDAL_HAVE_GEOS
-    StageFactory f;
-
     Options options;
 
     Option in_srs("spatialreference",Support::datapath("autzen/autzen-srs.wkt"), "Input SRS");
@@ -188,32 +187,29 @@ TEST(CropFilterTest, test_crop_polygon_reprojection)
     options.add(y_scale);
     options.add(filename);
 
-    std::istream* wkt_stream =
-        FileUtils::openFile(Support::datapath("autzen/autzen-selection-dd.wkt"));
+    std::istream* wkt_stream = FileUtils::openFile(
+        Support::datapath("autzen/autzen-selection-dd.wkt"));
     std::stringstream strbuf;
     strbuf << wkt_stream->rdbuf();
     std::string wkt(strbuf.str());
     Option polygon("polygon", wkt, "");
     options.add(polygon);
 
-    ReaderPtr reader(f.createReader("readers.las"));
-    EXPECT_TRUE(reader.get());
-    reader->setOptions(options);
+    LasReader reader;
+    reader.setOptions(options);
 
-    FilterPtr reprojection(f.createFilter("filters.reprojection"));
-    EXPECT_TRUE(reprojection.get());
-    reprojection->setOptions(options);
-    reprojection->setInput(reader.get());
+    ReprojectionFilter reprojection;
+    reprojection.setOptions(options);
+    reprojection.setInput(reader);
 
-    FilterPtr crop(f.createFilter("filters.crop"));
-    EXPECT_TRUE(crop.get());
-    crop->setOptions(options);
-    crop->setInput(reprojection.get());
+    CropFilter crop;
+    crop.setOptions(options);
+    crop.setInput(reprojection);
 
     PointContext ctx;
     PointBufferPtr buffer(new PointBuffer(ctx));
-    crop->prepare(ctx);
-    PointBufferSet pbSet = crop->execute(ctx);
+    crop.prepare(ctx);
+    PointBufferSet pbSet = crop.execute(ctx);
     EXPECT_EQ(pbSet.size(), 1u);
     buffer = *pbSet.begin();
     EXPECT_EQ(buffer->size(), 47u);

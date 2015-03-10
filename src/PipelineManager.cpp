@@ -34,9 +34,6 @@
 
 #include <pdal/PipelineManager.hpp>
 
-#include <pdal/Filter.hpp>
-#include <pdal/Reader.hpp>
-#include <pdal/Writer.hpp>
 #include <pdal/Utils.hpp>
 
 //#include <boost/optional.hpp>
@@ -44,50 +41,33 @@
 namespace pdal
 {
 
-PipelineManager::~PipelineManager()
+Stage& PipelineManager::addReader(const std::string& type)
 {
-    while (m_stages.size())
+    Stage *r = m_factory.createStage(type);
+    if (!r)
     {
-        Stage* stage = m_stages.back();
-        m_stages.pop_back();
-        delete stage;
+        std::ostringstream ss;
+        ss << "Couldn't create stage for type '" << type << "'.";
+        throw pdal_error(ss.str());
     }
+    m_stages.push_back(std::unique_ptr<Stage>(r));
+    return *r;
 }
 
 
-Reader* PipelineManager::addReader(const std::string& type)
+Stage& PipelineManager::addFilter(const std::string& type)
 {
-    Reader *r = m_factory.createReader(type);
-    m_stages.push_back(r);
-    return r;
+    Stage *stage = m_factory.createStage(type);
+    m_stages.push_back(std::unique_ptr<Stage>(stage));
+    return *stage;
 }
 
 
-Filter* PipelineManager::addFilter(const std::string& type,
-    const std::vector<Stage *>& prevStages)
+Stage& PipelineManager::addWriter(const std::string& type)
 {
-    Filter* stage = m_factory.createFilter(type);
-    stage->setInput(prevStages);
-    m_stages.push_back(stage);
-    return stage;
-}
-
-
-Filter* PipelineManager::addFilter(const std::string& type, Stage *prevStage)
-{
-    Filter* stage = m_factory.createFilter(type);
-    stage->setInput(prevStage);
-    m_stages.push_back(stage);
-    return stage;
-}
-
-
-Writer* PipelineManager::addWriter(const std::string& type, Stage *prevStage)
-{
-    Writer* writer = m_factory.createWriter(type);
-    writer->setInput(prevStage);
-    m_stages.push_back(writer);
-    return writer;
+    Stage *writer = m_factory.createStage(type);
+    m_stages.push_back(std::unique_ptr<Stage>(writer));
+    return *writer;
 }
 
 
@@ -122,8 +102,10 @@ MetadataNode PipelineManager::getMetadata() const
     MetadataNode output("stages");
 
     for (auto si = m_stages.begin(); si != m_stages.end(); ++si)
-        output.add((*si)->getMetadata());
-
+    {
+        Stage *s = si->get();
+        output.add(s->getMetadata());
+    }
     return output;
 }
 

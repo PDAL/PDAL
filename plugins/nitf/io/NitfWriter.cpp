@@ -77,11 +77,17 @@
 // syntactically, how do we name all the LAS writer options that we will pass to the las writer?
 //
 
-CREATE_WRITER_PLUGIN(nitf, pdal::NitfWriter)
-
 namespace pdal
 {
 
+static PluginInfo const s_info {
+    "writers.nitf",
+    "NITF Writer",
+    "http://pdal.io/stages/writers.nitf.html" };
+
+CREATE_SHARED_PLUGIN(1, 0, NitfWriter, Writer, s_info)
+
+std::string NitfWriter::getName() const { return s_info.name; }
 
 BOX3D reprojectBoxToDD(const SpatialReference& reference, const BOX3D& box)
 {

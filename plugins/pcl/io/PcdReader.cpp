@@ -43,10 +43,17 @@
 #include <pdal/PointBuffer.hpp>
 #include "PCLConversions.hpp"
 
-CREATE_READER_PLUGIN(pcd, pdal::PcdReader)
-
 namespace pdal
 {
+
+static PluginInfo const s_info {
+    "readers.pcd",
+    "Read data in the Point Cloud Library (PCL) format.",
+    "http://pdal.io/stages/readers.pclvisualizer.html" };
+
+CREATE_SHARED_PLUGIN(1, 0, PcdReader, Reader, s_info)
+
+std::string PcdReader::getName() const { return s_info.name; }
 
 void PcdReader::ready(PointContextRef ctx)
 {

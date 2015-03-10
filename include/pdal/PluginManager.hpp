@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Howard Butler <hobu.inc@gmail.com>
+* Copyright (c) 2015, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,43 +32,68 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+// The PluginManager was modeled very closely after the work of Gigi Sayfan in
+// the Dr. Dobbs article:
+// http://www.drdobbs.com/cpp/building-your-own-plugin-framework-part/206503957
+// The original work was released under the Apache License v2.
+
 #pragma once
 
-#include <pdal/Filter.hpp>
 #include <pdal/plugin.h>
 
 #include <map>
+#include <memory>
 #include <string>
-
-extern "C" int32_t FerryFilter_ExitFunc();
-extern "C" PF_ExitFunc FerryFilter_InitPlugin();
+#include <vector>
 
 namespace pdal
 {
 
-class PDAL_DLL FerryFilter : public Filter
+class DynamicLibrary;
+
+/*
+ * I think PluginManager can eventually be a private header, only accessible
+ * through the factories, but we'll leave it as public for now.
+ */
+class PluginManager
 {
+    typedef std::shared_ptr<DynamicLibrary> DynLibPtr;
+    typedef std::map<std::string, std::shared_ptr<DynamicLibrary>> DynamicLibraryMap;
+    typedef std::vector<PF_ExitFunc> ExitFuncVec;
+    typedef std::vector<PF_RegisterParams> RegistrationVec;
+
 public:
-    FerryFilter()
-    {}
+    typedef std::map<std::string, PF_RegisterParams> RegistrationMap;
 
-    static void * create();
-    static int32_t destroy(void *);
-    std::string getName() const;
+    static PluginManager & getInstance();
+    static int32_t initializePlugin(PF_InitFunc initFunc);
+    int32_t loadAll(PF_PluginType type);
+    int32_t loadAll(const std::string & pluginDirectory, PF_PluginType type);
+    int32_t guessLoadByPath(const std::string & driverName);
+    int32_t loadByPath(const std::string & path, PF_PluginType type);
 
-    Options getDefaultOptions();
+    void * createObject(const std::string & objectType);
+
+    int32_t shutdown();
+    static int32_t registerObject(const std::string& objectType,
+        const PF_RegisterParams* params);
+    const RegistrationMap& getRegistrationMap();
 
 private:
-    virtual void processOptions(const Options&);
-    virtual void addDimensions(PointContextRef ctx);
-    virtual void ready(PointContext ctx);
-    virtual void filter(PointBuffer& buffer);
+    ~PluginManager();
+    PluginManager();
+    PluginManager(const PluginManager &);
 
-    FerryFilter& operator=(const FerryFilter&); // not implemented
-    FerryFilter(const FerryFilter&); // not implemented
+    DynamicLibrary *loadLibrary(const std::string& path,
+        std::string& errorString);
 
-    std::map<std::string, std::string> m_name_map;
-    std::map< Dimension::Id::Enum ,  Dimension::Id::Enum > m_dimensions_map;
+    bool m_inInitializePlugin;
+    PF_PluginAPI_Version m_version;
+    DynamicLibraryMap m_dynamicLibraryMap;
+    ExitFuncVec m_exitFuncVec;
+    RegistrationMap m_tempExactMatchMap;
+    RegistrationMap m_exactMatchMap;
 };
 
 } // namespace pdal
+
