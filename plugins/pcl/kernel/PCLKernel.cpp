@@ -96,8 +96,15 @@ void PCLKernel::addSwitches()
     addPositionalSwitch("pcl", 1);
 }
 
-std::shared_ptr<Stage> PCLKernel::makeReader(Options readerOptions)
+
+int PCLKernel::execute()
 {
+    PointContext ctx;
+
+    Options readerOptions;
+    readerOptions.add<std::string>("filename", m_inputFile);
+    readerOptions.add<bool>("debug", isDebug());
+    readerOptions.add<uint32_t>("verbose", getVerboseLevel());
     if (isDebug())
     {
         readerOptions.add<bool>("debug", true);
@@ -108,30 +115,14 @@ std::shared_ptr<Stage> PCLKernel::makeReader(Options readerOptions)
         readerOptions.add<uint32_t>("verbose", verbosity);
         readerOptions.add<std::string>("log", "STDERR");
     }
-
-    std::shared_ptr<Stage> stage = KernelSupport::makeReader(m_inputFile);
-    stage->setOptions(readerOptions);
-
-    return stage;
-}
-
-
-int PCLKernel::execute()
-{
-    PointContext ctx;
-
-    Options readerOptions;
-    readerOptions.add<std::string>("filename", m_inputFile);
-    readerOptions.add<bool>("debug", isDebug());
-    readerOptions.add<uint32_t>("verbose", getVerboseLevel());
-
-    std::shared_ptr<Stage> readerStage = makeReader(readerOptions);
+    Stage& readerStage(Kernel::makeReader(m_inputFile));
+    readerStage.setOptions(readerOptions);
 
     // go ahead and prepare/execute on reader stage only to grab input
     // PointBufferSet, this makes the input PointBuffer available to both the
     // processing pipeline and the visualizer
-    readerStage->prepare(ctx);
-    PointBufferSet pbSetIn = readerStage->execute(ctx);
+    readerStage.prepare(ctx);
+    PointBufferSet pbSetIn = readerStage.execute(ctx);
 
     // the input PointBufferSet will be used to populate a BufferReader that is
     // consumed by the processing pipeline
@@ -145,7 +136,7 @@ int PCLKernel::execute()
     pclOptions.add<uint32_t>("verbose", getVerboseLevel());
 
     std::shared_ptr<Stage> pclStage(new PCLBlock());
-    pclStage->setInput(bufferReader);
+    pclStage->setInput(*bufferReader);
     pclStage->setOptions(pclOptions);
 
     // the PCLBlock stage consumes the BufferReader rather than the
@@ -165,20 +156,19 @@ int PCLKernel::execute()
         cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
         (UserCallback *)new HeartbeatCallback();
 
-    std::shared_ptr<Stage>
-        writer(KernelSupport::makeWriter(m_outputFile, pclStage));
+    Stage& writer(Kernel::makeWriter(m_outputFile, *pclStage));
 
     // Some options are inferred by makeWriter based on filename
     // (compression, driver type, etc).
-    writer->setOptions(writerOptions+writer->getOptions());
+    writer.setOptions(writerOptions+writer.getOptions());
 
-    writer->setUserCallback(callback);
+    writer.setUserCallback(callback);
 
     for (const auto& pi : getExtraStageOptions())
     {
         std::string name = pi.first;
         Options options = pi.second;
-        std::vector<std::shared_ptr<Stage> > stages = writer->findStage(name);
+        std::vector<Stage *> stages = writer.findStage(name);
         for (const auto& s : stages)
         {
             Options opts = s->getOptions();
@@ -188,11 +178,11 @@ int PCLKernel::execute()
         }
     }
 
-    writer->prepare(ctx);
+    writer.prepare(ctx);
 
     // process the data, grabbing the PointBufferSet for visualization of the
     // resulting PointBuffer
-    PointBufferSet pbSetOut = writer->execute(ctx);
+    PointBufferSet pbSetOut = writer.execute(ctx);
 
     if (isVisualize())
         visualize(*pbSetOut.begin());
