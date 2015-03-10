@@ -34,35 +34,14 @@
 
 #pragma once
 
+#include <memory>
 #include <vector>
-
-#include <boost/detail/endian.hpp>
 
 #include <pdal/plugin.h>
 #include <pdal/Reader.hpp>
 #include <pdal/Options.hpp>
+#include <pdal/util/IStream.hpp>
 
-#ifdef BOOST_LITTLE_ENDIAN
-# define QFIT_SWAP_BE_TO_LE(p) \
-    do { \
-        char* first = static_cast<char*>(static_cast<void*>(&p)); \
-        char* last = first + sizeof(p) - 1; \
-        for(; first < last; ++first, --last) { \
-            char const x = *last; \
-            *last = *first; \
-            *first = x; \
-        }} while(false)
-
-# define QFIT_SWAP_BE_TO_LE_N(p, n) \
-    do { \
-        char* first = static_cast<char*>(static_cast<void*>(&p)); \
-        char* last = first + n - 1; \
-        for(; first < last; ++first, --last) { \
-            char const x = *last; \
-            *last = *first; \
-            *first = x; \
-        }} while(false)
-#endif
 
 extern "C" int32_t QfitReader_ExitFunc();
 extern "C" PF_ExitFunc QfitReader_InitPlugin();
@@ -123,7 +102,7 @@ private:
     double m_scale_z;
     bool m_littleEndian;
     point_count_t m_numPoints;
-    std::istream* m_istream;
+    std::unique_ptr<IStream> m_istream;
     point_count_t m_index;
 
     virtual void processOptions(const Options& ops);

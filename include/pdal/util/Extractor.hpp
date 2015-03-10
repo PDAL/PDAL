@@ -240,4 +240,158 @@ public:
     }
 };
 
+
+/// Stream wrapper for input of binary data that converts from little-endian
+/// to host ordering.
+class PDAL_DLL SwitchableExtractor : public Extractor
+{
+public:
+    static const bool DefaultIsLittleEndian = true;
+
+    SwitchableExtractor(const char* buf, std::size_t size)
+        : Extractor(buf, size)
+        , m_isLittleEndian(DefaultIsLittleEndian)
+    {
+    }
+
+    SwitchableExtractor(const char* buf, std::size_t size, bool isLittleEndian)
+        : Extractor(buf, size)
+        , m_isLittleEndian(isLittleEndian)
+    {
+    }
+
+    bool isLittleEndian() const { return m_isLittleEndian; }
+    void switchToLittleEndian() { m_isLittleEndian = true; }
+    void switchToBigEndian() { m_isLittleEndian = false; }
+
+    using Extractor::get;
+    void get(Dimension::Type::Enum type, Everything& e)
+    {
+        using namespace Dimension::Type;
+
+        switch (type)
+        {
+        case Unsigned8:
+            *this >> e.u8;
+            break;
+        case Unsigned16:
+            *this >> e.u16;
+            break;
+        case Unsigned32:
+            *this >> e.u32;
+            break;
+        case Unsigned64:
+            *this >> e.u64;
+            break;
+        case Signed8:
+            *this >> e.s8;
+            break;
+        case Signed16:
+            *this >> e.s16;
+            break;
+        case Signed32:
+            *this >> e.s32;
+            break;
+        case Signed64:
+            *this >> e.s64;
+            break;
+        case Float:
+            *this >> e.f;
+            break;
+        case Double:
+            *this >> e.d;
+            break;
+        case None:
+            break;
+        }
+    }
+
+    SwitchableExtractor& operator>>(uint8_t& v)
+    {
+        v = *(const uint8_t*)m_gptr++;
+        return *this;
+    }
+
+    SwitchableExtractor& operator>>(int8_t& v)
+    {
+        v = *(const int8_t*)m_gptr++;
+        return *this;
+    }
+
+    SwitchableExtractor& operator>>(uint16_t& v)
+    {
+        memcpy(&v, m_gptr, sizeof(v));
+        v = isLittleEndian() ? le16toh(v) : be16toh(v);
+        m_gptr += sizeof(v);
+        return *this;
+    }
+
+    SwitchableExtractor& operator>>(int16_t& v)
+    {
+        memcpy(&v, m_gptr, sizeof(v));
+        v = isLittleEndian() ? (int16_t)le16toh((uint16_t)v)
+                             : (int16_t)be16toh((uint16_t)v);
+        m_gptr += sizeof(v);
+        return *this;
+    }
+
+    SwitchableExtractor& operator>>(uint32_t& v)
+    {
+        memcpy(&v, m_gptr, sizeof(v));
+        v = isLittleEndian() ? le32toh(v) : be32toh(v);
+        m_gptr += sizeof(v);
+        return *this;
+    }
+
+    SwitchableExtractor& operator>>(int32_t& v)
+    {
+        memcpy(&v, m_gptr, sizeof(v));
+        v = isLittleEndian() ? (int32_t)le32toh((uint32_t)v)
+                             : (int32_t)be32toh((uint32_t)v);
+        m_gptr += sizeof(v);
+        return *this;
+    }
+
+    SwitchableExtractor& operator>>(uint64_t& v)
+    {
+        memcpy(&v, m_gptr, sizeof(v));
+        v = isLittleEndian() ? le64toh(v) : be64toh(v);
+        m_gptr += sizeof(v);
+        return *this;
+    }
+
+    SwitchableExtractor& operator>>(int64_t& v)
+    {
+        memcpy(&v, m_gptr, sizeof(v));
+        v = isLittleEndian() ? (int64_t)le64toh((uint64_t)v)
+                             : (int64_t)be64toh((uint64_t)v);
+        m_gptr += sizeof(v);
+        return *this;
+    }
+
+    SwitchableExtractor& operator>>(float& v)
+    {
+        memcpy(&v, m_gptr, sizeof(v));
+        uint32_t tmp = isLittleEndian() ? le32toh(*(uint32_t*)(&v))
+                                        : be32toh(*(uint32_t*)(&v));
+        std::memcpy(&v, &tmp, sizeof(tmp));
+        m_gptr += sizeof(v);
+        return *this;
+    }
+
+    SwitchableExtractor& operator>>(double& v)
+    {
+        memcpy(&v, m_gptr, sizeof(v));
+        uint64_t tmp = isLittleEndian() ? le64toh(*(uint64_t*)(&v))
+                                        : be64toh(*(uint64_t*)(&v));
+        std::memcpy(&v, &tmp, sizeof(tmp));
+        m_gptr += sizeof(v);
+        return *this;
+    }
+
+private:
+    bool m_isLittleEndian;
+};
+
+
 } // namespace pdal
