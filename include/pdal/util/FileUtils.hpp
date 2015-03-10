@@ -34,12 +34,13 @@
 
 #pragma once
 
-#include <string>
 #include <cassert>
-#include <stdexcept>
 #include <cmath>
-#include <ostream>
+#include <cstdint>
 #include <istream>
+#include <ostream>
+#include <stdexcept>
+#include <string>
 
 #ifndef PDAL_DLL
 #if defined(WIN32)
