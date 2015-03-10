@@ -17,6 +17,7 @@ Readers
    readers.las
    readers.nitf
    readers.oci
+   readers.optech
    readers.pcd
    readers.pgpointcloud
    readers.qfit

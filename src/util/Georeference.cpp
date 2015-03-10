@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Peter J. Gadomski (pete.gadomski@gmail.com)
+* Copyright (c) 2015, Peter J. Gadomski <pete.gadomski@gmail.com>
 *
 * All rights reserved.
 *
@@ -32,42 +32,59 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <pdal/util/Georeference.hpp>
 
-#include <pdal/PointBuffer.hpp>
-#include <pdal/Reader.hpp>
-#include <pdal/util/IStream.hpp>
+#include <cmath>
+#include <iostream>
+#include <vector>
 
-#include "SbetCommon.hpp"
 
 namespace pdal
 {
-
-class PDAL_DLL SbetReader : public pdal::Reader
+namespace georeference
 {
-public:
-    SET_STAGE_NAME("readers.sbet", "SBET Reader")
-    SET_STAGE_LINK("http://pdal.io/stages/readers.sbet.html")
 
-    SbetReader() : Reader()
-        {}
 
-    static Options getDefaultOptions();
-    static Dimension::IdList getDefaultDimensions()
-        { return fileDimensions(); }
+namespace
+{
 
-private:
-    std::unique_ptr<ILeStream> m_stream;
-    // Number of points in the file.
-    point_count_t m_numPts;
-    point_count_t m_index;
 
-    virtual void addDimensions(PointContextRef ctx);
-    virtual void ready(PointContextRef ctx);
-    virtual point_count_t read(PointBuffer& buf, point_count_t count);
-    virtual bool eof();
+static const double a = 6378137.0;
+static const double f = 1 / 298.257223563;
+static const double e2 = 2 * f - f * f;
 
-    void seek(PointId idx);
-};
 
-} // namespace pdal
+Xyz rotate(const Xyz& point, const RotationMatrix& matrix)
+{
+    return Xyz(
+        matrix.m00 * point.X + matrix.m01 * point.Y + matrix.m02 * point.Z,
+        matrix.m10 * point.X + matrix.m11 * point.Y + matrix.m12 * point.Z,
+        matrix.m20 * point.X + matrix.m21 * point.Y + matrix.m22 * point.Z);
+}
+
+
+Xyz cartesianToCurvilinear(const Xyz& point, double latitude)
+{
+    double w = std::sqrt(1 - e2 * std::sin(latitude) * std::sin(latitude));
+    double n = a / w;
+    double m = a * (1 - e2) / (w * w * w);
+    return Xyz(point.X / (n * std::cos(latitude)), point.Y / m, point.Z);
+}
+}
+
+
+Xyz georeferenceWgs84(double range, double scanAngle,
+                      const RotationMatrix& boresightMatrix,
+                      const RotationMatrix& imuMatrix, const Xyz& gpsPoint)
+{
+    Xyz pSocs = {range * std::sin(scanAngle), 0, -range * std::cos(scanAngle)};
+
+    Xyz pSocsAligned = rotate(pSocs, boresightMatrix);
+    Xyz pLocalLevel = rotate(pSocsAligned, imuMatrix);
+    Xyz pCurvilinear = cartesianToCurvilinear(pLocalLevel, gpsPoint.Y);
+
+    return Xyz(gpsPoint.X + pCurvilinear.X, gpsPoint.Y + pCurvilinear.Y,
+               gpsPoint.Z + pCurvilinear.Z);
+}
+}
+}

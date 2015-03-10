@@ -45,6 +45,8 @@
 #include <bpf/BpfReader.hpp>
 #include <bpf/BpfWriter.hpp>
 
+#include <optech/OptechReader.hpp>
+
 #include <sbet/SbetReader.hpp>
 #include <sbet/SbetWriter.hpp>
 

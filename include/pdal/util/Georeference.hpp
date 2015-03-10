@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Peter J. Gadomski (pete.gadomski@gmail.com)
+* Copyright (c) 2015, Peter J. Gadomski <pete.gadomski@gmail.com>
 *
 * All rights reserved.
 *
@@ -34,40 +34,58 @@
 
 #pragma once
 
-#include <pdal/PointBuffer.hpp>
-#include <pdal/Reader.hpp>
-#include <pdal/util/IStream.hpp>
-
-#include "SbetCommon.hpp"
 
 namespace pdal
 {
-
-class PDAL_DLL SbetReader : public pdal::Reader
+namespace georeference
 {
-public:
-    SET_STAGE_NAME("readers.sbet", "SBET Reader")
-    SET_STAGE_LINK("http://pdal.io/stages/readers.sbet.html")
 
-    SbetReader() : Reader()
-        {}
 
-    static Options getDefaultOptions();
-    static Dimension::IdList getDefaultDimensions()
-        { return fileDimensions(); }
+struct Xyz
+{
+    Xyz(double x, double y, double z)
+        : X(x)
+        , Y(y)
+        , Z(z)
+    {
+    }
 
-private:
-    std::unique_ptr<ILeStream> m_stream;
-    // Number of points in the file.
-    point_count_t m_numPts;
-    point_count_t m_index;
-
-    virtual void addDimensions(PointContextRef ctx);
-    virtual void ready(PointContextRef ctx);
-    virtual point_count_t read(PointBuffer& buf, point_count_t count);
-    virtual bool eof();
-
-    void seek(PointId idx);
+    double X;
+    double Y;
+    double Z;
 };
 
-} // namespace pdal
+
+struct RotationMatrix
+{
+    // Row-major
+    RotationMatrix(double m00, double m01, double m02, double m10, double m11,
+                   double m12, double m20, double m21, double m22)
+        : m00(m00)
+        , m01(m01)
+        , m02(m02)
+        , m10(m10)
+        , m11(m11)
+        , m12(m12)
+        , m20(m20)
+        , m21(m21)
+        , m22(m22)
+    {
+    }
+
+    double m00, m01, m02, m10, m11, m12, m20, m21, m22;
+};
+
+
+inline RotationMatrix createIdentityMatrix()
+{
+    return RotationMatrix(1, 0, 0, 0, 1, 0, 0, 0, 1);
+}
+
+
+// Returns Latitude, Longitude, Height triplet with angles in radians
+Xyz georeferenceWgs84(double range, double scanAngle,
+                      const RotationMatrix& boresightMatrix,
+                      const RotationMatrix& imuMatrix, const Xyz& gpsPoint);
+}
+}

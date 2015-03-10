@@ -35,7 +35,8 @@
 #include <pdal/GlobalEnvironment.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/SpatialReference.hpp>
-#include <pdal/StageRunner.hpp>
+
+#include "StageRunner.hpp"
 
 #include <memory>
 

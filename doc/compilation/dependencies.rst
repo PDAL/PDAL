@@ -177,8 +177,8 @@ The `Point Cloud Library (PCL)`_ is used by the :ref:`ground_command`,
 :ref:`pcl_command`, :ref:`writers.pcd`, :ref:`readers.pcd`, and
 :ref:`filters.pclblock` to provide support for various PCL-related operations.
 
-At the moment, PCL must be built from the `pipeline branch`_, which is not
-maintained by PCL. We do our best to keep this up-to-date with PCL master.
+At the moment, PCL must be built from 1.7.2+. We do our best to keep this
+up-to-date with PCL master.
 
 .. _`ASPRS LAS`: http://www.asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html
 .. _`LASzip`: http://laszip.org
@@ -203,5 +203,4 @@ maintained by PCL. We do our best to keep this up-to-date with PCL master.
 
 .. _`Points2Grid`: https://github.com/CRREL/points2grid
 .. _`Point Cloud Library (PCL)`: http://pointclouds.org
-.. _`pipeline branch`: https://github.com/chambbj/pcl/tree/pipeline
 

@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/Charbuf.hpp>
+#include <pdal/util/Charbuf.hpp>
 
 namespace pdal
 {

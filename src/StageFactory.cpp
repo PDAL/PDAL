@@ -65,6 +65,7 @@ MAKE_READER_CREATOR(FauxReader, pdal::FauxReader)
 MAKE_READER_CREATOR(LasReader, pdal::LasReader)
 MAKE_READER_CREATOR(BpfReader, pdal::BpfReader)
 MAKE_READER_CREATOR(BufferReader, pdal::BufferReader)
+MAKE_READER_CREATOR(OptechReader, pdal::OptechReader)
 MAKE_READER_CREATOR(QfitReader, pdal::QfitReader)
 MAKE_READER_CREATOR(SbetReader, pdal::SbetReader)
 MAKE_READER_CREATOR(TerrasolidReader, pdal::TerrasolidReader)
@@ -129,6 +130,7 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
         drivers["nsf"] = "readers.nitf";
     }
     drivers["bpf"] = "readers.bpf";
+    drivers["cpd"] = "readers.optech";
     drivers["sbet"] = "readers.sbet";
     drivers["icebridge"] = "readers.icebridge";
     drivers["sqlite"] = "readers.sqlite";
@@ -312,6 +314,7 @@ void StageFactory::registerKnownReaders()
     REGISTER_READER(TerrasolidReader, pdal::TerrasolidReader);
     REGISTER_READER(BpfReader, pdal::BpfReader);
     REGISTER_READER(SbetReader, pdal::SbetReader);
+    REGISTER_READER(OptechReader, pdal::OptechReader);
 }
 
 
