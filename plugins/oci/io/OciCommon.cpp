@@ -85,7 +85,7 @@ Connection connect(std::string connSpec)
     string password = connection.substr(0, pos);
     string instance = connection.substr(pos + 1);
 
-    Connection con = make_shared<OWConnection>(username.c_str(),
+    Connection con = make_shared<pdal::OWConnection>(username.c_str(),
         password.c_str(), instance.c_str());
     if (!con->Succeeded())
         throw connection_failed("Oracle connection failed");
