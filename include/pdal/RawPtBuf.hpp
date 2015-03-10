@@ -77,16 +77,22 @@ public:
     void getField(Dimension::Detail *d, PointId idx, void *value)
        { memcpy(value, getDimension(d, idx), d->size()); }
 
-    void setPointSize(size_t size)
+    void update(Dimension::DetailList& detail)
     {
         if (m_numPts != 0)
-            throw pdal_error("Can't set point size after points have "
+            throw pdal_error("Can't update dimensions after points have "
                 "been added.");
 
+        int offset = 0;
+        for (auto& d : detail)
+        {
+            d.setOffset(offset);
+            offset += (int)d.size();
+        }
         //NOTE - I tried forcing all points to be aligned on 8-byte boundaries
         // in case this would matter to the optimized memcpy, but it made
         // no difference.  No sense wasting space for no difference.
-        m_pointSize = size;
+        m_pointSize = (size_t)offset;
     }
 
 private:

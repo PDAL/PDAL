@@ -55,7 +55,14 @@ namespace plang
 struct DimInfo
 {
     DimInfo() : m_detail(Dimension::COUNT), m_nextFree(Dimension::PROPRIETARY)
-        {}
+    {
+        int id = 0;
+        for (auto& d : m_detail)
+        {
+            d.setId((Dimension::Id::Enum)id);
+            id++;
+        }
+    }
 
     std::vector<Dimension::Detail> m_detail;
     Dimension::IdList m_used;
@@ -124,7 +131,7 @@ public:
         Dimension::Detail& dd = m_dims->m_detail[id];
         if (dd.type() == Dimension::Type::None)
             m_dims->m_used.push_back(id);
-        dd.m_type = resolveType(type, dd.m_type);
+        dd.setType(resolveType(type, dd.type()));
         update();
     }
 
@@ -145,8 +152,8 @@ public:
         }
         else
             id = di->second;
-        m_dims->m_detail[id].m_type =
-            resolveType(m_dims->m_detail[id].m_type, type);
+        m_dims->m_detail[id].setType(
+            resolveType(m_dims->m_detail[id].type(), type));
         update();
         return id;
     }
@@ -208,7 +215,7 @@ public:
 
     // @return whether or not the PointContext contains a given id
     bool hasDim(Dimension::Id::Enum id) const
-        { return m_dims->m_detail[id].m_type != Dimension::Type::None; }
+        { return m_dims->m_detail[id].type() != Dimension::Type::None; }
 
     // @return reference to vector of currently used dimensions
     const Dimension::IdList& dims() const
@@ -255,13 +262,13 @@ private:
 
         Dimension::IdList& used = m_dims->m_used;
         std::sort(used.begin(), used.end(), sorter);
-        int offset = 0;
-        for (auto ui = used.begin(); ui != used.end(); ++ui)
-        {
-            m_dims->m_detail[*ui].m_offset = offset;
-            offset += (int)m_dims->m_detail[*ui].size();
-        }
-        m_ptBuf->setPointSize((size_t)offset);
+        Dimension::DetailList detail;
+
+        for (auto id : used)
+            detail.push_back(m_dims->m_detail[id]);
+         rawPtBuf()->update(detail);
+         for (auto& dd : detail)
+             m_dims->m_detail[dd.id()] = dd;
     }
 
     Dimension::Type::Enum resolveType(Dimension::Type::Enum t1,
