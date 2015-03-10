@@ -39,10 +39,10 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "writers.sbet",
     "SBET Writer",
-    "http://pdal.io/stages/writers.sbet.html" };
+    "http://pdal.io/stages/writers.sbet.html" );
 
 CREATE_STATIC_PLUGIN(1, 0, SbetWriter, Writer, s_info)
 

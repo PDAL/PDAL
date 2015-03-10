@@ -48,11 +48,11 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "filters.attribute",
     "Assign values for a dimension using a specified value, \n" \
         "an OGR-readable data source, or an OGR SQL query.",
-    "http://pdal.io/stages/filters.attribute.html" };
+    "http://pdal.io/stages/filters.attribute.html" );
 
 CREATE_SHARED_PLUGIN(1, 0, AttributeFilter, Filter, s_info)
 

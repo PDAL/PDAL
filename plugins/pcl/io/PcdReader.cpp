@@ -46,10 +46,10 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "readers.pcd",
     "Read data in the Point Cloud Library (PCL) format.",
-    "http://pdal.io/stages/readers.pclvisualizer.html" };
+    "http://pdal.io/stages/readers.pclvisualizer.html" );
 
 CREATE_SHARED_PLUGIN(1, 0, PcdReader, Reader, s_info)
 

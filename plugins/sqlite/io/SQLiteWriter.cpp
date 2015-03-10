@@ -48,10 +48,10 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "writers.sqlite",
     "Write data to SQLite3 database files.",
-    "" };
+    "" );
 
 CREATE_SHARED_PLUGIN(1, 0, SQLiteWriter, Writer, s_info)
 

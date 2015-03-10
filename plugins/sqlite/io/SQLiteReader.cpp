@@ -38,10 +38,10 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "readers.sqlite",
     "Read data from SQLite3 database files.",
-    ""};
+    "" );
 
 CREATE_SHARED_PLUGIN(1, 0, SQLiteReader, Reader, s_info)
 

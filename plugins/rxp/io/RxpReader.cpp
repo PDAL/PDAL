@@ -45,10 +45,10 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "readers.rxp",
     "RXP Reader",
-    "http://pdal.io/stages/readers.rxp.html" };
+    "http://pdal.io/stages/readers.rxp.html" );
 
 CREATE_SHARED_PLUGIN(1, 0, RxpReader, Reader, s_info)
 

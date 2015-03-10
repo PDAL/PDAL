@@ -52,10 +52,10 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "writers.pcd",
     "Write data in the Point Cloud Library (PCL) format.",
-    "http://pdal.io/stages/writers.pclvisualizer.html" };
+    "http://pdal.io/stages/writers.pclvisualizer.html" );
 
 CREATE_SHARED_PLUGIN(1, 0, PcdWriter, Writer, s_info)
 

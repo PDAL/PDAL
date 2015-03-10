@@ -44,10 +44,10 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "readers.faux",
     "Faux Reader",
-    "http://pdal.io/stages/readers.faux.html" };
+    "http://pdal.io/stages/readers.faux.html" );
 
 CREATE_STATIC_PLUGIN(1, 0, FauxReader, Reader, s_info)
 

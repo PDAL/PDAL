@@ -49,10 +49,10 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "writers.text",
     "Text Writer",
-    "http://pdal.io/stages/writers.text.html" };
+    "http://pdal.io/stages/writers.text.html" );
 
 CREATE_STATIC_PLUGIN(1, 0, TextWriter, Writer, s_info)
 

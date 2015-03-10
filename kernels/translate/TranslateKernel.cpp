@@ -44,10 +44,10 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "kernels.translate",
     "Translate Kernel",
-    "http://pdal.io/kernels/kernels.translate.html" };
+    "http://pdal.io/kernels/kernels.translate.html" );
 
 CREATE_STATIC_PLUGIN(1, 0, TranslateKernel, Kernel, s_info)
 

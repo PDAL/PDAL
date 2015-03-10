@@ -41,10 +41,10 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "filters.predicate",
     "Filter data using inline Python expressions.",
-    "http://pdal.io/stages/filters.predicate.html" };
+    "http://pdal.io/stages/filters.predicate.html" );
 
 CREATE_SHARED_PLUGIN(1, 0, PredicateFilter, Filter, s_info)
 
