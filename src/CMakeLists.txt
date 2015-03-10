@@ -208,6 +208,10 @@ target_link_libraries(${PDAL_LIB_NAME}
 
 target_link_libraries(${PDAL_LIB_NAME} ${Boost_LIBRARIES})
 
+if(WIN32)
+    target_link_libraries(${PDAL_LIB_NAME} ws2_32)
+endif()
+
 ###############################################################################
 # Targets installation
 

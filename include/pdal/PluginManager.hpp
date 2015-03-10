@@ -39,6 +39,7 @@
 
 #pragma once
 
+#include <pdal/pdal_export.hpp>
 #include <pdal/plugin.h>
 
 #include <map>
@@ -55,7 +56,7 @@ class DynamicLibrary;
  * I think PluginManager can eventually be a private header, only accessible
  * through the factories, but we'll leave it as public for now.
  */
-class PluginManager
+class PDAL_DLL PluginManager
 {
     typedef std::shared_ptr<DynamicLibrary> DynLibPtr;
     typedef std::map<std::string, std::shared_ptr<DynamicLibrary>> DynamicLibraryMap;

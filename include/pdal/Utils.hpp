@@ -39,6 +39,7 @@
 #include <algorithm>
 #include <string>
 #include <cassert>
+#include <cctype>
 #include <stdexcept>
 #include <cmath>
 #include <fstream>

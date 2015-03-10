@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <pdal/pdal_export.hpp>
 
 namespace pdal
 {
@@ -84,7 +85,7 @@ inline RotationMatrix createIdentityMatrix()
 
 
 // Returns Latitude, Longitude, Height triplet with angles in radians
-Xyz georeferenceWgs84(double range, double scanAngle,
+PDAL_DLL Xyz georeferenceWgs84(double range, double scanAngle,
                       const RotationMatrix& boresightMatrix,
                       const RotationMatrix& imuMatrix, const Xyz& gpsPoint);
 }
