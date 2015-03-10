@@ -32,6 +32,10 @@
 
 #include <iostream>
 
+namespace pdal 
+{
+
+
 static const OW_CellDepth ahOW_CellDepth[] =
 {
     {"8BIT_U",          GDT_Byte},
@@ -2492,3 +2496,6 @@ bool CheckError(sword nStatus, OCIError* hError)
 
     return true;
 }
+
+
+} //namespace pdal
