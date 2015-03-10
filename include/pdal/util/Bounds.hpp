@@ -128,18 +128,7 @@ public:
         return (!equal(rhs));
     }
 
-    void grow(double x, double y, double z=LOWEST)
-    {
-        if (x < minx) minx = x;
-        if (x > maxx) maxx = x;
-
-        if (y < miny) miny = y;
-        if (y > maxy) maxy = y;
-
-        if (z < minz) minz = z;
-        if (z > maxz) maxz = z;
-
-    }
+    void grow(double x, double y, double z=LOWEST);
 
     void grow(const BOX3D& other)
     {

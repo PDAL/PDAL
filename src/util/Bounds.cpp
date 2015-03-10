@@ -86,6 +86,19 @@ bool BOX3D::empty() const
             minz == HIGHEST && maxz == LOWEST;
 }
 
+void BOX3D::grow(double x, double y, double z)
+{
+    if (x < minx) minx = x;
+    if (x > maxx) maxx = x;
+
+    if (y < miny) miny = y;
+    if (y > maxy) maxy = y;
+
+    if (z < minz) minz = z;
+    if (z > maxz) maxz = z;
+}
+
+
 bool BOX3D::is_z_empty() const
 {
     return ((minz == HIGHEST) && (maxz == LOWEST));
