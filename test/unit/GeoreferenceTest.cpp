@@ -32,6 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#define _USE_MATH_DEFINES
 #include <gtest/gtest.h>
 #include <pdal/util/Georeference.hpp>
 
@@ -77,7 +78,7 @@ TEST(RotationMatrix, IdentityMatrix)
 TEST(Georeference, Zeros)
 {
     Xyz point = georeferenceWgs84(0, 0, createIdentityMatrix(),
-                                  createIdentityMatrix(), {0, 0, 0});
+                                  createIdentityMatrix(), Xyz(0, 0, 0));
     EXPECT_DOUBLE_EQ(0, point.X);
     EXPECT_DOUBLE_EQ(0, point.Y);
     EXPECT_DOUBLE_EQ(0, point.Z);
@@ -87,7 +88,7 @@ TEST(Georeference, Zeros)
 TEST(Georeference, LatLonElev)
 {
     Xyz point = georeferenceWgs84(0, 0, createIdentityMatrix(),
-                                  createIdentityMatrix(), {1, 2, 3});
+                                  createIdentityMatrix(), Xyz(1, 2, 3));
     EXPECT_DOUBLE_EQ(1, point.X);
     EXPECT_DOUBLE_EQ(2, point.Y);
     EXPECT_DOUBLE_EQ(3, point.Z);
@@ -97,7 +98,7 @@ TEST(Georeference, LatLonElev)
 TEST(Georeference, Range)
 {
     Xyz point = georeferenceWgs84(3, 0, createIdentityMatrix(),
-                                  createIdentityMatrix(), {1, 2, 3});
+                                  createIdentityMatrix(), Xyz(1, 2, 3));
     EXPECT_DOUBLE_EQ(1, point.X);
     EXPECT_DOUBLE_EQ(2, point.Y);
     EXPECT_DOUBLE_EQ(0, point.Z);
@@ -107,7 +108,7 @@ TEST(Georeference, Range)
 TEST(Georeference, RangeAndAngle)
 {
     Xyz point = georeferenceWgs84(3, M_PI / 2, createIdentityMatrix(),
-                                  createIdentityMatrix(), {1, 2, 3});
+                                  createIdentityMatrix(), Xyz(1, 2, 3));
     EXPECT_DOUBLE_EQ(0.9999988728659957, point.X);
     EXPECT_DOUBLE_EQ(2, point.Y);
     EXPECT_DOUBLE_EQ(3, point.Z);
@@ -118,7 +119,7 @@ TEST(Georeference, WithImu)
 {
     RotationMatrix imuMatrix(0, 1, 0, 0, 0, -1, -1, 0, 0);
     Xyz point =
-        georeferenceWgs84(3, 0, imuMatrix, createIdentityMatrix(), {1, 2, 3});
+        georeferenceWgs84(3, 0, imuMatrix, createIdentityMatrix(), Xyz(1, 2, 3));
     EXPECT_DOUBLE_EQ(1, point.X);
     EXPECT_DOUBLE_EQ(2.0000004696006983, point.Y);
     EXPECT_DOUBLE_EQ(3, point.Z);

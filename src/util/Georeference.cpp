@@ -77,7 +77,7 @@ Xyz georeferenceWgs84(double range, double scanAngle,
                       const RotationMatrix& boresightMatrix,
                       const RotationMatrix& imuMatrix, const Xyz& gpsPoint)
 {
-    Xyz pSocs = {range * std::sin(scanAngle), 0, -range * std::cos(scanAngle)};
+    Xyz pSocs = Xyz(range * std::sin(scanAngle), 0, -range * std::cos(scanAngle));
 
     Xyz pSocsAligned = rotate(pSocs, boresightMatrix);
     Xyz pLocalLevel = rotate(pSocsAligned, imuMatrix);
