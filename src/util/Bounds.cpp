@@ -67,6 +67,35 @@ namespace pdal
 
 const double BOX3D::LOWEST = (std::numeric_limits<double>::lowest)();
 const double BOX3D::HIGHEST = (std::numeric_limits<double>::max)();
+    
+BOX3D::BOX3D(double minx, double miny, double maxx, double maxy) :
+    minx(minx), maxx(maxx), miny(miny), maxy(maxy),
+    minz(HIGHEST), maxz(LOWEST)
+{}
+
+void BOX3D::clear()
+{
+    minx = HIGHEST; miny = HIGHEST; minz = HIGHEST;
+    maxx = LOWEST; maxy = LOWEST; maxz = LOWEST;
+}
+
+bool BOX3D::empty() const
+{
+    return  minx == HIGHEST && maxx == LOWEST &&
+            miny == HIGHEST && maxy == LOWEST &&
+            minz == HIGHEST && maxz == LOWEST;
+}
+
+bool BOX3D::is_z_empty() const
+{
+    return ((minz == HIGHEST) && (maxz == LOWEST));
+}
+
+const BOX3D& BOX3D::getDefaultSpatialExtent()
+{
+    static BOX3D v(LOWEST, LOWEST, LOWEST, HIGHEST, HIGHEST, HIGHEST);
+    return v;
+}    
 
 std::istream& operator>>(std::istream& istr, BOX3D& bounds)
 {
