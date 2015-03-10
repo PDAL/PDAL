@@ -135,10 +135,10 @@ private:
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "writers.pclvisualizer",
     "PCL Visualizer",
-    "http://pdal.io/stages/writers.pclvisualizer.html" };
+    "http://pdal.io/stages/writers.pclvisualizer.html" );
 
 CREATE_SHARED_PLUGIN(1, 0, PclVisualizer, Writer, s_info)
 

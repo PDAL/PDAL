@@ -43,11 +43,10 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "kernels.sort",
     "Sort Kernel",
-    "http://pdal.io/kernels/kernels.sort.html"
-};
+    "http://pdal.io/kernels/kernels.sort.html" );
 
 CREATE_STATIC_PLUGIN(1, 0, SortKernel, Kernel, s_info)
 

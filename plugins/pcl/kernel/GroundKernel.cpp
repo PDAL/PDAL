@@ -51,10 +51,10 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "kernels.ground",
     "Ground Kernel",
-    "http://pdal.io/kernels/kernels.ground.html" };
+    "http://pdal.io/kernels/kernels.ground.html" );
 
 CREATE_SHARED_PLUGIN(1, 0, GroundKernel, Kernel, s_info)
 

@@ -39,10 +39,10 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "filters.ferry",
     "Copy date from one dimension to another.",
-    "http://pdal.io/stages/filters.ferry.html" };
+    "http://pdal.io/stages/filters.ferry.html" );
 
 CREATE_STATIC_PLUGIN(1, 0, FerryFilter, Filter, s_info)
 

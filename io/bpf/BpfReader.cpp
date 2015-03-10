@@ -42,12 +42,12 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "readers.bpf",
     "\"Binary Point Format\" (BPF) reader support. BPF is a simple \n" \
         "DoD and research format that is used by some sensor and \n" \
         "processing chains.",
-    "http://pdal.io/stages/readers.bpf.html" };
+    "http://pdal.io/stages/readers.bpf.html" );
 
 CREATE_STATIC_PLUGIN(1, 0, BpfReader, Reader, s_info)
 

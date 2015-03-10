@@ -46,10 +46,10 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "filters.colorization",
     "Fetch and assign RGB color information from a GDAL-readable datasource.",
-    "http://pdal.io/stages/filters.colorization.html" };
+    "http://pdal.io/stages/filters.colorization.html" );
 
 CREATE_STATIC_PLUGIN(1, 0, ColorizationFilter, Filter, s_info)
 

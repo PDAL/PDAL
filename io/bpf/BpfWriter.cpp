@@ -44,12 +44,12 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "writers.bpf",
     "\"Binary Point Format\" (BPF) writer support. BPF is a simple \n" \
         "DoD and research format that is used by some sensor and \n" \
         "processing chains.",
-    "http://pdal.io/stages/writers.bpf.html" };
+    "http://pdal.io/stages/writers.bpf.html" );
 
 CREATE_STATIC_PLUGIN(1, 0, BpfWriter, Writer, s_info)
 

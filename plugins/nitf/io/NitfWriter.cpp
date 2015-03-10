@@ -80,10 +80,10 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "writers.nitf",
     "NITF Writer",
-    "http://pdal.io/stages/writers.nitf.html" };
+    "http://pdal.io/stages/writers.nitf.html" );
 
 CREATE_SHARED_PLUGIN(1, 0, NitfWriter, Writer, s_info)
 

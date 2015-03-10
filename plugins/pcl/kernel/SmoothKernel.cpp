@@ -43,10 +43,10 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "kernels.smooth",
     "Smooth Kernel",
-    "http://pdal.io/kernels/kernels.smooth.html" };
+    "http://pdal.io/kernels/kernels.smooth.html" );
 
 CREATE_SHARED_PLUGIN(1, 0, SmoothKernel, Kernel, s_info)
 

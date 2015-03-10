@@ -37,10 +37,10 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "readers.sbet",
     "SBET Reader",
-    "http://pdal.io/stages/readers.sbet.html" };
+    "http://pdal.io/stages/readers.sbet.html" );
 
 CREATE_STATIC_PLUGIN(1, 0, SbetReader, Reader, s_info)
 

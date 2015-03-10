@@ -108,12 +108,12 @@ void LasReader::processOptions(const Options& options)
     m_error.setFilename(m_filename);
 }
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "readers.las",
     "ASPRS LAS 1.0 - 1.4 read support. LASzip support is also \n" \
         "enabled through this driver if LASzip was found diring \n" \
         "compilation.",
-    "http://pdal.io/stages/readers.las.html" };
+    "http://pdal.io/stages/readers.las.html" );
 
 CREATE_STATIC_PLUGIN(1, 0, LasReader, Reader, s_info)
 

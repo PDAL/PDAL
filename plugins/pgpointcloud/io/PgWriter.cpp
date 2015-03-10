@@ -46,10 +46,10 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "writers.pgpointcloud",
     "Write points to PostgreSQL pgpointcloud output",
-    "http://pdal.io/stages/writers.pgpointcloud.html" };
+    "http://pdal.io/stages/writers.pgpointcloud.html" );
 
 CREATE_SHARED_PLUGIN(1, 0, PgWriter, Writer, s_info)
 

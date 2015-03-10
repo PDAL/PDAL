@@ -43,10 +43,10 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "kernels.cpd",
     "CPD Kernel",
-    "http://pdal.io/kernels/kernels.cpd.html" };
+    "http://pdal.io/kernels/kernels.cpd.html" );
 
 CREATE_SHARED_PLUGIN(1, 0, CpdKernel, Kernel, s_info)
 

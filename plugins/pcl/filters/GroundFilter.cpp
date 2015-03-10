@@ -50,10 +50,10 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "filters.ground",
     "Progressive morphological filter",
-    "http://pdal.io/stages/filters.ground.html" };
+    "http://pdal.io/stages/filters.ground.html" );
 
 CREATE_SHARED_PLUGIN(1, 0, GroundFilter, Filter, s_info)
 

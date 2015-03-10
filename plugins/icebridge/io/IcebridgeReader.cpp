@@ -60,12 +60,12 @@ namespace
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "readers.icebridge",
     "NASA HDF5-based IceBridge ATM reader. \n" \
         "See http://nsidc.org/data/docs/daac/icebridge/ilatm1b/index.html \n" \
         "for more information.",
-    "http://pdal.io/stages/readers.icebridge.html" };
+    "http://pdal.io/stages/readers.icebridge.html" );
 
 CREATE_SHARED_PLUGIN(1, 0, IcebridgeReader, Reader, s_info)
 
