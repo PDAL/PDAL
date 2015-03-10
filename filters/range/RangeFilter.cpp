@@ -41,6 +41,7 @@
 #include <utility>
 #include <vector>
 
+
 namespace pdal
 {
 
@@ -66,11 +67,11 @@ void RangeFilter::processOptions(const Options& options)
         if (!dimensionOptions)
             throw pdal_error("No dimension options");
 
-        double val = dimensionOptions->getValueOrDefault<double>("equals", NAN);
+        double val = dimensionOptions->getValueOrDefault<double>("equals", std::numeric_limits<double>::max());
         double min = dimensionOptions->getValueOrDefault<double>("min", -std::numeric_limits<double>::max());
         double max = dimensionOptions->getValueOrDefault<double>("max", std::numeric_limits<double>::max());
 
-        if (!std::isnan(val))
+        if (val != std::numeric_limits<double>::max())
             min = max = val;
 
         Range range;
