@@ -32,8 +32,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#define _USE_MATH_DEFINES
 #include "OptechReader.hpp"
 
+#include <cmath>
 #include <cstring>
 #include <sstream>
 
@@ -245,7 +247,7 @@ point_count_t OptechReader::read(PointBuffer& data,
         ++numRead;
         ++m_returnIndex;
 
-        if (m_returnIndex >= m_pulse.returnCount or
+        if (m_returnIndex >= m_pulse.returnCount ||
             m_returnIndex >= MaximumNumberOfReturns)
         {
             m_returnIndex = 0;
