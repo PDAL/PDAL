@@ -45,13 +45,18 @@ class Reader;
 class PDAL_DLL Reader : public Stage
 {
 public:
-    Reader() : Stage(),
-        m_count(std::numeric_limits<point_count_t>::max())
+    typedef std::function<void(PointBuffer, PointId)> PointReadFunc;
+
+    Reader() : m_count(std::numeric_limits<point_count_t>::max())
+    {}
+
+    Reader(PointReadFunc) : m_count(std::numeric_limits<point_count_t>::max())
     {}
 
 protected:
     std::string m_filename;
     point_count_t m_count;
+    PointReadFunc m_cb;
 
 private:
     virtual PointBufferSet run(PointBufferPtr buffer)

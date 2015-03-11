@@ -89,6 +89,10 @@ public:
         m_metadata(new Metadata)
     {}
 
+    PointContext(RawPtBufPtr ptBuf) : m_dims(new DimInfo()), m_ptBuf(ptBuf),
+        m_metadata(new Metadata)
+    {}
+ 
     RawPtBuf *rawPtBuf() const
         { return m_ptBuf.get(); }
     MetadataNode metadata()

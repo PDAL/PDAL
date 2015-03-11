@@ -701,6 +701,8 @@ void LasReader::loadPointV10(PointBuffer& data, char *buf, size_t bufsize)
 
     if (m_extraDims.size())
         loadExtraDims(istream, data, nextId);
+    if (m_cb)
+        m_cb(data, nextId);
 }
 
 void LasReader::loadPointV14(PointBuffer& data, char *buf, size_t bufsize)
