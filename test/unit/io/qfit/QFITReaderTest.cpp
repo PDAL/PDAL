@@ -41,9 +41,6 @@
 
 #include <iostream>
 
-#ifdef PDAL_COMPILER_GCC
-#pragma GCC diagnostic ignored "-Wfloat-equal"
-#endif
 
 using namespace pdal;
 

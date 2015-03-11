@@ -50,11 +50,6 @@
 #include <pdal/Stage.hpp>
 #include "TestConfig.hpp"
 
-#ifdef PDAL_COMPILER_GCC
-#pragma GCC diagnostic ignored "-Wfloat-equal"
-//#pragma GCC diagnostic ignored "-Wsign-compare"
-#endif
-
 using namespace pdal;
 using namespace std;
 
