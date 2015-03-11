@@ -103,18 +103,8 @@ int PCLKernel::execute()
 
     Options readerOptions;
     readerOptions.add<std::string>("filename", m_inputFile);
-    readerOptions.add<bool>("debug", isDebug());
-    readerOptions.add<uint32_t>("verbose", getVerboseLevel());
-    if (isDebug())
-    {
-        readerOptions.add<bool>("debug", true);
-        uint32_t verbosity(getVerboseLevel());
-        if (!verbosity)
-            verbosity = 1;
+    setCommonOptions(readerOptions);
 
-        readerOptions.add<uint32_t>("verbose", verbosity);
-        readerOptions.add<std::string>("log", "STDERR");
-    }
     Stage& readerStage(Kernel::makeReader(m_inputFile));
     readerStage.setOptions(readerOptions);
 

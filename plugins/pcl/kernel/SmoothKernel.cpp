@@ -91,19 +91,7 @@ int SmoothKernel::execute()
 
     Options readerOptions;
     readerOptions.add("filename", m_inputFile);
-    readerOptions.add("debug", isDebug());
-    readerOptions.add("verbose", getVerboseLevel());
-
-    if (isDebug())
-    {
-        readerOptions.add("debug", true);
-        uint32_t verbosity(getVerboseLevel());
-        if (!verbosity)
-            verbosity = 1;
-
-        readerOptions.add("verbose", verbosity);
-        readerOptions.add("log", "STDERR");
-    }
+    setCommonOptions(readerOptions);
 
     Stage& readerStage(Kernel::makeReader(m_inputFile));
     readerStage.setOptions(readerOptions);

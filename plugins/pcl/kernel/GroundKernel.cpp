@@ -114,19 +114,7 @@ int GroundKernel::execute()
 
     Options readerOptions;
     readerOptions.add<std::string>("filename", m_inputFile);
-    readerOptions.add<bool>("debug", isDebug());
-    readerOptions.add<uint32_t>("verbose", getVerboseLevel());
-
-    if (isDebug())
-    {
-        readerOptions.add("debug", true);
-        uint32_t verbosity(getVerboseLevel());
-        if (!verbosity)
-            verbosity = 1;
-
-        readerOptions.add("verbose", verbosity);
-        readerOptions.add("log", "STDERR");
-    }
+    setCommonOptions(readerOptions);
 
     Stage& readerStage(Kernel::makeReader(m_inputFile));
     readerStage.setOptions(readerOptions);
