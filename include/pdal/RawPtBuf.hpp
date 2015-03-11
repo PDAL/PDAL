@@ -42,14 +42,25 @@
 namespace pdal
 {
 
-/// This class provides a place to store the point data.
 class RawPtBuf
 {
 public:
-    RawPtBuf() : m_numPts(0)
+    virtual PointId addPoint() = 0;
+    virtual char *getPoint(PointId idx) = 0;
+    virtual void setField(Dimension::Detail *d, PointId idx,
+        const void *value) = 0;
+    virtual void getField(Dimension::Detail *d, PointId idx, void *value) = 0;
+    virtual void update(Dimension::DetailList& detail) = 0;
+};
+
+/// This class provides a place to store the point data.
+class DefaultRawPtBuf : public RawPtBuf
+{
+public:
+    DefaultRawPtBuf() : m_numPts(0)
     {}
 
-    ~RawPtBuf()
+    ~DefaultRawPtBuf()
     {
         for (auto vi = m_blocks.begin(); vi != m_blocks.end(); ++vi)
             delete [] *vi;

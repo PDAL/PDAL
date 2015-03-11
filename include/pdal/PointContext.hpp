@@ -85,7 +85,7 @@ private:
     MetadataPtr m_metadata;
 
 public:
-    PointContext() : m_dims(new DimInfo()), m_ptBuf(new RawPtBuf()),
+    PointContext() : m_dims(new DimInfo()), m_ptBuf(new DefaultRawPtBuf()),
         m_metadata(new Metadata)
     {}
 
