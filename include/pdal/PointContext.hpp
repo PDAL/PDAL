@@ -46,7 +46,7 @@ namespace pdal
 {
 
 class PointBuffer;
-class PointContext;
+
 namespace plang
 {
     class BufferedInvocation;
@@ -73,23 +73,24 @@ typedef std::shared_ptr<DimInfo> DimInfoPtr;
 
 // This provides a context for processing a set of points and allows the library
 // to be used to process multiple point sets simultaneously.
-class PointContext
+template <typename BUFFERTYPE = RawPtBuf>
+class TypedPointContext
 {
     friend class PointBuffer;
     friend class plang::BufferedInvocation;
 private:
     DimInfoPtr m_dims;
     // Provides storage for the point data.
-    RawPtBufPtr m_ptBuf;
+    std::shared_ptr<BUFFERTYPE> m_ptBuf;
     // Metadata storage;
     MetadataPtr m_metadata;
 
 public:
-    PointContext() : m_dims(new DimInfo()), m_ptBuf(new RawPtBuf()),
+    TypedPointContext() : m_dims(new DimInfo()), m_ptBuf(new BUFFERTYPE()),
         m_metadata(new Metadata)
     {}
 
-    RawPtBuf *rawPtBuf() const
+    BUFFERTYPE *rawPtBuf() const
         { return m_ptBuf.get(); }
     MetadataNode metadata()
         { return m_metadata->getNode(); }
@@ -309,8 +310,9 @@ private:
         }
     }
 };
+typedef TypedPointContext<> PointContext;
 // A point context is in some instances more easily understood as a reference.
-typedef PointContext PointContextRef;
+typedef TypedPointContext<> PointContextRef;
 
-} //namespace
+} //namespace pdal
 
