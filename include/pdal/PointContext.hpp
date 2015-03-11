@@ -132,11 +132,9 @@ public:
     // is already larger, this does nothing.
     void registerDim(Dimension::Id::Enum id, Dimension::Type::Enum type)
     {
-        Dimension::Detail& dd = m_dims->m_detail[id];
-        if (dd.type() == Dimension::Type::None)
-            m_dims->m_used.push_back(id);
+        Dimension::Detail dd = m_dims->m_detail[id];
         dd.setType(resolveType(type, dd.type()));
-        update();
+        update(dd, Dimension::name(id));
     }
 
     // The type and size are REQUESTS, not absolutes.  If someone else
@@ -145,21 +143,23 @@ public:
     Dimension::Id::Enum assignDim(const std::string& name,
         Dimension::Type::Enum type)
     {
-        Dimension::Id::Enum id;
-
+        Dimension::Id::Enum id = (Dimension::Id::Enum)m_dims->m_nextFree;
+        
         auto di = m_dims->m_propIds.find(name);
-        if (di == m_dims->m_propIds.end())
-        {
-            id = (Dimension::Id::Enum)m_dims->m_nextFree++;
-            m_dims->m_propIds[name] = id;
-            m_dims->m_used.push_back(id);
-        }
-        else
+        if (di != m_dims->m_propIds.end())
             id = di->second;
-        m_dims->m_detail[id].setType(
-            resolveType(m_dims->m_detail[id].type(), type));
-        update();
-        return id;
+        Dimension::Detail dd = m_dims->m_detail[id];
+        dd.setType(resolveType(type, dd.type()));
+        if (update(dd, name))
+        {
+            if (di == m_dims->m_propIds.end())
+            {
+                m_dims->m_nextFree++;
+                m_dims->m_propIds[name] = id;
+            }
+            return id;
+        }
+        return Dimension::Id::Unknown;
     }
 
     Dimension::Id::Enum registerOrAssignDim(const std::string name,
@@ -250,29 +250,29 @@ private:
     Dimension::Detail *dimDetail(Dimension::Id::Enum id) const
         { return &(m_dims->m_detail[(size_t)id]); }
 
-    void update()
+    bool update(Dimension::Detail dd, const std::string& name)
     {
-        auto sorter = [this](const Dimension::Id::Enum& d1,
-            const Dimension::Id::Enum& d2) -> bool
-        {
-            size_t s1 = m_dims->m_detail[d1].size();
-            size_t s2 = m_dims->m_detail[d2].size();
-            if (s1 > s2)
-                return true;
-            if (s1 < s2)
-                return false;
-            return d1 < d2;
-        };
-
-        Dimension::IdList& used = m_dims->m_used;
-        std::sort(used.begin(), used.end(), sorter);
         Dimension::DetailList detail;
+        bool used = Utils::contains(m_dims->m_used, dd.id());
+        for (auto id : m_dims->m_used)
+        {
+            if (id == dd.id())
+                detail.push_back(dd);
+            else
+                detail.push_back(m_dims->m_detail[id]);
+        }
+        if (!used)
+            detail.push_back(dd);
 
-        for (auto id : used)
-            detail.push_back(m_dims->m_detail[id]);
-         rawPtBuf()->update(detail);
-         for (auto& dd : detail)
-             m_dims->m_detail[dd.id()] = dd;
+        bool addDim = rawPtBuf()->update(detail, dd.id(), name);
+        if (addDim)
+        {
+            if (!used)
+                m_dims->m_used.push_back(dd.id());
+            for (auto& dtemp : detail)
+                m_dims->m_detail[dtemp.id()] = dtemp;
+        }
+        return addDim;
     }
 
     Dimension::Type::Enum resolveType(Dimension::Type::Enum t1,

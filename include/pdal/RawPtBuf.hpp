@@ -50,7 +50,8 @@ public:
     virtual void setField(Dimension::Detail *d, PointId idx,
         const void *value) = 0;
     virtual void getField(Dimension::Detail *d, PointId idx, void *value) = 0;
-    virtual void update(Dimension::DetailList& detail) = 0;
+    virtual bool update(Dimension::DetailList& detail, Dimension::Id::Enum id,
+        const std::string& name) = 0;
 };
 
 /// This class provides a place to store the point data.
@@ -88,13 +89,25 @@ public:
     void getField(Dimension::Detail *d, PointId idx, void *value)
        { memcpy(value, getDimension(d, idx), d->size()); }
 
-    void update(Dimension::DetailList& detail)
+    bool update(Dimension::DetailList& detail, Dimension::Id::Enum id,
+        const std::string& name)
     {
+        auto sorter = [this](const Dimension::Detail& d1,
+                const Dimension::Detail& d2) -> bool
+        {
+            if (d1.size() > d2.size())
+                return true;
+            if (d1.size() < d2.size())
+                return false;
+            return d1.id() < d2.id();
+        };
+
         if (m_numPts != 0)
             throw pdal_error("Can't update dimensions after points have "
                 "been added.");
 
         int offset = 0;
+        std::sort(detail.begin(), detail.end(), sorter);
         for (auto& d : detail)
         {
             d.setOffset(offset);
@@ -104,6 +117,7 @@ public:
         // in case this would matter to the optimized memcpy, but it made
         // no difference.  No sense wasting space for no difference.
         m_pointSize = (size_t)offset;
+        return true;
     }
 
 private:
