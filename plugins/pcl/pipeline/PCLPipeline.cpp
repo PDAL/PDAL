@@ -39,10 +39,7 @@
  *
  */
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wfloat-equal"
 #include "PCLPipeline.hpp"
-#pragma clang diagnostic pop
 
 #ifndef PCL_NO_PRECOMPILE
 #include <pcl/impl/instantiate.hpp>

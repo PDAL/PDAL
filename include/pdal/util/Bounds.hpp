@@ -62,8 +62,6 @@ namespace pdal
     \endverbatim
 */
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wfloat-equal"
 
 class PDAL_DLL BOX3D
 {
@@ -254,4 +252,3 @@ extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX3D& bounds);
 
 } // namespace pdal
 
-#pragma GCC diagnostic pop
