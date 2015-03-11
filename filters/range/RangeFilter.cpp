@@ -41,6 +41,7 @@
 #include <utility>
 #include <vector>
 
+#pragma GCC diagnostic ignored "-Wfloat-equal"
 
 namespace pdal
 {
@@ -67,11 +68,14 @@ void RangeFilter::processOptions(const Options& options)
         if (!dimensionOptions)
             throw pdal_error("No dimension options");
 
-        double val = dimensionOptions->getValueOrDefault<double>("equals", std::numeric_limits<double>::max());
-        double min = dimensionOptions->getValueOrDefault<double>("min", -std::numeric_limits<double>::max());
-        double max = dimensionOptions->getValueOrDefault<double>("max", std::numeric_limits<double>::max());
+        double val =dimensionOptions->getValueOrDefault<double>("equals",
+            (std::numeric_limits<double>::max)());
+        double min = dimensionOptions->getValueOrDefault<double>("min",
+            -(std::numeric_limits<double>::max)());
+        double max = dimensionOptions->getValueOrDefault<double>("max",
+            (std::numeric_limits<double>::max)());
 
-        if (val != std::numeric_limits<double>::max())
+        if (val != (std::numeric_limits<double>::max)())
             min = max = val;
 
         Range range;
