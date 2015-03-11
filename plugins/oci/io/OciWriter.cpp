@@ -49,10 +49,10 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "writers.oci",
     "Write data using SDO_PC objects to Oracle.",
-    "http://pdal.io/stages/writers.oci.html" };
+    "http://pdal.io/stages/writers.oci.html" );
 
 CREATE_SHARED_PLUGIN(1, 0, OciWriter, Writer, s_info)
 

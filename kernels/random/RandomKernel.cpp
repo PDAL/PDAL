@@ -39,10 +39,10 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "kernels.random",
     "Random Kernel",
-    "http://pdal.io/kernels/kernels.random.html" };
+    "http://pdal.io/kernels/kernels.random.html" );
 
 CREATE_STATIC_PLUGIN(1, 0, RandomKernel, Kernel, s_info)
 

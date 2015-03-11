@@ -42,10 +42,10 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "filters.transformation",
     "Transform each point using a 4x4 transformation matrix",
-    "http://pdal.io/stages/filters.transformation.html" };
+    "http://pdal.io/stages/filters.transformation.html" );
 
 CREATE_STATIC_PLUGIN(1, 0, TransformationFilter, Filter, s_info)
 

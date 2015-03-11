@@ -41,10 +41,10 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "filters.programmable",
     "Manipulate data using inline Python",
-    "http://pdal.io/stages/filters.programmable.html" };
+    "http://pdal.io/stages/filters.programmable.html" );
 
 CREATE_SHARED_PLUGIN(1, 0, ProgrammableFilter, Filter, s_info)
 

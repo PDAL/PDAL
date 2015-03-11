@@ -34,12 +34,13 @@
 
 #pragma once
 
-#include <string>
 #include <cassert>
-#include <stdexcept>
 #include <cmath>
-#include <ostream>
+#include <cstdint>
 #include <istream>
+#include <ostream>
+#include <stdexcept>
+#include <string>
 
 #ifndef PDAL_DLL
 #if defined(WIN32)
@@ -67,6 +68,10 @@ public:
     // open new file for writing
     static std::ostream* createFile(std::string const& filename,
         bool asBinary=true);
+
+    static bool directoryExists(std::string const& dirname);
+    static bool createDirectory(std::string const& dirname);
+    static void deleteDirectory(std::string const& dirname);
 
     static void closeFile(std::ostream* ofs);
     static void closeFile(std::istream* ifs);

@@ -42,10 +42,10 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "kernels.delta",
     "Delta Kernel",
-    "http://pdal.io/kernels/kernels.delta.html" };
+    "http://pdal.io/kernels/kernels.delta.html" );
 
 CREATE_STATIC_PLUGIN(1, 0, DeltaKernel, Kernel, s_info)
 

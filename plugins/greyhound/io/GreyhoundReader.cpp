@@ -39,10 +39,10 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "readers.greyhound",
     "Greyhound Reader",
-    "http://pdal.io/stages/readers.greyhound.html" };
+    "http://pdal.io/stages/readers.greyhound.html" );
 
 CREATE_SHARED_PLUGIN(1, 0, GreyhoundReader, Reader, s_info)
 

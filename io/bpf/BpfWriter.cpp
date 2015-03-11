@@ -44,12 +44,12 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "writers.bpf",
     "\"Binary Point Format\" (BPF) writer support. BPF is a simple \n" \
         "DoD and research format that is used by some sensor and \n" \
         "processing chains.",
-    "http://pdal.io/stages/writers.bpf.html" };
+    "http://pdal.io/stages/writers.bpf.html" );
 
 CREATE_STATIC_PLUGIN(1, 0, BpfWriter, Writer, s_info)
 
@@ -171,7 +171,7 @@ void BpfWriter::writePointMajor(const PointBuffer& data)
 {
     // Blocks of 10,000 points will ensure that we're under 16MB, even
     // for 255 dimensions.
-    size_t blockpoints = std::min(10000UL, data.size());
+    size_t blockpoints = std::min<point_count_t>(10000UL, data.size());
 
     // For compression we're going to write to a buffer so that it can be
     // compressed before it's written to the file stream.

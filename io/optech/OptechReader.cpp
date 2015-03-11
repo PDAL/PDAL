@@ -32,8 +32,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#define _USE_MATH_DEFINES
 #include "OptechReader.hpp"
 
+#include <cmath>
 #include <cstring>
 #include <sstream>
 
@@ -43,12 +45,11 @@
 namespace pdal
 {
 
-static PluginInfo const s_info
-{
+static PluginInfo const s_info = PluginInfo(
     "readers.optech",
     "Optech reader support.",
-    "http://pdal.io/stages/readers.optech.html"
-};
+    "http://pdal.io/stages/readers.optech.html" );
+
 CREATE_STATIC_PLUGIN(1, 0, OptechReader, Reader, s_info);
 
 std::string OptechReader::getName() const
@@ -56,9 +57,11 @@ std::string OptechReader::getName() const
     return s_info.name;
 }
 
+#ifndef WIN32
 const size_t OptechReader::MaximumNumberOfReturns;
 const size_t OptechReader::MaxNumRecordsInBuffer;
 const size_t OptechReader::NumBytesInRecord;
+#endif
 
 OptechReader::OptechReader()
     : Reader()
@@ -245,7 +248,7 @@ point_count_t OptechReader::read(PointBuffer& data,
         ++numRead;
         ++m_returnIndex;
 
-        if (m_returnIndex >= m_pulse.returnCount or
+        if (m_returnIndex >= m_pulse.returnCount ||
             m_returnIndex >= MaximumNumberOfReturns)
         {
             m_returnIndex = 0;

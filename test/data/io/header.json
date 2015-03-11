@@ -1,0 +1,38 @@
+{
+    "version": 3,
+    "tilebbox": [-180.000000, -90.000000, 180.000000, 90.000000],
+    "numTilesX": 2,
+    "numTilesY": 1,
+    "databbox": [1.000000, 2.000000, 11.000000, 12.000000],
+    "numPoints": 10,
+    "dimensions": [
+        {
+            "datatype": "double",
+            "name": "X",
+            "min": 1.000000,
+            "mean": 6.000000,
+            "max": 11.000000
+        },
+        {
+            "datatype": "double",
+            "name": "Y",
+            "min": 2.000000,
+            "mean": 7.000000,
+            "max": 12.000000
+        },
+        {
+            "datatype": "double",
+            "name": "Z",
+            "min": 3.000000,
+            "mean": 8.000000,
+            "max": 13.000000
+        },
+        {
+            "datatype": "uint32_t",
+            "name": "OffsetTime",
+            "min": 0.000000,
+            "mean": 4.500000,
+            "max": 9.000000
+        }
+    ]
+}

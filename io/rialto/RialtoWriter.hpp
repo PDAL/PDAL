@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Peter J. Gadomski (pete.gadomski@gmail.com)
+* Copyright (c) 2014-2015, RadiantBlue Technologies, Inc.
 *
 * All rights reserved.
 *
@@ -32,79 +32,57 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "SbetReader.hpp"
+#pragma once
+
+#include <pdal/pdal_export.hpp>
+#include <pdal/plugin.h>
+#include <pdal/Writer.hpp>
+
+#include "RialtoCommon.hpp"
+
+#include <cstdint>
+#include <string>
+
+extern "C" int32_t RialtoWriter_ExitFunc();
+extern "C" PF_ExitFunc RialtoWriter_InitPlugin();
 
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
-    "readers.sbet",
-    "SBET Reader",
-    "http://pdal.io/stages/readers.sbet.html" );
+class Options;
+class PointBuffer;
+class Tile;
 
-CREATE_STATIC_PLUGIN(1, 0, SbetReader, Reader, s_info)
-
-std::string SbetReader::getName() const { return s_info.name; }
-
-Options SbetReader::getDefaultOptions()
+class PDAL_DLL RialtoWriter : public Writer
 {
-    Options options;
-    return options;
-}
+public:
+    RialtoWriter()
+        {}
 
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
-void SbetReader::addDimensions(PointContextRef ctx)
-{
-    ctx.registerDims(getDefaultDimensions());
-}
+    Options getDefaultOptions();
 
+private:
+    virtual void processOptions(const Options& options);
+    virtual void ready(PointContextRef ctx);
+    virtual void write(const PointBuffer& buf);
+    virtual void done(PointContextRef ctx);
 
-void SbetReader::ready(PointContextRef ctx)
-{
-    size_t fileSize = FileUtils::fileSize(m_filename);
-    size_t pointSize = getDefaultDimensions().size() * sizeof(double);
-    if (fileSize % pointSize != 0)
-        throw pdal_error("invalid sbet file size");
-    m_numPts = fileSize / pointSize;
-    m_index = 0;
-    m_stream.reset(new ILeStream(m_filename));
-}
+    int32_t m_bytesPerPoint;
+    int32_t m_maxLevel;
+    int32_t m_numTilesX;
+    int32_t m_numTilesY;
+    bool m_overwrite;
+    Rectangle m_rectangle;
+    Tile** m_roots;
+    PointContext m_context;
 
-
-point_count_t SbetReader::read(PointBuffer& buf, point_count_t count)
-{
-    PointId nextId = buf.size();
-    PointId idx = m_index;
-    point_count_t numRead = 0;
-    seek(idx);
-    Dimension::IdList dims = getDefaultDimensions();
-    while (numRead < count && idx < m_numPts)
-    {
-        for (auto di = dims.begin(); di != dims.end(); ++di)
-        {
-            double d;
-            *m_stream >> d;
-            Dimension::Id::Enum dim = *di;
-            buf.setField(dim, nextId, d);
-        }
-        idx++;
-        nextId++;
-        numRead++;
-    }
-    m_index = idx;
-    return numRead;
-}
-
-
-bool SbetReader::eof()
-{
-    return m_index >= m_numPts;
-}
-
-
-void SbetReader::seek(PointId idx)
-{
-    m_stream->seek(idx * sizeof(double) * getDefaultDimensions().size());
-}
+    RialtoWriter& operator=(const RialtoWriter&); // not implemented
+    RialtoWriter(const RialtoWriter&); // not implemented
+};
 
 } // namespace pdal
+

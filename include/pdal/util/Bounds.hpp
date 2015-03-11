@@ -81,10 +81,7 @@ public:
         minz(box.minz), maxz(box.maxz)
     {}
 
-    BOX3D(double minx, double miny, double maxx, double maxy) :
-        minx(minx), maxx(maxx), miny(miny), maxy(maxy),
-        minz(HIGHEST), maxz(LOWEST)
-    {}
+    BOX3D(double minx, double miny, double maxx, double maxy) ;
 
     BOX3D(double minx, double miny, double minz, double maxx, double maxy,
             double maxz) :
@@ -98,12 +95,7 @@ public:
     double minz;
     double maxz;
 
-    bool empty() const
-    {
-        return  minx == HIGHEST && maxx == LOWEST &&
-            miny == HIGHEST && maxy == LOWEST &&
-            minz == HIGHEST && maxz == LOWEST;
-    }
+    bool empty() const;
 
     bool contains(double x, double y, double z) const
     {
@@ -136,18 +128,9 @@ public:
         return (!equal(rhs));
     }
 
-    void grow(double x, double y, double z=LOWEST)
-    {
-        if (x < minx) minx = x;
-        if (x > maxx) maxx = x;
+    void grow(double x, double y);
 
-        if (y < miny) miny = y;
-        if (y > maxy) maxy = y;
-
-        if (z < minz) minz = z;
-        if (z > maxz) maxz = z;
-
-    }
+    void grow(double x, double y, double z);
 
     void grow(const BOX3D& other)
     {
@@ -185,10 +168,7 @@ public:
         if (other.maxz > maxz) maxz = other.maxz;
     }
 
-    bool is_z_empty() const
-    {
-        return ((minz == HIGHEST) && (maxz == LOWEST));
-    }
+    bool is_z_empty() const;
 
     bool overlaps(const BOX3D& other)
     {
@@ -200,11 +180,7 @@ public:
                minz <= other.maxz && maxz >= other.minz;
     }
 
-    void clear()
-    {
-        minx = HIGHEST; miny = HIGHEST; minz = HIGHEST;
-        maxx = LOWEST; maxy = LOWEST; maxz = LOWEST;
-    }
+    void clear();
 
     std::string toBox(uint32_t precision = 8, uint32_t dimensions = 2) const
     {
@@ -252,11 +228,7 @@ public:
     }
 
     /// Returns a staticly-allocated Bounds extent that represents infinity
-    static const BOX3D& getDefaultSpatialExtent()
-    {
-        static BOX3D v(LOWEST, LOWEST, LOWEST, HIGHEST, HIGHEST, HIGHEST);
-        return v;
-    }
+    static const BOX3D& getDefaultSpatialExtent();
 
 
 };

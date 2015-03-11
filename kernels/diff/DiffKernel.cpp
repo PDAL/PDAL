@@ -47,10 +47,10 @@ using boost::property_tree::ptree;
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "kernels.diff",
     "Diff Kernel",
-    "http://pdal.io/kernels/kernels.diff.html" };
+    "http://pdal.io/kernels/kernels.diff.html" );
 
 CREATE_STATIC_PLUGIN(1, 0, DiffKernel, Kernel, s_info)
 

@@ -41,10 +41,10 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "readers.mrsid",
     "MrSID Reader",
-    "http://www.pdal.io/stages/readers.mrsid.html" };
+    "http://www.pdal.io/stages/readers.mrsid.html" );
 
 CREATE_SHARED_PLUGIN(1, 0, MrsidReader, Reader, s_info)
 

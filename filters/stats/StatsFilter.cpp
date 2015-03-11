@@ -40,10 +40,10 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "filters.stats",
     "Compute statistics about each dimension (mean, min, max, etc.)",
-    "http://pdal.io/stages/filters.stats.html" };
+    "http://pdal.io/stages/filters.stats.html" );
 
 CREATE_STATIC_PLUGIN(1, 0, StatsFilter, Filter, s_info)
 

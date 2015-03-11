@@ -44,10 +44,10 @@
 namespace pdal
 {
 
-static PluginInfo const s_info {
+static PluginInfo const s_info = PluginInfo(
     "writers.p2g",
     "Points2Grid Writer",
-    "http://pdal.io/stages/writers.p2g.html" };
+    "http://pdal.io/stages/writers.p2g.html" );
 
 CREATE_SHARED_PLUGIN(1, 0, P2gWriter, Writer, s_info)
 
