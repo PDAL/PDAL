@@ -128,7 +128,9 @@ public:
         return (!equal(rhs));
     }
 
-    void grow(double x, double y, double z=LOWEST);
+    void grow(double x, double y);
+
+    void grow(double x, double y, double z);
 
     void grow(const BOX3D& other)
     {
