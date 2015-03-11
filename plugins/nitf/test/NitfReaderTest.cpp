@@ -47,7 +47,6 @@
 #include <iostream>
 
 #ifdef PDAL_COMPILER_GCC
-#pragma GCC diagnostic ignored "-Wfloat-equal"
 #pragma GCC diagnostic ignored "-Wsign-compare"
 #endif
 
