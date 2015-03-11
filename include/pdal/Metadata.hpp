@@ -677,7 +677,7 @@ inline bool operator != (const MetadataNode& m1, const MetadataNode& m2)
 
 class Metadata
 {
-    template <typename BUFFERTYPE> friend class TypedPointContext;
+    friend class PointContext;
 
 public:
     Metadata() : m_root("root"), m_private("private")

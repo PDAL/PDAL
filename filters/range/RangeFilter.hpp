@@ -34,7 +34,6 @@
 
 #pragma once
 
-#include <pdal/PointContext.hpp>
 #include <pdal/Filter.hpp>
 #include <pdal/plugin.h>
 
@@ -50,6 +49,10 @@ namespace pdal
 
 class Options;
 class PointBuffer;
+class PointContext;
+
+typedef std::shared_ptr<PointBuffer> PointBufferPtr;
+typedef PointContext PointContextRef;
 
 struct Range
 {
