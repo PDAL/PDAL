@@ -37,6 +37,7 @@
 #include <pdal/Utils.hpp>
 #include <pdal/PluginManager.hpp>
 
+// filters
 #include <chipper/ChipperFilter.hpp>
 #include <colorization/ColorizationFilter.hpp>
 #include <crop/CropFilter.hpp>
@@ -51,18 +52,22 @@
 #include <stats/StatsFilter.hpp>
 #include <transformation/TransformationFilter.hpp>
 
-#include <pdal/BufferReader.hpp>
+// readers
+#include <bpf/BpfReader.hpp>
 #include <faux/FauxReader.hpp>
 #include <las/LasReader.hpp>
-#include <las/LasWriter.hpp>
-#include <bpf/BpfReader.hpp>
-#include <bpf/BpfWriter.hpp>
-#include <sbet/SbetReader.hpp>
-#include <sbet/SbetWriter.hpp>
-#include <qfit/QfitReader.hpp>
-#include <terrasolid/TerrasolidReader.hpp>
-#include <text/TextWriter.hpp>
 #include <optech/OptechReader.hpp>
+#include <pdal/BufferReader.hpp>
+#include <qfit/QfitReader.hpp>
+#include <sbet/SbetReader.hpp>
+#include <terrasolid/TerrasolidReader.hpp>
+
+// writers
+#include <bpf/BpfWriter.hpp>
+#include <las/LasWriter.hpp>
+#include <rialto/RialtoWriter.hpp>
+#include <sbet/SbetWriter.hpp>
+#include <text/TextWriter.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
@@ -87,21 +92,21 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
 
     std::string ext = boost::filesystem::extension(filename);
     std::map<std::string, std::string> drivers;
-    drivers["las"] = "readers.las";
-    drivers["laz"] = "readers.las";
     drivers["bin"] = "readers.terrasolid";
-    drivers["greyhound"] = "readers.greyhound";
-    drivers["qi"] = "readers.qfit";
-    drivers["nitf"] = "readers.nitf";
-    drivers["ntf"] = "readers.nitf";
-    drivers["nsf"] = "readers.nitf";
     drivers["bpf"] = "readers.bpf";
     drivers["cpd"] = "readers.optech";
-    drivers["sbet"] = "readers.sbet";
+    drivers["greyhound"] = "readers.greyhound";
     drivers["icebridge"] = "readers.icebridge";
-    drivers["sqlite"] = "readers.sqlite";
-    drivers["rxp"] = "readers.rxp";
+    drivers["las"] = "readers.las";
+    drivers["laz"] = "readers.las";
+    drivers["nitf"] = "readers.nitf";
+    drivers["nsf"] = "readers.nitf";
+    drivers["ntf"] = "readers.nitf";
     drivers["pcd"] = "readers.pcd";
+    drivers["qi"] = "readers.qfit";
+    drivers["rxp"] = "readers.rxp";
+    drivers["sbet"] = "readers.sbet";
+    drivers["sqlite"] = "readers.sqlite";
 
     if (ext == "") return "";
     ext = ext.substr(1, ext.length()-1);
@@ -123,17 +128,18 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
 
     std::map<std::string, std::string> drivers;
     drivers["bpf"] = "writers.bpf";
-    drivers["las"] = "writers.las";
-    drivers["laz"] = "writers.las";
-    drivers["pcd"] = "writers.pcd";
-    drivers["pclviz"] = "writers.pclvisualizer";
-    drivers["sbet"] = "writers.sbet";
     drivers["csv"] = "writers.text";
     drivers["json"] = "writers.text";
-    drivers["xyz"] = "writers.text";
-    drivers["txt"] = "writers.text";
+    drivers["las"] = "writers.las";
+    drivers["laz"] = "writers.las";
     drivers["ntf"] = "writers.nitf";
+    drivers["pcd"] = "writers.pcd";
+    drivers["pclviz"] = "writers.pclvisualizer";
+    drivers["ria"] = "writers.rialto";
+    drivers["sbet"] = "writers.sbet";
     drivers["sqlite"] = "writers.sqlite";
+    drivers["txt"] = "writers.text";
+    drivers["xyz"] = "writers.text";
 
     if (boost::algorithm::iequals(filename, "STDOUT"))
     {
@@ -180,13 +186,8 @@ StageFactory::StageFactory(bool no_plugins)
         pm.loadAll(PF_PluginType_Reader);
         pm.loadAll(PF_PluginType_Writer);
     }
-    PluginManager::initializePlugin(FauxReader_InitPlugin);
-    PluginManager::initializePlugin(LasReader_InitPlugin);
-    PluginManager::initializePlugin(BpfReader_InitPlugin);
-    PluginManager::initializePlugin(QfitReader_InitPlugin);
-    PluginManager::initializePlugin(SbetReader_InitPlugin);
-    PluginManager::initializePlugin(TerrasolidReader_InitPlugin);
-    PluginManager::initializePlugin(OptechReader_InitPlugin);
+
+    // filters
     PluginManager::initializePlugin(ChipperFilter_InitPlugin);
     PluginManager::initializePlugin(ColorizationFilter_InitPlugin);
     PluginManager::initializePlugin(CropFilter_InitPlugin);
@@ -200,8 +201,20 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(SplitterFilter_InitPlugin);
     PluginManager::initializePlugin(StatsFilter_InitPlugin);
     PluginManager::initializePlugin(TransformationFilter_InitPlugin);
+
+    // readers
+    PluginManager::initializePlugin(BpfReader_InitPlugin);
+    PluginManager::initializePlugin(FauxReader_InitPlugin);
+    PluginManager::initializePlugin(LasReader_InitPlugin);
+    PluginManager::initializePlugin(OptechReader_InitPlugin);
+    PluginManager::initializePlugin(QfitReader_InitPlugin);
+    PluginManager::initializePlugin(SbetReader_InitPlugin);
+    PluginManager::initializePlugin(TerrasolidReader_InitPlugin);
+
+    // writers
     PluginManager::initializePlugin(BpfWriter_InitPlugin);
     PluginManager::initializePlugin(LasWriter_InitPlugin);
+    PluginManager::initializePlugin(RialtoWriter_InitPlugin);
     PluginManager::initializePlugin(SbetWriter_InitPlugin);
     PluginManager::initializePlugin(TextWriter_InitPlugin);
 }

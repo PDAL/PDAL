@@ -69,6 +69,10 @@ public:
     static std::ostream* createFile(std::string const& filename,
         bool asBinary=true);
 
+    static bool directoryExists(std::string const& dirname);
+    static bool createDirectory(std::string const& dirname);
+    static void deleteDirectory(std::string const& dirname);
+
     static void closeFile(std::ostream* ofs);
     static void closeFile(std::istream* ifs);
 
