@@ -419,9 +419,18 @@ void Kernel::addSwitchSet(po::options_description* options)
 
 void Kernel::setCommonOptions(Options &options)
 {
-    options.add("debug", m_isDebug);
-    options.add("verbose", m_verboseLevel);
     options.add("visualize", m_visualize);
+
+    if (m_isDebug)
+    {
+        options.add("debug", true);
+        uint32_t verbosity(m_verboseLevel);
+        if (!verbosity)
+            verbosity = 1;
+
+        options.add("verbose", verbosity);
+        options.add("log", "STDERR");
+    }
 
     boost::char_separator<char> sep(",| ");
 

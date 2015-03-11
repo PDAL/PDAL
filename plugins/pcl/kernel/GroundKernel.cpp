@@ -108,35 +108,16 @@ void GroundKernel::addSwitches()
     addPositionalSwitch("output", 1);
 }
 
-std::shared_ptr<Stage> GroundKernel::makeReader(Options readerOptions)
-{
-    if (isDebug())
-    {
-        readerOptions.add<bool>("debug", true);
-        uint32_t verbosity(getVerboseLevel());
-        if (!verbosity)
-            verbosity = 1;
-
-        readerOptions.add<uint32_t>("verbose", verbosity);
-        readerOptions.add<std::string>("log", "STDERR");
-    }
-
-    std::shared_ptr<Stage> stage = KernelSupport::makeReader(m_inputFile);
-    stage->setOptions(readerOptions);
-
-    return stage;
-}
-
 int GroundKernel::execute()
 {
     PointContext ctx;
 
     Options readerOptions;
     readerOptions.add<std::string>("filename", m_inputFile);
-    readerOptions.add<bool>("debug", isDebug());
-    readerOptions.add<uint32_t>("verbose", getVerboseLevel());
+    setCommonOptions(readerOptions);
 
-    std::unique_ptr<Stage> readerStage = makeReader(readerOptions);
+    Stage& readerStage(Kernel::makeReader(m_inputFile));
+    readerStage.setOptions(readerOptions);
 
     Options groundOptions;
     groundOptions.add<double>("maxWindowSize", m_maxWindowSize);
@@ -150,28 +131,28 @@ int GroundKernel::execute()
     StageFactory f;
     std::unique_ptr<Stage> groundStage(f.createStage("filters.ground"));
     groundStage->setOptions(groundOptions);
-    groundStage->setInput(*readerStage);
+    groundStage->setInput(readerStage);
 
     // setup the Writer and write the results
     Options writerOptions;
     writerOptions.add<std::string>("filename", m_outputFile);
     setCommonOptions(writerOptions);
 
-    std::shared_ptr<Stage> writer(KernelSupport::makeWriter(m_outputFile, groundStage));
-    writer->setOptions(writerOptions);
+    Stage& writer(Kernel::makeWriter(m_outputFile, *groundStage));
+    writer.setOptions(writerOptions);
 
     std::vector<std::string> cmd = getProgressShellCommand();
     UserCallback *callback =
         cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
         (UserCallback *)new HeartbeatCallback();
 
-    writer->setUserCallback(callback);
+    writer.setUserCallback(callback);
 
     for (const auto& pi: getExtraStageOptions())
     {
         std::string name = pi.first;
         Options options = pi.second;
-        std::vector<std::shared_ptr<Stage> > stages = writer->findStage(name);
+        std::vector<Stage*> stages = writer.findStage(name);
         for (const auto& s : stages)
         {
             Options opts = s->getOptions();
@@ -181,11 +162,11 @@ int GroundKernel::execute()
         }
     }
 
-    writer->prepare(ctx);
+    writer.prepare(ctx);
 
     // process the data, grabbing the PointBufferSet for visualization of the
     // resulting PointBuffer
-    PointBufferSet pbSetOut = writer->execute(ctx);
+    PointBufferSet pbSetOut = writer.execute(ctx);
 
     if (isVisualize())
         visualize(*pbSetOut.begin());
