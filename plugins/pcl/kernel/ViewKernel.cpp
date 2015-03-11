@@ -154,37 +154,18 @@ void ViewKernel::addSwitches()
     addPositionalSwitch("input", 1);
 }
 
-std::shared_ptr<Stage> ViewKernel::makeReader(Options readerOptions)
-{
-    if (isDebug())
-    {
-        readerOptions.add<bool>("debug", true);
-        uint32_t verbosity(getVerboseLevel());
-        if (!verbosity)
-            verbosity = 1;
-
-        readerOptions.add<uint32_t>("verbose", verbosity);
-        readerOptions.add<std::string>("log", "STDERR");
-    }
-
-    std::shared_ptr<Stage> stage(KernelSupport::makeReader(m_inputFile));
-    stage->setOptions(readerOptions);
-
-    return stage;
-}
-
-
 int ViewKernel::execute()
 {
     Options readerOptions;
     readerOptions.add<std::string>("filename", m_inputFile);
-    readerOptions.add<bool>("debug", isDebug());
-    readerOptions.add<uint32_t>("verbose", getVerboseLevel());
+    setCommonOptions(readerOptions);
 
-    std::shared_ptr<Stage> readerStage(makeReader(readerOptions));
+    Stage& readerStage(Kernel::makeReader(m_inputFile));
+    readerStage.setOptions(readerOptions);
+
     PointContext ctx;
-    readerStage->prepare(ctx);
-    PointBufferSet pbSetIn = readerStage->execute(ctx);
+    readerStage.prepare(ctx);
+    PointBufferSet pbSetIn = readerStage.execute(ctx);
     
     PointBufferPtr buf = *pbSetIn.begin();
     if (m_pointIndexes.size())

@@ -84,25 +84,6 @@ void SmoothKernel::addSwitches()
     addPositionalSwitch("output", 1);
 }
 
-std::shared_ptr<Stage> SmoothKernel::makeReader(Options readerOptions)
-{
-    if (isDebug())
-    {
-        readerOptions.add("debug", true);
-        uint32_t verbosity(getVerboseLevel());
-        if (!verbosity)
-            verbosity = 1;
-
-        readerOptions.add("verbose", verbosity);
-        readerOptions.add("log", "STDERR");
-    }
-
-    std::shared_ptr<Stage> stage = KernelSupport::makeReader(m_inputFile);
-    stage->setOptions(readerOptions);
-
-    return stage;
-}
-
 
 int SmoothKernel::execute()
 {
@@ -110,16 +91,16 @@ int SmoothKernel::execute()
 
     Options readerOptions;
     readerOptions.add("filename", m_inputFile);
-    readerOptions.add("debug", isDebug());
-    readerOptions.add("verbose", getVerboseLevel());
+    setCommonOptions(readerOptions);
 
-    std::shared_ptr<Stage> readerStage = makeReader(readerOptions);
+    Stage& readerStage(Kernel::makeReader(m_inputFile));
+    readerStage.setOptions(readerOptions);
 
     // go ahead and prepare/execute on reader stage only to grab input
     // PointBufferSet, this makes the input PointBuffer available to both the
     // processing pipeline and the visualizer
-    readerStage->prepare(ctx);
-    PointBufferSet pbSetIn = readerStage->execute(ctx);
+    readerStage.prepare(ctx);
+    PointBufferSet pbSetIn = readerStage.execute(ctx);
 
     // the input PointBufferSet will be used to populate a BufferReader that is
     // consumed by the processing pipeline
@@ -144,21 +125,21 @@ int SmoothKernel::execute()
 
     std::shared_ptr<Stage> smoothStage(new PCLBlock());
     smoothStage->setOptions(smoothOptions);
-    smoothStage->setInput(bufferReader);
+    smoothStage->setInput(*bufferReader);
 
     Options writerOptions;
     writerOptions.add("filename", m_outputFile);
     setCommonOptions(writerOptions);
 
-    std::shared_ptr<Stage> writer(KernelSupport::makeWriter(m_outputFile, smoothStage));
-    writer->setOptions(writerOptions);
+    Stage& writer(Kernel::makeWriter(m_outputFile, *smoothStage));
+    writer.setOptions(writerOptions);
 
     std::vector<std::string> cmd = getProgressShellCommand();
     UserCallback *callback =
         cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
         (UserCallback *)new HeartbeatCallback();
 
-    writer->setUserCallback(callback);
+    writer.setUserCallback(callback);
 
     std::map<std::string, Options> extra_opts = getExtraStageOptions();
     std::map<std::string, Options>::iterator pi;
@@ -166,8 +147,8 @@ int SmoothKernel::execute()
     {
         std::string name = pi->first;
         Options options = pi->second;
-        std::vector<std::shared_ptr<Stage> > stages = writer->findStage(name);
-        std::vector<std::shared_ptr<Stage> >::iterator s;
+        std::vector<Stage*> stages = writer.findStage(name);
+        std::vector<Stage*>::iterator s;
         for (s = stages.begin(); s != stages.end(); ++s)
         {
             Options opts = (*s)->getOptions();
@@ -178,11 +159,11 @@ int SmoothKernel::execute()
         }
     }
 
-    writer->prepare(ctx);
+    writer.prepare(ctx);
 
     // process the data, grabbing the PointBufferSet for visualization of the
     // resulting PointBuffer
-    PointBufferSet pbSetOut = writer->execute(ctx);
+    PointBufferSet pbSetOut = writer.execute(ctx);
 
     if (isVisualize())
         visualize(*pbSetOut.begin());
