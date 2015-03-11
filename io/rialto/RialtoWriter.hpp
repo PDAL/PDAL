@@ -63,7 +63,7 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    static Options getDefaultOptions();
+    Options getDefaultOptions();
 
 private:
     virtual void processOptions(const Options& options);
