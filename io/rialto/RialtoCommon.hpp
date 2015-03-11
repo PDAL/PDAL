@@ -130,7 +130,7 @@ public:
         { return m_points.size(); }
 
     void add(PointId pointNumber, char* data, double lon, double lat);
-    void collectStats(int32_t* numTilesPerLevel, int64_t* numPointsPerLevel) const;
+    void collectStats(std::vector<int32_t> numTilesPerLevel, std::vector<int64_t> numPointsPerLevel) const;
     void write(const char* dir) const;
     void writeData(FILE*) const;
 

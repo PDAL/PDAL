@@ -14,7 +14,7 @@ using namespace pdal;
 TEST(RialtoWriterTest, createWriter)
 {
     StageFactory f;
-    std::unique_ptr<Writer> writer(f.createWriter("writers.rialto"));
+    std::unique_ptr<Stage> writer(f.createStage("writers.rialto"));
     EXPECT_TRUE(writer.get());
 }
 
@@ -36,7 +36,7 @@ TEST(RialtoWriterTest, testWriteHeaderOverwrite)
     ro.add("mode", "ramp");
 
     StageFactory f;
-    std::unique_ptr<Reader> reader(f.createReader("readers.faux"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
     reader->setOptions(ro);
 
     Options wo;
@@ -44,9 +44,9 @@ TEST(RialtoWriterTest, testWriteHeaderOverwrite)
     wo.add("max_level", 0);
     wo.add("overwrite", true);
 
-    std::unique_ptr<Writer> writer(f.createWriter("writers.rialto"));
+    std::unique_ptr<Stage> writer(f.createStage("writers.rialto"));
     writer->setOptions(wo);
-    writer->setInput(reader.get());
+    writer->setInput(*reader);
 
     PointContext ctx;
     writer->prepare(ctx);
@@ -73,7 +73,7 @@ TEST(RialtoWriterTest, testWriteHeaderNoOverwrite)
     ro.add("mode", "ramp");
 
     StageFactory f;
-    std::unique_ptr<Reader> reader(f.createReader("readers.faux"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
     reader->setOptions(ro);
 
     Options wo;
@@ -81,9 +81,9 @@ TEST(RialtoWriterTest, testWriteHeaderNoOverwrite)
     wo.add("max_level", 0);
     wo.add("overwrite", false);
 
-    std::unique_ptr<Writer> writer(f.createWriter("writers.rialto"));
+    std::unique_ptr<Stage> writer(f.createStage("writers.rialto"));
     writer->setOptions(wo);
-    writer->setInput(reader.get());
+    writer->setInput(*reader);
 
     PointContext ctx;
     writer->prepare(ctx);

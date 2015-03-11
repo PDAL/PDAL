@@ -53,6 +53,15 @@
 namespace pdal
 {
 
+static PluginInfo const s_info = PluginInfo(
+    "writers.rialto",
+    "Rialto Writer",
+    "http://pdal.io/stages/writers.rialto.html" );
+
+CREATE_STATIC_PLUGIN(1, 0, RialtoWriter, Writer, s_info)
+
+std::string RialtoWriter::getName() const { return s_info.name; }
+
 char* getPointData(const PointBuffer& buf, PointId& idx)
 {
     char* p = new char[buf.pointSize()];
@@ -78,10 +87,10 @@ void writeHeader(const char* dir, const PointBuffer& buf, PointContextRef ctx, c
     FILE* fp = fopen(filename, "wt");
 
     std::unique_ptr<StatsFilter> stats(new StatsFilter);
-    std::unique_ptr<BufferReader> br(new BufferReader);
+    BufferReader br;
     PointBufferPtr input_buffer = std::make_shared<PointBuffer>(buf);
-    br->addBuffer(input_buffer);
-    stats->setInput(br.get());
+    br.addBuffer(input_buffer);
+    stats->setInput(br);
     stats->prepare(ctx);
     stats->execute(ctx);
 
@@ -204,19 +213,14 @@ void RialtoWriter::write(const PointBuffer& buf)
     // dump tile info
     if (log()->getLevel() >= LogLevel::Debug)
     {
-        int32_t numTilesPerLevel[m_maxLevel+1];
-        int64_t numPointsPerLevel[m_maxLevel+1];
-
-        for (int i=0; i<=m_maxLevel; ++i)
-        {
-            numTilesPerLevel[i] = 0;
-            numPointsPerLevel[i] = 0;
-        }
+        int32_t num_levels = m_maxLevel+1;
+        std::vector<int32_t> numTilesPerLevel(num_levels, 0);
+        std::vector<int64_t> numPointsPerLevel(num_levels, 0);
 
         m_roots[0]->collectStats(numTilesPerLevel, numPointsPerLevel);
         m_roots[1]->collectStats(numTilesPerLevel, numPointsPerLevel);
 
-        for (int i=0; i<=m_maxLevel; ++i)
+        for (int32_t i=0; i < num_levels; ++i)
             log()->get(LogLevel::Debug) << "L" << i << ": " << numTilesPerLevel[i] << " tiles, " << numPointsPerLevel[i] << " points\n";
     }
 

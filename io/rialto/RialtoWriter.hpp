@@ -35,12 +35,16 @@
 #pragma once
 
 #include <pdal/pdal_export.hpp>
-#include <pdal/Stage.hpp>
+#include <pdal/plugin.h>
 #include <pdal/Writer.hpp>
 
 #include "RialtoCommon.hpp"
 
 #include <cstdint>
+#include <string>
+
+extern "C" int32_t RialtoWriter_ExitFunc();
+extern "C" PF_ExitFunc RialtoWriter_InitPlugin();
 
 namespace pdal
 {
@@ -52,11 +56,12 @@ class Tile;
 class PDAL_DLL RialtoWriter : public Writer
 {
 public:
-    SET_STAGE_NAME("writers.rialto", "Rialto Writer")
-    SET_STAGE_LINK("http://pdal.io/stages/writers.rialto.html")
-
     RialtoWriter()
         {}
+
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
     static Options getDefaultOptions();
 

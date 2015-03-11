@@ -165,7 +165,7 @@ void Tile::add(PointId pointNumber, char* p, double lon, double lat)
     child->add(pointNumber, p, lon, lat);
 }
 
-void Tile::collectStats(int32_t* numTilesPerLevel, int64_t* numPointsPerLevel) const
+void Tile::collectStats(std::vector<int32_t> numTilesPerLevel, std::vector<int64_t> numPointsPerLevel) const
 {
     numPointsPerLevel[m_level] += m_points.size();
     ++numTilesPerLevel[m_level];
