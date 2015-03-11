@@ -90,16 +90,21 @@ LAS driver.  Obtain `GeoTIFF`_ from the same place you got `GDAL`_.
 Proj.4
 ------------------------------------------------------------------------------
 
-Proj.4_ is the projection engine that PDAL uses for the :cpp:class:`pdal::filters::InPlaceReprojection` and :ref:`filters.inplacereprojection`.
+Proj.4_ is the projection engine that PDAL uses for the
+:ref:`filters.reprojection` filter. It is used by GDAL. 
 
 .. note::
 
-    Proj.4 4.9.0+ is required.
+    Proj.4 4.9.0+ is required if you need vertical datum 
+    transformation support. Otherwise, older versions should be 
+    sufficient.
 
 libxml2
 ------------------------------------------------------------------------------
 
-libxml2_ is used to serialize PDAL :cpp:class:`pdal::Schema` to and from to raw XML.
+libxml2_ is used to serialize PDAL dimension descriptions into XML for the 
+database drivers such as :ref:`writers.oci`, :ref:`readers.sqlite`, or 
+:ref:`readers.pgpointcloud`
 
 .. note::
 

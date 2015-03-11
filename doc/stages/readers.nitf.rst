@@ -11,10 +11,14 @@ reading that data, if the NITF file supports it.
 * The file must be NITF 2.1
 * There must be at least one Image segment ("IM").
 * There must be at least one `DES segment`_ ("DE") named "LIDARA".
+* Only LAS or LAZ data may be stored in the LIDARA segment
 
 The dimensions produced by the reader match exactly to the LAS dimension names
 and types for convenience in file format transformation.
 
+.. note::
+    
+    Only LAS or LAZ data may be stored in the LIDARA segment
 
 Example
 -------
