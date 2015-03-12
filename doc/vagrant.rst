@@ -115,7 +115,7 @@ includes are:
 
 * Full `pgpointcloud`_ support including example database
 * :ref:`filters.hexbin`
-* :ref:`filters.inplacereprojection` 
+* :ref:`filters.reprojection` 
 * :ref:`readers.nitf` and :ref:`writers.nitf` 
 * `LASzip`_ support in :ref:`readers.las` and :ref:`writers.las`
 * Interpolation with `Points2Grid`_ using :ref:`writers.p2g`
