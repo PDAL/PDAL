@@ -253,6 +253,7 @@ private:
     bool update(Dimension::Detail dd, const std::string& name)
     {
         Dimension::DetailList detail;
+
         bool used = Utils::contains(m_dims->m_used, dd.id());
         for (auto id : m_dims->m_used)
         {
@@ -264,7 +265,13 @@ private:
         if (!used)
             detail.push_back(dd);
 
-        bool addDim = rawPtBuf()->update(detail, dd.id(), name);
+        // Find the dimension in the list that we're referring to with
+        // this update.
+        auto di = std::find_if(detail.begin(), detail.end(),
+            [dd](const Dimension::Detail& td){ return td.id() == dd.id(); });
+        Dimension::Detail *cur = &(*di);
+
+        bool addDim = rawPtBuf()->update(detail, cur, name);
         if (addDim)
         {
             if (!used)

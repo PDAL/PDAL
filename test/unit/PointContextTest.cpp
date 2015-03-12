@@ -136,17 +136,15 @@ TEST(PointContext, userBuffer)
                *(double *)value = m_z; 
         }
 
-        bool update(Dimension::DetailList& detail, Dimension::Id::Enum id,
+        bool update(Dimension::DetailList& detail, Dimension::Detail *cur,
             const std::string& name)
         {
+            Dimension::Id::Enum id = cur->id();
+
             if (id != Dimension::Id::X && id != Dimension::Id::Y &&
                 id != Dimension::Id::Z)
                 return false;
-            auto di = std::find_if(detail.begin(), detail.end(),
-                [id](const Dimension::Detail& dd) { return id == dd.id(); });
-            if (di == detail.end())
-                throw pdal_error("Internal dimension error.");
-            di->setType(Dimension::Type::Double);
+            cur->setType(Dimension::Type::Double);
             return true;    
         }
     };

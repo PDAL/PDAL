@@ -50,7 +50,7 @@ public:
     virtual void setField(Dimension::Detail *d, PointId idx,
         const void *value) = 0;
     virtual void getField(Dimension::Detail *d, PointId idx, void *value) = 0;
-    virtual bool update(Dimension::DetailList& detail, Dimension::Id::Enum id,
+    virtual bool update(Dimension::DetailList& detail, Dimension::Detail *cur,
         const std::string& name) = 0;
 };
 
@@ -89,7 +89,7 @@ public:
     void getField(Dimension::Detail *d, PointId idx, void *value)
        { memcpy(value, getDimension(d, idx), d->size()); }
 
-    bool update(Dimension::DetailList& detail, Dimension::Id::Enum id,
+    bool update(Dimension::DetailList& detail, Dimension::Detail *cur,
         const std::string& name)
     {
         auto sorter = [this](const Dimension::Detail& d1,
