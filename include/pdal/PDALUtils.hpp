@@ -62,7 +62,8 @@ inline ptree toPTree(MetadataNode const& node)
     tree.put("type", node.type());
     tree.put("value", node.value());
 
-    for (auto n = node.children().begin(); n != node.children().end(); ++n)
+    MetadataNodeList children = node.children();
+    for (auto n = children.begin(); n != children.end(); ++n)
     {
         ptree pnode = toPTree(*n);
         if (node.kind() == MetadataType::Array)
