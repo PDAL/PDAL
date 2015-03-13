@@ -100,14 +100,14 @@ TEST(LasWriterTest, auto_offset)
     reader.setOptions(readerOps);
 
     reader.prepare(readTable);
-    EXPECT_FLOAT_EQ(reader.header().offsetX(), 74529.00);
+    EXPECT_DOUBLE_EQ(74529.00, reader.header().offsetX());
     PointViewSet viewSet = reader.execute(readTable);
     EXPECT_EQ(viewSet.size(), 1u);
     view = *viewSet.begin();
     EXPECT_EQ(view->size(), 3u);
-    EXPECT_FLOAT_EQ(view->getFieldAs<double>(Id::X, 0), 125000.00);
-    EXPECT_FLOAT_EQ(view->getFieldAs<double>(Id::X, 1), 74529.00);
-    EXPECT_FLOAT_EQ(view->getFieldAs<double>(Id::X, 2), 523523.02);
+    EXPECT_DOUBLE_EQ(125000.00, view->getFieldAs<double>(Id::X, 0));
+    EXPECT_DOUBLE_EQ(74529.00, view->getFieldAs<double>(Id::X, 1));
+    EXPECT_DOUBLE_EQ(523523.02, view->getFieldAs<double>(Id::X, 2));
     FileUtils::deleteFile(FILENAME);
 }
 

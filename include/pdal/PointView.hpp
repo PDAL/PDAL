@@ -237,7 +237,7 @@ protected:
     std::deque<PointId> m_index;
     // The index might be larger than the size to support temporary point
     // references.
-    size_t m_size;
+    point_count_t m_size;
     std::queue<PointId> m_temps;
 
 private:
@@ -581,7 +581,6 @@ inline void PointView::appendPoint(const PointView& buffer, PointId id)
 {
     // Invalid 'id' is a programmer error.
     PointId rawId = buffer.m_index[id];
-    point_count_t newid = size();
     m_index.push_back(rawId);
     m_size++;
     assert(m_temps.empty());

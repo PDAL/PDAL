@@ -45,7 +45,7 @@ TEST(RangeFilterTest, createStage)
 {
     StageFactory f;
     std::shared_ptr<Stage> filter(f.createStage("filters.range"));
-    EXPECT_TRUE(filter.get());
+    EXPECT_TRUE(filter.get() != 0);
 }
 
 TEST(RangeFilterTest, noDimension)

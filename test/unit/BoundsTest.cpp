@@ -149,8 +149,8 @@ TEST(BoundsTest, test_static)
     BOX3D t = BOX3D::getDefaultSpatialExtent();
     double mind =  (std::numeric_limits<double>::lowest)();
     double maxd =  (std::numeric_limits<double>::max)();
-    EXPECT_FLOAT_EQ(t.minx, mind);
-    EXPECT_FLOAT_EQ(t.maxx, maxd);
+    EXPECT_DOUBLE_EQ(t.minx, mind);
+    EXPECT_DOUBLE_EQ(t.maxx, maxd);
 }
 
 TEST(BoundsTest, test_invalid)
@@ -158,8 +158,8 @@ TEST(BoundsTest, test_invalid)
     BOX3D t;
     double mind =  (std::numeric_limits<double>::lowest)();
     double maxd =  (std::numeric_limits<double>::max)();
-    EXPECT_FLOAT_EQ(t.minx, maxd);
-    EXPECT_FLOAT_EQ(t.maxx, mind);
+    EXPECT_DOUBLE_EQ(t.minx, maxd);
+    EXPECT_DOUBLE_EQ(t.maxx, mind);
 }
 
 TEST(BoundsTest, test_output)

@@ -278,8 +278,6 @@ void AttributeFilter::UpdateGEOSBuffer(PointViewPtr view, AttributeInfo& info)
         OGRGeometryH geom = OGR_F_GetGeometryRef(feature.get());
         OGRwkbGeometryType t = OGR_G_GetGeometryType(geom);
 
-        int f_count = OGR_F_GetFieldCount (feature.get());
-
         if (!(t == wkbPolygon ||
             t == wkbMultiPolygon ||
             t == wkbPolygon25D ||
@@ -312,7 +310,7 @@ void AttributeFilter::UpdateGEOSBuffer(PointViewPtr view, AttributeInfo& info)
         // find out the points that are inside the bbox. Then test each
         // point in the bbox against the prepared geometry.
         BOX3D box = computeBounds(m_geosEnvironment, geos_g);
-        std::vector<std::size_t> ids = idx.getPoints(box);
+        std::vector<PointId> ids = idx.getPoints(box);
         for (const auto& i : ids)
         {
 
@@ -322,7 +320,7 @@ void AttributeFilter::UpdateGEOSBuffer(PointViewPtr view, AttributeInfo& info)
 
             GEOSGeometry* p = createGEOSPoint(m_geosEnvironment, x, y ,z);
 
-            if (static_cast<bool>(GEOSPreparedContains_r(m_geosEnvironment, geos_pg, p)))
+            if ((GEOSPreparedContains_r(m_geosEnvironment, geos_pg, p)) != 0)
             {
                 // We're in the poly, write the attribute value
                 int32_t v = OGR_F_GetFieldAsInteger(feature.get(), field_index);

@@ -58,12 +58,11 @@ public:
 
     std::size_t kdtree_get_point_count() const;
 
-    double kdtree_get_pt(const std::size_t idx, int dim) const;
+    double kdtree_get_pt(const PointId idx, int dim) const;
 
     double kdtree_distance(
-            const double *p1,
-            const std::size_t idx_p2,
-            std::size_t size) const;
+            const PointId idx_p2,
+            point_count_t size) const;
 
     template <class BBOX> bool kdtree_get_bbox(BBOX &bb) const
     {
@@ -71,7 +70,6 @@ public:
         if (bounds.empty())
             return false;
 
-        std::size_t nDims = m_3d ? 3 : 2;
         bb[0].low = bounds.minx;
         bb[0].high = bounds.maxx;
         bb[1].low = bounds.miny;
@@ -91,11 +89,11 @@ public:
             double const& z,
             double const& r) const;
 
-    std::vector<std::size_t> neighbors(
+    std::vector<PointId> neighbors(
             double const& x,
             double const& y,
             double const& z,
-            uint32_t count = 1) const;
+            point_count_t count = 1) const;
 
     void build(bool b3d = true);
 

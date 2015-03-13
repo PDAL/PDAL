@@ -339,7 +339,7 @@ MetadataNode InfoKernel::dumpQuery(PointViewPtr inView) const
 
     KDIndex kdi(*inView);
     kdi.build(is3d);
-    std::vector<size_t> ids = kdi.neighbors(x, y, z, inView->size());
+    std::vector<PointId> ids = kdi.neighbors(x, y, z, inView->size());
     for (auto i = ids.begin(); i != ids.end(); ++i)
         outView->appendPoint(*inView.get(), *i);
 

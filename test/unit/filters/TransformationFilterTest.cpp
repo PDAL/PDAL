@@ -68,7 +68,7 @@ TEST(TransformationMatrix, create)
 {
     StageFactory f;
     std::unique_ptr<Stage> filter(f.createStage("filters.transformation"));
-    EXPECT_TRUE(filter.get());
+    EXPECT_TRUE(filter.get() != 0);
 }
 
 

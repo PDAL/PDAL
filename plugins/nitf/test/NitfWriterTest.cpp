@@ -148,11 +148,11 @@ TEST(NitfWriterTest, test1)
         writer_opts.add(writer_opt1);
 
         std::unique_ptr<Stage> reader(f.createStage("readers.las"));
-        EXPECT_TRUE(reader.get());
+        EXPECT_TRUE(reader.get() != 0);
         reader->setOptions(reader_opts);
 
         std::unique_ptr<Stage> writer(f.createStage("writers.nitf"));
-        EXPECT_TRUE(writer.get());
+        EXPECT_TRUE(writer.get() != 0);
         writer->setOptions(writer_opts);
         writer->setInput(*reader);
         {

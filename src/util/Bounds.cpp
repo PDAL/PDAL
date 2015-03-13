@@ -38,7 +38,12 @@
 
 #include <pdal/util/Bounds.hpp>
 
-#pragma GCC diagnostic ignored "-Wfloat-equal"
+#ifdef PDAL_COMPILER_CLANG
+#  pragma clang diagnostic ignored "-Wfloat-equal"
+#endif
+#ifdef PDAL_COMPILER_GCC
+#  pragma GCC diagnostic ignored "-Wfloat-equal"
+#endif
 
 namespace
 {

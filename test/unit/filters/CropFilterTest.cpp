@@ -50,7 +50,7 @@ TEST(CropFilterTest, create)
 {
     StageFactory f;
     std::unique_ptr<Stage> filter(f.createStage("filters.crop"));
-    EXPECT_TRUE(filter.get());
+    EXPECT_TRUE(filter.get() != 0);
 }
 
 TEST(CropFilterTest, test_crop)

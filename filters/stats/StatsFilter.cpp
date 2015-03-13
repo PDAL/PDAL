@@ -129,7 +129,6 @@ void StatsFilter::extractMetadata()
 
     for (auto di = m_stats.begin(); di != m_stats.end(); ++di)
     {
-        Dimension::Id::Enum d = di->first;
         const Summary& s = di->second;
 
         MetadataNode t = m_metadata.addList("statistic");

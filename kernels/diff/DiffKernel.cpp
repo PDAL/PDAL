@@ -111,7 +111,6 @@ void DiffKernel::addSwitches()
 void DiffKernel::checkPoints(const PointView& source_data,
     const PointView& candidate_data, ptree& errors)
 {
-    uint32_t i(0);
     uint32_t MAX_BADBYTES(20);
     uint32_t badbytes(0);
 

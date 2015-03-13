@@ -193,8 +193,6 @@ void TextWriter::writeCSVHeader(PointTableRef table)
 
 void TextWriter::writeCSVBuffer(const PointViewPtr view)
 {
-    uint32_t pointIndex(0);
-
     for (PointId idx = 0; idx < view->size(); ++idx)
     {
         for (auto di = m_dims.begin(); di != m_dims.end(); ++di)

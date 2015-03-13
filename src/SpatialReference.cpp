@@ -248,7 +248,7 @@ bool SpatialReference::isGeographic() const
 {
     OGRSpatialReferenceH current =
         OSRNewSpatialReference(getWKT(eCompoundOK, false).c_str());
-    bool output = OSRIsGeographic(current);
+    bool output = (OSRIsGeographic(current)) != 0;
     OSRDestroySpatialReference(current);
     return output;
 }

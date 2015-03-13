@@ -15,7 +15,7 @@ TEST(RialtoWriterTest, createWriter)
 {
     StageFactory f;
     std::unique_ptr<Stage> writer(f.createStage("writers.rialto"));
-    EXPECT_TRUE(writer.get());
+    EXPECT_TRUE(writer.get() != 0);
 }
 
 TEST(RialtoWriterTest, testConstructor)

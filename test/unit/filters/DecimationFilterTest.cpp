@@ -45,7 +45,7 @@ TEST(DecimationFilterTest, create)
 {
     StageFactory f;
     std::unique_ptr<Stage> filter(f.createStage("filters.decimation"));
-    EXPECT_TRUE(filter.get());
+    EXPECT_TRUE(filter.get() != 0);
 }
 
 TEST(DecimationFilterTest, DecimationFilterTest_test1)

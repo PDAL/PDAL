@@ -266,7 +266,7 @@ void CropFilter::crop(PointView& input, PointView& output)
             if (!p)
                 throw pdal_error("unable to allocate candidate test point");
 
-            if (static_cast<bool>(GEOSPreparedContains_r(m_geosEnvironment,
+            if ((GEOSPreparedContains_r(m_geosEnvironment,
                 m_geosPreparedGeometry, p)) != m_cropOutside)
                 output.appendPoint(input, idx);
             GEOSGeom_destroy_r(m_geosEnvironment, p);
