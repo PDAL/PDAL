@@ -101,7 +101,7 @@ std::string Support::binpath(const std::string& file)
 
 std::string Support::exename(const std::string& name)
 {
-#ifdef PDAL_PLATFORM_WIN32
+#ifdef _WIN32
     return name + ".exe";
 #else
     return name;

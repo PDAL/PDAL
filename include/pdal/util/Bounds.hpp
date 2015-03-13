@@ -38,7 +38,7 @@
 #include <sstream>
 
 #ifndef PDAL_DLL
-#if defined(WIN32)
+#if defined(_WIN32)
 #   define PDAL_DLL   __declspec(dllexport)
 #else
 #  if defined(USE_GCC_VISIBILITY_FLAG)

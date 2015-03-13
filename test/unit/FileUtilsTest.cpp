@@ -98,7 +98,7 @@ TEST(FileUtilsTest, test_getcwd)
 #endif
 }
 
-#ifdef PDAL_PLATFORM_WIN32
+#ifdef _WIN32
 static const std::string drive = "A:";
 #else
 static const std::string drive = "";

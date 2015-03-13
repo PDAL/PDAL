@@ -81,7 +81,7 @@ typedef int32_t (*PF_ExitFunc)();
 typedef PF_ExitFunc (*PF_InitFunc)();
 
 #ifndef PDAL_DLL
-  #ifdef WIN32
+  #ifdef _WIN32
     #define PDAL_DLL __declspec(dllimport)
   #else
     #define PDAL_DLL
