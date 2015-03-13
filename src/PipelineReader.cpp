@@ -34,10 +34,8 @@
 
 #include <pdal/PipelineReader.hpp>
 
-#include <pdal/PipelineManager.hpp>
 #include <pdal/Filter.hpp>
-#include <pdal/Reader.hpp>
-#include <pdal/Writer.hpp>
+#include <pdal/PipelineManager.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/util/FileUtils.hpp>
 
@@ -46,7 +44,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/trim.hpp>
 
-#ifndef PDAL_PLATFORM_WIN32
+#ifndef _WIN32
 #include <wordexp.h>
 #endif
 
@@ -191,7 +189,7 @@ Option PipelineReader::parseElement_Option(const ptree& tree)
     if (option.getName() == "filename")
     {
         std::string path = option.getValue<std::string>();
-#ifndef PDAL_PLATFORM_WIN32
+#ifndef _WIN32
         wordexp_t result;
         if (wordexp(path.c_str(), &result, 0) == 0)
         {
@@ -214,18 +212,16 @@ Option PipelineReader::parseElement_Option(const ptree& tree)
 }
 
 
-Stage* PipelineReader::parseElement_anystage(const std::string& name,
+Stage *PipelineReader::parseElement_anystage(const std::string& name,
     const ptree& subtree)
 {
-    Stage* stage = NULL;
-
     if (name == "Filter")
     {
-        stage = parseElement_Filter(subtree);
+        return parseElement_Filter(subtree);
     }
     else if (name == "Reader")
     {
-        stage = parseElement_Reader(subtree);
+        return parseElement_Reader(subtree);
     }
     else if (name == "<xmlattr>")
     {
@@ -236,11 +232,11 @@ Stage* PipelineReader::parseElement_anystage(const std::string& name,
         throw pipeline_xml_error("encountered unknown stage type");
     }
 
-    return stage;
+    return NULL;
 }
 
 
-Reader* PipelineReader::parseElement_Reader(const ptree& tree)
+Stage *PipelineReader::parseElement_Reader(const ptree& tree)
 {
     Options options(m_baseOptions);
 
@@ -302,23 +298,22 @@ Reader* PipelineReader::parseElement_Reader(const ptree& tree)
 
     context.validate();
 
-    Reader* reader =m_manager.addReader(type);
-    reader->setOptions(options);
-    return reader;
+    Stage& reader(m_manager.addReader(type));
+    reader.setOptions(options);
+    return &reader;
 }
 
 
-Filter* PipelineReader::parseElement_Filter(const ptree& tree)
+Stage *PipelineReader::parseElement_Filter(const ptree& tree)
 {
     Options options(m_baseOptions);
-//    Stage* prevStage = NULL;
 
     StageParserContext context;
 
     map_t attrs;
     collect_attributes(attrs, tree);
 
-    std::vector<Stage *> prevStages;
+    std::vector<Stage*> prevStages;
     for (auto iter = tree.begin(); iter != tree.end(); ++iter)
     {
         const std::string& name = iter->first;
@@ -355,12 +350,13 @@ Filter* PipelineReader::parseElement_Filter(const ptree& tree)
         context.addType();
     }
 
-    Filter* ptr = m_manager.addFilter(type, prevStages);
-    ptr->setOptions(options);
-    if (dynamic_cast<MultiFilter *>(ptr))
-        context.setCardinality(StageParserContext::Many);
+    Stage& filter(m_manager.addFilter(type));
+    filter.setOptions(options);
+    for (auto sp : prevStages)
+        filter.setInput(*sp);
+    context.setCardinality(StageParserContext::Many);
     context.validate();
-    return ptr;
+    return &filter;
 }
 
 
@@ -387,15 +383,15 @@ void PipelineReader::collect_attributes(map_t& attrs, const ptree& tree)
 }
 
 
-Writer* PipelineReader::parseElement_Writer(const ptree& tree)
+Stage *PipelineReader::parseElement_Writer(const ptree& tree)
 {
     Options options(m_baseOptions);
-    Stage* prevStage = NULL;
     StageParserContext context;
 
     map_t attrs;
     collect_attributes(attrs, tree);
 
+    std::vector<Stage *> prevStages;
     for (auto iter = tree.begin(); iter != tree.end(); ++iter)
     {
         const std::string& name = iter->first;
@@ -417,7 +413,7 @@ Writer* PipelineReader::parseElement_Writer(const ptree& tree)
         else if (name == "Filter" || name == "Reader")
         {
             context.addStage();
-            prevStage = parseElement_anystage(name, subtree);
+            prevStages.push_back(parseElement_anystage(name, subtree));
         }
         else
         {
@@ -433,16 +429,18 @@ Writer* PipelineReader::parseElement_Writer(const ptree& tree)
     }
 
     context.validate();
-    Writer* writer = m_manager.addWriter(type, prevStage);
-    writer->setOptions(options);
-    return writer;
+    Stage& writer(m_manager.addWriter(type));
+    for (auto sp : prevStages)
+        writer.setInput(*sp);
+    writer.setOptions(options);
+    return &writer;
 }
 
 
 bool PipelineReader::parseElement_Pipeline(const ptree& tree)
 {
-    Stage* stage = NULL;
-    Writer* writer = NULL;
+    Stage *stage = NULL;
+    Stage *writer = NULL;
 
     map_t attrs;
     collect_attributes(attrs, tree);

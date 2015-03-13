@@ -37,8 +37,16 @@
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
 #include <DecimationFilter.hpp>
+#include <FauxReader.hpp>
 
 using namespace pdal;
+
+TEST(DecimationFilterTest, create)
+{
+    StageFactory f;
+    std::unique_ptr<Stage> filter(f.createStage("filters.decimation"));
+    EXPECT_TRUE(filter.get());
+}
 
 TEST(DecimationFilterTest, DecimationFilterTest_test1)
 {
@@ -48,23 +56,20 @@ TEST(DecimationFilterTest, DecimationFilterTest_test1)
     ops.add("bounds", srcBounds);
     ops.add("mode", "random");
     ops.add("num_points", 30);
-    StageFactory f;
-    ReaderPtr reader(f.createReader("readers.faux"));
-    EXPECT_TRUE(reader.get());
-    reader->setOptions(ops);
+    FauxReader reader;
+    reader.setOptions(ops);
 
     Options decimationOps;
     decimationOps.add("step", 10);
     
-    FilterPtr filter(f.createFilter("filters.decimation"));
-    EXPECT_TRUE(filter.get());
-    filter->setOptions(decimationOps);
-    filter->setInput(reader.get());
+    DecimationFilter filter;
+    filter.setOptions(decimationOps);
+    filter.setInput(reader);
 
     PointContext ctx;
 
-    filter->prepare(ctx);
-    PointBufferSet pbSet = filter->execute(ctx);
+    filter.prepare(ctx);
+    PointBufferSet pbSet = filter.execute(ctx);
     EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
     EXPECT_EQ(buf->size(), 3u);

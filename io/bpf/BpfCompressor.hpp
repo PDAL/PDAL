@@ -37,8 +37,8 @@
 #include <ostream>
 #include <zlib.h>
 
-#include <pdal/Charbuf.hpp>
-#include <pdal/OStream.hpp>
+#include <pdal/util/Charbuf.hpp>
+#include <pdal/util/OStream.hpp>
 
 namespace pdal
 {
@@ -46,8 +46,7 @@ namespace pdal
 class BpfCompressor
 {
 public:
-    BpfCompressor(OLeStream& out, size_t maxSize,
-            int compressionLevel = Z_DEFAULT_COMPRESSION) :
+    BpfCompressor(OLeStream& out, size_t maxSize) :
         m_out(out), m_inbuf(maxSize), m_blockStart(out), m_rawSize(0),
         m_compressedSize(0)
     {}

@@ -52,12 +52,12 @@ typedef PointContext PointContextRef;
 class PDAL_DLL GroundFilter : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.ground", "Progressive Morphological Filter")
-    SET_STAGE_LINK("http://www.pdal.io/stages/filters.ground.html")
-    SET_PLUGIN_VERSION("1.0.0b1")
-
     GroundFilter() : Filter()
     {}
+
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
 private:
     double m_maxWindowSize;

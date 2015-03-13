@@ -292,7 +292,6 @@ TEST(MetadataTest, test_metadata_stage)
     PointContext ctx;
 
     LasReader reader(Support::datapath("interesting.las"));
-    EXPECT_TRUE(reader.getDescription() == "Las Reader");
     reader.prepare(ctx);
 
     MetadataNode file_metadata = ctx.metadata();
@@ -305,7 +304,7 @@ TEST(MetadataTest, test_metadata_stage)
     PipelineReader specReader(mgr);
     specReader.readPipeline(
         Support::datapath("pipeline/pipeline_metadata_reader.xml"));
-    Stage *stage = mgr.getStage();
+    std::shared_ptr<Stage> stage(mgr.getStage());
 
     stage->prepare(readerCtx);
     MetadataNode pipeline_metadata = readerCtx.metadata();

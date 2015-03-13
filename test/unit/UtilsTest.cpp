@@ -278,3 +278,31 @@ TEST(UtilsTest, split2Char)
     EXPECT_EQ(result[3], "test");
 }
 
+TEST(UtilsTest, case)
+{
+    std::string s("This is a test");
+    
+    EXPECT_EQ("THIS IS A TEST", Utils::toupper(s));
+    EXPECT_EQ("this is a test", Utils::tolower(s));
+
+    s = "FOOBARBAZ";
+
+    EXPECT_EQ("FOOBARBAZ", Utils::toupper(s));
+    EXPECT_EQ("foobarbaz", Utils::tolower(s));
+
+    s = "foo!bar.baz";
+    EXPECT_EQ("FOO!BAR.BAZ", Utils::toupper(s));
+    EXPECT_EQ(s, Utils::tolower(s));
+}
+
+TEST(UtilsTest, starts)
+{
+    std::string s("reference 1");
+
+    EXPECT_TRUE(Utils::startsWith(s, "ref"));
+    EXPECT_TRUE(Utils::startsWith(s, s));
+    EXPECT_FALSE(Utils::startsWith(s, "reference 123"));
+    EXPECT_FALSE(Utils::startsWith(s, "rawference 123"));
+    EXPECT_TRUE(Utils::startsWith(s, ""));
+}
+

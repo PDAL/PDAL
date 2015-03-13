@@ -38,17 +38,24 @@
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
 
-CREATE_FILTER_PLUGIN(predicate, pdal::PredicateFilter)
-
 namespace pdal
 {
+
+static PluginInfo const s_info = PluginInfo(
+    "filters.predicate",
+    "Filter data using inline Python expressions.",
+    "http://pdal.io/stages/filters.predicate.html" );
+
+CREATE_SHARED_PLUGIN(1, 0, PredicateFilter, Filter, s_info)
+
+std::string PredicateFilter::getName() const { return s_info.name; }
 
 void PredicateFilter::processOptions(const Options& options)
 {
     m_source = options.getValueOrDefault<std::string>("source", "");
     if (m_source.empty())
         m_source = FileUtils::readFileIntoString(
-            options.getValueOrThrow<std::string>("filename"));
+            options.getValueOrThrow<std::string>("script"));
     m_module = options.getValueOrThrow<std::string>("module");
     m_function = options.getValueOrThrow<std::string>("function");
 }

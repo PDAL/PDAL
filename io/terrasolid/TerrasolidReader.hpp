@@ -34,14 +34,16 @@
 
 #pragma once
 
-#include <pdal/Reader.hpp>
 #include <pdal/Options.hpp>
+#include <pdal/plugin.h>
+#include <pdal/Reader.hpp>
+#include <pdal/util/IStream.hpp>
 
 #include <memory>
 #include <vector>
 
-#include <boost/detail/endian.hpp>
-
+extern "C" int32_t TerrasolidReader_ExitFunc();
+extern "C" PF_ExitFunc TerrasolidReader_InitPlugin();
 
 namespace pdal
 {
@@ -95,16 +97,20 @@ public:
 class PDAL_DLL TerrasolidReader : public pdal::Reader
 {
 public:
-    SET_STAGE_NAME("readers.terrasolid", "TerraSolid Reader")
-
     TerrasolidReader() : pdal::Reader(),
         m_format(TERRASOLID_Format_Unknown)
     {}
+
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
     static Dimension::IdList getDefaultDimensions();
 
     point_count_t getNumPoints() const
         { return m_header->PntCnt; }
+
+    const TerraSolidHeader& getHeader() const { return *m_header; }
 
     // this is called by the stage's iterator
     uint32_t processBuffer(PointBuffer& PointBuffer, std::istream& stream,
@@ -117,7 +123,7 @@ private:
     bool m_haveColor;
     bool m_haveTime;
     uint32_t m_baseTime;
-    std::istream* m_istream;
+    std::unique_ptr<IStream> m_istream;
     point_count_t m_index;
 
     virtual void initialize();

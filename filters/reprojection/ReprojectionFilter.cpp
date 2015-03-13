@@ -34,18 +34,27 @@
 
 #include "ReprojectionFilter.hpp"
 
-#include <memory>
-
+#include <pdal/GDALUtils.hpp>
 #include <pdal/PointBuffer.hpp>
 #include <pdal/GlobalEnvironment.hpp>
 
 #pragma GCC diagnostic ignored "-Wfloat-equal"
 #include <gdal.h>
 #include <ogr_spatialref.h>
-#include <pdal/GDALUtils.hpp>
+
+#include <memory>
 
 namespace pdal
 {
+
+static PluginInfo const s_info = PluginInfo(
+    "filters.reprojection",
+    "Reproject data using GDAL from one coordinate system to another.",
+    "http://pdal.io/stages/filters.reprojection.html" );
+
+CREATE_STATIC_PLUGIN(1, 0, ReprojectionFilter, Filter, s_info)
+
+std::string ReprojectionFilter::getName() const { return s_info.name; }
 
 struct OGRSpatialReferenceDeleter
 {

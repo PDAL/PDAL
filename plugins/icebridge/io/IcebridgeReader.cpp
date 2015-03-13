@@ -38,8 +38,6 @@
 
 #include <map>
 
-CREATE_READER_PLUGIN(icebridge, pdal::IcebridgeReader)
-
 namespace
 {
     const std::vector<pdal::hdf5::Hdf5ColumnData> hdf5Columns =
@@ -61,6 +59,17 @@ namespace
 
 namespace pdal
 {
+
+static PluginInfo const s_info = PluginInfo(
+    "readers.icebridge",
+    "NASA HDF5-based IceBridge ATM reader. \n" \
+        "See http://nsidc.org/data/docs/daac/icebridge/ilatm1b/index.html \n" \
+        "for more information.",
+    "http://pdal.io/stages/readers.icebridge.html" );
+
+CREATE_SHARED_PLUGIN(1, 0, IcebridgeReader, Reader, s_info)
+
+std::string IcebridgeReader::getName() const { return s_info.name; }
 
 Options IcebridgeReader::getDefaultOptions()
 {

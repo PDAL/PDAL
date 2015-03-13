@@ -63,10 +63,6 @@ Dimension::IdList getRxpDimensions(bool syncToPps, bool minimal);
 class PDAL_DLL RxpReader : public pdal::Reader
 {
 public:
-    SET_STAGE_NAME("readers.rxp", "RXP Reader")
-    SET_STAGE_LINK("http://pdal.io/stages/readers.rxp.html")
-    SET_PLUGIN_VERSION("1.0.0b1")
-
     RxpReader()
         : pdal::Reader()
         , m_uri("")
@@ -74,7 +70,11 @@ public:
         , m_pointcloud()
     {}
 
-    static Options getDefaultOptions();
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+
+    Options getDefaultOptions();
     static Dimension::IdList getDefaultDimensions()
     {
         return getRxpDimensions(DEFAULT_SYNC_TO_PPS, DEFAULT_MINIMAL);

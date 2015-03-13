@@ -71,9 +71,6 @@ public:
         return buf + pointsToBytes(idx % m_blockPtCnt);
     }
 
-    char *getDimension(Dimension::Detail *d, PointId idx)
-        { return getPoint(idx) + d->offset(); }
-
     void setField(Dimension::Detail *d, PointId idx, const void *value)
        { memcpy(getDimension(d, idx), value, d->size()); }
 
@@ -99,6 +96,9 @@ private:
 
     // The number of points in each memory block.
     static const point_count_t m_blockPtCnt = 65536;
+
+    char *getDimension(Dimension::Detail *d, PointId idx)
+        { return getPoint(idx) + d->offset(); }
     
     std::size_t pointsToBytes(point_count_t numPts)
         { return m_pointSize * numPts; }

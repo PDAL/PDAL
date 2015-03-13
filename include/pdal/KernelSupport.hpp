@@ -38,7 +38,6 @@
 
 #include <pdal/Options.hpp>
 #include <pdal/Stage.hpp>
-#include <pdal/Writer.hpp>
 #include <pdal/UserCallback.hpp>
 #include <pdal/PipelineManager.hpp>
 
@@ -67,12 +66,8 @@ public:
 class PDAL_DLL KernelSupport
 {
 public:
-    // makes a reader/stage, from just the filename and some other options
-    static Stage* makeReader(const std::string& filename);
-
     // makes a writer, from just the filename and some other
     // options (and the input stage)
-    static Writer* makeWriter(const std::string& filename, Stage *stage);
     static PipelineManager* makePipeline(const std::string& filename);
 
 private:

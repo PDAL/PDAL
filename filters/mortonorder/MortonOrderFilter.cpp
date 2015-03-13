@@ -32,15 +32,23 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
+#include "MortonOrderFilter.hpp"
+
 #include <iostream>
 #include <limits>
 #include <map>
 
-#include "MortonOrderFilter.hpp"
-
 namespace pdal
 {
 
+static PluginInfo const s_info = PluginInfo(
+    "filters.morgonorder",
+    "Morton or z-order sorting of points. See http://en.wikipedia.org/wiki/Z-order_curve for more detail.",
+    "http://pdal.io/stages/filters.mortonorder.html" );
+
+CREATE_STATIC_PLUGIN(1, 0, MortonOrderFilter, Filter, s_info)
+
+std::string MortonOrderFilter::getName() const { return s_info.name; }
 
 Options MortonOrderFilter::getDefaultOptions()
 {

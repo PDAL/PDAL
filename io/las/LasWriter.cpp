@@ -37,9 +37,9 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <iostream>
 
-#include <pdal/Inserter.hpp>
-#include <pdal/OStream.hpp>
 #include <pdal/PointBuffer.hpp>
+#include <pdal/util/Inserter.hpp>
+#include <pdal/util/OStream.hpp>
 #include <pdal/Utils.hpp>
 
 #include "GeotiffSupport.hpp"
@@ -47,6 +47,17 @@
 
 namespace pdal
 {
+
+static PluginInfo const s_info = PluginInfo(
+    "writers.las",
+    "ASPRS LAS 1.0 - 1.4 writer. LASzip support is also \n" \
+        "available if enabled at compile-time. Note that LAZ \n" \
+        "does not provide LAS 1.4 support at this time.",
+    "http://pdal.io/stages/writers.las.html" );
+
+CREATE_STATIC_PLUGIN(1, 0, LasWriter, Writer, s_info)
+
+std::string LasWriter::getName() const { return s_info.name; }
 
 void LasWriter::construct()
 {

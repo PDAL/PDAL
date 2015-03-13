@@ -130,7 +130,6 @@ std::vector<std::size_t> KDIndex::neighbors(
         double const& x,
         double const& y,
         double const& z,
-        double distance,
         uint32_t k) const
 {
     std::vector<size_t> output(k);

@@ -14,14 +14,17 @@ Readers
    readers.buffer
    readers.faux
    readers.geowave
+   readers.greyhound
    readers.las
    readers.nitf
    readers.oci
+   readers.optech
    readers.pcd
    readers.pgpointcloud
    readers.qfit
    readers.rxp
    readers.sbet
+   readers.sqlite
 
 Writers
 =======
@@ -33,9 +36,12 @@ Writers
    writers.las
    writers.nitf
    writers.oci
+   writers.p2g
    writers.pcd
    writers.pgpointcloud
-   writers.p2g
+   writers.pclvisualizer
+   writers.rialto
+   writers.sqlite
    writers.text
 
 Filters
@@ -52,6 +58,7 @@ Filters
    filters.ferry
    filters.hexbin
    filters.mortonorder
+   filters.merge
    filters.pclblock
    filters.predicate
    filters.programmable

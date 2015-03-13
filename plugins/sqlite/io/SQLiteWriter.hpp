@@ -45,10 +45,11 @@ namespace pdal
 class PDAL_DLL SQLiteWriter : public DbWriter
 {
 public:
-    SET_STAGE_NAME("writers.sqlite", "Write data to SQLite3 database files.")
-    SET_PLUGIN_VERSION("1.0.0b1")
-
     SQLiteWriter();
+
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
 private:
 

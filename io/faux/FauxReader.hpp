@@ -35,6 +35,10 @@
 #pragma once
 
 #include <pdal/Reader.hpp>
+#include <pdal/plugin.h>
+
+extern "C" int32_t FauxReader_ExitFunc();
+extern "C" PF_ExitFunc FauxReader_InitPlugin();
 
 namespace pdal
 {
@@ -77,14 +81,17 @@ enum Mode
 // activated by passing a numeric value as "number_of_returns" to the
 // reader constructor.
 //
-class PDAL_DLL FauxReader : public pdal::Reader
+class PDAL_DLL FauxReader : public Reader
 {
 public:
-    SET_STAGE_NAME("readers.faux", "Faux Reader")
-
     FauxReader();
 
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+
     static Dimension::IdList getDefaultDimensions();
+    Options getDefaultOptions();
 
 private:
     Mode m_mode;

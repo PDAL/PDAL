@@ -35,6 +35,10 @@
 #pragma once
 
 #include <pdal/Kernel.hpp>
+#include <pdal/plugin.h>
+
+extern "C" int32_t TranslateKernel_ExitFunc();
+extern "C" PF_ExitFunc TranslateKernel_InitPlugin();
 
 namespace pdal
 {
@@ -42,19 +46,19 @@ namespace pdal
 class PDAL_DLL TranslateKernel : public Kernel
 {
 public:
-    SET_KERNEL_NAME ("translate", "Translate Kernel")
-    SET_KERNEL_LINK ("http://pdal.io/kernels/kernels.translate.html")
- 
-    TranslateKernel();
+    static void *create();
+    static int32_t destroy(void *);
+    std::string getName() const;
     int execute();
 
 private:
+    TranslateKernel();
     void addSwitches();
     void validateSwitches();
 
-    std::unique_ptr<Stage> makeReader(Options readerOptions);
-    Stage* makeTranslate(Options translateOptions, Stage* reader);
-    void forwardMetadata(Options & options, Metadata metadata);
+    Stage& makeReader(Options readerOptions);
+    Stage& makeTranslate(Options translateOptions, Stage& parent);
+    void forwardMetadata(Options& options, Metadata metadata);
 
     std::string m_inputFile;
     std::string m_outputFile;
@@ -69,7 +73,6 @@ private:
     double m_decimation_leaf_size;
     std::string m_decimation_method;
     point_count_t m_decimation_limit;
-
 };
 
 } // namespace pdal

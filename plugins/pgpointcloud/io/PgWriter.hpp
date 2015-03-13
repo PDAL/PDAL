@@ -45,15 +45,14 @@ namespace pdal
 class PDAL_DLL PgWriter : public DbWriter
 {
 public:
-    SET_STAGE_NAME("writers.pgpointcloud",
-        "Write points to PostgreSQL pgpointcloud output")
-    SET_STAGE_LINK("http://pdal.io/stages/writers.pgpointcloud.html")
-    SET_PLUGIN_VERSION("1.0.0b1")
-
     PgWriter();
     ~PgWriter();
 
-    static Options getDefaultOptions();
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+
+    Options getDefaultOptions();
 
 private:
     PgWriter& operator=(const PgWriter&); // not implemented

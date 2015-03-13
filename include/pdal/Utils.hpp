@@ -39,6 +39,7 @@
 #include <algorithm>
 #include <string>
 #include <cassert>
+#include <cctype>
 #include <stdexcept>
 #include <cmath>
 #include <fstream>
@@ -47,6 +48,7 @@
 #include <cstring>
 #include <sstream>
 #include <vector>
+#include <map>
 
 #include <boost/numeric/conversion/cast.hpp>
 
@@ -100,27 +102,6 @@ namespace Utils
         return compare_approx<T>(actual, expected, epsilon);
     }
 
-    // Return a 'T' from a stream and increment src by the sizeof 'T'
-    template<class T>
-    T read_field(uint8_t*& src)
-    {
-        T tmp = *(T*)(void*)src;
-        src += sizeof(T);
-        return tmp;
-    }
-
-    // Read 'num' items from the source stream to the dest location
-    template <typename T>
-    void read_n(T& dest, std::istream& src, std::streamsize const& num)
-    {
-        if (!src.good())
-            throw pdal::invalid_stream("pdal::Utils::read_n<T> input stream is "
-                "not readable");
-
-        src.read(as_buffer(dest), num);
-        assert(check_stream_state(src));
-    }
-
     // From http://stackoverflow.com/questions/485525/round-for-float-in-c
     inline double sround(double r)
         { return (r > 0.0) ? floor(r + 0.5) : ceil(r - 0.5); }
@@ -164,6 +145,29 @@ namespace Utils
             ss << syms[((*it >> 4) & 0xf)] << syms[*it & 0xf];
 
         return ss.str();
+    }
+
+    inline std::string tolower(const std::string& s)
+    {
+        std::string out;
+        for (size_t i = 0; i < s.size(); ++i)
+            out += std::tolower(s[i]);
+        return out;
+    }
+
+    inline std::string toupper(const std::string& s)
+    {
+        std::string out;
+        for (size_t i = 0; i < s.size(); ++i)
+            out += std::toupper(s[i]);
+        return out;
+    }
+
+    inline bool startsWith(const std::string& s, const std::string& prefix)
+    {
+        if (prefix.size() > s.size())
+            return false;
+        return (strncmp(prefix.data(), s.data(), prefix.size()) == 0);
     }
 
     template<typename Target, typename Source>
@@ -292,6 +296,10 @@ namespace Utils
     template<typename T>
     std::string typeidName()
         { return Utils::demangle(typeid(T).name()); }
+
+    template<typename KEY, typename VALUE>
+    bool contains(const std::map<KEY, VALUE>& c, const KEY& v)
+        { return c.find(v) != c.end(); };
 
     template<typename COLLECTION, typename VALUE>
     bool contains(const COLLECTION& c, const VALUE& v)

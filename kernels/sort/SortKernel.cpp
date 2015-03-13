@@ -34,16 +34,29 @@
 
 #include "SortKernel.hpp"
 
+#include <pdal/BufferReader.hpp>
 #include <pdal/KernelSupport.hpp>
 #include <pdal/StageFactory.hpp>
 
-#include <pdal/BufferReader.hpp>
+#include <boost/program_options.hpp>
 
 namespace pdal
 {
 
-SortKernel::SortKernel() :
-    Kernel(), m_bCompress(false), m_bForwardMetadata(false)
+static PluginInfo const s_info = PluginInfo(
+    "kernels.sort",
+    "Sort Kernel",
+    "http://pdal.io/kernels/kernels.sort.html" );
+
+CREATE_STATIC_PLUGIN(1, 0, SortKernel, Kernel, s_info)
+
+std::string SortKernel::getName() const
+{
+    return s_info.name;
+}
+
+
+SortKernel::SortKernel() : m_bCompress(false), m_bForwardMetadata(false)
 {}
 
 
@@ -79,7 +92,8 @@ void SortKernel::addSwitches()
     addPositionalSwitch("output", 1);
 }
 
-std::unique_ptr<Stage> SortKernel::makeReader(Options readerOptions)
+
+Stage& SortKernel::makeReader(Options readerOptions)
 {
     if (isDebug())
     {
@@ -92,11 +106,10 @@ std::unique_ptr<Stage> SortKernel::makeReader(Options readerOptions)
         readerOptions.add<std::string>("log", "STDERR");
     }
 
-    Stage* stage = KernelSupport::makeReader(m_inputFile);
-    stage->setOptions(readerOptions);
-    std::unique_ptr<Stage> reader_stage(stage);
+    Stage& stage = Kernel::makeReader(m_inputFile);
+    stage.setOptions(readerOptions);
 
-    return reader_stage;
+    return stage;
 }
 
 
@@ -109,17 +122,18 @@ int SortKernel::execute()
     readerOptions.add("debug", isDebug());
     readerOptions.add("verbose", getVerboseLevel());
 
-    std::unique_ptr<Stage> readerStage = makeReader(readerOptions);
+    Stage& readerStage = makeReader(readerOptions);
 
     // go ahead and prepare/execute on reader stage only to grab input
     // PointBufferSet, this makes the input PointBuffer available to both the
     // processing pipeline and the visualizer
-    readerStage->prepare(ctx);
-    PointBufferSet pbSetIn = readerStage->execute(ctx);
+    readerStage.prepare(ctx);
+    PointBufferSet pbSetIn = readerStage.execute(ctx);
 
     // the input PointBufferSet will be used to populate a BufferReader that is
     // consumed by the processing pipeline
     PointBufferPtr input_buffer = *pbSetIn.begin();
+
     BufferReader bufferReader;
     bufferReader.setOptions(readerOptions);
     bufferReader.addBuffer(input_buffer);
@@ -129,9 +143,9 @@ int SortKernel::execute()
     sortOptions.add<uint32_t>("verbose", getVerboseLevel());
 
     StageFactory f;
-    Filter* sortStage = f.createFilter("filters.mortonorder");
-    sortStage->setInput(&bufferReader);
-    sortStage->setOptions(sortOptions);
+    Stage& sortStage = ownStage(f.createStage("filters.mortonorder"));
+    sortStage.setInput(bufferReader);
+    sortStage.setOptions(sortOptions);
 
     Options writerOptions;
     writerOptions.add("filename", m_outputFile);
@@ -147,19 +161,19 @@ int SortKernel::execute()
         cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
         (UserCallback *)new HeartbeatCallback();
 
-    WriterPtr writer(KernelSupport::makeWriter(m_outputFile, sortStage));
+    Stage& writer = makeWriter(m_outputFile, sortStage);
 
     // Some options are inferred by makeWriter based on filename
     // (compression, driver type, etc).
-    writer->setOptions(writerOptions+writer->getOptions());
-
-    writer->setUserCallback(callback);
+    writer.setOptions(writerOptions + writer.getOptions());
+    writer.setUserCallback(callback);
 
     for (const auto& pi : getExtraStageOptions())
     {
         std::string name = pi.first;
         Options options = pi.second;
-        std::vector<Stage*> stages = writer->findStage(name);
+        //ABELL - Huh?
+        std::vector<Stage *> stages = writer.findStage(name);
         for (const auto& s : stages)
         {
             Options opts = s->getOptions();
@@ -168,16 +182,16 @@ int SortKernel::execute()
             s->setOptions(opts);
         }
     }
-    writer->prepare(ctx);
+    writer.prepare(ctx);
 
     // process the data, grabbing the PointBufferSet for visualization of the
-    PointBufferSet pbSetOut = writer->execute(ctx);
+    PointBufferSet pbSetOut = writer.execute(ctx);
 
     if (isVisualize())
         visualize(*pbSetOut.begin());
-    //visualize(*pbSetIn.begin(), *pbSetOut.begin());
 
     return 0;
 }
 
 } // namespace pdal
+

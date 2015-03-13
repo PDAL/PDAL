@@ -42,10 +42,6 @@
 #include "StageTester.hpp"
 #include "Support.hpp"
 
-#ifdef PDAL_COMPILER_GCC
-#pragma GCC diagnostic ignored "-Wfloat-equal"
-#endif
-
 using namespace pdal;
 
 TEST(ChipperTest, test_construction)
@@ -66,7 +62,7 @@ TEST(ChipperTest, test_construction)
         options.add(capacity);
 
         ChipperFilter chipper;
-        chipper.setInput(&reader);
+        chipper.setInput(reader);
         chipper.setOptions(options);
         chipper.prepare(ctx);
         PointBufferSet pbSet = chipper.execute(ctx);
@@ -113,9 +109,9 @@ TEST(ChipperTest, empty_buffer)
 
     ChipperFilter chipper;
     chipper.prepare(ctx);
-    StageTester::ready(&chipper, ctx);
-    PointBufferSet pbSet = StageTester::run(&chipper, buf);
-    StageTester::done(&chipper, ctx);
+    StageTester::ready(chipper, ctx);
+    PointBufferSet pbSet = StageTester::run(chipper, buf);
+    StageTester::done(chipper, ctx);
 
     EXPECT_EQ(pbSet.size(), 0u);
 }
@@ -135,9 +131,9 @@ TEST(ChipperTest, test_ordering)
     options.add(capacity);
 
     LasReader candidate_reader(options);
-    ChipperFilter chipper(options);
-    chipper.setInput(&candidate_reader);
-    chipper.prepare();
+    std::shared_ptr<ChipperFilter> chipper(new ChipperFilter)(options);
+    chipper->setInput(&candidate_reader);
+    chipper->prepare();
 
     Option& query = options.getOptionByRef("filename");
     query.setValue<std::string>(source_filename);
@@ -145,12 +141,12 @@ TEST(ChipperTest, test_ordering)
     LasReader source_reader(options);
     source_reader.prepare();
 
-    EXPECT_EQ(chipper.getNumPoints(), source_reader.getNumPoints());
+    EXPECT_EQ(chipper->getNumPoints(), source_reader.getNumPoints());
 
-    PointBuffer candidate(chipper.getSchema(), chipper.getNumPoints());
-    PointBuffer patch(chipper.getSchema(), chipper.getNumPoints());
+    PointBuffer candidate(chipper->getSchema(), chipper->getNumPoints());
+    PointBuffer patch(chipper->getSchema(), chipper->getNumPoints());
 
-    StageSequentialIterator* iter_c = chipper.createSequentialIterator(patch);
+    StageSequentialIterator* iter_c = chipper->createSequentialIterator(patch);
     uint64_t numRead(0);
 
     while (true)
@@ -161,7 +157,7 @@ TEST(ChipperTest, test_ordering)
         candidate.copyPointsFast(candidate.getNumPoints(), 0, patch, patch.getNumPoints());
         candidate.setNumPoints(candidate.getNumPoints() + patch.getNumPoints());
     }
-    EXPECT_EQ(candidate.getNumPoints(), chipper.getNumPoints());
+    EXPECT_EQ(candidate.getNumPoints(), chipper->getNumPoints());
 
     PointBuffer source(source_reader.getSchema(), source_reader.getNumPoints());
 

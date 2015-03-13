@@ -35,28 +35,31 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
+#include <pdal/plugin.h>
 
 #ifdef PDAL_HAVE_GEOS
 #include <geos_c.h>
 #endif
 
+extern "C" int32_t CropFilter_ExitFunc();
+extern "C" PF_ExitFunc CropFilter_InitPlugin();
+
 namespace pdal
 {
 class PointBuffer;
 
-#define CROPFILTERDOCS "Filter points inside or outside a bounding box or \n" \
-                       "a polygon if PDAL was built with GEOS support."
 // removes any points outside of the given range
 // updates the header accordingly
 class PDAL_DLL CropFilter : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.crop", CROPFILTERDOCS)
-    SET_STAGE_LINK("http://pdal.io/stages/filters.crop.html")
-
     CropFilter();
 
-    static Options getDefaultOptions();
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+
+    Options getDefaultOptions();
 
     const BOX3D& getBounds() const;
 

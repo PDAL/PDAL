@@ -41,11 +41,17 @@
 #include <boost/algorithm/string.hpp>
 #include <points2grid/Interpolation.hpp>
 
-CREATE_WRITER_PLUGIN(p2g, pdal::P2gWriter)
-
 namespace pdal
 {
 
+static PluginInfo const s_info = PluginInfo(
+    "writers.p2g",
+    "Points2Grid Writer",
+    "http://pdal.io/stages/writers.p2g.html" );
+
+CREATE_SHARED_PLUGIN(1, 0, P2gWriter, Writer, s_info)
+
+std::string P2gWriter::getName() const { return s_info.name; }
 
 void P2gWriter::processOptions(const Options& options)
 {

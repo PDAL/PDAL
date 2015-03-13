@@ -41,10 +41,14 @@
 
 #pragma once
 
+#include <pdal/Filter.hpp>
+#include <pdal/plugin.h>
+#include <pdal/PointBuffer.hpp>
+
 #include <vector>
 
-#include <pdal/Filter.hpp>
-#include <pdal/PointBuffer.hpp>
+extern "C" int32_t ChipperFilter_ExitFunc();
+extern "C" PF_ExitFunc ChipperFilter_InitPlugin();
 
 namespace pdal
 {
@@ -132,17 +136,16 @@ private:
 
 class PDAL_DLL ChipperFilter : public pdal::Filter
 {
-#define CHIPPERDOCS "Organize points into spatially contiguous, squarish, and \n" \
-                    "non-overlapping chips."
 public:
-    SET_STAGE_NAME("filters.chipper", CHIPPERDOCS)
-    SET_STAGE_LINK("http://pdal.io/stages/filters.chipper.html")
-
     ChipperFilter() : Filter(),
         m_xvec(DIR_X), m_yvec(DIR_Y), m_spare(DIR_NONE)
     {}
 
-    static Options getDefaultOptions();
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+
+    Options getDefaultOptions();
 
 private:
     virtual void processOptions(const Options& options);

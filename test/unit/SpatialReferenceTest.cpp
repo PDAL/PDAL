@@ -198,7 +198,7 @@ TEST(SpatialReferenceTest, test_vertical_datums)
 
     LasWriter writer;
     writer.setOptions(opts);
-    writer.setInput(&reader);
+    writer.setInput(reader);
     writer.setSpatialReference(ref);
     writer.prepare(ctx);
     writer.execute(ctx);
@@ -253,7 +253,7 @@ TEST(SpatialReferenceTest, test_writing_vlr)
 
         writerOpts.add("filename", tmpfile);
         writer.setOptions(writerOpts);
-        writer.setInput(&readerx);
+        writer.setInput(readerx);
         writer.prepare(ctx);
         writer.setSpatialReference(ref);
         writer.execute(ctx);

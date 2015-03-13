@@ -132,7 +132,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       "laszip.sh",
       "pcl.sh",
       "websocketpp.sh",
-      "pdal.sh",
+      "pdal_clone.sh",
+      "geowave.sh",
+      "pdal_install.sh",
       "pgpointcloud.sh"
     ];
     scripts.each { |script| config.vm.provision :shell, :path => "scripts/linux-install-scripts/" << script }

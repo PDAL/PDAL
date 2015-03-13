@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2015, Peter J. Gadomski <pete.gadomski@gmail.com>
 *
 * All rights reserved.
 *
@@ -34,66 +34,59 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
-#include <iosfwd>
-
-#include <pdal/pdal_internal.hpp>
+#include <pdal/pdal_export.hpp>
 
 namespace pdal
 {
-
-class Kernel;
-
-class PDAL_DLL KernelInfo
+namespace georeference
 {
-    friend class KernelBase;
-public:
 
-    /// Constructor.
-    ///
-    KernelInfo(std::string const& kernelName, std::string const& kernelDescription="");
 
-    KernelInfo& operator=(const KernelInfo& rhs);
-    KernelInfo(const KernelInfo&);
-
-    /// Destructor.
-    virtual ~KernelInfo() {};
-
-    inline std::string const& getName() const
+struct Xyz
+{
+    Xyz(double x, double y, double z)
+        : X(x)
+        , Y(y)
+        , Z(z)
     {
-        return m_name;
     }
 
-    inline std::string const& getDescription() const
-    {
-        return m_description;
-    }
-
-    inline void setInfoLink(std::string const& link)
-    {
-        m_link = link;
-    }
-
-    inline std::string const& getInfoLink() const
-    {
-        return m_link;
-    }
-
-private:
-    std::string m_name;
-    std::string m_description;
-    std::string m_link;
+    double X;
+    double Y;
+    double Z;
 };
 
-/// Output operator for serialization
-///
-/// @param ostr    The output stream to write to
-/// @param src     The KernelInfo to be serialized out
-///
-/// @return The output stream
 
-PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const KernelInfo& src);
+struct RotationMatrix
+{
+    // Row-major
+    RotationMatrix(double m00, double m01, double m02, double m10, double m11,
+                   double m12, double m20, double m21, double m22)
+        : m00(m00)
+        , m01(m01)
+        , m02(m02)
+        , m10(m10)
+        , m11(m11)
+        , m12(m12)
+        , m20(m20)
+        , m21(m21)
+        , m22(m22)
+    {
+    }
 
-} // namespace pdal
+    double m00, m01, m02, m10, m11, m12, m20, m21, m22;
+};
 
+
+inline RotationMatrix createIdentityMatrix()
+{
+    return RotationMatrix(1, 0, 0, 0, 1, 0, 0, 0, 1);
+}
+
+
+// Returns Latitude, Longitude, Height triplet with angles in radians
+PDAL_DLL Xyz georeferenceWgs84(double range, double scanAngle,
+                      const RotationMatrix& boresightMatrix,
+                      const RotationMatrix& imuMatrix, const Xyz& gpsPoint);
+}
+}

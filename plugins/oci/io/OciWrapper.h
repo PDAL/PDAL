@@ -42,6 +42,9 @@
 
 #include <oci.h>
 
+namespace pdal
+{
+
 /***************************************************************************/
 /*                            Data type conversion table record type       */
 /***************************************************************************/
@@ -476,4 +479,5 @@ public:
                             double dfValue );
 };
 
+} // namespace pdal
 #endif /* ifndef _ORCL_WRAP_H_INCLUDED */

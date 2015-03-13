@@ -21,6 +21,11 @@ if (MSVC)
         add_definitions(-DNOMINMAX)
         add_definitions(-DBOOST_LIB_TOOLSET="vc110")
         add_definitions(-DBOOST_ALL_DYN_LINK)
+
+	# Nitro makes use of Exception Specifications, which results in
+	# numerous warnings when compiling in MSVC. We will ignore them for
+	# now.
+	add_definitions("/wd4290")
     endif()
 
     if (CMAKE_CXX_FLAGS MATCHES "/W[0-4]")

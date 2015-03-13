@@ -35,10 +35,14 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
+#include <pdal/plugin.h>
 
 #include <memory>
 #include <map>
 #include <string>
+
+extern "C" int32_t RangeFilter_ExitFunc();
+extern "C" PF_ExitFunc RangeFilter_InitPlugin();
 
 namespace pdal
 {
@@ -56,15 +60,15 @@ struct Range
     double max;
 };
 
-#define RANGEDOCS "Pass only points given a dimension/range."
 class PDAL_DLL RangeFilter : public pdal::Filter
 {
 public:
-    SET_STAGE_NAME("filters.range", RANGEDOCS)
-    SET_STAGE_LINK("http://pdal.io/stages/filters.range.html")
-
     RangeFilter() : Filter()
     {}
+
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
 private:
     std::map<std::string, Range> m_name_map;

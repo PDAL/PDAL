@@ -23,7 +23,9 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/io/buffer
     ${PROJECT_SOURCE_DIR}/io/faux
     ${PROJECT_SOURCE_DIR}/io/las
+    ${PROJECT_SOURCE_DIR}/io/optech
     ${PROJECT_SOURCE_DIR}/io/qfit
+    ${PROJECT_SOURCE_DIR}/io/rialto
     ${PROJECT_SOURCE_DIR}/io/sbet
     ${PROJECT_SOURCE_DIR}/io/text
     ${PROJECT_SOURCE_DIR}/io/terrasolid
@@ -47,6 +49,7 @@ PDAL_ADD_TEST(pdal_config_test FILES ConfigTest.cpp)
 PDAL_ADD_TEST(pdal_environment_test FILES EnvironmentTest.cpp)
 PDAL_ADD_TEST(pdal_file_utils_test FILES FileUtilsTest.cpp)
 PDAL_ADD_TEST(pdal_gdal_utils_test FILES GDALUtilsTest.cpp)
+PDAL_ADD_TEST(pdal_georeference_test FILES GeoreferenceTest.cpp)
 PDAL_ADD_TEST(pdal_log_test FILES LogTest.cpp)
 PDAL_ADD_TEST(pdal_metadata_test FILES MetadataTest.cpp)
 PDAL_ADD_TEST(pdal_options_test FILES OptionsTest.cpp)
@@ -74,12 +77,15 @@ set(srcs
     io/las/LasWriterTest.cpp
 )
 PDAL_ADD_TEST(pdal_io_las_test FILES "${srcs}")
+PDAL_ADD_TEST(pdal_io_optech_test FILES io/optech/OptechReaderTest.cpp)
+PDAL_ADD_TEST(pdal_io_rialto_test FILES io/rialto/RialtoWriterTest.cpp)
 PDAL_ADD_TEST(pdal_io_qfit_test FILES io/qfit/QFITReaderTest.cpp)
 set(srcs
     io/sbet/SbetReaderTest.cpp
     io/sbet/SbetWriterTest.cpp
 )
 PDAL_ADD_TEST(pdal_io_sbet_test FILES "${srcs}")
+PDAL_ADD_TEST(pdal_io_terrasolid_test FILES io/terrasolid/TerrasolidReaderTest.cpp)
 
 #
 # sources for the native filters

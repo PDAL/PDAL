@@ -1,5 +1,6 @@
 include_directories(${PDAL_INCLUDE_DIR})
 include_directories(${PDAL_UTIL_DIR})
+include_directories(${PDAL_SRC_DIR})
 include_directories(${PDAL_IO_DIR})
 include_directories(${PDAL_KERNEL_DIR})
 include_directories(${PDAL_FILTER_DIR})

@@ -35,12 +35,21 @@
 #include "DeltaKernel.hpp"
 
 #include <boost/format.hpp>
-
+#include <boost/program_options.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
 namespace pdal
 {
+
+static PluginInfo const s_info = PluginInfo(
+    "kernels.delta",
+    "Delta Kernel",
+    "http://pdal.io/kernels/kernels.delta.html" );
+
+CREATE_STATIC_PLUGIN(1, 0, DeltaKernel, Kernel, s_info)
+
+std::string DeltaKernel::getName() const { return s_info.name; }
 
 DeltaKernel::DeltaKernel()
     : Kernel()
@@ -114,7 +123,7 @@ std::map<Point, Point>* cumulatePoints(PointBuffer& source_data,
         double sy = source_data.getFieldAs<double>(Dimension::Id::Y, i);
         double sz = source_data.getFieldAs<double>(Dimension::Id::Z, i);
 
-        std::vector<std::size_t> ids = index->neighbors(sx, sy, sz, 1);
+        std::vector<std::size_t> ids = index->neighbors(sx, sy, sz);
         if (!ids.size())
         {
             std::ostringstream oss;
@@ -156,7 +165,7 @@ void DeltaKernel::outputDetail(PointBuffer& source_data, PointBuffer& candidate_
         double sy = source_data.getFieldAs<double>(Dimension::Id::Y, i);
         double sz = source_data.getFieldAs<double>(Dimension::Id::Z, i);
 
-        std::vector<std::size_t> ids = m_index->neighbors(sx, sy, sz, 1);
+        std::vector<std::size_t> ids = m_index->neighbors(sx, sy, sz);
 
         if (!ids.size())
         {
@@ -277,10 +286,10 @@ int DeltaKernel::execute()
         sourceOptions.add<bool>("debug", isDebug());
         sourceOptions.add<uint32_t>("verbose", getVerboseLevel());
     }
-    std::unique_ptr<Stage> source(KernelSupport::makeReader(m_sourceFile));
-    source->setOptions(sourceOptions);
-    source->prepare(sourceCtx);
-    PointBufferSet pbSet = source->execute(sourceCtx);
+    Stage& source = makeReader(m_sourceFile);
+    source.setOptions(sourceOptions);
+    source.prepare(sourceCtx);
+    PointBufferSet pbSet = source.execute(sourceCtx);
     assert(pbSet.size() == 1);
     PointBufferPtr sourceBuf = *pbSet.begin();
     point_count_t sourceCount = sourceBuf->size();
@@ -288,15 +297,15 @@ int DeltaKernel::execute()
     PointContext candidateCtx;
     Options candidateOptions;
     {
-        candidateOptions.add<std::string>("filename", m_candidateFile);
-        candidateOptions.add<bool>("debug", isDebug());
-        candidateOptions.add<uint32_t>("verbose", getVerboseLevel());
+        candidateOptions.add("filename", m_candidateFile);
+        candidateOptions.add("debug", isDebug());
+        candidateOptions.add("verbose", getVerboseLevel());
     }
 
-    std::unique_ptr<Stage> candidate(KernelSupport::makeReader(m_candidateFile));
-    candidate->setOptions(candidateOptions);
-    candidate->prepare(candidateCtx);
-    pbSet = candidate->execute(candidateCtx);
+    Stage& candidate = makeReader(m_candidateFile);
+    candidate.setOptions(candidateOptions);
+    candidate.prepare(candidateCtx);
+    pbSet = candidate.execute(candidateCtx);
     assert(pbSet.size() == 1);
     PointBufferPtr candidateBuf = *pbSet.begin();
     point_count_t candidateCount = candidateBuf->size();

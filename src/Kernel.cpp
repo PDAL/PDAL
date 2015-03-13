@@ -56,6 +56,16 @@ namespace po = boost::program_options;
 namespace pdal
 {
 
+namespace
+{
+
+static void printError(const std::string& err)
+{
+    std::cout << err << std::endl;
+    std::cout << std::endl;
+}
+
+}
 
 Kernel::Kernel()
     : m_usestdin(false)
@@ -241,8 +251,8 @@ void Kernel::collectExtraOptions()
         // boost::erase_all(o, " "); // Wipe off spaces
         tokenizer option_tokens(o, equal);
         std::vector<std::string> option_split;
-        for (auto ti = option_tokens.begin(); ti != option_tokens.end(); ++ti)
-            option_split.push_back(boost::lexical_cast<std::string>(*ti));
+        for (auto const& ti : option_tokens)
+            option_split.push_back(boost::lexical_cast<std::string>(ti));
         if (!(option_split.size() == 2))
         {
             std::ostringstream oss;
@@ -256,10 +266,8 @@ void Kernel::collectExtraOptions()
 
         tokenizer name_tokens(stage_value, dot);
         std::vector<std::string> stage_values;
-        for (auto ti = name_tokens.begin(); ti != name_tokens.end(); ++ti)
-        {
-            stage_values.push_back(*ti);
-        }
+        for (auto const& ti : name_tokens)
+            stage_values.push_back(ti);
 
         std::string option_name = *stage_values.rbegin();
         std::ostringstream stage_name_ostr;
@@ -280,9 +288,10 @@ void Kernel::collectExtraOptions()
 
         auto found = m_extra_stage_options.find(stage_name);
         if (found == m_extra_stage_options.end())
-            m_extra_stage_options.insert(std::make_pair(stage_name, Option(option_name, option_value, "")));
+            m_extra_stage_options.insert(
+               std::make_pair(stage_name, Option(option_name, option_value)));
         else
-            found->second.add(Option(option_name, option_value, ""));
+            found->second.add(Option(option_name, option_value));
     }
 }
 
@@ -303,8 +312,8 @@ int Kernel::innerRun()
 
     if (!m_showOptions.empty())
     {
-        pdal::StageFactory factory;
-        std::cout << factory.toRST(m_showOptions) << std::endl;
+        //pdal::StageFactory factory;
+        //std::cout << factory.toRST(m_showOptions) << std::endl;
         return 0;
     }
     try
@@ -322,13 +331,6 @@ int Kernel::innerRun()
     }
 
     return execute();
-}
-
-
-void Kernel::printError(const std::string& err) const
-{
-    std::cout << err << std::endl;
-    std::cout << std::endl;
 }
 
 
@@ -350,18 +352,18 @@ bool Kernel::isVisualize() const
 }
 
 
-void Kernel::visualize(PointBufferPtr buffer) const
+void Kernel::visualize(PointBufferPtr buffer)
 {
     BufferReader bufferReader;
     bufferReader.addBuffer(buffer);
 
     StageFactory f;
-    WriterPtr writer(f.createWriter("writers.pclvisualizer"));
-    writer->setInput(&bufferReader);
+    Stage& writer = ownStage(f.createStage("writers.pclvisualizer"));
+    writer.setInput(bufferReader);
 
     PointContext ctx;
-    writer->prepare(ctx);
-    writer->execute(ctx);
+    writer.prepare(ctx);
+    writer.execute(ctx);
 }
 
 /*
@@ -417,9 +419,18 @@ void Kernel::addSwitchSet(po::options_description* options)
 
 void Kernel::setCommonOptions(Options &options)
 {
-    options.add("debug", m_isDebug);
-    options.add("verbose", m_verboseLevel);
     options.add("visualize", m_visualize);
+
+    if (m_isDebug)
+    {
+        options.add("debug", true);
+        uint32_t verbosity(m_verboseLevel);
+        if (!verbosity)
+            verbosity = 1;
+
+        options.add("verbose", verbosity);
+        options.add("log", "STDERR");
+    }
 
     boost::char_separator<char> sep(",| ");
 
@@ -427,8 +438,8 @@ void Kernel::setCommonOptions(Options &options)
     {
         std::vector<double> scales;
         tokenizer scale_tokens(m_scales, sep);
-        for (auto t = scale_tokens.begin(); t != scale_tokens.end(); ++t)
-            scales.push_back(boost::lexical_cast<double>(*t));
+        for (auto const& t : scale_tokens)
+            scales.push_back(boost::lexical_cast<double>(t));
         if (scales.size())
         {
             if (scales.size() <= 1)
@@ -453,8 +464,8 @@ void Kernel::setCommonOptions(Options &options)
     {
         std::vector<double> offsets;
         tokenizer offset_tokens(m_offsets, sep);
-        for (auto t = offset_tokens.begin(); t != offset_tokens.end(); ++t)
-            offsets.push_back(boost::lexical_cast<double>(*t));
+        for (auto const& t : offset_tokens)
+            offsets.push_back(boost::lexical_cast<double>(t));
         if (offsets.size())
         {
             if (offsets.size() <= 1)
@@ -486,11 +497,9 @@ void Kernel::outputHelp()
 {
     outputVersion();
 
-
-    for (auto iter = m_options.begin(); iter != m_options.end(); ++iter)
+    for (auto const& iter : m_options)
     {
-        const po::options_description* options = *iter;
-        std::cout << *options;
+        std::cout << *iter;
         std::cout << std::endl;
     }
 
@@ -552,13 +561,8 @@ void Kernel::parseSwitches()
 {
     po::options_description options;
 
-    for (auto iter = m_options.begin();
-            iter != m_options.end();
-            ++iter)
-    {
-        po::options_description* sub_options = *iter;
-        options.add(*sub_options);
-    }
+    for (auto const& iter : m_options)
+        options.add(*iter);
 
     try
     {
@@ -580,4 +584,45 @@ void Kernel::parseSwitches()
     return;
 }
 
+
+Stage& Kernel::makeReader(const std::string& inputFile)
+{
+    if (!FileUtils::fileExists(inputFile))
+        throw app_runtime_error("file not found: " + inputFile);
+
+    StageFactory factory;
+    std::string driver = factory.inferReaderDriver(inputFile);
+    if (driver.empty())
+        throw app_runtime_error("Cannot determine input file type of " +
+            inputFile);
+
+    Stage *stage = factory.createStage(driver);
+    if (!stage)
+        throw app_runtime_error("reader creation failed");
+    ownStage(stage);
+    return *stage;
+}
+
+
+Stage& Kernel::makeWriter(const std::string& outputFile, Stage& parent)
+{
+    pdal::StageFactory factory;
+
+    std::string driver = factory.inferWriterDriver(outputFile);
+    if (driver.empty())
+        throw app_runtime_error("Cannot determine output file type of " +
+            outputFile);
+    Options options = factory.inferWriterOptionsChanges(outputFile);
+
+    Stage *writer = factory.createStage(driver);
+    if (!writer)
+        throw app_runtime_error("writer creation failed");
+    ownStage(writer);
+    writer->setInput(parent);
+    writer->setOptions(options + writer->getOptions());
+
+    return *writer;
+}
+
 } // namespace pdal
+

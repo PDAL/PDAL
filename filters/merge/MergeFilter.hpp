@@ -35,6 +35,10 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
+#include <pdal/plugin.h>
+
+extern "C" int32_t MergeFilter_ExitFunc();
+extern "C" PF_ExitFunc MergeFilter_InitPlugin();
 
 namespace pdal
 {
@@ -42,11 +46,12 @@ namespace pdal
 class PDAL_DLL MergeFilter : public MultiFilter
 {
 public:
-    SET_STAGE_NAME("filters.merge", "Merge data from two different readers into a single stream.")
-    SET_STAGE_LINK("http://pdal.io/stages/filters.merge.html")
+    MergeFilter ()
+    {}
 
-    MergeFilter() : MultiFilter()
-        {}
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
 private:
     PointBufferPtr m_buf;
@@ -68,3 +73,4 @@ private:
 };
 
 } // namespace pdal
+

@@ -45,7 +45,6 @@
 #ifdef PDAL_COMPILER_GCC
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wredundant-decls"
-#  pragma GCC diagnostic ignored "-Wfloat-equal"
 #  pragma GCC diagnostic ignored "-Wextra"
 #  pragma GCC diagnostic ignored "-Wcast-qual"
    // The following pragma doesn't actually work:
@@ -56,7 +55,6 @@
 #include <cpl_conv.h>
 #ifdef PDAL_COMPILER_CLANG
 #  pragma clang diagnostic push
-#  pragma clang diagnostic ignored "-Wfloat-equal"
 #  pragma clang diagnostic ignored "-Wunused-private-field"
 #endif
 
@@ -77,11 +75,17 @@
 // syntactically, how do we name all the LAS writer options that we will pass to the las writer?
 //
 
-CREATE_WRITER_PLUGIN(nitf, pdal::NitfWriter)
-
 namespace pdal
 {
 
+static PluginInfo const s_info = PluginInfo(
+    "writers.nitf",
+    "NITF Writer",
+    "http://pdal.io/stages/writers.nitf.html" );
+
+CREATE_SHARED_PLUGIN(1, 0, NitfWriter, Writer, s_info)
+
+std::string NitfWriter::getName() const { return s_info.name; }
 
 BOX3D reprojectBoxToDD(const SpatialReference& reference, const BOX3D& box)
 {

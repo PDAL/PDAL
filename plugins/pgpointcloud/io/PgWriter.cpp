@@ -43,7 +43,17 @@
 #include <pdal/util/Endian.hpp>
 #include <pdal/XMLSchema.hpp>
 
-CREATE_WRITER_PLUGIN(pgpointcloud, pdal::PgWriter)
+namespace pdal
+{
+
+static PluginInfo const s_info = PluginInfo(
+    "writers.pgpointcloud",
+    "Write points to PostgreSQL pgpointcloud output",
+    "http://pdal.io/stages/writers.pgpointcloud.html" );
+
+CREATE_SHARED_PLUGIN(1, 0, PgWriter, Writer, s_info)
+
+std::string PgWriter::getName() const { return s_info.name; }
 
 // TO DO:
 // - change INSERT into COPY
@@ -56,10 +66,6 @@ CREATE_WRITER_PLUGIN(pgpointcloud, pdal::PgWriter)
 // - Load information table. Should PDAL write into a metadata
 // table information about each load? If so, how to distinguish
 // between loads? Leave to pre/post SQL?
-
-
-namespace pdal
-{
 
 PgWriter::PgWriter()
     : m_session(0)

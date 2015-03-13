@@ -35,7 +35,11 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
+#include <pdal/plugin.h>
 #include <pdal/PointBuffer.hpp>
+
+extern "C" int32_t StatsFilter_ExitFunc();
+extern "C" PF_ExitFunc StatsFilter_InitPlugin();
 
 namespace pdal
 {
@@ -87,16 +91,17 @@ private:
 
 } // namespace stats
 
-// This is just a pass-thorugh filter, which collects some stats about
+// This is just a pass-through filter, which collects some stats about
 // the points that are fed through it
 class PDAL_DLL StatsFilter : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.stats", "Compute statistics about each dimension (mean, min, max, etc.)")
-    SET_STAGE_LINK("http://pdal.io/stages/filters.stats.html")
-
     StatsFilter() : Filter()
         {}
+
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
     const stats::Summary& getStats(Dimension::Id::Enum d) const;
     void reset();

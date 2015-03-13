@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2014-2015, RadiantBlue Technologies, Inc.
 *
 * All rights reserved.
 *
@@ -34,16 +34,55 @@
 
 #pragma once
 
-#include <chipper/ChipperFilter.hpp>
-#include <colorization/ColorizationFilter.hpp>
-#include <crop/CropFilter.hpp>
-#include <decimation/DecimationFilter.hpp>
-#include <ferry/FerryFilter.hpp>
-#include <merge/MergeFilter.hpp>
-#include <mortonorder/MortonOrderFilter.hpp>
-#include <range/RangeFilter.hpp>
-#include <reprojection/ReprojectionFilter.hpp>
-#include <sort/SortFilter.hpp>
-#include <splitter/SplitterFilter.hpp>
-#include <stats/StatsFilter.hpp>
-#include <transformation/TransformationFilter.hpp>
+#include <pdal/pdal_export.hpp>
+#include <pdal/plugin.h>
+#include <pdal/Writer.hpp>
+
+#include "RialtoCommon.hpp"
+
+#include <cstdint>
+#include <string>
+
+extern "C" int32_t RialtoWriter_ExitFunc();
+extern "C" PF_ExitFunc RialtoWriter_InitPlugin();
+
+namespace pdal
+{
+
+class Options;
+class PointBuffer;
+class Tile;
+
+class PDAL_DLL RialtoWriter : public Writer
+{
+public:
+    RialtoWriter()
+        {}
+
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+
+    Options getDefaultOptions();
+
+private:
+    virtual void processOptions(const Options& options);
+    virtual void ready(PointContextRef ctx);
+    virtual void write(const PointBuffer& buf);
+    virtual void done(PointContextRef ctx);
+
+    int32_t m_bytesPerPoint;
+    int32_t m_maxLevel;
+    int32_t m_numTilesX;
+    int32_t m_numTilesY;
+    bool m_overwrite;
+    Rectangle m_rectangle;
+    Tile** m_roots;
+    PointContext m_context;
+
+    RialtoWriter& operator=(const RialtoWriter&); // not implemented
+    RialtoWriter(const RialtoWriter&); // not implemented
+};
+
+} // namespace pdal
+

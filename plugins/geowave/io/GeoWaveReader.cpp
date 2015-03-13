@@ -74,6 +74,8 @@ using jace::JArray;
 using jace::proxy::types::JBoolean;
 #include "jace/proxy/types/JDouble.h"
 using jace::proxy::types::JDouble;
+#include "jace/proxy/types/JInt.h"
+using jace::proxy::types::JInt;
 
 #include "jace/proxy/java/lang/Double.h"
 using jace::proxy::java::lang::Double;
@@ -164,11 +166,14 @@ namespace pdal
 
     void GeoWaveReader::initialize()
     {
-        int status = createJvm();
-        if (status == 0)
-            log()->get(LogLevel::Debug) << "JVM Creation Successful" << std::endl;
-        else
-            log()->get(LogLevel::Error) << "JVM Creation Failed: Error ["  << status << "]" << std::endl;
+        if (!jace::isRunning())
+        {
+            int status = createJvm();
+            if (status == 0)
+                log()->get(LogLevel::Debug) << "JVM Creation Successful" << std::endl;
+            else
+                log()->get(LogLevel::Error) << "JVM Creation Failed: Error ["  << status << "]" << std::endl;
+        }
     }
 
     void GeoWaveReader::processOptions(const Options& ops)
@@ -255,7 +260,8 @@ namespace pdal
         Polygon geom = factory.createPolygon(coordArray);
         Query query = java_new<SpatialQuery>(geom);
 
-        m_iterator = accumuloDataStore.query(index, query);
+        JInt count = m_count;
+        m_iterator = accumuloDataStore.query(index, query, count);
     }
 
     point_count_t GeoWaveReader::read(PointBuffer& buf, point_count_t count)

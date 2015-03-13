@@ -1,6 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
-* Copyright (c) 2014, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2015, Peter J. Gadomski <pete.gadomski@gmail.com>
 *
 * All rights reserved.
 *
@@ -35,10 +34,13 @@
 
 #pragma once
 
-#include <delta/DeltaKernel.hpp>
-#include <diff/DiffKernel.hpp>
-#include <info/InfoKernel.hpp>
-#include <pipeline/PipelineKernel.hpp>
-#include <random/RandomKernel.hpp>
-#include <sort/SortKernel.hpp>
-#include <translate/TranslateKernel.hpp>
+#include <cmath>
+
+#include <pdal/RotationMatrix.hpp>
+
+
+namespace pdal
+{
+
+
+}

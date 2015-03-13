@@ -92,7 +92,7 @@ std::string getFilePath()
 TEST(IcebridgeReaderTest, testRead)
 {
     StageFactory f;
-    ReaderPtr reader(f.createReader("readers.icebridge"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.icebridge"));
     EXPECT_TRUE(reader.get());
 
     Option filename("filename", getFilePath(), "");

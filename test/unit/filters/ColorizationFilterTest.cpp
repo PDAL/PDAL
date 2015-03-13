@@ -86,7 +86,7 @@ TEST(ColorizationFilterTest, ColorizationFilterTest_test_1)
 
     ColorizationFilter filter;
     filter.setOptions(reader_options);
-    filter.setInput(&reader);
+    filter.setInput(reader);
 
     PointContext ctx;
 

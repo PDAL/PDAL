@@ -38,10 +38,17 @@
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
 
-CREATE_FILTER_PLUGIN(programmable, pdal::ProgrammableFilter)
-
 namespace pdal
 {
+
+static PluginInfo const s_info = PluginInfo(
+    "filters.programmable",
+    "Manipulate data using inline Python",
+    "http://pdal.io/stages/filters.programmable.html" );
+
+CREATE_SHARED_PLUGIN(1, 0, ProgrammableFilter, Filter, s_info)
+
+std::string ProgrammableFilter::getName() const { return s_info.name; }
 
 Options ProgrammableFilter::getDefaultOptions()
 {
@@ -58,7 +65,7 @@ void ProgrammableFilter::processOptions(const Options& options)
     m_source = options.getValueOrDefault<std::string>("source", "");
     if (m_source.empty())
         m_source = FileUtils::readFileIntoString(
-            options.getValueOrThrow<std::string>("filename"));
+            options.getValueOrThrow<std::string>("script"));
     m_module = options.getValueOrThrow<std::string>("module");
     m_function = options.getValueOrThrow<std::string>("function");
 

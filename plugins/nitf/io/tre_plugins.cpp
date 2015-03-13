@@ -37,7 +37,6 @@
 #ifdef PDAL_COMPILER_GCC
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wredundant-decls"
-#  pragma GCC diagnostic ignored "-Wfloat-equal"
 #  pragma GCC diagnostic ignored "-Wextra"
 #  pragma GCC diagnostic ignored "-Wcast-qual"
    // The following pragma doesn't actually work:
@@ -46,7 +45,6 @@
 #endif
 #ifdef PDAL_COMPILER_CLANG
 #  pragma clang diagnostic push
-#  pragma clang diagnostic ignored "-Wfloat-equal"
 #  pragma clang diagnostic ignored "-Wunused-private-field"
 #endif
 

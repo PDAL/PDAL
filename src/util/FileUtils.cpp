@@ -88,6 +88,23 @@ ostream* FileUtils::createFile(string const& filename, bool asBinary)
 }
 
 
+bool FileUtils::directoryExists(std::string const& dirname)
+{
+    return boost::filesystem::exists(dirname);
+}
+
+
+bool FileUtils::createDirectory(std::string const& dirname)
+{
+    return boost::filesystem::create_directory(dirname); 
+}
+
+void FileUtils::deleteDirectory(std::string const& dirname)
+{
+    boost::filesystem::remove_all(dirname);
+}
+
+
 void FileUtils::closeFile(ostream* ofs)
 {
     namespace io = boost::iostreams;

@@ -34,29 +34,23 @@
 
 #include "PCLVisualizer.hpp"
 
-#include <chrono>
-#include <memory>
-#include <thread>
-
 #include <pcl/conversions.h>
 #include <pcl/io/pcd_io.h>
-
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wfloat-equal"
 
 #include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/visualization/impl/pcl_visualizer.hpp>
 #include <pcl/visualization/point_cloud_handlers.h>
 #include <pcl/visualization/impl/point_cloud_handlers.hpp>
-#pragma GCC diagnostic pop
 
-#include "PCLConversions.hpp"
-#include "point_types.hpp"
 #include <pdal/PointBuffer.hpp>
 #include <pdal/StageFactory.hpp>
 
-CREATE_WRITER_PLUGIN(pclvisualizer, pdal::PclVisualizer)
+#include "PCLConversions.hpp"
+#include "point_types.hpp"
+
+#include <chrono>
+#include <memory>
+#include <thread>
 
 bool
 isValidFieldName(const std::string &field)
@@ -137,6 +131,14 @@ private:
 namespace pdal
 {
 
+static PluginInfo const s_info = PluginInfo(
+    "writers.pclvisualizer",
+    "PCL Visualizer",
+    "http://pdal.io/stages/writers.pclvisualizer.html" );
+
+CREATE_SHARED_PLUGIN(1, 0, PclVisualizer, Writer, s_info)
+
+std::string PclVisualizer::getName() const { return s_info.name; }
 
 void PclVisualizer::write(const PointBuffer& data)
 {

@@ -50,12 +50,13 @@ TEST(StatsFilterTest, simple)
     ops.add("mode", "constant");
 
     StageFactory f;
-    ReaderPtr reader(f.createReader("readers.faux"));
+
+    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(ops);
 
     StatsFilter filter;
-    filter.setInput(reader.get());
+    filter.setInput(*reader);
     EXPECT_EQ(filter.getName(), "filters.stats");
 
     PointContext ctx;
@@ -83,6 +84,7 @@ TEST(StatsFilterTest, simple)
     EXPECT_FLOAT_EQ(statsZ.average(), 3.0);
 }
 
+
 TEST(StatsFilterTest, dimset)
 {
     BOX3D bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
@@ -92,14 +94,14 @@ TEST(StatsFilterTest, dimset)
     ops.add("mode", "constant");
 
     StageFactory f;
-    ReaderPtr reader(f.createReader("readers.faux"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(ops);
 
     Options filterOps;
     filterOps.add("dimensions", " , X, Z ");
     StatsFilter filter;
-    filter.setInput(reader.get());
+    filter.setInput(*reader);
     filter.setOptions(filterOps);
     EXPECT_EQ(filter.getName(), "filters.stats");
 
@@ -134,14 +136,14 @@ TEST(StatsFilterTest, metadata)
     ops.add("mode", "constant");
 
     StageFactory f;
-    ReaderPtr reader(f.createReader("readers.faux"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(ops);
 
     Options filterOps;
     filterOps.add("dimensions", " , X, Z ");
     StatsFilter filter;
-    filter.setInput(reader.get());
+    filter.setInput(*reader);
     filter.setOptions(filterOps);
 
     PointContext ctx;
@@ -159,7 +161,6 @@ TEST(StatsFilterTest, metadata)
         return m.find(findNameVal);
     };
  
-
     for (auto mi = children.begin(); mi != children.end(); ++mi)
     {
         if (findNode(*mi, "name", "X").valid())

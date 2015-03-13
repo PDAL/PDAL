@@ -41,9 +41,19 @@
 #include <utility>
 #include <vector>
 
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+
 namespace pdal
 {
 
+static PluginInfo const s_info = PluginInfo(
+    "filters.range",
+    "Pass only points given a dimension/range.",
+    "http://pdal.io/stages/filters.range.html" );
+
+CREATE_STATIC_PLUGIN(1, 0, RangeFilter, Filter, s_info)
+
+std::string RangeFilter::getName() const { return s_info.name; }
 
 void RangeFilter::processOptions(const Options& options)
 {
@@ -58,11 +68,14 @@ void RangeFilter::processOptions(const Options& options)
         if (!dimensionOptions)
             throw pdal_error("No dimension options");
 
-        double val = dimensionOptions->getValueOrDefault<double>("equals", NAN);
-        double min = dimensionOptions->getValueOrDefault<double>("min", -std::numeric_limits<double>::max());
-        double max = dimensionOptions->getValueOrDefault<double>("max", std::numeric_limits<double>::max());
+        double val =dimensionOptions->getValueOrDefault<double>("equals",
+            (std::numeric_limits<double>::max)());
+        double min = dimensionOptions->getValueOrDefault<double>("min",
+            -(std::numeric_limits<double>::max)());
+        double max = dimensionOptions->getValueOrDefault<double>("max",
+            (std::numeric_limits<double>::max)());
 
-        if (!std::isnan(val))
+        if (val != (std::numeric_limits<double>::max)())
             min = max = val;
 
         Range range;

@@ -79,11 +79,11 @@ void test_file_type(const std::string& filename)
 
     ops.add("filename", filename);
     ops.add("count", 506);
-    BpfReader reader;
-    reader.setOptions(ops);
+    std::shared_ptr<BpfReader> reader(new BpfReader);
+    reader->setOptions(ops);
 
-    reader.prepare(context);
-    PointBufferSet pbSet = reader.execute(context);
+    reader->prepare(context);
+    PointBufferSet pbSet = reader->execute(context);
 
     EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
@@ -145,7 +145,7 @@ void test_roundtrip(Options& writerOps)
     writerOps.add("filename", outfile);
     BpfWriter writer;
     writer.setOptions(writerOps);
-    writer.setInput(&reader);
+    writer.setInput(reader);
 
     FileUtils::deleteFile(outfile);
     writer.prepare(context);

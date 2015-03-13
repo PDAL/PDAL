@@ -32,13 +32,24 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
+#include "SplitterFilter.hpp"
+
+#include <pdal/pdal_macros.hpp>
+
 #include <iostream>
 #include <limits>
 
-#include "SplitterFilter.hpp"
-
 namespace pdal
 {
+
+static PluginInfo const s_info = PluginInfo(
+    "filters.splitter",
+    "Split data based on a X/Y box length.",
+    "http://pdal.io/stages/filters.splitter.html" );
+
+CREATE_STATIC_PLUGIN(1, 0, SplitterFilter, Filter, s_info)
+
+std::string SplitterFilter::getName() const { return s_info.name; }
 
 void SplitterFilter::processOptions(const Options& options)
 {

@@ -41,9 +41,6 @@
 
 #include <iostream>
 
-#ifdef PDAL_COMPILER_GCC
-#pragma GCC diagnostic ignored "-Wfloat-equal"
-#endif
 
 using namespace pdal;
 
@@ -74,14 +71,13 @@ TEST(QFITReaderTest, test_10_word)
     options.add("scale_z", 0.001f, "Z scale from mm to m");
     options.add("count", 3);
 
-    QfitReader reader;
-    reader.setOptions(options);
-    EXPECT_TRUE(reader.getDescription() == "QFIT Reader");
-    EXPECT_EQ(reader.getName(), "readers.qfit");
+    std::shared_ptr<QfitReader> reader(new QfitReader);
+    reader->setOptions(options);
+    EXPECT_EQ(reader->getName(), "readers.qfit");
 
     PointContext ctx;
-    reader.prepare(ctx);
-    PointBufferSet pbSet = reader.execute(ctx);
+    reader->prepare(ctx);
+    PointBufferSet pbSet = reader->execute(ctx);
     EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
     EXPECT_EQ(buf->size(), 3u);
@@ -103,10 +99,10 @@ TEST(QFITReaderTest, test_14_word)
     options.add("count", 3);
 
     PointContext ctx;
-    QfitReader reader;
-    reader.setOptions(options);
-    reader.prepare(ctx);
-    PointBufferSet pbSet = reader.execute(ctx);
+    std::shared_ptr<QfitReader> reader(new QfitReader);
+    reader->setOptions(options);
+    reader->prepare(ctx);
+    PointBufferSet pbSet = reader->execute(ctx);
     EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
     EXPECT_EQ(buf->size(), 3u);

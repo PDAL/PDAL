@@ -37,17 +37,17 @@
 #include <sstream>
 #include <string.h>
 
-#include <pdal/Extractor.hpp>
-#include <pdal/util/FileUtils.hpp>
-#include <pdal/IStream.hpp>
-#include <pdal/QuickInfo.hpp>
-#include <pdal/PointBuffer.hpp>
 #include <pdal/Metadata.hpp>
+#include <pdal/PointBuffer.hpp>
+#include <pdal/QuickInfo.hpp>
+#include <pdal/util/Extractor.hpp>
+#include <pdal/util/FileUtils.hpp>
+#include <pdal/util/IStream.hpp>
 
+#include "GeotiffSupport.hpp"
 #include "LasHeader.hpp"
 #include "VariableLengthRecord.hpp"
 #include "ZipPoint.hpp"
-#include "GeotiffSupport.hpp"
 
 namespace pdal
 {
@@ -108,6 +108,16 @@ void LasReader::processOptions(const Options& options)
     m_error.setFilename(m_filename);
 }
 
+static PluginInfo const s_info = PluginInfo(
+    "readers.las",
+    "ASPRS LAS 1.0 - 1.4 read support. LASzip support is also \n" \
+        "enabled through this driver if LASzip was found diring \n" \
+        "compilation.",
+    "http://pdal.io/stages/readers.las.html" );
+
+CREATE_STATIC_PLUGIN(1, 0, LasReader, Reader, s_info)
+
+std::string LasReader::getName() const { return s_info.name; }
 
 QuickInfo LasReader::inspect()
 {
@@ -228,6 +238,9 @@ void LasReader::extractHeaderMetadata(MetadataNode& m)
     m.add<uint32_t>("minor_version",
         static_cast<uint32_t>(m_lasHeader.versionMinor()),
         "The minor LAS version for the file");
+    m.add<uint32_t>("dataformat_id",
+        static_cast<uint32_t>(m_lasHeader.pointFormat()),
+        "LAS Point Data Format");
     if (m_lasHeader.versionAtLeast(1, 1))
         m.add<uint32_t>("filesource_id",
             static_cast<uint32_t>(m_lasHeader.fileSourceId()),
