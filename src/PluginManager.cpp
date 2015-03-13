@@ -54,11 +54,11 @@
 namespace pdal
 {
 
-#if defined(PDAL_PLATFORM_OSX)
+#if defined(__APPLE__) && defined(__MACH__)
     static std::string dynamicLibraryExtension(".dylib");
-#elif defined(PDAL_PLATFORM_LINUX)
+#elif defined __linux__
     static std::string dynamicLibraryExtension(".so");
-#elif defined(PDAL_PLATFORM_WIN32)
+#elif defined _WIN32
     static std::string dynamicLibraryExtension(".dll");
 #endif
 

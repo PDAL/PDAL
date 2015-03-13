@@ -47,7 +47,7 @@ namespace pdal
 {
 
 const std::string LasHeader::FILE_SIGNATURE("LASF");
-#ifndef WIN32
+#ifndef _WIN32
 const size_t LasHeader::LEGACY_RETURN_COUNT;
 const size_t LasHeader::RETURN_COUNT;
 #endif

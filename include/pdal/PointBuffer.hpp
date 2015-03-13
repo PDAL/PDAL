@@ -44,6 +44,10 @@
 #include <vector>
 #include <deque>
 
+#ifdef PDAL_COMPILER_MSVC
+#  pragma warning(disable: 4244)  // conversion from 'type1' to 'type2', possible loss of data
+#endif
+
 namespace pdal
 {
 namespace plang
