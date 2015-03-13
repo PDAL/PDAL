@@ -329,7 +329,7 @@ TEST(PointBufferTest, kdindex)
     unsigned k = 8;
 
     // If the query distance is 0, just return the k nearest neighbors
-    std::vector<size_t> ids = idata.neighbors(636199, 849238, 428.05, 0.0, k);
+    std::vector<size_t> ids = idata.neighbors(636199, 849238, 428.05, k);
     EXPECT_EQ(ids.size(), k);
     EXPECT_EQ(ids[0], 8u);
     EXPECT_EQ(ids[1], 7u);
@@ -337,12 +337,12 @@ TEST(PointBufferTest, kdindex)
     EXPECT_EQ(ids[3], 42u);
     EXPECT_EQ(ids[4], 40u);
 
-    std::vector<size_t> dist_ids = idata.neighbors(636199, 849238, 428.05, 100.0, 3);
+    std::vector<size_t> dist_ids = idata.neighbors(636199, 849238, 428.05, 3);
 
     EXPECT_EQ(dist_ids.size(), 3u);
     EXPECT_EQ(dist_ids[0], 8u);
 
-    std::vector<size_t> nids = idata.neighbors(636199, 849238, 428.05, 0.0, k);
+    std::vector<size_t> nids = idata.neighbors(636199, 849238, 428.05, k);
 
     EXPECT_EQ(nids.size(), k);
     EXPECT_EQ(nids[0], 8u);

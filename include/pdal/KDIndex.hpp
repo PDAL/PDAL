@@ -39,7 +39,8 @@
 
 namespace nanoflann
 {
-    template<typename Distance, class DatasetAdaptor, int DIM, typename IndexType>
+    template<typename Distance, class DatasetAdaptor, int DIM,
+        typename IndexType>
     class KDTreeSingleIndexAdaptor;
 
     template<class T, class DataSource, typename _DistanceType>
@@ -94,7 +95,6 @@ public:
             double const& x,
             double const& y,
             double const& z,
-            double distance,
             uint32_t count = 1) const;
 
     void build(bool b3d = true);

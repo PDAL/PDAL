@@ -338,7 +338,7 @@ MetadataNode InfoKernel::dumpQuery(PointBufferPtr buf) const
 
     KDIndex kdi(*buf);
     kdi.build(is3d);
-    std::vector<size_t> ids = kdi.neighbors(x, y, z, 0.0, buf->size());
+    std::vector<size_t> ids = kdi.neighbors(x, y, z, buf->size());
     for (auto i = ids.begin(); i != ids.end(); ++i)
         outbuf->appendPoint(*buf, *i);
 
