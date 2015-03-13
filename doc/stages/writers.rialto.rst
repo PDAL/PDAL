@@ -4,7 +4,7 @@ writers.rialto
 ==============
 
 The **RialtoWriter** supports writing to `Rialto-formatted
-tiles<http://lists.osgeo.org/pipermail/pointdown/2015-February/000001.html>`.
+tiles <http://lists.osgeo.org/pipermail/pointdown/2015-February/000001.html>`__.
 
 Example
 -------

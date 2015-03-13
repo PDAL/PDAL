@@ -65,7 +65,7 @@ void ProgrammableFilter::processOptions(const Options& options)
     m_source = options.getValueOrDefault<std::string>("source", "");
     if (m_source.empty())
         m_source = FileUtils::readFileIntoString(
-            options.getValueOrThrow<std::string>("filename"));
+            options.getValueOrThrow<std::string>("script"));
     m_module = options.getValueOrThrow<std::string>("module");
     m_function = options.getValueOrThrow<std::string>("function");
 

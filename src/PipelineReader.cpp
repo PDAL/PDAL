@@ -44,7 +44,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/trim.hpp>
 
-#ifndef PDAL_PLATFORM_WIN32
+#ifndef _WIN32
 #include <wordexp.h>
 #endif
 
@@ -189,7 +189,7 @@ Option PipelineReader::parseElement_Option(const ptree& tree)
     if (option.getName() == "filename")
     {
         std::string path = option.getValue<std::string>();
-#ifndef PDAL_PLATFORM_WIN32
+#ifndef _WIN32
         wordexp_t result;
         if (wordexp(path.c_str(), &result, 0) == 0)
         {
