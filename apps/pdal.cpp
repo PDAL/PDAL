@@ -87,6 +87,8 @@ void outputHelp()
 
     std::cout << "See http://pdal.io/apps.html for more detail";
     std::cout << std::endl;
+    std::cout << "Run pdal --list-commands for a complete list";
+    std::cout << std::endl;
 }
 
 void outputDrivers()
@@ -220,6 +222,16 @@ void outputOptions(std::string const& n)
         std::cerr << n << " has no options\n";
 }
 
+void outputCommands()
+{
+    KernelFactory f(false);
+    std::vector<std::string> loaded_kernels;
+    loaded_kernels = f.getKernelNames();
+    for (auto name : loaded_kernels)
+    {
+        std::cout << splitDriverName(name) << std::endl;
+    }
+}
 
 void outputOptions()
 {
@@ -318,6 +330,11 @@ int main(int argc, char* argv[])
         else if (boost::iequals(argv[i], "--version"))
         {
             version = true;
+        }
+        else if (boost::iequals(argv[i], "--list-commands"))
+        {
+            outputCommands();
+            return 0;
         }
         else
         {
