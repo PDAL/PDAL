@@ -36,6 +36,7 @@
 
 #include <pdal/util/Bounds.hpp>
 #include <pdal/pdal_internal.hpp>
+#include <pdal/PointLayout.hpp>
 #include <pdal/PointTable.hpp>
 
 #include <memory>
@@ -67,7 +68,11 @@ class PDAL_DLL PointView
     friend class plang::BufferedInvocation;
     friend class PointRef;
 public:
-    PointView(PointTableRef context) : m_context(context), m_size(0)
+    PointView(PointTablePtr pointTable)
+        : m_pointTable(pointTable)
+        , m_index()
+        , m_size(0)
+        , m_temps()
     {}
 
     PointViewIter begin();
@@ -91,10 +96,10 @@ public:
         clearTemps();
     }
 
-    /// Return a new point buffer with the same point context as this
+    /// Return a new point view with the same point table as this
     /// point buffer.
     PointViewPtr makeNew() const
-        { return PointViewPtr(new PointView(m_context)); }
+        { return PointViewPtr(new PointView(m_pointTable)); }
 
     template<class T>
     T getFieldAs(Dimension::Id::Enum dim, PointId pointIndex) const;
@@ -116,7 +121,7 @@ public:
 
     bool compare(Dimension::Id::Enum dim, PointId id1, PointId id2)
     {
-        Dimension::Detail *dd = m_context.dimDetail(dim);
+        const Dimension::Detail *dd = m_pointTable->layout()->dimDetail(dim);
 
         switch (dd->type())
         {
@@ -177,18 +182,17 @@ public:
 
     void dump(std::ostream& ostr) const;
     bool hasDim(Dimension::Id::Enum id) const
-        { return m_context.hasDim(id); }
+        { return m_pointTable->layout()->hasDim(id); }
     std::string dimName(Dimension::Id::Enum id) const
-        { return m_context.dimName(id); }
+        { return m_pointTable->layout()->dimName(id); }
     Dimension::IdList dims() const
-        { return m_context.dims(); }
+        { return m_pointTable->layout()->dims(); }
     std::size_t pointSize() const
-        { return m_context.pointSize(); }
+        { return m_pointTable->layout()->pointSize(); }
     std::size_t dimSize(Dimension::Id::Enum id) const
-        { return m_context.dimSize(id); }
+        { return m_pointTable->layout()->dimSize(id); }
     DimTypeList dimTypes() const
-        { return m_context.dimTypes(); }
-
+        { return m_pointTable->layout()->dimTypes(); }
 
     /// Fill a buffer with point data specified by the dimension list.
     /// \param[in] dims  List of dimensions/types to retrieve.
@@ -221,7 +225,7 @@ public:
     /// Provides access to the memory storing the point data.  Though this
     /// function is public, other access methods are safer and preferred.
     char *getPoint(PointId id)
-        { return m_context.rawPtBuf()->getPoint(m_index[id]); }
+        { return m_pointTable->getPoint(m_index[id]); }
 
     // The standard idiom is swapping with a stack-created empty queue, but
     // that invokes the ctor and probably allocates.  We've probably only got
@@ -233,7 +237,7 @@ public:
     }
 
 protected:
-    PointTableRef m_context;
+    PointTablePtr m_pointTable;
     std::deque<PointId> m_index;
     // The index might be larger than the size to support temporary point
     // references.
@@ -356,7 +360,7 @@ inline T PointView::getFieldAs(Dimension::Id::Enum dim,
     PointId pointIndex) const
 {
     T retval;
-    Dimension::Detail *dd = m_context.dimDetail(dim);
+    const Dimension::Detail *dd = m_pointTable->layout()->dimDetail(dim);
     double val;
 
     switch (dd->type())
@@ -492,7 +496,7 @@ bool PointView::convertAndSet(Dimension::Id::Enum dim, PointId idx, T_IN in)
 template<typename T>
 void PointView::setField(Dimension::Id::Enum dim, PointId idx, T val)
 {
-    Dimension::Detail *dd = m_context.dimDetail(dim);
+    const Dimension::Detail *dd = m_pointTable->layout()->dimDetail(dim);
 
     bool ok = true;
     switch (dd->type())
@@ -546,7 +550,9 @@ void PointView::setField(Dimension::Id::Enum dim, PointId idx, T val)
 inline void PointView::getFieldInternal(Dimension::Id::Enum dim,
     PointId id, void *buf) const
 {
-    m_context.rawPtBuf()->getField(m_context.dimDetail(dim), m_index[id], buf);
+    m_pointTable->getField(
+            m_pointTable->layout()->dimDetail(dim),
+            m_index[id], buf);
 }
 
 
@@ -556,7 +562,8 @@ inline void PointView::setFieldInternal(Dimension::Id::Enum dim,
     PointId rawId = 0;
     if (id == size())
     {
-        rawId = m_context.rawPtBuf()->addPoint();
+        rawId = m_pointTable->addPoint();
+        if (rawId == 0) m_pointTable->layout()->finalize();
         m_index.push_back(rawId);
         m_size++;
         assert(m_temps.empty());
@@ -571,7 +578,7 @@ inline void PointView::setFieldInternal(Dimension::Id::Enum dim,
     {
         rawId = m_index[id];
     }
-    m_context.rawPtBuf()->setField(m_context.dimDetail(dim), rawId, value);
+    m_pointTable->setField(m_pointTable->layout()->dimDetail(dim), rawId, value);
 }
 
 

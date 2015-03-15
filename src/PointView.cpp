@@ -103,7 +103,7 @@ BOX3D PointView::calculateBounds(const PointViewSet& set, bool is3d)
 void PointView::dump(std::ostream& ostr) const
 {
     using std::endl;
-    const Dimension::IdList& dims = m_context.dims();
+    const Dimension::IdList& dims = m_pointTable->layout()->dims();
 
     point_count_t numPoints = size();
     ostr << "Contains " << numPoints << "  points" << endl;
@@ -114,7 +114,7 @@ void PointView::dump(std::ostream& ostr) const
         for (auto di = dims.begin(); di != dims.end(); ++di)
         {
             Dimension::Id::Enum d = *di;
-            Dimension::Detail *dd = m_context.dimDetail(d);
+            const Dimension::Detail *dd = m_pointTable->layout()->dimDetail(d);
             ostr << Dimension::name(d) << " (" <<
                 Dimension::interpretationName(dd->type()) << ") : ";
 
