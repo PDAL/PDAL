@@ -39,114 +39,85 @@
 #include <vector>
 
 #include "pdal/Dimension.hpp"
+#include "pdal/PointLayout.hpp"
 #include "pdal/Metadata.hpp"
-#include "pdal/RawPtBuf.hpp"
 
 namespace pdal
 {
-
-class PointBuffer;
 
 namespace plang
 {
     class BufferedInvocation;
 }
 
-struct DimInfo
+class PointTable
 {
-    DimInfo() : m_detail(Dimension::COUNT), m_nextFree(Dimension::PROPRIETARY)
-    {
-        int id = 0;
-        for (auto& d : m_detail)
-        {
-            d.setId((Dimension::Id::Enum)id);
-            id++;
-        }
-    }
+public:
+    PointTable();
+    PointTable(PointLayoutPtr layout);
+    virtual ~PointTable();
 
-    std::vector<Dimension::Detail> m_detail;
-    Dimension::IdList m_used;
-    std::map<std::string, Dimension::Id::Enum> m_propIds;
-    int m_nextFree;
+    // Point data operations.
+    virtual PointId addPoint() = 0;
+    virtual char *getPoint(PointId idx) = 0;
+    virtual void setField(const Dimension::Detail *d, PointId idx,
+        const void *value) = 0;
+    virtual void getField(const Dimension::Detail *d, PointId idx,
+        void *value) = 0;
+
+    // Layout operations.
+    PointLayoutPtr layout();
+    const PointLayoutPtr layout() const;
+
+    // Metadata operations.
+    MetadataNode metadata();
+    SpatialReference spatialRef() const;
+    void setSpatialRef(const SpatialReference& sref);
+
+protected:
+    PointLayoutPtr m_layout;
+    MetadataPtr m_metadata;
 };
-typedef std::shared_ptr<DimInfo> DimInfoPtr;
+
+
+
 
 // This provides a context for processing a set of points and allows the library
 // to be used to process multiple point sets simultaneously.
-class PointTable
+class DefaultPointTable : public PointTable
 {
     friend class PointView;
-    friend class PointBuffer;
     friend class plang::BufferedInvocation;
 private:
-    DimInfoPtr m_dims;
-    // Provides storage for the point data.
-    RawPtBufPtr m_ptBuf;
-    // Metadata storage;
-    MetadataPtr m_metadata;
+    // Point storage.
+    std::vector<char *> m_blocks;
+    point_count_t m_numPts;
 
 public:
-    PointTable();
-    PointTable(RawPtBufPtr ptBuf);
-
-    RawPtBuf *rawPtBuf() const;
-    MetadataNode metadata();
-    SpatialReference spatialRef() const;
-
-    void setSpatialRef(const SpatialReference& sref);
-    void registerDims(std::vector<Dimension::Id::Enum> ids);
-    void registerDims(Dimension::Id::Enum *id);
-    void registerDim(Dimension::Id::Enum id);
-
-    // Register the dimension with the requested type if it hasn't already
-    // been registered with a "larger" type.  If the type of the dimension
-    // is already larger, this does nothing.
-    void registerDim(Dimension::Id::Enum id, Dimension::Type::Enum type);
-
-    // The type and size are REQUESTS, not absolutes.  If someone else
-    // has already registered with the same name, you get the existing
-    // dimension size/type.
-    Dimension::Id::Enum assignDim(
-            const std::string& name,
-            Dimension::Type::Enum type);
-
-    Dimension::Id::Enum registerOrAssignDim(
-            const std::string name,
-            Dimension::Type::Enum type);
-
-    DimTypeList dimTypes() const;
-    DimType findDimType(const std::string& name) const;
-    Dimension::Id::Enum findDim(const std::string& name) const;
-    Dimension::Id::Enum findProprietaryDim(const std::string& name) const;
-    std::string dimName(Dimension::Id::Enum id) const;
-
-    // @return whether or not the PointTable contains a given id
-    bool hasDim(Dimension::Id::Enum id) const;
-
-    // @return reference to vector of currently used dimensions
-    const Dimension::IdList& dims() const;
-
-    // @return the current type for a given id
-    Dimension::Type::Enum dimType(Dimension::Id::Enum id) const;
-
-    // @return the current size in bytes of the dimension
-    //         with the given id.
-    size_t dimSize(Dimension::Id::Enum id) const;
-    size_t dimOffset(Dimension::Id::Enum id) const;
-    size_t pointSize() const;
+    DefaultPointTable();
+    DefaultPointTable(PointLayoutPtr layout);
+    virtual ~DefaultPointTable();
 
 private:
-    Dimension::Detail *dimDetail(Dimension::Id::Enum id) const;
+    // Point data operations.
+    virtual PointId addPoint();
+    virtual char *getPoint(PointId idx);
+    virtual void setField(const Dimension::Detail *d, PointId idx,
+        const void *value);
+    virtual void getField(const Dimension::Detail *d, PointId idx,
+        void *value);
 
-    bool update(Dimension::Detail dd, const std::string& name);
+    // The number of points in each memory block.
+    static const point_count_t m_blockPtCnt = 65536;
 
-    Dimension::Type::Enum resolveType(
-            Dimension::Type::Enum t1,
-            Dimension::Type::Enum t2);
+    char *getDimension(const Dimension::Detail *d, PointId idx)
+        { return getPoint(idx) + d->offset(); }
+
+    std::size_t pointsToBytes(point_count_t numPts)
+        { return m_layout->pointSize() * numPts; }
 };
 
-// A point table is in some instances more easily understood as a reference.
-typedef PointTable PointTableRef;
+typedef std::shared_ptr<PointTable> PointTablePtr;
 
 } //namespace
 

@@ -35,17 +35,17 @@
 namespace pdal
 {
 
-DimTypeList DbWriter::dimTypes(PointContextRef ctx)
+DimTypeList DbWriter::dimTypes(PointTablePtr table)
 {
     using namespace Dimension;
-    
+
     if (m_outputDims.empty())
-        return ctx.dimTypes();
+        return table->layout()->dimTypes();
 
     DimTypeList dims;
     for (std::string& s : m_outputDims)
     {
-        DimType dt = ctx.findDimType(s);
+        DimType dt = table->layout()->findDimType(s);
         if (dt.m_id == Id::Unknown)
         {
             std::ostringstream oss;
@@ -60,13 +60,13 @@ DimTypeList DbWriter::dimTypes(PointContextRef ctx)
 
 
 // Placing this here allows validation of dimensions before execution begins.
-void DbWriter::prepared(PointContextRef ctx)
+void DbWriter::prepared(PointTablePtr table)
 {
-    m_dimTypes = dimTypes(ctx);
+    m_dimTypes = dimTypes(table);
 }
 
 
-void DbWriter::ready(PointContextRef ctx)
+void DbWriter::ready(PointTablePtr /*table*/)
 {
     using namespace Dimension;
 
@@ -145,14 +145,14 @@ DimTypeList DbWriter::dbDimTypes() const
 }
 
 
-size_t DbWriter::readField(const PointBuffer& pb, char *pos, DimType dimType,
+size_t DbWriter::readField(const PointView& view, char *pos, DimType dimType,
     PointId idx)
 {
     using namespace Dimension;
 
     size_t size = Dimension::size(dimType.m_type);
 
-    pb.getField(pos, dimType.m_id, dimType.m_type, idx);
+    view.getField(pos, dimType.m_id, dimType.m_type, idx);
 
     auto iconvert = [pos](const XForm& xform)
     {
@@ -190,14 +190,14 @@ size_t DbWriter::readField(const PointBuffer& pb, char *pos, DimType dimType,
 
 
 /// Read a point's data packed into a buffer.
-/// \param[in] pb  Point buffer to read from.
+/// \param[in] view  PointView to read from.
 /// \param[in] idx  Index of point to read.
 /// \param[in] outbuf  Buffer to write to.
 /// \return  Number of bytes written to buffer.
-size_t DbWriter::readPoint(const PointBuffer& pb, PointId idx, char *outbuf)
+size_t DbWriter::readPoint(const PointView& view, PointId idx, char *outbuf)
 {
-    pb.getPackedPoint(m_dimTypes, idx, outbuf);
-    
+    view.getPackedPoint(m_dimTypes, idx, outbuf);
+
     auto iconvert = [](const XForm& xform, const char *inpos, char *outpos)
     {
         double d;

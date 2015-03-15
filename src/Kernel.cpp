@@ -352,18 +352,18 @@ bool Kernel::isVisualize() const
 }
 
 
-void Kernel::visualize(PointBufferPtr buffer)
+void Kernel::visualize(PointViewPtr view)
 {
     BufferReader bufferReader;
-    bufferReader.addBuffer(buffer);
+    bufferReader.addView(view);
 
     StageFactory f;
     Stage& writer = ownStage(f.createStage("writers.pclvisualizer"));
     writer.setInput(bufferReader);
 
-    PointContext ctx;
-    writer.prepare(ctx);
-    writer.execute(ctx);
+    PointTablePtr table(new DefaultPointTable());
+    writer.prepare(table);
+    writer.execute(table);
 }
 
 /*

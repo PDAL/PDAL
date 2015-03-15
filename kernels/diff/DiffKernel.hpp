@@ -38,7 +38,6 @@
 #include <pdal/Stage.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/plugin.h>
-#include <pdal/PointBuffer.hpp>
 
 #include <boost/property_tree/ptree.hpp>
 
@@ -47,7 +46,8 @@ extern "C" PF_ExitFunc DiffKernel_InitPlugin();
 
 namespace pdal
 {
-    
+
+class PointView;
 
 class PDAL_DLL DiffKernel : public Kernel
 {
@@ -56,15 +56,15 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
     int execute(); // overrride
-    
-    
+
+
 private:
     DiffKernel();
     void addSwitches(); // overrride
     void validateSwitches(); // overrride
-    
-    void checkPoints(const PointBuffer& source_data,
-        const PointBuffer& candidate_data,
+
+    void checkPoints(const PointView& source_data,
+        const PointView& candidate_data,
         boost::property_tree::ptree& errors);
     std::string m_sourceFile;
     std::string m_candidateFile;

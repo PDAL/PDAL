@@ -59,7 +59,7 @@ private:
     uint32_t m_length;
 
     virtual void processOptions(const Options& options);
-    virtual PointBufferSet run(PointBufferPtr buf);
+    virtual PointViewSet run(PointViewPtr view);
 
     SplitterFilter& operator=(const SplitterFilter&); // not implemented
     SplitterFilter(const SplitterFilter&); // not implemented

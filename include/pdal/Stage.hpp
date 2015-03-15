@@ -40,7 +40,8 @@
 #include <pdal/Log.hpp>
 #include <pdal/Metadata.hpp>
 #include <pdal/Options.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointTable.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/QuickInfo.hpp>
 #include <pdal/SpatialReference.hpp>
 #include <pdal/UserCallback.hpp>
@@ -75,8 +76,8 @@ public:
         processOptions(m_options);
         return inspect();
     }
-    void prepare(PointContextRef ctx);
-    PointBufferSet execute(PointContextRef ctx);
+    void prepare(PointTablePtr table);
+    PointViewSet execute(PointTablePtr table);
 
     void setSpatialReference(SpatialReference const&);
     const SpatialReference& getSpatialReference() const;
@@ -109,7 +110,7 @@ public:
         { return std::string(); }
     static std::string s_getPluginVersion()
         { return std::string(); }
-    virtual boost::property_tree::ptree toPTree(PointContextRef ctx) const
+    virtual boost::property_tree::ptree toPTree(PointTablePtr table) const
         { return boost::property_tree::ptree(); }
 
     virtual StageSequentialIterator* createSequentialIterator() const
@@ -145,25 +146,25 @@ private:
         {}
     virtual void writerProcessOptions(const Options& /*options*/)
         {}
-    void l_initialize(PointContextRef ctx);
-    void l_done(PointContextRef ctx);
+    void l_initialize(PointTablePtr table);
+    void l_done(PointTablePtr table);
     virtual QuickInfo inspect()
         { return QuickInfo(); }
     virtual void initialize()
         {}
-    virtual void addDimensions(PointContextRef ctx)
-        { (void)ctx; }
-    virtual void prepared(PointContextRef ctx)
-        { (void)ctx; }
-    virtual void ready(PointContextRef ctx)
-        { (void)ctx; }
-    virtual void done(PointContextRef ctx)
-        { (void)ctx; }
-    virtual PointBufferSet run(PointBufferPtr buffer)
+    virtual void addDimensions(PointLayoutPtr layout)
+        { (void)layout; }
+    virtual void prepared(PointTablePtr table)
+        { (void)table; }
+    virtual void ready(PointTablePtr table)
+        { (void)table; }
+    virtual void done(PointTablePtr table)
+        { (void)table; }
+    virtual PointViewSet run(PointViewPtr view)
     {
-        (void)buffer;
+        (void)view;
         std::cerr << "Can't run stage = " << getName() << "!\n";
-        return PointBufferSet();
+        return PointViewSet();
     }
 };
 

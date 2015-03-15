@@ -61,25 +61,25 @@ TEST(SplitterTest, test_tile_filter)
     s.setOptions(o);
     s.setInput(r);
 
-    PointContext ctx;
-    PointBufferPtr buf(new PointBuffer(ctx));
-    s.prepare(ctx);
+    PointTablePtr table(new DefaultPointTable());
+    PointViewPtr view(new PointView(table));
+    s.prepare(table);
 
-    StageTester::ready(r, ctx);
-    PointBufferSet pbSet = StageTester::run(r, buf);
-    StageTester::done(r, ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
-    buf = *pbSet.begin();
+    StageTester::ready(r, table);
+    PointViewSet viewSet = StageTester::run(r, view);
+    StageTester::done(r, table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    view = *viewSet.begin();
 
-    StageTester::ready(s, ctx);
-    pbSet = StageTester::run(s, buf);
-    StageTester::done(s, ctx);
+    StageTester::ready(s, table);
+    viewSet = StageTester::run(s, view);
+    StageTester::done(s, table);
 
-    std::vector<PointBufferPtr> buffers;
-    for (auto it = pbSet.begin(); it != pbSet.end(); ++it)
-        buffers.push_back(*it);
+    std::vector<PointViewPtr> views;
+    for (auto it = viewSet.begin(); it != viewSet.end(); ++it)
+        views.push_back(*it);
 
-    auto sorter = [](PointBufferPtr p1, PointBufferPtr p2)
+    auto sorter = [](PointViewPtr p1, PointViewPtr p2)
     {
         BOX3D b1 = p1->calculateBounds();
         BOX3D b2 = p2->calculateBounds();
@@ -88,14 +88,14 @@ TEST(SplitterTest, test_tile_filter)
             b1.minx > b2.minx ? false :
             b1.miny < b2.miny;
     };
-    std::sort(buffers.begin(), buffers.end(), sorter);
+    std::sort(views.begin(), views.end(), sorter);
 
-    EXPECT_EQ(buffers.size(), 15u);
+    EXPECT_EQ(views.size(), 15u);
     size_t counts[] = {24, 27, 26, 27, 10, 166, 142, 76, 141, 132, 63, 70, 67,
         34, 60 };
-    for (size_t i = 0; i < buffers.size(); ++i)
+    for (size_t i = 0; i < views.size(); ++i)
     {
-        PointBufferPtr& buf = buffers[i];
-        EXPECT_EQ(buf->size(), counts[i]);
+        PointViewPtr view = views[i];
+        EXPECT_EQ(view->size(), counts[i]);
     }
 }

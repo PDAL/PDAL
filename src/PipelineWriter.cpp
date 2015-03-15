@@ -38,7 +38,6 @@
 #include <pdal/Reader.hpp>
 #include <pdal/Writer.hpp>
 #include <pdal/PipelineManager.hpp>
-#include <pdal/PointBuffer.hpp>
 #include <pdal/PDALUtils.hpp>
 
 #include <boost/property_tree/xml_parser.hpp>

@@ -37,7 +37,7 @@
 
 #include "PgWriter.hpp"
 
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Endian.hpp>
@@ -201,14 +201,14 @@ void PgWriter::writeInit()
     m_schema_is_initialized = true;
 }
 
-void PgWriter::write(const PointBuffer& buffer)
+void PgWriter::write(const PointViewPtr view)
 {
     writeInit();
-    writeTile(buffer);
+    writeTile(view);
 }
 
 
-void PgWriter::done(PointContextRef ctx)
+void PgWriter::done(PointTablePtr /*table*/)
 {
     //CreateIndex(m_schema_name, m_table_name, m_column_name);
 
@@ -439,27 +439,27 @@ void PgWriter::CreateIndex(std::string const& schema_name,
 }
 
 
-void PgWriter::writeTile(PointBuffer const& buffer)
+void PgWriter::writeTile(const PointViewPtr view)
 {
-    if (buffer.size() > m_patch_capacity)
+    if (view->size() > m_patch_capacity)
     {
         std::ostringstream oss;
-        oss << "writers.pgpointcloud buffer size (" << buffer.size()
+        oss << "writers.pgpointcloud view size (" << view->size()
             << ") is greater than capacity (" << m_patch_capacity << ")";
         throw pdal_error(oss.str());
     }
 
     std::vector<char> storage(m_packedPointSize);
     std::string hexrep;
-    size_t maxHexrepSize = m_packedPointSize * buffer.size() * 2;
+    size_t maxHexrepSize = m_packedPointSize * view->size() * 2;
     hexrep.reserve(maxHexrepSize);
 
     m_insert.clear();
     m_insert.reserve(maxHexrepSize + 3000);
 
-    for (PointId idx = 0; idx < buffer.size(); ++idx)
+    for (PointId idx = 0; idx < view->size(); ++idx)
     {
-        size_t written = readPoint(buffer, idx, storage.data());
+        size_t written = readPoint(*view.get(), idx, storage.data());
 
         /* We are always getting uncompressed bytes off the block_data */
         /* so we always used compression type 0 (uncompressed) in writing */
@@ -488,7 +488,7 @@ void PgWriter::writeTile(PointBuffer const& buffer)
 
     std::ostringstream options;
 
-    uint32_t num_points = buffer.size();
+    uint32_t num_points = view->size();
     int32_t pcid = m_pcid;
     CompressionType::Enum compression_v = CompressionType::None;
     uint32_t compression = static_cast<uint32_t>(compression_v);

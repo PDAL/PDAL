@@ -38,7 +38,7 @@
 #include <string.h>
 
 #include <pdal/Metadata.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/QuickInfo.hpp>
 #include <pdal/util/Extractor.hpp>
 #include <pdal/util/FileUtils.hpp>
@@ -122,14 +122,14 @@ std::string LasReader::getName() const { return s_info.name; }
 QuickInfo LasReader::inspect()
 {
     QuickInfo qi;
-    PointContext ctx;
+    PointLayoutPtr layout(new PointLayout());
 
-    addDimensions(ctx);
+    addDimensions(layout);
     initialize();
 
-    Dimension::IdList dims = ctx.dims();
+    Dimension::IdList dims = layout->dims();
     for (auto di = dims.begin(); di != dims.end(); ++di)
-        qi.m_dimNames.push_back(ctx.dimName(*di));
+        qi.m_dimNames.push_back(layout->dimName(*di));
     qi.m_pointCount =
         Utils::saturation_cast<point_count_t>(m_lasHeader.pointCount());
     qi.m_bounds = m_lasHeader.getBounds();
@@ -180,7 +180,7 @@ void LasReader::initialize()
 }
 
 
-void LasReader::ready(PointContext ctx, MetadataNode& m)
+void LasReader::ready(PointTablePtr table, MetadataNode& m)
 {
     m_index = 0;
 
@@ -355,7 +355,7 @@ void LasReader::fixupVlrs()
 void LasReader::readExtraBytesVlr()
 {
     VariableLengthRecord *vlr = findVlr(SPEC_USER_ID, EXTRA_BYTES_RECORD_ID);
-    if (!vlr) 
+    if (!vlr)
         return;
     const char *pos = vlr->data();
     size_t size = vlr->dataLen();
@@ -509,35 +509,35 @@ void LasReader::extractVlrMetadata(MetadataNode& m)
 }
 
 
-void LasReader::addDimensions(PointContextRef ctx)
+void LasReader::addDimensions(PointLayoutPtr layout)
 {
     using namespace Dimension;
 
-    ctx.registerDim(Id::X, Type::Double);
-    ctx.registerDim(Id::Y, Type::Double);
-    ctx.registerDim(Id::Z, Type::Double);
-    ctx.registerDim(Id::Intensity, Type::Unsigned16);
-    ctx.registerDim(Id::ReturnNumber, Type::Unsigned8);
-    ctx.registerDim(Id::NumberOfReturns, Type::Unsigned8);
-    ctx.registerDim(Id::ScanDirectionFlag, Type::Unsigned8);
-    ctx.registerDim(Id::EdgeOfFlightLine, Type::Unsigned8);
-    ctx.registerDim(Id::Classification, Type::Unsigned8);
-    ctx.registerDim(Id::ScanAngleRank, Type::Signed8);
-    ctx.registerDim(Id::UserData, Type::Unsigned8);
-    ctx.registerDim(Id::PointSourceId, Type::Unsigned16);
+    layout->registerDim(Id::X, Type::Double);
+    layout->registerDim(Id::Y, Type::Double);
+    layout->registerDim(Id::Z, Type::Double);
+    layout->registerDim(Id::Intensity, Type::Unsigned16);
+    layout->registerDim(Id::ReturnNumber, Type::Unsigned8);
+    layout->registerDim(Id::NumberOfReturns, Type::Unsigned8);
+    layout->registerDim(Id::ScanDirectionFlag, Type::Unsigned8);
+    layout->registerDim(Id::EdgeOfFlightLine, Type::Unsigned8);
+    layout->registerDim(Id::Classification, Type::Unsigned8);
+    layout->registerDim(Id::ScanAngleRank, Type::Signed8);
+    layout->registerDim(Id::UserData, Type::Unsigned8);
+    layout->registerDim(Id::PointSourceId, Type::Unsigned16);
 
     if (m_lasHeader.hasTime())
-        ctx.registerDim(Id::GpsTime, Type::Double);
+        layout->registerDim(Id::GpsTime, Type::Double);
     if (m_lasHeader.hasColor())
     {
-        ctx.registerDim(Id::Red, Type::Unsigned16);
-        ctx.registerDim(Id::Green, Type::Unsigned16);
-        ctx.registerDim(Id::Blue, Type::Unsigned16);
+        layout->registerDim(Id::Red, Type::Unsigned16);
+        layout->registerDim(Id::Green, Type::Unsigned16);
+        layout->registerDim(Id::Blue, Type::Unsigned16);
     }
     if (m_lasHeader.hasInfrared())
-        ctx.registerDim(Id::Infrared);
+        layout->registerDim(Id::Infrared);
     if (m_lasHeader.versionAtLeast(1, 4))
-        ctx.registerDim(Id::ScanChannel);
+        layout->registerDim(Id::ScanChannel);
 
     for (auto& dim : m_extraDims)
     {
@@ -546,12 +546,12 @@ void LasReader::addDimensions(PointContextRef ctx)
             continue;
         if (dim.m_dimType.m_xform.nonstandard())
             type = Dimension::Type::Double;
-        dim.m_dimType.m_id = ctx.assignDim(dim.m_name, type);
+        dim.m_dimType.m_id = layout->assignDim(dim.m_name, type);
     }
 }
 
 
-point_count_t LasReader::read(PointBuffer& data, point_count_t count)
+point_count_t LasReader::read(PointViewPtr view, point_count_t count)
 {
     size_t pointByteCount = m_lasHeader.pointLen();
     count = std::min(count, getNumPoints() - m_index);
@@ -571,7 +571,7 @@ point_count_t LasReader::read(PointBuffer& data, point_count_t count)
                 error += err;
                 throw pdal_error(error);
             }
-            loadPoint(data, (char *)m_zipPoint->m_lz_point_data.data(),
+            loadPoint(*view.get(), (char *)m_zipPoint->m_lz_point_data.data(),
                 pointByteCount);
         }
 #else
@@ -597,7 +597,7 @@ point_count_t LasReader::read(PointBuffer& data, point_count_t count)
                 char *pos = buf.data();
                 while (blockPoints--)
                 {
-                    loadPoint(data, pos, pointByteCount);
+                    loadPoint(*view.get(), pos, pointByteCount);
                     pos += pointByteCount;
                     i++;
                 }
@@ -625,7 +625,7 @@ point_count_t LasReader::readFileBlock(std::vector<char>& buf,
 }
 
 
-void LasReader::loadPoint(PointBuffer& data, char *buf, size_t bufsize)
+void LasReader::loadPoint(PointView& data, char *buf, size_t bufsize)
 {
     if (m_lasHeader.has14Format())
         loadPointV14(data, buf, bufsize);
@@ -634,7 +634,7 @@ void LasReader::loadPoint(PointBuffer& data, char *buf, size_t bufsize)
 }
 
 
-void LasReader::loadPointV10(PointBuffer& data, char *buf, size_t bufsize)
+void LasReader::loadPointV10(PointView& data, char *buf, size_t bufsize)
 {
     LeExtractor istream(buf, bufsize);
 
@@ -705,7 +705,7 @@ void LasReader::loadPointV10(PointBuffer& data, char *buf, size_t bufsize)
         m_cb(data, nextId);
 }
 
-void LasReader::loadPointV14(PointBuffer& data, char *buf, size_t bufsize)
+void LasReader::loadPointV14(PointView& data, char *buf, size_t bufsize)
 {
     LeExtractor istream(buf, bufsize);
 
@@ -777,7 +777,7 @@ void LasReader::loadPointV14(PointBuffer& data, char *buf, size_t bufsize)
 }
 
 
-void LasReader::loadExtraDims(LeExtractor& istream, PointBuffer& data,
+void LasReader::loadExtraDims(LeExtractor& istream, PointView& data,
     PointId nextId)
 {
     Everything e;
@@ -805,7 +805,7 @@ void LasReader::loadExtraDims(LeExtractor& istream, PointBuffer& data,
 }
 
 
-void LasReader::done(PointContextRef ctx)
+void LasReader::done(PointTablePtr table)
 {
 #ifdef PDAL_HAVE_LASZIP
     m_zipPoint.reset();

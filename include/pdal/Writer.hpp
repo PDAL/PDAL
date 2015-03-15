@@ -36,6 +36,7 @@
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Options.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/Stage.hpp>
 
 #include <string>
@@ -45,7 +46,6 @@ namespace pdal
 
 class Writer;
 
-class PointBuffer;
 class UserCallback;
 
 /// End-stage consumer of PDAL pipeline
@@ -69,18 +69,18 @@ protected:
     XForm m_zXform;
     StringList m_outputDims;
 
-    void setAutoOffset(const PointBuffer& buf);
+    void setAutoOffset(const PointViewPtr view);
 
 private:
-    virtual PointBufferSet run(PointBufferPtr buffer)
+    virtual PointViewSet run(PointViewPtr view)
     {
-        PointBufferSet pbSet;
-        write(*buffer);
-        pbSet.insert(buffer);
-        return pbSet;
+        PointViewSet viewSet;
+        write(view);
+        viewSet.insert(view);
+        return viewSet;
     }
     virtual void writerProcessOptions(const Options& options);
-    virtual void write(const PointBuffer& /*buffer*/)
+    virtual void write(const PointViewPtr /*view*/)
         { std::cerr << "Can't write with stage = " << getName() << "!\n"; }
 
     Writer& operator=(const Writer&); // not implemented

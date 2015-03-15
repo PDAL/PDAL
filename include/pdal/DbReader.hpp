@@ -49,11 +49,11 @@ protected:
     {}
 
     DimTypeList dbDimTypes() const;
-    void loadSchema(PointContextRef ctx, const std::string& schemaString);
-    void loadSchema(PointContextRef ctx, const XMLSchema& schema);
-    void writeField(PointBuffer& pb, const char *pos, const DimType& dim,
+    void loadSchema(PointLayoutPtr layout, const std::string& schemaString);
+    void loadSchema(PointLayoutPtr layout, const XMLSchema& schema);
+    void writeField(PointView& view, const char *pos, const DimType& dim,
         PointId idx);
-    void writePoint(PointBuffer& pb, PointId idx, const char *buf);
+    void writePoint(PointView& view, PointId idx, const char *buf);
 
 private:
     DbReader& operator=(const DbReader&); // not implemented

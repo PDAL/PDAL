@@ -66,17 +66,17 @@ public:
 
 private:
     virtual void processOptions(const Options&);
-    virtual void ready(PointContextRef ctx);
-    virtual void write(const PointBuffer& buf);
-    virtual void done(PointContextRef ctx);
+    virtual void ready(PointTablePtr table);
+    virtual void write(const PointViewPtr view);
+    virtual void done(PointTablePtr table);
 
-    void writeHeader(PointContextRef ctx);
+    void writeHeader(PointTablePtr table);
     void writeFooter();
     void writeGeoJSONHeader();
-    void writeCSVHeader(PointContextRef ctx);
+    void writeCSVHeader(PointTablePtr table);
 
-    void writeGeoJSONBuffer(const PointBuffer& data);
-    void writeCSVBuffer(const PointBuffer& data);
+    void writeGeoJSONBuffer(const PointViewPtr view);
+    void writeCSVBuffer(const PointViewPtr view);
 
     std::string m_filename;
     std::string m_outputType;

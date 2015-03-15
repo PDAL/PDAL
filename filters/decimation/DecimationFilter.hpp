@@ -60,8 +60,8 @@ private:
     point_count_t m_limit;
 
     virtual void processOptions(const Options& options);
-    PointBufferSet run(PointBufferPtr buffer);
-    void decimate(PointBuffer& input, PointBuffer& output);
+    PointViewSet run(PointViewPtr view);
+    void decimate(PointView& input, PointView& output);
 
     DecimationFilter& operator=(const DecimationFilter&); // not implemented
     DecimationFilter(const DecimationFilter&); // not implemented

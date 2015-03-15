@@ -63,14 +63,14 @@ public:
     virtual boost::property_tree::ptree serializePipeline() const;
 
 private:
-    virtual PointBufferSet run(PointBufferPtr buffer)
+    virtual PointViewSet run(PointViewPtr view)
     {
-        PointBufferSet pbSet;
-        filter(*buffer);
-        pbSet.insert(buffer);
-        return pbSet;
+        PointViewSet viewSet;
+        filter(view);
+        viewSet.insert(view);
+        return viewSet;
     }
-    virtual void filter(PointBuffer& /*buffer*/)
+    virtual void filter(PointViewPtr /*view*/)
     {}
 
     Filter& operator=(const Filter&); // not implemented

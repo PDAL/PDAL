@@ -35,7 +35,7 @@
 #pragma once
 
 #include <pdal/pdal_export.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/Reader.hpp>
 
 namespace pdal
@@ -46,15 +46,15 @@ class PDAL_DLL BufferReader : public pdal::Reader
 public:
     BufferReader() : Reader()
         {}
-    void addBuffer(const PointBufferPtr& buffer)
-        { m_buffers.insert(buffer); }
+    void addView(const PointViewPtr& view)
+        { m_views.insert(view); }
     std::string getName() const { return "readers.buffer"; }
 
 private:
-    PointBufferSet m_buffers;
+    PointViewSet m_views;
 
-    virtual PointBufferSet run(PointBufferPtr buf)
-        { return m_buffers; }
+    virtual PointViewSet run(PointViewPtr /*view*/)
+        { return m_views; }
 };
 
 } // namespace pdal

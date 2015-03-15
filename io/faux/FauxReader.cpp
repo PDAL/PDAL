@@ -35,7 +35,7 @@
 #include "FauxReader.hpp"
 
 #include <pdal/Options.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 
 #include <boost/algorithm/string.hpp>
 
@@ -106,13 +106,13 @@ Options FauxReader::getDefaultOptions()
 }
 
 
-void FauxReader::addDimensions(PointContextRef ctx)
+void FauxReader::addDimensions(PointLayoutPtr layout)
 {
-    ctx.registerDims(getDefaultDimensions());
+    layout->registerDims(getDefaultDimensions());
     if (m_numReturns > 0)
     {
-        ctx.registerDim(Dimension::Id::ReturnNumber);
-        ctx.registerDim(Dimension::Id::NumberOfReturns);
+        layout->registerDim(Dimension::Id::ReturnNumber);
+        layout->registerDim(Dimension::Id::NumberOfReturns);
     }
 }
 
@@ -129,14 +129,14 @@ Dimension::IdList FauxReader::getDefaultDimensions()
 }
 
 
-point_count_t FauxReader::read(PointBuffer& buf, point_count_t count)
+point_count_t FauxReader::read(PointViewPtr view, point_count_t count)
 {
     const double numDeltas = (double)count - 1.0;
     const double delX = (m_maxX - m_minX) / numDeltas;
     const double delY = (m_maxY - m_minY) / numDeltas;
     const double delZ = (m_maxZ - m_minZ) / numDeltas;
 
-    log()->get(LogLevel::Debug5) << "Reading a point buffer of " <<
+    log()->get(LogLevel::Debug5) << "Reading a point view of " <<
         count << " points." << std::endl;
 
     uint32_t seed = static_cast<uint32_t>(std::time(NULL));
@@ -178,14 +178,14 @@ point_count_t FauxReader::read(PointBuffer& buf, point_count_t count)
                 break;
         }
 
-        buf.setField(Dimension::Id::X, idx, x);
-        buf.setField(Dimension::Id::Y, idx, y);
-        buf.setField(Dimension::Id::Z, idx, z);
-        buf.setField(Dimension::Id::OffsetTime, idx, m_time++);
+        view->setField(Dimension::Id::X, idx, x);
+        view->setField(Dimension::Id::Y, idx, y);
+        view->setField(Dimension::Id::Z, idx, z);
+        view->setField(Dimension::Id::OffsetTime, idx, m_time++);
         if (m_numReturns > 0)
         {
-            buf.setField(Dimension::Id::ReturnNumber, idx, m_returnNum);
-            buf.setField(Dimension::Id::NumberOfReturns, idx, m_numReturns);
+            view->setField(Dimension::Id::ReturnNumber, idx, m_returnNum);
+            view->setField(Dimension::Id::NumberOfReturns, idx, m_numReturns);
             m_returnNum = (m_returnNum % m_numReturns) + 1;
         }
     }
