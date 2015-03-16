@@ -119,6 +119,11 @@ void LasWriter::processOptions(const Options& options)
     StringList extraDims = options.getValueOrDefault<StringList>("extra_dims");
     m_extraDims = LasUtils::parse(extraDims);
 
+#ifndef PDAL_HAVE_LASZIP
+    if (m_lasHeader.compressed())
+        throw pdal_error("Can't write LAZ output.  "
+            "PDAL not built with LASzip.");
+#endif // PDAL_HAVE_LASZIP
     getHeaderOptions(options);
     getVlrOptions(options);
     m_error.setFilename(m_filename);
@@ -485,9 +490,6 @@ void LasWriter::openCompression()
         oss << "Error opening LASzipper: " << std::string(err);
         throw pdal_error(oss.str());
     }
-#else
-    throw pdal_error("LASzip compression is not enabled for "
-        "this compressed file!");
 #endif
 }
 
