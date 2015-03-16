@@ -610,13 +610,17 @@ Stage& Kernel::makeWriter(const std::string& outputFile, Stage& parent)
 
     std::string driver = factory.inferWriterDriver(outputFile);
     if (driver.empty())
-        throw app_runtime_error("Cannot determine output file type of " +
+        throw pdal_error("Cannot determine output file type of " +
             outputFile);
     Options options = factory.inferWriterOptionsChanges(outputFile);
 
     Stage *writer = factory.createStage(driver);
     if (!writer)
-        throw app_runtime_error("writer creation failed");
+    {
+        std::ostringstream ss;
+        ss << "Error creating writer stage for file '" << outputFile << "'.";
+        throw pdal_error(ss.str());
+    }
     ownStage(writer);
     writer->setInput(parent);
     writer->setOptions(options + writer->getOptions());
