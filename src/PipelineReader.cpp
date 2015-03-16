@@ -515,6 +515,10 @@ bool PipelineReader::readPipeline(const std::string& filename)
     {
         isWriter = readPipeline(*input);
     }
+    catch (const pdal_error& error)
+    {
+        throw error;
+    }
     catch (...)
     {
         FileUtils::closeFile(input);
