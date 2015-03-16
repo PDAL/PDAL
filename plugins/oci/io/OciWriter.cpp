@@ -102,9 +102,6 @@ Options OciWriter::getDefaultOptions()
         "floats/doubles to streams. This is used for creating the SDO_PC "
         "object and adding the index entry to the USER_SDO_GEOM_METADATA "
         "for the block table");
-    Option cloud_id("cloud_id", -1,
-       "The point cloud id that links the point cloud object to the "
-       "entries in the block table.");
     Option connection("connection", "",
         "Oracle connection string to connect to database");
     Option block_table_name("block_table_name", "output",
@@ -169,7 +166,6 @@ Options OciWriter::getDefaultOptions()
     options.add(overwrite);
     options.add(srid);
     options.add(stream_output_precision);
-    options.add(cloud_id);
     options.add(connection);
     options.add(block_table_name);
     options.add(block_table_partition_column);
