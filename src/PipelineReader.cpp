@@ -351,7 +351,6 @@ Stage *PipelineReader::parseElement_Filter(const ptree& tree)
     }
 
     Stage& filter(m_manager.addFilter(type));
-    std::cerr << "Setting options on filter = " << type << "!\n";
     filter.setOptions(options);
     for (auto sp : prevStages)
         filter.setInput(*sp);
