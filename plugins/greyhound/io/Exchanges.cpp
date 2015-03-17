@@ -203,15 +203,15 @@ std::vector<DimData> GetSchema::schema() const
 // Read exchange
 
 Read::Read(
-        PointBuffer& pointBuffer,
-        const PointContextRef pointContext,
+        PointViewPtr view,
+        const PointLayoutPtr layout,
         const std::string& sessionId,
         bool compress,
         int offset,
         int count)
     : Exchange("read")
-    , m_pointBuffer(pointBuffer)
-    , m_pointContext(pointContext)
+    , m_view(view)
+    , m_layout(layout)
     , m_initialized(false)
     , m_error(false)
     , m_pointsToRead(0)
@@ -245,7 +245,7 @@ bool Read::check()
             m_numBytes =
                 std::max<int>(jsonResponse["numBytes"].asInt(), 0);
 
-            if (m_pointsToRead * m_pointContext.pointSize() != m_numBytes)
+            if (m_pointsToRead * m_layout->pointSize() != m_numBytes)
             {
                 valid = false;
                 m_error = true;
@@ -266,12 +266,12 @@ std::size_t Read::numRead() const
 }
 
 ReadUncompressed::ReadUncompressed(
-        PointBuffer& pointBuffer,
-        const PointContextRef pointContext,
+        PointViewPtr view,
+        const PointLayoutPtr layout,
         const std::string& sessionId,
         int offset,
         int count)
-    : Read(pointBuffer, pointContext, sessionId, false, offset, count)
+    : Read(view, layout, sessionId, false, offset, count)
 { }
 
 bool ReadUncompressed::done()
@@ -292,28 +292,28 @@ void ReadUncompressed::handleRx(const message_ptr message)
         {
             const std::string& bytes(message->get_payload());
             const std::size_t rawNumBytes(bytes.size());
-            const std::size_t stride(m_pointContext.pointSize());
+            const std::size_t stride(m_layout->pointSize());
 
             m_data.insert(m_data.end(), bytes.begin(), bytes.end());
 
             const std::size_t wholePoints(m_data.size() / stride);
 
-            PointId nextId(m_pointBuffer.size());
+            PointId nextId(m_view->size());
             const PointId doneId(nextId + wholePoints);
 
             const char* pos(m_data.data());
 
             while (nextId < doneId)
             {
-                for (const auto& dim : m_pointContext.dims())
+                for (const auto& dim : m_layout->dims())
                 {
-                    m_pointBuffer.setField(
+                    m_view->setField(
                             dim,
-                            m_pointContext.dimType(dim),
+                            m_layout->dimType(dim),
                             nextId,
                             pos);
 
-                    pos += m_pointContext.dimSize(dim);
+                    pos += m_layout->dimSize(dim);
                 }
 
                 ++nextId;
@@ -333,15 +333,15 @@ void ReadUncompressed::handleRx(const message_ptr message)
 
 #ifdef PDAL_HAVE_LAZPERF
 ReadCompressed::ReadCompressed(
-        PointBuffer& pointBuffer,
-        const PointContextRef pointContext,
+        PointViewPtr view,
+        const PointLayoutPtr layout,
         const std::string& sessionId,
         int offset,
         int count)
-    : Read(pointBuffer, pointContext, sessionId, true, offset, count)
+    : Read(view, layout, sessionId, true, offset, count)
     , m_decompressionThread()
     , m_compressionStream()
-    , m_decompressor(m_compressionStream, pointContext.dimTypes())
+    , m_decompressor(m_compressionStream, layout->dimTypes())
     , m_done(false)
     , m_doneCv()
     , m_doneMutex()
@@ -371,15 +371,15 @@ void ReadCompressed::handleRx(const message_ptr message)
             const char* pos(m_data.data());
             for (PointId i(0); i < m_pointsToRead; ++i)
             {
-                for (const auto& dim : m_pointContext.dims())
+                for (const auto& dim : m_layout->dims())
                 {
-                    m_pointBuffer.setField(
+                    m_view->setField(
                             dim,
-                            m_pointContext.dimType(dim),
+                            m_layout->dimType(dim),
                             i,
                             pos);
 
-                    pos += m_pointContext.dimSize(dim);
+                    pos += m_layout->dimSize(dim);
                 }
             }
 

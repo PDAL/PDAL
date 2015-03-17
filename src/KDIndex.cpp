@@ -39,7 +39,7 @@
 namespace pdal
 {
 
-KDIndex::KDIndex(const PointBuffer& buf)
+KDIndex::KDIndex(const PointView& buf)
     : m_buf(buf)
     , m_3d(buf.hasDim(Dimension::Id::Z))
     , m_index()

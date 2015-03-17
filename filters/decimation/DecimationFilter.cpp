@@ -34,7 +34,7 @@
 
 #include "DecimationFilter.hpp"
 
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 
 namespace pdal
 {
@@ -56,17 +56,17 @@ void DecimationFilter::processOptions(const Options& options)
 }
 
 
-PointBufferSet DecimationFilter::run(PointBufferPtr buffer)
+PointViewSet DecimationFilter::run(PointViewPtr inView)
 {
-    PointBufferSet pbSet;
-    PointBufferPtr output = buffer->makeNew();
-    decimate(*buffer, *output);
-    pbSet.insert(output);
-    return pbSet;
+    PointViewSet viewSet;
+    PointViewPtr outView = inView->makeNew();
+    decimate(*inView.get(), *outView.get());
+    viewSet.insert(outView);
+    return viewSet;
 }
 
 
-void DecimationFilter::decimate(PointBuffer& input, PointBuffer& output)
+void DecimationFilter::decimate(PointView& input, PointView& output)
 {
     PointId last_idx = (m_limit > 0) ? m_limit : input.size();
     for (PointId idx = m_offset; idx < last_idx; idx += m_step)

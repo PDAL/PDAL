@@ -177,10 +177,10 @@ void optionsWrite(const Options& writerOps)
     writer->setOptions(writerOps);
     writer->setInput(*reader);
 
-    PointContext ctx;
-    writer->prepare(ctx);
+    PointTablePtr table(new DefaultPointTable());
+    writer->prepare(table);
 
-    PointBufferSet written = writer->execute(ctx);
+    PointViewSet written = writer->execute(table);
 
     point_count_t count(0);
     for(auto i = written.begin(); i != written.end(); ++i)
@@ -213,13 +213,13 @@ TEST_F(PgpointcloudWriterTest, writeXYZ)
 
     optionsWrite(ops);
 
-    PointContext ctx;
+    PointTablePtr table(new DefaultPointTable());
     std::unique_ptr<Stage> reader(
         StageFactory().createStage("readers.pgpointcloud"));
     reader->setOptions(getDbOptions());
 
-    reader->prepare(ctx);
-    Dimension::IdList dims = ctx.dims();
+    reader->prepare(table);
+    Dimension::IdList dims = table->layout()->dims();
     EXPECT_EQ(dims.size(), (size_t)3);
     EXPECT_TRUE(Utils::contains(dims, Dimension::Id::X));
     EXPECT_TRUE(Utils::contains(dims, Dimension::Id::Y));
@@ -246,8 +246,8 @@ TEST_F(PgpointcloudWriterTest, writetNoPointcloudExtension)
     writer->setOptions(getDbOptions());
     writer->setInput(*reader);
 
-    PointContext ctx;
-    writer->prepare(ctx);
+    PointTablePtr table(new DefaultPointTable());
+    writer->prepare(table);
 
-    EXPECT_THROW(writer->execute(ctx), pdal_error);
+    EXPECT_THROW(writer->execute(table), pdal_error);
 }

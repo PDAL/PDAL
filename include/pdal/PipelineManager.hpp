@@ -49,7 +49,11 @@ class PDAL_DLL PipelineManager
 {
 public:
     PipelineManager()
-        {}
+        : m_factory()
+        , m_table(new DefaultPointTable())
+        , m_viewSet()
+        , m_stages()
+    {}
 
     // Use these to manually add stages into the pipeline manager.
     Stage& addReader(const std::string& type);
@@ -67,20 +71,20 @@ public:
     void prepare() const;
     point_count_t execute();
 
-    // Get the resulting point buffers.
-    const PointBufferSet& buffers() const
-        { return m_pbSet; }
+    // Get the resulting point views.
+    const PointViewSet& views() const
+        { return m_viewSet; }
 
-    // Get the point context;
-    PointContextRef context() const
-        { return m_context; }
+    // Get the point table data.
+    PointTablePtr pointTable() const
+        { return m_table; }
 
     MetadataNode getMetadata() const;
 
 private:
     StageFactory m_factory;
-    PointContext m_context;
-    PointBufferSet m_pbSet;
+    PointTablePtr m_table;
+    PointViewSet m_viewSet;
 
     typedef std::vector<std::unique_ptr<Stage> > StagePtrList;
     StagePtrList m_stages;

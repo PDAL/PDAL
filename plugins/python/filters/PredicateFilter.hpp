@@ -61,9 +61,9 @@ private:
     std::string m_function;
 
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContext ctx);
-    virtual PointBufferSet run(PointBufferPtr buf);
-    virtual void done(PointContext ctx);
+    virtual void ready(PointTablePtr table);
+    virtual PointViewSet run(PointViewPtr view);
+    virtual void done(PointTablePtr table);
 
     PredicateFilter& operator=(const PredicateFilter&); // not implemented
     PredicateFilter(const PredicateFilter&); // not implemented

@@ -11,32 +11,32 @@ namespace pdal
 class StageTester
 {
 public:
-    static void initialize(std::shared_ptr<Stage> s, PointContext ctx)
+    static void initialize(std::shared_ptr<Stage> s, PointTablePtr table)
     {
-        s->l_initialize(ctx);
+        s->l_initialize(table);
         s->initialize();
     }
     static void processOptions(Stage& s, const Options& options)
         { s.processOptions(options); }
-    static void addDimensions(Stage& s, PointContext ctx)
-        { s.addDimensions(ctx); }
-    static void ready(Stage& s, PointContext ctx)
-        { s.ready(ctx); }
-    static void done(Stage& s, PointContext ctx)
+    static void addDimensions(Stage& s, PointLayoutPtr layout)
+        { s.addDimensions(layout); }
+    static void ready(Stage& s, PointTablePtr table)
+        { s.ready(table); }
+    static void done(Stage& s, PointTablePtr table)
     {
-        s.l_done(ctx);
-        s.done(ctx);
+        s.l_done(table);
+        s.done(table);
     }
-    static PointBufferSet run(Stage& s, PointBufferPtr buffer)
-        { return s.run(buffer); }
+    static PointViewSet run(Stage& s, PointViewPtr view)
+        { return s.run(view); }
 };
 
 // Provide access to private members of Filter.
 class FilterTester : public StageTester
 {
 public:
-    static void filter(Filter& f, PointBuffer& buffer)
-        { f.filter(buffer); }
+    static void filter(Filter& f, PointViewPtr view)
+        { f.filter(view); }
 };
 
 //
@@ -44,8 +44,8 @@ public:
 class WriterTester : public StageTester
 {
 public:
-    static void write(Writer& w, PointBuffer& buffer)
-        { w.write(buffer); }
+    static void write(Writer& w, PointViewPtr view)
+        { w.write(view); }
 };
 
 } //namespace pdal

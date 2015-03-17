@@ -34,7 +34,7 @@
 
 #include "gtest/gtest.h"
 
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <LasReader.hpp>
 #include "Support.hpp"
@@ -121,14 +121,14 @@ TEST(LasReaderTest, test_base_options)
 
 TEST(LasReaderTest, header)
 {
-    PointContext ctx;
+    PointTablePtr table(new DefaultPointTable());
     Options ops;
     ops.add("filename", Support::datapath("las/simple.las"));
 
     LasReader reader;
     reader.setOptions(ops);
 
-    reader.prepare(ctx);
+    reader.prepare(table);
     // This tests the copy ctor, too.
     LasHeader h = reader.header();
 
@@ -166,7 +166,7 @@ TEST(LasReaderTest, header)
 
 TEST(LasReaderTest, test_sequential)
 {
-    PointContext ctx;
+    PointTablePtr table(new DefaultPointTable());
 
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
@@ -174,16 +174,16 @@ TEST(LasReaderTest, test_sequential)
     LasReader reader;
     reader.setOptions(ops1);
 
-    reader.prepare(ctx);
-    PointBufferSet pbSet = reader.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buf = *pbSet.begin();
-    Support::check_p0_p1_p2(*buf);
-    PointBufferPtr buf2 = buf->makeNew();
-    buf2->appendPoint(*buf, 100);
-    buf2->appendPoint(*buf, 101);
-    buf2->appendPoint(*buf, 102);
-    Support::check_p100_p101_p102(*buf2);
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    Support::check_p0_p1_p2(*view);
+    PointViewPtr view2 = view->makeNew();
+    view2->appendPoint(*view, 100);
+    view2->appendPoint(*view, 101);
+    view2->appendPoint(*view, 102);
+    Support::check_p100_p101_p102(*view2);
 }
 
 
@@ -192,25 +192,25 @@ static void test_a_format(const std::string& file, uint8_t majorVersion,
     double xref, double yref, double zref, double tref,
     uint16_t rref,  uint16_t gref,  uint16_t bref)
 {
-    PointContext ctx;
+    PointTablePtr table(new DefaultPointTable());
 
     Options ops1;
     ops1.add("filename", Support::datapath(file));
     ops1.add("count", 1);
     LasReader reader;
     reader.setOptions(ops1);
-    reader.prepare(ctx);
+    reader.prepare(table);
 
     EXPECT_EQ(reader.header().pointFormat(), pointFormat);
     EXPECT_EQ(reader.header().versionMajor(), majorVersion);
     EXPECT_EQ(reader.header().versionMinor(), minorVersion);
 
-    PointBufferSet pbSet = reader.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 1u);
+    PointViewSet viewSet = reader.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 1u);
 
-    Support::check_pN(*buf, 0, xref, yref, zref, tref, rref, gref, bref);
+    Support::check_pN(*view, 0, xref, yref, zref, tref, rref, gref, bref);
 }
 
 TEST(LasReaderTest, test_different_formats)
@@ -268,20 +268,20 @@ TEST(LasReaderTest, inspect)
     std::sort(qi.m_dimNames.begin(), qi.m_dimNames.end());
     EXPECT_TRUE(CheckEqualCollections(qi.m_dimNames.begin(),
         qi.m_dimNames.end(), std::begin(dims)));
-} 
+}
 
 //ABELL - Find another way to do this.
 /**
 TEST(LasReaderTest, test_vlr)
 {
-    PointContext ctx;
+    PointTablePtr table(new DefaultPointTable());
 
     Options ops1;
     ops1.add("filename", Support::datapath("las/lots_of_vlr.las"));
     LasReader reader;
     reader.setOptions(ops1);
-    reader.prepare(ctx);
-    reader.execute(ctx);
+    reader.prepare(table);
+    reader.execute(table);
 
     EXPECT_EQ(reader.header().getVLRs().getAll().size(), 390);
 }
@@ -290,7 +290,7 @@ TEST(LasReaderTest, test_vlr)
 
 TEST(LasReaderTest, testInvalidFileSignature)
 {
-    PointContext ctx;
+    PointTablePtr table(new DefaultPointTable());
 
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las.wkt"));
@@ -302,83 +302,84 @@ TEST(LasReaderTest, testInvalidFileSignature)
 
 TEST(LasReaderTest, extraBytes)
 {
-    PointContext ctx;
+    PointTablePtr table(new DefaultPointTable());
+    PointLayoutPtr layout(table->layout());
 
     Options readOps;
     readOps.add("filename", Support::datapath("las/extrabytes.las"));
     LasReader reader;
     reader.setOptions(readOps);
 
-    reader.prepare(ctx);
+    reader.prepare(table);
 
-    DimTypeList dimTypes = ctx.dimTypes();
+    DimTypeList dimTypes = layout->dimTypes();
     EXPECT_EQ(dimTypes.size(), (size_t)24);
 
-    Dimension::Id::Enum color0 = ctx.findProprietaryDim("Colors0");
-    EXPECT_EQ(ctx.dimType(color0), Dimension::Type::Unsigned16);
-    Dimension::Id::Enum color1 = ctx.findProprietaryDim("Colors1");
-    EXPECT_EQ(ctx.dimType(color1), Dimension::Type::Unsigned16);
-    Dimension::Id::Enum color2 = ctx.findProprietaryDim("Colors2");
-    EXPECT_EQ(ctx.dimType(color2), Dimension::Type::Unsigned16);
+    Dimension::Id::Enum color0 = layout->findProprietaryDim("Colors0");
+    EXPECT_EQ(layout->dimType(color0), Dimension::Type::Unsigned16);
+    Dimension::Id::Enum color1 = layout->findProprietaryDim("Colors1");
+    EXPECT_EQ(layout->dimType(color1), Dimension::Type::Unsigned16);
+    Dimension::Id::Enum color2 = layout->findProprietaryDim("Colors2");
+    EXPECT_EQ(layout->dimType(color2), Dimension::Type::Unsigned16);
 
-    Dimension::Id::Enum flag0 = ctx.findProprietaryDim("Flags0");
-    EXPECT_EQ(ctx.dimType(flag0), Dimension::Type::Signed8);
-    Dimension::Id::Enum flag1 = ctx.findProprietaryDim("Flags1");
-    EXPECT_EQ(ctx.dimType(flag1), Dimension::Type::Signed8);
+    Dimension::Id::Enum flag0 = layout->findProprietaryDim("Flags0");
+    EXPECT_EQ(layout->dimType(flag0), Dimension::Type::Signed8);
+    Dimension::Id::Enum flag1 = layout->findProprietaryDim("Flags1");
+    EXPECT_EQ(layout->dimType(flag1), Dimension::Type::Signed8);
 
-    Dimension::Id::Enum intense2 = ctx.findProprietaryDim("Intensity");
-    EXPECT_EQ(ctx.dimType(intense2), Dimension::Type::Unsigned32);
+    Dimension::Id::Enum intense2 = layout->findProprietaryDim("Intensity");
+    EXPECT_EQ(layout->dimType(intense2), Dimension::Type::Unsigned32);
 
-    Dimension::Id::Enum time2 = ctx.findProprietaryDim("Time");
-    EXPECT_EQ(ctx.dimType(time2), Dimension::Type::Unsigned64);
+    Dimension::Id::Enum time2 = layout->findProprietaryDim("Time");
+    EXPECT_EQ(layout->dimType(time2), Dimension::Type::Unsigned64);
 
-    PointBufferSet pbSet = reader.execute(ctx);
-    EXPECT_EQ(pbSet.size(), (size_t)1);
-    PointBufferPtr pb = *pbSet.begin();
+    PointViewSet viewSet = reader.execute(table);
+    EXPECT_EQ(viewSet.size(), (size_t)1);
+    PointViewPtr view = *viewSet.begin();
 
-    Dimension::Id::Enum red = ctx.findDim("Red");
-    Dimension::Id::Enum green = ctx.findDim("Green");
-    Dimension::Id::Enum blue = ctx.findDim("Blue");
+    Dimension::Id::Enum red = layout->findDim("Red");
+    Dimension::Id::Enum green = layout->findDim("Green");
+    Dimension::Id::Enum blue = layout->findDim("Blue");
 
-    Dimension::Id::Enum returnNum = ctx.findDim("ReturnNumber");
-    Dimension::Id::Enum numReturns = ctx.findDim("NumberOfReturns");
+    Dimension::Id::Enum returnNum = layout->findDim("ReturnNumber");
+    Dimension::Id::Enum numReturns = layout->findDim("NumberOfReturns");
 
-    Dimension::Id::Enum intensity = ctx.findDim("Intensity");
-    Dimension::Id::Enum time = ctx.findDim("GpsTime");
+    Dimension::Id::Enum intensity = layout->findDim("Intensity");
+    Dimension::Id::Enum time = layout->findDim("GpsTime");
 
-    for (PointId idx = 0; idx < pb->size(); ++idx)
+    for (PointId idx = 0; idx < view->size(); ++idx)
     {
-        EXPECT_EQ(pb->getFieldAs<uint16_t>(red, idx),
-            pb->getFieldAs<uint16_t>(color0, idx));
-        EXPECT_EQ(pb->getFieldAs<uint16_t>(green, idx),
-            pb->getFieldAs<uint16_t>(color1, idx));
-        EXPECT_EQ(pb->getFieldAs<uint16_t>(blue, idx),
-            pb->getFieldAs<uint16_t>(color2, idx));
+        EXPECT_EQ(view->getFieldAs<uint16_t>(red, idx),
+            view->getFieldAs<uint16_t>(color0, idx));
+        EXPECT_EQ(view->getFieldAs<uint16_t>(green, idx),
+            view->getFieldAs<uint16_t>(color1, idx));
+        EXPECT_EQ(view->getFieldAs<uint16_t>(blue, idx),
+            view->getFieldAs<uint16_t>(color2, idx));
 
-        EXPECT_EQ(pb->getFieldAs<uint16_t>(flag0, idx),
-            pb->getFieldAs<uint16_t>(returnNum, idx));
-        EXPECT_EQ(pb->getFieldAs<uint16_t>(flag1, idx),
-            pb->getFieldAs<uint16_t>(numReturns, idx));
+        EXPECT_EQ(view->getFieldAs<uint16_t>(flag0, idx),
+            view->getFieldAs<uint16_t>(returnNum, idx));
+        EXPECT_EQ(view->getFieldAs<uint16_t>(flag1, idx),
+            view->getFieldAs<uint16_t>(numReturns, idx));
 
-        EXPECT_EQ(pb->getFieldAs<uint16_t>(intensity, idx),
-            pb->getFieldAs<uint16_t>(intense2, idx));
+        EXPECT_EQ(view->getFieldAs<uint16_t>(intensity, idx),
+            view->getFieldAs<uint16_t>(intense2, idx));
 
         // Time was written truncated rather than rounded.
-        EXPECT_NEAR(pb->getFieldAs<double>(time, idx),
-            pb->getFieldAs<double>(time2, idx), 1.0);
+        EXPECT_NEAR(view->getFieldAs<double>(time, idx),
+            view->getFieldAs<double>(time2, idx), 1.0);
 
     }
 }
 
 TEST(LasReaderTest, callback)
 {
-    PointContext ctx;
+    PointTablePtr table(new DefaultPointTable());
     point_count_t count = 0;
 
     Options ops;
     ops.add("filename", Support::datapath("las/simple.las"));
 
-    Reader::PointReadFunc cb = [&count](PointBuffer& buf, PointId id)
+    Reader::PointReadFunc cb = [&count](PointView& view, PointId id)
     {
         count++;
     };
@@ -386,8 +387,8 @@ TEST(LasReaderTest, callback)
     reader.setOptions(ops);
     reader.setReadCb(cb);
 
-    reader.prepare(ctx);
-    reader.execute(ctx);
+    reader.prepare(table);
+    reader.execute(table);
     EXPECT_EQ(count, (point_count_t)1065);
 }
 

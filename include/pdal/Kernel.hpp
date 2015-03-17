@@ -60,9 +60,9 @@ namespace pdal
 {
 
 class Options;
-class PointBuffer;
+class PointView;
 
-typedef std::shared_ptr<PointBuffer> PointBufferPtr;
+typedef std::shared_ptr<PointView> PointViewPtr;
 
 //
 // The application base class gives us these common options:
@@ -83,7 +83,7 @@ public:
     uint32_t getVerboseLevel() const;
     virtual std::string getName() const = 0;
     bool isVisualize() const;
-    void visualize(PointBufferPtr buffer);
+    void visualize(PointViewPtr view);
 
 protected:
     // this is protected; your derived class ctor will be the public entry point

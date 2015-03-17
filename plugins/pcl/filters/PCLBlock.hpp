@@ -55,7 +55,7 @@ private:
     std::string m_json;
 
     virtual void processOptions(const Options& options);
-    virtual PointBufferSet run(PointBufferPtr buf);
+    virtual PointViewSet run(PointViewPtr view);
 
     PCLBlock& operator=(const PCLBlock&); // not implemented
     PCLBlock(const PCLBlock&); // not implemented

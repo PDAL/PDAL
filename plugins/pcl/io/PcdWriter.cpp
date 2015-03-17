@@ -46,7 +46,7 @@
 #include <pcl/io/impl/pcd_io.hpp>
 
 #include "PCLConversions.hpp"
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/pdal_macros.hpp>
 
 namespace pdal
@@ -79,11 +79,11 @@ Options PcdWriter::getDefaultOptions()
 }
 
 
-void PcdWriter::write(const PointBuffer& data)
+void PcdWriter::write(const PointViewPtr view)
 {
     pcl::PointCloud<XYZIRGBA>::Ptr cloud(new pcl::PointCloud<XYZIRGBA>);
-    BOX3D const& buffer_bounds = data.calculateBounds();
-    pclsupport::PDALtoPCD(const_cast<PointBuffer&>(data), *cloud, buffer_bounds);
+    BOX3D const& buffer_bounds = view->calculateBounds();
+    pclsupport::PDALtoPCD(view, *cloud, buffer_bounds);
 
     pcl::PCDWriter w;
 

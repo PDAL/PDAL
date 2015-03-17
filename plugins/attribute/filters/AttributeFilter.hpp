@@ -122,9 +122,9 @@ public:
 private:
     virtual void initialize();
     virtual void processOptions(const Options&);
-    virtual void ready(PointContext ctx);
-    virtual void filter(PointBuffer& buffer);
-    virtual void done(PointContext ctx);
+    virtual void ready(PointTablePtr table);
+    virtual void filter(PointViewPtr view);
+    virtual void done(PointTablePtr table);
 
     AttributeFilter& operator=(const AttributeFilter&); // not implemented
     AttributeFilter(const AttributeFilter&); // not implemented
@@ -134,7 +134,7 @@ private:
     AttributeInfoMap m_dimensions;
     GEOSContextHandle_t m_geosEnvironment;
     std::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
-    void UpdateGEOSBuffer(PointBuffer& buffer, AttributeInfo& info);
+    void UpdateGEOSBuffer(PointViewPtr view, AttributeInfo& info);
 
 };
 

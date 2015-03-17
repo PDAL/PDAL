@@ -37,8 +37,8 @@
 #include "PCLConversions.hpp"
 
 #include <pdal/Options.hpp>
-#include <pdal/PointBuffer.hpp>
-#include <pdal/PointContext.hpp>
+#include <pdal/PointTable.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 
 #include <pcl/point_types.h>
@@ -70,21 +70,23 @@ void GroundFilter::processOptions(const Options& options)
     m_extract = options.getValueOrDefault<bool>("extract", false);
 }
 
-void GroundFilter::addDimensions(PointContextRef ctx)
-{ ctx.registerDim(Dimension::Id::Classification); }
+void GroundFilter::addDimensions(PointLayoutPtr layout)
+{
+    layout->registerDim(Dimension::Id::Classification);
+}
 
-PointBufferSet GroundFilter::run(PointBufferPtr input)
+PointViewSet GroundFilter::run(PointViewPtr input)
 {
     bool logOutput = log()->getLevel() > LogLevel::Debug1;
     if (logOutput)
         log()->floatPrecision(8);
     log()->get(LogLevel::Debug2) << "Process GroundFilter...\n";
 
-    // convert PointBuffer to PointXYZ
+    // convert PointView to PointXYZ
     typedef pcl::PointCloud<pcl::PointXYZ> Cloud;
     Cloud::Ptr cloud(new Cloud);
     BOX3D const& bounds = input->calculateBounds();
-    pclsupport::PDALtoPCD(*input, *cloud, bounds);
+    pclsupport::PDALtoPCD(input, *cloud, bounds);
 
     // PCL should provide console output at similar verbosity level as PDAL
     int level = log()->getLevel();
@@ -123,9 +125,9 @@ PointBufferSet GroundFilter::run(PointBufferPtr input)
     pcl::PointIndicesPtr idx(new pcl::PointIndices);
     pmf.extract(idx->indices);
 
+    PointViewSet viewSet;
     if (!idx->indices.empty() && (m_classify || m_extract))
     {
-        PointBufferSet pbSet;
 
         if (m_classify)
         {
@@ -136,23 +138,23 @@ PointBufferSet GroundFilter::run(PointBufferPtr input)
             for (const auto& i : idx->indices)
             { input->setField(Dimension::Id::Classification, i, 2); }
 
-            pbSet.insert(input);
+            viewSet.insert(input);
         }
 
         if (m_extract)
         {
             log()->get(LogLevel::Debug2) << "Extracted " << idx->indices.size() << " ground returns!\n";
 
-            // create new PointBuffer containing only ground returns
-            PointBufferPtr output = input->makeNew();
+            // create new PointView containing only ground returns
+            PointViewPtr output = input->makeNew();
             for (const auto& i : idx->indices)
-            { output->appendPoint(*input, i); }
+            {
+                output->appendPoint(*input, i);
+            }
 
-            pbSet.erase(input);
-            pbSet.insert(output);
+            viewSet.erase(input);
+            viewSet.insert(output);
         }
-
-        return pbSet;
     }
     else
     {
@@ -163,10 +165,10 @@ PointBufferSet GroundFilter::run(PointBufferPtr input)
             log()->get(LogLevel::Debug2) << "Must choose --classify or --extract\n";
 
         // return the input buffer unchanged
-        PointBufferSet pbSet;
-        pbSet.insert(input);
-        return pbSet;
+        viewSet.insert(input);
     }
+
+    return viewSet;
 }
 
 } // namespace pdal

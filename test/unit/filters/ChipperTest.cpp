@@ -46,7 +46,7 @@ using namespace pdal;
 
 TEST(ChipperTest, test_construction)
 {
-    PointContext ctx;
+    PointTablePtr table(new DefaultPointTable());
 
     Options ops1;
     std::string filename(Support::datapath("las/1.2-with-color.las"));
@@ -64,15 +64,15 @@ TEST(ChipperTest, test_construction)
         ChipperFilter chipper;
         chipper.setInput(reader);
         chipper.setOptions(options);
-        chipper.prepare(ctx);
-        PointBufferSet pbSet = chipper.execute(ctx);
-        EXPECT_EQ(pbSet.size(), 71u);
+        chipper.prepare(table);
+        PointViewSet viewSet = chipper.execute(table);
+        EXPECT_EQ(viewSet.size(), 71u);
 
-        std::vector<PointBufferPtr> buffers;
-        for (auto it = pbSet.begin(); it != pbSet.end(); ++it)
-            buffers.push_back(*it);
+        std::vector<PointViewPtr> views;
+        for (auto it = viewSet.begin(); it != viewSet.end(); ++it)
+            views.push_back(*it);
 
-        auto sorter = [](PointBufferPtr p1, PointBufferPtr p2)
+        auto sorter = [](PointViewPtr p1, PointViewPtr p2)
         {
             //This is super inefficient, but we're doing tests.
             BOX3D b1 = p1->calculateBounds();
@@ -83,18 +83,18 @@ TEST(ChipperTest, test_construction)
                 b1.miny < b2.miny;
         };
 
-        std::sort(buffers.begin(), buffers.end(), sorter);
+        std::sort(views.begin(), views.end(), sorter);
 
-        auto buffer = buffers[2];
-        auto bounds = buffer->calculateBounds();
+        auto view = views[2];
+        auto bounds = view->calculateBounds();
 
         EXPECT_NEAR(bounds.minx, 635674.05, 0.05);
         EXPECT_NEAR(bounds.maxx, 635993.93, 0.05);
         EXPECT_NEAR(bounds.miny, 848992.45, 0.05);
         EXPECT_NEAR(bounds.maxy, 849427.07, 0.05);
 
-        for (size_t i = 0; i < buffers.size(); ++i)
-            EXPECT_EQ(buffers[i]->size(), 15u);
+        for (size_t i = 0; i < views.size(); ++i)
+            EXPECT_EQ(views[i]->size(), 15u);
     }
 }
 
@@ -102,18 +102,18 @@ TEST(ChipperTest, test_construction)
 // Make sure things don't crash if the point buffer is empty.
 TEST(ChipperTest, empty_buffer)
 {
-    PointContext ctx;
-    PointBufferPtr buf(new PointBuffer(ctx));
+    PointTablePtr table(new DefaultPointTable());
+    PointViewPtr view(new PointView(table));
 
     Options ops;
 
     ChipperFilter chipper;
-    chipper.prepare(ctx);
-    StageTester::ready(chipper, ctx);
-    PointBufferSet pbSet = StageTester::run(chipper, buf);
-    StageTester::done(chipper, ctx);
+    chipper.prepare(table);
+    StageTester::ready(chipper, table);
+    PointViewSet viewSet = StageTester::run(chipper, view);
+    StageTester::done(chipper, table);
 
-    EXPECT_EQ(pbSet.size(), 0u);
+    EXPECT_EQ(viewSet.size(), 0u);
 }
 
 //ABELL
@@ -143,8 +143,8 @@ TEST(ChipperTest, test_ordering)
 
     EXPECT_EQ(chipper->getNumPoints(), source_reader.getNumPoints());
 
-    PointBuffer candidate(chipper->getSchema(), chipper->getNumPoints());
-    PointBuffer patch(chipper->getSchema(), chipper->getNumPoints());
+    PointView candidate(chipper->getSchema(), chipper->getNumPoints());
+    PointView patch(chipper->getSchema(), chipper->getNumPoints());
 
     StageSequentialIterator* iter_c = chipper->createSequentialIterator(patch);
     uint64_t numRead(0);
@@ -159,7 +159,7 @@ TEST(ChipperTest, test_ordering)
     }
     EXPECT_EQ(candidate.getNumPoints(), chipper->getNumPoints());
 
-    PointBuffer source(source_reader.getSchema(), source_reader.getNumPoints());
+    PointView source(source_reader.getSchema(), source_reader.getNumPoints());
 
     StageSequentialIterator* iter_s = source_reader.createSequentialIterator(source);
     numRead = iter_s->read(source);

@@ -1,11 +1,10 @@
-.. _cpp-pdal-pointbuffer:
+.. _cpp-pdal-pointtable:
 
 ******************************************************************************
-pdal::PointBuffer
+pdal::PointTable
 ******************************************************************************
 
-.. doxygenclass:: pdal::PointBuffer
+
+.. doxygenclass:: pdal::PointTable
    :members:
-
-
 
