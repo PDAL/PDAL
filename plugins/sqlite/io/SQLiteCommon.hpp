@@ -119,7 +119,7 @@ public:
     point_count_t count;
     point_count_t remaining;
 
-    PointContextRef m_ctx;
+    PointTablePtr m_table;
     MetadataNode m_metadata;
     bool m_isCompressed;
     std::string m_compVersion;

@@ -96,7 +96,7 @@ QuickInfo BpfReader::inspect()
 
 // When the stage is intialized, the schema needs to be populated with the
 // dimensions in order to allow subsequent stages to be aware of or append to
-// the dimensions in the PointBuffer.
+// the dimensions in the PointView.
 void BpfReader::initialize()
 {
     m_stream.open(m_filename);

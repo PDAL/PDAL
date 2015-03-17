@@ -250,7 +250,7 @@ bool diffdump(const std::string& f1, const std::string& f2)
 
 TEST(LasWriterTest, simple)
 {
-    PointContext table;
+    PointTablePtr table(new DefaultPointTable());
 
     std::string infile(Support::datapath("las/1.2-with-color.las"));
     std::string outfile(Support::temppath("simple.las"));
@@ -282,7 +282,7 @@ TEST(LasWriterTest, simple)
 /**
 TEST(LasWriterTest, LasWriterTest_test_simple_laz)
 {
-    PointContext table;
+    PointTablePtr table(new DefaultPointTable());
 
     WriterOpts writerOpts;
     writerOpts.add("compressed", true);
@@ -334,7 +334,7 @@ TEST(LasWriterTest, LasWriterTest_test_simple_laz)
 static void test_a_format(const std::string& refFile, uint8_t majorVersion,
     uint8_t minorVersion, int pointFormat)
 {
-    PointContext table;
+    PointTablePtr table(new DefaultPointTable());
 
     // remove file from earlier run, if needed
     FileUtils::deleteFile("temp.las");
@@ -427,7 +427,7 @@ TEST(LasWriterTest, LasWriterTest_test_drop_extra_returns)
 {
     using namespace pdal;
 
-    PointContext table;
+    PointTablePtr table(new DefaultPointTable());
 
     // remove file from earlier run, if needed
     std::string temp_filename("temp-LasWriterTest_test_drop_extra_returns.las");
@@ -466,7 +466,7 @@ TEST(LasWriterTest, LasWriterTest_test_drop_extra_returns)
     std::shared_ptr<LasReader> reader2(new LasReader);
     reader2->setOptions(readerOptions);
 
-    PointContext readTable;
+    PointTablePtr readTable(new DefaultPointTable());
 
     reader2->prepare(readTable);
     PointViewSet viewSet = reader2->execute(readTable);

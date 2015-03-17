@@ -1,6 +1,6 @@
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/BufferReader.hpp>
-#include <pdal/PointContext.hpp>
+#include <pdal/Pointtable->hpp>
 #include <pdal/Dimension.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/StageFactory.hpp>
@@ -30,14 +30,14 @@ std::vector<Point> getMyData()
 }
 
 
-void fillBuffer(pdal::PointBufferPtr buffer, std::vector<Point> const& data)
+void fillView(pdal::PointViewPtr view, std::vector<Point> const& data)
 {
     for (int i = 0; i < data.size(); ++i)
     {
         Point const& pt = data[i];
-        buffer->setField<double>(pdal::Dimension::Id::X, i, pt.x);
-        buffer->setField<double>(pdal::Dimension::Id::Y, i, pt.y);
-        buffer->setField<double>(pdal::Dimension::Id::Z, i, pt.z);
+        view->setField<double>(pdal::Dimension::Id::X, i, pt.x);
+        view->setField<double>(pdal::Dimension::Id::Y, i, pt.y);
+        view->setField<double>(pdal::Dimension::Id::Z, i, pt.z);
     }
 }
 
@@ -45,31 +45,31 @@ void fillBuffer(pdal::PointBufferPtr buffer, std::vector<Point> const& data)
 int main(int argc, char* argv[])
 {
     using namespace pdal;
-      
+
     Options options;
     options.add("filename", "myfile.las");
 
-    PointContext ctx;
-    ctx.registerDim(Dimension::Id::X);
-    ctx.registerDim(Dimension::Id::Y);
-    ctx.registerDim(Dimension::Id::Z);
+    PointTablePtr table(new DefaultPointTable());
+    table->registerDim(Dimension::Id::X);
+    table->registerDim(Dimension::Id::Y);
+    table->registerDim(Dimension::Id::Z);
 
     {
-        PointBufferPtr buffer = PointBufferPtr(new pdal::PointBuffer(ctx));
+        PointViewPtr view(new PointView(table));
 
         std::vector<Point> data = getMyData();
-        fillBuffer(buffer, data);
+        fillView(view, data);
 
         BufferReader reader;
-        reader.addBuffer(buffer);
+        reader.addView(view);
 
         StageFactory f;
-        
+
         std::unique_ptr<Stage> writer(f.createStage("writers.las"));
 
         writer->setInput(&reader);
         writer->setOptions(options);
-        writer->prepare(ctx);
-        writer->execute(ctx);
+        writer->prepare(table);
+        writer->execute(table);
     }
 }

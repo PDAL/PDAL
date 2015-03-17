@@ -336,17 +336,17 @@ int TranslateKernel::execute()
     Stage& readerStage = makeReader(readerOptions);
 
     // go ahead and prepare/execute on reader stage only to grab input
-    // PointBufferSet, this makes the input PointBuffer available to both the
+    // PointViewSet, this makes the input PointView available to both the
     // processing pipeline and the visualizer
     //readerStage->prepare(table);
-    //PointBufferSet pbSetIn = readerStage->execute(table);
+    //PointViewSet viewSetIn = readerStage->execute(table);
 
-    // the input PointBufferSet will be used to populate a BufferReader that is
+    // the input PointViewSet will be used to populate a BufferReader that is
     // consumed by the processing pipeline
-    //PointBufferPtr input_buffer = *pbSetIn.begin();
+    //PointViewPtr input_view = *viewSetIn.begin();
     //BufferReader bufferReader;
     //bufferReader.setOptions(readerOptions);
-    //bufferReader.addBuffer(input_buffer);
+    //bufferReader.addView(input_view);
 
     // the translation consumes the BufferReader rather than the readerStage
     Stage& finalStage = makeTranslate(readerOptions, readerStage);

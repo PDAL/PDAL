@@ -33,7 +33,7 @@
 ****************************************************************************/
 
 #include "SQLiteReader.hpp"
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 
 namespace pdal
 {
@@ -176,7 +176,12 @@ void SQLiteReader::validateQuery() const
 }
 
 
-void SQLiteReader::addDimensions(PointContextRef ctx)
+void SQLiteReader::addDimensions(PointLayoutPtr layout)
+{
+}
+
+
+void SQLiteReader::ready(PointTablePtr table)
 {
     log()->get(LogLevel::Debug) << "Fetching schema object" << std::endl;
 
@@ -200,14 +205,10 @@ void SQLiteReader::addDimensions(PointContextRef ctx)
 
     XMLSchema schema(s.data);
     m_patch->m_metadata = schema.getMetadata();
-    m_patch->m_ctx = ctx;
+    m_patch->m_table = table;
 
-    loadSchema(ctx, schema);
-}
+    loadSchema(table->layout(), schema);
 
-
-void SQLiteReader::ready(PointContextRef ctx)
-{
     m_at_end = false;
     b_doneQuery = false;
 
@@ -216,13 +217,13 @@ void SQLiteReader::ready(PointContextRef ctx)
 }
 
 
-bool SQLiteReader::NextBuffer()
+bool SQLiteReader::nextBuffer()
 {
     return m_session->next();
 }
 
 
-point_count_t SQLiteReader::readPatch(PointBuffer& buffer, point_count_t numPts)
+point_count_t SQLiteReader::readPatch(PointViewPtr view, point_count_t numPts)
 {
     const row* r = m_session->get();
     if (!r)
@@ -251,7 +252,7 @@ point_count_t SQLiteReader::readPatch(PointBuffer& buffer, point_count_t numPts)
     position = columns.find("POINTS")->second;
 
     point_count_t numRead = 0;
-    PointId nextId = buffer.size();
+    PointId nextId = view->size();
     if (m_patch->m_isCompressed)
     {
 #ifdef PDAL_HAVE_LAZPERF
@@ -263,7 +264,7 @@ point_count_t SQLiteReader::readPatch(PointBuffer& buffer, point_count_t numPts)
         while (numRead < numPts && count > 0)
         {
             decompressor.decompress(tmpBuf.data(), tmpBuf.size());
-            writePoint(buffer, nextId, tmpBuf.data());
+            writePoint(*view.get(), nextId, tmpBuf.data());
 
             nextId++;
             numRead++;
@@ -285,7 +286,7 @@ point_count_t SQLiteReader::readPatch(PointBuffer& buffer, point_count_t numPts)
         const char *pos = (const char *)&((*r)[position].blobBuf[0]);
         while (numRead < numPts && count > 0)
         {
-            writePoint(buffer, nextId, pos);
+            writePoint(*view.get(), nextId, pos);
 
             pos += m_packedPointSize;
             nextId++;
@@ -298,13 +299,13 @@ point_count_t SQLiteReader::readPatch(PointBuffer& buffer, point_count_t numPts)
 }
 
 
-point_count_t SQLiteReader::read(PointBuffer& buffer, point_count_t count)
+point_count_t SQLiteReader::read(PointViewPtr view, point_count_t count)
 {
     if (eof())
         return 0;
 
-    log()->get(LogLevel::Debug4) << "readBufferImpl called with "
-        "PointBuffer filled to " << buffer.size() << " points" <<
+    log()->get(LogLevel::Debug4) << "read called with "
+        "PointView filled to " << view->size() << " points" <<
         std::endl;
 
     point_count_t totalNumRead = 0;
@@ -314,7 +315,7 @@ point_count_t SQLiteReader::read(PointBuffer& buffer, point_count_t count)
         m_session->query(m_query);
         validateQuery();
         b_doneQuery = true;
-        totalNumRead = readPatch(buffer, count);
+        totalNumRead = readPatch(view, count);
     }
 
     int patch_count(0);
@@ -322,14 +323,14 @@ point_count_t SQLiteReader::read(PointBuffer& buffer, point_count_t count)
     {
         if (m_patch->remaining == 0)
         {
-            if (!NextBuffer())
+            if (!nextBuffer())
             {
                 m_at_end = true;
                 return totalNumRead;
             }
         }
-        PointId bufBegin = buffer.size();
-        point_count_t numRead = readPatch(buffer, count - totalNumRead);
+        PointId bufBegin = view->size();
+        point_count_t numRead = readPatch(view, count - totalNumRead);
         PointId bufEnd = bufBegin + numRead;
         totalNumRead += numRead;
         patch_count++;

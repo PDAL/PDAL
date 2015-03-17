@@ -43,11 +43,13 @@ namespace pdal
 {
 
 class Options;
-class PointBuffer;
-class PointContext;
+class PointLayout;
+class PointTable;
+class PointView;
 
-typedef std::shared_ptr<PointBuffer> PointBufferPtr;
-typedef PointContext PointContextRef;
+typedef std::shared_ptr<PointLayout> PointLayoutPtr;
+typedef std::shared_ptr<PointView> PointViewPtr;
+typedef std::shared_ptr<PointTable> PointTablePtr;
 
 class PDAL_DLL GroundFilter : public Filter
 {
@@ -68,10 +70,10 @@ private:
     bool m_classify;
     bool m_extract;
 
-    virtual void addDimensions(PointContextRef ctx);
+    virtual void addDimensions(PointLayoutPtr layout);
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContext ctx) {};
-    virtual PointBufferSet run(PointBufferPtr buf);
+    virtual void ready(PointTablePtr table) {};
+    virtual PointViewSet run(PointViewPtr view);
 
     GroundFilter& operator=(const GroundFilter&); // not implemented
     GroundFilter(const GroundFilter&); // not implemented

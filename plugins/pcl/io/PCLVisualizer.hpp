@@ -52,8 +52,8 @@ public:
 
 private:
     virtual void processOptions(const Options&) {};
-    virtual void ready(PointContextRef ctx) {};
-    virtual void write(const PointBuffer& buf);
+    virtual void ready(PointTablePtr table) {};
+    virtual void write(const PointViewPtr view);
 
     PclVisualizer& operator=(const PclVisualizer&); // not implemented
     PclVisualizer(const PclVisualizer&); // not implemented

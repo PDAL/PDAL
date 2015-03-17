@@ -119,7 +119,7 @@ TEST(ReprojectionFilterTest, InPlaceReprojectionFilterTest_test_2)
     const double postZ = 131.570;
 
     {
-        PointContext table;
+        PointTablePtr table(new DefaultPointTable());
 
         const SpatialReference out_ref(epsg4326_wkt);
 
@@ -139,17 +139,17 @@ TEST(ReprojectionFilterTest, InPlaceReprojectionFilterTest_test_2)
         reprojectionFilter.setInput(&reader);
         reprojectionFilter.prepare(table);
 
-        PointBuffer buffer(table);
+        PointView view(table);
         StageSequentialIterator* iter = reader.createSequentialIterator();
 
-        point_count_t numRead = iter->read(buffer, 1);
+        point_count_t numRead = iter->read(view, 1);
         EXPECT_TRUE(numRead == 1);
 
         FilterTester::ready(&reprojectionFilter, table);
-        FilterTester::filter(&reprojectionFilter, buffer);
+        FilterTester::filter(&reprojectionFilter, view);
 
         double x, y, z;
-        getPoint(buffer, x, y, z);
+        getPoint(view, x, y, z);
         EXPECT_FLOAT_EQ(x, postX);
         EXPECT_FLOAT_EQ(y, postY);
         EXPECT_FLOAT_EQ(z, postZ);

@@ -143,8 +143,8 @@ TEST(ChipperTest, test_ordering)
 
     EXPECT_EQ(chipper->getNumPoints(), source_reader.getNumPoints());
 
-    PointBuffer candidate(chipper->getSchema(), chipper->getNumPoints());
-    PointBuffer patch(chipper->getSchema(), chipper->getNumPoints());
+    PointView candidate(chipper->getSchema(), chipper->getNumPoints());
+    PointView patch(chipper->getSchema(), chipper->getNumPoints());
 
     StageSequentialIterator* iter_c = chipper->createSequentialIterator(patch);
     uint64_t numRead(0);
@@ -159,7 +159,7 @@ TEST(ChipperTest, test_ordering)
     }
     EXPECT_EQ(candidate.getNumPoints(), chipper->getNumPoints());
 
-    PointBuffer source(source_reader.getSchema(), source_reader.getNumPoints());
+    PointView source(source_reader.getSchema(), source_reader.getNumPoints());
 
     StageSequentialIterator* iter_s = source_reader.createSequentialIterator(source);
     numRead = iter_s->read(source);

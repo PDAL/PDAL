@@ -121,11 +121,11 @@ TEST(PointTable, userView)
         void setField(const Dimension::Detail *d, PointId idx, const void *value)
         {
             if (d->id() == Dimension::Id::X)
-               m_x = *(double *)value;
+               m_x = *(const double *)value;
             else if (d->id() == Dimension::Id::Y)
-               m_y = *(double *)value;
+               m_y = *(const double *)value;
             else if (d->id() == Dimension::Id::Z)
-               m_z = *(double *)value;
+               m_z = *(const double *)value;
         }
         void getField(const Dimension::Detail *d, PointId idx, void *value)
         {

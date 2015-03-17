@@ -46,9 +46,9 @@ static const std::string testDbTempname("@PGPOINTCLOUD_TEST_DB_TEMPNAME@");
 
 
 
-//boost::property_tree::ptree Reader::serializePipeline(PointContext ctx) const
+//boost::property_tree::ptree Reader::serializePipeline(PointTablePtr table) const
 //{
-//    return m_stage->serializePipeline(ctx);
+//    return m_stage->serializePipeline(table);
 //}
 
 } // namespace pdal

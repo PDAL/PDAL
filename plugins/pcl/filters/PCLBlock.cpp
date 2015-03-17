@@ -53,7 +53,7 @@ CREATE_SHARED_PLUGIN(1, 0, PCLBlock, Filter, s_info)
 
 std::string PCLBlock::getName() const { return s_info.name; }
 
-/** \brief This method processes the PointBuffer through the given pipeline. */
+/** \brief This method processes the PointView through the given pipeline. */
 
 void PCLBlock::processOptions(const Options& options)
 {
@@ -61,11 +61,11 @@ void PCLBlock::processOptions(const Options& options)
     m_json = options.getValueOrDefault<std::string>("json", "");
 }
 
-PointBufferSet PCLBlock::run(PointBufferPtr input)
+PointViewSet PCLBlock::run(PointViewPtr input)
 {
-    PointBufferPtr output = input->makeNew();
-    PointBufferSet pbSet;
-    pbSet.insert(output);
+    PointViewPtr output = input->makeNew();
+    PointViewSet viewSet;
+    viewSet.insert(output);
 
     bool logOutput = log()->getLevel() > LogLevel::Debug1;
     if (logOutput)
@@ -78,7 +78,7 @@ PointBufferSet PCLBlock::run(PointBufferPtr input)
 
     BOX3D const& buffer_bounds = input->calculateBounds();
 
-    // convert PointBuffer to PointNormal
+    // convert PointView to PointNormal
     typedef pcl::PointCloud<pcl::PointXYZ> Cloud;
     Cloud::Ptr cloud(new Cloud);
     pclsupport::PDALtoPCD(*input, *cloud, buffer_bounds);
@@ -129,7 +129,7 @@ PointBufferSet PCLBlock::run(PointBufferPtr input)
     if (cloud_f->points.empty())
     {
         log()->get(LogLevel::Debug2) << "Filtered cloud has no points!" << std::endl;
-        return pbSet;
+        return viewSet;
     }
 
     pclsupport::PCDtoPDAL(*cloud_f, *output, buffer_bounds);
@@ -140,7 +140,7 @@ PointBufferSet PCLBlock::run(PointBufferPtr input)
     log()->get(LogLevel::Debug2) << output->getFieldAs<double>(Dimension::Id::X, 0) << ", " <<
                                  output->getFieldAs<double>(Dimension::Id::Y, 0) << ", " <<
                                  output->getFieldAs<double>(Dimension::Id::Z, 0) << std::endl;
-    return pbSet;
+    return viewSet;
 }
 
 } // namespace pdal

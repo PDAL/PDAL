@@ -115,8 +115,8 @@ class Read : public Exchange
 {
 public:
     Read(
-            PointBuffer& pointBuffer,
-            const PointContextRef,
+            PointViewPtr view,
+            const PointLayoutPtr layout,
             const std::string& sessionId,
             bool compress,
             int offset,
@@ -129,8 +129,8 @@ public:
     std::size_t numRead() const;
 
 protected:
-    PointBuffer& m_pointBuffer;
-    const PointContextRef m_pointContext;
+    PointViewPtr m_view;
+    const PointLayoutPtr m_layout;
 
     bool m_initialized;
     bool m_error;
@@ -144,8 +144,8 @@ class ReadUncompressed : public Read
 {
 public:
     ReadUncompressed(
-            PointBuffer& pointBuffer,
-            const PointContextRef,
+            PointViewPtr view,
+            const PointLayoutPtr,
             const std::string& sessionId,
             int offset = 0,
             int count = -1);
@@ -159,8 +159,8 @@ class ReadCompressed : public Read
 {
 public:
     ReadCompressed(
-            PointBuffer& pointBuffer,
-            const PointContextRef,
+            PointViewPtr view,
+            const PointLayoutPtr,
             const std::string& sessionId,
             int offset = 0,
             int count = -1);

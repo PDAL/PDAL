@@ -1,10 +1,11 @@
-.. _cpp-pdal-pointcontext:
+.. _cpp-pdal-pointview:
 
 ******************************************************************************
-pdal::PointContext
+pdal::PointView
 ******************************************************************************
 
-
-.. doxygenclass:: pdal::PointContext
+.. doxygenclass:: pdal::PointView
    :members:
+
+
 

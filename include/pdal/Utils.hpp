@@ -305,7 +305,7 @@ namespace Utils
     bool contains(const COLLECTION& c, const VALUE& v)
         { return (std::find(c.begin(), c.end(), v) != c.end()); }
 
-    struct RedirectCtx
+    struct RedirectStream
     {
         std::ofstream *m_out;
         std::streambuf *m_buf;
@@ -315,24 +315,24 @@ namespace Utils
     /// \param[in] out   Stream to redirect.
     /// \param[in] file  Name of file where stream should be redirected.
     /// \return  Context for stream restoration (see restore()).
-    inline RedirectCtx redirect(std::ostream& out,
+    inline RedirectStream redirect(std::ostream& out,
         const std::string& file = "/dev/null")
     {
-        RedirectCtx ctx;
+        RedirectStream redir;
 
-        ctx.m_out = new std::ofstream(file);
-        ctx.m_buf = out.rdbuf();
-        out.rdbuf(ctx.m_out->rdbuf());
-        return ctx;
+        redir.m_out = new std::ofstream(file);
+        redir.m_buf = out.rdbuf();
+        out.rdbuf(redir.m_out->rdbuf());
+        return redir;
     }
 
     /// Restore a stream redirected with redirect().
     /// \param[in] out  Stream to be restored.
-    /// \param[in] ctx  Context returned from corresponding redirect() call.
-    inline void restore(std::ostream& out, RedirectCtx ctx)
+    /// \param[in] redir RedirectStream returned from corresponding redirect() call.
+    inline void restore(std::ostream& out, RedirectStream redir)
     {
-        out.rdbuf(ctx.m_buf);
-        ctx.m_out->close();
+        out.rdbuf(redir.m_buf);
+        redir.m_out->close();
     }
 };
 
