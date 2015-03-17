@@ -35,10 +35,12 @@
 #include "gtest/gtest.h"
 
 #include <pdal/PointContext.hpp>
+#include <las/LasReader.hpp>
+#include "Support.hpp"
 
 using namespace pdal;
 
-TEST(PointContextTest, resolveType)
+TEST(PointContext, resolveType)
 {
     using namespace Dimension;
 
@@ -100,3 +102,85 @@ TEST(PointContextTest, resolveType)
     EXPECT_EQ(ctx.dimSize(Id::Z), 8u);
     EXPECT_EQ(ctx.dimType(Id::Z), Type::Double);
 }
+
+TEST(PointContext, userBuffer)
+{
+    class UserBuf : public RawPtBuf
+    {
+    private:
+        double m_x;
+        double m_y;
+        double m_z;
+
+    public:
+        PointId addPoint()
+            { return 0; }
+        char *getPoint(PointId idx)
+            { return NULL; }
+        void setField(Dimension::Detail *d, PointId idx, const void *value)
+        {
+            if (d->id() == Dimension::Id::X)
+               m_x = *(double *)value; 
+            else if (d->id() == Dimension::Id::Y)
+               m_y = *(double *)value; 
+            else if (d->id() == Dimension::Id::Z)
+               m_z = *(double *)value; 
+        }
+        void getField(Dimension::Detail *d, PointId idx, void *value)
+        {
+            if (d->id() == Dimension::Id::X)
+               *(double *)value = m_x; 
+            else if (d->id() == Dimension::Id::Y)
+               *(double *)value = m_y; 
+            else if (d->id() == Dimension::Id::Z)
+               *(double *)value = m_z; 
+        }
+
+        bool update(Dimension::DetailList& detail, Dimension::Detail *cur,
+            const std::string& name)
+        {
+            Dimension::Id::Enum id = cur->id();
+
+            if (id != Dimension::Id::X && id != Dimension::Id::Y &&
+                id != Dimension::Id::Z)
+                return false;
+            cur->setType(Dimension::Type::Double);
+            return true;    
+        }
+    };
+
+    LasReader reader;
+
+    Options opts;
+    opts.add("filename", Support::datapath("las/simple.las"));
+    opts.add("count", 100);
+
+    reader.setOptions(opts);
+
+    PointContext defCtx;
+    reader.prepare(defCtx);
+    PointBufferSet pbSet = reader.execute(defCtx);
+    PointBufferPtr pb = *pbSet.begin();
+
+    auto readCb = [pb](PointBuffer& buf, PointId id)
+    {
+        double xDef = pb->getFieldAs<double>(Dimension::Id::X, id);
+        double yDef = pb->getFieldAs<double>(Dimension::Id::Y, id);
+        double zDef = pb->getFieldAs<double>(Dimension::Id::Z, id);
+
+        double x = buf.getFieldAs<double>(Dimension::Id::X, id);
+        double y = buf.getFieldAs<double>(Dimension::Id::Y, id);
+        double z = buf.getFieldAs<double>(Dimension::Id::Z, id);
+
+        EXPECT_FLOAT_EQ(xDef, x);
+        EXPECT_FLOAT_EQ(yDef, y);
+        EXPECT_FLOAT_EQ(zDef, z);
+    };
+
+    reader.setReadCb(readCb);
+    PointContext ctx(RawPtBufPtr(new UserBuf()));
+
+    reader.prepare(ctx);
+    reader.execute(ctx);
+}
+

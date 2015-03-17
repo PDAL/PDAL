@@ -129,31 +129,6 @@ inline BaseType::Enum base(Type::Enum t)
     return BaseType::Enum(t & 0xFF00);
 }
 
-struct Detail
-{
-    Detail() : m_offset(-1), m_type(Type::None)
-    {}
-    //NOTE - This is strange, but for some reason things run faster with
-    // this NOOP virtual dtor.  Perhaps it has something to do with
-    // an inlining optimization or perhaps alignment (though a void * doesn't
-    // cause the same performance improvement) It may help on no machine
-    // except mine, but it doesn't hurt anything, either.
-    virtual ~Detail()
-    {}
-
-    int m_offset;
-    Type::Enum m_type;
-
-    int offset() const
-        { return m_offset; }
-    Type::Enum type() const
-        { return m_type; }
-    size_t size() const
-        { return Dimension::size(m_type); }
-    BaseType::Enum base() const
-        { return Dimension::base(m_type); }
-};
-
 namespace Id
 {
 enum Enum
@@ -753,6 +728,43 @@ inline Type::Enum type(std::string s)
         return Type::Double;
     return Type::None;
 }
+
+class Detail
+{
+public:
+    Detail() : m_id(Id::Unknown), m_offset(-1), m_type(Type::None)
+    {}
+    //NOTE - This is strange, but for some reason things run faster with
+    // this NOOP virtual dtor.  Perhaps it has something to do with
+    // an inlining optimization or perhaps alignment (though a void * doesn't
+    // cause the same performance improvement) It may help on no machine
+    // except mine, but it doesn't hurt anything, either.
+    virtual ~Detail()
+    {}
+
+    void setOffset(int offset)
+        { m_offset = offset; }
+    void setType(Type::Enum type)
+        { m_type = type; }
+    void setId(Id::Enum id)
+        { m_id = id; }
+    Id::Enum id() const
+        { return m_id; }
+    int offset() const
+        { return m_offset; }
+    Type::Enum type() const
+        { return m_type; }
+    size_t size() const
+        { return Dimension::size(m_type); }
+    BaseType::Enum base() const
+        { return Dimension::base(m_type); }
+
+private:
+    Id::Enum m_id; 
+    int m_offset;
+    Type::Enum m_type;
+};
+typedef std::vector<Detail> DetailList;
 
 } // namespace Dimension
 

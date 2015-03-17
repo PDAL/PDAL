@@ -55,7 +55,14 @@ namespace plang
 struct DimInfo
 {
     DimInfo() : m_detail(Dimension::COUNT), m_nextFree(Dimension::PROPRIETARY)
-        {}
+    {
+        int id = 0;
+        for (auto& d : m_detail)
+        {
+            d.setId((Dimension::Id::Enum)id);
+            id++;
+        }
+    }
 
     std::vector<Dimension::Detail> m_detail;
     Dimension::IdList m_used;
@@ -78,10 +85,14 @@ private:
     MetadataPtr m_metadata;
 
 public:
-    PointContext() : m_dims(new DimInfo()), m_ptBuf(new RawPtBuf()),
+    PointContext() : m_dims(new DimInfo()), m_ptBuf(new DefaultRawPtBuf()),
         m_metadata(new Metadata)
     {}
 
+    PointContext(RawPtBufPtr ptBuf) : m_dims(new DimInfo()), m_ptBuf(ptBuf),
+        m_metadata(new Metadata)
+    {}
+ 
     RawPtBuf *rawPtBuf() const
         { return m_ptBuf.get(); }
     MetadataNode metadata()
@@ -121,11 +132,9 @@ public:
     // is already larger, this does nothing.
     void registerDim(Dimension::Id::Enum id, Dimension::Type::Enum type)
     {
-        Dimension::Detail& dd = m_dims->m_detail[id];
-        if (dd.type() == Dimension::Type::None)
-            m_dims->m_used.push_back(id);
-        dd.m_type = resolveType(type, dd.m_type);
-        update();
+        Dimension::Detail dd = m_dims->m_detail[id];
+        dd.setType(resolveType(type, dd.type()));
+        update(dd, Dimension::name(id));
     }
 
     // The type and size are REQUESTS, not absolutes.  If someone else
@@ -134,21 +143,23 @@ public:
     Dimension::Id::Enum assignDim(const std::string& name,
         Dimension::Type::Enum type)
     {
-        Dimension::Id::Enum id;
-
+        Dimension::Id::Enum id = (Dimension::Id::Enum)m_dims->m_nextFree;
+        
         auto di = m_dims->m_propIds.find(name);
-        if (di == m_dims->m_propIds.end())
-        {
-            id = (Dimension::Id::Enum)m_dims->m_nextFree++;
-            m_dims->m_propIds[name] = id;
-            m_dims->m_used.push_back(id);
-        }
-        else
+        if (di != m_dims->m_propIds.end())
             id = di->second;
-        m_dims->m_detail[id].m_type =
-            resolveType(m_dims->m_detail[id].m_type, type);
-        update();
-        return id;
+        Dimension::Detail dd = m_dims->m_detail[id];
+        dd.setType(resolveType(type, dd.type()));
+        if (update(dd, name))
+        {
+            if (di == m_dims->m_propIds.end())
+            {
+                m_dims->m_nextFree++;
+                m_dims->m_propIds[name] = id;
+            }
+            return id;
+        }
+        return Dimension::Id::Unknown;
     }
 
     Dimension::Id::Enum registerOrAssignDim(const std::string name,
@@ -208,7 +219,7 @@ public:
 
     // @return whether or not the PointContext contains a given id
     bool hasDim(Dimension::Id::Enum id) const
-        { return m_dims->m_detail[id].m_type != Dimension::Type::None; }
+        { return m_dims->m_detail[id].type() != Dimension::Type::None; }
 
     // @return reference to vector of currently used dimensions
     const Dimension::IdList& dims() const
@@ -239,29 +250,36 @@ private:
     Dimension::Detail *dimDetail(Dimension::Id::Enum id) const
         { return &(m_dims->m_detail[(size_t)id]); }
 
-    void update()
+    bool update(Dimension::Detail dd, const std::string& name)
     {
-        auto sorter = [this](const Dimension::Id::Enum& d1,
-            const Dimension::Id::Enum& d2) -> bool
-        {
-            size_t s1 = m_dims->m_detail[d1].size();
-            size_t s2 = m_dims->m_detail[d2].size();
-            if (s1 > s2)
-                return true;
-            if (s1 < s2)
-                return false;
-            return d1 < d2;
-        };
+        Dimension::DetailList detail;
 
-        Dimension::IdList& used = m_dims->m_used;
-        std::sort(used.begin(), used.end(), sorter);
-        int offset = 0;
-        for (auto ui = used.begin(); ui != used.end(); ++ui)
+        bool used = Utils::contains(m_dims->m_used, dd.id());
+        for (auto id : m_dims->m_used)
         {
-            m_dims->m_detail[*ui].m_offset = offset;
-            offset += (int)m_dims->m_detail[*ui].size();
+            if (id == dd.id())
+                detail.push_back(dd);
+            else
+                detail.push_back(m_dims->m_detail[id]);
         }
-        m_ptBuf->setPointSize((size_t)offset);
+        if (!used)
+            detail.push_back(dd);
+
+        // Find the dimension in the list that we're referring to with
+        // this update.
+        auto di = std::find_if(detail.begin(), detail.end(),
+            [dd](const Dimension::Detail& td){ return td.id() == dd.id(); });
+        Dimension::Detail *cur = &(*di);
+
+        bool addDim = rawPtBuf()->update(detail, cur, name);
+        if (addDim)
+        {
+            if (!used)
+                m_dims->m_used.push_back(dd.id());
+            for (auto& dtemp : detail)
+                m_dims->m_detail[dtemp.id()] = dtemp;
+        }
+        return addDim;
     }
 
     Dimension::Type::Enum resolveType(Dimension::Type::Enum t1,
