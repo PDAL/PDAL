@@ -44,7 +44,7 @@
 namespace pdal
 {
 
-class PointLayout
+class PDAL_DLL PointLayout
 {
 public:
     PointLayout();

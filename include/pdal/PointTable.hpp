@@ -50,7 +50,7 @@ namespace plang
     class BufferedInvocation;
 }
 
-class PointTable
+class PDAL_DLL PointTable
 {
 public:
     PointTable();
@@ -84,7 +84,7 @@ protected:
 
 // This provides a context for processing a set of points and allows the library
 // to be used to process multiple point sets simultaneously.
-class DefaultPointTable : public PointTable
+class PDAL_DLL DefaultPointTable : public PointTable
 {
     friend class PointView;
     friend class plang::BufferedInvocation;
