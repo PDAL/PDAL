@@ -107,7 +107,7 @@ int SmoothKernel::execute()
     PointViewPtr input_view = *viewSetIn.begin();
     std::shared_ptr<BufferReader> bufferReader(new BufferReader);
     bufferReader->setOptions(readerOptions);
-    bufferReader->addBuffer(input_view);
+    bufferReader->addView(input_view);
 
     Options smoothOptions;
     std::ostringstream ss;

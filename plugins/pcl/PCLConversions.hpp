@@ -189,10 +189,10 @@ void PDALtoPCD(PointViewPtr view, CloudT &cloud, BOX3D const& bounds)
 
 
 template <typename CloudT>
-void PDALtoPCD(const PointViewPtr view, CloudT &cloud)
+void PDALtoPCD(PointViewPtr view, CloudT &cloud)
 {
     BOX3D buffer_bounds(0,0,0,0,0,0);
-    PDALtoPCD(const_cast<PointViewPtr>(view), cloud, buffer_bounds);
+    PDALtoPCD(view, cloud, buffer_bounds);
 }
 
 

@@ -81,7 +81,7 @@ PointViewSet PCLBlock::run(PointViewPtr input)
     // convert PointView to PointNormal
     typedef pcl::PointCloud<pcl::PointXYZ> Cloud;
     Cloud::Ptr cloud(new Cloud);
-    pclsupport::PDALtoPCD(*input, *cloud, buffer_bounds);
+    pclsupport::PDALtoPCD(input, *cloud, buffer_bounds);
 
     log()->get(LogLevel::Debug2) << cloud->points[0].x << ", " <<
                                  cloud->points[0].y << ", " << cloud->points[0].z << std::endl;
@@ -132,7 +132,7 @@ PointViewSet PCLBlock::run(PointViewPtr input)
         return viewSet;
     }
 
-    pclsupport::PCDtoPDAL(*cloud_f, *output, buffer_bounds);
+    pclsupport::PCDtoPDAL(*cloud_f, output, buffer_bounds);
 
     log()->get(LogLevel::Debug2) << cloud->points.size() << " before, " <<
                                  cloud_f->points.size() << " after" << std::endl;

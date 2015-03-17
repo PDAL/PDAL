@@ -149,7 +149,7 @@ void PclVisualizer::write(const PointViewPtr view)
 
     // Convert PointView to a PCL PointCloud
     pcl::PointCloud<PointType>::Ptr cloud(new pcl::PointCloud<PointType>);
-    pclsupport::PDALtoPCD(const_cast<PointViewPtr>(view), *cloud, buffer_bounds);
+    pclsupport::PDALtoPCD(view, *cloud, buffer_bounds);
 
     // Create PCLVisualizer
     std::shared_ptr<pcl::visualization::PCLVisualizer> p(new pcl::visualization::PCLVisualizer("3D Viewer"));
