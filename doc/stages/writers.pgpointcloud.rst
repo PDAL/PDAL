@@ -45,9 +45,6 @@ table
 schema
   Database schema to write to. [Default: **public**]
 
-capacity
-  How many points per patch? [Default: **400**]
-
 column
   Table column to put patches into. [Default: **pa**]
   
