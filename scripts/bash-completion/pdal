@@ -1,0 +1,20 @@
+# PDAL commandline completion for bash
+# See http://www.gnu.org/software/bash/manual/bash.html#Programmable-Completion-Builtins
+
+_pdal()
+{
+	local cur cmds
+    
+	COMPREPLY=()
+	cur=${COMP_WORDS[COMP_CWORD]}
+	cmds=$(pdal --list-commands)
+
+	if [ $COMP_CWORD -eq 1 ]; then
+		COMPREPLY=( $(compgen -o filenames -W "$cmds" $cur) )
+  else
+		COMPREPLY=( $(compgen -o filenames -G "${cur}*") )
+	fi
+
+	return 0
+}
+complete -F _pdal pdal

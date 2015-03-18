@@ -270,6 +270,9 @@ if(WITH_TESTS)
   endif()
 
   add_subdirectory(test)
+
+  # Define "make check" as alias for "make test"
+  ADD_CUSTOM_TARGET(check COMMAND ctest)
 else()
   if(ENABLE_CTEST)
     message(WARNING
@@ -331,3 +334,8 @@ install(EXPORT PDALTargets DESTINATION lib/pdal/cmake)
 include(${PDAL_CMAKE_DIR}/config.cmake)
 
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES)
+
+# TODO: move under scripts/bash-completion ?
+if (IS_DIRECTORY /etc/bash_completion.d)
+  install(FILES scripts/bash-completion/pdal DESTINATION /etc/bash_completion.d)
+endif()
