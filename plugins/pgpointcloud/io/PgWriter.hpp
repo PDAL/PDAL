@@ -55,6 +55,8 @@ public:
     Options getDefaultOptions();
 
 private:
+
+
     PgWriter& operator=(const PgWriter&); // not implemented
     PgWriter(const PgWriter&); // not implemented
 

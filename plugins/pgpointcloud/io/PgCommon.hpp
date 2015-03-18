@@ -41,6 +41,7 @@
 #include <pdal/pdal_error.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/Compression.hpp>
+#include <pdal/Utils.hpp>
 
 namespace pdal
 {
@@ -144,6 +145,13 @@ inline PGresult* pg_query_result(PGconn* session, std::string const& sql)
     return result;
 }
 
+inline std::string pg_quote_identifier(std::string const& name) {
+  return std::string("\"") + Utils::replaceAll(name, "\"", "\"\"") + "\"";
+}
+
+inline std::string pg_quote_literal(std::string const& lit) {
+  return std::string("'") + Utils::replaceAll(lit, "'", "'") + "'";
+}
 
 
 } // pdal

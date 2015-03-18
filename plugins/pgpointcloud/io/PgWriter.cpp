@@ -404,7 +404,6 @@ bool PgWriter::CheckTableExists(std::string const& name)
     return false;
 }
 
-
 void PgWriter::CreateTable(std::string const& schema_name,
     std::string const& table_name, std::string const& column_name,
     uint32_t pcid)
@@ -412,9 +411,10 @@ void PgWriter::CreateTable(std::string const& schema_name,
     std::ostringstream oss;
     oss << "CREATE TABLE ";
     if (schema_name.size())
-        oss << schema_name << ".";
-    oss << table_name;
-    oss << " (id SERIAL PRIMARY KEY, " << column_name << " PcPatch";
+        oss << pg_quote_identifier(schema_name) << ".";
+    oss << pg_quote_identifier(table_name);
+    oss << " (id SERIAL PRIMARY KEY, " <<
+        pg_quote_identifier(column_name) << " PcPatch";
     if (pcid)
         oss << "(" << pcid << ")";
     oss << ")";
@@ -479,11 +479,11 @@ void PgWriter::writeTile(PointBuffer const& buffer)
 
     if (m_schema_name.size())
     {
-        m_insert.append(m_schema_name);
+        m_insert.append(pg_quote_identifier(m_schema_name));
         m_insert.append(".");
     }
 
-    m_insert.append(m_table_name);
+    m_insert.append(pg_quote_identifier(m_table_name));
     m_insert.append(values);
 
     std::ostringstream options;
