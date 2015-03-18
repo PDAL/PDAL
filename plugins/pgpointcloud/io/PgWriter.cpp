@@ -70,7 +70,6 @@ std::string PgWriter::getName() const { return s_info.name; }
 PgWriter::PgWriter()
     : m_session(0)
     , m_patch_compression_type(CompressionType::None)
-    , m_patch_capacity(400)
     , m_srid(0)
     , m_pcid(0)
     , m_overwrite(true)
@@ -104,7 +103,6 @@ void PgWriter::processOptions(const Options& options)
 
     // Read other preferences
     m_overwrite = options.getValueOrDefault<bool>("overwrite", true);
-    m_patch_capacity = options.getValueOrDefault<uint32_t>("capacity", 400);
     m_srid = options.getValueOrDefault<uint32_t>("srid", 4326);
     m_pcid = options.getValueOrDefault<uint32_t>("pcid", 0);
     m_pre_sql = options.getValueOrDefault<std::string>("pre_sql");
@@ -137,7 +135,6 @@ Options PgWriter::getDefaultOptions()
     Option column("column", "", "column to write to");
     Option compression("compression", "dimensional", "patch compression format to use (none, dimensional, ght)");
     Option overwrite("overwrite", true, "replace any existing table");
-    Option capacity("capacity", 400, "how many points to store in each patch");
     Option srid("srid", 4326, "spatial reference id to store data in");
     Option pcid("pcid", 0, "use this existing pointcloud schema id, if it exists");
     Option pre_sql("pre_sql", "", "before the pipeline runs, read and execute this SQL file, or run this SQL command");
@@ -148,7 +145,6 @@ Options PgWriter::getDefaultOptions()
     options.add(column);
     options.add(compression);
     options.add(overwrite);
-    options.add(capacity);
     options.add(srid);
     options.add(pcid);
     options.add(pre_sql);
@@ -441,14 +437,6 @@ void PgWriter::CreateIndex(std::string const& schema_name,
 
 void PgWriter::writeTile(PointBuffer const& buffer)
 {
-    if (buffer.size() > m_patch_capacity)
-    {
-        std::ostringstream oss;
-        oss << "writers.pgpointcloud buffer size (" << buffer.size()
-            << ") is greater than capacity (" << m_patch_capacity << ")";
-        throw pdal_error(oss.str());
-    }
-
     std::vector<char> storage(m_packedPointSize);
     std::string hexrep;
     size_t maxHexrepSize = m_packedPointSize * buffer.size() * 2;
