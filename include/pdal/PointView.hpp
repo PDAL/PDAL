@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2014, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -36,7 +36,8 @@
 
 #include <pdal/util/Bounds.hpp>
 #include <pdal/pdal_internal.hpp>
-#include <pdal/PointContext.hpp>
+#include <pdal/PointLayout.hpp>
+#include <pdal/PointTable.hpp>
 
 #include <memory>
 #include <queue>
@@ -55,23 +56,23 @@ namespace plang
     class BufferedInvocation;
 }
 
-class PointBuffer;
-class PointBufferIter;
+class PointView;
+class PointViewIter;
 
-typedef std::shared_ptr<PointBuffer> PointBufferPtr;
-typedef std::set<PointBufferPtr> PointBufferSet;
+typedef std::shared_ptr<PointView> PointViewPtr;
+typedef std::set<PointViewPtr> PointViewSet;
 
 
-class PDAL_DLL PointBuffer
+class PDAL_DLL PointView
 {
     friend class plang::BufferedInvocation;
     friend class PointRef;
 public:
-    PointBuffer(PointContextRef context) : m_context(context), m_size(0)
+    PointView(PointTableRef pointTable) : m_pointTable(pointTable), m_size(0)
     {}
 
-    PointBufferIter begin();
-    PointBufferIter end();
+    PointViewIter begin();
+    PointViewIter end();
 
     point_count_t size() const
         { return m_size; }
@@ -79,8 +80,8 @@ public:
     bool empty() const
         { return m_size == 0; }
 
-    inline void appendPoint(const PointBuffer& buffer, PointId id);
-    void append(const PointBuffer& buf)
+    inline void appendPoint(const PointView& buffer, PointId id);
+    void append(const PointView& buf)
     {
         // We use size() instead of the index end because temp points
         // might have been placed at the end of the buffer.
@@ -91,10 +92,10 @@ public:
         clearTemps();
     }
 
-    /// Return a new point buffer with the same point context as this
+    /// Return a new point view with the same point table as this
     /// point buffer.
-    PointBufferPtr makeNew() const
-        { return PointBufferPtr(new PointBuffer(m_context)); }
+    PointViewPtr makeNew() const
+        { return PointViewPtr(new PointView(m_pointTable)); }
 
     template<class T>
     T getFieldAs(Dimension::Id::Enum dim, PointId pointIndex) const;
@@ -116,7 +117,7 @@ public:
 
     bool compare(Dimension::Id::Enum dim, PointId id1, PointId id2)
     {
-        Dimension::Detail *dd = m_context.dimDetail(dim);
+        const Dimension::Detail *dd = m_pointTable.layout()->dimDetail(dim);
 
         switch (dd->type())
         {
@@ -162,7 +163,7 @@ public:
         getFieldInternal(dim, idx, buf);
     }
 
-    /*! @return a cumulated bounds of all points in the PointBuffer.
+    /*! @return a cumulated bounds of all points in the PointView.
         \verbatim embed:rst
         .. note::
 
@@ -173,22 +174,21 @@ public:
         \endverbatim
     */
     BOX3D calculateBounds(bool bis3d=true) const;
-    static BOX3D calculateBounds(const PointBufferSet&, bool bis3d=true);
+    static BOX3D calculateBounds(const PointViewSet&, bool bis3d=true);
 
     void dump(std::ostream& ostr) const;
     bool hasDim(Dimension::Id::Enum id) const
-        { return m_context.hasDim(id); }
+        { return m_pointTable.layout()->hasDim(id); }
     std::string dimName(Dimension::Id::Enum id) const
-        { return m_context.dimName(id); }
+        { return m_pointTable.layout()->dimName(id); }
     Dimension::IdList dims() const
-        { return m_context.dims(); }
+        { return m_pointTable.layout()->dims(); }
     std::size_t pointSize() const
-        { return m_context.pointSize(); }
+        { return m_pointTable.layout()->pointSize(); }
     std::size_t dimSize(Dimension::Id::Enum id) const
-        { return m_context.dimSize(id); }
+        { return m_pointTable.layout()->dimSize(id); }
     DimTypeList dimTypes() const
-        { return m_context.dimTypes(); }
-
+        { return m_pointTable.layout()->dimTypes(); }
 
     /// Fill a buffer with point data specified by the dimension list.
     /// \param[in] dims  List of dimensions/types to retrieve.
@@ -221,7 +221,7 @@ public:
     /// Provides access to the memory storing the point data.  Though this
     /// function is public, other access methods are safer and preferred.
     char *getPoint(PointId id)
-        { return m_context.rawPtBuf()->getPoint(m_index[id]); }
+        { return m_pointTable.getPoint(m_index[id]); }
 
     // The standard idiom is swapping with a stack-created empty queue, but
     // that invokes the ctor and probably allocates.  We've probably only got
@@ -233,7 +233,7 @@ public:
     }
 
 protected:
-    PointContextRef m_context;
+    PointTableRef m_pointTable;
     std::deque<PointId> m_index;
     // The index might be larger than the size to support temporary point
     // references.
@@ -257,7 +257,7 @@ private:
 
 
 template <class T>
-T PointBuffer::getFieldInternal(Dimension::Id::Enum dim, PointId id) const
+T PointView::getFieldInternal(Dimension::Id::Enum dim, PointId id) const
 {
     T t;
 
@@ -265,7 +265,7 @@ T PointBuffer::getFieldInternal(Dimension::Id::Enum dim, PointId id) const
     return t;
 }
 
-inline void PointBuffer::getField(char *pos, Dimension::Id::Enum d,
+inline void PointView::getField(char *pos, Dimension::Id::Enum d,
     Dimension::Type::Enum type, PointId id) const
 {
     Everything e;
@@ -308,7 +308,7 @@ inline void PointBuffer::getField(char *pos, Dimension::Id::Enum d,
     memcpy(pos, &e, Dimension::size(type));
 }
 
-inline void PointBuffer::setField(Dimension::Id::Enum dim,
+inline void PointView::setField(Dimension::Id::Enum dim,
     Dimension::Type::Enum type, PointId idx, const void *val)
 {
     Everything e;
@@ -352,11 +352,11 @@ inline void PointBuffer::setField(Dimension::Id::Enum dim,
 }
 
 template <class T>
-inline T PointBuffer::getFieldAs(Dimension::Id::Enum dim,
+inline T PointView::getFieldAs(Dimension::Id::Enum dim,
     PointId pointIndex) const
 {
     T retval;
-    Dimension::Detail *dd = m_context.dimDetail(dim);
+    const Dimension::Detail *dd = m_pointTable.layout()->dimDetail(dim);
     double val;
 
     switch (dd->type())
@@ -432,14 +432,14 @@ inline T PointBuffer::getFieldAs(Dimension::Id::Enum dim,
 
 
 template<typename T_IN, typename T_OUT>
-bool PointBuffer::convertAndSet(Dimension::Id::Enum dim, PointId idx, T_IN in)
+bool PointView::convertAndSet(Dimension::Id::Enum dim, PointId idx, T_IN in)
 {
 // This mess, instead of just using boost::numeric_cast, is here to:
 //   1) Prevent the throwing of exceptions.  The entrance/exit of the try
 //      block seemed somewhat expensive.
 //   2) Round to nearest instead of truncation without rounding before
 //      invoking the converter.
-// 
+//
     using namespace boost;
     static bool ok;
 
@@ -490,9 +490,9 @@ bool PointBuffer::convertAndSet(Dimension::Id::Enum dim, PointId idx, T_IN in)
 
 
 template<typename T>
-void PointBuffer::setField(Dimension::Id::Enum dim, PointId idx, T val)
+void PointView::setField(Dimension::Id::Enum dim, PointId idx, T val)
 {
-    Dimension::Detail *dd = m_context.dimDetail(dim);
+    const Dimension::Detail *dd = m_pointTable.layout()->dimDetail(dim);
 
     bool ok = true;
     switch (dd->type())
@@ -543,20 +543,21 @@ void PointBuffer::setField(Dimension::Id::Enum dim, PointId idx, T val)
 }
 
 
-inline void PointBuffer::getFieldInternal(Dimension::Id::Enum dim,
+inline void PointView::getFieldInternal(Dimension::Id::Enum dim,
     PointId id, void *buf) const
 {
-    m_context.rawPtBuf()->getField(m_context.dimDetail(dim), m_index[id], buf);
+    m_pointTable.getField(m_pointTable.layout()->dimDetail(dim),
+        m_index[id], buf);
 }
 
 
-inline void PointBuffer::setFieldInternal(Dimension::Id::Enum dim,
+inline void PointView::setFieldInternal(Dimension::Id::Enum dim,
     PointId id, const void *value)
 {
     PointId rawId = 0;
     if (id == size())
     {
-        rawId = m_context.rawPtBuf()->addPoint();
+        rawId = m_pointTable.addPoint();
         m_index.push_back(rawId);
         m_size++;
         assert(m_temps.empty());
@@ -571,11 +572,12 @@ inline void PointBuffer::setFieldInternal(Dimension::Id::Enum dim,
     {
         rawId = m_index[id];
     }
-    m_context.rawPtBuf()->setField(m_context.dimDetail(dim), rawId, value);
+    m_pointTable.setField(m_pointTable.layout()->dimDetail(dim),
+        rawId, value);
 }
 
 
-inline void PointBuffer::appendPoint(const PointBuffer& buffer, PointId id)
+inline void PointView::appendPoint(const PointView& buffer, PointId id)
 {
     // Invalid 'id' is a programmer error.
     PointId rawId = buffer.m_index[id];
@@ -587,7 +589,7 @@ inline void PointBuffer::appendPoint(const PointBuffer& buffer, PointId id)
 
 
 // Make a temporary copy of a point by adding an entry to the index.
-inline PointId PointBuffer::getTemp(PointId id)
+inline PointId PointView::getTemp(PointId id)
 {
     PointId newid;
     if (m_temps.size())
@@ -604,6 +606,6 @@ inline PointId PointBuffer::getTemp(PointId id)
     return newid;
 }
 
-PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const PointBuffer&);
+PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const PointView&);
 
 } // namespace pdal

@@ -37,7 +37,6 @@
 #include <memory>
 
 #include <pdal/Stage.hpp>
-#include <pdal/PointBuffer.hpp>
 
 namespace pdal
 {
@@ -45,21 +44,21 @@ namespace pdal
 class StageRunner
 {
 public:
-    StageRunner(Stage *s, PointBufferPtr pointBuf) :
-        m_stage(s), m_pointBuf(pointBuf)
+    StageRunner(Stage *s, PointViewPtr view) :
+        m_stage(s), m_view(view)
     {}
 
     // For now this is all synchronous
     void run()
-        { m_bufSet = m_stage->run(m_pointBuf); }
+        { m_viewSet = m_stage->run(m_view); }
 
-    PointBufferSet wait()
-        { return m_bufSet; }
+    PointViewSet wait()
+        { return m_viewSet; }
 
 private:
     Stage *m_stage;
-    PointBufferPtr m_pointBuf;
-    PointBufferSet m_bufSet;
+    PointViewPtr m_view;
+    PointViewSet m_viewSet;
 };
 typedef std::shared_ptr<StageRunner> StageRunnerPtr;
 

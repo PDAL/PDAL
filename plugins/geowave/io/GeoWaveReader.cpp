@@ -189,9 +189,9 @@ namespace pdal
         m_bounds = ops.getValueOrDefault<BOX3D>("bounds", BOX3D());
     }
 
-    void GeoWaveReader::addDimensions(PointContext ctx)
+    void GeoWaveReader::addDimensions(PointLayoutPtr layout)
     {
-        ctx.registerDims(getDefaultDimensions());
+        layout->registerDims(getDefaultDimensions());
 
         BasicAccumuloOperations accumuloOperations = java_new<BasicAccumuloOperations>(
             java_new<String>(m_zookeeperUrl),
@@ -211,7 +211,7 @@ namespace pdal
         for (int i = 0; i < attribs.size(); ++i){
             std::string name = java_cast<AttributeDescriptor>(attribs.get(i)).getLocalName();
             if (name.compare("location") != 0 && name.compare("X") != 0 && name.compare("Y") != 0)
-                ctx.registerDim(Dimension::id(name));
+                layout->registerDim(Dimension::id(name));
         }
     }
 
@@ -223,7 +223,7 @@ namespace pdal
         return ids;
     }
 
-    void GeoWaveReader::ready(PointContext ctx)
+    void GeoWaveReader::ready(PointTableRef table)
     {
         if (m_bounds.empty())
             return;
@@ -264,7 +264,7 @@ namespace pdal
         m_iterator = accumuloDataStore.query(index, query, count);
     }
 
-    point_count_t GeoWaveReader::read(PointBuffer& buf, point_count_t count)
+    point_count_t GeoWaveReader::read(PointViewPtr view, point_count_t count)
     {
         using namespace Dimension;
 
@@ -289,7 +289,7 @@ namespace pdal
                         String name = java_cast<AttributeDescriptor>(attribs.get(i)).getLocalName();
 
                         if (!name.equals(location))
-                            buf.setField(id(name), numRead, java_cast<Double>(simpleFeature.getAttribute(name)).doubleValue());
+                            view->setField(id(name), numRead, java_cast<Double>(simpleFeature.getAttribute(name)).doubleValue());
                     }
 
                     ++numRead;
@@ -309,7 +309,7 @@ namespace pdal
                     String name = java_cast<AttributeDescriptor>(attribs.get(i)).getLocalName();
 
                     if (!name.equals(location))
-                        buf.setField(id(name), numRead, java_cast<Double>(simpleFeature.getAttribute(name)).doubleValue());
+                        view->setField(id(name), numRead, java_cast<Double>(simpleFeature.getAttribute(name)).doubleValue());
                 }
 
                 ++numRead;
@@ -319,7 +319,7 @@ namespace pdal
         return numRead;
     }
 
-    void GeoWaveReader::done(PointContext ctx)
+    void GeoWaveReader::done(PointTableRef table)
     {
         m_iterator.close();
     }

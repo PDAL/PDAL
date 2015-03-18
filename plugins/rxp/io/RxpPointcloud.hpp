@@ -44,8 +44,8 @@
 #include <riegl/scanlib.hpp>
 
 #include <pdal/pdal_macros.hpp>
-#include <pdal/PointBuffer.hpp>
-#include <pdal/PointContext.hpp>
+#include <pdal/PointTable.hpp>
+#include <pdal/PointView.hpp>
 
 
 namespace pdal
@@ -58,10 +58,14 @@ Dimension::Id::Enum getTimeDimensionId(bool syncToPps);
 class PDAL_DLL RxpPointcloud : public scanlib::pointcloud
 {
 public:
-    RxpPointcloud(const std::string& uri, bool isSyncToPps, bool m_minimal, PointContext ctx);
+    RxpPointcloud(
+            const std::string& uri,
+            bool isSyncToPps,
+            bool m_minimal,
+            PointTableRef table);
     virtual ~RxpPointcloud();
 
-    point_count_t read(PointBuffer& buf, point_count_t count);
+    point_count_t read(PointViewPtr view, point_count_t count);
 
     inline bool isSyncToPps() const
     {
@@ -72,9 +76,9 @@ protected:
     void on_echo_transformed(echo_type echo);
 
 private:
-    virtual point_count_t writeSavedPoints(PointBuffer& buf, point_count_t count);
+    virtual point_count_t writeSavedPoints(PointViewPtr view, point_count_t count);
 
-    PointBufferPtr m_buf;
+    PointViewPtr m_view;
     point_count_t m_idx;
     bool m_syncToPps;
     bool m_minimal;

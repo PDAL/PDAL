@@ -90,7 +90,7 @@ public:
         { return m_index >= m_numPoints; }
 
     // this is called by the stage's iterator
-    point_count_t processBuffer(PointBuffer& PointBuffer, std::istream& stream,
+    point_count_t processBuffer(PointViewPtr view, std::istream& stream,
         point_count_t count) const;
 
 private:
@@ -107,10 +107,10 @@ private:
 
     virtual void processOptions(const Options& ops);
     virtual void initialize();
-    virtual void addDimensions(PointContextRef ctx);
-    virtual void ready(PointContextRef ctx);
-    virtual point_count_t read(PointBuffer& buf, point_count_t count);
-    virtual void done(PointContextRef ctx);
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void ready(PointTableRef table);
+    virtual point_count_t read(PointViewPtr buf, point_count_t count);
+    virtual void done(PointTableRef table);
 
     QfitReader& operator=(const QfitReader&); // not implemented
     QfitReader(const QfitReader&); // not implemented

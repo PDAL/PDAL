@@ -39,7 +39,7 @@
 
 #include <pdal/pdal_macros.hpp>
 
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/GlobalEnvironment.hpp>
 
 #ifdef PDAL_COMPILER_GCC
@@ -167,16 +167,16 @@ void NitfWriter::processOptions(const Options& options)
     {}
 }
 
-void NitfWriter::write(const PointBuffer& buffer)
+void NitfWriter::write(const PointViewPtr view)
 {
-    m_bounds.grow(buffer.calculateBounds(true));
+    m_bounds.grow(view->calculateBounds(true));
 
-    LasWriter::write(buffer);
+    LasWriter::write(view);
 }
 
-void NitfWriter::done(PointContextRef ctx)
+void NitfWriter::done(PointTableRef table)
 {
-    LasWriter::done(ctx);
+    LasWriter::done(table);
 
     try
     {
@@ -227,7 +227,7 @@ void NitfWriter::done(PointContextRef ctx)
         ::nitf::ImageSubheader subheader = image.getSubheader();
 
 
-        BOX3D bounds =  reprojectBoxToDD(ctx.spatialRef(), m_bounds);
+        BOX3D bounds =  reprojectBoxToDD(table.spatialRef(), m_bounds);
 
         double corners[4][2];
         corners[0][0] = bounds.maxy;     corners[0][1] = bounds.minx;

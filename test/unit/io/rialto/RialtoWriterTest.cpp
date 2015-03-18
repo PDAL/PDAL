@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 
 #include <pdal/Options.hpp>
-#include <pdal/PointContext.hpp>
+#include <pdal/PointTable.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/Bounds.hpp>
 #include <pdal/util/FileUtils.hpp>
@@ -48,9 +48,9 @@ TEST(RialtoWriterTest, testWriteHeaderOverwrite)
     writer->setOptions(wo);
     writer->setInput(*reader);
 
-    PointContext ctx;
-    writer->prepare(ctx);
-    writer->execute(ctx);
+    PointTable table;
+    writer->prepare(table);
+    writer->execute(table);
 
     bool ok = Support::compare_text_files(Support::temppath("RialtoTest/header.json"),
                                           Support::datapath("io/header.json"));
@@ -85,8 +85,8 @@ TEST(RialtoWriterTest, testWriteHeaderNoOverwrite)
     writer->setOptions(wo);
     writer->setInput(*reader);
 
-    PointContext ctx;
-    writer->prepare(ctx);
-    EXPECT_THROW(writer->execute(ctx), pdal_error);
+    PointTable table;
+    writer->prepare(table);
+    EXPECT_THROW(writer->execute(table), pdal_error);
 }
 

@@ -40,7 +40,7 @@
 
 #include <cpl_port.h>
 
-#include <pdal/PointContext.hpp>
+#include <pdal/PointTable.hpp>
 #include <pdal/XMLSchema.hpp>
 
 namespace pdal
@@ -113,7 +113,6 @@ public:
     Connection m_connection;
     sdo_pc* pc;
     int32_t m_num_remaining;
-    PointContextRef m_ctx;
     XMLSchema m_schema;
     size_t m_point_size;
     bool m_fetched;  // Set when fetched but not initialized

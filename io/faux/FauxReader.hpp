@@ -112,13 +112,13 @@ private:
     int m_returnNum;
 
     virtual void processOptions(const Options& options);
-    virtual void addDimensions(PointContextRef ctx);
-    virtual void ready(PointContextRef ctx)
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void ready(PointTableRef table)
     {
         m_returnNum = 1;
         m_time = 0;
     }
-    virtual point_count_t read(PointBuffer& buf, point_count_t count);
+    virtual point_count_t read(PointViewPtr view, point_count_t count);
     virtual bool eof()
         { return false; }
 

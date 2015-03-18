@@ -83,8 +83,8 @@ TEST(OptechReader, Constructor)
 
 TEST_F(OptechReaderTest, Header)
 {
-    PointContext ctx;
-    m_reader.prepare(ctx);
+    PointTable table;
+    m_reader.prepare(table);
     CsdHeader header = m_reader.getHeader();
 
     EXPECT_STREQ("CSD", header.signature);
@@ -111,28 +111,28 @@ TEST_F(OptechReaderTest, Header)
 
 TEST_F(OptechReaderTest, ReadingPoints)
 {
-    PointContext ctx;
-    m_reader.prepare(ctx);
-    PointBufferSet pbSet = m_reader.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 1000u);
+    PointTable table;
+    m_reader.prepare(table);
+    PointViewSet viewSet = m_reader.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 1000u);
 
     EXPECT_DOUBLE_EQ(-82.554028877408555,
-                     buf->getFieldAs<double>(Dimension::Id::X, 0));
+                     view->getFieldAs<double>(Dimension::Id::X, 0));
     EXPECT_DOUBLE_EQ(36.534611447321907,
-                     buf->getFieldAs<double>(Dimension::Id::Y, 0));
+                     view->getFieldAs<double>(Dimension::Id::Y, 0));
     EXPECT_DOUBLE_EQ(344.80889224602356,
-                     buf->getFieldAs<double>(Dimension::Id::Z, 0));
+                     view->getFieldAs<double>(Dimension::Id::Z, 0));
     EXPECT_DOUBLE_EQ(5.756447448456390e5,
-                     buf->getFieldAs<double>(Dimension::Id::GpsTime, 0));
-    EXPECT_EQ(1, buf->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, 0));
-    EXPECT_EQ(1, buf->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, 0));
+                     view->getFieldAs<double>(Dimension::Id::GpsTime, 0));
+    EXPECT_EQ(1, view->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, 0));
+    EXPECT_EQ(1, view->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, 0));
     EXPECT_DOUBLE_EQ(8.27356689453125e2,
-                     buf->getFieldAs<float>(Dimension::Id::EchoRange, 0));
-    EXPECT_EQ(384, buf->getFieldAs<uint16_t>(Dimension::Id::Intensity, 0));
+                     view->getFieldAs<float>(Dimension::Id::EchoRange, 0));
+    EXPECT_EQ(384, view->getFieldAs<uint16_t>(Dimension::Id::Intensity, 0));
     EXPECT_DOUBLE_EQ(-14.555161476135254,
-                     buf->getFieldAs<double>(Dimension::Id::ScanAngleRank, 0));
+                     view->getFieldAs<double>(Dimension::Id::ScanAngleRank, 0));
 }
 
 

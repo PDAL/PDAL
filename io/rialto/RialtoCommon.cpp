@@ -36,7 +36,7 @@
 
 #include <pdal/Log.hpp>
 #include <pdal/pdal_types.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/util/FileUtils.hpp>
 
 #include <cmath>
@@ -44,14 +44,21 @@
 namespace pdal
 {
 
-Tile::Tile(int32_t level, int32_t tx, int32_t ty, Rectangle r, int32_t maxLevel, PointContextRef ctx, LogPtr log) :
+Tile::Tile(
+        int32_t level,
+        int32_t tx,
+        int32_t ty,
+        Rectangle r,
+        int32_t maxLevel,
+        const PointTableRef table,
+        LogPtr log) :
     m_level(level),
     m_tileX(tx),
     m_tileY(ty),
     m_rect(r),
     m_maxLevel(maxLevel),
     m_skip(0),
-    m_context(ctx),
+    m_table(table),
     m_log(log)
 {
     assert(m_level >= 0);
@@ -145,16 +152,16 @@ void Tile::add(PointId pointNumber, char* p, double lon, double lat)
         switch (q)
         {
             case QuadSW:
-                child = new Tile(m_level+1, m_tileX*2, m_tileY*2+1, r, m_maxLevel, m_context, m_log);
+                child = new Tile(m_level+1, m_tileX*2, m_tileY*2+1, r, m_maxLevel, m_table, m_log);
                 break;
             case QuadNW:
-                child = new Tile(m_level+1, m_tileX*2, m_tileY*2, r, m_maxLevel, m_context, m_log);
+                child = new Tile(m_level+1, m_tileX*2, m_tileY*2, r, m_maxLevel, m_table, m_log);
                 break;
             case QuadSE:
-                child = new Tile(m_level+1, m_tileX*2+1, m_tileY*2+1, r, m_maxLevel, m_context, m_log);
+                child = new Tile(m_level+1, m_tileX*2+1, m_tileY*2+1, r, m_maxLevel, m_table, m_log);
                 break;
             case QuadNE:
-                child = new Tile(m_level+1, m_tileX*2+1, m_tileY*2, r, m_maxLevel, m_context, m_log);
+                child = new Tile(m_level+1, m_tileX*2+1, m_tileY*2, r, m_maxLevel, m_table, m_log);
                 break;
             default:
                 assert(0);
@@ -230,13 +237,14 @@ void Tile::write(const char* prefix) const
 
 void Tile::writeData(FILE* fp) const
 {
+    const PointLayoutPtr layout(m_table.layout());
     for (size_t i=0; i<m_points.size(); ++i)
     {
         char* p = m_points[i];
 
-        for (const auto& dim : m_context.dims())
+        for (const auto& dim : layout->dims())
         {
-            size_t size = Dimension::size(m_context.dimType(dim));
+            size_t size = Dimension::size(layout->dimType(dim));
 
             fwrite(p, size, 1, fp);
 

@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2014, Hobu Inc.
 *
 * All rights reserved.
 *
@@ -34,27 +34,27 @@
 
 #include <iomanip>
 
-#include <pdal/PointBuffer.hpp>
-#include <pdal/PointBufferIter.hpp>
+#include <pdal/PointView.hpp>
+#include <pdal/PointViewIter.hpp>
 
 #include <boost/lexical_cast.hpp>
 
 namespace pdal
 {
 
-PointBufferIter PointBuffer::begin()
+PointViewIter PointView::begin()
 {
-    return PointBufferIter(this, 0);
+    return PointViewIter(this, 0);
 }
 
 
-PointBufferIter PointBuffer::end()
+PointViewIter PointView::end()
 {
-    return PointBufferIter(this, size());
+    return PointViewIter(this, size());
 }
 
 
-BOX3D PointBuffer::calculateBounds(bool is3d) const
+BOX3D PointView::calculateBounds(bool is3d) const
 {
     BOX3D output;
 
@@ -88,22 +88,23 @@ BOX3D PointBuffer::calculateBounds(bool is3d) const
 }
 
 
-BOX3D PointBuffer::calculateBounds(const PointBufferSet& set, bool is3d)
+BOX3D PointView::calculateBounds(const PointViewSet& set, bool is3d)
 {
     BOX3D out;
     for (auto iter = set.begin(); iter != set.end(); ++iter)
     {
-        PointBufferPtr buf = *iter;
+        PointViewPtr buf = *iter;
         out.grow(buf->calculateBounds(is3d));
     }
     return out;
 }
 
 
-void PointBuffer::dump(std::ostream& ostr) const
+void PointView::dump(std::ostream& ostr) const
 {
     using std::endl;
-    const Dimension::IdList& dims = m_context.dims();
+    PointLayoutPtr layout = m_pointTable.layout();
+    const Dimension::IdList& dims = layout->dims();
 
     point_count_t numPoints = size();
     ostr << "Contains " << numPoints << "  points" << endl;
@@ -114,7 +115,7 @@ void PointBuffer::dump(std::ostream& ostr) const
         for (auto di = dims.begin(); di != dims.end(); ++di)
         {
             Dimension::Id::Enum d = *di;
-            Dimension::Detail *dd = m_context.dimDetail(d);
+            const Dimension::Detail *dd = layout->dimDetail(d);
             ostr << Dimension::name(d) << " (" <<
                 Dimension::interpretationName(dd->type()) << ") : ";
 
@@ -179,7 +180,7 @@ void PointBuffer::dump(std::ostream& ostr) const
 }
 
 
-std::ostream& operator<<(std::ostream& ostr, const PointBuffer& buf)
+std::ostream& operator<<(std::ostream& ostr, const PointView& buf)
 {
     buf.dump(ostr);
     return ostr;

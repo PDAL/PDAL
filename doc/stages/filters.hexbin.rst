@@ -21,7 +21,7 @@ After running with the pipeline serialization option, the output file looks like
 
 .. code-block:: xml
 
-  <PointBuffer>
+  <PointView>
     <Metadata name="pointbuffer" type="blank">
       <Metadata name="filters.hexbin" type="blank">
         <Metadata name="edge_size" type="double">
@@ -35,17 +35,17 @@ After running with the pipeline serialization option, the output file looks like
         </Metadata>
         <Metadata name="boundary" type="string">
           MULTIPOLYGON (((
-          -80.8466 35.2183, -80.8460 35.2194, 
-          -80.8447 35.2194, -80.8441 35.2205, 
+          -80.8466 35.2183, -80.8460 35.2194,
+          -80.8447 35.2194, -80.8441 35.2205,
           -80.8428 35.2205, -80.8421 35.2216,
           ...
-          -80.8498 35.2194, -80.8486 35.2194, 
+          -80.8498 35.2194, -80.8486 35.2194,
           -80.8479 35.2183, -80.8466 35.2183
           )))
         </Metadata>
       </Metadata>
     </Metadata>
-  </PointBuffer>
+  </PointView>
 
 In addition, if you have defined a writer you will have the usual point data output file.
 
@@ -79,7 +79,7 @@ Options
 
 x_dim
   The name of the dimension to use as the X coordinate in the cropping process. [Default: **X**]
-  
+
 y_dim
   The name of the dimension to use as the Y coordinate in the cropping process. [Default: **Y**]
 
@@ -90,12 +90,12 @@ sample_size
   How many points to sample when automatically calculating the edge size? [Default: **5000**]
 
 threshold
-  Number of points that have to fall within a hexbin before it is considered "in" the data set. [Default: **15**] 
-  
+  Number of points that have to fall within a hexbin before it is considered "in" the data set. [Default: **15**]
+
 precision
   Coordinate precision to use in writing out the well-known text of the boundary polygon. [Default: **8**]
-  
-  
+
+
 
 
 

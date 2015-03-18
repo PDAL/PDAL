@@ -115,7 +115,7 @@ Stage& SortKernel::makeReader(Options readerOptions)
 
 int SortKernel::execute()
 {
-    PointContext ctx;
+    PointTable table;
 
     Options readerOptions;
     readerOptions.add("filename", m_inputFile);
@@ -125,18 +125,18 @@ int SortKernel::execute()
     Stage& readerStage = makeReader(readerOptions);
 
     // go ahead and prepare/execute on reader stage only to grab input
-    // PointBufferSet, this makes the input PointBuffer available to both the
+    // PointViewSet, this makes the input PointView available to both the
     // processing pipeline and the visualizer
-    readerStage.prepare(ctx);
-    PointBufferSet pbSetIn = readerStage.execute(ctx);
+    readerStage.prepare(table);
+    PointViewSet viewSetIn = readerStage.execute(table);
 
-    // the input PointBufferSet will be used to populate a BufferReader that is
+    // the input PointViewSet will be used to populate a BufferReader that is
     // consumed by the processing pipeline
-    PointBufferPtr input_buffer = *pbSetIn.begin();
+    PointViewPtr inView = *viewSetIn.begin();
 
     BufferReader bufferReader;
     bufferReader.setOptions(readerOptions);
-    bufferReader.addBuffer(input_buffer);
+    bufferReader.addView(inView);
 
     Options sortOptions;
     sortOptions.add<bool>("debug", isDebug());
@@ -182,13 +182,13 @@ int SortKernel::execute()
             s->setOptions(opts);
         }
     }
-    writer.prepare(ctx);
+    writer.prepare(table);
 
-    // process the data, grabbing the PointBufferSet for visualization of the
-    PointBufferSet pbSetOut = writer.execute(ctx);
+    // process the data, grabbing the PointViewSet for visualization of the
+    PointViewSet viewSetOut = writer.execute(table);
 
     if (isVisualize())
-        visualize(*pbSetOut.begin());
+        visualize(*viewSetOut.begin());
 
     return 0;
 }

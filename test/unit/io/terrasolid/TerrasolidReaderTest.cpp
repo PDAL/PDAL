@@ -82,8 +82,8 @@ TEST(TerrasolidReader, Constructor)
 
 TEST_F(TerrasolidReaderTest, Header)
 {
-    PointContext ctx;
-    m_reader.prepare(ctx);
+    PointTable table;
+    m_reader.prepare(table);
     TerraSolidHeader header = m_reader.getHeader();
 
     EXPECT_EQ(56, header.HdrSize);
@@ -102,27 +102,27 @@ TEST_F(TerrasolidReaderTest, Header)
 
 TEST_F(TerrasolidReaderTest, ReadingPoints)
 {
-    PointContext ctx;
-    m_reader.prepare(ctx);
-    PointBufferSet pbSet = m_reader.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 1000u);
+    PointTable table;
+    m_reader.prepare(table);
+    PointViewSet viewSet = m_reader.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 1000u);
 
-    EXPECT_DOUBLE_EQ(363127.94, buf->getFieldAs<double>(Dimension::Id::X, 0));
-    EXPECT_DOUBLE_EQ(3437612.33, buf->getFieldAs<double>(Dimension::Id::Y, 0));
-    EXPECT_DOUBLE_EQ(55.26, buf->getFieldAs<double>(Dimension::Id::Z, 0));
-    EXPECT_DOUBLE_EQ(0, buf->getFieldAs<double>(Dimension::Id::OffsetTime, 0));
-    EXPECT_EQ(1840, buf->getFieldAs<uint16_t>(Dimension::Id::Intensity, 0));
-    EXPECT_EQ(27207, buf->getFieldAs<uint16_t>(Dimension::Id::PointSourceId, 0));
-    EXPECT_EQ(239, buf->getFieldAs<uint8_t>(Dimension::Id::Red, 0));
-    EXPECT_EQ(252, buf->getFieldAs<uint8_t>(Dimension::Id::Green, 0));
-    EXPECT_EQ(95, buf->getFieldAs<uint8_t>(Dimension::Id::Blue, 0));
-    EXPECT_EQ(0, buf->getFieldAs<uint8_t>(Dimension::Id::Alpha, 0));
-    EXPECT_EQ(1, buf->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, 0));
-    EXPECT_EQ(1, buf->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, 0));
-    EXPECT_EQ(2, buf->getFieldAs<uint8_t>(Dimension::Id::Classification, 0));
-    EXPECT_EQ(0, buf->getFieldAs<uint8_t>(Dimension::Id::Flag, 0));
-    EXPECT_EQ(0, buf->getFieldAs<uint8_t>(Dimension::Id::Mark, 0));
+    EXPECT_DOUBLE_EQ(363127.94, view->getFieldAs<double>(Dimension::Id::X, 0));
+    EXPECT_DOUBLE_EQ(3437612.33, view->getFieldAs<double>(Dimension::Id::Y, 0));
+    EXPECT_DOUBLE_EQ(55.26, view->getFieldAs<double>(Dimension::Id::Z, 0));
+    EXPECT_DOUBLE_EQ(0, view->getFieldAs<double>(Dimension::Id::OffsetTime, 0));
+    EXPECT_EQ(1840, view->getFieldAs<uint16_t>(Dimension::Id::Intensity, 0));
+    EXPECT_EQ(27207, view->getFieldAs<uint16_t>(Dimension::Id::PointSourceId, 0));
+    EXPECT_EQ(239, view->getFieldAs<uint8_t>(Dimension::Id::Red, 0));
+    EXPECT_EQ(252, view->getFieldAs<uint8_t>(Dimension::Id::Green, 0));
+    EXPECT_EQ(95, view->getFieldAs<uint8_t>(Dimension::Id::Blue, 0));
+    EXPECT_EQ(0, view->getFieldAs<uint8_t>(Dimension::Id::Alpha, 0));
+    EXPECT_EQ(1, view->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, 0));
+    EXPECT_EQ(1, view->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, 0));
+    EXPECT_EQ(2, view->getFieldAs<uint8_t>(Dimension::Id::Classification, 0));
+    EXPECT_EQ(0, view->getFieldAs<uint8_t>(Dimension::Id::Flag, 0));
+    EXPECT_EQ(0, view->getFieldAs<uint8_t>(Dimension::Id::Mark, 0));
 }
 }

@@ -34,7 +34,7 @@
 
 #include "gtest/gtest.h"
 
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
@@ -58,22 +58,22 @@ TEST(FerryFilterTest, test_ferry_copy)
     specReader.readPipeline(Support::configuredpath("filters/ferry.xml"));
 
     mgr.execute();
-    PointContext ctx = mgr.context();
+    const PointTableRef table(mgr.pointTable());
 
-    PointBufferSet pbSet = mgr.buffers();
+    PointViewSet viewSet = mgr.views();
 
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 1065u);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 1065u);
 
-    Dimension::Id::Enum state_plane_x = ctx.findDim("StatePlaneX");
-    Dimension::Id::Enum state_plane_y = ctx.findDim("StatePlaneY");
+    Dimension::Id::Enum state_plane_x = table.layout()->findDim("StatePlaneX");
+    Dimension::Id::Enum state_plane_y = table.layout()->findDim("StatePlaneY");
 
-    double lon = buf->getFieldAs<double>(Dimension::Id::X, 0);
-    double lat = buf->getFieldAs<double>(Dimension::Id::Y, 0);
+    double lon = view->getFieldAs<double>(Dimension::Id::X, 0);
+    double lat = view->getFieldAs<double>(Dimension::Id::Y, 0);
 
-    double x = buf->getFieldAs<double>(state_plane_x, 0);
-    double y = buf->getFieldAs<double>(state_plane_y, 0);
+    double x = view->getFieldAs<double>(state_plane_x, 0);
+    double y = view->getFieldAs<double>(state_plane_y, 0);
 
     EXPECT_FLOAT_EQ(-117.2501328350574, lon);
     EXPECT_FLOAT_EQ(49.341077824192915, lat);
@@ -101,8 +101,8 @@ TEST(FerryFilterTest, test_ferry_invalid)
     ferry.setInput(reader);
     ferry.setOptions(options);
 
-    PointContext ctx;
+    PointTable table;
 
-    EXPECT_THROW(ferry.prepare(ctx), pdal_error );
+    EXPECT_THROW(ferry.prepare(table), pdal_error);
 }
 

@@ -66,23 +66,23 @@ void Summary::extractMetadata(MetadataNode &m) const
 
 using namespace stats;
 
-void StatsFilter::filter(PointBuffer& buffer)
+void StatsFilter::filter(PointViewPtr view)
 {
-    for (PointId idx = 0; idx < buffer.size(); ++idx)
+    for (PointId idx = 0; idx < view->size(); ++idx)
     {
         for (auto p = m_stats.begin(); p != m_stats.end(); ++p)
         {
             Dimension::Id::Enum d = p->first;
             Summary& c = p->second;
-            c.insert(buffer.getFieldAs<double>(d, idx));
+            c.insert(view->getFieldAs<double>(d, idx));
         }
     }
 }
 
 
-void StatsFilter::done(PointContext ctx)
+void StatsFilter::done(PointTableRef table)
 {
-    extractMetadata(ctx);
+    extractMetadata();
 }
 
 void StatsFilter::processOptions(const Options& options)
@@ -91,17 +91,18 @@ void StatsFilter::processOptions(const Options& options)
 }
 
 
-void StatsFilter::ready(PointContext ctx)
+void StatsFilter::ready(PointTableRef table)
 {
     using namespace std;
+    PointLayoutPtr layout(table.layout());
 
     std::vector<Dimension::Id::Enum> dims;
     std::vector<std::string> dimNames;
     if (m_dimNames.empty())
     {
-        dims = ctx.dims();
+        dims = layout->dims();
         for (auto di = dims.begin(); di != dims.end(); ++di)
-            dimNames.push_back(ctx.dimName(*di));
+            dimNames.push_back(layout->dimName(*di));
     }
     else
     {
@@ -110,7 +111,7 @@ void StatsFilter::ready(PointContext ctx)
         dimNames = Utils::split2(m_dimNames, splits);
         for (auto di = dimNames.begin(); di != dimNames.end(); ++di)
         {
-            auto dim = ctx.findDim(*di);
+            auto dim = layout->findDim(*di);
             if (dim != Dimension::Id::Unknown)
                 dims.push_back(dim);
         }
@@ -122,10 +123,10 @@ void StatsFilter::ready(PointContext ctx)
 }
 
 
-void StatsFilter::extractMetadata(PointContext ctx)
+void StatsFilter::extractMetadata()
 {
     uint32_t position(0);
-    
+
     for (auto di = m_stats.begin(); di != m_stats.end(); ++di)
     {
         Dimension::Id::Enum d = di->first;

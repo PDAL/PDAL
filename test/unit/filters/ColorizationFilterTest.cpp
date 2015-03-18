@@ -36,7 +36,7 @@
 
 #include <LasReader.hpp>
 #include <ColorizationFilter.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 
 #include "Support.hpp"
 
@@ -88,16 +88,16 @@ TEST(ColorizationFilterTest, ColorizationFilterTest_test_1)
     filter.setOptions(reader_options);
     filter.setInput(reader);
 
-    PointContext ctx;
+    PointTable table;
 
-    filter.prepare(ctx);
-    PointBufferSet pbSet = filter.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buf = *pbSet.begin();
+    filter.prepare(table);
+    PointViewSet viewSet = filter.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
 
-    uint16_t r = buf->getFieldAs<uint16_t>(Dimension::Id::Red, 0);
-    uint16_t g = buf->getFieldAs<uint16_t>(Dimension::Id::Green, 0);
-    uint16_t b = buf->getFieldAs<uint16_t>(Dimension::Id::Blue, 0);
+    uint16_t r = view->getFieldAs<uint16_t>(Dimension::Id::Red, 0);
+    uint16_t g = view->getFieldAs<uint16_t>(Dimension::Id::Green, 0);
+    uint16_t b = view->getFieldAs<uint16_t>(Dimension::Id::Blue, 0);
 
     EXPECT_EQ(r, 210u);
     EXPECT_EQ(g, 205u);

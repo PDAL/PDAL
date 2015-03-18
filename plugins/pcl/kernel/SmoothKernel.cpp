@@ -87,7 +87,7 @@ void SmoothKernel::addSwitches()
 
 int SmoothKernel::execute()
 {
-    PointContext ctx;
+    PointTable table;
 
     Options readerOptions;
     readerOptions.add("filename", m_inputFile);
@@ -97,17 +97,17 @@ int SmoothKernel::execute()
     readerStage.setOptions(readerOptions);
 
     // go ahead and prepare/execute on reader stage only to grab input
-    // PointBufferSet, this makes the input PointBuffer available to both the
+    // PointViewSet, this makes the input PointView available to both the
     // processing pipeline and the visualizer
-    readerStage.prepare(ctx);
-    PointBufferSet pbSetIn = readerStage.execute(ctx);
+    readerStage.prepare(table);
+    PointViewSet viewSetIn = readerStage.execute(table);
 
-    // the input PointBufferSet will be used to populate a BufferReader that is
+    // the input PointViewSet will be used to populate a BufferReader that is
     // consumed by the processing pipeline
-    PointBufferPtr input_buffer = *pbSetIn.begin();
+    PointViewPtr input_view = *viewSetIn.begin();
     std::shared_ptr<BufferReader> bufferReader(new BufferReader);
     bufferReader->setOptions(readerOptions);
-    bufferReader->addBuffer(input_buffer);
+    bufferReader->addView(input_view);
 
     Options smoothOptions;
     std::ostringstream ss;
@@ -159,15 +159,15 @@ int SmoothKernel::execute()
         }
     }
 
-    writer.prepare(ctx);
+    writer.prepare(table);
 
-    // process the data, grabbing the PointBufferSet for visualization of the
-    // resulting PointBuffer
-    PointBufferSet pbSetOut = writer.execute(ctx);
+    // process the data, grabbing the PointViewSet for visualization of the
+    // resulting PointView
+    PointViewSet viewSetOut = writer.execute(table);
 
     if (isVisualize())
-        visualize(*pbSetOut.begin());
-    //visualize(*pbSetIn.begin(), *pbSetOut.begin());
+        visualize(*viewSetOut.begin());
+    //visualize(*viewSetIn.begin(), *viewSetOut.begin());
 
     return 0;
 }

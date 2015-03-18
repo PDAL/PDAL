@@ -170,7 +170,7 @@ int RandomKernel::execute()
     Stage& writer = makeWriter(m_outputFile, makeReader(readerOptions));
     writer.setOptions(writerOptions);
 
-    PointContext ctx;
+    PointTable table;
 
     UserCallback* callback;
     if (!getProgressShellCommand().size())
@@ -179,11 +179,11 @@ int RandomKernel::execute()
         callback = static_cast<UserCallback*>(
             new ShellScriptCallback(getProgressShellCommand()));
     writer.setUserCallback(callback);
-    writer.prepare(ctx);
-    PointBufferSet pbSet = writer.execute(ctx);
+    writer.prepare(table);
+    PointViewSet viewSet = writer.execute(table);
 
     if (isVisualize())
-        visualize(*pbSet.begin());
+        visualize(*viewSet.begin());
 
     return 0;
 }

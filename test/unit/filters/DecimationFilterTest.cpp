@@ -34,7 +34,7 @@
 
 #include "gtest/gtest.h"
 
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <DecimationFilter.hpp>
 #include <FauxReader.hpp>
@@ -61,22 +61,22 @@ TEST(DecimationFilterTest, DecimationFilterTest_test1)
 
     Options decimationOps;
     decimationOps.add("step", 10);
-    
+
     DecimationFilter filter;
     filter.setOptions(decimationOps);
     filter.setInput(reader);
 
-    PointContext ctx;
+    PointTable table;
 
-    filter.prepare(ctx);
-    PointBufferSet pbSet = filter.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 3u);
+    filter.prepare(table);
+    PointViewSet viewSet = filter.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 3u);
 
-    uint64_t t0 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 0);
-    uint64_t t1 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 1);
-    uint64_t t2 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 2);
+    uint64_t t0 = view->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 0);
+    uint64_t t1 = view->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 1);
+    uint64_t t2 = view->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 2);
 
     EXPECT_EQ(t0, 0u);
     EXPECT_EQ(t1, 10u);

@@ -39,8 +39,8 @@
 #include <pdal/Options.hpp>
 #include <pdal/pdal_error.hpp>
 #include <pdal/pdal_types.hpp>
-#include <pdal/PointBuffer.hpp>
-#include <pdal/PointContext.hpp>
+#include <pdal/PointTable.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/util/Bounds.hpp>
 #include <pdal/util/FileUtils.hpp>
 
@@ -60,96 +60,101 @@ static PluginInfo const s_info = PluginInfo(
 
 CREATE_STATIC_PLUGIN(1, 0, RialtoWriter, Writer, s_info)
 
-std::string RialtoWriter::getName() const { return s_info.name; }
-
-char* getPointData(const PointBuffer& buf, PointId& idx)
+namespace
 {
-    char* p = new char[buf.pointSize()];
-    char* q = p;
-
-    for (const auto& dim : buf.dims())
+    char* getPointData(const PointView& buf, PointId& idx)
     {
-        buf.getRawField(dim, idx, q);
-        q += buf.dimSize(dim);
+        char* p = new char[buf.pointSize()];
+        char* q = p;
+
+        for (const auto& dim : buf.dims())
+        {
+            buf.getRawField(dim, idx, q);
+            q += buf.dimSize(dim);
+        }
+
+        return p;
     }
 
-    return p;
-}
-
-void writeHeader(const char* dir, const PointBuffer& buf, PointContextRef ctx, const Rectangle& rect, int32_t xt, int32_t yt)
-{
-    char* filename = new char[strlen(dir) + 64];
-    filename[0] = 0;
-    strcat(filename, dir);
-    strcat(filename, "/");
-    strcat(filename, "header.json");
-
-    FILE* fp = fopen(filename, "wt");
-
-    std::unique_ptr<StatsFilter> stats(new StatsFilter);
-    BufferReader br;
-    PointBufferPtr input_buffer = std::make_shared<PointBuffer>(buf);
-    br.addBuffer(input_buffer);
-    stats->setInput(br);
-    stats->prepare(ctx);
-    stats->execute(ctx);
-
-    double minx, maxx;
-    double miny, maxy;
-    const stats::Summary& x_stats = stats->getStats(Dimension::Id::X);
-    const stats::Summary& y_stats = stats->getStats(Dimension::Id::Y);
-    minx = x_stats.minimum();
-    maxx = x_stats.maximum();
-    miny = y_stats.minimum();
-    maxy = y_stats.maximum();
-
-    fprintf(fp, "{\n");
-    fprintf(fp, "    \"version\": 3,\n");
-
-    fprintf(fp, "    \"tilebbox\": [%f, %f, %f, %f],\n",
-            rect.m_west,
-            rect.m_south,
-            rect.m_east,
-            rect.m_north);
-
-    fprintf(fp, "    \"numTilesX\": %d,\n", xt);
-    fprintf(fp, "    \"numTilesY\": %d,\n", yt);
-
-    fprintf(fp, "    \"databbox\": [%f, %f, %f, %f],\n",
-            minx, miny, maxx, maxy);
-
-    fprintf(fp, "    \"numPoints\": %lu,\n", buf.size());
-
-    const size_t numDims = ctx.dims().size();
-    fprintf(fp, "    \"dimensions\": [\n");
-
-    size_t i = 0;
-    for (const auto& dim : ctx.dims())
+    void writeHeader(
+            std::string dir,
+            const PointViewPtr view,
+            PointTableRef table,
+            const Rectangle& rect,
+            int32_t xt,
+            int32_t yt)
     {
-        const Dimension::Type::Enum dataType = ctx.dimType(dim);
-        std::string dataTypeName = Dimension::interpretationName(dataType);
-        std::string name = Dimension::name(dim);
+        std::string filename(dir + "/header.json");
+        FILE* fp = fopen(filename.c_str(), "wt");
 
-        double mind, meand, maxd;
-        const stats::Summary& d_stats = stats->getStats(dim);
-        mind = d_stats.minimum();
-        meand = d_stats.average();
-        maxd = d_stats.maximum();
+        std::unique_ptr<StatsFilter> stats(new StatsFilter);
+        BufferReader br;
+        br.addView(view);
+        stats->setInput(br);
+        stats->prepare(table);
+        stats->execute(table);
 
-        fprintf(fp, "        {\n");
-        fprintf(fp, "            \"datatype\": \"%s\",\n", dataTypeName.c_str());
-        fprintf(fp, "            \"name\": \"%s\",\n", name.c_str());
-        fprintf(fp, "            \"min\": %f,\n", mind);
-        fprintf(fp, "            \"mean\": %f,\n", meand);
-        fprintf(fp, "            \"max\": %f\n", maxd);
-        fprintf(fp, "        }%s\n", i++==numDims-1 ? "" : ",");
+        double minx, maxx;
+        double miny, maxy;
+        const stats::Summary& x_stats = stats->getStats(Dimension::Id::X);
+        const stats::Summary& y_stats = stats->getStats(Dimension::Id::Y);
+        minx = x_stats.minimum();
+        maxx = x_stats.maximum();
+        miny = y_stats.minimum();
+        maxy = y_stats.maximum();
+
+        fprintf(fp, "{\n");
+        fprintf(fp, "    \"version\": 3,\n");
+
+        fprintf(fp, "    \"tilebbox\": [%f, %f, %f, %f],\n",
+                rect.m_west,
+                rect.m_south,
+                rect.m_east,
+                rect.m_north);
+
+        fprintf(fp, "    \"numTilesX\": %d,\n", xt);
+        fprintf(fp, "    \"numTilesY\": %d,\n", yt);
+
+        fprintf(fp, "    \"databbox\": [%f, %f, %f, %f],\n",
+                minx, miny, maxx, maxy);
+
+        fprintf(fp, "    \"numPoints\": %lu,\n", view->size());
+
+        const PointLayoutPtr layout(table.layout());
+        const size_t numDims = layout->dims().size();
+        fprintf(fp, "    \"dimensions\": [\n");
+
+        size_t i = 0;
+        for (const auto& dim : layout->dims())
+        {
+            const Dimension::Type::Enum dataType = layout->dimType(dim);
+            std::string dataTypeName = Dimension::interpretationName(dataType);
+            std::string name = Dimension::name(dim);
+
+            double mind, meand, maxd;
+            const stats::Summary& d_stats = stats->getStats(dim);
+            mind = d_stats.minimum();
+            meand = d_stats.average();
+            maxd = d_stats.maximum();
+
+            fprintf(fp, "        {\n");
+            fprintf(fp, "            \"datatype\": \"%s\",\n", dataTypeName.c_str());
+            fprintf(fp, "            \"name\": \"%s\",\n", name.c_str());
+            fprintf(fp, "            \"min\": %f,\n", mind);
+            fprintf(fp, "            \"mean\": %f,\n", meand);
+            fprintf(fp, "            \"max\": %f\n", maxd);
+            fprintf(fp, "        }%s\n", i++==numDims-1 ? "" : ",");
+        }
+        fprintf(fp, "    ]\n");
+        fprintf(fp, "}\n");
+
+        fclose(fp);
     }
-    fprintf(fp, "    ]\n");
-    fprintf(fp, "}\n");
+} // anonymous namespace
 
-    fclose(fp);
-
-    delete[] filename;
+std::string RialtoWriter::getName() const
+{
+    return s_info.name;
 }
 
 void RialtoWriter::processOptions(const Options& options)
@@ -166,9 +171,9 @@ Options RialtoWriter::getDefaultOptions()
     return options;
 }
 
-void RialtoWriter::ready(PointContextRef ctx)
+void RialtoWriter::ready(PointTableRef table)
 {
-    m_context = ctx;
+    m_table = &table;
 
     if (FileUtils::directoryExists(m_filename))
     {
@@ -190,19 +195,21 @@ void RialtoWriter::ready(PointContextRef ctx)
     Rectangle r00(-180, -90, 0, 90);
     Rectangle r10(0, -90, 180, 90);
     m_roots = new Tile*[2];
-    m_roots[0] = new Tile(0, 0, 0, r00, m_maxLevel, m_context, log());
-    m_roots[1] = new Tile(0, 1, 0, r10, m_maxLevel, m_context, log());
+    m_roots[0] = new Tile(0, 0, 0, r00, m_maxLevel, *m_table, log());
+    m_roots[1] = new Tile(0, 1, 0, r10, m_maxLevel, *m_table, log());
 }
 
-void RialtoWriter::write(const PointBuffer& buf)
+void RialtoWriter::write(const PointViewPtr view)
 {
-    // build the tiles
-    for (PointId idx = 0; idx < buf.size(); ++idx)
-    {
-        char* p = getPointData(buf, idx);
+    const PointView& viewRef(*view.get());
 
-        double lon = buf.getFieldAs<double>(Dimension::Id::X, idx);
-        double lat = buf.getFieldAs<double>(Dimension::Id::Y, idx);
+    // build the tiles
+    for (PointId idx = 0; idx < viewRef.size(); ++idx)
+    {
+        char* p = getPointData(viewRef, idx);
+
+        double lon = viewRef.getFieldAs<double>(Dimension::Id::X, idx);
+        double lat = viewRef.getFieldAs<double>(Dimension::Id::Y, idx);
 
         if (lon < 0)
             m_roots[0]->add(idx, p, lon, lat);
@@ -228,10 +235,16 @@ void RialtoWriter::write(const PointBuffer& buf)
     m_roots[0]->write(m_filename.c_str());
     m_roots[1]->write(m_filename.c_str());
 
-    writeHeader(m_filename.c_str(), buf, m_context, m_rectangle, m_numTilesX, m_numTilesY);
+    writeHeader(
+            m_filename,
+            view,
+            *m_table,
+            m_rectangle,
+            m_numTilesX,
+            m_numTilesY);
 }
 
-void RialtoWriter::done(PointContextRef ctx)
+void RialtoWriter::done(PointTableRef table)
 {
     delete m_roots[0];
     delete m_roots[1];

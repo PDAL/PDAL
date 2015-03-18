@@ -34,7 +34,7 @@
 
 #include "gtest/gtest.h"
 
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include "Support.hpp"
 
@@ -53,7 +53,7 @@ static void compare_contents(const std::string& las_file, const std::string& ntf
     LasReader las_reader(las_opts);
     las_reader.prepare();
     const Schema& las_schema = las_reader.getSchema();
-    PointBuffer las_data(las_schema, 750);
+    PointViewPtr las_data(las_schema, 750);
     StageSequentialIterator* las_iter = las_reader.createSequentialIterator(las_data);
     const uint32_t las_numRead = las_iter->read(las_data);
 
@@ -67,12 +67,12 @@ static void compare_contents(const std::string& las_file, const std::string& ntf
     NitfReader ntf_reader(ntf_opts);
     ntf_reader.prepare();
     const Schema& ntf_schema = ntf_reader.getSchema();
-    PointBuffer ntf_data(ntf_schema, 750);
+    PointViewPtr ntf_data(ntf_schema, 750);
     StageSequentialIterator* ntf_iter = ntf_reader.createSequentialIterator(ntf_data);
     const uint32_t ntf_numRead = ntf_iter->read(ntf_data);
 
     //
-    // compare the two buffers
+    // compare the two views
     //
     EXPECT_EQ(las_numRead, ntf_numRead);
 
@@ -163,9 +163,9 @@ TEST(NitfWriterTest, test1)
             // writer.setGeneratingSoftware("PDAL-NITF");
             // writer.setChunkSize(100);
         }
-        PointContext ctx;
-        writer->prepare(ctx);
-        writer->execute(ctx);
+        PointTable table;
+        writer->prepare(table);
+        writer->execute(table);
     }
 
     FileUtils::deleteFile(nitf_output);

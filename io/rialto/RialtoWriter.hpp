@@ -50,7 +50,6 @@ namespace pdal
 {
 
 class Options;
-class PointBuffer;
 class Tile;
 
 class PDAL_DLL RialtoWriter : public Writer
@@ -67,9 +66,9 @@ public:
 
 private:
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContextRef ctx);
-    virtual void write(const PointBuffer& buf);
-    virtual void done(PointContextRef ctx);
+    virtual void ready(PointTableRef table);
+    virtual void write(const PointViewPtr view);
+    virtual void done(PointTableRef table);
 
     int32_t m_bytesPerPoint;
     int32_t m_maxLevel;
@@ -78,7 +77,7 @@ private:
     bool m_overwrite;
     Rectangle m_rectangle;
     Tile** m_roots;
-    PointContext m_context;
+    BasePointTable *m_table;
 
     RialtoWriter& operator=(const RialtoWriter&); // not implemented
     RialtoWriter(const RialtoWriter&); // not implemented

@@ -35,7 +35,7 @@
 #pragma once
 
 #include <memory>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 
 namespace nanoflann
 {
@@ -53,7 +53,7 @@ namespace pdal
 class PDAL_DLL KDIndex
 {
 public:
-    KDIndex(const PointBuffer& buf);
+    KDIndex(const PointView& buf);
     ~KDIndex();
 
     std::size_t kdtree_get_point_count() const;
@@ -100,7 +100,7 @@ public:
     void build(bool b3d = true);
 
 private:
-    const PointBuffer& m_buf;
+    const PointView& m_buf;
     bool m_3d;
 
     typedef nanoflann::KDTreeSingleIndexAdaptor<nanoflann::L2_Adaptor<

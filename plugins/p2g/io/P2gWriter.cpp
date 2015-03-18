@@ -33,7 +33,7 @@
 ****************************************************************************/
 
 #include "P2gWriter.hpp"
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 
 #include <iostream>
 #include <algorithm>
@@ -108,7 +108,7 @@ void P2gWriter::processOptions(const Options& options)
 
 
 /*
-void P2gWriter::ready(PointContextRef ctx)
+void P2gWriter::ready(PointTableRef table)
 {
     double min_x = (std::numeric_limits<double>::max)();
     double max_x = (std::numeric_limits<double>::min)();
@@ -140,20 +140,20 @@ Options P2gWriter::getDefaultOptions()
 }
 
 
-void P2gWriter::write(const PointBuffer& buf)
+void P2gWriter::write(const PointViewPtr view)
 {
     std::string z_name = getOptions().getValueOrDefault<std::string>("Z", "Z");
 
 
-    for (point_count_t idx = 0; idx < buf.size(); idx++)
+    for (point_count_t idx = 0; idx < view->size(); idx++)
     {
-        double x = buf.getFieldAs<double>(Dimension::Id::X, idx);
-        double y = buf.getFieldAs<double>(Dimension::Id::Y, idx);
-        double z = buf.getFieldAs<double>(Dimension::Id::Z, idx);
+        double x = view->getFieldAs<double>(Dimension::Id::X, idx);
+        double y = view->getFieldAs<double>(Dimension::Id::Y, idx);
+        double z = view->getFieldAs<double>(Dimension::Id::Z, idx);
         m_coordinates.push_back(boost::tuple<double, double, double>(x, y, z));
     }
 
-    m_bounds = buf.calculateBounds();
+    m_bounds = view->calculateBounds();
 
     m_GRID_SIZE_X = (int)(ceil((m_bounds.maxx - m_bounds.minx)/m_GRID_DIST_X)) + 1;
     m_GRID_SIZE_Y = (int)(ceil((m_bounds.maxy - m_bounds.miny)/m_GRID_DIST_Y)) + 1;

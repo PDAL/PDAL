@@ -59,9 +59,9 @@ TEST(StatsFilterTest, simple)
     filter.setInput(*reader);
     EXPECT_EQ(filter.getName(), "filters.stats");
 
-    PointContext ctx;
-    filter.prepare(ctx);
-    filter.execute(ctx);
+    PointTable table;
+    filter.prepare(table);
+    filter.execute(table);
 
     const stats::Summary& statsX = filter.getStats(Dimension::Id::X);
     const stats::Summary& statsY = filter.getStats(Dimension::Id::Y);
@@ -105,9 +105,9 @@ TEST(StatsFilterTest, dimset)
     filter.setOptions(filterOps);
     EXPECT_EQ(filter.getName(), "filters.stats");
 
-    PointContext ctx;
-    filter.prepare(ctx);
-    filter.execute(ctx);
+    PointTable table;
+    filter.prepare(table);
+    filter.execute(table);
 
     const stats::Summary& statsX = filter.getStats(Dimension::Id::X);
     EXPECT_THROW(filter.getStats(Dimension::Id::Y), pdal_error);
@@ -146,9 +146,9 @@ TEST(StatsFilterTest, metadata)
     filter.setInput(*reader);
     filter.setOptions(filterOps);
 
-    PointContext ctx;
-    filter.prepare(ctx);
-    filter.execute(ctx);
+    PointTable table;
+    filter.prepare(table);
+    filter.execute(table);
     MetadataNode m = filter.getMetadata();
     std::vector<MetadataNode> children = m.children("statistic");
 
@@ -160,7 +160,7 @@ TEST(StatsFilterTest, metadata)
 
         return m.find(findNameVal);
     };
- 
+
     for (auto mi = children.begin(); mi != children.end(); ++mi)
     {
         if (findNode(*mi, "name", "X").valid())

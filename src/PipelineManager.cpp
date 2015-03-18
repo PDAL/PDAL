@@ -87,7 +87,7 @@ void PipelineManager::prepare() const
 {
     Stage *s = getStage();
     if (s)
-       s->prepare(m_context);
+       s->prepare(m_table);
 }
 
 
@@ -98,12 +98,12 @@ point_count_t PipelineManager::execute()
     Stage *s = getStage();
     if (!s)
         return 0;
-    m_pbSet = s->execute(m_context);
+    m_viewSet = s->execute(m_table);
     point_count_t cnt = 0;
-    for (auto pi = m_pbSet.begin(); pi != m_pbSet.end(); ++pi)
+    for (auto pi = m_viewSet.begin(); pi != m_viewSet.end(); ++pi)
     {
-        PointBufferPtr buf = *pi;
-        cnt += buf->size();
+        PointViewPtr view = *pi;
+        cnt += view->size();
     }
     return cnt;
 }

@@ -35,7 +35,7 @@
 #include "ReprojectionFilter.hpp"
 
 #include <pdal/GDALUtils.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/GlobalEnvironment.hpp>
 
 #pragma GCC diagnostic ignored "-Wfloat-equal"
@@ -130,11 +130,11 @@ void ReprojectionFilter::initialize()
     pdal::GlobalEnvironment::get().getGDALDebug()->addLog(log());
 }
 
-void ReprojectionFilter::ready(PointContext ctx)
+void ReprojectionFilter::ready(PointTableRef table)
 {
     if (m_inferInputSRS)
     {
-        m_inSRS = ctx.spatialRef();
+        m_inSRS = table.spatialRef();
         if (m_inSRS.getWKT().empty())
             throw pdal_error("Source data has no spatial reference and none "
                 "is specified with the 'in_srs' option.");
@@ -198,19 +198,19 @@ void ReprojectionFilter::transform(double& x, double& y, double& z)
 }
 
 
-void ReprojectionFilter::filter(PointBuffer& data)
+void ReprojectionFilter::filter(PointViewPtr view)
 {
-    for (PointId id = 0; id < data.size(); ++id)
+    for (PointId id = 0; id < view->size(); ++id)
     {
-        double x = data.getFieldAs<double>(Dimension::Id::X, id);
-        double y = data.getFieldAs<double>(Dimension::Id::Y, id);
-        double z = data.getFieldAs<double>(Dimension::Id::Z, id);
+        double x = view->getFieldAs<double>(Dimension::Id::X, id);
+        double y = view->getFieldAs<double>(Dimension::Id::Y, id);
+        double z = view->getFieldAs<double>(Dimension::Id::Z, id);
 
         transform(x, y, z);
 
-        data.setField(Dimension::Id::X, id, x);
-        data.setField(Dimension::Id::Y, id, y);
-        data.setField(Dimension::Id::Z, id, z);
+        view->setField(Dimension::Id::X, id, x);
+        view->setField(Dimension::Id::Y, id, y);
+        view->setField(Dimension::Id::Z, id, z);
     }
 }
 

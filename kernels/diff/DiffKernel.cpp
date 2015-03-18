@@ -37,6 +37,7 @@
 #include <memory>
 
 #include <pdal/PDALUtils.hpp>
+#include <pdal/PointView.hpp>
 
 #include <boost/program_options.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -107,8 +108,8 @@ void DiffKernel::addSwitches()
 }
 
 
-void DiffKernel::checkPoints(const PointBuffer& source_data,
-    const PointBuffer& candidate_data, ptree& errors)
+void DiffKernel::checkPoints(const PointView& source_data,
+    const PointView& candidate_data, ptree& errors)
 {
     uint32_t i(0);
     uint32_t MAX_BADBYTES(20);
@@ -150,72 +151,70 @@ void DiffKernel::checkPoints(const PointBuffer& source_data,
 
 int DiffKernel::execute()
 {
-    PointContext sourceCtx;
+    PointTable sourceTable;
 
     Options sourceOptions;
-    {
-        sourceOptions.add<std::string>("filename", m_sourceFile);
-        sourceOptions.add<bool>("debug", isDebug());
-        sourceOptions.add<uint32_t>("verbose", getVerboseLevel());
-    }
+    sourceOptions.add<std::string>("filename", m_sourceFile);
+    sourceOptions.add<bool>("debug", isDebug());
+    sourceOptions.add<uint32_t>("verbose", getVerboseLevel());
 
     Stage& source = makeReader(m_sourceFile);
     source.setOptions(sourceOptions);
-    source.prepare(sourceCtx);
-    PointBufferSet sourceSet = source.execute(sourceCtx);
+    source.prepare(sourceTable);
+    PointViewSet sourceSet = source.execute(sourceTable);
 
     ptree errors;
 
-    PointContext candidateCtx;
+    PointTable candidateTable;
     Options candidateOptions;
-    {
-        candidateOptions.add<std::string>("filename", m_candidateFile);
-        candidateOptions.add<bool>("debug", isDebug());
-        candidateOptions.add<uint32_t>("verbose", getVerboseLevel());
-    }
+    candidateOptions.add<std::string>("filename", m_candidateFile);
+    candidateOptions.add<bool>("debug", isDebug());
+    candidateOptions.add<uint32_t>("verbose", getVerboseLevel());
 
     Stage& candidate = makeReader(m_candidateFile);
     candidate.setOptions(candidateOptions);
-    candidate.prepare(candidateCtx);
-    PointBufferSet candidateSet = candidate.execute(candidateCtx);
+    candidate.prepare(candidateTable);
+    PointViewSet candidateSet = candidate.execute(candidateTable);
 
     assert(sourceSet.size() == 1);
     assert(candidateSet.size() == 1);
-    PointBufferPtr sourceBuf = *sourceSet.begin();
-    PointBufferPtr candidateBuf = *candidateSet.begin();
-    if (candidateBuf->size() != sourceBuf->size())
+    PointViewPtr sourceView = *sourceSet.begin();
+    PointViewPtr candidateView = *candidateSet.begin();
+    if (candidateView->size() != sourceView->size())
     {
         std::ostringstream oss;
 
         oss << "Source and candidate files do not have the same point count";
         errors.put("count.error", oss.str());
-        errors.put("count.candidate", candidateBuf->size());
-        errors.put("count.source", sourceBuf->size());
+        errors.put("count.candidate", candidateView->size());
+        errors.put("count.source", sourceView->size());
     }
 
-    MetadataNode source_metadata = sourceCtx.metadata();
-    MetadataNode candidate_metadata = candidateCtx.metadata();
+    MetadataNode source_metadata = sourceTable.metadata();
+    MetadataNode candidate_metadata = candidateTable.metadata();
     if (source_metadata != candidate_metadata)
     {
         std::ostringstream oss;
 
         oss << "Source and candidate files do not have the same metadata count";
         errors.put("metadata.error", oss.str());
-        errors.put_child("metadata.source", pdal::utils::toPTree(source_metadata));
-        errors.put_child("metadata.candidate", pdal::utils::toPTree(candidate_metadata));
+        errors.put_child("metadata.source", utils::toPTree(source_metadata));
+        errors.put_child("metadata.candidate",
+            utils::toPTree(candidate_metadata));
     }
 
-    if (candidateCtx.dims().size() != sourceCtx.dims().size())
+    if (candidateTable.layout()->dims().size() !=
+        sourceTable.layout()->dims().size())
     {
         std::ostringstream oss;
 
         oss << "Source and candidate files do not have the same "
             "number of dimensions";
         errors.put<std::string>("schema.error", oss.str());
-        //Need to "ptree" the PointContext dimension list in some way
-        // errors.put_child("schema.source", sourceCtx.schema()->toPTree());
+        //Need to "ptree" the PointTable dimension list in some way
+        // errors.put_child("schema.source", sourceTable.schema()->toPTree());
         // errors.put_child("schema.candidate",
-        //     candidateCtx.schema()->toPTree());
+        //     candidateTable.schema()->toPTree());
     }
 
     if (errors.size())
@@ -227,7 +226,7 @@ int DiffKernel::execute()
     {
         // If we made it this far with no errors, now we'll
         // check the points.
-        checkPoints(*sourceBuf, *candidateBuf, errors);
+        checkPoints(*sourceView, *candidateView, errors);
         if (errors.size())
         {
             write_json(std::cout, errors);

@@ -7,15 +7,15 @@ C++ API
 
 .. toctree::
    :maxdepth: 2
-   
+
    dimension
    bounds
    log
    metadata
    option
    options
-   pointbuffer
-   pointcontext
+   pointview
+   pointtable
    reader
    stage
    writer

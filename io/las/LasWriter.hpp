@@ -97,18 +97,18 @@ private:
     uint16_t m_extraByteLen;
 
     virtual void processOptions(const Options& options);
-    virtual void prepared(PointContextRef ctx);
-    virtual void ready(PointContextRef ctx);
-    virtual void write(const PointBuffer& pointBuffer);
-    virtual void done(PointContextRef ctx);
+    virtual void prepared(PointTableRef table);
+    virtual void ready(PointTableRef table);
+    virtual void write(const PointViewPtr view);
+    virtual void done(PointTableRef table);
 
     void construct();
     void getHeaderOptions(const Options& options);
     void getVlrOptions(const Options& opts);
     template<typename T>
     T headerVal(const std::string& name);
-    void fillHeader(PointContextRef ctx);
-    point_count_t fillWriteBuf(const PointBuffer& pointBuffer, PointId startId,
+    void fillHeader();
+    point_count_t fillWriteBuf(const PointView& view, PointId startId,
         std::vector<char>& buf);
     void setVlrsFromMetadata();
     MetadataNode findVlrMetadata(MetadataNode node, uint16_t recordId,

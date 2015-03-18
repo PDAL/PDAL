@@ -46,7 +46,6 @@ extern "C" PF_ExitFunc CropFilter_InitPlugin();
 
 namespace pdal
 {
-class PointBuffer;
 
 // removes any points outside of the given range
 // updates the header accordingly
@@ -80,10 +79,10 @@ private:
 #endif
 
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContext ctx);
-    virtual PointBufferSet run(PointBufferPtr buffer);
-    virtual void done(PointContext ctx);
-    void crop(PointBuffer& input, PointBuffer& output);
+    virtual void ready(PointTableRef table);
+    virtual PointViewSet run(PointViewPtr view);
+    virtual void done(PointTableRef table);
+    void crop(PointView& input, PointView& output);
     BOX3D computeBounds(GEOSGeometry const *geometry);
 
     CropFilter& operator=(const CropFilter&); // not implemented

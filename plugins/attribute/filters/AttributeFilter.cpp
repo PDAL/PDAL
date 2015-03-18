@@ -154,14 +154,14 @@ void AttributeFilter::processOptions(const Options& options)
     }
 }
 
-void AttributeFilter::ready(PointContext ctx)
+void AttributeFilter::ready(PointTableRef table)
 {
     m_gdal_debug = std::shared_ptr<pdal::gdal::Debug>(
         new pdal::gdal::Debug(isDebug(), log()));
 
     for (auto& dim_par : m_dimensions)
     {
-        Dimension::Id::Enum t = ctx.findDim(dim_par.first);
+        Dimension::Id::Enum t = table.layout()->findDim(dim_par.first);
         dim_par.second.dim = t;
 
         if (dim_par.second.isogr)
@@ -236,9 +236,9 @@ GEOSGeometry* createGEOSPoint(GEOSContextHandle_t ctx, double x, double y, doubl
     return p;
 }
 
-void AttributeFilter::UpdateGEOSBuffer(PointBuffer& buffer, AttributeInfo& info)
+void AttributeFilter::UpdateGEOSBuffer(PointViewPtr view, AttributeInfo& info)
 {
-    QuadIndex idx(buffer);
+    QuadIndex idx(view);
 
     if (!info.lyr) // wake up the layer
     {
@@ -316,9 +316,9 @@ void AttributeFilter::UpdateGEOSBuffer(PointBuffer& buffer, AttributeInfo& info)
         for (const auto& i : ids)
         {
 
-            double x = buffer.getFieldAs<double>(Dimension::Id::X, i);
-            double y = buffer.getFieldAs<double>(Dimension::Id::Y, i);
-            double z = buffer.getFieldAs<double>(Dimension::Id::Z, i);
+            double x = view->getFieldAs<double>(Dimension::Id::X, i);
+            double y = view->getFieldAs<double>(Dimension::Id::Y, i);
+            double z = view->getFieldAs<double>(Dimension::Id::Z, i);
 
             GEOSGeometry* p = createGEOSPoint(m_geosEnvironment, x, y ,z);
 
@@ -326,7 +326,7 @@ void AttributeFilter::UpdateGEOSBuffer(PointBuffer& buffer, AttributeInfo& info)
             {
                 // We're in the poly, write the attribute value
                 int32_t v = OGR_F_GetFieldAsInteger(feature.get(), field_index);
-                buffer.setField(info.dim, i, v);
+                view->setField(info.dim, i, v);
 //                 log()->get(LogLevel::Debug) << "Setting value: " << v << std::endl;
             }
 
@@ -338,29 +338,24 @@ void AttributeFilter::UpdateGEOSBuffer(PointBuffer& buffer, AttributeInfo& info)
     }
 }
 
-void AttributeFilter::filter(PointBuffer& buffer)
+void AttributeFilter::filter(PointViewPtr view)
 {
 
     for (auto& dim_par : m_dimensions)
     {
         if (dim_par.second.isogr)
         {
-            UpdateGEOSBuffer(buffer, dim_par.second);
+            UpdateGEOSBuffer(view, dim_par.second);
         }  else
         {
-            for (PointId i = 0; i < buffer.size(); ++i)
+            for (PointId i = 0; i < view->size(); ++i)
             {
                 double v = boost::lexical_cast<double>(dim_par.second.value);
-                buffer.setField(dim_par.second.dim, i, v);
+                view->setField(dim_par.second.dim, i, v);
             }
 
         }
     }
-}
-
-
-void AttributeFilter::done(PointContext ctx)
-{
 }
 
 } // namespace pdal

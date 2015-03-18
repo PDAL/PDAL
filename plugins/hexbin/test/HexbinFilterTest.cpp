@@ -36,7 +36,7 @@
 
 #include <pdal/SpatialReference.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 
 #include "Support.hpp"
 
@@ -80,12 +80,12 @@ TEST(HexbinFilterTest, HexbinFilterTest_test_1)
     hexbin->setOptions(options);
     hexbin->setInput(*reader);
 
-    PointContext ctx;
+    PointTable table;
 
-    hexbin->prepare(ctx);
-    hexbin->execute(ctx);
+    hexbin->prepare(table);
+    hexbin->execute(table);
 
-    MetadataNode m = ctx.metadata();
+    MetadataNode m = table.metadata();
     m = m.findChild(hexbin->getName());
 
     std::string filename = Support::temppath("hexbin.txt");

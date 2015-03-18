@@ -37,7 +37,7 @@
 #include <pdal/Kernel.hpp>
 #include <pdal/KernelSupport.hpp>
 #include <pdal/plugin.h>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/util/FileUtils.hpp>
 
@@ -71,11 +71,11 @@ private:
 
     void dump(std::ostream& o, const std::string& filename);
 
-    MetadataNode dumpPoints(PointBufferPtr buf) const;
+    MetadataNode dumpPoints(PointViewPtr inView) const;
     MetadataNode dumpStats() const;
     void dumpPipeline() const;
     MetadataNode dumpSummary(const QuickInfo& qi);
-    MetadataNode dumpQuery(PointBufferPtr buf) const;
+    MetadataNode dumpQuery(PointViewPtr inView) const;
 
     std::string m_inputFile;
     bool m_showStats;

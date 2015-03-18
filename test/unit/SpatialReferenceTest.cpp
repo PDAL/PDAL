@@ -143,14 +143,14 @@ TEST(SpatialReferenceTest, test_get_utmzone)
 // Test fetching SRS from an existing file
 TEST(SpatialReferenceTest, test_read_srs)
 {
-    PointContext ctx;
+    PointTable table;
 
     Options ops;
     ops.add("filename", Support::datapath("las/utm17.las"));
     LasReader reader;
     reader.setOptions(ops);
-    reader.prepare(ctx);
-    reader.execute(ctx);
+    reader.prepare(table);
+    reader.execute(table);
 
     const SpatialReference& ref = reader.getSpatialReference();
 
@@ -185,7 +185,7 @@ TEST(SpatialReferenceTest, test_vertical_datums)
     const std::string wktCheck = ref.getWKT(SpatialReference::eCompoundOK);
     EXPECT_TRUE(wkt == wktCheck); // just to make sure
 
-    PointContext ctx;
+    PointTable table;
     // Write a very simple file with our SRS and one point.
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
@@ -200,16 +200,16 @@ TEST(SpatialReferenceTest, test_vertical_datums)
     writer.setOptions(opts);
     writer.setInput(reader);
     writer.setSpatialReference(ref);
-    writer.prepare(ctx);
-    writer.execute(ctx);
+    writer.prepare(table);
+    writer.execute(table);
     SpatialReference sr = writer.getSpatialReference();
 
     // Reopen and check contents.
-    PointContext ctx2;
+    PointTable table2;
     LasReader reader2;
     reader2.setOptions(opts);
-    reader2.prepare(ctx2);
-    reader2.execute(ctx2);
+    reader2.prepare(table2);
+    reader2.execute(table2);
 
     const SpatialReference ref2 = reader2.getSpatialReference();
     const std::string wkt2 = ref2.getWKT(SpatialReference::eCompoundOK);
@@ -240,7 +240,7 @@ TEST(SpatialReferenceTest, test_writing_vlr)
     {
         FileUtils::deleteFile(tmpfile);
 
-        PointContext ctx;
+        PointTable table;
         LasReader readerx;
         Options readerOpts;
 
@@ -254,20 +254,20 @@ TEST(SpatialReferenceTest, test_writing_vlr)
         writerOpts.add("filename", tmpfile);
         writer.setOptions(writerOpts);
         writer.setInput(readerx);
-        writer.prepare(ctx);
+        writer.prepare(table);
         writer.setSpatialReference(ref);
-        writer.execute(ctx);
+        writer.execute(table);
     }
 
     // Reopen and check contents.
     {
-        PointContext ctx;
+        PointTable table;
         Options ops;
         ops.add("filename", tmpfile);
         LasReader reader;
         reader.setOptions(ops);
-        reader.prepare(ctx);
-        reader.execute(ctx);
+        reader.prepare(table);
+        reader.execute(table);
 
         SpatialReference result_ref = reader.getSpatialReference();
 

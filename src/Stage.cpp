@@ -59,44 +59,46 @@ void Stage::Construct()
 }
 
 
-void Stage::prepare(PointContextRef ctx)
+void Stage::prepare(PointTableRef table)
 {
     for (size_t i = 0; i < m_inputs.size(); ++i)
     {
         Stage *prev = m_inputs[i];
-        prev->prepare(ctx);
+        prev->prepare(table);
     }
     l_processOptions(m_options);
     processOptions(m_options);
-    l_initialize(ctx);
+    l_initialize(table);
     initialize();
-    addDimensions(ctx);
-    prepared(ctx);
+    addDimensions(table.layout());
+    prepared(table);
 }
 
 
-PointBufferSet Stage::execute(PointContextRef ctx)
+PointViewSet Stage::execute(PointTableRef table)
 {
-    PointBufferSet buffers;
+    table.layout()->finalize();
+
+    PointViewSet views;
     if (m_inputs.empty())
     {
-        buffers.insert(PointBufferPtr(new PointBuffer(ctx)));
+        views.insert(PointViewPtr(new PointView(table)));
     }
     else
     {
         for (size_t i = 0; i < m_inputs.size(); ++i)
         {
             Stage *prev = m_inputs[i];
-            PointBufferSet temp = prev->execute(ctx);
-            buffers.insert(temp.begin(), temp.end());
+            PointViewSet temp = prev->execute(table);
+            views.insert(temp.begin(), temp.end());
         }
     }
 
-    PointBufferSet outBuffers;
+    PointViewSet outViews;
     std::vector<StageRunnerPtr> runners;
 
-    ready(ctx);
-    for (auto const& it : buffers)
+    ready(table);
+    for (auto const& it : views)
     {
         StageRunnerPtr runner(new StageRunner(this, it));
         runners.push_back(runner);
@@ -105,18 +107,18 @@ PointBufferSet Stage::execute(PointContextRef ctx)
     for (auto const& it : runners)
     {
         StageRunnerPtr runner(it);
-        PointBufferSet temp = runner->wait();
-        outBuffers.insert(temp.begin(), temp.end());
+        PointViewSet temp = runner->wait();
+        outViews.insert(temp.begin(), temp.end());
     }
-    l_done(ctx);
-    done(ctx);
-    return outBuffers;
+    l_done(table);
+    done(table);
+    return outViews;
 }
 
 
-void Stage::l_initialize(PointContextRef ctx)
+void Stage::l_initialize(PointTableRef table)
 {
-    m_metadata = ctx.metadata().add(getName());
+    m_metadata = table.metadata().add(getName());
 }
 
 
@@ -170,10 +172,10 @@ void Stage::l_processOptions(const Options& options)
 }
 
 
-void Stage::l_done(PointContextRef ctx)
+void Stage::l_done(PointTableRef table)
 {
     if (!m_spatialReference.empty())
-        ctx.setSpatialRef(m_spatialReference);
+        table.setSpatialRef(m_spatialReference);
 }
 
 const SpatialReference& Stage::getSpatialReference() const

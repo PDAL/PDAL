@@ -96,7 +96,7 @@ QuickInfo BpfReader::inspect()
 
 // When the stage is intialized, the schema needs to be populated with the
 // dimensions in order to allow subsequent stages to be aware of or append to
-// the dimensions in the PointBuffer.
+// the dimensions in the PointView.
 void BpfReader::initialize()
 {
     m_stream.open(m_filename);
@@ -130,7 +130,7 @@ void BpfReader::initialize()
         readPolarData();
     }
 
-    // Read thing after the standard header as metadata.
+    // Read thing after the standard header as metadata->
     readHeaderExtraData();
 
     // Fast forward file to end of header as reported by base header.
@@ -142,12 +142,14 @@ void BpfReader::initialize()
 }
 
 
-void BpfReader::addDimensions(PointContextRef ctx)
+void BpfReader::addDimensions(PointLayoutPtr layout)
 {
     for (size_t i = 0; i < m_dims.size(); ++i)
     {
         BpfDimension& dim = m_dims[i];
-        dim.m_id = ctx.registerOrAssignDim(dim.m_label, Dimension::Type::Float);
+        dim.m_id = layout->registerOrAssignDim(
+                dim.m_label,
+                Dimension::Type::Float);
     }
 }
 
@@ -178,7 +180,7 @@ bool BpfReader::readUlemFiles()
 }
 
 
-/// Encode all data that follows the headers as metadata.
+/// Encode all data that follows the headers as metadata->
 /// \return  Whether the stream is still valid.
 bool BpfReader::readHeaderExtraData()
 {
@@ -208,7 +210,7 @@ bool BpfReader::readPolarData()
 }
 
 
-void BpfReader::ready(PointContextRef ctx)
+void BpfReader::ready(PointTableRef)
 {
     m_index = 0;
     m_start = m_stream.position();
@@ -228,13 +230,13 @@ void BpfReader::ready(PointContextRef ctx)
 }
 
 
-void BpfReader::done(PointContextRef)
+void BpfReader::done(PointTableRef)
 {
      delete m_stream.popStream();
 }
 
 
-point_count_t BpfReader::read(PointBuffer& data, point_count_t count)
+point_count_t BpfReader::read(PointViewPtr data, point_count_t count)
 {
     switch (m_header.m_pointFormat)
     {
@@ -275,9 +277,9 @@ bool BpfReader::eof()
 }
 
 
-point_count_t BpfReader::readPointMajor(PointBuffer& data, point_count_t count)
+point_count_t BpfReader::readPointMajor(PointViewPtr data, point_count_t count)
 {
-    PointId nextId = data.size();
+    PointId nextId = data->size();
     PointId idx = m_index;
     point_count_t numRead = 0;
     seekPointMajor(idx);
@@ -288,17 +290,17 @@ point_count_t BpfReader::readPointMajor(PointBuffer& data, point_count_t count)
             float f;
 
             m_stream >> f;
-            data.setField(m_dims[d].m_id, nextId, f + m_dims[d].m_offset);
+            data->setField(m_dims[d].m_id, nextId, f + m_dims[d].m_offset);
         }
 
         // Transformation only applies to X, Y and Z
-        double x = data.getFieldAs<double>(Dimension::Id::X, nextId);
-        double y = data.getFieldAs<double>(Dimension::Id::Y, nextId);
-        double z = data.getFieldAs<double>(Dimension::Id::Z, nextId);
+        double x = data->getFieldAs<double>(Dimension::Id::X, nextId);
+        double y = data->getFieldAs<double>(Dimension::Id::Y, nextId);
+        double z = data->getFieldAs<double>(Dimension::Id::Z, nextId);
         m_header.m_xform.apply(x, y, z);
-        data.setField(Dimension::Id::X, nextId, x);
-        data.setField(Dimension::Id::Y, nextId, y);
-        data.setField(Dimension::Id::Z, nextId, z);
+        data->setField(Dimension::Id::X, nextId, x);
+        data->setField(Dimension::Id::Y, nextId, y);
+        data->setField(Dimension::Id::Z, nextId, z);
 
         idx++;
         numRead++;
@@ -308,10 +310,10 @@ point_count_t BpfReader::readPointMajor(PointBuffer& data, point_count_t count)
     return numRead;
 }
 
-point_count_t BpfReader::readDimMajor(PointBuffer& data, point_count_t count)
+point_count_t BpfReader::readDimMajor(PointViewPtr data, point_count_t count)
 {
     PointId idx(0);
-    PointId startId = data.size();
+    PointId startId = data->size();
     point_count_t numRead = 0;
     for (size_t d = 0; d < m_dims.size(); ++d)
     {
@@ -324,33 +326,33 @@ point_count_t BpfReader::readDimMajor(PointBuffer& data, point_count_t count)
             float f;
 
             m_stream >> f;
-            data.setField(m_dims[d].m_id, nextId, f + m_dims[d].m_offset);
+            data->setField(m_dims[d].m_id, nextId, f + m_dims[d].m_offset);
         }
     }
     m_index = idx;
 
     // Transformation only applies to X, Y and Z
-    for (PointId idx = startId; idx < data.size(); idx++)
+    for (PointId idx = startId; idx < data->size(); idx++)
     {
-        double x = data.getFieldAs<double>(Dimension::Id::X, idx);
-        double y = data.getFieldAs<double>(Dimension::Id::Y, idx);
-        double z = data.getFieldAs<double>(Dimension::Id::Z, idx);
+        double x = data->getFieldAs<double>(Dimension::Id::X, idx);
+        double y = data->getFieldAs<double>(Dimension::Id::Y, idx);
+        double z = data->getFieldAs<double>(Dimension::Id::Z, idx);
         m_header.m_xform.apply(x, y, z);
-        data.setField(Dimension::Id::X, idx, x);
-        data.setField(Dimension::Id::Y, idx, y);
-        data.setField(Dimension::Id::Z, idx, z);
+        data->setField(Dimension::Id::X, idx, x);
+        data->setField(Dimension::Id::Y, idx, y);
+        data->setField(Dimension::Id::Z, idx, z);
     }
 
     return numRead;
 }
 
-point_count_t BpfReader::readByteMajor(PointBuffer& data, point_count_t count)
+point_count_t BpfReader::readByteMajor(PointViewPtr data, point_count_t count)
 {
     PointId idx(0);
-    PointId startId = data.size();
+    PointId startId = data->size();
     point_count_t numRead = 0;
 
-    // We need a temp buffer for the point data.
+    // We need a temp buffer for the point data->
     union uu
     {
         float f;
@@ -381,7 +383,7 @@ point_count_t BpfReader::readByteMajor(PointBuffer& data, point_count_t count)
                 if (b == 3)
                 {
                     u.f += m_dims[d].m_offset;
-                    data.setField(m_dims[d].m_id, nextId, u.f);
+                    data->setField(m_dims[d].m_id, nextId, u.f);
                 }
             }
         }
@@ -389,15 +391,15 @@ point_count_t BpfReader::readByteMajor(PointBuffer& data, point_count_t count)
     m_index = idx;
 
     // Transformation only applies to X, Y and Z
-    for (PointId idx = startId; idx < data.size(); idx++)
+    for (PointId idx = startId; idx < data->size(); idx++)
     {
-        double x = data.getFieldAs<double>(Dimension::Id::X, idx);
-        double y = data.getFieldAs<double>(Dimension::Id::Y, idx);
-        double z = data.getFieldAs<double>(Dimension::Id::Z, idx);
+        double x = data->getFieldAs<double>(Dimension::Id::X, idx);
+        double y = data->getFieldAs<double>(Dimension::Id::Y, idx);
+        double z = data->getFieldAs<double>(Dimension::Id::Z, idx);
         m_header.m_xform.apply(x, y, z);
-        data.setField(Dimension::Id::X, idx, x);
-        data.setField(Dimension::Id::Y, idx, y);
-        data.setField(Dimension::Id::Z, idx, z);
+        data->setField(Dimension::Id::X, idx, x);
+        data->setField(Dimension::Id::Y, idx, y);
+        data->setField(Dimension::Id::Z, idx, z);
     }
 
     return numRead;

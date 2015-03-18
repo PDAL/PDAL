@@ -36,8 +36,8 @@
 #include <vector>
 
 #include <pdal/Reader.hpp>
-#include <pdal/PointBuffer.hpp>
-#include <pdal/PointContext.hpp>
+#include <pdal/PointTable.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/util/Extractor.hpp>
 #include <pdal/util/Georeference.hpp>
 #include <pdal/util/IStream.hpp>
@@ -74,11 +74,11 @@ private:
     typedef buffer_t::size_type buffer_size_t;
 
     virtual void initialize();
-    virtual void addDimensions(PointContextRef ctx);
-    virtual void ready(PointContextRef ctx);
-    virtual point_count_t read(PointBuffer& buf, point_count_t num);
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void ready(PointTableRef table);
+    virtual point_count_t read(PointViewPtr view, point_count_t num);
     size_t fillBuffer();
-    virtual void done(PointContextRef ctx);
+    virtual void done(PointTableRef table);
 
     CsdHeader m_header;
     georeference::RotationMatrix m_boresightMatrix;

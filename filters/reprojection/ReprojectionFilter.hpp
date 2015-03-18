@@ -44,10 +44,10 @@ extern "C" PF_ExitFunc ReprojectionFilter_InitPlugin();
 
 namespace pdal
 {
-class PointBuffer;
+
 namespace gdal
 {
-class Debug;
+    class Debug;
 }
 
 class PDAL_DLL ReprojectionFilter : public Filter
@@ -62,9 +62,9 @@ public:
 
 private:
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContext ctx);
+    virtual void ready(PointTableRef table);
     virtual void initialize();
-    virtual void filter(PointBuffer& buffer);
+    virtual void filter(PointViewPtr view);
 
     void updateBounds();
     void transform(double& x, double& y, double& z);

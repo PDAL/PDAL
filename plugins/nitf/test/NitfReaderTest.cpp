@@ -36,7 +36,7 @@
 
 #include <boost/uuid/uuid_io.hpp>
 
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
 #include <pdal/StageFactory.hpp>
@@ -61,15 +61,15 @@ TEST(NitfReaderTest, test_one)
     nitf_opts.add("filename", Support::datapath("nitf/autzen-utm10.ntf"));
     nitf_opts.add("count", 750);
 
-    PointContext ctx;
+    PointTable table;
 
     std::shared_ptr<Stage> nitf_reader(f.createStage("readers.nitf"));
     EXPECT_TRUE(nitf_reader.get());
     nitf_reader->setOptions(nitf_opts);
-    nitf_reader->prepare(ctx);
-    PointBufferSet pbSet = nitf_reader->execute(ctx);
+    nitf_reader->prepare(table);
+    PointViewSet pbSet = nitf_reader->execute(table);
     EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buf = *pbSet.begin();
+    PointViewPtr view = *pbSet.begin();
 
     // check metadata
 //ABELL
@@ -88,30 +88,30 @@ TEST(NitfReaderTest, test_one)
     las_opts.add("count", 750);
     las_opts.add("filename", Support::datapath("nitf/autzen-utm10.las"));
 
-    PointContext ctx2;
+    PointTable table2;
 
     std::shared_ptr<Stage> las_reader(f.createStage("readers.las"));
     EXPECT_TRUE(las_reader.get());
     las_reader->setOptions(las_opts);
-    las_reader->prepare(ctx2);
-    PointBufferSet pbSet2 = las_reader->execute(ctx2);
+    las_reader->prepare(table2);
+    PointViewSet pbSet2 = las_reader->execute(table2);
     EXPECT_EQ(pbSet2.size(), 1u);
-    PointBufferPtr buf2 = *pbSet.begin();
+    PointViewPtr view2 = *pbSet.begin();
     //
     //
-    // compare the two buffers
+    // compare the two views
     //
-    EXPECT_EQ(buf->size(), buf2->size());
+    EXPECT_EQ(view->size(), view2->size());
 
-    for (PointId i = 0; i < buf2->size(); i++)
+    for (PointId i = 0; i < view2->size(); i++)
     {
-        int32_t nitf_x = buf->getFieldAs<int32_t>(Dimension::Id::X, i);
-        int32_t nitf_y = buf->getFieldAs<int32_t>(Dimension::Id::Y, i);
-        int32_t nitf_z = buf->getFieldAs<int32_t>(Dimension::Id::Z, i);
+        int32_t nitf_x = view->getFieldAs<int32_t>(Dimension::Id::X, i);
+        int32_t nitf_y = view->getFieldAs<int32_t>(Dimension::Id::Y, i);
+        int32_t nitf_z = view->getFieldAs<int32_t>(Dimension::Id::Z, i);
 
-        int32_t las_x = buf2->getFieldAs<int32_t>(Dimension::Id::X, i);
-        int32_t las_y = buf2->getFieldAs<int32_t>(Dimension::Id::Y, i);
-        int32_t las_z = buf2->getFieldAs<int32_t>(Dimension::Id::Z, i);
+        int32_t las_x = view2->getFieldAs<int32_t>(Dimension::Id::X, i);
+        int32_t las_y = view2->getFieldAs<int32_t>(Dimension::Id::Y, i);
+        int32_t las_z = view2->getFieldAs<int32_t>(Dimension::Id::Z, i);
 
         EXPECT_EQ(nitf_x, las_x);
         EXPECT_EQ(nitf_y, las_y);
@@ -125,7 +125,7 @@ TEST(NitfReaderTest, test_chipper)
     Option option("filename", Support::configuredpath("nitf/chipper.xml"));
     Options options(option);
 
-    PointContext ctx;
+    PointTable table;
 
     PipelineManager mgr;
     PipelineReader specReader(mgr);
@@ -153,7 +153,7 @@ TEST(NitfReaderTest, optionSrs)
 
     nitfOpts.add("spatialreference", sr);
 
-    PointContext ctx;
+    PointTable table;
 
     std::shared_ptr<Stage> nitfReader(f.createStage("readers.nitf"));
     EXPECT_TRUE(nitfReader.get());
@@ -166,10 +166,10 @@ TEST(NitfReaderTest, optionSrs)
     writer.setInput(*nitfReader);
     writer.setOptions(lasOpts);;
 
-    writer.prepare(ctx);
-    PointBufferSet pbSet = writer.execute(ctx);
+    writer.prepare(table);
+    PointViewSet pbSet = writer.execute(table);
 
     EXPECT_EQ(sr, nitfReader->getSpatialReference().getWKT());
     EXPECT_EQ("", writer.getSpatialReference().getWKT());
-    EXPECT_EQ(sr, ctx.spatialRef().getWKT());
+    EXPECT_EQ(sr, table.spatialRef().getWKT());
 }

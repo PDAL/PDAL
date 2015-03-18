@@ -86,11 +86,11 @@ TEST(PredicateFilterTest, PredicateFilterTest_test1)
     stats->setOptions(statOpts);
     stats->setInput(*filter);
 
-    PointContext ctx;
+    PointTable table;
 
-    stats->prepare(ctx);
-    PointBufferSet pbSet = stats->execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
+    stats->prepare(table);
+    PointViewSet viewSet = stats->execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
 
     const stats::Summary& statsX = stats->getStats(Dimension::Id::X);
     const stats::Summary& statsY = stats->getStats(Dimension::Id::Y);
@@ -144,11 +144,11 @@ TEST(PredicateFilterTest, PredicateFilterTest_test2)
     stats->setOptions(statOpts);
     stats->setInput(*filter);
 
-    PointContext ctx;
+    PointTable table;
 
-    stats->prepare(ctx);
-    PointBufferSet pbSet = stats->execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
+    stats->prepare(table);
+    PointViewSet viewSet = stats->execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
 
     const stats::Summary& statsX = stats->getStats(Dimension::Id::X);
     const stats::Summary& statsY = stats->getStats(Dimension::Id::Y);
@@ -227,9 +227,9 @@ TEST(PredicateFilterTest, PredicateFilterTest_test3)
     stats->setOptions(statOpts);
     stats->setInput(*filter2);
 
-    PointContext ctx;
-    stats->prepare(ctx);
-    stats->execute(ctx);
+    PointTable table;
+    stats->prepare(table);
+    stats->execute(table);
 
     const stats::Summary& statsX = stats->getStats(Dimension::Id::X);
     const stats::Summary& statsY = stats->getStats(Dimension::Id::Y);
@@ -278,23 +278,23 @@ TEST(PredicateFilterTest, PredicateFilterTest_test4)
     filter->setOptions(opts);
     filter->setInput(reader);
 
-    PointContext ctx;
-    PointBufferPtr buf(new PointBuffer(ctx));
+    PointTable table;
+    PointViewPtr buf(new PointView(table));
 
-    filter->prepare(ctx);
+    filter->prepare(table);
 
-    StageTester::ready(reader, ctx);
-    PointBufferSet pbSet = StageTester::run(reader, buf);
-    StageTester::done(reader, ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
-    buf = *pbSet.begin();
+    StageTester::ready(reader, table);
+    PointViewSet viewSet = StageTester::run(reader, buf);
+    StageTester::done(reader, table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    buf = *viewSet.begin();
     EXPECT_EQ(buf->size(), 1000u);
 
-    StageTester::ready(*filter, ctx);
-    pbSet = StageTester::run(*filter, buf);
-    StageTester::done(*filter, ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
-    buf = *pbSet.begin();
+    StageTester::ready(*filter, table);
+    viewSet = StageTester::run(*filter, buf);
+    StageTester::done(*filter, table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    buf = *viewSet.begin();
     EXPECT_EQ(buf->size(), 750u);
 }
 
@@ -333,10 +333,10 @@ TEST(PredicateFilterTest, PredicateFilterTest_test5)
     filter->setOptions(opts);
     filter->setInput(reader);
 
-    PointContext ctx;
-    filter->prepare(ctx);
+    PointTable table;
+    filter->prepare(table);
 
-    ASSERT_THROW(filter->execute(ctx), python_error);
+    ASSERT_THROW(filter->execute(table), python_error);
 }
 
 TEST(PredicateFilterTest, PredicateFilterTest_Pipeline)

@@ -35,7 +35,7 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/PointBufferIter.hpp>
+#include <pdal/PointViewIter.hpp>
 #include <pdal/plugin.h>
 
 extern "C" int32_t SortFilter_ExitFunc();
@@ -63,10 +63,10 @@ private:
     virtual void processOptions(const Options& options)
         { m_dimName = options.getValueOrThrow<std::string>("dimension"); }
 
-    virtual void ready(PointContext ctx)
-        { m_dim = ctx.findDim(m_dimName); }
+    virtual void ready(PointTableRef table)
+        { m_dim = table.layout()->findDim(m_dimName); }
 
-    virtual void filter(PointBuffer& buf)
+    virtual void filter(PointViewPtr view)
     {
         if (m_dim == Dimension::Id::Unknown)
             return;
@@ -74,7 +74,7 @@ private:
         auto cmp = [this](const PointRef& p1, const PointRef& p2)
             { return p1.compare(m_dim, p2); };
 
-        std::sort(buf.begin(), buf.end(), cmp);
+        std::sort(view->begin(), view->end(), cmp);
     }
 
     SortFilter& operator=(const SortFilter&); // not implemented

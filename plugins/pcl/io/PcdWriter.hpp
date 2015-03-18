@@ -57,8 +57,7 @@ public:
 
 private:
     virtual void processOptions(const Options&);
-    virtual void ready(PointContextRef ctx) {};
-    virtual void write(const PointBuffer& buf);
+    virtual void write(const PointViewPtr view);
 
     std::string m_filename;
     bool m_compressed;

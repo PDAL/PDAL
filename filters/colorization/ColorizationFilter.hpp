@@ -54,8 +54,6 @@ extern "C" PF_ExitFunc ColorizationFilter_InitPlugin();
 namespace pdal
 {
 
-class PointBuffer;
-
 namespace gdal
 { class GlobalDebug; }
 
@@ -90,9 +88,9 @@ public:
 private:
     virtual void initialize();
     virtual void processOptions(const Options&);
-    virtual void ready(PointContext ctx);
-    virtual void filter(PointBuffer& buffer);
-    virtual void done(PointContext ctx);
+    virtual void ready(PointTableRef table);
+    virtual void filter(PointViewPtr view);
+    virtual void done(PointTableRef table);
 
     bool getPixelAndLinePosition(double x, double y,
         boost::array<double, 6> const& inverse, int32_t& pixel,

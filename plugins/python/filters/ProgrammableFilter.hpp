@@ -64,10 +64,10 @@ private:
     std::vector<std::string> m_addDimensions;
 
     virtual void processOptions(const Options& options);
-    virtual void addDimensions(PointContext ctx);
-    virtual void ready(PointContext ctx);
-    virtual void filter(PointBuffer& buf);
-    virtual void done(PointContext ctx);
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void ready(PointTableRef table);
+    virtual void filter(PointViewPtr view);
+    virtual void done(PointTableRef table);
 
     ProgrammableFilter& operator=(const ProgrammableFilter&); // not implemented
     ProgrammableFilter(const ProgrammableFilter&); // not implemented

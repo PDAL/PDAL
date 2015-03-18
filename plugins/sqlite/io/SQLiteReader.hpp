@@ -74,15 +74,15 @@ private:
 
     virtual void initialize();
     virtual void processOptions(const Options& options);
-    virtual void addDimensions(PointContextRef ctx);
-    virtual void ready(PointContextRef ctx);
-    point_count_t read(PointBuffer& buf, point_count_t count);
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void ready(PointTableRef table);
+    point_count_t read(PointViewPtr view, point_count_t count);
     bool eof()
         { return m_at_end; }
 
     void validateQuery() const;
-    point_count_t readPatch(PointBuffer& buffer, point_count_t count);
-    bool NextBuffer();
+    point_count_t readPatch(PointViewPtr view, point_count_t count);
+    bool nextBuffer();
 
     SQLiteReader& operator=(const SQLiteReader&); // not implemented
     SQLiteReader(const SQLiteReader&); // not implemented

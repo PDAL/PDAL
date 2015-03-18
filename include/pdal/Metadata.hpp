@@ -677,7 +677,7 @@ inline bool operator != (const MetadataNode& m1, const MetadataNode& m2)
 
 class Metadata
 {
-    friend class PointContext;
+    friend class BasePointTable;
 
 public:
     Metadata() : m_root("root"), m_private("private")

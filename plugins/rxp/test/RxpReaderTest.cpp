@@ -25,7 +25,7 @@
 * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
 * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
 * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
-* OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+* OF USE, view, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
 * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
@@ -37,7 +37,7 @@
 #include <pdal/Options.hpp>
 #include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 
 #include "RxpReader.hpp"
 #include "Config.hpp"
@@ -48,32 +48,32 @@ Options defaultRxpReaderOptions()
 {
     Options options;
     Option filename("filename",
-        testDataPath() + "130501_232206_cut.rxp", "");
+        testviewPath() + "130501_232206_cut.rxp", "");
     options.add(filename);
     return options;
 }
 
 template <typename T>
-void checkDimensionClose(const PointBuffer& data,
+void checkDimensionClose(const PointViewPtr view,
                          std::size_t index,
                          Dimension::Id::Enum dim,
                          T expected)
 {
-    T actual = data.getFieldAs<T>(dim, index);
+    T actual = view->getFieldAs<T>(dim, index);
     EXPECT_FLOAT_EQ(expected, actual);
 }
 
 template <typename T>
-void checkDimensionEqual(const PointBuffer& data,
+void checkDimensionEqual(const PointViewPtr view,
                          std::size_t index,
                          Dimension::Id::Enum dim,
                          T expected)
 {
-    T actual = data.getFieldAs<T>(dim, index);
+    T actual = view->getFieldAs<T>(dim, index);
     EXPECT_EQ(expected, actual);
 }
 
-void checkPoint(const PointBuffer& data, std::size_t index,
+void checkPoint(const PointViewPtr view, std::size_t index,
                 float x, float y, float z,
                 double time, double echoRange, float amplitude,
                 float reflectance, float deviation,
@@ -82,20 +82,20 @@ void checkPoint(const PointBuffer& data, std::size_t index,
                 )
 {
     using namespace Dimension;
-    checkDimensionClose(data, index, Id::X, x);
-    checkDimensionClose(data, index, Id::Y, y);
-    checkDimensionClose(data, index, Id::Z, z);
-    checkDimensionClose(data,
+    checkDimensionClose(view, index, Id::X, x);
+    checkDimensionClose(view, index, Id::Y, y);
+    checkDimensionClose(view, index, Id::Z, z);
+    checkDimensionClose(view,
                         index,
                         getTimeDimensionId(isPpsLocked),
                         time);
-    checkDimensionClose(data, index, Id::EchoRange, echoRange);
-    checkDimensionClose(data, index, Id::Amplitude, amplitude);
-    checkDimensionClose(data, index, Id::Reflectance, reflectance);
-    checkDimensionClose(data, index, Id::Deviation, deviation);
-    checkDimensionEqual(data, index, Id::IsPpsLocked, isPpsLocked);
-    checkDimensionEqual(data, index, Id::ReturnNumber, returnNumber);
-    checkDimensionEqual(data, index, Id::NumberOfReturns, numberOfReturns);
+    checkDimensionClose(view, index, Id::EchoRange, echoRange);
+    checkDimensionClose(view, index, Id::Amplitude, amplitude);
+    checkDimensionClose(view, index, Id::Reflectance, reflectance);
+    checkDimensionClose(view, index, Id::Deviation, deviation);
+    checkDimensionEqual(view, index, Id::IsPpsLocked, isPpsLocked);
+    checkDimensionEqual(view, index, Id::ReturnNumber, returnNumber);
+    checkDimensionEqual(view, index, Id::NumberOfReturns, numberOfReturns);
 }
 
 TEST(RxpReaderTest, testConstructor)
@@ -112,19 +112,19 @@ TEST(RxpReaderTest, testRead)
     RxpReader reader;
     reader.setOptions(options);
 
-    PointContext ctx;
-    reader.prepare(ctx);
+    PointTable table;
+    reader.prepare(table);
 
-    PointBufferSet pbSet = reader.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1);
-    PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 177208);
+    PointViewSet viewSet = reader.execute(table);
+    EXPECT_EQ(viewSet.size(), 1);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 177208);
 
-    checkPoint(*buf, 0, 2.2630672454833984, -0.038407701998949051, -1.3249952793121338, 342656.34233957872,
+    checkPoint(*view, 0, 2.2630672454833984, -0.038407701998949051, -1.3249952793121338, 342656.34233957872,
             2.6865001276019029, 19.8699989, 5.70246553, 4, true, 1, 1);
-    checkPoint(*buf, 1, 2.2641847133636475, -0.038409631699323654, -1.3245694637298584, 342656.34235912003,
+    checkPoint(*view, 1, 2.2641847133636475, -0.038409631699323654, -1.3245694637298584, 342656.34235912003,
             2.687250127637526, 19.5299988, 5.36292124, 2, true, 1, 1);
-    checkPoint(*buf, 2, 2.26853346824646, -0.038410264998674393, -1.3260456323623657, 342656.34237866144,
+    checkPoint(*view, 2, 2.26853346824646, -0.038410264998674393, -1.3260456323623657, 342656.34237866144,
             2.6917501278512646, 19.3699989, 5.2056551, 5, true, 1, 1);
 }
 
@@ -136,13 +136,13 @@ TEST(RxpReaderTest, testNoPpsSync)
     RxpReader reader;
     reader.setOptions(options);
 
-    PointContext ctx;
-    reader.prepare(ctx);
+    PointTable table;
+    reader.prepare(table);
 
-    PointBufferSet pbSet = reader.execute(ctx);
-    PointBufferPtr buf = *pbSet.begin();
+    PointViewSet viewSet = reader.execute(table);
+    PointViewPtr view = *viewSet.begin();
 
-    checkPoint(*buf, 0, 0.0705248788, -0.0417557284, 0.0304775704, 31.917255942733149,
+    checkPoint(*view, 0, 0.0705248788, -0.0417557284, 0.0304775704, 31.917255942733149,
             0.14050000667339191, 0.689999998, -14.4898596, 3, false, 1, 1);
 }
 

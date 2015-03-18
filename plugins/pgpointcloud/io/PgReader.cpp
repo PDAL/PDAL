@@ -34,7 +34,7 @@
 ****************************************************************************/
 
 #include "PgReader.hpp"
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/XMLSchema.hpp>
 
 #include <iostream>
@@ -193,7 +193,7 @@ uint32_t PgReader::fetchPcid() const
 }
 
 
-void PgReader::addDimensions(PointContextRef ctx)
+void PgReader::addDimensions(PointLayoutPtr layout)
 {
     log()->get(LogLevel::Debug) << "Fetching schema object" << std::endl;
 
@@ -206,7 +206,7 @@ void PgReader::addDimensions(PointContextRef ctx)
     if (!xmlStr)
         throw pdal_error("Unable to fetch schema from `pointcloud_formats`");
 
-    loadSchema(ctx, xmlStr);
+    loadSchema(layout, xmlStr);
     free(xmlStr);
 }
 
@@ -238,7 +238,7 @@ pdal::SpatialReference PgReader::fetchSpatialReference() const
 }
 
 
-void PgReader::ready(PointContextRef ctx)
+void PgReader::ready(PointTableRef /*table*/)
 {
     m_atEnd = false;
     m_cur_row = 0;
@@ -256,7 +256,7 @@ void PgReader::ready(PointContextRef ctx)
 }
 
 
-void PgReader::done(PointContextRef ctx)
+void PgReader::done(PointTableRef /*table*/)
 {
     CursorTeardown();
     if (m_session)
@@ -295,10 +295,10 @@ void PgReader::CursorTeardown()
 }
 
 
-point_count_t PgReader::readPgPatch(PointBuffer& buffer, point_count_t numPts)
+point_count_t PgReader::readPgPatch(PointViewPtr view, point_count_t numPts)
 {
     point_count_t numRemaining = m_patch.remaining;
-    PointId nextId = buffer.size();
+    PointId nextId = view->size();
     point_count_t numRead = 0;
 
     size_t offset = ((m_patch.count - m_patch.remaining) * m_point_size);
@@ -306,7 +306,7 @@ point_count_t PgReader::readPgPatch(PointBuffer& buffer, point_count_t numPts)
 
     while (numRead < numPts && numRemaining > 0)
     {
-        writePoint(buffer, nextId, pos);
+        writePoint(*view.get(), nextId, pos);
         pos += m_point_size;
         numRemaining--;
         nextId++;
@@ -350,13 +350,13 @@ bool PgReader::NextBuffer()
 }
 
 
-point_count_t PgReader::read(PointBuffer& buffer, point_count_t count)
+point_count_t PgReader::read(PointViewPtr view, point_count_t count)
 {
     if (eof())
         return 0;
 
     log()->get(LogLevel::Debug) << "readBufferImpl called with "
-        "PointBuffer filled to " << buffer.size() << " points" <<
+        "PointView filled to " << view->size() << " points" <<
         std::endl;
 
     point_count_t totalNumRead = 0;
@@ -365,8 +365,8 @@ point_count_t PgReader::read(PointBuffer& buffer, point_count_t count)
         if (m_patch.remaining == 0)
             if (!NextBuffer())
                 return totalNumRead;
-        PointId bufBegin = buffer.size();
-        point_count_t numRead = readPgPatch(buffer, count - totalNumRead);
+        PointId bufBegin = view->size();
+        point_count_t numRead = readPgPatch(view, count - totalNumRead);
         PointId bufEnd = bufBegin + numRead;
         totalNumRead += numRead;
     }

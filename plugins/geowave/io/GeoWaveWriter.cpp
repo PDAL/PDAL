@@ -190,16 +190,16 @@ namespace pdal
         }
     }
 
-    void GeoWaveWriter::ready(PointContext ctx)
+    void GeoWaveWriter::ready(PointTableRef table)
     {
         // get a list of all the dimensions & their types
-        Dimension::IdList all = ctx.dims();
+        Dimension::IdList all = table->layout()->dims();
         for (auto di = all.begin(); di != all.end(); ++di)
             if (!contains(m_dims, *di))
                 m_dims.push_back(*di);
     }
 
-    void GeoWaveWriter::write(const PointBuffer& data)
+    void GeoWaveWriter::write(const PointViewPtr view)
     {
 
         using namespace Dimension;
@@ -229,7 +229,7 @@ namespace pdal
         // treat all types as double
         os << "location:Point:srid=4326";
         for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-            os << "," << data.dimName(*di) << ":Double";
+            os << "," << view->dimName(*di) << ":Double";
 
         SimpleFeatureType TYPE = DataUtilities::createType(
             java_new<String>(m_featureTypeName),
@@ -240,9 +240,9 @@ namespace pdal
         WritableDataAdapter dataAdapter;
         if (m_useFeatCollDataAdapter)
             dataAdapter = java_new<FeatureCollectionDataAdapter>(
-            TYPE, 
+            TYPE,
             m_pointsPerEntry);
-        else 
+        else
             dataAdapter = java_new<FeatureDataAdapter>(TYPE);
 
 
@@ -253,21 +253,21 @@ namespace pdal
             UUID::randomUUID().toString(),
             TYPE);
 
-        for (PointId idx = 0; idx < data.size(); ++idx)
+        for (PointId idx = 0; idx < view->size(); ++idx)
         {
-            JDouble X = data.getFieldAs<double>(Id::X, idx);
-            JDouble Y = data.getFieldAs<double>(Id::Y, idx);
+            JDouble X = view->getFieldAs<double>(Id::X, idx);
+            JDouble Y = view->getFieldAs<double>(Id::Y, idx);
 
             Point point = geometryFactory.createPoint(
                 java_new<Coordinate>(
-                X, 
+                X,
                 Y));
 
             builder.set(location, point);
 
             for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-                if (data.hasDim(*di))
-                    builder.set(java_new<String>(data.dimName(*di)), java_new<Double>(data.getFieldAs<double>(*di, idx)));
+                if (view->hasDim(*di))
+                    builder.set(java_new<String>(view->dimName(*di)), java_new<Double>(view->getFieldAs<double>(*di, idx)));
 
             SimpleFeature feature = builder.buildFeature(UUID::randomUUID().toString());
 

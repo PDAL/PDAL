@@ -100,9 +100,9 @@ void BpfWriter::processOptions(const Options& options)
 }
 
 
-void BpfWriter::ready(PointContextRef ctx)
+void BpfWriter::ready(PointTableRef table)
 {
-    loadBpfDimensions(ctx);
+    loadBpfDimensions(table.layout());
     m_stream = FileUtils::createFile(m_filename, true);
     m_header.m_version = 3;
     m_header.m_numDim = m_dims.size();
@@ -119,11 +119,11 @@ void BpfWriter::ready(PointContextRef ctx)
 }
 
 
-void BpfWriter::loadBpfDimensions(PointContextRef ctx)
+void BpfWriter::loadBpfDimensions(PointLayoutPtr layout)
 {
     // Verify that we have X, Y and Z and that they're the first three
     // dimensions.
-    Dimension::IdList dims = ctx.dims();
+    Dimension::IdList dims = layout->dims();
     std::sort(dims.begin(), dims.end());
     if (dims.size() < 3 || dims[0] != Dimension::Id::X ||
         dims[1] != Dimension::Id::Y || dims[2] != Dimension::Id::Z)
@@ -136,15 +136,18 @@ void BpfWriter::loadBpfDimensions(PointContextRef ctx)
     {
         BpfDimension dim;
         dim.m_id = id;
-        dim.m_label = ctx.dimName(id);
+        dim.m_label = layout->dimName(id);
         m_dims.push_back(dim);
     }
 }
 
 
-void BpfWriter::write(const PointBuffer& data)
+void BpfWriter::write(const PointViewPtr dataShared)
 {
-    setAutoOffset(data);
+    setAutoOffset(dataShared);
+
+    // Avoid reference count overhead internally.
+    const PointView* data(dataShared.get());
 
     // We know that X, Y and Z are dimensions 0, 1 and 2.
     m_dims[0].m_offset = m_xXform.m_offset;
@@ -163,27 +166,27 @@ void BpfWriter::write(const PointBuffer& data)
         writeByteMajor(data);
         break;
     }
-    m_header.m_numPts += data.size();
+    m_header.m_numPts += data->size();
 }
 
 
-void BpfWriter::writePointMajor(const PointBuffer& data)
+void BpfWriter::writePointMajor(const PointView* data)
 {
     // Blocks of 10,000 points will ensure that we're under 16MB, even
     // for 255 dimensions.
-    size_t blockpoints = std::min<point_count_t>(10000UL, data.size());
+    size_t blockpoints = std::min<point_count_t>(10000UL, data->size());
 
     // For compression we're going to write to a buffer so that it can be
     // compressed before it's written to the file stream.
     BpfCompressor compressor(m_stream,
         blockpoints * sizeof(float) * m_dims.size());
     PointId idx = 0;
-    while (idx < data.size())
+    while (idx < data->size())
     {
         if (m_header.m_compression)
             compressor.startBlock();
         size_t blockId;
-        for (blockId = 0; idx < data.size() && blockId < blockpoints;
+        for (blockId = 0; idx < data->size() && blockId < blockpoints;
             ++idx, ++blockId)
         {
             for (auto & bpfDim : m_dims)
@@ -201,17 +204,17 @@ void BpfWriter::writePointMajor(const PointBuffer& data)
 }
 
 
-void BpfWriter::writeDimMajor(const PointBuffer& data)
+void BpfWriter::writeDimMajor(const PointView* data)
 {
     // We're going to pretend for now that we only even have one point buffer.
-    BpfCompressor compressor(m_stream, data.size() * sizeof(float));
+    BpfCompressor compressor(m_stream, data->size() * sizeof(float));
 
     for (auto & bpfDim : m_dims)
     {
 
         if (m_header.m_compression)
             compressor.startBlock();
-        for (PointId idx = 0; idx < data.size(); ++idx)
+        for (PointId idx = 0; idx < data->size(); ++idx)
         {
             double d = getAdjustedValue(data, bpfDim, idx);
             m_stream << (float)d;
@@ -225,7 +228,7 @@ void BpfWriter::writeDimMajor(const PointBuffer& data)
 }
 
 
-void BpfWriter::writeByteMajor(const PointBuffer& data)
+void BpfWriter::writeByteMajor(const PointView* data)
 {
     union
     {
@@ -236,7 +239,7 @@ void BpfWriter::writeByteMajor(const PointBuffer& data)
     // We're going to pretend for now that we only even have one point buffer.
 
     BpfCompressor compressor(m_stream,
-        data.size() * sizeof(float) * m_dims.size());
+        data->size() * sizeof(float) * m_dims.size());
 
     if (m_header.m_compression)
         compressor.startBlock();
@@ -244,7 +247,7 @@ void BpfWriter::writeByteMajor(const PointBuffer& data)
     {
         for (size_t b = 0; b < sizeof(float); b++)
         {
-            for (PointId idx = 0; idx < data.size(); ++idx)
+            for (PointId idx = 0; idx < data->size(); ++idx)
             {
                 uu.f = (float)getAdjustedValue(data, bpfDim, idx);
                 uint8_t u8 = (uint8_t)(uu.u32 >> (b * CHAR_BIT));
@@ -260,10 +263,10 @@ void BpfWriter::writeByteMajor(const PointBuffer& data)
 }
 
 
-double BpfWriter::getAdjustedValue(const PointBuffer& buf,
+double BpfWriter::getAdjustedValue(const PointView* data,
     BpfDimension& bpfDim, PointId idx)
 {
-    double d = buf.getFieldAs<double>(bpfDim.m_id, idx);
+    double d = data->getFieldAs<double>(bpfDim.m_id, idx);
     bpfDim.m_min = std::min(bpfDim.m_min, d);
     bpfDim.m_max = std::max(bpfDim.m_max, d);
 
@@ -277,7 +280,7 @@ double BpfWriter::getAdjustedValue(const PointBuffer& buf,
 }
 
 
-void BpfWriter::done(PointContextRef)
+void BpfWriter::done(PointTableRef)
 {
     // Rewrite the header to update the the correct number of points and
     // statistics.
@@ -288,3 +291,4 @@ void BpfWriter::done(PointContextRef)
 }
 
 } //namespace pdal
+

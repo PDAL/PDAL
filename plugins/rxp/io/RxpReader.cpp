@@ -110,30 +110,29 @@ void RxpReader::processOptions(const Options& options)
     m_uri = extractRivlibURI(options);
     m_syncToPps = options.getValueOrDefault<bool>("sync_to_pps",
                                                   DEFAULT_SYNC_TO_PPS);
-
 }
 
 
-void RxpReader::addDimensions(PointContext ctx)
+void RxpReader::addDimensions(PointLayoutPtr layout)
 {
-    ctx.registerDims(getRxpDimensions(m_syncToPps, m_minimal));
+    layout->registerDims(getRxpDimensions(m_syncToPps, m_minimal));
 }
 
 
-void RxpReader::ready(PointContext ctx)
+void RxpReader::ready(PointTableRef table)
 {
-    m_pointcloud = std::unique_ptr<RxpPointcloud>(new RxpPointcloud(m_uri, m_syncToPps, m_minimal, ctx));
+    m_pointcloud.reset(new RxpPointcloud(m_uri, m_syncToPps, m_minimal, table));
 }
 
 
-point_count_t RxpReader::read(PointBuffer& buf, point_count_t count)
+point_count_t RxpReader::read(PointViewPtr view, point_count_t count)
 {
-    point_count_t numRead = m_pointcloud->read(buf, count);
+    point_count_t numRead = m_pointcloud->read(view, count);
     return numRead;
 }
 
 
-void RxpReader::done(PointContext ctx)
+void RxpReader::done(PointTableRef table)
 {
     m_pointcloud.reset();
 }

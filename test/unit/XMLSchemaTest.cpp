@@ -40,7 +40,7 @@
 
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/Metadata.hpp>
-#include <pdal/PointContext.hpp>
+#include <pdal/PointTable.hpp>
 #include <pdal/XMLSchema.hpp>
 
 #include "Support.hpp"
@@ -104,7 +104,7 @@ TEST(XMLSchemaTest, read)
     EXPECT_FLOAT_EQ(dt.m_xform.m_scale, .01);
     EXPECT_FLOAT_EQ(dt.m_xform.m_offset, 0.0);
     EXPECT_EQ(dt.m_type, Dimension::Type::Signed32);
-    
+
     dim = getDim(dims, "Z");
     dt = dim.m_dimType;
     EXPECT_EQ(dim.m_name, "Z");
@@ -145,12 +145,14 @@ TEST(XMLSchemaTest, copy)
 
     XMLSchema s1(xml, xsd);
 
-    PointContext ctx;
+    PointTable table;
     XMLDimList dims = s1.xmlDims();
     for (auto di = dims.begin(); di != dims.end(); ++di)
     {
         Dimension::Id::Enum id =
-            ctx.registerOrAssignDim(di->m_name, di->m_dimType.m_type);
+            table.layout()->registerOrAssignDim(
+                    di->m_name,
+                    di->m_dimType.m_type);
         s1.setId(di->m_name, id);
     }
 

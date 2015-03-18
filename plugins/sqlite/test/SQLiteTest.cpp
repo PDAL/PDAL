@@ -37,7 +37,7 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/StageFactory.hpp>
 
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/pdal_defines.h>
 #include <las/LasReader.hpp>
 
@@ -104,31 +104,31 @@ void testReadWrite(bool compression, bool scaling)
     sqliteWriter->setOptions(sqliteOptions);
     sqliteWriter->setInput(reader);
 
-    PointContext ctx;
-    sqliteWriter->prepare(ctx);
-    sqliteWriter->execute(ctx);
+    PointTable table;
+    sqliteWriter->prepare(table);
+    sqliteWriter->execute(table);
 
     // Done - now read back.
     std::unique_ptr<Stage> sqliteReader(f.createStage("readers.sqlite"));
     sqliteReader->setOptions(sqliteOptions);
 
-    PointContext ctx2;
-    sqliteReader->prepare(ctx2);
-    PointBufferSet pbSet = sqliteReader->execute(ctx2);
-    EXPECT_EQ(pbSet.size(), 1U);
-    PointBufferPtr buffer = *pbSet.begin();
+    PointTable table2;
+    sqliteReader->prepare(table2);
+    PointViewSet viewSet = sqliteReader->execute(table2);
+    EXPECT_EQ(viewSet.size(), 1U);
+    PointViewPtr view = *viewSet.begin();
 
     using namespace Dimension;
 
     uint16_t reds[] = {68, 54, 112, 178, 134, 99, 90, 106, 106, 100, 64};
     for (PointId idx = 0; idx < 11; idx++)
     {
-        uint16_t r = buffer->getFieldAs<uint16_t>(Id::Red, idx);
+        uint16_t r = view->getFieldAs<uint16_t>(Id::Red, idx);
         EXPECT_EQ(r, reds[idx]);
     }
-    int32_t x = buffer->getFieldAs<int32_t>(Id::X, 10);
+    int32_t x = view->getFieldAs<int32_t>(Id::X, 10);
     EXPECT_EQ(x, 636038);
-    double xd = buffer->getFieldAs<double>(Id::X, 10);
+    double xd = view->getFieldAs<double>(Id::X, 10);
     EXPECT_FLOAT_EQ(xd, 636037.53);
 
    FileUtils::deleteFile(tempFilename);

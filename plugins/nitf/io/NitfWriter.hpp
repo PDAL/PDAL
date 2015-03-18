@@ -52,8 +52,8 @@ public:
 
 private:
     virtual void processOptions(const Options& options);
-    virtual void done(PointContextRef ctx);
-    virtual void write(const PointBuffer&);
+    virtual void done(PointTableRef table);
+    virtual void write(const PointViewPtr view);
 
     BOX3D m_bounds;
     std::string m_cLevel;

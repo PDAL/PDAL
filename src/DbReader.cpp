@@ -35,29 +35,29 @@
 namespace pdal
 {
 
-void DbReader::loadSchema(PointContextRef ctx,
+void DbReader::loadSchema(PointLayoutPtr layout,
     const std::string& schemaString)
 {
     XMLSchema schema(schemaString);
-    loadSchema(ctx, schema);
+    loadSchema(layout, schema);
 }
 
-void DbReader::loadSchema(PointContextRef ctx, const XMLSchema& schema)
+void DbReader::loadSchema(PointLayoutPtr layout, const XMLSchema& schema)
 {
     m_dims = schema.xmlDims();
 
     // Override XYZ to doubles and use those going forward
     // we will apply any scaling set before handing it off
     // to PDAL.
-    ctx.registerDim(Dimension::Id::X);
-    ctx.registerDim(Dimension::Id::Y);
-    ctx.registerDim(Dimension::Id::Z);
+    layout->registerDim(Dimension::Id::X);
+    layout->registerDim(Dimension::Id::Y);
+    layout->registerDim(Dimension::Id::Z);
 
     m_packedPointSize = 0;
     for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
     {
         di->m_dimType.m_id =
-            ctx.registerOrAssignDim(di->m_name, di->m_dimType.m_type);
+            layout->registerOrAssignDim(di->m_name, di->m_dimType.m_type);
         m_packedPointSize += Dimension::size(di->m_dimType.m_type);
     }
 }
@@ -73,7 +73,7 @@ DimTypeList DbReader::dbDimTypes() const
 }
 
 
-void DbReader::writeField(PointBuffer& pb, const char *pos, const DimType& dim,
+void DbReader::writeField(PointView& view, const char *pos, const DimType& dim,
     PointId idx)
 {
     using namespace Dimension;
@@ -85,18 +85,20 @@ void DbReader::writeField(PointBuffer& pb, const char *pos, const DimType& dim,
 
         memcpy(&i, pos, sizeof(int32_t));
         double d = (i * dim.m_xform.m_scale) + dim.m_xform.m_offset;
-        pb.setField(dim.m_id, idx, d);
+        view.setField(dim.m_id, idx, d);
     }
     else
-        pb.setField(dim.m_id, dim.m_type, idx, pos);
+    {
+        view.setField(dim.m_id, dim.m_type, idx, pos);
+    }
 }
 
 
 /// Write a point's packed data into a buffer.
-/// \param[in] pb  PointBuffer to write to.
+/// \param[in] view PointView to write to.
 /// \param[in] idx  Index of point to write.
 /// \param[in] buf  Pointer to packed DB point data.
-void DbReader::writePoint(PointBuffer& pb, PointId idx, const char *buf)
+void DbReader::writePoint(PointView& view, PointId idx, const char *buf)
 {
     using namespace Dimension;
 
@@ -113,10 +115,12 @@ void DbReader::writePoint(PointBuffer& pb, PointId idx, const char *buf)
 
             memcpy(&i, buf, sizeof(int32_t));
             double d = (i * dimType.m_xform.m_scale) + dimType.m_xform.m_offset;
-            pb.setField(dimType.m_id, idx, d);
+            view.setField(dimType.m_id, idx, d);
         }
         else
-            pb.setField(dimType.m_id, dimType.m_type, idx, buf);
+        {
+            view.setField(dimType.m_id, dimType.m_type, idx, buf);
+        }
         buf += Dimension::size(dimType.m_type);
     }
 }

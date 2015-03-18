@@ -49,35 +49,33 @@ namespace plang
 
 BufferedInvocation::BufferedInvocation(const Script& script)
     : Invocation(script)
-{
-    return;
-}
+{}
 
 
-void BufferedInvocation::begin(PointBuffer& buffer)
+void BufferedInvocation::begin(PointViewPtr view)
 {
-    PointContext ctx = buffer.m_context;
-    Dimension::IdList const& dims = ctx.dims();
+    PointLayoutPtr layout(view->m_pointTable.layout());
+    Dimension::IdList const& dims = layout->dims();
 
     for (auto di = dims.begin(); di != dims.end(); ++di)
     {
         Dimension::Id::Enum d = *di;
-        Dimension::Detail *dd = ctx.dimDetail(d);
-        void *data = malloc(dd->size() * buffer.size());
+        const Dimension::Detail *dd = layout->dimDetail(d);
+        void *data = malloc(dd->size() * view->size());
         m_buffers.push_back(data);  // Hold pointer for deallocation
         char *p = (char *)data;
-        for (PointId idx = 0; idx < buffer.size(); ++idx)
+        for (PointId idx = 0; idx < view->size(); ++idx)
         {
-            buffer.getFieldInternal(d, idx, (void *)p);
+            view->getFieldInternal(d, idx, (void *)p);
             p += dd->size();
         }
-        std::string name = ctx.dimName(*di);
-        insertArgument(name, (uint8_t *)data, dd->type(), buffer.size());
+        std::string name = layout->dimName(*di);
+        insertArgument(name, (uint8_t *)data, dd->type(), view->size());
     }
 }
 
 
-void BufferedInvocation::end(PointBuffer& buffer)
+void BufferedInvocation::end(PointViewPtr view)
 {
     // for each entry in the script's outs dictionary,
     // look up that entry's name in the schema and then
@@ -87,14 +85,14 @@ void BufferedInvocation::end(PointBuffer& buffer)
     std::vector<std::string> names;
     getOutputNames(names);
 
-    PointContext ctx = buffer.m_context;
-    Dimension::IdList const& dims = ctx.dims();
+    PointLayoutPtr layout(view->m_pointTable.layout());
+    Dimension::IdList const& dims = layout->dims();
 
     for (auto di = dims.begin(); di != dims.end(); ++di)
     {
         Dimension::Id::Enum d = *di;
-        Dimension::Detail *dd = ctx.dimDetail(d);
-        std::string name = ctx.dimName(*di);
+        const Dimension::Detail *dd = layout->dimDetail(d);
+        std::string name = layout->dimName(*di);
         auto found = std::find(names.begin(), names.end(), name);
         if (found == names.end()) continue; // didn't have this dim in the names
 
@@ -104,9 +102,9 @@ void BufferedInvocation::end(PointBuffer& buffer)
         size_t size = dd->size();
         void *data = extractResult(name, dd->type());
         char *p = (char *)data;
-        for (PointId idx = 0; idx < buffer.size(); ++idx)
+        for (PointId idx = 0; idx < view->size(); ++idx)
         {
-            buffer.setField(d, dd->type(), idx, (void *)p);
+            view->setField(d, dd->type(), idx, (void *)p);
             p += size;
         }
     }

@@ -86,26 +86,32 @@ void RangeFilter::processOptions(const Options& options)
     }
 }
 
-void RangeFilter::ready(PointContext ctx)
+void RangeFilter::ready(PointTableRef table)
 {
+    const PointLayoutPtr layout(table.layout());
     for (auto const& d : m_name_map)
-        m_dimensions_map.insert(std::make_pair(ctx.findDim(d.first), d.second));
+    {
+        m_dimensions_map.insert(
+                std::make_pair(
+                    layout->findDim(d.first),
+                    d.second));
+    }
 }
 
-PointBufferSet RangeFilter::run(PointBufferPtr buf)
+PointViewSet RangeFilter::run(PointViewPtr inView)
 {
-    PointBufferSet pbSet;
-    if (!buf->size())
-        return pbSet;
-    
-    PointBufferPtr outbuf = buf->makeNew();
+    PointViewSet viewSet;
+    if (!inView->size())
+        return viewSet;
 
-    for (PointId i = 0; i < buf->size(); ++i)
+    PointViewPtr outView = inView->makeNew();
+
+    for (PointId i = 0; i < inView->size(); ++i)
     {
         bool keep_point = true;
         for (auto const& d : m_dimensions_map)
         {
-            double v = buf->getFieldAs<double>(d.first, i);
+            double v = inView->getFieldAs<double>(d.first, i);
             if (v < d.second.min || v > d.second.max)
             {
                 keep_point = false;
@@ -113,12 +119,12 @@ PointBufferSet RangeFilter::run(PointBufferPtr buf)
             }
         }
         if (keep_point)
-            outbuf->appendPoint(*buf, i);
+            outView->appendPoint(*inView, i);
     }
 
-    pbSet.insert(outbuf);
+    viewSet.insert(outView);
 
-    return pbSet;
+    return viewSet;
 }
 
 } // pdal

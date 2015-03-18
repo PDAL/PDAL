@@ -54,18 +54,18 @@ public:
     std::string getName() const;
 
 private:
-    PointBufferPtr m_buf;
+    PointViewPtr m_view;
 
-    virtual void ready(PointContext ctx)
-        { m_buf.reset(new PointBuffer(ctx)); }
+    virtual void ready(PointTableRef table)
+        { m_view.reset(new PointView(table)); }
 
-    virtual PointBufferSet run(PointBufferPtr buf)
+    virtual PointViewSet run(PointViewPtr in)
     {
-        PointBufferSet pbSet;
+        PointViewSet viewSet;
 
-        m_buf->append(*buf);
-        pbSet.insert(m_buf);
-        return pbSet;
+        m_view->append(*in.get());
+        viewSet.insert(m_view);
+        return viewSet;
     }
 
     MergeFilter& operator=(const MergeFilter&); // not implemented

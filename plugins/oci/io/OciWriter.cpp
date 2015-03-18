@@ -34,7 +34,7 @@
 
 
 #include <pdal/util/FileUtils.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/GlobalEnvironment.hpp>
 
@@ -714,10 +714,10 @@ void OciWriter::processOptions(const Options& options)
 }
 
 
-void OciWriter::write(const PointBuffer& buffer)
+void OciWriter::write(const PointViewPtr view)
 {
     writeInit();
-    writeTile(buffer);
+    writeTile(view);
 }
 
 
@@ -754,7 +754,7 @@ void OciWriter::writeInit()
 }
 
 
-void OciWriter::ready(PointContextRef ctx)
+void OciWriter::ready(PointTableRef table)
 {
     bool haveOutputTable = blockTableExists();
     if (m_overwrite && haveOutputTable)
@@ -765,11 +765,11 @@ void OciWriter::ready(PointContextRef ctx)
 
     m_pcExtent.clear();
     m_lastBlockId = 0;
-    DbWriter::ready(ctx);
+    DbWriter::ready(table);
 }
 
 
-void OciWriter::done(PointContextRef ctx)
+void OciWriter::done(PointTableRef table)
 {
     if (!m_connection)
         return;
@@ -824,7 +824,7 @@ void OciWriter::setOrdinates(Statement statement, OCIArray* ordinates,
 }
 
 
-void OciWriter::writeTile(PointBuffer const& buffer)
+void OciWriter::writeTile(const PointViewPtr view)
 {
     bool usePartition = (m_blockTablePartitionColumn.size() != 0);
 
@@ -854,7 +854,7 @@ void OciWriter::writeTile(PointBuffer const& buffer)
         m_lastBlockId << std::endl;
 
     // :3
-    long long_num_points = static_cast<long>(buffer.size());
+    long long_num_points = static_cast<long>(view->size());
     statement->Bind(&long_num_points);
     log()->get(LogLevel::Debug4) << "Num points " <<
         long_num_points << std::endl;
@@ -863,9 +863,9 @@ void OciWriter::writeTile(PointBuffer const& buffer)
 
     // :4
     size_t totalSize = 0;
-    std::vector<char> outbuf(m_packedPointSize * buffer.size());
+    std::vector<char> outbuf(m_packedPointSize * view->size());
     char *pos = outbuf.data();
-    m_callback->setTotal(buffer.size());
+    m_callback->setTotal(view->size());
     m_callback->invoke(0);
     if (m_orientation == Orientation::DimensionMajor)
     {
@@ -873,9 +873,9 @@ void OciWriter::writeTile(PointBuffer const& buffer)
         size_t interrupt = m_dimTypes.size() * 100;
         for (auto di = m_dimTypes.begin(); di != m_dimTypes.end(); ++di)
         {
-            for (PointId idx = 0; idx < buffer.size(); ++idx)
+            for (PointId idx = 0; idx < view->size(); ++idx)
             {
-                size_t size = readField(buffer, pos, *di, idx);
+                size_t size = readField(*view.get(), pos, *di, idx);
                 pos += size;
                 totalSize += size;
                 if (clicks++ % interrupt == 0)
@@ -887,9 +887,9 @@ void OciWriter::writeTile(PointBuffer const& buffer)
     {
         std::vector<char> storage(m_packedPointSize);
 
-        for (PointId idx = 0; idx < buffer.size(); ++idx)
+        for (PointId idx = 0; idx < view->size(); ++idx)
         {
-            size_t size = readPoint(buffer, idx, storage.data());
+            size_t size = readPoint(*view.get(), idx, storage.data());
             memcpy(pos, storage.data(), size);
             totalSize += size;
             if (idx % 100 == 0)
@@ -898,7 +898,7 @@ void OciWriter::writeTile(PointBuffer const& buffer)
             totalSize += size;
         }
     }
-    m_callback->invoke(buffer.size());
+    m_callback->invoke(view->size());
 
     log()->get(LogLevel::Debug4) << "Blob size " << totalSize << std::endl;
     OCILobLocator* locator;
@@ -936,7 +936,7 @@ void OciWriter::writeTile(PointBuffer const& buffer)
     m_connection->CreateType(&sdo_ordinates, m_connection->GetOrdinateType());
 
     // x0, x1, y0, y1, z0, z1, bUse3d
-    BOX3D bounds = buffer.calculateBounds(true);
+    BOX3D bounds = view->calculateBounds(true);
     // Cumulate a total bounds for the file.
     m_pcExtent.grow(bounds);
 

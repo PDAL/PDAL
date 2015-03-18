@@ -36,7 +36,6 @@
 
 #include <pdal/Filter.hpp>
 #include <pdal/plugin.h>
-#include <pdal/PointBuffer.hpp>
 
 extern "C" int32_t StatsFilter_ExitFunc();
 extern "C" PF_ExitFunc StatsFilter_InitPlugin();
@@ -110,10 +109,10 @@ private:
     StatsFilter& operator=(const StatsFilter&); // not implemented
     StatsFilter(const StatsFilter&); // not implemented
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContext ctx);
-    virtual void done(PointContext ctx);
-    virtual void filter(PointBuffer& data);
-    void extractMetadata(PointContext ctx);
+    virtual void ready(PointTableRef table);
+    virtual void done(PointTableRef table);
+    virtual void filter(PointViewPtr view);
+    void extractMetadata();
 
     std::string m_dimNames;
     std::map<Dimension::Id::Enum, stats::Summary> m_stats;

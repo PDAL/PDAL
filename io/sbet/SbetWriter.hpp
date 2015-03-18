@@ -64,8 +64,8 @@ private:
     std::string m_filename;
 
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContextRef ctx);
-    virtual void write(const PointBuffer& buf);
+    virtual void ready(PointTableRef table);
+    virtual void write(const PointViewPtr view);
 };
 
 } // namespace pdal

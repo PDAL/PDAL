@@ -111,7 +111,7 @@ void NitfReader::initialize()
 }
 
 
-void NitfReader::ready(PointContextRef ctx)
+void NitfReader::ready(PointTableRef table)
 {
 #if 0
     // When combined with setting REQUIRE_LIDAR_SEGMENTS, this little
@@ -127,7 +127,7 @@ void NitfReader::ready(PointContextRef ctx)
 #endif
     // Initialize the LAS stuff with its own metadata node.
     MetadataNode lasNode = m_metadata.add(LasReader::getName());
-    LasReader::ready(ctx, lasNode);
+    LasReader::ready(table, lasNode);
 }
 
 } // namespace pdal

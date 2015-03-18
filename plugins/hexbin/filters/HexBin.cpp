@@ -63,7 +63,7 @@ void HexBin::processOptions(const Options& options)
 }
 
 
-void HexBin::ready(PointContext ctx)
+void HexBin::ready(PointTableRef table)
 {
     if (m_edgeLength == 0.0)  // 0 can always be represented exactly.
     {
@@ -75,18 +75,18 @@ void HexBin::ready(PointContext ctx)
 }
 
 
-void HexBin::filter(PointBuffer& buf)
+void HexBin::filter(PointViewPtr view)
 {
-    for (PointId idx = 0; idx < buf.size(); ++idx)
+    for (PointId idx = 0; idx < view->size(); ++idx)
     {
-        double x = buf.getFieldAs<double>(pdal::Dimension::Id::X, idx);
-        double y = buf.getFieldAs<double>(pdal::Dimension::Id::Y, idx);
+        double x = view->getFieldAs<double>(pdal::Dimension::Id::X, idx);
+        double y = view->getFieldAs<double>(pdal::Dimension::Id::Y, idx);
         m_grid->addPoint(x, y);
     }
 }
 
 
-void HexBin::done(PointContext ctx)
+void HexBin::done(PointTableRef table)
 {
     m_grid->processSample();
     m_grid->findShapes();

@@ -35,7 +35,7 @@
 #pragma once
 
 #include <pdal/DbReader.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/XMLSchema.hpp>
 
@@ -98,18 +98,18 @@ public:
     void getSession() const;
 
 private:
-    virtual void addDimensions(PointContextRef ctx);
+    virtual void addDimensions(PointLayoutPtr layout);
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContextRef ctx);
+    virtual void ready(PointTableRef table);
     virtual void initialize();
-    virtual point_count_t read(PointBuffer& buf, point_count_t count);
-    virtual void done(PointContextRef ctx);
+    virtual point_count_t read(PointViewPtr view, point_count_t count);
+    virtual void done(PointTableRef table);
     virtual bool eof()
         { return m_atEnd; }
 
     SpatialReference fetchSpatialReference() const;
     uint32_t fetchPcid() const;
-    point_count_t readPgPatch(PointBuffer& buffer, point_count_t numPts);
+    point_count_t readPgPatch(PointViewPtr view, point_count_t numPts);
 
     // Internal functions for managing scroll cursor
     void CursorSetup();

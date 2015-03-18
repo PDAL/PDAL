@@ -34,7 +34,7 @@
 
 #include "gtest/gtest.h"
 
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <FauxReader.hpp>
 #include <RangeFilter.hpp>
@@ -52,21 +52,21 @@ TEST(RangeFilterTest, noDimension)
 {
     RangeFilter filter;
 
-    PointContext ctx;
-    EXPECT_THROW(filter.prepare(ctx), pdal_error);
+    PointTable table;
+    EXPECT_THROW(filter.prepare(table), pdal_error);
 }
 
 TEST(RangeFilterTest, noRange)
 {
     Options rangeOps;
     rangeOps.add("dimension", "Z");
-    
+
     RangeFilter filter;
     filter.setOptions(rangeOps);
 
-    PointContext ctx;
-    EXPECT_THROW(filter.prepare(ctx), pdal_error);
-} 
+    PointTable table;
+    EXPECT_THROW(filter.prepare(table), pdal_error);
+}
 
 TEST(RangeFilterTest, singleDimension)
 {
@@ -86,24 +86,24 @@ TEST(RangeFilterTest, singleDimension)
 
     Option dim("dimension", "Z");
     dim.setOptions(range);
-    
+
     Options rangeOps;
     rangeOps.add(dim);
-    
+
     RangeFilter filter;
     filter.setOptions(rangeOps);
     filter.setInput(reader);
 
-    PointContext ctx;
-    filter.prepare(ctx);
-    PointBufferSet pbSet = filter.execute(ctx);
-    PointBufferPtr buf = *pbSet.begin();
+    PointTable table;
+    filter.prepare(table);
+    PointViewSet viewSet = filter.execute(table);
+    PointViewPtr view = *viewSet.begin();
 
-    EXPECT_EQ(1u, pbSet.size());
-    EXPECT_EQ(3u, buf->size());
-    EXPECT_FLOAT_EQ(4.0, buf->getFieldAs<double>(Dimension::Id::Z, 0));
-    EXPECT_FLOAT_EQ(5.0, buf->getFieldAs<double>(Dimension::Id::Z, 1));
-    EXPECT_FLOAT_EQ(6.0, buf->getFieldAs<double>(Dimension::Id::Z, 2));
+    EXPECT_EQ(1u, viewSet.size());
+    EXPECT_EQ(3u, view->size());
+    EXPECT_FLOAT_EQ(4.0, view->getFieldAs<double>(Dimension::Id::Z, 0));
+    EXPECT_FLOAT_EQ(5.0, view->getFieldAs<double>(Dimension::Id::Z, 1));
+    EXPECT_FLOAT_EQ(6.0, view->getFieldAs<double>(Dimension::Id::Z, 2));
 }
 
 TEST(RangeFilterTest, multipleDimensions)
@@ -124,35 +124,35 @@ TEST(RangeFilterTest, multipleDimensions)
 
     Option y_dim("dimension", "Y");
     y_dim.setOptions(y_range);
- 
+
     Options z_range;
     z_range.add("min", 4);
     z_range.add("max", 6);
 
     Option z_dim("dimension", "Z");
     z_dim.setOptions(z_range);
-    
+
     Options rangeOps;
     rangeOps.add(y_dim);
     rangeOps.add(z_dim);
-    
+
     RangeFilter filter;
     filter.setOptions(rangeOps);
     filter.setInput(reader);
 
-    PointContext ctx;
-    filter.prepare(ctx);
-    PointBufferSet pbSet = filter.execute(ctx);
-    PointBufferPtr buf = *pbSet.begin();
+    PointTable table;
+    filter.prepare(table);
+    PointViewSet viewSet = filter.execute(table);
+    PointViewPtr view = *viewSet.begin();
 
-    EXPECT_EQ(1u, pbSet.size());
-    EXPECT_EQ(3u, buf->size());
-    EXPECT_FLOAT_EQ(4.0, buf->getFieldAs<double>(Dimension::Id::Y, 0));
-    EXPECT_FLOAT_EQ(5.0, buf->getFieldAs<double>(Dimension::Id::Y, 1));
-    EXPECT_FLOAT_EQ(6.0, buf->getFieldAs<double>(Dimension::Id::Y, 2));
-    EXPECT_FLOAT_EQ(4.0, buf->getFieldAs<double>(Dimension::Id::Z, 0));
-    EXPECT_FLOAT_EQ(5.0, buf->getFieldAs<double>(Dimension::Id::Z, 1));
-    EXPECT_FLOAT_EQ(6.0, buf->getFieldAs<double>(Dimension::Id::Z, 2));
+    EXPECT_EQ(1u, viewSet.size());
+    EXPECT_EQ(3u, view->size());
+    EXPECT_FLOAT_EQ(4.0, view->getFieldAs<double>(Dimension::Id::Y, 0));
+    EXPECT_FLOAT_EQ(5.0, view->getFieldAs<double>(Dimension::Id::Y, 1));
+    EXPECT_FLOAT_EQ(6.0, view->getFieldAs<double>(Dimension::Id::Y, 2));
+    EXPECT_FLOAT_EQ(4.0, view->getFieldAs<double>(Dimension::Id::Z, 0));
+    EXPECT_FLOAT_EQ(5.0, view->getFieldAs<double>(Dimension::Id::Z, 1));
+    EXPECT_FLOAT_EQ(6.0, view->getFieldAs<double>(Dimension::Id::Z, 2));
 }
 
 TEST(RangeFilterTest, onlyMin)
@@ -172,26 +172,26 @@ TEST(RangeFilterTest, onlyMin)
 
     Option dim("dimension", "Z");
     dim.setOptions(range);
-    
+
     Options rangeOps;
     rangeOps.add(dim);
-    
+
     RangeFilter filter;
     filter.setOptions(rangeOps);
     filter.setInput(reader);
 
-    PointContext ctx;
-    filter.prepare(ctx);
-    PointBufferSet pbSet = filter.execute(ctx);
-    PointBufferPtr buf = *pbSet.begin();
+    PointTable table;
+    filter.prepare(table);
+    PointViewSet viewSet = filter.execute(table);
+    PointViewPtr view = *viewSet.begin();
 
-    EXPECT_EQ(1u, pbSet.size());
-    EXPECT_EQ(5u, buf->size());
-    EXPECT_FLOAT_EQ(6.0, buf->getFieldAs<double>(Dimension::Id::Z, 0));
-    EXPECT_FLOAT_EQ(7.0, buf->getFieldAs<double>(Dimension::Id::Z, 1));
-    EXPECT_FLOAT_EQ(8.0, buf->getFieldAs<double>(Dimension::Id::Z, 2));
-    EXPECT_FLOAT_EQ(9.0, buf->getFieldAs<double>(Dimension::Id::Z, 3));
-    EXPECT_FLOAT_EQ(10.0, buf->getFieldAs<double>(Dimension::Id::Z, 4));
+    EXPECT_EQ(1u, viewSet.size());
+    EXPECT_EQ(5u, view->size());
+    EXPECT_FLOAT_EQ(6.0, view->getFieldAs<double>(Dimension::Id::Z, 0));
+    EXPECT_FLOAT_EQ(7.0, view->getFieldAs<double>(Dimension::Id::Z, 1));
+    EXPECT_FLOAT_EQ(8.0, view->getFieldAs<double>(Dimension::Id::Z, 2));
+    EXPECT_FLOAT_EQ(9.0, view->getFieldAs<double>(Dimension::Id::Z, 3));
+    EXPECT_FLOAT_EQ(10.0, view->getFieldAs<double>(Dimension::Id::Z, 4));
 }
 
 TEST(RangeFilterTest, onlyMax)
@@ -212,26 +212,26 @@ TEST(RangeFilterTest, onlyMax)
 
     Option dim("dimension", "Z");
     dim.setOptions(range);
-    
+
     Options rangeOps;
     rangeOps.add(dim);
-    
+
     RangeFilter filter;
     filter.setOptions(rangeOps);
     filter.setInput(reader);
 
-    PointContext ctx;
-    filter.prepare(ctx);
-    PointBufferSet pbSet = filter.execute(ctx);
-    PointBufferPtr buf = *pbSet.begin();
+    PointTable table;
+    filter.prepare(table);
+    PointViewSet viewSet = filter.execute(table);
+    PointViewPtr view = *viewSet.begin();
 
-    EXPECT_EQ(1u, pbSet.size());
-    EXPECT_EQ(5u, buf->size());
-    EXPECT_FLOAT_EQ(1.0, buf->getFieldAs<double>(Dimension::Id::Z, 0));
-    EXPECT_FLOAT_EQ(2.0, buf->getFieldAs<double>(Dimension::Id::Z, 1));
-    EXPECT_FLOAT_EQ(3.0, buf->getFieldAs<double>(Dimension::Id::Z, 2));
-    EXPECT_FLOAT_EQ(4.0, buf->getFieldAs<double>(Dimension::Id::Z, 3));
-    EXPECT_FLOAT_EQ(5.0, buf->getFieldAs<double>(Dimension::Id::Z, 4));
+    EXPECT_EQ(1u, viewSet.size());
+    EXPECT_EQ(5u, view->size());
+    EXPECT_FLOAT_EQ(1.0, view->getFieldAs<double>(Dimension::Id::Z, 0));
+    EXPECT_FLOAT_EQ(2.0, view->getFieldAs<double>(Dimension::Id::Z, 1));
+    EXPECT_FLOAT_EQ(3.0, view->getFieldAs<double>(Dimension::Id::Z, 2));
+    EXPECT_FLOAT_EQ(4.0, view->getFieldAs<double>(Dimension::Id::Z, 3));
+    EXPECT_FLOAT_EQ(5.0, view->getFieldAs<double>(Dimension::Id::Z, 4));
 }
 
 
@@ -252,22 +252,22 @@ TEST(RangeFilterTest, equals)
 
     Option dim("dimension", "Z");
     dim.setOptions(range);
-    
+
     Options rangeOps;
     rangeOps.add(dim);
-    
+
     RangeFilter filter;
     filter.setOptions(rangeOps);
     filter.setInput(reader);
 
-    PointContext ctx;
-    filter.prepare(ctx);
-    PointBufferSet pbSet = filter.execute(ctx);
-    PointBufferPtr buf = *pbSet.begin();
+    PointTable table;
+    filter.prepare(table);
+    PointViewSet viewSet = filter.execute(table);
+    PointViewPtr view = *viewSet.begin();
 
-    EXPECT_EQ(1u, pbSet.size());
-    EXPECT_EQ(1u, buf->size());
-    EXPECT_FLOAT_EQ(5.0, buf->getFieldAs<double>(Dimension::Id::Z, 0));
+    EXPECT_EQ(1u, viewSet.size());
+    EXPECT_EQ(1u, view->size());
+    EXPECT_FLOAT_EQ(5.0, view->getFieldAs<double>(Dimension::Id::Z, 0));
 }
 
 TEST(RangeFilterTest, negativeValues)
@@ -288,23 +288,23 @@ TEST(RangeFilterTest, negativeValues)
 
     Option dim("dimension", "Z");
     dim.setOptions(range);
-    
+
     Options rangeOps;
     rangeOps.add(dim);
-    
+
     RangeFilter filter;
     filter.setOptions(rangeOps);
     filter.setInput(reader);
 
-    PointContext ctx;
-    filter.prepare(ctx);
-    PointBufferSet pbSet = filter.execute(ctx);
-    PointBufferPtr buf = *pbSet.begin();
+    PointTable table;
+    filter.prepare(table);
+    PointViewSet viewSet = filter.execute(table);
+    PointViewPtr view = *viewSet.begin();
 
-    EXPECT_EQ(1u, pbSet.size());
-    EXPECT_EQ(3u, buf->size());
-    EXPECT_FLOAT_EQ(-1.0, buf->getFieldAs<double>(Dimension::Id::Z, 0));
-    EXPECT_FLOAT_EQ(0.0, buf->getFieldAs<double>(Dimension::Id::Z, 1));
-    EXPECT_FLOAT_EQ(1.0, buf->getFieldAs<double>(Dimension::Id::Z, 2));
+    EXPECT_EQ(1u, viewSet.size());
+    EXPECT_EQ(3u, view->size());
+    EXPECT_FLOAT_EQ(-1.0, view->getFieldAs<double>(Dimension::Id::Z, 0));
+    EXPECT_FLOAT_EQ(0.0, view->getFieldAs<double>(Dimension::Id::Z, 1));
+    EXPECT_FLOAT_EQ(1.0, view->getFieldAs<double>(Dimension::Id::Z, 2));
 }
 

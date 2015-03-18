@@ -54,14 +54,14 @@ protected:
     {}
 
     DimTypeList dbDimTypes() const;
-    size_t readField(const PointBuffer& pb, char *pos, DimType dimType,
+    size_t readField(const PointView& view, char *pos, DimType dimType,
         PointId idx);
-    size_t readPoint(const PointBuffer& pb, PointId idx, char *outbuf);
+    size_t readPoint(const PointView& view, PointId idx, char *outbuf);
 
 private:
-    virtual void prepared(PointContextRef ctx);
-    virtual void ready(PointContextRef ctx);
-    DimTypeList dimTypes(PointContextRef ctx);
+    virtual void prepared(PointTableRef table);
+    virtual void ready(PointTableRef table);
+    DimTypeList dimTypes(PointTableRef table);
 
     DimTypeList m_dimTypes;
     int m_xPackedOffset;

@@ -58,12 +58,11 @@ private:
 
     virtual void initialize();
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContextRef ctx);
-    virtual void write(const PointBuffer& pointBuffer);
-    virtual void done(PointContextRef ctx);
+    virtual void write(const PointViewPtr view);
+    virtual void done(PointTableRef table);
 
     void writeInit();
-    void writeTile(const PointBuffer& buffer);
+    void writeTile(const PointViewPtr view);
     void CreateBlockTable();
     void CreateCloudTable();
     bool CheckTableExists(std::string const& name);
@@ -97,7 +96,6 @@ private:
     bool m_is3d;
     bool m_doCompression;;
     PatchPtr m_patch;
-    PointContextRef m_context;
 };
 
 } // namespaces

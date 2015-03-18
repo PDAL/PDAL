@@ -34,7 +34,6 @@
 
 #include <pdal/Writer.hpp>
 #include <pdal/Stage.hpp>
-#include <pdal/PointBuffer.hpp>
 #include <pdal/UserCallback.hpp>
 
 #include <pdal/PipelineWriter.hpp>
@@ -75,12 +74,12 @@ void Writer::writerProcessOptions(const Options& options)
 }
 
 
-void Writer::setAutoOffset(const PointBuffer& buf)
+void Writer::setAutoOffset(const PointViewPtr view)
 {
    if (!m_xXform.m_autoOffset && !m_yXform.m_autoOffset &&
        !m_zXform.m_autoOffset)
-       return; 
-   if (buf.empty())
+       return;
+   if (view->empty())
         return;
 
     if (m_xXform.m_autoOffset)
@@ -89,19 +88,19 @@ void Writer::setAutoOffset(const PointBuffer& buf)
         m_yXform.m_offset = (std::numeric_limits<double>::max)();
     if (m_zXform.m_autoOffset)
         m_zXform.m_offset = (std::numeric_limits<double>::max)();
-    for (PointId idx = 0; idx < buf.size(); idx++)
+    for (PointId idx = 0; idx < view->size(); idx++)
     {
         if (m_xXform.m_autoOffset)
             m_xXform.m_offset =
-                std::min(buf.getFieldAs<double>(Dimension::Id::X, idx),
+                std::min(view->getFieldAs<double>(Dimension::Id::X, idx),
                     m_xXform.m_offset);
         if (m_yXform.m_autoOffset)
             m_yXform.m_offset =
-                std::min(buf.getFieldAs<double>(Dimension::Id::Y, idx),
+                std::min(view->getFieldAs<double>(Dimension::Id::Y, idx),
                     m_yXform.m_offset);
         if (m_zXform.m_autoOffset)
             m_zXform.m_offset =
-                std::min(buf.getFieldAs<double>(Dimension::Id::Z, idx),
+                std::min(view->getFieldAs<double>(Dimension::Id::Z, idx),
                     m_zXform.m_offset);
     }
 }

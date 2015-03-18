@@ -42,7 +42,7 @@
 #include <pcl/visualization/point_cloud_handlers.h>
 #include <pcl/visualization/impl/point_cloud_handlers.hpp>
 
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 
 #include "PCLConversions.hpp"
@@ -140,16 +140,16 @@ CREATE_SHARED_PLUGIN(1, 0, PclVisualizer, Writer, s_info)
 
 std::string PclVisualizer::getName() const { return s_info.name; }
 
-void PclVisualizer::write(const PointBuffer& data)
+void PclVisualizer::write(const PointViewPtr view)
 {
     // Determine XYZ bounds
-    BOX3D const& buffer_bounds = data.calculateBounds();
+    BOX3D const& buffer_bounds = view->calculateBounds();
 
     typedef XYZIRGBA PointType;
 
-    // Convert PointBuffer to a PCL PointCloud
+    // Convert PointView to a PCL PointCloud
     pcl::PointCloud<PointType>::Ptr cloud(new pcl::PointCloud<PointType>);
-    pclsupport::PDALtoPCD(const_cast<PointBuffer&>(data), *cloud, buffer_bounds);
+    pclsupport::PDALtoPCD(view, *cloud, buffer_bounds);
 
     // Create PCLVisualizer
     std::shared_ptr<pcl::visualization::PCLVisualizer> p(new pcl::visualization::PCLVisualizer("3D Viewer"));

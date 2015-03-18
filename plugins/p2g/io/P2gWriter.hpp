@@ -78,10 +78,7 @@ private:
     P2gWriter& operator=(const P2gWriter&); // not implemented
 
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContextRef ctx) {};
-    virtual void write(const PointBuffer& buf);
-    virtual void done(PointContextRef ctx) {};
-    virtual void initialize() {};
+    virtual void write(const PointViewPtr view);
 
     std::unique_ptr<OutCoreInterp> m_interpolator;
     uint64_t m_pointCount;

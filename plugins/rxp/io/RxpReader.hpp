@@ -43,7 +43,7 @@
 
 #include <memory>
 
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/Reader.hpp>
 #include "RxpPointcloud.hpp"
 
@@ -82,10 +82,10 @@ public:
 
 private:
     virtual void processOptions(const Options& options);
-    virtual void addDimensions(PointContext ctx);
-    virtual void ready(PointContext ctx);
-    virtual point_count_t read(PointBuffer& buf, point_count_t count);
-    virtual void done(PointContext ctx);
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void ready(PointTableRef table);
+    virtual point_count_t read(PointViewPtr view, point_count_t count);
+    virtual void done(PointTableRef table);
 
     std::string m_uri;
     bool m_syncToPps;

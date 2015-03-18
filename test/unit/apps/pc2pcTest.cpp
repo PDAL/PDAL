@@ -91,27 +91,27 @@ static bool fileIsOkay(const std::string& name)
 
 static bool fileIsCompressed(const std::string& name)
 {
-    PointContext ctx;
+    PointTable table;
 
     Options ops;
     ops.add("filename", name);
     std::shared_ptr<LasReader> reader(new LasReader);
     reader->setOptions(ops);
-    reader->prepare(ctx);
+    reader->prepare(table);
     return reader->header().compressed();
 }
 
 
 static bool fileHasSrs(const std::string& name)
 {
-    PointContext ctx;
+    PointTable table;
 
     Options ops;
     ops.add("filename", name);
     std::shared_ptr<LasReader> reader(new LasReader);
     reader->setOptions(ops);
-    reader->prepare(ctx);
-    reader->execute(ctx);
+    reader->prepare(table);
+    reader->execute(table);
     return !reader->getSpatialReference().empty();
 }
 

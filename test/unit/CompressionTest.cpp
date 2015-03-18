@@ -42,7 +42,7 @@
 
 #include "Support.hpp"
 #include <pdal/Options.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <LasReader.hpp>
 #include <pdal/Compression.hpp>
 
@@ -74,16 +74,16 @@ struct SQLiteTestStream
     size_t idx;
 };
 
-std::vector<char> getBytes(PointBuffer buffer)
+std::vector<char> getBytes(PointViewPtr view)
 {
-    std::vector<char> bytes(buffer.pointSize() * buffer.size());
-    DimTypeList dimTypes = buffer.dimTypes();
+    std::vector<char> bytes(view->pointSize() * view->size());
+    DimTypeList dimTypes = view->dimTypes();
 
     char *p = bytes.data();
-    for (PointId idx = 0; idx < buffer.size(); ++idx)
+    for (PointId idx = 0; idx < view->size(); ++idx)
     {
-        buffer.getPackedPoint(dimTypes, idx, p);
-        p += buffer.pointSize();
+        view->getPackedPoint(dimTypes, idx, p);
+        p += view->pointSize();
     }
     return bytes;
 }
@@ -100,27 +100,29 @@ TEST(Compression, Simple)
     LasReader reader;
     reader.setOptions(opts);
 
-    PointContext ctx;
-    reader.prepare(ctx);
-    PointBufferSet buffers = reader.execute(ctx);
-    PointBufferPtr buffer = *buffers.begin();
+    PointTable table;
+    PointLayoutPtr layout(table.layout());
 
-    EXPECT_EQ(ctx.pointSize(), 49U);
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    PointViewPtr view = *viewSet.begin();
+
+    EXPECT_EQ(layout->pointSize(), 49U);
     SQLiteTestStream s;
 
 
-    DimTypeList dimTypes = ctx.dimTypes();
+    DimTypeList dimTypes = layout->dimTypes();
     LazPerfCompressor<SQLiteTestStream> compressor(s, dimTypes);
 
     std::vector<char> tmpbuf(compressor.pointSize());
-    for (PointId idx = 0; idx < buffer->size(); ++idx)
+    for (PointId idx = 0; idx < view->size(); ++idx)
     {
-        buffer->getPackedPoint(dimTypes, idx, tmpbuf.data());
+        view->getPackedPoint(dimTypes, idx, tmpbuf.data());
         compressor.compress(tmpbuf.data(), compressor.pointSize());
     }
     compressor.done();
 
-    EXPECT_EQ(buffer->size() * compressor.pointSize(), (size_t)52185);
+    EXPECT_EQ(view->size() * compressor.pointSize(), (size_t)52185);
     EXPECT_EQ(s.buf.size(), (size_t)28170);
 
     SQLiteTestStream s2;
@@ -128,28 +130,28 @@ TEST(Compression, Simple)
 
     LazPerfDecompressor<SQLiteTestStream> decompressor(s2, dimTypes);
 
-    size_t outbufSize = decompressor.pointSize() * buffer->size();
+    size_t outbufSize = decompressor.pointSize() * view->size();
     std::vector<char> outbuf(outbufSize);
     decompressor.decompress(outbuf.data(), outbufSize);
 
-    PointBuffer b(ctx);
+    PointViewPtr otherView(new PointView(table));
 
     char *pos = outbuf.data();
     for (PointId nextId = 0; nextId < 11; nextId++)
     {
-        b.setPackedPoint(dimTypes, nextId, pos);
+        otherView->setPackedPoint(dimTypes, nextId, pos);
         pos += decompressor.pointSize();
     }
-    EXPECT_EQ(b.size(), 11U);
-    EXPECT_EQ(getBytes(b).size(), (size_t)(49 * 11));
+    EXPECT_EQ(otherView->size(), 11U);
+    EXPECT_EQ(getBytes(otherView).size(), (size_t)(49 * 11));
 
-    uint16_t r = b.getFieldAs<uint16_t>(Dimension::Id::Red, 10);
+    uint16_t r = otherView->getFieldAs<uint16_t>(Dimension::Id::Red, 10);
     EXPECT_EQ(r, 64U);
-    int32_t x = b.getFieldAs<int32_t>(Dimension::Id::X, 10);
+    int32_t x = otherView->getFieldAs<int32_t>(Dimension::Id::X, 10);
     EXPECT_EQ(x, 636038);
-    double xd = b.getFieldAs<double>(Dimension::Id::X, 10);
+    double xd = otherView->getFieldAs<double>(Dimension::Id::X, 10);
     EXPECT_FLOAT_EQ(xd, 636037.53);
-    int32_t y = b.getFieldAs<int32_t>(Dimension::Id::Y, 10);
+    int32_t y = otherView->getFieldAs<int32_t>(Dimension::Id::Y, 10);
     EXPECT_EQ(y, 849338);
 }
 
@@ -163,7 +165,7 @@ TEST(Compression, types)
         Type::Float, Type::Double
     };
     // Size is 42.
-    
+
     std::default_random_engine generator;
     std::uniform_int_distribution<int> dist(std::numeric_limits<int>::min());
     char pts[3][42];
@@ -210,7 +212,7 @@ TEST(Compression, types)
 }
 
 //
-// BOOST_AUTO_TEST_CASE(test_compress_copied_buffer)
+// BOOST_AUTO_TEST_CASE(test_compress_copied_view)
 // {
 //     using namespace pdal;
 //
@@ -221,28 +223,28 @@ TEST(Compression, types)
 //     opts.add(opt_filename);
 //     pdal::drivers::las::Reader reader;
 //     reader.setOptions(opts);
-//     PointContext fctx;
-//     reader.prepare(fctx);
-//     PointBufferSet buffers = reader.execute(fctx);
-//     PointBufferPtr buffer = *buffers.begin();
+//     PointTable ftable;
+//     reader.prepare(ftable);
+//     PointViewSet viewSet = reader.execute(ftable);
+//     PointViewPtr view = *viewSet.begin();
 //
-//     PointContext ctx;
-//     ctx.registerDim(Dimension::Id::X);
-//     ctx.registerDim(Dimension::Id::Y);
-//     ctx.registerDim(Dimension::Id::Z);
-//     PointBuffer new_buffer(ctx);
+//     PointTable table;
+//     table->registerDim(Dimension::Id::X);
+//     table->registerDim(Dimension::Id::Y);
+//     table->registerDim(Dimension::Id::Z);
+//     PointView new_view(table);
 // //
-//     for (PointId i = 0; i < buffer->size(); ++i)
+//     for (PointId i = 0; i < view->size(); ++i)
 //     {
-//         new_buffer.setField(Dimension::Id::X, i, buffer->getFieldAs<double>(Dimension::Id::X, i));
-//         new_buffer.setField(Dimension::Id::Y, i, buffer->getFieldAs<double>(Dimension::Id::Y, i));
-//         new_buffer.setField(Dimension::Id::Z, i, buffer->getFieldAs<double>(Dimension::Id::Z, i));
+//         new_view->setField(Dimension::Id::X, i, view->getFieldAs<double>(Dimension::Id::X, i));
+//         new_view->setField(Dimension::Id::Y, i, view->getFieldAs<double>(Dimension::Id::Y, i));
+//         new_view->setField(Dimension::Id::Z, i, view->getFieldAs<double>(Dimension::Id::Z, i));
 //     }
 //     SQLiteTestStream s;
-//     compression::Compress<SQLiteTestStream>(ctx, new_buffer, s, compression::CompressionType::Lazperf, 0, 0);
+//     compression::Compress<SQLiteTestStream>(table, new_view, s, compression::CompressionType::Lazperf, 0, 0);
 //     SQLiteTestStream s2;
 //     s2.buf = s.buf;
-//     PointBufferPtr b = compression::Decompress<SQLiteTestStream>(ctx, s2, 11, compression::CompressionType::Lazperf);
+//     PointViewPtr b = compression::Decompress<SQLiteTestStream>(table, s2, 11, compression::CompressionType::Lazperf);
 //
 //     int32_t y = b->getFieldAs<int32_t>(Dimension::Id::Y, 10);
 //     BOOST_CHECK_EQUAL(y, 849338);
@@ -255,53 +257,53 @@ TEST(Compression, types)
 //
 //
 //
-// BOOST_AUTO_TEST_CASE(test_compress_simple_buffer)
+// BOOST_AUTO_TEST_CASE(test_compress_simple_view)
 // {
 //     using namespace pdal;
 //
-//     PointContext ctx;
-//     ctx.registerDim(Dimension::Id::X);
-//     ctx.registerDim(Dimension::Id::Y);
-//     ctx.registerDim(Dimension::Id::Z);
-//     ctx.registerDim(Dimension::Id::GpsTime);
-//     ctx.registerDim(Dimension::Id::Intensity);
-//     ctx.registerDim(Dimension::Id::PointSourceId);
-//     ctx.registerDim(Dimension::Id::ScanAngleRank);
-//     ctx.registerDim(Dimension::Id::Red);
-//     ctx.registerDim(Dimension::Id::Green);
-//     ctx.registerDim(Dimension::Id::Blue);
-//     ctx.registerDim(Dimension::Id::ReturnNumber);
-//     ctx.registerDim(Dimension::Id::NumberOfReturns);
-//     ctx.registerDim(Dimension::Id::ScanDirectionFlag);
-//     ctx.registerDim(Dimension::Id::EdgeOfFlightLine);
-//     ctx.registerDim(Dimension::Id::Classification);
-//     ctx.registerDim(Dimension::Id::UserData);
-//     PointBuffer buffer(ctx);
+//     PointTable table;
+//     table->registerDim(Dimension::Id::X);
+//     table->registerDim(Dimension::Id::Y);
+//     table->registerDim(Dimension::Id::Z);
+//     table->registerDim(Dimension::Id::GpsTime);
+//     table->registerDim(Dimension::Id::Intensity);
+//     table->registerDim(Dimension::Id::PointSourceId);
+//     table->registerDim(Dimension::Id::ScanAngleRank);
+//     table->registerDim(Dimension::Id::Red);
+//     table->registerDim(Dimension::Id::Green);
+//     table->registerDim(Dimension::Id::Blue);
+//     table->registerDim(Dimension::Id::ReturnNumber);
+//     table->registerDim(Dimension::Id::NumberOfReturns);
+//     table->registerDim(Dimension::Id::ScanDirectionFlag);
+//     table->registerDim(Dimension::Id::EdgeOfFlightLine);
+//     table->registerDim(Dimension::Id::Classification);
+//     table->registerDim(Dimension::Id::UserData);
+//     PointView view(table);
 //     for (PointId i = 0; i < 100; ++i)
 //     {
-//         buffer.setField(Dimension::Id::X, i, i);
-//         buffer.setField(Dimension::Id::Y, i, i+100);
-//         buffer.setField(Dimension::Id::Z, i, i+1000);
-//         buffer.setField(Dimension::Id::GpsTime, i, i+10000);
-//         buffer.setField(Dimension::Id::Intensity, i, 600);
-//         buffer.setField(Dimension::Id::PointSourceId, i, 60);
-//         buffer.setField(Dimension::Id::ScanAngleRank, i, 1003.23);
-//         buffer.setField(Dimension::Id::Red, i, 26);
-//         buffer.setField(Dimension::Id::Green, i, 42);
-//         buffer.setField(Dimension::Id::Blue, i, 255);
-//         buffer.setField(Dimension::Id::ReturnNumber, i, 2);
-//         buffer.setField(Dimension::Id::NumberOfReturns, i, 2);
-//         buffer.setField(Dimension::Id::ScanDirectionFlag, i, 1);
-//         buffer.setField(Dimension::Id::EdgeOfFlightLine, i, 1);
-//         buffer.setField(Dimension::Id::Classification, i, 2);
-//         buffer.setField(Dimension::Id::UserData, i, 25);
+//         view->setField(Dimension::Id::X, i, i);
+//         view->setField(Dimension::Id::Y, i, i+100);
+//         view->setField(Dimension::Id::Z, i, i+1000);
+//         view->setField(Dimension::Id::GpsTime, i, i+10000);
+//         view->setField(Dimension::Id::Intensity, i, 600);
+//         view->setField(Dimension::Id::PointSourceId, i, 60);
+//         view->setField(Dimension::Id::ScanAngleRank, i, 1003.23);
+//         view->setField(Dimension::Id::Red, i, 26);
+//         view->setField(Dimension::Id::Green, i, 42);
+//         view->setField(Dimension::Id::Blue, i, 255);
+//         view->setField(Dimension::Id::ReturnNumber, i, 2);
+//         view->setField(Dimension::Id::NumberOfReturns, i, 2);
+//         view->setField(Dimension::Id::ScanDirectionFlag, i, 1);
+//         view->setField(Dimension::Id::EdgeOfFlightLine, i, 1);
+//         view->setField(Dimension::Id::Classification, i, 2);
+//         view->setField(Dimension::Id::UserData, i, 25);
 //     }
 //
 //     SQLiteTestStream s;
-//     compression::Compress<SQLiteTestStream>(ctx, buffer, s, compression::CompressionType::Lazperf, 0, 0);
+//     compression::Compress<SQLiteTestStream>(table, view, s, compression::CompressionType::Lazperf, 0, 0);
 //     SQLiteTestStream s2;
 //     s2.buf = s.buf;
-//     PointBufferPtr b = compression::Decompress<SQLiteTestStream>(ctx, s2, 11, compression::CompressionType::Lazperf);
+//     PointViewPtr b = compression::Decompress<SQLiteTestStream>(table, s2, 11, compression::CompressionType::Lazperf);
 // //     std::cout << *b << std::endl;
 //     uint16_t r = b->getFieldAs<uint16_t>(Dimension::Id::Red, 10);
 //     BOOST_CHECK_EQUAL(r, 26u);

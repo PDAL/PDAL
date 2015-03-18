@@ -195,23 +195,23 @@ vector<PointId> getListOfPoints(std::string p)
 
 } //namespace
 
-MetadataNode InfoKernel::dumpPoints(PointBufferPtr buf) const
+MetadataNode InfoKernel::dumpPoints(PointViewPtr inView) const
 {
     MetadataNode root;
-    PointBufferPtr outbuf = buf->makeNew();
+    PointViewPtr outView = inView->makeNew();
 
-    // Stick points in a buffer.
+    // Stick points in a inViewfer.
     std::vector<PointId> points = getListOfPoints(m_pointIndexes);
     for (size_t i = 0; i < points.size(); ++i)
     {
         PointId id = (PointId)points[i];
-        if (id < buf->size())
-            outbuf->appendPoint(*buf, id);
+        if (id < inView->size())
+            outView->appendPoint(*inView.get(), id);
     }
 
-    MetadataNode tree = utils::toMetadata(*outbuf);
+    MetadataNode tree = utils::toMetadata(outView);
     std::string prefix("point ");
-    for (size_t i = 0; i < outbuf->size(); ++i)
+    for (size_t i = 0; i < outView->size(); ++i)
     {
         MetadataNode n = tree.findChild(std::to_string(i));
         n.add("PointId", points[i]);
@@ -267,7 +267,8 @@ void InfoKernel::dump(std::ostream& o, const std::string& filename)
     {
         m_manager->prepare();
         bPrepared = true;
-        MetadataNode schema = utils::toMetadata(m_manager->context()).clone("schema");
+        MetadataNode schema =
+            utils::toMetadata(m_manager->pointTable()).clone("schema");
         root.add(schema);
     }
     if (!bPrepared)
@@ -285,16 +286,16 @@ void InfoKernel::dump(std::ostream& o, const std::string& filename)
 
     if (m_pointIndexes.size())
     {
-        PointBufferSet pbSet = m_manager->buffers();
-        assert(pbSet.size() == 1);
-        MetadataNode points = dumpPoints(*pbSet.begin()).clone("points");
+        PointViewSet viewSet = m_manager->views();
+        assert(viewSet.size() == 1);
+        MetadataNode points = dumpPoints(*viewSet.begin()).clone("points");
         root.add(points);
     }
     if (m_QueryPoint.size())
     {
-        PointBufferSet pbSet = m_manager->buffers();
-        assert(pbSet.size() == 1);
-        root = dumpQuery(*pbSet.begin());
+        PointViewSet viewSet = m_manager->views();
+        assert(viewSet.size() == 1);
+        root = dumpQuery(*viewSet.begin());
     }
     if (m_showMetadata || m_showAll)
     {
@@ -303,8 +304,8 @@ void InfoKernel::dump(std::ostream& o, const std::string& filename)
     }
     if (m_boundary || m_showAll)
     {
-        PointBufferSet pbSet = m_manager->buffers();
-        assert(pbSet.size() == 1);
+        PointViewSet viewSet = m_manager->views();
+        assert(viewSet.size() == 1);
         MetadataNode boundary = m_hexbinStage->getMetadata().clone("boundary");
         root.add(boundary);
     }
@@ -316,7 +317,7 @@ void InfoKernel::dump(std::ostream& o, const std::string& filename)
 }
 
 
-MetadataNode InfoKernel::dumpQuery(PointBufferPtr buf) const
+MetadataNode InfoKernel::dumpQuery(PointViewPtr inView) const
 {
     auto seps = [](char c){ return (c == ',' || c == '|' || c == ' '); };
 
@@ -334,15 +335,15 @@ MetadataNode InfoKernel::dumpQuery(PointBufferPtr buf) const
     double y = values[1];
     double z = is3d ? values[2] : 0.0;
 
-    PointBufferPtr outbuf = buf->makeNew();
+    PointViewPtr outView = inView->makeNew();
 
-    KDIndex kdi(*buf);
+    KDIndex kdi(*inView);
     kdi.build(is3d);
-    std::vector<size_t> ids = kdi.neighbors(x, y, z, buf->size());
+    std::vector<size_t> ids = kdi.neighbors(x, y, z, inView->size());
     for (auto i = ids.begin(); i != ids.end(); ++i)
-        outbuf->appendPoint(*buf, *i);
+        outView->appendPoint(*inView.get(), *i);
 
-    return utils::toMetadata(*outbuf);
+    return utils::toMetadata(outView);
 }
 
 

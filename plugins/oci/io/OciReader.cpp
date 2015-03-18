@@ -241,14 +241,13 @@ pdal::SpatialReference OciReader::fetchSpatialReference(Statement stmt,
 }
 
 
-void OciReader::addDimensions(PointContextRef ctx)
+void OciReader::addDimensions(PointLayoutPtr layout)
 {
     log()->get(LogLevel::Debug) << "Fetching schema from SDO_PC object" <<
         std::endl;
 
-    m_block->m_ctx = ctx;
     m_block->m_schema = fetchSchema(m_stmt, m_block);
-    loadSchema(ctx, m_block->m_schema);
+    loadSchema(layout, m_block->m_schema);
 
     if (m_schemaFile.size())
     {
@@ -260,7 +259,7 @@ void OciReader::addDimensions(PointContextRef ctx)
 }
 
 
-point_count_t OciReader::read(PointBuffer& buffer, point_count_t count)
+point_count_t OciReader::read(PointViewPtr view, point_count_t count)
 {
     if (eof())
         return 0;
@@ -271,14 +270,14 @@ point_count_t OciReader::read(PointBuffer& buffer, point_count_t count)
         if (m_block->numRemaining() == 0)
             if (!readOci(m_stmt, m_block))
                 return totalNumRead;
-        PointId bufBegin = buffer.size();
+        PointId bufBegin = view->size();
 
         Orientation::Enum orientation = m_block->m_schema.orientation();
         point_count_t numRead = 0;
         if (orientation == Orientation::DimensionMajor)
-            numRead = readDimMajor(buffer, m_block, count - totalNumRead);
+            numRead = readDimMajor(*view.get(), m_block, count - totalNumRead);
         else if (orientation == Orientation::PointMajor)
-            numRead = readPointMajor(buffer, m_block, count - totalNumRead);
+            numRead = readPointMajor(*view.get(), m_block, count - totalNumRead);
         PointId bufEnd = bufBegin + numRead;
         totalNumRead += numRead;
     }
@@ -286,13 +285,13 @@ point_count_t OciReader::read(PointBuffer& buffer, point_count_t count)
 }
 
 
-point_count_t OciReader::readDimMajor(PointBuffer& buffer, BlockPtr block,
+point_count_t OciReader::readDimMajor(PointView& view, BlockPtr block,
     point_count_t numPts)
 {
     using namespace Dimension;
 
     point_count_t numRemaining = block->numRemaining();
-    PointId startId = buffer.size();
+    PointId startId = view.size();
     point_count_t blockRemaining;
     point_count_t numRead = 0;
 
@@ -305,11 +304,11 @@ point_count_t OciReader::readDimMajor(PointBuffer& buffer, BlockPtr block,
         numRead = 0;
         while (numRead < numPts && blockRemaining > 0)
         {
-            writeField(buffer, pos, *di, nextId);
+            writeField(view, pos, *di, nextId);
             pos += Dimension::size(di->m_type);
 
             if (di->m_id == Id::PointSourceId && m_updatePointSourceId)
-                buffer.setField(Id::PointSourceId, nextId, block->obj_id);
+                view.setField(Id::PointSourceId, nextId, block->obj_id);
             nextId++;
             numRead++;
             blockRemaining--;
@@ -320,17 +319,17 @@ point_count_t OciReader::readDimMajor(PointBuffer& buffer, BlockPtr block,
 }
 
 
-point_count_t OciReader::readPointMajor(PointBuffer& buffer,
+point_count_t OciReader::readPointMajor(PointView& view,
     BlockPtr block, point_count_t numPts)
 {
     size_t numRemaining = block->numRemaining();
-    PointId nextId = buffer.size();
+    PointId nextId = view.size();
     point_count_t numRead = 0;
 
     char *pos = seekPointMajor(block);
     while (numRead < numPts && numRemaining > 0)
     {
-        writePoint(buffer, nextId, pos);
+        writePoint(view, nextId, pos);
 
         numRemaining--;
         nextId++;

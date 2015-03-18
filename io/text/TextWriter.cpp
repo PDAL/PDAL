@@ -35,7 +35,7 @@
 #include "TextWriter.hpp"
 
 #include <pdal/pdal_export.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/util/Algorithm.hpp>
 
 #include <algorithm>
@@ -105,7 +105,7 @@ void TextWriter::processOptions(const Options& ops)
 }
 
 
-void TextWriter::ready(PointContextRef ctx)
+void TextWriter::ready(PointTableRef table)
 {
     m_stream->precision(m_precision);
     *m_stream << std::fixed;
@@ -118,7 +118,7 @@ void TextWriter::ready(PointContextRef ctx)
     tokenizer sdims(m_dimOrder, separator);
     for (tokenizer::iterator ti = sdims.begin(); ti != sdims.end(); ++ti)
     {
-        Dimension::Id::Enum d = ctx.findDim(*ti);
+        Dimension::Id::Enum d = table.layout()->findDim(*ti);
         if (d == Dimension::Id::Unknown)
         {
             std::ostringstream oss;
@@ -131,7 +131,7 @@ void TextWriter::ready(PointContextRef ctx)
     // Yes, this isn't efficient when, but it's simple.
     if (m_dimOrder.empty() || m_writeAllDims)
     {
-        Dimension::IdList all = ctx.dims();
+        Dimension::IdList all = table.layout()->dims();
         for (auto di = all.begin(); di != all.end(); ++di)
             if (!contains(m_dims, *di))
                 m_dims.push_back(*di);
@@ -140,18 +140,18 @@ void TextWriter::ready(PointContextRef ctx)
     if (!m_writeHeader)
         log()->get(LogLevel::Debug) << "Not writing header" << std::endl;
     else
-        writeHeader(ctx);
+        writeHeader(table);
 }
 
 
-void TextWriter::writeHeader(PointContextRef ctx)
+void TextWriter::writeHeader(PointTableRef table)
 {
     log()->get(LogLevel::Debug) << "Writing header to filename: " <<
         m_filename << std::endl;
     if (m_outputType == "GEOJSON")
         writeGeoJSONHeader();
     else if (m_outputType == "CSV")
-        writeCSVHeader(ctx);
+        writeCSVHeader(table);
 }
 
 
@@ -175,51 +175,52 @@ void TextWriter::writeGeoJSONHeader()
 }
 
 
-void TextWriter::writeCSVHeader(PointContextRef ctx)
+void TextWriter::writeCSVHeader(PointTableRef table)
 {
+    const PointLayoutPtr layout(table.layout());
     for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
     {
         if (di != m_dims.begin())
             *m_stream << m_delimiter;
 
         if (m_quoteHeader)
-            *m_stream << "\"" << ctx.dimName(*di) << "\"";
+            *m_stream << "\"" << layout->dimName(*di) << "\"";
         else
-            *m_stream << ctx.dimName(*di);
+            *m_stream << layout->dimName(*di);
     }
     *m_stream << m_newline;
 }
 
-void TextWriter::writeCSVBuffer(const PointBuffer& data)
+void TextWriter::writeCSVBuffer(const PointViewPtr view)
 {
     uint32_t pointIndex(0);
 
-    for (PointId idx = 0; idx < data.size(); ++idx)
+    for (PointId idx = 0; idx < view->size(); ++idx)
     {
         for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
         {
             if (di != m_dims.begin())
                 *m_stream << m_delimiter;
-            *m_stream << data.getFieldAs<double>(*di, idx);
+            *m_stream << view->getFieldAs<double>(*di, idx);
         }
         *m_stream << m_newline;
     }
 }
 
-void TextWriter::writeGeoJSONBuffer(const PointBuffer& data)
+void TextWriter::writeGeoJSONBuffer(const PointViewPtr view)
 {
     using namespace Dimension;
 
-    for (PointId idx = 0; idx < data.size(); ++idx)
+    for (PointId idx = 0; idx < view->size(); ++idx)
     {
         if (idx)
             *m_stream << ",";
 
         *m_stream << "{ \"type\":\"Feature\",\"geometry\": "
             "{ \"type\": \"Point\", \"coordinates\": [";
-        *m_stream << data.getFieldAs<double>(Id::X, idx) << ",";
-        *m_stream << data.getFieldAs<double>(Id::Y, idx) << ",";
-        *m_stream << data.getFieldAs<double>(Id::Z, idx) << "]},";
+        *m_stream << view->getFieldAs<double>(Id::X, idx) << ",";
+        *m_stream << view->getFieldAs<double>(Id::Y, idx) << ",";
+        *m_stream << view->getFieldAs<double>(Id::Z, idx) << "]},";
 
         *m_stream << "\"properties\": {";
 
@@ -228,9 +229,9 @@ void TextWriter::writeGeoJSONBuffer(const PointBuffer& data)
             if (di != m_dims.begin())
                 *m_stream << ",";
 
-            *m_stream << "\"" << data.dimName(*di) << "\":";
+            *m_stream << "\"" << view->dimName(*di) << "\":";
             *m_stream << "\"";
-            *m_stream << data.getFieldAs<double>(*di, idx);
+            *m_stream << view->getFieldAs<double>(*di, idx);
             *m_stream <<"\"";
         }
         *m_stream << "}"; // end properties
@@ -238,16 +239,16 @@ void TextWriter::writeGeoJSONBuffer(const PointBuffer& data)
     }
 }
 
-void TextWriter::write(const PointBuffer& data)
+void TextWriter::write(const PointViewPtr view)
 {
     if (m_outputType == "CSV")
-        writeCSVBuffer(data);
+        writeCSVBuffer(view);
     else if (m_outputType == "GEOJSON")
-        writeGeoJSONBuffer(data);
+        writeGeoJSONBuffer(view);
 }
 
 
-void TextWriter::done(PointContextRef ctx)
+void TextWriter::done(PointTableRef /*table*/)
 {
     writeFooter();
 }

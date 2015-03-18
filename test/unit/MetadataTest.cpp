@@ -60,7 +60,7 @@ TEST(MetadataTest, test_construction)
     uint8_t u8(8);
     int16_t i16(-16);
     uint16_t u16(16);
-    
+
     {
         std::vector<uint8_t> v;
         for (uint8_t i = 0; i < 100; i++)
@@ -154,9 +154,9 @@ TEST(MetadataTest, typed_value)
     MetadataNode m4 = m.add("name", "65539");
     EXPECT_EQ(65539u, m4.value<unsigned>());
 
-    auto ctx = Utils::redirect(std::cerr);
+    auto redir = Utils::redirect(std::cerr);
     EXPECT_EQ(0u, m4.value<unsigned short>());
-    Utils::restore(std::cerr, ctx);
+    Utils::restore(std::cerr, redir);
 }
 
 
@@ -289,25 +289,25 @@ TEST(MetadataTest, test_metadata_stage)
 {
 //ABELL
 /**
-    PointContext ctx;
+    PointTable table;
 
     LasReader reader(Support::datapath("interesting.las"));
-    reader.prepare(ctx);
+    reader.prepare(table);
 
-    MetadataNode file_metadata = ctx.metadata();
+    MetadataNode file_metadata = table->metadata();
 
     EXPECT_EQ(file_metadata.toPTree().get_child("metadata").size(),
         32);
 
-    PointContext readerCtx;
+    PointTable readerTable;
     PipelineManager mgr;
     PipelineReader specReader(mgr);
     specReader.readPipeline(
         Support::datapath("pipeline/pipeline_metadata_reader.xml"));
     std::shared_ptr<Stage> stage(mgr.getStage());
 
-    stage->prepare(readerCtx);
-    MetadataNode pipeline_metadata = readerCtx.metadata();
+    stage->prepare(readerTable);
+    MetadataNode pipeline_metadata = readerTable->metadata();
     EXPECT_EQ(
         pipeline_metadata.toPTree().get_child("metadata").size(), 32);
 **/

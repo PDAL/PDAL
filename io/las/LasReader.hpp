@@ -90,7 +90,7 @@ private:
         { return StreamFactoryPtr(new FilenameStreamFactory(m_filename)); }
     virtual void processOptions(const Options& options);
     virtual void initialize();
-    virtual void addDimensions(PointContextRef ctx);
+    virtual void addDimensions(PointLayoutPtr layout);
     void fixupVlrs();
     VariableLengthRecord *findVlr(const std::string& userId, uint16_t recordId);
     void setSrsFromVlrs(MetadataNode& m);
@@ -101,17 +101,17 @@ private:
     void extractHeaderMetadata(MetadataNode& m);
     void extractVlrMetadata(MetadataNode& m);
     virtual QuickInfo inspect();
-    virtual void ready(PointContextRef ctx)
-        { ready(ctx, m_metadata); }
-    virtual void ready(PointContextRef ctx, MetadataNode& m);
-    virtual point_count_t read(PointBuffer& buf, point_count_t count);
-    virtual void done(PointContextRef ctx);
+    virtual void ready(PointTableRef table)
+        { ready(table, m_metadata); }
+    virtual void ready(PointTableRef table, MetadataNode& m);
+    virtual point_count_t read(PointViewPtr view, point_count_t count);
+    virtual void done(PointTableRef table);
     virtual bool eof()
         { return m_index >= getNumPoints(); }
-    void loadPoint(PointBuffer& data, char *buf, size_t bufsize);
-    void loadPointV10(PointBuffer& data, char *buf, size_t bufsize);
-    void loadPointV14(PointBuffer& data, char *buf, size_t bufsize);
-    void loadExtraDims(LeExtractor& istream, PointBuffer& data, PointId nextId);
+    void loadPoint(PointView& data, char *buf, size_t bufsize);
+    void loadPointV10(PointView& data, char *buf, size_t bufsize);
+    void loadPointV14(PointView& data, char *buf, size_t bufsize);
+    void loadExtraDims(LeExtractor& istream, PointView& data, PointId nextId);
     point_count_t readFileBlock(
             std::vector<char>& buf,
             point_count_t maxPoints);

@@ -52,9 +52,13 @@ Dimension::Id::Enum getTimeDimensionId(bool syncToPps)
 }
 
 
-RxpPointcloud::RxpPointcloud(const std::string& uri, bool syncToPps, bool minimal, PointContext ctx)
+RxpPointcloud::RxpPointcloud(
+        const std::string& uri,
+        bool syncToPps,
+        bool minimal,
+        PointTableRef table)
     : scanlib::pointcloud(syncToPps)
-    , m_buf(PointBufferPtr(new PointBuffer(ctx)))
+    , m_view(new PointView(table))
     , m_idx(0)
     , m_syncToPps(syncToPps)
     , m_minimal(minimal)
@@ -69,35 +73,35 @@ RxpPointcloud::~RxpPointcloud()
 }
 
 
-point_count_t RxpPointcloud::read(PointBuffer& buf, point_count_t count)
+point_count_t RxpPointcloud::read(PointViewPtr view, point_count_t count)
 {
     point_count_t numRead = 0;
 
-    if (m_idx < m_buf->size())
+    if (m_idx < m_view->size())
     {
-        numRead += writeSavedPoints(buf, count);
+        numRead += writeSavedPoints(view, count);
         if (numRead == count)
             return numRead;
     }
 
-    for (m_dec.get(m_rxpbuf); !m_dec.eoi(); m_dec.get(m_rxpbuf))
+    for (m_dec.get(m_rxpview); !m_dec.eoi(); m_dec.get(m_rxpview))
     {
-        dispatch(m_rxpbuf.begin(), m_rxpbuf.end());
-        if (m_buf->size() - m_idx + numRead >= count) break;
+        dispatch(m_rxpview.begin(), m_rxpview.end());
+        if (m_view->size() - m_idx + numRead >= count) break;
     }
 
-    numRead += writeSavedPoints(buf, count - numRead);
+    numRead += writeSavedPoints(view, count - numRead);
 
     return numRead;
 }
 
 
-point_count_t RxpPointcloud::writeSavedPoints(PointBuffer& buf, point_count_t count)
+point_count_t RxpPointcloud::writeSavedPoints(PointViewPtr view, point_count_t count)
 {
     point_count_t numRead = 0;
-    while (m_idx < m_buf->size() && numRead < count)
+    while (m_idx < m_view->size() && numRead < count)
     {
-        buf.appendPoint(*m_buf, m_idx);
+        view.appendPoint(*m_view, m_idx);
         ++m_idx, ++numRead;
     }
     return numRead;
@@ -114,25 +118,25 @@ void RxpPointcloud::on_echo_transformed(echo_type echo)
 
     using namespace Dimension;
 
-    point_count_t idx = m_buf->size();
+    point_count_t idx = m_view->size();
     unsigned int returnNumber = 1;
     Id::Enum timeId = getTimeDimensionId(m_syncToPps);
     for (const auto& t : targets)
     {
-        m_buf->setField(Id::X, idx, t.vertex[0]);
-        m_buf->setField(Id::Y, idx, t.vertex[1]);
-        m_buf->setField(Id::Z, idx, t.vertex[2]);
-        m_buf->setField(timeId, idx, t.time);
+        m_view->setField(Id::X, idx, t.vertex[0]);
+        m_view->setField(Id::Y, idx, t.vertex[1]);
+        m_view->setField(Id::Z, idx, t.vertex[2]);
+        m_view->setField(timeId, idx, t.time);
         if (!m_minimal)
         {
-            m_buf->setField(Id::Amplitude, idx, t.amplitude);
-            m_buf->setField(Id::Reflectance, idx, t.reflectance);
-            m_buf->setField(Id::ReturnNumber, idx, returnNumber);
-            m_buf->setField(Id::NumberOfReturns, idx, targets.size());
-            m_buf->setField(Id::EchoRange, idx, t.echo_range);
-            m_buf->setField(Id::Deviation, idx, t.deviation);
-            m_buf->setField(Id::BackgroundRadiation, idx, t.background_radiation);
-            m_buf->setField(Id::IsPpsLocked, idx, t.is_pps_locked);
+            m_view->setField(Id::Amplitude, idx, t.amplitude);
+            m_view->setField(Id::Reflectance, idx, t.reflectance);
+            m_view->setField(Id::ReturnNumber, idx, returnNumber);
+            m_view->setField(Id::NumberOfReturns, idx, targets.size());
+            m_view->setField(Id::EchoRange, idx, t.echo_range);
+            m_view->setField(Id::Deviation, idx, t.deviation);
+            m_view->setField(Id::BackgroundRadiation, idx, t.background_radiation);
+            m_view->setField(Id::IsPpsLocked, idx, t.is_pps_locked);
         }
         ++idx, ++returnNumber;
     }

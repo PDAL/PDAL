@@ -56,16 +56,16 @@ private:
     std::string m_url;
     std::string m_pipelineId;
     std::string m_sessionId;
-    PointContextRef m_pointContext;
+    PointLayoutPtr m_layout;
     WebSocketClient m_wsClient;
     point_count_t m_numPoints;
     point_count_t m_index;
 
     virtual void initialize();
     virtual void processOptions(const Options& options);
-    virtual void addDimensions(PointContextRef pointContext);
-    virtual void ready(PointContextRef ctx);
-    virtual point_count_t read(PointBuffer& buf, point_count_t count);
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void ready(PointTableRef table);
+    virtual point_count_t read(PointViewPtr view, point_count_t count);
     virtual bool eof() const;
 };
 

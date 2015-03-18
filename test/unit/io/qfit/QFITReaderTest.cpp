@@ -35,7 +35,7 @@
 #include "gtest/gtest.h"
 
 #include <pdal/Options.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <QfitReader.hpp>
 #include "Support.hpp"
 
@@ -44,7 +44,7 @@
 
 using namespace pdal;
 
-void Check_Point(const PointBuffer& data,
+void Check_Point(const PointView& data,
                  std::size_t index,
                  double xref, double yref, double zref,
                  int32_t tref)
@@ -75,16 +75,16 @@ TEST(QFITReaderTest, test_10_word)
     reader->setOptions(options);
     EXPECT_EQ(reader->getName(), "readers.qfit");
 
-    PointContext ctx;
-    reader->prepare(ctx);
-    PointBufferSet pbSet = reader->execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 3u);
+    PointTable table;
+    reader->prepare(table);
+    PointViewSet viewSet = reader->execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 3u);
 
-    Check_Point(*buf, 0, 221.826822, 59.205160, 32.0900, 0);
-    Check_Point(*buf, 1, 221.826740, 59.205161, 32.0190, 0);
-    Check_Point(*buf, 2, 221.826658, 59.205164, 32.0000, 0);
+    Check_Point(*view, 0, 221.826822, 59.205160, 32.0900, 0);
+    Check_Point(*view, 1, 221.826740, 59.205161, 32.0190, 0);
+    Check_Point(*view, 2, 221.826658, 59.205164, 32.0000, 0);
 }
 
 TEST(QFITReaderTest, test_14_word)
@@ -98,16 +98,16 @@ TEST(QFITReaderTest, test_14_word)
     options.add("scale_z", 0.001f, "Z scale from mm to m");
     options.add("count", 3);
 
-    PointContext ctx;
+    PointTable table;
     std::shared_ptr<QfitReader> reader(new QfitReader);
     reader->setOptions(options);
-    reader->prepare(ctx);
-    PointBufferSet pbSet = reader->execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 3u);
+    reader->prepare(table);
+    PointViewSet viewSet = reader->execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 3u);
 
-    Check_Point(*buf, 0, 244.306337, 35.623317, 1056.830000000, 903);
-    Check_Point(*buf, 1, 244.306260, 35.623280, 1056.409000000, 903);
-    Check_Point(*buf, 2, 244.306204, 35.623257, 1056.483000000, 903);
+    Check_Point(*view, 0, 244.306337, 35.623317, 1056.830000000, 903);
+    Check_Point(*view, 1, 244.306260, 35.623280, 1056.409000000, 903);
+    Check_Point(*view, 2, 244.306204, 35.623257, 1056.483000000, 903);
 }

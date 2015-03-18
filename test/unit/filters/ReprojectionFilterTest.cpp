@@ -37,7 +37,7 @@
 #include <pdal/SpatialReference.hpp>
 #include <LasReader.hpp>
 #include <ReprojectionFilter.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 
 #include "Support.hpp"
 
@@ -47,7 +47,7 @@ namespace
 {
 
 #if defined(PDAL_HAVE_GEOS) && defined(PDAL_HAVE_GEOTIFF)
-void getPoint(const PointBuffer& data, double& x, double& y, double& z)
+void getPoint(const PointView& data, double& x, double& y, double& z)
 {
     x = data.getFieldAs<double>(Dimension::Id::X, 0);
     y = data.getFieldAs<double>(Dimension::Id::Y, 0);
@@ -64,7 +64,7 @@ TEST(ReprojectionFilterTest, ReprojectionFilterTest_test_1)
 {
     const char* epsg4326_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
 
-    PointContext ctx;
+    PointTable table;
 
     const double postX = -93.351563;
     const double postY = 41.577148;
@@ -89,13 +89,13 @@ TEST(ReprojectionFilterTest, ReprojectionFilterTest_test_1)
         reprojectionFilter.setOptions(options);
         reprojectionFilter.setInput(&reader);
 
-        reprojectionFilter.prepare(ctx);
-        PointBufferSet pbSet = reprojectionFilter.execute(ctx);
-        EXPECT_EQ(pbSet.size(), 1);
-        PointBufferPtr buffer = *pbSet.begin();
+        reprojectionFilter.prepare(table);
+        PointViewSet viewSet = reprojectionFilter.execute(table);
+        EXPECT_EQ(viewSet.size(), 1);
+        PointViewPtr view = *viewSet.begin();
 
         double x, y, z;
-        getPoint(*buffer, x, y, z);
+        getPoint(*view.get(), x, y, z);
 
         EXPECT_FLOAT_EQ(x, postX);
         EXPECT_FLOAT_EQ(y, postY);
@@ -119,7 +119,7 @@ TEST(ReprojectionFilterTest, InPlaceReprojectionFilterTest_test_2)
     const double postZ = 131.570;
 
     {
-        PointContext ctx;
+        PointTable table;
 
         const SpatialReference out_ref(epsg4326_wkt);
 
@@ -137,19 +137,19 @@ TEST(ReprojectionFilterTest, InPlaceReprojectionFilterTest_test_2)
         LasReader reader(options);
         ReprojectionFilter reprojectionFilter(options);
         reprojectionFilter.setInput(&reader);
-        reprojectionFilter.prepare(ctx);
+        reprojectionFilter.prepare(table);
 
-        PointBuffer buffer(ctx);
+        PointView view(table);
         StageSequentialIterator* iter = reader.createSequentialIterator();
 
-        point_count_t numRead = iter->read(buffer, 1);
+        point_count_t numRead = iter->read(view, 1);
         EXPECT_TRUE(numRead == 1);
 
-        FilterTester::ready(&reprojectionFilter, ctx);
-        FilterTester::filter(&reprojectionFilter, buffer);
+        FilterTester::ready(&reprojectionFilter, table);
+        FilterTester::filter(&reprojectionFilter, view);
 
         double x, y, z;
-        getPoint(buffer, x, y, z); 
+        getPoint(view, x, y, z);
         EXPECT_FLOAT_EQ(x, postX);
         EXPECT_FLOAT_EQ(y, postY);
         EXPECT_FLOAT_EQ(z, postZ);

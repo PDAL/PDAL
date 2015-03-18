@@ -56,7 +56,7 @@ void PipelineKernel::validateSwitches()
 {
     if (m_usestdin)
         m_inputFile = "STDIN";
-        
+
     if (m_inputFile.empty())
         throw app_usage_error("input file name required");
 }
@@ -109,9 +109,9 @@ int PipelineKernel::execute()
         }
     }
 
-    PointContext ctx;
-    manager.getStage()->prepare(ctx);
-    manager.getStage()->execute(ctx);
+    PointTable table;
+    manager.getStage()->prepare(table);
+    manager.getStage()->execute(table);
     if (m_pipelineFile.size() > 0)
     {
         pdal::PipelineWriter writer(manager);

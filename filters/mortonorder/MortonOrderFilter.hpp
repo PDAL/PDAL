@@ -57,7 +57,7 @@ public:
 
 private:
     virtual void processOptions(const Options& ) {};
-    virtual PointBufferSet run(PointBufferPtr buf);
+    virtual PointViewSet run(PointViewPtr view);
 
     MortonOrderFilter& operator=(const MortonOrderFilter&); // not implemented
     MortonOrderFilter(const MortonOrderFilter&); // not implemented

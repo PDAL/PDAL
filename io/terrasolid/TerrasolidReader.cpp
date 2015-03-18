@@ -34,7 +34,7 @@
 
 #include "TerrasolidReader.hpp"
 
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/util/Extractor.hpp>
 
 #include <map>
@@ -93,21 +93,21 @@ void TerrasolidReader::initialize()
 }
 
 
-void TerrasolidReader::addDimensions(PointContextRef ctx)
+void TerrasolidReader::addDimensions(PointLayoutPtr layout)
 {
     m_size = 0;
-    ctx.registerDim(Dimension::Id::Classification);
-    ctx.registerDim(Dimension::Id::PointSourceId);
-    ctx.registerDim(Dimension::Id::Intensity);
-    ctx.registerDim(Dimension::Id::X);
-    ctx.registerDim(Dimension::Id::Y);
-    ctx.registerDim(Dimension::Id::Z);
-    ctx.registerDim(Dimension::Id::ReturnNumber);
-    ctx.registerDim(Dimension::Id::NumberOfReturns);
+    layout->registerDim(Dimension::Id::Classification);
+    layout->registerDim(Dimension::Id::PointSourceId);
+    layout->registerDim(Dimension::Id::Intensity);
+    layout->registerDim(Dimension::Id::X);
+    layout->registerDim(Dimension::Id::Y);
+    layout->registerDim(Dimension::Id::Z);
+    layout->registerDim(Dimension::Id::ReturnNumber);
+    layout->registerDim(Dimension::Id::NumberOfReturns);
     if (m_format == TERRASOLID_Format_2)
     {
-        ctx.registerDim(Dimension::Id::Flag);
-        ctx.registerDim(Dimension::Id::Mark);
+        layout->registerDim(Dimension::Id::Flag);
+        layout->registerDim(Dimension::Id::Mark);
     }
     if (m_format == TERRASOLID_Format_1)
         m_size = 16;
@@ -116,16 +116,16 @@ void TerrasolidReader::addDimensions(PointContextRef ctx)
 
     if (m_haveTime)
     {
-        ctx.registerDim(Dimension::Id::OffsetTime);
+        layout->registerDim(Dimension::Id::OffsetTime);
         m_size += 4;
     }
 
     if (m_haveColor)
     {
-        ctx.registerDim(Dimension::Id::Red);
-        ctx.registerDim(Dimension::Id::Green);
-        ctx.registerDim(Dimension::Id::Blue);
-        ctx.registerDim(Dimension::Id::Alpha);
+        layout->registerDim(Dimension::Id::Red);
+        layout->registerDim(Dimension::Id::Green);
+        layout->registerDim(Dimension::Id::Blue);
+        layout->registerDim(Dimension::Id::Alpha);
         m_size += 4;
     }
 }
@@ -156,7 +156,7 @@ Dimension::IdList TerrasolidReader::getDefaultDimensions()
 }
 
 
-void TerrasolidReader::ready(PointContextRef ctx)
+void TerrasolidReader::ready(PointTableRef)
 {
     m_istream.reset(new IStream(m_filename));
     // Skip to the beginning of points.
@@ -165,7 +165,7 @@ void TerrasolidReader::ready(PointContextRef ctx)
 }
 
 
-point_count_t TerrasolidReader::read(PointBuffer& data, point_count_t count)
+point_count_t TerrasolidReader::read(PointViewPtr view, point_count_t count)
 {
     count = std::min(count, getNumPoints() - m_index);
 
@@ -180,7 +180,7 @@ point_count_t TerrasolidReader::read(PointBuffer& data, point_count_t count)
     // says.
     // Also modified the fetch of time/color based on header flag (rather
     // than just not write the data into the buffer).
-    PointId nextId = data.size();
+    PointId nextId = view->size();
     while (!eof())
     {
         if (m_format == TERRASOLID_Format_1)
@@ -190,26 +190,26 @@ point_count_t TerrasolidReader::read(PointBuffer& data, point_count_t count)
             extractor >> classification >> flight_line >> echo_int >> x >> y >>
                 z;
 
-            data.setField(Dimension::Id::Classification, nextId,
+            view->setField(Dimension::Id::Classification, nextId,
                           classification);
-            data.setField(Dimension::Id::PointSourceId, nextId, flight_line);
+            view->setField(Dimension::Id::PointSourceId, nextId, flight_line);
             switch (echo_int)
             {
             case 0: // only echo
-                data.setField(Dimension::Id::ReturnNumber, nextId, 1);
-                data.setField(Dimension::Id::NumberOfReturns, nextId, 1);
+                view->setField(Dimension::Id::ReturnNumber, nextId, 1);
+                view->setField(Dimension::Id::NumberOfReturns, nextId, 1);
                 break;
             case 1: // first of many echos
-                data.setField(Dimension::Id::ReturnNumber, nextId, 1);
+                view->setField(Dimension::Id::ReturnNumber, nextId, 1);
                 break;
             default: // intermediate echo or last of many echos
                 break;
             }
-            data.setField(Dimension::Id::X, nextId,
+            view->setField(Dimension::Id::X, nextId,
                           (x - m_header->OrgX) / m_header->Units);
-            data.setField(Dimension::Id::Y, nextId,
+            view->setField(Dimension::Id::Y, nextId,
                           (y - m_header->OrgY) / m_header->Units);
-            data.setField(Dimension::Id::Z, nextId,
+            view->setField(Dimension::Id::Z, nextId,
                           (z - m_header->OrgZ) / m_header->Units);
         }
 
@@ -222,30 +222,30 @@ point_count_t TerrasolidReader::read(PointBuffer& data, point_count_t count)
             extractor >> x >> y >> z >> classification >> echo_int >> flag >>
                 mark >> flight_line >> intensity;
 
-            data.setField(Dimension::Id::X, nextId,
+            view->setField(Dimension::Id::X, nextId,
                           (x - m_header->OrgX) / m_header->Units);
-            data.setField(Dimension::Id::Y, nextId,
+            view->setField(Dimension::Id::Y, nextId,
                           (y - m_header->OrgY) / m_header->Units);
-            data.setField(Dimension::Id::Z, nextId,
+            view->setField(Dimension::Id::Z, nextId,
                           (z - m_header->OrgZ) / m_header->Units);
-            data.setField(Dimension::Id::Classification, nextId,
+            view->setField(Dimension::Id::Classification, nextId,
                           classification);
             switch (echo_int)
             {
             case 0: // only echo
-                data.setField(Dimension::Id::ReturnNumber, nextId, 1);
-                data.setField(Dimension::Id::NumberOfReturns, nextId, 1);
+                view->setField(Dimension::Id::ReturnNumber, nextId, 1);
+                view->setField(Dimension::Id::NumberOfReturns, nextId, 1);
                 break;
             case 1: // first of many echos
-                data.setField(Dimension::Id::ReturnNumber, nextId, 1);
+                view->setField(Dimension::Id::ReturnNumber, nextId, 1);
                 break;
             default: // intermediate echo or last of many echos
                 break;
             }
-            data.setField(Dimension::Id::Flag, nextId, flag);
-            data.setField(Dimension::Id::Mark, nextId, mark);
-            data.setField(Dimension::Id::PointSourceId, nextId, flight_line);
-            data.setField(Dimension::Id::Intensity, nextId, intensity);
+            view->setField(Dimension::Id::Flag, nextId, flag);
+            view->setField(Dimension::Id::Mark, nextId, mark);
+            view->setField(Dimension::Id::PointSourceId, nextId, flight_line);
+            view->setField(Dimension::Id::Intensity, nextId, intensity);
         }
 
         if (m_haveTime)
@@ -259,7 +259,7 @@ point_count_t TerrasolidReader::read(PointBuffer& data, point_count_t count)
             t -= m_baseTime; // Offset from the beginning of the read.
             // instead of GPS week.
             t /= 5; // 5000ths of a second to milliseconds
-            data.setField(Dimension::Id::OffsetTime, nextId, t);
+            view->setField(Dimension::Id::OffsetTime, nextId, t);
         }
 
         if (m_haveColor)
@@ -268,10 +268,10 @@ point_count_t TerrasolidReader::read(PointBuffer& data, point_count_t count)
 
             extractor >> red >> green >> blue >> alpha;
 
-            data.setField(Dimension::Id::Red, nextId, red);
-            data.setField(Dimension::Id::Green, nextId, green);
-            data.setField(Dimension::Id::Blue, nextId, blue);
-            data.setField(Dimension::Id::Alpha, nextId, alpha);
+            view->setField(Dimension::Id::Red, nextId, red);
+            view->setField(Dimension::Id::Green, nextId, green);
+            view->setField(Dimension::Id::Blue, nextId, blue);
+            view->setField(Dimension::Id::Alpha, nextId, alpha);
         }
         nextId++;
         m_index++;
@@ -281,7 +281,7 @@ point_count_t TerrasolidReader::read(PointBuffer& data, point_count_t count)
 }
 
 
-void TerrasolidReader::done(PointContextRef ctx)
+void TerrasolidReader::done(PointTableRef)
 {
     m_istream.reset();
 }

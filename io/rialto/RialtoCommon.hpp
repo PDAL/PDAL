@@ -120,7 +120,7 @@ class Tile
 {
 public:
     Tile(int32_t level, int32_t tx, int32_t ty, Rectangle r, int32_t maxLevel,
-        PointContextRef ctx, LogPtr log);
+        const PointTableRef table, LogPtr log);
     ~Tile();
 
     std::vector<char*>& points()
@@ -143,7 +143,7 @@ private:
     Rectangle m_rect;
     int32_t m_maxLevel;
     int64_t m_skip;
-    PointContext m_context;
+    const PointTableRef m_table;
     LogPtr m_log;
 };
 

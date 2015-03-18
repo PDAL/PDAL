@@ -352,35 +352,35 @@ bool Kernel::isVisualize() const
 }
 
 
-void Kernel::visualize(PointBufferPtr buffer)
+void Kernel::visualize(PointViewPtr view)
 {
     BufferReader bufferReader;
-    bufferReader.addBuffer(buffer);
+    bufferReader.addView(view);
 
     StageFactory f;
     Stage& writer = ownStage(f.createStage("writers.pclvisualizer"));
     writer.setInput(bufferReader);
 
-    PointContext ctx;
-    writer.prepare(ctx);
-    writer.execute(ctx);
+    PointTable table;
+    writer.prepare(table);
+    writer.execute(table);
 }
 
 /*
-void Kernel::visualize(PointBufferPtr input_buffer, PointBufferPtr output_buffer) const
+void Kernel::visualize(PointViewPtr input_view, PointViewPtr output_view) const
 {
 #ifdef PDAL_HAVE_PCL_VISUALIZE
     int viewport = 0;
 
     // Determine XYZ bounds
-    BOX3D const& input_bounds = input_buffer->calculateBounds();
-    BOX3D const& output_bounds = output_buffer->calculateBounds();
+    BOX3D const& input_bounds = input_view->calculateBounds();
+    BOX3D const& output_bounds = output_view->calculateBounds();
 
-    // Convert PointBuffer to a PCL PointCloud
+    // Convert PointView to a PCL PointCloud
     pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-    pclsupport::PDALtoPCD(const_cast<PointBuffer&>(*input_buffer), *input_cloud, input_bounds);
+    pclsupport::PDALtoPCD(const_cast<PointViewPtr>(*input_view), *input_cloud, input_bounds);
     pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-    pclsupport::PDALtoPCD(const_cast<PointBuffer&>(*output_buffer), *output_cloud, output_bounds);
+    pclsupport::PDALtoPCD(const_cast<PointViewPtr>(*output_view), *output_cloud, output_bounds);
 
     // Create PCLVisualizer
     std::shared_ptr<pcl::visualization::PCLVisualizer> p(new pcl::visualization::PCLVisualizer("3D Viewer"));

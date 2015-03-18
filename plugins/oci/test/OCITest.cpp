@@ -219,7 +219,7 @@ bool WriteUnprojectedData()
     Option filename("filename", Support::datapath("autzen/autzen-utm.las"), "");
     options.add(filename);
 
-    PointContext ctx;
+    PointTable table;
 
     StageFactory f;
     std::unique_ptr<Stage> reader(f.createStage("readers.las"));
@@ -230,14 +230,14 @@ bool WriteUnprojectedData()
     writer->setOptions(options);
     writer->setInput(*reader);
 
-    writer->prepare(ctx);
-    writer->execute(ctx);
+    writer->prepare(table);
+    writer->execute(table);
 
     //ABELL - This test doesn't test anything anymore.  Perhaps it should.
     return true;
 }
 
-void checkUnProjectedPoints(PointBuffer const& data)
+void checkUnProjectedPoints(const PointViewPtr view)
 {
     int X[] = { 49405730, 49413382, 49402110, 49419289, 49418622, 49403411 };
     int Y[] = { 487743335, 487743982, 487743983, 487744219, 487744254, 487745019 };
@@ -249,14 +249,14 @@ void checkUnProjectedPoints(PointBuffer const& data)
 
     for (unsigned i = 0; i < 6; ++i)
     {
-        int32_t x = data.getFieldAs<int32_t>(Dimension::Id::X, i);
-        int32_t y = data.getFieldAs<int32_t>(Dimension::Id::Y, i);
-        int32_t z = data.getFieldAs<int32_t>(Dimension::Id::Z, i);
+        int32_t x = view->getFieldAs<int32_t>(Dimension::Id::X, i);
+        int32_t y = view->getFieldAs<int32_t>(Dimension::Id::Y, i);
+        int32_t z = view->getFieldAs<int32_t>(Dimension::Id::Z, i);
         uint16_t intensity =
-            data.getFieldAs<uint16_t>(Dimension::Id::Intensity, i);
-        uint16_t red = data.getFieldAs<uint16_t>(Dimension::Id::Red, i);
-        uint16_t green = data.getFieldAs<uint16_t>(Dimension::Id::Green, i);
-        uint16_t blue = data.getFieldAs<uint16_t>(Dimension::Id::Blue, i);
+            view->getFieldAs<uint16_t>(Dimension::Id::Intensity, i);
+        uint16_t red = view->getFieldAs<uint16_t>(Dimension::Id::Red, i);
+        uint16_t green = view->getFieldAs<uint16_t>(Dimension::Id::Green, i);
+        uint16_t blue = view->getFieldAs<uint16_t>(Dimension::Id::Blue, i);
 
         EXPECT_EQ(x, X[i]);
         EXPECT_EQ(y, Y[i]);
@@ -269,26 +269,26 @@ void checkUnProjectedPoints(PointBuffer const& data)
 }
 
 
-void compareAgainstSourceBuffer(PointBuffer const& candidate,
+void compareAgainstSourceBuffer(const PointViewPtr candidate,
     std::string filename)
 {
     Options options;
     Option fn("filename", filename);
     options.add(fn);
 
-    PointContext tc;
+    PointTable table;
     StageFactory f;
     std::unique_ptr<Stage> reader(f.createStage("readers.las"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(options);
 
-    reader->prepare(tc);
+    reader->prepare(table);
 
-    //EXPECT_EQ(candidate.size(), reader->getNumPoints());
+    //EXPECT_EQ(candidate->size(), reader->getNumPoints());
 
-    PointBufferSet pbSet = reader->execute(tc);
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr source = *pbSet.begin();
+    PointViewSet viewSet = reader->execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr source = *viewSet.begin();
 
   // EXPECT_EQ(source->size(), reader->getNumPoints());
 
@@ -311,14 +311,14 @@ void compareAgainstSourceBuffer(PointBuffer const& candidate,
         uint16_t sgreen = source->getFieldAs<uint16_t>(Dimension::Id::Green, i);
         uint16_t sblue = source->getFieldAs<uint16_t>(Dimension::Id::Blue, i);
 
-        int32_t cx = candidate.getFieldAs<int32_t>(Dimension::Id::X, i);
-        int32_t cy = candidate.getFieldAs<int32_t>(Dimension::Id::Y, i);
-        int32_t cz = candidate.getFieldAs<int32_t>(Dimension::Id::Z, i);
+        int32_t cx = candidate->getFieldAs<int32_t>(Dimension::Id::X, i);
+        int32_t cy = candidate->getFieldAs<int32_t>(Dimension::Id::Y, i);
+        int32_t cz = candidate->getFieldAs<int32_t>(Dimension::Id::Z, i);
         uint16_t cintensity =
-            candidate.getFieldAs<uint16_t>(Dimension::Id::Intensity, i);
-        uint16_t cred = candidate.getFieldAs<uint16_t>(Dimension::Id::Red, i);
-        uint16_t cgreen = candidate.getFieldAs<uint16_t>(Dimension::Id::Green, i);
-        uint16_t cblue = candidate.getFieldAs<uint16_t>(Dimension::Id::Blue, i);
+            candidate->getFieldAs<uint16_t>(Dimension::Id::Intensity, i);
+        uint16_t cred = candidate->getFieldAs<uint16_t>(Dimension::Id::Red, i);
+        uint16_t cgreen = candidate->getFieldAs<uint16_t>(Dimension::Id::Green, i);
+        uint16_t cblue = candidate->getFieldAs<uint16_t>(Dimension::Id::Blue, i);
 
         EXPECT_EQ(sx, cx);
         EXPECT_EQ(sy, cy);
@@ -360,17 +360,17 @@ TEST_F(OCITest, read_unprojected_data)
     EXPECT_TRUE(reader.get());
 
     reader->setOptions(options);
-    PointContext ctx;
-    reader->prepare(ctx);
-    PointBufferSet pbSet = reader->execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 1065u);
+    PointTable table;
+    reader->prepare(table);
+    PointViewSet viewSet = reader->execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 1065u);
 
-    // checkUnProjectedPoints(*buf);
+    // checkUnProjectedPoints(*view);
 
-    // compareAgainstSourceBuffer(*buf,  Support::datapath("autzen-utm-chipped-25.las"));
-    compareAgainstSourceBuffer(*buf, Support::datapath("autzen/autzen-utm.las"));
+    compareAgainstSourceBuffer(view,
+        Support::datapath("autzen/autzen-utm.las"));
 }
 
 
@@ -430,7 +430,7 @@ TEST_F(OCITest, read_unprojected_data)
 //     // filters::InPlaceReprojection reproj(reader_reader, options);
 //     reader_reader.prepare();
 //
-//     PointBuffer data(reader_reader.getSchema(), chunk_size+30);
+//     PointViewPtr data(reader_reader.getSchema(), chunk_size+30);
 //     StageSequentialIterator* iter = reader_reader.createSequentialIterator(data);
 //
 //     uint32_t numRead(0);
@@ -438,7 +438,7 @@ TEST_F(OCITest, read_unprojected_data)
 //     numRead = iter->read(data);
 //
 //     EXPECT_EQ(numRead, chunk_size+30u);
-//     EXPECT_EQ(data.getNumPoints(), chunk_size+30u);
+//     EXPECT_EQ(view->getNumPoints(), chunk_size+30u);
 //
 //     checkPoints(data);
 //
@@ -463,7 +463,7 @@ TEST_F(OCITest, read_unprojected_data)
 //     OciReader reader_reader(options);
 //     reader_reader.prepare();
 //
-//     PointBuffer data(reader_reader.getSchema(), 2500);
+//     PointViewPtr data(reader_reader.getSchema(), 2500);
 //     std::unique_ptr<StageSequentialIterator> iter(reader_reader.createSequentialIterator(data));
 //
 //
@@ -471,18 +471,18 @@ TEST_F(OCITest, read_unprojected_data)
 //
 //     EXPECT_EQ(numRead, 2130u);
 //
-//     Schema const& schema = data.getSchema();
+//     Schema const& schema = view->getSchema();
 //     Dimension const& dimX = schema.getDimension("X");
 //     Dimension const& dimY = schema.getDimension("Y");
 //     Dimension const& dimZ = schema.getDimension("Z");
 //     Dimension const& dimIntensity = schema.getDimension("Intensity");
 //     Dimension const& dimRed = schema.getDimension("Red");
 //
-//     int32_t x = data.getFieldAs<int32_t>(dimX, 0);
-//     int32_t y = data.getFieldAs<int32_t>(dimY, 0);
-//     int32_t z = data.getFieldAs<int32_t>(dimZ, 0);
-//     uint16_t intensity = data.getFieldAs<uint16_t>(dimIntensity, 6);
-//     uint16_t red = data.getFieldAs<uint16_t>(dimRed, 6);
+//     int32_t x = view->getFieldAs<int32_t>(dimX, 0);
+//     int32_t y = view->getFieldAs<int32_t>(dimY, 0);
+//     int32_t z = view->getFieldAs<int32_t>(dimZ, 0);
+//     uint16_t intensity = view->getFieldAs<uint16_t>(dimIntensity, 6);
+//     uint16_t red = view->getFieldAs<uint16_t>(dimRed, 6);
 //
 //     EXPECT_EQ(x, -1250367506);
 //     EXPECT_EQ(y, 492519663);
@@ -513,14 +513,14 @@ TEST_F(OCITest, read_unprojected_data)
 //     OciReader reader_reader(options);
 //     reader_reader.prepare();
 //
-//     PointBuffer data(reader_reader.getSchema(), chunk_size+30);
+//     PointViewPtr data(reader_reader.getSchema(), chunk_size+30);
 //     std::unique_ptr<StageSequentialIterator> iter(reader_reader.createSequentialIterator(data));
 //
 //
 //     uint32_t numTotal(0);
 //     uint32_t numRead(0);
 //
-//     PointBuffer data3(reader_reader.getSchema(), 100);
+//     PointViewPtr data3(reader_reader.getSchema(), 100);
 //     numRead = iter->read(data3);
 //     EXPECT_EQ(numRead, 100u);
 //     numTotal = numRead + numTotal;

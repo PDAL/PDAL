@@ -82,9 +82,9 @@ TEST(SbetWriterTest, testWrite)
         writer.setOptions(makeWriterOptions());
         writer.setInput(reader);
 
-        PointContext ctx;
-        writer.prepare(ctx);
-        writer.execute(ctx);
+        PointTable table;
+        writer.prepare(table);
+        writer.execute(table);
     }
 
     //ABELL - Write of a read file is no longer identical.

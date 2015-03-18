@@ -48,9 +48,6 @@
 #endif
 
 #include <pdal/Dimension.hpp>
-#include <pdal/PointContext.hpp>
-#include <pdal/PointBuffer.hpp>
-#include <pdal/Compression.hpp>
 
 #include <map>
 #include <vector>

@@ -43,7 +43,7 @@
 
 #include <pdal/Filter.hpp>
 #include <pdal/plugin.h>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 
 #include <vector>
 
@@ -149,9 +149,9 @@ public:
 
 private:
     virtual void processOptions(const Options& options);
-    virtual PointBufferSet run(PointBufferPtr buffer);
+    virtual PointViewSet run(PointViewPtr view);
 
-    void load(PointBuffer& buffer, ChipRefList& xvec,
+    void load(PointView& view, ChipRefList& xvec,
         ChipRefList& yvec, ChipRefList& spare);
     void partition(point_count_t size);
     void decideSplit(ChipRefList& v1, ChipRefList& v2,
@@ -164,8 +164,8 @@ private:
         ChipRefList& narrow, PointId narrowmin, PointId narrowmax);
 
     PointId m_threshold;
-    PointBufferPtr m_inbuf;
-    PointBufferSet m_buffers;
+    PointViewPtr m_inView;
+    PointViewSet m_outViews;
     std::vector<PointId> m_partitions;
     ChipRefList m_xvec;
     ChipRefList m_yvec;
@@ -176,3 +176,4 @@ private:
 };
 
 } // namespace pdal
+

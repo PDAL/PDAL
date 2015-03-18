@@ -69,10 +69,10 @@ private:
     Hdf5Handler m_hdf5Handler;
     point_count_t m_index;
 
-    virtual void addDimensions(PointContextRef ctx);
-    virtual void ready(PointContextRef ctx);
-    virtual point_count_t read(PointBuffer& data, point_count_t count);
-    virtual void done(PointContextRef ctx);
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void ready(PointTableRef table);
+    virtual point_count_t read(PointViewPtr view, point_count_t count);
+    virtual void done(PointTableRef table);
     virtual bool eof();
 
     IcebridgeReader& operator=(const IcebridgeReader&);   // Not implemented.

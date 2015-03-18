@@ -67,11 +67,11 @@ private:
 
     virtual void processOptions(const Options& options);
     virtual void initialize();
-    virtual void ready(PointContextRef ctx);
-    virtual void write(const PointBuffer& buffer);
-    virtual void done(PointContextRef ctx);
+    virtual void ready(PointTableRef table);
+    virtual void write(const PointViewPtr view);
+    virtual void done(PointTableRef table);
     void writeInit();
-    void writeTile(const PointBuffer& buffer);
+    void writeTile(const PointViewPtr view);
 
     void runCommand(std::ostringstream const& command);
     void wipeBlockTable();

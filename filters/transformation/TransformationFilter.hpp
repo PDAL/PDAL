@@ -69,7 +69,7 @@ private:
     TransformationFilter& operator=(const TransformationFilter&); // not implemented
     TransformationFilter(const TransformationFilter&); // not implemented
     virtual void processOptions(const Options& options);
-    virtual void filter(PointBuffer& data);
+    virtual void filter(PointViewPtr view);
 
     TransformationMatrix m_matrix;
 };

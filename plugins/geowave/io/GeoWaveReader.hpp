@@ -61,10 +61,10 @@ namespace pdal
     private:
         virtual void initialize();
         virtual void processOptions(const Options& ops);
-        virtual void addDimensions(PointContext ctx);
-        virtual void ready(PointContext ctx);
-        virtual point_count_t read(PointBuffer& buf, point_count_t count);
-        virtual void done(PointContextRef ctx);
+        virtual void addDimensions(PointLayoutPtr layout);
+        virtual void ready(PointTableRef table);
+        virtual point_count_t read(PointViewPtr view, point_count_t count);
+        virtual void done(PointTableRef table);
 
         int createJvm();
 

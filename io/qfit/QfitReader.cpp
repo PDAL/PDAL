@@ -59,7 +59,7 @@ The files are organized into fixed-length logical records. The
 beginning of the file contains a header of one or more records
 followed by a data segment, in which there is one record per
 laser shot. It is not necessary to interpret the header
-to use the laser data.
+to use the laser data->
 
 The first word of the header (and the file) is a 32-bit  binary
 integer giving the number of bytes in each logical record.  Commonly
@@ -139,7 +139,7 @@ the vicinity of the laser pulse.  The horizontal position of the
 passive footprint is determined relative to the laser footprint
 by a  delay formulated during ground testing at Wallops.  The
 elevation of the footprint is synthesized from surrounding laser
-elevation data.  NOTE:  The passive data is not calibrated and
+elevation data->  NOTE:  The passive data is not calibrated and
 its use, if any, should  be qualitative in nature.  It may aid
 the interpretation of terrain features. The measurement capability
 was engineered into the ATM sensors to aid in the identification
@@ -168,7 +168,7 @@ Word #       Content
 
 #include "QfitReader.hpp"
 
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/portable_endian.hpp>
 #include <pdal/util/Extractor.hpp>
 
@@ -216,7 +216,7 @@ void QfitReader::initialize()
 
     str >> int4;
 
-    // They started writting little-endian data.
+    // They started writting little-endian data->
 
     /* For years we produced ATM data in big-endian format. With changes in
     computer hardware, we reluctantly changed our standard output to
@@ -295,41 +295,41 @@ void QfitReader::processOptions(const Options& ops)
 }
 
 
-void QfitReader::addDimensions(PointContextRef ctx)
+void QfitReader::addDimensions(PointLayoutPtr layout)
 {
     using namespace Dimension;
 
     m_size = 0;
-    ctx.registerDim(Id::OffsetTime);
-    ctx.registerDim(Id::Y);
-    ctx.registerDim(Id::X);
-    ctx.registerDim(Id::Z);
-    ctx.registerDim(Id::StartPulse);
-    ctx.registerDim(Id::ReflectedPulse);
-    ctx.registerDim(Id::ScanAngleRank);
-    ctx.registerDim(Id::Pitch);
-    ctx.registerDim(Id::Roll);
+    layout->registerDim(Id::OffsetTime);
+    layout->registerDim(Id::Y);
+    layout->registerDim(Id::X);
+    layout->registerDim(Id::Z);
+    layout->registerDim(Id::StartPulse);
+    layout->registerDim(Id::ReflectedPulse);
+    layout->registerDim(Id::ScanAngleRank);
+    layout->registerDim(Id::Pitch);
+    layout->registerDim(Id::Roll);
     m_size += 36;
 
     if (m_format == QFIT_Format_12)
     {
-        ctx.registerDim(Id::Pdop);
-        ctx.registerDim(Id::PulseWidth);
+        layout->registerDim(Id::Pdop);
+        layout->registerDim(Id::PulseWidth);
         m_size += 8;
     }
     else if (m_format == QFIT_Format_14)
     {
-        ctx.registerDim(Id::PassiveSignal);
-        ctx.registerDim(Id::PassiveY);
-        ctx.registerDim(Id::PassiveX);
-        ctx.registerDim(Id::PassiveZ);
+        layout->registerDim(Id::PassiveSignal);
+        layout->registerDim(Id::PassiveY);
+        layout->registerDim(Id::PassiveX);
+        layout->registerDim(Id::PassiveZ);
         m_size += 16;
     }
     m_size += 4;  // For the GPS time that we currently discard.
 }
 
 
-void QfitReader::ready(PointContextRef ctx)
+void QfitReader::ready(PointTableRef)
 {
     m_numPoints = m_point_bytes / m_size;
     if (m_point_bytes % m_size)
@@ -345,7 +345,7 @@ void QfitReader::ready(PointContextRef ctx)
 }
 
 
-point_count_t QfitReader::read(PointBuffer& data, point_count_t count)
+point_count_t QfitReader::read(PointViewPtr data, point_count_t count)
 {
     if (!m_istream->good())
     {
@@ -358,7 +358,7 @@ point_count_t QfitReader::read(PointBuffer& data, point_count_t count)
 
     count = std::min(m_numPoints - m_index, count);
     std::vector<char> buf(m_size);
-    PointId nextId = data.size();
+    PointId nextId = data->size();
     point_count_t numRead = 0;
     while (count--)
     {
@@ -375,25 +375,25 @@ point_count_t QfitReader::read(PointBuffer& data, point_count_t count)
             if (m_flip_x && x > 180)
                 x -= 360;
 
-            data.setField(Dimension::Id::OffsetTime, nextId, time);
-            data.setField(Dimension::Id::Y, nextId, y / 1000000.0);
-            data.setField(Dimension::Id::X, nextId, x);
-            data.setField(Dimension::Id::Z, nextId, z * m_scale_z);
-            data.setField(Dimension::Id::StartPulse, nextId, start_pulse);
-            data.setField(Dimension::Id::ReflectedPulse, nextId,
+            data->setField(Dimension::Id::OffsetTime, nextId, time);
+            data->setField(Dimension::Id::Y, nextId, y / 1000000.0);
+            data->setField(Dimension::Id::X, nextId, x);
+            data->setField(Dimension::Id::Z, nextId, z * m_scale_z);
+            data->setField(Dimension::Id::StartPulse, nextId, start_pulse);
+            data->setField(Dimension::Id::ReflectedPulse, nextId,
                 reflected_pulse);
-            data.setField(Dimension::Id::ScanAngleRank, nextId,
+            data->setField(Dimension::Id::ScanAngleRank, nextId,
                 scan_angle / 1000.0);
-            data.setField(Dimension::Id::Pitch, nextId, pitch / 1000.0);
-            data.setField(Dimension::Id::Roll, nextId, roll / 1000.0);
+            data->setField(Dimension::Id::Pitch, nextId, pitch / 1000.0);
+            data->setField(Dimension::Id::Roll, nextId, roll / 1000.0);
         }
 
         if (m_format == QFIT_Format_12)
         {
             int32_t pdop, pulse_width;
             extractor >> pdop >> pulse_width;
-            data.setField(Dimension::Id::Pdop, nextId, pdop / 10.0);
-            data.setField(Dimension::Id::PulseWidth, nextId, pulse_width);
+            data->setField(Dimension::Id::Pdop, nextId, pdop / 10.0);
+            data->setField(Dimension::Id::PulseWidth, nextId, pulse_width);
         }
         else if (m_format == QFIT_Format_14)
         {
@@ -402,11 +402,11 @@ point_count_t QfitReader::read(PointBuffer& data, point_count_t count)
             double x = passive_x / 1000000.0;
             if (m_flip_x && x > 180)
                 x -= 360;
-            data.setField(Dimension::Id::PassiveSignal, nextId, passive_signal);
-            data.setField(Dimension::Id::PassiveY, nextId,
+            data->setField(Dimension::Id::PassiveSignal, nextId, passive_signal);
+            data->setField(Dimension::Id::PassiveY, nextId,
                 passive_y / 1000000.0);
-            data.setField(Dimension::Id::PassiveX, nextId, x);
-            data.setField(Dimension::Id::PassiveZ, nextId,
+            data->setField(Dimension::Id::PassiveX, nextId, x);
+            data->setField(Dimension::Id::PassiveZ, nextId,
                 passive_z * m_scale_z);
         }
         // GPS time is really a GPS offset from the start of the GPS day
@@ -450,7 +450,7 @@ Dimension::IdList QfitReader::getDefaultDimensions()
 }
 
 
-void QfitReader::done(PointContextRef ctx)
+void QfitReader::done(PointTableRef)
 {
     m_istream.reset();
 }

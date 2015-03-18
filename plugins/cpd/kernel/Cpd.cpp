@@ -117,7 +117,8 @@ void CpdKernel::addSwitches()
 }
 
 
-PointBufferPtr CpdKernel::readFile(const std::string& filename, PointContext& ctx, arma::mat& mat)
+PointViewPtr CpdKernel::readFile(const std::string& filename,
+    PointTableRef table, arma::mat& mat)
 {
     Options opt;
     opt.add<std::string>("filename", filename);
@@ -127,7 +128,7 @@ PointBufferPtr CpdKernel::readFile(const std::string& filename, PointContext& ct
     Stage& reader = makeReader(filename);
     reader.setOptions(opt);
 
-    PointBufferSet pbset;
+    PointViewSet viewSet;
     if (!m_bounds.empty())
     {
         Options boundsOptions;
@@ -137,26 +138,26 @@ PointBufferPtr CpdKernel::readFile(const std::string& filename, PointContext& ct
         Stage& crop = ownStage(f.createStage("filters.crop"));
         crop.setInput(reader);
         crop.setOptions(boundsOptions);
-        crop.prepare(ctx);
-        pbset = crop.execute(ctx);
+        crop.prepare(table);
+        viewSet = crop.execute(table);
     }
     else
     {
-        reader.prepare(ctx);
-        pbset = reader.execute(ctx);
+        reader.prepare(table);
+        viewSet = reader.execute(table);
     }
 
 
     const arma::uword D = 3;
-    for (auto it = pbset.begin(); it != pbset.end(); ++it)
+    for (auto it = viewSet.begin(); it != viewSet.end(); ++it)
     {
-        PointBufferPtr pb = *it;
+        PointViewPtr view = *it;
 
         point_count_t rowidx;
         if (mat.is_empty())
         {
             rowidx = 0;
-            mat.set_size(pb->size(), D);
+            mat.set_size(view->size(), D);
         }
         else
         {
@@ -164,27 +165,28 @@ PointBufferPtr CpdKernel::readFile(const std::string& filename, PointContext& ct
             mat.set_size(mat.n_rows + (*it)->size(), D);
         }
 
-        for (point_count_t bufidx = 0; bufidx < pb->size(); ++bufidx, ++rowidx)
+        for (point_count_t bufidx = 0; bufidx < view->size(); ++bufidx, ++rowidx)
         {
-            mat(rowidx, 0) = pb->getFieldAs<double>(Dimension::Id::X, bufidx);
-            mat(rowidx, 1) = pb->getFieldAs<double>(Dimension::Id::Y, bufidx);
-            mat(rowidx, 2) = pb->getFieldAs<double>(Dimension::Id::Z, bufidx);
+            mat(rowidx, 0) = view->getFieldAs<double>(Dimension::Id::X, bufidx);
+            mat(rowidx, 1) = view->getFieldAs<double>(Dimension::Id::Y, bufidx);
+            mat(rowidx, 2) = view->getFieldAs<double>(Dimension::Id::Z, bufidx);
         }
     }
-    // Return a pointer to the first point buffer because we assume
-    // that readers only produce one point buffer. If that assumption
+    // Return a pointer to the first point view because we assume
+    // that readers only produce one point view. If that assumption
     // ever is invalid, this will presumably bork.
-    return (*pbset.begin());
+    return (*viewSet.begin());
 }
 
 
 int CpdKernel::execute()
 {
-    PointContext ctxX, ctxY;
+    PointTable tableX;
+    PointTable tableY;
 
     arma::mat X, Y;
-    PointBufferPtr bufX = readFile(m_filex, ctxX, X);
-    readFile(m_filey, ctxY, Y);
+    PointViewPtr viewX = readFile(m_filex, tableX, X);
+    readFile(m_filey, tableY, Y);
 
     if (X.n_rows == 0 || Y.n_rows == 0)
     {
@@ -202,33 +204,34 @@ int CpdKernel::execute()
     reg.set_sigma2(m_sigma2);
     if (m_auto_z_exaggeration)
     {
-        BOX3D bounds = bufX->calculateBounds();
+        BOX3D bounds = viewX->calculateBounds();
         double min_range = std::min(bounds.maxx - bounds.minx, bounds.maxy - bounds.miny);
         double exaggeration = m_auto_z_exaggeration_ratio * min_range / (bounds.maxz - bounds.minz);
         reg.set_z_exaggeration(exaggeration);
     }
 
     cpd::Registration::ResultPtr result;
-    PointContext ctxout;
-    ctxout.registerDim(Dimension::Id::X);
-    ctxout.registerDim(Dimension::Id::Y);
-    ctxout.registerDim(Dimension::Id::Z);
-    ctxout.registerDim(Dimension::Id::XVelocity);
-    ctxout.registerDim(Dimension::Id::YVelocity);
-    ctxout.registerDim(Dimension::Id::ZVelocity);
-    PointBufferPtr bufout(new PointBuffer(ctxout));
+    PointTable outTable;
+    PointLayoutPtr outLayout(outTable.layout());
+    outLayout->registerDim(Dimension::Id::X);
+    outLayout->registerDim(Dimension::Id::Y);
+    outLayout->registerDim(Dimension::Id::Z);
+    outLayout->registerDim(Dimension::Id::XVelocity);
+    outLayout->registerDim(Dimension::Id::YVelocity);
+    outLayout->registerDim(Dimension::Id::ZVelocity);
+    PointView outView(new PointView(outTable));
 
     if (m_chipped)
     {
-        result = chipThenRegister(reg, X, Y, bufX, ctxX);
+        result = chipThenRegister(reg, X, Y, viewX, tableX);
         for (arma::uword i = 0; i < result->Y.n_rows; ++i)
         {
-            bufout->setField<double>(Dimension::Id::X, i, result->Y(i, 0));
-            bufout->setField<double>(Dimension::Id::Y, i, result->Y(i, 1));
-            bufout->setField<double>(Dimension::Id::Z, i, result->Y(i, 2));
-            bufout->setField<double>(Dimension::Id::XVelocity, i, result->Y(i, 3));
-            bufout->setField<double>(Dimension::Id::YVelocity, i, result->Y(i, 4));
-            bufout->setField<double>(Dimension::Id::ZVelocity, i, result->Y(i, 5));
+            outView->setField<double>(Dimension::Id::X, i, result->Y(i, 0));
+            outView->setField<double>(Dimension::Id::Y, i, result->Y(i, 1));
+            outView->setField<double>(Dimension::Id::Z, i, result->Y(i, 2));
+            outView->setField<double>(Dimension::Id::XVelocity, i, result->Y(i, 3));
+            outView->setField<double>(Dimension::Id::YVelocity, i, result->Y(i, 4));
+            outView->setField<double>(Dimension::Id::ZVelocity, i, result->Y(i, 5));
         }
     }
     else
@@ -236,20 +239,20 @@ int CpdKernel::execute()
         result = reg.run(X, Y);
         for (arma::uword i = 0; i < Y.n_rows; ++i)
         {
-            bufout->setField<double>(Dimension::Id::X, i, result->Y(i, 0));
-            bufout->setField<double>(Dimension::Id::Y, i, result->Y(i, 1));
-            bufout->setField<double>(Dimension::Id::Z, i, result->Y(i, 2));
-            bufout->setField<double>(Dimension::Id::XVelocity, i,
+            outView->setField<double>(Dimension::Id::X, i, result->Y(i, 0));
+            outView->setField<double>(Dimension::Id::Y, i, result->Y(i, 1));
+            outView->setField<double>(Dimension::Id::Z, i, result->Y(i, 2));
+            outView->setField<double>(Dimension::Id::XVelocity, i,
                 Y(i, 0) - result->Y(i, 0));
-            bufout->setField<double>(Dimension::Id::YVelocity, i,
+            outView->setField<double>(Dimension::Id::YVelocity, i,
                 Y(i, 1) - result->Y(i, 1));
-            bufout->setField<double>(Dimension::Id::ZVelocity, i,
+            outView->setField<double>(Dimension::Id::ZVelocity, i,
                 Y(i, 2) - result->Y(i, 2));
         }
     }
 
     BufferReader reader;
-    reader.addBuffer(bufout);
+    reader.addView(outView);
 
     Options writerOpts;
     writerOpts.add<std::string>("filename", m_output);
@@ -259,8 +262,8 @@ int CpdKernel::execute()
 
     Stage& writer = makeWriter(m_output, reader);
     writer.setOptions(writerOpts + writer.getOptions());
-    writer.prepare(ctxout);
-    writer.execute(ctxout);
+    writer.prepare(outTable);
+    writer.execute(outTable);
 
     return 0;
 }
@@ -284,10 +287,10 @@ arma::mat getChip(const arma::mat& X, const BOX3D& bounds)
 
 cpd::Registration::ResultPtr CpdKernel::chipThenRegister(
     const cpd::NonrigidLowrank& reg, const arma::mat& X, const arma::mat& Y,
-    const PointBufferPtr& bufX, const PointContext& ctx)
+    const PointViewPtr& viewX, const PointTableRef table)
 {
     BufferReader reader;
-    reader.addBuffer(bufX);
+    reader.addView(viewX);
 
     ChipperFilter chipper;
     chipper.setInput(reader);
@@ -295,13 +298,13 @@ cpd::Registration::ResultPtr CpdKernel::chipThenRegister(
     options.add<int>("capacity", m_chip_capacity);
     chipper.setOptions(options);
 
-    chipper.prepare(ctx);
-    PointBufferSet pbSet = chipper.execute(ctx);
-    std::cerr << "Number of chips: " << pbSet.size() << std::endl;
+    chipper.prepare(table);
+    PointViewSet viewSet = chipper.execute(table);
+    std::cerr << "Number of chips: " << viewSet.size() << std::endl;
 
     cpd::Registration::ResultPtr result(new cpd::Registration::Result());
     int count = 0;
-    for (auto it = pbSet.begin(); it != pbSet.end(); ++it)
+    for (auto it = viewSet.begin(); it != viewSet.end(); ++it)
     {
         BOX3D bounds = (*it)->calculateBounds();
         BOX3D chipBounds(bounds.minx - m_chip_buffer,
@@ -318,7 +321,7 @@ cpd::Registration::ResultPtr CpdKernel::chipThenRegister(
         result->Y.insert_rows(result->Y.n_rows, getChip(
             arma::join_horiz(tmpresult->Y, Ychip - tmpresult->Y), bounds));
         std::cerr << "Done with chip #" << ++count << " of " <<
-            pbSet.size() << std::endl;
+            viewSet.size() << std::endl;
     }
 
     return result;

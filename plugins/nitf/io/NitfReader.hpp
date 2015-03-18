@@ -57,7 +57,7 @@ private:
     uint64_t m_length;
 
     virtual void initialize();
-    virtual void ready(PointContextRef ctx);
+    virtual void ready(PointTableRef table);
     virtual StreamFactoryPtr createFactory() const
     {
         return StreamFactoryPtr(

@@ -48,18 +48,22 @@ TEST(PipelineManagerTest, basic)
 
     PipelineManager mgr;
 
+    std::cout << "R" << std::endl;
     Options optsR;
     optsR.add("filename", Support::datapath("las/1.2-with-color.las"));
     Stage& reader = mgr.addReader("readers.las");
     reader.setOptions(optsR);
 
+    std::cout << "W" << std::endl;
     Options optsW;
     optsW.add("filename", outfile, "file to write to");
     Stage& writer = mgr.addWriter("writers.las");
     writer.setInput(reader);
     writer.setOptions(optsW);
 
+    std::cout << "E" << std::endl;
     point_count_t np = mgr.execute();
+    std::cout << "Done" << std::endl;
     EXPECT_TRUE(np == 1065U);
 
     EXPECT_TRUE(bool(std::ifstream(outfile)));

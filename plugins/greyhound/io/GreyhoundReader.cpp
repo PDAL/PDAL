@@ -81,7 +81,7 @@ void GreyhoundReader::processOptions(const Options& options)
     m_wsClient.initialize(m_url);
 }
 
-void GreyhoundReader::addDimensions(PointContextRef pointContext)
+void GreyhoundReader::addDimensions(PointLayoutPtr layout)
 {
     // Get Greyhound schema.
     exchanges::GetSchema schemaExchange(m_sessionId);
@@ -91,13 +91,13 @@ void GreyhoundReader::addDimensions(PointContextRef pointContext)
 
     for (const auto& dim : dimData)
     {
-        pointContext.registerDim(dim.id, dim.type);
+        layout->registerDim(dim.id, dim.type);
     }
 
-    m_pointContext = pointContext;
+    m_layout = layout;
 }
 
-void GreyhoundReader::ready(PointContextRef)
+void GreyhoundReader::ready(PointTableRef)
 {
     // Get number of points.
     exchanges::GetNumPoints numPointsExchange(m_sessionId);
@@ -106,7 +106,7 @@ void GreyhoundReader::ready(PointContextRef)
 }
 
 point_count_t GreyhoundReader::read(
-        PointBuffer& pointBuffer,
+        PointViewPtr view,
         const point_count_t count)
 {
     // Read data.
@@ -115,8 +115,8 @@ point_count_t GreyhoundReader::read(
 #else
     exchanges::ReadUncompressed readExchange(
 #endif
-            pointBuffer,
-            m_pointContext,
+            view,
+            m_layout,
             m_sessionId,
             m_index,
             count);

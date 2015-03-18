@@ -49,18 +49,18 @@ TEST(FauxReaderTest, test_constant_mode_sequential_iter)
     std::shared_ptr<FauxReader> reader(new FauxReader);
     reader->setOptions(ops);
 
-    PointContext ctx;
-    reader->prepare(ctx);
-    PointBufferSet pbSet = reader->execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 750u);
-    for (point_count_t i = 0; i < buf->size(); i++)
+    PointTable table;
+    reader->prepare(table);
+    PointViewSet viewSet = reader->execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 750u);
+    for (point_count_t i = 0; i < view->size(); i++)
     {
-        double x = buf->getFieldAs<double>(Dimension::Id::X, i);
-        double y = buf->getFieldAs<double>(Dimension::Id::Y, i);
-        double z = buf->getFieldAs<double>(Dimension::Id::Z, i);
-        uint64_t t = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, i);
+        double x = view->getFieldAs<double>(Dimension::Id::X, i);
+        double y = view->getFieldAs<double>(Dimension::Id::Y, i);
+        double z = view->getFieldAs<double>(Dimension::Id::Z, i);
+        uint64_t t = view->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, i);
 
         EXPECT_FLOAT_EQ(x, 1.0);
         EXPECT_FLOAT_EQ(y, 2.0);
@@ -80,19 +80,19 @@ TEST(FauxReaderTest, test_random_mode)
     std::shared_ptr<FauxReader> reader(new FauxReader);
     reader->setOptions(ops);
 
-    PointContext ctx;
-    reader->prepare(ctx);
-    PointBufferSet pbSet = reader->execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 750u);
+    PointTable table;
+    reader->prepare(table);
+    PointViewSet viewSet = reader->execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 750u);
 
-    for (point_count_t i = 0; i < buf->size(); ++i)
+    for (point_count_t i = 0; i < view->size(); ++i)
     {
-        double x = buf->getFieldAs<double>(Dimension::Id::X, i);
-        double y = buf->getFieldAs<double>(Dimension::Id::Y, i);
-        double z = buf->getFieldAs<double>(Dimension::Id::Z, i);
-        uint64_t t = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, i);
+        double x = view->getFieldAs<double>(Dimension::Id::X, i);
+        double y = view->getFieldAs<double>(Dimension::Id::Y, i);
+        double z = view->getFieldAs<double>(Dimension::Id::Z, i);
+        uint64_t t = view->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, i);
 
         EXPECT_GE(x, 1.0);
         EXPECT_LE(x, 101.0);
@@ -119,22 +119,22 @@ TEST(FauxReaderTest, test_ramp_mode_1)
     std::shared_ptr<FauxReader> reader(new FauxReader);
     reader->setOptions(ops);
 
-    PointContext ctx;
-    reader->prepare(ctx);
-    PointBufferSet pbSet = reader->execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 2u);
+    PointTable table;
+    reader->prepare(table);
+    PointViewSet viewSet = reader->execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 2u);
 
-    double x0 = buf->getFieldAs<double>(Dimension::Id::X, 0);
-    double y0 = buf->getFieldAs<double>(Dimension::Id::Y, 0);
-    double z0 = buf->getFieldAs<double>(Dimension::Id::Z, 0);
-    uint64_t t0 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 0);
+    double x0 = view->getFieldAs<double>(Dimension::Id::X, 0);
+    double y0 = view->getFieldAs<double>(Dimension::Id::Y, 0);
+    double z0 = view->getFieldAs<double>(Dimension::Id::Z, 0);
+    uint64_t t0 = view->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 0);
 
-    double x1 = buf->getFieldAs<double>(Dimension::Id::X, 1);
-    double y1 = buf->getFieldAs<double>(Dimension::Id::Y, 1);
-    double z1 = buf->getFieldAs<double>(Dimension::Id::Z, 1);
-    uint64_t t1 = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 1);
+    double x1 = view->getFieldAs<double>(Dimension::Id::X, 1);
+    double y1 = view->getFieldAs<double>(Dimension::Id::Y, 1);
+    double z1 = view->getFieldAs<double>(Dimension::Id::Z, 1);
+    uint64_t t1 = view->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, 1);
 
     EXPECT_FLOAT_EQ(x0, 0.0);
     EXPECT_FLOAT_EQ(y0, 0.0);
@@ -158,23 +158,23 @@ TEST(FauxReaderTest, test_ramp_mode_2)
     std::shared_ptr<FauxReader> reader(new FauxReader);
     reader->setOptions(ops);
 
-    PointContext ctx;
-    reader->prepare(ctx);
-    PointBufferSet pbSet = reader->execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 750u);
+    PointTable table;
+    reader->prepare(table);
+    PointViewSet viewSet = reader->execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 750u);
 
     double delX = (101.0 - 1.0) / (750.0 - 1.0);
     double delY = (152.0 - 2.0) / (750.0 - 1.0);
     double delZ = (203.0 - 3.0) / (750.0 - 1.0);
 
-    for (point_count_t i = 0; i < buf->size(); ++i)
+    for (point_count_t i = 0; i < view->size(); ++i)
     {
-        double x = buf->getFieldAs<double>(Dimension::Id::X, i);
-        double y = buf->getFieldAs<double>(Dimension::Id::Y, i);
-        double z = buf->getFieldAs<double>(Dimension::Id::Z, i);
-        uint64_t t = buf->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, i);
+        double x = view->getFieldAs<double>(Dimension::Id::X, i);
+        double y = view->getFieldAs<double>(Dimension::Id::Y, i);
+        double z = view->getFieldAs<double>(Dimension::Id::Z, i);
+        uint64_t t = view->getFieldAs<uint64_t>(Dimension::Id::OffsetTime, i);
 
         EXPECT_FLOAT_EQ(x, 1.0 + delX * i);
         EXPECT_FLOAT_EQ(y, 2.0 + delY * i);
@@ -196,19 +196,19 @@ TEST(FauxReaderTest, test_return_number)
     std::shared_ptr<FauxReader> reader(new FauxReader);
     reader->setOptions(ops);
 
-    PointContext ctx;
-    reader->prepare(ctx);
-    PointBufferSet pbSet = reader->execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 100u);
+    PointTable table;
+    reader->prepare(table);
+    PointViewSet viewSet = reader->execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 100u);
 
-    for (point_count_t i = 0; i < buf->size(); i++)
+    for (point_count_t i = 0; i < view->size(); i++)
     {
-        uint8_t returnNumber = buf->getFieldAs<uint8_t>(
+        uint8_t returnNumber = view->getFieldAs<uint8_t>(
             Dimension::Id::ReturnNumber, i);
         uint8_t numberOfReturns =
-            buf->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, i);
+            view->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, i);
 
         EXPECT_EQ(returnNumber, (i % 9) + 1);
         EXPECT_EQ(numberOfReturns, 9);

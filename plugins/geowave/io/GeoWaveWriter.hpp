@@ -55,8 +55,8 @@ namespace pdal
     private:
         virtual void initialize();
         virtual void processOptions(const Options&);
-        virtual void ready(PointContext ctx);
-        virtual void write(const PointBuffer& buf);
+        virtual void ready(PointTableRef table);
+        virtual void write(const PointViewPtr view);
 
         int createJvm();
 

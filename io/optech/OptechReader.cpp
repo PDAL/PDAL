@@ -141,16 +141,16 @@ void OptechReader::initialize()
 }
 
 
-void OptechReader::addDimensions(PointContextRef ctx)
+void OptechReader::addDimensions(PointLayoutPtr layout)
 {
     for (auto it : getDefaultDimensions())
     {
-        ctx.registerDim(it);
+        layout->registerDim(it);
     }
 }
 
 
-void OptechReader::ready(PointContextRef ctx)
+void OptechReader::ready(PointTableRef)
 {
     m_istream.reset(new IStream(m_filename));
     if (!*m_istream)
@@ -167,11 +167,11 @@ void OptechReader::ready(PointContextRef ctx)
 }
 
 
-point_count_t OptechReader::read(PointBuffer& data,
+point_count_t OptechReader::read(PointViewPtr data,
                                  point_count_t countRequested)
 {
     point_count_t numRead = 0;
-    point_count_t dataIndex = data.size();
+    point_count_t dataIndex = data->size();
 
     while (numRead < countRequested)
     {
@@ -221,27 +221,27 @@ point_count_t OptechReader::read(PointBuffer& data,
             m_pulse.range[m_returnIndex], m_pulse.scanAngle,
             m_boresightMatrix, rotationMatrix, gpsPoint);
 
-        data.setField(Dimension::Id::X, dataIndex, point.X * 180 / M_PI);
-        data.setField(Dimension::Id::Y, dataIndex, point.Y * 180 / M_PI);
-        data.setField(Dimension::Id::Z, dataIndex, point.Z);
-        data.setField(Dimension::Id::GpsTime, dataIndex, m_pulse.gpsTime);
+        data->setField(Dimension::Id::X, dataIndex, point.X * 180 / M_PI);
+        data->setField(Dimension::Id::Y, dataIndex, point.Y * 180 / M_PI);
+        data->setField(Dimension::Id::Z, dataIndex, point.Z);
+        data->setField(Dimension::Id::GpsTime, dataIndex, m_pulse.gpsTime);
         if (m_returnIndex == MaximumNumberOfReturns - 1)
         {
-            data.setField(Dimension::Id::ReturnNumber, dataIndex,
+            data->setField(Dimension::Id::ReturnNumber, dataIndex,
                           m_pulse.returnCount);
         }
         else
         {
-            data.setField(Dimension::Id::ReturnNumber, dataIndex,
+            data->setField(Dimension::Id::ReturnNumber, dataIndex,
                           m_returnIndex + 1);
         }
-        data.setField(Dimension::Id::NumberOfReturns, dataIndex,
+        data->setField(Dimension::Id::NumberOfReturns, dataIndex,
                       m_pulse.returnCount);
-        data.setField(Dimension::Id::EchoRange, dataIndex,
+        data->setField(Dimension::Id::EchoRange, dataIndex,
                       m_pulse.range[m_returnIndex]);
-        data.setField(Dimension::Id::Intensity, dataIndex,
+        data->setField(Dimension::Id::Intensity, dataIndex,
                       m_pulse.intensity[m_returnIndex]);
-        data.setField(Dimension::Id::ScanAngleRank, dataIndex,
+        data->setField(Dimension::Id::ScanAngleRank, dataIndex,
                       m_pulse.scanAngle * 180 / M_PI);
 
         ++dataIndex;
@@ -271,5 +271,10 @@ size_t OptechReader::fillBuffer()
 }
 
 
-void OptechReader::done(PointContextRef ctx) { m_istream.reset(); }
+void OptechReader::done(PointTableRef)
+{
+    m_istream.reset();
 }
+
+} // namespace pdal
+

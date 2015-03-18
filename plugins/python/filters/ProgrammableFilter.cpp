@@ -35,7 +35,7 @@
 #include <pdal/pdal_internal.hpp>
 #include <pdal/GlobalEnvironment.hpp>
 #include "ProgrammableFilter.hpp"
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 
 namespace pdal
@@ -77,17 +77,17 @@ void ProgrammableFilter::processOptions(const Options& options)
 }
 
 
-void ProgrammableFilter::addDimensions(PointContext ctx)
+void ProgrammableFilter::addDimensions(PointLayoutPtr layout)
 {
     for (auto it = m_addDimensions.cbegin(); it != m_addDimensions.cend(); ++it)
     {
-        Dimension::Id::Enum id = ctx.registerOrAssignDim(*it,
+        Dimension::Id::Enum id = layout->registerOrAssignDim(*it,
                                     pdal::Dimension::Type::Double);
     }
 }
 
 
-void ProgrammableFilter::ready(PointContext ctx)
+void ProgrammableFilter::ready(PointTableRef table)
 {
     m_script = new plang::Script(m_source, m_module, m_function);
     m_pythonMethod = new plang::BufferedInvocation(*m_script);
@@ -97,18 +97,18 @@ void ProgrammableFilter::ready(PointContext ctx)
 }
 
 
-void ProgrammableFilter::filter(PointBuffer& buf)
+void ProgrammableFilter::filter(PointViewPtr view)
 {
     log()->get(LogLevel::Debug5) << "Python script " << *m_script <<
-        " processing " << buf.size() << " points." << std::endl;
+        " processing " << view->size() << " points." << std::endl;
     m_pythonMethod->resetArguments();
-    m_pythonMethod->begin(buf);
+    m_pythonMethod->begin(view);
     m_pythonMethod->execute();
-    m_pythonMethod->end(buf);
+    m_pythonMethod->end(view);
 }
 
 
-void ProgrammableFilter::done(PointContext ctx)
+void ProgrammableFilter::done(PointTableRef table)
 {
     GlobalEnvironment::get().getPythonEnvironment().reset_stdout();
     delete m_pythonMethod;

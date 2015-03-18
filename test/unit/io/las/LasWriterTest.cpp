@@ -41,7 +41,7 @@
 #include <LasReader.hpp>
 #include <LasWriter.hpp>
 
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 
 #include "StageTester.hpp"
 #include "Support.hpp"
@@ -69,14 +69,14 @@ TEST(LasWriterTest, auto_offset)
     using namespace Dimension;
 
     const std::string FILENAME(Support::temppath("offset_test.las"));
-    PointContext ctx;
+    PointTable table;
 
-    ctx.registerDim(Id::X);
+    table.layout()->registerDim(Id::X);
 
-    PointBufferPtr buf(new PointBuffer(ctx));
-    buf->setField(Id::X, 0, 125000.00);
-    buf->setField(Id::X, 1, 74529.00);
-    buf->setField(Id::X, 2, 523523.02);
+    PointViewPtr view(new PointView(table));
+    view->setField(Id::X, 0, 125000.00);
+    view->setField(Id::X, 1, 74529.00);
+    view->setField(Id::X, 2, 523523.02);
 
     Options writerOps;
     writerOps.add("filename", FILENAME);
@@ -85,29 +85,29 @@ TEST(LasWriterTest, auto_offset)
     LasWriter writer;
     writer.setOptions(writerOps);
 
-    writer.prepare(ctx);
+    writer.prepare(table);
 
-    WriterTester::ready(writer, ctx);
-    WriterTester::write(writer, *buf);
-    WriterTester::done(writer, ctx);
+    WriterTester::ready(writer, table);
+    WriterTester::write(writer, view);
+    WriterTester::done(writer, table);
 
     Options readerOps;
     readerOps.add("filename", FILENAME);
 
-    PointContext readCtx;
+    PointTable readTable;
 
     LasReader reader;
     reader.setOptions(readerOps);
 
-    reader.prepare(readCtx);
+    reader.prepare(readTable);
     EXPECT_FLOAT_EQ(reader.header().offsetX(), 74529.00);
-    PointBufferSet pbSet = reader.execute(readCtx);
-    EXPECT_EQ(pbSet.size(), 1u);
-    buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 3u);
-    EXPECT_FLOAT_EQ(buf->getFieldAs<double>(Id::X, 0), 125000.00);
-    EXPECT_FLOAT_EQ(buf->getFieldAs<double>(Id::X, 1), 74529.00);
-    EXPECT_FLOAT_EQ(buf->getFieldAs<double>(Id::X, 2), 523523.02);
+    PointViewSet viewSet = reader.execute(readTable);
+    EXPECT_EQ(viewSet.size(), 1u);
+    view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 3u);
+    EXPECT_FLOAT_EQ(view->getFieldAs<double>(Id::X, 0), 125000.00);
+    EXPECT_FLOAT_EQ(view->getFieldAs<double>(Id::X, 1), 74529.00);
+    EXPECT_FLOAT_EQ(view->getFieldAs<double>(Id::X, 2), 523523.02);
     FileUtils::deleteFile(FILENAME);
 }
 
@@ -126,14 +126,14 @@ TEST(LasWriterTest, extra_dims)
     writer.setInput(reader);
     writer.setOptions(writerOps);
 
-    PointContext ctx;
-    writer.prepare(ctx);
-    PointBufferSet pbSet = writer.execute(ctx);
+    PointTable table;
+    writer.prepare(table);
+    PointViewSet viewSet = writer.execute(table);
 
     LasTester tester;
     LasHeader *header = tester.header(writer);
     EXPECT_EQ(header->pointLen(), header->basePointLen() + 10);
-    PointBufferPtr pb = *pbSet.begin();
+    PointViewPtr pb = *viewSet.begin();
 
     uint16_t colors[][3] = {
         { 68, 77, 88 },
@@ -155,15 +155,15 @@ TEST(LasWriterTest, extra_dims)
     std::shared_ptr<LasReader> reader2(new LasReader);
     reader2->setOptions(reader2Ops);
 
-    PointContext ctx2;
-    reader2->prepare(ctx2);
-    pbSet = reader2->execute(ctx2);
-    pb = *pbSet.begin();
-    Dimension::Id::Enum r1 = ctx2.findDim("R1");
+    PointTable readTable;
+    reader2->prepare(readTable);
+    viewSet = reader2->execute(readTable);
+    pb = *viewSet.begin();
+    Dimension::Id::Enum r1 = readTable.layout()->findDim("R1");
     EXPECT_TRUE(r1 != Dimension::Id::Unknown);
-    Dimension::Id::Enum b1 = ctx2.findDim("B1");
+    Dimension::Id::Enum b1 = readTable.layout()->findDim("B1");
     EXPECT_TRUE(b1 != Dimension::Id::Unknown);
-    Dimension::Id::Enum g1 = ctx2.findDim("G1");
+    Dimension::Id::Enum g1 = readTable.layout()->findDim("G1");
     EXPECT_TRUE(g1 != Dimension::Id::Unknown);
     EXPECT_EQ(pb->size(), (size_t)1065);
     size_t j = 0;
@@ -193,13 +193,13 @@ TEST(LasWriterTest, metadata_options)
     LasWriter writer;
     writer.setOptions(ops);
 
-    PointContext ctx;
-    writer.prepare(ctx);
+    PointTable table;
+    writer.prepare(table);
 
     MetadataNode m = writer.getMetadata();
     m.add("minor_version", 56);
 
-    uint8_t format = 
+    uint8_t format =
         (uint8_t)LasTester::headerVal<unsigned>(writer, "format");
     EXPECT_EQ(format, 4u);
     std::string softwareId =
@@ -250,7 +250,7 @@ bool diffdump(const std::string& f1, const std::string& f2)
 
 TEST(LasWriterTest, simple)
 {
-    PointContext ctx;
+    PointTable table;
 
     std::string infile(Support::datapath("las/1.2-with-color.las"));
     std::string outfile(Support::temppath("simple.las"));
@@ -271,8 +271,8 @@ TEST(LasWriterTest, simple)
     LasWriter writer;
     writer.setOptions(writerOpts);
     writer.setInput(reader);
-    writer.prepare(ctx);
-    writer.execute(ctx);
+    writer.prepare(table);
+    writer.execute(table);
 
     diffdump(infile, outfile);
 }
@@ -282,7 +282,7 @@ TEST(LasWriterTest, simple)
 /**
 TEST(LasWriterTest, LasWriterTest_test_simple_laz)
 {
-    PointContext ctx;
+    PointTable table;
 
     WriterOpts writerOpts;
     writerOpts.add("compressed", true);
@@ -305,8 +305,8 @@ TEST(LasWriterTest, LasWriterTest_test_simple_laz)
     writer->setOptions(writer);
     writer->setInput(&reader);
 
-    writer->prepare(ctx);
-    writer->execute(ctx);
+    writer->prepare(table);
+    writer->execute(table);
 
     FileUtils::closeFile(ofs);
 
@@ -334,7 +334,7 @@ TEST(LasWriterTest, LasWriterTest_test_simple_laz)
 static void test_a_format(const std::string& refFile, uint8_t majorVersion,
     uint8_t minorVersion, int pointFormat)
 {
-    PointContext ctx;
+    PointTable table;
 
     // remove file from earlier run, if needed
     FileUtils::deleteFile("temp.las");
@@ -366,8 +366,8 @@ static void test_a_format(const std::string& refFile, uint8_t majorVersion,
     writer->setOptions(writerOpts);
     writer->setInput(&reader);
 
-    writer->prepare(ctx);
-    writer->execute(ctx);
+    writer->prepare(table);
+    writer->execute(table);
 
     bool filesSame = Support::compare_files("temp.las",
         Support::datapath(directory + refFile));
@@ -427,7 +427,7 @@ TEST(LasWriterTest, LasWriterTest_test_drop_extra_returns)
 {
     using namespace pdal;
 
-    PointContext ctx;
+    PointTable table;
 
     // remove file from earlier run, if needed
     std::string temp_filename("temp-LasWriterTest_test_drop_extra_returns.las");
@@ -456,8 +456,8 @@ TEST(LasWriterTest, LasWriterTest_test_drop_extra_returns)
     std::shared_ptr<LasWriter> writer(new LasWriter)(ofs);
     writer->setOptions(writerOptions);
     writer->setInput(&reader);
-    writer->prepare(ctx);
-    writer->execute(ctx);
+    writer->prepare(table);
+    writer->execute(table);
 
     Options readerOptions;
     readerOptions.add("filename", Support::temppath(temp_filename));
@@ -466,20 +466,20 @@ TEST(LasWriterTest, LasWriterTest_test_drop_extra_returns)
     std::shared_ptr<LasReader> reader2(new LasReader);
     reader2->setOptions(readerOptions);
 
-    PointContext ctx2;
+    PointTable readTable;
 
-    reader2->prepare(ctx2);
-    PointBufferSet pbSet = reader2->execute(ctx2);
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buf = *pbSet.begin();
+    reader2->prepare(readTable);
+    PointViewSet viewSet = reader2->execute(readTable);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
 
-    uint8_t r1 = buf->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, 0);
+    uint8_t r1 = view->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, 0);
     EXPECT_EQ(r1, 1u);
-    uint8_t r2 = buf->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, 5);
+    uint8_t r2 = view->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, 5);
     EXPECT_EQ(r2, 1u);
-    uint8_t n1 = buf->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, 0);
+    uint8_t n1 = view->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, 0);
     EXPECT_EQ(n1, 5u);
-    uint8_t n2 = buf->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, 5);
+    uint8_t n2 = view->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, 5);
     EXPECT_EQ(n1, 5u);
 
     FileUtils::closeFile(ofs);

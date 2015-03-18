@@ -34,7 +34,7 @@
 
 #include "gtest/gtest.h"
 
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/BufferReader.hpp>
 #include <StatsFilter.hpp>
@@ -44,37 +44,36 @@ using namespace pdal;
 namespace
 {
 
-TEST(BufferTest, test_basic)
+TEST(ViewTest, test_basic)
 {
-    PointContext ctx;
+    PointTable table;
+    PointViewPtr view(new PointView(table));
 
-    PointBufferPtr buf(new PointBuffer(ctx));
-
-    ctx.registerDim(Dimension::Id::X);
-    ctx.registerDim(Dimension::Id::Y);
-    ctx.registerDim(Dimension::Id::Z);
+    table.layout()->registerDim(Dimension::Id::X);
+    table.layout()->registerDim(Dimension::Id::Y);
+    table.layout()->registerDim(Dimension::Id::Z);
 
     for (int i = 0; i < 20; ++i)
     {
-        buf->setField(Dimension::Id::X, i, i);
-        buf->setField(Dimension::Id::Y, i, 2 * i);
-        buf->setField(Dimension::Id::Z, i, -i);
+        view->setField(Dimension::Id::X, i, i);
+        view->setField(Dimension::Id::Y, i, 2 * i);
+        view->setField(Dimension::Id::Z, i, -i);
     }
 
     Options ops;
     BufferReader r;
     r.setOptions(ops);
-    r.addBuffer(buf);
+    r.addView(view);
 
     StatsFilter s;
     s.setOptions(ops);
     s.setInput(r);
 
-    s.prepare(ctx);
-    PointBufferSet pbSet = s.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
-    buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 20u);
+    s.prepare(table);
+    PointViewSet viewSet = s.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 20u);
 
     stats::Summary xSummary = s.getStats(Dimension::Id::X);
     EXPECT_FLOAT_EQ(xSummary.minimum(), 0);

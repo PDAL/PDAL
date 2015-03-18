@@ -163,14 +163,14 @@ int ViewKernel::execute()
     Stage& readerStage(Kernel::makeReader(m_inputFile));
     readerStage.setOptions(readerOptions);
 
-    PointContext ctx;
-    readerStage.prepare(ctx);
-    PointBufferSet pbSetIn = readerStage.execute(ctx);
-    
-    PointBufferPtr buf = *pbSetIn.begin();
+    PointTable table;
+    readerStage.prepare(table);
+    PointViewSet viewSetIn = readerStage.execute(table);
+
+    PointViewPtr buf = *viewSetIn.begin();
     if (m_pointIndexes.size())
     {
-        PointBufferPtr outbuf = buf->makeNew();
+        PointViewPtr outbuf = buf->makeNew();
 
         std::vector<uint32_t> points = getListOfPoints(m_pointIndexes);
         for (size_t i = 0; i < points.size(); ++i)

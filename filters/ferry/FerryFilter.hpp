@@ -60,9 +60,9 @@ public:
 
 private:
     virtual void processOptions(const Options&);
-    virtual void addDimensions(PointContextRef ctx);
-    virtual void ready(PointContext ctx);
-    virtual void filter(PointBuffer& buffer);
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void ready(PointTableRef table);
+    virtual void filter(PointViewPtr view);
 
     FerryFilter& operator=(const FerryFilter&); // not implemented
     FerryFilter(const FerryFilter&); // not implemented

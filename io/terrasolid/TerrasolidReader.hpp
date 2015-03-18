@@ -113,7 +113,7 @@ public:
     const TerraSolidHeader& getHeader() const { return *m_header; }
 
     // this is called by the stage's iterator
-    uint32_t processBuffer(PointBuffer& PointBuffer, std::istream& stream,
+    uint32_t processBuffer(PointViewPtr view, std::istream& stream,
         uint64_t numPointsLeft) const;
 
 private:
@@ -127,10 +127,10 @@ private:
     point_count_t m_index;
 
     virtual void initialize();
-    virtual void addDimensions(PointContextRef ctx);
-    virtual void ready(PointContextRef ctx);
-    virtual point_count_t read(PointBuffer& buf, point_count_t count);
-    virtual void done(PointContextRef ctx);
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void ready(PointTableRef table);
+    virtual point_count_t read(PointViewPtr view, point_count_t count);
+    virtual void done(PointTableRef table);
     virtual bool eof()
         { return m_index >= getNumPoints(); }
 

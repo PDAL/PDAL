@@ -35,7 +35,7 @@
 #include "gtest/gtest.h"
 
 #include <pdal/Options.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/StageFactory.hpp>
@@ -46,7 +46,7 @@
 using namespace pdal;
 
 template <typename T>
-void checkDimension(const PointBuffer& data, std::size_t index,
+void checkDimension(const PointView& data, std::size_t index,
     Dimension::Id::Enum dim, T expected)
 {
     float actual = data.getFieldAs<T>(dim, index);
@@ -54,7 +54,7 @@ void checkDimension(const PointBuffer& data, std::size_t index,
 }
 
 void checkPoint(
-        const PointBuffer& data,
+        const PointView& data,
         std::size_t index,
         float time,
         float latitude,
@@ -99,15 +99,15 @@ TEST(IcebridgeReaderTest, testRead)
     Options options(filename);
     reader->setOptions(options);
 
-    PointContext ctx;
-    reader->prepare(ctx);
-    PointBufferSet pbSet = reader->execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 2u);
+    PointTable table;
+    reader->prepare(table);
+    PointViewSet viewSet = reader->execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 2u);
 
     checkPoint(
-            *buf,
+            *view,
             0,
             141437548,     // time
             82.605319,      // latitude
@@ -123,7 +123,7 @@ TEST(IcebridgeReaderTest, testRead)
             0.0);           // relTime
 
     checkPoint(
-            *buf,
+            *view,
             1,
             141437548,     // time
             82.605287,      // latitude

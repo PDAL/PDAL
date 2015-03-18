@@ -36,7 +36,7 @@
 
 #include <iterator>
 
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 
 namespace pdal
 {
@@ -44,7 +44,7 @@ namespace pdal
 class PointRef
 {
 private:
-    PointBuffer *m_buf;
+    PointView *m_buf;
     PointId m_id;
     bool m_tmp;
 
@@ -57,7 +57,7 @@ public:
         m_tmp = true;
     }
     // This is the ctor used to make a PointRef from an iterator.
-    PointRef(PointBuffer *buf, PointId id) : m_buf(buf), m_id(id), m_tmp(false)
+    PointRef(PointView *buf, PointId id) : m_buf(buf), m_id(id), m_tmp(false)
     {}
 
     ~PointRef()
@@ -96,12 +96,12 @@ inline void swap(PointRef && p1, PointRef && p2)
     p1.swap(p2);
 }
 
-class PointBufferIter :
+class PointViewIter :
     public std::iterator<std::random_access_iterator_tag, PointRef,
         point_count_t>
 {
 protected:
-    PointBuffer *m_buf;
+    PointView *m_buf;
     PointId m_id;
 
 public:
@@ -114,38 +114,38 @@ public:
     typedef void * pointer;
 
 
-    PointBufferIter(PointBuffer *buf, PointId id) : m_buf(buf), m_id(id)
+    PointViewIter(PointView *buf, PointId id) : m_buf(buf), m_id(id)
     {}
 
-    PointBufferIter& operator++()
+    PointViewIter& operator++()
         { ++m_id; return *this; }
-    PointBufferIter operator++(int)
-        { return PointBufferIter(m_buf, m_id++); }
-    PointBufferIter& operator--()
+    PointViewIter operator++(int)
+        { return PointViewIter(m_buf, m_id++); }
+    PointViewIter& operator--()
         { --m_id; return *this; }
-    PointBufferIter operator--(int)
-        { return PointBufferIter(m_buf, m_id--); }
-    
-    PointBufferIter operator+(const difference_type& n) const
-        { return PointBufferIter(m_buf, m_id + n); }
-    PointBufferIter operator+=(const difference_type& n)
+    PointViewIter operator--(int)
+        { return PointViewIter(m_buf, m_id--); }
+
+    PointViewIter operator+(const difference_type& n) const
+        { return PointViewIter(m_buf, m_id + n); }
+    PointViewIter operator+=(const difference_type& n)
         { m_id += n; return *this; }
-    PointBufferIter operator-(const difference_type& n) const
-        { return PointBufferIter(m_buf, m_id - n); }
-    PointBufferIter operator-=(const difference_type& n)
+    PointViewIter operator-(const difference_type& n) const
+        { return PointViewIter(m_buf, m_id - n); }
+    PointViewIter operator-=(const difference_type& n)
         { m_id -= n; return *this; }
-    difference_type operator-(const PointBufferIter& i)
+    difference_type operator-(const PointViewIter& i)
         { return m_id - i.m_id; }
 
-    bool operator==(const PointBufferIter& i)
+    bool operator==(const PointViewIter& i)
         { return m_id == i.m_id; }
-    bool operator!=(const PointBufferIter& i)
+    bool operator!=(const PointViewIter& i)
         { return m_id != i.m_id; }
-    bool operator>=(const PointBufferIter& i)
+    bool operator>=(const PointViewIter& i)
         { return m_id <= i.m_id; }
-    bool operator<(const PointBufferIter& i)
+    bool operator<(const PointViewIter& i)
         { return m_id < i.m_id; }
-    bool operator>(const PointBufferIter& i)
+    bool operator>(const PointViewIter& i)
         { return m_id > i.m_id; }
 
     PointRef operator*() const
@@ -162,7 +162,7 @@ public:
 namespace std
 {
 template<>
-inline void iter_swap(pdal::PointBufferIter a, pdal::PointBufferIter b)
+inline void iter_swap(pdal::PointViewIter a, pdal::PointViewIter b)
 {
     swap(*a, *b);
 }

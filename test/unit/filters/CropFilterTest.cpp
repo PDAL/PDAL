@@ -35,7 +35,7 @@
 #include "gtest/gtest.h"
 
 #include <pdal/util/FileUtils.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <CropFilter.hpp>
 #include <FauxReader.hpp>
@@ -78,11 +78,11 @@ TEST(CropFilterTest, test_crop)
     stats.setOptions(statOpts);
     stats.setInput(filter);
 
-    PointContext ctx;
-    stats.prepare(ctx);
-    PointBufferSet pbSet = stats.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buf = *pbSet.begin();
+    PointTable table;
+    stats.prepare(table);
+    PointViewSet viewSet = stats.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr buf = *viewSet.begin();
 
     const stats::Summary& statsX = stats.getStats(Dimension::Id::X);
     const stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
@@ -142,13 +142,13 @@ TEST(CropFilterTest, test_crop_polygon)
     crop.setInput(reader);
     crop.setOptions(options);
 
-    PointContext ctx;
+    PointTable table;
 
-    crop.prepare(ctx);
-    PointBufferSet pbSet = crop.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buffer = *pbSet.begin();
-    EXPECT_EQ(buffer->size(), 47u);
+    crop.prepare(table);
+    PointViewSet viewSet = crop.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 47u);
 
     FileUtils::closeFile(wkt_stream);
 #endif
@@ -206,13 +206,13 @@ TEST(CropFilterTest, test_crop_polygon_reprojection)
     crop.setOptions(options);
     crop.setInput(reprojection);
 
-    PointContext ctx;
-    PointBufferPtr buffer(new PointBuffer(ctx));
-    crop.prepare(ctx);
-    PointBufferSet pbSet = crop.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
-    buffer = *pbSet.begin();
-    EXPECT_EQ(buffer->size(), 47u);
+    PointTable table;
+    PointViewPtr view(new PointView(table));
+    crop.prepare(table);
+    PointViewSet viewSet = crop.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 47u);
 
     FileUtils::closeFile(wkt_stream);
 

@@ -35,7 +35,7 @@
 #include <pdal/pdal_internal.hpp>
 #include "PredicateFilter.hpp"
 #include <pdal/GlobalEnvironment.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 
 namespace pdal
@@ -71,7 +71,7 @@ Options PredicateFilter::getDefaultOptions()
 }
 
 
-void PredicateFilter::ready(PointContext ctx)
+void PredicateFilter::ready(PointTableRef table)
 {
     m_script = new plang::Script(m_source, m_module, m_function);
     m_pythonMethod = new plang::BufferedInvocation(*m_script);
@@ -81,32 +81,32 @@ void PredicateFilter::ready(PointContext ctx)
 }
 
 
-PointBufferSet PredicateFilter::run(PointBufferPtr buf)
+PointViewSet PredicateFilter::run(PointViewPtr view)
 {
     m_pythonMethod->resetArguments();
-    m_pythonMethod->begin(*buf);
+    m_pythonMethod->begin(view);
     m_pythonMethod->execute();
 
     if (!m_pythonMethod->hasOutputVariable("Mask"))
         throw python_error("Mask variable not set in predicate "
             "filter function");
 
-    PointBufferPtr outbuf = buf->makeNew();
+    PointViewPtr outview = view->makeNew();
 
     void *pydata =
         m_pythonMethod->extractResult("Mask", Dimension::Type::Unsigned8);
     char *ok = (char *)pydata;
-    for (PointId idx = 0; idx < buf->size(); ++idx)
+    for (PointId idx = 0; idx < view->size(); ++idx)
         if (*ok++)
-            outbuf->appendPoint(*buf, idx);
+            outview->appendPoint(*view.get(), idx);
 
-    PointBufferSet pbSet;
-    pbSet.insert(outbuf);
-    return pbSet;
+    PointViewSet viewSet;
+    viewSet.insert(outview);
+    return viewSet;
 }
 
 
-void PredicateFilter::done(PointContext ctx)
+void PredicateFilter::done(PointTableRef table)
 {
     GlobalEnvironment::get().getPythonEnvironment().reset_stdout();
     delete m_pythonMethod;

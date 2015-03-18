@@ -111,8 +111,8 @@ std::ostream& writeHeader(std::ostream& strm, bool b3D)
 }
 
 
-std::map<Point, Point>* cumulatePoints(PointBuffer& source_data,
-    PointBuffer& candidate_data, KDIndex* index)
+std::map<Point, Point>* cumulatePoints(PointView& source_data,
+    PointView& candidate_data, KDIndex* index)
 {
     std::map<Point, Point> *output = new std::map<Point, Point>;
     uint32_t count(std::min(source_data.size(), candidate_data.size()));
@@ -148,7 +148,7 @@ std::map<Point, Point>* cumulatePoints(PointBuffer& source_data,
     return output;
 }
 
-void DeltaKernel::outputDetail(PointBuffer& source_data, PointBuffer& candidate_data,
+void DeltaKernel::outputDetail(PointView& source_data, PointView& candidate_data,
     std::map<Point, Point> *points) const
 {
 
@@ -279,7 +279,7 @@ void DeltaKernel::outputXML(boost::property_tree::ptree const& tree) const
 
 int DeltaKernel::execute()
 {
-    PointContext sourceCtx;
+    PointTable sourceTable;
     Options sourceOptions;
     {
         sourceOptions.add<std::string>("filename", m_sourceFile);
@@ -288,13 +288,13 @@ int DeltaKernel::execute()
     }
     Stage& source = makeReader(m_sourceFile);
     source.setOptions(sourceOptions);
-    source.prepare(sourceCtx);
-    PointBufferSet pbSet = source.execute(sourceCtx);
-    assert(pbSet.size() == 1);
-    PointBufferPtr sourceBuf = *pbSet.begin();
-    point_count_t sourceCount = sourceBuf->size();
+    source.prepare(sourceTable);
+    PointViewSet viewSet = source.execute(sourceTable);
+    assert(viewSet.size() == 1);
+    PointViewPtr sourceView = *viewSet.begin();
+    point_count_t sourceCount = sourceView->size();
 
-    PointContext candidateCtx;
+    PointTable candidateTable;
     Options candidateOptions;
     {
         candidateOptions.add("filename", m_candidateFile);
@@ -304,11 +304,11 @@ int DeltaKernel::execute()
 
     Stage& candidate = makeReader(m_candidateFile);
     candidate.setOptions(candidateOptions);
-    candidate.prepare(candidateCtx);
-    pbSet = candidate.execute(candidateCtx);
-    assert(pbSet.size() == 1);
-    PointBufferPtr candidateBuf = *pbSet.begin();
-    point_count_t candidateCount = candidateBuf->size();
+    candidate.prepare(candidateTable);
+    viewSet = candidate.execute(candidateTable);
+    assert(viewSet.size() == 1);
+    PointViewPtr candidateView = *viewSet.begin();
+    point_count_t candidateCount = candidateView->size();
 
     if (sourceCount != candidateCount)
         std::cerr << "Source and candidate files do not have the same "
@@ -318,14 +318,14 @@ int DeltaKernel::execute()
         m_outputStream = FileUtils::createFile(m_outputFileName);
 
     // Index the candidate data.
-    m_index = std::unique_ptr<KDIndex>(new KDIndex(*candidateBuf));
+    m_index = std::unique_ptr<KDIndex>(new KDIndex(*candidateView.get()));
     m_index->build(m_3d);
 
     std::unique_ptr<std::map<Point, Point>>
-        points(cumulatePoints(*sourceBuf, *candidateBuf, m_index.get()));
+        points(cumulatePoints(*sourceView.get(), *candidateView.get(), m_index.get()));
     if (m_OutputDetail)
     {
-        outputDetail(*sourceBuf, *candidateBuf, points.get());
+        outputDetail(*sourceView.get(), *candidateView.get(), points.get());
         return 0;
     }
 

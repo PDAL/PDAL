@@ -38,7 +38,7 @@
 #include <pdal/PipelineManager.hpp>
 #include <pdal/Utils.hpp>
 #include <pdal/util/FileUtils.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <BpfReader.hpp>
 #include <BpfWriter.hpp>
 
@@ -73,7 +73,7 @@ template<typename LeftIter, typename RightIter>
 
 void test_file_type(const std::string& filename)
 {
-    PointContext context;
+    PointTable table;
 
     Options ops;
 
@@ -82,12 +82,12 @@ void test_file_type(const std::string& filename)
     std::shared_ptr<BpfReader> reader(new BpfReader);
     reader->setOptions(ops);
 
-    reader->prepare(context);
-    PointBufferSet pbSet = reader->execute(context);
+    reader->prepare(table);
+    PointViewSet viewSet = reader->execute(table);
 
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 506u);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 506u);
 
     struct PtData
     {
@@ -102,9 +102,9 @@ void test_file_type(const std::string& filename)
 
     for (int i = 0; i < 3; ++i)
     {
-        float x = buf->getFieldAs<float>(Dimension::Id::X, i);
-        float y = buf->getFieldAs<float>(Dimension::Id::Y, i);
-        float z = buf->getFieldAs<float>(Dimension::Id::Z, i);
+        float x = view->getFieldAs<float>(Dimension::Id::X, i);
+        float y = view->getFieldAs<float>(Dimension::Id::Y, i);
+        float z = view->getFieldAs<float>(Dimension::Id::Z, i);
 
         EXPECT_FLOAT_EQ(x, pts2[i].x);
         EXPECT_FLOAT_EQ(y, pts2[i].y);
@@ -117,9 +117,9 @@ void test_file_type(const std::string& filename)
 
     for (int i = 503; i < 3; ++i)
     {
-        float x = buf->getFieldAs<float>(Dimension::Id::X, i);
-        float y = buf->getFieldAs<float>(Dimension::Id::Y, i);
-        float z = buf->getFieldAs<float>(Dimension::Id::Z, i);
+        float x = view->getFieldAs<float>(Dimension::Id::X, i);
+        float y = view->getFieldAs<float>(Dimension::Id::Y, i);
+        float z = view->getFieldAs<float>(Dimension::Id::Z, i);
 
         EXPECT_FLOAT_EQ(x, pts[i].x);
         EXPECT_FLOAT_EQ(y, pts[i].y);
@@ -134,7 +134,7 @@ void test_roundtrip(Options& writerOps)
     std::string outfile(Support::temppath("tmp.bpf"));
 
 
-    PointContext context;
+    PointTable table;
 
     Options readerOps;
 
@@ -148,8 +148,8 @@ void test_roundtrip(Options& writerOps)
     writer.setInput(reader);
 
     FileUtils::deleteFile(outfile);
-    writer.prepare(context);
-    writer.execute(context);
+    writer.prepare(table);
+    writer.execute(table);
 
     test_file_type(outfile);
 }
@@ -280,7 +280,7 @@ TEST(BPFTest, inspect)
         -13674705.011110275984, 4896224.6888861842453, 178.7299957275390625);
     EXPECT_EQ(qi.m_bounds, bounds);
 
-    const char *dims[] = 
+    const char *dims[] =
     {
         "Blue",
         "Classification",

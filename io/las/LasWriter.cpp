@@ -37,7 +37,7 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <iostream>
 
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/util/Inserter.hpp>
 #include <pdal/util/OStream.hpp>
 #include <pdal/Utils.hpp>
@@ -130,12 +130,12 @@ void LasWriter::processOptions(const Options& options)
 }
 
 
-void LasWriter::prepared(PointContextRef ctx)
+void LasWriter::prepared(PointTableRef table)
 {
     m_extraByteLen = 0;
     for (auto& dim : m_extraDims)
     {
-        dim.m_dimType.m_id = ctx.findDim(dim.m_name);
+        dim.m_dimType.m_id = table.layout()->findDim(dim.m_name);
         if (dim.m_dimType.m_id == Dimension::Id::Unknown)
         {
             std::ostringstream oss;
@@ -225,17 +225,17 @@ void LasWriter::getVlrOptions(const Options& opts)
 }
 
 
-void LasWriter::ready(PointContextRef ctx)
+void LasWriter::ready(PointTableRef table)
 {
     const SpatialReference& srs = getSpatialReference().empty() ?
-        ctx.spatialRef() : getSpatialReference();
+        table.spatialRef() : getSpatialReference();
 
     if (!m_ostream)
         m_ostream = FileUtils::createFile(m_filename, true);
     setVlrsFromMetadata();
     setVlrsFromSpatialRef(srs);
     setExtraBytesVlr();
-    fillHeader(ctx);
+    fillHeader();
 
     if (m_lasHeader.compressed())
         readyCompression();
@@ -401,7 +401,7 @@ void LasWriter::setExtraBytesVlr()
     for (auto& dim : m_extraDims)
     {
         ExtraBytesIf eb(dim.m_name, dim.m_dimType.m_type,
-            Dimension::description(dim.m_dimType.m_id)); 
+            Dimension::description(dim.m_dimType.m_id));
         eb.appendTo(ebBytes);
     }
 
@@ -432,7 +432,7 @@ void LasWriter::addVlr(const std::string& userId, uint16_t recordId,
 
 /// Fill the LAS header with values as provided in options or forwarded
 /// metadata.
-void LasWriter::fillHeader(PointContextRef ctx)
+void LasWriter::fillHeader()
 {
     m_lasHeader.setScale(m_xXform.m_scale, m_yXform.m_scale,
         m_zXform.m_scale);
@@ -494,22 +494,23 @@ void LasWriter::openCompression()
 }
 
 
-void LasWriter::write(const PointBuffer& pointBuffer)
+void LasWriter::write(const PointViewPtr view)
 {
-    setAutoOffset(pointBuffer);
+    setAutoOffset(view);
 
     size_t pointLen = m_lasHeader.pointLen();
 
     // Make a buffer of at most a meg.
-    std::vector<char> buf(std::min((size_t)1000000,
-        pointLen * pointBuffer.size()));
+    std::vector<char> buf(std::min((size_t)1000000, pointLen * view->size()));
+
+    const PointView& viewRef(*view.get());
 
     //ABELL - Removed callback handling for now.
-    point_count_t remaining = pointBuffer.size();
+    point_count_t remaining = view->size();
     PointId idx = 0;
     while (remaining)
     {
-        point_count_t filled = fillWriteBuf(pointBuffer, idx, buf);
+        point_count_t filled = fillWriteBuf(viewRef, idx, buf);
         idx += filled;
         remaining -= filled;
 
@@ -539,14 +540,14 @@ void LasWriter::write(const PointBuffer& pointBuffer)
 #endif
     }
 
-    m_numPointsWritten = pointBuffer.size() - remaining;
+    m_numPointsWritten = view->size() - remaining;
 }
 
-point_count_t LasWriter::fillWriteBuf(const PointBuffer& pointBuffer,
+point_count_t LasWriter::fillWriteBuf(const PointView& view,
     PointId startId, std::vector<char>& buf)
 {
     point_count_t blocksize = buf.size() / m_lasHeader.pointLen();
-    blocksize = std::min(blocksize, pointBuffer.size() - startId);
+    blocksize = std::min(blocksize, view.size() - startId);
 
     bool hasColor = m_lasHeader.hasColor();
     bool hasTime = m_lasHeader.hasTime();
@@ -560,15 +561,15 @@ point_count_t LasWriter::fillWriteBuf(const PointBuffer& pointBuffer,
 
         uint8_t returnNumber(1);
         uint8_t numberOfReturns(1);
-        if (pointBuffer.hasDim(Id::ReturnNumber))
+        if (view.hasDim(Id::ReturnNumber))
         {
-            returnNumber = pointBuffer.getFieldAs<uint8_t>(Id::ReturnNumber,
+            returnNumber = view.getFieldAs<uint8_t>(Id::ReturnNumber,
                 idx);
             if (returnNumber < 1 || returnNumber > maxReturnCount)
                 m_error.returnNumWarning(returnNumber);
         }
-        if (pointBuffer.hasDim(Id::NumberOfReturns))
-            numberOfReturns = pointBuffer.getFieldAs<uint8_t>(
+        if (view.hasDim(Id::NumberOfReturns))
+            numberOfReturns = view.getFieldAs<uint8_t>(
                 Id::NumberOfReturns, idx);
         if (numberOfReturns == 0)
             m_error.numReturnsWarning(0);
@@ -585,10 +586,10 @@ point_count_t LasWriter::fillWriteBuf(const PointBuffer& pointBuffer,
                 m_error.numReturnsWarning(numberOfReturns);
         }
 
-        double xOrig = pointBuffer.getFieldAs<double>(Id::X, idx);
-        double yOrig = pointBuffer.getFieldAs<double>(Id::Y, idx);
-        double zOrig = pointBuffer.getFieldAs<double>(Id::Z, idx);
-        
+        double xOrig = view.getFieldAs<double>(Id::X, idx);
+        double yOrig = view.getFieldAs<double>(Id::Y, idx);
+        double zOrig = view.getFieldAs<double>(Id::Z, idx);
+
         double x = (xOrig - m_xXform.m_offset) / m_xXform.m_scale;
         double y = (yOrig - m_yXform.m_offset) / m_yXform.m_scale;
         double z = (zOrig - m_zXform.m_offset) / m_zXform.m_scale;
@@ -598,18 +599,18 @@ point_count_t LasWriter::fillWriteBuf(const PointBuffer& pointBuffer,
         ostream << boost::numeric_cast<int32_t>(lround(z));
 
         uint16_t intensity = 0;
-        if (pointBuffer.hasDim(Id::Intensity))
-            intensity = pointBuffer.getFieldAs<uint16_t>(Id::Intensity, idx);
+        if (view.hasDim(Id::Intensity))
+            intensity = view.getFieldAs<uint16_t>(Id::Intensity, idx);
         ostream << intensity;
 
         uint8_t scanDirectionFlag(0);
-        if (pointBuffer.hasDim(Id::ScanDirectionFlag))
-            scanDirectionFlag = pointBuffer.getFieldAs<uint8_t>(
+        if (view.hasDim(Id::ScanDirectionFlag))
+            scanDirectionFlag = view.getFieldAs<uint8_t>(
                 Id::ScanDirectionFlag, idx);
 
         uint8_t edgeOfFlightLine(0);
-        if (pointBuffer.hasDim(Id::EdgeOfFlightLine))
-            edgeOfFlightLine = pointBuffer.getFieldAs<uint8_t>(
+        if (view.hasDim(Id::EdgeOfFlightLine))
+            edgeOfFlightLine = view.getFieldAs<uint8_t>(
                 Id::EdgeOfFlightLine, idx);
 
         uint8_t bits = returnNumber | (numberOfReturns<<3) |
@@ -617,33 +618,33 @@ point_count_t LasWriter::fillWriteBuf(const PointBuffer& pointBuffer,
         ostream << bits;
 
         uint8_t classification = 0;
-        if (pointBuffer.hasDim(Id::Classification))
-            classification = pointBuffer.getFieldAs<uint8_t>(Id::Classification,
+        if (view.hasDim(Id::Classification))
+            classification = view.getFieldAs<uint8_t>(Id::Classification,
                 idx);
         ostream << classification;
 
         int8_t scanAngleRank = 0;
-        if (pointBuffer.hasDim(Id::ScanAngleRank))
-            scanAngleRank = pointBuffer.getFieldAs<int8_t>(Id::ScanAngleRank,
+        if (view.hasDim(Id::ScanAngleRank))
+            scanAngleRank = view.getFieldAs<int8_t>(Id::ScanAngleRank,
                 idx);
         ostream << scanAngleRank;
 
         uint8_t userData = 0;
-        if (pointBuffer.hasDim(Id::UserData))
-            userData = pointBuffer.getFieldAs<uint8_t>(Id::UserData, idx);
+        if (view.hasDim(Id::UserData))
+            userData = view.getFieldAs<uint8_t>(Id::UserData, idx);
         ostream << userData;
 
         uint16_t pointSourceId = 0;
-        if (pointBuffer.hasDim(Id::PointSourceId))
-            pointSourceId = pointBuffer.getFieldAs<uint16_t>(Id::PointSourceId,
+        if (view.hasDim(Id::PointSourceId))
+            pointSourceId = view.getFieldAs<uint16_t>(Id::PointSourceId,
                 idx);
         ostream << pointSourceId;
 
         if (hasTime)
         {
             double t = 0.0;
-            if (pointBuffer.hasDim(Id::GpsTime))
-                t = pointBuffer.getFieldAs<double>(Id::GpsTime, idx);
+            if (view.hasDim(Id::GpsTime))
+                t = view.getFieldAs<double>(Id::GpsTime, idx);
             ostream << t;
         }
 
@@ -652,12 +653,12 @@ point_count_t LasWriter::fillWriteBuf(const PointBuffer& pointBuffer,
             uint16_t red = 0;
             uint16_t green = 0;
             uint16_t blue = 0;
-            if (pointBuffer.hasDim(Id::Red))
-                red = pointBuffer.getFieldAs<uint16_t>(Id::Red, idx);
-            if (pointBuffer.hasDim(Id::Green))
-                green = pointBuffer.getFieldAs<uint16_t>(Id::Green, idx);
-            if (pointBuffer.hasDim(Id::Blue))
-                blue = pointBuffer.getFieldAs<uint16_t>(Id::Blue, idx);
+            if (view.hasDim(Id::Red))
+                red = view.getFieldAs<uint16_t>(Id::Red, idx);
+            if (view.hasDim(Id::Green))
+                green = view.getFieldAs<uint16_t>(Id::Green, idx);
+            if (view.hasDim(Id::Blue))
+                blue = view.getFieldAs<uint16_t>(Id::Blue, idx);
 
             ostream << red << green << blue;
         }
@@ -665,7 +666,7 @@ point_count_t LasWriter::fillWriteBuf(const PointBuffer& pointBuffer,
         Everything e;
         for (auto& dim : m_extraDims)
         {
-            pointBuffer.getField((char *)&e, dim.m_dimType.m_id,
+            view.getField((char *)&e, dim.m_dimType.m_id,
                 dim.m_dimType.m_type, idx);
             ostream.put(dim.m_dimType.m_type, e);
         }
@@ -676,7 +677,7 @@ point_count_t LasWriter::fillWriteBuf(const PointBuffer& pointBuffer,
     return blocksize;
 }
 
-void LasWriter::done(PointContextRef ctx)
+void LasWriter::done(PointTableRef table)
 {
     //ABELL - The zipper has to be closed right after all the points
     // are written or bad things happen since this call expects the
