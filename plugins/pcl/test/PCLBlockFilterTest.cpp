@@ -49,7 +49,7 @@ TEST(PCLBlockFilterTest, PCLBlockFilterTest_example_passthrough_xml)
 {
     StageFactory f;
     std::unique_ptr<Stage> filter(f.createStage("filters.pclblock"));
-    EXPECT_TRUE(filter.get() != 0);
+    EXPECT_TRUE(filter.get());
 
     PipelineManager pipeline;
     PipelineReader pipelineReader(pipeline);
@@ -84,7 +84,7 @@ static void test_filter(const std::string& jsonFile,
     options.add(verbose);
 
     std::unique_ptr<Stage> reader(f.createStage("readers.las"));
-    EXPECT_TRUE(reader.get() != 0);
+    EXPECT_TRUE(reader.get());
     reader->setOptions(options);
 
     Option fname("filename", Support::datapath(jsonFile));
@@ -92,7 +92,7 @@ static void test_filter(const std::string& jsonFile,
     filter_options.add(fname);
 
     std::shared_ptr<Stage> pcl_block(f.createStage("filters.pclblock"));
-    EXPECT_TRUE(pcl_block.get() != 0);
+    EXPECT_TRUE(pcl_block.get());
     pcl_block->setOptions(filter_options);
     pcl_block->setInput(*reader);
 

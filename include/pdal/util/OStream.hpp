@@ -69,7 +69,7 @@ public:
     void flush()
         { m_stream->flush(); }
     operator bool ()
-        { return (*m_stream) != 0; }
+        { return (bool)(*m_stream); }
     void seek(std::streampos pos)
         { m_stream->seekp(pos, std::ostream::beg); }
     void put(const std::string& s)

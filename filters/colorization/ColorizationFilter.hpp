@@ -39,23 +39,9 @@
 
 #include <boost/array.hpp>
 
-#ifdef PDAL_COMPILER_CLANG
-#  pragma clang diagnostic push
-#  pragma clang diagnostic ignored "-Wfloat-equal"
-#endif
-#ifdef PDAL_COMPILER_GCC
-#  pragma GCC diagnostic push
-#  pragma GCC diagnostic ignored "-Wfloat-equal"
-#endif
 #include <gdal.h>
 #include <ogr_spatialref.h>
 #include <pdal/GDALUtils.hpp>
-#ifdef PDAL_COMPILER_GCC
-#  pragma GCC diagnostic pop
-#endif
-#ifdef PDAL_COMPILER_CLANG
-#  pragma clang diagnostic pop
-#endif
 
 #include <map>
 

@@ -77,7 +77,7 @@ TEST(OptechReader, Constructor)
 
     StageFactory f;
     std::unique_ptr<Stage> reader2(f.createStage("readers.optech"));
-    EXPECT_TRUE(reader2.get() != 0);
+    EXPECT_TRUE(reader2.get());
 }
 
 

@@ -52,7 +52,7 @@ TEST(StatsFilterTest, simple)
     StageFactory f;
 
     std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
-    EXPECT_TRUE(reader.get() != 0);
+    EXPECT_TRUE(reader.get());
     reader->setOptions(ops);
 
     StatsFilter filter;
@@ -95,7 +95,7 @@ TEST(StatsFilterTest, dimset)
 
     StageFactory f;
     std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
-    EXPECT_TRUE(reader.get() != 0);
+    EXPECT_TRUE(reader.get());
     reader->setOptions(ops);
 
     Options filterOps;
@@ -137,7 +137,7 @@ TEST(StatsFilterTest, metadata)
 
     StageFactory f;
     std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
-    EXPECT_TRUE(reader.get() != 0);
+    EXPECT_TRUE(reader.get());
     reader->setOptions(ops);
 
     Options filterOps;

@@ -48,7 +48,7 @@ TEST(FerryFilterTest, create)
 {
     StageFactory f;
     std::unique_ptr<Stage> filter(f.createStage("filters.ferry"));
-    EXPECT_TRUE(filter.get() != 0);
+    EXPECT_TRUE(filter.get());
 }
 
 TEST(FerryFilterTest, test_ferry_copy)

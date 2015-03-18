@@ -320,7 +320,7 @@ void AttributeFilter::UpdateGEOSBuffer(PointViewPtr view, AttributeInfo& info)
 
             GEOSGeometry* p = createGEOSPoint(m_geosEnvironment, x, y ,z);
 
-            if ((GEOSPreparedContains_r(m_geosEnvironment, geos_pg, p)) != 0)
+            if (static_cast<bool>(GEOSPreparedContains_r(m_geosEnvironment, geos_pg, p)))
             {
                 // We're in the poly, write the attribute value
                 int32_t v = OGR_F_GetFieldAsInteger(feature.get(), field_index);

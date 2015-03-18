@@ -73,7 +73,7 @@ public:
         return 0;
     }
     operator bool ()
-        { return (*m_stream) != 0; }
+        { return (bool)(*m_stream); }
     void seek(std::streampos pos)
         { m_stream->seekg(pos, std::istream::beg); }
     void seek(std::streampos pos, std::ios_base::seekdir way)

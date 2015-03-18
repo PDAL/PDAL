@@ -149,17 +149,17 @@ namespace Utils
 
     inline std::string tolower(const std::string& s)
     {
-        std::string out(s.length(), 'X');
-        std::transform(s.begin(), s.end(), out.begin(),
-            [](unsigned char c) { return std::tolower(c); });
+        std::string out;
+        for (size_t i = 0; i < s.size(); ++i)
+            out += (char)std::tolower(s[i]);
         return out;
     }
 
     inline std::string toupper(const std::string& s)
     {
-        std::string out(s.length(), 'X');
-        std::transform(s.begin(), s.end(), out.begin(),
-            [](unsigned char c) { return std::toupper(c); });
+        std::string out;
+        for (size_t i = 0; i < s.size(); ++i)
+            out += (char)std::toupper(s[i]);
         return out;
     }
 

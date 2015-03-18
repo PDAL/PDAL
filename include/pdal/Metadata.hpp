@@ -560,7 +560,7 @@ public:
     }
 
     bool hasChildren() const
-        { return (m_impl->m_subnodes.size()) != 0; }
+        { return m_impl->m_subnodes.size(); }
 
     std::vector<std::string> childNames() const
     {

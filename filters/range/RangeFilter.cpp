@@ -41,13 +41,6 @@
 #include <utility>
 #include <vector>
 
-#ifdef PDAL_COMPILER_CLANG
-#  pragma clang diagnostic ignored "-Wfloat-equal"
-#endif
-#ifdef PDAL_COMPILER_GCC
-#  pragma GCC diagnostic ignored "-Wfloat-equal"
-#endif
-
 namespace pdal
 {
 

@@ -60,7 +60,7 @@ public:
 
     // returns true if the pipeline endpoint is a writer
     bool isWriterPipeline() const
-        { return (getStage()) != 0; }
+        { return (bool)getStage(); }
 
     // return the pipeline reader endpoint (or NULL, if not a reader pipeline)
     Stage* getStage() const

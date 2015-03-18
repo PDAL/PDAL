@@ -38,22 +38,8 @@
 #include <pdal/PointView.hpp>
 #include <pdal/GlobalEnvironment.hpp>
 
-#ifdef PDAL_COMPILER_CLANG
-#  pragma clang diagnostic push
-#  pragma clang diagnostic ignored "-Wfloat-equal"
-#endif
-#ifdef PDAL_COMPILER_GCC
-#  pragma GCC diagnostic push
-#  pragma GCC diagnostic ignored "-Wfloat-equal"
-#endif
 #include <gdal.h>
 #include <ogr_spatialref.h>
-#ifdef PDAL_COMPILER_GCC
-#  pragma GCC diagnostic pop
-#endif
-#ifdef PDAL_COMPILER_CLANG
-#  pragma clang diagnostic pop
-#endif
 
 #include <memory>
 
