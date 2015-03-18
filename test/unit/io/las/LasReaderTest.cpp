@@ -35,6 +35,7 @@
 #include "gtest/gtest.h"
 
 #include <pdal/PointBuffer.hpp>
+#include <pdal/StageFactory.hpp>
 #include <LasReader.hpp>
 #include "Support.hpp"
 
@@ -66,6 +67,14 @@ template<typename LeftIter, typename RightIter>
 
 } // unnamed namespace
 
+TEST(LasReaderTest, create)
+{
+    StageFactory f;
+
+    std::unique_ptr<Stage> s(f.createStage("readers.las"));
+    EXPECT_TRUE(s.get());
+}
+
 TEST(LasReaderTest, test_base_options)
 {
     const std::string file(Support::datapath("las/1.2-with-color.las"));
@@ -80,10 +89,10 @@ TEST(LasReaderTest, test_base_options)
         Options opts;
         opts.add(opt_filename);
 
-        std::shared_ptr<LasReader> reader(new LasReader);
-        reader->setOptions(opts);
-        EXPECT_TRUE(reader->getVerboseLevel() == 0);
-        EXPECT_TRUE(reader->isDebug() == false);
+        LasReader reader;
+        reader.setOptions(opts);
+        EXPECT_TRUE(reader.getVerboseLevel() == 0);
+        EXPECT_TRUE(reader.isDebug() == false);
     }
 
     {
@@ -91,10 +100,10 @@ TEST(LasReaderTest, test_base_options)
         opts.add(opt_filename);
         opts.add(opt_verbose_string);
         opts.add(opt_debug_string);
-        std::shared_ptr<LasReader> reader(new LasReader);
-        reader->setOptions(opts);
-        EXPECT_TRUE(reader->getVerboseLevel() == 99);
-        EXPECT_TRUE(reader->isDebug() == true);
+        LasReader reader;
+        reader.setOptions(opts);
+        EXPECT_TRUE(reader.getVerboseLevel() == 99);
+        EXPECT_TRUE(reader.isDebug() == true);
     }
 
     {
@@ -102,10 +111,10 @@ TEST(LasReaderTest, test_base_options)
         opts.add(opt_filename);
         opts.add(opt_verbose_uint8);
         opts.add(opt_debug_bool);
-        std::shared_ptr<LasReader> reader(new LasReader);
-        reader->setOptions(opts);
-        EXPECT_TRUE(reader->getVerboseLevel() == 99);
-        EXPECT_TRUE(reader->isDebug() == true);
+        LasReader reader;
+        reader.setOptions(opts);
+        EXPECT_TRUE(reader.getVerboseLevel() == 99);
+        EXPECT_TRUE(reader.isDebug() == true);
     }
 }
 
@@ -115,12 +124,13 @@ TEST(LasReaderTest, header)
     PointContext ctx;
     Options ops;
     ops.add("filename", Support::datapath("las/simple.las"));
-    std::shared_ptr<LasReader> reader(new LasReader);
-    reader->setOptions(ops);
 
-    reader->prepare(ctx);
+    LasReader reader;
+    reader.setOptions(ops);
+
+    reader.prepare(ctx);
     // This tests the copy ctor, too.
-    LasHeader h = reader->header();
+    LasHeader h = reader.header();
 
     EXPECT_EQ(h.fileSignature(), "LASF");
     EXPECT_EQ(h.fileSourceId(), 0);
@@ -161,11 +171,11 @@ TEST(LasReaderTest, test_sequential)
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
     ops1.add("count", 103);
-    std::shared_ptr<LasReader> reader(new LasReader);
-    reader->setOptions(ops1);
+    LasReader reader;
+    reader.setOptions(ops1);
 
-    reader->prepare(ctx);
-    PointBufferSet pbSet = reader->execute(ctx);
+    reader.prepare(ctx);
+    PointBufferSet pbSet = reader.execute(ctx);
     EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
     Support::check_p0_p1_p2(*buf);
@@ -177,23 +187,25 @@ TEST(LasReaderTest, test_sequential)
 }
 
 
-static void test_a_format(const std::string& file, uint8_t majorVersion, uint8_t minorVersion, int pointFormat,
-                          double xref, double yref, double zref, double tref, uint16_t rref,  uint16_t gref,  uint16_t bref)
+static void test_a_format(const std::string& file, uint8_t majorVersion,
+    uint8_t minorVersion, int pointFormat,
+    double xref, double yref, double zref, double tref,
+    uint16_t rref,  uint16_t gref,  uint16_t bref)
 {
     PointContext ctx;
 
     Options ops1;
     ops1.add("filename", Support::datapath(file));
     ops1.add("count", 1);
-    std::shared_ptr<LasReader> reader(new LasReader);
-    reader->setOptions(ops1);
-    reader->prepare(ctx);
+    LasReader reader;
+    reader.setOptions(ops1);
+    reader.prepare(ctx);
 
-    EXPECT_EQ(reader->header().pointFormat(), pointFormat);
-    EXPECT_EQ(reader->header().versionMajor(), majorVersion);
-    EXPECT_EQ(reader->header().versionMinor(), minorVersion);
+    EXPECT_EQ(reader.header().pointFormat(), pointFormat);
+    EXPECT_EQ(reader.header().versionMajor(), majorVersion);
+    EXPECT_EQ(reader.header().versionMinor(), minorVersion);
 
-    PointBufferSet pbSet = reader->execute(ctx);
+    PointBufferSet pbSet = reader.execute(ctx);
     EXPECT_EQ(pbSet.size(), 1u);
     PointBufferPtr buf = *pbSet.begin();
     EXPECT_EQ(buf->size(), 1u);
@@ -221,10 +233,10 @@ TEST(LasReaderTest, inspect)
     Options ops;
     ops.add("filename", Support::datapath("las/epsg_4326.las"));
 
-    std::shared_ptr<LasReader> reader(new LasReader);
-    reader->setOptions(ops);
+    LasReader reader;
+    reader.setOptions(ops);
 
-    QuickInfo qi = reader->preview();
+    QuickInfo qi = reader.preview();
 
     std::string testWkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"unretrievable - using WGS84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
 #ifdef PDAL_HAVE_LIBGEOTIFF
@@ -266,12 +278,12 @@ TEST(LasReaderTest, test_vlr)
 
     Options ops1;
     ops1.add("filename", Support::datapath("las/lots_of_vlr.las"));
-    std::shared_ptr<LasReader> reader(new LasReader);
-    reader->setOptions(ops1);
-    reader->prepare(ctx);
-    reader->execute(ctx);
+    LasReader reader;
+    reader.setOptions(ops1);
+    reader.prepare(ctx);
+    reader.execute(ctx);
 
-    EXPECT_EQ(reader->header().getVLRs().getAll().size(), 390);
+    EXPECT_EQ(reader.header().getVLRs().getAll().size(), 390);
 }
 **/
 
@@ -282,10 +294,10 @@ TEST(LasReaderTest, testInvalidFileSignature)
 
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las.wkt"));
-    std::shared_ptr<LasReader> reader(new LasReader);
-    reader->setOptions(ops1);
+    LasReader reader;
+    reader.setOptions(ops1);
 
-    EXPECT_TRUE(reader->header().valid());
+    EXPECT_TRUE(reader.header().valid());
 }
 
 TEST(LasReaderTest, extraBytes)
@@ -294,10 +306,10 @@ TEST(LasReaderTest, extraBytes)
 
     Options readOps;
     readOps.add("filename", Support::datapath("las/extrabytes.las"));
-    std::shared_ptr<LasReader> reader(new LasReader);
-    reader->setOptions(readOps);
+    LasReader reader;
+    reader.setOptions(readOps);
 
-    reader->prepare(ctx);
+    reader.prepare(ctx);
 
     DimTypeList dimTypes = ctx.dimTypes();
     EXPECT_EQ(dimTypes.size(), (size_t)24);
@@ -320,7 +332,7 @@ TEST(LasReaderTest, extraBytes)
     Dimension::Id::Enum time2 = ctx.findProprietaryDim("Time");
     EXPECT_EQ(ctx.dimType(time2), Dimension::Type::Unsigned64);
 
-    PointBufferSet pbSet = reader->execute(ctx);
+    PointBufferSet pbSet = reader.execute(ctx);
     EXPECT_EQ(pbSet.size(), (size_t)1);
     PointBufferPtr pb = *pbSet.begin();
 
@@ -356,5 +368,26 @@ TEST(LasReaderTest, extraBytes)
             pb->getFieldAs<double>(time2, idx), 1.0);
 
     }
+}
+
+TEST(LasReaderTest, callback)
+{
+    PointContext ctx;
+    point_count_t count = 0;
+
+    Options ops;
+    ops.add("filename", Support::datapath("las/simple.las"));
+
+    Reader::PointReadFunc cb = [&count](PointBuffer& buf, PointId id)
+    {
+        count++;
+    };
+    LasReader reader;
+    reader.setOptions(ops);
+    reader.setReadCb(cb);
+
+    reader.prepare(ctx);
+    reader.execute(ctx);
+    EXPECT_EQ(count, (point_count_t)1065);
 }
 
