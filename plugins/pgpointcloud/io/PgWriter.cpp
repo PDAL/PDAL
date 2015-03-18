@@ -473,7 +473,8 @@ void PgWriter::writeTile(PointBuffer const& buffer)
     }
 
     std::string insert_into("INSERT INTO ");
-    std::string values(" (pa) VALUES ('");
+    std::string values(" (" + pg_quote_identifier(m_column_name) +
+                       ") VALUES ('");
 
     m_insert.append(insert_into);
 
