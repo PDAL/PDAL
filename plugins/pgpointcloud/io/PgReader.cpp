@@ -165,9 +165,18 @@ uint32_t PgReader::fetchPcid() const
 
     std::ostringstream oss;
     oss << "SELECT PC_Typmod_Pcid(a.atttypmod) AS pcid ";
-    oss << "FROM pg_class c, pg_attribute a ";
-    oss << "WHERE c.relname = " << pg_quote_literal(m_table_name) << " ";
-    oss << "AND a.attname = " << pg_quote_literal(m_column_name) << " ";
+    oss << "FROM pg_class c, pg_attribute a";
+    if (!m_schema_name.empty())
+    {
+      oss << ", pg_namespace n";
+    }
+    oss << " WHERE c.relname = " << pg_quote_literal(m_table_name);
+    oss << " AND a.attname = " << pg_quote_literal(m_column_name);
+    if (!m_schema_name.empty())
+    {
+      oss << " AND c.relnamespace = n.oid AND n.nspname = "
+          << pg_quote_literal(m_schema_name);
+    }
 
     char *pcid_str = pg_query_once(m_session, oss.str());
 
@@ -182,8 +191,10 @@ uint32_t PgReader::fetchPcid() const
     {
         std::ostringstream oss;
         oss << "Unable to fetch pcid with column '"
-            << m_column_name <<"' and  table '"
-            << m_table_name <<"'";
+            << m_column_name <<"' and  table ";
+        if (!m_schema_name.empty())
+          oss << "'" << m_schema_name << "'.";
+        oss << "'" << m_table_name << "'";
         throw pdal_error(oss.str());
     }
 
