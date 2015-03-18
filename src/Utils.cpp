@@ -553,19 +553,24 @@ int Utils::run_shell_command(const string& cmd, string& output)
     return portable_pclose(fp);
 }
 
-//#ifdef PDAL_COMPILER_MSVC
-// http://www.codepedia.com/1/CppStringReplace
+
 string Utils::replaceAll(string result, const string& replaceWhat,
     const string& replaceWithWhat)
 {
+    size_t pos = 0;
     while (1)
     {
-        const int pos = result.find(replaceWhat);
-        if (pos==-1) break;
-        result.replace(pos,replaceWhat.size(),replaceWithWhat);
+        pos = result.find(replaceWhat, pos);
+        if (pos == string::npos)
+            break;
+        result.replace(pos, replaceWhat.size(), replaceWithWhat);
+        pos += replaceWithWhat.size();
+        if (pos >= result.size())
+            break;
     }
     return result;
 }
+
 
 // Adapted from http://stackoverflow.com/a/11969098.
 std::string Utils::escapeJSON(const string &str)

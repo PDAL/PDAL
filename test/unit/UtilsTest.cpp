@@ -306,3 +306,9 @@ TEST(UtilsTest, starts)
     EXPECT_TRUE(Utils::startsWith(s, ""));
 }
 
+TEST(UtilsTest, replaceAll)
+{
+    std::string s(" This is a test ");
+    EXPECT_EQ(Utils::replaceAll(s, " ", "  "), "  This  is  a  test  ");
+    EXPECT_EQ(Utils::replaceAll(s, " ", "\""), "\"This\"is\"a\"test\"");
+}
