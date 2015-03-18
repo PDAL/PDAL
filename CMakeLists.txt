@@ -270,6 +270,9 @@ if(WITH_TESTS)
   endif()
 
   add_subdirectory(test)
+
+  # Define "make check" as alias for "make test"
+  ADD_CUSTOM_TARGET(check COMMAND ctest)
 else()
   if(ENABLE_CTEST)
     message(WARNING
