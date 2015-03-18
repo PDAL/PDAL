@@ -1,0 +1,3 @@
+Bash commandline completion for pdal.
+See https://www.gnu.org/software/bash/manual/html_node/Programmable-Completion.html
+On debian-based systems, copy the "pdal" file to /etc/bash_completion.d/
