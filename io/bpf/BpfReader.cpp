@@ -302,6 +302,9 @@ point_count_t BpfReader::readPointMajor(PointViewPtr data, point_count_t count)
         data->setField(Dimension::Id::Y, nextId, y);
         data->setField(Dimension::Id::Z, nextId, z);
 
+        if (m_cb)
+            m_cb(*data.get(), nextId);
+
         idx++;
         numRead++;
         nextId++;
