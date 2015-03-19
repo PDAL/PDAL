@@ -120,12 +120,12 @@ public:
 
     // validate a point's XYZ values
     static void check_pN(const pdal::PointView& data,
-                         PointId index,
+                         pdal::PointId index,
                          double xref, double yref, double zref);
 
     // validate a point's XYZ, Time, and Color values
     static void check_pN(const pdal::PointView& data,
-        PointId index, double xref, double yref, double zref,
+        pdal::PointId index, double xref, double yref, double zref,
         double tref, uint16_t rref, uint16_t gref, uint16_t bref);
 
     // these are for the 1.2-with-color image
