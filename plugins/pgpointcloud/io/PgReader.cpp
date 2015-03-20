@@ -108,11 +108,11 @@ point_count_t PgReader::getNumPoints() const
         return m_cached_point_count;
 
     std::ostringstream oss;
-    oss << "SELECT Sum(PC_NumPoints(" << m_column_name << ")) AS numpoints, ";
-    oss << "Max(PC_NumPoints(" << m_column_name << ")) AS maxpoints FROM ";
+    oss << "SELECT Sum(PC_NumPoints(" << pg_quote_identifier(m_column_name) << ")) AS numpoints, ";
+    oss << "Max(PC_NumPoints(" << pg_quote_identifier(m_column_name) << ")) AS maxpoints FROM ";
     if (m_schema_name.size())
-        oss << m_schema_name << ".";
-    oss << m_table_name;
+        oss << pg_quote_identifier(m_schema_name) << ".";
+    oss << pg_quote_identifier(m_table_name);
     if (m_where.size())
         oss << " WHERE " << m_where;
 
@@ -134,12 +134,12 @@ point_count_t PgReader::getNumPoints() const
 std::string PgReader::getDataQuery() const
 {
     std::ostringstream oss;
-    oss << "SELECT text(PC_Uncompress(" << m_column_name << ")) AS pa, ";
-    oss << "PC_NumPoints(" << m_column_name << ") AS npoints FROM ";
-    if (m_schema_name.size())
-        oss << m_schema_name << ".";
-    oss << m_table_name;
-    if (m_where.size())
+    oss << "SELECT text(PC_Uncompress(" << pg_quote_identifier(m_column_name) << ")) AS pa, ";
+    oss << "PC_NumPoints(" << pg_quote_identifier(m_column_name) << ") AS npoints FROM ";
+    if (!m_schema_name.empty())
+        oss << pg_quote_identifier(m_schema_name) << ".";
+    oss << pg_quote_identifier(m_table_name);
+    if (!m_where.empty())
         oss << " WHERE " << m_where;
 
     log()->get(LogLevel::Debug) << "Constructed data query " <<
@@ -165,9 +165,18 @@ uint32_t PgReader::fetchPcid() const
 
     std::ostringstream oss;
     oss << "SELECT PC_Typmod_Pcid(a.atttypmod) AS pcid ";
-    oss << "FROM pg_class c, pg_attribute a ";
-    oss << "WHERE c.relname = '" << m_table_name << "' ";
-    oss << "AND a.attname = '" << m_column_name << "' ";
+    oss << "FROM pg_class c, pg_attribute a";
+    if (!m_schema_name.empty())
+    {
+      oss << ", pg_namespace n";
+    }
+    oss << " WHERE c.relname = " << pg_quote_literal(m_table_name);
+    oss << " AND a.attname = " << pg_quote_literal(m_column_name);
+    if (!m_schema_name.empty())
+    {
+      oss << " AND c.relnamespace = n.oid AND n.nspname = "
+          << pg_quote_literal(m_schema_name);
+    }
 
     char *pcid_str = pg_query_once(m_session, oss.str());
 
@@ -182,8 +191,10 @@ uint32_t PgReader::fetchPcid() const
     {
         std::ostringstream oss;
         oss << "Unable to fetch pcid with column '"
-            << m_column_name <<"' and  table '"
-            << m_table_name <<"'";
+            << m_column_name <<"' and  table ";
+        if (!m_schema_name.empty())
+          oss << "'" << m_schema_name << "'.";
+        oss << "'" << m_table_name << "'";
         throw pdal_error(oss.str());
     }
 

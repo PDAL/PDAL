@@ -81,7 +81,8 @@ Options getDbOptions()
     Options options;
 
     options.add(Option("connection", getTestDBTempConn()));
-    options.add(Option("table", "pdal_test_table"));
+    options.add(Option("table", "pdal-\"test\"-table")); // intentional quotes
+    options.add(Option("column", "p\"a")); // intentional quotes
     options.add(Option("srid", "4326"));
     options.add(Option("capacity", "10000"));
 
