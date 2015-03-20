@@ -38,8 +38,8 @@
 #include <LasWriter.hpp>
 #include <LasReader.hpp>
 #include <pdal/Options.hpp>
+#include <pdal/StageWrapper.hpp>
 
-#include "StageTester.hpp"
 #include "Support.hpp"
 
 using namespace pdal;
@@ -109,9 +109,9 @@ TEST(ChipperTest, empty_buffer)
 
     ChipperFilter chipper;
     chipper.prepare(table);
-    StageTester::ready(chipper, table);
-    PointViewSet viewSet = StageTester::run(chipper, view);
-    StageTester::done(chipper, table);
+    StageWrapper::ready(chipper, table);
+    PointViewSet viewSet = StageWrapper::run(chipper, view);
+    StageWrapper::done(chipper, table);
 
     EXPECT_EQ(viewSet.size(), 0u);
 }

@@ -8,7 +8,7 @@ namespace pdal
 {
 
 // Provide access to private members of stage.
-class StageTester
+class StageWrapper
 {
 public:
     static void initialize(std::shared_ptr<Stage> s, PointTableRef table)
@@ -32,16 +32,15 @@ public:
 };
 
 // Provide access to private members of Filter.
-class FilterTester : public StageTester
+class FilterWrapper : public StageWrapper
 {
 public:
     static void filter(Filter& f, PointViewPtr view)
         { f.filter(view); }
 };
 
-//
 // Provide access to private members of Writer.
-class WriterTester : public StageTester
+class WriterWrapper : public StageWrapper
 {
 public:
     static void write(Writer& w, PointViewPtr view)

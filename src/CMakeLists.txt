@@ -55,17 +55,16 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/PipelineManager.hpp"
   "${PDAL_HEADERS_DIR}/PipelineReader.hpp"
   "${PDAL_HEADERS_DIR}/PipelineWriter.hpp"
-
   "${PDAL_HEADERS_DIR}/PointLayout.hpp"
   "${PDAL_HEADERS_DIR}/PointTable.hpp"
   "${PDAL_HEADERS_DIR}/PointView.hpp"
   "${PDAL_HEADERS_DIR}/PointViewIter.hpp"
-
   "${PDAL_HEADERS_DIR}/QuadIndex.hpp"
   "${PDAL_HEADERS_DIR}/Reader.hpp"
   "${PDAL_HEADERS_DIR}/SpatialReference.hpp"
   "${PDAL_HEADERS_DIR}/Stage.hpp"
   "${PDAL_HEADERS_DIR}/StageFactory.hpp"
+  "${PDAL_HEADERS_DIR}/StageWrapper.hpp"
   "${PDAL_HEADERS_DIR}/StreamFactory.hpp"
   "${PDAL_HEADERS_DIR}/UserCallback.hpp"
   "${PDAL_HEADERS_DIR}/Utils.hpp"

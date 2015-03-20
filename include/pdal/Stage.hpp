@@ -56,11 +56,11 @@ class StageSequentialIterator;
 class StageRandomIterator;
 class StageBlockIterator;
 class StageRunner;
-class StageTester;
+class StageWrapper;
 
 class PDAL_DLL Stage
 {
-    friend class StageTester;
+    friend class StageWrapper;
     friend class StageRunner;
 public:
     Stage();

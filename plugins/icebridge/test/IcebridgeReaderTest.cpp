@@ -40,7 +40,6 @@
 #include <pdal/PipelineManager.hpp>
 #include <pdal/StageFactory.hpp>
 
-#include "StageTester.hpp"
 #include "Support.hpp"
 
 using namespace pdal;

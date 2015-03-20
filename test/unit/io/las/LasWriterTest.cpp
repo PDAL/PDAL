@@ -42,8 +42,8 @@
 #include <LasWriter.hpp>
 
 #include <pdal/PointView.hpp>
+#include <pdal/StageWrapper.hpp>
 
-#include "StageTester.hpp"
 #include "Support.hpp"
 
 namespace pdal
@@ -87,9 +87,9 @@ TEST(LasWriterTest, auto_offset)
 
     writer.prepare(table);
 
-    WriterTester::ready(writer, table);
-    WriterTester::write(writer, view);
-    WriterTester::done(writer, table);
+    WriterWrapper::ready(writer, table);
+    WriterWrapper::write(writer, view);
+    WriterWrapper::done(writer, table);
 
     Options readerOps;
     readerOps.add("filename", FILENAME);

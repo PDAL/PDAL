@@ -41,7 +41,6 @@
 
 #include <SbetReader.hpp>
 
-#include "StageTester.hpp"
 #include "Support.hpp"
 
 using namespace pdal;

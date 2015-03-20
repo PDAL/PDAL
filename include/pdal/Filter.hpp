@@ -50,11 +50,11 @@ class Filter;
 //   <uint32>verbose
 //
 
-class FilterTester;
+class FilterWrapper;
 
 class PDAL_DLL Filter : public Stage
 {
-    friend class FilterTester;
+    friend class FilterWrapper;
 public:
     Filter() : Stage()
         {}

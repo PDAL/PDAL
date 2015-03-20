@@ -39,8 +39,8 @@
 #include <SortFilter.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
+#include <pdal/StageWrapper.hpp>
 #include "Support.hpp"
-#include "StageTester.hpp"
 
 using namespace pdal;
 
@@ -68,9 +68,9 @@ void doSort(point_count_t count)
         view->setField(Dimension::Id::X, i, dist(generator));
 
     filter.prepare(table);
-    FilterTester::ready(filter, table);
-    FilterTester::filter(filter, view);
-    FilterTester::done(filter, table);
+    FilterWrapper::ready(filter, table);
+    FilterWrapper::filter(filter, view);
+    FilterWrapper::done(filter, table);
 
     EXPECT_EQ(count, view->size());
     for (PointId i = 1; i < count; ++i)

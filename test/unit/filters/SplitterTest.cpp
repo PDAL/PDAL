@@ -35,10 +35,10 @@
 #include "gtest/gtest.h"
 
 #include <pdal/StageFactory.hpp>
+#include <pdal/StageWrapper.hpp>
 #include <LasReader.hpp>
 #include <SplitterFilter.hpp>
 #include "Support.hpp"
-#include "StageTester.hpp"
 
 using namespace pdal;
 
@@ -65,15 +65,15 @@ TEST(SplitterTest, test_tile_filter)
     PointViewPtr view(new PointView(table));
     s.prepare(table);
 
-    StageTester::ready(r, table);
-    PointViewSet viewSet = StageTester::run(r, view);
-    StageTester::done(r, table);
+    StageWrapper::ready(r, table);
+    PointViewSet viewSet = StageWrapper::run(r, view);
+    StageWrapper::done(r, table);
     EXPECT_EQ(viewSet.size(), 1u);
     view = *viewSet.begin();
 
-    StageTester::ready(s, table);
-    viewSet = StageTester::run(s, view);
-    StageTester::done(s, table);
+    StageWrapper::ready(s, table);
+    viewSet = StageWrapper::run(s, view);
+    StageWrapper::done(s, table);
 
     std::vector<PointViewPtr> views;
     for (auto it = viewSet.begin(); it != viewSet.end(); ++it)

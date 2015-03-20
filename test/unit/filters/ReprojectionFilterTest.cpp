@@ -145,8 +145,8 @@ TEST(ReprojectionFilterTest, InPlaceReprojectionFilterTest_test_2)
         point_count_t numRead = iter->read(view, 1);
         EXPECT_TRUE(numRead == 1);
 
-        FilterTester::ready(&reprojectionFilter, table);
-        FilterTester::filter(&reprojectionFilter, view);
+        FilterWrapper::ready(&reprojectionFilter, table);
+        FilterWrapper::filter(&reprojectionFilter, view);
 
         double x, y, z;
         getPoint(view, x, y, z);

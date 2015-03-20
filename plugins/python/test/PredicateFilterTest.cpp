@@ -37,10 +37,10 @@
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/StageWrapper.hpp>
 #include <stats/StatsFilter.hpp>
 #include <faux/FauxReader.hpp>
 
-#include "StageTester.hpp"
 #include "Support.hpp"
 
 using namespace pdal;
@@ -283,16 +283,16 @@ TEST(PredicateFilterTest, PredicateFilterTest_test4)
 
     filter->prepare(table);
 
-    StageTester::ready(reader, table);
-    PointViewSet viewSet = StageTester::run(reader, buf);
-    StageTester::done(reader, table);
+    StageWrapper::ready(reader, table);
+    PointViewSet viewSet = StageWrapper::run(reader, buf);
+    StageWrapper::done(reader, table);
     EXPECT_EQ(viewSet.size(), 1u);
     buf = *viewSet.begin();
     EXPECT_EQ(buf->size(), 1000u);
 
-    StageTester::ready(*filter, table);
-    viewSet = StageTester::run(*filter, buf);
-    StageTester::done(*filter, table);
+    StageWrapper::ready(*filter, table);
+    viewSet = StageWrapper::run(*filter, buf);
+    StageWrapper::done(*filter, table);
     EXPECT_EQ(viewSet.size(), 1u);
     buf = *viewSet.begin();
     EXPECT_EQ(buf->size(), 750u);
