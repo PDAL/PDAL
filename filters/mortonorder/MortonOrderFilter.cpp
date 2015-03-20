@@ -42,7 +42,7 @@ namespace pdal
 {
 
 static PluginInfo const s_info = PluginInfo(
-    "filters.morgonorder",
+    "filters.mortonorder",
     "Morton or z-order sorting of points. See http://en.wikipedia.org/wiki/Z-order_curve for more detail.",
     "http://pdal.io/stages/filters.mortonorder.html" );
 

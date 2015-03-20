@@ -48,6 +48,7 @@ class PDAL_DLL PointLayout
 {
 public:
     PointLayout();
+    virtual ~PointLayout() {}
 
     void finalize();
 
@@ -95,7 +96,7 @@ public:
     const Dimension::Detail *dimDetail(Dimension::Id::Enum id) const;
 
 private:
-    bool update(Dimension::Detail dd, const std::string& name);
+    virtual bool update(Dimension::Detail dd, const std::string& name);
 
     Dimension::Type::Enum resolveType(
             Dimension::Type::Enum t1,
