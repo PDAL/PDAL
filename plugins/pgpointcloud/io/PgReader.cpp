@@ -134,8 +134,10 @@ point_count_t PgReader::getNumPoints() const
 std::string PgReader::getDataQuery() const
 {
     std::ostringstream oss;
-    oss << "SELECT text(PC_Uncompress(" << pg_quote_identifier(m_column_name) << ")) AS pa, ";
-    oss << "PC_NumPoints(" << pg_quote_identifier(m_column_name) << ") AS npoints FROM ";
+    oss << "SELECT text(PC_Uncompress(" << pg_quote_identifier(m_column_name) <<
+        ")) AS pa, ";
+    oss << "PC_NumPoints(" << pg_quote_identifier(m_column_name) <<
+        ") AS npoints FROM ";
     if (!m_schema_name.empty())
         oss << pg_quote_identifier(m_schema_name) << ".";
     oss << pg_quote_identifier(m_table_name);
@@ -174,8 +176,8 @@ uint32_t PgReader::fetchPcid() const
     oss << " AND a.attname = " << pg_quote_literal(m_column_name);
     if (!m_schema_name.empty())
     {
-      oss << " AND c.relnamespace = n.oid AND n.nspname = "
-          << pg_quote_literal(m_schema_name);
+        oss << " AND c.relnamespace = n.oid AND n.nspname = " <<
+            pg_quote_literal(m_schema_name);
     }
 
     char *pcid_str = pg_query_once(m_session, oss.str());

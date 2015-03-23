@@ -133,12 +133,16 @@ Options PgWriter::getDefaultOptions()
     Option table("table", "", "table to write to");
     Option schema("schema", "", "schema table resides in");
     Option column("column", "", "column to write to");
-    Option compression("compression", "dimensional", "patch compression format to use (none, dimensional, ght)");
+    Option compression("compression", "dimensional",
+        "patch compression format to use (none, dimensional, ght)");
     Option overwrite("overwrite", true, "replace any existing table");
     Option srid("srid", 4326, "spatial reference id to store data in");
-    Option pcid("pcid", 0, "use this existing pointcloud schema id, if it exists");
-    Option pre_sql("pre_sql", "", "before the pipeline runs, read and execute this SQL file, or run this SQL command");
-    Option post_sql("post_sql", "", "after the pipeline runs, read and execute this SQL file, or run this SQL command");
+    Option pcid("pcid", 0, "use this existing pointcloud schema id, if it "
+        "exists");
+    Option pre_sql("pre_sql", "", "before the pipeline runs, read and "
+        "execute this SQL file, or run this SQL command");
+    Option post_sql("post_sql", "", "after the pipeline runs, read and "
+        "execute this SQL file, or run this SQL command");
 
     options.add(table);
     options.add(schema);
