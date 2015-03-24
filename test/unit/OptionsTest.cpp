@@ -39,6 +39,8 @@
 #include <CropFilter.hpp>
 #include <FauxReader.hpp>
 
+#include "Support.hpp"
+
 #include <boost/property_tree/xml_parser.hpp>
 
 static std::string xml_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
@@ -305,3 +307,31 @@ TEST(OptionsTest, implicitdefault)
     EXPECT_EQ(slist.size(), (size_t)4);
 }
 
+TEST(OptionsTest, metadata)
+{
+    Options ops;
+    ops.add("test1", "This is a test");
+    ops.add("test2", 56);
+    ops.add("test3", 27.5, "Testing test3");
+
+    Option op35("test3.5", 3.5);
+
+    Options subops;
+    subops.add("subtest1", "Subtest1");
+    subops.add("subtest2", "Subtest2");
+
+    op35.setOptions(subops);
+
+    ops.add(op35);
+    ops.add("test4", "Testing option test 4");
+
+    MetadataNode node = ops.toMetadata();
+
+    std::string goodfile(Support::datapath("misc/opts2json_meta.txt"));
+    std::string testfile(Support::temppath("opts2json.txt"));
+    {
+        std::ofstream out(testfile);
+        utils::toJSON(node, out);
+    }
+    EXPECT_TRUE(Support::compare_files(goodfile, testfile));
+}

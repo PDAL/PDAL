@@ -103,6 +103,17 @@ bool Option::empty()
         return false;
 }
 
+void Option::toMetadata(MetadataNode& parent) const
+{
+    MetadataNode child = parent.add(getName());
+    child.add("value", getValue<std::string>());
+    child.add("description", getDescription());
+
+    auto opts = getOptions();
+    if (opts)
+        opts->toMetadata(child);
+}
+
 //---------------------------------------------------------------------------
 
 

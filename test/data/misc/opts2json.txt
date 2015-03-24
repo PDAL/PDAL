@@ -1,41 +1,43 @@
-"options" :
 {
-  "test1" :
+  "options" :
   {
-    "value" : "This is a test",
-    "description" : ""
-  },
-  "test2" :
-  {
-    "value" : "56",
-    "description" : ""
-  },
-  "test3" :
-  {
-    "value" : "27.5",
-    "description" : "Testing test3"
-  },
-  "test3.5" :
-  {
-    "value" : "3.5",
-    "description" : ""
-    "options" :
+    "test1" :
     {
-      "subtest1" :
+      "value" : "This is a test",
+      "description" : ""
+    },
+    "test2" :
+    {
+      "value" : "56",
+      "description" : ""
+    },
+    "test3" :
+    {
+      "value" : "27.5",
+      "description" : "Testing test3"
+    },
+    "test3.5" :
+    {
+      "value" : "3.5",
+      "description" : ""
+      "options" :
       {
-        "value" : "Subtest1",
-        "description" : ""
-      },
-      "subtest2" :
-      {
-        "value" : "Subtest2",
-        "description" : ""
+        "subtest1" :
+        {
+          "value" : "Subtest1",
+          "description" : ""
+        },
+        "subtest2" :
+        {
+          "value" : "Subtest2",
+          "description" : ""
+        }
       }
+    },
+    "test4" :
+    {
+      "value" : "Testing option test 4",
+      "description" : ""
     }
-  },
-  "test4" :
-  {
-    "value" : "Testing option test 4",
-    "description" : ""
   }
 }

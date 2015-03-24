@@ -221,7 +221,9 @@ std::string toJSON(const Options& opts)
 
 void toJSON(const Options& opts, std::ostream& o)
 {
-    pdal::toJSON(opts, o, 0);
+    o << "{" << endl;
+    pdal::toJSON(opts, o, 1);
+    o << "}" << endl;
 }
 
 namespace reST

@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pdal/pdal_internal.hpp>
+#include <pdal/Metadata.hpp>
 #include <pdal/Utils.hpp>
 
 #include <boost/property_tree/ptree.hpp>
@@ -215,6 +216,8 @@ public:
     }
 #endif
 
+    void toMetadata(MetadataNode& parent) const;
+
 /// @name Private attributes
 private:
     std::string m_name;
@@ -338,6 +341,29 @@ public:
 
     // if option name not present, just returns
     void remove(const std::string& name);
+
+    MetadataNode toMetadata() const
+    {
+        MetadataNode cur("options");
+        std::vector<Option> optList = getOptions();
+        for (auto oi = optList.begin(); oi != optList.end(); ++oi)
+        {
+            Option& opt = *oi;
+            opt.toMetadata(cur);
+        }
+        return cur;
+    }
+
+    void toMetadata(MetadataNode& parent) const
+    {
+        MetadataNode cur = parent.add("options");
+        std::vector<Option> optList = getOptions();
+        for (auto oi = optList.begin(); oi != optList.end(); ++oi)
+        {
+            Option& opt = *oi;
+            opt.toMetadata(cur);
+        }
+    }
 
     // add an option (shortcut version, bypass need for an Option object)
     template<typename T> void add(const std::string& name, T value,

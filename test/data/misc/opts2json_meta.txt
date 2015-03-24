@@ -1,0 +1,43 @@
+{
+  "options":
+  {
+    "test1":
+    {
+      "description": "",
+      "value": "This is a test"
+    },
+    "test2":
+    {
+      "description": "",
+      "value": "56"
+    },
+    "test3":
+    {
+      "description": "Testing test3",
+      "value": "27.5"
+    },
+    "test3.5":
+    {
+      "description": "",
+      "options":
+      {
+        "subtest1":
+        {
+          "description": "",
+          "value": "Subtest1"
+        },
+        "subtest2":
+        {
+          "description": "",
+          "value": "Subtest2"
+        }
+      },
+      "value": "3.5"
+    },
+    "test4":
+    {
+      "description": "",
+      "value": "Testing option test 4"
+    }
+  }
+}
