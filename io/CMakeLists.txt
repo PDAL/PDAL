@@ -1,6 +1,7 @@
 add_subdirectory(bpf)
 add_subdirectory(faux)
 add_subdirectory(las)
+add_subdirectory(null)
 add_subdirectory(optech)
 add_subdirectory(qfit)
 add_subdirectory(rialto)

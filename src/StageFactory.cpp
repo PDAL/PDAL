@@ -68,6 +68,7 @@
 #include <rialto/RialtoWriter.hpp>
 #include <sbet/SbetWriter.hpp>
 #include <text/TextWriter.hpp>
+#include <null/NullWriter.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
@@ -217,6 +218,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(RialtoWriter_InitPlugin);
     PluginManager::initializePlugin(SbetWriter_InitPlugin);
     PluginManager::initializePlugin(TextWriter_InitPlugin);
+    PluginManager::initializePlugin(NullWriter_InitPlugin);
 }
 
 /// Create a stage and return a pointer to the created stage.  Caller takes
