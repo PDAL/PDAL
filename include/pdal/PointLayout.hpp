@@ -102,6 +102,7 @@ private:
             Dimension::Type::Enum t1,
             Dimension::Type::Enum t2);
 
+protected:
     std::vector<Dimension::Detail> m_detail;
     Dimension::IdList m_used;
     std::map<std::string, Dimension::Id::Enum> m_propIds;
