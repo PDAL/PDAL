@@ -337,5 +337,5 @@ feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES)
 
 # TODO: move under scripts/bash-completion ?
 if (IS_DIRECTORY /etc/bash_completion.d)
-  install(FILES scripts/bash-completion/pdal DESTINATION /etc/bash_completion.d)
+    install(FILES "${PROJECT_SOURCE_DIR}/scripts/bash-completion/pdal" DESTINATION "${CMAKE_INSTALL_PREFIX}/etc/bash_completion.d")
 endif()
