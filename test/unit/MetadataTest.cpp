@@ -35,18 +35,8 @@
 #include "gtest/gtest.h"
 
 #include <boost/algorithm/string.hpp>
-//#include <sstream>
-//#include <iostream>
-//#include <string>
 
-//#include <LasReader.hpp>
 #include <pdal/Metadata.hpp>
-//#include <pdal/PipelineManager.hpp>
-//#include <pdal/PipelineReader.hpp>
-//#include "Support.hpp"
-
-//#include <boost/property_tree/xml_parser.hpp>
-//#include <boost/property_tree/json_parser.hpp>
 
 using namespace pdal;
 
