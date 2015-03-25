@@ -119,7 +119,7 @@ void StatsFilter::ready(PointTableRef table)
 
     auto ni = dimNames.begin();
     for (auto di = dims.begin(); di != dims.end(); ++di, ++ni)
-        m_stats.emplace(std::make_pair(*di, Summary(*ni)));
+        m_stats.insert(std::make_pair(*di, Summary(*ni)));
 }
 
 
