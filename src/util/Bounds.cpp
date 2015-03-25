@@ -213,7 +213,7 @@ std::istream& operator>>(std::istream& istr, BOX3D& bounds)
         xxx.minx = v[0];
         xxx.maxx = v[1];
         xxx.miny = v[2];
-        xxx.maxx = v[3];
+        xxx.maxy = v[3];
     }
     else if (v.size() == 6)
     {
