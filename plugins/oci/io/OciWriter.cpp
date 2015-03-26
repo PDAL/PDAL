@@ -840,6 +840,8 @@ void OciWriter::writeTile(const PointViewPtr view)
     if (usePartition)
         oss << ", :9";
     oss <<")";
+ 
+    log()->get(LogLevel::Debug4) << "STMT = " << oss.str() << std::endl;
 
     Statement statement(m_connection->CreateStatement(oss.str().c_str()));
 
