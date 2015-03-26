@@ -75,10 +75,10 @@ TEST(FerryFilterTest, test_ferry_copy)
     double x = view->getFieldAs<double>(state_plane_x, 0);
     double y = view->getFieldAs<double>(state_plane_y, 0);
 
-    EXPECT_FLOAT_EQ(-117.2501328350574, lon);
-    EXPECT_FLOAT_EQ(49.341077824192915, lat);
-    EXPECT_FLOAT_EQ(637012.24, x);
-    EXPECT_FLOAT_EQ(849028.31, y);
+    EXPECT_DOUBLE_EQ(-117.2501328350574, lon);
+    EXPECT_DOUBLE_EQ(49.341077824192915, lat);
+    EXPECT_DOUBLE_EQ(637012.24, x);
+    EXPECT_DOUBLE_EQ(849028.31, y);
 }
 
 TEST(FerryFilterTest, test_ferry_invalid)

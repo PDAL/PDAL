@@ -38,7 +38,6 @@
 #include <pdal/PointView.hpp>
 #include <pdal/GlobalEnvironment.hpp>
 
-#pragma GCC diagnostic ignored "-Wfloat-equal"
 #include <gdal.h>
 #include <ogr_spatialref.h>
 

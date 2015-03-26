@@ -74,8 +74,6 @@ void arrayToJSON(const MetadataNodeList& children, std::ostream& o, int level)
 {
     const std::string indent(level * 2, ' ');
 
-    const MetadataNode& node = *children.begin();
-
     o << indent << "[" << std::endl;
     for (auto ci = children.begin(); ci != children.end(); ++ci)
     {

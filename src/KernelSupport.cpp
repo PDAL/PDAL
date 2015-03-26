@@ -139,7 +139,7 @@ void ShellScriptCallback::callback()
     else if (currPerc >= m_lastMajorPerc + 10.0)
     {
         std::string output;
-        int stat = Utils::run_shell_command(m_command + " " +
+        Utils::run_shell_command(m_command + " " +
             boost::lexical_cast<std::string>(static_cast<int>(currPerc)),
             output);
         m_lastMajorPerc = currPerc;

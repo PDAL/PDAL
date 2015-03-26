@@ -585,7 +585,7 @@ point_count_t LasReader::read(PointViewPtr view, point_count_t count)
         point_count_t remaining = count;
 
         // Make a buffer at most a meg.
-        size_t bufsize = std::min((point_count_t)1000000,
+        size_t bufsize = std::min<size_t>((point_count_t)1000000,
             count * pointByteCount);
         std::vector<char> buf(bufsize);
         try

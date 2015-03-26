@@ -91,7 +91,7 @@ TEST(UserCallbackTest, test1)
         EXPECT_TRUE(ok);
         uint32_t hb = 3 * (i + 1);
         EXPECT_EQ(cb.getHeartbeats(), hb);
-        EXPECT_FLOAT_EQ(cb.getPercentComplete(), (double)(i + 1));
+        EXPECT_DOUBLE_EQ(cb.getPercentComplete(), (double)(i + 1));
     }
 
     // to 51%...
@@ -105,5 +105,5 @@ TEST(UserCallbackTest, test1)
         ok = false;
     }
     EXPECT_TRUE(!ok);
-    EXPECT_FLOAT_EQ(cb.getPercentComplete(), 50.333333);
+    EXPECT_DOUBLE_EQ(100.0*(151.0/300.0), cb.getPercentComplete());
 }

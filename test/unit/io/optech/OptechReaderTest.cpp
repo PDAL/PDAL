@@ -90,7 +90,7 @@ TEST_F(OptechReaderTest, Header)
     EXPECT_STREQ("CSD", header.signature);
     EXPECT_STREQ("Optech Incorporated", header.vendorId);
     EXPECT_STREQ("DASHMap", header.softwareVersion);
-    EXPECT_FLOAT_EQ(5.2010002, header.formatVersion);
+    EXPECT_FLOAT_EQ(5.2010002f, header.formatVersion);
     EXPECT_EQ(2048, header.headerSize);
     EXPECT_EQ(1660u, header.gpsWeek);
     EXPECT_DOUBLE_EQ(575644.74484563898, header.minTime);
@@ -128,7 +128,7 @@ TEST_F(OptechReaderTest, ReadingPoints)
                      view->getFieldAs<double>(Dimension::Id::GpsTime, 0));
     EXPECT_EQ(1, view->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, 0));
     EXPECT_EQ(1, view->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, 0));
-    EXPECT_DOUBLE_EQ(8.27356689453125e2,
+    EXPECT_FLOAT_EQ(8.27356689453125e2,
                      view->getFieldAs<float>(Dimension::Id::EchoRange, 0));
     EXPECT_EQ(384, view->getFieldAs<uint16_t>(Dimension::Id::Intensity, 0));
     EXPECT_DOUBLE_EQ(-14.555161476135254,

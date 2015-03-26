@@ -95,8 +95,6 @@ static void check_contents_sub(std::istream& s)
 
 static void check_contents(std::istream& s)
 {
-    int c;
-
     std::string buf;
     s >> buf;
     EXPECT_EQ(buf, "This");

@@ -38,8 +38,6 @@
 
 #include <pdal/util/Bounds.hpp>
 
-#pragma GCC diagnostic ignored "-Wfloat-equal"
-
 namespace
 {
 

@@ -133,9 +133,7 @@ private:
     void outputRST(boost::property_tree::ptree const&) const;
     void outputXML(boost::property_tree::ptree const&) const;
     void outputJSON(boost::property_tree::ptree const&) const;
-    void outputDetail(PointView& source_data, PointView& candidate_data,
-        std::map<Point, Point> *points) const;
-
+    void outputDetail(PointView& source_data, PointView& candidate_data) const;
 };
 
 } // namespace pdal
