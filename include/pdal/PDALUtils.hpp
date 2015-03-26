@@ -202,8 +202,8 @@ inline ptree toPTree(const SpatialReference& ref)
 
 std::string PDAL_DLL toJSON(const MetadataNode& m);
 void PDAL_DLL toJSON(const MetadataNode& m, std::ostream& o);
-std::string toJSON(const Options& opts);
-void toJSON(const Options& opts, std::ostream& o);
+std::string PDAL_DLL toJSON(const Options& opts);
+void PDAL_DLL toJSON(const Options& opts, std::ostream& o);
 
 namespace reST
 {
