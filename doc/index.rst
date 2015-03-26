@@ -9,7 +9,7 @@ data`_ of various formats. It is a library that is analogous to the `GDAL`_
 raster library.  PDAL is focussed on reading, writing, and translating point
 cloud data from the ever-growing constellation of data formats.
 While PDAL is not explicitly limited to working with `LiDAR`_ data formats, its
-wides format coverage is in that domain.
+wide format coverage is in that domain.
 
 PDAL is related to `Point Cloud Library (PCL)`_ in the sense that
 both work with point data, but PDAL's niche is data translation and processing
