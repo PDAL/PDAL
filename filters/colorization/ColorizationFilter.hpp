@@ -39,12 +39,9 @@
 
 #include <boost/array.hpp>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wfloat-equal"
 #include <gdal.h>
 #include <ogr_spatialref.h>
 #include <pdal/GDALUtils.hpp>
-#pragma GCC diagnostic pop
 
 #include <map>
 

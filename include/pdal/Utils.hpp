@@ -151,7 +151,7 @@ namespace Utils
     {
         std::string out;
         for (size_t i = 0; i < s.size(); ++i)
-            out += std::tolower(s[i]);
+            out += (char)std::tolower(s[i]);
         return out;
     }
 
@@ -159,7 +159,7 @@ namespace Utils
     {
         std::string out;
         for (size_t i = 0; i < s.size(); ++i)
-            out += std::toupper(s[i]);
+            out += (char)std::toupper(s[i]);
         return out;
     }
 

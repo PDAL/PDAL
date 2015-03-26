@@ -138,7 +138,7 @@ TEST(MetadataTest, typed_value)
 
     double d = 123.45;
     MetadataNode m3 = m.addEncoded("name", (unsigned char *)&d, sizeof(d));
-    EXPECT_FLOAT_EQ(d, m3.value<double>());
+    EXPECT_DOUBLE_EQ(d, m3.value<double>());
     EXPECT_EQ("zczMzMzcXkA=", m3.value());
 
     MetadataNode m4 = m.add("name", "65539");

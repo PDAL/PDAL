@@ -41,8 +41,6 @@
 #include <utility>
 #include <vector>
 
-#pragma GCC diagnostic ignored "-Wfloat-equal"
-
 namespace pdal
 {
 

@@ -115,15 +115,15 @@ std::map<Point, Point>* cumulatePoints(PointView& source_data,
     PointView& candidate_data, KDIndex* index)
 {
     std::map<Point, Point> *output = new std::map<Point, Point>;
-    uint32_t count(std::min(source_data.size(), candidate_data.size()));
+    point_count_t count(std::min(source_data.size(), candidate_data.size()));
 
-    for (uint32_t i = 0; i < count; ++i)
+    for (PointId i = 0; i < count; ++i)
     {
         double sx = source_data.getFieldAs<double>(Dimension::Id::X, i);
         double sy = source_data.getFieldAs<double>(Dimension::Id::Y, i);
         double sz = source_data.getFieldAs<double>(Dimension::Id::Z, i);
 
-        std::vector<std::size_t> ids = index->neighbors(sx, sy, sz);
+        std::vector<PointId> ids = index->neighbors(sx, sy, sz);
         if (!ids.size())
         {
             std::ostringstream oss;
@@ -131,7 +131,7 @@ std::map<Point, Point>* cumulatePoints(PointView& source_data,
             throw app_runtime_error(oss.str() );
         }
 
-        std::size_t id = ids[0];
+        PointId id = ids[0];
         double cx = candidate_data.getFieldAs<double>(Dimension::Id::X, id);
         double cy = candidate_data.getFieldAs<double>(Dimension::Id::Y, id);
         double cz = candidate_data.getFieldAs<double>(Dimension::Id::Z, id);
@@ -139,33 +139,25 @@ std::map<Point, Point>* cumulatePoints(PointView& source_data,
         Point s(sx, sy, sz, i);
         Point c(cx, cy, cz, id);
         output->insert(std::pair<Point, Point>(s, c));
-
-        double xd = sx - cx;
-        double yd = sy - cy;
-        double zd = sz - cz;
     }
 
     return output;
 }
 
-void DeltaKernel::outputDetail(PointView& source_data, PointView& candidate_data,
-    std::map<Point, Point> *points) const
+void DeltaKernel::outputDetail(PointView& source_data, PointView& candidate_data) const
 {
-
-    bool bWroteHeader(false);
-
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
 
-    uint32_t count(std::min(source_data.size(), candidate_data.size()));
+    point_count_t count(std::min(source_data.size(), candidate_data.size()));
 
     boost::property_tree::ptree output;
-    for (uint32_t i = 0; i < count; ++i)
+    for (PointId i = 0; i < count; ++i)
     {
         double sx = source_data.getFieldAs<double>(Dimension::Id::X, i);
         double sy = source_data.getFieldAs<double>(Dimension::Id::Y, i);
         double sz = source_data.getFieldAs<double>(Dimension::Id::Z, i);
 
-        std::vector<std::size_t> ids = m_index->neighbors(sx, sy, sz);
+        std::vector<PointId> ids = m_index->neighbors(sx, sy, sz);
 
         if (!ids.size())
         {
@@ -174,7 +166,7 @@ void DeltaKernel::outputDetail(PointView& source_data, PointView& candidate_data
             throw app_runtime_error(oss.str() );
         }
 
-        std::size_t id = ids[0];
+        PointId id = ids[0];
         double cx = candidate_data.getFieldAs<double>(Dimension::Id::X, id);
         double cy = candidate_data.getFieldAs<double>(Dimension::Id::Y, id);
         double cz = candidate_data.getFieldAs<double>(Dimension::Id::Z, id);
@@ -230,9 +222,6 @@ void DeltaKernel::outputDetail(PointView& source_data, PointView& candidate_data
 
         ostr << std::endl;
     }
-
-
-
 
     if (m_outputStream)
     {
@@ -325,7 +314,7 @@ int DeltaKernel::execute()
         points(cumulatePoints(*sourceView.get(), *candidateView.get(), m_index.get()));
     if (m_OutputDetail)
     {
-        outputDetail(*sourceView.get(), *candidateView.get(), points.get());
+        outputDetail(*sourceView.get(), *candidateView.get());
         return 0;
     }
 

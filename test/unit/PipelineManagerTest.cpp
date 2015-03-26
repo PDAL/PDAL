@@ -66,7 +66,7 @@ TEST(PipelineManagerTest, basic)
     std::cout << "Done" << std::endl;
     EXPECT_TRUE(np == 1065U);
 
-    EXPECT_TRUE(bool(std::ifstream(outfile)));
+    EXPECT_TRUE(!std::ifstream(outfile).fail());
     FileUtils::deleteFile(outfile);
 }
 

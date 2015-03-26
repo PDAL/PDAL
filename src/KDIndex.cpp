@@ -53,7 +53,7 @@ std::size_t KDIndex::kdtree_get_point_count() const
     return m_buf.size();
 }
 
-double KDIndex::kdtree_get_pt(const std::size_t idx, int dim) const
+double KDIndex::kdtree_get_pt(const PointId idx, int dim) const
 {
     Dimension::Id::Enum id = Dimension::Id::Unknown;
     switch (dim)
@@ -72,9 +72,8 @@ double KDIndex::kdtree_get_pt(const std::size_t idx, int dim) const
 }
 
 double KDIndex::kdtree_distance(
-        const double *p1,
-        const std::size_t idx_p2,
-        std::size_t size) const
+        const PointId idx_p2,
+        point_count_t size) const
 {
     double d0 = m_buf.getFieldAs<double>(Dimension::Id::X, idx_p2) -
         m_buf.getFieldAs<double>(Dimension::Id::X, size - 1);
@@ -94,7 +93,7 @@ double KDIndex::kdtree_distance(
 void KDIndex::build(bool b3D)
 {
     m_3d = b3D;
-    std::size_t nDims = m_3d && m_buf.hasDim(Dimension::Id::Z) ? 3 : 2;
+    int nDims = m_3d && m_buf.hasDim(Dimension::Id::Z) ? 3 : 2;
     m_index.reset(
             new my_kd_tree_t(
                 nDims,
@@ -126,15 +125,15 @@ std::vector<std::size_t> KDIndex::radius(
     return output;
 }
 
-std::vector<std::size_t> KDIndex::neighbors(
+std::vector<PointId> KDIndex::neighbors(
         double const& x,
         double const& y,
         double const& z,
-        uint32_t k) const
+        point_count_t k) const
 {
-    std::vector<size_t> output(k);
+    std::vector<PointId> output(k);
     std::vector<double> out_dist_sqr(k);
-    nanoflann::KNNResultSet<double> resultSet(k);
+    nanoflann::KNNResultSet<double, PointId, point_count_t> resultSet(k);
 
     resultSet.init(&output[0], &out_dist_sqr[0]);
 

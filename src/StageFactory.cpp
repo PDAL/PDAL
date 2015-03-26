@@ -84,8 +84,6 @@ namespace pdal
 
 std::string StageFactory::inferReaderDriver(const std::string& filename)
 {
-    PluginManager & pm = PluginManager::getInstance();
-
     // filename may actually be a greyhound uri + pipelineId
     std::string http = filename.substr(0, 4);
     if (boost::iequals(http, "http"))
@@ -121,8 +119,6 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
 
 std::string StageFactory::inferWriterDriver(const std::string& filename)
 {
-    PluginManager & pm = PluginManager::getInstance();
-
     std::string ext = boost::filesystem::extension(filename);
 
     boost::to_lower(ext);

@@ -118,7 +118,8 @@ namespace
         fprintf(fp, "    \"databbox\": [%f, %f, %f, %f],\n",
                 minx, miny, maxx, maxy);
 
-        fprintf(fp, "    \"numPoints\": %lu,\n", view->size());
+        fprintf(fp, "    \"numPoints\": %lu,\n",
+                static_cast<unsigned long>(view->size()));
 
         const PointLayoutPtr layout(table.layout());
         const size_t numDims = layout->dims().size();

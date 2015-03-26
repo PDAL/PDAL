@@ -109,7 +109,7 @@ PointViewSet ChipperFilter::run(PointViewPtr view)
 void ChipperFilter::load(PointView& view, ChipRefList& xvec, ChipRefList& yvec,
     ChipRefList& spare)
 {
-    uint32_t idx;
+    point_count_t idx;
     std::vector<ChipPtRef>::iterator it;
 
     xvec.reserve(view.size());
@@ -209,7 +209,7 @@ void ChipperFilter::split(ChipRefList& wide, ChipRefList& narrow, ChipRefList& s
     // 2) We have a distance of three between left and right.
 
     if (pright - pleft == 1)
-        emit(wide, left, right, narrow, left, right);
+        emit(wide, left, right);
     else if (pright - pleft == 2)
         finalSplit(wide, narrow, pleft, pright);
     else
@@ -308,36 +308,18 @@ void ChipperFilter::finalSplit(ChipRefList& wide, ChipRefList& narrow,
     // Emit results.
     emit(wide,
          left,
-         center - 1,
-         narrow,
-         left1,
-         right1);
+         center - 1);
     emit(wide,
          center,
-         right,
-         narrow,
-         left2,
-         right2);
+         right);
 }
 
-void ChipperFilter::emit(ChipRefList& wide, PointId widemin, PointId widemax,
-    ChipRefList& narrow, PointId narrowmin, PointId narrowmax)
+void ChipperFilter::emit(ChipRefList& wide, PointId widemin, PointId widemax)
 {
     PointViewPtr view = m_inView->makeNew();
     for (size_t idx = widemin; idx <= widemax; ++idx)
         view->appendPoint(*m_inView.get(), wide[idx].m_ptindex);
 
-    /**
-    // We currently don't write the bounds in the view.
-    //
-    Bounds<double> bounds;
-    if (wide.m_dir == DIR_X)
-        bounds = Bounds<double>(wide[widemin].m_pos, narrow[narrowmin].m_pos,
-            wide[widemax].m_pos, narrow[narrowmax].m_pos);
-    else
-        bounds = Bounds<double>(narrow[narrowmin].m_pos, wide[widemin].m_pos,
-            narrow[narrowmax].m_pos, wide[widemax].m_pos);
-    **/
     m_outViews.insert(view);
 }
 

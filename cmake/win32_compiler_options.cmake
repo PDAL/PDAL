@@ -22,17 +22,22 @@ if (MSVC)
         add_definitions(-DBOOST_LIB_TOOLSET="vc110")
         add_definitions(-DBOOST_ALL_DYN_LINK)
 
-	# Nitro makes use of Exception Specifications, which results in
-	# numerous warnings when compiling in MSVC. We will ignore them for
-	# now.
-	add_definitions("/wd4290")
+        # Nitro makes use of Exception Specifications, which results in
+        # numerous warnings when compiling in MSVC. We will ignore them for
+        # now.
+        add_definitions("/wd4290")
+	add_definitions("/wd4800")
+
+        # Windows still warns about nameless struct/union, but we assume
+        # that all of our compilers support this
+        #add_definitions("/wd4201")
     endif()
 
     if (CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
-        string(REGEX REPLACE "/W[0-4]" "/W4"
+        string(REGEX REPLACE "/W[0-4]" "/W3"
                CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
     else()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3")
     endif()
 
     # check for MSVC 9+

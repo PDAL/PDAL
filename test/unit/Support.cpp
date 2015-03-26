@@ -202,11 +202,6 @@ uint32_t Support::diff_files(const std::string& file1,
             !pdal::FileUtils::fileExists(file2))
         return (std::numeric_limits<uint32_t>::max)();
 
-    uintmax_t len1x = pdal::FileUtils::fileSize(file1);
-    uintmax_t len2x = pdal::FileUtils::fileSize(file2);
-    const size_t len1 = (size_t)len1x; // BUG
-    const size_t len2 = (size_t)len2x;
-
     std::istream* str1 = pdal::FileUtils::openFile(file1);
     std::istream* str2 = pdal::FileUtils::openFile(file2);
 
@@ -222,7 +217,7 @@ uint32_t Support::diff_files(std::istream& str1, std::istream& str2,
     uint32_t numdiffs = 0;
     char p, q;
 
-    for (uint32_t i = 0; true; ++i)
+    for (uint32_t i = 0; ; ++i)
     {
         str1.get(p);
         str2.get(q);
@@ -288,7 +283,7 @@ bool Support::compare_text_files(std::istream& str1, std::istream& str2)
     return diff_text_files(str1, str2) == 0;
 }
 
-void Support::check_pN(const pdal::PointView& data, std::size_t index,
+void Support::check_pN(const pdal::PointView& data, PointId index,
     double xref, double yref, double zref)
 {
     double x0 = data.getFieldAs<double>(Dimension::Id::X, index);
@@ -301,7 +296,7 @@ void Support::check_pN(const pdal::PointView& data, std::size_t index,
 }
 
 
-void Support::check_pN(const PointView& data, size_t index,
+void Support::check_pN(const PointView& data, PointId index,
     double xref, double yref, double zref, double tref,
     uint16_t rref, uint16_t gref, uint16_t bref)
 {

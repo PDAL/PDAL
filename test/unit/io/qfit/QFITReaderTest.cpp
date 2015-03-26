@@ -45,7 +45,7 @@
 using namespace pdal;
 
 void Check_Point(const PointView& data,
-                 std::size_t index,
+                 PointId index,
                  double xref, double yref, double zref,
                  int32_t tref)
 {

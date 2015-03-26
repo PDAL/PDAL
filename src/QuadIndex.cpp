@@ -99,6 +99,8 @@ namespace
         const Point center;
         const double halfWidth;
         const double halfHeight;
+
+        BBox& operator=(const BBox&); // not implemented
     };
 
 } // anonymous namespace
@@ -124,13 +126,13 @@ struct Tree
     std::size_t addPoint(const QuadPointRef* toAdd, std::size_t curDepth = 0);
 
     void getPoints(
-            std::vector<std::size_t>& results,
+            std::vector<PointId>& results,
             std::size_t depthBegin,
             std::size_t depthEnd,
             std::size_t curDepth) const;
 
     void getPoints(
-            std::vector<std::size_t>& results,
+            std::vector<PointId>& results,
             std::size_t rasterize,
             double xBegin,
             double xEnd,
@@ -141,7 +143,7 @@ struct Tree
             std::size_t curDepth) const;
 
     void getPoints(
-            std::vector<std::size_t>& results,
+            std::vector<PointId>& results,
             double xBegin,
             double xEnd,
             double xStep,
@@ -150,7 +152,7 @@ struct Tree
             double yStep) const;
 
     void getPoints(
-            std::vector<std::size_t>& results,
+            std::vector<PointId>& results,
             const BBox& query,
             std::size_t depthBegin,
             std::size_t depthEnd,
@@ -281,7 +283,7 @@ void Tree::getFills(std::vector<std::size_t>& fills, std::size_t level) const
 }
 
 void Tree::getPoints(
-        std::vector<std::size_t>& results,
+        std::vector<PointId>& results,
         const std::size_t depthBegin,
         const std::size_t depthEnd,
         std::size_t curDepth) const
@@ -301,7 +303,7 @@ void Tree::getPoints(
 }
 
 void Tree::getPoints(
-        std::vector<std::size_t>& results,
+        std::vector<PointId>& results,
         const std::size_t rasterize,
         const double xBegin,
         const double xEnd,
@@ -375,7 +377,7 @@ void Tree::getPoints(
 }
 
 void Tree::getPoints(
-        std::vector<std::size_t>& results,
+        std::vector<PointId>& results,
         const double xBegin,
         const double xEnd,
         const double xStep,
@@ -448,7 +450,7 @@ void Tree::getPoints(
 }
 
 void Tree::getPoints(
-        std::vector<std::size_t>& results,
+        std::vector<PointId>& results,
         const BBox& query,
         const std::size_t depthBegin,
         const std::size_t depthEnd,
@@ -504,11 +506,11 @@ struct QuadIndex::QImpl
 
     std::vector<std::size_t> getFills();
 
-    std::vector<std::size_t> getPoints(
+    std::vector<PointId> getPoints(
             std::size_t depthBegin,
             std::size_t depthEnd) const;
 
-    std::vector<std::size_t> getPoints(
+    std::vector<PointId> getPoints(
             std::size_t rasterize,
             double& xBegin,
             double& xEnd,
@@ -517,7 +519,7 @@ struct QuadIndex::QImpl
             double& yEnd,
             double& yStep) const;
 
-    std::vector<std::size_t> getPoints(
+    std::vector<PointId> getPoints(
             double xBegin,
             double xEnd,
             double xStep,
@@ -525,7 +527,7 @@ struct QuadIndex::QImpl
             double yEnd,
             double yStep) const;
 
-    std::vector<std::size_t> getPoints(
+    std::vector<PointId> getPoints(
             double xMin,
             double yMin,
             double xMax,
@@ -554,7 +556,7 @@ QuadIndex::QImpl::QImpl(const PointViewPtr view, std::size_t topLevel)
     double xMax(std::numeric_limits<double>::min());
     double yMax(std::numeric_limits<double>::min());
 
-    for (std::size_t i(0); i < view->size(); ++i)
+    for (PointId i(0); i < view->size(); ++i)
     {
         m_pointRefVec[i].reset(
                 new QuadPointRef(
@@ -593,7 +595,7 @@ QuadIndex::QImpl::QImpl(
 {
     m_pointRefVec.resize(view->size());
 
-    for (std::size_t i(0); i < view->size(); ++i)
+    for (PointId i(0); i < view->size(); ++i)
     {
         m_pointRefVec[i].reset(
                 new QuadPointRef(
@@ -663,11 +665,11 @@ std::vector<std::size_t> QuadIndex::QImpl::getFills()
     return m_fills;
 }
 
-std::vector<std::size_t> QuadIndex::QImpl::getPoints(
+std::vector<PointId> QuadIndex::QImpl::getPoints(
         const std::size_t minDepth,
         const std::size_t maxDepth) const
 {
-    std::vector<std::size_t> results;
+    std::vector<PointId> results;
 
     if (m_tree)
     {
@@ -677,7 +679,7 @@ std::vector<std::size_t> QuadIndex::QImpl::getPoints(
     return results;
 }
 
-std::vector<std::size_t> QuadIndex::QImpl::getPoints(
+std::vector<PointId> QuadIndex::QImpl::getPoints(
         const std::size_t rasterize,
         double& xBegin,
         double& xEnd,
@@ -686,7 +688,7 @@ std::vector<std::size_t> QuadIndex::QImpl::getPoints(
         double& yEnd,
         double& yStep) const
 {
-    std::vector<std::size_t> results;
+    std::vector<PointId> results;
 
     if (m_tree)
     {
@@ -701,7 +703,7 @@ std::vector<std::size_t> QuadIndex::QImpl::getPoints(
         xEnd =      m_tree->bbox.max.x + (xStep / 2); // One tick past the end.
         yEnd =      m_tree->bbox.max.y + (yStep / 2);
 
-        results.resize(exp * exp, std::numeric_limits<std::size_t>::max());
+        results.resize(exp * exp, std::numeric_limits<PointId>::max());
 
         m_tree->getPoints(
                 results,
@@ -718,7 +720,7 @@ std::vector<std::size_t> QuadIndex::QImpl::getPoints(
     return results;
 }
 
-std::vector<std::size_t> QuadIndex::QImpl::getPoints(
+std::vector<PointId> QuadIndex::QImpl::getPoints(
         const double xBegin,
         const double xEnd,
         const double xStep,
@@ -726,13 +728,13 @@ std::vector<std::size_t> QuadIndex::QImpl::getPoints(
         const double yEnd,
         const double yStep) const
 {
-    std::vector<std::size_t> results;
+    std::vector<PointId> results;
 
     if (m_tree)
     {
         const std::size_t width (Utils::sround((xEnd - xBegin) / xStep));
         const std::size_t height(Utils::sround((yEnd - yBegin) / yStep));
-        results.resize(width * height, std::numeric_limits<std::size_t>::max());
+        results.resize(width * height, std::numeric_limits<PointId>::max());
 
         m_tree->getPoints(
                 results,
@@ -747,7 +749,7 @@ std::vector<std::size_t> QuadIndex::QImpl::getPoints(
     return results;
 }
 
-std::vector<std::size_t> QuadIndex::QImpl::getPoints(
+std::vector<PointId> QuadIndex::QImpl::getPoints(
         double xMin,
         double yMin,
         double xMax,
@@ -755,7 +757,7 @@ std::vector<std::size_t> QuadIndex::QImpl::getPoints(
         std::size_t minDepth,
         std::size_t maxDepth) const
 {
-    std::vector<std::size_t> results;
+    std::vector<PointId> results;
 
     // Making BBox from external parameters here, so do some light validation.
     if (m_tree)
@@ -819,20 +821,20 @@ std::vector<std::size_t> QuadIndex::getFills() const
     return m_qImpl->getFills();
 }
 
-std::vector<std::size_t> QuadIndex::getPoints(
+std::vector<PointId> QuadIndex::getPoints(
         std::size_t depthEnd) const
 {
     return m_qImpl->getPoints(0, depthEnd);
 }
 
-std::vector<std::size_t> QuadIndex::getPoints(
+std::vector<PointId> QuadIndex::getPoints(
         std::size_t depthBegin,
         std::size_t depthEnd) const
 {
     return m_qImpl->getPoints(depthBegin, depthEnd);
 }
 
-std::vector<std::size_t> QuadIndex::getPoints(
+std::vector<PointId> QuadIndex::getPoints(
         const std::size_t rasterize,
         double& xBegin,
         double& xEnd,
@@ -851,7 +853,7 @@ std::vector<std::size_t> QuadIndex::getPoints(
             yStep);
 }
 
-std::vector<std::size_t> QuadIndex::getPoints(
+std::vector<PointId> QuadIndex::getPoints(
         const double xBegin,
         const double xEnd,
         const double xStep,
@@ -868,7 +870,7 @@ std::vector<std::size_t> QuadIndex::getPoints(
             yStep);
 }
 
-std::vector<std::size_t> QuadIndex::getPoints(
+std::vector<PointId> QuadIndex::getPoints(
         double xMin,
         double yMin,
         double xMax,
@@ -884,7 +886,7 @@ std::vector<std::size_t> QuadIndex::getPoints(
             depthEnd);
 }
 
-std::vector<std::size_t> QuadIndex::getPoints(
+std::vector<PointId> QuadIndex::getPoints(
         double xMin,
         double yMin,
         double xMax,

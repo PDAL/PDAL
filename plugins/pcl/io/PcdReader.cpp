@@ -70,7 +70,7 @@ void PcdReader::addDimensions(PointLayoutPtr layout)
 }
 
 
-point_count_t PcdReader::read(PointViewPtr view, point_count_t count)
+point_count_t PcdReader::read(PointViewPtr view, point_count_t /*count*/)
 {
     pcl::PointCloud<XYZIRGBA>::Ptr cloud(new pcl::PointCloud<XYZIRGBA>);
 

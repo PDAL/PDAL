@@ -38,6 +38,7 @@
 #include <memory>
 
 #include <pdal/pdal_export.hpp>
+#include <pdal/pdal_types.hpp>
 #include <pdal/util/Bounds.hpp>
 #include <pdal/PointView.hpp>
 
@@ -57,6 +58,8 @@ struct Point
 
     const double x;
     const double y;
+
+    Point& operator=(const Point&); // not implemented
 };
 
 struct QuadPointRef
@@ -68,6 +71,9 @@ struct QuadPointRef
 
     const Point point;
     const std::size_t pbIndex;
+
+    QuadPointRef& operator=(const QuadPointRef&); // not implemented
+    QuadPointRef(const QuadPointRef&); // not implemented
 };
 
 class PDAL_DLL QuadIndex
@@ -102,17 +108,18 @@ public:
 
     // Return all points at depth levels strictly less than depthEnd.
     // A depthEnd value of zero returns all points in the tree.
-    std::vector<std::size_t> getPoints(
+    std::vector<PointId> getPoints(
             std::size_t depthEnd = 0) const;
 
     // Return all points at depth levels between [depthBegin, depthEnd).
     // A depthEnd value of zero will return all points at levels >= depthBegin.
-    std::vector<std::size_t> getPoints(
+    std::vector<PointId> getPoints(
             std::size_t depthBegin,
             std::size_t depthEnd) const;
 
-    // Rasterize a single level of the tree.
-    std::vector<std::size_t> getPoints(
+    // Rasterize a single level of the tree.  Empty positions will contain
+    // std::numeric_limits<PointId>::max().
+    std::vector<PointId> getPoints(
             std::size_t rasterize,
             double& xBegin,
             double& xEnd,
@@ -121,8 +128,9 @@ public:
             double& yEnd,
             double& yStep) const;
 
-    // Get custom raster via bounds and resolution query.
-    std::vector<std::size_t> getPoints(
+    // Get custom raster via bounds and resolution query.  Empty positions will
+    // contain std::numeric_limits<PointId>::max().
+    std::vector<PointId> getPoints(
             double xBegin,
             double xEnd,
             double xStep,
@@ -134,14 +142,14 @@ public:
     // depth levels strictly less than depthEnd.
     // A depthEnd value of zero will return all existing points that fall
     // within the query range regardless of depth.
-    std::vector<std::size_t> getPoints(
+    std::vector<PointId> getPoints(
             double xMin,
             double yMin,
             double xMax,
             double yMax,
             std::size_t depthEnd = 0) const;
 
-    std::vector<std::size_t> getPoints(
+    std::vector<PointId> getPoints(
             const BOX3D& box,
             std::size_t depthEnd=0) const
     {
@@ -152,7 +160,7 @@ public:
     // levels from [depthBegin, depthEnd).
     // A depthEnd value of zero will return all points within the query range
     // that have a tree level >= depthBegin.
-    std::vector<std::size_t> getPoints(
+    std::vector<PointId> getPoints(
             double xMin,
             double yMin,
             double xMax,
