@@ -703,7 +703,7 @@ std::vector<PointId> QuadIndex::QImpl::getPoints(
         xEnd =      m_tree->bbox.max.x + (xStep / 2); // One tick past the end.
         yEnd =      m_tree->bbox.max.y + (yStep / 2);
 
-        results.resize(exp * exp, std::numeric_limits<std::size_t>::max());
+        results.resize(exp * exp, std::numeric_limits<PointId>::max());
 
         m_tree->getPoints(
                 results,
@@ -734,7 +734,7 @@ std::vector<PointId> QuadIndex::QImpl::getPoints(
     {
         const std::size_t width (Utils::sround((xEnd - xBegin) / xStep));
         const std::size_t height(Utils::sround((yEnd - yBegin) / yStep));
-        results.resize(width * height, std::numeric_limits<std::size_t>::max());
+        results.resize(width * height, std::numeric_limits<PointId>::max());
 
         m_tree->getPoints(
                 results,

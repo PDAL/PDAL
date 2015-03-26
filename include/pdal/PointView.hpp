@@ -71,6 +71,9 @@ public:
     PointView(PointTableRef pointTable) : m_pointTable(pointTable), m_size(0)
     {}
 
+    virtual ~PointView()
+    {}
+
     PointViewIter begin();
     PointViewIter end();
 

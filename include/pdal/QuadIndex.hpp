@@ -117,7 +117,8 @@ public:
             std::size_t depthBegin,
             std::size_t depthEnd) const;
 
-    // Rasterize a single level of the tree.
+    // Rasterize a single level of the tree.  Empty positions will contain
+    // std::numeric_limits<PointId>::max().
     std::vector<PointId> getPoints(
             std::size_t rasterize,
             double& xBegin,
@@ -127,7 +128,8 @@ public:
             double& yEnd,
             double& yStep) const;
 
-    // Get custom raster via bounds and resolution query.
+    // Get custom raster via bounds and resolution query.  Empty positions will
+    // contain std::numeric_limits<PointId>::max().
     std::vector<PointId> getPoints(
             double xBegin,
             double xEnd,
