@@ -23,23 +23,7 @@ sudo apt-get install cmake
 
 if [[ $PDAL_CMAKE_GENERATOR == "Ninja" ]]
 then
-    # Need newer cmake for Ninja generator
-    wget http://www.cmake.org/files/v2.8/cmake-2.8.12.2.tar.gz
-    tar -xzf cmake-2.8.12.2.tar.gz
-    cd cmake-2.8.12.2
-    ./bootstrap
-    make
-    sudo make install
-    cd ..
-
-    git clone https://github.com/martine/ninja.git
-    cd ninja
-    git checkout release
-    ./bootstrap.py
-    sudo ln -s "$PWD/ninja" /usr/local/bin/ninja
-    cd ..
-else
-    sudo apt-get install cmake
+    sudo apt-get install ninja-build
 fi
 
 
