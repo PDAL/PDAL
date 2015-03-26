@@ -66,6 +66,15 @@ then
     cd libgeotiff-1.4.0
     ./configure --prefix=/usr && make && sudo make install
     cd $TRAVIS_BUILD_DIR
+
+    # install pgpointcloud from sources
+    sudo apt-get install postgresql-server-dev-9.1
+    wget https://github.com/pgpointcloud/pointcloud/archive/master.tar.gz
+    tar -xzf master.tar.gz
+    cd pointcloud-master
+    ./autogen.sh && ./configure
+    make && sudo make install
+    cd $TRAVIS_BUILD_DIR
 fi
 
 gcc --version

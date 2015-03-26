@@ -33,7 +33,7 @@ cmake \
     -DBUILD_PLUGIN_OCI=OFF \
     -DBUILD_PLUGIN_P2G=OFF \
     -DBUILD_PLUGIN_PCL=OFF \
-    -DBUILD_PLUGIN_PGPOINTCLOUD=OFF\
+    -DBUILD_PLUGIN_PGPOINTCLOUD=$OPTIONAL_COMPONENT_SWITCH \
     -DBUILD_PLUGIN_SQLITE=OFF \
     -DBUILD_PLUGIN_RIVLIB=OFF \
     -DBUILD_PLUGIN_PYTHON=$OPTIONAL_COMPONENT_SWITCH \
@@ -59,5 +59,5 @@ fi
 # saturate Travis's available memory.
 ${MAKECMD} -j ${NUMTHREADS} && \
     LD_LIBRARY_PATH=./lib && \
-    sudo ctest -V && \
+    sudo PGUSER=postgres ctest -V && \
     sudo ${MAKECMD} install
