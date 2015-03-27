@@ -18,7 +18,6 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(
     ${PROJECT_SOURCE_DIR}/include
     ${GDAL_INCLUDE_DIR}
-    ${GEOTIFF_INCLUDE_DIR}
     ${PROJECT_SOURCE_DIR}/io/bpf
     ${PROJECT_SOURCE_DIR}/io/buffer
     ${PROJECT_SOURCE_DIR}/io/faux
@@ -43,6 +42,10 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/filters/transformation
     ${PROJECT_SOURCE_DIR}/kernels/info
 )
+
+if (WITH_GEOTIFF)
+    include_directories(${GEOTIFF_INCLUDE_DIR})
+endif()
 
 PDAL_ADD_TEST(pdal_bounds_test FILES BoundsTest.cpp)
 PDAL_ADD_TEST(pdal_config_test FILES ConfigTest.cpp)
