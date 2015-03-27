@@ -43,10 +43,9 @@ then
         libxml2-dev \
         libflann-dev \
         libtiff4-dev \
-        libgeotiff-dev
+        libgeotiff-dev \
+        postgresql-server-dev-9.1
 
-    # install pgpointcloud from sources
-    sudo apt-get install postgresql-server-dev-9.1
     wget https://github.com/pgpointcloud/pointcloud/archive/master.tar.gz
     tar -xzf master.tar.gz
     cd pointcloud-master
