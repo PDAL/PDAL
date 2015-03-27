@@ -42,14 +42,8 @@ then
         python-numpy \
         libxml2-dev \
         libflann-dev \
-        libtiff4-dev
-
-    # install libgeotiff from sources
-    wget http://download.osgeo.org/geotiff/libgeotiff/libgeotiff-1.4.0.tar.gz
-    tar -xzf libgeotiff-1.4.0.tar.gz
-    cd libgeotiff-1.4.0
-    ./configure --prefix=/usr && make && sudo make install
-    cd $TRAVIS_BUILD_DIR
+        libtiff4-dev \
+        libgeotiff-dev
 
     # install pgpointcloud from sources
     sudo apt-get install postgresql-server-dev-9.1
