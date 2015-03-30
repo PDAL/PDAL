@@ -261,10 +261,6 @@ void PgReader::ready(PointTableRef /*table*/)
     if (getSpatialReference().empty())
         setSpatialReference(fetchSpatialReference());
 
-    m_point_size = 0;
-    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-        m_point_size += Dimension::size(di->m_dimType.m_type);
-
     CursorSetup();
 }
 
@@ -314,13 +310,13 @@ point_count_t PgReader::readPgPatch(PointViewPtr view, point_count_t numPts)
     PointId nextId = view->size();
     point_count_t numRead = 0;
 
-    size_t offset = ((m_patch.count - m_patch.remaining) * m_point_size);
+    size_t offset = (m_patch.count - m_patch.remaining) * packedPointSize();
     char *pos = (char *)(m_patch.binary.data() + offset);
 
     while (numRead < numPts && numRemaining > 0)
     {
         writePoint(*view.get(), nextId, pos);
-        pos += m_point_size;
+        pos += packedPointSize();
         numRemaining--;
         nextId++;
         numRead++;

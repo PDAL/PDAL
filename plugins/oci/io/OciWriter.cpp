@@ -335,7 +335,7 @@ bool OciWriter::blockTableExists()
     oss << "select table_name from user_tables";
 
     log()->get(LogLevel::Debug) << "checking for " << m_blockTableName <<
-        " existence ... " ;
+        " existence ... " << std::endl;
 
     Statement statement(m_connection->CreateStatement(oss.str().c_str()));
 
@@ -345,16 +345,11 @@ bool OciWriter::blockTableExists()
     statement->Define(szTable);
     statement->Execute();
 
-    log()->get(LogLevel::Debug) << "checking ... " << szTable ;
+    log()->get(LogLevel::Debug) << "checking ... " << szTable << std::endl;
     do
     {
-        log()->get(LogLevel::Debug) << ", " << szTable;
         if (boost::iequals(szTable, m_blockTableName))
-        {
-            log()->get(LogLevel::Debug) << " -- '" << m_blockTableName <<
-                "' found." <<std::endl;
             return true;
-        }
     } while (statement->Fetch());
 
     log()->get(LogLevel::Debug) << " -- '" << m_blockTableName <<
@@ -841,8 +836,6 @@ void OciWriter::writeTile(const PointViewPtr view)
         oss << ", :9";
     oss <<")";
  
-    log()->get(LogLevel::Debug4) << "STMT = " << oss.str() << std::endl;
-
     Statement statement(m_connection->CreateStatement(oss.str().c_str()));
 
     // :1

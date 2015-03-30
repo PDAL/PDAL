@@ -127,7 +127,6 @@ private:
     mutable point_count_t m_cached_max_points;
 
     bool m_atEnd;
-    size_t m_point_size;
     uint32_t m_cur_row;
     uint32_t m_cur_nrows;
     PGresult* m_cur_result;

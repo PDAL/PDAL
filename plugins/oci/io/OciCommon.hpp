@@ -91,7 +91,8 @@ public:
         { return num_points; }
     char *data() const
         { return (char *)chunk.data(); }
-    void update(XMLSchema *s);
+    void reset()
+        { m_num_remaining = num_points; }
     bool fetched() const
         { return m_fetched; }
     void setFetched()
@@ -113,8 +114,6 @@ public:
     Connection m_connection;
     sdo_pc* pc;
     int32_t m_num_remaining;
-    XMLSchema m_schema;
-    size_t m_point_size;
     bool m_fetched;  // Set when fetched but not initialized
 };
 typedef std::shared_ptr<Block> BlockPtr;
