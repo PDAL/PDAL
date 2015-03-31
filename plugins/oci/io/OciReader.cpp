@@ -305,6 +305,10 @@ point_count_t OciReader::readDimMajor(PointView& view, BlockPtr block,
 
             if (di->m_id == Id::PointSourceId && m_updatePointSourceId)
                 view.setField(Id::PointSourceId, nextId, block->obj_id);
+
+            if (m_cb && di == dims.rbegin().base() - 1)
+                m_cb(view, nextId);
+
             nextId++;
             numRead++;
             blockRemaining--;
@@ -326,6 +330,9 @@ point_count_t OciReader::readPointMajor(PointView& view,
     while (numRead < numPts && numRemaining > 0)
     {
         writePoint(view, nextId, pos);
+
+        if (m_cb)
+            m_cb(view, nextId);
 
         numRemaining--;
         nextId++;

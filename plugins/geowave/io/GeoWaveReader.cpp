@@ -292,6 +292,9 @@ namespace pdal
                             view->setField(id(name), numRead, java_cast<Double>(simpleFeature.getAttribute(name)).doubleValue());
                     }
 
+                    if (m_cb)
+                        m_cb(*view, numRead);
+
                     ++numRead;
                 }
                 featItr.close();
@@ -311,6 +314,9 @@ namespace pdal
                     if (!name.equals(location))
                         view->setField(id(name), numRead, java_cast<Double>(simpleFeature.getAttribute(name)).doubleValue());
                 }
+
+                if (m_cb)
+                    m_cb(*view, numRead);
 
                 ++numRead;
             }

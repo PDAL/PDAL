@@ -264,6 +264,9 @@ point_count_t SQLiteReader::readPatch(PointViewPtr view, point_count_t numPts)
             decompressor.decompress(tmpBuf.data(), tmpBuf.size());
             writePoint(*view.get(), nextId, tmpBuf.data());
 
+            if (m_cb)
+                m_cb(*view, nextId);
+
             nextId++;
             numRead++;
             count--;
@@ -287,6 +290,8 @@ point_count_t SQLiteReader::readPatch(PointViewPtr view, point_count_t numPts)
             writePoint(*view.get(), nextId, pos);
 
             pos += packedPointSize();
+            if (m_cb)
+                m_cb(*view, nextId);
             nextId++;
             numRead++;
             count--;

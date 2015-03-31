@@ -87,6 +87,10 @@ point_count_t SbetReader::read(PointViewPtr view, point_count_t count)
             Dimension::Id::Enum dim = *di;
             view->setField(dim, nextId, d);
         }
+
+        if (m_cb)
+            m_cb(*view, nextId);
+
         idx++;
         nextId++;
         numRead++;

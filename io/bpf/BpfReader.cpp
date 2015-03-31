@@ -302,6 +302,9 @@ point_count_t BpfReader::readPointMajor(PointViewPtr data, point_count_t count)
         data->setField(Dimension::Id::Y, nextId, y);
         data->setField(Dimension::Id::Z, nextId, z);
 
+        if (m_cb)
+            m_cb(*data, nextId);
+
         idx++;
         numRead++;
         nextId++;
@@ -341,6 +344,9 @@ point_count_t BpfReader::readDimMajor(PointViewPtr data, point_count_t count)
         data->setField(Dimension::Id::X, idx, x);
         data->setField(Dimension::Id::Y, idx, y);
         data->setField(Dimension::Id::Z, idx, z);
+
+        if (m_cb)
+            m_cb(*data, idx);
     }
 
     return numRead;
@@ -400,6 +406,9 @@ point_count_t BpfReader::readByteMajor(PointViewPtr data, point_count_t count)
         data->setField(Dimension::Id::X, idx, x);
         data->setField(Dimension::Id::Y, idx, y);
         data->setField(Dimension::Id::Z, idx, z);
+
+        if (m_cb)
+            m_cb(*data, idx);
     }
 
     return numRead;
