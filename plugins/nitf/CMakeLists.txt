@@ -47,11 +47,17 @@ PDAL_ADD_PLUGIN(writer_libname writer nitf
 
 if (WITH_TESTS)
 	set(srcs
-        test/NitfReaderTest.cpp
         test/NitfWriterTest.cpp
     )
 
-    PDAL_ADD_TEST(nitftest
+    PDAL_ADD_TEST(nitfwritertest
         FILES "${srcs}"
-        LINK_WITH ${reader_libname} ${writer_libname})
+        LINK_WITH ${writer_libname})
+
+    set(srcs
+        test/NitfReaderTest.cpp
+    )
+    PDAL_ADD_TEST(nitfreadertest
+        FILES "${srcs}"
+        LINK_WITH ${reader_libname})
 endif()
