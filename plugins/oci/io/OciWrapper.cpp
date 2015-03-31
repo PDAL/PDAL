@@ -99,11 +99,11 @@ OWConnection::OWConnection(const char* pszUserIn,
     // ------------------------------------------------------
 
     if (OCIEnvCreate(&hEnv,
-                     (ub4)(OCI_DEFAULT | OCI_OBJECT | OCI_THREADED),
-                     (dvoid *) 0, (dvoid * (*)(dvoid *, size_t)) 0,
-                     (dvoid * (*)(dvoid *, dvoid *, size_t)) 0,
-                     (void (*)(dvoid *, dvoid *)) 0, (size_t) 0,
-                     (dvoid **) 0), NULL)
+        (ub4)(OCI_DEFAULT | OCI_OBJECT | OCI_THREADED),
+        (dvoid *) 0, (dvoid * (*)(dvoid *, size_t)) 0,
+        (dvoid * (*)(dvoid *, dvoid *, size_t)) 0,
+        (void (*)(dvoid *, dvoid *)) 0, (size_t) 0,
+        (dvoid **) 0), NULL)
     {
         return;
     }
@@ -113,7 +113,7 @@ OWConnection::OWConnection(const char* pszUserIn,
     // ------------------------------------------------------
 
     if (CheckError(OCIHandleAlloc((dvoid *) hEnv, (dvoid **) &hError,
-                                  OCI_HTYPE_ERROR, (size_t) 0, (dvoid **) 0), NULL))
+        OCI_HTYPE_ERROR, (size_t) 0, (dvoid **) 0), NULL))
     {
         return;
     }
@@ -123,7 +123,7 @@ OWConnection::OWConnection(const char* pszUserIn,
     // ------------------------------------------------------
 
     if (CheckError(OCIHandleAlloc((dvoid *) hEnv, (dvoid **) &hSvcCtx,
-                                  OCI_HTYPE_SVCCTX, (size_t) 0, (dvoid **) 0), hError))
+        OCI_HTYPE_SVCCTX, (size_t) 0, (dvoid **) 0), hError))
     {
         return;
     }
@@ -133,13 +133,13 @@ OWConnection::OWConnection(const char* pszUserIn,
     // ------------------------------------------------------
 
     if (CheckError(OCIHandleAlloc((dvoid *) hEnv, (dvoid **) &hServer,
-                                  (ub4) OCI_HTYPE_SERVER, (size_t) 0, (dvoid **) 0), hError))
+        (ub4) OCI_HTYPE_SERVER, (size_t) 0, (dvoid **) 0), hError))
     {
         return;
     }
 
     if (CheckError(OCIHandleAlloc((dvoid *) hEnv, (dvoid **)&hSession,
-                                  (ub4) OCI_HTYPE_SESSION, (size_t) 0, (dvoid **) 0), hError))
+        (ub4) OCI_HTYPE_SESSION, (size_t) 0, (dvoid **) 0), hError))
     {
         return;
     }
@@ -149,27 +149,28 @@ OWConnection::OWConnection(const char* pszUserIn,
     // ------------------------------------------------------
 
     if (CheckError(OCIServerAttach(hServer, hError, (text*) pszServer,
-                                   strlen((char*) pszServer), 0), hError))
+        strlen((char*) pszServer), 0), hError))
     {
         return;
     }
 
     if (CheckError(OCIAttrSet((dvoid *) hSession, (ub4) OCI_HTYPE_SESSION,
-                              (dvoid*)const_cast<char *>( pszUserId), (ub4) strlen(pszUserId),
-                              (ub4) OCI_ATTR_USERNAME, hError), hError))
+        (dvoid*)const_cast<char *>( pszUserId), (ub4) strlen(pszUserId),
+        (ub4) OCI_ATTR_USERNAME, hError), hError))
     {
         return;
     }
 
     if (CheckError(OCIAttrSet((dvoid *) hSession, (ub4) OCI_HTYPE_SESSION,
-                              (dvoid *) pszPassword, (ub4) strlen((char *) pszPassword),
-                              (ub4) OCI_ATTR_PASSWORD, hError), hError))
+        (dvoid *) pszPassword, (ub4) strlen((char *) pszPassword),
+        (ub4) OCI_ATTR_PASSWORD, hError), hError))
     {
         return;
     }
 
-    if (CheckError(OCIAttrSet((dvoid *) hSvcCtx, OCI_HTYPE_SVCCTX, (dvoid *)hServer,
-                              (ub4) 0, OCI_ATTR_SERVER, (OCIError *) hError), hError))
+    if (CheckError(OCIAttrSet((dvoid *) hSvcCtx, OCI_HTYPE_SVCCTX,
+        (dvoid *)hServer, (ub4) 0, OCI_ATTR_SERVER, (OCIError *) hError),
+        hError))
     {
         return;
     }
@@ -643,8 +644,6 @@ OWStatement::OWStatement(OWConnection* pConnect, const char* pszStatement)
     {
         nStmtMode = OCI_DEFAULT;
     }
-
-    CPLDebug("PL/SQL","\n%s\n", pszStatement);
 }
 
 OWStatement::~OWStatement()
@@ -1341,8 +1340,6 @@ void OWStatement::WriteCLob(OCILobLocator** pphLocator, char* pszData)
                    (ub2) 0,
                    (ub1) SQLCS_IMPLICIT),
                hError);
-
-    CPLDebug("GEOR","Clob = %d = %d", nAmont, static_cast<int>(strlen(pszData)));
 }
 
 void OWStatement::Define(OCIArray** pphData)
@@ -2454,8 +2451,8 @@ bool CheckError(sword nStatus, OCIError* hError)
         case OCI_CONTINUE:
             CPLError(CE_Failure, CPLE_AppDefined, "OCI_CONTINUE\n");
             break;
-        case OCI_ERROR:
         case OCI_SUCCESS_WITH_INFO:
+        case OCI_ERROR:
 
             if (hError == NULL)
             {

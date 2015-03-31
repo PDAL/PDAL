@@ -273,6 +273,10 @@ point_count_t TerrasolidReader::read(PointViewPtr view, point_count_t count)
             view->setField(Dimension::Id::Blue, nextId, blue);
             view->setField(Dimension::Id::Alpha, nextId, alpha);
         }
+
+        if (m_cb)
+            m_cb(*view, nextId);
+
         nextId++;
         m_index++;
     }

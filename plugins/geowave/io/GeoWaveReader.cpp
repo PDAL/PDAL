@@ -129,7 +129,15 @@ using jace::proxy::mil::nga::giat::geowave::accumulo::AccumuloDataStore;
 #include "jace/proxy/mil/nga/giat/geowave/accumulo/metadata/AccumuloAdapterStore.h"
 using jace::proxy::mil::nga::giat::geowave::accumulo::metadata::AccumuloAdapterStore;
 
-CREATE_READER_PLUGIN(geowave, pdal::GeoWaveReader)
+static PluginInfo const s_info = PluginInfo(
+    "readers.geowave",
+    "\"GeoWave\"  reader support. ",
+    "http://pdal.io/stages/drivers.geowave.reader.html" );
+
+CREATE_SHARED_PLUGIN(1, 0, GeoWaveReader, Reader, s_info)
+
+std::string pdal::GeoWaveReader::getName() const { return s_info.name; }
+
 
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
@@ -292,6 +300,9 @@ namespace pdal
                             view->setField(id(name), numRead, java_cast<Double>(simpleFeature.getAttribute(name)).doubleValue());
                     }
 
+                    if (m_cb)
+                        m_cb(*view, numRead);
+
                     ++numRead;
                 }
                 featItr.close();
@@ -311,6 +322,9 @@ namespace pdal
                     if (!name.equals(location))
                         view->setField(id(name), numRead, java_cast<Double>(simpleFeature.getAttribute(name)).doubleValue());
                 }
+
+                if (m_cb)
+                    m_cb(*view, numRead);
 
                 ++numRead;
             }

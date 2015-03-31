@@ -53,9 +53,8 @@ Connection connect(std::string connSpec)
     if (connection.empty())
         throw pdal_error("Oracle connection string empty! Unable to connect");
 
-        if (FileUtils::fileExists(connection))
-        {
-
+    if (FileUtils::fileExists(connection))
+    {
         std::istream::pos_type size;
         std::istream* input = FileUtils::openFile(connection, true);
         if (!input->good())
@@ -75,7 +74,6 @@ Connection connect(std::string connSpec)
                 output = line;
         }
         connection = output;
-
     }
 
     string::size_type pos = connection.find("/", 0);
@@ -133,7 +131,7 @@ XMLSchema fetchSchema(Statement stmt, BlockPtr block)
 
 
 Block::Block(Connection connection) : num_points(0), m_connection(connection),
-    m_num_remaining(0), m_point_size(0), m_fetched(false)
+    m_num_remaining(0), m_fetched(false)
 {
     m_connection->CreateType(&blk_extent);
     m_connection->CreateType(&blk_extent->sdo_ordinates,
@@ -154,23 +152,6 @@ Block::~Block()
     // For some reason having the dtor destroy this
     // causes a segfault
     // m_connection->DestroyType(&blk_extent);
-}
-
-
-void Block::update(XMLSchema *s)
-{
-    using namespace Dimension;
-
-    m_point_size = 0; // Wipe the size to reset
-    m_num_remaining = num_points;
-    m_schema.setOrientation(s->orientation());
-    DimTypeList dims = s->dimTypes();
-    for (auto di = dims.begin(); di != dims.end(); ++di)
-    {
-        if (di->m_id == Id::X || di->m_id == Id::Y || di->m_id == Id::Z)
-            m_schema.setXForm(di->m_id, di->m_xform);
-        m_point_size += Dimension::size(di->m_type);
-    }
 }
 
 } // namespace pdal

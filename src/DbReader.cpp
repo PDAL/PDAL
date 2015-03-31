@@ -44,6 +44,7 @@ void DbReader::loadSchema(PointLayoutPtr layout,
 
 void DbReader::loadSchema(PointLayoutPtr layout, const XMLSchema& schema)
 {
+    m_layout = layout;
     m_dims = schema.xmlDims();
 
     // Override XYZ to doubles and use those going forward
@@ -53,11 +54,27 @@ void DbReader::loadSchema(PointLayoutPtr layout, const XMLSchema& schema)
     layout->registerDim(Dimension::Id::Y);
     layout->registerDim(Dimension::Id::Z);
 
+    m_orientation = schema.orientation();
     m_packedPointSize = 0;
     for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
     {
         di->m_dimType.m_id =
             layout->registerOrAssignDim(di->m_name, di->m_dimType.m_type);
+        m_packedPointSize += Dimension::size(di->m_dimType.m_type);
+    }
+}
+
+
+// If we start reading from a DB block with a different schema, reflect that
+// in the dimensions and size.
+void DbReader::updateSchema(const XMLSchema& schema)
+{
+    m_dims = schema.xmlDims();
+    m_orientation = schema.orientation();
+    m_packedPointSize = 0;
+    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+    {
+        di->m_dimType.m_id = m_layout->findDim(di->m_name);
         m_packedPointSize += Dimension::size(di->m_dimType.m_type);
     }
 }
@@ -70,6 +87,19 @@ DimTypeList DbReader::dbDimTypes() const
     for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
         dimTypes.push_back(di->m_dimType);
     return dimTypes;
+}
+
+
+size_t DbReader::dimOffset(Dimension::Id::Enum id) const
+{
+    size_t offset = 0;
+    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+    {
+        if (di->m_dimType.m_id == id)
+            break;
+        offset += Dimension::size(di->m_dimType.m_type);
+    }
+    return offset;
 }
 
 

@@ -188,6 +188,9 @@ point_count_t FauxReader::read(PointViewPtr view, point_count_t count)
             view->setField(Dimension::Id::NumberOfReturns, idx, m_numReturns);
             m_returnNum = (m_returnNum % m_numReturns) + 1;
         }
+
+        if (m_cb)
+            m_cb(*view, idx);
     }
     return count;
 }

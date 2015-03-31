@@ -111,7 +111,6 @@ private:
     uint32_t m_precision;
     bool m_overwrite;
     bool m_trace;
-    bool m_pack;
 
     std::string m_baseTableName;
     std::string m_cloudColumnName;

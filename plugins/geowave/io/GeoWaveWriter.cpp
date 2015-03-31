@@ -133,7 +133,15 @@ using jace::proxy::mil::nga::giat::geowave::accumulo::AccumuloDataStore;
 #include "jace/proxy/mil/nga/giat/geowave/accumulo/AccumuloIndexWriter.h"
 using jace::proxy::mil::nga::giat::geowave::accumulo::AccumuloIndexWriter;
 
-CREATE_WRITER_PLUGIN(geowave, pdal::GeoWaveWriter)
+static PluginInfo const s_info = PluginInfo(
+    "writers.geowave",
+    "Write data using GeoWave.",
+    "http://pdal.io/stages/drivers.geowave.writer.html" );
+
+CREATE_SHARED_PLUGIN(1, 0, GeoWaveWriter, Writer, s_info)
+
+std::string pdal::GeoWaveWriter::getName() const { return s_info.name; }
+
 
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
@@ -193,7 +201,7 @@ namespace pdal
     void GeoWaveWriter::ready(PointTableRef table)
     {
         // get a list of all the dimensions & their types
-        Dimension::IdList all = table->layout()->dims();
+        Dimension::IdList all = table.layout()->dims();
         for (auto di = all.begin(); di != all.end(); ++di)
             if (!contains(m_dims, *di))
                 m_dims.push_back(*di);

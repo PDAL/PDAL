@@ -417,6 +417,9 @@ point_count_t QfitReader::read(PointViewPtr data, point_count_t count)
         int32_t gpstime;
         extractor >> gpstime;
 
+        if (m_cb)
+            m_cb(*data, nextId);
+
         numRead++;
         nextId++;
     }

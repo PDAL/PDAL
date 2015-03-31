@@ -205,12 +205,15 @@ endif()
 
 target_link_libraries(${PDAL_LIB_NAME}
     ${CMAKE_THREAD_LIBS_INIT}
-    ${GEOTIFF_LIBRARY}
     ${GDAL_LIBRARY}
     ${GEOS_LIBRARY}
     ${ZLIB_LIBRARIES}
     ${PDAL_UTIL_LIB_NAME}
 )
+
+if (WITH_GEOTIFF)
+    target_link_libraries(${PDAL_LIB_NAME} ${GEOTIFF_LIBRARY})
+endif()
 
 target_link_libraries(${PDAL_LIB_NAME} ${Boost_LIBRARIES})
 

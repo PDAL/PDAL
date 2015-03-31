@@ -40,17 +40,20 @@
 #include <vector>
 #include <string>
 
+pdal::Writer* createGeoWaveWriter();
+
 namespace pdal
 {
 
     class PDAL_DLL GeoWaveWriter : public Writer
     {
     public:
-        SET_STAGE_NAME("writers.geowave", "GeoWave Writer")
-        SET_STAGE_LINK("http://pdal.io/stages/drivers.geowave.writer.html")
-        SET_PLUGIN_VERSION("1.0.0")
 
-        static Options getDefaultOptions();
+        static void * create();
+        static int32_t destroy(void *);
+        std::string getName() const;
+
+        Options getDefaultOptions();
 
     private:
         virtual void initialize();

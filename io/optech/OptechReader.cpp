@@ -244,6 +244,9 @@ point_count_t OptechReader::read(PointViewPtr data,
         data->setField(Dimension::Id::ScanAngleRank, dataIndex,
                       m_pulse.scanAngle * 180 / M_PI);
 
+        if (m_cb)
+            m_cb(*data, dataIndex);
+
         ++dataIndex;
         ++numRead;
         ++m_returnIndex;

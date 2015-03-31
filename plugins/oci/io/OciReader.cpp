@@ -67,7 +67,7 @@ void OciReader::processOptions(const Options& options)
 
 void OciReader::initialize()
 {
-    pdal::GlobalEnvironment::get().getGDALDebug()->addLog(log());
+    GlobalEnvironment::get().getGDALDebug()->addLog(log());
     m_connection = connect(m_connSpec);
     m_block = BlockPtr(new Block(m_connection));
 
@@ -186,9 +186,6 @@ void OciReader::validateQuery()
     while (m_stmt->GetNextField(col, fieldName, &hType, &size,
         &precision, &scale, typeName))
     {
-        log()->get(LogLevel::Debug) << "Fetched field '" << fieldName <<
-            "' of type '" << typeName << "'"<< std::endl;
-
         reqFields.erase(fieldName);
         if (hType == SQLT_NTY)
         {
@@ -246,12 +243,12 @@ void OciReader::addDimensions(PointLayoutPtr layout)
     log()->get(LogLevel::Debug) << "Fetching schema from SDO_PC object" <<
         std::endl;
 
-    m_block->m_schema = fetchSchema(m_stmt, m_block);
-    loadSchema(layout, m_block->m_schema);
+    XMLSchema schema = fetchSchema(m_stmt, m_block);
+    loadSchema(layout, schema);
 
     if (m_schemaFile.size())
     {
-        std::string pcSchema = m_block->m_schema.xml();
+        std::string pcSchema = schema.xml();
         std::ostream *out = FileUtils::createFile(m_schemaFile);
         out->write(pcSchema.c_str(), pcSchema.size());
         FileUtils::closeFile(out);
@@ -272,12 +269,11 @@ point_count_t OciReader::read(PointViewPtr view, point_count_t count)
                 return totalNumRead;
         PointId bufBegin = view->size();
 
-        Orientation::Enum orientation = m_block->m_schema.orientation();
         point_count_t numRead = 0;
-        if (orientation == Orientation::DimensionMajor)
-            numRead = readDimMajor(*view.get(), m_block, count - totalNumRead);
-        else if (orientation == Orientation::PointMajor)
-            numRead = readPointMajor(*view.get(), m_block, count - totalNumRead);
+        if (orientation() == Orientation::DimensionMajor)
+            numRead = readDimMajor(*view, m_block, count - totalNumRead);
+        else if (orientation() == Orientation::PointMajor)
+            numRead = readPointMajor(*view, m_block, count - totalNumRead);
         PointId bufEnd = bufBegin + numRead;
         totalNumRead += numRead;
     }
@@ -295,7 +291,7 @@ point_count_t OciReader::readDimMajor(PointView& view, BlockPtr block,
     point_count_t blockRemaining;
     point_count_t numRead = 0;
 
-    DimTypeList dims = block->m_schema.dimTypes();
+    DimTypeList dims = dbDimTypes();
     for (auto di = dims.begin(); di != dims.end(); ++di)
     {
         PointId nextId = startId;
@@ -309,6 +305,10 @@ point_count_t OciReader::readDimMajor(PointView& view, BlockPtr block,
 
             if (di->m_id == Id::PointSourceId && m_updatePointSourceId)
                 view.setField(Id::PointSourceId, nextId, block->obj_id);
+
+            if (m_cb && di == dims.rbegin().base() - 1)
+                m_cb(view, nextId);
+
             nextId++;
             numRead++;
             blockRemaining--;
@@ -331,6 +331,9 @@ point_count_t OciReader::readPointMajor(PointView& view,
     {
         writePoint(view, nextId, pos);
 
+        if (m_cb)
+            m_cb(view, nextId);
+
         numRemaining--;
         nextId++;
         numRead++;
@@ -342,19 +345,15 @@ point_count_t OciReader::readPointMajor(PointView& view,
 
 char *OciReader::seekDimMajor(const DimType& d, BlockPtr block)
 {
-    size_t size = 0;
-    DimTypeList dims = block->m_schema.dimTypes();
-    for (auto di = dims.begin(); di->m_id != d.m_id; ++di)
-        size += Dimension::size(di->m_type);
     return block->data() +
-        (size * block->numPoints()) +
+        (dimOffset(d.m_id) * block->numPoints()) +
         (Dimension::size(d.m_type) * block->numRead());
 }
 
 
 char *OciReader::seekPointMajor(BlockPtr block)
 {
-    return block->data() + (block->numRead() * block->m_point_size);
+    return block->data() + (block->numRead() * packedPointSize());
 }
 
 
@@ -373,8 +372,8 @@ bool OciReader::readOci(Statement stmt, BlockPtr block)
     // Read the points from the blob in the row.
     readBlob(stmt, block);
     XMLSchema *s = findSchema(stmt, block);
-    m_dims = s->xmlDims();
-    block->update(s);
+    updateSchema(*s);
+    block->reset();
     block->clearFetched();
     return true;
 }

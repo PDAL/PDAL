@@ -42,20 +42,28 @@ namespace pdal
 class PDAL_DLL DbReader : public Reader
 {
 protected:
-    XMLDimList m_dims;
-    size_t m_packedPointSize;
-
-    DbReader()
+    DbReader() : m_orientation(Orientation::PointMajor), m_packedPointSize(0)
     {}
 
     DimTypeList dbDimTypes() const;
     void loadSchema(PointLayoutPtr layout, const std::string& schemaString);
     void loadSchema(PointLayoutPtr layout, const XMLSchema& schema);
+    void updateSchema(const XMLSchema& schema);
     void writeField(PointView& view, const char *pos, const DimType& dim,
         PointId idx);
     void writePoint(PointView& view, PointId idx, const char *buf);
+    size_t packedPointSize() const
+        { return m_packedPointSize; }
+    size_t dimOffset(Dimension::Id::Enum id) const;
+    Orientation::Enum orientation() const
+        { return m_orientation; }
 
 private:
+    PointLayoutPtr m_layout;
+    XMLDimList m_dims;
+    Orientation::Enum m_orientation;
+    size_t m_packedPointSize;
+
     DbReader& operator=(const DbReader&); // not implemented
     DbReader(const DbReader&); // not implemented
 };
