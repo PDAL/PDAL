@@ -66,7 +66,7 @@ class PDAL_DLL PluginManager
 public:
     typedef std::map<std::string, PF_RegisterParams> RegistrationMap;
 
-    static PluginManager & getInstance();
+//     static PluginManager & getInstance();
     static int32_t initializePlugin(PF_InitFunc initFunc);
     int32_t loadAll(PF_PluginType type);
     int32_t loadAll(const std::string & pluginDirectory, PF_PluginType type);

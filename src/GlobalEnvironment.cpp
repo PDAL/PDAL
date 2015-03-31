@@ -155,5 +155,9 @@ pdal::gdal::GlobalDebug* GlobalEnvironment::getGDALDebug()
     return m_gdal_debug;
 }
 
+pdal::PluginManager& GlobalEnvironment::getPluginManager()
+{
+    return *m_pluginManager;
+}
 
 } //namespaces

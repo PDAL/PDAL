@@ -38,6 +38,7 @@
 // The original work was released under the Apache License v2.
 
 #include <pdal/PluginManager.hpp>
+#include <pdal/GlobalEnvironment.hpp>
 
 #include <boost/filesystem.hpp>
 
@@ -74,7 +75,7 @@ int32_t PluginManager::registerObject(const std::string& objectType,
     if (!isValid(params))
         return -1;
 
-    PluginManager& pm = PluginManager::getInstance();
+    PluginManager& pm = GlobalEnvironment::get().getPluginManager();
 
     PF_PluginAPI_Version v = pm.m_version;
     if (v.major != params->version.major)
@@ -88,13 +89,13 @@ int32_t PluginManager::registerObject(const std::string& objectType,
 }
 
 
-PluginManager& PluginManager::getInstance()
-{
-    static PluginManager instance;
-
-    return instance;
-}
-
+// PluginManager& PluginManager::getInstance()
+// {
+//     static PluginManager instance;
+// 
+//     return instance;
+// }
+// 
 
 int32_t PluginManager::loadAll(PF_PluginType type)
 {
@@ -153,7 +154,7 @@ int32_t PluginManager::loadAll(const std::string& pluginDirectory,
 
 int32_t PluginManager::initializePlugin(PF_InitFunc initFunc)
 {
-    PluginManager& pm = PluginManager::getInstance();
+    PluginManager& pm = GlobalEnvironment::get().getPluginManager();
 
     PF_ExitFunc exitFunc = initFunc();
     if (!exitFunc)
