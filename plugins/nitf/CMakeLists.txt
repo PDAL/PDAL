@@ -50,14 +50,14 @@ if (WITH_TESTS)
         test/NitfWriterTest.cpp
     )
 
-    PDAL_ADD_TEST(nitfwritertest
+    PDAL_ADD_TEST(pdal_io_nitf_writer_test
         FILES "${srcs}"
         LINK_WITH ${writer_libname})
 
     set(srcs
         test/NitfReaderTest.cpp
     )
-    PDAL_ADD_TEST(nitfreadertest
+    PDAL_ADD_TEST(pdal_io_nitf_reader_test
         FILES "${srcs}"
         LINK_WITH ${reader_libname})
 endif()
