@@ -149,8 +149,6 @@ Options OciWriter::getDefaultOptions()
         "set on the PC_EXTENT object of the SDO_PC. If none is specified, "
         "the cumulated bounds of all of the block data are used.");
     Option pc_id("pc_id", -1, "Point Cloud id");
-    Option pack("pack_ignored_fields", true,
-        "Pack ignored dimensions out of the data buffer that is written");
     Option do_trace("do_trace", false,
         "turn on server-side binds/waits tracing -- needs ALTER SESSION privs");
     Option stream_chunks("stream_chunks", false,
@@ -181,7 +179,6 @@ Options OciWriter::getDefaultOptions()
     options.add(post_block_sql);
     options.add(base_table_bounds);
     options.add(pc_id);
-    options.add(pack);
     options.add(do_trace);
     options.add(stream_chunks);
     options.add(blob_chunk_count);
@@ -673,7 +670,6 @@ void OciWriter::processOptions(const Options& options)
     m_solid = getDefaultedOption<bool>(options, "solid");
     m_3d = getDefaultedOption<bool>(options, "is3d");
     m_srid = options.getValueOrThrow<uint32_t>("srid");
-    m_pack = options.getValueOrDefault<bool>("pack_ignored_fields", true);
     m_baseTableBounds =
         getDefaultedOption<BOX3D>(options, "base_table_bounds");
     m_baseTableName = boost::to_upper_copy(
@@ -854,8 +850,6 @@ void OciWriter::writeTile(const PointViewPtr view)
     log()->get(LogLevel::Debug4) << "Num points " <<
         long_num_points << std::endl;
 
-
-
     // :4
     size_t totalSize = 0;
     std::vector<char> outbuf(m_packedPointSize * view->size());
@@ -890,7 +884,6 @@ void OciWriter::writeTile(const PointViewPtr view)
             if (idx % 100 == 0)
                 m_callback->invoke(idx);
             pos += size;
-            totalSize += size;
         }
     }
     m_callback->invoke(view->size());
