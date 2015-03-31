@@ -45,18 +45,21 @@
 #include "jace/proxy/mil/nga/giat/geowave/store/CloseableIterator.h"
 using jace::proxy::mil::nga::giat::geowave::store::CloseableIterator;
 
+extern "C" int32_t GeoWaveReader_ExitFunc();
+extern "C" PF_ExitFunc GeoWaveReader_InitPlugin();
+
+
 namespace pdal
 {
 
     class PDAL_DLL GeoWaveReader : public Reader
     {
     public:
-        SET_STAGE_NAME("readers.geowave", "GeoWave Reader")
-        SET_STAGE_LINK("http://pdal.io/stages/drivers.geowave.reader.html")
-        SET_PLUGIN_VERSION("1.0.0")
+        static void * create();
+        static int32_t destroy(void *);
+        std::string getName() const;
 
-        static Options getDefaultOptions();
-        static Dimension::IdList getDefaultDimensions();
+	Options getDefaultOptions();
 
     private:
         virtual void initialize();
@@ -66,6 +69,7 @@ namespace pdal
         virtual point_count_t read(PointViewPtr view, point_count_t count);
         virtual void done(PointTableRef table);
 
+	Dimension::IdList getDefaultDimensions();
         int createJvm();
 
         std::string m_zookeeperUrl;
