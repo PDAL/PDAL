@@ -32,10 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "gtest/gtest.h"
-
 #include <boost/property_tree/xml_parser.hpp>
 
+#include <pdal/pdal_test_main.hpp>
 #include <pdal/util/Bounds.hpp>
 #include <pdal/PDALUtils.hpp>
 

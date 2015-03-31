@@ -1,4 +1,4 @@
-#include "gtest/gtest.h"
+#include <pdal/pdal_test_main.hpp>
 
 #include <pdal/Options.hpp>
 #include <pdal/PointTable.hpp>

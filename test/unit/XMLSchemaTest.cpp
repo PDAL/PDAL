@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "gtest/gtest.h"
+#include <pdal/pdal_test_main.hpp>
 #include <boost/property_tree/ptree.hpp>
 
 #include <boost/uuid/uuid_generators.hpp>

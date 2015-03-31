@@ -33,7 +33,7 @@
 ****************************************************************************/
 
 #define _USE_MATH_DEFINES
-#include <gtest/gtest.h>
+#include <pdal/pdal_test_main.hpp>
 #include <pdal/util/Georeference.hpp>
 
 #include <cmath>

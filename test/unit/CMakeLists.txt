@@ -73,19 +73,13 @@ endif()
 PDAL_ADD_TEST(pdal_io_bpf_test FILES io/bpf/BPFTest.cpp)
 PDAL_ADD_TEST(pdal_io_buffer_test FILES io/buffer/BufferTest.cpp)
 PDAL_ADD_TEST(pdal_io_faux_test FILES io/faux/FauxReaderTest.cpp)
-set(srcs
-    io/las/LasReaderTest.cpp
-    io/las/LasWriterTest.cpp
-)
-PDAL_ADD_TEST(pdal_io_las_test FILES "${srcs}")
+PDAL_ADD_TEST(pdal_io_las_reader_test FILES io/las/LasReaderTest.cpp)
+PDAL_ADD_TEST(pdal_io_las_writer_test FILES io/las/LasWriterTest.cpp)
 PDAL_ADD_TEST(pdal_io_optech_test FILES io/optech/OptechReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_rialto_test FILES io/rialto/RialtoWriterTest.cpp)
 PDAL_ADD_TEST(pdal_io_qfit_test FILES io/qfit/QFITReaderTest.cpp)
-set(srcs
-    io/sbet/SbetReaderTest.cpp
-    io/sbet/SbetWriterTest.cpp
-)
-PDAL_ADD_TEST(pdal_io_sbet_test FILES "${srcs}")
+PDAL_ADD_TEST(pdal_io_sbet_reader_test FILES io/sbet/SbetReaderTest.cpp)
+PDAL_ADD_TEST(pdal_io_sbet_writer_test FILES io/sbet/SbetWriterTest.cpp)
 PDAL_ADD_TEST(pdal_io_terrasolid_test FILES io/terrasolid/TerrasolidReaderTest.cpp)
 
 #
