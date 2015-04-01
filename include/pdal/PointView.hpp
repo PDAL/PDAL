@@ -62,14 +62,18 @@ class PointViewIter;
 typedef std::shared_ptr<PointView> PointViewPtr;
 typedef std::set<PointViewPtr> PointViewSet;
 
-
 class PDAL_DLL PointView
 {
     friend class plang::BufferedInvocation;
     friend class PointRef;
+    friend bool operator < (const PointViewPtr& p1, const PointViewPtr& p2);
 public:
-    PointView(PointTableRef pointTable) : m_pointTable(pointTable), m_size(0)
-    {}
+    PointView(PointTableRef pointTable) : m_pointTable(pointTable),
+        m_size(0), m_id(0)
+    {
+        static int lastId = 0;
+        m_id = ++lastId;
+    }
 
     virtual ~PointView()
     {}
@@ -241,6 +245,7 @@ protected:
     // The index might be larger than the size to support temporary point
     // references.
     point_count_t m_size;
+    int m_id;
     std::queue<PointId> m_temps;
 
 private:
@@ -257,6 +262,9 @@ private:
     void freeTemp(PointId id)
         { m_temps.push(id); }
 };
+
+inline bool operator < (const PointViewPtr& p1, const PointViewPtr& p2)
+    { return p1->m_id < p2->m_id; }
 
 
 template <class T>

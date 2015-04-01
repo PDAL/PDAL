@@ -242,7 +242,6 @@ TEST(PointViewTest, bigfile)
 
     PointView view(table);
 
-    std::cout << "SET" << std::endl;
     for (PointId id = 0; id < NUM_PTS; ++id)
     {
         view.setField(Dimension::Id::X, id, id);
@@ -250,7 +249,6 @@ TEST(PointViewTest, bigfile)
         view.setField(Dimension::Id::Z, id, -(int)id);
     }
 
-    std::cout << "GET" << std::endl;
     for (PointId id = 0; id < NUM_PTS; ++id)
     {
         EXPECT_EQ(
@@ -260,7 +258,6 @@ TEST(PointViewTest, bigfile)
         EXPECT_EQ(
             view.getFieldAs<int>(Dimension::Id::Z, id), -(int)id);
     }
-    std::cout << "DONE" << std::endl;
 
     // Test some random access.
     std::unique_ptr<PointId[]> ids(new PointId[NUM_PTS]);
