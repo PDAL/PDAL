@@ -56,6 +56,8 @@ public:
 
     // get the plang (python) environment
     plang::PythonEnvironment& getPythonEnvironment();
+    PluginManager& getPluginManager(); 
+
     void getGDALEnvironment();
     gdal::GlobalDebug* getGDALDebug();
 
@@ -66,6 +68,7 @@ private:
     static void init();
 
     plang::PythonEnvironment* m_pythonEnvironment;
+    PluginManager* m_pluginManager;
     bool m_bIsGDALInitialized;
     pdal::gdal::GlobalDebug* m_gdal_debug;
 

@@ -34,6 +34,7 @@
 
 #include <pdal/KernelFactory.hpp>
 #include <pdal/Kernel.hpp>
+#include <pdal/GlobalEnvironment.hpp>
 #include <pdal/PluginManager.hpp>
 #include <pdal/Utils.hpp>
 
@@ -59,7 +60,7 @@ namespace pdal
 
 KernelFactory::KernelFactory(bool no_plugins)
 {
-    PluginManager & pm = PluginManager::getInstance();
+    PluginManager & pm = GlobalEnvironment::get().getPluginManager();
     if (!no_plugins) { pm.loadAll(PF_PluginType_Kernel); }
     PluginManager::initializePlugin(DeltaKernel_InitPlugin);
     PluginManager::initializePlugin(DiffKernel_InitPlugin);
@@ -72,7 +73,7 @@ KernelFactory::KernelFactory(bool no_plugins)
 
 std::unique_ptr<Kernel> KernelFactory::createKernel(std::string const& kernel_name)
 {
-    PluginManager & pm = PluginManager::getInstance();
+    PluginManager & pm = GlobalEnvironment::get().getPluginManager();
 
     void * kernel = pm.createObject(kernel_name);
     if (!kernel)
@@ -88,7 +89,7 @@ std::unique_ptr<Kernel> KernelFactory::createKernel(std::string const& kernel_na
 
 std::vector<std::string> KernelFactory::getKernelNames()
 {
-    PluginManager & pm = PluginManager::getInstance();
+    PluginManager & pm = GlobalEnvironment::get().getPluginManager();
     PluginManager::RegistrationMap rm = pm.getRegistrationMap();
     std::vector<std::string> nv;
     for (auto r : rm)

@@ -36,6 +36,7 @@
 
 #include <pdal/Utils.hpp>
 #include <pdal/PluginManager.hpp>
+#include <pdal/GlobalEnvironment.hpp>
 
 // filters
 #include <chipper/ChipperFilter.hpp>
@@ -164,7 +165,7 @@ pdal::Options StageFactory::inferWriterOptionsChanges(const std::string& filenam
         options.add("compression", true);
     }
 
-    PluginManager & pm = PluginManager::getInstance();
+    PluginManager & pm = GlobalEnvironment::get().getPluginManager();
     if (boost::algorithm::iequals(ext,".pcd") && pm.createObject("writers.pcd"))
     {
         options.add("format","PCD");
@@ -176,7 +177,7 @@ pdal::Options StageFactory::inferWriterOptionsChanges(const std::string& filenam
 
 StageFactory::StageFactory(bool no_plugins)
 {
-    PluginManager & pm = PluginManager::getInstance();
+    PluginManager & pm = GlobalEnvironment::get().getPluginManager();
     if (!no_plugins)
     {
         pm.loadAll(PF_PluginType_Filter);
@@ -225,7 +226,7 @@ StageFactory::StageFactory(bool no_plugins)
 ///
 Stage *StageFactory::createStage(std::string const& stage_name)
 {
-    PluginManager& pm = PluginManager::getInstance();
+    PluginManager& pm = GlobalEnvironment::get().getPluginManager();
 
     Stage *stage = (Stage *)pm.createObject(stage_name);
     if (!stage)
@@ -237,7 +238,7 @@ Stage *StageFactory::createStage(std::string const& stage_name)
 
 StringList StageFactory::getStageNames()
 {
-    PluginManager & pm = PluginManager::getInstance();
+    PluginManager & pm = GlobalEnvironment::get().getPluginManager();
     PluginManager::RegistrationMap rm = pm.getRegistrationMap();
     StringList nv;
     for (auto r : rm)
@@ -253,7 +254,7 @@ StringList StageFactory::getStageNames()
 
 std::map<std::string, std::string> StageFactory::getStageMap()
 {
-    PluginManager& pm = PluginManager::getInstance();
+    PluginManager& pm = GlobalEnvironment::get().getPluginManager();
     PluginManager::RegistrationMap rm = pm.getRegistrationMap();
     std::map<std::string, std::string> sm;
     for (auto r : rm)
