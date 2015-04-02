@@ -325,6 +325,21 @@ TEST_F(OCITest, dim_major_scaled)
     readData();
 }
 
+
+TEST_F(OCITest, point_major_unscaled)
+{
+    writeData(Orientation::PointMajor, false);
+    readData();
+}
+
+
+TEST_F(OCITest, point_major_scaled)
+{
+    writeData(Orientation::PointMajor, true);
+    readData();
+}
+
+
 // TEST_F(OCITest, read_view_reproj)
 // {
 //     if (!ShouldRunTest()) return;
