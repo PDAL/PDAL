@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include "PipelineKernel.hpp"
+#include <pdal/XMLSchema.hpp>
 
 #include <boost/program_options.hpp>
 
@@ -48,7 +49,7 @@ CREATE_STATIC_PLUGIN(1, 0, PipelineKernel, Kernel, s_info)
 
 std::string PipelineKernel::getName() const { return s_info.name; }
 
-PipelineKernel::PipelineKernel() : m_validate(false)
+PipelineKernel::PipelineKernel() : m_validate(false), m_PointCloudSchemaOutput("")
 {}
 
 
@@ -80,6 +81,17 @@ void PipelineKernel::addSwitches()
 
     addSwitchSet(file_options);
     addPositionalSwitch("input", 1);
+
+
+    po::options_description* hidden =
+        new po::options_description("Hidden options");
+    hidden->add_options()
+        ("pointcloudschema",
+         po::value<std::string>(&m_PointCloudSchemaOutput),
+        "dump PointCloudSchema XML output")
+            ;
+
+    addHiddenSwitchSet(hidden);
 }
 
 int PipelineKernel::execute()
@@ -116,6 +128,15 @@ int PipelineKernel::execute()
     {
         pdal::PipelineWriter writer(manager);
         writer.writePipeline(m_pipelineFile);
+    }
+    if (m_PointCloudSchemaOutput.size() > 0)
+    {
+        XMLSchema schema(manager.pointTable().layout()->dimTypes());
+        std::string xml_output = schema.xml();
+        std::ofstream f(m_PointCloudSchemaOutput, std::ios::out | std::ios::binary);
+        f << xml_output;
+        f.close();
+
     }
     return 0;
 }

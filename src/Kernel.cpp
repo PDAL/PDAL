@@ -413,7 +413,13 @@ void Kernel::visualize(PointViewPtr input_view, PointViewPtr output_view) const
 void Kernel::addSwitchSet(po::options_description* options)
 {
     if (!options) return;
-    m_options.push_back(options);
+    m_public_options.push_back(options);
+}
+
+void Kernel::addHiddenSwitchSet(po::options_description* options)
+{
+    if (!options) return;
+    m_hidden_options.push_back(options);
 }
 
 
@@ -497,7 +503,7 @@ void Kernel::outputHelp()
 {
     outputVersion();
 
-    for (auto const& iter : m_options)
+    for (auto const& iter : m_public_options)
     {
         std::cout << *iter;
         std::cout << std::endl;
@@ -561,7 +567,9 @@ void Kernel::parseSwitches()
 {
     po::options_description options;
 
-    for (auto const& iter : m_options)
+    for (auto const& iter : m_public_options)
+        options.add(*iter);
+    for (auto const& iter : m_hidden_options)
         options.add(*iter);
 
     try
