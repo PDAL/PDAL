@@ -33,7 +33,10 @@
 ****************************************************************************/
 
 #include "PipelineKernel.hpp"
+
+#ifdef PDAL_HAVE_LIBXML2
 #include <pdal/XMLSchema.hpp>
+#endif
 
 #include <boost/program_options.hpp>
 
@@ -131,11 +134,15 @@ int PipelineKernel::execute()
     }
     if (m_PointCloudSchemaOutput.size() > 0)
     {
+#ifdef PDAL_HAVE_LIBXML2
         XMLSchema schema(manager.pointTable().layout()->dimTypes());
         std::string xml_output = schema.xml();
         std::ofstream f(m_PointCloudSchemaOutput, std::ios::out | std::ios::binary);
         f << xml_output;
         f.close();
+#else
+        std::cerr << "libxml2 support not available, no schema is produced" << std::endl;
+#endif
 
     }
     return 0;
