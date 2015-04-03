@@ -610,7 +610,7 @@ inline PointId PointView::getTemp(PointId id)
     }
     else
     {
-        newid = m_index.size();
+        newid = (PointId)m_index.size();
         m_index.push_back(m_index[id]);
     }
     return newid;

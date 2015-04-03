@@ -34,7 +34,6 @@
 
 #include "ColorizationFilter.hpp"
 
-#include <pdal/GDALUtils.hpp>
 #include <pdal/GlobalEnvironment.hpp>
 #include <pdal/PointView.hpp>
 
@@ -67,8 +66,7 @@ struct GDALSourceDeleter
 
 void ColorizationFilter::initialize()
 {
-    GlobalEnvironment::get().getGDALEnvironment();
-    GlobalEnvironment::get().getGDALDebug()->addLog(log());
+    GlobalEnvironment::get().initializeGDAL(log());
 }
 
 

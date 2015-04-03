@@ -78,7 +78,6 @@ private:
     ReferencePtr m_in_ref_ptr;
     ReferencePtr m_out_ref_ptr;
     TransformPtr m_transform_ptr;
-    std::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
 
     ReprojectionFilter& operator=(const ReprojectionFilter&); // not implemented
     ReprojectionFilter(const ReprojectionFilter&); // not implemented

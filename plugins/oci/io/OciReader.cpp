@@ -34,7 +34,6 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include <pdal/GDALUtils.hpp>
 #include <pdal/GlobalEnvironment.hpp>
 #include "OciReader.hpp"
 
@@ -67,7 +66,7 @@ void OciReader::processOptions(const Options& options)
 
 void OciReader::initialize()
 {
-    GlobalEnvironment::get().getGDALDebug()->addLog(log());
+    GlobalEnvironment::get().initializeGDAL(log());
     m_connection = connect(m_connSpec);
     m_block = BlockPtr(new Block(m_connection));
 

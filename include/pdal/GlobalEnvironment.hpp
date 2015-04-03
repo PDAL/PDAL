@@ -36,7 +36,7 @@
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/plang/PythonEnvironment.hpp>
-
+#include <pdal/Log.hpp>
 
 namespace pdal
 {
@@ -56,7 +56,7 @@ public:
 
     // get the plang (python) environment
     plang::PythonEnvironment& getPythonEnvironment();
-    void getGDALEnvironment();
+    void initializeGDAL(LogPtr log);
     gdal::GlobalDebug* getGDALDebug();
 
 private:
