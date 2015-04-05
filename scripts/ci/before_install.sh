@@ -13,6 +13,7 @@ sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable -y
 sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
 sudo add-apt-repository ppa:boost-latest/ppa -y
 sudo add-apt-repository ppa:kalakris/cmake -y
+sudo add-apt-repository ppa:pdal/travis -y
 sudo apt-get update -qq
 
 # Install g++-4.8 (even if we're building clang) for updated libstdc++
@@ -44,14 +45,8 @@ then
         libflann-dev \
         libtiff4-dev \
         libgeotiff-dev \
-        postgresql-server-dev-9.1
-
-    wget https://github.com/pgpointcloud/pointcloud/archive/master.tar.gz
-    tar -xzf master.tar.gz
-    cd pointcloud-master
-    ./autogen.sh && ./configure
-    make && sudo make install
-    cd $TRAVIS_BUILD_DIR
+        postgresql-server-dev-9.1 \
+        pgpointcloud
 fi
 
 gcc --version
