@@ -34,6 +34,8 @@
 
 #include <boost/algorithm/string.hpp>
 
+#include <pdal/Compression.hpp>
+#include <pdal/GDALUtils.hpp>
 #include <pdal/GlobalEnvironment.hpp>
 #include "OciReader.hpp"
 
@@ -66,6 +68,7 @@ void OciReader::processOptions(const Options& options)
 
 void OciReader::initialize()
 {
+    m_compression = false;
     GlobalEnvironment::get().initializeGDAL(log());
     m_connection = connect(m_connSpec);
     m_block = BlockPtr(new Block(m_connection));
@@ -244,6 +247,8 @@ void OciReader::addDimensions(PointLayoutPtr layout)
 
     XMLSchema schema = fetchSchema(m_stmt, m_block);
     loadSchema(layout, schema);
+    MetadataNode comp = schema.getMetadata().findChild("compression");
+    m_compression = (comp.value() == "lazperf");
 
     if (m_schemaFile.size())
     {
@@ -325,18 +330,43 @@ point_count_t OciReader::readPointMajor(PointView& view,
     PointId nextId = view.size();
     point_count_t numRead = 0;
 
-    char *pos = seekPointMajor(block);
-    while (numRead < numPts && numRemaining > 0)
+    if (m_compression)
     {
-        writePoint(view, nextId, pos);
+#ifdef PDAL_HAVE_LAZPERF
+        LazPerfBuf buf(block->chunk);
+        LazPerfDecompressor<LazPerfBuf> decompressor(buf, dbDimTypes());
 
-        if (m_cb)
-            m_cb(view, nextId);
+        std::vector<char> ptBuf(decompressor.pointSize());
+        while (numRead < numPts && numRemaining > 0)
+        {
+            point_count_t numWritten =
+                decompressor.decompress(ptBuf.data(), ptBuf.size());
+            writePoint(view, nextId, ptBuf.data());
+            if (m_cb)
+                m_cb(view, nextId);
+            numRemaining--;
+            nextId++;
+            numRead++;
+        }
+#else
+        throw pdal_error("Can't decompress without LAZperf.");
+#endif
+    }
+    else
+    {
+        char *pos = seekPointMajor(block);
+        while (numRead < numPts && numRemaining > 0)
+        {
+            writePoint(view, nextId, pos);
 
-        pos += packedPointSize();
-        numRemaining--;
-        nextId++;
-        numRead++;
+            if (m_cb)
+                m_cb(view, nextId);
+
+            pos += packedPointSize();
+            numRemaining--;
+            nextId++;
+            numRead++;
+        }
     }
     block->setNumRemaining(numRemaining);
     return numRead;
@@ -373,6 +403,9 @@ bool OciReader::readOci(Statement stmt, BlockPtr block)
     readBlob(stmt, block);
     XMLSchema *s = findSchema(stmt, block);
     updateSchema(*s);
+    MetadataNode comp = s->getMetadata().findChild("compression");
+    m_compression = (comp.value() == "lazperf");
+
     block->reset();
     block->clearFetched();
     return true;
@@ -390,6 +423,8 @@ void OciReader::readBlob(Statement stmt, BlockPtr block)
     if (!stmt->ReadBlob(block->locator, (void*)(block->chunk.data()),
                         block->chunk.size() , &amountRead))
         throw pdal_error("Did not read all blob data!");
+
+    block->chunk.resize(amountRead);
 }
 
 

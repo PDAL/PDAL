@@ -183,7 +183,7 @@ protected:
 };
 
 
-void writeData(Orientation::Enum orient, bool scaling)
+void writeData(Orientation::Enum orient, bool scaling, bool compression = false)
 {
     Options options;
 
@@ -207,6 +207,8 @@ void writeData(Orientation::Enum orient, bool scaling)
         options.add("scale_y", 1e-6);
         options.add("scale_z", 1e-6);
     }
+    if (compression)
+        options.add("compression", true);
 
     PointTable table;
 
@@ -329,6 +331,13 @@ TEST_F(OCITest, dim_major_scaled)
 TEST_F(OCITest, point_major_unscaled)
 {
     writeData(Orientation::PointMajor, false);
+    readData();
+}
+
+
+TEST_F(OCITest, point_major_unscaled_compressed)
+{
+    writeData(Orientation::PointMajor, false, true);
     readData();
 }
 

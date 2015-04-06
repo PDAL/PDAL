@@ -40,6 +40,14 @@
 
 using namespace pdal;
 
+TEST(MetadataTest, assign)
+{
+    MetadataNode m1("Test");
+    MetadataNode m2 = m1;
+    EXPECT_EQ(m1.name(), "Test");
+    EXPECT_EQ(m2.name(), "Test");
+}
+
 TEST(MetadataTest, test_construction)
 {
     uint32_t u32(32u);

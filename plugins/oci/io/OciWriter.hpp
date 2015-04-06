@@ -92,6 +92,8 @@ private:
     std::string shutOff_SDO_PC_Trigger();
     void turnOn_SDO_PC_Trigger(std::string trigger_name);
     bool isValidWKT(std::string const& wkt);
+    void writeDimMajor(PointViewPtr view, std::vector<char>& outbuf);
+    void writePointMajor(PointViewPtr view, std::vector<char>& outbuf);
 
     long m_lastBlockId;
     BOX3D m_bounds; // Bounds of the entire point cloud
@@ -111,6 +113,7 @@ private:
     uint32_t m_precision;
     bool m_overwrite;
     bool m_trace;
+    bool m_compression;
 
     std::string m_baseTableName;
     std::string m_cloudColumnName;

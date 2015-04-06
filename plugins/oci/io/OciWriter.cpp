@@ -34,6 +34,7 @@
 
 
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/Compression.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/GlobalEnvironment.hpp>
@@ -541,7 +542,14 @@ void OciWriter::createPCEntry()
         s_geom << "," << bounds.maxy;
     s_geom << "))";
 
-    XMLSchema schema(dbDimTypes(), MetadataNode(), m_orientation);
+    MetadataNode node;
+    if (m_compression)
+    {
+        MetadataNode r = node.add("root");
+        r.add("compression", "lazperf");
+        r.add("version", "1.0");
+    }
+    XMLSchema schema(dbDimTypes(), node, m_orientation);
     std::string schemaData = schema.xml();
 
     oss << "declare\n"
@@ -702,6 +710,11 @@ void OciWriter::processOptions(const Options& options)
         Orientation::PointMajor;
     m_capacity = options.getValueOrThrow<uint32_t>("capacity");
     m_connSpec = options.getValueOrDefault<std::string>("connection", "");
+    m_compression = options.getValueOrDefault<bool>("compression", false);
+
+    if (m_compression && (m_orientation == Orientation::DimensionMajor))
+        throw pdal_error("LAZperf compression not supported for "
+            "dimension-major point storage."); 
 }
 
 
@@ -818,6 +831,67 @@ void OciWriter::setOrdinates(Statement statement, OCIArray* ordinates,
         statement->AddElement(ordinates, extent.maxz);
 }
 
+void OciWriter::writePointMajor(PointViewPtr view, std::vector<char>& outbuf)
+{
+    m_callback->setTotal(view->size());
+    m_callback->invoke(0);
+    if (m_compression)
+    {
+        outbuf.resize(0);
+#ifdef PDAL_HAVE_LAZPERF
+        SignedLazPerfBuf compBuf(outbuf);
+        LazPerfCompressor<SignedLazPerfBuf> compressor(compBuf, dbDimTypes());
+
+        std::vector<char> ptBuf(m_packedPointSize);
+        for (PointId idx = 0; idx < view->size(); ++idx)
+        {
+            size_t size = readPoint(*view, idx, ptBuf.data());
+            compressor.compress(ptBuf.data(), size);
+        }
+        compressor.done();
+#else
+        throw pdal_error("Can't compress without LAZperf.");
+#endif
+    }
+    else
+    {
+        size_t totalSize = 0;
+        char *pos = outbuf.data();
+        for (PointId idx = 0; idx < view->size(); ++idx)
+        {
+            size_t size = readPoint(*view.get(), idx, pos);
+            totalSize += size;
+            if (idx % 100 == 0)
+                m_callback->invoke(idx);
+            pos += size;
+        }
+        outbuf.resize(totalSize);
+    }
+    m_callback->invoke(view->size());
+}
+
+
+void OciWriter::writeDimMajor(PointViewPtr view, std::vector<char>& outbuf)
+{
+    size_t clicks = 0;
+    size_t interrupt = m_dimTypes.size() * 100;
+    size_t totalSize = 0;
+    char *pos = outbuf.data();
+
+    for (auto di = m_dimTypes.begin(); di != m_dimTypes.end(); ++di)
+    {
+        for (PointId idx = 0; idx < view->size(); ++idx)
+        {
+            size_t size = readField(*view.get(), pos, *di, idx);
+            pos += size;
+            totalSize += size;
+            if (clicks++ % interrupt == 0)
+                m_callback->invoke(clicks / m_dimTypes.size());
+        }
+    }
+    outbuf.resize(totalSize);
+}
+
 
 void OciWriter::writeTile(const PointViewPtr view)
 {
@@ -855,52 +929,28 @@ void OciWriter::writeTile(const PointViewPtr view)
         long_num_points << std::endl;
 
     // :4
-    size_t totalSize = 0;
+
+    //NOTE: packed point size is guaranteed to be of sufficient size to hold
+    // a point's data, but it may be larger than the actual size of a point
+    // if location scaling is being used. 
     std::vector<char> outbuf(m_packedPointSize * view->size());
-    char *pos = outbuf.data();
-    m_callback->setTotal(view->size());
-    m_callback->invoke(0);
+    size_t totalSize = 0;
     if (m_orientation == Orientation::DimensionMajor)
-    {
-        size_t clicks = 0;
-        size_t interrupt = m_dimTypes.size() * 100;
-        for (auto di = m_dimTypes.begin(); di != m_dimTypes.end(); ++di)
-        {
-            for (PointId idx = 0; idx < view->size(); ++idx)
-            {
-                size_t size = readField(*view.get(), pos, *di, idx);
-                pos += size;
-                totalSize += size;
-                if (clicks++ % interrupt == 0)
-                    m_callback->invoke(clicks / m_dimTypes.size());
-            }
-        }
-    }
+        writeDimMajor(view, outbuf);
     else if (m_orientation == Orientation::PointMajor)
-    {
-        std::vector<char> storage(m_packedPointSize);
+        writePointMajor(view, outbuf);
 
-        for (PointId idx = 0; idx < view->size(); ++idx)
-        {
-            size_t size = readPoint(*view.get(), idx, storage.data());
-            memcpy(pos, storage.data(), size);
-            totalSize += size;
-            if (idx % 100 == 0)
-                m_callback->invoke(idx);
-            pos += size;
-        }
-    }
-    m_callback->invoke(view->size());
 
-    log()->get(LogLevel::Debug4) << "Blob size " << totalSize << std::endl;
+    log()->get(LogLevel::Debug4) << "Blob size " << outbuf.size() << std::endl;
     OCILobLocator* locator;
     if (m_streamChunks)
     {
-        statement->WriteBlob(&locator, outbuf.data(), totalSize, m_chunkCount);
+        statement->WriteBlob(&locator, outbuf.data(), (long)outbuf.size(),
+            m_chunkCount);
         statement->BindBlob(&locator);
     }
     else
-        statement->Bind(outbuf.data(), (long)totalSize);
+        statement->Bind(outbuf.data(), (long)outbuf.size());
 
     // :5
     long long_gtype = static_cast<long>(m_gtype);

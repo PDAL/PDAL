@@ -122,6 +122,36 @@ enum Enum
 } // namespace CompressionType
 
 
+// This is a utility input/output buffer for the compressor/decompressor.
+template <typename CTYPE = unsigned char>
+class TypedLazPerfBuf
+{
+    typedef std::vector<CTYPE> LazPerfRawBuf;
+private:
+
+    LazPerfRawBuf& m_buf;
+    size_t m_idx;
+
+public:
+    TypedLazPerfBuf(LazPerfRawBuf& buf) : m_buf(buf), m_idx(0)
+    {}
+
+    void putBytes(const unsigned char *b, size_t len)
+        { m_buf.insert(m_buf.end(), (CTYPE *)b, (CTYPE *)(b + len)); }
+    void putByte(const unsigned char b)
+        {   m_buf.push_back((CTYPE)b); }
+    unsigned char getByte()
+        { return (unsigned char)m_buf[m_idx++]; }
+    void getBytes(unsigned char *b, int len)
+    {
+        memcpy(b, m_buf.data() + m_idx, len);
+        m_idx += len;
+    }
+};
+typedef TypedLazPerfBuf<char> SignedLazPerfBuf;
+typedef TypedLazPerfBuf<unsigned char> LazPerfBuf;
+
+
 #ifdef PDAL_HAVE_LAZPERF
 template<typename OutputStream>
 class LazPerfCompressor
@@ -130,11 +160,16 @@ public:
     LazPerfCompressor(OutputStream& output, const DimTypeList& dims) :
         m_encoder(output),
         m_compressor(laszip::formats::make_dynamic_compressor(m_encoder)),
-        m_pointSize(0)
+        m_pointSize(0),
+        m_done(false)
     { m_pointSize = addFields(m_compressor, dims); }
 
     ~LazPerfCompressor()
-        { done(); }
+    {
+        if (!m_done)
+            throw pdal_error("LasPerfCompressor destroyed without a call "
+               "to done()");
+    }
 
     size_t pointSize() const
         { return m_pointSize; }
@@ -152,7 +187,11 @@ public:
         return numRead;
     }
     void done()
-        { m_encoder.done(); }
+    {
+        if (!m_done)
+           m_encoder.done();
+        m_done = true;
+    }
 
 private:
     typedef laszip::encoders::arithmetic<OutputStream> Encoder;
@@ -161,6 +200,7 @@ private:
             Compressor;
     Compressor m_compressor;
     size_t m_pointSize;
+    bool m_done;
 };
 
 

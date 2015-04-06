@@ -91,6 +91,7 @@ private:
     boost::optional<SpatialReference> m_spatialRef;
     bool m_atEnd;
     std::map<int32_t, XMLSchema> m_schemas;
+    bool m_compression;
 
     OciReader& operator=(const OciReader&); // not implemented
     OciReader(const OciReader&); // not implemented
