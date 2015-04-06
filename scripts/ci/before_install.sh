@@ -61,7 +61,7 @@ then
 
     # From ppa:pdal/travis
     sudo apt-get install \
-        hexbin \
+        hexboundary \
         laz-perf \
         pgpointcloud
 fi
