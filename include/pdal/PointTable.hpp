@@ -50,21 +50,14 @@ class PDAL_DLL BasePointTable
     friend class PointView;
 
 public:
-    BasePointTable() : m_layout(new PointLayout()), m_metadata(new Metadata())
-        {}
-    BasePointTable(PointLayoutPtr layout) : m_layout(layout),
-            m_metadata(new Metadata())
+    BasePointTable() : m_metadata(new Metadata())
         {}
     virtual ~BasePointTable()
         {}
 
 public:
     // Layout operations.
-    PointLayoutPtr layout()
-        { return m_layout; }
-
-    const PointLayoutPtr layout() const
-        { return m_layout; }
+    virtual PointLayoutPtr layout() const = 0;
 
     // Metadata operations.
     MetadataNode metadata()
@@ -82,7 +75,6 @@ private:
         void *value) = 0;
 
 protected:
-    PointLayoutPtr m_layout;
     MetadataPtr m_metadata;
 };
 typedef BasePointTable& PointTableRef;
@@ -96,13 +88,15 @@ private:
     // Point storage.
     std::vector<char *> m_blocks;
     point_count_t m_numPts;
+    std::unique_ptr<PointLayout> m_layout;
 
 public:
-    PointTable() : m_numPts(0)
-        {}
-    PointTable(PointLayoutPtr layout) : BasePointTable(layout), m_numPts(0)
+    PointTable() : m_numPts(0), m_layout(new PointLayout())
         {}
     virtual ~PointTable();
+
+    virtual PointLayoutPtr layout() const
+        { return m_layout.get(); }
 
 private:
     // Point data operations.

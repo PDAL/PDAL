@@ -111,7 +111,7 @@ protected:
     bool m_finalized;
 };
 
-typedef std::shared_ptr<PointLayout> PointLayoutPtr;
+typedef PointLayout* PointLayoutPtr;
 
 } // namespace pdal
 
