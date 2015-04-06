@@ -50,7 +50,7 @@ class PDAL_DLL PipelineManager
 public:
     PipelineManager() : m_tablePtr(new PointTable()), m_table(*m_tablePtr)
         {}
-    PipelineManager(BasePointTable& table) : m_table(table)
+    PipelineManager(PointTableRef table) : m_table(table)
         {}
 
     // Use these to manually add stages into the pipeline manager.
@@ -82,8 +82,8 @@ public:
 private:
     StageFactory m_factory;
     std::unique_ptr<PointTable> m_tablePtr;
-    BasePointTable& m_table;
-    
+    PointTableRef m_table;
+
     PointViewSet m_viewSet;
 
     typedef std::vector<std::unique_ptr<Stage> > StagePtrList;
