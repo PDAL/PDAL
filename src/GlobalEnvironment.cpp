@@ -137,7 +137,7 @@ gdal::GlobalDebug* GlobalEnvironment::getGDALDebug()
 #ifdef PDAL_HAVE_PYTHON
 void GlobalEnvironment::createPythonEnvironment()
 {
-    m_pythonEnvironment = new pdal::plang::PythonEnvironment();
+    m_pythonEnvironment.reset(new pdal::plang::PythonEnvironment());
 }
 
 
