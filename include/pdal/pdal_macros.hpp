@@ -63,7 +63,7 @@ typedef struct PluginInfo {
         rp.createFunc = pdal::T::create; \
         rp.destroyFunc = pdal::T::destroy; \
         rp.description = info.description; \
-        rp.link, info.link; \
+        rp.link = info.link; \
         rp.pluginType = PF_PluginType_ ## type; \
         res = pdal::PluginManager::registerObject(info.name, &rp); \
         if (res < 0) \
