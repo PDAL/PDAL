@@ -65,7 +65,7 @@ private:
 
     virtual void processOptions(const Options& options);
     virtual void ready(PointTableRef table);
-    virtual void filter(PointViewPtr view);
+    virtual void filter(PointView& view);
     virtual void done(PointTableRef table);
 
     HexBin& operator=(const HexBin&); // not implemented

@@ -86,7 +86,7 @@ private:
     virtual void initialize();
     virtual void processOptions(const Options&);
     virtual void ready(PointTableRef table);
-    virtual void filter(PointViewPtr view);
+    virtual void filter(PointView& view);
     virtual void done(PointTableRef table);
 
     bool getPixelAndLinePosition(double x, double y,

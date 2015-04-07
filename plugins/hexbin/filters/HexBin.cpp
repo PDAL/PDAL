@@ -75,12 +75,12 @@ void HexBin::ready(PointTableRef table)
 }
 
 
-void HexBin::filter(PointViewPtr view)
+void HexBin::filter(PointView& view)
 {
-    for (PointId idx = 0; idx < view->size(); ++idx)
+    for (PointId idx = 0; idx < view.size(); ++idx)
     {
-        double x = view->getFieldAs<double>(pdal::Dimension::Id::X, idx);
-        double y = view->getFieldAs<double>(pdal::Dimension::Id::Y, idx);
+        double x = view.getFieldAs<double>(pdal::Dimension::Id::X, idx);
+        double y = view.getFieldAs<double>(pdal::Dimension::Id::Y, idx);
         m_grid->addPoint(x, y);
     }
 }

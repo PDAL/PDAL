@@ -112,14 +112,14 @@ void FerryFilter::ready(PointTableRef table)
 }
 
 
-void FerryFilter::filter(PointViewPtr view)
+void FerryFilter::filter(PointView& view)
 {
-    for (PointId id = 0; id < view->size(); ++id)
+    for (PointId id = 0; id < view.size(); ++id)
     {
         for (const auto& dim_par : m_dimensions_map)
         {
-            double v = view->getFieldAs<double>(dim_par.first, id);
-            view->setField(dim_par.second, id, v);
+            double v = view.getFieldAs<double>(dim_par.first, id);
+            view.setField(dim_par.second, id, v);
         }
     }
 }

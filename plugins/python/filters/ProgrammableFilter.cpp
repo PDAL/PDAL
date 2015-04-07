@@ -97,10 +97,10 @@ void ProgrammableFilter::ready(PointTableRef table)
 }
 
 
-void ProgrammableFilter::filter(PointViewPtr view)
+void ProgrammableFilter::filter(PointView& view)
 {
     log()->get(LogLevel::Debug5) << "Python script " << *m_script <<
-        " processing " << view->size() << " points." << std::endl;
+        " processing " << view.size() << " points." << std::endl;
     m_pythonMethod->resetArguments();
     m_pythonMethod->begin(view);
     m_pythonMethod->execute();
