@@ -69,7 +69,7 @@ void doSort(point_count_t count)
 
     filter.prepare(table);
     FilterWrapper::ready(filter, table);
-    FilterWrapper::filter(filter, view);
+    FilterWrapper::filter(filter, *view.get());
     FilterWrapper::done(filter, table);
 
     EXPECT_EQ(count, view->size());

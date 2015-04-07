@@ -65,7 +65,7 @@ private:
     virtual void ready(PointTableRef table)
         { m_dim = table.layout()->findDim(m_dimName); }
 
-    virtual void filter(PointViewPtr view)
+    virtual void filter(PointView& view)
     {
         if (m_dim == Dimension::Id::Unknown)
             return;
@@ -73,7 +73,7 @@ private:
         auto cmp = [this](const PointRef& p1, const PointRef& p2)
             { return p1.compare(m_dim, p2); };
 
-        std::sort(view->begin(), view->end(), cmp);
+        std::sort(view.begin(), view.end(), cmp);
     }
 
     SortFilter& operator=(const SortFilter&); // not implemented

@@ -36,6 +36,7 @@
 #include <cmath>
 #include <memory>
 
+#include <pdal/PointView.hpp>
 #include <pdal/QuadIndex.hpp>
 #include <pdal/Utils.hpp>
 
@@ -480,9 +481,9 @@ void Tree::getPoints(
 
 struct QuadIndex::QImpl
 {
-    QImpl(const PointViewPtr view, std::size_t topLevel);
+    QImpl(const PointView& view, std::size_t topLevel);
     QImpl(
-            const PointViewPtr view,
+            const PointView& view,
             double xMin,
             double yMin,
             double xMax,
@@ -542,27 +543,27 @@ struct QuadIndex::QImpl
     std::vector<std::size_t> m_fills;
 };
 
-QuadIndex::QImpl::QImpl(const PointViewPtr view, std::size_t topLevel)
+QuadIndex::QImpl::QImpl(const PointView& view, std::size_t topLevel)
     : m_topLevel(topLevel)
     , m_pointRefVec()
     , m_tree()
     , m_depth(0)
     , m_fills()
 {
-    m_pointRefVec.resize(view->size());
+    m_pointRefVec.resize(view.size());
 
     double xMin(std::numeric_limits<double>::max());
     double yMin(std::numeric_limits<double>::max());
     double xMax(std::numeric_limits<double>::min());
     double yMax(std::numeric_limits<double>::min());
 
-    for (PointId i(0); i < view->size(); ++i)
+    for (PointId i(0); i < view.size(); ++i)
     {
         m_pointRefVec[i].reset(
                 new QuadPointRef(
                     Point(
-                        view->getFieldAs<double>(Dimension::Id::X, i),
-                        view->getFieldAs<double>(Dimension::Id::Y, i)),
+                        view.getFieldAs<double>(Dimension::Id::X, i),
+                        view.getFieldAs<double>(Dimension::Id::Y, i)),
                 i));
 
         const QuadPointRef* pointRef(m_pointRefVec[i].get());
@@ -581,7 +582,7 @@ QuadIndex::QImpl::QImpl(const PointViewPtr view, std::size_t topLevel)
 }
 
 QuadIndex::QImpl::QImpl(
-        const PointViewPtr view,
+        const PointView& view,
         double xMin,
         double yMin,
         double xMax,
@@ -593,15 +594,15 @@ QuadIndex::QImpl::QImpl(
     , m_depth(0)
     , m_fills()
 {
-    m_pointRefVec.resize(view->size());
+    m_pointRefVec.resize(view.size());
 
-    for (PointId i(0); i < view->size(); ++i)
+    for (PointId i(0); i < view.size(); ++i)
     {
         m_pointRefVec[i].reset(
                 new QuadPointRef(
                     Point(
-                        view->getFieldAs<double>(Dimension::Id::X, i),
-                        view->getFieldAs<double>(Dimension::Id::Y, i)),
+                        view.getFieldAs<double>(Dimension::Id::X, i),
+                        view.getFieldAs<double>(Dimension::Id::Y, i)),
                 i));
     }
 
@@ -775,12 +776,12 @@ std::vector<PointId> QuadIndex::QImpl::getPoints(
     return results;
 }
 
-QuadIndex::QuadIndex(const PointViewPtr view, std::size_t topLevel)
+QuadIndex::QuadIndex(const PointView& view, std::size_t topLevel)
     : m_qImpl(new QImpl(view, topLevel))
 { }
 
 QuadIndex::QuadIndex(
-        const PointViewPtr view,
+        const PointView& view,
         double xMin,
         double yMin,
         double xMax,

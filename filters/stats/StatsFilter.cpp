@@ -66,15 +66,15 @@ void Summary::extractMetadata(MetadataNode &m) const
 
 using namespace stats;
 
-void StatsFilter::filter(PointViewPtr view)
+void StatsFilter::filter(PointView& view)
 {
-    for (PointId idx = 0; idx < view->size(); ++idx)
+    for (PointId idx = 0; idx < view.size(); ++idx)
     {
         for (auto p = m_stats.begin(); p != m_stats.end(); ++p)
         {
             Dimension::Id::Enum d = p->first;
             Summary& c = p->second;
-            c.insert(view->getFieldAs<double>(d, idx));
+            c.insert(view.getFieldAs<double>(d, idx));
         }
     }
 }
