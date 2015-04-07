@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/Kernel.hpp>
-#include <pdal/plugin.h>
 #include <pdal/util/FileUtils.hpp>
 
 

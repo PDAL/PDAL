@@ -37,7 +37,6 @@
 #include <pdal/KDIndex.hpp>
 #include <pdal/Kernel.hpp>
 #include <pdal/PointView.hpp>
-#include <pdal/plugin.h>
 #include <pdal/Stage.hpp>
 #include <pdal/util/FileUtils.hpp>
 

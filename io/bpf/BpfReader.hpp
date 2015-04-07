@@ -40,7 +40,6 @@
 #include <pdal/util/Charbuf.hpp>
 #include <pdal/util/IStream.hpp>
 #include <pdal/pdal_export.hpp>
-#include <pdal/plugin.h>
 
 #include "BpfHeader.hpp"
 

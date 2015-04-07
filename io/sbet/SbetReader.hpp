@@ -34,7 +34,6 @@
 
 #pragma once
 
-#include <pdal/plugin.h>
 #include <pdal/PointView.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/util/IStream.hpp>

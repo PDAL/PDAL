@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.h>
 
 extern "C" int32_t SplitterFilter_ExitFunc();
 extern "C" PF_ExitFunc SplitterFilter_InitPlugin();

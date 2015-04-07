@@ -39,7 +39,6 @@
 
 #include <pdal/Filter.hpp>
 #include <pdal/pdal_export.hpp>
-#include <pdal/plugin.h>
 
 extern "C" int32_t TransformationFilter_ExitFunc();
 extern "C" PF_ExitFunc TransformationFilter_InitPlugin();

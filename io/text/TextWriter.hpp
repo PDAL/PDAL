@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/pdal_export.hpp>
-#include <pdal/plugin.h>
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/Writer.hpp>

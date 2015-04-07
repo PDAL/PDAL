@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/Kernel.hpp>
-#include <pdal/plugin.h>
 
 extern "C" int32_t SortKernel_ExitFunc();
 extern "C" PF_ExitFunc SortKernel_InitPlugin();
