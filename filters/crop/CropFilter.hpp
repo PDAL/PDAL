@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.h>
 
 #ifdef PDAL_HAVE_GEOS
 #include <geos_c.h>

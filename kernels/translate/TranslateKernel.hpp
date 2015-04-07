@@ -35,7 +35,7 @@
 #pragma once
 
 #include <pdal/Kernel.hpp>
-#include <pdal/plugin.h>
+#include <pdal/plugin.hpp>
 
 extern "C" int32_t TranslateKernel_ExitFunc();
 extern "C" PF_ExitFunc TranslateKernel_InitPlugin();

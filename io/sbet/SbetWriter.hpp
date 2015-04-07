@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/util/OStream.hpp>
-#include <pdal/plugin.h>
 #include <pdal/Writer.hpp>
 
 #include "SbetCommon.hpp"

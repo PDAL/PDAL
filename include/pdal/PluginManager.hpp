@@ -40,7 +40,7 @@
 #pragma once
 
 #include <pdal/pdal_export.hpp>
-#include <pdal/plugin.h>
+#include <pdal/plugin.hpp>
 
 #include <map>
 #include <memory>

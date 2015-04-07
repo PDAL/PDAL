@@ -37,7 +37,6 @@
 #include "BpfHeader.hpp"
 
 #include <pdal/pdal_export.hpp>
-#include <pdal/plugin.h>
 #include <pdal/Writer.hpp>
 #include <pdal/util/OStream.hpp>
 

@@ -42,7 +42,6 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.h>
 #include <pdal/PointView.hpp>
 
 #include <vector>

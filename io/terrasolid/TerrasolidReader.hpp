@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/Options.hpp>
-#include <pdal/plugin.h>
 #include <pdal/Reader.hpp>
 #include <pdal/util/IStream.hpp>
 

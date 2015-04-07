@@ -39,12 +39,11 @@
 
 #pragma once
 
+#include <string>
+
 #include <pdal/pdal_export.hpp>
 
 #include <cstdint>
-
-#define PF_MAX_DESCRIPTION_LEN 128
-#define PF_MAX_LINK_LEN 128
 
 #ifdef __cplusplus
 extern "C" {
@@ -72,8 +71,8 @@ typedef struct PF_RegisterParams
     PF_PluginAPI_Version version;
     PF_CreateFunc createFunc;
     PF_DestroyFunc destroyFunc;
-    char description[PF_MAX_DESCRIPTION_LEN + 1];
-    char link[PF_MAX_LINK_LEN + 1];
+    std::string description;
+    std::string link;
     PF_PluginType pluginType;
 } PF_RegisterParams;
 
