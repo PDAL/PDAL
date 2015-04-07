@@ -92,7 +92,8 @@ void GlobalEnvironment::init()
 //
 
 GlobalEnvironment::GlobalEnvironment()
-    : m_bIsGDALInitialized(false)
+    : m_pythonEnvironment(0)
+    , m_bIsGDALInitialized(false)
 {
 }
 
@@ -106,7 +107,7 @@ void GlobalEnvironment::initializeGDAL(LogPtr log)
         {
             (void) GDALAllRegister();
             (void) OGRRegisterAll();
-            m_gdal_debug = std::unique_ptr<pdal::gdal::GlobalDebug>(new pdal::gdal::GlobalDebug());
+            m_gdal_debug.reset(new pdal::gdal::GlobalDebug());
             m_bIsGDALInitialized = true;
         }
     }
@@ -118,6 +119,11 @@ void GlobalEnvironment::initializeGDAL(LogPtr log)
 
 GlobalEnvironment::~GlobalEnvironment()
 {
+#ifdef PDAL_HAVE_PYTHON
+    delete m_pythonEnvironment;
+    m_pythonEnvironment = 0;
+#endif
+
     if (m_bIsGDALInitialized)
     {
         (void) GDALDestroyDriverManager();
@@ -129,7 +135,7 @@ GlobalEnvironment::~GlobalEnvironment()
 #ifdef PDAL_HAVE_PYTHON
 void GlobalEnvironment::createPythonEnvironment()
 {
-    m_pythonEnvironment = std::unique_ptr<pdal::plang::PythonEnvironment>(new pdal::plang::PythonEnvironment());
+    m_pythonEnvironment = new pdal::plang::PythonEnvironment();
 }
 #endif
 

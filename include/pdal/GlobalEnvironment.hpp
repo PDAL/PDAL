@@ -68,7 +68,7 @@ private:
 
     static void init();
 
-    std::unique_ptr<plang::PythonEnvironment> m_pythonEnvironment;
+    plang::PythonEnvironment* m_pythonEnvironment;
     bool m_bIsGDALInitialized;
     std::unique_ptr<pdal::gdal::GlobalDebug> m_gdal_debug;
 
