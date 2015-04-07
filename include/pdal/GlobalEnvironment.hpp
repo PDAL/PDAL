@@ -38,6 +38,9 @@
 #include <pdal/plang/PythonEnvironment.hpp>
 #include <pdal/Log.hpp>
 
+#include <mutex>
+#include <memory>
+
 namespace pdal
 {
 namespace gdal
@@ -65,9 +68,11 @@ private:
 
     static void init();
 
-    plang::PythonEnvironment* m_pythonEnvironment;
+    std::unique_ptr<plang::PythonEnvironment> m_pythonEnvironment;
     bool m_bIsGDALInitialized;
-    pdal::gdal::GlobalDebug* m_gdal_debug;
+    std::unique_ptr<pdal::gdal::GlobalDebug> m_gdal_debug;
+
+    std::mutex m_mutex;
 
     GlobalEnvironment(const GlobalEnvironment&); // nope
     GlobalEnvironment& operator=(const GlobalEnvironment&); // nope
