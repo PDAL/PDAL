@@ -35,8 +35,11 @@
 #pragma once
 
 #include <pdal/pdal_internal.hpp>
-#include <pdal/plang/PythonEnvironment.hpp>
 #include <pdal/Log.hpp>
+
+#ifdef PDAL_HAVE_PYTHON
+#include <pdal/plang/PythonEnvironment.hpp>
+#endif
 
 #include <mutex>
 #include <memory>
@@ -55,11 +58,14 @@ public:
     static void startup();
     static void shutdown();
 
+#ifdef PDAL_HAVE_PYTHON
     void createPythonEnvironment();
-
-    // get the plang (python) environment
     plang::PythonEnvironment& getPythonEnvironment();
+#endif
+
     void initializeGDAL(LogPtr log);
+
+    // Returns null pointer if GDAL has not been initialized.
     gdal::GlobalDebug* getGDALDebug();
 
 private:
@@ -68,9 +74,11 @@ private:
 
     static void init();
 
-    plang::PythonEnvironment* m_pythonEnvironment;
-    bool m_bIsGDALInitialized;
-    std::unique_ptr<pdal::gdal::GlobalDebug> m_gdal_debug;
+    std::unique_ptr<pdal::gdal::GlobalDebug> m_gdalDebug;
+
+#ifdef PDAL_HAVE_PYTHON
+    std::unique_ptr<plang::PythonEnvironment> m_pythonEnvironment;
+#endif
 
     std::mutex m_mutex;
 
