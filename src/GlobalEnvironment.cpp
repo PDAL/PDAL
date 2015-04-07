@@ -106,9 +106,10 @@ void GlobalEnvironment::initializeGDAL(LogPtr log)
         (void) GDALAllRegister();
         (void) OGRRegisterAll();
         m_gdal_debug = new pdal::gdal::GlobalDebug();
-        m_gdal_debug->addLog(log);
         m_bIsGDALInitialized = true;
     }
+    if (m_gdal_debug)
+        m_gdal_debug->addLog(log);
 }
 
 
