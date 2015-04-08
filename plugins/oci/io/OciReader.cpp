@@ -69,7 +69,7 @@ void OciReader::processOptions(const Options& options)
 void OciReader::initialize()
 {
     m_compression = false;
-    GlobalEnvironment::get().initializeGDAL(log());
+    GlobalEnvironment::get().initializeGDAL(log(), isDebug());
     m_connection = connect(m_connSpec);
     m_block = BlockPtr(new Block(m_connection));
 

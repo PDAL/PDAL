@@ -103,7 +103,7 @@ GlobalEnvironment::~GlobalEnvironment()
 }
 
 
-void GlobalEnvironment::initializeGDAL(LogPtr log)
+void GlobalEnvironment::initializeGDAL(LogPtr log, bool bGDALDebugOutput)
 {
     if (!m_gdalDebug)
     {
@@ -113,7 +113,7 @@ void GlobalEnvironment::initializeGDAL(LogPtr log)
             GDALAllRegister();
             OGRRegisterAll();
 
-            m_gdalDebug.reset(new pdal::gdal::Debug(true, log));
+            m_gdalDebug.reset(new pdal::gdal::Debug(bGDALDebugOutput, log));
         }
     }
 

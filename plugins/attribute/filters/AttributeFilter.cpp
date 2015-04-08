@@ -89,7 +89,7 @@ struct OGRFeatureDeleter
 
 void AttributeFilter::initialize()
 {
-    GlobalEnvironment::get().initializeGDAL(log());
+    GlobalEnvironment::get().initializeGDAL(log(), isDebug());
 }
 
 

@@ -125,7 +125,7 @@ void ReprojectionFilter::processOptions(const Options& options)
 
 void ReprojectionFilter::initialize()
 {
-    GlobalEnvironment::get().initializeGDAL(log());
+    GlobalEnvironment::get().initializeGDAL(log(), isDebug());
 }
 
 void ReprojectionFilter::ready(PointTableRef table)

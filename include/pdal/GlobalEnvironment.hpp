@@ -63,7 +63,7 @@ public:
     plang::PythonEnvironment& getPythonEnvironment();
 #endif
 
-    void initializeGDAL(LogPtr log);
+    void initializeGDAL(LogPtr log, bool bGDALDebugOutput=false);
 
     // Returns null pointer if GDAL has not been initialized.
     gdal::Debug* getGDALDebug();
