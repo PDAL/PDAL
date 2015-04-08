@@ -56,17 +56,18 @@ namespace plang
     class BufferedInvocation;
 }
 
+struct PointViewLess;
 class PointView;
 class PointViewIter;
 
 typedef std::shared_ptr<PointView> PointViewPtr;
-typedef std::set<PointViewPtr> PointViewSet;
+typedef std::set<PointViewPtr, PointViewLess> PointViewSet;
 
 class PDAL_DLL PointView
 {
     friend class plang::BufferedInvocation;
     friend class PointRef;
-    friend bool operator < (const PointViewPtr& p1, const PointViewPtr& p2);
+    friend struct PointViewLess;
 public:
     PointView(PointTableRef pointTable) : m_pointTable(pointTable),
         m_size(0), m_id(0)
@@ -80,6 +81,9 @@ public:
 
     PointViewIter begin();
     PointViewIter end();
+
+    int id() const
+        { return m_id; }
 
     point_count_t size() const
         { return m_size; }
@@ -263,9 +267,11 @@ private:
         { m_temps.push(id); }
 };
 
-inline bool operator < (const PointViewPtr& p1, const PointViewPtr& p2)
-    { return p1->m_id < p2->m_id; }
-
+struct PointViewLess
+{
+    bool operator () (const PointViewPtr& p1, const PointViewPtr& p2) const
+        { return p1->m_id < p2->m_id; }
+};
 
 template <class T>
 T PointView::getFieldInternal(Dimension::Id::Enum dim, PointId id) const
