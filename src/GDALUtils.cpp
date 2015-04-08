@@ -80,7 +80,8 @@ void Debug::log(::CPLErr code, int num, char const* msg)
     else if (code == CE_Debug)
     {
         oss << "GDAL debug: " << msg;
-        m_log->get(LogLevel::Debug) << oss.str() << std::endl;
+        if (m_log)
+            m_log->get(LogLevel::Debug) << oss.str() << std::endl;
     }
 }
 
