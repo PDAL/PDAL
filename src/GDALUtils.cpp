@@ -47,7 +47,7 @@ namespace pdal
 namespace gdal
 {
 
-Debug::Debug(bool isDebug, pdal::LogPtr log)
+ErrorHandler::ErrorHandler(bool isDebug, pdal::LogPtr log)
     : m_isDebug(isDebug)
     , m_log(log)
 {
@@ -58,17 +58,17 @@ Debug::Debug(bool isDebug, pdal::LogPtr log)
         {
             pdal::Utils::putenv("CPL_DEBUG=ON");
         }
-        m_gdal_callback = std::bind(&Debug::log, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+        m_gdal_callback = std::bind(&ErrorHandler::log, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
     }
     else
     {
-        m_gdal_callback = std::bind(&Debug::error, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+        m_gdal_callback = std::bind(&ErrorHandler::error, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
     }
 
-    CPLPushErrorHandlerEx(&Debug::trampoline, this);
+    CPLPushErrorHandlerEx(&ErrorHandler::trampoline, this);
 }
 
-void Debug::log(::CPLErr code, int num, char const* msg)
+void ErrorHandler::log(::CPLErr code, int num, char const* msg)
 {
     std::ostringstream oss;
 
@@ -86,7 +86,7 @@ void Debug::log(::CPLErr code, int num, char const* msg)
 }
 
 
-void Debug::error(::CPLErr code, int num, char const* msg)
+void ErrorHandler::error(::CPLErr code, int num, char const* msg)
 {
     std::ostringstream oss;
     if (code == CE_Failure || code == CE_Fatal)
@@ -97,7 +97,7 @@ void Debug::error(::CPLErr code, int num, char const* msg)
 }
 
 
-Debug::~Debug()
+ErrorHandler::~ErrorHandler()
 {
     CPLPopErrorHandler();
 }

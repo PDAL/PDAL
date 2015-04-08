@@ -56,16 +56,16 @@ namespace gdal
 {
 
 
-class PDAL_DLL Debug
+class PDAL_DLL ErrorHandler 
 {
 public:
 
-    Debug(bool isDebug, pdal::LogPtr log);
-    ~Debug();
+    ErrorHandler(bool isDebug, pdal::LogPtr log);
+    ~ErrorHandler();
 
     static void CPL_STDCALL trampoline(::CPLErr code, int num, char const* msg)
     {
-        Debug* debug = static_cast<Debug*>(CPLGetErrorHandlerUserData());
+        ErrorHandler* debug = static_cast<ErrorHandler*>(CPLGetErrorHandlerUserData());
         if (!debug)
             return;
 

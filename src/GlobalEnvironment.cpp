@@ -113,14 +113,14 @@ void GlobalEnvironment::initializeGDAL(LogPtr log, bool bGDALDebugOutput)
             GDALAllRegister();
             OGRRegisterAll();
 
-            m_gdalDebug.reset(new pdal::gdal::Debug(bGDALDebugOutput, log));
+            m_gdalDebug.reset(new pdal::gdal::ErrorHandler(bGDALDebugOutput, log));
         }
     }
 
 }
 
 
-gdal::Debug* GlobalEnvironment::getGDALDebug()
+gdal::ErrorHandler* GlobalEnvironment::getGDALDebug()
 {
     return m_gdalDebug.get();
 }
