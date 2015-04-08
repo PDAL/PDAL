@@ -101,57 +101,6 @@ Debug::~Debug()
     CPLPopErrorHandler();
 }
 
-
-GlobalDebug::GlobalDebug()
-{
-
-    const char* gdal_debug = ::pdal::Utils::getenv("CPL_DEBUG");
-    if (gdal_debug == 0)
-    {
-        pdal::Utils::putenv("CPL_DEBUG=ON");
-    }
-    m_gdal_callback = std::bind(&GlobalDebug::log, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
-
-    CPLPushErrorHandlerEx(&GlobalDebug::trampoline, this);
-}
-
-
-void GlobalDebug::log(::CPLErr code, int num, char const* msg)
-{
-    std::ostringstream oss;
-
-    if (code == CE_Failure || code == CE_Fatal)
-    {
-        oss <<"GDAL Failure number=" << num << ": " << msg;
-        throw pdal::gdal_error(oss.str());
-    }
-    else if (code == CE_Debug)
-    {
-        oss << "Global GDAL debug: " << msg;
-        std::vector<LogPtr>::const_iterator i;
-
-        std::map<std::ostream*, LogPtr> streams;
-        for (i = m_logs.begin(); i != m_logs.end(); ++i)
-        {
-            streams.insert(std::pair<std::ostream*, LogPtr>((*i)->getLogStream(), *i));
-        }
-
-        std::map<std::ostream*, LogPtr>::const_iterator t;
-        for (t = streams.begin(); t != streams.end(); t++)
-        {
-            LogPtr l = t->second;
-            if (l->getLevel() > LogLevel::Debug)
-                l->get(LogLevel::Debug) << oss.str() << std::endl;
-        }
-    }
-}
-
-GlobalDebug::~GlobalDebug()
-{
-    CPLPopErrorHandler();
-}
-
-
 VSILFileBuffer::VSILFileBuffer(VSILFILE* fp)
     : m_fp(fp)
 {}

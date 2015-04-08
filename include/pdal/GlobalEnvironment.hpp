@@ -48,7 +48,7 @@ namespace pdal
 {
 namespace gdal
 {
-class GlobalDebug;
+class Debug;
 }
 
 class PDAL_DLL GlobalEnvironment
@@ -66,7 +66,7 @@ public:
     void initializeGDAL(LogPtr log);
 
     // Returns null pointer if GDAL has not been initialized.
-    gdal::GlobalDebug* getGDALDebug();
+    gdal::Debug* getGDALDebug();
 
 private:
     GlobalEnvironment();
@@ -74,7 +74,7 @@ private:
 
     static void init();
 
-    std::unique_ptr<pdal::gdal::GlobalDebug> m_gdalDebug;
+    std::unique_ptr<pdal::gdal::Debug> m_gdalDebug;
 
 #ifdef PDAL_HAVE_PYTHON
     std::unique_ptr<plang::PythonEnvironment> m_pythonEnvironment;
