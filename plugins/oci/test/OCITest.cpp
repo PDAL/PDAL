@@ -90,17 +90,22 @@ Options getOCIOptions()
 class SplitFilter : public Filter
 {
 public:
+   SplitFilter(point_count_t viewSize = 100) : m_viewSize(viewSize)
+       {}
+
    virtual std::string getName() const
        { return "split_filter"; }
 
 private:
+    point_count_t m_viewSize;
+
     virtual PointViewSet run(PointViewPtr view)
     {
         PointViewSet out;
         PointViewPtr v = view->makeNew();
         for (PointId i = 0; i < view->size(); ++i)
         {
-            if (i && (i % 100 == 0))
+            if (i && (i % m_viewSize == 0))
             {
                 out.insert(v);
                 v = v->makeNew();
@@ -182,6 +187,51 @@ protected:
 
 };
 
+/**
+TEST_F(OCITest, throughput)
+{
+    Options options;
+
+    options.add("capacity", 10000);
+    options.add("connection", std::string(TestConfig::g_oracle_connection));
+    options.add("block_table_name", "PDAL_TEST_BLOCKS");
+    options.add("base_table_name", "PDAL_TEST_BASE");
+    options.add("cloud_column_name", "CLOUD");
+    options.add("srid", 26910);
+    options.add("disable_cloud_trigger", true);
+    options.add("store_dimensional_orientation", false);
+    options.add("filename", "/Volumes/acbell-lidar1/big.ntf");
+
+    {
+        options.add("offset_x", "auto");
+        options.add("offset_y", "auto");
+        options.add("offset_z", "auto");
+        options.add("scale_x", 1e-6);
+        options.add("scale_y", 1e-6);
+        options.add("scale_z", 1e-6);
+    }
+    //if (compression)
+        options.add("compression", true);
+
+    PointTable table;
+
+    StageFactory f;
+    std::unique_ptr<Stage> reader(f.createStage("readers.nitf"));
+    reader->setOptions(options);
+
+    SplitFilter split(10000);
+    split.setInput(*reader);
+
+    std::unique_ptr<Stage> writer(f.createStage("writers.oci"));
+    EXPECT_TRUE(writer.get());
+    writer->setOptions(options);
+    writer->setInput(split);
+
+    writer->prepare(table);
+    writer->execute(table);
+}
+***/
+
 
 void writeData(Orientation::Enum orient, bool scaling, bool compression = false)
 {
@@ -197,7 +247,6 @@ void writeData(Orientation::Enum orient, bool scaling, bool compression = false)
     options.add("disable_cloud_trigger", true);
     options.add("store_dimensional_orientation",
         orient == Orientation::DimensionMajor);
-    options.add("filename", Support::datapath("autzen/autzen-utm.las"));
     if (scaling)
     {
         options.add("offset_x", "auto");
@@ -212,9 +261,12 @@ void writeData(Orientation::Enum orient, bool scaling, bool compression = false)
 
     PointTable table;
 
+    Options readerOps;
+    readerOps.add("filename", Support::datapath("autzen/autzen-utm.las"));
+
     StageFactory f;
     LasReader reader;
-    reader.setOptions(options);
+    reader.setOptions(readerOps);
 
     SplitFilter split;
     split.setInput(reader);
@@ -348,161 +400,3 @@ TEST_F(OCITest, point_major_scaled)
     readData();
 }
 
-
-// TEST_F(OCITest, read_view_reproj)
-// {
-//     if (!ShouldRunTest()) return;
-//
-//     WriteDefaultData();
-//
-//     std::ostringstream oss;
-//
-//     oss << "SELECT  l.\"OBJ_ID\", l.\"BLK_ID\", l.\"BLK_EXTENT\", l.\"BLK_DOMAIN\","
-//            "        l.\"PCBLK_MIN_RES\", l.\"PCBLK_MAX_RES\", l.\"NUM_POINTS\","
-//            "        l.\"NUM_UNSORTED_POINTS\", l.\"PT_SORT_DIM\", l.\"POINTS\", b.cloud "
-//            "FROM PDAL_TEST_BLOCKS l, PDAL_TEST_BASE b "
-//         "WHERE b.id=1 and l.obj_id = b.id "
-//         "ORDER BY l.obj_id ";
-//     Options options = getOCIOptions();
-//     Option& query = options.getOptionByRef("query");
-//     query.setValue<std::string>(oss.str());
-//
-//     Option& out_srs = options.getOptionByRef("out_srs");
-//     out_srs.setValue<std::string>("EPSG:26910");
-//
-//     Option& x_scale = options.getOptionByRef("scale_x");
-//     x_scale.setValue<float>(0.01);
-//
-//     Option& y_scale = options.getOptionByRef("scale_y");
-//     y_scale.setValue<float>(0.01);
-//
-//     // Option& offset_x = options.getOptionByRef("offset_x");
-//     // offset_x.setValue<float>( -123.0749695f);
-//     // offset_x.setValue<float>( 0.0f);
-//
-//     // Option& offset_y = options.getOptionByRef("offset_y");
-//     // offset_y.setValue<float>( 44.0500086f);
-//     // offset_y.setValue<float>( 0.0f);
-//
-//
-//     Option x_dim("x_dim", std::string("readers.oci.X"), "Dimension name to use for 'X' data");
-//     Option y_dim("y_dim", std::string("readers.oci.Y"), "Dimension name to use for 'Y' data");
-//     Option z_dim("z_dim", std::string("readers.oci.Z"), "Dimension name to use for 'Z' data");
-//
-//     options.add(x_dim);
-//     options.add(y_dim);
-//     options.add(z_dim);
-//
-//     Option& debug = options.getOptionByRef("debug");
-//     debug.setValue<std::string>( "true");
-//
-//     OciReader reader_reader(options);
-//     // filters::InPlaceReprojection reproj(reader_reader, options);
-//     reader_reader.prepare();
-//
-//     PointViewPtr data(reader_reader.getSchema(), chunk_size+30);
-//     StageSequentialIterator* iter = reader_reader.createSequentialIterator(data);
-//
-//     uint32_t numRead(0);
-//
-//     numRead = iter->read(data);
-//
-//     EXPECT_EQ(numRead, chunk_size+30u);
-//     EXPECT_EQ(view->getNumPoints(), chunk_size+30u);
-//
-//     checkPoints(data);
-//
-//     delete iter;
-//
-// }
-
-//
-// TEST_F(OCITest, read_all)
-// {
-//     if (!ShouldRunTest()) return;
-//
-//     WriteDefaultData();
-//     WriteDefaultData();
-//
-//     std::ostringstream oss;
-//
-//     oss << "SELECT CLOUD FROM PDAL_TEST_BASE";
-//     Options options = getOCIOptions();
-//     Option& query = options.getOptionByRef("query");
-//     query.setValue<std::string>(oss.str());
-//     OciReader reader_reader(options);
-//     reader_reader.prepare();
-//
-//     PointViewPtr data(reader_reader.getSchema(), 2500);
-//     std::unique_ptr<StageSequentialIterator> iter(reader_reader.createSequentialIterator(data));
-//
-//
-//     uint32_t numRead = iter->read(data);
-//
-//     EXPECT_EQ(numRead, 2130u);
-//
-//     Schema const& schema = view->getSchema();
-//     Dimension const& dimX = schema.getDimension("X");
-//     Dimension const& dimY = schema.getDimension("Y");
-//     Dimension const& dimZ = schema.getDimension("Z");
-//     Dimension const& dimIntensity = schema.getDimension("Intensity");
-//     Dimension const& dimRed = schema.getDimension("Red");
-//
-//     int32_t x = view->getFieldAs<int32_t>(dimX, 0);
-//     int32_t y = view->getFieldAs<int32_t>(dimY, 0);
-//     int32_t z = view->getFieldAs<int32_t>(dimZ, 0);
-//     uint16_t intensity = view->getFieldAs<uint16_t>(dimIntensity, 6);
-//     uint16_t red = view->getFieldAs<uint16_t>(dimRed, 6);
-//
-//     EXPECT_EQ(x, -1250367506);
-//     EXPECT_EQ(y, 492519663);
-//     EXPECT_EQ(z, 12931);
-//     EXPECT_EQ(intensity, 67);
-//     EXPECT_EQ(red, 113);
-//
-// }
-//
-
-// TEST_F(OCITest, read_view)
-// {
-//     if (!ShouldRunTest()) return;
-//
-//     WriteDefaultData();
-//
-//     std::ostringstream oss;
-//
-//     oss << "SELECT  l.\"OBJ_ID\", l.\"BLK_ID\", l.\"BLK_EXTENT\", l.\"BLK_DOMAIN\","
-//            "        l.\"PCBLK_MIN_RES\", l.\"PCBLK_MAX_RES\", l.\"NUM_POINTS\","
-//            "        l.\"NUM_UNSORTED_POINTS\", l.\"PT_SORT_DIM\", l.\"POINTS\", b.cloud "
-//            "FROM PDAL_TEST_BLOCKS l, PDAL_TEST_BASE b "
-//         "WHERE b.id=1 and l.obj_id = b.id "
-//         "ORDER BY l.obj_id ";
-//     Options options = getOCIOptions();
-//     Option& query = options.getOptionByRef("query");
-//     query.setValue<std::string>(oss.str());
-//     OciReader reader_reader(options);
-//     reader_reader.prepare();
-//
-//     PointViewPtr data(reader_reader.getSchema(), chunk_size+30);
-//     std::unique_ptr<StageSequentialIterator> iter(reader_reader.createSequentialIterator(data));
-//
-//
-//     uint32_t numTotal(0);
-//     uint32_t numRead(0);
-//
-//     PointViewPtr data3(reader_reader.getSchema(), 100);
-//     numRead = iter->read(data3);
-//     EXPECT_EQ(numRead, 100u);
-//     numTotal = numRead + numTotal;
-//
-//     while (numRead !=0)
-//     {
-//         numRead = iter->read(data3);
-//         numTotal = numRead + numTotal;
-//
-//     }
-//
-//     EXPECT_EQ(numRead, 0u);
-//     EXPECT_EQ(numTotal, 1065u);
-//
-// }

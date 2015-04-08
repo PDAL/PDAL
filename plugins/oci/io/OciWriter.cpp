@@ -866,6 +866,8 @@ void OciWriter::writePointMajor(PointViewPtr view, std::vector<char>& outbuf)
             pos += size;
         }
         outbuf.resize(totalSize);
+        std::cerr << "WRITER BLOCK CKSUM = " <<
+            Utils::cksum(outbuf.data(), outbuf.size()) << "!\n";
     }
     m_callback->invoke(view->size());
 }

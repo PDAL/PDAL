@@ -354,7 +354,11 @@ point_count_t OciReader::readPointMajor(PointView& view,
     }
     else
     {
+        std::cerr << "READER CHUNK/POS CKSUM = " <<
+            Utils::cksum((char *)block->chunk.data(), block->chunk.size()) << "!\n";
         char *pos = seekPointMajor(block);
+        std::cerr << "READER BLOCK/POS CKSUM = " <<
+            Utils::cksum(pos, block->chunk.size()) << "!\n";
         while (numRead < numPts && numRemaining > 0)
         {
             writePoint(view, nextId, pos);
