@@ -84,7 +84,7 @@ void PredicateFilter::ready(PointTableRef table)
 PointViewSet PredicateFilter::run(PointViewPtr view)
 {
     m_pythonMethod->resetArguments();
-    m_pythonMethod->begin(view);
+    m_pythonMethod->begin(*view);
     m_pythonMethod->execute();
 
     if (!m_pythonMethod->hasOutputVariable("Mask"))
@@ -98,7 +98,7 @@ PointViewSet PredicateFilter::run(PointViewPtr view)
     char *ok = (char *)pydata;
     for (PointId idx = 0; idx < view->size(); ++idx)
         if (*ok++)
-            outview->appendPoint(*view.get(), idx);
+            outview->appendPoint(*view, idx);
 
     PointViewSet viewSet;
     viewSet.insert(outview);

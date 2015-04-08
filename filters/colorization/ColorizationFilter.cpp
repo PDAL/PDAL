@@ -173,16 +173,16 @@ void ColorizationFilter::ready(PointTableRef table)
 }
 
 
-void ColorizationFilter::filter(PointViewPtr view)
+void ColorizationFilter::filter(PointView& view)
 {
     int32_t pixel(0);
     int32_t line(0);
 
     std::array<double, 2> pix = { {0.0, 0.0} };
-    for (PointId idx = 0; idx < view->size(); ++idx)
+    for (PointId idx = 0; idx < view.size(); ++idx)
     {
-        double x = view->getFieldAs<double>(Dimension::Id::X, idx);
-        double y = view->getFieldAs<double>(Dimension::Id::Y, idx);
+        double x = view.getFieldAs<double>(Dimension::Id::X, idx);
+        double y = view.getFieldAs<double>(Dimension::Id::Y, idx);
 
         if (!getPixelAndLinePosition(x, y, m_inverse_transform, pixel,
                 line, m_ds))
@@ -201,7 +201,7 @@ void ColorizationFilter::filter(PointViewPtr view)
             }
             if (GDALRasterIO(hBand, GF_Read, pixel, line, 1, 1,
                 &pix[0], 1, 1, GDT_CFloat64, 0, 0) == CE_None)
-                view->setField(b.m_dim, idx, pix[0] * b.m_scale);
+                view.setField(b.m_dim, idx, pix[0] * b.m_scale);
         }
     }
 }

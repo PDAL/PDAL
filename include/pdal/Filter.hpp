@@ -66,11 +66,11 @@ private:
     virtual PointViewSet run(PointViewPtr view)
     {
         PointViewSet viewSet;
-        filter(view);
+        filter(*view);
         viewSet.insert(view);
         return viewSet;
     }
-    virtual void filter(PointViewPtr /*view*/)
+    virtual void filter(PointView& /*view*/)
     {}
 
     Filter& operator=(const Filter&); // not implemented

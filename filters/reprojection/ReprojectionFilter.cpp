@@ -193,19 +193,19 @@ void ReprojectionFilter::transform(double& x, double& y, double& z)
 }
 
 
-void ReprojectionFilter::filter(PointViewPtr view)
+void ReprojectionFilter::filter(PointView& view)
 {
-    for (PointId id = 0; id < view->size(); ++id)
+    for (PointId id = 0; id < view.size(); ++id)
     {
-        double x = view->getFieldAs<double>(Dimension::Id::X, id);
-        double y = view->getFieldAs<double>(Dimension::Id::Y, id);
-        double z = view->getFieldAs<double>(Dimension::Id::Z, id);
+        double x = view.getFieldAs<double>(Dimension::Id::X, id);
+        double y = view.getFieldAs<double>(Dimension::Id::Y, id);
+        double z = view.getFieldAs<double>(Dimension::Id::Z, id);
 
         transform(x, y, z);
 
-        view->setField(Dimension::Id::X, id, x);
-        view->setField(Dimension::Id::Y, id, y);
-        view->setField(Dimension::Id::Z, id, z);
+        view.setField(Dimension::Id::X, id, x);
+        view.setField(Dimension::Id::Y, id, y);
+        view.setField(Dimension::Id::Z, id, z);
     }
 }
 

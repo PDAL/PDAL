@@ -40,10 +40,11 @@
 #include <pdal/pdal_export.hpp>
 #include <pdal/pdal_types.hpp>
 #include <pdal/util/Bounds.hpp>
-#include <pdal/PointView.hpp>
 
 namespace pdal
 {
+
+class PointView;
 
 struct Point
 {
@@ -79,9 +80,9 @@ struct QuadPointRef
 class PDAL_DLL QuadIndex
 {
 public:
-    QuadIndex(const PointViewPtr view, std::size_t topLevel = 0);
+    QuadIndex(const PointView& view, std::size_t topLevel = 0);
     QuadIndex(
-            const PointViewPtr view,
+            const PointView& view,
             double xMin,
             double yMin,
             double xMax,

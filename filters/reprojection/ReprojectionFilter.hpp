@@ -63,7 +63,7 @@ private:
     virtual void processOptions(const Options& options);
     virtual void ready(PointTableRef table);
     virtual void initialize();
-    virtual void filter(PointViewPtr view);
+    virtual void filter(PointView& view);
 
     void updateBounds();
     void transform(double& x, double& y, double& z);

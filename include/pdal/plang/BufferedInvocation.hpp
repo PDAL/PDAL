@@ -47,8 +47,8 @@ class PDAL_DLL BufferedInvocation : public Invocation
 public:
     BufferedInvocation(const Script& script);
 
-    void begin(PointViewPtr view);
-    void end(PointViewPtr view);
+    void begin(PointView& view);
+    void end(PointView& view);
 
 private:
     std::vector<void *> m_buffers;

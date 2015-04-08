@@ -35,7 +35,7 @@ public:
 class FilterWrapper : public StageWrapper
 {
 public:
-    static void filter(Filter& f, PointViewPtr view)
+    static void filter(Filter& f, PointView& view)
         { f.filter(view); }
 };
 
