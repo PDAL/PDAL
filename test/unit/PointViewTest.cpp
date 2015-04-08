@@ -434,10 +434,9 @@ TEST(PointViewTest, order)
     for (size_t i = 0; i < COUNT; ++i)
         set.insert(views[i]);
 
+    PointViewSet::iterator pi;
     for (auto si = set.begin(); si != set.end(); ++si)
     {
-        decltype(si) pi;
-
         if (si != set.begin())
            EXPECT_TRUE((*pi)->id() < (*si)->id());
         pi = si;
