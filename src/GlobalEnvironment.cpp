@@ -114,17 +114,10 @@ void GlobalEnvironment::initializeGDAL(LogPtr log)
             OGRRegisterAll();
 
             m_gdalDebug.reset(new pdal::gdal::GlobalDebug());
+            m_gdalDebug->addLog(log);
         }
     }
 
-    if (m_gdalDebug)
-    {
-        m_gdalDebug->addLog(log);
-    }
-    else
-    {
-        throw pdal_error("Unable to initialize the GDAL environment");
-    }
 }
 
 
