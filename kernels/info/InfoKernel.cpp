@@ -66,8 +66,8 @@ InfoKernel::InfoKernel()
     , m_boundary(false)
     , m_useJSON(false)
     , m_showSummary(false)
-    , m_statsStage(NULL)
     , m_PointCloudSchemaOutput("")
+    , m_statsStage(NULL)
 {}
 
 
@@ -150,6 +150,7 @@ void InfoKernel::addSwitches()
         "dump PointCloudSchema XML output")
             ;
 
+    addSwitchSet(processing_options);
     addHiddenSwitchSet(hidden);
     addPositionalSwitch("input", 1);
 }
