@@ -90,6 +90,7 @@ private:
     double m_QueryDistance;
     std::string m_pipelineFile;
     bool m_showSummary;
+    std::string m_PointCloudSchemaOutput;
 
     Stage *m_statsStage;
     Stage *m_hexbinStage;

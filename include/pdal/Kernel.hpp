@@ -104,6 +104,7 @@ public:
     virtual int execute() = 0;
 
     void addSwitchSet(po::options_description* options);
+    void addHiddenSwitchSet(po::options_description* options);
     void addPositionalSwitch(const char* name, int max_count);
     void setCommonOptions(Options &options);
 
@@ -158,7 +159,8 @@ private:
     std::string m_offsets;
     bool m_visualize;
 
-    std::vector<po::options_description*> m_options;
+    std::vector<po::options_description*> m_public_options;
+    std::vector<po::options_description*> m_hidden_options;
     po::positional_options_description m_positionalOptions;
     po::variables_map m_variablesMap;
     std::vector<std::string> m_extra_options;

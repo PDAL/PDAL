@@ -40,6 +40,9 @@
 #include <pdal/PipelineWriter.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/pdal_config.hpp>
+#ifdef PDAL_HAVE_LIBXML2
+#include <pdal/XMLSchema.hpp>
+#endif
 
 #include <boost/program_options.hpp>
 
@@ -64,6 +67,7 @@ InfoKernel::InfoKernel()
     , m_useJSON(false)
     , m_showSummary(false)
     , m_statsStage(NULL)
+    , m_PointCloudSchemaOutput("")
 {}
 
 
@@ -138,7 +142,15 @@ void InfoKernel::addSwitches()
         "dump file metadata info")
         ;
 
-    addSwitchSet(processing_options);
+    po::options_description* hidden =
+        new po::options_description("Hidden options");
+    hidden->add_options()
+        ("pointcloudschema",
+         po::value<std::string>(&m_PointCloudSchemaOutput),
+        "dump PointCloudSchema XML output")
+            ;
+
+    addHiddenSwitchSet(hidden);
     addPositionalSwitch("input", 1);
 }
 
@@ -274,6 +286,19 @@ void InfoKernel::dump(std::ostream& o, const std::string& filename)
     if (!bPrepared)
         m_manager->prepare();
 
+    if (m_PointCloudSchemaOutput.size() > 0)
+    {
+#ifdef PDAL_HAVE_LIBXML2
+        XMLSchema schema(m_manager->pointTable().layout()->dimTypes());
+        std::string xml_output = schema.xml();
+        std::ofstream f(m_PointCloudSchemaOutput, std::ios::out | std::ios::binary);
+        f << xml_output;
+        f.close();
+#else
+        std::cerr << "libxml2 support not enabled, no schema is produced" << std::endl;
+#endif
+
+    }
     m_manager->execute();
     if (m_showStats || m_showAll)
     {

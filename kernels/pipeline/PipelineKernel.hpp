@@ -62,6 +62,7 @@ private:
     std::string m_inputFile;
     std::string m_pipelineFile;
     bool m_validate;
+    std::string m_PointCloudSchemaOutput;
 };
 
 } // pdal
