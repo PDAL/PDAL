@@ -42,42 +42,37 @@
 namespace pdal
 {
 
-static GlobalEnvironment* t = 0;
-static std::once_flag flag;
+static GlobalEnvironment* s_environment = 0;
 
 GlobalEnvironment& GlobalEnvironment::get()
 {
+    static std::once_flag flag;
+    
+    auto init = []()
+    {
+        s_environment = new GlobalEnvironment();
+    };
+
     std::call_once(flag, init);
-    return *t;
+    return *s_environment;
 }
 
 
 void GlobalEnvironment::startup()
 {
-    if (t != 0) // sanity check
-    {
+    if (s_environment)
         throw pdal_error("attempt to reinitialize global environment");
-    }
     get();
 }
 
 
 void GlobalEnvironment::shutdown()
 {
-    if (t == 0) // sanity check
-    {
+    if (!s_environment)
         throw pdal_error("bad global shutdown call -- was called more "
             "than once or was called without corresponding startup");
-    }
-
-    delete t;
-    t = 0;
-}
-
-
-void GlobalEnvironment::init()
-{
-    t = new GlobalEnvironment();
+    delete s_environment;
+    s_environment = 0;
 }
 
 
@@ -97,32 +92,22 @@ GlobalEnvironment::GlobalEnvironment()
 GlobalEnvironment::~GlobalEnvironment()
 {
     if (m_gdalDebug)
-    {
         GDALDestroyDriverManager();
-    }
 }
 
 
-void GlobalEnvironment::initializeGDAL(LogPtr log, bool bGDALDebugOutput)
+void GlobalEnvironment::initializeGDAL(LogPtr log, bool gdalDebugOutput)
 {
-    if (!m_gdalDebug)
+    static std::once_flag flag;
+
+    auto init = [this](LogPtr log, bool gdalDebugOutput) -> void
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
-        if (!m_gdalDebug)
-        {
-            GDALAllRegister();
-            OGRRegisterAll();
-
-            m_gdalDebug.reset(new pdal::gdal::ErrorHandler(bGDALDebugOutput, log));
-        }
-    }
-
-}
-
-
-gdal::ErrorHandler* GlobalEnvironment::getGDALDebug()
-{
-    return m_gdalDebug.get();
+        GDALAllRegister();
+        OGRRegisterAll();
+        m_gdalDebug.reset(new gdal::ErrorHandler(gdalDebugOutput, log));
+    };
+    
+    std::call_once(flag, init, log, gdalDebugOutput);
 }
 
 
@@ -140,8 +125,7 @@ plang::PythonEnvironment& GlobalEnvironment::getPythonEnvironment()
 
     if (m_pythonEnvironment)
         return *m_pythonEnvironment;
-    else
-        throw pdal_error("Unable to initialize the Python environment!");
+    throw pdal_error("Unable to initialize the Python environment!");
 }
 #endif
 

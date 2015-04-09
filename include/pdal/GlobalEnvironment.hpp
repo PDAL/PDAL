@@ -65,22 +65,14 @@ public:
 
     void initializeGDAL(LogPtr log, bool bGDALDebugOutput=false);
 
-    // Returns null pointer if GDAL has not been initialized.
-    gdal::ErrorHandler* getGDALDebug();
-
 private:
     GlobalEnvironment();
     ~GlobalEnvironment();
 
-    static void init();
-
-    std::unique_ptr<pdal::gdal::ErrorHandler> m_gdalDebug;
-
+    std::unique_ptr<gdal::ErrorHandler> m_gdalDebug;
 #ifdef PDAL_HAVE_PYTHON
     std::unique_ptr<plang::PythonEnvironment> m_pythonEnvironment;
 #endif
-
-    std::mutex m_mutex;
 
     GlobalEnvironment(const GlobalEnvironment&); // nope
     GlobalEnvironment& operator=(const GlobalEnvironment&); // nope
