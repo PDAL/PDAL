@@ -167,8 +167,8 @@ public:
     ~LazPerfCompressor()
     {
         if (!m_done)
-            throw pdal_error("LasPerfCompressor destroyed without a call "
-               "to done()");
+            std::cerr << "LasPerfCompressor destroyed without a call "
+               "to done()";
     }
 
     size_t pointSize() const
