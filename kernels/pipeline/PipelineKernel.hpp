@@ -38,7 +38,6 @@
 #include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineWriter.hpp>
-#include <pdal/plugin.h>
 #include <pdal/util/FileUtils.hpp>
 
 extern "C" int32_t PipelineKernel_ExitFunc();

@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.h>
 
 extern "C" int32_t StatsFilter_ExitFunc();
 extern "C" PF_ExitFunc StatsFilter_InitPlugin();
@@ -111,7 +110,7 @@ private:
     virtual void processOptions(const Options& options);
     virtual void ready(PointTableRef table);
     virtual void done(PointTableRef table);
-    virtual void filter(PointViewPtr view);
+    virtual void filter(PointView& view);
     void extractMetadata();
 
     std::string m_dimNames;

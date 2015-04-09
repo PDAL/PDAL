@@ -66,7 +66,7 @@ private:
     virtual void processOptions(const Options& options);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
-    virtual void filter(PointViewPtr view);
+    virtual void filter(PointView& view);
     virtual void done(PointTableRef table);
 
     ProgrammableFilter& operator=(const ProgrammableFilter&); // not implemented

@@ -99,12 +99,14 @@ GlobalEnvironment::GlobalEnvironment()
 }
 
 
-void GlobalEnvironment::getGDALEnvironment()
+void GlobalEnvironment::initializeGDAL(LogPtr log)
 {
     if (!m_bIsGDALInitialized)
     {
         (void) GDALAllRegister();
         (void) OGRRegisterAll();
+        m_gdal_debug = new pdal::gdal::GlobalDebug();
+        m_gdal_debug->addLog(log);
         m_bIsGDALInitialized = true;
     }
 }
@@ -146,14 +148,5 @@ plang::PythonEnvironment& GlobalEnvironment::getPythonEnvironment()
     else
         throw pdal_error("Unable to initialize the Python environment!");
 }
-
-pdal::gdal::GlobalDebug* GlobalEnvironment::getGDALDebug()
-{
-    getGDALEnvironment();
-    if (m_gdal_debug == 0)
-        m_gdal_debug = new pdal::gdal::GlobalDebug();
-    return m_gdal_debug;
-}
-
 
 } //namespaces

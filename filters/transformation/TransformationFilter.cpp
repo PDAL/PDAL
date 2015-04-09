@@ -91,16 +91,22 @@ void TransformationFilter::processOptions(const Options& options)
 }
 
 
-void TransformationFilter::filter(PointViewPtr view)
+void TransformationFilter::filter(PointView& view)
 {
-    for (PointId idx = 0; idx < view->size(); ++idx)
+    for (PointId idx = 0; idx < view.size(); ++idx)
     {
-        double x = view->getFieldAs<double>(Dimension::Id::X, idx);
-        double y = view->getFieldAs<double>(Dimension::Id::Y, idx);
-        double z = view->getFieldAs<double>(Dimension::Id::Z, idx);
-        view->setField(Dimension::Id::X, idx, x * m_matrix[0] + y * m_matrix[1] + z * m_matrix[2] + m_matrix[3]);
-        view->setField(Dimension::Id::Y, idx, x * m_matrix[4] + y * m_matrix[5] + z * m_matrix[6] + m_matrix[7]);
-        view->setField(Dimension::Id::Z, idx, x * m_matrix[8] + y * m_matrix[9] + z * m_matrix[10] + m_matrix[11]);
+        double x = view.getFieldAs<double>(Dimension::Id::X, idx);
+        double y = view.getFieldAs<double>(Dimension::Id::Y, idx);
+        double z = view.getFieldAs<double>(Dimension::Id::Z, idx);
+
+        view.setField(Dimension::Id::X, idx,
+            x * m_matrix[0] + y * m_matrix[1] + z * m_matrix[2] + m_matrix[3]);
+
+        view.setField(Dimension::Id::Y, idx,
+            x * m_matrix[4] + y * m_matrix[5] + z * m_matrix[6] + m_matrix[7]);
+
+        view.setField(Dimension::Id::Z, idx,
+            x * m_matrix[8] + y * m_matrix[9] + z * m_matrix[10] + m_matrix[11]);
     }
 }
 

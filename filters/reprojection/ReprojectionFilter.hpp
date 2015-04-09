@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.h>
 
 #include <memory>
 
@@ -64,7 +63,7 @@ private:
     virtual void processOptions(const Options& options);
     virtual void ready(PointTableRef table);
     virtual void initialize();
-    virtual void filter(PointViewPtr view);
+    virtual void filter(PointView& view);
 
     void updateBounds();
     void transform(double& x, double& y, double& z);
@@ -78,7 +77,6 @@ private:
     ReferencePtr m_in_ref_ptr;
     ReferencePtr m_out_ref_ptr;
     TransformPtr m_transform_ptr;
-    std::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
 
     ReprojectionFilter& operator=(const ReprojectionFilter&); // not implemented
     ReprojectionFilter(const ReprojectionFilter&); // not implemented

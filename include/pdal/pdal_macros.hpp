@@ -35,7 +35,7 @@
 #pragma once
 
 #include <pdal/pdal_export.hpp>
-#include <pdal/plugin.h>
+#include <pdal/plugin.hpp>
 #include <pdal/PluginManager.hpp>
 
 namespace {
@@ -62,10 +62,10 @@ typedef struct PluginInfo {
         rp.version.minor = version_minor; \
         rp.createFunc = pdal::T::create; \
         rp.destroyFunc = pdal::T::destroy; \
-        strcpy(rp.description, info.description.c_str()); \
-        strcpy(rp.link, info.link.c_str()); \
+        rp.description = info.description; \
+        rp.link = info.link; \
         rp.pluginType = PF_PluginType_ ## type; \
-        res = pdal::PluginManager::registerObject(info.name.c_str(), &rp); \
+        res = pdal::PluginManager::registerObject(info.name, &rp); \
         if (res < 0) \
             return NULL; \
         return ExitFunc; \
@@ -90,10 +90,10 @@ typedef struct PluginInfo {
         rp.version.minor = version_minor; \
         rp.createFunc = pdal::T::create; \
         rp.destroyFunc = pdal::T::destroy; \
-        strcpy(rp.description, info.description.c_str()); \
-        strcpy(rp.link, info.link.c_str()); \
+        rp.description = info.description; \
+        rp.link = info.link; \
         rp.pluginType = PF_PluginType_ ## type; \
-        res = pdal::PluginManager::registerObject(info.name.c_str(), &rp); \
+        res = pdal::PluginManager::registerObject(info.name, &rp); \
         if (res < 0) \
             return NULL; \
         return T ## _ExitFunc; \

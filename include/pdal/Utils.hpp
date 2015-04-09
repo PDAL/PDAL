@@ -170,6 +170,14 @@ namespace Utils
         return (strncmp(prefix.data(), s.data(), prefix.size()) == 0);
     }
 
+    inline int cksum(char *buf, size_t size)
+    {
+        int i = 0;
+        while (size--)
+            i += *buf++;
+        return i;
+    }
+
     template<typename Target, typename Source>
     Target saturation_cast(Source const& src)
     {

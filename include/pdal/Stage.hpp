@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pdal/pdal_internal.hpp>
+#include <pdal/plugin.hpp>
 
 #include <pdal/Dimension.hpp>
 #include <pdal/Log.hpp>
@@ -152,17 +153,16 @@ private:
         { return QuickInfo(); }
     virtual void initialize()
         {}
-    virtual void addDimensions(PointLayoutPtr layout)
-        { (void)layout; }
-    virtual void prepared(PointTableRef table)
-        { (void)table; }
-    virtual void ready(PointTableRef table)
-        { (void)table; }
-    virtual void done(PointTableRef table)
-        { (void)table; }
-    virtual PointViewSet run(PointViewPtr view)
+    virtual void addDimensions(PointLayoutPtr /*layout*/)
+        {}
+    virtual void prepared(PointTableRef /*table*/)
+        {}
+    virtual void ready(PointTableRef /*table*/)
+        {}
+    virtual void done(PointTableRef /*table*/)
+        {}
+    virtual PointViewSet run(PointViewPtr /*view*/)
     {
-        (void)view;
         std::cerr << "Can't run stage = " << getName() << "!\n";
         return PointViewSet();
     }

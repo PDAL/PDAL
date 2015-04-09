@@ -125,6 +125,7 @@ DimTypeList DbWriter::dbDimTypes() const
     if (!m_locationScaling)
         return dimTypes;
 
+    //ONLY for location scaling...
     for (auto di = dimTypes.begin(); di != dimTypes.end(); ++di)
     {
         if (di->m_id == Id::X)
@@ -170,7 +171,6 @@ size_t DbWriter::readField(const PointView& view, char *pos, DimType dimType,
     if (m_locationScaling)
     {
         // For X, Y or Z.
-        size = sizeof(int32_t);
         if (dimType.m_id == Id::X)
         {
             iconvert(m_xXform);

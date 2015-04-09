@@ -47,9 +47,6 @@ class PointLayout;
 class PointTable;
 class PointView;
 
-typedef std::shared_ptr<PointLayout> PointLayoutPtr;
-typedef std::shared_ptr<PointView> PointViewPtr;
-
 class PDAL_DLL GroundFilter : public Filter
 {
 public:

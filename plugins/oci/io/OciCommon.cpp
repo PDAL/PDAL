@@ -50,9 +50,6 @@ Connection connect(std::string connSpec)
 
     std::string connection(connSpec);
 
-    if (connection.empty())
-        throw pdal_error("Oracle connection string empty! Unable to connect");
-
     if (FileUtils::fileExists(connection))
     {
         std::istream::pos_type size;
@@ -76,17 +73,22 @@ Connection connect(std::string connSpec)
         connection = output;
     }
 
-    string::size_type pos = connection.find("/", 0);
+    Connection con;
+
+    auto pos = connection.find("/", 0);
+    if (pos == string::npos)
+        return con;
+
     string username = connection.substr(0, pos);
     connection = connection.substr(pos + 1);
     pos = connection.find("@", 0);
+    if (pos == string::npos)
+        return con;
     string password = connection.substr(0, pos);
     string instance = connection.substr(pos + 1);
 
-    Connection con = make_shared<pdal::OWConnection>(username.c_str(),
+    con = make_shared<pdal::OWConnection>(username.c_str(),
         password.c_str(), instance.c_str());
-    if (!con->Succeeded())
-        throw connection_failed("Oracle connection failed");
     return con;
 }
 

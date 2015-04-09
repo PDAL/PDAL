@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/pdal_export.hpp>
-#include <pdal/plugin.h>
 #include <pdal/Reader.hpp>
 #include <pdal/StreamFactory.hpp>
 

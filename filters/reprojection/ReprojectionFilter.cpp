@@ -34,7 +34,6 @@
 
 #include "ReprojectionFilter.hpp"
 
-#include <pdal/GDALUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/GlobalEnvironment.hpp>
 
@@ -126,7 +125,7 @@ void ReprojectionFilter::processOptions(const Options& options)
 
 void ReprojectionFilter::initialize()
 {
-    pdal::GlobalEnvironment::get().getGDALDebug()->addLog(log());
+    GlobalEnvironment::get().initializeGDAL(log());
 }
 
 void ReprojectionFilter::ready(PointTableRef table)
@@ -138,9 +137,6 @@ void ReprojectionFilter::ready(PointTableRef table)
             throw pdal_error("Source data has no spatial reference and none "
                 "is specified with the 'in_srs' option.");
     }
-
-    m_gdal_debug = std::shared_ptr<pdal::gdal::Debug>(
-        new pdal::gdal::Debug(isDebug(), log()));
 
     m_in_ref_ptr = ReferencePtr(OSRNewSpatialReference(0),
         OGRSpatialReferenceDeleter());
@@ -197,19 +193,19 @@ void ReprojectionFilter::transform(double& x, double& y, double& z)
 }
 
 
-void ReprojectionFilter::filter(PointViewPtr view)
+void ReprojectionFilter::filter(PointView& view)
 {
-    for (PointId id = 0; id < view->size(); ++id)
+    for (PointId id = 0; id < view.size(); ++id)
     {
-        double x = view->getFieldAs<double>(Dimension::Id::X, id);
-        double y = view->getFieldAs<double>(Dimension::Id::Y, id);
-        double z = view->getFieldAs<double>(Dimension::Id::Z, id);
+        double x = view.getFieldAs<double>(Dimension::Id::X, id);
+        double y = view.getFieldAs<double>(Dimension::Id::Y, id);
+        double z = view.getFieldAs<double>(Dimension::Id::Z, id);
 
         transform(x, y, z);
 
-        view->setField(Dimension::Id::X, id, x);
-        view->setField(Dimension::Id::Y, id, y);
-        view->setField(Dimension::Id::Z, id, z);
+        view.setField(Dimension::Id::X, id, x);
+        view.setField(Dimension::Id::Y, id, y);
+        view.setField(Dimension::Id::Z, id, z);
     }
 }
 

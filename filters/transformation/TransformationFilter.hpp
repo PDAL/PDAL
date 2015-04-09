@@ -39,7 +39,6 @@
 
 #include <pdal/Filter.hpp>
 #include <pdal/pdal_export.hpp>
-#include <pdal/plugin.h>
 
 extern "C" int32_t TransformationFilter_ExitFunc();
 extern "C" PF_ExitFunc TransformationFilter_InitPlugin();
@@ -69,7 +68,7 @@ private:
     TransformationFilter& operator=(const TransformationFilter&); // not implemented
     TransformationFilter(const TransformationFilter&); // not implemented
     virtual void processOptions(const Options& options);
-    virtual void filter(PointViewPtr view);
+    virtual void filter(PointView& view);
 
     TransformationMatrix m_matrix;
 };

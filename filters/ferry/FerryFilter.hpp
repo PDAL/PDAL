@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/plugin.h>
 
 #include <map>
 #include <string>
@@ -62,7 +61,7 @@ private:
     virtual void processOptions(const Options&);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
-    virtual void filter(PointViewPtr view);
+    virtual void filter(PointView& view);
 
     FerryFilter& operator=(const FerryFilter&); // not implemented
     FerryFilter(const FerryFilter&); // not implemented

@@ -416,33 +416,29 @@ TEST(PointViewTest, calcBounds)
     check_bounds(box_bs, 0.0, 3.0, 0.0, 3.0, 0.0, 3.0);
 }
 
-/**
-TEST(PointViewTest, sort)
+TEST(PointViewTest, order)
 {
     PointTable table;
-    PointView view(table);
-    const PointId NUM_PTS = 10000;
 
-    auto cmp = [](const PointRef& p1, const PointRef& p2)
+    const size_t COUNT(1000);
+    std::array<PointViewPtr, COUNT> views;
+
+    std::random_device dev;
+    std::mt19937 generator(dev());
+   
+    for (size_t i = 0; i < COUNT; ++i)
+        views[i] = PointViewPtr(new PointView(table));
+    std::shuffle(views.begin(), views.end(), generator);
+
+    PointViewSet set;
+    for (size_t i = 0; i < COUNT; ++i)
+        set.insert(views[i]);
+
+    PointViewSet::iterator pi;
+    for (auto si = set.begin(); si != set.end(); ++si)
     {
-        return p1.compare(Dimension::Id::X, p2);
-    };
-
-    table->layout()->registerDim(Dimension::Id::X);
-
-    std::default_random_engine generator;
-    std::uniform_real_distribution<double> dist(0.0, 10000.0);
-    for (PointId i = 0; i < NUM_PTS; ++i)
-        view.setField(Dimension::Id::X, i, dist(generator));
-
-    std::sort(view.begin(), view.end(), cmp);
-
-    for (PointId i = 1; i < NUM_PTS; ++i)
-    {
-        double d1 = view.getFieldAs<double>(Dimension::Id::X, i - 1);
-        double d2 = view.getFieldAs<double>(Dimension::Id::X, i);
-        EXPECT_TRUE(d1 <= d2);
+        if (si != set.begin())
+           EXPECT_TRUE((*pi)->id() < (*si)->id());
+        pi = si;
     }
 }
-**/
-

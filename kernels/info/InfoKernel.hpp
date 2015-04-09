@@ -36,7 +36,6 @@
 
 #include <pdal/Kernel.hpp>
 #include <pdal/KernelSupport.hpp>
-#include <pdal/plugin.h>
 #include <pdal/PointView.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/util/FileUtils.hpp>

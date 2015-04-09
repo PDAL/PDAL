@@ -4,6 +4,8 @@
 
 find_package(Oracle REQUIRED)
 include_directories(${ORACLE_INCLUDE_DIR})
+set(OCI_CONNECTION "scott/tiger@localhost/test" CACHE STRING
+    "OCI connection string <username/password@instance>")
 
 #
 # OCI Reader

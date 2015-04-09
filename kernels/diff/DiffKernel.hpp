@@ -37,7 +37,6 @@
 #include <pdal/Kernel.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/util/FileUtils.hpp>
-#include <pdal/plugin.h>
 
 #include <boost/property_tree/ptree.hpp>
 

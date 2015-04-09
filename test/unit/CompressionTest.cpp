@@ -48,32 +48,6 @@
 
 using namespace pdal;
 
-struct SQLiteTestStream
-{
-    SQLiteTestStream() : buf(), idx(0) {}
-
-    void putBytes(const unsigned char* b, size_t len)
-    {
-        while(len--)
-            buf.push_back(*b++);
-    }
-
-    void putByte(const unsigned char b)
-        { buf.push_back(b); }
-
-    unsigned char getByte()
-        { return buf[idx++]; }
-
-    void getBytes(unsigned char *b, int len)
-    {
-        for (int i = 0 ; i < len; i++)
-            b[i] = getByte();
-    }
-
-    std::vector<unsigned char> buf;
-    size_t idx;
-};
-
 std::vector<char> getBytes(PointViewPtr view)
 {
     std::vector<char> bytes(view->pointSize() * view->size());
@@ -108,11 +82,12 @@ TEST(Compression, Simple)
     PointViewPtr view = *viewSet.begin();
 
     EXPECT_EQ(layout->pointSize(), 49U);
-    SQLiteTestStream s;
 
+    std::vector<unsigned char> rawBuf;
+    LazPerfBuf b(rawBuf);
 
     DimTypeList dimTypes = layout->dimTypes();
-    LazPerfCompressor<SQLiteTestStream> compressor(s, dimTypes);
+    LazPerfCompressor<LazPerfBuf> compressor(b, dimTypes);
 
     std::vector<char> tmpbuf(compressor.pointSize());
     for (PointId idx = 0; idx < view->size(); ++idx)
@@ -123,12 +98,11 @@ TEST(Compression, Simple)
     compressor.done();
 
     EXPECT_EQ(view->size() * compressor.pointSize(), (size_t)52185);
-    EXPECT_EQ(s.buf.size(), (size_t)28170);
+    EXPECT_EQ(rawBuf.size(), (size_t)28170);
 
-    SQLiteTestStream s2;
-    s2.buf = s.buf;
+    LazPerfBuf b2(rawBuf);
 
-    LazPerfDecompressor<SQLiteTestStream> decompressor(s2, dimTypes);
+    LazPerfDecompressor<LazPerfBuf> decompressor(b2, dimTypes);
 
     size_t outbufSize = decompressor.pointSize() * view->size();
     std::vector<char> outbuf(outbufSize);
@@ -182,8 +156,9 @@ TEST(Compression, types)
     for (auto ti = std::begin(types); ti != std::end(types); ++ti)
         dimTypes.push_back(DimType(Dimension::Id::Unknown, *ti));
 
-    SQLiteTestStream s;
-    LazPerfCompressor<SQLiteTestStream> compressor(s, dimTypes);
+    std::vector<unsigned char> rawBuf;
+    LazPerfBuf b(rawBuf);
+    LazPerfCompressor<LazPerfBuf> compressor(b, dimTypes);
     for (size_t i = 0; i < 50; i++)
     {
         compressor.compress(pts[0], 42);
@@ -192,10 +167,9 @@ TEST(Compression, types)
     }
     compressor.done();
 
-    SQLiteTestStream s2;
-    s2.buf = s.buf;
+    LazPerfBuf b2(rawBuf);
 
-    LazPerfDecompressor<SQLiteTestStream> decompressor(s2, dimTypes);
+    LazPerfDecompressor<LazPerfBuf> decompressor(b2, dimTypes);
     char oPts[3][42];
     for (size_t i = 0; i < 50; ++i)
     {

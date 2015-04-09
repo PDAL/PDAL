@@ -34,7 +34,6 @@
 
 #pragma once
 
-#include <pdal/plugin.h>
 #include <pdal/Writer.hpp>
 
 #include "LasError.hpp"
