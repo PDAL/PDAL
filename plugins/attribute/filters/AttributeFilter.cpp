@@ -89,7 +89,7 @@ struct OGRFeatureDeleter
 
 void AttributeFilter::initialize()
 {
-    GlobalEnvironment::get().initializeGDAL(log());
+    GlobalEnvironment::get().initializeGDAL(log(), isDebug());
 }
 
 
@@ -156,8 +156,7 @@ void AttributeFilter::processOptions(const Options& options)
 
 void AttributeFilter::ready(PointTableRef table)
 {
-    m_gdal_debug = std::shared_ptr<pdal::gdal::Debug>(
-        new pdal::gdal::Debug(isDebug(), log()));
+    m_gdal_debug.reset( new pdal::gdal::ErrorHandler(isDebug(), log()));
 
     for (auto& dim_par : m_dimensions)
     {

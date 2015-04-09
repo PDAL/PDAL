@@ -47,7 +47,7 @@ namespace pdal
 namespace gdal
 {
 
-Debug::Debug(bool isDebug, pdal::LogPtr log)
+ErrorHandler::ErrorHandler(bool isDebug, pdal::LogPtr log)
     : m_isDebug(isDebug)
     , m_log(log)
 {
@@ -58,17 +58,17 @@ Debug::Debug(bool isDebug, pdal::LogPtr log)
         {
             pdal::Utils::putenv("CPL_DEBUG=ON");
         }
-        m_gdal_callback = std::bind(&Debug::log, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+        m_gdal_callback = std::bind(&ErrorHandler::log, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
     }
     else
     {
-        m_gdal_callback = std::bind(&Debug::error, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+        m_gdal_callback = std::bind(&ErrorHandler::error, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
     }
 
-    CPLPushErrorHandlerEx(&Debug::trampoline, this);
+    CPLPushErrorHandlerEx(&ErrorHandler::trampoline, this);
 }
 
-void Debug::log(::CPLErr code, int num, char const* msg)
+void ErrorHandler::log(::CPLErr code, int num, char const* msg)
 {
     std::ostringstream oss;
 
@@ -80,12 +80,13 @@ void Debug::log(::CPLErr code, int num, char const* msg)
     else if (code == CE_Debug)
     {
         oss << "GDAL debug: " << msg;
-        m_log->get(LogLevel::Debug) << oss.str() << std::endl;
+        if (m_log)
+            m_log->get(LogLevel::Debug) << oss.str() << std::endl;
     }
 }
 
 
-void Debug::error(::CPLErr code, int num, char const* msg)
+void ErrorHandler::error(::CPLErr code, int num, char const* msg)
 {
     std::ostringstream oss;
     if (code == CE_Failure || code == CE_Fatal)
@@ -96,61 +97,10 @@ void Debug::error(::CPLErr code, int num, char const* msg)
 }
 
 
-Debug::~Debug()
+ErrorHandler::~ErrorHandler()
 {
     CPLPopErrorHandler();
 }
-
-
-GlobalDebug::GlobalDebug()
-{
-
-    const char* gdal_debug = ::pdal::Utils::getenv("CPL_DEBUG");
-    if (gdal_debug == 0)
-    {
-        pdal::Utils::putenv("CPL_DEBUG=ON");
-    }
-    m_gdal_callback = std::bind(&GlobalDebug::log, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
-
-    CPLPushErrorHandlerEx(&GlobalDebug::trampoline, this);
-}
-
-
-void GlobalDebug::log(::CPLErr code, int num, char const* msg)
-{
-    std::ostringstream oss;
-
-    if (code == CE_Failure || code == CE_Fatal)
-    {
-        oss <<"GDAL Failure number=" << num << ": " << msg;
-        throw pdal::gdal_error(oss.str());
-    }
-    else if (code == CE_Debug)
-    {
-        oss << "Global GDAL debug: " << msg;
-        std::vector<LogPtr>::const_iterator i;
-
-        std::map<std::ostream*, LogPtr> streams;
-        for (i = m_logs.begin(); i != m_logs.end(); ++i)
-        {
-            streams.insert(std::pair<std::ostream*, LogPtr>((*i)->getLogStream(), *i));
-        }
-
-        std::map<std::ostream*, LogPtr>::const_iterator t;
-        for (t = streams.begin(); t != streams.end(); t++)
-        {
-            LogPtr l = t->second;
-            if (l->getLevel() > LogLevel::Debug)
-                l->get(LogLevel::Debug) << oss.str() << std::endl;
-        }
-    }
-}
-
-GlobalDebug::~GlobalDebug()
-{
-    CPLPopErrorHandler();
-}
-
 
 VSILFileBuffer::VSILFileBuffer(VSILFILE* fp)
     : m_fp(fp)

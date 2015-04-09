@@ -39,12 +39,6 @@
 #include <pdal/GlobalEnvironment.hpp>
 #include <pdal/GDALUtils.hpp>
 
-#ifdef PDAL_HAVE_PYTHON
-#include <pdal/plang/PythonEnvironment.hpp>
-#endif
-
-
-
 namespace pdal
 {
 
@@ -92,61 +86,63 @@ void GlobalEnvironment::init()
 //
 
 GlobalEnvironment::GlobalEnvironment()
-    : m_pythonEnvironment(0)
-    , m_bIsGDALInitialized(false)
-    , m_gdal_debug(0)
+    : m_gdalDebug()
+#ifdef PDAL_HAVE_PYTHON
+    , m_pythonEnvironment()
+#endif
 {
-}
-
-
-void GlobalEnvironment::initializeGDAL(LogPtr log)
-{
-    if (!m_bIsGDALInitialized)
-    {
-        (void) GDALAllRegister();
-        (void) OGRRegisterAll();
-        m_gdal_debug = new pdal::gdal::GlobalDebug();
-        m_gdal_debug->addLog(log);
-        m_bIsGDALInitialized = true;
-    }
 }
 
 
 GlobalEnvironment::~GlobalEnvironment()
 {
-#ifdef PDAL_HAVE_PYTHON
-    delete m_pythonEnvironment;
-    m_pythonEnvironment = 0;
-#endif
-
-    if (m_bIsGDALInitialized)
+    if (m_gdalDebug)
     {
-        delete m_gdal_debug;
-        (void) GDALDestroyDriverManager();
-        m_bIsGDALInitialized = false;
+        GDALDestroyDriverManager();
     }
+}
+
+
+void GlobalEnvironment::initializeGDAL(LogPtr log, bool bGDALDebugOutput)
+{
+    if (!m_gdalDebug)
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        if (!m_gdalDebug)
+        {
+            GDALAllRegister();
+            OGRRegisterAll();
+
+            m_gdalDebug.reset(new pdal::gdal::ErrorHandler(bGDALDebugOutput, log));
+        }
+    }
+
+}
+
+
+gdal::ErrorHandler* GlobalEnvironment::getGDALDebug()
+{
+    return m_gdalDebug.get();
 }
 
 
 #ifdef PDAL_HAVE_PYTHON
 void GlobalEnvironment::createPythonEnvironment()
 {
-    m_pythonEnvironment = new pdal::plang::PythonEnvironment();
+    m_pythonEnvironment.reset(new pdal::plang::PythonEnvironment());
 }
-#endif
 
 
 plang::PythonEnvironment& GlobalEnvironment::getPythonEnvironment()
 {
-#ifdef PDAL_HAVE_PYTHON
     if (!m_pythonEnvironment)
-        (void) createPythonEnvironment();
-#endif
+        createPythonEnvironment();
 
     if (m_pythonEnvironment)
         return *m_pythonEnvironment;
     else
         throw pdal_error("Unable to initialize the Python environment!");
 }
+#endif
 
 } //namespaces

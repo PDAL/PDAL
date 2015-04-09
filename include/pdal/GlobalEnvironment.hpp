@@ -35,14 +35,20 @@
 #pragma once
 
 #include <pdal/pdal_internal.hpp>
-#include <pdal/plang/PythonEnvironment.hpp>
 #include <pdal/Log.hpp>
+
+#ifdef PDAL_HAVE_PYTHON
+#include <pdal/plang/PythonEnvironment.hpp>
+#endif
+
+#include <mutex>
+#include <memory>
 
 namespace pdal
 {
 namespace gdal
 {
-class GlobalDebug;
+class ErrorHandler;
 }
 
 class PDAL_DLL GlobalEnvironment
@@ -52,12 +58,15 @@ public:
     static void startup();
     static void shutdown();
 
+#ifdef PDAL_HAVE_PYTHON
     void createPythonEnvironment();
-
-    // get the plang (python) environment
     plang::PythonEnvironment& getPythonEnvironment();
-    void initializeGDAL(LogPtr log);
-    gdal::GlobalDebug* getGDALDebug();
+#endif
+
+    void initializeGDAL(LogPtr log, bool bGDALDebugOutput=false);
+
+    // Returns null pointer if GDAL has not been initialized.
+    gdal::ErrorHandler* getGDALDebug();
 
 private:
     GlobalEnvironment();
@@ -65,9 +74,13 @@ private:
 
     static void init();
 
-    plang::PythonEnvironment* m_pythonEnvironment;
-    bool m_bIsGDALInitialized;
-    pdal::gdal::GlobalDebug* m_gdal_debug;
+    std::unique_ptr<pdal::gdal::ErrorHandler> m_gdalDebug;
+
+#ifdef PDAL_HAVE_PYTHON
+    std::unique_ptr<plang::PythonEnvironment> m_pythonEnvironment;
+#endif
+
+    std::mutex m_mutex;
 
     GlobalEnvironment(const GlobalEnvironment&); // nope
     GlobalEnvironment& operator=(const GlobalEnvironment&); // nope
