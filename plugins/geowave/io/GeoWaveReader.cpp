@@ -64,9 +64,6 @@ using ::jace::UnixVmLoader;
 const std::string os_pathsep(":");
 #endif
 
-#include "jace/proxy/types/JInt.h"
-using jace::proxy::types::JInt;
-
 #include "jace/JArray.h"
 using jace::JArray;
 
@@ -98,6 +95,11 @@ using jace::proxy::com::vividsolutions::jts::geom::GeometryFactory;
 #include "jace/proxy/com/vividsolutions/jts/geom/Point.h"
 using jace::proxy::com::vividsolutions::jts::geom::Point;
 
+#include "jace/proxy/org/apache/accumulo/core/client/AccumuloException.h"
+using jace::proxy::org::apache::accumulo::core::client::AccumuloException;
+#include "jace/proxy/org/apache/accumulo/core/client/AccumuloSecurityException.h"
+using jace::proxy::org::apache::accumulo::core::client::AccumuloSecurityException;
+
 #include "jace/proxy/org/opengis/feature/simple/SimpleFeature.h"
 using jace::proxy::org::opengis::feature::simple::SimpleFeature;
 #include "jace/proxy/org/opengis/feature/simple/SimpleFeatureType.h"
@@ -120,8 +122,6 @@ using jace::proxy::mil::nga::giat::geowave::store::query::Query;
 #include "jace/proxy/mil/nga/giat/geowave/store/query/SpatialQuery.h"
 using jace::proxy::mil::nga::giat::geowave::store::query::SpatialQuery;
 
-#include "jace/proxy/mil/nga/giat/geowave/accumulo/AccumuloOptions.h"
-using jace::proxy::mil::nga::giat::geowave::accumulo::AccumuloOptions;
 #include "jace/proxy/mil/nga/giat/geowave/accumulo/BasicAccumuloOperations.h"
 using jace::proxy::mil::nga::giat::geowave::accumulo::BasicAccumuloOperations;
 #include "jace/proxy/mil/nga/giat/geowave/accumulo/AccumuloDataStore.h"
@@ -155,7 +155,7 @@ namespace pdal
         Option password("password", "", "The password for the account to establish an Accumulo connector");
         Option tableNamespace("tableNamespace", "", "The table name to be used when interacting with GeoWave");
         Option featureTypeName("featureTypeName", "", "The feature type name to be used when interacting with GeoWave");
-        Option dataAdapter("dataAdapter", "FeatureCollectionDataAdapter", "FeatureCollectionDataAdapter stores multiple points per Accumulo entry.  FeatureDataAdapter stores a single point per Accumulo entry.");
+        Option dataAdapter("dataAdapter", "FeatureDataAdapter", "FeatureCollectionDataAdapter stores multiple points per Accumulo entry.  FeatureDataAdapter stores a single point per Accumulo entry.");
         Option pointsPerEntry("pointsPerEntry", 5000u, "Sets the maximum number of points per Accumulo entry when using FeatureCollectionDataAdapter.");
         Option bounds("bounds", "", "The extent of the bounding rectangle to use to query points, expressed as a string, eg: ([xmin, xmax], [ymin, ymax], [zmin, zmax])");
 
@@ -201,13 +201,27 @@ namespace pdal
     {
         layout->registerDims(getDefaultDimensions());
 
-        BasicAccumuloOperations accumuloOperations = java_new<BasicAccumuloOperations>(
-            java_new<String>(m_zookeeperUrl),
-            java_new<String>(m_instanceName),
-            java_new<String>(m_username),
-            java_new<String>(m_password),
-            java_new<String>(m_tableNamespace));
-
+        BasicAccumuloOperations accumuloOperations;
+        try 
+        {
+            accumuloOperations = java_new<BasicAccumuloOperations>(
+                java_new<String>(m_zookeeperUrl),
+                java_new<String>(m_instanceName),
+                java_new<String>(m_username),
+                java_new<String>(m_password),
+                java_new<String>(m_tableNamespace));
+        }
+        catch (AccumuloException& e)
+        {
+            log()->get(LogLevel::Error) << "There was a problem establishing a connector. " << e;
+            return;
+        }
+        catch (AccumuloSecurityException& e)
+        {
+            log()->get(LogLevel::Error) << "The credentials passed are invalid. " << e;
+            return;
+        }
+        
         AccumuloAdapterStore accumuloAdapterStore = java_new<AccumuloAdapterStore>(accumuloOperations);
 
         List attribs;
@@ -236,18 +250,29 @@ namespace pdal
         if (m_bounds.empty())
             return;
 
-        BasicAccumuloOperations accumuloOperations = java_new<BasicAccumuloOperations>(
-            java_new<String>(m_zookeeperUrl),
-            java_new<String>(m_instanceName),
-            java_new<String>(m_username),
-            java_new<String>(m_password),
-            java_new<String>(m_tableNamespace));
-
-        AccumuloOptions accumuloOptions = java_new<AccumuloOptions>();
-
+        BasicAccumuloOperations accumuloOperations;
+        try 
+        {
+            accumuloOperations = java_new<BasicAccumuloOperations>(
+                java_new<String>(m_zookeeperUrl),
+                java_new<String>(m_instanceName),
+                java_new<String>(m_username),
+                java_new<String>(m_password),
+                java_new<String>(m_tableNamespace));
+        }
+        catch (AccumuloException& e)
+        {
+            log()->get(LogLevel::Error) << "There was a problem establishing a connector. " << e;
+            return;
+        }
+        catch (AccumuloSecurityException& e)
+        {
+            log()->get(LogLevel::Error) << "The credentials passed are invalid. " << e;
+            return;
+        }
+        
         AccumuloDataStore accumuloDataStore = java_new<AccumuloDataStore>(
-            accumuloOperations,
-            accumuloOptions);
+            accumuloOperations);
 
         Index index = IndexType_JaceIndexType::createSpatialVectorIndex();
 
@@ -291,8 +316,6 @@ namespace pdal
                     SimpleFeature simpleFeature = java_cast<SimpleFeature>(featItr.next());
                     List attribs = simpleFeature.getType().getAttributeDescriptors();
 
-                    Coordinate coord = java_cast<Point>(simpleFeature.getAttribute(location)).getCoordinate();
-
                     for (int i = 0; i < attribs.size(); ++i){
                         String name = java_cast<AttributeDescriptor>(attribs.get(i)).getLocalName();
 
@@ -313,8 +336,6 @@ namespace pdal
             while (m_iterator.hasNext() && count-- > 0){
                 SimpleFeature simpleFeature = java_cast<SimpleFeature>(m_iterator.next());
                 List attribs = simpleFeature.getType().getAttributeDescriptors();
-
-                Coordinate coord = java_cast<Point>(simpleFeature.getAttribute(location)).getCoordinate();
 
                 for (int i = 0; i < attribs.size(); ++i){
                     String name = java_cast<AttributeDescriptor>(attribs.get(i)).getLocalName();
