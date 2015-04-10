@@ -61,5 +61,5 @@ bounds
 
 
 .. _GeoWave: https://ngageoint.github.io/geowave/
-.. _here: https://ngageoint.github.io/geowave/docs/pdal.html
+.. _here: https://ngageoint.github.io/geowave/documentation.html#jace-jni-proxies
 
