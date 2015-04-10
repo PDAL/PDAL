@@ -2,8 +2,8 @@
 # Installs GeoWave library
 git clone https://github.com/ngageoint/geowave.git geowave
 cd geowave
-git checkout tags/v0.8.3
-mvn clean package -pl geowave-deploy -am -P generate-pdal-proxies,linux-amd64-gcc-release -Dpdal.directory=/home/vagrant/pdal -DskipITs=true -DskipTests=true
+git checkout tags/v0.8.5
+mvn clean package -pl geowave-deploy -am -P generate-jace-proxies,linux-amd64-gcc -DskipITs=true -DskipTests=true
 
 # Configure library paths
 chmod 777 /home/vagrant/geowave/geowave-deploy/target/dependency/jace/libjace.so
@@ -13,6 +13,6 @@ echo "/usr/lib/jvm/java-7-oracle/jre/lib/amd64/server" | sudo tee --append /etc/
 sudo ldconfig
 
 # Install GeoWave as a service and configure to run at startup
-sudo cp /home/vagrant/pdal/scripts/linux-install-scripts/geowave /etc/init.d
+sudo cp /vagrant/scripts/linux-install-scripts/geowave /etc/init.d
 sudo update-rc.d geowave defaults
 sudo service geowave start
