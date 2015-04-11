@@ -13,6 +13,8 @@ echo "/usr/lib/jvm/java-7-oracle/jre/lib/amd64/server" | sudo tee --append /etc/
 sudo ldconfig
 
 # Install GeoWave as a service and configure to run at startup
-sudo cp /vagrant/scripts/linux-install-scripts/geowave /etc/init.d
+# Note: tr removes carriage returns and copies the file
+sudo tr -d '\r' < /vagrant/scripts/linux-install-scripts/geowave > /etc/init.d/geowave
+sudo chmod 755 /etc/init.d/geowave
 sudo update-rc.d geowave defaults
 sudo service geowave start

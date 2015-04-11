@@ -62,5 +62,5 @@ pointsPerEntry
 
 
 .. _GeoWave: https://ngageoint.github.io/geowave/
-.. _here: https://ngageoint.github.io/geowave/documentation.html#jace-jni-proxies
+.. _here: https://ngageoint.github.io/geowave/documentation.html#jace-jni-proxies-2
 
