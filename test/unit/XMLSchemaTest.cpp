@@ -215,16 +215,16 @@ TEST(XMLSchemaTest, utf8)
 
 TEST(XMLSchemaTest, precision)
 {
+    using namespace Dimension;
+
     XMLDimList dims;
 
     XForm xform1(1e-10, .0000000001);
-    XMLDim d1(DimType(Dimension::Id::X, Dimension::Type::Signed32, xform1),
-        "X");
+    XMLDim d1(DimType(Id::X, Type::Signed32, xform1), "X");
     dims.push_back(d1);
 
     XForm xform2(100000000, 12345678901);
-    XMLDim d2(DimType(Dimension::Id::Y, Dimension::Type::Unsigned32, xform2),
-        "Y");
+    XMLDim d2(DimType(Id::Y, Type::Unsigned32, xform2), "Y");
     dims.push_back(d2);
 
     XMLSchema x1(dims, MetadataNode());
@@ -244,4 +244,26 @@ TEST(XMLSchemaTest, precision)
     EXPECT_EQ(d.m_type, d2.m_dimType.m_type);
     EXPECT_DOUBLE_EQ(d.m_xform.m_offset, d2.m_dimType.m_xform.m_offset);
     EXPECT_DOUBLE_EQ(d.m_xform.m_scale, d2.m_dimType.m_xform.m_scale);
+}
+
+TEST(XMLSchemaTest, nonstandard)
+{
+    using namespace Dimension;
+
+    XMLDimList dims;
+
+    XMLDim d1(DimType((Dimension::Id::Enum)543, Type::Signed32), "FOOBAR");
+    XMLDim d2(DimType((Dimension::Id::Enum)545, Type::Signed32), "BARFOO");
+
+    dims.push_back(d1);
+    dims.push_back(d2);
+
+    XMLSchema x1(dims, MetadataNode());
+
+    std::string xml = x1.xml();
+
+    XMLSchema x2(xml);
+    dims = x2.xmlDims();
+    EXPECT_EQ(dims[0].m_name, "FOOBAR");
+    EXPECT_EQ(dims[1].m_name, "BARFOO");
 }
