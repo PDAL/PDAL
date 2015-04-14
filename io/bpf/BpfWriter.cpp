@@ -236,8 +236,7 @@ void BpfWriter::writeByteMajor(const PointView* data)
         uint32_t u32;
     } uu;
 
-    // We're going to pretend for now that we only even have one point buffer.
-
+    // We're going to pretend for now that we only ever have one point buffer.
     BpfCompressor compressor(m_stream,
         data->size() * sizeof(float) * m_dims.size());
 

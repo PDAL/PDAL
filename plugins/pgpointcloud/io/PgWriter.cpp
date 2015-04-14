@@ -441,9 +441,9 @@ void PgWriter::CreateIndex(std::string const& schema_name,
 
 void PgWriter::writeTile(const PointViewPtr view)
 {
-    std::vector<char> storage(m_packedPointSize);
+    std::vector<char> storage(packedPointSize());
     std::string hexrep;
-    size_t maxHexrepSize = m_packedPointSize * view->size() * 2;
+    size_t maxHexrepSize = packedPointSize() * view->size() * 2;
     hexrep.reserve(maxHexrepSize);
 
     m_insert.clear();
@@ -451,13 +451,13 @@ void PgWriter::writeTile(const PointViewPtr view)
 
     for (PointId idx = 0; idx < view->size(); ++idx)
     {
-        size_t written = readPoint(*view.get(), idx, storage.data());
+        size_t size = readPoint(*view.get(), idx, storage.data());
 
         /* We are always getting uncompressed bytes off the block_data */
         /* so we always used compression type 0 (uncompressed) in writing */
         /* our WKB */
         static char syms[] = "0123456789ABCDEF";
-        for (size_t i = 0; i != written; i++)
+        for (size_t i = 0; i != size; i++)
         {
             hexrep.push_back(syms[((storage[i] >> 4) & 0xf)]);
             hexrep.push_back(syms[storage[i] & 0xf]);

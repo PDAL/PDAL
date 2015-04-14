@@ -508,9 +508,14 @@ void SQLiteWriter::writeTile(const PointViewPtr view)
     if (m_doCompression)
     {
 #ifdef PDAL_HAVE_LAZPERF
-        LazPerfCompressor<Patch> compressor(*m_patch, dbDimTypes());
+        XMLDimList xmlDims = dbDimTypes();
+        DimTypeList dimTypes;
+        for (XMLDim& xmlDim : xmlDims)
+            dimTypes.push_back(xmlDim.m_dimType);
 
-        std::vector<char> outbuf(m_packedPointSize);
+        LazPerfCompressor<Patch> compressor(*m_patch, dimTypes);
+
+        std::vector<char> outbuf(packedPointSize());
         for (PointId idx = 0; idx < view->size(); idx++)
         {
             size_t size = readPoint(*view.get(), idx, outbuf.data());
@@ -531,7 +536,7 @@ void SQLiteWriter::writeTile(const PointViewPtr view)
     }
     else
     {
-        std::vector<char> storage(m_packedPointSize);
+        std::vector<char> storage(packedPointSize());
 
         for (PointId idx = 0; idx < view->size(); idx++)
         {

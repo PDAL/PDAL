@@ -34,8 +34,10 @@
 #pragma once
 
 #include <pdal/Writer.hpp>
+#include <pdal/XMLSchema.hpp>
 
 #include <string>
+#include <unordered_map>
 
 namespace pdal
 {
@@ -46,28 +48,38 @@ class OciWriter;
 
 class PDAL_DLL DbWriter : public Writer
 {
-    friend class SQLiteWriter;
-    friend class PgWriter;
-    friend class OciWriter;
 protected:
     DbWriter()
     {}
 
-    DimTypeList dbDimTypes() const;
-    size_t readField(const PointView& view, char *pos, DimType dimType,
+    virtual void setAutoOffset(const PointViewPtr view);
+    XMLDimList dbDimTypes() const
+        { return m_dbDims; }
+    size_t readField(const PointView& view, char *pos, Dimension::Id::Enum id,
         PointId idx);
     size_t readPoint(const PointView& view, PointId idx, char *outbuf);
+    size_t packedPointSize() const
+        { return m_packedPointSize; }
+
+    // Allows subclass access to ready() without the mess of friends.
+    void doReady(PointTableRef table)
+        { DbWriter::ready(table); }
 
 private:
     virtual void prepared(PointTableRef table);
     virtual void ready(PointTableRef table);
-    DimTypeList dimTypes(PointTableRef table);
 
     DimTypeList m_dimTypes;
-    int m_xPackedOffset;
-    int m_yPackedOffset;
-    int m_zPackedOffset;
+    XMLDimList m_dbDims;
+    std::unordered_map<int, DimType> m_dimMap;
+    std::pair<int, int> m_xOffsets;
+    std::pair<int, int> m_yOffsets;
+    std::pair<int, int> m_zOffsets;
+
+    // Size of point data as read from PointTable.
     size_t m_packedPointSize;
+    // Size of point data as written to DB.
+    size_t m_dbPointSize;
     bool m_locationScaling;
 
     DbWriter& operator=(const DbWriter&); // not implemented

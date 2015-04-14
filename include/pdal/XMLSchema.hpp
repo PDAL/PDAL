@@ -42,6 +42,7 @@
 
 #include <pdal/Dimension.hpp>
 #include <pdal/Metadata.hpp>
+#include <pdal/PointLayout.hpp>
 
 #include <string>
 #include <stdarg.h>
@@ -72,6 +73,9 @@ struct XMLDim
 public:
     XMLDim() : m_min(0.0), m_max(0.0)
     {}
+    XMLDim(const DimType& dim, const std::string& name) :
+        m_name(name), m_min(0.0), m_max(0.0), m_dimType(dim)
+    {}
 
     std::string m_name;
     std::string m_description;
@@ -89,7 +93,9 @@ class PDAL_DLL XMLSchema
 public:
     XMLSchema(std::string xml, std::string xsd = "",
         Orientation::Enum orientation = Orientation::PointMajor);
-    XMLSchema(const DimTypeList& dims, MetadataNode m = MetadataNode(),
+    XMLSchema(const XMLDimList& dims, MetadataNode m = MetadataNode(),
+        Orientation::Enum orientation = Orientation::PointMajor);
+    XMLSchema(const PointLayoutPtr& pointTable, MetadataNode m = MetadataNode(),
         Orientation::Enum orientation = Orientation::PointMajor);
     XMLSchema() : m_orientation(Orientation::PointMajor)
     {}

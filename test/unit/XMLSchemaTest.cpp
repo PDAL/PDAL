@@ -163,7 +163,7 @@ TEST(XMLSchemaTest, copy)
     MetadataNode m1prime = m.add("m1prime", "Some other metadata");
     m1.add("uuid", boost::uuids::nil_uuid());
 
-    XMLSchema s2(s1.dimTypes(), m);
+    XMLSchema s2(s1.xmlDims(), m);
     std::string xml_output = s2.xml();
 
     XMLSchema s3(xml_output, xsd);
@@ -215,31 +215,33 @@ TEST(XMLSchemaTest, utf8)
 
 TEST(XMLSchemaTest, precision)
 {
-    DimTypeList dims;
+    XMLDimList dims;
 
     XForm xform1(1e-10, .0000000001);
-    DimType d1(Dimension::Id::X, Dimension::Type::Signed32, xform1);
+    XMLDim d1(DimType(Dimension::Id::X, Dimension::Type::Signed32, xform1),
+        "X");
     dims.push_back(d1);
 
     XForm xform2(100000000, 12345678901);
-    DimType d2(Dimension::Id::Y, Dimension::Type::Unsigned32, xform2);
+    XMLDim d2(DimType(Dimension::Id::Y, Dimension::Type::Unsigned32, xform2),
+        "Y");
     dims.push_back(d2);
 
     XMLSchema x1(dims, MetadataNode());
     std::string s = x1.xml();
 
     XMLSchema x2(s);
-    dims = x2.dimTypes();
+    dims = x2.xmlDims();
 
     EXPECT_EQ(dims.size(), 2U);
     // Order of dimensions should be maintained.
-    DimType d = dims[0];
-    EXPECT_EQ(d.m_type, d1.m_type);
-    EXPECT_DOUBLE_EQ(d.m_xform.m_offset, d1.m_xform.m_offset);
-    EXPECT_DOUBLE_EQ(d.m_xform.m_scale, d1.m_xform.m_scale);
+    DimType d = dims[0].m_dimType;
+    EXPECT_EQ(d.m_type, d1.m_dimType.m_type);
+    EXPECT_DOUBLE_EQ(d.m_xform.m_offset, d1.m_dimType.m_xform.m_offset);
+    EXPECT_DOUBLE_EQ(d.m_xform.m_scale, d1.m_dimType.m_xform.m_scale);
 
-    d = dims[1];
-    EXPECT_EQ(d.m_type, d2.m_type);
-    EXPECT_DOUBLE_EQ(d.m_xform.m_offset, d2.m_xform.m_offset);
-    EXPECT_DOUBLE_EQ(d.m_xform.m_scale, d2.m_xform.m_scale);
+    d = dims[1].m_dimType;
+    EXPECT_EQ(d.m_type, d2.m_dimType.m_type);
+    EXPECT_DOUBLE_EQ(d.m_xform.m_offset, d2.m_dimType.m_xform.m_offset);
+    EXPECT_DOUBLE_EQ(d.m_xform.m_scale, d2.m_dimType.m_xform.m_scale);
 }

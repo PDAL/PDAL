@@ -570,7 +570,7 @@ void OciWriter::createPCEntry()
         << s_geom.str() <<
         ",  -- Extent\n"
         "     0.5, -- Tolerance for point cloud\n"
-        "           " << m_dimTypes.size() <<
+        "           " << dbDimTypes().size() <<
         ", -- Total number of dimensions\n"
         "           NULL,"
         "            NULL,"
@@ -773,7 +773,7 @@ void OciWriter::ready(PointTableRef table)
 
     m_pcExtent.clear();
     m_lastBlockId = 0;
-    DbWriter::ready(table);
+    DbWriter::doReady(table);
 }
 
 
@@ -839,10 +839,15 @@ void OciWriter::writePointMajor(PointViewPtr view, std::vector<char>& outbuf)
     {
         outbuf.resize(0);
 #ifdef PDAL_HAVE_LAZPERF
-        SignedLazPerfBuf compBuf(outbuf);
-        LazPerfCompressor<SignedLazPerfBuf> compressor(compBuf, dbDimTypes());
+        XMLDimList xmlDims = dbDimTypes();
+        DimTypeList dimTypes;
+        for (XMLDim& xmlDim : xmlDims)
+            dimTypes.push_back(xmlDim.m_dimType);
 
-        std::vector<char> ptBuf(m_packedPointSize);
+        SignedLazPerfBuf compBuf(outbuf);
+        LazPerfCompressor<SignedLazPerfBuf> compressor(compBuf, dimTypes);
+
+        std::vector<char> ptBuf(packedPointSize());
         for (PointId idx = 0; idx < view->size(); ++idx)
         {
             size_t size = readPoint(*view, idx, ptBuf.data());
@@ -874,19 +879,21 @@ void OciWriter::writePointMajor(PointViewPtr view, std::vector<char>& outbuf)
 void OciWriter::writeDimMajor(PointViewPtr view, std::vector<char>& outbuf)
 {
     size_t clicks = 0;
-    size_t interrupt = m_dimTypes.size() * 100;
+    size_t interrupt = dbDimTypes().size() * 100;
     size_t totalSize = 0;
     char *pos = outbuf.data();
 
-    for (auto di = m_dimTypes.begin(); di != m_dimTypes.end(); ++di)
+    XMLDimList xmlDims = dbDimTypes();
+    for (auto& xmlDim : xmlDims)
     {
         for (PointId idx = 0; idx < view->size(); ++idx)
         {
-            size_t size = readField(*view.get(), pos, *di, idx);
+            size_t size = readField(*view.get(), pos,
+                xmlDim.m_dimType.m_id, idx);
             pos += size;
             totalSize += size;
             if (clicks++ % interrupt == 0)
-                m_callback->invoke(clicks / m_dimTypes.size());
+                m_callback->invoke(clicks / xmlDims.size());
         }
     }
     outbuf.resize(totalSize);
@@ -933,7 +940,7 @@ void OciWriter::writeTile(const PointViewPtr view)
     //NOTE: packed point size is guaranteed to be of sufficient size to hold
     // a point's data, but it may be larger than the actual size of a point
     // if location scaling is being used. 
-    std::vector<char> outbuf(m_packedPointSize * view->size());
+    std::vector<char> outbuf(packedPointSize() * view->size());
     size_t totalSize = 0;
     if (m_orientation == Orientation::DimensionMajor)
         writeDimMajor(view, outbuf);

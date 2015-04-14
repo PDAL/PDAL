@@ -69,7 +69,7 @@ protected:
     XForm m_zXform;
     StringList m_outputDims;
 
-    void setAutoOffset(const PointViewPtr view);
+    virtual void setAutoOffset(const PointViewPtr view);
 
 private:
     virtual PointViewSet run(PointViewPtr view)
