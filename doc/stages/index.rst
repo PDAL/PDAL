@@ -65,5 +65,6 @@ Filters
    filters.range
    filters.reprojection
    filters.sort
+   filters.stats
    filters.transformation
 

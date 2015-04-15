@@ -47,8 +47,9 @@ namespace stats
 class PDAL_DLL Summary
 {
 public:
-    Summary(std::string name) : m_name(name)
-        { reset(); }
+    Summary(std::string name, bool enumerate) :
+        m_name(name), m_enumerate(enumerate)
+    { reset(); }
 
     double minimum() const
         { return m_min; }
@@ -60,6 +61,8 @@ public:
         { return m_cnt; }
     std::string name() const
         { return m_name; }
+    const std::set<double>& values() const
+        { return m_values; }
 
     void extractMetadata(MetadataNode &m) const;
 
@@ -77,14 +80,18 @@ public:
         m_min = (std::min)(m_min, value);
         m_max = (std::max)(m_max, value);
         m_avg += (value - m_avg) / m_cnt;
+        if (m_enumerate)
+            m_values.insert(value);
     }
 
 private:
+    std::string m_name;
+    bool m_enumerate;
     double m_max;
     double m_min;
     double m_avg;
+    std::set<double> m_values;
     point_count_t m_cnt;
-    std::string m_name;
 };
 
 } // namespace stats
@@ -108,12 +115,13 @@ private:
     StatsFilter& operator=(const StatsFilter&); // not implemented
     StatsFilter(const StatsFilter&); // not implemented
     virtual void processOptions(const Options& options);
-    virtual void ready(PointTableRef table);
+    virtual void prepared(PointTableRef table);
     virtual void done(PointTableRef table);
     virtual void filter(PointView& view);
     void extractMetadata();
 
-    std::string m_dimNames;
+    StringList m_dimNames;
+    StringList m_enums;
     std::map<Dimension::Id::Enum, stats::Summary> m_stats;
 };
 

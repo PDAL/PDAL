@@ -34,8 +34,12 @@
 
 #include "StatsFilter.hpp"
 
+#include <unordered_map>
+
 #include <pdal/pdal_export.hpp>
+#include <pdal/Options.hpp>
 #include <pdal/Utils.hpp>
+#include <pdal/PDALUtils.hpp>
 
 namespace pdal
 {
@@ -60,6 +64,9 @@ void Summary::extractMetadata(MetadataNode &m) const
     m.add("maximum", maximum(), "maximum");
     m.add("average", average(), "average");
     m.add("name", m_name, "name");
+    if (m_enumerate)
+        for (auto& v : m_values)
+            m.addList("values", v);
 }
 
 } // namespace stats
@@ -85,43 +92,62 @@ void StatsFilter::done(PointTableRef table)
     extractMetadata();
 }
 
+
 void StatsFilter::processOptions(const Options& options)
 {
-    m_dimNames = m_options.getValueOrDefault<std::string>("dimensions", "");
+    m_dimNames = options.getValueOrDefault<StringList>("dimensions");
+    m_enums = options.getValueOrDefault<StringList>("enumerate");
 }
 
 
-void StatsFilter::ready(PointTableRef table)
+void StatsFilter::prepared(PointTableRef table)
 {
-    using namespace std;
     PointLayoutPtr layout(table.layout());
 
-    std::vector<Dimension::Id::Enum> dims;
-    std::vector<std::string> dimNames;
+    std::unordered_map<std::string, bool> dims;
+
+    // Add dimensions to the list.
     if (m_dimNames.empty())
     {
-        dims = layout->dims();
-        for (auto di = dims.begin(); di != dims.end(); ++di)
-            dimNames.push_back(layout->dimName(*di));
+        for (auto id : layout->dims())
+            dims[layout->dimName(id)] = false;
     }
     else
     {
-        auto splits = [](char c)
-            { return c == ' ' || c == ','; };
-        dimNames = Utils::split2(m_dimNames, splits);
-        for (auto di = dimNames.begin(); di != dimNames.end(); ++di)
+        for (auto& s : m_dimNames)
         {
-            auto dim = layout->findDim(*di);
-            if (dim != Dimension::Id::Unknown)
-                dims.push_back(dim);
+            if (layout->findDim(s) == Dimension::Id::Unknown)
+            {
+                std::ostringstream out;
+                out << "Dimension '" << s << "' listed in --dimensions option "
+                   "does not exist.  Ignoring.";
+                utils::printError(out.str());
+            }
+            else
+                dims[s] = false;
         }
     }
 
-    auto ni = dimNames.begin();
-    for (auto di = dims.begin(); di != dims.end(); ++di, ++ni)
-        m_stats.insert(std::make_pair(*di, Summary(*ni)));
+    // Set the enumeration flag for those dimensions specified.
+    for (auto& s : m_enums)
+    {
+        if (dims.find(s) == dims.end())
+        {
+            std::ostringstream out;
+            out << "Dimension '" << s << "' listed in --enumerate option "
+                "does not exist.  Ignoring.";
+            utils::printError(out.str());
+        }
+        else
+            dims[s] = true;
+    }
+   
+    // Create the summary objects.
+    for (auto& dv : dims)
+        m_stats.insert(std::make_pair(layout->findDim(dv.first),
+            Summary(dv.first, dv.second)));
 }
-
+    
 
 void StatsFilter::extractMetadata()
 {

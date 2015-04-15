@@ -50,6 +50,12 @@ namespace pdal
 namespace utils
 {
 
+inline void printError(const std::string& s)
+{
+    std::cerr << "PDAL: " << s << std::endl;
+    std::cerr << std::endl;
+}
+
 using namespace boost::property_tree;
 
 inline ptree toPTree(MetadataNode const& node)

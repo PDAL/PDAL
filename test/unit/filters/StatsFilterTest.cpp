@@ -34,14 +34,16 @@
 
 #include <pdal/pdal_test_main.hpp>
 
+#include <pdal/PDALUtils.hpp>
 #include <pdal/StageFactory.hpp>
+#include <FauxReader.hpp>
 #include <StatsFilter.hpp>
 
 #include "Support.hpp"
 
 using namespace pdal;
 
-TEST(StatsFilterTest, simple)
+TEST(Stats, simple)
 {
     BOX3D bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     Options ops;
@@ -85,7 +87,7 @@ TEST(StatsFilterTest, simple)
 }
 
 
-TEST(StatsFilterTest, dimset)
+TEST(Stats, dimset)
 {
     BOX3D bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     Options ops;
@@ -127,7 +129,7 @@ TEST(StatsFilterTest, dimset)
 }
 
 
-TEST(StatsFilterTest, metadata)
+TEST(Stats, metadata)
 {
     BOX3D bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     Options ops;
@@ -180,3 +182,37 @@ TEST(StatsFilterTest, metadata)
     }
 }
 
+
+TEST(Stats, enum)
+{
+    BOX3D bounds(1.0, 0.0, 0.0, 10.0, 100.0, 1000.0);
+    Options ops;
+    ops.add("bounds", bounds);
+    ops.add("count", 10);
+    ops.add("mode", "ramp");
+
+    FauxReader reader;
+    reader.setOptions(ops);
+
+    Options filterOps;
+    filterOps.add("dimensions", "X, Z");
+    filterOps.add("enumerate", "X");
+
+    StatsFilter filter;
+    filter.setInput(reader);
+    filter.setOptions(filterOps);
+
+    PointTable table;
+    filter.prepare(table);
+    filter.execute(table);
+
+    const stats::Summary& statsX = filter.getStats(Dimension::Id::X);
+    const std::set<double>& values = statsX.values();
+    EXPECT_EQ(values.size(), 10U);
+    double d = 1.0;
+    for (double v : values)
+    {
+        EXPECT_DOUBLE_EQ(d, v); 
+        d += 1.0;
+    }
+}
