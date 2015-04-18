@@ -84,9 +84,9 @@ point_count_t RxpPointcloud::read(PointViewPtr view, point_count_t count)
             return numRead;
     }
 
-    for (m_dec.get(m_rxpview); !m_dec.eoi(); m_dec.get(m_rxpview))
+    for (m_dec.get(m_rxpbuf); !m_dec.eoi(); m_dec.get(m_rxpbuf))
     {
-        dispatch(m_rxpview.begin(), m_rxpview.end());
+        dispatch(m_rxpbuf.begin(), m_rxpbuf.end());
         if (m_view->size() - m_idx + numRead >= count) break;
     }
 
@@ -101,7 +101,7 @@ point_count_t RxpPointcloud::writeSavedPoints(PointViewPtr view, point_count_t c
     point_count_t numRead = 0;
     while (m_idx < m_view->size() && numRead < count)
     {
-        view.appendPoint(*m_view, m_idx);
+        view->appendPoint(*m_view, m_idx);
         ++m_idx, ++numRead;
     }
     return numRead;

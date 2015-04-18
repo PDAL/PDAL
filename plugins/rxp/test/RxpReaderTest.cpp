@@ -48,7 +48,7 @@ Options defaultRxpReaderOptions()
 {
     Options options;
     Option filename("filename",
-        testviewPath() + "130501_232206_cut.rxp", "");
+        testDataPath() + "130501_232206_cut.rxp", "");
     options.add(filename);
     return options;
 }
@@ -120,11 +120,11 @@ TEST(RxpReaderTest, testRead)
     PointViewPtr view = *viewSet.begin();
     EXPECT_EQ(view->size(), 177208);
 
-    checkPoint(*view, 0, 2.2630672454833984, -0.038407701998949051, -1.3249952793121338, 342656.34233957872,
+    checkPoint(view, 0, 2.2630672454833984, -0.038407701998949051, -1.3249952793121338, 342656.34233957872,
             2.6865001276019029, 19.8699989, 5.70246553, 4, true, 1, 1);
-    checkPoint(*view, 1, 2.2641847133636475, -0.038409631699323654, -1.3245694637298584, 342656.34235912003,
+    checkPoint(view, 1, 2.2641847133636475, -0.038409631699323654, -1.3245694637298584, 342656.34235912003,
             2.687250127637526, 19.5299988, 5.36292124, 2, true, 1, 1);
-    checkPoint(*view, 2, 2.26853346824646, -0.038410264998674393, -1.3260456323623657, 342656.34237866144,
+    checkPoint(view, 2, 2.26853346824646, -0.038410264998674393, -1.3260456323623657, 342656.34237866144,
             2.6917501278512646, 19.3699989, 5.2056551, 5, true, 1, 1);
 }
 
@@ -142,7 +142,7 @@ TEST(RxpReaderTest, testNoPpsSync)
     PointViewSet viewSet = reader.execute(table);
     PointViewPtr view = *viewSet.begin();
 
-    checkPoint(*view, 0, 0.0705248788, -0.0417557284, 0.0304775704, 31.917255942733149,
+    checkPoint(view, 0, 0.0705248788, -0.0417557284, 0.0304775704, 31.917255942733149,
             0.14050000667339191, 0.689999998, -14.4898596, 3, false, 1, 1);
 }
 
