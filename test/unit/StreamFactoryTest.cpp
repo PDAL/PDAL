@@ -44,45 +44,6 @@
 
 using namespace pdal;
 
-TEST(StreamFactoryTest, test1)
-{
-    const std::string wfilename(Support::temppath("temp.txt"));
-
-    // filename, writing
-    {
-        FileUtils::deleteFile(wfilename);
-        EXPECT_TRUE(!FileUtils::fileExists(wfilename));
-
-        {
-            OutputStreamManager wfile(wfilename);
-            wfile.open();
-
-            EXPECT_TRUE(FileUtils::fileExists(wfilename));
-            wfile.close();
-        }
-
-        // cleanup
-        FileUtils::deleteFile(wfilename);
-        EXPECT_TRUE(!FileUtils::fileExists(wfilename));
-    }
-
-    // stream, writing
-    {
-        std::ostream* ostreamname = FileUtils::createFile(wfilename);
-
-        {
-            OutputStreamManager ostream(ostreamname);
-            ostream.open();
-            EXPECT_TRUE(&(ostream.ostream()) == ostreamname);
-            ostream.close();
-        }
-
-        FileUtils::closeFile(ostreamname);
-        FileUtils::deleteFile(wfilename);
-    }
-}
-
-
 static void check_contents_sub(std::istream& s)
 {
     std::string buf;
@@ -124,22 +85,6 @@ TEST(StreamFactoryTest, test2)
         f.deallocate(s3);
         f.deallocate(s1);
         // f.deallocate(s2);   // let the dtor do it for us
-    }
-
-    {
-        const std::string nam = Support::datapath("text/text.txt");
-        std::istream* s = FileUtils::openFile(nam);
-        PassthruStreamFactory f(*s);
-
-        std::istream& s1 = f.allocate();
-
-        ASSERT_THROW(f.allocate(), pdal_error);
-
-        check_contents(s1);
-
-        f.deallocate(s1);
-
-        FileUtils::closeFile(s);
     }
 
     {

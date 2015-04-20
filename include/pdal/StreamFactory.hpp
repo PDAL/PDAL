@@ -75,23 +75,6 @@ private:
     StreamFactory& operator=(const StreamFactory&); // nope
 };
 
-
-// this one can't clone its stream!
-class PDAL_DLL PassthruStreamFactory : public StreamFactory
-{
-public:
-    PassthruStreamFactory(std::istream& s);
-    virtual ~PassthruStreamFactory();
-
-    virtual std::istream& allocate();
-    virtual void deallocate(std::istream&);
-
-private:
-    std::istream& m_istream;
-    bool m_allocated;
-};
-
-
 class PDAL_DLL FilenameStreamFactory : public StreamFactory
 {
 public:
@@ -142,39 +125,6 @@ private:
     typedef std::map<std::istream*,StreamSet*> Map;  // maps streamslice -> set
     Map m_streams;
 };
-
-
-// Many of our writer classes want to take a filename or a stream
-// in their ctors, which means that we need a common piece of code that
-// creates and takes ownership of the stream, if needed.
-//
-// You must always call open(), regardless of what kind of ctor you call,
-// i.e. stream or filename.  Calling close() is optional (the dtor will do
-// it for you.)
-
-class PDAL_DLL OutputStreamManager
-{
-public:
-    OutputStreamManager(const std::string& filename);
-    OutputStreamManager(std::ostream*); // may not be NULL
-    ~OutputStreamManager();
-
-    void open(); // throws
-    void close();
-    void flush();
-
-    std::ostream& ostream();
-
-private:
-    const bool m_isFileBased;
-    bool m_isOpen;
-    std::string m_filename;
-    std::ostream* m_ostream;
-
-    OutputStreamManager(const OutputStreamManager&); // nope
-    OutputStreamManager& operator=(const OutputStreamManager&); // nope
-};
-
 
 } // namespace pdal
 

@@ -42,43 +42,6 @@ namespace pdal
 
 // --------------------------------------------------------------------
 
-PassthruStreamFactory::PassthruStreamFactory(std::istream& s)
-    : StreamFactory()
-    , m_istream(s)
-    , m_allocated(false)
-{
-    return;
-}
-
-PassthruStreamFactory::~PassthruStreamFactory()
-{
-    return;
-}
-
-std::istream& PassthruStreamFactory::allocate()
-{
-    if (m_allocated)
-        throw pdal_error("can't allocate additional stream");
-
-    m_allocated = true;
-    return m_istream;
-}
-
-
-void PassthruStreamFactory::deallocate(std::istream& stream)
-{
-    if (!m_allocated)
-        throw pdal_error("incorrect stream deallocation");
-
-    if (&stream != &m_istream)
-        throw pdal_error("incorrect stream deallocation");
-
-    m_allocated = false;
-}
-
-
-// --------------------------------------------------------------------
-
 FilenameStreamFactory::FilenameStreamFactory(const std::string& name)
     : StreamFactory()
     , m_filename(name)
@@ -213,76 +176,6 @@ void FilenameSubsetStreamFactory::deallocate(std::istream& stream)
     delete s;
 
     return;
-}
-
-
-// --------------------------------------------------------------------
-
-
-OutputStreamManager::OutputStreamManager(const std::string& filename)
-    : m_isFileBased(true)
-    , m_isOpen(false)
-    , m_filename(filename)
-    , m_ostream(NULL)
-{}
-
-OutputStreamManager::OutputStreamManager(std::ostream *ostream)
-    : m_isFileBased(false)
-    , m_isOpen(false)
-    , m_ostream(ostream)
-{}
-
-
-OutputStreamManager::~OutputStreamManager()
-{
-    close();
-}
-
-void OutputStreamManager::flush()
-{
-    m_ostream->flush();
-}
-
-void OutputStreamManager::open()
-{
-    if (m_isOpen)
-        throw pdal_error("cannot re-open file or stream");
-
-    if (m_isFileBased)
-    {
-        m_ostream = FileUtils::createFile(m_filename, true);
-        if (m_ostream == NULL)
-        {
-            std::ostringstream oss;
-            oss << "Unable to create file '" << m_filename <<
-                "'. Check access permissions and/or directory location";
-            throw pdal_error(oss.str());
-        }
-    }
-    else if (m_ostream == NULL)
-        throw pdal_error("invalid stream");
-    m_isOpen = true;
-}
-
-
-void OutputStreamManager::close()
-{
-    if (!m_isOpen)
-        return;
-
-    if (m_isFileBased)
-        FileUtils::closeFile(m_ostream);
-
-    m_ostream = NULL;
-    m_isOpen = false;
-}
-
-
-std::ostream& OutputStreamManager::ostream()
-{
-    if (!m_isOpen || !m_ostream)
-        throw pdal_error("invalid stream");
-    return *m_ostream;
 }
 
 } // namespace pdal
