@@ -20,6 +20,7 @@ application currently contains six commands:
 * :ref:`random <random_command>`
 * :ref:`translate <translate_command>`
 * :ref:`view <view_command>`
+* :ref:`split <split_command>`
 
 Applications are run by invoking the *pdal* application along with the
 command name:
@@ -402,3 +403,40 @@ help.
         SHIFT + left click   : select a point (start with -use_point_picking)
 
               x, X   : toggle rubber band selection mode for left mouse button
+
+
+.. _split_command:
+
+``split`` command
+------------------------------------------------------------------------------
+
+The *split* will create multiple point output files from a single input file.
+The command takes an input file name and an output filename (used as a template)
+or output directory specification.
+
+::
+
+    $ pdal split --capacity 100000 infile.laz outfile.bpf
+
+This command takes the points from the input file 'infile.laz' and creates
+output files 'outfile_1.bpf', 'outfile_2.bpf', ... where each output file
+contains no more than 100000 points.
+
+::
+
+    -i [ --input ] arg           input file name
+    -o [ --output ] arg          output file/directory name
+    --length arg                 edge length for splitter cells
+    --capacity arg               point capacity for chipper cells
+
+Input and output arguments are required.  If neither the length nor capacity
+arguments are specified, an implcit argument of capacity with a value of 100000
+is added.
+
+The output argument is a template.  If the output argument is, for example,
+'file.ext', the output files created are 'file_#.ext' where # is a number
+starting at one and incrementing for each file created.
+
+If the output argument ends in a path separator, it is assumed to be a
+directory and the input argument is appended to create the output template.
+The split command never creates directories.  Directories must pre-exist.
