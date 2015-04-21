@@ -291,10 +291,11 @@ void InfoKernel::dump(std::ostream& o, const std::string& filename)
     {
 #ifdef PDAL_HAVE_LIBXML2
         XMLSchema schema(m_manager->pointTable().layout());
-        std::ofstream f(m_PointCloudSchemaOutput,
-            std::ios::out | std::ios::binary);
-        f << schema.xml();
-        f.close();
+        
+        std::ostream *out = FileUtils::createFile(m_PointCloudSchemaOutput);
+        std::string xml(schema.xml());
+        out->write(xml.c_str(), xml.size());
+        FileUtils::closeFile(out);
 #else
         std::cerr << "libxml2 support not enabled, no schema is produced" << std::endl;
 #endif
