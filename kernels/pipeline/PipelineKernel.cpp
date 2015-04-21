@@ -136,10 +136,12 @@ int PipelineKernel::execute()
     {
 #ifdef PDAL_HAVE_LIBXML2
         XMLSchema schema(manager.pointTable().layout());
-        std::ofstream f(m_PointCloudSchemaOutput,
-            std::ios::out | std::ios::binary);
-        f << schema.xml();
-        f.close();
+        
+        std::ostream *out = FileUtils::createFile(m_PointCloudSchemaOutput);
+        std::string xml(schema.xml());
+        out->write(xml.c_str(), xml.size());
+        FileUtils::closeFile(out);
+        
 #else
         std::cerr << "libxml2 support not available, no schema is produced" <<
             std::endl;
