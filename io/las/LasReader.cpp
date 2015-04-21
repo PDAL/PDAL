@@ -140,8 +140,7 @@ QuickInfo LasReader::inspect()
 
 void LasReader::initialize()
 {
-    m_streamFactory = createFactory();
-    m_istream = &(m_streamFactory->allocate());
+    m_istream = createStream();
 
     m_istream->seekg(0);
     ILeStream in(m_istream);
@@ -811,8 +810,7 @@ void LasReader::done(PointTableRef)
     m_zipPoint.reset();
     m_unzipper.reset();
 #endif
-    if (m_istream)
-        m_streamFactory->deallocate(*m_istream);
+    destroyStream();
 }
 
 } // namespace pdal

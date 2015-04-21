@@ -34,6 +34,7 @@
 
 #include <pdal/GlobalEnvironment.hpp>
 #include <pdal/Kernel.hpp>
+#include <pdal/PDALUtils.hpp>
 #include <iostream>
 
 #include <boost/algorithm/string.hpp>
@@ -56,23 +57,11 @@ namespace po = boost::program_options;
 namespace pdal
 {
 
-namespace
-{
-
-static void printError(const std::string& err)
-{
-    std::cout << err << std::endl;
-    std::cout << std::endl;
-}
-
-}
-
 Kernel::Kernel()
     : m_usestdin(false)
     , m_isDebug(false)
     , m_verboseLevel(0)
     , m_showHelp(false)
-    , m_showOptions("")
     , m_showVersion(false)
     , m_showTime(false)
     , m_hardCoreDebug(false)
@@ -105,15 +94,14 @@ int Kernel::do_switches()
     catch (std::exception const& e)
     {
         const std::string s("Caught exception handling switches: ");
-        printError(s + e.what());
+        utils::printError(s + e.what());
         return 1;
     }
     catch (...)
     {
-        printError("Caught unknown exception handling switches");
+        utils::printError("Caught unknown exception handling switches");
         return 1;
     }
-
     return 0;
 }
 
@@ -126,13 +114,13 @@ int Kernel::do_startup()
     }
     catch (std::exception const& e)
     {
-        const std::string s("Caught exception initializing PDAL: ");
-        printError(s + e.what());
+        const std::string s("Caught exception in initialization: ");
+        utils::printError(s + e.what());
         return 1;
     }
     catch (...)
     {
-        printError("Caught unknown exception initializing PDAL");
+        utils::printError("Caught unknown exception in initialization");
         return 1;
     }
 
@@ -163,19 +151,17 @@ int Kernel::do_execution()
     }
     catch (pdal::pdal_error const& e)
     {
-        const std::string s("PDAL: ");
-        printError(s + e.what());
+        utils::printError(e.what());
         return 1;
     }
     catch (std::exception const& e)
     {
-        const std::string s("PDAL: ");
-        printError(s + e.what());
+        utils::printError(e.what());
         return 1;
     }
     catch (...)
     {
-        printError("PDAL: ");
+        utils::printError("Caught unexpected exception.");
         return 1;
     }
 
@@ -191,13 +177,13 @@ int Kernel::do_shutdown()
     }
     catch (std::exception const& e)
     {
-        const std::string s("Caught exception shutting down PDAL: ");
-        printError(s + e.what());
+        const std::string s("Caught exception during shutdown: ");
+        utils::printError(s + e.what());
         return 1;
     }
     catch (...)
     {
-        printError("Caught unknown exception shutting down PDAL");
+        utils::printError("Caught unknown exception during shutdown.");
         return 1;
     }
 
@@ -235,20 +221,18 @@ int Kernel::run(int argc, const char* argv[], const std::string& appName)
 
 void Kernel::collectExtraOptions()
 {
-
     for (const auto& o : m_extra_options)
     {
-
         typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
 
         // if we don't have --, we're not an option we
         // even care about
-        if (!boost::algorithm::find_first(o, "--")) continue;
+        if (!boost::algorithm::find_first(o, "--"))
+            continue;
 
         // Find the dimensions listed and put them on the id list.
         boost::char_separator<char> equal("=");
         boost::char_separator<char> dot(".");
-        // boost::erase_all(o, " "); // Wipe off spaces
         tokenizer option_tokens(o, equal);
         std::vector<std::string> option_split;
         for (auto const& ti : option_tokens)
@@ -256,7 +240,8 @@ void Kernel::collectExtraOptions()
         if (!(option_split.size() == 2))
         {
             std::ostringstream oss;
-            oss << "option '" << o << "' did not split correctly. Is it in the form --readers.las.option=foo?";
+            oss << "option '" << o << "' did not split correctly. Is it "
+                "in the form --readers.las.option=foo?";
             throw app_usage_error(oss.str());
         }
 
@@ -272,7 +257,7 @@ void Kernel::collectExtraOptions()
         std::string option_name = *stage_values.rbegin();
         std::ostringstream stage_name_ostr;
         bool bFirst(true);
-        for (auto s = stage_values.begin(); s != stage_values.end()-1; ++s)
+        for (auto s = stage_values.begin(); s != stage_values.end() - 1; ++s)
         {
             auto s2 = boost::algorithm::erase_all_copy(*s, " ");
 
@@ -295,6 +280,7 @@ void Kernel::collectExtraOptions()
     }
 }
 
+
 int Kernel::innerRun()
 {
     // handle the well-known options
@@ -312,10 +298,9 @@ int Kernel::innerRun()
 
     if (!m_showOptions.empty())
     {
-        //pdal::StageFactory factory;
-        //std::cout << factory.toRST(m_showOptions) << std::endl;
         return 0;
     }
+
     try
     {
         // do any user-level sanity checking
@@ -324,8 +309,7 @@ int Kernel::innerRun()
     }
     catch (app_usage_error e)
     {
-        std::string s("Usage error: ");
-        printError(s + e.what());
+        utils::printError(std::string("Usage error: ") + e.what());
         outputHelp();
         return 1;
     }
@@ -365,6 +349,7 @@ void Kernel::visualize(PointViewPtr view)
     writer.prepare(table);
     writer.execute(table);
 }
+
 
 /*
 void Kernel::visualize(PointViewPtr input_view, PointViewPtr output_view) const
@@ -412,14 +397,15 @@ void Kernel::visualize(PointViewPtr input_view, PointViewPtr output_view) const
 
 void Kernel::addSwitchSet(po::options_description* options)
 {
-    if (!options) return;
-    m_public_options.push_back(options);
+    if (options)
+        m_public_options.push_back(options);
 }
+
 
 void Kernel::addHiddenSwitchSet(po::options_description* options)
 {
-    if (!options) return;
-    m_hidden_options.push_back(options);
+    if (options)
+        m_hidden_options.push_back(options);
 }
 
 
@@ -499,6 +485,7 @@ void Kernel::addPositionalSwitch(const char* name, int max_count)
     m_positionalOptions.add(name, max_count);
 }
 
+
 void Kernel::outputHelp()
 {
     outputVersion();
@@ -509,23 +496,20 @@ void Kernel::outputHelp()
         std::cout << std::endl;
     }
 
-    std::string headline("------------------------------------------------------------------------------------------");
+    std::string headline(90, '-');
 
-    std::cout <<"\nFor more information, see the full documentation for PDAL at:\n";
-
-    std::cout << "  http://pdal.io/\n";
-    std::cout << headline << std::endl;
-    std::cout << std::endl;
-
-    return;
+    std::cout <<"\nFor more information, see the full documentation for "
+        "PDAL at http://pdal.io/\n" <<
+        headline << std::endl << std::endl;
 }
 
 
 void Kernel::outputVersion()
 {
-    std::string headline("------------------------------------------------------------------------------------------");
+    std::string headline(90, '-');
     std::cout << headline << std::endl;
-    std::cout << "pdal " << m_appName << " (" << pdal::GetFullVersionString() << ")\n";
+    std::cout << "pdal " << m_appName << " (" <<
+        GetFullVersionString() << ")\n";
     std::cout << headline << std::endl;
     std::cout << std::endl;
 }
@@ -533,33 +517,50 @@ void Kernel::outputVersion()
 
 void Kernel::addBasicSwitchSet()
 {
-    po::options_description* basic_options = new po::options_description("basic options");
+    po::options_description* basic_options =
+        new po::options_description("basic options");
 
     basic_options->add_options()
-    ("help,h", po::value<bool>(&m_showHelp)->zero_tokens()->implicit_value(true), "Print help message")
-    ("options", po::value<std::string>(&m_showOptions)->implicit_value("all"), "Show available options for a driver")
-    ("debug,d", po::value<bool>(&m_isDebug)->zero_tokens()->implicit_value(true), "Enable debug mode")
-    ("report-debug", po::value<bool>(&m_reportDebug)->zero_tokens()->implicit_value(true), "Report PDAL compilation DEBUG status")
-    ("developer-debug", po::value<bool>(&m_hardCoreDebug)->zero_tokens()->implicit_value(true), "Enable developer debug mode (don't trap exceptions so segfaults are thrown)")
-    ("verbose,v", po::value<uint32_t>(&m_verboseLevel)->default_value(0), "Set verbose message level")
-    ("version", po::value<bool>(&m_showVersion)->zero_tokens()->implicit_value(true), "Show version info")
-    ("visualize", po::value<bool>(&m_visualize)->zero_tokens()->implicit_value(true), "Visualize result")
-    ("stdin,s", po::value<bool>(&m_usestdin)->zero_tokens()->implicit_value(true), "Read pipeline XML from stdin")
-    ("heartbeat", po::value< std::vector<std::string> >(&m_heartbeat_shell_command), "Shell command to run for every progress heartbeat")
+    ("help,h",
+        po::value<bool>(&m_showHelp)->zero_tokens()->implicit_value(true),
+        "Print help message")
+    ("options", po::value<std::string>(&m_showOptions)->implicit_value("all"),
+        "Show available options for a driver")
+    ("debug,d",
+        po::value<bool>(&m_isDebug)->zero_tokens()->implicit_value(true),
+        "Enable debug mode")
+    ("report-debug",
+        po::value<bool>(&m_reportDebug)->zero_tokens()->implicit_value(true),
+        "Report PDAL compilation DEBUG status")
+    ("developer-debug",
+        po::value<bool>(&m_hardCoreDebug)->zero_tokens()->implicit_value(true),
+        "Enable developer debug mode (don't trap exceptions so segfaults "
+        "are thrown)")
+    ("verbose,v", po::value<uint32_t>(&m_verboseLevel)->default_value(0),
+        "Set verbose message level")
+    ("version",
+        po::value<bool>(&m_showVersion)->zero_tokens()->implicit_value(true),
+        "Show version info")
+    ("visualize",
+        po::value<bool>(&m_visualize)->zero_tokens()->implicit_value(true),
+        "Visualize result")
+    ("stdin,s",
+        po::value<bool>(&m_usestdin)->zero_tokens()->implicit_value(true),
+        "Read pipeline XML from stdin")
+    ("heartbeat",
+        po::value< std::vector<std::string> >(&m_heartbeat_shell_command),
+        "Shell command to run for every progress heartbeat")
     ("scale", po::value< std::string >(&m_scales),
-     "A comma-separated or quoted, space-separated list of scales to "
-     "set on the output file: \n--scale 0.1,0.1,0.00001\n--scale \""
-     "0.1 0.1 0.00001\"")
+         "A comma-separated or quoted, space-separated list of scales to "
+         "set on the output file: \n--scale 0.1,0.1,0.00001\n--scale \""
+         "0.1 0.1 0.00001\"")
     ("offset", po::value< std::string >(&m_offsets),
-     "A comma-separated or quoted, space-separated list of offsets to "
-     "set on the output file: \n--offset 0,0,0\n--offset "
-     "\"1234 5678 91011\"")
-
+         "A comma-separated or quoted, space-separated list of offsets to "
+         "set on the output file: \n--offset 0,0,0\n--offset "
+         "\"1234 5678 91011\"")
     ;
 
     addSwitchSet(basic_options);
-
-    return;
 }
 
 
@@ -575,21 +576,18 @@ void Kernel::parseSwitches()
     try
     {
         auto parsed = po::command_line_parser(m_argc, m_argv).
-                      options(options).allow_unregistered().positional(m_positionalOptions).run();
-        m_extra_options = po::collect_unrecognized(parsed.options, po::include_positional);
+            options(options).allow_unregistered().
+            positional(m_positionalOptions).run();
+        m_extra_options = po::collect_unrecognized(parsed.options,
+            po::include_positional);
 
         po::store(parsed, m_variablesMap);
-
-
     }
     catch (boost::program_options::unknown_option e)
     {
         throw app_usage_error("unknown option: " + e.get_option_name());
     }
-
     po::notify(m_variablesMap);
-
-    return;
 }
 
 

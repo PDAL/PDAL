@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,74 +32,33 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/pdal_test_main.hpp>
+#pragma once
 
-#include <sstream>
-#include <iostream>
+#include <pdal/Kernel.hpp>
+#include <pdal/plugin.hpp>
 
-#include <pdal/StreamFactory.hpp>
-#include <pdal/util/FileUtils.hpp>
+extern "C" int32_t SplitKernel_ExitFunc();
+extern "C" PF_ExitFunc SplitKernel_InitPlugin();
 
-#include "Support.hpp"
-
-using namespace pdal;
-
-static void check_contents_sub(std::istream& s)
+namespace pdal
 {
-    std::string buf;
-    s >> buf;
-    EXPECT_EQ(buf, "allows");
-    s.get();
-    EXPECT_TRUE(s.eof());
-}
 
-
-static void check_contents(std::istream& s)
+class PDAL_DLL SplitKernel : public Kernel
 {
-    std::string buf;
-    s >> buf;
-    EXPECT_EQ(buf, "This");
-    s.seekg(-7, std::ios_base::end);
-    s >> buf;
-    EXPECT_EQ(buf, "utils.");
-    s.get();
-    EXPECT_TRUE(s.get() == -1);
-    EXPECT_TRUE(s.eof());
-}
+public:
+    static void *create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+    int execute();
 
+private:
+    void addSwitches();
+    void validateSwitches();
 
-TEST(StreamFactoryTest, test2)
-{
-    {
-        const std::string nam = Support::datapath("text/text.txt");
-        FilenameStreamFactory f(nam);
+    std::string m_inputFile;
+    std::string m_outputFile;
+    uint32_t m_capacity;
+    uint32_t m_length;
+};
 
-        std::istream& s1 = f.allocate();
-        std::istream& s2 = f.allocate();
-        std::istream& s3 = f.allocate();
-
-        check_contents(s1);
-        check_contents(s2);
-        check_contents(s3);
-
-        f.deallocate(s3);
-        f.deallocate(s1);
-        // f.deallocate(s2);   // let the dtor do it for us
-    }
-
-    {
-        FilenameSubsetStreamFactory f(Support::datapath("text/text.txt"), 20, 6);
-
-        std::istream& s1 = f.allocate();
-        std::istream& s2 = f.allocate();
-        std::istream& s3 = f.allocate();
-
-        check_contents_sub(s1);
-        check_contents_sub(s2);
-        check_contents_sub(s3);
-
-        f.deallocate(s1);
-        f.deallocate(s3);
-        // f.deallocate(s2);   // let the dtor do it for us
-    }
-}
+} // namespace pdal

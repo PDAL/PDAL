@@ -36,7 +36,6 @@
 
 #include <pdal/pdal_export.hpp>
 #include <pdal/Reader.hpp>
-#include <pdal/StreamFactory.hpp>
 
 #include "LasError.hpp"
 #include "LasHeader.hpp"
@@ -73,10 +72,16 @@ public:
     point_count_t getNumPoints() const
         { return m_lasHeader.pointCount(); }
 
+protected:
+    virtual std::istream *createStream()
+    {
+        m_istream = FileUtils::openFile(m_filename);
+        return m_istream;
+    }
+    virtual void destroyStream()
+        { FileUtils::closeFile(m_istream); }
 private:
     LasError m_error;
-    typedef std::unique_ptr<StreamFactory> StreamFactoryPtr;
-    StreamFactoryPtr m_streamFactory;
     LasHeader m_lasHeader;
     std::unique_ptr<ZipPoint> m_zipPoint;
     std::unique_ptr<LASunzipper> m_unzipper;
@@ -85,8 +90,6 @@ private:
     VlrList m_vlrs;
     std::vector<ExtraDim> m_extraDims;
 
-    virtual StreamFactoryPtr createFactory() const
-        { return StreamFactoryPtr(new FilenameStreamFactory(m_filename)); }
     virtual void processOptions(const Options& options);
     virtual void initialize();
     virtual void addDimensions(PointLayoutPtr layout);

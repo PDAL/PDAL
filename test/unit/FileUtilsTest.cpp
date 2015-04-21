@@ -56,8 +56,8 @@ TEST(FileUtilsTest, test_file_ops)
     *ostr << "yow";
     FileUtils::closeFile(ostr);
 
-    EXPECT_TRUE(FileUtils::fileExists(tmp1)==true);
-    EXPECT_TRUE(FileUtils::fileSize(tmp1)==3);
+    EXPECT_EQ(FileUtils::fileExists(tmp1), true);
+    EXPECT_EQ(FileUtils::fileSize(tmp1), 3U);
 
     // rename test
     FileUtils::renameFile(tmp2,tmp1);

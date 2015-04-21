@@ -34,12 +34,9 @@
 
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/pdal_error.hpp>
+#include <pdal/Utils.hpp>
 
-#include <boost/iostreams/device/file.hpp>
-#include <boost/iostreams/stream.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/version.hpp>
-#include <boost/algorithm/string.hpp>
 
 #include <iostream>
 #include <sstream>
@@ -49,41 +46,59 @@ using namespace std;
 namespace pdal
 {
 
+namespace
+{
+
+bool isStdin(std::string filename)
+{
+    return Utils::toupper(filename) == "STDIN";
+}
+
+bool isStdout(std::string filename)
+{
+    return Utils::toupper(filename) == "STOUT";
+}
+
+    
+}
 
 istream* FileUtils::openFile(string const& filename, bool asBinary)
 {
-    if (boost::algorithm::ifind_first(filename, "STDIN"))
+    if (isStdin(filename))
         return &cin;
 
     if (!FileUtils::fileExists(filename))
-        throw pdal_error("File not found: " + filename);
+        throw pdal_error(std::string("File '") + filename + "' not found");
 
     ios::openmode mode = ios::in;
     if (asBinary)
         mode |= ios::binary;
 
-    namespace io = boost::iostreams;
-    io::stream<io::file_source>* ifs = new io::stream<io::file_source>();
-    ifs->open(filename.c_str(), mode);
-    if (ifs->is_open() == false) return NULL;
+    std::ifstream *ifs = new std::ifstream(filename, mode);
+    if (! ifs->good())
+    {
+        delete ifs;
+        return NULL;
+    }
     return ifs;
 }
 
 
 ostream* FileUtils::createFile(string const& filename, bool asBinary)
 {
-    ios::openmode mode = ios::out;
-    if (asBinary)
-        mode  |= ios::binary;
-
-    if (boost::algorithm::ifind_first(filename, "STDOUT"))
+    if (isStdout(filename))
         return &cout;
 
+    ios::openmode mode = ios::out;
+    if (asBinary)
+        mode |= ios::binary;
 
-    namespace io = boost::iostreams;
-    io::stream<io::file_sink>* ofs = new io::stream<io::file_sink>();
-    ofs->open(filename.c_str(), mode);
-    if (ofs->is_open() == false) return NULL;
+    std::ostream *ofs = new std::ofstream(filename, mode);
+    if (! ofs->good())
+    {
+        delete ofs;
+        return NULL;
+    }
     return ofs;
 }
 
@@ -105,38 +120,32 @@ void FileUtils::deleteDirectory(std::string const& dirname)
 }
 
 
-void FileUtils::closeFile(ostream* ofs)
+void FileUtils::closeFile(ostream *out)
 {
-    namespace io = boost::iostreams;
-
     // An ofstream is closeable and deletable, but
     // an ostream like &std::cout isn't.
-    if (!ofs) return;
-    io::stream<io::file_sink>* sink =
-        dynamic_cast<io::stream<io::file_sink>*>(ofs);
-    if (sink)
+    if (!out)
+        return;
+    ofstream *ofs = dynamic_cast<ofstream *>(out);
+    if (ofs)
     {
-        sink->close();
-        delete sink;
+        ofs->close();
+        delete ofs;
     }
 }
 
 
-void FileUtils::closeFile(istream* ifs)
+void FileUtils::closeFile(istream* in)
 {
-    namespace io = boost::iostreams;
-
     // An ifstream is closeable and deletable, but
     // an istream like &std::cin isn't.
-    if (!ifs)
+    if (!in)
         return;
-    io::stream<io::file_source>* source =
-        dynamic_cast<io::stream<io::file_source>*>(ifs);
-
-    if (source)
+    ifstream *ifs = dynamic_cast<ifstream *>(in);
+    if (ifs)
     {
-        source->close();
-        delete source;
+        ifs->close();
+        delete ifs;
     }
 }
 
@@ -160,11 +169,12 @@ bool FileUtils::fileExists(const string& name)
 {
     // filename may actually be a greyhound uri + pipelineId
     std::string http = name.substr(0, 4);
-    if (boost::iequals(http, "http"))
+    if (Utils::iequals(http, "http"))
         return true;
  
-    return boost::filesystem::exists(name) ||
-        boost::algorithm::iequals(name, "STDIN");
+    boost::system::error_code ec;
+    boost::filesystem::exists(name, ec);
+    return boost::filesystem::exists(name) || isStdin(name);
 }
 
 uintmax_t FileUtils::fileSize(const string& file)

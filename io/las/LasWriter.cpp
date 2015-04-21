@@ -232,6 +232,14 @@ void LasWriter::ready(PointTableRef table)
 
     if (!m_ostream)
         m_ostream = FileUtils::createFile(m_filename, true);
+    if (!m_ostream)
+    {
+        std::stringstream out;
+
+        out << "writers.las couldn't open file '" << m_filename <<
+            "' for output.";
+        throw pdal_error(out.str());
+    }
     setVlrsFromMetadata();
     setVlrsFromSpatialRef(srs);
     setExtraBytesVlr();

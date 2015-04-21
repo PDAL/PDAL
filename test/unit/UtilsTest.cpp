@@ -306,6 +306,15 @@ TEST(UtilsTest, starts)
     EXPECT_TRUE(Utils::startsWith(s, ""));
 }
 
+TEST(UtilsTest, iequals)
+{
+    EXPECT_TRUE(Utils::iequals("", ""));
+    EXPECT_TRUE(Utils::iequals("Foobar", "foobar"));
+    EXPECT_TRUE(Utils::iequals("FOO.BAR~", "foo.Bar~"));
+    EXPECT_FALSE(Utils::iequals("Foobar", "foobarbaz"));
+    EXPECT_FALSE(Utils::iequals("Foobar", "foobat"));
+}
+
 TEST(UtilsTest, replaceAll)
 {
     std::string s(" This  is a   test ");

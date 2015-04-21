@@ -163,6 +163,16 @@ namespace Utils
         return out;
     }
 
+    inline bool iequals(const std::string& s, const std::string& s2)
+    {
+        if (s.length() != s2.length())
+            return false;
+        for (size_t i = 0; i < s.length(); ++i)
+            if (std::toupper(s[i]) != std::toupper(s2[i]))
+                return false;
+        return true;
+    }
+
     inline bool startsWith(const std::string& s, const std::string& prefix)
     {
         if (prefix.size() > s.size())
@@ -336,7 +346,8 @@ namespace Utils
 
     /// Restore a stream redirected with redirect().
     /// \param[in] out  Stream to be restored.
-    /// \param[in] redir RedirectStream returned from corresponding redirect() call.
+    /// \param[in] redir RedirectStream returned from corresponding
+    /// redirect() call.
     inline void restore(std::ostream& out, RedirectStream redir)
     {
         out.rdbuf(redir.m_buf);

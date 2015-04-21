@@ -43,6 +43,7 @@
 #include <pipeline/PipelineKernel.hpp>
 #include <random/RandomKernel.hpp>
 #include <sort/SortKernel.hpp>
+#include <split/SplitKernel.hpp>
 #include <translate/TranslateKernel.hpp>
 
 #include <boost/filesystem.hpp>
@@ -67,6 +68,7 @@ KernelFactory::KernelFactory(bool no_plugins)
     PluginManager::initializePlugin(PipelineKernel_InitPlugin);
     PluginManager::initializePlugin(RandomKernel_InitPlugin);
     PluginManager::initializePlugin(SortKernel_InitPlugin);
+    PluginManager::initializePlugin(SplitKernel_InitPlugin);
     PluginManager::initializePlugin(TranslateKernel_InitPlugin);
 }
 

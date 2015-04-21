@@ -64,8 +64,11 @@ struct FileStreamDeleter
     template <typename T>
     void operator()(T* ptr)
     {
-        ptr->flush();
-        FileUtils::closeFile(ptr);
+        if (ptr)
+        {
+            ptr->flush();
+            FileUtils::closeFile(ptr);
+        }
     }
 };
 
@@ -89,6 +92,13 @@ void TextWriter::processOptions(const Options& ops)
     m_filename = ops.getValueOrThrow<std::string>("filename");
     m_stream = FileStreamPtr(FileUtils::createFile(m_filename, true),
         FileStreamDeleter());
+    if (!m_stream)
+    {
+        std::stringstream out;
+        out << "writers.text couldn't open '" << m_filename <<
+            "' for output.";
+        throw pdal_error(out.str());
+    }
     m_outputType = ops.getValueOrDefault<std::string>("format", "csv");
     boost::to_upper(m_outputType);
     m_callback = ops.getValueOrDefault<std::string>("jscallback", "");

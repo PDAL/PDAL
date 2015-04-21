@@ -153,7 +153,8 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
 }
 
 
-pdal::Options StageFactory::inferWriterOptionsChanges(const std::string& filename)
+pdal::Options StageFactory::inferWriterOptionsChanges(
+    const std::string& filename)
 {
     std::string ext = boost::filesystem::extension(filename);
     boost::to_lower(ext);
