@@ -56,7 +56,7 @@ bool isStdin(std::string filename)
 
 bool isStdout(std::string filename)
 {
-    return Utils::toupper(filename) == "STOUT";
+    return Utils::toupper(filename) == "STOUT" || Utils::toupper(filename) == "STDOUT";
 }
 
     
