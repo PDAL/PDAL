@@ -62,7 +62,8 @@ then
     # From ppa:pdal/travis
     sudo apt-get install \
         laz-perf \
-        pgpointcloud
+        pgpointcloud \
+        points2grid
 fi
 
 gcc --version
