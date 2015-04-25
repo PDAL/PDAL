@@ -246,6 +246,12 @@ int32_t PluginManager::guessLoadByPath(const std::string& driverName)
             if (ext != dynamicLibraryExtension)
                 continue;
 
+            std::string stem = full_path.stem().string();
+            std::string::size_type pos = stem.find_last_of('_');
+            if (pos == std::string::npos || pos == stem.size() - 1 ||
+                    stem.substr(pos + 1) != driverNameVec[1])
+                continue;
+
             PF_PluginType type;
             if (driverNameVec[0] == "readers")
                 type = PF_PluginType_Reader;
@@ -258,10 +264,13 @@ int32_t PluginManager::guessLoadByPath(const std::string& driverName)
             else
                 type = PF_PluginType_Reader;
 
-            loadByPath(full_path.string(), type);
+            if (loadByPath(full_path.string(), type) == 0)
+            {
+                return 0;
+            }
         }
    }
-    return 0;
+    return -1;
 }
 
 
