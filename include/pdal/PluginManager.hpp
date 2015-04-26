@@ -59,7 +59,8 @@ class DynamicLibrary;
 class PDAL_DLL PluginManager
 {
     typedef std::shared_ptr<DynamicLibrary> DynLibPtr;
-    typedef std::map<std::string, std::shared_ptr<DynamicLibrary>> DynamicLibraryMap;
+    typedef std::map<std::string, std::shared_ptr<DynamicLibrary>>
+        DynamicLibraryMap;
     typedef std::vector<PF_ExitFunc> ExitFuncVec;
     typedef std::vector<PF_RegisterParams> RegistrationVec;
 
@@ -67,33 +68,40 @@ public:
     typedef std::map<std::string, PF_RegisterParams> RegistrationMap;
 
     static PluginManager & getInstance();
-    static int32_t initializePlugin(PF_InitFunc initFunc);
-    int32_t loadAll(PF_PluginType type);
-    int32_t loadAll(const std::string & pluginDirectory, PF_PluginType type);
-    int32_t guessLoadByPath(const std::string & driverName);
-    int32_t loadByPath(const std::string & path, PF_PluginType type);
+
+    // Returns true if initialization was successful.
+    static bool initializePlugin(PF_InitFunc initFunc);
+
+    void loadAll(PF_PluginType type);
+    void loadAll(const std::string & pluginDirectory, PF_PluginType type);
 
     void * createObject(const std::string & objectType);
 
-    int32_t shutdown();
-    static int32_t registerObject(const std::string& objectType,
+    static bool registerObject(const std::string& objectType,
         const PF_RegisterParams* params);
     const RegistrationMap& getRegistrationMap();
 
 private:
-    ~PluginManager();
     PluginManager();
-    PluginManager(const PluginManager &);
+    ~PluginManager();
+
+    // These functions return true if successful.
+    bool shutdown();
+    bool guessLoadByPath(const std::string & driverName);
+    bool loadByPath(const std::string & path, PF_PluginType type);
 
     DynamicLibrary *loadLibrary(const std::string& path,
         std::string& errorString);
 
-    bool m_inInitializePlugin;
     PF_PluginAPI_Version m_version;
     DynamicLibraryMap m_dynamicLibraryMap;
     ExitFuncVec m_exitFuncVec;
     RegistrationMap m_tempExactMatchMap;
     RegistrationMap m_exactMatchMap;
+
+    // Disable copy/assignment.
+    PluginManager(const PluginManager&);
+    PluginManager& operator=(const PluginManager&);
 };
 
 } // namespace pdal
