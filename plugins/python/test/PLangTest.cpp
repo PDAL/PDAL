@@ -37,6 +37,7 @@
 #include "../plang/Invocation.hpp"
 
 #include <Support.hpp>
+#include <faux/FauxReader.hpp>
 #include <pdal/StageFactory.hpp>
 
 using namespace pdal;
@@ -405,19 +406,20 @@ TEST(PLangTest, log)
     }
 
     {
-        ReaderPtr reader(f.createReader("readers.faux"));
-        reader->setOptions(reader_opts);
+        FauxReader reader;
 
-        FilterPtr xfilter(f.createFilter("filters.programmable"));
+        reader.setOptions(reader_opts);
+
+        std::unique_ptr<Stage> xfilter(f.createStage("filters.programmable"));
         xfilter->setOptions(xfilter_opts);
-        xfilter->setInput(reader.get());
+        xfilter->setInput(reader);
 
-        PointContext ctx;
-        xfilter->prepare(ctx);
-        PointBufferSet pbSet = xfilter->execute(ctx);
-        EXPECT_EQ(pbSet.size(), 1u);
-        PointBufferPtr buf = *pbSet.begin();
-        EXPECT_EQ(buf->size(), 750u);
+        PointTable table;
+        xfilter->prepare(table);
+        PointViewSet pvSet = xfilter->execute(table);
+        EXPECT_EQ(pvSet.size(), 1u);
+        PointViewPtr view = *pvSet.begin();
+        EXPECT_EQ(view->size(), 750u);
     }
 
     bool ok = Support::compare_text_files(

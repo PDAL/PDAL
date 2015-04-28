@@ -19,13 +19,11 @@ PDAL_ADD_PLUGIN(programmable_libname filter programmable
     LINK_WITH ${PYTHON_LIBRARY} ${PLANG_LIB_NAME})
 
 if (WITH_TESTS)
-    set(srcs
-        ../test/PredicateFilterTest.cpp
-        ../test/ProgrammableFilterTest.cpp
-    )
+    PDAL_ADD_TEST(python_predicate_test
+            FILES ../test/PredicateFilterTest.cpp
+            LINK_WITH ${predicate_libname} ${PLANG_LIB_NAME})
 
-    PDAL_ADD_TEST(pythontest
-            FILES "${srcs}"
-            LINK_WITH ${predicate_libname} ${programmable_libname}
-                ${PLANG_LIB_NAME})
+    PDAL_ADD_TEST(python_programmable_test
+            FILES ../test/ProgrammableFilterTest.cpp
+            LINK_WITH ${programmable_libname} ${PLANG_LIB_NAME})
 endif()
