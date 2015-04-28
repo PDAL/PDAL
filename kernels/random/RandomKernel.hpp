@@ -34,8 +34,8 @@
 
 #pragma once
 
-#include <pdal/FileUtils.hpp>
-#include "Kernel.hpp"
+#include <pdal/Kernel.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 
 #define SEPARATORS ",| "
@@ -43,23 +43,27 @@
 #include <boost/tokenizer.hpp>
 typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 
+extern "C" int32_t RandomKernel_ExitFunc();
+extern "C" PF_ExitFunc RandomKernel_InitPlugin();
+
 namespace pdal
 {
 
 class PDAL_DLL RandomKernel : public Kernel
 {
 public:
-    SET_KERNEL_NAME ("random", "Random Kernel")
-    SET_KERNEL_LINK ("http://pdal.io/kernels/kernels.random.html")
+    static void *create();
+    static int32_t destroy(void *);
 
-    RandomKernel();
+    std::string getName() const;
     int execute();
 
 private:
+    RandomKernel();
     void addSwitches();
     void validateSwitches();
 
-    Stage* makeReader(Options readerOptions);
+    Stage& makeReader(Options readerOptions);
 
     std::string m_outputFile;
     bool m_bCompress;

@@ -34,16 +34,12 @@
 
 #pragma once
 
-#include <pdal/pdal_internal.hpp>
+#include <pdal/pdal_export.hpp>
 #include <pdal/Stage.hpp>
-#include <pdal/Reader.hpp>
-#include <pdal/Filter.hpp>
-#include <pdal/Writer.hpp>
-#include <pdal/StageInfo.hpp>
 
-#include <vector>
 #include <map>
 #include <string>
+#include <vector>
 
 
 namespace pdal
@@ -68,16 +64,7 @@ class Options;
 class PDAL_DLL StageFactory
 {
 public:
-    typedef Reader* ReaderCreator();
-    typedef Filter* FilterCreator();
-    typedef Writer* WriterCreator();
-
-    typedef std::map<std::string, ReaderCreator*> ReaderCreatorList;
-    typedef std::map<std::string, FilterCreator*> FilterCreatorList;
-    typedef std::map<std::string, WriterCreator*> WriterCreatorList;
-
-public:
-    StageFactory();
+    StageFactory(bool no_plugins = true);
 
     // infer the driver to use based on filename extension
     // returns "" if no driver found
@@ -91,58 +78,15 @@ public:
     // e.g. output files ending in .laz should be compressed
     static pdal::Options inferWriterOptionsChanges(const std::string& filename);
 
-    Reader* createReader(const std::string& type);
-    Filter* createFilter(const std::string& type);
-    Writer* createWriter(const std::string& type);
+    Stage *createStage(const std::string& type) const;
 
-    void registerReader(const std::string& type, ReaderCreator* f);
-    void registerFilter(const std::string& type, FilterCreator* f);
-    void registerWriter(const std::string& type, WriterCreator* f);
-
-    void loadPlugins();
-    void registerPlugin(std::string const& filename);
-
-    std::map<std::string, pdal::StageInfo> const& getStageInfos() const;
-    template<class T> void registerDriverInfo();
-
-    std::string toRST(std::string driverName="") const;
-
-    // callers take ownership of returned stages
-    ReaderCreator* getReaderCreator(const std::string& type) const;
-    FilterCreator* getFilterCreator(const std::string& type) const;
-    WriterCreator* getWriterCreator(const std::string& type) const;
+    StringList getStageNames() const;
+    std::map<std::string, std::string> getStageMap() const;
 
 private:
-    void registerKnownReaders();
-    void registerKnownFilters();
-    void registerKnownWriters();
-
-    // these are the "registries" of the factory creator functions
-    ReaderCreatorList m_readerCreators;
-    FilterCreatorList m_filterCreators;
-    WriterCreatorList m_writerCreators;
-
-    // driver name + driver description
-    std::map<std::string, pdal::StageInfo> m_driver_info;
     StageFactory& operator=(const StageFactory&); // not implemented
     StageFactory(const StageFactory&); // not implemented
 };
-
-template <class T>
-inline void StageFactory::registerDriverInfo()
-{
-
-    pdal::StageInfo info(T::s_getName(), T::s_getDescription());
-    info.setInfoLink(T::s_getInfoLink());
-    info.addProvidedDimensions(T::getDefaultDimensions());
-    info.setPluginVersion(T::s_getPluginVersion());
-
-    std::vector<Option> options = T::getDefaultOptions().getOptions();
-    for (auto i = options.begin(); i != options.end(); ++i)
-        info.addProvidedOption(*i);
-    m_driver_info.insert(
-        std::pair<std::string, pdal::StageInfo>(T::s_getName(), info));
-}
 
 } // namespace pdal
 

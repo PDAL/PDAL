@@ -32,10 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_OPTIONS_HPP
-#define INCLUDED_OPTIONS_HPP
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
+#include <pdal/Metadata.hpp>
+#include <pdal/Utils.hpp>
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/lexical_cast.hpp>
@@ -164,9 +165,12 @@ public:
     }
 
     /// @return the value of the Option as casted by boost::lexical_cast
-    template<typename T> inline T getValue() const
+    template<typename T>
+    T getValue() const
     {
-        return boost::lexical_cast<T>(m_value);
+        T t;
+        getValue(t);
+        return t;
     }
 
     /// sets the value of the Option to T after boost::lexical_cast'ing
@@ -196,27 +200,8 @@ public:
 
     bool empty();
 
-/// @name Windows specializations
+
 #if defined(PDAL_COMPILER_MSVC)
-
-    /// explicit specialization to return actual bools in the case that
-    /// the string value of the Option is "true" or "false"
-    template<> bool getValue() const
-    {
-        if (m_value == "true")
-            return true;
-        if (m_value=="false")
-            return false;
-        return boost::lexical_cast<bool>(m_value);
-    }
-
-    /// explicit specialization to return a (const ref) string so we
-    /// don't need lexical_cast
-    template<> const std::string& getValue() const
-    {
-        return m_value;
-    }
-
     /// explicit specialization to insert a bool as "true" and "false" rather
     /// than "0" or "1" (which is what lexical_cast would do)
     template<> void setValue(const bool& value)
@@ -231,24 +216,46 @@ public:
     }
 #endif
 
+    void toMetadata(MetadataNode& parent) const;
+
 /// @name Private attributes
 private:
     std::string m_name;
     std::string m_value;
     std::string m_description; // optional field
-    options::OptionsPtr m_options; // any other Options instances this field may contain
+    options::OptionsPtr m_options; // Sub-options.
+
+    template <typename T>
+    void getValue(T& t) const
+    {
+        t = boost::lexical_cast<T>(m_value);
+    }
+
+    void getValue(StringList& values) const
+    {
+        values = Utils::split2(m_value, ',');
+        for (std::string& s : values)
+            Utils::trim(s);
+    }
+
+    void getValue(bool& value) const
+    {
+        if (m_value == "true")
+            value = true;
+        else if (m_value == "false")
+            value = false;
+        else
+            value = boost::lexical_cast<bool>(m_value);
+    }
+
+    /// Avoid lexical cast.
+    void getValue(std::string& value) const
+        { value = m_value; }
 };
 
 
 /// @name Specializations
 #if !defined(PDAL_COMPILER_VC10)
-
-/// explicit specialization to return actual bools in the case that
-/// the string value of the Option is "true" or "false"
-template<> bool Option::getValue() const;
-
-/// explicit specialization to return a (const ref) string so we don't need lexical_cast
-template<> const std::string& Option::getValue() const;
 
 /// explicit specialization to insert a bool as "true" and "false" rather
 /// than "0" or "1" (which is what lexical_cast would do)
@@ -282,7 +289,6 @@ template<> void Option::setValue(const std::string& value);
 class PDAL_DLL Options
 {
 public:
-    // defult ctor, empy options list
     Options()  {}
 
     // copy ctor
@@ -336,6 +342,29 @@ public:
     // if option name not present, just returns
     void remove(const std::string& name);
 
+    MetadataNode toMetadata() const
+    {
+        MetadataNode cur("options");
+        std::vector<Option> optList = getOptions();
+        for (auto oi = optList.begin(); oi != optList.end(); ++oi)
+        {
+            Option& opt = *oi;
+            opt.toMetadata(cur);
+        }
+        return cur;
+    }
+
+    void toMetadata(MetadataNode& parent) const
+    {
+        MetadataNode cur = parent.add("options");
+        std::vector<Option> optList = getOptions();
+        for (auto oi = optList.begin(); oi != optList.end(); ++oi)
+        {
+            Option& opt = *oi;
+            opt.toMetadata(cur);
+        }
+    }
+
     // add an option (shortcut version, bypass need for an Option object)
     template<typename T> void add(const std::string& name, T value,
         const std::string& description="")
@@ -357,8 +386,8 @@ public:
     }
 
     // get value of an option, or use given default if option not present
-    template<typename T> T getValueOrDefault(std::string const& name,
-        T defaultValue) const
+    template<typename T>
+    T getValueOrDefault(std::string const& name, T defaultValue) const
     {
         T result;
 
@@ -371,8 +400,24 @@ public:
         {
             result = defaultValue;
         }
-
         return result;
+    }
+
+    // get value of an option or use a value-initialized default
+    template<typename T>
+    T getValueOrDefault(std::string const& name) const
+    {
+        T out;
+
+#if defined(PDAL_COMPILER_MSVC)
+        T *t = new T();
+        out = getValueOrDefault(name, *t);
+        delete t;
+#else
+        T t{};
+        out = getValueOrDefault(name, t);
+#endif
+        return out;
     }
 
 
@@ -460,4 +505,3 @@ PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const Options&);
 
 } // namespace pdal
 
-#endif

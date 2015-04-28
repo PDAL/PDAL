@@ -34,16 +34,41 @@
 
 #include <pdal/StageFactory.hpp>
 
-#include <pdal/Filter.hpp>
-#include <pdal/Reader.hpp>
-#include <pdal/Writer.hpp>
-
-
-#include <pdal/Drivers.hpp>
-#include <pdal/Filters.hpp>
-
 #include <pdal/Utils.hpp>
+#include <pdal/PluginManager.hpp>
 
+// filters
+#include <chipper/ChipperFilter.hpp>
+#include <colorization/ColorizationFilter.hpp>
+#include <crop/CropFilter.hpp>
+#include <decimation/DecimationFilter.hpp>
+#include <ferry/FerryFilter.hpp>
+#include <merge/MergeFilter.hpp>
+#include <mortonorder/MortonOrderFilter.hpp>
+#include <range/RangeFilter.hpp>
+#include <reprojection/ReprojectionFilter.hpp>
+#include <sort/SortFilter.hpp>
+#include <splitter/SplitterFilter.hpp>
+#include <stats/StatsFilter.hpp>
+#include <transformation/TransformationFilter.hpp>
+
+// readers
+#include <bpf/BpfReader.hpp>
+#include <faux/FauxReader.hpp>
+#include <las/LasReader.hpp>
+#include <optech/OptechReader.hpp>
+#include <pdal/BufferReader.hpp>
+#include <qfit/QfitReader.hpp>
+#include <sbet/SbetReader.hpp>
+#include <terrasolid/TerrasolidReader.hpp>
+
+// writers
+#include <bpf/BpfWriter.hpp>
+#include <las/LasWriter.hpp>
+#include <rialto/RialtoWriter.hpp>
+#include <sbet/SbetWriter.hpp>
+#include <text/TextWriter.hpp>
+#include <null/NullWriter.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
@@ -52,91 +77,35 @@
 
 #include <sstream>
 #include <string>
-#include <vector>
 #include <stdio.h> // for funcptr
 
 namespace pdal
 {
 
-//
-// define the functions to create the readers
-//
-MAKE_READER_CREATOR(FauxReader, pdal::FauxReader)
-MAKE_READER_CREATOR(LasReader, pdal::LasReader)
-MAKE_READER_CREATOR(BpfReader, pdal::BpfReader)
-MAKE_READER_CREATOR(BufferReader, pdal::BufferReader)
-MAKE_READER_CREATOR(QfitReader, pdal::QfitReader)
-MAKE_READER_CREATOR(SbetReader, pdal::SbetReader)
-MAKE_READER_CREATOR(TerrasolidReader, pdal::TerrasolidReader)
-
-//
-// define the functions to create the filters
-//
-MAKE_FILTER_CREATOR(Chipper, pdal::ChipperFilter)
-MAKE_FILTER_CREATOR(Colorization, pdal::ColorizationFilter)
-MAKE_FILTER_CREATOR(Crop, pdal::CropFilter)
-MAKE_FILTER_CREATOR(Decimation, pdal::DecimationFilter)
-MAKE_FILTER_CREATOR(Ferry, pdal::FerryFilter)
-MAKE_FILTER_CREATOR(Merge, pdal::MergeFilter)
-MAKE_FILTER_CREATOR(MortonOrder, pdal::MortonOrderFilter)
-MAKE_FILTER_CREATOR(Reprojection, pdal::ReprojectionFilter)
-MAKE_FILTER_CREATOR(Sort, pdal::SortFilter)
-MAKE_FILTER_CREATOR(Splitter, pdal::SplitterFilter)
-MAKE_FILTER_CREATOR(Stats, pdal::StatsFilter)
-MAKE_FILTER_CREATOR(Transformation, pdal::TransformationFilter)
-
-//
-// define the functions to create the writers
-//
-MAKE_WRITER_CREATOR(BpfWriter, pdal::BpfWriter)
-MAKE_WRITER_CREATOR(LasWriter, pdal::LasWriter)
-MAKE_WRITER_CREATOR(SbetWriter, pdal::SbetWriter)
-MAKE_WRITER_CREATOR(TextWriter, pdal::TextWriter)
-
-StageFactory::StageFactory()
-{
-    registerKnownReaders();
-    registerKnownFilters();
-    registerKnownWriters();
-
-    loadPlugins();
-    return;
-}
-
-
 std::string StageFactory::inferReaderDriver(const std::string& filename)
 {
-    StageFactory f;
-
     // filename may actually be a greyhound uri + pipelineId
     std::string http = filename.substr(0, 4);
-    if (boost::iequals(http, "http") && f.getReaderCreator("readers.greyhound"))
+    if (boost::iequals(http, "http"))
         return "readers.greyhound";
 
     std::string ext = boost::filesystem::extension(filename);
     std::map<std::string, std::string> drivers;
+    drivers["bin"] = "readers.terrasolid";
+    drivers["bpf"] = "readers.bpf";
+    drivers["cpd"] = "readers.optech";
+    drivers["greyhound"] = "readers.greyhound";
+    drivers["icebridge"] = "readers.icebridge";
     drivers["las"] = "readers.las";
     drivers["laz"] = "readers.las";
-    drivers["bin"] = "readers.terrasolid";
-    if (f.getReaderCreator("readers.greyhound"))
-        drivers["greyhound"] = "readers.greyhound";
+    drivers["nitf"] = "readers.nitf";
+    drivers["nsf"] = "readers.nitf";
+    drivers["ntf"] = "readers.nitf";
+    drivers["pcd"] = "readers.pcd";
     drivers["qi"] = "readers.qfit";
-    if (f.getReaderCreator("readers.nitf"))
-    {
-        drivers["nitf"] = "readers.nitf";
-        drivers["ntf"] = "readers.nitf";
-        drivers["nsf"] = "readers.nitf";
-    }
-    drivers["bpf"] = "readers.bpf";
+    drivers["rxp"] = "readers.rxp";
     drivers["sbet"] = "readers.sbet";
-    drivers["icebridge"] = "readers.icebridge";
     drivers["sqlite"] = "readers.sqlite";
-
-    if (f.getReaderCreator("readers.rxp"))
-        drivers["rxp"] = "readers.rxp";
-
-    if (f.getReaderCreator("readers.pcd"))
-        drivers["pcd"] = "readers.pcd";
 
     if (ext == "") return "";
     ext = ext.substr(1, ext.length()-1);
@@ -156,21 +125,18 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
 
     std::map<std::string, std::string> drivers;
     drivers["bpf"] = "writers.bpf";
-    drivers["las"] = "writers.las";
-    drivers["laz"] = "writers.las";
-    StageFactory f;
-    if (f.getWriterCreator("writers.pcd"))
-        drivers["pcd"] = "writers.pcd";
-    if (f.getWriterCreator("writers.pclvisualizer"))
-        drivers["pclviz"] = "writers.pclvisualizer";
-    drivers["sbet"] = "writers.sbet";
     drivers["csv"] = "writers.text";
     drivers["json"] = "writers.text";
-    drivers["xyz"] = "writers.text";
-    drivers["txt"] = "writers.text";
-    if (f.getWriterCreator("writers.nitf"))
-        drivers["ntf"] = "writers.nitf";
+    drivers["las"] = "writers.las";
+    drivers["laz"] = "writers.las";
+    drivers["ntf"] = "writers.nitf";
+    drivers["pcd"] = "writers.pcd";
+    drivers["pclviz"] = "writers.pclvisualizer";
+    drivers["ria"] = "writers.rialto";
+    drivers["sbet"] = "writers.sbet";
     drivers["sqlite"] = "writers.sqlite";
+    drivers["txt"] = "writers.text";
+    drivers["xyz"] = "writers.text";
 
     if (boost::algorithm::iequals(filename, "STDOUT"))
     {
@@ -187,7 +153,8 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
 }
 
 
-pdal::Options StageFactory::inferWriterOptionsChanges(const std::string& filename)
+pdal::Options StageFactory::inferWriterOptionsChanges(
+    const std::string& filename)
 {
     std::string ext = boost::filesystem::extension(filename);
     boost::to_lower(ext);
@@ -198,8 +165,8 @@ pdal::Options StageFactory::inferWriterOptionsChanges(const std::string& filenam
         options.add("compression", true);
     }
 
-    StageFactory f;
-    if (boost::algorithm::iequals(ext,".pcd") && f.getWriterCreator("writers.pcd"))
+    PluginManager & pm = PluginManager::getInstance();
+    if (boost::algorithm::iequals(ext,".pcd") && pm.createObject("writers.pcd"))
     {
         options.add("format","PCD");
     }
@@ -208,306 +175,97 @@ pdal::Options StageFactory::inferWriterOptionsChanges(const std::string& filenam
     return options;
 }
 
-
-Reader* StageFactory::createReader(const std::string& type)
+StageFactory::StageFactory(bool no_plugins)
 {
-    ReaderCreator* f = getReaderCreator(type);
-    if (!f)
+    PluginManager & pm = PluginManager::getInstance();
+    if (!no_plugins)
     {
-        std::ostringstream oss;
-        oss << "Unable to create reader for type '" << type << "'. Does a driver with this type name exist?";
-        throw pdal_error(oss.str());
+        pm.loadAll(PF_PluginType_Filter);
+        pm.loadAll(PF_PluginType_Reader);
+        pm.loadAll(PF_PluginType_Writer);
     }
-    Reader* stage = f();
+
+    // filters
+    PluginManager::initializePlugin(ChipperFilter_InitPlugin);
+    PluginManager::initializePlugin(ColorizationFilter_InitPlugin);
+    PluginManager::initializePlugin(CropFilter_InitPlugin);
+    PluginManager::initializePlugin(DecimationFilter_InitPlugin);
+    PluginManager::initializePlugin(FerryFilter_InitPlugin);
+    PluginManager::initializePlugin(MergeFilter_InitPlugin);
+    PluginManager::initializePlugin(MortonOrderFilter_InitPlugin);
+    PluginManager::initializePlugin(RangeFilter_InitPlugin);
+    PluginManager::initializePlugin(ReprojectionFilter_InitPlugin);
+    PluginManager::initializePlugin(SortFilter_InitPlugin);
+    PluginManager::initializePlugin(SplitterFilter_InitPlugin);
+    PluginManager::initializePlugin(StatsFilter_InitPlugin);
+    PluginManager::initializePlugin(TransformationFilter_InitPlugin);
+
+    // readers
+    PluginManager::initializePlugin(BpfReader_InitPlugin);
+    PluginManager::initializePlugin(FauxReader_InitPlugin);
+    PluginManager::initializePlugin(LasReader_InitPlugin);
+    PluginManager::initializePlugin(OptechReader_InitPlugin);
+    PluginManager::initializePlugin(QfitReader_InitPlugin);
+    PluginManager::initializePlugin(SbetReader_InitPlugin);
+    PluginManager::initializePlugin(TerrasolidReader_InitPlugin);
+
+    // writers
+    PluginManager::initializePlugin(BpfWriter_InitPlugin);
+    PluginManager::initializePlugin(LasWriter_InitPlugin);
+    PluginManager::initializePlugin(RialtoWriter_InitPlugin);
+    PluginManager::initializePlugin(SbetWriter_InitPlugin);
+    PluginManager::initializePlugin(TextWriter_InitPlugin);
+    PluginManager::initializePlugin(NullWriter_InitPlugin);
+}
+
+/// Create a stage and return a pointer to the created stage.  Caller takes
+/// ownership and is responsible for stage cleanup.
+///
+/// \param[in] stage_name  Type of stage to by created.
+/// \return  Pointer to created stage.
+///
+Stage *StageFactory::createStage(std::string const& stage_name) const
+{
+    PluginManager& pm = PluginManager::getInstance();
+
+    Stage *stage = (Stage *)pm.createObject(stage_name);
+    if (!stage)
+        if (pm.guessLoadByPath(stage_name) == 0)
+            stage = (Stage *)pm.createObject(stage_name);
     return stage;
 }
 
 
-Filter* StageFactory::createFilter(const std::string& type)
+StringList StageFactory::getStageNames() const
 {
-    FilterCreator* f = getFilterCreator(type);
-    if (!f)
+    PluginManager & pm = PluginManager::getInstance();
+    PluginManager::RegistrationMap rm = pm.getRegistrationMap();
+    StringList nv;
+    for (auto r : rm)
     {
-        std::ostringstream oss;
-        oss << "Unable to create filter for type '" << type << "'. Does a driver with this type name exist?";
-        throw pdal_error(oss.str());
+        if (r.second.pluginType == PF_PluginType_Filter ||
+            r.second.pluginType == PF_PluginType_Reader ||
+            r.second.pluginType == PF_PluginType_Writer)
+            nv.push_back(r.first);
     }
-
-    return f();
+    return nv;
 }
 
 
-Writer* StageFactory::createWriter(const std::string& type)
+std::map<std::string, std::string> StageFactory::getStageMap() const
 {
-    WriterCreator* f = getWriterCreator(type);
-    if (!f)
+    PluginManager& pm = PluginManager::getInstance();
+    PluginManager::RegistrationMap rm = pm.getRegistrationMap();
+    std::map<std::string, std::string> sm;
+    for (auto r : rm)
     {
-        std::ostringstream oss;
-        oss << "Unable to create writer for type '" << type <<
-            "'. Does a driver with this type name exist?";
-        throw pdal_error(oss.str());
+        if (r.second.pluginType == PF_PluginType_Filter ||
+            r.second.pluginType == PF_PluginType_Reader ||
+            r.second.pluginType == PF_PluginType_Writer)
+            sm.insert(std::make_pair(r.first, r.second.description));
     }
-
-    return f();
-}
-
-
-template<typename T>
-static T* findFirst(const std::string& type, std::map<std::string, T*> list)
-{
-    typename std::map<std::string, T*>::const_iterator iter = list.find(type);
-    if (iter == list.end())
-        return NULL;
-    return (*iter).second;
-}
-
-
-StageFactory::ReaderCreator* StageFactory::getReaderCreator(const std::string& type) const
-{
-    return findFirst<ReaderCreator>(type, m_readerCreators);
-}
-
-
-StageFactory::FilterCreator* StageFactory::getFilterCreator(const std::string& type) const
-{
-    return findFirst<FilterCreator>(type, m_filterCreators);
-}
-
-
-StageFactory::WriterCreator* StageFactory::getWriterCreator(const std::string& type) const
-{
-    return findFirst<WriterCreator>(type, m_writerCreators);
-}
-
-
-void StageFactory::registerReader(const std::string& type, ReaderCreator* f)
-{
-    std::pair<std::string, ReaderCreator*> p(type, f);
-    m_readerCreators.insert(p);
-}
-
-
-void StageFactory::registerFilter(const std::string& type, FilterCreator* f)
-{
-    std::pair<std::string, FilterCreator*> p(type, f);
-    m_filterCreators.insert(p);
-}
-
-
-void StageFactory::registerWriter(const std::string& type, WriterCreator* f)
-{
-    std::pair<std::string, WriterCreator*> p(type, f);
-    m_writerCreators.insert(p);
-}
-
-
-void StageFactory::registerKnownReaders()
-{
-    REGISTER_READER(FauxReader, pdal::FauxReader);
-    REGISTER_READER(BufferReader, pdal::BufferReader);
-    REGISTER_READER(LasReader, pdal::LasReader);
-
-    REGISTER_READER(QfitReader, pdal::QfitReader);
-    REGISTER_READER(TerrasolidReader, pdal::TerrasolidReader);
-    REGISTER_READER(BpfReader, pdal::BpfReader);
-    REGISTER_READER(SbetReader, pdal::SbetReader);
-}
-
-
-void StageFactory::registerKnownFilters()
-{
-    REGISTER_FILTER(Chipper, pdal::ChipperFilter);
-    REGISTER_FILTER(Colorization, pdal::ColorizationFilter);
-    REGISTER_FILTER(Crop, pdal::CropFilter);
-    REGISTER_FILTER(Decimation, pdal::DecimationFilter);
-    REGISTER_FILTER(Ferry, pdal::FerryFilter);
-    REGISTER_FILTER(Merge, pdal::MergeFilter);
-    REGISTER_FILTER(MortonOrder, pdal::MortonOrderFilter);
-    REGISTER_FILTER(Reprojection, pdal::ReprojectionFilter);
-    REGISTER_FILTER(Sort, pdal::SortFilter);
-    REGISTER_FILTER(Splitter, pdal::SplitterFilter);
-    REGISTER_FILTER(Stats, pdal::StatsFilter);
-    REGISTER_FILTER(Transformation, pdal::TransformationFilter);
-}
-
-
-void StageFactory::registerKnownWriters()
-{
-    REGISTER_WRITER(BpfWriter, pdal::BpfWriter);
-    REGISTER_WRITER(LasWriter, pdal::LasWriter);
-    REGISTER_WRITER(SbetWriter, pdal::SbetWriter);
-    REGISTER_WRITER(TextWriter, pdal::TextWriter);
-}
-
-void StageFactory::loadPlugins()
-{
-    using namespace boost::filesystem;
-
-    std::string driver_path("PDAL_DRIVER_PATH");
-    std::string pluginDir = Utils::getenv(driver_path);
-
-    // Only filenames that start with libpdal_plugin are candidates to be loaded
-    // at runtime.  PDAL plugins are to be named in a specified form:
-
-    // libpdal_plugin_{stagetype}_{name}
-
-    // For example, libpdal_plugin_writer_text or libpdal_plugin_filter_color
-
-
-    // If we don't have a driver path, we'll default to /usr/local/lib and lib
-
-    if (pluginDir.size() == 0)
-    {
-        std::ostringstream oss;
-         oss << PDAL_PLUGIN_INSTALL_PATH << ":/usr/local/lib:./lib:../lib:../bin";
-        pluginDir = oss.str();
-    }
-
-    std::vector<std::string> pluginPathVec;
-    boost::algorithm::split(pluginPathVec, pluginDir,
-        boost::algorithm::is_any_of(":"), boost::algorithm::token_compress_on);
-
-    for (const auto& pluginPath : pluginPathVec)
-    {
-        if (!boost::filesystem::is_directory(pluginPath))
-            continue;
-        directory_iterator dir(pluginPath), it, end;
-
-        std::map<path, path> pluginFilenames;
-
-        // Collect candidate filenames in the above form. Prefer symlink files
-        // over hard files if their basenames are the same.
-        for (it = dir; it != end; ++it)
-        {
-            path p = it->path();
-
-            if (boost::algorithm::istarts_with(p.filename().string(),
-                 "libpdal_plugin"))
-            {
-                path extension = p.extension();
-                if (boost::algorithm::iends_with(extension.string(), "DLL") ||
-                    boost::algorithm::iends_with(extension.string(), "DYLIB") ||
-                    boost::algorithm::iends_with(extension.string(), "SO"))
-                {
-                    std::string basename;
-
-                    // Step through the stems until the extension of the stem
-                    // is empty. This is our basename.  For example,
-                    // libpdal_plugin_writer_text.0.dylib will basename down to
-                    // libpdal_plugin_writer_text and so will
-                    // libpdal_plugin_writer_text.dylib
-                    // copy the path so we can modify in place
-                    path t = p;
-                    for (; !t.extension().empty(); t = t.stem())
-                    {
-                        if (t.stem().extension().empty())
-                        {
-                            basename = t.stem().string();
-                        }
-                    }
-
-                    if (pluginFilenames.find(basename) == pluginFilenames.end())
-                    {
-                        // We haven't already loaded a plugin with this basename,
-                        // load it.
-                        pluginFilenames.insert(std::pair<path, path>(basename, p));
-                    }
-                    else
-                    {
-                        // We already have a filename with the basename of this
-                        // file.  If the basename of our current file is a symlink
-                        // we're going to replace what's in the map with ours because
-                        // we are going to presume that a symlink'd file is more
-                        // cannonical than a hard file of the same name.
-                        std::map<path, path>::iterator i = pluginFilenames.find(basename);
-                        if (it->symlink_status().type() == symlink_file)
-                        {
-                            // Take the symlink over a hard SO
-                            i->second = p;
-                        }
-                    }
-                }
-            }
-        }
-
-        std::map<std::string, std::string> registerMethods;
-
-        for (std::map<path, path>::iterator t = pluginFilenames.begin();
-                t!= pluginFilenames.end(); t ++)
-        {
-            // Basenames must be in the following form:
-            // libpdal_plugin_writer_text or libpdal_plugin_filter_color
-            // The last two tokens are the stage type and the stage name.
-            path basename = t->first;
-            path filename = t->second;
-
-            registerPlugin(filename.string());
-            // std::string methodName = "PDALRegister_" + boost::algorithm::ireplace_first_copy(basename.string(), "libpdal_plugin_", "");
-            // Utils::registerPlugin((void*)this, filename.string(), methodName);
-
-        }
-    }
-}
-
-void StageFactory::registerPlugin(std::string const& filename)
-{
-    using namespace boost::filesystem;
-    path basename;
-
-    path t = path(filename);
-    for (; !t.extension().empty(); t = t.stem())
-    {
-        if (t.stem().extension().empty())
-        {
-            basename = t.stem().string();
-        }
-    }
-
-    std::string base = basename.string();
-    std::string pluginName = boost::algorithm::ireplace_first_copy(base, "libpdal_plugin_", "");
-
-    std::string registerMethodName = "PDALRegister_" + pluginName;
-
-    std::string versionMethodName = "PDALRegister_version_" + pluginName;
-
-    Utils::registerPlugin((void*)this, filename, registerMethodName, versionMethodName);
-
-}
-
-
-std::map<std::string, pdal::StageInfo> const& StageFactory::getStageInfos() const
-{
-    return m_driver_info;
-}
-
-std::string StageFactory::toRST(std::string driverName) const
-{
-    std::ostringstream os;
-
-    std::map<std::string, pdal::StageInfo> const& drivers = getStageInfos();
-    typedef std::map<std::string, pdal::StageInfo>::const_iterator Iterator;
-
-    Iterator i = drivers.find(driverName);
-    std::string headline("------------------------------------------------------------------------------------------");
-
-    os << headline << std::endl;
-    os << "PDAL Options" << " (" << pdal::GetFullVersionString() << ")" <<std::endl;
-    os << headline << std::endl << std::endl;
-
-    // If we were given an explicit driver name, only display that.
-    // Otherwise, display output for all of the registered drivers.
-    if ( i != drivers.end())
-    {
-        os << i->second.optionsToRST() << std::endl;
-    }
-    else
-    {
-        for (i = drivers.begin(); i != drivers.end(); ++i)
-        {
-            os << i->second.optionsToRST() << std::endl;
-        }
-    }
-    return os.str();
+    return sm;
 }
 
 } // namespace pdal
+

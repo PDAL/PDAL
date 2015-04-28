@@ -33,7 +33,6 @@
 ****************************************************************************/
 
 #include "Script.hpp"
-//#include <pdal/FileUtils.hpp>
 
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127) // conditional expression is constant
@@ -51,11 +50,9 @@ Script::Script(const std::string& source, const std::string& module,
 }
 
 
-std::ostream& operator<<(std::ostream& os, Script const& script)
+std::ostream& operator << (std::ostream& os, Script const& script)
 {
-    int len = strlen(script.source());
-
-    os << "source=[" << len << " bytes], ";
+    os << "source=[" << strlen(script.source()) << " bytes], ";
     os << "module=" << script.module() << ", ";
     os << "function=" << script.function();
     os << std::endl;

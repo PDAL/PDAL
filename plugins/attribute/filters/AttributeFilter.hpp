@@ -50,7 +50,7 @@ namespace pdal
 
 namespace gdal
 {
-    class Debug;
+    class ErrorHandler;
 }
 
 
@@ -110,22 +110,20 @@ typedef std::map< std::string, AttributeInfo> AttributeInfoMap;
 
 class PDAL_DLL AttributeFilter : public Filter
 {
-#define ATTRIBUTEDOCS "Assign values for a dimension using a specified value, \n" \
-                      "an OGR-readable data source, or an OGR SQL query."
 public:
-    SET_STAGE_NAME("filters.attribute", ATTRIBUTEDOCS)
-    SET_STAGE_LINK("http://pdal.io/stages/filters.attribute.html")
-    SET_PLUGIN_VERSION("1.0.0b1")
-
     AttributeFilter() : Filter(), m_geosEnvironment(0) {};
-    static Options getDefaultOptions();
+
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const { return "filters.attribute"; }
+
+    Options getDefaultOptions();
 
 private:
     virtual void initialize();
     virtual void processOptions(const Options&);
-    virtual void ready(PointContext ctx);
-    virtual void filter(PointBuffer& buffer);
-    virtual void done(PointContext ctx);
+    virtual void ready(PointTableRef table);
+    virtual void filter(PointView& view);
 
     AttributeFilter& operator=(const AttributeFilter&); // not implemented
     AttributeFilter(const AttributeFilter&); // not implemented
@@ -134,8 +132,8 @@ private:
 
     AttributeInfoMap m_dimensions;
     GEOSContextHandle_t m_geosEnvironment;
-    std::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
-    void UpdateGEOSBuffer(PointBuffer& buffer, AttributeInfo& info);
+    std::unique_ptr<pdal::gdal::ErrorHandler> m_gdal_debug;
+    void UpdateGEOSBuffer(PointView& view, AttributeInfo& info);
 
 };
 

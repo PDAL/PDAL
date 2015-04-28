@@ -34,15 +34,23 @@
 ****************************************************************************/
 
 #include "PgReader.hpp"
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/XMLSchema.hpp>
 
 #include <iostream>
 
-CREATE_READER_PLUGIN(pgpointcloud, pdal::PgReader)
-
 namespace pdal
 {
+
+static PluginInfo const s_info = PluginInfo(
+    "readers.pgpointcloud",
+    "Read data from pgpointcloud format. \"query\" option needs to be a \n" \
+        "SQL statment selecting the data.",
+    "http://pdal.io/stages/readers.pgpointcloud.html" );
+
+CREATE_SHARED_PLUGIN(1, 0, PgReader, Reader, s_info)
+
+std::string PgReader::getName() const { return s_info.name; }
 
 PgReader::PgReader() : m_session(NULL), m_pcid(0), m_cached_point_count(0),
     m_cached_max_points(0)
@@ -100,11 +108,11 @@ point_count_t PgReader::getNumPoints() const
         return m_cached_point_count;
 
     std::ostringstream oss;
-    oss << "SELECT Sum(PC_NumPoints(" << m_column_name << ")) AS numpoints, ";
-    oss << "Max(PC_NumPoints(" << m_column_name << ")) AS maxpoints FROM ";
+    oss << "SELECT Sum(PC_NumPoints(" << pg_quote_identifier(m_column_name) << ")) AS numpoints, ";
+    oss << "Max(PC_NumPoints(" << pg_quote_identifier(m_column_name) << ")) AS maxpoints FROM ";
     if (m_schema_name.size())
-        oss << m_schema_name << ".";
-    oss << m_table_name;
+        oss << pg_quote_identifier(m_schema_name) << ".";
+    oss << pg_quote_identifier(m_table_name);
     if (m_where.size())
         oss << " WHERE " << m_where;
 
@@ -126,12 +134,14 @@ point_count_t PgReader::getNumPoints() const
 std::string PgReader::getDataQuery() const
 {
     std::ostringstream oss;
-    oss << "SELECT text(PC_Uncompress(" << m_column_name << ")) AS pa, ";
-    oss << "PC_NumPoints(" << m_column_name << ") AS npoints FROM ";
-    if (m_schema_name.size())
-        oss << m_schema_name << ".";
-    oss << m_table_name;
-    if (m_where.size())
+    oss << "SELECT text(PC_Uncompress(" << pg_quote_identifier(m_column_name) <<
+        ")) AS pa, ";
+    oss << "PC_NumPoints(" << pg_quote_identifier(m_column_name) <<
+        ") AS npoints FROM ";
+    if (!m_schema_name.empty())
+        oss << pg_quote_identifier(m_schema_name) << ".";
+    oss << pg_quote_identifier(m_table_name);
+    if (!m_where.empty())
         oss << " WHERE " << m_where;
 
     log()->get(LogLevel::Debug) << "Constructed data query " <<
@@ -157,9 +167,18 @@ uint32_t PgReader::fetchPcid() const
 
     std::ostringstream oss;
     oss << "SELECT PC_Typmod_Pcid(a.atttypmod) AS pcid ";
-    oss << "FROM pg_class c, pg_attribute a ";
-    oss << "WHERE c.relname = '" << m_table_name << "' ";
-    oss << "AND a.attname = '" << m_column_name << "' ";
+    oss << "FROM pg_class c, pg_attribute a";
+    if (!m_schema_name.empty())
+    {
+      oss << ", pg_namespace n";
+    }
+    oss << " WHERE c.relname = " << pg_quote_literal(m_table_name);
+    oss << " AND a.attname = " << pg_quote_literal(m_column_name);
+    if (!m_schema_name.empty())
+    {
+        oss << " AND c.relnamespace = n.oid AND n.nspname = " <<
+            pg_quote_literal(m_schema_name);
+    }
 
     char *pcid_str = pg_query_once(m_session, oss.str());
 
@@ -174,8 +193,10 @@ uint32_t PgReader::fetchPcid() const
     {
         std::ostringstream oss;
         oss << "Unable to fetch pcid with column '"
-            << m_column_name <<"' and  table '"
-            << m_table_name <<"'";
+            << m_column_name <<"' and  table ";
+        if (!m_schema_name.empty())
+          oss << "'" << m_schema_name << "'.";
+        oss << "'" << m_table_name << "'";
         throw pdal_error(oss.str());
     }
 
@@ -185,7 +206,7 @@ uint32_t PgReader::fetchPcid() const
 }
 
 
-void PgReader::addDimensions(PointContextRef ctx)
+void PgReader::addDimensions(PointLayoutPtr layout)
 {
     log()->get(LogLevel::Debug) << "Fetching schema object" << std::endl;
 
@@ -198,7 +219,7 @@ void PgReader::addDimensions(PointContextRef ctx)
     if (!xmlStr)
         throw pdal_error("Unable to fetch schema from `pointcloud_formats`");
 
-    loadSchema(ctx, xmlStr);
+    loadSchema(layout, xmlStr);
     free(xmlStr);
 }
 
@@ -230,7 +251,7 @@ pdal::SpatialReference PgReader::fetchSpatialReference() const
 }
 
 
-void PgReader::ready(PointContextRef ctx)
+void PgReader::ready(PointTableRef /*table*/)
 {
     m_atEnd = false;
     m_cur_row = 0;
@@ -240,15 +261,11 @@ void PgReader::ready(PointContextRef ctx)
     if (getSpatialReference().empty())
         setSpatialReference(fetchSpatialReference());
 
-    m_point_size = 0;
-    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
-        m_point_size += Dimension::size(di->m_dimType.m_type);
-
     CursorSetup();
 }
 
 
-void PgReader::done(PointContextRef ctx)
+void PgReader::done(PointTableRef /*table*/)
 {
     CursorTeardown();
     if (m_session)
@@ -287,19 +304,19 @@ void PgReader::CursorTeardown()
 }
 
 
-point_count_t PgReader::readPgPatch(PointBuffer& buffer, point_count_t numPts)
+point_count_t PgReader::readPgPatch(PointViewPtr view, point_count_t numPts)
 {
     point_count_t numRemaining = m_patch.remaining;
-    PointId nextId = buffer.size();
+    PointId nextId = view->size();
     point_count_t numRead = 0;
 
-    size_t offset = ((m_patch.count - m_patch.remaining) * m_point_size);
+    size_t offset = (m_patch.count - m_patch.remaining) * packedPointSize();
     char *pos = (char *)(m_patch.binary.data() + offset);
 
     while (numRead < numPts && numRemaining > 0)
     {
-        writePoint(buffer, nextId, pos);
-        pos += m_point_size;
+        writePoint(*view.get(), nextId, pos);
+        pos += packedPointSize();
         numRemaining--;
         nextId++;
         numRead++;
@@ -342,13 +359,13 @@ bool PgReader::NextBuffer()
 }
 
 
-point_count_t PgReader::read(PointBuffer& buffer, point_count_t count)
+point_count_t PgReader::read(PointViewPtr view, point_count_t count)
 {
     if (eof())
         return 0;
 
     log()->get(LogLevel::Debug) << "readBufferImpl called with "
-        "PointBuffer filled to " << buffer.size() << " points" <<
+        "PointView filled to " << view->size() << " points" <<
         std::endl;
 
     point_count_t totalNumRead = 0;
@@ -357,8 +374,8 @@ point_count_t PgReader::read(PointBuffer& buffer, point_count_t count)
         if (m_patch.remaining == 0)
             if (!NextBuffer())
                 return totalNumRead;
-        PointId bufBegin = buffer.size();
-        point_count_t numRead = readPgPatch(buffer, count - totalNumRead);
+        PointId bufBegin = view->size();
+        point_count_t numRead = readPgPatch(view, count - totalNumRead);
         PointId bufEnd = bufBegin + numRead;
         totalNumRead += numRead;
     }

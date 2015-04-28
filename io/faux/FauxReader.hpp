@@ -36,6 +36,9 @@
 
 #include <pdal/Reader.hpp>
 
+extern "C" int32_t FauxReader_ExitFunc();
+extern "C" PF_ExitFunc FauxReader_InitPlugin();
+
 namespace pdal
 {
 
@@ -77,14 +80,17 @@ enum Mode
 // activated by passing a numeric value as "number_of_returns" to the
 // reader constructor.
 //
-class PDAL_DLL FauxReader : public pdal::Reader
+class PDAL_DLL FauxReader : public Reader
 {
 public:
-    SET_STAGE_NAME("readers.faux", "Faux Reader")
-
     FauxReader();
 
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+
     static Dimension::IdList getDefaultDimensions();
+    Options getDefaultOptions();
 
 private:
     Mode m_mode;
@@ -105,13 +111,13 @@ private:
     int m_returnNum;
 
     virtual void processOptions(const Options& options);
-    virtual void addDimensions(PointContextRef ctx);
-    virtual void ready(PointContextRef ctx)
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void ready(PointTableRef table)
     {
         m_returnNum = 1;
         m_time = 0;
     }
-    virtual point_count_t read(PointBuffer& buf, point_count_t count);
+    virtual point_count_t read(PointViewPtr view, point_count_t count);
     virtual bool eof()
         { return false; }
 

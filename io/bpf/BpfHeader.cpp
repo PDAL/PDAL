@@ -36,8 +36,8 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <pdal/IStream.hpp>
-#include <pdal/OStream.hpp>
+#include <pdal/util/IStream.hpp>
+#include <pdal/util/OStream.hpp>
 
 #include "BpfHeader.hpp"
 
@@ -296,7 +296,7 @@ bool BpfUlemFile::read(ILeStream& stream)
     }
     stream >> m_len;
     stream.get(m_filename, 32);
-    Utils::removeTrailingBlanks(m_filename);
+    Utils::trimTrailing(m_filename);
     m_buf.resize(m_len);
     stream.get(m_buf);
 

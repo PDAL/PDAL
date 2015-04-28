@@ -32,10 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "gtest/gtest.h"
+#include <pdal/pdal_test_main.hpp>
 #include <pdal/Options.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
+#include <FauxReader.hpp>
 #include "Support.hpp"
 
 using namespace pdal;
@@ -58,20 +59,20 @@ TEST(LogTest, test_one)
     opts.add(opt4);
 
     {
-        PointContext ctx;
+        PointTable table;
 
-        ReaderPtr reader(f.createReader("readers.faux"));
-        reader->setOptions(opts);
-        reader->prepare(ctx);
+        FauxReader reader;
+        reader.setOptions(opts);
+        reader.prepare(table);
 
-        EXPECT_EQ(reader->log()->getLevel(), LogLevel::Error);
-        reader->log()->setLevel(LogLevel::Debug5);
-        EXPECT_EQ(reader->log()->getLevel(), LogLevel::Debug5);
+        EXPECT_EQ(reader.log()->getLevel(), LogLevel::Error);
+        reader.log()->setLevel(LogLevel::Debug5);
+        EXPECT_EQ(reader.log()->getLevel(), LogLevel::Debug5);
 
-        PointBufferSet pbSet = reader->execute(ctx);
-        EXPECT_EQ(pbSet.size(), 1u);
-        PointBufferPtr buf = *pbSet.begin();
-        EXPECT_EQ(buf->size(), 750u);
+        PointViewSet viewSet = reader.execute(table);
+        EXPECT_EQ(viewSet.size(), 1u);
+        PointViewPtr view = *viewSet.begin();
+        EXPECT_EQ(view->size(), 750u);
     }
     bool ok = Support::compare_text_files(
         Support::temppath("mylog_one.txt"),
@@ -79,7 +80,6 @@ TEST(LogTest, test_one)
 
     if (ok)
         FileUtils::deleteFile(Support::temppath("mylog_one.txt"));
-    
+
     EXPECT_TRUE(ok);
 }
-

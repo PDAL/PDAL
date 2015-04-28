@@ -32,9 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "gtest/gtest.h"
+#include <pdal/pdal_test_main.hpp>
 
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include "Support.hpp"
 
 #include <iostream>
@@ -186,6 +186,15 @@ TEST(pipelineFiltersTest, hexbin)
 
 TEST(pipelineFiltersTest, merge)
 { run_info("filters/merge.xml"); }
+
+TEST(pipelineFiltersTest, range_z)
+{ run_info("filters/range_z.xml"); }
+
+TEST(pipelineFiltersTest, range_z_classification)
+{ run_info("filters/range_z_classification.xml"); }
+
+TEST(pipelineFiltersTest, range_classification)
+{ run_info("filters/range_classification.xml"); }
 
 TEST(pipelineFiltersTest, reproject)
 { run_pipeline("filters/reproject.xml"); }

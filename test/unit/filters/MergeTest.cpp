@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "gtest/gtest.h"
+#include <pdal/pdal_test_main.hpp>
 
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
@@ -48,9 +48,9 @@ TEST(MergeTest, test1)
     specReader.readPipeline(Support::configuredpath("filters/merge.xml"));
     mgr.execute();
 
-    PointBufferSet pbSet = mgr.buffers();
+    PointViewSet viewSet = mgr.views();
 
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 2130u);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 2130u);
 }

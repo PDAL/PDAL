@@ -38,7 +38,6 @@
 #include <pdal/Reader.hpp>
 #include <pdal/Writer.hpp>
 #include <pdal/PipelineManager.hpp>
-#include <pdal/PointBuffer.hpp>
 #include <pdal/PDALUtils.hpp>
 
 #include <boost/property_tree/xml_parser.hpp>
@@ -48,7 +47,7 @@
 
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 using namespace boost::property_tree;
 
@@ -134,9 +133,7 @@ void PipelineWriter::writeMetadata(boost::property_tree::ptree& tree,
 
 void PipelineWriter::writePipeline(const std::string& filename) const
 {
-    const Stage* stage = m_manager.isWriterPipeline() ?
-        (Stage*)m_manager.getWriter() :
-        (Stage*)m_manager.getStage();
+    Stage *stage = m_manager.getStage();
 
     ptree tree = generateTreeFromStage(*stage);
 #if BOOST_VERSION >= 105600

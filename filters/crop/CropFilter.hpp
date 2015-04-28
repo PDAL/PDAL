@@ -40,23 +40,24 @@
 #include <geos_c.h>
 #endif
 
+extern "C" int32_t CropFilter_ExitFunc();
+extern "C" PF_ExitFunc CropFilter_InitPlugin();
+
 namespace pdal
 {
-class PointBuffer;
 
-#define CROPFILTERDOCS "Filter points inside or outside a bounding box or \n" \
-                       "a polygon if PDAL was built with GEOS support."
 // removes any points outside of the given range
 // updates the header accordingly
 class PDAL_DLL CropFilter : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.crop", CROPFILTERDOCS)
-    SET_STAGE_LINK("http://pdal.io/stages/filters.crop.html")
-
     CropFilter();
 
-    static Options getDefaultOptions();
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+
+    Options getDefaultOptions();
 
     const BOX3D& getBounds() const;
 
@@ -77,10 +78,10 @@ private:
 #endif
 
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContext ctx);
-    virtual PointBufferSet run(PointBufferPtr buffer);
-    virtual void done(PointContext ctx);
-    void crop(PointBuffer& input, PointBuffer& output);
+    virtual void ready(PointTableRef table);
+    virtual PointViewSet run(PointViewPtr view);
+    virtual void done(PointTableRef table);
+    void crop(PointView& input, PointView& output);
     BOX3D computeBounds(GEOSGeometry const *geometry);
 
     CropFilter& operator=(const CropFilter&); // not implemented

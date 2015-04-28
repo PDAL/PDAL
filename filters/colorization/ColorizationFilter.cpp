@@ -32,20 +32,27 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <array>
+#include "ColorizationFilter.hpp"
 
-#include <pdal/PointBuffer.hpp>
 #include <pdal/GlobalEnvironment.hpp>
+#include <pdal/PointView.hpp>
 
 #include <gdal.h>
 #include <ogr_spatialref.h>
-#include <pdal/GDALUtils.hpp>
 
-#include "ColorizationFilter.hpp"
+#include <array>
 
 namespace pdal
 {
 
+static PluginInfo const s_info = PluginInfo(
+    "filters.colorization",
+    "Fetch and assign RGB color information from a GDAL-readable datasource.",
+    "http://pdal.io/stages/filters.colorization.html" );
+
+CREATE_STATIC_PLUGIN(1, 0, ColorizationFilter, Filter, s_info)
+
+std::string ColorizationFilter::getName() const { return s_info.name; }
 
 struct GDALSourceDeleter
 {
@@ -59,8 +66,7 @@ struct GDALSourceDeleter
 
 void ColorizationFilter::initialize()
 {
-    GlobalEnvironment::get().getGDALEnvironment();
-    GlobalEnvironment::get().getGDALDebug()->addLog(log());
+    GlobalEnvironment::get().initializeGDAL(log());
 }
 
 
@@ -138,7 +144,7 @@ void ColorizationFilter::processOptions(const Options& options)
 }
 
 
-void ColorizationFilter::ready(PointContext ctx)
+void ColorizationFilter::ready(PointTableRef table)
 {
     m_forward_transform.assign(0.0);
     m_inverse_transform.assign(0.0);
@@ -159,7 +165,7 @@ void ColorizationFilter::ready(PointContext ctx)
     for (auto bi = m_bands.begin(); bi != m_bands.end(); ++bi)
     {
         if (bi->m_dim == Dimension::Id::Unknown)
-            bi->m_dim = ctx.findDim(bi->m_name);
+            bi->m_dim = table.layout()->findDim(bi->m_name);
         if (bi->m_dim == Dimension::Id::Unknown)
             throw pdal_error((std::string)"Can't colorize - no dimension " +
                 bi->m_name);
@@ -167,16 +173,16 @@ void ColorizationFilter::ready(PointContext ctx)
 }
 
 
-void ColorizationFilter::filter(PointBuffer& buffer)
+void ColorizationFilter::filter(PointView& view)
 {
     int32_t pixel(0);
     int32_t line(0);
 
     std::array<double, 2> pix = { {0.0, 0.0} };
-    for (PointId idx = 0; idx < buffer.size(); ++idx)
+    for (PointId idx = 0; idx < view.size(); ++idx)
     {
-        double x = buffer.getFieldAs<double>(Dimension::Id::X, idx);
-        double y = buffer.getFieldAs<double>(Dimension::Id::Y, idx);
+        double x = view.getFieldAs<double>(Dimension::Id::X, idx);
+        double y = view.getFieldAs<double>(Dimension::Id::Y, idx);
 
         if (!getPixelAndLinePosition(x, y, m_inverse_transform, pixel,
                 line, m_ds))
@@ -195,7 +201,7 @@ void ColorizationFilter::filter(PointBuffer& buffer)
             }
             if (GDALRasterIO(hBand, GF_Read, pixel, line, 1, 1,
                 &pix[0], 1, 1, GDT_CFloat64, 0, 0) == CE_None)
-                buffer.setField(b.m_dim, idx, pix[0] * b.m_scale);
+                view.setField(b.m_dim, idx, pix[0] * b.m_scale);
         }
     }
 }
@@ -228,7 +234,7 @@ bool ColorizationFilter::getPixelAndLinePosition(double x, double y,
 }
 
 
-void ColorizationFilter::done(PointContext ctx)
+void ColorizationFilter::done(PointTableRef /*table*/)
 {
     if (m_ds != 0)
     {

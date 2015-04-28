@@ -32,10 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "gtest/gtest.h"
-
 #include <boost/property_tree/xml_parser.hpp>
 
+#include <pdal/pdal_test_main.hpp>
 #include <pdal/util/Bounds.hpp>
 #include <pdal/PDALUtils.hpp>
 
@@ -149,8 +148,8 @@ TEST(BoundsTest, test_static)
     BOX3D t = BOX3D::getDefaultSpatialExtent();
     double mind =  (std::numeric_limits<double>::lowest)();
     double maxd =  (std::numeric_limits<double>::max)();
-    EXPECT_FLOAT_EQ(t.minx, mind);
-    EXPECT_FLOAT_EQ(t.maxx, maxd);
+    EXPECT_DOUBLE_EQ(t.minx, mind);
+    EXPECT_DOUBLE_EQ(t.maxx, maxd);
 }
 
 TEST(BoundsTest, test_invalid)
@@ -158,8 +157,8 @@ TEST(BoundsTest, test_invalid)
     BOX3D t;
     double mind =  (std::numeric_limits<double>::lowest)();
     double maxd =  (std::numeric_limits<double>::max)();
-    EXPECT_FLOAT_EQ(t.minx, maxd);
-    EXPECT_FLOAT_EQ(t.maxx, mind);
+    EXPECT_DOUBLE_EQ(t.minx, maxd);
+    EXPECT_DOUBLE_EQ(t.maxx, mind);
 }
 
 TEST(BoundsTest, test_output)
@@ -225,4 +224,13 @@ TEST(BoundsTest, test_wkt)
 {
     const BOX3D b(1.1,2.2,3.3,101.1,102.2,103.3);
     EXPECT_EQ(b.toWKT(1), "POLYGON ((1.1 2.2, 1.1 102.2, 101.1 102.2, 101.1 2.2, 1.1 2.2))");
+}
+
+TEST(BoundsTest, test_2d_input)
+{
+    std::stringstream ss("([1.1, 101.1], [2.2, 102.2])", std::stringstream::in | std::stringstream::out);
+    BOX3D rr;
+    ss >> rr;
+    BOX3D r(1.1,2.2,101.1,102.2);
+    EXPECT_EQ(r, rr);
 }

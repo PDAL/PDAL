@@ -32,23 +32,21 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "gtest/gtest.h"
+#include <pdal/pdal_test_main.hpp>
 
 #include <boost/algorithm/string.hpp>
-//#include <sstream>
-//#include <iostream>
-//#include <string>
 
-//#include <LasReader.hpp>
 #include <pdal/Metadata.hpp>
-//#include <pdal/PipelineManager.hpp>
-//#include <pdal/PipelineReader.hpp>
-//#include "Support.hpp"
-
-//#include <boost/property_tree/xml_parser.hpp>
-//#include <boost/property_tree/json_parser.hpp>
 
 using namespace pdal;
+
+TEST(MetadataTest, assign)
+{
+    MetadataNode m1("Test");
+    MetadataNode m2 = m1;
+    EXPECT_EQ(m1.name(), "Test");
+    EXPECT_EQ(m2.name(), "Test");
+}
 
 TEST(MetadataTest, test_construction)
 {
@@ -60,7 +58,7 @@ TEST(MetadataTest, test_construction)
     uint8_t u8(8);
     int16_t i16(-16);
     uint16_t u16(16);
-    
+
     {
         std::vector<uint8_t> v;
         for (uint8_t i = 0; i < 100; i++)
@@ -148,15 +146,15 @@ TEST(MetadataTest, typed_value)
 
     double d = 123.45;
     MetadataNode m3 = m.addEncoded("name", (unsigned char *)&d, sizeof(d));
-    EXPECT_FLOAT_EQ(d, m3.value<double>());
+    EXPECT_DOUBLE_EQ(d, m3.value<double>());
     EXPECT_EQ("zczMzMzcXkA=", m3.value());
 
     MetadataNode m4 = m.add("name", "65539");
     EXPECT_EQ(65539u, m4.value<unsigned>());
 
-    auto ctx = Utils::redirect(std::cerr);
+    auto redir = Utils::redirect(std::cerr);
     EXPECT_EQ(0u, m4.value<unsigned short>());
-    Utils::restore(std::cerr, ctx);
+    Utils::restore(std::cerr, redir);
 }
 
 
@@ -289,26 +287,25 @@ TEST(MetadataTest, test_metadata_stage)
 {
 //ABELL
 /**
-    PointContext ctx;
+    PointTable table;
 
     LasReader reader(Support::datapath("interesting.las"));
-    EXPECT_TRUE(reader.getDescription() == "Las Reader");
-    reader.prepare(ctx);
+    reader.prepare(table);
 
-    MetadataNode file_metadata = ctx.metadata();
+    MetadataNode file_metadata = table->metadata();
 
     EXPECT_EQ(file_metadata.toPTree().get_child("metadata").size(),
         32);
 
-    PointContext readerCtx;
+    PointTable readerTable;
     PipelineManager mgr;
     PipelineReader specReader(mgr);
     specReader.readPipeline(
         Support::datapath("pipeline/pipeline_metadata_reader.xml"));
-    Stage *stage = mgr.getStage();
+    std::shared_ptr<Stage> stage(mgr.getStage());
 
-    stage->prepare(readerCtx);
-    MetadataNode pipeline_metadata = readerCtx.metadata();
+    stage->prepare(readerTable);
+    MetadataNode pipeline_metadata = readerTable->metadata();
     EXPECT_EQ(
         pipeline_metadata.toPTree().get_child("metadata").size(), 32);
 **/

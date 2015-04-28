@@ -25,16 +25,16 @@ point as data are pulled through the pipeline from the starting point to
 end point.
 
 There are two primary building blocks in PDAL, :cpp:class:`pdal::Stage` and
-:cpp:class:`pdal::PointBuffer`. :cpp:class:`pdal::Reader`,
+:cpp:class:`pdal::PointView`. :cpp:class:`pdal::Reader`,
 :cpp:class:`pdal::Writer`, and :cpp:class:`pdal::Filter` are all subclasses of
 :cpp:class:`pdal::Stage` that provide the concrete dolls for the Matryoshka
 set.
 
-:cpp:class:`pdal::PointBuffer` is the substrate that flows between stages in a
+:cpp:class:`pdal::PointView` is the substrate that flows between stages in a
 pipeline and transfers the actual data as it moves through the pipeline. A
-:cpp:class:`pdal::PointBuffer` contains a :cpp:class:`pdal::PointContextRef`, which
+:cpp:class:`pdal::PointView` contains a :cpp:class:`pdal::PointTablePtr`, which
 itself contains a list of :cpp:class:`pdal::Dimension` objects that define the
-actual channels that are stored in the :cpp:class:`pdal::PointBuffer`.
+actual channels that are stored in the :cpp:class:`pdal::PointView`.
 
 PDAL provides four types of stages -- :cpp:class:`pdal::Reader`,
 :cpp:class:`pdal::Writer`, :cpp:class:`pdal::Filter`, and
@@ -45,8 +45,8 @@ Filter is an actor on data.
 .. note::
 
    As a consumer, you are generally not supposed to worry about the underlying storage of the
-   PointBuffer, but there might be times when you simply just "want the data."
-   In those situations, you can use the :cpp:class:`pdal::PointBuffer::getBytes`
+   PointView, but there might be times when you simply just "want the data."
+   In those situations, you can use the :cpp:class:`pdal::PointView::getBytes`
    method to stream out the raw storage.
 
 .. _`Matryoshka dolls`: http://en.wikipedia.org/wiki/Matryoshka_doll

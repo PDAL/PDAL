@@ -37,32 +37,99 @@
 #include <sstream>
 #include <string.h>
 
-#include <pdal/Charbuf.hpp>
-#include <pdal/FileUtils.hpp>
-#include <pdal/IStream.hpp>
-#include <pdal/QuickInfo.hpp>
-#include <pdal/PointBuffer.hpp>
 #include <pdal/Metadata.hpp>
+#include <pdal/PointView.hpp>
+#include <pdal/QuickInfo.hpp>
+#include <pdal/util/Extractor.hpp>
+#include <pdal/util/FileUtils.hpp>
+#include <pdal/util/IStream.hpp>
 
+#include "GeotiffSupport.hpp"
 #include "LasHeader.hpp"
 #include "VariableLengthRecord.hpp"
 #include "ZipPoint.hpp"
-#include "GeotiffSupport.hpp"
 
 namespace pdal
 {
 
+namespace
+{
+
+double toDouble(const Everything& e, Dimension::Type::Enum type)
+{
+    using namespace Dimension::Type;
+
+    double d = 0;
+    switch (type)
+    {
+    case Unsigned8:
+        d = e.u8;
+        break;
+    case Unsigned16:
+        d = e.u16;
+        break;
+    case Unsigned32:
+        d = e.u32;
+        break;
+    case Unsigned64:
+        d = e.u64;
+        break;
+    case Signed8:
+        d = e.s8;
+        break;
+    case Signed16:
+        d = e.s16;
+        break;
+    case Signed32:
+        d = e.s32;
+        break;
+    case Signed64:
+        d = e.s64;
+        break;
+    case Float:
+        d = e.f;
+        break;
+    case Double:
+        d = e.d;
+        break;
+    default:
+        break;
+    }
+    return d;
+}
+
+} // unnamed namespace
+
+void LasReader::processOptions(const Options& options)
+{
+    StringList extraDims = options.getValueOrDefault<StringList>("extra_dims");
+    m_extraDims = LasUtils::parse(extraDims);
+
+    m_error.setFilename(m_filename);
+}
+
+static PluginInfo const s_info = PluginInfo(
+    "readers.las",
+    "ASPRS LAS 1.0 - 1.4 read support. LASzip support is also \n" \
+        "enabled through this driver if LASzip was found diring \n" \
+        "compilation.",
+    "http://pdal.io/stages/readers.las.html" );
+
+CREATE_STATIC_PLUGIN(1, 0, LasReader, Reader, s_info)
+
+std::string LasReader::getName() const { return s_info.name; }
+
 QuickInfo LasReader::inspect()
 {
     QuickInfo qi;
-    PointContext ctx;
+    PointLayoutPtr layout(new PointLayout());
 
-    addDimensions(ctx);
+    addDimensions(layout);
     initialize();
 
-    Dimension::IdList dims = ctx.dims();
+    Dimension::IdList dims = layout->dims();
     for (auto di = dims.begin(); di != dims.end(); ++di)
-        qi.m_dimNames.push_back(ctx.dimName(*di));
+        qi.m_dimNames.push_back(layout->dimName(*di));
     qi.m_pointCount =
         Utils::saturation_cast<point_count_t>(m_lasHeader.pointCount());
     qi.m_bounds = m_lasHeader.getBounds();
@@ -73,8 +140,7 @@ QuickInfo LasReader::inspect()
 
 void LasReader::initialize()
 {
-    m_streamFactory = createFactory();
-    m_istream = &(m_streamFactory->allocate());
+    m_istream = createStream();
 
     m_istream->seekg(0);
     ILeStream in(m_istream);
@@ -107,12 +173,13 @@ void LasReader::initialize()
             in >> r;
             m_vlrs.push_back(std::move(r));
         }
+        readExtraBytesVlr();
     }
     fixupVlrs();
 }
 
 
-void LasReader::ready(PointContext ctx, MetadataNode& m)
+void LasReader::ready(PointTableRef table, MetadataNode& m)
 {
     m_index = 0;
 
@@ -152,8 +219,10 @@ void LasReader::ready(PointContext ctx, MetadataNode& m)
 
 Options LasReader::getDefaultOptions()
 {
-    Option option1("filename", "", "file to read from");
-    Options options(option1);
+    Options options;
+    options.add("filename", "", "file to read from");
+    options.add("extra_dims", "", "Extra dimensions not part of the LAS "
+        "point format to be read from each point.");
     return options;
 }
 
@@ -168,6 +237,9 @@ void LasReader::extractHeaderMetadata(MetadataNode& m)
     m.add<uint32_t>("minor_version",
         static_cast<uint32_t>(m_lasHeader.versionMinor()),
         "The minor LAS version for the file");
+    m.add<uint32_t>("dataformat_id",
+        static_cast<uint32_t>(m_lasHeader.pointFormat()),
+        "LAS Point Data Format");
     if (m_lasHeader.versionAtLeast(1, 1))
         m.add<uint32_t>("filesource_id",
             static_cast<uint32_t>(m_lasHeader.fileSourceId()),
@@ -279,6 +351,44 @@ void LasReader::fixupVlrs()
 }
 
 
+void LasReader::readExtraBytesVlr()
+{
+    VariableLengthRecord *vlr = findVlr(SPEC_USER_ID, EXTRA_BYTES_RECORD_ID);
+    if (!vlr)
+        return;
+    const char *pos = vlr->data();
+    size_t size = vlr->dataLen();
+    if (size % sizeof(ExtraBytesSpec) != 0)
+    {
+        log()->get(LogLevel::Warning) << "Bad size for extra bytes VLR.  "
+            "Ignoring.";
+        return;
+    }
+    size /= sizeof(ExtraBytesSpec);
+    std::vector<ExtraBytesIf> ebList;
+    while (size--)
+    {
+        ExtraBytesIf eb;
+        eb.readFrom(pos);
+        ebList.push_back(eb);
+        pos += sizeof(ExtraBytesSpec);
+    }
+
+    std::vector<ExtraDim> extraDims;
+    for (ExtraBytesIf& eb : ebList)
+    {
+       std::vector<ExtraDim> eds = eb.toExtraDims();
+       for (auto& ed : eds)
+           extraDims.push_back(std::move(ed));
+    }
+    if (m_extraDims.size() && m_extraDims != extraDims)
+        log()->get(LogLevel::Warning) << "Extra byte dimensions specified "
+            "in pineline and VLR don't match.  Ignoring pipeline-specified "
+            "dimensions";
+    m_extraDims = extraDims;
+}
+
+
 void LasReader::setSrsFromVlrs(MetadataNode& m)
 {
     // If the user is already overriding this by setting it on the stage, we'll
@@ -363,7 +473,10 @@ SpatialReference LasReader::getSrsFromGeotiffVlr()
             STT_ASCII);
 
     geotiff.setTags();
-    srs.setFromUserInput(geotiff.getWkt(false, false));
+    std::string wkt(geotiff.getWkt(false, false));
+    if (wkt.size())
+        srs.setFromUserInput(geotiff.getWkt(false, false));
+
 #endif
     return srs;
 }
@@ -395,30 +508,49 @@ void LasReader::extractVlrMetadata(MetadataNode& m)
 }
 
 
-void LasReader::addDimensions(PointContextRef ctx)
+void LasReader::addDimensions(PointLayoutPtr layout)
 {
     using namespace Dimension;
-    Id::Enum ids[] = { Id::X, Id::Y, Id::Z, Id::Intensity, Id::ReturnNumber,
-        Id::NumberOfReturns, Id::ScanDirectionFlag, Id::EdgeOfFlightLine,
-        Id::Classification, Id::ScanAngleRank, Id::UserData, Id::PointSourceId,
-        Id::Unknown };
-    ctx.registerDims(ids);
+
+    layout->registerDim(Id::X, Type::Double);
+    layout->registerDim(Id::Y, Type::Double);
+    layout->registerDim(Id::Z, Type::Double);
+    layout->registerDim(Id::Intensity, Type::Unsigned16);
+    layout->registerDim(Id::ReturnNumber, Type::Unsigned8);
+    layout->registerDim(Id::NumberOfReturns, Type::Unsigned8);
+    layout->registerDim(Id::ScanDirectionFlag, Type::Unsigned8);
+    layout->registerDim(Id::EdgeOfFlightLine, Type::Unsigned8);
+    layout->registerDim(Id::Classification, Type::Unsigned8);
+    layout->registerDim(Id::ScanAngleRank, Type::Signed8);
+    layout->registerDim(Id::UserData, Type::Unsigned8);
+    layout->registerDim(Id::PointSourceId, Type::Unsigned16);
 
     if (m_lasHeader.hasTime())
-        ctx.registerDim(Id::GpsTime);
+        layout->registerDim(Id::GpsTime, Type::Double);
     if (m_lasHeader.hasColor())
     {
-        Id::Enum ids[] = { Id::Red, Id::Green, Id::Blue, Id::Unknown };
-        ctx.registerDims(ids);
+        layout->registerDim(Id::Red, Type::Unsigned16);
+        layout->registerDim(Id::Green, Type::Unsigned16);
+        layout->registerDim(Id::Blue, Type::Unsigned16);
     }
     if (m_lasHeader.hasInfrared())
-        ctx.registerDim(Id::Infrared);
+        layout->registerDim(Id::Infrared);
     if (m_lasHeader.versionAtLeast(1, 4))
-        ctx.registerDim(Id::ScanChannel);
+        layout->registerDim(Id::ScanChannel);
+
+    for (auto& dim : m_extraDims)
+    {
+        Dimension::Type::Enum type = dim.m_dimType.m_type;
+        if (type == Dimension::Type::None)
+            continue;
+        if (dim.m_dimType.m_xform.nonstandard())
+            type = Dimension::Type::Double;
+        dim.m_dimType.m_id = layout->assignDim(dim.m_name, type);
+    }
 }
 
 
-point_count_t LasReader::read(PointBuffer& data, point_count_t count)
+point_count_t LasReader::read(PointViewPtr view, point_count_t count)
 {
     size_t pointByteCount = m_lasHeader.pointLen();
     count = std::min(count, getNumPoints() - m_index);
@@ -438,7 +570,7 @@ point_count_t LasReader::read(PointBuffer& data, point_count_t count)
                 error += err;
                 throw pdal_error(error);
             }
-            loadPoint(data, (char *)m_zipPoint->m_lz_point_data.data(),
+            loadPoint(*view.get(), (char *)m_zipPoint->m_lz_point_data.data(),
                 pointByteCount);
         }
 #else
@@ -449,14 +581,26 @@ point_count_t LasReader::read(PointBuffer& data, point_count_t count)
     else
     {
         m_istream->seekg(m_lasHeader.pointOffset());
-        std::vector<char> buf(pointByteCount);
+        point_count_t remaining = count;
+
+        // Make a buffer at most a meg.
+        size_t bufsize = std::min<size_t>((point_count_t)1000000,
+            count * pointByteCount);
+        std::vector<char> buf(bufsize);
         try
         {
-            for (; i < count; ++i)
+            do
             {
-                m_istream->read(buf.data(), pointByteCount);
-                loadPoint(data, buf.data(), pointByteCount);
-            }
+                point_count_t blockPoints = readFileBlock(buf, remaining);
+                remaining -= blockPoints;
+                char *pos = buf.data();
+                while (blockPoints--)
+                {
+                    loadPoint(*view.get(), pos, pointByteCount);
+                    pos += pointByteCount;
+                    i++;
+                }
+            } while (remaining);
         }
         catch (std::out_of_range&)
         {}
@@ -468,25 +612,30 @@ point_count_t LasReader::read(PointBuffer& data, point_count_t count)
 }
 
 
-void LasReader::loadPoint(PointBuffer& data, char *buf, size_t bufsize)
+point_count_t LasReader::readFileBlock(std::vector<char>& buf,
+    point_count_t maxpoints)
 {
-    if (m_lasHeader.versionAtLeast(1, 4))
+    size_t ptLen = m_lasHeader.pointLen();
+    point_count_t blockpoints = buf.size() / ptLen;
+
+    blockpoints = std::min(maxpoints, blockpoints);
+    m_istream->read(buf.data(), blockpoints * ptLen);
+    return blockpoints;
+}
+
+
+void LasReader::loadPoint(PointView& data, char *buf, size_t bufsize)
+{
+    if (m_lasHeader.has14Format())
         loadPointV14(data, buf, bufsize);
     else
         loadPointV10(data, buf, bufsize);
 }
 
 
-void LasReader::loadPointV10(PointBuffer& data, char *buf, size_t bufsize)
+void LasReader::loadPointV10(PointView& data, char *buf, size_t bufsize)
 {
-    // Turn a raw buffer (array of bytes) into a stream buf.
-    Charbuf charstreambuf(buf, bufsize, 0);
-
-    // Make an input stream based on the stream buf.
-    std::istream stream(&charstreambuf);
-
-    // Wrap the input stream with byte ordering.
-    ILeStream istream(&stream);
+    LeExtractor istream(buf, bufsize);
 
     PointId nextId = data.size();
 
@@ -494,7 +643,7 @@ void LasReader::loadPointV10(PointBuffer& data, char *buf, size_t bufsize)
     istream >> xi >> yi >> zi;
 
     const LasHeader& h = m_lasHeader;
-            
+
     double x = xi * h.scaleX() + h.offsetX();
     double y = yi * h.scaleY() + h.offsetY();
     double z = zi * h.scaleZ() + h.offsetZ();
@@ -548,18 +697,16 @@ void LasReader::loadPointV10(PointBuffer& data, char *buf, size_t bufsize)
         data.setField(Dimension::Id::Green, nextId, green);
         data.setField(Dimension::Id::Blue, nextId, blue);
     }
+
+    if (m_extraDims.size())
+        loadExtraDims(istream, data, nextId);
+    if (m_cb)
+        m_cb(data, nextId);
 }
 
-void LasReader::loadPointV14(PointBuffer& data, char *buf, size_t bufsize)
+void LasReader::loadPointV14(PointView& data, char *buf, size_t bufsize)
 {
-    // Turn a raw buffer (array of bytes) into a stream buf.
-    Charbuf charstreambuf(buf, bufsize, 0);
-
-    // Make an input stream based on the stream buf.
-    std::istream stream(&charstreambuf);
-
-    // Wrap the input stream with byte ordering.
-    ILeStream istream(&stream);
+    LeExtractor istream(buf, bufsize);
 
     PointId nextId = data.size();
 
@@ -567,7 +714,7 @@ void LasReader::loadPointV14(PointBuffer& data, char *buf, size_t bufsize)
     istream >> xi >> yi >> zi;
 
     const LasHeader& h = m_lasHeader;
-            
+
     double x = xi * h.scaleX() + h.offsetX();
     double y = yi * h.scaleY() + h.offsetY();
     double z = zi * h.scaleZ() + h.offsetZ();
@@ -623,17 +770,47 @@ void LasReader::loadPointV14(PointBuffer& data, char *buf, size_t bufsize)
         istream >> nearInfraRed;
         data.setField(Dimension::Id::Infrared, nextId, nearInfraRed);
     }
+
+    if (m_extraDims.size())
+        loadExtraDims(istream, data, nextId);
 }
 
 
-void LasReader::done(PointContextRef ctx)
+void LasReader::loadExtraDims(LeExtractor& istream, PointView& data,
+    PointId nextId)
+{
+    Everything e;
+    for (auto& dim : m_extraDims)
+    {
+        // Dimension type of None is undefined and unprocessed
+        if (dim.m_dimType.m_type == Dimension::Type::None)
+        {
+            istream.skip(dim.m_size);
+            continue;
+        }
+
+        istream.get(dim.m_dimType.m_type, e);
+
+        if (dim.m_dimType.m_xform.nonstandard())
+        {
+            double d = toDouble(e, dim.m_dimType.m_type);
+            d = d * dim.m_dimType.m_xform.m_scale +
+                dim.m_dimType.m_xform.m_offset;
+            data.setField(dim.m_dimType.m_id, nextId, d);
+        }
+        else
+            data.setField(dim.m_dimType.m_id, dim.m_dimType.m_type, nextId, &e);
+    }
+}
+
+
+void LasReader::done(PointTableRef)
 {
 #ifdef PDAL_HAVE_LASZIP
     m_zipPoint.reset();
     m_unzipper.reset();
 #endif
-    if (m_istream)
-        m_streamFactory->deallocate(*m_istream);
+    destroyStream();
 }
 
 } // namespace pdal

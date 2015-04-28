@@ -35,7 +35,6 @@
 #include <pdal/PDALUtils.hpp>
 
 #include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/optional.hpp>
 #include <boost/foreach.hpp>
@@ -50,9 +49,6 @@ namespace pdal
 {
 
 Option::Option(const boost::property_tree::ptree& tree)
-    : m_name("")
-    , m_value("")
-    , m_description("")
 {
     using namespace boost::property_tree;
 
@@ -82,26 +78,6 @@ void Option::setOptions(Options const& options)
 }
 
 #if !defined(PDAL_COMPILER_MSVC)
-// explicit specialization:
-//   boost::lexical_cast only understands "0" and "1" for bools,
-//   so we handle those situations explicitly
-template<> bool Option::getValue() const
-{
-    if (m_value == "true")
-        return true;
-    if (m_value == "false")
-        return false;
-    return boost::lexical_cast<bool>(m_value);
-}
-
-
-// explicit specialization:
-//   if we want to get out a (const ref) string, we don't need lexical_cast
-template<> const std::string& Option::getValue() const
-{
-    return m_value;
-}
-
 
 // explicit specialization:
 //   if insert a bool, we don't want it to be "0" or "1" (which is
@@ -125,6 +101,17 @@ bool Option::empty()
         return m_options->empty();
     else
         return false;
+}
+
+void Option::toMetadata(MetadataNode& parent) const
+{
+    MetadataNode child = parent.add(getName());
+    child.add("value", getValue<std::string>());
+    child.add("description", getDescription());
+
+    auto opts = getOptions();
+    if (opts)
+        opts->toMetadata(child);
 }
 
 //---------------------------------------------------------------------------

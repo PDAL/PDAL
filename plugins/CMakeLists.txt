@@ -2,6 +2,14 @@ if(BUILD_PLUGIN_ATTRIBUTE)
     add_subdirectory(attribute)
 endif()
 
+if(BUILD_PLUGIN_CPD)
+    add_subdirectory(cpd)
+endif(BUILD_PLUGIN_CPD)
+
+if(BUILD_PLUGIN_GEOWAVE)
+    add_subdirectory(geowave)
+endif(BUILD_PLUGIN_GEOWAVE)
+
 if(BUILD_PLUGIN_GREYHOUND)
     add_subdirectory(greyhound)
 endif()
@@ -42,10 +50,11 @@ if(BUILD_PLUGIN_PYTHON)
     add_subdirectory(python)
 endif()
 
+if(BUILD_PLUGIN_RIVLIB)
+    add_subdirectory(rxp)
+endif(BUILD_PLUGIN_RIVLIB)
+
 if(BUILD_PLUGIN_SQLITE)
     add_subdirectory(sqlite)
 endif()
 
-if(BUILD_PLUGIN_RIVLIB)
-    add_subdirectory(rxp)
-endif(BUILD_PLUGIN_RIVLIB)

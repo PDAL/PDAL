@@ -34,10 +34,13 @@
 
 #pragma once
 
-#include <pdal/OStream.hpp>
+#include <pdal/util/OStream.hpp>
 #include <pdal/Writer.hpp>
 
 #include "SbetCommon.hpp"
+
+extern "C" int32_t SbetWriter_ExitFunc();
+extern "C" PF_ExitFunc SbetWriter_InitPlugin();
 
 namespace pdal
 {
@@ -45,11 +48,12 @@ namespace pdal
 class PDAL_DLL SbetWriter : public pdal::Writer
 {
 public:
-    SET_STAGE_NAME("writers.sbet", "SBET Writer")
-    SET_STAGE_LINK("http://pdal.io/stages/writers.sbet.html")
-
     SbetWriter() : pdal::Writer()
         {}
+
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
     static Dimension::IdList getDefaultDimensions()
         { return fileDimensions(); }
@@ -59,8 +63,8 @@ private:
     std::string m_filename;
 
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContextRef ctx);
-    virtual void write(const PointBuffer& buf);
+    virtual void ready(PointTableRef table);
+    virtual void write(const PointViewPtr view);
 };
 
 } // namespace pdal

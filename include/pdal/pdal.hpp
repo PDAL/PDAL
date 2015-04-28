@@ -36,7 +36,7 @@
 #define INCLUDED_PDAL_TOP_INCUDE_HPP
 
 #include <pdal/pdal_config.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 
 #endif

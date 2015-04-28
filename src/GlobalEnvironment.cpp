@@ -42,84 +42,65 @@
 namespace pdal
 {
 
-static GlobalEnvironment* t = 0;
-static std::once_flag flag;
+static GlobalEnvironment* s_environment = 0;
 
 GlobalEnvironment& GlobalEnvironment::get()
 {
+    static std::once_flag flag;
+    
+    auto init = []()
+    {
+        s_environment = new GlobalEnvironment();
+    };
+
     std::call_once(flag, init);
-    return *t;
+    return *s_environment;
 }
 
 
 void GlobalEnvironment::startup()
 {
-    if (t != 0) // sanity check
-    {
+    if (s_environment)
         throw pdal_error("attempt to reinitialize global environment");
-    }
     get();
 }
 
 
 void GlobalEnvironment::shutdown()
 {
-    if (t == 0) // sanity check
-    {
+    if (!s_environment)
         throw pdal_error("bad global shutdown call -- was called more "
             "than once or was called without corresponding startup");
-    }
-
-    delete t;
-    t = 0;
+    delete s_environment;
+    s_environment = 0;
 }
 
 
-void GlobalEnvironment::init()
-{
-    t = new GlobalEnvironment();
-}
-
-
-//
-// regular member functions
-//
-
-GlobalEnvironment::GlobalEnvironment() : m_bIsGDALInitialized(false),
-    m_gdal_debug(0)
-{
-}
-
-
-void GlobalEnvironment::getGDALEnvironment()
-{
-    if (!m_bIsGDALInitialized)
-    {
-        (void) GDALAllRegister();
-        (void) OGRRegisterAll();
-        m_bIsGDALInitialized = true;
-    }
-}
+GlobalEnvironment::GlobalEnvironment() : m_gdalDebug()
+{}
 
 
 GlobalEnvironment::~GlobalEnvironment()
 {
-    if (m_bIsGDALInitialized)
-    {
-        delete m_gdal_debug;
-        (void) GDALDestroyDriverManager();
-        m_bIsGDALInitialized = false;
-    }
+    if (m_gdalDebug)
+        GDALDestroyDriverManager();
 }
 
 
-pdal::gdal::GlobalDebug* GlobalEnvironment::getGDALDebug()
+void GlobalEnvironment::initializeGDAL(LogPtr log, bool gdalDebugOutput)
 {
-    getGDALEnvironment();
-    if (m_gdal_debug == 0)
-        m_gdal_debug = new pdal::gdal::GlobalDebug();
-    return m_gdal_debug;
+    static std::once_flag flag;
+
+    auto init = [this](LogPtr log, bool gdalDebugOutput) -> void
+    {
+        GDALAllRegister();
+        OGRRegisterAll();
+        m_gdalDebug.reset(new gdal::ErrorHandler(gdalDebugOutput, log));
+    };
+    
+    std::call_once(flag, init, log, gdalDebugOutput);
 }
 
 
 } //namespaces
+

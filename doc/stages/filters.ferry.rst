@@ -3,7 +3,7 @@
 filters.ferry
 ============
 
-The ferry filter is used to stash intermediate veriables as part of
+The ferry filter is used to stash intermediate variables as part of
 processing data. For example, a common scenario is to keep both the
 original value and the reprojected X and Y variables in a
 scenario that uses the :ref:`filters.reprojection` filter. In the

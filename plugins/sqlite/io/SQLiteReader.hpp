@@ -48,13 +48,14 @@ namespace pdal
 class PDAL_DLL SQLiteReader : public DbReader
 {
 public:
-    SET_STAGE_NAME("readers.sqlite", "Read data from SQLite3 database files.")
-    SET_PLUGIN_VERSION("1.0.0b1")
-
     SQLiteReader()
     {}
 
-    static Options getDefaultOptions();
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+
+    Options getDefaultOptions();
     SpatialReference fetchSpatialReference(std::string const& query) const;
     SQLite& getSession()
         { return *m_session.get(); }
@@ -73,15 +74,15 @@ private:
 
     virtual void initialize();
     virtual void processOptions(const Options& options);
-    virtual void addDimensions(PointContextRef ctx);
-    virtual void ready(PointContextRef ctx);
-    point_count_t read(PointBuffer& buf, point_count_t count);
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void ready(PointTableRef table);
+    point_count_t read(PointViewPtr view, point_count_t count);
     bool eof()
         { return m_at_end; }
 
     void validateQuery() const;
-    point_count_t readPatch(PointBuffer& buffer, point_count_t count);
-    bool NextBuffer();
+    point_count_t readPatch(PointViewPtr view, point_count_t count);
+    bool nextBuffer();
 
     SQLiteReader& operator=(const SQLiteReader&); // not implemented
     SQLiteReader(const SQLiteReader&); // not implemented

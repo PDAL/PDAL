@@ -40,8 +40,8 @@
 #include <pdal/Dimension.hpp>
 #include <pdal/pdal_defines.h>
 #include <pdal/pdal_export.hpp>
-#include <pdal/PointContext.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointTable.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/Options.hpp>
 
 namespace pdal
@@ -49,6 +49,12 @@ namespace pdal
 
 namespace utils
 {
+
+inline void printError(const std::string& s)
+{
+    std::cerr << "PDAL: " << s << std::endl;
+    std::cerr << std::endl;
+}
 
 using namespace boost::property_tree;
 
@@ -62,7 +68,8 @@ inline ptree toPTree(MetadataNode const& node)
     tree.put("type", node.type());
     tree.put("value", node.value());
 
-    for (auto n = node.children().begin(); n != node.children().end(); ++n)
+    MetadataNodeList children = node.children();
+    for (auto n = children.begin(); n != children.end(); ++n)
     {
         ptree pnode = toPTree(*n);
         if (node.kind() == MetadataType::Array)
@@ -86,17 +93,18 @@ inline ptree toPTree(MetadataNode const& node)
 }
 
 
-inline MetadataNode toMetadata(PointContextRef ctx)
+inline MetadataNode toMetadata(PointTableRef table)
 {
+    const PointLayoutPtr layout(table.layout());
     MetadataNode root;
 
-    for (const auto& id : ctx.dims())
+    for (const auto& id : layout->dims())
     {
         MetadataNode dim("dimensions");
-        dim.add("name", ctx.dimName(id));
-        Dimension::Type::Enum t = ctx.dimType(id);
+        dim.add("name", layout->dimName(id));
+        Dimension::Type::Enum t = layout->dimType(id);
         dim.add("type", Dimension::toName(Dimension::base(t)));
-        dim.add("size", ctx.dimSize(id));
+        dim.add("size", layout->dimSize(id));
         root.addList(dim);
     }
 
@@ -104,18 +112,18 @@ inline MetadataNode toMetadata(PointContextRef ctx)
 }
 
 
-inline MetadataNode toMetadata(const PointBuffer& buffer)
+inline MetadataNode toMetadata(const PointViewPtr view)
 {
     MetadataNode node;
 
-    const Dimension::IdList& dims = buffer.dims();
+    const Dimension::IdList& dims = view->dims();
 
-    for (PointId idx = 0; idx < buffer.size(); idx++)
+    for (PointId idx = 0; idx < view->size(); idx++)
     {
         MetadataNode pointnode = node.add(std::to_string(idx));
         for (auto di = dims.begin(); di != dims.end(); ++di)
         {
-            double v = buffer.getFieldAs<double>(*di, idx);
+            double v = view->getFieldAs<double>(*di, idx);
             pointnode.add(Dimension::name(*di), v);
         }
     }
@@ -200,8 +208,8 @@ inline ptree toPTree(const SpatialReference& ref)
 
 std::string PDAL_DLL toJSON(const MetadataNode& m);
 void PDAL_DLL toJSON(const MetadataNode& m, std::ostream& o);
-std::string toJSONExt(const MetadataNode& m);
-void toJSONExt(const MetadataNode& m, std::ostream& o);
+std::string PDAL_DLL toJSON(const Options& opts);
+void PDAL_DLL toJSON(const Options& opts, std::ostream& o);
 
 namespace reST
 {
@@ -213,9 +221,9 @@ void PDAL_DLL write_rst(std::ostream& ost,
                int level=0);
 
 
-inline std::ostream& toRST(const PointBuffer& buffer, std::ostream& os)
+inline std::ostream& toRST(const PointViewPtr view, std::ostream& os)
 {
-    const Dimension::IdList& dims = buffer.dims();
+    const Dimension::IdList& dims = view->dims();
 
     size_t name_column(20);
     size_t value_column(40);
@@ -239,7 +247,7 @@ inline std::ostream& toRST(const PointBuffer& buffer, std::ostream& os)
     unsigned step_back(3);
 
     std::string hdr(80, '-');
-    for (PointId idx = 0; idx < buffer.size(); ++idx)
+    for (PointId idx = 0; idx < view->size(); ++idx)
     {
         os << "Point " << idx << std::endl;
         os << hdr << std::endl << std::endl;
@@ -249,7 +257,7 @@ inline std::ostream& toRST(const PointBuffer& buffer, std::ostream& os)
         os << thdr.str() << std::endl;
         for (auto di = dims.begin(); di != dims.end(); ++di)
         {
-            double v = buffer.getFieldAs<double>(*di, idx);
+            double v = view->getFieldAs<double>(*di, idx);
             std::string value = boost::lexical_cast<std::string>(v);
             os << std::left << std::setw(name_column) << Dimension::name(*di) <<
                 std::right << std::setw(value_column) << value << std::endl;

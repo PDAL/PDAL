@@ -48,59 +48,49 @@ class Options;
 class PDAL_DLL PipelineManager
 {
 public:
-    PipelineManager();
-    ~PipelineManager();
+    PipelineManager() : m_tablePtr(new PointTable()), m_table(*m_tablePtr)
+        {}
+    PipelineManager(PointTableRef table) : m_table(table)
+        {}
 
     // Use these to manually add stages into the pipeline manager.
-    Reader* addReader(const std::string& type);
-    Filter* addFilter(const std::string& type, Stage *stage);
-    Filter* addFilter(const std::string& type,
-        const std::vector<Stage *>& stages);
-    Writer* addWriter(const std::string& type, Stage *prevStage);
+    Stage& addReader(const std::string& type);
+    Stage& addFilter(const std::string& type);
+    Stage& addWriter(const std::string& type);
 
-    void removeWriter();
     // returns true if the pipeline endpoint is a writer
-    bool isWriterPipeline() const;
-
-    // return the pipeline writer endpoint (or NULL, if not a writer pipeline)
-    Writer* getWriter() const;
+    bool isWriterPipeline() const
+        { return (bool)getStage(); }
 
     // return the pipeline reader endpoint (or NULL, if not a reader pipeline)
-    Stage* getStage() const;
+    Stage* getStage() const
+        { return m_stages.empty() ? NULL : m_stages.back().get(); }
 
     void prepare() const;
     point_count_t execute();
 
-    // Get the resulting point buffers.
-    const PointBufferSet& buffers() const
-        { return m_pbSet; }
+    // Get the resulting point views.
+    const PointViewSet& views() const
+        { return m_viewSet; }
 
-    // Get the point context;
-    PointContextRef context() const
-        { return m_context; }
+    // Get the point table data.
+    PointTableRef pointTable() const
+        { return m_table; }
 
     MetadataNode getMetadata() const;
 
 private:
     StageFactory m_factory;
-    PointContext m_context;
-    PointBufferSet m_pbSet;
+    std::unique_ptr<PointTable> m_tablePtr;
+    PointTableRef m_table;
 
-    typedef std::vector<Reader*> ReaderList;
-    typedef std::vector<Filter*> FilterList;
-    typedef std::vector<Writer*> WriterList;
-    ReaderList m_readers;
-    FilterList m_filters;
-    WriterList m_writers;
+    PointViewSet m_viewSet;
 
-    Stage* m_lastStage;
-    Writer* m_lastWriter;
-    bool m_isWriterPipeline;
+    typedef std::vector<std::unique_ptr<Stage> > StagePtrList;
+    StagePtrList m_stages;
 
     PipelineManager& operator=(const PipelineManager&); // not implemented
     PipelineManager(const PipelineManager&); // not implemented
-
-    void registerPluginIfExists();
 };
 
 

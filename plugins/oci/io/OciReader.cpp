@@ -34,14 +34,22 @@
 
 #include <boost/algorithm/string.hpp>
 
+#include <pdal/Compression.hpp>
 #include <pdal/GDALUtils.hpp>
 #include <pdal/GlobalEnvironment.hpp>
 #include "OciReader.hpp"
 
-CREATE_READER_PLUGIN(oci, pdal::OciReader)
-
 namespace pdal
 {
+
+static PluginInfo const s_info = PluginInfo(
+    "readers.oci",
+    "Read point cloud data from Oracle SDO_POINTCLOUD.",
+    "http://pdal.io/stages/readers.oci.html" );
+
+CREATE_SHARED_PLUGIN(1, 0, OciReader, Reader, s_info)
+
+std::string OciReader::getName() const { return s_info.name; }
 
 void OciReader::processOptions(const Options& options)
 {
@@ -60,7 +68,8 @@ void OciReader::processOptions(const Options& options)
 
 void OciReader::initialize()
 {
-    pdal::GlobalEnvironment::get().getGDALDebug()->addLog(log());
+    m_compression = false;
+    GlobalEnvironment::get().initializeGDAL(log(), isDebug());
     m_connection = connect(m_connSpec);
     m_block = BlockPtr(new Block(m_connection));
 
@@ -142,13 +151,9 @@ Options OciReader::getDefaultOptions()
     Option xml_schema_dump("xml_schema_dump", std::string(),
         "Filename to dump the XML schema to.");
 
-    Option do_normalize_xyz("do_normalize_xyz", true, "Normalize XYZ "
-        "dimensions from selections that have varying scale/offsets");
-
     options.add(connection);
     options.add(query);
     options.add(xml_schema_dump);
-    options.add(do_normalize_xyz);
 
     return options;
 }
@@ -183,9 +188,6 @@ void OciReader::validateQuery()
     while (m_stmt->GetNextField(col, fieldName, &hType, &size,
         &precision, &scale, typeName))
     {
-        log()->get(LogLevel::Debug) << "Fetched field '" << fieldName <<
-            "' of type '" << typeName << "'"<< std::endl;
-
         reqFields.erase(fieldName);
         if (hType == SQLT_NTY)
         {
@@ -238,18 +240,19 @@ pdal::SpatialReference OciReader::fetchSpatialReference(Statement stmt,
 }
 
 
-void OciReader::addDimensions(PointContextRef ctx)
+void OciReader::addDimensions(PointLayoutPtr layout)
 {
     log()->get(LogLevel::Debug) << "Fetching schema from SDO_PC object" <<
         std::endl;
 
-    m_block->m_ctx = ctx;
-    m_block->m_schema = fetchSchema(m_stmt, m_block);
-    loadSchema(ctx, m_block->m_schema);
+    XMLSchema schema = fetchSchema(m_stmt, m_block);
+    loadSchema(layout, schema);
+    MetadataNode comp = schema.getMetadata().findChild("compression");
+    m_compression = (comp.value() == "lazperf");
 
     if (m_schemaFile.size())
     {
-        std::string pcSchema = m_block->m_schema.xml();
+        std::string pcSchema = schema.xml();
         std::ostream *out = FileUtils::createFile(m_schemaFile);
         out->write(pcSchema.c_str(), pcSchema.size());
         FileUtils::closeFile(out);
@@ -257,7 +260,7 @@ void OciReader::addDimensions(PointContextRef ctx)
 }
 
 
-point_count_t OciReader::read(PointBuffer& buffer, point_count_t count)
+point_count_t OciReader::read(PointViewPtr view, point_count_t count)
 {
     if (eof())
         return 0;
@@ -268,14 +271,13 @@ point_count_t OciReader::read(PointBuffer& buffer, point_count_t count)
         if (m_block->numRemaining() == 0)
             if (!readOci(m_stmt, m_block))
                 return totalNumRead;
-        PointId bufBegin = buffer.size();
+        PointId bufBegin = view->size();
 
-        Orientation::Enum orientation = m_block->m_schema.orientation();
         point_count_t numRead = 0;
-        if (orientation == Orientation::DimensionMajor)
-            numRead = readDimMajor(buffer, m_block, count - totalNumRead);
-        else if (orientation == Orientation::PointMajor)
-            numRead = readPointMajor(buffer, m_block, count - totalNumRead);
+        if (orientation() == Orientation::DimensionMajor)
+            numRead = readDimMajor(*view, m_block, count - totalNumRead);
+        else if (orientation() == Orientation::PointMajor)
+            numRead = readPointMajor(*view, m_block, count - totalNumRead);
         PointId bufEnd = bufBegin + numRead;
         totalNumRead += numRead;
     }
@@ -283,17 +285,17 @@ point_count_t OciReader::read(PointBuffer& buffer, point_count_t count)
 }
 
 
-point_count_t OciReader::readDimMajor(PointBuffer& buffer, BlockPtr block,
+point_count_t OciReader::readDimMajor(PointView& view, BlockPtr block,
     point_count_t numPts)
 {
     using namespace Dimension;
 
     point_count_t numRemaining = block->numRemaining();
-    PointId startId = buffer.size();
+    PointId startId = view.size();
     point_count_t blockRemaining;
     point_count_t numRead = 0;
 
-    DimTypeList dims = block->m_schema.dimTypes();
+    DimTypeList dims = dbDimTypes();
     for (auto di = dims.begin(); di != dims.end(); ++di)
     {
         PointId nextId = startId;
@@ -302,11 +304,15 @@ point_count_t OciReader::readDimMajor(PointBuffer& buffer, BlockPtr block,
         numRead = 0;
         while (numRead < numPts && blockRemaining > 0)
         {
-            writeField(buffer, pos, *di, nextId);
+            writeField(view, pos, *di, nextId);
             pos += Dimension::size(di->m_type);
 
             if (di->m_id == Id::PointSourceId && m_updatePointSourceId)
-                buffer.setField(Id::PointSourceId, nextId, block->obj_id);
+                view.setField(Id::PointSourceId, nextId, block->obj_id);
+
+            if (m_cb && di == dims.rbegin().base() - 1)
+                m_cb(view, nextId);
+
             nextId++;
             numRead++;
             blockRemaining--;
@@ -317,21 +323,50 @@ point_count_t OciReader::readDimMajor(PointBuffer& buffer, BlockPtr block,
 }
 
 
-point_count_t OciReader::readPointMajor(PointBuffer& buffer,
+point_count_t OciReader::readPointMajor(PointView& view,
     BlockPtr block, point_count_t numPts)
 {
     size_t numRemaining = block->numRemaining();
-    PointId nextId = buffer.size();
+    PointId nextId = view.size();
     point_count_t numRead = 0;
 
-    char *pos = seekPointMajor(block);
-    while (numRead < numPts && numRemaining > 0)
+    if (m_compression)
     {
-        writePoint(buffer, nextId, pos);
+#ifdef PDAL_HAVE_LAZPERF
+        LazPerfBuf buf(block->chunk);
+        LazPerfDecompressor<LazPerfBuf> decompressor(buf, dbDimTypes());
 
-        numRemaining--;
-        nextId++;
-        numRead++;
+        std::vector<char> ptBuf(decompressor.pointSize());
+        while (numRead < numPts && numRemaining > 0)
+        {
+            point_count_t numWritten =
+                decompressor.decompress(ptBuf.data(), ptBuf.size());
+            writePoint(view, nextId, ptBuf.data());
+            if (m_cb)
+                m_cb(view, nextId);
+            numRemaining--;
+            nextId++;
+            numRead++;
+        }
+#else
+        throw pdal_error("Can't decompress without LAZperf.");
+#endif
+    }
+    else
+    {
+        char *pos = seekPointMajor(block);
+        while (numRead < numPts && numRemaining > 0)
+        {
+            writePoint(view, nextId, pos);
+
+            if (m_cb)
+                m_cb(view, nextId);
+
+            pos += packedPointSize();
+            numRemaining--;
+            nextId++;
+            numRead++;
+        }
     }
     block->setNumRemaining(numRemaining);
     return numRead;
@@ -340,19 +375,15 @@ point_count_t OciReader::readPointMajor(PointBuffer& buffer,
 
 char *OciReader::seekDimMajor(const DimType& d, BlockPtr block)
 {
-    size_t size = 0;
-    DimTypeList dims = block->m_schema.dimTypes();
-    for (auto di = dims.begin(); di->m_id != d.m_id; ++di)
-        size += Dimension::size(di->m_type);
     return block->data() +
-        (size * block->numPoints()) +
+        (dimOffset(d.m_id) * block->numPoints()) +
         (Dimension::size(d.m_type) * block->numRead());
 }
 
 
 char *OciReader::seekPointMajor(BlockPtr block)
 {
-    return block->data() + (block->numRead() * block->m_point_size);
+    return block->data() + (block->numRead() * packedPointSize());
 }
 
 
@@ -371,8 +402,11 @@ bool OciReader::readOci(Statement stmt, BlockPtr block)
     // Read the points from the blob in the row.
     readBlob(stmt, block);
     XMLSchema *s = findSchema(stmt, block);
-    m_dims = s->xmlDims();
-    block->update(s);
+    updateSchema(*s);
+    MetadataNode comp = s->getMetadata().findChild("compression");
+    m_compression = (comp.value() == "lazperf");
+
+    block->reset();
     block->clearFetched();
     return true;
 }
@@ -389,6 +423,8 @@ void OciReader::readBlob(Statement stmt, BlockPtr block)
     if (!stmt->ReadBlob(block->locator, (void*)(block->chunk.data()),
                         block->chunk.size() , &amountRead))
         throw pdal_error("Did not read all blob data!");
+
+    block->chunk.resize(amountRead);
 }
 
 

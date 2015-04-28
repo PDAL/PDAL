@@ -36,20 +36,19 @@
 
 #include <pdal/Filter.hpp>
 
-#include <map>
 #include <boost/array.hpp>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wfloat-equal"
 #include <gdal.h>
 #include <ogr_spatialref.h>
 #include <pdal/GDALUtils.hpp>
-#pragma GCC diagnostic pop
+
+#include <map>
+
+extern "C" int32_t ColorizationFilter_ExitFunc();
+extern "C" PF_ExitFunc ColorizationFilter_InitPlugin();
 
 namespace pdal
 {
-
-class PointBuffer;
 
 namespace gdal
 { class GlobalDebug; }
@@ -72,23 +71,22 @@ struct BandInfo
     double m_scale;
 };
 
-#define COLORIZATIONDOC "Fetch and assign RGB color information from a GDAL-readable " \
-                        "datasource. "
 public:
-    SET_STAGE_NAME("filters.colorization", COLORIZATIONDOC)
-    SET_STAGE_LINK("http://pdal.io/stages/filters.colorization.html")
+    ColorizationFilter()
+    {}
 
-    ColorizationFilter() : Filter()
-        {}
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
-    static Options getDefaultOptions();
+    Options getDefaultOptions();
 
 private:
     virtual void initialize();
     virtual void processOptions(const Options&);
-    virtual void ready(PointContext ctx);
-    virtual void filter(PointBuffer& buffer);
-    virtual void done(PointContext ctx);
+    virtual void ready(PointTableRef table);
+    virtual void filter(PointView& view);
+    virtual void done(PointTableRef table);
 
     bool getPixelAndLinePosition(double x, double y,
         boost::array<double, 6> const& inverse, int32_t& pixel,

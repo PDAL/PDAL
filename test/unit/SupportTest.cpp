@@ -32,10 +32,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "gtest/gtest.h"
+#include <pdal/pdal_test_main.hpp>
 
 #include "Support.hpp"
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 using namespace pdal;
 using namespace std;
@@ -68,7 +68,7 @@ TEST(SupportTest, test_paths)
 
     // does binpath (and exename) work?
     string this_bin = Support::exename("pdal");
-#ifdef PDAL_PLATFORM_WIN32
+#ifdef _WIN32
     EXPECT_EQ(this_bin, "pdal.exe");
 #else
     EXPECT_EQ(this_bin, "pdal");

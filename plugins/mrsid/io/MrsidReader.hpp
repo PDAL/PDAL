@@ -37,7 +37,7 @@
 #include <pdal/Reader.hpp>
 #include <pdal/ReaderIterator.hpp>
 
-#include <pdal/Bounds.hpp>
+#include <pdal/util/Bounds.hpp>
 
 #include <lidar/PointSource.h>
 
@@ -60,15 +60,15 @@ class PDAL_DLL MrsidReader : public pdal::Reader
 {
 
 public:
-    SET_STAGE_NAME("readers.mrsid", "MrSID Reader")
-    SET_STAGE_LINK("http://www.pdal.io/stages/readers.mrsid.html")
-    SET_PLUGIN_VERSION("1.0.0b1")
-
     virtual ~MrsidReader();
     MrsidReader() : Writer() {};
     MrsidReader(LizardTech::PointSource *ps);
 
-    static Options getDefaultOptions();
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+
+    Options getDefaultOptions();
     static std::vector<Dimension> getDefaultDimensions();
     pdal::StageSequentialIterator*
         createSequentialIterator(PointBuffer& buffer) const;

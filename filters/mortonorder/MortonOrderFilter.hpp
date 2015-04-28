@@ -36,24 +36,27 @@
 
 #include <pdal/Filter.hpp>
 
+extern "C" int32_t MortonOrderFilter_ExitFunc();
+extern "C" PF_ExitFunc MortonOrderFilter_InitPlugin();
+
 namespace pdal
 {
 
-#define MORTONDOCS "Morton or z-order sorting of points. See \n" \
-                   "http://en.wikipedia.org/wiki/Z-order_curve for more detail."
 class PDAL_DLL MortonOrderFilter : public pdal::Filter
 {
 public:
-    SET_STAGE_NAME("filters.mortonorder", MORTONDOCS)
-    SET_STAGE_LINK("http://pdal.io/stages/filters.morton.html")
+    MortonOrderFilter()
+    {}
 
-    MortonOrderFilter() : Filter() {}
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
-    static Options getDefaultOptions();
+    Options getDefaultOptions();
 
 private:
     virtual void processOptions(const Options& ) {};
-    virtual PointBufferSet run(PointBufferPtr buf);
+    virtual PointViewSet run(PointViewPtr view);
 
     MortonOrderFilter& operator=(const MortonOrderFilter&); // not implemented
     MortonOrderFilter(const MortonOrderFilter&); // not implemented

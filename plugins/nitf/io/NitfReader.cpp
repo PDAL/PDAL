@@ -35,10 +35,17 @@
 #include "NitfFile.hpp"
 #include "NitfReader.hpp"
 
-CREATE_READER_PLUGIN(nitf, pdal::NitfReader)
-
 namespace pdal
 {
+
+static PluginInfo const s_info = PluginInfo(
+    "readers.nitf",
+    "NITF Reader",
+    "http://pdal.io/stages/readers.nitf.html" );
+
+CREATE_SHARED_PLUGIN(1, 0, NitfReader, Reader, s_info)
+
+std::string NitfReader::getName() const { return s_info.name; }
 
 //
 // References:
@@ -104,7 +111,7 @@ void NitfReader::initialize()
 }
 
 
-void NitfReader::ready(PointContextRef ctx)
+void NitfReader::ready(PointTableRef table)
 {
 #if 0
     // When combined with setting REQUIRE_LIDAR_SEGMENTS, this little
@@ -120,7 +127,7 @@ void NitfReader::ready(PointContextRef ctx)
 #endif
     // Initialize the LAS stuff with its own metadata node.
     MetadataNode lasNode = m_metadata.add(LasReader::getName());
-    LasReader::ready(ctx, lasNode);
+    LasReader::ready(table, lasNode);
 }
 
 } // namespace pdal

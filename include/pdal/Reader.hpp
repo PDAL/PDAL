@@ -42,30 +42,34 @@ namespace pdal
 
 class Reader;
 
-typedef std::unique_ptr<Reader> ReaderPtr;
-
 class PDAL_DLL Reader : public Stage
 {
 public:
-    Reader() : Stage(),
-        m_count(std::numeric_limits<point_count_t>::max())
+    typedef std::function<void(PointView&, PointId)> PointReadFunc;
+
+    Reader() : m_count(std::numeric_limits<point_count_t>::max())
     {}
+
+    void setReadCb(PointReadFunc cb)
+        { m_cb = cb; }
 
 protected:
     std::string m_filename;
     point_count_t m_count;
+    PointReadFunc m_cb;
 
 private:
-    virtual PointBufferSet run(PointBufferPtr buffer)
+    virtual PointViewSet run(PointViewPtr view)
     {
-        PointBufferSet pbSet;
+        PointViewSet viewSet;
 
-        read(*buffer, m_count);
-        pbSet.insert(buffer);
-        return pbSet;
+        view->clearTemps();
+        read(view, m_count);
+        viewSet.insert(view);
+        return viewSet;
     }
     virtual void readerProcessOptions(const Options& options);
-    virtual point_count_t read(PointBuffer& /*buf*/, point_count_t /*num*/)
+    virtual point_count_t read(PointViewPtr /*view*/, point_count_t /*num*/)
         { return 0; }
     virtual boost::property_tree::ptree serializePipeline() const;
 };

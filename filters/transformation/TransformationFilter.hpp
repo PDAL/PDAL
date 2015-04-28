@@ -37,9 +37,11 @@
 #include <array>
 #include <string>
 
-#include <pdal/pdal_export.hpp>
 #include <pdal/Filter.hpp>
+#include <pdal/pdal_export.hpp>
 
+extern "C" int32_t TransformationFilter_ExitFunc();
+extern "C" PF_ExitFunc TransformationFilter_InitPlugin();
 
 namespace pdal
 {
@@ -55,17 +57,18 @@ TransformationMatrix PDAL_DLL transformationMatrixFromString(const std::string& 
 class PDAL_DLL TransformationFilter : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.transformation", "Transform each point using a 4x4 transformation matrix")
-    SET_STAGE_LINK("http://pdal.io/stages/filters.transformation.html")
-
     TransformationFilter() : Filter()
     {}
+
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
 private:
     TransformationFilter& operator=(const TransformationFilter&); // not implemented
     TransformationFilter(const TransformationFilter&); // not implemented
     virtual void processOptions(const Options& options);
-    virtual void filter(PointBuffer& data);
+    virtual void filter(PointView& view);
 
     TransformationMatrix m_matrix;
 };

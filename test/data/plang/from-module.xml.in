@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <Pipeline version="1.0">
     <Filter type="filters.predicate">
-        <Option name="filename">@CMAKE_SOURCE_DIR@/test/data/plang/test1.py</Option>
+        <Option name="script">@CMAKE_SOURCE_DIR@/test/data/plang/test1.py</Option>
         <Option name="module">anything</Option>
         <Option name="function">fff</Option>
         <Reader type="readers.las">

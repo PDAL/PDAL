@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/StageFactory.hpp>
 
@@ -46,11 +46,11 @@ namespace pdal
 class PDAL_DLL PcdReader : public pdal::Reader
 {
 public:
-    SET_STAGE_NAME("readers.pcd", "Read data from Point Cloud Library (PCL).")
-    SET_STAGE_LINK("http://pdal.io/stages/readers.pcd.html")
-    SET_PLUGIN_VERSION("1.0.0b1")
-
     PcdReader() : Reader() {};
+
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
     static Dimension::IdList getDefaultDimensions()
     {
@@ -60,9 +60,9 @@ public:
 private:
     point_count_t m_numPts;
 
-    virtual void addDimensions(PointContextRef ctx);
-    virtual void ready(PointContextRef ctx);
-    virtual point_count_t read(PointBuffer& buf, point_count_t count);
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void ready(PointTableRef table);
+    virtual point_count_t read(PointViewPtr view, point_count_t count);
 };
 
 } // namespace pdal

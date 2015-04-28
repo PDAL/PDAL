@@ -33,8 +33,9 @@
 ****************************************************************************/
 
 
-#include <pdal/FileUtils.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/util/FileUtils.hpp>
+#include <pdal/Compression.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/GlobalEnvironment.hpp>
 
@@ -46,10 +47,17 @@
 
 #include <ogr_api.h>
 
-CREATE_WRITER_PLUGIN(oci, pdal::OciWriter)
-
 namespace pdal
 {
+
+static PluginInfo const s_info = PluginInfo(
+    "writers.oci",
+    "Write data using SDO_PC objects to Oracle.",
+    "http://pdal.io/stages/writers.oci.html" );
+
+CREATE_SHARED_PLUGIN(1, 0, OciWriter, Writer, s_info)
+
+std::string OciWriter::getName() const { return s_info.name; }
 
 OciWriter::OciWriter()
     : m_createIndex(false)
@@ -68,7 +76,7 @@ OciWriter::OciWriter()
 
 void OciWriter::initialize()
 {
-    GlobalEnvironment::get().getGDALDebug()->addLog(log());
+    GlobalEnvironment::get().initializeGDAL(log(), isDebug());
     m_connection = connect(m_connSpec);
     m_gtype = getGType();
 }
@@ -95,9 +103,6 @@ Options OciWriter::getDefaultOptions()
         "floats/doubles to streams. This is used for creating the SDO_PC "
         "object and adding the index entry to the USER_SDO_GEOM_METADATA "
         "for the block table");
-    Option cloud_id("cloud_id", -1,
-       "The point cloud id that links the point cloud object to the "
-       "entries in the block table.");
     Option connection("connection", "",
         "Oracle connection string to connect to database");
     Option block_table_name("block_table_name", "output",
@@ -145,8 +150,6 @@ Options OciWriter::getDefaultOptions()
         "set on the PC_EXTENT object of the SDO_PC. If none is specified, "
         "the cumulated bounds of all of the block data are used.");
     Option pc_id("pc_id", -1, "Point Cloud id");
-    Option pack("pack_ignored_fields", true,
-        "Pack ignored dimensions out of the data buffer that is written");
     Option do_trace("do_trace", false,
         "turn on server-side binds/waits tracing -- needs ALTER SESSION privs");
     Option stream_chunks("stream_chunks", false,
@@ -162,7 +165,6 @@ Options OciWriter::getDefaultOptions()
     options.add(overwrite);
     options.add(srid);
     options.add(stream_output_precision);
-    options.add(cloud_id);
     options.add(connection);
     options.add(block_table_name);
     options.add(block_table_partition_column);
@@ -178,7 +180,6 @@ Options OciWriter::getDefaultOptions()
     options.add(post_block_sql);
     options.add(base_table_bounds);
     options.add(pc_id);
-    options.add(pack);
     options.add(do_trace);
     options.add(stream_chunks);
     options.add(blob_chunk_count);
@@ -332,7 +333,7 @@ bool OciWriter::blockTableExists()
     oss << "select table_name from user_tables";
 
     log()->get(LogLevel::Debug) << "checking for " << m_blockTableName <<
-        " existence ... " ;
+        " existence ... " << std::endl;
 
     Statement statement(m_connection->CreateStatement(oss.str().c_str()));
 
@@ -342,16 +343,11 @@ bool OciWriter::blockTableExists()
     statement->Define(szTable);
     statement->Execute();
 
-    log()->get(LogLevel::Debug) << "checking ... " << szTable ;
+    log()->get(LogLevel::Debug) << "checking ... " << szTable << std::endl;
     do
     {
-        log()->get(LogLevel::Debug) << ", " << szTable;
         if (boost::iequals(szTable, m_blockTableName))
-        {
-            log()->get(LogLevel::Debug) << " -- '" << m_blockTableName <<
-                "' found." <<std::endl;
             return true;
-        }
     } while (statement->Fetch());
 
     log()->get(LogLevel::Debug) << " -- '" << m_blockTableName <<
@@ -546,7 +542,14 @@ void OciWriter::createPCEntry()
         s_geom << "," << bounds.maxy;
     s_geom << "))";
 
-    XMLSchema schema(dbDimTypes(), MetadataNode(), m_orientation);
+    MetadataNode node;
+    if (m_compression)
+    {
+        MetadataNode r = node.add("root");
+        r.add("compression", "lazperf");
+        r.add("version", "1.0");
+    }
+    XMLSchema schema(dbDimTypes(), node, m_orientation);
     std::string schemaData = schema.xml();
 
     oss << "declare\n"
@@ -567,7 +570,7 @@ void OciWriter::createPCEntry()
         << s_geom.str() <<
         ",  -- Extent\n"
         "     0.5, -- Tolerance for point cloud\n"
-        "           " << m_dimTypes.size() <<
+        "           " << dbDimTypes().size() <<
         ", -- Total number of dimensions\n"
         "           NULL,"
         "            NULL,"
@@ -675,7 +678,6 @@ void OciWriter::processOptions(const Options& options)
     m_solid = getDefaultedOption<bool>(options, "solid");
     m_3d = getDefaultedOption<bool>(options, "is3d");
     m_srid = options.getValueOrThrow<uint32_t>("srid");
-    m_pack = options.getValueOrDefault<bool>("pack_ignored_fields", true);
     m_baseTableBounds =
         getDefaultedOption<BOX3D>(options, "base_table_bounds");
     m_baseTableName = boost::to_upper_copy(
@@ -708,13 +710,22 @@ void OciWriter::processOptions(const Options& options)
         Orientation::PointMajor;
     m_capacity = options.getValueOrThrow<uint32_t>("capacity");
     m_connSpec = options.getValueOrDefault<std::string>("connection", "");
+    m_compression = options.getValueOrDefault<bool>("compression", false);
+
+    if (m_compression && (m_orientation == Orientation::DimensionMajor))
+        throw pdal_error("LAZperf compression not supported for "
+            "dimension-major point storage."); 
 }
 
 
-void OciWriter::write(const PointBuffer& buffer)
+void OciWriter::write(const PointViewPtr view)
 {
+    // While we'd like a separate offset for each tile, the schema is stored
+    // for the entire point cloud.
+    if (m_lastBlockId == 0)
+        setAutoOffset(view);
     writeInit();
-    writeTile(buffer);
+    writeTile(view);
 }
 
 
@@ -751,7 +762,7 @@ void OciWriter::writeInit()
 }
 
 
-void OciWriter::ready(PointContextRef ctx)
+void OciWriter::ready(PointTableRef table)
 {
     bool haveOutputTable = blockTableExists();
     if (m_overwrite && haveOutputTable)
@@ -762,11 +773,11 @@ void OciWriter::ready(PointContextRef ctx)
 
     m_pcExtent.clear();
     m_lastBlockId = 0;
-    DbWriter::ready(ctx);
+    DbWriter::doReady(table);
 }
 
 
-void OciWriter::done(PointContextRef ctx)
+void OciWriter::done(PointTableRef table)
 {
     if (!m_connection)
         return;
@@ -820,8 +831,76 @@ void OciWriter::setOrdinates(Statement statement, OCIArray* ordinates,
         statement->AddElement(ordinates, extent.maxz);
 }
 
+void OciWriter::writePointMajor(PointViewPtr view, std::vector<char>& outbuf)
+{
+    m_callback->setTotal(view->size());
+    m_callback->invoke(0);
+    if (m_compression)
+    {
+        outbuf.resize(0);
+#ifdef PDAL_HAVE_LAZPERF
+        XMLDimList xmlDims = dbDimTypes();
+        DimTypeList dimTypes;
+        for (XMLDim& xmlDim : xmlDims)
+            dimTypes.push_back(xmlDim.m_dimType);
 
-void OciWriter::writeTile(PointBuffer const& buffer)
+        SignedLazPerfBuf compBuf(outbuf);
+        LazPerfCompressor<SignedLazPerfBuf> compressor(compBuf, dimTypes);
+
+        std::vector<char> ptBuf(packedPointSize());
+        for (PointId idx = 0; idx < view->size(); ++idx)
+        {
+            size_t size = readPoint(*view, idx, ptBuf.data());
+            compressor.compress(ptBuf.data(), size);
+        }
+        compressor.done();
+#else
+        throw pdal_error("Can't compress without LAZperf.");
+#endif
+    }
+    else
+    {
+        size_t totalSize = 0;
+        char *pos = outbuf.data();
+        for (PointId idx = 0; idx < view->size(); ++idx)
+        {
+            size_t size = readPoint(*view.get(), idx, pos);
+            totalSize += size;
+            if (idx % 100 == 0)
+                m_callback->invoke(idx);
+            pos += size;
+        }
+        outbuf.resize(totalSize);
+    }
+    m_callback->invoke(view->size());
+}
+
+
+void OciWriter::writeDimMajor(PointViewPtr view, std::vector<char>& outbuf)
+{
+    size_t clicks = 0;
+    size_t interrupt = dbDimTypes().size() * 100;
+    size_t totalSize = 0;
+    char *pos = outbuf.data();
+
+    XMLDimList xmlDims = dbDimTypes();
+    for (auto& xmlDim : xmlDims)
+    {
+        for (PointId idx = 0; idx < view->size(); ++idx)
+        {
+            size_t size = readField(*view.get(), pos,
+                xmlDim.m_dimType.m_id, idx);
+            pos += size;
+            totalSize += size;
+            if (clicks++ % interrupt == 0)
+                m_callback->invoke(clicks / xmlDims.size());
+        }
+    }
+    outbuf.resize(totalSize);
+}
+
+
+void OciWriter::writeTile(const PointViewPtr view)
 {
     bool usePartition = (m_blockTablePartitionColumn.size() != 0);
 
@@ -837,7 +916,7 @@ void OciWriter::writeTile(PointBuffer const& buffer)
     if (usePartition)
         oss << ", :9";
     oss <<")";
-
+ 
     Statement statement(m_connection->CreateStatement(oss.str().c_str()));
 
     // :1
@@ -851,61 +930,34 @@ void OciWriter::writeTile(PointBuffer const& buffer)
         m_lastBlockId << std::endl;
 
     // :3
-    long long_num_points = static_cast<long>(buffer.size());
+    long long_num_points = static_cast<long>(view->size());
     statement->Bind(&long_num_points);
     log()->get(LogLevel::Debug4) << "Num points " <<
         long_num_points << std::endl;
 
-
-
     // :4
+
+    //NOTE: packed point size is guaranteed to be of sufficient size to hold
+    // a point's data, but it may be larger than the actual size of a point
+    // if location scaling is being used. 
+    std::vector<char> outbuf(packedPointSize() * view->size());
     size_t totalSize = 0;
-    std::vector<char> outbuf(m_packedPointSize * buffer.size());
-    char *pos = outbuf.data();
-    m_callback->setTotal(buffer.size());
-    m_callback->invoke(0);
     if (m_orientation == Orientation::DimensionMajor)
-    {
-        size_t clicks = 0;
-        size_t interrupt = m_dimTypes.size() * 100;
-        for (auto di = m_dimTypes.begin(); di != m_dimTypes.end(); ++di)
-        {
-            for (PointId idx = 0; idx < buffer.size(); ++idx)
-            {
-                size_t size = readField(buffer, pos, *di, idx);
-                pos += size;
-                totalSize += size;
-                if (clicks++ % interrupt == 0)
-                    m_callback->invoke(clicks / m_dimTypes.size());
-            }
-        }
-    }
+        writeDimMajor(view, outbuf);
     else if (m_orientation == Orientation::PointMajor)
-    {
-        std::vector<char> storage(m_packedPointSize);
+        writePointMajor(view, outbuf);
 
-        for (PointId idx = 0; idx < buffer.size(); ++idx)
-        {
-            size_t size = readPoint(buffer, idx, storage.data());
-            memcpy(pos, storage.data(), size);
-            totalSize += size;
-            if (idx % 100 == 0)
-                m_callback->invoke(idx);
-            pos += size;
-            totalSize += size;
-        }
-    }
-    m_callback->invoke(buffer.size());
 
-    log()->get(LogLevel::Debug4) << "Blob size " << totalSize << std::endl;
+    log()->get(LogLevel::Debug4) << "Blob size " << outbuf.size() << std::endl;
     OCILobLocator* locator;
     if (m_streamChunks)
     {
-        statement->WriteBlob(&locator, outbuf.data(), totalSize, m_chunkCount);
+        statement->WriteBlob(&locator, outbuf.data(), (long)outbuf.size(),
+            m_chunkCount);
         statement->BindBlob(&locator);
     }
     else
-        statement->Bind(outbuf.data(), (long)totalSize);
+        statement->Bind(outbuf.data(), (long)outbuf.size());
 
     // :5
     long long_gtype = static_cast<long>(m_gtype);
@@ -933,7 +985,7 @@ void OciWriter::writeTile(PointBuffer const& buffer)
     m_connection->CreateType(&sdo_ordinates, m_connection->GetOrdinateType());
 
     // x0, x1, y0, y1, z0, z1, bUse3d
-    BOX3D bounds = buffer.calculateBounds(true);
+    BOX3D bounds = view->calculateBounds(true);
     // Cumulate a total bounds for the file.
     m_pcExtent.grow(bounds);
 

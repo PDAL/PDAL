@@ -36,6 +36,9 @@
 
 #include <pdal/Filter.hpp>
 
+extern "C" int32_t DecimationFilter_ExitFunc();
+extern "C" PF_ExitFunc DecimationFilter_InitPlugin();
+
 namespace pdal
 {
 
@@ -43,10 +46,12 @@ namespace pdal
 class PDAL_DLL DecimationFilter : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.decimation", "Rank decimation filter. Keep every Nth point.")
-    SET_STAGE_LINK("http://pdal.io/stages/filters.decimation.html")
+    DecimationFilter()
+        {}
 
-    DecimationFilter();
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
 private:
     uint32_t m_step;
@@ -54,8 +59,8 @@ private:
     point_count_t m_limit;
 
     virtual void processOptions(const Options& options);
-    PointBufferSet run(PointBufferPtr buffer);
-    void decimate(PointBuffer& input, PointBuffer& output);
+    PointViewSet run(PointViewPtr view);
+    void decimate(PointView& input, PointView& output);
 
     DecimationFilter& operator=(const DecimationFilter&); // not implemented
     DecimationFilter(const DecimationFilter&); // not implemented

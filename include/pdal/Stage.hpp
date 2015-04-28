@@ -35,14 +35,17 @@
 #pragma once
 
 #include <pdal/pdal_internal.hpp>
+#include <pdal/plugin.hpp>
 
 #include <pdal/Dimension.hpp>
 #include <pdal/Log.hpp>
 #include <pdal/Metadata.hpp>
 #include <pdal/Options.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointTable.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/QuickInfo.hpp>
 #include <pdal/SpatialReference.hpp>
+#include <pdal/UserCallback.hpp>
 
 #include <boost/property_tree/ptree.hpp>
 
@@ -54,21 +57,19 @@ class StageSequentialIterator;
 class StageRandomIterator;
 class StageBlockIterator;
 class StageRunner;
-class StageTester;
+class StageWrapper;
 
 class PDAL_DLL Stage
 {
-    friend class StageTester;
+    friend class StageWrapper;
     friend class StageRunner;
 public:
     Stage();
     virtual ~Stage()
         {}
 
-    void setInput(const std::vector<Stage *>& inputs)
-        { m_inputs = inputs; }
-    void setInput(Stage *input)
-        { m_inputs.push_back(input); }
+    void setInput(Stage& input)
+        { m_inputs.push_back(&input); }
 
     QuickInfo preview()
     {
@@ -76,8 +77,8 @@ public:
         processOptions(m_options);
         return inspect();
     }
-    void prepare(PointContextRef ctx);
-    PointBufferSet execute(PointContextRef ctx);
+    void prepare(PointTableRef table);
+    PointViewSet execute(PointTableRef table);
 
     void setSpatialReference(SpatialReference const&);
     const SpatialReference& getSpatialReference() const;
@@ -99,11 +100,10 @@ public:
             return m_options.getValueOrDefault<uint32_t>("verbose", 0);
         }
     virtual std::string getName() const = 0;
-    virtual std::string getDescription() const = 0;
-    const std::vector<Stage *>& getInputs() const
+    const std::vector<Stage*>& getInputs() const
         { return m_inputs; }
-    std::vector<Stage*> findStage(std::string name);
-    static Options getDefaultOptions()
+    std::vector<Stage *> findStage(std::string name);
+    virtual Options getDefaultOptions()
         { return Options(); }
     static Dimension::IdList getDefaultDimensions()
         { return Dimension::IdList(); }
@@ -111,29 +111,20 @@ public:
         { return std::string(); }
     static std::string s_getPluginVersion()
         { return std::string(); }
-    virtual boost::property_tree::ptree toPTree(PointContextRef ctx) const
+    virtual boost::property_tree::ptree toPTree(PointTableRef table) const
         { return boost::property_tree::ptree(); }
-
-#define SET_STAGE_NAME(name, description)  \
-    static std::string s_getName() { return name; }  \
-    std::string getName() const { return name; }  \
-    static std::string s_getDescription() { return description; }  \
-    std::string getDescription() const { return description; }
-
-#define SET_STAGE_LINK(infolink) \
-    static std::string s_getInfoLink() { return infolink; }  \
-    std::string getInfoLink() const { return infolink; }
-
-#define SET_PLUGIN_VERSION(version) \
-    static std::string s_getPluginVersion() { return version; } \
-    std::string getPluginVersion() { return version; }
 
     virtual StageSequentialIterator* createSequentialIterator() const
         { return NULL; }
     inline MetadataNode getMetadata() const
         { return m_metadata; }
 
+    /// Sets the UserCallback to manage progress/cancel operations
+    void setUserCallback(UserCallback* userCallback)
+        { m_callback.reset(userCallback); }
+
 protected:
+    std::unique_ptr<UserCallback> m_callback;
     Options m_options;
     MetadataNode m_metadata;
 
@@ -156,23 +147,24 @@ private:
         {}
     virtual void writerProcessOptions(const Options& /*options*/)
         {}
-    void l_initialize(PointContextRef ctx);
-    void l_done(PointContextRef ctx);
+    void l_initialize(PointTableRef table);
+    void l_done(PointTableRef table);
     virtual QuickInfo inspect()
         { return QuickInfo(); }
     virtual void initialize()
         {}
-    virtual void addDimensions(PointContextRef ctx)
-        { (void)ctx; }
-    virtual void ready(PointContextRef ctx)
-        { (void)ctx; }
-    virtual void done(PointContextRef ctx)
-        { (void)ctx; }
-    virtual PointBufferSet run(PointBufferPtr buffer)
+    virtual void addDimensions(PointLayoutPtr /*layout*/)
+        {}
+    virtual void prepared(PointTableRef /*table*/)
+        {}
+    virtual void ready(PointTableRef /*table*/)
+        {}
+    virtual void done(PointTableRef /*table*/)
+        {}
+    virtual PointViewSet run(PointViewPtr /*view*/)
     {
-        (void)buffer;
         std::cerr << "Can't run stage = " << getName() << "!\n";
-        return PointBufferSet();
+        return PointViewSet();
     }
 };
 

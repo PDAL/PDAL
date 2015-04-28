@@ -34,44 +34,67 @@
 
 #include "PipelineKernel.hpp"
 
+#ifdef PDAL_HAVE_LIBXML2
+#include <pdal/XMLSchema.hpp>
+#endif
+
+#include <boost/program_options.hpp>
+
 namespace pdal
 {
-    
-PipelineKernel::PipelineKernel()
-    : Kernel()
-    , m_inputFile("")
-    , m_validate(false)
-{
-    return;
-}
+
+static PluginInfo const s_info = PluginInfo(
+    "kernels.pipeline",
+    "Pipeline Kernel",
+    "http://pdal.io/kernels/kernels.pipeline.html" );
+
+CREATE_STATIC_PLUGIN(1, 0, PipelineKernel, Kernel, s_info)
+
+std::string PipelineKernel::getName() const { return s_info.name; }
+
+PipelineKernel::PipelineKernel() : m_validate(false), m_PointCloudSchemaOutput("")
+{}
 
 
 void PipelineKernel::validateSwitches()
 {
     if (m_usestdin)
         m_inputFile = "STDIN";
-        
-    if (m_inputFile == "")
-    {
-        throw app_usage_error("input file name required");
-    }
 
-    return;
+    if (m_inputFile.empty())
+        throw app_usage_error("input file name required");
 }
 
 
 void PipelineKernel::addSwitches()
 {
-    po::options_description* file_options = new po::options_description("file options");
+    po::options_description* file_options =
+        new po::options_description("file options");
 
     file_options->add_options()
-        ("input,i", po::value<std::string>(&m_inputFile)->default_value(""), "input file name")
-        ("pipeline-serialization", po::value<std::string>(&m_pipelineFile)->default_value(""), "")
-        ("validate", po::value<bool>(&m_validate)->zero_tokens()->implicit_value(true), "Validate the pipeline (including serialization), but do not execute writing of points")
+        ("input,i", po::value<std::string>(&m_inputFile)->default_value(""),
+            "input file name")
+        ("pipeline-serialization",
+            po::value<std::string>(&m_pipelineFile)->default_value(""), "")
+        ("validate",
+            po::value<bool>(&m_validate)->zero_tokens()->implicit_value(true),
+            "Validate the pipeline (including serialization), but do not "
+            "execute writing of points")
         ;
 
     addSwitchSet(file_options);
     addPositionalSwitch("input", 1);
+
+
+    po::options_description* hidden =
+        new po::options_description("Hidden options");
+    hidden->add_options()
+        ("pointcloudschema",
+         po::value<std::string>(&m_PointCloudSchemaOutput),
+        "dump PointCloudSchema XML output")
+            ;
+
+    addHiddenSwitchSet(hidden);
 }
 
 int PipelineKernel::execute()
@@ -84,23 +107,14 @@ int PipelineKernel::execute()
     pdal::PipelineReader reader(manager, isDebug(), getVerboseLevel());
     bool isWriter = reader.readPipeline(m_inputFile);
     if (!isWriter)
-        throw app_runtime_error("Pipeline file does not contain a writer. Use 'pdal info' to read the data.");
-    else
-    {
-/**
-    if (!getProgressShellCommand().size())
-        callback = static_cast<pdal::UserCallback*>(new PercentageCallback);
-    else
-        callback = static_cast<pdal::UserCallback*>(new ShellScriptCallback(getProgressShellCommand()));
-    manager.getWriter()->setUserCallback(callback);
-**/
-    }
+        throw app_runtime_error("Pipeline file does not contain a writer. "
+            "Use 'pdal info' to read the data.");
 
     for (const auto& pi : getExtraStageOptions())
     {
         std::string name = pi.first;
         Options options = pi.second;
-        std::vector<Stage*> stages = manager.getWriter()->findStage(name);
+        std::vector<Stage *> stages = manager.getStage()->findStage(name);
         for (const auto& s : stages)
         {
             Options opts = s->getOptions();
@@ -110,13 +124,29 @@ int PipelineKernel::execute()
         }
     }
 
-    PointContext ctx;
-    manager.getWriter()->prepare(ctx);
-    manager.getWriter()->execute(ctx);
+    PointTable table;
+    manager.getStage()->prepare(table);
+    manager.getStage()->execute(table);
     if (m_pipelineFile.size() > 0)
     {
         pdal::PipelineWriter writer(manager);
         writer.writePipeline(m_pipelineFile);
+    }
+    if (m_PointCloudSchemaOutput.size() > 0)
+    {
+#ifdef PDAL_HAVE_LIBXML2
+        XMLSchema schema(manager.pointTable().layout());
+        
+        std::ostream *out = FileUtils::createFile(m_PointCloudSchemaOutput);
+        std::string xml(schema.xml());
+        out->write(xml.c_str(), xml.size());
+        FileUtils::closeFile(out);
+        
+#else
+        std::cerr << "libxml2 support not available, no schema is produced" <<
+            std::endl;
+#endif
+
     }
     return 0;
 }

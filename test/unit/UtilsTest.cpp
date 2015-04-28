@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "gtest/gtest.h"
+#include <pdal/pdal_test_main.hpp>
 
 #include <sstream>
 
@@ -133,6 +133,40 @@ TEST(UtilsTest, test_base64)
 
     EXPECT_EQ(decoded.size(), data.size());
     EXPECT_EQ(size, begin_size);
+}
+
+TEST(UtilsTest, blanks)
+{
+    std::string base("This is a test");
+    std::string trail("This is a test   ");
+    std::string lead("  This is a test");
+    std::string both("  This is a test    ");
+    std::string empty;
+
+    std::string s = "This is a test  \t  ";
+    Utils::trimTrailing(s);
+    EXPECT_EQ(s, base);
+    s = "";
+    Utils::trimTrailing(s);
+    EXPECT_EQ(s, empty);
+    s = "  \t\t  ";
+    Utils::trimTrailing(s);
+    EXPECT_EQ(s, empty);
+    s = base;
+    Utils::trimTrailing(s);
+    EXPECT_EQ(s, base);
+    s = "  \t This is a test";
+    Utils::trimLeading(s);
+    EXPECT_EQ(s, base);
+    s = "  \t  \t  ";
+    Utils::trimLeading(s);
+    EXPECT_EQ(s, empty);
+    s = "";
+    Utils::trimLeading(s);
+    EXPECT_EQ(s, empty);
+    s = base;
+    Utils::trimLeading(s);
+    EXPECT_EQ(s, base);
 }
 
 TEST(UtilsTest, split)
@@ -244,3 +278,47 @@ TEST(UtilsTest, split2Char)
     EXPECT_EQ(result[3], "test");
 }
 
+TEST(UtilsTest, case)
+{
+    std::string s("This is a test");
+    
+    EXPECT_EQ("THIS IS A TEST", Utils::toupper(s));
+    EXPECT_EQ("this is a test", Utils::tolower(s));
+
+    s = "FOOBARBAZ";
+
+    EXPECT_EQ("FOOBARBAZ", Utils::toupper(s));
+    EXPECT_EQ("foobarbaz", Utils::tolower(s));
+
+    s = "foo!bar.baz";
+    EXPECT_EQ("FOO!BAR.BAZ", Utils::toupper(s));
+    EXPECT_EQ(s, Utils::tolower(s));
+}
+
+TEST(UtilsTest, starts)
+{
+    std::string s("reference 1");
+
+    EXPECT_TRUE(Utils::startsWith(s, "ref"));
+    EXPECT_TRUE(Utils::startsWith(s, s));
+    EXPECT_FALSE(Utils::startsWith(s, "reference 123"));
+    EXPECT_FALSE(Utils::startsWith(s, "rawference 123"));
+    EXPECT_TRUE(Utils::startsWith(s, ""));
+}
+
+TEST(UtilsTest, iequals)
+{
+    EXPECT_TRUE(Utils::iequals("", ""));
+    EXPECT_TRUE(Utils::iequals("Foobar", "foobar"));
+    EXPECT_TRUE(Utils::iequals("FOO.BAR~", "foo.Bar~"));
+    EXPECT_FALSE(Utils::iequals("Foobar", "foobarbaz"));
+    EXPECT_FALSE(Utils::iequals("Foobar", "foobat"));
+}
+
+TEST(UtilsTest, replaceAll)
+{
+    std::string s(" This  is a   test ");
+    EXPECT_EQ(Utils::replaceAll(s, " ", "  "), "  This    is  a      test  ");
+    EXPECT_EQ(Utils::replaceAll(s, "  ", " "), " This is a  test ");
+    EXPECT_EQ(Utils::replaceAll(s, " ", "\""), "\"This\"\"is\"a\"\"\"test\"");
+}

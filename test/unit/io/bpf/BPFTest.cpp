@@ -32,14 +32,15 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "gtest/gtest.h"
+#include <pdal/pdal_test_main.hpp>
 
 #include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/Utils.hpp>
-#include <pdal/FileUtils.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/util/FileUtils.hpp>
+#include <pdal/PointView.hpp>
 #include <BpfReader.hpp>
+#include <BpfWriter.hpp>
 
 #include "Support.hpp"
 
@@ -49,42 +50,44 @@ namespace
 {
 
 template<typename LeftIter, typename RightIter>
-::testing::AssertionResult CheckEqualCollections(LeftIter left_begin, LeftIter left_end, RightIter right_begin)
+::testing::AssertionResult CheckEqualCollections(
+    LeftIter left_begin, LeftIter left_end, RightIter right_begin)
 {
-  bool equal(true);
-  std::string message;
-  size_t index(0);
-  while (left_begin != left_end)
-  {
-    if (*left_begin++ != *right_begin++)
+    bool equal(true);
+    std::string message;
+    size_t index(0);
+    while (left_begin != left_end)
     {
-      equal = false;
-      message += "\n\tMismatch at index " + std::to_string(index);
+        if (*left_begin++ != *right_begin++)
+        {
+            equal = false;
+            message += "\n\tMismatch at index " + std::to_string(index);
+        }
+        ++index;
     }
-    ++index;
-  }
-  if (message.size())
-    message += "\n\t";
-  return equal ? ::testing::AssertionSuccess() : ::testing::AssertionFailure() << message;
+    if (message.size())
+        message += "\n\t";
+    return equal ? ::testing::AssertionSuccess() :
+        ::testing::AssertionFailure() << message;
 }
 
 void test_file_type(const std::string& filename)
 {
-    PointContext context;
+    PointTable table;
 
     Options ops;
 
-    ops.add("filename", Support::datapath(filename));
+    ops.add("filename", filename);
     ops.add("count", 506);
-    BpfReader reader;
-    reader.setOptions(ops);
+    std::shared_ptr<BpfReader> reader(new BpfReader);
+    reader->setOptions(ops);
 
-    reader.prepare(context);
-    PointBufferSet pbSet = reader.execute(context);
+    reader->prepare(table);
+    PointViewSet viewSet = reader->execute(table);
 
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 506u);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 506u);
 
     struct PtData
     {
@@ -93,30 +96,30 @@ void test_file_type(const std::string& filename)
         float z;
     };
 
-    PtData pts2[3] = { {494057.312, 4877433.5, 130.630005},
-                       {494133.812, 4877440, 130.440002},
-                       {494021.094, 4877440, 130.460007} };
+    PtData pts2[3] = { {494057.312f, 4877433.5f, 130.630005f},
+                       {494133.812f, 4877440.0f, 130.440002f},
+                       {494021.094f, 4877440.0f, 130.460007f} };
 
     for (int i = 0; i < 3; ++i)
     {
-        float x = buf->getFieldAs<float>(Dimension::Id::X, i);
-        float y = buf->getFieldAs<float>(Dimension::Id::Y, i);
-        float z = buf->getFieldAs<float>(Dimension::Id::Z, i);
+        float x = view->getFieldAs<float>(Dimension::Id::X, i);
+        float y = view->getFieldAs<float>(Dimension::Id::Y, i);
+        float z = view->getFieldAs<float>(Dimension::Id::Z, i);
 
         EXPECT_FLOAT_EQ(x, pts2[i].x);
         EXPECT_FLOAT_EQ(y, pts2[i].y);
         EXPECT_FLOAT_EQ(z, pts2[i].z);
     }
 
-    PtData pts[3] = { {494915.25, 4878096.5, 128.220001},
-                      {494917.062, 4878124.5, 128.539993},
-                      {494920.781, 4877914.5, 127.43} };
+    PtData pts[3] = { {494915.25f, 4878096.5f, 128.220001f},
+                      {494917.062f, 4878124.5f, 128.539993f},
+                      {494920.781f, 4877914.5f, 127.43f} };
 
     for (int i = 503; i < 3; ++i)
     {
-        float x = buf->getFieldAs<float>(Dimension::Id::X, i);
-        float y = buf->getFieldAs<float>(Dimension::Id::Y, i);
-        float z = buf->getFieldAs<float>(Dimension::Id::Z, i);
+        float x = view->getFieldAs<float>(Dimension::Id::X, i);
+        float y = view->getFieldAs<float>(Dimension::Id::Y, i);
+        float z = view->getFieldAs<float>(Dimension::Id::Z, i);
 
         EXPECT_FLOAT_EQ(x, pts[i].x);
         EXPECT_FLOAT_EQ(y, pts[i].y);
@@ -124,36 +127,137 @@ void test_file_type(const std::string& filename)
     }
 }
 
+void test_roundtrip(Options& writerOps)
+{
+    std::string infile(
+        Support::datapath("bpf/autzen-utm-chipped-25-v3-interleaved.bpf"));
+    std::string outfile(Support::temppath("tmp.bpf"));
+
+
+    PointTable table;
+
+    Options readerOps;
+
+    readerOps.add("filename", infile);
+    BpfReader reader;
+    reader.setOptions(readerOps);
+
+    writerOps.add("filename", outfile);
+    BpfWriter writer;
+    writer.setOptions(writerOps);
+    writer.setInput(reader);
+
+    FileUtils::deleteFile(outfile);
+    writer.prepare(table);
+    writer.execute(table);
+
+    test_file_type(outfile);
+}
+
+
 } //namespace
 
 TEST(BPFTest, test_point_major)
 {
-    test_file_type("bpf/autzen-utm-chipped-25-v3-interleaved.bpf");
+    test_file_type(
+        Support::datapath("bpf/autzen-utm-chipped-25-v3-interleaved.bpf"));
 }
 
 TEST(BPFTest, test_dim_major)
 {
-    test_file_type("bpf/autzen-utm-chipped-25-v3.bpf");
+    test_file_type(
+        Support::datapath("bpf/autzen-utm-chipped-25-v3.bpf"));
 }
 
 TEST(BPFTest, test_byte_major)
 {
-    test_file_type("bpf/autzen-utm-chipped-25-v3-segregated.bpf");
+    test_file_type(
+        Support::datapath("bpf/autzen-utm-chipped-25-v3-segregated.bpf"));
 }
 
 TEST(BPFTest, test_point_major_zlib)
 {
-    test_file_type("bpf/autzen-utm-chipped-25-v3-deflate-interleaved.bpf");
+    test_file_type(
+        Support::datapath("bpf/"
+            "autzen-utm-chipped-25-v3-deflate-interleaved.bpf"));
 }
 
 TEST(BPFTest, test_dim_major_zlib)
 {
-    test_file_type("bpf/autzen-utm-chipped-25-v3-deflate.bpf");
+    test_file_type(
+        Support::datapath("bpf/autzen-utm-chipped-25-v3-deflate.bpf"));
 }
 
 TEST(BPFTest, test_byte_major_zlib)
 {
-    test_file_type("bpf/autzen-utm-chipped-25-v3-deflate-segregated.bpf");
+    test_file_type(
+        Support::datapath("bpf/"
+            "autzen-utm-chipped-25-v3-deflate-segregated.bpf"));
+}
+
+TEST(BPFTest, roundtrip_byte)
+{
+    Options ops;
+
+    ops.add("format", "BYTE");
+    test_roundtrip(ops);
+}
+
+TEST(BPFTest, roundtrip_dimension)
+{
+    Options ops;
+
+    ops.add("format", "DIMENSION");
+    test_roundtrip(ops);
+}
+
+TEST(BPFTest, roundtrip_point)
+{
+    Options ops;
+
+    ops.add("format", "POINT");
+    test_roundtrip(ops);
+}
+
+TEST(BPFTest, roundtrip_byte_compression)
+{
+    Options ops;
+
+    ops.add("format", "BYTE");
+    ops.add("compression", true);
+    test_roundtrip(ops);
+}
+
+TEST(BPFTest, roundtrip_dimension_compression)
+{
+    Options ops;
+
+    ops.add("format", "DIMENSION");
+    ops.add("compression", true);
+    test_roundtrip(ops);
+}
+
+TEST(BPFTest, roundtrip_point_compression)
+{
+    Options ops;
+
+    ops.add("format", "POINT");
+    ops.add("compression", true);
+    test_roundtrip(ops);
+}
+
+TEST(BPFTest, roundtrip_scaling)
+{
+    Options ops;
+
+    ops.add("format", "POINT");
+    ops.add("offset_x", 494000.0);
+    ops.add("offset_y", 487000.0);
+    ops.add("offset_z", 130.0);
+    ops.add("scale_x", .001);
+    ops.add("scale_y", .01);
+    ops.add("scale_z", 10.0);
+    test_roundtrip(ops);
 }
 
 TEST(BPFTest, inspect)
@@ -176,7 +280,7 @@ TEST(BPFTest, inspect)
         -13674705.011110275984, 4896224.6888861842453, 178.7299957275390625);
     EXPECT_EQ(qi.m_bounds, bounds);
 
-    const char *dims[] = 
+    const char *dims[] =
     {
         "Blue",
         "Classification",
@@ -193,7 +297,8 @@ TEST(BPFTest, inspect)
     };
 
     std::sort(qi.m_dimNames.begin(), qi.m_dimNames.end());
-    EXPECT_TRUE(CheckEqualCollections(qi.m_dimNames.begin(), qi.m_dimNames.end(), std::begin(dims)));
+    EXPECT_TRUE(CheckEqualCollections(qi.m_dimNames.begin(),
+        qi.m_dimNames.end(), std::begin(dims)));
 }
 
 TEST(BPFTest, mueller)

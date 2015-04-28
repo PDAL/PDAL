@@ -33,7 +33,7 @@
 ****************************************************************************/
 
 #include "P2gWriter.hpp"
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 
 #include <iostream>
 #include <algorithm>
@@ -41,17 +41,23 @@
 #include <boost/algorithm/string.hpp>
 #include <points2grid/Interpolation.hpp>
 
-CREATE_WRITER_PLUGIN(p2g, pdal::P2gWriter)
-
 namespace pdal
 {
 
+static PluginInfo const s_info = PluginInfo(
+    "writers.p2g",
+    "Points2Grid Writer",
+    "http://pdal.io/stages/writers.p2g.html" );
+
+CREATE_SHARED_PLUGIN(1, 0, P2gWriter, Writer, s_info)
+
+std::string P2gWriter::getName() const { return s_info.name; }
 
 void P2gWriter::processOptions(const Options& options)
 {
     m_GRID_DIST_X = options.getValueOrDefault<double>("grid_dist_x", 6.0);
     m_GRID_DIST_Y = options.getValueOrDefault<double>("grid_dist_y", 6.0);
-    m_RADIUS_SQ = options.getValueOrDefault<double>("radius",
+    m_RADIUS = options.getValueOrDefault<double>("radius",
         8.4852813742385713);
     m_fill_window_size = options.getValueOrDefault<uint32_t>(
         "fill_window_size", 3);
@@ -102,7 +108,7 @@ void P2gWriter::processOptions(const Options& options)
 
 
 /*
-void P2gWriter::ready(PointContextRef ctx)
+void P2gWriter::ready(PointTableRef table)
 {
     double min_x = (std::numeric_limits<double>::max)();
     double max_x = (std::numeric_limits<double>::min)();
@@ -134,20 +140,20 @@ Options P2gWriter::getDefaultOptions()
 }
 
 
-void P2gWriter::write(const PointBuffer& buf)
+void P2gWriter::write(const PointViewPtr view)
 {
     std::string z_name = getOptions().getValueOrDefault<std::string>("Z", "Z");
 
 
-    for (point_count_t idx = 0; idx < buf.size(); idx++)
+    for (point_count_t idx = 0; idx < view->size(); idx++)
     {
-        double x = buf.getFieldAs<double>(Dimension::Id::X, idx);
-        double y = buf.getFieldAs<double>(Dimension::Id::Y, idx);
-        double z = buf.getFieldAs<double>(Dimension::Id::Z, idx);
+        double x = view->getFieldAs<double>(Dimension::Id::X, idx);
+        double y = view->getFieldAs<double>(Dimension::Id::Y, idx);
+        double z = view->getFieldAs<double>(Dimension::Id::Z, idx);
         m_coordinates.push_back(boost::tuple<double, double, double>(x, y, z));
     }
 
-    m_bounds = buf.calculateBounds();
+    m_bounds = view->calculateBounds();
 
     m_GRID_SIZE_X = (int)(ceil((m_bounds.maxx - m_bounds.minx)/m_GRID_DIST_X)) + 1;
     m_GRID_SIZE_Y = (int)(ceil((m_bounds.maxy - m_bounds.miny)/m_GRID_DIST_Y)) + 1;
@@ -165,7 +171,7 @@ void P2gWriter::write(const PointBuffer& buf)
                                        m_GRID_DIST_Y,
                                        m_GRID_SIZE_X,
                                        m_GRID_SIZE_Y,
-                                       m_RADIUS_SQ,
+                                       m_RADIUS * m_RADIUS,
                                        m_bounds.minx,
                                        m_bounds.maxx,
                                        m_bounds.miny,
@@ -196,10 +202,10 @@ void P2gWriter::write(const PointBuffer& buf)
     }
 
     double adfGeoTransform[6];
-    adfGeoTransform[0] = m_bounds.minx;
+    adfGeoTransform[0] = m_bounds.minx - 0.5*m_GRID_DIST_X;
     adfGeoTransform[1] = m_GRID_DIST_X;
     adfGeoTransform[2] = 0.0;
-    adfGeoTransform[3] = m_bounds.maxy;
+    adfGeoTransform[3] = m_bounds.maxy + 0.5*m_GRID_DIST_Y;
     adfGeoTransform[4] = 0.0;
     adfGeoTransform[5] = -1 * m_GRID_DIST_Y;
 

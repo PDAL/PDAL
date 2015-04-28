@@ -32,11 +32,13 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "gtest/gtest.h"
+#include <pdal/pdal_test_main.hpp>
 
 #include <pdal/StageFactory.hpp>
+#include <pdal/StageWrapper.hpp>
+#include <LasReader.hpp>
+#include <SplitterFilter.hpp>
 #include "Support.hpp"
-#include "StageTester.hpp"
 
 using namespace pdal;
 
@@ -47,39 +49,37 @@ TEST(SplitterTest, test_tile_filter)
     // create the reader
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
-    ReaderPtr r(f.createReader("readers.las"));
-    EXPECT_TRUE(r.get());
-    r->setOptions(ops1);
+    LasReader r;
+    r.setOptions(ops1);
 
     Options o;
     Option length("length", 1000, "length");
     o.add(length);
 
     // create the tile filter and prepare
-    FilterPtr s(f.createFilter("filters.splitter"));
-    EXPECT_TRUE(s.get());
-    s->setOptions(o);
-    s->setInput(r.get());
+    SplitterFilter s;
+    s.setOptions(o);
+    s.setInput(r);
 
-    PointContext ctx;
-    PointBufferPtr buf(new PointBuffer(ctx));
-    s->prepare(ctx);
+    PointTable table;
+    PointViewPtr view(new PointView(table));
+    s.prepare(table);
 
-    StageTester::ready(r.get(), ctx);
-    PointBufferSet pbSet = StageTester::run(r.get(), buf);
-    StageTester::done(r.get(), ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
-    buf = *pbSet.begin();
+    StageWrapper::ready(r, table);
+    PointViewSet viewSet = StageWrapper::run(r, view);
+    StageWrapper::done(r, table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    view = *viewSet.begin();
 
-    StageTester::ready(s.get(), ctx);
-    pbSet = StageTester::run(s.get(), buf);
-    StageTester::done(s.get(), ctx);
+    StageWrapper::ready(s, table);
+    viewSet = StageWrapper::run(s, view);
+    StageWrapper::done(s, table);
 
-    std::vector<PointBufferPtr> buffers;
-    for (auto it = pbSet.begin(); it != pbSet.end(); ++it)
-        buffers.push_back(*it);
+    std::vector<PointViewPtr> views;
+    for (auto it = viewSet.begin(); it != viewSet.end(); ++it)
+        views.push_back(*it);
 
-    auto sorter = [](PointBufferPtr p1, PointBufferPtr p2)
+    auto sorter = [](PointViewPtr p1, PointViewPtr p2)
     {
         BOX3D b1 = p1->calculateBounds();
         BOX3D b2 = p2->calculateBounds();
@@ -88,14 +88,14 @@ TEST(SplitterTest, test_tile_filter)
             b1.minx > b2.minx ? false :
             b1.miny < b2.miny;
     };
-    std::sort(buffers.begin(), buffers.end(), sorter);
+    std::sort(views.begin(), views.end(), sorter);
 
-    EXPECT_EQ(buffers.size(), 15u);
+    EXPECT_EQ(views.size(), 15u);
     size_t counts[] = {24, 27, 26, 27, 10, 166, 142, 76, 141, 132, 63, 70, 67,
         34, 60 };
-    for (size_t i = 0; i < buffers.size(); ++i)
+    for (size_t i = 0; i < views.size(); ++i)
     {
-        PointBufferPtr& buf = buffers[i];
-        EXPECT_EQ(buf->size(), counts[i]);
+        PointViewPtr view = views[i];
+        EXPECT_EQ(view->size(), counts[i]);
     }
 }

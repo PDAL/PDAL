@@ -32,15 +32,24 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "gtest/gtest.h"
+#include <pdal/pdal_test_main.hpp>
 
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
+#include <FerryFilter.hpp>
+#include <LasReader.hpp>
 #include "Support.hpp"
 
 using namespace pdal;
+
+TEST(FerryFilterTest, create)
+{
+    StageFactory f;
+    std::unique_ptr<Stage> filter(f.createStage("filters.ferry"));
+    EXPECT_TRUE(filter.get());
+}
 
 TEST(FerryFilterTest, test_ferry_copy)
 {
@@ -48,39 +57,36 @@ TEST(FerryFilterTest, test_ferry_copy)
     PipelineReader specReader(mgr);
     specReader.readPipeline(Support::configuredpath("filters/ferry.xml"));
 
-    Stage *stage = mgr.getStage();
     mgr.execute();
-    PointContext ctx = mgr.context();
+    const PointTableRef table(mgr.pointTable());
 
-    PointBufferSet pbSet = mgr.buffers();
+    PointViewSet viewSet = mgr.views();
 
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 1065u);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 1065u);
 
-    Dimension::Id::Enum state_plane_x = ctx.findDim("StatePlaneX");
-    Dimension::Id::Enum state_plane_y = ctx.findDim("StatePlaneY");
+    Dimension::Id::Enum state_plane_x = table.layout()->findDim("StatePlaneX");
+    Dimension::Id::Enum state_plane_y = table.layout()->findDim("StatePlaneY");
 
-    double lon = buf->getFieldAs<double>(Dimension::Id::X, 0);
-    double lat = buf->getFieldAs<double>(Dimension::Id::Y, 0);
+    double lon = view->getFieldAs<double>(Dimension::Id::X, 0);
+    double lat = view->getFieldAs<double>(Dimension::Id::Y, 0);
 
-    double x = buf->getFieldAs<double>(state_plane_x, 0);
-    double y = buf->getFieldAs<double>(state_plane_y, 0);
+    double x = view->getFieldAs<double>(state_plane_x, 0);
+    double y = view->getFieldAs<double>(state_plane_y, 0);
 
-    EXPECT_FLOAT_EQ(-117.2501328350574, lon);
-    EXPECT_FLOAT_EQ(49.341077824192915, lat);
-    EXPECT_FLOAT_EQ(637012.24, x);
-    EXPECT_FLOAT_EQ(849028.31, y);
+    EXPECT_DOUBLE_EQ(-117.2501328350574, lon);
+    EXPECT_DOUBLE_EQ(49.341077824192915, lat);
+    EXPECT_DOUBLE_EQ(637012.24, x);
+    EXPECT_DOUBLE_EQ(849028.31, y);
 }
 
 TEST(FerryFilterTest, test_ferry_invalid)
 {
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
-    StageFactory f;
-    ReaderPtr reader(f.createReader("readers.las"));
-    EXPECT_TRUE(reader.get());
-    reader->setOptions(ops1);
+    LasReader reader;
+    reader.setOptions(ops1);
 
     Options options;
 
@@ -91,12 +97,12 @@ TEST(FerryFilterTest, test_ferry_invalid)
     x.setOptions(xO);
     options.add(x);
 
-    FilterPtr ferry(f.createFilter("filters.ferry"));
-    EXPECT_TRUE(ferry.get());
-    ferry->setInput(reader.get());
-    ferry->setOptions(options);
+    FerryFilter ferry;
+    ferry.setInput(reader);
+    ferry.setOptions(options);
 
-    PointContext ctx;
+    PointTable table;
 
-    EXPECT_THROW(ferry->prepare(ctx), pdal_error );
+    EXPECT_THROW(ferry.prepare(table), pdal_error);
 }
+

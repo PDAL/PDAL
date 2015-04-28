@@ -32,16 +32,26 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <ctime>
+#include "FauxReader.hpp"
 
-#include <pdal/PointBuffer.hpp>
+#include <pdal/Options.hpp>
+#include <pdal/PointView.hpp>
 
 #include <boost/algorithm/string.hpp>
 
-#include "FauxReader.hpp"
+#include <ctime>
 
 namespace pdal
 {
+
+static PluginInfo const s_info = PluginInfo(
+    "readers.faux",
+    "Faux Reader",
+    "http://pdal.io/stages/readers.faux.html" );
+
+CREATE_STATIC_PLUGIN(1, 0, FauxReader, Reader, s_info)
+
+std::string FauxReader::getName() const { return s_info.name; }
 
 static Mode string2mode(const std::string& str)
 {
@@ -59,7 +69,6 @@ FauxReader::FauxReader()
 {
     m_count = 0;
 }
-
 
 void FauxReader::processOptions(const Options& options)
 {
@@ -88,14 +97,22 @@ void FauxReader::processOptions(const Options& options)
         throw pdal_error("faux: number_of_returns option must be 10 or less.");
 }
 
-
-void FauxReader::addDimensions(PointContextRef ctx)
+Options FauxReader::getDefaultOptions()
 {
-    ctx.registerDims(getDefaultDimensions());
+    Options options;
+    Option count("num_points", 10, "Number of points");
+    options.add(count);
+    return options;
+}
+
+
+void FauxReader::addDimensions(PointLayoutPtr layout)
+{
+    layout->registerDims(getDefaultDimensions());
     if (m_numReturns > 0)
     {
-        ctx.registerDim(Dimension::Id::ReturnNumber);
-        ctx.registerDim(Dimension::Id::NumberOfReturns);
+        layout->registerDim(Dimension::Id::ReturnNumber);
+        layout->registerDim(Dimension::Id::NumberOfReturns);
     }
 }
 
@@ -112,14 +129,14 @@ Dimension::IdList FauxReader::getDefaultDimensions()
 }
 
 
-point_count_t FauxReader::read(PointBuffer& buf, point_count_t count)
+point_count_t FauxReader::read(PointViewPtr view, point_count_t count)
 {
     const double numDeltas = (double)count - 1.0;
     const double delX = (m_maxX - m_minX) / numDeltas;
     const double delY = (m_maxY - m_minY) / numDeltas;
     const double delZ = (m_maxZ - m_minZ) / numDeltas;
 
-    log()->get(LogLevel::Debug5) << "Reading a point buffer of " <<
+    log()->get(LogLevel::Debug5) << "Reading a point view of " <<
         count << " points." << std::endl;
 
     uint32_t seed = static_cast<uint32_t>(std::time(NULL));
@@ -161,16 +178,19 @@ point_count_t FauxReader::read(PointBuffer& buf, point_count_t count)
                 break;
         }
 
-        buf.setField(Dimension::Id::X, idx, x);
-        buf.setField(Dimension::Id::Y, idx, y);
-        buf.setField(Dimension::Id::Z, idx, z);
-        buf.setField(Dimension::Id::OffsetTime, idx, m_time++);
+        view->setField(Dimension::Id::X, idx, x);
+        view->setField(Dimension::Id::Y, idx, y);
+        view->setField(Dimension::Id::Z, idx, z);
+        view->setField(Dimension::Id::OffsetTime, idx, m_time++);
         if (m_numReturns > 0)
         {
-            buf.setField(Dimension::Id::ReturnNumber, idx, m_returnNum);
-            buf.setField(Dimension::Id::NumberOfReturns, idx, m_numReturns);
+            view->setField(Dimension::Id::ReturnNumber, idx, m_returnNum);
+            view->setField(Dimension::Id::NumberOfReturns, idx, m_numReturns);
             m_returnNum = (m_returnNum % m_numReturns) + 1;
         }
+
+        if (m_cb)
+            m_cb(*view, idx);
     }
     return count;
 }

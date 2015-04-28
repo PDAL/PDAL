@@ -35,12 +35,21 @@
 #include "DeltaKernel.hpp"
 
 #include <boost/format.hpp>
-
+#include <boost/program_options.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
 namespace pdal
 {
+
+static PluginInfo const s_info = PluginInfo(
+    "kernels.delta",
+    "Delta Kernel",
+    "http://pdal.io/kernels/kernels.delta.html" );
+
+CREATE_STATIC_PLUGIN(1, 0, DeltaKernel, Kernel, s_info)
+
+std::string DeltaKernel::getName() const { return s_info.name; }
 
 DeltaKernel::DeltaKernel()
     : Kernel()
@@ -102,19 +111,19 @@ std::ostream& writeHeader(std::ostream& strm, bool b3D)
 }
 
 
-std::map<Point, Point>* cumulatePoints(PointBuffer& source_data,
-    PointBuffer& candidate_data, KDIndex* index)
+std::map<Point, Point>* cumulatePoints(PointView& source_data,
+    PointView& candidate_data, KDIndex* index)
 {
     std::map<Point, Point> *output = new std::map<Point, Point>;
-    uint32_t count(std::min(source_data.size(), candidate_data.size()));
+    point_count_t count(std::min(source_data.size(), candidate_data.size()));
 
-    for (uint32_t i = 0; i < count; ++i)
+    for (PointId i = 0; i < count; ++i)
     {
         double sx = source_data.getFieldAs<double>(Dimension::Id::X, i);
         double sy = source_data.getFieldAs<double>(Dimension::Id::Y, i);
         double sz = source_data.getFieldAs<double>(Dimension::Id::Z, i);
 
-        std::vector<std::size_t> ids = index->neighbors(sx, sy, sz, 1);
+        std::vector<PointId> ids = index->neighbors(sx, sy, sz);
         if (!ids.size())
         {
             std::ostringstream oss;
@@ -122,7 +131,7 @@ std::map<Point, Point>* cumulatePoints(PointBuffer& source_data,
             throw app_runtime_error(oss.str() );
         }
 
-        std::size_t id = ids[0];
+        PointId id = ids[0];
         double cx = candidate_data.getFieldAs<double>(Dimension::Id::X, id);
         double cy = candidate_data.getFieldAs<double>(Dimension::Id::Y, id);
         double cz = candidate_data.getFieldAs<double>(Dimension::Id::Z, id);
@@ -130,33 +139,25 @@ std::map<Point, Point>* cumulatePoints(PointBuffer& source_data,
         Point s(sx, sy, sz, i);
         Point c(cx, cy, cz, id);
         output->insert(std::pair<Point, Point>(s, c));
-
-        double xd = sx - cx;
-        double yd = sy - cy;
-        double zd = sz - cz;
     }
 
     return output;
 }
 
-void DeltaKernel::outputDetail(PointBuffer& source_data, PointBuffer& candidate_data,
-    std::map<Point, Point> *points) const
+void DeltaKernel::outputDetail(PointView& source_data, PointView& candidate_data) const
 {
-
-    bool bWroteHeader(false);
-
     std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
 
-    uint32_t count(std::min(source_data.size(), candidate_data.size()));
+    point_count_t count(std::min(source_data.size(), candidate_data.size()));
 
     boost::property_tree::ptree output;
-    for (uint32_t i = 0; i < count; ++i)
+    for (PointId i = 0; i < count; ++i)
     {
         double sx = source_data.getFieldAs<double>(Dimension::Id::X, i);
         double sy = source_data.getFieldAs<double>(Dimension::Id::Y, i);
         double sz = source_data.getFieldAs<double>(Dimension::Id::Z, i);
 
-        std::vector<std::size_t> ids = m_index->neighbors(sx, sy, sz, 1);
+        std::vector<PointId> ids = m_index->neighbors(sx, sy, sz);
 
         if (!ids.size())
         {
@@ -165,7 +166,7 @@ void DeltaKernel::outputDetail(PointBuffer& source_data, PointBuffer& candidate_
             throw app_runtime_error(oss.str() );
         }
 
-        std::size_t id = ids[0];
+        PointId id = ids[0];
         double cx = candidate_data.getFieldAs<double>(Dimension::Id::X, id);
         double cy = candidate_data.getFieldAs<double>(Dimension::Id::Y, id);
         double cz = candidate_data.getFieldAs<double>(Dimension::Id::Z, id);
@@ -222,9 +223,6 @@ void DeltaKernel::outputDetail(PointBuffer& source_data, PointBuffer& candidate_
         ostr << std::endl;
     }
 
-
-
-
     if (m_outputStream)
     {
         FileUtils::closeFile(m_outputStream);
@@ -249,7 +247,7 @@ void DeltaKernel::outputRST(boost::property_tree::ptree const& tree) const
 
 
     std::cout << " Min        " << fmt % tree.get<float>("min.x") << "            " << fmt % tree.get<float>("min.y") << "            " << fmt % tree.get<float>("min.z")<<std::endl;
-    std::cout << " Min        " << fmt % tree.get<float>("max.x") << "            " << fmt % tree.get<float>("max.y") << "            " << fmt % tree.get<float>("max.z")<<std::endl;
+    std::cout << " Max        " << fmt % tree.get<float>("max.x") << "            " << fmt % tree.get<float>("max.y") << "            " << fmt % tree.get<float>("max.z")<<std::endl;
     std::cout << " Mean       " << fmt % tree.get<float>("mean.x") << "            " << fmt % tree.get<float>("mean.y") << "            " << fmt % tree.get<float>("mean.z")<<std::endl;
     std::cout << thead << std::endl;
 
@@ -270,36 +268,36 @@ void DeltaKernel::outputXML(boost::property_tree::ptree const& tree) const
 
 int DeltaKernel::execute()
 {
-    PointContext sourceCtx;
+    PointTable sourceTable;
     Options sourceOptions;
     {
         sourceOptions.add<std::string>("filename", m_sourceFile);
         sourceOptions.add<bool>("debug", isDebug());
         sourceOptions.add<uint32_t>("verbose", getVerboseLevel());
     }
-    std::unique_ptr<Stage> source(KernelSupport::makeReader(m_sourceFile));
-    source->setOptions(sourceOptions);
-    source->prepare(sourceCtx);
-    PointBufferSet pbSet = source->execute(sourceCtx);
-    assert(pbSet.size() == 1);
-    PointBufferPtr sourceBuf = *pbSet.begin();
-    point_count_t sourceCount = sourceBuf->size();
+    Stage& source = makeReader(m_sourceFile);
+    source.setOptions(sourceOptions);
+    source.prepare(sourceTable);
+    PointViewSet viewSet = source.execute(sourceTable);
+    assert(viewSet.size() == 1);
+    PointViewPtr sourceView = *viewSet.begin();
+    point_count_t sourceCount = sourceView->size();
 
-    PointContext candidateCtx;
+    PointTable candidateTable;
     Options candidateOptions;
     {
-        candidateOptions.add<std::string>("filename", m_candidateFile);
-        candidateOptions.add<bool>("debug", isDebug());
-        candidateOptions.add<uint32_t>("verbose", getVerboseLevel());
+        candidateOptions.add("filename", m_candidateFile);
+        candidateOptions.add("debug", isDebug());
+        candidateOptions.add("verbose", getVerboseLevel());
     }
 
-    std::unique_ptr<Stage> candidate(KernelSupport::makeReader(m_candidateFile));
-    candidate->setOptions(candidateOptions);
-    candidate->prepare(candidateCtx);
-    pbSet = candidate->execute(candidateCtx);
-    assert(pbSet.size() == 1);
-    PointBufferPtr candidateBuf = *pbSet.begin();
-    point_count_t candidateCount = candidateBuf->size();
+    Stage& candidate = makeReader(m_candidateFile);
+    candidate.setOptions(candidateOptions);
+    candidate.prepare(candidateTable);
+    viewSet = candidate.execute(candidateTable);
+    assert(viewSet.size() == 1);
+    PointViewPtr candidateView = *viewSet.begin();
+    point_count_t candidateCount = candidateView->size();
 
     if (sourceCount != candidateCount)
         std::cerr << "Source and candidate files do not have the same "
@@ -309,14 +307,14 @@ int DeltaKernel::execute()
         m_outputStream = FileUtils::createFile(m_outputFileName);
 
     // Index the candidate data.
-    m_index = std::unique_ptr<KDIndex>(new KDIndex(*candidateBuf));
+    m_index = std::unique_ptr<KDIndex>(new KDIndex(*candidateView.get()));
     m_index->build(m_3d);
 
     std::unique_ptr<std::map<Point, Point>>
-        points(cumulatePoints(*sourceBuf, *candidateBuf, m_index.get()));
+        points(cumulatePoints(*sourceView.get(), *candidateView.get(), m_index.get()));
     if (m_OutputDetail)
     {
-        outputDetail(*sourceBuf, *candidateBuf, points.get());
+        outputDetail(*sourceView.get(), *candidateView.get());
         return 0;
     }
 

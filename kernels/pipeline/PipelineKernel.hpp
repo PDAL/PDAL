@@ -34,32 +34,35 @@
 
 #pragma once
 
-#include "Kernel.hpp"
+#include <pdal/Kernel.hpp>
 #include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineWriter.hpp>
-#include <pdal/FileUtils.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/util/FileUtils.hpp>
+
+extern "C" int32_t PipelineKernel_ExitFunc();
+extern "C" PF_ExitFunc PipelineKernel_InitPlugin();
 
 namespace pdal
 {
-    
+
 class PDAL_DLL PipelineKernel : public Kernel
 {
 public:
-    SET_KERNEL_NAME ("pipeline", "Pipeline Kernel")
-    SET_KERNEL_LINK ("http://pdal.io/kernels/kernels.pipeline.html")
-
-    PipelineKernel();
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
     int execute();
 
 private:
+    PipelineKernel();
     void addSwitches();
     void validateSwitches();
-    
+
     std::string m_inputFile;
     std::string m_pipelineFile;
     bool m_validate;
+    std::string m_PointCloudSchemaOutput;
 };
 
 } // pdal

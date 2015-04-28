@@ -33,11 +33,10 @@
 ****************************************************************************/
 
 #include "SQLiteWriter.hpp"
-#include <pdal/PointBuffer.hpp>
-#include <pdal/Charbuf.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_internal.hpp>
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 #include <boost/format.hpp>
 
@@ -46,12 +45,19 @@
 #include <gdal.h>
 #include <ogr_api.h>
 
-CREATE_WRITER_PLUGIN(sqlite, pdal::SQLiteWriter)
-
 namespace pdal
 {
 
-SQLiteWriter::SQLiteWriter() : 
+static PluginInfo const s_info = PluginInfo(
+    "writers.sqlite",
+    "Write data to SQLite3 database files.",
+    "" );
+
+CREATE_SHARED_PLUGIN(1, 0, SQLiteWriter, Writer, s_info)
+
+std::string SQLiteWriter::getName() const { return s_info.name; }
+
+SQLiteWriter::SQLiteWriter() :
     m_doCreateIndex(false)
     , m_sdo_pc_is_initialized(false)
     , m_obj_id(0)
@@ -96,7 +102,7 @@ void SQLiteWriter::initialize()
 {
     try
     {
-        log()->get(LogLevel::Debug) << "Connection: '" << m_connection << 
+        log()->get(LogLevel::Debug) << "Connection: '" << m_connection <<
             "'" << std::endl;
         m_session = std::unique_ptr<SQLite>(new SQLite(m_connection, log()));
         m_session->connect(true);
@@ -125,18 +131,10 @@ void SQLiteWriter::initialize()
 }
 
 
-void SQLiteWriter::ready(PointContextRef ctx)
-{
-    m_context = ctx;
-    m_patch->m_ctx = ctx;
-    DbWriter::ready(ctx);
-}
-
-
-void SQLiteWriter::write(const PointBuffer& buffer)
+void SQLiteWriter::write(const PointViewPtr view)
 {
     writeInit();
-    writeTile(buffer);
+    writeTile(view);
 }
 
 void SQLiteWriter::writeInit()
@@ -395,7 +393,7 @@ bool SQLiteWriter::IsValidGeometryWKT(std::string const& input) const
     return (!e);
 }
 
-void SQLiteWriter::done(PointContextRef ctx)
+void SQLiteWriter::done(PointTableRef table)
 {
     if (m_doCreateIndex)
     {
@@ -501,7 +499,7 @@ void SQLiteWriter::CreateCloud()
 }
 
 
-void SQLiteWriter::writeTile(const PointBuffer& buffer)
+void SQLiteWriter::writeTile(const PointViewPtr view)
 {
     using namespace std;
 
@@ -510,12 +508,17 @@ void SQLiteWriter::writeTile(const PointBuffer& buffer)
     if (m_doCompression)
     {
 #ifdef PDAL_HAVE_LAZPERF
-        LazPerfCompressor<Patch> compressor(*m_patch, dbDimTypes());
+        XMLDimList xmlDims = dbDimTypes();
+        DimTypeList dimTypes;
+        for (XMLDim& xmlDim : xmlDims)
+            dimTypes.push_back(xmlDim.m_dimType);
 
-        std::vector<char> outbuf(m_packedPointSize);
-        for (PointId idx = 0; idx < buffer.size(); idx++)
+        LazPerfCompressor<Patch> compressor(*m_patch, dimTypes);
+
+        std::vector<char> outbuf(packedPointSize());
+        for (PointId idx = 0; idx < view->size(); idx++)
         {
-            size_t size = readPoint(buffer, idx, outbuf.data());
+            size_t size = readPoint(*view.get(), idx, outbuf.data());
             // Read the data and write to the patch.
             compressor.compress(outbuf.data(), size);
         }
@@ -524,8 +527,8 @@ void SQLiteWriter::writeTile(const PointBuffer& buffer)
         throw pdal_error("Can't compress without LAZperf.");
 #endif
 
-        size_t bufferSize = buffer.size() * m_context.pointSize();
-        double percent = (double) m_patch->byte_size()/(double) bufferSize;
+        size_t viewSize = view->size() * view->pointSize();
+        double percent = (double) m_patch->byte_size()/(double) viewSize;
         percent = percent * 100;
         log()->get(LogLevel::Debug3) << "Compressing tile by " <<
             boost::str(boost::format("%.2f") % (100 - percent)) <<
@@ -533,11 +536,11 @@ void SQLiteWriter::writeTile(const PointBuffer& buffer)
     }
     else
     {
-        std::vector<char> storage(m_packedPointSize);
+        std::vector<char> storage(packedPointSize());
 
-        for (PointId idx = 0; idx < buffer.size(); idx++)
+        for (PointId idx = 0; idx < view->size(); idx++)
         {
-            size_t size = readPoint(buffer, idx, storage.data());
+            size_t size = readPoint(*view.get(), idx, storage.data());
             m_patch->putBytes((const unsigned char *)storage.data(), size);
         }
         log()->get(LogLevel::Debug3) << "uncompressed size: " <<
@@ -548,7 +551,7 @@ void SQLiteWriter::writeTile(const PointBuffer& buffer)
     row r;
 
     uint32_t precision(9);
-    BOX3D b = buffer.calculateBounds(true);
+    BOX3D b = view->calculateBounds(true);
     std::string bounds = b.toWKT(precision); // polygons are only 2d, not cubes
 
     std::string box = b.toBox(precision, 3);
@@ -557,7 +560,7 @@ void SQLiteWriter::writeTile(const PointBuffer& buffer)
 
     r.push_back(column(m_obj_id));
     r.push_back(column(m_block_id));
-    r.push_back(column(buffer.size()));
+    r.push_back(column(view->size()));
     r.push_back(blob((const char*)(&m_patch->getBytes()[0]),
         m_patch->getBytes().size()));
     r.push_back(column(bounds));

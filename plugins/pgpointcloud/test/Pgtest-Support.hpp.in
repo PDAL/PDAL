@@ -38,23 +38,17 @@ namespace pdal
 {
 
 
+static const std::string testDbUser("@PGPOINTCLOUD_TEST_DB_USER@");
 static const std::string testDbHost("@PGPOINTCLOUD_TEST_DB_HOST@");
 static const std::string testDbPort("@PGPOINTCLOUD_TEST_DB_PORT@");
 static const std::string testDbName("@PGPOINTCLOUD_TEST_DB_NAME@");
 static const std::string testDbTempname("@PGPOINTCLOUD_TEST_DB_TEMPNAME@");
 
-static const std::string testDbConn(std::string("dbname='@PGPOINTCLOUD_TEST_DB_NAME@' ") +
-        "user='postgres' host='@PGPOINTCLOUD_TEST_DB_HOST@' port='@PGPOINTCLOUD_TEST_DB_PORT@'");
-static const std::string testDbTempConn(std::string("dbname='@PGPOINTCLOUD_TEST_DB_TEMPNAME@'") +
-        "user='postgres' host='@PGPOINTCLOUD_TEST_DB_HOST@' port='@PGPOINTCLOUD_TEST_DB_PORT@'");
 
 
-
-
-
-//boost::property_tree::ptree Reader::serializePipeline(PointContext ctx) const
+//boost::property_tree::ptree Reader::serializePipeline(PointTablePtr table) const
 //{
-//    return m_stage->serializePipeline(ctx);
+//    return m_stage->serializePipeline(table);
 //}
 
 } // namespace pdal

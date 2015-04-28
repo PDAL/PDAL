@@ -46,14 +46,20 @@
 #include <pcl/io/impl/pcd_io.hpp>
 
 #include "PCLConversions.hpp"
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/pdal_macros.hpp>
-
-CREATE_WRITER_PLUGIN(pcd, pdal::PcdWriter)
 
 namespace pdal
 {
 
+static PluginInfo const s_info = PluginInfo(
+    "writers.pcd",
+    "Write data in the Point Cloud Library (PCL) format.",
+    "http://pdal.io/stages/writers.pclvisualizer.html" );
+
+CREATE_SHARED_PLUGIN(1, 0, PcdWriter, Writer, s_info)
+
+std::string PcdWriter::getName() const { return s_info.name; }
 
 void PcdWriter::processOptions(const Options& ops)
 {
@@ -73,11 +79,11 @@ Options PcdWriter::getDefaultOptions()
 }
 
 
-void PcdWriter::write(const PointBuffer& data)
+void PcdWriter::write(const PointViewPtr view)
 {
     pcl::PointCloud<XYZIRGBA>::Ptr cloud(new pcl::PointCloud<XYZIRGBA>);
-    BOX3D const& buffer_bounds = data.calculateBounds();
-    pclsupport::PDALtoPCD(const_cast<PointBuffer&>(data), *cloud, buffer_bounds);
+    BOX3D const& buffer_bounds = view->calculateBounds();
+    pclsupport::PDALtoPCD(view, *cloud, buffer_bounds);
 
     pcl::PCDWriter w;
 

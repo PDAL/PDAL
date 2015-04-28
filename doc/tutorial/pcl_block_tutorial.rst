@@ -18,7 +18,7 @@ serve as a bridge between the two libraries, enabling rapid development of point
 cloud processing pipelines.
 
 .. seealso::
-    
+
     See :ref:`filters.pclblock` for details on PDAL's PCL Block filter.
 
 .. _`PCL`: http://www.pointclouds.org
@@ -58,7 +58,7 @@ entering
 at the command line. You should see output similar to the following:
 
 ::
-    
+
     ------------------------------------------------------------------------------------------
     pdal pipeline (PDAL 0.9.9 (2c6aa8) with GeoTIFF 1.4.0 GDAL 1.9.2 LASzip 2.2.0 System )
     ------------------------------------------------------------------------------------------
@@ -213,7 +213,7 @@ Simple point cloud cropping
 ..............................................................................
 
 The power of the PCL Block is really exposed through the JSON description. In
-this example, we apply a single PCL filter to the PointBuffer. The
+this example, we apply a single PCL filter to the PointView. The
 `PassThrough`_ filter removes points that lie outside a given range for the
 specified dimension. Here, we are asking PCL to crop the input point cloud,
 returning only those points with z values in the range 100 to 200.
@@ -345,7 +345,7 @@ Additional parameters can be set by advanced users:
 (These examples are taken from the unit tests
 `PCLBlockFilterTest_example_PMF_1` and `PCLBlockFilterTest_example_PMF_2`.)
 
-See :ref:`here <ProgressiveMorphologicalFilter>` for a more detailed
+See :ref:`here <pcl_ground>` for a more detailed
 explanation of the PMF parameters.
 
 .. _`JSON`: http://www.json.org/

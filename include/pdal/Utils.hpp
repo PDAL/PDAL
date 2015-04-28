@@ -39,6 +39,7 @@
 #include <algorithm>
 #include <string>
 #include <cassert>
+#include <cctype>
 #include <stdexcept>
 #include <cmath>
 #include <fstream>
@@ -47,6 +48,7 @@
 #include <cstring>
 #include <sstream>
 #include <vector>
+#include <map>
 
 #include <boost/numeric/conversion/cast.hpp>
 
@@ -100,27 +102,6 @@ namespace Utils
         return compare_approx<T>(actual, expected, epsilon);
     }
 
-    // Return a 'T' from a stream and increment src by the sizeof 'T'
-    template<class T>
-    T read_field(uint8_t*& src)
-    {
-        T tmp = *(T*)(void*)src;
-        src += sizeof(T);
-        return tmp;
-    }
-
-    // Read 'num' items from the source stream to the dest location
-    template <typename T>
-    void read_n(T& dest, std::istream& src, std::streamsize const& num)
-    {
-        if (!src.good())
-            throw pdal::invalid_stream("pdal::Utils::read_n<T> input stream is "
-                "not readable");
-
-        src.read(as_buffer(dest), num);
-        assert(check_stream_state(src));
-    }
-
     // From http://stackoverflow.com/questions/485525/round-for-float-in-c
     inline double sround(double r)
         { return (r > 0.0) ? floor(r + 0.5) : ceil(r - 0.5); }
@@ -166,6 +147,47 @@ namespace Utils
         return ss.str();
     }
 
+    inline std::string tolower(const std::string& s)
+    {
+        std::string out;
+        for (size_t i = 0; i < s.size(); ++i)
+            out += (char)std::tolower(s[i]);
+        return out;
+    }
+
+    inline std::string toupper(const std::string& s)
+    {
+        std::string out;
+        for (size_t i = 0; i < s.size(); ++i)
+            out += (char)std::toupper(s[i]);
+        return out;
+    }
+
+    inline bool iequals(const std::string& s, const std::string& s2)
+    {
+        if (s.length() != s2.length())
+            return false;
+        for (size_t i = 0; i < s.length(); ++i)
+            if (std::toupper(s[i]) != std::toupper(s2[i]))
+                return false;
+        return true;
+    }
+
+    inline bool startsWith(const std::string& s, const std::string& prefix)
+    {
+        if (prefix.size() > s.size())
+            return false;
+        return (strncmp(prefix.data(), s.data(), prefix.size()) == 0);
+    }
+
+    inline int cksum(char *buf, size_t size)
+    {
+        int i = 0;
+        while (size--)
+            i += *buf++;
+        return i;
+    }
+
     template<typename Target, typename Source>
     Target saturation_cast(Source const& src)
     {
@@ -193,7 +215,13 @@ namespace Utils
 
     // aid to operator>> parsers
     PDAL_DLL void eatwhitespace(std::istream& s);
-    PDAL_DLL void removeTrailingBlanks(std::string& s);
+    PDAL_DLL void trimLeading(std::string& s);
+    PDAL_DLL void trimTrailing(std::string& s);
+    inline void trim(std::string& s)
+    {
+        trimLeading(s);
+        trimTrailing(s);
+    }
     // if char found, eats it and returns true; otherwise, don't eat it and
     // then return false
     PDAL_DLL bool eatcharacter(std::istream& s, char x);
@@ -243,7 +271,7 @@ namespace Utils
     }
 
     /// Split a string into substrings.  Characters matching the predicate are
-    ///   discarded, as are empty strings produced by split().
+    ///   discarded, as are empty strings otherwise produced by split().
     /// \param[in] s  String to split.
     /// \param[in] p  Predicate returns true if a char in a string is a split
     ///   location.
@@ -287,11 +315,15 @@ namespace Utils
     std::string typeidName()
         { return Utils::demangle(typeid(T).name()); }
 
+    template<typename KEY, typename VALUE>
+    bool contains(const std::map<KEY, VALUE>& c, const KEY& v)
+        { return c.find(v) != c.end(); };
+
     template<typename COLLECTION, typename VALUE>
-    bool contains(COLLECTION c, VALUE v)
+    bool contains(const COLLECTION& c, const VALUE& v)
         { return (std::find(c.begin(), c.end(), v) != c.end()); }
 
-    struct RedirectCtx
+    struct RedirectStream
     {
         std::ofstream *m_out;
         std::streambuf *m_buf;
@@ -301,24 +333,25 @@ namespace Utils
     /// \param[in] out   Stream to redirect.
     /// \param[in] file  Name of file where stream should be redirected.
     /// \return  Context for stream restoration (see restore()).
-    inline RedirectCtx redirect(std::ostream& out,
+    inline RedirectStream redirect(std::ostream& out,
         const std::string& file = "/dev/null")
     {
-        RedirectCtx ctx;
+        RedirectStream redir;
 
-        ctx.m_out = new std::ofstream(file);
-        ctx.m_buf = out.rdbuf();
-        out.rdbuf(ctx.m_out->rdbuf());
-        return ctx;
+        redir.m_out = new std::ofstream(file);
+        redir.m_buf = out.rdbuf();
+        out.rdbuf(redir.m_out->rdbuf());
+        return redir;
     }
 
     /// Restore a stream redirected with redirect().
     /// \param[in] out  Stream to be restored.
-    /// \param[in] ctx  Context returned from corresponding redirect() call.
-    inline void restore(std::ostream& out, RedirectCtx ctx)
+    /// \param[in] redir RedirectStream returned from corresponding
+    /// redirect() call.
+    inline void restore(std::ostream& out, RedirectStream redir)
     {
-        out.rdbuf(ctx.m_buf);
-        ctx.m_out->close();
+        out.rdbuf(redir.m_buf);
+        redir.m_out->close();
     }
 };
 

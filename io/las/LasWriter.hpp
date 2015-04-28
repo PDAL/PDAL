@@ -38,8 +38,12 @@
 
 #include "LasError.hpp"
 #include "LasHeader.hpp"
+#include "LasUtils.hpp"
 #include "SummaryData.hpp"
 #include "ZipPoint.hpp"
+
+extern "C" int32_t LasWriter_ExitFunc();
+extern "C" PF_ExitFunc LasWriter_InitPlugin();
 
 namespace pdal
 {
@@ -56,23 +60,21 @@ struct VlrOptionInfo
     std::string m_description;
 };
 
-#define LASWRITERDOC "ASPRS LAS 1.0 - 1.4 writer. LASzip support is also \n" \
-                     "available if enabled at compile-time. Note that LAZ \n" \
-                     "does not provide LAS 1.4 support at this time."
 class PDAL_DLL LasWriter : public pdal::Writer
 {
     friend class LasTester;
     friend class NitfWriter;
 public:
-    SET_STAGE_NAME("writers.las", LASWRITERDOC)
-    SET_STAGE_LINK("http://pdal.io/stages/writers.las.html")
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
     LasWriter() : m_ostream(NULL)
          { construct(); }
     LasWriter(std::ostream *stream) : m_ostream(stream)
         { construct(); }
 
-    static Options getDefaultOptions();
+    Options getDefaultOptions();
 
     void flush();
 
@@ -90,21 +92,27 @@ private:
     std::ostream *m_ostream;
     std::vector<VariableLengthRecord> m_vlrs;
     std::vector<ExtVariableLengthRecord> m_eVlrs;
+    std::vector<ExtraDim> m_extraDims;
+    uint16_t m_extraByteLen;
 
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContextRef ctx);
-    virtual void write(const PointBuffer& pointBuffer);
-    virtual void done(PointContextRef ctx);
+    virtual void prepared(PointTableRef table);
+    virtual void ready(PointTableRef table);
+    virtual void write(const PointViewPtr view);
+    virtual void done(PointTableRef table);
 
     void construct();
     void getHeaderOptions(const Options& options);
     void getVlrOptions(const Options& opts);
     template<typename T>
     T headerVal(const std::string& name);
-    void fillHeader(PointContextRef ctx);
+    void fillHeader();
+    point_count_t fillWriteBuf(const PointView& view, PointId startId,
+        std::vector<char>& buf);
     void setVlrsFromMetadata();
     MetadataNode findVlrMetadata(MetadataNode node, uint16_t recordId,
         const std::string& userId);
+    void setExtraBytesVlr();
     void setVlrsFromSpatialRef(const SpatialReference& srs);
     void readyCompression();
     void openCompression();

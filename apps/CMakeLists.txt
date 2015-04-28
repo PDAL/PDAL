@@ -76,58 +76,10 @@ if(UNIX)
         set(PDAL_CONFIG_DEFINITIONS "${PDAL_CONFIG_DEFINITIONS} -D${definition}")
     endforeach()
 
-
-    set(PKGCFG_PREFIX "${CMAKE_INSTALL_PREFIX}")
-    set(PKGCFG_EXEC_PREFIX "${CMAKE_INSTALL_PREFIX}/${PDAL_BIN_INSTALL_DIR}")
-    set(PKGCFG_INC_DIR "${CMAKE_INSTALL_PREFIX}/${PDAL_INCLUDE_INSTALL_DIR}")
-    set(PKGCFG_LIB_DIR "${CMAKE_INSTALL_PREFIX}/${PDAL_LIB_INSTALL_DIR}")
-    set(PKGCFG_REQUIRES  "")
-    set(PKGCFG_VERSION ${PDAL_VERSION_STRING})
-    set(PKGCFG_LINK_FLAGS "-lpdalcpp")
-    set(PKGCFG_COMPILE_FLAGS "")
-    if(LIBXML2_FOUND)
-      set(PKGCFG_REQUIRES "${PKGCFG_REQUIRES} libxml2-dev")
-    endif()
-    if(GEOTIFF_FOUND)
-      set(PKGCFG_REQUIRES "${PKGCFG_REQUIRES} libgeotiff-dev")
-    endif()
-    if (GDAL_FOUND)
-        set(PKGCFG_REQUIRES "${PKGCFG_REQUIRES} libgdal-dev")
-    endif()
-    if (LASZIP_FOUND)
-        set(PKGCFG_REQUIRES "${PKGCFG_REQUIRES} laszip")
-    endif()
-    if (P2G_FOUND)
-        set(PKGCFG_REQUIRES "${PKGCFG_REQUIRES} points2grid")
-    endif()
-    if (NITRO_FOUND)
-        set(PKGCFG_REQUIRES "${PKGCFG_REQUIRES} nitro-cpp")
-    endif()
-    if (POSTGRESQL_FOUND)
-        set(PKGCFG_REQUIRES "${PKGCFG_REQUIRES} libpq-dev")
-    endif()
-    if (MSGPACK_FOUND)
-        set(PKGCFG_REQUIRES "${PKGCFG_REQUIRES} libmsgpack-dev")
-    endif()
-    if (SOCI_FOUND)
-        set(PKGCFG_REQUIRES "${PKGCFG_REQUIRES} libmsgpack-dev")
-    endif()
-
-    set(PKGCFG_REQUIRES "${PKGCFG_REQUIRES} libboost-dev")
-
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/pdal.pc.in
-      ${CMAKE_CURRENT_BINARY_DIR}/pdal.pc @ONLY)
-
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/pdal.pc
-        DESTINATION ${PDAL_PKGCFG_DIR}
-        PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
-
     # Autoconf compatibility variables to use the same script source.
     set(prefix ${CMAKE_INSTALL_PREFIX})
     set(exec_prefix ${CMAKE_INSTALL_PREFIX}/bin)
     set(libdir ${CMAKE_INSTALL_PREFIX}/lib)
-
-
 
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/pdal-config.in
       ${CMAKE_CURRENT_BINARY_DIR}/pdal-config @ONLY)

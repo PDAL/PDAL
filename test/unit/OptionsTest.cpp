@@ -32,11 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "gtest/gtest.h"
+#include <pdal/pdal_test_main.hpp>
 
 #include <pdal/Options.hpp>
-#include <pdal/StageFactory.hpp>
 #include <pdal/PDALUtils.hpp>
+#include <CropFilter.hpp>
+#include <FauxReader.hpp>
+
+#include "Support.hpp"
 
 #include <boost/property_tree/xml_parser.hpp>
 
@@ -46,44 +49,22 @@ static std::string xml_str_ref = "<Name>my_string</Name><Value>Yow.</Value><Desc
 
 using namespace pdal;
 
-namespace
-{
-    using namespace std;
-
-    static bool hasOption(vector<Option> const& opts, string const& name)
-    {
-        bool found = false;
-        for (const auto& o : opts)
-            if (o.getName() == name)
-                found = true;
-        return found;
-    }
-}
-
 TEST(OptionsTest, test_static_options)
 {
     Options ops;
 
-    StageFactory f;
-    ReaderPtr reader(f.createReader("readers.faux"));
-    EXPECT_TRUE(reader.get());
-    reader->setOptions(ops);
-    FilterPtr crop(f.createFilter("filters.crop"));
-    EXPECT_TRUE(crop.get());
-    crop->setOptions(ops);
-    crop->setInput(reader.get());
-    std::map<std::string, pdal::StageInfo> const& drivers = f.getStageInfos();
-    typedef std::map<std::string, pdal::StageInfo>::const_iterator Iterator;
-    Iterator i = drivers.find("filters.crop");
-    if (i != drivers.end())
-    {
-      const std::vector<Option> opts = i->second.getProvidedOptions();
-      EXPECT_EQ(opts.size(), 3u);
-      EXPECT_TRUE(hasOption(opts, "bounds"));
-      EXPECT_TRUE(hasOption(opts, "inside"));
-      EXPECT_TRUE(hasOption(opts, "polygon"));
-      EXPECT_FALSE(hasOption(opts, "metes"));
-    }
+    FauxReader reader;
+    reader.setOptions(ops);
+
+    CropFilter crop;
+    crop.setOptions(ops);
+    crop.setInput(reader);
+    auto opts = crop.getDefaultOptions();
+    EXPECT_EQ(opts.getOptions().size(), 3u);
+    EXPECT_TRUE(opts.hasOption("bounds"));
+    EXPECT_TRUE(opts.hasOption("inside"));
+    EXPECT_TRUE(opts.hasOption("polygon"));
+    EXPECT_FALSE(opts.hasOption("metes"));
 }
 
 TEST(OptionsTest, test_option_writing)
@@ -282,10 +263,10 @@ TEST(OptionsTest, Options_test_add_vs_put)
 
 TEST(OptionsTest, Options_test_bool)
 {
-    Option a("a","true", "");
-    Option b("b","false", "");
-    Option c("c",true);
-    Option d("d",false);
+    Option a("a", "true", "");
+    Option b("b", "false", "");
+    Option c("c", true);
+    Option d("d", false);
 
     bool av = a.getValue<bool>();
     bool bv = b.getValue<bool>();
@@ -296,4 +277,61 @@ TEST(OptionsTest, Options_test_bool)
     EXPECT_EQ(bv, false);
     EXPECT_EQ(cv, true);
     EXPECT_EQ(dv, false);
+}
+
+TEST(OptionsTest, stringsplit)
+{
+    Option a("a", "This, is,a, test  ,,");
+    std::vector<std::string> slist = a.getValue<std::vector<std::string>>();
+    EXPECT_EQ(slist.size(), (size_t)4);
+    EXPECT_EQ(slist[0], "This");
+    EXPECT_EQ(slist[1], "is");
+    EXPECT_EQ(slist[2], "a");
+    EXPECT_EQ(slist[3], "test");
+}
+
+TEST(OptionsTest, implicitdefault)
+{
+    Options ops;
+    ops.add("a", "This, is,a, test  ,,");
+    ops.add("b", 25);
+
+    int i = ops.getValueOrDefault<int>("c");
+    EXPECT_EQ(i, 0);
+    i = ops.getValueOrDefault<int>("b");
+    EXPECT_EQ(i, 25);
+    std::vector<std::string> slist =
+        ops.getValueOrDefault<std::vector<std::string>>("d");
+    EXPECT_EQ(slist.size(), (size_t)0);
+    slist = ops.getValueOrDefault<std::vector<std::string>>("a");
+    EXPECT_EQ(slist.size(), (size_t)4);
+}
+
+TEST(OptionsTest, metadata)
+{
+    Options ops;
+    ops.add("test1", "This is a test");
+    ops.add("test2", 56);
+    ops.add("test3", 27.5, "Testing test3");
+
+    Option op35("test3.5", 3.5);
+
+    Options subops;
+    subops.add("subtest1", "Subtest1");
+    subops.add("subtest2", "Subtest2");
+
+    op35.setOptions(subops);
+
+    ops.add(op35);
+    ops.add("test4", "Testing option test 4");
+
+    MetadataNode node = ops.toMetadata();
+
+    std::string goodfile(Support::datapath("misc/opts2json_meta.txt"));
+    std::string testfile(Support::temppath("opts2json.txt"));
+    {
+        std::ofstream out(testfile);
+        utils::toJSON(node, out);
+    }
+    EXPECT_TRUE(Support::compare_files(goodfile, testfile));
 }

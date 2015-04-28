@@ -64,6 +64,9 @@ macro(PDAL_ADD_LIBRARY _name)
         RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR}
         LIBRARY DESTINATION ${PDAL_LIB_INSTALL_DIR}
         ARCHIVE DESTINATION ${PDAL_LIB_INSTALL_DIR})
+    if (APPLE)
+        set_target_properties(${_name} PROPERTIES INSTALL_NAME_DIR "@executable_path/../lib")
+    endif()
 endmacro(PDAL_ADD_LIBRARY)
 
 ###############################################################################
@@ -114,6 +117,9 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
         RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR}
         LIBRARY DESTINATION ${PDAL_LIB_INSTALL_DIR}
         ARCHIVE DESTINATION ${PDAL_LIB_INSTALL_DIR})
+    if (APPLE)
+        set_target_properties(${${_name}} PROPERTIES INSTALL_NAME_DIR "@loader_path/../lib")
+    endif()
 endmacro(PDAL_ADD_PLUGIN)
 
 ###############################################################################
@@ -140,8 +146,13 @@ macro(PDAL_ADD_TEST _name)
     add_executable(${_name} ${PDAL_ADD_TEST_FILES} ${common_srcs})
     set_target_properties(${_name} PROPERTIES COMPILE_DEFINITIONS PDAL_DLL_IMPORT)
     set_property(TARGET ${_name} PROPERTY FOLDER "Tests")
-    target_link_libraries(${_name} ${PDAL_LIB_NAME} gtest gtest_main ${PDAL_ADD_TEST_LINK_WITH})
+    target_link_libraries(${_name} ${PDAL_LIB_NAME} gtest ${PDAL_ADD_TEST_LINK_WITH})
     add_test(NAME ${_name} COMMAND "${PROJECT_BINARY_DIR}/bin/${_name}" WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/..")
+    set_property(TEST ${_name} PROPERTY ENVIRONMENT
+      # Ensure plugins are loaded from build dir
+      # https://github.com/PDAL/PDAL/issues/840
+      "PDAL_DRIVER_PATH=${PROJECT_BINARY_DIR}/lib"
+    )
 endmacro(PDAL_ADD_TEST)
 
 ###############################################################################
@@ -218,7 +229,6 @@ macro(SET_INSTALL_DIRS)
         "share/doc/${PROJECT_NAME_LOWER}-${PDAL_VERSION_MAJOR}.${PDAL_VERSION_MINOR}")
     set(PDAL_BIN_INSTALL_DIR "bin")
     set(PDAL_PLUGIN_INSTALL_DIR "share/pdal/plugins")
-    set(PDAL_PKGCFG_DIR "${PDAL_LIB_INSTALL_DIR}/pkgconfig")
     if(WIN32)
         set(PDALCONFIG_INSTALL_DIR "cmake")
     else(WIN32)

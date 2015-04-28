@@ -35,12 +35,16 @@
 #pragma once
 
 #include <pdal/pdal_internal.hpp>
+#include <pdal/Log.hpp>
+
+#include <mutex>
+#include <memory>
 
 namespace pdal
 {
 namespace gdal
 {
-class GlobalDebug;
+class ErrorHandler;
 }
 
 class PDAL_DLL GlobalEnvironment
@@ -50,17 +54,13 @@ public:
     static void startup();
     static void shutdown();
 
-    void getGDALEnvironment();
-    gdal::GlobalDebug* getGDALDebug();
+    void initializeGDAL(LogPtr log, bool bGDALDebugOutput = false);
 
 private:
     GlobalEnvironment();
     ~GlobalEnvironment();
 
-    static void init();
-
-    bool m_bIsGDALInitialized;
-    pdal::gdal::GlobalDebug* m_gdal_debug;
+    std::unique_ptr<gdal::ErrorHandler> m_gdalDebug;
 
     GlobalEnvironment(const GlobalEnvironment&); // nope
     GlobalEnvironment& operator=(const GlobalEnvironment&); // nope

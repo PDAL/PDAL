@@ -522,7 +522,7 @@ public:
             m_impl->m_type == "uuid")
         {
             std::string val("\"");
-            val += value() + "\"";
+            val += escapeQuotes(value()) + "\"";
             return val;
         }
         return value();
@@ -648,6 +648,20 @@ private:
 
     MetadataNode(MetadataNodeImplPtr node) : m_impl(node)
         {}
+
+    std::string escapeQuotes(const std::string& in) const
+    {
+        std::string out;
+        for (std::size_t i(0); i < in.size(); ++i)
+        {
+            if (in[i] == '"' && ((i && in[i - 1] != '\\') || !i))
+            {
+                out.push_back('\\');
+            }
+            out.push_back(in[i]);
+        }
+        return out;
+    }
 };
 
 inline bool operator == (const MetadataNode& m1, const MetadataNode& m2)
@@ -663,7 +677,7 @@ inline bool operator != (const MetadataNode& m1, const MetadataNode& m2)
 
 class Metadata
 {
-    friend class PointContext;
+    friend class BasePointTable;
 
 public:
     Metadata() : m_root("root"), m_private("private")

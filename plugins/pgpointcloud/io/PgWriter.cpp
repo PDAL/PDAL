@@ -37,13 +37,23 @@
 
 #include "PgWriter.hpp"
 
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/FileUtils.hpp>
-#include <pdal/Endian.hpp>
+#include <pdal/util/FileUtils.hpp>
+#include <pdal/util/Endian.hpp>
 #include <pdal/XMLSchema.hpp>
 
-CREATE_WRITER_PLUGIN(pgpointcloud, pdal::PgWriter)
+namespace pdal
+{
+
+static PluginInfo const s_info = PluginInfo(
+    "writers.pgpointcloud",
+    "Write points to PostgreSQL pgpointcloud output",
+    "http://pdal.io/stages/writers.pgpointcloud.html" );
+
+CREATE_SHARED_PLUGIN(1, 0, PgWriter, Writer, s_info)
+
+std::string PgWriter::getName() const { return s_info.name; }
 
 // TO DO:
 // - change INSERT into COPY
@@ -57,18 +67,11 @@ CREATE_WRITER_PLUGIN(pgpointcloud, pdal::PgWriter)
 // table information about each load? If so, how to distinguish
 // between loads? Leave to pre/post SQL?
 
-
-namespace pdal
-{
-
 PgWriter::PgWriter()
     : m_session(0)
     , m_patch_compression_type(CompressionType::None)
-    , m_patch_capacity(400)
     , m_srid(0)
     , m_pcid(0)
-    , m_have_postgis(false)
-    , m_create_index(true)
     , m_overwrite(true)
     , m_schema_is_initialized(false)
 {}
@@ -88,7 +91,7 @@ void PgWriter::processOptions(const Options& options)
 
     // Schema and column name can be defaulted safely
     m_column_name = options.getValueOrDefault<std::string>("column", "pa");
-    m_schema_name = options.getValueOrDefault<std::string>("schema", "");
+    m_schema_name = options.getValueOrDefault<std::string>("schema");
     //
     // Read compression type and turn into an integer
     std::string compression_str =
@@ -100,11 +103,12 @@ void PgWriter::processOptions(const Options& options)
 
     // Read other preferences
     m_overwrite = options.getValueOrDefault<bool>("overwrite", true);
-    m_patch_capacity = options.getValueOrDefault<uint32_t>("capacity", 400);
     m_srid = options.getValueOrDefault<uint32_t>("srid", 4326);
     m_pcid = options.getValueOrDefault<uint32_t>("pcid", 0);
-    m_pack = options.getValueOrDefault<bool>("pack_ignored_fields", true);
-    m_pre_sql = getOptions().getValueOrDefault<std::string>("pre_sql", "");
+    m_pre_sql = options.getValueOrDefault<std::string>("pre_sql");
+    // Post-SQL can be *either* a SQL file to execute, *or* a SQL statement
+    // to execute. We find out which one here.
+    std::string post_sql = options.getValueOrDefault<std::string>("post_sql");
 }
 
 //
@@ -129,20 +133,22 @@ Options PgWriter::getDefaultOptions()
     Option table("table", "", "table to write to");
     Option schema("schema", "", "schema table resides in");
     Option column("column", "", "column to write to");
-    Option compression("compression", "dimensional", "patch compression format to use (none, dimensional, ght)");
+    Option compression("compression", "dimensional",
+        "patch compression format to use (none, dimensional, ght)");
     Option overwrite("overwrite", true, "replace any existing table");
-    Option capacity("capacity", 400, "how many points to store in each patch");
     Option srid("srid", 4326, "spatial reference id to store data in");
-    Option pcid("pcid", 0, "use this existing pointcloud schema id, if it exists");
-    Option pre_sql("pre_sql", "", "before the pipeline runs, read and execute this SQL file, or run this SQL command");
-    Option post_sql("post_sql", "", "after the pipeline runs, read and execute this SQL file, or run this SQL command");
+    Option pcid("pcid", 0, "use this existing pointcloud schema id, if it "
+        "exists");
+    Option pre_sql("pre_sql", "", "before the pipeline runs, read and "
+        "execute this SQL file, or run this SQL command");
+    Option post_sql("post_sql", "", "after the pipeline runs, read and "
+        "execute this SQL file, or run this SQL command");
 
     options.add(table);
     options.add(schema);
     options.add(column);
     options.add(compression);
     options.add(overwrite);
-    options.add(capacity);
     options.add(srid);
     options.add(pcid);
     options.add(pre_sql);
@@ -195,32 +201,26 @@ void PgWriter::writeInit()
     m_schema_is_initialized = true;
 }
 
-void PgWriter::write(const PointBuffer& buffer)
+void PgWriter::write(const PointViewPtr view)
 {
     writeInit();
-    writeTile(buffer);
+    writeTile(view);
 }
 
 
-void PgWriter::done(PointContextRef ctx)
+void PgWriter::done(PointTableRef /*table*/)
 {
-    if (m_create_index && m_have_postgis)
-    {
-        CreateIndex(m_schema_name, m_table_name, m_column_name);
-    }
+    //CreateIndex(m_schema_name, m_table_name, m_column_name);
 
-    // Post-SQL can be *either* a SQL file to execute, *or* a SQL statement
-    // to execute. We find out which one here.
-    std::string post_sql = getOptions().getValueOrDefault<std::string>("post_sql", "");
-    if (post_sql.size())
+    if (m_post_sql.size())
     {
-        std::string sql = FileUtils::readFileAsString(post_sql);
+        std::string sql = FileUtils::readFileAsString(m_post_sql);
         if (!sql.size())
         {
             // if there was no file to read because the data in post_sql was
             // actually the sql code the user wanted to run instead of the
             // filename to open, we'll use that instead.
-            sql = post_sql;
+            sql = m_post_sql;
         }
         pg_execute(m_session, sql);
     }
@@ -404,7 +404,6 @@ bool PgWriter::CheckTableExists(std::string const& name)
     return false;
 }
 
-
 void PgWriter::CreateTable(std::string const& schema_name,
     std::string const& table_name, std::string const& column_name,
     uint32_t pcid)
@@ -412,9 +411,10 @@ void PgWriter::CreateTable(std::string const& schema_name,
     std::ostringstream oss;
     oss << "CREATE TABLE ";
     if (schema_name.size())
-        oss << schema_name << ".";
-    oss << table_name;
-    oss << " (id SERIAL PRIMARY KEY, " << column_name << " PcPatch";
+        oss << pg_quote_identifier(schema_name) << ".";
+    oss << pg_quote_identifier(table_name);
+    oss << " (id SERIAL PRIMARY KEY, " <<
+        pg_quote_identifier(column_name) << " PcPatch";
     if (pcid)
         oss << "(" << pcid << ")";
     oss << ")";
@@ -439,56 +439,49 @@ void PgWriter::CreateIndex(std::string const& schema_name,
 }
 
 
-void PgWriter::writeTile(PointBuffer const& buffer)
+void PgWriter::writeTile(const PointViewPtr view)
 {
-    if (buffer.size() > m_patch_capacity)
-    {
-        std::ostringstream oss;
-        oss << "writers.pgpointcloud buffer size (" << buffer.size()
-            << ") is greater than capacity (" << m_patch_capacity << ")";
-        throw pdal_error(oss.str());
-    }
-
-    std::vector<char> storage(m_packedPointSize);
+    std::vector<char> storage(packedPointSize());
     std::string hexrep;
-    hexrep.resize(m_packedPointSize * buffer.size() * 2);
+    size_t maxHexrepSize = packedPointSize() * view->size() * 2;
+    hexrep.reserve(maxHexrepSize);
 
     m_insert.clear();
-    m_insert.reserve(hexrep.size() + 3000);
+    m_insert.reserve(maxHexrepSize + 3000);
 
-    size_t pos = 0;
-    for (PointId idx = 0; idx < buffer.size(); ++idx)
+    for (PointId idx = 0; idx < view->size(); ++idx)
     {
-        size_t written = readPoint(buffer, idx, storage.data());
+        size_t size = readPoint(*view.get(), idx, storage.data());
 
         /* We are always getting uncompressed bytes off the block_data */
         /* so we always used compression type 0 (uncompressed) in writing */
         /* our WKB */
         static char syms[] = "0123456789ABCDEF";
-        for (size_t i = 0; i != written; i++)
+        for (size_t i = 0; i != size; i++)
         {
-            hexrep[pos++] = syms[((storage[i] >> 4) & 0xf)];
-            hexrep[pos++] = syms[storage[i] & 0xf];
+            hexrep.push_back(syms[((storage[i] >> 4) & 0xf)]);
+            hexrep.push_back(syms[storage[i] & 0xf]);
         }
     }
 
     std::string insert_into("INSERT INTO ");
-    std::string values(" (pa) VALUES ('");
+    std::string values(" (" + pg_quote_identifier(m_column_name) +
+                       ") VALUES ('");
 
     m_insert.append(insert_into);
 
     if (m_schema_name.size())
     {
-        m_insert.append(m_schema_name);
+        m_insert.append(pg_quote_identifier(m_schema_name));
         m_insert.append(".");
     }
 
-    m_insert.append(m_table_name);
+    m_insert.append(pg_quote_identifier(m_table_name));
     m_insert.append(values);
 
     std::ostringstream options;
 
-    uint32_t num_points = buffer.size();
+    uint32_t num_points = view->size();
     int32_t pcid = m_pcid;
     CompressionType::Enum compression_v = CompressionType::None;
     uint32_t compression = static_cast<uint32_t>(compression_v);

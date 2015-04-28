@@ -34,12 +34,16 @@
 
 #pragma once
 
+#include "BpfHeader.hpp"
+
+#include <pdal/pdal_export.hpp>
+#include <pdal/Writer.hpp>
+#include <pdal/util/OStream.hpp>
+
 #include <vector>
 
-#include <pdal/OStream.hpp>
-#include <pdal/Writer.hpp>
-
-#include "BpfHeader.hpp"
+extern "C" int32_t BpfWriter_ExitFunc();
+extern "C" PF_ExitFunc BpfWriter_InitPlugin();
 
 namespace pdal
 {
@@ -47,14 +51,11 @@ namespace pdal
 class PDAL_DLL BpfWriter : public Writer
 {
 public:
-    SET_STAGE_NAME("writers.bpf",
-        "\"Binary Point Format\" (BPF) writer support. "
-        "BPF is a simple \n"
-        "DoD and research format that is used by some sensor and \n"
-        "processing chains.");
-    SET_STAGE_LINK("http://pdal.io/stages/writers.bpf.html")
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
-    static Options getDefaultOptions();
+    Options getDefaultOptions();
 
 private:
     OLeStream m_stream;
@@ -62,16 +63,16 @@ private:
     BpfDimensionList m_dims;
 
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContextRef ctx);
-    virtual void write(const PointBuffer& buf);
-    virtual void done(PointContextRef ctx);
+    virtual void ready(PointTableRef table);
+    virtual void write(const PointViewPtr data);
+    virtual void done(PointTableRef table);
 
-    double getAdjustedValue(const PointBuffer& buf, BpfDimension& bpfDim,
+    double getAdjustedValue(const PointView* data, BpfDimension& bpfDim,
         PointId idx);
-    void loadBpfDimensions(PointContextRef ctx);
-    void writePointMajor(const PointBuffer& buf);
-    void writeDimMajor(const PointBuffer& buf);
-    void writeByteMajor(const PointBuffer& buf);
+    void loadBpfDimensions(PointLayoutPtr layout);
+    void writePointMajor(const PointView* data);
+    void writeDimMajor(const PointView* data);
+    void writeByteMajor(const PointView* data);
     void writeCompressedBlock(char *buf, size_t size);
 };
 

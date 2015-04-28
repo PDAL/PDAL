@@ -69,6 +69,14 @@ be stored.
 namespace pdal
 {
 
+static PluginInfo const s_info = PluginInfo(
+    "filters.chipper",
+    "Organize points into spatially contiguous, squarish, and non-overlapping chips.",
+    "http://pdal.io/stages/filters.chipper.html" );
+
+CREATE_STATIC_PLUGIN(1, 0, ChipperFilter, Filter, s_info)
+
+std::string ChipperFilter::getName() const { return s_info.name; }
 
 void ChipperFilter::processOptions(const Options& options)
 {
@@ -85,40 +93,40 @@ Options ChipperFilter::getDefaultOptions()
 }
 
 
-PointBufferSet ChipperFilter::run(PointBufferPtr buffer)
+PointViewSet ChipperFilter::run(PointViewPtr view)
 {
-    if (buffer->size() == 0)
-        return m_buffers;
+    if (view->size() == 0)
+        return m_outViews;
 
-    m_inbuf = buffer;
-    load(*buffer, m_xvec, m_yvec, m_spare);
+    m_inView = view;
+    load(*view.get(), m_xvec, m_yvec, m_spare);
     partition(m_xvec.size());
     decideSplit(m_xvec, m_yvec, m_spare, 0, m_partitions.size() - 1);
-    return m_buffers;
+    return m_outViews;
 }
 
 
-void ChipperFilter::load(PointBuffer& buffer, ChipRefList& xvec, ChipRefList& yvec,
+void ChipperFilter::load(PointView& view, ChipRefList& xvec, ChipRefList& yvec,
     ChipRefList& spare)
 {
-    uint32_t idx;
+    point_count_t idx;
     std::vector<ChipPtRef>::iterator it;
 
-    xvec.reserve(buffer.size());
-    yvec.reserve(buffer.size());
-    spare.resize(buffer.size());
+    xvec.reserve(view.size());
+    yvec.reserve(view.size());
+    spare.resize(view.size());
 
-    for (PointId i = 0; i < buffer.size(); ++i)
+    for (PointId i = 0; i < view.size(); ++i)
     {
         ChipPtRef xref;
 
-        xref.m_pos = buffer.getFieldAs<double>(Dimension::Id::X, i);
+        xref.m_pos = view.getFieldAs<double>(Dimension::Id::X, i);
         xref.m_ptindex = i;
         xvec.push_back(xref);
 
         ChipPtRef yref;
 
-        yref.m_pos = buffer.getFieldAs<double>(Dimension::Id::Y, i);
+        yref.m_pos = view.getFieldAs<double>(Dimension::Id::Y, i);
         yref.m_ptindex = i;
         yvec.push_back(yref);
     }
@@ -201,7 +209,7 @@ void ChipperFilter::split(ChipRefList& wide, ChipRefList& narrow, ChipRefList& s
     // 2) We have a distance of three between left and right.
 
     if (pright - pleft == 1)
-        emit(wide, left, right, narrow, left, right);
+        emit(wide, left, right);
     else if (pright - pleft == 2)
         finalSplit(wide, narrow, pleft, pright);
     else
@@ -300,37 +308,20 @@ void ChipperFilter::finalSplit(ChipRefList& wide, ChipRefList& narrow,
     // Emit results.
     emit(wide,
          left,
-         center - 1,
-         narrow,
-         left1,
-         right1);
+         center - 1);
     emit(wide,
          center,
-         right,
-         narrow,
-         left2,
-         right2);
+         right);
 }
 
-void ChipperFilter::emit(ChipRefList& wide, PointId widemin, PointId widemax,
-    ChipRefList& narrow, PointId narrowmin, PointId narrowmax)
+void ChipperFilter::emit(ChipRefList& wide, PointId widemin, PointId widemax)
 {
-    PointBufferPtr buf = m_inbuf->makeNew();
+    PointViewPtr view = m_inView->makeNew();
     for (size_t idx = widemin; idx <= widemax; ++idx)
-        buf->appendPoint(*m_inbuf, wide[idx].m_ptindex);
+        view->appendPoint(*m_inView.get(), wide[idx].m_ptindex);
 
-    /**
-    // We currently don't write the bounds in the buffer.
-    //
-    Bounds<double> bounds;
-    if (wide.m_dir == DIR_X)
-        bounds = Bounds<double>(wide[widemin].m_pos, narrow[narrowmin].m_pos,
-            wide[widemax].m_pos, narrow[narrowmax].m_pos);
-    else
-        bounds = Bounds<double>(narrow[narrowmin].m_pos, wide[widemin].m_pos,
-            narrow[narrowmax].m_pos, wide[widemax].m_pos);
-    **/
-    m_buffers.insert(buf);
+    m_outViews.insert(view);
 }
 
 } // namespace pdal
+

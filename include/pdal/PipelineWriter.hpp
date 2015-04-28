@@ -37,7 +37,6 @@
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/Metadata.hpp>
-#include <pdal/PointContext.hpp>
 
 #include <string>
 
@@ -47,7 +46,6 @@ namespace pdal
 {
 
 class PipelineManager;
-class PointBuffer;
 
 class PDAL_DLL PipelineWriter
 {

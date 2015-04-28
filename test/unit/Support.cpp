@@ -43,17 +43,10 @@
 
 #include <boost/filesystem.hpp>
 
-#include <pdal/FileUtils.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/Options.hpp>
-#include <pdal/PointBuffer.hpp>
 #include <pdal/Stage.hpp>
 #include "TestConfig.hpp"
-
-#ifdef PDAL_COMPILER_GCC
-#pragma GCC diagnostic ignored "-Wfloat-equal"
-//#pragma GCC diagnostic ignored "-Wsign-compare"
-#endif
 
 using namespace pdal;
 using namespace std;
@@ -106,7 +99,7 @@ std::string Support::binpath(const std::string& file)
 
 std::string Support::exename(const std::string& name)
 {
-#ifdef PDAL_PLATFORM_WIN32
+#ifdef _WIN32
     return name + ".exe";
 #else
     return name;
@@ -209,11 +202,6 @@ uint32_t Support::diff_files(const std::string& file1,
             !pdal::FileUtils::fileExists(file2))
         return (std::numeric_limits<uint32_t>::max)();
 
-    uintmax_t len1x = pdal::FileUtils::fileSize(file1);
-    uintmax_t len2x = pdal::FileUtils::fileSize(file2);
-    const size_t len1 = (size_t)len1x; // BUG
-    const size_t len2 = (size_t)len2x;
-
     std::istream* str1 = pdal::FileUtils::openFile(file1);
     std::istream* str2 = pdal::FileUtils::openFile(file2);
 
@@ -229,7 +217,7 @@ uint32_t Support::diff_files(std::istream& str1, std::istream& str2,
     uint32_t numdiffs = 0;
     char p, q;
 
-    for (uint32_t i = 0; true; ++i)
+    for (uint32_t i = 0; ; ++i)
     {
         str1.get(p);
         str2.get(q);
@@ -295,7 +283,7 @@ bool Support::compare_text_files(std::istream& str1, std::istream& str2)
     return diff_text_files(str1, str2) == 0;
 }
 
-void Support::check_pN(const pdal::PointBuffer& data, std::size_t index,
+void Support::check_pN(const pdal::PointView& data, PointId index,
     double xref, double yref, double zref)
 {
     double x0 = data.getFieldAs<double>(Dimension::Id::X, index);
@@ -308,7 +296,7 @@ void Support::check_pN(const pdal::PointBuffer& data, std::size_t index,
 }
 
 
-void Support::check_pN(const PointBuffer& data, size_t index,
+void Support::check_pN(const PointView& data, PointId index,
     double xref, double yref, double zref, double tref,
     uint16_t rref, uint16_t gref, uint16_t bref)
 {
@@ -332,7 +320,7 @@ void Support::check_pN(const PointBuffer& data, size_t index,
 }
 
 
-void Support::check_p0_p1_p2(const pdal::PointBuffer& data)
+void Support::check_p0_p1_p2(const pdal::PointView& data)
 {
     Support::check_pN(data, 0, 637012.240000, 849028.310000, 431.660000);
     Support::check_pN(data, 1, 636896.330000, 849087.700000, 446.390000);
@@ -340,7 +328,7 @@ void Support::check_p0_p1_p2(const pdal::PointBuffer& data)
 }
 
 
-void Support::check_p100_p101_p102(const pdal::PointBuffer& data)
+void Support::check_p100_p101_p102(const pdal::PointView& data)
 {
     Support::check_pN(data, 0, 636661.060000, 849854.130000, 424.900000);
     Support::check_pN(data, 1, 636568.180000, 850179.490000, 441.800000);
@@ -348,7 +336,7 @@ void Support::check_p100_p101_p102(const pdal::PointBuffer& data)
 }
 
 
-void Support::check_p355_p356_p357(const pdal::PointBuffer& data)
+void Support::check_p355_p356_p357(const pdal::PointView& data)
 {
     Support::check_pN(data, 0, 636462.600000, 850566.110000, 432.610000);
     Support::check_pN(data, 1, 636356.140000, 850530.480000, 432.680000);
@@ -356,7 +344,7 @@ void Support::check_p355_p356_p357(const pdal::PointBuffer& data)
 }
 
 
-void Support::check_p710_p711_p712(const pdal::PointBuffer& data)
+void Support::check_p710_p711_p712(const pdal::PointView& data)
 {
     Support::check_pN(data, 0, 638720.670000, 850926.640000, 417.320000);
     Support::check_pN(data, 1, 638672.380000, 851081.660000, 420.670000);

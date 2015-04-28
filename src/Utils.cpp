@@ -42,7 +42,7 @@
 #include <cctype>
 #include <random>
 
-#ifndef PDAL_PLATFORM_WIN32
+#ifndef _WIN32
 #include <cxxabi.h>
 #endif
 
@@ -50,7 +50,7 @@
 #  pragma warning(disable: 4127)  // conditional expression is constant
 #endif
 
-#if !defined(WIN32)
+#if !defined(_WIN32)
 #include <dlfcn.h>
 #define DLL_LOAD_UNIX
 #else
@@ -85,7 +85,8 @@ double Utils::random(double minimum, double maximum)
     return t;
 }
 
-double Utils::uniform(const double& minimum, const double& maximum, uint32_t seed)
+double Utils::uniform(const double& minimum, const double& maximum,
+    uint32_t seed)
 {
     std::mt19937 gen(seed);
     std::uniform_real_distribution<double> dist(minimum, maximum);
@@ -130,7 +131,8 @@ void* Utils::registerPlugin(void* stageFactoryPtr, string const& filename,
     else
     {
         ostringstream oss;
-        oss << "Unable to register shared library '" << filename << "' with method name '" << registerMethod << "'";
+        oss << "Unable to register shared library '" << filename <<
+            "' with method name '" << registerMethod << "'";
         throw pdal_error(oss.str());
     }
 
@@ -150,7 +152,7 @@ string Utils::getenv(string const& name)
 
 int Utils::putenv(const char* env)
 {
-#ifdef PDAL_PLATFORM_WIN32
+#ifdef _WIN32
     return ::_putenv(env);
 #else
     return ::putenv(const_cast<char*>(env));
@@ -171,13 +173,33 @@ void Utils::eatwhitespace(istream& s)
     return;
 }
 
-void Utils::removeTrailingBlanks(std::string& s)
+
+void Utils::trimLeading(std::string& s)
 {
-    size_t pos = s.size();
-    while (isspace(s[--pos]))
-        ;
-    s = s.substr(0, pos);
+    size_t pos = 0;
+    // Note, that this should be OK in C++11, which guarantees a NULL.
+    while (isspace(s[pos]))
+        pos++;
+    s = s.substr(pos);
 }
+
+
+void Utils::trimTrailing(std::string& s)
+{
+    size_t pos = s.size() - 1;
+    while (isspace(s[pos]))
+    {
+        if (pos == 0)
+        {
+            s.clear();
+            return;
+        }
+        else
+            pos--;
+    }
+    s = s.substr(0, pos + 1);
+}
+
 
 bool Utils::eatcharacter(istream& s, char x)
 {
@@ -454,7 +476,7 @@ vector<uint8_t> Utils::base64_decode(string const& encoded_string)
 
 FILE* Utils::portable_popen(const string& command, const string& mode)
 {
-#ifdef PDAL_PLATFORM_WIN32
+#ifdef _WIN32
     const string dos_command = Utils::replaceAll(command, "/", "\\");
     return _popen(dos_command.c_str(), mode.c_str());
 #else
@@ -466,7 +488,7 @@ int Utils::portable_pclose(FILE* fp)
 {
     int status = 0;
 
-#ifdef PDAL_PLATFORM_WIN32
+#ifdef _WIN32
     status = _pclose(fp);
 #else
     status = pclose(fp);
@@ -531,19 +553,24 @@ int Utils::run_shell_command(const string& cmd, string& output)
     return portable_pclose(fp);
 }
 
-//#ifdef PDAL_COMPILER_MSVC
-// http://www.codepedia.com/1/CppStringReplace
+
 string Utils::replaceAll(string result, const string& replaceWhat,
     const string& replaceWithWhat)
 {
+    size_t pos = 0;
     while (1)
     {
-        const int pos = result.find(replaceWhat);
-        if (pos==-1) break;
-        result.replace(pos,replaceWhat.size(),replaceWithWhat);
+        pos = result.find(replaceWhat, pos);
+        if (pos == string::npos)
+            break;
+        result.replace(pos, replaceWhat.size(), replaceWithWhat);
+        pos += replaceWithWhat.size();
+        if (pos >= result.size())
+            break;
     }
     return result;
 }
+
 
 // Adapted from http://stackoverflow.com/a/11969098.
 std::string Utils::escapeJSON(const string &str)
@@ -612,7 +639,7 @@ void Utils::wordWrap(string const& inputString, vector<string>& outputString,
 /// \return  Demangled string
 std::string Utils::demangle(const std::string& s)
 {
-#ifndef PDAL_PLATFORM_WIN32
+#ifndef _WIN32
     int status;
     std::unique_ptr<char[], void (*)(void*)> result(
             abi::__cxa_demangle(s.c_str(), 0, 0, &status), std::free);

@@ -39,24 +39,10 @@ main one, `<pdal/pdal.hpp>`, brings in most of the utility and basic classes
 used throughout the PDAL system. Additionally, the following includes are
 available subject to having the required include directories pathed:
 
-* `#include <pdal/Drivers.hpp>`
-* `#include <pdal/Filters.hpp>`
-* `#include <pdal/Kernels.hpp>`
-
-
-.. note::
-
-    Drivers, Filters, and Kernels bring in *all* of the respective sub includes
-    for those sections of the source tree. You are not required to include
-    everything if you don't need it, however, and it is still possible to
-    selectively include the classes you need as shown in the example below.
-
-
-
 .. code-block:: cpp
 
     #include <pdal/pdal.hpp>
-    #include <pdal/PointBuffer.hpp>
+    #include <pdal/PointView.hpp>
     #include <BufferReader.hpp>
     #include <LasWriter.hpp>
 
@@ -86,15 +72,15 @@ available subject to having the required include directories pathed:
     }
 
 
-    void fillBuffer(pdal::PointBufferPtr buffer, std::vector<Point> const& data)
+    void fillView(pdal::PointViewPtr view, std::vector<Point> const& data)
     {
 
         for (int i = 0; i < data.size(); ++i)
         {
             Point const& pt = data[i];
-            buffer->setField<double>(pdal::Dimension::Id::X, i, pt.x);
-            buffer->setField<double>(pdal::Dimension::Id::Y, i, pt.y);
-            buffer->setField<double>(pdal::Dimension::Id::Z, i, pt.z);
+            view->setField<double>(pdal::Dimension::Id::X, i, pt.x);
+            view->setField<double>(pdal::Dimension::Id::Y, i, pt.y);
+            view->setField<double>(pdal::Dimension::Id::Z, i, pt.z);
         }
     }
 
@@ -110,26 +96,25 @@ available subject to having the required include directories pathed:
 
         pdal::Option filename("filename", "myfile.las");
         options.add(filename);
-        pdal::PointContextRef ctx;
+        pdal::PointTablePtr table(new pdal::DefaultPointTable());
 
-        ctx.registerDim(pdal::Dimension::Id::X);
-        ctx.registerDim(pdal::Dimension::Id::Y);
-        ctx.registerDim(pdal::Dimension::Id::Z);
+        table->registerDim(pdal::Dimension::Id::X);
+        table->registerDim(pdal::Dimension::Id::Y);
+        table->registerDim(pdal::Dimension::Id::Z);
 
         {
-            pdal::PointBufferPtr buffer = pdal::PointBufferPtr(new pdal::PointBuffer(ctx));
+            pdal::PointViewPtr view(new pdal::PointView(table));
 
             std::vector<Point> data = getMyData();
 
-            fillBuffer(buffer, data);
+            fillView(view, data);
 
             pdal::BufferReader reader(options);
-            reader.addBuffer(buffer);
+            reader.addView(view);
             pdal::LasWriter writer(options);
             writer.setInput(&reader);
-            writer.prepare(ctx);
-            writer.execute(ctx);
-
+            writer.prepare(table);
+            writer.execute(table);
 
         }
 

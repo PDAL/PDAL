@@ -331,6 +331,12 @@ public:
         return f == 8;
     }
 
+    bool has14Format() const
+    {
+        PointFormat f = pointFormat();
+        return f > 5;
+    }
+
     /// Returns true iff the file is compressed (laszip),
     /// as determined by the high bit in the point type
     bool compressed() const

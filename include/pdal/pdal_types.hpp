@@ -42,8 +42,23 @@
 namespace pdal
 {
 
-typedef std::vector<uint8_t>::size_type PointId;
-typedef std::vector<PointId>::size_type point_count_t;
+typedef uint32_t PointId;
+typedef uint32_t point_count_t;
+typedef std::vector<std::string> StringList;
+
+typedef union
+{
+    float f;
+    double d;
+    int8_t s8;
+    int16_t s16;
+    int32_t s32;
+    int64_t s64;
+    uint8_t u8;
+    uint16_t u16;
+    uint32_t u32;
+    uint64_t u64;
+} Everything;
 
 struct XForm
 {
@@ -65,10 +80,7 @@ public:
 
     bool nonstandard() const
     {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wfloat-equal"
         return m_autoScale || m_autoOffset || m_scale != 1.0 || m_offset != 0.0;
-#pragma GCC diagnostic pop
     }
 };
 

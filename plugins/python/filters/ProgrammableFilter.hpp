@@ -47,14 +47,14 @@ class ProgrammableFilterSequentialIterator;
 class PDAL_DLL ProgrammableFilter : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.programmable", "Manipulate data using inline Python")
-    SET_STAGE_LINK("http://pdal.io/stages/filters.programmable.html")
-    SET_PLUGIN_VERSION("1.0.0b1")
-
     ProgrammableFilter() : Filter(), m_script(NULL)
         {}
 
-    static Options getDefaultOptions();
+    static void *create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+
+    Options getDefaultOptions();
 
 private:
     plang::Script* m_script;
@@ -65,10 +65,10 @@ private:
     std::vector<std::string> m_addDimensions;
 
     virtual void processOptions(const Options& options);
-    virtual void addDimensions(PointContext ctx);
-    virtual void ready(PointContext ctx);
-    virtual void filter(PointBuffer& buf);
-    virtual void done(PointContext ctx);
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void ready(PointTableRef table);
+    virtual void filter(PointView& view);
+    virtual void done(PointTableRef table);
 
     ProgrammableFilter& operator=(const ProgrammableFilter&); // not implemented
     ProgrammableFilter(const ProgrammableFilter&); // not implemented

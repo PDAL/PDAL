@@ -34,13 +34,23 @@
 
 #include "CropFilter.hpp"
 
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
+
 #include <sstream>
 #include <cstdarg>
 
 namespace pdal
 {
+
+static PluginInfo const s_info = PluginInfo(
+    "filters.crop",
+    "Filter points inside or outside a bounding box or a polygon if PDAL was built with GEOS support.",
+    "http://pdal.io/stages/filters.crop.html" );
+
+CREATE_STATIC_PLUGIN(1, 0, CropFilter, Filter, s_info)
+
+std::string CropFilter::getName() const { return s_info.name; }
 
 #ifdef PDAL_HAVE_GEOS
 namespace geos
@@ -95,7 +105,7 @@ void CropFilter::processOptions(const Options& options)
 }
 
 
-void CropFilter::ready(PointContext ctx)
+void CropFilter::ready(PointTableRef /*table*/)
 {
 #ifdef PDAL_HAVE_GEOS
     if (!m_poly.empty())
@@ -196,17 +206,17 @@ BOX3D CropFilter::computeBounds(GEOSGeometry const *geometry)
 }
 
 
-PointBufferSet CropFilter::run(PointBufferPtr buffer)
+PointViewSet CropFilter::run(PointViewPtr view)
 {
-    PointBufferSet pbSet;
-    PointBufferPtr output = buffer->makeNew();
-    crop(*buffer, *output);
-    pbSet.insert(output);
-    return pbSet;
+    PointViewSet viewSet;
+    PointViewPtr outView = view->makeNew();
+    crop(*view.get(), *outView.get());
+    viewSet.insert(outView);
+    return viewSet;
 }
 
 
-void CropFilter::crop(PointBuffer& input, PointBuffer& output)
+void CropFilter::crop(PointView& input, PointView& output)
 {
     bool logOutput = (log()->getLevel() > LogLevel::Debug4);
     if (logOutput)
@@ -266,7 +276,7 @@ void CropFilter::crop(PointBuffer& input, PointBuffer& output)
 }
 
 
-void CropFilter::done(PointContext ctx)
+void CropFilter::done(PointTableRef /*table*/)
 {
 #ifdef PDAL_HAVE_GEOS
     if (m_geosPreparedGeometry)

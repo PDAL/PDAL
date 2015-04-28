@@ -12,6 +12,9 @@ plugins/pgpointcloud/Pgtest-Support.hpp
 #
 # cmake stuff
 #
+PDALConfig.cmake
+PDALConfigVersion.cmake
+PDALTargets.cmake
 CMakeCache.txt
 CMakeFiles/
 CPackConfig.cmake

@@ -39,13 +39,12 @@
 
 #include <pdal/pdal_macros.hpp>
 
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/GlobalEnvironment.hpp>
 
 #ifdef PDAL_COMPILER_GCC
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wredundant-decls"
-#  pragma GCC diagnostic ignored "-Wfloat-equal"
 #  pragma GCC diagnostic ignored "-Wextra"
 #  pragma GCC diagnostic ignored "-Wcast-qual"
    // The following pragma doesn't actually work:
@@ -56,7 +55,6 @@
 #include <cpl_conv.h>
 #ifdef PDAL_COMPILER_CLANG
 #  pragma clang diagnostic push
-#  pragma clang diagnostic ignored "-Wfloat-equal"
 #  pragma clang diagnostic ignored "-Wunused-private-field"
 #endif
 
@@ -77,11 +75,17 @@
 // syntactically, how do we name all the LAS writer options that we will pass to the las writer?
 //
 
-CREATE_WRITER_PLUGIN(nitf, pdal::NitfWriter)
-
 namespace pdal
 {
 
+static PluginInfo const s_info = PluginInfo(
+    "writers.nitf",
+    "NITF Writer",
+    "http://pdal.io/stages/writers.nitf.html" );
+
+CREATE_SHARED_PLUGIN(1, 0, NitfWriter, Writer, s_info)
+
+std::string NitfWriter::getName() const { return s_info.name; }
 
 BOX3D reprojectBoxToDD(const SpatialReference& reference, const BOX3D& box)
 {
@@ -163,16 +167,16 @@ void NitfWriter::processOptions(const Options& options)
     {}
 }
 
-void NitfWriter::write(const PointBuffer& buffer)
+void NitfWriter::write(const PointViewPtr view)
 {
-    m_bounds.grow(buffer.calculateBounds(true));
+    m_bounds.grow(view->calculateBounds(true));
 
-    LasWriter::write(buffer);
+    LasWriter::write(view);
 }
 
-void NitfWriter::done(PointContextRef ctx)
+void NitfWriter::done(PointTableRef table)
 {
-    LasWriter::done(ctx);
+    LasWriter::done(table);
 
     try
     {
@@ -223,13 +227,27 @@ void NitfWriter::done(PointContextRef ctx)
         ::nitf::ImageSubheader subheader = image.getSubheader();
 
 
-        BOX3D bounds =  reprojectBoxToDD(ctx.spatialRef(), m_bounds);
+        BOX3D bounds =  reprojectBoxToDD(table.spatialRef(), m_bounds);
+
+        //NITF decimal degree values for corner coordinates only has a
+        // precision of 3 after the decimal. This may cause an invalid
+        // polygon due to rounding errors with a small tile. Therefore
+        // instead of rounding min values will use the floor value and
+        // max values will use the ceiling values.
+        bounds.minx = (floor(bounds.minx * 1000)) / 1000.0;
+        bounds.miny = (floor(bounds.miny * 1000)) / 1000.0;
+        bounds.maxx = (ceil(bounds.maxx * 1000)) / 1000.0;
+        bounds.maxy = (ceil(bounds.maxy * 1000)) / 1000.0;
 
         double corners[4][2];
-        corners[0][0] = bounds.maxy;     corners[0][1] = bounds.minx;
-        corners[1][0] = bounds.maxy;     corners[1][1] = bounds.maxx;
-        corners[2][0] = bounds.miny;  corners[2][1] = bounds.maxx;
-        corners[3][0] = bounds.miny;  corners[3][1] = bounds.minx;
+        corners[0][0] = bounds.maxy;
+        corners[0][1] = bounds.minx;
+        corners[1][0] = bounds.maxy;
+        corners[1][1] = bounds.maxx;
+        corners[2][0] = bounds.miny;
+        corners[2][1] = bounds.maxx;
+        corners[3][0] = bounds.miny;
+        corners[3][1] = bounds.minx;
         subheader.setCornersFromLatLons(NRT_CORNERS_DECIMAL, corners);
 
         subheader.getImageSecurityClass().set(m_imgSecurityClass);

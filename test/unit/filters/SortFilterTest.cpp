@@ -32,15 +32,15 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "gtest/gtest.h"
+#include <pdal/pdal_test_main.hpp>
 
 #include <random>
 
 #include <SortFilter.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
+#include <pdal/StageWrapper.hpp>
 #include "Support.hpp"
-#include "StageTester.hpp"
 
 using namespace pdal;
 
@@ -56,27 +56,27 @@ void doSort(point_count_t count)
     SortFilter filter;
     filter.setOptions(opts);
 
-    PointContext ctx;
-    PointBuffer buf(ctx);
+    PointTable table;
+    PointViewPtr view(new PointView(table));
 
-    ctx.registerDim(Dimension::Id::X);
+    table.layout()->registerDim(Dimension::Id::X);
 
     std::default_random_engine generator;
     std::uniform_real_distribution<double> dist(0.0, (double)count);
 
     for (PointId i = 0; i < count; ++i)
-        buf.setField(Dimension::Id::X, i, dist(generator));
+        view->setField(Dimension::Id::X, i, dist(generator));
 
-    filter.prepare(ctx);
-    FilterTester::ready(&filter, ctx);
-    FilterTester::filter(&filter, buf);
-    FilterTester::done(&filter, ctx);
+    filter.prepare(table);
+    FilterWrapper::ready(filter, table);
+    FilterWrapper::filter(filter, *view.get());
+    FilterWrapper::done(filter, table);
 
-    EXPECT_EQ(count, buf.size());
+    EXPECT_EQ(count, view->size());
     for (PointId i = 1; i < count; ++i)
     {
-        double d1 = buf.getFieldAs<double>(Dimension::Id::X, i - 1);
-        double d2 = buf.getFieldAs<double>(Dimension::Id::X, i);
+        double d1 = view->getFieldAs<double>(Dimension::Id::X, i - 1);
+        double d2 = view->getFieldAs<double>(Dimension::Id::X, i);
         EXPECT_TRUE(d1 <= d2);
     }
 }
@@ -98,15 +98,15 @@ TEST(SortFilterTest, pipeline)
     reader.readPipeline(Support::configuredpath("filters/sort.xml"));
     mgr.execute();
 
-    PointBufferSet pbSet = mgr.buffers();
+    PointViewSet viewSet = mgr.views();
 
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buf = *pbSet.begin();
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
 
-    for (PointId i = 1; i < buf->size(); ++i)
+    for (PointId i = 1; i < view->size(); ++i)
     {
-        double d1 = buf->getFieldAs<double>(Dimension::Id::X, i - 1);
-        double d2 = buf->getFieldAs<double>(Dimension::Id::X, i);
+        double d1 = view->getFieldAs<double>(Dimension::Id::X, i - 1);
+        double d2 = view->getFieldAs<double>(Dimension::Id::X, i);
         EXPECT_TRUE(d1 <= d2);
     }
 }

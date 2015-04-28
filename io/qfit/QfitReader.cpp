@@ -59,7 +59,7 @@ The files are organized into fixed-length logical records. The
 beginning of the file contains a header of one or more records
 followed by a data segment, in which there is one record per
 laser shot. It is not necessary to interpret the header
-to use the laser data.
+to use the laser data->
 
 The first word of the header (and the file) is a 32-bit  binary
 integer giving the number of bytes in each logical record.  Commonly
@@ -139,7 +139,7 @@ the vicinity of the laser pulse.  The horizontal position of the
 passive footprint is determined relative to the laser footprint
 by a  delay formulated during ground testing at Wallops.  The
 elevation of the footprint is synthesized from surrounding laser
-elevation data.  NOTE:  The passive data is not calibrated and
+elevation data->  NOTE:  The passive data is not calibrated and
 its use, if any, should  be qualitative in nature.  It may aid
 the interpretation of terrain features. The measurement capability
 was engineered into the ATM sensors to aid in the identification
@@ -166,43 +166,57 @@ Word #       Content
 
 */
 
+#include "QfitReader.hpp"
+
+#include <pdal/PointView.hpp>
+#include <pdal/portable_endian.hpp>
+#include <pdal/util/Extractor.hpp>
+
 #include <algorithm>
 #include <map>
-
-#include <pdal/PointBuffer.hpp>
-#include <pdal/FileUtils.hpp>
-#include <pdal/Utils.hpp>
-
-#include "QfitReader.hpp"
 
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127)  // conditional expression is constant
 #endif
 
+
 namespace pdal
 {
 
-QfitReader::QfitReader() : pdal::Reader(),
-    m_format(QFIT_Format_Unknown), m_size(0), m_littleEndian(false)
+static PluginInfo const s_info = PluginInfo(
+    "readers.qfit",
+    "QFIT Reader",
+    "http://pdal.io/stages/readers.qfit.html" );
+
+CREATE_STATIC_PLUGIN(1, 0, QfitReader, Reader, s_info)
+
+std::string QfitReader::getName() const { return s_info.name; }
+
+QfitReader::QfitReader()
+    : pdal::Reader()
+    , m_format(QFIT_Format_Unknown)
+    , m_size(0)
+    , m_littleEndian(false)
+    , m_istream()
 {}
 
 
 void QfitReader::initialize()
 {
-    std::istream* str = FileUtils::openFile(m_filename);
-    if (str == 0)
+    ISwitchableStream str(m_filename);
+    if (!str)
     {
         std::ostringstream oss;
         oss << "Unable to open file '" << m_filename << "'";
         throw qfit_error(oss.str());
     }
-    str->seekg(0);
+    str.seek(0);
 
     int32_t int4(0);
 
-    Utils::read_n(int4, *str, sizeof(int4));
+    str >> int4;
 
-    // They started writting little-endian data.
+    // They started writting little-endian data->
 
     /* For years we produced ATM data in big-endian format. With changes in
     computer hardware, we reluctantly changed our standard output to
@@ -222,10 +236,16 @@ void QfitReader::initialize()
     // If the size comes back something other than 4*no_dimensions, we assume
     // The data were flipped
     if (int4 < 100)
+    {
         m_littleEndian = true;
+    }
+    else
+    {
+        str.switchToBigEndian();
+    }
 
     if (!m_littleEndian)
-        QFIT_SWAP_BE_TO_LE(int4);
+        int4 = int32_t(be32toh(uint32_t(int4)));
 
     if (int4 % 4 != 0)
         throw qfit_error("Base QFIT format is not a multiple of 4, "
@@ -235,21 +255,18 @@ void QfitReader::initialize()
     m_format = static_cast<QFIT_Format_Type>(m_size / sizeof(m_size));
 
     // The offset to start reading point data should be here.
-    str->seekg(m_size + sizeof(int4));
+    str.seek(m_size + sizeof(int4));
 
-    Utils::read_n(int4, *str, sizeof(int4));
-    if (!m_littleEndian)
-        QFIT_SWAP_BE_TO_LE(int4);
+    str >> int4;
     m_offset = static_cast<std::size_t>(int4);
 
     // Seek to the end
-    str->seekg(0, std::ios::end);
-    std::ios::pos_type end = str->tellg();
+    str.seek(0, std::istream::end);
+    std::ios::pos_type end = str.position();
 
     // First integer is the format of the file
     std::ios::off_type offset = static_cast<std::ios::off_type>(m_offset);
     m_point_bytes = end - offset;
-    delete str;
 }
 
 
@@ -278,41 +295,41 @@ void QfitReader::processOptions(const Options& ops)
 }
 
 
-void QfitReader::addDimensions(PointContextRef ctx)
+void QfitReader::addDimensions(PointLayoutPtr layout)
 {
     using namespace Dimension;
 
     m_size = 0;
-    ctx.registerDim(Id::OffsetTime);
-    ctx.registerDim(Id::Y);
-    ctx.registerDim(Id::X);
-    ctx.registerDim(Id::Z);
-    ctx.registerDim(Id::StartPulse);
-    ctx.registerDim(Id::ReflectedPulse);
-    ctx.registerDim(Id::ScanAngleRank);
-    ctx.registerDim(Id::Pitch);
-    ctx.registerDim(Id::Roll);
+    layout->registerDim(Id::OffsetTime);
+    layout->registerDim(Id::Y);
+    layout->registerDim(Id::X);
+    layout->registerDim(Id::Z);
+    layout->registerDim(Id::StartPulse);
+    layout->registerDim(Id::ReflectedPulse);
+    layout->registerDim(Id::ScanAngleRank);
+    layout->registerDim(Id::Pitch);
+    layout->registerDim(Id::Roll);
     m_size += 36;
 
     if (m_format == QFIT_Format_12)
     {
-        ctx.registerDim(Id::Pdop);
-        ctx.registerDim(Id::PulseWidth);
+        layout->registerDim(Id::Pdop);
+        layout->registerDim(Id::PulseWidth);
         m_size += 8;
     }
     else if (m_format == QFIT_Format_14)
     {
-        ctx.registerDim(Id::PassiveSignal);
-        ctx.registerDim(Id::PassiveY);
-        ctx.registerDim(Id::PassiveX);
-        ctx.registerDim(Id::PassiveZ);
+        layout->registerDim(Id::PassiveSignal);
+        layout->registerDim(Id::PassiveY);
+        layout->registerDim(Id::PassiveX);
+        layout->registerDim(Id::PassiveZ);
         m_size += 16;
     }
     m_size += 4;  // For the GPS time that we currently discard.
 }
 
 
-void QfitReader::ready(PointContextRef ctx)
+void QfitReader::ready(PointTableRef)
 {
     m_numPoints = m_point_bytes / m_size;
     if (m_point_bytes % m_size)
@@ -323,121 +340,73 @@ void QfitReader::ready(PointContextRef ctx)
         throw qfit_error(msg.str());
     }
     m_index = 0;
-    m_istream = FileUtils::openFile(m_filename);
-    m_istream->seekg(getPointDataOffset());
+    m_istream.reset(new IStream(m_filename));
+    m_istream->seek(getPointDataOffset());
 }
 
 
-point_count_t QfitReader::read(PointBuffer& data, point_count_t count)
+point_count_t QfitReader::read(PointViewPtr data, point_count_t count)
 {
     if (!m_istream->good())
     {
         throw pdal_error("QFIT file stream is no good!");
     }
-    if (m_istream->eof())
+    if (m_istream->stream()->eof())
     {
         throw pdal_error("QFIT file stream is eof!");
     }
 
     count = std::min(m_numPoints - m_index, count);
-    uint8_t *buf = new uint8_t[m_size];
-    PointId nextId = data.size();
+    std::vector<char> buf(m_size);
+    PointId nextId = data->size();
     point_count_t numRead = 0;
     while (count--)
     {
-        Utils::read_n(buf, *m_istream, m_size);
-        uint8_t* p = buf;
+        m_istream->get(buf);
+        SwitchableExtractor extractor(buf.data(), m_size, m_littleEndian);
 
         // always read the base fields
         {
-            int32_t time = Utils::read_field<int32_t>(p);
-            if (!m_littleEndian)
-                QFIT_SWAP_BE_TO_LE(time);
-            data.setField(Dimension::Id::OffsetTime, nextId, time);
-
-            int32_t y = Utils::read_field<int32_t>(p);
-            if (!m_littleEndian)
-                QFIT_SWAP_BE_TO_LE(y);
-            data.setField(Dimension::Id::Y, nextId, y / 1000000.0);
-
-            int32_t xi = Utils::read_field<int32_t>(p);
-            if (!m_littleEndian)
-                QFIT_SWAP_BE_TO_LE(xi);
+            int32_t time, y, xi, z, start_pulse, reflected_pulse, scan_angle,
+                pitch, roll;
+            extractor >> time >> y >> xi >> z >> start_pulse >>
+                reflected_pulse >> scan_angle >> pitch >> roll;
             double x = xi / 1000000.0;
             if (m_flip_x && x > 180)
                 x -= 360;
-            data.setField(Dimension::Id::X, nextId, x);
 
-            int32_t z = Utils::read_field<int32_t>(p);
-            if (!m_littleEndian)
-                QFIT_SWAP_BE_TO_LE(z);
-            data.setField(Dimension::Id::Z, nextId, z * m_scale_z);
-
-            int32_t start_pulse = Utils::read_field<int32_t>(p);
-            if (!m_littleEndian)
-                QFIT_SWAP_BE_TO_LE(start_pulse);
-            data.setField(Dimension::Id::StartPulse, nextId, start_pulse);
-
-            int32_t reflected_pulse = Utils::read_field<int32_t>(p);
-            if (!m_littleEndian)
-                QFIT_SWAP_BE_TO_LE(reflected_pulse);
-            data.setField(Dimension::Id::ReflectedPulse, nextId,
+            data->setField(Dimension::Id::OffsetTime, nextId, time);
+            data->setField(Dimension::Id::Y, nextId, y / 1000000.0);
+            data->setField(Dimension::Id::X, nextId, x);
+            data->setField(Dimension::Id::Z, nextId, z * m_scale_z);
+            data->setField(Dimension::Id::StartPulse, nextId, start_pulse);
+            data->setField(Dimension::Id::ReflectedPulse, nextId,
                 reflected_pulse);
-
-            int32_t scan_angle = Utils::read_field<int32_t>(p);
-            if (!m_littleEndian)
-                QFIT_SWAP_BE_TO_LE(scan_angle);
-            data.setField(Dimension::Id::ScanAngleRank, nextId,
+            data->setField(Dimension::Id::ScanAngleRank, nextId,
                 scan_angle / 1000.0);
-
-            int32_t pitch = Utils::read_field<int32_t>(p);
-            if (!m_littleEndian)
-                QFIT_SWAP_BE_TO_LE(pitch);
-            data.setField(Dimension::Id::Pitch, nextId, pitch / 1000.0);
-
-            int32_t roll = Utils::read_field<int32_t>(p);
-            if (!m_littleEndian)
-                QFIT_SWAP_BE_TO_LE(roll);
-            data.setField(Dimension::Id::Roll, nextId, roll / 1000.0);
+            data->setField(Dimension::Id::Pitch, nextId, pitch / 1000.0);
+            data->setField(Dimension::Id::Roll, nextId, roll / 1000.0);
         }
 
         if (m_format == QFIT_Format_12)
         {
-            int32_t pdop = Utils::read_field<int32_t>(p);
-            if (!m_littleEndian)
-                QFIT_SWAP_BE_TO_LE(pdop);
-            data.setField(Dimension::Id::Pdop, nextId, pdop / 10.0);
-
-            int32_t pulse_width = Utils::read_field<int32_t>(p);
-            if (!m_littleEndian)
-                QFIT_SWAP_BE_TO_LE(pulse_width);
-            data.setField(Dimension::Id::PulseWidth, nextId, pulse_width);
+            int32_t pdop, pulse_width;
+            extractor >> pdop >> pulse_width;
+            data->setField(Dimension::Id::Pdop, nextId, pdop / 10.0);
+            data->setField(Dimension::Id::PulseWidth, nextId, pulse_width);
         }
         else if (m_format == QFIT_Format_14)
         {
-            int32_t passive_signal = Utils::read_field<int32_t>(p);
-            if (!m_littleEndian)
-                QFIT_SWAP_BE_TO_LE(passive_signal);
-            data.setField(Dimension::Id::PassiveSignal, nextId, passive_signal);
-
-            int32_t passive_y = Utils::read_field<int32_t>(p);
-            if (!m_littleEndian)
-                QFIT_SWAP_BE_TO_LE(passive_y);
-            data.setField(Dimension::Id::PassiveY, nextId,
-                passive_y / 1000000.0);
-
-            int32_t passive_x = Utils::read_field<int32_t>(p);
-            if (!m_littleEndian)
-                QFIT_SWAP_BE_TO_LE(passive_x);
+            int32_t passive_signal, passive_y, passive_x, passive_z;
+            extractor >> passive_signal >> passive_y >> passive_x >> passive_z;
             double x = passive_x / 1000000.0;
             if (m_flip_x && x > 180)
                 x -= 360;
-            data.setField(Dimension::Id::PassiveX, nextId, x);
-
-            int32_t passive_z = Utils::read_field<int32_t>(p);
-            if (!m_littleEndian)
-                QFIT_SWAP_BE_TO_LE(passive_z);
-            data.setField(Dimension::Id::PassiveZ, nextId,
+            data->setField(Dimension::Id::PassiveSignal, nextId, passive_signal);
+            data->setField(Dimension::Id::PassiveY, nextId,
+                passive_y / 1000000.0);
+            data->setField(Dimension::Id::PassiveX, nextId, x);
+            data->setField(Dimension::Id::PassiveZ, nextId,
                 passive_z * m_scale_z);
         }
         // GPS time is really a GPS offset from the start of the GPS day
@@ -445,12 +414,15 @@ point_count_t QfitReader::read(PointBuffer& data, point_count_t count)
         // 20 seconds 100 milliseconds.
         // Not sure why we have that AND the other offset time.  For now
         // we'll just extract this time and drop it.
-        int32_t gpstime = Utils::read_field<int32_t>(p);
+        int32_t gpstime;
+        extractor >> gpstime;
+
+        if (m_cb)
+            m_cb(*data, nextId);
 
         numRead++;
         nextId++;
     }
-    delete[] buf;
     m_index += numRead;
 
     return numRead;
@@ -481,9 +453,9 @@ Dimension::IdList QfitReader::getDefaultDimensions()
 }
 
 
-void QfitReader::done(PointContextRef ctx)
+void QfitReader::done(PointTableRef)
 {
-    FileUtils::closeFile(m_istream);
+    m_istream.reset();
 }
 
 } // namespace pdal

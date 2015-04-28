@@ -35,7 +35,7 @@
 #pragma once
 
 #include <pdal/DbReader.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/XMLSchema.hpp>
 
@@ -82,15 +82,14 @@ class PDAL_DLL PgReader : public DbReader
     };
 
 public:
-    SET_STAGE_NAME("readers.pgpointcloud",
-        "Read data from pgpointcloud format. \"query\" option needs to be a SQL statment selecting the data.")
-    SET_STAGE_LINK("http://pdal.io/stages/readers.pgpointcloud.html")
-    SET_PLUGIN_VERSION("1.0.0b1")
-
     PgReader();
     ~PgReader();
 
-    static Options getDefaultOptions();
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+
+    Options getDefaultOptions();
     virtual point_count_t getNumPoints() const;
     point_count_t getMaxPoints() const;
     std::string getDataQuery() const;
@@ -99,18 +98,18 @@ public:
     void getSession() const;
 
 private:
-    virtual void addDimensions(PointContextRef ctx);
+    virtual void addDimensions(PointLayoutPtr layout);
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContextRef ctx);
+    virtual void ready(PointTableRef table);
     virtual void initialize();
-    virtual point_count_t read(PointBuffer& buf, point_count_t count);
-    virtual void done(PointContextRef ctx);
+    virtual point_count_t read(PointViewPtr view, point_count_t count);
+    virtual void done(PointTableRef table);
     virtual bool eof()
         { return m_atEnd; }
 
     SpatialReference fetchSpatialReference() const;
     uint32_t fetchPcid() const;
-    point_count_t readPgPatch(PointBuffer& buffer, point_count_t numPts);
+    point_count_t readPgPatch(PointViewPtr view, point_count_t numPts);
 
     // Internal functions for managing scroll cursor
     void CursorSetup();
@@ -128,7 +127,6 @@ private:
     mutable point_count_t m_cached_max_points;
 
     bool m_atEnd;
-    size_t m_point_size;
     uint32_t m_cur_row;
     uint32_t m_cur_nrows;
     PGresult* m_cur_result;

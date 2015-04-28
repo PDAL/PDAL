@@ -34,10 +34,19 @@
 
 #include "SbetWriter.hpp"
 
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 
 namespace pdal
 {
+
+static PluginInfo const s_info = PluginInfo(
+    "writers.sbet",
+    "SBET Writer",
+    "http://pdal.io/stages/writers.sbet.html" );
+
+CREATE_STATIC_PLUGIN(1, 0, SbetWriter, Writer, s_info)
+
+std::string SbetWriter::getName() const { return s_info.name; }
 
 void SbetWriter::processOptions(const Options& options)
 {
@@ -45,31 +54,31 @@ void SbetWriter::processOptions(const Options& options)
 }
 
 
-void SbetWriter::ready(PointContextRef ctx)
+void SbetWriter::ready(PointTableRef)
 {
     m_stream.reset(new OLeStream(m_filename));
 }
 
 
-void SbetWriter::write(const PointBuffer& buf)
+void SbetWriter::write(const PointViewPtr view)
 {
-    m_callback->setTotal(buf.size());
+    m_callback->setTotal(view->size());
     m_callback->invoke(0);
 
     Dimension::IdList dims = getDefaultDimensions();
-    for (PointId idx = 0; idx < buf.size(); ++idx)
+    for (PointId idx = 0; idx < view->size(); ++idx)
     {
         for (auto di = dims.begin(); di != dims.end(); ++di)
         {
             // If a dimension doesn't exist, write 0.
             Dimension::Id::Enum dim = *di;
-            *m_stream << (buf.hasDim(dim) ?
-                buf.getFieldAs<double>(dim, idx) : 0.0);
+            *m_stream << (view->hasDim(dim) ?
+                view->getFieldAs<double>(dim, idx) : 0.0);
         }
         if (idx % 100 == 0)
             m_callback->invoke(idx + 1);
     }
-    m_callback->invoke(buf.size());
+    m_callback->invoke(view->size());
 }
 
 } // namespace pdal

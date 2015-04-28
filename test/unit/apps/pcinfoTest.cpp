@@ -34,7 +34,7 @@
 
 #include "UnitTest.hpp"
 
-#include <pdal/FileUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include "Support.hpp"
 
 #include <iostream>
@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE(pdalinfo_test_dumps)
     command << cmd + " --stats " + inputLas + " --seed 1234 --sample" +" > " + stats_test; 
     stat = pdal::Utils::run_shell_command(command.str(), output);
     BOOST_CHECK_EQUAL(stat, 0);
-#if defined(PDAL_PLATFORM_WIN32)
+#if defined(_WIN32)
     were_equal = Support::compare_text_files(stats_test, Support::datapath("apps/pdalinfo_stats-win32.txt"));
 #else
     were_equal = Support::compare_text_files(stats_test, Support::datapath("apps/pdalinfo_stats.txt"));

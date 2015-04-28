@@ -34,15 +34,19 @@
 
 #include "FerryFilter.hpp"
 
+#include <pdal/pdal_export.hpp>
+
 namespace pdal
 {
 
+static PluginInfo const s_info = PluginInfo(
+    "filters.ferry",
+    "Copy date from one dimension to another.",
+    "http://pdal.io/stages/filters.ferry.html" );
 
+CREATE_STATIC_PLUGIN(1, 0, FerryFilter, Filter, s_info)
 
-void FerryFilter::initialize()
-{
-}
-
+std::string FerryFilter::getName() const { return s_info.name; }
 
 Options FerryFilter::getDefaultOptions()
 {
@@ -88,39 +92,37 @@ void FerryFilter::processOptions(const Options& options)
         m_name_map.insert(std::make_pair(name, to_dim));
     }
 }
-void FerryFilter::addDimensions(PointContextRef ctx)
-{
-    for(const auto& dim_par : m_name_map)
-    {
-        ctx.registerOrAssignDim(dim_par.second, Dimension::Type::Double);
-    }
-}
-
-void FerryFilter::ready(PointContext ctx)
+void FerryFilter::addDimensions(PointLayoutPtr layout)
 {
     for (const auto& dim_par : m_name_map)
     {
-        Dimension::Id::Enum f = ctx.findDim(dim_par.first);
-        Dimension::Id::Enum t = ctx.findDim(dim_par.second);
+        layout->registerOrAssignDim(dim_par.second, Dimension::Type::Double);
+    }
+}
+
+void FerryFilter::ready(PointTableRef table)
+{
+    const PointLayoutPtr layout(table.layout());
+    for (const auto& dim_par : m_name_map)
+    {
+        Dimension::Id::Enum f = layout->findDim(dim_par.first);
+        Dimension::Id::Enum t = layout->findDim(dim_par.second);
         m_dimensions_map.insert(std::make_pair(f,t));
     }
 }
 
 
-void FerryFilter::filter(PointBuffer& buffer)
+void FerryFilter::filter(PointView& view)
 {
-    for (PointId id = 0; id < buffer.size(); ++id)
+    for (PointId id = 0; id < view.size(); ++id)
     {
         for (const auto& dim_par : m_dimensions_map)
         {
-            double v = buffer.getFieldAs<double>(dim_par.first, id);
-            buffer.setField(dim_par.second, id, v);
+            double v = view.getFieldAs<double>(dim_par.first, id);
+            view.setField(dim_par.second, id, v);
         }
     }
 }
 
-void FerryFilter::done(PointContext ctx)
-{
-}
 
 } // namespace pdal

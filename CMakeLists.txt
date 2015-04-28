@@ -3,7 +3,7 @@
 #
 # (based originally on the libLAS files copyright Mateusz Loskot)
 
-cmake_minimum_required(VERSION 2.8.6)
+cmake_minimum_required(VERSION 2.8.11)
 
 project(PDAL CXX C)
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
@@ -51,10 +51,12 @@ file(MAKE_DIRECTORY "${PDAL_OUTPUT_BIN_DIR}")
 # per http://www.cmake.org/Wiki/CMake_RPATH_handling
 SET(CMAKE_SKIP_BUILD_RPATH FALSE )
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+if (APPLE)
+    SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+endif()
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 IF (APPLE)
     SET(MACOSX_RPATH ON)
-    SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 endif()
 LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
 IF("${isSystemDir}" STREQUAL "-1")
@@ -63,7 +65,7 @@ ENDIF("${isSystemDir}" STREQUAL "-1")
 
 # wipe lib/ drectory on clean. It will have plugins that could be out of date
 # in the next build
-set_directory_properties(PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${PDAL_OUTPUT_LIB_DIR}")
+set_directory_properties(PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${PDAL_OUTPUT_LIB_DIR}/*")
 
 if(WIN32)
   add_definitions("-DPDAL_DLL_EXPORT=1")
@@ -81,7 +83,6 @@ else(WIN32)
 endif(WIN32)
 
 set(PDAL_HEADERS_DIR "${PROJECT_SOURCE_DIR}/include/pdal")
-set(PDAL_UTIL_DIR "${PROJECT_SOURCE_DIR}/util")
 
 #------------------------------------------------------------------------------
 # misc user options
@@ -100,6 +101,14 @@ add_feature_info("PDAL application" WITH_APPS
 option(BUILD_PLUGIN_ATTRIBUTE "Choose if Attribute filter is built" FALSE)
 add_feature_info("Attribute plugin" BUILD_PLUGIN_ATTRIBUTE
     "apply attributes to a subset of points")
+
+option(BUILD_PLUGIN_CPD "Choose if Coherent Point Drift kernel is built" FALSE)
+add_feature_info("CPD plugin" BUILD_PLUGIN_CPD
+    "run Coherent Point Drift on two datasets")
+
+option(BUILD_PLUGIN_GEOWAVE "Choose if GeoWave support should be built" FALSE)
+add_feature_info("GeoWave plugin" BUILD_PLUGIN_GEOWAVE
+    "Read and Write data using GeoWave")
 
 option(BUILD_PLUGIN_GREYHOUND "Choose if Greyhound support should be built" FALSE)
 add_feature_info("Greyhound plugin" BUILD_PLUGIN_GREYHOUND
@@ -127,7 +136,8 @@ option(BUILD_PLUGIN_PCL "Choose if PCL support should be built" FALSE)
 add_feature_info("PCL plugin" BUILD_PLUGIN_PCL
     "provides PCL-based readers, writers, filters, and kernels")
 
-option(BUILD_PLUGIN_PGPOINTCLOUD "Choose if PostgreSQL PointCloud support should be built" TRUE)
+find_package(PostgreSQL QUIET)
+option(BUILD_PLUGIN_PGPOINTCLOUD "Choose if PostgreSQL PointCloud support should be built" ${POSTGRESQL_FOUND})
 add_feature_info("PostgreSQL PointCloud plugin" BUILD_PLUGIN_PGPOINTCLOUD
     "read/write PostgreSQL PointCloud objects")
 
@@ -142,9 +152,6 @@ add_feature_info("RiVLib plugin" BUILD_PLUGIN_RIVLIB
 option(BUILD_PLUGIN_PYTHON "Choose if Python support should be built" FALSE)
 add_feature_info("Python plugin" BUILD_PLUGIN_PYTHON
     "add features that depend on python")
-
-# Choose to use pkg-config or not
-option(WITH_PKGCONFIG "Choose whether a pkgconfig file (PDAL.pc) should be installed" TRUE)
 
 option(WITH_TESTS "Choose if PDAL unit tests should be built" TRUE)
 add_feature_info("Unit tests" WITH_TESTS "PDAL unit tests")
@@ -231,7 +238,7 @@ include_directories(vendor/nanoflann-1.1.8)
 # PDAL_TARGET_OBJECTS is used to collect the driver object libraries
 set(PDAL_TARGET_OBJECTS "")
 
-add_subdirectory(util)
+add_subdirectory(src/util)
 add_subdirectory(io)
 add_subdirectory(filters)
 add_subdirectory(kernels)
@@ -263,6 +270,9 @@ if(WITH_TESTS)
   endif()
 
   add_subdirectory(test)
+
+  # Define "make check" as alias for "make test"
+  ADD_CUSTOM_TARGET(check COMMAND ctest)
 else()
   if(ENABLE_CTEST)
     message(WARNING
@@ -324,3 +334,8 @@ install(EXPORT PDALTargets DESTINATION lib/pdal/cmake)
 include(${PDAL_CMAKE_DIR}/config.cmake)
 
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES)
+
+# TODO: move under scripts/bash-completion ?
+if (IS_DIRECTORY /etc/bash_completion.d)
+    install(FILES "${PROJECT_SOURCE_DIR}/scripts/bash-completion/pdal" DESTINATION "${CMAKE_INSTALL_PREFIX}/etc/bash_completion.d")
+endif()
