@@ -120,7 +120,7 @@ class Tile
 {
 public:
     Tile(int32_t level, int32_t tx, int32_t ty, Rectangle r, int32_t maxLevel,
-        const PointTableRef table, LogPtr log);
+        ConstPointTableRef table, LogPtr log);
     ~Tile();
 
     std::vector<char*>& points()
@@ -130,7 +130,8 @@ public:
         { return m_points.size(); }
 
     void add(PointId pointNumber, char* data, double lon, double lat);
-    void collectStats(std::vector<int32_t> numTilesPerLevel, std::vector<int64_t> numPointsPerLevel) const;
+    void collectStats(std::vector<int32_t> numTilesPerLevel,
+        std::vector<int64_t> numPointsPerLevel) const;
     void write(const char* dir) const;
     void writeData(FILE*) const;
 
@@ -143,7 +144,7 @@ private:
     Rectangle m_rect;
     int32_t m_maxLevel;
     int64_t m_skip;
-    const PointTableRef m_table;
+    ConstPointTableRef m_table;
     LogPtr m_log;
 };
 
