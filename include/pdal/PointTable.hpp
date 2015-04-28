@@ -78,6 +78,7 @@ protected:
     MetadataPtr m_metadata;
 };
 typedef BasePointTable& PointTableRef;
+typedef BasePointTable const & ConstPointTableRef;
 
 
 // This provides a context for processing a set of points and allows the library

@@ -35,8 +35,6 @@
 #include <pdal/SpatialReference.hpp>
 #include <pdal/PDALUtils.hpp>
 
-#include <boost/algorithm/string/trim.hpp>
-
 // gdal
 #ifdef PDAL_COMPILER_CLANG
 #  pragma clang diagnostic push
@@ -146,7 +144,7 @@ std::string SpatialReference::getProj4() const
         tmp = proj4;
         CPLFree(proj4);
 
-        boost::algorithm::trim(tmp);
+        Utils::trim(tmp);
     }
 
     return tmp;
@@ -253,43 +251,60 @@ bool SpatialReference::isGeographic() const
     return output;
 }
 
-int calculateZone(double longitude, double latitude )
+
+int SpatialReference::calculateZone(double lon, double lat)
 {
+    // Force longitude [-180, 180)
+    lon = fmod(lon, 360.0);
+    if (lon < -180.0)
+        lon += 360.0;
+    else if (lon >= 180.0)
+        lon -= 360.0;
 
-    // stolen from https://trac.osgeo.org/gdal/attachment/ticket/3623/getutmzone.cpp
-    double zone(0.0);
-    zone = ( longitude + 186.0 ) / 6.0;
+    int zone = 0;
 
-    if( abs(zone - (int) zone - 0.5 ) > 0.00001
-        || longitude < -177.00001
-        || longitude > 177.000001 )
-        return 0.0;
-
-    // return negative zone numbers for UTM South
-    if (latitude < 0) zone = zone * -1;
+    // Special Norway processing.
+    if (lat >= 56.0 && lat < 64.0 && lon >= 3.0 && lon < 12.0 )
+        zone = 32;
+    // Special Svalbard processing.
+    else if (lat >= 72.0 && lat < 84.0) 
+    {
+        if (lon >= 0.0  && lon < 9.0)
+            zone = 31;
+        else if (lon >= 9.0  && lon < 21.0)
+            zone = 33;
+        else if (lon >= 21.0  && lon < 33.0)
+            zone = 35;
+        else if (lon >= 33.0  && lon < 42.0)
+            zone = 37;
+    }
+    // Everywhere else.
+    else
+    {
+        zone = floor((lon + 180.0) / 6) + 1;
+        if (lat < 0)
+            zone = -zone;
+    }
 
     return zone;
 }
 
+
 int SpatialReference::computeUTMZone(const BOX3D& box) const
 {
-
     // Nothing we can do if we're an empty SRS
-    if (empty()) return 0;
+    if (empty())
+        return 0;
 
     OGRSpatialReferenceH current =
         OSRNewSpatialReference(getWKT(eHorizontalOnly, false).c_str());
     if (! current)
-    {
-        throw std::invalid_argument("could not fetch current SRS as GDAL object!");
-    }
+        throw std::invalid_argument("Could not fetch current SRS");
 
     OGRSpatialReferenceH wgs84 = OSRNewSpatialReference(0);
 
-    int result = OSRSetFromUserInput(wgs84, "EPSG:4326");
-    if (result != OGRERR_NONE)
+    if (OSRSetFromUserInput(wgs84, "EPSG:4326") != OGRERR_NONE)
     {
-
         OSRDestroySpatialReference(current);
         OSRDestroySpatialReference(wgs84);
         std::ostringstream msg;
@@ -303,7 +318,8 @@ int SpatialReference::computeUTMZone(const BOX3D& box) const
     {
         OSRDestroySpatialReference(current);
         OSRDestroySpatialReference(wgs84);
-        throw std::invalid_argument("could not comput transform from coordinate system to WGS84");
+        throw std::invalid_argument("could not comput transform from "
+            "coordinate system to WGS84");
     }
 
     double minx(0.0), miny(0.0), minz(0.0);
@@ -320,7 +336,8 @@ int SpatialReference::computeUTMZone(const BOX3D& box) const
         OSRDestroySpatialReference(current);
         OSRDestroySpatialReference(wgs84);
         std::ostringstream msg;
-        msg << "Could not project minimum point for computeUTMZone::" << CPLGetLastErrorMsg() << ret;
+        msg << "Could not project minimum point for computeUTMZone::" <<
+            CPLGetLastErrorMsg() << ret;
         throw pdal_error(msg.str());
     }
 
@@ -331,14 +348,17 @@ int SpatialReference::computeUTMZone(const BOX3D& box) const
         OSRDestroySpatialReference(current);
         OSRDestroySpatialReference(wgs84);
         std::ostringstream msg;
-        msg << "Could not project maximum point for computeUTMZone::" << CPLGetLastErrorMsg() << ret;
+        msg << "Could not project maximum point for computeUTMZone::" <<
+            CPLGetLastErrorMsg() << ret;
         throw pdal_error(msg.str());
     }
 
     int min_zone(0);
     int max_zone(0);
     min_zone = calculateZone(minx, miny);
+    std::cerr << "Min X/Y/zone = " << minx << "/" << miny << "/" << min_zone << "!\n";
     max_zone = calculateZone(maxx, maxy);
+    std::cerr << "Max X/Y/zone = " << maxx << "/" << maxy << "/" << max_zone << "!\n";
 
     if (min_zone != max_zone)
     {
@@ -346,19 +366,20 @@ int SpatialReference::computeUTMZone(const BOX3D& box) const
         OSRDestroySpatialReference(current);
         OSRDestroySpatialReference(wgs84);
         std::ostringstream msg;
-        msg << "Minimum zone is " << min_zone <<"' and maximum zone is '" << max_zone
-            << "'. They do not match because they cross a zone boundary";
+        msg << "Minimum zone is " << min_zone <<"' and maximum zone is '" <<
+            max_zone << "'. They do not match because they cross a "
+            "zone boundary";
         throw pdal_error(msg.str());
     }
-
 
     OCTDestroyCoordinateTransformation(transform);
     OSRDestroySpatialReference(current);
     OSRDestroySpatialReference(wgs84);
 
     return min_zone;
-
 }
+
+
 void SpatialReference::dump() const
 {
     std::cout << *this;

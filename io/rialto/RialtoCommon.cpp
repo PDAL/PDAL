@@ -50,7 +50,7 @@ Tile::Tile(
         int32_t ty,
         Rectangle r,
         int32_t maxLevel,
-        const PointTableRef table,
+        ConstPointTableRef table,
         LogPtr log) :
     m_level(level),
     m_tileX(tx),

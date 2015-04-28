@@ -134,9 +134,27 @@ TEST(SpatialReferenceTest, test_get_utmzone)
 
     int zone = ref.computeUTMZone(box);
 
-    EXPECT_EQ(zone , 10);
+    EXPECT_EQ(zone, 10);
 }
 
+
+TEST(SpatialReferenceTest, calcZone)
+{
+    int zone = 1;
+    for (double lon = -537.0; lon < 537.0; lon += 6.0)
+    {   
+       EXPECT_EQ(zone, SpatialReference::calculateZone(lon, 25));
+       EXPECT_EQ(-zone, SpatialReference::calculateZone(lon, -25));
+       zone++;
+       if (zone > 60)
+           zone = 1;
+    }
+    EXPECT_EQ(32, SpatialReference::calculateZone(5, 60));
+    EXPECT_EQ(31, SpatialReference::calculateZone(5, 80));
+    EXPECT_EQ(33, SpatialReference::calculateZone(10, 80));
+    EXPECT_EQ(35, SpatialReference::calculateZone(25, 80));
+    EXPECT_EQ(37, SpatialReference::calculateZone(40, 80));
+}
 
 
 #if defined(PDAL_HAVE_GEOS) && defined(PDAL_HAVE_LIBGEOTIFF)
