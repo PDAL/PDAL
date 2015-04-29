@@ -129,10 +129,10 @@ TEST_F(OptechReaderTest, ReadingPoints)
     EXPECT_EQ(1, view->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, 0));
     EXPECT_EQ(1, view->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, 0));
     EXPECT_FLOAT_EQ(8.27356689453125e2,
-                     view->getFieldAs<float>(Dimension::Id::EchoRange, 0));
+        view->getFieldAs<float>(Dimension::Id::EchoRange, 0));
     EXPECT_EQ(384, view->getFieldAs<uint16_t>(Dimension::Id::Intensity, 0));
-    EXPECT_DOUBLE_EQ(-14.555161476135254,
-                     view->getFieldAs<double>(Dimension::Id::ScanAngleRank, 0));
+    EXPECT_FLOAT_EQ(-14.55516,
+        view->getFieldAs<float>(Dimension::Id::ScanAngleRank, 0));
 }
 
 

@@ -265,6 +265,9 @@ private:
     inline PointId getTemp(PointId id);
     void freeTemp(PointId id)
         { m_temps.push(id); }
+
+    // Awfulness to avoid exceptions in numeric cast.
+    static bool m_ok;
 };
 
 struct PointViewLess
@@ -458,13 +461,12 @@ bool PointView::convertAndSet(Dimension::Id::Enum dim, PointId idx, T_IN in)
 //      invoking the converter.
 //
     using namespace boost;
-    static bool ok;
 
     struct RangeHandler
     {
         void operator() (numeric::range_check_result r)
         {
-            ok = (r == numeric::cInRange);
+            m_ok = (r == numeric::cInRange);
         }
     };
 
@@ -487,13 +489,13 @@ bool PointView::convertAndSet(Dimension::Id::Enum dim, PointId idx, T_IN in)
 #pragma warning(push)
 #pragma warning(disable:4127)
 #endif
-    ok = true;
+    m_ok = true;
     // This is an optimization.
     if (std::is_same<T_IN, T_OUT>::value == true)
         out = in;
     else
         out = localConverter::convert(in);
-    if (!ok)
+    if (!m_ok)
         return false;
 
 #ifdef PDAL_COMPILER_MSVC
