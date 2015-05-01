@@ -724,7 +724,7 @@ void OciWriter::write(const PointViewPtr view)
     // While we'd like a separate offset for each tile, the schema is stored
     // for the entire point cloud.
     if (m_lastBlockId == 0)
-        setAutoOffset(view);
+        setAutoXForm(view);
     writeInit();
     writeTile(view);
 }
