@@ -52,7 +52,7 @@ protected:
     DbWriter()
     {}
 
-    virtual void setAutoOffset(const PointViewPtr view);
+    virtual void setAutoXForm(const PointViewPtr view);
     XMLDimList dbDimTypes() const
         { return m_dbDims; }
     size_t readField(const PointView& view, char *pos, Dimension::Id::Enum id,

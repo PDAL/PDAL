@@ -413,24 +413,17 @@ inline T PointView::getFieldAs(Dimension::Id::Enum dim,
         val = 0;
         break;
     }
-#ifdef PDAL_COMPILER_MSVC
-// warning C4127: conditional expression is constant
-#pragma warning(push)
-#pragma warning(disable:4127)
-#endif
-    try
+
+    if (Utils::inRange<T>(val))
     {
-        if (std::is_same<T, double>::value)
-            retval = val;
-        else
+        if (std::is_integral<T>::value)
         {
-            if (std::is_integral<T>::value == true )
-                retval = boost::numeric_cast<T>(lround(val));
-            else
-                retval = boost::numeric_cast<T>(val);
+            val = Utils::sround(val);
         }
+
+        retval = static_cast<T>(val);
     }
-    catch (boost::numeric::bad_numeric_cast& )
+    else
     {
         std::ostringstream oss;
         oss << "Unable to fetch data and convert as requested: ";
@@ -439,11 +432,8 @@ inline T PointView::getFieldAs(Dimension::Id::Enum dim,
             "(" << (double)val << ") -> " << Utils::typeidName<T>();
         throw pdal_error(oss.str());
     }
+
     return retval;
-#ifdef PDAL_COMPILER_MSVC
-// warning C4127: conditional expression is constant
-#pragma warning(pop)
-#endif
 }
 
 
@@ -451,58 +441,21 @@ inline T PointView::getFieldAs(Dimension::Id::Enum dim,
 template<typename T_IN, typename T_OUT>
 bool PointView::convertAndSet(Dimension::Id::Enum dim, PointId idx, T_IN in)
 {
-// This mess, instead of just using boost::numeric_cast, is here to:
-//   1) Prevent the throwing of exceptions.  The entrance/exit of the try
-//      block seemed somewhat expensive.
-//   2) Round to nearest instead of truncation without rounding before
-//      invoking the converter.
-//
-    using namespace boost;
-    static bool ok;
+    bool success(false);
 
-    struct RangeHandler
+    if (Utils::inRange<T_IN, T_OUT>(in))
     {
-        void operator() (numeric::range_check_result r)
+        if (std::is_integral<T_OUT>::value)
         {
-            ok = (r == numeric::cInRange);
+            in = Utils::sround(in);
         }
-    };
 
-    T_OUT out;
+        const T_OUT out(static_cast<T_OUT>(in));
+        setFieldInternal(dim, idx, &out);
+        success = true;
+    }
 
-    typedef numeric::conversion_traits<T_OUT, T_IN> conv_traits;
-    typedef numeric::numeric_cast_traits<T_OUT, T_IN> cast_traits;
-    typedef numeric::converter<
-        T_OUT,
-        T_IN,
-        conv_traits,
-        RangeHandler,
-        numeric::RoundEven<T_IN>,
-        numeric::raw_converter<conv_traits>,
-        typename cast_traits::range_checking_policy>
-            localConverter;
-
-#ifdef PDAL_COMPILER_MSVC
-// warning C4127: conditional expression is constant
-#pragma warning(push)
-#pragma warning(disable:4127)
-#endif
-    ok = true;
-    // This is an optimization.
-    if (std::is_same<T_IN, T_OUT>::value == true)
-        out = in;
-    else
-        out = localConverter::convert(in);
-    if (!ok)
-        return false;
-
-#ifdef PDAL_COMPILER_MSVC
-// warning C4127: conditional expression is constant
-#pragma warning(pop)
-#endif
-
-    setFieldInternal(dim, idx, (void *)&out);
-    return true;
+    return success;
 }
 
 

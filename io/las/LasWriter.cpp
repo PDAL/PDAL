@@ -504,7 +504,7 @@ void LasWriter::openCompression()
 
 void LasWriter::write(const PointViewPtr view)
 {
-    setAutoOffset(view);
+    setAutoXForm(view);
 
     size_t pointLen = m_lasHeader.pointLen();
 
@@ -706,9 +706,12 @@ void LasWriter::done(PointTableRef table)
         out << evlr;
     }
 
-    // Reset the offset since it may have been auto-computed
+    // Reset the offset/scale since it may have been auto-computed
     m_lasHeader.setOffset(m_xXform.m_offset, m_yXform.m_offset,
         m_zXform.m_offset);
+    m_lasHeader.setScale(m_xXform.m_scale, m_yXform.m_scale,
+        m_zXform.m_scale);
+
     // We didn't know the point count until we go through the points.
     m_lasHeader.setPointCount(m_numPointsWritten);
     // The summary is calculated as points are written.

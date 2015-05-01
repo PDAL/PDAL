@@ -590,7 +590,7 @@ void OciWriter::createPCEntry()
     OCILobLocator *schema_locator;
     OCILobLocator *boundary_locator;
 
-    statement->WriteCLob(&schema_locator, (char *)schemaData.c_str());
+    statement->WriteCLob(&schema_locator, const_cast<char *>(schemaData.c_str()));
     statement->BindClob(&schema_locator);
 
     std::ostringstream wkt_s;
@@ -623,7 +623,8 @@ void OciWriter::createPCEntry()
 
     if (!m_baseTableBoundaryColumn.empty())
     {
-        statement->WriteCLob(&boundary_locator, (char *)wkt_s.str().c_str());
+        statement->WriteCLob(&boundary_locator,
+            const_cast<char *>(wkt_s.str().c_str()));
         statement->BindClob(&boundary_locator);
         statement->Bind((int*)&m_srid);
     }
@@ -723,7 +724,7 @@ void OciWriter::write(const PointViewPtr view)
     // While we'd like a separate offset for each tile, the schema is stored
     // for the entire point cloud.
     if (m_lastBlockId == 0)
-        setAutoOffset(view);
+        setAutoXForm(view);
     writeInit();
     writeTile(view);
 }

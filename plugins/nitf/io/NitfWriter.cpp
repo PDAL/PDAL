@@ -49,7 +49,7 @@
 #  pragma GCC diagnostic ignored "-Wcast-qual"
    // The following pragma doesn't actually work:
    //   https://gcc.gnu.org/bugzilla/show_bug.cgi?id=61653
-#  pragma GCC diagnostic ignored "-Wliteral-suffix"
+   //#  pragma GCC diagnostic ignored "-Wliteral-suffix"
 #endif
 #include <ogr_spatialref.h>
 #include <cpl_conv.h>

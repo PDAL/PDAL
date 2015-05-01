@@ -55,7 +55,7 @@ GTEST_API_ int main(int argc, char **argv)
         if (Utils::startsWith(s, "--connection"))
         {
             auto pos = s.find_first_of('=');
-            if (pos == string::npos)
+            if (pos == std::string::npos)
                 throw pdal_error("Invalid command line connection string.");
             TestConfig::g_oracle_connection = s.substr(pos + 1);
             break;

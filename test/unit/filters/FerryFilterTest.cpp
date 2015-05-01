@@ -58,7 +58,7 @@ TEST(FerryFilterTest, test_ferry_copy)
     specReader.readPipeline(Support::configuredpath("filters/ferry.xml"));
 
     mgr.execute();
-    const PointTableRef table(mgr.pointTable());
+    ConstPointTableRef table(mgr.pointTable());
 
     PointViewSet viewSet = mgr.views();
 

@@ -136,11 +136,11 @@ void DbWriter::ready(PointTableRef /*table*/)
 
 
 /// Make sure that computed offsets are stored in the schema.
-void DbWriter::setAutoOffset(const PointViewPtr view)
+void DbWriter::setAutoXForm(const PointViewPtr view)
 {
     using namespace Dimension;
 
-    Writer::setAutoOffset(view);
+    Writer::setAutoXForm(view);
     for (auto& xmlDim : m_dbDims)
     {
         if (xmlDim.m_dimType.m_id == Id::X)

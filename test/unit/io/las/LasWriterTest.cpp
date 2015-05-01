@@ -81,6 +81,7 @@ TEST(LasWriterTest, auto_offset)
     Options writerOps;
     writerOps.add("filename", FILENAME);
     writerOps.add("offset_x", "auto");
+    writerOps.add("scale_x", "auto");
 
     LasWriter writer;
     writer.setOptions(writerOps);
@@ -105,9 +106,9 @@ TEST(LasWriterTest, auto_offset)
     EXPECT_EQ(viewSet.size(), 1u);
     view = *viewSet.begin();
     EXPECT_EQ(view->size(), 3u);
-    EXPECT_DOUBLE_EQ(125000.00, view->getFieldAs<double>(Id::X, 0));
-    EXPECT_DOUBLE_EQ(74529.00, view->getFieldAs<double>(Id::X, 1));
-    EXPECT_DOUBLE_EQ(523523.02, view->getFieldAs<double>(Id::X, 2));
+    EXPECT_NEAR(125000.00, view->getFieldAs<double>(Id::X, 0), .0001);
+    EXPECT_NEAR(74529.00, view->getFieldAs<double>(Id::X, 1), .0001);
+    EXPECT_NEAR(523523.02, view->getFieldAs<double>(Id::X, 2), .0001);
     FileUtils::deleteFile(FILENAME);
 }
 
