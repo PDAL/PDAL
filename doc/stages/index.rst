@@ -21,6 +21,7 @@ Readers
    readers.optech
    readers.pcd
    readers.pgpointcloud
+   readers.ply
    readers.qfit
    readers.rxp
    readers.sbet

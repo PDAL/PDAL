@@ -230,6 +230,7 @@ PDAL_ADD_INCLUDES("" "" ${pdal_defines_h})
 include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
 
 include_directories(vendor/nanoflann-1.1.8)
+include_directories(vendor/rply-1.1.3)
 
 #------------------------------------------------------------------------------
 # subdirectory controls
