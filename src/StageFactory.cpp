@@ -66,6 +66,7 @@
 // writers
 #include <bpf/BpfWriter.hpp>
 #include <las/LasWriter.hpp>
+#include <ply/PlyWriter.hpp>
 #include <rialto/RialtoWriter.hpp>
 #include <sbet/SbetWriter.hpp>
 #include <text/TextWriter.hpp>
@@ -216,6 +217,7 @@ StageFactory::StageFactory(bool no_plugins)
     // writers
     PluginManager::initializePlugin(BpfWriter_InitPlugin);
     PluginManager::initializePlugin(LasWriter_InitPlugin);
+    PluginManager::initializePlugin(PlyWriter_InitPlugin);
     PluginManager::initializePlugin(RialtoWriter_InitPlugin);
     PluginManager::initializePlugin(SbetWriter_InitPlugin);
     PluginManager::initializePlugin(TextWriter_InitPlugin);
