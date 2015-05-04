@@ -66,7 +66,7 @@ TEST(Merge, Simple)
     std::string file2(Support::datapath("las/utm17.las"));
     std::string outfile(Support::temppath("out.las"));
     std::string cmd = appName() + " " + file1 + " " + file2 + " " + outfile +
-        "2>/dev/null";
+        " 2>/dev/null";
 
     std::string output;
     EXPECT_EQ(Utils::run_shell_command(cmd, output), 0);
