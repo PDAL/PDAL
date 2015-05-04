@@ -269,14 +269,10 @@ void Kernel::collectExtraOptions()
                 stage_name_ostr <<".";
             stage_name_ostr << s2;
         }
-        std::string stage_name(stage_name_ostr.str());
+        std::string stageName(stage_name_ostr.str());
 
-        auto found = m_extra_stage_options.find(stage_name);
-        if (found == m_extra_stage_options.end())
-            m_extra_stage_options.insert(
-               std::make_pair(stage_name, Option(option_name, option_value)));
-        else
-            found->second.add(Option(option_name, option_value));
+        Option op(option_name, option_value);
+        m_extraStageOptions[stageName].add(op);
     }
 }
 

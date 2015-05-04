@@ -86,6 +86,11 @@ public:
         { return m_options; }
     void setOptions(Options options)
         { m_options = options; }
+    void addOptions(Options opts)
+    {
+        for (const auto& o : opts.getOptions())
+            m_options.add(o);
+    }
     virtual boost::property_tree::ptree serializePipeline() const = 0;
     virtual LogPtr log() const
         { return m_log; }

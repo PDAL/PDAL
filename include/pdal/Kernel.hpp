@@ -117,9 +117,22 @@ public:
         return m_heartbeat_shell_command;
     }
 
-    std::map<std::string, Options> const& getExtraStageOptions()
+    const Options& extraStageOptions(const std::string& stage)
     {
-        return m_extra_stage_options;
+        static Options nullOpts;
+
+        auto oi = m_extraStageOptions.find(stage);
+        if (oi == m_extraStageOptions.end())
+            return nullOpts;
+        return oi->second;
+    }
+
+    void applyExtraStageOptionsRecursive(Stage *s)
+    {
+        s->addOptions(extraStageOptions(s->getName()));
+        auto stages = s->getInputs();
+        for (Stage *s : stages)
+            applyExtraStageOptionsRecursive(s);
     }
 
 protected:
@@ -164,7 +177,7 @@ private:
     po::positional_options_description m_positionalOptions;
     po::variables_map m_variablesMap;
     std::vector<std::string> m_extra_options;
-    std::map<std::string, Options> m_extra_stage_options;
+    std::map<std::string, Options> m_extraStageOptions;
     std::vector<std::unique_ptr<Stage>> m_stages;
 
     Kernel& operator=(const Kernel&); // not implemented

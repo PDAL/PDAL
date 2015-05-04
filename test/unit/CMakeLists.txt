@@ -110,14 +110,13 @@ endif()
 #
 # conditionally append apps/libxml2 sources
 #
-if(WITH_APPS)
-#    if(LIBXML2_FOUND)
-#        PDAL_ADD_TEST(pcinfo_test FILES apps/pcinfoTest.cpp)
-#    endif(LIBXML2_FOUND)
-
+if (WITH_APPS)
+    if (LASZIP_FOUND)
+        PDAL_ADD_TEST(pdal_merge_test FILES apps/MergeTest.cpp)
+    endif()
     PDAL_ADD_TEST(pc2pc_test FILES apps/pc2pcTest.cpp)
 
-    if(BUILD_PIPELINE_TESTS)
+    if (BUILD_PIPELINE_TESTS)
         PDAL_ADD_TEST(pcpipeline_test FILES apps/pcpipelineTest.cpp)
     endif()
 endif(WITH_APPS)

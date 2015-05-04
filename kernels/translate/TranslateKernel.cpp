@@ -210,16 +210,13 @@ Stage& TranslateKernel::makeTranslate(Options translateOptions, Stage& parent)
     Stage *nextStage = &parent;
 
     Options readerOptions = parent.getOptions();
-    std::map<std::string, Options> extra_opts = getExtraStageOptions();
+    const Options& reproOpts = extraStageOptions("filters.reprojection");
+    const Options& cropOpts = extraStageOptions("filters.crop");
+
     if (!m_bounds.empty() || !m_wkt.empty() || !m_output_srs.empty() ||
-        extra_opts.size() > 0)
+        !reproOpts.empty() || !cropOpts.empty())
     {
         Stage& cropStage = ownStage(f.createStage("filters.crop"));
-
-        bool bHaveReprojection =
-            Utils::contains(extra_opts, std::string("filters.reprojection"));
-        bool bHaveCrop =
-            Utils::contains(extra_opts, std::string("filters.crop"));
 
         if (!m_output_srs.empty())
         {
@@ -230,13 +227,11 @@ Stage& TranslateKernel::makeTranslate(Options translateOptions, Stage& parent)
             reprojectionStage.setOptions(readerOptions);
             nextStage = &reprojectionStage;
         }
-        else if (bHaveReprojection)
+        else if (!reproOpts.empty())
         {
             Stage& reprojectionStage =
                 ownStage(f.createStage("filters.reprojection"));
             reprojectionStage.setInput(*nextStage);
-            reprojectionStage.setOptions(
-                extra_opts.find("filters.reprojection")->second);
             nextStage = &reprojectionStage;
         }
 
@@ -270,10 +265,9 @@ Stage& TranslateKernel::makeTranslate(Options translateOptions, Stage& parent)
             cropStage.setOptions(readerOptions);
             nextStage = &cropStage;
         }
-        else if (bHaveCrop)
+        else if (!cropOpts.empty())
         {
             cropStage.setInput(*nextStage);
-            cropStage.setOptions(extra_opts.find("filters.crop")->second);
             nextStage = &cropStage;
         }
         finalStage = nextStage;
@@ -335,19 +329,6 @@ int TranslateKernel::execute()
 
     Stage& readerStage = makeReader(readerOptions);
 
-    // go ahead and prepare/execute on reader stage only to grab input
-    // PointViewSet, this makes the input PointView available to both the
-    // processing pipeline and the visualizer
-    //readerStage->prepare(table);
-    //PointViewSet viewSetIn = readerStage->execute(table);
-
-    // the input PointViewSet will be used to populate a BufferReader that is
-    // consumed by the processing pipeline
-    //PointViewPtr input_view = *viewSetIn.begin();
-    //BufferReader bufferReader;
-    //bufferReader.setOptions(readerOptions);
-    //bufferReader.addView(input_view);
-
     // the translation consumes the BufferReader rather than the readerStage
     Stage& finalStage = makeTranslate(readerOptions, readerStage);
 
@@ -375,22 +356,7 @@ int TranslateKernel::execute()
     // Some options are inferred by makeWriter based on filename
     // (compression, driver type, etc).
     writer.setOptions(writerOptions + writer.getOptions());
-
-    for (const auto& pi : getExtraStageOptions())
-    {
-        std::string name = pi.first;
-        Options options = pi.second;
-
-        //ABELL - What's this?
-        std::vector<Stage *> stages = writer.findStage(name);
-        for (const auto& s : stages)
-        {
-            Options opts = s->getOptions();
-            for (const auto& o : options.getOptions())
-                opts.add(o);
-            s->setOptions(opts);
-        }
-    }
+    applyExtraStageOptionsRecursive(&writer);
     writer.prepare(table);
 
     // process the data, grabbing the PointViewSet for visualization of the
