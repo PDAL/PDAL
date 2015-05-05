@@ -1,10 +1,12 @@
 set(src
     PlyReader.cpp
+    PlyWriter.cpp
     ${PROJECT_SOURCE_DIR}/vendor/rply-1.1.3/rply.c
 )
 
 set(inc
     PlyReader.hpp
+    PlyWriter.hpp
     ${PROJECT_SOURCE_DIR}/vendor/rply-1.1.3/rply.h
 )
 
