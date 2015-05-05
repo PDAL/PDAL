@@ -37,6 +37,7 @@ Writers
    writers.las
    writers.nitf
    writers.oci
+   writers.ply
    writers.p2g
    writers.pcd
    writers.pgpointcloud
