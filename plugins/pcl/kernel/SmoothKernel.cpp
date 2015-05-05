@@ -140,25 +140,7 @@ int SmoothKernel::execute()
         (UserCallback *)new HeartbeatCallback();
 
     writer.setUserCallback(callback);
-
-    std::map<std::string, Options> extra_opts = getExtraStageOptions();
-    std::map<std::string, Options>::iterator pi;
-    for (pi = extra_opts.begin(); pi != extra_opts.end(); ++pi)
-    {
-        std::string name = pi->first;
-        Options options = pi->second;
-        std::vector<Stage*> stages = writer.findStage(name);
-        std::vector<Stage*>::iterator s;
-        for (s = stages.begin(); s != stages.end(); ++s)
-        {
-            Options opts = (*s)->getOptions();
-            std::vector<Option>::iterator o;
-            for (o = options.getOptions().begin(); o != options.getOptions().end(); ++o)
-                opts.add(*o);
-            (*s)->setOptions(opts);
-        }
-    }
-
+    applyExtraStageOptionsRecursive(&writer);
     writer.prepare(table);
 
     // process the data, grabbing the PointViewSet for visualization of the
