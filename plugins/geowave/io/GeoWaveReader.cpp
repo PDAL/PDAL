@@ -107,27 +107,27 @@ using jace::proxy::org::opengis::feature::simple::SimpleFeatureType;
 #include "jace/proxy/org/opengis/feature/type/AttributeDescriptor.h"
 using jace::proxy::org::opengis::feature::type::AttributeDescriptor;
 
-#include "jace/proxy/mil/nga/giat/geowave/index/ByteArrayId.h"
-using jace::proxy::mil::nga::giat::geowave::index::ByteArrayId;
-#include "jace/proxy/mil/nga/giat/geowave/vector/adapter/FeatureDataAdapter.h"
-using jace::proxy::mil::nga::giat::geowave::vector::adapter::FeatureDataAdapter;
-#include "jace/proxy/mil/nga/giat/geowave/vector/adapter/FeatureCollectionDataAdapter.h"
-using jace::proxy::mil::nga::giat::geowave::vector::adapter::FeatureCollectionDataAdapter;
-#include "jace/proxy/mil/nga/giat/geowave/store/index/Index.h"
-using jace::proxy::mil::nga::giat::geowave::store::index::Index;
-#include "jace/proxy/mil/nga/giat/geowave/store/index/IndexType_JaceIndexType.h"
-using jace::proxy::mil::nga::giat::geowave::store::index::IndexType_JaceIndexType;
-#include "jace/proxy/mil/nga/giat/geowave/store/query/Query.h"
-using jace::proxy::mil::nga::giat::geowave::store::query::Query;
-#include "jace/proxy/mil/nga/giat/geowave/store/query/SpatialQuery.h"
-using jace::proxy::mil::nga::giat::geowave::store::query::SpatialQuery;
+#include "jace/proxy/mil/nga/giat/geowave/core/index/ByteArrayId.h"
+using jace::proxy::mil::nga::giat::geowave::core::index::ByteArrayId;
+#include "jace/proxy/mil/nga/giat/geowave/adapter/vector/FeatureDataAdapter.h"
+using jace::proxy::mil::nga::giat::geowave::adapter::vector::FeatureDataAdapter;
+#include "jace/proxy/mil/nga/giat/geowave/adapter/vector/FeatureCollectionDataAdapter.h"
+using jace::proxy::mil::nga::giat::geowave::adapter::vector::FeatureCollectionDataAdapter;
+#include "jace/proxy/mil/nga/giat/geowave/core/store/index/Index.h"
+using jace::proxy::mil::nga::giat::geowave::core::store::index::Index;
+#include "jace/proxy/mil/nga/giat/geowave/core/geotime/IndexType_JaceIndexType.h"
+using jace::proxy::mil::nga::giat::geowave::core::geotime::IndexType_JaceIndexType;
+#include "jace/proxy/mil/nga/giat/geowave/core/store/query/Query.h"
+using jace::proxy::mil::nga::giat::geowave::core::store::query::Query;
+#include "jace/proxy/mil/nga/giat/geowave/core/geotime/store/query/SpatialQuery.h"
+using jace::proxy::mil::nga::giat::geowave::core::geotime::store::query::SpatialQuery;
 
-#include "jace/proxy/mil/nga/giat/geowave/accumulo/BasicAccumuloOperations.h"
-using jace::proxy::mil::nga::giat::geowave::accumulo::BasicAccumuloOperations;
-#include "jace/proxy/mil/nga/giat/geowave/accumulo/AccumuloDataStore.h"
-using jace::proxy::mil::nga::giat::geowave::accumulo::AccumuloDataStore;
-#include "jace/proxy/mil/nga/giat/geowave/accumulo/metadata/AccumuloAdapterStore.h"
-using jace::proxy::mil::nga::giat::geowave::accumulo::metadata::AccumuloAdapterStore;
+#include "jace/proxy/mil/nga/giat/geowave/datastore/accumulo/BasicAccumuloOperations.h"
+using jace::proxy::mil::nga::giat::geowave::datastore::accumulo::BasicAccumuloOperations;
+#include "jace/proxy/mil/nga/giat/geowave/datastore/accumulo/AccumuloDataStore.h"
+using jace::proxy::mil::nga::giat::geowave::datastore::accumulo::AccumuloDataStore;
+#include "jace/proxy/mil/nga/giat/geowave/datastore/accumulo/metadata/AccumuloAdapterStore.h"
+using jace::proxy::mil::nga::giat::geowave::datastore::accumulo::metadata::AccumuloAdapterStore;
 
 static PluginInfo const s_info = PluginInfo(
     "readers.geowave",
