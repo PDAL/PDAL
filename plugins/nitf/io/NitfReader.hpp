@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/restrict.hpp>
 
 #include <las/LasReader.hpp>

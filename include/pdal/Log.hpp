@@ -32,20 +32,13 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_LOG_HPP
-#define INCLUDED_LOG_HPP
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
 
-#include <boost/iostreams/stream.hpp>
-#include <boost/iostreams/device/null.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <iosfwd>
 #include <memory>
-
-typedef boost::iostreams::null_sink sink;
-typedef boost::iostreams::stream<sink> null_stream;
-
 
 // Adapted from http://drdobbs.com/cpp/201804215
 
@@ -59,8 +52,6 @@ class PDAL_DLL Log
 {
 public:
 
-    /** @name Constructors
-    */
     /// Constructs a pdal::Log instance.
     /// @param leaderString A string to presage all log entries with
     /// @param outputName A filename or one of 'stdout', 'stdlog', or 'stderr'
@@ -110,7 +101,6 @@ public:
     /// @param level logging level to request
     /// If the logging level asked for with
     /// pdal::Log::get is less than the logging level of the pdal::Log instance
-    /// an ostream with a boost::iostreams::null_sink is returned.
     std::ostream& get(LogLevel::Enum level = LogLevel::Info);
 
     /// Sets the floating point precision
@@ -119,16 +109,15 @@ public:
     /// Clears the floating point precision settings of the streams
     void clearFloat();
 
-    /** @name private attributes
-    */
-
 protected:
-    std::ostream* m_log;
-    null_stream m_null_stream;
+    std::ostream *m_log;
+    std::ostream *m_nullStream;
 
 private:
     Log(const Log&);
     Log& operator =(const Log&);
+
+    void makeNullStream();
 
     LogLevel::Enum m_level;
     bool m_deleteStreamOnCleanup;
@@ -137,7 +126,5 @@ private:
 
 typedef std::shared_ptr<Log> LogPtr;
 
-
 } // namespace pdal
 
-#endif

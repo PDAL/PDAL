@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_GDALUTILS_HPP
-#define INCLUDED_GDALUTILS_HPP
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
 
@@ -85,24 +84,6 @@ private:
     pdal::LogPtr m_log;
 };
 
-class PDAL_DLL VSILFileBuffer
-{
-public:
-    typedef boost::iostreams::seekable_device_tag category;
-    typedef char char_type;
+} // namespace gdal
+} // namespace pdal
 
-    VSILFileBuffer(VSILFILE* fp);
-
-    std::streamsize read(char* s, std::streamsize n);
-    std::streamsize write(const char* s, std::streamsize n);
-    std::streampos seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way);
-
-private:
-    VSILFILE* m_fp;
-};
-
-
-}
-} // namespace pdal::gdal
-
-#endif
