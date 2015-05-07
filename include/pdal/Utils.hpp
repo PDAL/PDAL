@@ -317,7 +317,7 @@ namespace Utils
 
     template<typename KEY, typename VALUE>
     bool contains(const std::map<KEY, VALUE>& c, const KEY& v)
-        { return c.find(v) != c.end(); };
+        { return c.find(v) != c.end(); }
 
     template<typename COLLECTION, typename VALUE>
     bool contains(const COLLECTION& c, const VALUE& v)
@@ -377,7 +377,7 @@ namespace Utils
         return std::is_same<T_IN, T_OUT>::value ||
             inRange<T_OUT>(static_cast<double>(in));
     }
-};
+} // namespace Utils
 
 } // namespace pdal
 
