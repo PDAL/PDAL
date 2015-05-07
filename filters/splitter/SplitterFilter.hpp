@@ -55,7 +55,9 @@ public:
     Options getDefaultOptions();
 
 private:
-    uint32_t m_length;
+    double m_length;
+    double m_xOrigin;
+    double m_yOrigin;
 
     virtual void processOptions(const Options& options);
     virtual PointViewSet run(PointViewPtr view);

@@ -53,7 +53,11 @@ std::string SplitterFilter::getName() const { return s_info.name; }
 
 void SplitterFilter::processOptions(const Options& options)
 {
-    m_length = options.getValueOrDefault<uint32_t>("length", 1000);
+    m_length = options.getValueOrDefault<double>("length", 1000.0);
+    m_xOrigin = options.getValueOrDefault<double>("origin_x",
+        std::numeric_limits<double>::quiet_NaN());
+    m_yOrigin = options.getValueOrDefault<double>("origin_y",
+        std::numeric_limits<double>::quiet_NaN());
 }
 
 
@@ -94,24 +98,25 @@ PointViewSet SplitterFilter::run(PointViewPtr inView)
     std::map<Coord, PointViewPtr, CoordCompare> viewMap(compare);
 
     // Use the location of the first point as the origin.
-    double xOrigin = inView->getFieldAs<double>(Dimension::Id::X, 0);
-    double yOrigin = inView->getFieldAs<double>(Dimension::Id::Y, 0);
+    if (m_xOrigin == std::numeric_limits<double>::quiet_NaN())
+        m_xOrigin = inView->getFieldAs<double>(Dimension::Id::X, 0);
+    if (m_yOrigin == std::numeric_limits<double>::quiet_NaN())
+        m_yOrigin = inView->getFieldAs<double>(Dimension::Id::Y, 0);
 
     // Overlay a grid of squares on the points (m_length sides).  Each square
     // corresponds to a new point buffer.  Place the points falling in the
     // each square in the corresponding point buffer.
     for (PointId idx = 0; idx < inView->size(); idx++)
     {
-        int xpos = (inView->getFieldAs<double>(Dimension::Id::X, idx) - xOrigin) /
-            m_length;
-        int ypos = (inView->getFieldAs<double>(Dimension::Id::Y, idx) - yOrigin) /
-            m_length;
+        double x = inView->getFieldAs<double>(Dimension::Id::X, idx);
+        int xpos = (x - m_xOrigin) / m_length;
+        double y = inView->getFieldAs<double>(Dimension::Id::Y, idx);
+        int ypos = (y - m_yOrigin) / m_length;
+
         Coord loc(xpos, ypos);
         PointViewPtr& outView = viewMap[loc];
         if (!outView)
-        {
             outView = inView->makeNew();
-        }
         outView->appendPoint(*inView.get(), idx);
     }
 
