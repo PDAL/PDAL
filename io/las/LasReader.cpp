@@ -111,7 +111,7 @@ void LasReader::processOptions(const Options& options)
 static PluginInfo const s_info = PluginInfo(
     "readers.las",
     "ASPRS LAS 1.0 - 1.4 read support. LASzip support is also \n" \
-        "enabled through this driver if LASzip was found diring \n" \
+        "enabled through this driver if LASzip was found during \n" \
         "compilation.",
     "http://pdal.io/stages/readers.las.html" );
 
@@ -619,7 +619,17 @@ point_count_t LasReader::readFileBlock(std::vector<char>& buf,
     point_count_t blockpoints = buf.size() / ptLen;
 
     blockpoints = std::min(maxpoints, blockpoints);
+    if (m_istream->eof())
+        throw pdal::invalid_stream("stream is done");
+
     m_istream->read(buf.data(), blockpoints * ptLen);
+    if (m_istream->gcount() != (std::streamsize)(blockpoints * ptLen))
+    {
+        // we read fewer bytes than we asked for
+        // because the file was either truncated
+        // or the header is bunk.
+        blockpoints = m_istream->gcount() / ptLen;
+    }
     return blockpoints;
 }
 
