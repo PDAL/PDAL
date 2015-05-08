@@ -74,20 +74,10 @@ KernelFactory::KernelFactory(bool no_plugins)
     PluginManager::initializePlugin(TranslateKernel_InitPlugin);
 }
 
-std::unique_ptr<Kernel> KernelFactory::createKernel(std::string const& kernel_name)
+std::unique_ptr<Kernel> KernelFactory::createKernel(std::string const& name)
 {
     PluginManager & pm = PluginManager::getInstance();
-
-    void * kernel = pm.createObject(kernel_name);
-    if (!kernel)
-    {
-        int32_t res = pm.guessLoadByPath(kernel_name);
-        if (res == 0)
-            kernel = pm.createObject(kernel_name);
-    }
-    Kernel *k = (Kernel*)kernel;
-    std::unique_ptr<Kernel> retKernel(k);
-    return retKernel;
+    return std::unique_ptr<Kernel>(static_cast<Kernel*>(pm.createObject(name)));
 }
 
 std::vector<std::string> KernelFactory::getKernelNames()

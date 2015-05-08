@@ -65,8 +65,7 @@ typedef struct PluginInfo {
         rp.description = info.description; \
         rp.link = info.link; \
         rp.pluginType = PF_PluginType_ ## type; \
-        res = pdal::PluginManager::registerObject(info.name, &rp); \
-        if (res < 0) \
+        if (!pdal::PluginManager::registerObject(info.name, &rp)) \
             return NULL; \
         return ExitFunc; \
     } \
@@ -93,8 +92,7 @@ typedef struct PluginInfo {
         rp.description = info.description; \
         rp.link = info.link; \
         rp.pluginType = PF_PluginType_ ## type; \
-        res = pdal::PluginManager::registerObject(info.name, &rp); \
-        if (res < 0) \
+        if (!pdal::PluginManager::registerObject(info.name, &rp)) \
             return NULL; \
         return T ## _ExitFunc; \
     } \
