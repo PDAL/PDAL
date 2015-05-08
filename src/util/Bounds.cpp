@@ -67,11 +67,6 @@ namespace pdal
 
 const double BOX3D::LOWEST = (std::numeric_limits<double>::lowest)();
 const double BOX3D::HIGHEST = (std::numeric_limits<double>::max)();
-    
-BOX3D::BOX3D(double minx, double miny, double maxx, double maxy) :
-    minx(minx), maxx(maxx), miny(miny), maxy(maxy),
-    minz(HIGHEST), maxz(LOWEST)
-{}
 
 void BOX3D::clear()
 {
