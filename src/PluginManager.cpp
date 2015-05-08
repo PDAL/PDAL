@@ -330,8 +330,10 @@ bool PluginManager::loadByPath(const std::string& pluginPath,
     boost::filesystem::path path(pluginPath);
     std::string pathname = Utils::tolower(path.filename().string());
 
+    // If we are a valid type, and we're not yet already
+    // loaded in the LibraryMap, load it.
     if (pluginTypeValid(pathname, type) &&
-        m_dynamicLibraryMap.find(path.string()) != m_dynamicLibraryMap.end())
+        m_dynamicLibraryMap.find(path.string()) == m_dynamicLibraryMap.end())
     {
         std::string errorString;
         auto completePath(boost::filesystem::complete(path).string());
