@@ -234,20 +234,3 @@ TEST(BoundsTest, test_2d_input)
     BOX3D r(1.1,2.2,101.1,102.2);
     EXPECT_EQ(r, rr);
 }
-
-TEST(BoundsTest, test_issue_897)
-{
-    BOX3D boxA(0.0, 0.0, 100.0, 100.0);  // a "2D" box
-    BOX3D boxB(50.0, 50.0, 3.1, 51.0, 51.0, 3.14);  // a "3D" box, wholly inside boxA
-    
-    // Currently aContainsB is false: see issue #387.
-    const bool aContainsB = boxA.contains(boxB);
-    const bool bContainsA = boxB.contains(boxA);
-    const bool aContainsA = boxA.contains(boxA);
-    const bool bContainsB = boxB.contains(boxB);
-    
-    EXPECT_FALSE(aContainsB);
-    EXPECT_FALSE(bContainsA);
-    EXPECT_TRUE(aContainsA);
-    EXPECT_TRUE(bContainsB);
-}
