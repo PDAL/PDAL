@@ -71,6 +71,7 @@ GroundKernel::GroundKernel()
     , m_cellSize(1)
     , m_classify(true)
     , m_extract(false)
+    , m_approximate(false)
 {}
 
 void GroundKernel::validateSwitches()
@@ -100,6 +101,7 @@ void GroundKernel::addSwitches()
     ("cellSize", po::value<double>(&m_cellSize)->default_value(1), "cell size")
     ("classify", po::bool_switch(&m_classify), "apply classification labels?")
     ("extract", po::bool_switch(&m_extract), "extract ground returns?")
+    ("approximate,a", po::bool_switch(&m_approximate), "use approximate algorithm? (much faster)")
     ;
 
     addSwitchSet(file_options);

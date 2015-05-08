@@ -46,6 +46,7 @@
 #include <pcl/filters/extract_indices.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/segmentation/progressive_morphological_filter.h>
+#include <pcl/segmentation/approximate_progressive_morphological_filter.h>
 
 namespace pdal
 {
@@ -68,6 +69,7 @@ void GroundFilter::processOptions(const Options& options)
     m_cellSize = options.getValueOrDefault<double>("cellSize", 1);
     m_classify = options.getValueOrDefault<bool>("classify", true);
     m_extract = options.getValueOrDefault<bool>("extract", false);
+    m_approximate = options.getValueOrDefault<bool>("approximate", false);
 }
 
 void GroundFilter::addDimensions(PointLayoutPtr layout)
@@ -113,17 +115,35 @@ PointViewSet GroundFilter::run(PointViewPtr input)
     }
 
     // setup the PMF filter
-    pcl::ProgressiveMorphologicalFilter<pcl::PointXYZ> pmf;
-    pmf.setInputCloud(cloud);
-    pmf.setMaxWindowSize(m_maxWindowSize);
-    pmf.setSlope(m_slope);
-    pmf.setMaxDistance(m_maxDistance);
-    pmf.setInitialDistance(m_initialDistance);
-    pmf.setCellSize(m_cellSize);
-
-    // run the PMF filter, grabbing indices of ground returns
     pcl::PointIndicesPtr idx(new pcl::PointIndices);
-    pmf.extract(idx->indices);
+    if (!m_approximate)
+    {
+
+        pcl::ProgressiveMorphologicalFilter<pcl::PointXYZ> pmf;
+        pmf.setInputCloud(cloud);
+        pmf.setMaxWindowSize(m_maxWindowSize);
+        pmf.setSlope(m_slope);
+        pmf.setMaxDistance(m_maxDistance);
+        pmf.setInitialDistance(m_initialDistance);
+        pmf.setCellSize(m_cellSize);
+
+        // run the PMF filter, grabbing indices of ground returns
+        pcl::PointIndicesPtr idx(new pcl::PointIndices);
+        pmf.extract(idx->indices);
+    } else
+    {
+        pcl::ApproximateProgressiveMorphologicalFilter<pcl::PointXYZ> pmf;
+        pmf.setInputCloud(cloud);
+        pmf.setMaxWindowSize(m_maxWindowSize);
+        pmf.setSlope(m_slope);
+        pmf.setMaxDistance(m_maxDistance);
+        pmf.setInitialDistance(m_initialDistance);
+        pmf.setCellSize(m_cellSize);
+
+        // run the PMF filter, grabbing indices of ground returns
+        pmf.extract(idx->indices);
+
+    }
 
     PointViewSet viewSet;
     if (!idx->indices.empty() && (m_classify || m_extract))
