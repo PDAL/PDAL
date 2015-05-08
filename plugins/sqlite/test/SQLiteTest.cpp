@@ -41,6 +41,8 @@
 #include <pdal/pdal_defines.h>
 #include <las/LasReader.hpp>
 
+#include "../io/SQLiteCommon.hpp"
+
 #include "Support.hpp"
 
 using namespace pdal;
@@ -158,3 +160,73 @@ TEST(SQLiteTest, readWriteCompressScale)
     testReadWrite(true, true);
 }
 #endif
+
+TEST(SQLiteTest, Issue895)
+{
+    LogPtr log = std::shared_ptr<pdal::Log>(new pdal::Log("Issue895", "stdout"));
+    log->setLevel(LogLevel::Debug);
+
+    const std::string filename(Support::temppath("issue895.sqlite"));
+    
+    FileUtils::deleteFile(filename);
+    
+    bool ok;
+    const char* sql;
+
+    // make a DB, put a table in it
+    {
+        SQLite db(filename, LogPtr(log));
+        db.connect(true);
+        sql = "CREATE TABLE MyTable (id INTEGER PRIMARY KEY AUTOINCREMENT, data)";
+        db.execute(sql);
+    }
+
+    // open the DB, manually check the tables
+    {
+        SQLite db(filename, LogPtr(log));
+        db.connect(false);
+        sql = "SELECT name FROM sqlite_master WHERE type = \"table\"";
+        db.query(sql);
+    
+        // because order of the returned rows is undefined        
+        bool foundMine = false;
+        bool foundTheirs = false;
+        
+        {
+            const row* r = db.get();
+            column const& c = r->at(0);
+
+            foundMine = (strcmp(c.data.c_str(), "MyTable") == 0);
+            foundTheirs = (strcmp(c.data.c_str(), "sqlite_sequence") == 0);
+            //printf("%s %d %d\n", c.data.c_str(), (int)foundMine, (int)foundTheirs);
+            EXPECT_TRUE(foundMine || foundTheirs);
+        }    
+
+        ok = db.next();
+        EXPECT_TRUE(ok);
+
+        {
+            const row* r = db.get();
+            column const& c = r->at(0);
+            foundMine |= (strcmp(c.data.c_str(), "MyTable") == 0);
+            foundTheirs |= (strcmp(c.data.c_str(), "sqlite_sequence") == 0);
+            //printf("%s %d %d\n", c.data.c_str(), (int)foundMine, (int)foundTheirs);
+            EXPECT_TRUE(foundMine && foundTheirs);
+        }
+        
+        ok = db.next();
+        EXPECT_FALSE(ok);
+    }
+    
+    // open the DB, ask if the tables exist
+    {
+        SQLite db(filename, LogPtr(log));
+        db.connect(false);
+
+        ok = db.doesTableExist("MyTable");
+        EXPECT_TRUE(ok);
+
+        ok = db.doesTableExist("sqlite_sequence");
+        EXPECT_TRUE(ok);
+    }
+}
