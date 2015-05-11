@@ -56,7 +56,7 @@ std::string GridKernel::getName() const
 }
 
 
-void SplitKernel::addSwitches()
+void GridKernel::addSwitches()
 {
     po::options_description* file_options =
         new po::options_description("file options");
@@ -92,7 +92,7 @@ void SplitKernel::addSwitches()
 }
 
 
-void SplitKernel::validateSwitches()
+void GridKernel::validateSwitches()
 {
 #ifdef WIN32
     char pathSeparator = '\\';
@@ -119,7 +119,7 @@ std::string makeFilename(const std::string& s, int i)
 }
 
 
-int SplitKernel::execute()
+int GridKernel::execute()
 {
     PointTable table;
 
