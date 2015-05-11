@@ -42,6 +42,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/filters/stats
     ${PROJECT_SOURCE_DIR}/filters/transformation
     ${PROJECT_SOURCE_DIR}/kernels/info
+    ${PROJECT_SOURCE_DIR}/filters/gridder
 )
 
 if (WITH_GEOTIFF)
@@ -101,6 +102,7 @@ PDAL_ADD_TEST(pdal_filters_sort_test FILES filters/SortFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_splitter_test FILES filters/SplitterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_stats_test FILES filters/StatsFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_transformation_test FILES filters/TransformationFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_gridder_test FILES filters/GridderTest.cpp)
 
 #
 # sources for plang

@@ -205,6 +205,9 @@ TEST(pipelineFiltersTest, DISABLED_sort)
 TEST(pipelineFiltersTest, splitter)
 { run_pipeline("filters/splitter.xml"); }
 
+TEST(pipelineFiltersTest, gridder)
+{ run_pipeline("filters/gridder.xml"); }
+
 TEST(pipelineFiltersTest, stats)
 { run_pipeline("filters/stats.xml"); }
 

@@ -102,6 +102,7 @@ test/data/filters/range_z_classification.xml
 test/data/filters/reproject.xml
 test/data/filters/sort.xml
 test/data/filters/splitter.xml
+test/data/filters/gridder.xml
 test/data/filters/stats.xml
 test/data/hole/crop.xml
 test/data/icebridge/pipeline.xml
