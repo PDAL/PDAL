@@ -8,5 +8,6 @@ add_subdirectory(random)
 add_subdirectory(sort)
 add_subdirectory(split)
 add_subdirectory(translate)
+add_subdirectory(grid)
 
 set(PDAL_TARGET_OBJECTS ${PDAL_TARGET_OBJECTS} PARENT_SCOPE)
