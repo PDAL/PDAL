@@ -53,13 +53,19 @@ TEST(GridderTest, test_tile_filter)
     r.setOptions(ops1);
 
     Options o;
-    Option length("num_x", 16, "num_x");
-    Option length("num_y", 16, "num_y");
-    Option length("min_x", 635000, "min_x");
-    Option length("min_y", 845000, "min_y");
-    Option length("max_x", 640000, "max_x");
-    Option length("max_y", 855000, "max_y");
-    o.add(length);
+    Option num_x("num_x", 16, "num_x");
+    Option num_y("num_y", 16, "num_y");
+    Option min_x("min_x", 635000, "min_x");
+    Option min_y("min_y", 845000, "min_y");
+    Option max_x("max_x", 640000, "max_x");
+    Option max_y("max_y", 855000, "max_y");
+    o.add(num_x);
+    o.add(num_y);
+    o.add(min_x);
+    o.add(min_y);
+    o.add(max_x);
+    o.add(max_y);
+
 
     // create the grid filter and prepare
     GridderFilter s;
