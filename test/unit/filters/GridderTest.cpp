@@ -66,7 +66,6 @@ TEST(GridderTest, test_tile_filter)
     o.add(max_x);
     o.add(max_y);
 
-
     // create the grid filter and prepare
     GridderFilter s;
     s.setOptions(o);
@@ -90,7 +89,7 @@ TEST(GridderTest, test_tile_filter)
     for (auto it = viewSet.begin(); it != viewSet.end(); ++it)
         views.push_back(*it);
 
-/*    auto sorter = [](PointViewPtr p1, PointViewPtr p2)
+    auto sorter = [](PointViewPtr p1, PointViewPtr p2)
     {
         BOX3D b1 = p1->calculateBounds();
         BOX3D b2 = p2->calculateBounds();
@@ -101,13 +100,13 @@ TEST(GridderTest, test_tile_filter)
     };
     std::sort(views.begin(), views.end(), sorter);
 
-    EXPECT_EQ(views.size(), 15u);
-    size_t counts[] = {24, 27, 26, 27, 10, 166, 142, 76, 141, 132, 63, 70, 67,
-        34, 60 };
+    EXPECT_EQ(views.size(), 12u);
+    size_t counts[] = {73, 42, 108, 233, 6, 101, 45, 216, 40, 103, 79, 19 };
+
     for (size_t i = 0; i < views.size(); ++i)
     {
         PointViewPtr view = views[i];
         EXPECT_EQ(view->size(), counts[i]);
     }
-    */
+
 }
