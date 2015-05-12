@@ -40,8 +40,6 @@
 #include <pdal/XMLSchema.hpp>
 #include <pdal/Compression.hpp>
 
-#include <boost/algorithm/string.hpp>
-
 #include <sqlite3.h>
 #include <memory>
 #include <sstream>
@@ -306,10 +304,13 @@ public:
 
                     if (m_columns.size() != static_cast<std::vector<std::string>::size_type > (numCols))
                     {
-                        std::string ccolumnName = boost::to_upper_copy(std::string(sqlite3_column_name(m_statement, v)));
+                        std::string ccolumnName = Utils::toupper(std::string(sqlite3_column_name(m_statement, v)));
                         const char* coltype = sqlite3_column_decltype(m_statement, v);
-                        if (!coltype) coltype = "unknown";
-                        std::string ccolumnType = boost::to_upper_copy(std::string(coltype));
+                        if (!coltype)
+                        {
+                            coltype = "unknown";
+                        }
+                        std::string ccolumnType = Utils::toupper(std::string(coltype));
                         m_columns.insert(std::pair<std::string, int32_t>(ccolumnName, v));
                         m_types.push_back(ccolumnType);
                     }
@@ -506,7 +507,7 @@ public:
     {
         execute("SELECT InitSpatialMetadata(1)");
     }
-    
+
     bool doesTableExist(std::string const& name)
     {
         std::ostringstream oss;
@@ -523,7 +524,7 @@ public:
                 break ;// didn't have anything
 
             column const& c = r->at(0); // First column is table name!
-            if (boost::iequals(c.data, name))
+            if (Utils::iequals(c.data, name))
             {
                 return true;
             }
@@ -536,20 +537,20 @@ public:
         // TODO: ought to parse this numerically, so we can do version checks
         const std::string sql("SELECT spatialite_version()");
         query(sql);
-         
+
         const row* r = get();
         assert(r); // should get back exactly one row
         std::string ver = r->at(0).data;
         return ver;
     }
-    
+
     std::string getSQLiteVersion()
     {
          // TODO: parse this numerically, so we can do version checks
          std::string v(sqlite3_libversion());
          return v;
     }
-    
+
     LogPtr log() { return m_log; };
 
 private:
@@ -561,7 +562,7 @@ private:
     records::size_type m_position;
     std::map<std::string, int32_t> m_columns;
     std::vector<std::string> m_types;
-    
+
     void check_error(std::string const& msg)
     {
         const char *zErrMsg = sqlite3_errmsg(m_session);
