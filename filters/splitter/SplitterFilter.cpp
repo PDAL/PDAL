@@ -36,6 +36,7 @@
 
 #include <pdal/pdal_macros.hpp>
 
+#include <cmath>
 #include <iostream>
 #include <limits>
 
