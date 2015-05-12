@@ -230,3 +230,49 @@ TEST(SQLiteTest, Issue895)
         EXPECT_TRUE(ok);
     }
 }
+
+
+TEST(SQLiteTest, testSpatialite)
+{
+    LogPtr log = std::shared_ptr<pdal::Log>(new pdal::Log("spat", "stdout"));
+    log->setLevel(LogLevel::Debug);
+
+    const std::string filename(Support::temppath("spat.sqlite"));
+    
+    FileUtils::deleteFile(filename);
+    
+    SQLite db(filename, LogPtr(log));
+    db.connect(true);
+
+    EXPECT_FALSE(db.haveSpatialite());
+
+    db.loadSpatialite();
+    db.initSpatialiteMetadata();
+
+    EXPECT_TRUE(db.haveSpatialite());
+    
+    FileUtils::deleteFile(filename);
+}
+
+
+TEST(SQLiteTest, testVersionInfo)
+{
+    LogPtr log = std::shared_ptr<pdal::Log>(new pdal::Log("spver", "stdout"));
+    log->setLevel(LogLevel::Debug);
+
+    const std::string filename(Support::temppath("spver.sqlite"));
+    
+    FileUtils::deleteFile(filename);
+    
+    SQLite db(filename, LogPtr(log));
+    db.connect(true);
+    db.loadSpatialite();
+    
+    const std::string p = db.getSQLiteVersion();
+    EXPECT_EQ(p[0], '3'); // 3.8.9 as of this commit
+
+    const std::string q = db.getSpatialiteVersion();
+    EXPECT_EQ(q[0], '4'); // 4.2.0 as of this commit
+
+    FileUtils::deleteFile(filename);
+}

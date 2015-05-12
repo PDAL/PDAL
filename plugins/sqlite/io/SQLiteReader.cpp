@@ -56,10 +56,11 @@ void SQLiteReader::initialize()
         m_session = std::unique_ptr<SQLite>(new SQLite(m_connection, log()));
         m_session->connect(false); // don't connect in write mode
         log()->get(LogLevel::Debug) << "Connected to database" << std::endl;
-        bool bHaveSpatialite = m_session->doesTableExist("geometry_columns");
+        
+        bool bHaveSpatialite = m_session->haveSpatialite();
         log()->get(LogLevel::Debug) << "Have spatialite?: " <<
             bHaveSpatialite << std::endl;
-        m_session->spatialite(m_modulename);
+        m_session->loadSpatialite(m_modulename);
 
         if (!bHaveSpatialite)
         {
