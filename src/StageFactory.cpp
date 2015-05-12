@@ -233,12 +233,7 @@ StageFactory::StageFactory(bool no_plugins)
 Stage *StageFactory::createStage(std::string const& stage_name) const
 {
     PluginManager& pm = PluginManager::getInstance();
-
-    Stage *stage = (Stage *)pm.createObject(stage_name);
-    if (!stage)
-        if (pm.guessLoadByPath(stage_name) == 0)
-            stage = (Stage *)pm.createObject(stage_name);
-    return stage;
+    return static_cast<Stage*>(pm.createObject(stage_name));
 }
 
 

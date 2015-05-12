@@ -392,3 +392,21 @@ TEST(LasReaderTest, callback)
     EXPECT_EQ(count, (point_count_t)1065);
 }
 
+
+// The header of 1.2-with-color-clipped says that it has 1065 points,
+// but it really only has 1064.
+TEST(LasReaderTest, LasHeaderIncorrentPointcount)
+{
+    PointTable table;
+
+    Options readOps;
+    readOps.add("filename", Support::datapath("las/1.2-with-color-clipped.las"));
+    LasReader reader;
+    reader.setOptions(readOps);
+
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    PointViewPtr view = *viewSet.begin();
+
+    EXPECT_EQ(1064, view->size());
+}
