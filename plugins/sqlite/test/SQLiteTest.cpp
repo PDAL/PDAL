@@ -163,13 +163,13 @@ TEST(SQLiteTest, readWriteCompressScale)
 
 TEST(SQLiteTest, Issue895)
 {
-    LogPtr log = std::shared_ptr<pdal::Log>(new pdal::Log("Issue895", "stdout"));
+    LogPtr log(new pdal::Log("Issue895", "stdout"));
     log->setLevel(LogLevel::Debug);
 
     const std::string filename(Support::temppath("issue895.sqlite"));
-    
+
     FileUtils::deleteFile(filename);
-    
+
     bool ok;
     const char* sql;
 
@@ -187,11 +187,11 @@ TEST(SQLiteTest, Issue895)
         db.connect(false);
         sql = "SELECT name FROM sqlite_master WHERE type = \"table\"";
         db.query(sql);
-    
-        // because order of the returned rows is undefined        
+
+        // because order of the returned rows is undefined
         bool foundMine = false;
         bool foundTheirs = false;
-        
+
         {
             const row* r = db.get();
             column const& c = r->at(0);
@@ -200,7 +200,7 @@ TEST(SQLiteTest, Issue895)
             foundTheirs = (strcmp(c.data.c_str(), "sqlite_sequence") == 0);
             //printf("%s %d %d\n", c.data.c_str(), (int)foundMine, (int)foundTheirs);
             EXPECT_TRUE(foundMine || foundTheirs);
-        }    
+        }
 
         ok = db.next();
         EXPECT_TRUE(ok);
@@ -213,11 +213,11 @@ TEST(SQLiteTest, Issue895)
             //printf("%s %d %d\n", c.data.c_str(), (int)foundMine, (int)foundTheirs);
             EXPECT_TRUE(foundMine && foundTheirs);
         }
-        
+
         ok = db.next();
         EXPECT_FALSE(ok);
     }
-    
+
     // open the DB, ask if the tables exist
     {
         SQLite db(filename, LogPtr(log));
@@ -229,4 +229,50 @@ TEST(SQLiteTest, Issue895)
         ok = db.doesTableExist("sqlite_sequence");
         EXPECT_TRUE(ok);
     }
+}
+
+
+TEST(SQLiteTest, testSpatialite)
+{
+    LogPtr log(new pdal::Log("spat", "stdout"));
+    log->setLevel(LogLevel::Debug);
+
+    const std::string filename(Support::temppath("spat.sqlite"));
+
+    FileUtils::deleteFile(filename);
+
+    SQLite db(filename, LogPtr(log));
+    db.connect(true);
+
+    EXPECT_FALSE(db.haveSpatialite());
+
+    db.loadSpatialite();
+    db.initSpatialiteMetadata();
+
+    EXPECT_TRUE(db.haveSpatialite());
+
+    FileUtils::deleteFile(filename);
+}
+
+
+TEST(SQLiteTest, testVersionInfo)
+{
+    LogPtr log = std::shared_ptr<pdal::Log>(new pdal::Log("spver", "stdout"));
+    log->setLevel(LogLevel::Debug);
+
+    const std::string filename(Support::temppath("spver.sqlite"));
+
+    FileUtils::deleteFile(filename);
+
+    SQLite db(filename, LogPtr(log));
+    db.connect(true);
+    db.loadSpatialite();
+
+    const std::string p = db.getSQLiteVersion();
+    EXPECT_EQ(p[0], '3'); // 3.8.9 as of this commit
+
+    const std::string q = db.getSpatialiteVersion();
+    EXPECT_EQ(q[0], '4'); // 4.2.0 as of this commit
+
+    FileUtils::deleteFile(filename);
 }
