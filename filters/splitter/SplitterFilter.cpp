@@ -98,11 +98,10 @@ PointViewSet SplitterFilter::run(PointViewPtr inView)
     std::map<Coord, PointViewPtr, CoordCompare> viewMap(compare);
 
     // Use the location of the first point as the origin.
-    if (m_xOrigin == std::numeric_limits<double>::quiet_NaN())
+    if (std::isnan(m_xOrigin))
         m_xOrigin = inView->getFieldAs<double>(Dimension::Id::X, 0);
-    if (m_yOrigin == std::numeric_limits<double>::quiet_NaN())
+    if (std::isnan(m_yOrigin))
         m_yOrigin = inView->getFieldAs<double>(Dimension::Id::Y, 0);
-
     // Overlay a grid of squares on the points (m_length sides).  Each square
     // corresponds to a new point buffer.  Place the points falling in the
     // each square in the corresponding point buffer.
