@@ -65,6 +65,7 @@ private:
     double m_cellSize;
     bool m_classify;
     bool m_extract;
+    bool m_approximate;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void processOptions(const Options& options);
