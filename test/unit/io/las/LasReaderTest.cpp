@@ -408,5 +408,5 @@ TEST(LasReaderTest, LasHeaderIncorrentPointcount)
     PointViewSet viewSet = reader.execute(table);
     PointViewPtr view = *viewSet.begin();
 
-    EXPECT_EQ(1064, view->size());
+    EXPECT_EQ(1064u, view->size());
 }
