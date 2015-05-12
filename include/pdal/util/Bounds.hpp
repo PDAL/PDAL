@@ -243,12 +243,15 @@ inline std::ostream& operator << (std::ostream& ostr, const BOX3D& bounds)
         return ostr;
     }
 
+    const int savedPrec = ostr.precision();
+    ostr.precision(16); // or..?
     ostr << "(";
     ostr << "[" << bounds.minx << ", " << bounds.maxx << "], "
          << "[" << bounds.miny << ", " << bounds.maxy <<"]";
     if (!bounds.is_z_empty())
          ostr << ", [" <<  bounds.minz << ", " << bounds.maxz << "]";
     ostr << ")";
+    ostr.precision(savedPrec);
     return ostr;
 }
 

@@ -251,3 +251,22 @@ TEST(BoundsTest, test_issue_897)
     EXPECT_TRUE(aContainsA);
     EXPECT_TRUE(bContainsB);
 }
+
+TEST(BoundsTest, test_precisionloss)
+{
+    const BOX3D b1(0.123456789,0.0,0,0);
+    EXPECT_DOUBLE_EQ(b1.minx, 0.123456789);
+
+    // convert it to a string, which is what happens
+    // when you do something like:
+    //   options.getValueOrDefault<BOX3D>("bounds", BOX3D());
+    std::ostringstream oss;
+    oss << b1; 
+
+    // convert it back
+    std::istringstream iss(oss.str());
+    BOX3D b2;
+    iss >> b2;
+
+    EXPECT_DOUBLE_EQ(b2.minx, 0.123456789);
+}
