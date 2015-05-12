@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2015, Oscar Martinez Rubi (o.rubi@esciencecenter.nl)
 *
 * All rights reserved.
 *

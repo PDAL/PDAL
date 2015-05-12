@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2013, Bradley J Chambers (brad.chambers@gmail.com)
+ * Copyright (c) 2015, Oscar Martinez Rubi (o.rubi@esciencecenter.nl)
  *
  * All rights reserved.
  *
