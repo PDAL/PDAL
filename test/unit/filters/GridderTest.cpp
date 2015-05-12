@@ -53,8 +53,8 @@ TEST(GridderTest, test_tile_filter)
     r.setOptions(ops1);
 
     Options o;
-    Option num_x("num_x", 16, "num_x");
-    Option num_y("num_y", 16, "num_y");
+    Option num_x("num_x", 4, "num_x");
+    Option num_y("num_y", 4, "num_y");
     Option min_x("min_x", 635000, "min_x");
     Option min_y("min_y", 845000, "min_y");
     Option max_x("max_x", 640000, "max_x");
@@ -89,20 +89,9 @@ TEST(GridderTest, test_tile_filter)
     for (auto it = viewSet.begin(); it != viewSet.end(); ++it)
         views.push_back(*it);
 
-    auto sorter = [](PointViewPtr p1, PointViewPtr p2)
-    {
-        BOX3D b1 = p1->calculateBounds();
-        BOX3D b2 = p2->calculateBounds();
-
-        return b1.minx < b2.minx ?  true :
-            b1.minx > b2.minx ? false :
-            b1.miny < b2.miny;
-    };
-    std::sort(views.begin(), views.end(), sorter);
-
     EXPECT_EQ(views.size(), 12u);
     size_t counts[] = {73, 42, 108, 233, 6, 101, 45, 216, 40, 103, 79, 19 };
-
+                      
     for (size_t i = 0; i < views.size(); ++i)
     {
         PointViewPtr view = views[i];
