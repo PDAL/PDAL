@@ -225,15 +225,20 @@ StageFactory::StageFactory(bool no_plugins)
 }
 
 /// Create a stage and return a pointer to the created stage.  Caller takes
-/// ownership and is responsible for stage cleanup.
+/// ownership unless the ownStage argument is true.
 ///
 /// \param[in] stage_name  Type of stage to by created.
+/// \param[in] ownStage    Whether the factory should own the stage.
 /// \return  Pointer to created stage.
 ///
-Stage *StageFactory::createStage(std::string const& stage_name) const
+Stage *StageFactory::createStage(std::string const& stage_name,
+    bool ownStage)
 {
     PluginManager& pm = PluginManager::getInstance();
-    return static_cast<Stage*>(pm.createObject(stage_name));
+    Stage *s = static_cast<Stage*>(pm.createObject(stage_name));
+    if (s && ownStage)
+        m_ownedStages.push_back(std::unique_ptr<Stage>(s));
+    return s;
 }
 
 
