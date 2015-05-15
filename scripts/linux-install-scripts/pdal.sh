@@ -31,10 +31,10 @@ cmake   -G "Unix Makefiles"  \
         -DLAZPERF_INCLUDE_DIR=/home/vagrant/laz-perf \
         -DJSONCPP_ROOT_DIR=/usr/include/jsoncpp \
         -DBUILD_PLUGIN_GEOWAVE=ON \
-        -DGEOWAVE_RUNTIME_JAR=/home/vagrant/geowave/geowave-deploy/target/geowave-deploy-0.8.5-jace.jar \
-        -DJACE_INCLUDE_DIR=/home/vagrant/geowave/geowave-deploy/target/dependency/jace/include \
-        -DJACE_LIBRARY=/home/vagrant/geowave/geowave-deploy/target/dependency/jace/libjace.so \
-        -DJACE_RUNTIME_JAR=/home/vagrant/geowave/geowave-deploy/target/dependency/jace-core-runtime-1.2.22.jar \
+        -DGEOWAVE_RUNTIME_JAR=/home/vagrant/geowave/geowave-jace.jar \
+        -DJACE_INCLUDE_DIR=/home/vagrant/geowave/include \
+        -DJACE_LIBRARY=/home/vagrant/geowave/libjace.so \
+        -DJACE_RUNTIME_JAR=/home/vagrant/geowave/jace-core-runtime.jar \
         -DJAVA_AWT_INCLUDE_PATH=/usr/lib/jvm/java-7-oracle/include \
         -DJAVA_AWT_LIBRARY=/usr/lib/jvm/java-7-oracle/jre/lib/amd64/libjawt.so \
         -DJAVA_INCLUDE_PATH=/usr/lib/jvm/java-7-oracle/include \
