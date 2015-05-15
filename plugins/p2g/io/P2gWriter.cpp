@@ -215,8 +215,9 @@ void P2gWriter::done(PointTableRef table)
     adfGeoTransform[4] = 0.0;
     adfGeoTransform[5] = -1 * m_GRID_DIST_Y;
 
-    SpatialReference const& srs = getSpatialReference();
+    SpatialReference const& srs = table.spatialRef();
 
+    log()->get(LogLevel::Debug) << "Output SRS  :'" << srs.getWKT() << "'" << std::endl;
     if ((rc = m_interpolator->finish(const_cast<char*>(m_filename.c_str()), m_outputFormat, m_outputTypes, adfGeoTransform, srs.getWKT().c_str())) < 0)
     {
         throw p2g_error("interp->finish() error");
