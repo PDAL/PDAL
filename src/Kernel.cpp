@@ -67,6 +67,7 @@ Kernel::Kernel()
     , m_hardCoreDebug(false)
     , m_reportDebug(false)
     , m_visualize(false)
+    , m_label("")
 {
 }
 
@@ -532,6 +533,9 @@ void Kernel::addBasicSwitchSet()
         po::value<bool>(&m_hardCoreDebug)->zero_tokens()->implicit_value(true),
         "Enable developer debug mode (don't trap exceptions so segfaults "
         "are thrown)")
+    ("label",
+        po::value<std::string>(&m_label)->default_value(""),
+        "A string to label the process with")
     ("verbose,v", po::value<uint32_t>(&m_verboseLevel)->default_value(0),
         "Set verbose message level")
     ("version",
