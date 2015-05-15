@@ -153,7 +153,13 @@ void P2gWriter::write(const PointViewPtr view)
         m_coordinates.push_back(boost::tuple<double, double, double>(x, y, z));
     }
 
-    m_bounds = view->calculateBounds();
+    m_bounds.grow(view->calculateBounds());
+}
+
+void P2gWriter::done(PointTableRef table)
+{
+    // If we never got any points, we're done.
+    if (! m_coordinates.size()) return;
 
     m_GRID_SIZE_X = (int)(ceil((m_bounds.maxx - m_bounds.minx)/m_GRID_DIST_X)) + 1;
     m_GRID_SIZE_Y = (int)(ceil((m_bounds.maxy - m_bounds.miny)/m_GRID_DIST_Y)) + 1;
