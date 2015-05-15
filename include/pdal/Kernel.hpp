@@ -171,6 +171,7 @@ private:
     std::string m_scales;
     std::string m_offsets;
     bool m_visualize;
+    std::string m_label;
 
     std::vector<po::options_description*> m_public_options;
     std::vector<po::options_description*> m_hidden_options;
