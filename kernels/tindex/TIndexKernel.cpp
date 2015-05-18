@@ -162,7 +162,10 @@ void TIndexKernel::validateSwitches()
     {
         if (m_filespec.empty())
             throw pdal_error("No output filename provided.");
-        StringList invalidArgs { "t_srs", "srs_srs_name" };
+        StringList invalidArgs;
+        invalidArgs.push_back("t_srs");
+        invalidArgs.push_back("src_srs_name");
+
         for (auto arg : invalidArgs)
             if (argumentSpecified(arg))
             {
