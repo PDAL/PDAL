@@ -461,11 +461,7 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
     fileInfo.m_boundary = metadata.findChild("boundary:boundary").value();
     fileInfo.m_srs = metadata.findChild("summary:spatial_reference").value();
 
-    //ABELL - Not portable.
-    struct stat statbuf;
-    stat(filename.c_str(), &statbuf);
-    gmtime_r(&statbuf.st_mtime, &fileInfo.m_mtime);
-    gmtime_r(&statbuf.st_mtime, &fileInfo.m_ctime);
+    FileUtils::fileTimes(filename, &fileInfo.m_ctime, &fileInfo.m_mtime);
 
     return fileInfo;
 }
