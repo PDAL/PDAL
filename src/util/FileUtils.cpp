@@ -32,9 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef WIN32
 #include <sys/stat.h>
-#endif
 
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/pdal_error.hpp>

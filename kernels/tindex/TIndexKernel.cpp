@@ -193,7 +193,7 @@ int TIndexKernel::execute()
         {
             createFile();
         }
-        catch (pdal_error& error)
+        catch (pdal_error&)
         {
             if (m_dataset)
                 OGR_DS_Destroy(m_dataset);
