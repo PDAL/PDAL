@@ -98,8 +98,7 @@ std::string TIndexKernel::getName() const { return s_info.name; }
 
 TIndexKernel::TIndexKernel()
     : Kernel()
-    , m_driverName("ESRI Shapefile")
-    , m_tileIndexColumnName("location")
+//ABELL - need to option this.
     , m_srsColumnName("srs")
     , m_merge(false)
     , m_dataset(NULL)
@@ -124,13 +123,10 @@ void TIndexKernel::addSwitches()
             "Build: Pattern of files to index. Merge: Output filename")
         ("lyr_name", po::value<std::string>(&m_layerName),
             "OGR layer name to write into datasource")
-        ("tile_index", po::value<std::string>(&m_tileIndexColumnName),
-            "Tile index column name")
-        ("src_srs_name", po::value<std::string>(&m_srsColumnName),
-            "SRS column name")
-        ("driver_name,f",
-            po::value<std::string>(&m_driverName)->default_value(
-            "ESRI Shapefile"), "OGR driver name to use ")
+        ("tindex_name", po::value<std::string>(&m_tileIndexColumnName)->
+            default_value("location"), "Tile index column name")
+        ("driver,f", po::value<std::string>(&m_driverName)->
+            default_value("ESRI Shapefile"), "OGR driver name to use ")
         ("t_srs", po::value<std::string>(&m_tgtSrsString)->
             default_value("EPSG:4326"), "Target SRS of tile index")
         ("geometry", po::value<std::string>(&m_filterGeom),
@@ -165,7 +161,6 @@ void TIndexKernel::validateSwitches()
         StringList invalidArgs;
         invalidArgs.push_back("t_srs");
         invalidArgs.push_back("src_srs_name");
-
         for (auto arg : invalidArgs)
             if (argumentSpecified(arg))
             {
@@ -524,6 +519,12 @@ bool TIndexKernel::createLayer(std::string const& layername)
 
     if (m_layer)
         createFields();
+
+    //ABELL - At this point we should essentially "sync" things so that
+    //  index file gets created with the proper fields.  If this doesn't
+    //  and a failure occurs, the file may be left with a layer that doesn't
+    //  have the requisite fields.  Note that OGR_DS_SyncToDisk doesn't seem
+    //  to work reliably enough to warrant use.
     return (bool)m_layer;
 }
 
