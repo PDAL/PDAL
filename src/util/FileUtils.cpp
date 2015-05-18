@@ -271,18 +271,21 @@ bool FileUtils::isAbsolutePath(const string& path)
 void FileUtils::fileTimes(const std::string& filename,
     struct tm *createTime, struct tm *modTime)
 {
-    struct stat statbuf;
-    stat(filename.c_str(), &statbuf);
+#ifdef WIN32
+    struct _stat statbuf;
+    _stat(filename.c_str(), &statbuf);
+
     if (createTime)
-#ifdef WIN32
         *createTime = *gmtime(&statbuf.st_ctime);
-#else
-        gmtime_r(&statbuf.st_ctime, createTime);
-#endif
     if (modTime)
-#ifdef WIN32
         *modTime = *gmtime(&statbuf.st_mtime);
 #else
+    struct stat statbuf;
+    stat(filename.c_str(), &statbuf);
+
+    if (createTime)
+        gmtime_r(&statbuf.st_ctime, createTime);
+    if (modTime)
         gmtime_r(&statbuf.st_mtime, modTime);
 #endif
 }
