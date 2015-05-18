@@ -85,6 +85,11 @@ public:
         m_level = v;
     }
 
+    /// Set the leader string.
+    /// \param[in]  leader  Leader string.
+    void setLeader(const std::string& leader)
+        { m_leader = leader; }
+
     /// @return A string representing the LogLevel
     std::string getLevelString(LogLevel::Enum v) const;
 

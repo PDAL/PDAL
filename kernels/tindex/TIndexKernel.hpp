@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
+* Copyright (c) 2015, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -34,75 +34,79 @@
 
 #pragma once
 
+#include <pdal/GDALUtils.hpp>
 #include <pdal/Kernel.hpp>
-#include <pdal/KernelSupport.hpp>
-#include <pdal/PointView.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/plugin.hpp>
 
-#ifdef __clang__
-#pragma GCC diagnostic ignored "-Wtautological-constant-out-of-range-compare"
-#endif
 
-#include <boost/property_tree/json_parser.hpp>
-#include <boost/tokenizer.hpp>
-
-typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-
-extern "C" int32_t InfoKernel_ExitFunc();
-extern "C" PF_ExitFunc InfoKernel_InitPlugin();
+extern "C" int32_t TIndexKernel_ExitFunc();
+extern "C" PF_ExitFunc TIndexKernel_InitPlugin();
 
 namespace pdal
 {
+    
+class KernelFactory;
 
-class PDAL_DLL InfoKernel : public Kernel
+class PDAL_DLL TIndexKernel : public Kernel
 {
+    struct FileInfo
+    {
+        std::string m_filename;
+        std::string m_srs;
+        std::string m_boundary;
+        struct tm m_ctime;
+        struct tm m_mtime;
+    };
+
+    struct FieldIndexes
+    {
+        int m_filename;
+        int m_srs;
+        int m_ctime;
+        int m_mtime;
+    };
+
 public:
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
     int execute(); // overrride
-
-    MetadataNode dump(const std::string& filename);
-
-    void prepare(const std::string& filename);
     
-    inline bool showAll() { return m_showAll; }
-    inline void doShowAll(bool value) { m_showAll = value; }
-
 private:
-    InfoKernel();
+    TIndexKernel();
     void addSwitches(); // overrride
     void validateSwitches(); // overrride
 
-    MetadataNode dumpPoints(PointViewPtr inView) const;
-    MetadataNode dumpStats() const;
-    void dumpPipeline() const;
-    MetadataNode dumpSummary(const QuickInfo& qi);
-    MetadataNode dumpQuery(PointViewPtr inView) const;
+    void createFile();
+    void mergeFile();
+    bool openDataset(const std::string& filename);
+    bool createDataset(const std::string& filename);
+    bool openLayer(const std::string& layerName);
+    bool createLayer(const std::string& layerName);
+    FieldIndexes getFields();
+    FileInfo getFileInfo(KernelFactory& factory, const std::string& filename);
+    bool createFeature(const FieldIndexes& indexes, const FileInfo& info);
+    gdal::Geometry prepareGeometry(const FileInfo& fileInfo);
+    gdal::Geometry prepareGeometry(const std::string& wkt,
+        const gdal::SpatialRef& inSrs, const gdal::SpatialRef& outSrs);
+    void createFields();
 
-    std::string m_inputFile;
-    bool m_showStats;
-    bool m_showSchema;
-    bool m_showAll;
-    bool m_showMetadata;
-    bool m_boundary;
-    pdal::Options m_options;
-    std::string m_pointIndexes;
-    bool m_useJSON;
-    std::string m_Dimensions;
-    std::string m_QueryPoint;
-    double m_QueryDistance;
-    std::string m_pipelineFile;
-    bool m_showSummary;
-    std::string m_PointCloudSchemaOutput;
+    std::string m_idxFilename;
+    std::string m_filespec;
+    StringList m_files;
+    std::string m_layerName;
+    std::string m_driverName;
+    std::string m_tileIndexColumnName;
+    std::string m_srsColumnName;
+    std::string m_filterGeom;
+    bool m_merge;
 
-    Stage *m_statsStage;
-    Stage *m_hexbinStage;
-    Stage *m_reader;
-
-    MetadataNode m_tree;
-    std::unique_ptr<PipelineManager> m_manager;
+    void *m_dataset;
+    void *m_layer;
+    std::string m_tgtSrsString;
 };
 
 } // namespace pdal
+

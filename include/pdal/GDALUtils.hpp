@@ -48,12 +48,68 @@
 #include "gdal.h"
 #include <cpl_vsi.h>
 #include <ogr_api.h>
+#include <ogr_srs_api.h>
 
 namespace pdal
 {
 namespace gdal
 {
 
+typedef std::shared_ptr<void> RefPtr;
+
+class SpatialRef
+{
+public:
+    SpatialRef()
+        { newRef(OSRNewSpatialReference("")); }
+    SpatialRef(const std::string& srs)
+    {
+        newRef(OSRNewSpatialReference(""));
+        OSRSetFromUserInput(get(), srs.data());
+    }
+
+    void setFromLayer(OGRLayerH layer)
+        { newRef(OSRClone(OGR_L_GetSpatialRef(layer))); }
+    operator bool () const
+        { return m_ref.get() != NULL; }
+    OGRSpatialReferenceH get() const
+        { return m_ref.get(); }
+
+private:
+    void newRef(void *v)
+    {
+        m_ref = RefPtr(v, [](void* t){ OSRDestroySpatialReference(t); } );
+    }
+
+    RefPtr m_ref;
+};
+
+class Geometry
+{
+public:
+    Geometry()
+        {}
+    Geometry(const std::string& wkt, const SpatialRef& srs)
+    {
+        OGRGeometryH geom;
+
+        char *p_wkt = const_cast<char *>(wkt.data());
+        OGR_G_CreateFromWkt(&p_wkt, srs.get(), &geom);
+        newRef(geom);
+    }
+
+    operator bool () const
+        { return get() != NULL; }
+    OGRGeometryH get() const
+        { return m_ref.get(); }
+
+private:
+    void newRef(void *v)
+    {
+        m_ref = RefPtr(v, [](void* t){ OGR_G_DestroyGeometry(t); } );
+    }
+    RefPtr m_ref;
+};
 
 class PDAL_DLL ErrorHandler 
 {
@@ -64,7 +120,8 @@ public:
 
     static void CPL_STDCALL trampoline(::CPLErr code, int num, char const* msg)
     {
-        ErrorHandler* debug = static_cast<ErrorHandler*>(CPLGetErrorHandlerUserData());
+        ErrorHandler* debug =
+            static_cast<ErrorHandler*>(CPLGetErrorHandlerUserData());
         if (!debug)
             return;
 

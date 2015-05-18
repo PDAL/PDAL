@@ -214,6 +214,8 @@ void LasReader::ready(PointTableRef table, MetadataNode& m)
         throw pdal_error("LASzip is not enabled.  Can't read LAZ data.");
 #endif
     }
+    m_error.setLog(log());  
+    
 }
 
 
