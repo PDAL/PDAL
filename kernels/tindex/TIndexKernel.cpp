@@ -276,7 +276,7 @@ void TIndexKernel::mergeFile()
     }
 
     FieldIndexes indexes = getFields();
-    
+
     SpatialRef outSrs(m_tgtSrsString);
     if (!outSrs)
         throw pdal_error("Couldn't interpret target SRS string.");
@@ -307,7 +307,7 @@ void TIndexKernel::mergeFile()
         fileInfo.m_srs =
             OGR_F_GetFieldAsString(feature, indexes.m_srs);
         files.push_back(fileInfo);
-    
+
         OGR_F_Destroy(feature);
     }
 
@@ -407,7 +407,7 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
     {
         std::string auth = std::string(pszAuthorityName) + ":" +
             pszAuthorityCode;
-        OGR_F_SetFieldString(srcSrs.get(), indexes.m_srs, auth.data());
+        OGR_F_SetFieldString(hFeature, indexes.m_srs, auth.data());
     }
     else
     {
@@ -444,7 +444,7 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
 
     std::unique_ptr<Kernel> app = factory.createKernel("kernels.info");
     InfoKernel *info = static_cast<InfoKernel *>(app.get());
-    
+
     info->doShowAll(true);
     info->prepare(filename);
 
