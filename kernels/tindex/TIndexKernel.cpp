@@ -63,22 +63,6 @@ void setDate(OGRFeatureH feature, const tm& tyme, int fieldNumber)
 }
 
 
-pdal::StringList glob(std::string& path)
-{
-    pdal::StringList filenames;
-
-#ifndef WIN32
-    glob_t glob_result;
-
-    glob(path.c_str(), GLOB_TILDE, NULL, &glob_result);
-    for (unsigned int i = 0; i < glob_result.gl_pathc; ++i)
-        filenames.push_back(std::string(glob_result.gl_pathv[i]));
-    globfree(&glob_result);
-#endif
-
-    return filenames;
-}
-
 } // anonymous namespace
 
 
@@ -131,6 +115,9 @@ void TIndexKernel::addSwitches()
             default_value("EPSG:4326"), "Target SRS of tile index")
         ("geometry", po::value<std::string>(&m_filterGeom),
             "Geometry to filter points when merging.")
+        ("write_absolute_path", po::value<bool>(&m_absPath)->
+            default_value(false),
+            "Write absolute rather than relative file paths")
         ("merge", "Whether we're merging the entries in a tindex file.")
     ;
 
@@ -204,6 +191,28 @@ int TIndexKernel::execute()
 }
 
 
+StringList TIndexKernel::glob(std::string& path)
+{
+    StringList filenames;
+
+#ifndef WIN32
+    glob_t glob_result;
+
+    ::glob(path.c_str(), GLOB_TILDE, NULL, &glob_result);
+    for (unsigned int i = 0; i < glob_result.gl_pathc; ++i)
+    {
+        std::string filename = glob_result.gl_pathv[i];
+        if (m_absPath)
+            filename = FileUtils::toAbsolutePath(filename);
+        filenames.push_back(filename);
+    }
+    globfree(&glob_result);
+#endif
+
+    return filenames;
+}
+
+
 void TIndexKernel::createFile()
 {
     m_files = glob(m_filespec);
@@ -245,6 +254,7 @@ void TIndexKernel::createFile()
     KernelFactory factory(false);
     for (auto f : m_files)
     {
+        //ABELL - Not sure why we need to get absolute path here.
         f = FileUtils::toAbsolutePath(f);
         FileInfo info = getFileInfo(factory, f);
         if (createFeature(indexes, info))
@@ -414,11 +424,10 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
         char* pszProj4 = NULL;
         if (OSRExportToProj4(srcSrs.get(), &pszProj4) != OGRERR_NONE)
         {
-            std::ostringstream out;
-
-            out << "Unable to output proj4 SRS for file '" <<
-                fileInfo.m_filename << "'";
-            throw pdal_error(out.str());
+            m_log.get(LogLevel::Warning) << "Unable to convert SRS to "
+                "proj.4 format for file '" << fileInfo.m_filename << "'" <<
+                std::endl;
+            return false;
         }
         std::string srs = std::string(pszProj4);
         OGR_F_SetFieldString(hFeature, indexes.m_srs, srs.c_str());

@@ -79,6 +79,7 @@ private:
     void addSwitches(); // overrride
     void validateSwitches(); // overrride
 
+    StringList glob(std::string& path);
     void createFile();
     void mergeFile();
     bool openDataset(const std::string& filename);
@@ -102,6 +103,7 @@ private:
     std::string m_srsColumnName;
     std::string m_filterGeom;
     bool m_merge;
+    bool m_absPath;
 
     void *m_dataset;
     void *m_layer;
