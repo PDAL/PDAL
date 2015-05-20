@@ -407,7 +407,7 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
     {
         std::string auth = std::string(pszAuthorityName) + ":" +
             pszAuthorityCode;
-        OGR_F_SetFieldString(srcSrs.get(), indexes.m_srs, auth.data());
+        OGR_F_SetFieldString(hFeature, indexes.m_srs, auth.data());
     }
     else
     {
