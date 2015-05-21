@@ -239,6 +239,10 @@ bool PluginManager::shutdown()
     return success;
 }
 
+void PluginManager::loadPlugin(const std::string& driverFileName)
+{
+
+}
 
 bool PluginManager::guessLoadByPath(const std::string& driverName)
 {
