@@ -239,6 +239,46 @@ bool PluginManager::shutdown()
     return success;
 }
 
+bool PluginManager::loadPlugin(const std::string& driverFileName)
+{
+    std::vector<std::string> driverPathVec;
+    driverPathVec = Utils::split2(driverFileName, '.');
+
+    boost::filesystem::path full_path(driverFileName);
+
+    if (boost::filesystem::is_directory(full_path))
+        return false;
+
+    std::string ext = full_path.extension().string();
+    if (ext != dynamicLibraryExtension)
+        return false;
+    std::string stem = full_path.stem().string();
+    std::vector<std::string> driverNameVec;
+    driverNameVec = Utils::split2(driverPathVec[0], '_');
+
+    std::string ptype;
+    if (driverNameVec.size() >=3)
+        ptype = driverNameVec[2];
+
+    PF_PluginType type;
+    if (Utils::iequals(ptype, "reader"))
+        type = PF_PluginType_Reader;
+    else if (Utils::iequals(ptype,"kernel"))
+        type = PF_PluginType_Kernel;
+    else if (Utils::iequals(ptype, "filter"))
+        type = PF_PluginType_Filter;
+    else if (Utils::iequals(ptype, "writer"))
+        type = PF_PluginType_Writer;
+    else
+        throw pdal_error("Unknown plugin type '" + ptype +"'");
+
+    if (loadByPath(full_path.string(), type))
+    {
+        return true;
+    }
+
+    return false;
+}
 
 bool PluginManager::guessLoadByPath(const std::string& driverName)
 {
