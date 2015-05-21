@@ -74,7 +74,7 @@ public:
 
     void loadAll(PF_PluginType type);
     void loadAll(const std::string & pluginDirectory, PF_PluginType type);
-    void loadPlugin(const std::string & pluginFilename);
+    bool loadPlugin(const std::string & pluginFilename);
 
     void * createObject(const std::string & objectType);
 
