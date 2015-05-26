@@ -64,13 +64,11 @@ void SQLiteReader::initialize()
 
         if (!bHaveSpatialite)
         {
-            std::ostringstream oss;
-            oss << "no spatialite enabled!";
-            throw sqlite_driver_error(oss.str());
+            throw pdal_error("no spatialite enabled!");
         }
 
     }
-    catch (sqlite_driver_error const& e)
+    catch (pdal_error const& e)
     {
         std::stringstream oss;
         oss << "Unable to connect to database with error '" << e.what() << "'";
@@ -188,7 +186,7 @@ void SQLiteReader::addDimensions(PointLayoutPtr layout)
     m_session->query(q);
     const row* r = m_session->get(); // First result better have our schema
     if (!r)
-        throw sqlite_driver_error("Unable to select schema from query!");
+        throw pdal_error("Unable to select schema from query!");
 
     column const& s = r->at(0); // First column is schema
 

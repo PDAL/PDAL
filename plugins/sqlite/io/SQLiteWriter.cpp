@@ -80,7 +80,7 @@ void SQLiteWriter::processOptions(const Options& options)
             options.getValueOrDefault<std::string>("filename", "");
 
         if (!m_connection.size())
-        throw sqlite_driver_error("unable to connect to database, "
+        throw pdal_error("unable to connect to database, "
             "no connection string was given!");
     }
     m_block_table =
@@ -119,7 +119,7 @@ void SQLiteWriter::initialize()
         }
 
     }
-    catch (sqlite_driver_error const& e)
+    catch (pdal_error const& e)
     {
         std::stringstream oss;
         oss << "Unable to connect to database with error '" << e.what() << "'";
