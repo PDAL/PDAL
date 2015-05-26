@@ -63,7 +63,9 @@ PointId PointTable::addPoint()
 {
     if (m_numPts % m_blockPtCnt == 0)
     {
-        char *buf = new char[pointsToBytes(m_blockPtCnt)];
+        size_t size = pointsToBytes(m_blockPtCnt);
+        char *buf = new char[size];
+        memset(buf, 0, size);
         m_blocks.push_back(buf);
     }
     return m_numPts++;
