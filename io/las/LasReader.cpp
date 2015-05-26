@@ -134,6 +134,7 @@ QuickInfo LasReader::inspect()
         Utils::saturation_cast<point_count_t>(m_lasHeader.pointCount());
     qi.m_bounds = m_lasHeader.getBounds();
     qi.m_srs = getSrsFromVlrs();
+    qi.m_valid = true;
     return qi;
 }
 
