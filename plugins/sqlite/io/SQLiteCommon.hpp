@@ -174,9 +174,9 @@ public:
 
     void connect(bool bWrite=false)
     {
-        if ( ! m_connection.size() )
+        if (!m_connection.size())
         {
-            throw pdal_error("unable to connect to sqlite3 database, no connection string was given!");
+            throw pdal_error("Unable to connect to database: empty connection string [SQLite::connect]");
         }
 
         int flags = SQLITE_OPEN_NOMUTEX;
@@ -194,37 +194,34 @@ public:
         int status = sqlite3_open_v2(m_connection.c_str(), &m_session, flags, 0);
         if (status != SQLITE_OK)
         {
-            error("sqlite3_open_v2: unable to connect to database");
+            error("Unable to open database", "connect");
         }
     }
 
-    void execute(std::string const& sql, const std::string& userErrorMsg="")
+    void execute(std::string const& sql)
     {
-        if (!m_session)
-        {
-            throw pdal_error("Session not opened!");
-        }
+        checkSession();
+        
         m_log->get(LogLevel::Debug3) << "Executing '" << sql <<"'"<< std::endl;
 
         int status = sqlite3_exec(m_session, sql.c_str(), NULL, NULL, NULL);
         if (status != SQLITE_OK)
         {
             std::ostringstream oss;
-            oss << "sqlite3_exec: " << userErrorMsg
-                << std::endl
-                << "SQL: \"" << sql << "\"";
-            error(oss.str());
+            oss << "Database operation failed: "
+                << sql;
+            error(oss.str(), "execute");
         }
     }
 
     void begin()
     {
-        execute("BEGIN", "Unable to begin transaction");
+        execute("BEGIN");
     }
 
     void commit()
     {
-        execute("COMMIT", "Unable to commit transaction");
+        execute("COMMIT");
     }
 
     // Executes an SQL query statement and provides the returned rows via
@@ -242,6 +239,8 @@ public:
     //
     void query(std::string const& query)
     {
+        checkSession();
+
         m_position = 0;
         m_columns.clear();
         m_data.clear();
@@ -259,7 +258,7 @@ public:
                                     &tail);
         if (status != SQLITE_OK)
         {
-            error("sqlite3_prepare_v2 (query)");
+            error("query preparation failed", "query");
         }
 
         int numCols = -1;
@@ -329,14 +328,14 @@ public:
             }
             else
             {
-                error("sqlite3_step");
+                error("query step failed", "query");
             }
         }
 
         status = sqlite3_finalize(m_statement);
         if (status != SQLITE_OK)
         {
-            error("sqlite3_finalize");
+            error("query finalization failed", "query");
         }
         
         m_statement = NULL;
@@ -377,6 +376,8 @@ public:
 
     void insert(std::string const& statement, records const& rs)
     {
+        checkSession();
+        
         int status;
         
         records::size_type rows = rs.size();
@@ -389,7 +390,7 @@ public:
                                     0);
         if (status != SQLITE_OK)
         {
-            error("sqlite3_prepare_v2 (insert)");
+            error("insert preparation failed", "insert");
         }
         
         m_log->get(LogLevel::Debug3) << "Inserting '" << statement << "'"<<
@@ -423,9 +424,10 @@ public:
                 if (SQLITE_OK != status)
                 {
                     std::ostringstream oss;
-                    oss << "sqlite3_bind_*: row=" << r
-                        <<", position=" << pos;
-                    error(oss.str());
+                    oss << "insert bind failed (row=" << r
+                        <<", position=" << pos
+                        << ")";
+                    error(oss.str(), "insert");
                 }
             }
 
@@ -433,14 +435,14 @@ public:
 
             if (status != SQLITE_DONE && status != SQLITE_ROW)
             {
-                error("sqlite3_step");
+                error("insert step failed", "insert");
             }
         }
         
         status = sqlite3_finalize(m_statement);
         if (status != SQLITE_OK)
         {
-            error("sqlite3_finalize");
+            error("insert finalize failed", "insert");
         }
 
         m_statement = NULL;        
@@ -471,7 +473,7 @@ public:
         int status = sqlite3_enable_load_extension(m_session, 1);
         if (status != SQLITE_OK)
         {
-            error("sqlite3_enable_load_extension");
+            error("spatialite library load failed", "loadSpatialite");
         }
 
         std::ostringstream oss;
@@ -553,14 +555,24 @@ private:
     std::map<std::string, int32_t> m_columns;
     std::vector<std::string> m_types;
 
-    void error(std::string const& userMssg)
+    void error(std::string const& userMssg, std::string const& func)
     {
         char const* sqlMssg = sqlite3_errmsg(m_session);
 
-        std::ostringstream ss;
-        ss << "sqlite error: " << userMssg << std::endl 
-           << sqlMssg;
-        throw pdal_error(ss.str());
+        std::ostringstream oss;
+        oss << userMssg
+           << " [SQLite::" << func << "]"
+           << std::endl
+           << "sqlite3 error: " << sqlMssg;
+        throw pdal_error(oss.str());
+    }
+
+    void checkSession()
+    {
+        if (!m_session)
+        {
+            throw pdal_error("Database session not opened [SQLite::execute]");
+        }
     }
 };
 
