@@ -57,9 +57,11 @@ class PDAL_DLL LasReader : public pdal::Reader
 {
     friend class NitfReader;
 public:
-    LasReader() : pdal::Reader(), m_index(0),
-            m_istream(NULL)
+    LasReader() : pdal::Reader(), m_index(0), m_istream(NULL)
         {}
+
+    virtual ~LasReader()
+        {  destroyStream(); }
 
     static void * create();
     static int32_t destroy(void *);
@@ -79,7 +81,7 @@ protected:
         return m_istream;
     }
     virtual void destroyStream()
-        { FileUtils::closeFile(m_istream); }
+        { FileUtils::closeFile(m_istream); m_istream = NULL; }
 private:
     LasError m_error;
     LasHeader m_lasHeader;
