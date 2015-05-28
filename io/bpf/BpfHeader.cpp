@@ -47,7 +47,7 @@ namespace pdal
 ILeStream& operator >> (ILeStream& stream, BpfMuellerMatrix& m)
 {
     for (size_t i = 0; i < (sizeof(m.m_vals) / sizeof(m.m_vals[0])); ++i)
-        stream >> m.m_vals[i]; 
+        stream >> m.m_vals[i];
     return stream;
 }
 
@@ -55,7 +55,7 @@ ILeStream& operator >> (ILeStream& stream, BpfMuellerMatrix& m)
 OLeStream& operator << (OLeStream& stream, BpfMuellerMatrix& m)
 {
     for (size_t i = 0; i < (sizeof(m.m_vals) / sizeof(m.m_vals[0])); ++i)
-        stream << m.m_vals[i]; 
+        stream << m.m_vals[i];
     return stream;
 }
 
@@ -81,6 +81,8 @@ bool BpfHeader::read(ILeStream& stream)
 
 bool BpfHeader::readV3(ILeStream& stream)
 {
+    m_log->get(LogLevel::Debug) << "BPF: Reading V3\n";
+
     uint8_t dummyChar;
     uint8_t interleave;
     std::string magic;
@@ -97,6 +99,7 @@ bool BpfHeader::readV3(ILeStream& stream)
         dummyChar >> m_numPts >> m_coordType >> m_coordId >> m_spacing >>
         m_xform >> m_startTime >> m_endTime;
     m_numDim = (int32_t)numDim;
+
     switch (interleave)
     {
     case 0:
@@ -113,15 +116,17 @@ bool BpfHeader::readV3(ILeStream& stream)
     }
     return (bool)stream;
 }
-    
+
 
 bool BpfHeader::readV1(ILeStream& stream)
 {
+    m_log->get(LogLevel::Debug) << "BPF: Reading V1\n";
+
     stream >> m_len;
     stream >> m_version;
 
-    stream >> m_numPts >> m_numDim >> m_coordType >> m_coordId >>
-        m_spacing;
+    stream >> m_numPts >> m_numDim >> m_coordType >> m_coordId >> m_spacing;
+
     if (m_version == 1)
         m_pointFormat = BpfFormat::DimMajor;
     else if (m_version == 2)
@@ -180,8 +185,25 @@ bool BpfHeader::readDimensions(ILeStream& stream, BpfDimensionList& dims)
     size_t staticCnt = m_staticDims.size();
 
     dims.resize(m_numDim);
+
+    if (static_cast<std::size_t>(m_numDim) < staticCnt)
+    {
+        m_log->get(LogLevel::Error) << "BPF dimension range looks bad.\n";
+        m_log->get(LogLevel::Error) <<
+            "BPF: num dims: " << m_numDim << "\n" <<
+            "BPF: static count: " << staticCnt << "\n";
+
+        m_log->get(LogLevel::Error) << "Dims:\n";
+        for (auto d : dims)
+            m_log->get(LogLevel::Error) << "\t" << d.m_label << "\n";
+
+        m_log->get(LogLevel::Error) << "Static:\n";
+        for (auto d : m_staticDims)
+            m_log->get(LogLevel::Error) << "\t" << d.m_label << "\n";
+    }
+
     for (size_t d = 0; d < staticCnt; d++)
-        dims[d] = m_staticDims[d];
+        dims.at(d) = m_staticDims[d];
     if (!BpfDimension::read(stream, dims, staticCnt))
         return false;
 
@@ -272,7 +294,7 @@ bool BpfUlemHeader::read(ILeStream& stream)
     stream >> m_numFrames >> m_year >> m_month >> m_day >> m_lidarMode >>
         m_wavelen >> m_pulseFreq >> m_focalWidth >> m_focalHeight >>
         m_pixelPitchWidth >> m_pixelPitchHeight;
-    stream.get(m_classCode, 32);    
+    stream.get(m_classCode, 32);
     return (bool)stream;
 }
 
