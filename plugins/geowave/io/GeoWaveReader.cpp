@@ -57,11 +57,9 @@ using jace::StaticVmLoader;
 #ifdef _WIN32
 #include "jace/Win32VmLoader.h"
 using jace::Win32VmLoader;
-const std::string os_pathsep(";");
 #else
 #include "jace/UnixVmLoader.h"
 using ::jace::UnixVmLoader;
-const std::string os_pathsep(":");
 #endif
 
 #include "jace/JArray.h"
@@ -365,7 +363,6 @@ namespace pdal
         {
             StaticVmLoader loader(JNI_VERSION_1_2);
 
-            std::string jaceClasspath = TOSTRING(JACE_RUNTIME_JAR);
             std::string geowaveClasspath = TOSTRING(GEOWAVE_RUNTIME_JAR);
 
             OptionList options;
@@ -374,7 +371,7 @@ namespace pdal
             //options.push_back(CustomOption("-Xcheck:jni"));
             //options.push_back(Verbose (Verbose::JNI));
             //options.push_back(Verbose (Verbose::CLASS));
-            options.push_back(ClassPath(jaceClasspath + os_pathsep + geowaveClasspath));
+            options.push_back(ClassPath(geowaveClasspath));
 
             jace::createVm(loader, options);
         }

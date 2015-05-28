@@ -5,6 +5,7 @@ if [[ -f /sys/devices/system/cpu/online ]]; then
 fi
 #NUMTHREADS=1 # disable MP
 export NUMTHREADS
+export JAVA_HOME=/usr/lib/jvm/java-7-oracle
 
 git clone https://github.com/PDAL/PDAL.git pdal
 cd pdal
@@ -33,13 +34,7 @@ cmake   -G "Unix Makefiles"  \
         -DBUILD_PLUGIN_GEOWAVE=ON \
         -DGEOWAVE_RUNTIME_JAR=/home/vagrant/geowave/geowave-jace.jar \
         -DJACE_INCLUDE_DIR=/home/vagrant/geowave/include \
-        -DJACE_LIBRARY=/home/vagrant/geowave/libjace.so \
-        -DJACE_RUNTIME_JAR=/home/vagrant/geowave/jace-core-runtime.jar \
-        -DJAVA_AWT_INCLUDE_PATH=/usr/lib/jvm/java-7-oracle/include \
-        -DJAVA_AWT_LIBRARY=/usr/lib/jvm/java-7-oracle/jre/lib/amd64/libjawt.so \
-        -DJAVA_INCLUDE_PATH=/usr/lib/jvm/java-7-oracle/include \
-        -DJAVA_INCLUDE_PATH2=/usr/lib/jvm/java-7-oracle/include/linux \
-        -DJAVA_JVM_LIBRARY=/usr/lib/jvm/java-7-oracle/jre/lib/amd64/server/libjvm.so \
+        -DJACE_LIBRARY=/home/vagrant/geowave/build/libjace.so \
         ..
 
 make -j $NUMTHREADS
