@@ -149,9 +149,10 @@ bool BpfHeader::readV1(ILeStream& stream)
     stream >> xDim.m_min >> yDim.m_min >> zDim.m_min;
     stream >> xDim.m_max >> yDim.m_max >> zDim.m_max;
 
-    m_staticDims.push_back(xDim);
-    m_staticDims.push_back(yDim);
-    m_staticDims.push_back(zDim);
+    m_staticDims.resize(3);
+    m_staticDims[0] = xDim;
+    m_staticDims[1] = yDim;
+    m_staticDims[2] = zDim;
     return (bool)stream;
 }
 
