@@ -159,8 +159,8 @@ void TIndexKernel::validateSwitches()
     }
     else
     {
-        if (m_filespec.empty())
-            throw pdal_error("No input pattern specified.");
+        if (m_filespec.empty() && !m_usestdin)
+            throw pdal_error("No input pattern specified and STDIN not given");
         if (argumentExists("geometry"))
             throw pdal_error("--geometry option not supported when building "
                 "index.");
@@ -213,9 +213,24 @@ StringList TIndexKernel::glob(std::string& path)
 }
 
 
+StringList readSTDIN()
+{
+    std::string line;
+    StringList output;
+    while (std::getline(std::cin, line))
+    {
+        output.push_back(line);
+    }
+    return output;
+}
+
 void TIndexKernel::createFile()
 {
-    m_files = glob(m_filespec);
+
+    if (!m_usestdin)
+        m_files = glob(m_filespec);
+    else
+        m_files = readSTDIN();
 
     if (m_files.empty())
     {
@@ -286,7 +301,7 @@ void TIndexKernel::mergeFile()
     }
 
     FieldIndexes indexes = getFields();
-    
+
     SpatialRef outSrs(m_tgtSrsString);
     if (!outSrs)
         throw pdal_error("Couldn't interpret target SRS string.");
@@ -317,7 +332,7 @@ void TIndexKernel::mergeFile()
         fileInfo.m_srs =
             OGR_F_GetFieldAsString(feature, indexes.m_srs);
         files.push_back(fileInfo);
-    
+
         OGR_F_Destroy(feature);
     }
 
@@ -453,7 +468,7 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
 
     std::unique_ptr<Kernel> app = factory.createKernel("kernels.info");
     InfoKernel *info = static_cast<InfoKernel *>(app.get());
-    
+
     info->doShowAll(true);
     info->prepare(filename);
 
