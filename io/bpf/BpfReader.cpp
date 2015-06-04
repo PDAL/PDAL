@@ -68,6 +68,7 @@ QuickInfo BpfReader::inspect()
     QuickInfo qi;
 
     initialize();
+    qi.m_valid = true;
     qi.m_pointCount = m_header.m_numPts;
     qi.m_srs = getSpatialReference();
     for (auto di = m_dims.begin(); di != m_dims.end(); ++di)

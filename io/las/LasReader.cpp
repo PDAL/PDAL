@@ -122,9 +122,9 @@ std::string LasReader::getName() const { return s_info.name; }
 QuickInfo LasReader::inspect()
 {
     QuickInfo qi;
-    PointLayoutPtr layout(new PointLayout());
+    std::unique_ptr<PointLayout> layout(new PointLayout());
 
-    addDimensions(layout);
+    addDimensions(layout.get());
     initialize();
 
     Dimension::IdList dims = layout->dims();
@@ -134,6 +134,7 @@ QuickInfo LasReader::inspect()
         Utils::saturation_cast<point_count_t>(m_lasHeader.pointCount());
     qi.m_bounds = m_lasHeader.getBounds();
     qi.m_srs = getSrsFromVlrs();
+    qi.m_valid = true;
     return qi;
 }
 
@@ -214,8 +215,8 @@ void LasReader::ready(PointTableRef table, MetadataNode& m)
         throw pdal_error("LASzip is not enabled.  Can't read LAZ data.");
 #endif
     }
-    m_error.setLog(log());  
-    
+    m_error.setLog(log());
+
 }
 
 

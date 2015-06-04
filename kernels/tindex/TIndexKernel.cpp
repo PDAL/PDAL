@@ -159,8 +159,8 @@ void TIndexKernel::validateSwitches()
     }
     else
     {
-        if (m_filespec.empty())
-            throw pdal_error("No input pattern specified.");
+        if (m_filespec.empty() && !m_usestdin)
+            throw pdal_error("No input pattern specified and STDIN not given");
         if (argumentExists("geometry"))
             throw pdal_error("--geometry option not supported when building "
                 "index.");
@@ -213,9 +213,24 @@ StringList TIndexKernel::glob(std::string& path)
 }
 
 
+StringList readSTDIN()
+{
+    std::string line;
+    StringList output;
+    while (std::getline(std::cin, line))
+    {
+        output.push_back(line);
+    }
+    return output;
+}
+
 void TIndexKernel::createFile()
 {
-    m_files = glob(m_filespec);
+
+    if (!m_usestdin)
+        m_files = glob(m_filespec);
+    else
+        m_files = readSTDIN();
 
     if (m_files.empty())
     {

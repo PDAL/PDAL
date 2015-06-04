@@ -73,6 +73,7 @@ protected:
         m_rstream.reset();
         m_rdevice.reset();
         FileUtils::closeFile(m_istream);
+        m_istream = NULL;
     }
 
 private:
