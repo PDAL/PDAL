@@ -141,6 +141,7 @@ QuickInfo LasReader::inspect()
 
 void LasReader::initialize()
 {
+    if (m_initialized) return;
     m_istream = createStream();
 
     m_istream->seekg(0);
@@ -177,6 +178,7 @@ void LasReader::initialize()
         readExtraBytesVlr();
     }
     fixupVlrs();
+    m_initialized = true;
 }
 
 
