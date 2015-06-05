@@ -224,6 +224,33 @@ StringList readSTDIN()
     return output;
 }
 
+
+bool TIndexKernel::IsFileIndexed( const FieldIndexes& indexes,
+                    const FileInfo& fileInfo)
+{
+    std::ostringstream qstring;
+    qstring << Utils::toupper(m_tileIndexColumnName) << "=\"" << fileInfo.m_filename << "\"";
+    OGRErr err = OGR_L_SetAttributeFilter(m_layer, qstring.str().c_str());
+    if (err != OGRERR_NONE)
+    {
+        std::ostringstream oss;
+        oss << "Unable to set attribute filter for file '" << fileInfo.m_filename<<"'";
+        throw pdal_error(oss.str());
+    }
+    OGRFeatureH hFeature;
+
+    bool output(false);
+    OGR_L_ResetReading(m_layer);
+    while( (hFeature = OGR_L_GetNextFeature(m_layer)) != NULL )
+    {
+        output = true;
+        break;
+    }
+
+    OGR_L_ResetReading(m_layer);
+    err = OGR_L_SetAttributeFilter(m_layer, NULL);
+    return output;
+}
 void TIndexKernel::createFile()
 {
 
@@ -272,11 +299,15 @@ void TIndexKernel::createFile()
         //ABELL - Not sure why we need to get absolute path here.
         f = FileUtils::toAbsolutePath(f);
         FileInfo info = getFileInfo(factory, f);
-        if (createFeature(indexes, info))
-            m_log.get(LogLevel::Info) << "Indexed file " << f << std::endl;
-        else
-            m_log.get(LogLevel::Error) << "Failed to create feature for "
-                "file '" << f << "'" << std::endl;
+        if (!IsFileIndexed(indexes, info))
+        {
+            if (createFeature(indexes, info))
+                m_log.get(LogLevel::Info) << "Indexed file " << f << std::endl;
+            else
+                m_log.get(LogLevel::Error) << "Failed to create feature for "
+                    "file '" << f << "'" << std::endl;
+
+        }
     }
     OGR_DS_Destroy(m_dataset);
 }
