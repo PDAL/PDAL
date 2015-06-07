@@ -335,3 +335,18 @@ TEST(OptionsTest, metadata)
     }
     EXPECT_TRUE(Support::compare_files(goodfile, testfile));
 }
+
+TEST(OptionsTest, remove)
+{
+    Options ops;
+    ops.add("hi", 17);
+    EXPECT_TRUE(ops.hasOption("hi"));
+    
+    ops.remove("hi");
+    EXPECT_FALSE(ops.hasOption("hi"));
+
+    // removal of nonexistent option is okay
+    EXPECT_FALSE(ops.hasOption("bye"));
+    ops.remove("bye");
+    EXPECT_FALSE(ops.hasOption("bye"));
+}
