@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2015, Oscar Martinez Rubi (o.rubi@esciencecenter.nl)
 *
 * All rights reserved.
 *
@@ -37,12 +37,12 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/StageWrapper.hpp>
 #include <LasReader.hpp>
-#include <SplitterFilter.hpp>
+#include <GridderFilter.hpp>
 #include "Support.hpp"
 
 using namespace pdal;
 
-TEST(SplitterTest, test_grid_filter)
+TEST(GridderTest, test_tile_filter)
 {
     StageFactory f;
 
@@ -53,11 +53,21 @@ TEST(SplitterTest, test_grid_filter)
     r.setOptions(ops1);
 
     Options o;
-    Option length("length", 1000, "length");
-    o.add(length);
+    Option num_x("num_x", 4, "num_x");
+    Option num_y("num_y", 4, "num_y");
+    Option min_x("min_x", 635000, "min_x");
+    Option min_y("min_y", 845000, "min_y");
+    Option max_x("max_x", 640000, "max_x");
+    Option max_y("max_y", 855000, "max_y");
+    o.add(num_x);
+    o.add(num_y);
+    o.add(min_x);
+    o.add(min_y);
+    o.add(max_x);
+    o.add(max_y);
 
-    // create the tile filter and prepare
-    SplitterFilter s;
+    // create the grid filter and prepare
+    GridderFilter s;
     s.setOptions(o);
     s.setInput(r);
 
@@ -79,23 +89,13 @@ TEST(SplitterTest, test_grid_filter)
     for (auto it = viewSet.begin(); it != viewSet.end(); ++it)
         views.push_back(*it);
 
-    auto sorter = [](PointViewPtr p1, PointViewPtr p2)
-    {
-        BOX3D b1 = p1->calculateBounds();
-        BOX3D b2 = p2->calculateBounds();
-
-        return b1.minx < b2.minx ?  true :
-            b1.minx > b2.minx ? false :
-            b1.miny < b2.miny;
-    };
-    std::sort(views.begin(), views.end(), sorter);
-
-    EXPECT_EQ(views.size(), 15u);
-    size_t counts[] = {24, 27, 26, 27, 10, 166, 142, 76, 141, 132, 63, 70, 67,
-        34, 60 };
+    EXPECT_EQ(views.size(), 12u);
+    size_t counts[] = {73, 42, 108, 233, 6, 101, 45, 216, 40, 103, 79, 19 };
+                      
     for (size_t i = 0; i < views.size(); ++i)
     {
         PointViewPtr view = views[i];
         EXPECT_EQ(view->size(), counts[i]);
     }
+
 }

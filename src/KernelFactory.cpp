@@ -47,6 +47,7 @@
 #include <split/SplitKernel.hpp>
 #include <tindex/TIndexKernel.hpp>
 #include <translate/TranslateKernel.hpp>
+#include <grid/GridKernel.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
@@ -74,6 +75,7 @@ KernelFactory::KernelFactory(bool no_plugins)
     PluginManager::initializePlugin(SplitKernel_InitPlugin);
     PluginManager::initializePlugin(TIndexKernel_InitPlugin);
     PluginManager::initializePlugin(TranslateKernel_InitPlugin);
+    PluginManager::initializePlugin(GridKernel_InitPlugin);
 }
 
 std::unique_ptr<Kernel> KernelFactory::createKernel(std::string const& name)

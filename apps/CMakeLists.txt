@@ -25,6 +25,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/kernels/random
     ${PROJECT_SOURCE_DIR}/kernels/sort
     ${PROJECT_SOURCE_DIR}/kernels/translate
+    ${PROJECT_SOURCE_DIR}/kernels/grid
 )
 
 #------------------------------------------------------------------------------

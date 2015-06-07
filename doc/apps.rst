@@ -22,6 +22,7 @@ application currently contains six commands:
 * :ref:`translate <translate_command>`
 * :ref:`view <view_command>`
 * :ref:`split <split_command>`
+* :ref:`grid <grid_command>`
 
 Applications are run by invoking the *pdal* application along with the
 command name:
@@ -488,3 +489,42 @@ starting at one and incrementing for each file created.
 If the output argument ends in a path separator, it is assumed to be a
 directory and the input argument is appended to create the output template.
 The split command never creates directories.  Directories must pre-exist.
+
+.. _grid_command:
+
+``grid`` command
+------------------------------------------------------------------------------
+
+The *grid* will create multiple point output files from a single input file.
+The command takes an input file name and an output filename (used as a template)
+or output directory specification.
+
+::
+
+    $ pdal grid --num_x 16 --num_y 16 --min_x 80000 --min_y 100000 \
+      --max_x 90000 --max_y 400000 infile.laz outfile.bpf
+
+This command takes the points from the input file 'infile.laz' and creates
+output files 'outfile_1.bpf', 'outfile_2.bpf', ... where each output file
+contains the points that fall in each cell of the grid defined by 
+num_x and num_y and the extend defined by min_x, min_y, max_x and max_y
+
+::
+
+    -i [ --input ] arg           input file name
+    -o [ --output ] arg          output file/directory name
+    --num_x arg                  number of grid cells in the x axis
+    --num_y arg                  number of grid cells in the y axis				
+    --min_x arg                  minimum x value for the grid
+    --min_y arg                  minimum y value for the grid
+    --max_x arg                  maximum y value for the grid
+    --max_y arg                  maximum y value for the grid
+
+All the arguments are required. 
+
+The output argument is a template.  If the output argument is, for example,
+'file.ext', the output files created are 'file_#.ext'.
+
+If the output argument ends in a path separator, it is assumed to be a
+directory and the input argument is appended to create the output template.
+The grid command never creates directories.  Directories must pre-exist.

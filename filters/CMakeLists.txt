@@ -11,5 +11,6 @@ add_subdirectory(sort)
 add_subdirectory(splitter)
 add_subdirectory(stats)
 add_subdirectory(transformation)
+add_subdirectory(gridder)
 
 set(PDAL_TARGET_OBJECTS ${PDAL_TARGET_OBJECTS} PARENT_SCOPE)

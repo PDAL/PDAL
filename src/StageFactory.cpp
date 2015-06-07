@@ -51,6 +51,7 @@
 #include <splitter/SplitterFilter.hpp>
 #include <stats/StatsFilter.hpp>
 #include <transformation/TransformationFilter.hpp>
+#include <gridder/GridderFilter.hpp>
 
 // readers
 #include <bpf/BpfReader.hpp>
@@ -201,6 +202,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(SplitterFilter_InitPlugin);
     PluginManager::initializePlugin(StatsFilter_InitPlugin);
     PluginManager::initializePlugin(TransformationFilter_InitPlugin);
+    PluginManager::initializePlugin(GridderFilter_InitPlugin);
 
     // readers
     PluginManager::initializePlugin(BpfReader_InitPlugin);
