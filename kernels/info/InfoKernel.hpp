@@ -66,9 +66,10 @@ public:
     MetadataNode dump(const std::string& filename);
 
     void prepare(const std::string& filename);
-    
+
     inline bool showAll() { return m_showAll; }
     inline void doShowAll(bool value) { m_showAll = value; }
+    inline void doComputeBoundary(bool value) { m_boundary = value; }
 
 private:
     InfoKernel();
