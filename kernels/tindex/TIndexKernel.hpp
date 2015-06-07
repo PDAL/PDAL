@@ -111,6 +111,8 @@ private:
     void *m_dataset;
     void *m_layer;
     std::string m_tgtSrsString;
+    std::string m_assignSrsString;
+    bool m_fastBoundary;
 };
 
 } // namespace pdal
