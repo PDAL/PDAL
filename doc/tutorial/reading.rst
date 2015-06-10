@@ -265,7 +265,7 @@ a pipeline, substituting the input and output as it goes.
 
 ::
 
-    ls *.las | cut -d. -f1 | xargs -P20 -I{} pdal pipeline -i /path/to/proj.xml --readers.las.filename={}.las --writers.las.filename=output/{}.laz`
+    ls *.las | cut -d. -f1 | xargs -P20 -I{} pdal pipeline -i /path/to/proj.xml --readers.las.filename={}.las --writers.las.filename=output/{}.laz
 
 .. _`JSON`: http://www.json.org/
 .. _`XML`: http://en.wikipedia.org/wiki/XML
