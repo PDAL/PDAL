@@ -12,7 +12,7 @@ PDAL contains a single `git`_-style application, called *pdal*. The `pdal`
 application currently contains six commands:
 
 * :ref:`delta <delta_command>`
-* :ref:`diff <diff_command>`
+*
 * :ref:`ground <ground_command>`
 * :ref:`info <info_command>`
 * :ref:`pcl <pcl_command>`
@@ -21,6 +21,7 @@ application currently contains six commands:
 * :ref:`translate <translate_command>`
 * :ref:`view <view_command>`
 * :ref:`split <split_command>`
+* :ref:`tindex <tindex_command>`
 
 Applications are run by invoking the *pdal* application along with the
 command name:
@@ -68,7 +69,7 @@ option:
 
 .. _delta_command:
 
-``delta`` command
+delta command
 ------------------------------------------------------------------------------
 
 The *delta* command is used to select a nearest point from a candidate file
@@ -77,31 +78,45 @@ query only happens in XY coordinate space.
 
 ::
 
-    $ pdal delta test/data/1.2-with-color.las test/data/1.2-with-color.las > deltas
+    $ pdal delta <source> <candidate> [output]
 
-A simple CSV-style text is output with delta information:
+    Standard out is used if no output file is specified.
 
 ::
 
-    [hobu@pyro pdal (master)]$ ./bin/pdal delta test/data/1.2-with-color.las test/data/1.2-with-color.las
-    ------------------------------------------------------------------------------------------
-     Delta summary for source 'test/data/1.2-with-color.las' and candidate 'test/data/1.2-with-color.las'
-    ------------------------------------------------------------------------------------------
+      --source arg     Non-positional option for specifying source filename
+      --candidate arg  Non-positional option for specifying candidate filename
+      --output arg     Non-positional option for specifying output filename [/dev/stdout]
+      --2d             only 2D comparisons/indexing
+
+Example 1:
+^^^^^^^^^^^^^
+
+::
+
+    $ pdal delta ../../test/data/las/1.2-with-color.las ../../test/data/las/1.2-with-color.las
+    --------------------------------------------------------------------------------
+    Delta summary for
+         source: '../../test/data/las/1.2-with-color.las'
+         candidate: '../../test/data/las/1.2-with-color.las'
+    --------------------------------------------------------------------------------
 
     ----------- --------------- --------------- --------------
      Dimension       X             Y                  Z
     ----------- --------------- --------------- --------------
      Min        0.0000            0.0000            0.0000
-     Min        0.0000            0.0000            0.0000
+     Max        0.0000            0.0000            0.0000
      Mean       0.0000            0.0000            0.0000
     ----------- --------------- --------------- --------------
 
+
+
+Example 2:
+^^^^^^^^^^
+
 ::
 
-        [hobu@pyro pdal (master)]$ ./bin/pdal delta test/data/1.2-with-color.las test/data/1.2-with-color.las --detail
-
-::
-
+    $ ./bin/pdal delta test/data/1.2-with-color.las test/data/1.2-with-color.las --detail
     "ID","DeltaX","DeltaY","DeltaZ"
     0,0.00,0.00,0.00
     1,0.00,0.00,0.00
@@ -109,18 +124,13 @@ A simple CSV-style text is output with delta information:
     3,0.00,0.00,0.00
     4,0.00,0.00,0.00
     5,0.00,0.00,0.00
+    ....
 
-::
-
-      --source arg          source file name
-      --candidate arg       candidate file name
-      --output arg          output file name
-      --2d                  only 2D comparisons/indexing
 
 
 .. _diff_command:
 
-``diff`` command
+diff command
 ------------------------------------------------------------------------------
 
 The *diff* command is used for executing a simple contextual difference
@@ -128,11 +138,18 @@ between two sources.
 
 ::
 
-    $ pdal diff test/data/1.2-with-color.las test/data/1.2-with-color-clipped.las
+    $ pdal diff <source> <candidate>
+    
+::
 
-It will output JSON if there are any differences. It will output nothing
-and return 0 if there are no differences. At this time it supports
-checking the following:
+    --source arg     Non-positional option for specifying filename of source file.
+    --candidate arg  Non-positional option for specifying filename to test against source.
+
+The command returns 0 and produces no output if the files describe the same
+point data in the same format, otherwise 1 is returned and a JSON-formatted
+description of the differences is produced.
+
+The command checks for the equivalence of the following items:
 
 * Different schema
 * Expected count
@@ -143,49 +160,62 @@ checking the following:
 
 .. _ground_command:
 
-``ground`` command
+ground command
 ------------------------------------------------------------------------------
 
 The *ground* command is used to segment the input point cloud into ground
 versus non-ground returns. The output is a point cloud containing only ground
-returns. Internally, the tool is calling the Point Cloud Library's
-`ProgressiveMorphologicalFilter`_. As such, *ground* is only available when
-PDAL is linked with PCL.
+returns. The *ground* command invokes `Point Cloud Library
+<http://pointclouds.org/>`_'s `ProgressiveMorphologicalFilter`_. As such,
+*ground* is only available when PDAL is linked with PCL.
 
 .. _`ProgressiveMorphologicalFilter`: http://pointclouds.org/documentation/tutorials/progressive_morphological_filtering.php#progressive-morphological-filtering.
 
 ::
 
-    -i [ --input ] arg            input file name
-    -o [ --output ] arg           output file name
-    --maxWindowSize arg (=33)     max window size
-    --slope arg (=1)              slope
-    --maxDistance arg (=2.5)      max distance
-    --initialDistance arg (=0.15) initial distance
-    --cellSize arg (=1)           cell size
-    --base arg (=2)               base
-    --exponential arg (=1)        exponential?
+    pdal ground <input> <output>
+
+::
+
+    --input [-i] arg       Non-positional option for specifying input filename
+    --output [-o] arg      Non-positional option for specifying output filename
+    --maxWindowSize arg    max window size [33]
+    --slope arg            slope [1]
+    --maxDistance arg      max distance [2.5]
+    --initialDistance arg  initial distance [0.15]
+    --cellSize arg         cell size [1]
+    --classify             apply classification labels? [true]
+    --extract              extract ground returns? [false]
+    --approximate [-a]     Use significantly faster approximate algorithm? [false]
 
 
 .. _info_command:
 
-``info`` command
+info command
 ------------------------------------------------------------------------------
 
 Dumps information about a point cloud file, such as:
 
 * basic properties (extents, number of points, point format)
-
 * coordinate reference system
-
 * additional metadata
-
 * summary statistics about the points
-
 * the plain text format should be reStructured text if possible to allow
   a user to retransform the output into whatever they want with ease
 
 ::
+
+    pdal info <input>
+
+::
+
+    --input arg      Non-positional argument to specify input filename.
+    --point [-p] arg  Display points for particular points.  Points can be specified in a range or list: 4-10, 15, 255-300.
+    --query Point
+
+Example 1:
+^^^^^^^^^^^^
+
 
     $ pdal info  test/data/1.2-with-color.las --count 3 --query "636601.87, 849018.59, 425.10"
 
@@ -223,7 +253,7 @@ Print three selected points of the file as `reStructuredText`_
 
 .. _pcl_command:
 
-``pcl`` command
+pcl command
 ------------------------------------------------------------------------------
 
 The *pcl* command is used to invoke a PCL JSON pipeline. See
@@ -241,7 +271,7 @@ The *pcl* command is only available when PDAL is build with PCL support.
 
 .. _pipeline_command:
 
-``pipeline`` command
+pipeline command
 ------------------------------------------------------------------------------
 
 The *pipeline* command is used to execute :ref:`pipeline` XML. See :ref:`reading`
@@ -300,7 +330,7 @@ each of the x, y, and z dimensions.
 
 .. _translate_command:
 
-``translate`` command
+translate command
 ------------------------------------------------------------------------------
 
 The *translate* command is used for simple conversion of files based on their
@@ -354,7 +384,7 @@ command line invocation. For example, the following invocation will translate
 
 .. _view_command:
 
-``view`` command
+view command
 ------------------------------------------------------------------------------
 
 The *view* command can be used to visualize a point cloud using the
@@ -407,10 +437,11 @@ help.
 
 .. _split_command:
 
-``split`` command
+split command
 ------------------------------------------------------------------------------
 
-The *split* will create multiple point output files from a single input file.
+The *split* command will create multiple point output files from a single
+input file.
 The command takes an input file name and an output filename (used as a template)
 or output directory specification.
 
@@ -424,10 +455,10 @@ contains no more than 100000 points.
 
 ::
 
-    -i [ --input ] arg           input file name
-    -o [ --output ] arg          output file/directory name
-    --length arg                 edge length for splitter cells
-    --capacity arg               point capacity for chipper cells
+    -i [--input] arg   Non-positional option for specifying input file name
+    -o [--output] arg  Non-positional option for specifying output file/directory name
+    --length arg       Edge length for splitter cells
+    --capacity arg     Point capacity for chipper cells
 
 Input and output arguments are required.  If neither the length nor capacity
 arguments are specified, an implcit argument of capacity with a value of 100000
@@ -440,3 +471,68 @@ starting at one and incrementing for each file created.
 If the output argument ends in a path separator, it is assumed to be a
 directory and the input argument is appended to create the output template.
 The split command never creates directories.  Directories must pre-exist.
+
+
+.. _tindex_command:
+
+tindex command
+------------------------------------------------------------------------------
+
+The *tindex* command has two modes.  The first mode creates a spatial index
+file for a set of point cloud files.  The second mode creates a point cloud
+file that is the result of merging the points from files referred to in a
+spatial index file that meet some criteria (usually a geographic region
+filter).
+
+tindex Creation Mode
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+::
+
+    $ pdal tindex <tindex> <filespec>
+
+This command will index the files referred to by 'filespec' and place the
+result in 'tindex'.  The 'tindex' is a vector file or database that
+can be handled by `OGR <http://www.gdal.org/ogr_formats.html>`_. The type of
+the index file can be specified by specifying the OGR code for the format
+using the *--driver* option.  If no driver is specified, the format defaults
+to "ESRI Shapefile".
+
+In vector file-speak, each file specified by 'filespec' is stored as a feature
+in a layer in the index file. The filespec is a
+`glob pattern <http://man7.org/linux/man-pages/man7/glob.7.html>'_.  and
+normally needs to be quoted to prevent shell expansion of wildcard characters.
+
+::
+
+    --tindex       Non-positional option for specifying the index file name.
+    --filespec     Non-positional option for specifying pattern of files to
+                   be indexed.
+    --lyr_name     Name of layer in which to store the features. Defaults to
+                   the base name of the first file indexed.
+    --tindex_name  Name of the field in the feature in which to store the
+                   indexed file name. ["location"]
+    --driver       OGR driver name. ["ESRI Shapefile"]
+    --t_srs        Spatial reference system in which to store index vector
+                   data. ["EPSG:4326"]
+
+tindex Merge Mode
+^^^^^^^^^^^^^^^^^^^^^
+
+::
+
+    $ pdal tindex --merge <tindex> <filespec>
+
+This command will read the index file 'tindex' and merge the points in the
+files listed index file that pass any filter that might be specified,
+writing the output to the point cloud file specified in 'filespec'.  The type
+of the output file is determined automatically from the filename extension.
+
+::
+
+    --tindex    Non-positional option for specifying the index filename.
+    --filespec  Non-positional option for specifying the merge output filename.
+    --geometry  Well-known text representation of geometric filter.  Only
+                points inside the object will be in the output file.
+    --t_srs     Spatial reference system in which the output data should be
+                represented. ["EPSG:4326"]

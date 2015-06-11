@@ -44,6 +44,7 @@
 
 #ifndef _WIN32
 #include <cxxabi.h>
+#include <sys/ioctl.h>
 #endif
 
 #ifdef PDAL_COMPILER_MSVC
@@ -649,5 +650,16 @@ std::string Utils::demangle(const std::string& s)
 #endif
 }
 
+int Utils::screenWidth()
+{
+#ifdef WIN32
+    return 80;
+#else
+    struct winsize ws;
+    ioctl(0, TIOCGWINSZ, &ws);
+
+    return ws.ws_col;
+#endif
+}
 
 } // namespace pdal
