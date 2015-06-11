@@ -826,6 +826,7 @@ void LasReader::done(PointTableRef)
     m_unzipper.reset();
 #endif
     destroyStream();
+    m_initialized = false;
 }
 
 } // namespace pdal

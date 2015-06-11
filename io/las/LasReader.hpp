@@ -88,7 +88,14 @@ protected:
         return m_istream;
     }
     virtual void destroyStream()
-        { FileUtils::closeFile(m_istream); m_istream = NULL; m_initialized = false; }
+        {
+            if (m_istream && m_initialized)
+            {
+                FileUtils::closeFile(m_istream);
+                m_istream = NULL;
+                m_initialized = false;
+            }
+        }
 private:
     LasError m_error;
     LasHeader m_lasHeader;
