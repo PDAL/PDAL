@@ -54,6 +54,7 @@ class PDAL_DLL ReprojectionFilter : public Filter
 public:
     ReprojectionFilter() : m_inferInputSRS(true)
     {}
+    ~ReprojectionFilter();
 
     static void * create();
     static int32_t destroy(void *);
@@ -72,8 +73,8 @@ private:
     SpatialReference m_outSRS;
     bool m_inferInputSRS;
 
-    typedef std::shared_ptr<void> ReferencePtr;
-    typedef std::shared_ptr<void> TransformPtr;
+    typedef void* ReferencePtr;
+    typedef void* TransformPtr;
     ReferencePtr m_in_ref_ptr;
     ReferencePtr m_out_ref_ptr;
     TransformPtr m_transform_ptr;

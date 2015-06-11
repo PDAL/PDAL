@@ -57,9 +57,11 @@ class PDAL_DLL LasReader : public pdal::Reader
 {
     friend class NitfReader;
 public:
-    LasReader() : pdal::Reader(), m_index(0),
-            m_istream(NULL)
+    LasReader() : pdal::Reader(), m_index(0), m_istream(NULL), m_initialized(false)
         {}
+
+    virtual ~LasReader()
+        {  destroyStream(); }
 
     static void * create();
     static int32_t destroy(void *);
@@ -76,10 +78,24 @@ protected:
     virtual std::istream *createStream()
     {
         m_istream = FileUtils::openFile(m_filename);
+        if (!m_istream)
+        {
+            std::ostringstream oss;
+            oss << "Unable to create open stream for '"
+                << m_filename <<"' with error '" << strerror(errno) <<"'";
+            throw pdal_error(oss.str());
+        }
         return m_istream;
     }
     virtual void destroyStream()
-        { FileUtils::closeFile(m_istream); }
+        {
+            if (m_istream && m_initialized)
+            {
+                FileUtils::closeFile(m_istream);
+                m_istream = NULL;
+                m_initialized = false;
+            }
+        }
 private:
     LasError m_error;
     LasHeader m_lasHeader;
@@ -120,6 +136,7 @@ private:
 
     LasReader& operator=(const LasReader&); // not implemented
     LasReader(const LasReader&); // not implemented
+    bool m_initialized;
 };
 
 } // namespace pdal

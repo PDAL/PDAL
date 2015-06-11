@@ -290,7 +290,7 @@ void InfoKernel::prepare(const std::string& filename)
         m_statsStage->setInput(*stage);
         stage = m_statsStage;
     }
-    if (m_boundary || m_showAll)
+    if (m_boundary )
     {
         m_hexbinStage = &(m_manager->addFilter("filters.hexbin"));
         m_hexbinStage->setOptions(options);
@@ -328,7 +328,7 @@ MetadataNode InfoKernel::dump(const std::string& filename)
     {
 #ifdef PDAL_HAVE_LIBXML2
         XMLSchema schema(m_manager->pointTable().layout());
-        
+
         std::ostream *out = FileUtils::createFile(m_PointCloudSchemaOutput);
         std::string xml(schema.xml());
         out->write(xml.c_str(), xml.size());
@@ -366,7 +366,7 @@ MetadataNode InfoKernel::dump(const std::string& filename)
         MetadataNode metadata = m_reader->getMetadata().clone("metadata");
         root.add(metadata);
     }
-    if (m_boundary || m_showAll)
+    if (m_boundary)
     {
         PointViewSet viewSet = m_manager->views();
         assert(viewSet.size() == 1);

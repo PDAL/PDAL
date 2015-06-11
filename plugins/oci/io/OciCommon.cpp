@@ -71,6 +71,8 @@ Connection connect(std::string connSpec)
                 output = line;
         }
         connection = output;
+
+        FileUtils::closeFile(input);
     }
 
     Connection con;
