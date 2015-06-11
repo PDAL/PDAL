@@ -141,6 +141,7 @@ QuickInfo LasReader::inspect()
 
 void LasReader::initialize()
 {
+    if (m_initialized) return;
     m_istream = createStream();
 
     m_istream->seekg(0);
@@ -177,6 +178,7 @@ void LasReader::initialize()
         readExtraBytesVlr();
     }
     fixupVlrs();
+    m_initialized = true;
 }
 
 
@@ -824,6 +826,7 @@ void LasReader::done(PointTableRef)
     m_unzipper.reset();
 #endif
     destroyStream();
+    m_initialized = false;
 }
 
 } // namespace pdal

@@ -5,8 +5,8 @@ PDAL Applications
 ******************************************************************************
 
 :Author: Howard Butler
-:Contact: hobu.inc at gmail dot com
-:Date: 9/1/2014
+:Contact: howard at hobu.co
+:Date: 6/1/2015
 
 PDAL contains a single `git`_-style application, called *pdal*. The `pdal`
 application currently contains six commands:
@@ -18,6 +18,7 @@ application currently contains six commands:
 * :ref:`pcl <pcl_command>`
 * :ref:`pipeline <pipeline_command>`
 * :ref:`random <random_command>`
+* :ref:`tindex <tindex_command>`
 * :ref:`translate <translate_command>`
 * :ref:`view <view_command>`
 * :ref:`split <split_command>`
@@ -296,6 +297,53 @@ each of the x, y, and z dimensions.
                                 --stdev 0.0,0.0,0.0
                                 --stdev "0.0 0.0 0.0"
   --distribution arg (=uniform) Distribution (uniform / normal)
+
+
+.. _tindex_command:
+
+``tindex`` command
+------------------------------------------------------------------------------
+
+The *tindex* command is used to create a `GDAL`_-style tile index for PDAL-readable
+point cloud types. The `gdaltindex`_ command is the concept in that software,
+and the PDAL variant follows it very closely. This command requires `GDAL`_ to
+be linked to PDAL.
+
+::
+
+  --tindex arg                          OGR-readable/writeable tile index
+                                        output
+  --filespec arg                        Build: Pattern of files to index.
+                                        Merge: Output filename
+  --lyr_name arg                        OGR layer name to write into datasource
+  --tindex_name arg (=location)         Tile index column name
+  -f [ --driver ] arg (=ESRI Shapefile) OGR driver name to use
+  --t_srs arg (=EPSG:4326)              Target SRS of tile index
+  --geometry arg                        Geometry to filter points when merging.
+  --write_absolute_path arg (=0)        Write absolute rather than relative
+                                        file paths
+  --merge                               Whether we're merging the entries in a
+                                        tindex file.
+
+Some examples:
+
+1) Find all LAS files via `find`, send that file list via STDIN to `pdal tindex`,
+and write a `SQLite` tile index file with a layer named `pdal`:
+
+::
+
+    find las/ -iname "*.las" | pdal tindex index.sqlite -f "SQLite" --stdin --lyr_name pdal
+
+2) Glob a list of LAS files, output the SRS for the index entries to EPSG:4326, and
+write out an `SQLite`_ file.
+
+::
+
+    pdal tindex index.sqlite "*.las" -f "SQLite" --lyr_name "pdal" --t_srs "EPSG:4326"
+
+.. _`SQLite`: http://www.sqlite.org
+.. _`gdaltindex`: http://www.gdal.org/gdaltindex.html
+.. _`GDAL`: http://www.gdal.org
 
 
 .. _translate_command:

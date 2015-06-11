@@ -12,20 +12,20 @@ Reading with PDAL
 This tutorial will be presented in two parts -- the first being an introduction
 to the command-line utilities that can be used to perform processing operations
 with PDAL, and the second being an introductory C++ tutorial of how to use the
-:ref:`PDAL API <cppapi>` to accomplish similar tasks. 
+:ref:`PDAL API <cppapi>` to accomplish similar tasks.
 
 Introduction
 ------------------------------------------------------------------------------
 
-PDAL is both a C++ library and a collection of command-line utilities for 
-data processing operations.  While it is similar to `LAStools`_ in a few 
-aspects, and borrows some of its lineage in others, the PDAL library 
-is an attempt to construct a library that is primarily intended as a 
-data translation library first, and a exploitation and filtering library 
-second.  PDAL exists to provide an abstract API for software developers 
-wishing to navigate the multitude of point cloud formats that are out there. 
-Its value and niche is explicitly modeled after the hugely successful `GDAL`_ 
-library, which provides an abstract API for data formats in the GIS raster 
+PDAL is both a C++ library and a collection of command-line utilities for
+data processing operations.  While it is similar to `LAStools`_ in a few
+aspects, and borrows some of its lineage in others, the PDAL library
+is an attempt to construct a library that is primarily intended as a
+data translation library first, and a exploitation and filtering library
+second.  PDAL exists to provide an abstract API for software developers
+wishing to navigate the multitude of point cloud formats that are out there.
+Its value and niche is explicitly modeled after the hugely successful `GDAL`_
+library, which provides an abstract API for data formats in the GIS raster
 data space.
 
 .. _`GDAL`: http://www.gdal.org
@@ -44,8 +44,8 @@ Our first example to demonstrate PDAL's utility will be to simply query an
 `reStructuredText`_ output
 ................................................................................
 
-By default, PDAL outputs `reStructuredText`_. This makes it convenient for 
-transforming the output into more pleasing formats like PDF (using `rst2pdf`_) 
+By default, PDAL outputs `reStructuredText`_. This makes it convenient for
+transforming the output into more pleasing formats like PDF (using `rst2pdf`_)
 or HTML (using `rst2html`_) as part of a processing pipeline.
 
 .. _`rst2pdf`: https://code.google.com/p/rst2pdf/
@@ -55,7 +55,7 @@ or HTML (using `rst2html`_) as part of a processing pipeline.
 
 ::
 
-    $ pdal info interesting.las -p 0 
+    $ pdal info interesting.las -p 0
 
 ::
 
@@ -120,7 +120,7 @@ JavaScript `JSON`_ can also be output.
 XML output
 ................................................................................
 
-XML output of this same point is as simple as adding the appropriate 
+XML output of this same point is as simple as adding the appropriate
 switch:
 
 ::
@@ -164,14 +164,14 @@ carries.
 It is also important to recognize that both fixed and flexible point cloud
 formats exist, and conversion of flexible formats to fixed formats will often
 leak. The dimensions might even match in terms of type or name, but not in
-terms of width or interpretation. 
+terms of width or interpretation.
 
 .. seealso::
-    
+
     See :cpp:class:`pdal::Dimension` for details on PDAL dimensions.
 
 ::
-    
+
     $ pdal translate interesting.las output.txt
 
 ::
@@ -185,10 +185,10 @@ terms of width or interpretation.
     636451.97,849250.59,435.17,48,1,1,0,0,1,-9,122,7326,245384,99,85,95
     ...
 
-The text format, of course, is the ultimate flexible-definition format -- at 
-least for the point data themselves. For the other header information, like 
-the spatial reference system, or the `ASPRS LAS`_ `UUID`_, the conversion 
-leaks. In short, you may need to preserve some more information as part of 
+The text format, of course, is the ultimate flexible-definition format -- at
+least for the point data themselves. For the other header information, like
+the spatial reference system, or the `ASPRS LAS`_ `UUID`_, the conversion
+leaks. In short, you may need to preserve some more information as part of
 your conversion to make it useful down the road.
 
 :ref:`metadata`
@@ -214,13 +214,13 @@ alongside the ``.txt`` file as auxiliary information.
 A :ref:`pipeline_command` example
 ------------------------------------------------------------------------------
 
-The full power of PDAL comes in the form of :ref:`pipeline_command` invocations. 
-While :ref:`translate_command` provides some utility as far as simple conversion of 
-one format to another, it does not provide much power to a user to be able 
-to filter or alter data as they are converted.  Pipelines are the way to take 
-advantage of PDAL's ability to manipulate data as they are converted. This 
-section will provide a basic example and demonstration of :ref:`pipeline`, 
-but the :ref:`pipeline` document contains more detailed exposition of the 
+The full power of PDAL comes in the form of :ref:`pipeline_command` invocations.
+While :ref:`translate_command` provides some utility as far as simple conversion of
+one format to another, it does not provide much power to a user to be able
+to filter or alter data as they are converted.  Pipelines are the way to take
+advantage of PDAL's ability to manipulate data as they are converted. This
+section will provide a basic example and demonstration of :ref:`pipeline`,
+but the :ref:`pipeline` document contains more detailed exposition of the
 topic.
 
 .. note::
@@ -228,18 +228,18 @@ topic.
     The :ref:`pipeline_command` document contains detailed examples and background
     information.
 
-The :ref:`pipeline_command` PDAL utility is one that takes in a ``.xml`` file 
-containing :ref:`pipeline <pipeline_command>` description that defines a PDAL 
-processing pipeline. Options can be given at each :cpp:class:`pdal::Stage` of 
-the pipeline to affect different aspects of the processing pipeline, and 
-stages may be chained together into multiple combinations to have varying 
+The :ref:`pipeline_command` PDAL utility is one that takes in a ``.xml`` file
+containing :ref:`pipeline <pipeline_command>` description that defines a PDAL
+processing pipeline. Options can be given at each :cpp:class:`pdal::Stage` of
+the pipeline to affect different aspects of the processing pipeline, and
+stages may be chained together into multiple combinations to have varying
 effects.
 
 Simple conversion
 ..............................................................................
 
-The following XML document defines a :ref:`pipeline` that takes the ``file.las`` 
-`ASPRS LAS`_ file and converts it to a new file called ``output.las``. 
+The following XML document defines a :ref:`pipeline` that takes the ``file.las``
+`ASPRS LAS`_ file and converts it to a new file called ``output.las``.
 
 ::
 
@@ -256,6 +256,16 @@ The following XML document defines a :ref:`pipeline` that takes the ``file.las``
             </Reader>
         </Writer>
     </Pipeline>
+
+Loop a directory and filter it through a pipeline
+................................................................................
+
+This little bash script loops through a directory and pushes the las files through
+a pipeline, substituting the input and output as it goes.
+
+::
+
+    ls *.las | cut -d. -f1 | xargs -P20 -I{} pdal pipeline -i /path/to/proj.xml --readers.las.filename={}.las --writers.las.filename=output/{}.laz
 
 .. _`JSON`: http://www.json.org/
 .. _`XML`: http://en.wikipedia.org/wiki/XML

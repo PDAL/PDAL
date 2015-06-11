@@ -47,6 +47,7 @@
 #include <cpl_port.h>
 #include "gdal.h"
 #include <cpl_vsi.h>
+#include <cpl_conv.h>
 #include <ogr_api.h>
 #include <ogr_srs_api.h>
 
@@ -74,6 +75,20 @@ public:
         { return m_ref.get() != NULL; }
     OGRSpatialReferenceH get() const
         { return m_ref.get(); }
+    bool empty() const
+    {
+        bool bEmpty(true);
+        char *pszWKT = NULL;
+
+        OSRExportToWkt(m_ref.get(), &pszWKT);
+
+        if (pszWKT)
+            bEmpty = false;
+        CPLFree(pszWKT);
+        return bEmpty;
+
+    }
+
 
 private:
     void newRef(void *v)
@@ -111,7 +126,7 @@ private:
     RefPtr m_ref;
 };
 
-class PDAL_DLL ErrorHandler 
+class PDAL_DLL ErrorHandler
 {
 public:
 

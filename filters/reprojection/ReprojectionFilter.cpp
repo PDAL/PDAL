@@ -54,34 +54,12 @@ CREATE_STATIC_PLUGIN(1, 0, ReprojectionFilter, Filter, s_info)
 
 std::string ReprojectionFilter::getName() const { return s_info.name; }
 
-struct OGRSpatialReferenceDeleter
+ReprojectionFilter::~ReprojectionFilter()
 {
-    template <typename T>
-    void operator()(T* ptr)
-    {
-        ::OSRDestroySpatialReference(ptr);
-    }
-};
-
-struct OSRTransformDeleter
-{
-    template <typename T>
-    void operator()(T* ptr)
-    {
-        ::OCTDestroyCoordinateTransformation(ptr);
-    }
-};
-
-
-struct GDALSourceDeleter
-{
-    template <typename T>
-    void operator()(T* ptr)
-    {
-        ::GDALClose(ptr);
-    }
-};
-
+    OCTDestroyCoordinateTransformation(m_transform_ptr);
+    OSRDestroySpatialReference(m_in_ref_ptr);
+    OSRDestroySpatialReference(m_out_ref_ptr);
+}
 
 void ReprojectionFilter::processOptions(const Options& options)
 {
@@ -138,13 +116,11 @@ void ReprojectionFilter::ready(PointTableRef table)
                 "is specified with the 'in_srs' option.");
     }
 
-    m_in_ref_ptr = ReferencePtr(OSRNewSpatialReference(0),
-        OGRSpatialReferenceDeleter());
-    m_out_ref_ptr = ReferencePtr(OSRNewSpatialReference(0),
-        OGRSpatialReferenceDeleter());
+    m_in_ref_ptr = OSRNewSpatialReference(0);
+    m_out_ref_ptr = OSRNewSpatialReference(0);
 
     int result =
-        OSRSetFromUserInput(m_in_ref_ptr.get(),
+        OSRSetFromUserInput(m_in_ref_ptr,
             m_inSRS.getWKT(pdal::SpatialReference::eCompoundOK).c_str());
     if (result != OGRERR_NONE)
     {
@@ -155,7 +131,8 @@ void ReprojectionFilter::ready(PointTableRef table)
         throw pdal_error(msg.str());
     }
 
-    result = OSRSetFromUserInput(m_out_ref_ptr.get(),
+
+    result = OSRSetFromUserInput(m_out_ref_ptr,
         m_outSRS.getWKT(pdal::SpatialReference::eCompoundOK).c_str());
     if (result != OGRERR_NONE)
     {
@@ -165,11 +142,9 @@ void ReprojectionFilter::ready(PointTableRef table)
             "option.";
         throw pdal_error(msg.str());
     }
-    m_transform_ptr = TransformPtr(
-        OCTNewCoordinateTransformation(m_in_ref_ptr.get(),
-            m_out_ref_ptr.get()), OSRTransformDeleter());
 
-    if (!m_transform_ptr.get())
+    m_transform_ptr = OCTNewCoordinateTransformation(m_in_ref_ptr, m_out_ref_ptr);
+    if (!m_transform_ptr)
     {
         std::string msg = "Could not construct CoordinateTransformation in "
             "ReprojectionFilter:: ";
@@ -182,7 +157,7 @@ void ReprojectionFilter::ready(PointTableRef table)
 
 void ReprojectionFilter::transform(double& x, double& y, double& z)
 {
-    int ret = OCTTransform(m_transform_ptr.get(), 1, &x, &y, &z);
+    int ret = OCTTransform(m_transform_ptr, 1, &x, &y, &z);
     if (ret == 0)
     {
         std::ostringstream msg;

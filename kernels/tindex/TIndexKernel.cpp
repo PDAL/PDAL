@@ -47,6 +47,7 @@
 #include <pdal/KernelFactory.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <merge/MergeFilter.hpp>
+#include <pdal/PDALUtils.hpp>
 
 #include <cpl_string.h>
 
@@ -87,6 +88,7 @@ TIndexKernel::TIndexKernel()
     , m_merge(false)
     , m_dataset(NULL)
     , m_layer(NULL)
+    , m_fastBoundary(false)
 
 {
     m_log.setLeader("pdal tindex");
@@ -105,6 +107,8 @@ void TIndexKernel::addSwitches()
             "OGR-readable/writeable tile index output")
         ("filespec", po::value<std::string>(&m_filespec),
             "Build: Pattern of files to index. Merge: Output filename")
+        ("fast-boundary", po::value<bool>(&m_fastBoundary)->zero_tokens()->implicit_value(true),
+         "use extend instead of exact boundary")
         ("lyr_name", po::value<std::string>(&m_layerName),
             "OGR layer name to write into datasource")
         ("tindex_name", po::value<std::string>(&m_tileIndexColumnName)->
@@ -113,6 +117,8 @@ void TIndexKernel::addSwitches()
             default_value("ESRI Shapefile"), "OGR driver name to use ")
         ("t_srs", po::value<std::string>(&m_tgtSrsString)->
             default_value("EPSG:4326"), "Target SRS of tile index")
+        ("a_srs", po::value<std::string>(&m_assignSrsString)->
+            default_value("EPSG:4326"), "Assign SRS of tile with no SRS to this value")
         ("geometry", po::value<std::string>(&m_filterGeom),
             "Geometry to filter points when merging.")
         ("write_absolute_path", po::value<bool>(&m_absPath)->
@@ -224,6 +230,33 @@ StringList readSTDIN()
     return output;
 }
 
+
+bool TIndexKernel::IsFileIndexed( const FieldIndexes& indexes,
+                    const FileInfo& fileInfo)
+{
+    std::ostringstream qstring;
+    qstring << Utils::toupper(m_tileIndexColumnName) << "=\"" << fileInfo.m_filename << "\"";
+    OGRErr err = OGR_L_SetAttributeFilter(m_layer, qstring.str().c_str());
+    if (err != OGRERR_NONE)
+    {
+        std::ostringstream oss;
+        oss << "Unable to set attribute filter for file '" << fileInfo.m_filename<<"'";
+        throw pdal_error(oss.str());
+    }
+    OGRFeatureH hFeature;
+
+    bool output(false);
+    OGR_L_ResetReading(m_layer);
+    while( (hFeature = OGR_L_GetNextFeature(m_layer)) != NULL )
+    {
+        output = true;
+        break;
+    }
+
+    OGR_L_ResetReading(m_layer);
+    err = OGR_L_SetAttributeFilter(m_layer, NULL);
+    return output;
+}
 void TIndexKernel::createFile()
 {
 
@@ -272,11 +305,15 @@ void TIndexKernel::createFile()
         //ABELL - Not sure why we need to get absolute path here.
         f = FileUtils::toAbsolutePath(f);
         FileInfo info = getFileInfo(factory, f);
-        if (createFeature(indexes, info))
-            m_log.get(LogLevel::Info) << "Indexed file " << f << std::endl;
-        else
-            m_log.get(LogLevel::Error) << "Failed to create feature for "
-                "file '" << f << "'" << std::endl;
+        if (!IsFileIndexed(indexes, info))
+        {
+            if (createFeature(indexes, info))
+                m_log.get(LogLevel::Info) << "Indexed file " << f << std::endl;
+            else
+                m_log.get(LogLevel::Error) << "Failed to create feature for "
+                    "file '" << f << "'" << std::endl;
+
+        }
     }
     OGR_DS_Destroy(m_dataset);
 }
@@ -470,6 +507,7 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
     InfoKernel *info = static_cast<InfoKernel *>(app.get());
 
     info->doShowAll(true);
+    info->doComputeBoundary(!m_fastBoundary);
     info->prepare(filename);
 
     MetadataNode metadata;
@@ -482,7 +520,54 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
     }
 
     fileInfo.m_filename = filename;
-    fileInfo.m_boundary = metadata.findChild("boundary:boundary").value();
+    if (!m_fastBoundary)
+        fileInfo.m_boundary = metadata.findChild("boundary:boundary").value();
+    else
+    {
+        auto findNode = [](MetadataNode m,
+            const std::string name, const std::string val)
+        {
+            auto findNameVal = [name, val](MetadataNode m)
+                { return (m.name() == name && m.value() == val); };
+
+            return m.find(findNameVal);
+        };
+        std::ostringstream polygon;
+        polygon.precision(10);
+        polygon.setf(std::ios::fixed);
+        polygon << "POLYGON ((";
+
+        MetadataNode stats = metadata.findChild("stats");
+        std::vector<MetadataNode> children = stats.children();
+        std::string minx, miny, minz;
+        std::string maxx, maxy, maxz;
+        for (auto mi = children.begin(); mi != children.end(); ++mi)
+        {
+
+            if (findNode(*mi, "name", "X").valid())
+            {
+                minx = mi->findChild("minimum").value();
+                maxx = mi->findChild("maximum").value();
+            }
+            if (findNode(*mi, "name", "Y").valid())
+            {
+                miny = mi->findChild("minimum").value();
+                maxy = mi->findChild("maximum").value();
+            }
+        }
+
+        polygon << minx << " " << miny;
+        polygon << ", " << maxx << " " << miny;
+        polygon << ", " << maxy << " " << maxy;
+        polygon << ", " << maxy << " " << minx;
+        polygon << ", " << minx << " " << miny;
+        polygon << "))";
+
+        fileInfo.m_boundary = polygon.str();
+
+
+
+    }
     fileInfo.m_srs = metadata.findChild("summary:spatial_reference").value();
 
     FileUtils::fileTimes(filename, &fileInfo.m_ctime, &fileInfo.m_mtime);
@@ -601,14 +686,14 @@ TIndexKernel::FieldIndexes TIndexKernel::getFields()
     indexes.m_ctime = OGR_FD_GetFieldIndex(fDefn, "created");
     indexes.m_mtime = OGR_FD_GetFieldIndex(fDefn, "modified");
 
-    /* Load in memory existing file names in SHP */
-    int nExistingFiles = (int)OGR_L_GetFeatureCount(m_layer, FALSE);
-    for (auto i = 0; i < nExistingFiles; i++)
-    {
-        OGRFeatureH hFeature = OGR_L_GetNextFeature(m_layer);
-        m_files.push_back(OGR_F_GetFieldAsString(hFeature, indexes.m_filename));
-        OGR_F_Destroy(hFeature);
-    }
+//     /* Load in memory existing file names in SHP */
+//     int nExistingFiles = (int)OGR_L_GetFeatureCount(m_layer, FALSE);
+//     for (auto i = 0; i < nExistingFiles; i++)
+//     {
+//         OGRFeatureH hFeature = OGR_L_GetNextFeature(m_layer);
+//         m_files.push_back(OGR_F_GetFieldAsString(hFeature, indexes.m_filename));
+//         OGR_F_Destroy(hFeature);
+//     }
     return indexes;
 }
 
@@ -624,6 +709,8 @@ Geometry TIndexKernel::prepareGeometry(const FileInfo& fileInfo)
             fileInfo.m_filename << "'.";
         throw pdal_error(oss.str());
     }
+    if (srcSrs.empty())
+        srcSrs = SpatialRef(m_assignSrsString);
 
     SpatialRef tgtSrs(m_tgtSrsString);
     if (!tgtSrs)
