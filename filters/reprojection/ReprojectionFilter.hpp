@@ -52,8 +52,7 @@ namespace gdal
 class PDAL_DLL ReprojectionFilter : public Filter
 {
 public:
-    ReprojectionFilter() : m_inferInputSRS(true)
-    {}
+    ReprojectionFilter();
     ~ReprojectionFilter();
 
     static void * create();
