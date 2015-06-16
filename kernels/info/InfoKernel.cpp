@@ -64,9 +64,8 @@ InfoKernel::InfoKernel()
     , m_showAll(false)
     , m_showMetadata(false)
     , m_boundary(false)
-    , m_useJSON(false)
     , m_showSummary(false)
-    , m_PointCloudSchemaOutput("")
+    , m_needPoints(false)
     , m_statsStage(NULL)
 {}
 
@@ -75,25 +74,48 @@ void InfoKernel::validateSwitches()
 {
     int functions = 0;
 
-    if (m_showStats)
-        functions++;
+    if (!m_usestdin && m_inputFile.empty())
+        throw pdal_error("No input file specified.");
+
+    // All isn't really all.
+    if (m_showAll)
+    {
+        m_showStats = true;
+        m_showMetadata = true;
+        m_showSchema = true;
+    }
+
     if (m_boundary)
+    {
         functions++;
-    if (m_showSummary)
+        m_needPoints = true;
+    }
+    if (m_queryPoint.size())
+    {
         functions++;
-    if (m_QueryPoint.size())
-        functions++;
+        m_needPoints = true;
+    }
     if (m_pointIndexes.size())
+    {
         functions++;
+        m_needPoints = true;
+    }
     if (m_showSchema)
         functions++;
     if (m_showMetadata)
         functions++;
-
-    if (functions > 1)
-        throw pdal_error("Incompatible options.");
-    else if (functions == 0)
+    if (m_showSummary)
+        functions++;
+    if (m_showStats || functions == 0 )
+    {
+        functions++;
         m_showStats = true;
+        m_needPoints = true;
+    }
+
+    if (m_showSummary && functions > 1)
+        throw pdal_error("--summary option incompatible with other "
+            "specified options.");
 }
 
 
@@ -119,7 +141,7 @@ void InfoKernel::addSwitches()
          po::value<bool>(&m_showAll)->zero_tokens()->implicit_value(true),
          "dump the schema")
         ("point,p", po::value<std::string >(&m_pointIndexes), "point to dump")
-        ("query", po::value< std::string>(&m_QueryPoint),
+        ("query", po::value< std::string>(&m_queryPoint),
          "A 2d or 3d point query point")
         ("stats",
          po::value<bool>(&m_showStats)->zero_tokens()->implicit_value(true),
@@ -127,7 +149,7 @@ void InfoKernel::addSwitches()
         ("boundary",
          po::value<bool>(&m_boundary)->zero_tokens()->implicit_value(true),
          "compute a hexagonal hull/boundary of dataset")
-        ("dimensions", po::value<std::string >(&m_Dimensions),
+        ("dimensions", po::value<std::string >(&m_dimensions),
          "dimensions on which to compute statistics")
         ("schema",
          po::value<bool>(&m_showSchema)->zero_tokens()->implicit_value(true),
@@ -264,12 +286,12 @@ MetadataNode InfoKernel::dumpSummary(const QuickInfo& qi)
 }
 
 
-void InfoKernel::prepare(const std::string& filename)
+void InfoKernel::setup(const std::string& filename)
 {
     Options readerOptions;
 
     readerOptions.add("filename", filename);
-    if (m_showMetadata)
+    if (!m_needPoints)
         readerOptions.add("count", 0);
 
     m_manager = std::unique_ptr<PipelineManager>(
@@ -277,20 +299,20 @@ void InfoKernel::prepare(const std::string& filename)
     m_reader = m_manager->getStage();
     Stage *stage = m_reader;
 
-    if (m_Dimensions.size())
-        m_options.add("dimensions", m_Dimensions, "List of dimensions");
+    if (m_dimensions.size())
+        m_options.add("dimensions", m_dimensions, "List of dimensions");
 
     Options options = m_options + readerOptions;
     m_reader->setOptions(options);
 
-    if (m_showStats || m_showAll)
+    if (m_showStats)
     {
         m_statsStage = &(m_manager->addFilter("filters.stats"));
         m_statsStage->setOptions(options);
         m_statsStage->setInput(*stage);
         stage = m_statsStage;
     }
-    if (m_boundary )
+    if (m_boundary)
     {
         m_hexbinStage = &(m_manager->addFilter("filters.hexbin"));
         m_hexbinStage->setOptions(options);
@@ -298,31 +320,35 @@ void InfoKernel::prepare(const std::string& filename)
         stage = m_hexbinStage;
         Options readerOptions;
     }
-
 }
 
-MetadataNode InfoKernel::dump(const std::string& filename)
+
+MetadataNode InfoKernel::run(const std::string& filename)
 {
     MetadataNode root;
-    root.add("filename", filename);
 
-    bool bPrepared(false);
-    if (m_showSummary || m_showAll)
+    root.add("filename", filename);
+    if (m_showSummary)
     {
         QuickInfo qi = m_reader->preview();
         MetadataNode summary = dumpSummary(qi).clone("summary");
         root.add(summary);
     }
-    if (m_showSchema || m_showAll)
+    else
     {
         m_manager->prepare();
-        bPrepared = true;
-        MetadataNode schema =
-            utils::toMetadata(m_manager->pointTable()).clone("schema");
-        root.add(schema);
+        if (m_needPoints || m_showMetadata)
+            m_manager->execute();
+        dump(root);
     }
-    if (!bPrepared)
-        m_manager->prepare();
+    root.add("pdal_version", pdal::GetFullVersionString());
+    return root;
+}
+
+void InfoKernel::dump(MetadataNode& root)
+{
+    if (m_showSchema)
+        root.add(utils::toMetadata(m_manager->pointTable()).clone("schema"));
 
     if (m_PointCloudSchemaOutput.size() > 0)
     {
@@ -334,16 +360,13 @@ MetadataNode InfoKernel::dump(const std::string& filename)
         out->write(xml.c_str(), xml.size());
         FileUtils::closeFile(out);
 #else
-        std::cerr << "libxml2 support not enabled, no schema is produced" << std::endl;
+        std::cerr << "libxml2 support not enabled, no schema is produced" <<
+            std::endl;
 #endif
 
     }
-    m_manager->execute();
-    if (m_showStats || m_showAll)
-    {
-        MetadataNode stats = m_statsStage->getMetadata().clone("stats");
-        root.add(stats);
-    }
+    if (m_showStats)
+        root.add(m_statsStage->getMetadata().clone("stats"));
 
     if (m_pipelineFile.size() > 0)
         PipelineWriter(*m_manager).writePipeline(m_pipelineFile);
@@ -352,30 +375,22 @@ MetadataNode InfoKernel::dump(const std::string& filename)
     {
         PointViewSet viewSet = m_manager->views();
         assert(viewSet.size() == 1);
-        MetadataNode points = dumpPoints(*viewSet.begin()).clone("points");
-        root.add(points);
+        root.add(dumpPoints(*viewSet.begin()).clone("points"));
     }
-    if (m_QueryPoint.size())
+    if (m_queryPoint.size())
     {
         PointViewSet viewSet = m_manager->views();
         assert(viewSet.size() == 1);
-        root = dumpQuery(*viewSet.begin());
+        root.add(dumpQuery(*viewSet.begin()));
     }
-    if (m_showMetadata || m_showAll)
-    {
-        MetadataNode metadata = m_reader->getMetadata().clone("metadata");
-        root.add(metadata);
-    }
+    if (m_showMetadata)
+        root.add(m_reader->getMetadata().clone("metadata"));
     if (m_boundary)
     {
         PointViewSet viewSet = m_manager->views();
         assert(viewSet.size() == 1);
-        MetadataNode boundary = m_hexbinStage->getMetadata().clone("boundary");
-        root.add(boundary);
+        root.add(m_hexbinStage->getMetadata().clone("boundary"));
     }
-
-    root.add("pdal_version", pdal::GetFullVersionString());
-    return root;
 }
 
 
@@ -383,7 +398,7 @@ MetadataNode InfoKernel::dumpQuery(PointViewPtr inView) const
 {
     auto seps = [](char c){ return (c == ',' || c == '|' || c == ' '); };
 
-    std::vector<std::string> tokens = Utils::split2(m_QueryPoint, seps);
+    std::vector<std::string> tokens = Utils::split2(m_queryPoint, seps);
     std::vector<double> values;
     for (auto ti = tokens.begin(); ti != tokens.end(); ++ti)
         values.push_back(boost::lexical_cast<double>(*ti));
@@ -411,10 +426,9 @@ MetadataNode InfoKernel::dumpQuery(PointViewPtr inView) const
 
 int InfoKernel::execute()
 {
-
     std::string filename = m_usestdin ? std::string("STDIN") : m_inputFile;
-    prepare(filename);
-    MetadataNode root = dump(filename);
+    setup(filename);
+    MetadataNode root = run(filename);
     utils::toJSON(root, std::cout);
 
     return 0;
