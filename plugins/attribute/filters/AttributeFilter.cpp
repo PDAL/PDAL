@@ -156,8 +156,6 @@ void AttributeFilter::processOptions(const Options& options)
 
 void AttributeFilter::ready(PointTableRef table)
 {
-    m_gdal_debug.reset( new pdal::gdal::ErrorHandler(isDebug(), log()));
-
     for (auto& dim_par : m_dimensions)
     {
         Dimension::Id::Enum t = table.layout()->findDim(dim_par.first);
