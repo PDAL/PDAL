@@ -424,6 +424,12 @@ void TIndexKernel::mergeFile()
 
     Options writerOptions;
     writerOptions.add("filename", m_filespec);
+    writerOptions.add("scale_x", 1e-9);
+    writerOptions.add("scale_y", 1e-9);
+    writerOptions.add("scale_z", 1e-5);
+    writerOptions.add("offset_x", "auto");
+    writerOptions.add("offset_y", "auto");
+    writerOptions.add("offset_z", "auto");
     writer->setOptions(writerOptions);
 
     PointTable table;
@@ -506,8 +512,10 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
     std::unique_ptr<Kernel> app = factory.createKernel("kernels.info");
     InfoKernel *info = static_cast<InfoKernel *>(app.get());
 
-    info->doShowAll(true);
+    info->doShowAll(false);
     info->doComputeBoundary(!m_fastBoundary);
+    if (m_fastBoundary)
+        info->doComputeSummary(true);
     info->prepare(filename);
 
     MetadataNode metadata;
@@ -537,37 +545,20 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
         polygon.setf(std::ios::fixed);
         polygon << "POLYGON ((";
 
-        MetadataNode stats = metadata.findChild("stats");
-        std::vector<MetadataNode> children = stats.children();
-        std::string minx, miny, minz;
-        std::string maxx, maxy, maxz;
-        for (auto mi = children.begin(); mi != children.end(); ++mi)
-        {
+        std::string minx = metadata.findChild("summary:bounds:X:min").value();
+        std::string maxx = metadata.findChild("summary:bounds:X:max").value();
+        std::string miny = metadata.findChild("summary:bounds:Y:min").value();
+        std::string maxy = metadata.findChild("summary:bounds:Y:max").value();
 
-            if (findNode(*mi, "name", "X").valid())
-            {
-                minx = mi->findChild("minimum").value();
-                maxx = mi->findChild("maximum").value();
-            }
-            if (findNode(*mi, "name", "Y").valid())
-            {
-                miny = mi->findChild("minimum").value();
-                maxy = mi->findChild("maximum").value();
-            }
-        }
-
-        polygon << minx << " " << miny;
+        polygon <<         minx << " " << miny;
         polygon << ", " << maxx << " " << miny;
-        polygon << ", " << maxy << " " << maxy;
-        polygon << ", " << maxy << " " << minx;
+        polygon << ", " << maxx << " " << maxy;
+        polygon << ", " << minx << " " << maxy;
         polygon << ", " << minx << " " << miny;
         polygon << "))";
-
         fileInfo.m_boundary = polygon.str();
-
-
-
     }
+
     fileInfo.m_srs = metadata.findChild("summary:spatial_reference").value();
 
     FileUtils::fileTimes(filename, &fileInfo.m_ctime, &fileInfo.m_mtime);
