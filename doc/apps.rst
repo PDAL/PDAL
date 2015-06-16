@@ -8,21 +8,19 @@ PDAL Applications
 :Contact: howard at hobu.co
 :Date: 6/1/2015
 
-PDAL contains a single `git`_-style application, called *pdal*. The `pdal`
-application currently contains six commands:
+PDAL contains consists of a single application, called *pdal*. The `pdal`
+application currently has the following subcommands:
 
 * :ref:`delta <delta_command>`
-*
 * :ref:`ground <ground_command>`
 * :ref:`info <info_command>`
 * :ref:`pcl <pcl_command>`
 * :ref:`pipeline <pipeline_command>`
 * :ref:`random <random_command>`
-* :ref:`tindex <tindex_command>`
-* :ref:`translate <translate_command>`
 * :ref:`view <view_command>`
 * :ref:`split <split_command>`
 * :ref:`tindex <tindex_command>`
+* :ref:`translate <translate_command>`
 
 Applications are run by invoking the *pdal* application along with the
 command name:
@@ -33,12 +31,7 @@ command name:
     $ pdal translate input.las output.las
     $ pdal pipeline --stdin < myxml.xml
 
-.. note::
-
-    The :ref:`ground <ground_command>`, :ref:`pcl <pcl_command>`, and
-    :ref:`view <view_command>` commands are only available if PCL is linked.
-
-Help about each command can be retrieved via the ``--help`` switch.
+Help for each command can be retrieved via the ``--help`` switch.
 The ``--drivers`` and ``--options`` switches can tell you more about
 particular drivers and their options:
 
@@ -48,7 +41,7 @@ particular drivers and their options:
     $ pdal translate --drivers
     $ pdal pipeline --options writers.las
 
-Additional, driver-specific options may be specified by using a
+Additional driver-specific options may be specified by using a
 namespace-prefixed option name. For example, it is possible to
 set the LAS day of year at translation time with the following
 option:
@@ -62,10 +55,8 @@ option:
 
 .. note::
 
-        Driver specific options can be identified using the
-        ``pdal info --options`` invocation.
-
-.. _`git`: http://git-scm.com/
+    Driver specific options can be identified using the
+    ``pdal info --options`` invocation.
 
 
 .. _delta_command:
@@ -167,10 +158,13 @@ ground command
 The *ground* command is used to segment the input point cloud into ground
 versus non-ground returns. The output is a point cloud containing only ground
 returns. The *ground* command invokes `Point Cloud Library
-<http://pointclouds.org/>`_'s `ProgressiveMorphologicalFilter`_. As such,
-*ground* is only available when PDAL is linked with PCL.
+<http://pointclouds.org/>`_'s `ProgressiveMorphologicalFilter`_.
 
 .. _`ProgressiveMorphologicalFilter`: http://pointclouds.org/documentation/tutorials/progressive_morphological_filtering.php#progressive-morphological-filtering.
+
+.. note::
+
+    The *ground* command is only available when PDAL is linked with PCL.
 
 ::
 
@@ -210,46 +204,127 @@ Dumps information about a point cloud file, such as:
 
 ::
 
-    --input arg      Non-positional argument to specify input filename.
-    --point [-p] arg  Display points for particular points.  Points can be specified in a range or list: 4-10, 15, 255-300.
-    --query Point
+    --input arg       Non-positional argument to specify input filename.
+    --point [-p] arg  Display points for particular points.  Points can be specified in
+                      a range or list: 4-10, 15, 255-300.
+    --query arg       Add a listing of points based on the distance from the provided
+                      location.
+                      --query "25.34,35.123" or --query "11532.23 -10e23 1.234"
+    --stats           Display the minimum, maximum, average and count of each
+                      dimension.
+    --boundary        Compute a hexagonal boundary that contains all points.
+    --dimensions arg  Use with --stats to limit the dimensions on which statistics
+                      should be computed.
+                      --dimensions "X, Y,Red"
+    --schema          Dump the schema of the internal point storage.
+    --pipeline-serialization
+                      Create a JSON representation of the pipeline used to generate
+                      the output.
+    --summary         Dump the point count, spatial reference, extrema and dimension
+                      names.
+    --metadata        Dump the metadata associated with the input file.
+
+If no options are provided, --statistics is assumed.
 
 Example 1:
 ^^^^^^^^^^^^
 
+::
 
-    $ pdal info  test/data/1.2-with-color.las --count 3 --query "636601.87, 849018.59, 425.10"
+    $ pdal info  test/data/las/1.2-with-color.las --query="636601.87, 849018.59, 425.10"
+    {
+      "0":
+      {
+        "Blue": 134,
+        "Classssification": 1,
+        "EdgeOfFlightLine": 0,
+        "GpsTime": 245383.38808001476,
+        "Green": 104,
+        "Intensity": 124,
+        "NumberOfReturns": 1,
+        "PointSourceId": 7326,
+        "Red": 134,
+        "ReturnNumber": 1,
+        "ScanAngleRank": -4,
+        "ScanDirectionFlag": 1,
+        "UserData": 126,
+        "X": 636601.87,
+        "Y": 849018.59999999998,
+        "Z": 425.10000000000002
+      },
+      "1":
+      {
+        "Blue": 134,
+        "Classification": 2,
+        "EdgeOfFlightLine": 0,
+        "GpsTime": 246099.17323102333,
+        "Green": 106,
+        "Intensity": 153,
+        "NumberOfReturns": 1,
+        "PointSourceId": 7327,
+        "Red": 143,
+        "ReturnNumber": 1,
+        "ScanAngleRank": -10,
+        "ScanDirectionFlag": 1,
+        "UserData": 126,
+        "X": 636606.76000000001,
+        "Y": 849053.94000000006,
+        "Z": 425.88999999999999
+      },
+      ...
 
-Print the first 10 points of the file as `reStructuredText`_
+Example 2:
+^^^^^^^^^^
 
 ::
 
     $ pdal info test/data/1.2-with-color.las -p 0-10
-
-Print three selected points of the file as `reStructuredText`_
-
-::
-
-    $ pdal info test/data/1.2-with-color.las -p 4, 16, 28
-
-
-.. _`reStructuredText`: http://docutils.sourceforge.net/docs/user/rst/quickref.html
-
-::
-
-    -p [ --point ] [=arg(=0)] point to dump
-    --query arg               A 2d or 3d point query point
-    --distance arg            A query distance
-    -a [ --stats ]            dump stats on all points (reads entire dataset)
-    --count arg (=0)          How many points should we write?
-    --dimensions arg          dump stats on all points (reads entire dataset)
-    -s [ --schema ]           dump the schema
-    -m [ --metadata ]         dump the metadata
-    --sdo_pc                  dump the SDO_PC Oracle Metadata
-    -r [ --stage ]            dump the stage info
-    --xml                     dump XML instead of JSON
-    --seed arg (=0)           Seed value for random sample
-    --sample_size arg (=1000) Sample size for random sample
+    {
+      "filename": "../../test/data/las/1.2-with-color.las",
+      "pdal_version": "PDAL 1.0.0.b1 (116d7d) with GeoTIFF 1.4.1 GDAL 1.11.2 LASzip 2.2.0",
+      "points":
+      {
+        "point":
+        [
+          {
+            "Blue": 88,
+            "Classification": 1,
+            "EdgeOfFlightLine": 0,
+            "GpsTime": 245380.78254962614,
+            "Green": 77,
+            "Intensity": 143,
+            "NumberOfReturns": 1,
+            "PointId": 0,
+            "PointSourceId": 7326,
+            "Red": 68,
+            "ReturnNumber": 1,
+            "ScanAngleRank": -9,
+            "ScanDirectionFlag": 1,
+            "UserData": 132,
+            "X": 637012.23999999999,
+            "Y": 849028.31000000006,
+            "Z": 431.66000000000003
+          },
+          {
+            "Blue": 68,
+            "Classification": 1,
+            "EdgeOfFlightLine": 0,
+            "GpsTime": 245381.45279923646,
+            "Green": 66,
+            "Intensity": 18,
+            "NumberOfReturns": 2,
+            "PointId": 1,
+            "PointSourceId": 7326,
+            "Red": 54,
+            "ReturnNumber": 1,
+            "ScanAngleRank": -11,
+            "ScanDirectionFlag": 1,
+            "UserData": 128,
+            "X": 636896.32999999996,
+            "Y": 849087.70000000007,
+            "Z": 446.38999999999999
+          },
+          ...
 
 
 .. _pcl_command:
@@ -257,17 +332,24 @@ Print three selected points of the file as `reStructuredText`_
 pcl command
 ------------------------------------------------------------------------------
 
-The *pcl* command is used to invoke a PCL JSON pipeline. See
-:ref:`pcl_block_tutorial` for more information.
+The *pcl* command is used to invoke a PCL JSON pipeline. See :ref:`pcl_block_tutorial`
+for more information.
+
+.. note::
+
+    The *pcl* command is only available when PDAL is linked with PCL.
 
 ::
 
-    -i [ --input ] arg      input file name
-    -o [ --output ] arg     output file name
-    -p [ --pcl ] arg        pcl file name
-    -z [ --compress ]       Compress output data (if supported by output format)
+    pdal pcl <input> <output> <pcl>
 
-The *pcl* command is only available when PDAL is build with PCL support.
+::
+
+    --input [-i] arg   Non-positional argument to specify input file name.
+    --output [-o] arg  Non-positional argument to specify output file name.
+    --pcl [-p] arg     Non-positional argument to specify pcl file name.
+    --compress [-z]    Compress output data (if supported by output format)
+    --metadata [-m]    Forward metadata from previous stages.
 
 
 .. _pipeline_command:
@@ -275,33 +357,40 @@ The *pcl* command is only available when PDAL is build with PCL support.
 pipeline command
 ------------------------------------------------------------------------------
 
-The *pipeline* command is used to execute :ref:`pipeline` XML. See :ref:`reading`
-or :ref:`pipeline` for more information.
+The *pipeline* command is used to execute :ref:`pipeline` XML. See
+:ref:`reading` or :ref:`pipeline` for more information.
 
 ::
 
-    -i [ --input ] arg           input file name
+    pdal pipeline <input>
+
+::
+
+    --input [-i] arg  Non-positional argument to specify input file name.
     --pipeline-serialization arg
-    --validate                   Validate the pipeline (including serialization),
-                               but do not execute writing of points
-    --count arg (=0)             How many points should we write?
-    --skip arg (=0)              How many points should we skip?
+                      Write input pipeline along with all metadata and created by the
+                      pipeline to the specified file.
+    --validate        Validate the pipeline (including serialization), but do not execute
+                      writing of points
 
 .. note::
 
     The `pipeline` command can accept option substitutions, but they
-    do not replace existing options that are specified in the XML. For example,
-    to set the output and input LAS files for a pipeline that does a translation,
-    construct XML that does not containe `filename` options for each, and then
-    issue the command with the following arguments:
+    do not replace existing options that are specified in the input XML
+    pipeline.  For example, to set the output and input LAS files for a
+    pipeline that does a translation, construct XML that does not contain
+    `filename` for reader and writer and issue the command with the
+    following arguments:
 
     ::
 
-        pdal pipeline -i translate.xml --writers.las.filename=output.laz --readers.las.filename=input.las
+        pdal pipeline -i translate.xml --writers.las.filename=output.laz \
+            --readers.las.filename=input.las
+
 
 .. _random_command:
 
-``random`` command
+random command
 ------------------------------------------------------------------------------
 
 The *random* command is used to create a random point cloud. It uses
@@ -313,67 +402,22 @@ each of the x, y, and z dimensions.
 
 ::
 
-  -o [ --output ] arg           output file name
-  -z [ --compress ]             Compress output data (if supported by output
-                                format)
-  --count arg (=0)              How many points should we write?
-  --bounds arg                  Extent (in XYZ to clip output to)
-  --mean arg                    A comma-separated or quoted, space-separated
-                                list of means (normal mode):
-                                --mean 0.0,0.0,0.0
-                                --mean "0.0 0.0 0.0"
-  --stdev arg                   A comma-separated or quoted, space-separated
-                                list of standard deviations (normal mode):
-                                --stdev 0.0,0.0,0.0
-                                --stdev "0.0 0.0 0.0"
-  --distribution arg (=uniform) Distribution (uniform / normal)
-
-
-.. _tindex_command:
-
-``tindex`` command
-------------------------------------------------------------------------------
-
-The *tindex* command is used to create a `GDAL`_-style tile index for PDAL-readable
-point cloud types. The `gdaltindex`_ command is the concept in that software,
-and the PDAL variant follows it very closely. This command requires `GDAL`_ to
-be linked to PDAL.
+    pdal random <output>
 
 ::
 
-  --tindex arg                          OGR-readable/writeable tile index
-                                        output
-  --filespec arg                        Build: Pattern of files to index.
-                                        Merge: Output filename
-  --lyr_name arg                        OGR layer name to write into datasource
-  --tindex_name arg (=location)         Tile index column name
-  -f [ --driver ] arg (=ESRI Shapefile) OGR driver name to use
-  --t_srs arg (=EPSG:4326)              Target SRS of tile index
-  --geometry arg                        Geometry to filter points when merging.
-  --write_absolute_path arg (=0)        Write absolute rather than relative
-                                        file paths
-  --merge                               Whether we're merging the entries in a
-                                        tindex file.
-
-Some examples:
-
-1) Find all LAS files via `find`, send that file list via STDIN to `pdal tindex`,
-and write a `SQLite` tile index file with a layer named `pdal`:
-
-::
-
-    find las/ -iname "*.las" | pdal tindex index.sqlite -f "SQLite" --stdin --lyr_name pdal
-
-2) Glob a list of LAS files, output the SRS for the index entries to EPSG:4326, and
-write out an `SQLite`_ file.
-
-::
-
-    pdal tindex index.sqlite "*.las" -f "SQLite" --lyr_name "pdal" --t_srs "EPSG:4326"
-
-.. _`SQLite`: http://www.sqlite.org
-.. _`gdaltindex`: http://www.gdal.org/gdaltindex.html
-.. _`GDAL`: http://www.gdal.org
+    --output [-o] arg   Non-positional argument to specify output file name.
+    --compress [-z]     Compress output data (if supported by output format)
+    --count arg         Number of points in created point cloud [0].
+    --bounds arg        Extent (in XYZ to clip output to):
+                        --bounds "([xmin,xmax],[ymin,ymax],[zmin,zmax])"
+    --mean arg          List of means (for --distribution normal)
+                        --mean 0.0,0.0,0.0
+                        --mean "0.0 0.0 0.0"
+    --stdev arg         List of standard deviations (for --distribution normal)
+                        --stdev 0.0,0.0,0.0
+                        --stdev "0.0 0.0 0.0"
+    --distribution arg  Distribution type (uniform or normal) [uniform]
 
 
 .. _translate_command:
@@ -387,29 +431,24 @@ translation operations.
 
 ::
 
-    -i [ --input ] arg           input file name
-    -o [ --output ] arg          output file name
-    --a_srs arg                  Assign input coordinate system (if supported by
-                               output format)
-    --t_srs arg                  Transform to output coordinate system (if
-                               supported by output format)
-    -z [ --compress ]            Compress output data (if supported by output
-                               format)
-    --count arg (=0)             How many points should we write?
-    --skip arg (=0)              How many points should we skip?
-    --bounds arg                 Extent (in XYZ to clip output to)
-    --polygon arg                POLYGON WKT to use for precise crop of data (2d
-                               or 3d)
-    --scale arg                  A comma-separated or quoted, space-separated
-                               list of scales to set on the output file:
-                               --scale 0.1,0.1,0.00001
-                               --scale "0.1 0.1 0.00001"
-    --offset arg                 A comma-separated or quoted, space-separated
-                               list of offsets to set on the output file:
-                               --offset 0,0,0
-                               --offset "1234 5678 91011"
-    -m [ --metadata ] [=arg(=1)] Forward metadata (VLRs, header entries, etc)
-                               from previous stages
+    pdal translate <input> <output>
+
+::
+
+    --input [-i] arg   Non-positional argument to specify input file name.
+    --output [-o] arg  Non-positional argument to specify output file name.
+    --compress arg     Compress output data if supported by output format. [false]
+    --a_srs arg        Assign input coordinate system.
+    --t_srs arg        Transform to output coordinate system.
+    --bounds arg       Limit output to points inside the specified box.
+                       --bounds "([xmin,xmax],[ymin,ymax],[zmin,zmax])"
+    --polygon arg      Limit output to point inside the specified polygon (specified as
+                       well-known text).
+    --d_step arg       Step value to be passed to decimation filter. [1]
+    --d_offset arg     Offset value to be passed to decimation filter. [0]
+    --d_leaf_size arg  Leaf size to be bassed to decimation filter. [1]
+    --d_method arg     Decimation filter method (RankOrder|VoxelGrid).  [RankOrder]
+    --d_limit arg      Limit to be passed to decimation filter. [0]
 
 The translate command can be augmented by specifying full-path options at the
 command line invocation. For example, the following invocation will translate
@@ -438,9 +477,13 @@ view command
 The *view* command can be used to visualize a point cloud using the
 PCLVisualizer. The command takes a single argument, the input file name.
 
+.. note::
+
+    The *view* command is only available when PDAL is linked with PCL.
+
 ::
 
-    $ pdal view myfile.las
+    $ pdal view <input>
 
 Once the data has been loaded into the viewer, press h or H to display the
 help.
@@ -488,29 +531,23 @@ help.
 split command
 ------------------------------------------------------------------------------
 
-The *split* command will create multiple point output files from a single
-input file.
-The command takes an input file name and an output filename (used as a template)
-or output directory specification.
+The *split* command will create multiple output files from a single
+input file.  The command takes an input file name and an output filename
+(used as a template) or output directory specification.
 
 ::
 
-    $ pdal split --capacity 100000 infile.laz outfile.bpf
-
-This command takes the points from the input file 'infile.laz' and creates
-output files 'outfile_1.bpf', 'outfile_2.bpf', ... where each output file
-contains no more than 100000 points.
+    pdal split <input> <output>
 
 ::
 
-    -i [--input] arg   Non-positional option for specifying input file name
-    -o [--output] arg  Non-positional option for specifying output file/directory name
-    --length arg       Edge length for splitter cells
-    --capacity arg     Point capacity for chipper cells
+    --input [-i] arg   Non-positional option for specifying input file name
+    --output [-o] arg  Non-positional option for specifying output file/directory name
+    --length arg       Edge length for splitter cells.  See :ref:`filters.splitter`.
+    --capacity arg     Point capacity for chipper cells.  See :ref:`filters.chipper`.
 
-Input and output arguments are required.  If neither the length nor capacity
-arguments are specified, an implcit argument of capacity with a value of 100000
-is added.
+If neither the length nor capacity arguments are specified, an implcit argument of
+capacity with a value of 100000 is added.
 
 The output argument is a template.  If the output argument is, for example,
 'file.ext', the output files created are 'file_#.ext' where # is a number
@@ -521,10 +558,29 @@ directory and the input argument is appended to create the output template.
 The split command never creates directories.  Directories must pre-exist.
 
 
+Example 1:
+^^^^^^^^^^^
+
+::
+
+    $ pdal split --capacity 100000 infile.laz outfile.bpf
+
+This command takes the points from the input file 'infile.laz' and creates
+output files 'outfile_1.bpf', 'outfile_2.bpf', ... where each output file
+contains no more than 100000 points.
+
+
 .. _tindex_command:
 
 tindex command
 ------------------------------------------------------------------------------
+
+The *tindex* command is used to create a `GDAL`_-style tile index for
+PDAL-readable point cloud types (see `gdaltindex`_).
+
+.. note::
+
+    The *tindex* command is only available when PDAL is linked with `GDAL`_.
 
 The *tindex* command has two modes.  The first mode creates a spatial index
 file for a set of point cloud files.  The second mode creates a point cloud
@@ -553,16 +609,13 @@ normally needs to be quoted to prevent shell expansion of wildcard characters.
 
 ::
 
-    --tindex       Non-positional option for specifying the index file name.
-    --filespec     Non-positional option for specifying pattern of files to
-                   be indexed.
-    --lyr_name     Name of layer in which to store the features. Defaults to
-                   the base name of the first file indexed.
-    --tindex_name  Name of the field in the feature in which to store the
-                   indexed file name. ["location"]
-    --driver       OGR driver name. ["ESRI Shapefile"]
-    --t_srs        Spatial reference system in which to store index vector
-                   data. ["EPSG:4326"]
+    --tindex                   Non-positional option for specifying the index file name.
+    --filespec                 Non-positional option for specifying pattern of files to be indexed.
+    --lyr_name                 Name of layer in which to store the features. Defaults to the base name of the first file indexed.
+    --tindex_name              Name of the field in the feature in which to store the indexed file name. ["location"]
+    --driver                   OGR driver name. ["ESRI Shapefile"]
+    --t_srs                    Spatial reference system in which to store index vector data. ["EPSG:4326"]
+    --write_absolute_path arg  Write absolute rather than relative file paths [false]
 
 tindex Merge Mode
 ^^^^^^^^^^^^^^^^^^^^^
@@ -584,3 +637,27 @@ of the output file is determined automatically from the filename extension.
                 points inside the object will be in the output file.
     --t_srs     Spatial reference system in which the output data should be
                 represented. ["EPSG:4326"]
+
+Example 1:
+^^^^^^^^^^^
+
+Find all LAS files via `find`, send that file list via STDIN to `pdal tindex`,
+and write a `SQLite` tile index file with a layer named `pdal`:
+
+::
+
+    find las/ -iname "*.las" | pdal tindex index.sqlite -f "SQLite" --stdin --lyr_name pdal
+
+Example 2:
+^^^^^^^^^^^
+
+Glob a list of LAS files, output the SRS for the index entries to EPSG:4326, and
+write out an `SQLite`_ file.
+
+::
+
+    pdal tindex index.sqlite "*.las" -f "SQLite" --lyr_name "pdal" --t_srs "EPSG:4326"
+
+.. _`SQLite`: http://www.sqlite.org
+.. _`gdaltindex`: http://www.gdal.org/gdaltindex.html
+.. _`GDAL`: http://www.gdal.org
