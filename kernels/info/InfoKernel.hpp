@@ -69,6 +69,7 @@ public:
 
     inline bool showAll() { return m_showAll; }
     inline void doShowAll(bool value) { m_showAll = value; }
+    inline void doComputeSummary(bool value) { m_showSummary = value; }
     inline void doComputeBoundary(bool value) { m_boundary = value; }
 
 private:
