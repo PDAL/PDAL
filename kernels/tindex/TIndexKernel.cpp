@@ -33,7 +33,6 @@
 ****************************************************************************/
 
 #include "TIndexKernel.hpp"
-#include "../info/InfoKernel.hpp"
 
 #ifndef WIN32
 #include <glob.h>
@@ -107,8 +106,9 @@ void TIndexKernel::addSwitches()
             "OGR-readable/writeable tile index output")
         ("filespec", po::value<std::string>(&m_filespec),
             "Build: Pattern of files to index. Merge: Output filename")
-        ("fast-boundary", po::value<bool>(&m_fastBoundary)->zero_tokens()->implicit_value(true),
-         "use extend instead of exact boundary")
+        ("fast-boundary", po::value<bool>(&m_fastBoundary)->
+            zero_tokens()->implicit_value(true),
+            "use extend instead of exact boundary")
         ("lyr_name", po::value<std::string>(&m_layerName),
             "OGR layer name to write into datasource")
         ("tindex_name", po::value<std::string>(&m_tileIndexColumnName)->
@@ -118,7 +118,8 @@ void TIndexKernel::addSwitches()
         ("t_srs", po::value<std::string>(&m_tgtSrsString)->
             default_value("EPSG:4326"), "Target SRS of tile index")
         ("a_srs", po::value<std::string>(&m_assignSrsString)->
-            default_value("EPSG:4326"), "Assign SRS of tile with no SRS to this value")
+            default_value("EPSG:4326"),
+            "Assign SRS of tile with no SRS to this value")
         ("geometry", po::value<std::string>(&m_filterGeom),
             "Geometry to filter points when merging.")
         ("write_absolute_path", po::value<bool>(&m_absPath)->
@@ -257,9 +258,10 @@ bool TIndexKernel::IsFileIndexed( const FieldIndexes& indexes,
     err = OGR_L_SetAttributeFilter(m_layer, NULL);
     return output;
 }
+
+
 void TIndexKernel::createFile()
 {
-
     if (!m_usestdin)
         m_files = glob(m_filespec);
     else
@@ -509,57 +511,44 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
 {
     FileInfo fileInfo;
 
-    std::unique_ptr<Kernel> app = factory.createKernel("kernels.info");
-    InfoKernel *info = static_cast<InfoKernel *>(app.get());
+    StageFactory f;
 
-    info->doShowAll(false);
-    info->doComputeBoundary(!m_fastBoundary);
+    std::string driverName = f.inferReaderDriver(filename);
+    Stage *s = f.createStage(driverName, true);
+    Options ops;
+    ops.add("filename", filename);
+    s->setOptions(ops);
+
     if (m_fastBoundary)
-        info->doComputeSummary(true);
-    info->prepare(filename);
-
-    MetadataNode metadata;
-    try
     {
-        metadata = info->dump(filename);
-    } catch (...)
-    {
-        // empty metdata
-    }
+        QuickInfo qi = s->preview();
 
-    fileInfo.m_filename = filename;
-    if (!m_fastBoundary)
-        fileInfo.m_boundary = metadata.findChild("boundary:boundary").value();
-    else
-    {
-        auto findNode = [](MetadataNode m,
-            const std::string name, const std::string val)
-        {
-            auto findNameVal = [name, val](MetadataNode m)
-                { return (m.name() == name && m.value() == val); };
-
-            return m.find(findNameVal);
-        };
-        std::ostringstream polygon;
-        polygon.precision(10);
-        polygon.setf(std::ios::fixed);
+        std::stringstream polygon;
         polygon << "POLYGON ((";
 
-        std::string minx = metadata.findChild("summary:bounds:X:min").value();
-        std::string maxx = metadata.findChild("summary:bounds:X:max").value();
-        std::string miny = metadata.findChild("summary:bounds:Y:min").value();
-        std::string maxy = metadata.findChild("summary:bounds:Y:max").value();
-
-        polygon <<         minx << " " << miny;
-        polygon << ", " << maxx << " " << miny;
-        polygon << ", " << maxx << " " << maxy;
-        polygon << ", " << minx << " " << maxy;
-        polygon << ", " << minx << " " << miny;
+        polygon <<         qi.m_bounds.minx << " " << qi.m_bounds.miny;
+        polygon << ", " << qi.m_bounds.maxx << " " << qi.m_bounds.miny;
+        polygon << ", " << qi.m_bounds.maxx << " " << qi.m_bounds.maxy;
+        polygon << ", " << qi.m_bounds.minx << " " << qi.m_bounds.maxy;
+        polygon << ", " << qi.m_bounds.minx << " " << qi.m_bounds.miny;
         polygon << "))";
         fileInfo.m_boundary = polygon.str();
+        fileInfo.m_srs = qi.m_srs.getWKT();
     }
+    else
+    {
+        PointTable table;
 
-    fileInfo.m_srs = metadata.findChild("summary:spatial_reference").value();
+        Stage *hexer = f.createStage("filters.hexbin", true);
+        hexer->setInput(*s);
+
+        hexer->prepare(table);
+        hexer->execute(table);
+
+        fileInfo.m_boundary =
+            table.metadata().findChild("filters.hexbin:boundary").value();
+        fileInfo.m_srs = table.spatialRef().getWKT();
+    }
 
     FileUtils::fileTimes(filename, &fileInfo.m_ctime, &fileInfo.m_mtime);
 
