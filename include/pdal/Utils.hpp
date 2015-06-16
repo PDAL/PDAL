@@ -244,6 +244,7 @@ namespace Utils
         std::vector<std::string>& outputString, unsigned int lineLength);
     PDAL_DLL std::string escapeJSON(const std::string &s);
     PDAL_DLL std::string demangle(const std::string& s);
+    PDAL_DLL int screenWidth();
 
     /// Split a string into substrings.  Characters matching the predicate are
     ///   discarded.

@@ -423,6 +423,9 @@ std::string OciWriter::loadSQLData(std::string const& filename)
         else
             output = line;
     }
+
+    FileUtils::closeFile(input);
+
     return output;
 }
 
@@ -715,7 +718,7 @@ void OciWriter::processOptions(const Options& options)
 
     if (m_compression && (m_orientation == Orientation::DimensionMajor))
         throw pdal_error("LAZperf compression not supported for "
-            "dimension-major point storage."); 
+            "dimension-major point storage.");
 }
 
 
@@ -917,7 +920,7 @@ void OciWriter::writeTile(const PointViewPtr view)
     if (usePartition)
         oss << ", :9";
     oss <<")";
- 
+
     Statement statement(m_connection->CreateStatement(oss.str().c_str()));
 
     // :1
@@ -940,7 +943,7 @@ void OciWriter::writeTile(const PointViewPtr view)
 
     //NOTE: packed point size is guaranteed to be of sufficient size to hold
     // a point's data, but it may be larger than the actual size of a point
-    // if location scaling is being used. 
+    // if location scaling is being used.
     std::vector<char> outbuf(packedPointSize() * view->size());
     size_t totalSize = 0;
     if (m_orientation == Orientation::DimensionMajor)

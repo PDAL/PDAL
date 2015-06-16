@@ -79,7 +79,6 @@ void RandomKernel::addSwitches()
 
     addSwitchSet(file_options);
 
-    addPositionalSwitch("input", 1);
     addPositionalSwitch("output", 1);
 }
 

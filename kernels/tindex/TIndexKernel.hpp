@@ -46,7 +46,7 @@ extern "C" PF_ExitFunc TIndexKernel_InitPlugin();
 
 namespace pdal
 {
-    
+
 class KernelFactory;
 
 class PDAL_DLL TIndexKernel : public Kernel
@@ -73,7 +73,7 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
     int execute(); // overrride
-    
+
 private:
     TIndexKernel();
     void addSwitches(); // overrride
@@ -94,6 +94,9 @@ private:
         const gdal::SpatialRef& inSrs, const gdal::SpatialRef& outSrs);
     void createFields();
 
+    bool IsFileIndexed( const FieldIndexes& indexes,
+                        const FileInfo& fileInfo);
+
     std::string m_idxFilename;
     std::string m_filespec;
     StringList m_files;
@@ -108,6 +111,8 @@ private:
     void *m_dataset;
     void *m_layer;
     std::string m_tgtSrsString;
+    std::string m_assignSrsString;
+    bool m_fastBoundary;
 };
 
 } // namespace pdal

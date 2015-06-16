@@ -231,26 +231,33 @@ void DeltaKernel::outputDetail(PointView& source_data, PointView& candidate_data
 
 void DeltaKernel::outputRST(boost::property_tree::ptree const& tree) const
 {
-    std::string headline("------------------------------------------------------------------------------------------");
+    std::string headline(Utils::screenWidth(), '-');
+
     std::cout << headline << std::endl;
-    std::cout << " Delta summary for source '" << m_sourceFile << "' and candidate '" << m_candidateFile <<"'" << std::endl;
+    std::cout << " Delta summary for" << std::endl;
+    std::cout << "     source: '" << m_sourceFile << "'" << std::endl;
+    std::cout << "     candidate: '" << m_candidateFile << "'" << std::endl;
     std::cout << headline << std::endl;
     std::cout << std::endl;
 
     std::string thead("----------- --------------- --------------- --------------");
     std::cout << thead << std::endl;
-    std::cout << " Dimension       X             Y                  Z    " << std::endl;
+    std::cout << " Dimension       X             Y                  Z    " <<
+        std::endl;
     std::cout << thead << std::endl;
 
     boost::format fmt("%.4f");
 
-
-
-    std::cout << " Min        " << fmt % tree.get<float>("min.x") << "            " << fmt % tree.get<float>("min.y") << "            " << fmt % tree.get<float>("min.z")<<std::endl;
-    std::cout << " Max        " << fmt % tree.get<float>("max.x") << "            " << fmt % tree.get<float>("max.y") << "            " << fmt % tree.get<float>("max.z")<<std::endl;
-    std::cout << " Mean       " << fmt % tree.get<float>("mean.x") << "            " << fmt % tree.get<float>("mean.y") << "            " << fmt % tree.get<float>("mean.z")<<std::endl;
+    std::cout << " Min        " << fmt % tree.get<float>("min.x") <<
+        "            " << fmt % tree.get<float>("min.y") <<
+        "            " << fmt % tree.get<float>("min.z") << std::endl;
+    std::cout << " Max        " << fmt % tree.get<float>("max.x") <<
+        "            " << fmt % tree.get<float>("max.y") <<
+        "            " << fmt % tree.get<float>("max.z")<<std::endl;
+    std::cout << " Mean       " << fmt % tree.get<float>("mean.x") <<
+        "            " << fmt % tree.get<float>("mean.y") <<
+        "            " << fmt % tree.get<float>("mean.z") << std::endl;
     std::cout << thead << std::endl;
-
 }
 
 
