@@ -392,7 +392,10 @@ void TIndexKernel::mergeFile()
     MergeFilter merge;
 
     Options cropOptions;
-    cropOptions.add("polygon", m_wkt);
+    if (!m_bounds.empty())
+        cropOptions.add("bounds", m_bounds);
+    else
+        cropOptions.add("polygon", m_wkt);
 
     for (auto f : files)
     {
@@ -416,6 +419,8 @@ void TIndexKernel::mergeFile()
         repro->setOptions(reproOptions);
         premerge = repro;
 
+        // WKT is set, even if we're using a bounding box for fitering, so
+        // can be used as a test here.
         if (!m_wkt.empty())
         {
             Stage *crop = factory.createStage("filters.crop", true);
