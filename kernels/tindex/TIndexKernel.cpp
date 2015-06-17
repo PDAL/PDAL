@@ -441,6 +441,8 @@ void TIndexKernel::mergeFile()
     }
     writer->setInput(merge);
 
+    applyExtraStageOptionsRecursive(writer);
+
     Options writerOptions;
     writerOptions.add("filename", m_filespec);
     writerOptions.add("scale_x", 1e-9);
@@ -449,7 +451,7 @@ void TIndexKernel::mergeFile()
     writerOptions.add("offset_x", "auto");
     writerOptions.add("offset_y", "auto");
     writerOptions.add("offset_z", "auto");
-    writer->setOptions(writerOptions);
+    writer->addConditionalOptions(writerOptions);
 
     PointTable table;
 
