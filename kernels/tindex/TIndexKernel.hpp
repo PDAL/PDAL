@@ -104,7 +104,8 @@ private:
     std::string m_driverName;
     std::string m_tileIndexColumnName;
     std::string m_srsColumnName;
-    std::string m_filterGeom;
+    std::string m_wkt;
+    BOX3D m_bounds;
     bool m_merge;
     bool m_absPath;
 

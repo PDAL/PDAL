@@ -633,8 +633,11 @@ of the output file is determined automatically from the filename extension.
 
     --tindex    Non-positional option for specifying the index filename.
     --filespec  Non-positional option for specifying the merge output filename.
-    --geometry  Well-known text representation of geometric filter.  Only
-                points inside the object will be in the output file.
+    --polygon   Well-known text representation of geometric filter.  Only
+                points inside the object will be written to the output file.
+    --bounds    Bounding box for clipping points.  Only points inside the box
+                will be written to the output file.
+                --bounds "([xmin,xmax],[ymin,ymax],[zmin,zmax])"
     --t_srs     Spatial reference system in which the output data should be
                 represented. ["EPSG:4326"]
 

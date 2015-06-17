@@ -106,7 +106,7 @@ void TIndexKernel::addSwitches()
             "OGR-readable/writeable tile index output")
         ("filespec", po::value<std::string>(&m_filespec),
             "Build: Pattern of files to index. Merge: Output filename")
-        ("fast-boundary", po::value<bool>(&m_fastBoundary)->
+        ("fast_boundary", po::value<bool>(&m_fastBoundary)->
             zero_tokens()->implicit_value(true),
             "use extend instead of exact boundary")
         ("lyr_name", po::value<std::string>(&m_layerName),
@@ -120,8 +120,10 @@ void TIndexKernel::addSwitches()
         ("a_srs", po::value<std::string>(&m_assignSrsString)->
             default_value("EPSG:4326"),
             "Assign SRS of tile with no SRS to this value")
-        ("geometry", po::value<std::string>(&m_filterGeom),
-            "Geometry to filter points when merging.")
+        ("bounds", po::value<BOX3D>(&m_bounds),
+            "Extent (in XYZ) to clip output to")
+        ("polygon", po::value<std::string>(&m_wkt),
+            "Well-known text of polygon to clip output")
         ("write_absolute_path", po::value<bool>(&m_absPath)->
             default_value(false),
             "Write absolute rather than relative file paths")
@@ -150,6 +152,11 @@ void TIndexKernel::validateSwitches()
 
     if (m_merge)
     {
+        if (!m_wkt.empty() && !m_bounds.empty())
+            throw pdal_error("Can't specify both --polygon and "
+                "--bounds options.");
+        if (!m_bounds.empty())
+            m_wkt = m_bounds.toWKT();
         if (m_filespec.empty())
             throw pdal_error("No output filename provided.");
         StringList invalidArgs;
@@ -168,8 +175,11 @@ void TIndexKernel::validateSwitches()
     {
         if (m_filespec.empty() && !m_usestdin)
             throw pdal_error("No input pattern specified and STDIN not given");
-        if (argumentExists("geometry"))
-            throw pdal_error("--geometry option not supported when building "
+        if (argumentExists("polygon"))
+            throw pdal_error("--polygon option not supported when building "
+                "index.");
+        if (argumentExists("bounds"))
+            throw pdal_error("--bounds option not supported when building "
                 "index.");
     }
 }
@@ -236,12 +246,14 @@ bool TIndexKernel::IsFileIndexed( const FieldIndexes& indexes,
                     const FileInfo& fileInfo)
 {
     std::ostringstream qstring;
-    qstring << Utils::toupper(m_tileIndexColumnName) << "=\"" << fileInfo.m_filename << "\"";
+    qstring << Utils::toupper(m_tileIndexColumnName) << "=\"" <<
+        fileInfo.m_filename << "\"";
     OGRErr err = OGR_L_SetAttributeFilter(m_layer, qstring.str().c_str());
     if (err != OGRERR_NONE)
     {
         std::ostringstream oss;
-        oss << "Unable to set attribute filter for file '" << fileInfo.m_filename<<"'";
+        oss << "Unable to set attribute filter for file '" <<
+             fileInfo.m_filename << "'";
         throw pdal_error(oss.str());
     }
     OGRFeatureH hFeature;
@@ -255,7 +267,7 @@ bool TIndexKernel::IsFileIndexed( const FieldIndexes& indexes,
     }
 
     OGR_L_ResetReading(m_layer);
-    err = OGR_L_SetAttributeFilter(m_layer, NULL);
+    OGR_L_SetAttributeFilter(m_layer, NULL);
     return output;
 }
 
@@ -345,9 +357,9 @@ void TIndexKernel::mergeFile()
     if (!outSrs)
         throw pdal_error("Couldn't interpret target SRS string.");
 
-    if (!m_filterGeom.empty())
+    if (!m_wkt.empty())
     {
-        Geometry g(m_filterGeom, outSrs);
+        Geometry g(m_wkt, outSrs);
 
         if (!g)
             throw pdal_error("Couldn't interpret geometry filter string.");
@@ -380,7 +392,7 @@ void TIndexKernel::mergeFile()
     MergeFilter merge;
 
     Options cropOptions;
-    cropOptions.add("polygon", m_filterGeom);
+    cropOptions.add("polygon", m_wkt);
 
     for (auto f : files)
     {
@@ -404,7 +416,7 @@ void TIndexKernel::mergeFile()
         repro->setOptions(reproOptions);
         premerge = repro;
 
-        if (!m_filterGeom.empty())
+        if (!m_wkt.empty())
         {
             Stage *crop = factory.createStage("filters.crop", true);
             crop->setOptions(cropOptions);
