@@ -239,10 +239,11 @@ void Kernel::collectExtraOptions()
             option_split.push_back(boost::lexical_cast<std::string>(ti));
         if (!(option_split.size() == 2))
         {
-            std::ostringstream oss;
-            oss << "option '" << o << "' did not split correctly. Is it "
-                "in the form --readers.las.option=foo?";
-            throw app_usage_error(oss.str());
+//             std::ostringstream oss;
+//             oss << "option '" << o << "' did not split correctly. Is it "
+//                 "in the form --readers.las.option=foo?";
+//             throw app_usage_error(oss.str());
+            continue;
         }
 
         std::string option_value(option_split[1]);
