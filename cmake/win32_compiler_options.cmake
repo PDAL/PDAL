@@ -68,15 +68,6 @@ if (MSVC)
 endif(MSVC)
 add_definitions(-DWIN32_LEAN_AND_MEAN)
 
-# note we default to debug mode
-#if(NOT MSVC_IDE)
-#  if(NOT CMAKE_BUILD_TYPE)
-#  set(CMAKE_BUILD_TYPE Debug CACHE STRING
-#    "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel" FORCE)
-#  endif()
-#  message(STATUS "Setting PDAL build type - ${CMAKE_BUILD_TYPE}")
-#endif()
-
 set(CMAKE_INCLUDE_PATH "c:/OSGeo4W64/include;$ENV{CMAKE_INCLUDE_PATH}")
 set(CMAKE_LIBRARY_PATH "c:/OSGeo4W64/lib;$ENV{CMAKE_LIBRARY_PATH}")
 set(CMAKE_PREFIX_PATH "c:/OSGeo4W64/cmake;$ENV{CMAKE_LIBRARY_PATH}")
