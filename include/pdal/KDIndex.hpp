@@ -89,11 +89,17 @@ public:
             double const& z,
             double const& r) const;
 
+    PointId neighbor(double const& x, double const& y, double const& z) const
+    {
+        std::vector<PointId> ids = neighbors(x, y, z, 1);
+        return ids[0];
+    }
+
     std::vector<PointId> neighbors(
             double const& x,
             double const& y,
             double const& z,
-            point_count_t count = 1) const;
+            point_count_t count) const;
 
     void build(bool b3d = true);
 
