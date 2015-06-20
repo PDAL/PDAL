@@ -312,6 +312,11 @@ public:
         return (m_options.size() == 0);
     }
 
+    size_t size() const
+    {
+        return m_options.size();
+    }
+
     Options const operator+(const Options& rhs)
     {
         return Options(*this) += rhs;

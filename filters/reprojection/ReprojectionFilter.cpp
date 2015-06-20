@@ -54,11 +54,18 @@ CREATE_STATIC_PLUGIN(1, 0, ReprojectionFilter, Filter, s_info)
 
 std::string ReprojectionFilter::getName() const { return s_info.name; }
 
+ReprojectionFilter::ReprojectionFilter() : m_inferInputSRS(true),
+    m_in_ref_ptr(NULL), m_out_ref_ptr(NULL), m_transform_ptr(NULL)
+{}
+
 ReprojectionFilter::~ReprojectionFilter()
 {
-    OCTDestroyCoordinateTransformation(m_transform_ptr);
-    OSRDestroySpatialReference(m_in_ref_ptr);
-    OSRDestroySpatialReference(m_out_ref_ptr);
+    if (m_transform_ptr)
+        OCTDestroyCoordinateTransformation(m_transform_ptr);
+    if (m_in_ref_ptr)
+        OSRDestroySpatialReference(m_in_ref_ptr);
+    if (m_out_ref_ptr)
+        OSRDestroySpatialReference(m_out_ref_ptr);
 }
 
 void ReprojectionFilter::processOptions(const Options& options)

@@ -335,3 +335,34 @@ TEST(OptionsTest, metadata)
     }
     EXPECT_TRUE(Support::compare_files(goodfile, testfile));
 }
+
+TEST(OptionsTest, conditional)
+{
+    CropFilter s;
+
+    Options ops;
+    ops.add("foo", "foo");
+    ops.add("bar", "bar");
+    ops.add("baz", "baz");
+
+    s.setOptions(ops);
+
+    Options condOps;
+    condOps.add("foo", "lose");
+    condOps.add("bar", "lose");
+    condOps.add("baz", "lose");
+    condOps.add("foot", "win");
+    condOps.add("barf", "win");
+    condOps.add("bazel", "win");
+
+    s.addConditionalOptions(condOps);
+    ops = s.getOptions();
+    EXPECT_EQ(ops.size(), 6u);
+    EXPECT_EQ(ops.getValueOrDefault("foo", std::string()), "foo");
+    EXPECT_EQ(ops.getValueOrDefault("bar", std::string()), "bar");
+    EXPECT_EQ(ops.getValueOrDefault("baz", std::string()), "baz");
+    EXPECT_EQ(ops.getValueOrDefault("foot", std::string()), "win");
+    EXPECT_EQ(ops.getValueOrDefault("barf", std::string()), "win");
+    EXPECT_EQ(ops.getValueOrDefault("bazel", std::string()), "win");
+}
+

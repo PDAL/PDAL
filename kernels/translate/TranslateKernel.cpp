@@ -158,9 +158,6 @@ void TranslateKernel::addSwitches()
          "Extent (in XYZ to clip output to)")
         ("polygon", po::value<std::string >(&m_wkt),
          "POLYGON WKT to use for precise crop of data (2d or 3d)")
-        ("metadata,m",
-         po::value< bool >(&m_bForwardMetadata)->implicit_value(true),
-         "Forward metadata (VLRs, header entries, etc) from previous stages")
         ("d_step",
          po::value<uint32_t>(&m_decimation_step)->default_value(1),
          "Decimation filter step")
@@ -341,8 +338,6 @@ int TranslateKernel::execute()
 
     if (m_bCompress)
         writerOptions.add("compression", true);
-    if (m_bForwardMetadata)
-        writerOptions.add("forward_metadata", true);
 
     std::vector<std::string> cmd = getProgressShellCommand();
     UserCallback *callback =

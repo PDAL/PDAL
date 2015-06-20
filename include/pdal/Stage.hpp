@@ -86,7 +86,8 @@ public:
         { return m_options; }
     void setOptions(Options options)
         { m_options = options; }
-    void addOptions(Options opts)
+    void addConditionalOptions(const Options& opts);
+    void addOptions(const Options& opts)
     {
         for (const auto& o : opts.getOptions())
             m_options.add(o);
