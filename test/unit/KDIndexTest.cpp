@@ -61,13 +61,13 @@ TEST(KDIndex, simple)
     view.setField(Dimension::Id::X, 4, 10);
     view.setField(Dimension::Id::Y, 4, 10);
     
-    KDIndex index(view);
+    KD2Index index(view);
     index.build();
 
-    EXPECT_EQ(index.neighbor(0, 0, 0), 0u);
-    EXPECT_EQ(index.neighbor(1.1, 1.1, 0), 1u);
-    EXPECT_EQ(index.neighbor(3.3, 3.3, 0), 2u);
-    EXPECT_EQ(index.neighbor(6.1, 6.1, 0), 3u);
-    EXPECT_EQ(index.neighbor(15, 15, 0), 4u);
+    EXPECT_EQ(index.neighbor(0, 0), 0u);
+    EXPECT_EQ(index.neighbor(1.1, 1.1), 1u);
+    EXPECT_EQ(index.neighbor(3.3, 3.3), 2u);
+    EXPECT_EQ(index.neighbor(6.1, 6.1), 3u);
+    EXPECT_EQ(index.neighbor(15, 15), 4u);
 }
 

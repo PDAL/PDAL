@@ -406,17 +406,22 @@ MetadataNode InfoKernel::dumpQuery(PointViewPtr inView) const
     if (values.size() != 2 && values.size() != 3)
         throw app_runtime_error("--points must be two or three values");
 
-    bool is3d = (values.size() >= 3);
-
-    double x = values[0];
-    double y = values[1];
-    double z = is3d ? values[2] : 0.0;
-
     PointViewPtr outView = inView->makeNew();
 
-    KDIndex kdi(*inView);
-    kdi.build();
-    std::vector<PointId> ids = kdi.neighbors(x, y, z, inView->size());
+    std::vector<PointId> ids;
+    if (values.size() >= 3)
+    {
+        KD3Index kdi(*inView);
+        kdi.build();
+        ids = kdi.neighbors(values[0], values[1], values[2], inView->size());
+    }
+    else
+    {
+        KD2Index kdi(*inView);
+        kdi.build();
+        ids = kdi.neighbors(values[0], values[1], inView->size());
+    }
+
     for (auto i = ids.begin(); i != ids.end(); ++i)
         outView->appendPoint(*inView.get(), *i);
 
