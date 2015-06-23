@@ -90,6 +90,7 @@ int readPlyCallback(p_ply_argument argument)
     long numToRead;
     p_ply_property property;
     const char * propertyName;
+
     if (!ply_get_argument_element(argument, &element, &index))
     {
         std::stringstream ss;
@@ -103,7 +104,7 @@ int readPlyCallback(p_ply_argument argument)
         throw pdal_error(ss.str());
     }
     // We've read enough, abort the callback cycle
-    if (numToRead <= index)
+    if ((point_count_t)numToRead <= (point_count_t)index)
     {
         return 0;
     }
@@ -231,7 +232,8 @@ point_count_t PlyReader::read(PointViewPtr view, point_count_t num)
 
     for (auto it : m_vertexDimensions)
     {
-        ply_set_read_cb(m_ply, "vertex", it.first.c_str(), readPlyCallback, &context, num);
+        ply_set_read_cb(m_ply, "vertex", it.first.c_str(), readPlyCallback,
+            &context, num);
     }
     if (!ply_read(m_ply))
     {
