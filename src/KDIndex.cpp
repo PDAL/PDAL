@@ -131,6 +131,7 @@ std::vector<PointId> KDIndex::neighbors(
         double const& z,
         point_count_t k) const
 {
+    k = std::min(m_buf.size(), k);
     std::vector<PointId> output(k);
     std::vector<double> out_dist_sqr(k);
     nanoflann::KNNResultSet<double, PointId, point_count_t> resultSet(k);
