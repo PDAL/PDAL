@@ -43,10 +43,10 @@ KDIndex::KDIndex(const PointView& buf)
     : m_buf(buf)
     , m_3d(buf.hasDim(Dimension::Id::Z))
     , m_index()
-{ }
+{}
 
 KDIndex::~KDIndex()
-{ }
+{}
 
 std::size_t KDIndex::kdtree_get_point_count() const
 {
@@ -55,6 +55,9 @@ std::size_t KDIndex::kdtree_get_point_count() const
 
 double KDIndex::kdtree_get_pt(const PointId idx, int dim) const
 {
+    if (idx >= m_buf.size())
+        return 0.0;
+
     Dimension::Id::Enum id = Dimension::Id::Unknown;
     switch (dim)
     {
@@ -90,15 +93,12 @@ double KDIndex::kdtree_distance(
     return output;
 }
 
-void KDIndex::build(bool b3D)
+void KDIndex::build()
 {
-    m_3d = b3D;
-    int nDims = m_3d && m_buf.hasDim(Dimension::Id::Z) ? 3 : 2;
+    int nDims = m_3d ? 3 : 2;
     m_index.reset(
-            new my_kd_tree_t(
-                nDims,
-                *this,
-                nanoflann::KDTreeSingleIndexAdaptorParams(10, nDims)));
+        new my_kd_tree_t(nDims, *this,
+            nanoflann::KDTreeSingleIndexAdaptorParams(10, nDims)));
     m_index->buildIndex();
 }
 
@@ -117,8 +117,8 @@ std::vector<std::size_t> KDIndex::radius(
     pt.push_back(x);
     pt.push_back(y);
     pt.push_back(z);
-    const std::size_t count(
-            m_index->radiusSearch(&pt[0], r, ret_matches, params));
+    const std::size_t count =
+        m_index->radiusSearch(&pt[0], r, ret_matches, params);
 
     for (std::size_t i = 0; i < count; ++i)
         output.push_back(ret_matches[i].first);

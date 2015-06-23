@@ -40,8 +40,7 @@
 namespace nanoflann
 {
     template<typename Distance, class DatasetAdaptor, int DIM,
-        typename IndexType>
-    class KDTreeSingleIndexAdaptor;
+        typename IndexType> class KDTreeSingleIndexAdaptor;
 
     template<class T, class DataSource, typename _DistanceType>
     struct L2_Adaptor;
@@ -64,21 +63,34 @@ public:
             const PointId idx_p2,
             point_count_t size) const;
 
-    template <class BBOX> bool kdtree_get_bbox(BBOX &bb) const
+    template <class BBOX>
+    bool kdtree_get_bbox(BBOX& bb) const
     {
-        BOX3D bounds = m_buf.calculateBounds();
-        if (bounds.empty())
-            return false;
-
-        bb[0].low = bounds.minx;
-        bb[0].high = bounds.maxx;
-        bb[1].low = bounds.miny;
-        bb[1].high = bounds.maxy;
-
-        if (m_3d)
+        if (m_buf.empty())
         {
-            bb[2].low = bounds.minx;
-            bb[2].high = bounds.maxx;
+            bb[0].low = 0.0;
+            bb[0].high = 0.0;
+            bb[1].low = 0.0;
+            bb[1].high = 0.0;
+            if (m_3d)
+            {
+                bb[2].low = 0.0;
+                bb[2].high = 0.0;
+            }
+        }
+        else
+        {
+            BOX3D bounds = m_buf.calculateBounds();
+
+            bb[0].low = bounds.minx;
+            bb[0].high = bounds.maxx;
+            bb[1].low = bounds.miny;
+            bb[1].high = bounds.maxy;
+            if (m_3d)
+            {
+                bb[2].low = bounds.minz;
+                bb[2].high = bounds.maxz;
+            }
         }
         return true;
     }
@@ -89,13 +101,19 @@ public:
             double const& z,
             double const& r) const;
 
+    PointId neighbor(double const& x, double const& y, double const& z) const
+    {
+        std::vector<PointId> ids = neighbors(x, y, z, 1);
+        return ids[0];
+    }
+
     std::vector<PointId> neighbors(
             double const& x,
             double const& y,
             double const& z,
             point_count_t count = 1) const;
 
-    void build(bool b3d = true);
+    void build();
 
 private:
     const PointView& m_buf;

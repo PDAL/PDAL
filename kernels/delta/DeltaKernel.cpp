@@ -308,7 +308,7 @@ int DeltaKernel::execute()
 
     // Index the candidate data.
     m_index = std::unique_ptr<KDIndex>(new KDIndex(*candidateView.get()));
-    m_index->build(m_3d);
+    m_index->build();
 
     std::unique_ptr<std::map<Point, Point>>
         points(cumulatePoints(*sourceView.get(), *candidateView.get(), m_index.get()));
