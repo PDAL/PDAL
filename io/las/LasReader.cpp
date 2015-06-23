@@ -111,7 +111,7 @@ void LasReader::processOptions(const Options& options)
 static PluginInfo const s_info = PluginInfo(
     "readers.las",
     "ASPRS LAS 1.0 - 1.4 read support. LASzip support is also \n" \
-        "enabled through this driver if LASzip was found diring \n" \
+        "enabled through this driver if LASzip was found during \n" \
         "compilation.",
     "http://pdal.io/stages/readers.las.html" );
 
@@ -122,9 +122,9 @@ std::string LasReader::getName() const { return s_info.name; }
 QuickInfo LasReader::inspect()
 {
     QuickInfo qi;
-    PointLayoutPtr layout(new PointLayout());
+    std::unique_ptr<PointLayout> layout(new PointLayout());
 
-    addDimensions(layout);
+    addDimensions(layout.get());
     initialize();
 
     Dimension::IdList dims = layout->dims();
@@ -134,12 +134,14 @@ QuickInfo LasReader::inspect()
         Utils::saturation_cast<point_count_t>(m_lasHeader.pointCount());
     qi.m_bounds = m_lasHeader.getBounds();
     qi.m_srs = getSrsFromVlrs();
+    qi.m_valid = true;
     return qi;
 }
 
 
 void LasReader::initialize()
 {
+    if (m_initialized) return;
     m_istream = createStream();
 
     m_istream->seekg(0);
@@ -176,6 +178,7 @@ void LasReader::initialize()
         readExtraBytesVlr();
     }
     fixupVlrs();
+    m_initialized = true;
 }
 
 
@@ -214,6 +217,8 @@ void LasReader::ready(PointTableRef table, MetadataNode& m)
         throw pdal_error("LASzip is not enabled.  Can't read LAZ data.");
 #endif
     }
+    m_error.setLog(log());
+
 }
 
 
@@ -619,7 +624,17 @@ point_count_t LasReader::readFileBlock(std::vector<char>& buf,
     point_count_t blockpoints = buf.size() / ptLen;
 
     blockpoints = std::min(maxpoints, blockpoints);
+    if (m_istream->eof())
+        throw pdal::invalid_stream("stream is done");
+
     m_istream->read(buf.data(), blockpoints * ptLen);
+    if (m_istream->gcount() != (std::streamsize)(blockpoints * ptLen))
+    {
+        // we read fewer bytes than we asked for
+        // because the file was either truncated
+        // or the header is bunk.
+        blockpoints = m_istream->gcount() / ptLen;
+    }
     return blockpoints;
 }
 
@@ -811,6 +826,7 @@ void LasReader::done(PointTableRef)
     m_unzipper.reset();
 #endif
     destroyStream();
+    m_initialized = false;
 }
 
 } // namespace pdal

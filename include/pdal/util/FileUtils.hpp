@@ -110,6 +110,8 @@ public:
         const std::string base);
     
     static std::string readFileAsString(std::string const& filename);
+    static void fileTimes(const std::string& filename, struct tm *createTime,
+        struct tm *modTime);
 
 private:
     static std::string addTrailingSlash(std::string path);

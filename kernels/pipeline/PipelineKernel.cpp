@@ -110,21 +110,8 @@ int PipelineKernel::execute()
         throw app_runtime_error("Pipeline file does not contain a writer. "
             "Use 'pdal info' to read the data.");
 
-    for (const auto& pi : getExtraStageOptions())
-    {
-        std::string name = pi.first;
-        Options options = pi.second;
-        std::vector<Stage *> stages = manager.getStage()->findStage(name);
-        for (const auto& s : stages)
-        {
-            Options opts = s->getOptions();
-            for (const auto& o : options.getOptions())
-                opts.add(o);
-            s->setOptions(opts);
-        }
-    }
-
     PointTable table;
+    applyExtraStageOptionsRecursive(manager.getStage());
     manager.getStage()->prepare(table);
     manager.getStage()->execute(table);
     if (m_pipelineFile.size() > 0)

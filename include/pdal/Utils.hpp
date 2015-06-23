@@ -244,6 +244,7 @@ namespace Utils
         std::vector<std::string>& outputString, unsigned int lineLength);
     PDAL_DLL std::string escapeJSON(const std::string &s);
     PDAL_DLL std::string demangle(const std::string& s);
+    PDAL_DLL int screenWidth();
 
     /// Split a string into substrings.  Characters matching the predicate are
     ///   discarded.
@@ -317,7 +318,7 @@ namespace Utils
 
     template<typename KEY, typename VALUE>
     bool contains(const std::map<KEY, VALUE>& c, const KEY& v)
-        { return c.find(v) != c.end(); };
+        { return c.find(v) != c.end(); }
 
     template<typename COLLECTION, typename VALUE>
     bool contains(const COLLECTION& c, const VALUE& v)
@@ -353,7 +354,31 @@ namespace Utils
         out.rdbuf(redir.m_buf);
         redir.m_out->close();
     }
-};
+
+    // Determine whether a value of a given input type may be safely
+    // statically casted to the given output type without over/underflow.  If
+    // the output type is integral, inRange() will determine whether the
+    // rounded input value, rather than truncated, may be safely converted.
+    template<typename T_OUT>
+    bool inRange(double in)
+    {
+        if (std::is_integral<T_OUT>::value)
+        {
+            in = sround(in);
+        }
+
+        return std::is_same<double, T_OUT>::value ||
+           (in >= static_cast<double>(std::numeric_limits<T_OUT>::lowest()) &&
+            in <= static_cast<double>(std::numeric_limits<T_OUT>::max()));
+    }
+
+    template<typename T_IN, typename T_OUT>
+    bool inRange(T_IN in)
+    {
+        return std::is_same<T_IN, T_OUT>::value ||
+            inRange<T_OUT>(static_cast<double>(in));
+    }
+} // namespace Utils
 
 } // namespace pdal
 

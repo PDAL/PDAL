@@ -74,7 +74,9 @@ compression
 
 scale_x, scale_y, scale_z
   Scale to be divided from the X, Y and Z nominal values, respectively, after
-  the offset has been applied.  [Default: .01]
+  the offset has been applied.  The special value "auto" can be specified,
+  which causes the writer to select a scale to set the stored values of the
+  dimensions to range from [0, 2147483647].  [Default: .01]
 
   Note: written value = (nominal value - offset) / scale.
 

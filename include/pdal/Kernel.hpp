@@ -117,9 +117,22 @@ public:
         return m_heartbeat_shell_command;
     }
 
-    std::map<std::string, Options> const& getExtraStageOptions()
+    const Options& extraStageOptions(const std::string& stage)
     {
-        return m_extra_stage_options;
+        static Options nullOpts;
+
+        auto oi = m_extraStageOptions.find(stage);
+        if (oi == m_extraStageOptions.end())
+            return nullOpts;
+        return oi->second;
+    }
+
+    void applyExtraStageOptionsRecursive(Stage *s)
+    {
+        s->addOptions(extraStageOptions(s->getName()));
+        auto stages = s->getInputs();
+        for (Stage *s : stages)
+            applyExtraStageOptionsRecursive(s);
     }
 
 protected:
@@ -128,7 +141,14 @@ protected:
         m_stages.push_back(std::unique_ptr<Stage>(s));
         return *s;
     }
+    bool argumentExists(const std::string& name)
+        { return (bool)m_variablesMap.count(name); }
+    bool argumentSpecified(const std::string& name);
+
     bool m_usestdin;
+    int m_argc;
+    const char** m_argv;
+    Log m_log;
 
 private:
     int innerRun();
@@ -149,8 +169,6 @@ private:
     std::string m_showOptions;
     bool m_showVersion;
     bool m_showTime;
-    int m_argc;
-    const char** m_argv;
     std::string m_appName;
     bool m_hardCoreDebug;
     std::vector<std::string> m_heartbeat_shell_command;
@@ -158,13 +176,14 @@ private:
     std::string m_scales;
     std::string m_offsets;
     bool m_visualize;
+    std::string m_label;
 
     std::vector<po::options_description*> m_public_options;
     std::vector<po::options_description*> m_hidden_options;
     po::positional_options_description m_positionalOptions;
     po::variables_map m_variablesMap;
     std::vector<std::string> m_extra_options;
-    std::map<std::string, Options> m_extra_stage_options;
+    std::map<std::string, Options> m_extraStageOptions;
     std::vector<std::unique_ptr<Stage>> m_stages;
 
     Kernel& operator=(const Kernel&); // not implemented

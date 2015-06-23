@@ -1,4 +1,4 @@
-.. _filters.decimation:
+.. _filters_decimation:
 
 filters.decimation
 ==================

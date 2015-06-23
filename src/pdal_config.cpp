@@ -138,37 +138,8 @@ std::string GetFullVersionString()
 {
     std::ostringstream os;
 
-
-
-#ifdef PDAL_HAVE_LIBGEOTIFF
-    os << " GeoTIFF "
-       << (LIBGEOTIFF_VERSION / 1000) << '.'
-       << (LIBGEOTIFF_VERSION / 100 % 10) << '.'
-       << (LIBGEOTIFF_VERSION % 100 / 10);
-#endif
-
-    os << " GDAL " << GDALVersionInfo("RELEASE_NAME");
-
-#ifdef PDAL_HAVE_LASZIP
-    os << " LASzip "
-       << LASZIP_VERSION_MAJOR << "."
-       << LASZIP_VERSION_MINOR << "."
-       << LASZIP_VERSION_REVISION;
-#endif
-
-    std::string info(os.str());
-    os.str("");
-    os << "PDAL " << PDAL_VERSION_STRING;
-
-    std::ostringstream revs;
-    revs << GetSHA1();
-
-    os << " (" << revs.str().substr(0, 6) <<")";
-
-    if (!info.empty())
-    {
-        os << " with" << info;
-    }
+    os << "PDAL " << PDAL_VERSION_STRING << " (" <<
+        GetSHA1().substr(0, 6) << ")";
 
     return os.str();
 }

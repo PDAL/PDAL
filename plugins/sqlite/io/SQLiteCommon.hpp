@@ -40,8 +40,6 @@
 #include <pdal/XMLSchema.hpp>
 #include <pdal/Compression.hpp>
 
-#include <boost/algorithm/string.hpp>
-
 #include <sqlite3.h>
 #include <memory>
 #include <sstream>
@@ -188,17 +186,13 @@ public:
         sqlite3_shutdown();
 
     }
-    void log(int num, char const* msg)
-    {
-        std::ostringstream oss;
-        oss << "SQLite code: " << num << " msg: '" << msg << "'";
-        m_log->get(LogLevel::Debug) << oss.str() << std::endl;
-    }
 
     static void log_callback(void *p, int num, char const* msg)
     {
         SQLite* sql = reinterpret_cast<SQLite*>(p);
-        sql->log(num, msg);
+        sql->log()->get(LogLevel::Debug) << "SQLite code: "
+            << num << " msg: '" << msg << "'"
+            << std::endl;
     }
 
 
@@ -253,6 +247,19 @@ public:
         execute("COMMIT", "Unable to commit transaction");
     }
 
+    // Executes an SQL query statement and provides the returned rows via
+    // an iterator.
+    //
+    // Usage example:
+    //   query("SELECT * from TABLE");
+    //     do
+    //     {
+    //       const row* r = get();
+    //       if (!r) break ; // no more rows
+    //       column const& c = r->at(0); // get 1st column of this row
+    //       ... use c.data ...
+    //     } while (next());
+    //
     void query(std::string const& query)
     {
         m_position = 0;
@@ -297,8 +304,13 @@ public:
 
                     if (m_columns.size() != static_cast<std::vector<std::string>::size_type > (numCols))
                     {
-                        std::string ccolumnName = boost::to_upper_copy(std::string(sqlite3_column_name(m_statement, v)));
-                        std::string ccolumnType = boost::to_upper_copy(std::string(sqlite3_column_decltype(m_statement, v)));
+                        std::string ccolumnName = Utils::toupper(std::string(sqlite3_column_name(m_statement, v)));
+                        const char* coltype = sqlite3_column_decltype(m_statement, v);
+                        if (!coltype)
+                        {
+                            coltype = "unknown";
+                        }
+                        std::string ccolumnType = Utils::toupper(std::string(coltype));
                         m_columns.insert(std::pair<std::string, int32_t>(ccolumnName, v));
                         m_types.push_back(ccolumnType);
                     }
@@ -440,7 +452,7 @@ public:
         return true;
     }
 
-    bool spatialite(const std::string& module_name="")
+    bool loadSpatialite(const std::string& module_name="")
     {
         std::string so_extension;
         std::string lib_extension;
@@ -486,7 +498,15 @@ public:
 
     }
 
+    bool haveSpatialite()
+    {
+        return doesTableExist("geometry_columns");
+    }
 
+    void initSpatialiteMetadata()
+    {
+        execute("SELECT InitSpatialMetadata(1)");
+    }
 
     bool doesTableExist(std::string const& name)
     {
@@ -497,20 +517,41 @@ public:
         query(oss.str());
 
         std::ostringstream debug;
-        while (next())
+        do
         {
             const row* r = get();
             if (!r)
                 break ;// didn't have anything
 
             column const& c = r->at(0); // First column is table name!
-            if (boost::iequals(c.data, name))
+            if (Utils::iequals(c.data, name))
             {
                 return true;
             }
-        }
+        } while (next());
         return false;
     }
+
+    std::string getSpatialiteVersion()
+    {
+        // TODO: ought to parse this numerically, so we can do version checks
+        const std::string sql("SELECT spatialite_version()");
+        query(sql);
+
+        const row* r = get();
+        assert(r); // should get back exactly one row
+        std::string ver = r->at(0).data;
+        return ver;
+    }
+
+    std::string getSQLiteVersion()
+    {
+         // TODO: parse this numerically, so we can do version checks
+         std::string v(sqlite3_libversion());
+         return v;
+    }
+
+    LogPtr log() { return m_log; };
 
 private:
     pdal::LogPtr m_log;

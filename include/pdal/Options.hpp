@@ -198,8 +198,7 @@ public:
     /// @param op Options set to use
     void setOptions(Options const& op);
 
-    bool empty();
-
+    bool empty() const;
 
 #if defined(PDAL_COMPILER_MSVC)
     /// explicit specialization to insert a bool as "true" and "false" rather
@@ -308,10 +307,16 @@ public:
         return *this;
     }
 
-    bool empty()
+    bool empty() const
     {
         return (m_options.size() == 0);
     }
+
+    size_t size() const
+    {
+        return m_options.size();
+    }
+
     Options const operator+(const Options& rhs)
     {
         return Options(*this) += rhs;

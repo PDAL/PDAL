@@ -144,7 +144,7 @@ void BpfWriter::loadBpfDimensions(PointLayoutPtr layout)
 
 void BpfWriter::write(const PointViewPtr dataShared)
 {
-    setAutoOffset(dataShared);
+    setAutoXForm(dataShared);
 
     // Avoid reference count overhead internally.
     const PointView* data(dataShared.get());

@@ -111,7 +111,7 @@ public:
             double const& x,
             double const& y,
             double const& z,
-            point_count_t count = 1) const;
+            point_count_t count) const;
 
     void build();
 

@@ -79,6 +79,10 @@ public:
         minz(box.minz), maxz(box.maxz)
     {}
 
+    // Note: a "2D" bbox is explicitly constructed to have invalid Z values,
+    //   which might lead to some problems when used in conjuction with a "3D"
+    //   bbox. See, for example, issue #897.
+    // Note: ctor body not inlined due to MSVC, see #900
     BOX3D(double minx, double miny, double maxx, double maxy) ;
 
     BOX3D(double minx, double miny, double minz, double maxx, double maxy,
@@ -239,16 +243,18 @@ inline std::ostream& operator << (std::ostream& ostr, const BOX3D& bounds)
         return ostr;
     }
 
+    const int savedPrec = ostr.precision();
+    ostr.precision(16); // or..?
     ostr << "(";
     ostr << "[" << bounds.minx << ", " << bounds.maxx << "], "
          << "[" << bounds.miny << ", " << bounds.maxy <<"]";
     if (!bounds.is_z_empty())
          ostr << ", [" <<  bounds.minz << ", " << bounds.maxz << "]";
     ostr << ")";
+    ostr.precision(savedPrec);
     return ostr;
 }
 
 extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX3D& bounds);
 
 } // namespace pdal
-

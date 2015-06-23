@@ -23,8 +23,8 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/io/faux
     ${PROJECT_SOURCE_DIR}/io/las
     ${PROJECT_SOURCE_DIR}/io/optech
+    ${PROJECT_SOURCE_DIR}/io/ply
     ${PROJECT_SOURCE_DIR}/io/qfit
-    ${PROJECT_SOURCE_DIR}/io/rialto
     ${PROJECT_SOURCE_DIR}/io/sbet
     ${PROJECT_SOURCE_DIR}/io/text
     ${PROJECT_SOURCE_DIR}/io/terrasolid
@@ -51,8 +51,8 @@ PDAL_ADD_TEST(pdal_bounds_test FILES BoundsTest.cpp)
 PDAL_ADD_TEST(pdal_config_test FILES ConfigTest.cpp)
 PDAL_ADD_TEST(pdal_environment_test FILES EnvironmentTest.cpp)
 PDAL_ADD_TEST(pdal_file_utils_test FILES FileUtilsTest.cpp)
-PDAL_ADD_TEST(pdal_gdal_utils_test FILES GDALUtilsTest.cpp)
 PDAL_ADD_TEST(pdal_georeference_test FILES GeoreferenceTest.cpp)
+PDAL_ADD_TEST(pdal_kdindex_test FILES KDIndexTest.cpp)
 PDAL_ADD_TEST(pdal_log_test FILES LogTest.cpp)
 PDAL_ADD_TEST(pdal_metadata_test FILES MetadataTest.cpp)
 PDAL_ADD_TEST(pdal_options_test FILES OptionsTest.cpp)
@@ -78,7 +78,8 @@ PDAL_ADD_TEST(pdal_io_faux_test FILES io/faux/FauxReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_las_reader_test FILES io/las/LasReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_las_writer_test FILES io/las/LasWriterTest.cpp)
 PDAL_ADD_TEST(pdal_io_optech_test FILES io/optech/OptechReaderTest.cpp)
-PDAL_ADD_TEST(pdal_io_rialto_test FILES io/rialto/RialtoWriterTest.cpp)
+PDAL_ADD_TEST(pdal_io_ply_reader_test FILES io/ply/PlyReaderTest.cpp)
+PDAL_ADD_TEST(pdal_io_ply_writer_test FILES io/ply/PlyWriterTest.cpp)
 PDAL_ADD_TEST(pdal_io_qfit_test FILES io/qfit/QFITReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_sbet_reader_test FILES io/sbet/SbetReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_sbet_writer_test FILES io/sbet/SbetWriterTest.cpp)
@@ -110,14 +111,13 @@ endif()
 #
 # conditionally append apps/libxml2 sources
 #
-if(WITH_APPS)
-#    if(LIBXML2_FOUND)
-#        PDAL_ADD_TEST(pcinfo_test FILES apps/pcinfoTest.cpp)
-#    endif(LIBXML2_FOUND)
-
+if (WITH_APPS)
+    if (LASZIP_FOUND)
+        PDAL_ADD_TEST(pdal_merge_test FILES apps/MergeTest.cpp)
+    endif()
     PDAL_ADD_TEST(pc2pc_test FILES apps/pc2pcTest.cpp)
 
-    if(BUILD_PIPELINE_TESTS)
+    if (BUILD_PIPELINE_TESTS)
         PDAL_ADD_TEST(pcpipeline_test FILES apps/pcpipelineTest.cpp)
     endif()
 endif(WITH_APPS)

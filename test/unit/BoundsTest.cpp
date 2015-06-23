@@ -234,3 +234,39 @@ TEST(BoundsTest, test_2d_input)
     BOX3D r(1.1,2.2,101.1,102.2);
     EXPECT_EQ(r, rr);
 }
+
+TEST(BoundsTest, test_issue_897)
+{
+    BOX3D boxA(0.0, 0.0, 100.0, 100.0);  // a "2D" box
+    BOX3D boxB(50.0, 50.0, 3.1, 51.0, 51.0, 3.14);  // a "3D" box, wholly inside boxA
+    
+    // Currently aContainsB is false: see issue #387.
+    const bool aContainsB = boxA.contains(boxB);
+    const bool bContainsA = boxB.contains(boxA);
+    const bool aContainsA = boxA.contains(boxA);
+    const bool bContainsB = boxB.contains(boxB);
+    
+    EXPECT_FALSE(aContainsB);
+    EXPECT_FALSE(bContainsA);
+    EXPECT_TRUE(aContainsA);
+    EXPECT_TRUE(bContainsB);
+}
+
+TEST(BoundsTest, test_precisionloss)
+{
+    const BOX3D b1(0.123456789,0.0,0,0);
+    EXPECT_DOUBLE_EQ(b1.minx, 0.123456789);
+
+    // convert it to a string, which is what happens
+    // when you do something like:
+    //   options.getValueOrDefault<BOX3D>("bounds", BOX3D());
+    std::ostringstream oss;
+    oss << b1; 
+
+    // convert it back
+    std::istringstream iss(oss.str());
+    BOX3D b2;
+    iss >> b2;
+
+    EXPECT_DOUBLE_EQ(b2.minx, 0.123456789);
+}

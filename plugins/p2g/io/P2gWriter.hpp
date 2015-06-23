@@ -79,6 +79,7 @@ private:
 
     virtual void processOptions(const Options& options);
     virtual void write(const PointViewPtr view);
+    virtual void done(PointTableRef table);
 
     std::unique_ptr<OutCoreInterp> m_interpolator;
     uint64_t m_pointCount;

@@ -95,7 +95,7 @@ template<> void Option::setValue(const std::string& value)
 }
 #endif
 
-bool Option::empty()
+bool Option::empty() const
 {
     if (m_options)
         return m_options->empty();
