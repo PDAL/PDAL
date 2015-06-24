@@ -37,7 +37,7 @@
 
 using namespace pdal;
 
-TEST(KDIndex, simple)
+TEST(KDIndex, neighbors2D)
 {
     PointTable table;
     PointLayoutPtr layout = table.layout();
@@ -69,5 +69,222 @@ TEST(KDIndex, simple)
     EXPECT_EQ(index.neighbor(3.3, 3.3), 2u);
     EXPECT_EQ(index.neighbor(6.1, 6.1), 3u);
     EXPECT_EQ(index.neighbor(15, 15), 4u);
+
+    std::vector<PointId> ids;
+    ids = index.neighbors(0, 0, 5);
+    EXPECT_EQ(ids.size(), 5u);
+    EXPECT_EQ(ids[0], 0u);
+    EXPECT_EQ(ids[1], 1u);
+    EXPECT_EQ(ids[2], 2u);
+    EXPECT_EQ(ids[3], 3u);
+    EXPECT_EQ(ids[4], 4u);
+
+    ids = index.neighbors(0, 0, 25);
+    EXPECT_EQ(ids.size(), 5u);
+    EXPECT_EQ(ids[0], 0u);
+    EXPECT_EQ(ids[1], 1u);
+    EXPECT_EQ(ids[2], 2u);
+    EXPECT_EQ(ids[3], 3u);
+    EXPECT_EQ(ids[4], 4u);
+
+    ids = index.neighbors(3.1, 3.1, 5);
+    EXPECT_EQ(ids.size(), 5u);
+    EXPECT_EQ(ids[0], 2u);
+    EXPECT_EQ(ids[1], 1u);
+    EXPECT_EQ(ids[2], 3u);
+    EXPECT_EQ(ids[3], 0u);
+    EXPECT_EQ(ids[4], 4u);
+}
+
+TEST(KDIndex, neighbors3D)
+{
+    PointTable table;
+    PointLayoutPtr layout = table.layout();
+    PointView view(table);
+
+    layout->registerDim(Dimension::Id::X);
+    layout->registerDim(Dimension::Id::Y);
+    layout->registerDim(Dimension::Id::Z);
+
+    view.setField(Dimension::Id::X, 0, 0);
+    view.setField(Dimension::Id::Y, 0, 0);
+    view.setField(Dimension::Id::Z, 0, 0);
+    
+    view.setField(Dimension::Id::X, 1, 1);
+    view.setField(Dimension::Id::Y, 1, 1);
+    view.setField(Dimension::Id::Z, 1, 1);
+    
+    view.setField(Dimension::Id::X, 2, 3);
+    view.setField(Dimension::Id::Y, 2, 3);
+    view.setField(Dimension::Id::Z, 2, 3);
+    
+    view.setField(Dimension::Id::X, 3, 6);
+    view.setField(Dimension::Id::Y, 3, 6);
+    view.setField(Dimension::Id::Z, 3, 6);
+    
+    view.setField(Dimension::Id::X, 4, 10);
+    view.setField(Dimension::Id::Y, 4, 10);
+    view.setField(Dimension::Id::Z, 4, 10);
+    
+    KD3Index index(view);
+    index.build();
+
+    EXPECT_EQ(index.neighbor(0, 0, 0), 0u);
+    EXPECT_EQ(index.neighbor(1.1, 1.1, 1.1), 1u);
+    EXPECT_EQ(index.neighbor(3.3, 3.3, 3.3), 2u);
+    EXPECT_EQ(index.neighbor(6.1, 6.1, 6.1), 3u);
+    EXPECT_EQ(index.neighbor(15, 15, 15), 4u);
+
+    std::vector<PointId> ids;
+    ids = index.neighbors(0, 0, 0, 5);
+    EXPECT_EQ(ids.size(), 5u);
+    EXPECT_EQ(ids[0], 0u);
+    EXPECT_EQ(ids[1], 1u);
+    EXPECT_EQ(ids[2], 2u);
+    EXPECT_EQ(ids[3], 3u);
+    EXPECT_EQ(ids[4], 4u);
+
+    ids = index.neighbors(0, 0, 0, 25);
+    EXPECT_EQ(ids.size(), 5u);
+    EXPECT_EQ(ids[0], 0u);
+    EXPECT_EQ(ids[1], 1u);
+    EXPECT_EQ(ids[2], 2u);
+    EXPECT_EQ(ids[3], 3u);
+    EXPECT_EQ(ids[4], 4u);
+
+    ids = index.neighbors(3.1, 3.1, 3.1, 5);
+    EXPECT_EQ(ids.size(), 5u);
+    EXPECT_EQ(ids[0], 2u);
+    EXPECT_EQ(ids[1], 1u);
+    EXPECT_EQ(ids[2], 3u);
+    EXPECT_EQ(ids[3], 0u);
+    EXPECT_EQ(ids[4], 4u);
+}
+
+TEST(KDIndex, neighbordims)
+{
+    PointTable table;
+    PointLayoutPtr layout = table.layout();
+    PointView view(table);
+
+    layout->registerDim(Dimension::Id::X);
+    layout->registerDim(Dimension::Id::Z);
+
+    view.setField(Dimension::Id::X, 0, 0);
+    view.setField(Dimension::Id::Z, 0, 0);
+    
+    view.setField(Dimension::Id::X, 1, 1);
+    view.setField(Dimension::Id::Z, 1, 1);
+    
+    EXPECT_THROW(KD2Index index(view), pdal_error);
+
+    PointTable table2;
+    PointLayoutPtr layout2 = table.layout();
+    PointView view2(table2);
+
+    layout->registerDim(Dimension::Id::X);
+    layout->registerDim(Dimension::Id::Y);
+
+    view.setField(Dimension::Id::X, 0, 0);
+    view.setField(Dimension::Id::Y, 0, 0);
+    
+    view.setField(Dimension::Id::X, 1, 1);
+    view.setField(Dimension::Id::Y, 1, 1);
+    
+    EXPECT_THROW(KD3Index index(view2), pdal_error);
+}
+
+TEST(KDIndex, radius2D)
+{
+    PointTable table;
+    PointLayoutPtr layout = table.layout();
+    PointView view(table);
+
+    layout->registerDim(Dimension::Id::X);
+    layout->registerDim(Dimension::Id::Y);
+
+    view.setField(Dimension::Id::X, 0, 0);
+    view.setField(Dimension::Id::Y, 0, 0);
+    
+    view.setField(Dimension::Id::X, 1, 1);
+    view.setField(Dimension::Id::Y, 1, 1);
+    
+    view.setField(Dimension::Id::X, 2, 3);
+    view.setField(Dimension::Id::Y, 2, 3);
+    
+    view.setField(Dimension::Id::X, 3, 6);
+    view.setField(Dimension::Id::Y, 3, 6);
+    
+    view.setField(Dimension::Id::X, 4, 10);
+    view.setField(Dimension::Id::Y, 4, 10);
+    
+    KD2Index index(view);
+    index.build();
+
+    std::vector<PointId> ids;
+    ids = index.radius(0, 0, 4.25);
+    
+    EXPECT_EQ(ids.size(), 3u);
+    EXPECT_EQ(ids[0], 0u);
+    EXPECT_EQ(ids[1], 1u);
+    EXPECT_EQ(ids[2], 2u);
+
+    ids = index.radius(3.1, 3.1, 10);
+    EXPECT_EQ(ids.size(), 5u);
+    EXPECT_EQ(ids[0], 2u);
+    EXPECT_EQ(ids[1], 1u);
+    EXPECT_EQ(ids[2], 3u);
+    EXPECT_EQ(ids[3], 0u);
+    EXPECT_EQ(ids[4], 4u);
+}
+
+TEST(KDIndex, radius3D)
+{
+    PointTable table;
+    PointLayoutPtr layout = table.layout();
+    PointView view(table);
+
+    layout->registerDim(Dimension::Id::X);
+    layout->registerDim(Dimension::Id::Y);
+    layout->registerDim(Dimension::Id::Z);
+
+    view.setField(Dimension::Id::X, 0, 0);
+    view.setField(Dimension::Id::Y, 0, 0);
+    view.setField(Dimension::Id::Z, 0, 0);
+    
+    view.setField(Dimension::Id::X, 1, 1);
+    view.setField(Dimension::Id::Y, 1, 1);
+    view.setField(Dimension::Id::Z, 1, 1);
+    
+    view.setField(Dimension::Id::X, 2, 3);
+    view.setField(Dimension::Id::Y, 2, 3);
+    view.setField(Dimension::Id::Z, 2, 3);
+    
+    view.setField(Dimension::Id::X, 3, 6);
+    view.setField(Dimension::Id::Y, 3, 6);
+    view.setField(Dimension::Id::Z, 3, 6);
+    
+    view.setField(Dimension::Id::X, 4, 10);
+    view.setField(Dimension::Id::Y, 4, 10);
+    view.setField(Dimension::Id::Z, 4, 10);
+    
+    KD3Index index(view);
+    index.build();
+
+    std::vector<PointId> ids;
+    ids = index.radius(0, 0, 0, 5.2);
+    
+    EXPECT_EQ(ids.size(), 3u);
+    EXPECT_EQ(ids[0], 0u);
+    EXPECT_EQ(ids[1], 1u);
+    EXPECT_EQ(ids[2], 2u);
+
+    ids = index.radius(3.1, 3.1, 3.1, 12.2);
+    EXPECT_EQ(ids.size(), 5u);
+    EXPECT_EQ(ids[0], 2u);
+    EXPECT_EQ(ids[1], 1u);
+    EXPECT_EQ(ids[2], 3u);
+    EXPECT_EQ(ids[3], 0u);
+    EXPECT_EQ(ids[4], 4u);
 }
 

@@ -66,7 +66,8 @@ public:
         { return m_buf.size(); }
 
     double kdtree_get_pt(const PointId idx, int dim) const;
-    double kdtree_distance(const PointId idx, point_count_t size) const;
+    double kdtree_distance(const double *p1, const PointId p2_idx,
+        size_t /*numDims*/) const;
     template <class BBOX> bool kdtree_get_bbox(BBOX& bb) const;
     void build()
     {
@@ -75,16 +76,10 @@ public:
         m_index->buildIndex();
     }
 
-    std::vector<PointId> radius(double const& x, double const& y,
-        double const& z, double const& r) const;
-
-    std::vector<PointId> neighbors(double const& x, double const& y,
-        double const& z, point_count_t count) const;
-
 protected:
     const PointView& m_buf;
 
-    typedef nanoflann::KDTreeSingleIndexAdaptor<nanoflann::L2_Adaptor<
+    typedef nanoflann::KDTreeSingleIndexAdaptor<nanoflann::L2_Simple_Adaptor<
         double, KDIndex, double>, KDIndex, -1, std::size_t> my_kd_tree_t;
 
     std::unique_ptr<my_kd_tree_t> m_index;
@@ -98,7 +93,12 @@ class PDAL_DLL KD2Index : public KDIndex<2>
 {
 public:
     KD2Index(const PointView& buf) : KDIndex<2>(buf)
-    {}
+    {
+        if (!buf.hasDim(Dimension::Id::X))
+            throw pdal_error("KD2Index: point view missing 'X' dimension.");
+        if (!buf.hasDim(Dimension::Id::Y))
+            throw pdal_error("KD2Index: point view missing 'Y' dimension.");
+    }
 
     PointId neighbor(double x, double y)
     {
@@ -133,8 +133,11 @@ public:
         std::vector<double> pt;
         pt.push_back(x);
         pt.push_back(y);
+
+        // Our distance metric is square distance, so we use the square of
+        // the radius.
         const std::size_t count =
-            m_index->radiusSearch(&pt[0], r, ret_matches, params);
+            m_index->radiusSearch(&pt[0], r * r, ret_matches, params);
 
         for (std::size_t i = 0; i < count; ++i)
             output.push_back(ret_matches[i].first);
@@ -146,7 +149,14 @@ class PDAL_DLL KD3Index : public KDIndex<3>
 {
 public:
     KD3Index(const PointView& buf) : KDIndex<3>(buf)
-    {}
+    {
+        if (!buf.hasDim(Dimension::Id::X))
+            throw pdal_error("KD3Index: point view missing 'X' dimension.");
+        if (!buf.hasDim(Dimension::Id::Y))
+            throw pdal_error("KD3Index: point view missing 'Y' dimension.");
+        if (!buf.hasDim(Dimension::Id::Z))
+            throw pdal_error("KD3Index: point view missing 'Z' dimension.");
+    }
 
     PointId neighbor(double x, double y, double z)
     {
@@ -183,8 +193,11 @@ public:
         pt.push_back(x);
         pt.push_back(y);
         pt.push_back(z);
+
+        // Our distance metric is square distance, so we use the square of
+        // the radius.
         const std::size_t count =
-            m_index->radiusSearch(&pt[0], r, ret_matches, params);
+            m_index->radiusSearch(&pt[0], r * r, ret_matches, params);
 
         for (std::size_t i = 0; i < count; ++i)
             output.push_back(ret_matches[i].first);
@@ -241,31 +254,29 @@ double KDIndex<3>::kdtree_get_pt(const PointId idx, int dim) const
     return m_buf.getFieldAs<double>(id, idx);
 }
 
+// nanoflann hands us a vector that represents the position of p1.  We fetch
+// the position of p2 and and compute the square distance.
 template<>
-inline
-double KDIndex<2>::kdtree_distance(const PointId idx, point_count_t size) const
+inline double KDIndex<2>::kdtree_distance(const double *p1, const PointId idx,
+    size_t /*numDims*/) const
 {
-    double d0 = m_buf.getFieldAs<double>(Dimension::Id::X, idx) -
-        m_buf.getFieldAs<double>(Dimension::Id::X, size - 1);
-    double d1 = m_buf.getFieldAs<double>(Dimension::Id::Y, idx) -
-        m_buf.getFieldAs<double>(Dimension::Id::Y, size - 1);
+    double d0 = p1[0] - m_buf.getFieldAs<double>(Dimension::Id::X, idx);
+    double d1 = p1[1] - m_buf.getFieldAs<double>(Dimension::Id::Y, idx);
 
     return (d0 * d0 + d1 * d1);
 }
 
 template<>
-inline
-double KDIndex<3>::kdtree_distance(const PointId idx, point_count_t size) const
+inline double KDIndex<3>::kdtree_distance(const double *p1, const PointId idx,
+    size_t /*numDims*/) const
 {
-    double d0 = m_buf.getFieldAs<double>(Dimension::Id::X, idx) -
-        m_buf.getFieldAs<double>(Dimension::Id::X, size - 1);
-    double d1 = m_buf.getFieldAs<double>(Dimension::Id::Y, idx) -
-        m_buf.getFieldAs<double>(Dimension::Id::Y, size - 1);
-    double d2 = m_buf.getFieldAs<double>(Dimension::Id::Z, idx) -
-        m_buf.getFieldAs<double>(Dimension::Id::Z, size - 1);
+    double d0 = p1[0] - m_buf.getFieldAs<double>(Dimension::Id::X, idx);
+    double d1 = p1[1] - m_buf.getFieldAs<double>(Dimension::Id::Y, idx);
+    double d2 = p1[2] - m_buf.getFieldAs<double>(Dimension::Id::Z, idx);
 
     return (d0 * d0 + d1 * d1 + d2 * d2);
 }
+
 
 template<>
 template <class BBOX>
@@ -312,50 +323,9 @@ bool KDIndex<3>::kdtree_get_bbox(BBOX& bb) const
         bb[1].low = bounds.miny;
         bb[1].high = bounds.maxy;
         bb[2].low = bounds.minz;
-        bb[3].high = bounds.maxz;
+        bb[2].high = bounds.maxz;
     }
     return true;
-}
-
-//ABELL - Specialize in subclass
-template<int DIM>
-std::vector<PointId> KDIndex<DIM>::neighbors(double const& x, double const& y,
-    double const& z, point_count_t k) const
-{
-    k = std::min(m_buf.size(), k);
-    std::vector<PointId> output(k);
-    std::vector<double> out_dist_sqr(k);
-    nanoflann::KNNResultSet<double, PointId, point_count_t> resultSet(k);
-
-    resultSet.init(&output[0], &out_dist_sqr[0]);
-
-    std::vector<double> pt;
-    pt.push_back(x);
-    pt.push_back(y);
-    pt.push_back(z);
-    m_index->findNeighbors(resultSet, &pt[0], nanoflann::SearchParams(10));
-    return output;
-}
-
-template<int DIM>
-std::vector<PointId> KDIndex<DIM>::radius(double const& x, double const& y,
-    double const& z, double const& r) const
-{
-    std::vector<PointId> output;
-    std::vector<std::pair<std::size_t, double>> ret_matches;
-    nanoflann::SearchParams params;
-    params.sorted = true;
-
-    std::vector<double> pt;
-    pt.push_back(x);
-    pt.push_back(y);
-    pt.push_back(z);
-    const std::size_t count =
-        m_index->radiusSearch(&pt[0], r, ret_matches, params);
-
-    for (std::size_t i = 0; i < count; ++i)
-        output.push_back(ret_matches[i].first);
-    return output;
 }
 
 } // namespace pdal
