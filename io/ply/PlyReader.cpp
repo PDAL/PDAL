@@ -104,7 +104,7 @@ int readPlyCallback(p_ply_argument argument)
         throw pdal_error(ss.str());
     }
     // We've read enough, abort the callback cycle
-    if ((point_count_t)numToRead <= (point_count_t)index)
+    if (numToRead <= index)
     {
         return 0;
     }
@@ -230,10 +230,14 @@ point_count_t PlyReader::read(PointViewPtr view, point_count_t num)
     context.view = view;
     context.dimensionMap = m_vertexDimensions;
 
+    // It's possible that point_count_t holds a value that's larger than the
+    // long that is the maximum rply (don't know about ply) point count.
+    long cnt;
+    cnt = Utils::inRange<long>(num) ? num : (std::numeric_limits<long>::max)();
     for (auto it : m_vertexDimensions)
     {
         ply_set_read_cb(m_ply, "vertex", it.first.c_str(), readPlyCallback,
-            &context, num);
+            &context, cnt);
     }
     if (!ply_read(m_ply))
     {
