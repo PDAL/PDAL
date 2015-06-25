@@ -79,7 +79,6 @@ set(PDAL_BASE_CPP
   gitsha.cpp
   GDALUtils.cpp
   GlobalEnvironment.cpp
-  KDIndex.cpp
   Kernel.cpp
   KernelFactory.cpp
   KernelSupport.cpp

@@ -128,7 +128,6 @@ PointViewSet GroundFilter::run(PointViewPtr input)
         pmf.setCellSize(m_cellSize);
 
         // run the PMF filter, grabbing indices of ground returns
-        pcl::PointIndicesPtr idx(new pcl::PointIndices);
         pmf.extract(idx->indices);
     } else
     {

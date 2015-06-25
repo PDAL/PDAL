@@ -78,9 +78,9 @@ private:
     void addSwitches();
     PointViewPtr loadSet(const std::string& filename, PointTable& table);
     MetadataNode dump(PointViewPtr& srcView, PointViewPtr& candView,
-        KDIndex& index, DimIndexMap& dims);
+        KD3Index& index, DimIndexMap& dims);
     MetadataNode dumpDetail(PointViewPtr& srcView, PointViewPtr& candView,
-        KDIndex& index, DimIndexMap& dims);
+        KD3Index& index, DimIndexMap& dims);
     void accumulate(DimIndex& d, double v);
 
     std::string m_sourceFile;

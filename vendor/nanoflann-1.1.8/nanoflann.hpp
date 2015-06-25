@@ -78,7 +78,8 @@ namespace nanoflann
 			indices = indices_;
 			dists = dists_;
 			count = 0;
-			dists[capacity-1] = (std::numeric_limits<DistanceType>::max)();
+            if (capacity)
+                dists[capacity-1] = (std::numeric_limits<DistanceType>::max)();
 		}
 
 		inline CountType size() const
@@ -886,7 +887,8 @@ namespace nanoflann
 			init_vind();
 			computeBoundingBox(root_bbox);
 			freeIndex();
-			root_node = divideTree(0, m_size, root_bbox );   // construct the tree
+            if (size())
+                root_node = divideTree(0, m_size, root_bbox);   // construct the tree
 		}
 
 		/**
@@ -932,6 +934,8 @@ namespace nanoflann
 		void findNeighbors(RESULTSET& result, const ElementType* vec, const SearchParams& searchParams) const
 		{
 			assert(vec);
+            if (size() == 0)
+                return;
 			if (!root_node) throw std::runtime_error("[nanoflann] findNeighbors() called before building the index.");
 			float epsError = 1+searchParams.eps;
 

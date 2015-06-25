@@ -152,8 +152,8 @@ int DeltaKernel::execute()
     }
 
     // Index the candidate data.
-    KDIndex index(*candView);
-    index.build(m_3d);
+    KD3Index index(*candView);
+    index.build();
 
     MetadataNode root;
 
@@ -168,7 +168,7 @@ int DeltaKernel::execute()
 
 
 MetadataNode DeltaKernel::dump(PointViewPtr& srcView, PointViewPtr& candView,
-    KDIndex& index, DimIndexMap& dims)
+    KD3Index& index, DimIndexMap& dims)
 {
     MetadataNode root;
 
@@ -217,7 +217,7 @@ void DeltaKernel::accumulate(DimIndex& d, double v)
 
 
 MetadataNode DeltaKernel::dumpDetail(PointViewPtr& srcView,
-    PointViewPtr& candView, KDIndex& index, DimIndexMap& dims)
+    PointViewPtr& candView, KD3Index& index, DimIndexMap& dims)
 {
     MetadataNode root;
 
