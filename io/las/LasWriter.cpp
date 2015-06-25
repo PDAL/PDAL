@@ -100,8 +100,6 @@ Options LasWriter::getDefaultOptions()
     options.add("software_id", GetDefaultSoftwareId(),
         "Software ID for this file");
     options.add("filesource_id", 0, "File Source ID for this file");
-    options.add("forward_metadata", false, "forward metadata into "
-        "the file as necessary");
     options.add("extra_dims", "", "Extra dimensions not part of the LAS "
         "point format to be added to each point.");
 

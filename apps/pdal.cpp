@@ -37,8 +37,6 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_config.hpp>
 
-#include <boost/algorithm/string.hpp>
-
 #include <iomanip>
 #include <iostream>
 #include <memory>
@@ -48,15 +46,16 @@
 
 using namespace pdal;
 
-std::string headline("------------------------------------------------------------------------------------------");
+std::string headline(Utils::screenWidth(), '-');
 
 std::string splitDriverName(std::string const& name)
 {
-    std::vector<std::string> driverVec;
-    boost::algorithm::split(driverVec, name,
-        boost::algorithm::is_any_of("."), boost::algorithm::token_compress_on);
+    std::string out;
 
-    return driverVec[1];
+    StringList names = Utils::split2(name, '.');
+    if (names.size() == 2)
+        out = names[1];
+    return out;
 }
 
 void outputVersion()
@@ -69,72 +68,57 @@ void outputVersion()
 
 void outputHelp()
 {
-    std::cerr << "Usage: pdal <command> [--debug] [--drivers] [--help] [--options[=<driver name>]] [--version]\n";
-    std::cerr << "  --debug                Show debug information\n";
-    std::cerr << "  --drivers              Show drivers\n";
-    std::cerr << "  -h [ --help ]          Print help message\n";
-    std::cerr << "  --options [=arg(=all)] Show driver options\n";
-    std::cerr << "  --version              Show version info\n";
-    std::cerr << "\n";
+    std::cout << "Usage: pdal <command> [--debug] [--drivers] [--help] "
+        "[--options[=<driver name>]] [--version]" << std::endl << std::endl;
+    std::cout << "  --debug      Show debug information" << std::endl;
+    std::cout << "  --drivers    Show drivers" << std::endl;
+    std::cout << "  -h [--help]  Print help message" << std::endl;
+    std::cout << "  --options [=arg(=all)]" << std::endl;
+    std::cout << "               Show driver options" << std::endl;
+    std::cout << "  --version    Show version info" << std::endl;
+    std::cout << std::endl;
         
-    std::cerr << "The most commonly used pdal commands are:\n";
+    std::cout << "The following commands are available:" << std::endl;
 
     KernelFactory f(false);
-    std::vector<std::string> loaded_kernels = f.getKernelNames();
+    StringList loaded_kernels = f.getKernelNames();
 
     for (auto name : loaded_kernels)
         std::cout << "   - " << splitDriverName(name) << std::endl;
-
-    std::cout << "See http://pdal.io/apps.html for more detail";
-    std::cout << std::endl;
-    std::cout << "Run pdal --list-commands for a complete list";
-    std::cout << std::endl;
+    std::cout << "See http://pdal.io/apps.html for more detail" << std::endl;
 }
 
 void outputDrivers()
 {
     StageFactory f(false);
-    std::map<std::string, std::string> sm = f.getStageMap();
 
     std::ostringstream strm;
 
-    std::string tablehead("================================ ==========================================================");
-    std::string headings ("Name                             Description");
+    int nameColLen(25);
+    int descripColLen(Utils::screenWidth() - nameColLen - 1);
+
+    std::string tablehead(std::string(nameColLen, '=') + ' ' +
+        std::string(descripColLen, '='));
 
     strm << std::endl;
     strm << tablehead << std::endl;
-    strm << headings << std::endl;
+    strm << std::left << std::setw(nameColLen) << "Name" <<
+        " Description" << std::endl;
     strm << tablehead << std::endl;
-
-    uint32_t name_column(32);
-    uint32_t description_column(57);
 
     strm << std::left;
 
+    std::map<std::string, std::string> sm = f.getStageMap();
     for (auto s : sm)
     {
-        std::vector<std::string> lines;
-        std::string description(s.second);
-        description = boost::algorithm::erase_all_copy(description, "\n");
-
-        Utils::wordWrap(description, lines, description_column-1);
-        if (lines.size() == 1)
+        std::string name = s.first;
+        StringList lines = Utils::wordWrap(s.second, descripColLen - 1);
+        for (size_t i = 0; i < lines.size(); ++i)
         {
-            strm << std::setw(name_column) << s.first << " "
-                 << std::setw(description_column) << description << std::endl;
+            strm << std::setw(nameColLen) << name << " " <<
+                lines[i] << std::endl;
+            name.clear();
         }
-        else
-        {
-            strm << std::setw(name_column) << s.first << " "
-                 << lines[0] << std::endl;
-        }
-
-        std::stringstream blank;
-        size_t blanks(33);
-        for (size_t i = 0; i < blanks; ++i)
-            blank << " ";
-        for (size_t i = 1; i < lines.size(); ++i)
-            strm << blank.str() << lines[i] << std::endl;
     }
 
     strm << tablehead << std::endl;
@@ -152,75 +136,39 @@ void outputOptions(std::string const& n)
         return;
     }
 
+    std::cout << n << std::endl;
+    std::cout << headline << std::endl;
+
     std::vector<Option> options = s->getDefaultOptions().getOptions();
-    if (options.size())
+    if (options.empty())
     {
-        std::ostringstream strm;
-
-        strm << n << std::endl;
-        strm << headline << std::endl;
-
-        std::string tablehead("================================ "
-            "=============== =========================================");
-        std::string headings ("Name                              "
-            "Default          Description");
-        
-        strm << std::endl;
-        strm << tablehead << std::endl;
-        strm << headings << std::endl;
-        strm << tablehead << std::endl;
-        
-        uint32_t default_column(15);
-        uint32_t name_column(32);
-        uint32_t description_column(40);
-
-        strm << std::left;
-
-        for (auto const& opt : options)
-        {
-            std::string default_value(opt.getValue<std::string>() );
-            default_value = boost::algorithm::erase_all_copy(default_value,
-                "\n");
-            if (default_value.size() > default_column -1 )
-            {
-                default_value = default_value.substr(0, default_column-3);
-                default_value = default_value + "...";
-            }
-            
-            std::vector<std::string> lines;
-            std::string description(opt.getDescription());
-            description = boost::algorithm::erase_all_copy(description, "\n");
-            
-            Utils::wordWrap(description, lines, description_column-1);
-            if (lines.size() == 1)
-            {    
-                strm   << std::setw(name_column) << opt.getName() << " " 
-                       << std::setw(default_column) << default_value << " " 
-                       << std::setw(description_column) << description <<
-                       std::endl;
-            }
-            else
-            {
-                strm   << std::setw(name_column) << opt.getName() << " " 
-                       << std::setw(default_column) << default_value << " " 
-                       << lines[0] << std::endl;
-            }
-            
-            std::stringstream blank;
-            size_t blanks(49);
-            for (size_t i = 0; i < blanks; ++i)
-                blank << " ";
-            for (size_t i = 1; i < lines.size(); ++i)
-                strm << blank.str() <<lines[i] << std::endl;
-        }
-        strm << tablehead << std::endl;
-        strm << std::endl;
-
-        std::cout << strm.str() << std::endl;
+        std::cout << "No options" << std::endl << std::endl;
+        return;
     }
-    else
-        std::cerr << n << " has no options\n";
+
+    for (auto const& opt : options)
+    {
+        std::string name = opt.getName();
+        std::string defVal = Utils::escapeNonprinting(
+            opt.getValue<std::string>());
+        std::string description = opt.getDescription();
+
+        std::cout << name;
+        if (!defVal.empty())
+            std::cout << " [" << defVal << "]";
+        std::cout << std::endl;
+
+        if (!description.empty())
+        {
+            StringList lines =
+                Utils::wordWrap(description, headline.size() - 6);
+            for (std::string& line : lines)
+                std::cout << "    " << line << std::endl;
+        }
+        std::cout << std::endl;
+    }
 }
+
 
 void outputCommands()
 {
@@ -233,6 +181,7 @@ void outputCommands()
     }
 }
 
+
 void outputOptions()
 {
     StageFactory f(false);
@@ -240,6 +189,7 @@ void outputOptions()
     for (auto const& n : nv)
         outputOptions(n);
 }
+
 
 int main(int argc, char* argv[])
 {
