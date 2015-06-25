@@ -208,8 +208,9 @@ Dumps information about a point cloud file, such as:
     --point [-p] arg  Display points for particular points.  Points can be specified in
                       a range or list: 4-10, 15, 255-300.
     --query arg       Add a listing of points based on the distance from the provided
-                      location.
-                      --query "25.34,35.123" or --query "11532.23 -10e23 1.234"
+                      location.  The number of points returned can be limited by
+                      providing an optional count.
+                      --query "25.34,35.123/3" or --query "11532.23 -10e23 1.234/10"
     --stats           Display the minimum, maximum, average and count of each
                       dimension.
     --boundary        Compute a hexagonal boundary that contains all points.
