@@ -22,6 +22,10 @@ if(BUILD_PLUGIN_ICEBRIDGE)
     add_subdirectory(icebridge)
 endif()
 
+if(BUILD_PLUGIN_MATLAB)
+    add_subdirectory(matlab)
+endif()
+
 if(BUILD_PLUGIN_MRSID)
     add_subdirectory(mrsid)
 endif()

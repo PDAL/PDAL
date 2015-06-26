@@ -122,6 +122,10 @@ option(BUILD_PLUGIN_ICEBRIDGE "Choose if Icebridge support should be built" FALS
 add_feature_info("Icebridge plugin" BUILD_PLUGIN_ICEBRIDGE
     "read data in the Icebridge format")
 
+option(BUILD_PLUGIN_MATLAB "Choose if Matlab support should be built" FALSE)
+add_feature_info("Matlab plugin" BUILD_PLUGIN_MATLAB
+    "write data to a .mat file")
+
 option(BUILD_PLUGIN_MRSID "Choose if MrSID/LiDAR support should be built" FALSE)
 add_feature_info("MrSID plugin" BUILD_PLUGIN_MRSID
     "read data in the MrSID format")
