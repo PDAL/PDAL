@@ -180,7 +180,7 @@ std::string getPDALDebugInformation()
 #ifdef PDAL_HAVE_HEXER
     os << "Hexer (" << HEXER_VERSION_MAJOR << '.' << HEXER_VERSION_MINOR <<
         '.' << HEXER_VERSION_PATCH << ") - " <<
-        "http://github.com/hobu/hexer" << "std::endl;
+        "http://github.com/hobu/hexer" << std::endl;
 #endif
 
 #ifdef PDAL_HAVE_LASZIP
