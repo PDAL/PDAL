@@ -649,7 +649,7 @@ void OciWriter::createPCEntry()
         Option& pc_id = m_options.getOptionByRef("pc_id");
         pc_id.setValue(m_pc_id);
     }
-    catch (pdal::option_not_found&)
+    catch (Option::not_found)
     {
         Option pc_id("pc_id", m_pc_id, "Point Cloud Id");
         m_options.add(pc_id);

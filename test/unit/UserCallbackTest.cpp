@@ -100,7 +100,7 @@ TEST(UserCallbackTest, test1)
         ok = true;
         ok = worker.doWork();
     }
-    catch (pipeline_interrupt intr)
+    catch (UserCallback::interrupted)
     {
         ok = false;
     }

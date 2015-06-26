@@ -121,30 +121,26 @@ std::string getPythonTraceback()
     std::ostringstream mssg;
     if (traceback)
     {
-
         PyObject* tracebackModule;
         PyObject* tracebackDictionary;
         PyObject* tracebackFunction;
     
         tracebackModule = PyImport_ImportModule("traceback");
         if (!tracebackModule)
-        {
-            throw python_error("unable to load traceback module while importing numpy inside PDAL");
-        }
+            throw error("Unable to load traceback module while "
+                "importing numpy inside PDAL.");
 
         tracebackDictionary = PyModule_GetDict(tracebackModule);
 
-        tracebackFunction = PyDict_GetItemString(tracebackDictionary, "format_exception");
+        tracebackFunction =
+            PyDict_GetItemString(tracebackDictionary, "format_exception");
         if (!tracebackFunction)
-        {
-            throw python_error("unable to find traceback function while importing numpy inside PDAL");
-        }
+            throw error("Unable to find traceback function while "
+                "importing numpy inside PDAL.");
 
         if (!PyCallable_Check(tracebackFunction))
-        {
-            throw python_error("invalid traceback function while importing numpy inside PDAL");
-        }
-
+            throw error("Invalid traceback function while importing numpy "
+                "inside PDAL.");
         
         // create an argument for "format exception"
         PyObject* args = PyTuple_New(3);

@@ -36,6 +36,7 @@
 
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
+#include <pdal/plang/PythonEnvironment.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/StageWrapper.hpp>
 #include <stats/StatsFilter.hpp>
@@ -336,7 +337,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test5)
     PointTable table;
     filter->prepare(table);
 
-    ASSERT_THROW(filter->execute(table), python_error);
+    ASSERT_THROW(filter->execute(table), plang::error);
 }
 
 TEST(PredicateFilterTest, PredicateFilterTest_Pipeline)

@@ -133,7 +133,7 @@ void TextWriter::ready(PointTableRef table)
         {
             std::ostringstream oss;
             oss << "Dimension not found with name '" << *ti <<"'";
-            throw pdal::dimension_not_found(oss.str());
+            throw pdal_error(oss.str());
         }
         m_dims.push_back(d);
     }

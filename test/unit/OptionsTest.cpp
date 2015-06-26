@@ -208,41 +208,35 @@ TEST(OptionsTest, test_valid_options)
     try
     {
         opts.getOption("foo").getValue<int>();
-        reached = false;
     }
-    catch (option_not_found ex)
+    catch (Option::not_found ex)
     {
-        EXPECT_TRUE(strcmp(ex.what(), "Options::getOption: Required option 'foo' was not found on this stage") == 0);
+        EXPECT_EQ((std::string)ex.what(),
+            (std::string)"Options::getOption: Required option 'foo' was "
+            "not found on this stage");
         reached = true;
     }
-    EXPECT_TRUE(reached == true);
+    EXPECT_TRUE(reached);
 
-    bool ok = opts.hasOption("bar");
-    EXPECT_TRUE(!ok);
-
+    EXPECT_FALSE(opts.hasOption("bar"));
     {
         Options optI;
 
         optI.add("foo", 19, "foo as an int");
-        ok = optI.hasOption("foo");
-        EXPECT_TRUE(ok);
+        EXPECT_TRUE(optI.hasOption("foo"));
 
-        const int i1 = optI.getValueOrThrow<int>("foo");
-        EXPECT_TRUE(i1 == 19);
+        EXPECT_EQ(optI.getValueOrThrow<int>("foo"), 19);
 
         optI.add("foo", "nineteen", "foo as a string");
-        ok = optI.hasOption("foo");
-        EXPECT_TRUE(ok);
+        EXPECT_TRUE(optI.hasOption("foo"));
 
         // Options is backed by a std::multimap,
         // Adding new options will mean the first will
         // continue to be returned.
-        const int i2 = optI.getValueOrThrow<int>("foo");
-        EXPECT_TRUE(i2 == 19);
+        EXPECT_EQ(optI.getValueOrThrow<int>("foo"), 19);
 
         std::vector<Option> options = optI.getOptions("foo");
-
-        EXPECT_TRUE(options[1].getValue<std::string>() == "nineteen");
+        EXPECT_EQ(options[1].getValue<std::string>(), "nineteen");
     }
 }
 

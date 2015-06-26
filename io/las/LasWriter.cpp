@@ -212,7 +212,7 @@ void LasWriter::getVlrOptions(const Options& opts)
             info.m_recordId = vo->getOption("record_id").getValue<int16_t>();
             info.m_userId = vo->getOption("user_id").getValue<std::string>();
         }
-        catch (option_not_found err)
+        catch (Option::not_found)
         {
             continue;
         }
