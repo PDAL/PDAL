@@ -35,6 +35,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdexcept>
 #include <vector>
 
 #include <pdal/pdal_internal.hpp>
