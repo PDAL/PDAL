@@ -46,6 +46,10 @@ format
     all points are stored contiguously, followed by the second bytes of all
     points, etc.  See the BPF specification for further information.
 
+header_data
+  Base64-encoded data that will be decoded and written following the
+  standard BPF header.
+
 coord_id
   The coordinate ID (UTM zone) of the data.  NOTE: Only the UTM coordinate
   type is currently supported. [Default: 0, with coordinate type set to none]
