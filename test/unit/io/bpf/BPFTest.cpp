@@ -34,6 +34,8 @@
 
 #include <pdal/pdal_test_main.hpp>
 
+#include <string.h>
+
 #include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/Utils.hpp>
@@ -132,7 +134,6 @@ void test_roundtrip(Options& writerOps)
     std::string infile(
         Support::datapath("bpf/autzen-utm-chipped-25-v3-interleaved.bpf"));
     std::string outfile(Support::temppath("tmp.bpf"));
-
 
     PointTable table;
 
@@ -258,6 +259,49 @@ TEST(BPFTest, roundtrip_scaling)
     ops.add("scale_y", .01);
     ops.add("scale_z", 10.0);
     test_roundtrip(ops);
+}
+
+TEST(BPFTest, extra_bytes)
+{
+    std::string infile(
+        Support::datapath("bpf/autzen-utm-chipped-25-v3-interleaved.bpf"));
+    std::string outfile(Support::temppath("tmp.bpf"));
+
+    PointTable table;
+
+    Options readerOps;
+    readerOps.add("filename", infile);
+    BpfReader reader;
+    reader.setOptions(readerOps);
+
+    const unsigned char buf[] = "This is a test.";
+
+    Options writerOps;
+    writerOps.add("filename", outfile);
+    writerOps.add("header_data", Utils::base64_encode(buf, sizeof(buf)));
+    BpfWriter writer;
+    writer.setOptions(writerOps);
+    writer.setInput(reader);
+
+    FileUtils::deleteFile(outfile);
+    writer.prepare(table);
+    writer.execute(table);
+
+    test_file_type(outfile);
+
+    Options readerOps2;
+    readerOps2.add("filename", outfile);
+
+    PointTable table2;
+    BpfReader reader2;
+    reader2.setOptions(readerOps2);
+    reader2.prepare(table2);
+    reader2.execute(table2);
+    MetadataNode n = reader2.getMetadata();
+    std::string val = n.findChild("header_data").value();
+    std::vector<uint8_t> outbuf =
+        Utils::base64_decode(n.findChild("header_data").value());
+    EXPECT_EQ(memcmp(outbuf.data(), buf, sizeof(buf)), 0);
 }
 
 TEST(BPFTest, inspect)

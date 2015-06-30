@@ -61,6 +61,7 @@ private:
     OLeStream m_stream;
     BpfHeader m_header;
     BpfDimensionList m_dims;
+    std::vector<uint8_t> m_extraData;
 
     virtual void processOptions(const Options& options);
     virtual void ready(PointTableRef table);
