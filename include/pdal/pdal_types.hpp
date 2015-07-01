@@ -35,6 +35,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdexcept>
 #include <vector>
 
 #include <pdal/pdal_internal.hpp>
@@ -108,6 +109,13 @@ enum Enum
     DimensionMajor
 };
 } // namespace Orientation
+
+class PDAL_DLL pdal_error : public std::runtime_error
+{
+public:
+    pdal_error(std::string const& msg) : std::runtime_error(msg)
+        {}
+};
 
 } // namespace pdal
 

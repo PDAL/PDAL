@@ -35,6 +35,7 @@ Writers
 
    writers.geowave
    writers.las
+   writers.matlab
    writers.nitf
    writers.oci
    writers.ply

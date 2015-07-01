@@ -113,6 +113,9 @@ void InfoKernel::validateSwitches()
         m_needPoints = true;
     }
 
+    if (m_pointIndexes.size() && m_queryPoint.size())
+        throw pdal_error("--point option incompatible with --query option.");
+
     if (m_showSummary && functions > 1)
         throw pdal_error("--summary option incompatible with other "
             "specified options.");
@@ -142,7 +145,9 @@ void InfoKernel::addSwitches()
          "dump the schema")
         ("point,p", po::value<std::string >(&m_pointIndexes), "point to dump")
         ("query", po::value< std::string>(&m_queryPoint),
-         "A 2d or 3d point query point")
+         "Return points in order of distance from the specified "
+         "location (2D or 3D)\n"
+         "--query Xcoord,Ycoord[,Zcoord][/count]")
         ("stats",
          po::value<bool>(&m_showStats)->zero_tokens()->implicit_value(true),
          "dump stats on all points (reads entire dataset)")
@@ -345,6 +350,7 @@ MetadataNode InfoKernel::run(const std::string& filename)
     return root;
 }
 
+
 void InfoKernel::dump(MetadataNode& root)
 {
     if (m_showSchema)
@@ -396,9 +402,30 @@ void InfoKernel::dump(MetadataNode& root)
 
 MetadataNode InfoKernel::dumpQuery(PointViewPtr inView) const
 {
+    int count;
+    std::string location;
+
+    // See if there's a provided point count.
+    StringList parts = Utils::split2(m_queryPoint, '/');
+    if (parts.size() == 2)
+    {
+        location = parts[0];
+        count = atoi(parts[1].c_str());
+    }
+    else if (parts.size() == 1)
+    {
+        location = parts[0];
+        count = inView->size();
+    }
+    else
+        count = 0;
+    if (count == 0)
+        throw pdal_error("Invalid location specificiation. "
+            "--query=\"X,Y[/count]\"");
+
     auto seps = [](char c){ return (c == ',' || c == '|' || c == ' '); };
 
-    std::vector<std::string> tokens = Utils::split2(m_queryPoint, seps);
+    std::vector<std::string> tokens = Utils::split2(location, seps);
     std::vector<double> values;
     for (auto ti = tokens.begin(); ti != tokens.end(); ++ti)
         values.push_back(boost::lexical_cast<double>(*ti));
@@ -413,13 +440,13 @@ MetadataNode InfoKernel::dumpQuery(PointViewPtr inView) const
     {
         KD3Index kdi(*inView);
         kdi.build();
-        ids = kdi.neighbors(values[0], values[1], values[2], inView->size());
+        ids = kdi.neighbors(values[0], values[1], values[2], count);
     }
     else
     {
         KD2Index kdi(*inView);
         kdi.build();
-        ids = kdi.neighbors(values[0], values[1], inView->size());
+        ids = kdi.neighbors(values[0], values[1], count);
     }
 
     for (auto i = ids.begin(); i != ids.end(); ++i)

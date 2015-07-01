@@ -82,11 +82,11 @@ void ReprojectionFilter::processOptions(const Options& options)
             "specification for 'out_srs' option: '" << srs << "'.";
         throw pdal_error(oss.str());
     }
-    catch (option_not_found)
+    catch (Option::not_found)
     {
         std::ostringstream oss;
         oss << "Stage " << getName() << " missing required option 'out_srs'.";
-        throw pdal_error(oss.str());
+        throw Option::not_found(oss.str());
     }
 
     if (options.hasOption("in_srs"))

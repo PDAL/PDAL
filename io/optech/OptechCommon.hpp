@@ -32,9 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/pdal_error.hpp>
 #include <pdal/util/Georeference.hpp>
-
 
 namespace pdal
 {

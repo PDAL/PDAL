@@ -111,7 +111,6 @@ public:
 
     bool isGeographic() const;
     int computeUTMZone(const BOX3D& box) const;
-    const std::string& getDescription() const;
     const std::string& getName() const;
     static int calculateZone(double lon, double lat);
 

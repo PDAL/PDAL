@@ -240,11 +240,12 @@ namespace Utils
     PDAL_DLL int run_shell_command(const std::string& cmd, std::string& output);
     PDAL_DLL std::string replaceAll(std::string result,
         const std::string& replaceWhat, const std::string& replaceWithWhat);
-    PDAL_DLL void wordWrap(std::string const& inputString,
-        std::vector<std::string>& outputString, unsigned int lineLength);
+    PDAL_DLL StringList wordWrap(std::string const& inputString,
+        unsigned int lineLength);
     PDAL_DLL std::string escapeJSON(const std::string &s);
     PDAL_DLL std::string demangle(const std::string& s);
     PDAL_DLL int screenWidth();
+    PDAL_DLL std::string escapeNonprinting(const std::string& s);
 
     /// Split a string into substrings.  Characters matching the predicate are
     ///   discarded.

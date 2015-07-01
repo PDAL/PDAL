@@ -100,8 +100,6 @@ Options LasWriter::getDefaultOptions()
     options.add("software_id", GetDefaultSoftwareId(),
         "Software ID for this file");
     options.add("filesource_id", 0, "File Source ID for this file");
-    options.add("forward_metadata", false, "forward metadata into "
-        "the file as necessary");
     options.add("extra_dims", "", "Extra dimensions not part of the LAS "
         "point format to be added to each point.");
 
@@ -214,7 +212,7 @@ void LasWriter::getVlrOptions(const Options& opts)
             info.m_recordId = vo->getOption("record_id").getValue<int16_t>();
             info.m_userId = vo->getOption("user_id").getValue<std::string>();
         }
-        catch (option_not_found err)
+        catch (Option::not_found)
         {
             continue;
         }

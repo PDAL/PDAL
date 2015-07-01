@@ -50,6 +50,13 @@ namespace pdal
 namespace plang
 {
 
+class error : public pdal_error
+{
+public:
+    error(const std::string& msg) : pdal_error(msg)
+    {}
+};
+
 class Redirector;
 
 std::string getPythonTraceback();

@@ -131,6 +131,7 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
     drivers["json"] = "writers.text";
     drivers["las"] = "writers.las";
     drivers["laz"] = "writers.las";
+    drivers["mat"] = "writers.matlab";
     drivers["ntf"] = "writers.nitf";
     drivers["pcd"] = "writers.pcd";
     drivers["pclviz"] = "writers.pclvisualizer";

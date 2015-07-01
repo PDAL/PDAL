@@ -34,7 +34,6 @@
 
 #pragma once
 
-#include <pdal/pdal_error.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/Log.hpp>
 #include <pdal/XMLSchema.hpp>
@@ -570,9 +569,6 @@ private:
         ss << msg << " sqlite error: " << zErrMsg;
         throw sqlite_driver_error(ss.str());
     }
-
-
-
 };
 
 } // namespace pdal

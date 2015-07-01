@@ -153,7 +153,7 @@ Option& Options::getOptionByRef(const std::string& name)
         std::ostringstream oss;
         oss << "Options::getOptionByRef: Required option '" << name <<
             "' was not found on this stage";
-        throw option_not_found(oss.str());
+        throw Option::not_found(oss.str());
     }
     return iter->second;
 }
@@ -167,7 +167,7 @@ const Option& Options::getOption(const std::string& name) const
         std::ostringstream oss;
         oss << "Options::getOption: Required option '" << name <<
             "' was not found on this stage";
-        throw option_not_found(oss.str());
+        throw Option::not_found(oss.str());
     }
     return iter->second;
 }
@@ -210,7 +210,7 @@ bool Options::hasOption(std::string const& name) const
         (void)getOption(name);
         return true;
     }
-    catch (option_not_found&)
+    catch (Option::not_found)
     {}
     return false;
 }

@@ -82,7 +82,7 @@ void SQLiteReader::initialize()
             m_options.getValueOrThrow<pdal::SpatialReference>(
                 "spatialreference"));
     }
-    catch (pdal::option_not_found const&)
+    catch (Option::not_found)
     {
         // If one wasn't set on the options, we'll ignore at this
         setSpatialReference(fetchSpatialReference(m_query));

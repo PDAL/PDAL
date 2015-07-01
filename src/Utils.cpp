@@ -60,6 +60,7 @@
 #endif
 
 #include <stdio.h>
+#include <iomanip>
 
 using namespace std;
 
@@ -86,6 +87,7 @@ double Utils::random(double minimum, double maximum)
     return t;
 }
 
+
 double Utils::uniform(const double& minimum, const double& maximum,
     uint32_t seed)
 {
@@ -95,6 +97,7 @@ double Utils::uniform(const double& minimum, const double& maximum,
     return dist(gen);
 }
 
+
 double Utils::normal(const double& mean, const double& sigma, uint32_t seed)
 {
     std::mt19937 gen(seed);
@@ -102,6 +105,7 @@ double Utils::normal(const double& mean, const double& sigma, uint32_t seed)
 
     return dist(gen);
 }
+
 
 void* Utils::registerPlugin(void* stageFactoryPtr, string const& filename,
     string const& registerMethod, string const& versionMethod)
@@ -140,10 +144,12 @@ void* Utils::registerPlugin(void* stageFactoryPtr, string const& filename,
     return pRegister;
 }
 
+
 char* Utils::getenv(const char* env)
 {
     return ::getenv(env);
 }
+
 
 string Utils::getenv(string const& name)
 {
@@ -329,6 +335,7 @@ void* Utils::getDLLSymbol(string const& library, string const& name)
     return pSymbol;
 }
 
+
 string Utils::base64_encode(const unsigned char *bytes_to_encode, size_t in_len)
 {
 
@@ -411,10 +418,12 @@ string Utils::base64_encode(const unsigned char *bytes_to_encode, size_t in_len)
     return ret;
 }
 
+
 static inline bool is_base64(unsigned char c)
 {
     return (isalnum(c) || (c == '+') || (c == '/'));
 }
+
 
 vector<uint8_t> Utils::base64_decode(string const& encoded_string)
 {
@@ -606,12 +615,15 @@ std::string Utils::escapeJSON(const string &str)
 /// Break a string into a list of strings, none of which exceeds a specified
 /// length.
 /// \param[in] inputString  String to split
-/// \param[out] outputString  Vector of strings split from inputString
 /// \param[in] lineLength  Maximum length of any of the output strings
-void Utils::wordWrap(string const& inputString, vector<string>& outputString,
-    unsigned int lineLength)
+/// \return  List of string split from input.
+///
+StringList Utils::wordWrap(string const& inputString, unsigned int lineLength)
 {
     // stolen from http://stackoverflow.com/questions/5815227/fix-improve-word-wrap-function
+
+    StringList output;
+
     istringstream iss(inputString);
     string line;
     do
@@ -621,7 +633,7 @@ void Utils::wordWrap(string const& inputString, vector<string>& outputString,
 
         if (line.length() + word.length() > lineLength)
         {
-            outputString.push_back(line);
+            output.push_back(line);
             line.clear();
         }
         line += word + " ";
@@ -629,9 +641,8 @@ void Utils::wordWrap(string const& inputString, vector<string>& outputString,
     } while (iss);
 
     if (!line.empty())
-    {
-        outputString.push_back(line);
-    }
+        output.push_back(line);
+    return output;
 }
 
 
@@ -650,6 +661,7 @@ std::string Utils::demangle(const std::string& s)
 #endif
 }
 
+
 int Utils::screenWidth()
 {
 #ifdef WIN32
@@ -660,6 +672,35 @@ int Utils::screenWidth()
 
     return ws.ws_col;
 #endif
+}
+
+
+std::string Utils::escapeNonprinting(const std::string& s)
+{
+    std::string out;
+
+    for (size_t i = 0; i < s.size(); ++i)
+    {
+        if (s[i] == '\n')
+            out += "\\n";
+        else if (s[i] == '\a')
+            out += "\\a";
+        else if (s[i] == '\b')
+            out += "\\b";
+        else if (s[i] == '\r')
+            out += "\\r";
+        else if (s[i] == '\v')
+            out += "\\v";
+        else if (s[i] < 32)
+        {
+            std::stringstream oss;
+            oss << std::hex << std::setfill('0') << std::setw(2) << (int)s[i];
+            out += "\\x" + oss.str();
+        }
+        else
+            out += s[i];
+    }
+    return out;
 }
 
 } // namespace pdal

@@ -5,18 +5,18 @@ PDAL - Point Data Abstraction Library
 ******************************************************************************
 
 PDAL is a `BSD licensed`_ library for translating and manipulating `point cloud
-data`_ of various formats. It is a library that is analogous to the `GDAL`_
-raster library.  PDAL is focussed on reading, writing, and translating point
-cloud data from the ever-growing constellation of data formats.
-While PDAL is not explicitly limited to working with `LiDAR`_ data formats, its
-wide format coverage is in that domain.
+data`_ of various formats.  PDAL can be used to read, write and translate
+point cloud data in many formats.  Support is included for input files of
+LAS, LAZ, SBET, BPF, QFIT and others.  PDAL can also read from and write to
+databases that support point cloud storage, including Oracle, Postgres
+and SQLite.
 
-PDAL is related to `Point Cloud Library (PCL)`_ in the sense that
-both work with point data, but PDAL's niche is data translation and processing
-pipelines, and PCL's is more in the algorithmic exploition domain. There is
-cross over of both niches, however, and PDAL provides a user the ability to
-exploit data using PCL's techniques. See :ref:`filters.pclblock` for more
-background
+PDAL should not be confused with `PCL`_ (Point Cloud Library).  PCL is a
+library specifically designed
+to provide algorithmic analysis and modification of point clouds.  PDAL
+provides a limited interface to the facilities of PCL, but does not in
+general attempt to duplicate its capabilites.  See :ref:`filters.pclblock`
+for more background
 
 
 Developers and Sponsorship
@@ -25,8 +25,8 @@ Developers and Sponsorship
 PDAL is developed by `Howard Butler`_, `Michael Gerlek`_, `Andrew Bell`_,
 `Brad Chambers`_ and others.
 
-PDAL's development is in coordination with efforts by the `U.S. Army Cold Regions Research and
-Engineering Laboratory`_.
+PDAL's development is in coordination with efforts by the
+`U.S. Army Cold Regions Research and Engineering Laboratory`_.
 
 .. _`Aerial Services, Inc`: http://www.asi-gis.com/
 .. _`Point Cloud Library (PCL)`: http://pointclouds.org
@@ -35,6 +35,7 @@ Engineering Laboratory`_.
 .. _`point cloud data`: http://en.wikipedia.org/wiki/Point_cloud
 .. _`LIDAR`: http://en.wikipedia.org/wiki/LIDAR
 .. _`U.S. Army Cold Regions Research and Engineering Laboratory` : http://www.crrel.usace.army.mil/
+.. _`PDL`: http://pointclouds.org
 .. _`Howard Butler`: http://hobu.co
 .. _`Andrew Bell`: http://hobu.co
 .. _`Michael Gerlek`: http://www.radiantblue.com

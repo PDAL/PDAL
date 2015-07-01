@@ -38,9 +38,7 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include <pdal/pdal_error.hpp>
 #include <pdal/PointView.hpp>
-
 
 namespace pdal
 {
@@ -258,6 +256,5 @@ void PlyReader::done(PointTableRef table)
         throw pdal_error(ss.str());
     }
 }
-
 
 }

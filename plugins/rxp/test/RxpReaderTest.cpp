@@ -157,10 +157,10 @@ TEST(RxpReaderTest, testURILogic)
     EXPECT_EQ(extractRivlibURI(rdtpOptions), "rdtp://192.168.0.33");
 
     Options emptyOptions;
-    EXPECT_THROW(extractRivlibURI(emptyOptions), option_not_found);
+    EXPECT_THROW(extractRivlibURI(emptyOptions), Option::not_found);
 
     Options bothOptions;
     bothOptions.add(fileOption);
     bothOptions.add(rdtpOption);
-    EXPECT_THROW(extractRivlibURI(bothOptions), option_not_found);
+    EXPECT_THROW(extractRivlibURI(bothOptions), pdal_error);
 }

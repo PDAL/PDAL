@@ -36,7 +36,6 @@
 
 #include <pdal/KernelSupport.hpp>
 #include <pdal/pdal_export.hpp>
-#include <pdal/pdal_error.hpp>
 
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(push)

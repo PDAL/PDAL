@@ -1,14 +1,5 @@
 /******************************************************************************
- * $Id$
- *
- * Project:  libLAS - http://liblas.org - A BSD library for LAS format data.
- * Purpose:  LAS version related functions.
- * Author:   Mateusz Loskot, mateusz@loskot.net
- *           Frank Warmerdam, warmerdam@pobox.com
- *
- ******************************************************************************
- * Copyright (c) 2008, Mateusz Loskot
- * Copyright (c) 2010, Frank Warmerdam
+ * Copyright (c) 2015, Peter J. Gadomski <pete.gadomski@gmail.com>
  *
  * All rights reserved.
  *
@@ -22,10 +13,10 @@
  *       notice, this list of conditions and the following disclaimer in
  *       the documentation and/or other materials provided
  *       with the distribution.
- *     * Neither the name of the Martin Isenburg or Iowa Department
- *       of Natural Resources nor the names of its contributors may be
- *       used to endorse or promote products derived from this software
- *       without specific prior written permission.
+ *     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+ *       names of its contributors may be used to endorse or promote
+ *       products derived from this software without specific prior
+ *       written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -43,26 +34,43 @@
 
 #pragma once
 
-#include <pdal/pdal_internal.hpp>
-
 #include <string>
+
+#include <mat.h>
+
+#include <pdal/Writer.hpp>
+
+
+extern "C" int32_t MatlabWriter_ExitFunc();
+extern "C" PF_ExitFunc MatlabWriter_InitPlugin();
+
 
 namespace pdal
 {
 
-PDAL_DLL bool IsLibLASEnabled();
-PDAL_DLL bool IsGDALEnabled();
-PDAL_DLL bool IsLibGeoTIFFEnabled();
-PDAL_DLL bool IsLasZipEnabled();
 
-PDAL_DLL std::string GetFullVersionString();
-PDAL_DLL std::string GetVersionString();
-PDAL_DLL int GetVersionInteger();
-PDAL_DLL std::string GetSHA1();
-PDAL_DLL int GetVersionMajor();
-PDAL_DLL int GetVersionMinor();
-PDAL_DLL int GetVersionPatch();
-PDAL_DLL std::string getPDALDebugInformation();
+class PDAL_DLL MatlabWriter : public Writer
+{
+public:
 
-} // namespace pdal
+    static void* create();
+    static int32_t destroy(void*);
+    std::string getName() const;
 
+    MatlabWriter();
+
+private:
+
+    virtual void processOptions(const Options& options);
+    virtual void prepared(PointTableRef table);
+    virtual void ready(PointTableRef table);
+    virtual void write(const PointViewPtr view);
+    virtual void done(PointTableRef table);
+
+    // Can't use unique_ptr b/c MATFile is an incomplete type.
+    MATFile * m_matfile;
+    DimTypeList m_dimTypes;
+};
+
+
+}

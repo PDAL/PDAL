@@ -77,6 +77,10 @@ void BpfWriter::processOptions(const Options& options)
     m_header.m_compression = compression ? BpfCompression::Zlib :
         BpfCompression::None;
 
+    std::string encodedHeader =
+        options.getValueOrDefault<std::string>("header_data", "");
+    m_extraData = Utils::base64_decode(encodedHeader);
+
     std::string fileFormat =
         options.getValueOrDefault<std::string>("format", "POINT");
     std::transform(fileFormat.begin(), fileFormat.end(), fileFormat.begin(),
@@ -112,6 +116,7 @@ void BpfWriter::ready(PointTableRef table)
     // count and dimension min/max.
     m_header.write(m_stream);
     m_header.writeDimensions(m_stream, m_dims);
+    m_stream.put((const char *)m_extraData.data(), m_extraData.size());
     m_header.m_len = m_stream.position();
     m_header.m_xform.m_vals[0] = m_xXform.m_scale;
     m_header.m_xform.m_vals[5] = m_yXform.m_scale;

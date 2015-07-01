@@ -55,6 +55,13 @@ namespace pdal
 namespace
 {
 
+class invalid_stream : public pdal_error
+{
+public:
+    invalid_stream(const std::string& msg) : pdal_error(msg)
+        {}
+};
+
 double toDouble(const Everything& e, Dimension::Type::Enum type)
 {
     using namespace Dimension::Type;
@@ -609,7 +616,7 @@ point_count_t LasReader::read(PointViewPtr view, point_count_t count)
         }
         catch (std::out_of_range&)
         {}
-        catch (pdal::invalid_stream&)
+        catch (invalid_stream&)
         {}
     }
     m_index += i;
@@ -625,7 +632,7 @@ point_count_t LasReader::readFileBlock(std::vector<char>& buf,
 
     blockpoints = std::min(maxpoints, blockpoints);
     if (m_istream->eof())
-        throw pdal::invalid_stream("stream is done");
+        throw invalid_stream("stream is done");
 
     m_istream->read(buf.data(), blockpoints * ptLen);
     if (m_istream->gcount() != (std::streamsize)(blockpoints * ptLen))

@@ -158,12 +158,14 @@ void NitfWriter::processOptions(const Options& options)
     try
     {
         m_aimidb = getOptions().getOption("AIMIDB");
-    } catch (pdal::option_not_found&)
+    }
+    catch (Option::not_found)
     {}
     try
     {
         m_acftb = getOptions().getOption("ACFTB");
-    } catch (pdal::option_not_found&)
+    }
+    catch (Option::not_found)
     {}
 }
 

@@ -35,7 +35,6 @@
 #include <sys/stat.h>
 
 #include <pdal/util/FileUtils.hpp>
-#include <pdal/pdal_error.hpp>
 #include <pdal/Utils.hpp>
 
 #include <boost/filesystem.hpp>
