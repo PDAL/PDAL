@@ -49,7 +49,7 @@ namespace pdal
 {
 
 
-class PDAL_DLL MatlabWriter : public pdal::Writer
+class PDAL_DLL MatlabWriter : public Writer
 {
 public:
 

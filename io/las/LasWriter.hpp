@@ -60,7 +60,7 @@ struct VlrOptionInfo
     std::string m_description;
 };
 
-class PDAL_DLL LasWriter : public pdal::Writer
+class PDAL_DLL LasWriter : public Writer
 {
     friend class LasTester;
     friend class NitfWriter;
