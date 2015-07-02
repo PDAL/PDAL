@@ -67,6 +67,13 @@ public:
             std::ios_base::out | std::ios_base::binary);
         return 0;
     }
+    void close()
+    {
+        flush();
+        delete m_fstream;
+        m_fstream = NULL;
+        m_stream = NULL;
+    }
     void flush()
         { m_stream->flush(); }
     operator bool ()

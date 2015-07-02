@@ -36,6 +36,7 @@
 
 #include <string.h>
 
+#include <pdal/BufferReader.hpp>
 #include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/Utils.hpp>
@@ -389,3 +390,120 @@ TEST(BPFTest, mueller)
     EXPECT_DOUBLE_EQ(zp, -3.0);
 }
 
+
+TEST(BPFTest, flex)
+{
+    std::array<std::string, 3> outname =
+        {{ "test_1.bpf", "test_2.bpf", "test_3.bpf" }};
+
+    Options readerOps;
+    readerOps.add("filename",
+        Support::datapath("bpf/autzen-utm-chipped-25-v3.bpf"));
+
+    PointTable table;
+
+    BpfReader reader;
+    reader.setOptions(readerOps);
+
+    reader.prepare(table);
+    PointViewSet views = reader.execute(table);
+    PointViewPtr v = *(views.begin());
+
+    PointViewPtr v1(new PointView(table));
+    PointViewPtr v2(new PointView(table));
+    PointViewPtr v3(new PointView(table));
+
+    std::vector<PointViewPtr> vs;
+    vs.push_back(v1);
+    vs.push_back(v2);
+    vs.push_back(v3);
+
+    for (PointId i = 0; i < v->size(); ++i)
+        vs[i % 3]->appendPoint(*v, i);
+
+    for (size_t i = 0; i < outname.size(); ++i)
+        FileUtils::deleteFile(Support::temppath(outname[i]));
+
+    BufferReader reader2;
+    reader2.addView(v1);
+    reader2.addView(v2);
+    reader2.addView(v3);
+
+    Options writerOps;
+    writerOps.add("filename", Support::temppath("test_#.bpf"));
+
+    BpfWriter writer;
+    writer.setOptions(writerOps);
+    writer.setInput(reader2);
+
+    writer.prepare(table);
+    writer.execute(table);
+
+    for (size_t i = 0; i < outname.size(); ++i)
+    {
+        std::string filename = Support::temppath(outname[i]);
+        EXPECT_TRUE(FileUtils::fileExists(filename));
+
+        Options ops;
+        ops.add("filename", filename);
+
+        BpfReader r;
+        r.setOptions(ops);
+        EXPECT_EQ(r.preview().m_pointCount, 355u);
+    }
+}
+
+TEST(BPFTest, flex2)
+{
+    Options readerOps;
+    readerOps.add("filename",
+        Support::datapath("bpf/autzen-utm-chipped-25-v3.bpf"));
+
+    PointTable table;
+
+    BpfReader reader;
+    reader.setOptions(readerOps);
+
+    reader.prepare(table);
+    PointViewSet views = reader.execute(table);
+    PointViewPtr v = *(views.begin());
+
+    PointViewPtr v1(new PointView(table));
+    PointViewPtr v2(new PointView(table));
+    PointViewPtr v3(new PointView(table));
+
+    std::vector<PointViewPtr> vs;
+    vs.push_back(v1);
+    vs.push_back(v2);
+    vs.push_back(v3);
+
+    for (PointId i = 0; i < v->size(); ++i)
+        vs[i % 3]->appendPoint(*v, i);
+
+    std::string outfile(Support::temppath("test_flex.bpf"));
+    FileUtils::deleteFile(outfile);
+
+    BufferReader reader2;
+    reader2.addView(v1);
+    reader2.addView(v2);
+    reader2.addView(v3);
+
+    Options writerOps;
+    writerOps.add("filename", outfile);
+
+    BpfWriter writer;
+    writer.setOptions(writerOps);
+    writer.setInput(reader2);
+
+    writer.prepare(table);
+    writer.execute(table);
+
+    EXPECT_TRUE(FileUtils::fileExists(outfile));
+
+    Options ops;
+    ops.add("filename", outfile);
+
+    BpfReader r;
+    r.setOptions(ops);
+    EXPECT_EQ(r.preview().m_pointCount, 1065u);
+}

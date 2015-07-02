@@ -28,7 +28,13 @@ Options
 -------
 
 filename
-  BPF file to read [Required] 
+  BPF file to read.  The writer will accept a filename containing
+  a single placeholder character ('#').  If input to the writer consists
+  of multiple PointViews, each will be written to a separate file, where
+  the placeholder will be replaced with an incrementing integer.  If no
+  placeholder is found, all PointViews provided to the writer are
+  aggregated into a single file for output.  Multiple PointViews are usually
+  the result of using :ref:`filters.splitter` or :ref:`filters.chipper`.
 
 compression
   This option can be set to true to cause the file to be written with Zlib
