@@ -570,6 +570,7 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
     }
 
     FileUtils::fileTimes(filename, &fileInfo.m_ctime, &fileInfo.m_mtime);
+    fileInfo.m_filename = filename;
 
     return fileInfo;
 }
