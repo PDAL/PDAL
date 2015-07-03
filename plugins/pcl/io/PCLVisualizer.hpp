@@ -44,7 +44,7 @@ namespace pdal
 class PDAL_DLL PclVisualizer : public Writer
 {
 public:
-    PCLVisualizer()
+    PclVisualizer()
     {}
 
     static void * create();
