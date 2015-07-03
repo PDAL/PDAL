@@ -433,6 +433,7 @@ void TIndexKernel::mergeFile()
     }
 
     std::string driver = factory.inferWriterDriver(m_filespec);
+    Options factoryOptions = factory.inferWriterOptionsChanges(m_filespec);
     Stage *writer = factory.createStage(driver, true);
     if (!writer)
     {
@@ -443,7 +444,7 @@ void TIndexKernel::mergeFile()
 
     applyExtraStageOptionsRecursive(writer);
 
-    Options writerOptions;
+    Options writerOptions(factoryOptions);
     writerOptions.add("filename", m_filespec);
     writerOptions.add("scale_x", 1e-9);
     writerOptions.add("scale_y", 1e-9);
