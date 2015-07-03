@@ -44,6 +44,9 @@ namespace pdal
 class PDAL_DLL PclVisualizer : public Writer
 {
 public:
+    PCLVisualizer()
+    {}
+
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;

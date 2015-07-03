@@ -71,8 +71,6 @@ Options BpfWriter::getDefaultOptions()
 
 void BpfWriter::processOptions(const Options& options)
 {
-    if (m_filename.empty())
-        throw pdal_error("Can't write BPF file without filename.");
     bool compression = options.getValueOrDefault("compression", false);
     m_header.m_compression = compression ? BpfCompression::Zlib :
         BpfCompression::None;
@@ -104,12 +102,18 @@ void BpfWriter::processOptions(const Options& options)
 }
 
 
-void BpfWriter::ready(PointTableRef table)
+void BpfWriter::readyTable(PointTableRef table)
 {
     loadBpfDimensions(table.layout());
-    m_stream = FileUtils::createFile(m_filename, true);
+}
+
+
+void BpfWriter::readyFile(const std::string& filename)
+{
+    m_stream.open(filename);
     m_header.m_version = 3;
     m_header.m_numDim = m_dims.size();
+    m_header.m_numPts = 0;
     m_header.setLog(log());
 
     // We will re-write the header and dimensions to account for the point
@@ -147,7 +151,7 @@ void BpfWriter::loadBpfDimensions(PointLayoutPtr layout)
 }
 
 
-void BpfWriter::write(const PointViewPtr dataShared)
+void BpfWriter::writeView(const PointViewPtr dataShared)
 {
     setAutoXForm(dataShared);
 
@@ -284,14 +288,14 @@ double BpfWriter::getAdjustedValue(const PointView* data,
 }
 
 
-void BpfWriter::done(PointTableRef)
+void BpfWriter::doneFile()
 {
     // Rewrite the header to update the the correct number of points and
     // statistics.
     m_stream.seek(0);
     m_header.write(m_stream);
     m_header.writeDimensions(m_stream, m_dims);
-    m_stream.flush();
+    m_stream.close();
 }
 
 } //namespace pdal
