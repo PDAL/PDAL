@@ -559,6 +559,15 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
         PointTable table;
 
         Stage *hexer = f.createStage("filters.hexbin", true);
+        if (! hexer)
+        {
+
+            std::ostringstream oss;
+
+            oss << "Unable to create hexer stage to create boundaries. "
+                << "Is PDAL_DRIVER_PATH environment variable set?";
+            throw pdal_error(oss.str());
+        }
         hexer->setInput(*s);
 
         hexer->prepare(table);
