@@ -63,6 +63,7 @@ then
     sudo apt-get install \
         hexboundary \
         laz-perf \
+        pcl \
         pgpointcloud \
         points2grid
 fi
