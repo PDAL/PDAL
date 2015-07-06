@@ -59,26 +59,11 @@ CREATE_STATIC_PLUGIN(1, 0, LasWriter, Writer, s_info)
 
 std::string LasWriter::getName() const { return s_info.name; }
 
-void LasWriter::construct()
+LasWriter::LasWriter() : m_ostream(NULL)
 {
     m_xXform.m_scale = .01;
     m_yXform.m_scale = .01;
     m_zXform.m_scale = .01;
-    m_numPointsWritten = 0;
-    m_streamOffset = 0;
-}
-
-
-void LasWriter::flush()
-{
-#ifdef PDAL_HAVE_LASZIP
-    if (m_lasHeader.compressed())
-    {
-        m_zipper.reset();
-        m_zipPoint.reset();
-    }
-#endif
-    m_ostream->flush();
 }
 
 
@@ -124,7 +109,6 @@ void LasWriter::processOptions(const Options& options)
 #endif // PDAL_HAVE_LASZIP
     getHeaderOptions(options);
     getVlrOptions(options);
-    m_error.setFilename(m_filename);
 }
 
 
@@ -223,31 +207,42 @@ void LasWriter::getVlrOptions(const Options& opts)
 }
 
 
-void LasWriter::ready(PointTableRef table)
+void LasWriter::readyTable(PointTableRef table)
 {
     const SpatialReference& srs = getSpatialReference().empty() ?
         table.spatialRef() : getSpatialReference();
 
-    if (!m_ostream)
-        m_ostream = FileUtils::createFile(m_filename, true);
-    if (!m_ostream)
-    {
-        std::stringstream out;
-
-        out << "writers.las couldn't open file '" << m_filename <<
-            "' for output.";
-        throw pdal_error(out.str());
-    }
     setVlrsFromMetadata();
     setVlrsFromSpatialRef(srs);
     setExtraBytesVlr();
     fillHeader();
+}
 
+
+void LasWriter::readyFile(const std::string& filename)
+{
+    m_error.setFilename(filename);
+    std::ostream *out = FileUtils::createFile(filename, true);
+    if (!out)
+    {
+        std::stringstream out;
+
+        out << "writers.las couldn't open file '" << filename <<
+            "' for output.";
+        throw pdal_error(out.str());
+    }
+    prepOutput(out);
+}
+
+
+void LasWriter::prepOutput(std::ostream *outStream)
+{
+    m_summaryData.reset(new SummaryData());
+    m_ostream = outStream;
     if (m_lasHeader.compressed())
         readyCompression();
 
     // Write the header.
-    m_ostream->seekp(m_streamOffset);
     OLeStream out(m_ostream);
     out << m_lasHeader;
 
@@ -400,6 +395,7 @@ bool LasWriter::addWktVlr(const SpatialReference& srs)
     return true;
 }
 
+
 void LasWriter::setExtraBytesVlr()
 {
     if (m_extraDims.empty())
@@ -477,7 +473,7 @@ void LasWriter::readyCompression()
         m_lasHeader.pointLen()));
     m_zipper.reset(new LASzipper());
     // Note: this will make the VLR count in the header incorrect, but we
-    // rewrite that bit in done() to fix it up.
+    // rewrite that bit in finishOutput() to fix it up.
     std::vector<uint8_t> data = m_zipPoint->vlrData();
     addVlr(LASZIP_USER_ID, LASZIP_RECORD_ID, "http://laszip.org", data);
 #endif
@@ -502,7 +498,7 @@ void LasWriter::openCompression()
 }
 
 
-void LasWriter::write(const PointViewPtr view)
+void LasWriter::writeView(const PointViewPtr view)
 {
     setAutoXForm(view);
 
@@ -547,9 +543,8 @@ void LasWriter::write(const PointViewPtr view)
         m_ostream->write(buf.data(), filled * pointLen);
 #endif
     }
-
-    m_numPointsWritten = view->size() - remaining;
 }
+
 
 point_count_t LasWriter::fillWriteBuf(const PointView& view,
     PointId startId, std::vector<char>& buf)
@@ -680,12 +675,21 @@ point_count_t LasWriter::fillWriteBuf(const PointView& view,
         }
 
         using namespace Dimension;
-        m_summaryData.addPoint(xOrig, yOrig, zOrig, returnNumber);
+        m_summaryData->addPoint(xOrig, yOrig, zOrig, returnNumber);
     }
     return blocksize;
 }
 
-void LasWriter::done(PointTableRef table)
+
+void LasWriter::doneFile()
+{
+    finishOutput();
+    delete m_ostream;
+    m_ostream = NULL;
+}
+
+
+void LasWriter::finishOutput()
 {
     //ABELL - The zipper has to be closed right after all the points
     // are written or bad things happen since this call expects the
@@ -695,7 +699,8 @@ void LasWriter::done(PointTableRef table)
         m_zipper->close();
 #endif
 
-    log()->get(LogLevel::Debug) << "Wrote " << m_numPointsWritten <<
+    log()->get(LogLevel::Debug) << "Wrote " <<
+        m_summaryData->getTotalNumPoints() <<
         " points to the LAS file" << std::endl;
 
     OLeStream out(m_ostream);
@@ -712,16 +717,23 @@ void LasWriter::done(PointTableRef table)
     m_lasHeader.setScale(m_xXform.m_scale, m_yXform.m_scale,
         m_zXform.m_scale);
 
-    // We didn't know the point count until we go through the points.
-    m_lasHeader.setPointCount(m_numPointsWritten);
     // The summary is calculated as points are written.
-    m_lasHeader.setSummary(m_summaryData);
+    m_lasHeader.setSummary(*m_summaryData);
     // VLR count may change as LAS records are written.
     m_lasHeader.setVlrCount(m_vlrs.size());
 
-    out.seek(m_streamOffset);
+    out.seek(0);
     out << m_lasHeader;
     out.seek(m_lasHeader.pointOffset());
+
+#ifdef PDAL_HAVE_LASZIP
+    if (m_lasHeader.compressed())
+    {
+        m_zipper.reset();
+        m_zipPoint.reset();
+    }
+#endif
+    m_ostream->flush();
 }
 
 } // namespace pdal
