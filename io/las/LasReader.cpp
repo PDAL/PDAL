@@ -142,13 +142,18 @@ QuickInfo LasReader::inspect()
     qi.m_bounds = m_lasHeader.getBounds();
     qi.m_srs = getSrsFromVlrs();
     qi.m_valid = true;
+
+    PointTable table;
+    done(table);
+
     return qi;
 }
 
 
 void LasReader::initialize()
 {
-    if (m_initialized) return;
+    if (m_initialized)
+        return;
     m_istream = createStream();
 
     m_istream->seekg(0);
