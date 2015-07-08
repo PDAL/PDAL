@@ -74,7 +74,6 @@ private:
     pdal::Option m_acftb;
     std::string m_imgIdentifier2;
     std::string m_sic;
-    std::string m_igeolob;
     std::stringstream m_oss;
 
     NitfWriter& operator=(const NitfWriter&); // not implemented

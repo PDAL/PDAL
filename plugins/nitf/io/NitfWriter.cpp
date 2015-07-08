@@ -159,7 +159,6 @@ void NitfWriter::processOptions(const Options& options)
     m_imgDate = getOptions().getValueOrDefault<std::string>("IDATIM", "");
     m_imgIdentifier2 = getOptions().getValueOrDefault<std::string>("IID2", "");
     m_sic = getOptions().getValueOrDefault<std::string>("FSCLTX", "");
-    m_igeolob = getOptions().getValueOrDefault<std::string>("GEOLOB", "");
     try
     {
         m_aimidb = getOptions().getOption("AIMIDB");
