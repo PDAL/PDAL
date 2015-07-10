@@ -46,7 +46,7 @@ using namespace pdal;
 namespace
 {
 
-#if defined(PDAL_HAVE_GEOS) && defined(PDAL_HAVE_GEOTIFF)
+#if defined(PDAL_HAVE_GEOS) && defined(PDAL_HAVE_LIBGEOTIFF)
 void getPoint(const PointView& data, double& x, double& y, double& z)
 {
     x = data.getFieldAs<double>(Dimension::Id::X, 0);
@@ -58,7 +58,7 @@ void getPoint(const PointView& data, double& x, double& y, double& z)
 } // unnamed namespace
 
 
-#if defined(PDAL_HAVE_GEOS) && defined(PDAL_HAVE_GEOTIFF)
+#if defined(PDAL_HAVE_GEOS) && defined(PDAL_HAVE_LIBGEOTIFF)
 // Test reprojecting UTM 15 to DD with a filter
 TEST(ReprojectionFilterTest, ReprojectionFilterTest_test_1)
 {
