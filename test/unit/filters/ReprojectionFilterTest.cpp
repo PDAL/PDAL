@@ -87,11 +87,11 @@ TEST(ReprojectionFilterTest, ReprojectionFilterTest_test_1)
 
         ReprojectionFilter reprojectionFilter;
         reprojectionFilter.setOptions(options);
-        reprojectionFilter.setInput(&reader);
+        reprojectionFilter.setInput(reader);
 
         reprojectionFilter.prepare(table);
         PointViewSet viewSet = reprojectionFilter.execute(table);
-        EXPECT_EQ(viewSet.size(), 1);
+        EXPECT_EQ(viewSet.size(), 1u);
         PointViewPtr view = *viewSet.begin();
 
         double x, y, z;
