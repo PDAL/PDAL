@@ -341,6 +341,7 @@ MetadataNode InfoKernel::run(const std::string& filename)
     }
     else
     {
+        applyExtraStageOptionsRecursive(m_manager->getStage());
         m_manager->prepare();
         if (m_needPoints || m_showMetadata)
             m_manager->execute();
