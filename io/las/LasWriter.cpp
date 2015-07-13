@@ -552,8 +552,11 @@ point_count_t LasWriter::fillWriteBuf(const PointView& view,
     point_count_t blocksize = buf.size() / m_lasHeader.pointLen();
     blocksize = std::min(blocksize, view.size() - startId);
 
+    bool has14Format = m_lasHeader.has14Format();
     bool hasColor = m_lasHeader.hasColor();
     bool hasTime = m_lasHeader.hasTime();
+    bool hasInfrared = m_lasHeader.hasInfrared();
+
     PointId lastId = startId + blocksize;
     static const size_t maxReturnCount = m_lasHeader.maxReturnCount();
     LeInserter ostream(buf.data(), buf.size());
@@ -606,6 +609,10 @@ point_count_t LasWriter::fillWriteBuf(const PointView& view,
             intensity = view.getFieldAs<uint16_t>(Id::Intensity, idx);
         ostream << intensity;
 
+        uint8_t scanChannel(0);
+        if (view.hasDim(Id::ScanChannel))
+            scanChannel = view.getFieldAs<uint8_t>(Id::ScanChannel, idx);
+
         uint8_t scanDirectionFlag(0);
         if (view.hasDim(Id::ScanDirectionFlag))
             scanDirectionFlag = view.getFieldAs<uint8_t>(
@@ -616,26 +623,48 @@ point_count_t LasWriter::fillWriteBuf(const PointView& view,
             edgeOfFlightLine = view.getFieldAs<uint8_t>(
                 Id::EdgeOfFlightLine, idx);
 
-        uint8_t bits = returnNumber | (numberOfReturns<<3) |
-            (scanDirectionFlag << 6) | (edgeOfFlightLine << 7);
-        ostream << bits;
+        if (has14Format)
+        {
+            uint8_t bits = returnNumber | (numberOfReturns << 4);
+            ostream << bits;
+            bits = (scanChannel << 4) | (scanDirectionFlag << 6) |
+                (edgeOfFlightLine << 7);
+            ostream << bits;
+        }
+        else
+        {
+            uint8_t bits = returnNumber | (numberOfReturns << 3) |
+                (scanDirectionFlag << 6) | (edgeOfFlightLine << 7);
+            ostream << bits;
+        }
 
         uint8_t classification = 0;
         if (view.hasDim(Id::Classification))
+        {
             classification = view.getFieldAs<uint8_t>(Id::Classification,
                 idx);
+        }
         ostream << classification;
-
-        int8_t scanAngleRank = 0;
-        if (view.hasDim(Id::ScanAngleRank))
-            scanAngleRank = view.getFieldAs<int8_t>(Id::ScanAngleRank,
-                idx);
-        ostream << scanAngleRank;
 
         uint8_t userData = 0;
         if (view.hasDim(Id::UserData))
             userData = view.getFieldAs<uint8_t>(Id::UserData, idx);
-        ostream << userData;
+        if (has14Format)
+        {
+            int16_t scanAngleRank = 0;
+            if (view.hasDim(Id::ScanAngleRank))
+                scanAngleRank = view.getFieldAs<int16_t>(Id::ScanAngleRank,
+                    idx);
+            ostream << userData << scanAngleRank;
+        }
+        else
+        {
+            int8_t scanAngleRank = 0;
+            if (view.hasDim(Id::ScanAngleRank))
+                scanAngleRank = view.getFieldAs<int8_t>(Id::ScanAngleRank, idx);
+
+            ostream << scanAngleRank << userData;
+        }
 
         uint16_t pointSourceId = 0;
         if (view.hasDim(Id::PointSourceId))
@@ -664,6 +693,15 @@ point_count_t LasWriter::fillWriteBuf(const PointView& view,
                 blue = view.getFieldAs<uint16_t>(Id::Blue, idx);
 
             ostream << red << green << blue;
+        }
+
+        if (hasInfrared)
+        {
+            uint16_t nearInfraRed = 0;
+
+            if (view.hasDim(Id::Infrared))
+                nearInfraRed = view.getFieldAs<uint16_t>(Id::Infrared, idx);
+            ostream << nearInfraRed;
         }
 
         Everything e;
