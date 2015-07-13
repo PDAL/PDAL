@@ -47,7 +47,17 @@ namespace stats
 class PDAL_DLL Summary
 {
 public:
-    Summary(std::string name, bool enumerate) :
+    enum EnumType
+    {
+        NoEnum,
+        Enumerate,
+        Count
+    };
+
+typedef std::map<double, point_count_t> EnumMap;
+
+public:
+    Summary(std::string name, EnumType enumerate) :
         m_name(name), m_enumerate(enumerate)
     { reset(); }
 
@@ -61,7 +71,7 @@ public:
         { return m_cnt; }
     std::string name() const
         { return m_name; }
-    const std::set<double>& values() const
+    const EnumMap& values() const
         { return m_values; }
 
     void extractMetadata(MetadataNode &m) const;
@@ -80,17 +90,17 @@ public:
         m_min = (std::min)(m_min, value);
         m_max = (std::max)(m_max, value);
         m_avg += (value - m_avg) / m_cnt;
-        if (m_enumerate)
-            m_values.insert(value);
+        if (m_enumerate != NoEnum)
+            m_values[value]++;
     }
 
 private:
     std::string m_name;
-    bool m_enumerate;
+    EnumType m_enumerate;
     double m_max;
     double m_min;
     double m_avg;
-    std::set<double> m_values;
+    EnumMap m_values;
     point_count_t m_cnt;
 };
 
@@ -122,6 +132,7 @@ private:
 
     StringList m_dimNames;
     StringList m_enums;
+    StringList m_counts;
     std::map<Dimension::Id::Enum, stats::Summary> m_stats;
 };
 
