@@ -653,8 +653,8 @@ point_count_t LasWriter::fillWriteBuf(const PointView& view,
         {
             int16_t scanAngleRank = 0;
             if (view.hasDim(Id::ScanAngleRank))
-                scanAngleRank = view.getFieldAs<int16_t>(Id::ScanAngleRank,
-                    idx);
+                scanAngleRank =
+                    view.getFieldAs<float>(Id::ScanAngleRank, idx) / .006;
             ostream << userData << scanAngleRank;
         }
         else

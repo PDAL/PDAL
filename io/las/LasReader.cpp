@@ -538,7 +538,7 @@ void LasReader::addDimensions(PointLayoutPtr layout)
     layout->registerDim(Id::ScanDirectionFlag, Type::Unsigned8);
     layout->registerDim(Id::EdgeOfFlightLine, Type::Unsigned8);
     layout->registerDim(Id::Classification, Type::Unsigned8);
-    layout->registerDim(Id::ScanAngleRank, Type::Signed8);
+    layout->registerDim(Id::ScanAngleRank, Type::Float);
     layout->registerDim(Id::UserData, Type::Unsigned8);
     layout->registerDim(Id::PointSourceId, Type::Unsigned16);
 
