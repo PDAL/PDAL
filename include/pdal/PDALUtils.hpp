@@ -212,61 +212,6 @@ void PDAL_DLL toJSON(const MetadataNode& m, std::ostream& o);
 std::string PDAL_DLL toJSON(const Options& opts);
 void PDAL_DLL toJSON(const Options& opts, std::ostream& o);
 
-
-std::ostream& toRST(const ptree&, std::ostream& os);
-
-void PDAL_DLL write_rst(std::ostream& ost,
-               const boost::property_tree::ptree& pt,
-               int level=0);
-
-
-inline std::ostream& toRST(const PointViewPtr view, std::ostream& os)
-{
-    const Dimension::IdList& dims = view->dims();
-
-    size_t name_column(20);
-    size_t value_column(40);
-
-    for (auto di = dims.begin(); di != dims.end(); ++di)
-    {
-        std::string name = Dimension::name(*di);
-        name_column = std::max(name_column, name.size());
-    }
-
-    std::ostringstream thdr;
-    for (unsigned i = 0; i < name_column - 1; ++i)
-        thdr << "=";
-    thdr << " ";
-    for (unsigned i = 0; i < value_column - 1; ++i)
-        thdr << "=";
-    thdr << " ";
-    thdr << " ";
-
-    name_column--;
-    unsigned step_back(3);
-
-    std::string hdr(80, '-');
-    for (PointId idx = 0; idx < view->size(); ++idx)
-    {
-        os << "Point " << idx << std::endl;
-        os << hdr << std::endl << std::endl;
-        os << thdr.str() << std::endl;
-        os << std::setw(name_column-step_back) << "Name" <<
-            std::setw(value_column-step_back) << "Value"  << std::endl;
-        os << thdr.str() << std::endl;
-        for (auto di = dims.begin(); di != dims.end(); ++di)
-        {
-            double v = view->getFieldAs<double>(*di, idx);
-            std::string value = boost::lexical_cast<std::string>(v);
-            os << std::left << std::setw(name_column) << Dimension::name(*di) <<
-                std::right << std::setw(value_column) << value << std::endl;
-        }
-        os << thdr.str() << std::endl << std::endl;
-    }
-    os << std::endl << std::endl;
-    return os;
-}
-
 } // namespace PDALUtils
 } // namespace pdal
 

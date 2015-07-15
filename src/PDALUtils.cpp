@@ -224,46 +224,5 @@ void toJSON(const Options& opts, std::ostream& o)
     o << "}" << endl;
 }
 
-using namespace boost::property_tree;
-
-static std::string indent(int level)
-{
-    std::string s;
-    for (int i=0; i<level; i++) s += "    ";
-    return s;
-}
-
-
-void write_rst(std::ostream& ost,
-               const boost::property_tree::ptree& pt,
-               int level)
-{
-    using boost::property_tree::ptree;
-
-    if (pt.empty())
-    {
-        ost << pt.data();
-        ost << endl << endl;
-    }
-    else
-    {
-        if (level) ost << endl << endl;
-        for (ptree::const_iterator pos = pt.begin(); pos != pt.end();)
-        {
-            ost << indent(level+1) << "- " << pos->first << ": ";
-            write_rst(ost, pos->second, level + 1);
-            ++pos;
-            //ost << endl << endl;
-        }
-    }
-}
-
-
-std::ostream& toRST(const ptree& pt, std::ostream& os)
-{
-    write_rst(os, pt);
-    return os;
-}
-
 } // namespace Utils
 } // namespace pdal
