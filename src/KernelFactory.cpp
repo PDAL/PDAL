@@ -35,7 +35,7 @@
 #include <pdal/KernelFactory.hpp>
 #include <pdal/Kernel.hpp>
 #include <pdal/PluginManager.hpp>
-#include <pdal/Utils.hpp>
+#include <pdal/util/Utils.hpp>
 
 #include <delta/DeltaKernel.hpp>
 #include <diff/DiffKernel.hpp>

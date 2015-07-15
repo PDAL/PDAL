@@ -33,7 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/Log.hpp>
-#include <pdal/Utils.hpp>
+#include <pdal/util/Utils.hpp>
 
 #include <fstream>
 #include <ostream>

@@ -36,7 +36,7 @@
 
 #include <sstream>
 
-#include <pdal/Utils.hpp>
+#include <pdal/util/Utils.hpp>
 
 #include <vector>
 

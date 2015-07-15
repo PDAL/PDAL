@@ -34,10 +34,6 @@
 
 #include <pdal/PipelineManager.hpp>
 
-#include <pdal/Utils.hpp>
-
-//#include <boost/optional.hpp>
-
 namespace pdal
 {
 

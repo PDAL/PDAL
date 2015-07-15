@@ -38,8 +38,8 @@
 
 #include <pdal/pdal_export.hpp>
 #include <pdal/Options.hpp>
-#include <pdal/Utils.hpp>
 #include <pdal/PDALUtils.hpp>
+#include <pdal/util/Utils.hpp>
 
 namespace pdal
 {

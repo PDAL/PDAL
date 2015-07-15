@@ -53,7 +53,7 @@
 #endif
 #include <cpl_conv.h>
 
-#include <pdal/Utils.hpp>
+#include <pdal/util/Utils.hpp>
 
 namespace pdal
 {

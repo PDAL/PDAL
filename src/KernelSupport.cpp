@@ -39,7 +39,7 @@
 
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/PipelineReader.hpp>
-#include <pdal/Utils.hpp>
+#include <pdal/util/Utils.hpp>
 
 namespace pdal
 {

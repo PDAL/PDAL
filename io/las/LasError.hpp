@@ -35,7 +35,7 @@
 
 #include <vector>
 
-#include <pdal/Utils.hpp>
+#include <pdal/util/Utils.hpp>
 #include <pdal/Log.hpp>
 
 namespace pdal

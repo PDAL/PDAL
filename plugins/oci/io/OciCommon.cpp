@@ -32,13 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-
 #include "OciCommon.hpp"
 
 #include <iostream>
 
 #include <pdal/Dimension.hpp>
-#include <pdal/Utils.hpp>
 #include <pdal/util/FileUtils.hpp>
 
 namespace pdal

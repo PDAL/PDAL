@@ -43,7 +43,7 @@
 
 #include <pdal/pdal_defines.h>
 #include <pdal/util/FileUtils.hpp>
-#include <pdal/Utils.hpp>
+#include <pdal/util/Utils.hpp>
 
 #include "DynamicLibrary.h"
 

@@ -40,7 +40,7 @@
 #include <pdal/PointView.hpp>
 #include <pdal/util/Inserter.hpp>
 #include <pdal/util/OStream.hpp>
-#include <pdal/Utils.hpp>
+#include <pdal/util/Utils.hpp>
 
 #include "GeotiffSupport.hpp"
 #include "ZipPoint.hpp"

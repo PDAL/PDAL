@@ -38,7 +38,7 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
-#include <pdal/Utils.hpp>
+#include <pdal/util/Utils.hpp>
 #include <pdal/pdal_config.hpp>
 
 #include "SummaryData.hpp"
