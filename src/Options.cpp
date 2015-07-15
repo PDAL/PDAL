@@ -224,7 +224,7 @@ void Options::dump() const
 
 std::ostream& operator<<(std::ostream& ostr, const Options& options)
 {
-    const boost::property_tree::ptree tree = pdal::utils::toPTree(options);
+    const boost::property_tree::ptree tree = pdal::Utils::toPTree(options);
 
     boost::property_tree::write_json(ostr, tree);
 

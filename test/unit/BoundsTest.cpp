@@ -185,7 +185,7 @@ TEST(BoundsTest, BoundsTest_ptree)
 
     std::stringstream ss1(std::stringstream::in | std::stringstream::out);
 
-    boost::property_tree::ptree tree = pdal::utils::toPTree(b2);
+    boost::property_tree::ptree tree = Utils::toPTree(b2);
     boost::property_tree::write_xml(ss1, tree);
 
     const std::string out1 = ss1.str();

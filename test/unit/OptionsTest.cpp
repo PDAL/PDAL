@@ -74,7 +74,8 @@ TEST(OptionsTest, test_option_writing)
     std::ostringstream ostr_s;
     const std::string ref_s = xml_header + xml_str_ref;
 
-    const Option option_i("my_int", (uint16_t)17, "This is my integral option.");
+    const Option option_i("my_int", (uint16_t)17,
+        "This is my integral option.");
     EXPECT_TRUE(option_i.getName() == "my_int");
     EXPECT_TRUE(option_i.getDescription() == "This is my integral option.");
     EXPECT_TRUE(option_i.getValue<uint16_t>() == 17);
@@ -86,12 +87,12 @@ TEST(OptionsTest, test_option_writing)
     EXPECT_TRUE(option_s.getValue<std::string>() == "Yow.");
     EXPECT_TRUE(option_s.getValue<std::string>() == "Yow.");
 
-    const boost::property_tree::ptree tree_i = utils::toPTree(option_i);
+    const boost::property_tree::ptree tree_i = Utils::toPTree(option_i);
     boost::property_tree::xml_parser::write_xml(ostr_i, tree_i);
     const std::string str_i = ostr_i.str();
     EXPECT_TRUE(str_i == ref_i);
 
-    const boost::property_tree::ptree tree_s = utils::toPTree(option_s);
+    const boost::property_tree::ptree tree_s = Utils::toPTree(option_s);
     boost::property_tree::xml_parser::write_xml(ostr_s, tree_s);
     const std::string str_s = ostr_s.str();
     EXPECT_TRUE(str_s == ref_s);
@@ -111,7 +112,7 @@ TEST(OptionsTest, test_option_reading)
     EXPECT_TRUE(opt_from_istr.getValue<int>() == 17);
 
     // from a ptree (assumed to be built correctly)
-    const boost::property_tree::ptree tree2 = utils::toPTree(opt_from_istr);
+    const boost::property_tree::ptree tree2 = Utils::toPTree(opt_from_istr);
     Option opt_from_ptree(tree2);
 
     EXPECT_TRUE(opt_from_ptree.getName() == "my_int");
@@ -170,7 +171,7 @@ TEST(OptionsTest, test_options_writing)
     std::ostringstream ostr;
     const std::string ref = xml_header + "<Option>" + xml_int_ref + "</Option><Option>" + xml_str_ref + "</Option>";
 
-    const boost::property_tree::ptree& tree = utils::toPTree(opts);
+    const boost::property_tree::ptree& tree = Utils::toPTree(opts);
     boost::property_tree::xml_parser::write_xml(ostr, tree);
     const std::string str = ostr.str();
     EXPECT_TRUE(str == ref);
@@ -325,7 +326,7 @@ TEST(OptionsTest, metadata)
     std::string testfile(Support::temppath("opts2json.txt"));
     {
         std::ofstream out(testfile);
-        utils::toJSON(node, out);
+        Utils::toJSON(node, out);
     }
     EXPECT_TRUE(Support::compare_files(goodfile, testfile));
 }

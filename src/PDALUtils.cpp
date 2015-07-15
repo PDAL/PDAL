@@ -182,7 +182,7 @@ void toJSON(const Options& opts, std::ostream& o, int level)
 
 } // unnamed namespace
 
-namespace utils
+namespace Utils
 {
 
 std::string toJSON(const MetadataNode& m)
@@ -224,9 +224,6 @@ void toJSON(const Options& opts, std::ostream& o)
     o << "}" << endl;
 }
 
-namespace reST
-{
-    
 using namespace boost::property_tree;
 
 static std::string indent(int level)
@@ -268,6 +265,5 @@ std::ostream& toRST(const ptree& pt, std::ostream& os)
     return os;
 }
 
-} // namespace reST
-} // namespace utils
+} // namespace Utils
 } // namespace pdal

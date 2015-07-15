@@ -181,9 +181,9 @@ int DiffKernel::execute()
 
         oss << "Source and candidate files do not have the same metadata count";
         errors.put("metadata.error", oss.str());
-        errors.put_child("metadata.source", utils::toPTree(source_metadata));
+        errors.put_child("metadata.source", Utils::toPTree(source_metadata));
         errors.put_child("metadata.candidate",
-            utils::toPTree(candidate_metadata));
+            Utils::toPTree(candidate_metadata));
     }
 
     if (candidateTable.layout()->dims().size() !=

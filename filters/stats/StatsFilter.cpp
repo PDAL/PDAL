@@ -129,7 +129,7 @@ void StatsFilter::prepared(PointTableRef table)
                 std::ostringstream out;
                 out << "Dimension '" << s << "' listed in --dimensions option "
                    "does not exist.  Ignoring.";
-                utils::printError(out.str());
+                Utils::printError(out.str());
             }
             else
                 dims[s] = Summary::NoEnum;
@@ -144,7 +144,7 @@ void StatsFilter::prepared(PointTableRef table)
             std::ostringstream out;
             out << "Dimension '" << s << "' listed in --enumerate option "
                 "does not exist.  Ignoring.";
-            utils::printError(out.str());
+            Utils::printError(out.str());
         }
         else
             dims[s] = Summary::Enumerate;
@@ -158,7 +158,7 @@ void StatsFilter::prepared(PointTableRef table)
             std::ostringstream out;
             out << "Dimension '" << s << "' listed in --count option "
                 "does not exist.  Ignoring.";
-            utils::printError(out.str());
+            Utils::printError(out.str());
         }
         else
             dims[s] = Summary::Count;

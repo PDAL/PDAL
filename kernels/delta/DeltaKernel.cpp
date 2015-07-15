@@ -161,7 +161,7 @@ int DeltaKernel::execute()
         root = dumpDetail(srcView, candView, index, dims);
     else
         root = dump(srcView, candView, index, dims);
-    utils::toJSON(root, std::cout);
+    Utils::toJSON(root, std::cout);
 
     return 0;
 }
