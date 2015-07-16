@@ -110,10 +110,10 @@ enum Enum
 };
 } // namespace Orientation
 
-class PDAL_DLL pdal_error : public std::runtime_error
+class pdal_error : public std::runtime_error
 {
 public:
-    pdal_error(std::string const& msg) : std::runtime_error(msg)
+    inline pdal_error(std::string const& msg) : std::runtime_error(msg)
         {}
 };
 
