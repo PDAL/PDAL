@@ -41,7 +41,7 @@
 
 #include <pdal/Options.hpp>
 #include <pdal/Compression.hpp>
-#include <pdal/Utils.hpp>
+#include <pdal/util/Utils.hpp>
 
 namespace pdal
 {

@@ -369,7 +369,7 @@ void TIndexKernel::mergeFile()
     std::vector<FileInfo> files;
 
     // Docs are bad here.  You need this call even if you haven't read anything
-    // at or nothing happens.
+    // or nothing happens.
     OGR_L_ResetReading(m_layer);
     while (true)
     {

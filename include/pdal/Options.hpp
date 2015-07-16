@@ -36,7 +36,7 @@
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Metadata.hpp>
-#include <pdal/Utils.hpp>
+#include <pdal/util/Utils.hpp>
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/lexical_cast.hpp>

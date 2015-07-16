@@ -93,12 +93,12 @@ int Kernel::do_switches()
     }
     catch (std::exception const& e)
     {
-        utils::printError(e.what());
+        Utils::printError(e.what());
         return 1;
     }
     catch (...)
     {
-        utils::printError("Caught unknown exception handling switches");
+        Utils::printError("Caught unknown exception handling switches");
         return 1;
     }
     return 0;
@@ -114,12 +114,12 @@ int Kernel::do_startup()
     catch (std::exception const& e)
     {
         const std::string s("Caught exception in initialization: ");
-        utils::printError(s + e.what());
+        Utils::printError(s + e.what());
         return 1;
     }
     catch (...)
     {
-        utils::printError("Caught unknown exception in initialization");
+        Utils::printError("Caught unknown exception in initialization");
         return 1;
     }
 
@@ -150,17 +150,17 @@ int Kernel::do_execution()
     }
     catch (pdal::pdal_error const& e)
     {
-        utils::printError(e.what());
+        Utils::printError(e.what());
         return 1;
     }
     catch (std::exception const& e)
     {
-        utils::printError(e.what());
+        Utils::printError(e.what());
         return 1;
     }
     catch (...)
     {
-        utils::printError("Caught unexpected exception.");
+        Utils::printError("Caught unexpected exception.");
         return 1;
     }
 
@@ -177,12 +177,12 @@ int Kernel::do_shutdown()
     catch (std::exception const& e)
     {
         const std::string s("Caught exception during shutdown: ");
-        utils::printError(s + e.what());
+        Utils::printError(s + e.what());
         return 1;
     }
     catch (...)
     {
-        utils::printError("Caught unknown exception during shutdown.");
+        Utils::printError("Caught unknown exception during shutdown.");
         return 1;
     }
 
@@ -315,7 +315,7 @@ int Kernel::innerRun()
     }
     catch (app_usage_error e)
     {
-        utils::printError(std::string("Usage error: ") + e.what());
+        Utils::printError(std::string("Usage error: ") + e.what());
         outputHelp();
         return 1;
     }

@@ -17,6 +17,7 @@ set(PDAL_UTIL_HPP
     "${PDAL_INCLUDE_DIR}/pdal/util/Inserter.hpp"
     "${PDAL_INCLUDE_DIR}/pdal/util/IStream.hpp"
     "${PDAL_INCLUDE_DIR}/pdal/util/OStream.hpp"
+    "${PDAL_INCLUDE_DIR}/pdal/util/Utils.hpp"
     )
 
 set(PDAL_UTIL_CPP
@@ -24,6 +25,7 @@ set(PDAL_UTIL_CPP
     "${PDAL_UTIL_DIR}/Charbuf.cpp"
     "${PDAL_UTIL_DIR}/FileUtils.cpp"
     "${PDAL_UTIL_DIR}/Georeference.cpp"
+    "${PDAL_UTIL_DIR}/Utils.cpp"
     )
 
 set(PDAL_UTIL_SOURCES

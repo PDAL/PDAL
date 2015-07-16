@@ -34,13 +34,13 @@
 
 #include <sys/stat.h>
 
-#include <pdal/util/FileUtils.hpp>
-#include <pdal/Utils.hpp>
+#include <iostream>
+#include <sstream>
 
 #include <boost/filesystem.hpp>
 
-#include <iostream>
-#include <sstream>
+#include <pdal/util/FileUtils.hpp>
+#include <pdal/util/Utils.hpp>
 
 using namespace std;
 

@@ -38,7 +38,7 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/QuadIndex.hpp>
-#include <pdal/Utils.hpp>
+#include <pdal/util/Utils.hpp>
 
 namespace
 {

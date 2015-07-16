@@ -66,7 +66,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/StageFactory.hpp"
   "${PDAL_HEADERS_DIR}/StageWrapper.hpp"
   "${PDAL_HEADERS_DIR}/UserCallback.hpp"
-  "${PDAL_HEADERS_DIR}/Utils.hpp"
   "${PDAL_HEADERS_DIR}/Writer.hpp"
   "${PDAL_SRC_DIR}/StageRunner.hpp"
     ${PDAL_XML_HEADER}
@@ -99,7 +98,6 @@ set(PDAL_BASE_CPP
   SpatialReference.cpp
   Stage.cpp
   StageFactory.cpp
-  Utils.cpp
   Writer.cpp
   ${PDAL_XML_SRC}
   ${PDAL_LAZPERF_SRC}

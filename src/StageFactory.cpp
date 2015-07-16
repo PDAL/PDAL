@@ -33,8 +33,6 @@
 ****************************************************************************/
 
 #include <pdal/StageFactory.hpp>
-
-#include <pdal/Utils.hpp>
 #include <pdal/PluginManager.hpp>
 
 // filters

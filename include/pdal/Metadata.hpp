@@ -41,7 +41,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include <pdal/util/Bounds.hpp>
-#include <pdal/Utils.hpp>
+#include <pdal/util/Utils.hpp>
 #include <pdal/SpatialReference.hpp>
 
 #include <map>

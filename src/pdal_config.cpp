@@ -48,7 +48,6 @@
 
 #include <pdal/pdal_defines.h>
 #include <pdal/gitsha.h>
-#include <pdal/Utils.hpp>
 
 #ifdef PDAL_HAVE_LIBGEOTIFF
 #include <geotiff.h>
@@ -79,6 +78,7 @@
 #include <libxml/xmlversion.h>
 #endif
 
+#include <pdal/util/Utils.hpp>
 
 namespace pdal
 {

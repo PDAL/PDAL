@@ -142,13 +142,18 @@ QuickInfo LasReader::inspect()
     qi.m_bounds = m_lasHeader.getBounds();
     qi.m_srs = getSrsFromVlrs();
     qi.m_valid = true;
+
+    PointTable table;
+    done(table);
+
     return qi;
 }
 
 
 void LasReader::initialize()
 {
-    if (m_initialized) return;
+    if (m_initialized)
+        return;
     m_istream = createStream();
 
     m_istream->seekg(0);
@@ -533,7 +538,7 @@ void LasReader::addDimensions(PointLayoutPtr layout)
     layout->registerDim(Id::ScanDirectionFlag, Type::Unsigned8);
     layout->registerDim(Id::EdgeOfFlightLine, Type::Unsigned8);
     layout->registerDim(Id::Classification, Type::Unsigned8);
-    layout->registerDim(Id::ScanAngleRank, Type::Signed8);
+    layout->registerDim(Id::ScanAngleRank, Type::Float);
     layout->registerDim(Id::UserData, Type::Unsigned8);
     layout->registerDim(Id::PointSourceId, Type::Unsigned16);
 

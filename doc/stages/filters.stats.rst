@@ -46,3 +46,7 @@ enumerate
   A comma-separated list of dimensions whose values should be enumerated.
   Note that this list does not add to the list of dimensions that may be
   provided in the **dimensions** option.
+
+count
+  Identical to the --enumerate option, but provides a count of the number
+  of points in each enumerated category.

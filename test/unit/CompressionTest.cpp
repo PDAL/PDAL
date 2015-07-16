@@ -81,7 +81,7 @@ TEST(Compression, Simple)
     PointViewSet viewSet = reader.execute(table);
     PointViewPtr view = *viewSet.begin();
 
-    EXPECT_EQ(layout->pointSize(), 49U);
+    EXPECT_EQ(layout->pointSize(), 52U);
 
     std::vector<unsigned char> rawBuf;
     LazPerfBuf b(rawBuf);
@@ -97,8 +97,8 @@ TEST(Compression, Simple)
     }
     compressor.done();
 
-    EXPECT_EQ(view->size() * compressor.pointSize(), (size_t)52185);
-    EXPECT_EQ(rawBuf.size(), (size_t)28170);
+    EXPECT_EQ(view->size() * compressor.pointSize(), (size_t)55380);
+    EXPECT_EQ(rawBuf.size(), (size_t)30945);
 
     LazPerfBuf b2(rawBuf);
 
@@ -117,7 +117,7 @@ TEST(Compression, Simple)
         pos += decompressor.pointSize();
     }
     EXPECT_EQ(otherView->size(), 11U);
-    EXPECT_EQ(getBytes(otherView).size(), (size_t)(49 * 11));
+    EXPECT_EQ(getBytes(otherView).size(), (size_t)(52 * 11));
 
     uint16_t r = otherView->getFieldAs<uint16_t>(Dimension::Id::Red, 10);
     EXPECT_EQ(r, 64U);

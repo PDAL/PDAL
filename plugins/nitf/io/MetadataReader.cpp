@@ -121,8 +121,6 @@ void MetadataReader::read()
         ::nitf::Extensions ext = header.getUserDefinedSection();
         doExtensions(key, ext);
     }
-
-    return;
 }
 
 

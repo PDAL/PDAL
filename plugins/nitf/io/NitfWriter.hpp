@@ -52,9 +52,11 @@ public:
 
 private:
     virtual void processOptions(const Options& options);
-    virtual void done(PointTableRef table);
-    virtual void write(const PointViewPtr view);
+    virtual void readyFile(const std::string& filename);
+    virtual void doneFile();
+    virtual void writeView(const PointViewPtr view);
 
+    std::string m_nitfFilename;
     BOX3D m_bounds;
     std::string m_cLevel;
     std::string m_sType;
@@ -72,7 +74,6 @@ private:
     pdal::Option m_acftb;
     std::string m_imgIdentifier2;
     std::string m_sic;
-    std::string m_igeolob;
     std::stringstream m_oss;
 
     NitfWriter& operator=(const NitfWriter&); // not implemented

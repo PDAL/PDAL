@@ -249,7 +249,7 @@ MetadataNode InfoKernel::dumpPoints(PointViewPtr inView) const
             outView->appendPoint(*inView.get(), id);
     }
 
-    MetadataNode tree = utils::toMetadata(outView);
+    MetadataNode tree = Utils::toMetadata(outView);
     std::string prefix("point ");
     for (size_t i = 0; i < outView->size(); ++i)
     {
@@ -341,6 +341,7 @@ MetadataNode InfoKernel::run(const std::string& filename)
     }
     else
     {
+        applyExtraStageOptionsRecursive(m_manager->getStage());
         m_manager->prepare();
         if (m_needPoints || m_showMetadata)
             m_manager->execute();
@@ -354,7 +355,7 @@ MetadataNode InfoKernel::run(const std::string& filename)
 void InfoKernel::dump(MetadataNode& root)
 {
     if (m_showSchema)
-        root.add(utils::toMetadata(m_manager->pointTable()).clone("schema"));
+        root.add(Utils::toMetadata(m_manager->pointTable()).clone("schema"));
 
     if (m_PointCloudSchemaOutput.size() > 0)
     {
@@ -452,7 +453,7 @@ MetadataNode InfoKernel::dumpQuery(PointViewPtr inView) const
     for (auto i = ids.begin(); i != ids.end(); ++i)
         outView->appendPoint(*inView.get(), *i);
 
-    return utils::toMetadata(outView);
+    return Utils::toMetadata(outView);
 }
 
 
@@ -461,7 +462,7 @@ int InfoKernel::execute()
     std::string filename = m_usestdin ? std::string("STDIN") : m_inputFile;
     setup(filename);
     MetadataNode root = run(filename);
-    utils::toJSON(root, std::cout);
+    Utils::toJSON(root, std::cout);
 
     return 0;
 }

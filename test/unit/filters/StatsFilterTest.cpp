@@ -195,8 +195,9 @@ TEST(Stats, enum)
     reader.setOptions(ops);
 
     Options filterOps;
-    filterOps.add("dimensions", "X, Z");
+    filterOps.add("dimensions", "X, Y, Z");
     filterOps.add("enumerate", "X");
+    filterOps.add("count", "Y");
 
     StatsFilter filter;
     filter.setInput(reader);
@@ -207,12 +208,22 @@ TEST(Stats, enum)
     filter.execute(table);
 
     const stats::Summary& statsX = filter.getStats(Dimension::Id::X);
-    const std::set<double>& values = statsX.values();
+    const stats::Summary::EnumMap& values = statsX.values();
     EXPECT_EQ(values.size(), 10U);
     double d = 1.0;
-    for (double v : values)
+    for (auto& v : values)
     {
-        EXPECT_DOUBLE_EQ(d, v); 
+        EXPECT_DOUBLE_EQ(d, v.first);
         d += 1.0;
+    }
+
+    const stats::Summary& statsY = filter.getStats(Dimension::Id::Y);
+    const stats::Summary::EnumMap& yValues = statsY.values();
+    d = 0.0;
+    for (auto& v : yValues)
+    {
+        EXPECT_DOUBLE_EQ(d, v.first);
+        EXPECT_EQ(1u, v.second);
+        d += (100.0 / 9);
     }
 }

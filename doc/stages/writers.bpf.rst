@@ -35,6 +35,7 @@ filename
   placeholder is found, all PointViews provided to the writer are
   aggregated into a single file for output.  Multiple PointViews are usually
   the result of using :ref:`filters.splitter` or :ref:`filters.chipper`.
+  [Required]
 
 compression
   This option can be set to true to cause the file to be written with Zlib

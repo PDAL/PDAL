@@ -38,7 +38,6 @@
 
 #include <pdal/pdal_types.hpp>
 #include <pdal/util/Bounds.hpp>
-#include <pdal/Utils.hpp>
 
 namespace pdal
 {

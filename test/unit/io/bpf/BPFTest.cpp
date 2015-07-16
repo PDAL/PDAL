@@ -39,9 +39,10 @@
 #include <pdal/BufferReader.hpp>
 #include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
-#include <pdal/Utils.hpp>
-#include <pdal/util/FileUtils.hpp>
 #include <pdal/PointView.hpp>
+#include <pdal/util/Utils.hpp>
+#include <pdal/util/FileUtils.hpp>
+
 #include <BpfReader.hpp>
 #include <BpfWriter.hpp>
 

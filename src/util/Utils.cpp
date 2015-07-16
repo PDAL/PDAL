@@ -35,7 +35,7 @@
 #include <boost/algorithm/string/erase.hpp>
 #include <boost/filesystem.hpp>
 
-#include <pdal/Utils.hpp>
+#include <pdal/util/Utils.hpp>
 
 #include <cassert>
 #include <cstdlib>

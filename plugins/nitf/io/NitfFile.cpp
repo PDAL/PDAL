@@ -38,7 +38,6 @@
 
 #include <boost/algorithm/string.hpp>
 
-// local
 #include "MetadataReader.hpp"
 #include "tre_plugins.hpp"
 
@@ -68,23 +67,19 @@ NitfFile::NitfFile(const std::string& filename) :
     m_lidarDataSegment(0)
 {
     register_tre_plugins();
-
-    return;
 }
 
 
 NitfFile::~NitfFile()
 {
     close();
-
-    return;
 }
 
 
 void NitfFile::open()
 {
     if (::nitf::Reader::getNITFVersion(m_filename.c_str()) == NITF_VER_UNKNOWN)
-        throw pdal_error("unable to determine NITF file version");
+        throw pdal_error("Unable to determine NITF file version");
 
     // read the major NITF data structures, courtesy Nitro
     m_reader = new ::nitf::Reader();
@@ -110,19 +105,19 @@ void NitfFile::open()
     const bool imageOK = locateLidarImageSegment();
     if (REQUIRE_LIDAR_SEGMENTS && !imageOK)
     {
-        throw pdal_error("Unable to find lidar-compatible image segment in NITF file");
+        throw pdal_error("Unable to find lidar-compatible image "
+            "segment in NITF file");
     }
 
     // find the LAS data hidden in a DE field, if any
     const bool dataOK = locateLidarDataSegment();
     if (REQUIRE_LIDAR_SEGMENTS && !dataOK)
     {
-        throw pdal_error("Unable to find LIDARA data extension segment in NITF file");
+        throw pdal_error("Unable to find LIDARA data extension segment "
+            "in NITF file");
     }
 
     m_validLidarSegments = dataOK && imageOK;
-
-    return;
 }
 
 
@@ -135,24 +130,19 @@ void NitfFile::close()
         m_io = NULL;
     }
 
-    if (m_reader)
-    {
-        delete m_reader;
-        m_reader = NULL;
-    }
-
-    return;
+    delete m_reader;
+    m_reader = NULL;
 }
 
 
 void NitfFile::getLasOffset(uint64_t& offset,
                             uint64_t& length)
 {
+    offset = 0;
+    length = 0;
+
     if (!m_validLidarSegments)
-    {
-        offset = length = 0;
         return;
-    }
 
     ::nitf::ListIterator iter = m_record.getDataExtensions().begin();
     const ::nitf::Uint32 numSegs = m_record.getNumDataExtensions();
@@ -181,8 +171,6 @@ void NitfFile::extractMetadata(MetadataNode& node)
 {
     MetadataReader mr(m_record, node, SHOW_EMPTY_FIELDS);
     mr.read();
-
-    return;
 }
 
 
@@ -194,6 +182,7 @@ bool NitfFile::locateLidarImageSegment()
 
     ::nitf::ListIterator iter = m_record.getImages().begin();
     const ::nitf::Uint32 numSegs = m_record.getNumImages();
+
     for (::nitf::Uint32 segNum=0; segNum<numSegs; segNum++)
     {
         ::nitf::ImageSegment imseg = *iter;
@@ -207,7 +196,8 @@ bool NitfFile::locateLidarImageSegment()
         std::string iid1 = field.toString();
 
         // BUG: shouldn't allow "None" here!
-        if (iid1 == "INTENSITY " || iid1 == "ELEVATION " || iid1 == "None      ")
+        if (iid1 == "INTENSITY " || iid1 == "ELEVATION " ||
+            iid1 == "None      ")
         {
             m_lidarImageSegment = segNum;
             return true;

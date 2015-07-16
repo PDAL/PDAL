@@ -47,116 +47,116 @@
 namespace pdal
 {
 
-namespace utils
+namespace Utils
 {
 
-inline void printError(const std::string& s)
-{
-    std::cerr << "PDAL: " << s << std::endl;
-    std::cerr << std::endl;
-}
-
-using namespace boost::property_tree;
-
-inline ptree toPTree(MetadataNode const& node)
-{
-    typedef ptree::path_type path;
-
-    ptree tree;
-    tree.put("name", node.name());
-    tree.put("description", node.description());
-    tree.put("type", node.type());
-    tree.put("value", node.value());
-
-    MetadataNodeList children = node.children();
-    for (auto n = children.begin(); n != children.end(); ++n)
+    inline void printError(const std::string& s)
     {
-        ptree pnode = toPTree(*n);
-        if (node.kind() == MetadataType::Array)
-        {
-            boost::optional<ptree&> opt =
-                tree.get_child_optional(path(node.name(), '/'));
-            if (opt)
-                opt->push_back(std::make_pair("", pnode));
-            else
-            {
-                tree.push_back(ptree::value_type(node.name(), ptree()));
-                auto& p = tree.get_child(path(node.name(), '/'));
-                p.push_back(std::make_pair("", pnode));
+        std::cerr << "PDAL: " << s << std::endl;
+        std::cerr << std::endl;
+    }
 
+    using namespace boost::property_tree;
+
+    inline ptree toPTree(MetadataNode const& node)
+    {
+        typedef ptree::path_type path;
+
+        ptree tree;
+        tree.put("name", node.name());
+        tree.put("description", node.description());
+        tree.put("type", node.type());
+        tree.put("value", node.value());
+
+        MetadataNodeList children = node.children();
+        for (auto n = children.begin(); n != children.end(); ++n)
+        {
+            ptree pnode = toPTree(*n);
+            if (node.kind() == MetadataType::Array)
+            {
+                boost::optional<ptree&> opt =
+                    tree.get_child_optional(path(node.name(), '/'));
+                if (opt)
+                    opt->push_back(std::make_pair("", pnode));
+                else
+                {
+                    tree.push_back(ptree::value_type(node.name(), ptree()));
+                    auto& p = tree.get_child(path(node.name(), '/'));
+                    p.push_back(std::make_pair("", pnode));
+
+                }
+            }
+            else if (node.name().size())
+                tree.push_back(std::make_pair(node.name(), pnode));
+        }
+        return tree;
+    }
+
+
+    inline MetadataNode toMetadata(PointTableRef table)
+    {
+        const PointLayoutPtr layout(table.layout());
+        MetadataNode root;
+
+        for (const auto& id : layout->dims())
+        {
+            MetadataNode dim("dimensions");
+            dim.add("name", layout->dimName(id));
+            Dimension::Type::Enum t = layout->dimType(id);
+            dim.add("type", Dimension::toName(Dimension::base(t)));
+            dim.add("size", layout->dimSize(id));
+            root.addList(dim);
+        }
+
+        return root;
+    }
+
+
+    inline MetadataNode toMetadata(const PointViewPtr view)
+    {
+        MetadataNode node;
+
+        const Dimension::IdList& dims = view->dims();
+
+        for (PointId idx = 0; idx < view->size(); idx++)
+        {
+            MetadataNode pointnode = node.add(std::to_string(idx));
+            for (auto di = dims.begin(); di != dims.end(); ++di)
+            {
+                double v = view->getFieldAs<double>(*di, idx);
+                pointnode.add(Dimension::name(*di), v);
             }
         }
-        else if (node.name().size())
-            tree.push_back(std::make_pair(node.name(), pnode));
-    }
-    return tree;
-}
 
-
-inline MetadataNode toMetadata(PointTableRef table)
-{
-    const PointLayoutPtr layout(table.layout());
-    MetadataNode root;
-
-    for (const auto& id : layout->dims())
-    {
-        MetadataNode dim("dimensions");
-        dim.add("name", layout->dimName(id));
-        Dimension::Type::Enum t = layout->dimType(id);
-        dim.add("type", Dimension::toName(Dimension::base(t)));
-        dim.add("size", layout->dimSize(id));
-        root.addList(dim);
+        return node;
     }
 
-    return root;
-}
-
-
-inline MetadataNode toMetadata(const PointViewPtr view)
-{
-    MetadataNode node;
-
-    const Dimension::IdList& dims = view->dims();
-
-    for (PointId idx = 0; idx < view->size(); idx++)
+    /// Outputs a string-based boost::property_tree::ptree representation
+    /// of the BOX3D instance
+    inline ptree toPTree(const BOX3D& bounds)
     {
-        MetadataNode pointnode = node.add(std::to_string(idx));
-        for (auto di = dims.begin(); di != dims.end(); ++di)
+        ptree tree;
+        ptree x;
+        ptree y;
+        ptree z;
+
+        x.add("minimum", bounds.minx);
+        x.add("maximum", bounds.maxx);
+        tree.add_child("0", x);
+
+        y.add("minimum", bounds.miny);
+        y.add("maximum", bounds.maxy);
+        tree.add_child("1", y);
+
+        if (!bounds.is_z_empty())
         {
-            double v = view->getFieldAs<double>(*di, idx);
-            pointnode.add(Dimension::name(*di), v);
+            z.add("minimum", bounds.minz);
+            z.add("maximum", bounds.maxz);
+            tree.add_child("2", z);
         }
+
+        return tree;
     }
-
-    return node;
-}
-
-/// Outputs a string-based boost::property_tree::ptree representation
-/// of the BOX3D instance
-inline ptree toPTree(const BOX3D& bounds)
-{
-    ptree tree;
-    ptree x;
-    ptree y;
-    ptree z;
-
-    x.add("minimum", bounds.minx);
-    x.add("maximum", bounds.maxx);
-    tree.add_child("0", x);
-
-    y.add("minimum", bounds.miny);
-    y.add("maximum", bounds.maxy);
-    tree.add_child("1", y);
-
-    if (!bounds.is_z_empty())
-    {
-        z.add("minimum", bounds.minz);
-        z.add("maximum", bounds.maxz);
-        tree.add_child("2", z);
-    }
-
-    return tree;
-}
 
 ptree toPTree(const Options& options);
 inline ptree toPTree(const Option& option)
@@ -201,7 +201,8 @@ inline ptree toPTree(const SpatialReference& ref)
     srs.put("prettywkt", ref.getWKT(SpatialReference::eHorizontalOnly, true));
     srs.put("wkt", ref.getWKT(SpatialReference::eHorizontalOnly, false));
     srs.put("compoundwkt", ref.getWKT(SpatialReference::eCompoundOK, false));
-    srs.put("prettycompoundwkt", ref.getWKT(SpatialReference::eCompoundOK, true));
+    srs.put("prettycompoundwkt", ref.getWKT(SpatialReference::eCompoundOK,
+       true));
 
     return srs;
 }
@@ -211,65 +212,6 @@ void PDAL_DLL toJSON(const MetadataNode& m, std::ostream& o);
 std::string PDAL_DLL toJSON(const Options& opts);
 void PDAL_DLL toJSON(const Options& opts, std::ostream& o);
 
-namespace reST
-{
+} // namespace PDALUtils
+} // namespace pdal
 
-std::ostream& toRST(const ptree&, std::ostream& os);
-
-void PDAL_DLL write_rst(std::ostream& ost,
-               const boost::property_tree::ptree& pt,
-               int level=0);
-
-
-inline std::ostream& toRST(const PointViewPtr view, std::ostream& os)
-{
-    const Dimension::IdList& dims = view->dims();
-
-    size_t name_column(20);
-    size_t value_column(40);
-
-    for (auto di = dims.begin(); di != dims.end(); ++di)
-    {
-        std::string name = Dimension::name(*di);
-        name_column = std::max(name_column, name.size());
-    }
-
-    std::ostringstream thdr;
-    for (unsigned i = 0; i < name_column - 1; ++i)
-        thdr << "=";
-    thdr << " ";
-    for (unsigned i = 0; i < value_column - 1; ++i)
-        thdr << "=";
-    thdr << " ";
-    thdr << " ";
-
-    name_column--;
-    unsigned step_back(3);
-
-    std::string hdr(80, '-');
-    for (PointId idx = 0; idx < view->size(); ++idx)
-    {
-        os << "Point " << idx << std::endl;
-        os << hdr << std::endl << std::endl;
-        os << thdr.str() << std::endl;
-        os << std::setw(name_column-step_back) << "Name" <<
-            std::setw(value_column-step_back) << "Value"  << std::endl;
-        os << thdr.str() << std::endl;
-        for (auto di = dims.begin(); di != dims.end(); ++di)
-        {
-            double v = view->getFieldAs<double>(*di, idx);
-            std::string value = boost::lexical_cast<std::string>(v);
-            os << std::left << std::setw(name_column) << Dimension::name(*di) <<
-                std::right << std::setw(value_column) << value << std::endl;
-        }
-        os << thdr.str() << std::endl << std::endl;
-    }
-    os << std::endl << std::endl;
-    return os;
-}
-
-
-} // reST
-
-} // utils
-} // pdal
