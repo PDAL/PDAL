@@ -37,6 +37,7 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <iostream>
 
+#include <pdal/PDALUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/util/Inserter.hpp>
 #include <pdal/util/OStream.hpp>
@@ -231,6 +232,8 @@ void LasWriter::readyFile(const std::string& filename)
             "' for output.";
         throw pdal_error(out.str());
     }
+    m_curFilename = filename;
+    Utils::writeProgress(m_progressFd, "READYFILE", filename);
     prepOutput(out);
 }
 
@@ -500,6 +503,8 @@ void LasWriter::openCompression()
 
 void LasWriter::writeView(const PointViewPtr view)
 {
+    Utils::writeProgress(m_progressFd, "READYVIEW",
+        std::to_string(view->size()));
     setAutoXForm(view);
 
     size_t pointLen = m_lasHeader.pointLen();
@@ -543,6 +548,8 @@ void LasWriter::writeView(const PointViewPtr view)
         m_ostream->write(buf.data(), filled * pointLen);
 #endif
     }
+    Utils::writeProgress(m_progressFd, "DONEVIEW",
+        std::to_string(view->size()));
 }
 
 
@@ -722,6 +729,8 @@ point_count_t LasWriter::fillWriteBuf(const PointView& view,
 void LasWriter::doneFile()
 {
     finishOutput();
+    Utils::writeProgress(m_progressFd, "DONEFILE", m_curFilename);
+    m_curFilename.clear();
     delete m_ostream;
     m_ostream = NULL;
 }

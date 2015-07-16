@@ -207,6 +207,45 @@ inline ptree toPTree(const SpatialReference& ref)
     return srs;
 }
 
+inline int openProgress(const std::string& filename)
+{
+#ifdef WIN32
+    return -1;
+#else
+    int fd = open(filename.c_str(), O_WRONLY | O_NONBLOCK);
+    if (fd == -1)
+    {
+        std::string out = "Can't open progress file '";
+        out += filename + "'.";
+        printError(out);
+    }
+    return fd;
+#endif
+}
+
+
+inline void closeProgress(int fd)
+{
+#ifdef WIN32
+#else
+    if (fd >= 0)
+        close(fd);
+#endif
+}
+
+
+inline void writeProgress(int fd, const std::string& type,
+    const std::string& text)
+{
+    if (fd >= 0)
+    {
+        std::string out = type + ':' + text + '\n';
+
+        // This may error, but we don't care.
+        write(fd, out.c_str(), out.length());
+    }
+}
+
 std::string PDAL_DLL toJSON(const MetadataNode& m);
 void PDAL_DLL toJSON(const MetadataNode& m, std::ostream& o);
 std::string PDAL_DLL toJSON(const Options& opts);
