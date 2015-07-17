@@ -65,7 +65,7 @@ void SplitterFilter::processOptions(const Options& options)
 Options SplitterFilter::getDefaultOptions()
 {
     Options options;
-    Option length("length", 1000, "Splitter length");
+    Option length("length", 1000.0, "Splitter length");
     options.add(length);
 
     return options;
