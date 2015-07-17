@@ -237,6 +237,8 @@ inline void closeProgress(int fd)
 inline void writeProgress(int fd, const std::string& type,
     const std::string& text)
 {
+#ifdef WIN32
+#else
     if (fd >= 0)
     {
         std::string out = type + ':' + text + '\n';
@@ -244,6 +246,7 @@ inline void writeProgress(int fd, const std::string& type,
         // This may error, but we don't care.
         write(fd, out.c_str(), out.length());
     }
+#endif
 }
 
 std::string PDAL_DLL toJSON(const MetadataNode& m);
