@@ -35,5 +35,9 @@ set(PDAL_UTIL_SOURCES
 PDAL_ADD_LIBRARY(${PDAL_UTIL_LIB_NAME} SHARED ${PDAL_UTIL_SOURCES})
 target_link_libraries(${PDAL_UTIL_LIB_NAME} ${Boost_LIBRARIES})
 
+if (NOT WIN32)
+    target_link_libraries(${PDAL_UTIL_LIB_NAME} dl)
+endif (NOT WIN32)
+
 set_property(GLOBAL PROPERTY _UTIL_INCLUDED TRUE)
 
