@@ -103,6 +103,7 @@ void DiffKernel::checkPoints(const PointView& source_data,
     Dimension::IdList const& sourceDims = source_data.dims();
     Dimension::IdList const& candidateDims = candidate_data.dims();
 
+std::cerr << "Checking points!\n";
     char sbuf[8];
     char cbuf[8];
     for (PointId idx = 0; idx < source_data.size(); ++idx)
@@ -122,12 +123,23 @@ void DiffKernel::checkPoints(const PointView& source_data,
 
                 oss << "Point " << idx << " differs for dimension \"" <<
                     Dimension::name(sd) << "\" for source and candidate";
+                std::cerr << oss.str() << "!\n";
                 errors.put<std::string>("data.error", oss.str());
+                if (sd == Dimension::Id::X || sd == Dimension::Id::Y ||
+                    sd == Dimension::Id::Z)
+                {
+                    double d1 = *(double *)sbuf;
+                    double d2 = *(double *)cbuf;
+                    std::cerr << "D1/D2 = " << d1 << "/" << d2 << "!\n";
+                }
                 badbytes++;
             }
         }
         if (badbytes > MAX_BADBYTES )
+        {
+            std::cerr << "Breaking on badbytes!\n";
             break;
+        }
     }
 }
 
@@ -173,6 +185,7 @@ int DiffKernel::execute()
         errors.put("count.source", sourceView->size());
     }
 
+/**
     MetadataNode source_metadata = sourceTable.metadata();
     MetadataNode candidate_metadata = candidateTable.metadata();
     if (source_metadata != candidate_metadata)
@@ -185,6 +198,7 @@ int DiffKernel::execute()
         errors.put_child("metadata.candidate",
             Utils::toPTree(candidate_metadata));
     }
+**/
 
     if (candidateTable.layout()->dims().size() !=
         sourceTable.layout()->dims().size())

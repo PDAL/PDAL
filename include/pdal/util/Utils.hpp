@@ -356,6 +356,10 @@ namespace Utils
         redir.m_out->close();
     }
 
+    //ABELL - This is certainly not as efficient as boost::numeric_cast, but
+    //  has the advantage of not requiring an exception to indicate an error.
+    //  We should investigate incorporating a version of boost::numeric_cast
+    //  that avoids the exception for an error.
     // Determine whether a value of a given input type may be safely
     // statically casted to the given output type without over/underflow.  If
     // the output type is integral, inRange() will determine whether the
@@ -378,6 +382,26 @@ namespace Utils
     {
         return std::is_same<T_IN, T_OUT>::value ||
             inRange<T_OUT>(static_cast<double>(in));
+    }
+
+    template<typename T_IN, typename T_OUT>
+    bool numericCast(T_IN in, T_OUT& out)
+    {
+        if (std::is_same<T_IN, T_OUT>::value)
+        {
+            out = in;
+            return true;
+        }
+        if (std::is_integral<T_OUT>::value)
+            in = sround(in);
+        if ((std::is_same<T_OUT, double>::value) ||
+            (in <= static_cast<double>(std::numeric_limits<T_OUT>::max()) &&
+             in >= static_cast<double>(std::numeric_limits<T_OUT>::lowest())))
+        {
+            out = in;
+            return true;
+        }
+        return false;
     }
 } // namespace Utils
 

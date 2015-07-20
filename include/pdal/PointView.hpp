@@ -414,16 +414,7 @@ inline T PointView::getFieldAs(Dimension::Id::Enum dim,
         break;
     }
 
-    if (Utils::inRange<T>(val))
-    {
-        if (std::is_integral<T>::value)
-        {
-            val = Utils::sround(val);
-        }
-
-        retval = static_cast<T>(val);
-    }
-    else
+    if (!Utils::numericCast(val, retval))
     {
         std::ostringstream oss;
         oss << "Unable to fetch data and convert as requested: ";
@@ -437,24 +428,14 @@ inline T PointView::getFieldAs(Dimension::Id::Enum dim,
 }
 
 
-
 template<typename T_IN, typename T_OUT>
 bool PointView::convertAndSet(Dimension::Id::Enum dim, PointId idx, T_IN in)
 {
-    bool success(false);
+    T_OUT out;
 
-    if (Utils::inRange<T_IN, T_OUT>(in))
-    {
-        if (std::is_integral<T_OUT>::value)
-        {
-            in = Utils::sround(in);
-        }
-
-        const T_OUT out(static_cast<T_OUT>(in));
+    bool success = Utils::numericCast(in, out);
+    if (success)
         setFieldInternal(dim, idx, &out);
-        success = true;
-    }
-
     return success;
 }
 
