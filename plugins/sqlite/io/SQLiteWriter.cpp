@@ -514,12 +514,20 @@ void SQLiteWriter::writeTile(const PointViewPtr view)
 
         LazPerfCompressor<Patch> compressor(*m_patch, dimTypes);
 
-        std::vector<char> outbuf(packedPointSize());
-        for (PointId idx = 0; idx < view->size(); idx++)
+        try
         {
-            size_t size = readPoint(*view.get(), idx, outbuf.data());
-            // Read the data and write to the patch.
-            compressor.compress(outbuf.data(), size);
+            std::vector<char> outbuf(packedPointSize());
+            for (PointId idx = 0; idx < view->size(); idx++)
+            {
+                size_t size = readPoint(*view.get(), idx, outbuf.data());
+                // Read the data and write to the patch.
+                compressor.compress(outbuf.data(), size);
+            }
+        }
+        catch (pdal_error)
+        {
+            compressor.done();
+            throw;
         }
         compressor.done();
 #else

@@ -851,11 +851,19 @@ void OciWriter::writePointMajor(PointViewPtr view, std::vector<char>& outbuf)
         SignedLazPerfBuf compBuf(outbuf);
         LazPerfCompressor<SignedLazPerfBuf> compressor(compBuf, dimTypes);
 
-        std::vector<char> ptBuf(packedPointSize());
-        for (PointId idx = 0; idx < view->size(); ++idx)
+        try
         {
-            size_t size = readPoint(*view, idx, ptBuf.data());
-            compressor.compress(ptBuf.data(), size);
+            std::vector<char> ptBuf(packedPointSize());
+            for (PointId idx = 0; idx < view->size(); ++idx)
+            {
+                size_t size = readPoint(*view, idx, ptBuf.data());
+                compressor.compress(ptBuf.data(), size);
+            }
+        }
+        catch (pdal_error)
+        {
+            compressor.done();
+            throw;
         }
         compressor.done();
 #else
