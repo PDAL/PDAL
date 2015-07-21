@@ -441,6 +441,8 @@ void LasWriter::addVlr(const std::string& userId, uint16_t recordId,
 /// metadata.
 void LasWriter::fillHeader()
 {
+    const uint16_t WKT_MASK = (1 << 4);
+
     m_lasHeader.setScale(m_xXform.m_scale, m_yXform.m_scale,
         m_zXform.m_scale);
     m_lasHeader.setOffset(m_xXform.m_offset, m_yXform.m_offset,
@@ -456,8 +458,13 @@ void LasWriter::fillHeader()
     m_lasHeader.setSoftwareId(headerVal<std::string>("software_id"));
     m_lasHeader.setSystemId(headerVal<std::string>("system_id"));
     m_lasHeader.setProjectId(headerVal<boost::uuids::uuid>("project_id"));
-    m_lasHeader.setGlobalEncoding(headerVal<uint16_t>("global_encoding"));
     m_lasHeader.setFileSourceId(headerVal<uint16_t>("filesource_id"));
+    // We always write a WKT VLR, but we need to be sure to set the WKT
+    // bit when the version is at least 1.4.
+    uint16_t globalEncoding = headerVal<uint16_t>("global_encoding");
+    if (m_lasHeader.versionAtLeast(1, 4))
+        globalEncoding |= WKT_MASK;
+    m_lasHeader.setGlobalEncoding(globalEncoding);
 
     if (!m_lasHeader.pointFormatSupported())
     {
