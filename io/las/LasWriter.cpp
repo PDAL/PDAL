@@ -607,9 +607,24 @@ point_count_t LasWriter::fillWriteBuf(const PointView& view,
         double y = (yOrig - m_yXform.m_offset) / m_yXform.m_scale;
         double z = (zOrig - m_zXform.m_offset) / m_zXform.m_scale;
 
-        ostream << boost::numeric_cast<int32_t>(lround(x));
-        ostream << boost::numeric_cast<int32_t>(lround(y));
-        ostream << boost::numeric_cast<int32_t>(lround(z));
+        auto converter = [this](double d, Dimension::Id::Enum dim) -> int32_t
+        {
+            int32_t i;
+
+            if (!Utils::numericCast(d, i))
+            {
+                std::ostringstream oss;
+                oss << "Unable to convert scaled value (" << d << ") to "
+                    "int32 for dimension '" << Dimension::name(dim) <<
+                    "' when writing LAS/LAZ file " << m_curFilename << ".";
+                throw pdal_error(oss.str());
+            }
+            return i;
+        };
+
+        ostream << converter(x, Id::X);
+        ostream << converter(y, Id::Y);
+        ostream << converter(z, Id::Z);
 
         uint16_t intensity = 0;
         if (view.hasDim(Id::Intensity))

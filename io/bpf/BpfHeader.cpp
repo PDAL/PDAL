@@ -162,14 +162,8 @@ bool BpfHeader::write(OLeStream& stream)
     uint8_t dummyChar = 0;
     uint8_t numDim;
 
-    try
-    {
-        numDim = boost::numeric_cast<uint8_t>(m_numDim);
-    }
-    catch (boost::numeric::bad_numeric_cast&)
-    {
+    if (!Utils::numericCast(m_numDim, numDim))
         throw pdal_error("Can't write a BPF file of more than 255 dimensions.");
-    }
 
     stream.put("BPF!");
     stream.put("0003");
