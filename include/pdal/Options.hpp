@@ -392,6 +392,17 @@ public:
     const Option& getOption(const std::string & name) const;
     Option& getOptionByRef(const std::string& name);
 
+    template<typename T>
+    std::vector<T> getValues(const std::string& name) const
+    {
+        std::vector<T> vals;
+
+        auto ops = getOptions(name);
+        for (auto& op : ops)
+            vals.push_back(op.getValue<T>());
+        return vals;
+    }
+
     // get value of an option, or throw not_found if option not present
     template<typename T> T getValueOrThrow(std::string const& name) const
     {
