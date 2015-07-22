@@ -1,7 +1,5 @@
 .. _pcl_json_specification:
 
-.. sectnum::
-
 ============================
 Draft PCL JSON Specification
 ============================
@@ -15,6 +13,7 @@ The PCL JSON specification is a point cloud processing pipeline interchange
 format based on JavaScript Object Notation (JSON), drawing inspiration from
 both GeoJSON and TopoJSON.
 
+.. sectnum::
 .. contents::
    :depth: 4
    :backlinks: none

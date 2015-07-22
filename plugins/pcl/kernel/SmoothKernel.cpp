@@ -34,16 +34,23 @@
 ****************************************************************************/
 
 #include "SmoothKernel.hpp"
-#include "../filters/PCLBlock.hpp"
-#include <pdal/KernelFactory.hpp>
+
+#include "PCLBlock.hpp"
 
 #include <pdal/BufferReader.hpp>
-
-CREATE_KERNEL_PLUGIN(smooth, pdal::SmoothKernel)
+#include <pdal/KernelFactory.hpp>
 
 namespace pdal
 {
 
+static PluginInfo const s_info = PluginInfo(
+    "kernels.smooth",
+    "Smooth Kernel",
+    "http://pdal.io/kernels/kernels.smooth.html" );
+
+CREATE_SHARED_PLUGIN(1, 0, SmoothKernel, Kernel, s_info)
+
+std::string SmoothKernel::getName() const { return s_info.name; }
 
 void SmoothKernel::validateSwitches()
 {
@@ -77,50 +84,30 @@ void SmoothKernel::addSwitches()
     addPositionalSwitch("output", 1);
 }
 
-std::unique_ptr<Stage> SmoothKernel::makeReader(Options readerOptions)
-{
-    if (isDebug())
-    {
-        readerOptions.add("debug", true);
-        uint32_t verbosity(getVerboseLevel());
-        if (!verbosity)
-            verbosity = 1;
-
-        readerOptions.add("verbose", verbosity);
-        readerOptions.add("log", "STDERR");
-    }
-
-    Stage* stage = KernelSupport::makeReader(m_inputFile);
-    stage->setOptions(readerOptions);
-    std::unique_ptr<Stage> reader_stage(stage);
-
-    return reader_stage;
-}
-
 
 int SmoothKernel::execute()
 {
-    PointContext ctx;
+    PointTable table;
 
     Options readerOptions;
     readerOptions.add("filename", m_inputFile);
-    readerOptions.add("debug", isDebug());
-    readerOptions.add("verbose", getVerboseLevel());
+    setCommonOptions(readerOptions);
 
-    std::unique_ptr<Stage> readerStage = makeReader(readerOptions);
+    Stage& readerStage(Kernel::makeReader(m_inputFile));
+    readerStage.setOptions(readerOptions);
 
     // go ahead and prepare/execute on reader stage only to grab input
-    // PointBufferSet, this makes the input PointBuffer available to both the
+    // PointViewSet, this makes the input PointView available to both the
     // processing pipeline and the visualizer
-    readerStage->prepare(ctx);
-    PointBufferSet pbSetIn = readerStage->execute(ctx);
+    readerStage.prepare(table);
+    PointViewSet viewSetIn = readerStage.execute(table);
 
-    // the input PointBufferSet will be used to populate a BufferReader that is
+    // the input PointViewSet will be used to populate a BufferReader that is
     // consumed by the processing pipeline
-    PointBufferPtr input_buffer = *pbSetIn.begin();
-    BufferReader bufferReader;
-    bufferReader.setOptions(readerOptions);
-    bufferReader.addBuffer(input_buffer);
+    PointViewPtr input_view = *viewSetIn.begin();
+    std::shared_ptr<BufferReader> bufferReader(new BufferReader);
+    bufferReader->setOptions(readerOptions);
+    bufferReader->addView(input_view);
 
     Options smoothOptions;
     std::ostringstream ss;
@@ -136,51 +123,33 @@ int SmoothKernel::execute()
     smoothOptions.add("debug", isDebug());
     smoothOptions.add("verbose", getVerboseLevel());
 
-    std::unique_ptr<Stage> smoothStage(new filters::PCLBlock());
+    std::shared_ptr<Stage> smoothStage(new PCLBlock());
     smoothStage->setOptions(smoothOptions);
-    smoothStage->setInput(&bufferReader);
+    smoothStage->setInput(*bufferReader);
 
     Options writerOptions;
     writerOptions.add("filename", m_outputFile);
     setCommonOptions(writerOptions);
 
-    WriterPtr writer(KernelSupport::makeWriter(m_outputFile, smoothStage.get()));
-    writer->setOptions(writerOptions);
+    Stage& writer(Kernel::makeWriter(m_outputFile, *smoothStage));
+    writer.setOptions(writerOptions);
 
     std::vector<std::string> cmd = getProgressShellCommand();
     UserCallback *callback =
         cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
         (UserCallback *)new HeartbeatCallback();
 
-    writer->setUserCallback(callback);
+    writer.setUserCallback(callback);
+    applyExtraStageOptionsRecursive(&writer);
+    writer.prepare(table);
 
-    std::map<std::string, Options> extra_opts = getExtraStageOptions();
-    std::map<std::string, Options>::iterator pi;
-    for (pi = extra_opts.begin(); pi != extra_opts.end(); ++pi)
-    {
-        std::string name = pi->first;
-        Options options = pi->second;
-        std::vector<Stage*> stages = writer->findStage(name);
-        std::vector<Stage*>::iterator s;
-        for (s = stages.begin(); s != stages.end(); ++s)
-        {
-            Options opts = (*s)->getOptions();
-            std::vector<Option>::iterator o;
-            for (o = options.getOptions().begin(); o != options.getOptions().end(); ++o)
-                opts.add(*o);
-            (*s)->setOptions(opts);
-        }
-    }
-
-    writer->prepare(ctx);
-
-    // process the data, grabbing the PointBufferSet for visualization of the
-    // resulting PointBuffer
-    PointBufferSet pbSetOut = writer->execute(ctx);
+    // process the data, grabbing the PointViewSet for visualization of the
+    // resulting PointView
+    PointViewSet viewSetOut = writer.execute(table);
 
     if (isVisualize())
-        visualize(*pbSetOut.begin());
-    //visualize(*pbSetIn.begin(), *pbSetOut.begin());
+        visualize(*viewSetOut.begin());
+    //visualize(*viewSetIn.begin(), *viewSetOut.begin());
 
     return 0;
 }

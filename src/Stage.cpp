@@ -35,7 +35,9 @@
 #include <pdal/GlobalEnvironment.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/SpatialReference.hpp>
-#include <pdal/StageRunner.hpp>
+#include <pdal/UserCallback.hpp>
+
+#include "StageRunner.hpp"
 
 #include <memory>
 
@@ -44,8 +46,21 @@ namespace pdal
 
 
 Stage::Stage()
+  : m_callback(new UserCallback), m_progressFd(-1)
 {
     Construct();
+}
+
+
+/// Only add options if an option with the same name doesn't already exist.
+///
+/// \param[in] ops  Options to add.
+///
+void Stage::addConditionalOptions(const Options& opts)
+{
+    for (const auto& o : opts.getOptions())
+        if (!m_options.hasOption(o.getName()))
+            m_options.add(o);
 }
 
 
@@ -56,63 +71,66 @@ void Stage::Construct()
 }
 
 
-void Stage::prepare(PointContextRef ctx)
+void Stage::prepare(PointTableRef table)
 {
     for (size_t i = 0; i < m_inputs.size(); ++i)
     {
         Stage *prev = m_inputs[i];
-        prev->prepare(ctx);
+        prev->prepare(table);
     }
     l_processOptions(m_options);
     processOptions(m_options);
-    l_initialize(ctx);
+    l_initialize(table);
     initialize();
-    addDimensions(ctx);
+    addDimensions(table.layout());
+    prepared(table);
 }
 
 
-PointBufferSet Stage::execute(PointContextRef ctx)
+PointViewSet Stage::execute(PointTableRef table)
 {
-    PointBufferSet buffers;
+    table.layout()->finalize();
+
+    PointViewSet views;
     if (m_inputs.empty())
     {
-        buffers.insert(PointBufferPtr(new PointBuffer(ctx)));
+        views.insert(PointViewPtr(new PointView(table)));
     }
     else
     {
         for (size_t i = 0; i < m_inputs.size(); ++i)
         {
             Stage *prev = m_inputs[i];
-            PointBufferSet temp = prev->execute(ctx);
-            buffers.insert(temp.begin(), temp.end());
+            PointViewSet temp = prev->execute(table);
+            views.insert(temp.begin(), temp.end());
         }
     }
 
-    PointBufferSet outBuffers;
+    PointViewSet outViews;
     std::vector<StageRunnerPtr> runners;
 
-    ready(ctx);
-    for (auto it = buffers.begin(); it != buffers.end(); ++it)
+    ready(table);
+    for (auto const& it : views)
     {
-        StageRunnerPtr runner(new StageRunner(this, *it));
+        StageRunnerPtr runner(new StageRunner(this, it));
         runners.push_back(runner);
         runner->run();
     }
-    for (auto it = runners.begin(); it != runners.end(); ++it)
+    for (auto const& it : runners)
     {
-        StageRunnerPtr runner(*it);
-        PointBufferSet temp = runner->wait();
-        outBuffers.insert(temp.begin(), temp.end());
+        StageRunnerPtr runner(it);
+        PointViewSet temp = runner->wait();
+        outViews.insert(temp.begin(), temp.end());
     }
-    l_done(ctx);
-    done(ctx);
-    return outBuffers;
+    l_done(table);
+    done(table);
+    return outViews;
 }
 
 
-void Stage::l_initialize(PointContextRef ctx)
+void Stage::l_initialize(PointTableRef table)
 {
-    m_metadata = ctx.metadata().add(getName());
+    m_metadata = table.metadata().add(getName());
 }
 
 
@@ -166,10 +184,10 @@ void Stage::l_processOptions(const Options& options)
 }
 
 
-void Stage::l_done(PointContextRef ctx)
+void Stage::l_done(PointTableRef table)
 {
     if (!m_spatialReference.empty())
-        ctx.setSpatialRef(m_spatialReference);
+        table.setSpatialRef(m_spatialReference);
 }
 
 const SpatialReference& Stage::getSpatialReference() const
@@ -202,15 +220,15 @@ void Stage::setSpatialReference(MetadataNode& m,
     }
 }
 
-std::vector<Stage*> Stage::findStage(std::string name)
+std::vector<Stage *> Stage::findStage(std::string name)
 {
-    std::vector<Stage*> output;
+    std::vector<Stage *> output;
+
     if (boost::iequals(getName(), name))
         output.push_back(this);
 
-    for (auto s = m_inputs.begin(); s != m_inputs.end(); ++s)
+    for (auto const& stage : m_inputs)
     {
-        Stage* stage = (*s);
         if (boost::iequals(stage->getName(), name))
             output.push_back(stage);
         if (stage->getInputs().size())

@@ -45,27 +45,27 @@ namespace pdal
 class PDAL_DLL GreyhoundReader : public pdal::Reader
 {
 public:
-    SET_STAGE_NAME("readers.greyhound", "Greyhound Reader")
-    SET_STAGE_LINK("http://pdal.io/stages/readers.greyhound.html")
-    SET_PLUGIN_VERSION("1.0.0b1")
-
     GreyhoundReader();
     ~GreyhoundReader();
+
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
 private:
     std::string m_url;
     std::string m_pipelineId;
     std::string m_sessionId;
-    PointContextRef m_pointContext;
+    PointLayoutPtr m_layout;
     WebSocketClient m_wsClient;
     point_count_t m_numPoints;
     point_count_t m_index;
 
     virtual void initialize();
     virtual void processOptions(const Options& options);
-    virtual void addDimensions(PointContextRef pointContext);
-    virtual void ready(PointContextRef ctx);
-    virtual point_count_t read(PointBuffer& buf, point_count_t count);
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void ready(PointTableRef table);
+    virtual point_count_t read(PointViewPtr view, point_count_t count);
     virtual bool eof() const;
 };
 

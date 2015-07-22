@@ -32,11 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "gtest/gtest.h"
+#include <pdal/pdal_test_main.hpp>
 
 #include <pdal/SpatialReference.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 
 #include "Support.hpp"
 
@@ -61,6 +61,7 @@ TEST(HexbinFilterTest, HexbinFilterTest_test_1)
 
     Options options;
     options.add("filename", Support::datapath("las/hextest.las"));
+    options.add("output_tesselation", true);
     options.add("sample_size", 5000, "Number of samples to use "
         "when estimating hexagon edge size. Specify 0.0 for edge_size if "
         "you want to compute one.");
@@ -70,30 +71,26 @@ TEST(HexbinFilterTest, HexbinFilterTest_test_1)
         "use in situations where you do not want to estimate based on "
         "a sample");
 
-    ReaderPtr reader(f.createReader("readers.las"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.las"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(options);
 
-    FilterPtr hexbin(f.createFilter("filters.hexbin"));
+    std::unique_ptr<Stage> hexbin(f.createStage("filters.hexbin"));
     EXPECT_TRUE(hexbin.get());
     hexbin->setOptions(options);
-    hexbin->setInput(reader.get());
+    hexbin->setInput(*reader);
 
-    PointContext ctx;
+    PointTable table;
 
-    hexbin->prepare(ctx);
-    hexbin->execute(ctx);
+    hexbin->prepare(table);
+    hexbin->execute(table);
 
-    MetadataNode m = ctx.metadata();
+    MetadataNode m = table.metadata();
     m = m.findChild(hexbin->getName());
 
     std::string filename = Support::temppath("hexbin.txt");
     std::ofstream out(filename);
     printChildren(out, m);
     out.close();
-
-    EXPECT_TRUE(Support::compare_text_files(filename,
-        Support::datapath("filters/hexbin.txt")));
-
     FileUtils::deleteFile(filename);
 }

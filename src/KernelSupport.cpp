@@ -39,7 +39,7 @@
 
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/PipelineReader.hpp>
-#include <pdal/Utils.hpp>
+#include <pdal/util/Utils.hpp>
 
 namespace pdal
 {
@@ -69,47 +69,9 @@ PipelineManager* KernelSupport::makePipeline(const std::string& inputFile)
         if (driver.empty())
             throw app_runtime_error("Cannot determine input file type of " +
                 inputFile);
-        if (!output->addReader(driver))
-            throw app_runtime_error("reader creation failed");
+        output->addReader(driver);
     }
     return output;
-}
-
-
-Stage *KernelSupport::makeReader(const std::string& inputFile)
-{
-    if (!FileUtils::fileExists(inputFile))
-        throw app_runtime_error("file not found: " + inputFile);
-
-    StageFactory factory;
-    std::string driver = factory.inferReaderDriver(inputFile);
-    if (driver.empty())
-        throw app_runtime_error("Cannot determine input file type of " +
-            inputFile);
-
-    Stage* stage = factory.createReader(driver);
-    if (!stage)
-        throw app_runtime_error("reader creation failed");
-    return stage;
-}
-
-
-Writer* KernelSupport::makeWriter(const std::string& outputFile, Stage *stage)
-{
-    pdal::StageFactory factory;
-    std::string driver = factory.inferWriterDriver(outputFile);
-    if (driver.empty())
-        throw app_runtime_error("Cannot determine output file type of " +
-            outputFile);
-    Options options = factory.inferWriterOptionsChanges(outputFile);
-
-    pdal::Writer* writer = factory.createWriter(driver);
-    if (!writer)
-        throw app_runtime_error("writer creation failed");
-    writer->setInput(stage);
-    writer->setOptions(options + writer->getOptions());
-
-    return writer;
 }
 
 
@@ -177,7 +139,7 @@ void ShellScriptCallback::callback()
     else if (currPerc >= m_lastMajorPerc + 10.0)
     {
         std::string output;
-        int stat = Utils::run_shell_command(m_command + " " +
+        Utils::run_shell_command(m_command + " " +
             boost::lexical_cast<std::string>(static_cast<int>(currPerc)),
             output);
         m_lastMajorPerc = currPerc;

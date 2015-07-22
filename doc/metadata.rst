@@ -13,7 +13,7 @@ to allow users to operate with metadata in a relatively free-form way, with
 its main Metadata utility, :cpp:class:`pdal::Metadata`, being a lightly
 wrapped `boost::property_tree`_.
 
-The basic structure of a :cpp:class:`pdal::Metadata` instance is the following 
+The basic structure of a :cpp:class:`pdal::Metadata` instance is the following
 tree structure:
 
 .. code-block:: javascript
@@ -26,24 +26,24 @@ tree structure:
     }
 
 .. note::
-    
-    Metadata instances can contain other Metadata instances by adding them 
-    with the :cpp:func:`pdal::Metadata::addMetadata` method.  They will be 
+
+    Metadata instances can contain other Metadata instances by adding them
+    with the :cpp:func:`pdal::Metadata::addMetadata` method.  They will be
     added to the `metadata` sub-tree of the internal property_tree.
 
 Metadata Types
 ------------------------------------------------------------------------------
 
-:cpp:class:`pdal::Metadata` instances are essentially a specially-organized 
-boost::property_tree, and as such, require that any classes that are added 
-to them be copy-constructable and have an ostream<< operator for them.  While 
-these constraints mean they are all serializable to strings, 
-:cpp:class:`pdal::Metadata` also keeps an explicit type variable, `type` for 
-each instance. This property allows us to say something extra about the 
-Metadata entry, and allows them to go in and out of :cpp:class:`pdal::Stage` and 
-:cpp:class:`pdal::PointBuffer` with type fidelity. 
+:cpp:class:`pdal::Metadata` instances are essentially a specially-organized
+boost::property_tree, and as such, require that any classes that are added
+to them be copy-constructable and have an ostream<< operator for them.  While
+these constraints mean they are all serializable to strings,
+:cpp:class:`pdal::Metadata` also keeps an explicit type variable, `type` for
+each instance. This property allows us to say something extra about the
+Metadata entry, and allows them to go in and out of :cpp:class:`pdal::Stage` and
+:cpp:class:`pdal::PointView` with type fidelity.
 
-The metadata `type` variable roughly maps to the `XSD type names`_.  The following 
+The metadata `type` variable roughly maps to the `XSD type names`_.  The following
 types are valid for current PDAL versions, though more may be added.
 
 .. csv-table:: PDAL :cpp:class:`pdal::Metadata` types
@@ -61,13 +61,13 @@ types are valid for current PDAL versions, though more may be added.
     `nonNegativeInteger` map to the typical 4-byte signed and unsigned types.
     You might be required to adjust the value based on an explicit
     interpretation and cast it into these larger types.
-   
+
 `JSON`_ representation
 ------------------------------------------------------------------------------
- 
+
 A more interesting metadata tree might come from the
-:cpp:class:`pdal::drivers::las::Reader`.  Interesting things to note include 
- 
+:cpp:class:`pdal::drivers::las::Reader`.  Interesting things to note include
+
 
 
 .. _`JSON`: http://www.json.org/
@@ -151,14 +151,14 @@ A more interesting metadata tree might come from the
             ...
         }
     }
-    
+
 .. _metadataxml:
 
 :ref:`Pipeline` XML representation
 ------------------------------------------------------------------------------
 
-The :ref:`Pipeline` representation of the :cpp:class:`pdal::Metadata` is a 
-little bit flatter... 
+The :ref:`Pipeline` representation of the :cpp:class:`pdal::Metadata` is a
+little bit flatter...
 
 
 ::

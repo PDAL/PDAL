@@ -46,12 +46,12 @@ namespace pdal
 class PDAL_DLL HexBin : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.hexbin", "Tessellate the point's X/Y domain and determine point density and/or point boundary.")
-    SET_STAGE_LINK("http://pdal.io/stages/filters.hexbin.html")
-    SET_PLUGIN_VERSION("1.0.0b1")
-
     HexBin() : Filter()
         {}
+
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const { return "filters.hexbin"; }
 
 private:
 
@@ -61,11 +61,12 @@ private:
     uint32_t m_sampleSize;
     int32_t m_density;
     double m_edgeLength;
+    bool m_outputTesselation;
 
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContext ctx);
-    virtual void filter(PointBuffer& buf);
-    virtual void done(PointContext ctx);
+    virtual void ready(PointTableRef table);
+    virtual void filter(PointView& view);
+    virtual void done(PointTableRef table);
 
     HexBin& operator=(const HexBin&); // not implemented
     HexBin(const HexBin&); // not implemented

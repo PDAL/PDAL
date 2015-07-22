@@ -38,28 +38,32 @@
 
 #include <memory>
 
+extern "C" int32_t ReprojectionFilter_ExitFunc();
+extern "C" PF_ExitFunc ReprojectionFilter_InitPlugin();
+
 namespace pdal
 {
-class PointBuffer;
+
 namespace gdal
 {
-class Debug;
+    class Debug;
 }
 
 class PDAL_DLL ReprojectionFilter : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.reprojection", "Reproject data using GDAL from one coordinate system to another.")
-    SET_STAGE_LINK("http://www.pdal.io/stages/filters.reprojection.html")
-
     ReprojectionFilter();
-    ReprojectionFilter(const SpatialReference& outSRS);
-    ReprojectionFilter(const SpatialReference& inSRS, const SpatialReference& outSRS);
+    ~ReprojectionFilter();
+
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
 private:
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContext ctx);
-    virtual void filter(PointBuffer& buffer);
+    virtual void ready(PointTableRef table);
+    virtual void initialize();
+    virtual void filter(PointView& view);
 
     void updateBounds();
     void transform(double& x, double& y, double& z);
@@ -68,12 +72,11 @@ private:
     SpatialReference m_outSRS;
     bool m_inferInputSRS;
 
-    typedef std::shared_ptr<void> ReferencePtr;
-    typedef std::shared_ptr<void> TransformPtr;
+    typedef void* ReferencePtr;
+    typedef void* TransformPtr;
     ReferencePtr m_in_ref_ptr;
     ReferencePtr m_out_ref_ptr;
     TransformPtr m_transform_ptr;
-    std::shared_ptr<pdal::gdal::Debug> m_gdal_debug;
 
     ReprojectionFilter& operator=(const ReprojectionFilter&); // not implemented
     ReprojectionFilter(const ReprojectionFilter&); // not implemented

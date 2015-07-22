@@ -32,12 +32,13 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "gtest/gtest.h"
+#include <pdal/pdal_test_main.hpp>
 
 #include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/StageFactory.hpp>
 #include <stats/StatsFilter.hpp>
+#include <faux/FauxReader.hpp>
 
 #include "Support.hpp"
 
@@ -54,8 +55,8 @@ TEST(ProgrammableFilterTest, ProgrammableFilterTest_test1)
     ops.add("num_points", 10);
     ops.add("mode", "ramp");
 
-    ReaderPtr reader(f.createReader("readers.faux"));
-    reader->setOptions(ops);
+    FauxReader reader;
+    reader.setOptions(ops);
 
     Option source("source", "import numpy as np\n"
         "def myfunc(ins,outs):\n"
@@ -79,23 +80,23 @@ TEST(ProgrammableFilterTest, ProgrammableFilterTest_test1)
     opts.add(module);
     opts.add(function);
 
-    FilterPtr filter(f.createFilter("filters.programmable"));
+    std::unique_ptr<Stage> filter(f.createStage("filters.programmable"));
     filter->setOptions(opts);
-    filter->setInput(reader.get());
+    filter->setInput(reader);
 
-    StatsFilter stats;
-    stats.setInput(filter.get());
+    std::unique_ptr<StatsFilter> stats(new StatsFilter);
+    stats->setInput(*filter);
 
-    PointContext ctx;
+    PointTable table;
 
-    stats.prepare(ctx);
-    PointBufferSet pbSet = stats.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buf = *pbSet.begin();
+    stats->prepare(table);
+    PointViewSet viewSet = stats->execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
 
-    const stats::Summary& statsX = stats.getStats(Dimension::Id::X);
-    const stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
-    const stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
+    const stats::Summary& statsX = stats->getStats(Dimension::Id::X);
+    const stats::Summary& statsY = stats->getStats(Dimension::Id::Y);
+    const stats::Summary& statsZ = stats->getStats(Dimension::Id::Z);
 
     EXPECT_FLOAT_EQ(statsX.minimum(), 10.0);
     EXPECT_FLOAT_EQ(statsX.maximum(), 11.0);
@@ -114,13 +115,13 @@ TEST(ProgrammableFilterTest, pipeline)
 
     reader.readPipeline(Support::configuredpath("plang/programmable-update-y-dims.xml"));
     manager.execute();
-    PointBufferSet pbSet = manager.buffers();
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buf = *pbSet.begin();
+    PointViewSet viewSet = manager.views();
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
 
     for (PointId idx = 0; idx < 10; ++idx)
     {
-        int32_t y = buf->getFieldAs<int32_t>(Dimension::Id::Y, idx);
+        int32_t y = view->getFieldAs<int32_t>(Dimension::Id::Y, idx);
         EXPECT_EQ(y, 314);
     }
 }
@@ -137,8 +138,8 @@ TEST(ProgrammableFilterTest, add_dimension)
     ops.add("num_points", 10);
     ops.add("mode", "ramp");
 
-    ReaderPtr reader(f.createReader("readers.faux"));
-    reader->setOptions(ops);
+    FauxReader reader;
+    reader.setOptions(ops);
 
     Option source("source", "import numpy\n"
         "def myfunc(ins,outs):\n"
@@ -157,22 +158,24 @@ TEST(ProgrammableFilterTest, add_dimension)
     opts.add(intensity);
     opts.add(scanDirection);
 
-    FilterPtr filter(f.createFilter("filters.programmable"));
+    std::unique_ptr<Stage> filter(f.createStage("filters.programmable"));
     filter->setOptions(opts);
-    filter->setInput(reader.get());
+    filter->setInput(reader);
 
-    PointContext ctx;
-    filter->prepare(ctx);
-    PointBufferSet pbSet = filter->execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buf = *pbSet.begin();
+    PointTable table;
+    filter->prepare(table);
+    PointViewSet viewSet = filter->execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
 
-    pdal::Dimension::Id::Enum int_id = ctx.findDim("AddedIntensity");
-    pdal::Dimension::Id::Enum psid_id = ctx.findDim("AddedPointSourceId");
+    PointLayoutPtr layout(table.layout());
 
-    for (unsigned int i = 0; i < buf->size(); ++i)
+    Dimension::Id::Enum int_id = layout->findDim("AddedIntensity");
+    Dimension::Id::Enum psid_id = layout->findDim("AddedPointSourceId");
+
+    for (unsigned int i = 0; i < view->size(); ++i)
     {
-        EXPECT_EQ(buf->getFieldAs<uint16_t>(int_id, i), 1);
-        EXPECT_EQ(buf->getFieldAs<uint16_t>(psid_id, i), 2);
+        EXPECT_EQ(view->getFieldAs<uint16_t>(int_id, i), 1);
+        EXPECT_EQ(view->getFieldAs<uint16_t>(psid_id, i), 2);
     }
 }

@@ -62,26 +62,24 @@ public:
 
 class CoreInterp;
 
-class PDAL_DLL P2gWriter : public pdal::Writer
+class PDAL_DLL P2gWriter : public Writer
 {
 public:
-    SET_STAGE_NAME("writers.p2g", "Points2Grid Writer")
-    SET_STAGE_LINK("http://pdal.io/stages/writers.p2g.html")
-    SET_PLUGIN_VERSION("1.0.0b1")
+    P2gWriter() : m_outputTypes(0), m_outputFormat(OUTPUT_FORMAT_ARC_ASCII)
+        {}
 
-    P2gWriter() : Writer(), m_outputTypes(0), m_outputFormat(OUTPUT_FORMAT_ARC_ASCII) {};
-    ~P2gWriter() {};
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
-    static Options getDefaultOptions();
+    Options getDefaultOptions();
 
 private:
     P2gWriter& operator=(const P2gWriter&); // not implemented
 
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContextRef ctx) {};
-    virtual void write(const PointBuffer& buf);
-    virtual void done(PointContextRef ctx) {};
-    virtual void initialize() {};
+    virtual void write(const PointViewPtr view);
+    virtual void done(PointTableRef table);
 
     std::unique_ptr<OutCoreInterp> m_interpolator;
     uint64_t m_pointCount;
@@ -92,7 +90,7 @@ private:
     double m_GRID_DIST_X;
     double m_GRID_DIST_Y;
 
-    double m_RADIUS_SQ;
+    double m_RADIUS;
     unsigned int m_outputTypes;
     uint32_t m_fill_window_size;
     BOX3D m_bounds;

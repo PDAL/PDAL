@@ -34,9 +34,11 @@
 
 #pragma once
 
+#include <boost/iostreams/stream.hpp>
+#include <boost/iostreams/restrict.hpp>
+
 #include <las/LasReader.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/StreamFactory.hpp>
 
 namespace pdal
 {
@@ -44,26 +46,46 @@ namespace pdal
 
 class PDAL_DLL NitfReader : public LasReader
 {
-public:
-    SET_STAGE_NAME("readers.nitf", "NITF Reader")
-    SET_STAGE_LINK("http://pdal.io/stages/readers.nitf.html")
-    SET_PLUGIN_VERSION("1.0.0b1")
+typedef boost::iostreams::restriction<std::istream> RDevice;
+typedef boost::iostreams::stream<RDevice> RStream;
 
-    NitfReader() : LasReader()
-        {}
+public:
+    NitfReader() : LasReader(), m_offset(0), m_length(0), m_istream(NULL)
+    {}
+
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+
+protected:
+    virtual std::istream *createStream()
+    {
+        m_istream = FileUtils::openFile(m_filename);
+        if (!m_istream)
+            return NULL;
+        m_rdevice.reset(new RDevice(*m_istream, m_offset, m_length));
+        m_rstream.reset(new RStream(*m_rdevice));
+        return m_rstream.get();
+    }
+
+    virtual void destroyStream()
+    {
+        m_rstream.reset();
+        m_rdevice.reset();
+        FileUtils::closeFile(m_istream);
+        m_istream = NULL;
+    }
 
 private:
     uint64_t m_offset;
     uint64_t m_length;
 
-    virtual void initialize();
-    virtual void ready(PointContextRef ctx);
-    virtual StreamFactoryPtr createFactory() const
-    {
-        return StreamFactoryPtr(
-            new FilenameSubsetStreamFactory(m_filename, m_offset, m_length));
-    }
+    std::istream *m_istream;
+    std::unique_ptr<RDevice> m_rdevice;
+    std::unique_ptr<RStream> m_rstream;
 
+    virtual void initialize();
+    virtual void ready(PointTableRef table);
     NitfReader& operator=(const NitfReader&); // not implemented
     NitfReader(const NitfReader&); // not implemented
 };

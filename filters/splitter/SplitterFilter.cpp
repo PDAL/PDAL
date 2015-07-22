@@ -32,24 +32,40 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
+#include "SplitterFilter.hpp"
+
+#include <pdal/pdal_macros.hpp>
+
+#include <cmath>
 #include <iostream>
 #include <limits>
-
-#include "SplitterFilter.hpp"
 
 namespace pdal
 {
 
+static PluginInfo const s_info = PluginInfo(
+    "filters.splitter",
+    "Split data based on a X/Y box length.",
+    "http://pdal.io/stages/filters.splitter.html" );
+
+CREATE_STATIC_PLUGIN(1, 0, SplitterFilter, Filter, s_info)
+
+std::string SplitterFilter::getName() const { return s_info.name; }
+
 void SplitterFilter::processOptions(const Options& options)
 {
-    m_length = options.getValueOrDefault<uint32_t>("length", 1000);
+    m_length = options.getValueOrDefault<double>("length", 1000.0);
+    m_xOrigin = options.getValueOrDefault<double>("origin_x",
+        std::numeric_limits<double>::quiet_NaN());
+    m_yOrigin = options.getValueOrDefault<double>("origin_y",
+        std::numeric_limits<double>::quiet_NaN());
 }
 
 
 Options SplitterFilter::getDefaultOptions()
 {
     Options options;
-    Option length("length", 1000, "Splitter length");
+    Option length("length", 1000.0, "Splitter length");
     options.add(length);
 
     return options;
@@ -73,40 +89,43 @@ public:
 };
 }
 
-PointBufferSet SplitterFilter::run(PointBufferPtr buf)
+PointViewSet SplitterFilter::run(PointViewPtr inView)
 {
-    PointBufferSet pbSet;
-    if (!buf->size())
-        return pbSet;
+    PointViewSet viewSet;
+    if (!inView->size())
+        return viewSet;
 
     CoordCompare compare;
-    std::map<Coord, PointBufferPtr, CoordCompare> buffers(compare);
+    std::map<Coord, PointViewPtr, CoordCompare> viewMap(compare);
 
-    // Use the location of the first point as the origin.
-    double xOrigin = buf->getFieldAs<double>(Dimension::Id::X, 0);
-    double yOrigin = buf->getFieldAs<double>(Dimension::Id::Y, 0);
-
+    // Use the location of the first point as the origin, unless specified.
+    // (!= test == isnan(), which doesn't exist on windows)
+    if (m_xOrigin != m_xOrigin)
+        m_xOrigin = inView->getFieldAs<double>(Dimension::Id::X, 0);
+    if (m_yOrigin != m_yOrigin)
+        m_yOrigin = inView->getFieldAs<double>(Dimension::Id::Y, 0);
     // Overlay a grid of squares on the points (m_length sides).  Each square
     // corresponds to a new point buffer.  Place the points falling in the
     // each square in the corresponding point buffer.
-    for (PointId idx = 0; idx < buf->size(); idx++)
+    for (PointId idx = 0; idx < inView->size(); idx++)
     {
-        int xpos = (buf->getFieldAs<double>(Dimension::Id::X, idx) - xOrigin) /
-            m_length;
-        int ypos = (buf->getFieldAs<double>(Dimension::Id::Y, idx) - yOrigin) /
-            m_length;
+        double x = inView->getFieldAs<double>(Dimension::Id::X, idx);
+        int xpos = (x - m_xOrigin) / m_length;
+        double y = inView->getFieldAs<double>(Dimension::Id::Y, idx);
+        int ypos = (y - m_yOrigin) / m_length;
+
         Coord loc(xpos, ypos);
-        PointBufferPtr& outbuf = buffers[loc];
-        if (!outbuf)
-            outbuf = buf->makeNew();
-        outbuf->appendPoint(*buf, idx);
+        PointViewPtr& outView = viewMap[loc];
+        if (!outView)
+            outView = inView->makeNew();
+        outView->appendPoint(*inView.get(), idx);
     }
 
     // Pull the buffers out of the map and stick them in the standard
     // output set, setting the bounds as we go.
-    for (auto bi = buffers.begin(); bi != buffers.end(); ++bi)
-        pbSet.insert(bi->second);
-    return pbSet;
+    for (auto bi = viewMap.begin(); bi != viewMap.end(); ++bi)
+        viewSet.insert(bi->second);
+    return viewSet;
 }
 
 } // pdal

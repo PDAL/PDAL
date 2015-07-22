@@ -42,17 +42,18 @@ namespace pdal
 class PDAL_DLL PCLKernel : public Kernel
 {
 public:
-    SET_KERNEL_NAME("pcl", "PCL Kernel")
-    SET_KERNEL_LINK("http://pdal.io/kernels/kernels.pcl.html")
-
-    PCLKernel();
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
     int execute();
 
 private:
+    PCLKernel();
     void addSwitches();
     void validateSwitches();
 
-    std::unique_ptr<Stage> makeReader(Options readerOptions);
+    std::unique_ptr<PipelineManager> m_manager;
+    std::shared_ptr<Stage> makeReader(Options readerOptions);
 
     std::string m_inputFile;
     std::string m_outputFile;

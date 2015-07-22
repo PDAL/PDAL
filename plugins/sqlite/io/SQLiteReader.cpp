@@ -33,12 +33,19 @@
 ****************************************************************************/
 
 #include "SQLiteReader.hpp"
-#include <pdal/PointBuffer.hpp>
-
-CREATE_READER_PLUGIN(sqlite, pdal::SQLiteReader)
+#include <pdal/PointView.hpp>
 
 namespace pdal
 {
+
+static PluginInfo const s_info = PluginInfo(
+    "readers.sqlite",
+    "Read data from SQLite3 database files.",
+    "" );
+
+CREATE_SHARED_PLUGIN(1, 0, SQLiteReader, Reader, s_info)
+
+std::string SQLiteReader::getName() const { return s_info.name; }
 
 void SQLiteReader::initialize()
 {
@@ -49,20 +56,19 @@ void SQLiteReader::initialize()
         m_session = std::unique_ptr<SQLite>(new SQLite(m_connection, log()));
         m_session->connect(false); // don't connect in write mode
         log()->get(LogLevel::Debug) << "Connected to database" << std::endl;
-        bool bHaveSpatialite = m_session->doesTableExist("geometry_columns");
+        
+        bool bHaveSpatialite = m_session->haveSpatialite();
         log()->get(LogLevel::Debug) << "Have spatialite?: " <<
             bHaveSpatialite << std::endl;
-        m_session->spatialite(m_modulename);
+        m_session->loadSpatialite(m_modulename);
 
         if (!bHaveSpatialite)
         {
-            std::ostringstream oss;
-            oss << "no spatialite enabled!";
-            throw sqlite_driver_error(oss.str());
+            throw pdal_error("no spatialite enabled!");
         }
 
     }
-    catch (sqlite_driver_error const& e)
+    catch (pdal_error const& e)
     {
         std::stringstream oss;
         oss << "Unable to connect to database with error '" << e.what() << "'";
@@ -74,7 +80,7 @@ void SQLiteReader::initialize()
             m_options.getValueOrThrow<pdal::SpatialReference>(
                 "spatialreference"));
     }
-    catch (pdal::option_not_found const&)
+    catch (Option::not_found)
     {
         // If one wasn't set on the options, we'll ignore at this
         setSpatialReference(fetchSpatialReference(m_query));
@@ -169,7 +175,7 @@ void SQLiteReader::validateQuery() const
 }
 
 
-void SQLiteReader::addDimensions(PointContextRef ctx)
+void SQLiteReader::addDimensions(PointLayoutPtr layout)
 {
     log()->get(LogLevel::Debug) << "Fetching schema object" << std::endl;
 
@@ -180,7 +186,7 @@ void SQLiteReader::addDimensions(PointContextRef ctx)
     m_session->query(q);
     const row* r = m_session->get(); // First result better have our schema
     if (!r)
-        throw sqlite_driver_error("Unable to select schema from query!");
+        throw pdal_error("Unable to select schema from query!");
 
     column const& s = r->at(0); // First column is schema
 
@@ -193,13 +199,12 @@ void SQLiteReader::addDimensions(PointContextRef ctx)
 
     XMLSchema schema(s.data);
     m_patch->m_metadata = schema.getMetadata();
-    m_patch->m_ctx = ctx;
 
-    loadSchema(ctx, schema);
+    loadSchema(layout, schema);
 }
 
 
-void SQLiteReader::ready(PointContextRef ctx)
+void SQLiteReader::ready(PointTableRef table)
 {
     m_at_end = false;
     b_doneQuery = false;
@@ -209,13 +214,13 @@ void SQLiteReader::ready(PointContextRef ctx)
 }
 
 
-bool SQLiteReader::NextBuffer()
+bool SQLiteReader::nextBuffer()
 {
     return m_session->next();
 }
 
 
-point_count_t SQLiteReader::readPatch(PointBuffer& buffer, point_count_t numPts)
+point_count_t SQLiteReader::readPatch(PointViewPtr view, point_count_t numPts)
 {
     const row* r = m_session->get();
     if (!r)
@@ -244,7 +249,7 @@ point_count_t SQLiteReader::readPatch(PointBuffer& buffer, point_count_t numPts)
     position = columns.find("POINTS")->second;
 
     point_count_t numRead = 0;
-    PointId nextId = buffer.size();
+    PointId nextId = view->size();
     if (m_patch->m_isCompressed)
     {
 #ifdef PDAL_HAVE_LAZPERF
@@ -256,7 +261,10 @@ point_count_t SQLiteReader::readPatch(PointBuffer& buffer, point_count_t numPts)
         while (numRead < numPts && count > 0)
         {
             decompressor.decompress(tmpBuf.data(), tmpBuf.size());
-            writePoint(buffer, nextId, tmpBuf.data());
+            writePoint(*view.get(), nextId, tmpBuf.data());
+
+            if (m_cb)
+                m_cb(*view, nextId);
 
             nextId++;
             numRead++;
@@ -271,16 +279,18 @@ point_count_t SQLiteReader::readPatch(PointBuffer& buffer, point_count_t numPts)
         if (!m_patch->byte_size())
             throw pdal_error("Compressed patch size was 0!");
         log()->get(LogLevel::Debug3) << "Uncompressed byte size: " <<
-            (m_patch->count * m_packedPointSize) << std::endl;
+            (m_patch->count * packedPointSize()) << std::endl;
     }
     else
     {
         const char *pos = (const char *)&((*r)[position].blobBuf[0]);
         while (numRead < numPts && count > 0)
         {
-            writePoint(buffer, nextId, pos);
+            writePoint(*view.get(), nextId, pos);
 
-            pos += m_packedPointSize;
+            pos += packedPointSize();
+            if (m_cb)
+                m_cb(*view, nextId);
             nextId++;
             numRead++;
             count--;
@@ -291,13 +301,13 @@ point_count_t SQLiteReader::readPatch(PointBuffer& buffer, point_count_t numPts)
 }
 
 
-point_count_t SQLiteReader::read(PointBuffer& buffer, point_count_t count)
+point_count_t SQLiteReader::read(PointViewPtr view, point_count_t count)
 {
     if (eof())
         return 0;
 
-    log()->get(LogLevel::Debug4) << "readBufferImpl called with "
-        "PointBuffer filled to " << buffer.size() << " points" <<
+    log()->get(LogLevel::Debug4) << "read called with "
+        "PointView filled to " << view->size() << " points" <<
         std::endl;
 
     point_count_t totalNumRead = 0;
@@ -307,7 +317,7 @@ point_count_t SQLiteReader::read(PointBuffer& buffer, point_count_t count)
         m_session->query(m_query);
         validateQuery();
         b_doneQuery = true;
-        totalNumRead = readPatch(buffer, count);
+        totalNumRead = readPatch(view, count);
     }
 
     int patch_count(0);
@@ -315,14 +325,14 @@ point_count_t SQLiteReader::read(PointBuffer& buffer, point_count_t count)
     {
         if (m_patch->remaining == 0)
         {
-            if (!NextBuffer())
+            if (!nextBuffer())
             {
                 m_at_end = true;
                 return totalNumRead;
             }
         }
-        PointId bufBegin = buffer.size();
-        point_count_t numRead = readPatch(buffer, count - totalNumRead);
+        PointId bufBegin = view->size();
+        point_count_t numRead = readPatch(view, count - totalNumRead);
         PointId bufEnd = bufBegin + numRead;
         totalNumRead += numRead;
         patch_count++;

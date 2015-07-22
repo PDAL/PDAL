@@ -32,10 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "gtest/gtest.h"
-
 #include <boost/property_tree/xml_parser.hpp>
 
+#include <pdal/pdal_test_main.hpp>
 #include <pdal/util/Bounds.hpp>
 #include <pdal/PDALUtils.hpp>
 
@@ -149,8 +148,8 @@ TEST(BoundsTest, test_static)
     BOX3D t = BOX3D::getDefaultSpatialExtent();
     double mind =  (std::numeric_limits<double>::lowest)();
     double maxd =  (std::numeric_limits<double>::max)();
-    EXPECT_FLOAT_EQ(t.minx, mind);
-    EXPECT_FLOAT_EQ(t.maxx, maxd);
+    EXPECT_DOUBLE_EQ(t.minx, mind);
+    EXPECT_DOUBLE_EQ(t.maxx, maxd);
 }
 
 TEST(BoundsTest, test_invalid)
@@ -158,8 +157,8 @@ TEST(BoundsTest, test_invalid)
     BOX3D t;
     double mind =  (std::numeric_limits<double>::lowest)();
     double maxd =  (std::numeric_limits<double>::max)();
-    EXPECT_FLOAT_EQ(t.minx, maxd);
-    EXPECT_FLOAT_EQ(t.maxx, mind);
+    EXPECT_DOUBLE_EQ(t.minx, maxd);
+    EXPECT_DOUBLE_EQ(t.maxx, mind);
 }
 
 TEST(BoundsTest, test_output)
@@ -186,7 +185,7 @@ TEST(BoundsTest, BoundsTest_ptree)
 
     std::stringstream ss1(std::stringstream::in | std::stringstream::out);
 
-    boost::property_tree::ptree tree = pdal::utils::toPTree(b2);
+    boost::property_tree::ptree tree = Utils::toPTree(b2);
     boost::property_tree::write_xml(ss1, tree);
 
     const std::string out1 = ss1.str();
@@ -225,4 +224,49 @@ TEST(BoundsTest, test_wkt)
 {
     const BOX3D b(1.1,2.2,3.3,101.1,102.2,103.3);
     EXPECT_EQ(b.toWKT(1), "POLYGON ((1.1 2.2, 1.1 102.2, 101.1 102.2, 101.1 2.2, 1.1 2.2))");
+}
+
+TEST(BoundsTest, test_2d_input)
+{
+    std::stringstream ss("([1.1, 101.1], [2.2, 102.2])", std::stringstream::in | std::stringstream::out);
+    BOX3D rr;
+    ss >> rr;
+    BOX3D r(1.1,2.2,101.1,102.2);
+    EXPECT_EQ(r, rr);
+}
+
+TEST(BoundsTest, test_issue_897)
+{
+    BOX3D boxA(0.0, 0.0, 100.0, 100.0);  // a "2D" box
+    BOX3D boxB(50.0, 50.0, 3.1, 51.0, 51.0, 3.14);  // a "3D" box, wholly inside boxA
+    
+    // Currently aContainsB is false: see issue #387.
+    const bool aContainsB = boxA.contains(boxB);
+    const bool bContainsA = boxB.contains(boxA);
+    const bool aContainsA = boxA.contains(boxA);
+    const bool bContainsB = boxB.contains(boxB);
+    
+    EXPECT_FALSE(aContainsB);
+    EXPECT_FALSE(bContainsA);
+    EXPECT_TRUE(aContainsA);
+    EXPECT_TRUE(bContainsB);
+}
+
+TEST(BoundsTest, test_precisionloss)
+{
+    const BOX3D b1(0.123456789,0.0,0,0);
+    EXPECT_DOUBLE_EQ(b1.minx, 0.123456789);
+
+    // convert it to a string, which is what happens
+    // when you do something like:
+    //   options.getValueOrDefault<BOX3D>("bounds", BOX3D());
+    std::ostringstream oss;
+    oss << b1; 
+
+    // convert it back
+    std::istringstream iss(oss.str());
+    BOX3D b2;
+    iss >> b2;
+
+    EXPECT_DOUBLE_EQ(b2.minx, 0.123456789);
 }

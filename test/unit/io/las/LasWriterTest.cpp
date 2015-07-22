@@ -32,18 +32,19 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "gtest/gtest.h"
+#include <pdal/pdal_test_main.hpp>
 
 #include <stdlib.h>
 
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/BufferReader.hpp>
 #include <LasHeader.hpp>
 #include <LasReader.hpp>
 #include <LasWriter.hpp>
 
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
+#include <pdal/StageWrapper.hpp>
 
-#include "StageTester.hpp"
 #include "Support.hpp"
 
 namespace pdal
@@ -56,6 +57,8 @@ public:
     template <typename T>
     static T headerVal(LasWriter& w, const std::string& s)
         { return w.headerVal<T>(s); }
+    LasHeader *header(LasWriter& w)
+        { return &w.m_lasHeader; }
 };
 
 } // namespace pdal
@@ -67,46 +70,112 @@ TEST(LasWriterTest, auto_offset)
     using namespace Dimension;
 
     const std::string FILENAME(Support::temppath("offset_test.las"));
-    PointContext ctx;
+    PointTable table;
 
-    ctx.registerDim(Id::X);
+    table.layout()->registerDim(Id::X);
 
-    PointBufferPtr buf(new PointBuffer(ctx));
-    buf->setField(Id::X, 0, 125000.00);
-    buf->setField(Id::X, 1, 74529.00);
-    buf->setField(Id::X, 2, 523523.02);
+    PointViewPtr view(new PointView(table));
+    view->setField(Id::X, 0, 125000.00);
+    view->setField(Id::X, 1, 74529.00);
+    view->setField(Id::X, 2, 523523.02);
 
     Options writerOps;
     writerOps.add("filename", FILENAME);
     writerOps.add("offset_x", "auto");
+    writerOps.add("scale_x", "auto");
 
     LasWriter writer;
     writer.setOptions(writerOps);
 
-    writer.prepare(ctx);
+    writer.prepare(table);
 
-    WriterTester::ready(&writer, ctx);
-    WriterTester::write(&writer, *buf);
-    WriterTester::done(&writer, ctx);
+    WriterWrapper::ready(writer, table);
+    WriterWrapper::write(writer, view);
+    WriterWrapper::done(writer, table);
 
     Options readerOps;
     readerOps.add("filename", FILENAME);
 
-    PointContext readCtx;
+    PointTable readTable;
 
     LasReader reader;
     reader.setOptions(readerOps);
 
-    reader.prepare(readCtx);
-    EXPECT_FLOAT_EQ(reader.header().offsetX(), 74529.00);
-    PointBufferSet pbSet = reader.execute(readCtx);
-    EXPECT_EQ(pbSet.size(), 1u);
-    buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 3u);
-    EXPECT_FLOAT_EQ(buf->getFieldAs<double>(Id::X, 0), 125000.00);
-    EXPECT_FLOAT_EQ(buf->getFieldAs<double>(Id::X, 1), 74529.00);
-    EXPECT_FLOAT_EQ(buf->getFieldAs<double>(Id::X, 2), 523523.02);
+    reader.prepare(readTable);
+    EXPECT_DOUBLE_EQ(74529.00, reader.header().offsetX());
+    PointViewSet viewSet = reader.execute(readTable);
+    EXPECT_EQ(viewSet.size(), 1u);
+    view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 3u);
+    EXPECT_NEAR(125000.00, view->getFieldAs<double>(Id::X, 0), .0001);
+    EXPECT_NEAR(74529.00, view->getFieldAs<double>(Id::X, 1), .0001);
+    EXPECT_NEAR(523523.02, view->getFieldAs<double>(Id::X, 2), .0001);
     FileUtils::deleteFile(FILENAME);
+}
+
+TEST(LasWriterTest, extra_dims)
+{
+    Options readerOps;
+
+    readerOps.add("filename", Support::datapath("las/1.2-with-color.las"));
+    LasReader reader;
+    reader.setOptions(readerOps);
+
+    Options writerOps;
+    writerOps.add("extra_dims", "Red=int32, Blue = int16, Green = int32_t");
+    writerOps.add("filename", Support::temppath("simple.las"));
+    LasWriter writer;
+    writer.setInput(reader);
+    writer.setOptions(writerOps);
+
+    PointTable table;
+    writer.prepare(table);
+    PointViewSet viewSet = writer.execute(table);
+
+    LasTester tester;
+    LasHeader *header = tester.header(writer);
+    EXPECT_EQ(header->pointLen(), header->basePointLen() + 10);
+    PointViewPtr pb = *viewSet.begin();
+
+    uint16_t colors[][3] = {
+        { 68, 77, 88 },
+        { 92, 100, 110 },
+        { 79, 87, 87 },
+        { 100, 102, 116 },
+        { 162, 114, 145 },
+        { 163, 137, 155 },
+        { 154, 131, 144 },
+        { 104, 111, 126 },
+        { 164, 136, 156 },
+        { 72, 87, 82 },
+        { 117, 117, 136 }
+    };
+
+    Options reader2Ops;
+    reader2Ops.add("filename", Support::temppath("simple.las"));
+    reader2Ops.add("extra_dims", "R1 =int32, B1= int16 ,G1=int32_t");
+    std::shared_ptr<LasReader> reader2(new LasReader);
+    reader2->setOptions(reader2Ops);
+
+    PointTable readTable;
+    reader2->prepare(readTable);
+    viewSet = reader2->execute(readTable);
+    pb = *viewSet.begin();
+    Dimension::Id::Enum r1 = readTable.layout()->findDim("R1");
+    EXPECT_TRUE(r1 != Dimension::Id::Unknown);
+    Dimension::Id::Enum b1 = readTable.layout()->findDim("B1");
+    EXPECT_TRUE(b1 != Dimension::Id::Unknown);
+    Dimension::Id::Enum g1 = readTable.layout()->findDim("G1");
+    EXPECT_TRUE(g1 != Dimension::Id::Unknown);
+    EXPECT_EQ(pb->size(), (size_t)1065);
+    size_t j = 0;
+    for (PointId i = 0; i < pb->size(); i += 100)
+    {
+        EXPECT_EQ(pb->getFieldAs<int16_t>(r1, i), colors[j][0]);
+        EXPECT_EQ(pb->getFieldAs<int16_t>(g1, i), colors[j][1]);
+        EXPECT_EQ(pb->getFieldAs<int16_t>(b1, i), colors[j][2]);
+        j++;
+    }
 }
 
 TEST(LasWriterTest, metadata_options)
@@ -122,17 +191,18 @@ TEST(LasWriterTest, metadata_options)
     metadataOps.add("minor_version", "forward");
     metadataOp.setOptions(metadataOps);
     ops.add(metadataOp);
+    ops.add("filename", Support::temppath("wontgetwritten"));
 
     LasWriter writer;
     writer.setOptions(ops);
 
-    PointContext ctx;
-    writer.prepare(ctx);
+    PointTable table;
+    writer.prepare(table);
 
     MetadataNode m = writer.getMetadata();
     m.add("minor_version", 56);
 
-    uint8_t format = 
+    uint8_t format =
         (uint8_t)LasTester::headerVal<unsigned>(writer, "format");
     EXPECT_EQ(format, 4u);
     std::string softwareId =
@@ -150,6 +220,123 @@ TEST(LasWriterTest, metadata_options)
     uint8_t minorVersion =
         (uint8_t)LasTester::headerVal<unsigned>(writer, "minor_version");
     EXPECT_EQ(minorVersion, 56u);
+}
+
+// Test that data from three input views gets written to separate output files.
+TEST(LasWriterTest, flex)
+{
+    std::array<std::string, 3> outname =
+        {{ "test_1.las", "test_2.las", "test_3.las" }};
+
+    Options readerOps;
+    readerOps.add("filename", Support::datapath("las/simple.las"));
+
+    PointTable table;
+
+    LasReader reader;
+    reader.setOptions(readerOps);
+
+    reader.prepare(table);
+    PointViewSet views = reader.execute(table);
+    PointViewPtr v = *(views.begin());
+
+    PointViewPtr v1(new PointView(table));
+    PointViewPtr v2(new PointView(table));
+    PointViewPtr v3(new PointView(table));
+
+    std::vector<PointViewPtr> vs;
+    vs.push_back(v1);
+    vs.push_back(v2);
+    vs.push_back(v3);
+
+    for (PointId i = 0; i < v->size(); ++i)
+        vs[i % 3]->appendPoint(*v, i);
+
+    for (size_t i = 0; i < outname.size(); ++i)
+        FileUtils::deleteFile(Support::temppath(outname[i]));
+
+    BufferReader reader2;
+    reader2.addView(v1);
+    reader2.addView(v2);
+    reader2.addView(v3);
+
+    Options writerOps;
+    writerOps.add("filename", Support::temppath("test_#.las"));
+
+    LasWriter writer;
+    writer.setOptions(writerOps);
+    writer.setInput(reader2);
+
+    writer.prepare(table);
+    writer.execute(table);
+
+    for (size_t i = 0; i < outname.size(); ++i)
+    {
+        std::string filename = Support::temppath(outname[i]);
+        EXPECT_TRUE(FileUtils::fileExists(filename));
+
+        Options ops;
+        ops.add("filename", filename);
+
+        LasReader r;
+        r.setOptions(ops);
+        EXPECT_EQ(r.preview().m_pointCount, 355u);
+    }
+}
+
+// Test that data from three input views gets written to a single output file.
+TEST(LasWriterTest, flex2)
+{
+    Options readerOps;
+    readerOps.add("filename", Support::datapath("las/simple.las"));
+
+    PointTable table;
+
+    LasReader reader;
+    reader.setOptions(readerOps);
+
+    reader.prepare(table);
+    PointViewSet views = reader.execute(table);
+    PointViewPtr v = *(views.begin());
+
+    PointViewPtr v1(new PointView(table));
+    PointViewPtr v2(new PointView(table));
+    PointViewPtr v3(new PointView(table));
+
+    std::vector<PointViewPtr> vs;
+    vs.push_back(v1);
+    vs.push_back(v2);
+    vs.push_back(v3);
+
+    for (PointId i = 0; i < v->size(); ++i)
+        vs[i % 3]->appendPoint(*v, i);
+
+    std::string outfile(Support::temppath("test_flex.las"));
+    FileUtils::deleteFile(outfile);
+
+    BufferReader reader2;
+    reader2.addView(v1);
+    reader2.addView(v2);
+    reader2.addView(v3);
+
+    Options writerOps;
+    writerOps.add("filename", outfile);
+
+    LasWriter writer;
+    writer.setOptions(writerOps);
+    writer.setInput(reader2);
+
+    writer.prepare(table);
+    writer.execute(table);
+
+    EXPECT_TRUE(FileUtils::fileExists(outfile));
+
+    Options ops;
+    ops.add("filename", outfile);
+
+    LasReader r;
+    r.setOptions(ops);
+    EXPECT_EQ(r.preview().m_pointCount, 1065u);
 }
 
 /**
@@ -183,7 +370,7 @@ bool diffdump(const std::string& f1, const std::string& f2)
 
 TEST(LasWriterTest, simple)
 {
-    PointContext ctx;
+    PointTable table;
 
     std::string infile(Support::datapath("las/1.2-with-color.las"));
     std::string outfile(Support::temppath("simple.las"));
@@ -203,9 +390,9 @@ TEST(LasWriterTest, simple)
 
     LasWriter writer;
     writer.setOptions(writerOpts);
-    writer.setInput(&reader);
-    writer.prepare(ctx);
-    writer.execute(ctx);
+    writer.setInput(reader);
+    writer.prepare(table);
+    writer.execute(table);
 
     diffdump(infile, outfile);
 }
@@ -215,7 +402,7 @@ TEST(LasWriterTest, simple)
 /**
 TEST(LasWriterTest, LasWriterTest_test_simple_laz)
 {
-    PointContext ctx;
+    PointTable table;
 
     WriterOpts writerOpts;
     writerOpts.add("compressed", true);
@@ -234,12 +421,12 @@ TEST(LasWriterTest, LasWriterTest_test_simple_laz)
         Support::temppath("LasWriterTest_test_simple_laz.laz"));
 
     // need to scope the writer, so that's it dtor can use the stream
-    LasWriter writer(ofs);
-    writer.setOptions(writer);
-    writer.setInput(&reader);
+    std::shared_ptr<LasWriter> writer(new LasWriter)(ofs);
+    writer->setOptions(writer);
+    writer->setInput(&reader);
 
-    writer.prepare(ctx);
-    writer.execute(ctx);
+    writer->prepare(table);
+    writer->execute(table);
 
     FileUtils::closeFile(ofs);
 
@@ -267,7 +454,7 @@ TEST(LasWriterTest, LasWriterTest_test_simple_laz)
 static void test_a_format(const std::string& refFile, uint8_t majorVersion,
     uint8_t minorVersion, int pointFormat)
 {
-    PointContext ctx;
+    PointTable table;
 
     // remove file from earlier run, if needed
     FileUtils::deleteFile("temp.las");
@@ -276,8 +463,8 @@ static void test_a_format(const std::string& refFile, uint8_t majorVersion,
     Options readerOpts;
     readerOpts.add("filename", Support::datapath(directory + "1.2_3.las"));
 
-    LasReader reader;
-    reader.setOptions(readerOpts);
+    std::shared_ptr<LasReader> reader(new LasReader);
+    reader->setOptions(readerOpts);
 
     Options writerOpts;
     writerOpts.add("compression", false);
@@ -295,13 +482,12 @@ static void test_a_format(const std::string& refFile, uint8_t majorVersion,
     std::ostream* ofs = FileUtils::createFile(Support::temppath("temp.las"));
 
     // need to scope the writer, so that's it dtor can use the stream
-    LasWriter writer(ofs);
-    writer.setOptions(writerOpts);
-    writer.setInput(&reader);
-    EXPECT_EQ(writer.getDescription(), "Las Writer");
+    std::shared_ptr<LasWriter> writer(new LasWriter)(ofs);
+    writer->setOptions(writerOpts);
+    writer->setInput(&reader);
 
-    writer.prepare(ctx);
-    writer.execute(ctx);
+    writer->prepare(table);
+    writer->execute(table);
 
     bool filesSame = Support::compare_files("temp.las",
         Support::datapath(directory + refFile));
@@ -339,84 +525,3 @@ TEST(LasWriterTest, version1_2)
 }
 **/
 
-
-//ABELL
-/**
-TEST(LasWriterTest, test_summary_data_add_point)
-{
-    SummaryData summaryData;
-
-    summaryData.addPoint(-95.329381929535259, 29.71948951835612,
-        -17.515486778166398, 0);
-    BOX3D b = summaryData.getBounds();
-    EXPECT_EQ(b.minx, b.maxx);
-    EXPECT_EQ(b.minz, b.maxz);
-}
-**/
-
-
-//ABELL
-/**
-TEST(LasWriterTest, LasWriterTest_test_drop_extra_returns)
-{
-    using namespace pdal;
-
-    PointContext ctx;
-
-    // remove file from earlier run, if needed
-    std::string temp_filename("temp-LasWriterTest_test_drop_extra_returns.las");
-    FileUtils::deleteFile(Support::temppath(temp_filename));
-
-    Options ops;
-
-    BOX3D bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
-    ops.add("bounds", bounds);
-    ops.add("num_points", 100);
-    ops.add("mode", "constant");
-    ops.add("number_of_returns", 10);
-    FauxReader reader;
-    reader.setOptions(ops);
-
-    std::ostream* ofs = FileUtils::createFile(Support::temppath(temp_filename));
-
-    Options writerOptions;
-    writerOptions.add("discard_high_return_numbers", true);
-    writerOptions.add("compression", false);
-    writerOptions.add("creation_year", 0);
-    writerOptions.add("creation_doy", 0);
-    writerOptions.add("system_id", "");
-    writerOptions.add("software_id", "TerraScan");
-
-    LasWriter writer(ofs);
-    writer.setOptions(writerOptions);
-    writer.setInput(&reader);
-    writer.prepare(ctx);
-    writer.execute(ctx);
-
-    Options readerOptions;
-    readerOptions.add("filename", Support::temppath(temp_filename));
-    readerOptions.add("count", 6);
-
-    LasReader reader2;
-    reader2.setOptions(readerOptions);
-
-    PointContext ctx2;
-
-    reader2.prepare(ctx2);
-    PointBufferSet pbSet = reader2.execute(ctx2);
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buf = *pbSet.begin();
-
-    uint8_t r1 = buf->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, 0);
-    EXPECT_EQ(r1, 1u);
-    uint8_t r2 = buf->getFieldAs<uint8_t>(Dimension::Id::ReturnNumber, 5);
-    EXPECT_EQ(r2, 1u);
-    uint8_t n1 = buf->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, 0);
-    EXPECT_EQ(n1, 5u);
-    uint8_t n2 = buf->getFieldAs<uint8_t>(Dimension::Id::NumberOfReturns, 5);
-    EXPECT_EQ(n1, 5u);
-
-    FileUtils::closeFile(ofs);
-    FileUtils::deleteFile(Support::temppath(temp_filename));
-}
-**/

@@ -52,28 +52,27 @@ public:
     { }
 };
 
-#define ICEBRIDGEDOCS "NASA HDF5-based IceBridge ATM reader. \nSee http://nsidc.org/data/docs/daac/icebridge/ilatm1b/index.html for more information."
 class PDAL_DLL IcebridgeReader : public pdal::Reader
 {
 public:
-    SET_STAGE_NAME("readers.icebridge", ICEBRIDGEDOCS)
-    SET_STAGE_LINK("http://pdal.io/stages/readers.icebridge.html")
-    SET_PLUGIN_VERSION("1.0.0b1")
-
     IcebridgeReader() : pdal::Reader()
         {}
 
-    static Options getDefaultOptions();
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+
+    Options getDefaultOptions();
     static Dimension::IdList getDefaultDimensions();
 
 private:
     Hdf5Handler m_hdf5Handler;
     point_count_t m_index;
 
-    virtual void addDimensions(PointContextRef ctx);
-    virtual void ready(PointContextRef ctx);
-    virtual point_count_t read(PointBuffer& data, point_count_t count);
-    virtual void done(PointContextRef ctx);
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void ready(PointTableRef table);
+    virtual point_count_t read(PointViewPtr view, point_count_t count);
+    virtual void done(PointTableRef table);
     virtual bool eof();
 
     IcebridgeReader& operator=(const IcebridgeReader&);   // Not implemented.

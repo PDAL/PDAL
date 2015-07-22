@@ -37,9 +37,8 @@
 #include "PCLConversions.hpp"
 
 #include <pdal/Options.hpp>
-#include <pdal/pdal_macros.hpp>
-#include <pdal/PointBuffer.hpp>
-#include <pdal/PointContext.hpp>
+#include <pdal/PointTable.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 
 #include <pcl/point_types.h>
@@ -47,11 +46,19 @@
 #include <pcl/filters/extract_indices.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/segmentation/progressive_morphological_filter.h>
-
-CREATE_FILTER_PLUGIN(ground, pdal::GroundFilter)
+#include <pcl/segmentation/approximate_progressive_morphological_filter.h>
 
 namespace pdal
 {
+
+static PluginInfo const s_info = PluginInfo(
+    "filters.ground",
+    "Progressive morphological filter",
+    "http://pdal.io/stages/filters.ground.html" );
+
+CREATE_SHARED_PLUGIN(1, 0, GroundFilter, Filter, s_info)
+
+std::string GroundFilter::getName() const { return s_info.name; }
 
 void GroundFilter::processOptions(const Options& options)
 {
@@ -62,23 +69,26 @@ void GroundFilter::processOptions(const Options& options)
     m_cellSize = options.getValueOrDefault<double>("cellSize", 1);
     m_classify = options.getValueOrDefault<bool>("classify", true);
     m_extract = options.getValueOrDefault<bool>("extract", false);
+    m_approximate = options.getValueOrDefault<bool>("approximate", false);
 }
 
-void GroundFilter::addDimensions(PointContextRef ctx)
-{ ctx.registerDim(Dimension::Id::Classification); }
+void GroundFilter::addDimensions(PointLayoutPtr layout)
+{
+    layout->registerDim(Dimension::Id::Classification);
+}
 
-PointBufferSet GroundFilter::run(PointBufferPtr input)
+PointViewSet GroundFilter::run(PointViewPtr input)
 {
     bool logOutput = log()->getLevel() > LogLevel::Debug1;
     if (logOutput)
         log()->floatPrecision(8);
     log()->get(LogLevel::Debug2) << "Process GroundFilter...\n";
 
-    // convert PointBuffer to PointXYZ
+    // convert PointView to PointXYZ
     typedef pcl::PointCloud<pcl::PointXYZ> Cloud;
     Cloud::Ptr cloud(new Cloud);
     BOX3D const& bounds = input->calculateBounds();
-    pclsupport::PDALtoPCD(*input, *cloud, bounds);
+    pclsupport::PDALtoPCD(input, *cloud, bounds);
 
     // PCL should provide console output at similar verbosity level as PDAL
     int level = log()->getLevel();
@@ -105,21 +115,38 @@ PointBufferSet GroundFilter::run(PointBufferPtr input)
     }
 
     // setup the PMF filter
-    pcl::ProgressiveMorphologicalFilter<pcl::PointXYZ> pmf;
-    pmf.setInputCloud(cloud);
-    pmf.setMaxWindowSize(m_maxWindowSize);
-    pmf.setSlope(m_slope);
-    pmf.setMaxDistance(m_maxDistance);
-    pmf.setInitialDistance(m_initialDistance);
-    pmf.setCellSize(m_cellSize);
-
-    // run the PMF filter, grabbing indices of ground returns
     pcl::PointIndicesPtr idx(new pcl::PointIndices);
-    pmf.extract(idx->indices);
+    if (!m_approximate)
+    {
 
+        pcl::ProgressiveMorphologicalFilter<pcl::PointXYZ> pmf;
+        pmf.setInputCloud(cloud);
+        pmf.setMaxWindowSize(m_maxWindowSize);
+        pmf.setSlope(m_slope);
+        pmf.setMaxDistance(m_maxDistance);
+        pmf.setInitialDistance(m_initialDistance);
+        pmf.setCellSize(m_cellSize);
+
+        // run the PMF filter, grabbing indices of ground returns
+        pmf.extract(idx->indices);
+    } else
+    {
+        pcl::ApproximateProgressiveMorphologicalFilter<pcl::PointXYZ> pmf;
+        pmf.setInputCloud(cloud);
+        pmf.setMaxWindowSize(m_maxWindowSize);
+        pmf.setSlope(m_slope);
+        pmf.setMaxDistance(m_maxDistance);
+        pmf.setInitialDistance(m_initialDistance);
+        pmf.setCellSize(m_cellSize);
+
+        // run the PMF filter, grabbing indices of ground returns
+        pmf.extract(idx->indices);
+
+    }
+
+    PointViewSet viewSet;
     if (!idx->indices.empty() && (m_classify || m_extract))
     {
-        PointBufferSet pbSet;
 
         if (m_classify)
         {
@@ -130,23 +157,23 @@ PointBufferSet GroundFilter::run(PointBufferPtr input)
             for (const auto& i : idx->indices)
             { input->setField(Dimension::Id::Classification, i, 2); }
 
-            pbSet.insert(input);
+            viewSet.insert(input);
         }
 
         if (m_extract)
         {
             log()->get(LogLevel::Debug2) << "Extracted " << idx->indices.size() << " ground returns!\n";
 
-            // create new PointBuffer containing only ground returns
-            PointBufferPtr output = input->makeNew();
+            // create new PointView containing only ground returns
+            PointViewPtr output = input->makeNew();
             for (const auto& i : idx->indices)
-            { output->appendPoint(*input, i); }
+            {
+                output->appendPoint(*input, i);
+            }
 
-            pbSet.erase(input);
-            pbSet.insert(output);
+            viewSet.erase(input);
+            viewSet.insert(output);
         }
-
-        return pbSet;
     }
     else
     {
@@ -157,10 +184,10 @@ PointBufferSet GroundFilter::run(PointBufferPtr input)
             log()->get(LogLevel::Debug2) << "Must choose --classify or --extract\n";
 
         // return the input buffer unchanged
-        PointBufferSet pbSet;
-        pbSet.insert(input);
-        return pbSet;
+        viewSet.insert(input);
     }
+
+    return viewSet;
 }
 
 } // namespace pdal

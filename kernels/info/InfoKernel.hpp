@@ -35,11 +35,10 @@
 #pragma once
 
 #include <pdal/Kernel.hpp>
-
+#include <pdal/KernelSupport.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/util/FileUtils.hpp>
-#include <pdal/PointBuffer.hpp>
-
 
 #ifdef __clang__
 #pragma GCC diagnostic ignored "-Wtautological-constant-out-of-range-compare"
@@ -48,9 +47,10 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/tokenizer.hpp>
 
-#include <pdal/KernelSupport.hpp>
-
 typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+
+extern "C" int32_t InfoKernel_ExitFunc();
+extern "C" PF_ExitFunc InfoKernel_InitPlugin();
 
 namespace pdal
 {
@@ -58,41 +58,50 @@ namespace pdal
 class PDAL_DLL InfoKernel : public Kernel
 {
 public:
-    SET_KERNEL_NAME ("info", "Info Kernel")
-    SET_KERNEL_LINK ("http://pdal.io/kernels/kernels.info.html")
-
-    InfoKernel();
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
     int execute(); // overrride
 
+
+    void setup(const std::string& filename);
+    MetadataNode run(const std::string& filename);
+
+    inline bool showAll() { return m_showAll; }
+    inline void doShowAll(bool value) { m_showAll = value; }
+    inline void doComputeSummary(bool value) { m_showSummary = value; }
+    inline void doComputeBoundary(bool value) { m_boundary = value; }
+
 private:
+    InfoKernel();
     void addSwitches(); // overrride
     void validateSwitches(); // overrride
 
-    void dump(std::ostream& o);
-
-    MetadataNode dumpPoints(PointBufferPtr buf) const;
+    void dump(MetadataNode& root);
+    MetadataNode dumpPoints(PointViewPtr inView) const;
     MetadataNode dumpStats() const;
     void dumpPipeline() const;
     MetadataNode dumpSummary(const QuickInfo& qi);
-    MetadataNode dumpQuery(PointBufferPtr buf) const;
+    MetadataNode dumpQuery(PointViewPtr inView) const;
 
     std::string m_inputFile;
     bool m_showStats;
     bool m_showSchema;
+    bool m_showAll;
     bool m_showMetadata;
     bool m_boundary;
     pdal::Options m_options;
     std::string m_pointIndexes;
-    bool m_useJSON;
-    std::string m_Dimensions;
-    std::string m_QueryPoint;
-    double m_QueryDistance;
+    std::string m_dimensions;
+    std::string m_queryPoint;
     std::string m_pipelineFile;
     bool m_showSummary;
+    bool m_needPoints;
+    std::string m_PointCloudSchemaOutput;
 
     Stage *m_statsStage;
     Stage *m_hexbinStage;
-    Reader *m_reader;
+    Stage *m_reader;
 
     MetadataNode m_tree;
     std::unique_ptr<PipelineManager> m_manager;

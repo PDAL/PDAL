@@ -45,9 +45,6 @@ table
 schema
   Database schema to write to. [Default: **public**]
 
-capacity
-  How many points per patch? [Default: **400**]
-
 column
   Table column to put patches into. [Default: **pa**]
   
@@ -61,17 +58,28 @@ compression
 overwrite
   To drop the table before writing set to 'true'. To append to the table set to 'false'. [Default: **true**]
 
-pack_ignored_fields
-  Remove ignored fields from schema before creating schema object in pointcloud_schemas. [Default: **true**]
-
 srid
   Spatial reference ID (relative to the `spatial_ref_sys` table in PostGIS) to store with the point cloud schema. [Default: **4326**]
   
+pcid
+  An optional existing PCID to use for the point cloud schema. If specified, the schema must be present. If not specified, a match will still be looked for, or a new schema will be inserted.
+
 pre_sql
   Optional SQL to execute *before* running the translation. If the value references a file, the file is read and any SQL inside is executed. Otherwise the value is executed as SQL itself.
 
 post_sql
   Optional SQL to execute *after* running the translation. If the value references a file, the file is read and any SQL inside is executed. Otherwise the value is executed as SQL itself.
   
+scale_x, scale_y, scale_z / offset_x, offset_y, offset_z
+  If ANY of these options are specified the X, Y and Z dimensions are adjusted
+  by subtracting the offset and then dividing the values by the specified
+  scaling factor before being written as 32-bit integers (as opposed to double
+  precision values).  If any of these options is specified, unspecified
+  scale_<x,y,x> options are given the value of 1.0 and unspecified
+  offset_<x,y,z> are given the value of 0.0.
+
+output_dims
+  If specified, limits the dimensions written for each point.  Dimensions
+  are listed by name and separated by commas.
 
 .. _PostgreSQL Pointcloud: http://github.com/pramsey/pointcloud

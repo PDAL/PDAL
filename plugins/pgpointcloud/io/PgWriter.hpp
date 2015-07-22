@@ -45,27 +45,28 @@ namespace pdal
 class PDAL_DLL PgWriter : public DbWriter
 {
 public:
-    SET_STAGE_NAME("writers.pgpointcloud",
-        "Write points to PostgreSQL pgpointcloud output")
-    SET_STAGE_LINK("http://pdal.io/stages/writers.pgpointcloud.html")
-    SET_PLUGIN_VERSION("1.0.0b1")
-
     PgWriter();
     ~PgWriter();
 
-    static Options getDefaultOptions();
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+
+    Options getDefaultOptions();
 
 private:
+
+
     PgWriter& operator=(const PgWriter&); // not implemented
     PgWriter(const PgWriter&); // not implemented
 
     virtual void processOptions(const Options& options);
-    virtual void write(const PointBuffer& pointBuffer);
-    virtual void done(PointContextRef ctx);
+    virtual void write(const PointViewPtr view);
+    virtual void done(PointTableRef table);
     virtual void initialize();
 
     void writeInit();
-    void writeTile(const PointBuffer& buffer);
+    void writeTile(const PointViewPtr view);
 
     bool CheckTableExists(std::string const& name);
     bool CheckPointCloudExists();
@@ -84,7 +85,7 @@ private:
                      std::string const& table_name,
                      std::string const& column_name);
 
-    bool WriteBlock(PointBuffer const& buffer);
+    bool WriteBlock(const PointViewPtr view);
 
     PGconn* m_session;
     std::string m_schema_name;
@@ -95,13 +96,11 @@ private:
     uint32_t m_patch_capacity;
     uint32_t m_srid;
     uint32_t m_pcid;
-    bool m_have_postgis;
-    bool m_create_index;
     bool m_overwrite;
     std::string m_insert;
     Orientation::Enum m_orientation;
-    bool m_pack;
     std::string m_pre_sql;
+    std::string m_post_sql;
 
     // lose this
     bool m_schema_is_initialized;

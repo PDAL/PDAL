@@ -40,15 +40,22 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/io/impl/pcd_io.hpp>
 
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include "PCLConversions.hpp"
-
-CREATE_READER_PLUGIN(pcd, pdal::PcdReader)
 
 namespace pdal
 {
 
-void PcdReader::ready(PointContextRef ctx)
+static PluginInfo const s_info = PluginInfo(
+    "readers.pcd",
+    "Read data in the Point Cloud Library (PCL) format.",
+    "http://pdal.io/stages/readers.pclvisualizer.html" );
+
+CREATE_SHARED_PLUGIN(1, 0, PcdReader, Reader, s_info)
+
+std::string PcdReader::getName() const { return s_info.name; }
+
+void PcdReader::ready(PointTableRef table)
 {
     pcl::PCLPointCloud2 cloud;
     pcl::PCDReader r;
@@ -57,20 +64,20 @@ void PcdReader::ready(PointContextRef ctx)
 }
 
 
-void PcdReader::addDimensions(PointContextRef ctx)
+void PcdReader::addDimensions(PointLayoutPtr layout)
 {
-    ctx.registerDims(getDefaultDimensions());
+    layout->registerDims(getDefaultDimensions());
 }
 
 
-point_count_t PcdReader::read(PointBuffer& data, point_count_t count)
+point_count_t PcdReader::read(PointViewPtr view, point_count_t /*count*/)
 {
     pcl::PointCloud<XYZIRGBA>::Ptr cloud(new pcl::PointCloud<XYZIRGBA>);
 
     pcl::PCDReader r;
     r.read<XYZIRGBA>(m_filename, *cloud);
 
-    pclsupport::PCDtoPDAL(*cloud, data);
+    pclsupport::PCDtoPDAL(*cloud, view);
 
     return cloud->points.size();
 }

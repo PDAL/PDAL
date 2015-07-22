@@ -34,21 +34,34 @@
 
 #include "TerrasolidReader.hpp"
 
-#include <pdal/PointBuffer.hpp>
-#include <pdal/util/FileUtils.hpp>
+#include <pdal/PointView.hpp>
+#include <pdal/util/Extractor.hpp>
 
 #include <map>
 
 namespace pdal
 {
 
+static PluginInfo const s_info = PluginInfo(
+    "readers.terrasolid",
+    "TerraSolid Reader",
+    "http://pdal.io/stages/readers.terrasolid.html" );
+
+CREATE_STATIC_PLUGIN(1, 0, TerrasolidReader, Reader, s_info)
+
+std::string TerrasolidReader::getName() const { return s_info.name; }
+
 void TerrasolidReader::initialize()
 {
-    std::istream* stream = FileUtils::openFile(m_filename);
+    ILeStream stream(m_filename);
 
     TerraSolidHeaderPtr h(new TerraSolidHeader);
     m_header.swap(h);
-    Utils::read_n(*m_header, *stream, sizeof(TerraSolidHeader));
+
+    stream >> m_header->HdrSize >> m_header->HdrVersion >> m_header->RecogVal;
+    stream.get(m_header->RecogStr, 4);
+    stream >> m_header->PntCnt >> m_header->Units >> m_header->OrgX >>
+        m_header->OrgY >> m_header->OrgZ >> m_header->Time >> m_header->Color;
 
     if (m_header->RecogVal != 970401)
         throw terrasolid_error("Header identifier was not '970401', is this "
@@ -66,7 +79,6 @@ void TerrasolidReader::initialize()
         throw terrasolid_error(oss.str());
     }
 
-    delete stream;
     log()->get(LogLevel::Debug) << "TerraSolid Reader::initialize format: " <<
         m_format << std::endl;
     log()->get(LogLevel::Debug) << "OrgX: " << m_header->OrgX << std::endl;
@@ -81,20 +93,21 @@ void TerrasolidReader::initialize()
 }
 
 
-void TerrasolidReader::addDimensions(PointContextRef ctx)
+void TerrasolidReader::addDimensions(PointLayoutPtr layout)
 {
     m_size = 0;
-    ctx.registerDim(Dimension::Id::Classification);
-    ctx.registerDim(Dimension::Id::PointSourceId);
-    ctx.registerDim(Dimension::Id::Intensity);
-    ctx.registerDim(Dimension::Id::X);
-    ctx.registerDim(Dimension::Id::Y);
-    ctx.registerDim(Dimension::Id::Z);
+    layout->registerDim(Dimension::Id::Classification);
+    layout->registerDim(Dimension::Id::PointSourceId);
+    layout->registerDim(Dimension::Id::Intensity);
+    layout->registerDim(Dimension::Id::X);
+    layout->registerDim(Dimension::Id::Y);
+    layout->registerDim(Dimension::Id::Z);
+    layout->registerDim(Dimension::Id::ReturnNumber);
+    layout->registerDim(Dimension::Id::NumberOfReturns);
     if (m_format == TERRASOLID_Format_2)
     {
-        ctx.registerDim(Dimension::Id::ReturnNumber);
-        ctx.registerDim(Dimension::Id::Flag);
-        ctx.registerDim(Dimension::Id::Mark);
+        layout->registerDim(Dimension::Id::Flag);
+        layout->registerDim(Dimension::Id::Mark);
     }
     if (m_format == TERRASOLID_Format_1)
         m_size = 16;
@@ -103,16 +116,16 @@ void TerrasolidReader::addDimensions(PointContextRef ctx)
 
     if (m_haveTime)
     {
-        ctx.registerDim(Dimension::Id::OffsetTime);
+        layout->registerDim(Dimension::Id::OffsetTime);
         m_size += 4;
     }
 
     if (m_haveColor)
     {
-        ctx.registerDim(Dimension::Id::Red);
-        ctx.registerDim(Dimension::Id::Green);
-        ctx.registerDim(Dimension::Id::Blue);
-        ctx.registerDim(Dimension::Id::Alpha);
+        layout->registerDim(Dimension::Id::Red);
+        layout->registerDim(Dimension::Id::Green);
+        layout->registerDim(Dimension::Id::Blue);
+        layout->registerDim(Dimension::Id::Alpha);
         m_size += 4;
     }
 }
@@ -127,6 +140,7 @@ Dimension::IdList TerrasolidReader::getDefaultDimensions()
     dims.push_back(Id::Classification);
     dims.push_back(Id::PointSourceId);
     dims.push_back(Id::ReturnNumber);
+    dims.push_back(Id::NumberOfReturns);
     dims.push_back(Id::Flag);
     dims.push_back(Id::Mark);
     dims.push_back(Id::Intensity);
@@ -142,133 +156,138 @@ Dimension::IdList TerrasolidReader::getDefaultDimensions()
 }
 
 
-void TerrasolidReader::ready(PointContextRef ctx)
+void TerrasolidReader::ready(PointTableRef)
 {
-    m_istream = FileUtils::openFile(m_filename);
+    m_istream.reset(new IStream(m_filename));
     // Skip to the beginning of points.
-    m_istream->seekg(56);
+    m_istream->seek(56);
     m_index = 0;
 }
 
 
-point_count_t TerrasolidReader::read(PointBuffer& data, point_count_t count)
+point_count_t TerrasolidReader::read(PointViewPtr view, point_count_t count)
 {
     count = std::min(count, getNumPoints() - m_index);
 
-    uint8_t *buf = new uint8_t[m_size * count];
-    Utils::read_n(buf, *m_istream, m_size * count);
+    std::vector<char> buf(m_size * count);
+    m_istream->get(buf);
+    LeExtractor extractor(buf.data(), buf.size());
 
-    //See https://www.terrasolid.com/download/tscan.pdf
-    // This spec is awful, but it's something.  
+    // See https://www.terrasolid.com/download/tscan.pdf
+    // This spec is awful, but it's something.
     // The scaling adjustments are different than what we used to do and
     // seem wrong (scaling the offset is odd), but that's what the document
     // says.
     // Also modified the fetch of time/color based on header flag (rather
     // than just not write the data into the buffer).
-    PointId nextId = data.size();
+    PointId nextId = view->size();
     while (!eof())
     {
-        uint8_t* p = buf + m_size * m_index;
-
         if (m_format == TERRASOLID_Format_1)
         {
-            uint8_t classification = Utils::read_field<uint8_t>(p);
-            data.setField(Dimension::Id::Classification, nextId,
-                    classification);
+            uint8_t classification, flight_line, echo_int, x, y, z;
 
-            uint8_t flight_line = Utils::read_field<uint8_t>(p);
-            data.setField(Dimension::Id::PointSourceId, nextId,
-                flight_line);
+            extractor >> classification >> flight_line >> echo_int >> x >> y >>
+                z;
 
-            uint16_t echo_int = Utils::read_field<uint16_t>(p);
-            data.setField(Dimension::Id::ReturnNumber, nextId, echo_int);
-
-            int32_t x = Utils::read_field<int32_t>(p);
-            data.setField(Dimension::Id::X, nextId,
-                (x - m_header->OrgX) / m_header->Units);
-
-            int32_t y = Utils::read_field<int32_t>(p);
-            data.setField(Dimension::Id::Y, nextId,
-                (y - m_header->OrgY) / m_header->Units);
-
-            int32_t z = Utils::read_field<int32_t>(p);
-            data.setField(Dimension::Id::Z, nextId,
-                (z - m_header->OrgZ) / m_header->Units);
+            view->setField(Dimension::Id::Classification, nextId,
+                          classification);
+            view->setField(Dimension::Id::PointSourceId, nextId, flight_line);
+            switch (echo_int)
+            {
+            case 0: // only echo
+                view->setField(Dimension::Id::ReturnNumber, nextId, 1);
+                view->setField(Dimension::Id::NumberOfReturns, nextId, 1);
+                break;
+            case 1: // first of many echos
+                view->setField(Dimension::Id::ReturnNumber, nextId, 1);
+                break;
+            default: // intermediate echo or last of many echos
+                break;
+            }
+            view->setField(Dimension::Id::X, nextId,
+                          (x - m_header->OrgX) / m_header->Units);
+            view->setField(Dimension::Id::Y, nextId,
+                          (y - m_header->OrgY) / m_header->Units);
+            view->setField(Dimension::Id::Z, nextId,
+                          (z - m_header->OrgZ) / m_header->Units);
         }
 
         if (m_format == TERRASOLID_Format_2)
         {
-            int32_t x = Utils::read_field<int32_t>(p);
-            data.setField(Dimension::Id::X, nextId,
-                (x - m_header->OrgX) / m_header->Units);
+            int32_t x, y, z;
+            uint8_t classification, echo_int, flag, mark;
+            uint16_t flight_line, intensity;
 
-            int32_t y = Utils::read_field<int32_t>(p);
-            data.setField(Dimension::Id::Y, nextId,
-                (y - m_header->OrgY) / m_header->Units);
+            extractor >> x >> y >> z >> classification >> echo_int >> flag >>
+                mark >> flight_line >> intensity;
 
-            int32_t z = Utils::read_field<int32_t>(p);
-            data.setField(Dimension::Id::Z, nextId,
-                (z - m_header->OrgZ) / m_header->Units);
-
-            uint8_t classification = Utils::read_field<uint8_t>(p);
-            data.setField(Dimension::Id::Classification, nextId,
-                classification);
-
-            uint8_t return_number = Utils::read_field<uint8_t>(p);
-            data.setField(Dimension::Id::ReturnNumber, nextId,
-                return_number);
-
-            uint8_t flag = Utils::read_field<uint8_t>(p);
-            data.setField(Dimension::Id::Flag, nextId, flag);
-
-            uint8_t mark = Utils::read_field<uint8_t>(p);
-            data.setField(Dimension::Id::Mark, nextId, mark);
-
-            uint16_t flight_line = Utils::read_field<uint16_t>(p);
-            data.setField(Dimension::Id::PointSourceId, nextId,
-                flight_line);
-
-            uint16_t intensity = Utils::read_field<uint16_t>(p);
-            data.setField(Dimension::Id::Intensity, nextId, intensity);
+            view->setField(Dimension::Id::X, nextId,
+                          (x - m_header->OrgX) / m_header->Units);
+            view->setField(Dimension::Id::Y, nextId,
+                          (y - m_header->OrgY) / m_header->Units);
+            view->setField(Dimension::Id::Z, nextId,
+                          (z - m_header->OrgZ) / m_header->Units);
+            view->setField(Dimension::Id::Classification, nextId,
+                          classification);
+            switch (echo_int)
+            {
+            case 0: // only echo
+                view->setField(Dimension::Id::ReturnNumber, nextId, 1);
+                view->setField(Dimension::Id::NumberOfReturns, nextId, 1);
+                break;
+            case 1: // first of many echos
+                view->setField(Dimension::Id::ReturnNumber, nextId, 1);
+                break;
+            default: // intermediate echo or last of many echos
+                break;
+            }
+            view->setField(Dimension::Id::Flag, nextId, flag);
+            view->setField(Dimension::Id::Mark, nextId, mark);
+            view->setField(Dimension::Id::PointSourceId, nextId, flight_line);
+            view->setField(Dimension::Id::Intensity, nextId, intensity);
         }
 
         if (m_haveTime)
         {
-            uint32_t t = Utils::read_field<uint32_t>(p);
+            uint32_t t;
+
+            extractor >> t;
+
             if (m_index == 0)
                 m_baseTime = t;
-            t -= m_baseTime;    //Offset from the beginning of the read.
-                                //instead of GPS week.
-            t /= 5;             //5000ths of a second to milliseconds
-            data.setField(Dimension::Id::OffsetTime, nextId, t);
+            t -= m_baseTime; // Offset from the beginning of the read.
+            // instead of GPS week.
+            t /= 5; // 5000ths of a second to milliseconds
+            view->setField(Dimension::Id::OffsetTime, nextId, t);
         }
 
         if (m_haveColor)
         {
-            uint8_t red = Utils::read_field<uint8_t>(p);
-            data.setField(Dimension::Id::Red, nextId, red);
+            uint8_t red, green, blue, alpha;
 
-            uint8_t green = Utils::read_field<uint8_t>(p);
-            data.setField(Dimension::Id::Green, nextId,  green);
+            extractor >> red >> green >> blue >> alpha;
 
-            uint8_t blue = Utils::read_field<uint8_t>(p);
-            data.setField(Dimension::Id::Blue, nextId, blue);
-
-            uint8_t alpha = Utils::read_field<uint8_t>(p);
-            data.setField(Dimension::Id::Alpha, nextId, alpha);
+            view->setField(Dimension::Id::Red, nextId, red);
+            view->setField(Dimension::Id::Green, nextId, green);
+            view->setField(Dimension::Id::Blue, nextId, blue);
+            view->setField(Dimension::Id::Alpha, nextId, alpha);
         }
-        nextId++;
-    }
 
-    delete[] buf;
+        if (m_cb)
+            m_cb(*view, nextId);
+
+        nextId++;
+        m_index++;
+    }
 
     return count;
 }
 
 
-void TerrasolidReader::done(PointContextRef ctx)
+void TerrasolidReader::done(PointTableRef)
 {
-    FileUtils::closeFile(m_istream);
+    m_istream.reset();
 }
 
 } // namespace pdal

@@ -34,102 +34,76 @@
 
 #pragma once
 
-#include <pdal/pdal_internal.hpp>
-//
-// macros for creating the various stage types
-//
-#define MAKE_READER_CREATOR(T, FullT) \
-    pdal::Reader* create_##T() \
-        { pdal::Reader *r = new FullT(); return r; }
-#define MAKE_FILTER_CREATOR(T, FullT) \
-    pdal::Filter* create_##T() \
-        { pdal::Filter *f = new FullT(); return f; }
-#define MAKE_WRITER_CREATOR(T, FullT) \
-    pdal::Writer* create_##T() \
-        { pdal::Writer *w = new FullT(); return w; }
-#define MAKE_KERNEL_CREATOR(T, FullT) \
-    pdal::Kernel* create_##T() \
-        { pdal::Kernel *k = new FullT(); return k; }
+#include <pdal/pdal_export.hpp>
+#include <pdal/plugin.hpp>
+#include <pdal/PluginManager.hpp>
 
-//
-// macros to register the stage creators
-//
-#define REGISTER_WRITER(T, FullT) \
-    registerDriverInfo<FullT>(); \
-    registerWriter(FullT::s_getName(), create_##T)
-#define REGISTER_READER(T, FullT) \
-    registerDriverInfo<FullT>(); \
-    registerReader(FullT::s_getName(), create_##T)
-#define REGISTER_FILTER(T, FullT) \
-    registerDriverInfo<FullT>(); \
-    registerFilter(FullT::s_getName(), create_##T)
-#define REGISTER_KERNEL(T, FullT) \
-    registerKernelDriverInfo<FullT>(); \
-    registerKernel(FullT::s_getName(), create_##T)
+namespace {
 
-//
-// macros to create the various plugins types
-//
-#define CREATE_READER_PLUGIN(T, FullT) \
-    MAKE_READER_CREATOR(T, FullT) \
-    PDAL_C_START PDAL_DLL void PDALRegister_reader_##T(void* factory) \
-    { \
-        pdal::StageFactory& f = *(pdal::StageFactory*) factory; \
-        f.registerDriverInfo< FullT>(); \
-        f.registerReader(FullT::s_getName(), create_##T); \
-    } \
-    PDAL_C_END \
-    SET_READER_PLUGIN_VERSION(T)
-#define CREATE_FILTER_PLUGIN(T, FullT) \
-    MAKE_FILTER_CREATOR(T, FullT) \
-    PDAL_C_START PDAL_DLL void PDALRegister_filter_##T(void* factory) \
-    { \
-        pdal::StageFactory& f = *(pdal::StageFactory*) factory; \
-        f.registerDriverInfo< FullT>(); \
-        f.registerFilter(FullT::s_getName(), create_##T); \
-    } \
-    PDAL_C_END \
-    SET_FILTER_PLUGIN_VERSION(T)
-#define CREATE_WRITER_PLUGIN(T, FullT) \
-    MAKE_WRITER_CREATOR(T, FullT) \
-    PDAL_C_START PDAL_DLL void PDALRegister_writer_##T(void* factory) \
-    { \
-        pdal::StageFactory& f = *(pdal::StageFactory*) factory; \
-        f.registerDriverInfo< FullT>(); \
-        f.registerWriter(FullT::s_getName(), create_##T); \
-    } \
-    PDAL_C_END \
-    SET_WRITER_PLUGIN_VERSION(T)
-#define CREATE_KERNEL_PLUGIN(T, FullT) \
-    MAKE_KERNEL_CREATOR(T, FullT) \
-    PDAL_C_START PDAL_DLL void PDALRegister_kernel_##T(void* factory) \
-    { \
-        pdal::KernelFactory& f = *(pdal::KernelFactory*) factory; \
-        f.registerKernelDriverInfo< FullT>(); \
-        f.registerKernel(FullT::s_getName(), create_##T); \
-    } \
-    PDAL_C_END \
-    SET_KERNEL_PLUGIN_VERSION(T)
+typedef struct PluginInfo {
+    std::string name;
+    std::string description;
+    std::string link;
+    PluginInfo(const std::string& n, const std::string& d, const std::string& l)
+      : name(n), description(d), link(l)
+    {}
+} PluginInfo;
 
-//
-// macro to register the version of PDAL the plugin was linked against
-//
-#define SET_READER_PLUGIN_VERSION(T) \
-    PDAL_C_START PDAL_DLL int PDALRegister_version_reader_##T() \
-        { return PDAL_PLUGIN_VERSION; } \
-    PDAL_C_END
-#define SET_FILTER_PLUGIN_VERSION(T) \
-    PDAL_C_START PDAL_DLL int PDALRegister_version_filter_##T() \
-        { return PDAL_PLUGIN_VERSION; } \
-    PDAL_C_END
-#define SET_WRITER_PLUGIN_VERSION(T) \
-    PDAL_C_START PDAL_DLL int PDALRegister_version_writer_##T() \
-        { return PDAL_PLUGIN_VERSION; } \
-    PDAL_C_END
-#define SET_KERNEL_PLUGIN_VERSION(T) \
-    PDAL_C_START PDAL_DLL int PDALRegister_version_kernel_##T() \
-        { return PDAL_PLUGIN_VERSION; } \
-    PDAL_C_END
+}
+
+#define CREATE_SHARED_PLUGIN(version_major, version_minor, T, type, info) \
+    extern "C" PDAL_DLL int32_t ExitFunc() \
+    { return 0; } \
+    extern "C" PDAL_DLL PF_ExitFunc PF_initPlugin() \
+    { \
+        int res = 0; \
+        PF_RegisterParams rp; \
+        rp.version.major = version_major; \
+        rp.version.minor = version_minor; \
+        rp.createFunc = pdal::T::create; \
+        rp.destroyFunc = pdal::T::destroy; \
+        rp.description = info.description; \
+        rp.link = info.link; \
+        rp.pluginType = PF_PluginType_ ## type; \
+        if (!pdal::PluginManager::registerObject(info.name, &rp)) \
+            return NULL; \
+        return ExitFunc; \
+    } \
+    void * pdal::T::create() { return new pdal::T(); } \
+    int32_t pdal::T::destroy(void *p) \
+    { \
+        if (!p) \
+            return -1; \
+        delete (pdal::T *)p; \
+        return 0; \
+    }
+
+#define CREATE_STATIC_PLUGIN(version_major, version_minor, T, type, info) \
+    extern "C" PDAL_DLL int32_t T ## _ExitFunc() \
+    { return 0; } \
+    extern "C" PDAL_DLL PF_ExitFunc T ## _InitPlugin() \
+    { \
+        int res = 0; \
+        PF_RegisterParams rp; \
+        rp.version.major = version_major; \
+        rp.version.minor = version_minor; \
+        rp.createFunc = pdal::T::create; \
+        rp.destroyFunc = pdal::T::destroy; \
+        rp.description = info.description; \
+        rp.link = info.link; \
+        rp.pluginType = PF_PluginType_ ## type; \
+        if (!pdal::PluginManager::registerObject(info.name, &rp)) \
+            return NULL; \
+        return T ## _ExitFunc; \
+    } \
+    void * pdal::T::create() { return new pdal::T(); } \
+    int32_t pdal::T::destroy(void *p) \
+    { \
+        if (!p) \
+            return -1; \
+        delete (pdal::T *)p; \
+        return 0; \
+    }
 
 #ifdef _WIN32
 inline long lround(double d)

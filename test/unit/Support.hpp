@@ -36,12 +36,12 @@
 
 // support functions for unit testing
 
+#include <pdal/pdal_types.hpp>
 #include <pdal/util/Bounds.hpp>
-#include <pdal/Utils.hpp>
 
 namespace pdal
 {
-    class PointBuffer;
+    class PointView;
     class Stage;
 }
 
@@ -118,20 +118,20 @@ public:
     static bool compare_text_files(std::istream& str1, std::istream& str2);
 
     // validate a point's XYZ values
-    static void check_pN(const pdal::PointBuffer& data,
-                         std::size_t index,
+    static void check_pN(const pdal::PointView& data,
+                         pdal::PointId index,
                          double xref, double yref, double zref);
 
     // validate a point's XYZ, Time, and Color values
-    static void check_pN(const pdal::PointBuffer& data,
-        std::size_t index, double xref, double yref, double zref,
+    static void check_pN(const pdal::PointView& data,
+        pdal::PointId index, double xref, double yref, double zref,
         double tref, uint16_t rref, uint16_t gref, uint16_t bref);
 
     // these are for the 1.2-with-color image
-    static void check_p0_p1_p2(const pdal::PointBuffer& data);
-    static void check_p100_p101_p102(const pdal::PointBuffer& data);
-    static void check_p355_p356_p357(const pdal::PointBuffer& data);
-    static void check_p710_p711_p712(const pdal::PointBuffer& data);
+    static void check_p0_p1_p2(const pdal::PointView& data);
+    static void check_p100_p101_p102(const pdal::PointView& data);
+    static void check_p355_p356_p357(const pdal::PointView& data);
+    static void check_p710_p711_p712(const pdal::PointView& data);
 
     static void compareBounds(const pdal::BOX3D& p,
         const pdal::BOX3D& q);

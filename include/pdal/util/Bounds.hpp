@@ -38,7 +38,7 @@
 #include <sstream>
 
 #ifndef PDAL_DLL
-#if defined(WIN32)
+#if defined(_WIN32)
 #   define PDAL_DLL   __declspec(dllexport)
 #else
 #  if defined(USE_GCC_VISIBILITY_FLAG)
@@ -62,8 +62,6 @@ namespace pdal
     \endverbatim
 */
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wfloat-equal"
 
 class PDAL_DLL BOX3D
 {
@@ -81,10 +79,11 @@ public:
         minz(box.minz), maxz(box.maxz)
     {}
 
-    BOX3D(double minx, double miny, double maxx, double maxy) :
-        minx(minx), maxx(maxx), miny(miny), maxy(maxy),
-        minz(HIGHEST), maxz(LOWEST)
-    {}
+    // Note: a "2D" bbox is explicitly constructed to have invalid Z values,
+    //   which might lead to some problems when used in conjuction with a "3D"
+    //   bbox. See, for example, issue #897.
+    // Note: ctor body not inlined due to MSVC, see #900
+    BOX3D(double minx, double miny, double maxx, double maxy) ;
 
     BOX3D(double minx, double miny, double minz, double maxx, double maxy,
             double maxz) :
@@ -98,12 +97,7 @@ public:
     double minz;
     double maxz;
 
-    bool empty() const
-    {
-        return  minx == HIGHEST && maxx == LOWEST &&
-            miny == HIGHEST && maxy == LOWEST &&
-            minz == HIGHEST && maxz == LOWEST;
-    }
+    bool empty() const;
 
     bool contains(double x, double y, double z) const
     {
@@ -136,18 +130,9 @@ public:
         return (!equal(rhs));
     }
 
-    void grow(double x, double y, double z=LOWEST)
-    {
-        if (x < minx) minx = x;
-        if (x > maxx) maxx = x;
+    void grow(double x, double y);
 
-        if (y < miny) miny = y;
-        if (y > maxy) maxy = y;
-
-        if (z < minz) minz = z;
-        if (z > maxz) maxz = z;
-
-    }
+    void grow(double x, double y, double z);
 
     void grow(const BOX3D& other)
     {
@@ -185,10 +170,7 @@ public:
         if (other.maxz > maxz) maxz = other.maxz;
     }
 
-    bool is_z_empty() const
-    {
-        return ((minz == HIGHEST) && (maxz == LOWEST));
-    }
+    bool is_z_empty() const;
 
     bool overlaps(const BOX3D& other)
     {
@@ -200,11 +182,7 @@ public:
                minz <= other.maxz && maxz >= other.minz;
     }
 
-    void clear()
-    {
-        minx = HIGHEST; miny = HIGHEST; minz = HIGHEST;
-        maxx = LOWEST; maxy = LOWEST; maxz = LOWEST;
-    }
+    void clear();
 
     std::string toBox(uint32_t precision = 8, uint32_t dimensions = 2) const
     {
@@ -252,11 +230,7 @@ public:
     }
 
     /// Returns a staticly-allocated Bounds extent that represents infinity
-    static const BOX3D& getDefaultSpatialExtent()
-    {
-        static BOX3D v(LOWEST, LOWEST, LOWEST, HIGHEST, HIGHEST, HIGHEST);
-        return v;
-    }
+    static const BOX3D& getDefaultSpatialExtent();
 
 
 };
@@ -269,17 +243,18 @@ inline std::ostream& operator << (std::ostream& ostr, const BOX3D& bounds)
         return ostr;
     }
 
+    const int savedPrec = ostr.precision();
+    ostr.precision(16); // or..?
     ostr << "(";
     ostr << "[" << bounds.minx << ", " << bounds.maxx << "], "
          << "[" << bounds.miny << ", " << bounds.maxy <<"]";
     if (!bounds.is_z_empty())
          ostr << ", [" <<  bounds.minz << ", " << bounds.maxz << "]";
     ostr << ")";
+    ostr.precision(savedPrec);
     return ostr;
 }
 
 extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX3D& bounds);
 
 } // namespace pdal
-
-#pragma GCC diagnostic pop

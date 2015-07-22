@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "gtest/gtest.h"
+#include <pdal/pdal_test_main.hpp>
 
 #include <pdal/Writer.hpp>
 #include <pdal/StageFactory.hpp>
@@ -43,12 +43,46 @@
 
 using namespace pdal;
 
-Options getWriterOptions()
+namespace { // anonymous
+
+std::string getTestConnBase()
+{
+    std::string s;
+    if ( ! testDbPort.empty() )
+        s += " port='" + testDbPort + "'";
+    if ( ! testDbHost.empty() )
+        s += " host='" + testDbHost + "'";
+    if ( ! testDbUser.empty() )
+        s += " user='" + testDbUser + "'";
+    return s;
+}
+
+
+std::string getConnectionString(const std::string& dbname)
+{
+    return getTestConnBase() + " dbname='" + dbname + "'";
+}
+
+
+std::string getTestDBTempConn()
+{
+    return getConnectionString(testDbTempname);
+}
+
+std::string getMasterDBConn()
+{
+    return getConnectionString(testDbName);
+}
+
+} // anonymous namespace
+
+Options getDbOptions()
 {
     Options options;
 
-    options.add(Option("connection", testDbTempConn));
-    options.add(Option("table", "pdal_test_table"));
+    options.add(Option("connection", getTestDBTempConn()));
+    options.add(Option("table", "pdal-\"test\"-table")); // intentional quotes
+    options.add(Option("column", "p\"a")); // intentional quotes
     options.add(Option("srid", "4326"));
     options.add(Option("capacity", "10000"));
 
@@ -62,14 +96,8 @@ public:
 protected:
     virtual void SetUp()
     {
-        try
-        {
-            m_masterConnection = pg_connect(testDbConn);
-        } catch (pdal::pdal_error&)
-        {
-            m_masterConnection = 0;
-            return;
-        }
+        std::string connstr = getMasterDBConn();
+        m_masterConnection = pg_connect( connstr );
         m_testConnection = NULL;
 
         // Silence those pesky notices
@@ -82,25 +110,14 @@ protected:
             testDbTempname << " TEMPLATE template0";
         executeOnMasterDb(createDbSql.str());
 
-        try
-        {
-
-            m_testConnection = pg_connect( testDbTempConn);
-        } catch (pdal::pdal_error&)
-        {
-            m_testConnection = 0;
-            return;
-        }
+        m_testConnection = pg_connect( getTestDBTempConn() );
 
         executeOnTestDb("CREATE EXTENSION pointcloud");
     }
 
     void executeOnTestDb(const std::string& sql)
     {
-        if (m_testConnection)
-            pg_execute(m_testConnection, sql);
-        else
-            throw std::runtime_error("Not connected to test database for testing!");
+        pg_execute(m_testConnection, sql);
     }
 
     virtual void TearDown()
@@ -121,22 +138,12 @@ private:
 
     void executeOnMasterDb(const std::string& sql)
     {
-        if (m_masterConnection)
-            pg_execute(m_masterConnection, sql);
-        else
-            throw std::runtime_error("Not connected to database for testing!");
+        pg_execute(m_masterConnection, sql);
     }
 
     void execute(PGconn* connection, const std::string& sql)
     {
-        if (connection)
-        {
-            pg_execute(connection, sql);
-        }
-        else
-        {
-            throw std::runtime_error("Not connected to database for testing");
-        }
+        pg_execute(connection, sql);
     }
 
     void dropTestDb()
@@ -150,11 +157,14 @@ private:
     PGconn* m_testConnection;
 };
 
-TEST_F(PgpointcloudWriterTest, testWrite)
+namespace
+{
+
+void optionsWrite(const Options& writerOps)
 {
     StageFactory f;
-    WriterPtr writer(f.createWriter("writers.pgpointcloud"));
-    ReaderPtr reader(f.createReader("readers.las"));
+    std::unique_ptr<Stage> writer(f.createStage("writers.pgpointcloud"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.las"));
 
     EXPECT_TRUE(writer.get());
     EXPECT_TRUE(reader.get());
@@ -165,13 +175,13 @@ TEST_F(PgpointcloudWriterTest, testWrite)
     Options options;
     options.add("filename", file);
     reader->setOptions(options);
-    writer->setOptions(getWriterOptions());
-    writer->setInput(reader.get());
+    writer->setOptions(writerOps);
+    writer->setInput(*reader);
 
-    PointContext ctx;
-    writer->prepare(ctx);
+    PointTable table;
+    writer->prepare(table);
 
-    PointBufferSet written = writer->execute(ctx);
+    PointViewSet written = writer->execute(table);
 
     point_count_t count(0);
     for(auto i = written.begin(); i != written.end(); ++i)
@@ -180,11 +190,47 @@ TEST_F(PgpointcloudWriterTest, testWrite)
     EXPECT_EQ(count, 1065U);
 }
 
+} // unnamed namespace
 
-TEST_F(PgpointcloudWriterTest, testNoPointcloudExtension)
+TEST_F(PgpointcloudWriterTest, write)
+{
+    optionsWrite(getDbOptions());
+}
+
+TEST_F(PgpointcloudWriterTest, writeScaled)
+{
+    Options ops = getDbOptions();
+    ops.add("scale_x", .01);
+    ops.add("scale_y", .01);
+    ops.add("scale_z", .01);
+
+    optionsWrite(ops);
+}
+
+TEST_F(PgpointcloudWriterTest, writeXYZ)
+{
+    Options ops = getDbOptions();
+    ops.add("output_dims", "X,Y,Z");
+
+    optionsWrite(ops);
+
+    PointTable table;
+    std::unique_ptr<Stage> reader(
+        StageFactory().createStage("readers.pgpointcloud"));
+    reader->setOptions(getDbOptions());
+
+    reader->prepare(table);
+    Dimension::IdList dims = table.layout()->dims();
+    EXPECT_EQ(dims.size(), (size_t)3);
+    EXPECT_TRUE(Utils::contains(dims, Dimension::Id::X));
+    EXPECT_TRUE(Utils::contains(dims, Dimension::Id::Y));
+    EXPECT_TRUE(Utils::contains(dims, Dimension::Id::Z));
+}
+
+TEST_F(PgpointcloudWriterTest, writetNoPointcloudExtension)
 {
     StageFactory f;
-    WriterPtr writer(f.createWriter("writers.pgpointcloud"));
+    std::unique_ptr<Stage> writer(f.createStage("writers.pgpointcloud"));
     EXPECT_TRUE(writer.get());
 
     executeOnTestDb("DROP EXTENSION pointcloud");
@@ -193,16 +239,16 @@ TEST_F(PgpointcloudWriterTest, testNoPointcloudExtension)
 
     const Option opt_filename("filename", file);
 
-    ReaderPtr reader(f.createReader("readers.las"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.las"));
     EXPECT_TRUE(reader.get());
     Options options;
     options.add(opt_filename);
     reader->setOptions(options);
-    writer->setOptions(getWriterOptions());
-    writer->setInput(reader.get());
+    writer->setOptions(getDbOptions());
+    writer->setInput(*reader);
 
-    PointContext ctx;
-    writer->prepare(ctx);
+    PointTable table;
+    writer->prepare(table);
 
-    EXPECT_THROW(writer->execute(ctx), pdal_error);
+    EXPECT_THROW(writer->execute(table), pdal_error);
 }

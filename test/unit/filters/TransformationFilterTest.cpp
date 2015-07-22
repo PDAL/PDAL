@@ -32,7 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "gtest/gtest.h"
+#include <pdal/pdal_test_main.hpp>
+#include <FauxReader.hpp>
 #include <TransformationFilter.hpp>
 
 #include <pdal/StageFactory.hpp>
@@ -45,13 +46,6 @@ namespace pdal
 class TransformationFilterTest : public ::testing::Test
 {
 public:
-
-    TransformationFilterTest()
-        : factory()
-        , reader(factory.createReader("readers.faux"))
-        , filter(factory.createFilter("filters.transformation"))
-    {}
-
     virtual void SetUp()
     {
         StageFactory f;
@@ -61,16 +55,21 @@ public:
         readerOpts.add("mode", "constant");
         readerOpts.add("num_points", 3);
         readerOpts.add("bounds", bounds);
-        reader->setOptions(readerOpts);
-
-        filter->setInput(reader.get());
+        m_reader.setOptions(readerOpts);
+        m_filter.setInput(m_reader);
     }
 
-    StageFactory factory;
-    ReaderPtr reader;
-    FilterPtr filter;
-
+    FauxReader m_reader;
+    TransformationFilter m_filter;
 };
+
+
+TEST(TransformationMatrix, create)
+{
+    StageFactory f;
+    std::unique_ptr<Stage> filter(f.createStage("filters.transformation"));
+    EXPECT_TRUE(filter.get());
+}
 
 
 TEST(TransformationMatrix, FromString)
@@ -99,14 +98,14 @@ TEST(TransformationMatrix, FromString)
 TEST(TransformationMatrix, TooShort)
 {
     std::string s = "1 0 0 0\n0 1 0 0\n0 0 1 0\n0 0 0";
-    EXPECT_THROW(transformationMatrixFromString(s), invalid_format);
+    EXPECT_THROW(transformationMatrixFromString(s), pdal_error);
 }
 
 
 TEST(TransformationMatrix, TooLong)
 {
     std::string s = "1 0 0 0\n0 1 0 0\n0 0 1 0\n0 0 0 1 0";
-    EXPECT_THROW(transformationMatrixFromString(s), invalid_format);
+    EXPECT_THROW(transformationMatrixFromString(s), pdal_error);
 }
 
 
@@ -114,20 +113,20 @@ TEST_F(TransformationFilterTest, NoChange)
 {
     Options filterOpts;
     filterOpts.add("matrix", "1 0 0 0\n0 1 0 0\n0 0 1 0\n0 0 0 1");
-    filter->setOptions(filterOpts);
+    m_filter.setOptions(filterOpts);
 
-    PointContext ctx;
-    filter->prepare(ctx);
-    PointBufferSet pbSet = filter->execute(ctx);
-    EXPECT_EQ(1u, pbSet.size());
-    PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(3u, buf->size());
+    PointTable table;
+    m_filter.prepare(table);
+    PointViewSet viewSet = m_filter.execute(table);
+    EXPECT_EQ(1u, viewSet.size());
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(3u, view->size());
 
-    for (point_count_t i = 0; i < buf->size(); ++i)
+    for (point_count_t i = 0; i < view->size(); ++i)
     {
-        EXPECT_DOUBLE_EQ(1, buf->getFieldAs<double>(Dimension::Id::X, i));
-        EXPECT_DOUBLE_EQ(2, buf->getFieldAs<double>(Dimension::Id::Y, i));
-        EXPECT_DOUBLE_EQ(3, buf->getFieldAs<double>(Dimension::Id::Z, i));
+        EXPECT_DOUBLE_EQ(1, view->getFieldAs<double>(Dimension::Id::X, i));
+        EXPECT_DOUBLE_EQ(2, view->getFieldAs<double>(Dimension::Id::Y, i));
+        EXPECT_DOUBLE_EQ(3, view->getFieldAs<double>(Dimension::Id::Z, i));
     }
 }
 
@@ -136,18 +135,18 @@ TEST_F(TransformationFilterTest, Translation)
 {
     Options filterOpts;
     filterOpts.add("matrix", "1 0 0 1\n0 1 0 2\n0 0 1 3\n0 0 0 1");
-    filter->setOptions(filterOpts);
+    m_filter.setOptions(filterOpts);
 
-    PointContext ctx;
-    filter->prepare(ctx);
-    PointBufferSet pbSet = filter->execute(ctx);
-    PointBufferPtr buf = *pbSet.begin();
+    PointTable table;
+    m_filter.prepare(table);
+    PointViewSet viewSet = m_filter.execute(table);
+    PointViewPtr view = *viewSet.begin();
 
-    for (point_count_t i = 0; i < buf->size(); ++i)
+    for (point_count_t i = 0; i < view->size(); ++i)
     {
-        EXPECT_DOUBLE_EQ(2, buf->getFieldAs<double>(Dimension::Id::X, i));
-        EXPECT_DOUBLE_EQ(4, buf->getFieldAs<double>(Dimension::Id::Y, i));
-        EXPECT_DOUBLE_EQ(6, buf->getFieldAs<double>(Dimension::Id::Z, i));
+        EXPECT_DOUBLE_EQ(2, view->getFieldAs<double>(Dimension::Id::X, i));
+        EXPECT_DOUBLE_EQ(4, view->getFieldAs<double>(Dimension::Id::Y, i));
+        EXPECT_DOUBLE_EQ(6, view->getFieldAs<double>(Dimension::Id::Z, i));
     }
 }
 
@@ -156,18 +155,18 @@ TEST_F(TransformationFilterTest, Rotation)
 {
     Options filterOpts;
     filterOpts.add("matrix", "0 1 0 0\n-1 0 0 0\n0 0 1 0\n0 0 0 1");
-    filter->setOptions(filterOpts);
+    m_filter.setOptions(filterOpts);
 
-    PointContext ctx;
-    filter->prepare(ctx);
-    PointBufferSet pbSet = filter->execute(ctx);
-    PointBufferPtr buf = *pbSet.begin();
+    PointTable table;
+    m_filter.prepare(table);
+    PointViewSet viewSet = m_filter.execute(table);
+    PointViewPtr view = *viewSet.begin();
 
-    for (point_count_t i = 0; i < buf->size(); ++i)
+    for (point_count_t i = 0; i < view->size(); ++i)
     {
-        EXPECT_DOUBLE_EQ(2, buf->getFieldAs<double>(Dimension::Id::X, i));
-        EXPECT_DOUBLE_EQ(-1, buf->getFieldAs<double>(Dimension::Id::Y, i));
-        EXPECT_DOUBLE_EQ(3, buf->getFieldAs<double>(Dimension::Id::Z, i));
+        EXPECT_DOUBLE_EQ(2, view->getFieldAs<double>(Dimension::Id::X, i));
+        EXPECT_DOUBLE_EQ(-1, view->getFieldAs<double>(Dimension::Id::Y, i));
+        EXPECT_DOUBLE_EQ(3, view->getFieldAs<double>(Dimension::Id::Z, i));
     }
 }
 

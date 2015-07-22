@@ -13,9 +13,9 @@ if(WIN32)
     endif(MSVC)
 endif(WIN32)
 
-find_package(Boost QUIET 1.53 COMPONENTS program_options iostreams filesystem system)
+find_package(Boost 1.53 REQUIRED COMPONENTS program_options iostreams filesystem system thread)
 set_package_properties(Boost PROPERTIES TYPE REQUIRED
-        PURPOSE "Provides convenience, e.g., program_options, filesytem")
+    PURPOSE "Boost provides fundamental functionality for PDAL")
 if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})
 

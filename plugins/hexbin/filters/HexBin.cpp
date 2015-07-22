@@ -39,15 +39,21 @@
 
 using namespace hexer;
 
-CREATE_FILTER_PLUGIN(hexbin, pdal::HexBin)
-
 namespace pdal
 {
+
+static PluginInfo const s_info = PluginInfo(
+    "filters.hexbin",
+    "Tessellate the point's X/Y domain and determine point density and/or point boundary.",
+    "http://pdal.io/stages/filters.hexbin.html" );
+
+CREATE_SHARED_PLUGIN(1, 0, HexBin, Filter, s_info)
 
 void HexBin::processOptions(const Options& options)
 {
     m_sampleSize = options.getValueOrDefault<uint32_t>("sample_size", 5000);
     m_density = options.getValueOrDefault<uint32_t>("threshold", 15);
+    m_outputTesselation = options.getValueOrDefault<bool>("output_tesselation", false);
 
     if (options.hasOption("edge_length"))
         m_edgeLength = options.getValueOrDefault<double>("edge_length", 0.0);
@@ -57,7 +63,7 @@ void HexBin::processOptions(const Options& options)
 }
 
 
-void HexBin::ready(PointContext ctx)
+void HexBin::ready(PointTableRef table)
 {
     if (m_edgeLength == 0.0)  // 0 can always be represented exactly.
     {
@@ -69,18 +75,18 @@ void HexBin::ready(PointContext ctx)
 }
 
 
-void HexBin::filter(PointBuffer& buf)
+void HexBin::filter(PointView& view)
 {
-    for (PointId idx = 0; idx < buf.size(); ++idx)
+    for (PointId idx = 0; idx < view.size(); ++idx)
     {
-        double x = buf.getFieldAs<double>(pdal::Dimension::Id::X, idx);
-        double y = buf.getFieldAs<double>(pdal::Dimension::Id::Y, idx);
+        double x = view.getFieldAs<double>(pdal::Dimension::Id::X, idx);
+        double y = view.getFieldAs<double>(pdal::Dimension::Id::Y, idx);
         m_grid->addPoint(x, y);
     }
 }
 
-    
-void HexBin::done(PointContext ctx)
+
+void HexBin::done(PointTableRef table)
 {
     m_grid->processSample();
     m_grid->findShapes();
@@ -107,22 +113,26 @@ void HexBin::done(PointContext ctx)
         "for edge_size if you want to compute one.");
     m_metadata.add("hex_offsets", offsets.str(), "Offset of hex corners from "
         "hex centers.");
-    MetadataNode hexes = m_metadata.add("hexagons");
-    for (HexIter hi = m_grid->hexBegin(); hi != m_grid->hexEnd(); ++hi)
+    if (m_outputTesselation)
     {
-        using namespace boost;
 
-        HexInfo h = *hi;
+        MetadataNode hexes = m_metadata.add("hexagons");
+        for (HexIter hi = m_grid->hexBegin(); hi != m_grid->hexEnd(); ++hi)
+        {
+            using namespace boost;
 
-        MetadataNode hex = hexes.addList("hexagon");
-        hex.add("density", h.density());
+            HexInfo h = *hi;
 
-        hex.add("gridpos", lexical_cast<std::string>(h.xgrid()) + " " +
-            lexical_cast<std::string>(h.ygrid()));
-        std::ostringstream oss;
-        // Using stream limits precision (default 6)
-        oss << "POINT (" << h.x() << " " << h.y() << ")";
-        hex.add("center", oss.str());
+            MetadataNode hex = hexes.addList("hexagon");
+            hex.add("density", h.density());
+
+            hex.add("gridpos", lexical_cast<std::string>(h.xgrid()) + " " +
+                lexical_cast<std::string>(h.ygrid()));
+            std::ostringstream oss;
+            // Using stream limits precision (default 6)
+            oss << "POINT (" << h.x() << " " << h.y() << ")";
+            hex.add("center", oss.str());
+        }
     }
 
     std::ostringstream polygon;

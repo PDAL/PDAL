@@ -36,31 +36,35 @@
 
 #include <pdal/Filter.hpp>
 
+extern "C" int32_t MergeFilter_ExitFunc();
+extern "C" PF_ExitFunc MergeFilter_InitPlugin();
+
 namespace pdal
 {
 
 class PDAL_DLL MergeFilter : public MultiFilter
 {
 public:
-    SET_STAGE_NAME("filters.merge", "Merge data from two different readers into a single stream.")
-    SET_STAGE_LINK("http://pdal.io/stages/filters.merge.html")
+    MergeFilter ()
+    {}
 
-    MergeFilter() : MultiFilter()
-        {}
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
 private:
-    PointBufferPtr m_buf;
+    PointViewPtr m_view;
 
-    virtual void ready(PointContext ctx)
-        { m_buf.reset(new PointBuffer(ctx)); }
+    virtual void ready(PointTableRef table)
+        { m_view.reset(new PointView(table)); }
 
-    virtual PointBufferSet run(PointBufferPtr buf)
+    virtual PointViewSet run(PointViewPtr in)
     {
-        PointBufferSet pbSet;
+        PointViewSet viewSet;
 
-        m_buf->append(*buf);
-        pbSet.insert(m_buf);
-        return pbSet;
+        m_view->append(*in.get());
+        viewSet.insert(m_view);
+        return viewSet;
     }
 
     MergeFilter& operator=(const MergeFilter&); // not implemented
@@ -68,3 +72,4 @@ private:
 };
 
 } // namespace pdal
+

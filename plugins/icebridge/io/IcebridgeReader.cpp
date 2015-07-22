@@ -1,6 +1,6 @@
 /******************************************************************************
 * Copyright (c) 2014, Connor Manning, connor@hobu.co
-* 
+*
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -34,11 +34,9 @@
 
 #include "IcebridgeReader.hpp"
 #include <pdal/util/FileUtils.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 
 #include <map>
-
-CREATE_READER_PLUGIN(icebridge, pdal::IcebridgeReader)
 
 namespace
 {
@@ -61,6 +59,17 @@ namespace
 
 namespace pdal
 {
+
+static PluginInfo const s_info = PluginInfo(
+    "readers.icebridge",
+    "NASA HDF5-based IceBridge ATM reader. \n" \
+        "See http://nsidc.org/data/docs/daac/icebridge/ilatm1b/index.html \n" \
+        "for more information.",
+    "http://pdal.io/stages/readers.icebridge.html" );
+
+CREATE_SHARED_PLUGIN(1, 0, IcebridgeReader, Reader, s_info)
+
+std::string IcebridgeReader::getName() const { return s_info.name; }
 
 Options IcebridgeReader::getDefaultOptions()
 {
@@ -92,27 +101,27 @@ Dimension::IdList IcebridgeReader::getDefaultDimensions()
 }
 
 
-void IcebridgeReader::addDimensions(PointContextRef ctx)
+void IcebridgeReader::addDimensions(PointLayoutPtr layout)
 {
-    return ctx.registerDims(getDefaultDimensions());
+    return layout->registerDims(getDefaultDimensions());
 }
 
 
-void IcebridgeReader::ready(PointContextRef ctx)
+void IcebridgeReader::ready(PointTableRef table)
 {
     m_hdf5Handler.initialize(m_filename, hdf5Columns);
     m_index = 0;
 }
 
 
-point_count_t IcebridgeReader::read(PointBuffer& buf, point_count_t count)
+point_count_t IcebridgeReader::read(PointViewPtr view, point_count_t count)
 {
     //All data we read for icebridge is currently 4 bytes wide, so
     //  just allocate once and forget it.
     //This could be a huge allocation.  Perhaps we should do something
     //  in the icebridge handler?
 
-    PointId startId = buf.size();
+    PointId startId = view->size();
     point_count_t remaining = m_hdf5Handler.getNumPoints() - m_index;
     count = std::min(count, remaining);
 
@@ -143,7 +152,7 @@ point_count_t IcebridgeReader::read(PointBuffer& buf, point_count_t count)
                     float *fval = (float *)p;
                     for (PointId i = 0; i < count; ++i)
                     {
-                        buf.setField(*di, nextId++, *fval * 1000);
+                        view->setField(*di, nextId++, *fval * 1000);
                         fval++;
                     }
                 }
@@ -151,14 +160,14 @@ point_count_t IcebridgeReader::read(PointBuffer& buf, point_count_t count)
                 {
                     float *fval = (float *)p;
                     for (PointId i = 0; i < count; ++i)
-                        buf.setField(*di, nextId++, *fval++);
+                        view->setField(*di, nextId++, *fval++);
                 }
             }
             else if (column.predType == H5::PredType::NATIVE_INT)
             {
                 int32_t *ival = (int32_t *)p;
                 for (PointId i = 0; i < count; ++i)
-                    buf.setField(*di, nextId++, *ival++);
+                    view->setField(*di, nextId++, *ival++);
             }
         }
         catch(...)
@@ -170,7 +179,7 @@ point_count_t IcebridgeReader::read(PointBuffer& buf, point_count_t count)
 }
 
 
-void IcebridgeReader::done(PointContextRef ctx)
+void IcebridgeReader::done(PointTableRef table)
 {
     m_hdf5Handler.close();
 }

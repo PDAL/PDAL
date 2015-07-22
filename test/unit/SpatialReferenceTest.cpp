@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "gtest/gtest.h"
+#include <pdal/pdal_test_main.hpp>
 
 #include <pdal/SpatialReference.hpp>
 #include <pdal/util/FileUtils.hpp>
@@ -134,23 +134,41 @@ TEST(SpatialReferenceTest, test_get_utmzone)
 
     int zone = ref.computeUTMZone(box);
 
-    EXPECT_EQ(zone , 10);
+    EXPECT_EQ(zone, 10);
 }
 
+
+TEST(SpatialReferenceTest, calcZone)
+{
+    int zone = 1;
+    for (double lon = -537.0; lon < 537.0; lon += 6.0)
+    {   
+       EXPECT_EQ(zone, SpatialReference::calculateZone(lon, 25));
+       EXPECT_EQ(-zone, SpatialReference::calculateZone(lon, -25));
+       zone++;
+       if (zone > 60)
+           zone = 1;
+    }
+    EXPECT_EQ(32, SpatialReference::calculateZone(5, 60));
+    EXPECT_EQ(31, SpatialReference::calculateZone(5, 80));
+    EXPECT_EQ(33, SpatialReference::calculateZone(10, 80));
+    EXPECT_EQ(35, SpatialReference::calculateZone(25, 80));
+    EXPECT_EQ(37, SpatialReference::calculateZone(40, 80));
+}
 
 
 #if defined(PDAL_HAVE_GEOS) && defined(PDAL_HAVE_LIBGEOTIFF)
 // Test fetching SRS from an existing file
 TEST(SpatialReferenceTest, test_read_srs)
 {
-    PointContext ctx;
+    PointTable table;
 
     Options ops;
     ops.add("filename", Support::datapath("las/utm17.las"));
     LasReader reader;
     reader.setOptions(ops);
-    reader.prepare(ctx);
-    reader.execute(ctx);
+    reader.prepare(table);
+    reader.execute(table);
 
     const SpatialReference& ref = reader.getSpatialReference();
 
@@ -185,7 +203,7 @@ TEST(SpatialReferenceTest, test_vertical_datums)
     const std::string wktCheck = ref.getWKT(SpatialReference::eCompoundOK);
     EXPECT_TRUE(wkt == wktCheck); // just to make sure
 
-    PointContext ctx;
+    PointTable table;
     // Write a very simple file with our SRS and one point.
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
@@ -198,18 +216,18 @@ TEST(SpatialReferenceTest, test_vertical_datums)
 
     LasWriter writer;
     writer.setOptions(opts);
-    writer.setInput(&reader);
+    writer.setInput(reader);
     writer.setSpatialReference(ref);
-    writer.prepare(ctx);
-    writer.execute(ctx);
+    writer.prepare(table);
+    writer.execute(table);
     SpatialReference sr = writer.getSpatialReference();
 
     // Reopen and check contents.
-    PointContext ctx2;
+    PointTable table2;
     LasReader reader2;
     reader2.setOptions(opts);
-    reader2.prepare(ctx2);
-    reader2.execute(ctx2);
+    reader2.prepare(table2);
+    reader2.execute(table2);
 
     const SpatialReference ref2 = reader2.getSpatialReference();
     const std::string wkt2 = ref2.getWKT(SpatialReference::eCompoundOK);
@@ -240,7 +258,7 @@ TEST(SpatialReferenceTest, test_writing_vlr)
     {
         FileUtils::deleteFile(tmpfile);
 
-        PointContext ctx;
+        PointTable table;
         LasReader readerx;
         Options readerOpts;
 
@@ -253,25 +271,25 @@ TEST(SpatialReferenceTest, test_writing_vlr)
 
         writerOpts.add("filename", tmpfile);
         writer.setOptions(writerOpts);
-        writer.setInput(&readerx);
-        writer.prepare(ctx);
+        writer.setInput(readerx);
+        writer.prepare(table);
         writer.setSpatialReference(ref);
-        writer.execute(ctx);
+        writer.execute(table);
     }
 
     // Reopen and check contents.
     {
-        PointContext ctx;
+        PointTable table;
         Options ops;
         ops.add("filename", tmpfile);
         LasReader reader;
         reader.setOptions(ops);
-        reader.prepare(ctx);
-        reader.execute(ctx);
+        reader.prepare(table);
+        reader.execute(table);
 
         SpatialReference result_ref = reader.getSpatialReference();
 
-        EXPECT_EQ(reader.header().vlrCount(), 4u);
+        EXPECT_EQ(reader.header().vlrCount(), 5u);
         std::string wkt = result_ref.getWKT();
         EXPECT_EQ(wkt, reference_wkt);
     }

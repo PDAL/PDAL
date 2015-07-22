@@ -34,9 +34,19 @@
 
 #include <pdal/KernelFactory.hpp>
 #include <pdal/Kernel.hpp>
-#include <pdal/Kernels.hpp>
+#include <pdal/PluginManager.hpp>
+#include <pdal/util/Utils.hpp>
 
-#include <pdal/Utils.hpp>
+#include <delta/DeltaKernel.hpp>
+#include <diff/DiffKernel.hpp>
+#include <info/InfoKernel.hpp>
+#include <merge/MergeKernel.hpp>
+#include <pipeline/PipelineKernel.hpp>
+#include <random/RandomKernel.hpp>
+#include <sort/SortKernel.hpp>
+#include <split/SplitKernel.hpp>
+#include <tindex/TIndexKernel.hpp>
+#include <translate/TranslateKernel.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
@@ -44,219 +54,45 @@
 
 #include <sstream>
 #include <stdio.h> // for funcptr
+#include <string>
+#include <vector>
 
 namespace pdal
 {
 
-//
-// define the functions to create the kernels
-//
-MAKE_KERNEL_CREATOR(delta, pdal::DeltaKernel)
-MAKE_KERNEL_CREATOR(diff, pdal::DiffKernel)
-MAKE_KERNEL_CREATOR(info, pdal::InfoKernel)
-MAKE_KERNEL_CREATOR(pipeline, pdal::PipelineKernel)
-MAKE_KERNEL_CREATOR(random, pdal::RandomKernel)
-MAKE_KERNEL_CREATOR(sort, pdal::SortKernel)
-MAKE_KERNEL_CREATOR(translate, pdal::TranslateKernel)
-
-KernelFactory::KernelFactory()
+KernelFactory::KernelFactory(bool no_plugins)
 {
-    registerKnownKernels();
-
-    loadPlugins();
-    return;
+    PluginManager & pm = PluginManager::getInstance();
+    if (!no_plugins) { pm.loadAll(PF_PluginType_Kernel); }
+    PluginManager::initializePlugin(DeltaKernel_InitPlugin);
+    PluginManager::initializePlugin(DiffKernel_InitPlugin);
+    PluginManager::initializePlugin(InfoKernel_InitPlugin);
+    PluginManager::initializePlugin(MergeKernel_InitPlugin);
+    PluginManager::initializePlugin(PipelineKernel_InitPlugin);
+    PluginManager::initializePlugin(RandomKernel_InitPlugin);
+    PluginManager::initializePlugin(SortKernel_InitPlugin);
+    PluginManager::initializePlugin(SplitKernel_InitPlugin);
+    PluginManager::initializePlugin(TIndexKernel_InitPlugin);
+    PluginManager::initializePlugin(TranslateKernel_InitPlugin);
 }
 
-
-std::unique_ptr<Kernel> KernelFactory::createKernel(const std::string& type)
+std::unique_ptr<Kernel> KernelFactory::createKernel(std::string const& name)
 {
-    KernelCreator* f = getKernelCreator(type);
-    if (!f)
+    PluginManager & pm = PluginManager::getInstance();
+    return std::unique_ptr<Kernel>(static_cast<Kernel*>(pm.createObject(name)));
+}
+
+std::vector<std::string> KernelFactory::getKernelNames()
+{
+    PluginManager & pm = PluginManager::getInstance();
+    PluginManager::RegistrationMap rm = pm.getRegistrationMap();
+    std::vector<std::string> nv;
+    for (auto r : rm)
     {
-        std::ostringstream oss;
-        oss << "Unable to create kernel for type '" << type << "'. Does a driver with this type name exist?";
-        throw pdal_error(oss.str());
+        if (r.second.pluginType == PF_PluginType_Kernel)
+            nv.push_back(r.first);
     }
-    std::unique_ptr<Kernel> kernel(f());
-    return kernel;
+    return nv;
 }
-
-
-template<typename T>
-static T* findFirst(const std::string& type, std::map<std::string, T*> list)
-{
-    typename std::map<std::string, T*>::const_iterator iter = list.find(type);
-    if (iter == list.end())
-        return NULL;
-    return (*iter).second;
-}
-
-
-KernelFactory::KernelCreator* KernelFactory::getKernelCreator(const std::string& type) const
-{
-    return findFirst<KernelCreator>(type, m_kernelCreators);
-}
-
-
-void KernelFactory::registerKernel(const std::string& type, KernelCreator* f)
-{
-    std::pair<std::string, KernelCreator*> p(type, f);
-    m_kernelCreators.insert(p);
-}
-
-
-void KernelFactory::registerKnownKernels()
-{
-    REGISTER_KERNEL(delta, pdal::DeltaKernel);
-    REGISTER_KERNEL(diff, pdal::DiffKernel);
-    REGISTER_KERNEL(info, pdal::InfoKernel);
-    REGISTER_KERNEL(pipeline, pdal::PipelineKernel);
-    REGISTER_KERNEL(random, pdal::RandomKernel);
-    REGISTER_KERNEL(sort, pdal::SortKernel);
-    REGISTER_KERNEL(translate, pdal::TranslateKernel);
-}
-
-
-void KernelFactory::loadPlugins()
-{
-    using namespace boost::filesystem;
-
-    std::string driver_path("PDAL_DRIVER_PATH");
-    std::string pluginDir = Utils::getenv(driver_path);
-
-    // Only filenames that start with libpdal_plugin are candidates to be loaded
-    // at runtime.  PDAL plugins are to be named in a specified form:
-
-    // libpdal_plugin_{kerneltype}_{name}
-
-    // For example, libpdal_plugin_kernel_ground
-
-
-    // If we don't have a driver path, we're not loading anything
-
-    if (pluginDir.size() == 0)
-    {
-        pluginDir = "/usr/local/lib:./lib:../lib:../bin";
-    }
-
-    std::vector<std::string> pluginPathVec;
-    boost::algorithm::split(pluginPathVec, pluginDir, boost::algorithm::is_any_of(":"), boost::algorithm::token_compress_on);
-
-    for (const auto& pluginPath : pluginPathVec)
-    {
-        if (!boost::filesystem::is_directory(pluginPath))
-            continue;
-        directory_iterator dir(pluginPath), it, end;
-
-        std::map<path, path> pluginFilenames;
-
-        // Collect candidate filenames in the above form. Prefer symlink files
-        // over hard files if their basenames are the same.
-        for (it = dir; it != end; ++it)
-        {
-            path p = it->path();
-
-            if (boost::algorithm::istarts_with(p.filename().string(), "libpdal_plugin"))
-            {
-                path extension = p.extension();
-                if (boost::algorithm::iends_with(extension.string(), "DLL") ||
-                        boost::algorithm::iends_with(extension.string(), "DYLIB") ||
-                        boost::algorithm::iends_with(extension.string(), "SO"))
-                {
-                    std::string basename;
-
-                    // Step through the stems until the extension of the stem
-                    // is empty. This is our basename.  For example,
-                    // libpdal_plugin_writer_text.0.dylib will basename down to
-                    // libpdal_plugin_writer_text and so will
-                    // libpdal_plugin_writer_text.dylib
-                    // copy the path so we can modify in place
-                    path t = p;
-                    for (; !t.extension().empty(); t = t.stem())
-                    {
-                        if (t.stem().extension().empty())
-                        {
-                            basename = t.stem().string();
-                        }
-                    }
-
-                    if (pluginFilenames.find(basename) == pluginFilenames.end())
-                    {
-                        // We haven't already loaded a plugin with this basename,
-                        // load it.
-                        pluginFilenames.insert(std::pair<path, path>(basename, p));
-                    }
-                    else
-                    {
-                        // We already have a filename with the basename of this
-                        // file.  If the basename of our current file is a symlink
-                        // we're going to replace what's in the map with ours because
-                        // we are going to presume that a symlink'd file is more
-                        // cannonical than a hard file of the same name.
-                        std::map<path, path>::iterator i = pluginFilenames.find(basename);
-                        if (it->symlink_status().type() == symlink_file)
-                        {
-                            // Take the symlink over a hard SO
-                            i->second = p;
-                        }
-                    }
-                }
-            }
-        }
-
-        std::map<std::string, std::string> registerMethods;
-
-        for (std::map<path, path>::iterator t = pluginFilenames.begin();
-                t!= pluginFilenames.end(); t ++)
-        {
-            // Basenames must be in the following form:
-            // libpdal_plugin_writer_text or libpdal_plugin_filter_color
-            // The last two tokens are the kernel type and the kernel name.
-            path basename = t->first;
-            path filename = t->second;
-
-            registerPlugin(filename.string());
-            // std::string methodName = "PDALRegister_" + boost::algorithm::ireplace_first_copy(basename.string(), "libpdal_plugin_", "");
-            // Utils::registerPlugin((void*)this, filename.string(), methodName);
-
-        }
-    }
-}
-
-
-void KernelFactory::registerPlugin(std::string const& filename)
-{
-    using namespace boost::filesystem;
-    path basename;
-
-    path t = path(filename);
-    for (; !t.extension().empty(); t = t.stem())
-    {
-        if (t.stem().extension().empty())
-        {
-            basename = t.stem().string();
-        }
-    }
-
-    std::string base = basename.string();
-
-    std::string pluginName = boost::algorithm::ireplace_first_copy(base, "libpdal_plugin_", "");
-    std::string pluginType = pluginName.substr(0, pluginName.find_last_of("_"));
-    if (boost::iequals(pluginType, "kernel"))
-    {
-        std::string registerMethodName = "PDALRegister_" + pluginName;
-
-        std::string versionMethodName = "PDALRegister_version_" + pluginName;
-
-        Utils::registerPlugin((void*)this, filename, registerMethodName, versionMethodName);
-    }
-}
-
-
-std::map<std::string, pdal::KernelInfo> const& KernelFactory::getKernelInfos() const
-{
-    return m_driver_info;
-}
-
 
 } // namespace pdal

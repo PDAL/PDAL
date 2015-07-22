@@ -34,13 +34,10 @@
 
 #pragma once
 
-#include <pdal/pdal_error.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/Log.hpp>
 #include <pdal/XMLSchema.hpp>
 #include <pdal/Compression.hpp>
-
-#include <boost/algorithm/string.hpp>
 
 #include <sqlite3.h>
 #include <memory>
@@ -48,31 +45,6 @@
 
 namespace pdal
 {
-
-
-    class sqlite_driver_error : public pdal_error
-    {
-    public:
-        sqlite_driver_error(std::string const& msg)
-            : pdal_error(msg)
-        {}
-    };
-
-    class connection_failed : public sqlite_driver_error
-    {
-    public:
-        connection_failed(std::string const& msg)
-            : sqlite_driver_error(msg)
-        {}
-    };
-
-    class buffer_too_small : public sqlite_driver_error
-    {
-    public:
-        buffer_too_small(std::string const& msg)
-            : sqlite_driver_error(msg)
-        {}
-    };
 
 class column
 {
@@ -119,7 +91,6 @@ public:
     point_count_t count;
     point_count_t remaining;
 
-    PointContextRef m_ctx;
     MetadataNode m_metadata;
     bool m_isCompressed;
     std::string m_compVersion;
@@ -173,6 +144,7 @@ public:
         sqlite3_config(SQLITE_CONFIG_LOG, log_callback, this);
         sqlite3_initialize();
         m_log->get(LogLevel::Debug3) << "Set up config " << std::endl;
+        m_log->get(LogLevel::Debug3) << "SQLite version: " << sqlite3_libversion() << std::endl;
     }
 
     ~SQLite()
@@ -189,25 +161,21 @@ public:
         sqlite3_shutdown();
 
     }
-    void log(int num, char const* msg)
-    {
-        std::ostringstream oss;
-        oss << "SQLite code: " << num << " msg: '" << msg << "'";
-        m_log->get(LogLevel::Debug) << oss.str() << std::endl;
-    }
 
     static void log_callback(void *p, int num, char const* msg)
     {
         SQLite* sql = reinterpret_cast<SQLite*>(p);
-        sql->log(num, msg);
+        sql->log()->get(LogLevel::Debug) << "SQLite code: "
+            << num << " msg: '" << msg << "'"
+            << std::endl;
     }
 
 
     void connect(bool bWrite=false)
     {
-        if ( ! m_connection.size() )
+        if (!m_connection.size())
         {
-            throw connection_failed("unable to connect to sqlite3 database, no connection string was given!");
+            throw pdal_error("Unable to connect to database: empty connection string [SQLite::connect]");
         }
 
         int flags = SQLITE_OPEN_NOMUTEX;
@@ -222,69 +190,83 @@ public:
             flags |= SQLITE_OPEN_READONLY;
         }
 
-        int code = sqlite3_open_v2(m_connection.c_str(), &m_session, flags, 0);
-        if ( (code != SQLITE_OK) )
+        int status = sqlite3_open_v2(m_connection.c_str(), &m_session, flags, 0);
+        if (status != SQLITE_OK)
         {
-            check_error("unable to connect to database");
+            error("Unable to open database", "connect");
         }
     }
 
-    void execute(std::string const& sql, std::string errmsg="")
+    void execute(std::string const& sql)
     {
-        if (!m_session)
-            throw sqlite_driver_error("Session not opened!");
+        checkSession();
+
         m_log->get(LogLevel::Debug3) << "Executing '" << sql <<"'"<< std::endl;
 
-        int code = sqlite3_exec(m_session, sql.c_str(), NULL, NULL, NULL);
-        if (code != SQLITE_OK)
+        int status = sqlite3_exec(m_session, sql.c_str(), NULL, NULL, NULL);
+        if (status != SQLITE_OK)
         {
             std::ostringstream oss;
-            oss << errmsg <<" '" << sql << "'";
-            throw sqlite_driver_error(oss.str());
+            oss << "Database operation failed: "
+                << sql;
+            error(oss.str(), "execute");
         }
     }
 
     void begin()
     {
-        execute("BEGIN", "Unable to begin transaction");
+        execute("BEGIN");
     }
 
     void commit()
     {
-        execute("COMMIT", "Unable to commit transaction");
+        execute("COMMIT");
     }
 
+    // Executes an SQL query statement and provides the returned rows via
+    // an iterator.
+    //
+    // Usage example:
+    //   query("SELECT * from TABLE");
+    //     do
+    //     {
+    //       const row* r = get();
+    //       if (!r) break ; // no more rows
+    //       column const& c = r->at(0); // get 1st column of this row
+    //       ... use c.data ...
+    //     } while (next());
+    //
     void query(std::string const& query)
     {
+        checkSession();
+
         m_position = 0;
         m_columns.clear();
         m_data.clear();
-        sqlite3_reset(m_statement);
+        assert(!m_statement);
+
+        int status;
 
         m_log->get(LogLevel::Debug3) << "Querying '" << query.c_str() <<"'"<< std::endl;
 
         char const* tail = 0; // unused;
-        int res = sqlite3_prepare_v2(m_session,
-                                  query.c_str(),
-                                  static_cast<int>(query.size()),
-                                  &m_statement,
-                                  &tail);
-        if (res != SQLITE_OK)
+        status = sqlite3_prepare_v2(m_session,
+                                    query.c_str(),
+                                    static_cast<int>(query.size()),
+                                    &m_statement,
+                                    &tail);
+        if (status != SQLITE_OK)
         {
-            char const* zErrMsg = sqlite3_errmsg(m_session);
-
-              std::ostringstream ss;
-              ss << "sqlite3_statement_backend::prepare: "
-                 << zErrMsg;
-              throw sqlite_driver_error(ss.str());
+            error("query preparation failed", "query");
         }
+
         int numCols = -1;
 
-        while (res != SQLITE_DONE)
+        while (status != SQLITE_DONE)
         {
-            res = sqlite3_step(m_statement);
+            status = sqlite3_step(m_statement);
 
-            if (SQLITE_ROW == res)
+            if (SQLITE_ROW == status)
             {
                 // only need to set the number of columns once
                 if (-1 == numCols)
@@ -298,8 +280,13 @@ public:
 
                     if (m_columns.size() != static_cast<std::vector<std::string>::size_type > (numCols))
                     {
-                        std::string ccolumnName = boost::to_upper_copy(std::string(sqlite3_column_name(m_statement, v)));
-                        std::string ccolumnType = boost::to_upper_copy(std::string(sqlite3_column_decltype(m_statement, v)));
+                        std::string ccolumnName = Utils::toupper(std::string(sqlite3_column_name(m_statement, v)));
+                        const char* coltype = sqlite3_column_decltype(m_statement, v);
+                        if (!coltype)
+                        {
+                            coltype = "unknown";
+                        }
+                        std::string ccolumnType = Utils::toupper(std::string(coltype));
                         m_columns.insert(std::pair<std::string, int32_t>(ccolumnName, v));
                         m_types.push_back(ccolumnType);
                     }
@@ -334,7 +321,23 @@ public:
                 }
                 m_data.push_back(r);
             }
+            else if (status == SQLITE_DONE)
+            {
+                // ok
+            }
+            else
+            {
+                error("query step failed", "query");
+            }
         }
+
+        status = sqlite3_finalize(m_statement);
+        if (status != SQLITE_OK)
+        {
+            error("query finalization failed", "query");
+        }
+
+        m_statement = NULL;
     }
 
     bool next()
@@ -370,78 +373,81 @@ public:
         return (int64_t)sqlite3_last_insert_rowid(m_session);
     }
 
-    bool insert(std::string const& statement, records const& rs)
+    void insert(std::string const& statement, records const& rs)
     {
+        checkSession();
+
+        int status;
+
         records::size_type rows = rs.size();
 
-        int res = sqlite3_prepare_v2(m_session,
-                                  statement.c_str(),
-                                  static_cast<int>(statement.size()),
-                                  &m_statement,
-                                  0);
+        assert(!m_statement);
+        status = sqlite3_prepare_v2(m_session,
+                                    statement.c_str(),
+                                    static_cast<int>(statement.size()),
+                                    &m_statement,
+                                    0);
+        if (status != SQLITE_OK)
+        {
+            error("insert preparation failed", "insert");
+        }
+
         m_log->get(LogLevel::Debug3) << "Inserting '" << statement << "'"<<
             std::endl;
-
-        if (res != SQLITE_OK)
-        {
-            char const* zErrMsg = sqlite3_errmsg(m_session);
-
-              std::ostringstream ss;
-              ss << "sqlite insert prepare: "
-                 << zErrMsg;
-              throw sqlite_driver_error(ss.str());
-        }
 
         for (records::size_type r = 0; r < rows; ++r)
         {
             int const totalPositions = static_cast<int>(rs[0].size());
             for (int pos = 0; pos <= totalPositions-1; ++pos)
             {
-                int didBind = SQLITE_OK;
                 const column& c = rs[r][pos];
                 if (c.null)
                 {
-                    didBind = sqlite3_bind_null(m_statement, pos+1);
+                    status = sqlite3_bind_null(m_statement, pos+1);
                 }
                 else if (c.blobLen != 0)
                 {
-                    didBind = sqlite3_bind_blob(m_statement, pos+1,
-                                                &(c.blobBuf.front()),
-                                                static_cast<int>(c.blobLen),
-                                                SQLITE_STATIC);
+                    status = sqlite3_bind_blob(m_statement, pos+1,
+                                               &(c.blobBuf.front()),
+                                               static_cast<int>(c.blobLen),
+                                               SQLITE_STATIC);
                 }
                 else
                 {
-                    didBind = sqlite3_bind_text(m_statement, pos+1,
-                        c.data.c_str(), static_cast<int>(c.data.length()),
-                        SQLITE_STATIC);
+                    status = sqlite3_bind_text(m_statement, pos+1,
+                                               c.data.c_str(),
+                                               static_cast<int>(c.data.length()),
+                                               SQLITE_STATIC);
                 }
 
-                if (SQLITE_OK != didBind)
+                if (SQLITE_OK != status)
                 {
                     std::ostringstream oss;
-                    oss << "Failure to bind row number '"
-                        << r <<"' at position number '" <<pos <<"'";
-                    throw sqlite_driver_error(oss.str());
+                    oss << "insert bind failed (row=" << r
+                        <<", position=" << pos
+                        << ")";
+                    error(oss.str(), "insert");
                 }
             }
 
-            res = sqlite3_step(m_statement);
+            status = sqlite3_step(m_statement);
 
-            if (res != SQLITE_DONE && res != SQLITE_ROW)
+            if (status != SQLITE_DONE && status != SQLITE_ROW)
             {
-                char const* zErrMsg = sqlite3_errmsg(m_session);
-
-                std::ostringstream ss;
-                ss << "sqlite insert failure: " << zErrMsg;
-                throw sqlite_driver_error(ss.str());
+                error("insert step failed", "insert");
             }
         }
-        sqlite3_finalize(m_statement);
-        return true;
+
+        status = sqlite3_finalize(m_statement);
+        if (status != SQLITE_OK)
+        {
+            error("insert finalize failed", "insert");
+        }
+
+        m_statement = NULL;
     }
 
-    bool spatialite(const std::string& module_name="")
+    bool loadSpatialite(const std::string& module_name="")
     {
         std::string so_extension;
         std::string lib_extension;
@@ -463,16 +469,13 @@ public:
 // #if !defined(sqlite3_enable_load_extension)
 // #error "sqlite3_enable_load_extension and spatialite is required for sqlite PDAL support"
 // #endif
-        int code = sqlite3_enable_load_extension(m_session, 1);
-        if (code != SQLITE_OK)
+        int status = sqlite3_enable_load_extension(m_session, 1);
+        if (status != SQLITE_OK)
         {
-            std::ostringstream oss;
-            oss << "Unable to load spatialite extension!";
-            throw sqlite_driver_error(oss.str());
+            error("spatialite library load failed", "loadSpatialite");
         }
 
         std::ostringstream oss;
-
 
         oss << "SELECT load_extension('";
         if (module_name.size())
@@ -483,35 +486,63 @@ public:
         execute(oss.str());
         oss.str("");
 
+        m_log->get(LogLevel::Debug3) <<  "SpatiaLite version: " << getSpatialiteVersion() << std::endl;
+
         return true;
 
     }
 
+    bool haveSpatialite()
+    {
+        return doesTableExist("geometry_columns");
+    }
 
+    void initSpatialiteMetadata()
+    {
+        execute("SELECT InitSpatialMetadata(1)");
+    }
 
     bool doesTableExist(std::string const& name)
     {
-        std::ostringstream oss;
+        const std::string sql("SELECT name FROM sqlite_master WHERE type = 'table'");
 
-        oss << "SELECT name FROM sqlite_master WHERE type = \"table\"";
+        query(sql);
 
-        query(oss.str());
-
-        std::ostringstream debug;
-        while (next())
+        do
         {
             const row* r = get();
             if (!r)
                 break ;// didn't have anything
 
             column const& c = r->at(0); // First column is table name!
-            if (boost::iequals(c.data, name))
+            if (Utils::iequals(c.data, name))
             {
                 return true;
             }
-        }
+        } while (next());
         return false;
     }
+
+    std::string getSpatialiteVersion()
+    {
+        // TODO: ought to parse this numerically, so we can do version checks
+        const std::string sql("SELECT spatialite_version()");
+        query(sql);
+
+        const row* r = get();
+        assert(r); // should get back exactly one row
+        std::string ver = r->at(0).data;
+        return ver;
+    }
+
+    std::string getSQLiteVersion()
+    {
+         // TODO: parse this numerically, so we can do version checks
+         std::string v(sqlite3_libversion());
+         return v;
+    }
+
+    LogPtr log() { return m_log; };
 
 private:
     pdal::LogPtr m_log;
@@ -523,16 +554,25 @@ private:
     std::map<std::string, int32_t> m_columns;
     std::vector<std::string> m_types;
 
-    void check_error(std::string const& msg)
+    void error(std::string const& userMssg, std::string const& func)
     {
-        const char *zErrMsg = sqlite3_errmsg(m_session);
-        std::ostringstream ss;
-        ss << msg << " sqlite error: " << zErrMsg;
-        throw sqlite_driver_error(ss.str());
+        char const* sqlMssg = sqlite3_errmsg(m_session);
+
+        std::ostringstream oss;
+        oss << userMssg
+           << " [SQLite::" << func << "]"
+           << std::endl
+           << "sqlite3 error: " << sqlMssg;
+        throw pdal_error(oss.str());
     }
 
-
-
+    void checkSession()
+    {
+        if (!m_session)
+        {
+            throw pdal_error("Database session not opened [SQLite::execute]");
+        }
+    }
 };
 
 } // namespace pdal

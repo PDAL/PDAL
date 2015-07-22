@@ -38,25 +38,30 @@
 
 #include <map>
 #include <string>
+
+extern "C" int32_t FerryFilter_ExitFunc();
+extern "C" PF_ExitFunc FerryFilter_InitPlugin();
+
 namespace pdal
 {
 
 class PDAL_DLL FerryFilter : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.ferry", "Copy data from one dimension to another.")
-    SET_STAGE_LINK("http://pdal.io/stages/filters.ferry.html")
+    FerryFilter()
+    {}
 
-    FerryFilter() : Filter() {};
-    static Options getDefaultOptions();
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+
+    Options getDefaultOptions();
 
 private:
-    virtual void initialize();
     virtual void processOptions(const Options&);
-    virtual void addDimensions(PointContextRef ctx);
-    virtual void ready(PointContext ctx);
-    virtual void filter(PointBuffer& buffer);
-    virtual void done(PointContext ctx);
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void ready(PointTableRef table);
+    virtual void filter(PointView& view);
 
     FerryFilter& operator=(const FerryFilter&); // not implemented
     FerryFilter(const FerryFilter&); // not implemented

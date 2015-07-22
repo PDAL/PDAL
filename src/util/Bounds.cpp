@@ -67,6 +67,52 @@ namespace pdal
 
 const double BOX3D::LOWEST = (std::numeric_limits<double>::lowest)();
 const double BOX3D::HIGHEST = (std::numeric_limits<double>::max)();
+    
+BOX3D::BOX3D(double minx, double miny, double maxx, double maxy) :
+    minx(minx), maxx(maxx), miny(miny), maxy(maxy),
+    minz(HIGHEST), maxz(LOWEST)
+{}
+
+void BOX3D::clear()
+{
+    minx = HIGHEST; miny = HIGHEST; minz = HIGHEST;
+    maxx = LOWEST; maxy = LOWEST; maxz = LOWEST;
+}
+
+bool BOX3D::empty() const
+{
+    return  minx == HIGHEST && maxx == LOWEST &&
+            miny == HIGHEST && maxy == LOWEST &&
+            minz == HIGHEST && maxz == LOWEST;
+}
+
+void BOX3D::grow(double x, double y)
+{
+    grow(x, y, LOWEST);
+}
+
+void BOX3D::grow(double x, double y, double z)
+{
+    if (x < minx) minx = x;
+    if (x > maxx) maxx = x;
+
+    if (y < miny) miny = y;
+    if (y > maxy) maxy = y;
+
+    if (z < minz) minz = z;
+    if (z > maxz) maxz = z;
+}
+
+bool BOX3D::is_z_empty() const
+{
+    return ((minz == HIGHEST) && (maxz == LOWEST));
+}
+
+const BOX3D& BOX3D::getDefaultSpatialExtent()
+{
+    static BOX3D v(LOWEST, LOWEST, LOWEST, HIGHEST, HIGHEST, HIGHEST);
+    return v;
+}    
 
 std::istream& operator>>(std::istream& istr, BOX3D& bounds)
 {
@@ -165,7 +211,7 @@ std::istream& operator>>(std::istream& istr, BOX3D& bounds)
         xxx.minx = v[0];
         xxx.maxx = v[1];
         xxx.miny = v[2];
-        xxx.maxx = v[3];
+        xxx.maxy = v[3];
     }
     else if (v.size() == 6)
     {

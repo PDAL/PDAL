@@ -35,24 +35,30 @@
 
 #include "GroundKernel.hpp"
 
-#include <pdal/Options.hpp>
-#include <pdal/pdal_macros.hpp>
-#include <pdal/PointBuffer.hpp>
-#include <pdal/PointContext.hpp>
-#include <pdal/Stage.hpp>
-#include <pdal/StageFactory.hpp>
-
 #include <pdal/KernelFactory.hpp>
 #include <pdal/KernelSupport.hpp>
+#include <pdal/Options.hpp>
+#include <pdal/pdal_macros.hpp>
+#include <pdal/PointTable.hpp>
+#include <pdal/PointView.hpp>
+#include <pdal/Stage.hpp>
+#include <pdal/StageFactory.hpp>
 
 #include <memory>
 #include <string>
 #include <vector>
 
-CREATE_KERNEL_PLUGIN(ground, pdal::GroundKernel)
-
 namespace pdal
 {
+
+static PluginInfo const s_info = PluginInfo(
+    "kernels.ground",
+    "Ground Kernel",
+    "http://pdal.io/kernels/kernels.ground.html" );
+
+CREATE_SHARED_PLUGIN(1, 0, GroundKernel, Kernel, s_info)
+
+std::string GroundKernel::getName() const { return s_info.name; }
 
 GroundKernel::GroundKernel()
     : Kernel()
@@ -65,6 +71,7 @@ GroundKernel::GroundKernel()
     , m_cellSize(1)
     , m_classify(true)
     , m_extract(false)
+    , m_approximate(false)
 {}
 
 void GroundKernel::validateSwitches()
@@ -94,6 +101,7 @@ void GroundKernel::addSwitches()
     ("cellSize", po::value<double>(&m_cellSize)->default_value(1), "cell size")
     ("classify", po::bool_switch(&m_classify), "apply classification labels?")
     ("extract", po::bool_switch(&m_extract), "extract ground returns?")
+    ("approximate,a", po::bool_switch(&m_approximate), "use approximate algorithm? (much faster)")
     ;
 
     addSwitchSet(file_options);
@@ -102,36 +110,16 @@ void GroundKernel::addSwitches()
     addPositionalSwitch("output", 1);
 }
 
-std::unique_ptr<Stage> GroundKernel::makeReader(Options readerOptions)
-{
-    if (isDebug())
-    {
-        readerOptions.add<bool>("debug", true);
-        uint32_t verbosity(getVerboseLevel());
-        if (!verbosity)
-            verbosity = 1;
-
-        readerOptions.add<uint32_t>("verbose", verbosity);
-        readerOptions.add<std::string>("log", "STDERR");
-    }
-
-    Stage* stage = KernelSupport::makeReader(m_inputFile);
-    stage->setOptions(readerOptions);
-    std::unique_ptr<Stage> reader_stage(stage);
-
-    return reader_stage;
-}
-
 int GroundKernel::execute()
 {
-    PointContext ctx;
+    PointTable table;
 
     Options readerOptions;
     readerOptions.add<std::string>("filename", m_inputFile);
-    readerOptions.add<bool>("debug", isDebug());
-    readerOptions.add<uint32_t>("verbose", getVerboseLevel());
+    setCommonOptions(readerOptions);
 
-    std::unique_ptr<Stage> readerStage = makeReader(readerOptions);
+    Stage& readerStage(Kernel::makeReader(m_inputFile));
+    readerStage.setOptions(readerOptions);
 
     Options groundOptions;
     groundOptions.add<double>("maxWindowSize", m_maxWindowSize);
@@ -143,48 +131,35 @@ int GroundKernel::execute()
     groundOptions.add<bool>("extract", m_extract);
 
     StageFactory f;
-    std::unique_ptr<Filter> groundStage(f.createFilter("filters.ground"));
+    std::unique_ptr<Stage> groundStage(f.createStage("filters.ground"));
     groundStage->setOptions(groundOptions);
-    groundStage->setInput(readerStage.get());
+    groundStage->setInput(readerStage);
 
     // setup the Writer and write the results
     Options writerOptions;
     writerOptions.add<std::string>("filename", m_outputFile);
     setCommonOptions(writerOptions);
 
-    WriterPtr writer(KernelSupport::makeWriter(m_outputFile, groundStage.get()));
-    writer->setOptions(writerOptions);
+    Stage& writer(Kernel::makeWriter(m_outputFile, *groundStage));
+    writer.setOptions(writerOptions);
 
     std::vector<std::string> cmd = getProgressShellCommand();
     UserCallback *callback =
         cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
         (UserCallback *)new HeartbeatCallback();
 
-    writer->setUserCallback(callback);
+    writer.setUserCallback(callback);
 
-    for (const auto& pi: getExtraStageOptions())
-    {
-        std::string name = pi.first;
-        Options options = pi.second;
-        std::vector<Stage*> stages = writer->findStage(name);
-        for (const auto& s : stages)
-        {
-            Options opts = s->getOptions();
-            for (const auto& o : options.getOptions())
-                opts.add(o);
-            s->setOptions(opts);
-        }
-    }
+    applyExtraStageOptionsRecursive(&writer);
+    writer.prepare(table);
 
-    writer->prepare(ctx);
-
-    // process the data, grabbing the PointBufferSet for visualization of the
-    // resulting PointBuffer
-    PointBufferSet pbSetOut = writer->execute(ctx);
+    // process the data, grabbing the PointViewSet for visualization of the
+    // resulting PointView
+    PointViewSet viewSetOut = writer.execute(table);
 
     if (isVisualize())
-        visualize(*pbSetOut.begin());
-    //visualize(*pbSetIn.begin(), *pbSetOut.begin());
+        visualize(*viewSetOut.begin());
+    //visualize(*viewSetIn.begin(), *viewSetOut.begin());
 
     return 0;
 }

@@ -74,8 +74,6 @@ void arrayToJSON(const MetadataNodeList& children, std::ostream& o, int level)
 {
     const std::string indent(level * 2, ' ');
 
-    const MetadataNode& node = *children.begin();
-
     o << indent << "[" << std::endl;
     for (auto ci = children.begin(); ci != children.end(); ++ci)
     {
@@ -138,9 +136,53 @@ void toJSON(const MetadataNode& m, std::ostream& o, int level)
 }
 
 
+void toJSON(const Options& opts, std::ostream& o, int level);
+void toJSON(const Option& opt, std::ostream& o, int level)
+{
+    std::string indent(level * 2, ' ');
+    std::string indent2((level + 1) * 2, ' ');
+
+    std::string quote("\"");
+    std::string name = quote + opt.getName() + quote;
+    std::string description = quote + opt.getDescription() + quote;
+    std::string value = quote + opt.getValue<std::string>() + quote;
+
+    o << indent << name << " :" << endl;
+    o << indent << "{" << endl;
+    o << indent2 << "\"value\" : " << value << "," << endl;
+    o << indent2 << "\"description\" : " << description << endl;
+
+    boost::optional<Options const&> opts = opt.getOptions();
+    if (opts)
+        toJSON(*opts, o, level + 1);
+    o << indent << "}";
+}
+
+
+void toJSON(const Options& opts, std::ostream& o, int level)
+{
+    const std::string indent(level * 2, ' ');
+
+    std::vector<Option> optList = opts.getOptions();
+    if (optList.empty())
+        return;
+
+    o << indent << "\"options\" :" << endl;
+    o << indent << "{" << endl;
+    for (auto oi = optList.begin(); oi != optList.end(); ++oi)
+    {
+        Option& opt = *oi;
+        toJSON(opt, o, level + 1);
+        if (oi != optList.rbegin().base() - 1)
+            o << ",";
+        o << endl;
+    }
+    o << indent << "}" << endl;
+}
+
 } // unnamed namespace
 
-namespace utils
+namespace Utils
 {
 
 std::string toJSON(const MetadataNode& m)
@@ -167,50 +209,20 @@ void toJSON(const MetadataNode& m, std::ostream& o)
     o << std::endl;
 }
 
-namespace reST
+std::string toJSON(const Options& opts)
 {
-    
-using namespace boost::property_tree;
+    std::ostringstream o;
 
-static std::string indent(int level)
-{
-    std::string s;
-    for (int i=0; i<level; i++) s += "    ";
-    return s;
+    toJSON(opts, o);
+    return o.str();
 }
 
-
-void write_rst(std::ostream& ost,
-               const boost::property_tree::ptree& pt,
-               int level)
+void toJSON(const Options& opts, std::ostream& o)
 {
-    using boost::property_tree::ptree;
-
-    if (pt.empty())
-    {
-        ost << pt.data();
-        ost << endl << endl;
-    }
-    else
-    {
-        if (level) ost << endl << endl;
-        for (ptree::const_iterator pos = pt.begin(); pos != pt.end();)
-        {
-            ost << indent(level+1) << "- " << pos->first << ": ";
-            write_rst(ost, pos->second, level + 1);
-            ++pos;
-            //ost << endl << endl;
-        }
-    }
+    o << "{" << endl;
+    pdal::toJSON(opts, o, 1);
+    o << "}" << endl;
 }
 
-
-std::ostream& toRST(const ptree& pt, std::ostream& os)
-{
-    write_rst(os, pt);
-    return os;
-}
-
-} // namespace reST
-} // namespace utils
+} // namespace Utils
 } // namespace pdal

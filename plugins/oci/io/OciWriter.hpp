@@ -47,18 +47,18 @@ namespace pdal
 class PDAL_DLL OciWriter : public DbWriter
 {
 public:
-    SET_STAGE_NAME("writers.oci", "Write data using SDO_PC objects to Oracle.")
-    SET_STAGE_LINK("http://pdal.io/stages/writers.oci.html")
-    SET_PLUGIN_VERSION("1.0.0b1")
-
     OciWriter();
 
-    static Options getDefaultOptions();
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+
+    Options getDefaultOptions();
 
 private:
     template<typename T>
     T getDefaultedOption(const Options& options,
-        const std::string& option_name) const
+        const std::string& option_name)
     {
         T default_value =
             getDefaultOptions().getOption(option_name).getValue<T>();
@@ -67,11 +67,11 @@ private:
 
     virtual void processOptions(const Options& options);
     virtual void initialize();
-    virtual void ready(PointContextRef ctx);
-    virtual void write(const PointBuffer& buffer);
-    virtual void done(PointContextRef ctx);
+    virtual void ready(PointTableRef table);
+    virtual void write(const PointViewPtr view);
+    virtual void done(PointTableRef table);
     void writeInit();
-    void writeTile(const PointBuffer& buffer);
+    void writeTile(const PointViewPtr view);
 
     void runCommand(std::ostringstream const& command);
     void wipeBlockTable();
@@ -92,6 +92,8 @@ private:
     std::string shutOff_SDO_PC_Trigger();
     void turnOn_SDO_PC_Trigger(std::string trigger_name);
     bool isValidWKT(std::string const& wkt);
+    void writeDimMajor(PointViewPtr view, std::vector<char>& outbuf);
+    void writePointMajor(PointViewPtr view, std::vector<char>& outbuf);
 
     long m_lastBlockId;
     BOX3D m_bounds; // Bounds of the entire point cloud
@@ -111,7 +113,7 @@ private:
     uint32_t m_precision;
     bool m_overwrite;
     bool m_trace;
-    bool m_pack;
+    bool m_compression;
 
     std::string m_baseTableName;
     std::string m_cloudColumnName;

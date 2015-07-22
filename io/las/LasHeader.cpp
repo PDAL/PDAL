@@ -38,7 +38,7 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
-#include <pdal/Utils.hpp>
+#include <pdal/util/Utils.hpp>
 #include <pdal/pdal_config.hpp>
 
 #include "SummaryData.hpp"
@@ -47,7 +47,7 @@ namespace pdal
 {
 
 const std::string LasHeader::FILE_SIGNATURE("LASF");
-#ifndef WIN32
+#ifndef _WIN32
 const size_t LasHeader::LEGACY_RETURN_COUNT;
 const size_t LasHeader::RETURN_COUNT;
 #endif
@@ -204,6 +204,10 @@ ILeStream& operator>>(ILeStream& in, LasHeader& h)
     uint32_t legacyReturnCount;
 
     in.get(h.m_fileSig, 4);
+    if (!Utils::iequals(h.m_fileSig, "LASF"))
+    {
+        throw pdal::pdal_error("File signature is not 'LASF', is this an LAS/LAZ file?");
+    }
     in >> h.m_sourceId >> h.m_globalEncoding;
     LasHeader::get(in, h.m_projectGuid);
     in >> versionMajor >> h.m_versionMinor;
@@ -220,7 +224,7 @@ ILeStream& operator>>(ILeStream& in, LasHeader& h)
     if (h.m_pointFormat & 0x80)
         h.setCompressed(true);
     h.m_pointFormat &= ~0xC0;
-    
+
     for (size_t i = 0; i < LasHeader::LEGACY_RETURN_COUNT; ++i)
     {
         in >> legacyReturnCount;
@@ -229,7 +233,7 @@ ILeStream& operator>>(ILeStream& in, LasHeader& h)
 
     in >> h.m_scales[0] >> h.m_scales[1] >> h.m_scales[2];
     in >> h.m_offsets[0] >> h.m_offsets[1] >> h.m_offsets[2];
-    
+
     double maxX, minX;
     double maxY, minY;
     double maxZ, minZ;

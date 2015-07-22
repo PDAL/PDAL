@@ -21,13 +21,23 @@ if (MSVC)
         add_definitions(-DNOMINMAX)
         add_definitions(-DBOOST_LIB_TOOLSET="vc110")
         add_definitions(-DBOOST_ALL_DYN_LINK)
+
+        # Nitro makes use of Exception Specifications, which results in
+        # numerous warnings when compiling in MSVC. We will ignore them for
+        # now.
+        add_definitions("/wd4290")
+	add_definitions("/wd4800")
+
+        # Windows still warns about nameless struct/union, but we assume
+        # that all of our compilers support this
+        #add_definitions("/wd4201")
     endif()
 
     if (CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
-        string(REGEX REPLACE "/W[0-4]" "/W4"
+        string(REGEX REPLACE "/W[0-4]" "/W3"
                CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
     else()
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3")
     endif()
 
     # check for MSVC 9+
@@ -57,15 +67,6 @@ if (MSVC)
 
 endif(MSVC)
 add_definitions(-DWIN32_LEAN_AND_MEAN)
-
-# note we default to debug mode
-#if(NOT MSVC_IDE)
-#  if(NOT CMAKE_BUILD_TYPE)
-#  set(CMAKE_BUILD_TYPE Debug CACHE STRING
-#    "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel" FORCE)
-#  endif()
-#  message(STATUS "Setting PDAL build type - ${CMAKE_BUILD_TYPE}")
-#endif()
 
 set(CMAKE_INCLUDE_PATH "c:/OSGeo4W64/include;$ENV{CMAKE_INCLUDE_PATH}")
 set(CMAKE_LIBRARY_PATH "c:/OSGeo4W64/lib;$ENV{CMAKE_LIBRARY_PATH}")

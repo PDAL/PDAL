@@ -39,51 +39,40 @@
 #include <pdal/GlobalEnvironment.hpp>
 #include <pdal/GDALUtils.hpp>
 
-#ifdef PDAL_HAVE_PYTHON
-#include <pdal/plang/PythonEnvironment.hpp>
-#endif
-
-
-
 namespace pdal
 {
 
-static GlobalEnvironment* t = 0;
-static std::once_flag flag;
+static GlobalEnvironment* s_environment = 0;
 
 GlobalEnvironment& GlobalEnvironment::get()
 {
+    static std::once_flag flag;
+    
+    auto init = []()
+    {
+        s_environment = new GlobalEnvironment();
+    };
+
     std::call_once(flag, init);
-    return *t;
+    return *s_environment;
 }
 
 
 void GlobalEnvironment::startup()
 {
-    if (t != 0) // sanity check
-    {
+    if (s_environment)
         throw pdal_error("attempt to reinitialize global environment");
-    }
     get();
 }
 
 
 void GlobalEnvironment::shutdown()
 {
-    if (t == 0) // sanity check
-    {
+    if (!s_environment)
         throw pdal_error("bad global shutdown call -- was called more "
             "than once or was called without corresponding startup");
-    }
-
-    delete t;
-    t = 0;
-}
-
-
-void GlobalEnvironment::init()
-{
-    t = new GlobalEnvironment();
+    delete s_environment;
+    s_environment = 0;
 }
 
 
@@ -92,68 +81,52 @@ void GlobalEnvironment::init()
 //
 
 GlobalEnvironment::GlobalEnvironment()
-    : m_pythonEnvironment(0)
-    , m_bIsGDALInitialized(false)
-    , m_gdal_debug(0)
+    : m_gdalDebug()
+#ifdef PDAL_HAVE_PYTHON
+    , m_pythonEnvironment()
+#endif
 {
-}
-
-
-void GlobalEnvironment::getGDALEnvironment()
-{
-    if (!m_bIsGDALInitialized)
-    {
-        (void) GDALAllRegister();
-        (void) OGRRegisterAll();
-        m_bIsGDALInitialized = true;
-    }
 }
 
 
 GlobalEnvironment::~GlobalEnvironment()
 {
-#ifdef PDAL_HAVE_PYTHON
-    delete m_pythonEnvironment;
-    m_pythonEnvironment = 0;
-#endif
+    if (m_gdalDebug)
+        GDALDestroyDriverManager();
+}
 
-    if (m_bIsGDALInitialized)
+
+void GlobalEnvironment::initializeGDAL(LogPtr log, bool gdalDebugOutput)
+{
+    static std::once_flag flag;
+
+    auto init = [this](LogPtr log, bool gdalDebugOutput) -> void
     {
-        delete m_gdal_debug;
-        (void) GDALDestroyDriverManager();
-        m_bIsGDALInitialized = false;
-    }
+        GDALAllRegister();
+        OGRRegisterAll();
+        m_gdalDebug.reset(new gdal::ErrorHandler(gdalDebugOutput, log));
+    };
+    
+    std::call_once(flag, init, log, gdalDebugOutput);
 }
 
 
 #ifdef PDAL_HAVE_PYTHON
 void GlobalEnvironment::createPythonEnvironment()
 {
-    m_pythonEnvironment = new pdal::plang::PythonEnvironment();
+    m_pythonEnvironment.reset(new pdal::plang::PythonEnvironment());
 }
-#endif
 
 
 plang::PythonEnvironment& GlobalEnvironment::getPythonEnvironment()
 {
-#ifdef PDAL_HAVE_PYTHON
     if (!m_pythonEnvironment)
-        (void) createPythonEnvironment();
-#endif
+        createPythonEnvironment();
 
     if (m_pythonEnvironment)
         return *m_pythonEnvironment;
-    else
-        throw pdal_error("Unable to initialize the Python environment!");
+    throw pdal_error("Unable to initialize the Python environment!");
 }
-
-pdal::gdal::GlobalDebug* GlobalEnvironment::getGDALDebug()
-{
-    getGDALEnvironment();
-    if (m_gdal_debug == 0)
-        m_gdal_debug = new pdal::gdal::GlobalDebug();
-    return m_gdal_debug;
-}
-
+#endif
 
 } //namespaces

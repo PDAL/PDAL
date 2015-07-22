@@ -44,17 +44,19 @@ namespace pdal
 class PDAL_DLL NitfWriter : public LasWriter
 {
 public:
-    SET_STAGE_NAME("writers.nitf", "NITF Writer")
-    SET_STAGE_LINK("http://pdal.io/stages/writers.nitf.html")
-    SET_PLUGIN_VERSION("1.0.0b1")
+    NitfWriter();
 
-    NitfWriter() ;
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
 private:
     virtual void processOptions(const Options& options);
-    virtual void done(PointContextRef ctx);
-    virtual void write(const PointBuffer&);
+    virtual void readyFile(const std::string& filename);
+    virtual void doneFile();
+    virtual void writeView(const PointViewPtr view);
 
+    std::string m_nitfFilename;
     BOX3D m_bounds;
     std::string m_cLevel;
     std::string m_sType;
@@ -72,7 +74,6 @@ private:
     pdal::Option m_acftb;
     std::string m_imgIdentifier2;
     std::string m_sic;
-    std::string m_igeolob;
     std::stringstream m_oss;
 
     NitfWriter& operator=(const NitfWriter&); // not implemented

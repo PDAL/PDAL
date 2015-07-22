@@ -41,19 +41,18 @@
 namespace pdal
 {
 
-class PDAL_DLL PclVisualizer : public pdal::Writer
+class PDAL_DLL PclVisualizer : public Writer
 {
 public:
-    SET_STAGE_NAME("writers.pclvisualizer", "PCD Writer")
-    SET_STAGE_LINK("http://pdal.io/stages/writers.pclvisualizer.html")
-    SET_PLUGIN_VERSION("1.0.0b1")
+    PclVisualizer()
+    {}
 
-    PclVisualizer() : pdal::Writer() {};
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
 private:
-    virtual void processOptions(const Options&) {};
-    virtual void ready(PointContextRef ctx) {};
-    virtual void write(const PointBuffer& buf);
+    virtual void write(const PointViewPtr view);
 
     PclVisualizer& operator=(const PclVisualizer&); // not implemented
     PclVisualizer(const PclVisualizer&); // not implemented

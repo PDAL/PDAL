@@ -64,6 +64,9 @@ macro(PDAL_ADD_LIBRARY _name)
         RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR}
         LIBRARY DESTINATION ${PDAL_LIB_INSTALL_DIR}
         ARCHIVE DESTINATION ${PDAL_LIB_INSTALL_DIR})
+    if (APPLE)
+        set_target_properties(${_name} PROPERTIES INSTALL_NAME_DIR "@executable_path/../lib")
+    endif()
 endmacro(PDAL_ADD_LIBRARY)
 
 ###############################################################################
@@ -114,6 +117,9 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
         RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR}
         LIBRARY DESTINATION ${PDAL_LIB_INSTALL_DIR}
         ARCHIVE DESTINATION ${PDAL_LIB_INSTALL_DIR})
+    if (APPLE)
+        set_target_properties(${${_name}} PROPERTIES INSTALL_NAME_DIR "@loader_path/../lib")
+    endif()
 endmacro(PDAL_ADD_PLUGIN)
 
 ###############################################################################
@@ -131,7 +137,7 @@ macro(PDAL_ADD_TEST _name)
     include_directories(${PROJECT_BINARY_DIR}/test/unit)
     set(common_srcs
         ${PROJECT_SOURCE_DIR}/test/unit/Support.cpp
-	${PROJECT_SOURCE_DIR}/test/unit/TestConfig.cpp
+        ${PROJECT_SOURCE_DIR}/test/unit/TestConfig.cpp
     )
     if (WIN32)
         list(APPEND ${PDAL_ADD_TEST_FILES} ${PDAL_TARGET_OBJECTS})
@@ -140,8 +146,13 @@ macro(PDAL_ADD_TEST _name)
     add_executable(${_name} ${PDAL_ADD_TEST_FILES} ${common_srcs})
     set_target_properties(${_name} PROPERTIES COMPILE_DEFINITIONS PDAL_DLL_IMPORT)
     set_property(TARGET ${_name} PROPERTY FOLDER "Tests")
-    target_link_libraries(${_name} ${PDAL_LIB_NAME} gtest gtest_main ${PDAL_ADD_TEST_LINK_WITH})
+    target_link_libraries(${_name} ${PDAL_LIB_NAME} gtest ${PDAL_ADD_TEST_LINK_WITH})
     add_test(NAME ${_name} COMMAND "${PROJECT_BINARY_DIR}/bin/${_name}" WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/..")
+    set_property(TEST ${_name} PROPERTY ENVIRONMENT
+      # Ensure plugins are loaded from build dir
+      # https://github.com/PDAL/PDAL/issues/840
+      "PDAL_DRIVER_PATH=${PROJECT_BINARY_DIR}/lib"
+    )
 endmacro(PDAL_ADD_TEST)
 
 ###############################################################################

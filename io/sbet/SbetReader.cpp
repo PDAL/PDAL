@@ -37,6 +37,15 @@
 namespace pdal
 {
 
+static PluginInfo const s_info = PluginInfo(
+    "readers.sbet",
+    "SBET Reader",
+    "http://pdal.io/stages/readers.sbet.html" );
+
+CREATE_STATIC_PLUGIN(1, 0, SbetReader, Reader, s_info)
+
+std::string SbetReader::getName() const { return s_info.name; }
+
 Options SbetReader::getDefaultOptions()
 {
     Options options;
@@ -44,13 +53,13 @@ Options SbetReader::getDefaultOptions()
 }
 
 
-void SbetReader::addDimensions(PointContextRef ctx)
+void SbetReader::addDimensions(PointLayoutPtr layout)
 {
-    ctx.registerDims(getDefaultDimensions());
+    layout->registerDims(getDefaultDimensions());
 }
 
 
-void SbetReader::ready(PointContextRef ctx)
+void SbetReader::ready(PointTableRef)
 {
     size_t fileSize = FileUtils::fileSize(m_filename);
     size_t pointSize = getDefaultDimensions().size() * sizeof(double);
@@ -62,9 +71,9 @@ void SbetReader::ready(PointContextRef ctx)
 }
 
 
-point_count_t SbetReader::read(PointBuffer& buf, point_count_t count)
+point_count_t SbetReader::read(PointViewPtr view, point_count_t count)
 {
-    PointId nextId = buf.size();
+    PointId nextId = view->size();
     PointId idx = m_index;
     point_count_t numRead = 0;
     seek(idx);
@@ -76,8 +85,12 @@ point_count_t SbetReader::read(PointBuffer& buf, point_count_t count)
             double d;
             *m_stream >> d;
             Dimension::Id::Enum dim = *di;
-            buf.setField(dim, nextId, d);
+            view->setField(dim, nextId, d);
         }
+
+        if (m_cb)
+            m_cb(*view, nextId);
+
         idx++;
         nextId++;
         numRead++;

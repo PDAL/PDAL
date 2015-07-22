@@ -49,9 +49,6 @@ namespace pdal
 {
 
 Option::Option(const boost::property_tree::ptree& tree)
-    : m_name("")
-    , m_value("")
-    , m_description("")
 {
     using namespace boost::property_tree;
 
@@ -81,26 +78,6 @@ void Option::setOptions(Options const& options)
 }
 
 #if !defined(PDAL_COMPILER_MSVC)
-// explicit specialization:
-//   boost::lexical_cast only understands "0" and "1" for bools,
-//   so we handle those situations explicitly
-template<> bool Option::getValue() const
-{
-    if (m_value == "true")
-        return true;
-    if (m_value == "false")
-        return false;
-    return boost::lexical_cast<bool>(m_value);
-}
-
-
-// explicit specialization:
-//   if we want to get out a (const ref) string, we don't need lexical_cast
-template<> const std::string& Option::getValue() const
-{
-    return m_value;
-}
-
 
 // explicit specialization:
 //   if insert a bool, we don't want it to be "0" or "1" (which is
@@ -118,12 +95,23 @@ template<> void Option::setValue(const std::string& value)
 }
 #endif
 
-bool Option::empty()
+bool Option::empty() const
 {
     if (m_options)
         return m_options->empty();
     else
         return false;
+}
+
+void Option::toMetadata(MetadataNode& parent) const
+{
+    MetadataNode child = parent.add(getName());
+    child.add("value", getValue<std::string>());
+    child.add("description", getDescription());
+
+    auto opts = getOptions();
+    if (opts)
+        opts->toMetadata(child);
 }
 
 //---------------------------------------------------------------------------
@@ -165,7 +153,7 @@ Option& Options::getOptionByRef(const std::string& name)
         std::ostringstream oss;
         oss << "Options::getOptionByRef: Required option '" << name <<
             "' was not found on this stage";
-        throw option_not_found(oss.str());
+        throw Option::not_found(oss.str());
     }
     return iter->second;
 }
@@ -179,7 +167,7 @@ const Option& Options::getOption(const std::string& name) const
         std::ostringstream oss;
         oss << "Options::getOption: Required option '" << name <<
             "' was not found on this stage";
-        throw option_not_found(oss.str());
+        throw Option::not_found(oss.str());
     }
     return iter->second;
 }
@@ -222,7 +210,7 @@ bool Options::hasOption(std::string const& name) const
         (void)getOption(name);
         return true;
     }
-    catch (option_not_found&)
+    catch (Option::not_found)
     {}
     return false;
 }
@@ -236,7 +224,7 @@ void Options::dump() const
 
 std::ostream& operator<<(std::ostream& ostr, const Options& options)
 {
-    const boost::property_tree::ptree tree = pdal::utils::toPTree(options);
+    const boost::property_tree::ptree tree = pdal::Utils::toPTree(options);
 
     boost::property_tree::write_json(ostr, tree);
 

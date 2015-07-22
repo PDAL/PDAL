@@ -37,4 +37,5 @@
 std::string TestConfig::g_data_path = UNITTEST_TESTCONFIG_DATA_PATH;
 std::string TestConfig::g_configured_path = UNITTEST_TESTCONFIG_CONFIGURED_PATH;
 std::string TestConfig::g_binary_path = UNITTEST_TESTCONFIG_BINARY_PATH;
-std::string TestConfig::g_oracle_connection = "";
+std::string TestConfig::g_oracle_connection =
+    UNITTEST_TESTCONFIG_OCI_CONNECTION;

@@ -40,48 +40,58 @@
 #include <geos_c.h>
 #endif
 
+extern "C" int32_t CropFilter_ExitFunc();
+extern "C" PF_ExitFunc CropFilter_InitPlugin();
+
 namespace pdal
 {
-class PointBuffer;
 
-#define CROPFILTERDOCS "Filter points inside or outside a bounding box or \n" \
-                       "a polygon if PDAL was built with GEOS support."
 // removes any points outside of the given range
 // updates the header accordingly
 class PDAL_DLL CropFilter : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.crop", CROPFILTERDOCS)
-    SET_STAGE_LINK("http://pdal.io/stages/filters.crop.html")
-
     CropFilter();
 
-    static Options getDefaultOptions();
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+
+    Options getDefaultOptions();
 
     const BOX3D& getBounds() const;
 
 private:
-    BOX3D m_bounds;
+    std::vector<BOX3D> m_bounds;
     bool m_cropOutside;
-    std::string m_poly;
+    StringList m_polys;
 
-#ifdef PDAL_HAVE_GEOS
-	GEOSContextHandle_t m_geosEnvironment;
-    GEOSGeometry* m_geosGeometry;
-    GEOSPreparedGeometry const* m_geosPreparedGeometry;
-#else
-    void* m_geosEnvironment;
-    void* m_geosGeometry;
-    void* m_geosPreparedGeometry;
-    typedef struct GEOSGeometry* GEOSGeometryHS;
+#ifndef PDAL_HAVE_GEOS
+    typedef void *GEOSContextHandle_t;
+    typedef void GEOSGeometry;
+    typedef void GEOSPreparedGeometry;
 #endif
 
+	GEOSContextHandle_t m_geosEnvironment;
+    struct GeomPkg
+    {
+        GEOSGeometry *m_geom;
+        const GEOSPreparedGeometry *m_prepGeom;
+    };
+
+    std::vector<GeomPkg> m_geoms;
+
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContext ctx);
-    virtual PointBufferSet run(PointBufferPtr buffer);
-    virtual void done(PointContext ctx);
-    void crop(PointBuffer& input, PointBuffer& output);
+    virtual void ready(PointTableRef table);
+    virtual PointViewSet run(PointViewPtr view);
+    virtual void done(PointTableRef table);
+    void crop(const BOX3D& box, PointView& input, PointView& output);
+    void crop(const GeomPkg& g, PointView& input, PointView& output);
+#ifdef PDAL_HAVE_GEOS
+    GeomPkg preparePolygon(const std::string& poly);
     BOX3D computeBounds(GEOSGeometry const *geometry);
+    GEOSGeometry *createPoint(double x, double y, double z);
+#endif
 
     CropFilter& operator=(const CropFilter&); // not implemented
     CropFilter(const CropFilter&); // not implemented

@@ -54,6 +54,13 @@ namespace pdal
 class PDAL_DLL UserCallback
 {
 public:
+    class interrupted : public pdal_error
+    {
+    public:
+        interrupted() : pdal_error("UserCallback: interrupted by user")
+            {}
+    };
+
     UserCallback() : m_percentComplete(0.0), m_interruptFlag(false),
         m_heartbeats(0), m_total(1)
     {}
@@ -86,7 +93,7 @@ public:
         ++m_heartbeats;
         callback();
         if (m_interruptFlag)
-            throw pipeline_interrupt("user requested interrupt");
+            throw interrupted();
     }
 
     // This will be called by the pipeline (via check()) at various times

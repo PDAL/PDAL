@@ -35,7 +35,9 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/PointBuffer.hpp>
+
+extern "C" int32_t StatsFilter_ExitFunc();
+extern "C" PF_ExitFunc StatsFilter_InitPlugin();
 
 namespace pdal
 {
@@ -45,8 +47,19 @@ namespace stats
 class PDAL_DLL Summary
 {
 public:
-    Summary(std::string name) : m_name(name)
-        { reset(); }
+    enum EnumType
+    {
+        NoEnum,
+        Enumerate,
+        Count
+    };
+
+typedef std::map<double, point_count_t> EnumMap;
+
+public:
+    Summary(std::string name, EnumType enumerate) :
+        m_name(name), m_enumerate(enumerate)
+    { reset(); }
 
     double minimum() const
         { return m_min; }
@@ -58,6 +71,8 @@ public:
         { return m_cnt; }
     std::string name() const
         { return m_name; }
+    const EnumMap& values() const
+        { return m_values; }
 
     void extractMetadata(MetadataNode &m) const;
 
@@ -75,28 +90,33 @@ public:
         m_min = (std::min)(m_min, value);
         m_max = (std::max)(m_max, value);
         m_avg += (value - m_avg) / m_cnt;
+        if (m_enumerate != NoEnum)
+            m_values[value]++;
     }
 
 private:
+    std::string m_name;
+    EnumType m_enumerate;
     double m_max;
     double m_min;
     double m_avg;
+    EnumMap m_values;
     point_count_t m_cnt;
-    std::string m_name;
 };
 
 } // namespace stats
 
-// This is just a pass-thorugh filter, which collects some stats about
+// This is just a pass-through filter, which collects some stats about
 // the points that are fed through it
 class PDAL_DLL StatsFilter : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.stats", "Compute statistics about each dimension (mean, min, max, etc.)")
-    SET_STAGE_LINK("http://pdal.io/stages/filters.stats.html")
-
     StatsFilter() : Filter()
         {}
+
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
     const stats::Summary& getStats(Dimension::Id::Enum d) const;
     void reset();
@@ -105,12 +125,14 @@ private:
     StatsFilter& operator=(const StatsFilter&); // not implemented
     StatsFilter(const StatsFilter&); // not implemented
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContext ctx);
-    virtual void done(PointContext ctx);
-    virtual void filter(PointBuffer& data);
-    void extractMetadata(PointContext ctx);
+    virtual void prepared(PointTableRef table);
+    virtual void done(PointTableRef table);
+    virtual void filter(PointView& view);
+    void extractMetadata();
 
-    std::string m_dimNames;
+    StringList m_dimNames;
+    StringList m_enums;
+    StringList m_counts;
     std::map<Dimension::Id::Enum, stats::Summary> m_stats;
 };
 

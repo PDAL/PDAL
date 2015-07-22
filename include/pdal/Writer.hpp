@@ -36,7 +36,7 @@
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Options.hpp>
-#include <pdal/UserCallback.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/Stage.hpp>
 
 #include <string>
@@ -46,48 +46,42 @@ namespace pdal
 
 class Writer;
 
-typedef std::unique_ptr<Writer> WriterPtr;
-
-class PointBuffer;
 class UserCallback;
 
 /// End-stage consumer of PDAL pipeline
 class PDAL_DLL Writer : public Stage
 {
-    friend class WriterTester;
+    friend class WriterWrapper;
+    friend class FlexWriter;
 
 public:
     /// Constructs an end-stage consumer of a pipeline of data -- a writer
-    Writer() : m_callback(new UserCallback)
+    Writer()
         {}
 
     /// Serialize the pipeline to a boost::property_tree::ptree
     /// @return boost::property_tree::ptree with xml attributes
     virtual boost::property_tree::ptree serializePipeline() const;
 
-    /// Sets the UserCallback to manage progress/cancel operations
-    void setUserCallback(UserCallback* userCallback)
-        { m_callback.reset(userCallback); }
-
 protected:
-    std::unique_ptr<UserCallback> m_callback;
     std::string m_filename;
     XForm m_xXform;
     XForm m_yXform;
     XForm m_zXform;
+    StringList m_outputDims;
 
-    void setAutoOffset(const PointBuffer& buf);
+    virtual void setAutoXForm(const PointViewPtr view);
 
 private:
-    virtual PointBufferSet run(PointBufferPtr buffer)
+    virtual PointViewSet run(PointViewPtr view)
     {
-        PointBufferSet pbSet;
-        write(*buffer);
-        pbSet.insert(buffer);
-        return pbSet;
+        PointViewSet viewSet;
+        write(view);
+        viewSet.insert(view);
+        return viewSet;
     }
     virtual void writerProcessOptions(const Options& options);
-    virtual void write(const PointBuffer& /*buffer*/)
+    virtual void write(const PointViewPtr /*view*/)
         { std::cerr << "Can't write with stage = " << getName() << "!\n"; }
 
     Writer& operator=(const Writer&); // not implemented

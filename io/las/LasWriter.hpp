@@ -34,12 +34,16 @@
 
 #pragma once
 
-#include <pdal/Writer.hpp>
+#include <pdal/FlexWriter.hpp>
 
 #include "LasError.hpp"
 #include "LasHeader.hpp"
+#include "LasUtils.hpp"
 #include "SummaryData.hpp"
 #include "ZipPoint.hpp"
+
+extern "C" int32_t LasWriter_ExitFunc();
+extern "C" PF_ExitFunc LasWriter_InitPlugin();
 
 namespace pdal
 {
@@ -56,57 +60,58 @@ struct VlrOptionInfo
     std::string m_description;
 };
 
-#define LASWRITERDOC "ASPRS LAS 1.0 - 1.4 writer. LASzip support is also \n" \
-                     "available if enabled at compile-time. Note that LAZ \n" \
-                     "does not provide LAS 1.4 support at this time."
-class PDAL_DLL LasWriter : public pdal::Writer
+class PDAL_DLL LasWriter : public FlexWriter
 {
     friend class LasTester;
     friend class NitfWriter;
 public:
-    SET_STAGE_NAME("writers.las", LASWRITERDOC)
-    SET_STAGE_LINK("http://pdal.io/stages/writers.las.html")
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
-    LasWriter() : m_ostream(NULL)
-         { construct(); }
-    LasWriter(std::ostream *stream) : m_ostream(stream)
-        { construct(); }
+    LasWriter();
 
-    static Options getDefaultOptions();
+    Options getDefaultOptions();
 
-    void flush();
+protected:
+    void prepOutput(std::ostream *out);
+    void finishOutput();
 
 private:
     LasError m_error;
     LasHeader m_lasHeader;
-    uint32_t m_numPointsWritten;
-    SummaryData m_summaryData;
+    std::unique_ptr<SummaryData> m_summaryData;
     std::unique_ptr<LASzipper> m_zipper;
     std::unique_ptr<ZipPoint> m_zipPoint;
     bool m_discardHighReturnNumbers;
     std::map<std::string, std::string> m_headerVals;
     std::vector<VlrOptionInfo> m_optionInfos;
-    uint64_t m_streamOffset; // the first byte of the LAS file
     std::ostream *m_ostream;
     std::vector<VariableLengthRecord> m_vlrs;
     std::vector<ExtVariableLengthRecord> m_eVlrs;
+    std::vector<ExtraDim> m_extraDims;
+    uint16_t m_extraByteLen;
+    SpatialReference m_srs;
+    std::string m_curFilename;
 
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContextRef ctx);
-    virtual void write(const PointBuffer& pointBuffer);
-    virtual void done(PointContextRef ctx);
+    virtual void prepared(PointTableRef table);
+    virtual void readyTable(PointTableRef table);
+    virtual void readyFile(const std::string& filename);
+    virtual void writeView(const PointViewPtr view);
+    virtual void doneFile();
 
-    void construct();
     void getHeaderOptions(const Options& options);
     void getVlrOptions(const Options& opts);
     template<typename T>
     T headerVal(const std::string& name);
-    void fillHeader(PointContextRef ctx);
-    point_count_t fillWriteBuf(const PointBuffer& pointBuffer, PointId startId,
+    void fillHeader();
+    point_count_t fillWriteBuf(const PointView& view, PointId startId,
         std::vector<char>& buf);
     void setVlrsFromMetadata();
     MetadataNode findVlrMetadata(MetadataNode node, uint16_t recordId,
         const std::string& userId);
+    void setExtraBytesVlr();
     void setVlrsFromSpatialRef(const SpatialReference& srs);
     void readyCompression();
     void openCompression();

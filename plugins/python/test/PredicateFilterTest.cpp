@@ -32,14 +32,16 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "gtest/gtest.h"
+#include <pdal/pdal_test_main.hpp>
 
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
+#include <pdal/plang/PythonEnvironment.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/StageWrapper.hpp>
 #include <stats/StatsFilter.hpp>
+#include <faux/FauxReader.hpp>
 
-#include "StageTester.hpp"
 #include "Support.hpp"
 
 using namespace pdal;
@@ -54,8 +56,8 @@ TEST(PredicateFilterTest, PredicateFilterTest_test1)
     readerOps.add("num_points", 1000);
     readerOps.add("mode", "ramp");
 
-    ReaderPtr reader(f.createReader("readers.faux"));
-    reader->setOptions(readerOps);
+    FauxReader reader;
+    reader.setOptions(readerOps);
 
     // keep all points where x less than 1.0
     const Option source("source",
@@ -76,24 +78,24 @@ TEST(PredicateFilterTest, PredicateFilterTest_test1)
     opts.add(module);
     opts.add(function);
 
-    FilterPtr filter(f.createFilter("filters.predicate"));
+    std::unique_ptr<Stage> filter(f.createStage("filters.predicate"));
     filter->setOptions(opts);
-    filter->setInput(reader.get());
+    filter->setInput(reader);
 
     Options statOpts;
-    StatsFilter stats;
-    stats.setOptions(statOpts);
-    stats.setInput(filter.get());
+    std::unique_ptr<StatsFilter> stats(new StatsFilter);
+    stats->setOptions(statOpts);
+    stats->setInput(*filter);
 
-    PointContext ctx;
+    PointTable table;
 
-    stats.prepare(ctx);
-    PointBufferSet pbSet = stats.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
+    stats->prepare(table);
+    PointViewSet viewSet = stats->execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
 
-    const stats::Summary& statsX = stats.getStats(Dimension::Id::X);
-    const stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
-    const stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
+    const stats::Summary& statsX = stats->getStats(Dimension::Id::X);
+    const stats::Summary& statsY = stats->getStats(Dimension::Id::Y);
+    const stats::Summary& statsZ = stats->getStats(Dimension::Id::Z);
 
     EXPECT_TRUE(Utils::compare_approx<double>(statsX.minimum(), 0.0, 0.01));
     EXPECT_TRUE(Utils::compare_approx<double>(statsY.minimum(), 0.0, 0.01));
@@ -114,8 +116,8 @@ TEST(PredicateFilterTest, PredicateFilterTest_test2)
     readerOps.add("num_points", 1000);
     readerOps.add("mode", "ramp");
 
-    ReaderPtr reader(f.createReader("readers.faux"));
-    reader->setOptions(readerOps);
+    FauxReader reader;
+    reader.setOptions(readerOps);
 
     Option source("source",
         // "Y > 1.0"
@@ -134,24 +136,24 @@ TEST(PredicateFilterTest, PredicateFilterTest_test2)
     opts.add(module);
     opts.add(function);
 
-    FilterPtr filter(f.createFilter("filters.predicate"));
+    std::unique_ptr<Stage> filter(f.createStage("filters.predicate"));
     filter->setOptions(opts);
-    filter->setInput(reader.get());
+    filter->setInput(reader);
 
     Options statOpts;
-    StatsFilter stats;
-    stats.setOptions(statOpts);
-    stats.setInput(filter.get());
+    std::unique_ptr<StatsFilter> stats(new StatsFilter);
+    stats->setOptions(statOpts);
+    stats->setInput(*filter);
 
-    PointContext ctx;
+    PointTable table;
 
-    stats.prepare(ctx);
-    PointBufferSet pbSet = stats.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
+    stats->prepare(table);
+    PointViewSet viewSet = stats->execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
 
-    const stats::Summary& statsX = stats.getStats(Dimension::Id::X);
-    const stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
-    const stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
+    const stats::Summary& statsX = stats->getStats(Dimension::Id::X);
+    const stats::Summary& statsY = stats->getStats(Dimension::Id::Y);
+    const stats::Summary& statsZ = stats->getStats(Dimension::Id::Z);
 
     EXPECT_TRUE(Utils::compare_approx<double>(statsX.minimum(), 1.0, 0.01));
     EXPECT_TRUE(Utils::compare_approx<double>(statsY.minimum(), 1.0, 0.01));
@@ -172,8 +174,8 @@ TEST(PredicateFilterTest, PredicateFilterTest_test3)
     readerOpts.add("num_points", 1000);
     readerOpts.add("mode", "ramp");
 
-    ReaderPtr reader(f.createReader("readers.faux"));
-    reader->setOptions(readerOpts);
+    FauxReader reader;
+    reader.setOptions(readerOpts);
 
     // keep all points where x less than 1.0
     const Option source1("source",
@@ -194,9 +196,9 @@ TEST(PredicateFilterTest, PredicateFilterTest_test3)
     opts1.add(module1);
     opts1.add(function1);
 
-    FilterPtr filter1(f.createFilter("filters.predicate"));
+    std::unique_ptr<Stage> filter1(f.createStage("filters.predicate"));
     filter1->setOptions(opts1);
-    filter1->setInput(reader.get());
+    filter1->setInput(reader);
 
     // keep all points where y greater than 0.5
     const Option source2("source",
@@ -217,22 +219,22 @@ TEST(PredicateFilterTest, PredicateFilterTest_test3)
     opts2.add(module2);
     opts2.add(function2);
 
-    FilterPtr filter2(f.createFilter("filters.predicate"));
+    std::unique_ptr<Stage> filter2(f.createStage("filters.predicate"));
     filter2->setOptions(opts2);
-    filter2->setInput(filter1.get());
+    filter2->setInput(*filter1);
 
     Options statOpts;
-    StatsFilter stats;
-    stats.setOptions(statOpts);
-    stats.setInput(filter2.get());
+    std::unique_ptr<StatsFilter> stats(new StatsFilter);
+    stats->setOptions(statOpts);
+    stats->setInput(*filter2);
 
-    PointContext ctx;
-    stats.prepare(ctx);
-    stats.execute(ctx);
+    PointTable table;
+    stats->prepare(table);
+    stats->execute(table);
 
-    const stats::Summary& statsX = stats.getStats(Dimension::Id::X);
-    const stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
-    const stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
+    const stats::Summary& statsX = stats->getStats(Dimension::Id::X);
+    const stats::Summary& statsY = stats->getStats(Dimension::Id::Y);
+    const stats::Summary& statsZ = stats->getStats(Dimension::Id::Z);
 
     EXPECT_TRUE(Utils::compare_approx<double>(statsX.minimum(), 0.5, 0.01));
     EXPECT_TRUE(Utils::compare_approx<double>(statsY.minimum(), 0.5, 0.01));
@@ -253,8 +255,8 @@ TEST(PredicateFilterTest, PredicateFilterTest_test4)
     readerOpts.add("num_points", 1000);
     readerOpts.add("mode", "ramp");
 
-    ReaderPtr reader(f.createReader("readers.faux"));
-    reader->setOptions(readerOpts);
+    FauxReader reader;
+    reader.setOptions(readerOpts);
 
     const Option source("source",
         // "Y > 0.5"
@@ -273,27 +275,27 @@ TEST(PredicateFilterTest, PredicateFilterTest_test4)
     opts.add(module);
     opts.add(function);
 
-    FilterPtr filter(f.createFilter("filters.predicate"));
+    std::unique_ptr<Stage> filter(f.createStage("filters.predicate"));
     filter->setOptions(opts);
-    filter->setInput(reader.get());
+    filter->setInput(reader);
 
-    PointContext ctx;
-    PointBufferPtr buf(new PointBuffer(ctx));
+    PointTable table;
+    PointViewPtr buf(new PointView(table));
 
-    filter->prepare(ctx);
+    filter->prepare(table);
 
-    StageTester::ready(reader.get(), ctx);
-    PointBufferSet pbSet = StageTester::run(reader.get(), buf);
-    StageTester::done(reader.get(), ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
-    buf = *pbSet.begin();
+    StageWrapper::ready(reader, table);
+    PointViewSet viewSet = StageWrapper::run(reader, buf);
+    StageWrapper::done(reader, table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    buf = *viewSet.begin();
     EXPECT_EQ(buf->size(), 1000u);
 
-    StageTester::ready(filter.get(), ctx);
-    pbSet = StageTester::run(filter.get(), buf);
-    StageTester::done(filter.get(), ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
-    buf = *pbSet.begin();
+    StageWrapper::ready(*filter, table);
+    viewSet = StageWrapper::run(*filter, buf);
+    StageWrapper::done(*filter, table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    buf = *viewSet.begin();
     EXPECT_EQ(buf->size(), 750u);
 }
 
@@ -308,8 +310,8 @@ TEST(PredicateFilterTest, PredicateFilterTest_test5)
     readerOpts.add("num_points", 1000);
     readerOpts.add("mode", "ramp");
 
-    ReaderPtr reader(f.createReader("readers.faux"));
-    reader->setOptions(readerOpts);
+    FauxReader reader;
+    reader.setOptions(readerOpts);
 
     const Option source("source",
         // "Y > 0.5"
@@ -328,14 +330,14 @@ TEST(PredicateFilterTest, PredicateFilterTest_test5)
     opts.add(module);
     opts.add(function);
 
-    FilterPtr filter(f.createFilter("filters.predicate"));
+    std::unique_ptr<Stage> filter(f.createStage("filters.predicate"));
     filter->setOptions(opts);
-    filter->setInput(reader.get());
+    filter->setInput(reader);
 
-    PointContext ctx;
-    filter->prepare(ctx);
+    PointTable table;
+    filter->prepare(table);
 
-    ASSERT_THROW(filter->execute(ctx), python_error);
+    ASSERT_THROW(filter->execute(table), plang::error);
 }
 
 TEST(PredicateFilterTest, PredicateFilterTest_Pipeline)

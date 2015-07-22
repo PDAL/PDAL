@@ -34,10 +34,8 @@
 
 #include <pdal/PipelineReader.hpp>
 
-#include <pdal/PipelineManager.hpp>
 #include <pdal/Filter.hpp>
-#include <pdal/Reader.hpp>
-#include <pdal/Writer.hpp>
+#include <pdal/PipelineManager.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/util/FileUtils.hpp>
 
@@ -46,7 +44,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string/trim.hpp>
 
-#ifndef PDAL_PLATFORM_WIN32
+#ifndef _WIN32
 #include <wordexp.h>
 #endif
 
@@ -92,33 +90,35 @@ public:
 
     void addUnknown(const std::string& name)
     {
-        throw pipeline_xml_error("unknown child of element: " + name);
+        throw pdal_error("unknown child of element: " + name);
     }
 
     void validate()
     {
         if (m_numTypes == 0)
-            throw pipeline_xml_error("expected Type element missing");
+            throw pdal_error("PipelineReader: expected Type element missing");
         if (m_numTypes > 1)
-            throw pipeline_xml_error("extra Type element found");
+            throw pdal_error("PipelineReader: extra Type element found");
 
         if (m_cardinality == None)
         {
             if (m_numStages != 0)
-                throw pipeline_xml_error(
-                    "found child stages where none expected");
+                throw pdal_error("PipelineReader: found child stages where "
+                    "none were expected");
         }
         if (m_cardinality == One)
         {
             if (m_numStages == 0)
-                throw pipeline_xml_error("expected child stage missing");
+                throw pdal_error("PipelineReader: "
+                    "expected child stage missing");
             if (m_numStages > 1)
-                throw pipeline_xml_error("extra child stages found");
+                throw pdal_error("PipelineReader: extra child stages found");
         }
         if (m_cardinality == Many)
         {
             if (m_numStages == 0)
-                throw pipeline_xml_error("expected child stage missing");
+                throw pdal_error("PipelineReader: expected child stage "
+                    "missing");
         }
     }
 
@@ -191,7 +191,7 @@ Option PipelineReader::parseElement_Option(const ptree& tree)
     if (option.getName() == "filename")
     {
         std::string path = option.getValue<std::string>();
-#ifndef PDAL_PLATFORM_WIN32
+#ifndef _WIN32
         wordexp_t result;
         if (wordexp(path.c_str(), &result, 0) == 0)
         {
@@ -210,22 +210,26 @@ Option PipelineReader::parseElement_Option(const ptree& tree)
         }
         option.setValue(path);
     }
+    else if (option.getName() == "plugin")
+    {
+       PluginManager& pm = PluginManager::getInstance();
+       std::string path = option.getValue<std::string>();
+       pm.loadPlugin(path);
+    }
     return option;
 }
 
 
-Stage* PipelineReader::parseElement_anystage(const std::string& name,
+Stage *PipelineReader::parseElement_anystage(const std::string& name,
     const ptree& subtree)
 {
-    Stage* stage = NULL;
-
     if (name == "Filter")
     {
-        stage = parseElement_Filter(subtree);
+        return parseElement_Filter(subtree);
     }
     else if (name == "Reader")
     {
-        stage = parseElement_Reader(subtree);
+        return parseElement_Reader(subtree);
     }
     else if (name == "<xmlattr>")
     {
@@ -233,14 +237,14 @@ Stage* PipelineReader::parseElement_anystage(const std::string& name,
     }
     else
     {
-        throw pipeline_xml_error("encountered unknown stage type");
+        throw pdal_error("PipelineReader: encountered unknown stage type");
     }
 
-    return stage;
+    return NULL;
 }
 
 
-Reader* PipelineReader::parseElement_Reader(const ptree& tree)
+Stage *PipelineReader::parseElement_Reader(const ptree& tree)
 {
     Options options(m_baseOptions);
 
@@ -296,29 +300,28 @@ Reader* PipelineReader::parseElement_Reader(const ptree& tree)
                 context.addType();
             }
         }
-        catch (option_not_found)
-        {} // noop
+        catch (Option::not_found)
+        {}
     }
 
     context.validate();
 
-    Reader* reader =m_manager.addReader(type);
-    reader->setOptions(options);
-    return reader;
+    Stage& reader(m_manager.addReader(type));
+    reader.setOptions(options);
+    return &reader;
 }
 
 
-Filter* PipelineReader::parseElement_Filter(const ptree& tree)
+Stage *PipelineReader::parseElement_Filter(const ptree& tree)
 {
     Options options(m_baseOptions);
-//    Stage* prevStage = NULL;
 
     StageParserContext context;
 
     map_t attrs;
     collect_attributes(attrs, tree);
 
-    std::vector<Stage *> prevStages;
+    std::vector<Stage*> prevStages;
     for (auto iter = tree.begin(); iter != tree.end(); ++iter)
     {
         const std::string& name = iter->first;
@@ -355,12 +358,13 @@ Filter* PipelineReader::parseElement_Filter(const ptree& tree)
         context.addType();
     }
 
-    Filter* ptr = m_manager.addFilter(type, prevStages);
-    ptr->setOptions(options);
-    if (dynamic_cast<MultiFilter *>(ptr))
-        context.setCardinality(StageParserContext::Many);
+    Stage& filter(m_manager.addFilter(type));
+    filter.setOptions(options);
+    for (auto sp : prevStages)
+        filter.setInput(*sp);
+    context.setCardinality(StageParserContext::Many);
     context.validate();
-    return ptr;
+    return &filter;
 }
 
 
@@ -387,15 +391,15 @@ void PipelineReader::collect_attributes(map_t& attrs, const ptree& tree)
 }
 
 
-Writer* PipelineReader::parseElement_Writer(const ptree& tree)
+Stage *PipelineReader::parseElement_Writer(const ptree& tree)
 {
     Options options(m_baseOptions);
-    Stage* prevStage = NULL;
     StageParserContext context;
 
     map_t attrs;
     collect_attributes(attrs, tree);
 
+    std::vector<Stage *> prevStages;
     for (auto iter = tree.begin(); iter != tree.end(); ++iter)
     {
         const std::string& name = iter->first;
@@ -417,7 +421,7 @@ Writer* PipelineReader::parseElement_Writer(const ptree& tree)
         else if (name == "Filter" || name == "Reader")
         {
             context.addStage();
-            prevStage = parseElement_anystage(name, subtree);
+            prevStages.push_back(parseElement_anystage(name, subtree));
         }
         else
         {
@@ -433,16 +437,18 @@ Writer* PipelineReader::parseElement_Writer(const ptree& tree)
     }
 
     context.validate();
-    Writer* writer = m_manager.addWriter(type, prevStage);
-    writer->setOptions(options);
-    return writer;
+    Stage& writer(m_manager.addWriter(type));
+    for (auto sp : prevStages)
+        writer.setInput(*sp);
+    writer.setOptions(options);
+    return &writer;
 }
 
 
 bool PipelineReader::parseElement_Pipeline(const ptree& tree)
 {
-    Stage* stage = NULL;
-    Writer* writer = NULL;
+    Stage *stage = NULL;
+    Stage *writer = NULL;
 
     map_t attrs;
     collect_attributes(attrs, tree);
@@ -451,7 +457,7 @@ bool PipelineReader::parseElement_Pipeline(const ptree& tree)
     if (attrs.count("version"))
         version = attrs["version"];
     if (version != "1.0")
-        throw pipeline_xml_error("unsupported pipeline xml version");
+        throw pdal_error("PipelineReader: unsupported pipeline xml version");
 
     bool isWriter = false;
 
@@ -475,14 +481,15 @@ bool PipelineReader::parseElement_Pipeline(const ptree& tree)
         }
         else
         {
-            throw pipeline_xml_error("xml reader invalid child of "
+            throw pdal_error("PipelineReader: xml reader invalid child of "
                 "ReaderPipeline element");
         }
     }
 
     if (writer && stage)
     {
-        throw pipeline_xml_error("extra nodes at front of writer pipeline");
+        throw pdal_error("PipelineReader: extra nodes at front of "
+            "writer pipeline");
     }
 
     return isWriter;
@@ -492,13 +499,12 @@ bool PipelineReader::readPipeline(std::istream& input)
 {
 
     ptree tree;
+
     xml_parser::read_xml(input, tree, xml_parser::no_comments);
 
     boost::optional<ptree> opt(tree.get_child_optional("Pipeline"));
     if (!opt.is_initialized())
-    {
-        throw pipeline_xml_error("root element is not Pipeline");
-    }
+        throw pdal_error("PipelineReader: root element is not Pipeline");
     ptree subtree = opt.get();
     return parseElement_Pipeline(subtree);
 }
@@ -516,10 +522,17 @@ bool PipelineReader::readPipeline(const std::string& filename)
     {
         isWriter = readPipeline(*input);
     }
+    catch (const pdal_error& error)
+    {
+        throw error;
+    }
     catch (...)
     {
         FileUtils::closeFile(input);
-        throw;
+        std::ostringstream oss;
+        oss << "Unable to process pipeline file \"" << filename << "\"." <<
+            "  XML is invalid.";
+        throw pdal_error(oss.str());
     }
 
     FileUtils::closeFile(input);

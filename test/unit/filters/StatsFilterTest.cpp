@@ -32,16 +32,18 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "gtest/gtest.h"
+#include <pdal/pdal_test_main.hpp>
 
+#include <pdal/PDALUtils.hpp>
 #include <pdal/StageFactory.hpp>
+#include <FauxReader.hpp>
 #include <StatsFilter.hpp>
 
 #include "Support.hpp"
 
 using namespace pdal;
 
-TEST(StatsFilterTest, simple)
+TEST(Stats, simple)
 {
     BOX3D bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     Options ops;
@@ -50,17 +52,18 @@ TEST(StatsFilterTest, simple)
     ops.add("mode", "constant");
 
     StageFactory f;
-    ReaderPtr reader(f.createReader("readers.faux"));
+
+    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(ops);
 
     StatsFilter filter;
-    filter.setInput(reader.get());
+    filter.setInput(*reader);
     EXPECT_EQ(filter.getName(), "filters.stats");
 
-    PointContext ctx;
-    filter.prepare(ctx);
-    filter.execute(ctx);
+    PointTable table;
+    filter.prepare(table);
+    filter.execute(table);
 
     const stats::Summary& statsX = filter.getStats(Dimension::Id::X);
     const stats::Summary& statsY = filter.getStats(Dimension::Id::Y);
@@ -83,7 +86,8 @@ TEST(StatsFilterTest, simple)
     EXPECT_FLOAT_EQ(statsZ.average(), 3.0);
 }
 
-TEST(StatsFilterTest, dimset)
+
+TEST(Stats, dimset)
 {
     BOX3D bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     Options ops;
@@ -92,20 +96,20 @@ TEST(StatsFilterTest, dimset)
     ops.add("mode", "constant");
 
     StageFactory f;
-    ReaderPtr reader(f.createReader("readers.faux"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(ops);
 
     Options filterOps;
     filterOps.add("dimensions", " , X, Z ");
     StatsFilter filter;
-    filter.setInput(reader.get());
+    filter.setInput(*reader);
     filter.setOptions(filterOps);
     EXPECT_EQ(filter.getName(), "filters.stats");
 
-    PointContext ctx;
-    filter.prepare(ctx);
-    filter.execute(ctx);
+    PointTable table;
+    filter.prepare(table);
+    filter.execute(table);
 
     const stats::Summary& statsX = filter.getStats(Dimension::Id::X);
     EXPECT_THROW(filter.getStats(Dimension::Id::Y), pdal_error);
@@ -125,7 +129,7 @@ TEST(StatsFilterTest, dimset)
 }
 
 
-TEST(StatsFilterTest, metadata)
+TEST(Stats, metadata)
 {
     BOX3D bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
     Options ops;
@@ -134,19 +138,19 @@ TEST(StatsFilterTest, metadata)
     ops.add("mode", "constant");
 
     StageFactory f;
-    ReaderPtr reader(f.createReader("readers.faux"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(ops);
 
     Options filterOps;
     filterOps.add("dimensions", " , X, Z ");
     StatsFilter filter;
-    filter.setInput(reader.get());
+    filter.setInput(*reader);
     filter.setOptions(filterOps);
 
-    PointContext ctx;
-    filter.prepare(ctx);
-    filter.execute(ctx);
+    PointTable table;
+    filter.prepare(table);
+    filter.execute(table);
     MetadataNode m = filter.getMetadata();
     std::vector<MetadataNode> children = m.children("statistic");
 
@@ -158,7 +162,6 @@ TEST(StatsFilterTest, metadata)
 
         return m.find(findNameVal);
     };
- 
 
     for (auto mi = children.begin(); mi != children.end(); ++mi)
     {
@@ -179,3 +182,48 @@ TEST(StatsFilterTest, metadata)
     }
 }
 
+
+TEST(Stats, enum)
+{
+    BOX3D bounds(1.0, 0.0, 0.0, 10.0, 100.0, 1000.0);
+    Options ops;
+    ops.add("bounds", bounds);
+    ops.add("count", 10);
+    ops.add("mode", "ramp");
+
+    FauxReader reader;
+    reader.setOptions(ops);
+
+    Options filterOps;
+    filterOps.add("dimensions", "X, Y, Z");
+    filterOps.add("enumerate", "X");
+    filterOps.add("count", "Y");
+
+    StatsFilter filter;
+    filter.setInput(reader);
+    filter.setOptions(filterOps);
+
+    PointTable table;
+    filter.prepare(table);
+    filter.execute(table);
+
+    const stats::Summary& statsX = filter.getStats(Dimension::Id::X);
+    const stats::Summary::EnumMap& values = statsX.values();
+    EXPECT_EQ(values.size(), 10U);
+    double d = 1.0;
+    for (auto& v : values)
+    {
+        EXPECT_DOUBLE_EQ(d, v.first);
+        d += 1.0;
+    }
+
+    const stats::Summary& statsY = filter.getStats(Dimension::Id::Y);
+    const stats::Summary::EnumMap& yValues = statsY.values();
+    d = 0.0;
+    for (auto& v : yValues)
+    {
+        EXPECT_DOUBLE_EQ(d, v.first);
+        EXPECT_EQ(1u, v.second);
+        d += (100.0 / 9);
+    }
+}

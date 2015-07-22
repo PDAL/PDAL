@@ -38,9 +38,10 @@
 #include <boost/algorithm/string.hpp>
 
 #include "libpq-fe.h"
-#include <pdal/pdal_error.hpp>
+
 #include <pdal/Options.hpp>
 #include <pdal/Compression.hpp>
+#include <pdal/util/Utils.hpp>
 
 namespace pdal
 {
@@ -67,7 +68,8 @@ inline PGconn* pg_connect(std::string const& connection)
     /* Validate the connection string and get verbose error (?) */
 #ifdef PQconninfoParse
     char *errstr;
-    PQconninfoOption *connOptions = PQconninfoParse(connection.c_str(), &errstr);
+    PQconninfoOption *connOptions =
+        PQconninfoParse(connection.c_str(), &errstr);
     if ( ! connOptions )
     {
         throw pdal_error(errstr);
@@ -144,6 +146,14 @@ inline PGresult* pg_query_result(PGconn* session, std::string const& sql)
     return result;
 }
 
+inline std::string pg_quote_identifier(std::string const& name)
+{
+    return std::string("\"") + Utils::replaceAll(name, "\"", "\"\"") + "\"";
+}
 
+inline std::string pg_quote_literal(std::string const& lit)
+{
+    return std::string("'") + Utils::replaceAll(lit, "'", "'") + "'";
+}
 
 } // pdal

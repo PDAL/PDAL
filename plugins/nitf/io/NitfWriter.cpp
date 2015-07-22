@@ -39,24 +39,22 @@
 
 #include <pdal/pdal_macros.hpp>
 
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/GlobalEnvironment.hpp>
 
 #ifdef PDAL_COMPILER_GCC
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wredundant-decls"
-#  pragma GCC diagnostic ignored "-Wfloat-equal"
 #  pragma GCC diagnostic ignored "-Wextra"
 #  pragma GCC diagnostic ignored "-Wcast-qual"
    // The following pragma doesn't actually work:
    //   https://gcc.gnu.org/bugzilla/show_bug.cgi?id=61653
-#  pragma GCC diagnostic ignored "-Wliteral-suffix"
+   //#  pragma GCC diagnostic ignored "-Wliteral-suffix"
 #endif
 #include <ogr_spatialref.h>
 #include <cpl_conv.h>
 #ifdef PDAL_COMPILER_CLANG
 #  pragma clang diagnostic push
-#  pragma clang diagnostic ignored "-Wfloat-equal"
 #  pragma clang diagnostic ignored "-Wunused-private-field"
 #endif
 
@@ -77,11 +75,17 @@
 // syntactically, how do we name all the LAS writer options that we will pass to the las writer?
 //
 
-CREATE_WRITER_PLUGIN(nitf, pdal::NitfWriter)
-
 namespace pdal
 {
 
+static PluginInfo const s_info = PluginInfo(
+    "writers.nitf",
+    "NITF Writer",
+    "http://pdal.io/stages/writers.nitf.html" );
+
+CREATE_SHARED_PLUGIN(1, 0, NitfWriter, Writer, s_info)
+
+std::string NitfWriter::getName() const { return s_info.name; }
 
 BOX3D reprojectBoxToDD(const SpatialReference& reference, const BOX3D& box)
 {
@@ -91,19 +95,20 @@ BOX3D reprojectBoxToDD(const SpatialReference& reference, const BOX3D& box)
     BOX3D output(box);
 
     OGRSpatialReferenceH current =
-        OSRNewSpatialReference(reference.getWKT(SpatialReference::eCompoundOK, false).c_str());
-    OGRSpatialReferenceH dd =
-        OSRNewSpatialReference(0);
-
+        OSRNewSpatialReference(reference.getWKT(SpatialReference::eCompoundOK,
+            false).c_str());
+    OGRSpatialReferenceH dd = OSRNewSpatialReference(0);
 
     OGRErr err = OSRSetFromUserInput(dd, const_cast<char *>("EPSG:4326"));
     if (err != OGRERR_NONE)
         throw std::invalid_argument("could not import coordinate system "
             "into OGRSpatialReference SetFromUserInput");
 
-    OGRCoordinateTransformationH transform = OCTNewCoordinateTransformation(current, dd);
+    OGRCoordinateTransformationH transform =
+        OCTNewCoordinateTransformation(current, dd);
 
-    int ret = OCTTransform(transform, 1, &output.minx, &output.miny, &output.minz);
+    int ret = OCTTransform(transform, 1,
+        &output.minx, &output.miny, &output.minz);
     if (ret == 0)
     {
         std::ostringstream msg;
@@ -112,7 +117,7 @@ BOX3D reprojectBoxToDD(const SpatialReference& reference, const BOX3D& box)
         throw pdal_error(msg.str());
     }
 
-    ret = OCTTransform(transform, 1, &output.maxx, &output.maxy, &output.maxz);
+    OCTTransform(transform, 1, &output.maxx, &output.maxy, &output.maxz);
     if (ret == 0)
     {
         std::ostringstream msg;
@@ -128,10 +133,12 @@ BOX3D reprojectBoxToDD(const SpatialReference& reference, const BOX3D& box)
     return output;
 }
 
-NitfWriter::NitfWriter() :  LasWriter(&m_oss)
+
+NitfWriter::NitfWriter()
 {
     register_tre_plugins();
 }
+
 
 void NitfWriter::processOptions(const Options& options)
 {
@@ -139,40 +146,53 @@ void NitfWriter::processOptions(const Options& options)
     m_cLevel = options.getValueOrDefault<std::string>("CLEVEL","03");
     m_sType = options.getValueOrDefault<std::string>("STYPE","BF01");
     m_oStationId = options.getValueOrDefault<std::string>("OSTAID","PDAL");
-    m_fileTitle = options.getValueOrDefault<std::string>("FTITLE",m_filename);
+    m_fileTitle = options.getValueOrDefault<std::string>("FTITLE", "");
     m_fileClass = options.getValueOrDefault<std::string>("FSCLAS","U");
     m_origName = options.getValueOrDefault<std::string>("ONAME","");
     m_origPhone = options.getValueOrDefault<std::string>("OPHONE","");
     m_securityClass = options.getValueOrDefault<std::string>("FSCLAS","U");
-    m_securityControlAndHandling = options.getValueOrDefault<std::string>("FSCTLH","");
-    m_securityClassificationSystem = options.getValueOrDefault<std::string>("FSCLSY","");
+    m_securityControlAndHandling =
+        options.getValueOrDefault<std::string>("FSCTLH","");
+    m_securityClassificationSystem =
+        options.getValueOrDefault<std::string>("FSCLSY","");
     m_imgSecurityClass = options.getValueOrDefault<std::string>("FSCLAS","U");
     m_imgDate = getOptions().getValueOrDefault<std::string>("IDATIM", "");
     m_imgIdentifier2 = getOptions().getValueOrDefault<std::string>("IID2", "");
     m_sic = getOptions().getValueOrDefault<std::string>("FSCLTX", "");
-    m_igeolob = getOptions().getValueOrDefault<std::string>("GEOLOB", "");
     try
     {
         m_aimidb = getOptions().getOption("AIMIDB");
-    } catch (pdal::option_not_found&)
+    }
+    catch (Option::not_found)
     {}
     try
     {
         m_acftb = getOptions().getOption("ACFTB");
-    } catch (pdal::option_not_found&)
+    }
+    catch (Option::not_found)
     {}
 }
 
-void NitfWriter::write(const PointBuffer& buffer)
-{
-    m_bounds.grow(buffer.calculateBounds(true));
 
-    LasWriter::write(buffer);
+void NitfWriter::writeView(const PointViewPtr view)
+{
+    m_bounds.grow(view->calculateBounds(true));
+
+    LasWriter::writeView(view);
 }
 
-void NitfWriter::done(PointContextRef ctx)
+
+void NitfWriter::readyFile(const std::string& filename)
 {
-    LasWriter::done(ctx);
+    m_error.setFilename(filename);
+    m_nitfFilename = filename;
+    prepOutput(&m_oss);
+}
+
+
+void NitfWriter::doneFile()
+{
+    finishOutput();
 
     try
     {
@@ -182,6 +202,8 @@ void NitfWriter::done(PointContextRef ctx)
         header.getComplianceLevel().set(m_cLevel);
         header.getSystemType().set(m_sType);
         header.getOriginStationID().set(m_oStationId);
+        if (m_fileTitle.empty())
+            m_fileTitle = m_nitfFilename;
         header.getFileTitle().set(m_fileTitle);
         header.getClassification().set(m_fileClass);
         header.getMessageCopyNum().set("00000");
@@ -190,8 +212,10 @@ void NitfWriter::done(PointContextRef ctx)
         header.getBackgroundColor().setRawData(const_cast<char*>("000"), 3);
         header.getOriginatorName().set(m_origName);
         header.getOriginatorPhone().set(m_origPhone);
-        header.getSecurityGroup().getClassificationSystem().set(m_securityClassificationSystem);
-        header.getSecurityGroup().getControlAndHandling().set(m_securityControlAndHandling);
+        header.getSecurityGroup().getClassificationSystem().set(
+            m_securityClassificationSystem);
+        header.getSecurityGroup().getControlAndHandling().set(
+            m_securityControlAndHandling);
         header.getSecurityGroup().getClassificationText().set(m_sic);
 
         ::nitf::DESegment des = record.newDataExtensionSegment();
@@ -208,28 +232,40 @@ void NitfWriter::done(PointContextRef ctx)
         ::nitf::Field fld = usrHdr.getField("raw_data");
         fld.setType(::nitf::Field::BINARY);
 
-        flush();
-        m_oss.flush();
         std::streambuf *buf = m_oss.rdbuf();
         long size = buf->pubseekoff(0, m_oss.end);
         buf->pubseekoff(0, m_oss.beg);
 
         std::vector<char> bytes(size);
         buf->sgetn(bytes.data(), size);
+        m_oss.clear();
 
         des.getSubheader().setSubheaderFields(usrHdr);
 
         ::nitf::ImageSegment image = record.newImageSegment();
         ::nitf::ImageSubheader subheader = image.getSubheader();
 
+        BOX3D bounds =  reprojectBoxToDD(m_srs, m_bounds);
 
-        BOX3D bounds =  reprojectBoxToDD(ctx.spatialRef(), m_bounds);
+        //NITF decimal degree values for corner coordinates only has a
+        // precision of 3 after the decimal. This may cause an invalid
+        // polygon due to rounding errors with a small tile. Therefore
+        // instead of rounding min values will use the floor value and
+        // max values will use the ceiling values.
+        bounds.minx = (floor(bounds.minx * 1000)) / 1000.0;
+        bounds.miny = (floor(bounds.miny * 1000)) / 1000.0;
+        bounds.maxx = (ceil(bounds.maxx * 1000)) / 1000.0;
+        bounds.maxy = (ceil(bounds.maxy * 1000)) / 1000.0;
 
         double corners[4][2];
-        corners[0][0] = bounds.maxy;     corners[0][1] = bounds.minx;
-        corners[1][0] = bounds.maxy;     corners[1][1] = bounds.maxx;
-        corners[2][0] = bounds.miny;  corners[2][1] = bounds.maxx;
-        corners[3][0] = bounds.miny;  corners[3][1] = bounds.minx;
+        corners[0][0] = bounds.maxy;
+        corners[0][1] = bounds.minx;
+        corners[1][0] = bounds.maxy;
+        corners[1][1] = bounds.maxx;
+        corners[2][0] = bounds.miny;
+        corners[2][1] = bounds.maxx;
+        corners[3][0] = bounds.miny;
+        corners[3][1] = bounds.minx;
         subheader.setCornersFromLatLons(NRT_CORNERS_DECIMAL, corners);
 
         subheader.getImageSecurityClass().set(m_imgSecurityClass);
@@ -315,8 +351,8 @@ void NitfWriter::done(PointContextRef ctx)
         }
 
         ::nitf::Writer writer;
-        ::nitf::IOHandle output_io(m_filename.c_str(), NITF_ACCESS_WRITEONLY,
-            NITF_CREATE);
+        ::nitf::IOHandle output_io(m_nitfFilename.c_str(),
+            NITF_ACCESS_WRITEONLY, NITF_CREATE);
         writer.prepare(output_io, record);
 
         ::nitf::SegmentWriter sWriter = writer.newDEWriter(0);

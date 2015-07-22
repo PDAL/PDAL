@@ -32,10 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "gtest/gtest.h"
+#include <pdal/pdal_test_main.hpp>
 
 #include <pdal/util/FileUtils.hpp>
-#include <pdal/Utils.hpp>
+#include <pdal/util/Utils.hpp>
+
 #include "Support.hpp"
 
 using namespace pdal;
@@ -56,8 +57,8 @@ TEST(FileUtilsTest, test_file_ops)
     *ostr << "yow";
     FileUtils::closeFile(ostr);
 
-    EXPECT_TRUE(FileUtils::fileExists(tmp1)==true);
-    EXPECT_TRUE(FileUtils::fileSize(tmp1)==3);
+    EXPECT_EQ(FileUtils::fileExists(tmp1), true);
+    EXPECT_EQ(FileUtils::fileSize(tmp1), 3U);
 
     // rename test
     FileUtils::renameFile(tmp2,tmp1);
@@ -98,7 +99,7 @@ TEST(FileUtilsTest, test_getcwd)
 #endif
 }
 
-#ifdef PDAL_PLATFORM_WIN32
+#ifdef _WIN32
 static const std::string drive = "A:";
 #else
 static const std::string drive = "";

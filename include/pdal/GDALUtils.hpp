@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_GDALUTILS_HPP
-#define INCLUDED_GDALUTILS_HPP
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
 
@@ -45,28 +44,99 @@
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 
-#pragma GCC diagnostic ignored "-Wfloat-equal"
 #include <cpl_port.h>
 #include "gdal.h"
 #include <cpl_vsi.h>
+#include <cpl_conv.h>
 #include <ogr_api.h>
+#include <ogr_srs_api.h>
 
 namespace pdal
 {
 namespace gdal
 {
 
+typedef std::shared_ptr<void> RefPtr;
 
-class PDAL_DLL Debug
+class SpatialRef
+{
+public:
+    SpatialRef()
+        { newRef(OSRNewSpatialReference("")); }
+    SpatialRef(const std::string& srs)
+    {
+        newRef(OSRNewSpatialReference(""));
+        OSRSetFromUserInput(get(), srs.data());
+    }
+
+    void setFromLayer(OGRLayerH layer)
+        { newRef(OSRClone(OGR_L_GetSpatialRef(layer))); }
+    operator bool () const
+        { return m_ref.get() != NULL; }
+    OGRSpatialReferenceH get() const
+        { return m_ref.get(); }
+    bool empty() const
+    {
+        bool bEmpty(true);
+        char *pszWKT = NULL;
+
+        OSRExportToWkt(m_ref.get(), &pszWKT);
+
+        if (pszWKT)
+            bEmpty = false;
+        CPLFree(pszWKT);
+        return bEmpty;
+
+    }
+
+
+private:
+    void newRef(void *v)
+    {
+        m_ref = RefPtr(v, [](void* t){ OSRDestroySpatialReference(t); } );
+    }
+
+    RefPtr m_ref;
+};
+
+class Geometry
+{
+public:
+    Geometry()
+        {}
+    Geometry(const std::string& wkt, const SpatialRef& srs)
+    {
+        OGRGeometryH geom;
+
+        char *p_wkt = const_cast<char *>(wkt.data());
+        OGR_G_CreateFromWkt(&p_wkt, srs.get(), &geom);
+        newRef(geom);
+    }
+
+    operator bool () const
+        { return get() != NULL; }
+    OGRGeometryH get() const
+        { return m_ref.get(); }
+
+private:
+    void newRef(void *v)
+    {
+        m_ref = RefPtr(v, [](void* t){ OGR_G_DestroyGeometry(t); } );
+    }
+    RefPtr m_ref;
+};
+
+class PDAL_DLL ErrorHandler
 {
 public:
 
-    Debug(bool isDebug, pdal::LogPtr log);
-    ~Debug();
+    ErrorHandler(bool isDebug, pdal::LogPtr log);
+    ~ErrorHandler();
 
     static void CPL_STDCALL trampoline(::CPLErr code, int num, char const* msg)
     {
-        Debug* debug = static_cast<Debug*>(CPLGetErrorHandlerUserData());
+        ErrorHandler* debug =
+            static_cast<ErrorHandler*>(CPLGetErrorHandlerUserData());
         if (!debug)
             return;
 
@@ -86,52 +156,6 @@ private:
     pdal::LogPtr m_log;
 };
 
-class PDAL_DLL GlobalDebug
-{
-public:
-    GlobalDebug();
+} // namespace gdal
+} // namespace pdal
 
-    void addLog(LogPtr alog) { m_logs.push_back(alog); }
-
-    ~GlobalDebug();
-
-
-    void log(::CPLErr code, int num, char const* msg);
-    void error(::CPLErr code, int num, char const* msg);
-
-    static void CPL_STDCALL trampoline(::CPLErr code, int num, char const* msg)
-    {
-        GlobalDebug* debug = static_cast<GlobalDebug*>(CPLGetErrorHandlerUserData());
-        if (!debug)
-            return;
-
-        debug->m_gdal_callback(code, num, msg);
-    }
-
-private:
-    std::vector<LogPtr> m_logs;
-    boost::function<void(CPLErr, int, char const*)> m_gdal_callback;
-};
-
-
-class PDAL_DLL VSILFileBuffer
-{
-public:
-    typedef boost::iostreams::seekable_device_tag category;
-    typedef char char_type;
-
-    VSILFileBuffer(VSILFILE* fp);
-
-    std::streamsize read(char* s, std::streamsize n);
-    std::streamsize write(const char* s, std::streamsize n);
-    std::streampos seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way);
-
-private:
-    VSILFILE* m_fp;
-};
-
-
-}
-} // namespace pdal::gdal
-
-#endif

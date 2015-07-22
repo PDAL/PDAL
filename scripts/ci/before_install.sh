@@ -4,68 +4,67 @@ source ./scripts/ci/common.sh
 
 sudo apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 16126D3A3E5C1192
 sudo mv /etc/apt/sources.list.d/pgdg-source.list* /tmp
-sudo apt-get -qq remove postgis
 sudo apt-get update -qq
-sudo apt-get install software-properties-common -y
-sudo apt-get install python-software-properties -y
-# sudo add-apt-repository ppa:ubuntugis/ppa -y
+
+sudo apt-get install \
+    software-properties-common \
+    python-software-properties
 sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable -y
 sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
 sudo add-apt-repository ppa:boost-latest/ppa -y
 sudo add-apt-repository ppa:kalakris/cmake -y
+sudo add-apt-repository ppa:pdal/travis -y
 sudo apt-get update -qq
 
+sudo apt-get -qq remove postgis
+
+# From main
+if [[ $PDAL_CMAKE_GENERATOR == "Ninja" ]]
+then
+    sudo apt-get install ninja-build
+fi
+
+# From ppa:ubuntu-toolchain-r/test
 # Install g++-4.8 (even if we're building clang) for updated libstdc++
 sudo apt-get install g++-4.8
 
+# From ppa:boost-latest/ppa
 sudo apt-get install boost1.55
+
+# From ppa:kalakris/cmake
 sudo apt-get install cmake
 
-if [[ $PDAL_CMAKE_GENERATOR == "Ninja" ]]
-then
-    # Need newer cmake for Ninja generator
-    wget http://www.cmake.org/files/v2.8/cmake-2.8.12.2.tar.gz
-    tar -xzf cmake-2.8.12.2.tar.gz
-    cd cmake-2.8.12.2
-    ./bootstrap
-    make
-    sudo make install
-    cd ..
-
-    git clone https://github.com/martine/ninja.git
-    cd ninja
-    git checkout release
-    ./bootstrap.py
-    sudo ln -s "$PWD/ninja" /usr/local/bin/ninja
-    cd ..
-else
-    sudo apt-get install cmake
-fi
-
-
-# GDAL is now always required
+# From ppa:ubuntugis/ubuntugis-unstable
 sudo apt-get install \
     libgdal1h \
     libgdal-dev
 
-
 if [[ $PDAL_OPTIONAL_COMPONENTS == "all" ]]
 then
+    # From main
     sudo apt-get install \
-        libhdf5-serial-dev \
-        libproj-dev \
-        libgeos++-dev \
-        python-numpy \
-        libxml2-dev \
         libflann-dev \
-        libtiff4-dev
+        libhdf5-serial-dev \
+        libtiff4-dev \
+        postgresql-server-dev-9.1 \
+        python-numpy
 
-    # install libgeotiff from sources
-    wget http://download.osgeo.org/geotiff/libgeotiff/libgeotiff-1.4.0.tar.gz
-    tar -xzf libgeotiff-1.4.0.tar.gz
-    cd libgeotiff-1.4.0
-    ./configure --prefix=/usr && make && sudo make install
-    cd $TRAVIS_BUILD_DIR
+    # From ppa:ubuntugis/ppa
+    sudo apt-get install \
+        libgeotiff-dev \
+        libxml2-dev
+
+    # From ppa:ubuntugis/ubuntugis-unstable
+    sudo apt-get install \
+        libgeos++-dev \
+        libproj-dev
+
+    # From ppa:pdal/travis
+    sudo apt-get install \
+        hexboundary \
+        laz-perf \
+        pgpointcloud \
+        points2grid
 fi
 
 gcc --version

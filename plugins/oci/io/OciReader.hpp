@@ -47,22 +47,22 @@ namespace pdal
 class PDAL_DLL OciReader : public DbReader
 {
 public:
-    SET_STAGE_NAME("readers.oci", "Read point cloud data from Oracle SDO_POINTCLOUD.")
-    SET_STAGE_LINK("http://pdal.io/stages/readers.oci.html")
-    SET_PLUGIN_VERSION("1.0.0b1")
-
     OciReader()
     {}
 
-    static Options getDefaultOptions();
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+
+    Options getDefaultOptions();
 
 private:
     virtual void initialize();
     virtual void processOptions(const Options& options);
-    virtual void addDimensions(PointContextRef ctx);
-    virtual void ready(PointContextRef ctx)
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void ready(PointTableRef table)
         { m_atEnd = false; }
-    virtual point_count_t read(PointBuffer& buf, point_count_t);
+    virtual point_count_t read(PointViewPtr view, point_count_t);
     virtual bool eof()
         { return m_atEnd; }
 
@@ -72,9 +72,9 @@ private:
         BlockPtr block) const;
 
     void readBlob(Statement stmt, BlockPtr block);
-    point_count_t readDimMajor(PointBuffer& buffer, BlockPtr block,
+    point_count_t readDimMajor(PointView& view, BlockPtr block,
         point_count_t numPts);
-    point_count_t readPointMajor(PointBuffer& buffer, BlockPtr block,
+    point_count_t readPointMajor(PointView& view, BlockPtr block,
         point_count_t numPts);
     char *seekDimMajor(const DimType& d, BlockPtr block);
     char *seekPointMajor(BlockPtr block);
@@ -91,6 +91,7 @@ private:
     boost::optional<SpatialReference> m_spatialRef;
     bool m_atEnd;
     std::map<int32_t, XMLSchema> m_schemas;
+    bool m_compression;
 
     OciReader& operator=(const OciReader&); // not implemented
     OciReader(const OciReader&); // not implemented

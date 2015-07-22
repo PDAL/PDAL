@@ -14,6 +14,7 @@ set (srcs
   ${PDAL_DRIVERS_LAS_GTIFF}
   ${PDAL_DRIVERS_LAS_LASZIP}
   LasHeader.cpp
+  LasUtils.cpp
   SummaryData.cpp
   VariableLengthRecord.cpp
 )
@@ -22,6 +23,7 @@ set(incs
   GeotiffSupport.hpp
   LasError.hpp
   LasHeader.hpp
+  LasUtils.hpp
   SummaryData.hpp
   VariableLengthRecord.hpp
   ZipPoint.hpp

@@ -43,21 +43,19 @@ namespace pdal
 {
 
 class Options;
-class PointBuffer;
-class PointContext;
-
-typedef std::shared_ptr<PointBuffer> PointBufferPtr;
-typedef PointContext PointContextRef;
+class PointLayout;
+class PointTable;
+class PointView;
 
 class PDAL_DLL GroundFilter : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.ground", "Progressive Morphological Filter")
-    SET_STAGE_LINK("http://www.pdal.io/stages/filters.ground.html")
-    SET_PLUGIN_VERSION("1.0.0b1")
-
     GroundFilter() : Filter()
     {}
+
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
 private:
     double m_maxWindowSize;
@@ -67,11 +65,11 @@ private:
     double m_cellSize;
     bool m_classify;
     bool m_extract;
+    bool m_approximate;
 
-    virtual void addDimensions(PointContextRef ctx);
+    virtual void addDimensions(PointLayoutPtr layout);
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContext ctx) {};
-    virtual PointBufferSet run(PointBufferPtr buf);
+    virtual PointViewSet run(PointViewPtr view);
 
     GroundFilter& operator=(const GroundFilter&); // not implemented
     GroundFilter(const GroundFilter&); // not implemented

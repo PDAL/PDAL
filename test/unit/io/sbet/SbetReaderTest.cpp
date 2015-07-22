@@ -32,28 +32,26 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "gtest/gtest.h"
+#include <pdal/pdal_test_main.hpp>
 
 #include <pdal/Options.hpp>
 #include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 
 #include <SbetReader.hpp>
 
-#include "StageTester.hpp"
 #include "Support.hpp"
 
 using namespace pdal;
 
-void checkPoint(PointContext ctx, const PointBuffer& data,
-    std::size_t index, double time, double latitude, double longitude,
-    double altitude, double xvelocity, double yvelocity, double zvelocity,
-    float roll, float pitch, double heading, double wander, double xaccel,
-    double yaccel, double zaccel, double xangrate, double yangrate,
-    double zangrate)
+void checkPoint(const PointView& data, std::size_t index, double time,
+    double latitude, double longitude, double altitude, double xvelocity,
+    double yvelocity, double zvelocity, float roll, float pitch,
+    double heading, double wander, double xaccel, double yaccel,
+    double zaccel, double xangrate, double yangrate, double zangrate)
 {
-    auto checkDimension = [&ctx,&data,index](Dimension::Id::Enum dim,
+    auto checkDimension = [&data,index](Dimension::Id::Enum dim,
         double expected)
     {
         double actual = data.getFieldAs<double>(dim, index);
@@ -83,19 +81,20 @@ TEST(SbetReaderTest, testRead)
 {
     Option filename("filename", Support::datapath("sbet/2-points.sbet"), "");
     Options options(filename);
-    SbetReader reader;
-    reader.setOptions(options);
+    std::shared_ptr<SbetReader> reader(new SbetReader);
+    reader->setOptions(options);
 
-    PointContext ctx;
+    PointTable table;
 
-    reader.prepare(ctx);
-    PointBufferSet pbSet = reader.execute(ctx);
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buf = *pbSet.begin();
+    reader->prepare(table);
+    PointViewSet viewSet = reader->execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
 
-    EXPECT_EQ(buf->size(), 2u);
+    EXPECT_EQ(view->size(), 2u);
 
-    checkPoint(ctx, *buf, 0, 1.516310028360710e+05, 5.680211852972264e-01,
+    checkPoint(*view.get(), 0,
+               1.516310028360710e+05, 5.680211852972264e-01,
                -2.041654392303940e+00, 1.077152953296560e+02,
                -2.332420866600025e+00, -3.335067504871401e-01,
                -3.093961631767838e-02, -2.813407149321339e-02,
@@ -104,7 +103,8 @@ TEST(SbetReaderTest, testRead)
                7.849084719295495e-01, -2.978807916450262e-01,
                6.226807982589819e-05, 9.312162756440178e-03,
                7.217812320996525e-02);
-    checkPoint(ctx, *buf, 1, 1.516310078318641e+05, 5.680211834722869e-01,
+    checkPoint(*view.get(), 1,
+               1.516310078318641e+05, 5.680211834722869e-01,
                -2.041654392034053e+00, 1.077151424357507e+02,
                -2.336228229691271e+00, -3.324663118952635e-01,
                -3.022948961008987e-02, -2.813856631423094e-02,
@@ -119,11 +119,11 @@ TEST(SbetReaderTest, testBadFile)
 {
     Option filename("filename", Support::datapath("sbet/badfile.sbet"), "");
     Options options(filename);
-    SbetReader reader;
-    reader.setOptions(options);
-    PointContext ctx;
-    reader.prepare(ctx);
-    EXPECT_THROW(reader.execute(ctx), pdal_error);
+    std::shared_ptr<SbetReader> reader(new SbetReader);
+    reader->setOptions(options);
+    PointTable table;
+    reader->prepare(table);
+    EXPECT_THROW(reader->execute(table), pdal_error);
 }
 
 TEST(SbetReaderTest, testPipeline)

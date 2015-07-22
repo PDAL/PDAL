@@ -34,21 +34,21 @@
 
 #include "DeltaKernel.hpp"
 
-#include <boost/format.hpp>
-
-#include <boost/property_tree/json_parser.hpp>
-#include <boost/property_tree/xml_parser.hpp>
+#include <pdal/PDALUtils.hpp>
 
 namespace pdal
 {
 
-DeltaKernel::DeltaKernel()
-    : Kernel()
-    , m_outputStream(0)
-    , m_3d(true)
-    , m_OutputDetail(false)
-    , m_useXML(false)
-    , m_useJSON(false)
+static PluginInfo const s_info = PluginInfo(
+    "kernels.delta",
+    "Delta Kernel",
+    "http://pdal.io/kernels/kernels.delta.html" );
+
+CREATE_STATIC_PLUGIN(1, 0, DeltaKernel, Kernel, s_info)
+
+std::string DeltaKernel::getName() const { return s_info.name; }
+
+DeltaKernel::DeltaKernel() : m_3d(true), m_detail(false), m_allDims(false)
 {}
 
 
@@ -64,20 +64,16 @@ void DeltaKernel::addSwitches()
          "source file name")
         ("candidate", po::value<std::string>(&m_candidateFile),
          "candidate file name")
-        ("output", po::value<std::string>(&m_outputFileName),
+        ("output", po::value<std::string>(&m_outputFile),
          "output file name")
         ("2d", po::value<bool>(&m_3d)->zero_tokens()->implicit_value(false),
          "only 2D comparisons/indexing")
         ("detail",
-         po::value<bool>(&m_OutputDetail)->zero_tokens()->implicit_value(true),
+         po::value<bool>(&m_detail)->zero_tokens()->implicit_value(true),
          "Output deltas per-point")
-        ("output", po::value<std::string>(&m_outputFileName),
-         "output file name")
-        ("xml", po::value<bool>(&m_useXML)->zero_tokens()->implicit_value(true),
-         "dump XML")
-        ("json",
-         po::value<bool>(&m_useJSON)->zero_tokens()->implicit_value(true),
-         "dump JSON");
+        ("alldims",
+         po::value<bool>(&m_allDims)->zero_tokens()->implicit_value(true),
+         "Compute diffs for all dimensions (not just X,Y,Z)");
     addSwitchSet(file_options);
 
     po::options_description* processing_options =
@@ -92,280 +88,158 @@ void DeltaKernel::addSwitches()
 }
 
 
-std::ostream& writeHeader(std::ostream& strm, bool b3D)
+PointViewPtr DeltaKernel::loadSet(const std::string& filename,
+    PointTable& table)
 {
-    strm << "\"ID\",\"DeltaX\",\"DeltaY\"";
-    if (b3D)
-        strm << ",\"DeltaZ\"";
-    strm << std::endl;
-    return strm;
+    Options ops;
+
+    ops.add<std::string>("filename", filename);
+    ops.add<bool>("debug", isDebug());
+    ops.add<uint32_t>("verbose", getVerboseLevel());
+
+    Stage& reader = makeReader(filename);
+    reader.setOptions(ops);
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    assert(viewSet.size() == 1);
+    return *viewSet.begin();
 }
 
-
-std::map<Point, Point>* cumulatePoints(PointBuffer& source_data,
-    PointBuffer& candidate_data, KDIndex* index)
-{
-    std::map<Point, Point> *output = new std::map<Point, Point>;
-    uint32_t count(std::min(source_data.size(), candidate_data.size()));
-
-    for (uint32_t i = 0; i < count; ++i)
-    {
-        double sx = source_data.getFieldAs<double>(Dimension::Id::X, i);
-        double sy = source_data.getFieldAs<double>(Dimension::Id::Y, i);
-        double sz = source_data.getFieldAs<double>(Dimension::Id::Z, i);
-
-        std::vector<std::size_t> ids = index->neighbors(sx, sy, sz, 1);
-        if (!ids.size())
-        {
-            std::ostringstream oss;
-            oss << "unable to find point for id '"  << i <<"'";
-            throw app_runtime_error(oss.str() );
-        }
-
-        std::size_t id = ids[0];
-        double cx = candidate_data.getFieldAs<double>(Dimension::Id::X, id);
-        double cy = candidate_data.getFieldAs<double>(Dimension::Id::Y, id);
-        double cz = candidate_data.getFieldAs<double>(Dimension::Id::Z, id);
-
-        Point s(sx, sy, sz, i);
-        Point c(cx, cy, cz, id);
-        output->insert(std::pair<Point, Point>(s, c));
-
-        double xd = sx - cx;
-        double yd = sy - cy;
-        double zd = sz - cz;
-    }
-
-    return output;
-}
-
-void DeltaKernel::outputDetail(PointBuffer& source_data, PointBuffer& candidate_data,
-    std::map<Point, Point> *points) const
-{
-
-    bool bWroteHeader(false);
-
-    std::ostream& ostr = m_outputStream ? *m_outputStream : std::cout;
-
-    uint32_t count(std::min(source_data.size(), candidate_data.size()));
-
-    boost::property_tree::ptree output;
-    for (uint32_t i = 0; i < count; ++i)
-    {
-        double sx = source_data.getFieldAs<double>(Dimension::Id::X, i);
-        double sy = source_data.getFieldAs<double>(Dimension::Id::Y, i);
-        double sz = source_data.getFieldAs<double>(Dimension::Id::Z, i);
-
-        std::vector<std::size_t> ids = m_index->neighbors(sx, sy, sz, 1);
-
-        if (!ids.size())
-        {
-            std::ostringstream oss;
-            oss << "unable to find point for id '"  << i <<"'";
-            throw app_runtime_error(oss.str() );
-        }
-
-        std::size_t id = ids[0];
-        double cx = candidate_data.getFieldAs<double>(Dimension::Id::X, id);
-        double cy = candidate_data.getFieldAs<double>(Dimension::Id::Y, id);
-        double cz = candidate_data.getFieldAs<double>(Dimension::Id::Z, id);
-
-        Point s(sx, sy, sz, id);
-        Point c(cx, cy, cz, id);
-
-        double xd = sx - cx;
-        double yd = sy - cy;
-        double zd = sz - cz;
-        boost::property_tree::ptree pt;
-        pt.put<int32_t>("i", i);
-        pt.put<float>("xd", xd);
-        pt.put<float>("yd", yd);
-        if (m_3d)
-            pt.put<float>("zd", zd);
-
-        output.add_child("delta", pt);
-
-    }
-
-    if (m_useXML)
-    {
-        boost::property_tree::write_xml(ostr, output);
-    } else if (m_useJSON)
-    {
-        boost::property_tree::write_json(ostr, output);
-
-    } else
-    {
-        writeHeader(ostr, m_3d);
-
-        for (auto b = output.begin(); b != output.end(); ++b)
-        {
-            ostr << b->second.get<int32_t>("i")  << ",";
-            uint32_t precision = 12;
-            ostr.setf(std::ios_base::fixed, std::ios_base::floatfield);
-            ostr.precision(precision);
-            ostr << b->second.get<float>("xd") << ",";
-
-            ostr.precision(precision);
-            ostr << b->second.get<float>("yd");
-
-            if (m_3d)
-            {
-                ostr << ",";
-                ostr.precision(precision);
-                ostr << b->second.get<float>("zd");
-            }
-            ostr << std::endl;
-        }
-
-
-        ostr << std::endl;
-    }
-
-
-
-
-    if (m_outputStream)
-    {
-        FileUtils::closeFile(m_outputStream);
-    }
-}
-
-void DeltaKernel::outputRST(boost::property_tree::ptree const& tree) const
-{
-    std::string headline("------------------------------------------------------------------------------------------");
-    std::cout << headline << std::endl;
-    std::cout << " Delta summary for source '" << m_sourceFile << "' and candidate '" << m_candidateFile <<"'" << std::endl;
-    std::cout << headline << std::endl;
-    std::cout << std::endl;
-
-    std::string thead("----------- --------------- --------------- --------------");
-    std::cout << thead << std::endl;
-    std::cout << " Dimension       X             Y                  Z    " << std::endl;
-    std::cout << thead << std::endl;
-
-    boost::format fmt("%.4f");
-
-
-
-    std::cout << " Min        " << fmt % tree.get<float>("min.x") << "            " << fmt % tree.get<float>("min.y") << "            " << fmt % tree.get<float>("min.z")<<std::endl;
-    std::cout << " Max        " << fmt % tree.get<float>("max.x") << "            " << fmt % tree.get<float>("max.y") << "            " << fmt % tree.get<float>("max.z")<<std::endl;
-    std::cout << " Mean       " << fmt % tree.get<float>("mean.x") << "            " << fmt % tree.get<float>("mean.y") << "            " << fmt % tree.get<float>("mean.z")<<std::endl;
-    std::cout << thead << std::endl;
-
-}
-
-
-void DeltaKernel::outputJSON(boost::property_tree::ptree const& tree) const
-{
-    boost::property_tree::write_json(std::cout, tree);
-
-}
-
-void DeltaKernel::outputXML(boost::property_tree::ptree const& tree) const
-{
-    boost::property_tree::write_xml(std::cout, tree);
-
-}
 
 int DeltaKernel::execute()
 {
-    PointContext sourceCtx;
-    Options sourceOptions;
+    PointTable srcTable;
+    PointTable candTable;
+    DimIndexMap dims;
+
+    PointViewPtr srcView = loadSet(m_sourceFile, srcTable);
+    PointViewPtr candView = loadSet(m_candidateFile, candTable);
+
+    PointLayoutPtr srcLayout = srcTable.layout();
+    PointLayoutPtr candLayout = candTable.layout();
+
+    Dimension::IdList ids = srcLayout->dims();
+    for (Dimension::Id::Enum dim : ids)
     {
-        sourceOptions.add<std::string>("filename", m_sourceFile);
-        sourceOptions.add<bool>("debug", isDebug());
-        sourceOptions.add<uint32_t>("verbose", getVerboseLevel());
+        std::string name = srcLayout->dimName(dim);
+        if (!m_allDims)
+            if (name != "X" && name != "Y" && name != "Z")
+                continue;
+        DimIndex d;
+        d.m_name = name;
+        d.m_srcId = dim;
+        dims[name] = d;
     }
-    std::unique_ptr<Stage> source(KernelSupport::makeReader(m_sourceFile));
-    source->setOptions(sourceOptions);
-    source->prepare(sourceCtx);
-    PointBufferSet pbSet = source->execute(sourceCtx);
-    assert(pbSet.size() == 1);
-    PointBufferPtr sourceBuf = *pbSet.begin();
-    point_count_t sourceCount = sourceBuf->size();
-
-    PointContext candidateCtx;
-    Options candidateOptions;
+    ids = candLayout->dims();
+    for (Dimension::Id::Enum dim : ids)
     {
-        candidateOptions.add<std::string>("filename", m_candidateFile);
-        candidateOptions.add<bool>("debug", isDebug());
-        candidateOptions.add<uint32_t>("verbose", getVerboseLevel());
+        std::string name = candLayout->dimName(dim);
+        auto di = dims.find(name);
+        if (di == dims.end())
+            continue;
+        DimIndex& d = di->second;
+        d.m_candId = dim;
     }
 
-    std::unique_ptr<Stage> candidate(KernelSupport::makeReader(m_candidateFile));
-    candidate->setOptions(candidateOptions);
-    candidate->prepare(candidateCtx);
-    pbSet = candidate->execute(candidateCtx);
-    assert(pbSet.size() == 1);
-    PointBufferPtr candidateBuf = *pbSet.begin();
-    point_count_t candidateCount = candidateBuf->size();
-
-    if (sourceCount != candidateCount)
-        std::cerr << "Source and candidate files do not have the same "
-            "point count, testing each source point only!" << std::endl;
-
-    if (m_outputFileName.size())
-        m_outputStream = FileUtils::createFile(m_outputFileName);
+    // Remove dimensions that aren't in both the source and candidate lists.
+    for (auto di = dims.begin(); di != dims.end();)
+    {
+        DimIndex& d = di->second;
+        if (d.m_candId == Dimension::Id::Unknown)
+            dims.erase(di++);
+        else
+            ++di;
+    }
 
     // Index the candidate data.
-    m_index = std::unique_ptr<KDIndex>(new KDIndex(*candidateBuf));
-    m_index->build(m_3d);
+    KD3Index index(*candView);
+    index.build();
 
-    std::unique_ptr<std::map<Point, Point>>
-        points(cumulatePoints(*sourceBuf, *candidateBuf, m_index.get()));
-    if (m_OutputDetail)
-    {
-        outputDetail(*sourceBuf, *candidateBuf, points.get());
-        return 0;
-    }
+    MetadataNode root;
 
-    for (auto i = points->begin(); i != points->end(); ++i)
-    {
-        Point const& s = i->first;
-        Point const& c = i->second;
-
-        double xd = s.x - c.x;
-        double yd = s.y - c.y;
-        double zd = s.z - c.z;
-        m_summary_x(xd);
-        m_summary_y(yd);
-        m_summary_z(zd);
-    }
-
-    using boost::property_tree::ptree;
-    ptree output;
-
-    double sminx  = (boost::accumulators::min)(m_summary_x);
-    double sminy  = (boost::accumulators::min)(m_summary_y);
-    double sminz  = (boost::accumulators::min)(m_summary_z);
-    double smaxx  = (boost::accumulators::max)(m_summary_x);
-    double smaxy  = (boost::accumulators::max)(m_summary_y);
-    double smaxz  = (boost::accumulators::max)(m_summary_z);
-
-    double smeanx  = (boost::accumulators::mean)(m_summary_x);
-    double smeany  = (boost::accumulators::mean)(m_summary_y);
-    double smeanz  = (boost::accumulators::mean)(m_summary_z);
-
-    output.put<float>("min.x", sminx);
-    output.put<float>("min.y", sminy);
-    output.put<float>("min.z", sminz);
-    output.put<float>("max.x", smaxx);
-    output.put<float>("max.y", smaxy);
-    output.put<float>("max.z", smaxz);
-    output.put<float>("mean.x", smeanx);
-    output.put<float>("mean.y", smeany);
-    output.put<float>("mean.z", smeanz);
-    output.put<std::string>("source", m_sourceFile);
-    output.put<std::string>("candidate", m_candidateFile);
-
-    if (m_useJSON)
-        outputJSON(output);
-    else if (m_useXML)
-        outputXML(output);
+    if (m_detail)
+        root = dumpDetail(srcView, candView, index, dims);
     else
-        outputRST(output);
+        root = dump(srcView, candView, index, dims);
+    Utils::toJSON(root, std::cout);
+
     return 0;
+}
+
+
+MetadataNode DeltaKernel::dump(PointViewPtr& srcView, PointViewPtr& candView,
+    KD3Index& index, DimIndexMap& dims)
+{
+    MetadataNode root;
+
+    for (PointId id = 0; id < srcView->size(); ++id)
+    {
+        double x = srcView->getFieldAs<double>(Dimension::Id::X, id);
+        double y = srcView->getFieldAs<double>(Dimension::Id::Y, id);
+        double z = srcView->getFieldAs<double>(Dimension::Id::Z, id);
+
+        PointId candId = index.neighbor(x, y, z);
+
+        // It may be faster to put in a special case to avoid having to
+        // fetch X, Y and Z, more than once but this is simpler and
+        // I'm thinking in most cases it will make no practical difference.
+        for (auto di = dims.begin(); di != dims.end(); ++di)
+        {
+            DimIndex& d = di->second;
+            double sv = srcView->getFieldAs<double>(d.m_srcId, id);
+            double cv = candView->getFieldAs<double>(d.m_candId, candId);
+            accumulate(d, sv - cv);
+        }
+    }
+
+    root.add("source", m_sourceFile);
+    root.add("candidate", m_candidateFile);
+    for (auto dpair : dims)
+    {
+        DimIndex& d = dpair.second;
+
+        MetadataNode dimNode = root.add(d.m_name);
+        dimNode.add("min", d.m_min);
+        dimNode.add("max", d.m_max);
+        dimNode.add("mean", d.m_avg);
+    }
+    return root;
+}
+
+
+void DeltaKernel::accumulate(DimIndex& d, double v)
+{
+    d.m_cnt++;
+    d.m_min = std::min(v, d.m_min);
+    d.m_max = std::max(v, d.m_max);
+    d.m_avg += (v - d.m_avg) / d.m_cnt;
+}
+
+
+MetadataNode DeltaKernel::dumpDetail(PointViewPtr& srcView,
+    PointViewPtr& candView, KD3Index& index, DimIndexMap& dims)
+{
+    MetadataNode root;
+
+    for (PointId id = 0; id < srcView->size(); ++id)
+    {
+        double x = srcView->getFieldAs<double>(Dimension::Id::X, id);
+        double y = srcView->getFieldAs<double>(Dimension::Id::Y, id);
+        double z = srcView->getFieldAs<double>(Dimension::Id::Z, id);
+        PointId candId = index.neighbor(x, y, z);
+
+        MetadataNode delta = root.add("delta");
+        delta.add("i", id);
+        for (auto di = dims.begin(); di != dims.end(); ++di)
+        {
+            DimIndex& d = di->second;
+            double sv = srcView->getFieldAs<double>(d.m_srcId, id);
+            double cv = candView->getFieldAs<double>(d.m_candId, candId);
+
+            delta.add(d.m_name, sv - cv);
+        }
+    }
+    return root;
 }
 
 } // pdal

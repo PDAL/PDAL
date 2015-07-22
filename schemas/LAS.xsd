@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<xs:schema xmlns:pc="http://pointcloud.org/schemas/PC/" xmlns:xs="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://pointcloud.org/schemas/PC/" version="1.2">
+<xs:schema xmlns:pc="http://pointcloud.org/schemas/PC/" xmlns:xs="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://pointcloud.org/schemas/PC/" version="1.3">
 
     <xs:simpleType name="interpretationType">
         <xs:annotation>
@@ -128,36 +128,33 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
+            <xs:element name="metadata" minOccurs="0" maxOccurs="1" type="xs:anyType"/>
+
             <xs:element minOccurs="0" name="uuid" type="xs:string">
                 <xs:annotation>
                     <xs:documentation>
-                        A dimension may use a UUID as a unique identifier globally 
-                        for all dimensions of a specified type. PDAL uses UUIDs to be able 
-                        to determine which formats produced the specified dimension in 
-                        situations where that information is helpful.
+                        Unused
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
             <xs:element minOccurs="0" name="parent_uuid" type="xs:string">
                 <xs:annotation>
                     <xs:documentation>
-                        In addition to a uuid, a parent_uuid might also be specified to 
-                        express the parent/child relationship of two dimensions. PDAL 
-                        uses uuid/parent_uuid to describe dimensions that are derivatives 
-                        of each other. For example, they may have the same name and other 
-                        attributes, but the parent/child relationship describes which one 
-                        to use under certain circumstances.
+                        Unused
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
-
         </xs:all>
     </xs:complexType>
 
     <xs:simpleType name="orientationType">
         <xs:annotation>
       <xs:documentation>
-            Used to describe the storage orientation of the word. The orientation of a dimension might be 'point' oriented or 'dimension' oriented. A 'point' oriented dimension, the default orientation, has its dimensions composed as XYZXYZXYZ. A 'dimension' oriented one has data composed as XXXYYYZZZ.
+            Used to describe the storage orientation of the word. The
+            orientation of dimension might be point-major or dimension-major. 
+            A point-major dimension, the default orientation,
+            has its dimensions composed as XYZXYZXYZ. A dimension-major
+            one has data composed as XXXYYYZZZ.
         </xs:documentation>
     </xs:annotation>   
         <xs:restriction base="xs:string">

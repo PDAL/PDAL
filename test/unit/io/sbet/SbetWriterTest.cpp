@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "gtest/gtest.h"
+#include <pdal/pdal_test_main.hpp>
 
 #include <SbetReader.hpp>
 #include <SbetWriter.hpp>
@@ -64,9 +64,8 @@ TEST(SbetWriterTest, testConstructor)
     reader.setOptions(makeReaderOptions());
     SbetWriter writer;
     writer.setOptions(makeWriterOptions());
-    writer.setInput(&reader);
+    writer.setInput(reader);
 
-    EXPECT_TRUE(writer.getDescription() == "SBET Writer");
     EXPECT_EQ(writer.getName(), "writers.sbet");
 }
 
@@ -81,11 +80,11 @@ TEST(SbetWriterTest, testWrite)
         reader.setOptions(makeReaderOptions());
         SbetWriter writer;
         writer.setOptions(makeWriterOptions());
-        writer.setInput(&reader);
+        writer.setInput(reader);
 
-        PointContext ctx;
-        writer.prepare(ctx);
-        writer.execute(ctx);
+        PointTable table;
+        writer.prepare(table);
+        writer.execute(table);
     }
 
     //ABELL - Write of a read file is no longer identical.

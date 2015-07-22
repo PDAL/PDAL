@@ -43,118 +43,38 @@
 
 #include <memory>
 
-#include <riegl/scanlib.hpp>
-
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/Reader.hpp>
-
+#include "RxpPointcloud.hpp"
 
 
 namespace pdal
 {
 
 
-struct Inclination
-{
-    double time;
-    int16_t roll;
-    int16_t pitch;
-};
-
-struct Point
-{
-    float x;
-    float y;
-    float z;
-};
-
-typedef std::vector<Inclination> InclinationVector;
-typedef std::array< std::array<float, 3>, 3> RotationMatrix;
-
-
 const bool DEFAULT_SYNC_TO_PPS = true;
 const bool DEFAULT_MINIMAL = false;
-const bool DEFAULT_INCL_FIX = false;
-const InclinationVector::size_type DEFAULT_INCL_FIX_WINDOW = 100;
 
 
-Dimension::Id::Enum getTimeDimensionId(bool syncToPps);
 std::string extractRivlibURI(const Options& options);
 Dimension::IdList getRxpDimensions(bool syncToPps, bool minimal);
-RotationMatrix makeRotationMatrix(float roll, float pitch);
-Point rotatePoint(const Point& point, const RotationMatrix& matrix);
-Inclination movingAverage(const InclinationVector& incl,
-                          InclinationVector::size_type idx,
-                          InclinationVector::size_type halfWindowSize);
-
-
-class PDAL_DLL RxpPointcloud : public scanlib::pointcloud
-{
-public:
-    RxpPointcloud(const std::string& uri, bool isSyncToPps, bool m_minimal, PointContext ctx);
-    virtual ~RxpPointcloud();
-
-    point_count_t read(PointBuffer& buf, point_count_t count);
-    virtual point_count_t writeSavedPoints(PointBuffer& buf, point_count_t count);
-
-    inline bool isSyncToPps() const
-    {
-        return m_syncToPps;
-    }
-
-    PointBufferPtr m_buf;
-    point_count_t m_idx;
-
-protected:
-    void on_echo_transformed(echo_type echo);
-
-private:
-    bool m_syncToPps;
-    bool m_minimal;
-    std::shared_ptr<scanlib::basic_rconnection> m_rc;
-    scanlib::decoder_rxpmarker m_dec;
-    scanlib::buffer m_rxpbuf;
-
-};
-
-
-class PDAL_DLL RxpInclFixPointcloud : public RxpPointcloud
-{
-public:
-    RxpInclFixPointcloud(const std::string& uri, bool isSyncToPps, bool minimal,
-                         PointContext ctx, InclinationVector::size_type windowSize);
-    virtual ~RxpInclFixPointcloud();
-
-    virtual point_count_t writeSavedPoints(PointBuffer& buf, point_count_t count);
-
-protected:
-    void on_hk_incl(const scanlib::hk_incl<iterator_type>& arg);
-
-private:
-    InclinationVector::size_type m_windowSize;
-    InclinationVector m_incl;
-    InclinationVector::size_type m_inclIdx;
-
-};
 
 
 class PDAL_DLL RxpReader : public pdal::Reader
 {
 public:
-    SET_STAGE_NAME("readers.rxp", "RXP Reader")
-    SET_STAGE_LINK("http://pdal.io/stages/readers.rxp.html")
-    SET_PLUGIN_VERSION("1.0.0b1")
-
     RxpReader()
         : pdal::Reader()
         , m_uri("")
         , m_syncToPps(DEFAULT_SYNC_TO_PPS)
-        , m_inclFix(DEFAULT_INCL_FIX)
-        , m_inclFixWindow(DEFAULT_INCL_FIX_WINDOW)
-        , m_pointcloud(NULL)
+        , m_pointcloud()
     {}
 
-    static Options getDefaultOptions();
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+
+    Options getDefaultOptions();
     static Dimension::IdList getDefaultDimensions()
     {
         return getRxpDimensions(DEFAULT_SYNC_TO_PPS, DEFAULT_MINIMAL);
@@ -162,17 +82,15 @@ public:
 
 private:
     virtual void processOptions(const Options& options);
-    virtual void addDimensions(PointContext ctx);
-    virtual void ready(PointContext ctx);
-    virtual point_count_t read(PointBuffer& buf, point_count_t count);
-    virtual void done(PointContext ctx);
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void ready(PointTableRef table);
+    virtual point_count_t read(PointViewPtr view, point_count_t count);
+    virtual void done(PointTableRef table);
 
     std::string m_uri;
     bool m_syncToPps;
-    bool m_inclFix;
-    unsigned int m_inclFixWindow;
     bool m_minimal;
-    std::shared_ptr<RxpPointcloud> m_pointcloud;
+    std::unique_ptr<RxpPointcloud> m_pointcloud;
 
 };
 

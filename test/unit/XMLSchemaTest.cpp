@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "gtest/gtest.h"
+#include <pdal/pdal_test_main.hpp>
 #include <boost/property_tree/ptree.hpp>
 
 #include <boost/uuid/uuid_generators.hpp>
@@ -40,7 +40,7 @@
 
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/Metadata.hpp>
-#include <pdal/PointContext.hpp>
+#include <pdal/PointTable.hpp>
 #include <pdal/XMLSchema.hpp>
 
 #include "Support.hpp"
@@ -104,7 +104,7 @@ TEST(XMLSchemaTest, read)
     EXPECT_FLOAT_EQ(dt.m_xform.m_scale, .01);
     EXPECT_FLOAT_EQ(dt.m_xform.m_offset, 0.0);
     EXPECT_EQ(dt.m_type, Dimension::Type::Signed32);
-    
+
     dim = getDim(dims, "Z");
     dt = dim.m_dimType;
     EXPECT_EQ(dim.m_name, "Z");
@@ -145,12 +145,14 @@ TEST(XMLSchemaTest, copy)
 
     XMLSchema s1(xml, xsd);
 
-    PointContext ctx;
+    PointTable table;
     XMLDimList dims = s1.xmlDims();
     for (auto di = dims.begin(); di != dims.end(); ++di)
     {
         Dimension::Id::Enum id =
-            ctx.registerOrAssignDim(di->m_name, di->m_dimType.m_type);
+            table.layout()->registerOrAssignDim(
+                    di->m_name,
+                    di->m_dimType.m_type);
         s1.setId(di->m_name, id);
     }
 
@@ -161,7 +163,7 @@ TEST(XMLSchemaTest, copy)
     MetadataNode m1prime = m.add("m1prime", "Some other metadata");
     m1.add("uuid", boost::uuids::nil_uuid());
 
-    XMLSchema s2(s1.dimTypes(), m);
+    XMLSchema s2(s1.xmlDims(), m);
     std::string xml_output = s2.xml();
 
     XMLSchema s3(xml_output, xsd);
@@ -209,4 +211,59 @@ TEST(XMLSchemaTest, utf8)
     MetadataNode& m = *mlist.begin();
     EXPECT_EQ(m.name(), metaName);
     EXPECT_EQ(m.value(), metaValue);
+}
+
+TEST(XMLSchemaTest, precision)
+{
+    using namespace Dimension;
+
+    XMLDimList dims;
+
+    XForm xform1(1e-10, .0000000001);
+    XMLDim d1(DimType(Id::X, Type::Signed32, xform1), "X");
+    dims.push_back(d1);
+
+    XForm xform2(100000000, 12345678901);
+    XMLDim d2(DimType(Id::Y, Type::Unsigned32, xform2), "Y");
+    dims.push_back(d2);
+
+    XMLSchema x1(dims, MetadataNode());
+    std::string s = x1.xml();
+
+    XMLSchema x2(s);
+    dims = x2.xmlDims();
+
+    EXPECT_EQ(dims.size(), 2U);
+    // Order of dimensions should be maintained.
+    DimType d = dims[0].m_dimType;
+    EXPECT_EQ(d.m_type, d1.m_dimType.m_type);
+    EXPECT_DOUBLE_EQ(d.m_xform.m_offset, d1.m_dimType.m_xform.m_offset);
+    EXPECT_DOUBLE_EQ(d.m_xform.m_scale, d1.m_dimType.m_xform.m_scale);
+
+    d = dims[1].m_dimType;
+    EXPECT_EQ(d.m_type, d2.m_dimType.m_type);
+    EXPECT_DOUBLE_EQ(d.m_xform.m_offset, d2.m_dimType.m_xform.m_offset);
+    EXPECT_DOUBLE_EQ(d.m_xform.m_scale, d2.m_dimType.m_xform.m_scale);
+}
+
+TEST(XMLSchemaTest, nonstandard)
+{
+    using namespace Dimension;
+
+    XMLDimList dims;
+
+    XMLDim d1(DimType((Dimension::Id::Enum)543, Type::Signed32), "FOOBAR");
+    XMLDim d2(DimType((Dimension::Id::Enum)545, Type::Signed32), "BARFOO");
+
+    dims.push_back(d1);
+    dims.push_back(d2);
+
+    XMLSchema x1(dims, MetadataNode());
+
+    std::string xml = x1.xml();
+
+    XMLSchema x2(xml);
+    dims = x2.xmlDims();
+    EXPECT_EQ(dims[0].m_name, "FOOBAR");
+    EXPECT_EQ(dims[1].m_name, "BARFOO");
 }

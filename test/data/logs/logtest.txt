@@ -1,1 +1,1 @@
-(readers.faux Debug: 8): 					Reading a point buffer of 750 points.
+(readers.faux Debug: 8): 					Reading a point view of 750 points.

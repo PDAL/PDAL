@@ -37,8 +37,7 @@ ENDIF()
 
 
 FIND_PATH(LASZIP_INCLUDE_DIR
-  laszip.hpp
-  PATH_PREFIXES laszip
+  laszip/laszip.hpp
   PATHS
   /usr/include
   /usr/local/include

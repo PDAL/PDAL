@@ -34,13 +34,8 @@
 
 #pragma once
 
-#include <pdal/pdal_internal.hpp>
 #include <pdal/Kernel.hpp>
-#include <pdal/KernelInfo.hpp>
-
-#include <vector>
-#include <map>
-#include <string>
+#include <pdal/pdal_export.hpp>
 
 
 namespace pdal
@@ -62,47 +57,15 @@ namespace pdal
 class PDAL_DLL KernelFactory
 {
 public:
-    typedef Kernel* KernelCreator();
+    KernelFactory(bool no_plugins=true);
+    virtual ~KernelFactory() {};
 
-    typedef std::map<std::string, KernelCreator*> KernelCreatorList;
-
-public:
-    KernelFactory();
-
-    std::unique_ptr<Kernel> createKernel(const std::string& type);
-
-    void registerKernel(const std::string& type, KernelCreator* f);
-
-    void loadPlugins();
-    void registerPlugin(std::string const& filename);
-
-    std::map<std::string, pdal::KernelInfo> const& getKernelInfos() const;
-    template<class T> void registerKernelDriverInfo();
-
-    // callers take ownership of returned kernels
-    KernelCreator* getKernelCreator(const std::string& type) const;
+    static std::unique_ptr<Kernel> createKernel(std::string const& kernel_name);
+    static std::vector<std::string> getKernelNames();
 
 private:
-    void registerKnownKernels();
-
-    // these are the "registries" of the factory creator functions
-    KernelCreatorList m_kernelCreators;
-
-    // driver name + driver description
-    std::map<std::string, pdal::KernelInfo> m_driver_info;
     KernelFactory& operator=(const KernelFactory&); // not implemented
     KernelFactory(const KernelFactory&); // not implemented
 };
-
-template <class T>
-inline void KernelFactory::registerKernelDriverInfo()
-{
-
-    pdal::KernelInfo info(T::s_getName(), T::s_getDescription());
-    info.setInfoLink(T::s_getInfoLink());
-
-    m_driver_info.insert(
-        std::pair<std::string, pdal::KernelInfo>(T::s_getName(), info));
-}
 
 } // namespace pdal

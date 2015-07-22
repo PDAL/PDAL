@@ -33,7 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/GDALUtils.hpp>
-#include <pdal/Utils.hpp>
+#include <pdal/util/Utils.hpp>
 
 #include <functional>
 #include <map>
@@ -47,7 +47,7 @@ namespace pdal
 namespace gdal
 {
 
-Debug::Debug(bool isDebug, pdal::LogPtr log)
+ErrorHandler::ErrorHandler(bool isDebug, pdal::LogPtr log)
     : m_isDebug(isDebug)
     , m_log(log)
 {
@@ -58,152 +58,47 @@ Debug::Debug(bool isDebug, pdal::LogPtr log)
         {
             pdal::Utils::putenv("CPL_DEBUG=ON");
         }
-        m_gdal_callback = std::bind(&Debug::log, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+        m_gdal_callback = std::bind(&ErrorHandler::log, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
     }
     else
     {
-        m_gdal_callback = std::bind(&Debug::error, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+        m_gdal_callback = std::bind(&ErrorHandler::error, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
     }
 
-    CPLPushErrorHandlerEx(&Debug::trampoline, this);
+    CPLPushErrorHandlerEx(&ErrorHandler::trampoline, this);
 }
 
-void Debug::log(::CPLErr code, int num, char const* msg)
+void ErrorHandler::log(::CPLErr code, int num, char const* msg)
 {
     std::ostringstream oss;
 
     if (code == CE_Failure || code == CE_Fatal)
-    {
-        oss <<"GDAL Failure number=" << num << ": " << msg;
-        throw pdal::gdal_error(oss.str());
-    }
+        error(code, num, msg);
     else if (code == CE_Debug)
     {
         oss << "GDAL debug: " << msg;
-        m_log->get(LogLevel::Debug) << oss.str() << std::endl;
+        if (m_log)
+            m_log->get(LogLevel::Debug) << oss.str() << std::endl;
     }
 }
 
 
-void Debug::error(::CPLErr code, int num, char const* msg)
+void ErrorHandler::error(::CPLErr code, int num, char const* msg)
 {
     std::ostringstream oss;
     if (code == CE_Failure || code == CE_Fatal)
     {
-        oss <<"GDAL Failure number=" << num << ": " << msg;
-        throw pdal::gdal_error(oss.str());
+        oss <<"GDAL Failure number =" << num << ": " << msg;
+        throw pdal_error(oss.str());
     }
 }
 
 
-Debug::~Debug()
+ErrorHandler::~ErrorHandler()
 {
     CPLPopErrorHandler();
 }
 
+} // namespace gdal
+} // namespace pdal
 
-GlobalDebug::GlobalDebug()
-{
-
-    const char* gdal_debug = ::pdal::Utils::getenv("CPL_DEBUG");
-    if (gdal_debug == 0)
-    {
-        pdal::Utils::putenv("CPL_DEBUG=ON");
-    }
-    m_gdal_callback = std::bind(&GlobalDebug::log, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
-
-    CPLPushErrorHandlerEx(&GlobalDebug::trampoline, this);
-}
-
-
-void GlobalDebug::log(::CPLErr code, int num, char const* msg)
-{
-    std::ostringstream oss;
-
-    if (code == CE_Failure || code == CE_Fatal)
-    {
-        oss <<"GDAL Failure number=" << num << ": " << msg;
-        throw pdal::gdal_error(oss.str());
-    }
-    else if (code == CE_Debug)
-    {
-        oss << "Global GDAL debug: " << msg;
-        std::vector<LogPtr>::const_iterator i;
-
-        std::map<std::ostream*, LogPtr> streams;
-        for (i = m_logs.begin(); i != m_logs.end(); ++i)
-        {
-            streams.insert(std::pair<std::ostream*, LogPtr>((*i)->getLogStream(), *i));
-        }
-
-        std::map<std::ostream*, LogPtr>::const_iterator t;
-        for (t = streams.begin(); t != streams.end(); t++)
-        {
-            LogPtr l = t->second;
-            if (l->getLevel() > LogLevel::Debug)
-                l->get(LogLevel::Debug) << oss.str() << std::endl;
-        }
-    }
-}
-
-GlobalDebug::~GlobalDebug()
-{
-    CPLPopErrorHandler();
-}
-
-
-VSILFileBuffer::VSILFileBuffer(VSILFILE* fp)
-    : m_fp(fp)
-{}
-
-
-std::streamsize VSILFileBuffer::read(char* s, std::streamsize n)
-{
-    // Read up to n characters from the underlying data source
-    // into the buffer s, returning the number of characters
-    // read; return -1 to indicate EOF
-    size_t result = VSIFReadL/*fread*/(s, 1, (size_t)n, m_fp);
-    if (result == 0)
-        return -1;
-    return result;
-}
-
-
-std::streamsize VSILFileBuffer::write(const char* s, std::streamsize n)
-{
-    // Write up to n characters from the buffer
-    // s to the output sequence, returning the
-    // number of characters written
-    size_t result = VSIFWriteL/*fwrite*/(s, 1, (size_t)n, m_fp);
-    if (static_cast<std::streamsize>(result) != n)
-        return -1;
-    return result;
-}
-
-
-std::streampos VSILFileBuffer::seek(boost::iostreams::stream_offset off, std::ios_base::seekdir way)
-{
-    // Advances the read/write head by off characters,
-    // returning the new position, where the offset is
-    // calculated from:
-    //  - the start of the sequence if way == ios_base::beg
-    //  - the current position if way == ios_base::cur
-    //  - the end of the sequence if way == ios_base::end
-
-    int myway = 0;
-    if (way == std::ios_base::beg) myway = SEEK_SET;
-    else if (way == std::ios_base::cur) myway = SEEK_CUR;
-    else if (way == std::ios_base::end) myway = SEEK_END;
-
-    long myoff = (long)off;
-    int result = VSIFSeekL/*fseek*/(m_fp, myoff, myway);
-    if (result != 0)
-    {
-        return -1;
-    }
-    return static_cast<std::streamoff>(VSIFTellL/*ftell*/(m_fp));
-}
-
-
-}
-} // namespace pdal::gdal

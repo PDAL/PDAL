@@ -38,20 +38,22 @@
 #include <string>
 #include <vector>
 
-#include <pdal/IStream.hpp>
-#include <pdal/OStream.hpp>
 #include <pdal/SpatialReference.hpp>
+#include <pdal/util/IStream.hpp>
+#include <pdal/util/OStream.hpp>
 
 namespace pdal
 {
 
 static const int WKT_RECORD_ID = 2112;
 static const uint16_t GEOTIFF_DIRECTORY_RECORD_ID = 34735;
-static const uint16_t GEOTIFF_DOUBLES_RECORD_ID = 34376;
+static const uint16_t GEOTIFF_DOUBLES_RECORD_ID = 34736;
 static const uint16_t GEOTIFF_ASCII_RECORD_ID = 34737;
 static const uint16_t LASZIP_RECORD_ID = 22204;
+static const uint16_t EXTRA_BYTES_RECORD_ID = 4;
 
 static const char TRANSFORM_USER_ID[] = "LASF_Projection";
+static const char SPEC_USER_ID[] = "LASF_Spec";
 static const char LIBLAS_USER_ID[] = "liblas";
 static const char LASZIP_USER_ID[] = "laszip encoded";
 

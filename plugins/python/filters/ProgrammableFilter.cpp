@@ -35,13 +35,20 @@
 #include <pdal/pdal_internal.hpp>
 #include <pdal/GlobalEnvironment.hpp>
 #include "ProgrammableFilter.hpp"
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
-
-CREATE_FILTER_PLUGIN(programmable, pdal::ProgrammableFilter)
 
 namespace pdal
 {
+
+static PluginInfo const s_info = PluginInfo(
+    "filters.programmable",
+    "Manipulate data using inline Python",
+    "http://pdal.io/stages/filters.programmable.html" );
+
+CREATE_SHARED_PLUGIN(1, 0, ProgrammableFilter, Filter, s_info)
+
+std::string ProgrammableFilter::getName() const { return s_info.name; }
 
 Options ProgrammableFilter::getDefaultOptions()
 {
@@ -58,7 +65,7 @@ void ProgrammableFilter::processOptions(const Options& options)
     m_source = options.getValueOrDefault<std::string>("source", "");
     if (m_source.empty())
         m_source = FileUtils::readFileIntoString(
-            options.getValueOrThrow<std::string>("filename"));
+            options.getValueOrThrow<std::string>("script"));
     m_module = options.getValueOrThrow<std::string>("module");
     m_function = options.getValueOrThrow<std::string>("function");
 
@@ -70,17 +77,17 @@ void ProgrammableFilter::processOptions(const Options& options)
 }
 
 
-void ProgrammableFilter::addDimensions(PointContext ctx)
+void ProgrammableFilter::addDimensions(PointLayoutPtr layout)
 {
     for (auto it = m_addDimensions.cbegin(); it != m_addDimensions.cend(); ++it)
     {
-        Dimension::Id::Enum id = ctx.registerOrAssignDim(*it,
+        Dimension::Id::Enum id = layout->registerOrAssignDim(*it,
                                     pdal::Dimension::Type::Double);
     }
 }
 
 
-void ProgrammableFilter::ready(PointContext ctx)
+void ProgrammableFilter::ready(PointTableRef table)
 {
     m_script = new plang::Script(m_source, m_module, m_function);
     m_pythonMethod = new plang::BufferedInvocation(*m_script);
@@ -90,18 +97,18 @@ void ProgrammableFilter::ready(PointContext ctx)
 }
 
 
-void ProgrammableFilter::filter(PointBuffer& buf)
+void ProgrammableFilter::filter(PointView& view)
 {
     log()->get(LogLevel::Debug5) << "Python script " << *m_script <<
-        " processing " << buf.size() << " points." << std::endl;
+        " processing " << view.size() << " points." << std::endl;
     m_pythonMethod->resetArguments();
-    m_pythonMethod->begin(buf);
+    m_pythonMethod->begin(view);
     m_pythonMethod->execute();
-    m_pythonMethod->end(buf);
+    m_pythonMethod->end(view);
 }
 
 
-void ProgrammableFilter::done(PointContext ctx)
+void ProgrammableFilter::done(PointTableRef table)
 {
     GlobalEnvironment::get().getPythonEnvironment().reset_stdout();
     delete m_pythonMethod;

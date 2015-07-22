@@ -174,16 +174,18 @@ XMLSchema::XMLSchema(std::string xml, std::string xsd,
 }
 
 
-XMLSchema::XMLSchema(const DimTypeList& dims, MetadataNode m,
+XMLSchema::XMLSchema(const XMLDimList& dims, MetadataNode m,
+    Orientation::Enum orientation) : m_orientation(orientation), m_dims(dims),
+    m_metadata(m)
+{}
+
+
+XMLSchema::XMLSchema(const PointLayoutPtr& layout, MetadataNode m,
     Orientation::Enum orientation) : m_orientation(orientation), m_metadata(m)
 {
-    for (auto di = dims.begin(); di != dims.end(); ++di)
-    {
-        XMLDim dim;
-        dim.m_dimType = *di;
-        dim.m_name = Dimension::name(di->m_id);
-        m_dims.push_back(dim);
-    }
+    DimTypeList dimTypes = layout->dimTypes();
+    for (DimType& d : dimTypes)
+        m_dims.push_back(XMLDim(d, layout->dimName(d.m_id)));
 }
 
 
@@ -557,15 +559,26 @@ void XMLSchema::writeXml(xmlTextWriterPtr w) const
         XForm xform = di->m_dimType.m_xform;
         if (xform.nonstandard())
         {
+            std::ostringstream out;
+            out.precision(15);
+           
+            out << xform.m_scale;
+            std::string scale = out.str();
+
+            out.str(std::string());
+            out << xform.m_offset;
+            std::string offset = out.str();
+
+            out << xform.m_scale;
             xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc",
                 (const xmlChar *)"scale", NULL,
-                (const xmlChar *)std::to_string(xform.m_scale).c_str());
+                (const xmlChar *)scale.data());
             xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc",
                 (const xmlChar *)"offset", NULL,
-                (const xmlChar *)std::to_string(xform.m_offset).c_str());
+                (const xmlChar *)offset.data());
         }
 
-        std::string name = Dimension::name(di->m_dimType.m_id);
+        std::string name = di->m_name;
         if (name.size())
             xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc",
                 (const xmlChar*)"name", NULL, (const xmlChar*)name.c_str());

@@ -129,24 +129,6 @@ inline BaseType::Enum base(Type::Enum t)
     return BaseType::Enum(t & 0xFF00);
 }
 
-struct Detail
-{
-    Detail() : m_offset(-1), m_type(Type::None)
-    {}
-
-    int m_offset;
-    Type::Enum m_type;
-
-    int offset() const
-        { return m_offset; }
-    Type::Enum type() const
-        { return m_type; }
-    size_t size() const
-        { return Dimension::size(m_type); }
-    BaseType::Enum base() const
-        { return Dimension::base(m_type); }
-};
-
 namespace Id
 {
 enum Enum
@@ -375,7 +357,7 @@ inline Id::Enum id(std::string s)
         return Id::EdgeOfFlightLine;
     else if (s == "CLASSIFICATION")
         return Id::Classification;
-    else if (s == "SCANANGLERANK")
+    else if (s == "SCANANGLERANK" || s == "SCANANGLE")
         return Id::ScanAngleRank;
     else if (s == "USERDATA")
         return Id::UserData;
@@ -753,8 +735,45 @@ inline Type::Enum type(std::string s)
         return Type::Float;
     if (s == "double")
         return Type::Double;
-    throw pdal_error("Unrecognized dimension type");
+    return Type::None;
 }
+
+class Detail
+{
+public:
+    Detail() : m_id(Id::Unknown), m_offset(-1), m_type(Type::None)
+    {}
+    //NOTE - This is strange, but for some reason things run faster with
+    // this NOOP virtual dtor.  Perhaps it has something to do with
+    // an inlining optimization or perhaps alignment (though a void * doesn't
+    // cause the same performance improvement) It may help on no machine
+    // except mine, but it doesn't hurt anything, either.
+    virtual ~Detail()
+    {}
+
+    void setOffset(int offset)
+        { m_offset = offset; }
+    void setType(Type::Enum type)
+        { m_type = type; }
+    void setId(Id::Enum id)
+        { m_id = id; }
+    Id::Enum id() const
+        { return m_id; }
+    int offset() const
+        { return m_offset; }
+    Type::Enum type() const
+        { return m_type; }
+    size_t size() const
+        { return Dimension::size(m_type); }
+    BaseType::Enum base() const
+        { return Dimension::base(m_type); }
+
+private:
+    Id::Enum m_id; 
+    int m_offset;
+    Type::Enum m_type;
+};
+typedef std::vector<Detail> DetailList;
 
 } // namespace Dimension
 
@@ -762,8 +781,9 @@ struct DimType
 {
     DimType() : m_id(Dimension::Id::Unknown), m_type(Dimension::Type::None)
     {}
-    DimType(Dimension::Id::Enum id, Dimension::Type::Enum type) :
-        m_id(id), m_type(type)
+    DimType(Dimension::Id::Enum id, Dimension::Type::Enum type,
+        double scale = 1.0, double offset = 0.0) :
+        m_id(id), m_type(type), m_xform(scale, offset)
     {}
     DimType(Dimension::Id::Enum id, Dimension::Type::Enum type, XForm xform) :
         m_id(id), m_type(type), m_xform(xform)
@@ -771,7 +791,7 @@ struct DimType
 
     Dimension::Id::Enum m_id;
     Dimension::Type::Enum m_type;
-    XForm m_xform;  // Only useful when converting to/from XML.
+    XForm m_xform;  // A convenience for some formats.
 };
 typedef std::vector<DimType> DimTypeList;
 

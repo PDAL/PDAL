@@ -32,10 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "gtest/gtest.h"
+#include <pdal/pdal_test_main.hpp>
 #include <pdal/Options.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
+#include <FauxReader.hpp>
 #include "Support.hpp"
 
 using namespace pdal;
@@ -58,20 +59,20 @@ TEST(LogTest, test_one)
     opts.add(opt4);
 
     {
-        PointContext ctx;
+        PointTable table;
 
-        ReaderPtr reader(f.createReader("readers.faux"));
-        reader->setOptions(opts);
-        reader->prepare(ctx);
+        FauxReader reader;
+        reader.setOptions(opts);
+        reader.prepare(table);
 
-        EXPECT_EQ(reader->log()->getLevel(), LogLevel::Error);
-        reader->log()->setLevel(LogLevel::Debug5);
-        EXPECT_EQ(reader->log()->getLevel(), LogLevel::Debug5);
+        EXPECT_EQ(reader.log()->getLevel(), LogLevel::Error);
+        reader.log()->setLevel(LogLevel::Debug5);
+        EXPECT_EQ(reader.log()->getLevel(), LogLevel::Debug5);
 
-        PointBufferSet pbSet = reader->execute(ctx);
-        EXPECT_EQ(pbSet.size(), 1u);
-        PointBufferPtr buf = *pbSet.begin();
-        EXPECT_EQ(buf->size(), 750u);
+        PointViewSet viewSet = reader.execute(table);
+        EXPECT_EQ(viewSet.size(), 1u);
+        PointViewPtr view = *viewSet.begin();
+        EXPECT_EQ(view->size(), 750u);
     }
     bool ok = Support::compare_text_files(
         Support::temppath("mylog_one.txt"),
@@ -79,7 +80,7 @@ TEST(LogTest, test_one)
 
     if (ok)
         FileUtils::deleteFile(Support::temppath("mylog_one.txt"));
-    
+
     EXPECT_TRUE(ok);
 }
 
@@ -140,37 +141,37 @@ TEST(LogTest, test_two_a)
     }
 
     {
-        ReaderPtr reader(f.createReader("readers.faux"));
-        reader->setOptions(reader_opts);
+        FauxReader reader;
+        reader.setOptions(reader_opts);
 
-        FilterPtr xfilter(f.createFilter("filters.programmable"));
+        std::unique_ptr<Stage> xfilter(f.createStage("filters.programmable"));
         xfilter->setOptions(xfilter_opts);
-        xfilter->setInput(reader.get());
+        xfilter->setInput(reader);
 
-        FilterPtr yfilter(f.createFilter("filters.programmable"));
+        std::unique_ptr<Stage> yfilter(f.createStage("filters.programmable"));
         yfilter->setOptions(yfilter_opts);
-        yfilter->setInput(xfilter.get());
+        yfilter->setInput(*xfilter);
 
-        PointContext ctx;
-        yfilter->prepare(ctx);
+        PointTable table;
+        yfilter->prepare(table);
         EXPECT_TRUE(true);
 
-        reader->log()->setLevel(LogLevel::Debug5);
+        reader.log()->setLevel(LogLevel::Debug5);
         xfilter->log()->setLevel(LogLevel::Debug5);
         yfilter->log()->setLevel(LogLevel::Debug5);
         EXPECT_TRUE(true);
 
-        PointBufferSet pbSet = yfilter->execute(ctx);
+        PointViewSet viewSet = yfilter->execute(table);
         EXPECT_TRUE(true);
-        EXPECT_EQ(pbSet.size(), 1u);
-        PointBufferPtr buf = *pbSet.begin();
-        EXPECT_EQ(buf->size(), 750u);
+        EXPECT_EQ(viewSet.size(), 1u);
+        PointViewPtr view = *viewSet.begin();
+        EXPECT_EQ(view->size(), 750u);
     }
 
     bool ok1 = Support::compare_text_files(
         Support::temppath("logtest_123.txt"),
         Support::datapath("logs/logtest_123.txt"));
-    
+
     if (ok1)
       FileUtils::deleteFile(Support::temppath("logtest_123.txt"));
 
@@ -239,28 +240,28 @@ TEST(LogTest, test_two_b)
     }
 
     {
-        ReaderPtr reader(f.createReader("readers.faux"));
-        reader->setOptions(reader_opts);
+        FauxReader reader;
+        reader.setOptions(reader_opts);
 
-        FilterPtr xfilter(f.createFilter("filters.programmable"));
+        std::unique_ptr<Stage> xfilter(f.createStage("filters.programmable"));
         xfilter->setOptions(xfilter_opts);
-        xfilter->setInput(reader.get());
+        xfilter->setInput(reader);
 
-        FilterPtr yfilter(f.createFilter("filters.programmable"));
+        std::unique_ptr<Stage> yfilter(f.createStage("filters.programmable"));
         yfilter->setOptions(yfilter_opts);
-        yfilter->setInput(xfilter.get());
+        yfilter->setInput(*xfilter);
 
-        PointContext ctx;
-        yfilter->prepare(ctx);
+        PointTable table;
+        yfilter->prepare(table);
 
-        reader->log()->setLevel(LogLevel::Debug5);
+        reader.log()->setLevel(LogLevel::Debug5);
         xfilter->log()->setLevel(LogLevel::Debug5);
         yfilter->log()->setLevel(LogLevel::Debug5);
 
-        PointBufferSet pbSet = yfilter->execute(ctx);
-        EXPECT_EQ(pbSet.size(), 1u);
-        PointBufferPtr buf = *pbSet.begin();
-        EXPECT_EQ(buf->size(), 750u);
+        PointViewSet viewSet = yfilter->execute(table);
+        EXPECT_EQ(viewSet.size(), 1u);
+        PointViewPtr view = *viewSet.begin();
+        EXPECT_EQ(view->size(), 750u);
     }
 
     bool ok1 = Support::compare_text_files(
@@ -328,19 +329,19 @@ TEST(LogTest, test_three)
     }
 
     {
-        ReaderPtr reader(f.createReader("readers.faux"));
-        reader->setOptions(reader_opts);
+        FauxReader reader;
+        reader.setOptions(reader_opts);
 
-        FilterPtr xfilter(f.createFilter("filters.programmable"));
+        std::unique_ptr<Stage> xfilter(f.createStage("filters.programmable"));
         xfilter->setOptions(xfilter_opts);
-        xfilter->setInput(reader.get());
+        xfilter->setInput(reader);
 
-        PointContext ctx;
-        xfilter->prepare(ctx);
-        PointBufferSet pbSet = xfilter->execute(ctx);
-        EXPECT_EQ(pbSet.size(), 1u);
-        PointBufferPtr buf = *pbSet.begin();
-        EXPECT_EQ(buf->size(), 750u);
+        PointTable table;
+        xfilter->prepare(table);
+        PointViewSet viewSet = xfilter->execute(table);
+        EXPECT_EQ(viewSet.size(), 1u);
+        PointViewPtr view = *viewSet.begin();
+        EXPECT_EQ(view->size(), 750u);
     }
 
     bool ok = Support::compare_text_files(

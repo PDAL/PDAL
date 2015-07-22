@@ -1,6 +1,6 @@
 /******************************************************************************
 * Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
-* Copyright (c) 2014, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2014-2015, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -33,16 +33,30 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-//#include <pdal/Kernels.hpp>
 #include <pdal/KernelFactory.hpp>
+#include <pdal/StageFactory.hpp>
 #include <pdal/pdal_config.hpp>
 
-#include <boost/algorithm/string.hpp>
+#include <iomanip>
+#include <iostream>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <vector>
 
 using namespace pdal;
-namespace po = boost::program_options;
 
-std::string headline("------------------------------------------------------------------------------------------");
+std::string headline(Utils::screenWidth(), '-');
+
+std::string splitDriverName(std::string const& name)
+{
+    std::string out;
+
+    StringList names = Utils::split2(name, '.');
+    if (names.size() == 2)
+        out = names[1];
+    return out;
+}
 
 void outputVersion()
 {
@@ -52,174 +66,269 @@ void outputVersion()
     std::cout << std::endl;
 }
 
-void outputHelp(po::options_description const& options)
+void outputHelp()
 {
-    std::cerr << "Usage: pdal <command> [--debug] [--drivers] [--help] [--options[=<driver name>]] [--version]" << std::endl;
-    std::cerr << options << std::endl;
-        
-    std::cerr << "The most commonly used pdal commands are:" << std::endl;
-
-    KernelFactory f;
-    std::map<std::string, KernelInfo> const& kernels = f.getKernelInfos();
-    for (auto i = kernels.begin(); i != kernels.end(); ++i)
-        std::cout << "    - " << i->second.getName() << std::endl;
-
-    std::cout << "See http://pdal.io/apps.html for more detail";
+    std::cout << "Usage: pdal <command> [--debug] [--drivers] [--help] "
+        "[--options[=<driver name>]] [--version]" << std::endl << std::endl;
+    std::cout << "  --debug      Show debug information" << std::endl;
+    std::cout << "  --drivers    Show drivers" << std::endl;
+    std::cout << "  -h [--help]  Print help message" << std::endl;
+    std::cout << "  --options [=arg(=all)]" << std::endl;
+    std::cout << "               Show driver options" << std::endl;
+    std::cout << "  --version    Show version info" << std::endl;
     std::cout << std::endl;
+        
+    std::cout << "The following commands are available:" << std::endl;
+
+    KernelFactory f(false);
+    StringList loaded_kernels = f.getKernelNames();
+
+    for (auto name : loaded_kernels)
+        std::cout << "   - " << splitDriverName(name) << std::endl;
+    std::cout << "See http://pdal.io/apps.html for more detail" << std::endl;
 }
 
 void outputDrivers()
 {
-    StageFactory f;
-    std::map<std::string, StageInfo> const& drivers = f.getStageInfos();
+    StageFactory f(false);
 
     std::ostringstream strm;
 
-    std::string tablehead("================================ ==========================================================");
-    std::string headings ("Name                             Description");
+    int nameColLen(25);
+    int descripColLen(Utils::screenWidth() - nameColLen - 1);
+
+    std::string tablehead(std::string(nameColLen, '=') + ' ' +
+        std::string(descripColLen, '='));
 
     strm << std::endl;
     strm << tablehead << std::endl;
-    strm << headings << std::endl;
+    strm << std::left << std::setw(nameColLen) << "Name" <<
+        " Description" << std::endl;
     strm << tablehead << std::endl;
-
-    uint32_t name_column(32);
-    uint32_t description_column(57);
 
     strm << std::left;
 
-    for (auto i = drivers.begin(); i != drivers.end(); ++i)
+    std::map<std::string, std::string> sm = f.getStageMap();
+    for (auto s : sm)
     {
-        std::vector<std::string> lines;
-        std::string description(i->second.getDescription());
-        description = boost::algorithm::erase_all_copy(description, "\n");
-
-        Utils::wordWrap(description, lines, description_column-1);
-        if (lines.size() == 1)
+        std::string name = s.first;
+        StringList lines = Utils::wordWrap(s.second, descripColLen - 1);
+        for (size_t i = 0; i < lines.size(); ++i)
         {
-            strm << std::setw(name_column) << i->second.getName() << " "
-                 << std::setw(description_column) << description << std::endl;
+            strm << std::setw(nameColLen) << name << " " <<
+                lines[i] << std::endl;
+            name.clear();
         }
-        else
-        {
-            strm << std::setw(name_column) << i->second.getName() << " "
-                 << lines[0] << std::endl;
-        }
-
-        std::stringstream blank;
-        size_t blanks(33);
-        for (size_t i = 0; i < blanks; ++i)
-            blank << " ";
-        for (size_t i = 1; i < lines.size(); ++i)
-            strm << blank.str() << lines[i] << std::endl;
     }
 
     strm << tablehead << std::endl;
     std::cout << strm.str() << std::endl;
 }
 
-void outputOptions(std::string const& opt)
+void outputOptions(std::string const& n)
 {
-    StageFactory f;
-    std::cout << opt << std::endl;
-    std::cout << f.toRST(opt) << std::endl;
+    StageFactory f(false);
+
+    std::unique_ptr<Stage> s(f.createStage(n));
+    if (!s)
+    {
+        std::cerr << "Unable to create stage " << n << "\n";
+        return;
+    }
+
+    std::cout << n << std::endl;
+    std::cout << headline << std::endl;
+
+    std::vector<Option> options = s->getDefaultOptions().getOptions();
+    if (options.empty())
+    {
+        std::cout << "No options" << std::endl << std::endl;
+        return;
+    }
+
+    for (auto const& opt : options)
+    {
+        std::string name = opt.getName();
+        std::string defVal = Utils::escapeNonprinting(
+            opt.getValue<std::string>());
+        std::string description = opt.getDescription();
+
+        std::cout << name;
+        if (!defVal.empty())
+            std::cout << " [" << defVal << "]";
+        std::cout << std::endl;
+
+        if (!description.empty())
+        {
+            StringList lines =
+                Utils::wordWrap(description, headline.size() - 6);
+            for (std::string& line : lines)
+                std::cout << "    " << line << std::endl;
+        }
+        std::cout << std::endl;
+    }
 }
+
+
+void outputCommands()
+{
+    KernelFactory f(false);
+    std::vector<std::string> loaded_kernels;
+    loaded_kernels = f.getKernelNames();
+    for (auto name : loaded_kernels)
+    {
+        std::cout << splitDriverName(name) << std::endl;
+    }
+}
+
+
+void outputOptions()
+{
+    StageFactory f(false);
+    StringList nv = f.getStageNames();
+    for (auto const& n : nv)
+        outputOptions(n);
+}
+
 
 int main(int argc, char* argv[])
 {
-    KernelFactory f;
-
-    po::options_description options;
-    po::positional_options_description positional;
-    po::variables_map variables;
-    positional.add("command", 1);
-
-    options.add_options()
-        ("command", po::value<std::string>(), "command name")
-        ("debug", po::value<bool>()->zero_tokens()->implicit_value(true), "Show debug information")
-        ("drivers", po::value<bool>()->zero_tokens()->implicit_value(true), "Show drivers")
-        ("help,h", po::value<bool>()->zero_tokens()->implicit_value(true), "Print help message")
-        ("options", po::value<std::string>()->implicit_value("all"), "Show driver options")
-        ("version", po::value<bool>()->zero_tokens()->implicit_value(true), "Show version info")
-            ;
-
+    // No arguments, print basic usage, plugins will be loaded
     if (argc < 2)
     {
-        outputHelp(options);
+        outputHelp();
         return 1;
     }
 
-    try
+    // Discover available kernels without plugins, and test to see if
+    // the positional option 'command' is a valid kernel
+    KernelFactory f(true);
+    std::vector<std::string> loaded_kernels;
+    loaded_kernels = f.getKernelNames();
+
+    bool isValidKernel = false;
+    std::string command(argv[1]);
+    std::string fullname;
+    for (auto name : loaded_kernels)
     {
-        po::store(po::command_line_parser(2, argv).
-            options(options).positional(positional).run(),
-            variables);
+        if (boost::iequals(argv[1], splitDriverName(name)))
+        {
+            fullname = name;
+            isValidKernel = true;
+            break;
+        }
     }
-    catch (boost::program_options::unknown_option& e)
+
+    // If the kernel was not available, then light up the plugins and retry
+    if (!isValidKernel)
     {
-#if BOOST_VERSION >= 104200
+        KernelFactory f(false);
+        loaded_kernels.clear();
+        loaded_kernels = f.getKernelNames();
 
-        std::cerr << "Unknown option '" << e.get_option_name() <<"' not recognized" << std::endl << std::endl;
-#else
-        std::cerr << "Unknown option '" << std::string(e.what()) <<"' not recognized" << std::endl << std::endl;
-#endif
-        outputVersion();
-        return 1;
+        for (auto name : loaded_kernels)
+        {
+            if (boost::iequals(argv[1], splitDriverName(name)))
+            {
+                fullname = name;
+                isValidKernel = true;
+                break;
+            }
+        }
     }
 
-    int count(argc - 1); // remove the 1st argument
-    const char** args = const_cast<const char**>(&argv[1]);
+    // Dispatch execution to the kernel, passing all remaining args
+    if (isValidKernel)
+    {
+        int count(argc - 1); // remove the 1st argument
+        const char** args = const_cast<const char**>(&argv[1]);
+        std::unique_ptr<Kernel> app = f.createKernel(fullname);
+        return app->run(count, args, command);
+    }
 
-    if (variables.count("version"))
+    // Otherwise, process the remaining args to see if they are supported
+    bool debug = false;
+    bool drivers = false;
+    bool help = false;
+    bool options = false;
+    bool version = false;
+    std::string optString("all");  // --options will default to displaying information on all available stages
+    for (int i = 1; i < argc; ++i)
+    {
+        if (boost::iequals(argv[i], "--debug"))
+        {
+            debug = true;
+        }
+        else if (boost::iequals(argv[i], "--drivers"))
+        {
+            drivers = true;
+        }
+        else if (boost::iequals(argv[i], "--help") || boost::iequals(argv[i], "-h"))
+        {
+            help = true;
+        }
+        else if (boost::algorithm::istarts_with(argv[i], "--options"))
+        {
+            std::vector<std::string> optionsVec;
+            // we are rather unsophisticated for now, only splitting on '=', no spaces allowed
+            boost::algorithm::split(optionsVec, argv[i],
+                boost::algorithm::is_any_of("="), boost::algorithm::token_compress_on);
+            options = true;
+            if (optionsVec.size() == 2)
+                optString = optionsVec[1];
+        }
+        else if (boost::iequals(argv[i], "--version"))
+        {
+            version = true;
+        }
+        else if (boost::iequals(argv[i], "--list-commands"))
+        {
+            outputCommands();
+            return 0;
+        }
+        else
+        {
+            if (boost::algorithm::istarts_with(argv[i], "--"))
+                std::cerr << "Unknown option '" << argv[i] <<"' not recognized" << std::endl << std::endl;
+        }
+    }
+
+    if (version)
     {
         outputVersion();
         return 0;
     }
 
-    if (variables.count("drivers"))
+    if (drivers)
     {
         outputDrivers();
         return 0;
     }
 
-    if (variables.count("options"))
+    if (options)
     {
-        std::string opt = variables["options"].as<std::string>();
-        outputOptions(opt);
+        if (boost::iequals(optString, "all"))
+            outputOptions();
+        else
+            outputOptions(optString);
         return 0;
     }
 
-    if (variables.count("debug"))
+    if (debug)
     {
         std::cerr << getPDALDebugInformation() << std::endl;
         return 0;
     }
 
-    if (variables.count("help") || !variables.count("command"))
+    if (help)
     {
-        outputHelp(options);
+        outputHelp();
         return 0;
     }
 
-    std::string command = variables["command"].as<std::string>();
-
-    bool isValidKernel = false;
-    std::map<std::string, KernelInfo> const& kernels = f.getKernelInfos();
-    for (auto i = kernels.begin(); i != kernels.end(); ++i)
-    {
-        if (boost::iequals(command, i->second.getName()))
-        {
-            isValidKernel = true;
-        }
-    }
-
-    if (isValidKernel)
-    {
-        std::unique_ptr<Kernel> app(f.createKernel(command));
-        return app->run(count, args, command);
-    }
-
-    std::cerr << "Command '" << command <<"' not recognized" << std::endl << std::endl;
-    outputHelp(options);
+    if (!isValidKernel)
+        std::cerr << "Command '" << command <<"' not recognized" << std::endl << std::endl;
+    outputHelp();
     return 1;
 }
+

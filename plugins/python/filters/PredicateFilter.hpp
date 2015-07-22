@@ -44,14 +44,14 @@ namespace pdal
 class PDAL_DLL PredicateFilter : public Filter
 {
 public:
-    SET_STAGE_NAME("filters.predicate", "Filter data using inline Python expressions.")
-    SET_STAGE_LINK("http://pdal.io/stages/filters.predicate.html")
-    SET_PLUGIN_VERSION("1.0.0b1")
-
     PredicateFilter() : Filter(), m_script(NULL)
         {}
 
-    static Options getDefaultOptions();
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+
+    Options getDefaultOptions();
 
 private:
     plang::BufferedInvocation* m_pythonMethod;
@@ -61,9 +61,9 @@ private:
     std::string m_function;
 
     virtual void processOptions(const Options& options);
-    virtual void ready(PointContext ctx);
-    virtual PointBufferSet run(PointBufferPtr buf);
-    virtual void done(PointContext ctx);
+    virtual void ready(PointTableRef table);
+    virtual PointViewSet run(PointViewPtr view);
+    virtual void done(PointTableRef table);
 
     PredicateFilter& operator=(const PredicateFilter&); // not implemented
     PredicateFilter(const PredicateFilter&); // not implemented

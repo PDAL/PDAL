@@ -35,7 +35,7 @@
 #pragma once
 
 #include <pdal/plang/Invocation.hpp>
-#include <pdal/PointBuffer.hpp>
+#include <pdal/PointView.hpp>
 
 namespace pdal
 {
@@ -47,8 +47,8 @@ class PDAL_DLL BufferedInvocation : public Invocation
 public:
     BufferedInvocation(const Script& script);
 
-    void begin(PointBuffer& buffer);
-    void end(PointBuffer& buffer);
+    void begin(PointView& view);
+    void end(PointView& view);
 
 private:
     std::vector<void *> m_buffers;

@@ -34,118 +34,124 @@
 
 #include "ReprojectionFilter.hpp"
 
-#include <memory>
+#include <pdal/PointView.hpp>
+#include <pdal/GlobalEnvironment.hpp>
 
-#include <pdal/PointBuffer.hpp>
-
-#pragma GCC diagnostic ignored "-Wfloat-equal"
 #include <gdal.h>
 #include <ogr_spatialref.h>
-#include <pdal/GDALUtils.hpp>
+
+#include <memory>
 
 namespace pdal
 {
 
-struct OGRSpatialReferenceDeleter
-{
-    template <typename T>
-    void operator()(T* ptr)
-    {
-        ::OSRDestroySpatialReference(ptr);
-    }
-};
+static PluginInfo const s_info = PluginInfo(
+    "filters.reprojection",
+    "Reproject data using GDAL from one coordinate system to another.",
+    "http://pdal.io/stages/filters.reprojection.html" );
 
-struct OSRTransformDeleter
-{
-    template <typename T>
-    void operator()(T* ptr)
-    {
-        ::OCTDestroyCoordinateTransformation(ptr);
-    }
-};
+CREATE_STATIC_PLUGIN(1, 0, ReprojectionFilter, Filter, s_info)
 
+std::string ReprojectionFilter::getName() const { return s_info.name; }
 
-struct GDALSourceDeleter
-{
-    template <typename T>
-    void operator()(T* ptr)
-    {
-        ::GDALClose(ptr);
-    }
-};
-
-
-ReprojectionFilter::ReprojectionFilter()
-    : pdal::Filter(), m_inferInputSRS(true)
+ReprojectionFilter::ReprojectionFilter() : m_inferInputSRS(true),
+    m_in_ref_ptr(NULL), m_out_ref_ptr(NULL), m_transform_ptr(NULL)
 {}
 
-
-ReprojectionFilter::ReprojectionFilter(const SpatialReference& outSRS)
-    : m_outSRS(outSRS)
-    , m_inferInputSRS(true)
-{}
-
-
-ReprojectionFilter::ReprojectionFilter(const SpatialReference& inSRS,
-        const SpatialReference& outSRS)
-    : m_inSRS(inSRS)
-    , m_outSRS(outSRS)
-    , m_inferInputSRS(false)
-{}
-
+ReprojectionFilter::~ReprojectionFilter()
+{
+    if (m_transform_ptr)
+        OCTDestroyCoordinateTransformation(m_transform_ptr);
+    if (m_in_ref_ptr)
+        OSRDestroySpatialReference(m_in_ref_ptr);
+    if (m_out_ref_ptr)
+        OSRDestroySpatialReference(m_out_ref_ptr);
+}
 
 void ReprojectionFilter::processOptions(const Options& options)
 {
-    m_outSRS = options.getValueOrThrow<pdal::SpatialReference>("out_srs");
+    try
+    {
+       m_outSRS = options.getValueOrThrow<pdal::SpatialReference>("out_srs");
+    }
+    catch (std::invalid_argument)
+    {
+        std::string srs = options.getValueOrDefault<std::string>("out_srs", "");
+        std::ostringstream oss;
+        oss << "Stage " << getName() << " has invalid spatial reference "
+            "specification for 'out_srs' option: '" << srs << "'.";
+        throw pdal_error(oss.str());
+    }
+    catch (Option::not_found)
+    {
+        std::ostringstream oss;
+        oss << "Stage " << getName() << " missing required option 'out_srs'.";
+        throw Option::not_found(oss.str());
+    }
+
     if (options.hasOption("in_srs"))
     {
-        m_inSRS = options.getValueOrThrow<pdal::SpatialReference>("in_srs");
+        try
+        {
+            m_inSRS = options.getValueOrThrow<pdal::SpatialReference>("in_srs");
+        }
+        catch (std::invalid_argument)
+        {
+            std::string srs =
+                options.getValueOrDefault<std::string>("in_srs", "");
+            std::ostringstream oss;
+            oss << "Stage " << getName() << " has invalid spatial reference "
+                "specification for 'in_srs' option: '" << srs << "'.";
+            throw pdal_error(oss.str());
+        }
         m_inferInputSRS = false;
     }
 }
 
+void ReprojectionFilter::initialize()
+{
+    GlobalEnvironment::get().initializeGDAL(log(), isDebug());
+}
 
-void ReprojectionFilter::ready(PointContext ctx)
+void ReprojectionFilter::ready(PointTableRef table)
 {
     if (m_inferInputSRS)
-        m_inSRS = ctx.spatialRef();
+    {
+        m_inSRS = table.spatialRef();
+        if (m_inSRS.getWKT().empty())
+            throw pdal_error("Source data has no spatial reference and none "
+                "is specified with the 'in_srs' option.");
+    }
 
-    m_gdal_debug = std::shared_ptr<pdal::gdal::Debug>(
-        new pdal::gdal::Debug(isDebug(), log()));
-
-    m_in_ref_ptr = ReferencePtr(OSRNewSpatialReference(0),
-        OGRSpatialReferenceDeleter());
-    m_out_ref_ptr = ReferencePtr(OSRNewSpatialReference(0),
-        OGRSpatialReferenceDeleter());
+    m_in_ref_ptr = OSRNewSpatialReference(0);
+    m_out_ref_ptr = OSRNewSpatialReference(0);
 
     int result =
-        OSRSetFromUserInput(m_in_ref_ptr.get(),
+        OSRSetFromUserInput(m_in_ref_ptr,
             m_inSRS.getWKT(pdal::SpatialReference::eCompoundOK).c_str());
     if (result != OGRERR_NONE)
     {
         std::ostringstream msg;
-        msg << "Could not import input spatial reference for "
-            "ReprojectionFilter:: " << CPLGetLastErrorMsg() << " code: " <<
-            result << " wkt: '" << m_inSRS.getWKT() << "'";
-        throw std::runtime_error(msg.str());
+        msg << "Invalid input spatial reference '" << m_inSRS.getWKT() <<
+            "'.  This is usually caused by a bad value for the 'in_srs'"
+            "option or an invalid spatial reference in the source file.";
+        throw pdal_error(msg.str());
     }
 
-    result = OSRSetFromUserInput(m_out_ref_ptr.get(),
+
+    result = OSRSetFromUserInput(m_out_ref_ptr,
         m_outSRS.getWKT(pdal::SpatialReference::eCompoundOK).c_str());
     if (result != OGRERR_NONE)
     {
         std::ostringstream msg;
-        msg << "Could not import output spatial reference for "
-            "ReprojectionFilter:: " << CPLGetLastErrorMsg() << " code: " <<
-            result << " wkt: '" << m_outSRS.getWKT() << "'";
-        std::string message(msg.str());
-        throw std::runtime_error(message);
+        msg << "Invalid output spatial reference '" << m_outSRS.getWKT() <<
+            "'.  This is usually caused by a bad value for the 'out_srs'"
+            "option.";
+        throw pdal_error(msg.str());
     }
-    m_transform_ptr = TransformPtr(
-        OCTNewCoordinateTransformation(m_in_ref_ptr.get(),
-            m_out_ref_ptr.get()), OSRTransformDeleter());
 
-    if (!m_transform_ptr.get())
+    m_transform_ptr = OCTNewCoordinateTransformation(m_in_ref_ptr, m_out_ref_ptr);
+    if (!m_transform_ptr)
     {
         std::string msg = "Could not construct CoordinateTransformation in "
             "ReprojectionFilter:: ";
@@ -158,7 +164,7 @@ void ReprojectionFilter::ready(PointContext ctx)
 
 void ReprojectionFilter::transform(double& x, double& y, double& z)
 {
-    int ret = OCTTransform(m_transform_ptr.get(), 1, &x, &y, &z);
+    int ret = OCTTransform(m_transform_ptr, 1, &x, &y, &z);
     if (ret == 0)
     {
         std::ostringstream msg;
@@ -169,19 +175,19 @@ void ReprojectionFilter::transform(double& x, double& y, double& z)
 }
 
 
-void ReprojectionFilter::filter(PointBuffer& data)
+void ReprojectionFilter::filter(PointView& view)
 {
-    for (PointId id = 0; id < data.size(); ++id)
+    for (PointId id = 0; id < view.size(); ++id)
     {
-        double x = data.getFieldAs<double>(Dimension::Id::X, id);
-        double y = data.getFieldAs<double>(Dimension::Id::Y, id);
-        double z = data.getFieldAs<double>(Dimension::Id::Z, id);
+        double x = view.getFieldAs<double>(Dimension::Id::X, id);
+        double y = view.getFieldAs<double>(Dimension::Id::Y, id);
+        double z = view.getFieldAs<double>(Dimension::Id::Z, id);
 
         transform(x, y, z);
 
-        data.setField(Dimension::Id::X, id, x);
-        data.setField(Dimension::Id::Y, id, y);
-        data.setField(Dimension::Id::Z, id, z);
+        view.setField(Dimension::Id::X, id, x);
+        view.setField(Dimension::Id::Y, id, y);
+        view.setField(Dimension::Id::Z, id, z);
     }
 }
 

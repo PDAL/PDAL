@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "gtest/gtest.h"
+#include <pdal/pdal_test_main.hpp>
 
 #include <pdal/util/FileUtils.hpp>
 #include <LasReader.hpp>
@@ -91,28 +91,28 @@ static bool fileIsOkay(const std::string& name)
 
 static bool fileIsCompressed(const std::string& name)
 {
-    PointContext ctx;
+    PointTable table;
 
     Options ops;
     ops.add("filename", name);
-    LasReader reader;
-    reader.setOptions(ops);
-    reader.prepare(ctx);
-    return reader.header().compressed();
+    std::shared_ptr<LasReader> reader(new LasReader);
+    reader->setOptions(ops);
+    reader->prepare(table);
+    return reader->header().compressed();
 }
 
 
 static bool fileHasSrs(const std::string& name)
 {
-    PointContext ctx;
+    PointTable table;
 
     Options ops;
     ops.add("filename", name);
-    LasReader reader;
-    reader.setOptions(ops);
-    reader.prepare(ctx);
-    reader.execute(ctx);
-    return !reader.getSpatialReference().empty();
+    std::shared_ptr<LasReader> reader(new LasReader);
+    reader->setOptions(ops);
+    reader->prepare(table);
+    reader->execute(table);
+    return !reader->getSpatialReference().empty();
 }
 
 

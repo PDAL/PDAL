@@ -32,10 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "gtest/gtest.h"
+#include <pdal/pdal_test_main.hpp>
 
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
+#include <pdal/PluginManager.hpp>
 #include <pdal/StageFactory.hpp>
 
 #include "Support.hpp"
@@ -47,20 +48,19 @@ using namespace pdal;
 TEST(PCLBlockFilterTest, PCLBlockFilterTest_example_passthrough_xml)
 {
     StageFactory f;
-    FilterPtr filter(f.createFilter("filters.pclblock"));
+    std::unique_ptr<Stage> filter(f.createStage("filters.pclblock"));
     EXPECT_TRUE(filter.get());
 
     PipelineManager pipeline;
     PipelineReader pipelineReader(pipeline);
-    pipelineReader.readPipeline(Support::datapath("filters/pcl/passthrough.xml"));
-
+    pipelineReader.readPipeline(
+        Support::datapath("filters/pcl/passthrough.xml"));
     pipeline.execute();
-    PointContext ctx = pipeline.context();
 
-    PointBufferSet pbSet = pipeline.buffers();
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), 81u);
+    PointViewSet viewSet = pipeline.views();
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 81u);
 }
 
 
@@ -83,7 +83,7 @@ static void test_filter(const std::string& jsonFile,
     options.add(debug);
     options.add(verbose);
 
-    ReaderPtr reader(f.createReader("readers.las"));
+    std::unique_ptr<Stage> reader(f.createStage("readers.las"));
     EXPECT_TRUE(reader.get());
     reader->setOptions(options);
 
@@ -91,18 +91,18 @@ static void test_filter(const std::string& jsonFile,
     Options filter_options;
     filter_options.add(fname);
 
-    FilterPtr pcl_block(f.createFilter("filters.pclblock"));
+    std::shared_ptr<Stage> pcl_block(f.createStage("filters.pclblock"));
     EXPECT_TRUE(pcl_block.get());
     pcl_block->setOptions(filter_options);
-    pcl_block->setInput(reader.get());
+    pcl_block->setInput(*reader);
 
-    PointContext ctx;
-    pcl_block->prepare(ctx);
-    PointBufferSet pbSet = pcl_block->execute(ctx);
+    PointTable table;
+    pcl_block->prepare(table);
+    PointViewSet viewSet = pcl_block->execute(table);
 
-    EXPECT_EQ(pbSet.size(), 1u);
-    PointBufferPtr buf = *pbSet.begin();
-    EXPECT_EQ(buf->size(), expectedPointCount);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), expectedPointCount);
 }
 
 

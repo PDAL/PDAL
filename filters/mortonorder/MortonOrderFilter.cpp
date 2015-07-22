@@ -32,15 +32,23 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
+#include "MortonOrderFilter.hpp"
+
 #include <iostream>
 #include <limits>
 #include <map>
 
-#include "MortonOrderFilter.hpp"
-
 namespace pdal
 {
 
+static PluginInfo const s_info = PluginInfo(
+    "filters.mortonorder",
+    "Morton or z-order sorting of points. See http://en.wikipedia.org/wiki/Z-order_curve for more detail.",
+    "http://pdal.io/stages/filters.mortonorder.html" );
+
+CREATE_STATIC_PLUGIN(1, 0, MortonOrderFilter, Filter, s_info)
+
+std::string MortonOrderFilter::getName() const { return s_info.name; }
 
 Options MortonOrderFilter::getDefaultOptions()
 {
@@ -83,35 +91,35 @@ public:
 };
 }
 
-PointBufferSet MortonOrderFilter::run(PointBufferPtr buf)
+PointViewSet MortonOrderFilter::run(PointViewPtr inView)
 {
-    PointBufferSet pbSet;
-    if (!buf->size())
-        return pbSet;
+    PointViewSet viewSet;
+    if (!inView->size())
+        return viewSet;
     CmpZOrder compare;
     std::multimap<Coord, PointId, CmpZOrder> sorted(compare);
 
-    BOX3D const& buffer_bounds = buf->calculateBounds();
+    BOX3D const& buffer_bounds = inView->calculateBounds();
     double xrange = buffer_bounds.maxx - buffer_bounds.minx;
     double yrange = buffer_bounds.maxy - buffer_bounds.miny;
 
-    for (PointId idx = 0; idx < buf->size(); idx++)
+    for (PointId idx = 0; idx < inView->size(); idx++)
     {
-        double xpos = (buf->getFieldAs<double>(Dimension::Id::X, idx) - buffer_bounds.minx) / xrange;
-        double ypos = (buf->getFieldAs<double>(Dimension::Id::Y, idx) - buffer_bounds.miny) / yrange;
+        double xpos = (inView->getFieldAs<double>(Dimension::Id::X, idx) - buffer_bounds.minx) / xrange;
+        double ypos = (inView->getFieldAs<double>(Dimension::Id::Y, idx) - buffer_bounds.miny) / yrange;
         Coord loc(xpos, ypos);
         sorted.insert(std::make_pair(loc, idx));
     }
 
-    PointBufferPtr outbuf = buf->makeNew();
+    PointViewPtr outView = inView->makeNew();
     std::multimap<Coord, PointId, CmpZOrder>::iterator pos;
     for (pos = sorted.begin(); pos != sorted.end(); ++pos)
     {
-        outbuf->appendPoint(*buf, pos->second);
+        outView->appendPoint(*inView, pos->second);
     }
-    pbSet.insert(outbuf);
+    viewSet.insert(outView);
 
-    return pbSet;
+    return viewSet;
 }
 
 } // pdal
