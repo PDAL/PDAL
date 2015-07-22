@@ -176,7 +176,7 @@ void NitfWriter::processOptions(const Options& options)
 
 void NitfWriter::writeView(const PointViewPtr view)
 {
-    m_bounds.grow(view->calculateBounds(true));
+    view->calculateBounds(m_bounds);
 
     LasWriter::writeView(view);
 }

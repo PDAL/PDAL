@@ -62,151 +62,103 @@ namespace pdal
     \endverbatim
 */
 
-
-class PDAL_DLL BOX3D
+class PDAL_DLL BOX2D
 {
-private:
+protected:
     static const double LOWEST;
     static const double HIGHEST;
-    
+
 public:
-
-    BOX3D()
-       { clear(); }
-
-    BOX3D(const BOX3D& box) :
-        minx(box.minx), maxx(box.maxx), miny(box.miny), maxy(box.maxy),
-        minz(box.minz), maxz(box.maxz)
-    {}
-
-    // Note: a "2D" bbox is explicitly constructed to have invalid Z values,
-    //   which might lead to some problems when used in conjuction with a "3D"
-    //   bbox. See, for example, issue #897.
-    // Note: ctor body not inlined due to MSVC, see #900
-    BOX3D(double minx, double miny, double maxx, double maxy) ;
-
-    BOX3D(double minx, double miny, double minz, double maxx, double maxy,
-            double maxz) :
-        minx(minx), maxx(maxx), miny(miny), maxy(maxy), minz(minz), maxz(maxz)
-    {}
-
     double minx;
     double maxx;
     double miny;
     double maxy;
-    double minz;
-    double maxz;
+
+    BOX2D()
+        { clear(); }
+
+    BOX2D(const BOX2D& box) :
+        minx(box.minx), maxx(box.maxx), miny(box.miny), maxy(box.maxy)
+    {}
+
+    BOX2D(double minx, double miny, double maxx, double maxy) :
+        minx(minx), maxx(maxx), miny(miny), maxy(maxy)
+    {}
 
     bool empty() const;
+    void clear();
+    void grow(double x, double y);
 
-    bool contains(double x, double y, double z) const
-    {
-        return minx <= x && x <= maxx &&
-               miny <= y && y <= maxy &&
-               minz <= z && z <= maxz;
-    }
+    bool contains(double x, double y) const
+        { return minx <= x && x <= maxx && miny <= y && y <= maxy; }
 
-    bool contains(const BOX3D& other) const
+    bool contains(const BOX2D& other) const
     {
         return minx <= other.minx && other.maxx <= maxx &&
-            miny <= other.miny && other.maxy <= maxy &&
-            minz <= other.minz && other.maxz <= maxz;
+            miny <= other.miny && other.maxy <= maxy;
     }
 
-    bool equal(const BOX3D& other) const
+    bool equal(const BOX2D& other) const
     {
         return  minx == other.minx && maxx == other.maxx &&
-            miny == other.miny && maxy == other.maxy &&
-            minz == other.minz && maxz == other.maxz;
+            miny == other.miny && maxy == other.maxy;
     }
 
-    bool operator==(BOX3D const& rhs) const
+    bool operator==(BOX2D const& rhs) const
     {
         return equal(rhs);
     }
 
-    bool operator!=(BOX3D const& rhs) const
+    bool operator!=(BOX2D const& rhs) const
     {
         return (!equal(rhs));
     }
 
-    void grow(double x, double y);
-
-    void grow(double x, double y, double z);
-
-    void grow(const BOX3D& other)
+    void grow(const BOX2D& other)
     {
         if (other.minx < minx) minx = other.minx;
         if (other.maxx > maxx) maxx = other.maxx;
 
         if (other.miny < miny) miny = other.miny;
         if (other.maxy > maxy) maxy = other.maxy;
-
-        if (other.minz < minz) minz = other.minz;
-        if (other.maxz > maxz) maxz = other.maxz;
     }
 
-    void clip(double x, double y, double z)
+    void clip(double x, double y)
     {
         if (x > minx) minx = x;
         if (x < maxx) maxx = x;
 
         if (y > maxy) miny = y;
         if (y < maxy) maxy = y;
-
-        if (z > maxz) minz = z;
-        if (z < maxz) maxz = z;
     }
 
-    void clip(const BOX3D& other)
+    void clip(const BOX2D& other)
     {
         if (other.minx > minx) minx = other.minx;
         if (other.maxx < maxx) maxx = other.maxx;
 
         if (other.miny > miny) miny = other.miny;
         if (other.maxy < maxy) maxy = other.maxy;
-
-        if (other.minz < minz) minz = other.minz;
-        if (other.maxz > maxz) maxz = other.maxz;
     }
 
-    bool is_z_empty() const;
-
-    bool overlaps(const BOX3D& other)
+    bool overlaps(const BOX2D& other)
     {
-        if (is_z_empty())
-            return minx <= other.maxx && maxx >= other.minx &&
-                   miny <= other.maxy && maxy >= other.miny;
         return minx <= other.maxx && maxx >= other.minx &&
-               miny <= other.maxy && maxy >= other.miny &&
-               minz <= other.maxz && maxz >= other.minz;
+            miny <= other.maxy && maxy >= other.miny;
     }
 
-    void clear();
-
-    std::string toBox(uint32_t precision = 8, uint32_t dimensions = 2) const
+    std::string toBox(uint32_t precision = 8) const
     {
         std::stringstream oss;
 
         oss.precision(precision);
         oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
 
-        if (dimensions == 2)
-        {
-            oss << "box(";
+        oss << "box2d(";
             oss << minx << " " << miny << ", ";
             oss << maxx << " " << maxy << ")";
-        }
-
-        else if (dimensions == 3)
-        {
-            oss << "box3d(";
-            oss << minx << " " << miny << " " << minz << ", ";
-            oss << maxx << " " << maxy << " " << maxz << ")";
-        }
         return oss.str();
     }
-
 
     std::string toWKT(uint32_t precision = 8) const
     {
@@ -224,16 +176,177 @@ public:
         oss << minx << " " << miny;
         oss << "))";
 
-        // Nothing happens for 3D bounds.
+        return oss.str();
+    }
+
+    /// Returns a staticly-allocated Bounds extent that represents infinity
+    static const BOX2D& getDefaultSpatialExtent();
+};
+
+class PDAL_DLL BOX3D : private BOX2D
+{
+public:
+    using BOX2D::minx;
+    using BOX2D::maxx;
+    using BOX2D::miny;
+    using BOX2D::maxy;
+    double minz;
+    double maxz;
+
+    BOX3D()
+       { clear(); }
+
+    BOX3D(const BOX3D& box) :
+        BOX2D(box), minz(box.minz), maxz(box.maxz)
+    {}
+
+    BOX3D(double minx, double miny, double minz, double maxx, double maxy,
+        double maxz) : BOX2D(minx, miny, maxx, maxy), minz(minz), maxz(maxz)
+    {}
+
+
+    bool empty() const;
+    void grow(double x, double y, double z);
+    void clear();
+
+    bool contains(double x, double y, double z) const
+    {
+        return BOX2D::contains(x, y) && minz <= z && z <= maxz;
+    } 
+
+    bool contains(const BOX3D& other) const
+    {
+        return BOX2D::contains(other) &&
+            minz <= other.minz && other.maxz <= maxz;
+    }
+
+    bool equal(const BOX3D& other) const
+    {
+        return  BOX2D::contains(other) &&
+            minz == other.minz && maxz == other.maxz;
+    }
+
+    bool operator==(BOX3D const& rhs) const
+    {
+        return equal(rhs);
+    }
+
+    bool operator!=(BOX3D const& rhs) const
+    {
+        return (!equal(rhs));
+    }
+
+    void grow(const BOX3D& other)
+    {
+        BOX2D::grow(other);
+        if (other.minz < minz) minz = other.minz;
+        if (other.maxz > maxz) maxz = other.maxz;
+    }
+
+    void clip(double x, double y, double z)
+    {
+        BOX2D::clip(x, y);
+        if (z > maxz) minz = z;
+        if (z < maxz) maxz = z;
+    }
+
+    void clip(const BOX3D& other)
+    {
+        BOX2D::clip(other);
+        if (other.minz < minz) minz = other.minz;
+        if (other.maxz > maxz) maxz = other.maxz;
+    }
+
+    bool overlaps(const BOX3D& other)
+    {
+        return BOX2D::overlaps(other) &&
+           minz <= other.maxz && maxz >= other.minz;
+    }
+
+    std::string toBox(uint32_t precision = 8) const
+    {
+        std::stringstream oss;
+
+        oss.precision(precision);
+        oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
+
+        oss << "box3d(" << minx << " " << miny << " " << minz << ", " <<
+            maxx << " " << maxy << " " << maxz << ")";
+        return oss.str();
+    }
+
+    std::string toWKT(uint32_t precision = 8) const
+    {
+        std::stringstream oss;
+
+        oss.precision(precision);
+        oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
+
+        oss << "POLYHEDRON Z ( ";
+
+        oss << "((" << minx << " " << miny << " " << minz << ", " <<
+                       maxx << " " << miny << " " << minz << ", " <<
+                       maxx << " " << maxy << " " << minz << ", " <<
+                       minx << " " << maxy << " " << minz << ", " <<
+                       minx << " " << miny << " " << minz << ", " <<
+               ")), ";
+        oss << "((" << minx << " " << miny << " " << minz << ", " <<
+                       maxx << " " << miny << " " << minz << ", " <<
+                       maxx << " " << miny << " " << maxz << ", " <<
+                       minx << " " << miny << " " << maxz << ", " <<
+                       minx << " " << miny << " " << minz << ", " <<
+               ")), ";
+        oss << "((" << maxx << " " << miny << " " << minz << ", " <<
+                       maxx << " " << maxy << " " << minz << ", " <<
+                       maxx << " " << maxy << " " << maxz << ", " <<
+                       maxx << " " << miny << " " << maxz << ", " <<
+                       maxx << " " << miny << " " << minz << ", " <<
+               ")), ";
+        oss << "((" << maxx << " " << maxy << " " << minz << ", " <<
+                       minx << " " << maxy << " " << minz << ", " <<
+                       minx << " " << maxy << " " << maxz << ", " <<
+                       maxx << " " << maxy << " " << maxz << ", " <<
+                       maxx << " " << maxy << " " << minz << ", " <<
+               ")), ";
+        oss << "((" << minx << " " << maxy << " " << minz << ", " <<
+                       minx << " " << miny << " " << minz << ", " <<
+                       minx << " " << miny << " " << maxz << ", " <<
+                       minx << " " << maxy << " " << maxz << ", " <<
+                       minx << " " << maxy << " " << minz << ", " <<
+               ")), ";
+        oss << "((" << minx << " " << miny << " " << maxz << ", " <<
+                       maxx << " " << miny << " " << maxz << ", " <<
+                       maxx << " " << maxy << " " << maxz << ", " <<
+                       minx << " " << maxy << " " << maxz << ", " <<
+                       minx << " " << miny << " " << maxz << ", " <<
+               "))";
+
+        oss << " )";
 
         return oss.str();
     }
 
     /// Returns a staticly-allocated Bounds extent that represents infinity
     static const BOX3D& getDefaultSpatialExtent();
-
-
 };
+
+inline std::ostream& operator << (std::ostream& ostr, const BOX2D& bounds)
+{
+    if (bounds.empty())
+    {
+        ostr << "()";
+        return ostr;
+    }
+
+    const int savedPrec = ostr.precision();
+    ostr.precision(16); // or..?
+    ostr << "(";
+    ostr << "[" << bounds.minx << ", " << bounds.maxx << "], " <<
+            "[" << bounds.miny << ", " << bounds.maxy << "]";
+    ostr << ")";
+    ostr.precision(savedPrec);
+    return ostr;
+}
 
 inline std::ostream& operator << (std::ostream& ostr, const BOX3D& bounds)
 {
@@ -246,15 +359,15 @@ inline std::ostream& operator << (std::ostream& ostr, const BOX3D& bounds)
     const int savedPrec = ostr.precision();
     ostr.precision(16); // or..?
     ostr << "(";
-    ostr << "[" << bounds.minx << ", " << bounds.maxx << "], "
-         << "[" << bounds.miny << ", " << bounds.maxy <<"]";
-    if (!bounds.is_z_empty())
-         ostr << ", [" <<  bounds.minz << ", " << bounds.maxz << "]";
+    ostr << "[" << bounds.minx << ", " << bounds.maxx << "], " <<
+            "[" << bounds.miny << ", " << bounds.maxy << "], " <<
+            "[" << bounds.minz << ", " << bounds.maxz << "]";
     ostr << ")";
     ostr.precision(savedPrec);
     return ostr;
 }
 
+extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX2D& bounds);
 extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX3D& bounds);
 
 } // namespace pdal

@@ -50,113 +50,130 @@ namespace pdal
 namespace Utils
 {
 
-    inline void printError(const std::string& s)
+inline void printError(const std::string& s)
+{
+    std::cerr << "PDAL: " << s << std::endl;
+    std::cerr << std::endl;
+}
+
+using namespace boost::property_tree;
+
+inline ptree toPTree(MetadataNode const& node)
+{
+    typedef ptree::path_type path;
+
+    ptree tree;
+    tree.put("name", node.name());
+    tree.put("description", node.description());
+    tree.put("type", node.type());
+    tree.put("value", node.value());
+
+    MetadataNodeList children = node.children();
+    for (auto n = children.begin(); n != children.end(); ++n)
     {
-        std::cerr << "PDAL: " << s << std::endl;
-        std::cerr << std::endl;
-    }
-
-    using namespace boost::property_tree;
-
-    inline ptree toPTree(MetadataNode const& node)
-    {
-        typedef ptree::path_type path;
-
-        ptree tree;
-        tree.put("name", node.name());
-        tree.put("description", node.description());
-        tree.put("type", node.type());
-        tree.put("value", node.value());
-
-        MetadataNodeList children = node.children();
-        for (auto n = children.begin(); n != children.end(); ++n)
+        ptree pnode = toPTree(*n);
+        if (node.kind() == MetadataType::Array)
         {
-            ptree pnode = toPTree(*n);
-            if (node.kind() == MetadataType::Array)
+            boost::optional<ptree&> opt =
+                tree.get_child_optional(path(node.name(), '/'));
+            if (opt)
+                opt->push_back(std::make_pair("", pnode));
+            else
             {
-                boost::optional<ptree&> opt =
-                    tree.get_child_optional(path(node.name(), '/'));
-                if (opt)
-                    opt->push_back(std::make_pair("", pnode));
-                else
-                {
-                    tree.push_back(ptree::value_type(node.name(), ptree()));
-                    auto& p = tree.get_child(path(node.name(), '/'));
-                    p.push_back(std::make_pair("", pnode));
+                tree.push_back(ptree::value_type(node.name(), ptree()));
+                auto& p = tree.get_child(path(node.name(), '/'));
+                p.push_back(std::make_pair("", pnode));
 
-                }
-            }
-            else if (node.name().size())
-                tree.push_back(std::make_pair(node.name(), pnode));
-        }
-        return tree;
-    }
-
-
-    inline MetadataNode toMetadata(PointTableRef table)
-    {
-        const PointLayoutPtr layout(table.layout());
-        MetadataNode root;
-
-        for (const auto& id : layout->dims())
-        {
-            MetadataNode dim("dimensions");
-            dim.add("name", layout->dimName(id));
-            Dimension::Type::Enum t = layout->dimType(id);
-            dim.add("type", Dimension::toName(Dimension::base(t)));
-            dim.add("size", layout->dimSize(id));
-            root.addList(dim);
-        }
-
-        return root;
-    }
-
-
-    inline MetadataNode toMetadata(const PointViewPtr view)
-    {
-        MetadataNode node;
-
-        const Dimension::IdList& dims = view->dims();
-
-        for (PointId idx = 0; idx < view->size(); idx++)
-        {
-            MetadataNode pointnode = node.add(std::to_string(idx));
-            for (auto di = dims.begin(); di != dims.end(); ++di)
-            {
-                double v = view->getFieldAs<double>(*di, idx);
-                pointnode.add(Dimension::name(*di), v);
             }
         }
-
-        return node;
+        else if (node.name().size())
+            tree.push_back(std::make_pair(node.name(), pnode));
     }
+    return tree;
+}
 
-    /// Outputs a string-based boost::property_tree::ptree representation
-    /// of the BOX3D instance
-    inline ptree toPTree(const BOX3D& bounds)
+
+inline MetadataNode toMetadata(PointTableRef table)
+{
+    const PointLayoutPtr layout(table.layout());
+    MetadataNode root;
+
+    for (const auto& id : layout->dims())
     {
-        ptree tree;
-        ptree x;
-        ptree y;
-        ptree z;
-
-        x.add("minimum", bounds.minx);
-        x.add("maximum", bounds.maxx);
-        tree.add_child("0", x);
-
-        y.add("minimum", bounds.miny);
-        y.add("maximum", bounds.maxy);
-        tree.add_child("1", y);
-
-        if (!bounds.is_z_empty())
-        {
-            z.add("minimum", bounds.minz);
-            z.add("maximum", bounds.maxz);
-            tree.add_child("2", z);
-        }
-
-        return tree;
+        MetadataNode dim("dimensions");
+        dim.add("name", layout->dimName(id));
+        Dimension::Type::Enum t = layout->dimType(id);
+        dim.add("type", Dimension::toName(Dimension::base(t)));
+        dim.add("size", layout->dimSize(id));
+        root.addList(dim);
     }
+
+    return root;
+}
+
+
+inline MetadataNode toMetadata(const PointViewPtr view)
+{
+    MetadataNode node;
+
+    const Dimension::IdList& dims = view->dims();
+
+    for (PointId idx = 0; idx < view->size(); idx++)
+    {
+        MetadataNode pointnode = node.add(std::to_string(idx));
+        for (auto di = dims.begin(); di != dims.end(); ++di)
+        {
+            double v = view->getFieldAs<double>(*di, idx);
+            pointnode.add(Dimension::name(*di), v);
+        }
+    }
+
+    return node;
+}
+
+/// Outputs a string-based boost::property_tree::ptree representation
+/// of the BOX3D instance
+inline ptree toPTree(const BOX3D& bounds)
+{
+    ptree tree;
+    ptree x;
+    ptree y;
+    ptree z;
+
+    x.add("minimum", bounds.minx);
+    x.add("maximum", bounds.maxx);
+    tree.add_child("0", x);
+
+    y.add("minimum", bounds.miny);
+    y.add("maximum", bounds.maxy);
+    tree.add_child("1", y);
+
+    z.add("minimum", bounds.minz);
+    z.add("maximum", bounds.maxz);
+    tree.add_child("2", z);
+
+    return tree;
+}
+
+/// Outputs a string-based boost::property_tree::ptree representation
+/// of the BOX2D instance
+inline ptree toPTree(const BOX2D& bounds)
+{
+    ptree tree;
+    ptree x;
+    ptree y;
+    ptree z;
+
+    x.add("minimum", bounds.minx);
+    x.add("maximum", bounds.maxx);
+    tree.add_child("0", x);
+
+    y.add("minimum", bounds.miny);
+    y.add("maximum", bounds.maxy);
+    tree.add_child("1", y);
+
+    return tree;
+}
 
 ptree toPTree(const Options& options);
 inline ptree toPTree(const Option& option)

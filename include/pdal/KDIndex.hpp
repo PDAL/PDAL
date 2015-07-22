@@ -291,7 +291,8 @@ bool KDIndex<2>::kdtree_get_bbox(BBOX& bb) const
     }
     else
     {
-        BOX3D bounds = m_buf.calculateBounds();
+        BOX2D bounds;
+        m_buf.calculateBounds(bounds);
 
         bb[0].low = bounds.minx;
         bb[0].high = bounds.maxx;
@@ -316,7 +317,8 @@ bool KDIndex<3>::kdtree_get_bbox(BBOX& bb) const
     }
     else
     {
-        BOX3D bounds = m_buf.calculateBounds();
+        BOX3D bounds;
+        m_buf.calculateBounds(bounds);
 
         bb[0].low = bounds.minx;
         bb[0].high = bounds.maxx;

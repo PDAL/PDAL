@@ -184,8 +184,10 @@ public:
             method. Otherwise, an exception will be thrown.
         \endverbatim
     */
-    BOX3D calculateBounds(bool bis3d=true) const;
-    static BOX3D calculateBounds(const PointViewSet&, bool bis3d=true);
+    void calculateBounds(BOX2D& box) const;
+    static void calculateBounds(const PointViewSet&, BOX2D& box);
+    void calculateBounds(BOX3D& box) const;
+    static void calculateBounds(const PointViewSet&, BOX3D& box);
 
     void dump(std::ostream& ostr) const;
     bool hasDim(Dimension::Id::Enum id) const

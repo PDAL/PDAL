@@ -558,10 +558,11 @@ void SQLiteWriter::writeTile(const PointViewPtr view)
     row r;
 
     uint32_t precision(9);
-    BOX3D b = view->calculateBounds(true);
+    BOX3D b;
+    view->calculateBounds(b);
     std::string bounds = b.toWKT(precision); // polygons are only 2d, not cubes
 
-    std::string box = b.toBox(precision, 3);
+    std::string box = b.toBox(precision);
     log()->get(LogLevel::Debug3) << "extent: " << bounds << std::endl;
     log()->get(LogLevel::Debug3) << "bbox: " << box << std::endl;
 
