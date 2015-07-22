@@ -82,6 +82,8 @@ void testReadWrite(bool compression, bool scaling)
     std::string tempFilename =
         getSQLITEOptions().getValueOrThrow<std::string>("connection");
 
+    FileUtils::deleteFile(tempFilename);
+
     Options sqliteOptions = getSQLITEOptions();
     if (scaling)
     {
@@ -90,50 +92,55 @@ void testReadWrite(bool compression, bool scaling)
     }
     sqliteOptions.add("compression", compression, "");
 
-    // remove file from earlier run, if needed
-    std::string temp_filename =
+    {
+        // remove file from earlier run, if needed
+        std::string temp_filename =
         sqliteOptions.getValueOrThrow<std::string>("connection");
 
-    Options lasReadOpts;
-    lasReadOpts.add("filename", Support::datapath("las/1.2-with-color.las"));
-    lasReadOpts.add("count", 11);
+        Options lasReadOpts;
+        lasReadOpts.add("filename", Support::datapath("las/1.2-with-color.las"));
+        lasReadOpts.add("count", 11);
 
-    LasReader reader;
-    reader.setOptions(lasReadOpts);
+        LasReader reader;
+        reader.setOptions(lasReadOpts);
 
-    StageFactory f;
-    std::unique_ptr<Stage> sqliteWriter(f.createStage("writers.sqlite"));
-    sqliteWriter->setOptions(sqliteOptions);
-    sqliteWriter->setInput(reader);
+        StageFactory f;
+        std::unique_ptr<Stage> sqliteWriter(f.createStage("writers.sqlite"));
+        sqliteWriter->setOptions(sqliteOptions);
+        sqliteWriter->setInput(reader);
 
-    PointTable table;
-    sqliteWriter->prepare(table);
-    sqliteWriter->execute(table);
-
-    // Done - now read back.
-    std::unique_ptr<Stage> sqliteReader(f.createStage("readers.sqlite"));
-    sqliteReader->setOptions(sqliteOptions);
-
-    PointTable table2;
-    sqliteReader->prepare(table2);
-    PointViewSet viewSet = sqliteReader->execute(table2);
-    EXPECT_EQ(viewSet.size(), 1U);
-    PointViewPtr view = *viewSet.begin();
-
-    using namespace Dimension;
-
-    uint16_t reds[] = {68, 54, 112, 178, 134, 99, 90, 106, 106, 100, 64};
-    for (PointId idx = 0; idx < 11; idx++)
-    {
-        uint16_t r = view->getFieldAs<uint16_t>(Id::Red, idx);
-        EXPECT_EQ(r, reds[idx]);
+        PointTable table;
+        sqliteWriter->prepare(table);
+        sqliteWriter->execute(table);
     }
-    int32_t x = view->getFieldAs<int32_t>(Id::X, 10);
-    EXPECT_EQ(x, 636038);
-    double xd = view->getFieldAs<double>(Id::X, 10);
-    EXPECT_FLOAT_EQ(xd, 636037.53);
+    
+    {
+        // Done - now read back.
+        StageFactory f;
+        std::unique_ptr<Stage> sqliteReader(f.createStage("readers.sqlite"));
+        sqliteReader->setOptions(sqliteOptions);
 
-   FileUtils::deleteFile(tempFilename);
+        PointTable table2;
+        sqliteReader->prepare(table2);
+        PointViewSet viewSet = sqliteReader->execute(table2);
+        EXPECT_EQ(viewSet.size(), 1U);
+        PointViewPtr view = *viewSet.begin();
+
+        using namespace Dimension;
+
+        uint16_t reds[] = {68, 54, 112, 178, 134, 99, 90, 106, 106, 100, 64};
+        for (PointId idx = 0; idx < 11; idx++)
+        {
+            uint16_t r = view->getFieldAs<uint16_t>(Id::Red, idx);
+            EXPECT_EQ(r, reds[idx]);
+        }
+        int32_t x = view->getFieldAs<int32_t>(Id::X, 10);
+        EXPECT_EQ(x, 636038);
+        double xd = view->getFieldAs<double>(Id::X, 10);
+        EXPECT_FLOAT_EQ(xd, 636037.53);
+    }
+
+    FileUtils::deleteFile(tempFilename);
 }
 
 

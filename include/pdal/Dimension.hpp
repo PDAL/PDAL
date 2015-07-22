@@ -183,7 +183,8 @@ enum Enum
     Alpha,
     EchoRange,
     ScanChannel,
-    Infrared
+    Infrared,
+    HeightAboveGround
 };
 } // namespace Id
 typedef std::vector<Id::Enum> IdList;
@@ -318,6 +319,8 @@ inline std::string description(Id::Enum id)
         return "Scan Channel";
     case Id::Infrared:
         return "Near Infrared";
+    case Id::HeightAboveGround:
+        return "Height above ground";
     case Id::Unknown:
         return "";
     }
@@ -432,6 +435,8 @@ inline Id::Enum id(std::string s)
         return Id::ScanChannel;
     else if (s == "INFRARED" || s == "NEARINFRARED")
         return Id::Infrared;
+    else if (s == "HEIGHTABOVEGROUND")
+        return Id::HeightAboveGround;
     return Id::Unknown;
 }
 
@@ -542,6 +547,8 @@ inline std::string name(Id::Enum id)
         return "ScanChannel";
     case Id::Infrared:
         return "Infrared";
+    case Id::HeightAboveGround:
+        return "HeightAboveGround";
     case Id::Unknown:
         return "";
     }
@@ -659,6 +666,8 @@ inline Type::Enum defaultType(Id::Enum id)
         return Unsigned8;
     case Id::Infrared:
         return Unsigned16;
+    case Id::HeightAboveGround:
+        return Double;
     case Id::Unknown:
         throw pdal_error("No type for undefined dimension ID.");
     }
