@@ -246,6 +246,7 @@ namespace Utils
     PDAL_DLL std::string demangle(const std::string& s);
     PDAL_DLL int screenWidth();
     PDAL_DLL std::string escapeNonprinting(const std::string& s);
+    PDAL_DLL std::string hexDump(const char *buf, size_t count);
 
     /// Split a string into substrings.  Characters matching the predicate are
     ///   discarded.
