@@ -144,9 +144,9 @@ PDAL_ADD_PLUGIN(pcl_libname kernel pcl
 #
 # Height Above Ground Kernel
 #
-PDAL_ADD_PLUGIN(hag_libname kernel height
-    FILES kernel/HeightAboveGroundKernel.cpp
-    LINK_WITH ${PCL_LIBRARIES})
+#PDAL_ADD_PLUGIN(hag_libname kernel height
+#    FILES kernel/HeightAboveGroundKernel.cpp
+#    LINK_WITH ${PCL_LIBRARIES})
 
 #
 # Ground Kernel
