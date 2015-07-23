@@ -118,7 +118,6 @@ int PipelineKernel::execute()
             "Use 'pdal info' to read the data.");
 
     applyExtraStageOptionsRecursive(manager.getStage());
-    manager.prepare();
     manager.execute();
     if (m_pipelineFile.size() > 0)
     {
