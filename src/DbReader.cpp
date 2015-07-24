@@ -120,6 +120,13 @@ void DbReader::writeField(PointView& view, const char *pos, const DimType& dim,
     else
     {
         view.setField(dim.m_id, dim.m_type, idx, pos);
+        if (dim.m_id == Id::X || dim.m_id == Id::Y ||
+            dim.m_id == Id::Z)
+            {
+                double d = view.getFieldAs<double>(dim.m_id, idx);
+                d = (d * dim.m_xform.m_scale) + dim.m_xform.m_offset;
+                view.setField(dim.m_id, idx, d);
+            }
     }
 }
 
@@ -150,6 +157,13 @@ void DbReader::writePoint(PointView& view, PointId idx, const char *buf)
         else
         {
             view.setField(dimType.m_id, dimType.m_type, idx, buf);
+            if (dimType.m_id == Id::X || dimType.m_id == Id::Y ||
+                dimType.m_id == Id::Z)
+            {
+                double d = view.getFieldAs<double>(dimType.m_id, idx);
+                d = (d * dimType.m_xform.m_scale) + dimType.m_xform.m_offset;
+                view.setField(dimType.m_id, idx, d);
+            }
         }
         buf += Dimension::size(dimType.m_type);
     }
