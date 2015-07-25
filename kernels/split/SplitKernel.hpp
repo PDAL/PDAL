@@ -58,7 +58,9 @@ private:
     std::string m_inputFile;
     std::string m_outputFile;
     uint32_t m_capacity;
-    uint32_t m_length;
+    double m_length;
+    double m_xOrigin;
+    double m_yOrigin;
 };
 
 } // namespace pdal

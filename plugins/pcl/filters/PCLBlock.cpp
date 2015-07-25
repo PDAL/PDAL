@@ -71,12 +71,14 @@ PointViewSet PCLBlock::run(PointViewPtr input)
     if (logOutput)
         log()->floatPrecision(8);
 
-    log()->get(LogLevel::Debug2) << input->getFieldAs<double>(Dimension::Id::X, 0) << ", " <<
-                                 input->getFieldAs<double>(Dimension::Id::Y, 0) << ", " <<
-                                 input->getFieldAs<double>(Dimension::Id::Z, 0) << std::endl;
+    log()->get(LogLevel::Debug2) <<
+        input->getFieldAs<double>(Dimension::Id::X, 0) << ", " <<
+        input->getFieldAs<double>(Dimension::Id::Y, 0) << ", " <<
+        input->getFieldAs<double>(Dimension::Id::Z, 0) << std::endl;
     log()->get(LogLevel::Debug2) << "Process PCLBlock..." << std::endl;
 
-    BOX3D const& buffer_bounds = input->calculateBounds();
+    BOX3D buffer_bounds;
+    input->calculateBounds(buffer_bounds);
 
     // convert PointView to PointNormal
     typedef pcl::PointCloud<pcl::PointXYZ> Cloud;
@@ -84,7 +86,7 @@ PointViewSet PCLBlock::run(PointViewPtr input)
     pclsupport::PDALtoPCD(input, *cloud, buffer_bounds);
 
     log()->get(LogLevel::Debug2) << cloud->points[0].x << ", " <<
-                                 cloud->points[0].y << ", " << cloud->points[0].z << std::endl;
+        cloud->points[0].y << ", " << cloud->points[0].z << std::endl;
 
     int level = log()->getLevel();
     switch (level)

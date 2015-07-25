@@ -80,7 +80,7 @@ void SQLiteWriter::processOptions(const Options& options)
             options.getValueOrDefault<std::string>("filename", "");
 
         if (!m_connection.size())
-        throw sqlite_driver_error("unable to connect to database, "
+        throw pdal_error("unable to connect to database, "
             "no connection string was given!");
     }
     m_block_table =
@@ -119,7 +119,7 @@ void SQLiteWriter::initialize()
         }
 
     }
-    catch (sqlite_driver_error const& e)
+    catch (pdal_error const& e)
     {
         std::stringstream oss;
         oss << "Unable to connect to database with error '" << e.what() << "'";
@@ -514,12 +514,20 @@ void SQLiteWriter::writeTile(const PointViewPtr view)
 
         LazPerfCompressor<Patch> compressor(*m_patch, dimTypes);
 
-        std::vector<char> outbuf(packedPointSize());
-        for (PointId idx = 0; idx < view->size(); idx++)
+        try
         {
-            size_t size = readPoint(*view.get(), idx, outbuf.data());
-            // Read the data and write to the patch.
-            compressor.compress(outbuf.data(), size);
+            std::vector<char> outbuf(packedPointSize());
+            for (PointId idx = 0; idx < view->size(); idx++)
+            {
+                size_t size = readPoint(*view.get(), idx, outbuf.data());
+                // Read the data and write to the patch.
+                compressor.compress(outbuf.data(), size);
+            }
+        }
+        catch (pdal_error)
+        {
+            compressor.done();
+            throw;
         }
         compressor.done();
 #else
@@ -550,10 +558,11 @@ void SQLiteWriter::writeTile(const PointViewPtr view)
     row r;
 
     uint32_t precision(9);
-    BOX3D b = view->calculateBounds(true);
+    BOX3D b;
+    view->calculateBounds(b);
     std::string bounds = b.toWKT(precision); // polygons are only 2d, not cubes
 
-    std::string box = b.toBox(precision, 3);
+    std::string box = b.toBox(precision);
     log()->get(LogLevel::Debug3) << "extent: " << bounds << std::endl;
     log()->get(LogLevel::Debug3) << "bbox: " << box << std::endl;
 

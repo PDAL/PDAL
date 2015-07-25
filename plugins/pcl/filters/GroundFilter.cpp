@@ -87,7 +87,8 @@ PointViewSet GroundFilter::run(PointViewPtr input)
     // convert PointView to PointXYZ
     typedef pcl::PointCloud<pcl::PointXYZ> Cloud;
     Cloud::Ptr cloud(new Cloud);
-    BOX3D const& bounds = input->calculateBounds();
+    BOX3D bounds;
+    input->calculateBounds(bounds);
     pclsupport::PDALtoPCD(input, *cloud, bounds);
 
     // PCL should provide console output at similar verbosity level as PDAL

@@ -63,6 +63,8 @@ private:
     std::string m_pipelineFile;
     bool m_validate;
     std::string m_PointCloudSchemaOutput;
+    std::string m_progressFile;
+    int m_progressFd;
 };
 
 } // pdal

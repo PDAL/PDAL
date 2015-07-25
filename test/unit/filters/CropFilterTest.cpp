@@ -215,6 +215,29 @@ TEST(CropFilterTest, test_crop_polygon_reprojection)
     EXPECT_EQ(view->size(), 47u);
 
     FileUtils::closeFile(wkt_stream);
-
 #endif
 }
+
+/**
+TEST(CropFilterTest, multibounds)
+{
+    using namespace Dimension;
+
+    PointTable table;
+    table.layout->registerDim(Id::X);
+    table.layout->registerDim(Id::Y);
+    table.layout->registerDim(Id::Z);
+
+    PointView view(table);
+    view.setField(Id::X, 0, 1);
+    view.setField(Id::Y, 0, 1);
+
+    view.setField(Id::X, 1, 2);
+    view.setField(Id::Y, 1, 6);
+
+    view.setField(Id::X, 2, 4);
+    view.setField(Id::Y, 2, 4);
+
+    BOX3D p
+}
+**/

@@ -92,6 +92,7 @@ private:
     std::vector<ExtraDim> m_extraDims;
     uint16_t m_extraByteLen;
     SpatialReference m_srs;
+    std::string m_curFilename;
 
     virtual void processOptions(const Options& options);
     virtual void prepared(PointTableRef table);

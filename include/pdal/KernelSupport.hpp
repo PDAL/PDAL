@@ -44,19 +44,19 @@
 namespace pdal
 {
 
-class PDAL_DLL app_usage_error : public pdal::pdal_error
+class app_usage_error : public pdal::pdal_error
 {
 public:
-    app_usage_error(std::string const& msg)
+    inline app_usage_error(std::string const& msg)
         : pdal_error(msg)
     {}
 };
 
 
-class PDAL_DLL app_runtime_error : public pdal::pdal_error
+class app_runtime_error : public pdal::pdal_error
 {
 public:
-    app_runtime_error(std::string const& msg)
+    inline app_runtime_error(std::string const& msg)
         : pdal_error(msg)
     {}
 };

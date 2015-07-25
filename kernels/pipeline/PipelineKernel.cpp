@@ -40,6 +40,8 @@
 
 #include <boost/program_options.hpp>
 
+#include <pdal/PDALUtils.hpp>
+
 namespace pdal
 {
 
@@ -52,7 +54,7 @@ CREATE_STATIC_PLUGIN(1, 0, PipelineKernel, Kernel, s_info)
 
 std::string PipelineKernel::getName() const { return s_info.name; }
 
-PipelineKernel::PipelineKernel() : m_validate(false), m_PointCloudSchemaOutput("")
+PipelineKernel::PipelineKernel() : m_validate(false), m_progressFd(-1)
 {}
 
 
@@ -80,11 +82,14 @@ void PipelineKernel::addSwitches()
             po::value<bool>(&m_validate)->zero_tokens()->implicit_value(true),
             "Validate the pipeline (including serialization), but do not "
             "execute writing of points")
+        ("progress", po::value<std::string>(&m_progressFile),
+            "Name of file or FIFO to which stages should write progress "
+            "information.  The file/FIFO must exist.  PDAL will not create "
+            "the progress file.")
         ;
 
     addSwitchSet(file_options);
     addPositionalSwitch("input", 1);
-
 
     po::options_description* hidden =
         new po::options_description("Hidden options");
@@ -101,8 +106,10 @@ int PipelineKernel::execute()
 {
     if (!FileUtils::fileExists(m_inputFile))
         throw app_runtime_error("file not found: " + m_inputFile);
+    if (m_progressFile.size())
+        m_progressFd = Utils::openProgress(m_progressFile);
 
-    pdal::PipelineManager manager;
+    pdal::PipelineManager manager(m_progressFd);
 
     pdal::PipelineReader reader(manager, isDebug(), getVerboseLevel());
     bool isWriter = reader.readPipeline(m_inputFile);
@@ -110,10 +117,8 @@ int PipelineKernel::execute()
         throw app_runtime_error("Pipeline file does not contain a writer. "
             "Use 'pdal info' to read the data.");
 
-    PointTable table;
     applyExtraStageOptionsRecursive(manager.getStage());
-    manager.getStage()->prepare(table);
-    manager.getStage()->execute(table);
+    manager.execute();
     if (m_pipelineFile.size() > 0)
     {
         pdal::PipelineWriter writer(manager);
@@ -128,13 +133,13 @@ int PipelineKernel::execute()
         std::string xml(schema.xml());
         out->write(xml.c_str(), xml.size());
         FileUtils::closeFile(out);
-        
 #else
         std::cerr << "libxml2 support not available, no schema is produced" <<
             std::endl;
 #endif
 
     }
+    Utils::closeProgress(m_progressFd);
     return 0;
 }
 

@@ -54,49 +54,48 @@ PointViewIter PointView::end()
 }
 
 
-BOX3D PointView::calculateBounds(bool is3d) const
+void PointView::calculateBounds(BOX2D& output) const
 {
-    BOX3D output;
+    for (PointId idx = 0; idx < size(); idx++)
+    {
+        double x = getFieldAs<double>(Dimension::Id::X, idx);
+        double y = getFieldAs<double>(Dimension::Id::Y, idx);
 
-    bool first = true;
+        output.grow(x, y);
+    }
+}
+
+
+void PointView::calculateBounds(const PointViewSet& set, BOX2D& output)
+{
+    for (auto iter = set.begin(); iter != set.end(); ++iter)
+    {
+        PointViewPtr buf = *iter;
+        buf->calculateBounds(output);
+    }
+}
+
+
+void PointView::calculateBounds(BOX3D& output) const
+{
     for (PointId idx = 0; idx < size(); idx++)
     {
         double x = getFieldAs<double>(Dimension::Id::X, idx);
         double y = getFieldAs<double>(Dimension::Id::Y, idx);
         double z = getFieldAs<double>(Dimension::Id::Z, idx);
 
-        if (is3d)
-        {
-            if (first)
-            {
-                output = BOX3D(x, y, z, x, y, z);
-                first = false;
-            }
-            output.grow(x,y,z);
-        }
-        else
-        {
-            if (first)
-            {
-                output = BOX3D(x, y, x, y);
-                first = false;
-            }
-            output.grow(x, y);
-        }
+        output.grow(x, y, z);
     }
-    return output;
 }
 
 
-BOX3D PointView::calculateBounds(const PointViewSet& set, bool is3d)
+void PointView::calculateBounds(const PointViewSet& set, BOX3D& output)
 {
-    BOX3D out;
     for (auto iter = set.begin(); iter != set.end(); ++iter)
     {
         PointViewPtr buf = *iter;
-        out.grow(buf->calculateBounds(is3d));
+        buf->calculateBounds(output);
     }
-    return out;
 }
 
 

@@ -37,6 +37,7 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <iostream>
 
+#include <pdal/PDALUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/util/Inserter.hpp>
 #include <pdal/util/OStream.hpp>
@@ -231,6 +232,8 @@ void LasWriter::readyFile(const std::string& filename)
             "' for output.";
         throw pdal_error(out.str());
     }
+    m_curFilename = filename;
+    Utils::writeProgress(m_progressFd, "READYFILE", filename);
     prepOutput(out);
 }
 
@@ -438,6 +441,8 @@ void LasWriter::addVlr(const std::string& userId, uint16_t recordId,
 /// metadata.
 void LasWriter::fillHeader()
 {
+    const uint16_t WKT_MASK = (1 << 4);
+
     m_lasHeader.setScale(m_xXform.m_scale, m_yXform.m_scale,
         m_zXform.m_scale);
     m_lasHeader.setOffset(m_xXform.m_offset, m_yXform.m_offset,
@@ -453,8 +458,13 @@ void LasWriter::fillHeader()
     m_lasHeader.setSoftwareId(headerVal<std::string>("software_id"));
     m_lasHeader.setSystemId(headerVal<std::string>("system_id"));
     m_lasHeader.setProjectId(headerVal<boost::uuids::uuid>("project_id"));
-    m_lasHeader.setGlobalEncoding(headerVal<uint16_t>("global_encoding"));
     m_lasHeader.setFileSourceId(headerVal<uint16_t>("filesource_id"));
+    // We always write a WKT VLR, but we need to be sure to set the WKT
+    // bit when the version is at least 1.4.
+    uint16_t globalEncoding = headerVal<uint16_t>("global_encoding");
+    if (m_lasHeader.versionAtLeast(1, 4))
+        globalEncoding |= WKT_MASK;
+    m_lasHeader.setGlobalEncoding(globalEncoding);
 
     if (!m_lasHeader.pointFormatSupported())
     {
@@ -500,6 +510,8 @@ void LasWriter::openCompression()
 
 void LasWriter::writeView(const PointViewPtr view)
 {
+    Utils::writeProgress(m_progressFd, "READYVIEW",
+        std::to_string(view->size()));
     setAutoXForm(view);
 
     size_t pointLen = m_lasHeader.pointLen();
@@ -543,6 +555,8 @@ void LasWriter::writeView(const PointViewPtr view)
         m_ostream->write(buf.data(), filled * pointLen);
 #endif
     }
+    Utils::writeProgress(m_progressFd, "DONEVIEW",
+        std::to_string(view->size()));
 }
 
 
@@ -600,9 +614,24 @@ point_count_t LasWriter::fillWriteBuf(const PointView& view,
         double y = (yOrig - m_yXform.m_offset) / m_yXform.m_scale;
         double z = (zOrig - m_zXform.m_offset) / m_zXform.m_scale;
 
-        ostream << boost::numeric_cast<int32_t>(lround(x));
-        ostream << boost::numeric_cast<int32_t>(lround(y));
-        ostream << boost::numeric_cast<int32_t>(lround(z));
+        auto converter = [this](double d, Dimension::Id::Enum dim) -> int32_t
+        {
+            int32_t i;
+
+            if (!Utils::numericCast(d, i))
+            {
+                std::ostringstream oss;
+                oss << "Unable to convert scaled value (" << d << ") to "
+                    "int32 for dimension '" << Dimension::name(dim) <<
+                    "' when writing LAS/LAZ file " << m_curFilename << ".";
+                throw pdal_error(oss.str());
+            }
+            return i;
+        };
+
+        ostream << converter(x, Id::X);
+        ostream << converter(y, Id::Y);
+        ostream << converter(z, Id::Z);
 
         uint16_t intensity = 0;
         if (view.hasDim(Id::Intensity))
@@ -722,6 +751,8 @@ point_count_t LasWriter::fillWriteBuf(const PointView& view,
 void LasWriter::doneFile()
 {
     finishOutput();
+    Utils::writeProgress(m_progressFd, "DONEFILE", m_curFilename);
+    m_curFilename.clear();
     delete m_ostream;
     m_ostream = NULL;
 }

@@ -153,7 +153,7 @@ void P2gWriter::write(const PointViewPtr view)
         m_coordinates.push_back(boost::tuple<double, double, double>(x, y, z));
     }
 
-    m_bounds.grow(view->calculateBounds());
+    view->calculateBounds(m_bounds);
 }
 
 void P2gWriter::done(PointTableRef table)

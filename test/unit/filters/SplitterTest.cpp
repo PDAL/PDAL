@@ -81,8 +81,10 @@ TEST(SplitterTest, test_tile_filter)
 
     auto sorter = [](PointViewPtr p1, PointViewPtr p2)
     {
-        BOX3D b1 = p1->calculateBounds();
-        BOX3D b2 = p2->calculateBounds();
+        BOX2D b1, b2;
+
+        p1->calculateBounds(b1);
+        p2->calculateBounds(b2);
 
         return b1.minx < b2.minx ?  true :
             b1.minx > b2.minx ? false :

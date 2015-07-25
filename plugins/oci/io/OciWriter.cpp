@@ -851,11 +851,19 @@ void OciWriter::writePointMajor(PointViewPtr view, std::vector<char>& outbuf)
         SignedLazPerfBuf compBuf(outbuf);
         LazPerfCompressor<SignedLazPerfBuf> compressor(compBuf, dimTypes);
 
-        std::vector<char> ptBuf(packedPointSize());
-        for (PointId idx = 0; idx < view->size(); ++idx)
+        try
         {
-            size_t size = readPoint(*view, idx, ptBuf.data());
-            compressor.compress(ptBuf.data(), size);
+            std::vector<char> ptBuf(packedPointSize());
+            for (PointId idx = 0; idx < view->size(); ++idx)
+            {
+                size_t size = readPoint(*view, idx, ptBuf.data());
+                compressor.compress(ptBuf.data(), size);
+            }
+        }
+        catch (pdal_error)
+        {
+            compressor.done();
+            throw;
         }
         compressor.done();
 #else
@@ -988,8 +996,8 @@ void OciWriter::writeTile(const PointViewPtr view)
     OCIArray* sdo_ordinates = 0;
     m_connection->CreateType(&sdo_ordinates, m_connection->GetOrdinateType());
 
-    // x0, x1, y0, y1, z0, z1, bUse3d
-    BOX3D bounds = view->calculateBounds(true);
+    BOX3D bounds;
+    view->calculateBounds(bounds);
     // Cumulate a total bounds for the file.
     m_pcExtent.grow(bounds);
 

@@ -99,14 +99,17 @@ PointViewSet MortonOrderFilter::run(PointViewPtr inView)
     CmpZOrder compare;
     std::multimap<Coord, PointId, CmpZOrder> sorted(compare);
 
-    BOX3D const& buffer_bounds = inView->calculateBounds();
+    BOX2D buffer_bounds;
+    inView->calculateBounds(buffer_bounds);
     double xrange = buffer_bounds.maxx - buffer_bounds.minx;
     double yrange = buffer_bounds.maxy - buffer_bounds.miny;
 
     for (PointId idx = 0; idx < inView->size(); idx++)
     {
-        double xpos = (inView->getFieldAs<double>(Dimension::Id::X, idx) - buffer_bounds.minx) / xrange;
-        double ypos = (inView->getFieldAs<double>(Dimension::Id::Y, idx) - buffer_bounds.miny) / yrange;
+        double xpos = (inView->getFieldAs<double>(Dimension::Id::X, idx) -
+            buffer_bounds.minx) / xrange;
+        double ypos = (inView->getFieldAs<double>(Dimension::Id::Y, idx) -
+            buffer_bounds.miny) / yrange;
         Coord loc(xpos, ypos);
         sorted.insert(std::make_pair(loc, idx));
     }

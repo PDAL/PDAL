@@ -71,6 +71,9 @@ public:
     void setInput(Stage& input)
         { m_inputs.push_back(&input); }
 
+    void setProgressFd(int fd)
+        { m_progressFd = fd; }
+
     QuickInfo preview()
     {
         l_processOptions(m_options);
@@ -133,6 +136,7 @@ protected:
     std::unique_ptr<UserCallback> m_callback;
     Options m_options;
     MetadataNode m_metadata;
+    int m_progressFd;
 
     void setSpatialReference(MetadataNode& m, SpatialReference const&);
 
