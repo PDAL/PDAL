@@ -124,8 +124,13 @@ void CropFilter::processOptions(const Options& options)
     }
 #else
     if (m_polys.size())
-        throw pdal_error("Can't specify polygons for " << getName() <<
-            " without PDAL built with GEOS.");
+    {
+        std::ostringstream oss;
+
+        oss << "Can't specify polygons for " << getName() <<
+            " without PDAL built with GEOS.";
+        throw pdal_error(oss.str());
+    }
 #endif
 }
 
