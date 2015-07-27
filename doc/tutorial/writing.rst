@@ -15,108 +15,74 @@ interacting with a :ref:`reader stage <stage_index>`.
      pipeline using :ref:`pipeline` and not have to code anything explicit
      yourself.
 
-Compilation
--------------------------------------------------------------------------------
-
-To build this example create a file called `pdal-tutorial.cpp` in the root of your PDAL tree and
-issue a compilation command something like the following:
-
-
-::
-
-    g++ -g -std=c++11 -o pdal-tutorial -I./include -L./lib -lpdalcpp pdal-tutorial.cpp
-
-.. note::
-
-    Refer to :ref:`building` for information on how to build PDAL.
-
-
 Includes
 -------------------------------------------------------------------------------
 
-As of PDAL 1.0.0, there's a couple of include files available for use.  The
-main one, `<pdal/pdal.hpp>`, brings in most of the utility and basic classes
-used throughout the PDAL system. Additionally, the following includes are
-available subject to having the required include directories pathed:
+First, our code.
 
-.. code-block:: cpp
+.. literalinclude:: ../../examples/writing/tutorial.cpp
+   :language: cpp
 
-    #include <pdal/pdal.hpp>
-    #include <pdal/PointView.hpp>
-    #include <BufferReader.hpp>
-    #include <LasWriter.hpp>
+Take a closer look. We will need to include several PDAL headers.
 
-    #include <vector>
+.. literalinclude:: ../../examples/writing/tutorial.cpp
+   :language: cpp
+   :lines: 1-8
 
-    struct Point
-    {
-        double x;
-        double y;
-        double z;
-    };
+`BufferReader` will not be required by all users. Here is it used to populate a
+bare `PointBuffer`. This will often be accomplished by a `Reader` stage.
 
-    std::vector<Point> getMyData()
-    {
+Instead of directly including headers for individual stages, e.g., `LasWriter`,
+we rely on the `StageFactory` which has the ability to query available stages
+at runtime and return pointers to the created stages.
 
-        std::vector<Point> output;
-        Point p;
+We proceed by providing a mechanism for generating dummy data for the x, y, and
+z dimensions.
 
-        for (int i = 0; i < 1000; ++i)
-        {
-            p.x = -93.0 + i*0.001;
-            p.y = 42.0 + i*0.001 ;
-            p.z = 106.0 + i;
-            output.push_back(p);
-        }
-        return output;
-    }
+.. literalinclude:: ../../examples/writing/tutorial.cpp
+   :language: cpp
+   :lines: 10-30
 
+.. literalinclude:: ../../examples/writing/tutorial.cpp
+   :language: cpp
+   :lines: 32-41
 
-    void fillView(pdal::PointViewPtr view, std::vector<Point> const& data)
-    {
+.. literalinclude:: ../../examples/writing/tutorial.cpp
+   :language: cpp
+   :lines: 43-70
 
-        for (int i = 0; i < data.size(); ++i)
-        {
-            Point const& pt = data[i];
-            view->setField<double>(pdal::Dimension::Id::X, i, pt.x);
-            view->setField<double>(pdal::Dimension::Id::Y, i, pt.y);
-            view->setField<double>(pdal::Dimension::Id::Z, i, pt.z);
-        }
-    }
+Compiling and running the program
+-------------------------------------------------------------------------------
 
-    int main( int argc, const char* argv[] )
-    {
+.. note::
 
-        pdal::Options options;
+  Refer to :ref:`building` for information on how to build PDAL.
 
-        pdal::Option debug("debug", true, "");
-        pdal::Option verbose("verbose", 7, "");
-        // options.add(debug);
-        // options.add(verbose);
+To build this example, simply copy the files tutorial.cpp and CMakeLists.txt
+from the examples/writing directory of the PDAL source tree.
 
-        pdal::Option filename("filename", "myfile.las");
-        options.add(filename);
-        pdal::PointTablePtr table(new pdal::DefaultPointTable());
+.. literalinclude:: ../../examples/writing/CMakeLists.txt
+   :language: cmake
 
-        table->registerDim(pdal::Dimension::Id::X);
-        table->registerDim(pdal::Dimension::Id::Y);
-        table->registerDim(pdal::Dimension::Id::Z);
+.. note::
 
-        {
-            pdal::PointViewPtr view(new pdal::PointView(table));
+  Refer to :ref:`using` for an explanation of the basic CMakeLists.
 
-            std::vector<Point> data = getMyData();
+Begin by configuring your project using CMake (shown here on Unix) and building
+using make.
 
-            fillView(view, data);
+.. code-block:: bash
 
-            pdal::BufferReader reader(options);
-            reader.addView(view);
-            pdal::LasWriter writer(options);
-            writer.setInput(&reader);
-            writer.prepare(table);
-            writer.execute(table);
+  $ cd /PATH/TO/WRITING/TUTORIAL
+  $ mkdir build
+  $ cd build
+  $ cmake ..
+  $ make
 
-        }
+After the project is built, you can run it by typing:
 
-    }
+.. code-block:: bash
+
+  $ ./tutorial
+
 

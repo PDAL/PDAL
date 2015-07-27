@@ -48,9 +48,16 @@ class Options;
 class PDAL_DLL PipelineManager
 {
 public:
-    PipelineManager() : m_tablePtr(new PointTable()), m_table(*m_tablePtr)
+    PipelineManager() : m_tablePtr(new PointTable()), m_table(*m_tablePtr),
+            m_progressFd(-1)
         {}
-    PipelineManager(PointTableRef table) : m_table(table)
+    PipelineManager(int progressFd) : m_tablePtr(new PointTable()),
+            m_table(*m_tablePtr), m_progressFd(progressFd)
+        {}
+    PipelineManager(PointTableRef table) : m_table(table), m_progressFd(-1)
+        {}
+    PipelineManager(PointTableRef table, int progressFd) : m_table(table),
+            m_progressFd(progressFd)
         {}
 
     // Use these to manually add stages into the pipeline manager.
@@ -88,6 +95,7 @@ private:
 
     typedef std::vector<std::unique_ptr<Stage> > StagePtrList;
     StagePtrList m_stages;
+    int m_progressFd;
 
     PipelineManager& operator=(const PipelineManager&); // not implemented
     PipelineManager(const PipelineManager&); // not implemented

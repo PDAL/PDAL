@@ -220,10 +220,10 @@ TEST(PointViewTest, metaview)
     PointViewPtr view = makeTestView(table, 2);
 
     std::stringstream ss1(std::stringstream::in | std::stringstream::out);
-    MetadataNode tree = utils::toMetadata(view);
+    MetadataNode tree = Utils::toMetadata(view);
 
     std::ifstream str1(Support::datapath("pointbuffer/metaview.txt"));
-    std::istringstream str2(utils::toJSON(tree));
+    std::istringstream str2(Utils::toJSON(tree));
     //EXPECT_TRUE(Support::compare_text_files(str1, str2));
 }
 
@@ -391,7 +391,8 @@ TEST(PointViewTest, calcBounds)
     const double lim_min = (std::numeric_limits<double>::lowest)();
     const double lim_max = (std::numeric_limits<double>::max)();
     PointViewPtr b0(new PointView(table));
-    const BOX3D box_b0 = b0->calculateBounds(true);
+    BOX3D box_b0;
+    b0->calculateBounds(box_b0);
     check_bounds(box_b0, lim_max, lim_min, lim_max, lim_min, lim_max, lim_min);
 
     PointViewPtr b1(new PointView(table));
@@ -406,13 +407,16 @@ TEST(PointViewTest, calcBounds)
     bs.insert(b1);
     bs.insert(b2);
 
-    const BOX3D box_b1 = b1->calculateBounds(true);
+    BOX3D box_b1;
+    b1->calculateBounds(box_b1);
     check_bounds(box_b1, 0.0, 2.0, 0.0, 2.0, 0.0, 2.0);
 
-    const BOX3D box_b2 = b2->calculateBounds(true);
+    BOX3D box_b2;
+    b2->calculateBounds(box_b2);
     check_bounds(box_b2, 1.0, 3.0, 1.0, 3.0, 1.0, 3.0);
 
-    BOX3D box_bs = PointView::calculateBounds(bs);
+    BOX3D box_bs;
+    PointView::calculateBounds(bs, box_bs);
     check_bounds(box_bs, 0.0, 3.0, 0.0, 3.0, 0.0, 3.0);
 }
 

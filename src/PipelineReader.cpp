@@ -90,33 +90,35 @@ public:
 
     void addUnknown(const std::string& name)
     {
-        throw pipeline_xml_error("unknown child of element: " + name);
+        throw pdal_error("unknown child of element: " + name);
     }
 
     void validate()
     {
         if (m_numTypes == 0)
-            throw pipeline_xml_error("expected Type element missing");
+            throw pdal_error("PipelineReader: expected Type element missing");
         if (m_numTypes > 1)
-            throw pipeline_xml_error("extra Type element found");
+            throw pdal_error("PipelineReader: extra Type element found");
 
         if (m_cardinality == None)
         {
             if (m_numStages != 0)
-                throw pipeline_xml_error(
-                    "found child stages where none expected");
+                throw pdal_error("PipelineReader: found child stages where "
+                    "none were expected");
         }
         if (m_cardinality == One)
         {
             if (m_numStages == 0)
-                throw pipeline_xml_error("expected child stage missing");
+                throw pdal_error("PipelineReader: "
+                    "expected child stage missing");
             if (m_numStages > 1)
-                throw pipeline_xml_error("extra child stages found");
+                throw pdal_error("PipelineReader: extra child stages found");
         }
         if (m_cardinality == Many)
         {
             if (m_numStages == 0)
-                throw pipeline_xml_error("expected child stage missing");
+                throw pdal_error("PipelineReader: expected child stage "
+                    "missing");
         }
     }
 
@@ -208,6 +210,12 @@ Option PipelineReader::parseElement_Option(const ptree& tree)
         }
         option.setValue(path);
     }
+    else if (option.getName() == "plugin")
+    {
+       PluginManager& pm = PluginManager::getInstance();
+       std::string path = option.getValue<std::string>();
+       pm.loadPlugin(path);
+    }
     return option;
 }
 
@@ -229,7 +237,7 @@ Stage *PipelineReader::parseElement_anystage(const std::string& name,
     }
     else
     {
-        throw pipeline_xml_error("encountered unknown stage type");
+        throw pdal_error("PipelineReader: encountered unknown stage type");
     }
 
     return NULL;
@@ -292,8 +300,8 @@ Stage *PipelineReader::parseElement_Reader(const ptree& tree)
                 context.addType();
             }
         }
-        catch (option_not_found)
-        {} // noop
+        catch (Option::not_found)
+        {}
     }
 
     context.validate();
@@ -449,7 +457,7 @@ bool PipelineReader::parseElement_Pipeline(const ptree& tree)
     if (attrs.count("version"))
         version = attrs["version"];
     if (version != "1.0")
-        throw pipeline_xml_error("unsupported pipeline xml version");
+        throw pdal_error("PipelineReader: unsupported pipeline xml version");
 
     bool isWriter = false;
 
@@ -473,14 +481,15 @@ bool PipelineReader::parseElement_Pipeline(const ptree& tree)
         }
         else
         {
-            throw pipeline_xml_error("xml reader invalid child of "
+            throw pdal_error("PipelineReader: xml reader invalid child of "
                 "ReaderPipeline element");
         }
     }
 
     if (writer && stage)
     {
-        throw pipeline_xml_error("extra nodes at front of writer pipeline");
+        throw pdal_error("PipelineReader: extra nodes at front of "
+            "writer pipeline");
     }
 
     return isWriter;
@@ -495,9 +504,7 @@ bool PipelineReader::readPipeline(std::istream& input)
 
     boost::optional<ptree> opt(tree.get_child_optional("Pipeline"));
     if (!opt.is_initialized())
-    {
-        throw pipeline_xml_error("root element is not Pipeline");
-    }
+        throw pdal_error("PipelineReader: root element is not Pipeline");
     ptree subtree = opt.get();
     return parseElement_Pipeline(subtree);
 }

@@ -162,15 +162,13 @@ Word #       Content
   12    Passive Footprint Longitude (degrees X 1,000,000)
   13    Passive Footprint Synthesized Elevation (millimeters)
   14    GPS Time packed (example: 153320100 = 15h 33m 20s 100ms)
-
-
 */
 
 #include "QfitReader.hpp"
 
 #include <pdal/PointView.hpp>
-#include <pdal/portable_endian.hpp>
 #include <pdal/util/Extractor.hpp>
+#include <pdal/util/portable_endian.hpp>
 
 #include <algorithm>
 #include <map>

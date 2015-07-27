@@ -75,8 +75,11 @@ TEST(ChipperTest, test_construction)
         auto sorter = [](PointViewPtr p1, PointViewPtr p2)
         {
             //This is super inefficient, but we're doing tests.
-            BOX3D b1 = p1->calculateBounds();
-            BOX3D b2 = p2->calculateBounds();
+            BOX2D b1;
+            BOX2D b2;
+
+            p1->calculateBounds(b1);
+            p2->calculateBounds(b2);
 
             return b1.minx < b2.minx ?  true :
                 b1.minx > b2.minx ? false :
@@ -85,8 +88,9 @@ TEST(ChipperTest, test_construction)
 
         std::sort(views.begin(), views.end(), sorter);
 
-        auto view = views[2];
-        auto bounds = view->calculateBounds();
+        PointViewPtr view = views[2];
+        BOX2D bounds;
+        view->calculateBounds(bounds);
 
         EXPECT_NEAR(bounds.minx, 635674.05, 0.05);
         EXPECT_NEAR(bounds.maxx, 635993.93, 0.05);

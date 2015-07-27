@@ -60,7 +60,8 @@ std::string extractRivlibURI(const Options& options)
     {
         if (options.hasOption("rdtp"))
         {
-            throw option_not_found("Cannot create URI when both filename and rdtp are provided");
+            throw pdal_error("Cannot create URI when both filename "
+                "and rdtp are provided");
         }
         return "file:" + options.getValueOrThrow<std::string>("filename");
     }

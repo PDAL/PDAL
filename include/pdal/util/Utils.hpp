@@ -240,10 +240,13 @@ namespace Utils
     PDAL_DLL int run_shell_command(const std::string& cmd, std::string& output);
     PDAL_DLL std::string replaceAll(std::string result,
         const std::string& replaceWhat, const std::string& replaceWithWhat);
-    PDAL_DLL void wordWrap(std::string const& inputString,
-        std::vector<std::string>& outputString, unsigned int lineLength);
+    PDAL_DLL StringList wordWrap(std::string const& inputString,
+        unsigned int lineLength);
     PDAL_DLL std::string escapeJSON(const std::string &s);
     PDAL_DLL std::string demangle(const std::string& s);
+    PDAL_DLL int screenWidth();
+    PDAL_DLL std::string escapeNonprinting(const std::string& s);
+    PDAL_DLL std::string hexDump(const char *buf, size_t count);
 
     /// Split a string into substrings.  Characters matching the predicate are
     ///   discarded.
@@ -317,7 +320,7 @@ namespace Utils
 
     template<typename KEY, typename VALUE>
     bool contains(const std::map<KEY, VALUE>& c, const KEY& v)
-        { return c.find(v) != c.end(); };
+        { return c.find(v) != c.end(); }
 
     template<typename COLLECTION, typename VALUE>
     bool contains(const COLLECTION& c, const VALUE& v)
@@ -354,6 +357,10 @@ namespace Utils
         redir.m_out->close();
     }
 
+    //ABELL - This is certainly not as efficient as boost::numeric_cast, but
+    //  has the advantage of not requiring an exception to indicate an error.
+    //  We should investigate incorporating a version of boost::numeric_cast
+    //  that avoids the exception for an error.
     // Determine whether a value of a given input type may be safely
     // statically casted to the given output type without over/underflow.  If
     // the output type is integral, inRange() will determine whether the
@@ -377,7 +384,27 @@ namespace Utils
         return std::is_same<T_IN, T_OUT>::value ||
             inRange<T_OUT>(static_cast<double>(in));
     }
-};
+
+    template<typename T_IN, typename T_OUT>
+    bool numericCast(T_IN in, T_OUT& out)
+    {
+        if (std::is_same<T_IN, T_OUT>::value)
+        {
+            out = in;
+            return true;
+        }
+        if (std::is_integral<T_OUT>::value)
+            in = sround(in);
+        if ((std::is_same<T_OUT, double>::value) ||
+            (in <= static_cast<double>(std::numeric_limits<T_OUT>::max()) &&
+             in >= static_cast<double>(std::numeric_limits<T_OUT>::lowest())))
+        {
+            out = in;
+            return true;
+        }
+        return false;
+    }
+} // namespace Utils
 
 } // namespace pdal
 

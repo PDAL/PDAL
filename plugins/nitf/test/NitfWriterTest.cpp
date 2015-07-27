@@ -34,14 +34,17 @@
 
 #include <pdal/pdal_test_main.hpp>
 
+#include <pdal/BufferReader.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include "Support.hpp"
 
 using namespace pdal;
 
-#if 0
-static void compare_contents(const std::string& las_file, const std::string& ntf_file)
+namespace
+{
+
+void compare_contents(const std::string& las_file, const std::string& ntf_file)
 {
     //
     // read the LAS file
@@ -50,12 +53,16 @@ static void compare_contents(const std::string& las_file, const std::string& ntf
     Options las_opts;
     las_opts.add(las_opt);
 
-    LasReader las_reader(las_opts);
-    las_reader.prepare();
-    const Schema& las_schema = las_reader.getSchema();
-    PointViewPtr las_data(las_schema, 750);
-    StageSequentialIterator* las_iter = las_reader.createSequentialIterator(las_data);
-    const uint32_t las_numRead = las_iter->read(las_data);
+    PointTable lasPoints;
+
+    StageFactory f;
+
+    std::unique_ptr<Stage> las_reader(f.createStage("readers.las"));
+    las_reader->setOptions(las_opts);
+    las_reader->prepare(lasPoints);
+    PointViewSet lasViews = las_reader->execute(lasPoints);
+    EXPECT_EQ(lasViews.size(), 1u);
+    PointViewPtr lasView = *lasViews.begin();
 
     //
     // read the NITF file
@@ -64,45 +71,31 @@ static void compare_contents(const std::string& las_file, const std::string& ntf
     Options ntf_opts;
     ntf_opts.add(ntf_opt);
 
-    NitfReader ntf_reader(ntf_opts);
-    ntf_reader.prepare();
-    const Schema& ntf_schema = ntf_reader.getSchema();
-    PointViewPtr ntf_data(ntf_schema, 750);
-    StageSequentialIterator* ntf_iter = ntf_reader.createSequentialIterator(ntf_data);
-    const uint32_t ntf_numRead = ntf_iter->read(ntf_data);
+    PointTable ntfPoints;
+    std::unique_ptr<Stage> ntf_reader(f.createStage("readers.nitf"));
+    ntf_reader->setOptions(ntf_opts);
+    ntf_reader->prepare(ntfPoints);
+    PointViewSet ntfViews = ntf_reader->execute(ntfPoints);
+    EXPECT_EQ(ntfViews.size(), 1u);
+    PointViewPtr ntfView = *ntfViews.begin();
 
     //
     // compare the two views
     //
-    EXPECT_EQ(las_numRead, ntf_numRead);
+    EXPECT_EQ(ntfView->size(), lasView->size());
 
-    Dimension const& ntf_dimX = ntf_schema.getDimension("X");
-    Dimension const& ntf_dimY = ntf_schema.getDimension("Y");
-    Dimension const& ntf_dimZ = ntf_schema.getDimension("Z");
-
-    Dimension const& las_dimX = las_schema.getDimension("X");
-    Dimension const& las_dimY = las_schema.getDimension("Y");
-    Dimension const& las_dimZ = las_schema.getDimension("Z");
-
-    for (uint32_t i=0; i<las_numRead; i++)
+    for (PointId i = 0; i < ntfView->size(); ++i)
     {
-        const double ntf_x = ntf_data.getField<double>(ntf_dimX, i);
-        const double ntf_y = ntf_data.getField<double>(ntf_dimY, i);
-        const double ntf_z = ntf_data.getField<double>(ntf_dimZ, i);
-
-        const double las_x = las_data.getField<double>(las_dimX, i);
-        const double las_y = las_data.getField<double>(las_dimY, i);
-        const double las_z = las_data.getField<double>(las_dimZ, i);
-
-        EXPECT_FLOAT_EQ(ntf_x, las_x);
-        EXPECT_FLOAT_EQ(ntf_y, las_y);
-        EXPECT_FLOAT_EQ(ntf_z, las_z);
+        EXPECT_DOUBLE_EQ(ntfView->getFieldAs<double>(Dimension::Id::X, i),
+            lasView->getFieldAs<double>(Dimension::Id::X, i));
+        EXPECT_DOUBLE_EQ(ntfView->getFieldAs<double>(Dimension::Id::Y, i),
+            lasView->getFieldAs<double>(Dimension::Id::Y, i));
+        EXPECT_DOUBLE_EQ(ntfView->getFieldAs<double>(Dimension::Id::Z, i),
+            lasView->getFieldAs<double>(Dimension::Id::Z, i));
     }
-
-    delete ntf_iter;
-    delete las_iter;
 }
-#endif
+
+} // Unnamed namespace
 
 TEST(NitfWriterTest, test1)
 {
@@ -168,26 +161,146 @@ TEST(NitfWriterTest, test1)
         writer->execute(table);
     }
 
-    FileUtils::deleteFile(nitf_output);
-
-#if 0
     //
     // check the generated NITF
     //
+    //ABELL - This doesn't work and is probably broken because the reference
+    //  file is out of date, but some method of comparing the NITF wrapper
+    //  instead of a byte-by-byte file diff is probably in order.
+/**
     bool filesSame = Support::compare_files(nitf_output, reference_output);
     EXPECT_TRUE(filesSame);
+**/
 
     //
     // check the LAS contents against the source image
     //
+    //ABELL - This tells us that the packaged file (LAS) is fine, but it
+    //  doesn't tell us much about the NITF wrapper.
     compare_contents(las_input, nitf_output);
 
-    //
-    // rm temp file
-    //
-    if (filesSame)
-    {
+//    if (filesSame)
         FileUtils::deleteFile(Support::temppath(nitf_output));
+}
+
+// Test that data from three input views gets written to separate output files.
+TEST(NitfWriterTest, flex)
+{
+    StageFactory f;
+
+    std::array<std::string, 3> outname =
+        {{ "test_1.ntf", "test_2.ntf", "test_3.ntf" }};
+
+    Options readerOps;
+    readerOps.add("filename", Support::datapath("nitf/autzen-utm10.ntf"));
+
+    PointTable table;
+
+    std::unique_ptr<Stage> reader(f.createStage("readers.nitf"));
+    reader->setOptions(readerOps);
+
+    reader->prepare(table);
+    PointViewSet views = reader->execute(table);
+    PointViewPtr v = *(views.begin());
+
+    PointViewPtr v1(new PointView(table));
+    PointViewPtr v2(new PointView(table));
+    PointViewPtr v3(new PointView(table));
+
+    std::vector<PointViewPtr> vs;
+    vs.push_back(v1);
+    vs.push_back(v2);
+    vs.push_back(v3);
+
+    for (PointId i = 0; i < v->size(); ++i)
+        vs[i % 3]->appendPoint(*v, i);
+
+    for (size_t i = 0; i < outname.size(); ++i)
+        FileUtils::deleteFile(Support::temppath(outname[i]));
+
+    BufferReader reader2;
+    reader2.addView(v1);
+    reader2.addView(v2);
+    reader2.addView(v3);
+
+    Options writerOps;
+    writerOps.add("filename", Support::temppath("test_#.ntf"));
+
+    std::unique_ptr<Stage> writer(f.createStage("writers.nitf"));
+    writer->setOptions(writerOps);
+    writer->setInput(reader2);
+
+    writer->prepare(table);
+    writer->execute(table);
+
+    for (size_t i = 0; i < outname.size(); ++i)
+    {
+        std::string filename = Support::temppath(outname[i]);
+        EXPECT_TRUE(FileUtils::fileExists(filename));
+
+        Options ops;
+        ops.add("filename", filename);
+
+        std::unique_ptr<Stage> r(f.createStage("readers.nitf"));
+        r->setOptions(ops);
+        EXPECT_EQ(r->preview().m_pointCount, vs[i]->size());
     }
-#endif
+}
+
+
+// Test that data from three input views gets written to a single output file.
+TEST(NitfWriterTest, flex2)
+{
+    StageFactory f;
+
+    Options readerOps;
+    readerOps.add("filename", Support::datapath("nitf/autzen-utm10.ntf"));
+
+    PointTable table;
+
+    std::unique_ptr<Stage> reader(f.createStage("readers.nitf"));
+    reader->setOptions(readerOps);
+
+    reader->prepare(table);
+    PointViewSet views = reader->execute(table);
+    PointViewPtr v = *(views.begin());
+
+    PointViewPtr v1(new PointView(table));
+    PointViewPtr v2(new PointView(table));
+    PointViewPtr v3(new PointView(table));
+
+    std::vector<PointViewPtr> vs;
+    vs.push_back(v1);
+    vs.push_back(v2);
+    vs.push_back(v3);
+
+    for (PointId i = 0; i < v->size(); ++i)
+        vs[i % 3]->appendPoint(*v, i);
+
+    std::string outfile(Support::temppath("test_flex.ntf"));
+    FileUtils::deleteFile(outfile);
+
+    BufferReader reader2;
+    reader2.addView(v1);
+    reader2.addView(v2);
+    reader2.addView(v3);
+
+    Options writerOps;
+    writerOps.add("filename", outfile);
+
+    std::unique_ptr<Stage> writer(f.createStage("writers.nitf"));
+    writer->setOptions(writerOps);
+    writer->setInput(reader2);
+
+    writer->prepare(table);
+    writer->execute(table);
+
+    EXPECT_TRUE(FileUtils::fileExists(outfile));
+
+    Options ops;
+    ops.add("filename", outfile);
+
+    std::unique_ptr<Stage> r(f.createStage("readers.nitf"));
+    r->setOptions(ops);
+    EXPECT_EQ(r->preview().m_pointCount, v->size());
 }

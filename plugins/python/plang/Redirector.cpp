@@ -14,7 +14,6 @@
 
 #include <functional>
 #include <ostream>
-#include <Python.h>
 
 namespace pdal
 {

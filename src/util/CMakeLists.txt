@@ -17,6 +17,7 @@ set(PDAL_UTIL_HPP
     "${PDAL_INCLUDE_DIR}/pdal/util/Inserter.hpp"
     "${PDAL_INCLUDE_DIR}/pdal/util/IStream.hpp"
     "${PDAL_INCLUDE_DIR}/pdal/util/OStream.hpp"
+    "${PDAL_INCLUDE_DIR}/pdal/util/Utils.hpp"
     )
 
 set(PDAL_UTIL_CPP
@@ -24,6 +25,7 @@ set(PDAL_UTIL_CPP
     "${PDAL_UTIL_DIR}/Charbuf.cpp"
     "${PDAL_UTIL_DIR}/FileUtils.cpp"
     "${PDAL_UTIL_DIR}/Georeference.cpp"
+    "${PDAL_UTIL_DIR}/Utils.cpp"
     )
 
 set(PDAL_UTIL_SOURCES
@@ -32,6 +34,9 @@ set(PDAL_UTIL_SOURCES
 
 PDAL_ADD_LIBRARY(${PDAL_UTIL_LIB_NAME} SHARED ${PDAL_UTIL_SOURCES})
 target_link_libraries(${PDAL_UTIL_LIB_NAME} ${Boost_LIBRARIES})
+if (NOT WIN32)
+    target_link_libraries(${PDAL_UTIL_LIB_NAME} dl)
+endif (NOT WIN32)
 
 set_property(GLOBAL PROPERTY _UTIL_INCLUDED TRUE)
 

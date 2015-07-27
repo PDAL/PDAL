@@ -153,7 +153,7 @@ void DbWriter::setAutoXForm(const PointViewPtr view)
 }
 
 
-/// Read a field form a PointView and write it's value as formatted for output
+/// Read a field from a PointView and write its value as formatted for output
 /// to the DB schema to the location as requested.
 /// \param[in] view     PointView to read from.
 /// \param[in] pos      Location in which to store field value.
@@ -173,14 +173,20 @@ size_t DbWriter::readField(const PointView& view, char *pos,
     // scaling.
     view.getField(pos, id, dt.m_type, idx);
 
-    auto iconvert = [pos](const XForm& xform)
+    auto iconvert = [pos](const XForm& xform, Dimension::Id::Enum dim)
     {
         double d;
         int32_t i;
 
         memcpy(&d, pos, sizeof(double));
         d = (d - xform.m_offset) / xform.m_scale;
-        i = boost::numeric_cast<int32_t>(lround(d));
+        if (!Utils::numericCast(d, i))
+        {
+            std::ostringstream oss;
+            oss << "Unable to convert double to int32 for packed DB output: ";
+            oss << Dimension::name(dim) << ": (" << d << ").";
+            throw pdal_error(oss.str());
+        }
         memcpy(pos, &i, sizeof(int32_t));
     };
 
@@ -189,17 +195,17 @@ size_t DbWriter::readField(const PointView& view, char *pos,
         // For X, Y or Z.
         if (id == Id::X)
         {
-            iconvert(m_xXform);
+            iconvert(m_xXform, Id::X);
             size = sizeof(int32_t);
         }
         else if (id == Id::Y)
         {
-            iconvert(m_yXform);
+            iconvert(m_yXform, Id::Y);
             size = sizeof(int32_t);
         }
         else if (id == Id::Z)
         {
-            iconvert(m_zXform);
+            iconvert(m_zXform, Id::Z);
             size = sizeof(int32_t);
         }
     }
@@ -214,28 +220,37 @@ size_t DbWriter::readField(const PointView& view, char *pos,
 /// \return  Number of bytes written to buffer.
 size_t DbWriter::readPoint(const PointView& view, PointId idx, char *outbuf)
 {
+    using namespace Dimension;
+
     // Read the data for the output dimensions from the view into the outbuf.
     view.getPackedPoint(m_dimTypes, idx, outbuf);
 
-    auto iconvert = [](const XForm& xform, const char *inpos, char *outpos)
+    auto iconvert = [](const XForm& xform, Id::Enum dim,
+        const char *inpos, char *outpos)
     {
         double d;
         int32_t i;
 
         memcpy(&d, inpos, sizeof(double));
         d = (d - xform.m_offset) / xform.m_scale;
-        i = boost::numeric_cast<int32_t>(lround(d));
+        if (!Utils::numericCast(d, i))
+        {
+            std::ostringstream oss;
+            oss << "Unable to convert double to int32 for packed DB output: ";
+            oss << Dimension::name(dim) << ": (" << d << ").";
+            throw pdal_error(oss.str());
+        }
         memcpy(outpos, &i, sizeof(int32_t));
     };
 
     if (m_xOffsets.first >= 0)
-        iconvert(m_xXform, outbuf + m_xOffsets.first,
+        iconvert(m_xXform, Id::X, outbuf + m_xOffsets.first,
             outbuf + m_xOffsets.second);
     if (m_yOffsets.first >= 0)
-        iconvert(m_yXform, outbuf + m_yOffsets.first,
+        iconvert(m_yXform, Id::Y, outbuf + m_yOffsets.first,
             outbuf + m_yOffsets.second);
     if (m_zOffsets.first >= 0)
-        iconvert(m_zXform, outbuf + m_zOffsets.first,
+        iconvert(m_zXform, Id::Z, outbuf + m_zOffsets.first,
             outbuf + m_zOffsets.second);
     return m_dbPointSize;
 }

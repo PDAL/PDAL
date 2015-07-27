@@ -47,13 +47,56 @@
 namespace pdal
 {
 
-namespace utils
+namespace Utils
 {
 
 inline void printError(const std::string& s)
 {
     std::cerr << "PDAL: " << s << std::endl;
     std::cerr << std::endl;
+}
+
+inline double toDouble(const Everything& e, Dimension::Type::Enum type)
+{
+    using namespace Dimension::Type;
+
+    double d = 0;
+    switch (type)
+    {
+    case Unsigned8:
+        d = e.u8;
+        break;
+    case Unsigned16:
+        d = e.u16;
+        break;
+    case Unsigned32:
+        d = e.u32;
+        break;
+    case Unsigned64:
+        d = e.u64;
+        break;
+    case Signed8:
+        d = e.s8;
+        break;
+    case Signed16:
+        d = e.s16;
+        break;
+    case Signed32:
+        d = e.s32;
+        break;
+    case Signed64:
+        d = e.s64;
+        break;
+    case Float:
+        d = e.f;
+        break;
+    case Double:
+        d = e.d;
+        break;
+    default:
+        break;
+    }
+    return d;
 }
 
 using namespace boost::property_tree;
@@ -148,12 +191,29 @@ inline ptree toPTree(const BOX3D& bounds)
     y.add("maximum", bounds.maxy);
     tree.add_child("1", y);
 
-    if (!bounds.is_z_empty())
-    {
-        z.add("minimum", bounds.minz);
-        z.add("maximum", bounds.maxz);
-        tree.add_child("2", z);
-    }
+    z.add("minimum", bounds.minz);
+    z.add("maximum", bounds.maxz);
+    tree.add_child("2", z);
+
+    return tree;
+}
+
+/// Outputs a string-based boost::property_tree::ptree representation
+/// of the BOX2D instance
+inline ptree toPTree(const BOX2D& bounds)
+{
+    ptree tree;
+    ptree x;
+    ptree y;
+    ptree z;
+
+    x.add("minimum", bounds.minx);
+    x.add("maximum", bounds.maxx);
+    tree.add_child("0", x);
+
+    y.add("minimum", bounds.miny);
+    y.add("maximum", bounds.maxy);
+    tree.add_child("1", y);
 
     return tree;
 }
@@ -201,9 +261,52 @@ inline ptree toPTree(const SpatialReference& ref)
     srs.put("prettywkt", ref.getWKT(SpatialReference::eHorizontalOnly, true));
     srs.put("wkt", ref.getWKT(SpatialReference::eHorizontalOnly, false));
     srs.put("compoundwkt", ref.getWKT(SpatialReference::eCompoundOK, false));
-    srs.put("prettycompoundwkt", ref.getWKT(SpatialReference::eCompoundOK, true));
+    srs.put("prettycompoundwkt", ref.getWKT(SpatialReference::eCompoundOK,
+       true));
 
     return srs;
+}
+
+inline int openProgress(const std::string& filename)
+{
+#ifdef WIN32
+    return -1;
+#else
+    int fd = open(filename.c_str(), O_WRONLY | O_NONBLOCK);
+    if (fd == -1)
+    {
+        std::string out = "Can't open progress file '";
+        out += filename + "'.";
+        printError(out);
+    }
+    return fd;
+#endif
+}
+
+
+inline void closeProgress(int fd)
+{
+#ifdef WIN32
+#else
+    if (fd >= 0)
+        close(fd);
+#endif
+}
+
+
+inline void writeProgress(int fd, const std::string& type,
+    const std::string& text)
+{
+#ifdef WIN32
+#else
+    if (fd >= 0)
+    {
+        std::string out = type + ':' + text + '\n';
+
+        // This may error, but we don't care.
+        write(fd, out.c_str(), out.length());
+    }
+#endif
 }
 
 std::string PDAL_DLL toJSON(const MetadataNode& m);
@@ -211,65 +314,6 @@ void PDAL_DLL toJSON(const MetadataNode& m, std::ostream& o);
 std::string PDAL_DLL toJSON(const Options& opts);
 void PDAL_DLL toJSON(const Options& opts, std::ostream& o);
 
-namespace reST
-{
+} // namespace Utils
+} // namespace pdal
 
-std::ostream& toRST(const ptree&, std::ostream& os);
-
-void PDAL_DLL write_rst(std::ostream& ost,
-               const boost::property_tree::ptree& pt,
-               int level=0);
-
-
-inline std::ostream& toRST(const PointViewPtr view, std::ostream& os)
-{
-    const Dimension::IdList& dims = view->dims();
-
-    size_t name_column(20);
-    size_t value_column(40);
-
-    for (auto di = dims.begin(); di != dims.end(); ++di)
-    {
-        std::string name = Dimension::name(*di);
-        name_column = std::max(name_column, name.size());
-    }
-
-    std::ostringstream thdr;
-    for (unsigned i = 0; i < name_column - 1; ++i)
-        thdr << "=";
-    thdr << " ";
-    for (unsigned i = 0; i < value_column - 1; ++i)
-        thdr << "=";
-    thdr << " ";
-    thdr << " ";
-
-    name_column--;
-    unsigned step_back(3);
-
-    std::string hdr(80, '-');
-    for (PointId idx = 0; idx < view->size(); ++idx)
-    {
-        os << "Point " << idx << std::endl;
-        os << hdr << std::endl << std::endl;
-        os << thdr.str() << std::endl;
-        os << std::setw(name_column-step_back) << "Name" <<
-            std::setw(value_column-step_back) << "Value"  << std::endl;
-        os << thdr.str() << std::endl;
-        for (auto di = dims.begin(); di != dims.end(); ++di)
-        {
-            double v = view->getFieldAs<double>(*di, idx);
-            std::string value = boost::lexical_cast<std::string>(v);
-            os << std::left << std::setw(name_column) << Dimension::name(*di) <<
-                std::right << std::setw(value_column) << value << std::endl;
-        }
-        os << thdr.str() << std::endl << std::endl;
-    }
-    os << std::endl << std::endl;
-    return os;
-}
-
-
-} // reST
-
-} // utils
-} // pdal

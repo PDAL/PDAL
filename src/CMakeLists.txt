@@ -36,12 +36,12 @@ endif()
 # base
 #
 set(PDAL_BASE_HPP
-  "${PDAL_HEADERS_DIR}/pdal_error.hpp"
   "${PDAL_HEADERS_DIR}/pdal_types.hpp"
   "${PDAL_HEADERS_DIR}/BufferReader.hpp"
   "${PDAL_HEADERS_DIR}/Compression.hpp"
   "${PDAL_HEADERS_DIR}/Dimension.hpp"
   "${PDAL_HEADERS_DIR}/Filter.hpp"
+  "${PDAL_HEADERS_DIR}/FlexWriter.hpp"
   "${PDAL_HEADERS_DIR}/GDALUtils.hpp"
   "${PDAL_HEADERS_DIR}/GlobalEnvironment.hpp"
   "${PDAL_HEADERS_DIR}/gitsha.h"
@@ -66,7 +66,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/StageFactory.hpp"
   "${PDAL_HEADERS_DIR}/StageWrapper.hpp"
   "${PDAL_HEADERS_DIR}/UserCallback.hpp"
-  "${PDAL_HEADERS_DIR}/Utils.hpp"
   "${PDAL_HEADERS_DIR}/Writer.hpp"
   "${PDAL_SRC_DIR}/StageRunner.hpp"
     ${PDAL_XML_HEADER}
@@ -79,7 +78,6 @@ set(PDAL_BASE_CPP
   gitsha.cpp
   GDALUtils.cpp
   GlobalEnvironment.cpp
-  KDIndex.cpp
   Kernel.cpp
   KernelFactory.cpp
   KernelSupport.cpp
@@ -100,7 +98,6 @@ set(PDAL_BASE_CPP
   SpatialReference.cpp
   Stage.cpp
   StageFactory.cpp
-  Utils.cpp
   Writer.cpp
   ${PDAL_XML_SRC}
   ${PDAL_LAZPERF_SRC}

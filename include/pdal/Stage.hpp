@@ -71,6 +71,9 @@ public:
     void setInput(Stage& input)
         { m_inputs.push_back(&input); }
 
+    void setProgressFd(int fd)
+        { m_progressFd = fd; }
+
     QuickInfo preview()
     {
         l_processOptions(m_options);
@@ -86,6 +89,12 @@ public:
         { return m_options; }
     void setOptions(Options options)
         { m_options = options; }
+    void addConditionalOptions(const Options& opts);
+    void addOptions(const Options& opts)
+    {
+        for (const auto& o : opts.getOptions())
+            m_options.add(o);
+    }
     virtual boost::property_tree::ptree serializePipeline() const = 0;
     virtual LogPtr log() const
         { return m_log; }
@@ -127,6 +136,7 @@ protected:
     std::unique_ptr<UserCallback> m_callback;
     Options m_options;
     MetadataNode m_metadata;
+    int m_progressFd;
 
     void setSpatialReference(MetadataNode& m, SpatialReference const&);
 

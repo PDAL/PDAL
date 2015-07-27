@@ -43,12 +43,21 @@ typedef _object PyObject;
 #endif
 **/
 
+#include <pdal/pdal_internal.hpp>
+
 #include "Redirector.hpp"
 
 namespace pdal
 {
 namespace plang
 {
+
+class error : public pdal_error
+{
+public:
+    error(const std::string& msg) : pdal_error(msg)
+        {}
+};
 
 std::string getTraceback();
 

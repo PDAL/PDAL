@@ -55,6 +55,9 @@ std::string SplitKernel::getName() const
     return s_info.name;
 }
 
+    double m_length;
+    double m_xOrigin;
+    double m_yOrigin;
 
 void SplitKernel::addSwitches()
 {
@@ -62,10 +65,14 @@ void SplitKernel::addSwitches()
         new po::options_description("file options");
 
     file_options->add_options()
-        ("length", po::value<uint32_t>(&m_length)->default_value(0),
+        ("length", po::value<double>(&m_length)->default_value(0.0),
          "Edge length for splitter cells")
         ("capacity", po::value<uint32_t>(&m_capacity)->default_value(0),
          "Point capacity of chipper cells")
+        ("origin_x", po::value<double>(&m_xOrigin)->default_value(std::numeric_limits<double>::quiet_NaN()),
+         "Origin in X axis for splitter cells")
+        ("origin_y", po::value<double>(&m_yOrigin)->default_value(std::numeric_limits<double>::quiet_NaN()),
+         "Origin in Y axis for splitter cells")
         ("input,i", po::value<std::string>(&m_inputFile)->default_value(""),
          "input file name")
         ("output,o", po::value<std::string>(&m_outputFile)->default_value(""),
@@ -128,6 +135,8 @@ int SplitKernel::execute()
     {
         f.reset(factory.createStage("filters.splitter"));
         filterOpts.add("length", m_length);
+        filterOpts.add("origin_x", m_xOrigin);
+        filterOpts.add("origin_y", m_yOrigin);
     }
     else
     {

@@ -137,7 +137,7 @@ macro(PDAL_ADD_TEST _name)
     include_directories(${PROJECT_BINARY_DIR}/test/unit)
     set(common_srcs
         ${PROJECT_SOURCE_DIR}/test/unit/Support.cpp
-	${PROJECT_SOURCE_DIR}/test/unit/TestConfig.cpp
+        ${PROJECT_SOURCE_DIR}/test/unit/TestConfig.cpp
     )
     if (WIN32)
         list(APPEND ${PDAL_ADD_TEST_FILES} ${PDAL_TARGET_OBJECTS})
@@ -220,7 +220,7 @@ endmacro(DISSECT_VERSION)
 macro(SET_INSTALL_DIRS)
   string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
   if (NOT DEFINED PDAL_LIB_INSTALL_DIR)
-    set(PDAL_LIB_INSTALL_DIR "lib")
+    set(PDAL_LIB_INSTALL_DIR lib)
   endif ()
     set(PDAL_INCLUDE_INSTALL_ROOT "include/")
     set(PDAL_INCLUDE_INSTALL_DIR

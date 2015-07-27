@@ -34,7 +34,6 @@
 
 #include "TransformationFilter.hpp"
 
-#include <pdal/pdal_error.hpp>
 #include <pdal/pdal_export.hpp>
 
 #include <sstream>
@@ -64,7 +63,7 @@ TransformationMatrix transformationMatrixFromString(const std::string& s)
             std::stringstream msg;
             msg << "Too many entries in transformation matrix, should be "
                 << matrix.size();
-            throw invalid_format(msg.str());
+            throw pdal_error(msg.str());
         }
         matrix[i++] = entry;
     }
@@ -78,7 +77,7 @@ TransformationMatrix transformationMatrixFromString(const std::string& s)
             << matrix.size()
             << ")";
 
-        throw invalid_format(msg.str());
+        throw pdal_error(msg.str());
     }
 
     return matrix;
@@ -109,6 +108,5 @@ void TransformationFilter::filter(PointView& view)
             x * m_matrix[8] + y * m_matrix[9] + z * m_matrix[10] + m_matrix[11]);
     }
 }
-
 
 } // namespace pdal

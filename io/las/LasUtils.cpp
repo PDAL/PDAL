@@ -36,7 +36,7 @@
 
 #include <pdal/util/Extractor.hpp>
 #include <pdal/util/Inserter.hpp>
-#include <pdal/Utils.hpp>
+#include <pdal/util/Utils.hpp>
 
 #include <string>
 

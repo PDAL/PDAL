@@ -46,7 +46,7 @@ using namespace pdal;
 namespace
 {
 
-#if defined(PDAL_HAVE_GEOS) && defined(PDAL_HAVE_GEOTIFF)
+#if defined(PDAL_HAVE_GEOS) && defined(PDAL_HAVE_LIBGEOTIFF)
 void getPoint(const PointView& data, double& x, double& y, double& z)
 {
     x = data.getFieldAs<double>(Dimension::Id::X, 0);
@@ -58,7 +58,7 @@ void getPoint(const PointView& data, double& x, double& y, double& z)
 } // unnamed namespace
 
 
-#if defined(PDAL_HAVE_GEOS) && defined(PDAL_HAVE_GEOTIFF)
+#if defined(PDAL_HAVE_GEOS) && defined(PDAL_HAVE_LIBGEOTIFF)
 // Test reprojecting UTM 15 to DD with a filter
 TEST(ReprojectionFilterTest, ReprojectionFilterTest_test_1)
 {
@@ -87,11 +87,11 @@ TEST(ReprojectionFilterTest, ReprojectionFilterTest_test_1)
 
         ReprojectionFilter reprojectionFilter;
         reprojectionFilter.setOptions(options);
-        reprojectionFilter.setInput(&reader);
+        reprojectionFilter.setInput(reader);
 
         reprojectionFilter.prepare(table);
         PointViewSet viewSet = reprojectionFilter.execute(table);
-        EXPECT_EQ(viewSet.size(), 1);
+        EXPECT_EQ(viewSet.size(), 1u);
         PointViewPtr view = *viewSet.begin();
 
         double x, y, z;

@@ -60,53 +60,80 @@ bool eat(std::istream& in, char c)
     return false;
 }
 
-} // namespace
+void readpair(std::istream& istr, double& low, double& high)
+{
+    eat(istr, isspace);
+    if (!eat(istr,'['))
+        istr.setstate(std::ios_base::failbit);
+
+    eat(istr, isspace);
+    istr >> low;
+
+    eat(istr, isspace);
+    if (!eat(istr,','))
+        istr.setstate(std::ios_base::failbit);
+
+    eat(istr, isspace);
+    istr >> high;
+
+    if (!eat(istr,']'))
+        istr.setstate(std::ios_base::failbit);
+}
+
+} // unnamed namespace
 
 namespace pdal
 {
 
-const double BOX3D::LOWEST = (std::numeric_limits<double>::lowest)();
-const double BOX3D::HIGHEST = (std::numeric_limits<double>::max)();
+const double BOX2D::LOWEST = (std::numeric_limits<double>::lowest)();
+const double BOX2D::HIGHEST = (std::numeric_limits<double>::max)();
     
-BOX3D::BOX3D(double minx, double miny, double maxx, double maxy) :
-    minx(minx), maxx(maxx), miny(miny), maxy(maxy),
-    minz(HIGHEST), maxz(LOWEST)
-{}
+void BOX2D::clear()
+{
+    minx = HIGHEST; miny = HIGHEST;
+    maxx = LOWEST; maxy = LOWEST;
+}
 
 void BOX3D::clear()
 {
-    minx = HIGHEST; miny = HIGHEST; minz = HIGHEST;
-    maxx = LOWEST; maxy = LOWEST; maxz = LOWEST;
+    BOX2D::clear();
+    minz = HIGHEST;
+    maxz = LOWEST;
+}
+
+bool BOX2D::empty() const
+{
+    return  minx == HIGHEST && maxx == LOWEST &&
+        miny == HIGHEST && maxy == LOWEST;
 }
 
 bool BOX3D::empty() const
 {
-    return  minx == HIGHEST && maxx == LOWEST &&
-            miny == HIGHEST && maxy == LOWEST &&
-            minz == HIGHEST && maxz == LOWEST;
+    return  BOX2D::empty() && minz == HIGHEST && maxz == LOWEST;
 }
 
-void BOX3D::grow(double x, double y)
-{
-    grow(x, y, LOWEST);
-}
-
-void BOX3D::grow(double x, double y, double z)
+void BOX2D::grow(double x, double y)
 {
     if (x < minx) minx = x;
     if (x > maxx) maxx = x;
 
     if (y < miny) miny = y;
     if (y > maxy) maxy = y;
+}
 
+void BOX3D::grow(double x, double y, double z)
+{
+    BOX2D::grow(x, y);
     if (z < minz) minz = z;
     if (z > maxz) maxz = z;
 }
 
-bool BOX3D::is_z_empty() const
+const BOX2D& BOX2D::getDefaultSpatialExtent()
 {
-    return ((minz == HIGHEST) && (maxz == LOWEST));
-}
+    static BOX2D v(LOWEST, LOWEST, HIGHEST, HIGHEST);
+    return v;
+}    
+
 
 const BOX3D& BOX3D::getDefaultSpatialExtent()
 {
@@ -114,27 +141,66 @@ const BOX3D& BOX3D::getDefaultSpatialExtent()
     return v;
 }    
 
-std::istream& operator>>(std::istream& istr, BOX3D& bounds)
-{
-    istr.get();
-    if (istr.eof())
-    {
-        BOX3D output;
-        bounds = output;
-        return istr;
-    }
 
+std::istream& operator>>(std::istream& istr, BOX2D& bounds)
+{
+    //ABELL - Not sure the point of this.  I get that one can have an "empty"
+    // BOX2D, but when would it be useful to create one from a string?
+    // A really dirty way to check for an empty bounds object right off
+    // the bat
+    char left_paren = (char)istr.get();
     if (!istr.good())
     {
         istr.setstate(std::ios_base::failbit);
         return istr;
     }
+    const char right_paren = (char)istr.get();
 
+    if (left_paren == '(' && right_paren == ')')
+    {
+        bounds = BOX2D();
+        return istr;
+    }
     istr.unget();
+    istr.unget(); // ()
 
+    std::vector<double> v;
+
+    eat(istr, isspace);
+    if (!eat(istr,'('))
+        istr.setstate(std::ios_base::failbit);
+
+    bool done = false;
+    for (int i = 0; i < 2; ++i)
+    {
+        double low, high;
+
+        readpair(istr, low, high);
+
+        eat(istr, isspace);
+        if (!eat(istr, i == 1 ? ')' : ','))
+            istr.setstate(std::ios_base::failbit);
+        v.push_back(low);
+        v.push_back(high);
+    }
+
+    if (istr.good())
+    {
+        bounds.minx = v[0];
+        bounds.maxx = v[1];
+        bounds.miny = v[2];
+        bounds.maxy = v[3];
+    }
+    return istr;
+}
+
+std::istream& operator>>(std::istream& istr, BOX3D& bounds)
+{
+    //ABELL - Not sure the point of this.  I get that one can have an "empty"
+    // BOX3D, but when would it be useful to create one from a string?
     // A really dirty way to check for an empty bounds object right off
     // the bat
-    const char left_paren = (char)istr.get();
+    char left_paren = (char)istr.get();
     if (!istr.good())
     {
         istr.setstate(std::ios_base::failbit);
@@ -154,78 +220,32 @@ std::istream& operator>>(std::istream& istr, BOX3D& bounds)
     std::vector<double> v;
 
     eat(istr, isspace);
-
     if (!eat(istr,'('))
-    {
         istr.setstate(std::ios_base::failbit);
-        return istr;
-    }
 
     bool done = false;
-    while (!done)
+    for (int i = 0; i < 3; ++i)
     {
-        eat(istr, isspace);
         double low, high;
 
-        if (!eat(istr,'['))
-        {
-            istr.setstate(std::ios_base::failbit);
-            return istr;
-        }
+        readpair(istr, low, high);
 
         eat(istr, isspace);
-        istr >> low;
-        eat(istr, isspace);
-        if (!eat(istr,','))
-        {
+        if (!eat(istr, i == 2 ? ')' : ','))
             istr.setstate(std::ios_base::failbit);
-            return istr;
-        }
-
-        eat(istr, isspace);
-        istr >> high;
-
-        if (!eat(istr,']'))
-        {
-            istr.setstate(std::ios_base::failbit);
-            return istr;
-        }
-
-        eat(istr, isspace);
-        if (eat(istr,','))
-            done = false;
-        else if (eat(istr,')'))
-            done = true;
-        else
-        {
-            istr.setstate(std::ios_base::failbit);
-            return istr;
-        }
         v.push_back(low);
         v.push_back(high);
     }
 
-    BOX3D xxx;
-    if (v.size() == 4)
+    if (istr.good())
     {
-        xxx.minx = v[0];
-        xxx.maxx = v[1];
-        xxx.miny = v[2];
-        xxx.maxy = v[3];
+        bounds.minx = v[0];
+        bounds.maxx = v[1];
+        bounds.miny = v[2];
+        bounds.maxy = v[3];
+        bounds.minz = v[4];
+        bounds.maxz = v[5];
     }
-    else if (v.size() == 6)
-    {
-        xxx.minx = v[0];
-        xxx.maxx = v[1];
-        xxx.miny = v[2];
-        xxx.maxy = v[3];
-        xxx.minz = v[4];
-        xxx.maxz = v[5];
-    }
-    else
-        istr.setstate(std::ios_base::failbit);
-    eat(istr, isspace);
-    bounds = xxx;
     return istr;
 }
 

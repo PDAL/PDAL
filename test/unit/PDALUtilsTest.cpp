@@ -63,7 +63,7 @@ TEST(PDALUtilsTest, options1)
 
     {
         std::ofstream out(testfile);
-        utils::toJSON(ops, out);
+        Utils::toJSON(ops, out);
     }
     EXPECT_TRUE(Support::compare_files(goodfile, testfile));
 }

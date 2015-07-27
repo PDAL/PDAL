@@ -71,6 +71,7 @@ GroundKernel::GroundKernel()
     , m_cellSize(1)
     , m_classify(true)
     , m_extract(false)
+    , m_approximate(false)
 {}
 
 void GroundKernel::validateSwitches()
@@ -100,6 +101,7 @@ void GroundKernel::addSwitches()
     ("cellSize", po::value<double>(&m_cellSize)->default_value(1), "cell size")
     ("classify", po::bool_switch(&m_classify), "apply classification labels?")
     ("extract", po::bool_switch(&m_extract), "extract ground returns?")
+    ("approximate,a", po::bool_switch(&m_approximate), "use approximate algorithm? (much faster)")
     ;
 
     addSwitchSet(file_options);
@@ -148,20 +150,7 @@ int GroundKernel::execute()
 
     writer.setUserCallback(callback);
 
-    for (const auto& pi: getExtraStageOptions())
-    {
-        std::string name = pi.first;
-        Options options = pi.second;
-        std::vector<Stage*> stages = writer.findStage(name);
-        for (const auto& s : stages)
-        {
-            Options opts = s->getOptions();
-            for (const auto& o : options.getOptions())
-                opts.add(o);
-            s->setOptions(opts);
-        }
-    }
-
+    applyExtraStageOptionsRecursive(&writer);
     writer.prepare(table);
 
     // process the data, grabbing the PointViewSet for visualization of the

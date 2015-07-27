@@ -36,7 +36,7 @@
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Metadata.hpp>
-#include <pdal/Utils.hpp>
+#include <pdal/util/Utils.hpp>
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/lexical_cast.hpp>
@@ -89,6 +89,15 @@ typedef std::shared_ptr<Options> OptionsPtr;
 class PDAL_DLL Option
 {
 public:
+
+    class not_found : public pdal_error
+    {
+    public:
+        not_found() : pdal_error("Option not found.")
+        {}
+        not_found(const std::string& msg) : pdal_error(msg)
+        {}
+    };
 
 /// @name Constructors
 
@@ -198,8 +207,7 @@ public:
     /// @param op Options set to use
     void setOptions(Options const& op);
 
-    bool empty();
-
+    bool empty() const;
 
 #if defined(PDAL_COMPILER_MSVC)
     /// explicit specialization to insert a bool as "true" and "false" rather
@@ -308,10 +316,16 @@ public:
         return *this;
     }
 
-    bool empty()
+    bool empty() const
     {
         return (m_options.size() == 0);
     }
+
+    size_t size() const
+    {
+        return m_options.size();
+    }
+
     Options const operator+(const Options& rhs)
     {
         return Options(*this) += rhs;
@@ -374,11 +388,22 @@ public:
     }
 
     // get an option, by name
-    // throws pdal::option_not_found if the option name is not valid
+    // throws not_found if the option name is not valid
     const Option& getOption(const std::string & name) const;
     Option& getOptionByRef(const std::string& name);
 
-    // get value of an option, or throw option_not_found if option not present
+    template<typename T>
+    std::vector<T> getValues(const std::string& name) const
+    {
+        std::vector<T> vals;
+
+        auto ops = getOptions(name);
+        for (auto& op : ops)
+            vals.push_back(op.getValue<T>());
+        return vals;
+    }
+
+    // get value of an option, or throw not_found if option not present
     template<typename T> T getValueOrThrow(std::string const& name) const
     {
         const Option& opt = getOption(name);  // might throw
@@ -396,7 +421,7 @@ public:
             const Option& opt = getOption(name);  // might throw
             result = opt.getValue<T>();
         }
-        catch (option_not_found)
+        catch (Option::not_found)
         {
             result = defaultValue;
         }
@@ -472,7 +497,7 @@ public:
         {
             doMetadata = &getOption("metadata");
         }
-        catch (pdal::option_not_found&)
+        catch (Option::not_found)
         {
             return boost::optional<T>();
         }
@@ -484,7 +509,7 @@ public:
             {
                 meta->getOption(name);
             }
-            catch (pdal::option_not_found&)
+            catch (Option::not_found)
             {
                 return boost::optional<T>();
             }

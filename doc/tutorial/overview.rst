@@ -420,7 +420,7 @@ correct output when provided with multiple point views.  Users should
 use a merge filter immediately prior to such writers to avoid errors.
 As new writers are created, developers should try to make sure
 that they behave reasonably if passed multiple point views -- they
-correctly handle write() being called multiple times between after a single
+correctly handle write() being called multiple times after a single
 call to ready().
 
 ::

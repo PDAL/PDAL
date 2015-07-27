@@ -82,7 +82,8 @@ Options PcdWriter::getDefaultOptions()
 void PcdWriter::write(const PointViewPtr view)
 {
     pcl::PointCloud<XYZIRGBA>::Ptr cloud(new pcl::PointCloud<XYZIRGBA>);
-    BOX3D const& buffer_bounds = view->calculateBounds();
+    BOX3D buffer_bounds;
+    view->calculateBounds(buffer_bounds);
     pclsupport::PDALtoPCD(view, *cloud, buffer_bounds);
 
     pcl::PCDWriter w;

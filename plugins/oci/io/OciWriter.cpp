@@ -423,6 +423,9 @@ std::string OciWriter::loadSQLData(std::string const& filename)
         else
             output = line;
     }
+
+    FileUtils::closeFile(input);
+
     return output;
 }
 
@@ -646,7 +649,7 @@ void OciWriter::createPCEntry()
         Option& pc_id = m_options.getOptionByRef("pc_id");
         pc_id.setValue(m_pc_id);
     }
-    catch (pdal::option_not_found&)
+    catch (Option::not_found)
     {
         Option pc_id("pc_id", m_pc_id, "Point Cloud Id");
         m_options.add(pc_id);
@@ -715,7 +718,7 @@ void OciWriter::processOptions(const Options& options)
 
     if (m_compression && (m_orientation == Orientation::DimensionMajor))
         throw pdal_error("LAZperf compression not supported for "
-            "dimension-major point storage."); 
+            "dimension-major point storage.");
 }
 
 
@@ -848,11 +851,19 @@ void OciWriter::writePointMajor(PointViewPtr view, std::vector<char>& outbuf)
         SignedLazPerfBuf compBuf(outbuf);
         LazPerfCompressor<SignedLazPerfBuf> compressor(compBuf, dimTypes);
 
-        std::vector<char> ptBuf(packedPointSize());
-        for (PointId idx = 0; idx < view->size(); ++idx)
+        try
         {
-            size_t size = readPoint(*view, idx, ptBuf.data());
-            compressor.compress(ptBuf.data(), size);
+            std::vector<char> ptBuf(packedPointSize());
+            for (PointId idx = 0; idx < view->size(); ++idx)
+            {
+                size_t size = readPoint(*view, idx, ptBuf.data());
+                compressor.compress(ptBuf.data(), size);
+            }
+        }
+        catch (pdal_error)
+        {
+            compressor.done();
+            throw;
         }
         compressor.done();
 #else
@@ -917,7 +928,7 @@ void OciWriter::writeTile(const PointViewPtr view)
     if (usePartition)
         oss << ", :9";
     oss <<")";
- 
+
     Statement statement(m_connection->CreateStatement(oss.str().c_str()));
 
     // :1
@@ -940,7 +951,7 @@ void OciWriter::writeTile(const PointViewPtr view)
 
     //NOTE: packed point size is guaranteed to be of sufficient size to hold
     // a point's data, but it may be larger than the actual size of a point
-    // if location scaling is being used. 
+    // if location scaling is being used.
     std::vector<char> outbuf(packedPointSize() * view->size());
     size_t totalSize = 0;
     if (m_orientation == Orientation::DimensionMajor)
@@ -985,8 +996,8 @@ void OciWriter::writeTile(const PointViewPtr view)
     OCIArray* sdo_ordinates = 0;
     m_connection->CreateType(&sdo_ordinates, m_connection->GetOrdinateType());
 
-    // x0, x1, y0, y1, z0, z1, bUse3d
-    BOX3D bounds = view->calculateBounds(true);
+    BOX3D bounds;
+    view->calculateBounds(bounds);
     // Cumulate a total bounds for the file.
     m_pcExtent.grow(bounds);
 

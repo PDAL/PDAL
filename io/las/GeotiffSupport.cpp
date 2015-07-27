@@ -43,17 +43,8 @@
 PDAL_C_START
 #ifdef __geotiff_h_
 
-
-#ifdef GEO_NORMALIZE_H_INCLUDED
 char PDAL_DLL * GTIFGetOGISDefn(GTIF*, GTIFDefn*);
-#endif
-
 int PDAL_DLL GTIFSetFromOGISDefn(GTIF*, const char*);
-void SetLinearUnitCitation(GTIF* psGTIF, char* pszLinearUOMName);
-
-#ifdef _OGR_SRS_API_H_INCLUDED
-void SetGeogCSCitation(GTIF* psGTIF, OGRSpatialReference* poSRS, char* angUnitName, int nDatum, short nSpheroid);
-#endif // defined _OGR_SRS_API_H_INCLUDED
 
 #endif // defined __geotiff_h_
 PDAL_C_END

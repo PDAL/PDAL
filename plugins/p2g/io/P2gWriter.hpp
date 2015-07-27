@@ -62,11 +62,11 @@ public:
 
 class CoreInterp;
 
-class PDAL_DLL P2gWriter : public pdal::Writer
+class PDAL_DLL P2gWriter : public Writer
 {
 public:
-    P2gWriter() : Writer(), m_outputTypes(0), m_outputFormat(OUTPUT_FORMAT_ARC_ASCII) {};
-    ~P2gWriter() {};
+    P2gWriter() : m_outputTypes(0), m_outputFormat(OUTPUT_FORMAT_ARC_ASCII)
+        {}
 
     static void * create();
     static int32_t destroy(void *);
@@ -79,6 +79,7 @@ private:
 
     virtual void processOptions(const Options& options);
     virtual void write(const PointViewPtr view);
+    virtual void done(PointTableRef table);
 
     std::unique_ptr<OutCoreInterp> m_interpolator;
     uint64_t m_pointCount;

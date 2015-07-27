@@ -36,7 +36,7 @@
 
 #include <sstream>
 
-#include <pdal/Utils.hpp>
+#include <pdal/util/Utils.hpp>
 
 #include <vector>
 
@@ -321,4 +321,11 @@ TEST(UtilsTest, replaceAll)
     EXPECT_EQ(Utils::replaceAll(s, " ", "  "), "  This    is  a      test  ");
     EXPECT_EQ(Utils::replaceAll(s, "  ", " "), " This is a  test ");
     EXPECT_EQ(Utils::replaceAll(s, " ", "\""), "\"This\"\"is\"a\"\"\"test\"");
+}
+
+TEST(UtilsTest, escapeNonprinting)
+{
+    std::string s("CTRL-N,A,B,R,V: \n\a\b\r\v\x12\xe\x01");
+    std::string out = Utils::escapeNonprinting(s);
+    EXPECT_EQ(out, "CTRL-N,A,B,R,V: \\n\\a\\b\\r\\v\\x12\\x0e\\x01");
 }

@@ -32,8 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDALINTERNAL_HPP
-#define INCLUDED_PDALINTERNAL_HPP
+#pragma once
 
 // This file is for all the things that basically everybody has to include.
 
@@ -42,7 +41,6 @@
 #include <pdal/pdal_export.hpp>
 #include <pdal/pdal_defines.h>
 #include <pdal/pdal_types.hpp>
-#include <pdal/pdal_error.hpp>
 #include <pdal/pdal_macros.hpp>
 
 #include <boost/version.hpp>
@@ -67,4 +65,3 @@
 #  pragma warning(disable: 4068)  // ignore unknown pragmas (due to boost's use of GCC pragmas)
 #endif
 
-#endif

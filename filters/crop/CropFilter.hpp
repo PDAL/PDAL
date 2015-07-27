@@ -59,30 +59,38 @@ public:
 
     Options getDefaultOptions();
 
-    const BOX3D& getBounds() const;
-
 private:
-    BOX3D m_bounds;
+    std::vector<BOX2D> m_bounds;
     bool m_cropOutside;
-    std::string m_poly;
+    StringList m_polys;
 
-#ifdef PDAL_HAVE_GEOS
-	GEOSContextHandle_t m_geosEnvironment;
-    GEOSGeometry* m_geosGeometry;
-    GEOSPreparedGeometry const* m_geosPreparedGeometry;
-#else
-    void* m_geosEnvironment;
-    void* m_geosGeometry;
-    void* m_geosPreparedGeometry;
-    typedef struct GEOSGeometry* GEOSGeometryHS;
+#ifndef PDAL_HAVE_GEOS
+    typedef void *GEOSContextHandle_t;
+    typedef void GEOSGeometry;
+    typedef void GEOSPreparedGeometry;
 #endif
+
+	GEOSContextHandle_t m_geosEnvironment;
+    struct GeomPkg
+    {
+        GEOSGeometry *m_geom;
+        const GEOSPreparedGeometry *m_prepGeom;
+    };
+
+    std::vector<GeomPkg> m_geoms;
 
     virtual void processOptions(const Options& options);
     virtual void ready(PointTableRef table);
     virtual PointViewSet run(PointViewPtr view);
     virtual void done(PointTableRef table);
-    void crop(PointView& input, PointView& output);
-    BOX3D computeBounds(GEOSGeometry const *geometry);
+    void crop(const BOX2D& box, PointView& input, PointView& output);
+    void crop(const GeomPkg& g, PointView& input, PointView& output);
+#ifdef PDAL_HAVE_GEOS
+    GEOSGeometry *validatePolygon(const std::string& poly);
+    void preparePolygon(GeomPkg& g);
+    BOX2D computeBounds(GEOSGeometry const *geometry);
+    GEOSGeometry *createPoint(double x, double y, double z);
+#endif
 
     CropFilter& operator=(const CropFilter&); // not implemented
     CropFilter(const CropFilter&); // not implemented

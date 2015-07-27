@@ -98,14 +98,14 @@ TEST(TransformationMatrix, FromString)
 TEST(TransformationMatrix, TooShort)
 {
     std::string s = "1 0 0 0\n0 1 0 0\n0 0 1 0\n0 0 0";
-    EXPECT_THROW(transformationMatrixFromString(s), invalid_format);
+    EXPECT_THROW(transformationMatrixFromString(s), pdal_error);
 }
 
 
 TEST(TransformationMatrix, TooLong)
 {
     std::string s = "1 0 0 0\n0 1 0 0\n0 0 1 0\n0 0 0 1 0";
-    EXPECT_THROW(transformationMatrixFromString(s), invalid_format);
+    EXPECT_THROW(transformationMatrixFromString(s), pdal_error);
 }
 
 

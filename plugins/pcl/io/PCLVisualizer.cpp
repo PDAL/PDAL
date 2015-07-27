@@ -143,7 +143,9 @@ std::string PclVisualizer::getName() const { return s_info.name; }
 void PclVisualizer::write(const PointViewPtr view)
 {
     // Determine XYZ bounds
-    BOX3D const& buffer_bounds = view->calculateBounds();
+    BOX3D buffer_bounds;
+
+    view->calculateBounds(buffer_bounds);
 
     typedef XYZIRGBA PointType;
 

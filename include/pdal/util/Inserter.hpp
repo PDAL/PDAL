@@ -33,7 +33,7 @@
 ****************************************************************************/
 #pragma once
 
-#include <pdal/portable_endian.hpp>
+#include "portable_endian.hpp"
 
 namespace pdal
 {

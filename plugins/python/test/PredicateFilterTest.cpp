@@ -41,6 +41,8 @@
 #include <stats/StatsFilter.hpp>
 #include <faux/FauxReader.hpp>
 
+#include "../plang/Environment.hpp"
+
 #include "Support.hpp"
 
 using namespace pdal;
@@ -336,7 +338,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test5)
     PointTable table;
     filter->prepare(table);
 
-    ASSERT_THROW(filter->execute(table), python_error);
+    ASSERT_THROW(filter->execute(table), plang::error);
 }
 
 TEST(PredicateFilterTest, PredicateFilterTest_Pipeline)
