@@ -55,6 +55,7 @@ std::string CropFilter::getName() const { return s_info.name; }
 #ifdef PDAL_HAVE_GEOS
 namespace geos
 {
+
 static void _GEOSErrorHandler(const char *fmt, ...)
 {
     va_list args;
@@ -94,13 +95,37 @@ CropFilter::CropFilter() : pdal::Filter()
 void CropFilter::processOptions(const Options& options)
 {
     m_cropOutside = options.getValueOrDefault<bool>("outside", false);
-    m_bounds = options.getValues<BOX3D>("bounds");
-    m_polys = options.getValues<std::string>("polygon");
+    try
+    {
+        m_bounds = options.getValues<BOX2D>("bounds");
+    }
+    catch (boost::bad_lexical_cast)
+    {
+        std::ostringstream oss;
+        oss << "Invalid bounds for " << getName() << ".  "
+            "Format: '([xmin,xmax],[ymin,ymax])'.";
+        throw pdal_error(oss.str());
+    }
 
-#if !defined(PDAL_HAVE_GEOS)
+    m_polys = options.getValues<std::string>("polygon");
+#ifdef PDAL_HAVE_GEOS
     if (m_polys.size())
-        throw pdal_error("Polygon cropping not supported unless "
-            "built with GEOS");
+    {
+        m_geosEnvironment = initGEOS_r(pdal::geos::_GEOSWarningHandler,
+            pdal::geos::_GEOSErrorHandler);
+        for (std::string& poly : m_polys)
+        {
+            GeomPkg g;
+
+            // Throws if invalid.
+            g.m_geom = validatePolygon(poly);
+            m_geoms.push_back(g);
+        }
+    }
+#else
+    if (m_polys.size())
+        throw pdal_error("Can't specify polygons for " << getName() <<
+            " without PDAL built with GEOS.");
 #endif
 }
 
@@ -108,30 +133,48 @@ void CropFilter::processOptions(const Options& options)
 void CropFilter::ready(PointTableRef /*table*/)
 {
 #ifdef PDAL_HAVE_GEOS
-    if (m_polys.size())
-    {
-        m_geosEnvironment = initGEOS_r(pdal::geos::_GEOSWarningHandler,
-            pdal::geos::_GEOSErrorHandler);
-        for (auto& poly : m_polys)
-            m_geoms.push_back(preparePolygon(poly));
-    }
+    for (auto& g : m_geoms)
+        preparePolygon(g);
 #endif
 }
 
 
 #ifdef PDAL_HAVE_GEOS
-CropFilter::GeomPkg CropFilter::preparePolygon(const std::string& poly)
+GEOSGeometry *CropFilter::validatePolygon(const std::string& poly)
 {
-    GeomPkg g;
+    GEOSGeometry *geom = GEOSGeomFromWKT_r(m_geosEnvironment, poly.c_str());
+    if (!geom)
+    {
+        std::ostringstream oss;
+        oss << "Invalid polygon specification for " << getName() <<
+            ": " << poly << ".";
+        throw pdal_error(oss.str());
+    }
 
-    g.m_geom = GEOSGeomFromWKT_r(m_geosEnvironment, poly.c_str());
-    if (!g.m_geom)
-        throw pdal_error("unable to import polygon WKT");
+    int gtype = GEOSGeomTypeId_r(m_geosEnvironment, geom);
+    if (gtype != GEOS_POLYGON && gtype != GEOS_MULTIPOLYGON)
+    {
+        std::ostringstream oss;
+        oss << "Invalid polygon type for " << getName() << ": " <<
+            poly << ".  Must be POLYGON or MULTIPOLYGON.";
+        throw pdal_error(oss.str());
+    }
 
-    int gtype = GEOSGeomTypeId_r(m_geosEnvironment, g.m_geom);
-    if (!(gtype == GEOS_POLYGON || gtype == GEOS_MULTIPOLYGON))
-        throw pdal_error("input WKT was not a POLYGON or MULTIPOLYGON");
+    if (!GEOSisValid_r(m_geosEnvironment, geom))
+    {
+        char *reason = GEOSisValidReason_r(m_geosEnvironment, geom);
+        std::ostringstream oss;
+        oss << "WKT representation of (multi)polygon '" << poly <<
+            "' invalid: " << reason << ".";
+        GEOSFree_r(m_geosEnvironment, reason);
+        throw pdal_error(oss.str());
+    }
+    return geom;
+}
 
+
+void CropFilter::preparePolygon(GeomPkg& g)
+{
     //ABELL - Don't get this.  We already have the WKT in 'poly'.  Maybe it's
     //  prettier?
     char* out_wkt = GEOSGeomToWKT_r(m_geosEnvironment, g.m_geom);
@@ -139,20 +182,10 @@ CropFilter::GeomPkg CropFilter::preparePolygon(const std::string& poly)
         std::string(out_wkt) <<std::endl;
     GEOSFree_r(m_geosEnvironment, out_wkt);
 
-    if (!GEOSisValid_r(m_geosEnvironment, g.m_geom))
-    {
-        char* reason = GEOSisValidReason_r(m_geosEnvironment, g.m_geom);
-        std::ostringstream oss;
-        oss << "WKT is invalid: " << std::string(reason) << std::endl;
-        GEOSFree_r(m_geosEnvironment, reason);
-        throw pdal_error(oss.str());
-    }
-
     g.m_prepGeom = GEOSPrepare_r(m_geosEnvironment, g.m_geom);
     if (!g.m_prepGeom)
         throw pdal_error("unable to prepare geometry for index-accelerated "
             "intersection");
-    return g;
 }
 #endif
 
@@ -160,16 +193,12 @@ CropFilter::GeomPkg CropFilter::preparePolygon(const std::string& poly)
 Options CropFilter::getDefaultOptions()
 {
     Options options;
-    Option bounds("bounds",BOX3D(),"bounds to crop to");
-    Option polygon("polygon", std::string(""),
-        "WKT POLYGON() string to use to filter points");
-
-    Option inside("inside", true, "keep points that are inside or outside "
+    options.add("bounds", BOX2D(), "bounds to crop to");
+    options.add("polygon", std::string(""), "WKT POLYGON() string to "
+        "use to filter points");
+    options.add("inside", true, "Keep points that are inside or outside "
         "the given polygon");
 
-    options.add(inside);
-    options.add(polygon);
-    options.add(bounds);
     return options;
 }
 
@@ -185,28 +214,24 @@ PointViewSet CropFilter::run(PointViewPtr view)
         viewSet.insert(outView);
     }
 #endif
-    if (viewSet.empty())
+    for (auto& box : m_bounds)
     {
-        for (auto& box : m_bounds)
-        {
-            PointViewPtr outView = view->makeNew();
-            crop(box, *view, *outView);
-            viewSet.insert(outView);
-        }
+        PointViewPtr outView = view->makeNew();
+        crop(box, *view, *outView);
+        viewSet.insert(outView);
     }
     return viewSet;
 }
 
-void CropFilter::crop(const BOX3D& box, PointView& input, PointView& output)
+void CropFilter::crop(const BOX2D& box, PointView& input, PointView& output)
 {
     for (PointId idx = 0; idx < input.size(); ++idx)
     {
         double x = input.getFieldAs<double>(Dimension::Id::X, idx);
         double y = input.getFieldAs<double>(Dimension::Id::Y, idx);
-        double z = input.getFieldAs<double>(Dimension::Id::Z, idx);
 
-        bool contained = box.contains(x, y, z);
-        if (m_cropOutside != box.contains(x, y, z))
+        bool contained = box.contains(x, y);
+        if (m_cropOutside != box.contains(x, y))
             output.appendPoint(input, idx);
     }
 }

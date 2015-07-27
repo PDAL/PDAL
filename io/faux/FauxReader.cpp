@@ -72,8 +72,21 @@ FauxReader::FauxReader()
 
 void FauxReader::processOptions(const Options& options)
 {
-    BOX3D bounds = options.getValueOrDefault<BOX3D>("bounds",
-        BOX3D(0, 0, 0, 1, 1, 1));
+    BOX3D bounds;
+    try
+    {
+        bounds = options.getValueOrDefault<BOX3D>("bounds",
+            BOX3D(0, 0, 0, 1, 1, 1));
+    }
+    catch (boost::bad_lexical_cast)
+    {
+        std::string s = options.getValueOrDefault<std::string>("bounds");
+
+        std::ostringstream oss;
+        oss << "Invalid 'bounds' specification for " << getName() <<
+            ": '" << s << ".  Format: '([xmin,xmax],[ymin,ymax],[zmin,zmax])'.";
+        throw pdal_error(oss.str());
+    }
     m_minX = bounds.minx;
     m_maxX = bounds.maxx;
     m_minY = bounds.miny;

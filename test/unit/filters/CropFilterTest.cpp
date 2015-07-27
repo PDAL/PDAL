@@ -64,7 +64,7 @@ TEST(CropFilterTest, test_crop)
     reader.setOptions(opts);
 
     // crop the window to 1/3rd the size in each dimension
-    BOX3D dstBounds(3.33333, 33.33333, 333.33333, 6.66666, 66.66666, 666.66666);
+    BOX2D dstBounds(3.33333, 33.33333, 6.66666, 66.66666);
     Options cropOpts;
     cropOpts.add("bounds", dstBounds);
 
