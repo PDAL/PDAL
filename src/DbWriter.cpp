@@ -153,7 +153,7 @@ void DbWriter::setAutoXForm(const PointViewPtr view)
 }
 
 
-/// Read a field form a PointView and write it's value as formatted for output
+/// Read a field from a PointView and write its value as formatted for output
 /// to the DB schema to the location as requested.
 /// \param[in] view     PointView to read from.
 /// \param[in] pos      Location in which to store field value.

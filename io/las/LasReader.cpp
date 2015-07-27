@@ -38,6 +38,7 @@
 #include <string.h>
 
 #include <pdal/Metadata.hpp>
+#include <pdal/PDALUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/QuickInfo.hpp>
 #include <pdal/util/Extractor.hpp>
@@ -61,49 +62,6 @@ public:
     invalid_stream(const std::string& msg) : pdal_error(msg)
         {}
 };
-
-double toDouble(const Everything& e, Dimension::Type::Enum type)
-{
-    using namespace Dimension::Type;
-
-    double d = 0;
-    switch (type)
-    {
-    case Unsigned8:
-        d = e.u8;
-        break;
-    case Unsigned16:
-        d = e.u16;
-        break;
-    case Unsigned32:
-        d = e.u32;
-        break;
-    case Unsigned64:
-        d = e.u64;
-        break;
-    case Signed8:
-        d = e.s8;
-        break;
-    case Signed16:
-        d = e.s16;
-        break;
-    case Signed32:
-        d = e.s32;
-        break;
-    case Signed64:
-        d = e.s64;
-        break;
-    case Float:
-        d = e.f;
-        break;
-    case Double:
-        d = e.d;
-        break;
-    default:
-        break;
-    }
-    return d;
-}
 
 } // unnamed namespace
 
@@ -820,7 +778,7 @@ void LasReader::loadExtraDims(LeExtractor& istream, PointView& data,
 
         if (dim.m_dimType.m_xform.nonstandard())
         {
-            double d = toDouble(e, dim.m_dimType.m_type);
+            double d = Utils::toDouble(e, dim.m_dimType.m_type);
             d = d * dim.m_dimType.m_xform.m_scale +
                 dim.m_dimType.m_xform.m_offset;
             data.setField(dim.m_dimType.m_id, nextId, d);

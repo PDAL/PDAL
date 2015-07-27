@@ -56,6 +56,49 @@ inline void printError(const std::string& s)
     std::cerr << std::endl;
 }
 
+inline double toDouble(const Everything& e, Dimension::Type::Enum type)
+{
+    using namespace Dimension::Type;
+
+    double d = 0;
+    switch (type)
+    {
+    case Unsigned8:
+        d = e.u8;
+        break;
+    case Unsigned16:
+        d = e.u16;
+        break;
+    case Unsigned32:
+        d = e.u32;
+        break;
+    case Unsigned64:
+        d = e.u64;
+        break;
+    case Signed8:
+        d = e.s8;
+        break;
+    case Signed16:
+        d = e.s16;
+        break;
+    case Signed32:
+        d = e.s32;
+        break;
+    case Signed64:
+        d = e.s64;
+        break;
+    case Float:
+        d = e.f;
+        break;
+    case Double:
+        d = e.d;
+        break;
+    default:
+        break;
+    }
+    return d;
+}
+
 using namespace boost::property_tree;
 
 inline ptree toPTree(MetadataNode const& node)
@@ -271,6 +314,6 @@ void PDAL_DLL toJSON(const MetadataNode& m, std::ostream& o);
 std::string PDAL_DLL toJSON(const Options& opts);
 void PDAL_DLL toJSON(const Options& opts, std::ostream& o);
 
-} // namespace PDALUtils
+} // namespace Utils
 } // namespace pdal
 
