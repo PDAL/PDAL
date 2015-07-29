@@ -59,10 +59,8 @@ public:
 
     Options getDefaultOptions();
 
-    const BOX3D& getBounds() const;
-
 private:
-    std::vector<BOX3D> m_bounds;
+    std::vector<BOX2D> m_bounds;
     bool m_cropOutside;
     StringList m_polys;
 
@@ -85,11 +83,12 @@ private:
     virtual void ready(PointTableRef table);
     virtual PointViewSet run(PointViewPtr view);
     virtual void done(PointTableRef table);
-    void crop(const BOX3D& box, PointView& input, PointView& output);
+    void crop(const BOX2D& box, PointView& input, PointView& output);
     void crop(const GeomPkg& g, PointView& input, PointView& output);
 #ifdef PDAL_HAVE_GEOS
-    GeomPkg preparePolygon(const std::string& poly);
-    BOX3D computeBounds(GEOSGeometry const *geometry);
+    GEOSGeometry *validatePolygon(const std::string& poly);
+    void preparePolygon(GeomPkg& g);
+    BOX2D computeBounds(GEOSGeometry const *geometry);
     GEOSGeometry *createPoint(double x, double y, double z);
 #endif
 

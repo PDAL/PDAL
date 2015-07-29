@@ -145,7 +145,7 @@ const BOX3D& BOX3D::getDefaultSpatialExtent()
 std::istream& operator>>(std::istream& istr, BOX2D& bounds)
 {
     //ABELL - Not sure the point of this.  I get that one can have an "empty"
-    // BOX3D, but when would it be useful?
+    // BOX2D, but when would it be useful to create one from a string?
     // A really dirty way to check for an empty bounds object right off
     // the bat
     char left_paren = (char)istr.get();
@@ -197,7 +197,7 @@ std::istream& operator>>(std::istream& istr, BOX2D& bounds)
 std::istream& operator>>(std::istream& istr, BOX3D& bounds)
 {
     //ABELL - Not sure the point of this.  I get that one can have an "empty"
-    // BOX3D, but when would it be useful?
+    // BOX3D, but when would it be useful to create one from a string?
     // A really dirty way to check for an empty bounds object right off
     // the bat
     char left_paren = (char)istr.get();
