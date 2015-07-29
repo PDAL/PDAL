@@ -76,7 +76,7 @@ void BpfWriter::processOptions(const Options& options)
         BpfCompression::None;
 
     std::string encodedHeader =
-        options.getValueOrDefault<std::string>("header_data", "");
+        options.getValueOrDefault<std::string>("header_data");
     m_extraData = Utils::base64_decode(encodedHeader);
 
     std::string fileFormat =
@@ -99,6 +99,38 @@ void BpfWriter::processOptions(const Options& options)
         m_header.m_coordType = BpfCoordType::None;
         m_header.m_coordId = 0;
     }
+    StringList files = options.getValues<std::string>("bundledfile");
+    for (auto file : files)
+    {
+        if (!FileUtils::fileExists(file))
+        {
+            std::ostringstream oss;
+
+            oss << getName() << ": bundledfile '" << file << "' doesn't exist.";
+            throw pdal_error(oss.str());
+        }
+
+        size_t size = FileUtils::fileSize(file);
+        if (size > (std::numeric_limits<uint32_t>::max)())
+        {
+            std::ostringstream oss;
+            oss << getName() << ": bundledfile '" << file << "' too large.";
+            throw pdal_error(oss.str());
+        }
+
+        BpfUlemFile ulemFile;
+        ulemFile.m_len = size;
+        ulemFile.m_filespec = file;
+        ulemFile.m_filename = FileUtils::getFilename(file);
+        if (ulemFile.m_filename.length() > 32)
+        {
+            std::ostringstream oss;
+            oss << getName() << ": bundledfile '" << file << "' name "
+                "exceeds maximum length of 32.";
+            throw pdal_error(oss.str());
+        }
+        m_bundledFiles.push_back(ulemFile);
+    }
 }
 
 
@@ -120,8 +152,12 @@ void BpfWriter::readyFile(const std::string& filename)
     // count and dimension min/max.
     m_header.write(m_stream);
     m_header.writeDimensions(m_stream, m_dims);
+    for (auto& file : m_bundledFiles)
+        file.write(m_stream);
     m_stream.put((const char *)m_extraData.data(), m_extraData.size());
+
     m_header.m_len = m_stream.position();
+
     m_header.m_xform.m_vals[0] = m_xXform.m_scale;
     m_header.m_xform.m_vals[5] = m_yXform.m_scale;
     m_header.m_xform.m_vals[10] = m_zXform.m_scale;

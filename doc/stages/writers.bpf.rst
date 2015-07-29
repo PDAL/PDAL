@@ -53,6 +53,11 @@ format
     all points are stored contiguously, followed by the second bytes of all
     points, etc.  See the BPF specification for further information.
 
+bundledfile
+  Path of file to be written as a bundled file (see specification).  The path
+  part of the filespec is removed and the filename is stored as part of the
+  data.  This option can be specified as many times as desired.
+
 header_data
   Base64-encoded data that will be decoded and written following the
   standard BPF header.
