@@ -264,6 +264,20 @@ string FileUtils::toAbsolutePath(const string& filename, const string base)
     return p.string();
 }
 
+string FileUtils::getFilename(const string& path)
+{
+#ifdef _WIN32
+    char pathsep = '\\';
+#else
+    char pathsep = '/';
+#endif
+
+    std::string::size_type pos = path.find_last_of(pathsep);
+    if (pos == std::string::npos)
+        return path;
+    return path.substr(pos + 1);
+}
+
 // Get the directory part of a filename.
 string FileUtils::getDirectory(const string& path)
 {

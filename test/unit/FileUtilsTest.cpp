@@ -163,3 +163,9 @@ TEST(FileUtilsTest, test_isAbsolute)
     const bool b = FileUtils::isAbsolutePath("a/b/foo.txt");
     EXPECT_TRUE(!b);
 }
+
+TEST(FileUtilsTest, filename)
+{
+    std::string filename = "/foo//bar//baz.c";
+    EXPECT_EQ(FileUtils::getFilename(filename), "baz.c");
+}
