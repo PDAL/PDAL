@@ -300,10 +300,55 @@ TEST(BPFTest, extra_bytes)
     reader2.prepare(table2);
     reader2.execute(table2);
     MetadataNode n = reader2.getMetadata();
-    std::string val = n.findChild("header_data").value();
     std::vector<uint8_t> outbuf =
         Utils::base64_decode(n.findChild("header_data").value());
     EXPECT_EQ(memcmp(outbuf.data(), buf, sizeof(buf)), 0);
+}
+
+TEST(BPFTest, bundled)
+{
+    std::string infile(
+        Support::datapath("bpf/autzen-utm-chipped-25-v3-interleaved.bpf"));
+    std::string outfile(Support::temppath("tmp.bpf"));
+
+    PointTable table;
+
+    Options readerOps;
+    readerOps.add("filename", infile);
+    BpfReader reader;
+    reader.setOptions(readerOps);
+
+    Options writerOps;
+    writerOps.add("filename", outfile);
+    writerOps.add("bundledfile", Support::datapath("bpf/bundle1"));
+    writerOps.add("bundledfile", Support::datapath("bpf/bundle2"));
+
+    BpfWriter writer;
+    writer.setOptions(writerOps);
+    writer.setInput(reader);
+
+    FileUtils::deleteFile(outfile);
+    writer.prepare(table);
+    writer.execute(table);
+
+    test_file_type(outfile);
+
+    Options readerOps2;
+    readerOps2.add("filename", outfile);
+
+    PointTable table2;
+    BpfReader reader2;
+    reader2.setOptions(readerOps2);
+    reader2.prepare(table2);
+    reader2.execute(table2);
+    MetadataNode n = reader2.getMetadata();
+    std::vector<uint8_t> outbuf;
+    outbuf = Utils::base64_decode(n.findChild("bundle1").value());
+    EXPECT_EQ(memcmp(outbuf.data(), "This is a test",
+        outbuf.size() - 1), 0);
+    outbuf = Utils::base64_decode(n.findChild("bundle2").value());
+    EXPECT_EQ(memcmp(outbuf.data(), "This is another test",
+        outbuf.size() - 1), 0);
 }
 
 TEST(BPFTest, inspect)

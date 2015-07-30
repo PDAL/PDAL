@@ -62,6 +62,7 @@ private:
     BpfHeader m_header;
     BpfDimensionList m_dims;
     std::vector<uint8_t> m_extraData;
+    std::vector<BpfUlemFile> m_bundledFiles;
 
     virtual void processOptions(const Options& options);
     virtual void readyTable(PointTableRef table);

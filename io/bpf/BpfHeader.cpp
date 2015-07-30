@@ -320,6 +320,27 @@ bool BpfUlemFile::read(ILeStream& stream)
     return (bool)stream;
 }
 
+bool BpfUlemFile::write(OLeStream& stream)
+{
+    stream.put("FILE", 4);
+    stream << m_len;
+    stream.put(m_filename, 32);
+
+    std::ifstream in(m_filespec);
+    uint32_t len = m_len;
+
+    const uint32_t MAX_BLOCKSIZE = 1000000;
+    char buf[MAX_BLOCKSIZE];
+    while (len)
+    {
+        uint32_t blocksize = std::min(MAX_BLOCKSIZE, len);
+        in.read(buf, blocksize);
+        stream.put(buf, blocksize);
+        len -= blocksize;
+    }
+    return true;
+}
+
 bool BpfPolarStokesParam::read(ILeStream& stream)
 {
     stream >> m_x >> m_y >> m_z >> m_a;

@@ -214,8 +214,10 @@ struct BpfUlemFile
     uint32_t m_len;
     std::string m_filename;
     std::vector<char> m_buf;
+    std::string m_filespec;
 
     bool read(ILeStream& stream);
+    bool write(OLeStream& stream);
 };
 
 struct BpfPolarStokesParam
