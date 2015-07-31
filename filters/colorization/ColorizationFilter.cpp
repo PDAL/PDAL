@@ -144,6 +144,14 @@ void ColorizationFilter::processOptions(const Options& options)
 }
 
 
+void ColorizationFilter::addDimensions(PointLayoutPtr layout)
+{
+    for (auto& band : m_bands)
+        band.m_dim = layout->registerOrAssignDim(band.m_name,
+            Dimension::defaultType(Dimension::Id::Red));
+}
+
+
 void ColorizationFilter::ready(PointTableRef table)
 {
     m_forward_transform.assign(0.0);
