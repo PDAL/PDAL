@@ -84,6 +84,7 @@ public:
 private:
     virtual void initialize();
     virtual void processOptions(const Options&);
+    virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
     virtual void filter(PointView& view);
     virtual void done(PointTableRef table);
