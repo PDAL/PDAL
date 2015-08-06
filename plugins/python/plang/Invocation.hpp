@@ -82,7 +82,6 @@ public:
     void getOutputNames(std::vector<std::string>& names);
 
     static int getPythonDataType(Dimension::Type::Enum t);
-    static void numpy_init();
 
 private:
     void cleanup();

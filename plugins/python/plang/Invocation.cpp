@@ -44,29 +44,14 @@
 
 //#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 
-// This file can only be included once, otherwise we get wierd runtime errors,
-// even if we define NO_IMPORT and stuff, so we include it only here, and
-// provide a backdoor function numpy_init() which gets called from
-// GlobalEnvironment::startup().
+#define NO_IMPORT_ARRAY
+#define PY_ARRAY_UNIQUE_SYMBOL PDAL_ARRAY_API
 #include <numpy/arrayobject.h>
 
 namespace pdal
 {
 namespace plang
 {
-
-void Invocation::numpy_init()
-{
-    // this macro is defined be NumPy and must be included
-    if (_import_array() < 0)
-    {
-        std::ostringstream oss;
-        oss << "unable to initialize NumPy with error '" <<
-            getTraceback() << "'";
-        throw python_error(oss.str());
-    }
-}
-
 
 Invocation::Invocation(const Script& script)
     : m_script(script)

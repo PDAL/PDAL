@@ -6,7 +6,7 @@ set(incs PredicateFilter.hpp)
 
 PDAL_ADD_PLUGIN(predicate_libname filter predicate
     FILES "${srcs}" "${incs}"
-    LINK_WITH ${PYTHON_LIBRARY} ${PLANG_LIB_NAME})
+    LINK_WITH ${PLANG_LIB_NAME})
 
 #
 # Programmable Filter
@@ -16,7 +16,7 @@ set(incs ProgrammableFilter.hpp)
 
 PDAL_ADD_PLUGIN(programmable_libname filter programmable
     FILES "${srcs}" "${incs}"
-    LINK_WITH ${PYTHON_LIBRARY} ${PLANG_LIB_NAME})
+    LINK_WITH ${PLANG_LIB_NAME})
 
 if (WITH_TESTS)
     PDAL_ADD_TEST(python_predicate_test

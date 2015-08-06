@@ -162,7 +162,9 @@ PyObject* Redirector::init()
 #endif
     if (m)
     {
-        Py_INCREF(&StdoutType);
+        //ABELL - This is bad code as the type cast is invalid. (type pun
+        //  warning.)
+        Py_INCREF(reinterpret_cast<PyObject*>(&StdoutType));
         PyModule_AddObject(m, "Stdout", reinterpret_cast<PyObject*>(&StdoutType));
     }
     return m;

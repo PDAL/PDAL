@@ -33,23 +33,16 @@
 ****************************************************************************/
 
 #include "Environment.hpp"
+#define PY_ARRAY_UNIQUE_SYMBOL PDAL_ARRAY_API
+#include <numpy/arrayobject.h>
 
 #include <sstream>
 
 #include <pdal/pdal_error.hpp>
 
-#include "Invocation.hpp"
-
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127)  // conditional expression is constant
 #endif
-
-namespace pdal
-{
-namespace plang
-{
-} // namespace plang
-} // namespace pdal
 
 #include <Python.h>
 #include <pystate.h>
@@ -76,16 +69,10 @@ Environment::Environment()
 {
     PyImport_AppendInittab(const_cast<char*>("redirector"), redirector_init);
 
-std::cerr << "Constructed environment!\n";
     Py_Initialize();
 
-    if (Py_IsInitialized())
-        std::cerr << "Python initialized OK!\n";
-    else
-        std::cerr << "Bad pythong initialization!\n";
     char *path = Py_GetPath();
-    std::cerr << "PYTHON module search path = " << path << "!\n";
-    Invocation::numpy_init();
+    import_array();
     PyImport_ImportModule("redirector");
 }
 
