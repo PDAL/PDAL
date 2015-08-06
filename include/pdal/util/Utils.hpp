@@ -390,11 +390,11 @@ namespace Utils
     {
         if (std::is_same<T_IN, T_OUT>::value)
         {
-            out = in;
+            out = static_cast<T_OUT>(in);
             return true;
         }
         if (std::is_integral<T_OUT>::value)
-            in = sround(in);
+            in = static_cast<T_IN>(sround(in));
         if ((std::is_same<T_OUT, double>::value) ||
             (in <= static_cast<double>(std::numeric_limits<T_OUT>::max()) &&
              in >= static_cast<double>(std::numeric_limits<T_OUT>::lowest())))
