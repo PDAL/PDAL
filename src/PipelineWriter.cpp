@@ -65,7 +65,7 @@ static ptree generateTreeFromStage(const Stage& stage)
 
 void PipelineWriter::write_option_ptree(ptree& tree, const Options& opts)
 {
-    ptree m_tree = pdal::utils::toPTree(opts);
+    ptree m_tree = Utils::toPTree(opts);
 
     auto iter = m_tree.begin();
     while (iter != m_tree.end())

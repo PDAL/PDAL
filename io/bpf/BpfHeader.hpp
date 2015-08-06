@@ -61,6 +61,23 @@ struct BpfMuellerMatrix
 
     double m_vals[16];
 
+    void dump()
+    {
+        for (size_t i = 0; i < 4; ++i)
+            std::cerr << m_vals[i] << '\t';
+        std::cerr << "\n";
+        for (size_t i = 4; i < 8; ++i)
+            std::cerr << m_vals[i] << '\t';
+        std::cerr << "\n";
+        for (size_t i = 8; i < 12; ++i)
+            std::cerr << m_vals[i] << '\t';
+        std::cerr << "\n";
+        for (size_t i = 12; i < 16; ++i)
+            std::cerr << m_vals[i] << '\t';
+        std::cerr << "\n\n";
+        
+    }
+
     void apply(double& x, double& y, double& z)
     {
         double w = x * m_vals[12] + y * m_vals[13] + z * m_vals[14] +
@@ -197,8 +214,10 @@ struct BpfUlemFile
     uint32_t m_len;
     std::string m_filename;
     std::vector<char> m_buf;
+    std::string m_filespec;
 
     bool read(ILeStream& stream);
+    bool write(OLeStream& stream);
 };
 
 struct BpfPolarStokesParam

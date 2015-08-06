@@ -34,22 +34,11 @@
 
 #pragma once
 
+#include <map>
+
 #include <pdal/KDIndex.hpp>
 #include <pdal/Kernel.hpp>
 #include <pdal/PointView.hpp>
-#include <pdal/Stage.hpp>
-#include <pdal/util/FileUtils.hpp>
-
-#include <boost/property_tree/xml_parser.hpp>
-#include <boost/property_tree/json_parser.hpp>
-#include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/statistics/stats.hpp>
-#include <boost/accumulators/statistics/mean.hpp>
-//#include <boost/accumulators/statistics/moment.hpp>
-#include <boost/accumulators/statistics/max.hpp>
-#include <boost/accumulators/statistics/min.hpp>
-#include <boost/accumulators/statistics/count.hpp>
-//#include <boost/accumulators/statistics/density.hpp>
 
 extern "C" int32_t DeltaKernel_ExitFunc();
 extern "C" PF_ExitFunc DeltaKernel_InitPlugin();
@@ -57,47 +46,24 @@ extern "C" PF_ExitFunc DeltaKernel_InitPlugin();
 namespace pdal
 {
 
-
-typedef boost::accumulators::accumulator_set<double, boost::accumulators::features<     boost::accumulators::droppable<boost::accumulators::tag::mean>,
-        boost::accumulators::droppable<boost::accumulators::tag::max>,
-        boost::accumulators::droppable<boost::accumulators::tag::min>,
-        boost::accumulators::droppable<boost::accumulators::tag::count> > > summary_accumulator;
-
-class PDAL_DLL Point
+struct DimIndex
 {
-public:
-    double x;
-    double y;
-    double z;
-    uint64_t id;
+    std::string m_name;
+    Dimension::Id::Enum m_srcId;
+    Dimension::Id::Enum m_candId;
+    double m_min;
+    double m_max;
+    double m_avg;
+    point_count_t m_cnt;
 
-    Point(double x, double y, double z, uint64_t id = 0) :
-           x(x), y(y),z(z), id(id)
-        {}
-    Point() : x(0.0), y(0.0), z(0.0), id(0)
-        {}
-
-    bool equal(Point const& other) const
-    {
-        return (Utils::compare_distance(x, other.x) &&
-                Utils::compare_distance(y, other.y) &&
-                Utils::compare_distance(z, other.z));
-
-    }
-
-    bool operator==(Point const& other) const
-    {
-        return equal(other);
-    }
-    bool operator!=(Point const& other) const
-    {
-        return !equal(other);
-    }
-    bool operator<(Point const& other) const
-    {
-        return id < other.id;
-    }
+    DimIndex() : m_srcId(Dimension::Id::Unknown),
+        m_candId(Dimension::Id::Unknown),
+        m_min((std::numeric_limits<double>::max)()),
+        m_max((std::numeric_limits<double>::lowest)()),
+        m_avg(0.0), m_cnt(0)
+    {}
 };
+typedef std::map<std::string, DimIndex> DimIndexMap;
 
 class PDAL_DLL DeltaKernel : public Kernel
 {
@@ -105,34 +71,29 @@ public:
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
-    int execute(); // overrride
+    int execute();
 
 private:
     DeltaKernel();
-    void addSwitches(); // overrride
+    void addSwitches();
+    PointViewPtr loadSet(const std::string& filename, PointTable& table);
+    MetadataNode dump(PointViewPtr& srcView, PointViewPtr& candView,
+        KD3Index& index, DimIndexMap& dims);
+    MetadataNode dumpDetail(PointViewPtr& srcView, PointViewPtr& candView,
+        KD3Index& index, DimIndexMap& dims);
+    void accumulate(DimIndex& d, double v);
 
     std::string m_sourceFile;
     std::string m_candidateFile;
-    std::string m_wkt;
+    std::string m_outputFile;
 
+    /**
     std::ostream* m_outputStream;
-    std::string m_outputFileName;
-
-    summary_accumulator m_summary_x;
-    summary_accumulator m_summary_y;
-    summary_accumulator m_summary_z;
+    **/
 
     bool m_3d;
-    bool m_OutputDetail;
-    bool m_useXML;
-    bool m_useJSON;
-    std::unique_ptr<KDIndex> m_index;
-
-
-    void outputRST(boost::property_tree::ptree const&) const;
-    void outputXML(boost::property_tree::ptree const&) const;
-    void outputJSON(boost::property_tree::ptree const&) const;
-    void outputDetail(PointView& source_data, PointView& candidate_data) const;
+    bool m_detail;
+    bool m_allDims;
 };
 
 } // namespace pdal

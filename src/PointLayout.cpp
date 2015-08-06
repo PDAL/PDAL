@@ -33,7 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/PointLayout.hpp>
-#include <pdal/Utils.hpp>
+#include <pdal/util/Utils.hpp>
 
 namespace pdal
 {

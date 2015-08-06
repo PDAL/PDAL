@@ -31,6 +31,7 @@
 ****************************************************************************/
 
 #include <pdal/DbReader.hpp>
+#include <pdal/PDALUtils.hpp>
 
 namespace pdal
 {
@@ -108,19 +109,17 @@ void DbReader::writeField(PointView& view, const char *pos, const DimType& dim,
 {
     using namespace Dimension;
 
-    if (dim.m_type == Type::Signed32 &&
-        (dim.m_id == Id::X || dim.m_id == Id::Y || dim.m_id == Id::Z))
+    if (dim.m_id == Id::X || dim.m_id == Id::Y || dim.m_id == Id::Z)
     {
-        int32_t i;
+        Everything e;
 
-        memcpy(&i, pos, sizeof(int32_t));
-        double d = (i * dim.m_xform.m_scale) + dim.m_xform.m_offset;
+        memcpy(&e, pos, Dimension::size(dim.m_type));
+        double d = Utils::toDouble(e, dim.m_type);
+        d = (d * dim.m_xform.m_scale) + dim.m_xform.m_offset;
         view.setField(dim.m_id, idx, d);
     }
     else
-    {
         view.setField(dim.m_id, dim.m_type, idx, pos);
-    }
 }
 
 
@@ -130,28 +129,10 @@ void DbReader::writeField(PointView& view, const char *pos, const DimType& dim,
 /// \param[in] buf  Pointer to packed DB point data.
 void DbReader::writePoint(PointView& view, PointId idx, const char *buf)
 {
-    using namespace Dimension;
-
     for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
     {
-        DimType dimType = di->m_dimType;
-        // If we read X, Y or Z as a signed 32, apply the transform and write
-        // the transformed value (double).
-        if (dimType.m_type == Type::Signed32 &&
-            (dimType.m_id == Id::X || dimType.m_id == Id::Y ||
-             dimType.m_id == Id::Z))
-        {
-            int32_t i;
-
-            memcpy(&i, buf, sizeof(int32_t));
-            double d = (i * dimType.m_xform.m_scale) + dimType.m_xform.m_offset;
-            view.setField(dimType.m_id, idx, d);
-        }
-        else
-        {
-            view.setField(dimType.m_id, dimType.m_type, idx, buf);
-        }
-        buf += Dimension::size(dimType.m_type);
+        writeField(view, buf, di->m_dimType, idx);
+        buf += Dimension::size(di->m_dimType.m_type);
     }
 }
 

@@ -21,6 +21,7 @@ Readers
    readers.optech
    readers.pcd
    readers.pgpointcloud
+   readers.ply
    readers.qfit
    readers.rxp
    readers.sbet
@@ -34,8 +35,10 @@ Writers
 
    writers.geowave
    writers.las
+   writers.matlab
    writers.nitf
    writers.oci
+   writers.ply
    writers.p2g
    writers.pcd
    writers.pgpointcloud

@@ -88,6 +88,10 @@ public:
     // the result will always have a trailing '/'
     static std::string getcwd();
 
+    // return the file component of the given path,
+    // e.g. "d:/foo/bar/a.c" -> "a.c"
+    static std::string getFilename(const std::string& path);
+
     // return the directory component of the given path,
     // e.g. "d:/foo/bar/a.c" -> "d:/foo/bar"
     // the result will always have a trailing '/'
@@ -110,6 +114,8 @@ public:
         const std::string base);
     
     static std::string readFileAsString(std::string const& filename);
+    static void fileTimes(const std::string& filename, struct tm *createTime,
+        struct tm *modTime);
 
 private:
     static std::string addTrailingSlash(std::string path);

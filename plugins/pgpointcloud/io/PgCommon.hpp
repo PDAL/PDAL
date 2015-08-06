@@ -38,10 +38,10 @@
 #include <boost/algorithm/string.hpp>
 
 #include "libpq-fe.h"
-#include <pdal/pdal_error.hpp>
+
 #include <pdal/Options.hpp>
 #include <pdal/Compression.hpp>
-#include <pdal/Utils.hpp>
+#include <pdal/util/Utils.hpp>
 
 namespace pdal
 {
@@ -155,6 +155,5 @@ inline std::string pg_quote_literal(std::string const& lit)
 {
     return std::string("'") + Utils::replaceAll(lit, "'", "'") + "'";
 }
-
 
 } // pdal

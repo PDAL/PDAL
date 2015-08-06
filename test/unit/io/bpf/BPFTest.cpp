@@ -34,11 +34,15 @@
 
 #include <pdal/pdal_test_main.hpp>
 
+#include <string.h>
+
+#include <pdal/BufferReader.hpp>
 #include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
-#include <pdal/Utils.hpp>
-#include <pdal/util/FileUtils.hpp>
 #include <pdal/PointView.hpp>
+#include <pdal/util/Utils.hpp>
+#include <pdal/util/FileUtils.hpp>
+
 #include <BpfReader.hpp>
 #include <BpfWriter.hpp>
 
@@ -132,7 +136,6 @@ void test_roundtrip(Options& writerOps)
     std::string infile(
         Support::datapath("bpf/autzen-utm-chipped-25-v3-interleaved.bpf"));
     std::string outfile(Support::temppath("tmp.bpf"));
-
 
     PointTable table;
 
@@ -260,6 +263,94 @@ TEST(BPFTest, roundtrip_scaling)
     test_roundtrip(ops);
 }
 
+TEST(BPFTest, extra_bytes)
+{
+    std::string infile(
+        Support::datapath("bpf/autzen-utm-chipped-25-v3-interleaved.bpf"));
+    std::string outfile(Support::temppath("tmp.bpf"));
+
+    PointTable table;
+
+    Options readerOps;
+    readerOps.add("filename", infile);
+    BpfReader reader;
+    reader.setOptions(readerOps);
+
+    const unsigned char buf[] = "This is a test.";
+
+    Options writerOps;
+    writerOps.add("filename", outfile);
+    writerOps.add("header_data", Utils::base64_encode(buf, sizeof(buf)));
+    BpfWriter writer;
+    writer.setOptions(writerOps);
+    writer.setInput(reader);
+
+    FileUtils::deleteFile(outfile);
+    writer.prepare(table);
+    writer.execute(table);
+
+    test_file_type(outfile);
+
+    Options readerOps2;
+    readerOps2.add("filename", outfile);
+
+    PointTable table2;
+    BpfReader reader2;
+    reader2.setOptions(readerOps2);
+    reader2.prepare(table2);
+    reader2.execute(table2);
+    MetadataNode n = reader2.getMetadata();
+    std::vector<uint8_t> outbuf =
+        Utils::base64_decode(n.findChild("header_data").value());
+    EXPECT_EQ(memcmp(outbuf.data(), buf, sizeof(buf)), 0);
+}
+
+TEST(BPFTest, bundled)
+{
+    std::string infile(
+        Support::datapath("bpf/autzen-utm-chipped-25-v3-interleaved.bpf"));
+    std::string outfile(Support::temppath("tmp.bpf"));
+
+    PointTable table;
+
+    Options readerOps;
+    readerOps.add("filename", infile);
+    BpfReader reader;
+    reader.setOptions(readerOps);
+
+    Options writerOps;
+    writerOps.add("filename", outfile);
+    writerOps.add("bundledfile", Support::datapath("bpf/bundle1"));
+    writerOps.add("bundledfile", Support::datapath("bpf/bundle2"));
+
+    BpfWriter writer;
+    writer.setOptions(writerOps);
+    writer.setInput(reader);
+
+    FileUtils::deleteFile(outfile);
+    writer.prepare(table);
+    writer.execute(table);
+
+    test_file_type(outfile);
+
+    Options readerOps2;
+    readerOps2.add("filename", outfile);
+
+    PointTable table2;
+    BpfReader reader2;
+    reader2.setOptions(readerOps2);
+    reader2.prepare(table2);
+    reader2.execute(table2);
+    MetadataNode n = reader2.getMetadata();
+    std::vector<uint8_t> outbuf;
+    outbuf = Utils::base64_decode(n.findChild("bundle1").value());
+    EXPECT_EQ(memcmp(outbuf.data(), "This is a test",
+        outbuf.size() - 1), 0);
+    outbuf = Utils::base64_decode(n.findChild("bundle2").value());
+    EXPECT_EQ(memcmp(outbuf.data(), "This is another test",
+        outbuf.size() - 1), 0);
+}
+
 TEST(BPFTest, inspect)
 {
     Options ops;
@@ -345,3 +436,120 @@ TEST(BPFTest, mueller)
     EXPECT_DOUBLE_EQ(zp, -3.0);
 }
 
+
+TEST(BPFTest, flex)
+{
+    std::array<std::string, 3> outname =
+        {{ "test_1.bpf", "test_2.bpf", "test_3.bpf" }};
+
+    Options readerOps;
+    readerOps.add("filename",
+        Support::datapath("bpf/autzen-utm-chipped-25-v3.bpf"));
+
+    PointTable table;
+
+    BpfReader reader;
+    reader.setOptions(readerOps);
+
+    reader.prepare(table);
+    PointViewSet views = reader.execute(table);
+    PointViewPtr v = *(views.begin());
+
+    PointViewPtr v1(new PointView(table));
+    PointViewPtr v2(new PointView(table));
+    PointViewPtr v3(new PointView(table));
+
+    std::vector<PointViewPtr> vs;
+    vs.push_back(v1);
+    vs.push_back(v2);
+    vs.push_back(v3);
+
+    for (PointId i = 0; i < v->size(); ++i)
+        vs[i % 3]->appendPoint(*v, i);
+
+    for (size_t i = 0; i < outname.size(); ++i)
+        FileUtils::deleteFile(Support::temppath(outname[i]));
+
+    BufferReader reader2;
+    reader2.addView(v1);
+    reader2.addView(v2);
+    reader2.addView(v3);
+
+    Options writerOps;
+    writerOps.add("filename", Support::temppath("test_#.bpf"));
+
+    BpfWriter writer;
+    writer.setOptions(writerOps);
+    writer.setInput(reader2);
+
+    writer.prepare(table);
+    writer.execute(table);
+
+    for (size_t i = 0; i < outname.size(); ++i)
+    {
+        std::string filename = Support::temppath(outname[i]);
+        EXPECT_TRUE(FileUtils::fileExists(filename));
+
+        Options ops;
+        ops.add("filename", filename);
+
+        BpfReader r;
+        r.setOptions(ops);
+        EXPECT_EQ(r.preview().m_pointCount, 355u);
+    }
+}
+
+TEST(BPFTest, flex2)
+{
+    Options readerOps;
+    readerOps.add("filename",
+        Support::datapath("bpf/autzen-utm-chipped-25-v3.bpf"));
+
+    PointTable table;
+
+    BpfReader reader;
+    reader.setOptions(readerOps);
+
+    reader.prepare(table);
+    PointViewSet views = reader.execute(table);
+    PointViewPtr v = *(views.begin());
+
+    PointViewPtr v1(new PointView(table));
+    PointViewPtr v2(new PointView(table));
+    PointViewPtr v3(new PointView(table));
+
+    std::vector<PointViewPtr> vs;
+    vs.push_back(v1);
+    vs.push_back(v2);
+    vs.push_back(v3);
+
+    for (PointId i = 0; i < v->size(); ++i)
+        vs[i % 3]->appendPoint(*v, i);
+
+    std::string outfile(Support::temppath("test_flex.bpf"));
+    FileUtils::deleteFile(outfile);
+
+    BufferReader reader2;
+    reader2.addView(v1);
+    reader2.addView(v2);
+    reader2.addView(v3);
+
+    Options writerOps;
+    writerOps.add("filename", outfile);
+
+    BpfWriter writer;
+    writer.setOptions(writerOps);
+    writer.setInput(reader2);
+
+    writer.prepare(table);
+    writer.execute(table);
+
+    EXPECT_TRUE(FileUtils::fileExists(outfile));
+
+    Options ops;
+    ops.add("filename", outfile);
+
+    BpfReader r;
+    r.setOptions(ops);
+    EXPECT_EQ(r.preview().m_pointCount, 1065u);
+}

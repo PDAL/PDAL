@@ -58,51 +58,93 @@ void Writer::writerProcessOptions(const Options& options)
             xform.m_offset = boost::lexical_cast<double>(offset);
     };
 
+    auto setScale = [options](XForm& xform, const std::string& opName)
+    {
+        if (!options.hasOption(opName))
+            return;
+        std::string scale = options.getValueOrThrow<std::string>(opName);
+        if (scale == "auto")
+            xform.m_autoScale = true;
+        else
+            xform.m_scale = boost::lexical_cast<double>(scale);
+    };
+
     setOffset(m_xXform, "offset_x");
     setOffset(m_yXform, "offset_y");
     setOffset(m_zXform, "offset_z");
 
+    setScale(m_xXform, "scale_x");
+    setScale(m_yXform, "scale_y");
+    setScale(m_zXform, "scale_z");
+
     if (options.hasOption("filename"))
         m_filename = options.getValueOrThrow<std::string>("filename");
-    if (options.hasOption("scale_x"))
-        m_xXform.m_scale = options.getValueOrThrow<double>("scale_x");
-    if (options.hasOption("scale_y"))
-        m_yXform.m_scale = options.getValueOrThrow<double>("scale_y");
-    if (options.hasOption("scale_z"))
-        m_zXform.m_scale = options.getValueOrThrow<double>("scale_z");
     m_outputDims = options.getValueOrDefault<StringList>("output_dims");
 }
 
 
-void Writer::setAutoOffset(const PointViewPtr view)
+void Writer::setAutoXForm(const PointViewPtr view)
 {
-   if (!m_xXform.m_autoOffset && !m_yXform.m_autoOffset &&
-       !m_zXform.m_autoOffset)
+   double xmin = (std::numeric_limits<double>::max)();
+   double xmax = (std::numeric_limits<double>::lowest)();
+   bool xmod = m_xXform.m_autoOffset || m_xXform.m_autoScale;
+
+   double ymin = (std::numeric_limits<double>::max)();
+   double ymax = (std::numeric_limits<double>::lowest)();
+   bool ymod = m_yXform.m_autoOffset || m_yXform.m_autoScale;
+
+   double zmin = (std::numeric_limits<double>::max)();
+   double zmax = (std::numeric_limits<double>::lowest)();
+   bool zmod = m_zXform.m_autoOffset || m_zXform.m_autoScale;
+
+   if (!xmod && !ymod && !zmod)
        return;
    if (view->empty())
         return;
 
-    if (m_xXform.m_autoOffset)
-        m_xXform.m_offset = (std::numeric_limits<double>::max)();
-    if (m_yXform.m_autoOffset)
-        m_yXform.m_offset = (std::numeric_limits<double>::max)();
-    if (m_zXform.m_autoOffset)
-        m_zXform.m_offset = (std::numeric_limits<double>::max)();
     for (PointId idx = 0; idx < view->size(); idx++)
     {
-        if (m_xXform.m_autoOffset)
-            m_xXform.m_offset =
-                std::min(view->getFieldAs<double>(Dimension::Id::X, idx),
-                    m_xXform.m_offset);
-        if (m_yXform.m_autoOffset)
-            m_yXform.m_offset =
-                std::min(view->getFieldAs<double>(Dimension::Id::Y, idx),
-                    m_yXform.m_offset);
-        if (m_zXform.m_autoOffset)
-            m_zXform.m_offset =
-                std::min(view->getFieldAs<double>(Dimension::Id::Z, idx),
-                    m_zXform.m_offset);
+        if (xmod)
+        {
+            double x = view->getFieldAs<double>(Dimension::Id::X, idx);
+            xmin = std::min(x, xmin);
+            xmax = std::max(x, xmax);
+        }
+        if (ymod)
+        {
+            double y = view->getFieldAs<double>(Dimension::Id::Y, idx);
+            ymin = std::min(y, ymin);
+            ymax = std::max(y, ymax);
+        }
+        if (zmod)
+        {
+            double z = view->getFieldAs<double>(Dimension::Id::Z, idx);
+            zmin = std::min(z, zmin);
+            zmax = std::max(z, zmax);
+        }
     }
+
+    if (m_xXform.m_autoOffset)
+    {
+        m_xXform.m_offset = xmin;
+        xmax -= xmin;
+    }
+    if (m_yXform.m_autoOffset)
+    {
+        m_yXform.m_offset = ymin;
+        ymax -= ymin;
+    }
+    if (m_zXform.m_autoOffset)
+    {
+        m_zXform.m_offset = zmin;
+        zmax -= zmin;
+    }
+    if (m_xXform.m_autoScale)
+        m_xXform.m_scale = xmax / (std::numeric_limits<int>::max)();
+    if (m_yXform.m_autoScale)
+        m_yXform.m_scale = ymax / (std::numeric_limits<int>::max)();
+    if (m_zXform.m_autoScale)
+        m_zXform.m_scale = zmax / (std::numeric_limits<int>::max)();
 }
 
 

@@ -32,8 +32,6 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/pdal_error.hpp>
-
 #include "Exchanges.hpp"
 
 namespace pdal
@@ -406,7 +404,6 @@ void ReadCompressed::handleRx(const message_ptr message)
     }
 }
 #endif
-
 
 
 // Destroy exchange

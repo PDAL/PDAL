@@ -34,6 +34,7 @@
 
 #include "Hdf5Handler.hpp"
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/pdal_types.hpp>
 
 #include <boost/numeric/conversion/cast.hpp>
 
@@ -58,7 +59,7 @@ void Hdf5Handler::initialize(
     }
     catch (const H5::FileIException&)
     {
-        throw hdf5_error("Could not open HDF5 file");
+        throw pdal_error("Could not open HDF5 file.");
     }
 
     try
@@ -82,7 +83,7 @@ void Hdf5Handler::initialize(
     }
     catch (const H5::Exception&)
     {
-        throw hdf5_error("Could not initialize data set information");
+        throw pdal_error("Could not initialize data set information.");
     }
 }
 
@@ -123,7 +124,7 @@ void Hdf5Handler::getColumnEntries(
     }
     catch (const H5::Exception&)
     {
-        throw hdf5_error("Could not read from dataset");
+        throw pdal_error("Could not read from dataset.");
     }
 }
 
@@ -144,7 +145,7 @@ Hdf5Handler::getColumnData(const std::string& dataSetName) const
 
     if (columnDataIt == m_columnDataMap.end())
     {
-        throw hdf5_error("Could not retrieve column data");
+        throw pdal_error("Could not retrieve column data.");
     }
 
     return columnDataIt->second;

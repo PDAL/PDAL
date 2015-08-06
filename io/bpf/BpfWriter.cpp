@@ -71,11 +71,13 @@ Options BpfWriter::getDefaultOptions()
 
 void BpfWriter::processOptions(const Options& options)
 {
-    if (m_filename.empty())
-        throw pdal_error("Can't write BPF file without filename.");
     bool compression = options.getValueOrDefault("compression", false);
     m_header.m_compression = compression ? BpfCompression::Zlib :
         BpfCompression::None;
+
+    std::string encodedHeader =
+        options.getValueOrDefault<std::string>("header_data");
+    m_extraData = Utils::base64_decode(encodedHeader);
 
     std::string fileFormat =
         options.getValueOrDefault<std::string>("format", "POINT");
@@ -97,22 +99,65 @@ void BpfWriter::processOptions(const Options& options)
         m_header.m_coordType = BpfCoordType::None;
         m_header.m_coordId = 0;
     }
+    StringList files = options.getValues<std::string>("bundledfile");
+    for (auto file : files)
+    {
+        if (!FileUtils::fileExists(file))
+        {
+            std::ostringstream oss;
+
+            oss << getName() << ": bundledfile '" << file << "' doesn't exist.";
+            throw pdal_error(oss.str());
+        }
+
+        size_t size = FileUtils::fileSize(file);
+        if (size > (std::numeric_limits<uint32_t>::max)())
+        {
+            std::ostringstream oss;
+            oss << getName() << ": bundledfile '" << file << "' too large.";
+            throw pdal_error(oss.str());
+        }
+
+        BpfUlemFile ulemFile;
+        ulemFile.m_len = size;
+        ulemFile.m_filespec = file;
+        ulemFile.m_filename = FileUtils::getFilename(file);
+        if (ulemFile.m_filename.length() > 32)
+        {
+            std::ostringstream oss;
+            oss << getName() << ": bundledfile '" << file << "' name "
+                "exceeds maximum length of 32.";
+            throw pdal_error(oss.str());
+        }
+        m_bundledFiles.push_back(ulemFile);
+    }
 }
 
 
-void BpfWriter::ready(PointTableRef table)
+void BpfWriter::readyTable(PointTableRef table)
 {
     loadBpfDimensions(table.layout());
-    m_stream = FileUtils::createFile(m_filename, true);
+}
+
+
+void BpfWriter::readyFile(const std::string& filename)
+{
+    m_stream.open(filename);
     m_header.m_version = 3;
     m_header.m_numDim = m_dims.size();
+    m_header.m_numPts = 0;
     m_header.setLog(log());
 
     // We will re-write the header and dimensions to account for the point
     // count and dimension min/max.
     m_header.write(m_stream);
     m_header.writeDimensions(m_stream, m_dims);
+    for (auto& file : m_bundledFiles)
+        file.write(m_stream);
+    m_stream.put((const char *)m_extraData.data(), m_extraData.size());
+
     m_header.m_len = m_stream.position();
+
     m_header.m_xform.m_vals[0] = m_xXform.m_scale;
     m_header.m_xform.m_vals[5] = m_yXform.m_scale;
     m_header.m_xform.m_vals[10] = m_zXform.m_scale;
@@ -142,9 +187,9 @@ void BpfWriter::loadBpfDimensions(PointLayoutPtr layout)
 }
 
 
-void BpfWriter::write(const PointViewPtr dataShared)
+void BpfWriter::writeView(const PointViewPtr dataShared)
 {
-    setAutoOffset(dataShared);
+    setAutoXForm(dataShared);
 
     // Avoid reference count overhead internally.
     const PointView* data(dataShared.get());
@@ -279,14 +324,14 @@ double BpfWriter::getAdjustedValue(const PointView* data,
 }
 
 
-void BpfWriter::done(PointTableRef)
+void BpfWriter::doneFile()
 {
     // Rewrite the header to update the the correct number of points and
     // statistics.
     m_stream.seek(0);
     m_header.write(m_stream);
     m_header.writeDimensions(m_stream, m_dims);
-    m_stream.flush();
+    m_stream.close();
 }
 
 } //namespace pdal

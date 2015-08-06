@@ -41,8 +41,7 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_CONFIG_HPP
-#define INCLUDED_PDAL_CONFIG_HPP
+#pragma once
 
 #include <pdal/pdal_internal.hpp>
 
@@ -65,9 +64,5 @@ PDAL_DLL int GetVersionMinor();
 PDAL_DLL int GetVersionPatch();
 PDAL_DLL std::string getPDALDebugInformation();
 
-
-
-
 } // namespace pdal
 
-#endif

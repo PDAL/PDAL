@@ -35,7 +35,9 @@
 #include <pdal/pdal_test_main.hpp>
 
 #include "Support.hpp"
+
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/util/Utils.hpp>
 
 using namespace pdal;
 using namespace std;

@@ -12,11 +12,11 @@ Contents:
    
    download
    compilation/index
-   tutorial/index
+   commandline/index
    apps
    stages/index
    pipeline
-   vagrant
+   vagranttutorial
    community
    faq
    development/index

@@ -32,14 +32,15 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/util/FileUtils.hpp>
-#include <pdal/pdal_error.hpp>
-#include <pdal/Utils.hpp>
-
-#include <boost/filesystem.hpp>
+#include <sys/stat.h>
 
 #include <iostream>
 #include <sstream>
+
+#include <boost/filesystem.hpp>
+
+#include <pdal/util/FileUtils.hpp>
+#include <pdal/util/Utils.hpp>
 
 using namespace std;
 
@@ -56,11 +57,11 @@ bool isStdin(std::string filename)
 
 bool isStdout(std::string filename)
 {
-    return Utils::toupper(filename) == "STOUT" || Utils::toupper(filename) == "STDOUT";
+    return Utils::toupper(filename) == "STOUT" ||
+        Utils::toupper(filename) == "STDOUT";
 }
 
-    
-}
+} // unnamed namespace
 
 istream* FileUtils::openFile(string const& filename, bool asBinary)
 {
@@ -75,7 +76,7 @@ istream* FileUtils::openFile(string const& filename, bool asBinary)
         mode |= ios::binary;
 
     std::ifstream *ifs = new std::ifstream(filename, mode);
-    if (! ifs->good())
+    if (!ifs->good())
     {
         delete ifs;
         return NULL;
@@ -113,6 +114,7 @@ bool FileUtils::createDirectory(std::string const& dirname)
 {
     return boost::filesystem::create_directory(dirname); 
 }
+
 
 void FileUtils::deleteDirectory(std::string const& dirname)
 {
@@ -177,6 +179,7 @@ bool FileUtils::fileExists(const string& name)
     return boost::filesystem::exists(name) || isStdin(name);
 }
 
+
 uintmax_t FileUtils::fileSize(const string& file)
 {
     return boost::filesystem::file_size(file);
@@ -208,6 +211,25 @@ string FileUtils::getcwd()
     return addTrailingSlash(p.string());
 }
 
+
+/***
+// Non-boost alternative.  Requires file existence.
+string FileUtils::toAbsolutePath(const string& filename)
+{
+    std::string result;
+
+#ifdef WIN32
+    char buf[MAX_PATH]
+    if (GetFullPathName(filename.c_str(), MAX_PATH, buf, NULL))
+        result = buf;
+#else
+    char buf[PATH_MAX];
+    if (realpath(filename.c_str(), buf))
+        result = buf;
+#endif
+    return result;
+}
+***/
 
 // if the filename is an absolute path, just return it
 // otherwise, make it absolute (relative to current working dir) and return that
@@ -242,6 +264,20 @@ string FileUtils::toAbsolutePath(const string& filename, const string base)
     return p.string();
 }
 
+string FileUtils::getFilename(const string& path)
+{
+#ifdef _WIN32
+    char pathsep = '\\';
+#else
+    char pathsep = '/';
+#endif
+
+    std::string::size_type pos = path.find_last_of(pathsep);
+    if (pos == std::string::npos)
+        return path;
+    return path.substr(pos + 1);
+}
+
 // Get the directory part of a filename.
 string FileUtils::getDirectory(const string& path)
 {
@@ -249,6 +285,7 @@ string FileUtils::getDirectory(const string& path)
          boost::filesystem::path(path).parent_path();
     return addTrailingSlash(dir.string());
 }
+
 
 // Determine if the path is an absolute path
 bool FileUtils::isAbsolutePath(const string& path)
@@ -259,6 +296,30 @@ bool FileUtils::isAbsolutePath(const string& path)
     return boost::filesystem::path(path).is_complete();
 #endif
 }
+
+
+void FileUtils::fileTimes(const std::string& filename,
+    struct tm *createTime, struct tm *modTime)
+{
+#ifdef WIN32
+    struct _stat statbuf;
+    _stat(filename.c_str(), &statbuf);
+
+    if (createTime)
+        *createTime = *gmtime(&statbuf.st_ctime);
+    if (modTime)
+        *modTime = *gmtime(&statbuf.st_mtime);
+#else
+    struct stat statbuf;
+    stat(filename.c_str(), &statbuf);
+
+    if (createTime)
+        gmtime_r(&statbuf.st_ctime, createTime);
+    if (modTime)
+        gmtime_r(&statbuf.st_mtime, modTime);
+#endif
+}
+
 
 string FileUtils::readFileAsString(string const& filename)
 {

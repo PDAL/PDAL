@@ -32,12 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#ifndef INCLUDED_PDAL_HDF5_HANDLER_HPP
-#define INCLUDED_PDAL_HDF5_HANDLER_HPP
+#pragma once
 
 #include "H5Cpp.h"
-
-#include <pdal/pdal_error.hpp>
 
 #include <memory>
 #include <vector>
@@ -61,19 +58,10 @@ namespace hdf5
     };
 }
 
-class hdf5_error : public pdal_error
-{
-public:
-    hdf5_error(std::string const& msg)
-        : pdal_error(msg)
-    { }
-};
-
 class Hdf5Handler
 {
 public:
     Hdf5Handler();
-    ~Hdf5Handler() { }
 
     void initialize(
             const std::string& filename,
@@ -121,6 +109,4 @@ private:
 };
 
 } // namespace pdal
-
-#endif // INCLUDED_PDAL_HDF5_HANDLER_HPP
 

@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include <pdal/Writer.hpp>
+#include <pdal/FlexWriter.hpp>
 
 #include "LasError.hpp"
 #include "LasHeader.hpp"
@@ -60,7 +60,7 @@ struct VlrOptionInfo
     std::string m_description;
 };
 
-class PDAL_DLL LasWriter : public pdal::Writer
+class PDAL_DLL LasWriter : public FlexWriter
 {
     friend class LasTester;
     friend class NitfWriter;
@@ -69,39 +69,38 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    LasWriter() : m_ostream(NULL)
-         { construct(); }
-    LasWriter(std::ostream *stream) : m_ostream(stream)
-        { construct(); }
+    LasWriter();
 
     Options getDefaultOptions();
 
-    void flush();
+protected:
+    void prepOutput(std::ostream *out);
+    void finishOutput();
 
 private:
     LasError m_error;
     LasHeader m_lasHeader;
-    uint32_t m_numPointsWritten;
-    SummaryData m_summaryData;
+    std::unique_ptr<SummaryData> m_summaryData;
     std::unique_ptr<LASzipper> m_zipper;
     std::unique_ptr<ZipPoint> m_zipPoint;
     bool m_discardHighReturnNumbers;
     std::map<std::string, std::string> m_headerVals;
     std::vector<VlrOptionInfo> m_optionInfos;
-    uint64_t m_streamOffset; // the first byte of the LAS file
     std::ostream *m_ostream;
     std::vector<VariableLengthRecord> m_vlrs;
     std::vector<ExtVariableLengthRecord> m_eVlrs;
     std::vector<ExtraDim> m_extraDims;
     uint16_t m_extraByteLen;
+    SpatialReference m_srs;
+    std::string m_curFilename;
 
     virtual void processOptions(const Options& options);
     virtual void prepared(PointTableRef table);
-    virtual void ready(PointTableRef table);
-    virtual void write(const PointViewPtr view);
-    virtual void done(PointTableRef table);
+    virtual void readyTable(PointTableRef table);
+    virtual void readyFile(const std::string& filename);
+    virtual void writeView(const PointViewPtr view);
+    virtual void doneFile();
 
-    void construct();
     void getHeaderOptions(const Options& options);
     void getVlrOptions(const Options& opts);
     template<typename T>

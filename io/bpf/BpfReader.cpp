@@ -68,6 +68,7 @@ QuickInfo BpfReader::inspect()
     QuickInfo qi;
 
     initialize();
+    qi.m_valid = true;
     qi.m_pointCount = m_header.m_numPts;
     qi.m_srs = getSpatialReference();
     for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
@@ -146,10 +147,14 @@ void BpfReader::addDimensions(PointLayoutPtr layout)
 {
     for (size_t i = 0; i < m_dims.size(); ++i)
     {
+        Dimension::Type::Enum type = Dimension::Type::Float;
+
         BpfDimension& dim = m_dims[i];
-        dim.m_id = layout->registerOrAssignDim(
-                dim.m_label,
-                Dimension::Type::Float);
+        if (dim.m_label == "X" ||
+            dim.m_label == "Y" ||
+            dim.m_label == "Z")
+            type = Dimension::Type::Double;
+        dim.m_id = layout->registerOrAssignDim(dim.m_label, type);
     }
 }
 

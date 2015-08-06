@@ -74,7 +74,8 @@ TEST(OptionsTest, test_option_writing)
     std::ostringstream ostr_s;
     const std::string ref_s = xml_header + xml_str_ref;
 
-    const Option option_i("my_int", (uint16_t)17, "This is my integral option.");
+    const Option option_i("my_int", (uint16_t)17,
+        "This is my integral option.");
     EXPECT_TRUE(option_i.getName() == "my_int");
     EXPECT_TRUE(option_i.getDescription() == "This is my integral option.");
     EXPECT_TRUE(option_i.getValue<uint16_t>() == 17);
@@ -86,12 +87,12 @@ TEST(OptionsTest, test_option_writing)
     EXPECT_TRUE(option_s.getValue<std::string>() == "Yow.");
     EXPECT_TRUE(option_s.getValue<std::string>() == "Yow.");
 
-    const boost::property_tree::ptree tree_i = utils::toPTree(option_i);
+    const boost::property_tree::ptree tree_i = Utils::toPTree(option_i);
     boost::property_tree::xml_parser::write_xml(ostr_i, tree_i);
     const std::string str_i = ostr_i.str();
     EXPECT_TRUE(str_i == ref_i);
 
-    const boost::property_tree::ptree tree_s = utils::toPTree(option_s);
+    const boost::property_tree::ptree tree_s = Utils::toPTree(option_s);
     boost::property_tree::xml_parser::write_xml(ostr_s, tree_s);
     const std::string str_s = ostr_s.str();
     EXPECT_TRUE(str_s == ref_s);
@@ -111,7 +112,7 @@ TEST(OptionsTest, test_option_reading)
     EXPECT_TRUE(opt_from_istr.getValue<int>() == 17);
 
     // from a ptree (assumed to be built correctly)
-    const boost::property_tree::ptree tree2 = utils::toPTree(opt_from_istr);
+    const boost::property_tree::ptree tree2 = Utils::toPTree(opt_from_istr);
     Option opt_from_ptree(tree2);
 
     EXPECT_TRUE(opt_from_ptree.getName() == "my_int");
@@ -170,7 +171,7 @@ TEST(OptionsTest, test_options_writing)
     std::ostringstream ostr;
     const std::string ref = xml_header + "<Option>" + xml_int_ref + "</Option><Option>" + xml_str_ref + "</Option>";
 
-    const boost::property_tree::ptree& tree = utils::toPTree(opts);
+    const boost::property_tree::ptree& tree = Utils::toPTree(opts);
     boost::property_tree::xml_parser::write_xml(ostr, tree);
     const std::string str = ostr.str();
     EXPECT_TRUE(str == ref);
@@ -208,41 +209,35 @@ TEST(OptionsTest, test_valid_options)
     try
     {
         opts.getOption("foo").getValue<int>();
-        reached = false;
     }
-    catch (option_not_found ex)
+    catch (Option::not_found ex)
     {
-        EXPECT_TRUE(strcmp(ex.what(), "Options::getOption: Required option 'foo' was not found on this stage") == 0);
+        EXPECT_EQ((std::string)ex.what(),
+            (std::string)"Options::getOption: Required option 'foo' was "
+            "not found on this stage");
         reached = true;
     }
-    EXPECT_TRUE(reached == true);
+    EXPECT_TRUE(reached);
 
-    bool ok = opts.hasOption("bar");
-    EXPECT_TRUE(!ok);
-
+    EXPECT_FALSE(opts.hasOption("bar"));
     {
         Options optI;
 
         optI.add("foo", 19, "foo as an int");
-        ok = optI.hasOption("foo");
-        EXPECT_TRUE(ok);
+        EXPECT_TRUE(optI.hasOption("foo"));
 
-        const int i1 = optI.getValueOrThrow<int>("foo");
-        EXPECT_TRUE(i1 == 19);
+        EXPECT_EQ(optI.getValueOrThrow<int>("foo"), 19);
 
         optI.add("foo", "nineteen", "foo as a string");
-        ok = optI.hasOption("foo");
-        EXPECT_TRUE(ok);
+        EXPECT_TRUE(optI.hasOption("foo"));
 
         // Options is backed by a std::multimap,
         // Adding new options will mean the first will
         // continue to be returned.
-        const int i2 = optI.getValueOrThrow<int>("foo");
-        EXPECT_TRUE(i2 == 19);
+        EXPECT_EQ(optI.getValueOrThrow<int>("foo"), 19);
 
         std::vector<Option> options = optI.getOptions("foo");
-
-        EXPECT_TRUE(options[1].getValue<std::string>() == "nineteen");
+        EXPECT_EQ(options[1].getValue<std::string>(), "nineteen");
     }
 }
 
@@ -331,7 +326,38 @@ TEST(OptionsTest, metadata)
     std::string testfile(Support::temppath("opts2json.txt"));
     {
         std::ofstream out(testfile);
-        utils::toJSON(node, out);
+        Utils::toJSON(node, out);
     }
     EXPECT_TRUE(Support::compare_files(goodfile, testfile));
 }
+
+TEST(OptionsTest, conditional)
+{
+    CropFilter s;
+
+    Options ops;
+    ops.add("foo", "foo");
+    ops.add("bar", "bar");
+    ops.add("baz", "baz");
+
+    s.setOptions(ops);
+
+    Options condOps;
+    condOps.add("foo", "lose");
+    condOps.add("bar", "lose");
+    condOps.add("baz", "lose");
+    condOps.add("foot", "win");
+    condOps.add("barf", "win");
+    condOps.add("bazel", "win");
+
+    s.addConditionalOptions(condOps);
+    ops = s.getOptions();
+    EXPECT_EQ(ops.size(), 6u);
+    EXPECT_EQ(ops.getValueOrDefault("foo", std::string()), "foo");
+    EXPECT_EQ(ops.getValueOrDefault("bar", std::string()), "bar");
+    EXPECT_EQ(ops.getValueOrDefault("baz", std::string()), "baz");
+    EXPECT_EQ(ops.getValueOrDefault("foot", std::string()), "win");
+    EXPECT_EQ(ops.getValueOrDefault("barf", std::string()), "win");
+    EXPECT_EQ(ops.getValueOrDefault("bazel", std::string()), "win");
+}
+

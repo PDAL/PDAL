@@ -47,7 +47,7 @@ namespace pdal
 ILeStream& operator >> (ILeStream& stream, BpfMuellerMatrix& m)
 {
     for (size_t i = 0; i < (sizeof(m.m_vals) / sizeof(m.m_vals[0])); ++i)
-        stream >> m.m_vals[i]; 
+        stream >> m.m_vals[i];
     return stream;
 }
 
@@ -55,7 +55,7 @@ ILeStream& operator >> (ILeStream& stream, BpfMuellerMatrix& m)
 OLeStream& operator << (OLeStream& stream, BpfMuellerMatrix& m)
 {
     for (size_t i = 0; i < (sizeof(m.m_vals) / sizeof(m.m_vals[0])); ++i)
-        stream << m.m_vals[i]; 
+        stream << m.m_vals[i];
     return stream;
 }
 
@@ -81,6 +81,8 @@ bool BpfHeader::read(ILeStream& stream)
 
 bool BpfHeader::readV3(ILeStream& stream)
 {
+    m_log->get(LogLevel::Debug) << "BPF: Reading V3\n";
+
     uint8_t dummyChar;
     uint8_t interleave;
     std::string magic;
@@ -97,6 +99,7 @@ bool BpfHeader::readV3(ILeStream& stream)
         dummyChar >> m_numPts >> m_coordType >> m_coordId >> m_spacing >>
         m_xform >> m_startTime >> m_endTime;
     m_numDim = (int32_t)numDim;
+
     switch (interleave)
     {
     case 0:
@@ -113,15 +116,17 @@ bool BpfHeader::readV3(ILeStream& stream)
     }
     return (bool)stream;
 }
-    
+
 
 bool BpfHeader::readV1(ILeStream& stream)
 {
+    m_log->get(LogLevel::Debug) << "BPF: Reading V1\n";
+
     stream >> m_len;
     stream >> m_version;
 
-    stream >> m_numPts >> m_numDim >> m_coordType >> m_coordId >>
-        m_spacing;
+    stream >> m_numPts >> m_numDim >> m_coordType >> m_coordId >> m_spacing;
+
     if (m_version == 1)
         m_pointFormat = BpfFormat::DimMajor;
     else if (m_version == 2)
@@ -144,9 +149,10 @@ bool BpfHeader::readV1(ILeStream& stream)
     stream >> xDim.m_min >> yDim.m_min >> zDim.m_min;
     stream >> xDim.m_max >> yDim.m_max >> zDim.m_max;
 
-    m_staticDims.push_back(xDim);
-    m_staticDims.push_back(yDim);
-    m_staticDims.push_back(zDim);
+    m_staticDims.resize(3);
+    m_staticDims[0] = xDim;
+    m_staticDims[1] = yDim;
+    m_staticDims[2] = zDim;
     return (bool)stream;
 }
 
@@ -156,14 +162,8 @@ bool BpfHeader::write(OLeStream& stream)
     uint8_t dummyChar = 0;
     uint8_t numDim;
 
-    try
-    {
-        numDim = boost::numeric_cast<uint8_t>(m_numDim);
-    }
-    catch (boost::numeric::bad_numeric_cast&)
-    {
+    if (!Utils::numericCast(m_numDim, numDim))
         throw pdal_error("Can't write a BPF file of more than 255 dimensions.");
-    }
 
     stream.put("BPF!");
     stream.put("0003");
@@ -180,8 +180,25 @@ bool BpfHeader::readDimensions(ILeStream& stream, BpfDimensionList& dims)
     size_t staticCnt = m_staticDims.size();
 
     dims.resize(m_numDim);
+
+    if (static_cast<std::size_t>(m_numDim) < staticCnt)
+    {
+        m_log->get(LogLevel::Error) << "BPF dimension range looks bad.\n";
+        m_log->get(LogLevel::Error) <<
+            "BPF: num dims: " << m_numDim << "\n" <<
+            "BPF: static count: " << staticCnt << "\n";
+
+        m_log->get(LogLevel::Error) << "Dims:\n";
+        for (auto d : dims)
+            m_log->get(LogLevel::Error) << "\t" << d.m_label << "\n";
+
+        m_log->get(LogLevel::Error) << "Static:\n";
+        for (auto d : m_staticDims)
+            m_log->get(LogLevel::Error) << "\t" << d.m_label << "\n";
+    }
+
     for (size_t d = 0; d < staticCnt; d++)
-        dims[d] = m_staticDims[d];
+        dims.at(d) = m_staticDims[d];
     if (!BpfDimension::read(stream, dims, staticCnt))
         return false;
 
@@ -272,7 +289,7 @@ bool BpfUlemHeader::read(ILeStream& stream)
     stream >> m_numFrames >> m_year >> m_month >> m_day >> m_lidarMode >>
         m_wavelen >> m_pulseFreq >> m_focalWidth >> m_focalHeight >>
         m_pixelPitchWidth >> m_pixelPitchHeight;
-    stream.get(m_classCode, 32);    
+    stream.get(m_classCode, 32);
     return (bool)stream;
 }
 
@@ -301,6 +318,27 @@ bool BpfUlemFile::read(ILeStream& stream)
     stream.get(m_buf);
 
     return (bool)stream;
+}
+
+bool BpfUlemFile::write(OLeStream& stream)
+{
+    stream.put("FILE", 4);
+    stream << m_len;
+    stream.put(m_filename, 32);
+
+    std::ifstream in(m_filespec);
+    uint32_t len = m_len;
+
+    const uint32_t MAX_BLOCKSIZE = 1000000;
+    char buf[MAX_BLOCKSIZE];
+    while (len)
+    {
+        uint32_t blocksize = std::min(MAX_BLOCKSIZE, len);
+        in.read(buf, blocksize);
+        stream.put(buf, blocksize);
+        len -= blocksize;
+    }
+    return true;
 }
 
 bool BpfPolarStokesParam::read(ILeStream& stream)

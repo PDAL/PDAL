@@ -35,15 +35,17 @@
 #include <pdal/KernelFactory.hpp>
 #include <pdal/Kernel.hpp>
 #include <pdal/PluginManager.hpp>
-#include <pdal/Utils.hpp>
+#include <pdal/util/Utils.hpp>
 
 #include <delta/DeltaKernel.hpp>
 #include <diff/DiffKernel.hpp>
 #include <info/InfoKernel.hpp>
+#include <merge/MergeKernel.hpp>
 #include <pipeline/PipelineKernel.hpp>
 #include <random/RandomKernel.hpp>
 #include <sort/SortKernel.hpp>
 #include <split/SplitKernel.hpp>
+#include <tindex/TIndexKernel.hpp>
 #include <translate/TranslateKernel.hpp>
 
 #include <boost/filesystem.hpp>
@@ -65,27 +67,19 @@ KernelFactory::KernelFactory(bool no_plugins)
     PluginManager::initializePlugin(DeltaKernel_InitPlugin);
     PluginManager::initializePlugin(DiffKernel_InitPlugin);
     PluginManager::initializePlugin(InfoKernel_InitPlugin);
+    PluginManager::initializePlugin(MergeKernel_InitPlugin);
     PluginManager::initializePlugin(PipelineKernel_InitPlugin);
     PluginManager::initializePlugin(RandomKernel_InitPlugin);
     PluginManager::initializePlugin(SortKernel_InitPlugin);
     PluginManager::initializePlugin(SplitKernel_InitPlugin);
+    PluginManager::initializePlugin(TIndexKernel_InitPlugin);
     PluginManager::initializePlugin(TranslateKernel_InitPlugin);
 }
 
-std::unique_ptr<Kernel> KernelFactory::createKernel(std::string const& kernel_name)
+std::unique_ptr<Kernel> KernelFactory::createKernel(std::string const& name)
 {
     PluginManager & pm = PluginManager::getInstance();
-
-    void * kernel = pm.createObject(kernel_name);
-    if (!kernel)
-    {
-        int32_t res = pm.guessLoadByPath(kernel_name);
-        if (res == 0)
-            kernel = pm.createObject(kernel_name);
-    }
-    Kernel *k = (Kernel*)kernel;
-    std::unique_ptr<Kernel> retKernel(k);
-    return retKernel;
+    return std::unique_ptr<Kernel>(static_cast<Kernel*>(pm.createObject(name)));
 }
 
 std::vector<std::string> KernelFactory::getKernelNames()

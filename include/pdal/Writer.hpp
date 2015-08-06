@@ -52,6 +52,7 @@ class UserCallback;
 class PDAL_DLL Writer : public Stage
 {
     friend class WriterWrapper;
+    friend class FlexWriter;
 
 public:
     /// Constructs an end-stage consumer of a pipeline of data -- a writer
@@ -69,7 +70,7 @@ protected:
     XForm m_zXform;
     StringList m_outputDims;
 
-    virtual void setAutoOffset(const PointViewPtr view);
+    virtual void setAutoXForm(const PointViewPtr view);
 
 private:
     virtual PointViewSet run(PointViewPtr view)

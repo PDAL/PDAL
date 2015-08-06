@@ -38,6 +38,7 @@
 #include <string.h>
 
 #include <pdal/Metadata.hpp>
+#include <pdal/PDALUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/QuickInfo.hpp>
 #include <pdal/util/Extractor.hpp>
@@ -55,48 +56,12 @@ namespace pdal
 namespace
 {
 
-double toDouble(const Everything& e, Dimension::Type::Enum type)
+class invalid_stream : public pdal_error
 {
-    using namespace Dimension::Type;
-
-    double d = 0;
-    switch (type)
-    {
-    case Unsigned8:
-        d = e.u8;
-        break;
-    case Unsigned16:
-        d = e.u16;
-        break;
-    case Unsigned32:
-        d = e.u32;
-        break;
-    case Unsigned64:
-        d = e.u64;
-        break;
-    case Signed8:
-        d = e.s8;
-        break;
-    case Signed16:
-        d = e.s16;
-        break;
-    case Signed32:
-        d = e.s32;
-        break;
-    case Signed64:
-        d = e.s64;
-        break;
-    case Float:
-        d = e.f;
-        break;
-    case Double:
-        d = e.d;
-        break;
-    default:
-        break;
-    }
-    return d;
-}
+public:
+    invalid_stream(const std::string& msg) : pdal_error(msg)
+        {}
+};
 
 } // unnamed namespace
 
@@ -111,7 +76,7 @@ void LasReader::processOptions(const Options& options)
 static PluginInfo const s_info = PluginInfo(
     "readers.las",
     "ASPRS LAS 1.0 - 1.4 read support. LASzip support is also \n" \
-        "enabled through this driver if LASzip was found diring \n" \
+        "enabled through this driver if LASzip was found during \n" \
         "compilation.",
     "http://pdal.io/stages/readers.las.html" );
 
@@ -122,9 +87,9 @@ std::string LasReader::getName() const { return s_info.name; }
 QuickInfo LasReader::inspect()
 {
     QuickInfo qi;
-    PointLayoutPtr layout(new PointLayout());
+    std::unique_ptr<PointLayout> layout(new PointLayout());
 
-    addDimensions(layout);
+    addDimensions(layout.get());
     initialize();
 
     Dimension::IdList dims = layout->dims();
@@ -134,12 +99,19 @@ QuickInfo LasReader::inspect()
         Utils::saturation_cast<point_count_t>(m_lasHeader.pointCount());
     qi.m_bounds = m_lasHeader.getBounds();
     qi.m_srs = getSrsFromVlrs();
+    qi.m_valid = true;
+
+    PointTable table;
+    done(table);
+
     return qi;
 }
 
 
 void LasReader::initialize()
 {
+    if (m_initialized)
+        return;
     m_istream = createStream();
 
     m_istream->seekg(0);
@@ -176,6 +148,7 @@ void LasReader::initialize()
         readExtraBytesVlr();
     }
     fixupVlrs();
+    m_initialized = true;
 }
 
 
@@ -214,6 +187,8 @@ void LasReader::ready(PointTableRef table, MetadataNode& m)
         throw pdal_error("LASzip is not enabled.  Can't read LAZ data.");
 #endif
     }
+    m_error.setLog(log());
+
 }
 
 
@@ -521,7 +496,7 @@ void LasReader::addDimensions(PointLayoutPtr layout)
     layout->registerDim(Id::ScanDirectionFlag, Type::Unsigned8);
     layout->registerDim(Id::EdgeOfFlightLine, Type::Unsigned8);
     layout->registerDim(Id::Classification, Type::Unsigned8);
-    layout->registerDim(Id::ScanAngleRank, Type::Signed8);
+    layout->registerDim(Id::ScanAngleRank, Type::Float);
     layout->registerDim(Id::UserData, Type::Unsigned8);
     layout->registerDim(Id::PointSourceId, Type::Unsigned16);
 
@@ -604,7 +579,7 @@ point_count_t LasReader::read(PointViewPtr view, point_count_t count)
         }
         catch (std::out_of_range&)
         {}
-        catch (pdal::invalid_stream&)
+        catch (invalid_stream&)
         {}
     }
     m_index += i;
@@ -619,7 +594,17 @@ point_count_t LasReader::readFileBlock(std::vector<char>& buf,
     point_count_t blockpoints = buf.size() / ptLen;
 
     blockpoints = std::min(maxpoints, blockpoints);
+    if (m_istream->eof())
+        throw invalid_stream("stream is done");
+
     m_istream->read(buf.data(), blockpoints * ptLen);
+    if (m_istream->gcount() != (std::streamsize)(blockpoints * ptLen))
+    {
+        // we read fewer bytes than we asked for
+        // because the file was either truncated
+        // or the header is bunk.
+        blockpoints = m_istream->gcount() / ptLen;
+    }
     return blockpoints;
 }
 
@@ -793,7 +778,7 @@ void LasReader::loadExtraDims(LeExtractor& istream, PointView& data,
 
         if (dim.m_dimType.m_xform.nonstandard())
         {
-            double d = toDouble(e, dim.m_dimType.m_type);
+            double d = Utils::toDouble(e, dim.m_dimType.m_type);
             d = d * dim.m_dimType.m_xform.m_scale +
                 dim.m_dimType.m_xform.m_offset;
             data.setField(dim.m_dimType.m_id, nextId, d);
@@ -811,6 +796,7 @@ void LasReader::done(PointTableRef)
     m_unzipper.reset();
 #endif
     destroyStream();
+    m_initialized = false;
 }
 
 } // namespace pdal

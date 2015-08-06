@@ -36,7 +36,8 @@
 
 #include <pdal/Dimension.hpp>
 #include <pdal/pdal_macros.hpp>
-#include <pdal/portable_endian.hpp>
+
+#include "portable_endian.hpp"
 
 namespace pdal
 {

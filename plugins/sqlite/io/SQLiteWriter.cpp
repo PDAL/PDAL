@@ -80,7 +80,7 @@ void SQLiteWriter::processOptions(const Options& options)
             options.getValueOrDefault<std::string>("filename", "");
 
         if (!m_connection.size())
-        throw sqlite_driver_error("unable to connect to database, "
+        throw pdal_error("unable to connect to database, "
             "no connection string was given!");
     }
     m_block_table =
@@ -107,20 +107,19 @@ void SQLiteWriter::initialize()
         m_session = std::unique_ptr<SQLite>(new SQLite(m_connection, log()));
         m_session->connect(true);
         log()->get(LogLevel::Debug) << "Connected to database" << std::endl;
-        bool bHaveSpatialite = m_session->doesTableExist("geometry_columns");
+        
+        bool bHaveSpatialite = m_session->haveSpatialite();
         log()->get(LogLevel::Debug) << "Have spatialite?: " <<
             bHaveSpatialite << std::endl;
-        m_session->spatialite(m_modulename);
+        m_session->loadSpatialite(m_modulename);
 
         if (!bHaveSpatialite)
         {
-            std::ostringstream oss;
-            oss << "SELECT InitSpatialMetadata()";
-            m_session->execute(oss.str());
+            m_session->initSpatialiteMetadata();
         }
 
     }
-    catch (sqlite_driver_error const& e)
+    catch (pdal_error const& e)
     {
         std::stringstream oss;
         oss << "Unable to connect to database with error '" << e.what() << "'";
@@ -472,7 +471,7 @@ void SQLiteWriter::CreateCloud()
         Option& pc_id = m_options.getOptionByRef("pc_id");
         pc_id.setValue(id);
     }
-    catch (pdal::option_not_found&)
+    catch (Option::not_found)
     {
         Option pc_id("pc_id", id, "Point Cloud Id");
         m_options.add(pc_id);
@@ -515,12 +514,20 @@ void SQLiteWriter::writeTile(const PointViewPtr view)
 
         LazPerfCompressor<Patch> compressor(*m_patch, dimTypes);
 
-        std::vector<char> outbuf(packedPointSize());
-        for (PointId idx = 0; idx < view->size(); idx++)
+        try
         {
-            size_t size = readPoint(*view.get(), idx, outbuf.data());
-            // Read the data and write to the patch.
-            compressor.compress(outbuf.data(), size);
+            std::vector<char> outbuf(packedPointSize());
+            for (PointId idx = 0; idx < view->size(); idx++)
+            {
+                size_t size = readPoint(*view.get(), idx, outbuf.data());
+                // Read the data and write to the patch.
+                compressor.compress(outbuf.data(), size);
+            }
+        }
+        catch (pdal_error)
+        {
+            compressor.done();
+            throw;
         }
         compressor.done();
 #else
@@ -551,10 +558,11 @@ void SQLiteWriter::writeTile(const PointViewPtr view)
     row r;
 
     uint32_t precision(9);
-    BOX3D b = view->calculateBounds(true);
+    BOX3D b;
+    view->calculateBounds(b);
     std::string bounds = b.toWKT(precision); // polygons are only 2d, not cubes
 
-    std::string box = b.toBox(precision, 3);
+    std::string box = b.toBox(precision);
     log()->get(LogLevel::Debug3) << "extent: " << bounds << std::endl;
     log()->get(LogLevel::Debug3) << "bbox: " << box << std::endl;
 

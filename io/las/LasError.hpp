@@ -35,7 +35,8 @@
 
 #include <vector>
 
-#include <pdal/Utils.hpp>
+#include <pdal/util/Utils.hpp>
+#include <pdal/Log.hpp>
 
 namespace pdal
 {
@@ -49,6 +50,8 @@ public:
     void setFilename(const std::string& filename)
         { m_filename = filename; }
 
+    void setLog(LogPtr log) { m_log = log; }
+
     void returnNumWarning(int returnNum)
     {
         static std::vector<int> warned;
@@ -56,7 +59,7 @@ public:
         if (!Utils::contains(warned, returnNum))
         {
             warned.push_back(returnNum);
-            std::cerr << m_filename << ": Found invalid value of '" <<
+            m_log->get(LogLevel::Warning) << m_filename << ": Found invalid value of '" <<
                 returnNum << "' for point's return number.\n";
         }
     }
@@ -68,13 +71,14 @@ public:
         if (!Utils::contains(warned, numReturns))
         {
             warned.push_back(numReturns);
-            std::cerr << m_filename << ": Found invalid value "
+            m_log->get(LogLevel::Warning) << m_filename << ": Found invalid value "
                 "of '" << numReturns << "' for point's number of returns.\n";
         }
     }
 
 private:
     std::string m_filename;
+    LogPtr m_log;
 };
 
 } // namespace pdal

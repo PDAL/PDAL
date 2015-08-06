@@ -33,7 +33,6 @@
 ****************************************************************************/
 
 #include "Invocation.hpp"
-
 #include "Environment.hpp"
 
 #ifdef PDAL_COMPILER_MSVC
@@ -79,14 +78,14 @@ void Invocation::compile()
     m_bytecode = Py_CompileString(m_script.source(), m_script.module(),
         Py_file_input);
     if (!m_bytecode)
-        throw python_error(getTraceback());
+        throw error(getTraceback());
 
     Py_INCREF(m_bytecode);
 
     m_module = PyImport_ExecCodeModule(const_cast<char*>(m_script.module()),
         m_bytecode);
     if (!m_module)
-        throw python_error(getTraceback());
+        throw error(getTraceback());
 
     m_dictionary = PyModule_GetDict(m_module);
     m_function = PyDict_GetItemString(m_dictionary, m_script.function());
@@ -94,11 +93,11 @@ void Invocation::compile()
     {
         std::ostringstream oss;
         oss << "unable to find target function '" << m_script.function() <<
-            "' in module";
-        throw python_error(oss.str());
+            "' in module.";
+        throw error(oss.str());
     }
     if (!PyCallable_Check(m_function))
-        throw python_error(getTraceback());
+        throw error(getTraceback());
 }
 
 
@@ -147,9 +146,9 @@ void *Invocation::extractResult(std::string const& name,
 {
     PyObject* xarr = PyDict_GetItemString(m_varsOut, name.c_str());
     if (!xarr)
-        throw python_error("plang output variable '" + name + "' not found");
+        throw error("plang output variable '" + name + "' not found.");
     if (!PyArray_Check(xarr))
-        throw python_error("plang output variable  '" + name +
+        throw error("Plang output variable  '" + name +
             "' is not a numpy array");
 
     PyArrayObject* arr = (PyArrayObject*)xarr;
@@ -163,8 +162,8 @@ void *Invocation::extractResult(std::string const& name,
         std::ostringstream oss;
         oss << "dtype of array has size " << dtype->elsize
             << " but PDAL dimension '" << name << "' has byte size of "
-            << Dimension::size(t) << " bytes";
-        throw python_error(oss.str());
+            << Dimension::size(t) << " bytes.";
+        throw error(oss.str());
     }
 
     using namespace Dimension;
@@ -174,8 +173,8 @@ void *Invocation::extractResult(std::string const& name,
         std::ostringstream oss;
         oss << "dtype of array has a signed integer type but the " <<
             "dimension data type of '" << name <<
-            "' is not pdal::Signed";
-        throw python_error(oss.str());
+            "' is not pdal::Signed.";
+        throw error(oss.str());
     }
 
     if (dtype->kind == 'u' && b != BaseType::Unsigned)
@@ -183,16 +182,16 @@ void *Invocation::extractResult(std::string const& name,
         std::ostringstream oss;
         oss << "dtype of array has a unsigned integer type but the " <<
             "dimension data type of '" << name <<
-            "' is not pdal::Unsigned";
-        throw python_error(oss.str());
+            "' is not pdal::Unsigned.";
+        throw error(oss.str());
     }
 
     if (dtype->kind == 'f' && b != BaseType::Floating)
     {
         std::ostringstream oss;
         oss << "dtype of array has a float type but the " <<
-            "dimension data type of '" << name << "' is not pdal::Floating";
-        throw python_error(oss.str());
+            "dimension data type of '" << name << "' is not pdal::Floating.";
+        throw error(oss.str());
     }
     return PyArray_GetPtr(arr, &one);
 }
@@ -263,7 +262,7 @@ bool Invocation::hasOutputVariable(const std::string& name) const
 bool Invocation::execute()
 {
     if (!m_bytecode)
-        throw python_error("no code has been compiled");
+        throw error("No code has been compiled");
 
     Py_INCREF(m_varsIn);
     Py_INCREF(m_varsOut);
@@ -273,10 +272,10 @@ bool Invocation::execute()
 
     m_scriptResult = PyObject_CallObject(m_function, m_scriptArgs);
     if (!m_scriptResult)
-        throw python_error(getTraceback());
+        throw error(getTraceback());
 
     if (!PyBool_Check(m_scriptResult))
-        throw python_error("user function return value not a boolean type");
+        throw error("User function return value not a boolean type.");
 
     return (m_scriptResult == Py_True);
 }

@@ -113,18 +113,6 @@ void NitfReader::initialize()
 
 void NitfReader::ready(PointTableRef table)
 {
-#if 0
-    // When combined with setting REQUIRE_LIDAR_SEGMENTS, this little
-    // snippet can be used to "pretend" there is a real LAS file
-    // embedded in the NITF file. (This is useful for testing the
-    // metadata parsing routines on non-lidar nitf test files.)
-    if (m_offset == 0 && m_length == 0)
-    {
-        m_filename = "./simple.las";
-        m_offset = 0;
-        m_length = 36437;
-    }
-#endif
     // Initialize the LAS stuff with its own metadata node.
     MetadataNode lasNode = m_metadata.add(LasReader::getName());
     LasReader::ready(table, lasNode);

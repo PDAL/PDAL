@@ -35,10 +35,10 @@
 #include <thread>
 
 #include "WebSocketClient.hpp"
-#include <pdal/pdal_error.hpp>
 
 #include <websocketpp/config/asio_no_tls_client.hpp>
 #include <websocketpp/client.hpp>
+#include <pdal/pdal_types.hpp>
 
 namespace pdal
 {
@@ -150,7 +150,7 @@ void WebSocketClient::exchange(WebSocketExchange& exchange)
             std::cout << message << std::endl;
         }
 
-        throw new pdal_error(message);
+        throw new pdal::pdal_error(message);
     }
 }
 

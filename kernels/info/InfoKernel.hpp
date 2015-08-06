@@ -63,13 +63,21 @@ public:
     std::string getName() const;
     int execute(); // overrride
 
+
+    void setup(const std::string& filename);
+    MetadataNode run(const std::string& filename);
+
+    inline bool showAll() { return m_showAll; }
+    inline void doShowAll(bool value) { m_showAll = value; }
+    inline void doComputeSummary(bool value) { m_showSummary = value; }
+    inline void doComputeBoundary(bool value) { m_boundary = value; }
+
 private:
     InfoKernel();
     void addSwitches(); // overrride
     void validateSwitches(); // overrride
 
-    void dump(std::ostream& o, const std::string& filename);
-
+    void dump(MetadataNode& root);
     MetadataNode dumpPoints(PointViewPtr inView) const;
     MetadataNode dumpStats() const;
     void dumpPipeline() const;
@@ -84,12 +92,11 @@ private:
     bool m_boundary;
     pdal::Options m_options;
     std::string m_pointIndexes;
-    bool m_useJSON;
-    std::string m_Dimensions;
-    std::string m_QueryPoint;
-    double m_QueryDistance;
+    std::string m_dimensions;
+    std::string m_queryPoint;
     std::string m_pipelineFile;
     bool m_showSummary;
+    bool m_needPoints;
     std::string m_PointCloudSchemaOutput;
 
     Stage *m_statsStage;

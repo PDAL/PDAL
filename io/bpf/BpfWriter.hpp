@@ -37,7 +37,7 @@
 #include "BpfHeader.hpp"
 
 #include <pdal/pdal_export.hpp>
-#include <pdal/Writer.hpp>
+#include <pdal/FlexWriter.hpp>
 #include <pdal/util/OStream.hpp>
 
 #include <vector>
@@ -48,7 +48,7 @@ extern "C" PF_ExitFunc BpfWriter_InitPlugin();
 namespace pdal
 {
 
-class PDAL_DLL BpfWriter : public Writer
+class PDAL_DLL BpfWriter : public FlexWriter
 {
 public:
     static void * create();
@@ -61,11 +61,14 @@ private:
     OLeStream m_stream;
     BpfHeader m_header;
     BpfDimensionList m_dims;
+    std::vector<uint8_t> m_extraData;
+    std::vector<BpfUlemFile> m_bundledFiles;
 
     virtual void processOptions(const Options& options);
-    virtual void ready(PointTableRef table);
-    virtual void write(const PointViewPtr data);
-    virtual void done(PointTableRef table);
+    virtual void readyTable(PointTableRef table);
+    virtual void readyFile(const std::string& filename);
+    virtual void writeView(const PointViewPtr data);
+    virtual void doneFile();
 
     double getAdjustedValue(const PointView* data, BpfDimension& bpfDim,
         PointId idx);

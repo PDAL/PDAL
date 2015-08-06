@@ -44,10 +44,11 @@
 namespace pdal
 {
 
-class PDAL_DLL PcdWriter : public pdal::Writer
+class PDAL_DLL PcdWriter : public Writer
 {
 public:
-    PcdWriter() : pdal::Writer() {};
+    PcdWriter()
+    {}
 
     static void * create();
     static int32_t destroy(void *);

@@ -74,7 +74,7 @@ TEST(PLangTest, PLangTest_compile_error)
     Script script(source, "MyTest", "yow");
     Invocation meth(script);
 
-    ASSERT_THROW(meth.compile(), python_error);
+    ASSERT_THROW(meth.compile(), error);
 }
 
 
@@ -90,7 +90,7 @@ TEST(PLangTest, PLangTest_runtime_error)
     Invocation meth(script);
     meth.compile();
 
-    ASSERT_THROW(meth.execute(), python_error);
+    ASSERT_THROW(meth.execute(), error);
 }
 
 
@@ -106,7 +106,7 @@ TEST(PLangTest, PLangTest_toofewinputs)
     Invocation meth(script);
     meth.compile();
 
-    ASSERT_THROW(meth.execute(), python_error);
+    ASSERT_THROW(meth.execute(), error);
 }
 
 
@@ -122,7 +122,7 @@ TEST(PLangTest, PLangTest_toomanyinputs)
     Invocation meth(script);
     meth.compile();
 
-    ASSERT_THROW(meth.execute(), python_error);
+    ASSERT_THROW(meth.execute(), error);
 }
 
 
@@ -138,7 +138,7 @@ TEST(PLangTest, PLangTest_returnvoid)
     Invocation meth(script);
     meth.compile();
 
-    ASSERT_THROW(meth.execute(), python_error);
+    ASSERT_THROW(meth.execute(), error);
 }
 
 
@@ -154,7 +154,7 @@ TEST(PLangTest, PLangTest_returnint)
     Invocation meth(script);
     meth.compile();
 
-    ASSERT_THROW(meth.execute(), python_error);
+    ASSERT_THROW(meth.execute(), error);
 }
 
 

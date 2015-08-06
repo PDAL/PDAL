@@ -40,8 +40,9 @@
 #include <cstring>
 #include <stack>
 
-#include <pdal/portable_endian.hpp>
 #include <pdal/pdal_internal.hpp>
+
+#include "portable_endian.hpp"
 
 namespace pdal
 {
@@ -65,6 +66,13 @@ public:
         m_stream = m_fstream = new std::ofstream(filename,
             std::ios_base::out | std::ios_base::binary);
         return 0;
+    }
+    void close()
+    {
+        flush();
+        delete m_fstream;
+        m_fstream = NULL;
+        m_stream = NULL;
     }
     void flush()
         { m_stream->flush(); }

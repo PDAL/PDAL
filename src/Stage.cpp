@@ -46,9 +46,21 @@ namespace pdal
 
 
 Stage::Stage()
-  : m_callback(new UserCallback)
+  : m_callback(new UserCallback), m_progressFd(-1)
 {
     Construct();
+}
+
+
+/// Only add options if an option with the same name doesn't already exist.
+///
+/// \param[in] ops  Options to add.
+///
+void Stage::addConditionalOptions(const Options& opts)
+{
+    for (const auto& o : opts.getOptions())
+        if (!m_options.hasOption(o.getName()))
+            m_options.add(o);
 }
 
 

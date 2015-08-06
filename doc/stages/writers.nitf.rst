@@ -3,9 +3,9 @@
 writers.nitf
 ============
 
-The `NITF`_ format is used primarily by the US Department of Defence and supports many kinds of data inside a generic wrapper. The `NITF 2.1`_ version added support for LIDAR point cloud data, and the **NITF file writing** supports reading that data.
-
-The dimensions read by the writer match should exactly to the LAS dimension names and types for convenience in file format transformation.
+The `NITF`_ format is a US Department of Defense format for the transmission
+of imagery.  It supports various formats inside a generic wrapper.  However,
+the PDAL NITF writer only supports LAS/LAZ data.
 
 Example
 -------
@@ -29,34 +29,57 @@ Options
 -------
 
 filename
-  Filename to read from [Required] 
+  NITF file to write.  The writer will accept a filename containing
+  a single placeholder character ('#').  If input to the writer consists
+  of multiple PointViews, each will be written to a separate file, where
+  the placeholder will be replaced with an incrementing integer.  If no
+  placeholder is found, all PointViews provided to the writer are
+  aggregated into a single file for output.  Multiple PointViews are usually
+  the result of using :ref:`filters.splitter` or :ref:`filters.chipper`.
 
 CLEVEL
-  Set the "compliance level" metadata [Default: **03**]
+  File complexity level (2 characters) [Default: **03**]
   
 STYPE
-  Set the "system type" metadata [Default: **BF01**]
+  Standard type (4 characters) [Default: **BF01**]
 
 OSTAID
-  Set the "origin station id" metadata [Default: **PDAL**]
+  Originating station ID (10 characters) [Default: **PDAL**]
 
 FTITLE
-  Set the "file title" metadata [Default: **FTITLE**]
+  File title (80 characters) [Default: <spaces>]
 
 FSCLAS
-  Set the "classification" metadata [Default: **U**]
+  File security classification ('T', 'S', 'C', 'R' or 'U') [Default: **U**]
 
 ONAME
-  Set the "originator name" metadata [Default: none]
+  Originator name (24 characters) [Default: <spaces>]
 
 OPHONE
-  Set the "originator phone" metadata [Default: none]
+  Originator phone (18 characters) [Default: <spaces>]
+
+FSCTLH
+  File control and handling (2 characters) [Default: <spaces>]
+
+FSCLSY
+  File classification system (2 characters) [Default: <spaces>]
 
 IDATIM
-  Set the "file date" metadata [Default: none]
+  Image date and time (format: 'CCYYMMDDhhmmss') [Default: <spaces>]
 
+IID2
+  Image identifier 2 (80 characters) [Default: <spaces>]
 
+FSCLTX
+  File classification text (43 characters) [Default: <spaces>]
 
+AIMIDB
+  Option tag that should contain further options to complete the AIMIDB
+  (Additional Image ID) TRE record [Default: None]
+
+ACFTB
+  Option tag that should contain further options to complete the ACFTB
+  (Aircraft Information) TRE record [Default: None]
 
 
 .. _NITF: http://en.wikipedia.org/wiki/National_Imagery_Transmission_Format

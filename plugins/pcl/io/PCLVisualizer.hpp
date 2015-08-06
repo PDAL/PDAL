@@ -41,10 +41,11 @@
 namespace pdal
 {
 
-class PDAL_DLL PclVisualizer : public pdal::Writer
+class PDAL_DLL PclVisualizer : public Writer
 {
 public:
-    PclVisualizer() : pdal::Writer() {};
+    PclVisualizer()
+    {}
 
     static void * create();
     static int32_t destroy(void *);

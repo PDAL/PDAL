@@ -34,10 +34,6 @@
 
 #include <pdal/PipelineManager.hpp>
 
-#include <pdal/Utils.hpp>
-
-//#include <boost/optional.hpp>
-
 namespace pdal
 {
 
@@ -50,6 +46,7 @@ Stage& PipelineManager::addReader(const std::string& type)
         ss << "Couldn't create reader stage of type '" << type << "'.";
         throw pdal_error(ss.str());
     }
+    r->setProgressFd(m_progressFd);
     m_stages.push_back(std::unique_ptr<Stage>(r));
     return *r;
 }
@@ -64,6 +61,7 @@ Stage& PipelineManager::addFilter(const std::string& type)
         ss << "Couldn't create filter stage of type '" << type << "'.";
         throw pdal_error(ss.str());
     }
+    stage->setProgressFd(m_progressFd);
     m_stages.push_back(std::unique_ptr<Stage>(stage));
     return *stage;
 }
@@ -78,6 +76,7 @@ Stage& PipelineManager::addWriter(const std::string& type)
         ss << "Couldn't create writer stage of type '" << type << "'.";
         throw pdal_error(ss.str());
     }
+    writer->setProgressFd(m_progressFd);
     m_stages.push_back(std::unique_ptr<Stage>(writer));
     return *writer;
 }

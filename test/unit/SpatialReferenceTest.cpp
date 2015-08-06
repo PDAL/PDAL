@@ -130,7 +130,7 @@ TEST(SpatialReferenceTest, test_get_utmzone)
     std::string code = "+proj=lcc +lat_1=43 +lat_2=45.5 +lat_0=41.75 +lon_0=-120.5 +x_0=399999.9999999999 +y_0=0 +ellps=GRS80 +units=ft +no_defs";
     ref.setFromUserInput(code);
 
-    BOX3D box(635589.01, 848886.45, 638994.75, 853535.43);
+    BOX3D box(635589.01, 848886.45, 638994.75, 853535.43, 0, 0);
 
     int zone = ref.computeUTMZone(box);
 
@@ -289,7 +289,7 @@ TEST(SpatialReferenceTest, test_writing_vlr)
 
         SpatialReference result_ref = reader.getSpatialReference();
 
-        EXPECT_EQ(reader.header().vlrCount(), 4u);
+        EXPECT_EQ(reader.header().vlrCount(), 5u);
         std::string wkt = result_ref.getWKT();
         EXPECT_EQ(wkt, reference_wkt);
     }

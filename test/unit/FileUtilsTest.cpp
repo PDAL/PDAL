@@ -35,7 +35,8 @@
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/util/FileUtils.hpp>
-#include <pdal/Utils.hpp>
+#include <pdal/util/Utils.hpp>
+
 #include "Support.hpp"
 
 using namespace pdal;
@@ -161,4 +162,10 @@ TEST(FileUtilsTest, test_isAbsolute)
     // test relative case
     const bool b = FileUtils::isAbsolutePath("a/b/foo.txt");
     EXPECT_TRUE(!b);
+}
+
+TEST(FileUtilsTest, filename)
+{
+    std::string filename = "/foo//bar//baz.c";
+    EXPECT_EQ(FileUtils::getFilename(filename), "baz.c");
 }

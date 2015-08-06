@@ -38,7 +38,7 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/QuadIndex.hpp>
-#include <pdal/Utils.hpp>
+#include <pdal/util/Utils.hpp>
 
 namespace
 {
@@ -263,25 +263,23 @@ std::size_t Tree::addPoint(const QuadPointRef* toAdd, const std::size_t curDepth
     }
 }
 
+// Fills are a count of the number of points at each level of the quad tree.
 void Tree::getFills(std::vector<std::size_t>& fills, std::size_t level) const
 {
     if (data)
     {
         if (level >= fills.size())
-        {
             fills.resize(level + 1);
-        }
-
-        ++fills.at(level);
+        (fills[level])++;
     }
 
     ++level;
-
     if (nw) nw->getFills(fills, level);
     if (ne) ne->getFills(fills, level);
     if (sw) sw->getFills(fills, level);
     if (se) se->getFills(fills, level);
 }
+
 
 void Tree::getPoints(
         std::vector<PointId>& results,

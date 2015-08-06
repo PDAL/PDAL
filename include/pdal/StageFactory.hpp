@@ -78,7 +78,7 @@ public:
     // e.g. output files ending in .laz should be compressed
     static pdal::Options inferWriterOptionsChanges(const std::string& filename);
 
-    Stage *createStage(const std::string& type) const;
+    Stage *createStage(const std::string& type, bool ownStage = false);
 
     StringList getStageNames() const;
     std::map<std::string, std::string> getStageMap() const;
@@ -86,6 +86,8 @@ public:
 private:
     StageFactory& operator=(const StageFactory&); // not implemented
     StageFactory(const StageFactory&); // not implemented
+
+    std::vector<std::unique_ptr<Stage>> m_ownedStages;
 };
 
 } // namespace pdal

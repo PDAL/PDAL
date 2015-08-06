@@ -57,16 +57,6 @@ CREATE_STATIC_PLUGIN(1, 0, DiffKernel, Kernel, s_info)
 
 std::string DiffKernel::getName() const { return s_info.name; }
 
-DiffKernel::DiffKernel()
-    : Kernel()
-    , m_sourceFile("")
-    , m_candidateFile("")
-    , m_useXML(false)
-    , m_useJSON(false)
-
-{}
-
-
 void DiffKernel::validateSwitches()
 {
     if (!m_sourceFile.size())
@@ -85,14 +75,8 @@ void DiffKernel::addSwitches()
 
     file_options->add_options()
         ("source", po::value<std::string>(&m_sourceFile), "source file name")
-        ("candidate",
-            po::value<std::string>(&m_candidateFile), "candidate file name")
-        ("xml",
-            po::value<bool>(&m_useXML)->zero_tokens()->implicit_value(true),
-            "dump XML")
-        ("json",
-            po::value<bool>(&m_useJSON)->zero_tokens()->implicit_value(true),
-            "dump JSON")
+        ("candidate", po::value<std::string>(&m_candidateFile),
+            "candidate file name")
     ;
 
     addSwitchSet(file_options);
@@ -197,9 +181,9 @@ int DiffKernel::execute()
 
         oss << "Source and candidate files do not have the same metadata count";
         errors.put("metadata.error", oss.str());
-        errors.put_child("metadata.source", utils::toPTree(source_metadata));
+        errors.put_child("metadata.source", Utils::toPTree(source_metadata));
         errors.put_child("metadata.candidate",
-            utils::toPTree(candidate_metadata));
+            Utils::toPTree(candidate_metadata));
     }
 
     if (candidateTable.layout()->dims().size() !=

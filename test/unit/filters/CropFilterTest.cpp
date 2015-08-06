@@ -64,7 +64,7 @@ TEST(CropFilterTest, test_crop)
     reader.setOptions(opts);
 
     // crop the window to 1/3rd the size in each dimension
-    BOX3D dstBounds(3.33333, 33.33333, 333.33333, 6.66666, 66.66666, 666.66666);
+    BOX2D dstBounds(3.33333, 33.33333, 6.66666, 66.66666);
     Options cropOpts;
     cropOpts.add("bounds", dstBounds);
 
@@ -215,6 +215,29 @@ TEST(CropFilterTest, test_crop_polygon_reprojection)
     EXPECT_EQ(view->size(), 47u);
 
     FileUtils::closeFile(wkt_stream);
-
 #endif
 }
+
+/**
+TEST(CropFilterTest, multibounds)
+{
+    using namespace Dimension;
+
+    PointTable table;
+    table.layout->registerDim(Id::X);
+    table.layout->registerDim(Id::Y);
+    table.layout->registerDim(Id::Z);
+
+    PointView view(table);
+    view.setField(Id::X, 0, 1);
+    view.setField(Id::Y, 0, 1);
+
+    view.setField(Id::X, 1, 2);
+    view.setField(Id::Y, 1, 6);
+
+    view.setField(Id::X, 2, 4);
+    view.setField(Id::Y, 2, 4);
+
+    BOX3D p
+}
+**/
