@@ -74,7 +74,10 @@ void wake_up_numpy()
 #endif
 {
     import_array();
+#if (PY_VERSION_HEX >= 0x03000000)
     return 0;
+#else
+#endif
 }
 
 Environment::Environment()
