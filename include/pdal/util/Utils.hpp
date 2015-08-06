@@ -370,7 +370,7 @@ namespace Utils
     {
         if (std::is_integral<T_OUT>::value)
         {
-            in = sround(in);
+            in = sround((double)in);
         }
 
         return std::is_same<double, T_OUT>::value ||
@@ -394,7 +394,7 @@ namespace Utils
             return true;
         }
         if (std::is_integral<T_OUT>::value)
-            in = static_cast<T_IN>(sround(in));
+            in = static_cast<T_IN>(sround((double)in));
         if ((std::is_same<T_OUT, double>::value) ||
             (in <= static_cast<double>(std::numeric_limits<T_OUT>::max()) &&
              in >= static_cast<double>(std::numeric_limits<T_OUT>::lowest())))
