@@ -36,6 +36,8 @@
 
 #include <pdal/pdal_internal.hpp>
 
+#include <pdal/pdal_internal.hpp>
+
 #include "Redirector.hpp"
 
 namespace pdal
@@ -43,14 +45,14 @@ namespace pdal
 namespace plang
 {
 
-std::string getTraceback();
-
 class error : public pdal_error
 {
 public:
     error(const std::string& msg) : pdal_error(msg)
-    {}
+        {}
 };
+
+std::string getTraceback();
 
 class Environment;
 typedef Environment *EnvironmentPtr;

@@ -44,6 +44,9 @@
 
 #include <Python.h>
 #include <pystate.h>
+#undef toupper
+#undef tolower
+#undef isspace
 
 #include "Redirector.hpp"
 

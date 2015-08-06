@@ -11,6 +11,9 @@
 #pragma once
 
 #include <Python.h>
+#undef toupper
+#undef tolower
+#undef isspace
 
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
