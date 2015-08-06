@@ -84,6 +84,10 @@ private:
         return filename;
     }
 
+#if (__GNUG__ < 4 || (__GNUG__ == 4 && __GNUG_MINOR__ < 7))
+#define final
+#endif
+
     virtual void ready(PointTableRef table) final
     {
         readyTable(table);
@@ -106,6 +110,8 @@ private:
             doneFile();
         doneTable(table);
     }
+
+#undef final
 
     virtual void readyTable(PointTableRef table)
     {}

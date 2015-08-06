@@ -31,20 +31,48 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
- 
-#include <pdal/pdal_test_main.hpp>
 
-#include <pdal/GlobalEnvironment.hpp>
+#pragma once
 
-using namespace pdal;
+#include <pdal/pdal_internal.hpp>
 
-TEST(EnvironmentTest, EnvironmentTest_1)
+#include <pdal/pdal_internal.hpp>
+
+#include "Redirector.hpp"
+
+namespace pdal
 {
-    GlobalEnvironment& pdal_env = ::pdal::GlobalEnvironment::get();
+namespace plang
+{
 
-#ifdef PDAL_HAVE_PYTHON
-    plang::PythonEnvironment& python_env = pdal_env.getPythonEnvironment();
+class error : public pdal_error
+{
+public:
+    error(const std::string& msg) : pdal_error(msg)
+        {}
+};
 
-    (void)python_env;
-#endif
-}
+std::string getTraceback();
+
+class Environment;
+typedef Environment *EnvironmentPtr;
+
+class PDAL_DLL Environment
+{
+public:
+    Environment();
+    ~Environment();
+
+    // these just forward into the Redirector class
+    void set_stdout(std::ostream* ostr);
+    void reset_stdout();
+
+    static EnvironmentPtr get();
+
+private:
+    Redirector m_redirector;
+};
+
+} // namespace plang
+} // namespace pdal
+

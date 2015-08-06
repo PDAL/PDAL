@@ -173,9 +173,6 @@ cmake_dependent_option(BUILD_PIPELINE_TESTS "Choose if pipeline tests should be 
 if(BUILD_PLUGIN_PGPOINTCLOUD OR BUILD_PLUGIN_OCI OR BUILD_PLUGIN_SQLITE)
     include(${PDAL_CMAKE_DIR}/libxml2.cmake)
 endif()
-if(BUILD_PLUGIN_PYTHON)
-    include(${PDAL_CMAKE_DIR}/python.cmake)
-endif()
 
 #------------------------------------------------------------------------------
 # test harness settings

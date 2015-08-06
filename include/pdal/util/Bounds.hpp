@@ -338,7 +338,7 @@ inline std::ostream& operator << (std::ostream& ostr, const BOX2D& bounds)
         return ostr;
     }
 
-    const int savedPrec = ostr.precision();
+    auto savedPrec = ostr.precision();
     ostr.precision(16); // or..?
     ostr << "(";
     ostr << "[" << bounds.minx << ", " << bounds.maxx << "], " <<
@@ -356,7 +356,7 @@ inline std::ostream& operator << (std::ostream& ostr, const BOX3D& bounds)
         return ostr;
     }
 
-    const int savedPrec = ostr.precision();
+    auto savedPrec = ostr.precision();
     ostr.precision(16); // or..?
     ostr << "(";
     ostr << "[" << bounds.minx << ", " << bounds.maxx << "], " <<

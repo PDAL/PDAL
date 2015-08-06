@@ -267,6 +267,9 @@ private:
     inline PointId getTemp(PointId id);
     void freeTemp(PointId id)
         { m_temps.push(id); }
+
+    // Awfulness to avoid exceptions in numeric cast.
+    static bool m_ok;
 };
 
 struct PointViewLess

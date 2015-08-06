@@ -42,50 +42,21 @@
 
 using namespace pdal;
 
-TEST(ColorizationFilterTest, ColorizationFilterTest_test_1)
+namespace
 {
-    Options ops1;
-    ops1.add("filename", Support::datapath("autzen/autzen-point-format-3.las"));
+
+void testFile(const Options& filterOps, StringList dimNames,
+    uint16_t expectedRed, uint16_t expectedGreen, uint16_t expectedBlue)
+{
+    Options readerOps;
+    readerOps.add("filename",
+        Support::datapath("autzen/autzen-point-format-3.las"));
+
     LasReader reader;
-    reader.setOptions(ops1);
-
-    Options options;
-
-    Option red("dimension", "Red", "");
-    Option b0("band",1, "");
-    Option s0("scale", 1.0f, "scale factor for this dimension");
-    Options redO;
-    redO.add(b0);
-    redO.add(s0);
-    red.setOptions(redO);
-
-    Option green("dimension", "Green", "");
-    Option b1("band",2, "");
-    Option s1("scale", 1.0f, "scale factor for this dimension");
-    Options greenO;
-    greenO.add(b1);
-    greenO.add(s1);
-    green.setOptions(greenO);
-
-    Option blue("dimension", "Blue", "");
-    Option b2("band",3, "");
-    Option s2("scale", 255.0f, "scale factor for this dimension");
-    Options blueO;
-    blueO.add(b2);
-    blueO.add(s2);
-    blue.setOptions(blueO);
-
-    Option datasource("raster", Support::datapath("autzen/autzen.jpg"),
-        "raster to read");
-
-    Options reader_options;
-    reader_options.add(red);
-    reader_options.add(green);
-    reader_options.add(blue);
-    reader_options.add(datasource);
+    reader.setOptions(readerOps);
 
     ColorizationFilter filter;
-    filter.setOptions(reader_options);
+    filter.setOptions(filterOps);
     filter.setInput(reader);
 
     PointTable table;
@@ -95,12 +66,106 @@ TEST(ColorizationFilterTest, ColorizationFilterTest_test_1)
     EXPECT_EQ(viewSet.size(), 1u);
     PointViewPtr view = *viewSet.begin();
 
-    uint16_t r = view->getFieldAs<uint16_t>(Dimension::Id::Red, 0);
-    uint16_t g = view->getFieldAs<uint16_t>(Dimension::Id::Green, 0);
-    uint16_t b = view->getFieldAs<uint16_t>(Dimension::Id::Blue, 0);
+    uint16_t r = view->getFieldAs<uint16_t>(
+        table.layout()->findDim(dimNames[0]), 0);
+    uint16_t g = view->getFieldAs<uint16_t>(
+        table.layout()->findDim(dimNames[1]), 0);
+    uint16_t b = view->getFieldAs<uint16_t>(
+        table.layout()->findDim(dimNames[2]), 0);
 
-    EXPECT_EQ(r, 210u);
-    EXPECT_EQ(g, 205u);
+    EXPECT_EQ(r, expectedRed);
+    EXPECT_EQ(g, expectedGreen);
     // We scaled this up to 16bit by multiplying by 255
-    EXPECT_EQ(b, 47175u);
+    EXPECT_EQ(b, expectedBlue);
 }
+
+} // unnamed namespace
+
+// Test using the standard dimensions.
+TEST(ColorizationFilterTest, test1)
+{
+    Options options;
+
+    Option red("dimension", "Red");
+    Options subRed;
+    subRed.add("band", 1);
+    subRed.add("scale", 1.0f, "scale factor for this dimension");
+    red.setOptions(subRed);
+    options.add(red);
+
+    Option green("dimension", "Green");
+    Options subGreen;
+    subGreen.add("band", 2);
+    subGreen.add("scale", 1.0f, "scale factor for this dimension");
+    green.setOptions(subGreen);
+    options.add(green);
+
+    Option blue("dimension", "Blue", "");
+    Options subBlue;
+    subBlue.add("band", 3);
+    subBlue.add("scale", 255.0f, "scale factor for this dimension");
+    blue.setOptions(subBlue);
+    options.add(blue);
+
+    options.add("raster", Support::datapath("autzen/autzen.jpg"),
+        "raster to read");
+
+    StringList dims;
+    dims.push_back("Red");
+    dims.push_back("Green");
+    dims.push_back("Blue");
+    testFile(options, dims, 210, 205, 47175);
+}
+
+// Allow use of default dimensions.
+TEST(ColorizationFilterTest, test2)
+{
+    Options options;
+
+    options.add("raster", Support::datapath("autzen/autzen.jpg"),
+        "raster to read");
+
+    StringList dims;
+    dims.push_back("Red");
+    dims.push_back("Green");
+    dims.push_back("Blue");
+
+    testFile(options, dims, 210, 205, 185);
+}
+
+// Check that dimension creation works.
+TEST(ColorizationFilterTest, test3)
+{
+    Options options;
+
+    Option red("dimension", "Foo");
+    Options subRed;
+    subRed.add("band", 1);
+    subRed.add("scale", 1.0f, "scale factor for this dimension");
+    red.setOptions(subRed);
+    options.add(red);
+
+    Option green("dimension", "Bar");
+    Options subGreen;
+    subGreen.add("band", 2);
+    subGreen.add("scale", 1.0f, "scale factor for this dimension");
+    green.setOptions(subGreen);
+    options.add(green);
+
+    Option blue("dimension", "Baz", "");
+    Options subBlue;
+    subBlue.add("band", 3);
+    subBlue.add("scale", 255.0f, "scale factor for this dimension");
+    blue.setOptions(subBlue);
+    options.add(blue);
+
+    options.add("raster", Support::datapath("autzen/autzen.jpg"),
+        "raster to read");
+
+    StringList dims;
+    dims.push_back("Foo");
+    dims.push_back("Bar");
+    dims.push_back("Baz");
+    testFile(options, dims, 210, 205, 47175);
+}
+

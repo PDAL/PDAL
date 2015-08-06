@@ -36,11 +36,12 @@
 
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
-#include <pdal/plang/PythonEnvironment.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/StageWrapper.hpp>
 #include <stats/StatsFilter.hpp>
 #include <faux/FauxReader.hpp>
+
+#include "../plang/Environment.hpp"
 
 #include "Support.hpp"
 

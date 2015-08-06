@@ -33,8 +33,8 @@
 ****************************************************************************/
 
 #include <pdal/pdal_internal.hpp>
+
 #include "PredicateFilter.hpp"
-#include <pdal/GlobalEnvironment.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 
@@ -76,8 +76,7 @@ void PredicateFilter::ready(PointTableRef table)
     m_script = new plang::Script(m_source, m_module, m_function);
     m_pythonMethod = new plang::BufferedInvocation(*m_script);
     m_pythonMethod->compile();
-    GlobalEnvironment::get().getPythonEnvironment().set_stdout(
-        log()->getLogStream());
+    plang::Environment::get()->set_stdout(log()->getLogStream());
 }
 
 
@@ -108,7 +107,7 @@ PointViewSet PredicateFilter::run(PointViewPtr view)
 
 void PredicateFilter::done(PointTableRef table)
 {
-    GlobalEnvironment::get().getPythonEnvironment().reset_stdout();
+    plang::Environment::get()->reset_stdout();
     delete m_pythonMethod;
     delete m_script;
 }

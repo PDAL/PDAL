@@ -42,6 +42,8 @@
 namespace pdal
 {
 
+bool PointView::m_ok;
+
 PointViewIter PointView::begin()
 {
     return PointViewIter(this, 0);

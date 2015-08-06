@@ -32,22 +32,22 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/GlobalEnvironment.hpp>
-
-#include <pdal/plang/Invocation.hpp>
+#include "Invocation.hpp"
+#include "Environment.hpp"
 
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127) // conditional expression is constant
 #endif
 
 #include <Python.h>
+#undef toupper
+#undef tolower
+#undef isspace
 
 //#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 
-// This file can only be included once, otherwise we get wierd runtime errors,
-// even if we define NO_IMPORT and stuff, so we include it only here, and
-// provide a backdoor function numpy_init() which gets called from
-// GlobalEnvironment::startup().
+#define NO_IMPORT_ARRAY
+#define PY_ARRAY_UNIQUE_SYMBOL PDAL_ARRAY_API
 #include <numpy/arrayobject.h>
 
 namespace pdal
@@ -55,22 +55,8 @@ namespace pdal
 namespace plang
 {
 
-void Invocation::numpy_init()
-{
-    // this macro is defined be NumPy and must be included
-    if (_import_array() < 0)
-    {
-        std::ostringstream oss;
-        oss << "unable to initialize NumPy with error '" <<
-            getPythonTraceback() << "'";
-        throw error(oss.str());
-    }
-}
-
-
 Invocation::Invocation(const Script& script)
     : m_script(script)
-    , m_environment(pdal::GlobalEnvironment::get().getPythonEnvironment())
     , m_bytecode(NULL)
     , m_module(NULL)
     , m_dictionary(NULL)
@@ -95,14 +81,14 @@ void Invocation::compile()
     m_bytecode = Py_CompileString(m_script.source(), m_script.module(),
         Py_file_input);
     if (!m_bytecode)
-        throw error(getPythonTraceback());
+        throw error(getTraceback());
 
     Py_INCREF(m_bytecode);
 
     m_module = PyImport_ExecCodeModule(const_cast<char*>(m_script.module()),
         m_bytecode);
     if (!m_module)
-        throw error(getPythonTraceback());
+        throw error(getTraceback());
 
     m_dictionary = PyModule_GetDict(m_module);
     m_function = PyDict_GetItemString(m_dictionary, m_script.function());
@@ -114,7 +100,7 @@ void Invocation::compile()
         throw error(oss.str());
     }
     if (!PyCallable_Check(m_function))
-        throw error(getPythonTraceback());
+        throw error(getTraceback());
 }
 
 
@@ -281,8 +267,6 @@ bool Invocation::execute()
     if (!m_bytecode)
         throw error("No code has been compiled");
 
-    m_environment.gil_lock();
-
     Py_INCREF(m_varsIn);
     Py_INCREF(m_varsOut);
     m_scriptArgs = PyTuple_New(2);
@@ -291,11 +275,10 @@ bool Invocation::execute()
 
     m_scriptResult = PyObject_CallObject(m_function, m_scriptArgs);
     if (!m_scriptResult)
-        throw error(getPythonTraceback());
+        throw error(getTraceback());
 
     if (!PyBool_Check(m_scriptResult))
         throw error("User function return value not a boolean type.");
-    m_environment.gil_unlock();
 
     return (m_scriptResult == Py_True);
 }

@@ -398,7 +398,7 @@ public:
         std::vector<T> vals;
 
         auto ops = getOptions(name);
-        for (auto& op : ops)
+        for (Option& op : ops)
             vals.push_back(op.getValue<T>());
         return vals;
     }

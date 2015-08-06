@@ -34,7 +34,7 @@
 
 #include <mutex>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
+//#include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include <pdal/GlobalEnvironment.hpp>
 #include <pdal/GDALUtils.hpp>
@@ -76,17 +76,8 @@ void GlobalEnvironment::shutdown()
 }
 
 
-//
-// regular member functions
-//
-
-GlobalEnvironment::GlobalEnvironment()
-    : m_gdalDebug()
-#ifdef PDAL_HAVE_PYTHON
-    , m_pythonEnvironment()
-#endif
-{
-}
+GlobalEnvironment::GlobalEnvironment() : m_gdalDebug()
+{}
 
 
 GlobalEnvironment::~GlobalEnvironment()
@@ -111,22 +102,5 @@ void GlobalEnvironment::initializeGDAL(LogPtr log, bool gdalDebugOutput)
 }
 
 
-#ifdef PDAL_HAVE_PYTHON
-void GlobalEnvironment::createPythonEnvironment()
-{
-    m_pythonEnvironment.reset(new pdal::plang::PythonEnvironment());
-}
-
-
-plang::PythonEnvironment& GlobalEnvironment::getPythonEnvironment()
-{
-    if (!m_pythonEnvironment)
-        createPythonEnvironment();
-
-    if (m_pythonEnvironment)
-        return *m_pythonEnvironment;
-    throw pdal_error("Unable to initialize the Python environment!");
-}
-#endif
-
 } //namespaces
+

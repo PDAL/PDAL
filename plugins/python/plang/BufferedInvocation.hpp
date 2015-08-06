@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2012, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Consulting LLC nor the
+*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -34,53 +34,26 @@
 
 #pragma once
 
-#include <iostream>
+#include "../plang/Invocation.hpp"
 
-#include <pdal/pdal_internal.hpp>
-
-// forward declare PyObject so we don't need the python headers everywhere
-// see: http://mail.python.org/pipermail/python-dev/2003-August/037601.html
-#ifndef PyObject_HEAD
-struct _object;
-typedef _object PyObject;
-#endif
+#include <pdal/PointView.hpp>
 
 namespace pdal
 {
 namespace plang
 {
 
-class error : public pdal_error
+class PDAL_DLL BufferedInvocation : public Invocation
 {
 public:
-    error(const std::string& msg) : pdal_error(msg)
-    {}
-};
+    BufferedInvocation(const Script& script);
 
-class Redirector;
-
-std::string getPythonTraceback();
-
-// there is one PythonEnvironment object per GlobalEnvironment object
-class PDAL_DLL PythonEnvironment
-{
-public:
-    PythonEnvironment();
-    ~PythonEnvironment();
-
-    // these just forward into the Redirector class
-    void set_stdout(std::ostream* ostr);
-    void reset_stdout();
-
-    void gil_lock();
-    void gil_unlock();
+    void begin(PointView& view);
+    void end(PointView& view);
 
 private:
-
-    Redirector* m_redirector;
-
-    // this is a casted PyGILState_STATE enum (we don't want to include <pystate.h> here)
-    int m_gilstate; 
+    std::vector<void *> m_buffers;
+    BufferedInvocation& operator=(BufferedInvocation const& rhs); // nope
 };
 
 } // namespace plang

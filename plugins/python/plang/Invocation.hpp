@@ -34,25 +34,72 @@
 
 #pragma once
 
-#include <pdal/plang/Invocation.hpp>
-#include <pdal/PointView.hpp>
+#include <pdal/pdal_internal.hpp>
+
+#include "Script.hpp"
+#include "Environment.hpp"
+
+#include <pdal/Dimension.hpp>
 
 namespace pdal
 {
 namespace plang
 {
 
-class PDAL_DLL BufferedInvocation : public Invocation
+
+class PDAL_DLL Invocation
 {
 public:
-    BufferedInvocation(const Script& script);
+    Invocation(const Script&);
+    ~Invocation();
 
-    void begin(PointView& view);
-    void end(PointView& view);
+    void compile();
+
+    void resetArguments();
+
+
+    // creates a Python variable pointing to a (one dimensional) C array
+    // adds the new variable to the arguments dictionary
+    void insertArgument(std::string const& name,
+                        uint8_t* data,
+                        Dimension::Type::Enum t,
+                        point_count_t count);
+    void *extractResult(const std::string& name,
+                        Dimension::Type::Enum dataType);
+
+    bool hasOutputVariable(const std::string& name) const;
+
+    // returns true iff the called python function returns true,
+    // as would be used for a predicate function
+    // (that is, the return value is NOT an error indicator)
+    bool execute();
+
+    // after a call to execute, this function will return you a list of
+    // the names in the 'outs' dictionary (this is used by the
+    // BufferedInvocation class to find the returned data -- faster to
+    // examine what's already in there than it is to iterate over all the
+    // possible names from the schema)
+    void getOutputNames(std::vector<std::string>& names);
+
+    static int getPythonDataType(Dimension::Type::Enum t);
 
 private:
-    std::vector<void *> m_buffers;
-    BufferedInvocation& operator=(BufferedInvocation const& rhs); // nope
+    void cleanup();
+
+    Script m_script;
+
+    PyObject* m_bytecode;
+    PyObject* m_module;
+    PyObject* m_dictionary;
+    PyObject* m_function;
+
+    PyObject* m_varsIn;
+    PyObject* m_varsOut;
+    PyObject* m_scriptArgs;
+    PyObject* m_scriptResult;
+    std::vector<PyObject*> m_pyInputArrays;
+
+    Invocation& operator=(Invocation const& rhs); // nope
 };
 
 } // namespace plang

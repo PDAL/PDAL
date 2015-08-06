@@ -34,7 +34,11 @@
 
 #include <pdal/pdal_test_main.hpp>
 
-#include <pdal/plang/Invocation.hpp>
+#include "../plang/Invocation.hpp"
+
+#include <Support.hpp>
+#include <faux/FauxReader.hpp>
+#include <pdal/StageFactory.hpp>
 
 using namespace pdal;
 using namespace pdal::plang;
@@ -360,4 +364,70 @@ TEST(PLangTest, PLangTest_reentry)
         EXPECT_FLOAT_EQ(*d++, 41.0);
         EXPECT_FLOAT_EQ(*d++, 51.0);
     }
+}
+
+TEST(PLangTest, log)
+{
+    StageFactory f;
+    // verify we can redirect the stdout inside the python script
+
+    Options reader_opts;
+    {
+        BOX3D bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
+        Option opt1("bounds", bounds);
+        Option opt2("num_points", 750);
+        Option opt3("mode", "constant");
+
+        reader_opts.add(opt1);
+        reader_opts.add(opt2);
+        reader_opts.add(opt3);
+
+        Option optlog("log", Support::temppath("mylog_three.txt"));
+        reader_opts.add(optlog);
+    }
+
+    Options xfilter_opts;
+    {
+        const Option source("source",
+            "import numpy as np\n"
+            "def xfunc(ins,outs):\n"
+            "  X = ins['X']\n"
+            "  print (\"Testing log output through python script.\")\n"
+            "  X = X + 1.0\n"
+            "  outs['X'] = X\n"
+            "  return True\n"
+            );
+        const Option module("module", "xModule");
+        const Option function("function", "xfunc");
+        xfilter_opts.add("log", Support::temppath("mylog_three.txt"));
+        xfilter_opts.add(source);
+        xfilter_opts.add(module);
+        xfilter_opts.add(function);
+    }
+
+    {
+        FauxReader reader;
+
+        reader.setOptions(reader_opts);
+
+        std::unique_ptr<Stage> xfilter(f.createStage("filters.programmable"));
+        xfilter->setOptions(xfilter_opts);
+        xfilter->setInput(reader);
+
+        PointTable table;
+        xfilter->prepare(table);
+        PointViewSet pvSet = xfilter->execute(table);
+        EXPECT_EQ(pvSet.size(), 1u);
+        PointViewPtr view = *pvSet.begin();
+        EXPECT_EQ(view->size(), 750u);
+    }
+
+    bool ok = Support::compare_text_files(
+        Support::temppath("mylog_three.txt"),
+        Support::datapath("logs/log_py.txt"));
+
+    if (ok)
+        FileUtils::deleteFile(Support::temppath("mylog_three.txt"));
+
+    EXPECT_TRUE(ok);
 }

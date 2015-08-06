@@ -32,8 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/plang/PythonEnvironment.hpp>
-#include <pdal/plang/Invocation.hpp>
+#include "Environment.hpp"
+#define PY_ARRAY_UNIQUE_SYMBOL PDAL_ARRAY_API
+#include <numpy/arrayobject.h>
+
+#include <sstream>
 
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127)  // conditional expression is constant
@@ -41,6 +44,9 @@
 
 #include <Python.h>
 #include <pystate.h>
+#undef toupper
+#undef tolower
+#undef isspace
 
 #include "Redirector.hpp"
 
@@ -53,66 +59,45 @@ namespace pdal
 namespace plang
 {
 
+static Environment g_environment;
 
-PythonEnvironment::PythonEnvironment()
-    : m_redirector(new Redirector())
+EnvironmentPtr Environment::get()
+{
+    return &g_environment;
+}
+
+Environment::Environment()
 {
     PyImport_AppendInittab(const_cast<char*>("redirector"), redirector_init);
 
     Py_Initialize();
 
-    Invocation::numpy_init();
-
+    char *path = Py_GetPath();
+    import_array();
     PyImport_ImportModule("redirector");
-
-    return;
 }
 
 
-PythonEnvironment::~PythonEnvironment()
+Environment::~Environment()
 {
-    delete m_redirector;
-
     Py_Finalize();
-
-    return;
 }
 
 
-void PythonEnvironment::set_stdout(std::ostream* ostr)
+void Environment::set_stdout(std::ostream* ostr)
 {
-    m_redirector->set_stdout(ostr);
-
-    return;
+    m_redirector.set_stdout(ostr);
 }
 
 
-void PythonEnvironment::reset_stdout()
+void Environment::reset_stdout()
 {
-    m_redirector->reset_stdout();
-
-    return;
-}
-
-void PythonEnvironment::gil_lock()
-{
-    PyGILState_STATE gstate;
-    gstate = PyGILState_Ensure();
-
-    m_gilstate = (int)gstate;
+    m_redirector.reset_stdout();
 }
 
 
-void PythonEnvironment::gil_unlock()
+std::string getTraceback()
 {
-    PyGILState_STATE gstate = (PyGILState_STATE)m_gilstate;
-    PyGILState_Release(gstate);
-}
-
-
-std::string getPythonTraceback()
-{
-
     // get exception info
     PyObject *type, *value, *traceback;
     PyErr_Fetch(&type, &value, &traceback);
@@ -152,20 +137,19 @@ std::string getPythonTraceback()
         PyObject* output = PyObject_CallObject(tracebackFunction, args);
 
         // print error message
-        int i, n = PyList_Size(output);
+        int n = PyList_Size(output);
 
-#if PY_MAJOR_VERSION >= 3
-        for (i=0; i<n; i++) 
+        for (int i = 0; i < n; i++) 
         {
+#if PY_MAJOR_VERSION >= 3
             PyObject* u = PyUnicode_AsUTF8String(PyList_GetItem(output, i));
             const char* p = PyBytes_AsString(u);
             
             mssg << p;
-        }
-        
 #else
-        for (i=0; i<n; i++) mssg << PyString_AsString(PyList_GetItem(output, i));
+            mssg << PyString_AsString(PyList_GetItem(output, i));
 #endif
+        }
         
         // clean up
         Py_XDECREF(args);
@@ -185,9 +169,8 @@ std::string getPythonTraceback()
         mssg << text;
     }
     else
-    {
-        mssg << "unknown error that we are unable to get a traceback for. Was it already printed/taken?";
-    }
+        mssg << "unknown error that we are unable to get a traceback for."
+            "Was it already printed/taken?";
 
     Py_XDECREF(value);
     Py_XDECREF(type);

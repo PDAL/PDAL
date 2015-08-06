@@ -49,7 +49,6 @@ endif()
 
 PDAL_ADD_TEST(pdal_bounds_test FILES BoundsTest.cpp)
 PDAL_ADD_TEST(pdal_config_test FILES ConfigTest.cpp)
-PDAL_ADD_TEST(pdal_environment_test FILES EnvironmentTest.cpp)
 PDAL_ADD_TEST(pdal_file_utils_test FILES FileUtilsTest.cpp)
 PDAL_ADD_TEST(pdal_georeference_test FILES GeoreferenceTest.cpp)
 PDAL_ADD_TEST(pdal_kdindex_test FILES KDIndexTest.cpp)
@@ -100,13 +99,6 @@ PDAL_ADD_TEST(pdal_filters_sort_test FILES filters/SortFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_splitter_test FILES filters/SplitterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_stats_test FILES filters/StatsFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_transformation_test FILES filters/TransformationFilterTest.cpp)
-
-#
-# sources for plang
-#
-if (PDAL_HAVE_PYTHON)
-    PDAL_ADD_TEST(pdal_plang_test FILES plang/PLangTest.cpp)
-endif()
 
 #
 # conditionally append apps/libxml2 sources

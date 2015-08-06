@@ -292,7 +292,7 @@ point_count_t OciReader::readDimMajor(PointView& view, BlockPtr block,
 
     point_count_t numRemaining = block->numRemaining();
     PointId startId = view.size();
-    point_count_t blockRemaining;
+    point_count_t blockRemaining = numRemaining;
     point_count_t numRead = 0;
 
     DimTypeList dims = dbDimTypes();
