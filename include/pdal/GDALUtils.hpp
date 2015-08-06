@@ -118,6 +118,19 @@ public:
     OGRGeometryH get() const
         { return m_ref.get(); }
 
+    void transform(const SpatialRef& out_srs)
+    {
+        OGR_G_TransformTo(m_ref.get(), out_srs.get());
+    }
+
+    std::string wkt() const
+    {
+        char* p_wkt = 0;
+        OGRErr err = OGR_G_ExportToWkt(m_ref.get(), &p_wkt);
+        return std::string(p_wkt);
+    }
+
+
 private:
     void newRef(void *v)
     {
