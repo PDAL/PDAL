@@ -55,13 +55,8 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DLazperf_DIR=${LAZPERF_HOME}/ \
         -DJSONCPP_ROOT_DIR=${USR_LOCAL}/include/jsoncpp \
         -DSQLITE3_INCLUDE_DIR=${SQLITE_HOME}/include \
-        -DSQLITE3_LIBRARY=${SQLITE_HOME}/lib/libsqlite3.${SO_EXT}
+        -DSQLITE3_LIBRARY=${SQLITE_HOME}/lib/libsqlite3.${SO_EXT} \
+        -DPYTHON_EXECUTABLE=/usr/local/bin/python3 \
+        -DPYTHON_LIBRARY=/usr/local/Cellar/python3/3.4.2_1/Frameworks/Python.framework/Versions/3.4/lib/libpython3.4.dylib \
+        -DPYTHON_INCLUDE_DIR=/usr/local/Cellar/python3/3.4.2_1/Frameworks/Python.framework/Versions/3.4/include/python3.4m/
 
-    # -DUSE_PDAL_PLUGIN_SOCI=ON \
-    # -DUSE_PDAL_PLUGIN_PCD=ON \
-    # -DUSE_PDAL_PLUGIN_OCI=ON \
-    # -DUSE_PDAL_PLUGIN_TEXT=ON \
-
-        # -DPYTHON_EXECUTABLE=/usr/local/bin/python3 \
-        # -DPYTHON_LIBRARY=/usr/local/Cellar/python3/3.3.3/Frameworks/Python.framework/Versions/3.3/lib/libpython3.3.dylib \
-        # -DPYTHON_INCLUDE_DIR=/usr/local/Cellar/python3/3.3.3/Frameworks/Python.framework/Versions/3.3/include/python3.3m/ \

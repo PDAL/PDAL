@@ -9,7 +9,7 @@ Contents:
 
 .. toctree::
    :maxdepth: 2
-   
+
    download
    compilation/index
    commandline/index
@@ -20,10 +20,11 @@ Contents:
    community
    faq
    development/index
+   tutorial/index
    api/index
    metadata
    copyright
-  
+
 Indices and tables
 ==================
 
