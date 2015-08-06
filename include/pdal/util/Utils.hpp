@@ -399,12 +399,12 @@ namespace Utils
             (in <= static_cast<double>(std::numeric_limits<T_OUT>::max()) &&
              in >= static_cast<double>(std::numeric_limits<T_OUT>::lowest())))
         {
-            out = in;
+            out = static_cast<T_OUT>(in);
             return true;
         }
         return false;
     }
-} // namespace Utils
 
+} // namespace Utils
 } // namespace pdal
 
