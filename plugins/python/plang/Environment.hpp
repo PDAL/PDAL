@@ -57,7 +57,7 @@ std::string getTraceback();
 class Environment;
 typedef Environment *EnvironmentPtr;
 
-class Environment
+class PDAL_DLL Environment
 {
 public:
     Environment();
