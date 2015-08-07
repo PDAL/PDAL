@@ -59,6 +59,7 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DPYTHON_EXECUTABLE=/usr/local/bin/python3 \
         -DPYTHON_LIBRARY=/usr/local/Cellar/python3/3.4.2_1/Frameworks/Python.framework/Versions/3.4/lib/libpython3.4.dylib \
         -DPYTHON_INCLUDE_DIR=/usr/local/Cellar/python3/3.4.2_1/Frameworks/Python.framework/Versions/3.4/include/python3.4m/ \
-        -DOCI_CONNECTION="grid/grid@localhost/vm"
+        -DOCI_CONNECTION="grid/grid@localhost/vm" \
+        -DPGPOINTCLOUD_TEST_DB_HOST="test"
 
 
