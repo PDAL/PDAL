@@ -18,7 +18,7 @@ set(plang_headers
 set(PYTHON_LIBRARY ${PDAL_NO_AS_NEEDED_START}
     ${PYTHON_LIBRARY}
     ${PDAL_NO_AS_NEEDED_END})
-add_library(${PLANG_LIB_NAME} SHARED ${plang_srcs} ${plang_headers})
+PDAL_ADD_LIBRARY(${PLANG_LIB_NAME} ${plang_srcs} ${plang_headers})
 target_link_libraries(${PLANG_LIB_NAME} ${PDAL_LIB_NAME} ${PYTHON_LIBRARY})
 install(TARGETS ${PLANG_LIB_NAME}
     RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR}
