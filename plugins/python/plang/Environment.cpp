@@ -68,12 +68,23 @@ EnvironmentPtr Environment::get()
 
 Environment::Environment()
 {
+    // This awfulness is due to the import_array MACRO that returns a value
+    // in some cases and returns nothing at other times.  Defining
+    // NUMPY_IMPORT_ARRAY_RETVAL to nothing makes it so we don't ever return
+    // a value.  The function needs to be stuck in a function to deal with
+    // the return.
+    auto initNumpy = []()
+    {
+#undef NUMPY_IMPORT_ARRAY_RETVAL
+#define NUMPY_IMPORT_ARRAY_RETVAL
+        import_array();
+    };
+
     PyImport_AppendInittab(const_cast<char*>("redirector"), redirector_init);
 
     Py_Initialize();
 
-    char *path = Py_GetPath();
-    import_array();
+    initNumpy();
     PyImport_ImportModule("redirector");
 }
 
