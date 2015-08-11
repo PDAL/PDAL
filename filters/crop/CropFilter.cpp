@@ -36,6 +36,7 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/GDALUtils.hpp>
 
 #include <sstream>
 #include <cstdarg>
@@ -95,6 +96,7 @@ CropFilter::CropFilter() : pdal::Filter()
 void CropFilter::processOptions(const Options& options)
 {
     m_cropOutside = options.getValueOrDefault<bool>("outside", false);
+    m_assignedSRS = options.getValueOrDefault<std::string>("a_srs", "");
     try
     {
         m_bounds = options.getValues<BOX2D>("bounds");
@@ -113,10 +115,19 @@ void CropFilter::processOptions(const Options& options)
     {
         m_geosEnvironment = initGEOS_r(pdal::geos::_GEOSWarningHandler,
             pdal::geos::_GEOSErrorHandler);
-        for (std::string& poly : m_polys)
+        for (std::string poly : m_polys)
         {
             GeomPkg g;
 
+            if (!m_assignedSRS.empty())
+            {
+                // FIXME: This should use the PointTableRef's SpatialReference
+                pdal::gdal::SpatialRef in_ref(m_assignedSRS);
+                pdal::gdal::SpatialRef out_ref(getSpatialReference().getWKT());
+                pdal::gdal::Geometry geom(poly, in_ref);
+                geom.transform(out_ref);
+                poly = geom.wkt();
+            }
             // Throws if invalid.
             g.m_geom = validatePolygon(poly);
             m_geoms.push_back(g);

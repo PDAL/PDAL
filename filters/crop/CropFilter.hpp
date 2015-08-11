@@ -63,6 +63,7 @@ private:
     std::vector<BOX2D> m_bounds;
     bool m_cropOutside;
     StringList m_polys;
+    std::string m_assignedSRS;
 
 #ifndef PDAL_HAVE_GEOS
     typedef void *GEOSContextHandle_t;

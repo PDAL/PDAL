@@ -221,7 +221,7 @@ Stage& TranslateKernel::makeTranslate(Options translateOptions, Stage& parent)
             Stage& reprojectionStage =
                 ownStage(f.createStage("filters.reprojection"));
             reprojectionStage.setInput(*nextStage);
-            reprojectionStage.setOptions(readerOptions);
+            reprojectionStage.setOptions(translateOptions);
             nextStage = &reprojectionStage;
         }
         else if (!reproOpts.empty())
