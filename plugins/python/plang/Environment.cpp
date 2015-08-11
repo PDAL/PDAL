@@ -66,6 +66,7 @@ EnvironmentPtr Environment::get()
     return &g_environment;
 }
 
+
 Environment::Environment()
 {
     // This awfulness is due to the import_array MACRO that returns a value
@@ -83,7 +84,6 @@ Environment::Environment()
     PyImport_AppendInittab(const_cast<char*>("redirector"), redirector_init);
 
     Py_Initialize();
-
     initNumpy();
     PyImport_ImportModule("redirector");
 }
@@ -120,7 +120,7 @@ std::string getTraceback()
         PyObject* tracebackModule;
         PyObject* tracebackDictionary;
         PyObject* tracebackFunction;
-    
+
         tracebackModule = PyImport_ImportModule("traceback");
         if (!tracebackModule)
             throw error("Unable to load traceback module while "
@@ -137,7 +137,7 @@ std::string getTraceback()
         if (!PyCallable_Check(tracebackFunction))
             throw error("Invalid traceback function while importing numpy "
                 "inside PDAL.");
-        
+
         // create an argument for "format exception"
         PyObject* args = PyTuple_New(3);
         PyTuple_SetItem(args, 0, type);
@@ -150,18 +150,18 @@ std::string getTraceback()
         // print error message
         int n = PyList_Size(output);
 
-        for (int i = 0; i < n; i++) 
+        for (int i = 0; i < n; i++)
         {
 #if PY_MAJOR_VERSION >= 3
             PyObject* u = PyUnicode_AsUTF8String(PyList_GetItem(output, i));
             const char* p = PyBytes_AsString(u);
-            
+
             mssg << p;
 #else
             mssg << PyString_AsString(PyList_GetItem(output, i));
 #endif
         }
-        
+
         // clean up
         Py_XDECREF(args);
         Py_XDECREF(output);
@@ -172,7 +172,7 @@ std::string getTraceback()
 #if PY_MAJOR_VERSION >= 3
         // const char* text = PyUnicode_AS_DATA(s);
         PyObject* u = PyUnicode_AsUTF8String(s);
-        const char* text = PyBytes_AsString(u);        
+        const char* text = PyBytes_AsString(u);
 #else
         const char* text = PyString_AS_STRING(s);
 #endif

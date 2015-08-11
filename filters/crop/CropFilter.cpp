@@ -36,6 +36,7 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/GDALUtils.hpp>
 
 #include <sstream>
 #include <cstdarg>
@@ -95,6 +96,7 @@ CropFilter::CropFilter() : pdal::Filter()
 void CropFilter::processOptions(const Options& options)
 {
     m_cropOutside = options.getValueOrDefault<bool>("outside", false);
+    m_assignedSRS = options.getValueOrDefault<SpatialReference>("a_srs");
     try
     {
         m_bounds = options.getValues<BOX2D>("bounds");
@@ -113,7 +115,7 @@ void CropFilter::processOptions(const Options& options)
     {
         m_geosEnvironment = initGEOS_r(pdal::geos::_GEOSWarningHandler,
             pdal::geos::_GEOSErrorHandler);
-        for (std::string& poly : m_polys)
+        for (std::string poly : m_polys)
         {
             GeomPkg g;
 
@@ -135,11 +137,11 @@ void CropFilter::processOptions(const Options& options)
 }
 
 
-void CropFilter::ready(PointTableRef /*table*/)
+void CropFilter::ready(PointTableRef table)
 {
 #ifdef PDAL_HAVE_GEOS
     for (auto& g : m_geoms)
-        preparePolygon(g);
+        preparePolygon(g, table.spatialRef());
 #endif
 }
 
@@ -178,15 +180,18 @@ GEOSGeometry *CropFilter::validatePolygon(const std::string& poly)
 }
 
 
-void CropFilter::preparePolygon(GeomPkg& g)
+void CropFilter::preparePolygon(GeomPkg& g, const SpatialReference& to)
 {
-    //ABELL - Don't get this.  We already have the WKT in 'poly'.  Maybe it's
-    //  prettier?
     char* out_wkt = GEOSGeomToWKT_r(m_geosEnvironment, g.m_geom);
+    std::string poly(out_wkt);
+    poly = transformWkt(poly, m_assignedSRS, to);
     log()->get(LogLevel::Debug2) << "Ingested WKT for filters.crop: " <<
-        std::string(out_wkt) <<std::endl;
+        poly <<std::endl;
     GEOSFree_r(m_geosEnvironment, out_wkt);
 
+    // Store transformed geometry.
+    GEOSGeom_destroy_r(m_geosEnvironment, g.m_geom);
+    g.m_geom = GEOSGeomFromWKT_r(m_geosEnvironment, poly.c_str());
     g.m_prepGeom = GEOSPrepare_r(m_geosEnvironment, g.m_geom);
     if (!g.m_prepGeom)
         throw pdal_error("unable to prepare geometry for index-accelerated "

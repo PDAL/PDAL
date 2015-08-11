@@ -63,6 +63,7 @@ private:
     std::vector<BOX2D> m_bounds;
     bool m_cropOutside;
     StringList m_polys;
+    SpatialReference m_assignedSRS;
 
 #ifndef PDAL_HAVE_GEOS
     typedef void *GEOSContextHandle_t;
@@ -87,7 +88,7 @@ private:
     void crop(const GeomPkg& g, PointView& input, PointView& output);
 #ifdef PDAL_HAVE_GEOS
     GEOSGeometry *validatePolygon(const std::string& poly);
-    void preparePolygon(GeomPkg& g);
+    void preparePolygon(GeomPkg& g, const SpatialReference& to);
     BOX2D computeBounds(GEOSGeometry const *geometry);
     GEOSGeometry *createPoint(double x, double y, double z);
 #endif

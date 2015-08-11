@@ -460,26 +460,26 @@ void Kernel::setCommonOptions(Options &options)
 
     if (argumentExists("offset"))
     {
-        std::vector<double> offsets;
+        std::vector<std::string> offsets;
         tokenizer offset_tokens(m_offsets, sep);
         for (auto const& t : offset_tokens)
-            offsets.push_back(boost::lexical_cast<double>(t));
+            offsets.push_back(boost::lexical_cast<std::string>(t));
         if (offsets.size())
         {
             if (offsets.size() <= 1)
             {
-                options.add<double >("offset_x", offsets[0]);
+                options.add<std::string>("offset_x", offsets[0]);
             }
             else if (offsets.size() <= 2)
             {
-                options.add<double >("offset_x", offsets[0]);
-                options.add<double >("offset_y", offsets[1]);
+                options.add<std::string>("offset_x", offsets[0]);
+                options.add<std::string>("offset_y", offsets[1]);
             }
             else if (offsets.size() <= 3)
             {
-                options.add<double >("offset_x", offsets[0]);
-                options.add<double >("offset_y", offsets[1]);
-                options.add<double >("offset_z", offsets[2]);
+                options.add<std::string>("offset_x", offsets[0]);
+                options.add<std::string>("offset_y", offsets[1]);
+                options.add<std::string>("offset_z", offsets[2]);
             }
         }
     }

@@ -53,6 +53,9 @@
 
 namespace pdal
 {
+
+class SpatialReference;
+
 namespace gdal
 {
 
@@ -77,16 +80,10 @@ public:
         { return m_ref.get(); }
     bool empty() const
     {
-        bool bEmpty(true);
         char *pszWKT = NULL;
-
         OSRExportToWkt(m_ref.get(), &pszWKT);
-
-        if (pszWKT)
-            bEmpty = false;
         CPLFree(pszWKT);
-        return bEmpty;
-
+        return (bool)pszWKT;
     }
 
 
@@ -117,6 +114,19 @@ public:
         { return get() != NULL; }
     OGRGeometryH get() const
         { return m_ref.get(); }
+
+    void transform(const SpatialRef& out_srs)
+    {
+        OGR_G_TransformTo(m_ref.get(), out_srs.get());
+    }
+
+    std::string wkt() const
+    {
+        char* p_wkt = 0;
+        OGRErr err = OGR_G_ExportToWkt(m_ref.get(), &p_wkt);
+        return std::string(p_wkt);
+    }
+
 
 private:
     void newRef(void *v)
@@ -157,5 +167,10 @@ private:
 };
 
 } // namespace gdal
+
+std::string transformWkt(std::string wkt, const SpatialReference& from,
+    const SpatialReference& to);
+
+
 } // namespace pdal
 

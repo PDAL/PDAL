@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/GDALUtils.hpp>
+#include <pdal/SpatialReference.hpp>
 #include <pdal/util/Utils.hpp>
 
 #include <functional>
@@ -100,5 +101,20 @@ ErrorHandler::~ErrorHandler()
 }
 
 } // namespace gdal
+
+std::string transformWkt(std::string wkt, const SpatialReference& from,
+    const SpatialReference& to)
+{
+    //ABELL - Should this throw?  Return empty string?
+    if (from.empty() || to.empty())
+        return wkt;
+
+    gdal::SpatialRef fromRef(from.getWKT());
+    gdal::SpatialRef toRef(to.getWKT());
+    gdal::Geometry geom(wkt, fromRef);
+    geom.transform(toRef);
+    return geom.wkt();
+}
+
 } // namespace pdal
 
