@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<Pipeline version="1.0">
+    <Writer type="writers.las">
+        <Option name="filename">output.las</Option>
+    <Filter type="filters.programmable">
+        <Option name="function">myfunc</Option>
+        <Option name="module">derive</Option>
+        <Option name="source">
+import numpy as np
+def myfunc(ins,outs):
+    kls = ins['Classification']
+    class_map = {2:2, 3:1, 4:1, 5:1, 1:0}
+
+    for value in np.nditer(kls, op_flags=['readwrite']):
+        try:
+            new_value = class_map[int(value)]
+        except KeyError:
+            pass # if we didn't define the key, do nothing
+
+        # see http://docs.scipy.org/doc/numpy/reference/arrays.nditer.html#modifying-array-values
+        value[...] = new_value
+
+    outs['Classification'] = kls
+    return True
+        </Option>
+        <Reader type="readers.las">
+            <Option name="filename">
+                @CMAKE_SOURCE_DIR@/test/data/autzen/autzen-utm.las
+            </Option>
+        </Reader>
+    </Filter>
+    </Writer>
+</Pipeline>

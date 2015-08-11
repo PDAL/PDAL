@@ -277,9 +277,13 @@ TEST(PLangTest, PLangTest_aliases)
     {
         std::vector<std::string> names;
         meth.getOutputNames(names);
-        EXPECT_TRUE(names.size() == 2);
-        EXPECT_TRUE(names[0] == "Y");
-        EXPECT_TRUE(names[1] == "prefix.Y");
+
+        // We're getting stuff from a hash, so it
+        // isn't stable
+        std::sort(names.begin(), names.end());
+        EXPECT_EQ(names.size(), 2u);
+        EXPECT_EQ(names[0], "Y");
+        EXPECT_EQ(names[1], "prefix.Y");
     }
 }
 
