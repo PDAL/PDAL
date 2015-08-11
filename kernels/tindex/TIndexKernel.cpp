@@ -69,8 +69,6 @@ void setDate(OGRFeatureH feature, const tm& tyme, int fieldNumber)
 namespace pdal
 {
 
-using namespace gdal;
-
 static PluginInfo const s_info = PluginInfo(
     "kernels.tindex",
     "TIndex Kernel",
@@ -242,8 +240,8 @@ StringList readSTDIN()
 }
 
 
-bool TIndexKernel::IsFileIndexed( const FieldIndexes& indexes,
-                    const FileInfo& fileInfo)
+bool TIndexKernel::isFileIndexed(const FieldIndexes& indexes,
+    const FileInfo& fileInfo)
 {
     std::ostringstream qstring;
     qstring << Utils::toupper(m_tileIndexColumnName) << "=\"" <<
@@ -256,15 +254,11 @@ bool TIndexKernel::IsFileIndexed( const FieldIndexes& indexes,
              fileInfo.m_filename << "'";
         throw pdal_error(oss.str());
     }
-    OGRFeatureH hFeature;
 
     bool output(false);
     OGR_L_ResetReading(m_layer);
-    while( (hFeature = OGR_L_GetNextFeature(m_layer)) != NULL )
-    {
+    if (OGR_L_GetNextFeature(m_layer))
         output = true;
-        break;
-    }
 
     OGR_L_ResetReading(m_layer);
     OGR_L_SetAttributeFilter(m_layer, NULL);
@@ -319,7 +313,7 @@ void TIndexKernel::createFile()
         //ABELL - Not sure why we need to get absolute path here.
         f = FileUtils::toAbsolutePath(f);
         FileInfo info = getFileInfo(factory, f);
-        if (!IsFileIndexed(indexes, info))
+        if (!isFileIndexed(indexes, info))
         {
             if (createFeature(indexes, info))
                 m_log.get(LogLevel::Info) << "Indexed file " << f << std::endl;
@@ -335,6 +329,8 @@ void TIndexKernel::createFile()
 
 void TIndexKernel::mergeFile()
 {
+    using namespace gdal;
+
     std::ostringstream out;
 
     if (!openDataset(m_idxFilename))
@@ -462,8 +458,10 @@ void TIndexKernel::mergeFile()
 
 
 bool TIndexKernel::createFeature(const FieldIndexes& indexes,
-    const FileInfo& fileInfo)
+    FileInfo& fileInfo)
 {
+    using namespace gdal;
+
     OGRFeatureH hFeature = OGR_F_Create(OGR_L_GetLayerDefn(m_layer));
 
     // Set the creation time into the feature.
@@ -477,12 +475,18 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
         fileInfo.m_filename.c_str());
 
     // Set the SRS into the feature.
+    if (fileInfo.m_srs.empty())
+        fileInfo.m_srs = m_assignSrsString;
+
     SpatialRef srcSrs(fileInfo.m_srs);
-    if (!srcSrs)
+    if (srcSrs.empty())
     {
-        m_log.get(LogLevel::Error) << "Unable to import spatial "
-            "reference '" << fileInfo.m_srs << "' for file '" <<
-            fileInfo.m_filename << "'" << std::endl;
+        std::ostringstream oss;
+
+        oss << "Unable to import source spatial reference '" <<
+            fileInfo.m_srs << "' for file '" <<
+            fileInfo.m_filename << "'.";
+        throw pdal_error(oss.str());
     }
 
     // We have a limit of like 254 characters in some formats (notably
@@ -502,7 +506,14 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
     else
     {
         char* pszProj4 = NULL;
-        if (OSRExportToProj4(srcSrs.get(), &pszProj4) != OGRERR_NONE)
+        int err = -1;
+        try
+        {
+            err = OSRExportToProj4(srcSrs.get(), &pszProj4);
+        }
+        catch (pdal_error)
+        {}
+        if (err != OGRERR_NONE)
         {
             m_log.get(LogLevel::Warning) << "Unable to convert SRS to "
                 "proj.4 format for file '" << fileInfo.m_filename << "'" <<
@@ -553,7 +564,8 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
         polygon << ", " << qi.m_bounds.minx << " " << qi.m_bounds.miny;
         polygon << "))";
         fileInfo.m_boundary = polygon.str();
-        fileInfo.m_srs = qi.m_srs.getWKT();
+        if (!qi.m_srs.empty())
+            fileInfo.m_srs = qi.m_srs.getWKT();
     }
     else
     {
@@ -576,7 +588,8 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
 
         fileInfo.m_boundary =
             table.metadata().findChild("filters.hexbin:boundary").value();
-        fileInfo.m_srs = table.spatialRef().getWKT();
+        if (!table.spatialRef().empty())
+            fileInfo.m_srs = table.spatialRef().getWKT();
     }
 
     FileUtils::fileTimes(filename, &fileInfo.m_ctime, &fileInfo.m_mtime);
@@ -624,6 +637,8 @@ bool TIndexKernel::openLayer(const std::string& layerName)
 
 bool TIndexKernel::createLayer(std::string const& layername)
 {
+    using namespace gdal;
+
     SpatialRef srs(m_tgtSrsString);
     if (!srs)
         m_log.get(LogLevel::Error) << "Unable to import srs for layer "
@@ -708,20 +723,14 @@ TIndexKernel::FieldIndexes TIndexKernel::getFields()
 }
 
 
-Geometry TIndexKernel::prepareGeometry(const FileInfo& fileInfo)
+gdal::Geometry TIndexKernel::prepareGeometry(const FileInfo& fileInfo)
 {
+    using namespace gdal;
+
     std::ostringstream oss;
 
-    SpatialRef srcSrs(fileInfo.m_srs);
-    if (!srcSrs)
-    {
-        oss << "Unable to import source SRS for file '" <<
-            fileInfo.m_filename << "'.";
-        throw pdal_error(oss.str());
-    }
-    if (srcSrs.empty())
-        srcSrs = SpatialRef(m_assignSrsString);
 
+    SpatialRef srcSrs(fileInfo.m_srs);
     SpatialRef tgtSrs(m_tgtSrsString);
     if (!tgtSrs)
         throw pdal_error("Unable to import target SRS.");
@@ -748,12 +757,12 @@ Geometry TIndexKernel::prepareGeometry(const FileInfo& fileInfo)
 }
 
 
-Geometry TIndexKernel::prepareGeometry(const std::string& wkt,
-   const SpatialRef& inSrs, const SpatialRef& outSrs)
+gdal::Geometry TIndexKernel::prepareGeometry(const std::string& wkt,
+   const gdal::SpatialRef& inSrs, const gdal::SpatialRef& outSrs)
 {
     // Create OGR geometry from text.
 
-    Geometry g(wkt, inSrs);
+    gdal::Geometry g(wkt, inSrs);
 
     if (g)
         if (OGR_G_TransformTo(g.get(), outSrs.get()) != OGRERR_NONE)

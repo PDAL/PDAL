@@ -88,14 +88,13 @@ private:
     bool createLayer(const std::string& layerName);
     FieldIndexes getFields();
     FileInfo getFileInfo(KernelFactory& factory, const std::string& filename);
-    bool createFeature(const FieldIndexes& indexes, const FileInfo& info);
+    bool createFeature(const FieldIndexes& indexes, FileInfo& info);
     gdal::Geometry prepareGeometry(const FileInfo& fileInfo);
     gdal::Geometry prepareGeometry(const std::string& wkt,
         const gdal::SpatialRef& inSrs, const gdal::SpatialRef& outSrs);
     void createFields();
 
-    bool IsFileIndexed( const FieldIndexes& indexes,
-                        const FileInfo& fileInfo);
+    bool isFileIndexed( const FieldIndexes& indexes, const FileInfo& fileInfo);
 
     std::string m_idxFilename;
     std::string m_filespec;
