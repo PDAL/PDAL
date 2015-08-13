@@ -168,7 +168,8 @@ private:
 
 } // namespace gdal
 
-std::string transformWkt(std::string wkt, const SpatialReference& from,
+
+PDAL_DLL std::string transformWkt(std::string wkt, const SpatialReference& from,
     const SpatialReference& to);
 
 
