@@ -61,7 +61,7 @@ std::string splitDriverName(std::string const& name)
 void outputVersion()
 {
     std::cout << headline << std::endl;
-    std::cout << "pdal " << "(" << GetFullVersionString() << ")" << std::endl;
+    std::cout << "pdal " << GetFullVersionString() << std::endl;
     std::cout << headline << std::endl;
     std::cout << std::endl;
 }
@@ -77,7 +77,7 @@ void outputHelp()
     std::cout << "               Show driver options" << std::endl;
     std::cout << "  --version    Show version info" << std::endl;
     std::cout << std::endl;
-        
+
     std::cout << "The following commands are available:" << std::endl;
 
     KernelFactory f(false);
