@@ -33,6 +33,7 @@ Writers
 .. toctree::
    :maxdepth: 1
 
+   writers.derivative
    writers.geowave
    writers.las
    writers.matlab
@@ -70,4 +71,3 @@ Filters
    filters.sort
    filters.stats
    filters.transformation
-
