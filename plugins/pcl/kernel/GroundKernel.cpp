@@ -129,6 +129,9 @@ int GroundKernel::execute()
     groundOptions.add<double>("cellSize", m_cellSize);
     groundOptions.add<bool>("classify", m_classify);
     groundOptions.add<bool>("extract", m_extract);
+    groundOptions.add<bool>("approximate", m_approximate);
+    groundOptions.add<bool>("debug", isDebug());
+    groundOptions.add<uint32_t>("verbose", getVerboseLevel());
 
     StageFactory f;
     std::unique_ptr<Stage> groundStage(f.createStage("filters.ground"));
@@ -165,4 +168,3 @@ int GroundKernel::execute()
 }
 
 } // namespace pdal
-
