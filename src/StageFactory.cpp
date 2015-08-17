@@ -71,9 +71,6 @@
 #include <null/NullWriter.hpp>
 
 #include <boost/filesystem.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/tokenizer.hpp>
-#include <boost/algorithm/string.hpp>
 
 #include <sstream>
 #include <string>
@@ -86,7 +83,7 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
 {
     // filename may actually be a greyhound uri + pipelineId
     std::string http = filename.substr(0, 4);
-    if (boost::iequals(http, "http"))
+    if (Utils::iequals(http, "http"))
         return "readers.greyhound";
 
     std::string ext = boost::filesystem::extension(filename);
@@ -112,7 +109,7 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
     ext = ext.substr(1, ext.length()-1);
     if (ext == "") return "";
 
-    boost::to_lower(ext);
+    ext = Utils::tolower(ext);
     std::string driver = drivers[ext];
     return driver; // will be "" if not found
 }
@@ -120,9 +117,7 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
 
 std::string StageFactory::inferWriterDriver(const std::string& filename)
 {
-    std::string ext = boost::filesystem::extension(filename);
-
-    boost::to_lower(ext);
+    std::string ext = Utils::tolower(boost::filesystem::extension(filename));
 
     std::map<std::string, std::string> drivers;
     drivers["bpf"] = "writers.bpf";
@@ -141,16 +136,16 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
     drivers["txt"] = "writers.text";
     drivers["xyz"] = "writers.text";
 
-    if (boost::algorithm::iequals(filename, "STDOUT"))
-    {
+    if (Utils::iequals(filename, "STDOUT"))
         return drivers["txt"];
-    }
 
-    if (ext == "") return drivers["txt"];
+    if (ext == "")
+        return drivers["txt"];
     ext = ext.substr(1, ext.length()-1);
-    if (ext == "") return drivers["txt"];
+    if (ext == "")
+        return drivers["txt"];
 
-    boost::to_lower(ext);
+    ext = Utils::tolower(ext);
     std::string driver = drivers[ext];
     return driver; // will be "" if not found
 }
@@ -160,16 +155,14 @@ pdal::Options StageFactory::inferWriterOptionsChanges(
     const std::string& filename)
 {
     std::string ext = boost::filesystem::extension(filename);
-    boost::to_lower(ext);
+    ext = Utils::tolower(ext);
     Options options;
 
-    if (boost::algorithm::iequals(ext,".laz"))
-    {
+    if (Utils::iequals(ext,".laz"))
         options.add("compression", true);
-    }
 
     PluginManager & pm = PluginManager::getInstance();
-    if (boost::algorithm::iequals(ext,".pcd") && pm.createObject("writers.pcd"))
+    if (Utils::iequals(ext, ".pcd") && pm.createObject("writers.pcd"))
     {
         options.add("format","PCD");
     }

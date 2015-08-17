@@ -158,7 +158,7 @@ void TIndexKernel::validateSwitches()
         if (m_filespec.empty())
             throw pdal_error("No output filename provided.");
         StringList invalidArgs;
-        invalidArgs.push_back("t_srs");
+        invalidArgs.push_back("a_srs");
         invalidArgs.push_back("src_srs_name");
         for (auto arg : invalidArgs)
             if (argumentSpecified(arg))
@@ -406,14 +406,19 @@ void TIndexKernel::mergeFile()
         Options readerOptions;
         readerOptions.add("filename", f.m_filename);
         reader->setOptions(readerOptions);
+        premerge = reader;
 
-        Stage *repro = factory.createStage("filters.reprojection", true);
-        repro->setInput(*reader);
-        Options reproOptions;
-        reproOptions.add("out_srs", m_tgtSrsString);
-        reproOptions.add("in_srs", f.m_srs);
-        repro->setOptions(reproOptions);
-        premerge = repro;
+        if (m_tgtSrsString != f.m_srs)
+        {
+            Stage *repro = factory.createStage("filters.reprojection", true);
+            repro->setInput(*reader);
+            Options reproOptions;
+            reproOptions.add("out_srs", m_tgtSrsString);
+            reproOptions.add("in_srs", f.m_srs);
+    std::cerr << "Repro = " << m_tgtSrsString << "/" << f.m_srs << "!\n";
+            repro->setOptions(reproOptions);
+            premerge = repro;
+        }
 
         // WKT is set, even if we're using a bounding box for fitering, so
         // can be used as a test here.
@@ -421,7 +426,7 @@ void TIndexKernel::mergeFile()
         {
             Stage *crop = factory.createStage("filters.crop", true);
             crop->setOptions(cropOptions);
-            crop->setInput(*repro);
+            crop->setInput(*premerge);
             premerge = crop;
         }
 
@@ -441,17 +446,15 @@ void TIndexKernel::mergeFile()
     applyExtraStageOptionsRecursive(writer);
 
     Options writerOptions(factoryOptions);
+    setCommonOptions(writerOptions);
+
     writerOptions.add("filename", m_filespec);
-    writerOptions.add("scale_x", 1e-9);
-    writerOptions.add("scale_y", 1e-9);
-    writerOptions.add("scale_z", 1e-5);
     writerOptions.add("offset_x", "auto");
     writerOptions.add("offset_y", "auto");
     writerOptions.add("offset_z", "auto");
     writer->addConditionalOptions(writerOptions);
 
     PointTable table;
-
     writer->prepare(table);
     writer->execute(table);
 }
