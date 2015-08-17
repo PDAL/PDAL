@@ -66,6 +66,7 @@
 #include <las/LasWriter.hpp>
 #include <ply/PlyWriter.hpp>
 #include <sbet/SbetWriter.hpp>
+#include <derivative/DerivativeWriter.hpp>
 #include <text/TextWriter.hpp>
 #include <null/NullWriter.hpp>
 
@@ -135,6 +136,7 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
     drivers["pclviz"] = "writers.pclvisualizer";
     drivers["ply"] = "writers.ply";
     drivers["sbet"] = "writers.sbet";
+    drivers["derivative"] = "writers.derivative";
     drivers["sqlite"] = "writers.sqlite";
     drivers["txt"] = "writers.text";
     drivers["xyz"] = "writers.text";
@@ -216,6 +218,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(LasWriter_InitPlugin);
     PluginManager::initializePlugin(PlyWriter_InitPlugin);
     PluginManager::initializePlugin(SbetWriter_InitPlugin);
+    PluginManager::initializePlugin(DerivativeWriter_InitPlugin);
     PluginManager::initializePlugin(TextWriter_InitPlugin);
     PluginManager::initializePlugin(NullWriter_InitPlugin);
 }

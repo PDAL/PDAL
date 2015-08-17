@@ -22,16 +22,16 @@ install:
   # already been cloned, otherwise git would complain about a non-empty
   # directory
   - ps: mkdir C:\temp | out-null
-  
+
   # make the osgeo directory
   - ps: mkdir %OSGEODIR% | out-null
-  
+
   # get the OSGeo installer
   - ps: wget http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe -OutFile C:\temp\osgeo4w-setup.exe | out-null
-  
+
   # and install our dependencies
-  - C:\temp\osgeo4w-setup.exe -s http://download.osgeo.org/osgeo4w/ -a -q -P boost-devel,gdal,geos,hexer,iconv,laszip,libgeotiff,libtiff,libpq,libxml2,nitro,pcl,points2grid,proj,python-numpy,zlib -R %OSGEODIR% > nul
-  
+  - C:\temp\osgeo4w-setup.exe -s http://download.osgeo.org/osgeo4w/ -a -q -P boost-devel,eigen,gdal,geos,hexer,iconv,laszip,libgeotiff,libtiff,libpq,libxml2,nitro,pcl,points2grid,proj,python-numpy,zlib -R %OSGEODIR% > nul
+
   # call our PDAL install script
   - call .\\scripts\\appveyor\\install.cmd
 
