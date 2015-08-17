@@ -1,5 +1,6 @@
 /******************************************************************************
 * Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
+* Copyright (c) 2015, Brad Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -35,7 +36,12 @@
 #pragma once
 
 #include <pdal/Kernel.hpp>
-#include <pdal/plugin.hpp>
+#include <pdal/PipelineManager.hpp>
+#include <pdal/pdal_export.hpp>
+
+#include <memory>
+#include <string>
+#include <vector>
 
 extern "C" int32_t TranslateKernel_ExitFunc();
 extern "C" PF_ExitFunc TranslateKernel_InitPlugin();
@@ -46,7 +52,7 @@ namespace pdal
 class PDAL_DLL TranslateKernel : public Kernel
 {
 public:
-    static void *create();
+    static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
     int execute();
@@ -56,21 +62,14 @@ private:
     void addSwitches();
     void validateSwitches();
 
-    Stage& makeReader(Options readerOptions);
-    Stage& makeTranslate(Stage& parent);
-
     std::string m_inputFile;
     std::string m_outputFile;
-    bool m_bCompress;
-    pdal::SpatialReference m_input_srs;
-    pdal::SpatialReference m_output_srs;
-    BOX2D m_bounds;
-    std::string m_wkt;
-    uint32_t m_decimation_step;
-    uint32_t m_decimation_offset;
-    double m_decimation_leaf_size;
-    std::string m_decimation_method;
-    point_count_t m_decimation_limit;
+    std::string m_pipelineOutput;
+    std::string m_readerType;
+    std::vector<std::string> m_filterType;
+    std::string m_writerType;
+
+    std::unique_ptr<PipelineManager> m_manager;
 };
 
 } // namespace pdal
