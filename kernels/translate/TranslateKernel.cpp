@@ -154,7 +154,7 @@ void TranslateKernel::addSwitches()
         ("compress,z",
          po::value<bool>(&m_bCompress)->zero_tokens()->implicit_value(true),
          "Compress output data (if supported by output format)")
-        ("bounds", po::value<BOX3D >(&m_bounds),
+        ("bounds", po::value<BOX2D>(&m_bounds),
          "Extent (in XYZ to clip output to)")
         ("polygon", po::value<std::string >(&m_wkt),
          "POLYGON WKT to use for precise crop of data (2d or 3d)")
