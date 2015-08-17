@@ -661,6 +661,8 @@ int DerivativeWriter::determineCatchmentAreaD8(Eigen::MatrixXd* data,
         //}
         //(*area)(row, col) = determineCatchmentAreaD8(data, area, tNextY, tNextX, postSpacing);
     }
+    //ABELL - Returning something.
+    return 0;
 }
 
 double DerivativeWriter::determineHillshade(Eigen::MatrixXd* data, int row,
@@ -698,7 +700,9 @@ double DerivativeWriter::determineHillshade(Eigen::MatrixXd* data, int row,
         }
         else
         {
-            tAspectRad = tAspectRad;
+            //ABELL - This looks wrong.  At least needs a comment.
+            // tAspectRad = tAspectRad;
+            ;
         }
     }
     else
@@ -993,6 +997,8 @@ GDALDataset* DerivativeWriter::createFloat32GTIFF(std::string filename,
                 return dataset;
         }
     }
+    //ABELL
+    return NULL;
 }
 
 
@@ -1014,7 +1020,7 @@ void DerivativeWriter::writeSlope(Eigen::MatrixXd* tDemData,
         int tXStart = 1, tXEnd = m_GRID_SIZE_X - 1;
         int tYStart = 1, tYEnd = m_GRID_SIZE_Y - 1;
         float *poRasterData = new float[m_GRID_SIZE_X*m_GRID_SIZE_Y];
-        for (int i=0; i<m_GRID_SIZE_X*m_GRID_SIZE_Y; i++)
+        for (uint32_t i=0; i<m_GRID_SIZE_X*m_GRID_SIZE_Y; i++)
         {
             poRasterData[i] = c_background;
         }
@@ -1088,7 +1094,7 @@ void DerivativeWriter::writeAspect(Eigen::MatrixXd* tDemData,
         int tXStart = 1, tXEnd = m_GRID_SIZE_X - 1;
         int tYStart = 1, tYEnd = m_GRID_SIZE_Y - 1;
         float *poRasterData = new float[m_GRID_SIZE_X*m_GRID_SIZE_Y];
-        for (int i=0; i<m_GRID_SIZE_X*m_GRID_SIZE_Y; i++)
+        for (uint32_t i=0; i<m_GRID_SIZE_X*m_GRID_SIZE_Y; i++)
         {
             poRasterData[i] = 0;    // Initialize all elements to zero.
         }
@@ -1165,7 +1171,7 @@ void DerivativeWriter::writeCatchmentArea(Eigen::MatrixXd* tDemData,
         int tXStart = 1, tXEnd = m_GRID_SIZE_X - 1;
         int tYStart = 1, tYEnd = m_GRID_SIZE_Y - 1;
         float *poRasterData = new float[m_GRID_SIZE_X*m_GRID_SIZE_Y];
-        for (int i=0; i<m_GRID_SIZE_X*m_GRID_SIZE_Y; i++)
+        for (uint32_t i=0; i<m_GRID_SIZE_X*m_GRID_SIZE_Y; i++)
         {
             poRasterData[i] = c_background;    // Initialize all elements to zero.
         }
@@ -1305,7 +1311,7 @@ void DerivativeWriter::writeHillshade(Eigen::MatrixXd* tDemData,
         int tXStart = 1, tXEnd = m_GRID_SIZE_X - 1;
         int tYStart = 1, tYEnd = m_GRID_SIZE_Y - 1;
         float *poRasterData = new float[m_GRID_SIZE_X*m_GRID_SIZE_Y];
-        for (int i=0; i<m_GRID_SIZE_X*m_GRID_SIZE_Y; i++)
+        for (uint32_t i=0; i<m_GRID_SIZE_X*m_GRID_SIZE_Y; i++)
         {
             poRasterData[i] = 0;    // Initialize all elements to zero.
         }
@@ -1388,7 +1394,7 @@ void DerivativeWriter::writeCurvature(Eigen::MatrixXd* tDemData,
         int tXStart = 1, tXEnd = m_GRID_SIZE_X - 1;
         int tYStart = 1, tYEnd = m_GRID_SIZE_Y - 1;
         float *poRasterData = new float[m_GRID_SIZE_X*m_GRID_SIZE_Y];
-        for (int i=0; i<m_GRID_SIZE_X*m_GRID_SIZE_Y; i++)
+        for (uint32_t i=0; i<m_GRID_SIZE_X*m_GRID_SIZE_Y; i++)
         {
             poRasterData[i] = c_background;
         }
@@ -1568,6 +1574,9 @@ void DerivativeWriter::write(const PointViewPtr data)
             tInterpValue = data(yPlus, xPlus);
             if (tInterpValue != c_background)
                 return tInterpValue;
+
+            //ABELL - Returning something.
+            return 0.0f;
         };
 
         float tInterpValue;
@@ -1594,7 +1603,7 @@ void DerivativeWriter::write(const PointViewPtr data)
     bool* prevSetCols = new bool[m_GRID_SIZE_X];
     bool* curSetCols = new bool[m_GRID_SIZE_X];
 
-    for (int y = 1; y < m_GRID_SIZE_Y; ++y)
+    for (uint32_t y = 1; y < m_GRID_SIZE_Y; ++y)
     {
         CleanRasterScanLine(tDemData, tDemData.row(1), m_GRID_SIZE_X, y,
                             prevSetCols, curSetCols);

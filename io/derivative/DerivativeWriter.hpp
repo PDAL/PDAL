@@ -156,9 +156,9 @@ private:
     GDALDataset* createFloat32GTIFF(std::string filename, int cols, int rows);
     void stretchData(float *data);
 
-    boost::uint64_t m_pointCount;
-    boost::uint32_t m_GRID_SIZE_X;
-    boost::uint32_t m_GRID_SIZE_Y;
+    uint64_t m_pointCount;
+    uint32_t m_GRID_SIZE_X;
+    uint32_t m_GRID_SIZE_Y;
     double m_GRID_DIST_X;
     double m_GRID_DIST_Y;
     unsigned int m_primitive_type;
