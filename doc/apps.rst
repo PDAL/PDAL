@@ -442,7 +442,7 @@ translation operations.
     --a_srs arg        Assign input coordinate system.
     --t_srs arg        Transform to output coordinate system.
     --bounds arg       Limit output to points inside the specified box.
-                       --bounds "([xmin,xmax],[ymin,ymax],[zmin,zmax])"
+                       --bounds "([xmin,xmax],[ymin,ymax])"
     --polygon arg      Limit output to point inside the specified polygon (specified as
                        well-known text).
     --d_step arg       Step value to be passed to decimation filter. [1]
