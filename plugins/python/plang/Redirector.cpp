@@ -163,8 +163,11 @@ PyObject* Redirector::init()
     {
         //ABELL - This is bad code as the type cast is invalid. (type pun
         //  warning.)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
         Py_INCREF(reinterpret_cast<PyObject*>(&StdoutType));
         PyModule_AddObject(m, "Stdout", reinterpret_cast<PyObject*>(&StdoutType));
+#pragma GCC diagnostic pop
     }
     return m;
 }

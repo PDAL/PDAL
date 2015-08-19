@@ -668,7 +668,9 @@ int DerivativeWriter::determineCatchmentAreaD8(Eigen::MatrixXd* data,
 double DerivativeWriter::determineHillshade(Eigen::MatrixXd* data, int row,
         int col, double zenithRad, double azimuthRad, double postSpacing)
 {
-    double tAVar, tBVar, tCVar, tDVar, tEVar, tFVar, tGVar, tHVar, tIVar;
+    //ABELL - tEVar not currently used.
+    //double tAVar, tBVar, tCVar, tDVar, tEVar, tFVar, tGVar, tHVar, tIVar;
+    double tAVar, tBVar, tCVar, tDVar, tFVar, tGVar, tHVar, tIVar;
     double tDZDX, tDZDY, tSlopeRad, tAspectRad = 0.0;
     double tHillShade;
 
@@ -676,7 +678,7 @@ double DerivativeWriter::determineHillshade(Eigen::MatrixXd* data, int row,
     tBVar = GetNeighbor(data, row, col, NORTH);
     tCVar = GetNeighbor(data, row, col, NORTHWEST);
     tDVar = GetNeighbor(data, row, col, WEST);
-    tEVar = (double)(*data)(row, col);
+    //tEVar = (double)(*data)(row, col);
     tFVar = GetNeighbor(data, row, col, EAST);
     tGVar = GetNeighbor(data, row, col, SOUTHWEST);
     tHVar = GetNeighbor(data, row, col, SOUTH);
@@ -1033,7 +1035,7 @@ void DerivativeWriter::writeSlope(Eigen::MatrixXd* tDemData,
             {
                 int tYIn = tYOut;
 
-                float tSlopeValDegree;
+                float tSlopeValDegree(0);
 
                 //Compute Slope Value
                 switch (method)
@@ -1107,7 +1109,7 @@ void DerivativeWriter::writeAspect(Eigen::MatrixXd* tDemData,
             {
                 int tYIn = tYOut;
 
-                float tSlopeValDegree;
+                float tSlopeValDegree(0);
 
                 //Compute Aspect Value
                 switch (method)
@@ -1407,7 +1409,7 @@ void DerivativeWriter::writeCurvature(Eigen::MatrixXd* tDemData,
             {
                 int tYIn = tYOut;
 
-                double curve;
+                double curve(0);
 
                 //Compute Slope Value
                 switch (curveType)

@@ -299,6 +299,8 @@ inline void writeProgress(int fd, const std::string& type,
 {
 #ifdef WIN32
 #else
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
     if (fd >= 0)
     {
         std::string out = type + ':' + text + '\n';
@@ -306,6 +308,7 @@ inline void writeProgress(int fd, const std::string& type,
         // This may error, but we don't care.
         write(fd, out.c_str(), out.length());
     }
+#pragma GCC diagnostic pop
 #endif
 }
 
