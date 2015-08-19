@@ -1033,7 +1033,7 @@ void DerivativeWriter::writeSlope(Eigen::MatrixXd* tDemData,
             {
                 int tYIn = tYOut;
 
-                float tSlopeValDegree;
+                float tSlopeValDegree(0);
 
                 //Compute Slope Value
                 switch (method)
@@ -1107,7 +1107,7 @@ void DerivativeWriter::writeAspect(Eigen::MatrixXd* tDemData,
             {
                 int tYIn = tYOut;
 
-                float tSlopeValDegree;
+                float tSlopeValDegree(0);
 
                 //Compute Aspect Value
                 switch (method)
@@ -1407,7 +1407,7 @@ void DerivativeWriter::writeCurvature(Eigen::MatrixXd* tDemData,
             {
                 int tYIn = tYOut;
 
-                double curve;
+                double curve(0);
 
                 //Compute Slope Value
                 switch (curveType)
