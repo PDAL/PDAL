@@ -118,7 +118,7 @@ void TIndexKernel::addSwitches()
         ("a_srs", po::value<std::string>(&m_assignSrsString)->
             default_value("EPSG:4326"),
             "Assign SRS of tile with no SRS to this value")
-        ("bounds", po::value<BOX3D>(&m_bounds),
+        ("bounds", po::value<BOX2D>(&m_bounds),
             "Extent (in XYZ) to clip output to")
         ("polygon", po::value<std::string>(&m_wkt),
             "Well-known text of polygon to clip output")

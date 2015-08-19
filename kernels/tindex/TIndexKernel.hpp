@@ -104,7 +104,7 @@ private:
     std::string m_tileIndexColumnName;
     std::string m_srsColumnName;
     std::string m_wkt;
-    BOX3D m_bounds;
+    BOX2D m_bounds;
     bool m_merge;
     bool m_absPath;
 
