@@ -34,7 +34,6 @@
 
 #include "TranslateKernel.hpp"
 
-#include <pdal/BufferReader.hpp>
 #include <pdal/KernelSupport.hpp>
 #include <pdal/StageFactory.hpp>
 #include <reprojection/ReprojectionFilter.hpp>
@@ -57,10 +56,7 @@ std::string TranslateKernel::getName() const
 }
 
 TranslateKernel::TranslateKernel() :
-    Kernel(), m_bCompress(false),
-    m_input_srs(pdal::SpatialReference()),
-    m_output_srs(pdal::SpatialReference()), m_bForwardMetadata(false),
-    m_decimation_step(1), m_decimation_offset(0),
+    Kernel(), m_bCompress(false), m_decimation_step(1), m_decimation_offset(0),
     m_decimation_leaf_size(1), m_decimation_limit(0)
 {}
 
@@ -147,10 +143,9 @@ void TranslateKernel::addSwitches()
         ("output,o", po::value<std::string>(&m_outputFile)->default_value(""),
          "output file name")
         ("a_srs", po::value<pdal::SpatialReference>(&m_input_srs),
-         "Assign input coordinate system (if supported by output format)")
+         "Assign input coordinate system")
         ("t_srs", po::value<pdal::SpatialReference>(&m_output_srs),
-         "Transform to output coordinate system (if supported by "
-         "output format)")
+         "Transform to output coordinate system")
         ("compress,z",
          po::value<bool>(&m_bCompress)->zero_tokens()->implicit_value(true),
          "Compress output data (if supported by output format)")
@@ -200,75 +195,33 @@ Stage& TranslateKernel::makeReader(Options readerOptions)
 }
 
 
-Stage& TranslateKernel::makeTranslate(Options translateOptions, Stage& parent)
+Stage& TranslateKernel::makeTranslate(Stage& reader)
 {
     StageFactory f;
-    Stage *finalStage = &parent;
-    Stage *nextStage = &parent;
+    Stage *nextStage = &reader;
 
-    Options readerOptions = parent.getOptions();
-    const Options& reproOpts = extraStageOptions("filters.reprojection");
-    const Options& cropOpts = extraStageOptions("filters.crop");
-
-    if (!m_bounds.empty() || !m_wkt.empty() || !m_output_srs.empty() ||
-        !reproOpts.empty() || !cropOpts.empty())
+    if (!m_output_srs.empty())
     {
-        Stage& cropStage = ownStage(f.createStage("filters.crop"));
+        Options translateOptions;
 
         if (!m_output_srs.empty())
-        {
             translateOptions.add("out_srs", m_output_srs.getWKT());
-            Stage& reprojectionStage =
-                ownStage(f.createStage("filters.reprojection"));
-            reprojectionStage.setInput(*nextStage);
-            reprojectionStage.setOptions(translateOptions);
-            nextStage = &reprojectionStage;
-        }
-        else if (!reproOpts.empty())
-        {
-            Stage& reprojectionStage =
-                ownStage(f.createStage("filters.reprojection"));
-            reprojectionStage.setInput(*nextStage);
-            nextStage = &reprojectionStage;
-        }
-
-        if ((!m_bounds.empty() && m_wkt.empty()))
-        {
-            readerOptions.add("bounds", m_bounds);
-            cropStage.setInput(*nextStage);
-            cropStage.setOptions(readerOptions);
-            nextStage = &cropStage;
-        }
-        else if (m_bounds.empty() && !m_wkt.empty())
-        {
-            std::istream* wkt_stream;
-            try
-            {
-                wkt_stream = FileUtils::openFile(m_wkt);
-                std::stringstream buffer;
-                buffer << wkt_stream->rdbuf();
-
-                m_wkt = buffer.str();
-                FileUtils::closeFile(wkt_stream);
-
-            }
-            catch (pdal::pdal_error const&)
-            {
-                // If we couldn't open the file given in m_wkt because it
-                // was likely actually wkt, leave it alone
-            }
-            readerOptions.add("polygon", m_wkt);
-            cropStage.setInput(*nextStage);
-            cropStage.setOptions(readerOptions);
-            nextStage = &cropStage;
-        }
-        else if (!cropOpts.empty())
-        {
-            cropStage.setInput(*nextStage);
-            nextStage = &cropStage;
-        }
-        finalStage = nextStage;
+        Stage& reprojectionStage =
+            ownStage(f.createStage("filters.reprojection"));
+        reprojectionStage.setInput(*nextStage);
+        reprojectionStage.setOptions(translateOptions);
+        nextStage = &reprojectionStage;
     }
+
+    // We always throw in a crop filter.  If no bounds/polys are set it does
+    // nothing.
+    Options cropOptions;
+    if (!m_bounds.empty())
+        cropOptions.add("bounds", m_bounds);
+    Stage& cropStage = ownStage(f.createStage("filters.crop"));
+    cropStage.setInput(*nextStage);
+    cropStage.setOptions(cropOptions);
+    nextStage = &cropStage;
 
     if (boost::iequals(m_decimation_method, "VoxelGrid"))
     {
@@ -293,8 +246,8 @@ Stage& TranslateKernel::makeTranslate(Options translateOptions, Stage& parent)
         decimationOptions.add("debug", isDebug());
         decimationOptions.add("verbose", getVerboseLevel());
         decimationStage.setOptions(decimationOptions);
-        decimationStage.setInput(*finalStage);
-        finalStage = &decimationStage;
+        decimationStage.setInput(*nextStage);
+        nextStage = &decimationStage;
     }
     else if (m_decimation_step > 1 || m_decimation_limit > 0)
     {
@@ -305,11 +258,11 @@ Stage& TranslateKernel::makeTranslate(Options translateOptions, Stage& parent)
         decimationOptions.add("offset", m_decimation_offset);
         decimationOptions.add("limit", m_decimation_limit);
         Stage& decimationStage = ownStage(f.createStage("filters.decimation"));
-        decimationStage.setInput(*finalStage);
+        decimationStage.setInput(*nextStage);
         decimationStage.setOptions(decimationOptions);
-        finalStage = &decimationStage;
+        nextStage = &decimationStage;
     }
-    return *finalStage;
+    return *nextStage;
 }
 
 
@@ -325,16 +278,11 @@ int TranslateKernel::execute()
         readerOptions.add("spatialreference", m_input_srs.getWKT());
 
     Stage& readerStage = makeReader(readerOptions);
-
-    // the translation consumes the BufferReader rather than the readerStage
-    Stage& finalStage = makeTranslate(readerOptions, readerStage);
+    Stage& finalStage = makeTranslate(readerStage);
 
     Options writerOptions;
     writerOptions.add("filename", m_outputFile);
     setCommonOptions(writerOptions);
-
-    if (!m_input_srs.empty())
-        writerOptions.add("spatialreference", m_input_srs.getWKT());
 
     if (m_bCompress)
         writerOptions.add("compression", true);
@@ -351,9 +299,11 @@ int TranslateKernel::execute()
     // Some options are inferred by makeWriter based on filename
     // (compression, driver type, etc).
     writer.setOptions(writerOptions + writer.getOptions());
-    applyExtraStageOptionsRecursive(&writer);
-    writer.prepare(table);
 
+    // Set all the stage-named options.
+    applyExtraStageOptionsRecursive(&writer);
+
+    writer.prepare(table);
     // process the data, grabbing the PointViewSet for visualization of the
     PointViewSet viewSetOut = writer.execute(table);
 

@@ -82,10 +82,10 @@ public:
     {
         char *pszWKT = NULL;
         OSRExportToWkt(m_ref.get(), &pszWKT);
+        bool valid = (bool)*pszWKT;
         CPLFree(pszWKT);
-        return (bool)pszWKT;
+        return (!valid);
     }
-
 
 private:
     void newRef(void *v)
