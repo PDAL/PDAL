@@ -1,4 +1,5 @@
 add_subdirectory(bpf)
+add_subdirectory(derivative)
 add_subdirectory(faux)
 add_subdirectory(las)
 add_subdirectory(null)

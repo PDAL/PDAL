@@ -139,8 +139,11 @@ std::string GetFullVersionString()
 {
     std::ostringstream os;
 
-    os << "PDAL " << PDAL_VERSION_STRING << " (" <<
-        GetSHA1().substr(0, 6) << ")";
+    std::string sha = GetSHA1();
+    if (!Utils::iequals(sha, "Release"))
+        sha = sha.substr(0,6);
+
+    os << PDAL_VERSION_STRING << " (git-version: " << sha << ")";
 
     return os.str();
 }

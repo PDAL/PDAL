@@ -126,7 +126,6 @@ set (PDAL_CONFIG_CPP
 list (APPEND PDAL_CPP ${PDAL_CONFIG_CPP} )
 list (APPEND PDAL_HPP ${PDAL_CONFIG_HPP} )
 
-
 # Standard include directory of PDAL library
 
 ###############################################################################

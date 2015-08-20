@@ -296,9 +296,9 @@ void CropFilter::crop(const GeomPkg& g, PointView& input, PointView& output)
         }
 
         GEOSGeometry *p = createPoint(x, y, z);
-        bool contained = (bool)(GEOSPreparedContains_r(m_geosEnvironment,
+        bool covers = (bool)(GEOSPreparedCovers_r(m_geosEnvironment,
             g.m_prepGeom, p));
-        if (m_cropOutside != contained)
+        if (m_cropOutside != covers)
             output.appendPoint(input, idx);
         GEOSGeom_destroy_r(m_geosEnvironment, p);
     }

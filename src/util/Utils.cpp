@@ -706,7 +706,7 @@ std::string Utils::escapeNonprinting(const std::string& s)
 // Useful for debug on occasion.
 std::string Utils::hexDump(const char *buf, size_t count)
 {
-   unsigned char *cp = (unsigned char *) buf;
+   const unsigned char *cp = reinterpret_cast<const unsigned char *>(buf);
    char foo[80];
    int bytes, i, address = 0;
    std::string out;

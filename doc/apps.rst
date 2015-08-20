@@ -442,7 +442,7 @@ translation operations.
     --a_srs arg        Assign input coordinate system.
     --t_srs arg        Transform to output coordinate system.
     --bounds arg       Limit output to points inside the specified box.
-                       --bounds "([xmin,xmax],[ymin,ymax],[zmin,zmax])"
+                       --bounds "([xmin,xmax],[ymin,ymax])"
     --polygon arg      Limit output to point inside the specified polygon (specified as
                        well-known text).
     --d_step arg       Step value to be passed to decimation filter. [1]
@@ -611,11 +611,18 @@ normally needs to be quoted to prevent shell expansion of wildcard characters.
 ::
 
     --tindex                   Non-positional option for specifying the index file name.
-    --filespec                 Non-positional option for specifying pattern of files to be indexed.
-    --lyr_name                 Name of layer in which to store the features. Defaults to the base name of the first file indexed.
-    --tindex_name              Name of the field in the feature in which to store the indexed file name. ["location"]
+    --filespec                 Non-positional option for specifying pattern of files to
+                               be indexed.
+    --lyr_name                 Name of layer in which to store the features. Defaults to
+                               the base name of the first file indexed.
+    --tindex_name              Name of the field in the feature in which to store the
+                               indexed file name. ["location"]
     --driver                   OGR driver name. ["ESRI Shapefile"]
-    --t_srs                    Spatial reference system in which to store index vector data. ["EPSG:4326"]
+    --t_srs                    Spatial reference system in which to store index vector
+                               data. ["EPSG:4326"]
+    --a_srs                    Spatial reference assumed to be the reference for the
+                               source data.  If the source data includes spatial reference
+                               information, this value is IGNORED. ["EPSG:4326"]
     --write_absolute_path arg  Write absolute rather than relative file paths [false]
 
 tindex Merge Mode

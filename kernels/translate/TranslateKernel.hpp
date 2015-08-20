@@ -64,7 +64,7 @@ private:
     bool m_bCompress;
     pdal::SpatialReference m_input_srs;
     pdal::SpatialReference m_output_srs;
-    BOX3D m_bounds;
+    BOX2D m_bounds;
     std::string m_wkt;
     uint32_t m_decimation_step;
     uint32_t m_decimation_offset;

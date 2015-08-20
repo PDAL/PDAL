@@ -89,7 +89,7 @@ void ErrorHandler::error(::CPLErr code, int num, char const* msg)
     std::ostringstream oss;
     if (code == CE_Failure || code == CE_Fatal)
     {
-        oss <<"GDAL Failure number =" << num << ": " << msg;
+        oss << "GDAL Failure number = " << num << ": " << msg;
         throw pdal_error(oss.str());
     }
 }
