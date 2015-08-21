@@ -216,6 +216,14 @@ Options CropFilter::getDefaultOptions()
 PointViewSet CropFilter::run(PointViewPtr view)
 {
     PointViewSet viewSet;
+
+    // Don't do anything if no bounds have been specified.
+    if (m_geoms.empty() && m_bounds.empty())
+    {
+        viewSet.insert(view);
+        return viewSet;
+    }
+
 #ifdef PDAL_HAVE_GEOS
     for (const auto& geom : m_geoms)
     {

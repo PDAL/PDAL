@@ -57,8 +57,7 @@ private:
     void validateSwitches();
 
     Stage& makeReader(Options readerOptions);
-    Stage& makeTranslate(Options translateOptions, Stage& parent);
-    void forwardMetadata(Options& options, Metadata metadata);
+    Stage& makeTranslate(Stage& parent);
 
     std::string m_inputFile;
     std::string m_outputFile;
@@ -67,7 +66,6 @@ private:
     pdal::SpatialReference m_output_srs;
     BOX2D m_bounds;
     std::string m_wkt;
-    bool m_bForwardMetadata;
     uint32_t m_decimation_step;
     uint32_t m_decimation_offset;
     double m_decimation_leaf_size;
