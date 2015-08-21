@@ -218,6 +218,8 @@ Stage& TranslateKernel::makeTranslate(Stage& reader)
     Options cropOptions;
     if (!m_bounds.empty())
         cropOptions.add("bounds", m_bounds);
+    if (!m_wkt.empty())
+        cropOptions.add("polygon", m_wkt);
     Stage& cropStage = ownStage(f.createStage("filters.crop"));
     cropStage.setInput(*nextStage);
     cropStage.setOptions(cropOptions);
