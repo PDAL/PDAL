@@ -16,6 +16,7 @@ Readers
    readers.geowave
    readers.greyhound
    readers.las
+   readers.mrsid
    readers.nitf
    readers.oci
    readers.optech
