@@ -34,9 +34,8 @@
 
 #include "MrsidReader.hpp"
 
-#include <pdal/PointBuffer.hpp>
-
-#include <boost/algorithm/string.hpp>
+#include <lidar/MG4PointReader.h>
+#include <lidar/FileIO.h>
 
 namespace pdal
 {
@@ -50,391 +49,320 @@ CREATE_SHARED_PLUGIN(1, 0, MrsidReader, Reader, s_info)
 
 std::string MrsidReader::getName() const { return s_info.name; }
 
-MrsidReader::MrsidReader(LizardTech::PointSource *ps)
+MrsidReader::MrsidReader()
     : pdal::Reader()
-    , m_PS(ps), m_iter(NULL)
+    , m_PS(0), m_iter(NULL)
+    , m_initialized(false)
 {
-    m_PS->retain();
-    return;
 }
 
-MrsidReader::~MrsidReader()
+void MrsidReader::done(PointTableRef)
 {
     m_iter->release();
     m_PS->release();
+    m_initialized = false;
+    m_PS = 0;
+    m_iter = 0;
 }
 
-Dimension MrsidReader::LTChannelToPDalDimension(const LizardTech::ChannelInfo & channel, pdal::Schema const& dimensions) const
+pdal::Dimension::Type::Enum getPDALType(LizardTech::DataType t)
 {
 
-    std::string name = channel.getName();
+   using namespace Dimension;
+   using namespace Dimension::Type;
+   using namespace LizardTech;
+   switch (t)
+   {
+       case DATATYPE_SINT8:
+           return Signed8;
+       case DATATYPE_UINT8:
+           return Unsigned8;
+       case DATATYPE_SINT16:
+           return Signed16;
+       case DATATYPE_UINT16:
+           return Unsigned16;
+       case DATATYPE_SINT32:
+           return Signed32;
+       case DATATYPE_UINT32:
+           return Unsigned32;
+       case DATATYPE_SINT64:
+           return Signed64;
+       case DATATYPE_UINT64:
+           return Unsigned64;
+       case DATATYPE_FLOAT32:
+           return Float;
+       case DATATYPE_FLOAT64:
+           return Double;
 
-    // Map LT common names to PDAL common names (from drivers.las)
-    if (boost::iequals(channel.getName(), CHANNEL_NAME_EdgeFlightLine)) name = "EdgeOfFlightLine";
-    if (boost::iequals(channel.getName(), CHANNEL_NAME_ClassId)) name = "Classification";
-    if (boost::iequals(channel.getName(), CHANNEL_NAME_ScanAngle)) name = "ScanAngleRank";
-    if (boost::iequals(channel.getName(), CHANNEL_NAME_ScanDir)) name = "ScanDirectionFlag";
-    if (boost::iequals(channel.getName(), CHANNEL_NAME_GPSTime)) name = "Time";
-    if (boost::iequals(channel.getName(), CHANNEL_NAME_SourceId)) name = "PointSourceId";
-    if (boost::iequals(channel.getName(), CHANNEL_NAME_ReturnNum)) name = "ReturnNumber";
-    if (boost::iequals(channel.getName(), CHANNEL_NAME_NumReturns)) name = "NumberOfReturns";
-
-    Dimension retval = dimensions.getDimension(name);
-
-    return retval;
+       default:
+           return Double;
+   }
 }
 
-
-void MrsidReader::initialize()
+void MrsidReader::addDimensions(PointLayoutPtr layout)
 {
+    using namespace Dimension;
+
+    if (!m_PS)
+        throw pdal_error("MrSID object not initialized!");
     const LizardTech::PointInfo& pointinfo = m_PS->getPointInfo();
 
-    Schema const& dimensions(getDefaultDimensions());
+    // add a map for PDAL names that aren't the same as LT ones (GPSTime vs Time)
+    std::map<std::string, std::string> dimensionTranslations;
+    dimensionTranslations.insert(std::pair<std::string, std::string>("Time", "GPSTime"));
+    dimensionTranslations.insert(std::pair<std::string, std::string>("NumReturns", "NumberOfReturns"));
+    dimensionTranslations.insert(std::pair<std::string, std::string>("ReturnNum", "ReturnNumber"));
+    dimensionTranslations.insert(std::pair<std::string, std::string>("ScanDir", "ScanDirectionFlag"));
+    dimensionTranslations.insert(std::pair<std::string, std::string>("EdgeFlightLine", "EdgeOfFlightLine"));
+    dimensionTranslations.insert(std::pair<std::string, std::string>("ScanAngle", "ScanAngleRank"));
+    dimensionTranslations.insert(std::pair<std::string, std::string>("ClassId", "Classification"));
+    dimensionTranslations.insert(std::pair<std::string, std::string>("SourceId", "PointSourceId"));
+
     for (unsigned int i=0; i<pointinfo.getNumChannels(); i++)
     {
         const LizardTech::ChannelInfo &channel = pointinfo.getChannel(i);
-        Dimension dim = LTChannelToPDalDimension(channel, dimensions);
-        m_schema.appendDimension(dim);
-    }
+        const char* name = channel.getName();
+        auto translated = dimensionTranslations.find(name);
+        if (translated != dimensionTranslations.end())
+            name = translated->second.c_str();
 
-    setNumPoints(m_PS->getNumPoints());
-    pdal::Bounds<double> b(m_PS->getBounds().x.min, m_PS->getBounds().x.max,
-        m_PS->getBounds().y.min, m_PS->getBounds().y.max,
-        m_PS->getBounds().z.min,m_PS->getBounds().z.max);
-    setBounds(b);
-    m_iter = m_PS->createIterator(m_PS->getBounds(), 1.0,
-        m_PS->getPointInfo(), NULL);
+        LizardTech::DataType t = channel.getDataType();
+        Dimension::Type::Enum pdal_type = getPDALType(t);
+        layout->registerOrAssignDim(name, pdal_type);
+    }
+    m_layout = layout;
+
 }
 
+void MrsidReader::initialize()
+{
+    LT_USE_LIDAR_NAMESPACE
+
+    if (m_initialized)
+        return;
+
+    FileIO *file = FileIO::create();
+    file->init(m_filename.c_str(), "r");
+    m_PS = MG4PointReader::create();
+    m_PS->init(file);
+    file->release();
+    file = NULL;
+
+    m_iter = m_PS->createIterator(m_PS->getBounds(), 1.0,
+        m_PS->getPointInfo(), NULL);
+    m_initialized = true;
+}
+
+void MrsidReader::ready(PointTableRef table, MetadataNode& m)
+{
+    m_index = 0;
+}
 
 Options MrsidReader::getDefaultOptions()
 {
     Options options;
+    options.add("filename", "", "file to read from");
     return options;
 }
 
-pdal::StageSequentialIterator* MrsidReader::createSequentialIterator(PointBuffer& buffer) const
+
+QuickInfo MrsidReader::inspect()
 {
-    return new pdal::iterators::sequential::MrsidReader(*this, buffer, getNumPoints());
+    QuickInfo qi;
+    std::unique_ptr<PointLayout> layout(new PointLayout());
+
+    MrsidReader::initialize();
+    addDimensions(layout.get());
+
+    BOX3D b(m_PS->getBounds().x.min, m_PS->getBounds().x.max,
+        m_PS->getBounds().y.min, m_PS->getBounds().y.max,
+        m_PS->getBounds().z.min,m_PS->getBounds().z.max);
+
+    Dimension::IdList dims = layout->dims();
+    for (auto di = dims.begin(); di != dims.end(); ++di)
+        qi.m_dimNames.push_back(layout->dimName(*di));
+    qi.m_pointCount =
+        Utils::saturation_cast<point_count_t>(m_PS->getNumPoints());
+    qi.m_bounds = b;
+    qi.m_srs = pdal::SpatialReference(m_PS->getWKT());
+    qi.m_valid = true;
+
+    PointTable table;
+    done(table);
+
+    return qi;
 }
 
-int MrsidReader::SchemaToPointInfo(const Schema &schema, LizardTech::PointInfo &pointInfo) const
+void MrsidReader::LayoutToPointInfo(const PointLayout &layout, LizardTech::PointInfo &pointInfo) const
 {
-    schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();
+    using namespace pdal::Dimension;
+    using namespace pdal::Dimension::Type;
+    const Dimension::IdList& dims = layout.dims();
 
     pointInfo.init(dims.size());
     for (unsigned int idx=0; idx<dims.size(); idx++)
     {
-        Dimension const& dim = dims[idx];
+        std::string name = layout.dimName(dims[idx]);
+        Dimension::Type::Enum t = layout.dimType(dims[idx]);
+        size_t size = layout.dimSize(dims[idx]);
 
-        std::string name = dim.getName();
-        if (boost::iequals(dim.getName(),"EdgeOfFlightLine")) name = CHANNEL_NAME_EdgeFlightLine;
-        if (boost::iequals(dim.getName(), "Classification")) name = CHANNEL_NAME_ClassId;
-        if (boost::iequals(dim.getName(), "ScanAngleRank")) name = CHANNEL_NAME_ScanAngle;
-        if (boost::iequals(dim.getName(), "ScanDirectionFlag")) name = CHANNEL_NAME_ScanDir;
-        if (boost::iequals(dim.getName(), "Time")) name = CHANNEL_NAME_GPSTime;
-        if (boost::iequals(dim.getName(), "PointSourceId")) name = CHANNEL_NAME_SourceId;
-        if (boost::iequals(dim.getName(), "ReturnNumber")) name = CHANNEL_NAME_ReturnNum;
-        if (boost::iequals(dim.getName(), "NumberOfReturns")) name = CHANNEL_NAME_NumReturns;
+        if (Utils::iequals(name, "EdgeOfFlightLine")) name = CHANNEL_NAME_EdgeFlightLine;
+        if (Utils::iequals(name, "Classification")) name = CHANNEL_NAME_ClassId;
+        if (Utils::iequals(name, "ScanAngleRank")) name = CHANNEL_NAME_ScanAngle;
+        if (Utils::iequals(name, "ScanDirectionFlag")) name = CHANNEL_NAME_ScanDir;
+        if (Utils::iequals(name, "Time")) name = CHANNEL_NAME_GPSTime;
+        if (Utils::iequals(name, "PointSourceId")) name = CHANNEL_NAME_SourceId;
+        if (Utils::iequals(name, "ReturnNumber")) name = CHANNEL_NAME_ReturnNum;
+        if (Utils::iequals(name, "NumberOfReturns")) name = CHANNEL_NAME_NumReturns;
 
-        if (dim.getInterpretation() == dimension::Float)
-        {
-            if (dim.getByteSize() == 8)
-                pointInfo.getChannel(idx).init(name.c_str(), LizardTech::DATATYPE_FLOAT64, 64);
-            if (dim.getByteSize() == 4)
-                pointInfo.getChannel(idx).init(name.c_str(), LizardTech::DATATYPE_FLOAT32, 32);
-        }
-        if (dim.getInterpretation() == dimension::SignedInteger)
-        {
-            if (dim.getByteSize() == 8)
-                pointInfo.getChannel(idx).init(name.c_str(), LizardTech::DATATYPE_SINT64, 64);
-            if (dim.getByteSize() == 4)
-                pointInfo.getChannel(idx).init(name.c_str(), LizardTech::DATATYPE_SINT32, 32);
-            if (dim.getByteSize() == 2)
-                pointInfo.getChannel(idx).init(name.c_str(), LizardTech::DATATYPE_SINT16, 16);
-            if (dim.getByteSize() == 1)
-                pointInfo.getChannel(idx).init(name.c_str(), LizardTech::DATATYPE_SINT8, 8);
-        }
-        if (dim.getInterpretation() == dimension::UnsignedInteger)
-        {
-            if (dim.getByteSize() == 8)
-                pointInfo.getChannel(idx).init(name.c_str(), LizardTech::DATATYPE_UINT64, 64);
-            if (dim.getByteSize() == 4)
-                pointInfo.getChannel(idx).init(name.c_str(), LizardTech::DATATYPE_UINT32, 32);
-            if (dim.getByteSize() == 2)
-                pointInfo.getChannel(idx).init(name.c_str(), LizardTech::DATATYPE_UINT16, 16);
-            if (dim.getByteSize() == 1)
-                pointInfo.getChannel(idx).init(name.c_str(), LizardTech::DATATYPE_UINT8, 8);
-        }
-
+        if (t == Double)
+            pointInfo.getChannel(idx).init(name.c_str(), LizardTech::DATATYPE_FLOAT64, 64);
+        else if (t == Float)
+            pointInfo.getChannel(idx).init(name.c_str(), LizardTech::DATATYPE_FLOAT32, 32);
+        else if (t == Signed64)
+            pointInfo.getChannel(idx).init(name.c_str(), LizardTech::DATATYPE_SINT64, 64);
+        else if (t == Signed32)
+            pointInfo.getChannel(idx).init(name.c_str(), LizardTech::DATATYPE_SINT32, 32);
+        else if (t == Signed16)
+            pointInfo.getChannel(idx).init(name.c_str(), LizardTech::DATATYPE_SINT16, 16);
+        else if (t == Signed8)
+            pointInfo.getChannel(idx).init(name.c_str(), LizardTech::DATATYPE_SINT8, 8);
+        else if (t == Unsigned64)
+            pointInfo.getChannel(idx).init(name.c_str(), LizardTech::DATATYPE_UINT64, 64);
+        else if (t == Unsigned32)
+            pointInfo.getChannel(idx).init(name.c_str(), LizardTech::DATATYPE_UINT32, 32);
+        else if (t == Unsigned16)
+            pointInfo.getChannel(idx).init(name.c_str(), LizardTech::DATATYPE_UINT16, 16);
+        else if (t == Unsigned8)
+            pointInfo.getChannel(idx).init(name.c_str(), LizardTech::DATATYPE_UINT8, 8);
     }
-    return 0; //bug, do error checking
 }
 
-
-uint32_t MrsidReader::processBuffer(PointBuffer& data, uint64_t index) const
+point_count_t MrsidReader::read(PointViewPtr view, point_count_t count)
 {
-    const Schema& schema = data.getSchema();
-
-    // how many are they asking for?
-    uint64_t numPointsWanted = data.getCapacity();
-
-    // we can only give them as many as we have left
-    uint64_t numPointsAvailable = getNumPoints() - index;
-    if (numPointsAvailable < numPointsWanted)
-        numPointsWanted = numPointsAvailable;
-
+    using namespace pdal::Dimension::Type;
 
     LizardTech::PointData points;
-    // to do:  specify a PointInfo structure that reads only the channels we will output.
-    points.init(m_PS->getPointInfo(), (size_t)numPointsWanted);
-    size_t count = m_iter->getNextPoints(points);
+    LayoutToPointInfo(*m_layout, m_pointInfo);
 
-    uint32_t cnt = 0;
-    data.setNumPoints(0);
+    points.init(m_pointInfo, (size_t)count);
+    count = m_iter->getNextPoints(points);
+    Dimension::IdList dims = view->dims();
 
-    schema::index_by_index const& dims = schema.getDimensions().get<schema::index>();
-
-    for (uint32_t pointIndex=0; pointIndex<count; pointIndex++)
+    point_count_t cnt(0);
+    for (point_count_t pointIndex=0; pointIndex<count; pointIndex++)
     {
         ++cnt;
 
-        for (unsigned int i=0; i < dims.size(); i++)
+        for (Dimension::IdList::size_type i=0; i < dims.size(); i++)
         {
-            Dimension const& d = dims[i];
+            Dimension::Id::Enum const& d = dims[i];
+            std::string name = m_layout->dimName(d);
+            Dimension::Type::Enum t = m_layout->dimType(d);
 
-            if (d.getName() == "X" && d.getInterpretation() == dimension::Float && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_X))
+            if (Utils::iequals(name, "X") && m_pointInfo.hasChannel(CHANNEL_NAME_X))
             {
-                double *pData = static_cast<double*>(points.getChannel(CHANNEL_NAME_X)->getData());
-                double value = static_cast<double>(pData[pointIndex]);
-                data.setField<double>(d, pointIndex, value);
-            }
-            else if (d.getName() == "X" && d.getInterpretation() == dimension::SignedInteger && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_X))
+                if (t == Double)
+                {
+                    double *pData = static_cast<double*>(points.getChannel(CHANNEL_NAME_X)->getData());
+                    double value = static_cast<double>(pData[pointIndex]);
+                    view->setField<double>(d, pointIndex, value);
+                } else if (t == Signed32)
+                {
+                    double *pData = static_cast<double*>(points.getChannel(CHANNEL_NAME_X)->getData());
+                    int32_t value = static_cast<int32_t>(pData[pointIndex]);
+                    view->setField<int32_t>(d, pointIndex, value);
+                }
+            } else if (Utils::iequals(name, "Y") && m_pointInfo.hasChannel(CHANNEL_NAME_Y))
             {
-                double *pData = static_cast<double*>(points.getChannel(CHANNEL_NAME_X)->getData());
-                int32_t value = static_cast<int32_t>(pData[pointIndex]);
-                data.setField<int32_t>(d, pointIndex, value);
-            }
-            else if (d.getName() == "Y" && d.getInterpretation() == dimension::Float && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_Y))
+                if (t == Double)
+                {
+                    double *pData = static_cast<double*>(points.getChannel(CHANNEL_NAME_Y)->getData());
+                    double value = static_cast<double>(pData[pointIndex]);
+                    view->setField<double>(d, pointIndex, value);
+                } else if (t == Signed32)
+                {
+                    double *pData = static_cast<double*>(points.getChannel(CHANNEL_NAME_Y)->getData());
+                    int32_t value = static_cast<int32_t>(pData[pointIndex]);
+                    view->setField<int32_t>(d, pointIndex, value);
+                }
+            } else if (Utils::iequals(name, "Z") && m_pointInfo.hasChannel(CHANNEL_NAME_Z))
+            {
+                if (t == Double)
+                {
+                    double *pData = static_cast<double*>(points.getChannel(CHANNEL_NAME_Z)->getData());
+                    double value = static_cast<double>(pData[pointIndex]);
+                    view->setField<double>(d, pointIndex, value);
+                } else if (t == Signed32)
+                {
+                    double *pData = static_cast<double*>(points.getChannel(CHANNEL_NAME_Z)->getData());
+                    int32_t value = static_cast<int32_t>(pData[pointIndex]);
+                    view->setField<int32_t>(d, pointIndex, value);
+                }
+            } else if (Utils::iequals(name, "GpsTime") && m_pointInfo.hasChannel(CHANNEL_NAME_GPSTime))
             {
                 double *pData = static_cast<double*>(points.getChannel(CHANNEL_NAME_Y)->getData());
                 double value = static_cast<double>(pData[pointIndex]);
-                data.setField<double>(d, pointIndex, value);
+                view->setField<double>(d, pointIndex, value);
             }
-            else if (d.getName() == "Y" && d.getInterpretation() == dimension::SignedInteger && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_Y))
-            {
-                double *pData = static_cast<double*>(points.getChannel(CHANNEL_NAME_Y)->getData());
-                int32_t value = static_cast<int32_t>(pData[pointIndex]);
-                data.setField<int32_t>(d, pointIndex, value);
-            }
-            else if (d.getName() == "Z" && d.getInterpretation() == dimension::Float && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_Z))
-            {
-                double *pData = static_cast<double*>(points.getChannel(CHANNEL_NAME_Z)->getData());
-                double value = static_cast<double>(pData[pointIndex]);
-                data.setField<double>(d, pointIndex, value);
-            }
-            else if (d.getName() == "Z" && d.getInterpretation() == dimension::SignedInteger && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_Z))
-            {
-                double *pData = static_cast<double*>(points.getChannel(CHANNEL_NAME_Z)->getData());
-                int32_t value = static_cast<int32_t>(pData[pointIndex]);
-                data.setField<int32_t>(d, pointIndex, value);
-            }
-            else if (d.getName() == "Time" && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_GPSTime))
-            {
-                double *pData = static_cast<double*>(points.getChannel(CHANNEL_NAME_GPSTime)->getData());
-                uint64_t  value = static_cast<uint64_t>(pData[pointIndex]);
-                data.setField<uint64_t>(d, pointIndex, value);
-            }
-            else if (d.getName() == "Intensity" && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_Intensity))
+            else if (Utils::iequals(name, "Intensity") && m_pointInfo.hasChannel(CHANNEL_NAME_Intensity))
             {
                 uint16_t *pData = static_cast<uint16_t*>(points.getChannel(CHANNEL_NAME_Intensity)->getData());
                 uint16_t value = static_cast<uint16_t>(pData[pointIndex]);
-                data.setField<uint16_t>(d, pointIndex, value);
+                view->setField<uint16_t>(d, pointIndex, value);
             }
-            else if (d.getName() == "ReturnNumber" && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_ReturnNum))
+            else if (Utils::iequals(name, "ReturnNumber") && m_pointInfo.hasChannel(CHANNEL_NAME_ReturnNum))
             {
                 uint8_t *pData = static_cast<uint8_t*>(points.getChannel(CHANNEL_NAME_ReturnNum)->getData());
                 uint8_t value = static_cast<uint8_t>(pData[pointIndex]);
-                data.setField<uint8_t>(d, pointIndex, value);
+                view->setField<uint8_t>(d, pointIndex, value);
             }
-            else if (d.getName() == "NumberOfReturns" && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_NumReturns))
+            else if (Utils::iequals(name, "NumberOfReturns") && m_pointInfo.hasChannel(CHANNEL_NAME_NumReturns))
             {
                 uint8_t *pData = static_cast<uint8_t*>(points.getChannel(CHANNEL_NAME_NumReturns)->getData());
                 uint8_t value = static_cast<uint8_t>(pData[pointIndex]);
-                data.setField<uint8_t>(d, pointIndex, value);
+                view->setField<uint8_t>(d, pointIndex, value);
             }
-            else if (d.getName() == "ScanDirectionFlag" && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_ScanDir))
+            else if (Utils::iequals(name, "ScanDirectionFlag") && m_pointInfo.hasChannel(CHANNEL_NAME_ScanDir))
             {
-                uint8_t *pData = static_cast<uint8_t*>(points.getChannel(CHANNEL_NAME_NumReturns)->getData());
+                uint8_t *pData = static_cast<uint8_t*>(points.getChannel(CHANNEL_NAME_ScanDir)->getData());
                 uint8_t value = static_cast<uint8_t>(pData[pointIndex]);
-                data.setField<uint8_t>(d, pointIndex, value);
+                view->setField<uint8_t>(d, pointIndex, value);
             }
-            else if (d.getName() == "ScanAngleRank" && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_ScanAngle))
+            else if (Utils::iequals(name, "ScanAngleRank") && m_pointInfo.hasChannel(CHANNEL_NAME_ScanAngle))
             {
-                int8_t *pData = static_cast<int8_t*>(points.getChannel(CHANNEL_NAME_NumReturns)->getData());
+                int8_t *pData = static_cast<int8_t*>(points.getChannel(CHANNEL_NAME_ScanAngle)->getData());
                 int8_t value = static_cast<int8_t>(pData[pointIndex]);
-                data.setField<int8_t>(d, pointIndex, value);
+                view->setField<int8_t>(d, pointIndex, value);
             }
-            else if (d.getName() == "EdgeOfFlightLine" && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_EdgeFlightLine))
+            else if (Utils::iequals(name, "EdgeOfFlightLine") && m_pointInfo.hasChannel(CHANNEL_NAME_EdgeFlightLine))
             {
-                uint8_t *pData = static_cast<uint8_t*>(points.getChannel(CHANNEL_NAME_NumReturns)->getData());
+                uint8_t *pData = static_cast<uint8_t*>(points.getChannel(CHANNEL_NAME_EdgeFlightLine)->getData());
                 uint8_t value = static_cast<uint8_t>(pData[pointIndex]);
-                data.setField<uint8_t>(d, pointIndex, value);
+                view->setField<uint8_t>(d, pointIndex, value);
             }
-            else if (d.getName() == "Classification" && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_ClassId))
+            else if (Utils::iequals(name, "Classification") && m_pointInfo.hasChannel(CHANNEL_NAME_ClassId))
             {
-                uint8_t *pData = static_cast<uint8_t*>(points.getChannel(CHANNEL_NAME_NumReturns)->getData());
+                uint8_t *pData = static_cast<uint8_t*>(points.getChannel(CHANNEL_NAME_ClassId)->getData());
                 uint8_t value = static_cast<uint8_t>(pData[pointIndex]);
-                data.setField<uint8_t>(d, pointIndex, value);
+                view->setField<uint8_t>(d, pointIndex, value);
             }
-            else if (d.getName() == "UserData" && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_UserData))
+            else if (Utils::iequals(name, "UserData") && m_pointInfo.hasChannel(CHANNEL_NAME_UserData))
             {
-                uint8_t *pData = static_cast<uint8_t*>(points.getChannel(CHANNEL_NAME_NumReturns)->getData());
+                uint8_t *pData = static_cast<uint8_t*>(points.getChannel(CHANNEL_NAME_UserData)->getData());
                 uint8_t value = static_cast<uint8_t>(pData[pointIndex]);
-                data.setField<uint8_t>(d, pointIndex, value);
+                view->setField<uint8_t>(d, pointIndex, value);
             }
-            else if (d.getName() == "PointSourceId" && m_PS->getPointInfo().hasChannel(CHANNEL_NAME_SourceId))
+            else if (Utils::iequals(name, "PointSourceId") && m_pointInfo.hasChannel(CHANNEL_NAME_SourceId))
             {
-                uint16_t *pData = static_cast<uint16_t*>(points.getChannel(CHANNEL_NAME_NumReturns)->getData());
+                uint16_t *pData = static_cast<uint16_t*>(points.getChannel(CHANNEL_NAME_SourceId)->getData());
                 uint16_t value = static_cast<uint16_t>(pData[pointIndex]);
-                data.setField<uint16_t>(d, pointIndex, value);
+                view->setField<uint16_t>(d, pointIndex, value);
             }
-
-
         }
     }
-    data.setNumPoints(cnt);
-    assert(cnt <= data.getCapacity());
 
-    return cnt;
-}
-
-std::vector<Dimension> MrsidReader::getDefaultDimensions()
-{
-    std::vector<Dimension> output;
-
-    Dimension x("X", dimension::Float, 8);
-    x.setUUID("8c54ff0c-234f-43a2-8959-d9681ad1dea3");
-    x.setNamespace(s_getName());
-    output.push_back(x);
-
-    Dimension y("Y", dimension::Float, 8);
-    y.setUUID("9cee971b-2505-40cd-b7e9-f32c399afac7");
-    y.setNamespace(s_getName());
-    output.push_back(y);
-
-    Dimension z("Z", dimension::Float, 8);
-    z.setUUID("89dc4e36-6166-4bc8-bf95-5660657b0ea6");
-    z.setNamespace(s_getName());
-    output.push_back(z);
-
-    Dimension t("Time", dimension::Float, 8);
-    t.setUUID("3aea2826-4a6e-4c1b-ae27-7b2f24763ce1");
-    t.setNamespace(s_getName());
-    output.push_back(t);
-
-    Dimension blue("Blue", dimension::UnsignedInteger, 2);
-    blue.setUUID("f69977e3-23e8-4483-91b6-14cad981e9fd");
-    blue.setNamespace(s_getName());
-    output.push_back(blue);
-
-    Dimension red("Red", dimension::UnsignedInteger, 2);
-    red.setUUID("40a02a80-c399-42f0-a587-a286635b446e");
-    red.setNamespace(s_getName());
-    output.push_back(red);
-
-    Dimension green("Green", dimension::UnsignedInteger, 2);
-    green.setUUID("b329df2d-44f1-4f35-8993-d183dacaa1ff");
-    green.setNamespace(s_getName());
-    output.push_back(green);
-
-    Dimension cls("Classification", dimension::UnsignedInteger, 1);
-    cls.setUUID("ba1e2af8-6dfd-46a7-972a-ecc00f68914d");
-    cls.setNamespace(s_getName());
-    output.push_back(cls);
-
-    Dimension edge("EdgeOfFlightLine", dimension::UnsignedInteger, 1);
-    edge.setUUID("daed3bfc-650d-4265-93a7-d8093cbd75a0");
-    edge.setNamespace(s_getName());
-    output.push_back(edge);
-
-    Dimension intensity("Intensity", dimension::UnsignedInteger, 2);
-    intensity.setUUID("a43332a8-26b3-4609-a2b1-ddfda30e0565");
-    intensity.setNamespace(s_getName());
-    output.push_back(intensity);
-
-    Dimension num_returns("NumberOfReturns", dimension::UnsignedInteger, 1);
-    num_returns.setUUID("fa7c5d56-fb2b-4f81-9126-f183000c3cd8");
-    num_returns.setNamespace(s_getName());
-    output.push_back(num_returns);
-
-    Dimension return_no("ReturnNumber", dimension::UnsignedInteger, 1);
-    return_no.setUUID("e38cc121-8d26-482a-8920-c5599b2cdd19");
-    return_no.setNamespace(s_getName());
-    output.push_back(return_no);
-
-    Dimension scan_angle("ScanAngleRank", dimension::UnsignedInteger, 1);
-    scan_angle.setUUID("5d816875-10a5-4048-ad9d-fd3b8d065a6a");
-    scan_angle.setNamespace(s_getName());
-    output.push_back(scan_angle);
-
-    Dimension scan_dir("ScanDirectionFlag", dimension::UnsignedInteger, 1);
-    scan_dir.setUUID("d1054379-8bf6-4685-abfc-1f0ec37aa819");
-    scan_dir.setNamespace(s_getName());
-    output.push_back(scan_dir);
-
-    Dimension ptsource("PointSourceId", dimension::UnsignedInteger, 2);
-    ptsource.setUUID("be6e71af-b2f7-4107-a902-96e2fb71343f");
-    ptsource.setNamespace(s_getName());
-    output.push_back(ptsource);
-
-    Dimension userdata("UserData", dimension::UnsignedInteger, 1);
-    userdata.setUUID("551ca4be-cb6e-47a4-93a9-e403e9a06a8a");
-    userdata.setNamespace(s_getName());
-    output.push_back(userdata);
-
-    return output;
-}
-
-
-namespace iterators
-{
-
-namespace sequential
-{
-
-
-MrsidReader::MrsidReader(const pdal::MrsidReader& reader, PointBuffer& buffer, uint32_t numPoints)
-    : pdal::ReaderSequentialIterator(buffer)
-    , m_numPoints(numPoints)
-    , m_reader(reader)
-{
-    return;
-}
-
-
-uint64_t MrsidReader::skipImpl(uint64_t count)
-{
     return count;
 }
-
-
-bool MrsidReader::atEndImpl() const
-{
-    // const uint64_t numPoints = getStage().getNumPoints();
-    const uint64_t currPoint = getIndex();
-    return currPoint >= m_numPoints;
-}
-
-
-uint32_t MrsidReader::readBufferImpl(PointBuffer& data)
-{
-    return m_reader.processBuffer(data, getIndex());
-}
-
-} // sequential
-
-
-} // iterators
 
 } // namespaces

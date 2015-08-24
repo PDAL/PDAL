@@ -35,20 +35,17 @@
 #pragma once
 
 #include <pdal/Reader.hpp>
-#include <pdal/ReaderIterator.hpp>
 
 #include <pdal/util/Bounds.hpp>
 
 #include <lidar/PointSource.h>
+#include <lidar/PointData.h>
+#include <lidar/MG4PointReader.h>
 
-namespace pdal
-{
-class PointBuffer;
-}
-namespace LizardTech
-{
-class PointSource;
-}
+
+extern "C" int32_t MrsidReader_ExitFunc();
+extern "C" PF_ExitFunc MrsidReader_InitPlugin();
+
 
 namespace pdal
 {
@@ -60,76 +57,47 @@ class PDAL_DLL MrsidReader : public pdal::Reader
 {
 
 public:
-    virtual ~MrsidReader();
-    MrsidReader() : Writer() {};
-    MrsidReader(LizardTech::PointSource *ps);
+    virtual ~MrsidReader(){};
+    MrsidReader();
 
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
 
     Options getDefaultOptions();
-    static std::vector<Dimension> getDefaultDimensions();
-    pdal::StageSequentialIterator*
-        createSequentialIterator(PointBuffer& buffer) const;
 
-    // this is called by the stage's iterator
-    uint32_t processBuffer(PointBuffer& data, uint64_t index) const;
+    point_count_t getNumPoints() const
+        { if (m_PS)
+            return m_PS->getNumPoints();
+          else
+            return 0;
+        }
 
-private:
-    LizardTech::PointSource *m_PS;
-    LizardTech::PointIterator *m_iter;
-
+protected:
     virtual void initialize();
-    int SchemaToPointInfo(const Schema &schema, LizardTech::PointInfo &pointInfo) const;
-    Dimension LTChannelToPDalDimension(const LizardTech::ChannelInfo & channel, pdal::Schema const& dimensions) const;
+    virtual void addDimensions(PointLayoutPtr layout);
+private:
+    LizardTech::MG4PointReader *m_PS;
+    LizardTech::PointIterator *m_iter;
+    LizardTech::PointInfo m_pointInfo;
+    PointLayoutPtr m_layout;
+
+    point_count_t m_index;
+
     MrsidReader& operator=(const MrsidReader&); // not implemented
     MrsidReader(const MrsidReader&); // not implemented
+
+    void LayoutToPointInfo(const PointLayout &layout, LizardTech::PointInfo &pointInfo) const;
+    virtual QuickInfo inspect();
+    virtual void ready(PointTableRef table)
+        { ready(table, m_metadata); }
+    virtual void ready(PointTableRef table, MetadataNode& m);
+    virtual point_count_t read(PointViewPtr view, point_count_t count);
+    virtual void done(PointTableRef table);
+    virtual bool eof()
+        { return m_index >= getNumPoints(); }
+    bool m_initialized;
 };
-
-namespace iterators
-{
-
-namespace sequential
-{
-
-class MrsidReader : public pdal::ReaderSequentialIterator
-{
-public:
-    MrsidReader(const pdal::MrsidReader& reader, PointBuffer& buffer, uint32_t numPoints);
-
-private:
-    uint64_t skipImpl(uint64_t);
-    point_count_t readBufferImpl(PointBuffer&);
-    bool atEndImpl() const;
-    uint32_t m_numPoints;
-
-    const pdal::MrsidReader& m_reader;
-};
-
-} // sequential
-
-namespace random
-{
-
-class MrsidReader : public pdal::ReaderRandomIterator
-{
-public:
-    MrsidReader(const pdal::MrsidReader& reader,
-           PointBuffer& buffer, uint32_t numPoints);
-
-private:
-    uint64_t seekImpl(uint64_t);
-    uint32_t readBufferImpl(PointBuffer&);
-
-    const pdal::drivers::mrsid::MrsidReader& m_reader;
-    uint32_t m_numPoints;
-
-};
-
-
-} // random
-} // iterators
 
 
 } // namespaces
