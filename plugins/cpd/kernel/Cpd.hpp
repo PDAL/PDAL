@@ -59,7 +59,7 @@ private:
         arma::mat& mat);
     cpd::Registration::ResultPtr chipThenRegister(
         const cpd::NonrigidLowrank& reg, const arma::mat& X, const arma::mat& Y,
-        const PointViewPtr& bufX, const PointTableRef table);
+        const PointViewPtr& bufX, PointTableRef table);
 
     std::string m_filex;
     std::string m_filey;

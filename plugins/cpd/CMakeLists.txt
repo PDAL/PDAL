@@ -22,7 +22,7 @@ set(src
     )
 
 set(deps
-    cpd-lib
+    cpd
     )
 
 PDAL_ADD_PLUGIN(cpd_kernel_lib_name kernel cpd
