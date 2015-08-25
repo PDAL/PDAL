@@ -104,6 +104,7 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
     drivers["rxp"] = "readers.rxp";
     drivers["sbet"] = "readers.sbet";
     drivers["sqlite"] = "readers.sqlite";
+    drivers["sid"] = "readers.mrsid";
 
     if (ext == "") return "";
     ext = ext.substr(1, ext.length()-1);
