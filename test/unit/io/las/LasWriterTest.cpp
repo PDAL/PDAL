@@ -59,11 +59,62 @@ public:
         { return w.headerVal<T>(s); }
     LasHeader *header(LasWriter& w)
         { return &w.m_lasHeader; }
+    SpatialReference srs(LasWriter& w)
+        { return w.m_srs; }
 };
 
 } // namespace pdal
 
 using namespace pdal;
+
+TEST(LasWriterTest, srs)
+{
+    Options readerOps;
+    readerOps.add("filename", Support::datapath("las/utm15.las"));
+
+    LasReader reader;
+    reader.setOptions(readerOps);
+
+    Options writerOps;
+    writerOps.add("filename", Support::temppath("out.las"));
+    LasWriter writer;
+    writer.setInput(reader);
+    writer.setOptions(writerOps);
+
+    PointTable table;
+    writer.prepare(table);
+    writer.execute(table);
+
+    LasTester tester;
+    SpatialReference srs = tester.srs(writer);
+    EXPECT_EQ(srs, SpatialReference("EPSG:26915"));
+}
+
+
+TEST(LasWriterTest, srs2)
+{
+    Options readerOps;
+    readerOps.add("filename", Support::datapath("las/utm15.las"));
+
+    LasReader reader;
+    reader.setOptions(readerOps);
+
+    Options writerOps;
+    writerOps.add("filename", Support::temppath("out.las"));
+    writerOps.add("a_srs", "EPSG:32615");
+    LasWriter writer;
+    writer.setInput(reader);
+    writer.setOptions(writerOps);
+
+    PointTable table;
+    writer.prepare(table);
+    writer.execute(table);
+
+    LasTester tester;
+    SpatialReference srs = tester.srs(writer);
+    EXPECT_EQ(srs, SpatialReference("EPSG:32615"));
+}
+
 
 TEST(LasWriterTest, auto_offset)
 {

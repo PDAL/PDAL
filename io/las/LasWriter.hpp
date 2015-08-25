@@ -112,14 +112,14 @@ private:
     MetadataNode findVlrMetadata(MetadataNode node, uint16_t recordId,
         const std::string& userId);
     void setExtraBytesVlr();
-    void setVlrsFromSpatialRef(const SpatialReference& srs);
+    void setVlrsFromSpatialRef();
     void readyCompression();
     void openCompression();
     void addVlr(const std::string& userId, uint16_t recordId,
         const std::string& description, std::vector<uint8_t>& data);
     bool addGeotiffVlr(GeotiffSupport& geotiff, uint16_t recordId,
         const std::string& description);
-    bool addWktVlr(const SpatialReference& srs);
+    bool addWktVlr();
 
     LasWriter& operator=(const LasWriter&); // not implemented
     LasWriter(const LasWriter&); // not implemented
