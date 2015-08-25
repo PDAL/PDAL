@@ -210,7 +210,7 @@ void MrsidReader::LayoutToPointInfo(const PointLayout &layout, LizardTech::Point
         if (Utils::iequals(name, "Classification")) name = CHANNEL_NAME_ClassId;
         if (Utils::iequals(name, "ScanAngleRank")) name = CHANNEL_NAME_ScanAngle;
         if (Utils::iequals(name, "ScanDirectionFlag")) name = CHANNEL_NAME_ScanDir;
-        if (Utils::iequals(name, "Time")) name = CHANNEL_NAME_GPSTime;
+        if (Utils::iequals(name, "GpsTime")) name = CHANNEL_NAME_GPSTime;
         if (Utils::iequals(name, "PointSourceId")) name = CHANNEL_NAME_SourceId;
         if (Utils::iequals(name, "ReturnNumber")) name = CHANNEL_NAME_ReturnNum;
         if (Utils::iequals(name, "NumberOfReturns")) name = CHANNEL_NAME_NumReturns;
@@ -238,6 +238,14 @@ void MrsidReader::LayoutToPointInfo(const PointLayout &layout, LizardTech::Point
     }
 }
 
+template<typename T>
+T getData(LizardTech::PointData& points, const char* channelId, point_count_t pointIndex)
+{
+    T *pData = static_cast<T*>(points.getChannel(channelId)->getData());
+    T value = static_cast<T>(pData[pointIndex]);
+    return value;
+}
+
 point_count_t MrsidReader::read(PointViewPtr view, point_count_t count)
 {
     using namespace pdal::Dimension::Type;
@@ -260,104 +268,117 @@ point_count_t MrsidReader::read(PointViewPtr view, point_count_t count)
             std::string name = m_layout->dimName(d);
             Dimension::Type::Enum t = m_layout->dimType(d);
 
-            if (Utils::iequals(name, "X") && m_pointInfo.hasChannel(CHANNEL_NAME_X))
+            if (Utils::iequals(name, "X") &&
+                m_pointInfo.hasChannel(CHANNEL_NAME_X))
             {
                 if (t == Double)
                 {
-                    double *pData = static_cast<double*>(points.getChannel(CHANNEL_NAME_X)->getData());
-                    double value = static_cast<double>(pData[pointIndex]);
-                    view->setField<double>(d, pointIndex, value);
+                    view->setField<double>( d,
+                                            pointIndex,
+                                            getData<double>(points, CHANNEL_NAME_X, pointIndex));
                 } else if (t == Signed32)
                 {
-                    double *pData = static_cast<double*>(points.getChannel(CHANNEL_NAME_X)->getData());
-                    int32_t value = static_cast<int32_t>(pData[pointIndex]);
-                    view->setField<int32_t>(d, pointIndex, value);
+                    view->setField<int32_t>(d,
+                                            pointIndex,
+                                            getData<int32_t>(points, CHANNEL_NAME_X, pointIndex));
                 }
-            } else if (Utils::iequals(name, "Y") && m_pointInfo.hasChannel(CHANNEL_NAME_Y))
+            } else if (Utils::iequals(name, "Y") &&
+                       m_pointInfo.hasChannel(CHANNEL_NAME_Y))
             {
                 if (t == Double)
                 {
-                    double *pData = static_cast<double*>(points.getChannel(CHANNEL_NAME_Y)->getData());
-                    double value = static_cast<double>(pData[pointIndex]);
-                    view->setField<double>(d, pointIndex, value);
+                    view->setField<double>( d,
+                                            pointIndex,
+                                            getData<double>(points, CHANNEL_NAME_Y, pointIndex));
                 } else if (t == Signed32)
                 {
-                    double *pData = static_cast<double*>(points.getChannel(CHANNEL_NAME_Y)->getData());
-                    int32_t value = static_cast<int32_t>(pData[pointIndex]);
-                    view->setField<int32_t>(d, pointIndex, value);
+                    view->setField<int32_t>(d,
+                                            pointIndex,
+                                            getData<int32_t>(points, CHANNEL_NAME_Y, pointIndex));
                 }
-            } else if (Utils::iequals(name, "Z") && m_pointInfo.hasChannel(CHANNEL_NAME_Z))
+            } else if (Utils::iequals(name, "Z") &&
+                       m_pointInfo.hasChannel(CHANNEL_NAME_Z))
             {
                 if (t == Double)
                 {
-                    double *pData = static_cast<double*>(points.getChannel(CHANNEL_NAME_Z)->getData());
-                    double value = static_cast<double>(pData[pointIndex]);
-                    view->setField<double>(d, pointIndex, value);
+                    view->setField<double>( d,
+                                            pointIndex,
+                                            getData<double>(points, CHANNEL_NAME_Z, pointIndex));
                 } else if (t == Signed32)
                 {
-                    double *pData = static_cast<double*>(points.getChannel(CHANNEL_NAME_Z)->getData());
-                    int32_t value = static_cast<int32_t>(pData[pointIndex]);
-                    view->setField<int32_t>(d, pointIndex, value);
+                    view->setField<int32_t>(d,
+                                            pointIndex,
+                                            getData<int32_t>(points, CHANNEL_NAME_Z, pointIndex));
                 }
-            } else if (Utils::iequals(name, "GpsTime") && m_pointInfo.hasChannel(CHANNEL_NAME_GPSTime))
+            } else if (Utils::iequals(name, "GpsTime") &&
+                       m_pointInfo.hasChannel(CHANNEL_NAME_GPSTime))
             {
-                double *pData = static_cast<double*>(points.getChannel(CHANNEL_NAME_Y)->getData());
-                double value = static_cast<double>(pData[pointIndex]);
-                view->setField<double>(d, pointIndex, value);
+                view->setField<double>( d,
+                                        pointIndex,
+                                        getData<double>(points, CHANNEL_NAME_GPSTime, pointIndex));
             }
-            else if (Utils::iequals(name, "Intensity") && m_pointInfo.hasChannel(CHANNEL_NAME_Intensity))
+            else if (Utils::iequals(name, "Intensity") &&
+                     m_pointInfo.hasChannel(CHANNEL_NAME_Intensity))
             {
-                uint16_t *pData = static_cast<uint16_t*>(points.getChannel(CHANNEL_NAME_Intensity)->getData());
-                uint16_t value = static_cast<uint16_t>(pData[pointIndex]);
-                view->setField<uint16_t>(d, pointIndex, value);
+                view->setField<uint16_t>(   d,
+                                            pointIndex,
+                                            getData<uint16_t>(points, CHANNEL_NAME_Intensity, pointIndex));
             }
-            else if (Utils::iequals(name, "ReturnNumber") && m_pointInfo.hasChannel(CHANNEL_NAME_ReturnNum))
+            else if (Utils::iequals(name, "ReturnNumber") &&
+                     m_pointInfo.hasChannel(CHANNEL_NAME_ReturnNum))
             {
-                uint8_t *pData = static_cast<uint8_t*>(points.getChannel(CHANNEL_NAME_ReturnNum)->getData());
-                uint8_t value = static_cast<uint8_t>(pData[pointIndex]);
-                view->setField<uint8_t>(d, pointIndex, value);
+                view->setField<uint8_t>(d,
+                                        pointIndex,
+                                        getData<uint8_t>(points, CHANNEL_NAME_ReturnNum, pointIndex));
             }
-            else if (Utils::iequals(name, "NumberOfReturns") && m_pointInfo.hasChannel(CHANNEL_NAME_NumReturns))
+            else if (Utils::iequals(name, "NumberOfReturns") &&
+                     m_pointInfo.hasChannel(CHANNEL_NAME_NumReturns))
             {
-                uint8_t *pData = static_cast<uint8_t*>(points.getChannel(CHANNEL_NAME_NumReturns)->getData());
-                uint8_t value = static_cast<uint8_t>(pData[pointIndex]);
-                view->setField<uint8_t>(d, pointIndex, value);
+                view->setField<uint8_t>(d,
+                                        pointIndex,
+                                        getData<uint8_t>(points, CHANNEL_NAME_NumReturns, pointIndex));
             }
-            else if (Utils::iequals(name, "ScanDirectionFlag") && m_pointInfo.hasChannel(CHANNEL_NAME_ScanDir))
+            else if (Utils::iequals(name, "ScanDirectionFlag") &&
+                     m_pointInfo.hasChannel(CHANNEL_NAME_ScanDir))
             {
-                uint8_t *pData = static_cast<uint8_t*>(points.getChannel(CHANNEL_NAME_ScanDir)->getData());
-                uint8_t value = static_cast<uint8_t>(pData[pointIndex]);
-                view->setField<uint8_t>(d, pointIndex, value);
+                view->setField<uint8_t>(d,
+                                        pointIndex,
+                                        getData<uint8_t>(points, CHANNEL_NAME_ScanDir, pointIndex));
             }
-            else if (Utils::iequals(name, "ScanAngleRank") && m_pointInfo.hasChannel(CHANNEL_NAME_ScanAngle))
+            else if (Utils::iequals(name, "ScanAngleRank") &&
+                     m_pointInfo.hasChannel(CHANNEL_NAME_ScanAngle))
             {
-                int8_t *pData = static_cast<int8_t*>(points.getChannel(CHANNEL_NAME_ScanAngle)->getData());
-                int8_t value = static_cast<int8_t>(pData[pointIndex]);
-                view->setField<int8_t>(d, pointIndex, value);
+                view->setField<int8_t>( d,
+                                        pointIndex,
+                                        getData<int8_t>(points, CHANNEL_NAME_ScanAngle, pointIndex));
             }
-            else if (Utils::iequals(name, "EdgeOfFlightLine") && m_pointInfo.hasChannel(CHANNEL_NAME_EdgeFlightLine))
+            else if (Utils::iequals(name, "EdgeOfFlightLine") &&
+                     m_pointInfo.hasChannel(CHANNEL_NAME_EdgeFlightLine))
             {
-                uint8_t *pData = static_cast<uint8_t*>(points.getChannel(CHANNEL_NAME_EdgeFlightLine)->getData());
-                uint8_t value = static_cast<uint8_t>(pData[pointIndex]);
-                view->setField<uint8_t>(d, pointIndex, value);
+                view->setField<uint8_t>(d,
+                                        pointIndex,
+                                        getData<uint8_t>(points, CHANNEL_NAME_EdgeFlightLine, pointIndex));
             }
-            else if (Utils::iequals(name, "Classification") && m_pointInfo.hasChannel(CHANNEL_NAME_ClassId))
+            else if (Utils::iequals(name, "Classification") &&
+                     m_pointInfo.hasChannel(CHANNEL_NAME_ClassId))
             {
-                uint8_t *pData = static_cast<uint8_t*>(points.getChannel(CHANNEL_NAME_ClassId)->getData());
-                uint8_t value = static_cast<uint8_t>(pData[pointIndex]);
-                view->setField<uint8_t>(d, pointIndex, value);
+                view->setField<uint8_t>(d,
+                                        pointIndex,
+                                        getData<uint8_t>(points, CHANNEL_NAME_ClassId, pointIndex));
             }
-            else if (Utils::iequals(name, "UserData") && m_pointInfo.hasChannel(CHANNEL_NAME_UserData))
+            else if (Utils::iequals(name, "UserData") &&
+                     m_pointInfo.hasChannel(CHANNEL_NAME_UserData))
             {
-                uint8_t *pData = static_cast<uint8_t*>(points.getChannel(CHANNEL_NAME_UserData)->getData());
-                uint8_t value = static_cast<uint8_t>(pData[pointIndex]);
-                view->setField<uint8_t>(d, pointIndex, value);
+                view->setField<uint8_t>(d,
+                                        pointIndex,
+                                        getData<uint8_t>(points, CHANNEL_NAME_UserData, pointIndex));
             }
-            else if (Utils::iequals(name, "PointSourceId") && m_pointInfo.hasChannel(CHANNEL_NAME_SourceId))
+            else if (Utils::iequals(name, "PointSourceId") &&
+                     m_pointInfo.hasChannel(CHANNEL_NAME_SourceId))
             {
-                uint16_t *pData = static_cast<uint16_t*>(points.getChannel(CHANNEL_NAME_SourceId)->getData());
-                uint16_t value = static_cast<uint16_t>(pData[pointIndex]);
-                view->setField<uint16_t>(d, pointIndex, value);
+                view->setField<uint16_t>(   d,
+                                            pointIndex,
+                                            getData<uint16_t>(points, CHANNEL_NAME_SourceId, pointIndex));
             }
         }
     }
