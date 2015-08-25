@@ -257,11 +257,8 @@ point_count_t MrsidReader::read(PointViewPtr view, point_count_t count)
     count = m_iter->getNextPoints(points);
     Dimension::IdList dims = view->dims();
 
-    point_count_t cnt(0);
     for (point_count_t pointIndex=0; pointIndex<count; pointIndex++)
     {
-        ++cnt;
-
         for (Dimension::IdList::size_type i=0; i < dims.size(); i++)
         {
             Dimension::Id::Enum const& d = dims[i];

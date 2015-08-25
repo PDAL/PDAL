@@ -69,43 +69,14 @@ TEST(MrsidReaderTest, test_one)
     PointViewSet pbSet = sid_reader->execute(table);
     EXPECT_EQ(pbSet.size(), 1u);
     PointViewPtr view = *pbSet.begin();
-//     //
-//     //
-//     // read LAS
-//     //
-//     Options las_opts;
-//     las_opts.add("count", 750);
-//     las_opts.add("filename", Support::datapath("sid/autzen-utm10.las"));
-//
-//     PointTable table2;
-//
-//     std::shared_ptr<Stage> las_reader(f.createStage("readers.las"));
-//     EXPECT_TRUE(las_reader.get());
-//     las_reader->setOptions(las_opts);
-//     las_reader->prepare(table2);
-//     PointViewSet pbSet2 = las_reader->execute(table2);
-//     EXPECT_EQ(pbSet2.size(), 1u);
-//     PointViewPtr view2 = *pbSet.begin();
-//     //
-//     //
-//     // compare the two views
-//     //
-//     EXPECT_EQ(view->size(), view2->size());
-//
-//     for (PointId i = 0; i < view2->size(); i++)
-//     {
-//         int32_t sid_x = view->getFieldAs<int32_t>(Dimension::Id::X, i);
-//         int32_t sid_y = view->getFieldAs<int32_t>(Dimension::Id::Y, i);
-//         int32_t sid_z = view->getFieldAs<int32_t>(Dimension::Id::Z, i);
-//
-//         int32_t las_x = view2->getFieldAs<int32_t>(Dimension::Id::X, i);
-//         int32_t las_y = view2->getFieldAs<int32_t>(Dimension::Id::Y, i);
-//         int32_t las_z = view2->getFieldAs<int32_t>(Dimension::Id::Z, i);
-//
-//         EXPECT_EQ(sid_x, las_x);
-//         EXPECT_EQ(sid_y, las_y);
-//         EXPECT_EQ(sid_z, las_z);
-//     }
+    EXPECT_EQ(view->size(), 750u);
+    int32_t sid_x = view->getFieldAs<int32_t>(Dimension::Id::X, 10);
+    int32_t sid_y = view->getFieldAs<int32_t>(Dimension::Id::Y, 10);
+    int32_t sid_z = view->getFieldAs<int32_t>(Dimension::Id::Z, 10);
+    EXPECT_EQ(sid_x, 504577);
+    EXPECT_EQ(sid_y, 4795801);
+    EXPECT_EQ(sid_z, 2505);
+
 }
 
 
