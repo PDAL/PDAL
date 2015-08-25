@@ -67,6 +67,7 @@ public:
 
 using namespace pdal;
 
+#ifdef PDAL_HAVE_LIBGEOTIFF
 TEST(LasWriterTest, srs)
 {
     Options readerOps;
@@ -89,8 +90,10 @@ TEST(LasWriterTest, srs)
     SpatialReference srs = tester.srs(writer);
     EXPECT_EQ(srs, SpatialReference("EPSG:26915"));
 }
+#endif
 
 
+#ifdef PDAL_HAVE_LIBGEOTIFF
 TEST(LasWriterTest, srs2)
 {
     Options readerOps;
@@ -114,6 +117,7 @@ TEST(LasWriterTest, srs2)
     SpatialReference srs = tester.srs(writer);
     EXPECT_EQ(srs, SpatialReference("EPSG:32615"));
 }
+#endif
 
 
 TEST(LasWriterTest, auto_offset)
