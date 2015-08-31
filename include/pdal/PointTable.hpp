@@ -64,6 +64,7 @@ public:
         { return m_metadata->getNode(); }
     SpatialReference spatialRef() const;
     void setSpatialRef(const SpatialReference& sref);
+    MetadataNode privateMetadata(const std::string& name);
 
 private:
     // Point data operations.

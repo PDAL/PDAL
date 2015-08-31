@@ -53,6 +53,16 @@ void BasePointTable::setSpatialRef(const SpatialReference& sref)
 }
 
 
+MetadataNode BasePointTable::privateMetadata(const std::string& name)
+{
+    MetadataNode mp = m_metadata->m_private;
+    MetadataNode m = mp.findChild(name);
+    if (!m.valid())
+        m = mp.add(name);
+    return m;
+}
+
+
 PointTable::~PointTable()
 {
     for (auto vi = m_blocks.begin(); vi != m_blocks.end(); ++vi)

@@ -36,6 +36,7 @@
 
 #include <pdal/FlexWriter.hpp>
 
+#include "HeaderVal.hpp"
 #include "LasError.hpp"
 #include "LasHeader.hpp"
 #include "LasUtils.hpp"
@@ -93,6 +94,29 @@ private:
     uint16_t m_extraByteLen;
     SpatialReference m_srs;
     std::string m_curFilename;
+    std::set<std::string> m_forwards;
+    bool m_forwardVlrs;
+
+    NumHeaderVal<uint8_t, 1, 1> m_majorVersion;
+    NumHeaderVal<uint8_t, 1, 4> m_minorVersion;
+    NumHeaderVal<uint8_t, 0, 10> m_dataformatId;
+    // MSVC doesn't see numeric_limits::max() as constexpr do doesn't allow
+    // it as defaults for templates.  Remove when possible.
+    NumHeaderVal<uint16_t, 0, 65535> m_filesourceId;
+    NumHeaderVal<uint16_t, 0, 15> m_globalEncoding;
+    UuidHeaderVal m_projectId;
+    StringHeaderVal<32> m_systemId;
+    StringHeaderVal<32> m_softwareId;
+    NumHeaderVal<uint16_t, 0, 366> m_creationDoy;
+    // MSVC doesn't see numeric_limits::max() as constexpr do doesn't allow
+    // them as defaults for templates.  Remove when possible.
+    NumHeaderVal<uint16_t, 0, 65535> m_creationYear;
+    StringHeaderVal<20> m_scaleX;
+    StringHeaderVal<20> m_scaleY;
+    StringHeaderVal<20> m_scaleZ;
+    StringHeaderVal<20> m_offsetX;
+    StringHeaderVal<20> m_offsetY;
+    StringHeaderVal<20> m_offsetZ;
 
     virtual void processOptions(const Options& options);
     virtual void prepared(PointTableRef table);
@@ -101,11 +125,14 @@ private:
     virtual void writeView(const PointViewPtr view);
     virtual void doneFile();
 
+    void fillForwardList(const Options& options);
     void getHeaderOptions(const Options& options);
     void getVlrOptions(const Options& opts);
-    template<typename T>
-    T headerVal(const std::string& name);
-    void fillHeader();
+    template <typename T>
+    void handleForward(const std::string& s, T& headerVal,
+        const MetadataNode& base);
+    void handleForwards(MetadataNode& forward);
+    void fillHeader(MetadataNode& forward);
     point_count_t fillWriteBuf(const PointView& view, PointId startId,
         std::vector<char>& buf);
     void setVlrsFromMetadata();
@@ -124,41 +151,5 @@ private:
     LasWriter& operator=(const LasWriter&); // not implemented
     LasWriter(const LasWriter&); // not implemented
 };
-
-// Find the approriate value for the specified header field.
-/// \param  name - Name of header field.
-/// \return  Value of header field.
-template<typename T>
-T LasWriter::headerVal(const std::string& name)
-{
-    // The header values either come from options, or are overriden in
-    // the metadata for options which had the value FORWARD.  For those,
-    // grab the value from metadata if it exists, or use the default value,
-    // which was stuck on following the FORWARD value when processing options.
-    auto pred = [name](MetadataNode n)
-    {
-        return n.name() == name;
-    };
-
-    std::string val = m_headerVals[name];
-    if (val.find("FORWARD") == 0)
-    {
-        MetadataNode m = m_metadata.findChild(pred);
-        if (m.valid())
-            return m.value<T>();
-        val = val.substr(strlen("FORWARD"));
-    }
-    try
-    {
-        return boost::lexical_cast<T>(val);
-    }
-    catch (boost::bad_lexical_cast ex)
-    {
-        std::stringstream out;
-        out << "Couldn't convert option \"" << name << "\" with value \"" <<
-            val << "\" from string as necessary.";
-        throw pdal_error(out.str());
-    }
-}
 
 } // namespace pdal

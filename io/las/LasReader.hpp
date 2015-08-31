@@ -116,7 +116,7 @@ private:
     SpatialReference getSrsFromVlrs();
     SpatialReference getSrsFromWktVlr();
     SpatialReference getSrsFromGeotiffVlr();
-    void extractHeaderMetadata(MetadataNode& m);
+    void extractHeaderMetadata(MetadataNode& forward, MetadataNode& m);
     void extractVlrMetadata(MetadataNode& m);
     virtual QuickInfo inspect();
     virtual void ready(PointTableRef table)

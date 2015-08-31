@@ -49,24 +49,14 @@ void Writer::writerProcessOptions(const Options& options)
 {
     auto setOffset = [options](XForm& xform, const std::string& opName)
     {
-        if (!options.hasOption(opName))
-            return;
-        std::string offset = options.getValueOrThrow<std::string>(opName);
-        if (offset == "auto")
-            xform.m_autoOffset = true;
-        else
-            xform.m_offset = boost::lexical_cast<double>(offset);
+        if (options.hasOption(opName))
+            xform.setOffset(options.getValueOrThrow<std::string>(opName));
     };
 
     auto setScale = [options](XForm& xform, const std::string& opName)
     {
-        if (!options.hasOption(opName))
-            return;
-        std::string scale = options.getValueOrThrow<std::string>(opName);
-        if (scale == "auto")
-            xform.m_autoScale = true;
-        else
-            xform.m_scale = boost::lexical_cast<double>(scale);
+        if (options.hasOption(opName))
+            xform.setScale(options.getValueOrThrow<std::string>(opName));
     };
 
     setOffset(m_xXform, "offset_x");

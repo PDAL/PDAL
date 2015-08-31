@@ -98,14 +98,14 @@ TEST(ProgrammableFilterTest, ProgrammableFilterTest_test1)
     const stats::Summary& statsY = stats->getStats(Dimension::Id::Y);
     const stats::Summary& statsZ = stats->getStats(Dimension::Id::Z);
 
-    EXPECT_FLOAT_EQ(statsX.minimum(), 10.0);
-    EXPECT_FLOAT_EQ(statsX.maximum(), 11.0);
+    EXPECT_DOUBLE_EQ(statsX.minimum(), 10.0);
+    EXPECT_DOUBLE_EQ(statsX.maximum(), 11.0);
 
-    EXPECT_FLOAT_EQ(statsY.minimum(), 0.0);
-    EXPECT_FLOAT_EQ(statsY.maximum(), 1.0);
+    EXPECT_DOUBLE_EQ(statsY.minimum(), 0.0);
+    EXPECT_DOUBLE_EQ(statsY.maximum(), 1.0);
 
-    EXPECT_FLOAT_EQ(statsZ.minimum(), 3.14);
-    EXPECT_FLOAT_EQ(statsZ.maximum(), 3.14);
+    EXPECT_DOUBLE_EQ(statsZ.minimum(), 3.14);
+    EXPECT_DOUBLE_EQ(statsZ.maximum(), 3.14);
 }
 
 TEST(ProgrammableFilterTest, pipeline)
@@ -113,7 +113,8 @@ TEST(ProgrammableFilterTest, pipeline)
     PipelineManager manager;
     PipelineReader reader(manager);
 
-    reader.readPipeline(Support::configuredpath("plang/programmable-update-y-dims.xml"));
+    reader.readPipeline(
+        Support::configuredpath("plang/programmable-update-y-dims.xml"));
     manager.execute();
     PointViewSet viewSet = manager.views();
     EXPECT_EQ(viewSet.size(), 1u);

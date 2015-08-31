@@ -21,6 +21,7 @@ set (srcs
 
 set(incs
   GeotiffSupport.hpp
+  HeaderVal.hpp
   LasError.hpp
   LasHeader.hpp
   LasUtils.hpp

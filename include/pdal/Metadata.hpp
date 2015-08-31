@@ -38,7 +38,6 @@
 
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include <pdal/util/Bounds.hpp>
 #include <pdal/util/Utils.hpp>
@@ -48,32 +47,6 @@
 #include <memory>
 #include <vector>
 #include <stdint.h>
-
-namespace
-{
-    //ABELL - We should either pitch this or add a comment explaining why
-    //  we need to do this.
-    /**
-    std::string sanitize(const std::string& name)
-    {
-        auto ischar = [](char c)
-        {
-            return c == ';' || c == ':' || c == ' ' || c == '\'' ||
-                c == '\"' || c == '[' || c ==']';
-        };
-
-        std::string v;
-        for (size_t i = 0; i < name.size(); ++i)
-        {
-            if (ischar(name[i]))
-                v += '_';
-            else
-                v += name[i];
-        }
-        return v;
-    }
-    **/
-}
 
 namespace pdal
 {
@@ -101,11 +74,7 @@ class MetadataNodeImpl
 
 private:
     MetadataNodeImpl(const std::string& name) : m_kind(MetadataType::Instance)
-    {
-//ABELL
-//        m_name = sanitize(name);
-        m_name = name;
-    }
+        { m_name = name; }
 
     MetadataNodeImpl() : m_kind(MetadataType::Instance)
     {}
@@ -257,118 +226,117 @@ template <>
 inline void MetadataNodeImpl::setValue(const float& f)
 {
     m_type = "float";
-    m_value = boost::lexical_cast<std::string>(f);
+    m_value = Utils::toString(f);
 }
 
 template <>
 inline void MetadataNodeImpl::setValue<double>(const double& d)
 {
     m_type = "double";
-    m_value = boost::lexical_cast<std::string>(d);
+
+    // Get rid of -0.
+    double dd = d;
+    if (dd == 0.0)
+        dd = 0.0;
+    m_value = Utils::toString(dd);
 }
 
 template <>
 inline void MetadataNodeImpl::setValue(const SpatialReference& ref)
 {
-    std::ostringstream oss;
-    oss << ref;
     m_type = "spatialreference";
-    m_value = oss.str();
+    m_value = Utils::toString(ref);
 }
 
 template <>
 inline void MetadataNodeImpl::setValue(const BOX3D& b)
 {
-    std::ostringstream oss;
-    oss << b;
     m_type = "bounds";
-    m_value = oss.str();
+    m_value = Utils::toString(b);
 }
 
 template <>
 inline void MetadataNodeImpl::setValue(const unsigned char& u)
 {
     m_type = "nonNegativeInteger";
-    m_value = boost::lexical_cast<std::string>((unsigned)u);
+    m_value = Utils::toString(u);
 }
 
 template <>
 inline void MetadataNodeImpl::setValue(const unsigned short& u)
 {
     m_type = "nonNegativeInteger";
-    m_value = boost::lexical_cast<std::string>(u);
+    m_value = Utils::toString(u);
 }
 
 template <>
 inline void MetadataNodeImpl::setValue(const unsigned int& u)
 {
     m_type = "nonNegativeInteger";
-    m_value = boost::lexical_cast<std::string>(u);
+    m_value = Utils::toString(u);
 }
 
 template <>
 inline void MetadataNodeImpl::setValue(const unsigned long& u)
 {
     m_type = "nonNegativeInteger";
-    m_value = boost::lexical_cast<std::string>(u);
+    m_value = Utils::toString(u);
 }
 
 template <>
 inline void MetadataNodeImpl::setValue(const unsigned long long& u)
 {
     m_type = "nonNegativeInteger";
-    m_value = boost::lexical_cast<std::string>(u);
+    m_value = Utils::toString(u);
 }
 
 template <>
 inline void MetadataNodeImpl::setValue(const char& i)
 {
     m_type = "integer";
-    m_value = boost::lexical_cast<std::string>((int)i);
+    m_value = Utils::toString(i);
 }
 
 template <>
 inline void MetadataNodeImpl::setValue(const signed char& i)
 {
     m_type = "integer";
-    m_value = boost::lexical_cast<std::string>((int)i);
+    m_value = Utils::toString(i);
 }
 
 template <>
 inline void MetadataNodeImpl::setValue(const short& s)
 {
     m_type = "integer";
-    m_value = boost::lexical_cast<std::string>(s);
+    m_value = Utils::toString(s);
 }
 
 template <>
 inline void MetadataNodeImpl::setValue(const int& i)
 {
     m_type = "integer";
-    m_value = boost::lexical_cast<std::string>(i);
+    m_value = Utils::toString(i);
 }
 
 template <>
 inline void MetadataNodeImpl::setValue(const long& l)
 {
     m_type = "integer";
-    m_value = boost::lexical_cast<std::string>(l);
+    m_value = Utils::toString(l);
 }
 
 template <>
 inline void MetadataNodeImpl::setValue(const long long& l)
 {
     m_type = "integer";
-    m_value = boost::lexical_cast<std::string>(l);
+    m_value = Utils::toString(l);
 }
 
 template <>
 inline void MetadataNodeImpl::setValue(const boost::uuids::uuid& u)
 {
-    std::ostringstream oss;
-    oss << u;
     m_type = "uuid";
-    m_value = oss.str();
+    m_value = Utils::toString(u);
 }
 
 
@@ -495,11 +463,7 @@ public:
         }
         else
         {
-            try
-            {
-                t = boost::lexical_cast<T>(m_impl->m_value);
-            }
-            catch (boost::bad_lexical_cast&)
+            if (!Utils::fromString<T>(m_impl->m_value, t))
             {
                 // Static to get default initialization.
                 static T t2;

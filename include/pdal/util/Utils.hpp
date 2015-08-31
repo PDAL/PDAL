@@ -51,6 +51,7 @@
 #include <map>
 
 #include <boost/numeric/conversion/cast.hpp>
+#include <boost/lexical_cast.hpp>
 
 namespace pdal
 {
@@ -106,8 +107,8 @@ namespace Utils
     inline double sround(double r)
         { return (r > 0.0) ? floor(r + 0.5) : ceil(r - 0.5); }
 
-    inline std::vector<uint8_t>hex_string_to_binary(
-        std::string const& source)
+    inline std::vector<uint8_t>
+    hex_string_to_binary(std::string const& source)
     {
         // Stolen from http://stackoverflow.com/questions/7363774/  ...
         //    c-converting-binary-data-to-a-hex-string-and-back
@@ -241,7 +242,7 @@ namespace Utils
     PDAL_DLL std::string replaceAll(std::string result,
         const std::string& replaceWhat, const std::string& replaceWithWhat);
     PDAL_DLL StringList wordWrap(std::string const& inputString,
-        unsigned int lineLength);
+        size_t lineLength);
     PDAL_DLL std::string escapeJSON(const std::string &s);
     PDAL_DLL std::string demangle(const std::string& s);
     PDAL_DLL int screenWidth();
@@ -400,6 +401,102 @@ namespace Utils
              in >= static_cast<double>(std::numeric_limits<T_OUT>::lowest())))
         {
             out = static_cast<T_OUT>(in);
+            return true;
+        }
+        return false;
+    }
+
+    template<typename T>
+    std::string toString(const T& from)
+    {
+        std::ostringstream oss;
+        oss << from;
+        return oss.str();
+    }
+
+    // There is an overload of std::to_string() for float and double, but
+    // its behavior is different from streaming and doesn't match what
+    // we have been doing historically.
+
+    inline std::string toString(long long from)
+        { return std::to_string(from); }
+
+    inline std::string toString(unsigned long from)
+        { return std::to_string(from); }
+
+    inline std::string toString(long from)
+        { return std::to_string(from); }
+
+    inline std::string toString(unsigned int from)
+        { return std::to_string(from); }
+
+    inline std::string toString(int from)
+        { return std::to_string(from); }
+
+    inline std::string toString(unsigned short from)
+        { return std::to_string((int)from); }
+
+    inline std::string toString(short from)
+        { return std::to_string((int)from); }
+
+    inline std::string toString(char from)
+        { return std::to_string((int)from); }
+
+    inline std::string toString(unsigned char from)
+        { return std::to_string((int)from); }
+
+    inline std::string toString(signed char from)
+        { return std::to_string((int)from); }
+
+    template<typename T>
+    bool fromString(const std::string& from, T& to)
+    {
+        try
+        {
+            to = boost::lexical_cast<T>(from);
+        }
+        catch (boost::bad_lexical_cast&)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    template<>
+    inline bool fromString<char>(const std::string& s, char& to)
+    {
+        int i = std::stoi(s);
+        if (i >= std::numeric_limits<char>::lowest() &&
+            i <= std::numeric_limits<char>::max())
+        {
+            to = static_cast<char>(i);
+            return true;
+        }
+        return false;
+    }
+
+    template<>
+    inline bool fromString<unsigned char>(const std::string& s,
+        unsigned char& to)
+    {
+        int i = std::stoi(s);
+        if (i >= std::numeric_limits<unsigned char>::lowest() &&
+            i <= std::numeric_limits<unsigned char>::max())
+        {
+            to = static_cast<unsigned char>(i);
+            return true;
+        }
+        return false;
+    }
+
+    template<>
+    inline bool fromString<signed char>(const std::string& s, signed char& to)
+    {
+        int i = std::stoi(s);
+        if (i >= std::numeric_limits<signed char>::lowest() &&
+            i <= std::numeric_limits<signed char>::max())
+        {
+            to = static_cast<signed char>(i);
             return true;
         }
         return false;

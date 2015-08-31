@@ -34,6 +34,7 @@
 
 #include "LasWriter.hpp"
 
+#include <type_traits>
 #include <boost/uuid/uuid_generators.hpp>
 #include <iostream>
 
@@ -62,30 +63,56 @@ std::string LasWriter::getName() const { return s_info.name; }
 
 LasWriter::LasWriter() : m_ostream(NULL)
 {
-    m_xXform.m_scale = .01;
-    m_yXform.m_scale = .01;
-    m_zXform.m_scale = .01;
+    m_majorVersion.setDefault(1);
+    m_minorVersion.setDefault(2);
+    m_dataformatId.setDefault(3);
+    m_filesourceId.setDefault(0);
+    m_globalEncoding.setDefault(0);
+    m_systemId.setDefault(m_lasHeader.getSystemIdentifier());
+    m_softwareId.setDefault(GetDefaultSoftwareId());
+
+    std::time_t now;
+    std::time(&now);
+    std::tm* ptm = std::gmtime(&now);
+    uint16_t year = ptm->tm_year + 1900;
+    uint16_t doy = ptm->tm_yday;
+
+    m_creationDoy.setDefault(doy);
+    m_creationYear.setDefault(year);
+    m_scaleX.setDefault(".01");
+    m_scaleY.setDefault(".01");
+    m_scaleZ.setDefault(".01");
+    m_offsetX.setDefault("0");
+    m_offsetY.setDefault("0");
+    m_offsetZ.setDefault("0");
 }
 
 
 Options LasWriter::getDefaultOptions()
 {
     Options options;
+    LasHeader header;
 
     options.add("filename", "", "Name of the file for LAS/LAZ output.");
     options.add("compression", false, "Do we LASzip-compress the data?");
-    options.add("format", 3, "Point format to write");
     options.add("major_version", 1, "LAS Major version");
     options.add("minor_version", 2, "LAS Minor version");
-    options.add("creation_doy", 0, "Day of Year for file");
-    options.add("creation_year", 2011, "4-digit year value for file");
-
-    LasHeader header;
+    options.add("dataformat_id", 3, "Point format to write");
+    options.add("filesource_id", 0, "File Source ID for this file");
+    options.add("global_encoding", 0, "Global encoding bits");
     options.add("system_id", header.getSystemIdentifier(),
         "System ID for this file");
     options.add("software_id", GetDefaultSoftwareId(),
         "Software ID for this file");
-    options.add("filesource_id", 0, "File Source ID for this file");
+
+    std::time_t now;
+    std::time(&now);
+    std::tm* ptm = std::gmtime(&now);
+    uint16_t year = ptm->tm_year + 1900;
+    uint16_t doy = ptm->tm_yday;
+
+    options.add("creation_doy", doy, "Day of Year for file");
+    options.add("creation_year", year, "4-digit year value for file");
     options.add("extra_dims", "", "Extra dimensions not part of the LAS "
         "point format to be added to each point.");
 
@@ -108,6 +135,7 @@ void LasWriter::processOptions(const Options& options)
         throw pdal_error("Can't write LAZ output.  "
             "PDAL not built with LASzip.");
 #endif // PDAL_HAVE_LASZIP
+    fillForwardList(options);
     getHeaderOptions(options);
     getVlrOptions(options);
 }
@@ -133,46 +161,95 @@ void LasWriter::prepared(PointTableRef table)
 
 // Get header info from options and store in map for processing with
 // metadata.
+void LasWriter::fillForwardList(const Options &options)
+{
+    StringList forwards = options.getValues("forward");
+
+    StringList header;
+    header.push_back("dataformat_id");
+    header.push_back("major_version");
+    header.push_back("minor_version");
+    header.push_back("filesource_id");
+    header.push_back("global_encoding");
+    header.push_back("project_id");
+    header.push_back("system_id");
+    header.push_back("software_id");
+    header.push_back("creation_doy");
+    header.push_back("creation_year");
+
+    StringList scale;
+    scale.push_back("scale_x");
+    scale.push_back("scale_y");
+    scale.push_back("scale_z");
+
+    StringList offset;
+    offset.push_back("offset_x");
+    offset.push_back("offset_y");
+    offset.push_back("offset_z");
+
+    StringList all;
+    all.insert(all.begin(), header.begin(), header.end());
+    all.insert(all.begin(), scale.begin(), scale.end());
+    all.insert(all.begin(), offset.begin(), offset.end());
+
+    // Build the forward list, replacing special keywords with the proper
+    // field names.
+    for (auto& name : forwards)
+    {
+        if (name == "all")
+            m_forwards.insert(all.begin(), all.end());
+        else if (name == "header")
+            m_forwards.insert(header.begin(), header.end());
+        else if (name == "scale")
+            m_forwards.insert(scale.begin(), scale.end());
+        else if (name == "offset")
+            m_forwards.insert(offset.begin(), offset.end());
+        else if (name == "format")
+            m_forwards.insert("dataformat_id");
+        else if (name == "vlr")
+            m_forwardVlrs = true;
+        else if (Utils::contains(all, name))
+            m_forwards.insert(name);
+        else
+        {
+            std::ostringstream oss;
+
+            oss << "Error in 'forward' option.  Unknown field for "
+                "forwarding: '" << name << "'.";
+            throw pdal_error(oss.str());
+        }
+    }
+}
+
+
+template<typename T>
+void setHeaderOption(const std::string& name, T& headerVal, const Options& ops)
+{
+    if (ops.hasOption(name))
+        headerVal.setVal(ops.getValueOrDefault<typename T::type>(name));
+}
+
+
+// Get header info from options and store in map for processing with
+// metadata.
 void LasWriter::getHeaderOptions(const Options &options)
 {
-    typedef boost::optional<std::string> OpString;
-    auto metaOptionValue = [this, options](const std::string& name,
-        const::std::string& defVal)
-    {
-        std::string value;
-        OpString opValue = options.getMetadataOption<std::string>(name);
-        if (opValue)
-        {
-            value = *opValue;
-            // The reassignment makes sure the case is correct.
-            if (boost::iequals(value, "FORWARD"))
-            {
-                value = "FORWARD";
-                value += defVal;
-            }
-        }
-        else
-            value = options.getValueOrDefault(name, defVal);
-        m_headerVals[name] = value;
-    };
-
-    std::time_t now;
-    std::time(&now);
-    std::tm* ptm = std::gmtime(&now);
-    uint16_t year = ptm->tm_year + 1900;
-    uint16_t doy = ptm->tm_yday;
-
-    metaOptionValue("format", "3");
-    metaOptionValue("minor_version", "2");
-    metaOptionValue("creation_year", std::to_string(year));
-    metaOptionValue("creation_doy", std::to_string(doy));
-    metaOptionValue("software_id", GetDefaultSoftwareId());
-    LasHeader header;
-    metaOptionValue("system_id", header.getSystemIdentifier());
-    metaOptionValue("project_id",
-        boost::lexical_cast<std::string>(boost::uuids::uuid()));
-    metaOptionValue("global_encoding", "0");
-    metaOptionValue("filesource_id", "0");
+    setHeaderOption("major_version", m_majorVersion, options);
+    setHeaderOption("minor_version", m_minorVersion, options);
+    setHeaderOption("dataformat_id", m_dataformatId, options);
+    setHeaderOption("format", m_dataformatId, options);
+    setHeaderOption("global_encoding", m_globalEncoding, options);
+    setHeaderOption("project_id", m_projectId, options);
+    setHeaderOption("system_id", m_systemId, options);
+    setHeaderOption("software_id", m_softwareId, options);
+    setHeaderOption("creation_doy", m_creationDoy, options);
+    setHeaderOption("creation_year", m_creationYear, options);
+    setHeaderOption("scale_x", m_scaleX, options);
+    setHeaderOption("scale_y", m_scaleY, options);
+    setHeaderOption("scale_z", m_scaleZ, options);
+    setHeaderOption("offset_x", m_offsetX, options);
+    setHeaderOption("offset_y", m_offsetY, options);
+    setHeaderOption("offset_z", m_offsetZ, options);
 }
 
 /// Get VLR-specific options and store for processing with metadata.
@@ -216,7 +293,8 @@ void LasWriter::readyTable(PointTableRef table)
     setVlrsFromMetadata();
     setVlrsFromSpatialRef(srs);
     setExtraBytesVlr();
-    fillHeader();
+    MetadataNode forward = table.privateMetadata("lasforward");
+    fillHeader(forward);
 }
 
 
@@ -436,32 +514,73 @@ void LasWriter::addVlr(const std::string& userId, uint16_t recordId,
     }
 }
 
+template <typename T>
+void LasWriter::handleForward(const std::string& s, T& headerVal,
+    const MetadataNode& base)
+{
+    if (Utils::contains(m_forwards, s) && !headerVal.valSet())
+    {
+        MetadataNode invalid = base.findChild(s + "INVALID");
+        MetadataNode m = base.findChild(s);
+        if (!invalid.valid() && m.valid())
+            headerVal.setVal(m.value<typename T::type>());
+    }
+}
+
+void LasWriter::handleForwards(MetadataNode& forward)
+{
+    handleForward("major_version", m_majorVersion, forward);
+    handleForward("minor_version", m_minorVersion, forward);
+    handleForward("dataformat_id", m_dataformatId, forward);
+    handleForward("filesource_id", m_filesourceId, forward);
+    handleForward("global_encoding", m_globalEncoding, forward);
+    handleForward("project_id", m_projectId, forward);
+    handleForward("system_id", m_systemId, forward);
+    handleForward("software_id", m_softwareId, forward);
+    handleForward("creation_doy", m_creationDoy, forward);
+    handleForward("creation_year", m_creationYear, forward);
+
+    handleForward("scale_x", m_scaleX, forward);
+    handleForward("scale_y", m_scaleY, forward);
+    handleForward("scale_z", m_scaleZ, forward);
+    handleForward("offset_x", m_offsetX, forward);
+    handleForward("offset_y", m_offsetY, forward);
+    handleForward("offset_z", m_offsetZ, forward);
+
+    m_xXform.setScale(m_scaleX.val());
+    m_yXform.setScale(m_scaleY.val());
+    m_zXform.setScale(m_scaleZ.val());
+    m_xXform.setOffset(m_offsetX.val());
+    m_yXform.setOffset(m_offsetY.val());
+    m_zXform.setOffset(m_offsetZ.val());
+}
 
 /// Fill the LAS header with values as provided in options or forwarded
 /// metadata.
-void LasWriter::fillHeader()
+void LasWriter::fillHeader(MetadataNode& forward)
 {
+    handleForwards(forward);
+
     const uint16_t WKT_MASK = (1 << 4);
 
-    m_lasHeader.setScale(m_xXform.m_scale, m_yXform.m_scale,
-        m_zXform.m_scale);
+    m_lasHeader.setScale(m_xXform.m_scale, m_yXform.m_scale, m_zXform.m_scale);
     m_lasHeader.setOffset(m_xXform.m_offset, m_yXform.m_offset,
         m_zXform.m_offset);
     m_lasHeader.setVlrCount(m_vlrs.size());
     m_lasHeader.setEVlrCount(m_eVlrs.size());
 
-    m_lasHeader.setPointFormat((uint8_t)headerVal<unsigned>("format"));
+    m_lasHeader.setPointFormat(m_dataformatId.val());
     m_lasHeader.setPointLen(m_lasHeader.basePointLen() + m_extraByteLen);
-    m_lasHeader.setVersionMinor((uint8_t)headerVal<unsigned>("minor_version"));
-    m_lasHeader.setCreationYear(headerVal<uint16_t>("creation_year"));
-    m_lasHeader.setCreationDOY(headerVal<uint16_t>("creation_doy"));
-    m_lasHeader.setSoftwareId(headerVal<std::string>("software_id"));
-    m_lasHeader.setSystemId(headerVal<std::string>("system_id"));
-    m_lasHeader.setProjectId(headerVal<boost::uuids::uuid>("project_id"));
-    m_lasHeader.setFileSourceId(headerVal<uint16_t>("filesource_id"));
+    m_lasHeader.setVersionMinor(m_minorVersion.val());
+    m_lasHeader.setCreationYear(m_creationYear.val());
+    m_lasHeader.setCreationDOY(m_creationDoy.val());
+    m_lasHeader.setSoftwareId(m_softwareId.val());
+    m_lasHeader.setSystemId(m_systemId.val());
+    m_lasHeader.setProjectId(m_projectId.val());
+    m_lasHeader.setFileSourceId(m_filesourceId.val());
     // We always write a WKT VLR, but we need to be sure to set the WKT
     // bit when the version is at least 1.4.
-    uint16_t globalEncoding = headerVal<uint16_t>("global_encoding");
+    uint16_t globalEncoding = m_globalEncoding.val();
     if (m_lasHeader.versionAtLeast(1, 4))
         globalEncoding |= WKT_MASK;
     m_lasHeader.setGlobalEncoding(globalEncoding);

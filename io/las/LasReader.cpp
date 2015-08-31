@@ -157,7 +157,8 @@ void LasReader::ready(PointTableRef table, MetadataNode& m)
     m_index = 0;
 
     setSrsFromVlrs(m);
-    extractHeaderMetadata(m);
+    MetadataNode forward = table.privateMetadata("lasforward");
+    extractHeaderMetadata(forward, m);
 
     if (m_lasHeader.compressed())
     {
@@ -202,67 +203,93 @@ Options LasReader::getDefaultOptions()
 }
 
 
-void LasReader::extractHeaderMetadata(MetadataNode& m)
+// Store data in the normal metadata place.  Also store it in the private
+// lasforward metadata node.
+template <typename T>
+void addForwardMetadata(MetadataNode& forward, MetadataNode& m,
+    const std::string& name, T val, const std::string description = "")
+{
+    m.add(name, val, description);
+
+    // If the entry doesn't already exist, just add it.
+    MetadataNode f = forward.findChild(name);
+    if (!f.valid())
+    {
+        forward.add(name, val);
+        return;
+    }
+
+    // If the old value and new values aren't the same, set an invalid flag.
+    MetadataNode temp = f.addOrUpdate("temp", val);
+    if (f.value<std::string>() != temp.value<std::string>())
+        forward.addOrUpdate(name + "INVALID", "");
+}
+
+
+void LasReader::extractHeaderMetadata(MetadataNode& forward, MetadataNode& m)
 {
     m.add<bool>("compressed", m_lasHeader.compressed(),
         "true if this LAS file is compressed");
-    m.add<uint32_t>("major_version",
-        static_cast<uint32_t>(m_lasHeader.versionMajor()),
+
+    addForwardMetadata(forward, m, "major_version", m_lasHeader.versionMajor(),
         "The major LAS version for the file, always 1 for now");
-    m.add<uint32_t>("minor_version",
-        static_cast<uint32_t>(m_lasHeader.versionMinor()),
+    addForwardMetadata(forward, m, "minor_version", m_lasHeader.versionMinor(),
         "The minor LAS version for the file");
-    m.add<uint32_t>("dataformat_id",
-        static_cast<uint32_t>(m_lasHeader.pointFormat()),
+    addForwardMetadata(forward, m, "dataformat_id", m_lasHeader.pointFormat(),
         "LAS Point Data Format");
     if (m_lasHeader.versionAtLeast(1, 1))
-        m.add<uint32_t>("filesource_id",
-            static_cast<uint32_t>(m_lasHeader.fileSourceId()),
-            "File Source ID (Flight Line Number if this file was derived from "
-            "an original flight line).");
+        addForwardMetadata(forward, m, "filesource_id",
+            m_lasHeader.fileSourceId(), "File Source ID (Flight Line Number "
+            "if this file was derived from an original flight line).");
     if (m_lasHeader.versionAtLeast(1, 2))
     {
+        // For some reason we've written global encoding as a base 64
+        // encoded value in the past.  In an effort to standardize things,
+        // I'm writing this as a special value, and will also write
+        // global_encoding like we write all other header metadata.
         uint16_t globalEncoding = m_lasHeader.globalEncoding();
-        m.addEncoded("global_encoding", (uint8_t *)&globalEncoding,
+        m.addEncoded("global_encoding_base64", (uint8_t *)&globalEncoding,
             sizeof(globalEncoding),
             "Global Encoding: general property bit field.");
+
+        addForwardMetadata(forward, m, "global_encoding",
+            m_lasHeader.globalEncoding(),
+            "Global Encoding: general property bit field.");
     }
-    m.add<boost::uuids::uuid>("project_id",
-         m_lasHeader.projectId(), "Project ID.");
-    m.add<std::string>("system_id", m_lasHeader.systemId());
-    m.add<std::string>("software_id", m_lasHeader.softwareId(),
+
+    addForwardMetadata(forward, m, "project_id", m_lasHeader.projectId(),
+        "Project ID.");
+    addForwardMetadata(forward, m, "system_id", m_lasHeader.systemId());
+    addForwardMetadata(forward, m, "software_id", m_lasHeader.softwareId(),
         "Generating software description.");
-    m.add<uint32_t>("creation_doy",
-        static_cast<uint32_t>(m_lasHeader.creationDOY()),
+    addForwardMetadata(forward, m, "creation_doy", m_lasHeader.creationDOY(),
         "Day, expressed as an unsigned short, on which this file was created. "
         "Day is computed as the Greenwich Mean Time (GMT) day. January 1 is "
         "considered day 1.");
-    m.add<uint32_t>("creation_year",
-        static_cast<uint32_t>(m_lasHeader.creationYear()),
+    addForwardMetadata(forward, m, "creation_year", m_lasHeader.creationYear(),
         "The year, expressed as a four digit number, in which the file was "
         "created.");
-    m.add<uint32_t>("header_size",
-        static_cast<uint32_t>(m_lasHeader.vlrOffset()),
+    addForwardMetadata(forward, m, "scale_x", m_lasHeader.scaleX(),
+        "The scale factor for X values.");
+    addForwardMetadata(forward, m, "scale_y", m_lasHeader.scaleY(),
+        "The scale factor for Y values.");
+    addForwardMetadata(forward, m, "scale_z", m_lasHeader.scaleZ(),
+        "The scale factor for Z values.");
+    addForwardMetadata(forward, m, "offset_x", m_lasHeader.offsetX(),
+        "The offset for X values.");
+    addForwardMetadata(forward, m, "offset_y", m_lasHeader.offsetY(),
+        "The offset for Y values.");
+    addForwardMetadata(forward, m, "offset_z", m_lasHeader.offsetZ(),
+        "The offset for Z values.");
+
+    m.add("header_size", m_lasHeader.vlrOffset(),
         "The size, in bytes, of the header block, including any extension "
         "by specific software.");
-    m.add<uint32_t>("dataoffset",
-        static_cast<uint32_t>(m_lasHeader.pointOffset()),
+    m.add("dataoffset", m_lasHeader.pointOffset(),
         "The actual number of bytes from the beginning of the file to the "
         "first field of the first point record data field. This data offset "
         "must be updated if any software adds data from the Public Header "
         "Block or adds/removes data to/from the Variable Length Records.");
-    m.add<double>("scale_x", m_lasHeader.scaleX(),
-        "The scale factor for X values.");
-    m.add<double>("scale_y", m_lasHeader.scaleY(),
-        "The scale factor for Y values.");
-    m.add<double>("scale_z", m_lasHeader.scaleZ(),
-        "The scale factor for Z values.");
-    m.add<double>("offset_x", m_lasHeader.offsetX(),
-        "The offset for X values.");
-    m.add<double>("offset_y", m_lasHeader.offsetY(),
-        "The offset for Y values.");
-    m.add<double>("offset_z", m_lasHeader.offsetZ(),
-        "The offset for Z values.");
     m.add<double>("minx", m_lasHeader.minX(),
         "The max and min data fields are the actual unscaled extents of the "
         "LAS point file data, specified in the coordinate system of the LAS "

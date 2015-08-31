@@ -38,12 +38,30 @@ filename
   the result of using :ref:`filters.splitter` or :ref:`filters.chipper`. 
   [Required]
 
+forward
+  List of header fields whose values should be preserved from a source
+  LAS file.  The
+  option can be specified multiple times, which has the same effect as
+  listing values separated by a comma.  The following values are valid:
+  'major_version', 'minor_version', 'dataformat_id', 'filesource_id',
+  'global_encoding', 'project_id', 'system_id', 'software_id', 'creation_doy',
+  'creation_year', 'scale_x', 'scale_y', 'scale_z', 'offset_x', 'offset_y',
+  'offset_z'.  In addition, the special value 'header' can be specified,
+  which is equivalent to specifying all the values EXCEPT the scale and
+  offset values.  Scale and offset values can be forwarded as a group by
+  using the special values 'scale' and 'offset' respectively.  The special
+  value 'all' is equivalent to specifying 'header', 'scale' and 'offset'.
+  If an option is specified explicitly, it will override any forwarded value.
+  If a LAS file is the result of multiple LAS input files, the values to be
+  forwarded must match or they will be ignored.
+  
 minor_version
   All LAS files are version 1, but the minor version (0 - 4) can be specified
   with this option. [Default: 3]
 
 software_id
   String identifying the software that created this LAS file.
+  [Default: PDAL version num (build num)]"
 
 creation_doy
   Number of the day of the year (January 1 == 0, Dec 31 == 365) this file is
@@ -52,7 +70,7 @@ creation_doy
 creation_year
   Year (Gregorian) this file is being created.
   
-format
+dataformat_id
   Controls whether information about color and time are stored with the point
   information in the LAS file. [Default: 3]
   
@@ -74,6 +92,14 @@ system_id
 a_srs
   The spatial reference system of the file to be written. Can be an EPSG string (eg "EPSG:268910") or a WKT string. [Default: Not set]
   
+global_encoding
+  Various indicators to describe the data.  See the LAS documentation.  Note
+  that PDAL will always set bit four when creating LAS version output.
+  [Default: 0]
+
+project_id
+  UID reserved for the user [Default: Nil UID]
+
 compression
   Set to true to apply compression to the output, creating a LAZ file instead
   of an LAS file.  Requires PDAL to have been built with compression support

@@ -259,6 +259,15 @@ private:
     /// Avoid lexical cast.
     void getValue(std::string& value) const
         { value = m_value; }
+
+    void getValue(char& value)
+        { value = (char)std::stoi(m_value); }
+
+    void getValue(unsigned char& value) const
+        { value = (unsigned char)std::stoi(m_value); }
+
+    void getValue(signed char& value) const
+        { value = (signed char)std::stoi(m_value); }
 };
 
 
@@ -401,6 +410,19 @@ public:
         for (Option& op : ops)
             vals.push_back(op.getValue<T>());
         return vals;
+    }
+
+    StringList getValues(const std::string& name) const
+    {
+        StringList s;
+
+        auto ops = getOptions(name);
+        for (Option& op : ops)
+        {
+            StringList t = op.getValue<StringList>();
+            s.insert(s.end(), t.begin(), t.end());
+        }
+        return s;
     }
 
     // get value of an option, or throw not_found if option not present

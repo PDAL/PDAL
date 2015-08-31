@@ -45,9 +45,9 @@
 
 using namespace pdal;
 
-void checkPoint(const PointView& data, std::size_t index, double time,
+void checkPoint(const PointView& data, PointId index, double time,
     double latitude, double longitude, double altitude, double xvelocity,
-    double yvelocity, double zvelocity, float roll, float pitch,
+    double yvelocity, double zvelocity, double roll, double pitch,
     double heading, double wander, double xaccel, double yaccel,
     double zaccel, double xangrate, double yangrate, double zangrate)
 {

@@ -618,7 +618,7 @@ std::string Utils::escapeJSON(const string &str)
 /// \param[in] lineLength  Maximum length of any of the output strings
 /// \return  List of string split from input.
 ///
-StringList Utils::wordWrap(string const& inputString, unsigned int lineLength)
+StringList Utils::wordWrap(string const& inputString, size_t lineLength)
 {
     // stolen from http://stackoverflow.com/questions/5815227/fix-improve-word-wrap-function
 

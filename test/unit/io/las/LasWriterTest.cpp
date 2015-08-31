@@ -43,6 +43,7 @@
 #include <LasWriter.hpp>
 
 #include <pdal/PointView.hpp>
+#include <pdal/StageFactory.hpp>
 #include <pdal/StageWrapper.hpp>
 
 #include "Support.hpp"
@@ -54,9 +55,6 @@ namespace pdal
 class LasTester
 {
 public:
-    template <typename T>
-    static T headerVal(LasWriter& w, const std::string& s)
-        { return w.headerVal<T>(s); }
     LasHeader *header(LasWriter& w)
         { return &w.m_lasHeader; }
 };
@@ -178,48 +176,73 @@ TEST(LasWriterTest, extra_dims)
     }
 }
 
-TEST(LasWriterTest, metadata_options)
+// Merge a couple of 1.4 LAS files with point formats 1 and 6.  Write the
+// output with version 3.  Verify that you get point format 3 (default),
+// LAS 1.3 output and other header data forwarded.
+TEST(LasWriterTest, forward)
 {
-    Options ops;
+    Options readerOps1;
+    
+    readerOps1.add("filename", Support::datapath("las/4_1.las"));
+    
+    Options readerOps2;
 
-    Option metadataOp("metadata", "");
+    readerOps2.add("filename", Support::datapath("las/4_6.las"));
 
-    Options metadataOps;
-    metadataOps.add("format", 4);
-    metadataOps.add("software_id", "MySoftwareId");
-    metadataOps.add("system_id", "FORWARD");
-    metadataOps.add("minor_version", "forward");
-    metadataOp.setOptions(metadataOps);
-    ops.add(metadataOp);
-    ops.add("filename", Support::temppath("wontgetwritten"));
+    LasReader r1;
+    r1.addOptions(readerOps1);
 
-    LasWriter writer;
-    writer.setOptions(ops);
+    LasReader r2;
+    r2.addOptions(readerOps2);
 
-    PointTable table;
-    writer.prepare(table);
+    StageFactory sf;
+    Stage *m = sf.createStage("filters.merge");
+    m->setInput(r1);
+    m->setInput(r2);
 
-    MetadataNode m = writer.getMetadata();
-    m.add("minor_version", 56);
+    std::string testfile = Support::temppath("tmp.las");
+    FileUtils::deleteFile(testfile);
 
-    uint8_t format =
-        (uint8_t)LasTester::headerVal<unsigned>(writer, "format");
-    EXPECT_EQ(format, 4u);
-    std::string softwareId =
-        LasTester::headerVal<std::string>(writer, "software_id");
-    EXPECT_EQ(softwareId, "MySoftwareId");
-    std::string systemId =
-        LasTester::headerVal<std::string>(writer, "system_id");
+    Options writerOps;
+    writerOps.add("forward", "header");
+    writerOps.add("minor_version", 3);
+    writerOps.add("filename", testfile);
 
-    // Since the option specifies forward and there is not associated
-    // metadata, the value should be the default.
-    LasHeader header;
-    EXPECT_EQ(systemId, header.getSystemIdentifier());
+    LasWriter w;
+    w.setInput(*m);
+    w.addOptions(writerOps);
 
-    // In this case, we should have metadata to override the default.
-    uint8_t minorVersion =
-        (uint8_t)LasTester::headerVal<unsigned>(writer, "minor_version");
-    EXPECT_EQ(minorVersion, 56u);
+    PointTable t;
+
+    w.prepare(t);
+    w.execute(t);
+
+    Options readerOps;
+    readerOps.add("filename", testfile);
+
+    LasReader r;
+
+    r.setOptions(readerOps);
+
+    PointTable t2;
+
+    r.prepare(t2);
+    r.execute(t2);
+
+    MetadataNode n1 = r.getMetadata();
+    EXPECT_EQ(n1.findChild("major_version").value<uint8_t>(), 1);
+    EXPECT_EQ(n1.findChild("minor_version").value<uint8_t>(), 3);
+    EXPECT_EQ(n1.findChild("dataformat_id").value<uint8_t>(), 3);
+    EXPECT_EQ(n1.findChild("filesource_id").value<uint8_t>(), 0);
+    // Global encoding doesn't match because 4_1.las has a bad value, so we
+    // get the default.
+    EXPECT_EQ(n1.findChild("global_encoding").value<uint8_t>(), 0);
+    EXPECT_EQ(n1.findChild("project_id").value<boost::uuids::uuid>(),
+        boost::uuids::uuid());
+    EXPECT_EQ(n1.findChild("system_id").value(), "");
+    EXPECT_EQ(n1.findChild("software_id").value(), "TerraScan");
+    EXPECT_EQ(n1.findChild("creation_doy").value<uint16_t>(), 142);
+    EXPECT_EQ(n1.findChild("creation_year").value<uint16_t>(), 2014);
 }
 
 // Test that data from three input views gets written to separate output files.

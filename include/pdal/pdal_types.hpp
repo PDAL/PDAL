@@ -35,7 +35,9 @@
 #pragma once
 
 #include <stdint.h>
+#include <cstdlib>
 #include <stdexcept>
+#include <string>
 #include <vector>
 
 #include <pdal/pdal_internal.hpp>
@@ -82,6 +84,22 @@ public:
     bool nonstandard() const
     {
         return m_autoScale || m_autoOffset || m_scale != 1.0 || m_offset != 0.0;
+    }
+
+    void setOffset(const std::string& sval)
+    {
+        if (sval == "auto")
+            m_autoOffset = true;
+        else
+            m_offset = std::strtod(sval.c_str(), NULL);
+    }
+
+    void setScale(const std::string& sval)
+    {
+        if (sval == "auto")
+            m_autoScale = true;
+        else
+            m_scale = std::strtod(sval.c_str(), NULL);
     }
 };
 
