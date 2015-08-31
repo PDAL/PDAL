@@ -204,7 +204,8 @@ int CpdKernel::execute()
     reg.set_sigma2(m_sigma2);
     if (m_auto_z_exaggeration)
     {
-        BOX3D bounds = viewX->calculateBounds();
+        BOX3D bounds;
+        viewX->calculateBounds(bounds);
         double min_range = std::min(bounds.maxx - bounds.minx, bounds.maxy - bounds.miny);
         double exaggeration = m_auto_z_exaggeration_ratio * min_range / (bounds.maxz - bounds.minz);
         reg.set_z_exaggeration(exaggeration);
@@ -219,7 +220,7 @@ int CpdKernel::execute()
     outLayout->registerDim(Dimension::Id::XVelocity);
     outLayout->registerDim(Dimension::Id::YVelocity);
     outLayout->registerDim(Dimension::Id::ZVelocity);
-    PointView outView(new PointView(outTable));
+    PointViewPtr outView(new PointView(outTable));
 
     if (m_chipped)
     {
@@ -287,7 +288,7 @@ arma::mat getChip(const arma::mat& X, const BOX3D& bounds)
 
 cpd::Registration::ResultPtr CpdKernel::chipThenRegister(
     const cpd::NonrigidLowrank& reg, const arma::mat& X, const arma::mat& Y,
-    const PointViewPtr& viewX, const PointTableRef table)
+    const PointViewPtr& viewX, PointTableRef table)
 {
     BufferReader reader;
     reader.addView(viewX);
@@ -306,7 +307,8 @@ cpd::Registration::ResultPtr CpdKernel::chipThenRegister(
     int count = 0;
     for (auto it = viewSet.begin(); it != viewSet.end(); ++it)
     {
-        BOX3D bounds = (*it)->calculateBounds();
+        BOX3D bounds;
+        (*it)->calculateBounds(bounds);
         BOX3D chipBounds(bounds.minx - m_chip_buffer,
                          bounds.miny - m_chip_buffer,
                          bounds.minz,

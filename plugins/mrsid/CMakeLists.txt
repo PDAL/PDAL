@@ -16,6 +16,11 @@ if(MRSID_FOUND)
     PDAL_ADD_PLUGIN(libname reader mrsid
         FILES "${srcs}" "${incs}"
         LINK_WITH ${MRSID_LIBRARY})
+    if (WITH_TESTS)
+        PDAL_ADD_TEST(mrsidtest
+            FILES test/MrsidTest.cpp
+            LINK_WITH ${libname})
+    endif()
 else()
     message(STATUS "Building without MrSID support")
 endif()

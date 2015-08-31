@@ -287,11 +287,11 @@ void LasWriter::getVlrOptions(const Options& opts)
 
 void LasWriter::readyTable(PointTableRef table)
 {
-    const SpatialReference& srs = getSpatialReference().empty() ?
+    m_srs = getSpatialReference().empty() ?
         table.spatialRef() : getSpatialReference();
 
     setVlrsFromMetadata();
-    setVlrsFromSpatialRef(srs);
+    setVlrsFromSpatialRef();
     setExtraBytesVlr();
     MetadataNode forward = table.privateMetadata("lasforward");
     fillHeader(forward);
@@ -405,7 +405,7 @@ void LasWriter::setVlrsFromMetadata()
 
 /// Set VLRs from the active spatial reference.
 /// \param  srs - Active spatial reference.
-void LasWriter::setVlrsFromSpatialRef(const SpatialReference& srs)
+void LasWriter::setVlrsFromSpatialRef()
 {
     VlrList vlrs;
 
@@ -413,7 +413,7 @@ void LasWriter::setVlrsFromSpatialRef(const SpatialReference& srs)
     GeotiffSupport geotiff;
     geotiff.resetTags();
 
-    std::string wkt = srs.getWKT(SpatialReference::eCompoundOK, false);
+    std::string wkt = m_srs.getWKT(SpatialReference::eCompoundOK, false);
     geotiff.setWkt(wkt);
 
     addGeotiffVlr(geotiff, GEOTIFF_DIRECTORY_RECORD_ID,
@@ -422,7 +422,7 @@ void LasWriter::setVlrsFromSpatialRef(const SpatialReference& srs)
         "GeoTiff GeoDoubleParamsTag");
     addGeotiffVlr(geotiff, GEOTIFF_ASCII_RECORD_ID,
         "GeoTiff GeoAsciiParamsTag");
-    addWktVlr(srs);
+    addWktVlr();
 #endif // PDAL_HAVE_LIBGEOTIFF
 }
 
@@ -454,11 +454,10 @@ bool LasWriter::addGeotiffVlr(GeotiffSupport& geotiff, uint16_t recordId,
 
 
 /// Add a Well-known Text VLR associated with the spatial reference.
-/// \param  srs - Associated spatial reference.
 /// \return  Whether the VLR was added.
-bool LasWriter::addWktVlr(const SpatialReference& srs)
+bool LasWriter::addWktVlr()
 {
-    std::string wkt = srs.getWKT(SpatialReference::eCompoundOK);
+    std::string wkt = m_srs.getWKT(SpatialReference::eCompoundOK);
     if (wkt.empty())
         return false;
 
