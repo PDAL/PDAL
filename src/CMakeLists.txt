@@ -164,12 +164,16 @@ if (PDAL_HAVE_LIBXML2)
     target_link_libraries(${PDAL_LIB_NAME} ${LIBXML2_LIBRARIES})
 endif()
 
+set(BAR $<TARGET_SONAME_FILE:${PDAL_UTIL_LIB_NAME}>)
+
+message(STATUS "BAR = ${BAR}")
+
 target_link_libraries(${PDAL_LIB_NAME}
     ${CMAKE_THREAD_LIBS_INIT}
     ${GDAL_LIBRARY}
     ${GEOS_LIBRARY}
     ${ZLIB_LIBRARIES}
-    ${PDAL_UTIL_LIB_NAME}
+    -Wl,-reexport_library,${BAR}
 )
 
 if (WITH_GEOTIFF)
