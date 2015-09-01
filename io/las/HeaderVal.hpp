@@ -66,6 +66,8 @@ public:
 
     bool setVal(T val)
     {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wtype-limits"
         if (val >= MIN && val <= MAX)
         {
             this->m_val = val;
@@ -73,6 +75,7 @@ public:
             return true;
         }
         return false;
+#pragma GCC diagnostic pop
     }
 
     T val()

@@ -461,12 +461,22 @@ public:
         out = getValueOrDefault(name, *t);
         delete t;
 #else
-        T t{};
-        out = getValueOrDefault(name, t);
+        if (std::is_fundamental<T>::value)
+        {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+            T t{};
+            out = getValueOrDefault(name, t);
+#pragma GCC diagnostic pop
+        }
+        else
+        {
+            T t;
+            out = getValueOrDefault(name, t);
+        }
 #endif
         return out;
     }
-
 
     // returns true iff the option name is valid
     bool hasOption(std::string const& name) const;
