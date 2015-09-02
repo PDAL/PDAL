@@ -169,7 +169,7 @@ TEST(PointTable, userView)
     };
 
     reader.setReadCb(readCb);
-    PointTable table;
+    UserTable table;
 
     reader.prepare(table);
     reader.execute(table);

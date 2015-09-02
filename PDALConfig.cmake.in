@@ -14,7 +14,7 @@ foreach(_dir @PDAL_CONFIG_LIBRARY_DIRS@)
   set_and_check(_foo ${_dir})
   list(APPEND PDAL_LIBRARY_DIRS ${_foo})
 endforeach(_dir)
-check_required_components("@PDAL_LIB_NAME@")
+check_required_components("@PDAL_BASE_LIB_NAME@")
 check_required_components("@PDAL_UTIL_LIB_NAME@")
 set(PDAL_LIBRARIES "@PDAL_LIB_NAME@" "@PDAL_UTIL_LIB_NAME@")
 

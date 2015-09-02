@@ -52,7 +52,7 @@ if(PDAL_UTILITY)
     else (APPLE AND PDAL_BUNDLE)
         add_executable(${PDAL_UTILITY} ${srcs})
     endif(APPLE AND PDAL_BUNDLE)
-    target_link_libraries(${PDAL_UTILITY} ${PDAL_LIB_NAME})
+    target_link_libraries(${PDAL_UTILITY} ${PDAL_BASE_LIB_NAME})
 endif()
 
 #------------------------------------------------------------------------------

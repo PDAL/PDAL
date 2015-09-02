@@ -154,36 +154,58 @@ if(WIN32)
     endif()
 endif()
 
-PDAL_ADD_LIBRARY(${PDAL_LIB_NAME} ${PDAL_SOURCES})
+PDAL_ADD_LIBRARY(${PDAL_BASE_LIB_NAME} ${PDAL_SOURCES})
 
 if (WITH_LASZIP)
-    target_link_libraries(${PDAL_LIB_NAME} ${LASZIP_LIBRARY})
+    target_link_libraries(${PDAL_BASE_LIB_NAME} ${LASZIP_LIBRARY})
 endif()
 
 if (PDAL_HAVE_LIBXML2)
-    target_link_libraries(${PDAL_LIB_NAME} ${LIBXML2_LIBRARIES})
+    target_link_libraries(${PDAL_BASE_LIB_NAME} ${LIBXML2_LIBRARIES})
 endif()
 
-target_link_libraries(${PDAL_LIB_NAME}
+#
+# On OSX we reexport the symbols in libpdal_util.dylib into libpdalcpp.dylib
+# so that users only need link libpdalcpp.
+#
+if (APPLE)
+    set(UTIL_LIB "-Wl,-reexport_library,$<TARGET_SONAME_FILE:${PDAL_UTIL_LIB_NAME}>")
+else()
+    set(UTIL_LIB ${PDAL_UTIL_LIB_NAME})
+endif()
+
+
+target_link_libraries(${PDAL_BASE_LIB_NAME}
     ${CMAKE_THREAD_LIBS_INIT}
     ${GDAL_LIBRARY}
     ${GEOS_LIBRARY}
     ${ZLIB_LIBRARIES}
-    ${PDAL_UTIL_LIB_NAME}
+    ${UTIL_LIB}
 )
 
 if (WITH_GEOTIFF)
-    target_link_libraries(${PDAL_LIB_NAME} ${GEOTIFF_LIBRARY})
+    target_link_libraries(${PDAL_BASE_LIB_NAME} ${GEOTIFF_LIBRARY})
 endif()
 
-target_link_libraries(${PDAL_LIB_NAME} ${Boost_LIBRARIES})
+target_link_libraries(${PDAL_BASE_LIB_NAME} ${Boost_LIBRARIES})
 
 if(WIN32)
-    target_link_libraries(${PDAL_LIB_NAME} ws2_32)
+    target_link_libraries(${PDAL_BASE_LIB_NAME} ws2_32)
 endif()
 
 ###############################################################################
 # Targets installation
+
+#
+# On Linux, we install a linker script as libpdalcpp.so.  That file
+# specifies linking in libpdal_base.so and libpdal_util.so.  This allows
+# users to link a single library, libpdalcpp
+#
+if (UNIX AND NOT APPLE)
+    set(LIBNAME ${CMAKE_SHARED_LIBRARY_PREFIX}${PDAL_LIB_NAME})
+    install(FILES ${LIBNAME} DESTINATION ${PDAL_LIB_INSTALL_DIR}
+        RENAME ${LIBNAME}${CMAKE_SHARED_LIBRARY_SUFFIX})
+endif()
 
 install(DIRECTORY "${PDAL_HEADERS_DIR}/"
   DESTINATION "${PDAL_INCLUDE_INSTALL_DIR}"
