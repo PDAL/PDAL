@@ -3,14 +3,20 @@
 libLAS C API to PDAL
 ====================
 
-
+This page shows how to port code using libLAS C API to PDAL API
+(which is C++).
 
 Includes
 --------
 
+libLAS include:
+
 .. code-block:: cpp
 
     #include <liblas/capi/liblas.h>
+
+For PDAL, in addition to PDAL headers, we also include standard headers
+which will be useful later:
 
 .. code-block:: cpp
 
@@ -22,19 +28,21 @@ Includes
     #include <pdal/LasHeader.hpp>
     #include <pdal/Options.hpp>
 
-Opening the dataset
--------------------
+Initial steps
+-------------
+
+Opening the dataset in libLAS:
 
 .. code-block:: cpp
 
     LASReaderH LAS_reader;
     LASHeaderH LAS_header;
     LASSRSH LAS_srs;
-    LASPointH LAS_point;
-    double scale_x, scale_y, scale_z, offset_x, offset_y, offset_z;
-    int las_point_format;
     LAS_reader = LASReader_Create(in_opt->answer);
     LAS_header = LASReader_GetHeader(LAS_reader);
+
+The higher level of abstraction in PDAL requires a little bit more code
+for the initial steps:
 
 .. code-block:: cpp
 
@@ -48,8 +56,10 @@ Opening the dataset
     pdal::PointViewSet point_view_set = las_reader->execute(table);
     pdal::PointViewPtr point_view = *point_view_set.begin();
     pdal::Dimension::IdList dims = point_view->dims();
+    pdal::LasHeader las_header = las_reader->header();
 
-here we read right away and then iterate over it
+The PDAL code is also different in the way that we read all the data
+right away while in libLAS we just open the file.
 
 TODO: How to test if loaded successfully? Was ``LAS_header == NULL``
 
@@ -60,8 +70,15 @@ TODO: When the following can be used?
     pdal::StageFactory f;
     std::unique_ptr<pdal::Stage> las_reader(f.createStage("readers.las")
 
+
+
 Dataset properties
 ------------------
+
+We assume we defined all the following variables as ``double``.
+
+The general properties from the LAS file are retrieved from the
+header in libLAS:
 
 .. code-block:: cpp
 
@@ -78,6 +95,7 @@ Dataset properties
     ymin = LASHeader_GetMinY(LAS_header);
     ymax = LASHeader_GetMaxY(LAS_header);
 
+And the same applies PDAL:
 
 .. code-block:: cpp
 
@@ -95,43 +113,66 @@ Dataset properties
     ymin = las_header.minY();
     ymax = las_header.maxY();
 
+The point record count in libLAS:
 
 .. code-block:: cpp
 
-    n_features = LASHeader_GetPointRecordsCount(LAS_header);
+    unsigned int n_features = LASHeader_GetPointRecordsCount(LAS_header);
+
+is just point count in PDAL:
 
 .. code-block:: cpp
 
-    n_features = las_header.pointCount();
+    unsigned int n_features = las_header.pointCount();
+
+WKT of a spatial reference system is obtained from the header in libLAS:
 
 .. code-block:: cpp
 
     LAS_srs = LASHeader_GetSRS(LAS_header);
     char* projstr = LASSRS_GetWKT_CompoundOK(LAS_srs);
 
+In PDAL, spatial reference is part of the ``PointTable``:
+
 .. code-block:: cpp
 
     char* projstr = table.spatialRef().getWKT(pdal::SpatialReference::eCompoundOK).c_str();
+
+Whether the time or color is supported by the LAS format, one would
+have to determine from the format ID in libLAS:
 
 .. code-block:: cpp
 
     las_point_format = LASHeader_GetDataFormatId(LAS_header);
     have_time = (las_point_format == 1 ...
 
+In PDAL, there is a convenient function for it in the header:
+
 .. code-block:: cpp
 
     have_time = las_header.hasTime();
     have_color = las_header.hasColor();
 
+The presence of color, time and other dimensions can be also determined
+with:
+
+.. code-block:: cpp
+
+    pdal::Dimension::IdList dims = point_view->dims();
+
 
 Iterating over points
 ---------------------
+
+libLAS:
 
 .. code-block:: cpp
 
     while ((LAS_point = LASReader_GetNextPoint(LAS_reader)) != NULL) {
         // ...
     }
+
+PDAL:
 
 .. code-block:: cpp
 
@@ -142,21 +183,28 @@ Iterating over points
 Point validity
 --------------
 
+The correct usage of libLAS required to test point validity:
+
 .. code-block:: cpp
 
     LASPoint_IsValid(LAS_point)
 
-TODO: do we need to do that?
+In PDAL, there is no need to do that and the caller can assume that
+all the points provided by PDAL are valid.
 
 
 Coordinates
 -----------
+
+libLAS:
 
 .. code-block:: cpp
 
     x = LASPoint_GetX(LAS_point);
     y = LASPoint_GetY(LAS_point);
     z = LASPoint_GetZ(LAS_point);
+
+In PDAL, point coordinates are one of the dimensions:
 
 .. code-block:: cpp
 
@@ -165,13 +213,20 @@ Coordinates
     y = point_view->getFieldAs<double>(Id::Y, idx);
     z = point_view->getFieldAs<double>(Id::Z, idx);
 
+Thanks to ``using namespace pdal::Dimension`` we can just write ``Id::X`` etc.
+
+
 Returns
 -------
+
+libLAS:
 
 .. code-block:: cpp
 
     int return_no = LASPoint_GetReturnNumber(LAS_point);
     int n_returns = LASPoint_GetNumberOfReturns(LAS_point);
+
+PDAL:
 
 .. code-block:: cpp
 
@@ -182,9 +237,13 @@ Returns
 Classes
 -------
 
+libLAS:
+
 .. code-block:: cpp
 
     int point_class = (int) LASPoint_GetClassification(LAS_point);
+
+PDAL:
 
 .. code-block:: cpp
 
@@ -194,6 +253,8 @@ Classes
 Color
 -----
 
+libLAS:
+
 .. code-block:: cpp
 
     LASColorH LAS_color = LASPoint_GetColor(LAS_point);
@@ -201,6 +262,7 @@ Color
     int green = LASColor_GetGreen(LAS_color);
     int blue = LASColor_GetBlue(LAS_color);
 
+PDAL:
 
 .. code-block:: cpp
 
@@ -208,16 +270,22 @@ Color
     int green = point_view->getFieldAs<int>(Id::Green, idx);
     int blue = point_view->getFieldAs<int>(Id::Blue, idx);
 
-
-TODO: what is relation of ``hasColor()`` and ``hasDim(Id::Red)`` ?
+For LAS format, ``hasColor()`` method of ``LasHeader`` to see if the
+format supports RGB. However, in general, you can test use
+``hasDim(Id::Red)``, ``hasDim(Id::Green)`` and ``hasDim(Id::Blue)``
+method calls on the point, to see if the color was defined.
 
 
 Time
 ----
 
+libLAS:
+
 .. code-block:: cpp
 
     double time = LASPoint_GetTime(LAS_point);
+
+PDAL:
 
 .. code-block:: cpp
 
@@ -228,6 +296,8 @@ Time
 Other point attributes
 ----------------------
 
+libLAS:
+
 .. code-block:: cpp
 
     LASPoint_GetIntensity(LAS_point)
@@ -236,6 +306,8 @@ Other point attributes
     LASPoint_GetScanAngleRank(LAS_point)
     LASPoint_GetPointSourceId(LAS_point)
     LASPoint_GetUserData(LAS_point)
+
+PDAL:
 
 .. code-block:: cpp
 
@@ -250,16 +322,15 @@ Other point attributes
 Memory management
 -----------------
 
+In libLAS C API, we need to explicitly take care of freeing the memory:
+
 .. code-block:: cpp
 
     LASSRS_Destroy(LAS_srs);
     LASHeader_Destroy(LAS_header);
     LASReader_Destroy(LAS_reader);
 
-
-should go out of scope
-
-TODO: we need something for exit [noreturn]
-
-we don't destroy for PDAL as we will just go out of scope
-(using stack or smart pointers)
+When using C++ and PDAL, the objects created on stack free the memory
+when they go out of scope. When using smart pointers, they will take
+care of the memory they manage. This does not apply to special cases
+such as ``exit()`` function calls.
