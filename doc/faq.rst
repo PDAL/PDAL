@@ -15,4 +15,20 @@ FAQ
   declarative pipeline syntax for orchestrating translation operations.
   PDAL can also use PCL through the :ref:`filters.pclblock` mechanism.
 
+* What is PDAL's relationship to libLAS?
 
+  The idea behind libLAS was limited to LIDAR data and basic
+  manipulation. libLAS was also trying to be partially compatible
+  with LASlib and LAStools. PDAL, on the other hand, aims to be
+  a ultimate library and a set of tools for manipulating and processing
+  point clouds which is easily extensible by its users.
+
+* Are there any command line tools in PDAL similar to LAStools?
+
+  Yes. The ``pdal`` command provides a wide range of features which go
+  far beyond basic LIDAR data processing. Additionally, the whole
+  PDAL is licensed under an open source license.
+
+* Is there any compatibility with libLAS's LAS Utility Applications or LAStools?
+
+  No. To provide You will find ``pdal`` info translate :ref:`apps`
