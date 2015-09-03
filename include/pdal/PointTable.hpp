@@ -119,5 +119,79 @@ private:
         { return m_layout->pointSize() * numPts; }
 };
 
+class VectorPointTable : public BasePointTable
+{
+    friend class Reader;
+
+public:
+    VectorPointTable(PointLayout& layout)
+        : m_numPoints(0)
+        , m_pointsAvailable(0)
+        , m_layout(layout)
+    {}
+
+    virtual pdal::PointLayoutPtr layout() const
+    {
+        return &m_layout;
+    }
+
+    virtual pdal::PointId addPoint()
+    {
+        if (m_numPoints + 1 > m_pointsAvailable)
+        {
+            m_data.resize(m_data.size() + m_layout.pointSize());
+            ++m_pointsAvailable;
+        }
+
+        return m_numPoints++;
+    }
+
+    virtual char* getPoint(pdal::PointId index)
+    {
+        return m_data.data() + index * m_layout.pointSize();
+    }
+
+    virtual void setField(
+            const pdal::Dimension::Detail* dimDetail,
+            pdal::PointId index,
+            const void* value)
+    {
+        std::memcpy(getDimension(dimDetail, index), value,
+                dimDetail->size());
+    }
+
+    virtual void getField(
+            const pdal::Dimension::Detail* dimDetail,
+            pdal::PointId index,
+            void* value)
+    {
+        std::memcpy(value, getDimension(dimDetail, index),
+                dimDetail->size());
+    }
+
+    void reserve(std::size_t points)
+    {
+        m_data.resize(points * m_layout.pointSize());
+        m_pointsAvailable = points;
+    }
+
+    std::size_t numPoints() const { return m_numPoints; }
+
+private:
+    char* getDimension(
+            const pdal::Dimension::Detail* dimDetail,
+            pdal::PointId index)
+    {
+        return getPoint(index) + dimDetail->offset();
+    }
+
+    void clear() { m_numPoints = 0; }
+
+    std::vector<char> m_data;
+    std::size_t m_numPoints;
+    std::size_t m_pointsAvailable;
+    PointLayout& m_layout;
+};
+
 } //namespace
 
