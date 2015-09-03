@@ -197,7 +197,10 @@ void LasWriter::fillForwardList(const Options &options)
     for (auto& name : forwards)
     {
         if (name == "all")
+        {
             m_forwards.insert(all.begin(), all.end());
+            m_forwardVlrs = true;
+        }
         else if (name == "header")
             m_forwards.insert(header.begin(), header.end());
         else if (name == "scale")
@@ -290,11 +293,11 @@ void LasWriter::readyTable(PointTableRef table)
     m_srs = getSpatialReference().empty() ?
         table.spatialRef() : getSpatialReference();
 
-    setVlrsFromMetadata();
     setVlrsFromSpatialRef();
     setExtraBytesVlr();
     MetadataNode forward = table.privateMetadata("lasforward");
     fillHeader(forward);
+    setVlrsFromMetadata(forward);
 }
 
 
@@ -379,26 +382,27 @@ MetadataNode LasWriter::findVlrMetadata(MetadataNode node,
 
 /// Set VLRs from metadata for forwarded info, or from option-provided data
 /// otherwise.
-void LasWriter::setVlrsFromMetadata()
+void LasWriter::setVlrsFromMetadata(MetadataNode& forward)
 {
     std::vector<uint8_t> data;
 
-    for (auto oi = m_optionInfos.begin(); oi != m_optionInfos.end(); ++oi)
-    {
-        VlrOptionInfo& vlrInfo = *oi;
+    if (!m_forwardVlrs)
+        return;
 
-        if (vlrInfo.m_name == "FORWARD")
+    auto pred = [](MetadataNode n)
+        { return Utils::startsWith(n.name(), "vlr_"); };
+
+    MetadataNodeList nodes = forward.findChildren(pred);
+    for (auto& n : nodes)
+    {
+        const MetadataNode& userIdNode = n.findChild("user_id");
+        const MetadataNode& recordIdNode = n.findChild("record_id");
+        if (recordIdNode.valid() && userIdNode.valid())
         {
-            MetadataNode m = findVlrMetadata(m_metadata, vlrInfo.m_recordId,
-                vlrInfo.m_userId);
-            if (m.empty())
-                continue;
-            data = Utils::base64_decode(m.value());
+            data = Utils::base64_decode(n.value());
+            uint16_t recordId = (uint16_t)std::stoi(recordIdNode.value());
+            addVlr(userIdNode.value(), recordId, n.description(), data);
         }
-        else
-            data = Utils::base64_decode(vlrInfo.m_value);
-        addVlr(vlrInfo.m_userId, vlrInfo.m_recordId, vlrInfo.m_description,
-            data);
     }
 }
 

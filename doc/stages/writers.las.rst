@@ -50,10 +50,21 @@ forward
   which is equivalent to specifying all the values EXCEPT the scale and
   offset values.  Scale and offset values can be forwarded as a group by
   using the special values 'scale' and 'offset' respectively.  The special
-  value 'all' is equivalent to specifying 'header', 'scale' and 'offset'.
-  If an option is specified explicitly, it will override any forwarded value.
-  If a LAS file is the result of multiple LAS input files, the values to be
-  forwarded must match or they will be ignored.
+  value 'all' is equivalent to specifying 'header', 'scale', 'offset' and
+  'vlr' (see below).
+  If a header option is specified explicitly, it will override any forwarded
+  header value.
+  If a LAS file is the result of multiple LAS input files, the header values
+  to be forwarded must match or they will be ignored and a default will
+  be used instead.
+
+  VLRs can be forwarded by using the special value 'vlr'.  VLRs containing
+  the following User IDs are NOT forwarded: 'LASF_Projection', 'LASF_Spec',
+  'liblas', 'laszip encoded'.  These VLRs are known to contain information
+  regarding the formatting of the data and will be rebuilt properly in the
+  output file as necessary.  Unlike header values, VLRs from multiple input
+  files are accumulated and each is written to the output file.  Forwarded
+  VLRs may contain duplicate User ID/Record ID pairs.
   
 minor_version
   All LAS files are version 1, but the minor version (0 - 4) can be specified

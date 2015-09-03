@@ -559,6 +559,21 @@ public:
     }
 
     template <typename PREDICATE>
+    MetadataNodeList findChildren(PREDICATE p)
+    {
+        MetadataNodeList matches;
+
+        auto nodes = children();
+        for (auto ai = nodes.begin(); ai != nodes.end(); ++ai)
+        {
+            MetadataNode& n = *ai;
+            if (p(n))
+                matches.push_back(n);
+        }
+        return matches;
+    }
+
+    template <typename PREDICATE>
     MetadataNode findChild(PREDICATE p) const
     {
         auto nodes = children();
