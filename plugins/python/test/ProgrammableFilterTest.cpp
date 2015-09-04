@@ -180,3 +180,50 @@ TEST(ProgrammableFilterTest, add_dimension)
         EXPECT_EQ(view->getFieldAs<uint16_t>(psid_id, i), 2);
     }
 }
+
+
+TEST(ProgrammableFilterTest, metadata)
+{
+    StageFactory f;
+
+    BOX3D bounds(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+
+    Options ops;
+    ops.add("bounds", bounds);
+    ops.add("num_points", 10);
+    ops.add("mode", "ramp");
+
+    FauxReader reader;
+    reader.setOptions(ops);
+
+    Option source("source", "import numpy\n"
+        "def myfunc(ins,outs,inmeta,outmeta):\n"
+        "  t = ('name', 'value', '', '', [])\n"
+        "  outmeta.append(t)\n"
+        "  return True\n"
+    );
+    Option module("module", "MyModule");
+    Option function("function", "myfunc");
+    Options opts;
+    opts.add(source);
+    opts.add(module);
+    opts.add(function);
+
+    std::unique_ptr<Stage> filter(f.createStage("filters.programmable"));
+    filter->setOptions(opts);
+    filter->setInput(reader);
+
+    PointTable table;
+    filter->prepare(table);
+    PointViewSet viewSet = filter->execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+
+    PointLayoutPtr layout(table.layout());
+    MetadataNode m = table.metadata();
+    m = m.findChild("filters.programmable");
+    MetadataNodeList l = m.children();
+    EXPECT_EQ(l.size(), 1u);
+    EXPECT_EQ(l[0].name(), "name");
+    EXPECT_EQ(l[0].value(), "value");
+}

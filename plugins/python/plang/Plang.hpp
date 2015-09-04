@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2015, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -13,10 +13,9 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
-*       names of its contributors may be used to endorse or promote
-*       products derived from this software without specific prior
-*       written permission.
+*     * Neither the name of Hobu, Inc. nor the names of its contributors
+*       may be used to endorse or promote products derived from this
+*       software without specific prior written permission.
 *
 * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,27 +33,22 @@
 
 #pragma once
 
-#include "../plang/Invocation.hpp"
+#include <pdal/Metadata.hpp>
 
-#include <pdal/PointView.hpp>
+// forward declare PyObject so we don't need the python headers everywhere
+// see: http://mail.python.org/pipermail/python-dev/2003-August/037601.html
+#ifndef PyObject_HEAD
+struct _object;
+typedef _object PyObject;
+#endif
 
 namespace pdal
 {
 namespace plang
 {
 
-class PDAL_DLL BufferedInvocation : public Invocation
-{
-public:
-    BufferedInvocation(const Script& script);
-
-    void begin(PointView& view, MetadataNode m);
-    void end(PointView& view, MetadataNode m);
-
-private:
-    std::vector<void *> m_buffers;
-    BufferedInvocation& operator=(BufferedInvocation const& rhs); // nope
-};
+PyObject *fromMetadata(MetadataNode m);
+void addMetadata(PyObject *list, MetadataNode m);
 
 } // namespace plang
 } // namespace pdal

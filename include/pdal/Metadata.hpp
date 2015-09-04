@@ -397,6 +397,16 @@ public:
         return MetadataNode(impl);
     }
 
+    MetadataNode add(const std::string& name, const std::string& value,
+        const std::string& type, const std::string& descrip = std::string())
+    {
+        MetadataNodeImplPtr impl = m_impl->add(name);
+        impl->m_type = type;
+        impl->m_value = value;
+        impl->m_descrip = descrip;
+        return MetadataNode(impl);
+    }
+
     template<typename T>
     MetadataNode add(const std::string& name, const T& value,
         const std::string& descrip = std::string())
@@ -668,12 +678,72 @@ public:
     MetadataNode getNode() const
         { return m_root; }
 
+    inline static std::string inferType(const std::string& val);
 private:
     MetadataNode m_root;
     MetadataNode m_private;
     std::string m_name;
 };
 typedef std::shared_ptr<Metadata> MetadataPtr;
+
+inline std::string Metadata::inferType(const std::string& val)
+{
+    size_t pos;
+
+    long l;
+    try
+    {
+        pos = 0;
+        l = std::stol(val, &pos);
+    }
+    catch (std::invalid_argument)
+    {}
+    if (pos == val.length())
+        return (l < 0 ? "nonNegativeInteger" : "integer");
+
+    try
+    {
+        pos = 0;
+        std::stod(val, &pos);
+    }
+    catch(std::invalid_argument)
+    {}
+
+    if (pos == val.length())
+        return "double";
+
+    BOX2D b2d;
+    std::istringstream iss1(val);
+    iss1 >> b2d;
+    if (iss1.good())
+        return "bounds";
+
+    BOX3D b3d;
+    std::istringstream iss2(val);
+    iss2 >> b3d;
+    if (iss2.good())
+        return "bounds";
+
+    if (val == "true" || val == "false")
+        return "boolean";
+
+    try
+    {
+        SpatialReference s(val);
+        return "spatialreference";
+    }
+    catch (pdal_error&)
+    {
+    }
+
+    boost::uuids::uuid uuid;
+    std::istringstream iss3(val);
+    iss3 >> uuid;
+    if (iss3.good())
+        return "uuid";
+
+    return "string";
+}
 
 } // namespace pdal
 

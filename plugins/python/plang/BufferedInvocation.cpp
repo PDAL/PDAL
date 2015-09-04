@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include "BufferedInvocation.hpp"
+#include "Plang.hpp"
 
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127)  // conditional expression is constant
@@ -52,7 +53,7 @@ BufferedInvocation::BufferedInvocation(const Script& script)
 {}
 
 
-void BufferedInvocation::begin(PointView& view)
+void BufferedInvocation::begin(PointView& view, MetadataNode m)
 {
     PointLayoutPtr layout(view.m_pointTable.layout());
     Dimension::IdList const& dims = layout->dims();
@@ -72,10 +73,12 @@ void BufferedInvocation::begin(PointView& view)
         std::string name = layout->dimName(*di);
         insertArgument(name, (uint8_t *)data, dd->type(), view.size());
     }
+    Py_XDECREF(m_metaIn);
+    m_metaIn = plang::fromMetadata(m);
 }
 
 
-void BufferedInvocation::end(PointView& view)
+void BufferedInvocation::end(PointView& view, MetadataNode m)
 {
     // for each entry in the script's outs dictionary,
     // look up that entry's name in the schema and then
@@ -111,6 +114,7 @@ void BufferedInvocation::end(PointView& view)
     for (auto bi = m_buffers.begin(); bi != m_buffers.end(); ++bi)
         free(*bi);
     m_buffers.clear();
+    addMetadata(m_metaOut, m);
 }
 
 } //namespace plang

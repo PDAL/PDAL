@@ -82,8 +82,10 @@ void PredicateFilter::ready(PointTableRef table)
 
 PointViewSet PredicateFilter::run(PointViewPtr view)
 {
+    MetadataNode n;
+
     m_pythonMethod->resetArguments();
-    m_pythonMethod->begin(*view);
+    m_pythonMethod->begin(*view, n);
     m_pythonMethod->execute();
 
     if (!m_pythonMethod->hasOutputVariable("Mask"))

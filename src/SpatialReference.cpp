@@ -119,7 +119,7 @@ void SpatialReference::setFromUserInput(std::string const& v)
         std::ostringstream oss;
         oss << "Could not import coordinate system '" << input << "'";
         oss << " message '" << CPLGetLastErrorMsg() << "'";
-        throw std::invalid_argument(oss.str());
+        throw pdal_error(oss.str());
     }
 
     srs.exportToWkt(&poWKT);

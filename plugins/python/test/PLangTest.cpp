@@ -94,38 +94,6 @@ TEST(PLangTest, PLangTest_runtime_error)
 }
 
 
-TEST(PLangTest, PLangTest_toofewinputs)
-{
-    const char* source =
-        "import numpy as np\n"
-        "def yow(ins):\n"
-        "  #print 'foo'\n"
-        "  return True\n"
-        ;
-    Script script(source, "MyTest", "yow");
-    Invocation meth(script);
-    meth.compile();
-
-    ASSERT_THROW(meth.execute(), error);
-}
-
-
-TEST(PLangTest, PLangTest_toomanyinputs)
-{
-    const char* source =
-        "import numpy as np\n"
-        "def yow(ins,outs,mids):\n"
-        "  #print 'foo'\n"
-        "  return True\n"
-        ;
-    Script script(source, "MyTest", "yow");
-    Invocation meth(script);
-    meth.compile();
-
-    ASSERT_THROW(meth.execute(), error);
-}
-
-
 TEST(PLangTest, PLangTest_returnvoid)
 {
     const char* source =

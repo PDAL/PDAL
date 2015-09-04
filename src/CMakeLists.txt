@@ -107,7 +107,6 @@ set(PDAL_BASE_CPP
 list (APPEND PDAL_CPP ${PDAL_BASE_CPP} )
 list (APPEND PDAL_HPP ${PDAL_BASE_HPP} )
 
-
 #
 # config
 #

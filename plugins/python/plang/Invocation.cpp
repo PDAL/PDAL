@@ -50,13 +50,34 @@
 #define PY_ARRAY_UNIQUE_SYMBOL PDAL_ARRAY_API
 #include <numpy/arrayobject.h>
 
+namespace
+{
+
+int argCount(PyObject *function)
+{
+    PyObject *module = PyImport_ImportModule("inspect");
+    if (!module)
+        return false;
+    PyObject *dictionary = PyModule_GetDict(module);
+    PyObject *getargFunc = PyDict_GetItemString(dictionary, "getargspec");
+    PyObject *inArgs = PyTuple_New(1);
+    PyTuple_SetItem(inArgs, 0, function);
+    PyObject *outArgs = PyObject_CallObject(getargFunc, inArgs);
+    PyObject *arglist = PyTuple_GetItem(outArgs, 0);
+    return PyList_Size(arglist);
+}
+
+}
+
 namespace pdal
 {
 namespace plang
 {
 
-Invocation::Invocation(const Script& script)
-    : m_script(script)
+Invocation::Invocation(const Script& script) :
+    m_metaIn(NULL)
+    , m_metaOut(NULL)
+    , m_script(script)
     , m_bytecode(NULL)
     , m_module(NULL)
     , m_dictionary(NULL)
@@ -114,6 +135,8 @@ void Invocation::cleanup()
         Py_XDECREF(m_pyInputArrays[i]);
     m_pyInputArrays.clear();
     Py_XDECREF(m_bytecode);
+    Py_XDECREF(m_metaIn);
+    Py_XDECREF(m_metaOut);
 }
 
 
@@ -122,6 +145,8 @@ void Invocation::resetArguments()
     cleanup();
     m_varsIn = PyDict_New();
     m_varsOut = PyDict_New();
+    m_metaIn = PyList_New(0);
+    m_metaOut = PyList_New(0);
 }
 
 
@@ -269,9 +294,15 @@ bool Invocation::execute()
 
     Py_INCREF(m_varsIn);
     Py_INCREF(m_varsOut);
-    m_scriptArgs = PyTuple_New(2);
+    Py_ssize_t numArgs = argCount(m_function);
+    m_scriptArgs = PyTuple_New(numArgs);
     PyTuple_SetItem(m_scriptArgs, 0, m_varsIn);
-    PyTuple_SetItem(m_scriptArgs, 1, m_varsOut);
+    if (numArgs > 1)
+        PyTuple_SetItem(m_scriptArgs, 1, m_varsOut);
+    if (numArgs > 2)
+        PyTuple_SetItem(m_scriptArgs, 2, m_metaIn);
+    if (numArgs > 3)
+        PyTuple_SetItem(m_scriptArgs, 3, m_metaOut);
 
     m_scriptResult = PyObject_CallObject(m_function, m_scriptArgs);
     if (!m_scriptResult)
