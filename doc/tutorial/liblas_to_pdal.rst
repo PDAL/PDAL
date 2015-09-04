@@ -4,7 +4,9 @@ libLAS C API to PDAL
 ====================
 
 This page shows how to port code using libLAS C API to PDAL API
-(which is C++).
+(which is C++). The new code is not using full power of PDAL but
+it uses just what is necessary to read content of a LAS file.
+
 
 Includes
 --------
@@ -23,7 +25,6 @@ which will be useful later:
     #include <memory>
     #include <pdal/PointTable.hpp>
     #include <pdal/PointView.hpp>
-    #include <pdal/StageFactory.hpp>
     #include <pdal/LasReader.hpp>
     #include <pdal/LasHeader.hpp>
     #include <pdal/Options.hpp>
@@ -50,26 +51,39 @@ for the initial steps:
     pdal::Options las_opts;
     las_opts.add(las_opt);
     pdal::PointTable table;
-    std::unique_ptr<pdal::LasReader> las_reader(new pdal::LasReader())
-    las_reader->setOptions(las_opts);
-    las_reader->prepare(table);
-    pdal::PointViewSet point_view_set = las_reader->execute(table);
+    pdal::LasReader las_reader;
+    las_reader.setOptions(las_opts);
+    las_reader.prepare(table);
+    pdal::PointViewSet point_view_set = las_reader.execute(table);
     pdal::PointViewPtr point_view = *point_view_set.begin();
     pdal::Dimension::IdList dims = point_view->dims();
-    pdal::LasHeader las_header = las_reader->header();
+    pdal::LasHeader las_header = las_reader.header();
 
 The PDAL code is also different in the way that we read all the data
 right away while in libLAS we just open the file.
+To make use of other readers supported by PDAL, see ``StageFactory`` class.
 
-TODO: How to test if loaded successfully? Was ``LAS_header == NULL``
-
-TODO: When the following can be used?
+The test if the file was loaded successfully, the test of the header
+pointer was used with libLAS:
 
 .. code-block:: cpp
 
-    pdal::StageFactory f;
-    std::unique_ptr<pdal::Stage> las_reader(f.createStage("readers.las")
+if (LAS_header == NULL) {
+    /* fail */
+}
 
+In general, PDAL will throw a ``pdal_error`` exception in case something
+is wrong and it can't recover such in the case when the file can't be opened.
+To handle the exceptional state by yourself, you can wrap the code
+in ``try-catch`` block:
+
+.. code-block:: cpp
+
+try {
+    /* actual code */
+} catch {
+    /* fail in your own way */
+}
 
 
 Dataset properties
