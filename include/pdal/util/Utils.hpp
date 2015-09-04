@@ -189,23 +189,6 @@ namespace Utils
         return i;
     }
 
-    template<typename Target, typename Source>
-    Target saturation_cast(Source const& src)
-    {
-        try
-        {
-            return boost::numeric_cast<Target>(src);
-        }
-        catch (boost::numeric::negative_overflow const&)
-        {
-            return std::numeric_limits<Target>::min();
-        }
-        catch (boost::numeric::positive_overflow const&)
-        {
-            return std::numeric_limits<Target>::max();
-        }
-    }
-
     PDAL_DLL void *registerPlugin(void *stageFactoryPtr,
         std::string const& filename, std::string const& registerMethodName,
         std::string const& versionMethodName);

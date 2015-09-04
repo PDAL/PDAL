@@ -181,8 +181,8 @@ QuickInfo MrsidReader::inspect()
     Dimension::IdList dims = layout->dims();
     for (auto di = dims.begin(); di != dims.end(); ++di)
         qi.m_dimNames.push_back(layout->dimName(*di));
-    qi.m_pointCount =
-        Utils::saturation_cast<point_count_t>(m_PS->getNumPoints());
+    if (!Utils::numericCast(m_PS->getNumPoints(), qi.m_pointCount))
+        qi.m_pointCount = std::numericLimits<point_count_t>::max();
     qi.m_bounds = b;
     qi.m_srs = pdal::SpatialReference(m_PS->getWKT());
     qi.m_valid = true;
