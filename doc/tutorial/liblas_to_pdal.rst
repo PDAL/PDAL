@@ -1,7 +1,7 @@
-.. _writing-writer:
+.. _liblas-to-pdal:
 
-libLAS C API to PDAL
-====================
+libLAS C API to PDAL transition guide
+=====================================
 
 This page shows how to port code using libLAS C API to PDAL API
 (which is C++). The new code is not using full power of PDAL but
