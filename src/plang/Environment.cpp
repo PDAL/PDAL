@@ -275,7 +275,7 @@ void addMetadata(PyObject *list, MetadataNode m)
         std::string description = readPythonString(tuple, 3);
 
         PyObject *submeta = PyTuple_GetItem(tuple, 4);
-        MetadataNode child =  m.add(name, value, type, description);
+        MetadataNode child =  m.addWithType(name, value, type, description);
         if (submeta)
             addMetadata(submeta, child);
     }
