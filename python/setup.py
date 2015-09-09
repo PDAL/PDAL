@@ -5,7 +5,7 @@
 #
 # PDAL_LIBRARY_PATH: a path to a PDAL C++ shared library.
 #
-# GEOS_CONFIG: the path to a geos-config program that points to GEOS version,
+# GEOS_CONFIG: the path to a pdal-config program that points to GEOS version,
 # headers, and libraries.
 #
 # NB: within this setup scripts, software versions are evaluated according
@@ -36,6 +36,41 @@ log = logging.getLogger(__file__)
 # python -W all setup.py ...
 if 'all' in sys.warnoptions:
     log.level = logging.DEBUG
+
+
+# Second try: use PDAL_CONFIG environment variable
+if 'PDAL_CONFIG' in os.environ:
+    pdal_config = os.environ['GEOS_CONFIG']
+    log.debug('pdal_config: %s', pdal_config)
+else:
+    pdal_config = 'pdal-config'
+
+
+def get_pdal_config(option):
+    '''Get configuration option from the `pdal-config` development utility
+
+    This code was adapted from Shaply's pdal-config stuff
+    '''
+    import subprocess
+    pdal_config = globals().get('pdal_config')
+    if not pdal_config or not isinstance(pdal_config, str):
+        raise OSError('Path to pdal-config is not set')
+    try:
+        stdout, stderr = subprocess.Popen(
+            [pdal_config, option],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+    except OSError as ex:
+        # e.g., [Errno 2] No such file or directory
+        raise OSError(
+            'Could not find pdal-config %r: %s' % (pdal_config, ex))
+    if stderr and not stdout:
+        raise ValueError(stderr.strip())
+    if sys.version_info[0] >= 3:
+        result = stdout.decode('ascii').strip()
+    else:
+        result = stdout.strip()
+    log.debug('%s %s: %r', pdal_config, option, result)
+    return result
 
 # Get the version from the pdal module
 module_version = None
@@ -75,13 +110,24 @@ from setuptools.extension import Extension as DistutilsExtension
 
 # FIXME: get this stuff from PDAL's pkg-config
 
+if pdal_config:
+    # Collect other options from PDAL
+    for item in get_pdal_config('--includes').split():
+        if item.startswith("-I"):
+            include_dirs.extend(item[2:].split(":"))
+    for item in get_pdal_config('--libs').split():
+        if item.startswith("-L"):
+            library_dirs.extend(item[2:].split(":"))
+        elif item.startswith("-l"):
+            libraries.append(item[2:])
+
 include_dirs.append(numpy.get_include())
-include_dirs.append('../include')
-include_dirs.append('../plugins/python/plang/')
-include_dirs.append('/usr/include/libxml2/')
-library_dirs.append('../lib')
-libraries.append('pdalcpp')
-libraries.append('pdal_plang')
+# include_dirs.append('../include')
+# include_dirs.append('../plugins/python/plang/')
+# include_dirs.append('/usr/include/libxml2/')
+# library_dirs.append('../lib')
+# libraries.append('pdalcpp')
+# libraries.append('pdal_plang')
 
 sources=['pdal/libpdalpython'+ext,"pdal/Pipeline.cpp",  ]
 
@@ -102,7 +148,7 @@ setup_args = dict(
     requires            = ['Python (>=2.7)', ],
     description         = 'Point cloud data processing',
     license             = 'BSD',
-    keywords            = 'point cloud geospatial',
+    keywords            = 'point cloud pdalpatial',
     author              = 'Howard Butler',
     author_email        = 'howard@hobu.co',
     maintainer          = 'Howard Butler',

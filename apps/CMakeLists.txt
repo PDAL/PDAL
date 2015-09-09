@@ -69,24 +69,39 @@ endif(APPLE AND PDAL_BUNDLE)
 
 if(UNIX OR APPLE)
 
-    get_directory_property(PDAL_DEFINITIONS DIRECTORY ${PDAL_SOURCE_DIR}/../src COMPILE_DEFINITIONS)
+    set(PKGCONFIG_LIBRARY_DEFINITIONS "")
+    set(PDAL_INCLUDE_DEFINITIONS "-I${CMAKE_INSTALL_PREFIX}/include -I${Boost_INCLUDE_DIR} -I${GDAL_INCLUDE_DIR}")
+    set(PKGCONFIG_LIBRARY_DEFINITIONS "${PKGCONFIG_LIBRARY_DEFINITIONS} gdal")
 
-    set(PDAL_CONFIG_DEFINITIONS "")
-    foreach(definition ${PDAL_DEFINITIONS})
-        set(PDAL_CONFIG_DEFINITIONS "${PDAL_CONFIG_DEFINITIONS} -D${definition}")
-    endforeach()
+    if(LIBXML2_FOUND)
+        set(PKGCONFIG_LIBRARY_DEFINITIONS "${PKGCONFIG_LIBRARY_DEFINITIONS} libxml-2.0")
+        set(PDAL_INCLUDE_DEFINITIONS "${PDAL_INCLUDE_DEFINITIONS} -I${LIBXML2_INCLUDE_DIR}")
+    endif()
+
+    if (GEOS_FOUND)
+        set(PKGCONFIG_LIBRARY_DEFINITIONS "${PKGCONFIG_LIBRARY_DEFINITIONS} geos")
+        set(PDAL_INCLUDE_DEFINITIONS "${PDAL_INCLUDE_DEFINITIONS} -I${GEOS_INCLUDE_DIR}")
+    endif()
+
+    if (LASZIP_FOUND)
+        set(PDAL_INCLUDE_DEFINITIONS "${PDAL_INCLUDE_DEFINITIONS} -I${LASZIP_INCLUDE_DIR}")
+    endif()
+
+    file(MAKE_DIRECTORY "${PDAL_OUTPUT_LIB_DIR}/pkgconfig/")
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/pdal.pc.in
+                   ${CMAKE_CURRENT_BINARY_DIR}/pdal.pc @ONLY)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/pdal.pc
+        DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig/"
+        PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
+
+
 
     # Autoconf compatibility variables to use the same script source.
-    set(prefix ${CMAKE_INSTALL_PREFIX})
-    set(exec_prefix ${CMAKE_INSTALL_PREFIX}/bin)
-    set(libdir ${CMAKE_INSTALL_PREFIX}/lib)
+    configure_file("${CMAKE_CURRENT_SOURCE_DIR}/pdal-config.in"
+                   "${CMAKE_CURRENT_BINARY_DIR}/pdal-config" @ONLY)
 
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/pdal-config.in
-      ${CMAKE_CURRENT_BINARY_DIR}/pdal-config @ONLY)
-
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/pdal-config
-      DESTINATION "${CMAKE_INSTALL_PREFIX}/${PDAL_BIN_INSTALL_DIR}"
+    install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/pdal-config"
+      DESTINATION "${CMAKE_INSTALL_PREFIX}/bin"
       PERMISSIONS
       OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-
 endif()
