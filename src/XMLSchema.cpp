@@ -205,6 +205,8 @@ std::string XMLSchema::xml() const
         (const xmlChar*)"xsi", NULL,
         (const xmlChar*)"http://www.w3.org/2001/XMLSchema-instance");
 
+    xmlTextWriterWriteAttribute(w, (const xmlChar*)"version",
+                                   (const xmlChar*)PDAL_XML_SCHEMA_VERSION);
     writeXml(w);
 
     xmlTextWriterEndElement(w);
@@ -259,7 +261,7 @@ bool XMLSchema::validate(xmlDocPtr doc, const std::string& xsd)
     xmlDocPtr schemaDoc = xmlReadMemory(xsd.c_str(), xsd.size(),
         NULL, NULL, parserOption);
     xmlSchemaParserCtxtPtr parserCtxt = xmlSchemaNewDocParserCtxt(schemaDoc);
-    xmlSchemaSetParserStructuredErrors(parserCtxt, 
+    xmlSchemaSetParserStructuredErrors(parserCtxt,
         &OCISchemaParserStructuredErrorHandler, m_global_context);
     xmlSchemaPtr schema = xmlSchemaParse(parserCtxt);
     xmlSchemaValidCtxtPtr validCtxt = xmlSchemaNewValidCtxt(schema);
@@ -561,7 +563,7 @@ void XMLSchema::writeXml(xmlTextWriterPtr w) const
         {
             std::ostringstream out;
             out.precision(15);
-           
+
             out << xform.m_scale;
             std::string scale = out.str();
 
