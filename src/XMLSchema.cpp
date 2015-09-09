@@ -205,8 +205,6 @@ std::string XMLSchema::xml() const
         (const xmlChar*)"xsi", NULL,
         (const xmlChar*)"http://www.w3.org/2001/XMLSchema-instance");
 
-    xmlTextWriterWriteAttribute(w, (const xmlChar*)"version",
-                                   (const xmlChar*)PDAL_XML_SCHEMA_VERSION);
     writeXml(w);
 
     xmlTextWriterEndElement(w);
@@ -621,6 +619,9 @@ void XMLSchema::writeXml(xmlTextWriterPtr w) const
     xmlTextWriterWriteElementNS(w, (const xmlChar*) "pc",
         (const xmlChar*)"orientation", NULL,
         (const xmlChar*)orientation.str().c_str());
+
+    xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc", (const xmlChar*)"version", NULL,
+                                (const xmlChar*)PDAL_XML_SCHEMA_VERSION);
 
 
     xmlTextWriterEndElement(w);
