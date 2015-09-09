@@ -64,3 +64,10 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DPGPOINTCLOUD_TEST_DB_HOST="localhost"
 
 
+#         -DPYTHON_EXECUTABLE=/usr/local/bin/python \
+#         -DPYTHON_LIBRARY=/usr/local/Cellar/python/2.7.10_2/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib \
+#         -DPYTHON_INCLUDE_DIR=/usr/local/Cellar/python/2.7.10_2/Frameworks/Python.framework/Versions/2.7/include/python2.7/ \
+
+#         -DPYTHON_EXECUTABLE=/usr/local/bin/python3 \
+#         -DPYTHON_LIBRARY=/usr/local/Cellar/python3/3.4.2_1/Frameworks/Python.framework/Versions/3.4/lib/libpython3.4.dylib \
+#         -DPYTHON_INCLUDE_DIR=/usr/local/Cellar/python3/3.4.2_1/Frameworks/Python.framework/Versions/3.4/include/python3.4m/ \

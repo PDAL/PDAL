@@ -73,10 +73,10 @@ Options PredicateFilter::getDefaultOptions()
 
 void PredicateFilter::ready(PointTableRef table)
 {
+    plang::Environment::get()->set_stdout(log()->getLogStream());
     m_script = new plang::Script(m_source, m_module, m_function);
     m_pythonMethod = new plang::BufferedInvocation(*m_script);
     m_pythonMethod->compile();
-    plang::Environment::get()->set_stdout(log()->getLogStream());
 }
 
 
@@ -89,7 +89,7 @@ PointViewSet PredicateFilter::run(PointViewPtr view)
     m_pythonMethod->execute();
 
     if (!m_pythonMethod->hasOutputVariable("Mask"))
-        throw plang::error("Mask variable not set in predicate "
+        throw pdal::pdal_error("Mask variable not set in predicate "
             "filter function.");
 
     PointViewPtr outview = view->makeNew();

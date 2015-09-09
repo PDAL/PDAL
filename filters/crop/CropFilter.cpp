@@ -103,10 +103,20 @@ void CropFilter::processOptions(const Options& options)
     }
     catch (boost::bad_lexical_cast)
     {
-        std::ostringstream oss;
-        oss << "Invalid bounds for " << getName() << ".  "
-            "Format: '([xmin,xmax],[ymin,ymax])'.";
-        throw pdal_error(oss.str());
+        try
+        {
+            std::vector<BOX3D>  b3d = options.getValues<BOX3D>("bounds");
+            for (auto& i: b3d)
+                m_bounds.push_back(i.to2d());
+//             m_bounds = b3d.to2d();
+        }
+        catch (boost::bad_lexical_cast)
+        {
+            std::ostringstream oss;
+            oss << "Invalid bounds for " << getName() << ".  "
+                "Format: '([xmin,xmax],[ymin,ymax])'.";
+            throw pdal_error(oss.str());
+        }
     }
 
     m_polys = options.getValues<std::string>("polygon");

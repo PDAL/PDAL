@@ -90,10 +90,10 @@ void ProgrammableFilter::addDimensions(PointLayoutPtr layout)
 
 void ProgrammableFilter::ready(PointTableRef table)
 {
+    plang::Environment::get()->set_stdout(log()->getLogStream());
     m_script = new plang::Script(m_source, m_module, m_function);
     m_pythonMethod = new plang::BufferedInvocation(*m_script);
     m_pythonMethod->compile();
-    plang::Environment::get()->set_stdout(log()->getLogStream());
     m_totalMetadata = table.metadata();
 }
 

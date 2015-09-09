@@ -35,11 +35,15 @@
 #pragma once
 
 #include <pdal/pdal_internal.hpp>
+#include <pdal/PointView.hpp>
 
-#include "Script.hpp"
-#include "Environment.hpp"
 
-#include <pdal/Dimension.hpp>
+// forward declare PyObject so we don't need the python headers everywhere
+// see: http://mail.python.org/pipermail/python-dev/2003-August/037601.html
+#ifndef PyObject_HEAD
+struct _object;
+typedef _object PyObject;
+#endif
 
 namespace pdal
 {
@@ -47,63 +51,25 @@ namespace plang
 {
 
 
-class PDAL_DLL Invocation
+class PDAL_DLL Array
 {
 public:
-    Invocation(const Script&);
-    ~Invocation();
+    Array();
+    ~Array();
 
-    void compile();
+    void update(PointViewPtr view);
 
-    void resetArguments();
+    inline PyObject* getPythonArray() const { return m_py_array; }
 
-
-    // creates a Python variable pointing to a (one dimensional) C array
-    // adds the new variable to the arguments dictionary
-    void insertArgument(std::string const& name,
-                        uint8_t* data,
-                        Dimension::Type::Enum t,
-                        point_count_t count);
-    void *extractResult(const std::string& name,
-                        Dimension::Type::Enum dataType);
-
-    bool hasOutputVariable(const std::string& name) const;
-
-    // returns true iff the called python function returns true,
-    // as would be used for a predicate function
-    // (that is, the return value is NOT an error indicator)
-    bool execute();
-
-    // after a call to execute, this function will return you a list of
-    // the names in the 'outs' dictionary (this is used by the
-    // BufferedInvocation class to find the returned data -- faster to
-    // examine what's already in there than it is to iterate over all the
-    // possible names from the schema)
-    void getOutputNames(std::vector<std::string>& names);
-
-    static int getPythonDataType(Dimension::Type::Enum t);
-
-protected:
-    PyObject* m_metaIn;
-    PyObject* m_metaOut;
 
 private:
     void cleanup();
+    PyObject* buildNumpyDescription(PointViewPtr view) const;
 
-    Script m_script;
+    PyObject* m_py_array;
+    std::unique_ptr<std::vector<uint8_t> > m_data_array;
 
-    PyObject* m_bytecode;
-    PyObject* m_module;
-    PyObject* m_dictionary;
-    PyObject* m_function;
-
-    PyObject* m_varsIn;
-    PyObject* m_varsOut;
-    PyObject* m_scriptArgs;
-    PyObject* m_scriptResult;
-    std::vector<PyObject*> m_pyInputArrays;
-
-    Invocation& operator=(Invocation const& rhs); // nope
+    Array& operator=(Array const& rhs);
 };
 
 } // namespace plang

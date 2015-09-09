@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2012, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Consulting LLC nor the
+*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -36,41 +36,72 @@
 
 #include <pdal/pdal_internal.hpp>
 
-#include <pdal/pdal_internal.hpp>
+#include "Script.hpp"
+#include "Environment.hpp"
 
-#include "Redirector.hpp"
+#include <pdal/Dimension.hpp>
 
 namespace pdal
 {
 namespace plang
 {
 
-class error : public pdal_error
+
+class PDAL_DLL Invocation
 {
 public:
-    error(const std::string& msg) : pdal_error(msg)
-        {}
-};
+    Invocation(const Script&);
+    ~Invocation();
 
-std::string getTraceback();
+    void compile();
 
-class Environment;
-typedef Environment *EnvironmentPtr;
+    void resetArguments();
 
-class PDAL_DLL Environment
-{
-public:
-    Environment();
-    ~Environment();
 
-    // these just forward into the Redirector class
-    void set_stdout(std::ostream* ostr);
-    void reset_stdout();
+    // creates a Python variable pointing to a (one dimensional) C array
+    // adds the new variable to the arguments dictionary
+    void insertArgument(std::string const& name,
+                        uint8_t* data,
+                        Dimension::Type::Enum t,
+                        point_count_t count);
+    void *extractResult(const std::string& name,
+                        Dimension::Type::Enum dataType);
 
-    static EnvironmentPtr get();
+    bool hasOutputVariable(const std::string& name) const;
+
+    // returns true iff the called python function returns true,
+    // as would be used for a predicate function
+    // (that is, the return value is NOT an error indicator)
+    bool execute();
+
+    // after a call to execute, this function will return you a list of
+    // the names in the 'outs' dictionary (this is used by the
+    // BufferedInvocation class to find the returned data -- faster to
+    // examine what's already in there than it is to iterate over all the
+    // possible names from the schema)
+    void getOutputNames(std::vector<std::string>& names);
+
+protected:
+    PyObject* m_metaIn;
+    PyObject* m_metaOut;
 
 private:
-    Redirector m_redirector;
+    void cleanup();
+
+    Script m_script;
+
+    PyObject* m_bytecode;
+    PyObject* m_module;
+    PyObject* m_dictionary;
+    PyObject* m_function;
+
+    PyObject* m_varsIn;
+    PyObject* m_varsOut;
+    PyObject* m_scriptArgs;
+    PyObject* m_scriptResult;
+    std::vector<PyObject*> m_pyInputArrays;
+
+    Invocation& operator=(Invocation const& rhs); // nope
 };
 
 } // namespace plang

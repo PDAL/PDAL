@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2012, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*     * Neither the name of Hobu, Inc. or Flaxen Consulting LLC nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -32,34 +32,54 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "Script.hpp"
+#pragma once
 
-#ifdef PDAL_COMPILER_MSVC
-#  pragma warning(disable: 4127) // conditional expression is constant
+
+
+// forward declare PyObject so we don't need the python headers everywhere
+// see: http://mail.python.org/pipermail/python-dev/2003-August/037601.html
+#ifndef PyObject_HEAD
+struct _object;
+typedef _object PyObject;
 #endif
+
+
+#include <pdal/pdal_internal.hpp>
+#include <pdal/Metadata.hpp>
+#include <pdal/Dimension.hpp>
+
+#include "Redirector.hpp"
 
 namespace pdal
 {
 namespace plang
 {
 
-Script::Script(const std::string& source, const std::string& module,
-    const std::string& function) : m_source(source) , m_module(module),
-    m_function(function)
+PyObject *fromMetadata(MetadataNode m);
+void addMetadata(PyObject *list, MetadataNode m);
+
+std::string getTraceback();
+
+class Environment;
+typedef Environment *EnvironmentPtr;
+
+class PDAL_DLL Environment
 {
-}
+public:
+    Environment();
+    ~Environment();
 
+    // these just forward into the Redirector class
+    void set_stdout(std::ostream* ostr);
+    void reset_stdout();
 
-std::ostream& operator << (std::ostream& os, Script const& script)
-{
-    os << "source=[" << strlen(script.source()) << " bytes], ";
-    os << "module=" << script.module() << ", ";
-    os << "function=" << script.function();
-    os << std::endl;
+    static EnvironmentPtr get();
+    static int getPythonDataType(Dimension::Type::Enum t);
 
-    return os;
-}
+private:
+    Redirector m_redirector;
+};
 
-} //namespace plang
-} //namespace pdal
+} // namespace plang
+} // namespace pdal
 
