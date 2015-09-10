@@ -183,6 +183,8 @@ int TranslateKernel::execute()
         if (driver.empty())
             throw app_runtime_error("Cannot determine output file type of " +
                                     m_outputFile);
+        Options options = factory.inferWriterOptionsChanges(m_outputFile);
+        writerOptions += options;
         m_manager->addWriter(driver);
     }
 
