@@ -204,13 +204,16 @@ TEST(XMLSchemaTest, utf8)
 
     XMLDimList dims = s1.xmlDims();
     EXPECT_EQ(dims.size(), 1U);
-    XMLDim& dim = *dims.begin();
-    EXPECT_EQ(descripValue, dim.m_description);
-    MetadataNodeList mlist = s1.getMetadata().children();
-    EXPECT_EQ(mlist.size(), 1U);
-    MetadataNode& m = *mlist.begin();
-    EXPECT_EQ(m.name(), metaName);
-    EXPECT_EQ(m.value(), metaValue);
+    if (dims.size())
+    {
+        XMLDim& dim = *dims.begin();
+        EXPECT_EQ(descripValue, dim.m_description);
+        MetadataNodeList mlist = s1.getMetadata().children();
+        EXPECT_EQ(mlist.size(), 1U);
+        MetadataNode& m = *mlist.begin();
+        EXPECT_EQ(m.name(), metaName);
+        EXPECT_EQ(m.value(), metaValue);
+    }
 }
 
 TEST(XMLSchemaTest, precision)

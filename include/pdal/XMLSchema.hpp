@@ -36,6 +36,8 @@
 
 #include <pdal/pdal_internal.hpp>
 
+#define PDAL_XML_SCHEMA_VERSION "1.3"
+
 #ifndef PDAL_HAVE_LIBXML2
 #error "Including XMLSchema.hpp without libxml2 - build problem."
 #endif
