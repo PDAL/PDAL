@@ -108,8 +108,6 @@ extra_link_args = []
 
 from setuptools.extension import Extension as DistutilsExtension
 
-# FIXME: get this stuff from PDAL's pkg-config
-
 if pdal_config:
     # Collect other options from PDAL
     for item in get_pdal_config('--includes').split():
@@ -122,20 +120,19 @@ if pdal_config:
             libraries.append(item[2:])
 
 include_dirs.append(numpy.get_include())
-# include_dirs.append('../include')
-# include_dirs.append('../plugins/python/plang/')
-# include_dirs.append('/usr/include/libxml2/')
-# library_dirs.append('../lib')
-# libraries.append('pdalcpp')
-# libraries.append('pdal_plang')
+extra_compile_args = ['-std=c++11',]
+libraries.append('pdal_plang')
+
+DEBUG=False
+if DEBUG:
+    extra_compile_args += ['-g','-O0']
 
 sources=['pdal/libpdalpython'+ext,"pdal/Pipeline.cpp",  ]
-
 extensions = [DistutilsExtension("*",
                                    sources,
                                    include_dirs=include_dirs,
                                    library_dirs=library_dirs,
-                                   extra_compile_args=['-std=c++11','-g','-O0'],
+                                   extra_compile_args=extra_compile_args,
                                    libraries=libraries,
                                    extra_link_args=extra_link_args,)]
 if USE_CYTHON:
@@ -148,7 +145,7 @@ setup_args = dict(
     requires            = ['Python (>=2.7)', ],
     description         = 'Point cloud data processing',
     license             = 'BSD',
-    keywords            = 'point cloud pdalpatial',
+    keywords            = 'point cloud spatial',
     author              = 'Howard Butler',
     author_email        = 'howard@hobu.co',
     maintainer          = 'Howard Butler',
