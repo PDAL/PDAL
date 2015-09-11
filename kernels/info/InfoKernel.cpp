@@ -299,8 +299,7 @@ void InfoKernel::setup(const std::string& filename)
     if (!m_needPoints)
         readerOptions.add("count", 0);
 
-    m_manager = std::unique_ptr<PipelineManager>(
-        KernelSupport::makePipeline(filename));
+    m_manager = KernelSupport::makePipeline(filename);
     m_reader = m_manager->getStage();
     Stage *stage = m_reader;
 
