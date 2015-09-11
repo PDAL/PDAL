@@ -163,7 +163,7 @@ void LasReader::ready(PointTableRef table, MetadataNode& m)
 
     if (m_lasHeader.compressed())
     {
-#ifdef PDAL_HAVE_LASZIP
+#if defined(PDAL_HAVE_LASZIP)
         VariableLengthRecord *vlr = findVlr(LASZIP_USER_ID, LASZIP_RECORD_ID);
         m_zipPoint.reset(new ZipPoint(vlr));
 
@@ -185,6 +185,14 @@ void LasReader::ready(PointTableRef table, MetadataNode& m)
                 throw pdal_error(oss.str());
             }
         }
+
+// For now we prefer LASZIP to LAZPERF because it supports more formats.
+// LAZPERF only supports version 2 of LAZ items, which means no version 1.1
+// or 1.4.  Not sure about 1.3.
+#elif defined(PDAL_HAVE_LAZPERF)
+        VariableLengthRecord *vlr = findVlr(LASZIP_USER_ID, LASZIP_RECORD_ID);
+        m_decompressor.reset(new LazPerfVlrDecompressor(*m_istream, vlr->data(),
+            m_lasHeader.pointOffset()));
 #else
         throw pdal_error("LASzip is not enabled.  Can't read LAZ data.");
 #endif
@@ -565,9 +573,9 @@ point_count_t LasReader::read(PointViewPtr view, point_count_t count)
     count = std::min(count, getNumPoints() - m_index);
 
     PointId i = 0;
-    if (m_zipPoint)
+    if (m_lasHeader.compressed())
     {
-#ifdef PDAL_HAVE_LASZIP
+#if defined(PDAL_HAVE_LASZIP)
         for (i = 0; i < count; i++)
         {
             if (!m_unzipper->read(m_zipPoint->m_lz_point))
@@ -581,6 +589,15 @@ point_count_t LasReader::read(PointViewPtr view, point_count_t count)
             }
             loadPoint(*view.get(), (char *)m_zipPoint->m_lz_point_data.data(),
                 pointByteCount);
+        }
+#elfif defined(PDAL_HAVE_LAZPERF)
+        assert(pointByteCount == m_decompressor->pointSize());
+
+        std::vector<char> ptBuf(m_decompressor->pointSize());
+        for (i = 0; i < count; i++)
+        {
+            m_decompressor->decompress(ptBuf.data());
+            loadPoint(*view.get(), ptBuf.data(), pointByteCount);
         }
 #else
         throw pdal_error("LASzip is not enabled for this "

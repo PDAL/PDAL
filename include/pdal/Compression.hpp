@@ -44,6 +44,7 @@
 #include <laz-perf/encoder.hpp>
 #include <laz-perf/decoder.hpp>
 #include <laz-perf/formats.hpp>
+#include <laz-perf/io.hpp>
 #include <laz-perf/las.hpp>
 #endif
 
@@ -237,6 +238,57 @@ private:
     Decompressor m_decompressor;
     size_t m_pointSize;
 };
+
+class LazPerfVlrDecompressor
+{
+public:
+    LazPerfVlrDecompressor(std::istream& stream, const char *vlrData,
+        std::streamoff pointOffset) :
+        m_stream(stream), m_inputStream(stream), m_chunksize(0),
+        m_chunkPointsRead(0)
+    {
+        laszip::io::laz_vlr zipvlr(vlrData);
+        m_chunksize = zipvlr.chunk_size;
+        m_schema = laszip::io::laz_vlr::to_schema(zipvlr);
+        m_stream.seekg(pointOffset + sizeof(int64_t));
+    }
+
+    size_t pointSize() const
+        { return (size_t)m_schema.size_in_bytes(); }
+
+    void decompress(char *outbuf)
+    {
+        if (m_chunkPointsRead == m_chunksize || !m_decoder || !m_decompressor)
+        {
+            resetDecompressor();
+            m_chunkPointsRead = 0;
+        }
+        m_decompressor->decompress(outbuf);
+        m_chunkPointsRead++;
+    }
+
+private:
+    void resetDecompressor()
+    {
+        m_decoder.reset(new Decoder(m_inputStream));
+        m_decompressor =
+            laszip::factory::build_decompressor(*m_decoder, m_schema);
+    }
+
+    typedef laszip::io::__ifstream_wrapper<std::istream> InputStream;
+    typedef laszip::decoders::arithmetic<InputStream> Decoder;
+    typedef laszip::formats::dynamic_decompressor Decompressor;
+    typedef laszip::factory::record_schema Schema;
+
+    std::istream& m_stream;
+    InputStream m_inputStream;
+    std::unique_ptr<Decoder> m_decoder;
+    Decompressor::ptr m_decompressor;
+    Schema m_schema;
+    uint32_t m_chunksize;
+    uint32_t m_chunkPointsRead;
+};
+
 #endif  // PDAL_HAVE_LAZPERF
 
 } // namespace pdal
