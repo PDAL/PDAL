@@ -48,7 +48,7 @@ set(PDAL_BUILD_VERSION "1.0.0")
 # On OSX we reexport the symbols from libpdal_util.dylib into libpdalcpp.dylib
 # See src/CMakeLists.txt for the rest of the magic.
 #
-if (APPLE OR WINDOWS)
+if (APPLE OR WIN32)
     set(PDAL_LIB_NAME pdalcpp)
     set(PDAL_BASE_LIB_NAME pdalcpp)
     set(PDAL_UTIL_LIB_NAME pdal_util)
@@ -348,7 +348,6 @@ list(APPEND CPACK_SOURCE_IGNORE_FILES "/test/data/local/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/doc/doxygen/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/doc/build/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/doc/presentations/")
-list(APPEND CPACK_SOURCE_IGNORE_FILES "/scripts/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/cmake/examples/")
 
 include(CPack)
