@@ -110,6 +110,7 @@ private:
     std::istream* m_istream;
     VlrList m_vlrs;
     std::vector<ExtraDim> m_extraDims;
+    std::string m_compression;
 
     virtual void processOptions(const Options& options);
     virtual void initialize();
