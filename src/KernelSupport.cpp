@@ -44,12 +44,12 @@
 namespace pdal
 {
 
-PipelineManager* KernelSupport::makePipeline(const std::string& inputFile)
+PipelineManagerPtr KernelSupport::makePipeline(const std::string& inputFile)
 {
     if (!pdal::FileUtils::fileExists(inputFile))
         throw app_runtime_error("file not found: " + inputFile);
 
-    PipelineManager* output = new PipelineManager;
+    PipelineManagerPtr output(new PipelineManager);
 
     if (inputFile == "STDIN")
     {
