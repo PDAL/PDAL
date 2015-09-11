@@ -9,11 +9,12 @@ usage()
 	cat <<EOF
 Usage: pdal-config [OPTIONS]
 Options:
-	[--libs]
 	[--cflags]
 	[--cxxflags]
 	[--defines]
 	[--includes]
+	[--libs]
+	[--plugin-dir]
 	[--version]
 EOF
 	exit $1
