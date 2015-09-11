@@ -92,7 +92,8 @@ Options getDbOptions()
 class PgpointcloudWriterTest : public testing::Test
 {
 public:
-    PgpointcloudWriterTest() : m_masterConnection(0), m_testConnection(0) {};
+    PgpointcloudWriterTest() : m_masterConnection(0), m_testConnection(0),
+                               m_bSkipTests(false) {};
 protected:
     virtual void SetUp()
     {
@@ -108,11 +109,27 @@ protected:
         std::stringstream createDbSql;
         createDbSql << "CREATE DATABASE " <<
             testDbTempname << " TEMPLATE template0";
-        executeOnMasterDb(createDbSql.str());
+        try
+        {
+            executeOnMasterDb(createDbSql.str());
+        }
+        catch( const pdal_error& error )
+        {
+            m_bSkipTests = true;
+            return;
+        }
 
         m_testConnection = pg_connect( getTestDBTempConn() );
 
-        executeOnTestDb("CREATE EXTENSION pointcloud");
+        try
+        {
+            executeOnTestDb("CREATE EXTENSION pointcloud");
+        }
+        catch( const pdal_error& error )
+        {
+            m_bSkipTests = true;
+            return;
+        }
     }
 
     void executeOnTestDb(const std::string& sql)
@@ -133,6 +150,8 @@ protected:
             PQfinish(m_masterConnection);
         }
     }
+    
+    bool ShouldSkipTests() const { return m_bSkipTests; }
 
 private:
 
@@ -155,6 +174,7 @@ private:
 
     PGconn* m_masterConnection;
     PGconn* m_testConnection;
+    bool m_bSkipTests;
 };
 
 namespace
@@ -194,11 +214,21 @@ void optionsWrite(const Options& writerOps)
 
 TEST_F(PgpointcloudWriterTest, write)
 {
+    if( ShouldSkipTests() )
+    {
+        return;
+    }
+    
     optionsWrite(getDbOptions());
 }
 
 TEST_F(PgpointcloudWriterTest, writeScaled)
 {
+    if( ShouldSkipTests() )
+    {
+        return;
+    }
+    
     Options ops = getDbOptions();
     ops.add("scale_x", .01);
     ops.add("scale_y", .01);
@@ -209,6 +239,11 @@ TEST_F(PgpointcloudWriterTest, writeScaled)
 
 TEST_F(PgpointcloudWriterTest, writeXYZ)
 {
+    if( ShouldSkipTests() )
+    {
+        return;
+    }
+    
     Options ops = getDbOptions();
     ops.add("output_dims", "X,Y,Z");
 
@@ -229,6 +264,11 @@ TEST_F(PgpointcloudWriterTest, writeXYZ)
 
 TEST_F(PgpointcloudWriterTest, writetNoPointcloudExtension)
 {
+    if( ShouldSkipTests() )
+    {
+        return;
+    }
+    
     StageFactory f;
     std::unique_ptr<Stage> writer(f.createStage("writers.pgpointcloud"));
     EXPECT_TRUE(writer.get());
