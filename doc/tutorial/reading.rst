@@ -41,114 +41,43 @@ Our first example to demonstrate PDAL's utility will be to simply query an
 
     The `interesting.las`_ file in these examples can be found on github.
 
-`reStructuredText`_ output
-................................................................................
-
-By default, PDAL outputs `reStructuredText`_. This makes it convenient for
-transforming the output into more pleasing formats like PDF (using `rst2pdf`_)
-or HTML (using `rst2html`_) as part of a processing pipeline.
-
-.. _`rst2pdf`: https://code.google.com/p/rst2pdf/
-.. _`rst2html`: http://docutils.sourceforge.net/docs/user/tools.html#rst2html-py
-
-.. _`reStructuredText`: http://docutils.sourceforge.net/rst.html
-
-::
-
-    $ pdal info interesting.las -p 0
-
-::
-
-    Point 0
-    --------------------------------------------------------------------------------
-
-    =================== ======================================= ===================
-                Name                                Value        Namespace
-    =================== ======================================= ===================
-    X                                        637012.23999999999  readers.las
-    Y                                        849028.31000000006  readers.las
-    Z                                        431.66000000000003  readers.las
-    Intensity                                               143  readers.las
-    ReturnNumber                                              1  readers.las
-    NumberOfReturns                                           1  readers.las
-    ScanDirectionFlag                                         1  readers.las
-    EdgeOfFlightLine                                          0  readers.las
-    Classification                                            1  readers.las
-    ScanAngleRank                                            -9  readers.las
-    UserData                                                132  readers.las
-    PointSourceId                                          7326  readers.las
-    Time                                     245380.78254962614  readers.las
-    Red                                                      68  readers.las
-    Green                                                    77  readers.las
-    Blue                                                     88  readers.las
-    =================== ======================================= ===================
-
-JavaScript output
-................................................................................
-
-JavaScript `JSON`_ can also be output.
+PDAL outputs JavaScript `JSON`_.
 
 .. _`JSON`: http://www.json.org/
 
 ::
 
-    $ pdal info interesting.las -p 0 --json
+    $ pdal info interesting.las -p 0
 
 .. code-block:: javascript
 
     {
-        "X": "637012.23999999999",
-        "Y": "849028.31000000006",
-        "Z": "431.66000000000003",
-        "Intensity": "143",
-        "ReturnNumber": "1",
-        "NumberOfReturns": "1",
-        "ScanDirectionFlag": "1",
-        "EdgeOfFlightLine": "0",
-        "Classification": "1",
-        "ScanAngleRank": "-9",
-        "UserData": "132",
-        "PointSourceId": "7326",
-        "Time": "245380.78254962614",
-        "Red": "68",
-        "Green": "77",
-        "Blue": "88"
+      "filename": "interesting.las",
+      "pdal_version": "1.0.1 (git-version: 80644d)",
+      "points":
+      {
+        "point":
+        {
+          "Blue": 88,
+          "Classification": 1,
+          "EdgeOfFlightLine": 0,
+          "GpsTime": 245381,
+          "Green": 77,
+          "Intensity": 143,
+          "NumberOfReturns": 1,
+          "PointId": 0,
+          "PointSourceId": 7326,
+          "Red": 68,
+          "ReturnNumber": 1,
+          "ScanAngleRank": -9,
+          "ScanDirectionFlag": 1,
+          "UserData": 132,
+          "X": 637012,
+          "Y": 849028,
+          "Z": 431.66
+        }
+      }
     }
-
-
-
-XML output
-................................................................................
-
-XML output of this same point is as simple as adding the appropriate
-switch:
-
-::
-
-    $ pdal info interesting.las -p 0 --xml
-
-.. code-block:: xml
-
-    <?xml version="1.0" encoding="utf-8"?>
-    <point>
-      <X>637012.23999999999</X>
-      <Y>849028.31000000006</Y>
-      <Z>431.66000000000003</Z>
-      <Intensity>143</Intensity>
-      <ReturnNumber>1</ReturnNumber>
-      <NumberOfReturns>1</NumberOfReturns>
-      <ScanDirectionFlag>1</ScanDirectionFlag>
-      <EdgeOfFlightLine>0</EdgeOfFlightLine>
-      <Classification>1</Classification>
-      <ScanAngleRank>-9</ScanAngleRank>
-      <UserData>132</UserData>
-      <PointSourceId>7326</PointSourceId>
-      <Time>245380.78254962614</Time>
-      <Red>68</Red>
-      <Green>77</Green>
-      <Blue>88</Blue>
-    </point>
-
 
 A conversion example
 ------------------------------------------------------------------------------
