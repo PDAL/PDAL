@@ -21,7 +21,7 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
 MD5="md5"
 fi
 
-# make dist
+make dist
 
 extensions=".tar.gz .tar.bz2"
 for ext in $extensions
