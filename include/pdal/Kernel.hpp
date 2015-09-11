@@ -72,8 +72,7 @@ typedef std::shared_ptr<PointView> PointViewPtr;
 class PDAL_DLL Kernel
 {
 public:
-    virtual ~Kernel()
-    {}
+    virtual ~Kernel();
 
     // call this, to start the machine
     int run(int argc, const char* argv[], const std::string& appName);
