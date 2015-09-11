@@ -103,7 +103,9 @@ private:
     LasHeader m_lasHeader;
     std::unique_ptr<ZipPoint> m_zipPoint;
     std::unique_ptr<LASunzipper> m_unzipper;
+#ifdef PDAL_HAVE_LAZPERF
     std::unique_ptr<LazPerfVlrDecompressor> m_decompressor;
+#endif
     point_count_t m_index;
     std::istream* m_istream;
     VlrList m_vlrs;

@@ -590,7 +590,7 @@ point_count_t LasReader::read(PointViewPtr view, point_count_t count)
             loadPoint(*view.get(), (char *)m_zipPoint->m_lz_point_data.data(),
                 pointByteCount);
         }
-#elfif defined(PDAL_HAVE_LAZPERF)
+#elif defined(PDAL_HAVE_LAZPERF)
         assert(pointByteCount == m_decompressor->pointSize());
 
         std::vector<char> ptBuf(m_decompressor->pointSize());
