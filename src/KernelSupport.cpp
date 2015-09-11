@@ -67,9 +67,20 @@ PipelineManager* KernelSupport::makePipeline(const std::string& inputFile)
         std::string driver = factory.inferReaderDriver(inputFile);
 
         if (driver.empty())
+        {
+            delete output;
             throw app_runtime_error("Cannot determine input file type of " +
                 inputFile);
-        output->addReader(driver);
+        }
+        try
+        {
+            output->addReader(driver);
+        }
+        catch( const pdal_error& error )
+        {
+            delete output;
+            throw error;
+        }
     }
     return output;
 }
