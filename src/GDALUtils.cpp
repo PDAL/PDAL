@@ -104,7 +104,9 @@ Raster::Raster(const std::string& filename)
     : m_filename(filename)
     , m_raster_x_size(0)
     , m_raster_y_size(0)
+    , m_size(0)
     , m_band_count(0)
+    , m_ds(0)
 
 {
     m_forward_transform.fill(0.0);
@@ -129,6 +131,13 @@ bool Raster::open()
     m_raster_y_size = GDALGetRasterYSize(m_ds);
     m_band_count = GDALGetRasterCount(m_ds);
 
+    m_types = computePDALDimensionTypes();
+
+    m_size = 0;
+    for(auto t: m_types)
+    {
+        m_size += pdal::Dimension::size(t);
+    }
     return true;
 }
 
@@ -159,6 +168,108 @@ bool Raster::getPixelAndLinePosition(double x, double y,
     return true;
 }
 
+pdal::Dimension::Type::Enum convertGDALtoPDAL(GDALDataType t)
+{
+
+    using namespace pdal::Dimension::Type;
+    Enum pt(None);
+    switch (t)
+    {
+        case GDT_Byte:
+            pt= None;
+            break;
+        case GDT_UInt16:
+            pt = Unsigned16;
+            break;
+        case GDT_Int16:
+            pt = Signed16;
+            break;
+        case GDT_UInt32:
+            pt = Unsigned32;
+            break;
+        case GDT_Int32:
+            pt = Signed32;
+            break;
+        case GDT_CFloat32:
+            pt = Float;
+            break;
+        case GDT_CFloat64:
+            pt = Double;
+            break;
+        default:
+            pt = None;
+    }
+
+    return pt;
+}
+std::vector<pdal::Dimension::Type::Enum> Raster::computePDALDimensionTypes()
+{
+
+    if (!m_ds) throw pdal::pdal_error("raster is not open!");
+
+    std::vector<pdal::Dimension::Type::Enum> output(m_band_count);
+
+    for (int i=0; i < m_band_count; ++i)
+    {
+        GDALRasterBandH band = GDALGetRasterBand(m_ds, i);
+        if (!band)
+        {
+            std::ostringstream oss;
+            oss << "Unable to get band " << i <<
+                " from data source!";
+            throw pdal_error(oss.str());
+        }
+
+        GDALDataType t = GDALGetRasterDataType(band);
+        pdal::Dimension::Type::Enum ptype = convertGDALtoPDAL(t);
+
+        output.push_back(ptype);
+    }
+    return output;
+}
+
+
+bool Raster::read(double x, double y, std::vector<double>& data)
+{
+
+    if (!m_ds)
+        throw pdal::pdal_error("Unable to read() because raster data source is not open");
+
+    int32_t pixel(0);
+    int32_t line(0);
+
+    std::array<double, 2> pix = { {0.0, 0.0} };
+
+    // No data at this x,y if we can't compute a pixel/line location
+    // for it.
+    if (!getPixelAndLinePosition(x, y, m_inverse_transform, pixel, line))
+        return false;
+
+    for (int i=0; i < m_band_count; ++i)
+    {
+        GDALRasterBandH b = GDALGetRasterBand(m_ds, i);
+        if (GDALRasterIO(b, GF_Read, pixel, line, 1, 1,
+            &pix[0], 1, 1, GDT_CFloat64, 0, 0) == CE_None)
+        {
+            // we read a pixel put its values in our vector
+            data[i] = pix[0];
+        }
+
+    }
+
+    return true;
+}
+
+Raster::~Raster()
+{
+    if (m_ds != 0)
+    {
+        GDALClose(m_ds);
+        m_ds = 0;
+    }
+    m_size = 0;
+    m_types.clear();
+}
 
 } // namespace gdal
 

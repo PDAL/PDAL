@@ -179,6 +179,7 @@ struct BandInfo
     pdal::Dimension::Id::Enum m_dim;
     uint32_t m_band;
     double m_scale;
+    pdal::Dimension::Type::Enum m_type;
 };
 
 
@@ -188,12 +189,16 @@ class Raster
 
 public:
     Raster(const std::string& filename);
+    ~Raster();
     bool open();
-    bool getPixelAndLinePosition(double x, double y,
-                                 std::array<double, 6> const& inverse,
-                                 int32_t& pixel, int32_t& line);
 
-    std::vector<gdal::BandInfo> m_bands;
+    bool read(double x, double y, std::vector<double>& data);
+    inline std::vector<pdal::Dimension::Type::Enum> getPDALDimensionTypes() const
+    {
+        return m_types;
+    }
+
+//     std::vector<gdal::BandInfo> m_bands;
     std::string m_filename;
 
     std::array<double, 6> m_forward_transform;
@@ -201,9 +206,17 @@ public:
 
     int m_raster_x_size;
     int m_raster_y_size;
+    size_t m_size;
     int m_band_count;
+    std::vector<pdal::Dimension::Type::Enum> m_types;
 
     GDALDatasetH m_ds;
+
+private:
+    bool getPixelAndLinePosition(double x, double y,
+                                 std::array<double, 6> const& inverse,
+                                 int32_t& pixel, int32_t& line);
+    std::vector<pdal::Dimension::Type::Enum> computePDALDimensionTypes();
 
 };
 
