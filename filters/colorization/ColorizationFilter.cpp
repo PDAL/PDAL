@@ -54,15 +54,6 @@ CREATE_STATIC_PLUGIN(1, 0, ColorizationFilter, Filter, s_info)
 
 std::string ColorizationFilter::getName() const { return s_info.name; }
 
-struct GDALSourceDeleter
-{
-    template <typename T>
-    void operator()(T* ptr)
-    {
-        ::GDALClose(ptr);
-    }
-};
-
 
 void ColorizationFilter::initialize()
 {
@@ -154,21 +145,8 @@ void ColorizationFilter::addDimensions(PointLayoutPtr layout)
 
 void ColorizationFilter::ready(PointTableRef table)
 {
-    m_forward_transform.assign(0.0);
-    m_inverse_transform.assign(0.0);
-
-    log()->get(LogLevel::Debug) << "Using " << m_rasterFilename <<
-        " for raster" << std::endl;
-    m_ds = GDALOpen(m_rasterFilename.c_str(), GA_ReadOnly);
-    if (m_ds == NULL)
-        throw pdal_error("Unable to open GDAL datasource!");
-
-    if (GDALGetGeoTransform(m_ds, &(m_forward_transform.front())) != CE_None)
-        throw pdal_error("unable to fetch forward geotransform for raster!");
-
-    if (!GDALInvGeoTransform(&(m_forward_transform.front()),
-        &(m_inverse_transform.front())))
-        throw pdal_error("unable to fetch inverse geotransform for raster!");
+    m_raster = std::unique_ptr<gdal::Raster>(new gdal::Raster(m_rasterFilename));
+    m_raster->open();
 
     for (auto bi = m_bands.begin(); bi != m_bands.end(); ++bi)
     {
@@ -183,71 +161,24 @@ void ColorizationFilter::ready(PointTableRef table)
 
 void ColorizationFilter::filter(PointView& view)
 {
-    int32_t pixel(0);
-    int32_t line(0);
-
-    std::array<double, 2> pix = { {0.0, 0.0} };
+    std::vector<double> data;
+    int i(0);
     for (PointId idx = 0; idx < view.size(); ++idx)
     {
+        int i(0);
         double x = view.getFieldAs<double>(Dimension::Id::X, idx);
         double y = view.getFieldAs<double>(Dimension::Id::Y, idx);
 
-        if (!getPixelAndLinePosition(x, y, m_inverse_transform, pixel,
-                line, m_ds))
-            continue;
+        bool bRead = m_raster->read(x, y, data);
+
+        if (!bRead) continue;
 
         for (auto bi = m_bands.begin(); bi != m_bands.end(); ++bi)
         {
             gdal::BandInfo& b = *bi;
-            GDALRasterBandH hBand = GDALGetRasterBand(m_ds, b.m_band);
-            if (hBand == NULL)
-            {
-                std::ostringstream oss;
-                oss << "Unable to get band " << b.m_band <<
-                    " from data source!";
-                throw pdal_error(oss.str());
-            }
-            if (GDALRasterIO(hBand, GF_Read, pixel, line, 1, 1,
-                &pix[0], 1, 1, GDT_CFloat64, 0, 0) == CE_None)
-                view.setField(b.m_dim, idx, pix[0] * b.m_scale);
+            view.setField(b.m_dim, idx, data[i] * b.m_scale);
+            ++i;
         }
-    }
-}
-
-
-// Determines the pixel/line position given an x/y.
-// No reprojection is done at this time.
-bool ColorizationFilter::getPixelAndLinePosition(double x, double y,
-    boost::array<double, 6> const& inverse, int32_t& pixel,
-    int32_t& line, void *ds)
-{
-    pixel = (int32_t)std::floor(inverse[0] + (inverse[1] * x) +
-        (inverse[2] * y));
-    line = (int32_t) std::floor(inverse[3] + (inverse[4] * x) +
-        (inverse[5] * y));
-
-    int xs = GDALGetRasterXSize(ds);
-    int ys = GDALGetRasterYSize(ds);
-
-    if (!xs || !ys)
-        throw pdal_error("Unable to get X or Y size from raster!");
-
-    if (pixel < 0 || line < 0 || pixel >= xs || line  >= ys)
-    {
-        // The x, y is not coincident with this raster
-        return false;
-    }
-
-    return true;
-}
-
-
-void ColorizationFilter::done(PointTableRef /*table*/)
-{
-    if (m_ds != 0)
-    {
-        GDALClose(m_ds);
-        m_ds = 0;
     }
 }
 

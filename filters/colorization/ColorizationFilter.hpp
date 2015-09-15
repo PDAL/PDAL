@@ -75,19 +75,11 @@ private:
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
     virtual void filter(PointView& view);
-    virtual void done(PointTableRef table);
-
-    bool getPixelAndLinePosition(double x, double y,
-        boost::array<double, 6> const& inverse, int32_t& pixel,
-        int32_t& line, void *ds);
 
     std::string m_rasterFilename;
     std::vector<gdal::BandInfo> m_bands;
 
-    boost::array<double, 6> m_forward_transform;
-    boost::array<double, 6> m_inverse_transform;
-
-    GDALDatasetH m_ds;
+    std::unique_ptr<gdal::Raster> m_raster;
 
     ColorizationFilter& operator=(const ColorizationFilter&); // not implemented
     ColorizationFilter(const ColorizationFilter&); // not implemented
