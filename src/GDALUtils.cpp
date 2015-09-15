@@ -209,7 +209,7 @@ std::vector<pdal::Dimension::Type::Enum> Raster::computePDALDimensionTypes()
 
     std::vector<pdal::Dimension::Type::Enum> output(m_band_count);
 
-    for (int i=0; i < m_band_count; ++i)
+    for (int i=1; i < m_band_count; ++i)
     {
         GDALRasterBandH band = GDALGetRasterBand(m_ds, i);
         if (!band)
@@ -237,6 +237,7 @@ bool Raster::read(double x, double y, std::vector<double>& data)
 
     int32_t pixel(0);
     int32_t line(0);
+    data.resize(m_band_count);
 
     std::array<double, 2> pix = { {0.0, 0.0} };
 
@@ -245,7 +246,7 @@ bool Raster::read(double x, double y, std::vector<double>& data)
     if (!getPixelAndLinePosition(x, y, m_inverse_transform, pixel, line))
         return false;
 
-    for (int i=0; i < m_band_count; ++i)
+    for (int i=1; i < m_band_count; ++i)
     {
         GDALRasterBandH b = GDALGetRasterBand(m_ds, i);
         if (GDALRasterIO(b, GF_Read, pixel, line, 1, 1,
