@@ -47,10 +47,10 @@ class PointLayout;
 class PointTable;
 class PointView;
 
-class PDAL_DLL GroundFilter : public Filter
+class PDAL_DLL RadiusOutlierFilter : public Filter
 {
 public:
-    GroundFilter() : Filter()
+    RadiusOutlierFilter() : Filter()
     {}
 
     static void * create();
@@ -60,21 +60,17 @@ public:
     Options getDefaultOptions();
 
 private:
-    double m_maxWindowSize;
-    double m_slope;
-    double m_maxDistance;
-    double m_initialDistance;
-    double m_cellSize;
+    int m_min_neighbors;
+    double m_radius;
     bool m_classify;
     bool m_extract;
-    bool m_approximate;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void processOptions(const Options& options);
     virtual PointViewSet run(PointViewPtr view);
 
-    GroundFilter& operator=(const GroundFilter&); // not implemented
-    GroundFilter(const GroundFilter&); // not implemented
+    RadiusOutlierFilter& operator=(const RadiusOutlierFilter&); // not implemented
+    RadiusOutlierFilter(const RadiusOutlierFilter&); // not implemented
 };
 
 } // namespace pdal

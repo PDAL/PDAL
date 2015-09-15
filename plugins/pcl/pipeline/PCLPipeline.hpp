@@ -564,14 +564,14 @@ pcl::Pipeline<PointT>::applyMovingLeastSquares(PointCloudConstPtr cloud, PointCl
         mls.setSearchRadius(1);
         mls.setPolynomialFit(true);
         mls.setPolynomialOrder(2);
-        mls.setUpsamplingMethod(pcl::MovingLeastSquares<PointT, PointT>::SAMPLE_LOCAL_PLANE);
+        mls.setUpsamplingMethod(pcl::MovingLeastSquares<PointT, PointT>::NONE);
         //mls.setDilationIterations(1);
         //mls.setDilationVoxelSize(0.5);
         //mls.setPointDensity(20);
-        mls.setUpsamplingRadius(2);
-        mls.setUpsamplingStepSize(1);
-        PCL_DEBUG("%f radius \n", mls.getUpsamplingRadius());
-        PCL_DEBUG("%f step\n", mls.getUpsamplingStepSize());
+        //mls.setUpsamplingRadius(2);
+        //mls.setUpsamplingStepSize(1);
+        //PCL_DEBUG("%f radius \n", mls.getUpsamplingRadius());
+        //PCL_DEBUG("%f step\n", mls.getUpsamplingStepSize());
         mls.process(output);
 
     PCL_DEBUG("%d filtered to %d in moving least squares\n", cloud->points.size(), output.points.size());
