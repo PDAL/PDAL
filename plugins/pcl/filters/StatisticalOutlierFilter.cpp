@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "GroundFilter.hpp"
+#include "StatisticalOutlierFilter.hpp"
 
 #include "PCLConversions.hpp"
 
@@ -45,60 +45,51 @@
 #include <pcl/console/print.h>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/io/pcd_io.h>
-#include <pcl/segmentation/progressive_morphological_filter.h>
-#include <pcl/segmentation/approximate_progressive_morphological_filter.h>
+#include <pcl/filters/statistical_outlier_removal.h>
 
 namespace pdal
 {
 
 static PluginInfo const s_info =
-    PluginInfo("filters.ground", "Progressive morphological filter",
-               "http://pdal.io/stages/filters.ground.html");
+    PluginInfo("filters.statisticaloutlier", "Statistical outlier removal",
+               "http://pdal.io/stages/filters.statisticaloutlier.html");
 
-CREATE_SHARED_PLUGIN(1, 0, GroundFilter, Filter, s_info)
+CREATE_SHARED_PLUGIN(1, 0, StatisticalOutlierFilter, Filter, s_info)
 
-std::string GroundFilter::getName() const
+std::string StatisticalOutlierFilter::getName() const
 {
     return s_info.name;
 }
 
-Options GroundFilter::getDefaultOptions()
+Options StatisticalOutlierFilter::getDefaultOptions()
 {
     Options options;
-    options.add("maxWindowSize", 33, "Maximum window size");
-    options.add("slope", 1, "Slope");
-    options.add("maxDistance", 2.5, "Maximum distance");
-    options.add("initialDistance", 0.15, "Initial distance");
-    options.add("cellSize", 1, "Cell Size");
+    options.add("mean_k", 2, "Mean number of neighbors");
+    options.add("multiplier", 0, "Standard deviation threshold");
     options.add("classify", true, "Apply classification labels?");
     options.add("extract", false, "Extract ground returns?");
-    options.add("approximate", false, "Use approximate algorithm?");
     return options;
 }
 
-void GroundFilter::processOptions(const Options& options)
+void StatisticalOutlierFilter::processOptions(const Options& options)
 {
-    m_maxWindowSize = options.getValueOrDefault<double>("maxWindowSize", 33);
-    m_slope = options.getValueOrDefault<double>("slope", 1);
-    m_maxDistance = options.getValueOrDefault<double>("maxDistance", 2.5);
-    m_initialDistance = options.getValueOrDefault<double>("initialDistance", 0.15);
-    m_cellSize = options.getValueOrDefault<double>("cellSize", 1);
+    m_meanK = options.getValueOrDefault<int>("mean_k", 2);
+    m_multiplier = options.getValueOrDefault<double>("multiplier", 0);
     m_classify = options.getValueOrDefault<bool>("classify", true);
     m_extract = options.getValueOrDefault<bool>("extract", false);
-    m_approximate = options.getValueOrDefault<bool>("approximate", false);
 }
 
-void GroundFilter::addDimensions(PointLayoutPtr layout)
+void StatisticalOutlierFilter::addDimensions(PointLayoutPtr layout)
 {
     layout->registerDim(Dimension::Id::Classification);
 }
 
-PointViewSet GroundFilter::run(PointViewPtr input)
+PointViewSet StatisticalOutlierFilter::run(PointViewPtr input)
 {
     bool logOutput = log()->getLevel() > LogLevel::Debug1;
     if (logOutput)
         log()->floatPrecision(8);
-    log()->get(LogLevel::Debug2) << "Process GroundFilter...\n";
+    log()->get(LogLevel::Debug2) << "Process StatisticalOutlierFilter...\n";
 
     // convert PointView to PointXYZ
     typedef pcl::PointCloud<pcl::PointXYZ> Cloud;
@@ -131,50 +122,45 @@ PointViewSet GroundFilter::run(PointViewPtr input)
             break;
     }
 
-    // setup the PMF filter
-    pcl::PointIndicesPtr idx(new pcl::PointIndices);
-    if (!m_approximate)
+    // setup the outlier filter
+    pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor(true);
+    sor.setInputCloud(cloud);
+    sor.setMeanK(m_meanK);
+    sor.setStddevMulThresh(m_multiplier);
+
+    pcl::PointCloud<pcl::PointXYZ> output;
+    sor.setNegative(true);
+    sor.filter(output);
+
+    // filtered to return inliers
+    pcl::PointIndicesPtr inliers(new pcl::PointIndices);
+    sor.getRemovedIndices(*inliers);
+
+    // inverse are the outliers
+    std::vector<int> outliers(input->size()-inliers->indices.size());
+    for (int i = 0, j = 0, k = 0; i < input->size(); ++i)
     {
-
-        pcl::ProgressiveMorphologicalFilter<pcl::PointXYZ> pmf;
-        pmf.setInputCloud(cloud);
-        pmf.setMaxWindowSize(m_maxWindowSize);
-        pmf.setSlope(m_slope);
-        pmf.setMaxDistance(m_maxDistance);
-        pmf.setInitialDistance(m_initialDistance);
-        pmf.setCellSize(m_cellSize);
-
-        // run the PMF filter, grabbing indices of ground returns
-        pmf.extract(idx->indices);
-    }
-    else
-    {
-        pcl::ApproximateProgressiveMorphologicalFilter<pcl::PointXYZ> pmf;
-        pmf.setInputCloud(cloud);
-        pmf.setMaxWindowSize(m_maxWindowSize);
-        pmf.setSlope(m_slope);
-        pmf.setMaxDistance(m_maxDistance);
-        pmf.setInitialDistance(m_initialDistance);
-        pmf.setCellSize(m_cellSize);
-
-        // run the PMF filter, grabbing indices of ground returns
-        pmf.extract(idx->indices);
-
+        if (i == inliers->indices[j])
+        {
+            j++;
+            continue;
+        }
+        outliers[k++] = i;
     }
 
     PointViewSet viewSet;
-    if (!idx->indices.empty() && (m_classify || m_extract))
+    if (!outliers.empty() && (m_classify || m_extract))
     {
 
         if (m_classify)
         {
-            log()->get(LogLevel::Debug2) << "Labeled " << idx->indices.size() << " ground returns!\n";
+            log()->get(LogLevel::Debug2) << "Labeled " << outliers.size() << " outliers as noise!\n";
 
-            // set the classification label of ground returns as 2
-            // (corresponding to ASPRS LAS specification)
-            for (const auto& i : idx->indices)
+            // set the classification label of outlier returns as 18
+            // (corresponding to ASPRS LAS specification for high noise)
+            for (const auto& i : outliers)
             {
-                input->setField(Dimension::Id::Classification, i, 2);
+                input->setField(Dimension::Id::Classification, i, 18);
             }
 
             viewSet.insert(input);
@@ -182,11 +168,11 @@ PointViewSet GroundFilter::run(PointViewPtr input)
 
         if (m_extract)
         {
-            log()->get(LogLevel::Debug2) << "Extracted " << idx->indices.size() << " ground returns!\n";
+            log()->get(LogLevel::Debug2) << "Extracted " << inliers->indices.size() << " inliers!\n";
 
-            // create new PointView containing only ground returns
+            // create new PointView containing only outliers
             PointViewPtr output = input->makeNew();
-            for (const auto& i : idx->indices)
+            for (const auto& i : inliers->indices)
             {
                 output->appendPoint(*input, i);
             }
@@ -197,8 +183,8 @@ PointViewSet GroundFilter::run(PointViewPtr input)
     }
     else
     {
-        if (idx->indices.empty())
-            log()->get(LogLevel::Debug2) << "Filtered cloud has no ground returns!\n";
+        if (outliers.empty())
+            log()->get(LogLevel::Debug2) << "Filtered cloud has no outliers!\n";
 
         if (!(m_classify || m_extract))
             log()->get(LogLevel::Debug2) << "Must choose --classify or --extract\n";

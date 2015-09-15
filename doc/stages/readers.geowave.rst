@@ -1,9 +1,11 @@
 .. _readers.geowave:
 
 readers.geowave
-============
+===============================================================================
 
-The **GeoWave reader** uses `GeoWave`_ to read from Accumulo.  GeoWave entries are stored using EPSG:4326.  Instructions for configuring the GeoWave plugin can be found `here`_
+The **GeoWave reader** uses `GeoWave`_ to read from Accumulo.  GeoWave entries
+are stored using EPSG:4326.  Instructions for configuring the GeoWave plugin
+can be found `here`_
 
 Example
 -------
@@ -57,7 +59,7 @@ pointsPerEntry
   Sets the maximum number of points per Accumulo entry when using FeatureCollectionDataAdapter. [Default: 5000u]
 
 bounds
-  The extent of the bounding rectangle to use to query points, expressed as a string, eg: “([xmin,xmax],[ymin,ymax],[zmin,zmax])”. [Default: unit cube] 
+  The extent of the bounding rectangle to use to query points, expressed as a string, eg: “([xmin,xmax],[ymin,ymax],[zmin,zmax])”. [Default: unit cube]
 
 
 .. _GeoWave: https://ngageoint.github.io/geowave/

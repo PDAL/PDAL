@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
+* Copyright (c) 2013, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -34,77 +34,32 @@
 
 #pragma once
 
-#include <pdal/Kernel.hpp>
-#include <pdal/KernelSupport.hpp>
-#include <pdal/PointView.hpp>
-#include <pdal/Stage.hpp>
-#include <pdal/util/FileUtils.hpp>
-
-#ifdef __clang__
-#pragma GCC diagnostic ignored "-Wtautological-constant-out-of-range-compare"
-#endif
-
-#include <boost/property_tree/json_parser.hpp>
-#include <boost/tokenizer.hpp>
-
-typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-
-extern "C" int32_t InfoKernel_ExitFunc();
-extern "C" PF_ExitFunc InfoKernel_InitPlugin();
+#include <pdal/Filter.hpp>
+#include <pdal/StageFactory.hpp>
 
 namespace pdal
 {
 
-class PDAL_DLL InfoKernel : public Kernel
+class PDAL_DLL GreedyProjectionFilter : public Filter
 {
 public:
+    GreedyProjectionFilter() : Filter()
+    {}
+
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
-    int execute(); // overrride
 
-
-    void setup(const std::string& filename);
-    MetadataNode run(const std::string& filename);
-
-    inline bool showAll() { return m_showAll; }
-    inline void doShowAll(bool value) { m_showAll = value; }
-    inline void doComputeSummary(bool value) { m_showSummary = value; }
-    inline void doComputeBoundary(bool value) { m_boundary = value; }
+    Options getDefaultOptions();
 
 private:
-    InfoKernel();
-    void addSwitches(); // overrride
-    void validateSwitches(); // overrride
+    // double m_leaf_x, m_leaf_y, m_leaf_z;
 
-    void dump(MetadataNode& root);
-    MetadataNode dumpPoints(PointViewPtr inView) const;
-    MetadataNode dumpStats() const;
-    void dumpPipeline() const;
-    MetadataNode dumpSummary(const QuickInfo& qi);
-    MetadataNode dumpQuery(PointViewPtr inView) const;
+    virtual void processOptions(const Options& options);
+    virtual PointViewSet run(PointViewPtr view);
 
-    std::string m_inputFile;
-    bool m_showStats;
-    bool m_showSchema;
-    bool m_showAll;
-    bool m_showMetadata;
-    bool m_boundary;
-    pdal::Options m_options;
-    std::string m_pointIndexes;
-    std::string m_dimensions;
-    std::string m_queryPoint;
-    std::string m_pipelineFile;
-    bool m_showSummary;
-    bool m_needPoints;
-    std::string m_PointCloudSchemaOutput;
-
-    Stage *m_statsStage;
-    Stage *m_hexbinStage;
-    Stage *m_reader;
-
-    MetadataNode m_tree;
-    PipelineManagerPtr m_manager;
+    GreedyProjectionFilter& operator=(const GreedyProjectionFilter&); // not implemented
+    GreedyProjectionFilter(const GreedyProjectionFilter&); // not implemented
 };
 
 } // namespace pdal

@@ -71,6 +71,18 @@ Kernel::Kernel()
 {}
 
 
+Kernel::~Kernel()
+{
+    for (auto & iter : m_public_options)
+    {
+        delete iter;
+    }
+    for (auto & iter : m_hidden_options)
+    {
+        delete iter;
+    }
+}
+
 std::ostream& operator<<(std::ostream& ostr, const Kernel& kernel)
 {
     ostr << "  Name: " << kernel.getName() << std::endl;

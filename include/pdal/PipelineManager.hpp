@@ -100,7 +100,7 @@ private:
     PipelineManager& operator=(const PipelineManager&); // not implemented
     PipelineManager(const PipelineManager&); // not implemented
 };
-
+typedef std::unique_ptr<PipelineManager> PipelineManagerPtr;
 
 } // namespace pdal
 

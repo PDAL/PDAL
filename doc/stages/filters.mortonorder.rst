@@ -1,7 +1,7 @@
 .. _filters.mortonorder:
 
 filters.mortonorder
-===========
+================================================================================
 
 Sorts the XY data using `Morton ordering`_.
 

@@ -131,6 +131,34 @@ PDAL_ADD_PLUGIN(ground_filter_libname filter ground
     FILES filters/GroundFilter.hpp filters/GroundFilter.cpp
     LINK_WITH ${PCL_LIBRARIES})
 
+PDAL_ADD_PLUGIN(statistical_outlier_filter_libname filter statisticaloutlier
+    FILES filters/StatisticalOutlierFilter.hpp filters/StatisticalOutlierFilter.cpp
+    LINK_WITH ${PCL_LIBRARIES})
+
+PDAL_ADD_PLUGIN(radius_outlier_filter_libname filter radiusoutlier
+    FILES filters/RadiusOutlierFilter.hpp filters/RadiusOutlierFilter.cpp
+    LINK_WITH ${PCL_LIBRARIES})
+
+PDAL_ADD_PLUGIN(voxelgrid_filter_libname filter voxelgrid
+    FILES filters/VoxelGridFilter.hpp filters/VoxelGridFilter.cpp
+    LINK_WITH ${PCL_LIBRARIES})
+
+PDAL_ADD_PLUGIN(movingleastsquares_filter_libname filter movingleastsquares
+    FILES filters/MovingLeastSquaresFilter.hpp filters/MovingLeastSquaresFilter.cpp
+    LINK_WITH ${PCL_LIBRARIES})
+
+PDAL_ADD_PLUGIN(gridprojection_filter_libname filter gridprojection
+    FILES filters/GridProjectionFilter.hpp filters/GridProjectionFilter.cpp
+    LINK_WITH ${PCL_LIBRARIES})
+
+PDAL_ADD_PLUGIN(poisson_filter_libname filter poisson
+    FILES filters/PoissonFilter.hpp filters/PoissonFilter.cpp
+    LINK_WITH ${PCL_LIBRARIES})
+
+PDAL_ADD_PLUGIN(greedyprojection_filter_libname filter greedyprojection
+    FILES filters/GreedyProjectionFilter.hpp filters/GreedyProjectionFilter.cpp
+    LINK_WITH ${PCL_LIBRARIES})
+
 #
 # PCL Kernel
 #
