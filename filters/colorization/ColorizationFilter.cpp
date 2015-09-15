@@ -198,7 +198,7 @@ void ColorizationFilter::filter(PointView& view)
 
         for (auto bi = m_bands.begin(); bi != m_bands.end(); ++bi)
         {
-            BandInfo& b = *bi;
+            gdal::BandInfo& b = *bi;
             GDALRasterBandH hBand = GDALGetRasterBand(m_ds, b.m_band);
             if (hBand == NULL)
             {

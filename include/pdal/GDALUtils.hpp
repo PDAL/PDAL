@@ -35,17 +35,19 @@
 #pragma once
 
 #include <pdal/pdal_internal.hpp>
+#include <pdal/Dimension.hpp>
 
 #include <pdal/Log.hpp>
 
 #include <sstream>
 #include <vector>
+#include <array>
 
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 
 #include <cpl_port.h>
-#include "gdal.h"
+#include <gdal.h>
 #include <cpl_vsi.h>
 #include <cpl_conv.h>
 #include <ogr_api.h>
@@ -164,6 +166,45 @@ private:
     boost::function<void(CPLErr, int, char const*)> m_gdal_callback;
     bool m_isDebug;
     pdal::LogPtr m_log;
+};
+
+
+struct BandInfo
+{
+    BandInfo(const std::string& name, pdal::Dimension::Id::Enum dim, uint32_t band,
+        double scale) : m_name(name), m_dim(dim), m_band(band), m_scale(scale)
+    {}
+
+    std::string m_name;
+    pdal::Dimension::Id::Enum m_dim;
+    uint32_t m_band;
+    double m_scale;
+};
+
+
+class Raster
+
+{
+
+public:
+    Raster(const std::string& filename);
+    bool open();
+    bool getPixelAndLinePosition(double x, double y,
+                                 std::array<double, 6> const& inverse,
+                                 int32_t& pixel, int32_t& line);
+
+    std::vector<gdal::BandInfo> m_bands;
+    std::string m_filename;
+
+    std::array<double, 6> m_forward_transform;
+    std::array<double, 6> m_inverse_transform;
+
+    int m_raster_x_size;
+    int m_raster_y_size;
+    int m_band_count;
+
+    GDALDatasetH m_ds;
+
 };
 
 } // namespace gdal

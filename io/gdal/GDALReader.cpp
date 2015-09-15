@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2012, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2015, Howard Butler <howard@hobu.co>
 *
 * All rights reserved.
 *
@@ -32,65 +32,78 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include "GDALReader.hpp"
 
-#include <pdal/Filter.hpp>
+#include <sstream>
 
-#include <boost/array.hpp>
 
-#include <gdal.h>
-#include <ogr_spatialref.h>
-#include <pdal/GDALUtils.hpp>
-
-#include <map>
-
-extern "C" int32_t ColorizationFilter_ExitFunc();
-extern "C" PF_ExitFunc ColorizationFilter_InitPlugin();
+#include <pdal/PointView.hpp>
+#include <pdal/GlobalEnvironment.hpp>
 
 namespace pdal
 {
-
-namespace gdal
-{ class GlobalDebug; }
-
-// Provides GDAL-based raster overlay that places output data in
-// specified dimensions. It also supports scaling the data by a multiplier
-// on a per-dimension basis.
-class PDAL_DLL ColorizationFilter : public Filter
+namespace
 {
 
-public:
-    ColorizationFilter()
-    {}
 
-    static void * create();
-    static int32_t destroy(void *);
-    std::string getName() const;
 
-    Options getDefaultOptions();
+}
 
-private:
-    virtual void initialize();
-    virtual void processOptions(const Options&);
-    virtual void addDimensions(PointLayoutPtr layout);
-    virtual void ready(PointTableRef table);
-    virtual void filter(PointView& view);
-    virtual void done(PointTableRef table);
 
-    bool getPixelAndLinePosition(double x, double y,
-        boost::array<double, 6> const& inverse, int32_t& pixel,
-        int32_t& line, void *ds);
+static PluginInfo const s_info = PluginInfo(
+        "readers.gdal",
+        "Read GDAL rasters as point clouds.",
+        "http://pdal.io/stages/reader.gdal.html");
 
-    std::string m_rasterFilename;
-    std::vector<gdal::BandInfo> m_bands;
 
-    boost::array<double, 6> m_forward_transform;
-    boost::array<double, 6> m_inverse_transform;
+CREATE_STATIC_PLUGIN(1, 0, GDALReader, Reader, s_info);
 
-    GDALDatasetH m_ds;
 
-    ColorizationFilter& operator=(const ColorizationFilter&); // not implemented
-    ColorizationFilter(const ColorizationFilter&); // not implemented
-};
+std::string GDALReader::getName() const
+{
+    return s_info.name;
+}
 
-} // namespace pdal
+
+GDALReader::GDALReader()
+{}
+
+
+void GDALReader::initialize()
+{
+    GlobalEnvironment::get().initializeGDAL(log());
+}
+
+void GDALReader::processOptions(const Options& options)
+{
+    m_rasterFilename = options.getValueOrThrow<std::string>("raster");
+
+}
+void GDALReader::addDimensions(PointLayoutPtr layout)
+{
+//     band.m_dim = layout->registerOrAssignDim(band.m_name,
+//         Dimension::defaultType(Dimension::Id::Red));
+    for (auto it : m_vertexDimensions)
+    {
+        layout->registerDim(it.second);
+    }
+}
+
+
+void GDALReader::ready(PointTableRef table)
+{
+//     m_ply = openGDAL(m_filename);
+}
+
+
+point_count_t GDALReader::read(PointViewPtr view, point_count_t num)
+{
+    return view->size();
+}
+
+
+void GDALReader::done(PointTableRef table)
+{
+}
+
+}

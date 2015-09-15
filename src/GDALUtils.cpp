@@ -100,6 +100,66 @@ ErrorHandler::~ErrorHandler()
     CPLPopErrorHandler();
 }
 
+Raster::Raster(const std::string& filename)
+    : m_filename(filename)
+    , m_raster_x_size(0)
+    , m_raster_y_size(0)
+    , m_band_count(0)
+
+{
+    m_forward_transform.fill(0.0);
+    m_inverse_transform.fill(0.0);
+}
+
+bool Raster::open()
+{
+
+    m_ds = GDALOpen(m_filename.c_str(), GA_ReadOnly);
+    if (m_ds == NULL)
+        throw pdal_error("Unable to open GDAL datasource!");
+
+    if (GDALGetGeoTransform(m_ds, &(m_forward_transform.front())) != CE_None)
+        throw pdal_error("unable to fetch forward geotransform for raster!");
+
+    if (!GDALInvGeoTransform(&(m_forward_transform.front()),
+        &(m_inverse_transform.front())))
+        throw pdal_error("unable to fetch inverse geotransform for raster!");
+
+    m_raster_x_size = GDALGetRasterXSize(m_ds);
+    m_raster_y_size = GDALGetRasterYSize(m_ds);
+    m_band_count = GDALGetRasterCount(m_ds);
+
+    return true;
+}
+
+
+// Determines the pixel/line position given an x/y.
+// No reprojection is done at this time.
+bool Raster::getPixelAndLinePosition(double x, double y,
+                                     std::array<double, 6> const& inverse,
+                                    int32_t& pixel, int32_t& line)
+{
+    pixel = (int32_t)std::floor(inverse[0] + (inverse[1] * x) +
+        (inverse[2] * y));
+    line = (int32_t) std::floor(inverse[3] + (inverse[4] * x) +
+        (inverse[5] * y));
+
+    int xs = m_raster_x_size;
+    int ys = m_raster_y_size;
+
+    if (!xs || !ys)
+        throw pdal_error("Unable to get X or Y size from raster!");
+
+    if (pixel < 0 || line < 0 || pixel >= xs || line  >= ys)
+    {
+        // The x, y is not coincident with this raster
+        return false;
+    }
+
+    return true;
+}
+
+
 } // namespace gdal
 
 std::string transformWkt(std::string wkt, const SpatialReference& from,

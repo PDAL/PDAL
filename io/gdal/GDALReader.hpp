@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2012, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2015, Howard Butler <howard@hobu.co>
 *
 * All rights reserved.
 *
@@ -34,63 +34,52 @@
 
 #pragma once
 
-#include <pdal/Filter.hpp>
+#include <string>
 
-#include <boost/array.hpp>
 
-#include <gdal.h>
-#include <ogr_spatialref.h>
+#include <pdal/Dimension.hpp>
+#include <pdal/Reader.hpp>
+#include <pdal/StageFactory.hpp>
+
 #include <pdal/GDALUtils.hpp>
 
-#include <map>
+extern "C" int32_t GDALReader_ExitFunc();
+extern "C" PF_ExitFunc GDALReader_InitPlugin();
 
-extern "C" int32_t ColorizationFilter_ExitFunc();
-extern "C" PF_ExitFunc ColorizationFilter_InitPlugin();
 
 namespace pdal
 {
 
-namespace gdal
-{ class GlobalDebug; }
 
-// Provides GDAL-based raster overlay that places output data in
-// specified dimensions. It also supports scaling the data by a multiplier
-// on a per-dimension basis.
-class PDAL_DLL ColorizationFilter : public Filter
+typedef std::map<std::string, Dimension::Id::Enum> DimensionMap;
+
+
+
+class PDAL_DLL GDALReader : public Reader
 {
-
 public:
-    ColorizationFilter()
-    {}
-
-    static void * create();
+    static void *create();
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
+    GDALReader();
+
+    static Dimension::IdList getDefaultDimensions();
 
 private:
     virtual void initialize();
-    virtual void processOptions(const Options&);
     virtual void addDimensions(PointLayoutPtr layout);
+    virtual void processOptions(const Options&);
     virtual void ready(PointTableRef table);
-    virtual void filter(PointView& view);
+    virtual point_count_t read(PointViewPtr view, point_count_t num);
     virtual void done(PointTableRef table);
 
-    bool getPixelAndLinePosition(double x, double y,
-        boost::array<double, 6> const& inverse, int32_t& pixel,
-        int32_t& line, void *ds);
-
+    DimensionMap m_vertexDimensions;
     std::string m_rasterFilename;
-    std::vector<gdal::BandInfo> m_bands;
 
-    boost::array<double, 6> m_forward_transform;
-    boost::array<double, 6> m_inverse_transform;
 
     GDALDatasetH m_ds;
 
-    ColorizationFilter& operator=(const ColorizationFilter&); // not implemented
-    ColorizationFilter(const ColorizationFilter&); // not implemented
 };
+}
 
-} // namespace pdal
