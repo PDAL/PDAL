@@ -1,4 +1,4 @@
-.. _writers.text:
+.. _writers.null:
 
 writers.null
 ============

@@ -1,7 +1,7 @@
 .. _filters.splitter:
 
 filters.splitter
-===============
+===============================================================================
 
 The splitter filter breaks a point cloud into square tiles of a size that
 you choose.  The origin of the tiles is chosen arbitrarily unless specified
@@ -12,7 +12,7 @@ for each tile as its output.
 
 Splitting is usually applied to data read from files (which produce one large
 stream of points) before the points are written to a database (which prefer
-data segmented into smaller blocks). 
+data segmented into smaller blocks).
 
 Example
 -------
@@ -40,10 +40,10 @@ Options
 length
   Length of the sides of the tiles that are created to hold points.
   [Default: 1000]
-  
+
 origin_x
   X Origin of the tiles.  [Default: none (chosen arbitarily)]
 
 origin_y
   Y Origin of the tiles.  [Default: none (chosen arbitarily)]
-  
+

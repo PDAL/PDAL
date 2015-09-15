@@ -68,9 +68,9 @@ pointer was used with libLAS:
 
 .. code-block:: cpp
 
-if (LAS_header == NULL) {
-    /* fail */
-}
+    if (LAS_header == NULL) {
+        /* fail */
+    }
 
 In general, PDAL will throw a ``pdal_error`` exception in case something
 is wrong and it can't recover such in the case when the file can't be opened.
@@ -79,11 +79,11 @@ in ``try-catch`` block:
 
 .. code-block:: cpp
 
-try {
-    /* actual code */
-} catch {
-    /* fail in your own way */
-}
+    try {
+        /* actual code */
+    } catch {
+        /* fail in your own way */
+    }
 
 
 Dataset properties
