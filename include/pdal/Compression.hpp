@@ -49,6 +49,7 @@
 #endif
 
 #include <pdal/Dimension.hpp>
+#include <pdal/util/OStream.hpp>
 
 #include <map>
 #include <vector>
@@ -168,7 +169,7 @@ public:
     ~LazPerfCompressor()
     {
         if (!m_done)
-            std::cerr << "LasPerfCompressor destroyed without a call "
+            std::cerr << "LazPerfCompressor destroyed without a call "
                "to done()";
     }
 
@@ -202,6 +203,110 @@ private:
     Compressor m_compressor;
     size_t m_pointSize;
     bool m_done;
+};
+
+class LazPerfVlrCompressor
+{
+public:
+    LazPerfVlrCompressor(std::ostream& stream) :
+        m_stream(stream), m_outputStream(stream), m_chunksize(50000),
+        m_chunkPointsWritten(0), m_chunkInfoPos(0), m_chunkOffset(0)
+    {}
+
+    ~LazPerfVlrCompressor()
+    {
+        if (m_encoder)
+            std::cerr << "LazPerfVlrCompressor destroyed without a call "
+               "to done()";
+    }
+
+
+    void compress(const char *inbuf)
+    {
+        // First time through.
+        if (!m_encoder || !m_compressor)
+        {
+            // Get the position 
+            m_chunkInfoPos = m_stream.tellp();
+            // Seek over the chunk info offset value
+            m_stream.seekp(sizeof(uint64_t), std::ios::cur);
+            resetCompressor();
+        }
+        else if (m_chunkPointsWritten == m_chunksize)
+        {
+            resetCompressor();
+            newChunk();
+        }
+        m_compressor->compress(inbuf);
+        m_chunkPointsWritten++;
+    }
+
+    void done()
+    {
+        // Close and clear the point encoder.
+        m_encoder->done();
+        m_encoder.reset();
+
+        // Save our current position.  Go to the location where we need
+        // to write the chunk table offset at the beginning of the point data.
+        std::streampos chunkTablePos = m_stream.tellp();
+        m_stream.seekp(m_chunkInfoPos);
+        OLeStream out(&m_stream);
+        out << (uint64_t)chunkTablePos;
+
+        // Move to the start of the chunk table.
+        m_stream.seekp(chunkTablePos);
+
+        // Write the chunk table header.
+        out << (uint32_t)0;  // Version (?)
+        out << (uint32_t)m_chunkTable.size();
+
+        // Encode and write the chunk table.
+        OutputStream outputStream(m_stream);
+        Encoder encoder(outputStream);
+        laszip::compressors::integer compressor(32, 2);
+
+        uint32_t predictor = 0;
+        for (uint32_t offset : m_chunkTable)
+        {
+            offset = htole32(offset);
+            compressor.compress(encoder, predictor, offset, 1);
+            predictor = offset;
+        }
+        encoder.done();
+    }
+
+private:
+    void resetCompressor()
+    {
+        m_encoder->done();
+        m_encoder.reset(new Encoder(m_outputStream));
+        m_compressor = laszip::factory::build_compressor(*m_encoder, m_schema);
+    }
+
+    void newChunk()
+    {
+        std::streampos offset = m_stream.tellp();
+        m_chunkTable.push_back((uint32_t)(offset - m_chunkOffset));
+        m_chunkOffset = offset;
+        m_chunkPointsWritten = 0;
+    }
+
+    typedef laszip::io::__ofstream_wrapper<std::ostream> OutputStream;
+    typedef laszip::encoders::arithmetic<OutputStream> Encoder;
+    typedef laszip::formats::dynamic_compressor Compressor;
+    typedef laszip::factory::record_schema Schema;
+
+    std::ostream& m_stream;
+    OutputStream m_outputStream;
+    std::unique_ptr<Encoder> m_encoder;
+    Compressor::ptr m_compressor;
+    Schema m_schema;
+    uint32_t m_chunksize;
+    uint32_t m_chunkPointsWritten;
+    std::streampos m_chunkInfoPos;
+    std::streampos m_chunkOffset;
+    std::vector<uint32_t> m_chunkTable;
 };
 
 
@@ -288,6 +393,10 @@ private:
     uint32_t m_chunksize;
     uint32_t m_chunkPointsRead;
 };
+
+#else
+
+typedef char LazPerfVlrDecompressor;
 
 #endif  // PDAL_HAVE_LAZPERF
 

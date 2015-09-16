@@ -38,6 +38,7 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <iostream>
 
+#include <pdal/Compression.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/util/Inserter.hpp>
@@ -61,7 +62,7 @@ CREATE_STATIC_PLUGIN(1, 0, LasWriter, Writer, s_info)
 
 std::string LasWriter::getName() const { return s_info.name; }
 
-LasWriter::LasWriter() : m_ostream(NULL)
+LasWriter::LasWriter() : m_ostream(NULL), m_compression(LasCompression::None)
 {
     m_majorVersion.setDefault(1);
     m_minorVersion.setDefault(2);
@@ -93,8 +94,9 @@ Options LasWriter::getDefaultOptions()
     Options options;
     LasHeader header;
 
-    options.add("filename", "", "Name of the file for LAS/LAZ output.");
-    options.add("compression", false, "Do we LASzip-compress the data?");
+    options.add("filename", "", "Output file specification.");
+    options.add("compression", "none", "Compression engine to use ('laszip' "
+        "or 'lazperf'.");
     options.add("major_version", 1, "LAS Major version");
     options.add("minor_version", 2, "LAS Minor version");
     options.add("dataformat_id", 3, "Point format to write");
@@ -123,18 +125,31 @@ Options LasWriter::getDefaultOptions()
 void LasWriter::processOptions(const Options& options)
 {
     if (options.hasOption("a_srs"))
-        setSpatialReference(options.getValueOrDefault("a_srs", std::string()));
-    m_lasHeader.setCompressed(options.getValueOrDefault("compression", false));
+        setSpatialReference(options.getValueOrDefault<std::string>("a_srs"));
+
+    std::string compression =
+        options.getValueOrDefault<std::string>("compression");
+    compression = Utils::toupper(compression);
+std::cerr << "Compression = " << compression << "!\n";
+    if (compression == "LASZIP" || compression == "TRUE")
+        m_compression = LasCompression::LasZip;
+    else if (compression == "LAZPERF")
+        m_compression = LasCompression::LazPerf;
+    else
+        m_compression = LasCompression::None;
+    if (m_compression != LasCompression::None)
+        m_lasHeader.setCompressed(true);
+#if !defined(PDAL_HAVE_LASZIP) && !defined(PDAL_HAVE_LAZPERF)
+    if (m_compression != LasCompression::None)
+        throw pdal_error("Can't write LAZ output.  "
+            "PDAL not built with LASzip or LAZperf.");
+#endif
+
     m_discardHighReturnNumbers = options.getValueOrDefault(
         "discard_high_return_numbers", false);
     StringList extraDims = options.getValueOrDefault<StringList>("extra_dims");
     m_extraDims = LasUtils::parse(extraDims);
 
-#ifndef PDAL_HAVE_LASZIP
-    if (m_lasHeader.compressed())
-        throw pdal_error("Can't write LAZ output.  "
-            "PDAL not built with LASzip.");
-#endif // PDAL_HAVE_LASZIP
     fillForwardList(options);
     getHeaderOptions(options);
     getVlrOptions(options);
@@ -600,6 +615,15 @@ void LasWriter::fillHeader(MetadataNode& forward)
 
 void LasWriter::readyCompression()
 {
+    if (m_compression == LasCompression::LasZip)
+        readyLasZipCompression();
+    else if (m_compression == LasCompression::LazPerf)
+        readyLazPerfCompression();
+}
+
+
+void LasWriter::readyLasZipCompression()
+{
 #ifdef PDAL_HAVE_LASZIP
     m_zipPoint.reset(new ZipPoint(m_lasHeader.pointFormat(),
         m_lasHeader.pointLen()));
@@ -608,6 +632,28 @@ void LasWriter::readyCompression()
     // rewrite that bit in finishOutput() to fix it up.
     std::vector<uint8_t> data = m_zipPoint->vlrData();
     addVlr(LASZIP_USER_ID, LASZIP_RECORD_ID, "http://laszip.org", data);
+#endif
+}
+
+
+void LasWriter::readyLazPerfCompression()
+{
+#ifdef PDAL_HAVE_LAZPERF
+    if (m_lasHeader.versionAtLeast(1, 4))
+        throw pdal_error("Can't write version 1.4 output with LAZperf.");
+
+    laszip::factory::record_schema schema;
+    schema.push(laszip::factory::record_item::POINT10);
+    if (m_lasHeader.hasTime())
+        schema.push(laszip::factory::record_item::GPSTIME);
+    if (m_lasHeader.hasColor())
+        schema.push(laszip::factory::record_item::RGB12);
+    laszip::io::laz_vlr zipvlr = laszip::io::laz_vlr::from_schema(schema);
+    std::vector<uint8_t> data(zipvlr.size());
+    zipvlr.extract((char *)data.data());
+    addVlr(LASZIP_USER_ID, LASZIP_RECORD_ID, "http://laszip.org", data);
+
+    m_compressor.reset(new LazPerfVlrCompressor(*m_ostream));
 #endif
 }
 
@@ -643,7 +689,6 @@ void LasWriter::writeView(const PointViewPtr view)
 
     const PointView& viewRef(*view.get());
 
-    //ABELL - Removed callback handling for now.
     point_count_t remaining = view->size();
     PointId idx = 0;
     while (remaining)
@@ -652,33 +697,49 @@ void LasWriter::writeView(const PointViewPtr view)
         idx += filled;
         remaining -= filled;
 
-#ifdef PDAL_HAVE_LASZIP
-        if (m_lasHeader.compressed())
-        {
-            char *pos = buf.data();
-            for (point_count_t i = 0; i < filled; i++)
-            {
-                memcpy(m_zipPoint->m_lz_point_data.data(), pos, pointLen);
-                if (!m_zipper->write(m_zipPoint->m_lz_point))
-                {
-                    std::ostringstream oss;
-                    const char* err = m_zipper->get_error();
-                    if (err == NULL)
-                        err = "(unknown error)";
-                    oss << "Error writing point: " << std::string(err);
-                    throw pdal_error(oss.str());
-                }
-                pos += pointLen;
-            }
-        }
+        if (m_compression == LasCompression::LasZip)
+            writeLasZipBuf(buf.data(), pointLen, filled);
+        else if (m_compression == LasCompression::LazPerf)
+            writeLazPerfBuf(buf.data(), pointLen, filled);
         else
             m_ostream->write(buf.data(), filled * pointLen);
-#else
-        m_ostream->write(buf.data(), filled * pointLen);
-#endif
     }
     Utils::writeProgress(m_progressFd, "DONEVIEW",
         std::to_string(view->size()));
+}
+
+
+void LasWriter::writeLasZipBuf(char *pos, size_t pointLen, point_count_t numPts)
+{
+#ifdef PDAL_HAVE_LASZIP
+    for (point_count_t i = 0; i < numPts; i++)
+    {
+        memcpy(m_zipPoint->m_lz_point_data.data(), pos, pointLen);
+        if (!m_zipper->write(m_zipPoint->m_lz_point))
+        {
+            std::ostringstream oss;
+            const char* err = m_zipper->get_error();
+            if (err == NULL)
+                err = "(unknown error)";
+            oss << "Error writing point: " << std::string(err);
+            throw pdal_error(oss.str());
+        }
+        pos += pointLen;
+    }
+#endif
+}
+
+
+void LasWriter::writeLazPerfBuf(char *pos, size_t pointLen,
+    point_count_t numPts)
+{
+#ifdef PDAL_HAVE_LAZPERF
+    for (point_count_t i = 0; i < numPts; i++)
+    {
+        m_compressor->compress(pos);
+        pos += pointLen;
+    }
+#endif
 }
 
 
@@ -882,13 +943,10 @@ void LasWriter::doneFile()
 
 void LasWriter::finishOutput()
 {
-    //ABELL - The zipper has to be closed right after all the points
-    // are written or bad things happen since this call expects the
-    // stream to be positioned at a particular position.
-#ifdef PDAL_HAVE_LASZIP
-    if (m_lasHeader.compressed())
-        m_zipper->close();
-#endif
+    if (m_compression == LasCompression::LasZip)
+        finishLasZipOutput();
+    else if (m_compression == LasCompression::LazPerf)
+        finishLazPerfOutput();
 
     log()->get(LogLevel::Debug) << "Wrote " <<
         m_summaryData->getTotalNumPoints() <<
@@ -917,14 +975,22 @@ void LasWriter::finishOutput()
     out << m_lasHeader;
     out.seek(m_lasHeader.pointOffset());
 
-#ifdef PDAL_HAVE_LASZIP
-    if (m_lasHeader.compressed())
-    {
-        m_zipper.reset();
-        m_zipPoint.reset();
-    }
-#endif
     m_ostream->flush();
+}
+
+void LasWriter::finishLasZipOutput()
+{
+#ifdef PDAL_HAVE_LASZIP
+    m_zipper->close();
+#endif
+}
+
+
+void LasWriter::finishLazPerfOutput()
+{
+#ifdef PDAL_HAVE_LAZPERF
+    m_compressor->done();
+#endif
 }
 
 } // namespace pdal
