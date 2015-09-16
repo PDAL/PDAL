@@ -1,6 +1,5 @@
 from xml.etree import ElementTree
-
-import version
+import pdal
 
 
 class XMLElement(object):
@@ -26,7 +25,7 @@ class Pipeline(XMLElement):
 
     def __init__(self, customversion=None):
         super(Pipeline, self).__init__()
-        self.attrib = {'version': customversion or version.as_string()}
+        self.attrib = {'version': customversion or pdal.__version__}
 
     def xml(self):
         element = super(Pipeline, self).xml()

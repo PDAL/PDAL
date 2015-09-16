@@ -259,7 +259,7 @@ bool XMLSchema::validate(xmlDocPtr doc, const std::string& xsd)
     xmlDocPtr schemaDoc = xmlReadMemory(xsd.c_str(), xsd.size(),
         NULL, NULL, parserOption);
     xmlSchemaParserCtxtPtr parserCtxt = xmlSchemaNewDocParserCtxt(schemaDoc);
-    xmlSchemaSetParserStructuredErrors(parserCtxt, 
+    xmlSchemaSetParserStructuredErrors(parserCtxt,
         &OCISchemaParserStructuredErrorHandler, m_global_context);
     xmlSchemaPtr schema = xmlSchemaParse(parserCtxt);
     xmlSchemaValidCtxtPtr validCtxt = xmlSchemaNewValidCtxt(schema);
@@ -561,7 +561,7 @@ void XMLSchema::writeXml(xmlTextWriterPtr w) const
         {
             std::ostringstream out;
             out.precision(15);
-           
+
             out << xform.m_scale;
             std::string scale = out.str();
 
@@ -619,6 +619,9 @@ void XMLSchema::writeXml(xmlTextWriterPtr w) const
     xmlTextWriterWriteElementNS(w, (const xmlChar*) "pc",
         (const xmlChar*)"orientation", NULL,
         (const xmlChar*)orientation.str().c_str());
+
+    xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc", (const xmlChar*)"version", NULL,
+                                (const xmlChar*)PDAL_XML_SCHEMA_VERSION);
 
 
     xmlTextWriterEndElement(w);

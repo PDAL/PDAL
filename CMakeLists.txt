@@ -28,13 +28,14 @@ mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
 
 # the next line is the ONLY place in the entire pdal system where
 # the version info is hard-coded
-set(PDAL_VERSION_STRING "1.0.0.b1" CACHE STRING "PDAL version" FORCE)
+set(PDAL_VERSION_STRING "1.0.1" CACHE STRING "PDAL version" FORCE)
 
 DISSECT_VERSION()
 GET_OS_INFO()
 SET_INSTALL_DIRS()
 
-SET(PDAL_LIB_SOVERSION "0.0.0")
+set(PDAL_API_VERSION "1")
+set(PDAL_BUILD_VERSION "1.0.0")
 
 # Name of C++ library
 
@@ -47,14 +48,16 @@ SET(PDAL_LIB_SOVERSION "0.0.0")
 # On OSX we reexport the symbols from libpdal_util.dylib into libpdalcpp.dylib
 # See src/CMakeLists.txt for the rest of the magic.
 #
-if (APPLE OR WINDOWS)
+if (APPLE OR WIN32)
     set(PDAL_LIB_NAME pdalcpp)
     set(PDAL_BASE_LIB_NAME pdalcpp)
     set(PDAL_UTIL_LIB_NAME pdal_util)
+    set(PDAL_PLANG_LIB_NAME pdal_plang)
 else()
     set(PDAL_LIB_NAME pdalcpp)
     set(PDAL_BASE_LIB_NAME pdal_base)
     set(PDAL_UTIL_LIB_NAME pdal_util)
+    set(PDAL_PLANG_LIB_NAME pdal_plang)
 endif()
 
 set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
@@ -264,6 +267,9 @@ add_subdirectory(filters)
 add_subdirectory(kernels)
 add_subdirectory(src)
 add_subdirectory(tools)
+if (BUILD_PLUGIN_PYTHON)
+    add_subdirectory(src/plang)
+endif()
 
 if(WITH_TESTS)
   # This is fixed in trunk
@@ -335,6 +341,7 @@ list(APPEND CPACK_SOURCE_IGNORE_FILES "Testing")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "PDAL.build/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/bin/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/lib/")
+list(APPEND CPACK_SOURCE_IGNORE_FILES "/build/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "Makefile")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "CMakeFiles")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "CTestTestfile.cmake")
@@ -342,7 +349,6 @@ list(APPEND CPACK_SOURCE_IGNORE_FILES "/test/data/local/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/doc/doxygen/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/doc/build/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/doc/presentations/")
-list(APPEND CPACK_SOURCE_IGNORE_FILES "/scripts/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/cmake/examples/")
 
 include(CPack)

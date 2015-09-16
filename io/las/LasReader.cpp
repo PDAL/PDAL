@@ -115,8 +115,8 @@ QuickInfo LasReader::inspect()
     Dimension::IdList dims = layout->dims();
     for (auto di = dims.begin(); di != dims.end(); ++di)
         qi.m_dimNames.push_back(layout->dimName(*di));
-    qi.m_pointCount =
-        Utils::saturation_cast<point_count_t>(m_lasHeader.pointCount());
+    if (!Utils::numericCast(m_lasHeader.pointCount(), qi.m_pointCount))
+        qi.m_pointCount = std::numeric_limits<point_count_t>::max();
     qi.m_bounds = m_lasHeader.getBounds();
     qi.m_srs = getSrsFromVlrs();
     qi.m_valid = true;

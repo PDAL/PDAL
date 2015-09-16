@@ -47,7 +47,7 @@ static GlobalEnvironment* s_environment = 0;
 GlobalEnvironment& GlobalEnvironment::get()
 {
     static std::once_flag flag;
-    
+
     auto init = []()
     {
         s_environment = new GlobalEnvironment();
@@ -97,7 +97,7 @@ void GlobalEnvironment::initializeGDAL(LogPtr log, bool gdalDebugOutput)
         OGRRegisterAll();
         m_gdalDebug.reset(new gdal::ErrorHandler(gdalDebugOutput, log));
     };
-    
+
     std::call_once(flag, init, log, gdalDebugOutput);
 }
 

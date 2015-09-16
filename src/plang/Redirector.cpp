@@ -6,7 +6,7 @@
 //
 // Blog article: http://mateusz.loskot.net/?p=2819
 
-#include "Redirector.hpp"
+#include <pdal/plang/Redirector.hpp>
 
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127)  // conditional expression is constant

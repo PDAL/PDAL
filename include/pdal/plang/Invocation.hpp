@@ -81,7 +81,9 @@ public:
     // possible names from the schema)
     void getOutputNames(std::vector<std::string>& names);
 
-    static int getPythonDataType(Dimension::Type::Enum t);
+protected:
+    PyObject* m_metaIn;
+    PyObject* m_metaOut;
 
 private:
     void cleanup();

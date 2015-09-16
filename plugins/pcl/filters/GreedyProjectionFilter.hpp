@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2013, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,34 +32,34 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "Script.hpp"
+#pragma once
 
-#ifdef PDAL_COMPILER_MSVC
-#  pragma warning(disable: 4127) // conditional expression is constant
-#endif
+#include <pdal/Filter.hpp>
+#include <pdal/StageFactory.hpp>
 
 namespace pdal
 {
-namespace plang
+
+class PDAL_DLL GreedyProjectionFilter : public Filter
 {
+public:
+    GreedyProjectionFilter() : Filter()
+    {}
 
-Script::Script(const std::string& source, const std::string& module,
-    const std::string& function) : m_source(source) , m_module(module),
-    m_function(function)
-{
-}
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
+    Options getDefaultOptions();
 
-std::ostream& operator << (std::ostream& os, Script const& script)
-{
-    os << "source=[" << strlen(script.source()) << " bytes], ";
-    os << "module=" << script.module() << ", ";
-    os << "function=" << script.function();
-    os << std::endl;
+private:
+    // double m_leaf_x, m_leaf_y, m_leaf_z;
 
-    return os;
-}
+    virtual void processOptions(const Options& options);
+    virtual PointViewSet run(PointViewPtr view);
 
-} //namespace plang
-} //namespace pdal
+    GreedyProjectionFilter& operator=(const GreedyProjectionFilter&); // not implemented
+    GreedyProjectionFilter(const GreedyProjectionFilter&); // not implemented
+};
 
+} // namespace pdal

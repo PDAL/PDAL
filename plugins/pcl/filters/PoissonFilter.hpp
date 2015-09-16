@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2013, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -34,28 +34,33 @@
 
 #pragma once
 
-#include "../plang/Invocation.hpp"
-
-#include <pdal/PointView.hpp>
+#include <pdal/Filter.hpp>
+#include <pdal/StageFactory.hpp>
 
 namespace pdal
 {
-namespace plang
-{
 
-class PDAL_DLL BufferedInvocation : public Invocation
+class PDAL_DLL PoissonFilter : public Filter
 {
 public:
-    BufferedInvocation(const Script& script);
+    PoissonFilter() : Filter()
+    {}
 
-    void begin(PointView& view);
-    void end(PointView& view);
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+
+    Options getDefaultOptions();
 
 private:
-    std::vector<void *> m_buffers;
-    BufferedInvocation& operator=(BufferedInvocation const& rhs); // nope
+    int m_depth;
+    float m_point_weight;
+
+    virtual void processOptions(const Options& options);
+    virtual PointViewSet run(PointViewPtr view);
+
+    PoissonFilter& operator=(const PoissonFilter&); // not implemented
+    PoissonFilter(const PoissonFilter&); // not implemented
 };
 
-} // namespace plang
 } // namespace pdal
-

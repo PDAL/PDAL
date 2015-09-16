@@ -12,17 +12,17 @@ Contents:
 
    download
    compilation/index
-   commandline/index
    apps
    stages/index
    pipeline
-   vagranttutorial
+   vagrant
    community
    faq
    development/index
    tutorial/index
    api/index
    metadata
+   vagrant
    copyright
 
 Indices and tables

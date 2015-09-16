@@ -1,7 +1,6 @@
 import unittest
-
-import pipeline_xml as pxml
-import version
+import pdal
+import pdal.pipeline_xml as pxml
 
 class TestXML(unittest.TestCase):
 
@@ -9,7 +8,7 @@ class TestXML(unittest.TestCase):
         p = pxml.Pipeline()
         p.source = pxml.Reader('foo')
         xml = p.xml()
-        self.assertEqual(xml.getroot().attrib['version'], version.as_string())
+        self.assertEqual(xml.getroot().attrib['version'], pdal.__version__)
         self.assertEqual(xml.find('Reader').attrib['type'],
                          'readers.foo')
 
@@ -36,7 +35,7 @@ class TestXML(unittest.TestCase):
         writer = pxml.Writer('foo')
         writer.source = pxml.Reader('bar')
         xml = writer.xml()
-        self.assert_(xml.find('Reader') is not None)
+        self.assertTrue(xml.find('Reader') is not None)
 
     def test_multifilter_source(self):
         mfilter = pxml.MultiFilter('multi')
@@ -44,11 +43,9 @@ class TestXML(unittest.TestCase):
         xml = mfilter.xml()
         self.assertEqual(len(xml.findall('Reader')), 2)
 
-    def test_reader_source_error(self):
-        reader = pxml.Reader('foo')
-        otherreader = pxml.Reader('bar')
-        self.assertRaises(ValueError, setattr, reader, 'source', otherreader)
-
+def test_suite():
+    return unittest.TestSuite(
+        [TestXML])
 
 if __name__ == '__main__':
     unittest.main()

@@ -44,14 +44,16 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
-    "filters.pclblock",
-    "PCL Block implementation",
-    "http://pdal.io/stages/filters.pclblock.html" );
+static PluginInfo const s_info =
+    PluginInfo("filters.pclblock", "PCL Block implementation",
+               "http://pdal.io/stages/filters.pclblock.html");
 
 CREATE_SHARED_PLUGIN(1, 0, PCLBlock, Filter, s_info)
 
-std::string PCLBlock::getName() const { return s_info.name; }
+std::string PCLBlock::getName() const
+{
+    return s_info.name;
+}
 
 /** \brief This method processes the PointView through the given pipeline. */
 
@@ -72,9 +74,9 @@ PointViewSet PCLBlock::run(PointViewPtr input)
         log()->floatPrecision(8);
 
     log()->get(LogLevel::Debug2) <<
-        input->getFieldAs<double>(Dimension::Id::X, 0) << ", " <<
-        input->getFieldAs<double>(Dimension::Id::Y, 0) << ", " <<
-        input->getFieldAs<double>(Dimension::Id::Z, 0) << std::endl;
+                                 input->getFieldAs<double>(Dimension::Id::X, 0) << ", " <<
+                                 input->getFieldAs<double>(Dimension::Id::Y, 0) << ", " <<
+                                 input->getFieldAs<double>(Dimension::Id::Z, 0) << std::endl;
     log()->get(LogLevel::Debug2) << "Process PCLBlock..." << std::endl;
 
     BOX3D buffer_bounds;
@@ -86,7 +88,7 @@ PointViewSet PCLBlock::run(PointViewPtr input)
     pclsupport::PDALtoPCD(input, *cloud, buffer_bounds);
 
     log()->get(LogLevel::Debug2) << cloud->points[0].x << ", " <<
-        cloud->points[0].y << ", " << cloud->points[0].z << std::endl;
+                                 cloud->points[0].y << ", " << cloud->points[0].z << std::endl;
 
     int level = log()->getLevel();
     switch (level)
@@ -146,4 +148,3 @@ PointViewSet PCLBlock::run(PointViewPtr input)
 }
 
 } // namespace pdal
-

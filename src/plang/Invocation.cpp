@@ -32,8 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "Invocation.hpp"
-#include "Environment.hpp"
+#include <pdal/plang/Invocation.hpp>
+#include <pdal/plang/Environment.hpp>
 
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127) // conditional expression is constant
@@ -44,19 +44,40 @@
 #undef tolower
 #undef isspace
 
-//#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 
 #define NO_IMPORT_ARRAY
 #define PY_ARRAY_UNIQUE_SYMBOL PDAL_ARRAY_API
 #include <numpy/arrayobject.h>
+
+namespace
+{
+
+int argCount(PyObject *function)
+{
+    PyObject *module = PyImport_ImportModule("inspect");
+    if (!module)
+        return false;
+    PyObject *dictionary = PyModule_GetDict(module);
+    PyObject *getargFunc = PyDict_GetItemString(dictionary, "getargspec");
+    PyObject *inArgs = PyTuple_New(1);
+    PyTuple_SetItem(inArgs, 0, function);
+    PyObject *outArgs = PyObject_CallObject(getargFunc, inArgs);
+    PyObject *arglist = PyTuple_GetItem(outArgs, 0);
+    return PyList_Size(arglist);
+}
+
+}
 
 namespace pdal
 {
 namespace plang
 {
 
-Invocation::Invocation(const Script& script)
-    : m_script(script)
+Invocation::Invocation(const Script& script) :
+    m_metaIn(NULL)
+    , m_metaOut(NULL)
+    , m_script(script)
     , m_bytecode(NULL)
     , m_module(NULL)
     , m_dictionary(NULL)
@@ -66,6 +87,7 @@ Invocation::Invocation(const Script& script)
     , m_scriptArgs(NULL)
     , m_scriptResult(NULL)
 {
+    plang::Environment::get();
     resetArguments();
 }
 
@@ -81,14 +103,14 @@ void Invocation::compile()
     m_bytecode = Py_CompileString(m_script.source(), m_script.module(),
         Py_file_input);
     if (!m_bytecode)
-        throw error(getTraceback());
+        throw pdal::pdal_error(getTraceback());
 
     Py_INCREF(m_bytecode);
 
     m_module = PyImport_ExecCodeModule(const_cast<char*>(m_script.module()),
         m_bytecode);
     if (!m_module)
-        throw error(getTraceback());
+        throw pdal::pdal_error(getTraceback());
 
     m_dictionary = PyModule_GetDict(m_module);
     m_function = PyDict_GetItemString(m_dictionary, m_script.function());
@@ -97,10 +119,10 @@ void Invocation::compile()
         std::ostringstream oss;
         oss << "unable to find target function '" << m_script.function() <<
             "' in module.";
-        throw error(oss.str());
+        throw pdal::pdal_error(oss.str());
     }
     if (!PyCallable_Check(m_function))
-        throw error(getTraceback());
+        throw pdal::pdal_error(getTraceback());
 }
 
 
@@ -114,6 +136,8 @@ void Invocation::cleanup()
         Py_XDECREF(m_pyInputArrays[i]);
     m_pyInputArrays.clear();
     Py_XDECREF(m_bytecode);
+    Py_XDECREF(m_metaIn);
+    Py_XDECREF(m_metaOut);
 }
 
 
@@ -122,6 +146,8 @@ void Invocation::resetArguments()
     cleanup();
     m_varsIn = PyDict_New();
     m_varsOut = PyDict_New();
+    m_metaIn = PyList_New(0);
+    m_metaOut = PyList_New(0);
 }
 
 
@@ -133,9 +159,14 @@ void Invocation::insertArgument(std::string const& name, uint8_t* data,
     npy_intp* dims = &mydims;
     npy_intp stride = Dimension::size(t);
     npy_intp* strides = &stride;
-    int flags = NPY_CARRAY; // NPY_BEHAVED
 
-    const int pyDataType = getPythonDataType(t);
+#ifdef NPY_ARRAY_CARRAY
+    int flags = NPY_ARRAY_CARRAY;
+#else
+    int flags = NPY_CARRAY;
+#endif
+
+    const int pyDataType = plang::Environment::getPythonDataType(t);
 
     PyObject* pyArray = PyArray_New(&PyArray_Type, nd, dims, pyDataType,
         strides, data, 0, flags, NULL);
@@ -149,15 +180,15 @@ void *Invocation::extractResult(std::string const& name,
 {
     PyObject* xarr = PyDict_GetItemString(m_varsOut, name.c_str());
     if (!xarr)
-        throw error("plang output variable '" + name + "' not found.");
+        throw pdal::pdal_error("plang output variable '" + name + "' not found.");
     if (!PyArray_Check(xarr))
-        throw error("Plang output variable  '" + name +
+        throw pdal::pdal_error("Plang output variable  '" + name +
             "' is not a numpy array");
 
     PyArrayObject* arr = (PyArrayObject*)xarr;
 
     npy_intp one = 0;
-    const int pyDataType = getPythonDataType(t);
+    const int pyDataType = pdal::plang::Environment::getPythonDataType(t);
     PyArray_Descr *dtype = PyArray_DESCR(arr);
 
     if (static_cast<uint32_t>(dtype->elsize) != Dimension::size(t))
@@ -166,7 +197,7 @@ void *Invocation::extractResult(std::string const& name,
         oss << "dtype of array has size " << dtype->elsize
             << " but PDAL dimension '" << name << "' has byte size of "
             << Dimension::size(t) << " bytes.";
-        throw error(oss.str());
+        throw pdal::pdal_error(oss.str());
     }
 
     using namespace Dimension;
@@ -177,7 +208,7 @@ void *Invocation::extractResult(std::string const& name,
         oss << "dtype of array has a signed integer type but the " <<
             "dimension data type of '" << name <<
             "' is not pdal::Signed.";
-        throw error(oss.str());
+        throw pdal::pdal_error(oss.str());
     }
 
     if (dtype->kind == 'u' && b != BaseType::Unsigned)
@@ -186,7 +217,7 @@ void *Invocation::extractResult(std::string const& name,
         oss << "dtype of array has a unsigned integer type but the " <<
             "dimension data type of '" << name <<
             "' is not pdal::Unsigned.";
-        throw error(oss.str());
+        throw pdal::pdal_error(oss.str());
     }
 
     if (dtype->kind == 'f' && b != BaseType::Floating)
@@ -194,7 +225,7 @@ void *Invocation::extractResult(std::string const& name,
         std::ostringstream oss;
         oss << "dtype of array has a float type but the " <<
             "dimension data type of '" << name << "' is not pdal::Floating.";
-        throw error(oss.str());
+        throw pdal::pdal_error(oss.str());
     }
     return PyArray_GetPtr(arr, &one);
 }
@@ -221,41 +252,6 @@ void Invocation::getOutputNames(std::vector<std::string>& names)
 }
 
 
-int Invocation::getPythonDataType(Dimension::Type::Enum t)
-{
-    using namespace Dimension;
-
-    switch (t)
-    {
-    case Type::Float:
-        return PyArray_FLOAT;
-    case Type::Double:
-        return PyArray_DOUBLE;
-    case Type::Signed8:
-        return PyArray_BYTE;
-    case Type::Signed16:
-        return PyArray_SHORT;
-    case Type::Signed32:
-        return PyArray_INT;
-    case Type::Signed64:
-        return PyArray_LONGLONG;
-    case Type::Unsigned8:
-        return PyArray_UBYTE;
-    case Type::Unsigned16:
-        return PyArray_USHORT;
-    case Type::Unsigned32:
-        return PyArray_UINT;
-    case Type::Unsigned64:
-        return PyArray_ULONGLONG;
-    default:
-        return -1;
-    }
-    assert(0);
-
-    return -1;
-}
-
-
 bool Invocation::hasOutputVariable(const std::string& name) const
 {
     return (PyDict_GetItemString(m_varsOut, name.c_str()) != NULL);
@@ -265,20 +261,26 @@ bool Invocation::hasOutputVariable(const std::string& name) const
 bool Invocation::execute()
 {
     if (!m_bytecode)
-        throw error("No code has been compiled");
+        throw pdal::pdal_error("No code has been compiled");
 
     Py_INCREF(m_varsIn);
     Py_INCREF(m_varsOut);
-    m_scriptArgs = PyTuple_New(2);
+    Py_ssize_t numArgs = argCount(m_function);
+    m_scriptArgs = PyTuple_New(numArgs);
     PyTuple_SetItem(m_scriptArgs, 0, m_varsIn);
-    PyTuple_SetItem(m_scriptArgs, 1, m_varsOut);
+    if (numArgs > 1)
+        PyTuple_SetItem(m_scriptArgs, 1, m_varsOut);
+    if (numArgs > 2)
+        PyTuple_SetItem(m_scriptArgs, 2, m_metaIn);
+    if (numArgs > 3)
+        PyTuple_SetItem(m_scriptArgs, 3, m_metaOut);
 
     m_scriptResult = PyObject_CallObject(m_function, m_scriptArgs);
     if (!m_scriptResult)
-        throw error(getTraceback());
+        throw pdal::pdal_error(getTraceback());
 
     if (!PyBool_Check(m_scriptResult))
-        throw error("User function return value not a boolean type.");
+        throw pdal::pdal_error("User function return value not a boolean type.");
 
     return (m_scriptResult == Py_True);
 }

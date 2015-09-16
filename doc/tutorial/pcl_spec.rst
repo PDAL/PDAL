@@ -156,7 +156,10 @@ Any JSON keys not recognized by the spec are blissfully ignored.
 ApproximateProgressiveMorphologicalFilter (APMF)
 ````````````````````````````````````````````````
 
-:pcl:`ApproximateProgressiveMorphologicalFilter <pcl::ApproximateProgressiveMorphologicalFilter>`
+.. seealso:
+
+    :ref:`filters.ground` utilizes ApproximateProgressiveMorphologicalFilter in
+    the context of a PDAL filter
 
 This filter removes nonground points to produce a bare-earth point cloud. It is
 similar to the ProgressiveMorphologicalFilter, but is potentially faster (and
@@ -225,7 +228,10 @@ setNegative: bool
 ConditionalRemoval
 ``````````````````
 
-:pcl:`ConditionalRemoval <pcl::ConditionalRemoval>`
+.. seealso::
+
+    :ref:`filters.range` implements support for this PCL operation as a
+    PDAL filter
 
 This filter removes normals outside of a given Z range.
 
@@ -263,8 +269,6 @@ normalZ: object `{"min": float, "max": float}`
 GridMinimum
 ```````````
 
-:pcl:`GridMinimum <pcl::GridMinimum>`
-
 This filter assembles a local 2D grid over a given PointCloud, then downsamples
 the data.
 
@@ -297,7 +301,6 @@ setResolution: float
 NormalEstimation
 ````````````````
 
-:pcl:`NormalEstimation <pcl::NormalEstimation>`
 
 **Description**
 
@@ -337,8 +340,6 @@ setRadiusSearch: float
 PassThrough
 ```````````
 
-:pcl:`PassThrough <pcl::PassThrough>`
-
 **Description**
 
 This filter allows the user to set min/max bounds on one dimension of the data.
@@ -376,9 +377,9 @@ setFilterFieldName: string (required)
 
     Only the `X`, `Y`, `Z`, `R`, `G`, `B`, and `Intensity` dimensions are
     supported.
-    
+
 .. note::
-    
+
     Although PDAL capitalizes the dimension names ("Z", "Intensity"), PCL
     requires the names be given in lower case ("z", "intensity").
 
@@ -391,7 +392,11 @@ setFilterLimits: object `{"min": float, "max": float}`
 ProgressiveMorphologicalFilter (PMF)
 ````````````````````````````````````
 
-:pcl:`ProgressiveMorphologicalFilter <pcl::ProgressiveMorphologialFilter>`
+
+.. seealso::
+
+    :ref:`filters.ground` implements support for this operation as a
+    PDAL filter
 
 **Description**
 
@@ -422,7 +427,7 @@ Example:
             ]
         }
     }
-   
+
 **Parameters**
 
 setMaxWindowSize: int
@@ -460,7 +465,11 @@ setNegative: bool
 RadiusOutlierRemoval
 ````````````````````
 
-:pcl:`RadiusOutlierRemoval <pcl::RadiusOutlierRemoval>`
+.. seealso::
+
+    :ref:`filters.radiusoutlier` implements support for this operation
+    as a PDAL filter
+
 
 **Description**
 
@@ -502,7 +511,10 @@ setRadiusSearch: float
 StatisticalOutlierRemoval
 `````````````````````````
 
-:pcl:`StatisticalOutlierRemoval <pcl::StatisticalOutlierRemoval>`
+.. seealso::
+
+    :ref:`filters.statisticaloutlier` implements support for this
+    operation as a PDAL filter
 
 **Description**
 
@@ -543,7 +555,11 @@ setStddevMulThresh: float
 VoxelGrid
 `````````
 
-:pcl:`VoxelGrid <pcl::VoxelGrid>`
+.. seealso::
+
+    :ref:`filters.voxelgrid` implements support for this operation as a
+    PDAL filter
+
 
 This filter assembles a local 3D grid over a given PointCloud, then downsamples
 and filters the data.

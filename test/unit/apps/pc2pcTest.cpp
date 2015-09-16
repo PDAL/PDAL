@@ -151,7 +151,7 @@ TEST(pc2pcTest, pc2pc_test_switches)
 #ifdef PDAL_HAVE_LASZIP
     // does --compress make a compressed file?
     stat = Utils::run_shell_command(cmd + " --input=" + inputLas +
-        " --output=" + outputLas + " --compress", output);
+        " --output=" + outputLas + " --writers.las.compression=true", output);
     EXPECT_EQ(stat, 0);
     EXPECT_TRUE(fileIsOkay(outputLas));
     EXPECT_TRUE(fileIsCompressed(outputLas));
@@ -168,7 +168,7 @@ TEST(pc2pcTest, pc2pc_test_switches)
 
     // does --a_srs add an SRS?
     fullCmd = cmd + " --input=" + inputLas + " --output=" + outputLas +
-        " --a_srs=epsg:4326";
+        " --readers.las.spatialreference=epsg:4326";
     stat = Utils::run_shell_command(fullCmd, output);
     EXPECT_EQ(stat, 0);
     EXPECT_TRUE(fileIsOkay(outputLas));
