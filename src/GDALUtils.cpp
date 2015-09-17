@@ -333,9 +333,9 @@ bool Raster::read(double x, double y, std::vector<double>& data)
     if (!getPixelAndLinePosition(x, y, m_inverse_transform, pixel, line))
         return false;
 
-    for (int i=1; i < m_band_count; ++i)
+    for (int i=0; i < m_band_count; ++i)
     {
-        GDALRasterBandH b = GDALGetRasterBand(m_ds, i);
+        GDALRasterBandH b = GDALGetRasterBand(m_ds, i+1);
         if (GDALRasterIO(b, GF_Read, pixel, line, 1, 1,
             &pix[0], 1, 1, GDT_CFloat64, 0, 0) == CE_None)
         {
