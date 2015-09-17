@@ -189,7 +189,7 @@ struct BandInfo
 };
 
 
-class Raster
+class PDAL_DLL Raster
 
 {
 
