@@ -147,9 +147,9 @@ point_count_t GDALReader::read(PointViewPtr view, point_count_t num)
     PointId nextId = view->size();
 
     std::array<double, 2> coords;
-    for(int col = 0; col < m_raster->m_raster_x_size; ++col)
+    for (int row = 0; row < m_raster->m_raster_y_size; ++row)
     {
-        for (int row = 0; row < m_raster->m_raster_y_size; ++row)
+        for(int col = 0; col < m_raster->m_raster_x_size; ++col)
         {
             m_raster->pixelToCoord(row, col, coords);
             view->setField(Dimension::Id::X, nextId, coords[0]);
@@ -169,6 +169,7 @@ point_count_t GDALReader::read(PointViewPtr view, point_count_t num)
         m_raster->readBand(band, b+1);
         std::stringstream oss;
         oss << "band-" << b+1;
+        log()->get(LogLevel::Info) << "Read band '" << oss.str() <<"'" << std::endl;
         pdal::Dimension::Id::Enum d = view->layout()->findProprietaryDim(oss.str());
         size_t dimSize = pdal::Dimension::size(band_types[b]); // count from 0
 

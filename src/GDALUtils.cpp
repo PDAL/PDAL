@@ -136,7 +136,6 @@ bool Raster::open()
     m_band_count = GDALGetRasterCount(m_ds);
 
     m_types = computePDALDimensionTypes();
-
     m_size = 0;
     for(auto t: m_types)
     {
@@ -235,9 +234,21 @@ bool Raster::readBand(std::vector<uint8_t>& data, int nBand)
 
     for (int iYBlock = 0; iYBlock < nYBlocks; iYBlock++)
     {
+        int nXValid(0); int nYValid(0);
         for (int iXBlock = 0; iXBlock < nXBlocks; iXBlock++)
         {
-            int offset = iXBlock * (nXBlockSize * nYBlockSize) + iYBlock * (nXBlockSize * nYBlockSize);
+
+             if ((iXBlock+1) * nXBlockSize > GDALGetRasterBandXSize(band))
+                 nXValid = GDALGetRasterBandXSize(band) - iXBlock * nXBlockSize;
+             else
+                 nXValid = nXBlockSize;
+             if ((iYBlock+1) * nYBlockSize > GDALGetRasterBandYSize(band))
+                 nYValid = GDALGetRasterBandYSize(band) - iYBlock * nYBlockSize;
+             else
+                 nYValid = nYBlockSize;
+
+            int offset = iXBlock * (nXValid * nYValid) + iYBlock * (nXValid * nYValid);
+
             CPLErr err = GDALReadBlock(band, iXBlock, iYBlock, data.data() + offset);
             if (err != CPLE_None)
             {
