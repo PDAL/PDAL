@@ -73,12 +73,10 @@ private:
     virtual void ready(PointTableRef table);
     virtual point_count_t read(PointViewPtr view, point_count_t num);
     virtual void done(PointTableRef table);
+    virtual QuickInfo inspect();
 
-    DimensionMap m_vertexDimensions;
-    std::string m_rasterFilename;
-
-
-    GDALDatasetH m_ds;
+    std::unique_ptr<gdal::Raster> m_raster;
+    point_count_t m_index;
 
 };
 }

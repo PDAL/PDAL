@@ -80,13 +80,19 @@ public:
         { return m_ref.get() != NULL; }
     OGRSpatialReferenceH get() const
         { return m_ref.get(); }
-    bool empty() const
+    std::string wkt() const
     {
         char *pszWKT = NULL;
         OSRExportToWkt(m_ref.get(), &pszWKT);
         bool valid = (bool)*pszWKT;
+        std::string output(pszWKT);
         CPLFree(pszWKT);
-        return (!valid);
+        return output;
+    }
+
+    bool empty() const
+    {
+        return (wkt().size() != 0);
     }
 
 private:
@@ -191,14 +197,19 @@ public:
     Raster(const std::string& filename);
     ~Raster();
     bool open();
+    void close();
 
     bool read(double x, double y, std::vector<double>& data);
     inline std::vector<pdal::Dimension::Type::Enum> getPDALDimensionTypes() const
     {
         return m_types;
     }
+    bool readBand(std::vector<uint8_t>& band, int nBand);
 
-//     std::vector<gdal::BandInfo> m_bands;
+    void pixelToCoord(int column, int row, std::array<double, 2>& output) const;
+
+    SpatialReference getSpatialRef() const;
+
     std::string m_filename;
 
     std::array<double, 6> m_forward_transform;
@@ -206,9 +217,14 @@ public:
 
     int m_raster_x_size;
     int m_raster_y_size;
+
+    int m_block_x;
+    int m_block_y;
+
     size_t m_size;
     int m_band_count;
     std::vector<pdal::Dimension::Type::Enum> m_types;
+    std::vector<std::array<double, 2>> m_block_sizes;
 
     GDALDatasetH m_ds;
 
@@ -216,7 +232,8 @@ private:
     bool getPixelAndLinePosition(double x, double y,
                                  std::array<double, 6> const& inverse,
                                  int32_t& pixel, int32_t& line);
-    std::vector<pdal::Dimension::Type::Enum> computePDALDimensionTypes();
+    std::vector<pdal::Dimension::Type::Enum> computePDALDimensionTypes() const;
+    std::vector<std::array<int, 2>> fetchGDALBlockSizes() const;
 
 };
 

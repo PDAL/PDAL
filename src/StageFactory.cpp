@@ -53,6 +53,7 @@
 // readers
 #include <bpf/BpfReader.hpp>
 #include <faux/FauxReader.hpp>
+#include <gdal/GDALReader.hpp>
 #include <las/LasReader.hpp>
 #include <optech/OptechReader.hpp>
 #include <pdal/BufferReader.hpp>
@@ -200,6 +201,7 @@ StageFactory::StageFactory(bool no_plugins)
     // readers
     PluginManager::initializePlugin(BpfReader_InitPlugin);
     PluginManager::initializePlugin(FauxReader_InitPlugin);
+    PluginManager::initializePlugin(GDALReader_InitPlugin);
     PluginManager::initializePlugin(LasReader_InitPlugin);
     PluginManager::initializePlugin(OptechReader_InitPlugin);
     PluginManager::initializePlugin(PlyReader_InitPlugin);
