@@ -92,17 +92,11 @@ QuickInfo GDALReader::inspect()
     m_raster = std::unique_ptr<gdal::Raster>(new gdal::Raster(m_filename));
     m_raster->open();
 
-//     Dimension::IdList dims = layout->dims();
-//     for (auto di = dims.begin(); di != dims.end(); ++di)
-//         qi.m_dimNames.push_back(layout->dimName(*di));
-//     if (!Utils::numericCast(m_lasHeader.pointCount(), qi.m_pointCount))
     qi.m_pointCount = m_raster->m_raster_x_size * m_raster->m_raster_y_size;
 //     qi.m_bounds = m_lasHeader.getBounds();
     qi.m_srs = m_raster->getSpatialRef();
     qi.m_valid = true;
 
-    PointTable table;
-    done(table);
 
     return qi;
 }
@@ -176,7 +170,6 @@ point_count_t GDALReader::read(PointViewPtr view, point_count_t num)
         uint8_t* p = band.data();
         for (point_count_t i = 0; i < count; ++i)
         {
-            double test =  convert<uint8_t>(p);
 
             if (band_types[b] == pdal::Dimension::Type::Float ||
                 band_types[b] == pdal::Dimension::Type::Double )
@@ -208,9 +201,5 @@ point_count_t GDALReader::read(PointViewPtr view, point_count_t num)
     return view->size();
 }
 
-
-void GDALReader::done(PointTableRef table)
-{
-}
 
 }

@@ -92,7 +92,7 @@ public:
 
     bool empty() const
     {
-        return (wkt().size() != 0);
+        return wkt().empty();
     }
 
 private:
@@ -200,7 +200,7 @@ public:
     void close();
 
     bool read(double x, double y, std::vector<double>& data);
-    inline std::vector<pdal::Dimension::Type::Enum> getPDALDimensionTypes() const
+    std::vector<pdal::Dimension::Type::Enum> getPDALDimensionTypes() const
     {
         return m_types;
     }

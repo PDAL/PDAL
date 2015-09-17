@@ -72,7 +72,6 @@ private:
     virtual void processOptions(const Options&);
     virtual void ready(PointTableRef table);
     virtual point_count_t read(PointViewPtr view, point_count_t num);
-    virtual void done(PointTableRef table);
     virtual QuickInfo inspect();
 
     std::unique_ptr<gdal::Raster> m_raster;
