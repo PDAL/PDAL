@@ -393,6 +393,7 @@ TEST(LasReaderTest, callback)
     EXPECT_EQ(count, (point_count_t)1065);
 }
 
+#ifdef PDAL_HAVE_LAZPERF
 // LAZ files are normally written in chunks of 50,000, so a file of size
 // 110,000 ensures we read some whole chunks and a partial.
 TEST(LasReaderTest, lazperf)
@@ -437,6 +438,7 @@ TEST(LasReaderTest, lazperf)
        EXPECT_EQ(memcmp(buf1.get(), buf2.get(), pointSize), 0);
     }
 }
+#endif
 
 
 // The header of 1.2-with-color-clipped says that it has 1065 points,

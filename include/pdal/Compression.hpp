@@ -207,10 +207,17 @@ private:
 
 class LazPerfVlrCompressor
 {
+    typedef laszip::io::__ofstream_wrapper<std::ostream> OutputStream;
+    typedef laszip::encoders::arithmetic<OutputStream> Encoder;
+    typedef laszip::formats::dynamic_compressor Compressor;
+    typedef laszip::factory::record_schema Schema;
+
 public:
-    LazPerfVlrCompressor(std::ostream& stream) :
-        m_stream(stream), m_outputStream(stream), m_chunksize(50000),
-        m_chunkPointsWritten(0), m_chunkInfoPos(0), m_chunkOffset(0)
+    LazPerfVlrCompressor(std::ostream& stream, const Schema& schema,
+        uint32_t chunksize) :
+        m_stream(stream), m_outputStream(stream), m_schema(schema),
+        m_chunksize(chunksize), m_chunkPointsWritten(0), m_chunkInfoPos(0),
+        m_chunkOffset(0)
     {}
 
     ~LazPerfVlrCompressor()
@@ -247,6 +254,8 @@ public:
         m_encoder->done();
         m_encoder.reset();
 
+        newChunk();
+
         // Save our current position.  Go to the location where we need
         // to write the chunk table offset at the beginning of the point data.
         std::streampos chunkTablePos = m_stream.tellp();
@@ -265,6 +274,7 @@ public:
         OutputStream outputStream(m_stream);
         Encoder encoder(outputStream);
         laszip::compressors::integer compressor(32, 2);
+        compressor.init();
 
         uint32_t predictor = 0;
         for (uint32_t offset : m_chunkTable)
@@ -279,7 +289,8 @@ public:
 private:
     void resetCompressor()
     {
-        m_encoder->done();
+        if (m_encoder)
+            m_encoder->done();
         m_encoder.reset(new Encoder(m_outputStream));
         m_compressor = laszip::factory::build_compressor(*m_encoder, m_schema);
     }
@@ -291,11 +302,6 @@ private:
         m_chunkOffset = offset;
         m_chunkPointsWritten = 0;
     }
-
-    typedef laszip::io::__ofstream_wrapper<std::ostream> OutputStream;
-    typedef laszip::encoders::arithmetic<OutputStream> Encoder;
-    typedef laszip::formats::dynamic_compressor Compressor;
-    typedef laszip::factory::record_schema Schema;
 
     std::ostream& m_stream;
     OutputStream m_outputStream;
@@ -396,6 +402,7 @@ private:
 
 #else
 
+typedef char LazPerfVlrCompressor;
 typedef char LazPerfVlrDecompressor;
 
 #endif  // PDAL_HAVE_LAZPERF

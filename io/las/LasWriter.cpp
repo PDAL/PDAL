@@ -130,7 +130,6 @@ void LasWriter::processOptions(const Options& options)
     std::string compression =
         options.getValueOrDefault<std::string>("compression");
     compression = Utils::toupper(compression);
-std::cerr << "Compression = " << compression << "!\n";
     if (compression == "LASZIP" || compression == "TRUE")
         m_compression = LasCompression::LasZip;
     else if (compression == "LAZPERF")
@@ -357,7 +356,7 @@ void LasWriter::prepOutput(std::ostream *outStream)
     if (m_lasHeader.versionEquals(1, 0))
         out << (uint16_t)0xCCDD;
     m_lasHeader.setPointOffset((uint32_t)m_ostream->tellp());
-    if (m_lasHeader.compressed())
+    if (m_compression == LasCompression::LasZip)
         openCompression();
 
     m_error.setLog(log());
@@ -653,7 +652,8 @@ void LasWriter::readyLazPerfCompression()
     zipvlr.extract((char *)data.data());
     addVlr(LASZIP_USER_ID, LASZIP_RECORD_ID, "http://laszip.org", data);
 
-    m_compressor.reset(new LazPerfVlrCompressor(*m_ostream));
+    m_compressor.reset(new LazPerfVlrCompressor(*m_ostream, schema,
+        zipvlr.chunk_size));
 #endif
 }
 
