@@ -150,8 +150,8 @@ protected:
             PQfinish(m_masterConnection);
         }
     }
-    
-    bool ShouldSkipTests() const { return m_bSkipTests; }
+
+    bool shouldSkipTests() const { return m_bSkipTests; }
 
 private:
 
@@ -214,21 +214,21 @@ void optionsWrite(const Options& writerOps)
 
 TEST_F(PgpointcloudWriterTest, write)
 {
-    if( ShouldSkipTests() )
+    if (shouldSkipTests())
     {
         return;
     }
-    
+
     optionsWrite(getDbOptions());
 }
 
 TEST_F(PgpointcloudWriterTest, writeScaled)
 {
-    if( ShouldSkipTests() )
+    if (shouldSkipTests())
     {
         return;
     }
-    
+
     Options ops = getDbOptions();
     ops.add("scale_x", .01);
     ops.add("scale_y", .01);
@@ -239,11 +239,11 @@ TEST_F(PgpointcloudWriterTest, writeScaled)
 
 TEST_F(PgpointcloudWriterTest, writeXYZ)
 {
-    if( ShouldSkipTests() )
+    if (shouldSkipTests())
     {
         return;
     }
-    
+
     Options ops = getDbOptions();
     ops.add("output_dims", "X,Y,Z");
 
@@ -264,11 +264,11 @@ TEST_F(PgpointcloudWriterTest, writeXYZ)
 
 TEST_F(PgpointcloudWriterTest, writetNoPointcloudExtension)
 {
-    if( ShouldSkipTests() )
+    if (shouldSkipTests())
     {
         return;
     }
-    
+
     StageFactory f;
     std::unique_ptr<Stage> writer(f.createStage("writers.pgpointcloud"));
     EXPECT_TRUE(writer.get());
