@@ -300,6 +300,50 @@ TEST(LasWriterTest, forward)
     EXPECT_EQ(n1.findChild("creation_year").value<uint16_t>(), 2014);
 }
 
+TEST(LasWriterTest, forwardvlr)
+{
+    Options readerOps1;
+    
+    readerOps1.add("filename", Support::datapath("las/lots_of_vlr.las"));
+    LasReader r1;
+    r1.addOptions(readerOps1);
+    
+    std::string testfile = Support::temppath("tmp.las");
+    FileUtils::deleteFile(testfile);
+
+    Options writerOps;
+    writerOps.add("forward", "vlr");
+    writerOps.add("filename", testfile);
+
+    LasWriter w;
+    w.setInput(r1);
+    w.addOptions(writerOps);
+
+    PointTable t;
+
+    w.prepare(t);
+    w.execute(t);
+
+    Options readerOps;
+    readerOps.add("filename", testfile);
+
+    LasReader r;
+
+    r.setOptions(readerOps);
+
+    PointTable t2;
+
+    r.prepare(t2);
+    r.execute(t2);
+    
+    MetadataNode forward = t2.privateMetadata("lasforward");
+
+    auto pred = [](MetadataNode temp)
+        { return Utils::startsWith(temp.name(), "vlr_"); };
+    MetadataNodeList nodes = forward.findChildren(pred);
+    EXPECT_EQ(nodes.size(), 388UL);
+}
+
 // Test that data from three input views gets written to separate output files.
 TEST(LasWriterTest, flex)
 {

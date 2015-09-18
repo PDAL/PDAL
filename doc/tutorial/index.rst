@@ -37,4 +37,4 @@ Developing
    writing-kernel
    writing-reader
    writing-writer
-
+   liblas_to_pdal

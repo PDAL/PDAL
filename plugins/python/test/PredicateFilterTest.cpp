@@ -41,15 +41,28 @@
 #include <stats/StatsFilter.hpp>
 #include <faux/FauxReader.hpp>
 
-#include "../plang/Environment.hpp"
 
 #include "Support.hpp"
 
+
 using namespace pdal;
 
-TEST(PredicateFilterTest, PredicateFilterTest_test1)
+#include <pdal/plang/Environment.hpp>
+
+class PredicateFilterTest : public ::testing::Test
+{
+public:
+    virtual void SetUp()
+    {
+        pdal::plang::Environment::get();
+    }
+
+};
+
+TEST_F(PredicateFilterTest, PredicateFilterTest_test1)
 {
     StageFactory f;
+
 
     BOX3D bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
     Options readerOps;
@@ -106,7 +119,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test1)
     EXPECT_TRUE(Utils::compare_approx<double>(statsZ.maximum(), 1.0, 0.01));
 }
 
-TEST(PredicateFilterTest, PredicateFilterTest_test2)
+TEST_F(PredicateFilterTest, PredicateFilterTest_test2)
 {
     StageFactory f;
     // same as above, but with 'Y >' instead of 'X <'
@@ -164,7 +177,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test2)
     EXPECT_TRUE(Utils::compare_approx<double>(statsZ.maximum(), 2.0, 0.01));
 }
 
-TEST(PredicateFilterTest, PredicateFilterTest_test3)
+TEST_F(PredicateFilterTest, PredicateFilterTest_test3)
 {
     StageFactory f;
     // can we make a pipeline with TWO python filters in it?
@@ -245,7 +258,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test3)
     EXPECT_TRUE(Utils::compare_approx<double>(statsZ.maximum(), 1.0, 0.01));
 }
 
-TEST(PredicateFilterTest, PredicateFilterTest_test4)
+TEST_F(PredicateFilterTest, PredicateFilterTest_test4)
 {
     StageFactory f;
     // test the point counters in the Predicate's iterator
@@ -300,7 +313,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_test4)
     EXPECT_EQ(buf->size(), 750u);
 }
 
-TEST(PredicateFilterTest, PredicateFilterTest_test5)
+TEST_F(PredicateFilterTest, PredicateFilterTest_test5)
 {
     StageFactory f;
     // test error handling if missing Mask
@@ -338,10 +351,10 @@ TEST(PredicateFilterTest, PredicateFilterTest_test5)
     PointTable table;
     filter->prepare(table);
 
-    ASSERT_THROW(filter->execute(table), plang::error);
+    ASSERT_THROW(filter->execute(table), pdal::pdal_error);
 }
 
-TEST(PredicateFilterTest, PredicateFilterTest_Pipeline)
+TEST_F(PredicateFilterTest, PredicateFilterTest_Pipeline)
 {
     PipelineManager mgr;
     PipelineReader reader(mgr);
@@ -351,7 +364,7 @@ TEST(PredicateFilterTest, PredicateFilterTest_Pipeline)
     EXPECT_EQ(cnt, 1u);
 }
 
-TEST(PredicateFilterTest, PredicateFilterTest_Embed)
+TEST_F(PredicateFilterTest, PredicateFilterTest_Embed)
 {
     PipelineManager mgr;
     PipelineReader reader(mgr);

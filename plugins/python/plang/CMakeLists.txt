@@ -3,6 +3,7 @@ set(plang_srcs
     BufferedInvocation.cpp
     Invocation.cpp
     Environment.cpp
+    Plang.cpp
     Redirector.cpp
     Script.cpp
 )
@@ -11,6 +12,7 @@ set(plang_headers
     BufferedInvocation.hpp
     Invocation.hpp
     Environment.hpp
+    Plang.hpp
     Redirector.hpp
     Script.hpp
 )

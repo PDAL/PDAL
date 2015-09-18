@@ -95,8 +95,8 @@ QuickInfo LasReader::inspect()
     Dimension::IdList dims = layout->dims();
     for (auto di = dims.begin(); di != dims.end(); ++di)
         qi.m_dimNames.push_back(layout->dimName(*di));
-    qi.m_pointCount =
-        Utils::saturation_cast<point_count_t>(m_lasHeader.pointCount());
+    if (!Utils::numericCast(m_lasHeader.pointCount(), qi.m_pointCount))
+        qi.m_pointCount = std::numeric_limits<point_count_t>::max();
     qi.m_bounds = m_lasHeader.getBounds();
     qi.m_srs = getSrsFromVlrs();
     qi.m_valid = true;
@@ -159,6 +159,7 @@ void LasReader::ready(PointTableRef table, MetadataNode& m)
     setSrsFromVlrs(m);
     MetadataNode forward = table.privateMetadata("lasforward");
     extractHeaderMetadata(forward, m);
+    extractVlrMetadata(forward, m);
 
     if (m_lasHeader.compressed())
     {
@@ -209,13 +210,13 @@ template <typename T>
 void addForwardMetadata(MetadataNode& forward, MetadataNode& m,
     const std::string& name, T val, const std::string description = "")
 {
-    m.add(name, val, description);
+    MetadataNode n = m.add(name, val, description);
 
     // If the entry doesn't already exist, just add it.
     MetadataNode f = forward.findChild(name);
     if (!f.valid())
     {
-        forward.add(name, val);
+        forward.add(n);
         return;
     }
 
@@ -484,7 +485,7 @@ SpatialReference LasReader::getSrsFromGeotiffVlr()
 }
 
 
-void LasReader::extractVlrMetadata(MetadataNode& m)
+void LasReader::extractVlrMetadata(MetadataNode& forward, MetadataNode& m)
 {
     static const size_t DATA_LEN_MAX = 1000000;
 
@@ -506,6 +507,12 @@ void LasReader::extractVlrMetadata(MetadataNode& m)
         vlrNode.add("record_id", vlr.recordId(),
             "Record ID specified by the user.");
         vlrNode.add("description", vlr.description());
+
+        if ((vlr.userId() != TRANSFORM_USER_ID) &&
+            (vlr.userId() != SPEC_USER_ID) &&
+            (vlr.userId() != LASZIP_USER_ID) &&
+            (vlr.userId() != LIBLAS_USER_ID))
+            forward.add(vlrNode);
     }
 }
 

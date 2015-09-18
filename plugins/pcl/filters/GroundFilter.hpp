@@ -57,6 +57,8 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
+    Options getDefaultOptions();
+
 private:
     double m_maxWindowSize;
     double m_slope;
@@ -76,4 +78,3 @@ private:
 };
 
 } // namespace pdal
-

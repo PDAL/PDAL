@@ -36,8 +36,6 @@
 
 #include <sstream>
 
-#include <boost/algorithm/string.hpp>
-
 #include <pdal/PointView.hpp>
 
 namespace pdal

@@ -32,6 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+// BPF is an NGA specification for point cloud data. The specification can be
+// found at https://nsgreg.nga.mil/doc/view?i=4202
+
 #pragma once
 
 #include <vector>

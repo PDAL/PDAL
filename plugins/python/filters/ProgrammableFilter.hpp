@@ -37,7 +37,7 @@
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Filter.hpp>
 
-#include "../plang/BufferedInvocation.hpp"
+#include <pdal/plang/BufferedInvocation.hpp>
 
 namespace pdal
 {
@@ -72,6 +72,8 @@ private:
 
     ProgrammableFilter& operator=(const ProgrammableFilter&); // not implemented
     ProgrammableFilter(const ProgrammableFilter&); // not implemented
+
+    MetadataNode m_totalMetadata;
 };
 
 } // namespace pdal

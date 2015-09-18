@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2015, Howard Butler <howard@hobu.co>
 *
 * All rights reserved.
 *
@@ -34,28 +34,49 @@
 
 #pragma once
 
-#include "../plang/Invocation.hpp"
+#include <string>
 
-#include <pdal/PointView.hpp>
+
+#include <pdal/Dimension.hpp>
+#include <pdal/Reader.hpp>
+#include <pdal/StageFactory.hpp>
+
+#include <pdal/GDALUtils.hpp>
+
+extern "C" int32_t GDALReader_ExitFunc();
+extern "C" PF_ExitFunc GDALReader_InitPlugin();
+
 
 namespace pdal
 {
-namespace plang
-{
 
-class PDAL_DLL BufferedInvocation : public Invocation
+
+typedef std::map<std::string, Dimension::Id::Enum> DimensionMap;
+
+
+
+class PDAL_DLL GDALReader : public Reader
 {
 public:
-    BufferedInvocation(const Script& script);
+    static void *create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
-    void begin(PointView& view);
-    void end(PointView& view);
+    GDALReader();
+
+    static Dimension::IdList getDefaultDimensions();
 
 private:
-    std::vector<void *> m_buffers;
-    BufferedInvocation& operator=(BufferedInvocation const& rhs); // nope
-};
+    virtual void initialize();
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void processOptions(const Options&);
+    virtual void ready(PointTableRef table);
+    virtual point_count_t read(PointViewPtr view, point_count_t num);
+    virtual QuickInfo inspect();
 
-} // namespace plang
-} // namespace pdal
+    std::unique_ptr<gdal::Raster> m_raster;
+    point_count_t m_index;
+
+};
+}
 

@@ -54,6 +54,7 @@ public:
         {}
 
     void writePipeline(const std::string& filename) const;
+    void writePipeline(std::ostream& strm) const;
 
     static void write_option_ptree(boost::property_tree::ptree& tree,
         const Options& opts);

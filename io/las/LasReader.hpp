@@ -57,7 +57,8 @@ class PDAL_DLL LasReader : public pdal::Reader
 {
     friend class NitfReader;
 public:
-    LasReader() : pdal::Reader(), m_index(0), m_istream(NULL), m_initialized(false)
+    LasReader() : pdal::Reader(), m_index(0), m_istream(NULL),
+        m_initialized(false)
         {}
 
     virtual ~LasReader()
@@ -66,7 +67,6 @@ public:
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
-
     Options getDefaultOptions();
 
     const LasHeader& header() const
@@ -88,14 +88,15 @@ protected:
         return m_istream;
     }
     virtual void destroyStream()
+    {
+        if (m_istream && m_initialized)
         {
-            if (m_istream && m_initialized)
-            {
-                FileUtils::closeFile(m_istream);
-                m_istream = NULL;
-                m_initialized = false;
-            }
+            FileUtils::closeFile(m_istream);
+            m_istream = NULL;
+            m_initialized = false;
         }
+    }
+
 private:
     LasError m_error;
     LasHeader m_lasHeader;
@@ -117,7 +118,7 @@ private:
     SpatialReference getSrsFromWktVlr();
     SpatialReference getSrsFromGeotiffVlr();
     void extractHeaderMetadata(MetadataNode& forward, MetadataNode& m);
-    void extractVlrMetadata(MetadataNode& m);
+    void extractVlrMetadata(MetadataNode& forward, MetadataNode& m);
     virtual QuickInfo inspect();
     virtual void ready(PointTableRef table)
         { ready(table, m_metadata); }

@@ -4,15 +4,15 @@
     <xs:simpleType name="interpretationType">
         <xs:annotation>
       <xs:documentation>
-            Common interpretations of the data that may be used.  This 
-            type may be extended under the expectation that clients 
-            know how to consume the data.  In the case of string-like 
-            data, use uint8_t (common byte) as the interpretation 
-            and transform accordingly.  Because nulls (or even 
-            multi-byte strings) might be allowed, there are 
+            Common interpretations of the data that may be used.  This
+            type may be extended under the expectation that clients
+            know how to consume the data.  In the case of string-like
+            data, use uint8_t (common byte) as the interpretation
+            and transform accordingly.  Because nulls (or even
+            multi-byte strings) might be allowed, there are
             no common string interpretations provided by default.
         </xs:documentation>
-    </xs:annotation>   
+    </xs:annotation>
         <xs:restriction base="xs:string">
             <xs:enumeration value="int8_t"/>
             <xs:enumeration value="uint8_t"/>
@@ -38,13 +38,13 @@
       <xs:documentation>
             Used to describe the storage endianness of the data in the dimension.
         </xs:documentation>
-    </xs:annotation>   
+    </xs:annotation>
         <xs:restriction base="xs:string">
             <xs:enumeration value="big"/>
             <xs:enumeration value="little"/>
         </xs:restriction>
     </xs:simpleType>
-    
+
     <xs:complexType name="dimensionType">
         <xs:all>
             <xs:element name="position" type="xs:positiveInteger">
@@ -53,7 +53,7 @@
                         The dimension's position in the block of point data
                         (counting from 1)
                     </xs:documentation>
-                </xs:annotation>                
+                </xs:annotation>
             </xs:element>
 
             <xs:element name="size" type="xs:positiveInteger">
@@ -62,8 +62,8 @@
                         The size of this dimension in bytes.
                     </xs:documentation>
                 </xs:annotation>
-            </xs:element>            
-            
+            </xs:element>
+
             <xs:element minOccurs="0" name="name" type="xs:string"/>
             <xs:element minOccurs="0" name="description" type="xs:string"/>
 
@@ -77,7 +77,7 @@
                 </xs:annotation>
             </xs:element>
 
-            
+
             <xs:element minOccurs="0" name="interpretation" type="pc:interpretationType">
                 <xs:annotation>
                     <xs:documentation>
@@ -89,13 +89,13 @@
                     </xs:documentation>
                 </xs:annotation>
             </xs:element>
-            
+
             <xs:element minOccurs="0" name="minimum" type="pc:rangeType">
                 <xs:annotation>
                     <xs:documentation>
                         The minimum value of this dimension.
                     </xs:documentation>
-                </xs:annotation>                   
+                </xs:annotation>
             </xs:element>
 
             <xs:element minOccurs="0" name="maximum" type="pc:rangeType">
@@ -103,23 +103,23 @@
                     <xs:documentation>
                         The maximum value of this dimension.
                     </xs:documentation>
-                </xs:annotation>   
+                </xs:annotation>
             </xs:element>
 
             <xs:element minOccurs="0" name="offset" type="xs:double">
                 <xs:annotation>
                     <xs:documentation>
-                        The double offset to use when applying a scaling 
+                        The double offset to use when applying a scaling
                         factor to an integer dimension
                     </xs:documentation>
-                </xs:annotation>   
+                </xs:annotation>
             </xs:element>
             <xs:element minOccurs="0" name="scale" type="xs:double">
                 <xs:annotation>
                     <xs:documentation>
                         The scale of this dimension.  Used to support scaled integer types
                     </xs:documentation>
-                </xs:annotation>   
+                </xs:annotation>
             </xs:element>
             <xs:element minOccurs="0" name="endianness" type="pc:endiannessType">
                 <xs:annotation>
@@ -151,28 +151,29 @@
         <xs:annotation>
       <xs:documentation>
             Used to describe the storage orientation of the word. The
-            orientation of dimension might be point-major or dimension-major. 
+            orientation of dimension might be point-major or dimension-major.
             A point-major dimension, the default orientation,
             has its dimensions composed as XYZXYZXYZ. A dimension-major
             one has data composed as XXXYYYZZZ.
         </xs:documentation>
-    </xs:annotation>   
+    </xs:annotation>
         <xs:restriction base="xs:string">
             <xs:enumeration value="point"/>
             <xs:enumeration value="dimension"/>
             <xs:enumeration value="unknown"/>
         </xs:restriction>
     </xs:simpleType>
-    
+
     <xs:element name="PointCloudSchema">
         <xs:complexType>
             <xs:sequence>
                 <xs:element maxOccurs="unbounded" minOccurs="1" name="dimension" type="pc:dimensionType"/>
                 <xs:element name="metadata" minOccurs="0" maxOccurs="1" type="xs:anyType"/>
                 <xs:element name="orientation" minOccurs="0" maxOccurs="1" type="pc:orientationType"/>
+                <xs:element name="version" minOccurs="0" maxOccurs="1" type="xs:decimal"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
 
-    
+
 </xs:schema>

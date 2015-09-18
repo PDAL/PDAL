@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2012, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Consulting LLC nor the
+*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -34,43 +34,26 @@
 
 #pragma once
 
-#include <pdal/pdal_internal.hpp>
+#include "../plang/Invocation.hpp"
 
-#include <pdal/pdal_internal.hpp>
-
-#include "Redirector.hpp"
+#include <pdal/PointView.hpp>
 
 namespace pdal
 {
 namespace plang
 {
 
-class error : public pdal_error
+class PDAL_DLL BufferedInvocation : public Invocation
 {
 public:
-    error(const std::string& msg) : pdal_error(msg)
-        {}
-};
+    BufferedInvocation(const Script& script);
 
-std::string getTraceback();
-
-class Environment;
-typedef Environment *EnvironmentPtr;
-
-class PDAL_DLL Environment
-{
-public:
-    Environment();
-    ~Environment();
-
-    // these just forward into the Redirector class
-    void set_stdout(std::ostream* ostr);
-    void reset_stdout();
-
-    static EnvironmentPtr get();
+    void begin(PointView& view, MetadataNode m);
+    void end(PointView& view, MetadataNode m);
 
 private:
-    Redirector m_redirector;
+    std::vector<void *> m_buffers;
+    BufferedInvocation& operator=(BufferedInvocation const& rhs); // nope
 };
 
 } // namespace plang

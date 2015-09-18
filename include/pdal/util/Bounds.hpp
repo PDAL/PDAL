@@ -212,7 +212,7 @@ public:
     bool contains(double x, double y, double z) const
     {
         return BOX2D::contains(x, y) && minz <= z && z <= maxz;
-    } 
+    }
 
     bool contains(const BOX3D& other) const
     {
@@ -263,6 +263,10 @@ public:
            minz <= other.maxz && maxz >= other.minz;
     }
 
+    BOX2D to2d() const
+    {
+        return *this;
+    }
     std::string toBox(uint32_t precision = 8) const
     {
         std::stringstream oss;

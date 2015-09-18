@@ -37,7 +37,7 @@
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Filter.hpp>
 
-#include "../plang/BufferedInvocation.hpp"
+#include <pdal/plang/BufferedInvocation.hpp>
 
 namespace pdal
 {

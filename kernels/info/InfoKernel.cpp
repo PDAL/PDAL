@@ -142,7 +142,7 @@ void InfoKernel::addSwitches()
     processing_options->add_options()
         ("all",
          po::value<bool>(&m_showAll)->zero_tokens()->implicit_value(true),
-         "dump the schema")
+         "dump statistics, schema and metadata")
         ("point,p", po::value<std::string >(&m_pointIndexes), "point to dump")
         ("query", po::value< std::string>(&m_queryPoint),
          "Return points in order of distance from the specified "
@@ -299,8 +299,7 @@ void InfoKernel::setup(const std::string& filename)
     if (!m_needPoints)
         readerOptions.add("count", 0);
 
-    m_manager = std::unique_ptr<PipelineManager>(
-        KernelSupport::makePipeline(filename));
+    m_manager = KernelSupport::makePipeline(filename);
     m_reader = m_manager->getStage();
     Stage *stage = m_reader;
 

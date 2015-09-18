@@ -34,7 +34,8 @@
 
 #include <pdal/pdal_test_main.hpp>
 
-#include "../plang/Invocation.hpp"
+#include <pdal/plang/Invocation.hpp>
+#include <pdal/plang/Array.hpp>
 
 #include <Support.hpp>
 #include <faux/FauxReader.hpp>
@@ -74,7 +75,7 @@ TEST(PLangTest, PLangTest_compile_error)
     Script script(source, "MyTest", "yow");
     Invocation meth(script);
 
-    ASSERT_THROW(meth.compile(), error);
+    ASSERT_THROW(meth.compile(), pdal::pdal_error);
 }
 
 
@@ -90,39 +91,7 @@ TEST(PLangTest, PLangTest_runtime_error)
     Invocation meth(script);
     meth.compile();
 
-    ASSERT_THROW(meth.execute(), error);
-}
-
-
-TEST(PLangTest, PLangTest_toofewinputs)
-{
-    const char* source =
-        "import numpy as np\n"
-        "def yow(ins):\n"
-        "  #print 'foo'\n"
-        "  return True\n"
-        ;
-    Script script(source, "MyTest", "yow");
-    Invocation meth(script);
-    meth.compile();
-
-    ASSERT_THROW(meth.execute(), error);
-}
-
-
-TEST(PLangTest, PLangTest_toomanyinputs)
-{
-    const char* source =
-        "import numpy as np\n"
-        "def yow(ins,outs,mids):\n"
-        "  #print 'foo'\n"
-        "  return True\n"
-        ;
-    Script script(source, "MyTest", "yow");
-    Invocation meth(script);
-    meth.compile();
-
-    ASSERT_THROW(meth.execute(), error);
+    ASSERT_THROW(meth.execute(), pdal::pdal_error);
 }
 
 
@@ -138,7 +107,7 @@ TEST(PLangTest, PLangTest_returnvoid)
     Invocation meth(script);
     meth.compile();
 
-    ASSERT_THROW(meth.execute(), error);
+    ASSERT_THROW(meth.execute(), pdal::pdal_error);
 }
 
 
@@ -154,7 +123,7 @@ TEST(PLangTest, PLangTest_returnint)
     Invocation meth(script);
     meth.compile();
 
-    ASSERT_THROW(meth.execute(), error);
+    ASSERT_THROW(meth.execute(), pdal::pdal_error);
 }
 
 
@@ -435,3 +404,60 @@ TEST(PLangTest, log)
 
     EXPECT_TRUE(ok);
 }
+
+
+
+PointViewPtr makeTestView(PointTableRef table, point_count_t cnt = 17)
+{
+    PointLayoutPtr layout(table.layout());
+
+    layout->registerDim(Dimension::Id::Classification);
+    layout->registerDim(Dimension::Id::X);
+    layout->registerDim(Dimension::Id::Y);
+
+    PointViewPtr view(new PointView(table));
+
+    // write the data into the view
+    for (PointId i = 0; i < cnt; i++)
+    {
+        const uint8_t x = (uint8_t)(i + 1);
+        const int32_t y = i * 10;
+        const double z = i * 100;
+
+        view->setField(Dimension::Id::Classification, i, x);
+        view->setField(Dimension::Id::X, i, y);
+        view->setField(Dimension::Id::Y, i, z);
+    }
+    EXPECT_EQ(view->size(), cnt);
+    return view;
+}
+
+void verifyTestView(const PointView& view, point_count_t cnt = 17)
+{
+    // read the view back out
+    for (PointId i = 0; i < cnt; i++)
+    {
+        uint8_t x = view.getFieldAs<uint8_t>(
+            Dimension::Id::Classification, i);
+        int32_t y = view.getFieldAs<uint32_t>(Dimension::Id::X, i);
+        double z = view.getFieldAs<double>(Dimension::Id::Y, i);
+
+        EXPECT_EQ(x, (uint8_t)(i + 1));
+        EXPECT_EQ(y, (int32_t)(i * 10));
+        EXPECT_TRUE(Utils::compare_approx(z, static_cast<double>(i) * 100.0,
+            (std::numeric_limits<double>::min)()));
+    }
+}
+
+TEST(PLangTest, PLangTest_array)
+{
+    PointTable table;
+    PointViewPtr view = makeTestView(table, 40);
+
+    plang::Array array;
+    array.update(view);
+    verifyTestView(*view.get(), 4);
+
+}
+
+

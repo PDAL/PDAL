@@ -1,7 +1,7 @@
 #!/bin/sh
-prefix=@prefix@
-exec_prefix=@exec_prefix@
-libdir=@libdir@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=@CMAKE_INSTALL_PREFIX@/bin
+libdir=@CMAKE_INSTALL_PREFIX@/lib
 
 
 usage()
@@ -9,11 +9,12 @@ usage()
 	cat <<EOF
 Usage: pdal-config [OPTIONS]
 Options:
-	[--libs]
 	[--cflags]
 	[--cxxflags]
 	[--defines]
 	[--includes]
+	[--libs]
+	[--plugin-dir]
 	[--version]
 EOF
 	exit $1
@@ -23,9 +24,13 @@ if test $# -eq 0; then
 	usage 1 1>&2
 fi
 
-case $1 in 
-  --libs) 
-    echo $LIBS
+case $1 in
+  --libs)
+    echo -L@CMAKE_INSTALL_PREFIX@/lib -lpdalcpp
+    ;;
+
+  --plugin-dir)
+    echo @PDAL_PLUGIN_INSTALL_PATH@
     ;;
 
   --prefix)
@@ -41,7 +46,7 @@ case $1 in
     ;;
 
   --includes)
-    echo ${INCLUDES}
+    echo @PDAL_INCLUDE_DEFINITIONS@
     ;;
 
   --cflags)
@@ -49,9 +54,9 @@ case $1 in
     ;;
 
   --cxxflags)
-    echo @CMAKE_CXX_FLAGS@
+    echo @CMAKE_CXX_FLAGS@ -std=c++11
     ;;
-    
+
   --version)
     echo @PDAL_VERSION_STRING@
     ;;

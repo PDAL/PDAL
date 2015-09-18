@@ -104,7 +104,7 @@ private:
     Stage *m_reader;
 
     MetadataNode m_tree;
-    std::unique_ptr<PipelineManager> m_manager;
+    PipelineManagerPtr m_manager;
 };
 
 } // namespace pdal

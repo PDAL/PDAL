@@ -32,11 +32,14 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "Environment.hpp"
+#include <pdal/plang/Environment.hpp>
+#include <pdal/plang/Redirector.hpp>
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #define PY_ARRAY_UNIQUE_SYMBOL PDAL_ARRAY_API
 #include <numpy/arrayobject.h>
 
 #include <sstream>
+#include <mutex>
 
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127)  // conditional expression is constant
@@ -48,7 +51,6 @@
 #undef tolower
 #undef isspace
 
-#include "Redirector.hpp"
 
 // http://www.linuxjournal.com/article/3641
 // http://www.codeproject.com/Articles/11805/Embedding-Python-in-C-C-Part-I
@@ -59,11 +61,20 @@ namespace pdal
 namespace plang
 {
 
-static Environment g_environment;
+static Environment* g_environment=0;
 
 EnvironmentPtr Environment::get()
 {
-    return &g_environment;
+    static std::once_flag flag;
+
+    auto init = []()
+    {
+        g_environment = new Environment();
+    };
+
+    std::call_once(flag, init);
+
+    return g_environment;
 }
 
 
@@ -123,20 +134,18 @@ std::string getTraceback()
 
         tracebackModule = PyImport_ImportModule("traceback");
         if (!tracebackModule)
-            throw error("Unable to load traceback module while "
-                "importing numpy inside PDAL.");
+            throw pdal::pdal_error("Unable to load traceback module.");
 
         tracebackDictionary = PyModule_GetDict(tracebackModule);
-
+        if (!tracebackDictionary)
+            throw pdal::pdal_error("Unable to load traceback dictionary.");
         tracebackFunction =
             PyDict_GetItemString(tracebackDictionary, "format_exception");
         if (!tracebackFunction)
-            throw error("Unable to find traceback function while "
-                "importing numpy inside PDAL.");
+            throw pdal::pdal_error("Unable to find traceback function.");
 
         if (!PyCallable_Check(tracebackFunction))
-            throw error("Invalid traceback function while importing numpy "
-                "inside PDAL.");
+            throw pdal::pdal_error("Invalid traceback function.");
 
         // create an argument for "format exception"
         PyObject* args = PyTuple_New(3);
@@ -152,14 +161,19 @@ std::string getTraceback()
 
         for (int i = 0; i < n; i++)
         {
+            PyObject* l = PyList_GetItem(output, i);
+            if (!l)
+                throw pdal::pdal_error("unable to get list item in getTraceback");
+            PyObject* r = PyObject_Repr(l);
+            if (!r)
+                throw pdal::pdal_error("unable to get repr in getTraceback");
+            Py_ssize_t size;
 #if PY_MAJOR_VERSION >= 3
-            PyObject* u = PyUnicode_AsUTF8String(PyList_GetItem(output, i));
-            const char* p = PyBytes_AsString(u);
-
-            mssg << p;
+            char* d = PyUnicode_AsUTF8AndSize(r, &size);
 #else
-            mssg << PyString_AsString(PyList_GetItem(output, i));
+            char* d = PyString_AsString(r);
 #endif
+            mssg << d;
         }
 
         // clean up
@@ -168,16 +182,16 @@ std::string getTraceback()
     }
     else if (value != NULL)
     {
-        PyObject *s = PyObject_Str(value);
+        PyObject* r = PyObject_Repr(value);
+        if (!r)
+            throw pdal::pdal_error("couldn't make string representation of traceback value");
+        Py_ssize_t size;
 #if PY_MAJOR_VERSION >= 3
-        // const char* text = PyUnicode_AS_DATA(s);
-        PyObject* u = PyUnicode_AsUTF8String(s);
-        const char* text = PyBytes_AsString(u);
+            char* d = PyUnicode_AsUTF8AndSize(r, &size);
 #else
-        const char* text = PyString_AS_STRING(s);
+            char* d = PyString_AsString(r);
 #endif
-        Py_DECREF(s);
-        mssg << text;
+        mssg << d;
     }
     else
         mssg << "unknown error that we are unable to get a traceback for."
@@ -189,6 +203,119 @@ std::string getTraceback()
 
     return mssg.str();
 }
+
+PyObject *fromMetadata(MetadataNode m)
+{
+    std::string name = m.name();
+    std::string value = m.value();
+    std::string type = m.type();
+    std::string description = m.description();
+
+    MetadataNodeList children = m.children();
+    PyObject *submeta = NULL;
+    if (children.size())
+    {
+        submeta = PyList_New(0);
+        for (MetadataNode& child : children)
+            PyList_Append(submeta, fromMetadata(child));
+    }
+    PyObject *data = PyTuple_New(5);
+    PyTuple_SetItem(data, 0, PyUnicode_FromString(name.data()));
+    PyTuple_SetItem(data, 1, PyUnicode_FromString(value.data()));
+    PyTuple_SetItem(data, 2, PyUnicode_FromString(type.data()));
+    PyTuple_SetItem(data, 3, PyUnicode_FromString(description.data()));
+    PyTuple_SetItem(data, 4, submeta);
+
+    return data;
+}
+
+std::string readPythonString(PyObject* list, Py_ssize_t index)
+{
+    std::stringstream ss;
+
+    PyObject* o = PyTuple_GetItem(list, index);
+    if (!o)
+    {
+        std::stringstream oss;
+        oss << "Unable to get list item number " << index << " for list of length " << PyTuple_Size(list);
+        throw pdal_error(oss.str());
+    }
+    PyObject* r = PyObject_Repr(o);
+    if (!r)
+        throw pdal::pdal_error("unable to get repr in readPythonString");
+    Py_ssize_t size;
+#if PY_MAJOR_VERSION >= 3
+            char* d = PyUnicode_AsUTF8AndSize(r, &size);
+#else
+            char* d = PyString_AsString(r);
+#endif
+    ss << d;
+
+    return ss.str();
+}
+void addMetadata(PyObject *list, MetadataNode m)
+{
+
+    if (!PyList_Check(list))
+        return;
+
+    for (Py_ssize_t i = 0; i < PyList_Size(list); ++i)
+    {
+        PyObject *tuple = PyList_GetItem(list, i);
+        if (!PyTuple_Check(tuple) || PyTuple_Size(tuple) != 5)
+            continue;
+
+        std::string name = readPythonString(tuple, 0);
+        std::string value = readPythonString(tuple, 1);
+
+        std::string type = readPythonString(tuple, 2);
+        if (type.empty())
+            type = Metadata::inferType(value);
+
+        std::string description = readPythonString(tuple, 3);
+
+        PyObject *submeta = PyTuple_GetItem(tuple, 4);
+        MetadataNode child =  m.addWithType(name, value, type, description);
+        if (submeta)
+            addMetadata(submeta, child);
+    }
+}
+
+int Environment::getPythonDataType(Dimension::Type::Enum t)
+{
+    using namespace Dimension;
+
+    switch (t)
+    {
+    case Type::Float:
+        return NPY_FLOAT;
+    case Type::Double:
+        return NPY_DOUBLE;
+    case Type::Signed8:
+        return NPY_BYTE;
+    case Type::Signed16:
+        return NPY_SHORT;
+    case Type::Signed32:
+        return NPY_INT;
+    case Type::Signed64:
+        return NPY_LONGLONG;
+    case Type::Unsigned8:
+        return NPY_UBYTE;
+    case Type::Unsigned16:
+        return NPY_USHORT;
+    case Type::Unsigned32:
+        return NPY_UINT;
+    case Type::Unsigned64:
+        return NPY_ULONGLONG;
+    default:
+        return -1;
+    }
+    assert(0);
+
+    return -1;
+}
+
+
 
 } // namespace plang
 } // namespace pdal

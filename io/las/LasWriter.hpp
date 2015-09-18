@@ -135,7 +135,7 @@ private:
     void fillHeader(MetadataNode& forward);
     point_count_t fillWriteBuf(const PointView& view, PointId startId,
         std::vector<char>& buf);
-    void setVlrsFromMetadata();
+    void setVlrsFromMetadata(MetadataNode& forward);
     MetadataNode findVlrMetadata(MetadataNode node, uint16_t recordId,
         const std::string& userId);
     void setExtraBytesVlr();

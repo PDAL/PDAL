@@ -1,5 +1,6 @@
 /******************************************************************************
 * Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2015, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -34,19 +35,31 @@
 
 #include "TranslateKernel.hpp"
 
+#include <pdal/KernelFactory.hpp>
 #include <pdal/KernelSupport.hpp>
+#include <pdal/Options.hpp>
+#include <pdal/pdal_macros.hpp>
+#include <pdal/PipelineWriter.hpp>
+#include <pdal/PointTable.hpp>
+#include <pdal/PointView.hpp>
+#include <pdal/Stage.hpp>
 #include <pdal/StageFactory.hpp>
-#include <reprojection/ReprojectionFilter.hpp>
 
-#include <boost/program_options.hpp>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
-    "kernels.translate",
-    "Translate Kernel",
-    "http://pdal.io/kernels/kernels.translate.html" );
+static PluginInfo const s_info =
+    PluginInfo("kernels.translate",
+               "The Translate kernel allows users to construct a pipeline " \
+               "consisting of a reader, a writer, and N filter stages. " \
+               "Any supported stage type can be specified from the command " \
+               "line, reducing the need to create custom kernels for every " \
+               "combination.",
+               "http://pdal.io/kernels/kernels.translate.html");
 
 CREATE_STATIC_PLUGIN(1, 0, TranslateKernel, Kernel, s_info)
 
@@ -55,82 +68,23 @@ std::string TranslateKernel::getName() const
     return s_info.name;
 }
 
-TranslateKernel::TranslateKernel() :
-    Kernel(), m_bCompress(false), m_decimation_step(1), m_decimation_offset(0),
-    m_decimation_leaf_size(1), m_decimation_limit(0)
+TranslateKernel::TranslateKernel()
+    : Kernel()
+    , m_inputFile("")
+    , m_outputFile("")
+    , m_pipelineOutput("")
+    , m_readerType("")
+    , m_writerType("")
 {}
-
 
 void TranslateKernel::validateSwitches()
 {
     if (m_inputFile == "")
         throw app_usage_error("--input/-i required");
+
     if (m_outputFile == "")
         throw app_usage_error("--output/-o required");
-    //
-    // auto options = getExtraOptions();
-    //
-    // for (const auto& o : options)
-    // {
-    //
-    //     typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-    //
-    //     // if we don't have --, we're not an option we
-    //     // even care about
-    //     if (!boost::algorithm::find_first(o, "--")) continue;
-    //
-    //     // Find the dimensions listed and put them on the id list.
-    //     boost::char_separator<char> equal("=");
-    //     boost::char_separator<char> dot(".");
-    //     // boost::erase_all(o, " "); // Wipe off spaces
-    //     tokenizer option_tokens(o, equal);
-    //     std::vector<std::string> option_split;
-    //     for (auto ti = option_tokens.begin(); ti != option_tokens.end(); ++ti)
-    //         option_split.push_back(boost::lexical_cast<std::string>(*ti));
-    //     if (! (option_split.size() == 2))
-    //     {
-    //         std::ostringstream oss;
-    //         oss << "option '" << o << "' did not split correctly. Is it in the form --readers.las.option=foo?";
-    //         throw app_usage_error(oss.str());
-    //     }
-    //
-    //     std::string option_value(option_split[1]);
-    //     std::string stage_value(option_split[0]);
-    //     boost::algorithm::erase_all(stage_value, "--");
-    //
-    //     tokenizer name_tokens(stage_value, dot);
-    //     std::vector<std::string> stage_values;
-    //     for (auto ti = name_tokens.begin(); ti != name_tokens.end(); ++ti)
-    //     {
-    //         stage_values.push_back(*ti);
-    //     }
-    //
-    //     std::string option_name = *stage_values.rbegin();
-    //     std::ostringstream stage_name_ostr;
-    //     bool bFirst(true);
-    //     for (auto s = stage_values.begin(); s != stage_values.end()-1; ++s)
-    //     {
-    //         auto s2 = boost::algorithm::erase_all_copy(*s, " ");
-    //
-    //         if (bFirst)
-    //         {
-    //             bFirst = false;
-    //         } else
-    //             stage_name_ostr <<".";
-    //         stage_name_ostr << s2;
-    //     }
-    //     std::string stage_name(stage_name_ostr.str());
-    //     std::cout << "stage name: '" << stage_name << "' option_name: '" << option_name << "' option value: '" << option_value <<"'"<<std::endl;
-    //
-    //     auto found = m_stage_options.find(stage_name);
-    //     if (found == m_stage_options.end())
-    //         m_stage_options.insert(std::make_pair(stage_name, Option(option_name, option_value, "")));
-    //     else
-    //         found->second.add(Option(option_name, option_value, ""));
-    // }
-
 }
-
 
 void TranslateKernel::addSwitches()
 {
@@ -138,182 +92,123 @@ void TranslateKernel::addSwitches()
         new po::options_description("file options");
 
     file_options->add_options()
-        ("input,i", po::value<std::string>(&m_inputFile)->default_value(""),
-         "input file name")
-        ("output,o", po::value<std::string>(&m_outputFile)->default_value(""),
-         "output file name")
-        ("a_srs", po::value<pdal::SpatialReference>(&m_input_srs),
-         "Assign input coordinate system")
-        ("t_srs", po::value<pdal::SpatialReference>(&m_output_srs),
-         "Transform to output coordinate system")
-        ("compress,z",
-         po::value<bool>(&m_bCompress)->zero_tokens()->implicit_value(true),
-         "Compress output data (if supported by output format)")
-        ("bounds", po::value<BOX2D>(&m_bounds),
-         "Extent (in XYZ to clip output to)")
-        ("polygon", po::value<std::string >(&m_wkt),
-         "POLYGON WKT to use for precise crop of data (2d or 3d)")
-        ("d_step",
-         po::value<uint32_t>(&m_decimation_step)->default_value(1),
-         "Decimation filter step")
-        ("d_offset",
-         po::value<uint32_t>(&m_decimation_offset)->default_value(0),
-         "Decimation filter offset")
-        ("d_leaf_size",
-         po::value<double>(&m_decimation_leaf_size)->default_value(1),
-         "Decimation filter leaf size")
-        ("d_method",
-         po::value<std::string>(&m_decimation_method)->default_value("RankOrder"),
-         "Decimation filter method (RankOrder, VoxelGrid)")
-        ("d_limit",
-         po::value<point_count_t>(&m_decimation_limit)->default_value(0),
-         "Decimation limit")
-        ;
+    ("input,i", po::value<std::string>(&m_inputFile)->default_value(""),
+     "input file name")
+    ("output,o", po::value<std::string>(&m_outputFile)->default_value(""),
+     "output file name")
+    ("pipeline,p", po::value<std::string>(&m_pipelineOutput)->default_value(""),
+     "pipeline output")
+    ("reader,r", po::value<std::string>(&m_readerType)->default_value(""),
+     "reader type")
+    ("filter,f",
+     po::value<std::vector<std::string> >(&m_filterType)->multitoken(),
+     "filter type")
+    ("writer,w", po::value<std::string>(&m_writerType)->default_value(""),
+     "writer type")
+    ;
 
     addSwitchSet(file_options);
+
     addPositionalSwitch("input", 1);
     addPositionalSwitch("output", 1);
+    addPositionalSwitch("filter", -1);
 }
-
-Stage& TranslateKernel::makeReader(Options readerOptions)
-{
-    if (isDebug())
-    {
-        readerOptions.add("debug", true);
-        uint32_t verbosity(getVerboseLevel());
-        if (!verbosity)
-            verbosity = 1;
-
-        readerOptions.add("verbose", verbosity);
-        readerOptions.add("log", "STDERR");
-    }
-
-    Stage& reader = Kernel::makeReader(m_inputFile);
-    reader.setOptions(readerOptions);
-
-    return reader;
-}
-
-
-Stage& TranslateKernel::makeTranslate(Stage& reader)
-{
-    StageFactory f;
-    Stage *nextStage = &reader;
-
-    if (!m_output_srs.empty())
-    {
-        Options translateOptions;
-
-        if (!m_output_srs.empty())
-            translateOptions.add("out_srs", m_output_srs.getWKT());
-        Stage& reprojectionStage =
-            ownStage(f.createStage("filters.reprojection"));
-        reprojectionStage.setInput(*nextStage);
-        reprojectionStage.setOptions(translateOptions);
-        nextStage = &reprojectionStage;
-    }
-
-    // We always throw in a crop filter.  If no bounds/polys are set it does
-    // nothing.
-    Options cropOptions;
-    if (!m_bounds.empty())
-        cropOptions.add("bounds", m_bounds);
-    if (!m_wkt.empty())
-        cropOptions.add("polygon", m_wkt);
-    Stage& cropStage = ownStage(f.createStage("filters.crop"));
-    cropStage.setInput(*nextStage);
-    cropStage.setOptions(cropOptions);
-    nextStage = &cropStage;
-
-    if (boost::iequals(m_decimation_method, "VoxelGrid"))
-    {
-        Stage& decimationStage = ownStage(f.createStage("filters.pclblock"));
-
-        Options decimationOptions;
-        std::ostringstream ss;
-        ss << "{";
-        ss << "  \"pipeline\": {";
-        ss << "    \"filters\": [{";
-        ss << "      \"name\": \"VoxelGrid\",";
-        ss << "      \"setLeafSize\": {";
-        ss << "        \"x\": " << m_decimation_leaf_size << ",";
-        ss << "        \"y\": " << m_decimation_leaf_size << ",";
-        ss << "        \"z\": " << m_decimation_leaf_size;
-        ss << "        }";
-        ss << "      }]";
-        ss << "    }";
-        ss << "}";
-        std::string json = ss.str();
-        decimationOptions.add("json", json);
-        decimationOptions.add("debug", isDebug());
-        decimationOptions.add("verbose", getVerboseLevel());
-        decimationStage.setOptions(decimationOptions);
-        decimationStage.setInput(*nextStage);
-        nextStage = &decimationStage;
-    }
-    else if (m_decimation_step > 1 || m_decimation_limit > 0)
-    {
-        Options decimationOptions;
-        decimationOptions.add("debug", isDebug());
-        decimationOptions.add("verbose", getVerboseLevel());
-        decimationOptions.add("step", m_decimation_step);
-        decimationOptions.add("offset", m_decimation_offset);
-        decimationOptions.add("limit", m_decimation_limit);
-        Stage& decimationStage = ownStage(f.createStage("filters.decimation"));
-        decimationStage.setInput(*nextStage);
-        decimationStage.setOptions(decimationOptions);
-        nextStage = &decimationStage;
-    }
-    return *nextStage;
-}
-
 
 int TranslateKernel::execute()
 {
-    PointTable table;
-
-    Options readerOptions;
-    readerOptions.add("filename", m_inputFile);
-    readerOptions.add("debug", isDebug());
-    readerOptions.add("verbose", getVerboseLevel());
-    if (!m_input_srs.empty())
-        readerOptions.add("spatialreference", m_input_srs.getWKT());
-
-    Stage& readerStage = makeReader(readerOptions);
-    Stage& finalStage = makeTranslate(readerStage);
-
-    Options writerOptions;
-    writerOptions.add("filename", m_outputFile);
+    // setting common options for each stage propagates the debug flag and
+    // verbosity level
+    Options readerOptions, filterOptions, writerOptions;
+    setCommonOptions(readerOptions);
+    setCommonOptions(filterOptions);
     setCommonOptions(writerOptions);
 
-    if (m_bCompress)
-        writerOptions.add("compression", true);
+    m_manager = std::unique_ptr<PipelineManager>(new PipelineManager);
 
-    std::vector<std::string> cmd = getProgressShellCommand();
-    UserCallback *callback =
-        cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
-        (UserCallback *)new HeartbeatCallback();
+    if (!m_readerType.empty())
+    {
+        m_manager->addReader(m_readerType);
+    }
+    else
+    {
+        StageFactory factory;
+        std::string driver = factory.inferReaderDriver(m_inputFile);
 
-    Stage& writer = makeWriter(m_outputFile, finalStage);
-    if (!m_output_srs.empty())
-        writer.setSpatialReference(m_output_srs);
+        if (driver.empty())
+            throw app_runtime_error("Cannot determine input file type of " +
+                                    m_inputFile);
+        m_manager->addReader(driver);
+    }
 
-    // Some options are inferred by makeWriter based on filename
-    // (compression, driver type, etc).
-    writer.setOptions(writerOptions + writer.getOptions());
+    if (m_manager == NULL)
+        throw pdal_error("Error making pipeline\n");
 
-    // Set all the stage-named options.
-    applyExtraStageOptionsRecursive(&writer);
+    Stage* reader = m_manager->getStage();
 
-    writer.prepare(table);
-    // process the data, grabbing the PointViewSet for visualization of the
-    PointViewSet viewSetOut = writer.execute(table);
+    if (reader == NULL)
+        throw pdal_error("Error getting reader\n");
 
-    if (isVisualize())
-        visualize(*viewSetOut.begin());
+    readerOptions.add("filename", m_inputFile);
+    reader->setOptions(readerOptions);
+
+    Stage* stage = reader;
+
+    // add each filter provided on the command-line, updating the stage pointer
+    for (auto const f : m_filterType)
+    {
+        std::string filter_name(f);
+
+        if (!Utils::startsWith(f, "filters."))
+            filter_name.insert(0, "filters.");
+
+        Stage* filter = &(m_manager->addFilter(filter_name));
+
+        if (filter == NULL)
+            throw pdal_error("Error getting filter\n");
+
+        filter->setOptions(filterOptions);
+        filter->setInput(*stage);
+        stage = filter;
+    }
+
+    if (!m_writerType.empty())
+    {
+        m_manager->addWriter(m_writerType);
+    }
+    else
+    {
+        StageFactory factory;
+        std::string driver = factory.inferWriterDriver(m_outputFile);
+
+        if (driver.empty())
+            throw app_runtime_error("Cannot determine output file type of " +
+                                    m_outputFile);
+        Options options = factory.inferWriterOptionsChanges(m_outputFile);
+        writerOptions += options;
+        m_manager->addWriter(driver);
+    }
+
+    Stage* writer = m_manager->getStage();
+
+    if (writer == NULL)
+        throw pdal_error("Error getting writer\n");
+
+    writerOptions.add("filename", m_outputFile);
+    writer->setOptions(writerOptions);
+    writer->setInput(*stage);
+
+    // be sure to recurse through any extra stage options provided by the user
+    applyExtraStageOptionsRecursive(writer);
+
+    m_manager->execute();
+
+    if (m_pipelineOutput.size() > 0)
+    {
+        PipelineWriter writer(*m_manager);
+        writer.writePipeline(m_pipelineOutput);
+    }
 
     return 0;
 }
 
 } // namespace pdal
-

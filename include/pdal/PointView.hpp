@@ -201,8 +201,12 @@ public:
         { return m_pointTable.layout()->pointSize(); }
     std::size_t dimSize(Dimension::Id::Enum id) const
         { return m_pointTable.layout()->dimSize(id); }
+    Dimension::Type::Enum dimType(Dimension::Id::Enum id) const
+     { return m_pointTable.layout()->dimType(id);}
     DimTypeList dimTypes() const
         { return m_pointTable.layout()->dimTypes(); }
+
+    PointLayoutPtr layout() const { return m_pointTable.layout(); }
 
     /// Fill a buffer with point data specified by the dimension list.
     /// \param[in] dims  List of dimensions/types to retrieve.

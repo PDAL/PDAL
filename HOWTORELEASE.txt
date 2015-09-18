@@ -1,0 +1,82 @@
+
+Steps for Making a PDAL Release
+==============================================================================
+
+:Author: Howard Butler
+:Contact: howard@hobu.co
+:Date: 09/11/2015
+
+This document describes the process for releasing a new version of PDAL.
+
+General Notes
+------------------------------------------------------------------------------
+
+Release Process
+
+1) Increment Version Numbers
+
+  - CMakeLists.txt
+    * set(PDAL_VERSION_STRING "1.0.0" CACHE STRING "PDAL version")
+    * DISSECT_VERSION() CMake macro will break version down into
+      PDAL_VERSION_MAJOR, PDAL_VERSION_MINOR, PDAL_VERSION_PATCH,
+      and PDAL_CANDIDATE_VERSION strings.
+
+  - Update SO versioning
+    set(PDAL_API_VERSION "1")
+    set(PDAL_BUILD_VERSION "1.0.0")
+    * https://github.com/libspatialindex/libspatialindex/pull/44#issuecomment-57088783
+
+2) Update README to include any relevant info about the release that
+   might have changed.
+
+3) Update ChangeLog with git2cl
+
+  * git2cl . > ChangeLog
+
+4) Build and run the tests.  Really.
+
+    ::
+
+        ctest -V
+
+5) Clone a new tree and issue cmake. The package_source CMake target is
+   aggressive about scooping up every file in the tree to include in the package.
+   It does ok with CMake-specific stuff, but any other cruft in the tree is
+   likely to get dumped into the package.
+
+   ::
+
+        git clone git://github.com/PDAL/PDAL.git pdal2
+        cmake .
+
+6) Make the source distribution. If you are doing a release candidate
+   add an RC tag to the invocation.
+
+  ::
+
+      ./package.sh
+      ./package.sh RC1
+
+
+   package.sh will rename the source files if necessary for the release
+   candidate tag and create .md5 sum files. This script only works on
+   linux and windows.
+
+7) Update docs/download.txt to point at the location of the new release
+
+8) Upload the new release to download.osgeo.org:/osgeo/download/pdal
+
+  ::
+
+        scp PDAL-* hobu@download.osgeo.org:/osgeo/download/pdal
+
+9) Tag the release.  Use the ``-f`` switch if you are retagging because you
+   missed something.
+
+  ::
+        git tag 1.0.0
+        git push --tags
+
+
+10) Write the release notes. Email PDAL mailing list with notice about release
+
