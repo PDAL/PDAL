@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2015, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2013, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -35,22 +35,15 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-#include <pdal/Stage.hpp>
-
-#include <memory>
+#include <pdal/StageFactory.hpp>
 
 namespace pdal
 {
 
-class Options;
-class PointLayout;
-class PointTable;
-class PointView;
-
-class PDAL_DLL GroundFilter : public Filter
+class PDAL_DLL PoissonFilter : public Filter
 {
 public:
-    GroundFilter() : Filter()
+    PoissonFilter() : Filter()
     {}
 
     static void * create();
@@ -60,21 +53,14 @@ public:
     Options getDefaultOptions();
 
 private:
-    double m_maxWindowSize;
-    double m_slope;
-    double m_maxDistance;
-    double m_initialDistance;
-    double m_cellSize;
-    bool m_classify;
-    bool m_extract;
-    bool m_approximate;
+    int m_depth;
+    float m_point_weight;
 
-    virtual void addDimensions(PointLayoutPtr layout);
     virtual void processOptions(const Options& options);
     virtual PointViewSet run(PointViewPtr view);
 
-    GroundFilter& operator=(const GroundFilter&); // not implemented
-    GroundFilter(const GroundFilter&); // not implemented
+    PoissonFilter& operator=(const PoissonFilter&); // not implemented
+    PoissonFilter(const PoissonFilter&); // not implemented
 };
 
 } // namespace pdal

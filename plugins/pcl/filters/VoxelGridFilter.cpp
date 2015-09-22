@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013-2014, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2015, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "PCLBlock.hpp"
+#include "VoxelGridFilter.hpp"
 
 #include "PCLConversions.hpp"
 #include "PCLPipeline.h"
@@ -40,30 +40,41 @@
 #include <pcl/console/print.h>
 #include <pcl/point_types.h>
 #include <pcl/io/pcd_io.h>
+#include <pcl/filters/voxel_grid.h>
 
 namespace pdal
 {
 
 static PluginInfo const s_info =
-    PluginInfo("filters.pclblock", "PCL Block implementation",
-               "http://pdal.io/stages/filters.pclblock.html");
+    PluginInfo("filters.voxelgrid", "Voxel grid filter",
+               "http://pdal.io/stages/filters.voxelgrid.html");
 
-CREATE_SHARED_PLUGIN(1, 0, PCLBlock, Filter, s_info)
+CREATE_SHARED_PLUGIN(1, 0, VoxelGridFilter, Filter, s_info)
 
-std::string PCLBlock::getName() const
+std::string VoxelGridFilter::getName() const
 {
     return s_info.name;
 }
 
-/** \brief This method processes the PointView through the given pipeline. */
-
-void PCLBlock::processOptions(const Options& options)
+Options VoxelGridFilter::getDefaultOptions()
 {
-    m_filename = options.getValueOrDefault<std::string>("filename", "");
-    m_json = options.getValueOrDefault<std::string>("json", "");
+    Options options;
+    options.add("leaf_x", 1.0, "Leaf size in X dimension");
+    options.add("leaf_y", 1.0, "Leaf size in Y dimension");
+    options.add("leaf_z", 1.0, "Leaf size in Z dimension");
+    return options;
 }
 
-PointViewSet PCLBlock::run(PointViewPtr input)
+/** \brief This method processes the PointView through the given pipeline. */
+
+void VoxelGridFilter::processOptions(const Options& options)
+{
+    m_leaf_x = options.getValueOrDefault<double>("leaf_x", 1.0);
+    m_leaf_y = options.getValueOrDefault<double>("leaf_y", 1.0);
+    m_leaf_z = options.getValueOrDefault<double>("leaf_z", 1.0);
+}
+
+PointViewSet VoxelGridFilter::run(PointViewPtr input)
 {
     PointViewPtr output = input->makeNew();
     PointViewSet viewSet;
@@ -73,11 +84,7 @@ PointViewSet PCLBlock::run(PointViewPtr input)
     if (logOutput)
         log()->floatPrecision(8);
 
-    log()->get(LogLevel::Debug2) <<
-                                 input->getFieldAs<double>(Dimension::Id::X, 0) << ", " <<
-                                 input->getFieldAs<double>(Dimension::Id::Y, 0) << ", " <<
-                                 input->getFieldAs<double>(Dimension::Id::Z, 0) << std::endl;
-    log()->get(LogLevel::Debug2) << "Process PCLBlock..." << std::endl;
+    log()->get(LogLevel::Debug2) << "Process VoxelGridFilter..." << std::endl;
 
     BOX3D buffer_bounds;
     input->calculateBounds(buffer_bounds);
@@ -86,9 +93,6 @@ PointViewSet PCLBlock::run(PointViewPtr input)
     typedef pcl::PointCloud<pcl::PointXYZ> Cloud;
     Cloud::Ptr cloud(new Cloud);
     pclsupport::PDALtoPCD(input, *cloud, buffer_bounds);
-
-    log()->get(LogLevel::Debug2) << cloud->points[0].x << ", " <<
-                                 cloud->points[0].y << ", " << cloud->points[0].z << std::endl;
 
     int level = log()->getLevel();
     switch (level)
@@ -113,22 +117,14 @@ PointViewSet PCLBlock::run(PointViewPtr input)
             break;
     }
 
-    pcl::Pipeline<pcl::PointXYZ> pipeline;
-    pipeline.setInputCloud(cloud);
-    if (!m_filename.empty())
-        pipeline.setFilename(m_filename);
-    else if (!m_json.empty())
-        pipeline.setJSON(m_json);
-    else
-        throw pdal_error("No PCL pipeline specified!");
-    // PDALtoPCD subtracts min values in each XYZ dimension to prevent rounding
-    // errors in conversion to float. These offsets need to be conveyed to the
-    // pipeline to offset any bounds entered as part of a PassThrough filter.
-    pipeline.setOffsets(buffer_bounds.minx, buffer_bounds.miny, buffer_bounds.minz);
+    // initial setup
+    pcl::VoxelGrid<pcl::PointXYZ> vg;
+    vg.setInputCloud(cloud);
+    vg.setLeafSize(m_leaf_x, m_leaf_y, m_leaf_z);
 
     // create PointCloud for results
     Cloud::Ptr cloud_f(new Cloud);
-    pipeline.filter(*cloud_f);
+    vg.filter(*cloud_f);
 
     if (cloud_f->points.empty())
     {
@@ -141,9 +137,7 @@ PointViewSet PCLBlock::run(PointViewPtr input)
     log()->get(LogLevel::Debug2) << cloud->points.size() << " before, " <<
                                  cloud_f->points.size() << " after" << std::endl;
     log()->get(LogLevel::Debug2) << output->size() << std::endl;
-    log()->get(LogLevel::Debug2) << output->getFieldAs<double>(Dimension::Id::X, 0) << ", " <<
-                                 output->getFieldAs<double>(Dimension::Id::Y, 0) << ", " <<
-                                 output->getFieldAs<double>(Dimension::Id::Z, 0) << std::endl;
+
     return viewSet;
 }
 

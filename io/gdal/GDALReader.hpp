@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2015, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2015, Howard Butler <howard@hobu.co>
 *
 * All rights reserved.
 *
@@ -34,47 +34,49 @@
 
 #pragma once
 
-#include <pdal/Filter.hpp>
-#include <pdal/Stage.hpp>
+#include <string>
 
-#include <memory>
+
+#include <pdal/Dimension.hpp>
+#include <pdal/Reader.hpp>
+#include <pdal/StageFactory.hpp>
+
+#include <pdal/GDALUtils.hpp>
+
+extern "C" int32_t GDALReader_ExitFunc();
+extern "C" PF_ExitFunc GDALReader_InitPlugin();
+
 
 namespace pdal
 {
 
-class Options;
-class PointLayout;
-class PointTable;
-class PointView;
 
-class PDAL_DLL GroundFilter : public Filter
+typedef std::map<std::string, Dimension::Id::Enum> DimensionMap;
+
+
+
+class PDAL_DLL GDALReader : public Reader
 {
 public:
-    GroundFilter() : Filter()
-    {}
-
-    static void * create();
+    static void *create();
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
+    GDALReader();
+
+    static Dimension::IdList getDefaultDimensions();
 
 private:
-    double m_maxWindowSize;
-    double m_slope;
-    double m_maxDistance;
-    double m_initialDistance;
-    double m_cellSize;
-    bool m_classify;
-    bool m_extract;
-    bool m_approximate;
-
+    virtual void initialize();
     virtual void addDimensions(PointLayoutPtr layout);
-    virtual void processOptions(const Options& options);
-    virtual PointViewSet run(PointViewPtr view);
+    virtual void processOptions(const Options&);
+    virtual void ready(PointTableRef table);
+    virtual point_count_t read(PointViewPtr view, point_count_t num);
+    virtual QuickInfo inspect();
 
-    GroundFilter& operator=(const GroundFilter&); // not implemented
-    GroundFilter(const GroundFilter&); // not implemented
+    std::unique_ptr<gdal::Raster> m_raster;
+    point_count_t m_index;
+
 };
+}
 
-} // namespace pdal

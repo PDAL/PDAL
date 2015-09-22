@@ -41,50 +41,43 @@ Our first example to demonstrate PDAL's utility will be to simply query an
 
     The `interesting.las`_ file in these examples can be found on github.
 
-`reStructuredText`_ output
-................................................................................
-
-By default, PDAL outputs `reStructuredText`_. This makes it convenient for
-transforming the output into more pleasing formats like PDF (using `rst2pdf`_)
-or HTML (using `rst2html`_) as part of a processing pipeline.
-
-.. _`rst2pdf`: https://code.google.com/p/rst2pdf/
-.. _`rst2html`: http://docutils.sourceforge.net/docs/user/tools.html#rst2html-py
-.. _`reStructuredText`: http://docutils.sourceforge.net/rst.html
-
-
-JavaScript output
-................................................................................
-
-JavaScript `JSON`_ can also be output.
+PDAL outputs JavaScript `JSON`_.
 
 .. _`JSON`: http://www.json.org/
 
 ::
 
-    $ pdal info interesting.las -p 0 --json
+    $ pdal info interesting.las -p 0
 
 .. code-block:: javascript
 
     {
-        "X": "637012.23999999999",
-        "Y": "849028.31000000006",
-        "Z": "431.66000000000003",
-        "Intensity": "143",
-        "ReturnNumber": "1",
-        "NumberOfReturns": "1",
-        "ScanDirectionFlag": "1",
-        "EdgeOfFlightLine": "0",
-        "Classification": "1",
-        "ScanAngleRank": "-9",
-        "UserData": "132",
-        "PointSourceId": "7326",
-        "Time": "245380.78254962614",
-        "Red": "68",
-        "Green": "77",
-        "Blue": "88"
+      "filename": "interesting.las",
+      "pdal_version": "1.0.1 (git-version: 80644d)",
+      "points":
+      {
+        "point":
+        {
+          "Blue": 88,
+          "Classification": 1,
+          "EdgeOfFlightLine": 0,
+          "GpsTime": 245381,
+          "Green": 77,
+          "Intensity": 143,
+          "NumberOfReturns": 1,
+          "PointId": 0,
+          "PointSourceId": 7326,
+          "Red": 68,
+          "ReturnNumber": 1,
+          "ScanAngleRank": -9,
+          "ScanDirectionFlag": 1,
+          "UserData": 132,
+          "X": 637012,
+          "Y": 849028,
+          "Z": 431.66
+        }
+      }
     }
-
 
 A conversion example
 ------------------------------------------------------------------------------
@@ -174,7 +167,7 @@ effects.
 Simple conversion
 ..............................................................................
 
-The following XML document defines a :ref:`pipeline` that takes the ``file.las``
+The following `XML`_ document defines a :ref:`pipeline` that takes the ``file.las``
 `ASPRS LAS`_ file and converts it to a new file called ``output.las``.
 
 ::

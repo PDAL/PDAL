@@ -1,7 +1,7 @@
 .. _filters.ferry:
 
 filters.ferry
-============
+================================================================================
 
 The ferry filter is used to stash intermediate variables as part of
 processing data. For example, a common scenario is to keep both the

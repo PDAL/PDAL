@@ -1,7 +1,7 @@
 .. _filters.stats:
 
 filters.stats
-============
+===============================================================================
 
 The stats filter calculates the minimum, maximum and average (mean) values
 of dimensions.  On request it will also provide an enumeration of values of
@@ -41,7 +41,7 @@ Options
 dimensions
   A comma-separated list of dimensions whose statistics should be
   processed.  If not provided, statistics for all dimensions are calculated.
-  
+
 enumerate
   A comma-separated list of dimensions whose values should be enumerated.
   Note that this list does not add to the list of dimensions that may be
