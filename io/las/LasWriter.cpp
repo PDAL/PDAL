@@ -380,8 +380,7 @@ MetadataNode LasWriter::findVlrMetadata(MetadataNode node,
 }
 
 
-/// Set VLRs from metadata for forwarded info, or from option-provided data
-/// otherwise.
+/// Set VLRs from metadata for forwarded info.
 void LasWriter::setVlrsFromMetadata(MetadataNode& forward)
 {
     std::vector<uint8_t> data;
@@ -705,8 +704,7 @@ point_count_t LasWriter::fillWriteBuf(const PointView& view,
         uint8_t numberOfReturns(1);
         if (view.hasDim(Id::ReturnNumber))
         {
-            returnNumber = view.getFieldAs<uint8_t>(Id::ReturnNumber,
-                idx);
+            returnNumber = view.getFieldAs<uint8_t>(Id::ReturnNumber, idx);
             if (returnNumber < 1 || returnNumber > maxReturnCount)
                 m_error.returnNumWarning(returnNumber);
         }
@@ -791,10 +789,7 @@ point_count_t LasWriter::fillWriteBuf(const PointView& view,
 
         uint8_t classification = 0;
         if (view.hasDim(Id::Classification))
-        {
-            classification = view.getFieldAs<uint8_t>(Id::Classification,
-                idx);
-        }
+            classification = view.getFieldAs<uint8_t>(Id::Classification, idx);
         ostream << classification;
 
         uint8_t userData = 0;
@@ -819,8 +814,7 @@ point_count_t LasWriter::fillWriteBuf(const PointView& view,
 
         uint16_t pointSourceId = 0;
         if (view.hasDim(Id::PointSourceId))
-            pointSourceId = view.getFieldAs<uint16_t>(Id::PointSourceId,
-                idx);
+            pointSourceId = view.getFieldAs<uint16_t>(Id::PointSourceId, idx);
         ostream << pointSourceId;
 
         if (hasTime)
