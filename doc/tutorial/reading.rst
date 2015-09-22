@@ -50,38 +50,8 @@ or HTML (using `rst2html`_) as part of a processing pipeline.
 
 .. _`rst2pdf`: https://code.google.com/p/rst2pdf/
 .. _`rst2html`: http://docutils.sourceforge.net/docs/user/tools.html#rst2html-py
-
 .. _`reStructuredText`: http://docutils.sourceforge.net/rst.html
 
-::
-
-    $ pdal info interesting.las -p 0
-
-::
-
-    Point 0
-    --------------------------------------------------------------------------------
-
-    =================== ======================================= ===================
-                Name                                Value        Namespace
-    =================== ======================================= ===================
-    X                                        637012.23999999999  readers.las
-    Y                                        849028.31000000006  readers.las
-    Z                                        431.66000000000003  readers.las
-    Intensity                                               143  readers.las
-    ReturnNumber                                              1  readers.las
-    NumberOfReturns                                           1  readers.las
-    ScanDirectionFlag                                         1  readers.las
-    EdgeOfFlightLine                                          0  readers.las
-    Classification                                            1  readers.las
-    ScanAngleRank                                            -9  readers.las
-    UserData                                                132  readers.las
-    PointSourceId                                          7326  readers.las
-    Time                                     245380.78254962614  readers.las
-    Red                                                      68  readers.las
-    Green                                                    77  readers.las
-    Blue                                                     88  readers.las
-    =================== ======================================= ===================
 
 JavaScript output
 ................................................................................
@@ -114,40 +84,6 @@ JavaScript `JSON`_ can also be output.
         "Green": "77",
         "Blue": "88"
     }
-
-
-
-XML output
-................................................................................
-
-XML output of this same point is as simple as adding the appropriate
-switch:
-
-::
-
-    $ pdal info interesting.las -p 0 --xml
-
-.. code-block:: xml
-
-    <?xml version="1.0" encoding="utf-8"?>
-    <point>
-      <X>637012.23999999999</X>
-      <Y>849028.31000000006</Y>
-      <Z>431.66000000000003</Z>
-      <Intensity>143</Intensity>
-      <ReturnNumber>1</ReturnNumber>
-      <NumberOfReturns>1</NumberOfReturns>
-      <ScanDirectionFlag>1</ScanDirectionFlag>
-      <EdgeOfFlightLine>0</EdgeOfFlightLine>
-      <Classification>1</Classification>
-      <ScanAngleRank>-9</ScanAngleRank>
-      <UserData>132</UserData>
-      <PointSourceId>7326</PointSourceId>
-      <Time>245380.78254962614</Time>
-      <Red>68</Red>
-      <Green>77</Green>
-      <Blue>88</Blue>
-    </point>
 
 
 A conversion example
@@ -200,12 +136,12 @@ We can capture this metadata using the :ref:`info_command` utility.
 
 ::
 
-    $ pdal info --metadata --xml interesting.las
+    $ pdal info --metadata interesting.las
 
-This produces metadata that looks like :ref:`this <metadataxml>`. You can use
-your favorite `XML`_ or `JSON`_ manipulation tools to extract this information
-and do what you need with it. For formats that do not have the ability to
-preserve this metadata internally, you can keep a ``.xml`` or ``.json`` file
+This produces metadata that looks like :ref:`this <metadatajson>`. You can use
+your `JSON`_ manipulation tools to extract this information.
+For formats that do not have the ability to
+preserve this metadata internally, you can keep a ``.json`` file
 alongside the ``.txt`` file as auxiliary information.
 
 .. seealso::

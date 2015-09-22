@@ -152,7 +152,7 @@ A more interesting metadata tree might come from the
         }
     }
 
-.. _metadataxml:
+.. _metadatajson:
 
 :ref:`Pipeline` XML representation
 ------------------------------------------------------------------------------
