@@ -488,7 +488,6 @@ TEST(LasWriterTest, lazperf)
     PointTable t;
     lazWriter.prepare(t);
     lazWriter.execute(t);
-std::cerr << "Wrote file!\n";
 
     // Now test the points were properly written.  Use laszip.
     Options ops1;

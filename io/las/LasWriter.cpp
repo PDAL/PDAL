@@ -654,7 +654,6 @@ void LasWriter::readyLazPerfCompression()
 
     m_compressor.reset(new LazPerfVlrCompressor(*m_ostream, schema,
         zipvlr.chunk_size));
-std::cerr << "Made perf VLR!\n";
 #endif
 }
 
@@ -740,7 +739,6 @@ void LasWriter::writeLazPerfBuf(char *pos, size_t pointLen,
         m_compressor->compress(pos);
         pos += pointLen;
     }
-    std::cerr << "Wrote " << numPts << " points with LazPerf compressor!\n";
 #endif
 }
 
@@ -992,7 +990,6 @@ void LasWriter::finishLazPerfOutput()
 {
 #ifdef PDAL_HAVE_LAZPERF
     m_compressor->done();
-    std::cerr << "Done with laz perf!\n";
 #endif
 }
 

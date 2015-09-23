@@ -237,6 +237,7 @@ public:
             m_chunkInfoPos = m_stream.tellp();
             // Seek over the chunk info offset value
             m_stream.seekp(sizeof(uint64_t), std::ios::cur);
+            m_chunkOffset = m_stream.tellp();
             resetCompressor();
         }
         else if (m_chunkPointsWritten == m_chunksize)
