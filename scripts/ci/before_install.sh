@@ -68,6 +68,10 @@ then
         points2grid
 fi
 
+#
+# LasZIP
+#
+
 mkdir laszip
 cd laszip
 wget https://github.com/LASzip/LASzip/releases/download/v2.2.0/laszip-src-2.2.0.tar.gz &&
@@ -75,9 +79,10 @@ wget https://github.com/LASzip/LASzip/releases/download/v2.2.0/laszip-src-2.2.0.
   cd laszip-src-2.2.0 &&
   ./configure &&
   make &&
-  make install &&
-  ldconfig &&
-  (cd /usr/local/include && mkdir laszip && cd laszip && ln -s ../las*.hpp .)
+  sudo make install &&
+  sudo ldconfig
+
+#  (cd /usr/local/include && mkdir laszip && cd laszip && ln -s ../las*.hpp .)
 
 gcc --version
 clang --version
