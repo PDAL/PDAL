@@ -462,7 +462,7 @@ TEST(LasWriterTest, flex2)
     EXPECT_EQ(r.preview().m_pointCount, 1065u);
 }
 
-#ifdef PDAL_HAVE_LAZPERF
+#if defined(PDAL_HAVE_LAZPERF) && defined(PDAL_HAVE_LASZIP)
 // LAZ files are normally written in chunks of 50,000, so a file of size
 // 110,000 ensures we read some whole chunks and a partial.
 TEST(LasWriterTest, lazperf)
