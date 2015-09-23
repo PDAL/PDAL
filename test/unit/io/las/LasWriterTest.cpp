@@ -479,7 +479,7 @@ TEST(LasWriterTest, lazperf)
 
     Options writerOps;
     writerOps.add("filename", testfile);
-//    writerOps.add("compression", "lazperf");
+    writerOps.add("compression", "lazperf");
 
     LasWriter lazWriter;
     lazWriter.setOptions(writerOps);
