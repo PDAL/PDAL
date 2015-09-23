@@ -147,9 +147,7 @@ void Options::add(const Option& option)
 
 void Options::remove(const Option& option)
 {
-    auto oi = m_options.find(option.getName());
-    if (oi != m_options.end())
-        m_options.erase(oi);
+    m_options.erase(option.getName());
 }
 
 
