@@ -473,9 +473,13 @@ TEST(LasWriterTest, lazperf)
     LasReader lazReader;
     lazReader.setOptions(readerOps);
 
+    std::string testfile(Support::temppath("temp.laz"));
+
+    FileUtils::deleteFile(testfile);
+
     Options writerOps;
-    writerOps.add("filename", Support::temppath("temp.laz"));
-    writerOps.add("compression", "lazperf");
+    writerOps.add("filename", testfile);
+//    writerOps.add("compression", "lazperf");
 
     LasWriter lazWriter;
     lazWriter.setOptions(writerOps);
@@ -484,10 +488,11 @@ TEST(LasWriterTest, lazperf)
     PointTable t;
     lazWriter.prepare(t);
     lazWriter.execute(t);
+std::cerr << "Wrote file!\n";
 
     // Now test the points were properly written.  Use laszip.
     Options ops1;
-    ops1.add("filename", Support::temppath("temp.laz"));
+    ops1.add("filename", testfile);
 
     LasReader r1;
     r1.setOptions(ops1);
