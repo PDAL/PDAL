@@ -95,6 +95,11 @@ public:
         for (const auto& o : opts.getOptions())
             m_options.add(o);
     }
+    void removeOptions(const Options& opts)
+    {
+        for (const auto& o : opts.getOptions())
+            m_options.remove(o);
+    }
     virtual boost::property_tree::ptree serializePipeline() const = 0;
     virtual LogPtr log() const
         { return m_log; }
@@ -181,4 +186,3 @@ private:
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const Stage&);
 
 } // namespace pdal
-
