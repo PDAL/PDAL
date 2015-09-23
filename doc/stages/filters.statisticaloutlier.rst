@@ -18,6 +18,19 @@ can be set using ``multiplier``. During the next iteration the points will be
 classified as inlier or outlier if their average neighbor distance is below or
 above this threshold respectively.
 
+.. figure:: filters.statisticaloutlier.img1.png
+    :scale: 100 %
+    :alt: Points before outlier removal
+
+    Before outlier removal, noise points can be found both above and below the scene.
+
+
+.. figure:: filters.statisticaloutlier.img2.png
+    :scale: 100 %
+    :alt: Points after outlier removal
+
+    After outlier removal, the noise points are removed.
+
 See [Rusu2008]_ for more information.
 
 .. [Rusu2008] Rusu, Radu Bogdan, et al. "Towards 3D point cloud based object maps for household environments." Robotics and Autonomous Systems 56.11 (2008): 927-941.
