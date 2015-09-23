@@ -145,6 +145,12 @@ void Options::add(const Option& option)
 }
 
 
+void Options::remove(const Option& option)
+{
+    m_options.erase(option.getName());
+}
+
+
 Option& Options::getOptionByRef(const std::string& name)
 {
     auto iter = m_options.find(name);
