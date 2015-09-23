@@ -81,7 +81,7 @@ wget https://github.com/LASzip/LASzip/releases/download/v2.2.0/laszip-src-2.2.0.
   make &&
   sudo make install &&
   sudo ldconfig &&
-  (cd /usr/local/include && mkdir laszip && cd laszip && ln -s ../las*.hpp .)
+  (cd /usr/local/include && sudo mkdir laszip && cd laszip && sudo ln -s ../las*.hpp .)
 
 gcc --version
 clang --version
