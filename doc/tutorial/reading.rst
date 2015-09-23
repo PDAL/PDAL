@@ -129,12 +129,12 @@ We can capture this metadata using the :ref:`info_command` utility.
 
 ::
 
-    $ pdal info --metadata --xml interesting.las
+    $ pdal info --metadata interesting.las
 
-This produces metadata that looks like :ref:`this <metadataxml>`. You can use
-your favorite `XML`_ or `JSON`_ manipulation tools to extract this information
-and do what you need with it. For formats that do not have the ability to
-preserve this metadata internally, you can keep a ``.xml`` or ``.json`` file
+This produces metadata that looks like :ref:`this <metadatajson>`. You can use
+your `JSON`_ manipulation tools to extract this information.
+For formats that do not have the ability to
+preserve this metadata internally, you can keep a ``.json`` file
 alongside the ``.txt`` file as auxiliary information.
 
 .. seealso::
@@ -167,7 +167,7 @@ effects.
 Simple conversion
 ..............................................................................
 
-The following XML document defines a :ref:`pipeline` that takes the ``file.las``
+The following `XML`_ document defines a :ref:`pipeline` that takes the ``file.las``
 `ASPRS LAS`_ file and converts it to a new file called ``output.las``.
 
 ::
