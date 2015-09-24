@@ -138,9 +138,9 @@ PointViewSet StatisticalOutlierFilter::run(PointViewPtr input)
 
     // inverse are the outliers
     std::vector<int> outliers(input->size()-inliers->indices.size());
-    for (int i = 0, j = 0, k = 0; i < input->size(); ++i)
+    for (PointId i = 0, j = 0, k = 0; i < input->size(); ++i)
     {
-        if (i == inliers->indices[j])
+        if (i == (PointId)inliers->indices[j])
         {
             j++;
             continue;

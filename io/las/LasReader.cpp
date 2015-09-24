@@ -70,6 +70,26 @@ void LasReader::processOptions(const Options& options)
     StringList extraDims = options.getValueOrDefault<StringList>("extra_dims");
     m_extraDims = LasUtils::parse(extraDims);
 
+    m_compression = options.getValueOrDefault<std::string>("compression",
+        "LASZIP");
+    std::string compression = Utils::toupper(m_compression);
+#ifndef PDAL_HAVE_LAZPERF
+    if (compression == "LAZPERF")
+        throw pdal_error("Can't decompress with LAZperf.  PDAL not built "
+            "with LAZperf.");
+#endif
+    if (compression != "LAZPERF" && compression != "LASZIP")
+    {
+        std::ostringstream oss;
+
+        oss << "Invalid value for option for compression: '" <<
+            m_compression << "'.  Value values are 'lazperf' and 'laszip'.";
+        throw pdal_error(oss.str());
+    }
+
+    // Set case-corrected value.
+    m_compression = compression;
+
     m_error.setFilename(m_filename);
 }
 
@@ -164,29 +184,46 @@ void LasReader::ready(PointTableRef table, MetadataNode& m)
     if (m_lasHeader.compressed())
     {
 #ifdef PDAL_HAVE_LASZIP
-        VariableLengthRecord *vlr = findVlr(LASZIP_USER_ID, LASZIP_RECORD_ID);
-        m_zipPoint.reset(new ZipPoint(vlr));
-
-        if (!m_unzipper)
+        if (m_compression == "LASZIP")
         {
-            m_unzipper.reset(new LASunzipper());
+            VariableLengthRecord *vlr = findVlr(LASZIP_USER_ID,
+                LASZIP_RECORD_ID);
+            m_zipPoint.reset(new ZipPoint(vlr));
 
-            m_istream->seekg(m_lasHeader.pointOffset(), std::ios::beg);
-
-            // Once we open the zipper, don't touch the stream until the
-            // zipper is closed or bad things happen.
-            if (!m_unzipper->open(*m_istream, m_zipPoint->GetZipper()))
+            if (!m_unzipper)
             {
-                std::ostringstream oss;
-                const char* err = m_unzipper->get_error();
-                if (err == NULL)
-                    err = "(unknown error)";
-                oss << "Failed to open LASzip stream: " << std::string(err);
-                throw pdal_error(oss.str());
+                m_unzipper.reset(new LASunzipper());
+
+                m_istream->seekg(m_lasHeader.pointOffset(), std::ios::beg);
+
+                // Once we open the zipper, don't touch the stream until the
+                // zipper is closed or bad things happen.
+                if (!m_unzipper->open(*m_istream, m_zipPoint->GetZipper()))
+                {
+                    std::ostringstream oss;
+                    const char* err = m_unzipper->get_error();
+                    if (err == NULL)
+                        err = "(unknown error)";
+                    oss << "Failed to open LASzip stream: " << std::string(err);
+                    throw pdal_error(oss.str());
+                }
             }
         }
-#else
-        throw pdal_error("LASzip is not enabled.  Can't read LAZ data.");
+#endif
+
+#ifdef PDAL_HAVE_LAZPERF
+        if (m_compression == "LAZPERF")
+        {
+            VariableLengthRecord *vlr = findVlr(LASZIP_USER_ID,
+                LASZIP_RECORD_ID);
+            m_decompressor.reset(new LazPerfVlrDecompressor(*m_istream,
+                vlr->data(), m_lasHeader.pointOffset()));
+        }
+#endif
+
+#if !defined(PDAL_HAVE_LAZPERF) && !defined(PDAL_HAVE_LASZIP)
+        throw pdal_error("Can't read compressed file without LASzip or "
+            "LAZperf decompression library.");
 #endif
     }
     m_error.setLog(log());
@@ -565,26 +602,44 @@ point_count_t LasReader::read(PointViewPtr view, point_count_t count)
     count = std::min(count, getNumPoints() - m_index);
 
     PointId i = 0;
-    if (m_zipPoint)
+    if (m_lasHeader.compressed())
     {
 #ifdef PDAL_HAVE_LASZIP
-        for (i = 0; i < count; i++)
+        if (m_compression == "LASZIP")
         {
-            if (!m_unzipper->read(m_zipPoint->m_lz_point))
+            for (i = 0; i < count; i++)
             {
-                std::string error = "Error reading compressed point data: ";
-                const char* err = m_unzipper->get_error();
-                if (!err)
-                    err = "(unknown error)";
-                error += err;
-                throw pdal_error(error);
+                if (!m_unzipper->read(m_zipPoint->m_lz_point))
+                {
+                    std::string error = "Error reading compressed point data: ";
+                    const char* err = m_unzipper->get_error();
+                    if (!err)
+                        err = "(unknown error)";
+                    error += err;
+                    throw pdal_error(error);
+                }
+                loadPoint(*view.get(),
+                    (char *)m_zipPoint->m_lz_point_data.data(), pointByteCount);
             }
-            loadPoint(*view.get(), (char *)m_zipPoint->m_lz_point_data.data(),
-                pointByteCount);
         }
-#else
-        throw pdal_error("LASzip is not enabled for this "
-            "LasReader::processBuffer");
+#endif
+
+#ifdef PDAL_HAVE_LAZPERF
+        if (m_compression == "LAZPERF")
+        {
+            assert(pointByteCount == m_decompressor->pointSize());
+
+            std::vector<char> ptBuf(m_decompressor->pointSize());
+            for (i = 0; i < count; i++)
+            {
+                m_decompressor->decompress(ptBuf.data());
+                loadPoint(*view.get(), ptBuf.data(), pointByteCount);
+            }
+        }
+#endif
+#if !defined(PDAL_HAVE_LAZPERF) && !defined(PDAL_HAVE_LASZIP)
+        throw pdal_error("Can't read compressed file without LASzip or "
+            "LAZperf decompression library.");
 #endif
     }
     else

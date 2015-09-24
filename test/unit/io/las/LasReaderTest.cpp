@@ -393,6 +393,53 @@ TEST(LasReaderTest, callback)
     EXPECT_EQ(count, (point_count_t)1065);
 }
 
+#ifdef PDAL_HAVE_LAZPERF
+// LAZ files are normally written in chunks of 50,000, so a file of size
+// 110,000 ensures we read some whole chunks and a partial.
+TEST(LasReaderTest, lazperf)
+{
+    Options ops1;
+    ops1.add("filename", Support::datapath("laz/autzen_trim.laz"));
+    ops1.add("compression", "lazperf");
+
+    LasReader lazReader;
+    lazReader.setOptions(ops1);
+
+    PointTable t1;
+    lazReader.prepare(t1);
+    PointViewSet pbSet = lazReader.execute(t1);
+    EXPECT_EQ(pbSet.size(), 1UL);
+    PointViewPtr view1 = *pbSet.begin();
+    EXPECT_EQ(view1->size(), (point_count_t)110000);
+
+    Options ops2;
+    ops2.add("filename", Support::datapath("las/autzen_trim.las"));
+
+    LasReader lasReader;
+    lasReader.setOptions(ops2);
+
+    PointTable t2;
+    lasReader.prepare(t2);
+    pbSet = lasReader.execute(t2);
+    EXPECT_EQ(pbSet.size(), 1UL);
+    PointViewPtr view2 = *pbSet.begin();
+    EXPECT_EQ(view2->size(), (point_count_t)110000);
+
+    DimTypeList dims = view1->dimTypes();
+    size_t pointSize = view1->pointSize();
+    EXPECT_EQ(view1->pointSize(), view2->pointSize());
+    // Validate some point data.
+    std::unique_ptr<char> buf1(new char[pointSize]);
+    std::unique_ptr<char> buf2(new char[pointSize]);
+    for (PointId i = 0; i < 110000; i += 100)
+    {
+       view1->getPackedPoint(dims, i, buf1.get());
+       view2->getPackedPoint(dims, i, buf2.get());
+       EXPECT_EQ(memcmp(buf1.get(), buf2.get(), pointSize), 0);
+    }
+}
+#endif
+
 
 // The header of 1.2-with-color-clipped says that it has 1065 points,
 // but it really only has 1064.

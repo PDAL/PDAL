@@ -207,12 +207,13 @@ TEST(LasWriterTest, extra_dims)
     Options reader2Ops;
     reader2Ops.add("filename", Support::temppath("simple.las"));
     reader2Ops.add("extra_dims", "R1 =int32, B1= int16 ,G1=int32_t");
-    std::shared_ptr<LasReader> reader2(new LasReader);
-    reader2->setOptions(reader2Ops);
+
+    LasReader reader2;
+    reader2.setOptions(reader2Ops);
 
     PointTable readTable;
-    reader2->prepare(readTable);
-    viewSet = reader2->execute(readTable);
+    reader2.prepare(readTable);
+    viewSet = reader2.execute(readTable);
     pb = *viewSet.begin();
     Dimension::Id::Enum r1 = readTable.layout()->findDim("R1");
     EXPECT_TRUE(r1 != Dimension::Id::Unknown);
@@ -460,6 +461,76 @@ TEST(LasWriterTest, flex2)
     r.setOptions(ops);
     EXPECT_EQ(r.preview().m_pointCount, 1065u);
 }
+
+#if defined(PDAL_HAVE_LAZPERF) && defined(PDAL_HAVE_LASZIP)
+// LAZ files are normally written in chunks of 50,000, so a file of size
+// 110,000 ensures we read some whole chunks and a partial.
+TEST(LasWriterTest, lazperf)
+{
+    Options readerOps;
+    readerOps.add("filename", Support::datapath("las/autzen_trim.las"));
+
+    LasReader lazReader;
+    lazReader.setOptions(readerOps);
+
+    std::string testfile(Support::temppath("temp.laz"));
+
+    FileUtils::deleteFile(testfile);
+
+    Options writerOps;
+    writerOps.add("filename", testfile);
+    writerOps.add("compression", "lazperf");
+
+    LasWriter lazWriter;
+    lazWriter.setOptions(writerOps);
+    lazWriter.setInput(lazReader);
+
+    PointTable t;
+    lazWriter.prepare(t);
+    lazWriter.execute(t);
+
+    // Now test the points were properly written.  Use laszip.
+    Options ops1;
+    ops1.add("filename", testfile);
+
+    LasReader r1;
+    r1.setOptions(ops1);
+
+    PointTable t1;
+    r1.prepare(t1);
+    PointViewSet set1 = r1.execute(t1); 
+    PointViewPtr view1 = *set1.begin();
+
+    Options ops2;
+    ops2.add("filename", Support::datapath("las/autzen_trim.las"));
+
+    LasReader r2;
+    r2.setOptions(ops2);
+
+    PointTable t2;
+    r2.prepare(t2);
+    PointViewSet set2 = r2.execute(t2); 
+    PointViewPtr view2 = *set2.begin();
+
+    EXPECT_EQ(view1->size(), view2->size());
+    EXPECT_EQ(view1->size(), (point_count_t)110000);
+
+    DimTypeList dims = view1->dimTypes();
+    size_t pointSize = view1->pointSize();
+    EXPECT_EQ(view1->pointSize(), view2->pointSize());
+
+   // Validate some point data.
+    std::unique_ptr<char> buf1(new char[pointSize]);
+    std::unique_ptr<char> buf2(new char[pointSize]);
+    for (PointId i = 0; i < view1->pointSize(); i += 100)
+    {
+       view1->getPackedPoint(dims, i, buf1.get());
+       view2->getPackedPoint(dims, i, buf2.get());
+       EXPECT_EQ(memcmp(buf1.get(), buf2.get(), pointSize), 0);
+    }
+}
+#endif
+
 
 /**
 namespace

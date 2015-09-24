@@ -40,6 +40,18 @@
 namespace pdal
 {
 
+namespace LasCompression
+{
+
+enum Enum
+{
+    LasZip,
+    LazPerf,
+    None
+};
+
+}
+
 struct ExtraDim
 {
     ExtraDim(const std::string name, Dimension::Type::Enum type,

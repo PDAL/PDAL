@@ -47,3 +47,9 @@ extra_dims
 
 .. _LAS format: http://asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html
   
+compression
+  May be set to "lazperf" or "laszip" to choose either the LazPerf decompressor
+  or the LasZip decompressor for LAZ files.  PDAL must have been build with
+  support for the decompressor being requested.  The LazPerf decompressor
+  doesn't support version 1 LAZ files or version 1.4 of LAS.
+  [Default: "laszip"]

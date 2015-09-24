@@ -434,7 +434,7 @@ public:
 
     // get value of an option, or use given default if option not present
     template<typename T>
-    T getValueOrDefault(std::string const& name, T defaultValue) const
+    T getValueOrDefault(std::string const& name, const T& defaultValue) const
     {
         T result;
 
