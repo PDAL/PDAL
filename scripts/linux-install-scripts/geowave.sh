@@ -10,7 +10,7 @@ export NUMTHREADS
 # Installs GeoWave library
 mkdir geowave
 cd geowave
-wget http://s3.amazonaws.com/geowave-rpms/release/TARBALL/geowave-0.8.7-c8ef40c-jace-source.tar.gz
+wget http://s3.amazonaws.com/geowave-rpms/release/TARBALL/geowave-0.8.8.1-24f1a85-jace-source.tar.gz
 tar -xzf geowave-*-jace-source.tar.gz
 mkdir build
 cd build
