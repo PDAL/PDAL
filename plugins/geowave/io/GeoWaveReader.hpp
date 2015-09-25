@@ -42,8 +42,8 @@
 #include <geos_c.h>
 #endif
 
-#include "jace/proxy/mil/nga/giat/geowave/store/CloseableIterator.h"
-using jace::proxy::mil::nga::giat::geowave::store::CloseableIterator;
+#include "jace/proxy/mil/nga/giat/geowave/core/store/CloseableIterator.h"
+using jace::proxy::mil::nga::giat::geowave::core::store::CloseableIterator;
 
 extern "C" int32_t GeoWaveReader_ExitFunc();
 extern "C" PF_ExitFunc GeoWaveReader_InitPlugin();

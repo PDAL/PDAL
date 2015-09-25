@@ -39,8 +39,7 @@ sudo apt-get install -y -q  git \
                            g++-multilib \
                            libglew-dev \
                            oracle-java7-installer \
-                           maven \
-                           libc6-i386
+                           maven
 
 
 
