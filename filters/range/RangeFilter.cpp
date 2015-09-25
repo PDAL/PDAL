@@ -37,6 +37,7 @@
 #include <cmath>
 #include <limits>
 #include <map>
+#include <regex>
 #include <string>
 #include <utility>
 #include <vector>
@@ -44,55 +45,69 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
-    "filters.range",
-    "Pass only points given a dimension/range.",
-    "http://pdal.io/stages/filters.range.html" );
+static PluginInfo const s_info =
+    PluginInfo("filters.range", "Pass only points given a dimension/range.",
+               "http://pdal.io/stages/filters.range.html");
 
 CREATE_STATIC_PLUGIN(1, 0, RangeFilter, Filter, s_info)
 
-std::string RangeFilter::getName() const { return s_info.name; }
+std::string RangeFilter::getName() const
+{
+    return s_info.name;
+}
 
 void RangeFilter::processOptions(const Options& options)
 {
-    std::vector<Option> dimensions = options.getOptions("dimension");
-    if (dimensions.size() == 0)
-        throw pdal_error("No dimensions given");
-
-    for (auto const& d : dimensions)
+    StringList range_string = options.getValueOrDefault<StringList>("limits");
+    auto parseRanges = [range_string]()
     {
-        std::string name = d.getValue<std::string>();
-        boost::optional<Options const&> dimensionOptions = d.getOptions();
-        if (!dimensionOptions)
-            throw pdal_error("No dimension options");
+        std::vector<Range> range_list;
 
-        double val =dimensionOptions->getValueOrDefault<double>("equals",
-            (std::numeric_limits<double>::max)());
-        double min = dimensionOptions->getValueOrDefault<double>("min",
-            -(std::numeric_limits<double>::max)());
-        double max = dimensionOptions->getValueOrDefault<double>("max",
-            (std::numeric_limits<double>::max)());
+        for (auto const& r : range_string)
+        {
+            std::regex rgx("(\\w+)([\\(\\[])([-]{0,1}[\\d]*[\\.]{0,1}[\\d]*):([-]{0,1}[\\d]*[\\.]{0,1}[\\d]*)([\\)\\]])");
+            int submatches[] = { 1, 2, 3, 4, 5 };
+            std::sregex_token_iterator it(r.begin(), r.end(), rgx, submatches);
 
-        if (val != (std::numeric_limits<double>::max)())
-            min = max = val;
+            std::string name;
+            bool ilb = true;
+            bool iub = true;
+            double lb = -std::numeric_limits<double>::max();
+            double ub = std::numeric_limits<double>::max();
 
-        Range range;
-        range.min = min;
-        range.max = max;
+            name = *it++;
+            if (*it++ == "(")
+                ilb = false;
+            std::string lbtmp = *it++;
+            if (lbtmp != "")
+                lb = std::atof(lbtmp.c_str());
+            std::string uptmp = *it++;
+            if (uptmp != "")
+                ub = std::atof(uptmp.c_str());
+            if (*it++ == ")")
+                iub = false;
 
-        m_name_map.insert(std::make_pair(name, range));
-    }
+            Range range(name, lb, ub, ilb, iub);
+            range_list.push_back(range);
+        }
+
+        return range_list;
+    };
+    m_range_list = parseRanges();
+
+    if (m_range_list.size() == 0)
+        throw pdal_error("No ranges given");
 }
 
 void RangeFilter::ready(PointTableRef table)
 {
     const PointLayoutPtr layout(table.layout());
-    for (auto const& d : m_name_map)
+    for (auto const& d : m_range_list)
     {
         m_dimensions_map.insert(
-                std::make_pair(
-                    layout->findDim(d.first),
-                    d.second));
+            std::make_pair(
+                layout->findDim(d.m_name),
+                d));
     }
 }
 
@@ -110,11 +125,29 @@ PointViewSet RangeFilter::run(PointViewPtr inView)
         for (auto const& d : m_dimensions_map)
         {
             double v = inView->getFieldAs<double>(d.first, i);
-            if (v < d.second.min || v > d.second.max)
+            if (d.second.m_inclusive_lower_bound)
             {
-                keep_point = false;
-                break;
+                if (v < d.second.m_lower_bound)
+                    keep_point = false;
             }
+            else
+            {
+                if (v <= d.second.m_lower_bound)
+                    keep_point = false;
+            }
+            if (d.second.m_inclusive_upper_bound)
+            {
+                if (v > d.second.m_upper_bound)
+                    keep_point = false;
+            }
+            else
+            {
+                if (v >= d.second.m_upper_bound)
+                    keep_point = false;
+            }
+
+            if (keep_point)
+                break;
         }
         if (keep_point)
             outView->appendPoint(*inView, i);
@@ -126,4 +159,3 @@ PointViewSet RangeFilter::run(PointViewPtr inView)
 }
 
 } // pdal
-

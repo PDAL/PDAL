@@ -48,21 +48,9 @@ TEST(RangeFilterTest, createStage)
     EXPECT_TRUE(filter.get());
 }
 
-TEST(RangeFilterTest, noDimension)
+TEST(RangeFilterTest, noLimits)
 {
     RangeFilter filter;
-
-    PointTable table;
-    EXPECT_THROW(filter.prepare(table), pdal_error);
-}
-
-TEST(RangeFilterTest, noRange)
-{
-    Options rangeOps;
-    rangeOps.add("dimension", "Z");
-
-    RangeFilter filter;
-    filter.setOptions(rangeOps);
 
     PointTable table;
     EXPECT_THROW(filter.prepare(table), pdal_error);
@@ -80,15 +68,8 @@ TEST(RangeFilterTest, singleDimension)
     FauxReader reader;
     reader.setOptions(ops);
 
-    Options range;
-    range.add("min", 4);
-    range.add("max", 6);
-
-    Option dim("dimension", "Z");
-    dim.setOptions(range);
-
     Options rangeOps;
-    rangeOps.add(dim);
+    rangeOps.add("limits", "Z[4:6]");
 
     RangeFilter filter;
     filter.setOptions(rangeOps);
@@ -118,23 +99,9 @@ TEST(RangeFilterTest, multipleDimensions)
     FauxReader reader;
     reader.setOptions(ops);
 
-    Options y_range;
-    y_range.add("min", 4);
-    y_range.add("max", 6);
-
-    Option y_dim("dimension", "Y");
-    y_dim.setOptions(y_range);
-
-    Options z_range;
-    z_range.add("min", 4);
-    z_range.add("max", 6);
-
-    Option z_dim("dimension", "Z");
-    z_dim.setOptions(z_range);
-
     Options rangeOps;
-    rangeOps.add(y_dim);
-    rangeOps.add(z_dim);
+    rangeOps.add("limits", "Y[4:6]");
+    rangeOps.add("limits", "Z[4:6]");
 
     RangeFilter filter;
     filter.setOptions(rangeOps);
@@ -167,14 +134,8 @@ TEST(RangeFilterTest, onlyMin)
     FauxReader reader;
     reader.setOptions(ops);
 
-    Options range;
-    range.add("min", 6);
-
-    Option dim("dimension", "Z");
-    dim.setOptions(range);
-
     Options rangeOps;
-    rangeOps.add(dim);
+    rangeOps.add("limits", "Z[6:]");
 
     RangeFilter filter;
     filter.setOptions(rangeOps);
@@ -207,14 +168,8 @@ TEST(RangeFilterTest, onlyMax)
     FauxReader reader;
     reader.setOptions(ops);
 
-    Options range;
-    range.add("max", 5);
-
-    Option dim("dimension", "Z");
-    dim.setOptions(range);
-
     Options rangeOps;
-    rangeOps.add(dim);
+    rangeOps.add("limits", "Z[:5]");
 
     RangeFilter filter;
     filter.setOptions(rangeOps);
@@ -234,7 +189,6 @@ TEST(RangeFilterTest, onlyMax)
     EXPECT_FLOAT_EQ(5.0, view->getFieldAs<double>(Dimension::Id::Z, 4));
 }
 
-
 TEST(RangeFilterTest, equals)
 {
     BOX3D srcBounds(0.0, 0.0, 1.0, 0.0, 0.0, 10.0);
@@ -247,14 +201,8 @@ TEST(RangeFilterTest, equals)
     FauxReader reader;
     reader.setOptions(ops);
 
-    Options range;
-    range.add("equals", 5);
-
-    Option dim("dimension", "Z");
-    dim.setOptions(range);
-
     Options rangeOps;
-    rangeOps.add(dim);
+    rangeOps.add("limits", "Z[5:5]");
 
     RangeFilter filter;
     filter.setOptions(rangeOps);
@@ -282,15 +230,8 @@ TEST(RangeFilterTest, negativeValues)
     FauxReader reader;
     reader.setOptions(ops);
 
-    Options range;
-    range.add("min", -1);
-    range.add("max", 1);
-
-    Option dim("dimension", "Z");
-    dim.setOptions(range);
-
     Options rangeOps;
-    rangeOps.add(dim);
+    rangeOps.add("limits", "Z[-1:1]");
 
     RangeFilter filter;
     filter.setOptions(rangeOps);
@@ -307,4 +248,3 @@ TEST(RangeFilterTest, negativeValues)
     EXPECT_FLOAT_EQ(0.0, view->getFieldAs<double>(Dimension::Id::Z, 1));
     EXPECT_FLOAT_EQ(1.0, view->getFieldAs<double>(Dimension::Id::Z, 2));
 }
-
