@@ -136,8 +136,6 @@ point_count_t Ilvis2Reader::read(PointViewPtr view, point_count_t count)
         }
 
         StringList s = Utils::split2(line, ' ');
-        std::cout << s.size() << std::endl;
-        std::cout << line << std::endl;
 //        # LVIS_LFID SHOTNUMBER TIME LONGITUDE_CENTROID LATITUDE_CENTROID ELEVATION_CENTROID LONGITUDE_LOW LATITUDE_LOW ELEVATION_LOW LONGITUDE_HIGH LATITUDE_HIGH ELEVATION_HIGH
         unsigned long u64(0);
         if (s.size() != 12)

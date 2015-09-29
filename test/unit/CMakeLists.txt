@@ -21,6 +21,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/io/bpf
     ${PROJECT_SOURCE_DIR}/io/buffer
     ${PROJECT_SOURCE_DIR}/io/faux
+    ${PROJECT_SOURCE_DIR}/io/ilvis2
     ${PROJECT_SOURCE_DIR}/io/las
     ${PROJECT_SOURCE_DIR}/io/optech
     ${PROJECT_SOURCE_DIR}/io/ply
@@ -74,6 +75,7 @@ endif()
 PDAL_ADD_TEST(pdal_io_bpf_test FILES io/bpf/BPFTest.cpp)
 PDAL_ADD_TEST(pdal_io_buffer_test FILES io/buffer/BufferTest.cpp)
 PDAL_ADD_TEST(pdal_io_faux_test FILES io/faux/FauxReaderTest.cpp)
+PDAL_ADD_TEST(pdal_io_ilvis2_test FILES io/ilvis2/Ilvis2ReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_las_reader_test FILES io/las/LasReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_las_writer_test FILES io/las/LasWriterTest.cpp)
 PDAL_ADD_TEST(pdal_io_optech_test FILES io/optech/OptechReaderTest.cpp)
