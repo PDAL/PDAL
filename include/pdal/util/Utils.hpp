@@ -393,7 +393,7 @@ namespace Utils
     std::string toString(const T& from)
     {
         std::ostringstream oss;
-        oss << from;
+        oss << std::fixed << from;
         return oss.str();
     }
 
