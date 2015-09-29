@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="writers.las">
+        <Option name="filename">
+            autzen-hag.las
+        </Option>
+        <Filter type="filters.programmable">
+            <Option name="script">
+                hag.py
+            </Option>
+            <Option name="function">
+                filter
+            </Option>
+            <Option name="module">
+                anything
+            </Option>
+            <Filter type="filters.ferry">
+                <Option name="dimension">
+                    Z
+                    <Options>
+                        <Option name="to">
+                            HAG
+                        </Option>
+                    </Options>
+                </Option>
+                <Reader type="readers.las">
+                    <Option name="filename">
+                        @CMAKE_SOURCE_DIR@/autzen/autzen.las
+                    </Option>
+                </Reader>
+            </Filter>
+        </Filter>
+    </Writer>
+</Pipeline>

@@ -127,6 +127,9 @@ public:
 
     void applyExtraStageOptionsRecursive(Stage *s)
     {
+        // if options provided via command-line, we assume they should overwrite
+        // existing options, remove first, and then add
+        s->removeOptions(extraStageOptions(s->getName()));
         s->addOptions(extraStageOptions(s->getName()));
         auto stages = s->getInputs();
         for (Stage *s : stages)
@@ -191,4 +194,3 @@ private:
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const Kernel&);
 
 } // namespace pdal
-

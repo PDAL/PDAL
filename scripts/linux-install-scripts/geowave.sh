@@ -1,14 +1,29 @@
 #!/bin/bash -e
+NUMTHREADS=2
+if [[ -f /sys/devices/system/cpu/online ]]; then
+	# Calculates 1.5 times physical threads
+	NUMTHREADS=$(( ( $(cut -f 2 -d '-' /sys/devices/system/cpu/online) + 1 ) * 15 / 10  ))
+fi
+#NUMTHREADS=1 # disable MP
+export NUMTHREADS
+
 # Installs GeoWave library
-git clone https://github.com/ngageoint/geowave.git geowave
+mkdir geowave
 cd geowave
-git checkout tags/v0.8.5
-mvn clean package -pl geowave-deploy -am -P generate-jace-proxies,linux-amd64-gcc -DskipITs=true -DskipTests=true
+wget http://s3.amazonaws.com/geowave-rpms/release/TARBALL/geowave-0.8.8.1-24f1a85-jace-source.tar.gz
+tar -xzf geowave-*-jace-source.tar.gz
+mkdir build
+cd build
+cmake -G "Unix Makefiles" \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DBUILD_SHARED_LIBS=ON \
+      ..
+
+make -j $NUMTHREADS
 
 # Configure library paths
-chmod 777 /home/vagrant/geowave/geowave-deploy/target/dependency/jace/libjace.so
-sudo ln -s /home/vagrant/geowave/geowave-deploy/target/dependency/jace/libjace.so /usr/lib/libjace.so
-echo "/usr/lib/jvm/java-7-oracle/jre/lib/amd64" | sudo tee --append /etc/ld.so.conf.d/awt.conf
+chmod 777 /home/vagrant/geowave/build/libjace.so
+sudo ln -s /home/vagrant/geowave/build/libjace.so /usr/lib/libjace.so
 echo "/usr/lib/jvm/java-7-oracle/jre/lib/amd64/server" | sudo tee --append /etc/ld.so.conf.d/jvm.conf
 sudo ldconfig
 

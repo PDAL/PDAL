@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <pdal/Compression.hpp>
 #include <pdal/FlexWriter.hpp>
 
 #include "HeaderVal.hpp"
@@ -84,6 +85,7 @@ private:
     std::unique_ptr<SummaryData> m_summaryData;
     std::unique_ptr<LASzipper> m_zipper;
     std::unique_ptr<ZipPoint> m_zipPoint;
+    std::unique_ptr<LazPerfVlrCompressor> m_compressor;
     bool m_discardHighReturnNumbers;
     std::map<std::string, std::string> m_headerVals;
     std::vector<VlrOptionInfo> m_optionInfos;
@@ -96,6 +98,7 @@ private:
     std::string m_curFilename;
     std::set<std::string> m_forwards;
     bool m_forwardVlrs;
+    LasCompression::Enum m_compression;
 
     NumHeaderVal<uint8_t, 1, 1> m_majorVersion;
     NumHeaderVal<uint8_t, 1, 4> m_minorVersion;
@@ -135,18 +138,24 @@ private:
     void fillHeader(MetadataNode& forward);
     point_count_t fillWriteBuf(const PointView& view, PointId startId,
         std::vector<char>& buf);
+    void writeLasZipBuf(char *data, size_t pointLen, point_count_t numPts);
+    void writeLazPerfBuf(char *data, size_t pointLen, point_count_t numPts);
     void setVlrsFromMetadata(MetadataNode& forward);
     MetadataNode findVlrMetadata(MetadataNode node, uint16_t recordId,
         const std::string& userId);
     void setExtraBytesVlr();
     void setVlrsFromSpatialRef();
     void readyCompression();
+    void readyLasZipCompression();
+    void readyLazPerfCompression();
     void openCompression();
     void addVlr(const std::string& userId, uint16_t recordId,
         const std::string& description, std::vector<uint8_t>& data);
     bool addGeotiffVlr(GeotiffSupport& geotiff, uint16_t recordId,
         const std::string& description);
     bool addWktVlr();
+    void finishLasZipOutput();
+    void finishLazPerfOutput();
 
     LasWriter& operator=(const LasWriter&); // not implemented
     LasWriter(const LasWriter&); // not implemented

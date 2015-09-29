@@ -363,7 +363,7 @@ public:
     void add(const Option& option);
 
     // if option name not present, just returns
-    void remove(const std::string& name);
+    void remove(const Option& option);
 
     MetadataNode toMetadata() const
     {
@@ -434,7 +434,7 @@ public:
 
     // get value of an option, or use given default if option not present
     template<typename T>
-    T getValueOrDefault(std::string const& name, T defaultValue) const
+    T getValueOrDefault(std::string const& name, const T& defaultValue) const
     {
         T result;
 
@@ -561,4 +561,3 @@ PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const Options&);
 
 
 } // namespace pdal
-

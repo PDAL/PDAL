@@ -64,8 +64,8 @@ std::string StatisticalOutlierFilter::getName() const
 Options StatisticalOutlierFilter::getDefaultOptions()
 {
     Options options;
-    options.add("mean_k", 2, "Mean number of neighbors");
-    options.add("multiplier", 0, "Standard deviation threshold");
+    options.add("mean_k", 8, "Mean number of neighbors");
+    options.add("multiplier", 2, "Standard deviation threshold");
     options.add("classify", true, "Apply classification labels?");
     options.add("extract", false, "Extract ground returns?");
     return options;
@@ -73,8 +73,8 @@ Options StatisticalOutlierFilter::getDefaultOptions()
 
 void StatisticalOutlierFilter::processOptions(const Options& options)
 {
-    m_meanK = options.getValueOrDefault<int>("mean_k", 2);
-    m_multiplier = options.getValueOrDefault<double>("multiplier", 0);
+    m_meanK = options.getValueOrDefault<int>("mean_k", 8);
+    m_multiplier = options.getValueOrDefault<double>("multiplier", 2);
     m_classify = options.getValueOrDefault<bool>("classify", true);
     m_extract = options.getValueOrDefault<bool>("extract", false);
 }
@@ -138,9 +138,9 @@ PointViewSet StatisticalOutlierFilter::run(PointViewPtr input)
 
     // inverse are the outliers
     std::vector<int> outliers(input->size()-inliers->indices.size());
-    for (int i = 0, j = 0, k = 0; i < input->size(); ++i)
+    for (PointId i = 0, j = 0, k = 0; i < input->size(); ++i)
     {
-        if (i == inliers->indices[j])
+        if (i == (PointId)inliers->indices[j])
         {
             j++;
             continue;

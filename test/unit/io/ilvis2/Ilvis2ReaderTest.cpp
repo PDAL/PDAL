@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2015, James W. O'Meara (james.w.omeara@gmail.com)
+* Copyright (c) 2015, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -32,58 +32,57 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <pdal/pdal_test_main.hpp>
 
-#include <pdal/Reader.hpp>
-#include <pdal/StageFactory.hpp>
-#include <pdal/util/Bounds.hpp>
+#include <pdal/Options.hpp>
+#include <pdal/PipelineReader.hpp>
+#include <pdal/PipelineManager.hpp>
+#include <pdal/PointView.hpp>
 
-#ifdef PDAL_HAVE_GEOS
-#include <geos_c.h>
-#endif
+#include <Ilvis2Reader.hpp>
 
-#include "jace/proxy/mil/nga/giat/geowave/core/store/CloseableIterator.h"
-using jace::proxy::mil::nga::giat::geowave::core::store::CloseableIterator;
+#include "Support.hpp"
 
-extern "C" int32_t GeoWaveReader_ExitFunc();
-extern "C" PF_ExitFunc GeoWaveReader_InitPlugin();
+using namespace pdal;
 
-
-namespace pdal
+void checkPoint(const PointView& data, PointId index, double time,
+    double latitude, double longitude, double altitude)
 {
-
-    class PDAL_DLL GeoWaveReader : public Reader
+    auto checkDimension = [&data,index](Dimension::Id::Enum dim,
+        double expected)
     {
-    public:
-        static void * create();
-        static int32_t destroy(void *);
-        std::string getName() const;
-
-	Options getDefaultOptions();
-
-    private:
-        virtual void initialize();
-        virtual void processOptions(const Options& ops);
-        virtual void addDimensions(PointLayoutPtr layout);
-        virtual void ready(PointTableRef table);
-        virtual point_count_t read(PointViewPtr view, point_count_t count);
-        virtual void done(PointTableRef table);
-
-	Dimension::IdList getDefaultDimensions();
-        int createJvm();
-
-        std::string m_zookeeperUrl;
-        std::string m_instanceName;
-        std::string m_username;
-        std::string m_password;
-        std::string m_tableNamespace;
-        std::string m_featureTypeName;
-        bool m_useFeatCollDataAdapter;
-        uint32_t m_pointsPerEntry;
-
-        BOX3D m_bounds;
-
-        CloseableIterator m_iterator;
+        double actual = data.getFieldAs<double>(dim, index);
+        EXPECT_FLOAT_EQ(expected, actual);
     };
 
-} // namespace pdal
+    checkDimension(Dimension::Id::Y, latitude);
+    checkDimension(Dimension::Id::X, longitude);
+    checkDimension(Dimension::Id::Z, altitude);
+    checkDimension(Dimension::Id::GpsTime, time);
+}
+
+TEST(Ilvis2ReaderTest, testRead)
+{
+    Option filename("filename", Support::datapath("ilvis2/ILVIS2_GL2009_0414_R1401_042504.TXT"), "");
+    Options options(filename);
+    std::shared_ptr<Ilvis2Reader> reader(new Ilvis2Reader);
+    reader->setOptions(options);
+
+    PointTable table;
+
+    reader->prepare(table);
+    PointViewSet viewSet = reader->execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+
+    EXPECT_EQ(view->size(), 998u);
+
+    checkPoint(*view.get(), 0, 42504.48313,
+             78.307673,121.21479,1956.583
+            );
+
+    checkPoint(*view.get(), 996, 42520.90035,
+             78.320149, 121.32024, 1959.206
+            );
+}
+

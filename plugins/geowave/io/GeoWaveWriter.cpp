@@ -59,11 +59,9 @@ using jace::StaticVmLoader;
 #ifdef _WIN32
 #include "jace/Win32VmLoader.h"
 using jace::Win32VmLoader;
-const std::string os_pathsep(";");
 #else
 #include "jace/UnixVmLoader.h"
 using ::jace::UnixVmLoader;
-const std::string os_pathsep(":");
 #endif
 
 #include "jace/proxy/types/JDouble.h"
@@ -117,24 +115,24 @@ using jace::proxy::org::opengis::feature::simple::SimpleFeatureType;
 #include "jace/proxy/org/opengis/feature/type/AttributeDescriptor.h"
 using jace::proxy::org::opengis::feature::type::AttributeDescriptor;
 
-#include "jace/proxy/mil/nga/giat/geowave/index/ByteArrayId.h"
-using jace::proxy::mil::nga::giat::geowave::index::ByteArrayId;
-#include "jace/proxy/mil/nga/giat/geowave/vector/adapter/FeatureDataAdapter.h"
-using jace::proxy::mil::nga::giat::geowave::vector::adapter::FeatureDataAdapter;
-#include "jace/proxy/mil/nga/giat/geowave/vector/adapter/FeatureCollectionDataAdapter.h"
-using jace::proxy::mil::nga::giat::geowave::vector::adapter::FeatureCollectionDataAdapter;
-#include "jace/proxy/mil/nga/giat/geowave/store/adapter/WritableDataAdapter.h"
-using jace::proxy::mil::nga::giat::geowave::store::adapter::WritableDataAdapter;
-#include "jace/proxy/mil/nga/giat/geowave/store/index/Index.h"
-using jace::proxy::mil::nga::giat::geowave::store::index::Index;
-#include "jace/proxy/mil/nga/giat/geowave/store/index/IndexType_JaceIndexType.h"
-using jace::proxy::mil::nga::giat::geowave::store::index::IndexType_JaceIndexType;
-#include "jace/proxy/mil/nga/giat/geowave/accumulo/BasicAccumuloOperations.h"
-using jace::proxy::mil::nga::giat::geowave::accumulo::BasicAccumuloOperations;
-#include "jace/proxy/mil/nga/giat/geowave/accumulo/AccumuloDataStore.h"
-using jace::proxy::mil::nga::giat::geowave::accumulo::AccumuloDataStore;
-#include "jace/proxy/mil/nga/giat/geowave/accumulo/AccumuloIndexWriter.h"
-using jace::proxy::mil::nga::giat::geowave::accumulo::AccumuloIndexWriter;
+#include "jace/proxy/mil/nga/giat/geowave/core/index/ByteArrayId.h"
+using jace::proxy::mil::nga::giat::geowave::core::index::ByteArrayId;
+#include "jace/proxy/mil/nga/giat/geowave/adapter/vector/FeatureDataAdapter.h"
+using jace::proxy::mil::nga::giat::geowave::adapter::vector::FeatureDataAdapter;
+#include "jace/proxy/mil/nga/giat/geowave/adapter/vector/FeatureCollectionDataAdapter.h"
+using jace::proxy::mil::nga::giat::geowave::adapter::vector::FeatureCollectionDataAdapter;
+#include "jace/proxy/mil/nga/giat/geowave/core/store/adapter/WritableDataAdapter.h"
+using jace::proxy::mil::nga::giat::geowave::core::store::adapter::WritableDataAdapter;
+#include "jace/proxy/mil/nga/giat/geowave/core/store/index/Index.h"
+using jace::proxy::mil::nga::giat::geowave::core::store::index::Index;
+#include "jace/proxy/mil/nga/giat/geowave/core/geotime/IndexType_JaceIndexType.h"
+using jace::proxy::mil::nga::giat::geowave::core::geotime::IndexType_JaceIndexType;
+#include "jace/proxy/mil/nga/giat/geowave/datastore/accumulo/BasicAccumuloOperations.h"
+using jace::proxy::mil::nga::giat::geowave::datastore::accumulo::BasicAccumuloOperations;
+#include "jace/proxy/mil/nga/giat/geowave/datastore/accumulo/AccumuloDataStore.h"
+using jace::proxy::mil::nga::giat::geowave::datastore::accumulo::AccumuloDataStore;
+#include "jace/proxy/mil/nga/giat/geowave/datastore/accumulo/AccumuloIndexWriter.h"
+using jace::proxy::mil::nga::giat::geowave::datastore::accumulo::AccumuloIndexWriter;
 
 static PluginInfo const s_info = PluginInfo(
     "writers.geowave",
@@ -315,7 +313,6 @@ namespace pdal
         {
             StaticVmLoader loader(JNI_VERSION_1_2);
 
-            std::string jaceClasspath = TOSTRING(JACE_RUNTIME_JAR);
             std::string geowaveClasspath = TOSTRING(GEOWAVE_RUNTIME_JAR);
 
             OptionList options;
@@ -324,7 +321,7 @@ namespace pdal
             //options.push_back(CustomOption("-Xcheck:jni"));
             //options.push_back(Verbose (Verbose::JNI));
             //options.push_back(Verbose (Verbose::CLASS));
-            options.push_back(ClassPath(jaceClasspath + os_pathsep + geowaveClasspath));
+            options.push_back(ClassPath(geowaveClasspath));
 
             jace::createVm(loader, options);
         }

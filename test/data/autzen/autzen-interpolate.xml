@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="writers.p2g">
+        <Option name="filename">
+            autzen-surface.tif
+        </Option>
+        <Option name="output_type">
+            min
+        </Option>
+        <Option name="output_format">
+            tif
+        </Option>
+        <Option name="grid_dist_x">
+          1.0
+        </Option>
+        <Option name="grid_dist_y">
+          1.0
+        </Option>
+        <Filter type="filters.pclblock">
+            <Option name="filename">
+                ./autzen-APMF.json
+            </Option>
+        <Reader type="readers.las">
+            <Option name="filename">
+                /Users/hobu/dev/git/pdal/test/data/local/autzen/autzen-full.las
+            </Option>
+        </Reader>
+    </Filter>
+    </Writer>
+</Pipeline>
