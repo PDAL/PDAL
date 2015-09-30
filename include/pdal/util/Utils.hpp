@@ -58,27 +58,6 @@ namespace pdal
 
 namespace Utils
 {
-    template<typename T>
-    char *as_buffer(T& data)
-        { return static_cast<char*>(static_cast<void*>(&data)); }
-
-    template<typename T>
-    char *as_buffer(T* data)
-        { return static_cast<char*>(static_cast<void*>(data)); }
-
-    template <typename C, typename T>
-    bool check_stream_state(std::basic_ios<C, T>& srtm)
-    {
-        // Test stream state bits
-        if (srtm.eof())
-            throw std::out_of_range("end of file encountered");
-        else if (srtm.fail())
-            throw std::runtime_error("non-fatal I/O error occured");
-        else if (srtm.bad())
-            throw std::runtime_error("fatal I/O error occured");
-        return true;
-    }
-
     PDAL_DLL void random_seed(unsigned int seed);
     PDAL_DLL double random(double minimum, double maximum);
     PDAL_DLL double uniform(const double& minimum=0.0f,
