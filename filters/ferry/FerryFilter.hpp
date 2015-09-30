@@ -60,6 +60,7 @@ public:
 private:
     virtual void processOptions(const Options&);
     virtual void addDimensions(PointLayoutPtr layout);
+    virtual void prepared(PointTableRef table);
     virtual void ready(PointTableRef table);
     virtual void filter(PointView& view);
 

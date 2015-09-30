@@ -15,21 +15,8 @@
                 0.0000001
             </Option>
             <Filter type="filters.ferry">
-                <Option name="dimension">
-                    X
-                    <Options>
-                        <Option name="to">
-                            StatePlaneX
-                        </Option>
-                    </Options>
-                </Option>
-                <Option name="dimension">
-                    Y
-                    <Options>
-                        <Option name="to">
-                            StatePlaneY
-                        </Option>
-                    </Options>
+                <Option name="dimensions">
+                    X=StatePlaneX, Y=StatePlaneY
                 </Option>
                 <Reader type="readers.las">
                     <Option name="filename">

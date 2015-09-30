@@ -52,15 +52,7 @@ Options FerryFilter::getDefaultOptions()
 {
     Options options;
 
-    pdal::Option red("dimension", "Red", "");
-    pdal::Option b0("to","Red2", "");
-    pdal::Option def("def","Red2", "");
-    pdal::Options redO;
-    redO.add(b0);
-    redO.add(def);
-    red.setOptions(redO);
-
-    options.add(red);
+    options.add("dimensions", "", "Dimensions to copy (<in>=<out>,...)");
 
     return options;
 }
@@ -68,36 +60,54 @@ Options FerryFilter::getDefaultOptions()
 
 void FerryFilter::processOptions(const Options& options)
 {
-    std::vector<Option> dimensions = options.getOptions("dimension");
-    for (auto i = dimensions.begin(); i != dimensions.end(); ++i)
+    if (options.hasOption("dimension"))
+        throw pdal_error("Option 'dimension' no longer supported.  Use "
+            "'dimensions' instead.");
+
+    StringList dims = options.getValueOrThrow<StringList>("dimensions");
+    for (auto& dim : dims)
     {
-        std::string name = i->getValue<std::string>();
-        boost::optional<Options const&> dimensionOptions = i->getOptions();
-        if (!dimensionOptions)
+        StringList s = Utils::split2(dim, '=');
+        if (s.size() != 2)
         {
             std::ostringstream oss;
-            oss << "No 'to' dimension given for dimension '" <<
-                name << "'";
+            oss << "Invalid dimension specified '" << dim <<
+                "'.  Need <from dimension>=<to dimension>.  See "
+                "documentation for details.";
             throw pdal_error(oss.str());
         }
-        std::string to_dim =
-            dimensionOptions->getValueOrThrow<std::string>("to");
-        if (boost::algorithm::iequals(name, to_dim))
+        Utils::trim(s[0]);
+        Utils::trim(s[1]);
+        if (s[0] == s[1])
         {
             std::ostringstream oss;
-            oss << "The from and to dimension cannot be the same"
-                << " name for dimension '" << name << "'";
+            oss << "Can't ferry dimension '" << s[0] << "' to itself.";
             throw pdal_error(oss.str());
         }
-        m_name_map.insert(std::make_pair(name, to_dim));
+        m_name_map[s[0]] = s[1];
     }
 }
+
+
 void FerryFilter::addDimensions(PointLayoutPtr layout)
 {
     for (const auto& dim_par : m_name_map)
     {
         layout->registerOrAssignDim(dim_par.second, Dimension::Type::Double);
     }
+}
+
+
+void FerryFilter::prepared(PointTableRef table)
+{
+    for (const auto& dims : m_name_map)
+        if (table.layout()->findDim(dims.first) == Dimension::Id::Unknown)
+        {
+            std::ostringstream oss;
+            oss << "Can't ferry dimension '" << dims.first << "'. "
+                "Dimension doesn't exist.";
+            throw pdal_error(oss.str());
+        }
 }
 
 void FerryFilter::ready(PointTableRef table)
@@ -124,5 +134,5 @@ void FerryFilter::filter(PointView& view)
     }
 }
 
-
 } // namespace pdal
+

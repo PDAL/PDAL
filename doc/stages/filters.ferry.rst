@@ -39,21 +39,8 @@ processing, can then operate on these data.
                     0.0000001
                 </Option>
                 <Filter type="filters.ferry">
-                    <Option name="dimension">
-                        X
-                        <Options>
-                            <Option name="to">
-                                StatePlaneX
-                            </Option>
-                        </Options>
-                    </Option>
-                    <Option name="dimension">
-                        Y
-                        <Options>
-                            <Option name="to">
-                                StatePlaneY
-                            </Option>
-                        </Options>
+                    <Option name="dimensions">
+                        X = StatePlaneX, Y=StatePlaneY
                     </Option>
                     <Reader type="readers.las">
                         <Option name="filename">
@@ -71,10 +58,9 @@ processing, can then operate on these data.
 Options
 -------
 
-dimension
-  A dimension Option with an Options block containing at least a "to" dimension
-  name.  If the "to" dimension already exists, it will be used. If it does not,
-  it will be created as a dimension of type `double`.
-
-  * to: The dimension to copy the data to. The data are currently read as
-    doubles and put into the output dimension as double.
+dimensions
+  A list of dimensions whose values should be copied to the specified
+  dimensions.
+  The format of the option is <from>=<to>, <from>=<to>,... Spaces are ignored.
+  'from' dimensions must exist and have been created by a reader or filter.
+  'to' dimensions will be created if necessary.
