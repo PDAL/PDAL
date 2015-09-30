@@ -177,7 +177,6 @@ else()
     set(UTIL_LIB ${PDAL_UTIL_LIB_NAME})
 endif()
 
-
 target_link_libraries(${PDAL_BASE_LIB_NAME}
     ${CMAKE_THREAD_LIBS_INIT}
     ${GDAL_LIBRARY}
