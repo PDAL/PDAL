@@ -164,7 +164,13 @@ int TranslateKernel::execute()
         Stage* filter = &(m_manager->addFilter(filter_name));
 
         if (filter == NULL)
+        {
+            std::ostringstream oss;
+            oss << "Unable to add filter " << filter_name << ".  Filter "
+              "is invalid or plugin could not be loaded.  Check "
+              "'pdal --drivers'.";
             throw pdal_error("Error getting filter\n");
+        }
 
         filter->setOptions(filterOptions);
         filter->setInput(*stage);

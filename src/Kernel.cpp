@@ -35,6 +35,8 @@
 #include <pdal/GlobalEnvironment.hpp>
 #include <pdal/Kernel.hpp>
 #include <pdal/PDALUtils.hpp>
+
+#include <cctype>
 #include <iostream>
 
 #include <boost/algorithm/string.hpp>
@@ -231,61 +233,72 @@ int Kernel::run(int argc, const char* argv[], const std::string& appName)
 }
 
 
+namespace
+{
+
+template<typename PREDICATE>
+std::string::size_type
+extract(std::string& s, std::string::size_type p, PREDICATE pred)
+{
+    std::string::size_type count = 0;
+    while (pred(s[p++]))
+        count++;
+    return count;
+}
+
+
+bool parseOption(std::string o, std::string& stage, std::string& option,
+    std::string& value)
+{
+    if (o.size() < 2)
+        return false;
+    if (o[0] != '-' || o[1] != '-')
+        return false;
+
+    o = o.substr(2);
+
+    auto islc = [](char c)
+        { return (std::isalpha(c) && islower(c)) || c == '-' || c == '_'; };
+
+    std::string::size_type pos = 0;
+    std::string::size_type count = 0;
+    std::string::size_type optionStart = 0;
+    // Read stage name.
+    while ((count = extract(o, pos, islc)) != 0)
+    {
+        pos += count;
+        if (o[pos] == '.')
+            stage = o.substr(0, pos);
+        else
+            break;
+        pos++;
+        optionStart = pos;
+    }
+    option = o.substr(optionStart, pos - optionStart);
+
+    if (o[pos++] != '=')
+        return false;
+
+    // The command-line parser takes care of quotes around an argument
+    // value and such.  May want to do something to handle escaped characters?
+    value = o.substr(pos);
+    return true;
+}
+
+} // unnamed namespace
+
+
 void Kernel::collectExtraOptions()
 {
     for (const auto& o : m_extra_options)
     {
-        typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
+        std::string stageName, opName, value;
 
-        // if we don't have --, we're not an option we
-        // even care about
-        if (!boost::algorithm::find_first(o, "--"))
-            continue;
-
-        // Find the dimensions listed and put them on the id list.
-        boost::char_separator<char> equal("=");
-        boost::char_separator<char> dot(".");
-        tokenizer option_tokens(o, equal);
-        std::vector<std::string> option_split;
-        for (auto const& ti : option_tokens)
-            option_split.push_back(boost::lexical_cast<std::string>(ti));
-        if (!(option_split.size() == 2))
+        if (parseOption(o, stageName, opName, value))
         {
-//             std::ostringstream oss;
-//             oss << "option '" << o << "' did not split correctly. Is it "
-//                 "in the form --readers.las.option=foo?";
-//             throw app_usage_error(oss.str());
-            continue;
+            Option op(opName, value);
+            m_extraStageOptions[stageName].add(op);
         }
-
-        std::string option_value(option_split[1]);
-        std::string stage_value(option_split[0]);
-        boost::algorithm::erase_all(stage_value, "--");
-
-        tokenizer name_tokens(stage_value, dot);
-        std::vector<std::string> stage_values;
-        for (auto const& ti : name_tokens)
-            stage_values.push_back(ti);
-
-        std::string option_name = *stage_values.rbegin();
-        std::ostringstream stage_name_ostr;
-        bool bFirst(true);
-        for (auto s = stage_values.begin(); s != stage_values.end() - 1; ++s)
-        {
-            auto s2 = boost::algorithm::erase_all_copy(*s, " ");
-
-            if (bFirst)
-            {
-                bFirst = false;
-            }
-            else
-                stage_name_ostr <<".";
-            stage_name_ostr << s2;
-        }
-        std::string stageName(stage_name_ostr.str());
-
-        Option op(option_name, option_value);
-        m_extraStageOptions[stageName].add(op);
     }
 }
 
