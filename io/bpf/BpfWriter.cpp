@@ -134,7 +134,7 @@ void BpfWriter::processOptions(const Options& options)
 }
 
 
-void BpfWriter::readyTable(PointTableRef table)
+void BpfWriter::prepared(PointTableRef table)
 {
     loadBpfDimensions(table.layout());
 }
@@ -166,9 +166,28 @@ void BpfWriter::readyFile(const std::string& filename)
 
 void BpfWriter::loadBpfDimensions(PointLayoutPtr layout)
 {
+    Dimension::IdList dims;
+
+    if (m_outputDims.size())
+    {
+       for (std::string& s : m_outputDims)
+       {
+           Dimension::Id::Enum id = layout->findDim(s);
+           if (id == Dimension::Id::Unknown)
+           {
+               std::ostringstream oss;
+               oss << "Invalid dimension '" << s << "' specified for "
+                   "'output_dims' option.";
+               throw pdal_error(oss.str());
+            }
+            dims.push_back(id);
+       }
+    }
+    else
+        dims = layout->dims();
+
     // Verify that we have X, Y and Z and that they're the first three
     // dimensions.
-    Dimension::IdList dims = layout->dims();
     std::sort(dims.begin(), dims.end());
     if (dims.size() < 3 || dims[0] != Dimension::Id::X ||
         dims[1] != Dimension::Id::Y || dims[2] != Dimension::Id::Z)

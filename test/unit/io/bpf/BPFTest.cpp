@@ -553,3 +553,68 @@ TEST(BPFTest, flex2)
     r.setOptions(ops);
     EXPECT_EQ(r.preview().m_pointCount, 1065u);
 }
+
+TEST(BPFTest, outputdims)
+{
+    Options ops;
+    ops.add("filename", Support::datapath("bpf/autzen-dd.bpf"));
+
+    BpfReader reader;
+    reader.setOptions(ops);
+
+    std::string testfile(Support::temppath("test.bpf"));
+
+    FileUtils::deleteFile(testfile);
+    Options writerOps;
+    writerOps.add("filename", testfile);
+    writerOps.add("output_dims", "X, Y, Z, Red, Green");
+
+    BpfWriter writer;
+    writer.setInput(reader);
+    writer.setOptions(writerOps);
+    
+    PointTable t;
+    writer.prepare(t);
+    writer.execute(t);
+
+    Options o2;
+    o2.add("filename", testfile);
+
+    BpfReader r;
+    r.setOptions(o2);
+
+    PointTable t2;
+    r.prepare(t2);
+
+    StringList dimNames;
+    Dimension::IdList dimList = t2.layout()->dims(); 
+    EXPECT_EQ(dimList.size(), 5u);
+    for (auto di : dimList)
+        dimNames.push_back(t2.layout()->dimName(di));
+
+    const char *dims[] =
+    {
+        "Green",
+        "Red",
+        "X",
+        "Y",
+        "Z"
+    };
+   
+    std::sort(dimNames.begin(), dimNames.end());
+    EXPECT_TRUE(CheckEqualCollections(dimNames.begin(),
+        dimNames.end(), std::begin(dims)));
+
+    Options o3;
+    o3.add("filename", testfile);
+    o3.add("output_dims", "Y, Z, Red, Green");
+
+    BpfWriter w3;
+    w3.setOptions(o3);
+    
+    // Missing X dimension.
+    PointTable t3;
+    EXPECT_THROW(w3.prepare(t3), pdal_error);
+    
+}
+

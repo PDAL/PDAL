@@ -48,8 +48,8 @@ format
 
     * dim == Dimension-major (non-interleaved).  All data for a single dimension
       are stored contiguously.
-    * point == Point-major (interleaved).  All data for a single point are stored
-      contiguously.
+    * point == Point-major (interleaved).  All data for a single point
+      are stored contiguously.
     * byte == Byte-major (byte-segregated).  All data for a single dimension are
       stored contiguously, but bytes are arranged such that the first bytes for
       all points are stored contiguously, followed by the second bytes of all
@@ -87,3 +87,9 @@ offset_x, offset_y, offset_z
     .. note::
 
         written value = (nominal value - offset) / scale.
+
+output_dims
+    If specified, limits the dimensions written for each point.  Dimensions
+    are listed by name and separated by commas.  X, Y and Z are required and
+    must be explicitly listed.
+
