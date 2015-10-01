@@ -232,6 +232,16 @@ namespace Utils
     PDAL_DLL std::string escapeNonprinting(const std::string& s);
     PDAL_DLL std::string hexDump(const char *buf, size_t count);
 
+    template<typename PREDICATE>
+    PDAL_DLL std::string::size_type
+    extract(std::string& s, std::string::size_type p, PREDICATE pred)
+    {
+        std::string::size_type count = 0;
+        while (pred(s[p++]))
+            count++;
+        return count;
+    }
+
     /// Split a string into substrings.  Characters matching the predicate are
     ///   discarded.
     /// \param[in] s  String to split.
