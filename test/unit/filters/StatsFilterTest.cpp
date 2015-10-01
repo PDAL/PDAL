@@ -167,17 +167,17 @@ TEST(Stats, metadata)
     {
         if (findNode(*mi, "name", "X").valid())
         {
-            EXPECT_EQ(mi->findChild("average").value(), "1");
-            EXPECT_EQ(mi->findChild("minimum").value(), "1");
-            EXPECT_EQ(mi->findChild("maximum").value(), "1");
-            EXPECT_EQ(mi->findChild("count").value(), "1000");
+            EXPECT_DOUBLE_EQ(mi->findChild("average").value<double>(), 1.0);
+            EXPECT_DOUBLE_EQ(mi->findChild("minimum").value<double>(), 1.0);
+            EXPECT_DOUBLE_EQ(mi->findChild("maximum").value<double>(), 1.0);
+            EXPECT_DOUBLE_EQ(mi->findChild("count").value<double>(), 1000.0);
         }
         if (findNode(*mi, "name", "Z").valid())
         {
-            EXPECT_EQ(mi->findChild("average").value(), "3");
-            EXPECT_EQ(mi->findChild("minimum").value(), "3");
-            EXPECT_EQ(mi->findChild("maximum").value(), "3");
-            EXPECT_EQ(mi->findChild("count").value(), "1000");
+            EXPECT_DOUBLE_EQ(mi->findChild("average").value<double>(), 3.0);
+            EXPECT_DOUBLE_EQ(mi->findChild("minimum").value<double>(), 3.0);
+            EXPECT_DOUBLE_EQ(mi->findChild("maximum").value<double>(), 3.0);
+            EXPECT_DOUBLE_EQ(mi->findChild("count").value<double>(), 1000.0);
         }
     }
 }

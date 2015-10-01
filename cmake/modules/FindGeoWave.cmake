@@ -15,7 +15,7 @@ IF(GEOWAVE_RUNTIME_JAR)
 ENDIF()
 
 FIND_FILE(GEOWAVE_RUNTIME_JAR
-  geowave-deploy-${GeoWave_FIND_VERSION}-accumulo-singlejar.jar
+  geowave-jace.jar
   PATHS
   /usr/bin
   /usr/local

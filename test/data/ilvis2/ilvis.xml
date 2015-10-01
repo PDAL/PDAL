@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+    <Writer type="writers.las">
+        <Option name="filename">
+            ilvis.las
+        </Option>
+        <Reader type="readers.ilvis2">
+            <Option name="filename">
+                ILVIS2_GL2009_0414_R1401_042504.TXT
+            </Option>
+        </Reader>
+    </Writer>
+</Pipeline>

@@ -68,7 +68,7 @@ private:
     std::vector<BpfUlemFile> m_bundledFiles;
 
     virtual void processOptions(const Options& options);
-    virtual void readyTable(PointTableRef table);
+    virtual void prepared(PointTableRef table);
     virtual void readyFile(const std::string& filename);
     virtual void writeView(const PointViewPtr data);
     virtual void doneFile();

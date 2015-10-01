@@ -129,8 +129,10 @@ public:
     {
         // if options provided via command-line, we assume they should overwrite
         // existing options, remove first, and then add
-        s->removeOptions(extraStageOptions(s->getName()));
-        s->addOptions(extraStageOptions(s->getName()));
+        Options ops = extraStageOptions(s->getName());
+
+        s->removeOptions(ops);
+        s->addOptions(ops);
         auto stages = s->getInputs();
         for (Stage *s : stages)
             applyExtraStageOptionsRecursive(s);

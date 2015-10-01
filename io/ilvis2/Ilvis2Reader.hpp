@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2015, James W. O'Meara (james.w.omeara@gmail.com)
+* Copyright (c) 2015, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -34,56 +34,41 @@
 
 #pragma once
 
+#include <pdal/PointView.hpp>
 #include <pdal/Reader.hpp>
-#include <pdal/StageFactory.hpp>
-#include <pdal/util/Bounds.hpp>
+#include <pdal/util/IStream.hpp>
 
-#ifdef PDAL_HAVE_GEOS
-#include <geos_c.h>
-#endif
 
-#include "jace/proxy/mil/nga/giat/geowave/core/store/CloseableIterator.h"
-using jace::proxy::mil::nga::giat::geowave::core::store::CloseableIterator;
-
-extern "C" int32_t GeoWaveReader_ExitFunc();
-extern "C" PF_ExitFunc GeoWaveReader_InitPlugin();
-
+extern "C" int32_t Ilvis2Reader_ExitFunc();
+extern "C" PF_ExitFunc Ilvis2Reader_InitPlugin();
 
 namespace pdal
 {
+class PDAL_DLL Ilvis2Reader : public pdal::Reader
+{
+public:
+    Ilvis2Reader() : Reader(), m_index(0), m_convert("CENTROID")
+        {}
 
-    class PDAL_DLL GeoWaveReader : public Reader
-    {
-    public:
-        static void * create();
-        static int32_t destroy(void *);
-        std::string getName() const;
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
-	Options getDefaultOptions();
+    Options getDefaultOptions();
+    static Dimension::IdList getDefaultDimensions();
 
-    private:
-        virtual void initialize();
-        virtual void processOptions(const Options& ops);
-        virtual void addDimensions(PointLayoutPtr layout);
-        virtual void ready(PointTableRef table);
-        virtual point_count_t read(PointViewPtr view, point_count_t count);
-        virtual void done(PointTableRef table);
 
-	Dimension::IdList getDefaultDimensions();
-        int createJvm();
+private:
+    std::unique_ptr<ILeStream> m_stream;
+    point_count_t m_index;
+    std::string m_convert;
 
-        std::string m_zookeeperUrl;
-        std::string m_instanceName;
-        std::string m_username;
-        std::string m_password;
-        std::string m_tableNamespace;
-        std::string m_featureTypeName;
-        bool m_useFeatCollDataAdapter;
-        uint32_t m_pointsPerEntry;
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void processOptions(const Options& options);
+    virtual void ready(PointTableRef table);
+    virtual point_count_t read(PointViewPtr view, point_count_t count);
 
-        BOX3D m_bounds;
+};
 
-        CloseableIterator m_iterator;
-    };
 
 } // namespace pdal

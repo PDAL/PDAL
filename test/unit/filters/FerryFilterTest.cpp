@@ -88,21 +88,47 @@ TEST(FerryFilterTest, test_ferry_invalid)
     LasReader reader;
     reader.setOptions(ops1);
 
-    Options options;
+    Options op1;
+    
+    op1.add("dimensions", "X=X");
 
-    Option x("dimension", "X", "");
-    Option toX("to","X", "");
-    Options xO;
-    xO.add(toX);
-    x.setOptions(xO);
-    options.add(x);
-
-    FerryFilter ferry;
-    ferry.setInput(reader);
-    ferry.setOptions(options);
+    FerryFilter f1;
+    f1.setInput(reader);
+    f1.setOptions(op1);
 
     PointTable table;
 
-    EXPECT_THROW(ferry.prepare(table), pdal_error);
+    // Make sure we can't ferry to ourselves.
+    EXPECT_THROW(f1.prepare(table), pdal_error);
+
+    Options op2;
+
+    op2.add("dimension", "X=NewX");
+    FerryFilter f2;
+    f2.setInput(reader);
+    f2.setOptions(op2);
+
+    // Make sure we reject old option name.
+    EXPECT_THROW(f2.prepare(table), pdal_error);
+
+    Options op3;
+
+    op3.add("dimensions", "NewX = X");
+    FerryFilter f3;
+    f3.setInput(reader);
+    f3.setOptions(op3);
+
+    // Make sure we reject bad source dimension.
+    EXPECT_THROW(f3.prepare(table), pdal_error);
+
+    Options op4;
+
+    op4.add("dimensions", "X = Y, X = NewZ = NewQ");
+    FerryFilter f4;
+    f4.setInput(reader);
+    f4.setOptions(op4);
+
+    // Make sure we reject bad option format.
+    EXPECT_THROW(f4.prepare(table), pdal_error);
 }
 
