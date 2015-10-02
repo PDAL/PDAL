@@ -62,6 +62,7 @@
 #include <qfit/QfitReader.hpp>
 #include <sbet/SbetReader.hpp>
 #include <terrasolid/TerrasolidReader.hpp>
+#include <tindex/TIndexReader.hpp>
 
 // writers
 #include <bpf/BpfWriter.hpp>
@@ -107,6 +108,7 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
     drivers["sbet"] = "readers.sbet";
     drivers["sqlite"] = "readers.sqlite";
     drivers["sid"] = "readers.mrsid";
+    drivers["tindex"] = "readers.tindex";
 
     if (ext == "") return "";
     ext = ext.substr(1, ext.length()-1);
@@ -210,6 +212,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(QfitReader_InitPlugin);
     PluginManager::initializePlugin(SbetReader_InitPlugin);
     PluginManager::initializePlugin(TerrasolidReader_InitPlugin);
+    PluginManager::initializePlugin(TIndexReader_InitPlugin);
 
     // writers
     PluginManager::initializePlugin(BpfWriter_InitPlugin);
