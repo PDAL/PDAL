@@ -95,6 +95,9 @@ RangeFilter::Range parseRange(const std::string& r)
             lb = std::numeric_limits<double>::min();
         pos += (end - start);
 
+        count = Utils::extract(r, pos, (int(*)(int))std::isspace);
+        pos += count;
+
         if (r[pos] != ':')
             throw std::string("Missing ':' limit separator.");
         pos++;
@@ -104,6 +107,9 @@ RangeFilter::Range parseRange(const std::string& r)
         if (start == end)
             ub = std::numeric_limits<double>::max();
         pos += (end - start);
+
+        count = Utils::extract(r, pos, (int(*)(int))std::isspace);
+        pos += count;
 
         if (r[pos] == ')')
             iub = false;
