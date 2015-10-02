@@ -34,12 +34,12 @@
 
 #include "RangeFilter.hpp"
 
-#include <cmath>
+#include <pdal/util/Utils.hpp>
+
+#include <cctype>
 #include <limits>
 #include <map>
-#include <regex>
 #include <string>
-#include <utility>
 #include <vector>
 
 namespace pdal
@@ -56,58 +56,106 @@ std::string RangeFilter::getName() const
     return s_info.name;
 }
 
-void RangeFilter::processOptions(const Options& options)
+namespace
 {
-    StringList range_string = options.getValueOrDefault<StringList>("limits");
-    auto parseRanges = [range_string]()
+
+RangeFilter::Range parseRange(const std::string& r)
+{ 
+    std::string::size_type pos, count;
+    bool ilb = true;
+    bool iub = true;
+    const char *start;
+    char *end;
+    std::string name;
+    double ub, lb;
+
+    try
     {
-        std::vector<Range> range_list;
+        pos = 0;
+        // Skip leading whitespace.
+        count = Utils::extract(r, pos, (int(*)(int))std::isspace);
+        pos += count;
 
-        for (auto const& r : range_string)
-        {
-            std::regex rgx("(\\w+)([\\(\\[])([-]{0,1}[\\d]*[\\.]{0,1}[\\d]*):([-]{0,1}[\\d]*[\\.]{0,1}[\\d]*)([\\)\\]])");
-            int submatches[] = { 1, 2, 3, 4, 5 };
-            std::sregex_token_iterator it(r.begin(), r.end(), rgx, submatches);
+        count = Utils::extract(r, pos, (int(*)(int))std::isalpha);
+        if (count == 0)
+           throw std::string("No dimension name.");
+        name = r.substr(pos, count);
+        pos += count;
 
-            std::string name;
-            bool ilb = true;
-            bool iub = true;
-            double lb = -std::numeric_limits<double>::max();
-            double ub = std::numeric_limits<double>::max();
+        if (r[pos] == '(')
+            ilb = false;
+        else if (r[pos] != '[')
+            throw std::string("Missing '(' or '['.");
+        pos++;
 
-            name = *it++;
-            if (*it++ == "(")
-                ilb = false;
-            std::string lbtmp = *it++;
-            if (lbtmp != "")
-                lb = std::atof(lbtmp.c_str());
-            std::string uptmp = *it++;
-            if (uptmp != "")
-                ub = std::atof(uptmp.c_str());
-            if (*it++ == ")")
-                iub = false;
+        // Extract lower bound.
+        start = r.data() + pos;
+        lb = std::strtod(start, &end);
+        if (start == end)
+            lb = std::numeric_limits<double>::min();
+        pos += (end - start);
 
-            Range range(name, lb, ub, ilb, iub);
-            range_list.push_back(range);
-        }
+        if (r[pos] != ':')
+            throw std::string("Missing ':' limit separator.");
+        pos++;
 
-        return range_list;
-    };
-    m_range_list = parseRanges();
+        start = r.data() + pos;
+        ub = std::strtod(start, &end);
+        if (start == end)
+            ub = std::numeric_limits<double>::max();
+        pos += (end - start);
 
-    if (m_range_list.size() == 0)
-        throw pdal_error("No ranges given");
+        if (r[pos] == ')')
+            iub = false;
+        else if (r[pos] != ']')
+            throw std::string("Missing ')' or ']'.");
+        pos++;
+
+        count = Utils::extract(r, pos, (int(*)(int))std::isspace);
+        pos += count;
+
+        if (pos != r.size())
+            throw std::string("Invalid characters following valid range.");
+    }
+    catch (std::string s)
+    {
+        std::ostringstream oss;
+        oss << "filters.range: invalid --limits option: '" << r << "': " << s;
+        throw pdal_error(oss.str());
+    }
+    return RangeFilter::Range(name, lb, ub, ilb, iub);
 }
 
-void RangeFilter::ready(PointTableRef table)
+}
+
+
+void RangeFilter::processOptions(const Options& options)
+{
+    StringList rangeString = options.getValueOrDefault<StringList>("limits");
+
+    if (rangeString.empty())
+        throw pdal_error("filters.range missing required --limits option.");
+
+    for (auto const& r : rangeString)
+        m_range_list.push_back(parseRange(r));
+}
+
+
+void RangeFilter::prepared(PointTableRef table)
 {
     const PointLayoutPtr layout(table.layout());
+
     for (auto const& d : m_range_list)
     {
-        m_dimensions_map.insert(
-            std::make_pair(
-                layout->findDim(d.m_name),
-                d));
+        Dimension::Id::Enum id = layout->findDim(d.m_name);
+        if (id == Dimension::Id::Unknown)
+        {
+            std::ostringstream oss;
+            oss << "Invalid dimension name in filters.range --limits "
+                "option: '" << d.m_name << "'.";
+            throw pdal_error(oss.str());
+        }
+        m_dimensions_map[id] = d;
     }
 }
 

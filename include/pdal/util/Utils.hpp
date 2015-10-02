@@ -213,7 +213,7 @@ namespace Utils
 
     template<typename PREDICATE>
     PDAL_DLL std::string::size_type
-    extract(std::string& s, std::string::size_type p, PREDICATE pred)
+    extract(const std::string& s, std::string::size_type p, PREDICATE pred)
     {
         std::string::size_type count = 0;
         while (pred(s[p++]))

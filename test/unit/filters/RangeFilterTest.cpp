@@ -69,7 +69,7 @@ TEST(RangeFilterTest, singleDimension)
     reader.setOptions(ops);
 
     Options rangeOps;
-    rangeOps.add("limits", "Z[4:6]");
+    rangeOps.add("limits", "Z(3.50:6]  ");
 
     RangeFilter filter;
     filter.setOptions(rangeOps);
@@ -100,7 +100,7 @@ TEST(RangeFilterTest, multipleDimensions)
     reader.setOptions(ops);
 
     Options rangeOps;
-    rangeOps.add("limits", "Y[4:6]");
+    rangeOps.add("limits", "Y[4.00e0:+6]");
     rangeOps.add("limits", "Z[4:6]");
 
     RangeFilter filter;
@@ -231,7 +231,7 @@ TEST(RangeFilterTest, negativeValues)
     reader.setOptions(ops);
 
     Options rangeOps;
-    rangeOps.add("limits", "Z[-1:1]");
+    rangeOps.add("limits", "Z[-1:1)");
 
     RangeFilter filter;
     filter.setOptions(rangeOps);
@@ -243,8 +243,7 @@ TEST(RangeFilterTest, negativeValues)
     PointViewPtr view = *viewSet.begin();
 
     EXPECT_EQ(1u, viewSet.size());
-    EXPECT_EQ(3u, view->size());
+    EXPECT_EQ(2u, view->size());
     EXPECT_FLOAT_EQ(-1.0, view->getFieldAs<double>(Dimension::Id::Z, 0));
     EXPECT_FLOAT_EQ(0.0, view->getFieldAs<double>(Dimension::Id::Z, 1));
-    EXPECT_FLOAT_EQ(1.0, view->getFieldAs<double>(Dimension::Id::Z, 2));
 }

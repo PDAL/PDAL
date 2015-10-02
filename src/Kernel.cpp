@@ -236,17 +236,6 @@ int Kernel::run(int argc, const char* argv[], const std::string& appName)
 namespace
 {
 
-template<typename PREDICATE>
-std::string::size_type
-extract(std::string& s, std::string::size_type p, PREDICATE pred)
-{
-    std::string::size_type count = 0;
-    while (pred(s[p++]))
-        count++;
-    return count;
-}
-
-
 bool parseOption(std::string o, std::string& stage, std::string& option,
     std::string& value)
 {
@@ -264,7 +253,7 @@ bool parseOption(std::string o, std::string& stage, std::string& option,
     std::string::size_type count = 0;
     std::string::size_type optionStart = 0;
     // Read stage name.
-    while ((count = extract(o, pos, islc)) != 0)
+    while ((count = Utils::extract(o, pos, islc)) != 0)
     {
         pos += count;
         if (o[pos] == '.')

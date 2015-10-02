@@ -48,28 +48,33 @@ namespace pdal
 
 class Options;
 
-struct Range
-{
-    Range(const std::string name,
-          double lower_bound = -std::numeric_limits<double>::max(),
-          double upper_bound = std::numeric_limits<double>::max(),
-          bool inclusive_lower_bound = true,
-          bool inclusive_upper_bound = true) :
-        m_name(name), m_lower_bound(lower_bound), m_upper_bound(upper_bound),
-        m_inclusive_lower_bound(inclusive_lower_bound),
-        m_inclusive_upper_bound(inclusive_upper_bound)
-    {}
-
-    std::string m_name;
-    double m_lower_bound;
-    double m_upper_bound;
-    bool m_inclusive_lower_bound;
-    bool m_inclusive_upper_bound;
-};
-
 class PDAL_DLL RangeFilter : public pdal::Filter
 {
 public:
+
+    struct Range
+    {
+        Range(const std::string name,
+              double lower_bound,
+              double upper_bound,
+              bool inclusive_lower_bound,
+              bool inclusive_upper_bound) :
+            m_name(name), m_lower_bound(lower_bound),
+            m_upper_bound(upper_bound),
+            m_inclusive_lower_bound(inclusive_lower_bound),
+            m_inclusive_upper_bound(inclusive_upper_bound)
+        {}
+
+        Range()
+            {}
+
+        std::string m_name;
+        double m_lower_bound;
+        double m_upper_bound;
+        bool m_inclusive_lower_bound;
+        bool m_inclusive_upper_bound;
+    };
+
     RangeFilter() : Filter()
     {}
 
@@ -82,7 +87,7 @@ private:
     std::map<Dimension::Id::Enum, Range> m_dimensions_map;
 
     virtual void processOptions(const Options&options);
-    virtual void ready(PointTableRef table);
+    virtual void prepared(PointTableRef table);
     virtual PointViewSet run(PointViewPtr view);
 
     RangeFilter& operator=(const RangeFilter&); // not implemented
