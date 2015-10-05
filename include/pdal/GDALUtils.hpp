@@ -174,21 +174,6 @@ private:
     pdal::LogPtr m_log;
 };
 
-
-struct BandInfo
-{
-    BandInfo(const std::string& name, pdal::Dimension::Id::Enum dim, uint32_t band,
-        double scale) : m_name(name), m_dim(dim), m_band(band), m_scale(scale)
-    {}
-
-    std::string m_name;
-    pdal::Dimension::Id::Enum m_dim;
-    uint32_t m_band;
-    double m_scale;
-    pdal::Dimension::Type::Enum m_type;
-};
-
-
 class PDAL_DLL Raster
 
 {

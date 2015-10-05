@@ -50,16 +50,29 @@ extern "C" PF_ExitFunc ColorizationFilter_InitPlugin();
 namespace pdal
 {
 
-namespace gdal
-{ class GlobalDebug; }
-
 // Provides GDAL-based raster overlay that places output data in
 // specified dimensions. It also supports scaling the data by a multiplier
 // on a per-dimension basis.
 class PDAL_DLL ColorizationFilter : public Filter
 {
-
 public:
+    struct BandInfo
+    {
+        BandInfo(const std::string& name, uint32_t band, double scale) :
+            m_name(name), m_band(band), m_scale(scale),
+            m_dim(Dimension::Id::Unknown)
+        {}
+
+        BandInfo() : m_band(0), m_scale(1.0), m_dim(Dimension::Id::Unknown)
+        {}
+
+        std::string m_name;
+        uint32_t m_band;
+        double m_scale;
+        Dimension::Id::Enum m_dim;
+    };
+
+
     ColorizationFilter()
     {}
 
@@ -77,7 +90,7 @@ private:
     virtual void filter(PointView& view);
 
     std::string m_rasterFilename;
-    std::vector<gdal::BandInfo> m_bands;
+    std::vector<BandInfo> m_bands;
 
     std::unique_ptr<gdal::Raster> m_raster;
 

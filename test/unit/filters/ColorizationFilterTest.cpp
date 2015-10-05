@@ -86,27 +86,7 @@ TEST(ColorizationFilterTest, test1)
 {
     Options options;
 
-    Option red("dimension", "Red");
-    Options subRed;
-    subRed.add("band", 1);
-    subRed.add("scale", 1.0f, "scale factor for this dimension");
-    red.setOptions(subRed);
-    options.add(red);
-
-    Option green("dimension", "Green");
-    Options subGreen;
-    subGreen.add("band", 2);
-    subGreen.add("scale", 1.0f, "scale factor for this dimension");
-    green.setOptions(subGreen);
-    options.add(green);
-
-    Option blue("dimension", "Blue", "");
-    Options subBlue;
-    subBlue.add("band", 3);
-    subBlue.add("scale", 255.0f, "scale factor for this dimension");
-    blue.setOptions(subBlue);
-    options.add(blue);
-
+    options.add("dimensions", "Red, Green,Blue::255  ");
     options.add("raster", Support::datapath("autzen/autzen.jpg"),
         "raster to read");
 
@@ -138,27 +118,7 @@ TEST(ColorizationFilterTest, test3)
 {
     Options options;
 
-    Option red("dimension", "Foo");
-    Options subRed;
-    subRed.add("band", 1);
-    subRed.add("scale", 1.0f, "scale factor for this dimension");
-    red.setOptions(subRed);
-    options.add(red);
-
-    Option green("dimension", "Bar");
-    Options subGreen;
-    subGreen.add("band", 2);
-    subGreen.add("scale", 1.0f, "scale factor for this dimension");
-    green.setOptions(subGreen);
-    options.add(green);
-
-    Option blue("dimension", "Baz", "");
-    Options subBlue;
-    subBlue.add("band", 3);
-    subBlue.add("scale", 255.0f, "scale factor for this dimension");
-    blue.setOptions(subBlue);
-    options.add(blue);
-
+    options.add("dimensions", "Foo:1,Bar:2,Baz:3:255");
     options.add("raster", Support::datapath("autzen/autzen.jpg"),
         "raster to read");
 

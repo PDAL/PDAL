@@ -20,26 +20,8 @@ The bands of the raster to apply to each are selected using the "band" option, a
     <Writer type="writers.las">
       <Option name="filename">colorized.las</Option>
       <Filter type="filters.colorization">
-        <Option name="dimension">
-          Red
-          <Options>
-            <Option name="band">1</Option>
-            <Option name="scale">1.0</Option>
-          </Options>
-        </Option>
-        <Option name="dimension">
-          Green
-          <Options>
-              <Option name="band">2</Option>
-              <Option name="scale">1.0</Option>
-          </Options>
-        </Option>
-        <Option name="dimension">
-          Blue
-          <Options>
-            <Option name="band">3</Option>
-            <Option name="scale">256</Option>
-          </Options>
+        <Option name="dimensions">
+          Red:1:1.0, Blue, Green::256.0
         </Option>
         <Option name="raster">aerial.tif</Option>
         <Reader type="readers.las">
@@ -50,27 +32,19 @@ The bands of the raster to apply to each are selected using the "band" option, a
   </Pipeline>
 
 
-
 Options
 -------
 
 raster
   The raster file to read the band from. Any format supported by `GDAL`_ may be read.
 
-dimension
-  A dimension to populate with values from the raster file. There may be multiple dimension options declared. The dimension name should be supplied, and an options list indicating the raster band to read from and the scaling to apply.
+dimensions
+  A comma separated list of dimensions to populate with values from the raster
+  file. The format of each dimension is <name>:<band_number>:<scale_factor>.
+  Either or both of band number and scale factor may be omitted as may ':'
+  separators if the data is not ambiguous.  If not supplied, band numbers
+  begin at 1 and increment from the band number of the previous dimension.
+  If not supplied, the scaling factor is 1.0.
+  [Default: "Red:1:1.0, Green:2:1.0, Blue:3:1.0"]
   
-  band
-    The raster band from which to read values for this dimension.
-  
-  scale
-    The scaling factor to apply to the value read from the raster. [Default: **1.0**]
-
-x_dim
-  The point dimension to use for the x dimension [Default: **X**]
-  
-y_dim
-  The point dimension to use for the y dimension [Default: **Y**]
-
-
 .. _GDAL: http://gdal.org

@@ -65,72 +65,104 @@ Options ColorizationFilter::getDefaultOptions()
 {
     Options options;
 
-    pdal::Option red("dimension", "Red", "");
-    pdal::Option b0("band",1, "");
-    pdal::Option s0("scale", 1.0f, "scale factor for this dimension");
-    pdal::Options redO;
-    redO.add(b0);
-    redO.add(s0);
-    red.setOptions(redO);
-
-    pdal::Option green("dimension", "Green", "");
-    pdal::Option b1("band",2, "");
-    pdal::Option s1("scale", 1.0f, "scale factor for this dimension");
-    pdal::Options greenO;
-    greenO.add(b1);
-    greenO.add(s1);
-    green.setOptions(greenO);
-
-    pdal::Option blue("dimension", "Blue", "");
-    pdal::Option b2("band",3, "");
-    pdal::Option s2("scale", 1.0f, "scale factor for this dimension");
-    pdal::Options blueO;
-    blueO.add(b2);
-    blueO.add(s2);
-    blue.setOptions(blueO);
-
-    pdal::Option reproject("reproject", false,
-        "Reproject the input data into the same coordinate system as "
-        "the raster?");
-
-    options.add(red);
-    options.add(green);
-    options.add(blue);
-    options.add(reproject);
+    options.add("dimensions", "Red:1:1.0, Green:2:1.0, Blue:3");
 
     return options;
 }
 
+namespace
+{
+
+ColorizationFilter::BandInfo parseDim(const std::string& dim,
+    uint32_t defaultBand)
+{
+    std::string::size_type pos, count;
+    const char *start;
+    char *end;
+    std::string name;
+    uint32_t band = defaultBand;
+    double scale = 1.0;
+
+    try
+    {
+        pos = 0;
+        // Skip leading whitespace.
+        count = Utils::extract(dim, pos, (int(*)(int))std::isspace);
+        pos += count;
+
+        count = Utils::extract(dim, pos, (int(*)(int))std::isalpha);
+        if (count == 0)
+           throw std::string("No dimension name.");
+        name = dim.substr(pos, count);
+        pos += count;
+
+        count = Utils::extract(dim, pos, (int(*)(int))std::isspace);
+        pos += count;
+
+        if (pos < dim.size() && dim[pos] == ':')
+        {
+            pos++;
+            start = dim.data() + pos;
+            band = std::strtoul(start, &end, 10);
+            if (start == end)
+                band = defaultBand;
+            pos += (end - start);
+
+            count = Utils::extract(dim, pos, (int(*)(int))std::isspace);
+            pos += count;
+
+            if (pos < dim.size() && dim[pos] == ':')
+            {
+                pos++;
+                start = dim.data() + pos;
+                scale = std::strtod(start, &end);
+                if (start == end)
+                    scale = 1.0;
+                pos += (end - start);
+            }
+        }
+
+        count = Utils::extract(dim, pos, (int(*)(int))std::isspace);
+        pos += count;
+
+        if (pos != dim.size())
+            throw std::string("Invalid characters following dimension "
+                "specification.");
+    }
+    catch (std::string s)
+    {
+        std::ostringstream oss;
+        oss << "filters.colorization: invalid --dimensions option: '" << dim <<
+            "': " << s;
+        throw pdal_error(oss.str());
+    }
+    return ColorizationFilter::BandInfo(name, band, scale);
+}
+
+} // unnamed namespace
 
 void ColorizationFilter::processOptions(const Options& options)
 {
     m_rasterFilename = options.getValueOrThrow<std::string>("raster");
-    std::vector<Option> dimensions = options.getOptions("dimension");
 
-    if (dimensions.size() == 0)
+    if (options.hasOption("dimension") && !options.hasOption("dimensions"))
+        throw pdal_error("Option 'dimension' no longer supported.  Use "
+            "'dimensions' instead.");
+
+    StringList defaultDims;
+    defaultDims.push_back("Red");
+    defaultDims.push_back("Green");
+    defaultDims.push_back("Blue");
+
+    StringList dims =
+        options.getValueOrDefault<StringList>("dimensions", defaultDims);
+
+    uint32_t defaultBand = 1;
+    for (std::string& dim : dims)
     {
-        m_bands.emplace_back("Red", Dimension::Id::Red, 1, 1.0);
-        m_bands.emplace_back("Green", Dimension::Id::Green, 2, 1.0);
-        m_bands.emplace_back("Blue", Dimension::Id::Blue, 3, 1.0);
-        log()->get(LogLevel::Debug) << "No dimension mappings were given. "
-            "Using default mappings." << std::endl;
-    }
-    for (auto i = dimensions.begin(); i != dimensions.end(); ++i)
-    {
-        std::string name = i->getValue<std::string>();
-        boost::optional<Options const&> dimensionOptions = i->getOptions();
-        if (!dimensionOptions)
-        {
-            std::ostringstream oss;
-            oss << "No band and scaling information given for dimension '" <<
-                name << "'";
-            throw pdal_error(oss.str());
-        }
-        uint32_t bandId =
-            dimensionOptions->getValueOrThrow<uint32_t>("band");
-        double scale =
-            dimensionOptions->getValueOrDefault<double>("scale", 1.0);
-        m_bands.emplace_back(name, Dimension::Id::Unknown, bandId, scale);
+        BandInfo bi = parseDim(dim, defaultBand);
+        defaultBand = bi.m_band + 1;
+        m_bands.push_back(bi);
     }
 }
 
@@ -145,37 +177,28 @@ void ColorizationFilter::addDimensions(PointLayoutPtr layout)
 
 void ColorizationFilter::ready(PointTableRef table)
 {
-    m_raster = std::unique_ptr<gdal::Raster>(new gdal::Raster(m_rasterFilename));
+    m_raster =
+        std::unique_ptr<gdal::Raster>(new gdal::Raster(m_rasterFilename));
     m_raster->open();
-
-    for (auto bi = m_bands.begin(); bi != m_bands.end(); ++bi)
-    {
-        if (bi->m_dim == Dimension::Id::Unknown)
-            bi->m_dim = table.layout()->findDim(bi->m_name);
-        if (bi->m_dim == Dimension::Id::Unknown)
-            throw pdal_error((std::string)"Can't colorize - no dimension " +
-                bi->m_name);
-    }
 }
 
 
 void ColorizationFilter::filter(PointView& view)
 {
     std::vector<double> data;
-    int i(0);
+
     for (PointId idx = 0; idx < view.size(); ++idx)
     {
-        int i(0);
         double x = view.getFieldAs<double>(Dimension::Id::X, idx);
         double y = view.getFieldAs<double>(Dimension::Id::Y, idx);
 
-        bool bRead = m_raster->read(x, y, data);
+        if (!m_raster->read(x, y, data))
+            continue;
 
-        if (!bRead) continue;
-
+        int i(0);
         for (auto bi = m_bands.begin(); bi != m_bands.end(); ++bi)
         {
-            gdal::BandInfo& b = *bi;
+            BandInfo& b = *bi;
             view.setField(b.m_dim, idx, data[i] * b.m_scale);
             ++i;
         }
