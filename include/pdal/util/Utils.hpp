@@ -43,6 +43,7 @@
 #include <stdexcept>
 #include <cmath>
 #include <fstream>
+#include <iomanip>
 #include <istream>
 #include <limits>
 #include <cstring>
@@ -382,13 +383,23 @@ namespace Utils
     std::string toString(const T& from)
     {
         std::ostringstream oss;
-        oss << std::fixed << from;
+        oss << from;
         return oss.str();
     }
 
-    // There is an overload of std::to_string() for float and double, but
-    // its behavior is different from streaming and doesn't match what
-    // we have been doing historically.
+    inline std::string toString(double from)
+    {
+        std::ostringstream oss;
+        oss << std::setprecision(10) << from;
+        return oss.str();
+    }
+
+    inline std::string toString(float from)
+    {
+        std::ostringstream oss;
+        oss << std::setprecision(8) << from;
+        return oss.str();
+    }
 
     inline std::string toString(long long from)
         { return std::to_string(from); }

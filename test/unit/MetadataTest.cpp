@@ -283,30 +283,13 @@ TEST(MetadataTest, sanitize)
 }
 **/
 
-TEST(MetadataTest, test_metadata_stage)
+// Make sure that we handle double-precision values to 10 decimal places.
+TEST(MetadataTest, test_float)
 {
-//ABELL
-/**
-    PointTable table;
+    MetadataNode n("top");
+    MetadataNode n2 = n.add("test", 1e-20);
+    EXPECT_DOUBLE_EQ(n2.value<double>(), 1e-20);
 
-    LasReader reader(Support::datapath("interesting.las"));
-    reader.prepare(table);
-
-    MetadataNode file_metadata = table->metadata();
-
-    EXPECT_EQ(file_metadata.toPTree().get_child("metadata").size(),
-        32);
-
-    PointTable readerTable;
-    PipelineManager mgr;
-    PipelineReader specReader(mgr);
-    specReader.readPipeline(
-        Support::datapath("pipeline/pipeline_metadata_reader.xml"));
-    std::shared_ptr<Stage> stage(mgr.getStage());
-
-    stage->prepare(readerTable);
-    MetadataNode pipeline_metadata = readerTable->metadata();
-    EXPECT_EQ(
-        pipeline_metadata.toPTree().get_child("metadata").size(), 32);
-**/
+    n2 = n.add("test2", 1.12345678);
+    EXPECT_DOUBLE_EQ(n2.value<double>(), 1.12345678);
 }
