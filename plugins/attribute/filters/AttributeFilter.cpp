@@ -35,6 +35,7 @@
 #include "AttributeFilter.hpp"
 
 #include <memory>
+#include <vector>
 
 #include <pdal/GlobalEnvironment.hpp>
 #include <pdal/GDALUtils.hpp>
@@ -66,16 +67,33 @@ struct OGRDataSourceDeleter
     }
 };
 
-struct OGRGeometryDeleter
+namespace
 {
-    template <typename T>
-    void operator()(T* ptr)
-    {
-        if (ptr)
-            ::OGR_G_DestroyGeometry(ptr);
-    }
-};
 
+static void _GEOSErrorHandler(const char *fmt, ...)
+{
+    va_list args;
+
+    va_start(args, fmt);
+    char buf[1024];
+
+    vsnprintf(buf, sizeof(buf), fmt, args);
+
+    va_end(args);
+}
+
+static void _GEOSWarningHandler(const char *fmt, ...)
+{
+    va_list args;
+
+    char buf[1024];
+    vsnprintf(buf, sizeof(buf), fmt, args);
+    std::cout << "GEOS warning: " << buf << std::endl;
+
+    va_end(args);
+}
+
+} // unnamed namespace
 
 struct OGRFeatureDeleter
 {
@@ -99,13 +117,11 @@ Options AttributeFilter::getDefaultOptions()
 
     pdal::Option red("dimension", "Classification", "");
     pdal::Option b0("value","0", "");
-    pdal::Option geometry("geometry","POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))", "");
     pdal::Option query("query","", "");
     pdal::Option layer("layer","", "");
     pdal::Option datasource("datasource","", "");
     pdal::Options redO;
     redO.add(b0);
-    redO.add(geometry);
     redO.add(query);
     redO.add(layer);
     redO.add(datasource);
@@ -119,63 +135,76 @@ Options AttributeFilter::getDefaultOptions()
 
 void AttributeFilter::processOptions(const Options& options)
 {
-    std::vector<Option> dimensions = options.getOptions("dimension");
-    for (auto i = dimensions.begin(); i != dimensions.end(); ++i)
+    if (!options.hasOption("dimension"))
     {
-        std::string name = i->getValue<std::string>();
-        boost::optional<Options const&> dimensionOptions = i->getOptions();
-        if (!dimensionOptions)
+        std::ostringstream oss;
+        oss << getName() << ": option 'dimension' must be specified.";
+        throw pdal_error(oss.str());
+    }
+    if (options.hasOption("value") && options.hasOption("datasource"))
+    {
+        std::ostringstream oss;
+        oss << getName() << ": options 'value' and 'datasource' mutually "
+            "exclusive.";
+        throw pdal_error(oss.str());
+    }
+    if (!options.hasOption("value") && !options.hasOption("datasource"))
+    {
+        std::ostringstream oss;
+        oss << getName() << ": Either option 'value' or 'datasource' must "
+            "be specified.";
+        throw pdal_error(oss.str());
+    }
+
+    std::string ops[] = { "column", "query", "layer" };
+    for (auto& op : ops)
+    {
+        if (options.hasOption("value") && options.hasOption(op))
         {
             std::ostringstream oss;
-            oss << "No options dimension given for dimension '" <<
-                name << "'";
+            oss << getName() << ": option 'op' invalid with option 'value'.";
             throw pdal_error(oss.str());
         }
+    }
 
-        AttributeInfo info;
-        info.datasource = dimensionOptions->getValueOrDefault<std::string>("datasource", "");
+    m_dimName = options.getValueOrDefault<std::string>("dimension");
+    m_value = options.getValueOrDefault<double>("value",
+        std::numeric_limits<double>::quiet_NaN());
+    m_datasource = options.getValueOrDefault<std::string>("datasource");
+    m_column = options.getValueOrDefault<std::string>("column");
+    m_query = options.getValueOrDefault<std::string>("query");
+    m_layer = options.getValueOrDefault<std::string>("layer");
+}
 
 
-        // If we have no datasource, then we're simply setting a value.
-        // If we have no value, throw an exception.
-        if (!info.datasource.size())
-        {
-            info.value = dimensionOptions->getValueOrThrow<std::string>("value");
-            info.isogr = false;
-        } else
-        {
-            info.column = dimensionOptions->getValueOrDefault<std::string>("column",""); // take first column
-            info.query = dimensionOptions->getValueOrDefault<std::string>("query","");
-            info.layer = dimensionOptions->getValueOrDefault<std::string>("layer",""); // take first layer
-
-        }
-
-        m_dimensions.insert(std::make_pair(name, info));
+void AttributeFilter::prepared(PointTableRef table)
+{
+    m_dim = table.layout()->findDim(m_dimName);
+    if (m_dim == Dimension::Id::Unknown)
+    {
+        std::ostringstream oss;
+        oss << getName() << ": Dimension '" << m_dimName << "' not found.";
+        throw pdal_error(oss.str());
     }
 }
+
 
 void AttributeFilter::ready(PointTableRef table)
 {
-    for (auto& dim_par : m_dimensions)
+    if (m_value != m_value)
     {
-        Dimension::Id::Enum t = table.layout()->findDim(dim_par.first);
-        dim_par.second.dim = t;
-
-        if (dim_par.second.isogr)
+        m_ds = OGRDSPtr(OGROpen(m_datasource.c_str(), 0, 0),
+            OGRDataSourceDeleter());
+        if (!m_ds)
         {
-
-            OGRDSPtr ds = OGRDSPtr(OGROpen(dim_par.second.datasource.c_str(), 0, 0), OGRDataSourceDeleter());
-            if (!ds)
-            {
-                std::ostringstream oss;
-                oss << "Unable to open data source '" << dim_par.second.datasource <<"'";
-                throw pdal_error(oss.str());
-            }
-            dim_par.second.ds = ds;
+            std::ostringstream oss;
+            oss << getName() << ": Unable to open data source '" <<
+                    m_datasource << "'";
+            throw pdal_error(oss.str());
         }
-
     }
 }
+
 
 BOX3D computeBounds(GEOSContextHandle_t ctx, GEOSGeometry const *geometry)
 {
@@ -208,13 +237,13 @@ BOX3D computeBounds(GEOSContextHandle_t ctx, GEOSGeometry const *geometry)
 }
 
 
-GEOSGeometry* createGEOSPoint(GEOSContextHandle_t ctx, double x, double y, double z)
+GEOSGeometry* createGEOSPoint(GEOSContextHandle_t ctx,
+    double x, double y, double z)
 {
     int ret(0);
 
     // precise filtering based on the geometry
-    GEOSCoordSequence* coords =
-        GEOSCoordSeq_create_r(ctx, 1, 3);
+    GEOSCoordSequence* coords = GEOSCoordSeq_create_r(ctx, 1, 3);
     if (!coords)
         throw pdal_error("unable to allocate coordinate sequence");
     ret = GEOSCoordSeq_setX_r(ctx, coords, 0, x);
@@ -233,47 +262,46 @@ GEOSGeometry* createGEOSPoint(GEOSContextHandle_t ctx, double x, double y, doubl
     return p;
 }
 
-void AttributeFilter::UpdateGEOSBuffer(PointView& view, AttributeInfo& info)
+
+void AttributeFilter::UpdateGEOSBuffer(PointView& view)
 {
     QuadIndex idx(view);
 
-    if (!info.lyr) // wake up the layer
+    if (m_layer.size())
+        m_lyr = OGR_DS_GetLayerByName(m_ds.get(), m_layer.c_str());
+    else if (m_query.size())
+        m_lyr = OGR_DS_ExecuteSQL(m_ds.get(), m_query.c_str(), 0, 0);
+    else
+        m_lyr = OGR_DS_GetLayer(m_ds.get(), 0);
+
+    if (!m_lyr)
     {
-        if (info.layer.size())
-            info.lyr = OGR_DS_GetLayerByName(info.ds.get(), info.layer.c_str());
-        else if (info.query.size())
-        {
-            info.lyr = OGR_DS_ExecuteSQL(info.ds.get(), info.query.c_str(), 0, 0);
-        }
-        else
-            info.lyr = OGR_DS_GetLayer(info.ds.get(), 0);
-        if (!info.lyr)
-        {
-            std::ostringstream oss;
-            oss << "Unable to select layer '" << info.layer << "'";
-            throw pdal_error(oss.str());
-        }
+        std::ostringstream oss;
+        oss << getName() << ": Unable to select layer '" << m_layer << "'";
+        throw pdal_error(oss.str());
     }
 
-    OGRFeaturePtr feature = OGRFeaturePtr(OGR_L_GetNextFeature(info.lyr), OGRFeatureDeleter());
+    OGRFeaturePtr feature = OGRFeaturePtr(OGR_L_GetNextFeature(m_lyr),
+        OGRFeatureDeleter());
 
     int field_index(1); // default to first column if nothing was set
-    if (info.column.size())
+    if (m_column.size())
     {
-
-        field_index = OGR_F_GetFieldIndex(feature.get(), info.column.c_str());
+        field_index = OGR_F_GetFieldIndex(feature.get(), m_column.c_str());
         if (field_index == -1)
         {
             std::ostringstream oss;
-            oss << "No column name '" << info.column << "' was found.";
+            oss << getName() << ": No column name '" << m_column <<
+                "' was found.";
             throw pdal_error(oss.str());
         }
     }
 
-    while(feature)
+    while (feature)
     {
         OGRGeometryH geom = OGR_F_GetGeometryRef(feature.get());
         OGRwkbGeometryType t = OGR_G_GetGeometryType(geom);
+        int32_t fieldVal = OGR_F_GetFieldAsInteger(feature.get(), field_index);
 
         if (!(t == wkbPolygon ||
             t == wkbMultiPolygon ||
@@ -281,27 +309,35 @@ void AttributeFilter::UpdateGEOSBuffer(PointView& view, AttributeInfo& info)
             t == wkbMultiPolygon25D))
         {
             std::ostringstream oss;
-            oss << "Geometry is not Polygon or MultiPolygon!";
+            oss << getName() << ": Geometry is not Polygon or MultiPolygon!";
             throw pdal::pdal_error(oss.str());
         }
 
-        OGRGeometry* ogr_g = (OGRGeometry*) geom;
-        GEOSGeometry* geos_g (0);
+        OGRGeometry *ogr_g = (OGRGeometry*)geom;
         if (!m_geosEnvironment)
-        {
+            m_geosEnvironment = initGEOS_r(_GEOSWarningHandler,
+                _GEOSErrorHandler);
 
-#if (GDAL_VERSION_MINOR < 11) && (GDAL_VERSION_MAJOR == 1)
-        geos_g = ogr_g->exportToGEOS();
-#else
-        m_geosEnvironment = ogr_g->createGEOSContext();
-        geos_g = ogr_g->exportToGEOS(m_geosEnvironment);
+        // Convert the the GDAL geom to WKB in order to avoid the version
+        // context issues with exporting directoly to GEOS.
+        OGRwkbByteOrder bo =
+            GEOS_getWKBByteOrder() == GEOS_WKB_XDR ? wkbXDR : wkbNDR;
+        int wkbSize = ogr_g->WkbSize();
+        std::vector<unsigned char> wkb(wkbSize);
 
-#endif
-        }
+        ogr_g->exportToWkb(bo, wkb.data());
+        GEOSGeometry *geos_g = GEOSGeomFromWKB_buf_r(m_geosEnvironment,
+            wkb.data(), wkbSize);
 
-        GEOSPreparedGeometry const* geos_pg = GEOSPrepare_r(m_geosEnvironment, geos_g);
+        GEOSPreparedGeometry const* geos_pg = GEOSPrepare_r(m_geosEnvironment,
+            geos_g);
         if (!geos_pg)
-            throw pdal_error("unable to prepare geometry for index-accelerated intersection");
+        {
+            std::ostringstream oss;
+            oss << getName() << ": unable to prepare geometry for "
+                "index-accelerated intersection";
+            throw pdal_error(oss.str());
+        }
 
         // Compute a total bounds for the geometry. Query the QuadTree to
         // find out the points that are inside the bbox. Then test each
@@ -310,47 +346,40 @@ void AttributeFilter::UpdateGEOSBuffer(PointView& view, AttributeInfo& info)
         std::vector<PointId> ids = idx.getPoints(box);
         for (const auto& i : ids)
         {
-
             double x = view.getFieldAs<double>(Dimension::Id::X, i);
             double y = view.getFieldAs<double>(Dimension::Id::Y, i);
             double z = view.getFieldAs<double>(Dimension::Id::Z, i);
 
             GEOSGeometry* p = createGEOSPoint(m_geosEnvironment, x, y ,z);
 
-            if (static_cast<bool>(GEOSPreparedContains_r(m_geosEnvironment, geos_pg, p)))
+            if ((bool)(GEOSPreparedCovers_r(m_geosEnvironment, geos_pg, p)))
             {
                 // We're in the poly, write the attribute value
-                int32_t v = OGR_F_GetFieldAsInteger(feature.get(), field_index);
-                view.setField(info.dim, i, v);
-//                 log()->get(LogLevel::Debug) << "Setting value: " << v << std::endl;
+                view.setField(m_dim, i, fieldVal);
             }
-
             GEOSGeom_destroy_r(m_geosEnvironment, p);
-
         }
-
-        feature = OGRFeaturePtr(OGR_L_GetNextFeature(info.lyr), OGRFeatureDeleter());
+        feature = OGRFeaturePtr(OGR_L_GetNextFeature(m_lyr),
+            OGRFeatureDeleter());
     }
 }
 
+
 void AttributeFilter::filter(PointView& view)
 {
+    if (m_value == m_value)
+        for (PointId i = 0; i < view.size(); ++i)
+            view.setField(m_dim, i, m_value);
+    else
+        UpdateGEOSBuffer(view);
+}
 
-    for (auto& dim_par : m_dimensions)
-    {
-        if (dim_par.second.isogr)
-        {
-            UpdateGEOSBuffer(view, dim_par.second);
-        }  else
-        {
-            for (PointId i = 0; i < view.size(); ++i)
-            {
-                double v = boost::lexical_cast<double>(dim_par.second.value);
-                view.setField(dim_par.second.dim, i, v);
-            }
 
-        }
-    }
+void AttributeFilter::done(PointTableRef /*table*/)
+{
+    if (m_geosEnvironment)
+        finishGEOS_r(m_geosEnvironment);
+    m_geosEnvironment = 0;
 }
 
 } // namespace pdal

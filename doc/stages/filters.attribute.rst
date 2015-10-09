@@ -4,12 +4,13 @@ filters.attribute
 ===================
 
 The attribute filter allows you to set the values of a
-selected dimension. There are three possible scenarios that
-are currently supported:
+selected dimension. Two scenarios are supported:
 
-* Set all points in a dimension to single value
+* Set the value of a dimension of all points to single value
+  (use option 'value')
 
 * Set points inside an OGR-readable Polygon or MultiPolygon
+  (use option 'datasource')
 
 OGR SQL support
 ----------------
@@ -28,21 +29,13 @@ but that may be added in the future.
 
 .. _`ExecuteSQL`: http://www.gdal.org/ogr__api_8h.html#a9892ecb0bf61add295bd9decdb13797a
 
+Example 1
+---------
 
-.. warning::
-
-    If no `datasource` is given, it is assumed that the query
-    is setting all of the values for the given dimension to the
-    `value` option.
-
-Example
--------
-
-In this scenario, we are altering the attributes of three
-dimensions -- `Classification`, `PointSourceId`, and `Intensity`. The
-`PointSourceId` will simply be set to the single value `26`, while
-`Classification` and `Intensity` will have their values set when the
-candidate point is inside a polygon with that polygon's attribute.
+In this scenario, we are altering the attributes of the dimension
+'Classification'.  Points from autzen-dd.las that lie within a feature will
+have their classification to match the 'CLS' field associated with that
+feature.
 
 .. code-block:: xml
 
@@ -52,11 +45,8 @@ candidate point is inside a polygon with that polygon's attribute.
             <Option name="filename">
                 attributed.las
             </Option>
-            <Option name="scale_x">
-                0.0000001
-            </Option>
-            <Option name="scale_y">
-                0.0000001
+            <Option name="forward">
+                all
             </Option>
             <Filter type="filters.attribute">
                 <Option name="dimension">
@@ -73,27 +63,38 @@ candidate point is inside a polygon with that polygon's attribute.
                         </Option>
                     </Options>
                 </Option>
-                <Option name="dimension">
-                    Intensity
-                    <Options>
-                        <Option name="datasource">
-                            ./test/data/autzen/attributes.shp
-                        </Option>
-                        <Option name="query">
-                            SELECT CLS FROM attributes where cls!=6
-                        </Option>
-                        <Option name="column">
-                            CLS
-                        </Option>
-                    </Options>
-                </Option>
+                <Reader type="readers.las">
+                    <Option name="filename">
+                        ../autzen/autzen-dd.las
+                    </Option>
+                </Reader>
+            </Filter>
+        </Writer>
+    </Pipeline>
+
+Example 2
+---------
+
+This pipeline sets the PointSourceId of all points from 'autzen-dd.las'
+to the value '26'.
+
+.. code-block:: xml
+
+    <?xml version="2.0" encoding="utf-8"?>
+    <Pipeline version="1.0">
+        <Writer type="writers.las">
+            <Option name="filename">
+                attributed.las
+            </Option>
+            <Option name="forward">
+                all
+            </Option>
+            <Filter type="filters.attribute">
                 <Option name="dimension">
                     PointSourceId
-                    <Options>
-                        <Option name="value">
-                            26
-                        </Option>
-                    </Options>
+                </Option>
+                <Option name="value">
+                    26
                 </Option>
                 <Reader type="readers.las">
                     <Option name="filename">
@@ -109,19 +110,22 @@ Options
 -------
 
 dimension
-  A dimension Option with an Options block containing at least a "value"
-  Option to set all points.
+  Name of the dimension whose value should be altered.  [Default: none]
 
-  * value: The value to set all points to for the given dimension
+value
+  Value to apply to the dimension.  [Default: none]
 
-  * datasource: OGR-readable datasource for Polygon or MultiPolygon data
+datasource
+  OGR-readable datasource for Polygon or MultiPolygon data.  [Default: none]
 
-  * column: The column from which to read the attribute. If none is
-    specified, the first column is used.
+column
+  The OGR datasource column from which to read the attribute.
+  [Default: first column]
 
-  * query: The OGR SQL query to execute on the datasource to fetch
-    geometry and attributes.
+query
+  OGR SQL query to execute on the datasource to fetch geometry and attributes.
+  [Default: none]
 
-  * layer: The data source's layer to use. If none is specified, the
-    first one is used.
+layer
+  The data source's layer to use. [Defalt: first layer]
 

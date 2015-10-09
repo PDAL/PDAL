@@ -53,65 +53,15 @@ namespace gdal
     class ErrorHandler;
 }
 
-
 typedef std::shared_ptr<void> OGRDSPtr;
 typedef std::shared_ptr<void> OGRFeaturePtr;
 typedef std::shared_ptr<void> OGRGeometryPtr;
 
-class AttributeInfo
-{
-public:
-    AttributeInfo() : ds(0), lyr(0), isogr(true) {};
-
-    std::string connection;
-    std::string column;
-    std::string datasource;
-    OGRDSPtr ds;
-    OGRLayerH lyr;
-    std::string query;
-    std::string layer;
-    std::string value;
-    bool isogr;
-    Dimension::Id::Enum dim;
-    AttributeInfo(const AttributeInfo& other)
-        : connection(other.connection)
-        , column(other.column)
-        , datasource(other.datasource)
-        , ds(other.ds)
-        , lyr(other.lyr)
-        , query(other.query)
-        , layer(other.layer)
-        , value(other.value)
-        , isogr(other.isogr)
-        , dim(other.dim) {};
-    AttributeInfo& operator=(const AttributeInfo& other)
-    {
-        if (&other != this)
-        {
-            connection = other.connection;
-            column = other.column;
-            datasource = other.datasource;
-            ds = other.ds;
-            lyr = other.lyr;
-            query = other.query;
-            value = other.value;
-            layer = other.layer;
-            isogr = other.isogr;
-            dim = other.dim;
-        }
-        return *this;
-    }
-
-};
-
-
-typedef std::map< std::string, AttributeInfo> AttributeInfoMap;
-
-
 class PDAL_DLL AttributeFilter : public Filter
 {
 public:
-    AttributeFilter() : Filter(), m_geosEnvironment(0) {};
+    AttributeFilter() : Filter(), m_ds(0), m_lyr(0), m_geosEnvironment(0)
+    {}
 
     static void * create();
     static int32_t destroy(void *);
@@ -122,18 +72,29 @@ public:
 private:
     virtual void initialize();
     virtual void processOptions(const Options&);
+    virtual void prepared(PointTableRef table);
     virtual void ready(PointTableRef table);
     virtual void filter(PointView& view);
+    virtual void done(PointTableRef table);
 
     AttributeFilter& operator=(const AttributeFilter&); // not implemented
     AttributeFilter(const AttributeFilter&); // not implemented
 
     typedef std::shared_ptr<void> OGRDSPtr;
 
-    AttributeInfoMap m_dimensions;
+    OGRDSPtr m_ds;
+    OGRLayerH m_lyr;
+    std::string m_dimName;
+    double m_value;
+    std::string m_datasource;
+    std::string m_column;
+    std::string m_query;
+    std::string m_layer;
+    Dimension::Id::Enum m_dim;
+
     GEOSContextHandle_t m_geosEnvironment;
     std::unique_ptr<pdal::gdal::ErrorHandler> m_gdal_debug;
-    void UpdateGEOSBuffer(PointView& view, AttributeInfo& info);
+    void UpdateGEOSBuffer(PointView& view);
 
 };
 

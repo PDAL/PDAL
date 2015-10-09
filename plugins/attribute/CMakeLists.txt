@@ -16,6 +16,11 @@ if (GEOS_FOUND AND GDAL_FOUND)
     PDAL_ADD_PLUGIN(libname filter attribute
         FILES "${srcs}" "${incs}"
         LINK_WITH ${GEOS_LIBRARY} ${GDAL_LIBRARY})
+
+    if (WITH_TESTS)
+        PDAL_ADD_TEST(pdal_filters_attribute_test
+            FILES test/AttributeFilterTest.cpp)
+    endif()
 else()
     message(STATUS "BUILD_PLUGIN_ATTRIBUTE disabled because GEOS and/or GDAL was not found")
 endif()

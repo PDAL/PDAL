@@ -34,6 +34,8 @@
 
 #include "CropFilter.hpp"
 
+#include <iomanip>
+
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/GDALUtils.hpp>
@@ -65,7 +67,6 @@ static void _GEOSErrorHandler(const char *fmt, ...)
     char buf[1024];
 
     vsnprintf(buf, sizeof(buf), fmt, args);
-    std::cerr << "GEOS Error: " << buf << std::endl;
 
     va_end(args);
 }
@@ -123,8 +124,12 @@ void CropFilter::processOptions(const Options& options)
 #ifdef PDAL_HAVE_GEOS
     if (m_polys.size())
     {
-        m_geosEnvironment = initGEOS_r(pdal::geos::_GEOSWarningHandler,
-            pdal::geos::_GEOSErrorHandler);
+        m_geoms.clear();
+        if (!m_geosEnvironment)
+        {
+            m_geosEnvironment = initGEOS_r(pdal::geos::_GEOSWarningHandler,
+                pdal::geos::_GEOSErrorHandler);
+        }
         for (std::string poly : m_polys)
         {
             GeomPkg g;
@@ -324,8 +329,10 @@ void CropFilter::done(PointTableRef /*table*/)
         GEOSPreparedGeom_destroy_r(m_geosEnvironment, g.m_prepGeom);
         GEOSGeom_destroy_r(m_geosEnvironment, g.m_geom);
     }
+    m_geoms.clear();
     if (m_geosEnvironment)
         finishGEOS_r(m_geosEnvironment);
+    m_geosEnvironment = 0;
 #endif
 }
 
