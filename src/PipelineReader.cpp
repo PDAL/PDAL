@@ -164,26 +164,6 @@ Option PipelineReader::parseElement_Option(const ptree& tree)
     boost::algorithm::trim(value);
     Option option(name, value);
 
-    boost::optional<ptree const&> moreOptions =
-        tree.get_child_optional("Options");
-
-    if (moreOptions)
-    {
-        ptree::const_iterator iter = moreOptions->begin();
-
-        Options options;
-        while (iter != moreOptions->end())
-        {
-            if (iter->first == "Option")
-            {
-                Option o2 = parseElement_Option(iter->second);
-                options.add(o2);
-            }
-            ++iter;
-        }
-        option.setOptions(options);
-    }
-
     // filenames in the XML are fixed up as follows:
     //   - if absolute path, leave it alone
     //   - if relative path, make it absolute using the XML file's directory

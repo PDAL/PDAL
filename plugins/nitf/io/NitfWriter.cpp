@@ -146,38 +146,27 @@ void NitfWriter::processOptions(const Options& options)
     m_cLevel = options.getValueOrDefault<std::string>("CLEVEL","03");
     m_sType = options.getValueOrDefault<std::string>("STYPE","BF01");
     m_oStationId = options.getValueOrDefault<std::string>("OSTAID","PDAL");
-    m_fileTitle = options.getValueOrDefault<std::string>("FTITLE", "");
+    m_fileTitle = options.getValueOrDefault<std::string>("FTITLE");
     m_fileClass = options.getValueOrDefault<std::string>("FSCLAS","U");
-    m_origName = options.getValueOrDefault<std::string>("ONAME","");
-    m_origPhone = options.getValueOrDefault<std::string>("OPHONE","");
+    m_origName = options.getValueOrDefault<std::string>("ONAME");
+    m_origPhone = options.getValueOrDefault<std::string>("OPHONE");
     m_securityClass = options.getValueOrDefault<std::string>("FSCLAS","U");
     m_securityControlAndHandling =
-        options.getValueOrDefault<std::string>("FSCTLH","");
+        options.getValueOrDefault<std::string>("FSCTLH");
     m_securityClassificationSystem =
-        options.getValueOrDefault<std::string>("FSCLSY","");
+        options.getValueOrDefault<std::string>("FSCLSY");
     m_imgSecurityClass = options.getValueOrDefault<std::string>("FSCLAS","U");
-    m_imgDate = getOptions().getValueOrDefault<std::string>("IDATIM", "");
-    m_imgIdentifier2 = getOptions().getValueOrDefault<std::string>("IID2", "");
-    m_sic = getOptions().getValueOrDefault<std::string>("FSCLTX", "");
-    try
-    {
-        m_aimidb = getOptions().getOption("AIMIDB");
-    }
-    catch (Option::not_found)
-    {}
-    try
-    {
-        m_acftb = getOptions().getOption("ACFTB");
-    }
-    catch (Option::not_found)
-    {}
+    m_imgDate = options.getValueOrDefault<std::string>("IDATIM");
+    m_imgIdentifier2 = options.getValueOrDefault<std::string>("IID2");
+    m_sic = options.getValueOrDefault<std::string>("FSCLTX");
+    m_aimidb = options.getValueOrDefault<StringList>("AIMIDB");
+    m_acftb = options.getValueOrDefault<StringList>("ACFTB");
 }
 
 
 void NitfWriter::writeView(const PointViewPtr view)
 {
     view->calculateBounds(m_bounds);
-
     LasWriter::writeView(view);
 }
 
@@ -319,35 +308,39 @@ void NitfWriter::doneFile()
         iSource.addBand(*band);
 
         //AIMIDB
-        if (!m_aimidb.empty())
+        ::nitf::TRE aimidbTre("AIMIDB");
+        for (auto& s : m_aimidb)
         {
-            boost::optional<const Options&> options = m_aimidb.getOptions();
-            if (options)
+            StringList v = Utils::split2(s, ':');
+            if (v.size() != 2)
             {
-                ::nitf::TRE tre("AIMIDB");
-                std::vector<Option> opts = options->getOptions();
-                for (auto i = opts.begin(); i != opts.end(); ++i)
-                {
-                    tre.setField(i->getName(), i->getValue<std::string>());
-                }
-                subheader.getExtendedSection().appendTRE(tre);
+                std::ostringstream oss;
+                oss << "Invalid name/value for AIMDB '" << s <<
+                    "'.  Format: <name>:<value>.";
+                throw oss.str();
             }
+            Utils::trim(v[0]);
+            Utils::trim(v[1]);
+            aimidbTre.setField(v[0], v[1]);
+            subheader.getExtendedSection().appendTRE(aimidbTre);
         }
 
         //ACFTB
-        if (!m_acftb.empty())
+        ::nitf::TRE acftbTre("ACFTB");
+        for (auto& s : m_acftb)
         {
-            boost::optional<const Options&> options = m_acftb.getOptions();
-            if (options)
+            StringList v = Utils::split2(s, ':');
+            if (v.size() != 2)
             {
-                ::nitf::TRE tre("ACFTB");
-                std::vector<Option> opts = options->getOptions();
-                for (auto i = opts.begin(); i != opts.end(); ++i)
-                {
-                    tre.setField(i->getName(), i->getValue<std::string>());
-                }
-                subheader.getExtendedSection().appendTRE(tre);
+                std::ostringstream oss;
+                oss << "Invalid name/value for ACFTB '" << s <<
+                    "'.  Format: <name>:<value>.";
+                throw oss.str();
             }
+            Utils::trim(v[0]);
+            Utils::trim(v[1]);
+            acftbTre.setField(v[0], v[1]);
+            subheader.getExtendedSection().appendTRE(acftbTre);
         }
 
         ::nitf::Writer writer;

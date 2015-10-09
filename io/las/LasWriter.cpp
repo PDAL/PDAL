@@ -151,7 +151,6 @@ void LasWriter::processOptions(const Options& options)
 
     fillForwardList(options);
     getHeaderOptions(options);
-    getVlrOptions(options);
 }
 
 
@@ -267,38 +266,6 @@ void LasWriter::getHeaderOptions(const Options &options)
     setHeaderOption("offset_x", m_offsetX, options);
     setHeaderOption("offset_y", m_offsetY, options);
     setHeaderOption("offset_z", m_offsetZ, options);
-}
-
-/// Get VLR-specific options and store for processing with metadata.
-/// \param opts  Options to check for VLR info.
-void LasWriter::getVlrOptions(const Options& opts)
-{
-    std::vector<pdal::Option> options = opts.getOptions("vlr");
-    for (auto o = options.begin(); o != options.end(); ++o)
-    {
-        if (!boost::algorithm::istarts_with(o->getName(), "vlr"))
-            continue;
-
-        boost::optional<pdal::Options const&> vo = o->getOptions();
-        if (!vo)
-            continue;
-
-        VlrOptionInfo info;
-        info.m_name = o->getName().substr(strlen("vlr"));
-        info.m_value = o->getValue<std::string>();
-        try
-        {
-            info.m_recordId = vo->getOption("record_id").getValue<int16_t>();
-            info.m_userId = vo->getOption("user_id").getValue<std::string>();
-        }
-        catch (Option::not_found)
-        {
-            continue;
-        }
-        info.m_description = vo->getValueOrDefault<std::string>
-            ("description", "");
-        m_optionInfos.push_back(info);
-    }
 }
 
 

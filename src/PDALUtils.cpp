@@ -152,9 +152,6 @@ void toJSON(const Option& opt, std::ostream& o, int level)
     o << indent2 << "\"value\" : " << value << "," << endl;
     o << indent2 << "\"description\" : " << description << endl;
 
-    boost::optional<Options const&> opts = opt.getOptions();
-    if (opts)
-        toJSON(*opts, o, level + 1);
     o << indent << "}";
 }
 

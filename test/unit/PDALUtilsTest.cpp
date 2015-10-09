@@ -49,13 +49,6 @@ TEST(PDALUtilsTest, options1)
 
     Option op35("test3.5", 3.5);
 
-    Options subops;
-    subops.add("subtest1", "Subtest1");
-    subops.add("subtest2", "Subtest2");
-
-    op35.setOptions(subops);
-
-    ops.add(op35);
     ops.add("test4", "Testing option test 4");
 
     std::string goodfile(Support::datapath("misc/opts2json.txt"));

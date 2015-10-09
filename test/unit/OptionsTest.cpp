@@ -132,31 +132,8 @@ TEST(OptionsTest, test_options_copy_ctor)
 
     Options copy(opts);
 
-    opt_i.setOptions(copy);
-
     EXPECT_TRUE(copy.hasOption("my_int"));
     EXPECT_TRUE(copy.hasOption("my_string"));
-}
-
-TEST(OptionsTest, test_options_multi)
-{
-    Option opt_i("a", 1, "This is my integral option.");
-    const Option opt_s("b", "2", "This is my stringy option.");
-
-    Options opts;
-    opts.add(opt_i);
-    opts.add(opt_s);
-
-    Option opt;
-    opt.setOptions(opts);
-
-    boost::optional<Options const&> o = opt.getOptions();
-
-    Option const& i = o->getOption("a");
-    EXPECT_EQ(i.getValue<int>(), 1);
-
-    Option const& s = o->getOption("b");
-    EXPECT_EQ(s.getValue<std::string>(), "2");
 }
 
 TEST(OptionsTest, test_options_writing)
@@ -311,13 +288,6 @@ TEST(OptionsTest, metadata)
 
     Option op35("test3.5", 3.5);
 
-    Options subops;
-    subops.add("subtest1", "Subtest1");
-    subops.add("subtest2", "Subtest2");
-
-    op35.setOptions(subops);
-
-    ops.add(op35);
     ops.add("test4", "Testing option test 4");
 
     MetadataNode node = ops.toMetadata();

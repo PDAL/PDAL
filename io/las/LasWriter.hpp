@@ -130,7 +130,6 @@ private:
 
     void fillForwardList(const Options& options);
     void getHeaderOptions(const Options& options);
-    void getVlrOptions(const Options& opts);
     template <typename T>
     void handleForward(const std::string& s, T& headerVal,
         const MetadataNode& base);

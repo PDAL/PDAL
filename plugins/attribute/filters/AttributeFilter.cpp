@@ -115,19 +115,8 @@ Options AttributeFilter::getDefaultOptions()
 {
     Options options;
 
-    pdal::Option red("dimension", "Classification", "");
-    pdal::Option b0("value","0", "");
-    pdal::Option query("query","", "");
-    pdal::Option layer("layer","", "");
-    pdal::Option datasource("datasource","", "");
-    pdal::Options redO;
-    redO.add(b0);
-    redO.add(query);
-    redO.add(layer);
-    redO.add(datasource);
-    red.setOptions(redO);
-
-    options.add(red);
+    options.add("dimension", "Classification");
+    options.add("datasource", "source");
 
     return options;
 }

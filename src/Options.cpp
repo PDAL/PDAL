@@ -56,25 +56,6 @@ Option::Option(const boost::property_tree::ptree& tree)
     m_value = tree.get<std::string>("Value");
     m_description =
     tree.count("Description") ? tree.get<std::string>("Description") : "";
-
-    boost::property_tree::ptree opts;
-    ptree const& options = tree.get_child("Options", opts);
-    if (options.size())
-        m_options = options::OptionsPtr(new Options(options));
-}
-
-
-boost::optional<Options const&> Option::getOptions() const
-{
-    if (m_options.get())
-        return boost::optional<Options const&>(*m_options.get());
-    else
-        return boost::optional<Options const&>();
-}
-
-void Option::setOptions(Options const& options)
-{
-    m_options = options::OptionsPtr(new Options(options));
 }
 
 #if !defined(PDAL_COMPILER_MSVC)
@@ -95,23 +76,12 @@ template<> void Option::setValue(const std::string& value)
 }
 #endif
 
-bool Option::empty() const
-{
-    if (m_options)
-        return m_options->empty();
-    else
-        return false;
-}
 
 void Option::toMetadata(MetadataNode& parent) const
 {
     MetadataNode child = parent.add(getName());
     child.add("value", getValue<std::string>());
     child.add("description", getDescription());
-
-    auto opts = getOptions();
-    if (opts)
-        opts->toMetadata(child);
 }
 
 //---------------------------------------------------------------------------
@@ -183,7 +153,7 @@ std::vector<Option> Options::getOptions(std::string const& name) const
     std::vector<Option> output;
 
     // If we have an empty name, return them all
-    if (boost::iequals(name, ""))
+    if (name.empty())
     {
         for (auto it = m_options.begin(); it != m_options.end(); ++it)
         {
@@ -199,13 +169,6 @@ std::vector<Option> Options::getOptions(std::string const& name) const
         }
     }
     return output;
-}
-
-// the empty options set
-static const Options s_none;
-const Options& Options::none()
-{
-    return s_none;
 }
 
 

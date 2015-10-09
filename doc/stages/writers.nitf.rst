@@ -74,12 +74,12 @@ FSCLTX
   File classification text (43 characters) [Default: <spaces>]
 
 AIMIDB
-  Option tag that should contain further options to complete the AIMIDB
-  (Additional Image ID) TRE record [Default: None]
+  Comma separated list of name/value pairs to complete the AIMIDB
+  (Additional Image ID) TRE record (format name:value) [Default: None]
 
 ACFTB
-  Option tag that should contain further options to complete the ACFTB
-  (Aircraft Information) TRE record [Default: None]
+  Comma separated list of name/value pairs to complete the ACFTB
+  (Aircraft Information) TRE record (format name:value) [Default: None]
 
 
 .. _NITF: http://en.wikipedia.org/wiki/National_Imagery_Transmission_Format

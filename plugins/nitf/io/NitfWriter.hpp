@@ -70,8 +70,8 @@ private:
     std::string m_securityClassificationSystem;
     std::string m_imgSecurityClass;
     std::string m_imgDate;
-    pdal::Option m_aimidb;
-    pdal::Option m_acftb;
+    StringList m_aimidb;
+    StringList m_acftb;
     std::string m_imgIdentifier2;
     std::string m_sic;
     std::stringstream m_oss;

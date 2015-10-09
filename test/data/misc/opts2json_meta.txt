@@ -16,24 +16,6 @@
       "description": "Testing test3",
       "value": "27.5"
     },
-    "test3.5":
-    {
-      "description": "",
-      "options":
-      {
-        "subtest1":
-        {
-          "description": "",
-          "value": "Subtest1"
-        },
-        "subtest2":
-        {
-          "description": "",
-          "value": "Subtest2"
-        }
-      },
-      "value": "3.5"
-    },
     "test4":
     {
       "description": "",
