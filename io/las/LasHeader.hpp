@@ -41,6 +41,7 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/property_tree/ptree.hpp>
 
+#include <pdal/Dimension.hpp>
 #include <pdal/util/Bounds.hpp>
 #include <pdal/pdal_config.hpp>
 #include <pdal/gitsha.h>
@@ -366,6 +367,7 @@ public:
 
     void setSummary(const SummaryData& summary);
     bool valid() const;
+    Dimension::IdList usedDims() const;
 
     friend ILeStream& operator>>(ILeStream&, LasHeader& h);
     friend OLeStream& operator<<(OLeStream&, const LasHeader& h);

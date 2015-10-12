@@ -185,9 +185,16 @@ namespace LasUtils
 std::vector<ExtraDim> parse(const StringList& dimString)
 {
     std::vector<ExtraDim> extraDims;
+    bool all = false;
 
     for (auto& dim : dimString)
     {
+        if (dim == "all")
+        {
+            all = true;
+            continue;
+        }
+
         StringList s = Utils::split2(dim, '=');
         if (s.size() != 2)
         {
@@ -211,6 +218,15 @@ std::vector<ExtraDim> parse(const StringList& dimString)
         ExtraDim ed(s[0], type);
         extraDims.push_back(ed);
     }
+
+    if (all)
+    {
+        if (extraDims.size())
+            throw (pdal_error("Can't specify specific extra dimensions with "
+                "special 'all' keyword."));
+        extraDims.push_back(ExtraDim("all", Dimension::Type::None));
+    }
+
     return extraDims;
 }
 

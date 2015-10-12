@@ -152,5 +152,10 @@ extra_dims
   bytes VLR (User ID: LASF_Spec, Record ID: 4), is created that describes the
   extra dimensions specified by this option.
 
+  The special value 'all' can be used in place of a dimension/type list
+  to request
+  that all dimensions that can't be stored in the predefined LAS point
+  record get added as extra data at the end of each point record.
+
 .. _LAS format: http://asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html
 

@@ -90,7 +90,7 @@ void LasHeader::setSummary(const SummaryData& summary)
 {
     m_pointCount = summary.getTotalNumPoints();
     for (size_t num = 0; num < RETURN_COUNT; ++num)
-        m_pointCountByReturn[num] = summary.getReturnCount(num);
+        m_pointCountByReturn[num] = (int)summary.getReturnCount(num);
     m_bounds = summary.getBounds();
 }
 
@@ -196,6 +196,33 @@ void LasHeader::put(OLeStream& out, boost::uuids::uuid uuid)
     out.put(u.uidPart4, sizeof(u.uidPart4));
 }
 
+
+Dimension::IdList LasHeader::usedDims() const
+{
+    using namespace Dimension;
+
+    Dimension::Id::Enum dims[] = { Id::ReturnNumber, Id::NumberOfReturns,
+        Id::X, Id::Y, Id::Z, Id::Intensity, Id::ScanChannel,
+        Id::ScanDirectionFlag, Id::EdgeOfFlightLine, Id::Classification,
+        Id::UserData, Id::ScanAngleRank, Id::PointSourceId };
+
+    // This mess is because MSVC doesn't support initializer lists.
+    Dimension::IdList ids;
+    std::copy(std::begin(dims), std::end(dims), std::back_inserter(ids));
+
+    if (hasTime())
+        ids.push_back(Id::GpsTime);
+    if (hasColor())
+    {
+        ids.push_back(Id::Red);
+        ids.push_back(Id::Green);
+        ids.push_back(Id::Blue);
+    }
+    if (hasInfrared())
+        ids.push_back(Id::Infrared);
+
+    return ids;
+}
 
 ILeStream& operator>>(ILeStream& in, LasHeader& h)
 {

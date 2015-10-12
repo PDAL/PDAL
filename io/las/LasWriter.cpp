@@ -156,6 +156,23 @@ void LasWriter::processOptions(const Options& options)
 
 void LasWriter::prepared(PointTableRef table)
 {
+    PointLayoutPtr layout = table.layout();
+
+    // If we've asked for all dimensions, add to extraDims all dimensions
+    // in the layout that aren't already destined for LAS output.
+    if (m_extraDims.size() == 1 && m_extraDims[0].m_name == "all")
+    {
+        m_extraDims.clear();
+        Dimension::IdList ids = m_lasHeader.usedDims();
+        DimTypeList dimTypes = layout->dimTypes();
+        for (auto& dt : dimTypes)
+        {
+            if (!Utils::contains(ids, dt.m_id))
+                m_extraDims.push_back(
+                    ExtraDim(layout->dimName(dt.m_id), dt.m_type));
+        }
+    }
+
     m_extraByteLen = 0;
     for (auto& dim : m_extraDims)
     {
