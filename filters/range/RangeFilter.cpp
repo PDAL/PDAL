@@ -126,7 +126,7 @@ RangeFilter::Range parseRange(const std::string& r)
     catch (std::string s)
     {
         std::ostringstream oss;
-        oss << "filters.range: invalid --limits option: '" << r << "': " << s;
+        oss << "filters.range: invalid 'limits' option: '" << r << "': " << s;
         throw pdal_error(oss.str());
     }
     return RangeFilter::Range(name, lb, ub, ilb, iub);
@@ -140,7 +140,7 @@ void RangeFilter::processOptions(const Options& options)
     StringList rangeString = options.getValueOrDefault<StringList>("limits");
 
     if (rangeString.empty())
-        throw pdal_error("filters.range missing required --limits option.");
+        throw pdal_error("filters.range missing required 'limits' option.");
 
     for (auto const& r : rangeString)
         m_range_list.push_back(parseRange(r));
@@ -157,7 +157,7 @@ void RangeFilter::prepared(PointTableRef table)
         if (id == Dimension::Id::Unknown)
         {
             std::ostringstream oss;
-            oss << "Invalid dimension name in filters.range --limits "
+            oss << "Invalid dimension name in filters.range 'limits' "
                 "option: '" << d.m_name << "'.";
             throw pdal_error(oss.str());
         }

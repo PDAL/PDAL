@@ -5,38 +5,8 @@
             @CMAKE_SOURCE_DIR@/test/temp/colorized.las
         </Option>
         <Filter type="filters.colorization">
-            <Option name="dimension">
-                Red
-                <Options>
-                    <Option name="band">
-                        1
-                    </Option>
-                    <Option name="scale">
-                        1.0
-                    </Option>
-                </Options>
-            </Option>
-            <Option name="dimension">
-                Green
-                <Options>
-                    <Option name="band">
-                        2
-                    </Option>
-                    <Option name="scale">
-                        1.0
-                    </Option>
-                </Options>
-            </Option>
-            <Option name="dimension">
-                Blue
-                <Options>
-                    <Option name="band">
-                        3
-                    </Option>
-                    <Option name="scale">
-                        256
-                    </Option>
-                </Options>
+            <Option name="dimensions">
+                Red, Green, Blue::256
             </Option>
             <Option name="raster">
                 @CMAKE_SOURCE_DIR@/test/data/autzen/autzen.jpg

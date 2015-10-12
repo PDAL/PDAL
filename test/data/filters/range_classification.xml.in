@@ -5,11 +5,8 @@
             @CMAKE_SOURCE_DIR@/test/temp/only_class_equals_2.las
         </Option>
         <Filter type="filters.range">
-            <Option name="dimension">
-                Classification
-                <Options>
-                    <Option name="equals">2</Option>
-                </Options>
+            <Option name="limits">
+                Classification[2:2]
             </Option>
             <Reader type="readers.las">
                 <Option name="filename">

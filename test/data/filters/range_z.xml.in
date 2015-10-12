@@ -5,12 +5,8 @@
             @CMAKE_SOURCE_DIR@/test/temp/only_z_400-500.las
         </Option>
         <Filter type="filters.range">
-            <Option name="dimension">
-                Z
-                <Options>
-                    <Option name="min">400</Option>
-                    <Option name="max">500</Option>
-                </Options>
+            <Option name="limits">
+                Z[400:500]
             </Option>
             <Reader type="readers.las">
                 <Option name="filename">

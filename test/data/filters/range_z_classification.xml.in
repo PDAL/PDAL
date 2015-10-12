@@ -5,18 +5,8 @@
             @CMAKE_SOURCE_DIR@/test/temp/only_z_400-500_class_equals_2.las
         </Option>
         <Filter type="filters.range">
-            <Option name="dimension">
-                Z
-                <Options>
-                    <Option name="min">400</Option>
-                    <Option name="max">500</Option>
-                </Options>
-            </Option>
-            <Option name="dimension">
-                Classification
-                <Options>
-                    <Option name="equals">2</Option>
-                </Options>
+            <Option name="limits">
+                Z[400:500], Classification[2:2]
             </Option>
             <Reader type="readers.las">
                 <Option name="filename">
