@@ -145,7 +145,7 @@ public:
 
     // Make sure that the option name consists of lowercase characters or
     // underscores.
-    bool nameValid(const std::string& name) const
+    static bool nameValid(const std::string& name)
     {
         auto isname = [](char c)
             { return (std::isalpha(c) && islower(c)) || c == '_'; };

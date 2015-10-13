@@ -282,13 +282,13 @@ TEST(OptionsTest, implicitdefault)
 TEST(OptionsTest, metadata)
 {
     Options ops;
-    ops.add("test1", "This is a test");
-    ops.add("test2", 56);
-    ops.add("test3", 27.5, "Testing test3");
+    ops.add("testa", "This is a test");
+    ops.add("testb", 56);
+    ops.add("testc", 27.5, "Testing testc");
 
-    Option op35("test3.5", 3.5);
+    Option op35("testd", 3.5);
 
-    ops.add("test4", "Testing option test 4");
+    ops.add("teste", "Testing option test e");
 
     MetadataNode node = ops.toMetadata();
 

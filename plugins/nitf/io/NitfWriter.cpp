@@ -157,7 +157,7 @@ void NitfWriter::processOptions(const Options& options)
         options.getValueOrDefault<std::string>("fsclsy");
     m_imgSecurityClass = options.getValueOrDefault<std::string>("fsclas","U");
     m_imgDate = options.getValueOrDefault<std::string>("idatim");
-    m_imgIdentifier2 = options.getValueOrDefault<std::string>("iid2");
+    m_imgIdentifier2 = options.getValueOrDefault<std::string>("iid");
     m_sic = options.getValueOrDefault<std::string>("fscltx");
     m_aimidb = options.getValueOrDefault<StringList>("aimidb");
     m_acftb = options.getValueOrDefault<StringList>("acftb");

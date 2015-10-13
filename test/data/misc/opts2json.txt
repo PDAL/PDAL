@@ -1,24 +1,24 @@
 {
   "options" :
   {
-    "test1" :
+    "testa" :
     {
       "value" : "This is a test",
       "description" : ""
     },
-    "test2" :
+    "testb" :
     {
       "value" : "56",
       "description" : ""
     },
-    "test3" :
+    "testc" :
     {
       "value" : "27.5",
-      "description" : "Testing test3"
+      "description" : "Testing testc"
     },
-    "test4" :
+    "teste" :
     {
-      "value" : "Testing option test 4",
+      "value" : "Testing option test e",
       "description" : ""
     }
   }

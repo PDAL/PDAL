@@ -111,7 +111,7 @@ Options::Options(const boost::property_tree::ptree& tree)
 
 void Options::add(const Option& option)
 {
-    assert(nameValid(option.getName()));
+    assert(Option::nameValid(option.getName()));
     m_options.insert(std::pair<std::string, Option>(option.getName(), option));
 }
 
@@ -138,7 +138,7 @@ Option& Options::getOptionByRef(const std::string& name)
 
 const Option& Options::getOption(const std::string& name) const
 {
-    assert(nameValid(name));
+    assert(Option::nameValid(name));
     auto iter = m_options.find(name);
     if (iter == m_options.end())
     {
