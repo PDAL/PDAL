@@ -17,7 +17,7 @@ Example
       <Option name="spatialreference">EPSG:26910</Option>
       <Reader type="readers.greyhound">
         <Option name="url">greyhound.organization.com:8080</Option>
-        <Option name="pipelineId">a87d0a50e03a880c75e9f872c925f984</Option>
+        <Option name="pipeline_id">a87d0a50e03a880c75e9f872c925f984</Option>
       </Reader>
     </Writer>
   </Pipeline>
@@ -28,7 +28,7 @@ Options
 url
   Greyhound server URL string. [Required]
 
-pipelineId
+pipeline_id
   Greyhound pipelineId to read. [Required]
 
 

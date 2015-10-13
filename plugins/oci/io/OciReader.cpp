@@ -53,14 +53,13 @@ std::string OciReader::getName() const { return s_info.name; }
 
 void OciReader::processOptions(const Options& options)
 {
-    m_schemaFile = options.getValueOrDefault<std::string>(
-        "xml_schema_dump", std::string());
+    m_schemaFile = options.getValueOrDefault<std::string>("xml_schema_dump");
     if (options.hasOption("spatialreference"))
         m_spatialRef = boost::optional<SpatialReference>(
             options.getValueOrThrow<pdal::SpatialReference>(
                 "spatialreference"));
     m_query = options.getValueOrThrow<std::string>("query");
-    m_connSpec = options.getValueOrDefault<std::string>("connection", "");
+    m_connSpec = options.getValueOrDefault<std::string>("connection");
 
     m_updatePointSourceId =  options.getValueOrDefault<bool>(
         "populate_pointsourceid", false);

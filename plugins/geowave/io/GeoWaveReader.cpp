@@ -147,14 +147,14 @@ namespace pdal
     {
         Options options;
 
-        Option zookeeperUrl("zookeeperUrl", "", "The comma-delimited URLs for all zookeeper servers, this will be directly used to instantiate a ZookeeperInstance");
-        Option instanceName("instanceName", "", "The zookeeper instance name, this will be directly used to instantiate a ZookeeperInstance");
+        Option zookeeperUrl("zookeeper_url", "", "The comma-delimited URLs for all zookeeper servers, this will be directly used to instantiate a ZookeeperInstance");
+        Option instanceName("instance_name", "", "The zookeeper instance name, this will be directly used to instantiate a ZookeeperInstance");
         Option username("username", "", "The username for the account to establish an Accumulo connector");
         Option password("password", "", "The password for the account to establish an Accumulo connector");
-        Option tableNamespace("tableNamespace", "", "The table name to be used when interacting with GeoWave");
-        Option featureTypeName("featureTypeName", "", "The feature type name to be used when interacting with GeoWave");
-        Option dataAdapter("dataAdapter", "FeatureDataAdapter", "FeatureCollectionDataAdapter stores multiple points per Accumulo entry.  FeatureDataAdapter stores a single point per Accumulo entry.");
-        Option pointsPerEntry("pointsPerEntry", 5000u, "Sets the maximum number of points per Accumulo entry when using FeatureCollectionDataAdapter.");
+        Option tableNamespace("table_namespace", "", "The table name to be used when interacting with GeoWave");
+        Option featureTypeName("feature_type_name", "", "The feature type name to be used when interacting with GeoWave");
+        Option dataAdapter("data_adapter", "FeatureDataAdapter", "FeatureCollectionDataAdapter stores multiple points per Accumulo entry.  FeatureDataAdapter stores a single point per Accumulo entry.");
+        Option pointsPerEntry("points_per_entry", 5000u, "Sets the maximum number of points per Accumulo entry when using FeatureCollectionDataAdapter.");
         Option bounds("bounds", "", "The extent of the bounding rectangle to use to query points, expressed as a string, eg: ([xmin, xmax], [ymin, ymax], [zmin, zmax])");
 
         options.add(zookeeperUrl);
@@ -184,14 +184,14 @@ namespace pdal
 
     void GeoWaveReader::processOptions(const Options& ops)
     {
-        m_zookeeperUrl = ops.getValueOrThrow<std::string>("zookeeperUrl");
-        m_instanceName = ops.getValueOrThrow<std::string>("instanceName");
+        m_zookeeperUrl = ops.getValueOrThrow<std::string>("zookeeper_url");
+        m_instanceName = ops.getValueOrThrow<std::string>("instance_name");
         m_username = ops.getValueOrThrow<std::string>("username");
         m_password = ops.getValueOrThrow<std::string>("password");
-        m_tableNamespace = ops.getValueOrThrow<std::string>("tableNamespace");
-        m_featureTypeName =  ops.getValueOrDefault<std::string>("featureTypeName", "PDAL_Point");
-        m_useFeatCollDataAdapter = !(ops.getValueOrDefault<std::string>("dataAdapter", "FeatureCollectionDataAdapter").compare("FeatureDataAdapter") == 0);
-        m_pointsPerEntry = ops.getValueOrDefault<uint32_t>("pointsPerEntry", 5000u);
+        m_tableNamespace = ops.getValueOrThrow<std::string>("table_namespace");
+        m_featureTypeName =  ops.getValueOrDefault<std::string>("feature_type_name", "PDAL_Point");
+        m_useFeatCollDataAdapter = !(ops.getValueOrDefault<std::string>("data_adapter", "FeatureCollectionDataAdapter").compare("FeatureDataAdapter") == 0);
+        m_pointsPerEntry = ops.getValueOrDefault<uint32_t>("points_per_Entry", 5000u);
         m_bounds = ops.getValueOrDefault<BOX3D>("bounds", BOX3D());
     }
 

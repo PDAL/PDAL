@@ -65,11 +65,11 @@ std::string GroundFilter::getName() const
 Options GroundFilter::getDefaultOptions()
 {
     Options options;
-    options.add("maxWindowSize", 33, "Maximum window size");
+    options.add("max_window_size", 33, "Maximum window size");
     options.add("slope", 1, "Slope");
-    options.add("maxDistance", 2.5, "Maximum distance");
-    options.add("initialDistance", 0.15, "Initial distance");
-    options.add("cellSize", 1, "Cell Size");
+    options.add("max_distance", 2.5, "Maximum distance");
+    options.add("initial_distance", 0.15, "Initial distance");
+    options.add("cell_size", 1, "Cell Size");
     options.add("classify", true, "Apply classification labels?");
     options.add("extract", false, "Extract ground returns?");
     options.add("approximate", false, "Use approximate algorithm?");
@@ -78,11 +78,11 @@ Options GroundFilter::getDefaultOptions()
 
 void GroundFilter::processOptions(const Options& options)
 {
-    m_maxWindowSize = options.getValueOrDefault<double>("maxWindowSize", 33);
+    m_maxWindowSize = options.getValueOrDefault<double>("max_window_size", 33);
     m_slope = options.getValueOrDefault<double>("slope", 1);
-    m_maxDistance = options.getValueOrDefault<double>("maxDistance", 2.5);
-    m_initialDistance = options.getValueOrDefault<double>("initialDistance", 0.15);
-    m_cellSize = options.getValueOrDefault<double>("cellSize", 1);
+    m_maxDistance = options.getValueOrDefault<double>("max_distance", 2.5);
+    m_initialDistance = options.getValueOrDefault<double>("initial_distance", 0.15);
+    m_cellSize = options.getValueOrDefault<double>("cell_size", 1);
     m_classify = options.getValueOrDefault<bool>("classify", true);
     m_extract = options.getValueOrDefault<bool>("extract", false);
     m_approximate = options.getValueOrDefault<bool>("approximate", false);

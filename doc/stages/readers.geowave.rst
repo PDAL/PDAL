@@ -17,14 +17,14 @@ Example
     <Writer type="writers.text">
       <Option name="filename">outputfile.txt</Option>
       <Reader type="readers.geowave">
-        <Option name="zookeeperUrl">zookeeper1:2181,zookeeper2:2181,zookeeper3:2181</Option>
-        <Option name="instanceName">GeoWave</Option>
+        <Option name="zookeeper_url">zookeeper1:2181,zookeeper2:2181,zookeeper3:2181</Option>
+        <Option name="instance_name">GeoWave</Option>
         <Option name="username">user</Option>
         <Option name="password">pass</Option>
-        <Option name="tableNamespace">PDAL_Table</Option>
-        <Option name="featureTypeName">PDAL_Point</Option>
-        <Option name="dataAdapter">FeatureCollectionDataAdapter</Option>
-        <Option name="pointsPerEntry">5000u</Option>
+        <Option name="table_namespace">PDAL_Table</Option>
+        <Option name="feature_type_name">PDAL_Point</Option>
+        <Option name="data_adapter">FeatureCollectionDataAdapter</Option>
+        <Option name="points_per_entry">5000u</Option>
         <Option name="bounds">([0,1000000],[0,1000000],[0,100])</Option>
       </Reader>
     </Writer>
@@ -34,11 +34,11 @@ Example
 Options
 -------
 
-zookeeperUrl
+zookeeper_url
   The comma-delimited URLs for all zookeeper servers, this will be directly used to instantiate a ZookeeperInstance. [Required]
 
-instanceName
-  The zookeeper instance name, this will be directly used to instantiate a ZookeeperInstance. [Required]
+instance_name
+  the zookeeper instance name, this will be directly used to instantiate a ZookeeperInstance. [Required]
 
 username
   The username for the account to establish an Accumulo connector. [Required]
@@ -46,16 +46,16 @@ username
 password
   The password for the account to establish an Accumulo connector. [Required]
 
-tableNamespace
+table_namespace
   The table name to be used when interacting with GeoWave. [Required]
 
-featureTypeName
+feature_type_name
   The feature type name to be used when ineracting GeoWave. [Default: PDAL_Point]
 
-dataAdapter
+data_adapter
   FeatureCollectionDataAdapter stores multiple points per Accumulo entry. FeatureDataAdapter stores a single point per Accumulo entry. [Default: FeatureCollectionDataAdapter]
 
-pointsPerEntry
+points_per_entry
   Sets the maximum number of points per Accumulo entry when using FeatureCollectionDataAdapter. [Default: 5000u]
 
 bounds

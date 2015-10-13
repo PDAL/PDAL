@@ -19,5 +19,5 @@ Options
 depth
   Maximum depth of the tree used for reconstruction. [Default: **8**]
 
-pointWeight
+point_weight
   Importance of interpolation of point samples in the screened Poisson equation. [Default: **4.0**]

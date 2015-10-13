@@ -143,24 +143,24 @@ NitfWriter::NitfWriter()
 void NitfWriter::processOptions(const Options& options)
 {
     LasWriter::processOptions(options);
-    m_cLevel = options.getValueOrDefault<std::string>("CLEVEL","03");
-    m_sType = options.getValueOrDefault<std::string>("STYPE","BF01");
-    m_oStationId = options.getValueOrDefault<std::string>("OSTAID","PDAL");
-    m_fileTitle = options.getValueOrDefault<std::string>("FTITLE");
-    m_fileClass = options.getValueOrDefault<std::string>("FSCLAS","U");
-    m_origName = options.getValueOrDefault<std::string>("ONAME");
-    m_origPhone = options.getValueOrDefault<std::string>("OPHONE");
-    m_securityClass = options.getValueOrDefault<std::string>("FSCLAS","U");
+    m_cLevel = options.getValueOrDefault<std::string>("clevel","03");
+    m_sType = options.getValueOrDefault<std::string>("stype","BF01");
+    m_oStationId = options.getValueOrDefault<std::string>("ostaid", "PDAL");
+    m_fileTitle = options.getValueOrDefault<std::string>("ftitle");
+    m_fileClass = options.getValueOrDefault<std::string>("fsclas","U");
+    m_origName = options.getValueOrDefault<std::string>("oname");
+    m_origPhone = options.getValueOrDefault<std::string>("ophone");
+    m_securityClass = options.getValueOrDefault<std::string>("fsclas","U");
     m_securityControlAndHandling =
-        options.getValueOrDefault<std::string>("FSCTLH");
+        options.getValueOrDefault<std::string>("fsctlh");
     m_securityClassificationSystem =
-        options.getValueOrDefault<std::string>("FSCLSY");
-    m_imgSecurityClass = options.getValueOrDefault<std::string>("FSCLAS","U");
-    m_imgDate = options.getValueOrDefault<std::string>("IDATIM");
-    m_imgIdentifier2 = options.getValueOrDefault<std::string>("IID2");
-    m_sic = options.getValueOrDefault<std::string>("FSCLTX");
-    m_aimidb = options.getValueOrDefault<StringList>("AIMIDB");
-    m_acftb = options.getValueOrDefault<StringList>("ACFTB");
+        options.getValueOrDefault<std::string>("fsclsy");
+    m_imgSecurityClass = options.getValueOrDefault<std::string>("fsclas","U");
+    m_imgDate = options.getValueOrDefault<std::string>("idatim");
+    m_imgIdentifier2 = options.getValueOrDefault<std::string>("iid2");
+    m_sic = options.getValueOrDefault<std::string>("fscltx");
+    m_aimidb = options.getValueOrDefault<StringList>("aimidb");
+    m_acftb = options.getValueOrDefault<StringList>("acftb");
 }
 
 

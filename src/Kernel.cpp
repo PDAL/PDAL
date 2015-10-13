@@ -247,7 +247,7 @@ bool parseOption(std::string o, std::string& stage, std::string& option,
     o = o.substr(2);
 
     auto islc = [](char c)
-        { return (std::isalpha(c) && islower(c)) || c == '-' || c == '_'; };
+        { return (std::isalpha(c) && islower(c)) || c == '_'; };
 
     std::string::size_type pos = 0;
     std::string::size_type count = 0;

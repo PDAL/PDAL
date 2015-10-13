@@ -86,9 +86,9 @@ Options OciWriter::getDefaultOptions()
 {
     Options options;
 
-    Option is3d("is3d",  false,
-        "Should we use 3D objects for SDO_PC PC_EXTENT, BLK_EXTENT, "
-        "and indexing");
+    Option is3d("use_z",  false,
+        "Should we use 3D objects (include the z dimension) for SDO_PC "
+        "PC_EXTENT, BLK_EXTENT, and indexing");
     Option solid("solid", false,
         "Define the point cloud's PC_EXTENT geometry gtype as (1,1007,3) "
         "instead of the normal (1,1003,3), and use gtype 3008/2008 vs "
@@ -433,7 +433,7 @@ std::string OciWriter::loadSQLData(std::string const& filename)
 void OciWriter::runFileSQL(std::string const& filename)
 {
     std::ostringstream oss;
-    std::string sql = getOptions().getValueOrDefault<std::string>(filename, "");
+    std::string sql = getOptions().getValueOrDefault<std::string>(filename);
 
     if (!sql.size())
         return;
@@ -670,6 +670,11 @@ bool OciWriter::isValidWKT(std::string const& input)
 
 void OciWriter::processOptions(const Options& options)
 {
+    if (options.hasOption("is3d"))
+        throw pdal_error("Option 'is3d' no longer supported.  Use 'use_z' "
+            "instead.");
+    m_3d = getDefaultedOption<bool>(options, "use_z");
+
     m_precision = getDefaultedOption<uint32_t>(options,
         "stream_output_precision");
     m_createIndex = options.getValueOrDefault<bool>("create_index", true);
@@ -680,7 +685,6 @@ void OciWriter::processOptions(const Options& options)
         options.getValueOrDefault<bool>("disable_cloud_trigger", false);
     m_trace = options.getValueOrDefault<bool>("do_trace", false);
     m_solid = getDefaultedOption<bool>(options, "solid");
-    m_3d = getDefaultedOption<bool>(options, "is3d");
     m_srid = options.getValueOrThrow<uint32_t>("srid");
     m_baseTableBounds =
         getDefaultedOption<BOX3D>(options, "base_table_bounds");

@@ -76,7 +76,7 @@ void GreyhoundReader::initialize()
 void GreyhoundReader::processOptions(const Options& options)
 {
     m_url = options.getValueOrThrow<std::string>("url");
-    m_pipelineId = options.getValueOrThrow<std::string>("pipelineId");
+    m_pipelineId = options.getValueOrThrow<std::string>("pipeline_id");
 
     m_wsClient.initialize(m_url);
 }

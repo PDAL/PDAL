@@ -142,8 +142,7 @@ Options P2gWriter::getDefaultOptions()
 
 void P2gWriter::write(const PointViewPtr view)
 {
-    std::string z_name = getOptions().getValueOrDefault<std::string>("Z", "Z");
-
+    std::string z_name = getOptions().getValueOrDefault<std::string>("z", "Z");
 
     for (point_count_t idx = 0; idx < view->size(); idx++)
     {

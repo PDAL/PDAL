@@ -23,13 +23,13 @@ maxWindowSize
 slope
   Slope. [Default: **1.0**]
 
-maxDistance
+max_distance
   Maximum distance. [Default: **2.5**]
 
-initialDistance
+initial_distance
   Initial distance. [Default: **0.15**]
 
-cellSize
+cell_size
   Cell Size. [Default: **1**]
 
 classify

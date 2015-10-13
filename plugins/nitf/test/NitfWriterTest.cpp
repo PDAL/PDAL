@@ -121,19 +121,19 @@ TEST(NitfWriterTest, test1)
         Option debug("debug", true);
         Option verbose("verbose", 8);
 
-        Option datetime("IDATIM", "20110516183337");
+        Option datetime("idatim", "20110516183337");
         writer_opts.add(datetime);
 
-        Option cls("FSCLAS", "S");
+        Option cls("fsclas", "S");
         writer_opts.add(cls);
 
-        Option phone("OPHONE", "5159664628");
+        Option phone("ophone", "5159664628");
         writer_opts.add(phone);
 
-        Option name("ONAME", "Howard Butler");
+        Option name("oname", "Howard Butler");
         writer_opts.add(name);
 
-        Option ftitle("FTITLE", "LiDAR from somewhere");
+        Option ftitle("ftitle", "LiDAR from somewhere");
         writer_opts.add(ftitle);
 
         // writer_opts.add(debug);

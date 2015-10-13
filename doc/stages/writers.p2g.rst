@@ -101,3 +101,5 @@ output_type
 output_format
   File output format to use, one of "grid", "tif", or "asc". [Default: **grid**]
 
+z
+  Name of the 'z' dimension to use. [Default: 'Z']

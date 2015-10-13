@@ -61,7 +61,7 @@ Options PoissonFilter::getDefaultOptions()
 {
     Options options;
     options.add("depth", 8, "Maximum depth of the tree used for reconstruction");
-    options.add("pointWeight", 4.0,
+    options.add("point_weight", 4.0,
                 "Importance of interpolation of point samples in the screened "\
                 "Poisson equation");
     return options;
@@ -72,7 +72,7 @@ Options PoissonFilter::getDefaultOptions()
 void PoissonFilter::processOptions(const Options& options)
 {
     m_depth = options.getValueOrDefault<int>("depth", 8);
-    m_point_weight = options.getValueOrDefault<float>("pointWeight", 4.0);
+    m_point_weight = options.getValueOrDefault<float>("point_weight", 4.0);
 }
 
 PointViewSet PoissonFilter::run(PointViewPtr input)

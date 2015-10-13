@@ -26,7 +26,7 @@ Example
       <Option name="cloud_column_name">
         CLOUD
       </Option>
-      <Option name="is3d">
+      <Option name="use_z">
         false
       </Option>
       <Option name="solid">
@@ -73,8 +73,8 @@ Options
 connection
   Oracle connection string to connect to database
 
-is3d
-  Should we use 3D objects for SDO_PC PC_EXTENT, BLK_EXTENT, and indexing [Default: **false**]
+use_z
+  Should we use 3D objects (include the z dimension) for SDO_PC PC_EXTENT, BLK_EXTENT, and indexing [Default: **false**]
 
 solid
   Define the point cloud's PC_EXTENT geometry gtype as (1,1007,3) instead of the normal (1,1003,3), and use gtype 3008/2008 vs 3003/2003 for BLK_EXTENT geometry values.  [Default: **false**]

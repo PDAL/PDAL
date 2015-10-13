@@ -137,17 +137,20 @@ public:
 
 /// @name Attribute access
 
-    /// Overwrites the name given in the constructor
-    /// @param name new value to use for the name of the Option
-    inline void setName(const std::string& name)
-    {
-        m_name = name;
-    }
-
     /// @return the name for the Option instance
-    inline std::string const& getName() const
+    std::string const& getName() const
     {
         return m_name;
+    }
+
+    // Make sure that the option name consists of lowercase characters or
+    // underscores.
+    bool nameValid(const std::string& name) const
+    {
+        auto isname = [](char c)
+            { return (std::isalpha(c) && islower(c)) || c == '_'; };
+
+        return (Utils::extract(name, 0, isname) == name.size());
     }
 
     /// Overwrites the description given in the constructor
