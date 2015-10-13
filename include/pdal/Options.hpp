@@ -143,14 +143,27 @@ public:
         return m_name;
     }
 
+    static std::string::size_type
+    parse(const std::string& name, std::string::size_type p)
+    {
+        std::string::size_type count = 0;
+
+        if (std::islower(name[p++]))
+        {
+            count++;
+
+            auto isname = [](char c)
+                { return (std::islower(c) || std::isdigit(c) || c == '_'); };
+            count += Utils::extract(name, p, isname);
+        }
+        return count;
+    }
+
     // Make sure that the option name consists of lowercase characters or
     // underscores.
     static bool nameValid(const std::string& name)
     {
-        auto isname = [](char c)
-            { return (std::isalpha(c) && islower(c)) || c == '_'; };
-
-        return (Utils::extract(name, 0, isname) == name.size());
+        return (parse(name, 0) == name.size());
     }
 
     /// Overwrites the description given in the constructor

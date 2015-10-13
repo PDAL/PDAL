@@ -26,7 +26,7 @@ Example
       <Option name="cloud_column_name">
         CLOUD
       </Option>
-      <Option name="use_z">
+      <Option name="is3d">
         false
       </Option>
       <Option name="solid">
@@ -73,7 +73,7 @@ Options
 connection
   Oracle connection string to connect to database
 
-use_z
+is3d
   Should we use 3D objects (include the z dimension) for SDO_PC PC_EXTENT, BLK_EXTENT, and indexing [Default: **false**]
 
 solid

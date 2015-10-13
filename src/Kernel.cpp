@@ -42,6 +42,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include <pdal/pdal_config.hpp>
+#include <pdal/Options.hpp>
 #include <pdal/StageFactory.hpp>
 
 #include <pdal/pdal_config.hpp>
@@ -246,24 +247,35 @@ bool parseOption(std::string o, std::string& stage, std::string& option,
 
     o = o.substr(2);
 
+    // Options are stage_type.stage_name.option_name
+    // stage_type and stage_name are always lowercase.  Option name starts
+    // with lowercase and then contains lowercase, numbers or underscore.
+
+    // This awfulness is to work around the multiply-defined islower.  Seems
+    // a bit better than the cast solution.
     auto islc = [](char c)
-        { return (std::isalpha(c) && islower(c)) || c == '_'; };
+        { return std::islower(c); };
 
     std::string::size_type pos = 0;
     std::string::size_type count = 0;
-    std::string::size_type optionStart = 0;
-    // Read stage name.
-    while ((count = Utils::extract(o, pos, islc)) != 0)
-    {
-        pos += count;
-        if (o[pos] == '.')
-            stage = o.substr(0, pos);
-        else
-            break;
-        pos++;
-        optionStart = pos;
-    }
-    option = o.substr(optionStart, pos - optionStart);
+    // Get stage_type.
+    count = Utils::extract(o, pos, islc);
+    pos += count;
+    if (o[pos++] != '.')
+        return false;
+
+    // Get stage_name.
+    count = Utils::extract(o, pos, islc);
+    pos += count;
+    stage = o.substr(0, pos);
+    if (o[pos++] != '.')
+        return false;
+
+    // Get option name.
+    std::string::size_type optionStart = pos;
+    count = Option::parse(o, pos);
+    pos += count;
+    option = o.substr(optionStart, count);
 
     if (o[pos++] != '=')
         return false;

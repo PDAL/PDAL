@@ -67,7 +67,7 @@ fsclsy
 idatim
   Image date and time (format: 'CCYYMMDDhhmmss') [Default: <spaces>]
 
-iid
+iid2
   Image identifier 2 (80 characters) [Default: <spaces>]
 
 fscltx

@@ -86,7 +86,7 @@ Options OciWriter::getDefaultOptions()
 {
     Options options;
 
-    Option is3d("use_z",  false,
+    Option is3d("is3d",  false,
         "Should we use 3D objects (include the z dimension) for SDO_PC "
         "PC_EXTENT, BLK_EXTENT, and indexing");
     Option solid("solid", false,
@@ -670,11 +670,7 @@ bool OciWriter::isValidWKT(std::string const& input)
 
 void OciWriter::processOptions(const Options& options)
 {
-    if (options.hasOption("is3d"))
-        throw pdal_error("Option 'is3d' no longer supported.  Use 'use_z' "
-            "instead.");
-    m_3d = getDefaultedOption<bool>(options, "use_z");
-
+    m_3d = getDefaultedOption<bool>(options, "is3d");
     m_precision = getDefaultedOption<uint32_t>(options,
         "stream_output_precision");
     m_createIndex = options.getValueOrDefault<bool>("create_index", true);
