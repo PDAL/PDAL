@@ -58,25 +58,11 @@ Example
       <Option name="output_format">
         grid
       </Option>
-        <Filter type="filters.inplacereprojection">
-          <Option name="out_srs">
-            EPSG:26910
-          </Option>
-          <Option name="scale_x">
-            0.01
-          </Option>
-          <Option name="scale_y">
-            0.01
-          </Option>
-          <Reader type="readers.las">
-            <Option name="filename">
-              ../1.2-with-color.las
-            </Option>
-            <Option name="spatialreference">
-              ../1.2-with-color.las.wkt
-            </Option>
-          </Reader>
-      </Filter>
+      <Reader type="readers.las">
+        <Option name="filename">
+            .a./1.2-with-color.las
+        </Option>
+      </Reader>
     </Writer>
   </Pipeline>
 
