@@ -66,7 +66,7 @@ typedef std::set<PointViewPtr, PointViewLess> PointViewSet;
 class PDAL_DLL PointView
 {
     friend class plang::BufferedInvocation;
-    friend class PointRef;
+    friend class PointIdxRef;
     friend struct PointViewLess;
 public:
     PointView(PointTableRef pointTable) : m_pointTable(pointTable),
