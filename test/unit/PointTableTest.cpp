@@ -118,22 +118,22 @@ TEST(PointTable, userView)
             { return 0; }
         char *getPoint(PointId idx)
             { return NULL; }
-        void setField(const Dimension::Detail *d, PointId idx, const void *value)
+        void setField(Dimension::Id::Enum id, PointId idx, const void *value)
         {
-            if (d->id() == Dimension::Id::X)
+            if (id == Dimension::Id::X)
                m_x = *(const double *)value;
-            else if (d->id() == Dimension::Id::Y)
+            else if (id == Dimension::Id::Y)
                m_y = *(const double *)value;
-            else if (d->id() == Dimension::Id::Z)
+            else if (id == Dimension::Id::Z)
                m_z = *(const double *)value;
         }
-        void getField(const Dimension::Detail *d, PointId idx, void *value)
+        void getField(Dimension::Id::Enum id, PointId idx, void *value)
         {
-            if (d->id() == Dimension::Id::X)
+            if (id == Dimension::Id::X)
                *(double *)value = m_x;
-            else if (d->id() == Dimension::Id::Y)
+            else if (id == Dimension::Id::Y)
                *(double *)value = m_y;
-            else if (d->id() == Dimension::Id::Z)
+            else if (id == Dimension::Id::Z)
                *(double *)value = m_z;
         }
     };

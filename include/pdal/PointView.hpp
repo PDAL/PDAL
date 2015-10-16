@@ -506,8 +506,7 @@ void PointView::setField(Dimension::Id::Enum dim, PointId idx, T val)
 inline void PointView::getFieldInternal(Dimension::Id::Enum dim,
     PointId id, void *buf) const
 {
-    m_pointTable.getField(m_pointTable.layout()->dimDetail(dim),
-        m_index[id], buf);
+    m_pointTable.getField(dim, m_index[id], buf);
 }
 
 
@@ -532,8 +531,7 @@ inline void PointView::setFieldInternal(Dimension::Id::Enum dim,
     {
         rawId = m_index[id];
     }
-    m_pointTable.setField(m_pointTable.layout()->dimDetail(dim),
-        rawId, value);
+    m_pointTable.setField(dim, rawId, value);
 }
 
 

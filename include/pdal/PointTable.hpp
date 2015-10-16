@@ -70,9 +70,9 @@ private:
     // Point data operations.
     virtual PointId addPoint() = 0;
     virtual char *getPoint(PointId idx) = 0;
-    virtual void setField(const Dimension::Detail *d, PointId idx,
+    virtual void setField(Dimension::Id::Enum id, PointId idx,
         const void *value) = 0;
-    virtual void getField(const Dimension::Detail *d, PointId idx,
+    virtual void getField(Dimension::Id::Enum id, PointId idx,
         void *value) = 0;
 
 protected:
@@ -104,10 +104,9 @@ private:
     // Point data operations.
     virtual PointId addPoint();
     virtual char *getPoint(PointId idx);
-    virtual void setField(const Dimension::Detail *d, PointId idx,
+    virtual void setField(Dimension::Id::Enum id, PointId idx,
         const void *value);
-    virtual void getField(const Dimension::Detail *d, PointId idx,
-        void *value);
+    virtual void getField(Dimension::Id::Enum id, PointId idx, void *value);
 
     // The number of points in each memory block.
     static const point_count_t m_blockPtCnt = 65536;
