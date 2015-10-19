@@ -89,15 +89,21 @@ char *PointTable::getPoint(PointId idx)
 }
 
 
-void PointTable::setField(const Dimension::Detail *d, PointId idx,
+void PointTable::setField(Dimension::Id::Enum id, PointId idx,
     const void *value)
 {
-    std::memcpy(getDimension(d, idx), value, d->size());
+    const Dimension::Detail *d = m_layout->dimDetail(id);
+    const char *src  = (const char *)value;
+    char *dst = getDimension(d, idx);
+    std::copy(src, src + d->size(), dst);
 }
 
-void PointTable::getField(const Dimension::Detail *d, PointId idx, void *value)
+void PointTable::getField(Dimension::Id::Enum id, PointId idx, void *value)
 {
-    std::memcpy(value, getDimension(d, idx), d->size());
+    const Dimension::Detail *d = m_layout->dimDetail(id);
+    const char *src = getDimension(d, idx);
+    char *dst = (char *)value;
+    std::copy(src, src + d->size(), dst);
 }
 
 } // namespace pdal
