@@ -55,7 +55,7 @@ CREATE_STATIC_PLUGIN(1, 0, ReprojectionFilter, Filter, s_info)
 std::string ReprojectionFilter::getName() const { return s_info.name; }
 
 ReprojectionFilter::ReprojectionFilter() : m_inferInputSRS(true),
-    m_in_ref_ptr(NULL), m_out_ref_ptr(NULL), m_transform_ptr(NULL)
+    m_in_ref_ptr(NULL), m_out_ref_ptr(NULL), m_transform_ptr(NULL), m_cullBadPoints(false)
 {}
 
 ReprojectionFilter::~ReprojectionFilter()
@@ -106,6 +106,8 @@ void ReprojectionFilter::processOptions(const Options& options)
         }
         m_inferInputSRS = false;
     }
+
+    m_cullBadPoints = options.getValueOrDefault("cull_unprojectable_points", false);
 }
 
 void ReprojectionFilter::initialize()
@@ -175,20 +177,46 @@ void ReprojectionFilter::transform(double& x, double& y, double& z)
 }
 
 
-void ReprojectionFilter::filter(PointView& view)
+PointViewSet ReprojectionFilter::run(PointViewPtr view)
 {
-    for (PointId id = 0; id < view.size(); ++id)
+    PointViewSet viewSet;
+    PointViewPtr outView = view->makeNew();
+
+    for (PointId id = 0; id < view->size(); ++id)
     {
-        double x = view.getFieldAs<double>(Dimension::Id::X, id);
-        double y = view.getFieldAs<double>(Dimension::Id::Y, id);
-        double z = view.getFieldAs<double>(Dimension::Id::Z, id);
+        double x = view->getFieldAs<double>(Dimension::Id::X, id);
+        double y = view->getFieldAs<double>(Dimension::Id::Y, id);
+        double z = view->getFieldAs<double>(Dimension::Id::Z, id);
 
-        transform(x, y, z);
+        bool keep_point(false);
+        if (!m_cullBadPoints)
+        {
+            transform(x, y, z);
+            keep_point = true;
+        }
+        else
+        {
+            try
+            {
+                transform(x, y, z);
+                keep_point = true;
+                std::cerr << "do it";
+            } catch (pdal::pdal_error& e)
+            {
+                std::cerr << "Point " << id << " was unable to reproject with error '" << e.what() <<"'" << std::endl;
+            }
+        }
 
-        view.setField(Dimension::Id::X, id, x);
-        view.setField(Dimension::Id::Y, id, y);
-        view.setField(Dimension::Id::Z, id, z);
+        view->setField(Dimension::Id::X, id, x);
+        view->setField(Dimension::Id::Y, id, y);
+        view->setField(Dimension::Id::Z, id, z);
+        if (keep_point)
+            outView->appendPoint(*view, id);
     }
+
+    viewSet.insert(outView);
+
+    return viewSet;
 }
 
 } // namespace pdal

@@ -63,7 +63,7 @@ private:
     virtual void processOptions(const Options& options);
     virtual void ready(PointTableRef table);
     virtual void initialize();
-    virtual void filter(PointView& view);
+    virtual PointViewSet run(PointViewPtr view);
 
     void updateBounds();
     void transform(double& x, double& y, double& z);
@@ -77,6 +77,8 @@ private:
     ReferencePtr m_in_ref_ptr;
     ReferencePtr m_out_ref_ptr;
     TransformPtr m_transform_ptr;
+
+    bool m_cullBadPoints;
 
     ReprojectionFilter& operator=(const ReprojectionFilter&); // not implemented
     ReprojectionFilter(const ReprojectionFilter&); // not implemented
