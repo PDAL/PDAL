@@ -39,13 +39,14 @@
 #include <vector>
 
 #include "pdal/Dimension.hpp"
+#include "pdal/PointContainer.hpp"
 #include "pdal/PointLayout.hpp"
 #include "pdal/Metadata.hpp"
 
 namespace pdal
 {
 
-class PDAL_DLL BasePointTable
+class PDAL_DLL BasePointTable : public PointContainer
 {
     friend class PointView;
 
@@ -69,11 +70,7 @@ public:
 private:
     // Point data operations.
     virtual PointId addPoint() = 0;
-    virtual char *getPoint(PointId idx) = 0;
-    virtual void setField(Dimension::Id::Enum id, PointId idx,
-        const void *value) = 0;
-    virtual void getField(Dimension::Id::Enum id, PointId idx,
-        void *value) = 0;
+    virtual char *getPoint(PointId idx) const = 0;
 
 protected:
     MetadataPtr m_metadata;
@@ -103,18 +100,20 @@ public:
 private:
     // Point data operations.
     virtual PointId addPoint();
-    virtual char *getPoint(PointId idx);
-    virtual void setField(Dimension::Id::Enum id, PointId idx,
+    virtual char *getPoint(PointId idx) const;
+
+    virtual void setFieldInternal(Dimension::Id::Enum id, PointId idx,
         const void *value);
-    virtual void getField(Dimension::Id::Enum id, PointId idx, void *value);
+    virtual void getFieldInternal(Dimension::Id::Enum id, PointId idx,
+        void *value) const;
 
     // The number of points in each memory block.
     static const point_count_t m_blockPtCnt = 65536;
 
-    char *getDimension(const Dimension::Detail *d, PointId idx)
+    char *getDimension(const Dimension::Detail *d, PointId idx) const
         { return getPoint(idx) + d->offset(); }
 
-    std::size_t pointsToBytes(point_count_t numPts)
+    std::size_t pointsToBytes(point_count_t numPts) const
         { return m_layout->pointSize() * numPts; }
 };
 

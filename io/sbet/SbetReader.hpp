@@ -65,7 +65,9 @@ private:
     // Number of points in the file.
     point_count_t m_numPts;
     point_count_t m_index;
+    Dimension::IdList m_dims;
 
+    virtual bool processOne(PointRef point);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
     virtual point_count_t read(PointViewPtr view, point_count_t count);

@@ -82,14 +82,14 @@ PointId PointTable::addPoint()
 }
 
 
-char *PointTable::getPoint(PointId idx)
+char *PointTable::getPoint(PointId idx) const
 {
     char *buf = m_blocks[idx / m_blockPtCnt];
     return buf + pointsToBytes(idx % m_blockPtCnt);
 }
 
 
-void PointTable::setField(Dimension::Id::Enum id, PointId idx,
+void PointTable::setFieldInternal(Dimension::Id::Enum id, PointId idx,
     const void *value)
 {
     const Dimension::Detail *d = m_layout->dimDetail(id);
@@ -98,7 +98,8 @@ void PointTable::setField(Dimension::Id::Enum id, PointId idx,
     std::copy(src, src + d->size(), dst);
 }
 
-void PointTable::getField(Dimension::Id::Enum id, PointId idx, void *value)
+void PointTable::getFieldInternal(Dimension::Id::Enum id, PointId idx,
+    void *value) const
 {
     const Dimension::Detail *d = m_layout->dimDetail(id);
     const char *src = getDimension(d, idx);

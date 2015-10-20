@@ -116,9 +116,10 @@ TEST(PointTable, userView)
     public:
         PointId addPoint()
             { return 0; }
-        char *getPoint(PointId idx)
+        char *getPoint(PointId idx) const
             { return NULL; }
-        void setField(Dimension::Id::Enum id, PointId idx, const void *value)
+        void setFieldInternal(Dimension::Id::Enum id, PointId idx,
+            const void *value)
         {
             if (id == Dimension::Id::X)
                m_x = *(const double *)value;
@@ -127,7 +128,8 @@ TEST(PointTable, userView)
             else if (id == Dimension::Id::Z)
                m_z = *(const double *)value;
         }
-        void getField(Dimension::Id::Enum id, PointId idx, void *value)
+        void getFieldInternal(Dimension::Id::Enum id, PointId idx,
+            void *value) const
         {
             if (id == Dimension::Id::X)
                *(double *)value = m_x;

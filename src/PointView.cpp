@@ -42,8 +42,6 @@
 namespace pdal
 {
 
-bool PointView::m_ok;
-
 PointViewIter PointView::begin()
 {
     return PointViewIter(this, 0);
@@ -53,6 +51,31 @@ PointViewIter PointView::begin()
 PointViewIter PointView::end()
 {
     return PointViewIter(this, size());
+}
+
+
+void PointView::setFieldInternal(Dimension::Id::Enum dim, PointId idx,
+    const void *buf)
+{
+    PointId rawId = 0;
+    if (idx == size())
+    {
+        rawId = m_pointTable.addPoint();
+        m_index.push_back(rawId);
+        m_size++;
+        assert(m_temps.empty());
+    }
+    else if (idx > size())
+    {
+        std::cerr << "Point index must increment.\n";
+        //error - throw?
+        return;
+    }
+    else
+    {
+        rawId = m_index[idx];
+    }
+    m_pointTable.setFieldInternal(dim, rawId, buf);
 }
 
 
