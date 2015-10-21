@@ -164,15 +164,28 @@ void ReprojectionFilter::ready(PointTableRef table)
 }
 
 
-void ReprojectionFilter::transform(double& x, double& y, double& z)
+bool ReprojectionFilter::transform(double& x, double& y, double& z, bool bThrowOnFailure)
 {
-    int ret = OCTTransform(m_transform_ptr, 1, &x, &y, &z);
-    if (ret == 0)
+    try
     {
-        std::ostringstream msg;
-        msg << "Could not project point for ReprojectionTransform::" <<
-            CPLGetLastErrorMsg() << ret;
-        throw pdal_error(msg.str());
+        // OCTTransform will throw via GDAL error handler
+        // if there is an error. We don't expect the return value
+        // unless the GDAL handler gets shut off for whatever reason. In
+        // that case, we'll just throw.
+        int ret = OCTTransform(m_transform_ptr, 1, &x, &y, &z);
+        if (ret == 0)
+        {
+            std::ostringstream msg;
+            msg << "Could not project point for ReprojectionTransform::" <<
+                CPLGetLastErrorMsg() << ret;
+            throw pdal_error(msg.str());
+        }
+        return true;
+    } catch (pdal::pdal_error& e)
+    {
+        if (bThrowOnFailure)
+            throw;
+        return false;
     }
 }
 
@@ -188,32 +201,15 @@ PointViewSet ReprojectionFilter::run(PointViewPtr view)
         double y = view->getFieldAs<double>(Dimension::Id::Y, id);
         double z = view->getFieldAs<double>(Dimension::Id::Z, id);
 
-        bool keep_point(false);
-        if (!m_cullBadPoints)
-        {
-            transform(x, y, z);
-            keep_point = true;
-        }
-        else
-        {
-            try
-            {
-                transform(x, y, z);
-                keep_point = true;
-                std::cerr << "do it";
-            } catch (pdal::pdal_error& e)
-            {
-                std::cerr << "Point " << id << " was unable to reproject with error '" << e.what() <<"'" << std::endl;
-            }
-        }
-
-        view->setField(Dimension::Id::X, id, x);
-        view->setField(Dimension::Id::Y, id, y);
-        view->setField(Dimension::Id::Z, id, z);
+        bool keep_point = transform(x, y, z, m_cullBadPoints);
         if (keep_point)
+        {
+            view->setField(Dimension::Id::X, id, x);
+            view->setField(Dimension::Id::Y, id, y);
+            view->setField(Dimension::Id::Z, id, z);
             outView->appendPoint(*view, id);
+        }
     }
-
     viewSet.insert(outView);
 
     return viewSet;

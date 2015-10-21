@@ -66,7 +66,7 @@ private:
     virtual PointViewSet run(PointViewPtr view);
 
     void updateBounds();
-    void transform(double& x, double& y, double& z);
+    bool transform(double& x, double& y, double& z, bool bThrowOnFailure);
 
     SpatialReference m_inSRS;
     SpatialReference m_outSRS;
