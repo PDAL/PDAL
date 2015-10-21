@@ -56,13 +56,14 @@ public:
     virtual ~BasePointTable()
         {}
 
-public:
     // Layout operations.
     virtual PointLayoutPtr layout() const = 0;
 
     // Metadata operations.
     MetadataNode metadata()
         { return m_metadata->getNode(); }
+    virtual void finalize()
+        { layout()->finalize(); }
     SpatialReference spatialRef() const;
     void setSpatialRef(const SpatialReference& sref);
     MetadataNode privateMetadata(const std::string& name);
@@ -70,51 +71,100 @@ public:
 private:
     // Point data operations.
     virtual PointId addPoint() = 0;
-    virtual char *getPoint(PointId idx) const = 0;
+
+protected:
+    virtual char *getPoint(PointId idx) = 0;
 
 protected:
     MetadataPtr m_metadata;
+
 };
 typedef BasePointTable& PointTableRef;
 typedef BasePointTable const & ConstPointTableRef;
 
 
-// This provides a context for processing a set of points and allows the library
-// to be used to process multiple point sets simultaneously.
-class PDAL_DLL PointTable : public BasePointTable
+class PDAL_DLL SimplePointTable : public BasePointTable
 {
 private:
-    // Point storage.
-    std::vector<char *> m_blocks;
-    point_count_t m_numPts;
     std::unique_ptr<PointLayout> m_layout;
 
 public:
-    PointTable() : m_numPts(0), m_layout(new PointLayout())
+    SimplePointTable() : m_layout(new PointLayout())
         {}
-    virtual ~PointTable();
 
     virtual PointLayoutPtr layout() const
         { return m_layout.get(); }
 
-private:
-    // Point data operations.
-    virtual PointId addPoint();
-    virtual char *getPoint(PointId idx) const;
+protected:
+    std::size_t pointsToBytes(point_count_t numPts) const
+        { return m_layout->pointSize() * numPts; }
 
+private:
     virtual void setFieldInternal(Dimension::Id::Enum id, PointId idx,
         const void *value);
     virtual void getFieldInternal(Dimension::Id::Enum id, PointId idx,
         void *value) const;
 
     // The number of points in each memory block.
-    static const point_count_t m_blockPtCnt = 65536;
-
-    char *getDimension(const Dimension::Detail *d, PointId idx) const
+    char *getDimension(const Dimension::Detail *d, PointId idx)
         { return getPoint(idx) + d->offset(); }
 
-    std::size_t pointsToBytes(point_count_t numPts) const
-        { return m_layout->pointSize() * numPts; }
+    const char *getDimension(const Dimension::Detail *d, PointId idx) const
+    {
+        SimplePointTable *ncThis = const_cast<SimplePointTable *>(this);
+        return ncThis->getPoint(idx) + d->offset();
+    }
+};
+
+// This provides a context for processing a set of points and allows the library
+// to be used to process multiple point sets simultaneously.
+class PDAL_DLL PointTable : public SimplePointTable
+{
+private:
+    // Point storage.
+    std::vector<char *> m_blocks;
+    point_count_t m_numPts;
+    static const point_count_t m_blockPtCnt = 65536;
+
+public:
+    PointTable() : m_numPts(0)
+        {}
+    virtual ~PointTable();
+
+protected:
+    virtual char *getPoint(PointId idx);
+
+private:
+    // Point data operations.
+    virtual PointId addPoint();
+};
+
+class PDAL_DLL FixedPointTable : SimplePointTable
+{
+public:
+    FixedPointTable(point_count_t capacity) : m_capacity(capacity), m_numPts(0)
+    {}
+
+    virtual void finalize()
+    {
+        BasePointTable::finalize();
+        m_buf.resize(pointsToBytes(m_capacity + 1));
+    }
+
+    void reset()
+        { m_numPts = 0; }
+
+protected:
+    virtual char *getPoint(PointId idx)
+        { return m_buf.data() + pointsToBytes(idx); }
+
+private:
+    std::vector<char> m_buf;
+    point_count_t m_capacity;
+    point_count_t m_numPts;
+
+    virtual PointId addPoint()
+        { return ++m_numPts; }
 };
 
 } //namespace

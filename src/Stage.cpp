@@ -89,7 +89,7 @@ void Stage::prepare(PointTableRef table)
 
 PointViewSet Stage::execute(PointTableRef table)
 {
-    table.layout()->finalize();
+    table.finalize();
 
     PointViewSet views;
     if (m_inputs.empty())

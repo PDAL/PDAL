@@ -63,6 +63,26 @@ MetadataNode BasePointTable::privateMetadata(const std::string& name)
 }
 
 
+void SimplePointTable::setFieldInternal(Dimension::Id::Enum id, PointId idx,
+    const void *value)
+{
+    const Dimension::Detail *d = m_layout->dimDetail(id);
+    const char *src  = (const char *)value;
+    char *dst = getDimension(d, idx);
+    std::copy(src, src + d->size(), dst);
+}
+
+
+void SimplePointTable::getFieldInternal(Dimension::Id::Enum id, PointId idx,
+    void *value) const
+{
+    const Dimension::Detail *d = m_layout->dimDetail(id);
+    const char *src = getDimension(d, idx);
+    char *dst = (char *)value;
+    std::copy(src, src + d->size(), dst);
+}
+
+
 PointTable::~PointTable()
 {
     for (auto vi = m_blocks.begin(); vi != m_blocks.end(); ++vi)
@@ -82,29 +102,10 @@ PointId PointTable::addPoint()
 }
 
 
-char *PointTable::getPoint(PointId idx) const
+char *PointTable::getPoint(PointId idx)
 {
     char *buf = m_blocks[idx / m_blockPtCnt];
     return buf + pointsToBytes(idx % m_blockPtCnt);
-}
-
-
-void PointTable::setFieldInternal(Dimension::Id::Enum id, PointId idx,
-    const void *value)
-{
-    const Dimension::Detail *d = m_layout->dimDetail(id);
-    const char *src  = (const char *)value;
-    char *dst = getDimension(d, idx);
-    std::copy(src, src + d->size(), dst);
-}
-
-void PointTable::getFieldInternal(Dimension::Id::Enum id, PointId idx,
-    void *value) const
-{
-    const Dimension::Detail *d = m_layout->dimDetail(id);
-    const char *src = getDimension(d, idx);
-    char *dst = (char *)value;
-    std::copy(src, src + d->size(), dst);
 }
 
 } // namespace pdal

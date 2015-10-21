@@ -116,7 +116,7 @@ TEST(PointTable, userView)
     public:
         PointId addPoint()
             { return 0; }
-        char *getPoint(PointId idx) const
+        char *getPoint(PointId idx)
             { return NULL; }
         void setFieldInternal(Dimension::Id::Enum id, PointId idx,
             const void *value)
