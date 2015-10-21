@@ -128,6 +128,56 @@ PointViewSet Stage::execute(PointTableRef table)
 }
 
 
+// This is streamed execution.
+void Stage::execute(FixedPointTable& table)
+{
+    table.finalize();
+
+    std::list<Stage *> stages;
+
+    // Build a list of the stages.
+    Stage *s = this;
+    while (s->m_inputs.size())
+    {
+        if (s->m_inputs.size() > 1)
+            throw pdal_error("Can't execute streaming pipeline stages "
+                "containing multiple inputs.");
+        stages.push_front(s);
+        s = s->m_inputs[0];
+    }
+
+
+    for (Stage *s : stages)
+        s->ready(table);
+
+    bool finished = false;
+    while (!finished)
+    {
+        point_count_t pointLimit = table.capacity();
+        for (Stage *s : stages)
+        {
+            PointId idx = 0;
+            PointRef point(&table, idx);
+            while (true)
+            {
+                finished = s->processOne(point);
+                idx++;
+                if (finished)
+                    pointLimit = idx;
+                if (idx >= pointLimit)
+                    break;
+                point.setPointId(idx);
+            }
+            s->l_done(table);
+        }
+        table.reset();
+    }
+
+    for (Stage *s : stages)
+        done(table);
+}
+
+
 void Stage::l_initialize(PointTableRef table)
 {
     m_metadata = table.metadata().add(getName());
@@ -138,8 +188,6 @@ void Stage::l_processOptions(const Options& options)
 {
     m_debug = options.getValueOrDefault<bool>("debug", false);
     m_verbose = options.getValueOrDefault<uint32_t>("verbose", 0);
-    if (m_debug && !m_verbose)
-        m_verbose = 1;
     if (m_debug && !m_verbose)
         m_verbose = 1;
 

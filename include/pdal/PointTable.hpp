@@ -82,7 +82,6 @@ protected:
 typedef BasePointTable& PointTableRef;
 typedef BasePointTable const & ConstPointTableRef;
 
-
 class PDAL_DLL SimplePointTable : public BasePointTable
 {
 private:
@@ -139,7 +138,7 @@ private:
     virtual PointId addPoint();
 };
 
-class PDAL_DLL FixedPointTable : SimplePointTable
+class PDAL_DLL FixedPointTable : public SimplePointTable
 {
 public:
     FixedPointTable(point_count_t capacity) : m_capacity(capacity), m_numPts(0)
@@ -151,6 +150,8 @@ public:
         m_buf.resize(pointsToBytes(m_capacity + 1));
     }
 
+    point_count_t capacity() const
+        { return m_capacity; }
     void reset()
         { m_numPts = 0; }
 
