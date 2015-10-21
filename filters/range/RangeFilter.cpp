@@ -83,7 +83,7 @@ RangeFilter::Range parseRange(const std::string& r)
         name = r.substr(pos, count);
         pos += count;
 
-        if (r[pos] == '~')
+        if (r[pos] == '!')
         {
             negate = true;
             pos++;

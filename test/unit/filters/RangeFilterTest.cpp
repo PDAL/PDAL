@@ -203,7 +203,7 @@ TEST(RangeFilterTest, negation)
     reader.setOptions(ops);
 
     Options rangeOps;
-    rangeOps.add("limits", "Z~[2:5]");
+    rangeOps.add("limits", "Z![2:5]");
 
     RangeFilter filter;
     filter.setOptions(rangeOps);
