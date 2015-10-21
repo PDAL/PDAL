@@ -6,6 +6,9 @@ writers.las
 The **LAS Writer** supports writing to `LAS format`_ files, the standard
 interchange file format for LIDAR data.
 
+IMPORTANT NOTE: Scale/offset are not preserved from an input LAS file.  See
+below for information on the scale/offset options and the 'forward' option.
+
 Example
 -------
 
