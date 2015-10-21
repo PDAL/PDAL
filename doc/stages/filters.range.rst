@@ -78,3 +78,10 @@ limits
   .. code-block:: bash
 
     Classification[2:2]
+
+  Any range can be negated by prefacing with the '~' character.  The following
+  will select all classifications that aren't equal to the value 2.
+
+  .. code-block:: bash
+
+    Classification~[2:2]

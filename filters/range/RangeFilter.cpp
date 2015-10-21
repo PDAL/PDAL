@@ -64,6 +64,7 @@ RangeFilter::Range parseRange(const std::string& r)
     std::string::size_type pos, count;
     bool ilb = true;
     bool iub = true;
+    bool negate = false;
     const char *start;
     char *end;
     std::string name;
@@ -81,6 +82,12 @@ RangeFilter::Range parseRange(const std::string& r)
            throw std::string("No dimension name.");
         name = r.substr(pos, count);
         pos += count;
+
+        if (r[pos] == '~')
+        {
+            negate = true;
+            pos++;
+        }
 
         if (r[pos] == '(')
             ilb = false;
@@ -129,7 +136,7 @@ RangeFilter::Range parseRange(const std::string& r)
         oss << "filters.range: invalid 'limits' option: '" << r << "': " << s;
         throw pdal_error(oss.str());
     }
-    return RangeFilter::Range(name, lb, ub, ilb, iub);
+    return RangeFilter::Range(name, lb, ub, ilb, iub, negate);
 }
 
 }
@@ -199,7 +206,8 @@ PointViewSet RangeFilter::run(PointViewPtr inView)
                 if (v >= d.second.m_upper_bound)
                     keep_point = false;
             }
-
+            if (d.second.m_negate)
+                keep_point = !keep_point;
             if (keep_point)
                 break;
         }

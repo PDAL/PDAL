@@ -189,6 +189,41 @@ TEST(RangeFilterTest, onlyMax)
     EXPECT_FLOAT_EQ(5.0, view->getFieldAs<double>(Dimension::Id::Z, 4));
 }
 
+TEST(RangeFilterTest, negation)
+{
+    BOX3D srcBounds(0.0, 0.0, 1.0, 0.0, 0.0, 10.0);
+
+    Options ops;
+    ops.add("bounds", srcBounds);
+    ops.add("mode", "ramp");
+    ops.add("num_points", 10);
+
+    StageFactory f;
+    FauxReader reader;
+    reader.setOptions(ops);
+
+    Options rangeOps;
+    rangeOps.add("limits", "Z~[2:5]");
+
+    RangeFilter filter;
+    filter.setOptions(rangeOps);
+    filter.setInput(reader);
+
+    PointTable table;
+    filter.prepare(table);
+    PointViewSet viewSet = filter.execute(table);
+    PointViewPtr view = *viewSet.begin();
+
+    EXPECT_EQ(1u, viewSet.size());
+    EXPECT_EQ(6u, view->size());
+    EXPECT_FLOAT_EQ(1.0, view->getFieldAs<double>(Dimension::Id::Z, 0));
+    EXPECT_FLOAT_EQ(6.0, view->getFieldAs<double>(Dimension::Id::Z, 1));
+    EXPECT_FLOAT_EQ(7.0, view->getFieldAs<double>(Dimension::Id::Z, 2));
+    EXPECT_FLOAT_EQ(8.0, view->getFieldAs<double>(Dimension::Id::Z, 3));
+    EXPECT_FLOAT_EQ(9.0, view->getFieldAs<double>(Dimension::Id::Z, 4));
+    EXPECT_FLOAT_EQ(10.0, view->getFieldAs<double>(Dimension::Id::Z, 5));
+}
+
 TEST(RangeFilterTest, equals)
 {
     BOX3D srcBounds(0.0, 0.0, 1.0, 0.0, 0.0, 10.0);

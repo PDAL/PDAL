@@ -58,11 +58,13 @@ public:
               double lower_bound,
               double upper_bound,
               bool inclusive_lower_bound,
-              bool inclusive_upper_bound) :
+              bool inclusive_upper_bound,
+              bool negate) :
             m_name(name), m_lower_bound(lower_bound),
             m_upper_bound(upper_bound),
             m_inclusive_lower_bound(inclusive_lower_bound),
-            m_inclusive_upper_bound(inclusive_upper_bound)
+            m_inclusive_upper_bound(inclusive_upper_bound),
+            m_negate(negate)
         {}
 
         Range()
@@ -73,6 +75,7 @@ public:
         double m_upper_bound;
         bool m_inclusive_lower_bound;
         bool m_inclusive_upper_bound;
+        bool m_negate;
     };
 
     RangeFilter() : Filter()
