@@ -137,12 +137,14 @@ void Stage::execute(FixedPointTable& table)
 
     // Build a list of the stages.
     Stage *s = this;
-    while (s->m_inputs.size())
+    while (true)
     {
         if (s->m_inputs.size() > 1)
             throw pdal_error("Can't execute streaming pipeline stages "
                 "containing multiple inputs.");
         stages.push_front(s);
+        if (s->m_inputs.empty())
+            break;
         s = s->m_inputs[0];
     }
 
@@ -150,25 +152,27 @@ void Stage::execute(FixedPointTable& table)
     for (Stage *s : stages)
         s->ready(table);
 
-    bool finished = false;
-    while (!finished)
+    bool allFinished = false;
+    while (!allFinished)
     {
         point_count_t pointLimit = table.capacity();
         for (Stage *s : stages)
         {
             PointId idx = 0;
             PointRef point(&table, idx);
+            bool ok;
             while (true)
             {
-                finished = s->processOne(point);
+                ok = s->processOne(point);
                 idx++;
-                if (finished)
+                if (!ok)
                     pointLimit = idx;
                 if (idx >= pointLimit)
                     break;
                 point.setPointId(idx);
             }
             s->l_done(table);
+            allFinished = allFinished || !ok;
         }
         table.reset();
     }

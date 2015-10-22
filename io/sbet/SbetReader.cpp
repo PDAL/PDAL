@@ -84,7 +84,7 @@ bool SbetReader::processOne(PointRef point)
         Dimension::Id::Enum dim = *di;
         point.setField(dim, d);
     }
-    return (!m_stream);
+    return (m_stream->good());
 }
 
 
