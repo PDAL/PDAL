@@ -252,7 +252,7 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
 
 include_directories(vendor/eigen-3.1.91)
 include_directories(vendor/nanoflann-1.1.8)
-include_directories(vendor/rply-1.1.3)
+include_directories(vendor/rply-1.1.4)
 
 #------------------------------------------------------------------------------
 # subdirectory controls

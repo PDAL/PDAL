@@ -1,13 +1,13 @@
 set(src
     PlyReader.cpp
     PlyWriter.cpp
-    ${PROJECT_SOURCE_DIR}/vendor/rply-1.1.3/rply.c
+    ${PROJECT_SOURCE_DIR}/vendor/rply-1.1.4/rply.c
 )
 
 set(inc
     PlyReader.hpp
     PlyWriter.hpp
-    ${PROJECT_SOURCE_DIR}/vendor/rply-1.1.3/rply.h
+    ${PROJECT_SOURCE_DIR}/vendor/rply-1.1.4/rply.h
 )
 
 PDAL_ADD_DRIVER(reader ply "${src}" "${inc}" objs)
