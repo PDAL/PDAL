@@ -1,6 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2014, Hobu Inc. (hobu@hobu.co)
- * Copyright (c) 2015, Bradley J Chambers, brad.chambers@gmail.com
+ * Copyright (c) 2015, Hobu Inc. (hobu@hobu.co)
  *
  * All rights reserved.
  *
