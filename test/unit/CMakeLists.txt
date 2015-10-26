@@ -33,6 +33,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/filters/colorization
     ${PROJECT_SOURCE_DIR}/filters/crop
     ${PROJECT_SOURCE_DIR}/filters/decimation
+    ${PROJECT_SOURCE_DIR}/filters/divider
     ${PROJECT_SOURCE_DIR}/filters/ferry
     ${PROJECT_SOURCE_DIR}/filters/mortonorder
     ${PROJECT_SOURCE_DIR}/filters/randomize
@@ -94,6 +95,7 @@ PDAL_ADD_TEST(pdal_filters_chipper_test FILES filters/ChipperTest.cpp)
 PDAL_ADD_TEST(pdal_filters_colorization_test FILES filters/ColorizationFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_crop_test FILES filters/CropFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_decimation_test FILES filters/DecimationFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_divider_test FILES filters/DividerFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_ferry_test FILES filters/FerryFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_merge_test FILES filters/MergeTest.cpp)
 PDAL_ADD_TEST(pdal_filters_reprojection_test FILES filters/ReprojectionFilterTest.cpp)

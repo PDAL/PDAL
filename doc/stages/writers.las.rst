@@ -38,7 +38,8 @@ filename
   the placeholder will be replaced with an incrementing integer.  If no
   placeholder is found, all PointViews provided to the writer are
   aggregated into a single file for output.  Multiple PointViews are usually
-  the result of using :ref:`filters.splitter` or :ref:`filters.chipper`.
+  the result of using :ref:`filters.splitter`, :ref:`filters.chipper` or
+  :ref:`filters.divider`.
   [Required]
 
 forward
