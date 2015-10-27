@@ -1,4 +1,4 @@
-.. _readers.pcd:
+.. _readers.ply:
 
 readers.ply
 ===========

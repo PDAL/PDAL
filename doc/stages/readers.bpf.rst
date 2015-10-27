@@ -1,7 +1,8 @@
 .. _readers.bpf:
 
+******************************************************************************
 readers.bpf
-===========
+******************************************************************************
 
 BPF is an NGA specification for point cloud data. The specification can be
 found at https://nsgreg.nga.mil/doc/view?i=4202 The **BPF Reader** supports
@@ -16,7 +17,7 @@ Data that follows the standard header but precedes point data is taken to
 be metadata and is UTF-encoded and added to the reader's metadata.
 
 Example
--------
+------------------------------------------------------------------------------
 
 .. code-block:: xml
 
@@ -31,7 +32,7 @@ Example
   </Pipeline>
 
 Options
--------
+------------------------------------------------------------------------------
 
 filename
     BPF file to read [Required]

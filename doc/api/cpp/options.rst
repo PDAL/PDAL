@@ -1,9 +1,10 @@
 .. _cpp-pdal-options:
 
 ******************************************************************************
-pdal::Options
+:cpp:class:`pdal::Options`
 ******************************************************************************
 
 .. doxygenclass:: pdal::Options
    :members:
+   :undoc-members:
 

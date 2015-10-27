@@ -1,10 +1,11 @@
 .. _cpp-pdal-pointtable:
 
 ******************************************************************************
-pdal::PointTable
+:cpp:class:`pdal::PointTable`
 ******************************************************************************
 
 
 .. doxygenclass:: pdal::PointTable
    :members:
+   :undoc-members:
 

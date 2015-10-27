@@ -1,11 +1,12 @@
-.. _cpp-pdal-option:
+.. _cpp-pdal-filter:
 
 ******************************************************************************
-pdal::Option
+:cpp:class:`pdal::Filter`
 ******************************************************************************
 
 
-
-.. doxygenclass:: pdal::Option
+.. doxygenclass:: pdal::Filter
    :members:
+   :undoc-members:
+
 

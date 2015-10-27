@@ -1,23 +1,24 @@
 .. _vagrant:
 
 ******************************************************************************
-Getting Started with PDAL using `Vagrant`_ and `VirtualBox`_
+Vagrant
 ******************************************************************************
-
 
 :Author: Howard Butler
 :Contact: howard@hobu.co
-:Date: 11/04/2013
+:Date: 10/27/2015
+
+.. index:: Vagrant
 
 Introduction
 ------------------------------------------------------------------------------
 
 Because of PDAL's relatively short lifespan, there are not so many
 distributions and packaging solutions that have it available. This means that
-prospective users of PDAL are pretty much on their own to build up PDAL
-and use it. Folks who've climbed this mountain with other well-entangled
-software like `GDAL`_, `MapServer`_, or `Mapnik`_ should be able to manage
-the compilation challenges listed in the full set of dependencies in :ref:`building_unix`.
+prospective users of PDAL are pretty much on their own to build up PDAL and use
+it. Folks who've climbed this mountain with other well-entangled software like
+`GDAL`_, `MapServer`_, or `Mapnik`_ should be able to manage the compilation
+challenges listed in the full set of dependencies in :ref:`building_unix`.
 
 For everyone else, suffering all of the compilation challenges, including
 at least three different build systems is simply too much. "Give me a
@@ -122,6 +123,7 @@ includes are:
 * Python manipulation using :ref:`filters.predicate` and :ref:`filters.programmable`
 * `PCL`_ support via :ref:`filters.pclblock`, :ref:`readers.pcd`,
   :ref:`writers.pcd`, :ref:`ground_command`, and :ref:`pcl_command`
+* :ref:`writers.geowave`
 
 Head to :ref:`pipeline` for more information on using PDAL pipelines. Two pipelines
 are provided in ``/home/vagrant`` that are used to load the ``st-helens-small.las``

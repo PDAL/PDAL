@@ -3,6 +3,10 @@
 libLAS C API to PDAL transition guide
 =====================================
 
+:Author: Vaclav Petras
+:Contact: wenzeslaus@gmail.com
+:Date: 09/04/2015
+
 This page shows how to port code using libLAS C API to PDAL API
 (which is C++). The new code is not using full power of PDAL but
 it uses just what is necessary to read content of a LAS file.

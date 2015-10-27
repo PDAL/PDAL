@@ -1,8 +1,13 @@
 .. _cpp-pdal-bounds:
 
 ******************************************************************************
-pdal::BOX3D
+:cpp:class:`pdal::BOX2D`
 ******************************************************************************
+
+.. doxygenclass:: pdal::BOX2D
+   :members:
+   :undoc-members:
 
 .. doxygenclass:: pdal::BOX3D
    :members:
+   :undoc-members:
