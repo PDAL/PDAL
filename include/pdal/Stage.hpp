@@ -53,9 +53,6 @@ namespace pdal
 {
 
 class Iterator;
-class StageSequentialIterator;
-class StageRandomIterator;
-class StageBlockIterator;
 class StageRunner;
 class StageWrapper;
 
@@ -121,15 +118,9 @@ public:
         { return Options(); }
     static Dimension::IdList getDefaultDimensions()
         { return Dimension::IdList(); }
-    static std::string s_getInfoLink()
-        { return std::string(); }
     static std::string s_getPluginVersion()
         { return std::string(); }
-    virtual boost::property_tree::ptree toPTree(PointTableRef table) const
-        { return boost::property_tree::ptree(); }
 
-    virtual StageSequentialIterator* createSequentialIterator() const
-        { return NULL; }
     inline MetadataNode getMetadata() const
         { return m_metadata; }
 

@@ -10,44 +10,5 @@ format that is described via the :cpp:class:`pdal::Schema`.
 
 .. doxygenclass:: pdal::Reader
    :members:
-   :sections: public*
-
-
-`ASPRS LAS`_ Reader
-------------------------------------------------------------------------------
-
-The `ASPRS LAS`_ format is a sequential binary format used to store data from
-LiDAR sensors and by LiDAR processing software for data interchange and archival.
-
-
-.. _`ASPRS LAS`: http://www.asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html
-
-.. doxygenclass:: pdal::drivers::las::Reader
-   :members:
-
-OCI Reader
-------------------------------------------------------------------------------
-
-The OCI reader provides `Oracle Point Cloud`_ support to PDAL.
-
-.. _`Oracle Point Cloud`: http://docs.oracle.com/cd/B28359_01/appdev.111/b28400/sdo_pc_pkg_ref.htm
-
-.. doxygenclass:: pdal::drivers::oci::OciReader
-   :members:
-
-QFIT Reader
-------------------------------------------------------------------------------
-`QFIT`_ is a format for the NASA IceBridge sea ice sensor.
- 
-.. _`QFIT`: http://nsidc.org/data/ilatm1b.html
-
-.. doxygenclass:: pdal::QfitReader
-  :members:
-
-TerraSolid Reader
-------------------------------------------------------------------------------
-
-.. doxygenclass:: pdal::drivers::terrasolid::Reader
- :members:
-
+    :undoc-members:
 

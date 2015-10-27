@@ -4,8 +4,13 @@
 Identifying ground returns using ProgressiveMorphologicalFilter segmentation
 ===============================================================================
 
+:Author: Bradley Chambers
+:Contact: brad.chambers@gmail.com
+:Date: 10/28/2015
+
+
 Implements the Progressive Morphological Filter for segmentation of ground
-points. 
+points.
 
 Background
 ------------------------------------------------------------------------------

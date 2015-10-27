@@ -4,6 +4,8 @@
 FAQ
 ******************************************************************************
 
+.. index:: pronounce
+
 * How do you pronounce PDAL?
 
   The proper spelling of the project name is PDAL, in uppercase. It is
@@ -29,6 +31,11 @@ FAQ
   far beyond basic LIDAR data processing. Additionally, PDAL is licensed
   under an open source license (this applies to the whole library and
   all command line tools).
+
+  .. seealso::
+
+        :ref:`apps` describes application operations you can
+        achieve with PDAL.
 
 * Is there any compatibility with libLAS's LAS Utility Applications or LAStools?
 

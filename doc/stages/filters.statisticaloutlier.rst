@@ -19,14 +19,14 @@ classified as inlier or outlier if their average neighbor distance is below or
 above this threshold respectively.
 
 .. figure:: filters.statisticaloutlier.img1.png
-    :scale: 100 %
+    :scale: 70 %
     :alt: Points before outlier removal
 
     Before outlier removal, noise points can be found both above and below the scene.
 
 
 .. figure:: filters.statisticaloutlier.img2.png
-    :scale: 100 %
+    :scale: 60 %
     :alt: Points after outlier removal
 
     After outlier removal, the noise points are removed.

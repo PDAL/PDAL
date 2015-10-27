@@ -4,13 +4,18 @@
 Writing with PDAL
 =====================
 
+:Author: Bradley Chambers
+:Contact: brad.chambers@gmail.com
+:Date: 01/21/2015
+
+
 This tutorial will describe a complete example of using PDAL C++ objects to write
 a LAS file. The example will show fetching data from your own data source rather than
 interacting with a :ref:`reader stage <stage_index>`.
 
 .. note::
 
-     If you implement your own :ref:`reader <stage_index>` that conforms to
+     If you implement your own :ref:`readers` that conforms to
      PDAL's :cpp:class:`pdal::Stage`, you can implement a simple read-filter-write
      pipeline using :ref:`pipeline` and not have to code anything explicit
      yourself.

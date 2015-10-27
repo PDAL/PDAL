@@ -6,27 +6,28 @@ Unix Compilation
 
 :Author: Howard Butler
 :Contact: howard@hobu.co
-:Date: 11/16/2013
+:Date: 10/27/2015
 
-`CMake`_ 2.8.6+ is the prescribed tool for building from source as well as
-running unit tests. `CMake`_ is a cross-platform build system that provides a
-number of benefits, and its usage ensures a single, up-to-date build system
-for all PDAL-supported operating systems and compiler platforms.
+`CMake`_ 2.8.11+ is the prescribed tool for building from source, with `CMake`_
+3.0+ being desired. `CMake`_ is a cross-platform build system that provides a
+number of benefits, and its usage ensures a single, up-to-date build system for
+all PDAL-supported operating systems and compiler platforms.
 
-Like a combination of autoconf/autotools, except that it actually works on
-Windows (and works without eye-stabbing pain in general), `CMake`_ is somewhat
-of a meta-building tool. It can be used to generate MSVC project files, GNU
-Makefiles, NMake files for MSVC, XCode projects on Mac OS X, and Eclipse
-projects (as well as many others).  This functionality allows the PDAL project 
-to avoid maintaining these build options by hand and target a single configuration
-and build platform.
+Like a combination of autoconf/autotools, except that it works on Windows with
+minimal eye-stabbing pain, `CMake`_ is somewhat of a meta-building tool. It can
+be used to generate MSVC project files, GNU Makefiles, NMake files for MSVC,
+XCode projects on Mac OS X, and Eclipse projects (as well as many others).
+This functionality allows the PDAL project to avoid maintaining these build
+options by hand and target a single configuration and build platform.
 
-This tutorial will describe how to build PDAL using CMake on a 
-Unix platform.  PDAL is known to compile on Linux 2.6's of various flavors and 
-OSX Snow Leopard and Lion with XCode 4.2.
+This tutorial will describe how to build PDAL using CMake on a Unix platform.
+PDAL is known to compile on Linux 2.6's of various flavors and OSX with XCode.
 
-:ref:`dependencies` contains more information about specific library version
-requirements and notes about building or acquiring them.
+
+.. note::
+
+    :ref:`dependencies` contains more information about specific library
+    version requirements and notes about building or acquiring them.
 
 Using "Unix Makefiles" on Linux
 ..............................................................................
@@ -45,7 +46,7 @@ example, we are going to generate a "Unix Makefiles" builder
 for PDAL on Mac OS X.
 
 ::
-    
+
     $ cd PDAL
     $ mkdir makefiles
     $ cd makefiles
@@ -80,12 +81,12 @@ Configure the basic core library for the "Unix Makefiles" target:
 
 .. note::
 
-    The ``hobu-config.sh`` shell script contains a number of common 
-    settings that I use to configure my `Homebrew`-based Macintosh 
+    The ``./cmake/examples/hobu-config.sh`` shell script contains a number of common
+    settings that I use to configure my `Homebrew`-based Macintosh
     system.
 
 .. _`Homebrew`: http://brew.sh/
- 
+
 Issue the `make` command
 ------------------------------------------------------------------------------
 
@@ -98,9 +99,9 @@ configured.
 Run ``make install`` and test your installation with a :ref:`pdal_test` command
 -------------------------------------------------------------------------------
 
-``make install`` will install the :ref:`utilities <apps>` in the location
-that was specified for 'CMAKE_INSTALL_PREFIX'.  Once installed, ensure that 
-you can run `pdal info`.
+``make install`` will install the :ref:`utilities <apps>` in the location that
+was specified for 'CMAKE_INSTALL_PREFIX'.  Once installed, ensure that you can
+run `pdal info`.
 
 
 .. _configure_optional_libraries:
@@ -135,18 +136,18 @@ substituting accordingly, to values that match your system layout.
 .. _`DebianGIS`: http://wiki.debian.org/DebianGis
 .. _`Debian`: http://www.debian.org
 .. _`KyngChaos`: http://www.kyngchaos.com/software/unixport
-.. _`OSGeo4W`: http://trac.osgeo.org/osgeo4w/  
+.. _`OSGeo4W`: http://trac.osgeo.org/osgeo4w/
 
 
 CCMake and cmake-gui
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. warning::
-    
-    The following was just swiped from the libLAS compilation document 
-    and it has not been updated for PDAL. The basics should be the same, however. 
+
+    The following was just swiped from the libLAS compilation document
+    and it has not been updated for PDAL. The basics should be the same, however.
     Please ask on the :ref:`mailing list<community>` if you run into any issues.
-    
+
 While `CMake`_ can be run from the command-line, and this is the preferred
 way for many individuals, it can be much easier to run CMake from a GUI.
 Now that we have a basic library building, we will use CMake's GUIs to
@@ -154,27 +155,28 @@ help us configure the rest of the optional components of the library. Run
 ``ccmake ../`` for the `Curses`_ interface or ``cmake-gui ../`` for a GUI
 version.
 
-  
+
 .. figure:: media/ccmake-osx-start.png
     :alt: Running CCMake in OS X
 
-    Running the `Curses`_ `CMake`_ interface.  This interface is available to 
-    all unix-like operating systems. 
-    
+    Running the `Curses`_ `CMake`_ interface.  This interface is available to
+    all unix-like operating systems.
+
 .. note::
-    If your arrow keys are not working with in CCMake, use CTRL-N and 
+
+    If your arrow keys are not working with in CCMake, use CTRL-N and
     CTRL-P to move back and forth between the options.
 
 .. figure:: media/cmake-gui-osx-start.png
     :alt: Running cmake-gui in OS X
 
-    Running the cmake-gui `CMake`_ interface.  This interface is available 
+    Running the cmake-gui `CMake`_ interface.  This interface is available
     on Linux, Windows, and Mac OS X.
 
-Build and install 
+Build and install
 ------------------------------------------------------------------------------
 
-Once you have configured your additional libraries, you can install the 
+Once you have configured your additional libraries, you can install the
 software.  The main pieces that will be installed are:
 
 * PDAL headers (typically in a location ./include/pdal/...)
@@ -201,7 +203,7 @@ Prepare a build directory
 
 CMake allows you to generate different builders for a project, and in this
 example, we are going to generate an "Xcode" builder for PDAL on Mac OS X.
-Additionally, we're going to use an alternative compiler -- `LLVM`_ -- which 
+Additionally, we're going to use an alternative compiler -- `LLVM`_ -- which
 under certain situations can produce much faster code on Mac OS X.
 
 ::
@@ -241,9 +243,9 @@ Configure the basic core library for the Xcode build:
     -- Build files have been written to: /Users/hobu/hg/PDAL-cmake/xcode
 
 
-Alternatively, if you have `KyngChaos`_ frameworks for `GDAL`_ and
-`GeoTIFF`_ installed, you can provide locations for those as part of your
-``cmake`` invocation:
+Alternatively, if you have `KyngChaos`_ frameworks for `GDAL`_ and `GeoTIFF`_
+installed, you can provide locations for those as part of your ``cmake``
+invocation:
 
 ::
 
@@ -253,9 +255,13 @@ Alternatively, if you have `KyngChaos`_ frameworks for `GDAL`_ and
       -D GEOTIFF_LIBRARY=/Library/Frameworks/UnixImageIO.framework/unix/lib/libgeotiff.dylib \
       ..
 
-    
-:: 
-    
+.. note::
+
+    I recommend that you use in `Homebrew`_ for `GDAL`_ and friends. Its configuration
+    is featureful and up-to-date.
+
+::
+
     $ open PDAL.xcodeproj/
 
 .. figure:: media/xcode-start.png
@@ -264,9 +270,9 @@ Alternatively, if you have `KyngChaos`_ frameworks for `GDAL`_ and
 Set default command for XCode
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Set the default executable for the project to be ``lasinfo`` by opening the 
-"Executables" tree, choosing "lasinfo," and clicking the bubble next to 
-the "Executable name" in the right-hand panel.  
+Set the default executable for the project to be ``lasinfo`` by opening the
+"Executables" tree, choosing "lasinfo," and clicking the bubble next to
+the "Executable name" in the right-hand panel.
 
 .. figure:: media/xcode-set-default-executable.png
     :alt: Setting the default executable
@@ -287,14 +293,14 @@ location of our test file. This is similar to the :ref:`same command
 Configure :ref:`Optional Libraries <dependencies>`
 ------------------------------------------------------------------------------
 
-As :ref:`before <configure_optional_libraries>`, use ``ccmake ../`` or ``cmake-gui ../`` to 
+As :ref:`before <configure_optional_libraries>`, use ``ccmake ../`` or ``cmake-gui ../`` to
 configure your :ref:`dependencies`.
 
 
 .. figure:: media/cmake-gui-osx-configured.png
     :alt: Configuring optional libraries with CMake GUI
-    
-  
+
+
 .. _`CMake`: http://www.cmake.org/
 .. _`CTest`: http://cmake.org/cmake/help/ctest-2-8-docs.html
 .. _`CMake 2.8.0+`: http://www.cmake.org/cmake/help/cmake-2-8-docs.html

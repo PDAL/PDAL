@@ -36,17 +36,17 @@ Options
 -------
 
 filename
-  LAS file to read [Required] 
+  LAS file to read [Required]
 
 extra_dims
   Extra dimensions to be read as part of each point beyond those specified by
   the LAS point format.  The format of the option is
   <dimension_name>=<type>, ... where type is one of:
-      int8, int16, int32, int64, uint8, uint16, uint32, uint64, float, double
+  int8, int16, int32, int64, uint8, uint16, uint32, uint64, float, double
   '_t' may be added to any of the type names as well (e.g., uint32_t)
 
 .. _LAS format: http://asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html
-  
+
 compression
   May be set to "lazperf" or "laszip" to choose either the LazPerf decompressor
   or the LasZip decompressor for LAZ files.  PDAL must have been build with

@@ -4,6 +4,11 @@
 Reading with PDAL
 ===============================================================================
 
+:Author: Bradley Chambers
+:Contact: brad.chambers@gmail.com
+:Date: 01/21/2015
+
+
 
 .. contents:: Contents
    :depth: 3
@@ -41,7 +46,7 @@ Our first example to demonstrate PDAL's utility will be to simply query an
 
     The `interesting.las`_ file in these examples can be found on github.
 
-PDAL outputs JavaScript `JSON`_.
+`pdal info` outputs JavaScript `JSON`_.
 
 .. _`JSON`: http://www.json.org/
 

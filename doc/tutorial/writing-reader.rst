@@ -4,6 +4,11 @@
 Writing a reader
 ===============================================================================
 
+:Author: Bradley Chambers
+:Contact: brad.chambers@gmail.com
+:Date: 01/21/2015
+
+
 PDAL's command-line application can be extended through the development of
 reader functions. In this tutorial, we will give a brief example.
 

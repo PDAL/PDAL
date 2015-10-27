@@ -3,9 +3,11 @@
 readers.geowave
 ===============================================================================
 
+.. index:: GeoWave
+
 The **GeoWave reader** uses `GeoWave`_ to read from Accumulo.  GeoWave entries
-are stored using EPSG:4326.  Instructions for configuring the GeoWave plugin
-can be found `here`_
+are stored using `EPSG:4326 <http://epsg.io/4326/>`__.  Instructions for
+configuring the GeoWave plugin can be found `here`_.
 
 Example
 -------
