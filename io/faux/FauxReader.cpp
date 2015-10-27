@@ -55,12 +55,20 @@ std::string FauxReader::getName() const { return s_info.name; }
 
 static Mode string2mode(const std::string& str)
 {
-    if (boost::iequals(str, "constant")) return Constant;
-    if (boost::iequals(str, "random")) return Random;
-    if (boost::iequals(str, "ramp")) return Ramp;
-    if (boost::iequals(str, "uniform")) return Uniform;
-    if (boost::iequals(str, "normal")) return Normal;
-    throw pdal_error("invalid Mode option: " + str);
+    std::string lstr = Utils::tolower(str);
+    if (lstr == "constant")
+        return Constant;
+    if (lstr == "random")
+        return Random;
+    if (lstr == "ramp")
+        return Ramp;
+    if (lstr == "uniform")
+        return Uniform;
+    if (lstr == "normal")
+        return Normal;
+    std::ostringstream oss;
+    oss << s_info.name << ": Invalid 'mode' option: '" << str << "'.";
+    throw pdal_error(oss.str());
 }
 
 
@@ -83,8 +91,8 @@ void FauxReader::processOptions(const Options& options)
         std::string s = options.getValueOrDefault<std::string>("bounds");
 
         std::ostringstream oss;
-        oss << "Invalid 'bounds' specification for " << getName() <<
-            ": '" << s << ".  Format: '([xmin,xmax],[ymin,ymax],[zmin,zmax])'.";
+        oss << getName() << ": Invalid 'bounds' specification: '" << s <<
+            "'.  Format: '([xmin,xmax],[ymin,ymax],[zmin,zmax])'.";
         throw pdal_error(oss.str());
     }
     m_minX = bounds.minx;
@@ -97,6 +105,12 @@ void FauxReader::processOptions(const Options& options)
     // For backward compatibility.
     if (m_count == 0)
         m_count = options.getValueOrThrow<point_count_t>("num_points");
+    if (m_count == 0)
+    {
+        std::ostringstream oss;
+        oss << getName() << ": Option 'count' must be non-zero.";
+        throw pdal_error(oss.str());
+    }
 
     m_mean_x = options.getValueOrDefault<double>("mean_x",0.0);
     m_mean_y = options.getValueOrDefault<double>("mean_y",0.0);
@@ -107,7 +121,12 @@ void FauxReader::processOptions(const Options& options)
     m_mode = string2mode(options.getValueOrThrow<std::string>("mode"));
     m_numReturns = options.getValueOrDefault("number_of_returns", 0);
     if (m_numReturns > 10)
-        throw pdal_error("faux: number_of_returns option must be 10 or less.");
+    {
+        std::ostringstream oss;
+        oss << getName() << ": Option 'number_of_returns' must be in the range "
+            "[0,10].";
+        throw pdal_error(oss.str());
+    }
 }
 
 Options FauxReader::getDefaultOptions()
@@ -145,9 +164,13 @@ Dimension::IdList FauxReader::getDefaultDimensions()
 point_count_t FauxReader::read(PointViewPtr view, point_count_t count)
 {
     const double numDeltas = (double)count - 1.0;
-    const double delX = (m_maxX - m_minX) / numDeltas;
-    const double delY = (m_maxY - m_minY) / numDeltas;
-    const double delZ = (m_maxZ - m_minZ) / numDeltas;
+    double delX, delY, delZ = 0;
+    if (numDeltas)
+    {
+        delX = (m_maxX - m_minX) / numDeltas;
+        delY = (m_maxY - m_minY) / numDeltas;
+        delZ = (m_maxZ - m_minZ) / numDeltas;
+    }
 
     log()->get(LogLevel::Debug5) << "Reading a point view of " <<
         count << " points." << std::endl;
