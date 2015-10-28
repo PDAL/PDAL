@@ -58,22 +58,27 @@ public:
               double lower_bound,
               double upper_bound,
               bool inclusive_lower_bound,
-              bool inclusive_upper_bound) :
-            m_name(name), m_lower_bound(lower_bound),
-            m_upper_bound(upper_bound),
+              bool inclusive_upper_bound,
+              bool negate) :
+            m_name(name), m_id(Dimension::Id::Unknown),
+            m_lower_bound(lower_bound), m_upper_bound(upper_bound),
             m_inclusive_lower_bound(inclusive_lower_bound),
-            m_inclusive_upper_bound(inclusive_upper_bound)
+            m_inclusive_upper_bound(inclusive_upper_bound),
+            m_negate(negate)
         {}
 
         Range()
             {}
 
         std::string m_name;
+        Dimension::Id::Enum m_id;
         double m_lower_bound;
         double m_upper_bound;
         bool m_inclusive_lower_bound;
         bool m_inclusive_upper_bound;
+        bool m_negate;
     };
+
 
     RangeFilter() : Filter()
     {}
@@ -84,11 +89,13 @@ public:
 
 private:
     std::vector<Range> m_range_list;
-    std::map<Dimension::Id::Enum, Range> m_dimensions_map;
 
     virtual void processOptions(const Options&options);
     virtual void prepared(PointTableRef table);
+    virtual bool processOne(PointRef point);
     virtual PointViewSet run(PointViewPtr view);
+    bool dimensionPasses(double v, const Range& r) const;
+    bool pointPasses(PointView *view, PointId idx) const;
 
     RangeFilter& operator=(const RangeFilter&); // not implemented
     RangeFilter(const RangeFilter&); // not implemented

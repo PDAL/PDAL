@@ -35,7 +35,7 @@ RPly: ANSI C library for PLY file format input and output
 
 <p>RPly is a library that lets applications read and write PLY files.  The
 PLY file format is widely used to store geometric information, such as 3D
-models, but is general enough to be useful for other purposes.  
+models, but is general enough to be useful for other purposes.
 </p>
 
 <p>There are other libraries out there, of course. I tried using them and
@@ -46,23 +46,23 @@ hope you are as happy with it as I am. </p>
 open-source, ANSI C, efficient, and well tested. I will keep supporting it
 for a while because all my tools use the library for input/output. The highlights are: </p>
 <ul>
-<li> A callback mechanism that makes PLY file input straightforward; 
-<li> Support for the full range of numeric formats though the user only 
+<li> A callback mechanism that makes PLY file input straightforward;
+<li> Support for the full range of numeric formats though the user only
 deals with doubles;
 <li> Binary (big and little endian) and text modes are fully supported;
 <li> Input and output are buffered for efficiency;
-<li> Available under the 
-<a href=http://www.opensource.org/licenses/mit-license.html>MIT license</a> 
+<li> Available under the
+<a href=http://www.opensource.org/licenses/mit-license.html>MIT license</a>
 for added freedom.
 </ul>
 
 <p>
 The format was developed at <a
-href=http://graphics.stanford.edu/data/3Dscanrep/>Stanford University</a> 
+href=http://graphics.stanford.edu/data/3Dscanrep/>Stanford University</a>
 for use with their 3D scanning projects. Greg Turk's PLY library, available
 from <a href=http://www.cc.gatech.edu/projects/large_models>
 Georgia Institute of Technology</a>, seems to be the standard reference
-to the PLY file format, although there are some variations out there. 
+to the PLY file format, although there are some variations out there.
 </p>
 
 <p> Whatever documentation and examples were found, were taken into
@@ -73,20 +73,25 @@ In practice, the library works with all PLY files that I could find.  </p>
 <h2>Download</h2>
 
 <p>
-Version 1.1.3 of RPly is available for download in source
-code from <a href=rply-1.1.3.tar.gz>this link</a>. Examples and documentation 
+Version 1.1.4 of RPly is available for download in source
+code from <a href=rply-1.1.4.tar.gz>this link</a>. Examples and documentation
 are packed inside the tarball. Have fun!
 </p>
 
 <p>
-Copyright &copy; 2003-2013 Diego Nehab. All rights reserved. <br>
+Copyright &copy; 2003-2015 Diego Nehab. All rights reserved. <br>
 Author: <A href="http://www.impa.br/~diego">Diego Nehab</a>
 </p>
 
 <h2>What's new?</h2>
 
 <ul>
-<li> Remove trailing white space from lines in ASCII output.
+<li> Fixed bug that prevented reading of ASCII files that
+are not terminated by a whitespace;
+<li> Added <tt>ply_open_from_file</tt> and
+<tt>ply_create_to_file</tt> variants to <tt>ply_open</tt>
+and <tt>ply_create</tt>, respectively, that receive file
+pointers instead of file names.
 </ul>
 
 <h2> RPly's idea of what a PLY file is </h2>
@@ -105,20 +110,20 @@ of its properties. Properties values also appear in the order of their
 declaration. Here is a sample PLY file describing a triangle: </p>
 
 <pre class=example>
-ply 
+ply
 format ascii 1.0
 comment this is a simple file
 obj_info any data, in one line of free form text
 element vertex 3
 property float x
 property float y
-property float z 
+property float z
 element face 1
 property list uchar int vertex_indices
 end_header
 -1 0 0
  0 1 0
- 1 0 0 
+ 1 0 0
 3 0 1 2
 </pre>
 
@@ -158,7 +163,7 @@ instance will be given. This element consists of a <tt>list</tt> property,
 named <tt>vertex_indices</tt>. Lists are sequences on which the
 first value, the <em>length</em>, gives the number of remaining values. List properties are described by the scalar
 type of their length field and the scalar type of the remaining fields.
-In the case of <tt>vertex_indices</tt>, the length field 
+In the case of <tt>vertex_indices</tt>, the length field
 is of type <tt>uchar</tt> and the remaining values are of type
 <tt>int</tt>. </p>
 
@@ -166,7 +171,7 @@ is of type <tt>uchar</tt> and the remaining values are of type
 declared in the header.  First come the 3 elements of type <tt>vertex</tt>,
 each represented by the value of their properties <tt>x</tt>, <tt>y</tt>
 and <tt>z</tt>. Then comes the single <tt>face</tt> element, composed by a
-single list of type <tt>vertex_indices</tt> containing 3 values 
+single list of type <tt>vertex_indices</tt> containing 3 values
 (0 1 2).</p>
 
 <h2> How to read a file with RPly </h2>
@@ -183,7 +188,7 @@ header come the vertices, and finally the triangles. Here is the sample
 code for the program:</p>
 
 <pre class=example>
-#include &lt;stdio.h&gt; 
+#include &lt;stdio.h&gt;
 #include "rply.h"
 
 static int vertex_cb(p_ply_argument argument) {
@@ -200,13 +205,13 @@ static int face_cb(p_ply_argument argument) {
     ply_get_argument_property(argument, NULL, &amp;length, &amp;value_index);
     switch (value_index) {
         case 0:
-        case 1: 
+        case 1:
             printf("%g ", ply_get_argument_value(argument));
             break;
         case 2:
             printf("%g\n", ply_get_argument_value(argument));
             break;
-        default: 
+        default:
             break;
     }
     return 1;
@@ -232,9 +237,9 @@ int main(void) {
 can be  associated with each property of each element. For scalar
 properties, the callback is invoked once for each instance. For list
 properties, the callback is invoked first with the number of
-entries in the instance, and then once for each of the data entries. 
+entries in the instance, and then once for each of the data entries.
 <em>This is exactly the order in which the data items appear in the
-file.</em></p> 
+file.</em></p>
 
 <p> To keep things simple, values are always passed as <tt>double</tt>,
 regardless of how they are stored in the file. From its parameters,
@@ -250,7 +255,7 @@ of the <tt>vertex</tt> element properties and the <tt>face</tt> property
 (using <tt>ply_set_read_cb</tt>). Finally, we invoke the main RPly reading
 function, <tt>ply_read</tt>. This function reads all data in the file,
 passing the data to the appropriate callbacks.  After all reading is done,
-we call <tt>ply_close</tt> to release any resources used by RPly.</p> 
+we call <tt>ply_close</tt> to release any resources used by RPly.</p>
 
 <p>There are some details, of course. <tt>Ply_set_read_cb</tt> returns the
 number of instances of the target property (which is the same as the number
@@ -266,7 +271,7 @@ property (notice the last argument of <tt>ply_set_read_cb</tt>).</p>
 <p><tt>Vertex_cb</tt> gets the user data and the property value from it's
 argument and prints accordingly.  The <tt>face_cb</tt> callback is a bit
 more complicated because lists are more complicated.  Since the
-simple file format only supports triangles, it only prints the first 
+simple file format only supports triangles, it only prints the first
 3 list values, after which it breaks the line. </p>
 
 <p> The output of the program, as expected, is: </p>
@@ -302,10 +307,10 @@ properties, we add comments and obj_infos. We then write the header with
 one by one, with calls to <tt>ply_write</tt>, <em>in the same order they
 are to appear in the file</em>.  Again, to simplify things, this function
 receives data as <tt>double</tt> and performs the needed conversion. Here
-is the code for the example: </p> 
+is the code for the example: </p>
 
 <pre class=example>
-#include &lt;stdio.h&gt; 
+#include &lt;stdio.h&gt;
 #include "rply.h"
 
 static int callback(p_ply_argument argument) {
@@ -330,13 +335,13 @@ static int setup_callbacks(p_ply iply, p_ply oply) {
         while ((property = ply_get_next_property(element, property))) {
             const char *property_name;
             e_ply_type type, length_type, value_type;
-            ply_get_property_info(property, &amp;property_name, &amp;type, 
+            ply_get_property_info(property, &amp;property_name, &amp;type,
                     &amp;length_type, &amp;value_type);
             /* setup input callback for this property */
-            if (!ply_set_read_cb(iply, element_name, property_name, callback, 
+            if (!ply_set_read_cb(iply, element_name, property_name, callback,
                     oply, 0)) return 0;
             /* add this property to output file */
-            if (!ply_add_property(oply, property_name, type, length_type, 
+            if (!ply_add_property(oply, property_name, type, length_type,
                     value_type)) return 0;
         }
     }
@@ -345,26 +350,26 @@ static int setup_callbacks(p_ply iply, p_ply oply) {
 
 int main(int argc, char *argv[]) {
     const char *value;
-    p_ply iply, oply; 
+    p_ply iply, oply;
     iply = ply_open("input.ply", NULL, 0, NULL);
-    if (!iply) return 1; 
-    if (!ply_read_header(iply)) return 1; 
+    if (!iply) return 1;
+    if (!ply_read_header(iply)) return 1;
     oply = ply_create("output.ply", PLY_LITTLE_ENDIAN, NULL, 0, NULL);
     if (!oply) return 1;
-    if (!setup_callbacks(iply, oply)) return 1; 
+    if (!setup_callbacks(iply, oply)) return 1;
     /* pass comments and obj_infos from input to output */
     value = NULL;
     while ((value = ply_get_next_comment(iply, value)))
-        if (!ply_add_comment(oply, value)) return 1; 
+        if (!ply_add_comment(oply, value)) return 1;
     value = NULL;
     while ((value = ply_get_next_obj_info(iply, value)))
         if (!ply_add_obj_info(oply, value)) return 1;;
     /* write output header */
-    if (!ply_write_header(oply)) return 1; 
+    if (!ply_write_header(oply)) return 1;
     /* read input file generating callbacks that pass data to output file */
-    if (!ply_read(iply)) return 1; 
+    if (!ply_read(iply)) return 1;
     /* close up, we are done */
-    if (!ply_close(iply)) return 1; 
+    if (!ply_close(iply)) return 1;
     if (!ply_close(oply)) return 1;
     return 0;
 }
@@ -393,7 +398,7 @@ locale for numeric formatting. RPly relies on library
 functions (such as <tt>fprintf</tt> and <tt>strtod</tt>)
 that are affected by the current locale. If your software
 modifies the locale (or if it uses another library/toolkit that
-does) and you use RPly under the modified locale, you may be 
+does) and you use RPly under the modified locale, you may be
 unable to read or write properly formatted ASCII PLY files.
 </p>
 
@@ -431,11 +436,11 @@ and returns a handle to it.
 
 <p class=arguments>
 <tt>Name</tt> is the file name, and <tt>error_cb</tt> is a function to
-be called when an error is found. 
+be called when an error is found.
 Arguments <tt>idata</tt>
 and <tt>pdata</tt> are available to the error callback via the
-<a href=#ply_get_ply_user_data><tt>ply_get_ply_user_data</tt></a> 
-function.  
+<a href=#ply_get_ply_user_data><tt>ply_get_ply_user_data</tt></a>
+function.
 If <tt>error_cb</tt> is NULL, the default
 error callback is used. It prints a message to the standard error stream.
 </p>
@@ -449,6 +454,41 @@ Note: <tt>Error_cb</tt> is of type <tt>void
     (*p_ply_error_cb)(p_ply ply, const char *message)</tt>.
 </p>
 
+<!-- ply_open_from_file ++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class=name id=ply_open_from_file>
+p_ply <b>ply_open_from_file</b>(FILE *file_pointer, p_ply_error_cb error_cb, long idata, void *pdata)
+</p>
+
+<p class=description>
+Checks if the FILE pointer points to a valid PLY file and returns a
+handle to it. The handle can be used wherever a handle returned by <a
+href=#ply_open><tt>ply_open</tt></a> is accepted.
+</p>
+
+<p class=arguments>
+<tt>File_pointer</tt> is the FILE pointer open for reading, and <tt>error_cb</tt> is a function to be called when an error is found.
+Arguments <tt>idata</tt>
+and <tt>pdata</tt> are available to the error callback via the
+<a href=#ply_get_ply_user_data><tt>ply_get_ply_user_data</tt></a>
+function.
+If <tt>error_cb</tt> is NULL, the default
+error callback is used. It prints a message to the standard error stream.
+</p>
+
+<p class=return>
+Returns a handle to the file or NULL on error.
+</p>
+
+<p class=note>
+Note: <tt>Error_cb</tt> is of type <tt>void
+    (*p_ply_error_cb)(p_ply ply, const char *message)</tt>.
+</p>
+
+<p class=note>
+Note: This function is declared in header <tt>rplyfile.h</tt>.
+</p>
+
 <!-- ply_get_ply_user_data ++++++++++++++++++++++++++++++++++++++++ -->
 
 <p class=name id=ply_get_ply_user_data>
@@ -456,7 +496,7 @@ int <b>ply_get_ply_user_data</b>(p_ply_ply ply, void *pdata, long *idata)
 </p>
 
 <p class=description>
-Retrieves user data from the ply handle. 
+Retrieves user data from the ply handle.
 </p>
 
 <p class=arguments>
@@ -467,7 +507,7 @@ Retrieves user data from the ply handle.
 </p>
 
 <p class=return>
-Returns 1 in case of success, 0 otherwise. 
+Returns 1 in case of success, 0 otherwise.
 </p>
 
 
@@ -478,22 +518,23 @@ int <b>ply_read_header</b>(p_ply ply)
 </p>
 
 <p class=description>
-Reads and parses the header of a PLY file. 
-After a call to this function, the query functions 
+Reads and parses the header of a PLY file.
+After a call to this function, the query functions
 <a href=#ply_get_next_element><tt>ply_get_next_element</tt></a>,
 <a href=#ply_get_next_property><tt>ply_get_next_property</tt></a>,
 <a href=#ply_get_next_comment><tt>ply_get_next_comment</tt></a>, and
 <a href=#ply_get_next_obj_info><tt>ply_get_next_obj_info</tt></a> can be
-called. Callbacks can also be set with the 
-<a href=#ply_set_read_cb><tt>ply_set_read_cb</tt></a> function. 
+called. Callbacks can also be set with the
+<a href=#ply_set_read_cb><tt>ply_set_read_cb</tt></a> function.
 </p>
 
 <p class=arguments>
-<tt>Ply</tt> is a handle returned by <a href=#ply_open><tt>ply_open</tt></a>. 
+<tt>Ply</tt> is a handle returned by <a
+href=#ply_open><tt>ply_open</tt></a>.
 </p>
 
 <p class=return>
-Returns 1 in case of success, 0 otherwise. 
+Returns 1 in case of success, 0 otherwise.
 </p>
 
 <!-- ply_set_read_cb +++++++++++++++++++++++++++++++++++++++++++++++++ -->
@@ -518,35 +559,35 @@ Sets up the callback to be invoked when the value of a property is read.
 <tt>Element_name</tt> and <tt>property_name</tt> are the names of the
 element and property of interest. <tt>Read_cb</tt> is the callback
 function.  <tt>Pdata</tt> and <tt>idata</tt> are user data to be passed to
-the callback function.  
+the callback function.
 </p>
 
 <p class=return>
-Returns the number of instances of the element of interest. 
+Returns the number of instances of the element of interest.
 </p>
 
 <p class=note>
-Note: <tt>Read_cb</tt> is of type 
-<tt>int (*p_ply_read_cb)(p_ply_argument argument)</tt>. 
-The callback should return 1 to continue the reading process, 
-or return 0 to abort. 
+Note: <tt>Read_cb</tt> is of type
+<tt>int (*p_ply_read_cb)(p_ply_argument argument)</tt>.
+The callback should return 1 to continue the reading process,
+or return 0 to abort.
 
 <!-- ply_get_argument_element ++++++++++++++++++++++++++++++++++++++++ -->
 
 <p class=name id=ply_get_argument_element>
 int <b>ply_get_argument_element</b>(<br>
 &nbsp;&nbsp; p_ply_argument argument,<br>
-&nbsp;&nbsp; p_ply_element *element,<br> 
+&nbsp;&nbsp; p_ply_element *element,<br>
 &nbsp;&nbsp; long *instance_index<br>
 )
 </p>
 
 <p class=description>
-Retrieves element information from the callback argument. 
+Retrieves element information from the callback argument.
 </p>
 
 <p class=arguments>
-<tt>Argument</tt> is the handle passed to the callback. 
+<tt>Argument</tt> is the handle passed to the callback.
 <tt>Element</tt> receives a handle to the element
 originating the callback. <tt>Instance_index</tt> receives
 the index of the instance of the element
@@ -554,7 +595,7 @@ being read. <tt>Element</tt> and <tt>instance_index</tt> can be NULL.
 </p>
 
 <p class=return>
-Returns 1 in case of success, 0 otherwise. 
+Returns 1 in case of success, 0 otherwise.
 </p>
 
 <p class=note>
@@ -574,11 +615,11 @@ int <b>ply_get_argument_property</b>(<br>
 </p>
 
 <p class=description>
-Retrieves property information from the callback argument. 
+Retrieves property information from the callback argument.
 </p>
 
 <p class=arguments>
-<tt>Argument</tt> is the handle passed to the callback. 
+<tt>Argument</tt> is the handle passed to the callback.
 <tt>Property</tt> receives a handle to the property
 originating the callback. <tt>Length</tt> receives the number
 of values in the list property (1 for scalar properties).
@@ -589,7 +630,7 @@ gives the number of entries). <tt>Property</tt>, <tt>length</tt> and
 </p>
 
 <p class=return>
-Returns 1 in case of success, 0 otherwise. 
+Returns 1 in case of success, 0 otherwise.
 </p>
 
 <p class=note>
@@ -605,7 +646,7 @@ int <b>ply_get_argument_user_data</b>(p_ply_argument argument, void *pdata,
 </p>
 
 <p class=description>
-Retrieves the user data from the callback argument. 
+Retrieves the user data from the callback argument.
 </p>
 
 <p class=arguments>
@@ -616,7 +657,7 @@ Retrieves the user data from the callback argument.
 </p>
 
 <p class=return>
-Returns 1 in case of success, 0 otherwise. 
+Returns 1 in case of success, 0 otherwise.
 </p>
 
 <!-- ply_get_argument_value +++++++++++++++++++++++++++++++++++++++++++ -->
@@ -626,7 +667,7 @@ double <b>ply_get_argument_value</b>(p_ply_argument argument)
 </p>
 
 <p class=description>
-Retrieves the property value from the callback argument. 
+Retrieves the property value from the callback argument.
 </p>
 
 <p class=arguments>
@@ -634,7 +675,7 @@ Retrieves the property value from the callback argument.
 </p>
 
 <p class=return>
-Returns the property value. 
+Returns the property value.
 </p>
 
 <!-- ply_read +++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
@@ -644,15 +685,15 @@ int <b>ply_read</b>(p_ply ply)
 </p>
 
 <p class=description>
-Reads all data in file, calling appropriate callbacks. 
+Reads all data in file, calling appropriate callbacks.
 </p>
 
 <p class=arguments>
-<tt>Ply</tt> is a handle returned by <a href=#ply_open><tt>ply_open</tt></a>. 
+<tt>Ply</tt> is a handle returned by <a href=#ply_open><tt>ply_open</tt></a>.
 </p>
 
 <p class=return>
-Returns 1 in case of success, 0 otherwise. 
+Returns 1 in case of success, 0 otherwise.
 </p>
 
 <!-- ply_get_next_element ++++++++++++++++++++++++++++++++++++++++++++ -->
@@ -662,11 +703,11 @@ p_ply_element <b>ply_get_next_element</b>(p_ply ply, p_ply_element last)
 </p>
 
 <p class=description>
-Iterates over all elements on the header of a PLY file. 
+Iterates over all elements on the header of a PLY file.
 </p>
 
 <p class=arguments>
-<tt>Ply</tt> is a handle returned by <a href=#ply_open><tt>ply_open</tt></a>. 
+<tt>Ply</tt> is a handle returned by <a href=#ply_open><tt>ply_open</tt></a>.
 <a href=#ply_read_header><tt>Ply_read_header</tt></a> must have been called
 on the handle otherwise no elements will be found.
 <tt>Last</tt> is NULL to retrieve the first element, and an element to
@@ -674,7 +715,7 @@ retrieve the next element.
 </p>
 
 <p class=return>
-Returns the next element, or NULL if no more elements. 
+Returns the next element, or NULL if no more elements.
 </p>
 
 <p class=note>
@@ -689,17 +730,17 @@ p_ply_property <b>ply_get_next_property</b>(p_ply_element element, p_ply_propert
 </p>
 
 <p class=description>
-Iterates over all properties of an element. 
+Iterates over all properties of an element.
 </p>
 
 <p class=arguments>
-<tt>Element</tt> is an element handle. 
+<tt>Element</tt> is an element handle.
 <tt>Last</tt> is NULL to retrieve the first property, and a property to
 retrieve the next property.
 </p>
 
 <p class=return>
-Returns the next property, or NULL if no more properties. 
+Returns the next property, or NULL if no more properties.
 </p>
 
 <p class=note>
@@ -714,11 +755,11 @@ const char *<b>ply_get_next_comment</b>(p_ply ply, const char *last)
 </p>
 
 <p class=description>
-Iterates over all comments on the header of a PLY file. 
+Iterates over all comments on the header of a PLY file.
 </p>
 
 <p class=arguments>
-<tt>Ply</tt> is a handle returned by <a href=#ply_open><tt>ply_open</tt></a>. 
+<tt>Ply</tt> is a handle returned by <a href=#ply_open><tt>ply_open</tt></a>.
 <a href=#ply_read_header><tt>Ply_read_header</tt></a> must have been called
 on the handle otherwise no comments will be found.
 <tt>Last</tt> is NULL to retrieve the first comment, and a comment to
@@ -726,7 +767,7 @@ retrieve the next comment.
 </p>
 
 <p class=return>
-Returns the next comment, or NULL if no more comments. 
+Returns the next comment, or NULL if no more comments.
 </p>
 
 <!-- ply_get_next_obj_info +++++++++++++++++++++++++++++++++++++++++++ -->
@@ -736,11 +777,11 @@ const char *<b>ply_get_next_obj_info</b>(p_ply ply, const char *last)
 </p>
 
 <p class=description>
-Iterates over all obj_infos on the header of a PLY file. 
+Iterates over all obj_infos on the header of a PLY file.
 </p>
 
 <p class=arguments>
-<tt>Ply</tt> is a handle returned by <a href=#ply_open><tt>ply_open</tt></a>. 
+<tt>Ply</tt> is a handle returned by <a href=#ply_open><tt>ply_open</tt></a>.
 <a href=#ply_read_header><tt>Ply_read_header</tt></a> must have been called
 on the handle otherwise no obj_infos will be found.
 <tt>Last</tt> is NULL to retrieve the first obj_info, and a obj_info to
@@ -748,7 +789,7 @@ retrieve the next obj_info.
 </p>
 
 <p class=return>
-Returns the next obj_info, or NULL if no more obj_infos. 
+Returns the next obj_info, or NULL if no more obj_infos.
 </p>
 
 <!-- ply_get_element_info ++++++++++++++++++++++++++++++++++++++++++++ -->
@@ -759,18 +800,18 @@ int <b>ply_get_element_info</b>(p_ply_element element, const char** name,
 </p>
 
 <p class=description>
-Retrieves information from an element handle. 
+Retrieves information from an element handle.
 </p>
 
 <p class=arguments>
-<tt>Element</tt> is the handle of the element of interest. 
-<tt>Name</tt> receives the internal copy of the element name. 
-<tt>Ninstances</tt> receives the number of instances of this element 
+<tt>Element</tt> is the handle of the element of interest.
+<tt>Name</tt> receives the internal copy of the element name.
+<tt>Ninstances</tt> receives the number of instances of this element
 in the file. Both <tt>name</tt> and <tt>ninstances</tt> can be NULL.
 </p>
 
 <p class=return>
-Returns 1 in case of success, 0 otherwise. 
+Returns 1 in case of success, 0 otherwise.
 </p>
 
 <!-- ply_get_property_info +++++++++++++++++++++++++++++++++++++++++++ -->
@@ -786,30 +827,30 @@ int <b>ply_get_property_info</b>(<br>
 </p>
 
 <p class=description>
-Retrieves information from a property handle. 
+Retrieves information from a property handle.
 </p>
 
 <p class=arguments>
-<tt>Property</tt> is the handle of the property of interest. 
-<tt>Name</tt> receives the internal copy of the property name. 
-<tt>Type</tt> receives the property type. 
-<tt>Length_type</tt> receives the scalar type of the first entry 
-in a list property (the one that gives the number of entries). 
-<tt>Value_type</tt> receives the scalar type of the remaining list entries. 
+<tt>Property</tt> is the handle of the property of interest.
+<tt>Name</tt> receives the internal copy of the property name.
+<tt>Type</tt> receives the property type.
+<tt>Length_type</tt> receives the scalar type of the first entry
+in a list property (the one that gives the number of entries).
+<tt>Value_type</tt> receives the scalar type of the remaining list entries.
 <tt>Name</tt>, <tt>type</tt>, <tt>length_type</tt>, and
 <tt>value_type</tt> can be NULL.
 </p>
 
 <p class=return>
-Returns 1 in case of success, 0 otherwise. 
+Returns 1 in case of success, 0 otherwise.
 </p>
 
-<p class=note> 
+<p class=note>
 Note: <tt>Length_type</tt> and <tt>value_type</tt> can
 receive any of the constants for scalar types defined in
 <tt>e_ply_type</tt>. <tt>Type</tt> can, in addition, be <tt>PLY_LIST</tt>,
 in which case the property is a list property and the fields
-<tt>length_type</tt> and <tt>value_type</tt> become meaningful.  
+<tt>length_type</tt> and <tt>value_type</tt> become meaningful.
 </p>
 
 <!-- ply_create ++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
@@ -820,19 +861,19 @@ p_ply <b>ply_create</b>(const char *name, e_ply_storage_mode storage_mode,
 </p>
 
 <p class=description>
-Creates a PLY file for writing. 
+Creates a PLY file for writing.
 </p>
 
 <p class=arguments>
 <tt>Name</tt> is the file name, <tt>storage_mode</tt> is the file storage mode
 (<tt>PLY_ASCII</tt>, <tt>PLY_LITTLE_ENDIAN</tt>,
 <tt>PLY_BIG_ENDIAN</tt>, or <tt>PLY_DEFAULT</tt> to
-automatically detect host endianess). 
-<tt>Error_cb</tt> is a function to be called when an error is found. 
+automatically detect host endianess).
+<tt>Error_cb</tt> is a function to be called when an error is found.
 Arguments <tt>idata</tt>
 and <tt>pdata</tt> are available to the error callback via the
-<a href=#ply_get_ply_user_data><tt>ply_get_ply_user_data</tt></a> 
-function.  
+<a href=#ply_get_ply_user_data><tt>ply_get_ply_user_data</tt></a>
+function.
 If <tt>error_cb</tt> is NULL, the default
 error callback is used. It prints a message to the standard error stream.
 </p>
@@ -846,6 +887,46 @@ Note: <tt>Error_cb</tt> is of type <tt>void
     (*p_ply_error_cb)(const char *message)</tt>
 </p>
 
+<!-- ply_create_to_file ++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+<p class=name id=ply_create_to_file>
+p_ply <b>ply_create_to_file</b>(FILE *file_pointer, e_ply_storage_mode storage_mode, p_ply_error_cb error_cb)
+</p>
+
+<p class=description>
+Creates a PLY file to be written to a FILE pointer and
+returns a handle to it.
+The handle can be used wherever a handle returned by <a
+href=#ply_create><tt>ply_create</tt></a> is accepted.
+</p>
+
+<p class=arguments>
+<tt>File_pointer</tt> a pointer to a file open for writing, <tt>storage_mode</tt> is the file storage mode
+(<tt>PLY_ASCII</tt>, <tt>PLY_LITTLE_ENDIAN</tt>,
+<tt>PLY_BIG_ENDIAN</tt>, or <tt>PLY_DEFAULT</tt> to
+automatically detect host endianess).
+<tt>Error_cb</tt> is a function to be called when an error is found.
+Arguments <tt>idata</tt>
+and <tt>pdata</tt> are available to the error callback via the
+<a href=#ply_get_ply_user_data><tt>ply_get_ply_user_data</tt></a>
+function.
+If <tt>error_cb</tt> is NULL, the default
+error callback is used. It prints a message to the standard error stream.
+</p>
+
+<p class=return>
+Returns a handle to the file or NULL on error.
+</p>
+
+<p class=note>
+Note: <tt>Error_cb</tt> is of type <tt>void
+    (*p_ply_error_cb)(const char *message)</tt>
+</p>
+
+<p class=note>
+Note: This function is declared in header <tt>rplyfile.h</tt>.
+</p>
+
 <!-- ply_add_element +++++++++++++++++++++++++++++++++++++++++++++++++ -->
 
 <p class=name id=ply_add_element>
@@ -853,18 +934,18 @@ int <b>ply_add_element</b>(p_ply ply, const char *name, long ninstances)
 </p>
 
 <p class=description>
-Adds a new element to the ply file. 
+Adds a new element to the ply file.
 </p>
 
 <p class=arguments>
-<tt>Ply</tt> is a handle returned by 
+<tt>Ply</tt> is a handle returned by
 <a href=#ply_create><tt>ply_create</tt></a>, <tt>name</tt> is the element
 name and <tt>ninstances</tt> is the number of instances of this element that
 will be written to the file.
 </p>
 
 <p class=return>
-Returns 1 in case of success, 0 otherwise. 
+Returns 1 in case of success, 0 otherwise.
 </p>
 
 <!-- ply_add_property ++++++++++++++++++++++++++++++++++++++++++++++++ -->
@@ -874,29 +955,29 @@ int <b>ply_add_property</b>(<br>
 &nbsp;&nbsp; p_ply ply,<br>
 &nbsp;&nbsp; const char *name,<br>
 &nbsp;&nbsp; e_ply_type type,<br>
-&nbsp;&nbsp; e_ply_type length_type,<br> 
+&nbsp;&nbsp; e_ply_type length_type,<br>
 &nbsp;&nbsp; e_ply_type value_type<br>
 )
 </p>
 
 <p class=description>
-Adds a new property to the last element added to the ply file. 
+Adds a new property to the last element added to the ply file.
 </p>
 
 <p class=arguments>
-<tt>Ply</tt> is a handle returned by 
-<a href=#ply_create><tt>ply_create</tt></a> and <tt>name</tt> is the 
-property name. 
-<tt>Type</tt> is the property type. 
-<tt>Length_type</tt> is the scalar type of the first entry 
-in a list property (the one that gives the number of entries). 
-<tt>Value_type</tt> is the scalar type of the remaining list entries. 
-If <tt>type</tt> is not <tt>PLY_LIST</tt>, <tt>length_type</tt> and 
+<tt>Ply</tt> is a handle returned by
+<a href=#ply_create><tt>ply_create</tt></a> and <tt>name</tt> is the
+property name.
+<tt>Type</tt> is the property type.
+<tt>Length_type</tt> is the scalar type of the first entry
+in a list property (the one that gives the number of entries).
+<tt>Value_type</tt> is the scalar type of the remaining list entries.
+If <tt>type</tt> is not <tt>PLY_LIST</tt>, <tt>length_type</tt> and
 <tt>value_type</tt> are ignored.
 </p>
 
 <p class=return>
-Returns 1 in case of success, 0 otherwise. 
+Returns 1 in case of success, 0 otherwise.
 </p>
 
 <p class=note>
@@ -920,7 +1001,7 @@ int <b>ply_add_list_property</b>(<br>
 
 <p class=description>
 Same as <a href=#ply_add_property><tt>ply_add_property</tt></a> if
-<tt>type</tt> is <tt>PLY_LIST</tt>. 
+<tt>type</tt> is <tt>PLY_LIST</tt>.
 </p>
 
 <!-- ply_add_scalar_property +++++++++++++++++++++++++++++++++++++++++ -->
@@ -931,7 +1012,7 @@ int <b>ply_add_scalar_property</b>(p_ply ply, const char *name, e_ply_type type)
 
 <p class=description>
 Same as <a href=#ply_add_property><tt>ply_add_property</tt></a> if
-<tt>type</tt> is <em>not</em> <tt>PLY_LIST</tt>. 
+<tt>type</tt> is <em>not</em> <tt>PLY_LIST</tt>.
 </p>
 
 <!-- ply_add_comment +++++++++++++++++++++++++++++++++++++++++++++++++ -->
@@ -941,17 +1022,17 @@ int <b>ply_add_comment</b>(p_ply ply, const char *comment);
 </p>
 
 <p class=description>
-Adds a comment to a PLY file. 
+Adds a comment to a PLY file.
 </p>
 
 <p class=arguments>
-<tt>Ply</tt> is a handle returned by 
-<a href=#ply_create><tt>ply_create</tt></a> and <tt>comment</tt> is the 
-comment text. 
+<tt>Ply</tt> is a handle returned by
+<a href=#ply_create><tt>ply_create</tt></a> and <tt>comment</tt> is the
+comment text.
 </p>
 
 <p class=return>
-Returns 1 in case of success, 0 otherwise. 
+Returns 1 in case of success, 0 otherwise.
 </p>
 
 <!-- ply_add_obj_info ++++++++++++++++++++++++++++++++++++++++++++++++ -->
@@ -961,17 +1042,17 @@ int <b>ply_add_obj_info</b>(p_ply ply, const char *obj_info);
 </p>
 
 <p class=description>
-Adds a obj_info to a PLY file. 
+Adds a obj_info to a PLY file.
 </p>
 
 <p class=arguments>
-<tt>Ply</tt> is a handle returned by 
-<a href=#ply_create><tt>ply_create</tt></a> and <tt>obj_info</tt> is the 
-obj_info text. 
+<tt>Ply</tt> is a handle returned by
+<a href=#ply_create><tt>ply_create</tt></a> and <tt>obj_info</tt> is the
+obj_info text.
 </p>
 
 <p class=return>
-Returns 1 in case of success, 0 otherwise. 
+Returns 1 in case of success, 0 otherwise.
 </p>
 
 <!-- ply_write_header ++++++++++++++++++++++++++++++++++++++++++++++++ -->
@@ -982,17 +1063,17 @@ int <b>ply_write_header</b>(p_ply ply);
 
 <p class=description>
 Writes the PLY file header to disk, after all elements, properties,
-comments and obj_infos have been added to the handle. 
+comments and obj_infos have been added to the handle.
 </p>
 
 <p class=arguments>
-<tt>Ply</tt> is a handle returned by 
-<a href=#ply_create><tt>ply_create</tt></a> and <tt>comment</tt> is the 
-comment text. 
+<tt>Ply</tt> is a handle returned by
+<a href=#ply_create><tt>ply_create</tt></a> and <tt>comment</tt> is the
+comment text.
 </p>
 
 <p class=return>
-Returns 1 in case of success, 0 otherwise. 
+Returns 1 in case of success, 0 otherwise.
 </p>
 
 <!-- ply_write +++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
@@ -1002,19 +1083,19 @@ int <b>ply_write</b>(p_ply ply, double value);
 </p>
 
 <p class=description>
-Passes a value to be stored in the PLY file. 
-Values must be passed in the order they will appear in the file. 
+Passes a value to be stored in the PLY file.
+Values must be passed in the order they will appear in the file.
 </p>
 
 <p class=arguments>
-<tt>Ply</tt> is a handle returned by 
+<tt>Ply</tt> is a handle returned by
 <a href=#ply_create><tt>ply_create</tt></a> and <tt>value</tt> is the
-value to be stored.  For simplicity, values are always passed as 
+value to be stored.  For simplicity, values are always passed as
 <tt>double</tt> and conversion is performed as needed.
 </p>
 
 <p class=return>
-Returns 1 in case of success, 0 otherwise. 
+Returns 1 in case of success, 0 otherwise.
 </p>
 
 <!-- ply_close +++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
@@ -1025,17 +1106,17 @@ int <b>ply_close</b>(p_ply ply);
 
 <p class=description>
 Closes the handle and ensures that all resources have been freed and data
-have been written. 
+have been written.
 </p>
 
 <p class=arguments>
-<tt>Ply</tt> is a handle returned by 
-<a href=#ply_create><tt>ply_create</tt></a> or by 
-<a href=#ply_open><tt>ply_open</tt></a>. 
+<tt>Ply</tt> is a handle returned by
+<a href=#ply_create><tt>ply_create</tt></a> or by
+<a href=#ply_open><tt>ply_open</tt></a>.
 </p>
 
 <p class=return>
-Returns 1 in case of success, 0 otherwise. 
+Returns 1 in case of success, 0 otherwise.
 </p>
 
 <!-- footer ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
@@ -1046,7 +1127,7 @@ Returns 1 in case of success, 0 otherwise.
 <p>
 <small>
 Last modified by Diego Nehab on <br>
-Thu Jul  4 15:25:50 BRT 2013
+Fri Aug 21 17:11:09 BRT 2015
 </small>
 </p>
 </center>

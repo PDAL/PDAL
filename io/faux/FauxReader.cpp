@@ -55,12 +55,20 @@ std::string FauxReader::getName() const { return s_info.name; }
 
 static Mode string2mode(const std::string& str)
 {
-    if (boost::iequals(str, "constant")) return Constant;
-    if (boost::iequals(str, "random")) return Random;
-    if (boost::iequals(str, "ramp")) return Ramp;
-    if (boost::iequals(str, "uniform")) return Uniform;
-    if (boost::iequals(str, "normal")) return Normal;
-    throw pdal_error("invalid Mode option: " + str);
+    std::string lstr = Utils::tolower(str);
+    if (lstr == "constant")
+        return Constant;
+    if (lstr == "random")
+        return Random;
+    if (lstr == "ramp")
+        return Ramp;
+    if (lstr == "uniform")
+        return Uniform;
+    if (lstr == "normal")
+        return Normal;
+    std::ostringstream oss;
+    oss << s_info.name << ": Invalid 'mode' option: '" << str << "'.";
+    throw pdal_error(oss.str());
 }
 
 
@@ -83,8 +91,8 @@ void FauxReader::processOptions(const Options& options)
         std::string s = options.getValueOrDefault<std::string>("bounds");
 
         std::ostringstream oss;
-        oss << "Invalid 'bounds' specification for " << getName() <<
-            ": '" << s << ".  Format: '([xmin,xmax],[ymin,ymax],[zmin,zmax])'.";
+        oss << getName() << ": Invalid 'bounds' specification: '" << s <<
+            "'.  Format: '([xmin,xmax],[ymin,ymax],[zmin,zmax])'.";
         throw pdal_error(oss.str());
     }
     m_minX = bounds.minx;
@@ -97,6 +105,12 @@ void FauxReader::processOptions(const Options& options)
     // For backward compatibility.
     if (m_count == 0)
         m_count = options.getValueOrThrow<point_count_t>("num_points");
+    if (m_count == 0)
+    {
+        std::ostringstream oss;
+        oss << getName() << ": Option 'count' must be non-zero.";
+        throw pdal_error(oss.str());
+    }
 
     m_mean_x = options.getValueOrDefault<double>("mean_x",0.0);
     m_mean_y = options.getValueOrDefault<double>("mean_y",0.0);
@@ -107,8 +121,26 @@ void FauxReader::processOptions(const Options& options)
     m_mode = string2mode(options.getValueOrThrow<std::string>("mode"));
     m_numReturns = options.getValueOrDefault("number_of_returns", 0);
     if (m_numReturns > 10)
-        throw pdal_error("faux: number_of_returns option must be 10 or less.");
+    {
+        std::ostringstream oss;
+        oss << getName() << ": Option 'number_of_returns' must be in the range "
+            "[0,10].";
+        throw pdal_error(oss.str());
+    }
+    if (m_count > 1)
+    {
+        m_delX = (m_maxX - m_minX) / (m_count - 1);
+        m_delY = (m_maxY - m_minY) / (m_count - 1);
+        m_delZ = (m_maxZ - m_minZ) / (m_count - 1);
+    }
+    else
+    {
+        m_delX = 0;
+        m_delY = 0;
+        m_delZ = 0;
+    }
 }
+
 
 Options FauxReader::getDefaultOptions()
 {
@@ -142,66 +174,71 @@ Dimension::IdList FauxReader::getDefaultDimensions()
 }
 
 
+void FauxReader::ready(PointTableRef /*table*/)
+{
+    m_returnNum = 1;
+    m_time = 0;
+    m_seed = (uint32_t)std::time(NULL);    
+    m_index = 0;
+}
+
+
+bool FauxReader::processOne(PointRef point)
+{
+    if (m_index >= m_count)
+        return false;
+
+    double x;
+    double y;
+    double z;
+    switch (m_mode)
+    {
+    case Random:
+        x = Utils::random(m_minX, m_maxX);
+        y = Utils::random(m_minY, m_maxY);
+        z = Utils::random(m_minZ, m_maxZ);
+        break;
+    case Constant:
+        x = m_minX;
+        y = m_minY;
+        z = m_minZ;
+        break;
+    case Ramp:
+        x = m_minX + m_delX * m_index;
+        y = m_minY + m_delY * m_index;
+        z = m_minZ + m_delZ * m_index;
+        break;
+    case Uniform:
+        x = Utils::uniform(m_minX, m_maxX, m_seed++);
+        y = Utils::uniform(m_minY, m_maxY, m_seed++);
+        z = Utils::uniform(m_minZ, m_maxZ, m_seed++);
+        break;
+    case Normal:
+        x = Utils::normal(m_mean_x, m_stdev_x, m_seed++);
+        y = Utils::normal(m_mean_y, m_stdev_y, m_seed++);
+        z = Utils::normal(m_mean_z, m_stdev_z, m_seed++);
+        break;
+    }
+
+    point.setField(Dimension::Id::X, x);
+    point.setField(Dimension::Id::Y, y);
+    point.setField(Dimension::Id::Z, z);
+    point.setField(Dimension::Id::OffsetTime, m_time++);
+    if (m_numReturns > 0)
+    {
+        point.setField(Dimension::Id::ReturnNumber, m_returnNum);
+        point.setField(Dimension::Id::NumberOfReturns, m_numReturns);
+        m_returnNum = (m_returnNum % m_numReturns) + 1;
+    }
+    m_index++;
+    return true;
+}
+
 point_count_t FauxReader::read(PointViewPtr view, point_count_t count)
 {
-    const double numDeltas = (double)count - 1.0;
-    const double delX = (m_maxX - m_minX) / numDeltas;
-    const double delY = (m_maxY - m_minY) / numDeltas;
-    const double delZ = (m_maxZ - m_minZ) / numDeltas;
-
-    log()->get(LogLevel::Debug5) << "Reading a point view of " <<
-        count << " points." << std::endl;
-
-    uint32_t seed = static_cast<uint32_t>(std::time(NULL));
-
     for (PointId idx = 0; idx < count; ++idx)
     {
-        double x;
-        double y;
-        double z;
-        switch (m_mode)
-        {
-            case Random:
-                x = Utils::random(m_minX, m_maxX);
-                y = Utils::random(m_minY, m_maxY);
-                z = Utils::random(m_minZ, m_maxZ);
-                break;
-            case Constant:
-                x = m_minX;
-                y = m_minY;
-                z = m_minZ;
-                break;
-            case Ramp:
-                x = m_minX + delX * idx;
-                y = m_minY + delY * idx;
-                z = m_minZ + delZ * idx;
-                break;
-            case Uniform:
-                x = Utils::uniform(m_minX, m_maxX, seed++);
-                y = Utils::uniform(m_minY, m_maxY, seed++);
-                z = Utils::uniform(m_minZ, m_maxZ, seed++);
-                break;
-            case Normal:
-                x = Utils::normal(m_mean_x, m_stdev_x, seed++);
-                y = Utils::normal(m_mean_y, m_stdev_y, seed++);
-                z = Utils::normal(m_mean_z, m_stdev_z, seed++);
-                break;
-            default:
-                throw pdal_error("invalid mode in FauxReader");
-                break;
-        }
-
-        view->setField(Dimension::Id::X, idx, x);
-        view->setField(Dimension::Id::Y, idx, y);
-        view->setField(Dimension::Id::Z, idx, z);
-        view->setField(Dimension::Id::OffsetTime, idx, m_time++);
-        if (m_numReturns > 0)
-        {
-            view->setField(Dimension::Id::ReturnNumber, idx, m_returnNum);
-            view->setField(Dimension::Id::NumberOfReturns, idx, m_numReturns);
-            m_returnNum = (m_returnNum % m_numReturns) + 1;
-        }
-
+        processOne(view->point(idx));
         if (m_cb)
             m_cb(*view, idx);
     }

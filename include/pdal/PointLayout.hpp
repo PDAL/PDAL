@@ -51,6 +51,8 @@ public:
     virtual ~PointLayout() {}
 
     void finalize();
+    bool finalized() const
+        { return m_finalized; }
 
     void registerDims(std::vector<Dimension::Id::Enum> ids);
     void registerDims(Dimension::Id::Enum *id);

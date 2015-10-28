@@ -146,15 +146,17 @@ public:
 
     virtual void finalize()
     {
-        BasePointTable::finalize();
-        m_buf.resize(pointsToBytes(m_capacity + 1));
+        if (!layout()->finalized())
+        {
+            BasePointTable::finalize();
+            m_buf.resize(pointsToBytes(m_capacity + 1));
+        }
     }
 
     point_count_t capacity() const
         { return m_capacity; }
     void reset()
-        { m_numPts = 0; }
-
+        { m_numPts = 0; } 
 protected:
     virtual char *getPoint(PointId idx)
         { return m_buf.data() + pointsToBytes(idx); }

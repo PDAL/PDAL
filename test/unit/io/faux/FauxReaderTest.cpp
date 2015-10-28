@@ -214,3 +214,26 @@ TEST(FauxReaderTest, test_return_number)
         EXPECT_EQ(numberOfReturns, 9);
     }
 }
+
+
+TEST(FauxReaderTest, one_point)
+{
+    Options ops;
+
+    ops.add("bounds", BOX3D(1, 2, 3, 1, 2, 3));
+    ops.add("count", 1);
+    ops.add("mode", "ramp");
+    FauxReader reader;
+    reader.setOptions(ops);
+
+    PointTable table;
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 1u);
+
+    EXPECT_EQ(1, view->getFieldAs<int>(Dimension::Id::X, 0));
+    EXPECT_EQ(2, view->getFieldAs<int>(Dimension::Id::Y, 0));
+    EXPECT_EQ(3, view->getFieldAs<int>(Dimension::Id::Z, 0));
+}

@@ -1,9 +1,13 @@
 .. _stage_index:
 
 ******************************************************************************
-Stage Reference
+Readers, Writers, and Filters
 ******************************************************************************
 
+The :cpp:class:`pdal::Stage` object encapsulates the reading, writing, and
+filtering capabilities for PDAL.
+
+.. _readers:
 
 Readers
 =======
@@ -14,6 +18,8 @@ Readers
 
    readers.*
 
+.. _writers:
+
 Writers
 =======
 
@@ -22,6 +28,8 @@ Writers
    :glob:
 
    writers.*
+
+.. _filters:
 
 Filters
 =======

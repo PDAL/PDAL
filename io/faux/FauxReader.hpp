@@ -106,17 +106,19 @@ private:
     double m_stdev_x;
     double m_stdev_y;
     double m_stdev_z;
+    double m_delX;
+    double m_delY;
+    double m_delZ;
     uint64_t m_time;
     int m_numReturns;
     int m_returnNum;
+    point_count_t m_index;
+    uint32_t m_seed;
 
     virtual void processOptions(const Options& options);
     virtual void addDimensions(PointLayoutPtr layout);
-    virtual void ready(PointTableRef table)
-    {
-        m_returnNum = 1;
-        m_time = 0;
-    }
+    virtual void ready(PointTableRef table);
+    virtual bool processOne(PointRef point);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
     virtual bool eof()
         { return false; }

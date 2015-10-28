@@ -41,45 +41,4 @@
 
 using namespace pdal;
 
-TEST(LogTest, test_one)
-{
-    StageFactory f;
-
-    BOX3D bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
-
-    Option opt1("bounds", bounds);
-    Option opt2("log", Support::temppath("mylog_one.txt"));
-    Option opt3("num_points", 750);
-    Option opt4("mode", "constant");
-
-    Options opts;
-    opts.add(opt1);
-    opts.add(opt2);
-    opts.add(opt3);
-    opts.add(opt4);
-
-    {
-        PointTable table;
-
-        FauxReader reader;
-        reader.setOptions(opts);
-        reader.prepare(table);
-
-        EXPECT_EQ(reader.log()->getLevel(), LogLevel::Error);
-        reader.log()->setLevel(LogLevel::Debug5);
-        EXPECT_EQ(reader.log()->getLevel(), LogLevel::Debug5);
-
-        PointViewSet viewSet = reader.execute(table);
-        EXPECT_EQ(viewSet.size(), 1u);
-        PointViewPtr view = *viewSet.begin();
-        EXPECT_EQ(view->size(), 750u);
-    }
-    bool ok = Support::compare_text_files(
-        Support::temppath("mylog_one.txt"),
-        Support::datapath("logs/logtest.txt"));
-
-    if (ok)
-        FileUtils::deleteFile(Support::temppath("mylog_one.txt"));
-
-    EXPECT_TRUE(ok);
-}
+//ABELL - Need some tests here, but what we had was crap.

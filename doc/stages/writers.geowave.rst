@@ -1,13 +1,17 @@
 .. _writers.geowave:
 
 writers.geowave
-============
+================================================================================
 
-The **GeoWave writer** uses `GeoWave`_ to write to Accumulo.  GeoWave entries are stored using EPSG:4326.  Instructions for configuring the GeoWave plugin can be found `here`_
+.. index:: GeoWave
+
+The **GeoWave writer** uses `GeoWave`_ to write to Accumulo.  GeoWave entries
+are stored using `EPSG:4326 <http://epsg.io/4326/>`__.  Instructions for
+configuring the GeoWave plugin can be found `here`_.
 
 
 Example
--------
+--------------------------------------------------------------------------------
 
 .. code-block:: xml
 
@@ -58,7 +62,7 @@ data_adapter
   FeatureCollectionDataAdapter stores multiple points per Accumulo entry. FeatureDataAdapter stores a single point per Accumulo entry. [Default: FeatureCollectionDataAdapter]
 
 points_per_entry
-  Sets the maximum number of points per Accumulo entry when using FeatureCollectionDataAdapter. [Default: 5000u]  
+  Sets the maximum number of points per Accumulo entry when using FeatureCollectionDataAdapter. [Default: 5000u]
 
 
 .. _GeoWave: https://ngageoint.github.io/geowave/

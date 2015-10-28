@@ -55,7 +55,7 @@ CREATE_STATIC_PLUGIN(1, 0, ReprojectionFilter, Filter, s_info)
 std::string ReprojectionFilter::getName() const { return s_info.name; }
 
 ReprojectionFilter::ReprojectionFilter() : m_inferInputSRS(true),
-    m_in_ref_ptr(NULL), m_out_ref_ptr(NULL), m_transform_ptr(NULL)
+    m_in_ref_ptr(NULL), m_out_ref_ptr(NULL), m_transform_ptr(NULL), m_cullBadPoints(false)
 {}
 
 ReprojectionFilter::~ReprojectionFilter()
@@ -106,6 +106,8 @@ void ReprojectionFilter::processOptions(const Options& options)
         }
         m_inferInputSRS = false;
     }
+
+    m_cullBadPoints = options.getValueOrDefault("cull_unprojectable_points", false);
 }
 
 void ReprojectionFilter::initialize()
@@ -162,33 +164,55 @@ void ReprojectionFilter::ready(PointTableRef table)
 }
 
 
-void ReprojectionFilter::transform(double& x, double& y, double& z)
+bool ReprojectionFilter::transform(double& x, double& y, double& z, bool bThrowOnFailure)
 {
-    int ret = OCTTransform(m_transform_ptr, 1, &x, &y, &z);
-    if (ret == 0)
+    try
     {
-        std::ostringstream msg;
-        msg << "Could not project point for ReprojectionTransform::" <<
-            CPLGetLastErrorMsg() << ret;
-        throw pdal_error(msg.str());
+        // OCTTransform will throw via GDAL error handler
+        // if there is an error. We don't expect the return value
+        // unless the GDAL handler gets shut off for whatever reason. In
+        // that case, we'll just throw.
+        int ret = OCTTransform(m_transform_ptr, 1, &x, &y, &z);
+        if (ret == 0)
+        {
+            std::ostringstream msg;
+            msg << "Could not project point for ReprojectionTransform::" <<
+                CPLGetLastErrorMsg() << ret;
+            throw pdal_error(msg.str());
+        }
+        return true;
+    } catch (pdal::pdal_error& e)
+    {
+        if (bThrowOnFailure)
+            throw;
+        return false;
     }
 }
 
 
-void ReprojectionFilter::filter(PointView& view)
+PointViewSet ReprojectionFilter::run(PointViewPtr view)
 {
-    for (PointId id = 0; id < view.size(); ++id)
+    PointViewSet viewSet;
+    PointViewPtr outView = view->makeNew();
+
+    for (PointId id = 0; id < view->size(); ++id)
     {
-        double x = view.getFieldAs<double>(Dimension::Id::X, id);
-        double y = view.getFieldAs<double>(Dimension::Id::Y, id);
-        double z = view.getFieldAs<double>(Dimension::Id::Z, id);
+        double x = view->getFieldAs<double>(Dimension::Id::X, id);
+        double y = view->getFieldAs<double>(Dimension::Id::Y, id);
+        double z = view->getFieldAs<double>(Dimension::Id::Z, id);
 
-        transform(x, y, z);
-
-        view.setField(Dimension::Id::X, id, x);
-        view.setField(Dimension::Id::Y, id, y);
-        view.setField(Dimension::Id::Z, id, z);
+        bool keep_point = transform(x, y, z, m_cullBadPoints);
+        if (keep_point)
+        {
+            view->setField(Dimension::Id::X, id, x);
+            view->setField(Dimension::Id::Y, id, y);
+            view->setField(Dimension::Id::Z, id, z);
+            outView->appendPoint(*view, id);
+        }
     }
+    viewSet.insert(outView);
+
+    return viewSet;
 }
 
 } // namespace pdal

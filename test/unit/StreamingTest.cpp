@@ -36,11 +36,14 @@
 
 #include <pdal/Filter.hpp>
 #include <pdal/PointTable.hpp>
-#include <sbet/SbetReader.hpp>
+#include <SbetReader.hpp>
+#include <FauxReader.hpp>
+#include <RangeFilter.hpp>
 #include "Support.hpp"
 
 using namespace pdal;
 
+/**
 TEST(Streaming, simple)
 {
     class SimpleFilter : public Filter
@@ -72,4 +75,58 @@ TEST(Streaming, simple)
     f.prepare(t);
     f.execute(t);
 }
+**/
 
+
+TEST(Streaming, filter)
+{
+    Options ro;
+    ro.add("bounds", BOX3D(1, 1, 1, 1000, 1000, 1000));
+    ro.add("mode", "ramp");
+    ro.add("count", 1000);
+    FauxReader r;
+    r.setOptions(ro);
+
+    Options fo;
+    fo.add("limits", "X(100:200], X(300:400], X(500:600], "
+        "X(700:800], X(900:1000]");
+    RangeFilter f;
+    f.setOptions(fo);
+    f.setInput(r);
+
+    class Writer : public Filter
+    {
+    public:
+        std::string getName() const
+            { return "filterstester"; }
+        Writer() : m_cnt(0), m_val(101)
+            {}
+    private:
+        int m_cnt;
+        int m_val;
+
+        bool processOne(PointRef point)
+        {
+            int i = point.getFieldAs<int>(Dimension::Id::X);
+            std::cerr << "Testing " << m_val << " against " << i << "!\n";
+            EXPECT_EQ(m_val, i);
+            if (m_val / 100 == 0)
+                m_val += 100;
+            m_val++;
+            m_cnt++;
+            return true;
+        }
+
+        void done(PointTableRef)
+        {
+            EXPECT_EQ(m_cnt, 500);
+        }
+    };
+
+    Writer w;
+    w.setInput(f);
+
+    FixedPointTable t(50);
+    f.prepare(t);
+    f.execute(t);
+}

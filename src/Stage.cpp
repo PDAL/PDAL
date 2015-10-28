@@ -128,12 +128,14 @@ PointViewSet Stage::execute(PointTableRef table)
 }
 
 
-// This is streamed execution.
+// Streamed execution.
 void Stage::execute(FixedPointTable& table)
 {
     table.finalize();
 
     std::list<Stage *> stages;
+    std::list<Stage *> filters;
+    std::vector<bool> skips(table.capacity());
 
     // Build a list of the stages.
     Stage *s = this;
@@ -148,37 +150,60 @@ void Stage::execute(FixedPointTable& table)
         s = s->m_inputs[0];
     }
 
+    // Separate the first stage.
+    Stage *reader = stages.front();
+    // We may have a reader in the filter list, but we treat them in the
+    // same way.
+    auto begin = stages.begin();
+    begin++;
+    std::copy(begin, stages.end(), std::back_inserter(filters));
 
     for (Stage *s : stages)
         s->ready(table);
 
-    bool allFinished = false;
-    while (!allFinished)
+    bool finished = false;
+    while (!finished)
     {
+        PointId idx = 0;
+        PointRef point(&table, idx);
         point_count_t pointLimit = table.capacity();
-        for (Stage *s : stages)
+
+        for (PointId idx = 0; idx < pointLimit; idx++)
         {
-            PointId idx = 0;
-            PointRef point(&table, idx);
-            bool ok;
-            while (true)
+            point.setPointId(idx);
+            finished = !reader->processOne(point);
+            if (finished)
+                pointLimit = idx + 1;
+        }
+        reader->l_done(table);
+
+        std::cerr << "Filters list size() = " << filters.size() << "!\n";
+        std::cerr << "Point limit = " << pointLimit << "!\n";
+        for (Stage *s : filters)
+        {
+            std::cerr << "Stage name = " << s->getName() << "!\n";
+            for (PointId idx = 0; idx < pointLimit; idx++)
             {
-                ok = s->processOne(point);
-                idx++;
-                if (!ok)
-                    pointLimit = idx;
-                if (idx >= pointLimit)
-                    break;
+                if (skips[idx])
+                    continue;
                 point.setPointId(idx);
+                if (!s->processOne(point))
+                {
+                    std::cerr << "SKIP for " << idx << "!\n";
+                    skips[idx] = true;
+                }
+                else
+                    std::cerr << "No SKIP for " << idx << "!\n";
             }
             s->l_done(table);
-            allFinished = allFinished || !ok;
         }
+        for (size_t i = 0; i < skips.size(); ++i)
+            skips[i] = false;
         table.reset();
     }
 
     for (Stage *s : stages)
-        done(table);
+        s->done(table);
 }
 
 

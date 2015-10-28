@@ -64,6 +64,7 @@ RangeFilter::Range parseRange(const std::string& r)
     std::string::size_type pos, count;
     bool ilb = true;
     bool iub = true;
+    bool negate = false;
     const char *start;
     char *end;
     std::string name;
@@ -81,6 +82,12 @@ RangeFilter::Range parseRange(const std::string& r)
            throw std::string("No dimension name.");
         name = r.substr(pos, count);
         pos += count;
+
+        if (r[pos] == '!')
+        {
+            negate = true;
+            pos++;
+        }
 
         if (r[pos] == '(')
             ilb = false;
@@ -129,9 +136,17 @@ RangeFilter::Range parseRange(const std::string& r)
         oss << "filters.range: invalid 'limits' option: '" << r << "': " << s;
         throw pdal_error(oss.str());
     }
-    return RangeFilter::Range(name, lb, ub, ilb, iub);
+    return RangeFilter::Range(name, lb, ub, ilb, iub, negate);
 }
 
+} // unnamed namespace
+
+
+bool operator < (const RangeFilter::Range& r1, const RangeFilter::Range& r2)
+{
+    return (r1.m_name < r2.m_name ? true :
+        r1.m_name > r2.m_name ? false :
+        &r1 < &r2);
 }
 
 
@@ -151,19 +166,62 @@ void RangeFilter::prepared(PointTableRef table)
 {
     const PointLayoutPtr layout(table.layout());
 
-    for (auto const& d : m_range_list)
+    for (auto& r : m_range_list)
     {
-        Dimension::Id::Enum id = layout->findDim(d.m_name);
-        if (id == Dimension::Id::Unknown)
+        r.m_id = layout->findDim(r.m_name);
+        if (r.m_id == Dimension::Id::Unknown)
         {
             std::ostringstream oss;
             oss << "Invalid dimension name in filters.range 'limits' "
-                "option: '" << d.m_name << "'.";
+                "option: '" << r.m_name << "'.";
             throw pdal_error(oss.str());
         }
-        m_dimensions_map[id] = d;
     }
+    std::sort(m_range_list.begin(), m_range_list.end());
 }
+
+// Determine if a point passes a single range.
+bool RangeFilter::dimensionPasses(double v, const Range& r) const
+{
+    bool fail = ((r.m_inclusive_lower_bound && v < r.m_lower_bound) ||
+        (!r.m_inclusive_lower_bound && v <= r.m_lower_bound) ||
+        (r.m_inclusive_upper_bound && v > r.m_upper_bound) ||
+        (!r.m_inclusive_upper_bound && v >= r.m_upper_bound));
+    if (r.m_negate)
+        fail = !fail;
+    return !fail;
+}
+
+// The range list is sorted by dimension, so the logic here should work
+// as ORs between ranges of the same dimension and ANDs between ranges
+// of different dimensions.  This is simple logic, but is probably the most
+// common case.
+bool RangeFilter::pointPasses(PointView *view, PointId idx) const
+{
+    Dimension::Id::Enum lastId = m_range_list.front().m_id;
+    bool passes = false;
+    for (auto const& r : m_range_list)
+    {
+        // If we're at a new dimension, return false if we haven't passed
+        // the dimension, otherwise reset passes to false for the next
+        // dimension and keep checking.
+        if (r.m_id != lastId)
+        {
+            if (!passes)
+                return false;
+            lastId = r.m_id;
+            passes = false;
+        }
+        // If we've already passed this dimension, continue until we find
+        // a new dimension.
+        else if (passes)
+            continue;
+        double v = view->getFieldAs<double>(r.m_id, idx);
+        passes = dimensionPasses(v, r);
+    }
+    return passes;
+}
+
 
 PointViewSet RangeFilter::run(PointViewPtr inView)
 {
@@ -174,41 +232,10 @@ PointViewSet RangeFilter::run(PointViewPtr inView)
     PointViewPtr outView = inView->makeNew();
 
     for (PointId i = 0; i < inView->size(); ++i)
-    {
-        bool keep_point = true;
-        for (auto const& d : m_dimensions_map)
-        {
-            double v = inView->getFieldAs<double>(d.first, i);
-            if (d.second.m_inclusive_lower_bound)
-            {
-                if (v < d.second.m_lower_bound)
-                    keep_point = false;
-            }
-            else
-            {
-                if (v <= d.second.m_lower_bound)
-                    keep_point = false;
-            }
-            if (d.second.m_inclusive_upper_bound)
-            {
-                if (v > d.second.m_upper_bound)
-                    keep_point = false;
-            }
-            else
-            {
-                if (v >= d.second.m_upper_bound)
-                    keep_point = false;
-            }
-
-            if (keep_point)
-                break;
-        }
-        if (keep_point)
+        if (pointPasses(inView.get(), i))
             outView->appendPoint(*inView, i);
-    }
 
     viewSet.insert(outView);
-
     return viewSet;
 }
 

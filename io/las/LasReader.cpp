@@ -109,8 +109,8 @@ QuickInfo LasReader::inspect()
     QuickInfo qi;
     std::unique_ptr<PointLayout> layout(new PointLayout());
 
-    addDimensions(layout.get());
     initialize();
+    addDimensions(layout.get());
 
     Dimension::IdList dims = layout->dims();
     for (auto di = dims.begin(); di != dims.end(); ++di)

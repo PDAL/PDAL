@@ -6,6 +6,9 @@ writers.las
 The **LAS Writer** supports writing to `LAS format`_ files, the standard
 interchange file format for LIDAR data.
 
+IMPORTANT NOTE: Scale/offset are not preserved from an input LAS file.  See
+below for information on the scale/offset options and the 'forward' option.
+
 Example
 -------
 
@@ -35,7 +38,8 @@ filename
   the placeholder will be replaced with an incrementing integer.  If no
   placeholder is found, all PointViews provided to the writer are
   aggregated into a single file for output.  Multiple PointViews are usually
-  the result of using :ref:`filters.splitter` or :ref:`filters.chipper`.
+  the result of using :ref:`filters.splitter`, :ref:`filters.chipper` or
+  :ref:`filters.divider`.
   [Required]
 
 forward

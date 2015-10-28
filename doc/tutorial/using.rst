@@ -4,6 +4,10 @@
 Using PDAL with CMake
 ===============================================================================
 
+:Author: Bradley Chambers
+:Contact: brad.chambers@gmail.com
+:Date: 01/21/2015
+
 This tutorial will explain how to use PDAL in your own projects using CMake. A
 more complete, working example can be found :ref:`here <writing>`.
 

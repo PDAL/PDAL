@@ -3,7 +3,7 @@
 filters.sort
 ============
 
-The sort filter orders a point buffer based on the values of a dimension.
+The sort filter orders a point view based on the values of a dimension.
 The current filter only supports sorting based on a single dimension in
 increasing order.
 

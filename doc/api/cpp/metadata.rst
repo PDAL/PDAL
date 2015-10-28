@@ -1,11 +1,15 @@
 .. _cpp-pdal-metadata:
 
 ******************************************************************************
-pdal::Metadata
+:cpp:class:`pdal::Metadata`
 ******************************************************************************
-
 
 
 .. doxygenclass:: pdal::Metadata
    :members:
+   :undoc-members:
+
+.. doxygenclass:: pdal::MetadataNode
+   :members:
+   :undoc-members:
 

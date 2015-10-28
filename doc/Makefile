@@ -42,7 +42,7 @@ clean:
 	-rm -rf doxygen/xml*;
 	-rm -rf doxygen/html*;
 
-html: 
+html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
@@ -114,11 +114,6 @@ text:
 	@echo
 	@echo "Build finished. The text files are in $(BUILDDIR)/text."
 
-pdf:
-	$(SPHINXBUILD) -b text $(ALLSPHINXOPTS) $(BUILDDIR)/pdf
-	@echo
-	@echo "Build finished. The text files are in $(BUILDDIR)/pdf."
-
 man:
 	$(SPHINXBUILD) -b man $(ALLSPHINXOPTS) $(BUILDDIR)/man
 	@echo
@@ -146,8 +141,12 @@ doxygen:
 clone: html
 	-rm -rf $(OUTPUTDIR)
 	git clone git@github.com:PDAL/pdal.github.io.git $(OUTPUTDIR)
-	
+
 publish: clone
 	cp -r build/html/* $(OUTPUTDIR)/
 	cd $(OUTPUTDIR) ; git checkout master; git add  "*" ; git commit -m "update for $(DATE)" . ; git push
 
+pdf:
+	$(SPHINXBUILD) -b pdf $(ALLSPHINXOPTS) $(BUILDDIR)/pdf
+	@echo
+	@echo "Build finished. The PDF files are in _build/pdf."

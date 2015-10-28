@@ -1,11 +1,12 @@
 .. _cpp-pdal-pointview:
 
 ******************************************************************************
-pdal::PointView
+:cpp:class:`pdal::PointView`
 ******************************************************************************
 
 .. doxygenclass:: pdal::PointView
    :members:
+   :undoc-members:
 
 
 

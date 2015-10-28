@@ -10,9 +10,9 @@ C++ API
 
    dimension
    bounds
+   filter
    log
    metadata
-   option
    options
    pointview
    pointtable
