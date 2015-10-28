@@ -46,19 +46,18 @@ Options
 -------
 
 limits
-  A comma-separated list of :ref:'ranges'.  If more than one range is
+  A comma-separated list of :ref:`ranges`.  If more than one range is
   specified for a dimension, the criteria are treated as being logically
   ORed together.  Ranges for different dimensions are treated as being
   logically ANDed.
 
   Example:
-  --------
-    .. code-block:: bash
 
-      Classification[1:2], Red[1:50], Blue[25:75], Red[75:255],
-      Classification[6:7]
+  ::
 
-    This specification will select points that have the classification of
-    1, 2, 6 or 7 and have a blue value or 25-75 and have a red value of
-    1-50 or 75-255.  In this case, all values are inclusive.
+    Classification[1:2], Red[1:50], Blue[25:75], Red[75:255], Classification[6:7]
+
+  This specification will select points that have the classification of
+  1, 2, 6 or 7 and have a blue value or 25-75 and have a red value of
+  1-50 or 75-255.  In this case, all values are inclusive.
 

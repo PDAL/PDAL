@@ -42,6 +42,7 @@ Example 4:
 ----------
 
 ::
+
   Blue[:255)
   
 Selects all points with a blue value less than 255.
@@ -50,6 +51,7 @@ Example 5:
 ----------
 
 ::
+
   Intesity![25:25]
 
 Selects all points with an intensity not equal to 25.
