@@ -110,7 +110,7 @@ TEST(Streaming, filter)
             int i = point.getFieldAs<int>(Dimension::Id::X);
             std::cerr << "Testing " << m_val << " against " << i << "!\n";
             EXPECT_EQ(m_val, i);
-            if (m_val / 100 == 0)
+            if (m_val % 100 == 0)
                 m_val += 100;
             m_val++;
             m_cnt++;
@@ -127,6 +127,6 @@ TEST(Streaming, filter)
     w.setInput(f);
 
     FixedPointTable t(50);
-    f.prepare(t);
-    f.execute(t);
+    w.prepare(t);
+    w.execute(t);
 }

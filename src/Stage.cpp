@@ -150,10 +150,11 @@ void Stage::execute(FixedPointTable& table)
         s = s->m_inputs[0];
     }
 
-    // Separate the first stage.
+    // Separate out the first stage.
     Stage *reader = stages.front();
-    // We may have a reader in the filter list, but we treat them in the
-    // same way.
+
+    // Build a list of all stages except the first.  We may have a writer in
+    // this list in addition to filters, but we treat them in the same way.
     auto begin = stages.begin();
     begin++;
     std::copy(begin, stages.end(), std::back_inserter(filters));
@@ -161,6 +162,8 @@ void Stage::execute(FixedPointTable& table)
     for (Stage *s : stages)
         s->ready(table);
 
+    // Loop until we're finished.  We handle the number of points up to
+    // the capacity of the FixedPointTable that we've been provided.
     bool finished = false;
     while (!finished)
     {
@@ -168,35 +171,35 @@ void Stage::execute(FixedPointTable& table)
         PointRef point(&table, idx);
         point_count_t pointLimit = table.capacity();
 
+        // When we get false back from a reader, we're done, so set
+        // the point limit to the number of points processed in this loop
+        // of the table.
         for (PointId idx = 0; idx < pointLimit; idx++)
         {
             point.setPointId(idx);
             finished = !reader->processOne(point);
             if (finished)
-                pointLimit = idx + 1;
+                pointLimit = idx;
         }
         reader->l_done(table);
 
-        std::cerr << "Filters list size() = " << filters.size() << "!\n";
-        std::cerr << "Point limit = " << pointLimit << "!\n";
+        // When we get a false back from a filter, we're filtering out a
+        // point, so add it to the list of skips so that it doesn't get
+        // processed by subsequent filters.
         for (Stage *s : filters)
         {
-            std::cerr << "Stage name = " << s->getName() << "!\n";
             for (PointId idx = 0; idx < pointLimit; idx++)
             {
                 if (skips[idx])
                     continue;
                 point.setPointId(idx);
                 if (!s->processOne(point))
-                {
-                    std::cerr << "SKIP for " << idx << "!\n";
                     skips[idx] = true;
-                }
-                else
-                    std::cerr << "No SKIP for " << idx << "!\n";
             }
             s->l_done(table);
         }
+
+        // Yes, vector<bool> is terrible.  Can do something better later.
         for (size_t i = 0; i < skips.size(); ++i)
             skips[i] = false;
         table.reset();

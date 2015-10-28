@@ -173,7 +173,6 @@ Dimension::IdList FauxReader::getDefaultDimensions()
     return ids;
 }
 
-
 void FauxReader::ready(PointTableRef /*table*/)
 {
     m_returnNum = 1;
@@ -233,6 +232,7 @@ bool FauxReader::processOne(PointRef point)
     m_index++;
     return true;
 }
+
 
 point_count_t FauxReader::read(PointViewPtr view, point_count_t count)
 {
