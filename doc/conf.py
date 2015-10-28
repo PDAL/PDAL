@@ -151,9 +151,6 @@ html_theme_options = {
     'navbar_links': [
         ("Download", "download"),
         ("GitHub", "https://github.com/PDAL/PDAL", True),
-        ("Bugs", "https://github.com/PDAL/PDAL/issues", True),
-        ("FAQ", "faq"),
-        ("Mailing Lists", "community"),
     ],
 
     # Render the next and previous page links in navbar. (Default: true)
