@@ -46,42 +46,19 @@ Options
 -------
 
 limits
-  A comma-separated list of dimension names and limits, given in the following
-  form.
+  A comma-separated list of :ref:'ranges'.  If more than one range is
+  specified for a dimension, the criteria are treated as being logically
+  ORed together.  Ranges for different dimensions are treated as being
+  logically ANDed.
 
-  .. code-block:: bash
+  Example:
+  --------
+    .. code-block:: bash
 
-    dimension-name(lower-bound:upper-bound)
+      Classification[1:2], Red[1:50], Blue[25:75], Red[75:255],
+      Classification[6:7]
 
-  In this example, we have used parenthesis to enclose the bounds, thus
-  indicating that the bounds shall be interpreted as exclusive. To mark either
-  the upper or lower bound as inclusive, simply replace the corresponding
-  parenthesis with a square bracket. For example,
+    This specification will select points that have the classification of
+    1, 2, 6 or 7 and have a blue value or 25-75 and have a red value of
+    1-50 or 75-255.  In this case, all values are inclusive.
 
-  .. code-block:: bash
-
-    dimension-name(lower-bound:upper-bound]
-
-  where the lower bound remains exclusive, but the upper bound is inclusive.
-
-  Either bound may also be omitted to indicate that there is no bound. In the
-  following example, points with a Z value of 10 or greater are retained.
-
-  .. code-block:: bash
-
-    Z[10:]
-
-  Currently, exact values can be matched by repeating the exact value as both
-  the upper and lower bound. Below, only points with a Classification of 2 are
-  retained.
-
-  .. code-block:: bash
-
-    Classification[2:2]
-
-  Any range can be negated by prefacing with the '!' character.  The following
-  will select all classifications that aren't equal to the value 2.
-
-  .. code-block:: bash
-
-    Classification![2:2]
