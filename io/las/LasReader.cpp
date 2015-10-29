@@ -128,7 +128,7 @@ QuickInfo LasReader::inspect()
 }
 
 
-void LasReader::initialize()
+void LasReader::initialize(MetadataNode& m)
 {
     if (m_initialized)
         return;
@@ -168,6 +168,7 @@ void LasReader::initialize()
         readExtraBytesVlr();
     }
     fixupVlrs();
+    setSrsFromVlrs(m);
     m_initialized = true;
 }
 
@@ -176,7 +177,6 @@ void LasReader::ready(PointTableRef table, MetadataNode& m)
 {
     m_index = 0;
 
-    setSrsFromVlrs(m);
     MetadataNode forward = table.privateMetadata("lasforward");
     extractHeaderMetadata(forward, m);
     extractVlrMetadata(forward, m);
