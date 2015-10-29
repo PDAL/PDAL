@@ -37,6 +37,9 @@
 #include <pdal/PointView.hpp>
 #include <pdal/GlobalEnvironment.hpp>
 
+#include <gdal.h>
+#include <ogr_spatialref.h>
+
 #include <memory>
 
 namespace pdal
@@ -162,6 +165,33 @@ void ReprojectionFilter::ready(PointTableRef table)
 }
 
 
+bool ReprojectionFilter::transform(double& x, double& y, double& z)
+{
+    try
+    {
+        // OCTTransform will throw via GDAL error handler
+        // if there is an error. We don't expect the return value
+        // unless the GDAL handler gets shut off for whatever reason. In
+        // that case, we'll just throw.
+        if (OCTTransform(m_transform_ptr, 1, &x, &y, &z))
+        {
+            return true;
+        }
+        else
+        {
+            std::ostringstream msg;
+            msg << "Could not project point for ReprojectionTransform::" <<
+                CPLGetLastErrorMsg();
+            throw pdal_error(msg.str());
+        }
+    }
+    catch (pdal::pdal_error& e)
+    {
+        if (m_cullBadPoints) return false;
+        else throw e;
+    }
+}
+
 PointViewSet ReprojectionFilter::run(PointViewPtr view)
 {
     PointViewSet viewSet;
@@ -200,13 +230,13 @@ void ReprojectionFilter::filter(PointView& view)
         y = view.getFieldAs<double>(Dimension::Id::Y, id);
         z = view.getFieldAs<double>(Dimension::Id::Z, id);
 
-        if (transform(x, y, z))
-        {
-            view.setField(Dimension::Id::X, id, x);
-            view.setField(Dimension::Id::Y, id, y);
-            view.setField(Dimension::Id::Z, id, z);
-        }
+        OCTTransform(m_transform_ptr, 1, &x, &y, &z);
+
+        view.setField(Dimension::Id::X, id, x);
+        view.setField(Dimension::Id::Y, id, y);
+        view.setField(Dimension::Id::Z, id, z);
     }
 }
+
 
 } // namespace pdal
