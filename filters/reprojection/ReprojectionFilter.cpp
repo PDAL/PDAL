@@ -55,7 +55,8 @@ CREATE_STATIC_PLUGIN(1, 0, ReprojectionFilter, Filter, s_info)
 std::string ReprojectionFilter::getName() const { return s_info.name; }
 
 ReprojectionFilter::ReprojectionFilter() : m_inferInputSRS(true),
-    m_in_ref_ptr(NULL), m_out_ref_ptr(NULL), m_transform_ptr(NULL), m_cullBadPoints(false)
+    m_in_ref_ptr(NULL), m_out_ref_ptr(NULL), m_transform_ptr(NULL),
+    m_cullBadPoints(false)
 {}
 
 ReprojectionFilter::~ReprojectionFilter()
@@ -191,7 +192,6 @@ bool ReprojectionFilter::transform(double& x, double& y, double& z)
     }
 }
 
-
 PointViewSet ReprojectionFilter::run(PointViewPtr view)
 {
     PointViewSet viewSet;
@@ -213,6 +213,7 @@ PointViewSet ReprojectionFilter::run(PointViewPtr view)
             outView->appendPoint(*view, id);
         }
     }
+
     viewSet.insert(outView);
 
     return viewSet;
