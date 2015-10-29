@@ -107,7 +107,10 @@ void NitfReader::initialize()
     m_metadata.add("DESDATA_LENGTH", m_length);
 
     nitf.close();
-    LasReader::initialize();
+
+    // Initialize the LAS stuff with its own metadata node.
+    MetadataNode lasNode = m_metadata.add(LasReader::getName());
+    LasReader::initialize(lasNode);
 }
 
 

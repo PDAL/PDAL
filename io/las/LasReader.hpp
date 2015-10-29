@@ -111,7 +111,9 @@ private:
     std::string m_compression;
 
     virtual void processOptions(const Options& options);
-    virtual void initialize();
+    virtual void initialize()
+        { initialize(m_metadata); }
+    virtual void initialize(MetadataNode& m);
     virtual void addDimensions(PointLayoutPtr layout);
     void fixupVlrs();
     VariableLengthRecord *findVlr(const std::string& userId, uint16_t recordId);
