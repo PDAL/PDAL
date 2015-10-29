@@ -64,9 +64,10 @@ private:
     virtual void ready(PointTableRef table);
     virtual void initialize();
     virtual PointViewSet run(PointViewPtr view);
+    virtual void filter(PointView& view);
 
     void updateBounds();
-    bool transform(double& x, double& y, double& z, bool bThrowOnFailure);
+    bool transform(double& x, double& y, double& z);
 
     SpatialReference m_inSRS;
     SpatialReference m_outSRS;
