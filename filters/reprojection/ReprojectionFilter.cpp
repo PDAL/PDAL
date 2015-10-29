@@ -187,7 +187,7 @@ bool ReprojectionFilter::transform(double& x, double& y, double& z)
     catch (pdal::pdal_error& e)
     {
         if (m_cullBadPoints) return false;
-        else throw e.what();
+        else throw e;
     }
 }
 
