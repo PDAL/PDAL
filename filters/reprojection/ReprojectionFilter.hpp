@@ -36,6 +36,9 @@
 
 #include <pdal/Filter.hpp>
 
+#include <gdal.h>
+#include <ogr_spatialref.h>
+
 #include <memory>
 
 extern "C" int32_t ReprojectionFilter_ExitFunc();
@@ -64,9 +67,22 @@ private:
     virtual void ready(PointTableRef table);
     virtual void initialize();
     virtual PointViewSet run(PointViewPtr view);
+    virtual void filter(PointView& view);
 
     void updateBounds();
-    bool transform(double& x, double& y, double& z, bool bThrowOnFailure);
+    bool transform(double& x, double& y, double& z)
+    {
+        if (OCTTransform(m_transform_ptr, 1, &x, &y, &z))
+        {
+            return true;
+        }
+        else
+        {
+            if (m_cullBadPoints) return false;
+            else throw pdal_error(std::string("Could not reproject point: ") +
+                    CPLGetLastErrorMsg());
+        }
+    }
 
     SpatialReference m_inSRS;
     SpatialReference m_outSRS;
