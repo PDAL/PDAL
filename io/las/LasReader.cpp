@@ -168,6 +168,8 @@ void LasReader::initialize()
         readExtraBytesVlr();
     }
     fixupVlrs();
+    MetadataNode m;
+    setSrsFromVlrs(m);
     m_initialized = true;
 }
 
