@@ -109,7 +109,8 @@ QuickInfo LasReader::inspect()
     QuickInfo qi;
     std::unique_ptr<PointLayout> layout(new PointLayout());
 
-    initialize();
+    PointTable table;
+    initialize(table);
     addDimensions(layout.get());
 
     Dimension::IdList dims = layout->dims();
@@ -121,14 +122,13 @@ QuickInfo LasReader::inspect()
     qi.m_srs = getSrsFromVlrs();
     qi.m_valid = true;
 
-    PointTable table;
     done(table);
 
     return qi;
 }
 
 
-void LasReader::initialize(MetadataNode& m)
+void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
 {
     if (m_initialized)
         return;
@@ -169,18 +169,17 @@ void LasReader::initialize(MetadataNode& m)
     }
     fixupVlrs();
     setSrsFromVlrs(m);
-    m_initialized = true;
-}
-
-
-void LasReader::ready(PointTableRef table, MetadataNode& m)
-{
-    m_index = 0;
-
     MetadataNode forward = table.privateMetadata("lasforward");
     extractHeaderMetadata(forward, m);
     extractVlrMetadata(forward, m);
 
+    m_initialized = true;
+}
+
+
+void LasReader::ready(PointTableRef table)
+{
+    m_index = 0;
     if (m_lasHeader.compressed())
     {
 #ifdef PDAL_HAVE_LASZIP

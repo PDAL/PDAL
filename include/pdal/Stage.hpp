@@ -157,6 +157,8 @@ private:
     void l_done(PointTableRef table);
     virtual QuickInfo inspect()
         { return QuickInfo(); }
+    virtual void initialize(PointTableRef /*table*/)
+        { initialize(); }
     virtual void initialize()
         {}
     virtual void addDimensions(PointLayoutPtr /*layout*/)

@@ -81,7 +81,7 @@ void Stage::prepare(PointTableRef table)
     l_processOptions(m_options);
     processOptions(m_options);
     l_initialize(table);
-    initialize();
+    initialize(table);
     addDimensions(table.layout());
     prepared(table);
 }
