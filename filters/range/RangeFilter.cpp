@@ -197,7 +197,7 @@ bool RangeFilter::dimensionPasses(double v, const Range& r) const
 // as ORs between ranges of the same dimension and ANDs between ranges
 // of different dimensions.  This is simple logic, but is probably the most
 // common case.
-bool RangeFilter::processOne(PointRef point)
+bool RangeFilter::processOne(PointRef& point)
 {
     Dimension::Id::Enum lastId = m_range_list.front().m_id;
     bool passes = false;
@@ -232,8 +232,11 @@ PointViewSet RangeFilter::run(PointViewPtr inView)
     PointViewPtr outView = inView->makeNew();
 
     for (PointId i = 0; i < inView->size(); ++i)
-        if (processOne(inView->point(i)))
+    {
+        PointRef point = inView->point(i);
+        if (processOne(point))
             outView->appendPoint(*inView, i);
+    }
 
     viewSet.insert(outView);
     return viewSet;

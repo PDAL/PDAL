@@ -168,7 +168,7 @@ private:
         {}
     virtual void done(PointTableRef /*table*/)
         {}
-    virtual bool processOne(PointRef /*point*/)
+    virtual bool processOne(PointRef& /*point*/)
     {
         std::ostringstream oss;
         oss << "Point streaming not supported for stage " << getName() << ".";

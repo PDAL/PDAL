@@ -118,7 +118,7 @@ private:
     virtual void processOptions(const Options& options);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
-    virtual bool processOne(PointRef point);
+    virtual bool processOne(PointRef& point);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
     virtual bool eof()
         { return false; }

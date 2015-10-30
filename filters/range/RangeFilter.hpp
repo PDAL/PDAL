@@ -92,7 +92,7 @@ private:
 
     virtual void processOptions(const Options&options);
     virtual void prepared(PointTableRef table);
-    virtual bool processOne(PointRef point);
+    virtual bool processOne(PointRef& point);
     virtual PointViewSet run(PointViewPtr view);
     bool dimensionPasses(double v, const Range& r) const;
 

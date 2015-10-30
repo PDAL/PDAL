@@ -105,10 +105,9 @@ TEST(Streaming, filter)
         int m_cnt;
         int m_val;
 
-        bool processOne(PointRef point)
+        bool processOne(PointRef& point)
         {
             int i = point.getFieldAs<int>(Dimension::Id::X);
-            std::cerr << "Testing " << m_val << " against " << i << "!\n";
             EXPECT_EQ(m_val, i);
             if (m_val % 100 == 0)
                 m_val += 100;

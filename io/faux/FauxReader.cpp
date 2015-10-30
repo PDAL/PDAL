@@ -182,7 +182,7 @@ void FauxReader::ready(PointTableRef /*table*/)
 }
 
 
-bool FauxReader::processOne(PointRef point)
+bool FauxReader::processOne(PointRef& point)
 {
     if (m_index >= m_count)
         return false;
@@ -238,7 +238,8 @@ point_count_t FauxReader::read(PointViewPtr view, point_count_t count)
 {
     for (PointId idx = 0; idx < count; ++idx)
     {
-        processOne(view->point(idx));
+        PointRef point = view->point(idx);
+        processOne(point);
         if (m_cb)
             m_cb(*view, idx);
     }

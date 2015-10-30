@@ -75,7 +75,7 @@ void SbetReader::ready(PointTableRef)
 }
 
 
-bool SbetReader::processOne(PointRef point)
+bool SbetReader::processOne(PointRef& point)
 {
     for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
     {
@@ -96,7 +96,8 @@ point_count_t SbetReader::read(PointViewPtr view, point_count_t count)
     seek(idx);
     while (numRead < count && idx < m_numPts)
     {
-        processOne(view->point(nextId));
+        PointRef point = view->point(nextId);
+        processOne(point);
         if (m_cb)
             m_cb(*view, nextId);
 
