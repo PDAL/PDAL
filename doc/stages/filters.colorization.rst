@@ -41,11 +41,11 @@ can have issues is when a `TIFF`_ file is striped vs. tiled. GDAL's data access
 in that situation is likely to cause lots of re-reading if the cache isn't large
 enough.
 
-Consider a striped TIFF file of 300mb:
+Consider a striped TIFF file of 286mb:
 
 ::
 
-    -rw-r--r--+  1 hobu  staff   300M Oct 29 17:04 orth-tiled.tif
+    -rw-r-----@  1 hobu  staff   286M Oct 29 16:58 orth-striped.tif
 
 ::
 
@@ -65,7 +65,7 @@ Consider a striped TIFF file of 300mb:
 Simple application of the :ref:`filters.colorization` using the striped `TIFF`_
 with a 268mb :ref:`readers.las` file will take nearly 1:54.
 
-.. `TIFF`: http://www.gdal.org/frmt_gtiff.html
+.. _`TIFF`: http://www.gdal.org/frmt_gtiff.html
 
 ::
 
