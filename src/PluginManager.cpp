@@ -303,6 +303,13 @@ bool PluginManager::guessLoadByPath(const std::string& driverName)
         pluginDir = oss.str();
     }
 
+    std::string plugin_debug("PDAL_DEBUG");
+    std::string plugin_debug_path = Utils::getenv(plugin_debug);
+    if (plugin_debug_path.size())
+    {
+        std::cerr << "PDAL: plugin search path '" << pluginDir <<"'"<<std::endl;
+    }
+
     std::vector<std::string> pluginPathVec = Utils::split2(pluginDir, ':');
     for (const auto& pluginPath : pluginPathVec)
     {
