@@ -5,10 +5,10 @@ filters.divider
 
 The divider filter breaks a point view into a set of smaller point views
 based on simple criteria.  The number of subsets can be specified explicitly,
- or one can specify a maximum point count for each subset.  Additionally,
- points can be placed into each subset sequentially (as they appear in the
- input) or in round-robin fashion.
- 
+or one can specify a maximum point count for each subset.  Additionally,
+points can be placed into each subset sequentially (as they appear in the
+input) or in round-robin fashion.
+
 Normally points are divided into subsets to facilitate output by writers
 that support creating multiple output files with a template (LAS and BPF
 are notable examples).
@@ -48,6 +48,6 @@ count
 capacity
   Maximum number of points in each output view.  Views will contain
   approximately equal numbers of points.  [Default: none]
-  
+
 NOTE: You must specify exactly one of either 'count' or 'capacity'.
 
