@@ -18,8 +18,14 @@ is kept in tact (the same cannot be said for :ref:`filters.voxelgrid`).
 
 .. seealso::
 
-    :ref:`filters.decimation` and :ref:`filters.voxelgrid` also perform
-    decimation.
+    :ref:`filters.decimation`, :ref:`filters.farthestpointsampling` and
+    :ref:`filters.relaxationdartthrowing` also perform decimation.
+
+.. note::
+
+    The ``shuffle`` option does not reorder points in the PointView, but
+    shuffles the order in which the points are visited while processing, which
+    can improve the quality of the result.
 
 .. embed::
 
@@ -28,6 +34,13 @@ Options
 
 radius
   Minimum distance between samples. [Default: 1.0]
+
+shuffle
+  Choose whether or not to shuffle order in which points are visited. [Default:
+  true]
+
+seed
+  Seed for random number generator, used only with shuffle.
 
 .. include:: filter_opts.rst
 

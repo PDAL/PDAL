@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2016-2017, Bradley J Chambers (brad.chambers@gmail.com)
+ * Copyright (c) 2020, Bradley J Chambers (brad.chambers@gmail.com)
  *
  * All rights reserved.
  *
@@ -32,7 +32,7 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "SampleFilter.hpp"
+#include "RelaxationDartThrowing.hpp"
 
 #include <pdal/KDIndex.hpp>
 #include <pdal/util/ProgramArgs.hpp>
@@ -47,30 +47,28 @@
 namespace pdal
 {
 
-static StaticPluginInfo const s_info
-{
-    "filters.sample",
-    "Subsampling filter",
-    "http://pdal.io/stages/filters.sample.html"
-};
+static StaticPluginInfo const s_info{
+    "filters.relaxationdartthrowing", "Subsampling filter",
+    "http://pdal.io/stages/filters.relaxationdartthrowing.html"};
 
-CREATE_STATIC_STAGE(SampleFilter, s_info)
+CREATE_STATIC_STAGE(RelaxationDartThrowing, s_info)
 
-std::string SampleFilter::getName() const
+std::string RelaxationDartThrowing::getName() const
 {
     return s_info.name;
 }
 
-
-void SampleFilter::addArgs(ProgramArgs& args)
+void RelaxationDartThrowing::addArgs(ProgramArgs& args)
 {
-    args.add("radius", "Minimum radius", m_radius, 1.0);
+    args.add("decay", "Decay rate", m_decay, 0.9);
+    args.add("radius", "Minimum radius (initial)", m_startRadius, 1.0);
+    args.add("count", "Target number of points after sampling", m_maxSize,
+             (point_count_t)1000);
     args.add("shuffle", "Shuffle points prior to sampling?", m_shuffle, true);
     m_seedArg = &args.add("seed", "Random number generator seed", m_seed);
 }
 
-
-PointViewSet SampleFilter::run(PointViewPtr inView)
+PointViewSet RelaxationDartThrowing::run(PointViewPtr inView)
 {
     point_count_t np = inView->size();
 
@@ -84,6 +82,10 @@ PointViewSet SampleFilter::run(PointViewPtr inView)
     // Build the 3D KD-tree.
     KD3Index& index = inView->build3dIndex();
 
+    PointIdList finalIds;
+
+    double radius(m_startRadius);
+
     PointIdList shuffledIds(np);
     std::iota(shuffledIds.begin(), shuffledIds.end(), 0);
     if (m_shuffle)
@@ -95,26 +97,52 @@ PointViewSet SampleFilter::run(PointViewPtr inView)
                      std::mt19937(m_seed));
     }
 
-    // All points are marked as kept (1) by default. As they are masked by
-    // neighbors within the user-specified radius, their value is changed to 0.
-    std::vector<int> keep(np, 1);
-
-    // We are able to subsample in a single pass over the shuffled indices.
-    for (PointId const& i : shuffledIds)
+    while (finalIds.size() < m_maxSize)
     {
-        // If a point is masked, it is forever masked, and cannot be part of the
-        // sampled cloud. Otherwise, the current index is appended to the output
-        // PointView.
-        if (keep[i] == 0)
-            continue;
-        outView->appendPoint(*inView, i);
+        // All points are marked as kept (1) by default. As they are masked by
+        // neighbors within the user-specified radius, their value is changed to
+        // 0.
+        std::vector<int> keep(np, 1);
 
-        // We now proceed to mask all neighbors within m_radius of the kept
-        // point.
-        PointIdList ids = index.radius(i, m_radius);
-        for (PointId const& id : ids)
-            keep[id] = 0;
+        // Start by masking all points within radius of finalIds.
+        for (PointId i : finalIds)
+        {
+            PointIdList ids = index.radius(i, radius);
+            for (PointId const& id : ids)
+                keep[id] = 0;
+        }
+
+        // We are able to subsample in a single pass over the shuffled indices.
+        for (PointId const& i : shuffledIds)
+        {
+            // If a point is masked, it is forever masked, and cannot be part of
+            // the sampled cloud. Otherwise, the current index is appended to
+            // the output PointView.
+            if (keep[i] == 0)
+                continue;
+            finalIds.push_back(i);
+
+            if (finalIds.size() == m_maxSize)
+                break;
+
+            // We now proceed to mask all neighbors within radius of the
+            // kept point.
+            PointIdList ids = index.radius(i, radius);
+            for (PointId const& id : ids)
+                keep[id] = 0;
+        }
+
+        if (finalIds.size() < m_maxSize)
+        {
+            radius = m_decay * radius;
+            log()->get(LogLevel::Debug)
+                << "Currently have " << finalIds.size()
+                << " ids, reducing radius to " << radius << std::endl;
+        }
     }
+
+    for (PointId i : finalIds)
+        outView->appendPoint(*inView, i);
 
     // Simply calculate the percentage of retained points.
     double frac = (double)outView->size() / (double)inView->size();
