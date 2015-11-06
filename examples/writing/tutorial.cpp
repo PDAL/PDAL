@@ -1,6 +1,6 @@
 #include <pdal/PointView.hpp>
 #include <pdal/BufferReader.hpp>
-#include <pdal/Pointtable.hpp>
+#include <pdal/PointTable.hpp>
 #include <pdal/Dimension.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/StageFactory.hpp>
