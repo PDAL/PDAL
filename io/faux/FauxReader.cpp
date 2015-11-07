@@ -164,7 +164,7 @@ Dimension::IdList FauxReader::getDefaultDimensions()
 point_count_t FauxReader::read(PointViewPtr view, point_count_t count)
 {
     const double numDeltas = (double)count - 1.0;
-    double delX, delY, delZ = 0;
+    double delX(0), delY(0), delZ(0);
     if (numDeltas)
     {
         delX = (m_maxX - m_minX) / numDeltas;
