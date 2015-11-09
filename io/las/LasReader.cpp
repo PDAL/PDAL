@@ -119,7 +119,7 @@ QuickInfo LasReader::inspect()
     if (!Utils::numericCast(m_lasHeader.pointCount(), qi.m_pointCount))
         qi.m_pointCount = std::numeric_limits<point_count_t>::max();
     qi.m_bounds = m_lasHeader.getBounds();
-    qi.m_srs = getSrsFromVlrs();
+    qi.m_srs = getSpatialReference();
     qi.m_valid = true;
 
     done(table);
@@ -516,6 +516,10 @@ SpatialReference LasReader::getSrsFromGeotiffVlr()
     if (wkt.size())
         srs.setFromUserInput(geotiff.getWkt(false, false));
 
+#else
+    if (findVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID))
+        Utils::printError("Can't decode LAS GeoTiff VLR to SRS - "
+            "PDAL not built with GeoTiff.");
 #endif
     return srs;
 }
