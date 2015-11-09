@@ -9,10 +9,6 @@ Clipping with Geometries
 :Date: 11/09/2015
 
 
-This tutorial describes how to construct a pipeline that takes in geometries and
-clips out data with given geometry attributes.
-
-
 Introduction
 -------------------------------------------------------------------------------
 
