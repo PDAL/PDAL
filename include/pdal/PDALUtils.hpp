@@ -44,7 +44,9 @@
 #include <pdal/PointView.hpp>
 #include <pdal/Options.hpp>
 
+#ifndef _WIN32
 #include <sys/fcntl.h>
+#endif
 
 namespace pdal
 {
