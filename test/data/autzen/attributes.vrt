@@ -1,0 +1,9 @@
+<OGRVRTDataSource>
+    <OGRVRTWarpedLayer>
+        <OGRVRTLayer name="OGRGeoJSON">
+            <SrcDataSource>attributes.json</SrcDataSource>
+            <LayerSRS>EPSG:4326</LayerSRS>
+        </OGRVRTLayer>
+        <TargetSRS>+proj=lcc +lat_1=43 +lat_2=45.5 +lat_0=41.75 +lon_0=-120.5 +x_0=399999.9999999999 +y_0=0 +ellps=GRS80 +units=ft +no_defs</TargetSRS>
+    </OGRVRTWarpedLayer>
+</OGRVRTDataSource>
