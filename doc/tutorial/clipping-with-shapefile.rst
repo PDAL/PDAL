@@ -19,7 +19,6 @@ auxillary data sources such as `OGR`_-readable `Shapefiles`_.  This tutorial
 describes how to construct a pipeline that takes in geometries and clips out
 point cloud data inside geometries with matching attributes.
 
-.. sectnum::
 .. contents::
    :depth: 4
    :backlinks: none
@@ -163,6 +162,13 @@ as they are read, filtered, and written.
   we're only keeping those points with a classification value of 5.
 * :ref:`writers.las`: write our content back out using an `ASPRS LAS`_ writer.
 
+.. note::
+
+    You don't have to use only ``Classification`` to set the attributes
+    with :ref:`filters.attribute`. Any valid dimension name could work, but
+    most LiDAR softwares will display categorical coloring for the
+    ``Classification`` field, and we can leverage that behavior in this
+    scenario.
 
 Processing
 -------------------------------------------------------------------------------
