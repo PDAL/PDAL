@@ -15,9 +15,14 @@ Introduction
 This tutorial describes how to construct a pipeline that takes in geometries
 and clips out data with given geometry attributes.  It is common to desire
 being able to cut or clip point cloud data with 2D geometries, often from
-auxillary data sources such as `OGR`-readable `Shapefiles`_.  This tutorial
+auxillary data sources such as `OGR`_-readable `Shapefiles`_.  This tutorial
 describes how to construct a pipeline that takes in geometries and clips out
 point cloud data inside geometries with matching attributes.
+
+.. sectnum::
+.. contents::
+   :depth: 4
+   :backlinks: none
 
 
 .. _`OGR`: http://www.gdal.org
@@ -52,6 +57,11 @@ criteria.
 Data Preparation
 -------------------------------------------------------------------------------
 
+.. figure:: autzen-shapes-point-cloud.png
+    :scale: 30%
+
+    Autzen Stadium, a 100 million+ point cloud file.
+
 The data are mixed in two different coordinate systems. The :ref:`LAZ
 <readers.las>` file is in `Oregon State Plane Ft.`_ and the `GeoJSON`_ defining
 the polygons is in `EPSG:4326`_. We have two options -- project the point cloud
@@ -73,28 +83,29 @@ for us on-the-fly:
         </OGRVRTWarpedLayer>
     </OGRVRTDataSource>
 
-Save this VRT definition to a file, called ``attributes.vrt`` in the same location where you
-stored the ``autzen.laz`` and ``attributes.json`` files.
-
 .. note::
 
     The GeoJSON file does not have an externally-defined coordinate system,
     so we are explictly setting one with the LayerSRS parameter. If your
     data does have coordinate system information, you don't need to do that.
 
+Save this VRT definition to a file, called ``attributes.vrt`` in the same location where you
+stored the ``autzen.laz`` and ``attributes.json`` files.
+
+
 The attribute GeoJSON file has a couple of features with different attributes.
 For our scenario, we want to clip out the yellow-green polygon, marked number "5",
 in the upper right hand corner.
 
-.. figure:: autzen-shapes-point-cloud.png
-    :scale: 50%
 
-    Autzen Stadium, a 100 million+ point cloud file.
 
 .. figure:: autzen-shapes-to-clip.png
-    :scale: 50%
+    :scale: 30%
 
-    We want to clip out the polygon in the upper right hand corner.
+    We want to clip out the polygon in the upper right hand corner. We can
+    view the `GeoJSON`_ geometry using something like `QGIS`_
+
+.. _`QGIS`: http://qgis.org
 
 Pipeline
 -------------------------------------------------------------------------------
@@ -159,17 +170,17 @@ Processing
 1) Save the pipeline to a file called ``shape-clip.xml`` in the same directory as
    your ``attributes.json`` and ``autzen.laz`` files.
 
-2) Call ``pdal pipeline`` on the :ref:`pipeline`
+2) Call ``pdal pipeline`` on the :ref:`pipeline`.
 
     ::
 
-        pdal pipeline shape-clip.xml
+        $ pdal pipeline shape-clip.xml
 
 3) Visualize ``output.las`` in an environment capable of viewing it. http://plas.io
    or `CloudCompare`_ should do the trick.
 
     .. image:: autzen-shapes-clipped.png
-        :scale: 50%
+        :scale: 30%
 
 Conclusion
 -------------------------------------------------------------------------------
