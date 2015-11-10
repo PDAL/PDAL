@@ -8,7 +8,7 @@ Applications
 :Contact: howard at hobu.co
 :Date: 6/1/2015
 
-PDAL contains consists of a single application, called ``pdal``. The ```pdal``
+PDAL contains consists of a single application, called ``pdal``. The ``pdal``
 application currently has the following subcommands:
 
 * :ref:`delta <delta_command>`
