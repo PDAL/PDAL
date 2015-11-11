@@ -82,12 +82,14 @@ Options HeightFilter::getDefaultOptions()
 
 void HeightFilter::addDimensions(PointLayoutPtr layout)
 {
-    layout->registerDim(Dimension::Id::Classification);
     m_heightDim = layout->registerOrAssignDim("Height", Dimension::Type::Double);
 }
 
 void HeightFilter::filter(PointView& view)
 {
+    if (!view.hasDim(Dimension::Id::Classification))
+        throw pdal_error("HeightFilter: missing Classification dimension in input PointView");
+
     bool logOutput = log()->getLevel() > LogLevel::Debug1;
     if (logOutput)
         log()->floatPrecision(8);
@@ -115,6 +117,9 @@ void HeightFilter::filter(PointView& view)
         else
             nonground.push_back(id);
     }
+
+    if (ground->indices.size()==0)
+        throw pdal_error("HeightFilter: the input PointView does not appear to have any points classified as ground");
 
     pcl::ExtractIndices<pcl::PointXYZ> extract;
     extract.setInputCloud(cloud_in);
