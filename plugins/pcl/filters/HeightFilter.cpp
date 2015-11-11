@@ -74,22 +74,20 @@ std::string HeightFilter::getName() const
     return s_info.name;
 }
 
-Options HeightFilter::getDefaultOptions()
-{
-    Options options;
-    return options;
-}
-
 void HeightFilter::addDimensions(PointLayoutPtr layout)
 {
     m_heightDim = layout->registerOrAssignDim("Height", Dimension::Type::Double);
 }
 
+void HeightFilter::prepared(PointTableRef table)
+{
+    const PointLayoutPtr layout(table.layout());
+    if (!layout->hasDim(Dimension::Id::Classification))
+        throw pdal_error("HeightFilter: missing Classification dimension in input PointView");
+}
+
 void HeightFilter::filter(PointView& view)
 {
-    if (!view.hasDim(Dimension::Id::Classification))
-        throw pdal_error("HeightFilter: missing Classification dimension in input PointView");
-
     bool logOutput = log()->getLevel() > LogLevel::Debug1;
     if (logOutput)
         log()->floatPrecision(8);

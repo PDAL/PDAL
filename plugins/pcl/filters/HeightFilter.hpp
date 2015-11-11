@@ -60,12 +60,11 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
-
 private:
     Dimension::Id::Enum m_heightDim;
 
     virtual void addDimensions(PointLayoutPtr layout);
+    virtual void prepared(PointTableRef table);
     virtual void filter(PointView& view);
 
     HeightFilter& operator=(const HeightFilter&); // not implemented
