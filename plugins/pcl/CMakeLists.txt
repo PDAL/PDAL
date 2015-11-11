@@ -159,6 +159,10 @@ PDAL_ADD_PLUGIN(greedyprojection_filter_libname filter greedyprojection
     FILES filters/GreedyProjectionFilter.hpp filters/GreedyProjectionFilter.cpp
     LINK_WITH ${PCL_LIBRARIES})
 
+PDAL_ADD_PLUGIN(height_filter_libname filter height
+    FILES filters/HeightFilter.cpp
+    LINK_WITH ${PCL_LIBRARIES})
+
 #
 # PCL Kernel
 #
