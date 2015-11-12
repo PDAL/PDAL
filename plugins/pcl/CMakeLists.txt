@@ -31,6 +31,7 @@ include_directories(${PCL_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_LIST_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/filters)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/pipeline)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/dartsample)
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 if (NOT WIN32)
@@ -161,6 +162,12 @@ PDAL_ADD_PLUGIN(greedyprojection_filter_libname filter greedyprojection
 
 PDAL_ADD_PLUGIN(height_filter_libname filter height
     FILES filters/HeightFilter.cpp
+    LINK_WITH ${PCL_LIBRARIES})
+
+PDAL_ADD_PLUGIN(dartsample_filter_libname filter dartsample
+    FILES
+        filters/DartSampleFilter.cpp
+        dartsample/dart_sample.cpp
     LINK_WITH ${PCL_LIBRARIES})
 
 #
