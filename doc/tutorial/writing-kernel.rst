@@ -93,9 +93,7 @@ and execute on the final stage.
    :language: cpp
    :lines: 78-79
 
-When compiled, a dynamic library file will be created; in this case:
-::
-   libpdal_plugin_kernel_mykernel.dylib
+When compiled, a dynamic library file will be created; in this case, ``libpdal_plugin_kernel_mykernel.dylib``
 
 Put this file in whatever directory ``PDAL_DRIVER_PATH`` is pointing to.  Then, if you run ``pdal --help``, you should see ``mykernel`` listed in the possible commands.
 
