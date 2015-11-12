@@ -168,7 +168,7 @@ we run the following PDAL CLI command
 
 The result, when colored by the normalized height instead of elevation is
 
-.. image:: autzen-elevation.png
+.. image:: autzen-height.png
    :height: 400px
 
 Example #2
