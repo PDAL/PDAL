@@ -131,6 +131,18 @@ void BpfWriter::processOptions(const Options& options)
         }
         m_bundledFiles.push_back(ulemFile);
     }
+
+    // BPF coordinates are always in UTM meters, which can be quite large.
+    // Allowing the writer to proceed with the default offset of 0 can lead to
+    // unexpected quantization of the coordinates. Instead, we force use of
+    // auto offset to subtract the minimum value in XYZ, unless of course, the
+    // user chooses to override with their own offset.
+    if (!options.hasOption("offset_x"))
+        m_xXform.m_autoOffset = true;
+    if (!options.hasOption("offset_y"))
+        m_yXform.m_autoOffset = true;
+    if (!options.hasOption("offset_z"))
+        m_zXform.m_autoOffset = true;
 }
 
 
@@ -354,4 +366,3 @@ void BpfWriter::doneFile()
 }
 
 } //namespace pdal
-
