@@ -44,7 +44,7 @@ Again, we start with a full listing of the filter source.
 .. literalinclude:: ../../examples/writing-filter/MyFilter.cpp
    :language: cpp
 
-For your filter to available to PDAL at runtime, it must adhere to the PDAL plugin interface. As a convenience, we provide the macros in ``pdal_macros.hpp`` to do just this.
+For your filter to be available to PDAL at runtime, it must adhere to the PDAL plugin interface. As a convenience, we provide the macros in ``pdal_macros.hpp`` to do just this.
 
 We begin by creating a ``PluginInfo`` struct containing three identifying elements - the filter name, description, and a link to documentation.
 
