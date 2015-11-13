@@ -2,24 +2,33 @@
 
 #pragma once
 
-#include "Reader.hpp"
+#include <pdal/PointView.hpp>
+#include <pdal/Reader.hpp>
+#include <pdal/util/IStream.hpp>
 
-#include <string>
-
-class MyReader : public pdal::Reader
+namespace pdal
 {
-public:
-  SET_STAGE_NAME ("MyReader", "My Awesome Reader")
-  SET_STAGE_LINK ("http://link/to/documentation")
+  class MyReader : public Reader
+  {
+  public:
+    MyReader() : Reader() {};
 
-  MyReader() : Reader() {};
-  int execute();
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
-private:
-  void validateSwitches();
-  void addSwitches();
+    Options getDefaultOptions();
+    static Dimension::IdList getDefaultDimensions();
 
-  std::string m_input_file;
-  std::string m_output_file;
-};
+  private:
+    std::unique_ptr<ILeStream> m_stream;
+    point_count_t m_index;
+    double m_scale_z;
 
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void processOptions(const Options& options);
+    virtual void ready(PointTableRef table);
+    virtual point_count_t read(PointViewPtr view, point_count_t count);
+    virtual void done(PointTableRef table);
+  };
+}
