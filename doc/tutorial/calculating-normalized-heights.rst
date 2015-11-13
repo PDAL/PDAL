@@ -14,7 +14,7 @@ This tutorial will describe the creation of a new filter for calculating normali
 Introduction
 -------------------------------------------------------------------------------
 
-Normalized heights are a commonly used attribute of point cloud data. This can also be referred to as _height above ground_ (HAG) or _above ground level_ (AGL) heights. In the end, it is simply a measure of a point's relative height as opposed to its raw elevation value.
+Normalized heights are a commonly used attribute of point cloud data. This can also be referred to as *height above ground* (HAG) or *above ground level* (AGL) heights. In the end, it is simply a measure of a point's relative height as opposed to its raw elevation value.
 
 The process of computing normalized heights is straightforward. First, we must have an estimate of the underlying terrain model. With this we can compute the difference between each point's elevation and the elevation of the terrain model at the same XY coordinate. The quality of the normalized heights will be a function of the quality of the terrain model, which of course depends on the quality of the ground segmentation approach and any interpolation that is required to arrive at the terrain elevation for a given XY coordinate.
 
