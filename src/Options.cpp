@@ -95,7 +95,7 @@ Options::Options(const Option& opt)
 bool Option::nameValid(const std::string& name, bool reportError)
 {
     bool valid = (parse(name, 0) == name.size());
-    if (reportError)
+    if (!valid && reportError)
     {
         std::ostringstream oss;
         oss << "Invalid option name '" << name << "'.  Options must "
