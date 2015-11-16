@@ -37,6 +37,43 @@
 #include <hexer/HexIter.hpp>
 #include <pdal/StageFactory.hpp>
 
+#ifdef PDAL_HAVE_GEOS
+#include <geos_c.h>
+#endif
+
+
+
+#ifdef PDAL_HAVE_GEOS
+namespace geos
+{
+
+static void _GEOSErrorHandler(const char *fmt, ...)
+{
+    va_list args;
+
+    va_start(args, fmt);
+    char buf[1024];
+
+    vsnprintf(buf, sizeof(buf), fmt, args);
+
+    va_end(args);
+}
+
+static void _GEOSWarningHandler(const char *fmt, ...)
+{
+    va_list args;
+
+    char buf[1024];
+    vsnprintf(buf, sizeof(buf), fmt, args);
+    std::cout << "GEOS warning: " << buf << std::endl;
+
+    va_end(args);
+}
+
+} // geos
+#endif
+
+
 using namespace hexer;
 
 namespace pdal
@@ -85,6 +122,35 @@ void HexBin::filter(PointView& view)
     }
 }
 
+std::string smoothPolygon(std::string wkt, double tolerance)
+{
+    GEOSContextHandle_t environment(0);
+    if (tolerance < 0)
+        throw pdal::pdal_error("Tolerance cannot be zero!");
+    environment = initGEOS_r(geos::_GEOSWarningHandler, geos::_GEOSErrorHandler);
+    GEOSGeometry* geom(0);
+    geom = GEOSGeomFromWKT_r(environment, wkt.c_str());
+    if (!geom)
+    {
+        throw pdal::pdal_error("unable to import polygon to smooth");
+    }
+
+    GEOSGeometry* smoothed(0);
+    smoothed = GEOSTopologyPreserveSimplify_r(environment, geom, tolerance);
+    if (!smoothed)
+    {
+        std::ostringstream oss;
+        oss << "Unable to smooth polgyon";
+        throw pdal::pdal_error(oss.str());
+    }
+    char* out_wkt = GEOSGeomToWKT_r(environment , smoothed);
+    std::string poly(out_wkt);
+    GEOSFree_r(environment, out_wkt);
+    GEOSGeom_destroy_r(environment, geom);
+    GEOSGeom_destroy_r(environment, smoothed);
+    finishGEOS_r(environment);
+    return poly;
+}
 
 void HexBin::done(PointTableRef table)
 {
@@ -141,6 +207,9 @@ void HexBin::done(PointTableRef table)
     m_grid->toWKT(polygon);
     m_metadata.add("boundary", polygon.str(),
         "Boundary MULTIPOLYGON of domain");
+    std::string smooth = smoothPolygon(polygon.str(), m_edgeLength + 2.0);
+    m_metadata.add("smooth", smooth,
+        "Smoothed boundary MULTIPOLYGON of domain");
 }
 
 } // namespace pdal
