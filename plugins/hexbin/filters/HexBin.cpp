@@ -97,6 +97,8 @@ void HexBin::processOptions(const Options& options)
     else
         // Backward compatability.
         m_edgeLength = options.getValueOrDefault<double>("edge_size", 0.0);
+
+    m_smoothTolerance= options.getValueOrDefault<double>("smooth_tolerance", 10.0);
 }
 
 
@@ -207,7 +209,7 @@ void HexBin::done(PointTableRef table)
     m_grid->toWKT(polygon);
     m_metadata.add("boundary", polygon.str(),
         "Boundary MULTIPOLYGON of domain");
-    std::string smooth = smoothPolygon(polygon.str(), m_edgeLength + 2.0);
+    std::string smooth = smoothPolygon(polygon.str(), m_smoothTolerance);
     m_metadata.add("smooth", smooth,
         "Smoothed boundary MULTIPOLYGON of domain");
 }
