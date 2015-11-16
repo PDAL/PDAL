@@ -36,6 +36,7 @@
 
 #include <hexer/HexIter.hpp>
 #include <pdal/StageFactory.hpp>
+#include <cstdarg>
 
 #ifdef PDAL_HAVE_GEOS
 #include <geos_c.h>
