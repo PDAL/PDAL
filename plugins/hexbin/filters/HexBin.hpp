@@ -61,6 +61,7 @@ private:
     uint32_t m_sampleSize;
     int32_t m_density;
     double m_edgeLength;
+    double m_smoothTolerance;
     bool m_outputTesselation;
 
     virtual void processOptions(const Options& options);
