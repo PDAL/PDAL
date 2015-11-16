@@ -35,6 +35,7 @@
 #include "HexBin.hpp"
 
 #include <hexer/HexIter.hpp>
+#include <pdal/Geometry.hpp>
 #include <pdal/StageFactory.hpp>
 
 using namespace hexer;
@@ -141,6 +142,15 @@ void HexBin::done(PointTableRef table)
     m_grid->toWKT(polygon);
     m_metadata.add("boundary", polygon.str(),
         "Boundary MULTIPOLYGON of domain");
+
+    const double SQRT_3(1.732050808);
+    // This is just a little longer than the prependicular distance of the
+    // "humps."
+//    double tolerance = 1.1 * m_grid->height() / (2 * SQRT_3);
+    double tolerance = 1.1 * m_grid->height() / 2;
+    m_metadata.add("smoothed_boundary",
+        Geometry::smoothPolygon(polygon.str(), tolerance),
+        "Smoothed boundary MULTIPOLYGON of domain");
 }
 
 } // namespace pdal

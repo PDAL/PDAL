@@ -158,7 +158,7 @@ void HeightFilter::filter(PointView& view)
     ground_tree.reset(new pcl::search::KdTree<pcl::PointXYZ> (false));
     ground_tree->setInputCloud(cloud_ground_projected);
 
-    for (int i = 0; i < cloud_nonground_projected->size(); ++i)
+    for (size_t i = 0; i < cloud_nonground_projected->size(); ++i)
     {
         pcl::PointXYZ nonground_query = cloud_nonground_projected->points[i];
         std::vector<int> neighbors(1);

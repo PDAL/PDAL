@@ -80,7 +80,7 @@ pcl::DartSample<PointT>::applyFilter (std::vector<int> &indices)
 
   // Create octree, seeded with the first index
   pcl::octree::OctreePointCloudSearch<PointT> tree (radius_ / std::sqrt (3));
-  pcl::PointCloud<PointT>::Ptr cloud_t (new pcl::PointCloud<PointT>);
+  typename pcl::PointCloud<PointT>::Ptr cloud_t (new pcl::PointCloud<PointT>);
   tree.setInputCloud (cloud_t);
   tree.addPointToCloud (input_->points[shuffled_indices[0]], cloud_t);
 
