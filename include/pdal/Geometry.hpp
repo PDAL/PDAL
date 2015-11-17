@@ -116,6 +116,21 @@ static std::string smoothPolygon(const std::string& wkt, double tolerance)
     finish();
     return outWkt;
 }
+
+static double computeArea(const std::string& wkt)
+{
+    GEOSContextHandle_t env = init();
+
+    GEOSGeometry *geom = GEOSGeomFromWKT_r(env, wkt.c_str());
+    if (!geom)
+        return 0.0;
+
+    double output(0.0);
+    int er = GEOSArea_r(env, geom, &output);
+    GEOSGeom_destroy_r(env, geom);
+    finish();
+    return output;
+}
 #else
 
 static std::string smoothPolygon(const std::string& wkt, double tolerance)

@@ -62,6 +62,7 @@ private:
     int32_t m_density;
     double m_edgeLength;
     bool m_outputTesselation;
+    point_count_t m_count;
 
     virtual void processOptions(const Options& options);
     virtual void ready(PointTableRef table);
