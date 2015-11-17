@@ -76,9 +76,9 @@ void GDALReader::initialize()
 }
 
 
-QuickInfo GDALReader::inspect()
+std::unique_ptr<QuickInfo> GDALReader::inspect()
 {
-    QuickInfo qi;
+    std::unique_ptr<QuickInfo> qi(new QuickInfo());
     std::unique_ptr<PointLayout> layout(new PointLayout());
 
     addDimensions(layout.get());
@@ -87,10 +87,9 @@ QuickInfo GDALReader::inspect()
     m_raster = std::unique_ptr<gdal::Raster>(new gdal::Raster(m_filename));
     m_raster->open();
 
-    qi.m_pointCount = m_raster->m_raster_x_size * m_raster->m_raster_y_size;
-    // qi.m_bounds = ???;
-    qi.m_srs = m_raster->getSpatialRef();
-    qi.m_valid = true;
+    qi->m_pointCount = m_raster->m_raster_x_size * m_raster->m_raster_y_size;
+//     qi.m_bounds = ???;
+    qi->m_srs = m_raster->getSpatialRef();
 
     return qi;
 }

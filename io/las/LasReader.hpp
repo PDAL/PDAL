@@ -120,7 +120,7 @@ private:
     SpatialReference getSrsFromGeotiffVlr();
     void extractHeaderMetadata(MetadataNode& forward, MetadataNode& m);
     void extractVlrMetadata(MetadataNode& forward, MetadataNode& m);
-    virtual QuickInfo inspect();
+    virtual std::unique_ptr<QuickInfo> inspect();
     virtual void ready(PointTableRef table);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
     virtual bool processOne(PointRef& point);

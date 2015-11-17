@@ -75,7 +75,13 @@ public:
     {
         l_processOptions(m_options);
         processOptions(m_options);
-        return inspect();
+        auto quickInfo = inspect();
+        if (!quickInfo) {
+            std::stringstream ss;
+            ss << "Cannot preview stage '" << getName() << "' because it does not implement `inspect()`";
+            throw pdal_error(ss.str());
+        }
+        return *quickInfo;
     }
     void prepare(PointTableRef table);
     PointViewSet execute(PointTableRef table);
@@ -155,8 +161,8 @@ private:
     virtual void writerProcessOptions(const Options& /*options*/)
         {}
     void l_initialize(PointTableRef table);
-    virtual QuickInfo inspect()
-        { return QuickInfo(); }
+    virtual std::unique_ptr<QuickInfo> inspect()
+        { return nullptr; }
     virtual void initialize(PointTableRef /*table*/)
         { initialize(); }
     virtual void initialize()

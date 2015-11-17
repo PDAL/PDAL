@@ -166,9 +166,9 @@ Options MrsidReader::getDefaultOptions()
 }
 
 
-QuickInfo MrsidReader::inspect()
+std::unique_ptr<QuickInfo> MrsidReader::inspect()
 {
-    QuickInfo qi;
+    std::unique_ptr<QuickInfo> qi(new QuickInfo());
     std::unique_ptr<PointLayout> layout(new PointLayout());
 
     MrsidReader::initialize();
@@ -180,12 +180,11 @@ QuickInfo MrsidReader::inspect()
 
     Dimension::IdList dims = layout->dims();
     for (auto di = dims.begin(); di != dims.end(); ++di)
-        qi.m_dimNames.push_back(layout->dimName(*di));
-    if (!Utils::numericCast(m_PS->getNumPoints(), qi.m_pointCount))
-        qi.m_pointCount = std::numeric_limits<point_count_t>::max();
-    qi.m_bounds = b;
-    qi.m_srs = pdal::SpatialReference(m_PS->getWKT());
-    qi.m_valid = true;
+        qi->m_dimNames.push_back(layout->dimName(*di));
+    if (!Utils::numericCast(m_PS->getNumPoints(), qi->m_pointCount))
+        qi->m_pointCount = std::numeric_limits<point_count_t>::max();
+    qi->m_bounds = b;
+    qi->m_srs = pdal::SpatialReference(m_PS->getWKT());
 
     PointTable table;
     done(table);

@@ -82,7 +82,7 @@ private:
     Charbuf m_charbuf;
 
     virtual void processOptions(const Options& options);
-    virtual QuickInfo inspect();
+    virtual std::unique_ptr<QuickInfo> inspect();
     virtual void initialize();
     virtual void addDimensions(PointLayoutPtr Layout);
     virtual void ready(PointTableRef table);

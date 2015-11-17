@@ -73,7 +73,7 @@ private:
     virtual point_count_t read(PointViewPtr view, point_count_t num);
     virtual void done(PointTableRef table)
         { m_raster->close(); }
-    virtual QuickInfo inspect();
+    virtual std::unique_ptr<QuickInfo> inspect();
 
     std::unique_ptr<gdal::Raster> m_raster;
     point_count_t m_index;

@@ -104,9 +104,9 @@ CREATE_STATIC_PLUGIN(1, 0, LasReader, Reader, s_info)
 
 std::string LasReader::getName() const { return s_info.name; }
 
-QuickInfo LasReader::inspect()
+std::unique_ptr<QuickInfo> LasReader::inspect()
 {
-    QuickInfo qi;
+    std::unique_ptr<QuickInfo> qi(new QuickInfo());
     std::unique_ptr<PointLayout> layout(new PointLayout());
 
     PointTable table;
@@ -115,12 +115,11 @@ QuickInfo LasReader::inspect()
 
     Dimension::IdList dims = layout->dims();
     for (auto di = dims.begin(); di != dims.end(); ++di)
-        qi.m_dimNames.push_back(layout->dimName(*di));
-    if (!Utils::numericCast(m_lasHeader.pointCount(), qi.m_pointCount))
-        qi.m_pointCount = std::numeric_limits<point_count_t>::max();
-    qi.m_bounds = m_lasHeader.getBounds();
-    qi.m_srs = getSpatialReference();
-    qi.m_valid = true;
+        qi->m_dimNames.push_back(layout->dimName(*di));
+    if (!Utils::numericCast(m_lasHeader.pointCount(), qi->m_pointCount))
+        qi->m_pointCount = std::numeric_limits<point_count_t>::max();
+    qi->m_bounds = m_lasHeader.getBounds();
+    qi->m_srs = getSpatialReference();
 
     done(table);
 
