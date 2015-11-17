@@ -53,6 +53,21 @@ public:
     void setReadCb(PointReadFunc cb)
         { m_cb = cb; }
 
+    void read(
+            const std::string path,
+            std::function<void(BasePointTable&)> onInit,
+            std::function<void(PointView&)> onData,
+            const std::size_t chunkBytes = 65536,
+            Options options = Options());
+
+    void read(
+            const std::string path,
+            PointLayout& layout,
+            std::function<void(BasePointTable&)> onInit,
+            std::function<void(PointView&)> onData,
+            const std::size_t chunkBytes = 65536,
+            Options options = Options());
+
 protected:
     std::string m_filename;
     point_count_t m_count;

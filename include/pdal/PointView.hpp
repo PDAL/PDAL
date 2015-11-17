@@ -67,6 +67,7 @@ class PDAL_DLL PointView
 {
     friend class plang::BufferedInvocation;
     friend class PointRef;
+    friend class Reader;
     friend struct PointViewLess;
 public:
     PointView(PointTableRef pointTable) : m_pointTable(pointTable),
@@ -272,8 +273,11 @@ private:
     void freeTemp(PointId id)
         { m_temps.push(id); }
 
-    // Awfulness to avoid exceptions in numeric cast.
-    static bool m_ok;
+    void clear()
+    {
+        m_index.resize(0);
+        m_size = 0;
+    }
 };
 
 struct PointViewLess

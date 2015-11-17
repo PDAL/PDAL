@@ -62,4 +62,54 @@ boost::property_tree::ptree Reader::serializePipeline() const
     return root;
 }
 
+
+void Reader::read(
+        const std::string path,
+        std::function<void(BasePointTable&)> onInit,
+        std::function<void(PointView&)> onData,
+        const std::size_t chunkBytes,
+        Options options)
+{
+    PointLayout layout;
+    read(path, layout, onInit, onData, chunkBytes, options);
+}
+
+void Reader::read(
+        const std::string path,
+        PointLayout& layout,
+        std::function<void(BasePointTable&)> onInit,
+        std::function<void(PointView&)> onData,
+        const std::size_t chunkBytes,
+        Options options)
+{
+    options.add(Option("filename", path));
+    setOptions(options);
+
+    VectorPointTable table(layout);
+    prepare(table);
+
+    const std::size_t pointSize(layout.pointSize());
+    std::size_t maxIndex(
+            chunkBytes / pointSize + (chunkBytes % pointSize ? 1 : 0));
+
+    table.reserve(maxIndex + 1);
+
+    setReadCb(
+            [&onData, &table, &maxIndex]
+            (pdal::PointView& view, pdal::PointId index)
+    {
+        if (index >= maxIndex && table.numPoints() == index + 1)
+        {
+            onData(view);
+
+            table.clear();
+            view.clear();
+        }
+    });
+
+    onInit(table);
+    onData(**execute(table).begin());
+}
+
 } // namespace pdal
+
