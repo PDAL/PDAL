@@ -397,7 +397,6 @@ void InfoKernel::dump(MetadataNode& root)
         PointViewSet viewSet = m_manager->views();
         assert(viewSet.size() == 1);
         root.add(m_hexbinStage->getMetadata().clone("boundary"));
-        root.add(m_hexbinStage->getMetadata().clone("smoothed_boundary"));
     }
 }
 
