@@ -51,17 +51,15 @@ feature.
             <Filter type="filters.attribute">
                 <Option name="dimension">
                     Classification
-                    <Options>
-                        <Option name="datasource">
-                            ./test/data/autzen/attributes.shp
-                        </Option>
-                        <Option name="layer">
-                            attributes
-                        </Option>
-                        <Option name="column">
-                            CLS
-                        </Option>
-                    </Options>
+                </Option>
+                <Option name="datasource">
+                    ./test/data/autzen/attributes.shp
+                </Option>
+                <Option name="layer">
+                    attributes
+                </Option>
+                <Option name="column">
+                    CLS
                 </Option>
                 <Reader type="readers.las">
                     <Option name="filename">
@@ -96,6 +94,9 @@ to the value '26'.
                 <Option name="value">
                     26
                 </Option>
+                <Option name="datasource">
+                    ./test/data/autzen/attributes.shp
+                </Option>
                 <Reader type="readers.las">
                     <Option name="filename">
                         ../autzen/autzen-dd.las
@@ -105,6 +106,46 @@ to the value '26'.
         </Writer>
     </Pipeline>
 
+Example 3
+--------------------------------------------------------------------------------
+
+This example sets the Intensity attribute to ``CLS`` values read from the
+`OGR SQL`_ query.
+
+.. _`OGR SQL`: http://www.gdal.org/ogr_sql_sqlite.html
+
+.. code-block:: xml
+
+    <?xml version="2.0" encoding="utf-8"?>
+    <Pipeline version="1.0">
+        <Writer type="writers.las">
+            <Option name="filename">
+                attributed.las
+            </Option>
+            <Option name="forward">
+                all
+            </Option>
+            <Filter type="filters.attribute">
+                <Option name="dimension">
+                    Intensity
+                </Option>
+                <Option name="datasource">
+                    ./test/data/autzen/attributes.shp
+                </Option>
+                <Option name="query">
+                    SELECT CLS FROM attributes where cls != 6
+                </Option>
+                <Option name="column">
+                    CLS
+                </Option>
+                <Reader type="readers.las">
+                    <Option name="filename">
+                        ../autzen/autzen-dd.las
+                    </Option>
+                </Reader>
+            </Filter>
+        </Writer>
+    </Pipeline>
 
 Options
 -------

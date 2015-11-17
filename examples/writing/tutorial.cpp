@@ -1,8 +1,9 @@
 #include <pdal/PointView.hpp>
 #include <pdal/BufferReader.hpp>
-#include <pdal/Pointtable->hpp>
+#include <pdal/PointTable.hpp>
 #include <pdal/Dimension.hpp>
 #include <pdal/Options.hpp>
+#include <pdal/StageFactory.hpp>
 
 #include <vector>
 
@@ -49,9 +50,9 @@ int main(int argc, char* argv[])
     options.add("filename", "myfile.las");
 
     PointTable table;
-    table.registerDim(Dimension::Id::X);
-    table.registerDim(Dimension::Id::Y);
-    table.registerDim(Dimension::Id::Z);
+    table.layout()->registerDim(Dimension::Id::X);
+    table.layout()->registerDim(Dimension::Id::Y);
+    table.layout()->registerDim(Dimension::Id::Z);
 
     {
         PointViewPtr view(new PointView(table));
@@ -59,14 +60,15 @@ int main(int argc, char* argv[])
         std::vector<Point> data = getMyData();
         fillView(view, data);
 
-        BufferReader reader;
-        reader.addView(view);
+        BufferReader *reader = new BufferReader();
+        reader->addView(view);
 
-        LasWriter writer;
+        StageFactory factory;
+        Stage *writer = factory.createStage("writers.las");
 
-        writer.setInput(&reader);
-        writer.setOptions(options);
-        writer.prepare(table);
-        writer.execute(table);
+        writer->setInput(*reader);
+        writer->setOptions(options);
+        writer->prepare(table);
+        writer->execute(table);
     }
 }

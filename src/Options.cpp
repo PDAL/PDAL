@@ -1,4 +1,5 @@
 /******************************************************************************
+* Copyright (c) 2015, Hobu Inc. (hobu@hobu.co)
 *
 * All rights reserved.
 *
@@ -34,16 +35,9 @@
 #include <pdal/Options.hpp>
 #include <pdal/PDALUtils.hpp>
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
-#include <boost/optional.hpp>
-#include <boost/foreach.hpp>
-#include <boost/algorithm/string.hpp>
-
 #include <iostream>
 #include <sstream>
 #include <iostream>
-
 
 namespace pdal
 {
@@ -98,6 +92,20 @@ Options::Options(const Option& opt)
 }
 
 
+bool Option::nameValid(const std::string& name, bool reportError)
+{
+    bool valid = (parse(name, 0) == name.size());
+    if (!valid && reportError)
+    {
+        std::ostringstream oss;
+        oss << "Invalid option name '" << name << "'.  Options must "
+            "consist of only lowercase letters, numbers and '_'.";
+        Utils::printError(oss.str());
+    }
+    return valid;
+}
+
+
 Options::Options(const boost::property_tree::ptree& tree)
 {
     for (auto iter = tree.begin(); iter != tree.end(); ++iter)
@@ -111,7 +119,7 @@ Options::Options(const boost::property_tree::ptree& tree)
 
 void Options::add(const Option& option)
 {
-    assert(Option::nameValid(option.getName()));
+    assert(Option::nameValid(option.getName(), true));
     m_options.insert(std::pair<std::string, Option>(option.getName(), option));
 }
 
@@ -138,7 +146,7 @@ Option& Options::getOptionByRef(const std::string& name)
 
 const Option& Options::getOption(const std::string& name) const
 {
-    assert(Option::nameValid(name));
+    assert(Option::nameValid(name, true));
     auto iter = m_options.find(name);
     if (iter == m_options.end())
     {

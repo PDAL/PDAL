@@ -23,6 +23,10 @@ options by hand and target a single configuration and build platform.
 This tutorial will describe how to build PDAL using CMake on a Unix platform.
 PDAL is known to compile on Linux 2.6's of various flavors and OSX with XCode.
 
+.. seealso::
+
+    :ref:`vagrant` contains an automated way to build PDAL and all of
+    its dependencies.
 
 .. note::
 

@@ -177,7 +177,7 @@ void FauxReader::ready(PointTableRef /*table*/)
 {
     m_returnNum = 1;
     m_time = 0;
-    m_seed = (uint32_t)std::time(NULL);    
+    m_seed = (uint32_t)std::time(NULL);
     m_index = 0;
 }
 
@@ -187,9 +187,8 @@ bool FauxReader::processOne(PointRef& point)
     if (m_index >= m_count)
         return false;
 
-    double x;
-    double y;
-    double z;
+    double x(0), y(0), z(0);
+
     switch (m_mode)
     {
     case Random:

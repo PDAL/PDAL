@@ -143,7 +143,7 @@ clone: html
 	git clone git@github.com:PDAL/pdal.github.io.git $(OUTPUTDIR)
 
 publish: clone
-	cp -r build/html/* $(OUTPUTDIR)/
+	cp -r $(BUILDDIR)/html/* $(OUTPUTDIR)/
 	cd $(OUTPUTDIR) ; git checkout master; git add  "*" ; git commit -m "update for $(DATE)" . ; git push
 
 pdf:

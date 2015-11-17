@@ -6,34 +6,36 @@
 #include <pdal/Stage.hpp>
 
 #include <memory>
-#include <set>
 
 namespace pdal
 {
+
 class Options;
-class PointBuffer;
-class PointContext;
-}
+class PointLayout;
+class PointView;
 
-typedef std::shared_ptr<pdal::PointBuffer> PointBufferPtr;
-typedef std::set<PointBufferPtr> PointBufferSet;
-typedef PointContext PointContextRef;
-
-class MyFilter : public pdal::Filter
+class PDAL_DLL MyFilter : public Filter
 {
 public:
-  SET_STAGE_NAME ("filters.name", "My Awesome Filter")
-  SET_STAGE_LINK ("http://link/to/documentation")
-  SET_PLUGIN_VERSION("1.0.0")
+    MyFilter() : Filter()
+    {}
 
-  MyFilter() : Filter() {};
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+
+    Options getDefaultOptions();
 
 private:
-  virtual void addDimensions(PointContextRef ctx);
-  virtual void processOptions(const Options& options);
-  virtual PointBufferSet run(PointBufferPtr buf);
+    double m_value;
+    Dimension::Id::Enum m_myDimension;
 
-  MyFilter& operator=(const MyFilter&); // not implemented
-  MyFilter(const MyFilter&); // not implemented
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void processOptions(const Options& options);
+    virtual PointViewSet run(PointViewPtr view);
+
+    MyFilter& operator=(const MyFilter&); // not implemented
+    MyFilter(const MyFilter&); // not implemented
 };
 
+} // namespace pdal

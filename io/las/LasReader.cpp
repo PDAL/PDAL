@@ -109,7 +109,8 @@ QuickInfo LasReader::inspect()
     QuickInfo qi;
     std::unique_ptr<PointLayout> layout(new PointLayout());
 
-    initialize();
+    PointTable table;
+    initialize(table);
     addDimensions(layout.get());
 
     Dimension::IdList dims = layout->dims();
@@ -118,17 +119,16 @@ QuickInfo LasReader::inspect()
     if (!Utils::numericCast(m_lasHeader.pointCount(), qi.m_pointCount))
         qi.m_pointCount = std::numeric_limits<point_count_t>::max();
     qi.m_bounds = m_lasHeader.getBounds();
-    qi.m_srs = getSrsFromVlrs();
+    qi.m_srs = getSpatialReference();
     qi.m_valid = true;
 
-    PointTable table;
     done(table);
 
     return qi;
 }
 
 
-void LasReader::initialize()
+void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
 {
     if (m_initialized)
         return;
@@ -168,19 +168,18 @@ void LasReader::initialize()
         readExtraBytesVlr();
     }
     fixupVlrs();
-    m_initialized = true;
-}
-
-
-void LasReader::ready(PointTableRef table, MetadataNode& m)
-{
-    m_index = 0;
-
     setSrsFromVlrs(m);
     MetadataNode forward = table.privateMetadata("lasforward");
     extractHeaderMetadata(forward, m);
     extractVlrMetadata(forward, m);
 
+    m_initialized = true;
+}
+
+
+void LasReader::ready(PointTableRef table)
+{
+    m_index = 0;
     if (m_lasHeader.compressed())
     {
 #ifdef PDAL_HAVE_LASZIP
@@ -517,6 +516,10 @@ SpatialReference LasReader::getSrsFromGeotiffVlr()
     if (wkt.size())
         srs.setFromUserInput(geotiff.getWkt(false, false));
 
+#else
+    if (findVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID))
+        Utils::printError("Can't decode LAS GeoTiff VLR to SRS - "
+            "PDAL not built with GeoTiff.");
 #endif
     return srs;
 }

@@ -385,6 +385,7 @@ template <class T>
 inline T PointView::getFieldAs(Dimension::Id::Enum dim,
     PointId pointIndex) const
 {
+    assert(pointIndex < m_size);
     T retval;
     const Dimension::Detail *dd = layout()->dimDetail(dim);
     double val;

@@ -20,21 +20,12 @@ First, we provide a full listing of the kernel header.
 .. literalinclude:: ../../examples/writing-kernel/MyKernel.hpp
    :language: cpp
 
-In your MyKernel class, you will use two macros defined in Kernel.hpp to
-register some useful information about your kernel. SET_KERNEL_NAME sets the
-kernel name and description. These are extracted by the PDAL application to
-inform the user of the kernel's name and purpose. The name will be displayed
-when the user types `pdal --help`.
+As with other plugins, the MyKernel class needs to have the following three methods declared for the plugin interface to be satisfied:
 
 .. literalinclude:: ../../examples/writing-kernel/MyKernel.hpp
    :language: cpp
-   :lines: 12
+   :lines: 16-18
 
-SET_KERNEL_LINK will provide a link to a webpage that documents the kernel.
-
-.. literalinclude:: ../../examples/writing-kernel/MyKernel.hpp
-   :language: cpp
-   :lines: 13
 
 The source
 -------------------------------------------------------------------------------
@@ -44,31 +35,26 @@ Again, we start with a full listing of the kernel source.
 .. literalinclude:: ../../examples/writing-kernel/MyKernel.cpp
    :language: cpp
 
-In your kernel implementation, you will use a third macro defined in
-pdal_macros. This macro registers the plugin with the Kernel factory. It is
+In your kernel implementation, you will use a macro defined in pdal_macros.
+This macro registers the plugin with the Kernel factory. It is
 only required by plugins.
 
 .. literalinclude:: ../../examples/writing-kernel/MyKernel.cpp
    :language: cpp
-   :lines: 24
+   :lines: 23-29
 
-Native kernels will use a different set of macros added directly to the
-KernelFactory.cpp file to register themselves.
-
-.. code-block:: cpp
-
-  MAKE_KERNEL_CREATOR(mykernel, pdal::MyKernel)
-  REGISTER_KERNEL(mykernel, pdal::MyKernel);
+A static plugin macro can also be used to integrate the kernel with the main code.
+This will not be described here.  Using this as a shared plugin will be described later.
 
 To build up a processing pipeline in this
 example, we need to create two objects: the
-PointContext and the StageFactory. The latter is
+PointTable and the StageFactory. The latter is
 used to create the various stages that will be
 used within the kernel.
 
 .. literalinclude:: ../../examples/writing-kernel/MyKernel.cpp
    :language: cpp
-   :lines: 50-51
+   :lines: 60
 
 The Reader is created from the StageFactory, and
 is specified by the stage name, in this case an
@@ -78,7 +64,7 @@ read.
 
 .. literalinclude:: ../../examples/writing-kernel/MyKernel.cpp
    :language: cpp
-   :lines: 53-56
+   :lines: 62-65
 
 The Filter is also created from the StageFactory.
 Here, we create a decimation filter that will
@@ -88,7 +74,7 @@ the reader.
 
 .. literalinclude:: ../../examples/writing-kernel/MyKernel.cpp
    :language: cpp
-   :lines: 58-62
+   :lines: 67-71
 
 Finally, the Writer is created from the
 StageFactory. This text writer, takes as input
@@ -97,7 +83,7 @@ the output filename as its sole option.
 
 .. literalinclude:: ../../examples/writing-kernel/MyKernel.cpp
    :language: cpp
-   :lines: 64-68
+   :lines: 73-77
 
 The final two steps are to prepare and execute
 the pipeline. This is achieved by calling prepare
@@ -105,4 +91,10 @@ and execute on the final stage.
 
 .. literalinclude:: ../../examples/writing-kernel/MyKernel.cpp
    :language: cpp
-   :lines: 69-70
+   :lines: 78-79
+
+When compiled, a dynamic library file will be created; in this case, ``libpdal_plugin_kernel_mykernel.dylib``
+
+Put this file in whatever directory ``PDAL_DRIVER_PATH`` is pointing to.  Then, if you run ``pdal --help``, you should see ``mykernel`` listed in the possible commands.
+
+To run this kernel, you would use ``pdal mykernel -i <input las file> -o <output text file>``.

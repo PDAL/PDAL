@@ -83,14 +83,19 @@ offset_x, offset_y, offset_z
     Offset to be subtracted from the X, Y and Z nominal values, respectively,
     before the value is scaled.  The special value "auto" can be specified,
     which causes the writer to set the offset to the minimum value of the
-    dimension.  [Default: 0]
+    dimension.  [Default: auto]
 
     .. note::
 
         written value = (nominal value - offset) / scale.
 
+    .. note::
+
+        Because BPF data is always stored in UTM, the XYZ offsets are set to
+        "auto" by default. This is to avoid truncation of the decimal digits
+        (which may occur with offsets left at 0).
+
 output_dims
     If specified, limits the dimensions written for each point.  Dimensions
     are listed by name and separated by commas.  X, Y and Z are required and
     must be explicitly listed.
-

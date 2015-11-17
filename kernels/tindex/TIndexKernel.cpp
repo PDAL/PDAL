@@ -86,6 +86,7 @@ TIndexKernel::TIndexKernel()
     , m_dataset(NULL)
     , m_layer(NULL)
     , m_fastBoundary(false)
+    , m_smoothBoundary(false)
 
 {
     m_log.setLeader("pdal tindex");
@@ -104,9 +105,12 @@ void TIndexKernel::addSwitches()
             "OGR-readable/writeable tile index output")
         ("filespec", po::value<std::string>(&m_filespec),
             "Build: Pattern of files to index. Merge: Output filename")
+        ("smooth_boundary", po::value<bool>(&m_smoothBoundary)->
+            zero_tokens()->implicit_value(false),
+            "use smoothed version of full boundary")
         ("fast_boundary", po::value<bool>(&m_fastBoundary)->
             zero_tokens()->implicit_value(true),
-            "use extend instead of exact boundary")
+            "use extent instead of exact boundary")
         ("lyr_name", po::value<std::string>(&m_layerName),
             "OGR layer name to write into datasource")
         ("tindex_name", po::value<std::string>(&m_tileIndexColumnName)->
@@ -180,6 +184,9 @@ void TIndexKernel::validateSwitches()
             throw pdal_error("--bounds option not supported when building "
                 "index.");
     }
+    if (m_smoothBoundary && m_fastBoundary)
+        throw pdal_error("Can't request both smooth_boundary and "
+            "fast_boundary.");
 }
 
 
@@ -415,7 +422,6 @@ void TIndexKernel::mergeFile()
             Options reproOptions;
             reproOptions.add("out_srs", m_tgtSrsString);
             reproOptions.add("in_srs", f.m_srs);
-    std::cerr << "Repro = " << m_tgtSrsString << "/" << f.m_srs << "!\n";
             repro->setOptions(reproOptions);
             premerge = repro;
         }
@@ -589,8 +595,12 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
         hexer->prepare(table);
         hexer->execute(table);
 
-        fileInfo.m_boundary =
-            table.metadata().findChild("filters.hexbin:boundary").value();
+        MetadataNode m = table.metadata();
+        m = m_smoothBoundary ?
+            m.findChild("filters.hexbin:smooth_boundary") :
+            m.findChild("filters.hexbin:boundary");
+        fileInfo.m_boundary = m.value();
+
         if (!table.spatialRef().empty())
             fileInfo.m_srs = table.spatialRef().getWKT();
     }

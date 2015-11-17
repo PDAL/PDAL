@@ -50,11 +50,14 @@ z dimensions.
 
 .. literalinclude:: ../../examples/writing/tutorial.cpp
    :language: cpp
-   :lines: 32-41
+   :lines: 33-42
+
+Finally, the main code which creates the dummy data, puts it into a BufferReader
+and sends it to a writer.
 
 .. literalinclude:: ../../examples/writing/tutorial.cpp
    :language: cpp
-   :lines: 43-70
+   :lines: 45-74
 
 Compiling and running the program
 -------------------------------------------------------------------------------
@@ -89,5 +92,3 @@ After the project is built, you can run it by typing:
 .. code-block:: bash
 
   $ ./tutorial
-
-

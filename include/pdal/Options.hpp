@@ -161,10 +161,7 @@ public:
 
     // Make sure that the option name consists of lowercase characters or
     // underscores.
-    static bool nameValid(const std::string& name)
-    {
-        return (parse(name, 0) == name.size());
-    }
+    static bool nameValid(const std::string& name, bool reportError);
 
     /// Overwrites the description given in the constructor
     /// @param description new value to use for the description of the Option

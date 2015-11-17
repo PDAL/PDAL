@@ -6,22 +6,19 @@ Dependencies
 
 :Author: Howard Butler
 :Contact: howard@hobu.co
-:Date: 11/15/2013
+:Date: 11/03/2015
 
 PDAL explicitly stands on the shoulders of giants that have come before it.
-Specifically, PDAL depends on a number of libraries to do its work including:
+Specifically, PDAL depends on a number of libraries to do its work. Most are
+not required. For optional dependencies, PDAL utilizes a dynamically-linked
+plugin architecture that loads them at runtime.
 
-.. contents::
-    :depth: 1
-    :local:
 
-.. note::
-
-    :ref:`stage_index` contains explicit usages of the various
-    stage types available to PDAL.
+Required Dependencies
+------------------------------------------------------------------------------
 
 Boost
-------------------------------------------------------------------------------
+..............................................................................
 
 PDAL attempts to constrain its code-love for Boost and not always try to use the
 latest and the greatest, but the instinct is hard to control. Specifically, PDAL
@@ -32,10 +29,10 @@ work with some minor modifications or ``#ifdef``'ing, but the PDAL developers
 currently track rather late versions of Boost.
 
 
-Boost Packages Used
-..............................................................................
+Packages Used
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-An unexhaustive list includes:
+An list includes:
 
 * Accumulators
 * Filesystem
@@ -44,19 +41,19 @@ An unexhaustive list includes:
 * IO Streams
 * System
 * String Algorithms
-* Endian
 * UUID
 
 
+
 GDAL
-------------------------------------------------------------------------------
+..............................................................................
 
 PDAL uses GDAL for spatial reference system description manipulation, and image
-reading supporting for the NITF driver, and :ref:`writers.oci` support. In conjunction with GeoTIFF_,
-GDAL is used to convert GeoTIFF keys and OGC WKT SRS description strings into
-formats required by specific drivers. While PDAL can be built without GDAL
-support, if you want SRS manipulation and description ability, you must have
-GDAL (and GeoTIFF_) linked in at compile time.
+reading supporting for the NITF driver, and :ref:`writers.oci` support. In
+conjunction with GeoTIFF_, GDAL is used to convert GeoTIFF keys and OGC WKT SRS
+description strings into formats required by specific drivers. While PDAL can
+be built without GDAL support, if you want SRS manipulation and description
+ability, you must have GDAL (and GeoTIFF_) linked in at compile time.
 
 Obtain `GDAL`_ via whatever method is convenient.  Linux platforms such as
 `Debian`_ have `DebianGIS`_, Mac OS X has the `KyngChaos`_ software frameworks,
@@ -68,8 +65,11 @@ and Windows has the `OSGeo4W`_ platform.
     If you are using `OSGeo4W`_ as your provider of GDAL, you must make sure
     to use the GDAL 1.9 package.
 
-GeoTIFF
+Optional Dependencies
 ------------------------------------------------------------------------------
+
+GeoTIFF
+..............................................................................
 
 PDAL uses GeoTIFF in conjunction with GDAL for GeoTIFF key support in the
 LAS driver.  Obtain `GeoTIFF`_ from the same place you got `GDAL`_.
@@ -88,22 +88,22 @@ LAS driver.  Obtain `GeoTIFF`_ from the same place you got `GDAL`_.
     not need to worry about this issue.
 
 Proj.4
-------------------------------------------------------------------------------
+..............................................................................
 
 Proj.4_ is the projection engine that PDAL uses for the
-:ref:`filters.reprojection` filter. It is used by GDAL. 
+:ref:`filters.reprojection` filter. It is used by GDAL.
 
 .. note::
 
-    Proj.4 4.9.0+ is required if you need vertical datum 
-    transformation support. Otherwise, older versions should be 
+    Proj.4 4.9.0+ is required if you need vertical datum
+    transformation support. Otherwise, older versions should be
     sufficient.
 
 libxml2
-------------------------------------------------------------------------------
+..............................................................................
 
-libxml2_ is used to serialize PDAL dimension descriptions into XML for the 
-database drivers such as :ref:`writers.oci`, :ref:`readers.sqlite`, or 
+libxml2_ is used to serialize PDAL dimension descriptions into XML for the
+database drivers such as :ref:`writers.oci`, :ref:`readers.sqlite`, or
 :ref:`readers.pgpointcloud`
 
 .. note::
@@ -111,7 +111,7 @@ database drivers such as :ref:`writers.oci`, :ref:`readers.sqlite`, or
     libxml 2.7.0+ is required. Older versions may also work but are untested.
 
 `OCI`_
-------------------------------------------------------------------------------
+..............................................................................
 
 Obtain the `Oracle Instant Client`_ and install in a location on your system.
 Be sure to install both the "Basic" and the "SDK" modules. Set your
@@ -136,7 +136,7 @@ Point Cloud read/write support.
     MSVC should only require the oci.lib and oci.dll library and dlls.
 
 Points2Grid
-------------------------------------------------------------------------------
+..............................................................................
 
 `Points2Grid`_ is a library with a simple `CMake`-based build system that
 provides simple, out-of-process interpolation of large point sets using
@@ -144,7 +144,7 @@ Boost_. It can be obtained via github.com at https://github.com/CRREL/points2gri
 It is used by :ref:`writers.p2g` to output point cloud interpolation.
 
 Hexer
-------------------------------------------------------------------------------
+..............................................................................
 
 `Hexer`_ is a library with a simple `CMake`-based build system that
 provides simple hexagon gridding of large point sets for density surface
@@ -153,11 +153,11 @@ https://github.com/hobu/hexer It is used by :ref:`filters.hexbin` to output
 density surfaces and boundary approximations.
 
 Nitro
-------------------------------------------------------------------------------
+..............................................................................
 
 Nitro is a library that provides `NITF`_ support for PDAL to write LAS-in-NITF
-files for :ref:`writers.nitf`. PDAL can only use a fork of Nitro located at http://github.com/hobu/nitro instead
-of the mainline tree for two reasons:
+files for :ref:`writers.nitf`. PDAL can only use a fork of Nitro located at
+http://github.com/hobu/nitro instead of the mainline tree for two reasons:
 
 1) The fork contains a simple `CMake`-based build system
 2) The fork properly dynamically links on Windows to maintain LGPL compliance.
@@ -167,23 +167,38 @@ the main source tree.
 
 
 LASzip
-------------------------------------------------------------------------------
+..............................................................................
 
 `LASzip`_ is a library with a simple `CMake`-based build system that
 provides periodic compression of `ASPRS LAS`_ data. It is used by the
 :ref:`writers.las` and :ref:`readers.las` to provide
 compressed LAS support.
 
+laz-perf
+..............................................................................
+
+In addition to `LASzip`_, you can use the alternative `laz-perf`_ library.
+`laz-perf`_ provides slightly faster decompression capability for typical
+LAS files. It is also used as a compression type for :ref:`writers.oci` and
+:ref:`writers.sqlite`
+
+.. _`laz-perf`: https://github.com/verma/laz-perf/
 
 PCL
-------------------------------------------------------------------------------
+..............................................................................
 
 The `Point Cloud Library (PCL)`_ is used by the :ref:`ground_command`,
 :ref:`pcl_command`, :ref:`writers.pcd`, :ref:`readers.pcd`, and
 :ref:`filters.pclblock` to provide support for various PCL-related operations.
 
-At the moment, PCL must be built from 1.7.2+. We do our best to keep this
-up-to-date with PCL master.
+PCL must be 1.7.2+. We do our best to keep this up-to-date with PCL master.
+
+.. note::
+    `Homebrew`_-based OSX builds use PCL 1.7.2, but you may need to switch
+    of `VTK`_ support depending on the configuration.
+
+.. _`Homebrew`: http://brew.sh
+.. _`VTK`: http://vtk.org
 
 .. _`ASPRS LAS`: http://www.asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html
 .. _`LASzip`: http://laszip.org
