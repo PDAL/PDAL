@@ -76,11 +76,6 @@ static void GEOSWarningHandler(const char *fmt, ...)
     va_end(args);
 }
 
-} // Unnamed namespace
-
-namespace Geometry
-{
-
 static GEOSContextHandle_t init()
 {
     if (s_contextCnt == 0)
@@ -95,6 +90,11 @@ static void finish()
     if (s_contextCnt == 0)
         finishGEOS_r(s_environment);
 }
+
+} // Unnamed namespace
+
+namespace Geometry
+{
 
 static std::string smoothPolygon(const std::string& wkt, double tolerance)
 {
