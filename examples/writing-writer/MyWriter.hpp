@@ -2,24 +2,39 @@
 
 #pragma once
 
-#include "Writer.hpp"
+#include <pdal/Writer.hpp>
 
 #include <string>
 
-class MyWriter : public pdal::Writer
-{
-public:
-  SET_STAGE_NAME ("MyWriter", "My Awesome Writer")
-  SET_STAGE_LINK ("http://link/to/documentation")
+namespace pdal{
 
-  MyWriter() : Writer() {};
-  int execute();
+  typedef std::shared_ptr<std::ostream> FileStreamPtr;
 
-private:
-  void validateSwitches();
-  void addSwitches();
+  class MyWriter : public Writer
+  {
+  public:
+    MyWriter()
+    {}
 
-  std::string m_input_file;
-  std::string m_output_file;
-};
+    static void  * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
+    Options getDefaultOptions();
+
+  private:
+    virtual void processOptions(const Options&);
+    virtual void ready(PointTableRef table);
+    virtual void write(const PointViewPtr view);
+    virtual void done(PointTableRef table);
+
+    std::string m_filename;
+    std::string m_newline;
+    std::string m_datafield;
+    int m_precision;
+
+    FileStreamPtr m_stream;
+    Dimension::Id::Enum m_dataDim;
+  };
+
+} // namespace pdal

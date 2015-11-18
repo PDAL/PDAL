@@ -1,0 +1,19 @@
+<?xml version="2.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+  <Writer type="writers.mywriter">
+    <Option name="filename">
+      output.txt
+    </Option>
+    <Option name="datafield">
+      Intensity
+    </Option>
+    <Option name="precision">
+      0
+    </Option>
+    <Reader type="readers.las">
+      <Option name="filename">
+        interesting.las
+      </Option>
+    </Reader>
+  </Writer>
+</Pipeline>
