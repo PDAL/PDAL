@@ -30,7 +30,7 @@ the two supported decompressors, `LASzip`_ or `LAZperf`_.  See the
 
   LAS 1.4 files can contain datatypes that are actually arrays rather than
   individual dimensions.  Since PDAL doesn't support these datatypes, it
-  must map them into datatypes is supports.  This is done by appending the
+  must map them into datatypes it supports.  This is done by appending the
   array index to the name of the datatype.  For example, datatypes 11 - 20
   are two dimensional array types and if a field had the name Foo for
   datatype 11, PDAL would create the dimensions Foo0 and Foo1 to hold the
