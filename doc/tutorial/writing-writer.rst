@@ -128,6 +128,12 @@ integer, but the field we are reading might be a double.  Converting from double
 to integer is done via truncation, not rounding, so by adding .5 before making
 the conversion will ensure rounding is done properly.
 
+Note that in this case, the output format is pretty simple.  For more complex
+outputs, you may need to generate helper methods (and possibly helper classes)
+to help generate the proper output.  The key is reading in the appropriate
+values from the PointView, and then writing those in whatever necessary format
+to the output stream.
+
 .. literalinclude:: ../../examples/writing-writer/MyWriter.cpp
    :language: cpp
    :lines: 104-107
