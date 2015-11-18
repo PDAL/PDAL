@@ -74,4 +74,6 @@
  */
 #cmakedefine PDAL_APP_BUNDLE
 
+#define PDAL_PYTHON_LIBRARY "${PYTHON_LIBRARY}"
+
 #endif
