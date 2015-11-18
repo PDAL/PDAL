@@ -32,6 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <dlfcn.h>
+
 #include <pdal/plang/Environment.hpp>
 #include <pdal/plang/Redirector.hpp>
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
@@ -51,6 +53,11 @@
 #undef tolower
 #undef isspace
 
+__attribute__ ((constructor))
+void loadPython()
+{
+    ::dlopen(PDAL_PYTHON_LIBRARY, RTLD_LAZY | RTLD_GLOBAL);
+}
 
 // http://www.linuxjournal.com/article/3641
 // http://www.codeproject.com/Articles/11805/Embedding-Python-in-C-C-Part-I
