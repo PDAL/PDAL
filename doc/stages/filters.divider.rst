@@ -49,5 +49,7 @@ capacity
   Maximum number of points in each output view.  Views will contain
   approximately equal numbers of points.  [Default: none]
 
-NOTE: You must specify exactly one of either 'count' or 'capacity'.
+.. warning::
+
+    You must specify exactly one of either 'count' or 'capacity'.
 

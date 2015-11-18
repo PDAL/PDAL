@@ -17,7 +17,7 @@ that are center pixel, and each band is represented by "band-1", "band-2", or
 .. note::
 
     :ref:`filters.ferry` is needed because raster data do not map to
-    typical dimension names. For output to formats such as :ref:`writers.las <LAS>`,
+    typical dimension names. For output to formats such as :ref:`LAS <writers.las>`,
     this mapping is required.
 
 
