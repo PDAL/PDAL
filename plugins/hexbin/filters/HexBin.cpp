@@ -83,6 +83,7 @@ void HexBin::filter(PointView& view)
         double x = view.getFieldAs<double>(pdal::Dimension::Id::X, idx);
         double y = view.getFieldAs<double>(pdal::Dimension::Id::Y, idx);
         m_grid->addPoint(x, y);
+        m_count++;
     }
 }
 
@@ -160,6 +161,16 @@ void HexBin::done(PointTableRef table)
     m_metadata.add("smoothed_boundary",
         Geometry::smoothPolygon(polygon.str(), tolerance),
         "Smoothed boundary MULTIPOLYGON of domain");
+    double area = Geometry::computeArea(polygon.str());
+
+    double density = (double) m_count / area ;
+    m_metadata.add("density",
+            density,
+        "Number of points per square unit");
+    m_metadata.add("area",
+            area,
+        "Area in square units of tessellated polygon");
+
 }
 
 } // namespace pdal
