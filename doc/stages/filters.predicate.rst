@@ -33,6 +33,20 @@ The example above sets the "mask" to true for points that are in
 classifications 1 or 2 and to false otherwise, causing points that are not
 classified 1 or 2 to be dropped from the point stream.
 
+.. note::
+
+    :ref:`filters.range` is a specialized filter that implements the exact
+    functionality described in this Python operation. It is likely to be
+    much faster than Python, but not as flexible. :ref:`filters.predicate` and
+    :ref:`filters.programmable` are tools you can use for prototyping
+    point stream processing operations.
+
+.. seealso::
+
+    If you want to just read a :ref:`pipeline` of operations into a numpy
+    array, the PDAL Python extension might be what you want. See it at
+    https://pypi.python.org/pypi/PDAL
+
 Example
 -------
 
