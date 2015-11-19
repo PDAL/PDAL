@@ -32,7 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#ifndef _WIN32
 #include <dlfcn.h>
+#endif
 
 #include <pdal/plang/Environment.hpp>
 #include <pdal/plang/Redirector.hpp>
@@ -59,11 +61,13 @@
 // they depend on it.  If a platform doesn't support
 // __attribute__ ((constructor)) this does nothing.  We'll have to deal with
 // those as they come up.
+#ifndef _WIN32
 __attribute__ ((constructor))
 void loadPython()
 {
     ::dlopen(PDAL_PYTHON_LIBRARY, RTLD_LAZY | RTLD_GLOBAL);
 }
+#endif
 
 // http://www.linuxjournal.com/article/3641
 // http://www.codeproject.com/Articles/11805/Embedding-Python-in-C-C-Part-I
