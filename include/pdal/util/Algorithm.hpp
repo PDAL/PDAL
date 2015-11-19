@@ -39,11 +39,36 @@
 namespace pdal
 {
 
+namespace Utils
+{
+
 template<typename CONTAINER, typename VALUE>
 bool contains(const CONTAINER& cont, const VALUE& val)
 {
     return std::find(cont.begin(), cont.end(), val) != cont.end();
 }
 
+
+template<typename KEY, typename VALUE>
+bool contains(const std::map<KEY, VALUE>& c, const KEY& v)
+{
+    return c.find(v) != c.end();
+}
+
+
+template<typename TYPE, typename VALUE>
+void remove(std::vector<TYPE>& v, const VALUE& val)
+{
+    v.erase(std::remove(v.begin(), v.end(), val), v.end());
+}
+
+
+template<typename TYPE, typename PREDICATE>
+void remove_if(std::vector<TYPE>& v, PREDICATE p)
+{
+    v.erase(std::remove_if(v.begin(), v.end(), p), v.end());
+}
+
+} // namespace Utils
 } // namespace pdal
 

@@ -41,6 +41,7 @@
 #include <pdal/Compression.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/PointView.hpp>
+#include <pdal/util/Algorithm.hpp>
 #include <pdal/util/Inserter.hpp>
 #include <pdal/util/OStream.hpp>
 #include <pdal/util/Utils.hpp>
@@ -288,20 +289,14 @@ void LasWriter::getHeaderOptions(const Options &options)
 
 void LasWriter::readyTable(PointTableRef table)
 {
-    m_srs = getSpatialReference().empty() ?
-        table.spatialRef() : getSpatialReference();
-
-    setVlrsFromSpatialRef();
+    m_forwardMetadata = table.privateMetadata("lasforward");
     setExtraBytesVlr();
-    MetadataNode forward = table.privateMetadata("lasforward");
-    fillHeader(forward);
-    setVlrsFromMetadata(forward);
 }
 
 
-void LasWriter::readyFile(const std::string& filename)
+void LasWriter::readyFile(const std::string& filename,
+    const SpatialReference& srs)
 {
-    m_error.setFilename(filename);
     std::ostream *out = FileUtils::createFile(filename, true);
     if (!out)
     {
@@ -312,13 +307,25 @@ void LasWriter::readyFile(const std::string& filename)
         throw pdal_error(out.str());
     }
     m_curFilename = filename;
+    m_error.setFilename(filename);
     Utils::writeProgress(m_progressFd, "READYFILE", filename);
-    prepOutput(out);
+    prepOutput(out, srs);
 }
 
 
-void LasWriter::prepOutput(std::ostream *outStream)
+void LasWriter::prepOutput(std::ostream *outStream, const SpatialReference& srs)
 {
+    // Use stage SRS if provided.
+    m_srs = getSpatialReference().empty() ? srs : getSpatialReference();
+
+    // Spatial reference can potentially change for multiple output files.
+    setVlrsFromSpatialRef();
+    handleHeaderForwards(m_forwardMetadata);
+    setVlrsFromMetadata(m_forwardMetadata);
+
+    // We need to set all the VLRs before we fill the header.
+    fillHeader();
+
     m_summaryData.reset(new SummaryData());
     m_ostream = outStream;
     if (m_lasHeader.compressed())
@@ -404,10 +411,19 @@ void LasWriter::setVlrsFromMetadata(MetadataNode& forward)
 }
 
 
+//ABELL - Need to clear SRS VLRs.
+
 /// Set VLRs from the active spatial reference.
 /// \param  srs - Active spatial reference.
 void LasWriter::setVlrsFromSpatialRef()
 {
+    // Delete any existing spatial ref VLRs.
+    deleteVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID);
+    deleteVlr(TRANSFORM_USER_ID, GEOTIFF_DOUBLES_RECORD_ID);
+    deleteVlr(TRANSFORM_USER_ID, GEOTIFF_ASCII_RECORD_ID);
+    deleteVlr(TRANSFORM_USER_ID, WKT_RECORD_ID);
+    deleteVlr(LIBLAS_USER_ID, WKT_RECORD_ID);
+
     VlrList vlrs;
 
 #ifdef PDAL_HAVE_LIBGEOTIFF
@@ -514,8 +530,22 @@ void LasWriter::addVlr(const std::string& userId, uint16_t recordId,
     }
 }
 
+/// Delete a VLR from the vlr list.
+///
+void LasWriter::deleteVlr(const std::string& userId, uint16_t recordId)
+{
+    auto matches = [&userId, recordId](const VariableLengthRecord& vlr)
+    {
+        return vlr.matches(userId, recordId);
+    };
+
+    Utils::remove_if(m_vlrs, matches);
+    Utils::remove_if(m_eVlrs, matches);
+}
+
+
 template <typename T>
-void LasWriter::handleForward(const std::string& s, T& headerVal,
+void LasWriter::handleHeaderForward(const std::string& s, T& headerVal,
     const MetadataNode& base)
 {
     if (Utils::contains(m_forwards, s) && !headerVal.valSet())
@@ -527,25 +557,26 @@ void LasWriter::handleForward(const std::string& s, T& headerVal,
     }
 }
 
-void LasWriter::handleForwards(MetadataNode& forward)
-{
-    handleForward("major_version", m_majorVersion, forward);
-    handleForward("minor_version", m_minorVersion, forward);
-    handleForward("dataformat_id", m_dataformatId, forward);
-    handleForward("filesource_id", m_filesourceId, forward);
-    handleForward("global_encoding", m_globalEncoding, forward);
-    handleForward("project_id", m_projectId, forward);
-    handleForward("system_id", m_systemId, forward);
-    handleForward("software_id", m_softwareId, forward);
-    handleForward("creation_doy", m_creationDoy, forward);
-    handleForward("creation_year", m_creationYear, forward);
 
-    handleForward("scale_x", m_scaleX, forward);
-    handleForward("scale_y", m_scaleY, forward);
-    handleForward("scale_z", m_scaleZ, forward);
-    handleForward("offset_x", m_offsetX, forward);
-    handleForward("offset_y", m_offsetY, forward);
-    handleForward("offset_z", m_offsetZ, forward);
+void LasWriter::handleHeaderForwards(MetadataNode& forward)
+{
+    handleHeaderForward("major_version", m_majorVersion, forward);
+    handleHeaderForward("minor_version", m_minorVersion, forward);
+    handleHeaderForward("dataformat_id", m_dataformatId, forward);
+    handleHeaderForward("filesource_id", m_filesourceId, forward);
+    handleHeaderForward("global_encoding", m_globalEncoding, forward);
+    handleHeaderForward("project_id", m_projectId, forward);
+    handleHeaderForward("system_id", m_systemId, forward);
+    handleHeaderForward("software_id", m_softwareId, forward);
+    handleHeaderForward("creation_doy", m_creationDoy, forward);
+    handleHeaderForward("creation_year", m_creationYear, forward);
+
+    handleHeaderForward("scale_x", m_scaleX, forward);
+    handleHeaderForward("scale_y", m_scaleY, forward);
+    handleHeaderForward("scale_z", m_scaleZ, forward);
+    handleHeaderForward("offset_x", m_offsetX, forward);
+    handleHeaderForward("offset_y", m_offsetY, forward);
+    handleHeaderForward("offset_z", m_offsetZ, forward);
 
     m_xXform.setScale(m_scaleX.val());
     m_yXform.setScale(m_scaleY.val());
@@ -557,10 +588,8 @@ void LasWriter::handleForwards(MetadataNode& forward)
 
 /// Fill the LAS header with values as provided in options or forwarded
 /// metadata.
-void LasWriter::fillHeader(MetadataNode& forward)
+void LasWriter::fillHeader()
 {
-    handleForwards(forward);
-
     const uint16_t WKT_MASK = (1 << 4);
 
     m_lasHeader.setScale(m_xXform.m_scale, m_yXform.m_scale, m_zXform.m_scale);
@@ -946,7 +975,8 @@ void LasWriter::finishOutput()
 
     // The summary is calculated as points are written.
     m_lasHeader.setSummary(*m_summaryData);
-    // VLR count may change as LAS records are written.
+
+    // VLR count may change after header was initially written.
     m_lasHeader.setVlrCount(m_vlrs.size());
 
     out.seek(0);
@@ -955,6 +985,7 @@ void LasWriter::finishOutput()
 
     m_ostream->flush();
 }
+
 
 void LasWriter::finishLasZipOutput()
 {

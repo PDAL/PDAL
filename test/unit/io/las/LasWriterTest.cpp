@@ -128,10 +128,13 @@ TEST(LasWriterTest, auto_offset)
 
     table.layout()->registerDim(Id::X);
 
+    BufferReader bufferReader;
+
     PointViewPtr view(new PointView(table));
     view->setField(Id::X, 0, 125000.00);
     view->setField(Id::X, 1, 74529.00);
     view->setField(Id::X, 2, 523523.02);
+    bufferReader.addView(view);
 
     Options writerOps;
     writerOps.add("filename", FILENAME);
@@ -140,12 +143,10 @@ TEST(LasWriterTest, auto_offset)
 
     LasWriter writer;
     writer.setOptions(writerOps);
+    writer.setInput(bufferReader);
 
     writer.prepare(table);
-
-    WriterWrapper::ready(writer, table);
-    WriterWrapper::write(writer, view);
-    WriterWrapper::done(writer, table);
+    writer.execute(table);
 
     Options readerOps;
     readerOps.add("filename", FILENAME);

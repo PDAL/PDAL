@@ -23,10 +23,7 @@ public:
     static void ready(Stage& s, PointTableRef table)
         { s.ready(table); }
     static void done(Stage& s, PointTableRef table)
-    {
-        s.l_done(table);
-        s.done(table);
-    }
+        { s.done(table); }
     static PointViewSet run(Stage& s, PointViewPtr view)
         { return s.run(view); }
 };

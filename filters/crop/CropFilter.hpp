@@ -63,7 +63,8 @@ private:
     std::vector<BOX2D> m_bounds;
     bool m_cropOutside;
     StringList m_polys;
-    SpatialReference m_assignedSRS;
+    SpatialReference m_assignedSrs;
+    SpatialReference m_lastSrs;
 
 #ifndef PDAL_HAVE_GEOS
     typedef void *GEOSContextHandle_t;
@@ -74,14 +75,17 @@ private:
 	GEOSContextHandle_t m_geosEnvironment;
     struct GeomPkg
     {
+        GeomPkg() : m_geom(NULL), m_geomXform(NULL), m_prepGeom(NULL)
+        {}
+
         GEOSGeometry *m_geom;
+        GEOSGeometry *m_geomXform;
         const GEOSPreparedGeometry *m_prepGeom;
     };
 
     std::vector<GeomPkg> m_geoms;
 
     virtual void processOptions(const Options& options);
-    virtual void ready(PointTableRef table);
     virtual PointViewSet run(PointViewPtr view);
     virtual void done(PointTableRef table);
     void crop(const BOX2D& box, PointView& input, PointView& output);
@@ -89,6 +93,7 @@ private:
 #ifdef PDAL_HAVE_GEOS
     GEOSGeometry *validatePolygon(const std::string& poly);
     void preparePolygon(GeomPkg& g, const SpatialReference& to);
+    void freePolygon(GeomPkg& g, bool freeBase);
     BOX2D computeBounds(GEOSGeometry const *geometry);
     GEOSGeometry *createPoint(double x, double y, double z);
 #endif

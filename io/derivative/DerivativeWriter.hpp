@@ -108,8 +108,8 @@ public:
     Options getDefaultOptions();
 
 private:
+    virtual void processOptions(const Options& ops);
     virtual void initialize();
-    virtual void ready(PointTableRef table);
     virtual void write(const PointViewPtr view);
 
     void setBounds(const BOX2D& v)
@@ -163,7 +163,6 @@ private:
     double m_GRID_DIST_Y;
     unsigned int m_primitive_type;
     BOX2D m_bounds;
-    std::string m_filename;
     SpatialReference m_inSRS;
 
     DerivativeWriter& operator=(const DerivativeWriter&); // not implemented

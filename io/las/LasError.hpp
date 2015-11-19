@@ -35,7 +35,7 @@
 
 #include <vector>
 
-#include <pdal/util/Utils.hpp>
+#include <pdal/util/Algorithm.hpp>
 #include <pdal/Log.hpp>
 
 namespace pdal
@@ -59,8 +59,9 @@ public:
         if (!Utils::contains(warned, returnNum))
         {
             warned.push_back(returnNum);
-            m_log->get(LogLevel::Warning) << m_filename << ": Found invalid value of '" <<
-                returnNum << "' for point's return number.\n";
+            m_log->get(LogLevel::Warning) << m_filename <<
+                ": Found invalid value of '" << returnNum <<
+                "' for point's return number.\n";
         }
     }
 

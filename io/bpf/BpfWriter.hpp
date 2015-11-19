@@ -69,7 +69,8 @@ private:
 
     virtual void processOptions(const Options& options);
     virtual void prepared(PointTableRef table);
-    virtual void readyFile(const std::string& filename);
+    virtual void readyFile(const std::string& filename,
+        const SpatialReference& srs);
     virtual void writeView(const PointViewPtr data);
     virtual void doneFile();
 

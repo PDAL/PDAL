@@ -435,7 +435,8 @@ void LasReader::setSrsFromVlrs(MetadataNode& m)
     SpatialReference srs = getSpatialReference();
 
     if (srs.getWKT(pdal::SpatialReference::eCompoundOK).empty())
-        setSpatialReference(m, getSrsFromVlrs());
+        srs = getSrsFromVlrs();
+    setSpatialReference(m, srs);
 }
 
 

@@ -292,14 +292,6 @@ namespace Utils
     std::string typeidName()
         { return Utils::demangle(typeid(T).name()); }
 
-    template<typename KEY, typename VALUE>
-    bool contains(const std::map<KEY, VALUE>& c, const KEY& v)
-        { return c.find(v) != c.end(); }
-
-    template<typename COLLECTION, typename VALUE>
-    bool contains(const COLLECTION& c, const VALUE& v)
-        { return (std::find(c.begin(), c.end(), v) != c.end()); }
-
     struct RedirectStream
     {
         std::ofstream *m_out;

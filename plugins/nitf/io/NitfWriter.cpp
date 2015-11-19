@@ -171,11 +171,13 @@ void NitfWriter::writeView(const PointViewPtr view)
 }
 
 
-void NitfWriter::readyFile(const std::string& filename)
+void NitfWriter::readyFile(const std::string& filename,
+    const SpatialReference& srs)
 {
     m_error.setFilename(filename);
     m_nitfFilename = filename;
-    prepOutput(&m_oss);
+    Utils::writeProgress(m_progressFd, "READYFILE", filename);
+    prepOutput(&m_oss, srs);
 }
 
 

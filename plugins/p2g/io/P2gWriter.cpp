@@ -107,16 +107,24 @@ void P2gWriter::processOptions(const Options& options)
 }
 
 
-/*
 void P2gWriter::ready(PointTableRef table)
 {
+/*
     double min_x = (std::numeric_limits<double>::max)();
     double max_x = (std::numeric_limits<double>::min)();
     double min_y = (std::numeric_limits<double>::max)();
     double max_y = (std::numeric_limits<double>::min)();
     setBounds(pdal::Bounds<double>(min_x, min_y, max_x, max_y));
-}
 */
+    if (!table.spatialReferenceUnique())
+    {
+        std::ostringstream oss;
+
+        oss << getName() << ": Can't write output with multiple spatial "
+            "references.";
+        throw pdal_error(oss.str());
+    }
+}
 
 
 Options P2gWriter::getDefaultOptions()
@@ -214,17 +222,17 @@ void P2gWriter::done(PointTableRef table)
     adfGeoTransform[4] = 0.0;
     adfGeoTransform[5] = -1 * m_GRID_DIST_Y;
 
-    SpatialReference const& srs = table.spatialRef();
+    SpatialReference const& srs = table.spatialReference();
 
-    log()->get(LogLevel::Debug) << "Output SRS  :'" << srs.getWKT() << "'" << std::endl;
-    if ((rc = m_interpolator->finish(const_cast<char*>(m_filename.c_str()), m_outputFormat, m_outputTypes, adfGeoTransform, srs.getWKT().c_str())) < 0)
+    log()->get(LogLevel::Debug) << "Output SRS  :'" << srs.getWKT() << "'" <<
+        std::endl;
+    if ((rc = m_interpolator->finish(const_cast<char*>(m_filename.c_str()),
+        m_outputFormat, m_outputTypes, adfGeoTransform,
+        srs.getWKT().c_str())) < 0)
     {
         throw p2g_error("interp->finish() error");
     }
-
-    return;
 }
 
-
-
 } // namespaces
+

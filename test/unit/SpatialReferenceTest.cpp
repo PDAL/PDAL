@@ -36,6 +36,8 @@
 
 #include <pdal/SpatialReference.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <ReprojectionFilter.hpp>
+#include <MergeFilter.hpp>
 #include <LasWriter.hpp>
 #include <LasReader.hpp>
 
@@ -332,3 +334,51 @@ TEST(SpatialReferenceTest, test_vertical_and_horizontal)
     EXPECT_EQ(vert, vertical);
 
 }
+
+#if defined(PDAL_HAVE_LIBGEOTIFF)
+TEST(SpatialReferenceTest, merge)
+{
+    Options o1;
+    o1.add("filename", Support::datapath("las/test_utm17.las"));
+    LasReader r1;
+    r1.setOptions(o1);
+
+    Options o2;
+    o2.add("filename", Support::datapath("las/test_epsg_4326.las"));
+    LasReader r2;
+    r2.setOptions(o2);
+
+    Options o3;
+    o3.add("filename", Support::datapath("las/test_epsg_4047.las"));
+    LasReader r3;
+    r3.setOptions(o3);
+
+    Options o4;
+    o4.add("out_srs", "EPSG:4326");
+    ReprojectionFilter repro;
+    repro.setOptions(o4);
+    repro.setInput(r1);
+    repro.setInput(r2);
+    repro.setInput(r3);
+
+    MergeFilter merge;
+    merge.setInput(repro);
+
+    FileUtils::deleteFile(Support::temppath("triple.las"));
+    Options o5;
+    o5.add("filename", Support::temppath("triple.las"));
+    o5.add("scale_x", .0001);
+    o5.add("scale_y", .0001);
+    o5.add("scale_z", .0001);
+    LasWriter w;
+    w.setOptions(o5);
+    w.setInput(merge);
+
+    PointTable t1;
+    w.prepare(t1);
+    w.execute(t1);
+
+    Support::checkXYZ(Support::temppath("triple.las"),
+        Support::datapath("las/test_epsg_4326x3.las"));
+}
+#endif

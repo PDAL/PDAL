@@ -64,25 +64,21 @@ std::string DerivativeWriter::getName() const
 const double c_pi = 3.14159265358979323846; /*!< PI value */
 const float c_background = FLT_MIN;
 
-DerivativeWriter::DerivativeWriter()
-    : Writer()
-    , m_primitive_type(0)
-//    , m_outputTypes(0)
+DerivativeWriter::DerivativeWriter() : m_primitive_type(0)
 {
     GDALAllRegister();
 }
 
 
-void DerivativeWriter::ready(PointTableRef table)
+void DerivativeWriter::processOptions(const Options& ops)
 {
-    m_inSRS = table.spatialRef();
+    m_GRID_DIST_X = ops.getValueOrDefault<double>("grid_dist_x", 15.0);
+    m_GRID_DIST_Y = ops.getValueOrDefault<double>("grid_dist_y", 15.0);
 }
+
 
 void DerivativeWriter::initialize()
 {
-    m_GRID_DIST_X = getOptions().getValueOrDefault<double>("grid_dist_x", 15.0);
-    m_GRID_DIST_Y = getOptions().getValueOrDefault<double>("grid_dist_y", 15.0);
-    m_filename = getOptions().getValueOrThrow<std::string>("filename");
 
     // maybe we eventually introduce an option to do more than slope
     //std::vector<Option> types = options.getOptions("output_type");
@@ -661,7 +657,6 @@ int DerivativeWriter::determineCatchmentAreaD8(Eigen::MatrixXd* data,
         //}
         //(*area)(row, col) = determineCatchmentAreaD8(data, area, tNextY, tNextX, postSpacing);
     }
-    //ABELL - Returning something.
     return 0;
 }
 
@@ -999,7 +994,6 @@ GDALDataset* DerivativeWriter::createFloat32GTIFF(std::string filename,
                 return dataset;
         }
     }
-    //ABELL
     return NULL;
 }
 
@@ -1471,6 +1465,7 @@ void DerivativeWriter::writeCurvature(Eigen::MatrixXd* tDemData,
 
 void DerivativeWriter::write(const PointViewPtr data)
 {
+    m_inSRS = data->spatialReference();
     data->calculateBounds(m_bounds);
 
     // calculate grid based off bounds and post spacing
@@ -1577,7 +1572,6 @@ void DerivativeWriter::write(const PointViewPtr data)
             if (tInterpValue != c_background)
                 return tInterpValue;
 
-            //ABELL - Returning something.
             return 0.0f;
         };
 

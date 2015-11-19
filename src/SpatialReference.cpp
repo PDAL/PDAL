@@ -356,9 +356,7 @@ int SpatialReference::computeUTMZone(const BOX3D& box) const
     int min_zone(0);
     int max_zone(0);
     min_zone = calculateZone(minx, miny);
-    std::cerr << "Min X/Y/zone = " << minx << "/" << miny << "/" << min_zone << "!\n";
     max_zone = calculateZone(maxx, maxy);
-    std::cerr << "Max X/Y/zone = " << maxx << "/" << maxy << "/" << max_zone << "!\n";
 
     if (min_zone != max_zone)
     {

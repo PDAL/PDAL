@@ -35,7 +35,7 @@ Example 3:
 
   Red!(20:40]
 
-Selects all points with values less than or equal to twenty and those with
+Selects all points with red values less than or equal to 20 and those with
 values greater than 40
 
 Example 4:
