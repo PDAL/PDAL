@@ -33,8 +33,10 @@
 ****************************************************************************/
 
 #include <pdal/pdal_types.hpp>
+#include <pdal/Log.hpp>
 
 #include <cstdarg>
+#include <functional>
 
 #ifdef PDAL_HAVE_GEOS
 #include <geos_c.h>
@@ -49,7 +51,7 @@ namespace pdal
 namespace
 {
 
-static GEOSContextHandle_t s_environment(NULL);
+static GEOSContextHandle_t s_geos_environment(NULL);
 static int s_contextCnt(0);
 
 static void GEOSErrorHandler(const char *fmt, ...)
@@ -79,19 +81,55 @@ static void GEOSWarningHandler(const char *fmt, ...)
 static GEOSContextHandle_t init()
 {
     if (s_contextCnt == 0)
-        s_environment = initGEOS_r(GEOSWarningHandler, GEOSErrorHandler);
+        s_geos_environment = initGEOS_r(GEOSWarningHandler, GEOSErrorHandler);
     s_contextCnt++;
-    return s_environment;
+    return s_geos_environment;
 }
 
 static void finish()
 {
     s_contextCnt--;
     if (s_contextCnt == 0)
-        finishGEOS_r(s_environment);
+        finishGEOS_r(s_geos_environment);
 }
 
 } // Unnamed namespace
+
+namespace geos
+{
+
+class PDAL_DLL ErrorHandler
+{
+public:
+
+    ErrorHandler(bool isDebug, pdal::LogPtr log);
+    ~ErrorHandler();
+
+    static void GEOS_DLL trampoline(const char* message, void* userdata)
+    {
+        ErrorHandler* debug =
+            static_cast<ErrorHandler*>(userdata);
+        if (!debug)
+            return;
+
+        // if (!debug->m_log->get()) return;
+        debug->m_geos_callback(message);
+    }
+
+    void log(char const* msg);
+    void error(char const* msg);
+
+    inline LogPtr getLogger() const { return m_log; }
+    inline void setLogger(LogPtr logger) { m_log = logger; }
+
+private:
+    std::function<void(const char*)> m_geos_callback;
+    bool m_isDebug;
+    pdal::LogPtr m_log;
+    void* m_context;
+};
+
+
 
 namespace Geometry
 {
@@ -141,6 +179,7 @@ static std::string smoothPolygon(const std::string& wkt, double tolerance)
 #endif
 
 } // namespace Geometry
+} // end geos
 
 } // namespace pdal
 

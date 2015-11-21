@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2012, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2015, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -32,46 +32,67 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <pdal/GEOSUtils.hpp>
+#include <pdal/util/Utils.hpp>
 
-#include <pdal/pdal_internal.hpp>
-#include <pdal/Log.hpp>
+#include <functional>
+#include <map>
 
-#include <mutex>
-#include <memory>
+#ifdef PDAL_COMPILER_MSVC
+#  pragma warning(disable: 4127)  // conditional expression is constant
+#endif
 
 namespace pdal
 {
-namespace gdal
-{
-class ErrorHandler;
-}
-
 namespace geos
 {
-class ErrorHandler;
+
+ErrorHandler::ErrorHandler(bool isDebug, pdal::LogPtr log)
+    : m_isDebug(isDebug)
+    , m_log(log)
+{
+    if (m_isDebug)
+        m_geos_callback = std::bind(&ErrorHandler::log, this, std::placeholders::_1 );
+    else
+        m_geos_callback = std::bind(&ErrorHandler::error, this, std::placeholders::_1 );
+
+    m_context = initGEOS_r(GEOSWarningHandler, GEOSErrorHandler);
+
+    GEOSContextHandle_t* ctx = static_cast<GEOSContextHandle_t*>(m_context);
+//     GEOSContext_setErrorHandler_r(*ctx, &ErrorHandler::trampoline);
+    GEOSContext_setErrorMessageHandler_r(*ctx, &ErrorHandler::trampoline);
 }
 
-class PDAL_DLL GlobalEnvironment
+void ErrorHandler::log(char const* msg)
 {
-public:
-    static GlobalEnvironment& get();
-    static void startup();
-    static void shutdown();
+    std::ostringstream oss;
 
-    void initializeGDAL(LogPtr log, bool bIsDebug = false);
-    void initializeGEOS(LogPtr log, bool bIsDebug = false);
+//     if (code == CE_Failure || code == CE_Fatal)
+//         error(code, num, msg);
+//     else if (code == CE_Debug)
+//     {
+//         oss << "GDAL debug: " << msg;
+//         if (m_log)
+//             m_log->get(LogLevel::Debug) << oss.str() << std::endl;
+//     }
+}
 
-private:
-    GlobalEnvironment();
-    ~GlobalEnvironment();
 
-    std::unique_ptr<gdal::ErrorHandler> m_gdalDebug;
-    std::unique_ptr<geos::ErrorHandler> m_geosDebug;
+void ErrorHandler::error(char const* msg)
+{
+    std::ostringstream oss;
+//     if (code == CE_Failure || code == CE_Fatal)
+//     {
+//         oss << "GDAL Failure number = " << num << ": " << msg;
+//         throw pdal_error(oss.str());
+//     }
+}
 
-    GlobalEnvironment(const GlobalEnvironment&); // nope
-    GlobalEnvironment& operator=(const GlobalEnvironment&); // nope
-};
 
+ErrorHandler::~ErrorHandler()
+{
+//     CPLPopErrorHandler();
+}
+} // namespace geos
 } // namespace pdal
 

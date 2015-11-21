@@ -38,6 +38,7 @@
 
 #include <pdal/GlobalEnvironment.hpp>
 #include <pdal/GDALUtils.hpp>
+#include <pdal/GEOSUtils.hpp>
 
 namespace pdal
 {
@@ -87,20 +88,31 @@ GlobalEnvironment::~GlobalEnvironment()
 }
 
 
-void GlobalEnvironment::initializeGDAL(LogPtr log, bool gdalDebugOutput)
+void GlobalEnvironment::initializeGDAL(LogPtr log, bool isDebug)
 {
     static std::once_flag flag;
 
-    auto init = [this](LogPtr log, bool gdalDebugOutput) -> void
+    auto init = [this](LogPtr log, bool isDebug) -> void
     {
         GDALAllRegister();
         OGRRegisterAll();
-        m_gdalDebug.reset(new gdal::ErrorHandler(gdalDebugOutput, log));
+        m_gdalDebug.reset(new gdal::ErrorHandler(isDebug, log));
     };
 
-    std::call_once(flag, init, log, gdalDebugOutput);
+    std::call_once(flag, init, log, isDebug);
 }
 
+void GlobalEnvironment::initializeGEOS(LogPtr log, bool isDebug)
+{
+    static std::once_flag flag;
+
+    auto init = [this](LogPtr log, bool isDebug) -> void
+    {
+        m_geosDebug.reset(new geos::ErrorHandler(isDebug, log));
+    };
+
+    std::call_once(flag, init, log, isDebug);
+}
 
 } //namespaces
 

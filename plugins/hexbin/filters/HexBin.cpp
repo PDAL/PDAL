@@ -35,7 +35,7 @@
 #include "HexBin.hpp"
 
 #include <hexer/HexIter.hpp>
-#include <pdal/Geometry.hpp>
+#include <pdal/GEOSUtils.hpp>
 #include <pdal/StageFactory.hpp>
 
 using namespace hexer;
@@ -153,11 +153,11 @@ void HexBin::done(PointTableRef table)
       tolerance a little larger than that.  This is larger than the
       perpendicular distance needed to eliminate B in ABC, so should
       serve for both cases.
-      
+
          B ______  C
           /      \
        A /        \ D
-    
+
     ***/
     double tolerance = 1.1 * m_grid->height() / 2;
     m_metadata.add("smoothed_boundary",
