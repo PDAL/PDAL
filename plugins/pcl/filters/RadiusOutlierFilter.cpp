@@ -61,7 +61,7 @@ std::string RadiusOutlierFilter::getName() const
     return s_info.name;
 }
 
-Options RadiusOutlierFilter::getDefaultOptions()
+Options RadiusOutlierFilter::getAnsweredOptions()
 {
     Options options;
     options.add("min_neighbors", 2, "Minimum number of neighbors in radius");

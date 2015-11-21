@@ -62,7 +62,7 @@ std::string GroundFilter::getName() const
     return s_info.name;
 }
 
-Options GroundFilter::getDefaultOptions()
+Options GroundFilter::getAnsweredOptions()
 {
     Options options;
     options.add("max_window_size", 33, "Maximum window size");

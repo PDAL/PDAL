@@ -126,7 +126,7 @@ void PgWriter::initialize()
 // Called from somewhere (?) in PDAL core presumably to provide a user-friendly
 // means of editing the reader options.
 //
-Options PgWriter::getDefaultOptions()
+Options PgWriter::getAnsweredOptions()
 {
     Options options;
 

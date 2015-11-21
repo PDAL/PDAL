@@ -82,7 +82,7 @@ void OciWriter::initialize()
 }
 
 
-Options OciWriter::getDefaultOptions()
+Options OciWriter::getAnsweredOptions()
 {
     Options options;
 

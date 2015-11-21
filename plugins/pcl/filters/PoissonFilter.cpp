@@ -57,7 +57,7 @@ std::string PoissonFilter::getName() const
     return s_info.name;
 }
 
-Options PoissonFilter::getDefaultOptions()
+Options PoissonFilter::getAnsweredOptions()
 {
     Options options;
     options.add("depth", 8, "Maximum depth of the tree used for reconstruction");

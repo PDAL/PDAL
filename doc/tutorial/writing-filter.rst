@@ -68,7 +68,7 @@ Finally, we implement a method to get the plugin name, which is primarily used b
    :language: cpp
    :lines: 20-23
 
-Now that the filter has implemented the proper plugin interface, we will begin to implement some methods that actually implement the filter. First, ``getDefaultOptions()`` is used to advertise those options that the filter provides. Within PDAL, this is primarily used as a means of displaying options via the PDAL CLI with the ``--options`` argument. It provides the user with the option names, descriptions, and default values.
+Now that the filter has implemented the proper plugin interface, we will begin to implement some methods that actually implement the filter. First, ``getAnsweredOptions()`` is used to advertise those options that the filter provides. Within PDAL, this is primarily used as a means of displaying options via the PDAL CLI with the ``--options`` argument. It provides the user with the option names, descriptions, and default values.
 
 .. literalinclude:: ../../examples/writing-filter/MyFilter.cpp
    :language: cpp

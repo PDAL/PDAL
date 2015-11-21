@@ -90,7 +90,7 @@ void SQLiteReader::initialize()
 }
 
 
-Options SQLiteReader::getDefaultOptions()
+Options SQLiteReader::getAnsweredOptions()
 {
     Options options;
 

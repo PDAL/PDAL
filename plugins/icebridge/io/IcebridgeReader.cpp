@@ -71,7 +71,7 @@ CREATE_SHARED_PLUGIN(1, 0, IcebridgeReader, Reader, s_info)
 
 std::string IcebridgeReader::getName() const { return s_info.name; }
 
-Options IcebridgeReader::getDefaultOptions()
+Options IcebridgeReader::getAnsweredOptions()
 {
     Options options;
     options.add("filename", "", "file to read from");

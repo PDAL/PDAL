@@ -68,7 +68,7 @@ void PcdWriter::processOptions(const Options& ops)
 }
 
 
-Options PcdWriter::getDefaultOptions()
+Options PcdWriter::getAnsweredOptions()
 {
     Options options;
 

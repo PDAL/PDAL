@@ -55,7 +55,7 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
+    Options getAnsweredOptions();
     SpatialReference fetchSpatialReference(std::string const& query) const;
     SQLite& getSession()
         { return *m_session.get(); }

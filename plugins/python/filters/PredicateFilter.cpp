@@ -61,7 +61,7 @@ void PredicateFilter::processOptions(const Options& options)
 }
 
 
-Options PredicateFilter::getDefaultOptions()
+Options PredicateFilter::getAnsweredOptions()
 {
     Options options;
     options.add("script", "");

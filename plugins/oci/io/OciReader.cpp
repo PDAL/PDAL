@@ -137,7 +137,7 @@ void OciReader::defineBlock(Statement stmt, BlockPtr block) const
 }
 
 
-Options OciReader::getDefaultOptions()
+Options OciReader::getAnsweredOptions()
 {
     Options options;
 

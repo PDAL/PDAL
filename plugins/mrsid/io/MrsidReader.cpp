@@ -158,7 +158,7 @@ void MrsidReader::ready(PointTableRef table, MetadataNode& m)
     m_index = 0;
 }
 
-Options MrsidReader::getDefaultOptions()
+Options MrsidReader::getAnsweredOptions()
 {
     Options options;
     options.add("filename", "", "file to read from");

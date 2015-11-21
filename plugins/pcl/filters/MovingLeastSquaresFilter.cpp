@@ -56,7 +56,7 @@ std::string MovingLeastSquaresFilter::getName() const
     return s_info.name;
 }
 
-Options MovingLeastSquaresFilter::getDefaultOptions()
+Options MovingLeastSquaresFilter::getAnsweredOptions()
 {
     Options options;
     // options.add("leaf_x", 1.0, "Leaf size in X dimension");
