@@ -559,7 +559,7 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
     ops.add("filename", filename);
     s->setOptions(ops);
 
-    if (m_fastBoundary)
+    if (!m_hexBoundary)
     {
         QuickInfo qi = s->preview();
 
