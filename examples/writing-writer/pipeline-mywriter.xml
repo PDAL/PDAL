@@ -1,15 +1,18 @@
 <?xml version="2.0" encoding="utf-8"?>
 <Pipeline version="1.0">
-  <Writer type="writers.text">
+  <Writer type="writers.mywriter">
     <Option name="filename">
       output.txt
     </Option>
-    <Reader type="readers.myreader">
+    <Option name="datafield">
+      Intensity
+    </Option>
+    <Option name="precision">
+      0
+    </Option>
+    <Reader type="readers.las">
       <Option name="filename">
-        test-reader-input.txt
-      </Option>
-      <Option name="z_scale">
-        .001
+        interesting.las
       </Option>
     </Reader>
   </Writer>
