@@ -1,8 +1,8 @@
 .. _development_conventions:
 
-==================
+================================================================================
 Coding Conventions
-==================
+================================================================================
 
 To the extent possible and reasonable, we value consistency of source code
 formatting, class and variable naming, and so forth.
@@ -24,8 +24,8 @@ Our conventions are:
 
 * spaces, not tabs
 
-* indent to four (4) spaces ("Four shalt be the number thou shalt count, 
-  and the number of the counting shall be four. Three shalt thou not count, 
+* indent to four (4) spaces ("Four shalt be the number thou shalt count,
+  and the number of the counting shall be four. Three shalt thou not count,
   neither count thou five...")
 
 * braces shall be on their own lines, like this::
@@ -35,7 +35,7 @@ Our conventions are:
        foo();
     }
 
-* copyright header on every file 
+* copyright header, license, and author(s) on every file
 
 * two spaces between major units, e.g. function bodies
 
@@ -50,7 +50,7 @@ Naming Conventions
 * member variables should be prefixed with "m\_", followed by the name in
   lowerCamelCase -- for example, "m_numberOfPoints"
 
-* there should be only one class per file, and the name of the file should 
+* there should be only one class per file, and the name of the file should
   match the class name -- that is, class PointData should live in files
   PointData.hpp and PointData.cpp
 
@@ -60,21 +60,21 @@ Other Conventions
 
 * the use of getter and setter methods is preferred to exposing member
   variables
-  
-* Surround all code with "namespace pdal {...}"; where justifiable, you 
+
+* Surround all code with "namespace pdal {...}"; where justifiable, you
   may introduce a nested namespace.
-  
-* Use exceptions for exceptional events that are not going to be handled 
+
+* Use exceptions for exceptional events that are not going to be handled
   directly within the context of where the event occurs.  Avoid status
-  codes.  See exceptions.hpp for a set of pdal-specific exception types 
-  you may throw.  (See Note on error handling)
+  codes.  See pdal_error.hpp for a set of pdal-specific exception types
+  you may throw.
 
 * Describe use of "debug" and "verbose" settings.
 
 * Don't put member function bodies in the class declaration in the
   header file, unless clearly justified for performance reasons.
   Use the "inline" keyword in these cases(?).
-  
+
 * Use const.
 
 * Don't put "using" declarations in headers.
@@ -86,7 +86,7 @@ Layout/Organization of Source Tree
 ==================================
 
 * public headers in ./include
-    
+
 * private headers alongside source files in src/
 
 * ...
@@ -109,13 +109,14 @@ Layout/Organization of Source Tree
 * Exception to the above: source files (.cpp) should #include their
   corresponding .hpp file first.  This assures that the header is including
   all the files it needs to.
-  
+
 * Don't #include a file where a simple forward declaration will do.
   (Note: this only applies to pdal files; don't forward declare from system
   or 3rd party headers.)
 
 * Don't include a file unless it actually is required to compile the source unit.
 
-* Include guards should spell out the full path, like this:
-  #ifndef INCLUDED_DRIVERS_FAUX_READER_ITERATOR_HPP
- 
+* Don't use manual include guards. All reasonable compilers support the once pragma::
+
+  #pragma once
+
