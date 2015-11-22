@@ -484,6 +484,7 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
         fileInfo.m_filename.c_str());
 
     // Set the SRS into the feature.
+    // We override if m_assignSrsString is set
     if (fileInfo.m_srs.empty() || m_assignSrsString.size())
         fileInfo.m_srs = m_assignSrsString;
 
@@ -557,8 +558,9 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
     Stage *s = f.createStage(driverName, true);
     Options ops;
     ops.add("filename", filename);
+    setCommonOptions(ops);
     s->setOptions(ops);
-
+    applyExtraStageOptionsRecursive(s);
     if (!m_hexBoundary)
     {
         QuickInfo qi = s->preview();

@@ -150,7 +150,6 @@ void TIndexReader::processOptions(const Options& options)
     }
     m_tgtSrsString = options.getValueOrDefault<std::string>("t_srs", "EPSG:4326");
     m_filterSRS = options.getValueOrDefault<std::string>("filter_srs", "");
-    m_assignSrsString = options.getValueOrDefault<std::string>("a_srs", "");
     m_attributeFilter = options.getValueOrDefault<std::string>("where", "");
     m_dialect = options.getValueOrDefault<std::string>("dialect", "OGRSQL");
 

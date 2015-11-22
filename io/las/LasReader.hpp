@@ -141,6 +141,7 @@ private:
     LasReader& operator=(const LasReader&); // not implemented
     LasReader(const LasReader&); // not implemented
     bool m_initialized;
+    bool m_skipWktVLR;
 };
 
 } // namespace pdal

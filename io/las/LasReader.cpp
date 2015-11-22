@@ -67,6 +67,7 @@ public:
 
 void LasReader::processOptions(const Options& options)
 {
+    m_skipWktVLR = options.getValueOrDefault<bool>("skip_vlr_wkt", false);
     StringList extraDims = options.getValueOrDefault<StringList>("extra_dims");
     m_extraDims = LasUtils::parse(extraDims);
 
@@ -443,7 +444,7 @@ void LasReader::setSrsFromVlrs(MetadataNode& m)
 SpatialReference LasReader::getSrsFromVlrs()
 {
     SpatialReference srs = getSrsFromWktVlr();
-    if (srs.empty())
+    if (srs.empty() || m_skipWktVLR)
         srs = getSrsFromGeotiffVlr();
     return srs;
 }
@@ -481,6 +482,7 @@ SpatialReference LasReader::getSrsFromWktVlr()
     if (*c == 0)
         len--;
     std::string wkt(vlr->data(), len);
+
     srs.setWKT(wkt);
     return srs;
 }
@@ -517,10 +519,7 @@ SpatialReference LasReader::getSrsFromGeotiffVlr()
     if (wkt.size())
         srs.setFromUserInput(geotiff.getWkt(false, false));
 
-#else
-    if (findVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID))
-        Utils::printError("Can't decode LAS GeoTiff VLR to SRS - "
-            "PDAL not built with GeoTiff.");
+    log()->get(LogLevel::Debug5) << "GeoTIFF keys: " << geotiff.getText() << std::endl;
 #endif
     return srs;
 }

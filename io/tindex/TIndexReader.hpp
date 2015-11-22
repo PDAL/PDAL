@@ -98,7 +98,6 @@ private:
     std::string m_srsColumnName;
     std::string m_wkt;
     std::string m_tgtSrsString;
-    std::string m_assignSrsString;
     std::string m_filterSRS;
     std::string m_attributeFilter;
     std::string m_dialect;
