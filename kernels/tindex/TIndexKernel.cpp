@@ -561,7 +561,7 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
     setCommonOptions(ops);
     s->setOptions(ops);
     applyExtraStageOptionsRecursive(s);
-    if (!m_hexBoundary)
+    if (m_fastBoundary)
     {
         QuickInfo qi = s->preview();
 
