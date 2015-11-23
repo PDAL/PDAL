@@ -75,7 +75,7 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
+    Options getAnsweredOptions();
     static Dimension::IdList getDefaultDimensions()
     {
         return getRxpDimensions(DEFAULT_SYNC_TO_PPS, DEFAULT_MINIMAL);

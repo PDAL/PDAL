@@ -150,7 +150,7 @@ std::string pdal::GeoWaveWriter::getName() const { return s_info.name; }
 namespace pdal
 {
 
-    Options GeoWaveWriter::getDefaultOptions()
+    Options GeoWaveWriter::getAnsweredOptions()
     {
         Options options;
 

@@ -65,7 +65,7 @@ PgReader::~PgReader()
 }
 
 
-Options PgReader::getDefaultOptions()
+Options PgReader::getAnsweredOptions()
 {
     Options ops;
 

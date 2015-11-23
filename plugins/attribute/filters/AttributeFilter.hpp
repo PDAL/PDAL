@@ -67,7 +67,7 @@ public:
     static int32_t destroy(void *);
     std::string getName() const { return "filters.attribute"; }
 
-    Options getDefaultOptions();
+    Options getAnsweredOptions();
 
 private:
     virtual void initialize();

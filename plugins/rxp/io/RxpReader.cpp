@@ -97,7 +97,7 @@ Dimension::IdList getRxpDimensions(bool syncToPps, bool minimal)
 }
 
 
-Options RxpReader::getDefaultOptions()
+Options RxpReader::getAnsweredOptions()
 {
     Options options;
     options.add("sync_to_pps", DEFAULT_SYNC_TO_PPS, "");

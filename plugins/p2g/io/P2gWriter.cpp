@@ -127,7 +127,7 @@ void P2gWriter::ready(PointTableRef table)
 }
 
 
-Options P2gWriter::getDefaultOptions()
+Options P2gWriter::getAnsweredOptions()
 {
     Options options;
 

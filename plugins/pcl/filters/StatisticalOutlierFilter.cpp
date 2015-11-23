@@ -61,7 +61,7 @@ std::string StatisticalOutlierFilter::getName() const
     return s_info.name;
 }
 
-Options StatisticalOutlierFilter::getDefaultOptions()
+Options StatisticalOutlierFilter::getAnsweredOptions()
 {
     Options options;
     options.add("mean_k", 8, "Mean number of neighbors");

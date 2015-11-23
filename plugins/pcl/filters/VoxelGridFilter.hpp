@@ -50,7 +50,7 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
+    Options getAnsweredOptions();
 
 private:
     double m_leaf_x, m_leaf_y, m_leaf_z;

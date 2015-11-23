@@ -56,7 +56,7 @@ std::string DartSampleFilter::getName() const
     return s_info.name;
 }
 
-Options DartSampleFilter::getDefaultOptions()
+Options DartSampleFilter::getAnsweredOptions()
 {
     Options options;
     options.add("radius", 1.0, "Minimum distance criterion");

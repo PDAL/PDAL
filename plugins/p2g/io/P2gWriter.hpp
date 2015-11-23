@@ -72,7 +72,7 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
+    Options getAnsweredOptions();
 
 private:
     P2gWriter& operator=(const P2gWriter&); // not implemented

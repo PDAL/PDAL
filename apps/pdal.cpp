@@ -139,7 +139,7 @@ void outputOptions(std::string const& n)
     std::cout << n << std::endl;
     std::cout << headline << std::endl;
 
-    std::vector<Option> options = s->getDefaultOptions().getOptions();
+    std::vector<Option> options = s->getAnsweredOptions().getOptions();
     if (options.empty())
     {
         std::cout << "No options" << std::endl << std::endl;

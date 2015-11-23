@@ -56,7 +56,7 @@ std::string VoxelGridFilter::getName() const
     return s_info.name;
 }
 
-Options VoxelGridFilter::getDefaultOptions()
+Options VoxelGridFilter::getAnsweredOptions()
 {
     Options options;
     options.add("leaf_x", 1.0, "Leaf size in X dimension");

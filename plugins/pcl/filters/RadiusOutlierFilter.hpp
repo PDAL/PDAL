@@ -57,7 +57,7 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
+    Options getAnsweredOptions();
 
 private:
     int m_min_neighbors;

@@ -53,7 +53,7 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
+    Options getAnsweredOptions();
 
 private:
     template<typename T>
@@ -61,7 +61,7 @@ private:
         const std::string& option_name)
     {
         T default_value =
-            getDefaultOptions().getOption(option_name).getValue<T>();
+            getAnsweredOptions().getOption(option_name).getValue<T>();
         return options.getValueOrDefault<T>(option_name, default_value);
     }
 

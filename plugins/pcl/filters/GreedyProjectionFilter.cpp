@@ -57,7 +57,7 @@ std::string GreedyProjectionFilter::getName() const
     return s_info.name;
 }
 
-Options GreedyProjectionFilter::getDefaultOptions()
+Options GreedyProjectionFilter::getAnsweredOptions()
 {
     Options options;
     // options.add("leaf_x", 1.0, "Leaf size in X dimension");

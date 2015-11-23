@@ -111,7 +111,7 @@ void AttributeFilter::initialize()
 }
 
 
-Options AttributeFilter::getDefaultOptions()
+Options AttributeFilter::getAnsweredOptions()
 {
     Options options;
 

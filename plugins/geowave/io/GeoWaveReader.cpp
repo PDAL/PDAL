@@ -143,7 +143,7 @@ std::string pdal::GeoWaveReader::getName() const { return s_info.name; }
 namespace pdal
 {
 
-    Options GeoWaveReader::getDefaultOptions()
+    Options GeoWaveReader::getAnsweredOptions()
     {
         Options options;
 

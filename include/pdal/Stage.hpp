@@ -114,7 +114,7 @@ public:
     const std::vector<Stage*>& getInputs() const
         { return m_inputs; }
     std::vector<Stage *> findStage(std::string name);
-    virtual Options getDefaultOptions()
+    virtual Options getAnsweredOptions()
         { return Options(); }
     static Dimension::IdList getDefaultDimensions()
         { return Dimension::IdList(); }
@@ -127,6 +127,11 @@ public:
     /// Sets the UserCallback to manage progress/cancel operations
     void setUserCallback(UserCallback* userCallback)
         { m_callback.reset(userCallback); }
+
+    // Don't use this. It is around to allow plugins to catch
+    // up to the rename to getAnsweredOptions
+    Options getDefaultOptions()
+        { return getAnsweredOptions(); }
 
 protected:
     std::unique_ptr<UserCallback> m_callback;

@@ -64,7 +64,7 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
+    Options getAnsweredOptions();
 
     point_count_t getNumPoints() const
         { if (m_PS)
