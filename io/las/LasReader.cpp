@@ -495,6 +495,7 @@ SpatialReference LasReader::getSrsFromWktVlr()
     if (*c == 0)
         len--;
     std::string wkt(vlr->data(), len);
+
     srs.setWKT(wkt);
     return srs;
 }
@@ -531,6 +532,7 @@ SpatialReference LasReader::getSrsFromGeotiffVlr()
     if (wkt.size())
         srs.setFromUserInput(geotiff.getWkt(false, false));
 
+    log()->get(LogLevel::Debug5) << "GeoTIFF keys: " << geotiff.getText() << std::endl;
 #else
     if (findVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID))
         log()->get(LogLevel::Error) << getName() <<

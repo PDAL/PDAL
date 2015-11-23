@@ -61,8 +61,6 @@ Example
         file-output.las
       </Option>
       <Filter type="filters.hexbin">
-        <Option name="x_dim">readers.las.X</Option>
-        <Option name="y_dim">readers.las.Y</Option>
         <Option name="threshold">10</Option>
         <Reader type="readers.las">
           <Option name="filename">
@@ -77,14 +75,10 @@ Example
 Options
 -------
 
-x_dim
-  The name of the dimension to use as the X coordinate in the cropping process. [Default: **X**]
-
-y_dim
-  The name of the dimension to use as the Y coordinate in the cropping process. [Default: **Y**]
-
 edge_size
-  If not set, the hexbin filter will estimate a hex size based on a sample of the data. If set, hexbin will use the provided size in constructing the hexbins to test.
+  If not set, the hexbin filter will estimate a hex size based on a sample of
+  the data. If set, hexbin will use the provided size in constructing the
+  hexbins to test.
 
 sample_size
   How many points to sample when automatically calculating the edge size? [Default: **5000**]

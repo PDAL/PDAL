@@ -11,5 +11,6 @@ add_subdirectory(qfit)
 add_subdirectory(sbet)
 add_subdirectory(text)
 add_subdirectory(terrasolid)
+add_subdirectory(tindex)
 
 set(PDAL_TARGET_OBJECTS ${PDAL_TARGET_OBJECTS} PARENT_SCOPE)

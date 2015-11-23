@@ -79,6 +79,10 @@ public:
     // (this is a cleaner way of saying "getWKT() == "")
     bool empty() const;
 
+
+    // Returns true of OSR can validate the SRS
+    bool valid() const;
+
     /// Returns the OGC WKT describing Spatial Reference System.
     /// If GDAL is linked, it uses GDAL's operations and methods to determine
     /// the WKT.  If GDAL is not linked, no WKT is returned.

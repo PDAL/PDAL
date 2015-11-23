@@ -484,7 +484,8 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
         fileInfo.m_filename.c_str());
 
     // Set the SRS into the feature.
-    if (fileInfo.m_srs.empty())
+    // We override if m_assignSrsString is set
+    if (fileInfo.m_srs.empty() || m_assignSrsString.size())
         fileInfo.m_srs = m_assignSrsString;
 
     SpatialRef srcSrs(fileInfo.m_srs);
@@ -557,8 +558,9 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
     Stage *s = f.createStage(driverName, true);
     Options ops;
     ops.add("filename", filename);
+    setCommonOptions(ops);
     s->setOptions(ops);
-
+    applyExtraStageOptionsRecursive(s);
     if (m_fastBoundary)
     {
         QuickInfo qi = s->preview();
@@ -750,15 +752,14 @@ gdal::Geometry TIndexKernel::prepareGeometry(const FileInfo& fileInfo)
         throw pdal_error("Unable to import target SRS.");
 
     Geometry g;
-
     try
     {
        g = prepareGeometry(fileInfo.m_boundary, srcSrs, tgtSrs);
     }
-    catch (pdal_error)
+    catch (pdal_error& e)
     {
         oss << "Unable to transform geometry from source to target SRS for " <<
-            fileInfo.m_filename << "'.";
+            fileInfo.m_filename << "'. Message is '" << e.what() << "'";
         throw pdal_error(oss.str());
     }
     if (!g)
