@@ -76,6 +76,13 @@ public:
         m_id = ++lastId;
     }
 
+    PointView(PointTableRef pointTable, const SpatialReference& srs) :
+        m_pointTable(pointTable), m_size(0), m_id(0), m_spatialReference(srs)
+    {
+        static int lastId = 0;
+        m_id = ++lastId;
+    }
+
     virtual ~PointView()
     {}
 
@@ -106,7 +113,9 @@ public:
     /// Return a new point view with the same point table as this
     /// point buffer.
     PointViewPtr makeNew() const
-        { return PointViewPtr(new PointView(m_pointTable)); }
+    {
+        return PointViewPtr( new PointView(m_pointTable, m_spatialReference));
+    }
 
     template<class T>
     T getFieldAs(Dimension::Id::Enum dim, PointId pointIndex) const;

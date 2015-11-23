@@ -69,8 +69,13 @@ public:
         { return m_spatialRefs.size() == 1; }
     SpatialReference spatialReference() const
     {
-        return spatialReferenceUnique() ? *m_spatialRefs.begin() :
+        return spatialReferenceUnique() ? anySpatialReference() :
             SpatialReference();
+    }
+    SpatialReference anySpatialReference() const
+    {
+        return m_spatialRefs.size() ?
+            *m_spatialRefs.begin() : SpatialReference();
     }
 
     MetadataNode privateMetadata(const std::string& name);

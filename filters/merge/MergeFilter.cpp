@@ -46,5 +46,30 @@ CREATE_STATIC_PLUGIN(1, 0, MergeFilter, Filter, s_info)
 
 std::string MergeFilter::getName() const { return s_info.name; }
 
+void MergeFilter::ready(PointTableRef table)
+{
+    SpatialReference srs = getSpatialReference();
+
+    if (srs.empty())
+        srs = table.anySpatialReference();
+    m_view.reset(new PointView(table, srs));
+}
+
+
+PointViewSet MergeFilter::run(PointViewPtr in)
+{
+    PointViewSet viewSet;
+
+    // If the SRS of all the point views aren't the same, print a warning
+    // unless we're explicitly overriding the SRS.
+    if (getSpatialReference().empty() &&
+      (in->spatialReference() != m_view->spatialReference()))
+        log()->get(LogLevel::Warning) << getName() << ": merging points "
+            "with inconsistent spatial references." << std::endl;
+    m_view->append(*in.get());
+    viewSet.insert(m_view);
+    return viewSet;
+}
+
 } // namespace pdal
 
