@@ -67,7 +67,6 @@ public:
 
 void LasReader::processOptions(const Options& options)
 {
-    m_skipWktVLR = options.getValueOrDefault<bool>("skip_vlr_wkt", false);
     StringList extraDims = options.getValueOrDefault<StringList>("extra_dims");
     m_extraDims = LasUtils::parse(extraDims);
 
@@ -444,7 +443,7 @@ void LasReader::setSrsFromVlrs(MetadataNode& m)
 SpatialReference LasReader::getSrsFromVlrs()
 {
     SpatialReference srs = getSrsFromWktVlr();
-    if (srs.empty() || m_skipWktVLR)
+    if (srs.empty())
         srs = getSrsFromGeotiffVlr();
     return srs;
 }
