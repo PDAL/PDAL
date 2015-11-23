@@ -318,18 +318,23 @@ void LasWriter::prepOutput(std::ostream *outStream, const SpatialReference& srs)
     // Use stage SRS if provided.
     m_srs = getSpatialReference().empty() ? srs : getSpatialReference();
 
+    // Filling the header here gives the VLR functions below easy access to
+    // the version information and so on.
+    fillHeader();
+
     // Spatial reference can potentially change for multiple output files.
     setVlrsFromSpatialRef();
     handleHeaderForwards(m_forwardMetadata);
     setVlrsFromMetadata(m_forwardMetadata);
 
-    // We need to set all the VLRs before we fill the header.
-    fillHeader();
-
     m_summaryData.reset(new SummaryData());
     m_ostream = outStream;
     if (m_lasHeader.compressed())
         readyCompression();
+
+    // Compression should cause the last of the VLRs to get filled.  We now
+    // have a valid count, so fill the header again.
+    fillHeader();
 
     // Write the header.
     OLeStream out(m_ostream);
@@ -411,21 +416,26 @@ void LasWriter::setVlrsFromMetadata(MetadataNode& forward)
 }
 
 
-//ABELL - Need to clear SRS VLRs.
-
 /// Set VLRs from the active spatial reference.
 /// \param  srs - Active spatial reference.
 void LasWriter::setVlrsFromSpatialRef()
 {
-    // Delete any existing spatial ref VLRs.
+    // Delete any existing spatial ref VLRs.  This can be an issue if we're
+    // using the reader to write multiple output files via a filename template.
     deleteVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID);
     deleteVlr(TRANSFORM_USER_ID, GEOTIFF_DOUBLES_RECORD_ID);
     deleteVlr(TRANSFORM_USER_ID, GEOTIFF_ASCII_RECORD_ID);
     deleteVlr(TRANSFORM_USER_ID, WKT_RECORD_ID);
     deleteVlr(LIBLAS_USER_ID, WKT_RECORD_ID);
 
-    VlrList vlrs;
+    if (m_lasHeader.versionAtLeast(1, 4))
+        addWktVlr();
+    else
+        addGeotiffVlrs();
+}
 
+void LasWriter::addGeotiffVlrs()
+{
 #ifdef PDAL_HAVE_LIBGEOTIFF
     GeotiffSupport geotiff;
     geotiff.resetTags();
@@ -439,7 +449,9 @@ void LasWriter::setVlrsFromSpatialRef()
         "GeoTiff GeoDoubleParamsTag");
     addGeotiffVlr(geotiff, GEOTIFF_ASCII_RECORD_ID,
         "GeoTiff GeoAsciiParamsTag");
-    addWktVlr();
+#else
+    log()->get(LogLevel::Error) << getName() << ": PDAL not built with "
+        "libGeoTiff.  Can't write valid LAS file." << std::endl;
 #endif // PDAL_HAVE_LIBGEOTIFF
 }
 
@@ -449,7 +461,7 @@ void LasWriter::setVlrsFromSpatialRef()
 /// \param  recordId - Record ID associated with the VLR/Geotiff ref.
 /// \param  description - Description to use with the VLR
 /// \return  Whether the VLR was added.
-bool LasWriter::addGeotiffVlr(GeotiffSupport& geotiff, uint16_t recordId,
+void LasWriter::addGeotiffVlr(GeotiffSupport& geotiff, uint16_t recordId,
     const std::string& description)
 {
 #ifdef PDAL_HAVE_LIBGEOTIFF
@@ -458,14 +470,15 @@ bool LasWriter::addGeotiffVlr(GeotiffSupport& geotiff, uint16_t recordId,
 
     size_t size = geotiff.getKey(recordId, &count, &data);
     if (size == 0)
-        return false;
+    {
+        log()->get(LogLevel::Warning) << getName() << ": Invalid spatial "
+            "reference for writing GeoTiff VLR." << std::endl;
+        return;
+    }
 
     std::vector<uint8_t> buf(size);
     memcpy(buf.data(), data, size);
     addVlr(TRANSFORM_USER_ID, recordId, description, buf);
-    return true;
-#else
-    return false;
 #endif // PDAL_HAVE_LIBGEOTIFF
 }
 
@@ -607,8 +620,8 @@ void LasWriter::fillHeader()
     m_lasHeader.setSystemId(m_systemId.val());
     m_lasHeader.setProjectId(m_projectId.val());
     m_lasHeader.setFileSourceId(m_filesourceId.val());
-    // We always write a WKT VLR, but we need to be sure to set the WKT
-    // bit when the version is at least 1.4.
+
+    // We always write a WKT VLR for version 1.4 and later.
     uint16_t globalEncoding = m_globalEncoding.val();
     if (m_lasHeader.versionAtLeast(1, 4))
         globalEncoding |= WKT_MASK;
@@ -975,9 +988,6 @@ void LasWriter::finishOutput()
 
     // The summary is calculated as points are written.
     m_lasHeader.setSummary(*m_summaryData);
-
-    // VLR count may change after header was initially written.
-    m_lasHeader.setVlrCount(m_vlrs.size());
 
     out.seek(0);
     out << m_lasHeader;

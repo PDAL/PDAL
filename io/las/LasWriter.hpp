@@ -153,7 +153,8 @@ private:
     void addVlr(const std::string& userId, uint16_t recordId,
         const std::string& description, std::vector<uint8_t>& data);
     void deleteVlr(const std::string& userId, uint16_t recordId);
-    bool addGeotiffVlr(GeotiffSupport& geotiff, uint16_t recordId,
+    void addGeotiffVlrs();
+    void addGeotiffVlr(GeotiffSupport& geotiff, uint16_t recordId,
         const std::string& description);
     bool addWktVlr();
     void finishLasZipOutput();
