@@ -446,3 +446,14 @@ TEST(PointViewTest, order)
         pi = si;
     }
 }
+
+// Per discussions with @abellgithub (https://github.com/gadomski/PDAL/commit/c1d54e56e2de841d37f2a1b1c218ed723053f6a9#commitcomment-14415138)
+// we only do bounds checking on `PointView`s when in debug mode.
+#ifndef NDEBUG
+TEST(PointViewDeathTest, out_of_bounds)
+{
+    PointTable point_table;
+    auto point_view = makeTestView(point_table, 1);
+    EXPECT_DEATH(point_view->getFieldAs<uint8_t>(Dimension::Id::X, 1), "< m_size");
+}
+#endif

@@ -3,9 +3,17 @@
 filters.transformation
 ======================
 
-The transformation filter applies an arbitrary rotation+translation transformation, represented as a 4x4 matrix, to each xyz triplet.
-The filter does *no* checking to ensure the matrix is a valid affine transformation — buyer beware.
+The transformation filter applies an arbitrary rotation+translation
+transformation, represented as a 4x4 matrix, to each xyz triplet.
 
+The filter does *no* checking to ensure the matrix is a valid affine
+transformation — buyer beware.
+
+.. note::
+
+    The transformation filter does not apply any spatial reference information
+    — if spatial reference information is desired, it must be specified on
+    another filter.
 
 Example
 -------

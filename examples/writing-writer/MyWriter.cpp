@@ -4,70 +4,106 @@
 
 #include <boost/program_options.hpp>
 
-#include <pdal/Writer.hpp>
-#include <pdal/Kernel.hpp>
-#include <pdal/KernelFactory.hpp>
-#include <pdal/KernelSupport.hpp>
-#include <pdal/Options.hpp>
-#include <pdal/pdal_macros.hpp>
-#include <pdal/PointBuffer.hpp>
-#include <pdal/PointContext.hpp>
-#include <pdal/Writer.hpp>
-#include <pdal/StageFactory.hpp>
-#include <pdal/Writer.hpp>
-
-#include <memory>
-#include <string>
-
 namespace po = boost::program_options;
 
-CREATE_FILTER_PLUGIN(myfilter, MyWriter)
-
-void MyWriter::validateSwitches()
+namespace pdal
 {
-  if (m_input_file == "")
-    throw pdal::app_usage_error("--input/-i required");
-  if (m_output_file == "")
-    throw pdal::app_usage_error("--output/-o required");
+  static PluginInfo const s_info = PluginInfo(
+    "writers.mywriter",
+    "My Awesome Writer",
+    "http://path/to/documentation" );
+
+  CREATE_SHARED_PLUGIN(1, 0, MyWriter, Writer, s_info);
+
+  std::string MyWriter::getName() const { return s_info.name; }
+
+  struct FileStreamDeleter
+  {
+    template <typename T>
+    void operator()(T* ptr)
+    {
+      if (ptr)
+      {
+        ptr->flush();
+        FileUtils::closeFile(ptr);
+      }
+    }
+  };
+
+
+  Options MyWriter::getDefaultOptions()
+  {
+    Options options;
+
+    options.add("newline", "\n", "Newline character to use for additional lines");
+    options.add("filename", "", "filename to write output to");
+    options.add("datafield", "", "field to use as the User Data field");
+    options.add("precision", 3, "Precision to use for data fields");
+
+    return options;
+  }
+
+
+  void MyWriter::processOptions(const Options& options)
+  {
+    m_filename = options.getValueOrThrow<std::string>("filename");
+    m_stream = FileStreamPtr(FileUtils::createFile(m_filename, true),
+      FileStreamDeleter());
+    if (!m_stream)
+    {
+      std::stringstream out;
+      out << "writers.mywriter couldn't open '" << m_filename <<
+        "' for output.";
+      throw pdal_error(out.str());
+    }
+
+    m_newline = options.getValueOrDefault<std::string>("newline", "\n");
+    m_datafield = options.getValueOrDefault<std::string>("datafield", "UserData");
+    m_precision = options.getValueOrDefault<int>("precision", 3);
+  }
+
+
+  void MyWriter::ready(PointTableRef table)
+  {
+    m_stream->precision(m_precision);
+    *m_stream << std::fixed;
+
+    Dimension::Id::Enum d = table.layout()->findDim(m_datafield);
+    if (d == Dimension::Id::Unknown)
+    {
+      std::ostringstream oss;
+      oss << "Dimension not found with name '" << m_datafield << "'";
+      throw pdal_error(oss.str());
+    }
+
+    m_dataDim = d;
+
+    *m_stream << "#X:Y:Z:MyData" << m_newline;
+  }
+
+
+  void MyWriter::write(PointViewPtr view)
+  {
+      for (PointId idx = 0; idx < view->size(); ++idx)
+      {
+        double x = view->getFieldAs<double>(Dimension::Id::X, idx);
+        double y = view->getFieldAs<double>(Dimension::Id::Y, idx);
+        double z = view->getFieldAs<double>(Dimension::Id::Z, idx);
+        unsigned int myData = 0;
+
+        if (!m_datafield.empty()) {
+          myData = (int)(view->getFieldAs<double>(m_dataDim, idx) + 0.5);
+        }
+
+        *m_stream << x << ":" << y << ":" << z << ":"
+          << myData << m_newline;
+      }
+  }
+
+
+  void MyWriter::done(PointTableRef)
+  {
+    m_stream.reset();
+  }
+
 }
-
-void MyWriter::addSwitches()
-{
-  po::options_description* options = new po::options_description("file options");
-  options->add_options()
-  ("input,i", po::value<std::string>(&m_input_file)->default_value(""), "input file name")
-  ("output,o", po::value<std::string>(&m_output_file)->default_value(""), "output file name")
-  ;
-
-  addSwitchSet(options);
-  addPositionalSwitch("input", 1);
-  addPositionalSwitch("output", 1);
-}
-
-int MyWriter::execute()
-{
-  pdal::PointContextRef ctx;
-  pdal::StageFactory f;
-
-  std::unique_ptr<pdal::Writer> reader(f.createWriter("readers.las"));
-  pdal::Options readerOptions;
-  readerOptions.add("filename", m_input_file);
-  reader->setOptions(readerOptions);
-
-  std::unique_ptr<pdal::Writer> filter(f.createWriter("filters.decimation"));
-  pdal::Options filterOptions;
-  filterOptions.add("step", 10);
-  filter->setOptions(filterOptions);
-  filter->setInput(reader.get());
-
-  std::unique_ptr<pdal::Writer> writer(f.createWriter("writers.text"));
-  pdal::Options writerOptions;
-  writerOptions.add("filename", m_output_file);
-  writer->setOptions(writerOptions);
-  writer->setInput(filter.get());
-  writer->prepare(ctx);
-  writer->execute(ctx);
-
-  return 0;
-}
-

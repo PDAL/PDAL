@@ -109,7 +109,8 @@ QuickInfo LasReader::inspect()
     QuickInfo qi;
     std::unique_ptr<PointLayout> layout(new PointLayout());
 
-    initialize();
+    PointTable table;
+    initialize(table);
     addDimensions(layout.get());
 
     Dimension::IdList dims = layout->dims();
@@ -118,17 +119,16 @@ QuickInfo LasReader::inspect()
     if (!Utils::numericCast(m_lasHeader.pointCount(), qi.m_pointCount))
         qi.m_pointCount = std::numeric_limits<point_count_t>::max();
     qi.m_bounds = m_lasHeader.getBounds();
-    qi.m_srs = getSrsFromVlrs();
+    qi.m_srs = getSpatialReference();
     qi.m_valid = true;
 
-    PointTable table;
     done(table);
 
     return qi;
 }
 
 
-void LasReader::initialize()
+void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
 {
     if (m_initialized)
         return;
@@ -168,19 +168,18 @@ void LasReader::initialize()
         readExtraBytesVlr();
     }
     fixupVlrs();
-    m_initialized = true;
-}
-
-
-void LasReader::ready(PointTableRef table, MetadataNode& m)
-{
-    m_index = 0;
-
     setSrsFromVlrs(m);
     MetadataNode forward = table.privateMetadata("lasforward");
     extractHeaderMetadata(forward, m);
     extractVlrMetadata(forward, m);
 
+    m_initialized = true;
+}
+
+
+void LasReader::ready(PointTableRef table)
+{
+    m_index = 0;
     if (m_lasHeader.compressed())
     {
 #ifdef PDAL_HAVE_LASZIP
@@ -436,16 +435,31 @@ void LasReader::setSrsFromVlrs(MetadataNode& m)
     SpatialReference srs = getSpatialReference();
 
     if (srs.getWKT(pdal::SpatialReference::eCompoundOK).empty())
-        setSpatialReference(m, getSrsFromVlrs());
+        srs = getSrsFromVlrs();
+    setSpatialReference(m, srs);
 }
 
 
 SpatialReference LasReader::getSrsFromVlrs()
 {
-    SpatialReference srs = getSrsFromWktVlr();
-    if (srs.empty())
-        srs = getSrsFromGeotiffVlr();
-    return srs;
+    bool useWkt = false;
+
+    if (m_lasHeader.incompatibleSrs())
+    {
+        log()->get(LogLevel::Error) << getName() <<
+            ": Invalid SRS specification.  GeoTiff not "
+            "allowed with point formats 6 - 10." << std::endl;
+    }
+    else if (findVlr(TRANSFORM_USER_ID, WKT_RECORD_ID) &&
+        findVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID))
+    {
+        log()->get(LogLevel::Error) << getName() << ": File contains both "
+            "WKT and GeoTiff VLRs which is disallowed." << std::endl;
+    }
+    else
+        useWkt = (m_lasHeader.versionMinor() >= 4);
+
+    return useWkt ? getSrsFromWktVlr() : getSrsFromGeotiffVlr();
 }
 
 
@@ -481,6 +495,7 @@ SpatialReference LasReader::getSrsFromWktVlr()
     if (*c == 0)
         len--;
     std::string wkt(vlr->data(), len);
+
     srs.setWKT(wkt);
     return srs;
 }
@@ -517,6 +532,12 @@ SpatialReference LasReader::getSrsFromGeotiffVlr()
     if (wkt.size())
         srs.setFromUserInput(geotiff.getWkt(false, false));
 
+    log()->get(LogLevel::Debug5) << "GeoTIFF keys: " << geotiff.getText() << std::endl;
+#else
+    if (findVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID))
+        log()->get(LogLevel::Error) << getName() <<
+            ": Can't decode LAS GeoTiff VLR to SRS - PDAL not built "
+            "with GeoTiff." << std::endl;
 #endif
     return srs;
 }

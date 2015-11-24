@@ -4,26 +4,47 @@
 
 #include <pdal/Options.hpp>
 #include <pdal/pdal_macros.hpp>
-#include <pdal/PointBuffer.hpp>
-#include <pdal/PointContext.hpp>
+#include <pdal/PointTable.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 
-CREATE_FILTER_PLUGIN(myfilter, MyFilter)
+namespace pdal
+{
+
+static PluginInfo const s_info =
+    PluginInfo("filters.name", "My awesome filter",
+               "http://link/to/documentation");
+
+CREATE_STATIC_PLUGIN(1, 0, MyFilter, Filter, s_info)
+
+std::string MyFilter::getName() const
+{
+    return s_info.name;
+}
+
+Options MyFilter::getDefaultOptions()
+{
+    Options options;
+    options.add("param", 1.0, "My parameter");
+    return options;
+}
 
 void MyFilter::processOptions(const pdal::Options& options)
 {
-  m_value = options.getValueOrDefault<double>("param", 1.0);
+    m_value = options.getValueOrDefault<double>("param", 1.0);
 }
 
-void MyFilter::addDimensions(PointContextRef ctx)
+void MyFilter::addDimensions(PointLayoutPtr layout)
 {
-  ctx.registerDim(pdal::Dimension::Id::Intensity);
+    layout->registerDim(Dimension::Id::Intensity);
+    m_myDimension = layout->registerOrAssignDim("MyDimension", Dimension::Type::Unsigned8);
 }
 
-PointBufferSet MyFilter::run(PointBufferPtr input)
+PointViewSet MyFilter::run(PointViewPtr input)
 {
-  PointBufferSet pbSet;
-  pbSet.insert(input);
-  return pbSet;
+    PointViewSet viewSet;
+    viewSet.insert(input);
+    return viewSet;
 }
 
+} // namespace pdal

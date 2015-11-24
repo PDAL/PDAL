@@ -54,3 +54,43 @@ TEST(MergeTest, test1)
     PointViewPtr view = *viewSet.begin();
     EXPECT_EQ(view->size(), 2130u);
 }
+
+TEST(MergeTest, test2)
+{
+    using namespace pdal;
+
+    PipelineManager mgr;
+    PipelineReader specReader(mgr);
+    specReader.readPipeline(Support::configuredpath("filters/merge2.xml"));
+    mgr.execute();
+
+    PointViewSet viewSet = mgr.views();
+
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 2130u);
+}
+
+TEST(MergeTest, test3)
+{
+    using namespace pdal;
+
+    PipelineManager mgr;
+    PipelineReader specReader(mgr);
+    specReader.readPipeline(Support::configuredpath("filters/merge3.xml"));
+
+    std::ostringstream oss;
+    std::ostream& o = std::clog;
+    auto ctx = Utils::redirect(o, oss);
+
+    mgr.execute();
+    std::string s = oss.str();
+    EXPECT_TRUE(s.find("inconsistent spatial references") != s.npos);
+    Utils::restore(o, ctx);
+
+    PointViewSet viewSet = mgr.views();
+
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 2130u);
+}

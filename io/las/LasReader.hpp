@@ -111,7 +111,9 @@ private:
     std::string m_compression;
 
     virtual void processOptions(const Options& options);
-    virtual void initialize();
+    virtual void initialize(PointTableRef table)
+        { initializeLocal(table, m_metadata); }
+    virtual void initializeLocal(PointTableRef table, MetadataNode& m);
     virtual void addDimensions(PointLayoutPtr layout);
     void fixupVlrs();
     VariableLengthRecord *findVlr(const std::string& userId, uint16_t recordId);
@@ -123,9 +125,7 @@ private:
     void extractHeaderMetadata(MetadataNode& forward, MetadataNode& m);
     void extractVlrMetadata(MetadataNode& forward, MetadataNode& m);
     virtual QuickInfo inspect();
-    virtual void ready(PointTableRef table)
-        { ready(table, m_metadata); }
-    virtual void ready(PointTableRef table, MetadataNode& m);
+    virtual void ready(PointTableRef table);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
     virtual void done(PointTableRef table);
     virtual bool eof()
@@ -141,6 +141,7 @@ private:
     LasReader& operator=(const LasReader&); // not implemented
     LasReader(const LasReader&); // not implemented
     bool m_initialized;
+    bool m_skipWktVLR;
 };
 
 } // namespace pdal

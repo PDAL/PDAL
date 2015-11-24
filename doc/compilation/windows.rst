@@ -8,6 +8,21 @@ Building Under Windows
 :Contact: unknown at lizardtech dot com
 :Date: 3/19/2012
 
+.. note::
+
+    `OSGeo4W`_ contains a pre-built up-to-date 64 bit Windows binary. It
+    is fully-featured, and if you do not need anything custom, it is likely
+    the fastest way to get going.
+
+.. seealso::
+
+    :ref:`vagrant` contains an automated way to build PDAL and all of
+    its dependencies on Unix. If you just want to apply PDAL commandline
+    operations to data, this mechanism is likely to be much faster than
+    compiling your own.
+
+.. _`OSGeo4W`: https://trac.osgeo.org/osgeo4w/
+
 Most Users
 ------------------------------------------------------------------------------
 

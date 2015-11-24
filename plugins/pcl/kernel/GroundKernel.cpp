@@ -94,11 +94,11 @@ void GroundKernel::addSwitches()
     file_options->add_options()
     ("input,i", po::value<std::string>(&m_inputFile)->default_value(""), "input file name")
     ("output,o", po::value<std::string>(&m_outputFile)->default_value(""), "output file name")
-    ("maxWindowSize", po::value<double>(&m_maxWindowSize)->default_value(33), "max window size")
+    ("max_window_size", po::value<double>(&m_maxWindowSize)->default_value(33), "max window size")
     ("slope", po::value<double>(&m_slope)->default_value(1), "slope")
-    ("maxDistance", po::value<double>(&m_maxDistance)->default_value(2.5), "max distance")
-    ("initialDistance", po::value<double>(&m_initialDistance)->default_value(0.15, "0.15"), "initial distance")
-    ("cellSize", po::value<double>(&m_cellSize)->default_value(1), "cell size")
+    ("max_distance", po::value<double>(&m_maxDistance)->default_value(2.5), "max distance")
+    ("initial_distance", po::value<double>(&m_initialDistance)->default_value(0.15, "0.15"), "initial distance")
+    ("cell_size", po::value<double>(&m_cellSize)->default_value(1), "cell size")
     ("classify", po::bool_switch(&m_classify), "apply classification labels?")
     ("extract", po::bool_switch(&m_extract), "extract ground returns?")
     ("approximate,a", po::bool_switch(&m_approximate), "use approximate algorithm? (much faster)")
@@ -122,11 +122,11 @@ int GroundKernel::execute()
     readerStage.setOptions(readerOptions);
 
     Options groundOptions;
-    groundOptions.add<double>("maxWindowSize", m_maxWindowSize);
+    groundOptions.add<double>("max_window_size", m_maxWindowSize);
     groundOptions.add<double>("slope", m_slope);
-    groundOptions.add<double>("maxDistance", m_maxDistance);
-    groundOptions.add<double>("initialDistance", m_initialDistance);
-    groundOptions.add<double>("cellSize", m_cellSize);
+    groundOptions.add<double>("max_distance", m_maxDistance);
+    groundOptions.add<double>("initial_distance", m_initialDistance);
+    groundOptions.add<double>("cell_size", m_cellSize);
     groundOptions.add<bool>("classify", m_classify);
     groundOptions.add<bool>("extract", m_extract);
     groundOptions.add<bool>("approximate", m_approximate);

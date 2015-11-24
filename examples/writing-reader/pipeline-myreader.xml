@@ -1,0 +1,16 @@
+<?xml version="2.0" encoding="utf-8"?>
+<Pipeline version="1.0">
+  <Writer type="writers.text">
+    <Option name="filename">
+      output.txt
+    </Option>
+    <Reader type="readers.myreader">
+      <Option name="filename">
+        test-reader-input.txt
+      </Option>
+      <Option name="z_scale">
+        .001
+      </Option>
+    </Reader>
+  </Writer>
+</Pipeline>

@@ -303,6 +303,13 @@ bool PluginManager::guessLoadByPath(const std::string& driverName)
         pluginDir = oss.str();
     }
 
+    std::string plugin_debug("PDAL_DEBUG");
+    std::string plugin_debug_path = Utils::getenv(plugin_debug);
+    if (plugin_debug_path.size())
+    {
+        std::cerr << "PDAL: plugin search path '" << pluginDir <<"'"<<std::endl;
+    }
+
     std::vector<std::string> pluginPathVec = Utils::split2(pluginDir, ':');
     for (const auto& pluginPath : pluginPathVec)
     {
@@ -372,18 +379,40 @@ bool PluginManager::loadByPath(const std::string& pluginPath,
 
     // If we are a valid type, and we're not yet already
     // loaded in the LibraryMap, load it.
+
+    std::string plugin_debug("PDAL_DEBUG");
+    std::string plugin_debug_path = Utils::getenv(plugin_debug);
+
     if (pluginTypeValid(pathname, type) &&
         m_dynamicLibraryMap.find(path.string()) == m_dynamicLibraryMap.end())
     {
         std::string errorString;
         auto completePath(boost::filesystem::complete(path).string());
+        if (plugin_debug_path.size())
+        {
+            std::cerr << "PDAL: attempting to load plugin '" << completePath <<"'"<<std::endl;
+        }
 
         if (DynamicLibrary *d = loadLibrary(completePath, errorString))
         {
+            if (plugin_debug_path.size())
+            {
+                std::cerr << "PDAL: loaded plugin '" << completePath <<"'"<<std::endl;
+            }
             if (PF_InitFunc initFunc =
                     (PF_InitFunc)(d->getSymbol("PF_initPlugin")))
             {
                 loaded = initializePlugin(initFunc);
+                if (plugin_debug_path.size())
+                {
+                    std::cerr << "PDAL: initialized plugin '" << completePath <<"'"<<std::endl;
+                }
+            } else
+            {
+                if (plugin_debug_path.size())
+                {
+                    std::cerr << "PDAL: failed to initialize plugin '" << completePath <<"'"<<std::endl;
+                }
             }
         }
     }

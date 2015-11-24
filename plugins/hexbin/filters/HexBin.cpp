@@ -35,6 +35,7 @@
 #include "HexBin.hpp"
 
 #include <hexer/HexIter.hpp>
+#include <pdal/Geometry.hpp>
 #include <pdal/StageFactory.hpp>
 
 using namespace hexer;
@@ -82,6 +83,7 @@ void HexBin::filter(PointView& view)
         double x = view.getFieldAs<double>(pdal::Dimension::Id::X, idx);
         double y = view.getFieldAs<double>(pdal::Dimension::Id::Y, idx);
         m_grid->addPoint(x, y);
+        m_count++;
     }
 }
 
@@ -141,6 +143,36 @@ void HexBin::done(PointTableRef table)
     m_grid->toWKT(polygon);
     m_metadata.add("boundary", polygon.str(),
         "Boundary MULTIPOLYGON of domain");
+
+    /***
+      We want to make these bumps on edges go away, which means that
+      we want to elimnate both B and C.  If we take a line from A -> C,
+      we need the tolerance to eliminate B.  After that we're left with
+      the triangle ACD and we want to eliminate C.  The perpendicular
+      distance from AD to C is the hexagon height / 2, so we set the
+      tolerance a little larger than that.  This is larger than the
+      perpendicular distance needed to eliminate B in ABC, so should
+      serve for both cases.
+      
+         B ______  C
+          /      \
+       A /        \ D
+    
+    ***/
+    double tolerance = 1.1 * m_grid->height() / 2;
+    m_metadata.add("smoothed_boundary",
+        Geometry::smoothPolygon(polygon.str(), tolerance),
+        "Smoothed boundary MULTIPOLYGON of domain");
+    double area = Geometry::computeArea(polygon.str());
+
+    double density = (double) m_count / area ;
+    m_metadata.add("density",
+            density,
+        "Number of points per square unit");
+    m_metadata.add("area",
+            area,
+        "Area in square units of tessellated polygon");
+
 }
 
 } // namespace pdal

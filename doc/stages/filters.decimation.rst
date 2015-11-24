@@ -1,9 +1,12 @@
-.. _filters_decimation:
+.. _filters.decimation:
 
 filters.decimation
 ==================
 
-The decimation filter takes a stream of points and steps through it, taking only every Nth point. With a step of 2, the filter takes every second point, for a reduction of 50%. With a step of 10, the filter takes every tenth point, for a reduction of 90%.
+The decimation filter takes a stream of points and steps through it, taking
+only every Nth point. With a step of 2, the filter takes every second point,
+for a reduction of 50%. With a step of 10, the filter takes every tenth point,
+for a reduction of 90%.
 
 Example
 -------
@@ -23,11 +26,15 @@ Example
     </Writer>
   </Pipeline>
 
+.. seealso::
+
+    :ref:`filters.voxelgrid` provides grid-style point decimation.
+
 Options
 -------
 
 step
   How many points to skip between each sample point? A step of 1 will skip no point, and leave the stream unchanged. A step of 100 will reduce the stream by 99%. [Default: **1**]
-  
+
 offset
   Start sampling with what point? [Default: **0**]

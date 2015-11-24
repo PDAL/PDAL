@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2015, Hobu Inc. (info@hobu.co)
+* Copyright (c) 2013, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -13,9 +13,10 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. nor the names of its contributors
-*       may be used to endorse or promote products derived from this
-*       software without specific prior written permission.
+*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*       names of its contributors may be used to endorse or promote
+*       products derived from this software without specific prior
+*       written permission.
 *
 * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -33,23 +34,32 @@
 
 #pragma once
 
-#include <pdal/Metadata.hpp>
-
-// forward declare PyObject so we don't need the python headers everywhere
-// see: http://mail.python.org/pipermail/python-dev/2003-August/037601.html
-#ifndef PyObject_HEAD
-struct _object;
-typedef _object PyObject;
-#endif
+#include <pdal/Filter.hpp>
+#include <pdal/StageFactory.hpp>
 
 namespace pdal
 {
-namespace plang
+
+class PDAL_DLL DartSampleFilter : public Filter
 {
+public:
+    DartSampleFilter() : Filter()
+    {}
 
-PyObject *fromMetadata(MetadataNode m);
-void addMetadata(PyObject *list, MetadataNode m);
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
-} // namespace plang
+    Options getDefaultOptions();
+
+private:
+    double m_radius;
+
+    virtual void processOptions(const Options& options);
+    virtual PointViewSet run(PointViewPtr view);
+
+    DartSampleFilter& operator=(const DartSampleFilter&); // not implemented
+    DartSampleFilter(const DartSampleFilter&); // not implemented
+};
+
 } // namespace pdal
-

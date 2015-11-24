@@ -81,7 +81,7 @@ void Stage::prepare(PointTableRef table)
     l_processOptions(m_options);
     processOptions(m_options);
     l_initialize(table);
-    initialize();
+    initialize(table);
     addDimensions(table.layout());
     prepared(table);
 }
@@ -92,6 +92,8 @@ PointViewSet Stage::execute(PointTableRef table)
     table.finalize();
 
     PointViewSet views;
+
+    // If the inputs are empty, we're a reader.
     if (m_inputs.empty())
     {
         views.insert(PointViewPtr(new PointView(table)));
@@ -109,6 +111,19 @@ PointViewSet Stage::execute(PointTableRef table)
     PointViewSet outViews;
     std::vector<StageRunnerPtr> runners;
 
+    // Put the spatial references from the views onto the table.
+    // The table's spatial references are only valid as long as the stage
+    // is running.
+    // ABELL - Should we clear the references once the stage run has
+    //   completed?  Wondering if that would break something where a
+    //   writer wants to check a table's SRS.
+    SpatialReference srs;
+    table.clearSpatialReferences();
+    for (auto const& it : views)
+        table.addSpatialReference(it->spatialReference());
+
+    // Do the ready operation and then start running all the views
+    // through the stage.
     ready(table);
     for (auto const& it : views)
     {
@@ -116,13 +131,22 @@ PointViewSet Stage::execute(PointTableRef table)
         runners.push_back(runner);
         runner->run();
     }
+
+    // As the stages complete (synchronously at this time), propagate the
+    // spatial reference and merge the output views.
+    srs = getSpatialReference();
     for (auto const& it : runners)
     {
         StageRunnerPtr runner(it);
         PointViewSet temp = runner->wait();
+        
+        // If our stage has a spatial reference, the view takes it on once
+        // the stage has been run.
+        if (!srs.empty())
+            for (PointViewPtr v : temp)
+                v->setSpatialReference(srs);
         outViews.insert(temp.begin(), temp.end());
     }
-    l_done(table);
     done(table);
     return outViews;
 }
@@ -181,7 +205,8 @@ void Stage::execute(FixedPointTable& table)
             if (finished)
                 pointLimit = idx;
         }
-        reader->l_done(table);
+// This is about forwarding SRSs
+//        reader->l_done(table);
 
         // When we get a false back from a filter, we're filtering out a
         // point, so add it to the list of skips so that it doesn't get
@@ -196,7 +221,8 @@ void Stage::execute(FixedPointTable& table)
                 if (!s->processOne(point))
                     skips[idx] = true;
             }
-            s->l_done(table);
+// This is about forwarding SRSs
+//            s->l_done(table);
         }
 
         // Yes, vector<bool> is terrible.  Can do something better later.
@@ -263,12 +289,6 @@ void Stage::l_processOptions(const Options& options)
     writerProcessOptions(options);
 }
 
-
-void Stage::l_done(PointTableRef table)
-{
-    if (!m_spatialReference.empty())
-        table.setSpatialRef(m_spatialReference);
-}
 
 const SpatialReference& Stage::getSpatialReference() const
 {

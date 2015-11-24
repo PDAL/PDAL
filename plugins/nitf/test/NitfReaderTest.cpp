@@ -171,5 +171,5 @@ TEST(NitfReaderTest, optionSrs)
 
     EXPECT_EQ(sr, nitfReader->getSpatialReference().getWKT());
     EXPECT_EQ("", writer.getSpatialReference().getWKT());
-    EXPECT_EQ(sr, table.spatialRef().getWKT());
+    EXPECT_EQ(sr, table.spatialReference().getWKT());
 }

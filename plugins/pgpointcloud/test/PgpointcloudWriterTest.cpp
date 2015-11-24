@@ -36,6 +36,7 @@
 
 #include <pdal/Writer.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/util/Algorithm.hpp>
 
 #include "Support.hpp"
 #include "Pgtest-Support.hpp"

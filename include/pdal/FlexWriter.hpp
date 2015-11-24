@@ -33,6 +33,7 @@
 
 #pragma once
 
+#include <pdal/PDALUtils.hpp>
 #include <pdal/Writer.hpp>
 
 namespace pdal
@@ -92,13 +93,22 @@ private:
     {
         readyTable(table);
         if (m_hashPos == std::string::npos)
-            readyFile(generateFilename());
+        {
+            if (!table.spatialReferenceUnique())
+            {
+                std::ostringstream oss;
+                oss << getName() << ": Attempting to write '" << m_filename <<
+                    "' with multiple spatial references.";
+                Utils::printError(oss.str());
+            }
+            readyFile(generateFilename(), table.spatialReference());
+        }
     }
 
     virtual void write(const PointViewPtr view) final
     {
         if (m_hashPos != std::string::npos)
-            readyFile(generateFilename());
+            readyFile(generateFilename(), view->spatialReference());
         writeView(view);
         if (m_hashPos != std::string::npos)
             doneFile();
@@ -119,7 +129,8 @@ private:
     virtual void doneTable(PointTableRef table)
     {}
 
-    virtual void readyFile(const std::string& filename) = 0;
+    virtual void readyFile(const std::string& filename,
+        const SpatialReference& srs) = 0;
     virtual void writeView(const PointViewPtr view) = 0;
     virtual void doneFile()
     {}

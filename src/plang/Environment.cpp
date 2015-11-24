@@ -32,6 +32,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#ifndef _WIN32
+#include <dlfcn.h>
+#endif
+
 #include <pdal/plang/Environment.hpp>
 #include <pdal/plang/Redirector.hpp>
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
@@ -51,6 +55,20 @@
 #undef tolower
 #undef isspace
 
+// See ticket #1010.  This function runs when libplang is loaded.  It makes
+// sure python symbols can be found by extention module .so's since on some
+// platforms (notably Ubuntu), they aren't linked with libpython even though
+// they depend on it.  If a platform doesn't support
+// __attribute__ ((constructor)) this does nothing.  We'll have to deal with
+// those as they come up.
+#ifndef _WIN32
+__attribute__ ((constructor))
+static void loadPython()
+{
+    std::cerr << "Force load python.\n";
+    ::dlopen(PDAL_PYTHON_LIBRARY, RTLD_LAZY | RTLD_GLOBAL);
+}
+#endif
 
 // http://www.linuxjournal.com/article/3641
 // http://www.codeproject.com/Articles/11805/Embedding-Python-in-C-C-Part-I

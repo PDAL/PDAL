@@ -97,7 +97,7 @@ std::string NitfReader::getName() const { return s_info.name; }
 //
 
 
-void NitfReader::initialize()
+void NitfReader::initialize(PointTableRef table)
 {
     NitfFile nitf(m_filename);
     nitf.open();
@@ -107,15 +107,11 @@ void NitfReader::initialize()
     m_metadata.add("DESDATA_LENGTH", m_length);
 
     nitf.close();
-    LasReader::initialize();
-}
 
-
-void NitfReader::ready(PointTableRef table)
-{
     // Initialize the LAS stuff with its own metadata node.
     MetadataNode lasNode = m_metadata.add(LasReader::getName());
-    LasReader::ready(table, lasNode);
+    initializeLocal(table, lasNode);
 }
 
 } // namespace pdal
+

@@ -78,6 +78,13 @@ public:
         m_id = ++lastId;
     }
 
+    PointView(PointTableRef pointTable, const SpatialReference& srs) :
+        m_pointTable(pointTable), m_size(0), m_id(0), m_spatialReference(srs)
+    {
+        static int lastId = 0;
+        m_id = ++lastId;
+    }
+
     virtual ~PointView()
     {}
 
@@ -108,7 +115,9 @@ public:
     /// Return a new point view with the same point table as this
     /// point buffer.
     PointViewPtr makeNew() const
-        { return PointViewPtr(new PointView(m_pointTable)); }
+    {
+        return PointViewPtr( new PointView(m_pointTable, m_spatialReference));
+    }
 
     PointRef point(PointId id)
         { return PointRef(this, id); }
@@ -206,11 +215,15 @@ public:
     std::size_t dimSize(Dimension::Id::Enum id) const
         { return layout()->dimSize(id); }
     Dimension::Type::Enum dimType(Dimension::Id::Enum id) const
-     { return layout()->dimType(id);}
+         { return layout()->dimType(id);}
     DimTypeList dimTypes() const
         { return layout()->dimTypes(); }
     PointLayoutPtr layout() const
         { return m_pointTable.layout(); }
+    void setSpatialReference(const SpatialReference& spatialRef)
+        { m_spatialReference = spatialRef; }
+    SpatialReference spatialReference() const
+        { return m_spatialReference; }
 
     /// Fill a buffer with point data specified by the dimension list.
     /// \param[in] dims  List of dimensions/types to retrieve.
@@ -262,6 +275,7 @@ protected:
     point_count_t m_size;
     int m_id;
     std::queue<PointId> m_temps;
+    SpatialReference m_spatialReference;
 
 private:
     template<typename T_IN, typename T_OUT>
@@ -385,6 +399,7 @@ template <class T>
 inline T PointView::getFieldAs(Dimension::Id::Enum dim,
     PointId pointIndex) const
 {
+    assert(pointIndex < m_size);
     T retval;
     const Dimension::Detail *dd = layout()->dimDetail(dim);
     double val;

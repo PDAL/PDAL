@@ -67,6 +67,7 @@ public:
         : pdal::Reader()
         , m_uri("")
         , m_syncToPps(DEFAULT_SYNC_TO_PPS)
+        , m_minimal(false)
         , m_pointcloud()
     {}
 

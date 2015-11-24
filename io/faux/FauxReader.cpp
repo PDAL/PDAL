@@ -184,12 +184,13 @@ void FauxReader::ready(PointTableRef /*table*/)
 
 bool FauxReader::processOne(PointRef& point)
 {
-    if (m_index >= m_count)
-        return false;
-
     double x;
     double y;
     double z;
+
+    if (m_index >= m_count)
+        return false;
+
     switch (m_mode)
     {
     case Random:
@@ -239,7 +240,8 @@ point_count_t FauxReader::read(PointViewPtr view, point_count_t count)
     for (PointId idx = 0; idx < count; ++idx)
     {
         PointRef point = view->point(idx);
-        processOne(point);
+        if (!processOne(point));
+            break;
         if (m_cb)
             m_cb(*view, idx);
     }

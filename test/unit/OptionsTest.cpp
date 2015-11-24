@@ -331,3 +331,11 @@ TEST(OptionsTest, conditional)
     EXPECT_EQ(ops.getValueOrDefault("bazel", std::string()), "win");
 }
 
+TEST(OptionsTest, valid)
+{
+    EXPECT_TRUE(Option::nameValid("foo_123_bar_baz", false));
+    EXPECT_FALSE(Option::nameValid("foo_123_bar-baz", false));
+    EXPECT_FALSE(Option::nameValid("Afoo_123_bar_baz", false));
+    EXPECT_FALSE(Option::nameValid("1foo_123_bar_baz", false));
+    EXPECT_FALSE(Option::nameValid("1foo_123_bar_baz", false));
+}

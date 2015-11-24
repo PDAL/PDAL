@@ -43,6 +43,7 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/Filter.hpp"
   "${PDAL_HEADERS_DIR}/FlexWriter.hpp"
   "${PDAL_HEADERS_DIR}/GDALUtils.hpp"
+  "${PDAL_HEADERS_DIR}/Geometry.hpp"
   "${PDAL_HEADERS_DIR}/GlobalEnvironment.hpp"
   "${PDAL_HEADERS_DIR}/gitsha.h"
   "${PDAL_HEADERS_DIR}/KDIndex.hpp"

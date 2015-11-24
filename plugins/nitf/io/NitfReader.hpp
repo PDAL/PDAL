@@ -84,8 +84,7 @@ private:
     std::unique_ptr<RDevice> m_rdevice;
     std::unique_ptr<RStream> m_rstream;
 
-    virtual void initialize();
-    virtual void ready(PointTableRef table);
+    virtual void initialize(PointTableRef table);
     NitfReader& operator=(const NitfReader&); // not implemented
     NitfReader(const NitfReader&); // not implemented
 };
