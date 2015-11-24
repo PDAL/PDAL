@@ -240,7 +240,7 @@ point_count_t FauxReader::read(PointViewPtr view, point_count_t count)
     for (PointId idx = 0; idx < count; ++idx)
     {
         PointRef point = view->point(idx);
-        if (!processOne(point));
+        if (!processOne(point))
             break;
         if (m_cb)
             m_cb(*view, idx);
