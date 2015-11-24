@@ -177,7 +177,7 @@ void FauxReader::ready(PointTableRef /*table*/)
 {
     m_returnNum = 1;
     m_time = 0;
-    m_seed = (uint32_t)std::time(NULL);    
+    m_seed = (uint32_t)std::time(NULL);
     m_index = 0;
 }
 
