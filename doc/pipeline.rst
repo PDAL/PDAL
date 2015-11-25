@@ -39,7 +39,7 @@ actual channels that are stored in the :cpp:class:`pdal::PointView`.
 PDAL provides four types of stages -- :cpp:class:`pdal::Reader`,
 :cpp:class:`pdal::Writer`, :cpp:class:`pdal::Filter`, and
 :cpp:class:`pdal::MultiFilter` -- with the latter being hardly used at this
-point. A Reader is a producer of data, a Writer is a consumer of data, and a
+point. A Reader is a consumer of data, a Writer is a producer of data, and a
 Filter is an actor on data.
 
 .. note::
