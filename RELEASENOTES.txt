@@ -39,10 +39,16 @@ Fixes:
   on postgres server.  Skip tests if extention is missing.
 - Set precision on output of doubles to metadata.
 - Fix a divide-by-zero error in readers.faux when the point count was 1.
+  (https://github.com/PDAL/PDAL/issues/1015)
 - Fix fatal error loading numpy library that occurred when running
   filters.predicate or filters.programmable.
+  (https://github.com/PDAL/PDAL/issues/1010)
 - Correct readers.las to properly check WKT bit when choosing spatial
-  reference VLR
+  reference VLR.
+  (https://github.com/PDAL/PDAL/issues/1040)
 - Correct writer.las to emit only WKT or GeoTiff VLR, not both.
+  (https://github.com/PDAL/PDAL/issues/1040)
 - Check object ID against table column id (attrelid) to ensure correct PCID
   retrieval in readers.pgpointcloud.
+  (https://github.com/PDAL/PDAL/pull/1051)
+
