@@ -349,6 +349,7 @@ list(APPEND CPACK_SOURCE_IGNORE_FILES "/test/data/local/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/doc/doxygen/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/doc/build/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/doc/presentations/")
+list(APPEND CPACK_SOURCE_IGNORE_FILES "/doc/_static/logo/dongle/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/cmake/examples/")
 
 include(CPack)
