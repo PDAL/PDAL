@@ -137,9 +137,10 @@ void HexBin::done(PointTableRef table)
         }
     }
 
+    uint32_t precision  = m_options.getValueOrDefault<uint32_t>("precision", 8);
     std::ostringstream polygon;
     polygon.setf(std::ios_base::fixed, std::ios_base::floatfield);
-    polygon.precision(m_options.getValueOrDefault<uint32_t>("precision", 8));
+    polygon.precision(precision);
     m_grid->toWKT(polygon);
     m_metadata.add("boundary", polygon.str(),
         "Boundary MULTIPOLYGON of domain");
@@ -153,15 +154,18 @@ void HexBin::done(PointTableRef table)
       tolerance a little larger than that.  This is larger than the
       perpendicular distance needed to eliminate B in ABC, so should
       serve for both cases.
-      
+
          B ______  C
           /      \
        A /        \ D
-    
+
     ***/
     double tolerance = 1.1 * m_grid->height() / 2;
+
+    std::string smooth = Geometry::smoothPolygon(polygon.str(), tolerance, precision);
+
     m_metadata.add("smoothed_boundary",
-        Geometry::smoothPolygon(polygon.str(), tolerance),
+        smooth,
         "Smoothed boundary MULTIPOLYGON of domain");
     double area = Geometry::computeArea(polygon.str());
 

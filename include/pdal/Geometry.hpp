@@ -96,7 +96,7 @@ static void finish()
 namespace Geometry
 {
 
-static std::string smoothPolygon(const std::string& wkt, double tolerance)
+static std::string smoothPolygon(const std::string& wkt, double tolerance, uint32_t precision)
 {
     GEOSContextHandle_t env = init();
 
@@ -108,13 +108,19 @@ static std::string smoothPolygon(const std::string& wkt, double tolerance)
         tolerance);
     if (!smoothed)
         return "";
-    char *smoothedWkt = GEOSGeomToWKT_r(env, smoothed);
-    std::string outWkt(smoothedWkt);
-    GEOSFree_r(env, smoothedWkt);
+
+    GEOSWKTWriter *writer = GEOSWKTWriter_create_r(env);
+    GEOSWKTWriter_setRoundingPrecision_r(env, writer, precision);
+
+    char *smoothWkt = GEOSWKTWriter_write_r(env, writer, smoothed);
+
+    std::string output(smoothWkt);
+    GEOSFree_r(env, smoothWkt);
+    GEOSWKTWriter_destroy_r(env, writer);
     GEOSGeom_destroy_r(env, geom);
     GEOSGeom_destroy_r(env, smoothed);
     finish();
-    return outWkt;
+    return output;
 }
 
 static double computeArea(const std::string& wkt)
