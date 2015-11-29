@@ -105,9 +105,10 @@ void HexBin::done(PointTableRef table)
     }
     offsets << ")";
 
-    m_metadata.add("edge_length", m_grid->height(), "The edge length of the "
+    m_metadata.add("edge_length", m_edgeLength, "The edge length of the "
         "hexagon to use in situations where you do not want to estimate "
         "based on a sample");
+    m_metadata.add("estimated_edge", m_grid->height(), "Estimated computed edge distance");
     m_metadata.add("threshold", m_grid->denseLimit(), "Minimum number of points inside "
         "a hexagon to be considered full");
     m_metadata.add("sample_size", m_sampleSize, "Number of samples to use "
