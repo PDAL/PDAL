@@ -217,6 +217,7 @@ void LasReader::ready(PointTableRef table)
                 LASZIP_RECORD_ID);
             m_decompressor.reset(new LazPerfVlrDecompressor(*m_istream,
                 vlr->data(), m_lasHeader.pointOffset()));
+            m_decompressorBuf.resize(m_decompressor->pointSize());
         }
 #endif
 
@@ -225,8 +226,10 @@ void LasReader::ready(PointTableRef table)
             "LAZperf decompression library.");
 #endif
     }
+    else
+        m_istream->seekg(m_lasHeader.pointOffset());
+       
     m_error.setLog(log());
-
 }
 
 
@@ -617,60 +620,88 @@ void LasReader::addDimensions(PointLayoutPtr layout)
 }
 
 
-point_count_t LasReader::read(PointViewPtr view, point_count_t count)
+bool LasReader::processOne(PointRef& point)
 {
-    size_t pointByteCount = m_lasHeader.pointLen();
-    count = std::min(count, getNumPoints() - m_index);
+    if (m_index >= getNumPoints())
+        return false;
 
-    PointId i = 0;
+    size_t pointLen = m_lasHeader.pointLen();
+
     if (m_lasHeader.compressed())
     {
 #ifdef PDAL_HAVE_LASZIP
         if (m_compression == "LASZIP")
         {
-            for (i = 0; i < count; i++)
+            if (!m_unzipper->read(m_zipPoint->m_lz_point))
             {
-                if (!m_unzipper->read(m_zipPoint->m_lz_point))
-                {
-                    std::string error = "Error reading compressed point data: ";
-                    const char* err = m_unzipper->get_error();
-                    if (!err)
-                        err = "(unknown error)";
-                    error += err;
-                    throw pdal_error(error);
-                }
-                loadPoint(*view.get(),
-                    (char *)m_zipPoint->m_lz_point_data.data(), pointByteCount);
+                std::string error = "Error reading compressed point data: ";
+                const char* err = m_unzipper->get_error();
+                if (!err)
+                    err = "(unknown error)";
+                error += err;
+                throw pdal_error(error);
             }
+            loadPoint(point, (char *)m_zipPoint->m_lz_point_data.data(),
+                pointLen);
         }
 #endif
 
 #ifdef PDAL_HAVE_LAZPERF
         if (m_compression == "LAZPERF")
         {
-            assert(pointByteCount == m_decompressor->pointSize());
-
-            std::vector<char> ptBuf(m_decompressor->pointSize());
-            for (i = 0; i < count; i++)
-            {
-                m_decompressor->decompress(ptBuf.data());
-                loadPoint(*view.get(), ptBuf.data(), pointByteCount);
-            }
+            m_decompressor->decompress(m_decompressorBuf.data());
+            loadPoint(point, m_decompressorBuf.data(), pointLen);
         }
 #endif
 #if !defined(PDAL_HAVE_LAZPERF) && !defined(PDAL_HAVE_LASZIP)
         throw pdal_error("Can't read compressed file without LASzip or "
             "LAZperf decompression library.");
 #endif
+    } // compression
+    else
+    {
+        std::vector<char> buf(m_lasHeader.pointLen());
+
+        m_istream->read(buf.data(), pointLen);
+        loadPoint(point, buf.data(), pointLen);
+    }
+    m_index++;
+    return true;
+}
+
+
+point_count_t LasReader::read(PointViewPtr view, point_count_t count)
+{
+    size_t pointLen = m_lasHeader.pointLen();
+    count = std::min(count, getNumPoints() - m_index);
+
+    PointId i = 0;
+    if (m_lasHeader.compressed())
+    {
+#if defined(PDAL_HAVE_LAZPERF) || defined(PDAL_HAVE_LASZIP)
+        if (m_compression == "LASZIP" || m_compression == "LAZPERF")
+        {
+            for (i = 0; i < count; i++)
+            {
+                PointRef point = view->point(i);
+                PointId id = view->size();
+                processOne(point);
+                if (m_cb)
+                    m_cb(*view, id);
+            }
+        }
+#else
+        throw pdal_error("Can't read compressed file without LASzip or "
+            "LAZperf decompression library.");
+#endif
     }
     else
     {
-        m_istream->seekg(m_lasHeader.pointOffset());
         point_count_t remaining = count;
 
         // Make a buffer at most a meg.
         size_t bufsize = std::min<size_t>((point_count_t)1000000,
-            count * pointByteCount);
+            count * pointLen);
         std::vector<char> buf(bufsize);
         try
         {
@@ -681,8 +712,12 @@ point_count_t LasReader::read(PointViewPtr view, point_count_t count)
                 char *pos = buf.data();
                 while (blockPoints--)
                 {
-                    loadPoint(*view.get(), pos, pointByteCount);
-                    pos += pointByteCount;
+                    PointId id = view->size();
+                    PointRef point = view->point(id);
+                    loadPoint(point, pos, pointLen);
+                    if (m_cb)
+                        m_cb(*view, id);
+                    pos += pointLen;
                     i++;
                 }
             } while (remaining);
@@ -719,20 +754,18 @@ point_count_t LasReader::readFileBlock(std::vector<char>& buf,
 }
 
 
-void LasReader::loadPoint(PointView& data, char *buf, size_t bufsize)
+void LasReader::loadPoint(PointRef& point, char *buf, size_t bufsize)
 {
     if (m_lasHeader.has14Format())
-        loadPointV14(data, buf, bufsize);
+        loadPointV14(point, buf, bufsize);
     else
-        loadPointV10(data, buf, bufsize);
+        loadPointV10(point, buf, bufsize);
 }
 
 
-void LasReader::loadPointV10(PointView& data, char *buf, size_t bufsize)
+void LasReader::loadPointV10(PointRef& point, char *buf, size_t bufsize)
 {
     LeExtractor istream(buf, bufsize);
-
-    PointId nextId = data.size();
 
     int32_t xi, yi, zi;
     istream >> xi >> yi >> zi;
@@ -764,46 +797,43 @@ void LasReader::loadPointV10(PointView& data, char *buf, size_t bufsize)
     if (numReturns == 0 || numReturns > 5)
         m_error.numReturnsWarning(numReturns);
 
-    data.setField(Dimension::Id::X, nextId, x);
-    data.setField(Dimension::Id::Y, nextId, y);
-    data.setField(Dimension::Id::Z, nextId, z);
-    data.setField(Dimension::Id::Intensity, nextId, intensity);
-    data.setField(Dimension::Id::ReturnNumber, nextId, returnNum);
-    data.setField(Dimension::Id::NumberOfReturns, nextId, numReturns);
-    data.setField(Dimension::Id::ScanDirectionFlag, nextId, scanDirFlag);
-    data.setField(Dimension::Id::EdgeOfFlightLine, nextId, flight);
-    data.setField(Dimension::Id::Classification, nextId, classification);
-    data.setField(Dimension::Id::ScanAngleRank, nextId, scanAngleRank);
-    data.setField(Dimension::Id::UserData, nextId, user);
-    data.setField(Dimension::Id::PointSourceId, nextId, pointSourceId);
+    point.setField(Dimension::Id::X, x);
+    point.setField(Dimension::Id::Y, y);
+    point.setField(Dimension::Id::Z, z);
+    point.setField(Dimension::Id::Intensity, intensity);
+    point.setField(Dimension::Id::ReturnNumber, returnNum);
+    point.setField(Dimension::Id::NumberOfReturns, numReturns);
+    point.setField(Dimension::Id::ScanDirectionFlag, scanDirFlag);
+    point.setField(Dimension::Id::EdgeOfFlightLine, flight);
+    point.setField(Dimension::Id::Classification, classification);
+    point.setField(Dimension::Id::ScanAngleRank, scanAngleRank);
+    point.setField(Dimension::Id::UserData, user);
+    point.setField(Dimension::Id::PointSourceId, pointSourceId);
 
     if (h.hasTime())
     {
         double time;
         istream >> time;
-        data.setField(Dimension::Id::GpsTime, nextId, time);
+        point.setField(Dimension::Id::GpsTime, time);
     }
 
     if (h.hasColor())
     {
         uint16_t red, green, blue;
         istream >> red >> green >> blue;
-        data.setField(Dimension::Id::Red, nextId, red);
-        data.setField(Dimension::Id::Green, nextId, green);
-        data.setField(Dimension::Id::Blue, nextId, blue);
+        point.setField(Dimension::Id::Red, red);
+        point.setField(Dimension::Id::Green, green);
+        point.setField(Dimension::Id::Blue, blue);
     }
 
     if (m_extraDims.size())
-        loadExtraDims(istream, data, nextId);
-    if (m_cb)
-        m_cb(data, nextId);
+        loadExtraDims(istream, point);
+
 }
 
-void LasReader::loadPointV14(PointView& data, char *buf, size_t bufsize)
+void LasReader::loadPointV14(PointRef& point, char *buf, size_t bufsize)
 {
     LeExtractor istream(buf, bufsize);
-
-    PointId nextId = data.size();
 
     int32_t xi, yi, zi;
     istream >> xi >> yi >> zi;
@@ -834,28 +864,28 @@ void LasReader::loadPointV14(PointView& data, char *buf, size_t bufsize)
     uint8_t flight = (flags >> 7) & 0x01;
 
     //ABELL - Need to do something with the classFlags;
-    data.setField(Dimension::Id::X, nextId, x);
-    data.setField(Dimension::Id::Y, nextId, y);
-    data.setField(Dimension::Id::Z, nextId, z);
-    data.setField(Dimension::Id::Intensity, nextId, intensity);
-    data.setField(Dimension::Id::ReturnNumber, nextId, returnNum);
-    data.setField(Dimension::Id::NumberOfReturns, nextId, numReturns);
-    data.setField(Dimension::Id::ScanChannel, nextId, scanChannel);
-    data.setField(Dimension::Id::ScanDirectionFlag, nextId, scanDirFlag);
-    data.setField(Dimension::Id::EdgeOfFlightLine, nextId, flight);
-    data.setField(Dimension::Id::Classification, nextId, classification);
-    data.setField(Dimension::Id::ScanAngleRank, nextId, scanAngle * .006);
-    data.setField(Dimension::Id::UserData, nextId, user);
-    data.setField(Dimension::Id::PointSourceId, nextId, pointSourceId);
-    data.setField(Dimension::Id::GpsTime, nextId, gpsTime);
+    point.setField(Dimension::Id::X, x);
+    point.setField(Dimension::Id::Y, y);
+    point.setField(Dimension::Id::Z, z);
+    point.setField(Dimension::Id::Intensity, intensity);
+    point.setField(Dimension::Id::ReturnNumber, returnNum);
+    point.setField(Dimension::Id::NumberOfReturns, numReturns);
+    point.setField(Dimension::Id::ScanChannel, scanChannel);
+    point.setField(Dimension::Id::ScanDirectionFlag, scanDirFlag);
+    point.setField(Dimension::Id::EdgeOfFlightLine, flight);
+    point.setField(Dimension::Id::Classification, classification);
+    point.setField(Dimension::Id::ScanAngleRank, scanAngle * .006);
+    point.setField(Dimension::Id::UserData, user);
+    point.setField(Dimension::Id::PointSourceId, pointSourceId);
+    point.setField(Dimension::Id::GpsTime, gpsTime);
 
     if (h.hasColor())
     {
         uint16_t red, green, blue;
         istream >> red >> green >> blue;
-        data.setField(Dimension::Id::Red, nextId, red);
-        data.setField(Dimension::Id::Green, nextId, green);
-        data.setField(Dimension::Id::Blue, nextId, blue);
+        point.setField(Dimension::Id::Red, red);
+        point.setField(Dimension::Id::Green, green);
+        point.setField(Dimension::Id::Blue, blue);
     }
 
     if (h.hasInfrared())
@@ -863,16 +893,15 @@ void LasReader::loadPointV14(PointView& data, char *buf, size_t bufsize)
         uint16_t nearInfraRed;
 
         istream >> nearInfraRed;
-        data.setField(Dimension::Id::Infrared, nextId, nearInfraRed);
+        point.setField(Dimension::Id::Infrared, nearInfraRed);
     }
 
     if (m_extraDims.size())
-        loadExtraDims(istream, data, nextId);
+        loadExtraDims(istream, point);
 }
 
 
-void LasReader::loadExtraDims(LeExtractor& istream, PointView& data,
-    PointId nextId)
+void LasReader::loadExtraDims(LeExtractor& istream, PointRef& point)
 {
     Everything e;
     for (auto& dim : m_extraDims)
@@ -891,10 +920,10 @@ void LasReader::loadExtraDims(LeExtractor& istream, PointView& data,
             double d = Utils::toDouble(e, dim.m_dimType.m_type);
             d = d * dim.m_dimType.m_xform.m_scale +
                 dim.m_dimType.m_xform.m_offset;
-            data.setField(dim.m_dimType.m_id, nextId, d);
+            point.setField(dim.m_dimType.m_id, d);
         }
         else
-            data.setField(dim.m_dimType.m_id, dim.m_dimType.m_type, nextId, &e);
+            point.setField(dim.m_dimType.m_id, dim.m_dimType.m_type, &e);
     }
 }
 

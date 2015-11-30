@@ -152,11 +152,129 @@ public:
 
     void setPointId(PointId idx)
         { m_idx = idx; }
+    inline void getField(char *val, Dimension::Id::Enum d,
+        Dimension::Type::Enum type) const;
+    inline void setField(Dimension::Id::Enum dim,
+        Dimension::Type::Enum type, const void *val);
+
+    /// Fill a buffer with point data specified by the dimension list.
+    /// \param[in] dims  List of dimensions/types to retrieve.
+    /// \param[in] idx   Index of point to get.
+    /// \param[in] buf   Pointer to buffer to fill.
+    void getPackedData(const DimTypeList& dims, char *buf) const
+    {
+        for (auto di = dims.begin(); di != dims.end(); ++di)
+        {
+            getField(buf, di->m_id, di->m_type);
+            buf += Dimension::size(di->m_type);
+        }
+    }
+
+    /// Load the point buffer from memory whose arrangement is specified
+    /// by the dimension list.
+    /// \param[in] dims  Dimension/types of data in packed order
+    /// \param[in] idx   Index of point to write.
+    /// \param[in] buf   Packed data buffer.
+    void setPackedData(const DimTypeList& dims, const char *buf)
+    {
+        for (auto di = dims.begin(); di != dims.end(); ++di)
+        {
+            setField(di->m_id, di->m_type, (const void *)buf);
+            buf += Dimension::size(di->m_type);
+        }
+    }
+
 
 private:
     PointContainer *m_container;
     PointLayout *m_layout;
     PointId m_idx;
 };
+
+inline void PointRef::getField(char *val, Dimension::Id::Enum d,
+    Dimension::Type::Enum type) const
+{
+    Everything e;
+
+    switch (type)
+    {
+    case Dimension::Type::Float:
+        e.f = getFieldAs<float>(d);
+        break;
+    case Dimension::Type::Double:
+        e.d = getFieldAs<double>(d);
+        break;
+    case Dimension::Type::Signed8:
+        e.s8 = getFieldAs<int8_t>(d);
+        break;
+    case Dimension::Type::Signed16:
+        e.s16 = getFieldAs<int16_t>(d);
+        break;
+    case Dimension::Type::Signed32:
+        e.s32 = getFieldAs<int32_t>(d);
+        break;
+    case Dimension::Type::Signed64:
+        e.s64 = getFieldAs<int64_t>(d);
+        break;
+    case Dimension::Type::Unsigned8:
+        e.u8 = getFieldAs<uint8_t>(d);
+        break;
+    case Dimension::Type::Unsigned16:
+        e.u16 = getFieldAs<uint16_t>(d);
+        break;
+    case Dimension::Type::Unsigned32:
+        e.u32 = getFieldAs<uint32_t>(d);
+        break;
+    case Dimension::Type::Unsigned64:
+        e.u64 = getFieldAs<uint64_t>(d);
+        break;
+    case Dimension::Type::None:
+        break;
+    }
+    memcpy(val, &e, Dimension::size(type));
+}
+
+inline void PointRef::setField(Dimension::Id::Enum dim,
+    Dimension::Type::Enum type, const void *val)
+{
+    Everything e;
+
+    memcpy(&e, val, Dimension::size(type));
+    switch (type)
+    {
+        case Dimension::Type::Float:
+            setField(dim, e.f);
+            break;
+        case Dimension::Type::Double:
+            setField(dim, e.d);
+            break;
+        case Dimension::Type::Signed8:
+            setField(dim, e.s8);
+            break;
+        case Dimension::Type::Signed16:
+            setField(dim, e.s16);
+            break;
+        case Dimension::Type::Signed32:
+            setField(dim, e.s32);
+            break;
+        case Dimension::Type::Signed64:
+            setField(dim, e.s64);
+            break;
+        case Dimension::Type::Unsigned8:
+            setField(dim, e.u8);
+            break;
+        case Dimension::Type::Unsigned16:
+            setField(dim, e.u16);
+            break;
+        case Dimension::Type::Unsigned32:
+            setField(dim, e.u32);
+            break;
+        case Dimension::Type::Unsigned64:
+            setField(dim, e.u64);
+            break;
+        case Dimension::Type::None:
+            break;
+    }
+}
 
 } // namespace pdal
