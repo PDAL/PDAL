@@ -106,7 +106,7 @@ void TIndexKernel::addSwitches()
         ("filespec", po::value<std::string>(&m_filespec),
             "Build: Pattern of files to index. Merge: Output filename")
         ("smooth_boundary", po::value<bool>(&m_smoothBoundary)->
-            zero_tokens()->implicit_value(false),
+            zero_tokens()->implicit_value(true),
             "use smoothed version of full boundary")
         ("fast_boundary", po::value<bool>(&m_fastBoundary)->
             zero_tokens()->implicit_value(true),
@@ -599,7 +599,7 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
 
         MetadataNode m = table.metadata();
         m = m_smoothBoundary ?
-            m.findChild("filters.hexbin:smooth_boundary") :
+            m.findChild("filters.hexbin:smoothed_boundary") :
             m.findChild("filters.hexbin:boundary");
         fileInfo.m_boundary = m.value();
 
