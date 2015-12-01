@@ -4,7 +4,7 @@ language: cpp
 
 
 sudo:
-    false
+    required
 
 services:
     docker
