@@ -2,6 +2,11 @@
 # Configure Travis CI service for http://github.com/PDAL
 language: cpp
 
+sudo: required
+
+services:
+    docker
+
 compiler:
   - g++
   - clang
