@@ -86,7 +86,6 @@ TIndexKernel::TIndexKernel()
     , m_dataset(NULL)
     , m_layer(NULL)
     , m_fastBoundary(false)
-    , m_smoothBoundary(false)
 
 {
     m_log.setLeader("pdal tindex");
@@ -105,9 +104,6 @@ void TIndexKernel::addSwitches()
             "OGR-readable/writeable tile index output")
         ("filespec", po::value<std::string>(&m_filespec),
             "Build: Pattern of files to index. Merge: Output filename")
-        ("smooth_boundary", po::value<bool>(&m_smoothBoundary)->
-            zero_tokens()->implicit_value(true),
-            "use smoothed version of full boundary")
         ("fast_boundary", po::value<bool>(&m_fastBoundary)->
             zero_tokens()->implicit_value(true),
             "use extent instead of exact boundary")
@@ -184,9 +180,6 @@ void TIndexKernel::validateSwitches()
             throw pdal_error("--bounds option not supported when building "
                 "index.");
     }
-    if (m_smoothBoundary && m_fastBoundary)
-        throw pdal_error("Can't request both smooth_boundary and "
-            "fast_boundary.");
 }
 
 
@@ -598,9 +591,7 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
         PointViewSet set = hexer->execute(table);
 
         MetadataNode m = table.metadata();
-        m = m_smoothBoundary ?
-            m.findChild("filters.hexbin:smoothed_boundary") :
-            m.findChild("filters.hexbin:boundary");
+        m = m.findChild("filters.hexbin:boundary");
         fileInfo.m_boundary = m.value();
 
         PointViewPtr v = *set.begin();
