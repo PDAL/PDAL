@@ -13,22 +13,7 @@ source ./scripts/ci/common.sh
 mkdir -p _build || exit 1
 cd _build || exit 1
 
-case "$PDAL_OPTIONAL_COMPONENTS" in
-    all)
-        OPTIONAL_COMPONENT_SWITCH=ON
-        ;;
-    none)
-        OPTIONAL_COMPONENT_SWITCH=OFF
-        ;;
-    *)
-        echo "Unrecognized value for PDAL_OPTIONAL_COMPONENTS=$PDAL_OPTIONAL_COMPONENTS"
-        exit 1
-esac
-
-if [[ "$CXX" == "g++" ]]
-then
-    export CXX="g++-4.8"
-fi
+OPTIONAL_COMPONENT_SWITCH=ON
 
 cmake \
     -DBUILD_PLUGIN_ATTRIBUTE=$OPTIONAL_COMPONENT_SWITCH \
@@ -56,15 +41,11 @@ cmake \
     -G "$PDAL_CMAKE_GENERATOR" \
     ..
 
-if [[ $PDAL_CMAKE_GENERATOR == "Unix Makefiles" ]]
-then
-    MAKECMD=make
-else
-    MAKECMD=ninja
-fi
+MAKECMD=make
 
 # Don't use ninja's default number of threads becuase it can
 # saturate Travis's available memory.
+NUMTHREADS=2
 ${MAKECMD} -j ${NUMTHREADS} && \
     LD_LIBRARY_PATH=./lib && \
     sudo PGUSER=postgres ctest -V && \
