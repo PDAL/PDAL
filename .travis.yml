@@ -19,7 +19,7 @@ env:
 before_install: ./scripts/ci/before_install.sh
 
 script:
-    docker run -t pdal/dependencies:latest -v $TRAVIS_BUILD_DIR:/pdal /bin/sh -c "/pdal/scripts/ci/script.sh"
+    docker run -v $TRAVIS_BUILD_DIR:/pdal -t pdal/dependencies:latest /bin/sh -c "/pdal/scripts/ci/script.sh"
 
 notifications:
   on_success: always
