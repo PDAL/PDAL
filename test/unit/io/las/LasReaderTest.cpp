@@ -506,8 +506,12 @@ TEST(LasReaderTest, stream)
 {
     // Compression option is ignored for non-compressed file.
     streamTest(Support::datapath("las/autzen_trim.las"), "laszip");
+#ifdef PDAL_HAVE_LASZIP
     streamTest(Support::datapath("laz/autzen_trim.laz"), "laszip");
+#endif
+#ifdef PDAL_HAVE_LAZPERF
     streamTest(Support::datapath("laz/autzen_trim.laz"), "lazperf");
+#endif
 }
 
 
