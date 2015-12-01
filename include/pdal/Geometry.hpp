@@ -118,7 +118,7 @@ static std::string smoothPolygon(const std::string& wkt, double tolerance, uint3
         GEOSGeometry* exterior = GEOSGeom_clone_r(env, GEOSGetExteriorRing_r(env, m));
 
         std::vector<GEOSGeometry*> keep_rings;
-        int numRings = GEOSGetNumInteriorRings_r(env, smoothed);
+        int numRings = GEOSGetNumInteriorRings_r(env, m);
         double area_threshold = 6 * tolerance * tolerance;
         for (int i = 0; i < numRings; ++i)
         {
@@ -127,7 +127,6 @@ static std::string smoothPolygon(const std::string& wkt, double tolerance, uint3
             GEOSGeometry* aring = GEOSGeom_createPolygon_r(env, cring, NULL, 0);
 
             int errored = GEOSArea_r(env, aring, &area);
-//             std::cout << "ring area: " << area << " threshold: " << area_threshold << std::endl;
             if (errored == 0)
                 throw pdal::pdal_error("Unable to get area of ring!");
             if (area > area_threshold)
@@ -137,7 +136,8 @@ static std::string smoothPolygon(const std::string& wkt, double tolerance, uint3
         }
 
         GEOSGeometry* p = GEOSGeom_createPolygon_r(env,exterior, keep_rings.data(), keep_rings.size());
-        if (p == NULL) throw pdal::pdal_error("smooth polygon could not be created!" );
+        if (p == NULL) throw
+            pdal::pdal_error("smooth polygon could not be created!" );
         geometries.push_back(p);
     }
 
