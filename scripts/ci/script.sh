@@ -7,7 +7,8 @@ clang --version
 
 echo `pwd`
 ls `pwd`
-source ./ci/common.sh
+cd /pdal
+source ./scripts/ci/common.sh
 
 mkdir -p _build || exit 1
 cd _build || exit 1
