@@ -4,8 +4,6 @@
 gcc --version
 clang --version
 
-docker run pdal/dependencies
-
 
 source ./scripts/ci/common.sh
 

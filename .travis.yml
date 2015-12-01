@@ -18,7 +18,8 @@ env:
 
 before_install: ./scripts/ci/before_install.sh
 
-script: ./scripts/ci/script.sh
+script:
+    docker run pdal/dependencies ./scripts/ci/script.sh
 
 notifications:
   on_success: always
