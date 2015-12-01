@@ -6,7 +6,7 @@ language: cpp
 sudo:
     required
 
-service:
+services:
     docker
 
 compiler:
