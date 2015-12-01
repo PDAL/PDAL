@@ -34,6 +34,7 @@ RUN add-apt-repository ppa:ubuntu-toolchain-r/test -y
 RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
 		# from ppa:ubuntu-toolchain-r/test
 		g++-4.8 \
+		clang \
 		# from ppa:boost-latest/ppa
 		libboost-filesystem1.55-dev \
 		libboost-iostreams1.55-dev \

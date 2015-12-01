@@ -5,7 +5,9 @@ gcc --version
 clang --version
 
 
-source ./scripts/ci/common.sh
+echo `pwd`
+ls `pwd`
+source ./ci/common.sh
 
 mkdir -p _build || exit 1
 cd _build || exit 1
