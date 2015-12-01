@@ -6,6 +6,9 @@ language: cpp
 sudo:
     required
 
+service:
+    docker
+
 compiler:
   - clang
 
