@@ -3,6 +3,9 @@
 language: cpp
 
 
+sudo:
+    false
+
 services:
     docker
 
