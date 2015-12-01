@@ -6,19 +6,21 @@ language: cpp
 sudo:
     required
 
-services:
-    docker
-
 compiler:
-  - g++
+  - clang
 
 env:
   - PDAL_OPTIONAL_COMPONENTS=all
+  - PDAL_OPTIONAL_COMPONENTS=none
+
 
 before_install: ./scripts/ci/before_install.sh
 
 script:
-    docker run -v $TRAVIS_BUILD_DIR:/pdal -t pdal/dependencies:latest /bin/sh -c "/pdal/scripts/ci/script.sh"
+    docker run -v $TRAVIS_BUILD_DIR:/pdal
+    -t pdal/dependencies:latest
+    -e PDAL_OPTIONAL_COMPONENTS='$PDAL_OPTIONAL_COMPONENTS'
+    /bin/sh -c "/pdal/scripts/ci/script.sh"
 
 notifications:
   on_success: always

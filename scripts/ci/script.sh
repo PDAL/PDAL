@@ -1,9 +1,7 @@
 #!/bin/bash -e
 # Builds and tests PDAL
 
-gcc --version
 clang --version
-
 
 cd /pdal
 source ./scripts/ci/common.sh
@@ -11,7 +9,18 @@ source ./scripts/ci/common.sh
 mkdir -p _build || exit 1
 cd _build || exit 1
 
-OPTIONAL_COMPONENT_SWITCH=ON
+case "$PDAL_OPTIONAL_COMPONENTS" in
+    all)
+        OPTIONAL_COMPONENT_SWITCH=ON
+        ;;
+    none)
+        OPTIONAL_COMPONENT_SWITCH=OFF
+        ;;
+    *)
+        echo "Unrecognized value for PDAL_OPTIONAL_COMPONENTS=$PDAL_OPTIONAL_COMPONENTS"
+        exit 1
+esac
+
 
 cmake \
     -DBUILD_PLUGIN_ATTRIBUTE=$OPTIONAL_COMPONENT_SWITCH \
@@ -40,7 +49,7 @@ cmake \
     -G "$PDAL_CMAKE_GENERATOR" \
     ..
 
-MAKECMD=make
+MAKECMD=ninja
 
 # Don't use ninja's default number of threads becuase it can
 # saturate Travis's available memory.
