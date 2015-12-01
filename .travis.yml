@@ -2,7 +2,6 @@
 # Configure Travis CI service for http://github.com/PDAL
 language: cpp
 
-sudo: required
 
 services:
     docker
@@ -13,7 +12,6 @@ compiler:
 
 env:
   - PDAL_OPTIONAL_COMPONENTS=all
-  - PDAL_OPTIONAL_COMPONENTS=none
 
 before_install: ./scripts/ci/before_install.sh
 
