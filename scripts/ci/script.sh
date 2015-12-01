@@ -1,5 +1,12 @@
 #!/bin/bash -e
 # Builds and tests PDAL
+
+gcc --version
+clang --version
+
+docker run pdal/dependencies
+
+
 source ./scripts/ci/common.sh
 
 mkdir -p _build || exit 1
