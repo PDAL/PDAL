@@ -2,12 +2,7 @@
 # Builds and tests PDAL
 
 gcc --version
-clang --version
 
-
-echo `pwd`
-ls `pwd`
-cd /pdal
 source ./scripts/ci/common.sh
 
 mkdir -p _build || exit 1
@@ -27,6 +22,7 @@ cmake \
     -DBUILD_PLUGIN_P2G=$OPTIONAL_COMPONENT_SWITCH \
     -DBUILD_PLUGIN_PCL=OFF \
     -DBUILD_PLUGIN_PGPOINTCLOUD=$OPTIONAL_COMPONENT_SWITCH \
+    -DBUILD_PGPOINTCLOUD_TESTS=OFF \
     -DBUILD_PLUGIN_SQLITE=$OPTIONAL_COMPONENT_SWITCH \
     -DBUILD_PLUGIN_RIVLIB=OFF \
     -DBUILD_PLUGIN_PYTHON=$OPTIONAL_COMPONENT_SWITCH \
