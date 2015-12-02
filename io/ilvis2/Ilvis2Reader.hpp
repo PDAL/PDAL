@@ -65,6 +65,7 @@ private:
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void processOptions(const Options& options);
+    virtual void initialize(PointTableRef table);
     virtual void ready(PointTableRef table);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
 
