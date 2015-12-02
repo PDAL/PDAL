@@ -108,13 +108,21 @@ void HexBin::done(PointTableRef table)
     m_metadata.add("edge_length", m_edgeLength, "The edge length of the "
         "hexagon to use in situations where you do not want to estimate "
         "based on a sample");
-    m_metadata.add("threshold", m_density, "Minimum number of points inside "
+    m_metadata.add("estimated_edge", m_grid->height(), "Estimated computed edge distance");
+    m_metadata.add("threshold", m_grid->denseLimit(), "Minimum number of points inside "
         "a hexagon to be considered full");
     m_metadata.add("sample_size", m_sampleSize, "Number of samples to use "
         "when estimating hexagon edge size. Specify 0.0 or omit options "
         "for edge_size if you want to compute one.");
     m_metadata.add("hex_offsets", offsets.str(), "Offset of hex corners from "
         "hex centers.");
+
+    uint32_t precision  = m_options.getValueOrDefault<uint32_t>("precision", 8);
+    std::ostringstream polygon;
+    polygon.setf(std::ios_base::fixed, std::ios_base::floatfield);
+    polygon.precision(precision);
+    m_grid->toWKT(polygon);
+
     if (m_outputTesselation)
     {
 
@@ -135,14 +143,10 @@ void HexBin::done(PointTableRef table)
             oss << "POINT (" << h.x() << " " << h.y() << ")";
             hex.add("center", oss.str());
         }
+        m_metadata.add("hex_boundary", polygon.str(),
+            "Boundary MULTIPOLYGON of domain");
     }
 
-    std::ostringstream polygon;
-    polygon.setf(std::ios_base::fixed, std::ios_base::floatfield);
-    polygon.precision(m_options.getValueOrDefault<uint32_t>("precision", 8));
-    m_grid->toWKT(polygon);
-    m_metadata.add("boundary", polygon.str(),
-        "Boundary MULTIPOLYGON of domain");
 
     /***
       We want to make these bumps on edges go away, which means that
@@ -153,16 +157,19 @@ void HexBin::done(PointTableRef table)
       tolerance a little larger than that.  This is larger than the
       perpendicular distance needed to eliminate B in ABC, so should
       serve for both cases.
-      
+
          B ______  C
           /      \
        A /        \ D
-    
+
     ***/
     double tolerance = 1.1 * m_grid->height() / 2;
-    m_metadata.add("smoothed_boundary",
-        Geometry::smoothPolygon(polygon.str(), tolerance),
-        "Smoothed boundary MULTIPOLYGON of domain");
+
+    std::string smooth = Geometry::smoothPolygon(polygon.str(), tolerance, precision);
+
+    m_metadata.add("boundary",
+        smooth,
+        "Approximated MULTIPOLYGON of domain");
     double area = Geometry::computeArea(polygon.str());
 
     double density = (double) m_count / area ;

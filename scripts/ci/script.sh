@@ -1,5 +1,9 @@
 #!/bin/bash -e
 # Builds and tests PDAL
+
+clang --version
+
+cd /pdal
 source ./scripts/ci/common.sh
 
 mkdir -p _build || exit 1
@@ -17,10 +21,6 @@ case "$PDAL_OPTIONAL_COMPONENTS" in
         exit 1
 esac
 
-if [[ "$CXX" == "g++" ]]
-then
-    export CXX="g++-4.8"
-fi
 
 cmake \
     -DBUILD_PLUGIN_ATTRIBUTE=$OPTIONAL_COMPONENT_SWITCH \
@@ -32,8 +32,9 @@ cmake \
     -DBUILD_PLUGIN_NITF=OFF \
     -DBUILD_PLUGIN_OCI=OFF \
     -DBUILD_PLUGIN_P2G=$OPTIONAL_COMPONENT_SWITCH \
-    -DBUILD_PLUGIN_PCL=OFF \
+    -DBUILD_PLUGIN_PCL=$OPTIONAL_COMPONENT_SWITCH \
     -DBUILD_PLUGIN_PGPOINTCLOUD=$OPTIONAL_COMPONENT_SWITCH \
+    -DBUILD_PGPOINTCLOUD_TESTS=OFF \
     -DBUILD_PLUGIN_SQLITE=$OPTIONAL_COMPONENT_SWITCH \
     -DBUILD_PLUGIN_RIVLIB=OFF \
     -DBUILD_PLUGIN_PYTHON=$OPTIONAL_COMPONENT_SWITCH \
@@ -42,21 +43,17 @@ cmake \
     -DWITH_LAZPERF=$OPTIONAL_COMPONENT_SWITCH \
     -DWITH_GEOTIFF=$OPTIONAL_COMPONENT_SWITCH \
     -DWITH_LASZIP=$OPTIONAL_COMPONENT_SWITCH \
-    -DLASZIP_INCLUDE_DIR:PATH=/usr/local/include \
-    -DLASZIP_LIBRARY:FILEPATH=/usr/local/lib/liblaszip.so \
+    -DLASZIP_INCLUDE_DIR:PATH=/usr/include \
+    -DLASZIP_LIBRARY:FILEPATH=/usr/lib/liblaszip.so \
     -DWITH_TESTS=ON \
     -G "$PDAL_CMAKE_GENERATOR" \
     ..
 
-if [[ $PDAL_CMAKE_GENERATOR == "Unix Makefiles" ]]
-then
-    MAKECMD=make
-else
-    MAKECMD=ninja
-fi
+MAKECMD=ninja
 
 # Don't use ninja's default number of threads becuase it can
 # saturate Travis's available memory.
+NUMTHREADS=2
 ${MAKECMD} -j ${NUMTHREADS} && \
     LD_LIBRARY_PATH=./lib && \
     sudo PGUSER=postgres ctest -V && \

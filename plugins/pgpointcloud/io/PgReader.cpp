@@ -259,9 +259,6 @@ void PgReader::ready(PointTableRef /*table*/)
     m_cur_nrows = 0;
     m_cur_result = NULL;
 
-    if (getSpatialReference().empty())
-        setSpatialReference(fetchSpatialReference());
-
     CursorSetup();
 }
 
@@ -282,6 +279,8 @@ void PgReader::initialize()
     if (!m_session)
         m_session = pg_connect(m_connection);
 
+    if (getSpatialReference().empty())
+        setSpatialReference(fetchSpatialReference());
 }
 
 
