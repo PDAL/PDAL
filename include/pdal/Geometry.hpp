@@ -109,10 +109,44 @@ static std::string smoothPolygon(const std::string& wkt, double tolerance, uint3
     if (!smoothed)
         return "";
 
+    std::vector<GEOSGeometry*> geometries;
+
+    int numGeom = GEOSGetNumGeometries_r(env, smoothed);
+    for (int n = 0; n < numGeom; ++n)
+    {
+        const GEOSGeometry* m = GEOSGetGeometryN_r(env, smoothed, n);
+        GEOSGeometry* exterior = GEOSGeom_clone_r(env, GEOSGetExteriorRing_r(env, m));
+
+        std::vector<GEOSGeometry*> keep_rings;
+        int numRings = GEOSGetNumInteriorRings_r(env, m);
+        double area_threshold = 6 * tolerance * tolerance;
+        for (int i = 0; i < numRings; ++i)
+        {
+            double area(0.0);
+            GEOSGeometry* cring = GEOSGeom_clone_r(env, GEOSGetInteriorRingN_r(env, smoothed, i));
+            GEOSGeometry* aring = GEOSGeom_createPolygon_r(env, cring, NULL, 0);
+
+            int errored = GEOSArea_r(env, aring, &area);
+            if (errored == 0)
+                throw pdal::pdal_error("Unable to get area of ring!");
+            if (area > area_threshold)
+            {
+                keep_rings.push_back(cring);
+            }
+        }
+
+        GEOSGeometry* p = GEOSGeom_createPolygon_r(env,exterior, keep_rings.data(), keep_rings.size());
+        if (p == NULL) throw
+            pdal::pdal_error("smooth polygon could not be created!" );
+        geometries.push_back(p);
+    }
+
+    GEOSGeometry* o = GEOSGeom_createCollection_r(env, GEOS_MULTIPOLYGON, geometries.data(), geometries.size());
+
     GEOSWKTWriter *writer = GEOSWKTWriter_create_r(env);
     GEOSWKTWriter_setRoundingPrecision_r(env, writer, precision);
 
-    char *smoothWkt = GEOSWKTWriter_write_r(env, writer, smoothed);
+    char *smoothWkt = GEOSWKTWriter_write_r(env, writer, o);
 
     std::string output(smoothWkt);
     GEOSFree_r(env, smoothWkt);

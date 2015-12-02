@@ -116,6 +116,13 @@ void HexBin::done(PointTableRef table)
         "for edge_size if you want to compute one.");
     m_metadata.add("hex_offsets", offsets.str(), "Offset of hex corners from "
         "hex centers.");
+
+    uint32_t precision  = m_options.getValueOrDefault<uint32_t>("precision", 8);
+    std::ostringstream polygon;
+    polygon.setf(std::ios_base::fixed, std::ios_base::floatfield);
+    polygon.precision(precision);
+    m_grid->toWKT(polygon);
+
     if (m_outputTesselation)
     {
 
@@ -136,15 +143,10 @@ void HexBin::done(PointTableRef table)
             oss << "POINT (" << h.x() << " " << h.y() << ")";
             hex.add("center", oss.str());
         }
+        m_metadata.add("hex_boundary", polygon.str(),
+            "Boundary MULTIPOLYGON of domain");
     }
 
-    uint32_t precision  = m_options.getValueOrDefault<uint32_t>("precision", 8);
-    std::ostringstream polygon;
-    polygon.setf(std::ios_base::fixed, std::ios_base::floatfield);
-    polygon.precision(precision);
-    m_grid->toWKT(polygon);
-    m_metadata.add("boundary", polygon.str(),
-        "Boundary MULTIPOLYGON of domain");
 
     /***
       We want to make these bumps on edges go away, which means that
@@ -165,9 +167,9 @@ void HexBin::done(PointTableRef table)
 
     std::string smooth = Geometry::smoothPolygon(polygon.str(), tolerance, precision);
 
-    m_metadata.add("smoothed_boundary",
+    m_metadata.add("boundary",
         smooth,
-        "Smoothed boundary MULTIPOLYGON of domain");
+        "Approximated MULTIPOLYGON of domain");
     double area = Geometry::computeArea(polygon.str());
 
     double density = (double) m_count / area ;
