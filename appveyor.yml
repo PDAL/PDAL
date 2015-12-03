@@ -5,17 +5,15 @@ os: Windows Server 2012
 platform:
   - x64
 
+init:
+  - SET PATH=C:\Python27-x64\;%PATH%
+
 configuration: Release
 
 environment:
   # set the directory to use for OSGeo4W install, our CMake find packages know
   # to look here
   OSGEODIR: C:\OSGeo4W64
-
-  # make sure we are using 64-bit python libs
-  PYTHON: "C:\\Python27-x64"
-  PYTHON_VERSION: "2.7.10"
-  PYTHON_ARCH: "64"
 
   matrix:
     - PDAL_OPTIONAL_COMPONENTS: OFF
