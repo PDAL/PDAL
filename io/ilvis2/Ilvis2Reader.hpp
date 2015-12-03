@@ -47,7 +47,7 @@ namespace pdal
 class PDAL_DLL Ilvis2Reader : public pdal::Reader
 {
 public:
-    Ilvis2Reader() : Reader(), m_index(0), m_convert("CENTROID")
+    Ilvis2Reader() : Reader(), m_index(0), m_mapping("ALL")
         {}
 
     static void * create();
@@ -61,12 +61,16 @@ public:
 private:
     std::unique_ptr<ILeStream> m_stream;
     point_count_t m_index;
-    std::string m_convert;
+    std::string m_mapping;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void processOptions(const Options& options);
     virtual void ready(PointTableRef table);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
+
+    virtual void readPoint(PointViewPtr view, PointId id, StringList s, std::string pointMap);
+
+    double convertLongitude(double longitude);
 
 };
 
