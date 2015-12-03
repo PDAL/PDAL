@@ -160,6 +160,7 @@ void Stage::execute(FixedPointTable& table)
     std::list<Stage *> stages;
     std::list<Stage *> filters;
     std::vector<bool> skips(table.capacity());
+    SpatialReference srs;
 
     // Build a list of the stages.
     Stage *s = this;
@@ -184,13 +185,22 @@ void Stage::execute(FixedPointTable& table)
     std::copy(begin, stages.end(), std::back_inserter(filters));
 
     for (Stage *s : stages)
+    {
         s->ready(table);
+        srs = s->getSpatialReference();
+        if (!srs.empty())
+            table.setSpatialReference(srs);            
+    }
 
     // Loop until we're finished.  We handle the number of points up to
     // the capacity of the FixedPointTable that we've been provided.
+
     bool finished = false;
     while (!finished)
     {
+static bool first = true;
+        // Clear the spatial
+        table.clearSpatialReferences();
         PointId idx = 0;
         PointRef point(&table, idx);
         point_count_t pointLimit = table.capacity();
@@ -205,8 +215,10 @@ void Stage::execute(FixedPointTable& table)
             if (finished)
                 pointLimit = idx;
         }
-// This is about forwarding SRSs
-//        reader->l_done(table);
+        srs = reader->getSpatialReference();
+std::cerr << "Reader SRS = " << srs << "!\n";
+        if (!srs.empty())
+            table.setSpatialReference(srs);            
 
         // When we get a false back from a filter, we're filtering out a
         // point, so add it to the list of skips so that it doesn't get
@@ -221,14 +233,16 @@ void Stage::execute(FixedPointTable& table)
                 if (!s->processOne(point))
                     skips[idx] = true;
             }
-// This is about forwarding SRSs
-//            s->l_done(table);
+            srs = s->getSpatialReference();
+            if (!srs.empty())
+                table.setSpatialReference(srs);            
         }
 
         // Yes, vector<bool> is terrible.  Can do something better later.
         for (size_t i = 0; i < skips.size(); ++i)
             skips[i] = false;
         table.reset();
+first = false;
     }
 
     for (Stage *s : stages)

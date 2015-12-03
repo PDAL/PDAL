@@ -157,6 +157,8 @@ void LasWriter::processOptions(const Options& options)
 
 void LasWriter::prepared(PointTableRef table)
 {
+    FlexWriter::validateFilename(table);
+
     PointLayoutPtr layout = table.layout();
 
     // If we've asked for all dimensions, add to extraDims all dimensions
@@ -701,6 +703,24 @@ void LasWriter::openCompression()
 }
 
 
+bool LasWriter::processOne(PointRef& point)
+{
+    size_t pointLen = m_lasHeader.pointLen();
+    // Store this somewhere.
+    std::vector<char> buf(pointLen);
+    if (!fillPointBuf(point, buf))
+        return false;
+
+    if (m_compression == LasCompression::LasZip)
+        writeLasZipBuf(buf.data(), pointLen, 1);
+    else if (m_compression == LasCompression::LazPerf)
+        writeLazPerfBuf(buf.data(), pointLen, 1);
+    else
+        m_ostream->write(buf.data(), pointLen);
+    return true;
+}
+
+
 void LasWriter::writeView(const PointViewPtr view)
 {
     Utils::writeProgress(m_progressFd, "READYVIEW",
@@ -765,6 +785,135 @@ void LasWriter::writeLazPerfBuf(char *pos, size_t pointLen,
         pos += pointLen;
     }
 #endif
+}
+
+
+bool LasWriter::fillPointBuf(PointRef& point, std::vector<char>& buf)
+{
+    bool has14Format = m_lasHeader.has14Format();
+    bool hasColor = m_lasHeader.hasColor();
+    bool hasTime = m_lasHeader.hasTime();
+    bool hasInfrared = m_lasHeader.hasInfrared();
+    static const size_t maxReturnCount = m_lasHeader.maxReturnCount();
+
+    LeInserter ostream(buf.data(), buf.size());
+
+    // we always write the base fields
+    using namespace Dimension;
+
+    uint8_t returnNumber(1);
+    uint8_t numberOfReturns(1);
+    if (point.hasDim(Id::ReturnNumber))
+    {
+        returnNumber = point.getFieldAs<uint8_t>(Id::ReturnNumber);
+        if (returnNumber < 1 || returnNumber > maxReturnCount)
+            m_error.returnNumWarning(returnNumber);
+    }
+    if (point.hasDim(Id::NumberOfReturns))
+        numberOfReturns = point.getFieldAs<uint8_t>(Id::NumberOfReturns);
+    if (numberOfReturns == 0)
+        m_error.numReturnsWarning(0);
+    if (numberOfReturns > maxReturnCount)
+    {
+        if (m_discardHighReturnNumbers)
+        {
+            // If this return number is too high, pitch the point.
+            if (returnNumber > maxReturnCount)
+                return false;
+            numberOfReturns = maxReturnCount;
+        }
+        else
+            m_error.numReturnsWarning(numberOfReturns);
+    }
+
+    double xOrig = point.getFieldAs<double>(Id::X);
+    double yOrig = point.getFieldAs<double>(Id::Y);
+    double zOrig = point.getFieldAs<double>(Id::Z);
+
+    double x = (xOrig - m_xXform.m_offset) / m_xXform.m_scale;
+    double y = (yOrig - m_yXform.m_offset) / m_yXform.m_scale;
+    double z = (zOrig - m_zXform.m_offset) / m_zXform.m_scale;
+
+    auto converter = [this](double d, Dimension::Id::Enum dim) -> int32_t
+    {
+        int32_t i;
+
+        if (!Utils::numericCast(d, i))
+        {
+            std::ostringstream oss;
+            oss << "Unable to convert scaled value (" << d << ") to "
+                "int32 for dimension '" << Dimension::name(dim) <<
+                "' when writing LAS/LAZ file " << m_curFilename << ".";
+            throw pdal_error(oss.str());
+        }
+        return i;
+    };
+
+    ostream << converter(x, Id::X);
+    ostream << converter(y, Id::Y);
+    ostream << converter(z, Id::Z);
+
+    ostream << point.getFieldAs<uint16_t>(Id::Intensity);
+
+    uint8_t scanChannel = point.getFieldAs<uint8_t>(Id::ScanChannel);
+    uint8_t scanDirectionFlag =
+        point.getFieldAs<uint8_t>(Id::ScanDirectionFlag);
+    uint8_t edgeOfFlightLine =
+        point.getFieldAs<uint8_t>(Id::EdgeOfFlightLine);
+    if (has14Format)
+    {
+        uint8_t bits = returnNumber | (numberOfReturns << 4);
+        ostream << bits;
+        bits = (scanChannel << 4) | (scanDirectionFlag << 6) |
+            (edgeOfFlightLine << 7);
+        ostream << bits;
+    }
+    else
+    {
+        uint8_t bits = returnNumber | (numberOfReturns << 3) |
+            (scanDirectionFlag << 6) | (edgeOfFlightLine << 7);
+        ostream << bits;
+    }
+
+    ostream << point.getFieldAs<uint8_t>(Id::Classification);
+
+    uint8_t userData = point.getFieldAs<uint8_t>(Id::UserData);
+    if (has14Format)
+    {
+         int16_t scanAngleRank =
+             point.getFieldAs<float>(Id::ScanAngleRank) / .006;
+         ostream << userData << scanAngleRank;
+    }
+    else
+    {
+        int8_t scanAngleRank = point.getFieldAs<int8_t>(Id::ScanAngleRank);
+        ostream << scanAngleRank << userData;
+    }
+
+    ostream << point.getFieldAs<uint16_t>(Id::PointSourceId);
+
+    if (hasTime)
+        ostream << point.getFieldAs<double>(Id::GpsTime);
+
+    if (hasColor)
+    {
+        ostream << point.getFieldAs<uint16_t>(Id::Red);
+        ostream << point.getFieldAs<uint16_t>(Id::Green);
+        ostream << point.getFieldAs<uint16_t>(Id::Blue);
+    }
+
+    if (hasInfrared)
+        ostream << point.getFieldAs<uint16_t>(Id::Infrared);
+
+    Everything e;
+    for (auto& dim : m_extraDims)
+    {
+        point.getField((char *)&e, dim.m_dimType.m_id, dim.m_dimType.m_type);
+        ostream.put(dim.m_dimType.m_type, e);
+    }
+
+    m_summaryData->addPoint(xOrig, yOrig, zOrig, returnNumber);
+    return true;
 }
 
 

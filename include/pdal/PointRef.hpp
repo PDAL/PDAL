@@ -48,11 +48,14 @@ public:
         m_container(container), m_layout(container->layout()), m_idx(idx)
     {}
 
+    bool hasDim(Dimension::Id::Enum dim) const
+    { return m_layout->hasDim(dim); }
+
     template<class T>
     T getFieldAs(Dimension::Id::Enum dim) const
     {
         T val;
-        bool success = false;
+        bool success = true;
         Everything e;
         Dimension::Type::Enum type = m_layout->dimDetail(dim)->type();
 
@@ -90,6 +93,7 @@ public:
             success = Utils::numericCast(e.d, val);
             break;
         case Dimension::Type::None:
+            val = 0;
             break;
         }
         if (!success)

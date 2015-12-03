@@ -128,6 +128,7 @@ private:
     virtual void readyFile(const std::string& filename,
         const SpatialReference& srs);
     virtual void writeView(const PointViewPtr view);
+    virtual bool processOne(PointRef& point);
     virtual void doneFile();
 
     void fillForwardList(const Options& options);
@@ -137,6 +138,7 @@ private:
         const MetadataNode& base);
     void handleHeaderForwards(MetadataNode& forward);
     void fillHeader();
+    bool fillPointBuf(PointRef& point, std::vector<char>& buf);
     point_count_t fillWriteBuf(const PointView& view, PointId startId,
         std::vector<char>& buf);
     void writeLasZipBuf(char *data, size_t pointLen, point_count_t numPts);

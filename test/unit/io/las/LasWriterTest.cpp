@@ -587,6 +587,77 @@ TEST(LasWriterTest, lazperf)
 }
 #endif
 
+void compareFiles(const std::string& name1, const std::string& name2,
+    size_t increment = 100)
+{
+    Options o1;
+    o1.add("filename", name1);
+
+    Options o2;
+    o2.add("filename", name2);
+
+    LasReader r1;
+    r1.setOptions(o1);
+
+    LasReader r2;
+    r2.setOptions(o2);
+
+    PointTable t1;
+    r1.prepare(t1);
+    PointViewSet s1 = r1.execute(t1);
+    EXPECT_EQ(s1.size(), 1u);
+    PointViewPtr v1 = *s1.begin();
+    DimTypeList d1 = v1->dimTypes();
+    size_t size1 = v1->pointSize();
+    std::vector<char> buf1(size1);
+
+    PointTable t2;
+    r2.prepare(t2);
+    PointViewSet s2 = r2.execute(t2);
+    EXPECT_EQ(s2.size(), 1u);
+    PointViewPtr v2 = *s2.begin();
+    DimTypeList d2 = v2->dimTypes();
+    size_t size2 = v2->pointSize();
+    std::vector<char> buf2(size2);
+
+    EXPECT_EQ(v1->size(), v2->size());
+    EXPECT_EQ(d1.size(), d2.size());
+    EXPECT_EQ(size1, size2);
+
+    for (PointId i = 0; i < std::min(size1, size2); i += increment)
+    {
+       v1->getPackedPoint(d1, i, buf1.data());
+       v2->getPackedPoint(d2, i, buf2.data());
+       EXPECT_EQ(memcmp(buf1.data(), buf2.data(), std::min(size1, size2)), 0);
+    }
+}
+
+TEST(LasWriterTest, stream)
+{
+    std::string infile(Support::datapath("las/autzen_trim.las"));
+    std::string outfile(Support::temppath("trimtest.las"));
+
+    FileUtils::deleteFile(outfile);
+
+    Options ops1;
+    ops1.add("filename", infile);
+
+    LasReader r;
+    r.setOptions(ops1);
+
+    Options ops2;
+    ops2.add("filename", outfile);
+    ops2.add("forward", "all");
+    LasWriter w;
+    w.setOptions(ops2);
+    w.setInput(r);
+
+    FixedPointTable t(100);
+    w.prepare(t);
+    w.execute(t);
+
+    compareFiles(infile, outfile);
+}
 
 /**
 namespace
@@ -644,82 +715,6 @@ TEST(LasWriterTest, simple)
     writer.execute(table);
 
     diffdump(infile, outfile);
-}
-**/
-
-//ABELL
-/**
-static void test_a_format(const std::string& refFile, uint8_t majorVersion,
-    uint8_t minorVersion, int pointFormat)
-{
-    PointTable table;
-
-    // remove file from earlier run, if needed
-    FileUtils::deleteFile("temp.las");
-
-    std::string directory = "las/permutations/";
-    Options readerOpts;
-    readerOpts.add("filename", Support::datapath(directory + "1.2_3.las"));
-
-    std::shared_ptr<LasReader> reader(new LasReader);
-    reader->setOptions(readerOpts);
-
-    Options writerOpts;
-    writerOpts.add("compression", false);
-    writerOpts.add("creation_doy", 78);
-    writerOpts.add("creation_year", 2008);
-    writerOpts.add("format", pointFormat);
-    writerOpts.add("minor_version", (unsigned)minorVersion);
-    writerOpts.add("system_id", "libLAS");
-    writerOpts.add("software_id", "libLAS 1.2");
-    writerOpts.add<boost::uuids::uuuid>("project_id",
-        "8388f1b8-aa1b-4108-bca3-6bc68e7b062e");
-//    writerOpts.add("project_id", boost::lexical_cast<boost::uuids::uuid>(
-//        "8388f1b8-aa1b-4108-bca3-6bc68e7b062e");
-
-    std::ostream* ofs = FileUtils::createFile(Support::temppath("temp.las"));
-
-    // need to scope the writer, so that's it dtor can use the stream
-    std::shared_ptr<LasWriter> writer(new LasWriter)(ofs);
-    writer->setOptions(writerOpts);
-    writer->setInput(&reader);
-
-    writer->prepare(table);
-    writer->execute(table);
-
-    bool filesSame = Support::compare_files("temp.las",
-        Support::datapath(directory + refFile));
-    EXPECT_TRUE(filesSame);
-    if (filesSame)
-        FileUtils::deleteFile(Support::temppath("temp.las"));
-    else
-        exit(0);
-}
-**/
-
-
-//ABELL
-/**
-TEST(LasWriterTest, version1_0)
-{
-    test_a_format("1.0_0.las", 1, 0, 0);
-    test_a_format("1.0_1.las", 1, 0, 1);
-}
-
-
-TEST(LasWriterTest, version1_1)
-{
-    test_a_format("1.1_0.las", 1, 1, 0);
-    test_a_format("1.1_1.las", 1, 1, 1);
-}
-
-
-TEST(LasWriterTest, version1_2)
-{
-    test_a_format("1.2_0.las", 1, 2, 0);
-    test_a_format("1.2_1.las", 1, 2, 1);
-    test_a_format("1.2_2.las", 1, 2, 2);
-    test_a_format("1.2_3.las", 1, 2, 3);
 }
 **/
 

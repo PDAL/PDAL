@@ -63,6 +63,11 @@ public:
         { return m_metadata->getNode(); }
     virtual void finalize()
         { layout()->finalize(); }
+    void setSpatialReference(const SpatialReference& srs)
+    {
+        clearSpatialReferences();
+        addSpatialReference(srs);
+    }
     void clearSpatialReferences()
         { m_spatialRefs.clear(); }
     void addSpatialReference(const SpatialReference& srs)
@@ -79,6 +84,8 @@ public:
         return m_spatialRefs.size() ?
             *m_spatialRefs.begin() : SpatialReference();
     }
+    virtual bool supportsView() const
+    { return false; }
 
     MetadataNode privateMetadata(const std::string& name);
 
@@ -143,6 +150,8 @@ public:
     PointTable() : m_numPts(0)
         {}
     virtual ~PointTable();
+    virtual bool supportsView() const
+    { return true; }
 
 protected:
     virtual char *getPoint(PointId idx);
