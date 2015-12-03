@@ -12,6 +12,11 @@ environment:
   # to look here
   OSGEODIR: C:\OSGeo4W64
 
+  # make sure we are using 64-bit python libs
+  PYTHON: "C:\\Python27-x64"
+  PYTHON_VERSION: "2.7.10"
+  PYTHON_ARCH: "64"
+
   matrix:
     - PDAL_OPTIONAL_COMPONENTS: OFF
     - PDAL_OPTIONAL_COMPONENTS: ON
