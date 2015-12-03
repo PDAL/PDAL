@@ -165,7 +165,8 @@ void HexBin::done(PointTableRef table)
     ***/
     double tolerance = 1.1 * m_grid->height() / 2;
 
-    std::string smooth = Geometry::smoothPolygon(polygon.str(), tolerance, precision);
+    double cull = m_options.getValueOrDefault<double>("hole_cull_area_tolerance", 6 * tolerance * tolerance);
+    std::string smooth = Geometry::smoothPolygon(polygon.str(), tolerance, precision, cull);
 
     m_metadata.add("boundary",
         smooth,
