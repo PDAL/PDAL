@@ -49,9 +49,11 @@ class PDAL_DLL BasePointTable : public PointContainer
 {
     friend class PointView;
 
-public:
+protected:
     BasePointTable() : m_metadata(new Metadata())
         {}
+
+public:
     virtual ~BasePointTable()
         {}
 
@@ -105,13 +107,12 @@ typedef BasePointTable const & ConstPointTableRef;
 
 class PDAL_DLL SimplePointTable : public BasePointTable
 {
-private:
-    std::unique_ptr<PointLayout> m_layout;
 
-public:
+protected:
     SimplePointTable() : m_layout(new PointLayout())
         {}
 
+public:
     virtual PointLayoutPtr layout() const
         { return m_layout.get(); }
 
@@ -120,6 +121,8 @@ protected:
         { return m_layout->pointSize() * numPts; }
 
 private:
+    std::unique_ptr<PointLayout> m_layout;
+
     virtual void setFieldInternal(Dimension::Id::Enum id, PointId idx,
         const void *value);
     virtual void getFieldInternal(Dimension::Id::Enum id, PointId idx,
@@ -161,10 +164,37 @@ private:
     virtual PointId addPoint();
 };
 
-class PDAL_DLL FixedPointTable : public SimplePointTable
+/// A StreamPointTable must provide storage for point data up to its capacity.
+/// It must implement getPoint() which returns a pointer to a buffer of
+/// sufficient size to contain a point's data.  The minimum size required
+/// is constant and can be determined by calling pointsToBytes(1) in the
+/// finalize() method.
+class PDAL_DLL StreamPointTable : public SimplePointTable
+{
+protected:
+    StreamPointTable()
+    {}
+
+public:
+    /// Called when a new point should be added.  Probably a no-op for
+    /// streaming. 
+    virtual PointId addPoint()
+    { return 0; }
+    /// Called when execute() is started.  Typically used to set buffer size
+    /// when all dimensions are known.
+    virtual void finalize()
+    {}
+    /// Called when the contents of StreamPointTable have been consumed and
+    /// the point data will be potentially overwritten.
+    virtual void reset()
+    {}
+    virtual point_count_t capacity() const = 0;
+};
+
+class PDAL_DLL FixedPointTable : public StreamPointTable
 {
 public:
-    FixedPointTable(point_count_t capacity) : m_capacity(capacity), m_numPts(0)
+    FixedPointTable(point_count_t capacity) : m_capacity(capacity)
     {}
 
     virtual void finalize()
@@ -178,8 +208,6 @@ public:
 
     point_count_t capacity() const
         { return m_capacity; }
-    void reset()
-        { m_numPts = 0; } 
 protected:
     virtual char *getPoint(PointId idx)
         { return m_buf.data() + pointsToBytes(idx); }
@@ -187,10 +215,6 @@ protected:
 private:
     std::vector<char> m_buf;
     point_count_t m_capacity;
-    point_count_t m_numPts;
-
-    virtual PointId addPoint()
-        { return ++m_numPts; }
 };
 
 } //namespace

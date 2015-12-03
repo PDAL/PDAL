@@ -79,7 +79,7 @@ public:
     }
     void prepare(PointTableRef table);
     PointViewSet execute(PointTableRef table);
-    void execute(FixedPointTable& table);
+    void execute(StreamPointTable& table);
 
     void setSpatialReference(SpatialReference const&);
     const SpatialReference& getSpatialReference() const;

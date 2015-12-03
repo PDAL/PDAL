@@ -153,7 +153,7 @@ PointViewSet Stage::execute(PointTableRef table)
 
 
 // Streamed execution.
-void Stage::execute(FixedPointTable& table)
+void Stage::execute(StreamPointTable& table)
 {
     table.finalize();
 
@@ -189,16 +189,15 @@ void Stage::execute(FixedPointTable& table)
         s->ready(table);
         srs = s->getSpatialReference();
         if (!srs.empty())
-            table.setSpatialReference(srs);            
+            table.setSpatialReference(srs);
     }
 
     // Loop until we're finished.  We handle the number of points up to
-    // the capacity of the FixedPointTable that we've been provided.
+    // the capacity of the StreamPointTable that we've been provided.
 
     bool finished = false;
     while (!finished)
     {
-static bool first = true;
         // Clear the spatial
         table.clearSpatialReferences();
         PointId idx = 0;
@@ -216,9 +215,8 @@ static bool first = true;
                 pointLimit = idx;
         }
         srs = reader->getSpatialReference();
-std::cerr << "Reader SRS = " << srs << "!\n";
         if (!srs.empty())
-            table.setSpatialReference(srs);            
+            table.setSpatialReference(srs);
 
         // When we get a false back from a filter, we're filtering out a
         // point, so add it to the list of skips so that it doesn't get
@@ -235,14 +233,13 @@ std::cerr << "Reader SRS = " << srs << "!\n";
             }
             srs = s->getSpatialReference();
             if (!srs.empty())
-                table.setSpatialReference(srs);            
+                table.setSpatialReference(srs);
         }
 
         // Yes, vector<bool> is terrible.  Can do something better later.
         for (size_t i = 0; i < skips.size(); ++i)
             skips[i] = false;
         table.reset();
-first = false;
     }
 
     for (Stage *s : stages)
@@ -314,6 +311,7 @@ void Stage::setSpatialReference(const SpatialReference& spatialRef)
 {
     setSpatialReference(m_metadata, spatialRef);
 }
+
 
 void Stage::setSpatialReference(MetadataNode& m,
     const SpatialReference& spatialRef)
