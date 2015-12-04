@@ -279,11 +279,11 @@ TEST(LasWriterTest, all_extra_dims)
     {
         using namespace Dimension;
 
-        EXPECT_FLOAT_EQ(v->getFieldAs<float>(Id::X, i),
+        ASSERT_FLOAT_EQ(v->getFieldAs<float>(Id::X, i),
             v->getFieldAs<float>(foo, i));
-        EXPECT_FLOAT_EQ(v->getFieldAs<float>(Id::Y, i),
+        ASSERT_FLOAT_EQ(v->getFieldAs<float>(Id::Y, i),
             v->getFieldAs<float>(bar, i));
-        EXPECT_FLOAT_EQ(v->getFieldAs<float>(Id::Z, i),
+        ASSERT_FLOAT_EQ(v->getFieldAs<float>(Id::Z, i),
             v->getFieldAs<float>(baz, i));
     }
 }

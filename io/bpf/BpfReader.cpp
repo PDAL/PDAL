@@ -241,6 +241,24 @@ void BpfReader::done(PointTableRef)
 }
 
 
+bool BpfReader::processOne(PointRef& point)
+{
+    switch (m_header.m_pointFormat)
+    {
+    case BpfFormat::PointMajor:
+        readPointMajor(point);
+        break;
+    case BpfFormat::DimMajor:
+        readDimMajor(point);
+        break;
+    case BpfFormat::ByteMajor:
+        readByteMajor(point);
+        break;
+    }
+    return !eof() && (m_index < m_count);
+}
+
+
 point_count_t BpfReader::read(PointViewPtr data, point_count_t count)
 {
     switch (m_header.m_pointFormat)
@@ -251,8 +269,6 @@ point_count_t BpfReader::read(PointViewPtr data, point_count_t count)
         return readDimMajor(data, count);
     case BpfFormat::ByteMajor:
         return readByteMajor(data, count);
-    default:
-        break;
     }
     return 0;
 }
@@ -282,9 +298,38 @@ bool BpfReader::eof()
 }
 
 
-point_count_t BpfReader::readPointMajor(PointViewPtr data, point_count_t count)
+void BpfReader::readPointMajor(PointRef& point)
 {
-    PointId nextId = data->size();
+    double x, y, z;
+
+    seekPointMajor(m_index);
+    for (size_t dim = 0; dim < m_dims.size(); ++dim)
+    {
+        float f;
+
+        m_stream >> f;
+        double d = f + m_dims[dim].m_offset;
+        if (m_dims[dim].m_id == Dimension::Id::X)
+            x = d;
+        else if (m_dims[dim].m_id == Dimension::Id::Y)
+            y = d;
+        else if (m_dims[dim].m_id == Dimension::Id::Z)
+            z = d;
+        else
+            point.setField(m_dims[dim].m_id, d);
+    }
+
+    m_header.m_xform.apply(x, y, z);
+    point.setField(Dimension::Id::X, x);
+    point.setField(Dimension::Id::Y, y);
+    point.setField(Dimension::Id::Z, z);
+    m_index++;
+}
+
+
+point_count_t BpfReader::readPointMajor(PointViewPtr view, point_count_t count)
+{
+    PointId nextId = view->size();
     PointId idx = m_index;
     point_count_t numRead = 0;
     seekPointMajor(idx);
@@ -295,20 +340,19 @@ point_count_t BpfReader::readPointMajor(PointViewPtr data, point_count_t count)
             float f;
 
             m_stream >> f;
-            data->setField(m_dims[d].m_id, nextId, f + m_dims[d].m_offset);
+            view->setField(m_dims[d].m_id, nextId, f + m_dims[d].m_offset);
         }
 
         // Transformation only applies to X, Y and Z
-        double x = data->getFieldAs<double>(Dimension::Id::X, nextId);
-        double y = data->getFieldAs<double>(Dimension::Id::Y, nextId);
-        double z = data->getFieldAs<double>(Dimension::Id::Z, nextId);
+        double x = view->getFieldAs<double>(Dimension::Id::X, nextId);
+        double y = view->getFieldAs<double>(Dimension::Id::Y, nextId);
+        double z = view->getFieldAs<double>(Dimension::Id::Z, nextId);
         m_header.m_xform.apply(x, y, z);
-        data->setField(Dimension::Id::X, nextId, x);
-        data->setField(Dimension::Id::Y, nextId, y);
-        data->setField(Dimension::Id::Z, nextId, z);
-
+        view->setField(Dimension::Id::X, nextId, x);
+        view->setField(Dimension::Id::Y, nextId, y);
+        view->setField(Dimension::Id::Z, nextId, z);
         if (m_cb)
-            m_cb(*data, nextId);
+            m_cb(*view, nextId);
 
         idx++;
         numRead++;
@@ -317,6 +361,38 @@ point_count_t BpfReader::readPointMajor(PointViewPtr data, point_count_t count)
     m_index = idx;
     return numRead;
 }
+
+
+// This isn't lovely as we have to seek for each dimension access.
+void BpfReader::readDimMajor(PointRef& point)
+{
+    double x, y, z;
+
+    for (size_t dim = 0; dim < m_dims.size(); ++dim)
+    {
+        seekDimMajor(dim, m_index);
+
+        float f;
+        m_stream >> f;
+        double d = f + m_dims[dim].m_offset;
+        if (m_dims[dim].m_id == Dimension::Id::X)
+            x = d;
+        else if (m_dims[dim].m_id == Dimension::Id::Y)
+            y = d;
+        else if (m_dims[dim].m_id == Dimension::Id::Z)
+            z = d;
+        else
+            point.setField(m_dims[dim].m_id, d);
+    }
+
+    // Transformation only applies to X, Y and Z
+    m_header.m_xform.apply(x, y, z);
+    point.setField(Dimension::Id::X, x);
+    point.setField(Dimension::Id::Y, y);
+    point.setField(Dimension::Id::Z, z);
+    m_index++;
+}
+
 
 point_count_t BpfReader::readDimMajor(PointViewPtr data, point_count_t count)
 {
@@ -357,13 +433,54 @@ point_count_t BpfReader::readDimMajor(PointViewPtr data, point_count_t count)
     return numRead;
 }
 
+
+void BpfReader::readByteMajor(PointRef& point)
+{
+    // We need a temp buffer for the point data
+    union uu
+    {
+        float f;
+        uint32_t u32;
+    } u;
+    double x, y, z;
+    uint8_t u8;
+
+    for (size_t dim = 0; dim < m_dims.size(); ++dim)
+    {
+        u.u32 = 0;
+        for (size_t b = 0; b < sizeof(float); ++b)
+        {
+            seekByteMajor(dim, b, m_index);
+
+            m_stream >> u8;
+            u.u32 |= ((uint32_t)u8 << (b * CHAR_BIT));
+        }
+        double d = u.f + m_dims[dim].m_offset;
+        if (m_dims[dim].m_id == Dimension::Id::X)
+            x = d;
+        else if (m_dims[dim].m_id == Dimension::Id::Y)
+            y = d;
+        else if (m_dims[dim].m_id == Dimension::Id::Z)
+            z = d;
+        else
+            point.setField(m_dims[dim].m_id, d);
+    }
+
+    m_header.m_xform.apply(x, y, z);
+    point.setField(Dimension::Id::X, x);
+    point.setField(Dimension::Id::Y, y);
+    point.setField(Dimension::Id::Z, z);
+    m_index++;
+}
+
+
 point_count_t BpfReader::readByteMajor(PointViewPtr data, point_count_t count)
 {
     PointId idx(0);
     PointId startId = data->size();
     point_count_t numRead = 0;
 
-    // We need a temp buffer for the point data->
+    // We need a temp buffer for the point data
     union uu
     {
         float f;
