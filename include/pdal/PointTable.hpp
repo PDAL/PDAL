@@ -118,7 +118,7 @@ public:
 
 protected:
     std::size_t pointsToBytes(point_count_t numPts) const
-        { return m_layout->pointSize() * numPts; }
+        { return layout()->pointSize() * numPts; }
 
 private:
     std::unique_ptr<PointLayout> m_layout;
