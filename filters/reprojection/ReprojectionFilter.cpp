@@ -241,5 +241,24 @@ void ReprojectionFilter::filter(PointView& view)
     }
 }
 
+bool ReprojectionFilter::processOne(PointRef& point)
+{
+    double x(point.getFieldAs<double>(Dimension::Id::X));
+    double y(point.getFieldAs<double>(Dimension::Id::Y));
+    double z(point.getFieldAs<double>(Dimension::Id::Z));
+
+    if (OCTTransform(m_transform_ptr, 1, &x, &y, &z))
+    {
+        point.setField(Dimension::Id::X, x);
+        point.setField(Dimension::Id::Y, y);
+        point.setField(Dimension::Id::Z, z);
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
 
 } // namespace pdal

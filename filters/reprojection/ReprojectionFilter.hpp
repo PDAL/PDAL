@@ -64,6 +64,7 @@ private:
     virtual void initialize();
     virtual PointViewSet run(PointViewPtr view);
     virtual void filter(PointView& view);
+    virtual bool processOne(PointRef& point);
 
     void updateBounds();
     void createTransform(PointView *view);
