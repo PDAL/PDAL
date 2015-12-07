@@ -126,6 +126,9 @@ void ReprojectionFilter::initialize()
         throw pdal_error(oss.str());
     }
 
+    // If we have our input and output spatial references, create the transform
+    // now.  Otherwise, if this filter is used via the FilterWrapper, it will
+    // not be initialized properly since run() won't get called.
     if (!m_inferInputSRS)
     {
         createTransform(0);
