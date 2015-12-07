@@ -126,7 +126,10 @@ void ReprojectionFilter::initialize()
         throw pdal_error(oss.str());
     }
 
-    if (!m_inferInputSRS) createTransform(nullptr);
+    if (!m_inferInputSRS)
+    {
+        createTransform(0);
+    }
 }
 
 
@@ -134,11 +137,6 @@ void ReprojectionFilter::createTransform(PointView *view)
 {
     if (m_inferInputSRS)
     {
-        if (!view)
-        {
-            throw pdal_error(getName() + ": Cannot infer SRS from empty view");
-        }
-
         m_inSRS = view->spatialReference();
 
         if (m_inSRS.empty())
@@ -204,7 +202,10 @@ PointViewSet ReprojectionFilter::run(PointViewPtr view)
     PointViewSet viewSet;
     PointViewPtr outView = view->makeNew();
 
-    if (m_inferInputSRS) createTransform(view.get());
+    if (m_inferInputSRS)
+    {
+        createTransform(view.get());
+    }
 
     double x, y, z;
 
