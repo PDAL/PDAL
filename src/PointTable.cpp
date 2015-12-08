@@ -50,7 +50,7 @@ MetadataNode BasePointTable::privateMetadata(const std::string& name)
 void SimplePointTable::setFieldInternal(Dimension::Id::Enum id, PointId idx,
     const void *value)
 {
-    const Dimension::Detail *d = m_layout->dimDetail(id);
+    const Dimension::Detail *d = m_layoutRef.dimDetail(id);
     const char *src  = (const char *)value;
     char *dst = getDimension(d, idx);
     std::copy(src, src + d->size(), dst);
@@ -60,7 +60,7 @@ void SimplePointTable::setFieldInternal(Dimension::Id::Enum id, PointId idx,
 void SimplePointTable::getFieldInternal(Dimension::Id::Enum id, PointId idx,
     void *value) const
 {
-    const Dimension::Detail *d = m_layout->dimDetail(id);
+    const Dimension::Detail *d = m_layoutRef.dimDetail(id);
     const char *src = getDimension(d, idx);
     char *dst = (char *)value;
     std::copy(src, src + d->size(), dst);
