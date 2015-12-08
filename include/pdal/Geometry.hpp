@@ -96,7 +96,8 @@ static void finish()
 namespace Geometry
 {
 
-static std::string smoothPolygon(const std::string& wkt, double tolerance, uint32_t precision, double area_threshold)
+static std::string smoothPolygon(const std::string& wkt, double tolerance,
+    uint32_t precision, double area_threshold)
 {
     GEOSContextHandle_t env = init();
 
@@ -186,16 +187,31 @@ static double computeArea(const std::string& wkt)
     finish();
     return output;
 }
+
+} // namespace Geometry
+
 #else
 
-static std::string smoothPolygon(const std::string& wkt, double tolerance)
+namespace Geometry
+{
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+static std::string smoothPolygon(const std::string& wkt, double tolerance,
+    uint32_t precision, double area_threshold)
 {
     throw pdal_error("Can't call smoothPolygon.  PDAL not built with GEOS.");
 }
 
-#endif
+static double computeArea(const std::string& wkt)
+{
+    throw pdal_error("Can't call computeArea.  PDAL not built with GEOS.");
+}
+#pragma GCC diagnostic pop
 
 } // namespace Geometry
+
+#endif
 
 } // namespace pdal
 
