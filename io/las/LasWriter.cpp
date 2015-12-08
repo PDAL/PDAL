@@ -318,13 +318,14 @@ void LasWriter::prepOutput(std::ostream *outStream, const SpatialReference& srs)
     // Use stage SRS if provided.
     m_srs = getSpatialReference().empty() ? srs : getSpatialReference();
 
+    handleHeaderForwards(m_forwardMetadata);
+
     // Filling the header here gives the VLR functions below easy access to
     // the version information and so on.
     fillHeader();
 
     // Spatial reference can potentially change for multiple output files.
     setVlrsFromSpatialRef();
-    handleHeaderForwards(m_forwardMetadata);
     setVlrsFromMetadata(m_forwardMetadata);
 
     m_summaryData.reset(new SummaryData());
