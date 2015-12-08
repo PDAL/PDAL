@@ -866,9 +866,9 @@ point_count_t LasWriter::fillWriteBuf(const PointView& view,
 
             uint8_t classFlags = view.getFieldAs<uint8_t>(Id::ClassFlags, idx);
             bits = (classFlags & 0x0F) |
-            ((scanChannel & 0x03) << 4) |
-            ((scanDirectionFlag & 0x01) << 6) |
-            ((edgeOfFlightLine & 0x01) << 7);
+                ((scanChannel & 0x03) << 4) |
+                ((scanDirectionFlag & 0x01) << 6) |
+                ((edgeOfFlightLine & 0x01) << 7);
             ostream << bits;
         }
         else
