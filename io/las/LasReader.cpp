@@ -603,7 +603,10 @@ void LasReader::addDimensions(PointLayoutPtr layout)
     if (m_lasHeader.hasInfrared())
         layout->registerDim(Id::Infrared);
     if (m_lasHeader.versionAtLeast(1, 4))
+    {
         layout->registerDim(Id::ScanChannel);
+        layout->registerDim(Id::ClassFlags);
+    }
 
     for (auto& dim : m_extraDims)
     {
@@ -840,6 +843,7 @@ void LasReader::loadPointV14(PointView& data, char *buf, size_t bufsize)
     data.setField(Dimension::Id::Intensity, nextId, intensity);
     data.setField(Dimension::Id::ReturnNumber, nextId, returnNum);
     data.setField(Dimension::Id::NumberOfReturns, nextId, numReturns);
+    data.setField(Dimension::Id::ClassFlags, nextId, classFlags);
     data.setField(Dimension::Id::ScanChannel, nextId, scanChannel);
     data.setField(Dimension::Id::ScanDirectionFlag, nextId, scanDirFlag);
     data.setField(Dimension::Id::EdgeOfFlightLine, nextId, flight);
