@@ -1,6 +1,6 @@
 FROM pdal/dependencies:latest
 MAINTAINER Howard Butler <howard@hobu.co>
-ENV branch master
+ARG branch=master
 
 ENV CC clang
 ENV CXX clang++
