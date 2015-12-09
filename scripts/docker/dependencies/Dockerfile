@@ -172,3 +172,14 @@ RUN git clone https://github.com/chambbj/pcl.git \
                 .. \
         && make \
         && make install
+
+RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
+		subversion
+
+RUN svn co -r 2691 https://svn.osgeo.org/metacrs/geotiff/trunk/libgeotiff/ \
+    && cd libgeotiff \
+    &&  cmake . -DCMAKE_INSTALL_PREFIX=/usr -DWITH_TIFF=ON -DWITH_PROJ4=ON \
+    && make \
+    && make install
+
+
