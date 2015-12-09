@@ -593,9 +593,12 @@ TEST(LasWriterTest, fix1063_1064_1065)
     std::string infile = Support::datapath("las/test1_4.las");
 
     FileUtils::deleteFile(outfile);
+
+
     std::string cmd = "pdal translate --writers.las.forward=all "
         "--writers.las.a_srs=\"EPSG:4326\" " + infile + " " + outfile;
-    system(cmd.c_str());
+    std::string output;
+    Utils::run_shell_command(Support::binpath(cmd), output);
 
     Options o;
     o.add("filename", outfile);
