@@ -67,7 +67,7 @@
 #endif
 
 #ifdef PDAL_HAVE_GEOS
-#include <geos/version.h>
+#include <geos_c.h>
 #endif
 
 #ifdef PDAL_HAVE_HEXER
