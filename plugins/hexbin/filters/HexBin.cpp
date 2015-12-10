@@ -66,6 +66,7 @@ void HexBin::processOptions(const Options& options)
 
 void HexBin::ready(PointTableRef table)
 {
+    m_count = 0;
     if (m_edgeLength == 0.0)  // 0 can always be represented exactly.
     {
         m_grid.reset(new HexGrid(m_density));
@@ -84,6 +85,7 @@ void HexBin::filter(PointView& view)
         double y = view.getFieldAs<double>(pdal::Dimension::Id::Y, idx);
         m_grid->addPoint(x, y);
     }
+    m_count += view.size();
 }
 
 
@@ -173,8 +175,8 @@ void HexBin::done(PointTableRef table)
     m_metadata.add("boundary", smooth, "Approximated MULTIPOLYGON of domain");
     double area = Geometry::computeArea(polygon.str());
 
-    double density = (double) m_grid->densePointCount() / area ;
-std::cerr << "Area/count = " << area << "/" << m_grid->densePointCount() << "!\n";
+//    double density = (double) m_grid->densePointCount() / area ;
+    double density = (double) m_count/ area ;
     m_metadata.add("density", density, "Number of points per square unit");
     m_metadata.add("area", area, "Area in square units of tessellated polygon");
 }
