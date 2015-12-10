@@ -38,7 +38,5 @@ RUN git clone https://github.com/PDAL/PDAL \
 	&& cd / \
 	&& rm -rf PDAL
 
-
 # cleanup
 RUN rm -rf laszip laz-perf points2grid pcl nitro hexer 3.2.7.tar.gz eigen-eigen-b30b87236a1b
-
