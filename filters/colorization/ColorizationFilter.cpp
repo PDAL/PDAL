@@ -183,25 +183,33 @@ void ColorizationFilter::ready(PointTableRef table)
 }
 
 
-void ColorizationFilter::filter(PointView& view)
+bool ColorizationFilter::processOne(PointRef& point)
 {
-    std::vector<double> data;
+    static std::vector<double> data;
 
-    for (PointId idx = 0; idx < view.size(); ++idx)
-    {
-        double x = view.getFieldAs<double>(Dimension::Id::X, idx);
-        double y = view.getFieldAs<double>(Dimension::Id::Y, idx);
+    double x = point.getFieldAs<double>(Dimension::Id::X);
+    double y = point.getFieldAs<double>(Dimension::Id::Y);
 
-        if (!m_raster->read(x, y, data))
-            continue;
-
+    if (m_raster->read(x, y, data))
+    { 
         int i(0);
         for (auto bi = m_bands.begin(); bi != m_bands.end(); ++bi)
         {
             BandInfo& b = *bi;
-            view.setField(b.m_dim, idx, data[i] * b.m_scale);
+            point.setField(b.m_dim, data[i] * b.m_scale);
             ++i;
         }
+    }
+    return true;
+}
+
+void ColorizationFilter::filter(PointView& view)
+{
+    PointRef point = view.point(0);
+    for (PointId idx = 0; idx < view.size(); ++idx)
+    {
+        point.setPointId(idx);
+        processOne(point);
     }
 }
 

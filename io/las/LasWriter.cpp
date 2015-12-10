@@ -709,6 +709,7 @@ void LasWriter::openCompression()
 
 bool LasWriter::processOne(PointRef& point)
 {
+    //ABELL - Need to do something about auto offset.
     LeInserter ostream(m_pointBuf.data(), m_pointBuf.size());
 
     if (!fillPointBuf(point, ostream))
