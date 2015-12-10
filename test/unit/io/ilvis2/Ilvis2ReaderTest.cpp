@@ -99,7 +99,7 @@ TEST(Ilvis2ReaderTest, testReadHigh)
 {
     Option filename("filename", Support::datapath("ilvis2/ILVIS2_TEST_FILE.TXT"), "");
     Options options(filename);
-    options.add("mapping","HIGH");
+    options.add("mapping","high");
     std::shared_ptr<Ilvis2Reader> reader(new Ilvis2Reader);
     reader->setOptions(options);
 

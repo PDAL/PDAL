@@ -37,6 +37,7 @@
 #include <pdal/PointView.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/util/IStream.hpp>
+#include <map>
 
 
 extern "C" int32_t Ilvis2Reader_ExitFunc();
@@ -47,7 +48,37 @@ namespace pdal
 class PDAL_DLL Ilvis2Reader : public pdal::Reader
 {
 public:
-    Ilvis2Reader() : Reader(), m_index(0), m_mapping("ALL")
+    enum IlvisMappingType
+    {
+      LOW,
+      HIGH,
+      ALL,
+      INVALID
+    };
+
+    class MappingParser
+    {
+      std::map<std::string, IlvisMappingType> mappingMap;
+
+      public:
+        MappingParser()
+        {
+            mappingMap["LOW"] = LOW;
+            mappingMap["HIGH"] = HIGH;
+            mappingMap["ALL"] = ALL;
+        }
+
+        IlvisMappingType parseMapping(const std::string &value) {
+          std::map<std::string, IlvisMappingType>::const_iterator iValue = mappingMap.find(value);
+          if (iValue == mappingMap.end())
+          {
+              return INVALID;
+          }
+          return iValue->second;
+        }
+    };
+
+    Ilvis2Reader() : Reader(), m_index(0), m_mapping(ALL)
         {}
 
     static void * create();
@@ -61,7 +92,8 @@ public:
 private:
     std::unique_ptr<ILeStream> m_stream;
     point_count_t m_index;
-    std::string m_mapping;
+    MappingParser parser;
+    IlvisMappingType m_mapping;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void processOptions(const Options& options);

@@ -50,7 +50,7 @@ std::string Ilvis2Reader::getName() const { return s_info.name; }
 Options Ilvis2Reader::getDefaultOptions()
 {
     Options options;
-    options.add("mapping", "ALL", "The point to extract from the shot: LOW, HIGH, or ALL.  ALL creates 1 or 2 points per shot, depending on if LOW and HIGH are the same.");
+    options.add("mapping", "ALL", "The point to extract from the shot: low, high, or all.  ALL creates 1 or 2 points per shot, depending on if LOW and HIGH are the same.");
     options.add("filename", "", "The file to read from");
     options.add("metadata", "", "The metadata file to read from");
 
@@ -59,7 +59,17 @@ Options Ilvis2Reader::getDefaultOptions()
 
 void Ilvis2Reader::processOptions(const Options& options)
 {
-    m_mapping = options.getValueOrDefault<std::string>("mapping", "ALL");
+    std::string mapping = options.getValueOrDefault<std::string>("mapping", "ALL");
+    mapping = Utils::toupper(mapping);
+    m_mapping = parser.parseMapping(mapping);
+    if (m_mapping == INVALID)
+    {
+      std::ostringstream oss;
+
+      oss << "Invalid value for option for mapping: '" <<
+          mapping << "'.  Value values are 'low', 'high' and 'all'.";
+      throw pdal_error(oss.str());
+    }
 }
 
 void Ilvis2Reader::addDimensions(PointLayoutPtr layout)
@@ -233,14 +243,14 @@ point_count_t Ilvis2Reader::read(PointViewPtr view, point_count_t count)
         high_elev = convert<double>(s, name, 11);
 
         // write LOW point if specified, or for ALL
-        if (m_mapping == "LOW" || m_mapping == "ALL")
+        if (m_mapping == LOW || m_mapping == ALL)
         {
           readPoint(view, nextId, s, "LOW");
           nextId++;
         }
 
         // write HIGH point if specified, or for ALL, but only if it's not the same as the low point
-        if (m_mapping == "HIGH" || (m_mapping == "ALL" && low_elev != high_elev))
+        if (m_mapping == HIGH || (m_mapping == ALL && low_elev != high_elev))
         {
           readPoint(view, nextId, s, "HIGH");
           nextId++;
