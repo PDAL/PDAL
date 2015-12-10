@@ -50,21 +50,23 @@ class PDAL_DLL BasePointTable : public PointContainer
     friend class PointView;
 
 protected:
-    BasePointTable() : m_metadata(new Metadata())
-        {}
+    BasePointTable(PointLayout& layout) : m_metadata(new Metadata()),
+        m_layoutRef(layout)
+    {}
 
 public:
     virtual ~BasePointTable()
         {}
 
     // Layout operations.
-    virtual PointLayoutPtr layout() const = 0;
+    virtual PointLayoutPtr layout() const
+        { return &m_layoutRef; }
 
     // Metadata operations.
     MetadataNode metadata()
         { return m_metadata->getNode(); }
     virtual void finalize()
-        { layout()->finalize(); }
+        { m_layoutRef.finalize(); }
     void setSpatialReference(const SpatialReference& srs)
     {
         clearSpatialReferences();
@@ -87,7 +89,7 @@ public:
             *m_spatialRefs.begin() : SpatialReference();
     }
     virtual bool supportsView() const
-    { return false; }
+        { return false; }
 
     MetadataNode privateMetadata(const std::string& name);
 
@@ -101,6 +103,7 @@ protected:
 protected:
     MetadataPtr m_metadata;
     std::set<SpatialReference> m_spatialRefs;
+    PointLayout& m_layoutRef;
 };
 typedef BasePointTable& PointTableRef;
 typedef BasePointTable const & ConstPointTableRef;
@@ -109,20 +112,14 @@ class PDAL_DLL SimplePointTable : public BasePointTable
 {
 
 protected:
-    SimplePointTable() : m_layout(new PointLayout())
+    SimplePointTable(PointLayout& layout) : BasePointTable(layout)
         {}
-
-public:
-    virtual PointLayoutPtr layout() const
-        { return m_layout.get(); }
 
 protected:
     std::size_t pointsToBytes(point_count_t numPts) const
-        { return m_layout->pointSize() * numPts; }
+        { return m_layoutRef.pointSize() * numPts; }
 
 private:
-    std::unique_ptr<PointLayout> m_layout;
-
     virtual void setFieldInternal(Dimension::Id::Enum id, PointId idx,
         const void *value);
     virtual void getFieldInternal(Dimension::Id::Enum id, PointId idx,
@@ -150,11 +147,11 @@ private:
     static const point_count_t m_blockPtCnt = 65536;
 
 public:
-    PointTable() : m_numPts(0)
+    PointTable() : SimplePointTable(m_layout), m_numPts(0)
         {}
     virtual ~PointTable();
     virtual bool supportsView() const
-    { return true; }
+        { return true; }
 
 protected:
     virtual char *getPoint(PointId idx);
@@ -162,6 +159,8 @@ protected:
 private:
     // Point data operations.
     virtual PointId addPoint();
+
+    PointLayout m_layout;
 };
 
 /// A StreamPointTable must provide storage for point data up to its capacity.
@@ -172,7 +171,7 @@ private:
 class PDAL_DLL StreamPointTable : public SimplePointTable
 {
 protected:
-    StreamPointTable()
+    StreamPointTable(PointLayout& layout) : SimplePointTable(layout)
     {}
 
 public:
@@ -194,12 +193,13 @@ public:
 class PDAL_DLL FixedPointTable : public StreamPointTable
 {
 public:
-    FixedPointTable(point_count_t capacity) : m_capacity(capacity)
+    FixedPointTable(point_count_t capacity) : StreamPointTable(m_layout),
+        m_capacity(capacity)
     {}
 
     virtual void finalize()
     {
-        if (!layout()->finalized())
+        if (!m_layout.finalized())
         {
             BasePointTable::finalize();
             m_buf.resize(pointsToBytes(m_capacity + 1));
@@ -215,6 +215,7 @@ protected:
 private:
     std::vector<char> m_buf;
     point_count_t m_capacity;
+    PointLayout m_layout;
 };
 
 } //namespace
