@@ -128,10 +128,13 @@ TEST(LasWriterTest, auto_offset)
 
     table.layout()->registerDim(Id::X);
 
+    BufferReader bufferReader;
+
     PointViewPtr view(new PointView(table));
     view->setField(Id::X, 0, 125000.00);
     view->setField(Id::X, 1, 74529.00);
     view->setField(Id::X, 2, 523523.02);
+    bufferReader.addView(view);
 
     Options writerOps;
     writerOps.add("filename", FILENAME);
@@ -140,12 +143,10 @@ TEST(LasWriterTest, auto_offset)
 
     LasWriter writer;
     writer.setOptions(writerOps);
+    writer.setInput(bufferReader);
 
     writer.prepare(table);
-
-    WriterWrapper::ready(writer, table);
-    WriterWrapper::write(writer, view);
-    WriterWrapper::done(writer, table);
+    writer.execute(table);
 
     Options readerOps;
     readerOps.add("filename", FILENAME);
@@ -586,6 +587,46 @@ TEST(LasWriterTest, lazperf)
 }
 #endif
 
+TEST(LasWriterTest, fix1063_1064_1065)
+{
+    std::string outfile = Support::temppath("out.las");
+    std::string infile = Support::datapath("las/test1_4.las");
+
+    FileUtils::deleteFile(outfile);
+
+
+    std::string cmd = "pdal translate --writers.las.forward=all "
+        "--writers.las.a_srs=\"EPSG:4326\" " + infile + " " + outfile;
+    std::string output;
+    Utils::run_shell_command(Support::binpath(cmd), output);
+
+    Options o;
+    o.add("filename", outfile);
+
+    LasReader r;
+    r.setOptions(o);
+
+    PointTable t;
+    r.prepare(t);
+    PointViewSet s = r.execute(t);
+    EXPECT_EQ(s.size(), 1u);
+    PointViewPtr v = *s.begin();
+    EXPECT_EQ(v->size(), 1000u);
+
+    // https://github.com/PDAL/PDAL/issues/1063
+    for (PointId idx = 0; idx < v->size(); ++idx)
+        EXPECT_EQ(8, v->getFieldAs<int>(Dimension::Id::ClassFlags, idx));
+
+    // https://github.com/PDAL/PDAL/issues/1064
+    MetadataNode m = r.getMetadata();
+    m = m.findChild("global_encoding");
+    EXPECT_EQ(17, m.value<int>());
+
+    // https://github.com/PDAL/PDAL/issues/1065
+    SpatialReference ref = v->spatialReference();
+    std::string wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]";
+    EXPECT_EQ(ref.getWKT(), wkt);
+}
 
 /**
 namespace

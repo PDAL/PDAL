@@ -78,6 +78,7 @@ private:
     P2gWriter& operator=(const P2gWriter&); // not implemented
 
     virtual void processOptions(const Options& options);
+    virtual void ready(PointTableRef table);
     virtual void write(const PointViewPtr view);
     virtual void done(PointTableRef table);
 

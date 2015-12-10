@@ -174,6 +174,7 @@ uint32_t PgReader::fetchPcid() const
     }
     oss << " WHERE c.relname = " << pg_quote_literal(m_table_name);
     oss << " AND a.attname = " << pg_quote_literal(m_column_name);
+    oss << " AND a.attrelid = c.oid " ;
     if (!m_schema_name.empty())
     {
         oss << " AND c.relnamespace = n.oid AND n.nspname = " <<
@@ -258,9 +259,6 @@ void PgReader::ready(PointTableRef /*table*/)
     m_cur_nrows = 0;
     m_cur_result = NULL;
 
-    if (getSpatialReference().empty())
-        setSpatialReference(fetchSpatialReference());
-
     CursorSetup();
 }
 
@@ -281,6 +279,8 @@ void PgReader::initialize()
     if (!m_session)
         m_session = pg_connect(m_connection);
 
+    if (getSpatialReference().empty())
+        setSpatialReference(fetchSpatialReference());
 }
 
 

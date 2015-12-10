@@ -117,6 +117,8 @@ public:
         const std::string& file2);
     static bool compare_text_files(std::istream& str1, std::istream& str2);
 
+    static void checkXYZ(const std::string& file1, const std::string& file2);
+
     // validate a point's XYZ values
     static void check_pN(const pdal::PointView& data,
                          pdal::PointId index,

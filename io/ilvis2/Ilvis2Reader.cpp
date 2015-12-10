@@ -82,7 +82,8 @@ void Ilvis2Reader::addDimensions(PointLayoutPtr layout)
     layout->registerDim(pdal::Dimension::Id::Z);
 }
 
-pdal::Dimension::IdList Ilvis2Reader::getDefaultDimensions()
+
+Dimension::IdList Ilvis2Reader::getDefaultDimensions()
 {
     using namespace pdal::Dimension;
     Dimension::IdList ids;
@@ -94,23 +95,29 @@ pdal::Dimension::IdList Ilvis2Reader::getDefaultDimensions()
     return ids;
 }
 
-void Ilvis2Reader::ready(PointTableRef)
-{
-    m_stream.reset(new ILeStream(m_filename));
 
+void Ilvis2Reader::initialize(PointTableRef)
+{
     SpatialReference ref("EPSG:4385");
     setSpatialReference(ref);
 }
+
+
+void Ilvis2Reader::ready(PointTableRef)
+{
+    m_stream.reset(new ILeStream(m_filename));
+}
+
 
 template <typename T>
 T convert(const StringList& s, const std::string& name, size_t fieldno)
 {
     T output;
-    bool bConverted = Utils::fromString(s[fieldno], output);
-    if (!bConverted)
+    if (!Utils::fromString(s[fieldno], output))
     {
         std::stringstream oss;
-        oss << "Unable to convert " << name << ", " << s[fieldno] << ", to double";
+        oss << "Unable to convert " << name << ", " << s[fieldno] <<
+            ", to double";
         throw pdal_error(oss.str());
     }
 
@@ -247,8 +254,5 @@ point_count_t Ilvis2Reader::read(PointViewPtr view, point_count_t count)
     return numRead;
 }
 
-
-
-
-
 } // namespace pdal
+

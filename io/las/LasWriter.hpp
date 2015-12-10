@@ -76,7 +76,7 @@ public:
     Options getDefaultOptions();
 
 protected:
-    void prepOutput(std::ostream *out);
+    void prepOutput(std::ostream *out, const SpatialReference& srs);
     void finishOutput();
 
 private:
@@ -106,7 +106,7 @@ private:
     // MSVC doesn't see numeric_limits::max() as constexpr do doesn't allow
     // it as defaults for templates.  Remove when possible.
     NumHeaderVal<uint16_t, 0, 65535> m_filesourceId;
-    NumHeaderVal<uint16_t, 0, 15> m_globalEncoding;
+    NumHeaderVal<uint16_t, 0, 31> m_globalEncoding;
     UuidHeaderVal m_projectId;
     StringHeaderVal<32> m_systemId;
     StringHeaderVal<32> m_softwareId;
@@ -120,21 +120,23 @@ private:
     StringHeaderVal<20> m_offsetX;
     StringHeaderVal<20> m_offsetY;
     StringHeaderVal<20> m_offsetZ;
+    MetadataNode m_forwardMetadata;
 
     virtual void processOptions(const Options& options);
     virtual void prepared(PointTableRef table);
     virtual void readyTable(PointTableRef table);
-    virtual void readyFile(const std::string& filename);
+    virtual void readyFile(const std::string& filename,
+        const SpatialReference& srs);
     virtual void writeView(const PointViewPtr view);
     virtual void doneFile();
 
     void fillForwardList(const Options& options);
     void getHeaderOptions(const Options& options);
     template <typename T>
-    void handleForward(const std::string& s, T& headerVal,
+    void handleHeaderForward(const std::string& s, T& headerVal,
         const MetadataNode& base);
-    void handleForwards(MetadataNode& forward);
-    void fillHeader(MetadataNode& forward);
+    void handleHeaderForwards(MetadataNode& forward);
+    void fillHeader();
     point_count_t fillWriteBuf(const PointView& view, PointId startId,
         std::vector<char>& buf);
     void writeLasZipBuf(char *data, size_t pointLen, point_count_t numPts);
@@ -150,7 +152,9 @@ private:
     void openCompression();
     void addVlr(const std::string& userId, uint16_t recordId,
         const std::string& description, std::vector<uint8_t>& data);
-    bool addGeotiffVlr(GeotiffSupport& geotiff, uint16_t recordId,
+    void deleteVlr(const std::string& userId, uint16_t recordId);
+    void addGeotiffVlrs();
+    void addGeotiffVlr(GeotiffSupport& geotiff, uint16_t recordId,
         const std::string& description);
     bool addWktVlr();
     void finishLasZipOutput();

@@ -34,8 +34,7 @@
 
 #pragma once
 
-#include <map>
-#include <memory>
+#include <set>
 #include <vector>
 
 #include "pdal/Dimension.hpp"
@@ -62,8 +61,23 @@ public:
     // Metadata operations.
     MetadataNode metadata()
         { return m_metadata->getNode(); }
-    SpatialReference spatialRef() const;
-    void setSpatialRef(const SpatialReference& sref);
+    void clearSpatialReferences()
+        { m_spatialRefs.clear(); }
+    void addSpatialReference(const SpatialReference& srs)
+        { m_spatialRefs.insert(srs); }
+    bool spatialReferenceUnique() const
+        { return m_spatialRefs.size() == 1; }
+    SpatialReference spatialReference() const
+    {
+        return spatialReferenceUnique() ? anySpatialReference() :
+            SpatialReference();
+    }
+    SpatialReference anySpatialReference() const
+    {
+        return m_spatialRefs.size() ?
+            *m_spatialRefs.begin() : SpatialReference();
+    }
+
     MetadataNode privateMetadata(const std::string& name);
 
 private:
@@ -77,6 +91,7 @@ private:
 
 protected:
     MetadataPtr m_metadata;
+    std::set<SpatialReference> m_spatialRefs;
 };
 typedef BasePointTable& PointTableRef;
 typedef BasePointTable const & ConstPointTableRef;

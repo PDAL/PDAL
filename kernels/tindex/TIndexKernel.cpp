@@ -86,7 +86,6 @@ TIndexKernel::TIndexKernel()
     , m_dataset(NULL)
     , m_layer(NULL)
     , m_fastBoundary(false)
-    , m_smoothBoundary(false)
 
 {
     m_log.setLeader("pdal tindex");
@@ -105,9 +104,6 @@ void TIndexKernel::addSwitches()
             "OGR-readable/writeable tile index output")
         ("filespec", po::value<std::string>(&m_filespec),
             "Build: Pattern of files to index. Merge: Output filename")
-        ("smooth_boundary", po::value<bool>(&m_smoothBoundary)->
-            zero_tokens()->implicit_value(false),
-            "use smoothed version of full boundary")
         ("fast_boundary", po::value<bool>(&m_fastBoundary)->
             zero_tokens()->implicit_value(true),
             "use extent instead of exact boundary")
@@ -184,9 +180,6 @@ void TIndexKernel::validateSwitches()
             throw pdal_error("--bounds option not supported when building "
                 "index.");
     }
-    if (m_smoothBoundary && m_fastBoundary)
-        throw pdal_error("Can't request both smooth_boundary and "
-            "fast_boundary.");
 }
 
 
@@ -484,7 +477,8 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
         fileInfo.m_filename.c_str());
 
     // Set the SRS into the feature.
-    if (fileInfo.m_srs.empty())
+    // We override if m_assignSrsString is set
+    if (fileInfo.m_srs.empty() || m_assignSrsString.size())
         fileInfo.m_srs = m_assignSrsString;
 
     SpatialRef srcSrs(fileInfo.m_srs);
@@ -557,8 +551,9 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
     Stage *s = f.createStage(driverName, true);
     Options ops;
     ops.add("filename", filename);
+    setCommonOptions(ops);
     s->setOptions(ops);
-
+    applyExtraStageOptionsRecursive(s);
     if (m_fastBoundary)
     {
         QuickInfo qi = s->preview();
@@ -593,16 +588,15 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
         hexer->setInput(*s);
 
         hexer->prepare(table);
-        hexer->execute(table);
+        PointViewSet set = hexer->execute(table);
 
         MetadataNode m = table.metadata();
-        m = m_smoothBoundary ?
-            m.findChild("filters.hexbin:smooth_boundary") :
-            m.findChild("filters.hexbin:boundary");
+        m = m.findChild("filters.hexbin:boundary");
         fileInfo.m_boundary = m.value();
 
-        if (!table.spatialRef().empty())
-            fileInfo.m_srs = table.spatialRef().getWKT();
+        PointViewPtr v = *set.begin();
+        if (!v->spatialReference().empty())
+            fileInfo.m_srs = v->spatialReference().getWKT();
     }
 
     FileUtils::fileTimes(filename, &fileInfo.m_ctime, &fileInfo.m_mtime);
@@ -749,15 +743,14 @@ gdal::Geometry TIndexKernel::prepareGeometry(const FileInfo& fileInfo)
         throw pdal_error("Unable to import target SRS.");
 
     Geometry g;
-
     try
     {
        g = prepareGeometry(fileInfo.m_boundary, srcSrs, tgtSrs);
     }
-    catch (pdal_error)
+    catch (pdal_error& e)
     {
         oss << "Unable to transform geometry from source to target SRS for " <<
-            fileInfo.m_filename << "'.";
+            fileInfo.m_filename << "'. Message is '" << e.what() << "'";
         throw pdal_error(oss.str());
     }
     if (!g)

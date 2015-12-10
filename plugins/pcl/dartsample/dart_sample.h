@@ -91,7 +91,7 @@ namespace pcl
     protected:
 
       /** \brief Minimum distance radius for adding points. */
-      unsigned int radius_;
+      double radius_;
 
       /** \brief Sample of point indices into a separate PointCloud
         * \param output the resultant point cloud

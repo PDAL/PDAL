@@ -52,7 +52,8 @@ public:
 
 private:
     virtual void processOptions(const Options& options);
-    virtual void readyFile(const std::string& filename);
+    virtual void readyFile(const std::string& filename,
+        const SpatialReference& srs);
     virtual void doneFile();
     virtual void writeView(const PointViewPtr view);
 

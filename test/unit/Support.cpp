@@ -46,6 +46,7 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/Stage.hpp>
+#include <pdal/StageFactory.hpp>
 #include "TestConfig.hpp"
 
 using namespace pdal;
@@ -282,6 +283,56 @@ bool Support::compare_text_files(std::istream& str1, std::istream& str2)
 {
     return diff_text_files(str1, str2) == 0;
 }
+
+
+void Support::checkXYZ(const std::string& file1, const std::string& file2)
+{
+    StageFactory f;
+
+    const std::string driver1 = f.inferReaderDriver(file1);
+    EXPECT_NE(driver1, "") << "Can't find driver";
+
+    const std::string driver2 = f.inferReaderDriver(file2);
+    EXPECT_NE(driver2, "") << "Can't find driver";
+    
+    Stage *reader1 = f.createStage(driver1);
+    EXPECT_NE(reader1, (Stage *)NULL) << "Couldn't create stage";
+    
+    Stage *reader2 = f.createStage(driver2);
+    EXPECT_NE(reader1, (Stage *)NULL) << "Couldn't create stage";
+
+    Options o1;
+    o1.add("filename", file1);
+    reader1->setOptions(o1);
+    PointTable t1;
+    reader1->prepare(t1);
+    PointViewSet s1 = reader1->execute(t1);
+    EXPECT_EQ(s1.size(), 1u);
+    PointViewPtr v1 = *s1.begin();
+
+    Options o2;
+    o2.add("filename", file2);
+    reader2->setOptions(o2);
+    PointTable t2;
+    reader2->prepare(t2);
+    PointViewSet s2 = reader2->execute(t2);
+    EXPECT_EQ(s2.size(), 1u);
+    PointViewPtr v2 = *s2.begin();
+
+    EXPECT_EQ(v1->size(), v2->size()) << "Files " << file1 << " and " <<
+        file2 << " have different point counts.";
+    for (PointId idx = 0; idx < v1->size(); ++idx)
+    {
+        using namespace Dimension;
+        ASSERT_DOUBLE_EQ(v1->getFieldAs<double>(Id::X, idx),
+            v2->getFieldAs<double>(Id::X, idx)) << "Index = " << idx;
+        ASSERT_DOUBLE_EQ(v1->getFieldAs<double>(Id::Y, idx),
+            v2->getFieldAs<double>(Id::Y, idx)) << "Index = " << idx;
+        ASSERT_DOUBLE_EQ(v1->getFieldAs<double>(Id::Z, idx),
+            v2->getFieldAs<double>(Id::Z, idx)) << "Index = " << idx;
+    }
+}
+
 
 void Support::check_pN(const pdal::PointView& data, PointId index,
     double xref, double yref, double zref)

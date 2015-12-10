@@ -35,7 +35,6 @@
 #include <pdal/pdal_internal.hpp>
 
 #include "ProgrammableFilter.hpp"
-#include "../plang/Plang.hpp"
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 

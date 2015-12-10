@@ -35,6 +35,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/filters/decimation
     ${PROJECT_SOURCE_DIR}/filters/divider
     ${PROJECT_SOURCE_DIR}/filters/ferry
+    ${PROJECT_SOURCE_DIR}/filters/merge
     ${PROJECT_SOURCE_DIR}/filters/mortonorder
     ${PROJECT_SOURCE_DIR}/filters/randomize
     ${PROJECT_SOURCE_DIR}/filters/reprojection

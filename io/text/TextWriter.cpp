@@ -42,8 +42,6 @@
 #include <iostream>
 #include <map>
 
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/erase.hpp>
 #include <boost/tokenizer.hpp>
 
 namespace pdal
@@ -100,7 +98,7 @@ void TextWriter::processOptions(const Options& ops)
         throw pdal_error(out.str());
     }
     m_outputType = ops.getValueOrDefault<std::string>("format", "csv");
-    boost::to_upper(m_outputType);
+    m_outputType = Utils::toupper(m_outputType);
     m_callback = ops.getValueOrDefault<std::string>("jscallback", "");
     m_writeAllDims = ops.getValueOrDefault<bool>("keep_unspecified", true);
     m_dimOrder = ops.getValueOrDefault<std::string>("order", "");
@@ -143,7 +141,7 @@ void TextWriter::ready(PointTableRef table)
     {
         Dimension::IdList all = table.layout()->dims();
         for (auto di = all.begin(); di != all.end(); ++di)
-            if (!contains(m_dims, *di))
+            if (!Utils::contains(m_dims, *di))
                 m_dims.push_back(*di);
     }
 

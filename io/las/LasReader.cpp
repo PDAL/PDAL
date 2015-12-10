@@ -435,16 +435,31 @@ void LasReader::setSrsFromVlrs(MetadataNode& m)
     SpatialReference srs = getSpatialReference();
 
     if (srs.getWKT(pdal::SpatialReference::eCompoundOK).empty())
-        setSpatialReference(m, getSrsFromVlrs());
+        srs = getSrsFromVlrs();
+    setSpatialReference(m, srs);
 }
 
 
 SpatialReference LasReader::getSrsFromVlrs()
 {
-    SpatialReference srs = getSrsFromWktVlr();
-    if (srs.empty())
-        srs = getSrsFromGeotiffVlr();
-    return srs;
+    bool useWkt = false;
+
+    if (m_lasHeader.incompatibleSrs())
+    {
+        log()->get(LogLevel::Error) << getName() <<
+            ": Invalid SRS specification.  GeoTiff not "
+            "allowed with point formats 6 - 10." << std::endl;
+    }
+    else if (findVlr(TRANSFORM_USER_ID, WKT_RECORD_ID) &&
+        findVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID))
+    {
+        log()->get(LogLevel::Error) << getName() << ": File contains both "
+            "WKT and GeoTiff VLRs which is disallowed." << std::endl;
+    }
+    else
+        useWkt = (m_lasHeader.versionMinor() >= 4);
+
+    return useWkt ? getSrsFromWktVlr() : getSrsFromGeotiffVlr();
 }
 
 
@@ -480,6 +495,7 @@ SpatialReference LasReader::getSrsFromWktVlr()
     if (*c == 0)
         len--;
     std::string wkt(vlr->data(), len);
+
     srs.setWKT(wkt);
     return srs;
 }
@@ -516,10 +532,12 @@ SpatialReference LasReader::getSrsFromGeotiffVlr()
     if (wkt.size())
         srs.setFromUserInput(geotiff.getWkt(false, false));
 
+    log()->get(LogLevel::Debug5) << "GeoTIFF keys: " << geotiff.getText() << std::endl;
 #else
     if (findVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID))
-        Utils::printError("Can't decode LAS GeoTiff VLR to SRS - "
-            "PDAL not built with GeoTiff.");
+        log()->get(LogLevel::Error) << getName() <<
+            ": Can't decode LAS GeoTiff VLR to SRS - PDAL not built "
+            "with GeoTiff." << std::endl;
 #endif
     return srs;
 }
@@ -585,7 +603,10 @@ void LasReader::addDimensions(PointLayoutPtr layout)
     if (m_lasHeader.hasInfrared())
         layout->registerDim(Id::Infrared);
     if (m_lasHeader.versionAtLeast(1, 4))
+    {
         layout->registerDim(Id::ScanChannel);
+        layout->registerDim(Id::ClassFlags);
+    }
 
     for (auto& dim : m_extraDims)
     {
@@ -822,6 +843,7 @@ void LasReader::loadPointV14(PointView& data, char *buf, size_t bufsize)
     data.setField(Dimension::Id::Intensity, nextId, intensity);
     data.setField(Dimension::Id::ReturnNumber, nextId, returnNum);
     data.setField(Dimension::Id::NumberOfReturns, nextId, numReturns);
+    data.setField(Dimension::Id::ClassFlags, nextId, classFlags);
     data.setField(Dimension::Id::ScanChannel, nextId, scanChannel);
     data.setField(Dimension::Id::ScanDirectionFlag, nextId, scanDirFlag);
     data.setField(Dimension::Id::EdgeOfFlightLine, nextId, flight);

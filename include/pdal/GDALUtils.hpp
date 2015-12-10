@@ -75,7 +75,18 @@ public:
     }
 
     void setFromLayer(OGRLayerH layer)
-        { newRef(OSRClone(OGR_L_GetSpatialRef(layer))); }
+        {
+            if (layer)
+            {
+                OGRSpatialReferenceH s = OGR_L_GetSpatialRef(layer);
+                if (s)
+                {
+                    OGRSpatialReferenceH clone = OSRClone(s);
+                    newRef(clone);
+                }
+
+            }
+        }
     operator bool () const
         { return m_ref.get() != NULL; }
     OGRSpatialReferenceH get() const
@@ -114,7 +125,14 @@ public:
         OGRGeometryH geom;
 
         char *p_wkt = const_cast<char *>(wkt.data());
-        OGR_G_CreateFromWkt(&p_wkt, srs.get(), &geom);
+        OGRSpatialReferenceH ref = srs.get();
+        if (srs.empty())
+        {
+            ref = NULL;
+        }
+        OGRErr err = OGR_G_CreateFromWkt(&p_wkt, ref, &geom);
+        if (err != OGRERR_NONE)
+            throw pdal::pdal_error("unable to construct OGR geometry from wkt!");
         newRef(geom);
     }
 
@@ -135,6 +153,11 @@ public:
         return std::string(p_wkt);
     }
 
+    void setFromGeometry(OGRGeometryH geom)
+        {
+            if (geom)
+                newRef(OGR_G_Clone(geom));
+        }
 
 private:
     void newRef(void *v)

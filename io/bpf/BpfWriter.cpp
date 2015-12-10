@@ -152,7 +152,7 @@ void BpfWriter::prepared(PointTableRef table)
 }
 
 
-void BpfWriter::readyFile(const std::string& filename)
+void BpfWriter::readyFile(const std::string& filename, const SpatialReference&)
 {
     m_stream.open(filename);
     m_header.m_version = 3;

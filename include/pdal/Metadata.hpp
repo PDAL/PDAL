@@ -690,7 +690,7 @@ inline std::string Metadata::inferType(const std::string& val)
 {
     size_t pos;
 
-    long l;
+    long l = 0;
     try
     {
         pos = 0;

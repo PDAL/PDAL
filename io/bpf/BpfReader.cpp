@@ -179,8 +179,11 @@ bool BpfReader::readUlemFiles()
 {
     BpfUlemFile file;
     while (file.read(m_stream))
-        m_metadata.addEncoded(file.m_filename,
+    {
+        MetadataNode m = m_metadata.add("bundled_file");
+        m.addEncoded(file.m_filename,
             (const unsigned char *)file.m_buf.data(), file.m_len);
+    }
     return (bool)m_stream;
 }
 

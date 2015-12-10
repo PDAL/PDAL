@@ -40,6 +40,19 @@ namespace pdal
 {
 
 class PDAL_DLL BOX3D;
+
+/// A SpatialReference defines a model of the earth that is used to describe
+/// the location of points.
+/// A SpatialReference is part of input data and is automatically loaded
+/// into PDAL by readers, or it's provided explicitly by a user through an
+/// option.  All points in a point view share a common spatial reference.  When
+/// a stage finishes processing point view, the point view takes on the
+/// spatial reference of that stage, if it had one.
+/// A point table tracks the spatial references of the views currently being
+/// processed by a stage.  If a point table being processed by a stage has
+/// more than one spatial reference, PointTable::spatialReference() will
+/// return an empty spatial reference and PointTable::spatialReferenceUnique()
+/// will return false.
 class PDAL_DLL SpatialReference
 {
 public:
@@ -59,10 +72,16 @@ public:
     bool equals(const SpatialReference& other) const;
     bool operator==(const SpatialReference& other) const;
     bool operator!=(const SpatialReference& other) const;
+    bool operator<(const SpatialReference& other) const
+        { return m_wkt < other.m_wkt; }
 
     // Returns true iff the object doesn't contain a valid srs.
     // (this is a cleaner way of saying "getWKT() == "")
     bool empty() const;
+
+
+    // Returns true of OSR can validate the SRS
+    bool valid() const;
 
     /// Returns the OGC WKT describing Spatial Reference System.
     /// If GDAL is linked, it uses GDAL's operations and methods to determine

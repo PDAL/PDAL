@@ -69,6 +69,18 @@ bool SpatialReference::empty() const
     return getWKT().empty();
 }
 
+bool SpatialReference::valid() const
+{
+    std::string wkt = getWKT();
+    OGRSpatialReferenceH current =
+        OSRNewSpatialReference(wkt.c_str());
+
+    OGRErr err = OSRValidate(current);
+
+    OSRDestroySpatialReference(current);
+    return err == OGRERR_NONE;
+}
+
 
 std::string SpatialReference::getWKT(WKTModeFlag mode_flag) const
 {
@@ -267,7 +279,7 @@ int SpatialReference::calculateZone(double lon, double lat)
     if (lat >= 56.0 && lat < 64.0 && lon >= 3.0 && lon < 12.0 )
         zone = 32;
     // Special Svalbard processing.
-    else if (lat >= 72.0 && lat < 84.0) 
+    else if (lat >= 72.0 && lat < 84.0)
     {
         if (lon >= 0.0  && lon < 9.0)
             zone = 31;
@@ -356,9 +368,7 @@ int SpatialReference::computeUTMZone(const BOX3D& box) const
     int min_zone(0);
     int max_zone(0);
     min_zone = calculateZone(minx, miny);
-    std::cerr << "Min X/Y/zone = " << minx << "/" << miny << "/" << min_zone << "!\n";
     max_zone = calculateZone(maxx, maxy);
-    std::cerr << "Max X/Y/zone = " << maxx << "/" << maxy << "/" << max_zone << "!\n";
 
     if (min_zone != max_zone)
     {
