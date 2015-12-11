@@ -44,12 +44,12 @@ namespace pdal
 class PDAL_DLL PointRef
 {
 public:
-    PointRef(PointContainer *container, PointId idx) :
-        m_container(container), m_layout(container->layout()), m_idx(idx)
+    PointRef(PointContainer& container, PointId idx) :
+        m_container(container), m_layout(*container.layout()), m_idx(idx)
     {}
 
     bool hasDim(Dimension::Id::Enum dim) const
-    { return m_layout->hasDim(dim); }
+    { return m_layout.hasDim(dim); }
 
     template<class T>
     T getFieldAs(Dimension::Id::Enum dim) const
@@ -57,9 +57,9 @@ public:
         T val;
         bool success = true;
         Everything e;
-        Dimension::Type::Enum type = m_layout->dimDetail(dim)->type();
+        Dimension::Type::Enum type = m_layout.dimDetail(dim)->type();
 
-        m_container->getFieldInternal(dim, m_idx, &e);
+        m_container.getFieldInternal(dim, m_idx, &e);
         switch (type)
         {
         case Dimension::Type::Unsigned8:
@@ -111,7 +111,7 @@ public:
     template<typename T>
     void setField(Dimension::Id::Enum dim, T val)
     {
-        Dimension::Type::Enum type = m_layout->dimDetail(dim)->type();
+        Dimension::Type::Enum type = m_layout.dimDetail(dim)->type();
         Everything e;
         bool success = false;
 
@@ -151,7 +151,7 @@ public:
             break;
         }
         if (success)
-            m_container->setFieldInternal(dim, m_idx, &e);
+            m_container.setFieldInternal(dim, m_idx, &e);
     }
 
     void setPointId(PointId idx)
@@ -190,8 +190,8 @@ public:
 
 
 private:
-    PointContainer *m_container;
-    PointLayout *m_layout;
+    PointContainer& m_container;
+    PointLayout& m_layout;
     PointId m_idx;
 };
 

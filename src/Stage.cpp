@@ -139,7 +139,7 @@ PointViewSet Stage::execute(PointTableRef table)
     {
         StageRunnerPtr runner(it);
         PointViewSet temp = runner->wait();
-        
+
         // If our stage has a spatial reference, the view takes it on once
         // the stage has been run.
         if (!srs.empty())
@@ -201,7 +201,7 @@ void Stage::execute(StreamPointTable& table)
         // Clear the spatial
         table.clearSpatialReferences();
         PointId idx = 0;
-        PointRef point(&table, idx);
+        PointRef point(table, idx);
         point_count_t pointLimit = table.capacity();
 
         // When we get false back from a reader, we're done, so set
