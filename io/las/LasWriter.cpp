@@ -320,13 +320,14 @@ void LasWriter::prepOutput(std::ostream *outStream, const SpatialReference& srs)
     // Use stage SRS if provided.
     m_srs = getSpatialReference().empty() ? srs : getSpatialReference();
 
+    handleHeaderForwards(m_forwardMetadata);
+
     // Filling the header here gives the VLR functions below easy access to
     // the version information and so on.
     fillHeader();
 
     // Spatial reference can potentially change for multiple output files.
     setVlrsFromSpatialRef();
-    handleHeaderForwards(m_forwardMetadata);
     setVlrsFromMetadata(m_forwardMetadata);
 
     m_summaryData.reset(new SummaryData());
@@ -862,12 +863,17 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
         point.getFieldAs<uint8_t>(Id::ScanDirectionFlag);
     uint8_t edgeOfFlightLine =
         point.getFieldAs<uint8_t>(Id::EdgeOfFlightLine);
+
     if (has14Format)
     {
         uint8_t bits = returnNumber | (numberOfReturns << 4);
         ostream << bits;
-        bits = (scanChannel << 4) | (scanDirectionFlag << 6) |
-            (edgeOfFlightLine << 7);
+
+        uint8_t classFlags = point.getFieldAs<uint8_t>(Id::ClassFlags);
+        bits = (classFlags & 0x0F) |
+            ((scanChannel & 0x03) << 4) |
+            ((scanDirectionFlag & 0x01) << 6) |
+            ((edgeOfFlightLine & 0x01) << 7);
         ostream << bits;
     }
     else

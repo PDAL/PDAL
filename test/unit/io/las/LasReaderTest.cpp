@@ -315,7 +315,7 @@ TEST(LasReaderTest, extraBytes)
     reader.prepare(table);
 
     DimTypeList dimTypes = layout->dimTypes();
-    EXPECT_EQ(dimTypes.size(), (size_t)24);
+    EXPECT_EQ(dimTypes.size(), (size_t)25);
 
     Dimension::Id::Enum color0 = layout->findProprietaryDim("Colors0");
     EXPECT_EQ(layout->dimType(color0), Dimension::Type::Unsigned16);

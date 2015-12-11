@@ -606,7 +606,10 @@ void LasReader::addDimensions(PointLayoutPtr layout)
     if (m_lasHeader.hasInfrared())
         layout->registerDim(Id::Infrared);
     if (m_lasHeader.versionAtLeast(1, 4))
+    {
         layout->registerDim(Id::ScanChannel);
+        layout->registerDim(Id::ClassFlags);
+    }
 
     for (auto& dim : m_extraDims)
     {
@@ -863,13 +866,13 @@ void LasReader::loadPointV14(PointRef& point, char *buf, size_t bufsize)
     uint8_t scanDirFlag = (flags >> 6) & 0x01;
     uint8_t flight = (flags >> 7) & 0x01;
 
-    //ABELL - Need to do something with the classFlags;
     point.setField(Dimension::Id::X, x);
     point.setField(Dimension::Id::Y, y);
     point.setField(Dimension::Id::Z, z);
     point.setField(Dimension::Id::Intensity, intensity);
     point.setField(Dimension::Id::ReturnNumber, returnNum);
     point.setField(Dimension::Id::NumberOfReturns, numReturns);
+    point.setField(Dimension::Id::ClassFlags, classFlags);
     point.setField(Dimension::Id::ScanChannel, scanChannel);
     point.setField(Dimension::Id::ScanDirectionFlag, scanDirFlag);
     point.setField(Dimension::Id::EdgeOfFlightLine, flight);
