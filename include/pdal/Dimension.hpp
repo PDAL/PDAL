@@ -185,7 +185,18 @@ enum Enum
     ScanChannel,
     Infrared,
     HeightAboveGround,
-    ClassFlags
+    ClassFlags,
+    LvisLfid,
+    ShotNumber,
+    LongitudeCentroid,
+    LatitudeCentroid,
+    ElevationCentroid,
+    LongitudeLow,
+    LatitudeLow,
+    ElevationLow,
+    LongitudeHigh,
+    LatitudeHigh,
+    ElevationHigh
 };
 } // namespace Id
 typedef std::vector<Id::Enum> IdList;
@@ -324,6 +335,29 @@ inline std::string description(Id::Enum id)
         return "Height above ground";
     case Id::ClassFlags:
         return "Classification Flags";
+    case Id::LvisLfid:
+        return "LVIS file ID, includes date and time of collection and file number.  "
+            "The second through sixth values represent modified Julian date of collection.";
+    case Id::ShotNumber:
+        return "Laser shot assigned during collection.";
+    case Id::LongitudeCentroid:
+        return "Refers to the centroid longitude of the corresponding LVIS Level-1B waveform.";
+    case Id::LatitudeCentroid:
+        return "Refers to the centroid latitude of the corresponding LVIS Level-1B waveform.";
+    case Id::ElevationCentroid:
+        return "Refers to the centroid elevation of the corresponding LVIS Level-1B waveform.";
+    case Id::LongitudeLow:
+        return "Longitude of the lowest detected mode within the waveform.";
+    case Id::LatitudeLow:
+        return "Latitude of the lowest detected mode within the waveform.";
+    case Id::ElevationLow:
+        return "Mean Elevation of the lowest detected mode within the waveform.";
+    case Id::LongitudeHigh:
+        return "Longitude of the highest detected mode within the waveform.";
+    case Id::LatitudeHigh:
+        return "Latitude of the highest detected mode within the waveform.";
+    case Id::ElevationHigh:
+        return "Mean Elevation of the highest detected mode within the waveform.";
     case Id::Unknown:
         return "";
     }
@@ -442,6 +476,28 @@ inline Id::Enum id(std::string s)
         return Id::HeightAboveGround;
     else if (s == "CLASSFLAGS")
         return Id::ClassFlags;
+    else if (s == "LVIS_LFID" || s == "LVISLFID")
+        return Id::LvisLfid;
+    else if (s == "SHOTNUMBER")
+        return Id::ShotNumber;
+    else if (s == "LONGITUDE_CENTROID" || s == "LONGITUDECENTROID")
+        return Id::LongitudeCentroid;
+    else if (s == "LATITUDE_CENTROID" || s == "LATITUDECENTROID")
+        return Id::LatitudeCentroid;
+    else if (s == "ELEVATION_CENTROID" || s == "ELEVATIONCENTROID")
+        return Id::ElevationCentroid;
+    else if (s == "LONGITUDE_LOW" || s == "LONGITUDELOW")
+        return Id::LongitudeLow;
+    else if (s == "LATITUDE_LOW" || s == "LATITUDELOW")
+        return Id::LatitudeLow;
+    else if (s == "ELEVATION_LOW" || s == "ELEVATIONCLOW")
+        return Id::ElevationLow;
+    else if (s == "LONGITUDE_HIGH" || s == "LONGITUDEHIGH")
+        return Id::LongitudeHigh;
+    else if (s == "LATITUDE_HIGH" || s == "LATITUDEHIGH")
+        return Id::LatitudeHigh;
+    else if (s == "ELEVATION_HIGH" || s == "ELEVATIONHIGH")
+        return Id::ElevationHigh;
     return Id::Unknown;
 }
 
@@ -556,6 +612,28 @@ inline std::string name(Id::Enum id)
         return "HeightAboveGround";
     case Id::ClassFlags:
         return "ClassFlags";
+    case Id::LvisLfid:
+        return "LVIS_LFID";
+    case Id::ShotNumber:
+        return "SHOTNUMBER";
+    case Id::LongitudeCentroid:
+        return "LONGITUDE_CENTROID";
+    case Id::LatitudeCentroid:
+        return "LATITUDE_CENTROID";
+    case Id::ElevationCentroid:
+        return "ELEVATION_CENTROID";
+    case Id::LongitudeLow:
+        return "LONGITUDE_LOW";
+    case Id::LatitudeLow:
+        return "LATITUDE_LOW";
+    case Id::ElevationLow:
+        return "ELEVATION_LOW";
+    case Id::LongitudeHigh:
+        return "LONGITUDE_HIGH";
+    case Id::LatitudeHigh:
+        return "LATITUDE_HIGH";
+    case Id::ElevationHigh:
+        return "ELEVATION_HIGH";
     case Id::Unknown:
         return "";
     }
@@ -677,6 +755,28 @@ inline Type::Enum defaultType(Id::Enum id)
         return Double;
     case Id::ClassFlags:
         return Unsigned8;
+    case Id::LvisLfid:
+        return Unsigned64;
+    case Id::ShotNumber:
+        return Unsigned64;
+    case Id::LongitudeCentroid:
+        return Double;
+    case Id::LatitudeCentroid:
+        return Double;
+    case Id::ElevationCentroid:
+        return Double;
+    case Id::LongitudeLow:
+        return Double;
+    case Id::LatitudeLow:
+        return Double;
+    case Id::ElevationLow:
+        return Double;
+    case Id::LongitudeHigh:
+        return Double;
+    case Id::LatitudeHigh:
+        return Double;
+    case Id::ElevationHigh:
+        return Double;
     case Id::Unknown:
         throw pdal_error("No type for undefined dimension ID.");
     }
@@ -778,7 +878,7 @@ public:
         { return Dimension::base(m_type); }
 
 private:
-    Id::Enum m_id; 
+    Id::Enum m_id;
     int m_offset;
     Type::Enum m_type;
 };

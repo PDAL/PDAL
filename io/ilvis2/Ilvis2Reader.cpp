@@ -75,18 +75,18 @@ void Ilvis2Reader::processOptions(const Options& options)
 void Ilvis2Reader::addDimensions(PointLayoutPtr layout)
 {
     using namespace pdal::Dimension::Type;
-    layout->registerOrAssignDim("LVIS_LFID", Unsigned64);
-    layout->registerOrAssignDim("SHOTNUMBER", Unsigned64);
+    layout->registerDim(pdal::Dimension::Id::LvisLfid);
+    layout->registerDim(pdal::Dimension::Id::ShotNumber);
     layout->registerDim(pdal::Dimension::Id::GpsTime);
-    layout->registerOrAssignDim("LONGITUDE_CENTROID", Double);
-    layout->registerOrAssignDim("LATITUDE_CENTROID", Double);
-    layout->registerOrAssignDim("ELEVATION_CENTROID", Double);
-    layout->registerOrAssignDim("LONGITUDE_LOW", Double);
-    layout->registerOrAssignDim("LATITUDE_LOW", Double);
-    layout->registerOrAssignDim("ELEVATION_LOW", Double);
-    layout->registerOrAssignDim("LONGITUDE_HIGH", Double);
-    layout->registerOrAssignDim("LATITUDE_HIGH", Double);
-    layout->registerOrAssignDim("ELEVATION_HIGH", Double);
+    layout->registerDim(pdal::Dimension::Id::LongitudeCentroid);
+    layout->registerDim(pdal::Dimension::Id::LatitudeCentroid);
+    layout->registerDim(pdal::Dimension::Id::ElevationCentroid);
+    layout->registerDim(pdal::Dimension::Id::LongitudeLow);
+    layout->registerDim(pdal::Dimension::Id::LatitudeLow);
+    layout->registerDim(pdal::Dimension::Id::ElevationLow);
+    layout->registerDim(pdal::Dimension::Id::LongitudeHigh);
+    layout->registerDim(pdal::Dimension::Id::LatitudeHigh);
+    layout->registerDim(pdal::Dimension::Id::ElevationHigh);
     layout->registerDim(pdal::Dimension::Id::X);
     layout->registerDim(pdal::Dimension::Id::Y);
     layout->registerDim(pdal::Dimension::Id::Z);
@@ -154,47 +154,25 @@ void Ilvis2Reader::readPoint(PointViewPtr view, PointId nextId, StringList s, st
 {
   PointLayoutPtr layout = view->layout();
 
-  std::string name("LVIS_LFID");
-  view->setField(layout->findProprietaryDim(name), nextId, convert<unsigned int>(s, name, 0));
-
-  name = "SHOTNUMBER";
-  view->setField(layout->findProprietaryDim(name), nextId, convert<unsigned int>(s, name, 1));
-
-  view->setField(pdal::Dimension::Id::GpsTime, nextId, convert<double>(s, name, 2));
-
-  name = "LONGITUDE_CENTROID";
-  view->setField(layout->findProprietaryDim(name), nextId, convertLongitude(convert<double>(s, name, 3)));
-
-  name = "LATITUDE_CENTROID";
-  view->setField(layout->findProprietaryDim(name), nextId, convert<double>(s, name, 4));
-
-  name = "ELEVATION_CENTROID";
-  view->setField(layout->findProprietaryDim(name), nextId, convert<double>(s, name, 5));
-
-  name = "LONGITUDE_LOW";
-  view->setField(layout->findProprietaryDim(name), nextId, convertLongitude(convert<double>(s, name, 6)));
-
-  name = "LATITUDE_LOW";
-  view->setField(layout->findProprietaryDim(name), nextId, convert<double>(s, name, 7));
-
-  name = "ELEVATION_LOW";
-  view->setField(layout->findProprietaryDim(name), nextId, convert<double>(s, name, 8));
-
-  name = "LONGITUDE_HIGH";
-  view->setField(layout->findProprietaryDim(name), nextId, convertLongitude(convert<double>(s, name, 9)));
-
-  name = "LATITUDE_HIGH";
-  view->setField(layout->findProprietaryDim(name), nextId, convert<double>(s, name, 10));
-
-  name = "ELEVATION_HIGH";
-  view->setField(layout->findProprietaryDim(name), nextId, convert<double>(s, name, 11));
+  view->setField(pdal::Dimension::Id::LvisLfid, nextId, convert<unsigned int>(s, "LVIS_LFID", 0));
+  view->setField(pdal::Dimension::Id::ShotNumber, nextId, convert<unsigned int>(s, "SHOTNUMBER", 1));
+  view->setField(pdal::Dimension::Id::GpsTime, nextId, convert<double>(s, "GPSTIME", 2));
+  view->setField(pdal::Dimension::Id::LongitudeCentroid, nextId, convertLongitude(convert<double>(s, "LONGITUDE_CENTROID", 3)));
+  view->setField(pdal::Dimension::Id::LatitudeCentroid, nextId, convert<double>(s, "LATITUDE_CENTROID", 4));
+  view->setField(pdal::Dimension::Id::ElevationCentroid, nextId, convert<double>(s, "ELEVATION_CENTROID", 5));
+  view->setField(pdal::Dimension::Id::LongitudeLow, nextId, convertLongitude(convert<double>(s, "LONGITUDE_LOW", 6)));
+  view->setField(pdal::Dimension::Id::LatitudeLow, nextId, convert<double>(s, "LATITUDE_LOW", 7));
+  view->setField(pdal::Dimension::Id::ElevationLow, nextId, convert<double>(s, "ELEVATION_LOW", 8));
+  view->setField(pdal::Dimension::Id::LongitudeHigh, nextId, convertLongitude(convert<double>(s, "LONGITUDE_HIGH", 9)));
+  view->setField(pdal::Dimension::Id::LatitudeHigh, nextId, convert<double>(s, "LATITUDE_HIGH", 10));
+  view->setField(pdal::Dimension::Id::ElevationHigh, nextId, convert<double>(s, "ELEVATION_HIGH", 11));
 
   double x, y, z;
   pdal::Dimension::Id::Enum xd, yd, zd;
 
-  xd = layout->findProprietaryDim("LONGITUDE_" + pointMap);
-  yd = layout->findProprietaryDim("LATITUDE_" + pointMap);
-  zd = layout->findProprietaryDim("ELEVATION_" + pointMap);
+  xd = layout->findDim("LONGITUDE_" + pointMap);
+  yd = layout->findDim("LATITUDE_" + pointMap);
+  zd = layout->findDim("ELEVATION_" + pointMap);
 
   x = view->getFieldAs<double>(xd, nextId);
   y = view->getFieldAs<double>(yd, nextId);
