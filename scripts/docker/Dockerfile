@@ -1,8 +1,13 @@
 FROM pdal/dependencies:latest
 MAINTAINER Howard Butler <howard@hobu.co>
+ARG branch=master
+
+ENV CC clang
+ENV CXX clang++
 
 RUN git clone https://github.com/PDAL/PDAL \
 	&& cd PDAL \
+	&& git checkout ${branch} \
 	&& mkdir build \
 	&& cd build \
 	&& cmake \
@@ -29,5 +34,9 @@ RUN git clone https://github.com/PDAL/PDAL \
 		-DWITH_TESTS=ON \
 		.. \
 	&& make -j4 \
-	&& make install
+	&& make install \
+	&& cd / \
+	&& rm -rf PDAL
 
+# cleanup
+RUN rm -rf laszip laz-perf points2grid pcl nitro hexer 3.2.7.tar.gz eigen-eigen-b30b87236a1b
