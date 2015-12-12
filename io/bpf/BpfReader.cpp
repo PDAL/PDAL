@@ -303,7 +303,7 @@ bool BpfReader::eof()
 
 void BpfReader::readPointMajor(PointRef& point)
 {
-    double x, y, z;
+    double x(0), y(0), z(0);
 
     seekPointMajor(m_index);
     for (size_t dim = 0; dim < m_dims.size(); ++dim)
@@ -369,7 +369,7 @@ point_count_t BpfReader::readPointMajor(PointViewPtr view, point_count_t count)
 // This isn't lovely as we have to seek for each dimension access.
 void BpfReader::readDimMajor(PointRef& point)
 {
-    double x, y, z;
+    double x(0), y(0), z(0);
 
     for (size_t dim = 0; dim < m_dims.size(); ++dim)
     {
@@ -445,7 +445,7 @@ void BpfReader::readByteMajor(PointRef& point)
         float f;
         uint32_t u32;
     } u;
-    double x, y, z;
+    double x(0), y(0), z(0);
     uint8_t u8;
 
     for (size_t dim = 0; dim < m_dims.size(); ++dim)

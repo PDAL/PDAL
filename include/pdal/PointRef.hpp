@@ -54,7 +54,7 @@ public:
     template<class T>
     T getFieldAs(Dimension::Id::Enum dim) const
     {
-        T val;
+        T val(0);
         bool success = true;
         Everything e;
         Dimension::Type::Enum type = m_layout.dimDetail(dim)->type();
