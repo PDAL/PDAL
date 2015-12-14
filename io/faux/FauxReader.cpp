@@ -184,9 +184,9 @@ void FauxReader::ready(PointTableRef /*table*/)
 
 bool FauxReader::processOne(PointRef& point)
 {
-    double x;
-    double y;
-    double z;
+    double x(0);
+    double y(0);
+    double z(0);
 
     if (m_index >= m_count)
         return false;

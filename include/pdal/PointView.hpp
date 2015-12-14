@@ -120,7 +120,7 @@ public:
     }
 
     PointRef point(PointId id)
-        { return PointRef(this, id); }
+        { return PointRef(*this, id); }
 
     template<class T>
     T getFieldAs(Dimension::Id::Enum dim, PointId pointIndex) const;
