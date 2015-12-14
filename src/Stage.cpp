@@ -198,7 +198,7 @@ void Stage::execute(StreamPointTable& table)
     bool finished = false;
     while (!finished)
     {
-        // Clear the spatial
+        // Clear the spatial reference when processing starts.
         table.clearSpatialReferences();
         PointId idx = 0;
         PointRef point(&table, idx);

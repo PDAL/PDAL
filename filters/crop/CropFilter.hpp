@@ -86,9 +86,13 @@ private:
     std::vector<GeomPkg> m_geoms;
 
     virtual void processOptions(const Options& options);
+    virtual void ready(PointTableRef table);
+    virtual bool processOne(PointRef& point);
     virtual PointViewSet run(PointViewPtr view);
     virtual void done(PointTableRef table);
+    bool crop(PointRef& point, const BOX2D& box);
     void crop(const BOX2D& box, PointView& input, PointView& output);
+    bool crop(PointRef& point, const GeomPkg& g);
     void crop(const GeomPkg& g, PointView& input, PointView& output);
 #ifdef PDAL_HAVE_GEOS
     GEOSGeometry *validatePolygon(const std::string& poly);
