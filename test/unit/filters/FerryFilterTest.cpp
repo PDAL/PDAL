@@ -38,8 +38,10 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReader.hpp>
+#include <FauxReader.hpp>
 #include <FerryFilter.hpp>
 #include <LasReader.hpp>
+#include <StreamCallbackFilter.hpp>
 #include "Support.hpp"
 
 using namespace pdal;
@@ -79,6 +81,48 @@ TEST(FerryFilterTest, test_ferry_copy)
     EXPECT_DOUBLE_EQ(49.341077824192915, lat);
     EXPECT_DOUBLE_EQ(637012.24, x);
     EXPECT_DOUBLE_EQ(849028.31, y);
+}
+
+TEST(FerryFilterTest, stream)
+{
+    FauxReader r;
+
+    Options ro;
+    ro.add("mode", "ramp");
+    ro.add("bounds", BOX3D(0, 0, 0, 99, 99, 99));
+    ro.add("num_points", 100);
+
+    r.setOptions(ro);
+
+    Options fo;
+    fo.add("dimensions", "X=FooX,Y=BarY");
+
+    FerryFilter f;
+    f.setOptions(fo);
+    f.setInput(r);
+
+    StreamCallbackFilter c;
+    c.setInput(f);
+
+    FixedPointTable t(10);
+    c.prepare(t);
+
+    auto foox = t.layout()->findDim("FooX");
+    auto fooy = t.layout()->findDim("BarY");
+    auto cb = [foox,fooy](PointRef& point)
+    {
+        static int i = 0;
+        EXPECT_EQ(point.getFieldAs<int>(Dimension::Id::X),
+            point.getFieldAs<int>(foox));
+        EXPECT_EQ(point.getFieldAs<int>(Dimension::Id::Y),
+            point.getFieldAs<int>(fooy));
+        EXPECT_EQ(i, point.getFieldAs<int>(foox));
+        ++i;
+        return true;
+    };
+    c.setCallback(cb);
+
+    c.execute(t);
 }
 
 TEST(FerryFilterTest, test_ferry_invalid)
