@@ -50,8 +50,8 @@ build:
   project: PDAL.sln
   verbosity: minimal
 
-after_build:
-  - call .\\scripts\\appveyor\\install.cmd
+#after_build:
+#  - call .\\scripts\\appveyor\\install.cmd
 
 notifications:
   - provider: Email
@@ -68,7 +68,7 @@ notifications:
     on_build_status_changed: true
 
 artifacts:
-  - path: C:\pdalbin
+  - path: pdal\bin
     name: pdal-master
 
 deploy:
