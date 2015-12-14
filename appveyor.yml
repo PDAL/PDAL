@@ -71,7 +71,7 @@ deploy:
     access_key_id:
       secure: +qSWtlKwUGZmIoUR25u08KxPVmiEA7obV2SF+aJLRDs=
     secret_access_key:
-      secure: 9OxM0f4/sBCrNE9XhRnHMnImz5FQe6q9aBJ6+0X1Cf9+ZEqDTsu3o084aIPGnstv
+      secure: 9OxM0f4/sBCrNE9XhRnHMnImz5FQe6q9aBJ6+0X1Cf8ZWu0akG+ZG2jBXs5t9dJ8
     bucket: pdal
     folder: osgeo4w
     artifact: pdal-master
