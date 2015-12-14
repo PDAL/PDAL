@@ -38,6 +38,7 @@
 #include <pdal/StageFactory.hpp>
 #include <FauxReader.hpp>
 #include <RangeFilter.hpp>
+#include <StreamCallbackFilter.hpp>
 
 using namespace pdal;
 
@@ -352,5 +353,51 @@ TEST(RangeFilterTest, simple_logic)
     EXPECT_EQ(view->getFieldAs<int>(Dimension::Id::X, 2), 5);
     EXPECT_EQ(view->getFieldAs<int>(Dimension::Id::X, 3), 8);
     EXPECT_EQ(view->getFieldAs<int>(Dimension::Id::X, 4), 9);
+}
+
+TEST(RangeFilterTest, stream_logic)
+{
+    Options ops;
+    ops.add("bounds", BOX3D(1, 101, 201, 10, 110, 210));
+    ops.add("mode", "ramp");
+    ops.add("num_points", 10);
+
+    FauxReader reader;
+    reader.setOptions(ops);
+
+    Options rangeOps;
+    rangeOps.add("limits", "Y[108:109], X[2:5], Z[1:1000], X[7:9], Y[103:105]");
+
+    RangeFilter range;
+    range.setOptions(rangeOps);
+    range.setInput(reader);
+
+    StreamCallbackFilter f;
+    f.setInput(range);
+
+    FixedPointTable table(20);
+    f.prepare(table);
+
+    auto cb = [](PointRef& point)
+    {
+        static int i = 0;
+        int x = point.getFieldAs<int>(Dimension::Id::X);
+        if (i == 0)
+            EXPECT_EQ(x, 3);
+        else if (i == 1)
+            EXPECT_EQ(x, 4);
+        else if (i == 2)
+            EXPECT_EQ(x, 5);
+        else if (i == 3)
+            EXPECT_EQ(x, 8);
+        else if (i == 4)
+            EXPECT_EQ(x, 9);
+        EXPECT_TRUE(i < 5);
+        ++i;
+        return true;
+    };
+    f.setCallback(cb);
+
+    f.execute(table);
 }
 
