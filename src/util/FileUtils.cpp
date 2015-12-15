@@ -42,8 +42,6 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Utils.hpp>
 
-using namespace std;
-
 namespace pdal
 {
 
@@ -63,17 +61,17 @@ bool isStdout(std::string filename)
 
 } // unnamed namespace
 
-istream* FileUtils::openFile(string const& filename, bool asBinary)
+std::istream* FileUtils::openFile(std::string const& filename, bool asBinary)
 {
     if (isStdin(filename))
-        return &cin;
+        return &std::cin;
 
     if (!FileUtils::fileExists(filename))
         throw pdal_error(std::string("File '") + filename + "' not found");
 
-    ios::openmode mode = ios::in;
+    std::ios::openmode mode = std::ios::in;
     if (asBinary)
-        mode |= ios::binary;
+        mode |= std::ios::binary;
 
     std::ifstream *ifs = new std::ifstream(filename, mode);
     if (!ifs->good())
@@ -85,14 +83,14 @@ istream* FileUtils::openFile(string const& filename, bool asBinary)
 }
 
 
-ostream* FileUtils::createFile(string const& filename, bool asBinary)
+std::ostream* FileUtils::createFile(std::string const& filename, bool asBinary)
 {
     if (isStdout(filename))
-        return &cout;
+        return &std::cout;
 
-    ios::openmode mode = ios::out;
+    std::ios::openmode mode = std::ios::out;
     if (asBinary)
-        mode |= ios::binary;
+        mode |= std::ios::binary;
 
     std::ostream *ofs = new std::ofstream(filename, mode);
     if (! ofs->good())
@@ -112,7 +110,7 @@ bool FileUtils::directoryExists(std::string const& dirname)
 
 bool FileUtils::createDirectory(std::string const& dirname)
 {
-    return boost::filesystem::create_directory(dirname); 
+    return boost::filesystem::create_directory(dirname);
 }
 
 
@@ -122,13 +120,13 @@ void FileUtils::deleteDirectory(std::string const& dirname)
 }
 
 
-void FileUtils::closeFile(ostream *out)
+void FileUtils::closeFile(std::ostream *out)
 {
     // An ofstream is closeable and deletable, but
     // an ostream like &std::cout isn't.
     if (!out)
         return;
-    ofstream *ofs = dynamic_cast<ofstream *>(out);
+    std::ofstream *ofs = dynamic_cast<std::ofstream *>(out);
     if (ofs)
     {
         ofs->close();
@@ -137,13 +135,13 @@ void FileUtils::closeFile(ostream *out)
 }
 
 
-void FileUtils::closeFile(istream* in)
+void FileUtils::closeFile(std::istream* in)
 {
     // An ifstream is closeable and deletable, but
     // an istream like &std::cin isn't.
     if (!in)
         return;
-    ifstream *ifs = dynamic_cast<ifstream *>(in);
+    std::ifstream *ifs = dynamic_cast<std::ifstream *>(in);
     if (ifs)
     {
         ifs->close();
@@ -152,7 +150,7 @@ void FileUtils::closeFile(istream* in)
 }
 
 
-bool FileUtils::deleteFile(const string& file)
+bool FileUtils::deleteFile(const std::string& file)
 {
     if (!fileExists(file))
         return false;
@@ -161,43 +159,43 @@ bool FileUtils::deleteFile(const string& file)
 }
 
 
-void FileUtils::renameFile(const string& dest, const string& src)
+void FileUtils::renameFile(const std::string& dest, const std::string& src)
 {
     boost::filesystem::rename(src, dest);
 }
 
 
-bool FileUtils::fileExists(const string& name)
+bool FileUtils::fileExists(const std::string& name)
 {
     // filename may actually be a greyhound uri + pipelineId
     std::string http = name.substr(0, 4);
     if (Utils::iequals(http, "http"))
         return true;
- 
+
     boost::system::error_code ec;
     boost::filesystem::exists(name, ec);
     return boost::filesystem::exists(name) || isStdin(name);
 }
 
 
-uintmax_t FileUtils::fileSize(const string& file)
+uintmax_t FileUtils::fileSize(const std::string& file)
 {
     return boost::filesystem::file_size(file);
 }
 
 
-string FileUtils::readFileIntoString(const string& filename)
+std::string FileUtils::readFileIntoString(const std::string& filename)
 {
-    istream* stream = FileUtils::openFile(filename, false);
+    std::istream* stream = FileUtils::openFile(filename, false);
     assert(stream);
-    string str((istreambuf_iterator<char>(*stream)),
-        istreambuf_iterator<char>());
+    std::string str((std::istreambuf_iterator<char>(*stream)),
+        std::istreambuf_iterator<char>());
     FileUtils::closeFile(stream);
     return str;
 }
 
 
-string FileUtils::addTrailingSlash(string path)
+std::string FileUtils::addTrailingSlash(std::string path)
 {
     if (path[path.size() - 1] != '/' && path[path.size() - 1] != '\\')
         path += "/";
@@ -205,7 +203,7 @@ string FileUtils::addTrailingSlash(string path)
 }
 
 
-string FileUtils::getcwd()
+std::string FileUtils::getcwd()
 {
     const boost::filesystem::path p = boost::filesystem::current_path();
     return addTrailingSlash(p.string());
@@ -233,7 +231,7 @@ string FileUtils::toAbsolutePath(const string& filename)
 
 // if the filename is an absolute path, just return it
 // otherwise, make it absolute (relative to current working dir) and return that
-string FileUtils::toAbsolutePath(const string& filename)
+std::string FileUtils::toAbsolutePath(const std::string& filename)
 {
 
 #if BOOST_VERSION >= 104600 && BOOST_FILESYSTEM_VERSION >= 3
@@ -251,9 +249,9 @@ string FileUtils::toAbsolutePath(const string& filename)
 //
 // note: if base dir is not absolute, first make it absolute via
 // toAbsolutePath(base)
-string FileUtils::toAbsolutePath(const string& filename, const string base)
+std::string FileUtils::toAbsolutePath(const std::string& filename, const std::string base)
 {
-    const string newbase = toAbsolutePath(base);
+    const std::string newbase = toAbsolutePath(base);
 
 #if BOOST_VERSION >= 104600 && BOOST_FILESYSTEM_VERSION >= 3
     const boost::filesystem::path p = boost::filesystem::absolute(filename, newbase);
@@ -264,7 +262,7 @@ string FileUtils::toAbsolutePath(const string& filename, const string base)
     return p.string();
 }
 
-string FileUtils::getFilename(const string& path)
+std::string FileUtils::getFilename(const std::string& path)
 {
 #ifdef _WIN32
     char pathsep = '\\';
@@ -279,7 +277,7 @@ string FileUtils::getFilename(const string& path)
 }
 
 // Get the directory part of a filename.
-string FileUtils::getDirectory(const string& path)
+std::string FileUtils::getDirectory(const std::string& path)
 {
     const boost::filesystem::path dir =
          boost::filesystem::path(path).parent_path();
@@ -288,7 +286,7 @@ string FileUtils::getDirectory(const string& path)
 
 
 // Determine if the path is an absolute path
-bool FileUtils::isAbsolutePath(const string& path)
+bool FileUtils::isAbsolutePath(const std::string& path)
 {
 #if BOOST_VERSION >= 104600 && BOOST_FILESYSTEM_VERSION >= 3
     return boost::filesystem::path(path).is_absolute();
@@ -321,22 +319,22 @@ void FileUtils::fileTimes(const std::string& filename,
 }
 
 
-string FileUtils::readFileAsString(string const& filename)
+std::string FileUtils::readFileAsString(std::string const& filename)
 {
     if (!FileUtils::fileExists(filename))
     {
-        ostringstream oss;
+        std::ostringstream oss;
         oss << filename << " does not exist";
         throw pdal_error(oss.str());
     }
 
-    istream::pos_type size;
-    istream* input = FileUtils::openFile(filename, true);
+    std::istream::pos_type size;
+    std::istream* input = FileUtils::openFile(filename, true);
 
     if (input->good())
     {
-        string output;
-        string line;
+        std::string output;
+        std::string line;
         while (input->good())
         {
             getline(*input, line);
@@ -352,7 +350,7 @@ string FileUtils::readFileAsString(string const& filename)
         return output;
     }
     FileUtils::closeFile(input);
-    return string();
+    return std::string();
 }
 
 } // namespace pdal
