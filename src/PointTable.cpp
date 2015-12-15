@@ -37,24 +37,6 @@
 namespace pdal
 {
 
-/**
-SpatialReference BasePointTable::spatialRef() const
-{
-    MetadataNode m = m_metadata->m_private.findChild("spatialreference");
-    SpatialReference sref;
-    sref.setWKT(m.value());
-    return sref;
-}
-
-
-void BasePointTable::setSpatialRef(const SpatialReference& sref)
-{
-    MetadataNode mp = m_metadata->m_private;
-    mp.addOrUpdate("spatialreference", sref.getRawWKT());
-}
-**/
-
-
 MetadataNode BasePointTable::privateMetadata(const std::string& name)
 {
     MetadataNode mp = m_metadata->m_private;

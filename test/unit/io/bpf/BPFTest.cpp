@@ -343,10 +343,18 @@ TEST(BPFTest, bundled)
     reader2.execute(table2);
     MetadataNode n = reader2.getMetadata();
     std::vector<uint8_t> outbuf;
-    outbuf = Utils::base64_decode(n.findChild("bundle1").value());
+    auto findbundle = [](MetadataNode& m)
+        { return m.name() == "bundled_file"; };
+    MetadataNodeList nodes = n.findChildren(findbundle);
+    EXPECT_EQ(nodes.size(), 2u);
+    auto findbundle1 = [](const MetadataNode& m)
+        { return m.name() == "bundle1"; };
+    outbuf = Utils::base64_decode(n.find(findbundle1).value());
     EXPECT_EQ(memcmp(outbuf.data(), "This is a test",
         outbuf.size() - 1), 0);
-    outbuf = Utils::base64_decode(n.findChild("bundle2").value());
+    auto findbundle2 = [](const MetadataNode& m)
+        { return m.name() == "bundle2"; };
+    outbuf = Utils::base64_decode(n.find(findbundle2).value());
     EXPECT_EQ(memcmp(outbuf.data(), "This is another test",
         outbuf.size() - 1), 0);
 }

@@ -61,9 +61,9 @@ void checkPoint(const PointView& data, PointId index, double time,
     checkDimension(Dimension::Id::GpsTime, time);
 }
 
-TEST(Ilvis2ReaderTest, testRead)
+TEST(Ilvis2ReaderTest, testReadDefault)
 {
-    Option filename("filename", Support::datapath("ilvis2/ILVIS2_GL2009_0414_R1401_042504.TXT"), "");
+    Option filename("filename", Support::datapath("ilvis2/ILVIS2_TEST_FILE.TXT"), "");
     Options options(filename);
     std::shared_ptr<Ilvis2Reader> reader(new Ilvis2Reader);
     reader->setOptions(options);
@@ -75,14 +75,52 @@ TEST(Ilvis2ReaderTest, testRead)
     EXPECT_EQ(viewSet.size(), 1u);
     PointViewPtr view = *viewSet.begin();
 
-    EXPECT_EQ(view->size(), 998u);
+    EXPECT_EQ(view->size(), 4u);
 
     checkPoint(*view.get(), 0, 42504.48313,
-             78.307673,121.21479,1956.583
+             78.307672,-58.785213,1956.777
             );
 
-    checkPoint(*view.get(), 996, 42520.90035,
-             78.320149, 121.32024, 1959.206
+    checkPoint(*view.get(), 1, 42504.48512,
+             78.307592, 101.215097, 1956.588
+            );
+
+    checkPoint(*view.get(), 2, 42504.48712,
+             78.307512, -58.78459, 1956.667
+            );
+
+    checkPoint(*view.get(), 3, 42504.48712,
+             78.307512, -58.78459, 2956.667
             );
 }
 
+
+TEST(Ilvis2ReaderTest, testReadHigh)
+{
+    Option filename("filename", Support::datapath("ilvis2/ILVIS2_TEST_FILE.TXT"), "");
+    Options options(filename);
+    options.add("mapping","high");
+    std::shared_ptr<Ilvis2Reader> reader(new Ilvis2Reader);
+    reader->setOptions(options);
+
+    PointTable table;
+
+    reader->prepare(table);
+    PointViewSet viewSet = reader->execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+
+    EXPECT_EQ(view->size(), 3u);
+
+    checkPoint(*view.get(), 0, 42504.48313,
+             78.307672,-58.785213,1956.777
+            );
+
+    checkPoint(*view.get(), 1, 42504.48512,
+             78.307592, 101.215097, 1956.588
+            );
+
+    checkPoint(*view.get(), 2, 42504.48712,
+             78.307512, -58.78459, 2956.667
+            );
+}

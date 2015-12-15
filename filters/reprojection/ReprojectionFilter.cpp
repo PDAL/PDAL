@@ -125,6 +125,14 @@ void ReprojectionFilter::initialize()
             "for the 'out_srs' option.";
         throw pdal_error(oss.str());
     }
+
+    // If we have our input and output spatial references, create the transform
+    // now.  Otherwise, if this filter is used via the FilterWrapper, it will
+    // not be initialized properly since run() won't get called.
+    if (!m_inferInputSRS)
+    {
+        createTransform(0);
+    }
 }
 
 
@@ -133,6 +141,7 @@ void ReprojectionFilter::createTransform(PointView *view)
     if (m_inferInputSRS)
     {
         m_inSRS = view->spatialReference();
+
         if (m_inSRS.empty())
         {
             std::ostringstream oss;
@@ -196,7 +205,10 @@ PointViewSet ReprojectionFilter::run(PointViewPtr view)
     PointViewSet viewSet;
     PointViewPtr outView = view->makeNew();
 
-    createTransform(view.get());
+    if (m_inferInputSRS)
+    {
+        createTransform(view.get());
+    }
 
     double x, y, z;
 

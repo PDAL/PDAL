@@ -28,14 +28,14 @@ mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
 
 # the next line is the ONLY place in the entire pdal system where
 # the version info is hard-coded
-set(PDAL_VERSION_STRING "1.0.1" CACHE STRING "PDAL version" FORCE)
+set(PDAL_VERSION_STRING "1.1.0" CACHE STRING "PDAL version" FORCE)
 
 DISSECT_VERSION()
 GET_OS_INFO()
 SET_INSTALL_DIRS()
 
 set(PDAL_API_VERSION "1")
-set(PDAL_BUILD_VERSION "1.0.0")
+set(PDAL_BUILD_VERSION "2.0.0")
 
 # Name of C++ library
 
@@ -349,6 +349,7 @@ list(APPEND CPACK_SOURCE_IGNORE_FILES "/test/data/local/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/doc/doxygen/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/doc/build/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/doc/presentations/")
+list(APPEND CPACK_SOURCE_IGNORE_FILES "/doc/_static/logo/dongle/")
 list(APPEND CPACK_SOURCE_IGNORE_FILES "/cmake/examples/")
 
 include(CPack)

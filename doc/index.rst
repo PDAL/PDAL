@@ -30,7 +30,7 @@ Documentation
    community
    stages/index
    tutorial/index
-   vagrant
+   docker
    pipeline
    faq
    development/index

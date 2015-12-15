@@ -208,5 +208,5 @@ In the directory with those two files, run
 called ``output.txt``, which will have the same data as in the input file,
 except in a CSV style format, and with the Z values scaled by .001.
 
-.. _`pipeline-myreader.xml`: https://github.com/PDAL/PDAL/examples/writing-reader/pipeline-myreader.xml?raw=true
-.. _`test-reader-input.txt`:https://github.com/PDAL/PDAL/examples/writing-reader/test-reader-input.txt?raw=true
+.. _`pipeline-myreader.xml`: https://github.com/PDAL/PDAL/blob/master/examples/writing-reader/pipeline-myreader.xml?raw=true
+.. _`test-reader-input.txt`: https://github.com/PDAL/PDAL/blob/master/examples/writing-reader/test-reader-input.txt?raw=true

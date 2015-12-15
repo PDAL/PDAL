@@ -5,6 +5,9 @@ os: Windows Server 2012
 platform:
   - x64
 
+init:
+  - SET PATH=C:\Python27-x64\;%PATH%
+
 configuration: Release
 
 environment:

@@ -1,8 +1,8 @@
 #!/bin/bash
-if [[ "$TRAVIS" != "true" ]] ; then
-	echo "Running this script makes no sense outside of travis-ci.org"
-	exit 1
-fi
+# if [[ "$TRAVIS" != "true" ]] ; then
+# 	echo "Running this script makes no sense outside of travis-ci.org"
+# 	exit 1
+# fi
 
 # Functions
 tmstamp() { echo -n "[$(date '+%H:%M:%S')]" ; }

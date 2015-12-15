@@ -55,17 +55,8 @@ public:
 private:
     PointViewPtr m_view;
 
-    virtual void ready(PointTableRef table)
-        { m_view.reset(new PointView(table)); }
-
-    virtual PointViewSet run(PointViewPtr in)
-    {
-        PointViewSet viewSet;
-
-        m_view->append(*in.get());
-        viewSet.insert(m_view);
-        return viewSet;
-    }
+    virtual void ready(PointTableRef table);
+    virtual PointViewSet run(PointViewPtr in);
 
     MergeFilter& operator=(const MergeFilter&); // not implemented
     MergeFilter(const MergeFilter&); // not implemented

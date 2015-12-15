@@ -294,9 +294,28 @@ namespace Utils
 
     struct RedirectStream
     {
+        RedirectStream() : m_out(NULL), m_out2(NULL), m_buf(NULL)
+        {}
+
         std::ofstream *m_out;
+        std::ostream *m_out2;
         std::streambuf *m_buf;
     };
+
+    /// Redirect a stream to some other stream.
+    /// \param[in] out   Stream to redirect.
+    /// \param[in] dst   Destination stream.
+    /// \return  Context for stream restoration (see restore()).
+    inline RedirectStream redirect(std::ostream& out, std::ostream& dst)
+    {
+        RedirectStream redir;
+
+        redir.m_out2 = &dst;
+        redir.m_buf = out.rdbuf();
+        out.rdbuf(redir.m_out2->rdbuf());
+        return redir;
+    }
+
 
     /// Redirect a stream to some file, by default /dev/null.
     /// \param[in] out   Stream to redirect.
@@ -320,7 +339,11 @@ namespace Utils
     inline void restore(std::ostream& out, RedirectStream redir)
     {
         out.rdbuf(redir.m_buf);
-        redir.m_out->close();
+        if (redir.m_out)
+            redir.m_out->close();
+        redir.m_out = NULL;
+        redir.m_out2 = NULL;
+        redir.m_buf = NULL;
     }
 
     //ABELL - This is certainly not as efficient as boost::numeric_cast, but

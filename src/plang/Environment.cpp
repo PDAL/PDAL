@@ -65,7 +65,6 @@
 __attribute__ ((constructor))
 static void loadPython()
 {
-    std::cerr << "Force load python.\n";
     ::dlopen(PDAL_PYTHON_LIBRARY, RTLD_LAZY | RTLD_GLOBAL);
 }
 #endif
