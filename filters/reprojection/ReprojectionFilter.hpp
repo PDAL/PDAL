@@ -62,12 +62,12 @@ public:
 private:
     virtual void processOptions(const Options& options);
     virtual void initialize();
+    virtual void ready(PointTableRef table);
     virtual PointViewSet run(PointViewPtr view);
-    virtual void filter(PointView& view);
     virtual bool processOne(PointRef& point);
 
     void updateBounds();
-    void createTransform(PointView *view);
+    void createTransform(const SpatialReference& srs);
     bool transform(double& x, double& y, double& z);
 
     SpatialReference m_inSRS;

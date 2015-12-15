@@ -125,23 +125,21 @@ void ReprojectionFilter::initialize()
             "for the 'out_srs' option.";
         throw pdal_error(oss.str());
     }
-
-    // If we have our input and output spatial references, create the transform
-    // now.  Otherwise, if this filter is used via the FilterWrapper, it will
-    // not be initialized properly since run() won't get called.
-    if (!m_inferInputSRS)
-    {
-        createTransform(0);
-    }
 }
 
 
-void ReprojectionFilter::createTransform(PointView *view)
+void ReprojectionFilter::ready(PointTableRef table)
+{
+    if (!table.supportsView())
+        createTransform(table.anySpatialReference());
+}
+
+
+void ReprojectionFilter::createTransform(const SpatialReference& srsSRS)
 {
     if (m_inferInputSRS)
     {
-        m_inSRS = view->spatialReference();
-
+        m_inSRS = srsSRS;
         if (m_inSRS.empty())
         {
             std::ostringstream oss;
@@ -205,26 +203,16 @@ PointViewSet ReprojectionFilter::run(PointViewPtr view)
     PointViewSet viewSet;
     PointViewPtr outView = view->makeNew();
 
-    if (m_inferInputSRS)
-    {
-        createTransform(view.get());
-    }
+    createTransform(view->spatialReference());
 
     double x, y, z;
 
+    PointRef point(*view, 0);
     for (PointId id = 0; id < view->size(); ++id)
     {
-        x = view->getFieldAs<double>(Dimension::Id::X, id);
-        y = view->getFieldAs<double>(Dimension::Id::Y, id);
-        z = view->getFieldAs<double>(Dimension::Id::Z, id);
-
-        if (transform(x, y, z))
-        {
-            view->setField(Dimension::Id::X, id, x);
-            view->setField(Dimension::Id::Y, id, y);
-            view->setField(Dimension::Id::Z, id, z);
+        point.setPointId(id);
+        if (processOne(point))
             outView->appendPoint(*view, id);
-        }
     }
 
     viewSet.insert(outView);
@@ -234,24 +222,6 @@ PointViewSet ReprojectionFilter::run(PointViewPtr view)
     return viewSet;
 }
 
-
-void ReprojectionFilter::filter(PointView& view)
-{
-    double x, y, z;
-
-    for (PointId id = 0; id < view.size(); ++id)
-    {
-        x = view.getFieldAs<double>(Dimension::Id::X, id);
-        y = view.getFieldAs<double>(Dimension::Id::Y, id);
-        z = view.getFieldAs<double>(Dimension::Id::Z, id);
-
-        OCTTransform(m_transform_ptr, 1, &x, &y, &z);
-
-        view.setField(Dimension::Id::X, id, x);
-        view.setField(Dimension::Id::Y, id, y);
-        view.setField(Dimension::Id::Z, id, z);
-    }
-}
 
 bool ReprojectionFilter::processOne(PointRef& point)
 {
