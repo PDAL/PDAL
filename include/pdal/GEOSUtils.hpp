@@ -31,6 +31,7 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
+#pragma once
 
 #include <pdal/pdal_types.hpp>
 #include <pdal/Log.hpp>
@@ -42,7 +43,6 @@
 #include <geos_c.h>
 #endif
 
-#pragma once
 
 namespace pdal
 {
@@ -248,9 +248,9 @@ static double computeArea(const std::string& wkt)
 #pragma GCC diagnostic pop
 
 } // namespace Geometry
-} // end geos
 
 #endif
 
+} // end geos
 } // namespace pdal
 

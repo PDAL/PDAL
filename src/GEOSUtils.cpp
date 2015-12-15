@@ -33,10 +33,11 @@
 ****************************************************************************/
 
 #include <pdal/GEOSUtils.hpp>
-#include <pdal/util/Utils.hpp>
+#include <pdal/Log.hpp>
 
 #include <functional>
 #include <map>
+#include <sstream>
 
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127)  // conditional expression is constant
@@ -47,7 +48,7 @@ namespace pdal
 namespace geos
 {
 
-ErrorHandler::ErrorHandler(bool isDebug, pdal::LogPtr log)
+ErrorHandler::ErrorHandler(bool isDebug, LogPtr log)
     : m_isDebug(isDebug)
     , m_log(log)
 {
@@ -60,7 +61,9 @@ ErrorHandler::ErrorHandler(bool isDebug, pdal::LogPtr log)
 
     GEOSContextHandle_t* ctx = static_cast<GEOSContextHandle_t*>(m_context);
 //     GEOSContext_setErrorHandler_r(*ctx, &ErrorHandler::trampoline);
-    GEOSContext_setErrorMessageHandler_r(*ctx, &ErrorHandler::trampoline);
+//     GEOSContext_setErrorMessageHandler_r(*ctx, &ErrorHandler::trampoline);
+//     GEOSContext_setErrorHandler_r(*ctx, &ErrorHandler::trampoline);
+    GEOSContext_setErrorHandler_r(*ctx, &GEOSErrorHandler);
 }
 
 void ErrorHandler::log(char const* msg)
