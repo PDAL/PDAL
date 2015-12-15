@@ -36,6 +36,8 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/PipelineManager.hpp>
+#include <pdal/PipelineReaderJSON.hpp>
+#include <pdal/PipelineReaderXML.hpp>
 #include <pdal/StageFactory.hpp>
 #include <las/LasWriter.hpp>
 
@@ -117,7 +119,7 @@ TEST(NitfReaderTest, test_one)
 }
 
 
-TEST(NitfReaderTest, test_chipper)
+TEST(NitfReaderTest, test_chipperXML)
 {
     Option option("filename", Support::configuredpath("nitf/chipper.xml"));
     Options options(option);
@@ -125,7 +127,30 @@ TEST(NitfReaderTest, test_chipper)
     PointTable table;
 
     PipelineManager mgr;
-    mgr.readPipeline(Support::configuredpath("nitf/chipper.xml"));
+    PipelineReaderXML specReader(mgr);
+    specReader.readPipeline(Support::configuredpath("nitf/chipper.xml"));
+    //ABELL - need faux writer or something.
+    /**
+    mgr.execute();
+    StageSequentialIterator* iter = reader.createSequentialIterator(data);
+    const uint32_t num_read = iter->read(data);
+    EXPECT_EQ(num_read, 13u);
+
+    uint32_t num_blocks = chipper->GetBlockCount();
+    EXPECT_EQ(num_blocks, 8u);
+    **/
+}
+
+TEST(NitfReaderTest, test_chipperJSON)
+{
+    Option option("filename", Support::configuredpath("nitf/chipper.json"));
+    Options options(option);
+
+    PointTable table;
+
+    PipelineManager mgr;
+    PipelineReaderJSON specReader(mgr);
+    specReader.readPipeline(Support::configuredpath("nitf/chipper.json"));
     //ABELL - need faux writer or something.
     /**
     mgr.execute();

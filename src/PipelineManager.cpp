@@ -33,23 +33,23 @@
 ****************************************************************************/
 
 #include <pdal/PipelineManager.hpp>
-#include "PipelineReader.hpp"
+#include <pdal/PipelineReaderXML.hpp>
 
 namespace pdal
 {
 
 bool PipelineManager::readPipeline(std::istream& input)
 {
-    PipelineReader reader(*this);
-    
+    PipelineReaderXML reader(*this);
+
     return reader.readPipeline(input);
 }
 
 
 bool PipelineManager::readPipeline(const std::string& filename)
 {
-    PipelineReader reader(*this);
-    
+    PipelineReaderXML reader(*this);
+
     return reader.readPipeline(filename);
 }
 

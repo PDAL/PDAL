@@ -34,6 +34,8 @@
 
 #include <pdal/KernelSupport.hpp>
 
+#include <pdal/PipelineReaderJSON.hpp>
+#include <pdal/PipelineReaderXML.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Utils.hpp>
 
@@ -49,11 +51,18 @@ PipelineManagerPtr KernelSupport::makePipeline(const std::string& inputFile)
 
     if (inputFile == "STDIN")
     {
-        output->readPipeline(std::cin);
+        PipelineReaderXML pipeReader(*output);
+        pipeReader.readPipeline(std::cin);
     }
     else if (FileUtils::extension(inputFile) == ".xml")
     {
-        output->readPipeline(inputFile);
+        PipelineReaderXML pipeReader(*output);
+        pipeReader.readPipeline(inputFile);
+    }
+    else if (FileUtils::extension(inputFile) == ".json")
+    {
+        PipelineReaderJSON pipeReader(*output);
+        pipeReader.readPipeline(inputFile);
     }
     else
     {

@@ -255,6 +255,7 @@ PDAL_ADD_INCLUDES("" "" ${pdal_defines_h})
 include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
 
 include_directories(vendor/eigen-3.1.91)
+include_directories(vendor/jsoncpp-1.6.2/dist)
 include_directories(vendor/nanoflann-1.1.8)
 include_directories(vendor/rply-1.1.4)
 

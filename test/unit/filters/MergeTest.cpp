@@ -35,6 +35,8 @@
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/PipelineManager.hpp>
+#include <pdal/PipelineReaderJSON.hpp>
+#include <pdal/PipelineReaderXML.hpp>
 
 #include "Support.hpp"
 
@@ -43,7 +45,8 @@ TEST(MergeTest, test1)
     using namespace pdal;
 
     PipelineManager mgr;
-    mgr.readPipeline(Support::configuredpath("filters/merge.xml"));
+    PipelineReaderXML specReader(mgr);
+    specReader.readPipeline(Support::configuredpath("filters/merge.xml"));
     mgr.execute();
 
     PointViewSet viewSet = mgr.views();
@@ -58,7 +61,8 @@ TEST(MergeTest, test2)
     using namespace pdal;
 
     PipelineManager mgr;
-    mgr.readPipeline(Support::configuredpath("filters/merge2.xml"));
+    PipelineReaderXML specReader(mgr);
+    specReader.readPipeline(Support::configuredpath("filters/merge2.xml"));
     mgr.execute();
 
     PointViewSet viewSet = mgr.views();
@@ -73,7 +77,64 @@ TEST(MergeTest, test3)
     using namespace pdal;
 
     PipelineManager mgr;
-    mgr.readPipeline(Support::configuredpath("filters/merge3.xml"));
+    PipelineReaderXML specReader(mgr);
+    specReader.readPipeline(Support::configuredpath("filters/merge3.xml"));
+
+    std::ostringstream oss;
+    std::ostream& o = std::clog;
+    auto ctx = Utils::redirect(o, oss);
+
+    mgr.execute();
+    std::string s = oss.str();
+    EXPECT_TRUE(s.find("inconsistent spatial references") != s.npos);
+    Utils::restore(o, ctx);
+
+    PointViewSet viewSet = mgr.views();
+
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 2130u);
+}
+
+TEST(MergeTest, test4)
+{
+    using namespace pdal;
+
+    PipelineManager mgr;
+    PipelineReaderJSON specReader(mgr);
+    specReader.readPipeline(Support::configuredpath("filters/merge.json"));
+    mgr.execute();
+
+    PointViewSet viewSet = mgr.views();
+
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 2130u);
+}
+
+TEST(MergeTest, test5)
+{
+    using namespace pdal;
+
+    PipelineManager mgr;
+    PipelineReaderJSON specReader(mgr);
+    specReader.readPipeline(Support::configuredpath("filters/merge2.json"));
+    mgr.execute();
+
+    PointViewSet viewSet = mgr.views();
+
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 2130u);
+}
+
+TEST(MergeTest, test6)
+{
+    using namespace pdal;
+
+    PipelineManager mgr;
+    PipelineReaderJSON specReader(mgr);
+    specReader.readPipeline(Support::configuredpath("filters/merge3.json"));
 
     std::ostringstream oss;
     std::ostream& o = std::clog;

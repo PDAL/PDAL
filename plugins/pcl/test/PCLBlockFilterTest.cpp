@@ -35,6 +35,8 @@
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/PipelineManager.hpp>
+#include <pdal/PipelineReaderJSON.hpp>
+#include <pdal/PipelineReaderXML.hpp>
 #include <pdal/PluginManager.hpp>
 #include <pdal/StageFactory.hpp>
 
@@ -51,15 +53,34 @@ TEST(PCLBlockFilterTest, PCLBlockFilterTest_example_passthrough_xml)
     EXPECT_TRUE(filter.get());
 
     PipelineManager pipeline;
-    pipeline.readPipeline(Support::datapath("filters/pcl/passthrough.xml"));
+    PipelineReaderXML pipelineReader(pipeline);
+    pipelineReader.readPipeline(
+        Support::configuredpath("filters/pcl/passthrough.xml"));
     pipeline.execute();
 
     PointViewSet viewSet = pipeline.views();
     EXPECT_EQ(viewSet.size(), 1u);
     PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 81u);
+    EXPECT_EQ(view->size(), 795u);
 }
 
+TEST(PCLBlockFilterTest, PCLBlockFilterTest_example_passthrough_json)
+{
+    StageFactory f;
+    std::unique_ptr<Stage> filter(f.createStage("filters.pclblock"));
+    EXPECT_TRUE(filter.get());
+
+    PipelineManager pipeline;
+    PipelineReaderJSON pipelineReader(pipeline);
+    pipelineReader.readPipeline(
+        Support::configuredpath("filters/pcl/passthrough.json"));
+    pipeline.execute();
+
+    PointViewSet viewSet = pipeline.views();
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 795u);
+}
 
 static void test_filter(const std::string& jsonFile,
                         size_t expectedPointCount,
