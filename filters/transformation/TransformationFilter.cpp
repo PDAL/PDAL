@@ -104,6 +104,7 @@ bool TransformationFilter::processOne(PointRef& point)
 
     point.setField(Dimension::Id::Z,
         x * m_matrix[8] + y * m_matrix[9] + z * m_matrix[10] + m_matrix[11]);
+    return true;
 }
 
 
