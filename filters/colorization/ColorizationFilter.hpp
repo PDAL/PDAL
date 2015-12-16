@@ -87,6 +87,7 @@ private:
     virtual void processOptions(const Options&);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
+    virtual bool processOne(PointRef& point);
     virtual void filter(PointView& view);
 
     std::string m_rasterFilename;

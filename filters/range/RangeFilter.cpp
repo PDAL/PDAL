@@ -180,6 +180,7 @@ void RangeFilter::prepared(PointTableRef table)
     std::sort(m_range_list.begin(), m_range_list.end());
 }
 
+
 // Determine if a point passes a single range.
 bool RangeFilter::dimensionPasses(double v, const Range& r) const
 {
@@ -196,7 +197,7 @@ bool RangeFilter::dimensionPasses(double v, const Range& r) const
 // as ORs between ranges of the same dimension and ANDs between ranges
 // of different dimensions.  This is simple logic, but is probably the most
 // common case.
-bool RangeFilter::pointPasses(PointView *view, PointId idx) const
+bool RangeFilter::processOne(PointRef& point)
 {
     Dimension::Id::Enum lastId = m_range_list.front().m_id;
     bool passes = false;
@@ -216,8 +217,7 @@ bool RangeFilter::pointPasses(PointView *view, PointId idx) const
         // a new dimension.
         else if (passes)
             continue;
-        double v = view->getFieldAs<double>(r.m_id, idx);
-        passes = dimensionPasses(v, r);
+        passes = dimensionPasses(point.getFieldAs<double>(r.m_id), r);
     }
     return passes;
 }
@@ -232,11 +232,15 @@ PointViewSet RangeFilter::run(PointViewPtr inView)
     PointViewPtr outView = inView->makeNew();
 
     for (PointId i = 0; i < inView->size(); ++i)
-        if (pointPasses(inView.get(), i))
+    {
+        PointRef point = inView->point(i);
+        if (processOne(point))
             outView->appendPoint(*inView, i);
+    }
 
     viewSet.insert(outView);
     return viewSet;
 }
 
-} // pdal
+} // namespace pdal
+

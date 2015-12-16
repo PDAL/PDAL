@@ -122,15 +122,24 @@ void FerryFilter::ready(PointTableRef table)
 }
 
 
+bool FerryFilter::processOne(PointRef& point)
+{
+    for (const auto& dim_par : m_dimensions_map)
+    {
+        double v = point.getFieldAs<double>(dim_par.first);
+        point.setField(dim_par.second, v);
+    }
+    return true;
+}
+
+
 void FerryFilter::filter(PointView& view)
 {
+    PointRef point(view, 0);
     for (PointId id = 0; id < view.size(); ++id)
     {
-        for (const auto& dim_par : m_dimensions_map)
-        {
-            double v = view.getFieldAs<double>(dim_par.first, id);
-            view.setField(dim_par.second, id, v);
-        }
+        point.setPointId(id);
+        processOne(point);
     }
 }
 

@@ -42,6 +42,7 @@
 #include <pdal/Metadata.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/PointTable.hpp>
+#include <pdal/PointRef.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/QuickInfo.hpp>
 #include <pdal/SpatialReference.hpp>
@@ -52,7 +53,6 @@
 namespace pdal
 {
 
-class Iterator;
 class StageRunner;
 class StageWrapper;
 
@@ -79,6 +79,7 @@ public:
     }
     void prepare(PointTableRef table);
     PointViewSet execute(PointTableRef table);
+    void execute(StreamPointTable& table);
 
     void setSpatialReference(SpatialReference const&);
     const SpatialReference& getSpatialReference() const;
@@ -168,11 +169,18 @@ private:
         {}
     virtual void done(PointTableRef /*table*/)
         {}
+    virtual bool processOne(PointRef& /*point*/)
+    {
+        std::ostringstream oss;
+        oss << "Point streaming not supported for stage " << getName() << ".";
+        throw pdal_error(oss.str());
+    }
     virtual PointViewSet run(PointViewPtr /*view*/)
     {
         std::cerr << "Can't run stage = " << getName() << "!\n";
         return PointViewSet();
     }
+    void execute(StreamPointTable& table, std::list<Stage *>& stages);
 };
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const Stage&);

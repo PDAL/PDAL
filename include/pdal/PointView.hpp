@@ -36,7 +36,9 @@
 
 #include <pdal/util/Bounds.hpp>
 #include <pdal/pdal_internal.hpp>
+#include <pdal/PointContainer.hpp>
 #include <pdal/PointLayout.hpp>
+#include <pdal/PointRef.hpp>
 #include <pdal/PointTable.hpp>
 
 #include <memory>
@@ -63,10 +65,10 @@ class PointViewIter;
 typedef std::shared_ptr<PointView> PointViewPtr;
 typedef std::set<PointViewPtr, PointViewLess> PointViewSet;
 
-class PDAL_DLL PointView
+class PDAL_DLL PointView : public PointContainer
 {
     friend class plang::BufferedInvocation;
-    friend class PointRef;
+    friend class PointIdxRef;
     friend struct PointViewLess;
 public:
     PointView(PointTableRef pointTable) : m_pointTable(pointTable),
@@ -117,6 +119,9 @@ public:
         return PointViewPtr( new PointView(m_pointTable, m_spatialReference));
     }
 
+    PointRef point(PointId id)
+        { return PointRef(*this, id); }
+
     template<class T>
     T getFieldAs(Dimension::Id::Enum dim, PointId pointIndex) const;
 
@@ -137,7 +142,7 @@ public:
 
     bool compare(Dimension::Id::Enum dim, PointId id1, PointId id2)
     {
-        const Dimension::Detail *dd = m_pointTable.layout()->dimDetail(dim);
+        const Dimension::Detail *dd = layout()->dimDetail(dim);
 
         switch (dd->type())
         {
@@ -200,19 +205,19 @@ public:
 
     void dump(std::ostream& ostr) const;
     bool hasDim(Dimension::Id::Enum id) const
-        { return m_pointTable.layout()->hasDim(id); }
+        { return layout()->hasDim(id); }
     std::string dimName(Dimension::Id::Enum id) const
-        { return m_pointTable.layout()->dimName(id); }
+        { return layout()->dimName(id); }
     Dimension::IdList dims() const
-        { return m_pointTable.layout()->dims(); }
+        { return layout()->dims(); }
     std::size_t pointSize() const
-        { return m_pointTable.layout()->pointSize(); }
+        { return layout()->pointSize(); }
     std::size_t dimSize(Dimension::Id::Enum id) const
-        { return m_pointTable.layout()->dimSize(id); }
+        { return layout()->dimSize(id); }
     Dimension::Type::Enum dimType(Dimension::Id::Enum id) const
-     { return m_pointTable.layout()->dimType(id);}
+         { return layout()->dimType(id);}
     DimTypeList dimTypes() const
-        { return m_pointTable.layout()->dimTypes(); }
+        { return layout()->dimTypes(); }
     PointLayoutPtr layout() const
         { return m_pointTable.layout(); }
     void setSpatialReference(const SpatialReference& spatialRef)
@@ -276,12 +281,14 @@ private:
     template<typename T_IN, typename T_OUT>
     bool convertAndSet(Dimension::Id::Enum dim, PointId idx, T_IN in);
 
-    inline void setFieldInternal(Dimension::Id::Enum dim, PointId pointIndex,
-        const void *value);
+    virtual void setFieldInternal(Dimension::Id::Enum dim, PointId idx,
+        const void *buf);
+    virtual void getFieldInternal(Dimension::Id::Enum dim, PointId idx,
+        void *buf) const
+    { m_pointTable.getFieldInternal(dim, m_index[idx], buf); }
+
     template<class T>
     T getFieldInternal(Dimension::Id::Enum dim, PointId pointIndex) const;
-    inline void getFieldInternal(Dimension::Id::Enum dim, PointId pointIndex,
-        void *value) const;
     inline PointId getTemp(PointId id);
     void freeTemp(PointId id)
         { m_temps.push(id); }
@@ -394,7 +401,7 @@ inline T PointView::getFieldAs(Dimension::Id::Enum dim,
 {
     assert(pointIndex < m_size);
     T retval;
-    const Dimension::Detail *dd = m_pointTable.layout()->dimDetail(dim);
+    const Dimension::Detail *dd = layout()->dimDetail(dim);
     double val;
 
     switch (dd->type())
@@ -464,7 +471,7 @@ bool PointView::convertAndSet(Dimension::Id::Enum dim, PointId idx, T_IN in)
 template<typename T>
 void PointView::setField(Dimension::Id::Enum dim, PointId idx, T val)
 {
-    const Dimension::Detail *dd = m_pointTable.layout()->dimDetail(dim);
+    const Dimension::Detail *dd = layout()->dimDetail(dim);
 
     bool ok = true;
     switch (dd->type())
@@ -514,27 +521,19 @@ void PointView::setField(Dimension::Id::Enum dim, PointId idx, T val)
     }
 }
 
-
-inline void PointView::getFieldInternal(Dimension::Id::Enum dim,
-    PointId id, void *buf) const
-{
-    m_pointTable.getField(m_pointTable.layout()->dimDetail(dim),
-        m_index[id], buf);
-}
-
-
-inline void PointView::setFieldInternal(Dimension::Id::Enum dim,
-    PointId id, const void *value)
+/**
+void PointView::setFieldInternal(Dimension::Id::Enum dim, PointId idx,
+    const void *value)
 {
     PointId rawId = 0;
-    if (id == size())
+    if (idx == size())
     {
         rawId = m_pointTable.addPoint();
         m_index.push_back(rawId);
         m_size++;
         assert(m_temps.empty());
     }
-    else if (id > size())
+    else if (idx > size())
     {
         std::cerr << "Point index must increment.\n";
         //error - throw?
@@ -542,12 +541,11 @@ inline void PointView::setFieldInternal(Dimension::Id::Enum dim,
     }
     else
     {
-        rawId = m_index[id];
+        rawId = m_index[idx];
     }
-    m_pointTable.setField(m_pointTable.layout()->dimDetail(dim),
-        rawId, value);
+    m_pointTable.setFieldInternal(dim, rawId, value);
 }
-
+**/
 
 inline void PointView::appendPoint(const PointView& buffer, PointId id)
 {

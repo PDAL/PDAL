@@ -56,6 +56,8 @@ private:
     PointViewPtr m_view;
 
     virtual void ready(PointTableRef table);
+    virtual bool processOne(PointRef& point)
+        { return true; }
     virtual PointViewSet run(PointViewPtr in);
 
     MergeFilter& operator=(const MergeFilter&); // not implemented

@@ -32,6 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/PointRef.hpp>
+
 #include "SbetReader.hpp"
 
 namespace pdal
@@ -68,6 +70,21 @@ void SbetReader::ready(PointTableRef)
     m_numPts = fileSize / pointSize;
     m_index = 0;
     m_stream.reset(new ILeStream(m_filename));
+    m_dims = fileDimensions();
+    seek(m_index);
+}
+
+
+bool SbetReader::processOne(PointRef& point)
+{
+    for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
+    {
+        double d;
+        *m_stream >> d;
+        Dimension::Id::Enum dim = *di;
+        point.setField(dim, d);
+    }
+    return (m_stream->good());
 }
 
 
@@ -77,17 +94,10 @@ point_count_t SbetReader::read(PointViewPtr view, point_count_t count)
     PointId idx = m_index;
     point_count_t numRead = 0;
     seek(idx);
-    Dimension::IdList dims = getDefaultDimensions();
     while (numRead < count && idx < m_numPts)
     {
-        for (auto di = dims.begin(); di != dims.end(); ++di)
-        {
-            double d;
-            *m_stream >> d;
-            Dimension::Id::Enum dim = *di;
-            view->setField(dim, nextId, d);
-        }
-
+        PointRef point = view->point(nextId);
+        processOne(point);
         if (m_cb)
             m_cb(*view, nextId);
 

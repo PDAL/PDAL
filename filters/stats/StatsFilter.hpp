@@ -125,6 +125,7 @@ private:
     StatsFilter& operator=(const StatsFilter&); // not implemented
     StatsFilter(const StatsFilter&); // not implemented
     virtual void processOptions(const Options& options);
+    virtual bool processOne(PointRef& point);
     virtual void prepared(PointTableRef table);
     virtual void done(PointTableRef table);
     virtual void filter(PointView& view);
