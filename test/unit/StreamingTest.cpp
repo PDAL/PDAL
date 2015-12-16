@@ -36,96 +36,73 @@
 
 #include <pdal/Filter.hpp>
 #include <pdal/PointTable.hpp>
-#include <SbetReader.hpp>
 #include <FauxReader.hpp>
-#include <RangeFilter.hpp>
+#include <MergeFilter.hpp>
+#include <StreamCallbackFilter.hpp>
 #include "Support.hpp"
 
 using namespace pdal;
 
-/**
-TEST(Streaming, simple)
-{
-    class SimpleFilter : public Filter
-    {
-    public:
-        std::string getName() const
-            { return "filters.simple"; }
-        SimpleFilter() : m_cnt(0)
-            {}
-    private:
-        int m_cnt;
-        bool processOne(PointRef point)
-        {
-            double d = point.getFieldAs<double>(Dimension::Id::X);
-            std::cerr << "Value[" << m_cnt++ << "] = " << d << "!\n";
-            return true;
-        }
-    };
-
-    Options ops;
-    ops.add("filename", Support::datapath("sbet/autzen_trim.sbet"));
-    SbetReader r;
-    r.setOptions(ops);
-
-    SimpleFilter f;
-    f.setInput(r);
-
-    FixedPointTable t(100);
-    f.prepare(t);
-    f.execute(t);
-}
-**/
-
-
+// This test depends on stages being executed in the order that they were
+// added to each parent.  If you change order, things will break.
 TEST(Streaming, filter)
 {
-    Options ro;
-    ro.add("bounds", BOX3D(1, 1, 1, 1000, 1000, 1000));
-    ro.add("mode", "ramp");
-    ro.add("count", 1000);
-    FauxReader r;
-    r.setOptions(ro);
+    Options ro1;
+    ro1.add("bounds", BOX3D(0, 0, 0, 99, 99, 99));
+    ro1.add("mode", "ramp");
+    ro1.add("count", 100);
+    FauxReader r1;
+    r1.setOptions(ro1);
 
-    Options fo;
-    fo.add("limits", "X(100:200], X(300:400], X(500:600], "
-        "X(700:800], X(900:1000]");
-    RangeFilter f;
-    f.setOptions(fo);
-    f.setInput(r);
+    Options ro2;
+    ro2.add("bounds", BOX3D(100, 100, 100, 199, 199, 199));
+    ro2.add("mode", "ramp");
+    ro2.add("count", 100);
+    FauxReader r2;
+    r2.setOptions(ro2);
 
-    class Writer : public Filter
+    Options ro3;
+    ro3.add("bounds", BOX3D(200, 200, 200, 299, 299, 299));
+    ro3.add("mode", "ramp");
+    ro3.add("count", 100);
+    FauxReader r3;
+    r3.setOptions(ro3);
+
+    Options ro4;
+    ro4.add("bounds", BOX3D(300, 300, 300, 399, 399, 399));
+    ro4.add("mode", "ramp");
+    ro4.add("count", 100);
+    FauxReader r4;
+    r4.setOptions(ro4);
+
+    MergeFilter m1;
+    m1.setInput(r1);
+    m1.setInput(r2);
+
+    MergeFilter m2;
+    m2.setInput(r3);
+    m2.setInput(r4);
+
+    MergeFilter m3;
+    m3.setInput(m1);
+    m3.setInput(m2);
+
+    StreamCallbackFilter f;
+    int cnt = 0;
+    auto cb = [&cnt](PointRef& point)
     {
-    public:
-        std::string getName() const
-            { return "filterstester"; }
-        Writer() : m_cnt(0), m_val(101)
-            {}
-    private:
-        int m_cnt;
-        int m_val;
-
-        bool processOne(PointRef& point)
-        {
-            int i = point.getFieldAs<int>(Dimension::Id::X);
-            EXPECT_EQ(m_val, i);
-            if (m_val % 100 == 0)
-                m_val += 100;
-            m_val++;
-            m_cnt++;
-            return true;
-        }
-
-        void done(PointTableRef)
-        {
-            EXPECT_EQ(m_cnt, 500);
-        }
+        static int x(0), y(0), z(0);
+        EXPECT_EQ(point.getFieldAs<int>(Dimension::Id::X), x++);
+        EXPECT_EQ(point.getFieldAs<int>(Dimension::Id::Y), y++);
+        EXPECT_EQ(point.getFieldAs<int>(Dimension::Id::Z), z++);
+        cnt++;
+        return true;
     };
+    f.setCallback(cb);
+    f.setInput(m3);
 
-    Writer w;
-    w.setInput(f);
-
-    FixedPointTable t(50);
-    w.prepare(t);
-    w.execute(t);
+    FixedPointTable t(20);
+    f.prepare(t);
+    f.execute(t);
+    EXPECT_EQ(cnt, 400);
 }

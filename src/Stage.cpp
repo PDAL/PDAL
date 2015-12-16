@@ -155,25 +155,55 @@ PointViewSet Stage::execute(PointTableRef table)
 // Streamed execution.
 void Stage::execute(StreamPointTable& table)
 {
+    typedef std::list<Stage *> StageList;
+
+    std::list<StageList> lists;
+    StageList stages;
+
     table.finalize();
 
-    std::list<Stage *> stages;
-    std::list<Stage *> filters;
-    std::vector<bool> skips(table.capacity());
-    SpatialReference srs;
-
-    // Build a list of the stages.
+    // Walk from the current stage backwards.  As we add each input, copy
+    // the list of stages and push it on a list.  We then pull a list from the
+    // front of list and keep going.  Placing on the back and pulling from the
+    // front insures that the stages will be executed in the order that they
+    // were added.  If we hit stage with no previous stages, we execute
+    // the stage list.
+    // All this often amounts to a bunch of list copying for
+    // no reason, but it's more simple than what we might otherwise do and
+    // this should be a nit in the grand scheme of execution time.
+    //
+    // As an example, if there are four paths from the end stage (writer) to
+    // reader stages, there will be four stage lists and execute(table, stages)
+    // will be called four times.
     Stage *s = this;
+    stages.push_front(s);
     while (true)
     {
-        if (s->m_inputs.size() > 1)
-            throw pdal_error("Can't execute streaming pipeline stages "
-                "containing multiple inputs.");
-        stages.push_front(s);
         if (s->m_inputs.empty())
+            execute(table, stages);
+        else
+        {
+            for (auto s2 : s->m_inputs)
+            {
+                StageList newStages(stages);
+                newStages.push_front(s2);
+                lists.push_front(newStages);
+            }
+        }
+        if (lists.empty())
             break;
-        s = s->m_inputs[0];
+        stages = lists.back();
+        lists.pop_back();
+        s = stages.front();
     }
+}
+
+
+void Stage::execute(StreamPointTable& table, std::list<Stage *>& stages)
+{
+    std::vector<bool> skips(table.capacity());
+    std::list<Stage *> filters;
+    SpatialReference srs;
 
     // Separate out the first stage.
     Stage *reader = stages.front();

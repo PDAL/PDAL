@@ -180,6 +180,7 @@ private:
         std::cerr << "Can't run stage = " << getName() << "!\n";
         return PointViewSet();
     }
+    void execute(StreamPointTable& table, std::list<Stage *>& stages);
 };
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const Stage&);
