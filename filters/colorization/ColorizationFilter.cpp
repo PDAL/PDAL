@@ -177,9 +177,24 @@ void ColorizationFilter::addDimensions(PointLayoutPtr layout)
 
 void ColorizationFilter::ready(PointTableRef table)
 {
-    m_raster =
-        std::unique_ptr<gdal::Raster>(new gdal::Raster(m_rasterFilename));
-    m_raster->open();
+    using namespace gdal;
+
+    m_raster.reset(new gdal::Raster(m_rasterFilename));
+
+    GDALError::Enum error = m_raster->open();
+    if (error != GDALError::None)
+    {
+        if (error == GDALError::NoTransform ||
+            error == GDALError::NotInvertible)
+        {
+            log()->get(LogLevel::Warning) << getName() << ": " <<
+                m_raster->errorMsg() << std::endl;
+        }
+        else
+        {
+            throw pdal_error(getName() + ": " + m_raster->errorMsg());
+        }
+    }
 }
 
 
@@ -190,7 +205,7 @@ bool ColorizationFilter::processOne(PointRef& point)
     double x = point.getFieldAs<double>(Dimension::Id::X);
     double y = point.getFieldAs<double>(Dimension::Id::Y);
 
-    if (m_raster->read(x, y, data))
+    if (m_raster->read(x, y, data) == gdal::GDALError::None)
     { 
         int i(0);
         for (auto bi = m_bands.begin(); bi != m_bands.end(); ++bi)
@@ -199,8 +214,9 @@ bool ColorizationFilter::processOne(PointRef& point)
             point.setField(b.m_dim, data[i] * b.m_scale);
             ++i;
         }
+        return true;
     }
-    return true;
+    return false;
 }
 
 void ColorizationFilter::filter(PointView& view)
