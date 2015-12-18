@@ -49,6 +49,7 @@ extern "C" PF_ExitFunc LasWriter_InitPlugin();
 
 namespace pdal
 {
+class LeInserter;
 class LasTester;
 class NitfWriter;
 class GeotiffSupport;
@@ -99,6 +100,7 @@ private:
     std::set<std::string> m_forwards;
     bool m_forwardVlrs;
     LasCompression::Enum m_compression;
+    std::vector<char> m_pointBuf;
 
     NumHeaderVal<uint8_t, 1, 1> m_majorVersion;
     NumHeaderVal<uint8_t, 1, 4> m_minorVersion;
@@ -128,6 +130,7 @@ private:
     virtual void readyFile(const std::string& filename,
         const SpatialReference& srs);
     virtual void writeView(const PointViewPtr view);
+    virtual bool processOne(PointRef& point);
     virtual void doneFile();
 
     void fillForwardList(const Options& options);
@@ -137,6 +140,7 @@ private:
         const MetadataNode& base);
     void handleHeaderForwards(MetadataNode& forward);
     void fillHeader();
+    bool fillPointBuf(PointRef& point, LeInserter& ostream);
     point_count_t fillWriteBuf(const PointView& view, PointId startId,
         std::vector<char>& buf);
     void writeLasZipBuf(char *data, size_t pointLen, point_count_t numPts);

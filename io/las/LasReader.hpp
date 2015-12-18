@@ -104,6 +104,7 @@ private:
     std::unique_ptr<ZipPoint> m_zipPoint;
     std::unique_ptr<LASunzipper> m_unzipper;
     std::unique_ptr<LazPerfVlrDecompressor> m_decompressor;
+    std::vector<char> m_decompressorBuf;
     point_count_t m_index;
     std::istream* m_istream;
     VlrList m_vlrs;
@@ -127,13 +128,14 @@ private:
     virtual QuickInfo inspect();
     virtual void ready(PointTableRef table);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
+    virtual bool processOne(PointRef& point);
     virtual void done(PointTableRef table);
     virtual bool eof()
         { return m_index >= getNumPoints(); }
-    void loadPoint(PointView& data, char *buf, size_t bufsize);
-    void loadPointV10(PointView& data, char *buf, size_t bufsize);
-    void loadPointV14(PointView& data, char *buf, size_t bufsize);
-    void loadExtraDims(LeExtractor& istream, PointView& data, PointId nextId);
+    void loadPoint(PointRef& point, char *buf, size_t bufsize);
+    void loadPointV10(PointRef& point, char *buf, size_t bufsize);
+    void loadPointV14(PointRef& point, char *buf, size_t bufsize);
+    void loadExtraDims(LeExtractor& istream, PointRef& data);
     point_count_t readFileBlock(
             std::vector<char>& buf,
             point_count_t maxPoints);

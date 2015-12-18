@@ -37,11 +37,13 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/BufferReader.hpp>
 #include <CropFilter.hpp>
 #include <FauxReader.hpp>
 #include <LasReader.hpp>
 #include <ReprojectionFilter.hpp>
 #include <StatsFilter.hpp>
+#include <StreamCallbackFilter.hpp>
 #include "Support.hpp"
 
 using namespace pdal;
@@ -200,26 +202,158 @@ TEST(CropFilterTest, test_crop_polygon_reprojection)
 #endif
 }
 
-/**
 TEST(CropFilterTest, multibounds)
 {
     using namespace Dimension;
 
     PointTable table;
-    table.layout->registerDim(Id::X);
-    table.layout->registerDim(Id::Y);
-    table.layout->registerDim(Id::Z);
+    table.layout()->registerDim(Id::X);
+    table.layout()->registerDim(Id::Y);
+    table.layout()->registerDim(Id::Z);
 
-    PointView view(table);
-    view.setField(Id::X, 0, 1);
-    view.setField(Id::Y, 0, 1);
+    PointViewPtr view(new PointView(table));
+    view->setField(Id::X, 0, 2);
+    view->setField(Id::Y, 0, 2);
 
-    view.setField(Id::X, 1, 2);
-    view.setField(Id::Y, 1, 6);
+    view->setField(Id::X, 1, 4);
+    view->setField(Id::Y, 1, 2);
 
-    view.setField(Id::X, 2, 4);
-    view.setField(Id::Y, 2, 4);
+    view->setField(Id::X, 2, 6);
+    view->setField(Id::Y, 2, 2);
 
-    BOX3D p
+    view->setField(Id::X, 3, 8);
+    view->setField(Id::Y, 3, 2);
+
+    view->setField(Id::X, 4, 10);
+    view->setField(Id::Y, 4, 2);
+
+    view->setField(Id::X, 5, 12);
+    view->setField(Id::Y, 5, 2);
+
+    BufferReader r;
+    r.addView(view);
+
+    CropFilter crop;
+    Options o;
+    o.add("bounds", "([1, 3], [1, 3])");
+    o.add("bounds", "([5, 7], [1, 3])");
+    o.add("polygon", "POLYGON ((9 1, 11 1, 11 3, 9 3, 9 1))");
+    crop.setInput(r);
+    crop.setOptions(o);
+
+    crop.prepare(table);
+    PointViewSet s = crop.execute(table);
+    // Make sure we get three views, one with the point 2, 2, one with the
+    // point 6, 2 and one with 10,2.
+    EXPECT_EQ(s.size(), 3u);
+    static int total_cnt = 0;
+    for (auto v : s)
+    {
+        int cnt = 0;
+        EXPECT_EQ(v->size(), 1u);
+        double x = v->getFieldAs<double>(Dimension::Id::X, 0);
+        double y = v->getFieldAs<double>(Dimension::Id::Y, 0);
+        if (x == 2 && y == 2)
+            cnt = 1;
+        if (x == 6 && y == 2)
+            cnt = 2;
+        if (x == 10 && y == 2)
+            cnt = 4;
+        EXPECT_TRUE(cnt > 0);
+        total_cnt += cnt;
+    }
+    EXPECT_EQ(total_cnt, 7);
 }
-**/
+
+TEST(CropFilterTest, stream)
+{
+    using namespace Dimension;
+
+    FixedPointTable table(2);
+    table.layout()->registerDim(Id::X);
+    table.layout()->registerDim(Id::Y);
+    table.layout()->registerDim(Id::Z);
+
+    class StreamReader : public Reader
+    {
+    public:
+        std::string getName() const
+            { return "readers.stream"; }
+        bool processOne(PointRef& point)
+        {
+            static int i = 0;
+
+            if (i == 0)
+            {
+                point.setField(Id::X, 2);
+                point.setField(Id::Y, 2);
+            }
+            else if (i == 1)
+            {
+                point.setField(Id::X, 6);
+                point.setField(Id::Y, 2);
+            }
+            else if (i == 2)
+            {
+                point.setField(Id::X, 8);
+                point.setField(Id::Y, 2);
+            }
+            else if (i == 3)
+            {
+                point.setField(Id::X, 10);
+                point.setField(Id::Y, 2);
+            }
+            else if (i == 4)
+            {
+                point.setField(Id::X, 12);
+                point.setField(Id::Y, 2);
+            }
+            else
+                return false;
+            i++;
+            return true;
+        }
+    };
+
+    StreamReader r;
+
+    CropFilter crop;
+    Options o;
+    o.add("bounds", "([1, 3], [1, 3])");
+    o.add("bounds", "([5, 7], [1, 3])");
+    o.add("polygon", "POLYGON ((9 1, 11 1, 11 3, 9 3, 9 1))");
+    crop.setInput(r);
+    crop.setOptions(o);
+
+    auto cb = [](PointRef& point)
+    {
+        static int i = 0;
+        if (i == 0)
+        {
+            EXPECT_EQ(point.getFieldAs<int>(Id::X), 2);
+            EXPECT_EQ(point.getFieldAs<int>(Id::Y), 2);
+        }
+        if (i == 1)
+        {
+            EXPECT_EQ(point.getFieldAs<int>(Id::X), 6);
+            EXPECT_EQ(point.getFieldAs<int>(Id::Y), 2);
+        }
+        if (i == 2)
+        {
+            EXPECT_EQ(point.getFieldAs<int>(Id::X), 10);
+            EXPECT_EQ(point.getFieldAs<int>(Id::Y), 2);
+        }
+        else
+            return false;
+        i++;
+        return true;
+    };
+
+    StreamCallbackFilter f;
+    f.setCallback(cb);
+    f.setInput(crop);
+
+    f.prepare(table);
+    f.execute(table);
+}
+

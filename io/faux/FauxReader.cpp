@@ -127,7 +127,20 @@ void FauxReader::processOptions(const Options& options)
             "[0,10].";
         throw pdal_error(oss.str());
     }
+    if (m_count > 1)
+    {
+        m_delX = (m_maxX - m_minX) / (m_count - 1);
+        m_delY = (m_maxY - m_minY) / (m_count - 1);
+        m_delZ = (m_maxZ - m_minZ) / (m_count - 1);
+    }
+    else
+    {
+        m_delX = 0;
+        m_delY = 0;
+        m_delZ = 0;
+    }
 }
+
 
 Options FauxReader::getDefaultOptions()
 {
@@ -160,71 +173,75 @@ Dimension::IdList FauxReader::getDefaultDimensions()
     return ids;
 }
 
+void FauxReader::ready(PointTableRef /*table*/)
+{
+    m_returnNum = 1;
+    m_time = 0;
+    m_seed = (uint32_t)std::time(NULL);
+    m_index = 0;
+}
+
+
+bool FauxReader::processOne(PointRef& point)
+{
+    double x(0);
+    double y(0);
+    double z(0);
+
+    if (m_index >= m_count)
+        return false;
+
+    switch (m_mode)
+    {
+    case Random:
+        x = Utils::random(m_minX, m_maxX);
+        y = Utils::random(m_minY, m_maxY);
+        z = Utils::random(m_minZ, m_maxZ);
+        break;
+    case Constant:
+        x = m_minX;
+        y = m_minY;
+        z = m_minZ;
+        break;
+    case Ramp:
+        x = m_minX + m_delX * m_index;
+        y = m_minY + m_delY * m_index;
+        z = m_minZ + m_delZ * m_index;
+        break;
+    case Uniform:
+        x = Utils::uniform(m_minX, m_maxX, m_seed++);
+        y = Utils::uniform(m_minY, m_maxY, m_seed++);
+        z = Utils::uniform(m_minZ, m_maxZ, m_seed++);
+        break;
+    case Normal:
+        x = Utils::normal(m_mean_x, m_stdev_x, m_seed++);
+        y = Utils::normal(m_mean_y, m_stdev_y, m_seed++);
+        z = Utils::normal(m_mean_z, m_stdev_z, m_seed++);
+        break;
+    }
+
+    point.setField(Dimension::Id::X, x);
+    point.setField(Dimension::Id::Y, y);
+    point.setField(Dimension::Id::Z, z);
+    point.setField(Dimension::Id::OffsetTime, m_time++);
+    if (m_numReturns > 0)
+    {
+        point.setField(Dimension::Id::ReturnNumber, m_returnNum);
+        point.setField(Dimension::Id::NumberOfReturns, m_numReturns);
+        m_returnNum = (m_returnNum % m_numReturns) + 1;
+    }
+    m_index++;
+    return true;
+}
+
 
 point_count_t FauxReader::read(PointViewPtr view, point_count_t count)
 {
-    const double numDeltas = (double)count - 1.0;
-    double delX(0), delY(0), delZ(0);
-    if (numDeltas)
-    {
-        delX = (m_maxX - m_minX) / numDeltas;
-        delY = (m_maxY - m_minY) / numDeltas;
-        delZ = (m_maxZ - m_minZ) / numDeltas;
-    }
-
-    log()->get(LogLevel::Debug5) << "Reading a point view of " <<
-        count << " points." << std::endl;
-
-    uint32_t seed = static_cast<uint32_t>(std::time(NULL));
-
     for (PointId idx = 0; idx < count; ++idx)
     {
-        double x;
-        double y;
-        double z;
-        switch (m_mode)
-        {
-            case Random:
-                x = Utils::random(m_minX, m_maxX);
-                y = Utils::random(m_minY, m_maxY);
-                z = Utils::random(m_minZ, m_maxZ);
-                break;
-            case Constant:
-                x = m_minX;
-                y = m_minY;
-                z = m_minZ;
-                break;
-            case Ramp:
-                x = m_minX + delX * idx;
-                y = m_minY + delY * idx;
-                z = m_minZ + delZ * idx;
-                break;
-            case Uniform:
-                x = Utils::uniform(m_minX, m_maxX, seed++);
-                y = Utils::uniform(m_minY, m_maxY, seed++);
-                z = Utils::uniform(m_minZ, m_maxZ, seed++);
-                break;
-            case Normal:
-                x = Utils::normal(m_mean_x, m_stdev_x, seed++);
-                y = Utils::normal(m_mean_y, m_stdev_y, seed++);
-                z = Utils::normal(m_mean_z, m_stdev_z, seed++);
-                break;
-            default:
-                throw pdal_error("invalid mode in FauxReader");
-                break;
-        }
-
-        view->setField(Dimension::Id::X, idx, x);
-        view->setField(Dimension::Id::Y, idx, y);
-        view->setField(Dimension::Id::Z, idx, z);
-        view->setField(Dimension::Id::OffsetTime, idx, m_time++);
-        if (m_numReturns > 0)
-        {
-            view->setField(Dimension::Id::ReturnNumber, idx, m_returnNum);
-            view->setField(Dimension::Id::NumberOfReturns, idx, m_numReturns);
-            m_returnNum = (m_returnNum % m_numReturns) + 1;
-        }
-
+        PointRef point = view->point(idx);
+        if (!processOne(point))
+            break;
         if (m_cb)
             m_cb(*view, idx);
     }

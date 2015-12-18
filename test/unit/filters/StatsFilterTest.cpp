@@ -87,6 +87,50 @@ TEST(Stats, simple)
 }
 
 
+TEST(Stats, stream)
+{
+    BOX3D bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
+    Options ops;
+    ops.add("bounds", bounds);
+    ops.add("count", 1000);
+    ops.add("mode", "constant");
+
+    StageFactory f;
+
+    std::unique_ptr<Stage> reader(f.createStage("readers.faux"));
+    EXPECT_TRUE(reader.get());
+    reader->setOptions(ops);
+
+    StatsFilter filter;
+    filter.setInput(*reader);
+    EXPECT_EQ(filter.getName(), "filters.stats");
+
+    FixedPointTable table(100);
+    filter.prepare(table);
+    filter.execute(table);
+
+    const stats::Summary& statsX = filter.getStats(Dimension::Id::X);
+    const stats::Summary& statsY = filter.getStats(Dimension::Id::Y);
+    const stats::Summary& statsZ = filter.getStats(Dimension::Id::Z);
+
+    EXPECT_EQ(statsX.count(), 1000u);
+    EXPECT_EQ(statsY.count(), 1000u);
+    EXPECT_EQ(statsZ.count(), 1000u);
+
+    EXPECT_FLOAT_EQ(statsX.minimum(), 1.0);
+    EXPECT_FLOAT_EQ(statsY.minimum(), 2.0);
+    EXPECT_FLOAT_EQ(statsZ.minimum(), 3.0);
+
+    EXPECT_FLOAT_EQ(statsX.maximum(), 1.0);
+    EXPECT_FLOAT_EQ(statsY.maximum(), 2.0);
+    EXPECT_FLOAT_EQ(statsZ.maximum(), 3.0);
+
+    EXPECT_FLOAT_EQ(statsX.average(), 1.0);
+    EXPECT_FLOAT_EQ(statsY.average(), 2.0);
+    EXPECT_FLOAT_EQ(statsZ.average(), 3.0);
+}
+
+
 TEST(Stats, dimset)
 {
     BOX3D bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);

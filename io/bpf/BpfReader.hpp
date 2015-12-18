@@ -86,18 +86,23 @@ private:
     virtual void initialize();
     virtual void addDimensions(PointLayoutPtr Layout);
     virtual void ready(PointTableRef table);
+    virtual bool processOne(PointRef& point);
     virtual point_count_t read(PointViewPtr data, point_count_t num);
     virtual void done(PointTableRef table);
-    virtual bool eof();
+
 
     bool readUlemData();
     bool readUlemFiles();
     bool readHeaderExtraData();
     bool readPolarData();
+    void readPointMajor(PointRef& point);
     point_count_t readPointMajor(PointViewPtr data, point_count_t count);
+    void readDimMajor(PointRef& point);
     point_count_t readDimMajor(PointViewPtr data, point_count_t count);
+    void readByteMajor(PointRef& point);
     point_count_t readByteMajor(PointViewPtr data, point_count_t count);
     size_t readBlock(std::vector<char>& outBuf, size_t index);
+    bool eof();
 
     int inflate(char *inbuf, size_t insize, char *outbuf, size_t outsize);
 
