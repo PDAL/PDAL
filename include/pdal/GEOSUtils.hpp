@@ -51,48 +51,6 @@ namespace pdal
 namespace
 {
 
-static GEOSContextHandle_t s_geos_environment(NULL);
-static int s_contextCnt(0);
-
-static void GEOSErrorHandler(const char *fmt, ...)
-{
-    va_list args;
-
-    va_start(args, fmt);
-    char buf[1024];
-
-    vsnprintf(buf, sizeof(buf), fmt, args);
-    std::cout << "GEOS error: " << buf << std::endl;
-
-    va_end(args);
-}
-
-static void GEOSWarningHandler(const char *fmt, ...)
-{
-    va_list args;
-
-    char buf[1024];
-    vsnprintf(buf, sizeof(buf), fmt, args);
-    std::cout << "GEOS warning: " << buf << std::endl;
-
-    va_end(args);
-}
-
-static GEOSContextHandle_t init()
-{
-    if (s_contextCnt == 0)
-        s_geos_environment = initGEOS_r(GEOSWarningHandler, GEOSErrorHandler);
-    s_contextCnt++;
-    return s_geos_environment;
-}
-
-static void finish()
-{
-    s_contextCnt--;
-    if (s_contextCnt == 0)
-        finishGEOS_r(s_geos_environment);
-}
-
 } // Unnamed namespace
 
 namespace geos
@@ -105,19 +63,64 @@ public:
     ErrorHandler(bool isDebug, pdal::LogPtr log);
     ~ErrorHandler();
 
-    static void GEOS_DLL trampoline(const char* message, void* userdata)
+#ifdef GEOSGContext_setErrorMessageHandler_r
+    static void GEOS_DLL error_trampoline(const char* message, void* userdata)
     {
         ErrorHandler* debug =
             static_cast<ErrorHandler*>(userdata);
         if (!debug)
             return;
-
-        // if (!debug->m_log->get()) return;
         debug->m_geos_callback(message);
+        if (!debug->m_log->get()) return;
     }
+#else
+
+    static void GEOS_DLL error_trampoline(const char* message, ...)
+    {
+    va_list args;
+
+    va_start(args, message);
+    char buf[1024];
+
+    vsnprintf(buf, sizeof(buf), message, args);
+    std::cout << "GEOS error: " << buf << std::endl;
+
+    va_end(args);
+
+    }
+#endif
+
+#ifdef GEOSContext_setNoticeHandler_r
+    static void GEOS_DLL notice_trampoline(const char* message, void* userdata)
+    {
+        ErrorHandler* debug =
+            static_cast<ErrorHandler*>(userdata);
+        if (!debug)
+            return;
+        debug->m_geos_callback(message);
+        if (!debug->m_log->get()) return;
+    }
+#else
+
+    static void GEOS_DLL notice_trampoline(const char* message, ...)
+    {
+    va_list args;
+
+    va_start(args, message);
+    char buf[1024];
+
+    vsnprintf(buf, sizeof(buf), message, args);
+    std::cout << "GEOS notice: " << buf << std::endl;
+
+    va_end(args);
+
+    }
+#endif
 
     void log(char const* msg);
     void error(char const* msg);
+
+    GEOSContextHandle_t ctx;
 
     inline LogPtr getLogger() const { return m_log; }
     inline void setLogger(LogPtr logger) { m_log = logger; }
@@ -126,7 +129,6 @@ private:
     std::function<void(const char*)> m_geos_callback;
     bool m_isDebug;
     pdal::LogPtr m_log;
-    void* m_context;
 };
 
 
@@ -137,50 +139,50 @@ namespace Geometry
 static std::string smoothPolygon(const std::string& wkt, double tolerance,
     uint32_t precision, double area_threshold)
 {
-    GEOSContextHandle_t env = init();
+    ErrorHandler env(false, LogPtr());
 
-    GEOSGeometry *geom = GEOSGeomFromWKT_r(env, wkt.c_str());
+    GEOSGeometry *geom = GEOSGeomFromWKT_r(env.ctx, wkt.c_str());
     if (!geom)
         return "";
 
-    GEOSGeometry *smoothed = GEOSTopologyPreserveSimplify_r(env, geom,
+    GEOSGeometry *smoothed = GEOSTopologyPreserveSimplify_r(env.ctx, geom,
         tolerance);
     if (!smoothed)
         return "";
 
     std::vector<GEOSGeometry*> geometries;
 
-    int numGeom = GEOSGetNumGeometries_r(env, smoothed);
+    int numGeom = GEOSGetNumGeometries_r(env.ctx, smoothed);
     for (int n = 0; n < numGeom; ++n)
     {
-        const GEOSGeometry* m = GEOSGetGeometryN_r(env, smoothed, n);
+        const GEOSGeometry* m = GEOSGetGeometryN_r(env.ctx, smoothed, n);
         if (!m)
             throw pdal::pdal_error("Unable to Get GeometryN");
 
-        const GEOSGeometry* ering = GEOSGetExteriorRing_r(env, m);
+        const GEOSGeometry* ering = GEOSGetExteriorRing_r(env.ctx, m);
         if (!ering)
             throw pdal::pdal_error("Unable to Get Exterior Ring");
 
-        GEOSGeometry* exterior = GEOSGeom_clone_r(env, GEOSGetExteriorRing_r(env, m));
+        GEOSGeometry* exterior = GEOSGeom_clone_r(env.ctx, GEOSGetExteriorRing_r(env.ctx, m));
         if (!exterior)
             throw pdal::pdal_error("Unable to clone exterior ring!");
 
         std::vector<GEOSGeometry*> keep_rings;
-        int numRings = GEOSGetNumInteriorRings_r(env, m);
+        int numRings = GEOSGetNumInteriorRings_r(env.ctx, m);
         for (int i = 0; i < numRings; ++i)
         {
             double area(0.0);
 
-            const GEOSGeometry* iring = GEOSGetInteriorRingN_r(env, m, i);
+            const GEOSGeometry* iring = GEOSGetInteriorRingN_r(env.ctx, m, i);
             if (!iring)
                 throw pdal::pdal_error("Unable to Get Interior Ring");
 
-            GEOSGeometry* cring = GEOSGeom_clone_r(env, iring);
+            GEOSGeometry* cring = GEOSGeom_clone_r(env.ctx, iring);
             if (!cring)
                 throw pdal::pdal_error("Unable to clone interior ring!");
-            GEOSGeometry* aring = GEOSGeom_createPolygon_r(env, cring, NULL, 0);
+            GEOSGeometry* aring = GEOSGeom_createPolygon_r(env.ctx, cring, NULL, 0);
 
-            int errored = GEOSArea_r(env, aring, &area);
+            int errored = GEOSArea_r(env.ctx, aring, &area);
             if (errored == 0)
                 throw pdal::pdal_error("Unable to get area of ring!");
             if (area > area_threshold)
@@ -189,40 +191,38 @@ static std::string smoothPolygon(const std::string& wkt, double tolerance,
             }
         }
 
-        GEOSGeometry* p = GEOSGeom_createPolygon_r(env,exterior, keep_rings.data(), keep_rings.size());
+        GEOSGeometry* p = GEOSGeom_createPolygon_r(env.ctx,exterior, keep_rings.data(), keep_rings.size());
         if (p == NULL) throw
             pdal::pdal_error("smooth polygon could not be created!" );
         geometries.push_back(p);
     }
 
-    GEOSGeometry* o = GEOSGeom_createCollection_r(env, GEOS_MULTIPOLYGON, geometries.data(), geometries.size());
+    GEOSGeometry* o = GEOSGeom_createCollection_r(env.ctx, GEOS_MULTIPOLYGON, geometries.data(), geometries.size());
 
-    GEOSWKTWriter *writer = GEOSWKTWriter_create_r(env);
-    GEOSWKTWriter_setRoundingPrecision_r(env, writer, precision);
+    GEOSWKTWriter *writer = GEOSWKTWriter_create_r(env.ctx);
+    GEOSWKTWriter_setRoundingPrecision_r(env.ctx, writer, precision);
 
-    char *smoothWkt = GEOSWKTWriter_write_r(env, writer, o);
+    char *smoothWkt = GEOSWKTWriter_write_r(env.ctx, writer, o);
 
     std::string output(smoothWkt);
-    GEOSFree_r(env, smoothWkt);
-    GEOSWKTWriter_destroy_r(env, writer);
-    GEOSGeom_destroy_r(env, geom);
-    GEOSGeom_destroy_r(env, smoothed);
-    finish();
+    GEOSFree_r(env.ctx, smoothWkt);
+    GEOSWKTWriter_destroy_r(env.ctx, writer);
+    GEOSGeom_destroy_r(env.ctx, geom);
+    GEOSGeom_destroy_r(env.ctx, smoothed);
     return output;
 }
 
 static double computeArea(const std::string& wkt)
 {
-    GEOSContextHandle_t env = init();
+    ErrorHandler env(false, LogPtr());
 
-    GEOSGeometry *geom = GEOSGeomFromWKT_r(env, wkt.c_str());
+    GEOSGeometry *geom = GEOSGeomFromWKT_r(env.ctx, wkt.c_str());
     if (!geom)
         return 0.0;
 
     double output(0.0);
-    int er = GEOSArea_r(env, geom, &output);
-    GEOSGeom_destroy_r(env, geom);
-    finish();
+    int er = GEOSArea_r(env.ctx, geom, &output);
+    GEOSGeom_destroy_r(env.ctx, geom);
     return output;
 }
 

@@ -57,13 +57,26 @@ ErrorHandler::ErrorHandler(bool isDebug, LogPtr log)
     else
         m_geos_callback = std::bind(&ErrorHandler::error, this, std::placeholders::_1 );
 
-    m_context = initGEOS_r(GEOSWarningHandler, GEOSErrorHandler);
+    // GEOS 3.5+ provides error handling context, so we will
+    // prefer to use that where possible. Otherwise, we will default to
+    // output to std::clog
+#ifndef GEOS_init_r
+    ctx = initGEOS_r(NULL, NULL);
+#else
+    ctx = GEOS_init_r();
+#endif
 
-    GEOSContextHandle_t* ctx = static_cast<GEOSContextHandle_t*>(m_context);
-//     GEOSContext_setErrorHandler_r(*ctx, &ErrorHandler::trampoline);
-//     GEOSContext_setErrorMessageHandler_r(*ctx, &ErrorHandler::trampoline);
-//     GEOSContext_setErrorHandler_r(*ctx, &ErrorHandler::trampoline);
-    GEOSContext_setErrorHandler_r(*ctx, &GEOSErrorHandler);
+#ifdef GEOSContext_setErrorMessageHandler_r
+    GEOSContext_setErrorMessageHandler_r(ctx, &ErrorHandler::error_trampoline, &this);
+#else
+    GEOSContext_setErrorHandler_r(ctx, &ErrorHandler::error_trampoline);
+#endif
+
+#ifdef GEOSContext_setNoticeHandler_r
+    GEOSContext_setNoticeHandler_r(ctx, &ErrorHandler::notice_trampoline, &this);
+#else
+    GEOSContext_setErrorHandler_r(ctx, &ErrorHandler::notice_trampoline);
+#endif
 }
 
 void ErrorHandler::log(char const* msg)
@@ -94,6 +107,12 @@ void ErrorHandler::error(char const* msg)
 
 ErrorHandler::~ErrorHandler()
 {
+
+#ifdef GEOS_finish_r
+    GEOS_finish_r(ctx);
+#else
+    finishGEOS_r(ctx);
+#endif
 //     CPLPopErrorHandler();
 }
 } // namespace geos
