@@ -59,11 +59,15 @@ ErrorHandler::ErrorHandler(bool isDebug, pdal::LogPtr log)
         {
             pdal::Utils::putenv("CPL_DEBUG=ON");
         }
-        m_gdal_callback = std::bind(&ErrorHandler::log, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+        m_gdal_callback = std::bind(&ErrorHandler::log, this,
+            std::placeholders::_1, std::placeholders::_2,
+            std::placeholders::_3);
     }
     else
     {
-        m_gdal_callback = std::bind(&ErrorHandler::error, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+        m_gdal_callback = std::bind(&ErrorHandler::error, this,
+            std::placeholders::_1, std::placeholders::_2,
+            std::placeholders::_3);
     }
 
     CPLPushErrorHandlerEx(&ErrorHandler::trampoline, this);
@@ -125,6 +129,8 @@ GDALError::Enum Raster::open()
         return GDALError::CantOpen;
     }
 
+    // GDAL docs state that we should return an identity transform, even
+    // on error, which should let things work.
     if (GDALGetGeoTransform(m_ds, &(m_forward_transform.front())) != CE_None)
     {
         m_errorMsg = "Unable to get geotransform for raster '" +
@@ -159,6 +165,15 @@ void Raster::pixelToCoord(int col, int row, std::array<double, 2>& output) const
     double d = m_forward_transform[4];
     double e = m_forward_transform[5];
 
+    //ABELL - Not sure why this is right.  You can think of this like:
+    //   output[0] = a * (col + .5) + b * (row + .5) + c;
+    //   output[1] = d * (col + .5) + e * (row + .5) + f;
+    //   Is there some reason why you want to "move" the points in the raster
+    //   to a location between the rows/columns?  Seems that you would just
+    //   use 'c' and 'f' to shift everything a half-row and half-column if
+    //   that's what you wanted.
+    //   Also, this isn't what GDALApplyGeoTransform does.  And why aren't
+    //   we just calling GDALApplyGeoTransform?
     output[0] = a*col + b*row + a*0.5 + b*0.5 + c;
     output[1] = d*col + e*row + d*0.5 + e*0.5 + f;
 }
@@ -177,7 +192,6 @@ bool Raster::getPixelAndLinePosition(double x, double y,
     return (pixel >= 0 && pixel < m_raster_x_size &&
         line >= 0 && line < m_raster_y_size);
 }
-
 
 Dimension::Type::Enum convertGDALtoPDAL(GDALDataType t)
 {

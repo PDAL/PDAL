@@ -73,6 +73,12 @@ public:
             std::ios_base::in | std::ios_base::binary);
         return 0;
     }
+    void close()
+    {
+        delete m_fstream;
+        m_fstream = NULL;
+        m_stream = NULL;
+    }
     operator bool ()
         { return (bool)(*m_stream); }
     void seek(std::streampos pos)
@@ -128,7 +134,7 @@ public:
 
 protected:
     std::istream *m_stream;
-    std::istream *m_fstream; // Dup of above to facilitate cleanup.
+    std::ifstream *m_fstream; // Dup of above to facilitate cleanup.
 
 private:
     std::stack<std::istream *> m_streams;
