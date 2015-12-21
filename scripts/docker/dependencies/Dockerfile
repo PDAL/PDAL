@@ -182,4 +182,22 @@ RUN svn co -r 2691 https://svn.osgeo.org/metacrs/geotiff/trunk/libgeotiff/ \
     && make \
     && make install
 
+RUN wget http://sourceforge.net/projects/arma/files/armadillo-6.400.2.tar.gz \
+    && tar zxvf armadillo-6.400.2.tar.gz \
+    && cd armadillo-6.400.2 \
+    && cmake . -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+    && make \
+    && make install
 
+RUN git clone https://github.com/gadomski/fgt.git \
+    && cd fgt \
+    && cmake . -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+    && make \
+    && make install
+
+RUN git clone https://github.com/hobu/cpd.git \
+    && cd cpd \
+    && git checkout armadillo-6 \
+    && cmake . -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DFgt_DIR=/usr \
+    && make \
+    && make install
