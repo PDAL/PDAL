@@ -123,6 +123,7 @@ if (WITH_APPS)
     if (BUILD_PIPELINE_TESTS)
         PDAL_ADD_TEST(pcpipeline_test FILES apps/pcpipelineTest.cpp)
     endif()
+    PDAL_ADD_TEST(random_test FILES apps/RandomTest.cpp)
 endif(WITH_APPS)
 
 if(LIBXML2_FOUND)
