@@ -174,13 +174,20 @@ RUN git clone https://github.com/chambbj/pcl.git \
         && make install
 
 RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
-		subversion
+		subversion \
+		libjsoncpp-dev
 
 RUN svn co -r 2691 https://svn.osgeo.org/metacrs/geotiff/trunk/libgeotiff/ \
     && cd libgeotiff \
     &&  cmake . -DCMAKE_INSTALL_PREFIX=/usr -DWITH_TIFF=ON -DWITH_PROJ4=ON \
     && make \
     && make install
+#RUN wget https://cmake.org/files/v3.4/cmake-3.4.1.tar.gz \
+#    && tar zxvf cmake-3.4.1.tar.gz \
+#    && cd cmake-3.4.1 \
+#    && ./bootstrap --prefix=/usr \
+#    && make \
+#    && make install
 
 RUN wget http://sourceforge.net/projects/arma/files/armadillo-6.400.2.tar.gz \
     && tar zxvf armadillo-6.400.2.tar.gz \
