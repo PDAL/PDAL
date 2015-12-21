@@ -106,15 +106,20 @@ ErrorHandler::~ErrorHandler()
 
 Raster::Raster(const std::string& filename)
     : m_filename(filename)
-    , m_forward_transform{ { 0, 1, 0, 0, 0, 1 } }
-    , m_inverse_transform{ { 0, 1, 0, 0, 0, 1 } }
     , m_raster_x_size(0)
     , m_raster_y_size(0)
     , m_block_x(0)
     , m_block_y(0)
     , m_band_count(0)
     , m_ds(0)
-{}
+{
+    m_forward_transform.fill(0);
+    m_forward_transform[1] = 1;
+    m_forward_transform[5] = 1;
+    m_inverse_transform.fill(0);
+    m_inverse_transform[1] = 1;
+    m_inverse_transform[5] = 1;
+}
 
 GDALError::Enum Raster::open()
 {
