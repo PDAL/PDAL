@@ -208,3 +208,5 @@ RUN git clone https://github.com/hobu/cpd.git \
     && cmake . -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DFgt_DIR=/usr \
     && make \
     && make install
+
+RUN rm -rf /cpd /armadillo* /fgt /libgeotiff /pcl /eigen* /points2grid /nitro /*.gz /laszip /laz-perf /hexer
