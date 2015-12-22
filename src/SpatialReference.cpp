@@ -120,20 +120,29 @@ std::string SpatialReference::getWKT(WKTModeFlag mode_flag , bool pretty) const
 
 void SpatialReference::setFromUserInput(std::string const& v)
 {
-    char* poWKT = 0;
-    const char* input = v.c_str();
+    if (v.empty())
+    {
+        m_wkt.clear();
+        return;
+    }
 
     OGRSpatialReference srs(NULL);
+
+    CPLErrorReset();
+    const char* input = v.c_str();
     OGRErr err = srs.SetFromUserInput(const_cast<char *>(input));
     if (err != OGRERR_NONE)
     {
-
         std::ostringstream oss;
-        oss << "Could not import coordinate system '" << input << "'";
-        oss << " message '" << CPLGetLastErrorMsg() << "'";
+        std::string msg = CPLGetLastErrorMsg();
+        if (msg.empty())
+            msg = "(unknown reason)";
+        oss << "Could not import coordinate system '" << input << "': " <<
+            msg << ".";
         throw pdal_error(oss.str());
     }
 
+    char *poWKT = 0;
     srs.exportToWkt(&poWKT);
     std::string tmp(poWKT);
     CPLFree(poWKT);

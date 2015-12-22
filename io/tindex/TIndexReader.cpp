@@ -302,6 +302,19 @@ void TIndexReader::initialize()
 
         m_merge.setInput(*premerge);
     }
+
+    if (m_sql.size())
+    {
+        // We were created with OGR_DS_ExecuteSQL which needs to have
+        // its layer explicitly released
+        OGR_DS_ReleaseResultSet(m_dataset, m_layer);
+    }
+    else
+    {
+        OGR_DS_Destroy(m_dataset);
+    }
+    m_layer = 0;
+    m_dataset = 0;
 }
 
 
@@ -315,26 +328,6 @@ void TIndexReader::ready(PointTableRef table)
 PointViewSet TIndexReader::run(PointViewPtr)
 {
     return m_pvSet;
-}
-
-
-void TIndexReader::done(PointTableRef)
-{
-    if (!m_dataset)
-        return;
-    if (m_sql.size())
-    {
-        // We were created with OGR_DS_ExecuteSQL which needs to have
-        // its layer explicitly released
-        OGR_DS_ReleaseResultSet(m_dataset, m_layer);
-    }
-    else
-    {
-        OGR_DS_Destroy(m_dataset);
-    }
-
-    m_layer = 0;
-    m_dataset = 0;
 }
 
 } // namespace pdal
