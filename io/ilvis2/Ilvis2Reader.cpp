@@ -199,6 +199,7 @@ void Ilvis2Reader::ready(PointTableRef table)
     m_lineNum = 0;
     m_stream.open(m_filename);
     m_layout = table.layout();
+    m_resample = false;
     for (size_t i = 0; i < HeaderSize; ++i)
     {
         std::getline(m_stream, line);

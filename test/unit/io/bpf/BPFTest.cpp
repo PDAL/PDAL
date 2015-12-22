@@ -36,7 +36,6 @@
 
 #include <string.h>
 
-#include <pdal/BufferReader.hpp>
 #include <pdal/Filter.hpp>
 #include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
@@ -46,6 +45,7 @@
 
 #include <BpfReader.hpp>
 #include <BpfWriter.hpp>
+#include <BufferReader.hpp>
 
 #include "Support.hpp"
 

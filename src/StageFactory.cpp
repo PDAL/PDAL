@@ -57,7 +57,7 @@
 #include <ilvis2/Ilvis2Reader.hpp>
 #include <las/LasReader.hpp>
 #include <optech/OptechReader.hpp>
-#include <pdal/BufferReader.hpp>
+#include <buffer/BufferReader.hpp>
 #include <ply/PlyReader.hpp>
 #include <qfit/QfitReader.hpp>
 #include <sbet/SbetReader.hpp>

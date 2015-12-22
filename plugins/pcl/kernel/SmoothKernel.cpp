@@ -37,7 +37,7 @@
 
 #include "PCLBlock.hpp"
 
-#include <pdal/BufferReader.hpp>
+#include <buffer/BufferReader.hpp>
 #include <pdal/KernelFactory.hpp>
 
 namespace pdal
