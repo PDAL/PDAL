@@ -83,7 +83,6 @@ private:
     virtual void initialize();
     virtual void ready(PointTableRef table);
     virtual PointViewSet run(PointViewPtr view);
-    virtual void done(PointTableRef table);
 
     std::string m_layerName;
     std::string m_driverName;
