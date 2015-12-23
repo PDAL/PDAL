@@ -40,6 +40,7 @@
 #include <colorization/ColorizationFilter.hpp>
 #include <crop/CropFilter.hpp>
 #include <decimation/DecimationFilter.hpp>
+#include <divider/DividerFilter.hpp>
 #include <ferry/FerryFilter.hpp>
 #include <merge/MergeFilter.hpp>
 #include <mortonorder/MortonOrderFilter.hpp>
@@ -191,6 +192,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(ColorizationFilter_InitPlugin);
     PluginManager::initializePlugin(CropFilter_InitPlugin);
     PluginManager::initializePlugin(DecimationFilter_InitPlugin);
+    PluginManager::initializePlugin(DividerFilter_InitPlugin);
     PluginManager::initializePlugin(FerryFilter_InitPlugin);
     PluginManager::initializePlugin(MergeFilter_InitPlugin);
     PluginManager::initializePlugin(MortonOrderFilter_InitPlugin);
