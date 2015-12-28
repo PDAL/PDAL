@@ -4,7 +4,7 @@
 # On success, the macro sets the following variables:
 # GDAL_FOUND       = if the library found
 # GDAL_LIBRARY     = full path to the library
-# GDAL_INCLUDE_DIR = where to find the library headers 
+# GDAL_INCLUDE_DIR = where to find the library headers
 #
 # On Unix, macro sets also:
 # GDAL_VERSION_STRING = human-readable string containing version of the library
@@ -89,6 +89,7 @@ set (GDAL_VERSION_COUNT 3)
 
 SET(GDAL_NAMES gdal)
 
+MESSAGE(STATUS "I'm here!!!!!!!!!!!!!!!")
 IF(WIN32)
 
     SET(OSGEO4W_IMPORT_LIBRARY gdal_i)
@@ -123,7 +124,7 @@ IF(WIN32)
     IF(MSVC)
 
         FIND_PATH(GDAL_INCLUDE_DIR
-            NAMES gdal.h 
+            NAMES gdal.h
             PATH_PREFIXES gdal gdal-1.6
             PATHS
             "${OSGEO4W_ROOT_DIR}/apps/gdal-dev/include"
@@ -138,14 +139,14 @@ IF(WIN32)
             "$ENV{LIB_DIR}/lib"
             /usr/lib
             c:/msys/local/lib
-            "${OSGEO4W_ROOT_DIR}/apps/gdal-dev/lib"            
+            "${OSGEO4W_ROOT_DIR}/apps/gdal-dev/lib"
             ${OSGEO4W_ROOT_DIR}/lib)
-        
+
         IF(GDAL_LIBRARY)
             SET(GDAL_LIBRARY;odbc32;odbccp32 CACHE STRING INTERNAL)
         ENDIF()
     ENDIF(MSVC)
-  
+
 ELSEIF(UNIX)
 
     # Try to use framework on Mac OS X
@@ -154,44 +155,49 @@ ELSEIF(UNIX)
     ENDIF()
 
     # Try to use GDAL_HOME location if specified
-    IF($ENV{GDAL_HOME})
+    IF(DEFINED ENV{GDAL_HOME})
         SET(GDAL_CONFIG_PREFER_PATH
             "$ENV{GDAL_HOME}/bin" CACHE STRING "Search for gdal-config program in preferred location")
     ENDIF()
 
     # Try to use OSGeo4W installation
-    IF($ENV{OSGEO4W_HOME})
+    IF(DEFINED ENV{OSGEO4W_HOME})
         SET(GDAL_CONFIG_PREFER_OSGEO4W_PATH
             "$ENV{OSGEO4W_HOME}/bin" CACHE STRING "Search for gdal-config program provided by OSGeo4W")
     ENDIF()
 
     # Try to use FWTools installation
-    IF($ENV{FWTOOLS_HOME})
+    IF(DEFINED ENV{FWTOOLS_HOME})
         SET(GDAL_CONFIG_PREFER_FWTOOLS_PATH
             "$ENV{FWTOOLS_HOME}/bin_safe" CACHE STRING "Search for gdal-config program provided by FWTools")
     ENDIF()
 
     FIND_PROGRAM(GDAL_CONFIG gdal-config
+        HINTS
         ${GDAL_CONFIG_PREFER_PATH}
         ${GDAL_CONFIG_PREFER_OSGEO4W_PATH}
         ${GDAL_CONFIG_PREFER_FWTOOLS_PATH}
         ${GDAL_MAC_PATH}
         /usr/local/bin/
         /usr/bin/)
-            
-    IF(GDAL_CONFIG) 
+
+    IF(GDAL_CONFIG)
 
         # TODO: Replace the regex hacks with CMake version comparison feature:
         # if(version1 VERSION_LESS version2)
 
         # Extract GDAL version
+        MESSAGE(STATUS "GDAL_CONFIG: ${GDAL_CONFIG}")
+        MESSAGE(STATUS "ORACLE_HOME: $ENV{ORACLE_HOME}")
+        MESSAGE(STATUS "GDAL_HOME: $ENV{GDAL_HOME}")
+        MESSAGE(STATUS "GDAL_CONFIG_PREFER_PATH: ${GDAL_CONFIG_PREFER_PATH}")
         EXEC_PROGRAM(${GDAL_CONFIG} ARGS --version OUTPUT_VARIABLE GDAL_VERSION_STATED)
         SET(GDAL_VERSION_STRING "${GDAL_VERSION_STATED}" CACHE STRING "Version of GDAL package found")
 
         STRING(REGEX REPLACE "([0-9]+)\\.([0-9]+)\\.([0-9]+)" "\\1" GDAL_VERSION_MAJOR "${GDAL_VERSION_STATED}")
         STRING(REGEX REPLACE "([0-9]+)\\.(/^\\d{1,2}$/)\\.([0-9]+)" "\\2" GDAL_VERSION_MINOR "${GDAL_VERSION_STATED}")
         STRING(REGEX REPLACE "([0-9]+)\\.([0-9]+)\\.([0-9]+)" "\\3" GDAL_VERSION_PATCH "${GDAL_VERSION_STATED}")
-        
+
         # Check for GDAL version
         if (GDAL_FIND_VERSION)
             COMPARE_VERSION_STRINGS( "${GDAL_VERSION_STATED}" "${GDAL_FIND_VERSION}" version_result)
@@ -202,20 +208,22 @@ ELSEIF(UNIX)
             set (GDAL_VERSION_COMPATIBLE true)
         endif()
 
+        MESSAGE(STATUS "Found version: ${GDAL_VERSION_STRING}")
         set (GDAL_FOUND TRUE)
         # Set INCLUDE_DIR to prefix+include
         EXEC_PROGRAM(${GDAL_CONFIG} ARGS --prefix OUTPUT_VARIABLE GDAL_PREFIX)
 
         FIND_PATH(GDAL_INCLUDE_DIR
-            gdal.h 
+            gdal.h
             PATH_PREFIXES gdal
-            PATHS
+            HINTS
             ${GDAL_PREFIX}/include/gdal
             ${GDAL_PREFIX}/include
-            /usr/local/include 
+            /usr/local/include
             /usr/include)
+        MESSAGE(STATUS "Include directory version: ${GDAL_INCLUDE_DIR}")
 
-        # Extract link dirs for rpath  
+        # Extract link dirs for rpath
         EXEC_PROGRAM(${GDAL_CONFIG} ARGS --libs OUTPUT_VARIABLE GDAL_CONFIG_LIBS)
 
         # Split off the link dirs (for rpath)
@@ -245,7 +253,7 @@ ELSEIF(UNIX)
         ELSE()
             SET(GDAL_LIBRARY ${GDAL_LINK_DIRECTORIES}/lib${GDAL_LIB_NAME}.so CACHE STRING INTERNAL)
         ENDIF()
-      
+
     ELSE()
         MESSAGE("FindGDAL.cmake: gdal-config not found. Please set it manually: GDAL_CONFIG=${GDAL_CONFIG}")
     ENDIF(GDAL_CONFIG)
