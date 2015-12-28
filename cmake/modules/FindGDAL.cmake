@@ -89,7 +89,6 @@ set (GDAL_VERSION_COUNT 3)
 
 SET(GDAL_NAMES gdal)
 
-MESSAGE(STATUS "I'm here!!!!!!!!!!!!!!!")
 IF(WIN32)
 
     SET(OSGEO4W_IMPORT_LIBRARY gdal_i)
@@ -187,10 +186,6 @@ ELSEIF(UNIX)
         # if(version1 VERSION_LESS version2)
 
         # Extract GDAL version
-        MESSAGE(STATUS "GDAL_CONFIG: ${GDAL_CONFIG}")
-        MESSAGE(STATUS "ORACLE_HOME: $ENV{ORACLE_HOME}")
-        MESSAGE(STATUS "GDAL_HOME: $ENV{GDAL_HOME}")
-        MESSAGE(STATUS "GDAL_CONFIG_PREFER_PATH: ${GDAL_CONFIG_PREFER_PATH}")
         EXEC_PROGRAM(${GDAL_CONFIG} ARGS --version OUTPUT_VARIABLE GDAL_VERSION_STATED)
         SET(GDAL_VERSION_STRING "${GDAL_VERSION_STATED}" CACHE STRING "Version of GDAL package found")
 
@@ -208,7 +203,6 @@ ELSEIF(UNIX)
             set (GDAL_VERSION_COMPATIBLE true)
         endif()
 
-        MESSAGE(STATUS "Found version: ${GDAL_VERSION_STRING}")
         set (GDAL_FOUND TRUE)
         # Set INCLUDE_DIR to prefix+include
         EXEC_PROGRAM(${GDAL_CONFIG} ARGS --prefix OUTPUT_VARIABLE GDAL_PREFIX)
@@ -221,7 +215,6 @@ ELSEIF(UNIX)
             ${GDAL_PREFIX}/include
             /usr/local/include
             /usr/include)
-        MESSAGE(STATUS "Include directory version: ${GDAL_INCLUDE_DIR}")
 
         # Extract link dirs for rpath
         EXEC_PROGRAM(${GDAL_CONFIG} ARGS --libs OUTPUT_VARIABLE GDAL_CONFIG_LIBS)
