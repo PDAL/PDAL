@@ -38,9 +38,9 @@
 #include <pdal/Stage.hpp>
 
 #include <map>
+#include <mutex>
 #include <string>
 #include <vector>
-
 
 namespace pdal
 {
