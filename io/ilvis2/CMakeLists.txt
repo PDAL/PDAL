@@ -9,10 +9,12 @@ set(objs "")
 #
 set(srcs
     Ilvis2Reader.cpp
+    Ilvis2MetadataReader.cpp
 )
 
 set(incs
     Ilvis2Reader.hpp
+    Ilvis2MetadataReader.hpp
 )
 
 PDAL_ADD_DRIVER(reader ilvis2 "${srcs}" "${incs}" reader_objs)
