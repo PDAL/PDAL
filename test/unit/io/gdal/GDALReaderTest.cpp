@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2015, Howard Butler <howard@hobu.co>
+* Copyright (c) 2015, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*     * Neither the name of Hobu, Inc. nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -32,52 +32,51 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <pdal/pdal_test_main.hpp>
 
-#include <string>
+#include "GDALReader.hpp"
+#include "Support.hpp"
 
+#include <iostream>
 
-#include <pdal/Dimension.hpp>
-#include <pdal/Reader.hpp>
-#include <pdal/StageFactory.hpp>
+using namespace pdal;
 
-#include <pdal/GDALUtils.hpp>
-
-extern "C" int32_t GDALReader_ExitFunc();
-extern "C" PF_ExitFunc GDALReader_InitPlugin();
-
-
-namespace pdal
+TEST(GDALReaderTest, simple)
 {
+    Options ro;
+    ro.add("filename", Support::datapath("png/autzen-height.png"));
 
+    GDALReader gr;
+    gr.setOptions(ro);
 
-typedef std::map<std::string, Dimension::Id::Enum> DimensionMap;
+    PointTable t;
+    gr.prepare(t);
+    PointViewSet s = gr.execute(t);
+    PointViewPtr v = *s.begin();
+    PointLayoutPtr l = t.layout();
+    Dimension::Id::Enum id1 = l->findDim("band-1");
+    Dimension::Id::Enum id2 = l->findDim("band-2");
+    Dimension::Id::Enum id3 = l->findDim("band-3");
+    EXPECT_EQ(v->size(), (size_t)(735 * 973));
 
+    auto verify = [v, id1, id2, id3]
+        (PointId idx, double xx, double xy, double xr, double xg, double xb)
+    {
+        double r, g, b, x, y;
+        x = v->getFieldAs<double>(Dimension::Id::X, idx);
+        y = v->getFieldAs<double>(Dimension::Id::Y, idx);
+        r = v->getFieldAs<double>(id1, idx);
+        g = v->getFieldAs<double>(id2, idx);
+        b = v->getFieldAs<double>(id3, idx);
+        EXPECT_DOUBLE_EQ(x, xx);
+        EXPECT_DOUBLE_EQ(y, xy);
+        EXPECT_DOUBLE_EQ(r, xr);
+        EXPECT_DOUBLE_EQ(g, xg);
+        EXPECT_DOUBLE_EQ(b, xb);
+    };
 
-
-class PDAL_DLL GDALReader : public Reader
-{
-public:
-    static void *create();
-    static int32_t destroy(void *);
-    std::string getName() const;
-
-    GDALReader();
-
-    static Dimension::IdList getDefaultDimensions();
-
-private:
-    virtual void initialize();
-    virtual void addDimensions(PointLayoutPtr layout);
-    virtual void ready(PointTableRef table);
-    virtual point_count_t read(PointViewPtr view, point_count_t num);
-    virtual void done(PointTableRef table)
-        { m_raster->close(); }
-    virtual QuickInfo inspect();
-
-    std::unique_ptr<gdal::Raster> m_raster;
-    point_count_t m_index;
-
-};
+    verify(0, .5, .5, 0, 0, 0);
+    verify(120000, 163.5, 195.5, 255, 213, 0);
+    verify(290000, 394.5, 410.5, 0, 255, 206);
+    verify(715154, 972.5, 734.5, 0, 0, 0);
 }
-

@@ -40,8 +40,6 @@
 #include <string>
 #include <vector>
 
-#include <pdal/pdal_internal.hpp>
-
 namespace pdal
 {
 

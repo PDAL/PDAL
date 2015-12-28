@@ -37,7 +37,7 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/BufferReader.hpp>
+#include <BufferReader.hpp>
 #include <CropFilter.hpp>
 #include <FauxReader.hpp>
 #include <LasReader.hpp>

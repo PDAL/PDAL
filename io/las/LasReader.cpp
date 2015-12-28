@@ -130,8 +130,6 @@ QuickInfo LasReader::inspect()
 
 void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
 {
-    if (m_initialized)
-        return;
     m_istream = createStream();
 
     m_istream->seekg(0);
@@ -172,13 +170,18 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     MetadataNode forward = table.privateMetadata("lasforward");
     extractHeaderMetadata(forward, m);
     extractVlrMetadata(forward, m);
-
-    m_initialized = true;
+    // The stream is closed because all stages are prepared() before they
+    // are run which results in all readers having files open simultaneously,
+    // which can be a problem on Windows, which has restrictive open
+    // file limits.
+    destroyStream();
+    m_istream = NULL;
 }
 
 
 void LasReader::ready(PointTableRef table)
 {
+    m_istream = createStream();
     m_index = 0;
     if (m_lasHeader.compressed())
     {
@@ -938,7 +941,9 @@ void LasReader::done(PointTableRef)
     m_unzipper.reset();
 #endif
     destroyStream();
-    m_initialized = false;
+    // Reset stream to NULL because destroyStream is virtual and can't reset
+    // m_istream.
+    m_istream = NULL;
 }
 
 } // namespace pdal

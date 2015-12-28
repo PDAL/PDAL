@@ -40,6 +40,7 @@
 #include <colorization/ColorizationFilter.hpp>
 #include <crop/CropFilter.hpp>
 #include <decimation/DecimationFilter.hpp>
+#include <divider/DividerFilter.hpp>
 #include <ferry/FerryFilter.hpp>
 #include <merge/MergeFilter.hpp>
 #include <mortonorder/MortonOrderFilter.hpp>
@@ -57,7 +58,7 @@
 #include <ilvis2/Ilvis2Reader.hpp>
 #include <las/LasReader.hpp>
 #include <optech/OptechReader.hpp>
-#include <pdal/BufferReader.hpp>
+#include <buffer/BufferReader.hpp>
 #include <ply/PlyReader.hpp>
 #include <qfit/QfitReader.hpp>
 #include <sbet/SbetReader.hpp>
@@ -110,9 +111,11 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
     drivers["sid"] = "readers.mrsid";
     drivers["tindex"] = "readers.tindex";
 
-    if (ext == "") return "";
+    if (ext == "")
+        return "";
     ext = ext.substr(1, ext.length()-1);
-    if (ext == "") return "";
+    if (ext == "")
+        return "";
 
     ext = Utils::tolower(ext);
     std::string driver = drivers[ext];
@@ -166,8 +169,8 @@ pdal::Options StageFactory::inferWriterOptionsChanges(
     if (Utils::iequals(ext,".laz"))
         options.add("compression", true);
 
-    PluginManager & pm = PluginManager::getInstance();
-    if (Utils::iequals(ext, ".pcd") && pm.createObject("writers.pcd"))
+    if (Utils::iequals(ext, ".pcd") &&
+        PluginManager::createObject("writers.pcd"))
     {
         options.add("format","PCD");
     }
@@ -176,14 +179,13 @@ pdal::Options StageFactory::inferWriterOptionsChanges(
     return options;
 }
 
+
 StageFactory::StageFactory(bool no_plugins)
 {
-    PluginManager & pm = PluginManager::getInstance();
     if (!no_plugins)
     {
-        pm.loadAll(PF_PluginType_Filter);
-        pm.loadAll(PF_PluginType_Reader);
-        pm.loadAll(PF_PluginType_Writer);
+        PluginManager::loadAll(PF_PluginType_Filter | PF_PluginType_Reader |
+            PF_PluginType_Writer);
     }
 
     // filters
@@ -191,6 +193,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(ColorizationFilter_InitPlugin);
     PluginManager::initializePlugin(CropFilter_InitPlugin);
     PluginManager::initializePlugin(DecimationFilter_InitPlugin);
+    PluginManager::initializePlugin(DividerFilter_InitPlugin);
     PluginManager::initializePlugin(FerryFilter_InitPlugin);
     PluginManager::initializePlugin(MergeFilter_InitPlugin);
     PluginManager::initializePlugin(MortonOrderFilter_InitPlugin);
@@ -224,6 +227,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(NullWriter_InitPlugin);
 }
 
+
 /// Create a stage and return a pointer to the created stage.  Caller takes
 /// ownership unless the ownStage argument is true.
 ///
@@ -234,43 +238,13 @@ StageFactory::StageFactory(bool no_plugins)
 Stage *StageFactory::createStage(std::string const& stage_name,
     bool ownStage)
 {
-    PluginManager& pm = PluginManager::getInstance();
-    Stage *s = static_cast<Stage*>(pm.createObject(stage_name));
+    Stage *s = static_cast<Stage*>(PluginManager::createObject(stage_name));
     if (s && ownStage)
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
         m_ownedStages.push_back(std::unique_ptr<Stage>(s));
+    }
     return s;
-}
-
-
-StringList StageFactory::getStageNames() const
-{
-    PluginManager & pm = PluginManager::getInstance();
-    PluginManager::RegistrationMap rm = pm.getRegistrationMap();
-    StringList nv;
-    for (auto r : rm)
-    {
-        if (r.second.pluginType == PF_PluginType_Filter ||
-            r.second.pluginType == PF_PluginType_Reader ||
-            r.second.pluginType == PF_PluginType_Writer)
-            nv.push_back(r.first);
-    }
-    return nv;
-}
-
-
-std::map<std::string, std::string> StageFactory::getStageMap() const
-{
-    PluginManager& pm = PluginManager::getInstance();
-    PluginManager::RegistrationMap rm = pm.getRegistrationMap();
-    std::map<std::string, std::string> sm;
-    for (auto r : rm)
-    {
-        if (r.second.pluginType == PF_PluginType_Filter ||
-            r.second.pluginType == PF_PluginType_Reader ||
-            r.second.pluginType == PF_PluginType_Writer)
-            sm.insert(std::make_pair(r.first, r.second.description));
-    }
-    return sm;
 }
 
 } // namespace pdal

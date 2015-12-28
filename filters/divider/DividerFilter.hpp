@@ -36,7 +36,7 @@
 #include <pdal/Filter.hpp>
 
 extern "C" int32_t DividerFilter_ExitFunc();
-extern "C" PF_ExitFunc DividefFilter_InitPlugin();
+extern "C" PF_ExitFunc DividerFilter_InitPlugin();
 
 namespace pdal
 {

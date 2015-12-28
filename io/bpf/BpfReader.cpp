@@ -137,9 +137,13 @@ void BpfReader::initialize()
     // Fast forward file to end of header as reported by base header.
     std::streampos pos = m_stream.position();
     if (pos > m_header.m_len)
-        throw pdal_error("BPF Header length exceeded that reported by file.");
-    else if (pos < m_header.m_len)
-        m_stream.seek(m_header.m_len);
+    {
+        std::ostringstream oss;
+        oss << getName() << ": BPF Header length exceeded that reported by "
+            "file.";
+        throw pdal_error(oss.str());
+    }
+    m_stream.close();
 }
 
 
@@ -220,6 +224,8 @@ bool BpfReader::readPolarData()
 
 void BpfReader::ready(PointTableRef)
 {
+    m_stream.open(m_filename);
+    m_stream.seek(m_header.m_len);
     m_index = 0;
     m_start = m_stream.position();
     if (m_header.m_compression)
@@ -241,6 +247,7 @@ void BpfReader::ready(PointTableRef)
 void BpfReader::done(PointTableRef)
 {
      delete m_stream.popStream();
+     m_stream.close();
 }
 
 
