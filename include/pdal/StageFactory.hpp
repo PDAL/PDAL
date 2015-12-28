@@ -38,9 +38,9 @@
 #include <pdal/Stage.hpp>
 
 #include <map>
+#include <mutex>
 #include <string>
 #include <vector>
-
 
 namespace pdal
 {
@@ -80,14 +80,12 @@ public:
 
     Stage *createStage(const std::string& type, bool ownStage = false);
 
-    StringList getStageNames() const;
-    std::map<std::string, std::string> getStageMap() const;
-
 private:
     StageFactory& operator=(const StageFactory&); // not implemented
     StageFactory(const StageFactory&); // not implemented
 
     std::vector<std::unique_ptr<Stage>> m_ownedStages;
+    std::mutex m_mutex;
 };
 
 } // namespace pdal

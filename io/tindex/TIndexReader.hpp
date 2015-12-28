@@ -66,15 +66,9 @@ class PDAL_DLL TIndexReader : public pdal::Reader
     };
 
 public:
-    TIndexReader()
-        : Reader()
-        , m_dataset(0)
-        , m_layer(0)
-        , m_tablePtr(new PointTable())
-        , m_table(*m_tablePtr)
+    TIndexReader() : m_dataset(NULL) , m_layer(NULL)
         {}
 
-    ~TIndexReader();
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
@@ -86,12 +80,10 @@ private:
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void processOptions(const Options& options);
-    virtual void ready(PointTableRef table);
-    virtual PointViewSet run(PointViewPtr /*view*/);
-
     virtual void initialize();
+    virtual void ready(PointTableRef table);
+    virtual PointViewSet run(PointViewPtr view);
 
-    std::vector<FileInfo> m_files;
     std::string m_layerName;
     std::string m_driverName;
     std::string m_tileIndexColumnName;
@@ -108,14 +100,12 @@ private:
     void *m_dataset;
     void *m_layer;
 
-    std::unique_ptr<PointTable> m_tablePtr;
-    PointTableRef m_table;
     StageFactory m_factory;
     MergeFilter m_merge;
+    PointViewSet m_pvSet;
 
     std::vector<FileInfo> getFiles();
     FieldIndexes getFields();
-
 };
 
 

@@ -66,6 +66,7 @@ void HexBin::processOptions(const Options& options)
 
 void HexBin::ready(PointTableRef table)
 {
+    m_count = 0;
     if (m_edgeLength == 0.0)  // 0 can always be represented exactly.
     {
         m_grid.reset(new HexGrid(m_density));
@@ -83,8 +84,8 @@ void HexBin::filter(PointView& view)
         double x = view.getFieldAs<double>(pdal::Dimension::Id::X, idx);
         double y = view.getFieldAs<double>(pdal::Dimension::Id::Y, idx);
         m_grid->addPoint(x, y);
-        m_count++;
     }
+    m_count += view.size();
 }
 
 
@@ -108,9 +109,10 @@ void HexBin::done(PointTableRef table)
     m_metadata.add("edge_length", m_edgeLength, "The edge length of the "
         "hexagon to use in situations where you do not want to estimate "
         "based on a sample");
-    m_metadata.add("estimated_edge", m_grid->height(), "Estimated computed edge distance");
-    m_metadata.add("threshold", m_grid->denseLimit(), "Minimum number of points inside "
-        "a hexagon to be considered full");
+    m_metadata.add("estimated_edge", m_grid->height(),
+        "Estimated computed edge distance");
+    m_metadata.add("threshold", m_grid->denseLimit(),
+        "Minimum number of points inside a hexagon to be considered full");
     m_metadata.add("sample_size", m_sampleSize, "Number of samples to use "
         "when estimating hexagon edge size. Specify 0.0 or omit options "
         "for edge_size if you want to compute one.");
@@ -125,7 +127,6 @@ void HexBin::done(PointTableRef table)
 
     if (m_outputTesselation)
     {
-
         MetadataNode hexes = m_metadata.add("hexagons");
         for (HexIter hi = m_grid->hexBegin(); hi != m_grid->hexEnd(); ++hi)
         {
@@ -165,21 +166,19 @@ void HexBin::done(PointTableRef table)
     ***/
     double tolerance = 1.1 * m_grid->height() / 2;
 
-    std::string smooth = Geometry::smoothPolygon(polygon.str(), tolerance, precision);
+    double cull =
+        m_options.getValueOrDefault<double>("hole_cull_area_tolerance",
+            6 * tolerance * tolerance);
+    std::string smooth = Geometry::smoothPolygon(polygon.str(), tolerance,
+        precision, cull);
 
-    m_metadata.add("boundary",
-        smooth,
-        "Approximated MULTIPOLYGON of domain");
+    m_metadata.add("boundary", smooth, "Approximated MULTIPOLYGON of domain");
     double area = Geometry::computeArea(polygon.str());
 
-    double density = (double) m_count / area ;
-    m_metadata.add("density",
-            density,
-        "Number of points per square unit");
-    m_metadata.add("area",
-            area,
-        "Area in square units of tessellated polygon");
-
+//    double density = (double) m_grid->densePointCount() / area ;
+    double density = (double) m_count/ area ;
+    m_metadata.add("density", density, "Number of points per square unit");
+    m_metadata.add("area", area, "Area in square units of tessellated polygon");
 }
 
 } // namespace pdal

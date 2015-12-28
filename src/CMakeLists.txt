@@ -37,7 +37,6 @@ endif()
 #
 set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/pdal_types.hpp"
-  "${PDAL_HEADERS_DIR}/BufferReader.hpp"
   "${PDAL_HEADERS_DIR}/Compression.hpp"
   "${PDAL_HEADERS_DIR}/Dimension.hpp"
   "${PDAL_HEADERS_DIR}/Filter.hpp"
@@ -56,7 +55,9 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/PipelineManager.hpp"
   "${PDAL_HEADERS_DIR}/PipelineReader.hpp"
   "${PDAL_HEADERS_DIR}/PipelineWriter.hpp"
+  "${PDAL_HEADERS_DIR}/PointContainer.hpp"
   "${PDAL_HEADERS_DIR}/PointLayout.hpp"
+  "${PDAL_HEADERS_DIR}/PointRef.hpp"
   "${PDAL_HEADERS_DIR}/PointTable.hpp"
   "${PDAL_HEADERS_DIR}/PointView.hpp"
   "${PDAL_HEADERS_DIR}/PointViewIter.hpp"

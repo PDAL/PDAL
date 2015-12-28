@@ -237,6 +237,32 @@ Options CropFilter::getDefaultOptions()
 }
 
 
+void CropFilter::ready(PointTableRef table)
+{
+    // If we're using view-based SRSs, handle geometry in the view.
+    if (table.supportsView())
+        return;
+
+    for (auto& geom : m_geoms)
+        preparePolygon(geom, table.anySpatialReference());
+}
+
+
+bool CropFilter::processOne(PointRef& point)
+{
+#ifdef PDAL_HAVE_GEOS
+    for (auto& geom : m_geoms)
+        if (!crop(point, geom))
+            return false;
+#endif
+    for (auto& box : m_bounds)
+        if (!crop(point, box))
+            return false;
+
+    return true;
+}
+
+
 PointViewSet CropFilter::run(PointViewPtr view)
 {
     PointViewSet viewSet;
@@ -276,15 +302,23 @@ PointViewSet CropFilter::run(PointViewPtr view)
 }
 
 
+bool CropFilter::crop(PointRef& point, const BOX2D& box)
+{
+    double x = point.getFieldAs<double>(Dimension::Id::X);
+    double y = point.getFieldAs<double>(Dimension::Id::Y);
+
+    // Return true if we're keeping a point.
+    return (m_cropOutside != box.contains(x, y));
+}
+
+
 void CropFilter::crop(const BOX2D& box, PointView& input, PointView& output)
 {
+    PointRef point = input.point(0);
     for (PointId idx = 0; idx < input.size(); ++idx)
     {
-        double x = input.getFieldAs<double>(Dimension::Id::X, idx);
-        double y = input.getFieldAs<double>(Dimension::Id::Y, idx);
-
-        bool contained = box.contains(x, y);
-        if (m_cropOutside != box.contains(x, y))
+        point.setPointId(idx);
+        if (crop(point, box))
             output.appendPoint(input, idx);
     }
 }
@@ -311,33 +345,46 @@ GEOSGeometry *CropFilter::createPoint(double x, double y, double z)
 }
 
 
-void CropFilter::crop(const GeomPkg& g, PointView& input, PointView& output)
+bool CropFilter::crop(PointRef& point, const GeomPkg& g)
 {
     bool logOutput = (log()->getLevel() > LogLevel::Debug4);
+
+    //ABELL - This makes no sense.  Why are we setting this here but never
+    //  using it, as it gets reset to 10 below.
     if (logOutput)
         log()->floatPrecision(8);
 
+    double x = point.getFieldAs<double>(Dimension::Id::X);
+    double y = point.getFieldAs<double>(Dimension::Id::Y);
+    double z = point.getFieldAs<double>(Dimension::Id::Z);
+
+    if (logOutput)
+    {
+        log()->floatPrecision(10);
+        log()->get(LogLevel::Debug5) << "input: " << x << " y: " << y <<
+            " z: " << z << std::endl;
+    }
+
+    GEOSGeometry *p = createPoint(x, y, z);
+    bool covers = (bool)(GEOSPreparedCovers_r(m_geosEnvironment,
+        g.m_prepGeom, p));
+    bool keep = (m_cropOutside != covers);
+    GEOSGeom_destroy_r(m_geosEnvironment, p);
+    return keep;
+}
+
+
+void CropFilter::crop(const GeomPkg& g, PointView& input, PointView& output)
+{
+    PointRef point = input.point(0);
     for (PointId idx = 0; idx < input.size(); ++idx)
     {
-        double x = input.getFieldAs<double>(Dimension::Id::X, idx);
-        double y = input.getFieldAs<double>(Dimension::Id::Y, idx);
-        double z = input.getFieldAs<double>(Dimension::Id::Z, idx);
-
-        if (logOutput)
-        {
-            log()->floatPrecision(10);
-            log()->get(LogLevel::Debug5) << "input: " << x << " y: " << y <<
-                " z: " << z << std::endl;
-        }
-
-        GEOSGeometry *p = createPoint(x, y, z);
-        bool covers = (bool)(GEOSPreparedCovers_r(m_geosEnvironment,
-            g.m_prepGeom, p));
-        if (m_cropOutside != covers)
+        point.setPointId(idx);
+        if (crop(point, g))
             output.appendPoint(input, idx);
-        GEOSGeom_destroy_r(m_geosEnvironment, p);
     }
 }
+
 #endif
 
 

@@ -70,7 +70,7 @@ private:
         if (m_dim == Dimension::Id::Unknown)
             return;
 
-        auto cmp = [this](const PointRef& p1, const PointRef& p2)
+        auto cmp = [this](const PointIdxRef& p1, const PointIdxRef& p2)
             { return p1.compare(m_dim, p2); };
 
         std::sort(view.begin(), view.end(), cmp);

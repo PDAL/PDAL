@@ -34,6 +34,7 @@
 
 #include <pdal/pdal_test_main.hpp>
 
+#include <pdal/Filter.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <LasReader.hpp>
@@ -314,7 +315,7 @@ TEST(LasReaderTest, extraBytes)
     reader.prepare(table);
 
     DimTypeList dimTypes = layout->dimTypes();
-    EXPECT_EQ(dimTypes.size(), (size_t)24);
+    EXPECT_EQ(dimTypes.size(), (size_t)25);
 
     Dimension::Id::Enum color0 = layout->findProprietaryDim("Colors0");
     EXPECT_EQ(layout->dimType(color0), Dimension::Type::Unsigned16);
@@ -368,7 +369,6 @@ TEST(LasReaderTest, extraBytes)
         // Time was written truncated rather than rounded.
         EXPECT_NEAR(view->getFieldAs<double>(time, idx),
             view->getFieldAs<double>(time2, idx), 1.0);
-
     }
 }
 
@@ -439,6 +439,80 @@ TEST(LasReaderTest, lazperf)
     }
 }
 #endif
+
+void streamTest(const std::string src, const std::string compression)
+{
+    Options ops1;
+    ops1.add("filename", src);
+    ops1.add("compression", compression);
+
+    LasReader lasReader;
+    lasReader.setOptions(ops1);
+
+    PointTable t;
+    lasReader.prepare(t);
+    PointViewSet s = lasReader.execute(t);
+    PointViewPtr p = *s.begin();
+
+    class Checker : public Filter
+    {
+    public:
+        std::string getName() const
+            { return "checker"; }
+        Checker(PointViewPtr v) : m_cnt(0), m_view(v),
+            m_bulkBuf(v->pointSize()), m_buf(v->pointSize()),
+            m_dims(v->dimTypes())
+            {}
+    private:
+        point_count_t m_cnt;
+        PointViewPtr m_view;
+        std::vector<char> m_bulkBuf;
+        std::vector<char> m_buf;
+        DimTypeList m_dims;
+
+        bool processOne(PointRef& point)
+        {
+            PointRef bulkPoint = m_view->point(m_cnt);
+
+            bulkPoint.getPackedData(m_dims, m_bulkBuf.data());
+            point.getPackedData(m_dims, m_buf.data());
+            EXPECT_EQ(memcmp(m_buf.data(), m_bulkBuf.data(),
+                m_view->pointSize()), 0);
+            m_cnt++;
+            return true;
+        }
+
+        void done(PointTableRef)
+        {
+            EXPECT_EQ(m_cnt, 110000u);
+        }
+    };
+
+    Options ops2;
+    ops2.add("filename", Support::datapath("las/autzen_trim.las"));
+
+    LasReader lazReader;
+    lazReader.setOptions(ops2);
+
+    Checker c(p);
+    c.setInput(lazReader);
+
+    FixedPointTable fixed(100);
+    c.prepare(fixed);
+    c.execute(fixed);
+}
+
+TEST(LasReaderTest, stream)
+{
+    // Compression option is ignored for non-compressed file.
+    streamTest(Support::datapath("las/autzen_trim.las"), "laszip");
+#ifdef PDAL_HAVE_LASZIP
+    streamTest(Support::datapath("laz/autzen_trim.laz"), "laszip");
+#endif
+#ifdef PDAL_HAVE_LAZPERF
+    streamTest(Support::datapath("laz/autzen_trim.laz"), "lazperf");
+#endif
+}
 
 
 // The header of 1.2-with-color-clipped says that it has 1065 points,

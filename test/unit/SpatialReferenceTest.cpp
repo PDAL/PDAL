@@ -41,6 +41,8 @@
 #include <LasWriter.hpp>
 #include <LasReader.hpp>
 
+#include <gdal_version.h>
+
 #include "Support.hpp"
 
 using namespace pdal;
@@ -74,9 +76,15 @@ TEST(SpatialReferenceTest, test_proj4_roundtrip)
     std::string proj4 = "+proj=utm +zone=15 +datum=WGS84 +units=m +no_defs";
     std::string proj4_ellps =
         "+proj=utm +zone=15 +ellps=WGS84 +datum=WGS84 +units=m +no_defs";
+
+#if GDAL_VERSION_MAJOR <=1
     std::string proj4_out =
         "+proj=utm +zone=15 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m "
         "+no_defs";
+#else
+    std::string proj4_out = "+proj=utm +zone=15 +datum=WGS84 +units=m +no_defs";
+
+#endif
 
     {
         SpatialReference ref;
@@ -90,7 +98,6 @@ TEST(SpatialReferenceTest, test_proj4_roundtrip)
         SpatialReference ref;
         ref.setProj4(proj4_ellps);
         const std::string ret = ref.getProj4();
-        //EXPECT_TRUE(ret == proj4);
         EXPECT_TRUE(ret == proj4_out);
     }
 
@@ -144,7 +151,7 @@ TEST(SpatialReferenceTest, calcZone)
 {
     int zone = 1;
     for (double lon = -537.0; lon < 537.0; lon += 6.0)
-    {   
+    {
        EXPECT_EQ(zone, SpatialReference::calculateZone(lon, 25));
        EXPECT_EQ(-zone, SpatialReference::calculateZone(lon, -25));
        zone++;
@@ -177,8 +184,11 @@ TEST(SpatialReferenceTest, test_read_srs)
     const std::string ret_wkt = ref.getWKT();
     const std::string ret_proj4 = ref.getProj4();
 
+#if GDAL_VERSION_MAJOR <=1
     const std::string wkt = "PROJCS[\"WGS 84 / UTM zone 17N\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-81],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AUTHORITY[\"EPSG\",\"32617\"]]";
-
+#else
+    const std::string wkt = "PROJCS[\"WGS 84 / UTM zone 17N\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-81],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],AUTHORITY[\"EPSG\",\"32617\"]]";
+#endif
     EXPECT_TRUE(ret_wkt == wkt);
 
     std::string proj4 = "+proj=utm +zone=17 +datum=WGS84 +units=m +no_defs";

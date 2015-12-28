@@ -157,6 +157,8 @@ void LasWriter::processOptions(const Options& options)
 
 void LasWriter::prepared(PointTableRef table)
 {
+    FlexWriter::validateFilename(table);
+
     PointLayoutPtr layout = table.layout();
 
     // If we've asked for all dimensions, add to extraDims all dimensions
@@ -318,13 +320,14 @@ void LasWriter::prepOutput(std::ostream *outStream, const SpatialReference& srs)
     // Use stage SRS if provided.
     m_srs = getSpatialReference().empty() ? srs : getSpatialReference();
 
+    handleHeaderForwards(m_forwardMetadata);
+
     // Filling the header here gives the VLR functions below easy access to
     // the version information and so on.
     fillHeader();
 
     // Spatial reference can potentially change for multiple output files.
     setVlrsFromSpatialRef();
-    handleHeaderForwards(m_forwardMetadata);
     setVlrsFromMetadata(m_forwardMetadata);
 
     m_summaryData.reset(new SummaryData());
@@ -354,6 +357,10 @@ void LasWriter::prepOutput(std::ostream *outStream, const SpatialReference& srs)
     m_lasHeader.setPointOffset((uint32_t)m_ostream->tellp());
     if (m_compression == LasCompression::LasZip)
         openCompression();
+
+    // Set the point buffer size here in case we're using the streaming
+    // interface.
+    m_pointBuf.resize(m_lasHeader.pointLen());
 
     m_error.setLog(log());
 }
@@ -701,6 +708,24 @@ void LasWriter::openCompression()
 }
 
 
+bool LasWriter::processOne(PointRef& point)
+{
+    //ABELL - Need to do something about auto offset.
+    LeInserter ostream(m_pointBuf.data(), m_pointBuf.size());
+
+    if (!fillPointBuf(point, ostream))
+        return false;
+
+    if (m_compression == LasCompression::LasZip)
+        writeLasZipBuf(m_pointBuf.data(), m_lasHeader.pointLen(), 1);
+    else if (m_compression == LasCompression::LazPerf)
+        writeLazPerfBuf(m_pointBuf.data(), m_lasHeader.pointLen(), 1);
+    else
+        m_ostream->write(m_pointBuf.data(), m_lasHeader.pointLen());
+    return true;
+}
+
+
 void LasWriter::writeView(const PointViewPtr view)
 {
     Utils::writeProgress(m_progressFd, "READYVIEW",
@@ -710,7 +735,7 @@ void LasWriter::writeView(const PointViewPtr view)
     size_t pointLen = m_lasHeader.pointLen();
 
     // Make a buffer of at most a meg.
-    std::vector<char> buf(std::min((size_t)1000000, pointLen * view->size()));
+    m_pointBuf.resize(std::min((size_t)1000000, pointLen * view->size()));
 
     const PointView& viewRef(*view.get());
 
@@ -718,16 +743,16 @@ void LasWriter::writeView(const PointViewPtr view)
     PointId idx = 0;
     while (remaining)
     {
-        point_count_t filled = fillWriteBuf(viewRef, idx, buf);
+        point_count_t filled = fillWriteBuf(viewRef, idx, m_pointBuf);
         idx += filled;
         remaining -= filled;
 
         if (m_compression == LasCompression::LasZip)
-            writeLasZipBuf(buf.data(), pointLen, filled);
+            writeLasZipBuf(m_pointBuf.data(), pointLen, filled);
         else if (m_compression == LasCompression::LazPerf)
-            writeLazPerfBuf(buf.data(), pointLen, filled);
+            writeLazPerfBuf(m_pointBuf.data(), pointLen, filled);
         else
-            m_ostream->write(buf.data(), filled * pointLen);
+            m_ostream->write(m_pointBuf.data(), filled * pointLen);
     }
     Utils::writeProgress(m_progressFd, "DONEVIEW",
         std::to_string(view->size()));
@@ -768,184 +793,151 @@ void LasWriter::writeLazPerfBuf(char *pos, size_t pointLen,
 }
 
 
+bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
+{
+    bool has14Format = m_lasHeader.has14Format();
+    bool hasColor = m_lasHeader.hasColor();
+    bool hasTime = m_lasHeader.hasTime();
+    bool hasInfrared = m_lasHeader.hasInfrared();
+    static const size_t maxReturnCount = m_lasHeader.maxReturnCount();
+
+    // we always write the base fields
+    using namespace Dimension;
+
+    uint8_t returnNumber(1);
+    uint8_t numberOfReturns(1);
+    if (point.hasDim(Id::ReturnNumber))
+    {
+        returnNumber = point.getFieldAs<uint8_t>(Id::ReturnNumber);
+        if (returnNumber < 1 || returnNumber > maxReturnCount)
+            m_error.returnNumWarning(returnNumber);
+    }
+    if (point.hasDim(Id::NumberOfReturns))
+        numberOfReturns = point.getFieldAs<uint8_t>(Id::NumberOfReturns);
+    if (numberOfReturns == 0)
+        m_error.numReturnsWarning(0);
+    if (numberOfReturns > maxReturnCount)
+    {
+        if (m_discardHighReturnNumbers)
+        {
+            // If this return number is too high, pitch the point.
+            if (returnNumber > maxReturnCount)
+                return false;
+            numberOfReturns = maxReturnCount;
+        }
+        else
+            m_error.numReturnsWarning(numberOfReturns);
+    }
+
+    double xOrig = point.getFieldAs<double>(Id::X);
+    double yOrig = point.getFieldAs<double>(Id::Y);
+    double zOrig = point.getFieldAs<double>(Id::Z);
+
+    double x = (xOrig - m_xXform.m_offset) / m_xXform.m_scale;
+    double y = (yOrig - m_yXform.m_offset) / m_yXform.m_scale;
+    double z = (zOrig - m_zXform.m_offset) / m_zXform.m_scale;
+
+    auto converter = [this](double d, Dimension::Id::Enum dim) -> int32_t
+    {
+        int32_t i;
+
+        if (!Utils::numericCast(d, i))
+        {
+            std::ostringstream oss;
+            oss << "Unable to convert scaled value (" << d << ") to "
+                "int32 for dimension '" << Dimension::name(dim) <<
+                "' when writing LAS/LAZ file " << m_curFilename << ".";
+            throw pdal_error(oss.str());
+        }
+        return i;
+    };
+
+    ostream << converter(x, Id::X);
+    ostream << converter(y, Id::Y);
+    ostream << converter(z, Id::Z);
+
+    ostream << point.getFieldAs<uint16_t>(Id::Intensity);
+
+    uint8_t scanChannel = point.getFieldAs<uint8_t>(Id::ScanChannel);
+    uint8_t scanDirectionFlag =
+        point.getFieldAs<uint8_t>(Id::ScanDirectionFlag);
+    uint8_t edgeOfFlightLine =
+        point.getFieldAs<uint8_t>(Id::EdgeOfFlightLine);
+
+    if (has14Format)
+    {
+        uint8_t bits = returnNumber | (numberOfReturns << 4);
+        ostream << bits;
+
+        uint8_t classFlags = point.getFieldAs<uint8_t>(Id::ClassFlags);
+        bits = (classFlags & 0x0F) |
+            ((scanChannel & 0x03) << 4) |
+            ((scanDirectionFlag & 0x01) << 6) |
+            ((edgeOfFlightLine & 0x01) << 7);
+        ostream << bits;
+    }
+    else
+    {
+        uint8_t bits = returnNumber | (numberOfReturns << 3) |
+            (scanDirectionFlag << 6) | (edgeOfFlightLine << 7);
+        ostream << bits;
+    }
+
+    ostream << point.getFieldAs<uint8_t>(Id::Classification);
+
+    uint8_t userData = point.getFieldAs<uint8_t>(Id::UserData);
+    if (has14Format)
+    {
+         int16_t scanAngleRank =
+             point.getFieldAs<float>(Id::ScanAngleRank) / .006;
+         ostream << userData << scanAngleRank;
+    }
+    else
+    {
+        int8_t scanAngleRank = point.getFieldAs<int8_t>(Id::ScanAngleRank);
+        ostream << scanAngleRank << userData;
+    }
+
+    ostream << point.getFieldAs<uint16_t>(Id::PointSourceId);
+
+    if (hasTime)
+        ostream << point.getFieldAs<double>(Id::GpsTime);
+
+    if (hasColor)
+    {
+        ostream << point.getFieldAs<uint16_t>(Id::Red);
+        ostream << point.getFieldAs<uint16_t>(Id::Green);
+        ostream << point.getFieldAs<uint16_t>(Id::Blue);
+    }
+
+    if (hasInfrared)
+        ostream << point.getFieldAs<uint16_t>(Id::Infrared);
+
+    Everything e;
+    for (auto& dim : m_extraDims)
+    {
+        point.getField((char *)&e, dim.m_dimType.m_id, dim.m_dimType.m_type);
+        ostream.put(dim.m_dimType.m_type, e);
+    }
+
+    m_summaryData->addPoint(xOrig, yOrig, zOrig, returnNumber);
+    return true;
+}
+
+
 point_count_t LasWriter::fillWriteBuf(const PointView& view,
     PointId startId, std::vector<char>& buf)
 {
     point_count_t blocksize = buf.size() / m_lasHeader.pointLen();
     blocksize = std::min(blocksize, view.size() - startId);
-
-    bool has14Format = m_lasHeader.has14Format();
-    bool hasColor = m_lasHeader.hasColor();
-    bool hasTime = m_lasHeader.hasTime();
-    bool hasInfrared = m_lasHeader.hasInfrared();
-
     PointId lastId = startId + blocksize;
-    static const size_t maxReturnCount = m_lasHeader.maxReturnCount();
+
     LeInserter ostream(buf.data(), buf.size());
+    PointRef point = (const_cast<PointView&>(view)).point(0);
     for (PointId idx = startId; idx < lastId; idx++)
     {
-        // we always write the base fields
-        using namespace Dimension;
-
-        uint8_t returnNumber(1);
-        uint8_t numberOfReturns(1);
-        if (view.hasDim(Id::ReturnNumber))
-        {
-            returnNumber = view.getFieldAs<uint8_t>(Id::ReturnNumber, idx);
-            if (returnNumber < 1 || returnNumber > maxReturnCount)
-                m_error.returnNumWarning(returnNumber);
-        }
-        if (view.hasDim(Id::NumberOfReturns))
-            numberOfReturns = view.getFieldAs<uint8_t>(
-                Id::NumberOfReturns, idx);
-        if (numberOfReturns == 0)
-            m_error.numReturnsWarning(0);
-        if (numberOfReturns > maxReturnCount)
-        {
-            if (m_discardHighReturnNumbers)
-            {
-                // If this return number is too high, pitch the point.
-                if (returnNumber > maxReturnCount)
-                    continue;
-                numberOfReturns = maxReturnCount;
-            }
-            else
-                m_error.numReturnsWarning(numberOfReturns);
-        }
-
-        double xOrig = view.getFieldAs<double>(Id::X, idx);
-        double yOrig = view.getFieldAs<double>(Id::Y, idx);
-        double zOrig = view.getFieldAs<double>(Id::Z, idx);
-
-        double x = (xOrig - m_xXform.m_offset) / m_xXform.m_scale;
-        double y = (yOrig - m_yXform.m_offset) / m_yXform.m_scale;
-        double z = (zOrig - m_zXform.m_offset) / m_zXform.m_scale;
-
-        auto converter = [this](double d, Dimension::Id::Enum dim) -> int32_t
-        {
-            int32_t i;
-
-            if (!Utils::numericCast(d, i))
-            {
-                std::ostringstream oss;
-                oss << "Unable to convert scaled value (" << d << ") to "
-                    "int32 for dimension '" << Dimension::name(dim) <<
-                    "' when writing LAS/LAZ file " << m_curFilename << ".";
-                throw pdal_error(oss.str());
-            }
-            return i;
-        };
-
-        ostream << converter(x, Id::X);
-        ostream << converter(y, Id::Y);
-        ostream << converter(z, Id::Z);
-
-        uint16_t intensity = 0;
-        if (view.hasDim(Id::Intensity))
-            intensity = view.getFieldAs<uint16_t>(Id::Intensity, idx);
-        ostream << intensity;
-
-        uint8_t scanChannel(0);
-        if (view.hasDim(Id::ScanChannel))
-            scanChannel = view.getFieldAs<uint8_t>(Id::ScanChannel, idx);
-
-        uint8_t scanDirectionFlag(0);
-        if (view.hasDim(Id::ScanDirectionFlag))
-            scanDirectionFlag = view.getFieldAs<uint8_t>(
-                Id::ScanDirectionFlag, idx);
-
-        uint8_t edgeOfFlightLine(0);
-        if (view.hasDim(Id::EdgeOfFlightLine))
-            edgeOfFlightLine = view.getFieldAs<uint8_t>(
-                Id::EdgeOfFlightLine, idx);
-
-        if (has14Format)
-        {
-            uint8_t bits = returnNumber | (numberOfReturns << 4);
-            ostream << bits;
-            bits = (scanChannel << 4) | (scanDirectionFlag << 6) |
-                (edgeOfFlightLine << 7);
-            ostream << bits;
-        }
-        else
-        {
-            uint8_t bits = returnNumber | (numberOfReturns << 3) |
-                (scanDirectionFlag << 6) | (edgeOfFlightLine << 7);
-            ostream << bits;
-        }
-
-        uint8_t classification = 0;
-        if (view.hasDim(Id::Classification))
-            classification = view.getFieldAs<uint8_t>(Id::Classification, idx);
-        ostream << classification;
-
-        uint8_t userData = 0;
-        if (view.hasDim(Id::UserData))
-            userData = view.getFieldAs<uint8_t>(Id::UserData, idx);
-        if (has14Format)
-        {
-            int16_t scanAngleRank = 0;
-            if (view.hasDim(Id::ScanAngleRank))
-                scanAngleRank =
-                    view.getFieldAs<float>(Id::ScanAngleRank, idx) / .006;
-            ostream << userData << scanAngleRank;
-        }
-        else
-        {
-            int8_t scanAngleRank = 0;
-            if (view.hasDim(Id::ScanAngleRank))
-                scanAngleRank = view.getFieldAs<int8_t>(Id::ScanAngleRank, idx);
-
-            ostream << scanAngleRank << userData;
-        }
-
-        uint16_t pointSourceId = 0;
-        if (view.hasDim(Id::PointSourceId))
-            pointSourceId = view.getFieldAs<uint16_t>(Id::PointSourceId, idx);
-        ostream << pointSourceId;
-
-        if (hasTime)
-        {
-            double t = 0.0;
-            if (view.hasDim(Id::GpsTime))
-                t = view.getFieldAs<double>(Id::GpsTime, idx);
-            ostream << t;
-        }
-
-        if (hasColor)
-        {
-            uint16_t red = 0;
-            uint16_t green = 0;
-            uint16_t blue = 0;
-            if (view.hasDim(Id::Red))
-                red = view.getFieldAs<uint16_t>(Id::Red, idx);
-            if (view.hasDim(Id::Green))
-                green = view.getFieldAs<uint16_t>(Id::Green, idx);
-            if (view.hasDim(Id::Blue))
-                blue = view.getFieldAs<uint16_t>(Id::Blue, idx);
-
-            ostream << red << green << blue;
-        }
-
-        if (hasInfrared)
-        {
-            uint16_t nearInfraRed = 0;
-
-            if (view.hasDim(Id::Infrared))
-                nearInfraRed = view.getFieldAs<uint16_t>(Id::Infrared, idx);
-            ostream << nearInfraRed;
-        }
-
-        Everything e;
-        for (auto& dim : m_extraDims)
-        {
-            view.getField((char *)&e, dim.m_dimType.m_id,
-                dim.m_dimType.m_type, idx);
-            ostream.put(dim.m_dimType.m_type, e);
-        }
-
-        using namespace Dimension;
-        m_summaryData->addPoint(xOrig, yOrig, zOrig, returnNumber);
+        point.setPointId(idx);
+        fillPointBuf(point, ostream);
     }
     return blocksize;
 }

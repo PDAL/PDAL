@@ -49,6 +49,7 @@ extern "C" PF_ExitFunc LasWriter_InitPlugin();
 
 namespace pdal
 {
+class LeInserter;
 class LasTester;
 class NitfWriter;
 class GeotiffSupport;
@@ -99,6 +100,7 @@ private:
     std::set<std::string> m_forwards;
     bool m_forwardVlrs;
     LasCompression::Enum m_compression;
+    std::vector<char> m_pointBuf;
 
     NumHeaderVal<uint8_t, 1, 1> m_majorVersion;
     NumHeaderVal<uint8_t, 1, 4> m_minorVersion;
@@ -106,7 +108,7 @@ private:
     // MSVC doesn't see numeric_limits::max() as constexpr do doesn't allow
     // it as defaults for templates.  Remove when possible.
     NumHeaderVal<uint16_t, 0, 65535> m_filesourceId;
-    NumHeaderVal<uint16_t, 0, 15> m_globalEncoding;
+    NumHeaderVal<uint16_t, 0, 31> m_globalEncoding;
     UuidHeaderVal m_projectId;
     StringHeaderVal<32> m_systemId;
     StringHeaderVal<32> m_softwareId;
@@ -128,6 +130,7 @@ private:
     virtual void readyFile(const std::string& filename,
         const SpatialReference& srs);
     virtual void writeView(const PointViewPtr view);
+    virtual bool processOne(PointRef& point);
     virtual void doneFile();
 
     void fillForwardList(const Options& options);
@@ -137,6 +140,7 @@ private:
         const MetadataNode& base);
     void handleHeaderForwards(MetadataNode& forward);
     void fillHeader();
+    bool fillPointBuf(PointRef& point, LeInserter& ostream);
     point_count_t fillWriteBuf(const PointView& view, PointId startId,
         std::vector<char>& buf);
     void writeLasZipBuf(char *data, size_t pointLen, point_count_t numPts);

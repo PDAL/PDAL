@@ -37,6 +37,7 @@
 #include <pdal/PointView.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/util/IStream.hpp>
+#include <map>
 
 
 extern "C" int32_t Ilvis2Reader_ExitFunc();
@@ -47,7 +48,31 @@ namespace pdal
 class PDAL_DLL Ilvis2Reader : public pdal::Reader
 {
 public:
-    Ilvis2Reader() : Reader(), m_index(0), m_convert("CENTROID")
+    enum IlvisMappingType
+    {
+      INVALID,
+      LOW,
+      HIGH,
+      ALL
+    };
+
+    class MappingParser
+    {
+      std::map<std::string, IlvisMappingType> mappingMap;
+
+      public:
+        MappingParser()
+        {
+            mappingMap["LOW"] = LOW;
+            mappingMap["HIGH"] = HIGH;
+            mappingMap["ALL"] = ALL;
+        }
+
+        IlvisMappingType parseMapping(const std::string &value)
+        { return mappingMap[value]; }
+    };
+
+    Ilvis2Reader() : Reader(), m_mapping(ALL)
         {}
 
     static void * create();
@@ -59,14 +84,24 @@ public:
 
 
 private:
-    std::unique_ptr<ILeStream> m_stream;
-    point_count_t m_index;
-    std::string m_convert;
+    std::ifstream m_stream;
+    MappingParser parser;
+    IlvisMappingType m_mapping;
+    StringList m_fields;
+    size_t m_lineNum;
+    bool m_resample;
+    PointLayoutPtr m_layout;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void processOptions(const Options& options);
+    virtual void initialize(PointTableRef table);
     virtual void ready(PointTableRef table);
+    virtual bool processOne(PointRef& point);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
+
+    virtual void readPoint(PointRef& point, StringList s, std::string pointMap);
+
+    double convertLongitude(double longitude);
 
 };
 

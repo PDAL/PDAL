@@ -128,11 +128,18 @@ void ReprojectionFilter::initialize()
 }
 
 
-void ReprojectionFilter::createTransform(PointView *view)
+void ReprojectionFilter::ready(PointTableRef table)
+{
+    if (!table.supportsView())
+        createTransform(table.anySpatialReference());
+}
+
+
+void ReprojectionFilter::createTransform(const SpatialReference& srsSRS)
 {
     if (m_inferInputSRS)
     {
-        m_inSRS = view->spatialReference();
+        m_inSRS = srsSRS;
         if (m_inSRS.empty())
         {
             std::ostringstream oss;
@@ -196,23 +203,16 @@ PointViewSet ReprojectionFilter::run(PointViewPtr view)
     PointViewSet viewSet;
     PointViewPtr outView = view->makeNew();
 
-    createTransform(view.get());
+    createTransform(view->spatialReference());
 
     double x, y, z;
 
+    PointRef point(*view, 0);
     for (PointId id = 0; id < view->size(); ++id)
     {
-        x = view->getFieldAs<double>(Dimension::Id::X, id);
-        y = view->getFieldAs<double>(Dimension::Id::Y, id);
-        z = view->getFieldAs<double>(Dimension::Id::Z, id);
-
-        if (transform(x, y, z))
-        {
-            view->setField(Dimension::Id::X, id, x);
-            view->setField(Dimension::Id::Y, id, y);
-            view->setField(Dimension::Id::Z, id, z);
+        point.setPointId(id);
+        if (processOne(point))
             outView->appendPoint(*view, id);
-        }
     }
 
     viewSet.insert(outView);
@@ -223,23 +223,24 @@ PointViewSet ReprojectionFilter::run(PointViewPtr view)
 }
 
 
-void ReprojectionFilter::filter(PointView& view)
+bool ReprojectionFilter::processOne(PointRef& point)
 {
-    double x, y, z;
+    double x(point.getFieldAs<double>(Dimension::Id::X));
+    double y(point.getFieldAs<double>(Dimension::Id::Y));
+    double z(point.getFieldAs<double>(Dimension::Id::Z));
 
-    for (PointId id = 0; id < view.size(); ++id)
+    if (OCTTransform(m_transform_ptr, 1, &x, &y, &z))
     {
-        x = view.getFieldAs<double>(Dimension::Id::X, id);
-        y = view.getFieldAs<double>(Dimension::Id::Y, id);
-        z = view.getFieldAs<double>(Dimension::Id::Z, id);
+        point.setField(Dimension::Id::X, x);
+        point.setField(Dimension::Id::Y, y);
+        point.setField(Dimension::Id::Z, z);
 
-        OCTTransform(m_transform_ptr, 1, &x, &y, &z);
-
-        view.setField(Dimension::Id::X, id, x);
-        view.setField(Dimension::Id::Y, id, y);
-        view.setField(Dimension::Id::Z, id, z);
+        return true;
+    }
+    else
+    {
+        return false;
     }
 }
-
 
 } // namespace pdal

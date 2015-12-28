@@ -96,7 +96,8 @@ static void finish()
 namespace Geometry
 {
 
-static std::string smoothPolygon(const std::string& wkt, double tolerance, uint32_t precision)
+static std::string smoothPolygon(const std::string& wkt, double tolerance,
+    uint32_t precision, double area_threshold)
 {
     GEOSContextHandle_t env = init();
 
@@ -115,15 +116,30 @@ static std::string smoothPolygon(const std::string& wkt, double tolerance, uint3
     for (int n = 0; n < numGeom; ++n)
     {
         const GEOSGeometry* m = GEOSGetGeometryN_r(env, smoothed, n);
+        if (!m)
+            throw pdal::pdal_error("Unable to Get GeometryN");
+
+        const GEOSGeometry* ering = GEOSGetExteriorRing_r(env, m);
+        if (!ering)
+            throw pdal::pdal_error("Unable to Get Exterior Ring");
+
         GEOSGeometry* exterior = GEOSGeom_clone_r(env, GEOSGetExteriorRing_r(env, m));
+        if (!exterior)
+            throw pdal::pdal_error("Unable to clone exterior ring!");
 
         std::vector<GEOSGeometry*> keep_rings;
         int numRings = GEOSGetNumInteriorRings_r(env, m);
-        double area_threshold = 6 * tolerance * tolerance;
         for (int i = 0; i < numRings; ++i)
         {
             double area(0.0);
-            GEOSGeometry* cring = GEOSGeom_clone_r(env, GEOSGetInteriorRingN_r(env, smoothed, i));
+
+            const GEOSGeometry* iring = GEOSGetInteriorRingN_r(env, m, i);
+            if (!iring)
+                throw pdal::pdal_error("Unable to Get Interior Ring");
+
+            GEOSGeometry* cring = GEOSGeom_clone_r(env, iring);
+            if (!cring)
+                throw pdal::pdal_error("Unable to clone interior ring!");
             GEOSGeometry* aring = GEOSGeom_createPolygon_r(env, cring, NULL, 0);
 
             int errored = GEOSArea_r(env, aring, &area);
@@ -171,16 +187,31 @@ static double computeArea(const std::string& wkt)
     finish();
     return output;
 }
+
+} // namespace Geometry
+
 #else
 
-static std::string smoothPolygon(const std::string& wkt, double tolerance)
+namespace Geometry
+{
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
+static std::string smoothPolygon(const std::string& wkt, double tolerance,
+    uint32_t precision, double area_threshold)
 {
     throw pdal_error("Can't call smoothPolygon.  PDAL not built with GEOS.");
 }
 
-#endif
+static double computeArea(const std::string& wkt)
+{
+    throw pdal_error("Can't call computeArea.  PDAL not built with GEOS.");
+}
+#pragma GCC diagnostic pop
 
 } // namespace Geometry
+
+#endif
 
 } // namespace pdal
 

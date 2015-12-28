@@ -162,6 +162,9 @@ public:
 
     std::string toWKT(uint32_t precision = 8) const
     {
+        if (empty())
+            return std::string();
+
         std::stringstream oss;
 
         oss.precision(precision);
@@ -281,6 +284,9 @@ public:
 
     std::string toWKT(uint32_t precision = 8) const
     {
+        if (empty())
+            return std::string();
+
         std::stringstream oss;
 
         oss.precision(precision);

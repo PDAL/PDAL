@@ -139,7 +139,9 @@ public:
     {}
 
     void putBytes(const unsigned char *b, size_t len)
-        { m_buf.insert(m_buf.end(), (CTYPE *)b, (CTYPE *)(b + len)); }
+    {
+        m_buf.insert(m_buf.end(), (const CTYPE *)b, (const CTYPE *)(b + len));
+    }
     void putByte(const unsigned char b)
         {   m_buf.push_back((CTYPE)b); }
     unsigned char getByte()

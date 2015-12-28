@@ -45,6 +45,7 @@
 #include <boost/filesystem.hpp>
 
 #include "gdal_priv.h" // For File I/O
+#include "gdal_version.h" // For version info
 #include "ogr_spatialref.h"  //For Geographic Information/Transformations
 
 namespace pdal
@@ -1060,9 +1061,20 @@ void DerivativeWriter::writeSlope(Eigen::MatrixXd* tDemData,
             tBand->SetNoDataValue((double)c_background);
 
             if (m_GRID_SIZE_X > 0 && m_GRID_SIZE_Y > 0)
+// #define STR_HELPER(x) #x
+// #define STR(x) STR_HELPER(x)
+//
+// #pragma message "content of GDAL_VERSION_MAJOR:" STR(GDAL_VERSION_MAJOR)
+#if GDAL_VERSION_MAJOR <= 1
                 tBand->RasterIO(GF_Write, 0, 0, m_GRID_SIZE_X, m_GRID_SIZE_Y,
                                 poRasterData, m_GRID_SIZE_X, m_GRID_SIZE_Y,
                                 GDT_Float32, 0, 0);
+#else
+
+                int ret = tBand->RasterIO(GF_Write, 0, 0, m_GRID_SIZE_X, m_GRID_SIZE_Y,
+                                          poRasterData, m_GRID_SIZE_X, m_GRID_SIZE_Y,
+                                          GDT_Float32, 0, 0, 0);
+#endif
         }
 
         GDALClose((GDALDatasetH) mpDstDS);
@@ -1134,9 +1146,15 @@ void DerivativeWriter::writeAspect(Eigen::MatrixXd* tDemData,
             tBand->SetNoDataValue((double)c_background);
 
             if (m_GRID_SIZE_X > 0 && m_GRID_SIZE_Y > 0)
+#if GDAL_VERSION_MAJOR <= 1
                 tBand->RasterIO(GF_Write, 0, 0, m_GRID_SIZE_X, m_GRID_SIZE_Y,
                                 poRasterData, m_GRID_SIZE_X, m_GRID_SIZE_Y,
                                 GDT_Float32, 0, 0);
+#else
+                int ret = tBand->RasterIO(GF_Write, 0, 0, m_GRID_SIZE_X, m_GRID_SIZE_Y,
+                                          poRasterData, m_GRID_SIZE_X, m_GRID_SIZE_Y,
+                                          GDT_Float32, 0, 0, 0);
+#endif
         }
 
         GDALClose((GDALDatasetH) mpDstDS);
@@ -1214,9 +1232,15 @@ void DerivativeWriter::writeCatchmentArea(Eigen::MatrixXd* tDemData,
             tBand->SetNoDataValue((double)c_background);
 
             if (m_GRID_SIZE_X > 0 && m_GRID_SIZE_Y > 0)
+#if GDAL_VERSION_MAJOR <= 1
                 tBand->RasterIO(GF_Write, 0, 0, m_GRID_SIZE_X, m_GRID_SIZE_Y,
                                 poRasterData, m_GRID_SIZE_X, m_GRID_SIZE_Y,
                                 GDT_Float32, 0, 0);
+#else
+                int ret = tBand->RasterIO(GF_Write, 0, 0, m_GRID_SIZE_X, m_GRID_SIZE_Y,
+                                          poRasterData, m_GRID_SIZE_X, m_GRID_SIZE_Y,
+                                          GDT_Float32, 0, 0, 0);
+#endif
         }
 
         GDALClose((GDALDatasetH) mpDstDS);
@@ -1358,9 +1382,16 @@ void DerivativeWriter::writeHillshade(Eigen::MatrixXd* tDemData,
             tBand->SetNoDataValue((double)c_background);
 
             if (m_GRID_SIZE_X > 0 && m_GRID_SIZE_Y > 0)
+#if GDAL_VERSION_MAJOR <= 1
                 tBand->RasterIO(GF_Write, 0, 0, m_GRID_SIZE_X, m_GRID_SIZE_Y,
                                 poRasterData, m_GRID_SIZE_X, m_GRID_SIZE_Y,
                                 GDT_Float32, 0, 0);
+#else
+
+                int ret = tBand->RasterIO(GF_Write, 0, 0, m_GRID_SIZE_X, m_GRID_SIZE_Y,
+                                          poRasterData, m_GRID_SIZE_X, m_GRID_SIZE_Y,
+                                          GDT_Float32, 0, 0, 0);
+#endif
         }
 
         GDALClose((GDALDatasetH) mpDstDS);
@@ -1451,9 +1482,15 @@ void DerivativeWriter::writeCurvature(Eigen::MatrixXd* tDemData,
             tBand->SetNoDataValue((double)c_background);
 
             if (m_GRID_SIZE_X > 0 && m_GRID_SIZE_Y > 0)
+#if GDAL_VERSION_MAJOR <= 1
                 tBand->RasterIO(GF_Write, 0, 0, m_GRID_SIZE_X, m_GRID_SIZE_Y,
                                 poRasterData, m_GRID_SIZE_X, m_GRID_SIZE_Y,
                                 GDT_Float32, 0, 0);
+#else
+                int ret = tBand->RasterIO(GF_Write, 0, 0, m_GRID_SIZE_X, m_GRID_SIZE_Y,
+                                          poRasterData, m_GRID_SIZE_X, m_GRID_SIZE_Y,
+                                          GDT_Float32, 0, 0, 0);
+#endif
         }
 
         GDALClose((GDALDatasetH) mpDstDS);

@@ -52,7 +52,8 @@ void DecimationFilter::processOptions(const Options& options)
 {
     m_step = options.getValueOrDefault<uint32_t>("step", 1);
     m_offset = options.getValueOrDefault<uint32_t>("offset", 0);
-    m_limit = options.getValueOrDefault<point_count_t>("limit", 0);
+    m_limit = options.getValueOrDefault<point_count_t>("limit",
+        std::numeric_limits<point_count_t>::max());
 }
 
 
@@ -66,9 +67,21 @@ PointViewSet DecimationFilter::run(PointViewPtr inView)
 }
 
 
+bool DecimationFilter::processOne(PointRef& point)
+{
+    bool keep = true;
+    if (m_index < m_offset || m_index >= m_limit)
+        keep = false;
+    else if ((m_index - m_offset) % m_step != 0)
+        keep = false;
+    m_index++;
+    return keep;
+}
+
+
 void DecimationFilter::decimate(PointView& input, PointView& output)
 {
-    PointId last_idx = (m_limit > 0) ? m_limit : input.size();
+    PointId last_idx = std::min(m_limit, input.size());
     for (PointId idx = m_offset; idx < last_idx; idx += m_step)
         output.appendPoint(input, idx);
 }

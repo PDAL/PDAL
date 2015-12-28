@@ -34,6 +34,7 @@
 
 #include "Ilvis2Reader.hpp"
 #include <algorithm>
+#include <cmath>
 
 namespace pdal
 {
@@ -50,37 +51,52 @@ std::string Ilvis2Reader::getName() const { return s_info.name; }
 Options Ilvis2Reader::getDefaultOptions()
 {
     Options options;
-    Option mapping("mapping", "LOW");
-    options.add(mapping);
+    options.add("mapping", "ALL", "The point to extract from the shot: "
+        "low, high, or all.  ALL creates 1 or 2 points per shot, "
+        "depending on if LOW and HIGH are the same.");
+    options.add("filename", "", "The file to read from");
+    options.add("metadata", "", "The metadata file to read from");
+
     return options;
 }
 
 void Ilvis2Reader::processOptions(const Options& options)
 {
-    m_convert = options.getValueOrDefault<std::string>("mapping", "CENTROID");
+    std::string mapping =
+        options.getValueOrDefault<std::string>("mapping", "ALL");
+    mapping = Utils::toupper(mapping);
+    m_mapping = parser.parseMapping(mapping);
+    if (m_mapping == INVALID)
+    {
+        std::ostringstream oss;
+
+        oss << "Invalid value for option for mapping: '" <<
+            mapping << "'.  Value values are 'low', 'high' and 'all'.";
+        throw pdal_error(oss.str());
+    }
 }
 
 void Ilvis2Reader::addDimensions(PointLayoutPtr layout)
 {
-    using namespace pdal::Dimension::Type;
-    layout->registerOrAssignDim("LVIS_LFID", Unsigned64);
-    layout->registerOrAssignDim("SHOTNUMBER", Unsigned64);
-    layout->registerDim(pdal::Dimension::Id::GpsTime);
-    layout->registerOrAssignDim("LONGITUDE_CENTROID", Double);
-    layout->registerOrAssignDim("LATITUDE_CENTROID", Double);
-    layout->registerOrAssignDim("ELEVATION_CENTROID", Double);
-    layout->registerOrAssignDim("LONGITUDE_LOW", Double);
-    layout->registerOrAssignDim("LATITUDE_LOW", Double);
-    layout->registerOrAssignDim("ELEVATION_LOW", Double);
-    layout->registerOrAssignDim("LONGITUDE_HIGH", Double);
-    layout->registerOrAssignDim("LATITUDE_HIGH", Double);
-    layout->registerOrAssignDim("ELEVATION_HIGH", Double);
-    layout->registerDim(pdal::Dimension::Id::X);
-    layout->registerDim(pdal::Dimension::Id::Y);
-    layout->registerDim(pdal::Dimension::Id::Z);
+    layout->registerDim(Dimension::Id::LvisLfid);
+    layout->registerDim(Dimension::Id::ShotNumber);
+    layout->registerDim(Dimension::Id::GpsTime);
+    layout->registerDim(Dimension::Id::LongitudeCentroid);
+    layout->registerDim(Dimension::Id::LatitudeCentroid);
+    layout->registerDim(Dimension::Id::ElevationCentroid);
+    layout->registerDim(Dimension::Id::LongitudeLow);
+    layout->registerDim(Dimension::Id::LatitudeLow);
+    layout->registerDim(Dimension::Id::ElevationLow);
+    layout->registerDim(Dimension::Id::LongitudeHigh);
+    layout->registerDim(Dimension::Id::LatitudeHigh);
+    layout->registerDim(Dimension::Id::ElevationHigh);
+    layout->registerDim(Dimension::Id::X);
+    layout->registerDim(Dimension::Id::Y);
+    layout->registerDim(Dimension::Id::Z);
 }
 
-pdal::Dimension::IdList Ilvis2Reader::getDefaultDimensions()
+
+Dimension::IdList Ilvis2Reader::getDefaultDimensions()
 {
     using namespace pdal::Dimension;
     Dimension::IdList ids;
@@ -92,134 +108,205 @@ pdal::Dimension::IdList Ilvis2Reader::getDefaultDimensions()
     return ids;
 }
 
-void Ilvis2Reader::ready(PointTableRef)
-{
-    m_stream.reset(new ILeStream(m_filename));
 
+void Ilvis2Reader::initialize(PointTableRef)
+{
+    //ABELL - Are ILVIS2 files always EPSG 4385?  If so, add comment.
     SpatialReference ref("EPSG:4385");
     setSpatialReference(ref);
 }
+
 
 template <typename T>
 T convert(const StringList& s, const std::string& name, size_t fieldno)
 {
     T output;
-    bool bConverted = Utils::fromString(s[fieldno], output);
-    if (!bConverted)
+    if (!Utils::fromString(s[fieldno], output))
     {
         std::stringstream oss;
-        oss << "Unable to convert " << name << ", " << s[fieldno] << ", to double";
+        oss << "Unable to convert " << name << ", " << s[fieldno] <<
+            ", to double";
         throw pdal_error(oss.str());
     }
 
     return output;
 }
 
-point_count_t Ilvis2Reader::read(PointViewPtr view, point_count_t count)
+
+// If longitude between 0-180, just return it, degrees east; if between 180
+// and 360, subtract 360 to get negative value.
+double Ilvis2Reader::convertLongitude(double longitude)
 {
-    PointLayoutPtr layout = view->layout();
-    PointId nextId = view->size();
-    PointId idx = m_index;
-    point_count_t numRead = 0;
-
-    // do any skipping to get to our m_index position;
-    m_stream.reset(new ILeStream(m_filename));
-
-    size_t HEADERSIZE(2);
-    size_t skip_lines(std::max(HEADERSIZE, (size_t)m_index));
-    size_t line_no(1);
-    for (std::string line; std::getline(*m_stream->stream(), line); line_no++)
-    {
-        if (line_no <= skip_lines)
-        {
-            continue;
-        }
-
-        StringList s = Utils::split2(line, ' ');
-//        # LVIS_LFID SHOTNUMBER TIME LONGITUDE_CENTROID LATITUDE_CENTROID ELEVATION_CENTROID LONGITUDE_LOW LATITUDE_LOW ELEVATION_LOW LONGITUDE_HIGH LATITUDE_HIGH ELEVATION_HIGH
-        unsigned long u64(0);
-        if (s.size() != 12)
-        {
-            std::stringstream oss;
-            oss << "Unable to split proper number of fields. Expected 12, got " << s.size();
-            throw pdal_error(oss.str());
-        }
-
-        std::string name("LVIS_LFID");
-        view->setField(layout->findProprietaryDim(name), nextId, convert<unsigned int>(s, name, 0));
-
-        name = "SHOTNUMBER";
-        view->setField(layout->findProprietaryDim(name), nextId, convert<unsigned int>(s, name, 1));
-
-        view->setField(pdal::Dimension::Id::GpsTime, nextId, convert<double>(s, name, 2));
-
-        name = "LONGITUDE_CENTROID";
-        view->setField(layout->findProprietaryDim(name), nextId, convert<double>(s, name, 3) - 180.0);
-
-        name = "LATITUDE_CENTROID";
-        view->setField(layout->findProprietaryDim(name), nextId, convert<double>(s, name, 4));
-
-        name = "ELEVATION_CENTROID";
-        view->setField(layout->findProprietaryDim(name), nextId, convert<double>(s, name, 5));
-
-        name = "LONGITUDE_LOW";
-        view->setField(layout->findProprietaryDim(name), nextId, convert<double>(s, name, 6) - 180.0);
-
-        name = "LATITUDE_LOW";
-        view->setField(layout->findProprietaryDim(name), nextId, convert<double>(s, name, 7));
-
-        name = "ELEVATION_LOW";
-        view->setField(layout->findProprietaryDim(name), nextId, convert<double>(s, name, 8));
-
-        name = "LONGITUDE_HIGH";
-        view->setField(layout->findProprietaryDim(name), nextId, convert<double>(s, name, 9) - 180.0);
-
-        name = "LATITUDE_HIGH";
-        view->setField(layout->findProprietaryDim(name), nextId, convert<double>(s, name, 10));
-
-        name = "ELEVATION_HIGH";
-        view->setField(layout->findProprietaryDim(name), nextId, convert<double>(s, name, 11));
-
-        double x, y, z;
-        pdal::Dimension::Id::Enum xd, yd, zd;
-        if (Utils::iequals(m_convert, "HIGH"))
-        {
-            xd = layout->findProprietaryDim("LONGITUDE_HIGH");
-            yd = layout->findProprietaryDim("LATITUDE_HIGH");
-            zd = layout->findProprietaryDim("ELEVATION_HIGH");
-
-        } else if (Utils::iequals(m_convert, "LOW"))
-        {
-            xd = layout->findProprietaryDim("LONGITUDE_LOW");
-            yd = layout->findProprietaryDim("LATITUDE_LOW");
-            zd = layout->findProprietaryDim("ELEVATION_LOW");
-
-        } else
-        {
-            xd = layout->findProprietaryDim("LONGITUDE_CENTROID");
-            yd = layout->findProprietaryDim("LATITUDE_CENTROID");
-            zd = layout->findProprietaryDim("ELEVATION_CENTROID");
-
-        }
-
-        x = view->getFieldAs<double>(xd, nextId);
-        y = view->getFieldAs<double>(yd, nextId);
-        z = view->getFieldAs<double>(zd, nextId);
-
-        view->setField(pdal::Dimension::Id::X, nextId, x);
-        view->setField(pdal::Dimension::Id::Y, nextId, y);
-        view->setField(pdal::Dimension::Id::Z, nextId, z);
-        nextId++;
-        if (m_cb)
-            m_cb(*view, nextId);
-    }
-    m_index = nextId;
-    numRead = nextId;
-    return numRead;
+    longitude = fmod(longitude, 360.0);
+    if (longitude <= -180)
+        longitude += 360;
+    else if (longitude > 180)
+        longitude -= 360;
+    return longitude;
 }
 
 
+void Ilvis2Reader::readPoint(PointRef& point, StringList s,
+    std::string pointMap)
+{
+    point.setField(pdal::Dimension::Id::LvisLfid,
+        convert<unsigned>(s, "LVIS_LFID", 0));
+    point.setField(pdal::Dimension::Id::ShotNumber,
+        convert<unsigned>(s, "SHOTNUMBER", 1));
+    point.setField(pdal::Dimension::Id::GpsTime,
+        convert<double>(s, "GPSTIME", 2));
+    point.setField(pdal::Dimension::Id::LongitudeCentroid,
+        convertLongitude(convert<double>(s, "LONGITUDE_CENTROID", 3)));
+    point.setField(pdal::Dimension::Id::LatitudeCentroid,
+        convert<double>(s, "LATITUDE_CENTROID", 4));
+    point.setField(pdal::Dimension::Id::ElevationCentroid,
+        convert<double>(s, "ELEVATION_CENTROID", 5));
+    point.setField(pdal::Dimension::Id::LongitudeLow,
+        convertLongitude(convert<double>(s, "LONGITUDE_LOW", 6)));
+    point.setField(pdal::Dimension::Id::LatitudeLow,
+        convert<double>(s, "LATITUDE_LOW", 7));
+    point.setField(pdal::Dimension::Id::ElevationLow,
+        convert<double>(s, "ELEVATION_LOW", 8));
+    point.setField(pdal::Dimension::Id::LongitudeHigh,
+        convertLongitude(convert<double>(s, "LONGITUDE_HIGH", 9)));
+    point.setField(pdal::Dimension::Id::LatitudeHigh,
+        convert<double>(s, "LATITUDE_HIGH", 10));
+    point.setField(pdal::Dimension::Id::ElevationHigh,
+        convert<double>(s, "ELEVATION_HIGH", 11));
+
+    double x, y, z;
+    pdal::Dimension::Id::Enum xd, yd, zd;
+
+    xd = m_layout->findDim("LONGITUDE_" + pointMap);
+    yd = m_layout->findDim("LATITUDE_" + pointMap);
+    zd = m_layout->findDim("ELEVATION_" + pointMap);
+
+    x = point.getFieldAs<double>(xd);
+    y = point.getFieldAs<double>(yd);
+    z = point.getFieldAs<double>(zd);
+
+    point.setField(pdal::Dimension::Id::X, x);
+    point.setField(pdal::Dimension::Id::Y, y);
+    point.setField(pdal::Dimension::Id::Z, z);
+}
 
 
+void Ilvis2Reader::ready(PointTableRef table)
+{
+    static const int HeaderSize = 2;
+    std::string line;
+
+    m_lineNum = 0;
+    m_stream.open(m_filename);
+    m_layout = table.layout();
+    m_resample = false;
+    for (size_t i = 0; i < HeaderSize; ++i)
+    {
+        std::getline(m_stream, line);
+        m_lineNum++;
+    }
+}
+
+
+bool Ilvis2Reader::processOne(PointRef& point)
+{
+    std::string line;
+
+// Format:
+// LVIS_LFID SHOTNUMBER TIME LONGITUDE_CENTROID LATITUDE_CENTROID ELEVATION_CENTROID LONGITUDE_LOW LATITUDE_LOW ELEVATION_LOW LONGITUDE_HIGH LATITUDE_HIGH ELEVATION_HIGH
+
+    // This handles the second time through for this data line when we have
+    // an "ALL" mapping and the high and low elevations are different.
+    if (m_resample)
+    {
+        readPoint(point, m_fields, "HIGH");
+        m_resample = false;
+        return true;
+    }
+
+    if (!std::getline(m_stream, line))
+        return false;
+    m_fields = Utils::split2(line, ' ');
+    if (m_fields.size() != 12)
+    {
+        std::stringstream oss;
+        oss << getName() << ": Invalid format for line " << m_lineNum <<
+            ".  Expected 12 fields, got " << m_fields.size() << ".";
+        throw pdal_error(oss.str());
+    }
+
+    double low_elev = convert<double>(m_fields, "ELEVATION_LOW", 8);
+    double high_elev = convert<double>(m_fields, "ELEVATION_HIGH", 11);
+
+    // write LOW point if specified, or for ALL
+    if (m_mapping == LOW || m_mapping == ALL)
+    {
+        readPoint(point, m_fields, "LOW");
+        // If we have ALL mapping and the high elevation is different
+        // from that of the low elevation, we'll a second point with the
+        // high elevation.
+        if (m_mapping == ALL && (low_elev != high_elev))
+            m_resample = true;
+    }
+    else if (m_mapping == HIGH)
+        readPoint(point, m_fields, "HIGH");
+    return true;
+}
+    
+
+point_count_t Ilvis2Reader::read(PointViewPtr view, point_count_t count)
+{
+    PointId idx = view->size();
+    point_count_t numRead = 0;
+
+    PointRef point = PointRef(*view, 0);
+    while (numRead < count)
+    {
+        point.setPointId(idx++);
+        if (!processOne(point))
+            break;
+        if (m_cb)
+            m_cb(*view, idx);
+        numRead++;
+    }
+/**
+    for (; std::getline(m_stream, line) && numRead < count; m_lineNum++)
+    {
+        StringList s = Utils::split2(line, ' ');
+        if (s.size() != 12)
+        {
+            std::stringstream oss;
+            oss << getName() << ": Invalid format for line " << m_lineNum <<
+                ".  Expected 12 fields, got " << s.size() << ".";
+            throw pdal_error(oss.str());
+        }
+
+        double low_elev = convert<double>(s, "ELEVATION_LOW", 8);
+        double high_elev = convert<double>(s, "ELEVATION_HIGH", 11);
+
+        // write LOW point if specified, or for ALL
+        if (m_mapping == LOW || m_mapping == ALL)
+        {
+            readPoint(view, nextId, s, "LOW");
+            nextId++;
+        }
+
+        // If we have ALL mapping and the high elevation is different from that
+        // of the low elevation, add a second point with the high elevation.
+        if (m_mapping == HIGH || (m_mapping == ALL && low_elev != high_elev))
+        {
+            readPoint(view, nextId, s, "HIGH");
+            nextId++;
+        }
+        if (m_cb)
+            m_cb(*view, nextId);
+    }
+**/
+/**
+    numRead = nextId;
+**/
+    return numRead;
+}
 
 } // namespace pdal
+
