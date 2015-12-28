@@ -92,9 +92,9 @@ private:
 
     virtual void processOptions(const Options&options);
     virtual void prepared(PointTableRef table);
+    virtual bool processOne(PointRef& point);
     virtual PointViewSet run(PointViewPtr view);
     bool dimensionPasses(double v, const Range& r) const;
-    bool pointPasses(PointView *view, PointId idx) const;
 
     RangeFilter& operator=(const RangeFilter&); // not implemented
     RangeFilter(const RangeFilter&); // not implemented

@@ -50,10 +50,10 @@ class PDAL_DLL Ilvis2Reader : public pdal::Reader
 public:
     enum IlvisMappingType
     {
+      INVALID,
       LOW,
       HIGH,
-      ALL,
-      INVALID
+      ALL
     };
 
     class MappingParser
@@ -68,17 +68,11 @@ public:
             mappingMap["ALL"] = ALL;
         }
 
-        IlvisMappingType parseMapping(const std::string &value) {
-          std::map<std::string, IlvisMappingType>::const_iterator iValue = mappingMap.find(value);
-          if (iValue == mappingMap.end())
-          {
-              return INVALID;
-          }
-          return iValue->second;
-        }
+        IlvisMappingType parseMapping(const std::string &value)
+        { return mappingMap[value]; }
     };
 
-    Ilvis2Reader() : Reader(), m_index(0), m_mapping(ALL)
+    Ilvis2Reader() : Reader(), m_mapping(ALL)
         {}
 
     static void * create();
@@ -90,18 +84,22 @@ public:
 
 
 private:
-    std::unique_ptr<ILeStream> m_stream;
-    point_count_t m_index;
+    std::ifstream m_stream;
     MappingParser parser;
     IlvisMappingType m_mapping;
+    StringList m_fields;
+    size_t m_lineNum;
+    bool m_resample;
+    PointLayoutPtr m_layout;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void processOptions(const Options& options);
     virtual void initialize(PointTableRef table);
     virtual void ready(PointTableRef table);
+    virtual bool processOne(PointRef& point);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
 
-    virtual void readPoint(PointViewPtr view, PointId id, StringList s, std::string pointMap);
+    virtual void readPoint(PointRef& point, StringList s, std::string pointMap);
 
     double convertLongitude(double longitude);
 

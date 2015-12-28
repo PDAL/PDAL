@@ -41,7 +41,7 @@
 namespace pdal
 {
 
-class PointRef
+class PointIdxRef
 {
 private:
     PointView *m_buf;
@@ -49,24 +49,24 @@ private:
     bool m_tmp;
 
 public:
-    PointRef() : m_buf(NULL), m_id(0), m_tmp(false)
+    PointIdxRef() : m_buf(NULL), m_id(0), m_tmp(false)
     {}
-    PointRef(const PointRef& r) : m_buf(r.m_buf)
+    PointIdxRef(const PointIdxRef& r) : m_buf(r.m_buf)
     {
         m_id = m_buf->getTemp(r.m_id);
         m_tmp = true;
     }
-    // This is the ctor used to make a PointRef from an iterator.
-    PointRef(PointView *buf, PointId id) : m_buf(buf), m_id(id), m_tmp(false)
+    // This is the ctor used to make a PointIdxRef from an iterator.
+    PointIdxRef(PointView *buf, PointId id) : m_buf(buf), m_id(id), m_tmp(false)
     {}
 
-    ~PointRef()
+    ~PointIdxRef()
     {
         if (m_tmp)
             m_buf->freeTemp(m_id);
     }
 
-    PointRef& operator=(const PointRef& r)
+    PointIdxRef& operator=(const PointIdxRef& r)
     {
         assert(m_buf == NULL || r.m_buf == m_buf);
         if (!m_buf)
@@ -80,10 +80,10 @@ public:
         return *this;
     }
 
-    bool compare(Dimension::Id::Enum dim, const PointRef& p) const
+    bool compare(Dimension::Id::Enum dim, const PointIdxRef& p) const
         { return m_buf->compare(dim, m_id, p.m_id); }
 
-    void swap(PointRef& p)
+    void swap(PointIdxRef& p)
     {
         PointId id = m_buf->m_index[m_id];
         m_buf->m_index[m_id] = p.m_buf->m_index[p.m_id];
@@ -91,13 +91,13 @@ public:
     }
 };
 
-inline void swap(PointRef && p1, PointRef && p2)
+inline void swap(PointIdxRef && p1, PointIdxRef && p2)
 {
     p1.swap(p2);
 }
 
 class PointViewIter :
-    public std::iterator<std::random_access_iterator_tag, PointRef,
+    public std::iterator<std::random_access_iterator_tag, PointIdxRef,
         point_count_t>
 {
 protected:
@@ -106,11 +106,11 @@ protected:
 
 public:
     typedef std::random_access_iterator_tag iterator_category;
-    typedef std::iterator<iterator_category, PointRef>::value_type
+    typedef std::iterator<iterator_category, PointIdxRef>::value_type
             value_type;
-    typedef std::iterator<iterator_category, PointRef>::difference_type
+    typedef std::iterator<iterator_category, PointIdxRef>::difference_type
             difference_type;
-    typedef PointRef reference;
+    typedef PointIdxRef reference;
     typedef void * pointer;
 
 
@@ -148,12 +148,12 @@ public:
     bool operator>(const PointViewIter& i)
         { return m_id > i.m_id; }
 
-    PointRef operator*() const
-        { return PointRef(m_buf, m_id); }
+    PointIdxRef operator*() const
+        { return PointIdxRef(m_buf, m_id); }
     pointer operator->() const
         { return NULL; }
-    PointRef operator[](const difference_type& /*n*/) const
-        { return PointRef(m_buf, m_id); }
+    PointIdxRef operator[](const difference_type& /*n*/) const
+        { return PointIdxRef(m_buf, m_id); }
 };
 
 } // namespace pdal

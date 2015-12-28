@@ -38,10 +38,10 @@ Options
 -------
 
 bounds
-  The extent of the clipping rectangle, expressed in a string, eg: *([xmin, xmax], [ymin, ymax])*
+  The extent of the clipping rectangle, expressed in a string, eg: *([xmin, xmax], [ymin, ymax])*  This option can be specified more than once.
   
 polygon
-  The clipping polygon, expressed in a well-known text string, eg: *POLYGON((0 0, 5000 10000, 10000 0, 0 0))* 
+  The clipping polygon, expressed in a well-known text string, eg: *POLYGON((0 0, 5000 10000, 10000 0, 0 0))*  This option can be specified more than once.
   
 outside
   Invert the cropping logic and only take points **outside** the cropping bounds or polygon. [Default: **false**]

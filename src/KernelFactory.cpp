@@ -33,9 +33,6 @@
 ****************************************************************************/
 
 #include <pdal/KernelFactory.hpp>
-#include <pdal/Kernel.hpp>
-#include <pdal/PluginManager.hpp>
-#include <pdal/util/Utils.hpp>
 
 #include <delta/DeltaKernel.hpp>
 #include <diff/DiffKernel.hpp>
@@ -48,22 +45,14 @@
 #include <tindex/TIndexKernel.hpp>
 #include <translate/TranslateKernel.hpp>
 
-#include <boost/filesystem.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/tokenizer.hpp>
-
-#include <sstream>
-#include <stdio.h> // for funcptr
-#include <string>
-#include <vector>
-
 namespace pdal
 {
 
 KernelFactory::KernelFactory(bool no_plugins)
 {
-    PluginManager & pm = PluginManager::getInstance();
-    if (!no_plugins) { pm.loadAll(PF_PluginType_Kernel); }
+    if (!no_plugins)
+        PluginManager::loadAll(PF_PluginType_Kernel);
+
     PluginManager::initializePlugin(DeltaKernel_InitPlugin);
     PluginManager::initializePlugin(DiffKernel_InitPlugin);
     PluginManager::initializePlugin(InfoKernel_InitPlugin);
@@ -74,25 +63,6 @@ KernelFactory::KernelFactory(bool no_plugins)
     PluginManager::initializePlugin(SplitKernel_InitPlugin);
     PluginManager::initializePlugin(TIndexKernel_InitPlugin);
     PluginManager::initializePlugin(TranslateKernel_InitPlugin);
-}
-
-std::unique_ptr<Kernel> KernelFactory::createKernel(std::string const& name)
-{
-    PluginManager & pm = PluginManager::getInstance();
-    return std::unique_ptr<Kernel>(static_cast<Kernel*>(pm.createObject(name)));
-}
-
-std::vector<std::string> KernelFactory::getKernelNames()
-{
-    PluginManager & pm = PluginManager::getInstance();
-    PluginManager::RegistrationMap rm = pm.getRegistrationMap();
-    std::vector<std::string> nv;
-    for (auto r : rm)
-    {
-        if (r.second.pluginType == PF_PluginType_Kernel)
-            nv.push_back(r.first);
-    }
-    return nv;
 }
 
 } // namespace pdal

@@ -3,10 +3,7 @@
 filters.decimation
 ==================
 
-The decimation filter takes a stream of points and steps through it, taking
-only every Nth point. With a step of 2, the filter takes every second point,
-for a reduction of 50%. With a step of 10, the filter takes every tenth point,
-for a reduction of 90%.
+The decimation filter retains every Nth point from an input point view.
 
 Example
 -------
@@ -34,7 +31,13 @@ Options
 -------
 
 step
-  How many points to skip between each sample point? A step of 1 will skip no point, and leave the stream unchanged. A step of 100 will reduce the stream by 99%. [Default: **1**]
+  Number of points to skip between each sample point.  A step of 1 will skip
+  no points.  A step of 2 will skip every other point.  A step of 100 will
+  reduce the input by ~99%. [Default: 1]
 
 offset
-  Start sampling with what point? [Default: **0**]
+  Point index to start sampling.  Point indexes start at 0.  [Default: 0]
+
+limit
+  Point index at which sampling should stop (exclusive).  [Default: No limit]
+

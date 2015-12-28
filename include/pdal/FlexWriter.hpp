@@ -45,6 +45,17 @@ protected:
     FlexWriter() : m_hashPos(std::string::npos), m_filenum(1)
     {}
 
+    void validateFilename(PointTableRef table)
+    {
+        if (!table.supportsView() && (m_hashPos != std::string::npos))
+        {
+            std::ostringstream oss;
+            oss << getName() << ": Can't write with template-based "
+                "filename using streaming point table.";
+            throw oss.str();
+        }
+    }
+
 private:
     virtual void writerProcessOptions(const Options& options)
     {
@@ -105,6 +116,11 @@ private:
         }
     }
 
+    // This essentially moves ready() and done() into write(), which means
+    // that they get executed once for each view.  The check for m_hashPos
+    // is a test to see if the filename specification is a template.  If it's
+    // not a template, ready() and done() are taken care of in the ready()
+    // and done() functions in this class.
     virtual void write(const PointViewPtr view) final
     {
         if (m_hashPos != std::string::npos)

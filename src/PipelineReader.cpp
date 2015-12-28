@@ -192,9 +192,7 @@ Option PipelineReader::parseElement_Option(const ptree& tree)
     }
     else if (option.getName() == "plugin")
     {
-       PluginManager& pm = PluginManager::getInstance();
-       std::string path = option.getValue<std::string>();
-       pm.loadPlugin(path);
+       PluginManager::loadPlugin(option.getValue<std::string>());
     }
     return option;
 }

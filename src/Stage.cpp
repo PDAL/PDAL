@@ -89,7 +89,7 @@ void Stage::prepare(PointTableRef table)
 
 PointViewSet Stage::execute(PointTableRef table)
 {
-    table.layout()->finalize();
+    table.finalize();
 
     PointViewSet views;
 
@@ -139,7 +139,7 @@ PointViewSet Stage::execute(PointTableRef table)
     {
         StageRunnerPtr runner(it);
         PointViewSet temp = runner->wait();
-        
+
         // If our stage has a spatial reference, the view takes it on once
         // the stage has been run.
         if (!srs.empty())
@@ -149,6 +149,131 @@ PointViewSet Stage::execute(PointTableRef table)
     }
     done(table);
     return outViews;
+}
+
+
+// Streamed execution.
+void Stage::execute(StreamPointTable& table)
+{
+    typedef std::list<Stage *> StageList;
+
+    std::list<StageList> lists;
+    StageList stages;
+
+    table.finalize();
+
+    // Walk from the current stage backwards.  As we add each input, copy
+    // the list of stages and push it on a list.  We then pull a list from the
+    // front of list and keep going.  Placing on the back and pulling from the
+    // front insures that the stages will be executed in the order that they
+    // were added.  If we hit stage with no previous stages, we execute
+    // the stage list.
+    // All this often amounts to a bunch of list copying for
+    // no reason, but it's more simple than what we might otherwise do and
+    // this should be a nit in the grand scheme of execution time.
+    //
+    // As an example, if there are four paths from the end stage (writer) to
+    // reader stages, there will be four stage lists and execute(table, stages)
+    // will be called four times.
+    Stage *s = this;
+    stages.push_front(s);
+    while (true)
+    {
+        if (s->m_inputs.empty())
+            execute(table, stages);
+        else
+        {
+            for (auto s2 : s->m_inputs)
+            {
+                StageList newStages(stages);
+                newStages.push_front(s2);
+                lists.push_front(newStages);
+            }
+        }
+        if (lists.empty())
+            break;
+        stages = lists.back();
+        lists.pop_back();
+        s = stages.front();
+    }
+}
+
+
+void Stage::execute(StreamPointTable& table, std::list<Stage *>& stages)
+{
+    std::vector<bool> skips(table.capacity());
+    std::list<Stage *> filters;
+    SpatialReference srs;
+
+    // Separate out the first stage.
+    Stage *reader = stages.front();
+
+    // Build a list of all stages except the first.  We may have a writer in
+    // this list in addition to filters, but we treat them in the same way.
+    auto begin = stages.begin();
+    begin++;
+    std::copy(begin, stages.end(), std::back_inserter(filters));
+
+    for (Stage *s : stages)
+    {
+        s->ready(table);
+        srs = s->getSpatialReference();
+        if (!srs.empty())
+            table.setSpatialReference(srs);
+    }
+
+    // Loop until we're finished.  We handle the number of points up to
+    // the capacity of the StreamPointTable that we've been provided.
+
+    bool finished = false;
+    while (!finished)
+    {
+        // Clear the spatial reference when processing starts.
+        table.clearSpatialReferences();
+        PointId idx = 0;
+        PointRef point(table, idx);
+        point_count_t pointLimit = table.capacity();
+
+        // When we get false back from a reader, we're done, so set
+        // the point limit to the number of points processed in this loop
+        // of the table.
+        for (PointId idx = 0; idx < pointLimit; idx++)
+        {
+            point.setPointId(idx);
+            finished = !reader->processOne(point);
+            if (finished)
+                pointLimit = idx;
+        }
+        srs = reader->getSpatialReference();
+        if (!srs.empty())
+            table.setSpatialReference(srs);
+
+        // When we get a false back from a filter, we're filtering out a
+        // point, so add it to the list of skips so that it doesn't get
+        // processed by subsequent filters.
+        for (Stage *s : filters)
+        {
+            for (PointId idx = 0; idx < pointLimit; idx++)
+            {
+                if (skips[idx])
+                    continue;
+                point.setPointId(idx);
+                if (!s->processOne(point))
+                    skips[idx] = true;
+            }
+            srs = s->getSpatialReference();
+            if (!srs.empty())
+                table.setSpatialReference(srs);
+        }
+
+        // Yes, vector<bool> is terrible.  Can do something better later.
+        for (size_t i = 0; i < skips.size(); ++i)
+            skips[i] = false;
+        table.reset();
+    }
+
+    for (Stage *s : stages)
+        s->done(table);
 }
 
 
@@ -162,8 +287,6 @@ void Stage::l_processOptions(const Options& options)
 {
     m_debug = options.getValueOrDefault<bool>("debug", false);
     m_verbose = options.getValueOrDefault<uint32_t>("verbose", 0);
-    if (m_debug && !m_verbose)
-        m_verbose = 1;
     if (m_debug && !m_verbose)
         m_verbose = 1;
 
@@ -218,6 +341,7 @@ void Stage::setSpatialReference(const SpatialReference& spatialRef)
 {
     setSpatialReference(m_metadata, spatialRef);
 }
+
 
 void Stage::setSpatialReference(MetadataNode& m,
     const SpatialReference& spatialRef)

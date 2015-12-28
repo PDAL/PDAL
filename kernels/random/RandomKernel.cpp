@@ -168,6 +168,7 @@ int RandomKernel::execute()
 
     Stage& writer = makeWriter(m_outputFile, makeReader(readerOptions));
     writer.setOptions(writerOptions);
+    applyExtraStageOptionsRecursive(&writer);
 
     PointTable table;
 

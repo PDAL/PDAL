@@ -35,9 +35,10 @@
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/SpatialReference.hpp>
+#include <pdal/PointView.hpp>
 #include <LasReader.hpp>
 #include <ReprojectionFilter.hpp>
-#include <pdal/PointView.hpp>
+#include <StreamCallbackFilter.hpp>
 
 #include "Support.hpp"
 
@@ -104,56 +105,50 @@ TEST(ReprojectionFilterTest, ReprojectionFilterTest_test_1)
 }
 #endif
 
-
-/**
- This test would pass but for the strange scaling of the dimension, which
- exceeds an integer.
-
-// Test reprojecting UTM 15 to DD with a filter randomly
-TEST(ReprojectionFilterTest, InPlaceReprojectionFilterTest_test_2)
+#if defined(PDAL_HAVE_GEOS) && defined(PDAL_HAVE_LIBGEOTIFF)
+// Test reprojecting UTM 15 to DD with a filter
+TEST(ReprojectionFilterTest, stream_test_1)
 {
     const char* epsg4326_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
 
-    const double postX = 194161.33;
-    const double postY = 258783.820;
-    const double postZ = 131.570;
 
+    Options ops1;
+    ops1.add("filename", Support::datapath("las/utm15.las"));
+    LasReader reader;
+    reader.setOptions(ops1);
+
+    Options options;
+    options.add("out_srs", epsg4326_wkt);
+
+    ReprojectionFilter reprojectionFilter;
+    reprojectionFilter.setOptions(options);
+    reprojectionFilter.setInput(reader);
+
+    auto cb = [](PointRef& point)
     {
-        PointTable table;
+        static int i = 0;
+        const double x = -93.351563;
+        const double y = 41.577148;
+        const double z = 16.000000;
 
-        const SpatialReference out_ref(epsg4326_wkt);
+        if (i == 0)
+        {
+            EXPECT_FLOAT_EQ(point.getFieldAs<float>(Dimension::Id::X), x);
+            EXPECT_FLOAT_EQ(point.getFieldAs<float>(Dimension::Id::Y), y);
+            EXPECT_FLOAT_EQ(point.getFieldAs<float>(Dimension::Id::Z), z);
+        }
+        ++i;
+        return true;
+    };
 
-        Options options;
+    StreamCallbackFilter stream;
+    stream.setCallback(cb);
+    stream.setInput(reprojectionFilter);
 
-        Option debug("debug", true, "");
-        Option verbose("verbose", 9, "");
-        Option out_srs("out_srs","EPSG:2993", "Output SRS to reproject to");
+    FixedPointTable table(20);
 
-        Option filename("filename",
-            Support::datapath("las/autzen-dd.las"), "filename");
-        options.add(out_srs);
-        options.add(filename);
-
-        LasReader reader(options);
-        ReprojectionFilter reprojectionFilter(options);
-        reprojectionFilter.setInput(&reader);
-        reprojectionFilter.prepare(table);
-
-        PointView view(table);
-        StageSequentialIterator* iter = reader.createSequentialIterator();
-
-        point_count_t numRead = iter->read(view, 1);
-        EXPECT_TRUE(numRead == 1);
-
-        FilterWrapper::ready(&reprojectionFilter, table);
-        FilterWrapper::filter(&reprojectionFilter, view);
-
-        double x, y, z;
-        getPoint(view, x, y, z);
-        EXPECT_FLOAT_EQ(x, postX);
-        EXPECT_FLOAT_EQ(y, postY);
-        EXPECT_FLOAT_EQ(z, postZ);
-        delete iter;
-    }
+    stream.prepare(table);
+    stream.execute(table);
 }
-**/
+#endif
+

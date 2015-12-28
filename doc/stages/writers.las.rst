@@ -72,7 +72,7 @@ forward
 
 minor_version
   All LAS files are version 1, but the minor version (0 - 4) can be specified
-  with this option. [Default: 3]
+  with this option. [Default: 2]
 
 software_id
   String identifying the software that created this LAS file.

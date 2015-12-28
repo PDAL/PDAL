@@ -38,6 +38,7 @@
 #include <pdal/StageFactory.hpp>
 #include <DecimationFilter.hpp>
 #include <FauxReader.hpp>
+#include <StreamCallbackFilter.hpp>
 
 using namespace pdal;
 
@@ -82,3 +83,46 @@ TEST(DecimationFilterTest, DecimationFilterTest_test1)
     EXPECT_EQ(t1, 10u);
     EXPECT_EQ(t2, 20u);
 }
+
+TEST(DecimationFilterTest, stream)
+{
+    BOX3D srcBounds(0.0, 0.0, 0.0, 99.0, 99.0, 99.0);
+
+    Options ops;
+    ops.add("bounds", srcBounds);
+    ops.add("mode", "ramp");
+    ops.add("num_points", 100);
+    FauxReader reader;
+    reader.setOptions(ops);
+
+    Options decimationOps;
+    decimationOps.add("step", 10);
+    decimationOps.add("offset", 10);
+    decimationOps.add("limit", 90);
+
+    DecimationFilter dec;
+    dec.setOptions(decimationOps);
+    dec.setInput(reader);
+
+    StreamCallbackFilter filter;
+    
+    auto cb = [](PointRef& point)
+    {
+        static int i = 0;
+        int x = point.getFieldAs<int>(Dimension::Id::X);
+        int y = point.getFieldAs<int>(Dimension::Id::Y);
+        EXPECT_EQ(x, (i + 1) * 10);
+        EXPECT_EQ(y, (i + 1) * 10);
+        EXPECT_TRUE(i < 8);
+        i++;
+        return true;
+    };
+    filter.setCallback(cb);
+    filter.setInput(dec);
+
+    FixedPointTable t(2);
+
+    filter.prepare(t);
+    filter.execute(t);
+}
+
