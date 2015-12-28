@@ -15,6 +15,7 @@ application currently has the following subcommands:
 * :ref:`diff <diff_command>`
 * :ref:`ground <ground_command>`
 * :ref:`info <info_command>`
+* :ref:`merge <merge_command>`
 * :ref:`pcl <pcl_command>`
 * :ref:`pipeline <pipeline_command>`
 * :ref:`random <random_command>`
@@ -324,6 +325,28 @@ Example 2:
             "Z": 446.38999999999999
           },
           ...
+
+
+.. _merge_command:
+
+merge command
+------------------------------------------------------------------------------
+
+The ``merge`` command will combine input files into a single output file.
+
+
+::
+
+    $ pdal merge <input> ... <output>
+
+::
+
+    --files [-f] arg  Non-positional argument to specify filenames.  The last
+      file listed is taken to be the output file.
+
+This command provides simple merging of files.  It provides no facility for
+filtering, reprojection, etc.  The file type of the input files may be
+different from one another and different from that of the output file.
 
 
 .. _pcl_command:
