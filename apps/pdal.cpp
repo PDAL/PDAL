@@ -81,7 +81,7 @@ void outputHelp()
     std::cout << "The following commands are available:" << std::endl;
 
     KernelFactory f(false);
-    StringList loaded_kernels = f.getKernelNames();
+    StringList loaded_kernels = PluginManager::names(PF_PluginType_Kernel);
 
     for (auto name : loaded_kernels)
         std::cout << "   - " << splitDriverName(name) << std::endl;
@@ -108,11 +108,12 @@ void outputDrivers()
 
     strm << std::left;
 
-    std::map<std::string, std::string> sm = f.getStageMap();
-    for (auto s : sm)
+    StringList stages = PluginManager::names(PF_PluginType_Filter |
+        PF_PluginType_Reader | PF_PluginType_Writer);
+    for (auto name : stages)
     {
-        std::string name = s.first;
-        StringList lines = Utils::wordWrap(s.second, descripColLen - 1);
+        std::string descrip = PluginManager::description(name);
+        StringList lines = Utils::wordWrap(descrip, descripColLen - 1);
         for (size_t i = 0; i < lines.size(); ++i)
         {
             strm << std::setw(nameColLen) << name << " " <<
@@ -174,7 +175,7 @@ void outputCommands()
 {
     KernelFactory f(false);
     std::vector<std::string> loaded_kernels;
-    loaded_kernels = f.getKernelNames();
+    loaded_kernels = PluginManager::names(PF_PluginType_Kernel);
     for (auto name : loaded_kernels)
     {
         std::cout << splitDriverName(name) << std::endl;
@@ -184,8 +185,8 @@ void outputCommands()
 
 void outputOptions()
 {
-    StageFactory f(false);
-    StringList nv = f.getStageNames();
+    StringList nv = PluginManager::names(PF_PluginType_Filter |
+        PF_PluginType_Reader | PF_PluginType_Writer);
     for (auto const& n : nv)
         outputOptions(n);
 }
@@ -204,7 +205,7 @@ int main(int argc, char* argv[])
     // the positional option 'command' is a valid kernel
     KernelFactory f(true);
     std::vector<std::string> loaded_kernels;
-    loaded_kernels = f.getKernelNames();
+    loaded_kernels = PluginManager::names(PF_PluginType_Kernel);
 
     bool isValidKernel = false;
     std::string command(argv[1]);
@@ -224,7 +225,7 @@ int main(int argc, char* argv[])
     {
         KernelFactory f(false);
         loaded_kernels.clear();
-        loaded_kernels = f.getKernelNames();
+        loaded_kernels = PluginManager::names(PF_PluginType_Kernel);
 
         for (auto name : loaded_kernels)
         {
@@ -242,7 +243,8 @@ int main(int argc, char* argv[])
     {
         int count(argc - 1); // remove the 1st argument
         const char** args = const_cast<const char**>(&argv[1]);
-        std::unique_ptr<Kernel> app = f.createKernel(fullname);
+        void *kernel = PluginManager::createObject(fullname);
+        std::unique_ptr<Kernel> app(static_cast<Kernel *>(kernel));
         return app->run(count, args, command);
     }
 

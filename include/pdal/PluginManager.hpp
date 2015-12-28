@@ -39,7 +39,7 @@
 
 #pragma once
 
-#include <pdal/pdal_export.hpp>
+#include <pdal/pdal_internal.hpp>
 #include <pdal/plugin.hpp>
 
 #include <map>
@@ -56,40 +56,42 @@ class DynamicLibrary;
  * I think PluginManager can eventually be a private header, only accessible
  * through the factories, but we'll leave it as public for now.
  */
+
 class PDAL_DLL PluginManager
 {
     typedef std::shared_ptr<DynamicLibrary> DynLibPtr;
-    typedef std::map<std::string, std::shared_ptr<DynamicLibrary>>
-        DynamicLibraryMap;
+    typedef std::map<std::string, DynLibPtr> DynamicLibraryMap;
     typedef std::vector<PF_ExitFunc> ExitFuncVec;
-    typedef std::vector<PF_RegisterParams> RegistrationVec;
+    typedef std::map<std::string, PF_RegisterParams> RegistrationInfoMap;
 
 public:
-    typedef std::map<std::string, PF_RegisterParams> RegistrationMap;
-
-    static PluginManager & getInstance();
-
-    // Returns true if initialization was successful.
-    static bool initializePlugin(PF_InitFunc initFunc);
-
-    void loadAll(PF_PluginType type);
-    void loadAll(const std::string & pluginDirectory, PF_PluginType type);
-    bool loadPlugin(const std::string & pluginFilename);
-
-    void * createObject(const std::string & objectType);
-
-    static bool registerObject(const std::string& objectType,
-        const PF_RegisterParams* params);
-    const RegistrationMap& getRegistrationMap();
-
-private:
     PluginManager();
     ~PluginManager();
 
+    static std::string description(const std::string& name);
+    static bool registerObject(const std::string& name,
+        const PF_RegisterParams *params);
+    static bool initializePlugin(PF_InitFunc initFunc);
+    static bool loadPlugin(const std::string& pluginFilename);
+    static void loadAll(int type);
+    static void *createObject(const std::string& objectType);
+    static StringList names(int typeMask);
+
+private:
     // These functions return true if successful.
     bool shutdown();
     bool guessLoadByPath(const std::string & driverName);
     bool loadByPath(const std::string & path, PF_PluginType type);
+    bool libraryLoaded(const std::string& path);
+    void loadAll(const std::string& pluginDirectory, int type);
+    bool l_initializePlugin(PF_InitFunc initFunc);
+    void *l_createObject(const std::string& objectType);
+    bool l_registerObject(const std::string& name,
+        const PF_RegisterParams *params);
+    bool l_loadPlugin(const std::string& pluginFilename);
+    void l_loadAll(int type);
+    StringList l_names(int typeMask);
+    std::string l_description(const std::string& name);
 
     DynamicLibrary *loadLibrary(const std::string& path,
         std::string& errorString);
@@ -97,8 +99,8 @@ private:
     PF_PluginAPI_Version m_version;
     DynamicLibraryMap m_dynamicLibraryMap;
     ExitFuncVec m_exitFuncVec;
-    RegistrationMap m_tempExactMatchMap;
-    RegistrationMap m_exactMatchMap;
+    RegistrationInfoMap m_plugins;
+    std::mutex m_mutex;
 
     // Disable copy/assignment.
     PluginManager(const PluginManager&);
