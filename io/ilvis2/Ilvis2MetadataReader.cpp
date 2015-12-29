@@ -32,16 +32,17 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#pragma once
+
 #include "Ilvis2MetadataReader.hpp"
 
 namespace pdal
 {
 
-MetadataNode * Ilvis2MetadataReader::readMetadataFile(std::string filename)
+MetadataNode * Ilvis2MetadataReader::readMetadataFile(std::string filename, MetadataNode* m)
 {
     xmlDocPtr doc;
     xmlNodePtr node;
-    MetadataNode * m = new MetadataNode();
 
     doc = xmlReadFile(filename.c_str(), NULL, 0);
     if (doc == NULL)
@@ -378,7 +379,7 @@ void Ilvis2MetadataReader::parseGPolygon(xmlNodePtr node, MetadataNode * m)
 
       GEOSGeom ring = GEOSGeom_createLinearRing(points);
       poly[polyNum] = GEOSGeom_createPolygon(ring, NULL, 0);
-      
+
       polyNum += 1;
       child = getNextElementNode(child);
     }

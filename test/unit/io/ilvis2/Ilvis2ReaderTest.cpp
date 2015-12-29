@@ -126,3 +126,87 @@ TEST(Ilvis2ReaderTest, testReadHigh)
              78.307512, -58.78459, 2956.667
             );
 }
+
+
+TEST(Ilvis2ReaderTest, testInvalidMetadataFile)
+{
+    Option filename("filename",
+        Support::datapath("ilvis2/ILVIS2_TEST_FILE.TXT"));
+    Options options(filename);
+    options.add("metadata", "invalidfile");
+    std::shared_ptr<Ilvis2Reader> reader(new Ilvis2Reader);
+    reader->setOptions(options);
+
+    PointTable table;
+    try
+    {
+        reader->prepare(table);
+        reader->execute(table);
+        FAIL() << "Expected an exception for an invalid file";
+    }
+    catch (pdal_error const & err)
+    {
+        EXPECT_EQ("Invalid metadata file: 'invalidfile'", std::string(err.what()));
+    }
+}
+
+
+TEST(Ilvis2ReaderTest, testValidMetadataFile)
+{
+    Option filename("filename",
+        Support::datapath("ilvis2/ILVIS2_TEST_FILE.TXT"));
+    Options options(filename);
+    options.add("metadata", Support::datapath("ilvis2/ILVIS2_TEST_FILE.TXT.xml"));
+    std::shared_ptr<Ilvis2Reader> reader(new Ilvis2Reader);
+    reader->setOptions(options);
+
+    PointTable table;
+    reader->prepare(table);
+    reader->execute(table);
+
+    MetadataNode m, n;
+    MetadataNodeList l;
+    m = reader->getMetadata();
+
+    n = m.children("GranuleUR")[0];
+    EXPECT_EQ("SC:ILVIS2.001:51203496", n.value());
+
+    l = m.children("DataFile");
+    EXPECT_EQ(std::size_t{2}, l.size());
+    EXPECT_EQ("SHA1", l[1].children("ChecksumType")[0].value());
+
+    l = m.children("Platform")[0].children("Instrument")[0].children("Sensor")[0].children("SensorCharacteristic");
+    EXPECT_EQ(std::size_t{2}, l.size());
+    EXPECT_EQ("CharName1", l[0].children("CharacteristicName")[0].value());
+    EXPECT_EQ("MyValue", l[1].children("CharacteristicValue")[0].value());
+}
+
+
+TEST(Ilvis2ReaderTest, testNoMetadataFile)
+{
+    Option filename("filename",
+        Support::datapath("ilvis2/ILVIS2_TEST_FILE.TXT"));
+    Options options(filename);
+    std::shared_ptr<Ilvis2Reader> reader(new Ilvis2Reader);
+    reader->setOptions(options);
+
+    PointTable table;
+    reader->prepare(table);
+    reader->execute(table);
+
+    MetadataNode m;
+    MetadataNodeList l;
+    m = reader->getMetadata();
+
+    l = m.children("GranuleUR");
+    EXPECT_EQ(std::size_t{0}, l.size());
+
+    l = m.children("DataFile");
+    EXPECT_EQ(std::size_t{0}, l.size());
+
+    l = m.children("Platform");
+    EXPECT_EQ(std::size_t{0}, l.size());
+
+    l = m.children("ConvexHull");
+    EXPECT_EQ(std::size_t{0}, l.size());
+}

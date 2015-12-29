@@ -51,8 +51,8 @@ std::string Ilvis2Reader::getName() const { return s_info.name; }
 Options Ilvis2Reader::getDefaultOptions()
 {
     Options options;
-    options.add("mapping", "ALL", "The point to extract from the shot: "
-        "low, high, or all.  ALL creates 1 or 2 points per shot, "
+    options.add("mapping", "all", "The point to extract from the shot: "
+        "low, high, or all.  'all' creates 1 or 2 points per shot, "
         "depending on if LOW and HIGH are the same.");
     options.add("filename", "", "The file to read from");
     options.add("metadata", "", "The metadata file to read from");
@@ -63,15 +63,23 @@ Options Ilvis2Reader::getDefaultOptions()
 void Ilvis2Reader::processOptions(const Options& options)
 {
     std::string mapping =
-        options.getValueOrDefault<std::string>("mapping", "ALL");
+        options.getValueOrDefault<std::string>("mapping", "all");
     mapping = Utils::toupper(mapping);
     m_mapping = parser.parseMapping(mapping);
     if (m_mapping == INVALID)
     {
         std::ostringstream oss;
-
         oss << "Invalid value for option for mapping: '" <<
             mapping << "'.  Value values are 'low', 'high' and 'all'.";
+        throw pdal_error(oss.str());
+    }
+
+    m_metadataFile =
+        options.getValueOrDefault<std::string>("metadata", "");
+    if (!m_metadataFile.empty() && access(m_metadataFile.c_str(), R_OK) != 0)
+    {
+        std::ostringstream oss;
+        oss << "Invalid metadata file: '" << m_metadataFile << "'";
         throw pdal_error(oss.str());
     }
 }
@@ -113,7 +121,7 @@ void Ilvis2Reader::initialize(PointTableRef)
 {
     //ABELL - Are ILVIS2 files always EPSG 4385?  If so, add comment.
     SpatialReference ref("EPSG:4385");
-    setSpatialReference(ref);
+    setSpatialReference(m_metadata, ref);
 }
 
 
@@ -252,7 +260,7 @@ bool Ilvis2Reader::processOne(PointRef& point)
         readPoint(point, m_fields, "HIGH");
     return true;
 }
-    
+
 
 point_count_t Ilvis2Reader::read(PointViewPtr view, point_count_t count)
 {
@@ -305,6 +313,11 @@ point_count_t Ilvis2Reader::read(PointViewPtr view, point_count_t count)
 /**
     numRead = nextId;
 **/
+    if (!m_metadataFile.empty())
+    {
+        m_mdReader.readMetadataFile(m_metadataFile, &m_metadata);
+    }
+
     return numRead;
 }
 

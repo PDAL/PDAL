@@ -47,7 +47,7 @@ namespace pdal
 class PDAL_DLL Ilvis2MetadataReader
 {
 public:
-    MetadataNode * readMetadataFile(std::string filename);
+    MetadataNode * readMetadataFile(std::string filename, MetadataNode* m);
 
 protected:
     void parseGranuleMetaDataFile(xmlNodePtr node, MetadataNode* m);

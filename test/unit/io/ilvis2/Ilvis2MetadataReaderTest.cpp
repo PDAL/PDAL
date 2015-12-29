@@ -50,9 +50,9 @@ TEST(Ilvis2MetadataReaderTest, testReadMetadata)
     MetadataNodeList l,l1,l2,l3;
     std::ofstream outfile;
 
-    m = reader.readMetadataFile(Support::datapath("ilvis2/ILVIS2_TEST_FILE.TXT.xml"));
-    EXPECT_TRUE(m != NULL);
-
+    m = new MetadataNode();
+    reader.readMetadataFile(Support::datapath("ilvis2/ILVIS2_TEST_FILE.TXT.xml"), m);
+    
     n = m->children("GranuleUR")[0];
     EXPECT_EQ("SC:ILVIS2.001:51203496", n.value());
 
