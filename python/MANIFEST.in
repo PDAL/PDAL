@@ -3,3 +3,4 @@ exclude MANIFEST.in
 include CHANGES.txt README.rst VERSION.txt
 recursive-include test *.py
 recursive-include pdal *.pyx
+recursive-include pdal *.hpp

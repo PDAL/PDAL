@@ -25,7 +25,9 @@ cdef class PyPipeline:
     def __cinit__(self, unicode xml):
         cdef char* x
         if PY_MAJOR_VERSION >= 3:
-            self.thisptr = new Pipeline(xml.encode('UTF-8'))
+            py_byte_string = xml.encode('UTF-8')
+            x= py_byte_string
+            self.thisptr = new Pipeline(x)
         else:
             self.thisptr = new Pipeline(xml)
     def __dealloc__(self):
