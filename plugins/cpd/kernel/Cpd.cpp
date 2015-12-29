@@ -34,11 +34,11 @@
 
 #include "kernel/Cpd.hpp"
 
-#include <pdal/BufferReader.hpp>
 #include <pdal/KernelFactory.hpp>
 
 #include "chipper/ChipperFilter.hpp"
 #include "crop/CropFilter.hpp"
+#include "buffer/BufferReader.hpp"
 
 namespace pdal
 {

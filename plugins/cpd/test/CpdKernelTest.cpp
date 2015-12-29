@@ -104,8 +104,9 @@ protected:
 TEST_F(CpdKernelTest, Execution)
 {
     KernelFactory f;
-    std::unique_ptr<Kernel> cpdKernel = f.createKernel("kernels.cpd");
+    void* stage= PluginManager::createObject("kernels.cpd");
 
+    std::unique_ptr<Kernel> cpdKernel( static_cast<Kernel*>(stage));
     int argc = 7;
     const char * argv[7] = {
         "cpd",
