@@ -5,7 +5,7 @@
 #
 # PDAL_LIBRARY_PATH: a path to a PDAL C++ shared library.
 #
-# GEOS_CONFIG: the path to a pdal-config program that points to GEOS version,
+# PDAL_CONFIG: the path to a pdal-config program that points to PDAL version,
 # headers, and libraries.
 #
 # NB: within this setup scripts, software versions are evaluated according
@@ -40,7 +40,7 @@ if 'all' in sys.warnoptions:
 
 # Second try: use PDAL_CONFIG environment variable
 if 'PDAL_CONFIG' in os.environ:
-    pdal_config = os.environ['GEOS_CONFIG']
+    pdal_config = os.environ['PDAL_CONFIG']
     log.debug('pdal_config: %s', pdal_config)
 else:
     pdal_config = 'pdal-config'
