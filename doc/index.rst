@@ -36,6 +36,7 @@ Documentation
    development/index
    api/index
    metadata
+   contributors
    copyright
 
 
@@ -43,10 +44,8 @@ Developers and Sponsorship
 ------------------------------------------------------------------------------
 
 PDAL is developed by `Howard Butler`_, `Michael Gerlek`_, `Andrew Bell`_,
-`Brad Chambers`_ and `others`_.
-
-PDAL's development is supported in coordination with efforts by the `U.S. Army
-Cold Regions Research and Engineering Laboratory`_.
+`Brad Chambers`_ and `others`_. Find out more about who contributes to
+PDAL at :ref:`contributors`.
 
 
 .. note::
