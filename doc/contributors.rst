@@ -52,10 +52,10 @@ he maintains the :ref:`Windows builds <download>` for the project.
 .. _`RadiantBlue`: http://radiantblue.com/
 
 
-.. image:: http://www.erdc.usace.army.mil/Portals/55/usace_logo.png
+.. image:: ./rsgis_logo.png
     :target: http://www.erdc.usace.army.mil/Locations/CRREL.aspx
 
-U.S. Army Corps of Engineers' `CRREL`_ sponsors development of PDAL for its
+The US Army Corps of Engineers Remote Sensing / GIS Center of Expertise at `CRREL`_ sponsors development of PDAL for its
 use in point cloud data management. `CRREL`_'s `GRiD`_ project manages LiDAR
 and point cloud data for a multitude of U.S. Army Corps missions. Find out
 more about GRiD in this `LiDAR Magazine article`_.
