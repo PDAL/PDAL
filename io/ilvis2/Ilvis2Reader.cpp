@@ -33,6 +33,8 @@
 ****************************************************************************/
 
 #include "Ilvis2Reader.hpp"
+#include "Ilvis2MetadataReader.hpp"
+
 #include <algorithm>
 #include <cmath>
 
@@ -315,6 +317,7 @@ point_count_t Ilvis2Reader::read(PointViewPtr view, point_count_t count)
 **/
     if (!m_metadataFile.empty())
     {
+        Ilvis2MetadataReader m_mdReader;
         m_mdReader.readMetadataFile(m_metadataFile, &m_metadata);
     }
 
