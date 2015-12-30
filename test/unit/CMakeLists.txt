@@ -22,7 +22,6 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/io/buffer
     ${PROJECT_SOURCE_DIR}/io/faux
     ${PROJECT_SOURCE_DIR}/io/gdal
-    ${PROJECT_SOURCE_DIR}/io/ilvis2
     ${PROJECT_SOURCE_DIR}/io/las
     ${PROJECT_SOURCE_DIR}/io/optech
     ${PROJECT_SOURCE_DIR}/io/ply
@@ -53,6 +52,10 @@ if (WITH_GEOTIFF)
     include_directories(${GEOTIFF_INCLUDE_DIR})
 endif()
 
+if (LIBXML2_FOUND)
+    include_directories(${PROJECT_SOURCE_DIR}/io/ilvis2)
+endif()
+
 PDAL_ADD_TEST(pdal_bounds_test FILES BoundsTest.cpp)
 PDAL_ADD_TEST(pdal_config_test FILES ConfigTest.cpp)
 PDAL_ADD_TEST(pdal_file_utils_test FILES FileUtilsTest.cpp)
@@ -81,8 +84,6 @@ endif()
 PDAL_ADD_TEST(pdal_io_bpf_test FILES io/bpf/BPFTest.cpp)
 PDAL_ADD_TEST(pdal_io_buffer_test FILES io/buffer/BufferTest.cpp)
 PDAL_ADD_TEST(pdal_io_faux_test FILES io/faux/FauxReaderTest.cpp)
-PDAL_ADD_TEST(pdal_io_ilvis2_test FILES io/ilvis2/Ilvis2ReaderTest.cpp)
-PDAL_ADD_TEST(pdal_io_ilvis2_metadata_test FILES io/ilvis2/Ilvis2MetadataReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_gdal_reader_test FILES io/gdal/GDALReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_las_reader_test FILES io/las/LasReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_las_writer_test FILES io/las/LasWriterTest.cpp)
@@ -93,6 +94,11 @@ PDAL_ADD_TEST(pdal_io_qfit_test FILES io/qfit/QFITReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_sbet_reader_test FILES io/sbet/SbetReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_sbet_writer_test FILES io/sbet/SbetWriterTest.cpp)
 PDAL_ADD_TEST(pdal_io_terrasolid_test FILES io/terrasolid/TerrasolidReaderTest.cpp)
+
+if (LIBXML2_FOUND)
+    PDAL_ADD_TEST(pdal_io_ilvis2_test FILES io/ilvis2/Ilvis2ReaderTest.cpp)
+    PDAL_ADD_TEST(pdal_io_ilvis2_metadata_test FILES io/ilvis2/Ilvis2MetadataReaderTest.cpp)
+endif()
 
 #
 # sources for the native filters

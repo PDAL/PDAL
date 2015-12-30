@@ -47,9 +47,13 @@ namespace pdal
 class PDAL_DLL Ilvis2MetadataReader
 {
 public:
-    MetadataNode * readMetadataFile(std::string filename, MetadataNode* m);
+    void readMetadataFile(std::string filename, MetadataNode* m);
 
 protected:
+    // These methods are written to parse specific nodes.  It doesn't
+    // do full validation, but does check to make sure things are in
+    // the order it expects them to be in.
+
     void parseGranuleMetaDataFile(xmlNodePtr node, MetadataNode* m);
     void parseGranuleURMetaData(xmlNodePtr node, MetadataNode* m);
     void parseCollectionMetaData(xmlNodePtr node, MetadataNode* m);
@@ -73,13 +77,23 @@ protected:
     void parsePoint(xmlNodePtr node, MetadataNode* m);
 
 private:
+    // These private methods are mostly helper functions for proessing
+    // the heirarchy and contents of the various XML node objects that
+    // are returned by libxml.
+
     std::string extractString(xmlNodePtr node);
     double extractDouble(xmlNodePtr node);
     int extractInt(xmlNodePtr node);
     long extractLong(xmlNodePtr node);
 
+    // These two methods are useful to help ignore "empty" text nodes
+    // caused by indentation, etc.  These will simply grab the actual
+    // element nodes directly.
+    // Note that due to the way LIBXML parses things, a child points
+    // to its own siblings; the parent only points to the first child.
     xmlNodePtr getNextElementNode(xmlNodePtr node);
     xmlNodePtr getFirstChildElementNode(xmlNodePtr node);
+
     bool nodeElementIs(xmlNodePtr node, std::string expected);
     void assertElementIs(xmlNodePtr node, std::string expected);
     void assertEndOfElements(xmlNodePtr node);

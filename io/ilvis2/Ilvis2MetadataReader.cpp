@@ -32,14 +32,12 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
-
 #include "Ilvis2MetadataReader.hpp"
 
 namespace pdal
 {
 
-MetadataNode * Ilvis2MetadataReader::readMetadataFile(std::string filename, MetadataNode* m)
+void Ilvis2MetadataReader::readMetadataFile(std::string filename, MetadataNode* m)
 {
     xmlDocPtr doc;
     xmlNodePtr node;
@@ -47,7 +45,7 @@ MetadataNode * Ilvis2MetadataReader::readMetadataFile(std::string filename, Meta
     doc = xmlReadFile(filename.c_str(), NULL, 0);
     if (doc == NULL)
     {
-        return NULL;
+        return;
     }
 
     node = xmlDocGetRootElement(doc);
@@ -56,8 +54,6 @@ MetadataNode * Ilvis2MetadataReader::readMetadataFile(std::string filename, Meta
 
     xmlCleanupParser();
     xmlMemoryDump();
-
-    return m;
 }
 
 
@@ -78,7 +74,7 @@ void Ilvis2MetadataReader::parseGranuleMetaDataFile(xmlNodePtr node, MetadataNod
     parseGranuleURMetaData(child, m);
 
     child = getNextElementNode(child);
-    //assertEndOfElements(child);
+    assertEndOfElements(child);
 }
 
 void Ilvis2MetadataReader::parseGranuleURMetaData(xmlNodePtr node, MetadataNode* m)
@@ -330,6 +326,7 @@ void Ilvis2MetadataReader::parseGPolygon(xmlNodePtr node, MetadataNode * m)
     xmlNodePtr child = getFirstChildElementNode(node);
     assertElementIs(child, "Boundary");
 
+    // The number of boundaries is essentially the number of sub-polygons
     int numBoundaries = countChildElements(node, "Boundary");
     GEOSGeom poly[numBoundaries];
     GEOSGeom fullPoly;
@@ -339,6 +336,7 @@ void Ilvis2MetadataReader::parseGPolygon(xmlNodePtr node, MetadataNode * m)
 
     while (nodeElementIs(child, "Boundary"))
     {
+      // There must be at least 3 points to be valid per the schema.
       int numPoints = countChildElements(child, "Point");
       if (numPoints < 3)
       {
@@ -367,6 +365,8 @@ void Ilvis2MetadataReader::parseGPolygon(xmlNodePtr node, MetadataNode * m)
         GEOSCoordSeq_setX(points, ptNum, ptLon);
         GEOSCoordSeq_setY(points, ptNum, ptLat);
 
+        // In the file, the loop is not closed; GEOS requires polygons
+        // to be closed, so we'll do it ourselves.
         if (ptNum == 0)
         {
           GEOSCoordSeq_setX(points, numPoints, ptLon);
@@ -386,6 +386,7 @@ void Ilvis2MetadataReader::parseGPolygon(xmlNodePtr node, MetadataNode * m)
 
     assertEndOfElements(child);
 
+    // If only one sub-polygon, just make a POLYGON WKT, else make it a MULTIPOLYGON
     if (numBoundaries > 1)
     {
       fullPoly = GEOSGeom_createCollection(GEOS_MULTIPOLYGON, poly, numBoundaries);
@@ -539,6 +540,8 @@ void Ilvis2MetadataReader::parsePSA(xmlNodePtr node, MetadataNode * m)
 }
 
 
+// Since the Browse, PH, QA, and MP product nodes have the same structure
+// just differing prefixes, they can share this code.
 void Ilvis2MetadataReader::parseXXProduct(std::string type, xmlNodePtr node, MetadataNode * m)
 {
     std::string fullBase = type + "Product";
@@ -585,6 +588,7 @@ long Ilvis2MetadataReader::extractLong(xmlNodePtr node)
 
 // private
 
+// Skip all non-element nodes, just get the next element node.
 xmlNodePtr Ilvis2MetadataReader::getNextElementNode(xmlNodePtr node)
 {
     node = node->next;
@@ -596,6 +600,7 @@ xmlNodePtr Ilvis2MetadataReader::getNextElementNode(xmlNodePtr node)
     return node;
 }
 
+// Skip all non-element child nodes, get the first element child node
 xmlNodePtr Ilvis2MetadataReader::getFirstChildElementNode(xmlNodePtr node)
 {
     xmlNodePtr child = node->children;
@@ -613,6 +618,7 @@ xmlNodePtr Ilvis2MetadataReader::getFirstChildElementNode(xmlNodePtr node)
     }
 }
 
+// Verifies the name of the node matches what's expected
 bool Ilvis2MetadataReader::nodeElementIs(xmlNodePtr node, std::string expected)
 {
     if (!node)
@@ -623,6 +629,7 @@ bool Ilvis2MetadataReader::nodeElementIs(xmlNodePtr node, std::string expected)
     return (xmlStrcmp(node->name, (xmlChar*)expected.c_str()) == 0);
 }
 
+// Throws an error if the next element is not what it expects
 void Ilvis2MetadataReader::assertElementIs(xmlNodePtr node, std::string expected)
 {
     if (!node || !nodeElementIs(node, expected))
@@ -631,6 +638,7 @@ void Ilvis2MetadataReader::assertElementIs(xmlNodePtr node, std::string expected
     }
 }
 
+// Throws an error if the node is not null
 void Ilvis2MetadataReader::assertEndOfElements(xmlNodePtr node)
 {
     if (node)
@@ -639,6 +647,7 @@ void Ilvis2MetadataReader::assertEndOfElements(xmlNodePtr node)
     }
 }
 
+// Counts the number of child element nodes with a given name
 int Ilvis2MetadataReader::countChildElements(xmlNodePtr node, std::string childName)
 {
     xmlNodePtr child = getFirstChildElementNode(node);
@@ -656,6 +665,8 @@ int Ilvis2MetadataReader::countChildElements(xmlNodePtr node, std::string childN
     return ctr;
 }
 
+
+// Errors used when a file doesn't match the schema.
 void Ilvis2MetadataReader::errWrongElement(xmlNodePtr node, std::string expected)
 {
     std::ostringstream oss;
