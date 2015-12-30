@@ -38,13 +38,14 @@
 #include <map>
 
 #ifndef PDAL_HAVE_LIBXML2
-  class PDAL_DLL Ilvis2MetadataReader
+namespace pdal
+{
+  class Ilvis2MetadataReader
   {
   public:
-      void readMetadataFile(std::string filename, MetadataNode* m);
-  }
-
-  void readMetadataFile(std::string filename, MetadataNode* m) {}
+      inline void readMetadataFile(std::string filename, pdal::MetadataNode* m) {};
+  };
+}
 #else
     #include "Ilvis2MetadataReader.hpp"
 #endif
