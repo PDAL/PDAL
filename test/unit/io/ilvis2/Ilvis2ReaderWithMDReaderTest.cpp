@@ -45,23 +45,61 @@
 
 using namespace pdal;
 
-void checkPoint(const PointView& data, PointId index, double time,
-    double latitude, double longitude, double altitude)
+TEST(Ilvis2ReaderWithMDReaderTest, testInvalidMetadataFile)
 {
-    auto checkDimension = [&data,index](Dimension::Id::Enum dim,
-        double expected)
+    Option filename("filename",
+        Support::datapath("ilvis2/ILVIS2_TEST_FILE.TXT"));
+    Options options(filename);
+    options.add("metadata", "invalidfile");
+    std::shared_ptr<Ilvis2Reader> reader(new Ilvis2Reader);
+    reader->setOptions(options);
+
+    PointTable table;
+    try
     {
-        double actual = data.getFieldAs<double>(dim, index);
-        EXPECT_FLOAT_EQ(expected, actual);
-    };
-
-    checkDimension(Dimension::Id::Y, latitude);
-    checkDimension(Dimension::Id::X, longitude);
-    checkDimension(Dimension::Id::Z, altitude);
-    checkDimension(Dimension::Id::GpsTime, time);
+        reader->prepare(table);
+        reader->execute(table);
+        FAIL() << "Expected an exception for an invalid file";
+    }
+    catch (pdal_error const & err)
+    {
+        EXPECT_EQ("Invalid metadata file: 'invalidfile'", std::string(err.what()));
+    }
 }
 
-TEST(Ilvis2ReaderTest, testReadDefault)
+
+TEST(Ilvis2ReaderWithMDReaderTest, testValidMetadataFile)
+{
+    Option filename("filename",
+        Support::datapath("ilvis2/ILVIS2_TEST_FILE.TXT"));
+    Options options(filename);
+    options.add("metadata", Support::datapath("ilvis2/ILVIS2_TEST_FILE.TXT.xml"));
+    std::shared_ptr<Ilvis2Reader> reader(new Ilvis2Reader);
+    reader->setOptions(options);
+
+    PointTable table;
+    reader->prepare(table);
+    reader->execute(table);
+
+    MetadataNode m, n;
+    MetadataNodeList l;
+    m = reader->getMetadata();
+
+    n = m.children("GranuleUR")[0];
+    EXPECT_EQ("SC:ILVIS2.001:51203496", n.value());
+
+    l = m.children("DataFile");
+    EXPECT_EQ(std::size_t{2}, l.size());
+    EXPECT_EQ("SHA1", l[1].children("ChecksumType")[0].value());
+
+    l = m.children("Platform")[0].children("Instrument")[0].children("Sensor")[0].children("SensorCharacteristic");
+    EXPECT_EQ(std::size_t{2}, l.size());
+    EXPECT_EQ("CharName1", l[0].children("CharacteristicName")[0].value());
+    EXPECT_EQ("MyValue", l[1].children("CharacteristicValue")[0].value());
+}
+
+
+TEST(Ilvis2ReaderWithMDReaderTest, testNoMetadataFile)
 {
     Option filename("filename",
         Support::datapath("ilvis2/ILVIS2_TEST_FILE.TXT"));
@@ -70,59 +108,22 @@ TEST(Ilvis2ReaderTest, testReadDefault)
     reader->setOptions(options);
 
     PointTable table;
-
     reader->prepare(table);
-    PointViewSet viewSet = reader->execute(table);
-    EXPECT_EQ(viewSet.size(), 1u);
-    PointViewPtr view = *viewSet.begin();
+    reader->execute(table);
 
-    EXPECT_EQ(view->size(), 4u);
+    MetadataNode m;
+    MetadataNodeList l;
+    m = reader->getMetadata();
 
-    checkPoint(*view.get(), 0, 42504.48313,
-             78.307672,-58.785213,1956.777
-            );
+    l = m.children("GranuleUR");
+    EXPECT_EQ(std::size_t{0}, l.size());
 
-    checkPoint(*view.get(), 1, 42504.48512,
-             78.307592, 101.215097, 1956.588
-            );
+    l = m.children("DataFile");
+    EXPECT_EQ(std::size_t{0}, l.size());
 
-    checkPoint(*view.get(), 2, 42504.48712,
-             78.307512, -58.78459, 1956.667
-            );
+    l = m.children("Platform");
+    EXPECT_EQ(std::size_t{0}, l.size());
 
-    checkPoint(*view.get(), 3, 42504.48712,
-             78.307512, -58.78459, 2956.667
-            );
-}
-
-
-TEST(Ilvis2ReaderTest, testReadHigh)
-{
-    Option filename("filename",
-        Support::datapath("ilvis2/ILVIS2_TEST_FILE.TXT"));
-    Options options(filename);
-    options.add("mapping","high");
-    std::shared_ptr<Ilvis2Reader> reader(new Ilvis2Reader);
-    reader->setOptions(options);
-
-    PointTable table;
-
-    reader->prepare(table);
-    PointViewSet viewSet = reader->execute(table);
-    EXPECT_EQ(viewSet.size(), 1u);
-    PointViewPtr view = *viewSet.begin();
-
-    EXPECT_EQ(view->size(), 3u);
-
-    checkPoint(*view.get(), 0, 42504.48313,
-             78.307672,-58.785213,1956.777
-            );
-
-    checkPoint(*view.get(), 1, 42504.48512,
-             78.307592, 101.215097, 1956.588
-            );
-
-    checkPoint(*view.get(), 2, 42504.48712,
-             78.307512, -58.78459, 2956.667
-            );
+    l = m.children("ConvexHull");
+    EXPECT_EQ(std::size_t{0}, l.size());
 }

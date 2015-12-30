@@ -37,6 +37,18 @@
 #include <pdal/util/IStream.hpp>
 #include <map>
 
+#ifndef PDAL_HAVE_LIBXML2
+  class PDAL_DLL Ilvis2MetadataReader
+  {
+  public:
+      void readMetadataFile(std::string filename, MetadataNode* m);
+  }
+
+  void readMetadataFile(std::string filename, MetadataNode* m) {}
+#else
+    #include "Ilvis2MetadataReader.hpp"
+#endif
+
 extern "C" int32_t Ilvis2Reader_ExitFunc();
 extern "C" PF_ExitFunc Ilvis2Reader_InitPlugin();
 
@@ -89,6 +101,7 @@ private:
     bool m_resample;
     PointLayoutPtr m_layout;
     std::string m_metadataFile;
+    Ilvis2MetadataReader m_mdReader;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void processOptions(const Options& options);

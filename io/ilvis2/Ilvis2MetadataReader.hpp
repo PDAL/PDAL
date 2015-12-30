@@ -32,6 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#pragma once
+
 #include <pdal/Metadata.hpp>
 
 #include <libxml/parser.h>
