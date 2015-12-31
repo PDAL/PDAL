@@ -138,7 +138,7 @@ Options P2gWriter::getDefaultOptions()
     Option radius("radius", default_radius);
 
     Option fill_window_size("fill_window_size", 3);
-    Option dim_z("Z", "Z", "Name of Z dimension to interpolate");
+    Option dim_z("z", "Z", "Name of Z dimension to interpolate");
     options.add(dim_z);
     options.add(grid_x);
     options.add(grid_y);
@@ -235,4 +235,3 @@ void P2gWriter::done(PointTableRef table)
 }
 
 } // namespaces
-
