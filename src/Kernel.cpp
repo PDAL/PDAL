@@ -254,7 +254,7 @@ bool parseOption(std::string o, std::string& stage, std::string& option,
     // This awfulness is to work around the multiply-defined islower.  Seems
     // a bit better than the cast solution.
     auto islc = [](char c)
-        { return std::islower(c); };
+        { return std::islower(c) || std::isdigit(c); };
 
     std::string::size_type pos = 0;
     std::string::size_type count = 0;
@@ -664,4 +664,3 @@ Stage& Kernel::makeWriter(const std::string& outputFile, Stage& parent)
 }
 
 } // namespace pdal
-
