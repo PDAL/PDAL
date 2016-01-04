@@ -253,6 +253,7 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
 include_directories(vendor/eigen-3.1.91)
 include_directories(vendor/nanoflann-1.1.8)
 include_directories(vendor/rply-1.1.4)
+include_directories(vendor/gtest-1.7.0/include vendor/gtest-1.7.0)
 
 #------------------------------------------------------------------------------
 # subdirectory controls
@@ -282,7 +283,6 @@ if(WITH_TESTS)
 
   add_subdirectory(vendor/gtest-1.7.0)
   enable_testing()
-  include_directories(vendor/gtest-1.7.0/include vendor/gtest-1.7.0)
 
   if(ENABLE_CTEST)
     message(STATUS

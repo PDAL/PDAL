@@ -248,16 +248,20 @@ bool parseOption(std::string o, std::string& stage, std::string& option,
     o = o.substr(2);
 
     // Options are stage_type.stage_name.option_name
-    // stage_type and stage_name are always lowercase.  Option name starts
-    // with lowercase and then contains lowercase, numbers or underscore.
+    // stage_type is always lowercase stage_names start with lowercase and
+    // then are lowercase or digits.  Option names start with lowercase and
+    // then contain lowercase, digits or underscore.
 
     // This awfulness is to work around the multiply-defined islower.  Seems
     // a bit better than the cast solution.
     auto islc = [](char c)
+        { return std::islower(c); };
+    auto islcOrDigit = [](char c)
         { return std::islower(c) || std::isdigit(c); };
 
     std::string::size_type pos = 0;
     std::string::size_type count = 0;
+
     // Get stage_type.
     count = Utils::extract(o, pos, islc);
     pos += count;
@@ -265,7 +269,9 @@ bool parseOption(std::string o, std::string& stage, std::string& option,
         return false;
 
     // Get stage_name.
-    count = Utils::extract(o, pos, islc);
+    count = Utils::extract(o, pos, islcOrDigit);
+    if (std::isdigit(o[pos]))
+        return false; 
     pos += count;
     stage = o.substr(0, pos);
     if (o[pos++] != '.')
@@ -661,6 +667,13 @@ Stage& Kernel::makeWriter(const std::string& outputFile, Stage& parent)
     writer->setOptions(options + writer->getOptions());
 
     return *writer;
+}
+
+
+bool Kernel::test_parseOption(std::string o, std::string& stage,
+    std::string& option, std::string& value)
+{
+    return parseOption(o, stage, option, value);
 }
 
 } // namespace pdal
