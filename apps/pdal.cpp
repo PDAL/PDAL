@@ -90,6 +90,7 @@ void outputHelp()
 
 void outputDrivers()
 {
+    // Force plugin loading.
     StageFactory f(false);
 
     std::ostringstream strm;
@@ -128,6 +129,7 @@ void outputDrivers()
 
 void outputOptions(std::string const& n)
 {
+    // Force plugin loading.
     StageFactory f(false);
 
     std::unique_ptr<Stage> s(f.createStage(n));
@@ -185,6 +187,9 @@ void outputCommands()
 
 void outputOptions()
 {
+    // Force plugin loading.
+    StageFactory f(false);
+
     StringList nv = PluginManager::names(PF_PluginType_Filter |
         PF_PluginType_Reader | PF_PluginType_Writer);
     for (auto const& n : nv)

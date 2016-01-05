@@ -145,7 +145,7 @@ StringList PluginManager::l_names(int typeMask)
 
     std::lock_guard<std::mutex> lock(m_mutex);
     for (auto p : m_plugins)
-        if (p.second.pluginType | typeMask)
+        if (p.second.pluginType & typeMask)
             l.push_back(p.first);
     return l;
 }
