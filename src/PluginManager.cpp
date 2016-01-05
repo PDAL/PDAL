@@ -225,6 +225,7 @@ PluginManager::PluginManager()
 
 PluginManager::~PluginManager()
 {
+    std::cerr << "Destroying plugin manager!\n";
     if (!shutdown())
         Log("PDAL", "stderr").get(LogLevel::Error) <<
             "Error destroying PluginManager" << std::endl;
@@ -446,8 +447,12 @@ void *PluginManager::l_createObject(const std::string& objectType)
     void *obj(0);
     if (find() || (guessLoadByPath(objectType) && find()))
     {
-        std::lock_guard<std::mutex> lock(m_mutex);
-        obj = m_plugins[objectType].createFunc();
+        PF_CreateFunc f;
+        {
+            std::lock_guard<std::mutex> lock(m_mutex);
+            f = m_plugins[objectType].createFunc;
+        }
+        obj = f();
     }
 
     return obj;
