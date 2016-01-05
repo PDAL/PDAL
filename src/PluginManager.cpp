@@ -225,7 +225,6 @@ PluginManager::PluginManager()
 
 PluginManager::~PluginManager()
 {
-    std::cerr << "Destroying plugin manager!\n";
     if (!shutdown())
         Log("PDAL", "stderr").get(LogLevel::Error) <<
             "Error destroying PluginManager" << std::endl;
