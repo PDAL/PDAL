@@ -47,7 +47,7 @@
 #include <pdal/util/Utils.hpp>
 #include <pdal/Log.hpp>
 
-#include "DynamicLibrary.h"
+#include "DynamicLibrary.hpp"
 
 #include <memory>
 #include <sstream>
@@ -252,6 +252,17 @@ bool PluginManager::shutdown()
             success = false;
         }
     }
+
+    // This clears the handles on the dynamic libraries so that they won't
+    // be closed with dlclose().  Depending on the order of dll unloading,
+    // it's possible for a plugin library to be unloaded before this function
+    // (which is usually in a dll) is called, which can raise an error on
+    // some systems when dlclose() is called on a library for which the
+    // reference count is already 0.  Since we're exiting anyway and all the
+    // dlls will be closed, there is no need to call dlclose() on them
+    // explicitly.
+    for (auto l : m_dynamicLibraryMap)
+        l.second->clear();
 
     m_dynamicLibraryMap.clear();
     m_plugins.clear();

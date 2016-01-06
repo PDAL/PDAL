@@ -52,6 +52,7 @@ public:
 
     ~DynamicLibrary();
     void *getSymbol(const std::string& name);
+    void clear();
 
 private:
     DynamicLibrary(void *handle) : m_handle(handle)
