@@ -6,16 +6,16 @@ Docker
 
 :Author: Howard Butler
 :Contact: howard@hobu.co
-:Date: 12/02/2015
+:Date: 01/07/2015
 
 .. index:: Docker
 
 Introduction
 ------------------------------------------------------------------------------
 
-It's a giant pain to build everything yourself. Like the :ref:`vagrant` configuration,
-a PDAL build based on `Docker`_ is also available. This document describes how
-to use it to operate on data.
+It's a giant pain to build everything yourself. To make it simpler to use PDAL, a
+build based on `Docker`_ is also available. This document describes how
+to use it to operate on your own data.
 
 
 .. seealso::
@@ -26,27 +26,34 @@ to use it to operate on data.
 Prerequisites
 ------------------------------------------------------------------------------
 
-Install `Docker`_.
+Install `Docker`_ and `Docker Toolbox`_.
+................................................................................
 
 * `Windows <http://docs.docker.com/windows/started/>`__
 * `OSX <http://docs.docker.com/mac/started/>`__
 * `Linux <http://docs.docker.com/linux/started/>`__
 
+.. _`Docker Toolbox`: https://www.docker.com/docker-toolbox
+
 .. note::
 
     This tutorial will assume you are running on Windows, but the same commands should
-    work in OSX or Linux too.
+    work in OSX or Linux too -- though definition of file paths might provide
+    a significant difference..
 
-Data
-------------------------------------------------------------------------------
+Fetch Sample Data
+................................................................................
 
-Copy some LAS data to the directory you're running the shell
+Download the ``autzen.laz`` file to your ``C:/`` drive.
+
+* http://www.liblas.org/samples/autzen/autzen.laz
+
 
 
 What you get
 ------------------------------------------------------------------------------
 
-The :ref:`docker`_ configuration that PDAL provides contains nearly
+The :ref:`docker` configuration that PDAL provides contains nearly
 every possible feature except for `Oracle Point Cloud`_ support. Things it
 includes are:
 
