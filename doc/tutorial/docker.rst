@@ -70,8 +70,10 @@ Fetch PDAL Image
 ................................................................................
 
 The PDAL image provides a recent ``master`` branch build of PDAL. It is pushed
-to `Docker Hub`_ periodically by the PDAL developers. We need to fetch it
-locally so we can use it to run PDAL commands
+to `Docker Hub`_ periodically by the PDAL developers. We need to pull it
+locally so we can use it to run PDAL commands. Once it is pulled, we
+don't have to pull it again unless we want to refresh it for
+whatever reason.
 
 ::
 
@@ -97,6 +99,10 @@ Quickstart Terminal, issue the following ``curl`` command:
 ::
 
     curl -O http://www.liblas.org/samples/autzen/autzen.laz
+
+.. note::
+
+    That's a capital Oh, not a zero.
 
 List the directory to be sure that it was downloaded
 
