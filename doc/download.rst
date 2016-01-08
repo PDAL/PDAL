@@ -43,10 +43,13 @@ You can obtain a copy of the active source code by issuing the following command
 Binaries
 ------------------------------------------------------------------------------
 
+The fastest way to get going with PDAL is to use the Docker build. See the
+tutorial at :ref:`docker`.
+
 Windows
 ................................................................................
 
-A 1.0.1 release of PDAL is available via `OSGeo4W`_. It is only 64-bit at this
+A 1.1.0 release of PDAL is available via `OSGeo4W`_. It is only 64-bit at this
 time.
 
 RPMs
@@ -55,9 +58,5 @@ RPMs
 RPMs for PDAL are available at http://pdal.s3-website-us-east-1.amazonaws.com/rpms/
 
 .. _`OSGeo4W`: http://trac.osgeo.org/osgeo4w/
-
-
 .. _`DebianGIS`: http://wiki.debian.org/DebianGis
-
-
 .. _`LASzip`: http://laszip.org
