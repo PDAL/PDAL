@@ -143,7 +143,7 @@ Here's a summary of what's going on with that command invocation
 
 5. ``pdal``: We're finally going to run the ``pdal`` command :)
 
-6. ``info``: We want to run ref:`info_command` on the data
+6. ``info``: We want to run :ref:`info_command` on the data
 
 7. ``//data/autzen.laz``: The ``pdal`` command is now running in the context of
    our container, which we mounted a ``/data`` directory in with the volume
