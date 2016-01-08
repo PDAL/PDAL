@@ -75,7 +75,7 @@ locally so we can use it to run PDAL commands
 
 ::
 
-    docker fetch pdal/master
+    docker pull pdal/master
 
 .. note::
 
