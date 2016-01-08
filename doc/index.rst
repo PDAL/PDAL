@@ -30,7 +30,7 @@ Documentation
    community
    stages/index
    tutorial/index
-   docker
+   tutorial/docker
    pipeline
    faq
    development/index
