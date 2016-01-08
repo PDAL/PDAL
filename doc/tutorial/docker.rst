@@ -160,6 +160,7 @@ Here's a summary of what's going on with that command invocation
         The same note about the double slash described in Step #3 applies here
         as well.
 
+.. image:: docker-print-one.png
 
 
 What you get
