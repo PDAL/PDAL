@@ -222,6 +222,14 @@ RUN svn co -r 2691 https://svn.osgeo.org/metacrs/geotiff/trunk/libgeotiff/ \
     && make \
     && make install
 
+RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
+        ninja-build \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN rm -rf laszip laz-perf points2grid pcl nitro hexer 3.2.7.tar.gz eigen-eigen-b30b87236a1b gdal libgeotiff
+RUN apt-get clean
+
+
 #RUN wget http://sourceforge.net/projects/arma/files/armadillo-6.400.3.tar.gz \
 #    && tar zxvf armadillo-6.400.3.tar.gz \
 #    && cd armadillo-6.400.3 \
