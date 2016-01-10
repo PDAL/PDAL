@@ -45,14 +45,6 @@
 #include <cpl_conv.h>
 #endif
 
-// Fake out the compiler if we don't have libgeotiff includes already
-#if !defined(__geotiff_h_)
-typedef struct GTIFS *GTIF;
-#endif
-#if !defined(__geo_simpletags_h_)
-typedef struct ST_TIFFS *ST_TIFF;
-#endif
-
 #include <string>
 #include <stdexcept>
 
@@ -65,7 +57,7 @@ public:
     GeotiffSupport() : m_gtiff(0), m_tiff(0)
     {}
     ~GeotiffSupport();
-    
+
     void resetTags();
     int setKey(int tag, void *data, int size, int type);
     size_t getKey(int tag, int *count, void **data_ptr) const;

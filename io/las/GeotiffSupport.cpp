@@ -41,12 +41,12 @@
 #include <sstream>
 
 PDAL_C_START
-#ifdef __geotiff_h_
 
-char PDAL_DLL * GTIFGetOGISDefn(GTIF*, GTIFDefn*);
-int PDAL_DLL GTIFSetFromOGISDefn(GTIF*, const char*);
+// These functions are available from GDAL, but they
+// aren't exported.
+char CPL_DLL * GTIFGetOGISDefn(GTIF*, GTIFDefn*);
+int CPL_DLL GTIFSetFromOGISDefn(GTIF*, const char*);
 
-#endif // defined __geotiff_h_
 PDAL_C_END
 
 
@@ -105,7 +105,7 @@ int GeotiffSupport::setKey(int tag, void *data, int size, int type)
         count = size / sizeof(double);
         break;
     default:
-        count = size; 
+        count = size;
         break;
     }
     return ST_SetKey(m_tiff, tag, count, type, data);
