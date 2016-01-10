@@ -34,10 +34,6 @@
 
 #include "GeotiffSupport.hpp"
 
-// GDAL
-#include <geo_normalize.h>
-#include <ogr_spatialref.h>
-
 #include <sstream>
 
 PDAL_C_START
@@ -58,12 +54,14 @@ GeotiffSupport::~GeotiffSupport()
 #ifdef PDAL_HAVE_LIBGEOTIFF
     if (m_gtiff != 0)
     {
-        GTIFFree(m_gtiff);
+        GTIF* t = static_cast<GTIF*>(m_gtiff);
+        GTIFFree(t);
         m_gtiff = 0;
     }
     if (m_tiff != 0)
     {
-        ST_Destroy(m_tiff);
+        ST_TIFF* t = static_cast<ST_TIFF*>(m_tiff);
+        ST_Destroy(t);
         m_tiff = 0;
     }
 #endif
@@ -77,13 +75,15 @@ void GeotiffSupport::resetTags()
     // SpatialReference is defined, not the GeoTIFF keys.
     if (m_tiff != 0)
     {
-        ST_Destroy(m_tiff);
+        ST_TIFF* t = static_cast<ST_TIFF*>(m_tiff);
+        ST_Destroy(t);
         m_tiff = 0;
     }
 
     if (m_gtiff != 0)
     {
-        GTIFFree(m_gtiff);
+        GTIF* t = static_cast<GTIF*>(m_gtiff);
+        GTIFFree(t);
         m_gtiff = 0;
     }
 
@@ -108,7 +108,9 @@ int GeotiffSupport::setKey(int tag, void *data, int size, int type)
         count = size;
         break;
     }
-    return ST_SetKey(m_tiff, tag, count, type, data);
+
+    ST_TIFF* t = static_cast<ST_TIFF*>(m_tiff);
+    return ST_SetKey(t, tag, count, type, data);
 }
 
 
@@ -123,7 +125,9 @@ size_t GeotiffSupport::getKey(int tag, int *count, void **data_ptr) const
 
     if (m_tiff == 0)
         return 0;
-    if (!ST_GetKey(m_tiff, tag, count, &st_type, data_ptr))
+
+    ST_TIFF* t = static_cast<ST_TIFF*>(m_tiff);
+    if (!ST_GetKey(t, tag, count, &st_type, data_ptr))
         return 0;
 
     if (st_type == STT_ASCII)
@@ -138,7 +142,8 @@ size_t GeotiffSupport::getKey(int tag, int *count, void **data_ptr) const
 
 void GeotiffSupport::setTags()
 {
-    m_gtiff = GTIFNewSimpleTags(m_tiff);
+    ST_TIFF* t = static_cast<ST_TIFF*>(m_tiff);
+    m_gtiff = GTIFNewSimpleTags(t);
     if (!m_gtiff)
         throw std::runtime_error("The geotiff keys could not be read from VLR records");
     return;
@@ -155,12 +160,13 @@ std::string GeotiffSupport::getWkt(bool horizOnly, bool pretty) const
         return std::string();
     }
 
-    if (!GTIFGetDefn(m_gtiff, &sGTIFDefn))
+    GTIF* t = static_cast<GTIF*>(m_gtiff);
+    if (!GTIFGetDefn(t, &sGTIFDefn))
     {
         return std::string();
     }
 
-    pszWKT = GTIFGetOGISDefn(m_gtiff, &sGTIFDefn);
+    pszWKT = GTIFGetOGISDefn(t, &sGTIFDefn);
 
     if (pretty)
     {
@@ -213,13 +219,15 @@ void GeotiffSupport::rebuildGTIF()
     // SpatialReference is defined, not the GeoTIFF keys.
     if (m_tiff != 0)
     {
-        ST_Destroy(m_tiff);
+        ST_TIFF* t = static_cast<ST_TIFF*>(m_tiff);
+        ST_Destroy(t);
         m_tiff = 0;
     }
 
     if (m_gtiff != 0)
     {
-        GTIFFree(m_gtiff);
+        GTIF* t = static_cast<GTIF*>(m_gtiff);
+        GTIFFree(t);
         m_gtiff = 0;
     }
 
@@ -227,7 +235,8 @@ void GeotiffSupport::rebuildGTIF()
 
     // (here it used to read in the VLRs)
 
-    m_gtiff = GTIFNewSimpleTags(m_tiff);
+    ST_TIFF* t = static_cast<ST_TIFF*>(m_tiff);
+    m_gtiff = GTIFNewSimpleTags(t);
     if (!m_gtiff)
         throw std::runtime_error("The geotiff keys could not be read from VLR records");
 
@@ -247,14 +256,15 @@ void GeotiffSupport::setWkt(const std::string& v)
         return;
     }
 
+    GTIF* t = static_cast<GTIF*>(m_gtiff);
     int ret = 0;
-    ret = GTIFSetFromOGISDefn(m_gtiff, v.c_str());
+    ret = GTIFSetFromOGISDefn(t, v.c_str());
     if (!ret)
     {
         throw std::invalid_argument("could not set m_gtiff from WKT");
     }
 
-    ret = GTIFWriteKeys(m_gtiff);
+    ret = GTIFWriteKeys(t);
     if (!ret)
     {
         throw std::runtime_error("The geotiff keys could not be written");
@@ -305,7 +315,8 @@ std::string GeotiffSupport::getText() const
         return std::string("");
 
     geotiff_dir_printer geotiff_printer;
-    GTIFPrint(m_gtiff, pdalGeoTIFFPrint, &geotiff_printer);
+    GTIF* t = static_cast<GTIF*>(m_gtiff);
+    GTIFPrint(t, pdalGeoTIFFPrint, &geotiff_printer);
     const std::string s = geotiff_printer.output();
     return s;
 }
