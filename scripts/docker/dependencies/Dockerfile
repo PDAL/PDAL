@@ -58,6 +58,7 @@ RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
         libcurl4-openssl-dev \
         libspatialite-dev \
         libdap-dev\
+        ninja \
     && rm -rf /var/lib/apt/lists/*
 
 
