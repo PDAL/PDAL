@@ -70,6 +70,9 @@ this `LiDAR Magazine article`_.
 .. image:: ./nsf1.gif
     :target: http://www.nsf.gov
 
+.. image:: ./uoh.png
+    :target: http://www.uh.edu
+
 `NSF <http://www.nsf.gov>`_, in collaboration with `Dr. Craig Glennie
 <http://www.cive.uh.edu/faculty/glennie>`_ at the `University of Houston
 <http://www.uh.edu>`_ supports PDAL with funding support to develop and enhance
