@@ -17,6 +17,8 @@ management. We hope you'll find it useful too.
 
 This page is to recognize these contributors and their contributions. Thanks.
 
+Engineering Contributors
+--------------------------------------------------------------------------------
 
 .. image:: https://hobu.co/theme/images/hobulogo.png
     :target: http://hobu.co
@@ -24,8 +26,8 @@ This page is to recognize these contributors and their contributions. Thanks.
 `Hobu`_ is the primary company behind the design, testing, development, and
 distribution of PDAL. Two Hobu team members primarily interact with PDAL.
 `Howard Butler`_ founded the project, and he provides project leadership and
-software development.  `Andrew Bell`_ has contributed design, refactoring, and new
-feature development of PDAL over the past couple of years.
+software development.  `Andrew Bell`_ has contributed design, refactoring, and
+new feature development of PDAL over the past couple of years.
 
 .. _`Howard Butler`: https://github.com/hobu
 .. _`Andrew Bell`: https://github.com/abellgithub
@@ -45,20 +47,35 @@ implementations.
 `Bradley Chambers`_ from `RadiantBlue`_ has contributed numerous features and
 capabilities to the PDAL project, including :ref:`Poisson sampling
 <dart-throwing>`, :ref:`Progressive Morphological Filters <pcl_ground>`, and
-:ref:`PCL Visualizer <writers.pclvisualizer>`. He is also a prolific :ref:`tutorial` writer, and
-he maintains the :ref:`Windows builds <download>` for the project.
+:ref:`PCL Visualizer <writers.pclvisualizer>`. He is also a prolific
+:ref:`tutorial` writer, and he maintains the :ref:`Windows builds <download>`
+for the project.
 
 .. _`Bradley Chambers`: https://github.com/chambbj
 .. _`RadiantBlue`: http://radiantblue.com/
 
 
+Funding Contributors
+--------------------------------------------------------------------------------
+
 .. image:: ./rsgis_logo.png
     :target: http://www.erdc.usace.army.mil/Locations/CRREL.aspx
 
-The US Army Corps of Engineers Remote Sensing / GIS Center of Expertise at `CRREL`_ sponsors development of PDAL for its
-use in point cloud data management. `CRREL`_'s `GRiD`_ project manages LiDAR
-and point cloud data for a multitude of U.S. Army Corps missions. Find out
-more about GRiD in this `LiDAR Magazine article`_.
+The US Army Corps of Engineers Remote Sensing / GIS Center of Expertise at
+`CRREL`_ sponsors development of PDAL for its use in point cloud data
+management systems. `CRREL`_'s `GRiD`_ project manages LiDAR and point cloud
+data for a multitude of U.S. Army Corps missions. Find out more about GRiD in
+this `LiDAR Magazine article`_.
+
+.. image:: ./nsf1.gif
+    :target: http://www.nsf.gov
+
+`NSF <http://www.nsf.gov>`_, in collaboration with `Dr. Craig Glennie
+<http://www.cive.uh.edu/faculty/glennie>`_ at the `University of Houston
+<http://www.uh.edu>`_ supports PDAL with funding support to develop and enhance
+statistical methods, transformation operations, tutorial and example
+development, and `PCL <http://pointclouds.org>`_ integration.
+
 
 .. _`GRiD`: http://lidar.io/about.html
 .. _`LiDAR Magazine article`: http://www.lidarmag.com/content/view/11343/198/
