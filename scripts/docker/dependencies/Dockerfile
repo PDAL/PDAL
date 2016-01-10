@@ -1,121 +1,160 @@
-FROM ubuntu:14.04
+FROM ubuntu:15.04
 MAINTAINER Howard Butler <howard@hobu.co>
-
 
 RUN apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 16126D3A3E5C1192
 RUN apt-get update -qq
 RUN apt-get -qq remove postgis
 
 RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
-		build-essential \
-		ca-certificates \
-		cmake \
-		curl \
-		gfortran \
-		git \
-		libarmadillo-dev \
-		libarpack2-dev \
-		libflann-dev \
-		libhdf5-serial-dev \
-		liblapack-dev \
-		libtiff4-dev \
-		openssh-client \
-		python-dev \
-		python-numpy \
-		python-numpy \
-		python-software-properties \
-		software-properties-common \
-		wget \
-	&& rm -rf /var/lib/apt/lists/*
+        build-essential \
+        ca-certificates \
+        cmake \
+        curl \
+        gfortran \
+        git \
+        libarmadillo-dev \
+        libarpack2-dev \
+        libflann-dev \
+        libhdf5-serial-dev \
+        liblapack-dev \
+        libtiff5-dev \
+        openssh-client \
+        python-dev \
+        python-numpy \
+        python-numpy \
+        python-software-properties \
+        software-properties-common \
+        wget \
+        automake \
+        libtool \
+        libspatialite-dev \
+        libhdf5-dev \
+        subversion \
+        libjsoncpp-dev \
+        libboost-filesystem1.55-dev \
+        libboost-iostreams1.55-dev \
+        libboost-program-options1.55-dev \
+        libboost-system1.55-dev \
+        libboost-thread1.55-dev \
+        subversion \
+        clang \
+        libproj-dev \
+        libc6-dev \
+        libnetcdf-dev \
+        libjasper-dev \
+        libpng-dev \
+        libjpeg-dev \
+        libgif-dev \
+        libwebp-dev \
+        libhdf4-alt-dev \
+        libhdf5-dev \
+        libpq-dev \
+        libxerces-c-dev \
+        unixodbc-dev \
+        libsqlite3-dev \
+        libgeos-dev \
+        libmysqlclient-dev \
+        libltdl-dev \
+        libcurl4-openssl-dev \
+        libspatialite-dev \
+        libdap-dev\
+    && rm -rf /var/lib/apt/lists/*
 
-RUN add-apt-repository ppa:ubuntugis/ubuntugis-unstable -y
-RUN add-apt-repository ppa:ubuntu-toolchain-r/test -y
 
-RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
-		# from ppa:ubuntu-toolchain-r/test
-		g++-4.8 \
-		clang \
-		ninja-build \
-		# from ppa:boost-latest/ppa
-		libboost-filesystem1.55-dev \
-		libboost-iostreams1.55-dev \
-		libboost-program-options1.55-dev \
-		libboost-system1.55-dev \
-		libboost-thread1.55-dev \
-#
-		# from ppa:ubuntugis/ubuntugis-unstable
-		libgdal1h \
-		libgdal-dev \
-		gdal-bin \
-		libgeos++-dev \
-		libproj-dev \
-
-		# from ppa:ubuntugis/ppa
-		libgeotiff-dev \
-		libxml2-dev \
-#
-	&& rm -rf /var/lib/apt/lists/*
-
-# Get howard@hobu.co key
-RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys BFE1B014
-
-RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50
-
+RUN git clone --depth=1 https://github.com/OSGeo/gdal.git \
+    &&    cd gdal/gdal \
+    && ./configure --prefix=/usr \
+            --mandir=/usr/share/man \
+            --includedir=/usr/include/gdal \
+            --with-threads \
+            --with-grass=no \
+            --with-hide-internal-symbols=yes \
+            --with-rename-internal-libtiff-symbols=yes \
+            --with-rename-internal-libgeotiff-symbols=yes \
+            --with-libtiff=internal \
+            --with-geotiff=internal \
+            --with-webp \
+            --with-jasper \
+            --with-netcdf \
+            --with-hdf5=/usr/lib/x86_64-linux-gnu/hdf5/serial/ \
+            --with-xerces \
+            --with-geos \
+            --with-sqlite3 \
+            --with-curl \
+            --with-pg \
+            --with-mysql \
+            --with-python \
+            --with-odbc \
+            --with-ogdi \
+            --with-dods-root=/usr \
+            --with-spatialite=/usr \
+            --with-cfitsio=no \
+            --with-ecw=no \
+            --with-mrsid=no \
+            --with-poppler=yes \
+            --with-openjpeg=yes \
+            --with-freexl=yes \
+            --with-libkml=yes \
+            --with-armadillo=yes \
+            --with-liblzma=yes \
+            --with-epsilon=/usr \
+    && make -j 4 \
+    && make install
 
 RUN git clone https://github.com/hobu/nitro \
-	&& cd nitro \
-	&& mkdir build \
-	&& cd build \
-	&& cmake \
-		-DCMAKE_INSTALL_PREFIX=/usr \
-		.. \
-	&& make \
-	&& make install
+    && cd nitro \
+    && mkdir build \
+    && cd build \
+    && cmake \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        .. \
+    && make \
+    && make install
 
 RUN git clone https://github.com/LASzip/LASzip.git laszip \
-	&& cd laszip \
-	&& mkdir build \
-	&& cd build \
-	&& cmake \
-		-DCMAKE_INSTALL_PREFIX=/usr \
-		-DCMAKE_BUILD_TYPE="Release" \
-		.. \
-	&& make \
-	&& make install
+    && cd laszip \
+    && mkdir build \
+    && cd build \
+    && cmake \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_BUILD_TYPE="Release" \
+        .. \
+    && make \
+    && make install
 
 
 RUN git clone https://github.com/hobu/hexer.git \
-	&& cd hexer \
-	&& mkdir build \
-	&& cd build \
-	&& cmake \
-		-DCMAKE_INSTALL_PREFIX=/usr \
-		-DCMAKE_BUILD_TYPE="Release" \
-		.. \
-	&& make \
-	&& make install
+    && cd hexer \
+    && mkdir build \
+    && cd build \
+    && cmake \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_BUILD_TYPE="Release" \
+        .. \
+    && make \
+    && make install
 
 RUN git clone https://github.com/CRREL/points2grid.git \
-	&& cd points2grid \
-	&& mkdir build \
-	&& cd build \
-	&& cmake \
-		-DCMAKE_INSTALL_PREFIX=/usr \
-		-DCMAKE_BUILD_TYPE="Release" \
-		.. \
-	&& make \
-	&& make install
+    && cd points2grid \
+    && mkdir build \
+    && cd build \
+    && cmake \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_BUILD_TYPE="Release" \
+        .. \
+    && make \
+    && make install
 
 RUN git clone  https://github.com/verma/laz-perf.git \
-	&& cd laz-perf \
-	&& mkdir build \
-	&& cd build \
-	&& cmake \
-		-DCMAKE_INSTALL_PREFIX=/usr \
-		-DCMAKE_BUILD_TYPE="Release" \
-		.. \
-	&& make \
-	&& make install
+    && cd laz-perf \
+    && mkdir build \
+    && cd build \
+    && cmake \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_BUILD_TYPE="Release" \
+        .. \
+    && make \
+    && make install
 
 RUN wget http://bitbucket.org/eigen/eigen/get/3.2.7.tar.gz \
         && tar -xvf 3.2.7.tar.gz \
@@ -173,40 +212,31 @@ RUN git clone https://github.com/chambbj/pcl.git \
         && make \
         && make install
 
-RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
-		subversion \
-		libjsoncpp-dev
+
 
 RUN svn co -r 2691 https://svn.osgeo.org/metacrs/geotiff/trunk/libgeotiff/ \
     && cd libgeotiff \
-    &&  cmake . -DCMAKE_INSTALL_PREFIX=/usr -DWITH_TIFF=ON -DWITH_PROJ4=ON \
+    && ./autogen.sh \
+    && ./configure --prefix=/usr \
     && make \
     && make install
-#RUN wget https://cmake.org/files/v3.4/cmake-3.4.1.tar.gz \
-#    && tar zxvf cmake-3.4.1.tar.gz \
-#    && cd cmake-3.4.1 \
-#    && ./bootstrap --prefix=/usr \
+
+#RUN wget http://sourceforge.net/projects/arma/files/armadillo-6.400.3.tar.gz \
+#    && tar zxvf armadillo-6.400.3.tar.gz \
+#    && cd armadillo-6.400.3 \
+#    && cmake . -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+#     && make \
+#     && make install
+
+#RUN git clone https://github.com/gadomski/fgt.git \
+#    && cd fgt \
+#    && cmake . -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
 #    && make \
 #    && make install
 
-RUN wget http://sourceforge.net/projects/arma/files/armadillo-6.400.2.tar.gz \
-    && tar zxvf armadillo-6.400.2.tar.gz \
-    && cd armadillo-6.400.2 \
-    && cmake . -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
-    && make \
-    && make install
-
-RUN git clone https://github.com/gadomski/fgt.git \
-    && cd fgt \
-    && cmake . -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
-    && make \
-    && make install
-
-RUN git clone https://github.com/hobu/cpd.git \
-    && cd cpd \
-    && git checkout armadillo-6 \
-    && cmake . -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DFgt_DIR=/usr \
-    && make \
-    && make install
-
-RUN rm -rf /cpd /armadillo* /fgt /libgeotiff /pcl /eigen* /points2grid /nitro /*.gz /laszip /laz-perf /hexer
+#RUN git clone https://github.com/hobu/cpd.git \
+#    && cd cpd \
+#    && git checkout armadillo-6 \
+#    && cmake . -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DFgt_DIR=/usr \
+#    && make \
+#    && make install
