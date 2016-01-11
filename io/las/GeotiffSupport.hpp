@@ -43,12 +43,11 @@
 // See http://lists.osgeo.org/pipermail/gdal-dev/2013-November/037429.html
 #define CPL_SERV_H_INCLUDED
 
-#include <geo_simpletags.h>
-#include <cpl_conv.h>
-
-
 #include <string>
 #include <stdexcept>
+
+struct GTIFS;
+struct StTiff;
 
 namespace pdal
 {
@@ -61,7 +60,9 @@ public:
     ~GeotiffSupport();
 
     void resetTags();
-    int setKey(int tag, void *data, int size, int type);
+    void setShortKeys(int tag, void *data, int size);
+    void setDoubleKeys(int tag, void *data, int size);
+    void setAsciiKeys(int tag, void *data, int size);
     size_t getKey(int tag, int *count, void **data_ptr) const;
     void setTags();
 
@@ -73,8 +74,8 @@ public:
 private:
     void rebuildGTIF();
 
-    void* m_gtiff;
-    void* m_tiff;
+    GTIF *m_gtiff;
+    StTiff *m_tiff;
 };
 
 } // namespace pdal

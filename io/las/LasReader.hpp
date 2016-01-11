@@ -111,7 +111,6 @@ private:
         { initializeLocal(table, m_metadata); }
     virtual void initializeLocal(PointTableRef table, MetadataNode& m);
     virtual void addDimensions(PointLayoutPtr layout);
-    void fixupVlrs();
     VariableLengthRecord *findVlr(const std::string& userId, uint16_t recordId);
     void setSrsFromVlrs(MetadataNode& m);
     void readExtraBytesVlr();
