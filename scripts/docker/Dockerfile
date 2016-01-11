@@ -5,6 +5,12 @@ ARG branch=master
 ENV CC clang
 ENV CXX clang++
 
+RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
+        cython \
+        python-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+
 RUN git clone --depth=1 https://github.com/PDAL/PDAL \
 	&& cd PDAL \
 	&& git checkout ${branch} \
@@ -35,8 +41,10 @@ RUN git clone --depth=1 https://github.com/PDAL/PDAL \
 		-DCMAKE_BUILD_TYPE=Release \
 		.. \
 	&& make -j4 \
-	&& make install \
-    && cd /PDAL/python \
+	&& make install
+
+RUN cd /PDAL/python \
+    && pip install packaging \
     && python setup.py build \
     && python setup.py install
 
