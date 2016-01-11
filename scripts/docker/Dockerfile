@@ -36,7 +36,7 @@ RUN git clone --depth=1 https://github.com/PDAL/PDAL \
 		.. \
 	&& make -j4 \
 	&& make install \
-    && cd python \
+    && cd /PDAL/python \
     && python setup.py build \
     && python setup.py install
 
