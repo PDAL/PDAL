@@ -69,7 +69,7 @@ istream* FileUtils::openFile(string const& filename, bool asBinary)
         return &cin;
 
     if (!FileUtils::fileExists(filename))
-        throw pdal_error(std::string("File '") + filename + "' not found");
+        return NULL;
 
     ios::openmode mode = ios::in;
     if (asBinary)
@@ -318,41 +318,6 @@ void FileUtils::fileTimes(const std::string& filename,
     if (modTime)
         gmtime_r(&statbuf.st_mtime, modTime);
 #endif
-}
-
-
-string FileUtils::readFileAsString(string const& filename)
-{
-    if (!FileUtils::fileExists(filename))
-    {
-        ostringstream oss;
-        oss << filename << " does not exist";
-        throw pdal_error(oss.str());
-    }
-
-    istream::pos_type size;
-    istream* input = FileUtils::openFile(filename, true);
-
-    if (input->good())
-    {
-        string output;
-        string line;
-        while (input->good())
-        {
-            getline(*input, line);
-            if (output.size())
-            {
-                output = output + "\n" + line;
-            }
-            else
-            {
-                output = line;
-            }
-        }
-        return output;
-    }
-    FileUtils::closeFile(input);
-    return string();
 }
 
 } // namespace pdal

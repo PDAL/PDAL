@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Hobu Inc.
+* Copyright (c) 2016, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*     * Neither the name of Hobu, Inc. nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -32,44 +32,23 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <pdal/pdal_test_main.hpp>
 
-#include <streambuf>
-#include <iostream>
-#include <vector>
+#include <pdal/util/Uuid.hpp>
 
-#include "pdal_util_export.hpp"
+using namespace pdal;
 
-namespace pdal
+TEST(UuidTest, test)
 {
+    std::string s("5CE0E9A5-6015-FEC5-AADF-A328AE398115");
+    unsigned char id[16] = {0x5c, 0xe0, 0xe9, 0xa5, 0x60, 0x15, 0xfe, 0xc5,
+                            0xaa, 0xdf, 0xa3, 0x28, 0xae, 0x39, 0x81, 0x15 };
+    Uuid uuid((char *)id);
+    EXPECT_EQ(uuid.toString(), s);
 
-// Turns a vector into a streambuf.
-class PDAL_DLL Charbuf : public std::streambuf
-{
-public:
-    Charbuf() : m_bufOffset(0)
-        {}
-    Charbuf (std::vector<char>& v, pos_type bufOffset = 0)
-        { initialize(v.data(), v.size(), bufOffset); }
-    Charbuf (char *buf, size_t count, pos_type bufOffset = 0)
-        { initialize(buf, count, bufOffset); }
-
-    void initialize(char *buf, size_t count, pos_type bufOffset = 0);
-
-protected:
-    std::ios::pos_type seekpos(std::ios::pos_type pos,
-        std::ios_base::openmode which = std::ios_base::in | std::ios_base::out);
-    std::ios::pos_type seekoff(std::ios::off_type off,
-        std::ios_base::seekdir dir,
-        std::ios_base::openmode which = std::ios_base::in | std::ios_base::out);
-
-private:
-    // The offset allows one to use offsets when seeking that refer not to
-    // the positions in the backing vector, but to some other reference point.
-    std::ios::pos_type m_bufOffset;
-    // For the put pointer, it seems we need the beginning of the buffer
-    // in order to deal with offsets.
-    char *m_buf;
-};
-
-} //namespace pdal
+    Uuid uuid2(s);
+    unsigned char buf[16];
+    uuid2.pack((char *)buf);
+    for (size_t i = 0; i < 16; ++i)
+        EXPECT_EQ(id[i], buf[i]);
+}

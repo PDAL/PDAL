@@ -72,6 +72,7 @@ PDAL_ADD_TEST(pdal_streaming_test FILES StreamingTest.cpp)
 PDAL_ADD_TEST(pdal_support_test FILES SupportTest.cpp)
 PDAL_ADD_TEST(pdal_user_callback_test FILES UserCallbackTest.cpp)
 PDAL_ADD_TEST(pdal_utils_test FILES UtilsTest.cpp)
+PDAL_ADD_TEST(pdal_uuid_test FILES UuidTest.cpp)
 
 if (PDAL_HAVE_LAZPERF)
     PDAL_ADD_TEST(pdal_lazperf_test FILES CompressionTest.cpp)

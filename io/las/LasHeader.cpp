@@ -35,9 +35,6 @@
 
 #include "LasHeader.hpp"
 
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
-
 #include <pdal/util/Utils.hpp>
 #include <pdal/pdal_config.hpp>
 
@@ -157,43 +154,21 @@ bool LasHeader::valid() const
 }
 
 
-void LasHeader::get(ILeStream& in, boost::uuids::uuid& uuid)
+void LasHeader::get(ILeStream& in, Uuid& uuid)
 {
-    union
-    {
-        char buf[16];
-        struct
-        {
-            uint32_t uidPart1;
-            uint16_t uidPart2;
-            uint16_t uidPart3;
-            char uidPart4[8];
-        };
-    } u;
+    char buf[uuid.size()];
 
-    in >> u.uidPart1 >> u.uidPart2 >> u.uidPart3;
-    in.get(u.uidPart4, sizeof(u.uidPart4));
-    memcpy(uuid.data, u.buf, sizeof(u.buf));
+    in.get(buf, uuid.size());
+    uuid.unpack(buf);
 }
 
 
-void LasHeader::put(OLeStream& out, boost::uuids::uuid uuid)
+void LasHeader::put(OLeStream& out, Uuid uuid)
 {
-    union
-    {
-        char buf[16];
-        struct
-        {
-            uint32_t uidPart1;
-            uint16_t uidPart2;
-            uint16_t uidPart3;
-            char uidPart4[8];
-        };
-    } u;
+    char buf[uuid.size()];
 
-    memcpy(u.buf, uuid.data, sizeof(u.buf));
-    out << u.uidPart1 << u.uidPart2 << u.uidPart3;
-    out.put(u.uidPart4, sizeof(u.uidPart4));
+    uuid.pack(buf);
+    out.put(buf, uuid.size());
 }
 
 
@@ -236,7 +211,7 @@ ILeStream& operator>>(ILeStream& in, LasHeader& h)
         throw pdal::pdal_error("File signature is not 'LASF', is this an LAS/LAZ file?");
     }
     in >> h.m_sourceId >> h.m_globalEncoding;
-    LasHeader::get(in, h.m_projectGuid);
+    LasHeader::get(in, h.m_projectUuid);
     in >> versionMajor >> h.m_versionMinor;
     in.get(h.m_systemId, 32);
 
@@ -296,7 +271,7 @@ OLeStream& operator<<(OLeStream& out, const LasHeader& h)
         out << h.m_sourceId << (uint16_t)0;
     else
         out << h.m_sourceId << h.m_globalEncoding;
-    LasHeader::put(out, h.m_projectGuid);
+    LasHeader::put(out, h.m_projectUuid);
     out << (uint8_t)1 << h.m_versionMinor;
     out.put(h.m_systemId, 32);
     out.put(h.m_softwareId, 32);
@@ -340,7 +315,7 @@ std::ostream& operator<<(std::ostream& out, const LasHeader& h)
     out << "File signature: " << h.m_fileSig << "\n";
     out << "File source ID: " << h.m_sourceId << "\n";
     out << "Global encoding: " << h.m_globalEncoding << "\n";
-    out << "Project GUID: " << h.m_projectGuid << "\n";
+    out << "Project UUID: " << h.m_projectUuid << "\n";
     out << "System ID: " << h.m_systemId << "\n";
     out << "Software ID: " << h.m_softwareId << "\n";
     out << "Creation DOY: " << h.m_createDOY << "\n";

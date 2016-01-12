@@ -35,14 +35,17 @@
 #pragma once
 
 #include <pdal/Metadata.hpp>
+
 #include <boost/property_tree/json_parser.hpp>
-#include <boost/algorithm/string.hpp>
+
 #include <pdal/Dimension.hpp>
 #include <pdal/pdal_defines.h>
 #include <pdal/pdal_export.hpp>
 #include <pdal/PointTable.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/Options.hpp>
+#include <pdal/util/Inserter.hpp>
+#include <pdal/util/Extractor.hpp>
 
 #ifndef _WIN32
 #include <sys/fcntl.h>
@@ -101,6 +104,91 @@ inline double toDouble(const Everything& e, Dimension::Type::Enum type)
         break;
     }
     return d;
+}
+
+inline Everything extractDim(Extractor& ext, Dimension::Type::Enum type)
+{
+    using namespace Dimension::Type;
+
+    Everything e;
+    switch (type)
+    {
+        case Unsigned8:
+            ext >> e.u8;
+            break;
+        case Unsigned16:
+            ext >> e.u16;
+            break;
+        case Unsigned32:
+            ext >> e.u32;
+            break;
+        case Unsigned64:
+            ext >> e.u64;
+            break;
+        case Signed8:
+            ext >> e.s8;
+            break;
+        case Signed16:
+            ext >> e.s16;
+            break;
+        case Signed32:
+            ext >> e.s32;
+            break;
+        case Signed64:
+            ext >> e.s64;
+            break;
+        case Float:
+            ext >> e.f;
+            break;
+        case Double:
+            ext >> e.d;
+            break;
+        case None:
+            break;
+    }
+    return e;
+}
+
+inline void insertDim(Inserter& ins, Dimension::Type::Enum type,
+    const Everything& e)
+{
+    using namespace Dimension::Type;
+
+    switch (type)
+    {
+        case Unsigned8:
+            ins << e.u8;
+            break;
+        case Unsigned16:
+            ins << e.u16;
+            break;
+        case Unsigned32:
+            ins << e.u32;
+            break;
+        case Unsigned64:
+            ins << e.u64;
+            break;
+        case Signed8:
+            ins << e.s8;
+            break;
+        case Signed16:
+            ins << e.s16;
+            break;
+        case Signed32:
+            ins << e.s32;
+            break;
+        case Signed64:
+            ins << e.s64;
+            break;
+        case Float:
+            ins << e.f;
+            break;
+        case Double:
+            ins << e.d;
+            break;
+        case None:
+            break;
+    }
 }
 
 using namespace boost::property_tree;

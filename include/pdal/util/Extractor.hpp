@@ -34,9 +34,7 @@
 
 #pragma once
 
-#include <pdal/Dimension.hpp>
-#include <pdal/pdal_macros.hpp>
-
+#include "pdal_util_export.hpp"
 #include "portable_endian.hpp"
 
 namespace pdal
@@ -103,6 +101,17 @@ public:
         m_gptr += size;
     }
 
+    virtual Extractor& operator >> (uint8_t& v) = 0;
+    virtual Extractor& operator >> (int8_t& v) = 0;
+    virtual Extractor& operator >> (uint16_t& v) = 0;
+    virtual Extractor& operator >> (int16_t& v) = 0;
+    virtual Extractor& operator >> (uint32_t& v) = 0;
+    virtual Extractor& operator >> (int32_t& v) = 0;
+    virtual Extractor& operator >> (uint64_t& v) = 0;
+    virtual Extractor& operator >> (int64_t& v) = 0;
+    virtual Extractor& operator >> (float& v) = 0;
+    virtual Extractor& operator >> (double& v) = 0;
+
 protected:
     // Beginning of the buffer (names come from std::streambuf)
     const char *m_eback;
@@ -119,48 +128,6 @@ class PDAL_DLL LeExtractor : public Extractor
 public:
     LeExtractor(const char *buf, std::size_t size) : Extractor(buf, size)
     {}
-
-    using Extractor::get;
-    void get(Dimension::Type::Enum type, Everything& e)
-    {
-        using namespace Dimension::Type;
-
-        switch (type)
-        {
-        case Unsigned8:
-            *this >> e.u8;
-            break;
-        case Unsigned16:
-            *this >> e.u16;
-            break;
-        case Unsigned32:
-            *this >> e.u32;
-            break;
-        case Unsigned64:
-            *this >> e.u64;
-            break;
-        case Signed8:
-            *this >> e.s8;
-            break;
-        case Signed16:
-            *this >> e.s16;
-            break;
-        case Signed32:
-            *this >> e.s32;
-            break;
-        case Signed64:
-            *this >> e.s64;
-            break;
-        case Float:
-            *this >> e.f;
-            break;
-        case Double:
-            *this >> e.d;
-            break;
-        case None:
-            break;
-        }
-    }
 
     LeExtractor& operator >> (uint8_t& v)
     {
@@ -242,6 +209,94 @@ public:
 };
 
 
+/// Stream wrapper for input of binary data that converts from big-endian
+/// to host ordering.
+class PDAL_DLL BeExtractor : public Extractor
+{
+public:
+    BeExtractor(const char *buf, std::size_t size) : Extractor(buf, size)
+    {}
+
+    BeExtractor& operator >> (uint8_t& v)
+    {
+        v = *(const uint8_t *)m_gptr++;
+        return *this;
+    }
+
+    BeExtractor& operator >> (int8_t& v)
+    {
+        v = *(const int8_t *)m_gptr++;
+        return *this;
+    }
+
+    BeExtractor& operator >> (uint16_t& v)
+    {
+        memcpy(&v, m_gptr, sizeof(v));
+        v = be16toh(v);
+        m_gptr += sizeof(v);
+        return *this;
+    }
+
+    BeExtractor& operator >> (int16_t& v)
+    {
+        memcpy(&v, m_gptr, sizeof(v));
+        v = (int16_t)be16toh((uint16_t)v);
+        m_gptr += sizeof(v);
+        return *this;
+    }
+
+    BeExtractor& operator >> (uint32_t& v)
+    {
+        memcpy(&v, m_gptr, sizeof(v));
+        v = be32toh(v);
+        m_gptr += sizeof(v);
+        return *this;
+    }
+
+    BeExtractor& operator >> (int32_t& v)
+    {
+        memcpy(&v, m_gptr, sizeof(v));
+        v = (int32_t)be32toh((uint32_t)v);
+        m_gptr += sizeof(v);
+        return *this;
+    }
+
+    BeExtractor& operator >> (uint64_t& v)
+    {
+        memcpy(&v, m_gptr, sizeof(v));
+        v = be64toh(v);
+        m_gptr += sizeof(v);
+        return *this;
+    }
+
+    BeExtractor& operator >> (int64_t& v)
+    {
+        memcpy(&v, m_gptr, sizeof(v));
+        v = (int64_t)be64toh((uint64_t)v);
+        m_gptr += sizeof(v);
+        return *this;
+    }
+
+    BeExtractor& operator >> (float& v)
+    {
+        memcpy(&v, m_gptr, sizeof(v));
+        uint32_t tmp = be32toh(*(uint32_t *)(&v));
+        std::memcpy(&v, &tmp, sizeof(tmp));
+        m_gptr += sizeof(v);
+        return *this;
+    }
+
+    BeExtractor& operator >> (double& v)
+    {
+        memcpy(&v, m_gptr, sizeof(v));
+        uint64_t tmp = be64toh(*(uint64_t *)(&v));
+        std::memcpy(&v, &tmp, sizeof(tmp));
+        m_gptr += sizeof(v);
+        return *this;
+    }
+};
+
+
 /// Stream wrapper for input of binary data that converts from little-endian
 /// to host ordering.
 class PDAL_DLL SwitchableExtractor : public Extractor
@@ -264,48 +319,6 @@ public:
     bool isLittleEndian() const { return m_isLittleEndian; }
     void switchToLittleEndian() { m_isLittleEndian = true; }
     void switchToBigEndian() { m_isLittleEndian = false; }
-
-    using Extractor::get;
-    void get(Dimension::Type::Enum type, Everything& e)
-    {
-        using namespace Dimension::Type;
-
-        switch (type)
-        {
-        case Unsigned8:
-            *this >> e.u8;
-            break;
-        case Unsigned16:
-            *this >> e.u16;
-            break;
-        case Unsigned32:
-            *this >> e.u32;
-            break;
-        case Unsigned64:
-            *this >> e.u64;
-            break;
-        case Signed8:
-            *this >> e.s8;
-            break;
-        case Signed16:
-            *this >> e.s16;
-            break;
-        case Signed32:
-            *this >> e.s32;
-            break;
-        case Signed64:
-            *this >> e.s64;
-            break;
-        case Float:
-            *this >> e.f;
-            break;
-        case Double:
-            *this >> e.d;
-            break;
-        case None:
-            break;
-        }
-    }
 
     SwitchableExtractor& operator>>(uint8_t& v)
     {

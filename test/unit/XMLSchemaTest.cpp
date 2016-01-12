@@ -35,10 +35,8 @@
 #include <pdal/pdal_test_main.hpp>
 #include <boost/property_tree/ptree.hpp>
 
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
-
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/util/Uuid.hpp>
 #include <pdal/Metadata.hpp>
 #include <pdal/PointTable.hpp>
 #include <pdal/XMLSchema.hpp>
@@ -161,7 +159,7 @@ TEST(XMLSchemaTest, copy)
     MetadataNode m1 = m.add("m1", 1u);
     MetadataNode m2 = m.add("m2", 1);
     MetadataNode m1prime = m.add("m1prime", "Some other metadata");
-    m1.add("uuid", boost::uuids::nil_uuid());
+    m1.add("uuid", Uuid());
 
     XMLSchema s2(s1.xmlDims(), m);
     std::string xml_output = s2.xml();

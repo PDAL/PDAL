@@ -885,7 +885,6 @@ void LasReader::loadPointV14(PointRef& point, char *buf, size_t bufsize)
 
 void LasReader::loadExtraDims(LeExtractor& istream, PointRef& point)
 {
-    Everything e;
     for (auto& dim : m_extraDims)
     {
         // Dimension type of None is undefined and unprocessed
@@ -895,8 +894,7 @@ void LasReader::loadExtraDims(LeExtractor& istream, PointRef& point)
             continue;
         }
 
-        istream.get(dim.m_dimType.m_type, e);
-
+        Everything e = Utils::extractDim(istream, dim.m_dimType.m_type);
         if (dim.m_dimType.m_xform.nonstandard())
         {
             double d = Utils::toDouble(e, dim.m_dimType.m_type);

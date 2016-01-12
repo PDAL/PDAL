@@ -36,11 +36,9 @@
 
 #include <pdal/pdal_internal.hpp>
 
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_io.hpp>
-
 #include <pdal/util/Bounds.hpp>
 #include <pdal/util/Utils.hpp>
+#include <pdal/util/Uuid.hpp>
 #include <pdal/SpatialReference.hpp>
 
 #include <map>
@@ -333,10 +331,10 @@ inline void MetadataNodeImpl::setValue(const long long& l)
 }
 
 template <>
-inline void MetadataNodeImpl::setValue(const boost::uuids::uuid& u)
+inline void MetadataNodeImpl::setValue(const Uuid& u)
 {
     m_type = "uuid";
-    m_value = Utils::toString(u);
+    m_value = u.toString();
 }
 
 
@@ -736,10 +734,8 @@ inline std::string Metadata::inferType(const std::string& val)
     {
     }
 
-    boost::uuids::uuid uuid;
-    std::istringstream iss3(val);
-    iss3 >> uuid;
-    if (iss3.good())
+    Uuid uuid(val);
+    if (!uuid.isNull())
         return "uuid";
 
     return "string";

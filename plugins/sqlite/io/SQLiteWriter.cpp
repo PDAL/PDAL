@@ -191,7 +191,7 @@ void SQLiteWriter::writeInit()
         m_options.getValueOrDefault<std::string>("pre_sql", "");
     if (pre_sql.size())
     {
-        std::string sql = FileUtils::readFileAsString(pre_sql);
+        std::string sql = FileUtils::readFileIntoString(pre_sql);
         if (!sql.size())
         {
             // if there was no file to read because the data in pre_sql was
@@ -368,7 +368,7 @@ SQLiteWriter::loadGeometryWKT(std::string const& filename_or_wkt) const
     }
     else
     {
-        std::string wkt = FileUtils::readFileAsString(filename_or_wkt);
+        std::string wkt = FileUtils::readFileIntoString(filename_or_wkt);
         if (!IsValidGeometryWKT(wkt))
         {
             std::ostringstream oss;
@@ -403,7 +403,7 @@ void SQLiteWriter::done(PointTableRef table)
         m_options.getValueOrDefault<std::string>("post_sql", "");
     if (post_sql.size())
     {
-        std::string sql = FileUtils::readFileAsString(post_sql);
+        std::string sql = FileUtils::readFileIntoString(post_sql);
         if (!sql.size())
         {
             // if there was no file to read because the data in post_sql was

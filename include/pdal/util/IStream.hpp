@@ -43,9 +43,8 @@
 #include <vector>
 #include <cstring>
 
-#include <pdal/pdal_export.hpp>
-
 #include "portable_endian.hpp"
+#include "pdal_util_export.hpp"
 
 namespace pdal
 {

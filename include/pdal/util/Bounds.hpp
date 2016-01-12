@@ -37,17 +37,7 @@
 #include <cstdint>
 #include <sstream>
 
-#ifndef PDAL_DLL
-#if defined(_WIN32)
-#   define PDAL_DLL   __declspec(dllexport)
-#else
-#  if defined(USE_GCC_VISIBILITY_FLAG)
-#    define PDAL_DLL     __attribute__ ((visibility("default")))
-#  else
-#    define PDAL_DLL
-#  endif
-#endif
-#endif
+#include "pdal_util_export.hpp"
 
 namespace pdal
 {
