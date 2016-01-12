@@ -54,8 +54,9 @@
 
 #pragma once
 
-#include <cstddef>
 #include <string>
+
+#include "pdal_util_export.hpp"
 
 #include "Inserter.hpp"
 #include "Extractor.hpp"
@@ -89,7 +90,7 @@ inline bool operator < (const uuid& u1, const uuid& u2)
     return false;
 }
 
-class Uuid
+PDAL_DLL class Uuid
 {
     friend inline bool operator < (const Uuid& u1, const Uuid& u2);
 public:
@@ -187,8 +188,12 @@ public:
         return true;
     }
 
+/**
+    // Sadly, MS doesn't do constexpr.
     static constexpr size_t size()
         { return sizeof(m_data); }
+**/
+    static const int size = sizeof(uuid);
 
 private:
     uuid m_data;
