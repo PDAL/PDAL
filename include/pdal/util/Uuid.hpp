@@ -54,6 +54,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <string>
 
 #include "pdal_util_export.hpp"
