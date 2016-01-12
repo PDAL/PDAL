@@ -193,7 +193,7 @@ public:
     {
         memcpy(&v, m_gptr, sizeof(v));
         uint32_t tmp = le32toh(*(uint32_t *)(&v));
-        std::memcpy(&v, &tmp, sizeof(tmp));
+        memcpy(&v, &tmp, sizeof(tmp));
         m_gptr += sizeof(v);
         return *this;
     }
@@ -202,7 +202,7 @@ public:
     {
         memcpy(&v, m_gptr, sizeof(v));
         uint64_t tmp = le64toh(*(uint64_t *)(&v));
-        std::memcpy(&v, &tmp, sizeof(tmp));
+        memcpy(&v, &tmp, sizeof(tmp));
         m_gptr += sizeof(v);
         return *this;
     }
@@ -281,7 +281,7 @@ public:
     {
         memcpy(&v, m_gptr, sizeof(v));
         uint32_t tmp = be32toh(*(uint32_t *)(&v));
-        std::memcpy(&v, &tmp, sizeof(tmp));
+        memcpy(&v, &tmp, sizeof(tmp));
         m_gptr += sizeof(v);
         return *this;
     }
@@ -290,7 +290,7 @@ public:
     {
         memcpy(&v, m_gptr, sizeof(v));
         uint64_t tmp = be64toh(*(uint64_t *)(&v));
-        std::memcpy(&v, &tmp, sizeof(tmp));
+        memcpy(&v, &tmp, sizeof(tmp));
         m_gptr += sizeof(v);
         return *this;
     }
@@ -388,7 +388,7 @@ public:
         memcpy(&v, m_gptr, sizeof(v));
         uint32_t tmp = isLittleEndian() ? le32toh(*(uint32_t*)(&v))
                                         : be32toh(*(uint32_t*)(&v));
-        std::memcpy(&v, &tmp, sizeof(tmp));
+        memcpy(&v, &tmp, sizeof(tmp));
         m_gptr += sizeof(v);
         return *this;
     }
@@ -398,7 +398,7 @@ public:
         memcpy(&v, m_gptr, sizeof(v));
         uint64_t tmp = isLittleEndian() ? le64toh(*(uint64_t*)(&v))
                                         : be64toh(*(uint64_t*)(&v));
-        std::memcpy(&v, &tmp, sizeof(tmp));
+        memcpy(&v, &tmp, sizeof(tmp));
         m_gptr += sizeof(v);
         return *this;
     }
