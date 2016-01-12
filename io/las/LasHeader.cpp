@@ -156,19 +156,19 @@ bool LasHeader::valid() const
 
 void LasHeader::get(ILeStream& in, Uuid& uuid)
 {
-    char buf[uuid.size()];
+    char buf[uuid.size];
 
-    in.get(buf, uuid.size());
+    in.get(buf, uuid.size);
     uuid.unpack(buf);
 }
 
 
 void LasHeader::put(OLeStream& out, Uuid uuid)
 {
-    char buf[uuid.size()];
+    char buf[uuid.size];
 
     uuid.pack(buf);
-    out.put(buf, uuid.size());
+    out.put(buf, uuid.size);
 }
 
 
