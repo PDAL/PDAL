@@ -224,6 +224,7 @@ RUN svn co -r 2691 https://svn.osgeo.org/metacrs/geotiff/trunk/libgeotiff/ \
 
 RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
         ninja-build \
+        libgeos++-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN rm -rf laszip laz-perf points2grid pcl nitro hexer 3.2.7.tar.gz eigen-eigen-b30b87236a1b gdal libgeotiff
