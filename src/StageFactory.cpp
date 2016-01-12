@@ -110,6 +110,7 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
     drivers["sqlite"] = "readers.sqlite";
     drivers["sid"] = "readers.mrsid";
     drivers["tindex"] = "readers.tindex";
+    drivers["txt"] = "readers.ilvis2";
 
     if (ext == "")
         return "";
