@@ -40,7 +40,6 @@
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/FileUtils.hpp>
-#include <pdal/util/Endian.hpp>
 #include <pdal/XMLSchema.hpp>
 
 namespace pdal
@@ -481,17 +480,14 @@ void PgWriter::writeTile(const PointViewPtr view)
 
     std::ostringstream options;
 
-    uint32_t num_points = view->size();
-    int32_t pcid = m_pcid;
+    uint32_t num_points = htobe32(view->size());
+    int32_t pcid = htobe32(m_pcid);
     CompressionType::Enum compression_v = CompressionType::None;
-    uint32_t compression = static_cast<uint32_t>(compression_v);
+    uint32_t compression = htobe32(static_cast<uint32_t>(compression_v));
 
 #ifdef BOOST_LITTLE_ENDIAN
     // needs to be 1 byte
     options << boost::format("%02x") % 1;
-    SWAP_ENDIANNESS(pcid);
-    SWAP_ENDIANNESS(compression);
-    SWAP_ENDIANNESS(num_points);
 #elif BOOST_BIG_ENDIAN
     // needs to be 1 byte
     options << boost::format("%02x") % 0;
