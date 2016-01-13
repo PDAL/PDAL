@@ -8,6 +8,7 @@ ENV CXX clang++
 RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
         cython \
         python-pip \
+        libhpdf-dev \
     && rm -rf /var/lib/apt/lists/*
 
 
@@ -49,5 +50,20 @@ RUN cd /PDAL/python \
     && python setup.py install
 
 
+RUN git clone https://github.com/PDAL/PRC.git \
+    && cd PRC \
+    && git checkout ${branch} \
+    && mkdir build \
+    && cd build \
+    && echo `pwd` \
+    && ls .. \
+    && cmake \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DPDAL_DIR=/usr/lib/cmake/pdal \
+        ..
+
+RUN cd /PRC/build \
+    && make \
+    && make install
 # cleanup
-RUN rm -rf laszip laz-perf points2grid pcl nitro hexer 3.2.7.tar.gz eigen-eigen-b30b87236a1b PDAL
+RUN rm -rf laszip laz-perf points2grid pcl nitro hexer 3.2.7.tar.gz eigen-eigen-b30b87236a1b PDAL PRC
