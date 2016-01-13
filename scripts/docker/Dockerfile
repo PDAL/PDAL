@@ -59,7 +59,7 @@ RUN git clone https://github.com/PDAL/PRC.git \
     && ls .. \
     && cmake \
         -DCMAKE_BUILD_TYPE=Release \
-        -DPDAL_DIR=/usr/lib/cmake/pdal \
+        -DPDAL_DIR=/usr/lib/pdal/cmake \
         ..
 
 RUN cd /PRC/build \
