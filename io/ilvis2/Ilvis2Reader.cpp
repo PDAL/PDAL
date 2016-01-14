@@ -124,7 +124,7 @@ void Ilvis2Reader::initialize(PointTableRef)
     // Data are WGS84 (4326) with ITRF2000 datum (6656)
     // See http://nsidc.org/data/docs/daac/icebridge/ilvis2/index.html for
     // background
-    SpatialReference ref("EPSG:4326+6656");
+    SpatialReference ref("EPSG:4326");
     setSpatialReference(m_metadata, ref);
 }
 
