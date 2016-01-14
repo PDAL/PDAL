@@ -262,7 +262,7 @@ int CpdKernel::execute()
     setCommonOptions(writerOpts);
 
     Stage& writer = makeWriter(m_output, reader);
-    writer.setOptions(writerOpts + writer.getOptions());
+    writer.addOptions(writerOpts);
     writer.prepare(outTable);
     writer.execute(outTable);
 

@@ -140,21 +140,7 @@ void Writer::setAutoXForm(const PointViewPtr view)
 
 boost::property_tree::ptree Writer::serializePipeline() const
 {
-    boost::property_tree::ptree tree;
-
-    tree.add("<xmlattr>.type", getName());
-
-    PipelineWriter::write_option_ptree(tree, getOptions());
-
-    const Stage& stage = *getInputs()[0];
-    boost::property_tree::ptree subtree = stage.serializePipeline();
-
-    tree.add_child(subtree.begin()->first, subtree.begin()->second);
-
-    boost::property_tree::ptree root;
-    root.add_child("Writer", tree);
-
-    return root;
+    return serialize(getName(), "Writer");
 }
 
 } // namespace pdal
