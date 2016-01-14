@@ -41,6 +41,7 @@
 #include <pdal/Log.hpp>
 #include <pdal/Metadata.hpp>
 #include <pdal/Options.hpp>
+#include <pdal/PipelineWriter.hpp>
 #include <pdal/PointTable.hpp>
 #include <pdal/PointRef.hpp>
 #include <pdal/PointView.hpp>
@@ -50,6 +51,8 @@
 
 #include <boost/property_tree/ptree.hpp>
 
+#include <gtest/gtest.h>
+
 namespace pdal
 {
 
@@ -58,6 +61,7 @@ class StageWrapper;
 
 class PDAL_DLL Stage
 {
+    FRIEND_TEST(OptionsTest, conditional);
     friend class StageWrapper;
     friend class StageRunner;
 public:
@@ -83,8 +87,6 @@ public:
 
     void setSpatialReference(SpatialReference const&);
     const SpatialReference& getSpatialReference() const;
-    const Options& getOptions() const
-        { return m_options; }
     void setOptions(Options options)
         { m_options = options; }
     void addConditionalOptions(const Options& opts);
@@ -99,6 +101,28 @@ public:
             m_options.remove(o);
     }
     virtual boost::property_tree::ptree serializePipeline() const = 0;
+
+    boost::property_tree::ptree serialize(const std::string& name,
+        const std::string& type) const
+    {
+        boost::property_tree::ptree tree;
+
+        tree.add("<xmlattr>.type", name);
+        PipelineWriter::write_option_ptree(tree, m_options);
+        PipelineWriter::writeMetadata(tree, m_metadata);
+
+        if (m_inputs.size())
+        {
+            boost::property_tree::ptree subtree =
+                m_inputs[0]->serializePipeline();
+            tree.add_child(subtree.begin()->first, subtree.begin()->second);
+        }
+
+        boost::property_tree::ptree root;
+        root.add_child(type, tree);
+        return root;
+    }
+
     virtual LogPtr log() const
         { return m_log; }
     bool isDebug() const
@@ -181,6 +205,8 @@ private:
         return PointViewSet();
     }
     void execute(StreamPointTable& table, std::list<Stage *>& stages);
+    const Options& getOptions() const
+        { return m_options; }
 };
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const Stage&);

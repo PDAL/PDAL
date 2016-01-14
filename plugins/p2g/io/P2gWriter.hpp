@@ -98,6 +98,7 @@ private:
 
     std::string m_filename;
     int m_outputFormat;
+    std::string m_zName;
 
     std::vector<boost::tuple<double, double, double> > m_coordinates;
 };

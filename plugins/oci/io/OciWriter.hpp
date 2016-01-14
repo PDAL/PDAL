@@ -132,6 +132,8 @@ private:
     bool m_streamChunks;
     Orientation::Enum m_orientation;
     std::string m_connSpec;
+    std::string m_preSql;
+    std::string m_postBlockSql;
 
     OciWriter& operator=(const OciWriter&); // not implemented
     OciWriter(const OciWriter&); // not implemented
