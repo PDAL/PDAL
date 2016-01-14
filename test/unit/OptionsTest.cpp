@@ -43,11 +43,15 @@
 
 #include <boost/property_tree/xml_parser.hpp>
 
-static std::string xml_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-static std::string xml_int_ref = "<Name>my_int</Name><Value>17</Value><Description>This is my integral option.</Description>";
-static std::string xml_str_ref = "<Name>my_string</Name><Value>Yow.</Value><Description>This is my stringy option.</Description>";
+namespace
+{
+const std::string xml_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+const std::string xml_int_ref = "<Name>my_int</Name><Value>17</Value><Description>This is my integral option.</Description>";
+const std::string xml_str_ref = "<Name>my_string</Name><Value>Yow.</Value><Description>This is my stringy option.</Description>";
+}
 
-using namespace pdal;
+namespace pdal
+{
 
 TEST(OptionsTest, test_static_options)
 {
@@ -339,3 +343,5 @@ TEST(OptionsTest, valid)
     EXPECT_FALSE(Option::nameValid("1foo_123_bar_baz", false));
     EXPECT_FALSE(Option::nameValid("1foo_123_bar_baz", false));
 }
+
+} // namespace pdal

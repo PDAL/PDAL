@@ -664,7 +664,7 @@ Stage& Kernel::makeWriter(const std::string& outputFile, Stage& parent)
     }
     ownStage(writer);
     writer->setInput(parent);
-    writer->setOptions(options + writer->getOptions());
+    writer->addOptions(options);
 
     return *writer;
 }

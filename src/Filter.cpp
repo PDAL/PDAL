@@ -40,22 +40,7 @@ namespace pdal
 
 boost::property_tree::ptree Filter::serializePipeline() const
 {
-    boost::property_tree::ptree tree;
-
-    tree.add("<xmlattr>.type", getName());
-
-    PipelineWriter::write_option_ptree(tree, getOptions());
-    PipelineWriter::writeMetadata(tree, m_metadata);
-
-    const Stage& stage = *getInputs()[0];
-    boost::property_tree::ptree subtree = stage.serializePipeline();
-
-    tree.add_child(subtree.begin()->first, subtree.begin()->second);
-
-    boost::property_tree::ptree root;
-    root.add_child("Filter", tree);
-
-    return root;
+    return serialize(getName(), "Filter");
 }
 
 
