@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include "Ilvis2Reader.hpp"
+#include <pdal/util/FileUtils.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -77,7 +78,7 @@ void Ilvis2Reader::processOptions(const Options& options)
 
     m_metadataFile =
         options.getValueOrDefault<std::string>("metadata", "");
-    if (!m_metadataFile.empty() && access(m_metadataFile.c_str(), R_OK) != 0)
+    if (!m_metadataFile.empty() && ! FileUtils::fileExists(m_metadataFile))
     {
         std::ostringstream oss;
         oss << "Invalid metadata file: '" << m_metadataFile << "'";
