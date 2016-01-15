@@ -71,6 +71,27 @@ void Stage::Construct()
 }
 
 
+boost::property_tree::ptree Stage::serialize(const std::string& name,
+    const std::string& type) const
+{
+    boost::property_tree::ptree tree;
+
+    tree.add("<xmlattr>.type", name);
+    PipelineWriter::writeOptions(tree, m_options);
+    PipelineWriter::writeMetadata(tree, m_metadata);
+
+    if (m_inputs.size())
+    {
+        boost::property_tree::ptree subtree =
+            m_inputs[0]->serializePipeline();
+        tree.add_child(subtree.begin()->first, subtree.begin()->second);
+    }
+
+    boost::property_tree::ptree root;
+    root.add_child(type, tree);
+    return root;
+}
+
 void Stage::prepare(PointTableRef table)
 {
     for (size_t i = 0; i < m_inputs.size(); ++i)

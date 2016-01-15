@@ -101,27 +101,8 @@ public:
             m_options.remove(o);
     }
     virtual boost::property_tree::ptree serializePipeline() const = 0;
-
     boost::property_tree::ptree serialize(const std::string& name,
-        const std::string& type) const
-    {
-        boost::property_tree::ptree tree;
-
-        tree.add("<xmlattr>.type", name);
-        PipelineWriter::write_option_ptree(tree, m_options);
-        PipelineWriter::writeMetadata(tree, m_metadata);
-
-        if (m_inputs.size())
-        {
-            boost::property_tree::ptree subtree =
-                m_inputs[0]->serializePipeline();
-            tree.add_child(subtree.begin()->first, subtree.begin()->second);
-        }
-
-        boost::property_tree::ptree root;
-        root.add_child(type, tree);
-        return root;
-    }
+        const std::string& type) const;
 
     virtual LogPtr log() const
         { return m_log; }

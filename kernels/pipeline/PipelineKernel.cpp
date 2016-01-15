@@ -119,11 +119,10 @@ int PipelineKernel::execute()
 
     applyExtraStageOptionsRecursive(manager.getStage());
     manager.execute();
+
     if (m_pipelineFile.size() > 0)
-    {
-        pdal::PipelineWriter writer(manager);
-        writer.writePipeline(m_pipelineFile);
-    }
+        PipelineWriter::writePipeline(manager.getStage(), m_pipelineFile);
+
     if (m_PointCloudSchemaOutput.size() > 0)
     {
 #ifdef PDAL_HAVE_LIBXML2

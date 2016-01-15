@@ -54,7 +54,10 @@ using namespace boost::property_tree;
 namespace pdal
 {
 
-static ptree generateTreeFromStage(const Stage& stage)
+namespace
+{
+    
+ptree generateTreeFromStage(const Stage& stage)
 {
     ptree tree;
     ptree& attrtree = tree.add_child("Pipeline", stage.serializePipeline());
@@ -62,8 +65,55 @@ static ptree generateTreeFromStage(const Stage& stage)
     return tree;
 }
 
+ptree getMetadataEntry(const MetadataNode& input)
+{
+    ptree entry;
 
-void PipelineWriter::write_option_ptree(ptree& tree, const Options& opts)
+    entry.put_value(input.value());
+    entry.put("<xmlattr>.name", input.name());
+    entry.put("<xmlattr>.type", input.type());
+
+    std::vector<MetadataNode> children = input.children();
+    for (auto ci = children.begin(); ci != children.end(); ++ci)
+        entry.add_child("Metadata", getMetadataEntry(*ci));
+    return entry;
+}
+
+} // unnamed namespace
+
+namespace PipelineWriter
+{
+
+void writePipeline(Stage *stage, const std::string& filename)
+{
+    ptree tree = generateTreeFromStage(*stage);
+#if BOOST_VERSION >= 105600
+    const xml_parser::xml_writer_settings<std::string> settings(' ', 4);
+#else
+    const xml_parser::xml_writer_settings<char> settings(' ', 4);
+#endif
+
+    if (boost::iequals(filename, "STDOUT"))
+        xml_parser::write_xml(std::cout, tree);
+    else
+        xml_parser::write_xml(filename, tree, std::locale(), settings);
+}
+
+
+void writePipeline(Stage *stage, std::ostream& strm)
+{
+    ptree tree = generateTreeFromStage(*stage);
+#if BOOST_VERSION >= 105600
+    const xml_parser::xml_writer_settings<std::string> settings(' ', 4);
+#else
+    const xml_parser::xml_writer_settings<char> settings(' ', 4);
+#endif
+
+    xml_parser::write_xml(strm, tree);
+}
+
+
+void writeOptions(ptree& tree, const Options& opts)
 {
     ptree m_tree = Utils::toPTree(opts);
 
@@ -93,7 +143,7 @@ void PipelineWriter::write_option_ptree(ptree& tree, const Options& opts)
         if (moreOptions)
         {
             ptree newOpts;
-            write_option_ptree(newOpts, moreOptions.get());
+            writeOptions(newOpts, moreOptions.get());
             subtree.put_child("Options", newOpts);
         }
         ++iter;
@@ -101,66 +151,20 @@ void PipelineWriter::write_option_ptree(ptree& tree, const Options& opts)
 }
 
 
-ptree PipelineWriter::getMetadataEntry(const MetadataNode& input)
-{
-    ptree entry;
-
-    entry.put_value(input.value());
-    entry.put("<xmlattr>.name", input.name());
-    entry.put("<xmlattr>.type", input.type());
-
-    std::vector<MetadataNode> children = input.children();
-    for (auto ci = children.begin(); ci != children.end(); ++ci)
-        entry.add_child("Metadata", getMetadataEntry(*ci));
-    return entry;
-}
-
-
-void PipelineWriter::writeMetadata(boost::property_tree::ptree& tree,
-    const MetadataNode& input)
+void writeMetadata(boost::property_tree::ptree& tree, const MetadataNode& input)
 {
     tree.add_child("Metadata", getMetadataEntry(input));
 }
 
 
-void PipelineWriter::writeMetadata(boost::property_tree::ptree& tree,
+void writeMetadata(boost::property_tree::ptree& tree,
     const MetadataNodeList& input)
 {
     for (auto mi = input.begin(); mi != input.end(); ++mi)
         tree.add_child("Metadata", getMetadataEntry(*mi));
 }
 
+} // namespace PipelineWriter
 
-void PipelineWriter::writePipeline(const std::string& filename) const
-{
-    Stage *stage = m_manager.getStage();
-
-    ptree tree = generateTreeFromStage(*stage);
-#if BOOST_VERSION >= 105600
-    const xml_parser::xml_writer_settings<std::string> settings(' ', 4);
-#else
-    const xml_parser::xml_writer_settings<char> settings(' ', 4);
-#endif
-
-    if (boost::iequals(filename, "STDOUT"))
-        xml_parser::write_xml(std::cout, tree);
-    else
-        xml_parser::write_xml(filename, tree, std::locale(), settings);
-}
-
-void PipelineWriter::writePipeline(std::ostream& strm) const
-{
-    Stage *stage = m_manager.getStage();
-
-    ptree tree = generateTreeFromStage(*stage);
-#if BOOST_VERSION >= 105600
-    const xml_parser::xml_writer_settings<std::string> settings(' ', 4);
-#else
-    const xml_parser::xml_writer_settings<char> settings(' ', 4);
-#endif
-
-    xml_parser::write_xml(strm, tree);
-
-}
 } // namespace pdal
 

@@ -45,32 +45,19 @@
 namespace pdal
 {
 
-class PipelineManager;
+class Stage;
 
-class PDAL_DLL PipelineWriter
+namespace PipelineWriter
 {
-public:
-    PipelineWriter(const PipelineManager& manager) : m_manager(manager)
-        {}
+    void writePipeline(Stage *s, const std::string& filename);
+    void writePipeline(Stage *s, std::ostream& strm);
 
-    void writePipeline(const std::string& filename) const;
-    void writePipeline(std::ostream& strm) const;
-
-    static void write_option_ptree(boost::property_tree::ptree& tree,
+    void writeOptions(boost::property_tree::ptree& tree,
         const Options& opts);
-
-    static void writeMetadata(boost::property_tree::ptree& tree,
+    void writeMetadata(boost::property_tree::ptree& tree,
         const MetadataNode& input);
-    static void writeMetadata(boost::property_tree::ptree& tree,
+    void writeMetadata(boost::property_tree::ptree& tree,
         const MetadataNodeList& input);
-
-    static boost::property_tree::ptree getMetadataEntry(
-        const MetadataNode& input);
-private:
-    const PipelineManager& m_manager;
-
-    PipelineWriter& operator=(const PipelineWriter&); // not implemented
-    PipelineWriter(const PipelineWriter&); // not implemented
 };
 
 } // namespace pdal

@@ -376,7 +376,7 @@ void InfoKernel::dump(MetadataNode& root)
         root.add(m_statsStage->getMetadata().clone("stats"));
 
     if (m_pipelineFile.size() > 0)
-        PipelineWriter(*m_manager).writePipeline(m_pipelineFile);
+        PipelineWriter::writePipeline(m_manager->getStage(), m_pipelineFile);
 
     if (m_pointIndexes.size())
     {
