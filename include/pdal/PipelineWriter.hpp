@@ -49,14 +49,14 @@ class Stage;
 
 namespace PipelineWriter
 {
-    void writePipeline(Stage *s, const std::string& filename);
-    void writePipeline(Stage *s, std::ostream& strm);
+    void PDAL_DLL writePipeline(Stage *s, const std::string& filename);
+    void PDAL_DLL writePipeline(Stage *s, std::ostream& strm);
 
-    void writeOptions(boost::property_tree::ptree& tree,
+    void PDAL_DLL writeOptions(boost::property_tree::ptree& tree,
         const Options& opts);
-    void writeMetadata(boost::property_tree::ptree& tree,
+    void PDAL_DLL writeMetadata(boost::property_tree::ptree& tree,
         const MetadataNode& input);
-    void writeMetadata(boost::property_tree::ptree& tree,
+    void PDAL_DLL writeMetadata(boost::property_tree::ptree& tree,
         const MetadataNodeList& input);
 };
 
