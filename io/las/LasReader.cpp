@@ -130,8 +130,6 @@ QuickInfo LasReader::inspect()
 
 void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
 {
-    if (m_initialized)
-        return;
     m_istream = createStream();
 
     m_istream->seekg(0);
@@ -167,18 +165,22 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
         }
         readExtraBytesVlr();
     }
-    fixupVlrs();
     setSrsFromVlrs(m);
     MetadataNode forward = table.privateMetadata("lasforward");
     extractHeaderMetadata(forward, m);
     extractVlrMetadata(forward, m);
-
-    m_initialized = true;
+    // The stream is closed because all stages are prepared() before they
+    // are run which results in all readers having files open simultaneously,
+    // which can be a problem on Windows, which has restrictive open
+    // file limits.
+    destroyStream();
+    m_istream = NULL;
 }
 
 
 void LasReader::ready(PointTableRef table)
 {
+    m_istream = createStream();
     m_index = 0;
     if (m_lasHeader.compressed())
     {
@@ -228,7 +230,7 @@ void LasReader::ready(PointTableRef table)
     }
     else
         m_istream->seekg(m_lasHeader.pointOffset());
-       
+
     m_error.setLog(log());
 }
 
@@ -360,39 +362,6 @@ void LasReader::extractHeaderMetadata(MetadataNode& forward, MetadataNode& m)
 }
 
 
-void LasReader::fixupVlrs()
-{
-    const size_t KEY_SIZE = 8;
-    char zeros[8] = {};
-
-    // There is currently only one fixup - for the geotiff directory VLR.
-    VariableLengthRecord *vlr =
-        findVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID);
-    if (vlr)
-    {
-        while (vlr->dataLen() > 8)
-        {
-            // If the key at the end has a zero value, remove it
-            // by resizing the array and decrementing the size.
-            char *testPos = const_cast<char *>(
-                vlr->data() + vlr->dataLen() - KEY_SIZE);
-            if (memcmp(zeros, testPos, KEY_SIZE))
-                break;
-            uint16_t size;
-            vlr->setDataLen(vlr->dataLen() - 8);
-
-            // Reduce the size of the data by one.  The size field is
-            // at offset 6 from the beginning of the data.
-            memcpy((void *)&size, vlr->data() + 6, 2);
-            size = le16toh(size);
-            size--;
-            size = htole16(size);
-            memcpy((void *)(vlr->data()  + 6), &size, 2);
-        }
-    }
-}
-
-
 void LasReader::readExtraBytesVlr()
 {
     VariableLengthRecord *vlr = findVlr(SPEC_USER_ID, EXTRA_BYTES_RECORD_ID);
@@ -509,6 +478,17 @@ SpatialReference LasReader::getSrsFromGeotiffVlr()
     SpatialReference srs;
 
 #ifdef PDAL_HAVE_LIBGEOTIFF
+
+// These are defined in geo_simpletags.h
+// We're not including that file because it includes
+// geotiff.h, which includes a ton of other stuff
+// that might conflict with the messy libgeotiff/GDAL
+// symbol mess
+
+#define STT_SHORT   1
+#define STT_DOUBLE  2
+#define STT_ASCII   3
+
     GeotiffSupport geotiff;
     geotiff.resetTags();
 
@@ -518,17 +498,16 @@ SpatialReference LasReader::getSrsFromGeotiffVlr()
     // We must have a directory entry.
     if (!vlr)
         return srs;
-    geotiff.setKey(vlr->recordId(), (void *)vlr->data(), vlr->dataLen(),
-        STT_SHORT);
+    geotiff.setShortKeys(vlr->recordId(), (void *)vlr->data(), vlr->dataLen());
 
     vlr = findVlr(TRANSFORM_USER_ID, GEOTIFF_DOUBLES_RECORD_ID);
     if (vlr)
-        geotiff.setKey(vlr->recordId(), (void *)vlr->data(), vlr->dataLen(),
-            STT_DOUBLE);
+        geotiff.setDoubleKeys(vlr->recordId(), (void *)vlr->data(),
+            vlr->dataLen());
     vlr = findVlr(TRANSFORM_USER_ID, GEOTIFF_ASCII_RECORD_ID);
     if (vlr)
-        geotiff.setKey(vlr->recordId(), (void *)vlr->data(), vlr->dataLen(),
-            STT_ASCII);
+        geotiff.setAsciiKeys(vlr->recordId(), (void *)vlr->data(),
+            vlr->dataLen());
 
     geotiff.setTags();
     std::string wkt(geotiff.getWkt(false, false));
@@ -906,7 +885,6 @@ void LasReader::loadPointV14(PointRef& point, char *buf, size_t bufsize)
 
 void LasReader::loadExtraDims(LeExtractor& istream, PointRef& point)
 {
-    Everything e;
     for (auto& dim : m_extraDims)
     {
         // Dimension type of None is undefined and unprocessed
@@ -916,8 +894,7 @@ void LasReader::loadExtraDims(LeExtractor& istream, PointRef& point)
             continue;
         }
 
-        istream.get(dim.m_dimType.m_type, e);
-
+        Everything e = Utils::extractDim(istream, dim.m_dimType.m_type);
         if (dim.m_dimType.m_xform.nonstandard())
         {
             double d = Utils::toDouble(e, dim.m_dimType.m_type);
@@ -938,7 +915,9 @@ void LasReader::done(PointTableRef)
     m_unzipper.reset();
 #endif
     destroyStream();
-    m_initialized = false;
+    // Reset stream to NULL because destroyStream is virtual and can't reset
+    // m_istream.
+    m_istream = NULL;
 }
 
 } // namespace pdal

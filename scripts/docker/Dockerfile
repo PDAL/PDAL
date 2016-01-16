@@ -5,7 +5,14 @@ ARG branch=master
 ENV CC clang
 ENV CXX clang++
 
-RUN git clone https://github.com/PDAL/PDAL \
+RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
+        cython \
+        python-pip \
+        libhpdf-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+
+RUN git clone --depth=1 https://github.com/PDAL/PDAL \
 	&& cd PDAL \
 	&& git checkout ${branch} \
 	&& mkdir build \
@@ -32,11 +39,31 @@ RUN git clone https://github.com/PDAL/PDAL \
 		-DWITH_GEOTIFF=ON \
 		-DWITH_LASZIP=ON \
 		-DWITH_TESTS=ON \
+		-DCMAKE_BUILD_TYPE=Release \
 		.. \
 	&& make -j4 \
-	&& make install \
-	&& cd / \
-	&& rm -rf PDAL
+	&& make install
 
+RUN cd /PDAL/python \
+    && pip install packaging \
+    && python setup.py build \
+    && python setup.py install
+
+
+RUN git clone https://github.com/PDAL/PRC.git \
+    && cd PRC \
+    && git checkout ${branch} \
+    && mkdir build \
+    && cd build \
+    && echo `pwd` \
+    && ls .. \
+    && cmake \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DPDAL_DIR=/usr/lib/pdal/cmake \
+        ..
+
+RUN cd /PRC/build \
+    && make \
+    && make install
 # cleanup
-RUN rm -rf laszip laz-perf points2grid pcl nitro hexer 3.2.7.tar.gz eigen-eigen-b30b87236a1b
+RUN rm -rf laszip laz-perf points2grid pcl nitro hexer 3.2.7.tar.gz eigen-eigen-b30b87236a1b PDAL PRC

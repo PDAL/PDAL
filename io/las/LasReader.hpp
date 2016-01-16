@@ -58,8 +58,7 @@ class PDAL_DLL LasReader : public pdal::Reader
 {
     friend class NitfReader;
 public:
-    LasReader() : pdal::Reader(), m_index(0), m_istream(NULL),
-        m_initialized(false)
+    LasReader() : pdal::Reader(), m_index(0), m_istream(NULL)
         {}
 
     virtual ~LasReader()
@@ -90,12 +89,8 @@ protected:
     }
     virtual void destroyStream()
     {
-        if (m_istream && m_initialized)
-        {
-            FileUtils::closeFile(m_istream);
-            m_istream = NULL;
-            m_initialized = false;
-        }
+        FileUtils::closeFile(m_istream);
+        m_istream = NULL;
     }
 
 private:
@@ -116,7 +111,6 @@ private:
         { initializeLocal(table, m_metadata); }
     virtual void initializeLocal(PointTableRef table, MetadataNode& m);
     virtual void addDimensions(PointLayoutPtr layout);
-    void fixupVlrs();
     VariableLengthRecord *findVlr(const std::string& userId, uint16_t recordId);
     void setSrsFromVlrs(MetadataNode& m);
     void readExtraBytesVlr();

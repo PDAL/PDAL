@@ -38,11 +38,11 @@
 #include <array>
 #include <vector>
 
-#include <boost/uuid/uuid.hpp>
 #include <boost/property_tree/ptree.hpp>
 
 #include <pdal/Dimension.hpp>
 #include <pdal/util/Bounds.hpp>
+#include <pdal/util/Uuid.hpp>
 #include <pdal/pdal_config.hpp>
 #include <pdal/gitsha.h>
 
@@ -98,12 +98,12 @@ public:
 
     /// Get project identifier.
     /// \return Global Unique Identifier as an instance of liblas::guid class.
-    boost::uuids::uuid projectId() const
-        { return m_projectGuid; }
+    Uuid projectId() const
+        { return m_projectUuid; }
 
     /// Set project identifier.
-    void setProjectId(boost::uuids::uuid const& v)
-        { m_projectGuid = v; }
+    void setProjectId(const Uuid& v)
+        { m_projectUuid = v; }
 
     /// Get the LAS major version.
     /// \return  LAS major version
@@ -383,7 +383,7 @@ private:
     std::string m_fileSig;
     uint16_t m_sourceId;
     uint16_t m_globalEncoding;
-    boost::uuids::uuid m_projectGuid;
+    Uuid m_projectUuid;
     uint8_t m_versionMinor;
     std::string m_systemId;
     std::string m_softwareId;
@@ -404,8 +404,8 @@ private:
     BOX3D m_bounds;
     std::string m_compressionInfo;
 
-    static void get(ILeStream& in, boost::uuids::uuid& uuid);
-    static void put(OLeStream& in, boost::uuids::uuid uuid);
+    static void get(ILeStream& in, Uuid& uuid);
+    static void put(OLeStream& in, Uuid uuid);
 };
 
 } // namespace pdal

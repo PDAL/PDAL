@@ -43,9 +43,8 @@
 #include <vector>
 #include <cstring>
 
-#include <pdal/pdal_export.hpp>
-
 #include "portable_endian.hpp"
+#include "pdal_util_export.hpp"
 
 namespace pdal
 {
@@ -72,6 +71,12 @@ public:
         m_stream = m_fstream = new std::ifstream(filename,
             std::ios_base::in | std::ios_base::binary);
         return 0;
+    }
+    void close()
+    {
+        delete m_fstream;
+        m_fstream = NULL;
+        m_stream = NULL;
     }
     operator bool ()
         { return (bool)(*m_stream); }
@@ -128,7 +133,7 @@ public:
 
 protected:
     std::istream *m_stream;
-    std::istream *m_fstream; // Dup of above to facilitate cleanup.
+    std::ifstream *m_fstream; // Dup of above to facilitate cleanup.
 
 private:
     std::stack<std::istream *> m_streams;

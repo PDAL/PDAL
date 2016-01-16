@@ -223,6 +223,8 @@ include(${PDAL_CMAKE_DIR}/lazperf.cmake)  # Optional
 include(${PDAL_CMAKE_DIR}/laszip.cmake)  # Optional
 include(${PDAL_CMAKE_DIR}/threads.cmake)
 include(${PDAL_CMAKE_DIR}/zlib.cmake)
+include(${PDAL_CMAKE_DIR}/test.cmake)
+include(${PDAL_CMAKE_DIR}/ctest.cmake)
 
 #------------------------------------------------------------------------------
 # generate the pdal_defines.h header
@@ -271,41 +273,14 @@ if (BUILD_PLUGIN_PYTHON)
     add_subdirectory(src/plang)
 endif()
 
-if(WITH_TESTS)
-  # This is fixed in trunk
-  # https://code.google.com/p/googletest/source/detail?r=675
-  # but for now, we need this fix
-  # http://stackoverflow.com/questions/12558327/google-test-in-visual-studio-2012
-  if (MSVC AND MSVC_VERSION EQUAL 1700)
-    add_definitions(/D _VARIADIC_MAX=10)
-  endif()
-
-  add_subdirectory(vendor/gtest-1.7.0)
-  enable_testing()
-  include_directories(vendor/gtest-1.7.0/include vendor/gtest-1.7.0)
-
-  if(ENABLE_CTEST)
-    message(STATUS
-      "Enable CTest to support submissions of results to CDash at http://cdash.org")
-    cmake_minimum_required(VERSION 2.8.0)
-    # Dashboard has been prepared for experiments
-    # http://my.cdash.org/index.php?project=PDAL
-    include(CTest)
-    message(STATUS
-      "Enable CTest to support submissions of results to CDash at http://cdash.org - done")
-  endif()
-
-  add_subdirectory(test)
-
-  # Define "make check" as alias for "make test"
-  ADD_CUSTOM_TARGET(check COMMAND ctest)
-else()
-  if(ENABLE_CTEST)
-    message(WARNING
-      "CTest support requested but WITH_TESTS option not specified to build of PDAL unit tests")
-  endif()
+if (WITH_TESTS)
+    enable_testing()
+    add_subdirectory(vendor/gtest-1.7.0)
+    add_subdirectory(test)
+    # Define "make check" as alias for "make test"
+    ADD_CUSTOM_TARGET(check COMMAND ctest)
 endif()
-
+  
 add_subdirectory(plugins)
 
 if(WITH_APPS)

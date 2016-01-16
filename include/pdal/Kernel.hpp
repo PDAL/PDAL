@@ -53,6 +53,8 @@
 #include <string>
 #include <vector>
 
+#include <gtest/gtest.h>
+
 namespace po = boost::program_options;
 
 namespace pdal
@@ -71,6 +73,7 @@ typedef std::shared_ptr<PointView> PointViewPtr;
 //
 class PDAL_DLL Kernel
 {
+    FRIEND_TEST(KernelTest, parseOption);
 public:
     virtual ~Kernel();
 
@@ -165,6 +168,9 @@ private:
     int do_startup();
     int do_execution();
     int do_shutdown();
+
+    static bool test_parseOption(std::string o, std::string& stage,
+        std::string& option, std::string& value);
 
     bool m_isDebug;
     uint32_t m_verboseLevel;

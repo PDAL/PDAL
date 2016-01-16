@@ -21,6 +21,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/io/bpf
     ${PROJECT_SOURCE_DIR}/io/buffer
     ${PROJECT_SOURCE_DIR}/io/faux
+    ${PROJECT_SOURCE_DIR}/io/gdal
     ${PROJECT_SOURCE_DIR}/io/ilvis2
     ${PROJECT_SOURCE_DIR}/io/las
     ${PROJECT_SOURCE_DIR}/io/optech
@@ -57,6 +58,7 @@ PDAL_ADD_TEST(pdal_config_test FILES ConfigTest.cpp)
 PDAL_ADD_TEST(pdal_file_utils_test FILES FileUtilsTest.cpp)
 PDAL_ADD_TEST(pdal_georeference_test FILES GeoreferenceTest.cpp)
 PDAL_ADD_TEST(pdal_kdindex_test FILES KDIndexTest.cpp)
+PDAL_ADD_TEST(pdal_kernel_test FILES KernelTest.cpp)
 PDAL_ADD_TEST(pdal_log_test FILES LogTest.cpp)
 PDAL_ADD_TEST(pdal_metadata_test FILES MetadataTest.cpp)
 PDAL_ADD_TEST(pdal_options_test FILES OptionsTest.cpp)
@@ -65,10 +67,12 @@ PDAL_ADD_TEST(pdal_pipeline_manager_test FILES PipelineManagerTest.cpp)
 PDAL_ADD_TEST(pdal_point_view_test FILES PointViewTest.cpp)
 PDAL_ADD_TEST(pdal_point_table_test FILES PointTableTest.cpp)
 PDAL_ADD_TEST(pdal_spatial_reference_test FILES SpatialReferenceTest.cpp)
+PDAL_ADD_TEST(pdal_stage_factory_test FILES StageFactoryTest.cpp)
 PDAL_ADD_TEST(pdal_streaming_test FILES StreamingTest.cpp)
 PDAL_ADD_TEST(pdal_support_test FILES SupportTest.cpp)
 PDAL_ADD_TEST(pdal_user_callback_test FILES UserCallbackTest.cpp)
 PDAL_ADD_TEST(pdal_utils_test FILES UtilsTest.cpp)
+PDAL_ADD_TEST(pdal_uuid_test FILES UuidTest.cpp)
 
 if (PDAL_HAVE_LAZPERF)
     PDAL_ADD_TEST(pdal_lazperf_test FILES CompressionTest.cpp)
@@ -80,6 +84,7 @@ endif()
 PDAL_ADD_TEST(pdal_io_bpf_test FILES io/bpf/BPFTest.cpp)
 PDAL_ADD_TEST(pdal_io_buffer_test FILES io/buffer/BufferTest.cpp)
 PDAL_ADD_TEST(pdal_io_faux_test FILES io/faux/FauxReaderTest.cpp)
+PDAL_ADD_TEST(pdal_io_gdal_reader_test FILES io/gdal/GDALReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_ilvis2_test FILES io/ilvis2/Ilvis2ReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_las_reader_test FILES io/las/LasReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_las_writer_test FILES io/las/LasWriterTest.cpp)
@@ -121,8 +126,11 @@ if (WITH_APPS)
     if (BUILD_PIPELINE_TESTS)
         PDAL_ADD_TEST(pcpipeline_test FILES apps/pcpipelineTest.cpp)
     endif()
+    PDAL_ADD_TEST(random_test FILES apps/RandomTest.cpp)
 endif(WITH_APPS)
 
 if(LIBXML2_FOUND)
+    PDAL_ADD_TEST(pdal_io_ilvis2_metadata_test FILES io/ilvis2/Ilvis2MetadataReaderTest.cpp)
+    PDAL_ADD_TEST(pdal_io_ilvis2_reader_with_metadata_test FILES io/ilvis2/Ilvis2ReaderWithMDReaderTest.cpp)
     PDAL_ADD_TEST(xml_schema_test FILES XMLSchemaTest.cpp)
 endif()

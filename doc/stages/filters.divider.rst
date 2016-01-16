@@ -51,5 +51,5 @@ capacity
 
 .. warning::
 
-    You must specify exactly one of either 'count' or 'capacity'.
+    You must specify exactly one of either ``count`` or ``capacity``.
 

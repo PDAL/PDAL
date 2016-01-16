@@ -43,7 +43,7 @@
   #include <dlfcn.h>
 #endif
 
-#include "DynamicLibrary.h"
+#include "DynamicLibrary.hpp"
 #include <sstream>
 #include <iostream>
 
@@ -61,6 +61,13 @@ DynamicLibrary::~DynamicLibrary()
 #endif
     }
 }
+
+
+void DynamicLibrary::clear()
+{
+    m_handle = NULL;
+}
+
 
 DynamicLibrary *DynamicLibrary::load(const std::string &name, 
     std::string &errorString)

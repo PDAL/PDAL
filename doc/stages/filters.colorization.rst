@@ -3,7 +3,10 @@
 filters.colorization
 ====================
 
-The colorization filter populates dimensions in the point buffer using input values read from a raster file. Commonly this is used to add Red/Green/Blue values to points from an aerial photograph of an area. However, any band can be read from the raster and applied to any dimension name desired.
+The colorization filter populates dimensions in the point buffer using input
+values read from a raster file. Commonly this is used to add Red/Green/Blue
+values to points from an aerial photograph of an area. However, any band can be
+read from the raster and applied to any dimension name desired.
 
 .. figure:: filters.colorization.img1.jpg
     :scale: 50 %
@@ -11,7 +14,18 @@ The colorization filter populates dimensions in the point buffer using input val
 
     After colorization, points take on the colors provided by the input image
 
-The bands of the raster to apply to each are selected using the "band" option, and the values of the band may be scaled before being written to the dimension. If the band range is 0-1, for example, it might make sense to scale by 256 to fit into a traditional 1-byte color value range.
+.. note::
+
+    `GDAL`_ is used to read the color information and any GDAL-readable
+    `supported format`_ can be read.
+
+.. _`GDAL`: http://www.gdal.org
+.. _`supported format`: www.gdal.org/formats_list.html
+
+The bands of the raster to apply to each are selected using the "band" option,
+and the values of the band may be scaled before being written to the dimension.
+If the band range is 0-1, for example, it might make sense to scale by 256 to
+fit into a traditional 1-byte color value range.
 
 .. code-block:: xml
 

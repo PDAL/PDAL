@@ -34,7 +34,7 @@
 
 #include "SortKernel.hpp"
 
-#include <pdal/BufferReader.hpp>
+#include <buffer/BufferReader.hpp>
 #include <pdal/KernelSupport.hpp>
 #include <pdal/StageFactory.hpp>
 
@@ -165,7 +165,7 @@ int SortKernel::execute()
 
     // Some options are inferred by makeWriter based on filename
     // (compression, driver type, etc).
-    writer.setOptions(writerOptions + writer.getOptions());
+    writer.addOptions(writerOptions);
     writer.setUserCallback(callback);
 
     applyExtraStageOptionsRecursive(&writer);

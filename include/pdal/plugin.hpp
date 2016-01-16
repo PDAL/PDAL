@@ -49,13 +49,11 @@
 extern "C" {
 #endif
 
-typedef enum PF_PluginType
-{
-    PF_PluginType_Kernel,
-    PF_PluginType_Reader,
-    PF_PluginType_Filter,
-    PF_PluginType_Writer
-} PF_PluginType;
+const int PF_PluginType_Kernel = 1;
+const int PF_PluginType_Reader = 2;
+const int PF_PluginType_Filter = 4;
+const int PF_PluginType_Writer = 8;
+typedef int PF_PluginType;
 
 typedef struct PF_PluginAPI_Version
 {

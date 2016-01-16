@@ -40,9 +40,8 @@
 #include <cstring>
 #include <stack>
 
-#include <pdal/pdal_internal.hpp>
-
 #include "portable_endian.hpp"
+#include "pdal_util_export.hpp"
 
 namespace pdal
 {

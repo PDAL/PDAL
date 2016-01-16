@@ -34,10 +34,11 @@
 
 #pragma once
 
-#include <pdal/pdal_export.hpp>
 #include <streambuf>
 #include <iostream>
 #include <vector>
+
+#include "pdal_util_export.hpp"
 
 namespace pdal
 {

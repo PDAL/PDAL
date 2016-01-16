@@ -60,9 +60,6 @@ public:
     KernelFactory(bool no_plugins=true);
     virtual ~KernelFactory() {};
 
-    static std::unique_ptr<Kernel> createKernel(std::string const& kernel_name);
-    static std::vector<std::string> getKernelNames();
-
 private:
     KernelFactory& operator=(const KernelFactory&); // not implemented
     KernelFactory(const KernelFactory&); // not implemented

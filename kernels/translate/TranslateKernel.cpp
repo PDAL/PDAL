@@ -209,10 +209,7 @@ int TranslateKernel::execute()
     m_manager->execute();
 
     if (m_pipelineOutput.size() > 0)
-    {
-        PipelineWriter writer(*m_manager);
-        writer.writePipeline(m_pipelineOutput);
-    }
+        PipelineWriter::writePipeline(m_manager->getStage(), m_pipelineOutput);
 
     return 0;
 }

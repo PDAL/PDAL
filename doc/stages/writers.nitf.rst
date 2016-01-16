@@ -4,8 +4,14 @@ writers.nitf
 ============
 
 The `NITF`_ format is a US Department of Defense format for the transmission
-of imagery.  It supports various formats inside a generic wrapper.  However,
-the PDAL NITF writer only supports LAS/LAZ data.
+of imagery.  It supports various formats inside a generic wrapper.
+
+.. note::
+
+    LAS inside of NITF is widely supported by software that uses NITF
+    for point cloud storage, and LAZ is supported by some softwares.
+    No other content type beyond those two is widely supported as
+    of January of 2016.
 
 Example
 -------
@@ -40,7 +46,7 @@ filename
 
 clevel
   File complexity level (2 characters) [Default: **03**]
-  
+
 stype
   Standard type (4 characters) [Default: **BF01**]
 

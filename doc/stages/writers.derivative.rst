@@ -5,6 +5,13 @@ writers.derivative
 
 The **Derivative Writer** supports writing of primary topographic attributes.
 
+
+.. note::
+    This driver uses `GDAL`_ to write the data. Only the `GeoTIFF`_ driver
+    is supported at this time.
+
+.. _`GeoTiff`: http://www.gdal.org/frmt_gtiff.html
+
 Example
 -------
 
@@ -31,7 +38,7 @@ Options
 -------
 
 filename
-  GeoTiff file to write.  [Required]
+  `GeoTiff`_ file to write.  [Required]
 
 primitive_type
   Topographic attribute to compute.  [Default: slope_d8]

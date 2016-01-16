@@ -34,8 +34,6 @@
 
 #include "LasWriter.hpp"
 
-#include <type_traits>
-#include <boost/uuid/uuid_generators.hpp>
 #include <iostream>
 
 #include <pdal/Compression.hpp>
@@ -917,7 +915,7 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
     for (auto& dim : m_extraDims)
     {
         point.getField((char *)&e, dim.m_dimType.m_id, dim.m_dimType.m_type);
-        ostream.put(dim.m_dimType.m_type, e);
+        Utils::insertDim(ostream, dim.m_dimType.m_type, e);
     }
 
     m_summaryData->addPoint(xOrig, yOrig, zOrig, returnNumber);

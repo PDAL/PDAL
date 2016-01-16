@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include <pdal/pdal_export.hpp>
+#include "pdal_util_export.hpp"
 
 namespace pdal
 {

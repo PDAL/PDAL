@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2015, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2016, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*     * Neither the name of Hobu, Inc. nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -32,37 +32,23 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-// The DynamicLibrary was modeled very closely after the work of Gigi Sayfan in
-// the Dr. Dobbs article:
-// http://www.drdobbs.com/cpp/building-your-own-plugin-framework-part/206503957
-// The original work was released under the Apache License v2.
+#include <pdal/pdal_test_main.hpp>
 
-#pragma once
+#include <pdal/util/Uuid.hpp>
 
-#include <string>
+using namespace pdal;
 
-namespace pdal
+TEST(UuidTest, test)
 {
+    std::string s("5CE0E9A5-6015-FEC5-AADF-A328AE398115");
+    unsigned char id[16] = {0x5c, 0xe0, 0xe9, 0xa5, 0x60, 0x15, 0xfe, 0xc5,
+                            0xaa, 0xdf, 0xa3, 0x28, 0xae, 0x39, 0x81, 0x15 };
+    Uuid uuid((char *)id);
+    EXPECT_EQ(uuid.toString(), s);
 
-class DynamicLibrary
-{
-public:
-    static DynamicLibrary *load(const std::string &path,
-        std::string &errorString);
-
-    ~DynamicLibrary();
-    void *getSymbol(const std::string& name);
-
-private:
-    DynamicLibrary(void *handle) : m_handle(handle)
-    {}
-
-    DynamicLibrary();  // Unimplemented
-    DynamicLibrary(const DynamicLibrary &);  // Unimplemented
-  
-private:
-    void *m_handle;
-};
-
-} // namespace pdal
-
+    Uuid uuid2(s);
+    unsigned char buf[16];
+    uuid2.pack((char *)buf);
+    for (size_t i = 0; i < 16; ++i)
+        EXPECT_EQ(id[i], buf[i]);
+}

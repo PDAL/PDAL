@@ -33,6 +33,8 @@
 
 #pragma once
 
+#include <pdal/util/Uuid.hpp>
+
 namespace pdal
 {
 
@@ -40,7 +42,6 @@ template <typename T>
 class BaseHeaderVal
 {
 protected:
-//    std::string m_name;
     T m_val;
     T m_defVal;
     bool m_forward;
@@ -116,19 +117,19 @@ public:
         { return m_valSet ? m_val : m_defVal; }
 };
 
-class UuidHeaderVal : public BaseHeaderVal<boost::uuids::uuid>
+class UuidHeaderVal : public BaseHeaderVal<Uuid>
 {
 public:
-    typedef boost::uuids::uuid type;
+    typedef Uuid type;
 
-    bool setVal(boost::uuids::uuid val)
+    bool setVal(Uuid val)
     {
         m_valSet = true;
         m_val = val;
         return true;
     }
 
-    boost::uuids::uuid val()
+    Uuid val()
         { return m_valSet ? m_val : m_defVal; }
 };
 

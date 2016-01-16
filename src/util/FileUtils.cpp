@@ -41,6 +41,7 @@
 
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Utils.hpp>
+#include <pdal/pdal_types.hpp>
 
 namespace pdal
 {
@@ -67,7 +68,7 @@ std::istream* FileUtils::openFile(std::string const& filename, bool asBinary)
         return &std::cin;
 
     if (!FileUtils::fileExists(filename))
-        throw pdal_error(std::string("File '") + filename + "' not found");
+        return NULL;
 
     std::ios::openmode mode = std::ios::in;
     if (asBinary)
@@ -318,39 +319,5 @@ void FileUtils::fileTimes(const std::string& filename,
 #endif
 }
 
-
-std::string FileUtils::readFileAsString(std::string const& filename)
-{
-    if (!FileUtils::fileExists(filename))
-    {
-        std::ostringstream oss;
-        oss << filename << " does not exist";
-        throw pdal_error(oss.str());
-    }
-
-    std::istream::pos_type size;
-    std::istream* input = FileUtils::openFile(filename, true);
-
-    if (input->good())
-    {
-        std::string output;
-        std::string line;
-        while (input->good())
-        {
-            getline(*input, line);
-            if (output.size())
-            {
-                output = output + "\n" + line;
-            }
-            else
-            {
-                output = line;
-            }
-        }
-        return output;
-    }
-    FileUtils::closeFile(input);
-    return std::string();
-}
 
 } // namespace pdal

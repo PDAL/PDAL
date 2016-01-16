@@ -37,7 +37,7 @@
 #include <stdlib.h>
 
 #include <pdal/util/FileUtils.hpp>
-#include <pdal/BufferReader.hpp>
+#include <BufferReader.hpp>
 #include <LasHeader.hpp>
 #include <LasReader.hpp>
 #include <LasWriter.hpp>
@@ -349,8 +349,7 @@ TEST(LasWriterTest, forward)
     // Global encoding doesn't match because 4_1.las has a bad value, so we
     // get the default.
     EXPECT_EQ(n1.findChild("global_encoding").value<uint8_t>(), 0);
-    EXPECT_EQ(n1.findChild("project_id").value<boost::uuids::uuid>(),
-        boost::uuids::uuid());
+    EXPECT_EQ(n1.findChild("project_id").value<Uuid>(), Uuid());
     EXPECT_EQ(n1.findChild("system_id").value(), "");
     EXPECT_EQ(n1.findChild("software_id").value(), "TerraScan");
     EXPECT_EQ(n1.findChild("creation_doy").value<uint16_t>(), 142);

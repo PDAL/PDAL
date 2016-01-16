@@ -34,11 +34,11 @@
 
 #include "kernel/Cpd.hpp"
 
-#include <pdal/BufferReader.hpp>
 #include <pdal/KernelFactory.hpp>
 
 #include "chipper/ChipperFilter.hpp"
 #include "crop/CropFilter.hpp"
+#include "buffer/BufferReader.hpp"
 
 namespace pdal
 {
@@ -262,7 +262,7 @@ int CpdKernel::execute()
     setCommonOptions(writerOpts);
 
     Stage& writer = makeWriter(m_output, reader);
-    writer.setOptions(writerOpts + writer.getOptions());
+    writer.addOptions(writerOpts);
     writer.prepare(outTable);
     writer.execute(outTable);
 

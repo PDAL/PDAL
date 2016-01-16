@@ -36,25 +36,18 @@
 
 #include <pdal/pdal_internal.hpp>
 
+// GDAL
+#include <geo_normalize.h>
+#include <ogr_spatialref.h>
+
 // See http://lists.osgeo.org/pipermail/gdal-dev/2013-November/037429.html
 #define CPL_SERV_H_INCLUDED
 
-
-#ifdef PDAL_HAVE_LIBGEOTIFF
-#include <geo_simpletags.h>
-#include <cpl_conv.h>
-#endif
-
-// Fake out the compiler if we don't have libgeotiff includes already
-#if !defined(__geotiff_h_)
-typedef struct GTIFS *GTIF;
-#endif
-#if !defined(__geo_simpletags_h_)
-typedef struct ST_TIFFS *ST_TIFF;
-#endif
-
 #include <string>
 #include <stdexcept>
+
+struct GTIFS;
+struct StTiff;
 
 namespace pdal
 {
@@ -65,9 +58,11 @@ public:
     GeotiffSupport() : m_gtiff(0), m_tiff(0)
     {}
     ~GeotiffSupport();
-    
+
     void resetTags();
-    int setKey(int tag, void *data, int size, int type);
+    void setShortKeys(int tag, void *data, int size);
+    void setDoubleKeys(int tag, void *data, int size);
+    void setAsciiKeys(int tag, void *data, int size);
     size_t getKey(int tag, int *count, void **data_ptr) const;
     void setTags();
 
@@ -79,8 +74,8 @@ public:
 private:
     void rebuildGTIF();
 
-    GTIF* m_gtiff;
-    ST_TIFF* m_tiff;
+    GTIF *m_gtiff;
+    StTiff *m_tiff;
 };
 
 } // namespace pdal

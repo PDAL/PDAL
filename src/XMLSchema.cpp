@@ -46,9 +46,6 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/erase.hpp>
 #include <boost/property_tree/xml_parser.hpp>
-#include <boost/uuid/string_generator.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
 
 #include <string.h>
 #include <stdlib.h>

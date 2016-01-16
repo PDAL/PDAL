@@ -135,7 +135,7 @@ TEST(LasReaderTest, header)
 
     EXPECT_EQ(h.fileSignature(), "LASF");
     EXPECT_EQ(h.fileSourceId(), 0);
-    EXPECT_TRUE(h.projectId().is_nil());
+    EXPECT_TRUE(h.projectId().isNull());
     EXPECT_EQ(h.versionMajor(), 1);
     EXPECT_EQ(h.versionMinor(), 2);
     EXPECT_EQ(h.creationDOY(), 0);

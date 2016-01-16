@@ -34,21 +34,29 @@
 
 #include "GeotiffSupport.hpp"
 
+#include <sstream>
+
 // GDAL
 #include <geo_normalize.h>
 #include <ogr_spatialref.h>
 
-#include <sstream>
+// See http://lists.osgeo.org/pipermail/gdal-dev/2013-November/037429.html
+#define CPL_SERV_H_INCLUDED
+
+#include <geo_simpletags.h>
+#include <cpl_conv.h>
 
 PDAL_C_START
-#ifdef __geotiff_h_
 
-char PDAL_DLL * GTIFGetOGISDefn(GTIF*, GTIFDefn*);
-int PDAL_DLL GTIFSetFromOGISDefn(GTIF*, const char*);
+// These functions are available from GDAL, but they
+// aren't exported.
+char CPL_DLL * GTIFGetOGISDefn(GTIF*, GTIFDefn*);
+int CPL_DLL GTIFSetFromOGISDefn(GTIF*, const char*);
 
-#endif // defined __geotiff_h_
 PDAL_C_END
 
+struct StTiff : public ST_TIFF
+{};
 
 namespace pdal
 {
@@ -87,28 +95,40 @@ void GeotiffSupport::resetTags()
         m_gtiff = 0;
     }
 
-    m_tiff = ST_Create();
+    m_tiff = (StTiff *)ST_Create();
 
     return;
 }
 
 
-int GeotiffSupport::setKey(int tag, void *data, int size, int type)
+void GeotiffSupport::setShortKeys(int tag, void *data, int size)
 {
-    int count;
-    switch (type)
+    // Make sure struct is 16 bytes.
+#pragma pack(push)
+#pragma pack(1)
+    struct ShortKeyHeader
     {
-    case STT_SHORT:
-        count = size / sizeof(short);
-        break;
-    case STT_DOUBLE:
-        count = size / sizeof(double);
-        break;
-    default:
-        count = size; 
-        break;
-    }
-    return ST_SetKey(m_tiff, tag, count, type, data);
+        uint16_t dirVersion;
+        uint16_t keyRev;
+        uint16_t minorRev;
+        uint16_t numKeys;
+    };
+#pragma pack(pop)
+
+    ShortKeyHeader *header = (ShortKeyHeader *)data;
+    ST_SetKey(m_tiff, tag, (1 + header->numKeys) * 4, STT_SHORT, data);
+}
+
+
+void GeotiffSupport::setDoubleKeys(int tag, void *data, int size)
+{
+    ST_SetKey(m_tiff, tag, size / sizeof(double), STT_DOUBLE, data);
+}
+
+
+void GeotiffSupport::setAsciiKeys(int tag, void *data, int size)
+{
+    ST_SetKey(m_tiff, tag, size, STT_ASCII, data);
 }
 
 
@@ -123,6 +143,7 @@ size_t GeotiffSupport::getKey(int tag, int *count, void **data_ptr) const
 
     if (m_tiff == 0)
         return 0;
+
     if (!ST_GetKey(m_tiff, tag, count, &st_type, data_ptr))
         return 0;
 
@@ -140,8 +161,8 @@ void GeotiffSupport::setTags()
 {
     m_gtiff = GTIFNewSimpleTags(m_tiff);
     if (!m_gtiff)
-        throw std::runtime_error("The geotiff keys could not be read from VLR records");
-    return;
+        throw std::runtime_error("The geotiff keys could not be read "
+            "from VLR records");
 }
 
 
@@ -223,29 +244,27 @@ void GeotiffSupport::rebuildGTIF()
         m_gtiff = 0;
     }
 
-    m_tiff = ST_Create();
+    m_tiff = (StTiff *)ST_Create();
 
     // (here it used to read in the VLRs)
 
     m_gtiff = GTIFNewSimpleTags(m_tiff);
     if (!m_gtiff)
-        throw std::runtime_error("The geotiff keys could not be read from VLR records");
-
-    return;
+        throw std::runtime_error("The geotiff keys could not be read from "
+            "VLR records");
 }
 
 
 void GeotiffSupport::setWkt(const std::string& v)
 {
     if (!m_gtiff)
-    {
         rebuildGTIF();
-    }
 
     if (v == "")
-    {
         return;
-    }
+
+    if (!GTIFSetFromOGISDefn(m_gtiff, v.c_str()))
+        throw std::invalid_argument("could not set m_gtiff from WKT");
 
     int ret = 0;
     ret = GTIFSetFromOGISDefn(m_gtiff, v.c_str());

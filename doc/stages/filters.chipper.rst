@@ -7,9 +7,14 @@ The chipper filter takes a single large point cloud and converts it into a set
 of smaller clouds, or chips. The chips are all spatially contiguous and
 non-overlapping, so the result is a an irregular tiling of the input data.
 
+.. note::
+
+    Each chip will have approximately, but not exactly, the ``capacity`` point
+    count specified.
+
 .. seealso::
 
-    :ref:`split_command` utilizes the :ref:`filters.chipper` to split
+    The :ref:`split_command` utilizes the :ref:`filters.chipper` to split
     data by capacity.
 
 .. figure:: filters.chipper.img1.png

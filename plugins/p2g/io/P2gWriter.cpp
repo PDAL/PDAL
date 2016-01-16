@@ -57,6 +57,7 @@ void P2gWriter::processOptions(const Options& options)
 {
     m_GRID_DIST_X = options.getValueOrDefault<double>("grid_dist_x", 6.0);
     m_GRID_DIST_Y = options.getValueOrDefault<double>("grid_dist_y", 6.0);
+    m_zName = options.getValueOrDefault<std::string>("z", "Z");
     m_RADIUS = options.getValueOrDefault<double>("radius",
         8.4852813742385713);
     m_fill_window_size = options.getValueOrDefault<uint32_t>(
@@ -138,7 +139,7 @@ Options P2gWriter::getDefaultOptions()
     Option radius("radius", default_radius);
 
     Option fill_window_size("fill_window_size", 3);
-    Option dim_z("Z", "Z", "Name of Z dimension to interpolate");
+    Option dim_z("z", "Z", "Name of Z dimension to interpolate");
     options.add(dim_z);
     options.add(grid_x);
     options.add(grid_y);
@@ -150,8 +151,6 @@ Options P2gWriter::getDefaultOptions()
 
 void P2gWriter::write(const PointViewPtr view)
 {
-    std::string z_name = getOptions().getValueOrDefault<std::string>("z", "Z");
-
     for (point_count_t idx = 0; idx < view->size(); idx++)
     {
         double x = view->getFieldAs<double>(Dimension::Id::X, idx);
@@ -235,4 +234,3 @@ void P2gWriter::done(PointTableRef table)
 }
 
 } // namespaces
-

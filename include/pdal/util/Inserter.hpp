@@ -34,6 +34,7 @@
 #pragma once
 
 #include "portable_endian.hpp"
+#include "pdal_util_export.hpp"
 
 namespace pdal
 {
@@ -82,6 +83,17 @@ public:
     }
     std::size_t position() const
         { return m_pptr - m_pbase; }
+
+    virtual Inserter& operator << (uint8_t v) = 0;
+    virtual Inserter& operator << (int8_t v) = 0;
+    virtual Inserter& operator << (uint16_t v) = 0;
+    virtual Inserter& operator << (int16_t v) = 0;
+    virtual Inserter& operator << (uint32_t v) = 0;
+    virtual Inserter& operator << (int32_t v) = 0;
+    virtual Inserter& operator << (uint64_t v) = 0;
+    virtual Inserter& operator << (int64_t v) = 0;
+    virtual Inserter& operator << (float v) = 0;
+    virtual Inserter& operator << (double v) = 0;
 };
 
 /// Stream wrapper for output of binary data that converts from host ordering
@@ -93,48 +105,6 @@ public:
     {}
     LeInserter(unsigned char *buf, std::size_t size) : Inserter(buf, size)
     {}
-
-    using Inserter::put;
-    void put(Dimension::Type::Enum type, const Everything& e)
-    {
-       using namespace Dimension::Type;
-
-        switch (type)
-        {
-        case Unsigned8:
-            *this << e.u8;
-            break;
-        case Unsigned16:
-            *this << e.u16;
-            break;
-        case Unsigned32:
-            *this << e.u32;
-            break;
-        case Unsigned64:
-            *this << e.u64;
-            break;
-        case Signed8:
-            *this << e.s8;
-            break;
-        case Signed16:
-            *this << e.s16;
-            break;
-        case Signed32:
-            *this << e.s32;
-            break;
-        case Signed64:
-            *this << e.s64;
-            break;
-        case Float:
-            *this << e.f;
-            break;
-        case Double:
-            *this << e.d;
-            break;
-        case None:
-            break;
-        }
-    }
 
     LeInserter& operator << (uint8_t v)
     {
@@ -221,6 +191,108 @@ public:
 
         uu.d = v;
         uu.u = htole64(uu.u);
+        memcpy(m_pptr, &uu.d, sizeof(uu.d));
+        m_pptr += sizeof(uu.d);
+        return *this;
+    }
+};
+
+
+/// Stream wrapper for output of binary data that converts from host ordering
+/// to big endian format
+class PDAL_DLL BeInserter : public Inserter
+{
+public:
+    BeInserter(char *buf, std::size_t size) : Inserter(buf, size)
+    {}
+    BeInserter(unsigned char *buf, std::size_t size) : Inserter(buf, size)
+    {}
+
+    BeInserter& operator << (uint8_t v)
+    {
+        *m_pptr++ = (char)v;
+        return *this;
+    }
+
+    BeInserter& operator << (int8_t v)
+    {
+        *m_pptr++ = v;
+        return *this;
+    }
+
+    BeInserter& operator << (uint16_t v)
+    {
+        v = htobe16(v);
+        memcpy(m_pptr, &v, sizeof(v));
+        m_pptr += sizeof(v);
+        return *this;
+    }
+
+    BeInserter& operator << (int16_t v)
+    {
+        v = (int16_t)htobe16((uint16_t)v);
+        memcpy(m_pptr, &v, sizeof(v));
+        m_pptr += sizeof(v);
+        return *this;
+    }
+
+    BeInserter& operator << (uint32_t v)
+    {
+        v = htobe32(v);
+        memcpy(m_pptr, &v, sizeof(v));
+        m_pptr += sizeof(v);
+        return *this;
+    }
+
+    BeInserter& operator << (int32_t v)
+    {
+        v = (int32_t)htobe32((uint32_t)v);
+        memcpy(m_pptr, &v, sizeof(v));
+        m_pptr += sizeof(v);
+        return *this;
+    }
+
+    BeInserter& operator << (uint64_t v)
+    {
+        v = htobe64(v);
+        memcpy(m_pptr, &v, sizeof(v));
+        m_pptr += sizeof(v);
+        return *this;
+    }
+
+    BeInserter& operator << (int64_t v)
+    {
+        v = (int64_t)htobe64((uint64_t)v);
+        memcpy(m_pptr, &v, sizeof(v));
+        m_pptr += sizeof(v);
+        return *this;
+    }
+
+    BeInserter& operator << (float v)
+    {
+        union
+        {
+            float f;
+            uint32_t u;
+        } uu;
+
+        uu.f = v;
+        uu.u = htobe32(uu.u);
+        memcpy(m_pptr, &uu.f, sizeof(uu.f));
+        m_pptr += sizeof(uu.f);
+        return *this;
+    }
+
+    BeInserter& operator << (double v)
+    {
+        union
+        {
+            double d;
+            uint64_t u;
+        } uu;
+
+        uu.d = v;
+        uu.u = htobe64(uu.u);
         memcpy(m_pptr, &uu.d, sizeof(uu.d));
         m_pptr += sizeof(uu.d);
         return *this;
