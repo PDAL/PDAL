@@ -34,19 +34,9 @@
 
 #include <pdal/PipelineWriter.hpp>
 
-#include <pdal/Filter.hpp>
-#include <pdal/Reader.hpp>
-#include <pdal/Writer.hpp>
-#include <pdal/PipelineManager.hpp>
+#include <pdal/Metadata.hpp>
 #include <pdal/PDALUtils.hpp>
-
-#include <boost/property_tree/xml_parser.hpp>
-#include <boost/optional.hpp>
-#include <boost/foreach.hpp>
-#include <boost/algorithm/string.hpp>
-
-#include <boost/property_tree/xml_parser.hpp>
-#include <boost/property_tree/json_parser.hpp>
+#include <pdal/Stage.hpp>
 #include <pdal/util/FileUtils.hpp>
 
 using namespace boost::property_tree;
@@ -56,112 +46,51 @@ namespace pdal
 
 namespace
 {
-    
-ptree generateTreeFromStage(const Stage& stage)
+
+void generateTags(Stage *stage, PipelineWriter::TagMap& tags)
 {
-    ptree tree;
-    ptree& attrtree = tree.add_child("Pipeline", stage.serializePipeline());
-    attrtree.put("<xmlattr>.version", "1.0");
-    return tree;
+    auto tagExists = [tags](const std::string& tag)
+    {
+        for (auto& t : tags)
+        {
+            if (t.second == tag)
+                return true;
+        }
+        return false;
+    };
+
+    for (Stage *s : stage->getInputs())
+        generateTags(s, tags);
+    std::string tag;
+    for (size_t i = 1; ; ++i)
+    {
+        tag = stage->tagName() + std::to_string(i);
+        if (!tagExists(tag))
+            break;
+    }
+    tags[stage] = tag;
 }
 
-ptree getMetadataEntry(const MetadataNode& input)
-{
-    ptree entry;
-
-    entry.put_value(input.value());
-    entry.put("<xmlattr>.name", input.name());
-    entry.put("<xmlattr>.type", input.type());
-
-    std::vector<MetadataNode> children = input.children();
-    for (auto ci = children.begin(); ci != children.end(); ++ci)
-        entry.add_child("Metadata", getMetadataEntry(*ci));
-    return entry;
-}
-
-} // unnamed namespace
+} // anonymous namespace
 
 namespace PipelineWriter
 {
 
-void writePipeline(Stage *stage, const std::string& filename)
+PDAL_DLL void writePipeline(Stage *stage, const std::string& filename)
 {
-    ptree tree = generateTreeFromStage(*stage);
-#if BOOST_VERSION >= 105600
-    const xml_parser::xml_writer_settings<std::string> settings(' ', 4);
-#else
-    const xml_parser::xml_writer_settings<char> settings(' ', 4);
-#endif
-
-    if (boost::iequals(filename, "STDOUT"))
-        xml_parser::write_xml(std::cout, tree);
-    else
-        xml_parser::write_xml(filename, tree, std::locale(), settings);
+    std::ostream *out = FileUtils::createFile(filename, false);
+    writePipeline(stage, *out);
+    FileUtils::closeFile(out);
 }
 
-
-void writePipeline(Stage *stage, std::ostream& strm)
+PDAL_DLL void writePipeline(Stage *stage, std::ostream& strm)
 {
-    ptree tree = generateTreeFromStage(*stage);
-#if BOOST_VERSION >= 105600
-    const xml_parser::xml_writer_settings<std::string> settings(' ', 4);
-#else
-    const xml_parser::xml_writer_settings<char> settings(' ', 4);
-#endif
+    TagMap tags;
+    generateTags(stage, tags);
 
-    xml_parser::write_xml(strm, tree);
-}
-
-
-void writeOptions(ptree& tree, const Options& opts)
-{
-    ptree m_tree = Utils::toPTree(opts);
-
-    auto iter = m_tree.begin();
-    while (iter != m_tree.end())
-    {
-        if (iter->first != "Option")
-            throw pdal_error("malformed Options ptree");
-        const ptree& optionTree = iter->second;
-
-        // we want to create this:
-        //      ...
-        //      <Option name="file">foo.las</Option>
-        //      ...
-
-        const std::string& name =
-            optionTree.get_child("Name").get_value<std::string>();
-        const std::string& value =
-            optionTree.get_child("Value").get_value<std::string>();
-
-        ptree& subtree = tree.add("Option", value);
-        subtree.put("<xmlattr>.name", name);
-
-        boost::optional<ptree const&> moreOptions =
-            optionTree.get_child_optional("Options");
-
-        if (moreOptions)
-        {
-            ptree newOpts;
-            writeOptions(newOpts, moreOptions.get());
-            subtree.put_child("Options", newOpts);
-        }
-        ++iter;
-    }
-}
-
-
-void writeMetadata(boost::property_tree::ptree& tree, const MetadataNode& input)
-{
-    tree.add_child("Metadata", getMetadataEntry(input));
-}
-
-
-void writeMetadata(boost::property_tree::ptree& tree,
-    const MetadataNodeList& input)
-{
-    for (auto mi = input.begin(); mi != input.end(); ++mi)
-        tree.add_child("Metadata", getMetadataEntry(*mi));
+    MetadataNode root;
+    stage->serialize(root, tags);
+    Utils::toJSON(root, strm);
 }
 
 } // namespace PipelineWriter

@@ -34,18 +34,14 @@
 
 #pragma once
 
-#include <pdal/pdal_internal.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/Stage.hpp>
-
-#include <string>
 
 namespace pdal
 {
 
 class Writer;
-
 class UserCallback;
 
 /// End-stage consumer of PDAL pipeline
@@ -58,10 +54,6 @@ public:
     /// Constructs an end-stage consumer of a pipeline of data -- a writer
     Writer()
         {}
-
-    /// Serialize the pipeline to a boost::property_tree::ptree
-    /// @return boost::property_tree::ptree with xml attributes
-    virtual boost::property_tree::ptree serializePipeline() const;
 
 protected:
     std::string m_filename;

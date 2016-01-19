@@ -340,27 +340,10 @@ public:
     // if option name not present, just returns
     void remove(const Option& option);
 
-    MetadataNode toMetadata() const
-    {
-        MetadataNode cur("options");
-        std::vector<Option> optList = getOptions();
-        for (auto oi = optList.begin(); oi != optList.end(); ++oi)
-        {
-            Option& opt = *oi;
-            opt.toMetadata(cur);
-        }
-        return cur;
-    }
-
     void toMetadata(MetadataNode& parent) const
     {
-        MetadataNode cur = parent.add("options");
-        std::vector<Option> optList = getOptions();
-        for (auto oi = optList.begin(); oi != optList.end(); ++oi)
-        {
-            Option& opt = *oi;
-            opt.toMetadata(cur);
-        }
+        for (auto o : getOptions())
+            o.toMetadata(parent);
     }
 
     // add an option (shortcut version, bypass need for an Option object)

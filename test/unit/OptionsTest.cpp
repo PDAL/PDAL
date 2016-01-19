@@ -294,7 +294,8 @@ TEST(OptionsTest, metadata)
 
     ops.add("teste", "Testing option test e");
 
-    MetadataNode node = ops.toMetadata();
+    MetadataNode node;
+    ops.toMetadata(node);
 
     std::string goodfile(Support::datapath("misc/opts2json_meta.txt"));
     std::string testfile(Support::temppath("opts2json.txt"));

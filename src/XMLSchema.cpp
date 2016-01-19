@@ -528,6 +528,25 @@ XMLDim& XMLSchema::xmlDim(const std::string& name)
 }
 
 
+namespace
+{
+
+boost::property_tree::ptree getMetadataEntry(const MetadataNode& input)
+{
+    boost::property_tree::ptree entry;
+
+    entry.put_value(input.value());
+    entry.put("<xmlattr>.name", input.name());
+    entry.put("<xmlattr>.type", input.type());
+
+    for (auto& m : input.children())
+        entry.add_child("Metadata", getMetadataEntry(m));
+    return entry;
+}
+
+} // anonymous namespace
+
+
 void XMLSchema::writeXml(xmlTextWriterPtr w) const
 {
     int pos = 0;
@@ -602,7 +621,10 @@ void XMLSchema::writeXml(xmlTextWriterPtr w) const
             (const xmlChar*) "metadata", NULL);
 
         boost::property_tree::ptree output;
-        PipelineWriter::writeMetadata(output, m_metadata.children());
+
+        for (auto m : m_metadata.children())
+            output.add_child("Metadata", getMetadataEntry(m));
+
         std::ostringstream oss;
         boost::property_tree::xml_parser::write_xml(oss, output);
         std::string xml = oss.str();

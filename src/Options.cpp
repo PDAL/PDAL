@@ -73,9 +73,7 @@ template<> void Option::setValue(const std::string& value)
 
 void Option::toMetadata(MetadataNode& parent) const
 {
-    MetadataNode child = parent.add(getName());
-    child.add("value", getValue<std::string>());
-    child.add("description", getDescription());
+    parent.add(getName(), getValue<std::string>());
 }
 
 //---------------------------------------------------------------------------

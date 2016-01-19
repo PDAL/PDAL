@@ -46,10 +46,4 @@ void Reader::readerProcessOptions(const Options& options)
         m_count = options.getValueOrThrow<point_count_t>("count");
 }
 
-
-boost::property_tree::ptree Reader::serializePipeline() const
-{
-    return serialize(getName(), "Reader");
-}
-
 } // namespace pdal

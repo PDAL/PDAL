@@ -76,7 +76,6 @@ set(PDAL_BASE_HPP
 
 set(PDAL_BASE_CPP
   DynamicLibrary.cpp
-  Filter.cpp
   gitsha.cpp
   GDALUtils.cpp
   GlobalEnvironment.cpp

@@ -100,10 +100,6 @@ public:
         for (const auto& o : opts.getOptions())
             m_options.remove(o);
     }
-    virtual boost::property_tree::ptree serializePipeline() const = 0;
-    boost::property_tree::ptree serialize(const std::string& name,
-        const std::string& type) const;
-
     virtual LogPtr log() const
         { return m_log; }
     bool isDebug() const
@@ -117,6 +113,8 @@ public:
             return m_options.getValueOrDefault<uint32_t>("verbose", 0);
         }
     virtual std::string getName() const = 0;
+    virtual std::string tagName() const
+        { return getName(); }
     const std::vector<Stage*>& getInputs() const
         { return m_inputs; }
     std::vector<Stage *> findStage(std::string name);
@@ -126,9 +124,9 @@ public:
         { return Dimension::IdList(); }
     static std::string s_getPluginVersion()
         { return std::string(); }
-
     inline MetadataNode getMetadata() const
         { return m_metadata; }
+    void serialize(MetadataNode root, PipelineWriter::TagMap& tags) const;
 
     /// Sets the UserCallback to manage progress/cancel operations
     void setUserCallback(UserCallback* userCallback)
