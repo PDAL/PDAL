@@ -102,6 +102,7 @@ TEST(OptionsTest, test_option_writing)
     EXPECT_TRUE(str_s == ref_s);
 }
 
+/**
 TEST(OptionsTest, test_option_reading)
 {
     // from an xml stream
@@ -124,6 +125,7 @@ TEST(OptionsTest, test_option_reading)
     EXPECT_TRUE(opt_from_ptree.getValue<std::string>() == "17");
     EXPECT_TRUE(opt_from_ptree.getValue<int>() == 17);
 }
+**/
 
 TEST(OptionsTest, test_options_copy_ctor)
 {
@@ -165,21 +167,6 @@ TEST(OptionsTest, test_options_writing)
     EXPECT_TRUE(val_s == "Yow.");
     EXPECT_TRUE(desc_i == "This is my integral option.");
     EXPECT_TRUE(desc_s == "This is my stringy option.");
-}
-
-TEST(OptionsTest, test_options_reading)
-{
-    const std::string ref = xml_header + "<Option>" + xml_int_ref + "</Option><Option>" + xml_str_ref + "</Option>";
-    std::istringstream istr(ref);
-
-    boost::property_tree::ptree tree;
-    boost::property_tree::read_xml(istr,tree);
-    Options opts_from_istr(tree);
-
-    const Option& opt = opts_from_istr.getOption("my_int");
-
-    EXPECT_TRUE(opt.getValue<std::string>() == "17");
-    EXPECT_TRUE(opt.getValue<int>() == 17);
 }
 
 TEST(OptionsTest, test_valid_options)
@@ -281,29 +268,6 @@ TEST(OptionsTest, implicitdefault)
     EXPECT_EQ(slist.size(), (size_t)0);
     slist = ops.getValueOrDefault<std::vector<std::string>>("a");
     EXPECT_EQ(slist.size(), (size_t)4);
-}
-
-TEST(OptionsTest, metadata)
-{
-    Options ops;
-    ops.add("testa", "This is a test");
-    ops.add("testb", 56);
-    ops.add("testc", 27.5, "Testing testc");
-
-    Option op35("testd", 3.5);
-
-    ops.add("teste", "Testing option test e");
-
-    MetadataNode node;
-    ops.toMetadata(node);
-
-    std::string goodfile(Support::datapath("misc/opts2json_meta.txt"));
-    std::string testfile(Support::temppath("opts2json.txt"));
-    {
-        std::ofstream out(testfile);
-        Utils::toJSON(node, out);
-    }
-    EXPECT_TRUE(Support::compare_files(goodfile, testfile));
 }
 
 TEST(OptionsTest, conditional)
