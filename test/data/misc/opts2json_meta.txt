@@ -1,25 +1,6 @@
 {
-  "options":
-  {
-    "testa":
-    {
-      "description": "",
-      "value": "This is a test"
-    },
-    "testb":
-    {
-      "description": "",
-      "value": "56"
-    },
-    "testc":
-    {
-      "description": "Testing testc",
-      "value": "27.5"
-    },
-    "teste":
-    {
-      "description": "",
-      "value": "Testing option test e"
-    }
-  }
+  "testa": "This is a test",
+  "testb": "56",
+  "testc": "27.5",
+  "teste": "Testing option test e"
 }

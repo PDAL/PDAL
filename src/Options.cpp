@@ -42,16 +42,6 @@
 namespace pdal
 {
 
-Option::Option(const boost::property_tree::ptree& tree)
-{
-    using namespace boost::property_tree;
-
-    m_name = tree.get<std::string>("Name");
-    m_value = tree.get<std::string>("Value");
-    m_description =
-    tree.count("Description") ? tree.get<std::string>("Description") : "";
-}
-
 #if !defined(PDAL_COMPILER_MSVC)
 
 // explicit specialization:
@@ -73,9 +63,7 @@ template<> void Option::setValue(const std::string& value)
 
 void Option::toMetadata(MetadataNode& parent) const
 {
-    MetadataNode child = parent.add(getName());
-    child.add("value", getValue<std::string>());
-    child.add("description", getDescription());
+    parent.add(getName(), getValue<std::string>());
 }
 
 //---------------------------------------------------------------------------
@@ -103,17 +91,6 @@ bool Option::nameValid(const std::string& name, bool reportError)
         Utils::printError(oss.str());
     }
     return valid;
-}
-
-
-Options::Options(const boost::property_tree::ptree& tree)
-{
-    for (auto iter = tree.begin(); iter != tree.end(); ++iter)
-    {
-        assert(iter->first == "Option");
-        Option opt(iter->second);
-        add(opt);
-    }
 }
 
 
@@ -193,22 +170,5 @@ bool Options::hasOption(std::string const& name) const
     {}
     return false;
 }
-
-
-void Options::dump() const
-{
-    std::cout << *this;
-}
-
-
-std::ostream& operator<<(std::ostream& ostr, const Options& options)
-{
-    const boost::property_tree::ptree tree = pdal::Utils::toPTree(options);
-
-    boost::property_tree::write_json(ostr, tree);
-
-    return ostr;
-}
-
 
 } // namespace pdal

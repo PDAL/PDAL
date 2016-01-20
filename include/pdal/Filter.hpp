@@ -34,8 +34,6 @@
 
 #pragma once
 
-#include <pdal/pdal_internal.hpp>
-
 #include <pdal/Stage.hpp>
 
 namespace pdal
@@ -43,24 +41,14 @@ namespace pdal
 
 class Filter;
 
-//
-// supported options:
-//   <uint32>id
-//   <bool>debug
-//   <uint32>verbose
-//
-
 class FilterWrapper;
 
 class PDAL_DLL Filter : public Stage
 {
     friend class FilterWrapper;
 public:
-    Filter() : Stage()
+    Filter()
         {}
-
-    // for xml serializion of pipelines
-    virtual boost::property_tree::ptree serializePipeline() const;
 
 private:
     virtual PointViewSet run(PointViewPtr view)

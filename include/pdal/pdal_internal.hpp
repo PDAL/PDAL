@@ -45,6 +45,13 @@
 
 #include <boost/version.hpp>
 
+// This is an extraction from the gtest header.  It allows us to make test
+// functions friends of classes without including the gtest headers.
+#ifndef FRIEND_TEST
+#define FRIEND_TEST(test_case_name, test_name)\
+friend class test_case_name##_##test_name##_Test
+#endif
+
 // See http://stackoverflow.com/questions/1814548/boostsystem-category-defined-but-not-used
 #ifndef BOOST_SYSTEM_NO_DEPRECATED
 #define BOOST_SYSTEM_NO_DEPRECATED 1

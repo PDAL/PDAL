@@ -359,7 +359,7 @@ public:
     MetadataNode addList(const std::string& name)
         { return MetadataNode(m_impl->addList(name)); }
 
-    MetadataNode clone(const std::string& name)
+    MetadataNode clone(const std::string& name) const
     {
         MetadataNode node;
         node.m_impl.reset(new MetadataNodeImpl(*m_impl));

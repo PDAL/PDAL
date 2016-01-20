@@ -38,7 +38,6 @@
 #include <pdal/Metadata.hpp>
 #include <pdal/util/Utils.hpp>
 
-#include <boost/property_tree/ptree.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/optional.hpp>
 
@@ -117,9 +116,6 @@ public:
         {
         }
     }
-
-    /// Construct from an existing boost::property_tree
-    Option(const boost::property_tree::ptree& tree);
 
     /// Equality operator
     bool operator==(const Option& rhs) const
@@ -332,35 +328,16 @@ public:
 
     Options(const Option&);
 
-    Options(const boost::property_tree::ptree& tree);
-
     // add an option
     void add(const Option& option);
 
     // if option name not present, just returns
     void remove(const Option& option);
 
-    MetadataNode toMetadata() const
-    {
-        MetadataNode cur("options");
-        std::vector<Option> optList = getOptions();
-        for (auto oi = optList.begin(); oi != optList.end(); ++oi)
-        {
-            Option& opt = *oi;
-            opt.toMetadata(cur);
-        }
-        return cur;
-    }
-
     void toMetadata(MetadataNode& parent) const
     {
-        MetadataNode cur = parent.add("options");
-        std::vector<Option> optList = getOptions();
-        for (auto oi = optList.begin(); oi != optList.end(); ++oi)
-        {
-            Option& opt = *oi;
-            opt.toMetadata(cur);
-        }
+        for (auto o : getOptions())
+            o.toMetadata(parent);
     }
 
     // add an option (shortcut version, bypass need for an Option object)
@@ -455,8 +432,6 @@ public:
 
     // returns true iff the option name is valid
     bool hasOption(std::string const& name) const;
-
-    void dump() const;
 
     std::vector<Option> getOptions(std::string const& name="") const;
 

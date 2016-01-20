@@ -53,8 +53,6 @@
 #include <string>
 #include <vector>
 
-#include <gtest/gtest.h>
-
 namespace po = boost::program_options;
 
 namespace pdal

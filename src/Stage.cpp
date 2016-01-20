@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/GlobalEnvironment.hpp>
+#include <pdal/PipelineManager.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/SpatialReference.hpp>
 #include <pdal/UserCallback.hpp>
@@ -71,25 +72,26 @@ void Stage::Construct()
 }
 
 
-boost::property_tree::ptree Stage::serialize(const std::string& name,
-    const std::string& type) const
+void Stage::serialize(MetadataNode root, PipelineWriter::TagMap& tags) const
 {
-    boost::property_tree::ptree tree;
+    for (Stage *s : m_inputs)
+        s->serialize(root, tags);
 
-    tree.add("<xmlattr>.type", name);
-    PipelineWriter::writeOptions(tree, m_options);
-    PipelineWriter::writeMetadata(tree, m_metadata);
-
-    if (m_inputs.size())
+    auto tagname = [tags](const Stage *s)
     {
-        boost::property_tree::ptree subtree =
-            m_inputs[0]->serializePipeline();
-        tree.add_child(subtree.begin()->first, subtree.begin()->second);
-    }
+        const auto ti = tags.find(s);
+        return ti->second;
+    };
 
-    boost::property_tree::ptree root;
-    root.add_child(type, tree);
-    return root;
+    MetadataNode anon("pipeline");
+    anon.add("type", getName());
+    anon.add("tag", tagname(this));
+    m_options.toMetadata(anon);
+    for (Stage *s : m_inputs)
+        anon.addList("inputs", tagname(s));
+    if (m_metadata.hasChildren())
+        anon.add(m_metadata.clone("execution_metadata"));
+    root.addList(anon);
 }
 
 void Stage::prepare(PointTableRef table)

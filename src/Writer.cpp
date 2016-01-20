@@ -137,10 +137,4 @@ void Writer::setAutoXForm(const PointViewPtr view)
         m_zXform.m_scale = zmax / (std::numeric_limits<int>::max)();
 }
 
-
-boost::property_tree::ptree Writer::serializePipeline() const
-{
-    return serialize(getName(), "Writer");
-}
-
 } // namespace pdal
