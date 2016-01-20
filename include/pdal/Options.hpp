@@ -38,7 +38,6 @@
 #include <pdal/Metadata.hpp>
 #include <pdal/util/Utils.hpp>
 
-#include <boost/property_tree/ptree.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/optional.hpp>
 
@@ -117,9 +116,6 @@ public:
         {
         }
     }
-
-    /// Construct from an existing boost::property_tree
-    Option(const boost::property_tree::ptree& tree);
 
     /// Equality operator
     bool operator==(const Option& rhs) const
@@ -332,8 +328,6 @@ public:
 
     Options(const Option&);
 
-    Options(const boost::property_tree::ptree& tree);
-
     // add an option
     void add(const Option& option);
 
@@ -438,8 +432,6 @@ public:
 
     // returns true iff the option name is valid
     bool hasOption(std::string const& name) const;
-
-    void dump() const;
 
     std::vector<Option> getOptions(std::string const& name="") const;
 

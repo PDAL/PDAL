@@ -131,6 +131,6 @@ endif(WITH_APPS)
 
 if(LIBXML2_FOUND)
     PDAL_ADD_TEST(pdal_io_ilvis2_metadata_test FILES io/ilvis2/Ilvis2MetadataReaderTest.cpp)
-    PDAL_ADD_TEST(pdal_io_ilvis2_reader_with_metadata_test FILES io/ilvis2/Ilvis2ReaderWithMDReaderTest.cpp)
+    PDAL_ADD_TEST(pdal_io_ilvis2_reader_metadata_test FILES io/ilvis2/Ilvis2ReaderWithMDReaderTest.cpp)
     PDAL_ADD_TEST(xml_schema_test FILES XMLSchemaTest.cpp)
 endif()
