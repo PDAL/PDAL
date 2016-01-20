@@ -51,8 +51,6 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-#include <gtest/gtest.h>
-
 namespace pdal
 {
 
