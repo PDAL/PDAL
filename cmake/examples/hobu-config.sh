@@ -24,7 +24,7 @@ fi
 
 CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DCMAKE_BUILD_TYPE=Debug \
-        -DCMAKE_INSTALL_PREFIX=/Users/hobu \
+        -DCMAKE_INSTALL_PREFIX=/Users/hobu/pdal-build \
         -DBUILD_PLUGIN_OCI=ON \
         -DWITH_GEOTIFF=ON \
         -DBUILD_PLUGIN_SQLITE=ON \
