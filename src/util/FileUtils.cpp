@@ -43,18 +43,20 @@
 #include <pdal/util/Utils.hpp>
 #include <pdal/pdal_types.hpp>
 
+using namespace std;
+
 namespace pdal
 {
 
 namespace
 {
 
-bool isStdin(std::string filename)
+bool isStdin(string filename)
 {
     return Utils::toupper(filename) == "STDIN";
 }
 
-bool isStdout(std::string filename)
+bool isStdout(string filename)
 {
     return Utils::toupper(filename) == "STOUT" ||
         Utils::toupper(filename) == "STDOUT";
@@ -62,19 +64,19 @@ bool isStdout(std::string filename)
 
 } // unnamed namespace
 
-std::istream* FileUtils::openFile(std::string const& filename, bool asBinary)
+istream* FileUtils::openFile(string const& filename, bool asBinary)
 {
     if (isStdin(filename))
-        return &std::cin;
+        return &cin;
 
     if (!FileUtils::fileExists(filename))
         return NULL;
 
-    std::ios::openmode mode = std::ios::in;
+    ios::openmode mode = ios::in;
     if (asBinary)
-        mode |= std::ios::binary;
+        mode |= ios::binary;
 
-    std::ifstream *ifs = new std::ifstream(filename, mode);
+    ifstream *ifs = new ifstream(filename, mode);
     if (!ifs->good())
     {
         delete ifs;
@@ -84,16 +86,16 @@ std::istream* FileUtils::openFile(std::string const& filename, bool asBinary)
 }
 
 
-std::ostream* FileUtils::createFile(std::string const& filename, bool asBinary)
+ostream* FileUtils::createFile(string const& filename, bool asBinary)
 {
     if (isStdout(filename))
-        return &std::cout;
+        return &cout;
 
-    std::ios::openmode mode = std::ios::out;
+    ios::openmode mode = ios::out;
     if (asBinary)
-        mode |= std::ios::binary;
+        mode |= ios::binary;
 
-    std::ostream *ofs = new std::ofstream(filename, mode);
+    ostream *ofs = new ofstream(filename, mode);
     if (! ofs->good())
     {
         delete ofs;
@@ -103,31 +105,31 @@ std::ostream* FileUtils::createFile(std::string const& filename, bool asBinary)
 }
 
 
-bool FileUtils::directoryExists(std::string const& dirname)
+bool FileUtils::directoryExists(string const& dirname)
 {
     return boost::filesystem::exists(dirname);
 }
 
 
-bool FileUtils::createDirectory(std::string const& dirname)
+bool FileUtils::createDirectory(string const& dirname)
 {
     return boost::filesystem::create_directory(dirname);
 }
 
 
-void FileUtils::deleteDirectory(std::string const& dirname)
+void FileUtils::deleteDirectory(string const& dirname)
 {
     boost::filesystem::remove_all(dirname);
 }
 
 
-void FileUtils::closeFile(std::ostream *out)
+void FileUtils::closeFile(ostream *out)
 {
     // An ofstream is closeable and deletable, but
-    // an ostream like &std::cout isn't.
+    // an ostream like &cout isn't.
     if (!out)
         return;
-    std::ofstream *ofs = dynamic_cast<std::ofstream *>(out);
+    ofstream *ofs = dynamic_cast<ofstream *>(out);
     if (ofs)
     {
         ofs->close();
@@ -136,13 +138,13 @@ void FileUtils::closeFile(std::ostream *out)
 }
 
 
-void FileUtils::closeFile(std::istream* in)
+void FileUtils::closeFile(istream* in)
 {
     // An ifstream is closeable and deletable, but
-    // an istream like &std::cin isn't.
+    // an istream like &cin isn't.
     if (!in)
         return;
-    std::ifstream *ifs = dynamic_cast<std::ifstream *>(in);
+    ifstream *ifs = dynamic_cast<ifstream *>(in);
     if (ifs)
     {
         ifs->close();
@@ -151,7 +153,7 @@ void FileUtils::closeFile(std::istream* in)
 }
 
 
-bool FileUtils::deleteFile(const std::string& file)
+bool FileUtils::deleteFile(const string& file)
 {
     if (!fileExists(file))
         return false;
@@ -160,16 +162,16 @@ bool FileUtils::deleteFile(const std::string& file)
 }
 
 
-void FileUtils::renameFile(const std::string& dest, const std::string& src)
+void FileUtils::renameFile(const string& dest, const string& src)
 {
     boost::filesystem::rename(src, dest);
 }
 
 
-bool FileUtils::fileExists(const std::string& name)
+bool FileUtils::fileExists(const string& name)
 {
     // filename may actually be a greyhound uri + pipelineId
-    std::string http = name.substr(0, 4);
+    string http = name.substr(0, 4);
     if (Utils::iequals(http, "http"))
         return true;
 
@@ -179,24 +181,24 @@ bool FileUtils::fileExists(const std::string& name)
 }
 
 
-uintmax_t FileUtils::fileSize(const std::string& file)
+uintmax_t FileUtils::fileSize(const string& file)
 {
     return boost::filesystem::file_size(file);
 }
 
 
-std::string FileUtils::readFileIntoString(const std::string& filename)
+string FileUtils::readFileIntoString(const string& filename)
 {
-    std::istream* stream = FileUtils::openFile(filename, false);
+    istream* stream = FileUtils::openFile(filename, false);
     assert(stream);
-    std::string str((std::istreambuf_iterator<char>(*stream)),
-        std::istreambuf_iterator<char>());
+    string str((istreambuf_iterator<char>(*stream)),
+        istreambuf_iterator<char>());
     FileUtils::closeFile(stream);
     return str;
 }
 
 
-std::string FileUtils::addTrailingSlash(std::string path)
+string FileUtils::addTrailingSlash(string path)
 {
     if (path[path.size() - 1] != '/' && path[path.size() - 1] != '\\')
         path += "/";
@@ -204,7 +206,7 @@ std::string FileUtils::addTrailingSlash(std::string path)
 }
 
 
-std::string FileUtils::getcwd()
+string FileUtils::getcwd()
 {
     const boost::filesystem::path p = boost::filesystem::current_path();
     return addTrailingSlash(p.string());
@@ -215,7 +217,7 @@ std::string FileUtils::getcwd()
 // Non-boost alternative.  Requires file existence.
 string FileUtils::toAbsolutePath(const string& filename)
 {
-    std::string result;
+    string result;
 
 #ifdef WIN32
     char buf[MAX_PATH]
@@ -232,7 +234,7 @@ string FileUtils::toAbsolutePath(const string& filename)
 
 // if the filename is an absolute path, just return it
 // otherwise, make it absolute (relative to current working dir) and return that
-std::string FileUtils::toAbsolutePath(const std::string& filename)
+string FileUtils::toAbsolutePath(const string& filename)
 {
 
 #if BOOST_VERSION >= 104600 && BOOST_FILESYSTEM_VERSION >= 3
@@ -250,9 +252,9 @@ std::string FileUtils::toAbsolutePath(const std::string& filename)
 //
 // note: if base dir is not absolute, first make it absolute via
 // toAbsolutePath(base)
-std::string FileUtils::toAbsolutePath(const std::string& filename, const std::string base)
+string FileUtils::toAbsolutePath(const string& filename, const string base)
 {
-    const std::string newbase = toAbsolutePath(base);
+    const string newbase = toAbsolutePath(base);
 
 #if BOOST_VERSION >= 104600 && BOOST_FILESYSTEM_VERSION >= 3
     const boost::filesystem::path p = boost::filesystem::absolute(filename, newbase);
@@ -263,7 +265,7 @@ std::string FileUtils::toAbsolutePath(const std::string& filename, const std::st
     return p.string();
 }
 
-std::string FileUtils::getFilename(const std::string& path)
+string FileUtils::getFilename(const string& path)
 {
 #ifdef _WIN32
     char pathsep = '\\';
@@ -271,14 +273,14 @@ std::string FileUtils::getFilename(const std::string& path)
     char pathsep = '/';
 #endif
 
-    std::string::size_type pos = path.find_last_of(pathsep);
-    if (pos == std::string::npos)
+    string::size_type pos = path.find_last_of(pathsep);
+    if (pos == string::npos)
         return path;
     return path.substr(pos + 1);
 }
 
 // Get the directory part of a filename.
-std::string FileUtils::getDirectory(const std::string& path)
+string FileUtils::getDirectory(const string& path)
 {
     const boost::filesystem::path dir =
          boost::filesystem::path(path).parent_path();
@@ -287,7 +289,7 @@ std::string FileUtils::getDirectory(const std::string& path)
 
 
 // Determine if the path is an absolute path
-bool FileUtils::isAbsolutePath(const std::string& path)
+bool FileUtils::isAbsolutePath(const string& path)
 {
 #if BOOST_VERSION >= 104600 && BOOST_FILESYSTEM_VERSION >= 3
     return boost::filesystem::path(path).is_absolute();
@@ -297,7 +299,7 @@ bool FileUtils::isAbsolutePath(const std::string& path)
 }
 
 
-void FileUtils::fileTimes(const std::string& filename,
+void FileUtils::fileTimes(const string& filename,
     struct tm *createTime, struct tm *modTime)
 {
 #ifdef WIN32
