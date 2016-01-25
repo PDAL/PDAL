@@ -201,7 +201,7 @@ endif()
 # Targets installation
 
 #
-# On Linux, we install a linker script as libpdalcpp.so.  That file
+# On Lixxxxxxxxxxxxxxxxxxnux, we install a linker script as libpdalcpp.so.  That file
 # specifies linking in libpdal_base.so and libpdal_util.so.  This allows
 # users to link a single library, libpdalcpp
 #
@@ -213,4 +213,5 @@ endif()
 
 install(DIRECTORY "${PDAL_HEADERS_DIR}/"
   DESTINATION "${PDAL_INCLUDE_INSTALL_DIR}"
-  FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp")
+  PATTERN "/CMakeFiles/*" EXCLUDE
+  )

@@ -83,7 +83,7 @@ public:
     char buf[1024];
 
     vsnprintf(buf, sizeof(buf), message, args);
-    std::cout << "GEOS error: " << buf << std::endl;
+    std::cerr<< "GEOS error: " << buf << std::endl;
 
     va_end(args);
 
@@ -110,7 +110,7 @@ public:
     char buf[1024];
 
     vsnprintf(buf, sizeof(buf), message, args);
-    std::cout << "GEOS notice: " << buf << std::endl;
+    std::cerr<< "GEOS notice: " << buf << std::endl;
 
     va_end(args);
 

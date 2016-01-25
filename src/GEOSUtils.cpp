@@ -67,13 +67,13 @@ ErrorHandler::ErrorHandler(bool isDebug, LogPtr log)
 #endif
 
 #ifdef GEOSContext_setErrorMessageHandler_r
-    GEOSContext_setErrorMessageHandler_r(ctx, &ErrorHandler::error_trampoline, &this);
+    GEOSContext_setErrorMessageHandler_r(ctx, &ErrorHandler::error_trampoline, this);
 #else
     GEOSContext_setErrorHandler_r(ctx, &ErrorHandler::error_trampoline);
 #endif
 
 #ifdef GEOSContext_setNoticeHandler_r
-    GEOSContext_setNoticeHandler_r(ctx, &ErrorHandler::notice_trampoline, &this);
+    GEOSContext_setNoticeHandler_r(ctx, &ErrorHandler::notice_trampoline, this);
 #else
     GEOSContext_setErrorHandler_r(ctx, &ErrorHandler::notice_trampoline);
 #endif
@@ -82,26 +82,17 @@ ErrorHandler::ErrorHandler(bool isDebug, LogPtr log)
 void ErrorHandler::log(char const* msg)
 {
     std::ostringstream oss;
-
-//     if (code == CE_Failure || code == CE_Fatal)
-//         error(code, num, msg);
-//     else if (code == CE_Debug)
-//     {
-//         oss << "GDAL debug: " << msg;
-//         if (m_log)
-//             m_log->get(LogLevel::Debug) << oss.str() << std::endl;
-//     }
+    oss << "GEOS debug: " << msg;
+    if (m_log)
+        m_log->get(LogLevel::Debug) << oss.str() << std::endl;
 }
 
 
 void ErrorHandler::error(char const* msg)
 {
     std::ostringstream oss;
-//     if (code == CE_Failure || code == CE_Fatal)
-//     {
-//         oss << "GDAL Failure number = " << num << ": " << msg;
-//         throw pdal_error(oss.str());
-//     }
+    oss << "GEOS failure: '" << msg <<"'";
+    throw pdal_error(oss.str());
 }
 
 
