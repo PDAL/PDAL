@@ -39,15 +39,12 @@
 #include <cstdarg>
 #include <functional>
 
-#ifdef PDAL_HAVE_GEOS
 #include <geos_c.h>
-#endif
 
 
 namespace pdal
 {
 
-#ifdef PDAL_HAVE_GEOS
 namespace
 {
 
@@ -228,28 +225,6 @@ static double computeArea(const std::string& wkt)
 
 } // namespace Geometry
 
-#else
-
-namespace Geometry
-{
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-function"
-static std::string smoothPolygon(const std::string& wkt, double tolerance,
-    uint32_t precision, double area_threshold)
-{
-    throw pdal_error("Can't call smoothPolygon.  PDAL not built with GEOS.");
-}
-
-static double computeArea(const std::string& wkt)
-{
-    throw pdal_error("Can't call computeArea.  PDAL not built with GEOS.");
-}
-#pragma GCC diagnostic pop
-
-} // namespace Geometry
-
-#endif
 
 } // end geos
 } // namespace pdal

@@ -166,7 +166,7 @@ TEST(SpatialReferenceTest, calcZone)
 }
 
 
-#if defined(PDAL_HAVE_GEOS) && defined(PDAL_HAVE_LIBGEOTIFF)
+#if defined(PDAL_HAVE_LIBGEOTIFF)
 // Test fetching SRS from an existing file
 TEST(SpatialReferenceTest, test_read_srs)
 {
@@ -255,7 +255,7 @@ TEST(SpatialReferenceTest, test_vertical_datums)
 #endif //PDAL_HAVE_LIBGEOTIFF
 
 
-#if defined(PDAL_HAVE_GEOS) && defined(PDAL_HAVE_LIBGEOTIFF)
+#if defined(PDAL_HAVE_LIBGEOTIFF)
 // Try writing only the WKT VLR to a file, and see if the resulting
 // file still works ok.
 TEST(SpatialReferenceTest, test_writing_vlr)

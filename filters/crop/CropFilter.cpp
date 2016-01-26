@@ -55,7 +55,6 @@ CREATE_STATIC_PLUGIN(1, 0, CropFilter, Filter, s_info)
 
 std::string CropFilter::getName() const { return s_info.name; }
 
-#ifdef PDAL_HAVE_GEOS
 namespace geos
 {
 
@@ -83,14 +82,11 @@ static void _GEOSWarningHandler(const char *fmt, ...)
 }
 
 } // geos
-#endif
 
 CropFilter::CropFilter() : pdal::Filter()
 {
     m_cropOutside = false;
-#ifdef PDAL_HAVE_GEOS
     m_geosEnvironment = 0;
-#endif
 }
 
 
@@ -120,7 +116,6 @@ void CropFilter::processOptions(const Options& options)
     }
 
     m_polys = options.getValues<std::string>("polygon");
-#ifdef PDAL_HAVE_GEOS
     if (m_polys.size())
     {
         m_geoms.clear();
@@ -138,20 +133,9 @@ void CropFilter::processOptions(const Options& options)
             m_geoms.push_back(g);
         }
     }
-#else
-    if (m_polys.size())
-    {
-        std::ostringstream oss;
-
-        oss << "Can't specify polygons for " << getName() <<
-            " without PDAL built with GEOS.";
-        throw pdal_error(oss.str());
-    }
-#endif
 }
 
 
-#ifdef PDAL_HAVE_GEOS
 GEOSGeometry *CropFilter::validatePolygon(const std::string& poly)
 {
     GEOSGeometry *geom = GEOSGeomFromWKT_r(m_geosEnvironment, poly.c_str());
@@ -221,7 +205,6 @@ void CropFilter::freePolygon(GeomPkg& g, bool freeBase)
         g.m_geomXform = NULL;
     }
 }
-#endif
 
 
 Options CropFilter::getDefaultOptions()
@@ -250,11 +233,10 @@ void CropFilter::ready(PointTableRef table)
 
 bool CropFilter::processOne(PointRef& point)
 {
-#ifdef PDAL_HAVE_GEOS
     for (auto& geom : m_geoms)
         if (!crop(point, geom))
             return false;
-#endif
+
     for (auto& box : m_bounds)
         if (!crop(point, box))
             return false;
@@ -275,7 +257,6 @@ PointViewSet CropFilter::run(PointViewPtr view)
         return viewSet;
     }
 
-#ifdef PDAL_HAVE_GEOS
     for (auto& geom : m_geoms)
     {
         // If this is the first time through or the SRS has changed,
@@ -291,7 +272,7 @@ PointViewSet CropFilter::run(PointViewPtr view)
         viewSet.insert(outView);
     }
     m_lastSrs = srs;
-#endif
+
     for (auto& box : m_bounds)
     {
         PointViewPtr outView = view->makeNew();
@@ -324,7 +305,6 @@ void CropFilter::crop(const BOX2D& box, PointView& input, PointView& output)
 }
 
 
-#ifdef PDAL_HAVE_GEOS
 GEOSGeometry *CropFilter::createPoint(double x, double y, double z)
 {
     // precise filtering based on the geometry
@@ -385,19 +365,16 @@ void CropFilter::crop(const GeomPkg& g, PointView& input, PointView& output)
     }
 }
 
-#endif
 
 
 void CropFilter::done(PointTableRef /*table*/)
 {
-#ifdef PDAL_HAVE_GEOS
     for (auto& g : m_geoms)
         freePolygon(g, true);
     m_geoms.clear();
     if (m_geosEnvironment)
         finishGEOS_r(m_geosEnvironment);
     m_geosEnvironment = 0;
-#endif
 }
 
 } // namespace pdal

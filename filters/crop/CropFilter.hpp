@@ -36,9 +36,7 @@
 
 #include <pdal/Filter.hpp>
 
-#ifdef PDAL_HAVE_GEOS
 #include <geos_c.h>
-#endif
 
 extern "C" int32_t CropFilter_ExitFunc();
 extern "C" PF_ExitFunc CropFilter_InitPlugin();
@@ -66,12 +64,6 @@ private:
     SpatialReference m_assignedSrs;
     SpatialReference m_lastSrs;
 
-#ifndef PDAL_HAVE_GEOS
-    typedef void *GEOSContextHandle_t;
-    typedef void GEOSGeometry;
-    typedef void GEOSPreparedGeometry;
-#endif
-
 	GEOSContextHandle_t m_geosEnvironment;
     struct GeomPkg
     {
@@ -94,13 +86,11 @@ private:
     void crop(const BOX2D& box, PointView& input, PointView& output);
     bool crop(PointRef& point, const GeomPkg& g);
     void crop(const GeomPkg& g, PointView& input, PointView& output);
-#ifdef PDAL_HAVE_GEOS
     GEOSGeometry *validatePolygon(const std::string& poly);
     void preparePolygon(GeomPkg& g, const SpatialReference& to);
     void freePolygon(GeomPkg& g, bool freeBase);
     BOX2D computeBounds(GEOSGeometry const *geometry);
     GEOSGeometry *createPoint(double x, double y, double z);
-#endif
 
     CropFilter& operator=(const CropFilter&); // not implemented
     CropFilter(const CropFilter&); // not implemented
