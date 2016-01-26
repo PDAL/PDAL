@@ -32,18 +32,18 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/GlobalEnvironment.hpp>
-#include <pdal/Kernel.hpp>
-#include <pdal/PDALUtils.hpp>
-
 #include <cctype>
 #include <iostream>
 
 #include <boost/algorithm/string.hpp>
 
+#include <pdal/GlobalEnvironment.hpp>
+#include <pdal/Kernel.hpp>
+#include <pdal/PDALUtils.hpp>
 #include <pdal/pdal_config.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include <pdal/pdal_config.hpp>
 
@@ -549,9 +549,36 @@ void Kernel::outputVersion()
 
 void Kernel::addBasicSwitchSet()
 {
+    ProgramArgs args;
+
+    args.add("help,h", "Print help message", m_showHelp);
+    args.add("options", "Show available options for a driver",
+        m_showOptions, "all");
+    args.add("debug,d", "Enable debug mode", m_isDebug);
+    args.add("report-debug", "Report PDAL compilation DEBUG status",
+        m_reportDebug, true);
+    args.add("label", "A string to label the process with", m_label);
+    args.add("verbose,v", "Set verbose message level", m_verboseLevel, 0u);
+    args.add("version", "Show version info", m_showVersion);
+    args.add("visualize", "Visualize result", m_visualize);
+    args.add("stdin,s", "Read pipeline XML from stdin", m_usestdin);
+    /**
+    args.add("heartbeat", "Shell command to run for every progress heartbeat",
+        m_heartbeat_shell_command);
+    **/
+    args.add("scale",
+         "A comma-separated or quoted, space-separated list of scales to "
+         "set on the output file: \n--scale 0.1,0.1,0.00001\n--scale \""
+         "0.1 0.1 0.00001\"", m_scales);
+    args.add("offset",
+         "A comma-separated or quoted, space-separated list of offsets to "
+         "set on the output file: \n--offset 0,0,0\n--offset "
+         "\"1234 5678 91011\"", m_offsets);
+
     po::options_description* basic_options =
         new po::options_description("basic options");
 
+    /**
     basic_options->add_options()
     ("help,h",
         po::value<bool>(&m_showHelp)->zero_tokens()->implicit_value(true),
@@ -596,6 +623,7 @@ void Kernel::addBasicSwitchSet()
     ;
 
     addSwitchSet(basic_options);
+    **/
 }
 
 
