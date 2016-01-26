@@ -38,9 +38,7 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/Bounds.hpp>
 
-#ifdef PDAL_HAVE_GEOS
 #include <geos_c.h>
-#endif
 
 #include "jace/proxy/mil/nga/giat/geowave/core/store/CloseableIterator.h"
 using jace::proxy::mil::nga::giat::geowave::core::store::CloseableIterator;

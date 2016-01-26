@@ -119,7 +119,6 @@ TEST(CropFilterTest, test_crop)
 
 TEST(CropFilterTest, test_crop_polygon)
 {
-#ifdef PDAL_HAVE_GEOS
     Options ops1;
     ops1.add("filename", Support::datapath("las/1.2-with-color.las"));
     LasReader reader;
@@ -153,12 +152,10 @@ TEST(CropFilterTest, test_crop_polygon)
     EXPECT_EQ(view->size(), 47u);
 
     FileUtils::closeFile(wkt_stream);
-#endif
 }
 
 TEST(CropFilterTest, test_crop_polygon_reprojection)
 {
-#ifdef PDAL_HAVE_GEOS
     Options options;
 
     options.add("spatialreference", Support::datapath("autzen/autzen-srs.wkt"));
@@ -199,7 +196,6 @@ TEST(CropFilterTest, test_crop_polygon_reprojection)
     EXPECT_EQ(view->size(), 47u);
 
     FileUtils::closeFile(wkt_stream);
-#endif
 }
 
 TEST(CropFilterTest, multibounds)

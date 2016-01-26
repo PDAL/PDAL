@@ -35,7 +35,7 @@
 #include "HexBin.hpp"
 
 #include <hexer/HexIter.hpp>
-#include <pdal/Geometry.hpp>
+#include <pdal/GEOSUtils.hpp>
 #include <pdal/StageFactory.hpp>
 
 using namespace hexer;
@@ -169,11 +169,11 @@ void HexBin::done(PointTableRef table)
     double cull =
         m_options.getValueOrDefault<double>("hole_cull_area_tolerance",
             6 * tolerance * tolerance);
-    std::string smooth = Geometry::smoothPolygon(polygon.str(), tolerance,
+    std::string smooth = pdal::geos::Geometry::smoothPolygon(polygon.str(), tolerance,
         precision, cull);
 
     m_metadata.add("boundary", smooth, "Approximated MULTIPOLYGON of domain");
-    double area = Geometry::computeArea(polygon.str());
+    double area = pdal::geos::Geometry::computeArea(polygon.str());
 
 //    double density = (double) m_grid->densePointCount() / area ;
     double density = (double) m_count/ area ;

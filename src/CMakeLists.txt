@@ -42,7 +42,7 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/Filter.hpp"
   "${PDAL_HEADERS_DIR}/FlexWriter.hpp"
   "${PDAL_HEADERS_DIR}/GDALUtils.hpp"
-  "${PDAL_HEADERS_DIR}/Geometry.hpp"
+  "${PDAL_HEADERS_DIR}/GEOSUtils.hpp"
   "${PDAL_HEADERS_DIR}/GlobalEnvironment.hpp"
   "${PDAL_HEADERS_DIR}/gitsha.h"
   "${PDAL_HEADERS_DIR}/KDIndex.hpp"
@@ -78,6 +78,7 @@ set(PDAL_BASE_CPP
   DynamicLibrary.cpp
   gitsha.cpp
   GDALUtils.cpp
+  GEOSUtils.cpp
   GlobalEnvironment.cpp
   Kernel.cpp
   KernelFactory.cpp
@@ -212,4 +213,5 @@ endif()
 
 install(DIRECTORY "${PDAL_HEADERS_DIR}/"
   DESTINATION "${PDAL_INCLUDE_INSTALL_DIR}"
-  FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp")
+  PATTERN "/CMakeFiles/*" EXCLUDE
+  )
