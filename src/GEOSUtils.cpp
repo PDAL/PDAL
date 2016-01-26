@@ -72,11 +72,14 @@ ErrorHandler::ErrorHandler(bool isDebug, LogPtr log)
     GEOSContext_setErrorHandler_r(ctx, &ErrorHandler::error_trampoline);
 #endif
 
+    if (m_isDebug)
+    {
 #ifdef GEOSContext_setNoticeHandler_r
-    GEOSContext_setNoticeHandler_r(ctx, &ErrorHandler::notice_trampoline, this);
+        GEOSContext_setNoticeHandler_r(ctx, &ErrorHandler::notice_trampoline, this);
 #else
-    GEOSContext_setErrorHandler_r(ctx, &ErrorHandler::notice_trampoline);
+        GEOSContext_setErrorHandler_r(ctx, &ErrorHandler::notice_trampoline);
 #endif
+    }
 }
 
 void ErrorHandler::log(char const* msg)
@@ -98,14 +101,13 @@ void ErrorHandler::error(char const* msg)
 
 ErrorHandler::~ErrorHandler()
 {
-
 #ifdef GEOS_finish_r
     GEOS_finish_r(ctx);
 #else
     finishGEOS_r(ctx);
 #endif
-//     CPLPopErrorHandler();
 }
+
 } // namespace geos
 } // namespace pdal
 

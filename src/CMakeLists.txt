@@ -61,6 +61,7 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/PointTable.hpp"
   "${PDAL_HEADERS_DIR}/PointView.hpp"
   "${PDAL_HEADERS_DIR}/PointViewIter.hpp"
+  "${PDAL_HEADERS_DIR}/Polygon.hpp"
   "${PDAL_HEADERS_DIR}/QuadIndex.hpp"
   "${PDAL_HEADERS_DIR}/Reader.hpp"
   "${PDAL_HEADERS_DIR}/SpatialReference.hpp"
@@ -86,11 +87,10 @@ set(PDAL_BASE_CPP
   Log.cpp
   Options.cpp
   PDALUtils.cpp
-
   PointLayout.cpp
   PointTable.cpp
   PointView.cpp
-
+  Polygon.cpp
   PipelineManager.cpp
   PipelineReader.cpp
   PipelineWriter.cpp

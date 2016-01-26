@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2012, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2016, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*     * Neither the name of Hobu, Inc. nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -31,64 +31,55 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
-
 #pragma once
 
-#include <pdal/pdal_internal.hpp>
+#include <pdal/pdal_types.hpp>
 #include <pdal/Log.hpp>
+#include <pdal/PointRef.hpp>
+#include <pdal/GDALUtils.hpp>
+#include <pdal/GEOSUtils.hpp>
+#include <pdal/util/Bounds.hpp>
 
-#include <mutex>
-#include <memory>
+#include <pdal/SpatialReference.hpp>
+#include <pdal/GlobalEnvironment.hpp>
+
+
 
 namespace pdal
 {
-namespace gdal
-{
-class ErrorHandler;
-}
 
-namespace geos
-{
-class ErrorHandler;
-}
 
-class PDAL_DLL GlobalEnvironment
+class PDAL_DLL Polygon
 {
 public:
-    static GlobalEnvironment& get();
-    static void startup();
-    static void shutdown();
 
-    void initializeGDAL(LogPtr log, bool bIsDebug = false);
-    void initializeGEOS(LogPtr log, bool bIsDebug = false);
+    Polygon(const std::string& wkt_or_json,
+           SpatialReference ref = SpatialReference());
+    Polygon(const Polygon&);
+    Polygon(GEOSGeometry* g, const SpatialReference& srs, geos::ErrorHandler& ctx);
 
-    geos::ErrorHandler& geos()
-    {
-        if (!m_geosDebug)
-        {
-            initializeGEOS(LogPtr(), false);
-        }
-        return *m_geosDebug;
-    }
-    gdal::ErrorHandler& gdal()
-    {
-        if (!m_gdalDebug)
-        {
-            initializeGDAL(LogPtr(), false);
-        }
-        return *m_gdalDebug;
-    }
+    ~Polygon();
 
+    Polygon simplify(double distance_tolerance, double area_tolerance) const;
+    double area() const;
+
+    bool covers(PointRef& ref) const;
+    bool valid() const;
+    std::string validReason() const;
+
+    std::string wkt(double precision=8) const;
+    std::string json(double precision=8) const;
+
+    BOX3D bounds() const;
 private:
-    GlobalEnvironment();
-    ~GlobalEnvironment();
 
-    std::unique_ptr<gdal::ErrorHandler> m_gdalDebug;
-    std::unique_ptr<geos::ErrorHandler> m_geosDebug;
+    GEOSGeometry *m_geom;
+    const GEOSPreparedGeometry *m_prepGeom;
 
-    GlobalEnvironment(const GlobalEnvironment&); // nope
-    GlobalEnvironment& operator=(const GlobalEnvironment&); // nope
+    SpatialReference m_srs;
+    geos::ErrorHandler& m_ctx;
 };
+
 
 } // namespace pdal
 
