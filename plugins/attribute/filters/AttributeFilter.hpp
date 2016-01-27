@@ -60,7 +60,7 @@ typedef std::shared_ptr<void> OGRGeometryPtr;
 class PDAL_DLL AttributeFilter : public Filter
 {
 public:
-    AttributeFilter() : Filter(), m_ds(0), m_lyr(0), m_geosEnvironment(0)
+    AttributeFilter() : Filter(), m_ds(0), m_lyr(0)
     {}
 
     static void * create();
@@ -92,8 +92,6 @@ private:
     std::string m_layer;
     Dimension::Id::Enum m_dim;
 
-    GEOSContextHandle_t m_geosEnvironment;
-    std::unique_ptr<pdal::gdal::ErrorHandler> m_gdal_debug;
     void UpdateGEOSBuffer(PointView& view);
 
 };

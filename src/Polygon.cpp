@@ -35,6 +35,8 @@
 #include <pdal/Polygon.hpp>
 #include "cpl_string.h"
 
+#include <ogr_geometry.h>
+
 namespace pdal
 {
 
@@ -88,12 +90,14 @@ void Polygon::update(const std::string& wkt_or_json,
         }
         OGRFree(gdal_wkt);
     }
+    prepare();
 
+}
+void Polygon::prepare()
+{
     m_prepGeom = GEOSPrepare_r(m_ctx.ctx, m_geom);
     if (!m_prepGeom)
-        throw pdal_error("unable to prepare geometry for index-accelerated "
-            "intersection");
-
+        throw pdal_error("unable to prepare geometry for index-accelerated access");
 }
 
 Polygon::Polygon(const Polygon& input)
@@ -101,7 +105,7 @@ Polygon::Polygon(const Polygon& input)
     , m_srs(input.m_srs)
     , m_ctx(input.m_ctx)
 {
-
+    prepare();
 }
 
 Polygon::Polygon(GEOSGeometry* g, const SpatialReference& srs, geos::ErrorHandler& ctx)
@@ -109,7 +113,41 @@ Polygon::Polygon(GEOSGeometry* g, const SpatialReference& srs, geos::ErrorHandle
     , m_srs(srs)
     , m_ctx(ctx)
 {
+    prepare();
 }
+
+Polygon::Polygon(OGRGeometryH g, const SpatialReference& srs, geos::ErrorHandler& ctx)
+    : m_srs(srs)
+    , m_ctx(ctx)
+{
+
+    OGRwkbGeometryType t = OGR_G_GetGeometryType(g);
+
+    if (!(t == wkbPolygon ||
+        t == wkbMultiPolygon ||
+        t == wkbPolygon25D ||
+        t == wkbMultiPolygon25D))
+    {
+        std::ostringstream oss;
+        oss << "pdal::Polygon cannot construct geometry because OGR geometry is not Polygon or MultiPolygon!";
+        throw pdal::pdal_error(oss.str());
+    }
+
+    OGRGeometry *ogr_g = (OGRGeometry*)g;
+    //
+    // Convert the the GDAL geom to WKB in order to avoid the version
+    // context issues with exporting directoly to GEOS.
+    OGRwkbByteOrder bo =
+        GEOS_getWKBByteOrder() == GEOS_WKB_XDR ? wkbXDR : wkbNDR;
+    int wkbSize = ogr_g->WkbSize();
+    std::vector<unsigned char> wkb(wkbSize);
+
+    ogr_g->exportToWkb(bo, wkb.data());
+    m_geom = GEOSGeomFromWKB_buf_r(m_ctx.ctx, wkb.data(), wkbSize);
+    prepare();
+
+}
+
 
 Polygon Polygon::simplify(double distance_tolerance, double area_tolerance) const
 {
@@ -175,18 +213,6 @@ Polygon Polygon::simplify(double distance_tolerance, double area_tolerance) cons
     GEOSGeom_destroy_r(m_ctx.ctx, o);
 
     return p;
-
-//     GEOSWKTWriter *writer = GEOSWKTWriter_create_r(m_ctx.ctx);
-//     GEOSWKTWriter_setRoundingPrecision_r(m_ctx.ctx, writer, precision);
-//
-//     char *smoothWkt = GEOSWKTWriter_write_r(m_ctx.ctx, writer, o);
-//
-//     std::string output(smoothWkt);
-//     GEOSFree_r(m_ctx.ctx, smoothWkt);
-//     GEOSWKTWriter_destroy_r(m_ctx.ctx, writer);
-//     GEOSGeom_destroy_r(m_ctx.ctx, smoothed);
-
-
 }
 
 double Polygon::area() const

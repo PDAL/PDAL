@@ -59,6 +59,7 @@ public:
            geos::ErrorHandler& ctx = pdal::GlobalEnvironment::get().geos());
     Polygon(const Polygon&);
     Polygon(GEOSGeometry* g, const SpatialReference& srs, geos::ErrorHandler& ctx);
+    Polygon(OGRGeometryH g, const SpatialReference& srs, geos::ErrorHandler& ctx);
 
     ~Polygon();
     void update(const std::string& wkt_or_json,
@@ -92,6 +93,9 @@ private:
 
     SpatialReference m_srs;
     geos::ErrorHandler& m_ctx;
+
+    void prepare();
+
     friend PDAL_DLL std::ostream& operator<<(std::ostream& ostr,
         const Polygon& p);
     friend PDAL_DLL std::istream& operator>>(std::istream& istr,
