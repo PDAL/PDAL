@@ -38,11 +38,25 @@
 namespace pdal
 {
 
+Polygon::Polygon()
+    : m_geom(0)
+    , m_ctx(pdal::GlobalEnvironment::get().geos())
+{
+
+}
 
 Polygon::Polygon(const std::string& wkt_or_json,
+                   SpatialReference ref,
+                   geos::ErrorHandler& ctx)
+    : m_geom(0)
+    , m_srs(ref)
+    , m_ctx(ctx)
+{
+    update(wkt_or_json, ref);
+}
+
+void Polygon::update(const std::string& wkt_or_json,
                    SpatialReference ref)
-    : m_srs(ref)
-    , m_ctx(pdal::GlobalEnvironment::get().geos())
 {
     bool isJson = wkt_or_json.find("{") != wkt_or_json.npos ||
                   wkt_or_json.find("}") != wkt_or_json.npos;
@@ -244,6 +258,24 @@ BOX3D Polygon::bounds() const
 
 }
 
+bool Polygon::equals(const Polygon& p, double tolerance) const
+{
+
+    char c = GEOSEqualsExact_r(m_ctx.ctx, m_geom, p.m_geom, tolerance);
+    return (bool) c;
+}
+
+bool Polygon::operator==(const Polygon& input) const
+{
+    return this->equals(input);
+}
+
+
+bool Polygon::operator!=(const Polygon& input) const
+{
+    return !(this->equals(input));
+}
+
 bool Polygon::valid() const
 {
     int gtype = GEOSGeomTypeId_r(m_ctx.ctx, m_geom);
@@ -300,6 +332,25 @@ std::string Polygon::json(double precision) const
 Polygon::~Polygon()
 {
     GEOSGeom_destroy_r(m_ctx.ctx, m_geom);
+}
+
+std::ostream& operator<<(std::ostream& ostr, const Polygon& p)
+{
+    ostr << p.wkt();
+    return ostr;
+}
+
+
+std::istream& operator>>(std::istream& istr, Polygon& p)
+{
+
+    std::ostringstream oss;
+    oss << istr.rdbuf();
+
+    std::string wkt = oss.str();
+
+    p.update(wkt);
+    return istr;
 }
 
 } // namespace geos

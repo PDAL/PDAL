@@ -53,17 +53,31 @@ class PDAL_DLL Polygon
 {
 public:
 
+    Polygon();
     Polygon(const std::string& wkt_or_json,
-           SpatialReference ref = SpatialReference());
+           SpatialReference ref = SpatialReference(),
+           geos::ErrorHandler& ctx = pdal::GlobalEnvironment::get().geos());
     Polygon(const Polygon&);
     Polygon(GEOSGeometry* g, const SpatialReference& srs, geos::ErrorHandler& ctx);
 
     ~Polygon();
+    void update(const std::string& wkt_or_json,
+                SpatialReference ref = SpatialReference());
+
+
+    bool equals(const Polygon& other, double tolerance=0.0001) const;
+    bool operator==(const Polygon& other) const;
+    bool operator!=(const Polygon& other) const;
+    bool operator<(const Polygon& other) const
+        { return wkt() < other.wkt(); }
+
 
     Polygon simplify(double distance_tolerance, double area_tolerance) const;
     double area() const;
 
     bool covers(PointRef& ref) const;
+    bool equal(const Polygon& p) const;
+
     bool valid() const;
     std::string validReason() const;
 
@@ -78,8 +92,16 @@ private:
 
     SpatialReference m_srs;
     geos::ErrorHandler& m_ctx;
+    friend PDAL_DLL std::ostream& operator<<(std::ostream& ostr,
+        const Polygon& p);
+    friend PDAL_DLL std::istream& operator>>(std::istream& istr,
+        Polygon& p);
 };
 
+
+PDAL_DLL std::ostream& operator<<(std::ostream& ostr,
+    const Polygon& p);
+PDAL_DLL std::istream& operator>>(std::istream& istr, Polygon& p);
 
 } // namespace pdal
 

@@ -155,4 +155,21 @@ TEST(PolygonTest, bounds)
     EXPECT_FLOAT_EQ(b.maxz, 438.70996);
 }
 
+TEST(PolygonTest, streams)
+{
+    pdal::Polygon p(getWKT());
+
+    std::stringstream ss(std::stringstream::in | std::stringstream::out);
+
+    ss << p;
+
+    pdal::Polygon p2;
+    ss >> p2;
+
+    EXPECT_TRUE(p == p2);
+
 }
+
+
+
+} // namespace pdal
