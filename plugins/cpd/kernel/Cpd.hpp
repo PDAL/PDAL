@@ -53,7 +53,7 @@ public:
 
 private:
     CpdKernel() {};
-    void addSwitches();
+    virtual void addSwitches(ProgramArgs& args);
     void validateSwitches();
     PointViewPtr readFile(const std::string& filename, PointTableRef table,
         arma::mat& mat);

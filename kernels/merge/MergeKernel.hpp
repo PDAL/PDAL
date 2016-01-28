@@ -51,7 +51,7 @@ public:
     int execute();
 
 private:
-    void addSwitches();
+    void addSwitches(ProgramArgs& args);
     void validateSwitches();
 
     StringList m_files;

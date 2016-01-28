@@ -58,7 +58,7 @@ public:
 
 
 private:
-    void addSwitches(); // overrride
+    virtual void addSwitches(ProgramArgs& args);
     void validateSwitches(); // overrride
 
     void checkPoints(const PointView& source_data,

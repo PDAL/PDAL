@@ -140,19 +140,15 @@ void ViewKernel::validateSwitches()
 }
 
 
-void ViewKernel::addSwitches()
+void ViewKernel::addSwitches(ProgramArgs& args)
 {
-    po::options_description* file_options = new po::options_description("file options");
+    Arg *arg;
 
-    file_options->add_options()
-    ("input,i", po::value<std::string>(&m_inputFile)->default_value(""), "input file name")
-    ("point,p", po::value<std::string >(&m_pointIndexes), "point to dump")
-    ;
-
-    addSwitchSet(file_options);
-
-    addPositionalSwitch("input", 1);
+    arg = args.add("input,i", "Input filename", m_inputFile);
+    arg->setPositional();
+    args.add("point,p", "Point to dump", m_pointIndexes);
 }
+
 
 int ViewKernel::execute()
 {

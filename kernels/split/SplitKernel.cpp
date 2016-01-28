@@ -59,29 +59,20 @@ std::string SplitKernel::getName() const
     double m_xOrigin;
     double m_yOrigin;
 
-void SplitKernel::addSwitches()
+void SplitKernel::addSwitches(ProgramArgs& args)
 {
-    po::options_description* file_options =
-        new po::options_description("file options");
+    Arg *arg;
 
-    file_options->add_options()
-        ("length", po::value<double>(&m_length)->default_value(0.0),
-         "Edge length for splitter cells")
-        ("capacity", po::value<uint32_t>(&m_capacity)->default_value(0),
-         "Point capacity of chipper cells")
-        ("origin_x", po::value<double>(&m_xOrigin)->default_value(std::numeric_limits<double>::quiet_NaN()),
-         "Origin in X axis for splitter cells")
-        ("origin_y", po::value<double>(&m_yOrigin)->default_value(std::numeric_limits<double>::quiet_NaN()),
-         "Origin in Y axis for splitter cells")
-        ("input,i", po::value<std::string>(&m_inputFile)->default_value(""),
-         "input file name")
-        ("output,o", po::value<std::string>(&m_outputFile)->default_value(""),
-         "output file name")
-        ;
-
-    addSwitchSet(file_options);
-    addPositionalSwitch("input", 1);
-    addPositionalSwitch("output", 1);
+    arg = args.add("length", "Edge length for splitter cells", m_length, 0.0);
+    arg->setPositional();
+    arg = args.add("capacity", "Point capacity of chipper cells", m_capacity);
+    arg->setPositional();
+    args.add("origin_x", "Origin in X axis for splitter cells", m_xOrigin,
+        std::numeric_limits<double>::quiet_NaN());
+    args.add("origin_y", "Origin in Y axis for splitter cells", m_yOrigin,
+        std::numeric_limits<double>::quiet_NaN());
+    args.add("input,i", "Input filename", m_inputFile);
+    args.add("output,o", "Output filename", m_outputFile);
 }
 
 

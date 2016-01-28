@@ -49,7 +49,7 @@ public:
 
 private:
     PCLKernel();
-    void addSwitches();
+    virtual void addSwitches(ProgramArgs& args);
     void validateSwitches();
 
     std::unique_ptr<PipelineManager> m_manager;

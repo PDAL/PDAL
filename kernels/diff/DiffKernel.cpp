@@ -66,29 +66,13 @@ void DiffKernel::validateSwitches()
 }
 
 
-void DiffKernel::addSwitches()
+void DiffKernel::addSwitches(ProgramArgs& args)
 {
-    namespace po = boost::program_options;
-
-    po::options_description* file_options =
-        new po::options_description("file options");
-
-    file_options->add_options()
-        ("source", po::value<std::string>(&m_sourceFile), "source file name")
-        ("candidate", po::value<std::string>(&m_candidateFile),
-            "candidate file name")
-    ;
-
-    addSwitchSet(file_options);
-    po::options_description* processing_options =
-        new po::options_description("processing options");
-
-    processing_options->add_options();
-
-    addSwitchSet(processing_options);
-
-    addPositionalSwitch("source", 1);
-    addPositionalSwitch("candidate", 2);
+    Arg *arg;
+    arg = args.add("source", "Source filename", m_sourceFile);
+    arg->setPositional();
+    arg = args.add("candidate", "Candidate filename", m_candidateFile);
+    arg->setPositional();
 }
 
 

@@ -34,8 +34,6 @@
 
 #pragma once
 
-#include <pdal/KernelSupport.hpp>
-#include <pdal/pdal_export.hpp>
 
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(push)
@@ -52,6 +50,9 @@
 #include <memory>
 #include <string>
 #include <vector>
+
+#include <pdal/KernelSupport.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace po = boost::program_options;
 
@@ -91,8 +92,7 @@ protected:
     Stage& makeWriter(const std::string& outputFile, Stage& parent);
 
 public:
-    // implement this, with calls to addOptionSet()
-    virtual void addSwitches() {}
+    virtual void addSwitches(ProgramArgs& args) {}
 
     // implement this, to do sanity checking of cmd line
     // will throw if the user gave us bad options
@@ -104,7 +104,6 @@ public:
 
     void addSwitchSet(po::options_description* options);
     void addHiddenSwitchSet(po::options_description* options);
-    void addPositionalSwitch(const char* name, int max_count);
     void setCommonOptions(Options &options);
 
     void setProgressShellCommand(std::vector<std::string> const& command)
@@ -150,22 +149,19 @@ protected:
     bool argumentSpecified(const std::string& name);
 
     bool m_usestdin;
-    int m_argc;
-    const char** m_argv;
     Log m_log;
 
 private:
     int innerRun();
-    void parseSwitches();
     void outputHelp();
     void outputVersion();
-    void addBasicSwitchSet();
+    void addBasicSwitches(ProgramArgs& args);
     void collectExtraOptions();
 
-    int do_switches();
-    int do_startup();
-    int do_execution();
-    int do_shutdown();
+    void doSwitches(int argc, const char *argv[], ProgramArgs& args);
+    int doStartup();
+    int doExecution();
+    int doShutdown();
 
     static bool test_parseOption(std::string o, std::string& stage,
         std::string& option, std::string& value);
@@ -173,7 +169,7 @@ private:
     bool m_isDebug;
     uint32_t m_verboseLevel;
     bool m_showHelp;
-    std::string m_showOptions;
+    bool m_showOptions;
     bool m_showVersion;
     bool m_showTime;
     std::string m_appName;

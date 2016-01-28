@@ -75,7 +75,7 @@ public:
 
 private:
     DeltaKernel();
-    void addSwitches();
+    void addSwitches(ProgramArgs& args);
     PointViewPtr loadSet(const std::string& filename, PointTable& table);
     MetadataNode dump(PointViewPtr& srcView, PointViewPtr& candView,
         KD3Index& index, DimIndexMap& dims);

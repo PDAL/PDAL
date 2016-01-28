@@ -246,11 +246,11 @@ int main(int argc, char* argv[])
     // Dispatch execution to the kernel, passing all remaining args
     if (isValidKernel)
     {
-        int count(argc - 1); // remove the 1st argument
-        const char** args = const_cast<const char**>(&argv[1]);
+        int count(argc - 2); // remove 'pdal' and the kernel name
+        argv += 2;
         void *kernel = PluginManager::createObject(fullname);
         std::unique_ptr<Kernel> app(static_cast<Kernel *>(kernel));
-        return app->run(count, args, command);
+        return app->run(count, const_cast<char const **>(argv), command);
     }
 
     // Otherwise, process the remaining args to see if they are supported

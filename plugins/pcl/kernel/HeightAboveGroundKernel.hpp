@@ -54,7 +54,7 @@ public:
 
 private:
     void validateSwitches();
-    void addSwitches();
+    virtual void addSwitches(ProgramArgs& args);
 
     bool m_use_classification;
 

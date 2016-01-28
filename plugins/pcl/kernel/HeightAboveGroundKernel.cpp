@@ -79,20 +79,18 @@ void HeightAboveGroundKernel::validateSwitches()
     // should probably also verify that there is a classification dimension if --use_classification == true
 }
 
-void HeightAboveGroundKernel::addSwitches()
+void HeightAboveGroundKernel::addSwitches(ProgramArgs& args)
 {
-    po::options_description* options = new po::options_description("file options");
-    options->add_options()
-    ("input,i", po::value<std::string>(&m_input_file)->default_value(""), "input file name")
-    ("ground,g", po::value<std::string>(&m_ground_file)->default_value(""), "ground file name")
-    ("output,o", po::value<std::string>(&m_output_file)->default_value(""), "output file name")
-    ("use_classification,c", po::bool_switch(&m_use_classification)->default_value(false), "use existing classification labels?")
-    ;
+    Arg *arg;
 
-    addSwitchSet(options);
-    addPositionalSwitch("input", 1);
-    addPositionalSwitch("ground", 1);
-    addPositionalSwitch("output", 1);
+    arg = args.add("input,i", "Input filename", m_input_file);
+    arg->setPositional();
+    arg = args.add("ground,g", "Ground filename", m_ground_file);
+    arg->setPositional();
+    arg = args.add("output,o", "Output filename", m_output_file);
+    arg->setPositional();
+    args.add("use_classification,c", "Use existing classification labels?",
+        m_use_classification);
 }
 
 int HeightAboveGroundKernel::execute()

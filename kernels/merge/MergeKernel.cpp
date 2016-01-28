@@ -56,18 +56,13 @@ std::string MergeKernel::getName() const
 }
 
 
-void MergeKernel::addSwitches()
+void MergeKernel::addSwitches(ProgramArgs& args)
 {
-    po::options_description* file_options =
-        new po::options_description("file options");
+//    args.add("files,f", "input/output files", m_files);
 
-    file_options->add_options()
-        ("files,f", po::value<StringList>(&m_files)->multitoken(),
-         "input/output files")
-        ;
-
-    addSwitchSet(file_options);
+    /**
     addPositionalSwitch("files", 10000);
+    **/
 }
 
 

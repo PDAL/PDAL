@@ -69,27 +69,19 @@ void SortKernel::validateSwitches()
 }
 
 
-void SortKernel::addSwitches()
+void SortKernel::addSwitches(ProgramArgs& args)
 {
-    po::options_description* file_options =
-        new po::options_description("file options");
+    Arg *arg;
 
-    file_options->add_options()
-    ("input,i", po::value<std::string>(&m_inputFile)->default_value(""),
-     "input file name")
-    ("output,o", po::value<std::string>(&m_outputFile)->default_value(""),
-     "output file name")
-    ("compress,z",
-     po::value<bool>(&m_bCompress)->zero_tokens()->implicit_value(true),
-     "Compress output data (if supported by output format)")
-    ("metadata,m",
-     po::value< bool >(&m_bForwardMetadata)->implicit_value(true),
-     "Forward metadata (VLRs, header entries, etc) from previous stages")
-    ;
-
-    addSwitchSet(file_options);
-    addPositionalSwitch("input", 1);
-    addPositionalSwitch("output", 1);
+    arg = args.add("input,i", "Input filename", m_inputFile);
+    arg->setPositional();
+    arg = args.add("output,o", "Output filename", m_outputFile);
+    arg->setPositional();
+    args.add("compress,z",
+        "Compress output data (if supported by output format)", m_bCompress);
+    args.add("metadata,m",
+        "Forward metadata (VLRs, header entries, etc) from previous stages",
+        m_bForwardMetadata);
 }
 
 

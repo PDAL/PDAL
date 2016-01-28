@@ -213,3 +213,46 @@ TEST(ProgramArgsTest, t4)
     // No program option provided.
     HANDLE_EXCEPTION(args.add("", "Foo description", m_foo, "foo"));
 }
+
+TEST(ProgramArgsTest, positional)
+{
+    ProgramArgs args;
+    Arg *arg;
+
+    std::string m_foo;
+    int m_bar;
+    bool m_baz;
+
+    arg = args.add("foo,f", "Foo description", m_foo, "foo");
+    arg->setPositional();
+    arg = args.add("bar", "Foo description", m_bar, 23);
+    arg->setPositional();
+    arg = args.add("baz,z", "Foo description", m_baz);
+    EXPECT_THROW(arg->setPositional(), arg_error);
+
+    // Go through exceptions procedurally.
+
+    StringList s = toStringList("--foo Foo -z 55");
+    args.parse(s);
+    EXPECT_EQ(m_foo, "Foo");
+    EXPECT_EQ(m_bar, 55);
+    EXPECT_EQ(m_baz, true);
+
+    args.reset();
+
+    s = toStringList("-z Flub 66");
+    args.parse(s);
+    EXPECT_EQ(m_foo, "Flub");
+    EXPECT_EQ(m_bar, 66);
+    EXPECT_EQ(m_baz, true);
+
+    args.reset();
+
+    s = toStringList("Flub 66");
+    args.parse(s);
+    EXPECT_EQ(m_foo, "Flub");
+    EXPECT_EQ(m_bar, 66);
+    EXPECT_EQ(m_baz, false);
+
+
+}

@@ -23,6 +23,7 @@
 #pragma once
 
 #include <map>
+#include <queue>
 
 #include <pdal/util/Utils.hpp>
 
@@ -38,13 +39,26 @@ public:
     std::string m_error;
 };
 
-class BaseArg
+class Arg
 {
 protected:
-    BaseArg(const std::string& longname, const std::string& shortname,
+    Arg(const std::string& longname, const std::string& shortname,
         const std::string& description) : m_longname(longname),
-        m_shortname(shortname), m_description(description), m_set(false)
+        m_shortname(shortname), m_description(description), m_set(false),
+        m_hidden(false), m_positional(false)
     {}
+
+public:
+    void setHidden(bool hidden = true)
+        { m_hidden = true; }
+    virtual void setPositional()
+        { m_positional = true; }
+    bool set() const
+        { return m_set; }
+    bool positional() const
+        { return m_positional; }
+    std::string name() const
+        { return m_longname; }
 
 public:
     virtual bool needsValue() const
@@ -58,15 +72,17 @@ protected:
     std::string m_description;
     std::string m_rawVal;
     bool m_set;
+    bool m_hidden;
+    bool m_positional;
 };
 
 template <typename T>
-class Arg : public BaseArg
+class TArg : public Arg
 {
 public:
-    Arg(const std::string& longname, const std::string& shortname,
+    TArg(const std::string& longname, const std::string& shortname,
         const std::string& description, T& variable, T def) :
-        BaseArg(longname, shortname, description), m_var(variable),
+        Arg(longname, shortname, description), m_var(variable),
         m_defaultVal(def)
     { m_var = m_defaultVal; }
 
@@ -93,6 +109,7 @@ public:
     {
         m_var = m_defaultVal;
         m_set = false;
+        m_hidden = false;
     }
 
 private:
@@ -101,12 +118,12 @@ private:
 };
 
 template <>
-class Arg<bool> : public BaseArg
+class TArg<bool> : public Arg
 {
 public:
-    Arg(const std::string& longname, const std::string& shortname,
+    TArg(const std::string& longname, const std::string& shortname,
         const std::string& description, bool& variable, bool def) :
-        BaseArg(longname, shortname, description), m_val(variable),
+        Arg(longname, shortname, description), m_val(variable),
         m_defaultVal(def)
     {}
 
@@ -128,6 +145,13 @@ public:
     {
         m_val = m_defaultVal;
         m_set = false;
+        m_hidden = false;
+    }
+    virtual void setPositional()
+    {
+        std::ostringstream oss;
+        oss << "Boolean argument '" << m_longname << "' can't be positional.";
+        throw arg_error(oss.str());
     }
 
 private:
@@ -138,14 +162,14 @@ private:
 class ProgramArgs
 {
 public:
-    void add(const std::string& name, const std::string description,
+    Arg *add(const std::string& name, const std::string description,
         std::string& var, std::string def)
     {
-        add<std::string>(name, description, var, def);
+        return add<std::string>(name, description, var, def);
     }
 
     template<typename T>
-    void add(const std::string& name, const std::string description, T& var,
+    Arg *add(const std::string& name, const std::string description, T& var,
         T def = T())
     {
         // Arg names must be specified as "longname[,shortname]" where
@@ -161,12 +185,13 @@ public:
         if (s.size() == 1)
             s.push_back("");
 
-        BaseArg *arg = new Arg<T>(s[0], s[1], description, var, def);
+        Arg *arg = new TArg<T>(s[0], s[1], description, var, def);
         if (s[0].size())
             m_longargs[s[0]] = arg;
         if (s[1].size())
             m_shortargs[s[1]] = arg;
-        m_args.push_back(std::unique_ptr<BaseArg>(arg));
+        m_args.push_back(std::unique_ptr<Arg>(arg));
+        return arg;
     }
 
     void parse(int argc, char *argv[])
@@ -188,6 +213,25 @@ public:
             std::string value((i != s.size() - 1) ? s[i + 1] : "-");
             i += parseArg(arg, value);
         }
+
+        // Go through things on the positional list looking for matches.
+        for (auto ai = m_args.begin(); ai != m_args.end(); ++ai)
+        {
+            Arg *arg = ai->get();
+            if (arg->positional() && !arg->set())
+            {
+                if (m_positional.empty())
+                {
+                    std::ostringstream oss;
+
+                    oss << "Missing value for positional argument '" <<
+                        arg->name() << "'.";
+                    throw arg_error(oss.str());
+                }
+                arg->setValue(m_positional.front());
+                m_positional.pop();
+            }
+        }
     }
 
     void reset()
@@ -197,7 +241,7 @@ public:
     }
 
 private:
-    BaseArg *findLongArg(const std::string& s)
+    Arg *findLongArg(const std::string& s)
     {
         auto si = m_longargs.find(s);
         if (si != m_longargs.end())
@@ -205,7 +249,7 @@ private:
         return NULL;
     }
 
-    BaseArg *findShortArg(char c)
+    Arg *findShortArg(char c)
     {
         std::string s(1, c);
         auto si = m_shortargs.find(s);
@@ -216,17 +260,20 @@ private:
 
     int parseArg(std::string& arg, std::string value)
     {
-        if (arg.size() > 2 && arg[0] == '-' && arg[1] == '-')
+        if (arg.size() > 1 && arg[0] == '-' && arg[1] == '-')
             return parseLongArg(arg, value);
-        else if (arg.size() > 1 && arg[0] == '-')
+        else if (arg.size() && arg[0] == '-')
             return parseShortArg(arg, value);
-        m_unrecognized.push_back(arg);
+        m_positional.push(arg);
         return 1;
     }
 
     int parseLongArg(std::string name, std::string value)
     {
         bool attachedValue = false;
+
+        if (name.size() == 2)
+            throw arg_error("No argument found following '--'.");
 
         name = name.substr(2);
 
@@ -240,7 +287,7 @@ private:
                 attachedValue = true;
             }
         }
-        BaseArg *arg = findLongArg(name);
+        Arg *arg = findLongArg(name);
         if (!arg)
         {
             std::ostringstream oss;
@@ -272,7 +319,7 @@ private:
         if (name.size() == 1)
             throw arg_error("No argument found following '-'.");
 
-        BaseArg *arg = findShortArg(name[1]);
+        Arg *arg = findShortArg(name[1]);
         if (!arg)
         {
             std::ostringstream oss;
@@ -306,10 +353,13 @@ private:
         return cnt;
     }
 
-    std::vector<std::unique_ptr<BaseArg>> m_args;
-    std::map<std::string, BaseArg *> m_shortargs;
-    std::map<std::string, BaseArg *> m_longargs;
-    std::vector<std::string> m_unrecognized;
+    std::vector<std::unique_ptr<Arg>> m_args;
+    std::map<std::string, Arg *> m_shortargs;
+    std::map<std::string, Arg *> m_longargs;
+
+    // Contains remaining arguments after positional argument have been
+    // processed.
+    std::queue<std::string> m_positional;
 };
 
 } // namespace pdal

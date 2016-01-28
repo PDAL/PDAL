@@ -122,64 +122,34 @@ void InfoKernel::validateSwitches()
 }
 
 
-void InfoKernel::addSwitches()
+void InfoKernel::addSwitches(ProgramArgs& args)
 {
-    namespace po = boost::program_options;
+    Arg *arg;
 
-    po::options_description* file_options =
-        new po::options_description("file options");
-
-    file_options->add_options()
-        ("input,i", po::value<std::string>(&m_inputFile)->default_value(""),
-         "input file name")
-        ;
-
-    addSwitchSet(file_options);
-
-    po::options_description* processing_options =
-        new po::options_description("processing options");
-
-    processing_options->add_options()
-        ("all",
-         po::value<bool>(&m_showAll)->zero_tokens()->implicit_value(true),
-         "dump statistics, schema and metadata")
-        ("point,p", po::value<std::string >(&m_pointIndexes), "point to dump")
-        ("query", po::value< std::string>(&m_queryPoint),
+    arg = args.add("input,i", "input file name", m_inputFile);
+    arg->setPositional();
+    args.add("all", "dump statistics, schema and metadata", m_showAll);
+    args.add("point,p", "point to dump\n--point=\"1-5,10,100-200\"",
+        m_pointIndexes);
+    args.add("query",
          "Return points in order of distance from the specified "
          "location (2D or 3D)\n"
-         "--query Xcoord,Ycoord[,Zcoord][/count]")
-        ("stats",
-         po::value<bool>(&m_showStats)->zero_tokens()->implicit_value(true),
-         "dump stats on all points (reads entire dataset)")
-        ("boundary",
-         po::value<bool>(&m_boundary)->zero_tokens()->implicit_value(true),
-         "compute a hexagonal hull/boundary of dataset")
-        ("dimensions", po::value<std::string >(&m_dimensions),
-         "dimensions on which to compute statistics")
-        ("schema",
-         po::value<bool>(&m_showSchema)->zero_tokens()->implicit_value(true),
-         "dump the schema")
-        ("pipeline-serialization",
-         po::value<std::string>(&m_pipelineFile)->default_value(""), "")
-        ("summary",
-         po::value<bool>(&m_showSummary)->zero_tokens()->implicit_value(true),
-        "dump summary of the info")
-        ("metadata",
-         po::value<bool>(&m_showMetadata)->zero_tokens()->implicit_value(true),
-        "dump file metadata info")
-        ;
-
-    po::options_description* hidden =
-        new po::options_description("Hidden options");
-    hidden->add_options()
-        ("pointcloudschema",
-         po::value<std::string>(&m_PointCloudSchemaOutput),
-        "dump PointCloudSchema XML output")
-            ;
-
-    addSwitchSet(processing_options);
-    addHiddenSwitchSet(hidden);
-    addPositionalSwitch("input", 1);
+         "--query Xcoord,Ycoord[,Zcoord][/count]",
+         m_queryPoint);
+    args.add("stats", "dump stats on all points (reads entire dataset)",
+        m_showStats);
+    args.add("boundary", "compute a hexagonal hull/boundary of dataset",
+        m_boundary);
+    args.add("dimensions", "dimensions on which to compute statistics",
+        m_dimensions);
+    args.add("schema", "dump the schema", m_showSchema);
+    args.add("pipeline-serialization", "Output file for pipeline serialization",
+         m_pipelineFile);
+    args.add("summary", "dump summary of the info", m_showSummary);
+    args.add("metadata", "dump file metadata info", m_showMetadata);
+    arg = args.add("pointcloudschema", "dump PointCloudSchema XML output",
+        m_PointCloudSchemaOutput);
+    arg->setHidden();
 }
 
 // Support for parsing point numbers.  Points can be specified singly or as

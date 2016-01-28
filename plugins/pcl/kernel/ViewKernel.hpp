@@ -52,7 +52,7 @@ public:
 
 private:
     ViewKernel();
-    void addSwitches();
+    virtual void addSwitches(ProgramArgs& args);
     void validateSwitches();
 
     std::shared_ptr<Stage> makeReader(Options readerOptions);

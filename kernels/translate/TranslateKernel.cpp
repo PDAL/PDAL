@@ -86,32 +86,24 @@ void TranslateKernel::validateSwitches()
         throw app_usage_error("--output/-o required");
 }
 
-void TranslateKernel::addSwitches()
+void TranslateKernel::addSwitches(ProgramArgs& args)
 {
-    po::options_description* file_options =
-        new po::options_description("file options");
+    Arg *arg;
 
-    file_options->add_options()
-    ("input,i", po::value<std::string>(&m_inputFile)->default_value(""),
-     "input file name")
-    ("output,o", po::value<std::string>(&m_outputFile)->default_value(""),
-     "output file name")
-    ("pipeline,p", po::value<std::string>(&m_pipelineOutput)->default_value(""),
-     "pipeline output")
-    ("reader,r", po::value<std::string>(&m_readerType)->default_value(""),
-     "reader type")
-    ("filter,f",
-     po::value<std::vector<std::string> >(&m_filterType)->multitoken(),
-     "filter type")
-    ("writer,w", po::value<std::string>(&m_writerType)->default_value(""),
-     "writer type")
-    ;
+    arg = args.add("input,i", "Input filename", m_inputFile);
+    arg->setPositional();
+    arg = args.add("output,o", "Output filename", m_outputFile);
+    arg->setPositional();
+    args.add("pipeline,p", "Pipeline output", m_pipelineOutput);
+    args.add("reader,r", "Reader type", m_readerType);
+    //TODO - Accept multiple filters.
+//    args.add("filter,f", "Filter type", m_filterType);
+    args.add("writer,w", "Writer type", m_writerType);
 
-    addSwitchSet(file_options);
-
-    addPositionalSwitch("input", 1);
-    addPositionalSwitch("output", 1);
+    //ABELL - Think this should go away.
+    /**
     addPositionalSwitch("filter", -1);
+    **/
 }
 
 int TranslateKernel::execute()

@@ -52,39 +52,20 @@ DeltaKernel::DeltaKernel() : m_3d(true), m_detail(false), m_allDims(false)
 {}
 
 
-void DeltaKernel::addSwitches()
+void DeltaKernel::addSwitches(ProgramArgs& args)
 {
-    namespace po = boost::program_options;
+    Arg *arg;
 
-    po::options_description* file_options =
-        new po::options_description("file options");
-
-    file_options->add_options()
-        ("source", po::value<std::string>(&m_sourceFile),
-         "source file name")
-        ("candidate", po::value<std::string>(&m_candidateFile),
-         "candidate file name")
-        ("output", po::value<std::string>(&m_outputFile),
-         "output file name")
-        ("2d", po::value<bool>(&m_3d)->zero_tokens()->implicit_value(false),
-         "only 2D comparisons/indexing")
-        ("detail",
-         po::value<bool>(&m_detail)->zero_tokens()->implicit_value(true),
-         "Output deltas per-point")
-        ("alldims",
-         po::value<bool>(&m_allDims)->zero_tokens()->implicit_value(true),
-         "Compute diffs for all dimensions (not just X,Y,Z)");
-    addSwitchSet(file_options);
-
-    po::options_description* processing_options =
-        new po::options_description("processing options");
-
-    processing_options->add_options();
-    addSwitchSet(processing_options);
-
-    addPositionalSwitch("source", 1);
-    addPositionalSwitch("candidate", 2);
-    addPositionalSwitch("output", 3);
+    arg = args.add("source", "source file name", m_sourceFile);
+    arg->setPositional();
+    arg = args.add("candidate", "candidate file name", m_candidateFile);
+    arg->setPositional();
+    arg = args.add("output", "output file name", m_outputFile);
+    arg->setPositional();
+    args.add("2d", "only 2D comparisons/indexing", m_3d, true);
+    args.add("detail", "Output deltas per-point", m_detail);
+    args.add("alldims", "Compute diffs for all dimensions (not just X,Y,Z)",
+        m_allDims);
 }
 
 

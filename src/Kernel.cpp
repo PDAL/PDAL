@@ -60,6 +60,72 @@ namespace po = boost::program_options;
 namespace pdal
 {
 
+namespace
+{
+
+bool parseOption(std::string o, std::string& stage, std::string& option,
+    std::string& value)
+{
+    if (o.size() < 2)
+        return false;
+    if (o[0] != '-' || o[1] != '-')
+        return false;
+
+    o = o.substr(2);
+
+    // Options are stage_type.stage_name.option_name
+    // stage_type is always lowercase stage_names start with lowercase and
+    // then are lowercase or digits.  Option names start with lowercase and
+    // then contain lowercase, digits or underscore.
+
+    // This awfulness is to work around the multiply-defined islower.  Seems
+    // a bit better than the cast solution.
+    auto islc = [](char c)
+        { return std::islower(c); };
+    auto islcOrDigit = [](char c)
+        { return std::islower(c) || std::isdigit(c); };
+
+    std::string::size_type pos = 0;
+    std::string::size_type count = 0;
+
+    // Get stage_type.
+    count = Utils::extract(o, pos, islc);
+    pos += count;
+
+    std::string stage_type = o.substr(0, pos);
+    if (stage_type != "readers" && stage_type != "writers" &&
+        stage_type != "filters")
+        return false;
+    if (o[pos++] != '.')
+        return false;
+
+    // Get stage_name.
+    count = Utils::extract(o, pos, islcOrDigit);
+    if (std::isdigit(o[pos]))
+        return false; 
+    pos += count;
+    stage = o.substr(0, pos);
+    if (o[pos++] != '.')
+        return false;
+
+    // Get option name.
+    std::string::size_type optionStart = pos;
+    count = Option::parse(o, pos);
+    pos += count;
+    option = o.substr(optionStart, count);
+
+    if (o[pos++] != '=')
+        return false;
+
+    // The command-line parser takes care of quotes around an argument
+    // value and such.  May want to do something to handle escaped characters?
+    value = o.substr(pos);
+    return true;
+}
+
+} // unnamed namespace
+
+
 Kernel::Kernel()
     : m_usestdin(false)
     , m_log("pdal", "stderr")
@@ -93,34 +159,44 @@ std::ostream& operator<<(std::ostream& ostr, const Kernel& kernel)
 }
 
 
-int Kernel::do_switches()
+void Kernel::doSwitches(int argc, const char *argv[], ProgramArgs& args)
 {
+    StringList stringArgs;
+
+    // Scan the argument vector for extra stage options.  Pull them out and
+    // stick them in the list.  Let the ProgramArgs handle everything else.
+    // NOTE: This depends on the format being "option=value" rather than
+    //   "option value".  This is what we've always expected, so no problem,
+    //   but it would be better to be more flexible.
+    for (int i = 0; i < argc; ++i)
+    {
+        std::string stageName, opName, value;
+
+        if (parseOption(argv[i], stageName, opName, value))
+        {
+            Option op(opName, value);
+            m_extraStageOptions[stageName].add(op);
+        }
+        else
+            stringArgs.push_back(argv[i]);
+    }
+
     try
     {
         // add -h, -v, etc
-        addBasicSwitchSet();
-
+        addBasicSwitches(args);
         // add the options for the derived application
-        addSwitches();
-
-        // parse the command line
-        parseSwitches();
+        addSwitches(args);
+        args.parse(stringArgs);
     }
-    catch (std::exception const& e)
+    catch (arg_error& e)
     {
-        Utils::printError(e.what());
-        return 1;
+        throw pdal_error(e.m_error);
     }
-    catch (...)
-    {
-        Utils::printError("Caught unknown exception handling switches");
-        return 1;
-    }
-    return 0;
 }
 
 
-int Kernel::do_startup()
+int Kernel::doStartup()
 {
     try
     {
@@ -142,9 +218,8 @@ int Kernel::do_startup()
 }
 
 
-int Kernel::do_execution()
+int Kernel::doExecution()
 {
-
     if (m_reportDebug)
     {
         std::cout << getPDALDebugInformation() << std::endl;
@@ -183,7 +258,7 @@ int Kernel::do_execution()
 }
 
 
-int Kernel::do_shutdown()
+int Kernel::doShutdown()
 {
     try
     {
@@ -206,93 +281,30 @@ int Kernel::do_shutdown()
 
 
 // this just wraps ALL the code in total catch block
-int Kernel::run(int argc, const char* argv[], const std::string& appName)
+int Kernel::run(int argc, char const * argv[], const std::string& appName)
 {
-    m_argc = argc;
-    m_argv = argv;
     m_appName = appName;
 
-    int switches_status = do_switches();
-    if (switches_status)
-        return switches_status;
+    ProgramArgs args;
 
-    int startup_status = do_startup();
+    doSwitches(argc, argv, args);
+
+    int startup_status = doStartup();
     if (startup_status)
         return startup_status;
 
-    int execution_status = do_execution();
+    int execution_status = doExecution();
 
     // note we will try to shutdown cleanly even if we got an error condition
     // in the execution phase
 
-    int shutdown_status = do_shutdown();
+    int shutdown_status = doShutdown();
 
     if (execution_status)
         return execution_status;
 
     return shutdown_status;
 }
-
-
-namespace
-{
-
-bool parseOption(std::string o, std::string& stage, std::string& option,
-    std::string& value)
-{
-    if (o.size() < 2)
-        return false;
-    if (o[0] != '-' || o[1] != '-')
-        return false;
-
-    o = o.substr(2);
-
-    // Options are stage_type.stage_name.option_name
-    // stage_type is always lowercase stage_names start with lowercase and
-    // then are lowercase or digits.  Option names start with lowercase and
-    // then contain lowercase, digits or underscore.
-
-    // This awfulness is to work around the multiply-defined islower.  Seems
-    // a bit better than the cast solution.
-    auto islc = [](char c)
-        { return std::islower(c); };
-    auto islcOrDigit = [](char c)
-        { return std::islower(c) || std::isdigit(c); };
-
-    std::string::size_type pos = 0;
-    std::string::size_type count = 0;
-
-    // Get stage_type.
-    count = Utils::extract(o, pos, islc);
-    pos += count;
-    if (o[pos++] != '.')
-        return false;
-
-    // Get stage_name.
-    count = Utils::extract(o, pos, islcOrDigit);
-    if (std::isdigit(o[pos]))
-        return false; 
-    pos += count;
-    stage = o.substr(0, pos);
-    if (o[pos++] != '.')
-        return false;
-
-    // Get option name.
-    std::string::size_type optionStart = pos;
-    count = Option::parse(o, pos);
-    pos += count;
-    option = o.substr(optionStart, count);
-
-    if (o[pos++] != '=')
-        return false;
-
-    // The command-line parser takes care of quotes around an argument
-    // value and such.  May want to do something to handle escaped characters?
-    value = o.substr(pos);
-    return true;
-}
-
-} // unnamed namespace
 
 
 void Kernel::collectExtraOptions()
@@ -334,10 +346,8 @@ int Kernel::innerRun()
         return 0;
     }
 
-    if (!m_showOptions.empty())
-    {
+    if (m_showOptions)
         return 0;
-    }
 
     try
     {
@@ -518,12 +528,6 @@ void Kernel::setCommonOptions(Options &options)
 }
 
 
-void Kernel::addPositionalSwitch(const char* name, int max_count)
-{
-    m_positionalOptions.add(name, max_count);
-}
-
-
 void Kernel::outputHelp()
 {
     outputVersion();
@@ -547,19 +551,19 @@ void Kernel::outputVersion()
 }
 
 
-void Kernel::addBasicSwitchSet()
+void Kernel::addBasicSwitches(ProgramArgs& args)
 {
-    ProgramArgs args;
-
     args.add("help,h", "Print help message", m_showHelp);
-    args.add("options", "Show available options for a driver",
-        m_showOptions, "all");
+    args.add("options", "Show available options for a driver", m_showOptions);
     args.add("debug,d", "Enable debug mode", m_isDebug);
     args.add("report-debug", "Report PDAL compilation DEBUG status",
         m_reportDebug, true);
+    args.add("developer-debug",
+        "Enable developer debug (don't trap exceptions)", m_hardCoreDebug);
     args.add("label", "A string to label the process with", m_label);
     args.add("verbose,v", "Set verbose message level", m_verboseLevel, 0u);
     args.add("version", "Show version info", m_showVersion);
+
     args.add("visualize", "Visualize result", m_visualize);
     args.add("stdin,s", "Read pipeline XML from stdin", m_usestdin);
     /**
@@ -574,83 +578,6 @@ void Kernel::addBasicSwitchSet()
          "A comma-separated or quoted, space-separated list of offsets to "
          "set on the output file: \n--offset 0,0,0\n--offset "
          "\"1234 5678 91011\"", m_offsets);
-
-    po::options_description* basic_options =
-        new po::options_description("basic options");
-
-    /**
-    basic_options->add_options()
-    ("help,h",
-        po::value<bool>(&m_showHelp)->zero_tokens()->implicit_value(true),
-        "Print help message")
-    ("options", po::value<std::string>(&m_showOptions)->implicit_value("all"),
-        "Show available options for a driver")
-    ("debug,d",
-        po::value<bool>(&m_isDebug)->zero_tokens()->implicit_value(true),
-        "Enable debug mode")
-    ("report-debug",
-        po::value<bool>(&m_reportDebug)->zero_tokens()->implicit_value(true),
-        "Report PDAL compilation DEBUG status")
-    ("developer-debug",
-        po::value<bool>(&m_hardCoreDebug)->zero_tokens()->implicit_value(true),
-        "Enable developer debug mode (don't trap exceptions so segfaults "
-        "are thrown)")
-    ("label",
-        po::value<std::string>(&m_label)->default_value(""),
-        "A string to label the process with")
-    ("verbose,v", po::value<uint32_t>(&m_verboseLevel)->default_value(0),
-        "Set verbose message level")
-    ("version",
-        po::value<bool>(&m_showVersion)->zero_tokens()->implicit_value(true),
-        "Show version info")
-    ("visualize",
-        po::value<bool>(&m_visualize)->zero_tokens()->implicit_value(true),
-        "Visualize result")
-    ("stdin,s",
-        po::value<bool>(&m_usestdin)->zero_tokens()->implicit_value(true),
-        "Read pipeline XML from stdin")
-    ("heartbeat",
-        po::value< std::vector<std::string> >(&m_heartbeat_shell_command),
-        "Shell command to run for every progress heartbeat")
-    ("scale", po::value< std::string >(&m_scales),
-         "A comma-separated or quoted, space-separated list of scales to "
-         "set on the output file: \n--scale 0.1,0.1,0.00001\n--scale \""
-         "0.1 0.1 0.00001\"")
-    ("offset", po::value< std::string >(&m_offsets),
-         "A comma-separated or quoted, space-separated list of offsets to "
-         "set on the output file: \n--offset 0,0,0\n--offset "
-         "\"1234 5678 91011\"")
-    ;
-
-    addSwitchSet(basic_options);
-    **/
-}
-
-
-void Kernel::parseSwitches()
-{
-    po::options_description options;
-
-    for (auto const& iter : m_public_options)
-        options.add(*iter);
-    for (auto const& iter : m_hidden_options)
-        options.add(*iter);
-
-    try
-    {
-        auto parsed = po::command_line_parser(m_argc, m_argv).
-            options(options).allow_unregistered().
-            positional(m_positionalOptions).run();
-        m_extra_options = po::collect_unrecognized(parsed.options,
-            po::include_positional);
-
-        po::store(parsed, m_variablesMap);
-    }
-    catch (boost::program_options::unknown_option e)
-    {
-        throw app_usage_error("unknown option: " + e.get_option_name());
-    }
-    po::notify(m_variablesMap);
 }
 
 

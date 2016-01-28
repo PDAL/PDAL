@@ -74,7 +74,7 @@ public:
 
 private:
     InfoKernel();
-    void addSwitches(); // overrride
+    void addSwitches(ProgramArgs& args);
     void validateSwitches(); // overrride
 
     void dump(MetadataNode& root);
