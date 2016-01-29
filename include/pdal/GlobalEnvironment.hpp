@@ -62,29 +62,29 @@ public:
     void initializeGDAL(LogPtr log, bool bIsDebug = false);
     void initializeGEOS(LogPtr log, bool bIsDebug = false);
 
-    std::shared_ptr<geos::ErrorHandler> geos()
+    geos::ErrorHandler* geos()
     {
         if (!m_geosDebug)
         {
             initializeGEOS(LogPtr(), false);
         }
-        return m_geosDebug;
+        return m_geosDebug.get();
     }
-    std::shared_ptr<gdal::ErrorHandler> gdal()
+    gdal::ErrorHandler* gdal()
     {
         if (!m_gdalDebug)
         {
             initializeGDAL(LogPtr(), false);
         }
-        return m_gdalDebug;
+        return m_gdalDebug.get();
     }
 
 private:
     GlobalEnvironment();
     ~GlobalEnvironment();
 
-    std::shared_ptr<gdal::ErrorHandler> m_gdalDebug;
-    std::shared_ptr<geos::ErrorHandler> m_geosDebug;
+    std::unique_ptr<gdal::ErrorHandler> m_gdalDebug;
+    std::unique_ptr<geos::ErrorHandler> m_geosDebug;
 
     GlobalEnvironment(const GlobalEnvironment&); // nope
     GlobalEnvironment& operator=(const GlobalEnvironment&); // nope

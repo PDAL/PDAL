@@ -51,7 +51,7 @@ namespace pdal
 
 class PDAL_DLL Polygon
 {
-    typedef std::shared_ptr<geos::ErrorHandler> ErrorHandlerPtr;
+    typedef geos::ErrorHandler* ErrorHandlerPtr;
 public:
 
     Polygon();
