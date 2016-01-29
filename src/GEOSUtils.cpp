@@ -51,6 +51,12 @@ namespace geos
 ErrorHandler::ErrorHandler(bool isDebug, LogPtr log)
     : m_isDebug(isDebug)
     , m_log(log)
+
+{
+    setup(isDebug, log);
+}
+
+void ErrorHandler::setup(bool isDebug, LogPtr log)
 {
     if (m_isDebug)
         m_geos_callback = std::bind(&ErrorHandler::log, this, std::placeholders::_1 );
@@ -72,11 +78,19 @@ ErrorHandler::ErrorHandler(bool isDebug, LogPtr log)
     GEOSContext_setErrorHandler_r(ctx, &ErrorHandler::error_trampoline);
 #endif
 
+    if (m_isDebug)
+    {
 #ifdef GEOSContext_setNoticeHandler_r
-    GEOSContext_setNoticeHandler_r(ctx, &ErrorHandler::notice_trampoline, this);
+        GEOSContext_setNoticeHandler_r(ctx, &ErrorHandler::notice_trampoline, this);
 #else
-    GEOSContext_setErrorHandler_r(ctx, &ErrorHandler::notice_trampoline);
+        GEOSContext_setErrorHandler_r(ctx, &ErrorHandler::notice_trampoline);
 #endif
+    }
+}
+
+ErrorHandler::ErrorHandler(const ErrorHandler& other )
+{
+    setup(other.m_isDebug, other.m_log);
 }
 
 void ErrorHandler::log(char const* msg)
@@ -98,14 +112,14 @@ void ErrorHandler::error(char const* msg)
 
 ErrorHandler::~ErrorHandler()
 {
-
+    std::cout << "context is going away" <<std::endl;
 #ifdef GEOS_finish_r
     GEOS_finish_r(ctx);
 #else
     finishGEOS_r(ctx);
 #endif
-//     CPLPopErrorHandler();
 }
+
 } // namespace geos
 } // namespace pdal
 

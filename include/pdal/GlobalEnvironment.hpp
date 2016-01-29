@@ -62,6 +62,23 @@ public:
     void initializeGDAL(LogPtr log, bool bIsDebug = false);
     void initializeGEOS(LogPtr log, bool bIsDebug = false);
 
+    geos::ErrorHandler* geos()
+    {
+        if (!m_geosDebug)
+        {
+            initializeGEOS(LogPtr(), false);
+        }
+        return m_geosDebug.get();
+    }
+    gdal::ErrorHandler* gdal()
+    {
+        if (!m_gdalDebug)
+        {
+            initializeGDAL(LogPtr(), false);
+        }
+        return m_gdalDebug.get();
+    }
+
 private:
     GlobalEnvironment();
     ~GlobalEnvironment();

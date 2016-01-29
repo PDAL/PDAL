@@ -35,8 +35,7 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
-
-#include <geos_c.h>
+#include <pdal/Polygon.hpp>
 
 extern "C" int32_t CropFilter_ExitFunc();
 extern "C" PF_ExitFunc CropFilter_InitPlugin();
@@ -60,19 +59,17 @@ public:
 private:
     std::vector<BOX2D> m_bounds;
     bool m_cropOutside;
-    StringList m_polys;
+    std::vector<Polygon> m_polys;
     SpatialReference m_assignedSrs;
     SpatialReference m_lastSrs;
 
-	GEOSContextHandle_t m_geosEnvironment;
     struct GeomPkg
     {
-        GeomPkg() : m_geom(NULL), m_geomXform(NULL), m_prepGeom(NULL)
+        GeomPkg()
         {}
 
-        GEOSGeometry *m_geom;
-        GEOSGeometry *m_geomXform;
-        const GEOSPreparedGeometry *m_prepGeom;
+        Polygon m_geom;
+        Polygon m_geomXform;
     };
 
     std::vector<GeomPkg> m_geoms;
@@ -81,16 +78,10 @@ private:
     virtual void ready(PointTableRef table);
     virtual bool processOne(PointRef& point);
     virtual PointViewSet run(PointViewPtr view);
-    virtual void done(PointTableRef table);
     bool crop(PointRef& point, const BOX2D& box);
     void crop(const BOX2D& box, PointView& input, PointView& output);
     bool crop(PointRef& point, const GeomPkg& g);
     void crop(const GeomPkg& g, PointView& input, PointView& output);
-    GEOSGeometry *validatePolygon(const std::string& poly);
-    void preparePolygon(GeomPkg& g, const SpatialReference& to);
-    void freePolygon(GeomPkg& g, bool freeBase);
-    BOX2D computeBounds(GEOSGeometry const *geometry);
-    GEOSGeometry *createPoint(double x, double y, double z);
 
     CropFilter& operator=(const CropFilter&); // not implemented
     CropFilter(const CropFilter&); // not implemented

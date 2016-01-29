@@ -45,11 +45,6 @@
 namespace pdal
 {
 
-namespace
-{
-
-} // Unnamed namespace
-
 namespace geos
 {
 
@@ -59,6 +54,9 @@ public:
 
     ErrorHandler(bool isDebug, pdal::LogPtr log);
     ~ErrorHandler();
+    ErrorHandler(const ErrorHandler& other );
+    void setup(bool isDebug, pdal::LogPtr log);
+
 
 #ifdef GEOSGContext_setErrorMessageHandler_r
     static void GEOS_DLL error_trampoline(const char* message, void* userdata)
@@ -107,7 +105,7 @@ public:
     char buf[1024];
 
     vsnprintf(buf, sizeof(buf), message, args);
-    std::cerr<< "GEOS notice: " << buf << std::endl;
+    std::cerr<< "GEOS notice tramp: " << buf << std::endl;
 
     va_end(args);
 
@@ -130,100 +128,7 @@ private:
 
 
 
-namespace Geometry
-{
 
-static std::string smoothPolygon(const std::string& wkt, double tolerance,
-    uint32_t precision, double area_threshold)
-{
-    ErrorHandler env(false, LogPtr());
-
-    GEOSGeometry *geom = GEOSGeomFromWKT_r(env.ctx, wkt.c_str());
-    if (!geom)
-        return "";
-
-    GEOSGeometry *smoothed = GEOSTopologyPreserveSimplify_r(env.ctx, geom,
-        tolerance);
-    if (!smoothed)
-        return "";
-
-    std::vector<GEOSGeometry*> geometries;
-
-    int numGeom = GEOSGetNumGeometries_r(env.ctx, smoothed);
-    for (int n = 0; n < numGeom; ++n)
-    {
-        const GEOSGeometry* m = GEOSGetGeometryN_r(env.ctx, smoothed, n);
-        if (!m)
-            throw pdal::pdal_error("Unable to Get GeometryN");
-
-        const GEOSGeometry* ering = GEOSGetExteriorRing_r(env.ctx, m);
-        if (!ering)
-            throw pdal::pdal_error("Unable to Get Exterior Ring");
-
-        GEOSGeometry* exterior = GEOSGeom_clone_r(env.ctx, GEOSGetExteriorRing_r(env.ctx, m));
-        if (!exterior)
-            throw pdal::pdal_error("Unable to clone exterior ring!");
-
-        std::vector<GEOSGeometry*> keep_rings;
-        int numRings = GEOSGetNumInteriorRings_r(env.ctx, m);
-        for (int i = 0; i < numRings; ++i)
-        {
-            double area(0.0);
-
-            const GEOSGeometry* iring = GEOSGetInteriorRingN_r(env.ctx, m, i);
-            if (!iring)
-                throw pdal::pdal_error("Unable to Get Interior Ring");
-
-            GEOSGeometry* cring = GEOSGeom_clone_r(env.ctx, iring);
-            if (!cring)
-                throw pdal::pdal_error("Unable to clone interior ring!");
-            GEOSGeometry* aring = GEOSGeom_createPolygon_r(env.ctx, cring, NULL, 0);
-
-            int errored = GEOSArea_r(env.ctx, aring, &area);
-            if (errored == 0)
-                throw pdal::pdal_error("Unable to get area of ring!");
-            if (area > area_threshold)
-            {
-                keep_rings.push_back(cring);
-            }
-        }
-
-        GEOSGeometry* p = GEOSGeom_createPolygon_r(env.ctx,exterior, keep_rings.data(), keep_rings.size());
-        if (p == NULL) throw
-            pdal::pdal_error("smooth polygon could not be created!" );
-        geometries.push_back(p);
-    }
-
-    GEOSGeometry* o = GEOSGeom_createCollection_r(env.ctx, GEOS_MULTIPOLYGON, geometries.data(), geometries.size());
-
-    GEOSWKTWriter *writer = GEOSWKTWriter_create_r(env.ctx);
-    GEOSWKTWriter_setRoundingPrecision_r(env.ctx, writer, precision);
-
-    char *smoothWkt = GEOSWKTWriter_write_r(env.ctx, writer, o);
-
-    std::string output(smoothWkt);
-    GEOSFree_r(env.ctx, smoothWkt);
-    GEOSWKTWriter_destroy_r(env.ctx, writer);
-    GEOSGeom_destroy_r(env.ctx, geom);
-    GEOSGeom_destroy_r(env.ctx, smoothed);
-    return output;
-}
-
-static double computeArea(const std::string& wkt)
-{
-    ErrorHandler env(false, LogPtr());
-
-    GEOSGeometry *geom = GEOSGeomFromWKT_r(env.ctx, wkt.c_str());
-    if (!geom)
-        return 0.0;
-
-    double output(0.0);
-    int er = GEOSArea_r(env.ctx, geom, &output);
-    GEOSGeom_destroy_r(env.ctx, geom);
-    return output;
-}
-
-} // namespace Geometry
 
 
 } // end geos
