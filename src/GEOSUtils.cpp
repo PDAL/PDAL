@@ -51,6 +51,12 @@ namespace geos
 ErrorHandler::ErrorHandler(bool isDebug, LogPtr log)
     : m_isDebug(isDebug)
     , m_log(log)
+
+{
+    setup(isDebug, log);
+}
+
+void ErrorHandler::setup(bool isDebug, LogPtr log)
 {
     if (m_isDebug)
         m_geos_callback = std::bind(&ErrorHandler::log, this, std::placeholders::_1 );
@@ -82,6 +88,11 @@ ErrorHandler::ErrorHandler(bool isDebug, LogPtr log)
     }
 }
 
+ErrorHandler::ErrorHandler(const ErrorHandler& other )
+{
+    setup(other.m_isDebug, other.m_log);
+}
+
 void ErrorHandler::log(char const* msg)
 {
     std::ostringstream oss;
@@ -101,6 +112,7 @@ void ErrorHandler::error(char const* msg)
 
 ErrorHandler::~ErrorHandler()
 {
+    std::cout << "context is going away" <<std::endl;
 #ifdef GEOS_finish_r
     GEOS_finish_r(ctx);
 #else

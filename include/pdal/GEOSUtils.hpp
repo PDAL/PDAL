@@ -54,6 +54,9 @@ public:
 
     ErrorHandler(bool isDebug, pdal::LogPtr log);
     ~ErrorHandler();
+    ErrorHandler(const ErrorHandler& other );
+    void setup(bool isDebug, pdal::LogPtr log);
+
 
 #ifdef GEOSGContext_setErrorMessageHandler_r
     static void GEOS_DLL error_trampoline(const char* message, void* userdata)

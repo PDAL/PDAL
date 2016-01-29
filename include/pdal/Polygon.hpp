@@ -51,20 +51,29 @@ namespace pdal
 
 class PDAL_DLL Polygon
 {
+    typedef std::shared_ptr<geos::ErrorHandler> ErrorHandlerPtr;
 public:
 
     Polygon();
     Polygon(const std::string& wkt_or_json,
            SpatialReference ref = SpatialReference(),
-           geos::ErrorHandler& ctx = pdal::GlobalEnvironment::get().geos());
+           ErrorHandlerPtr ctx = pdal::GlobalEnvironment::get().geos());
     Polygon(const Polygon&);
-    Polygon(GEOSGeometry* g, const SpatialReference& srs, geos::ErrorHandler& ctx);
-    Polygon(OGRGeometryH g, const SpatialReference& srs, geos::ErrorHandler& ctx);
+    Polygon(GEOSGeometry* g, const SpatialReference& srs, ErrorHandlerPtr ctx);
+    Polygon(OGRGeometryH g, const SpatialReference& srs, ErrorHandlerPtr ctx);
+    Polygon& operator=(const Polygon&);
+
 
     ~Polygon();
     void update(const std::string& wkt_or_json,
                 SpatialReference ref = SpatialReference());
 
+    void setSpatialReference( const SpatialReference& ref)
+    {
+        m_srs = ref;
+    }
+
+    Polygon transform(const SpatialReference& ref) const;
 
     bool equals(const Polygon& other, double tolerance=0.0001) const;
     bool operator==(const Polygon& other) const;
@@ -86,13 +95,16 @@ public:
     std::string json(double precision=8) const;
 
     BOX3D bounds() const;
+
+    operator bool () const
+        { return m_geom != NULL; }
 private:
 
     GEOSGeometry *m_geom;
     const GEOSPreparedGeometry *m_prepGeom;
 
     SpatialReference m_srs;
-    geos::ErrorHandler& m_ctx;
+    ErrorHandlerPtr m_ctx;
 
     void prepare();
 

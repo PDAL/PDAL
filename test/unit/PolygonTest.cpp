@@ -38,6 +38,7 @@
 
 
 #include <pdal/PointView.hpp>
+#include <pdal/Options.hpp>
 
 #include <pdal/Polygon.hpp>
 #include "Support.hpp"
@@ -56,6 +57,9 @@ std::string getWKT()
     strbuf << wkt_stream->rdbuf();
 
     std::string wkt(strbuf.str());
+
+    FileUtils::closeFile(wkt_stream);
+
     return wkt;
 }
 
@@ -68,6 +72,7 @@ std::string getJSON()
     strbuf << json_stream->rdbuf();
 
     std::string json(strbuf.str());
+    FileUtils::closeFile(json_stream);
     return json;
 }
 
@@ -167,6 +172,14 @@ TEST(PolygonTest, streams)
     ss >> p2;
 
     EXPECT_TRUE(p == p2);
+
+}
+
+TEST(PolygonTest, options)
+{
+    pdal::Option op("polygon", getWKT(), "");
+
+    Polygon p = op.getValue<Polygon>();
 
 }
 
