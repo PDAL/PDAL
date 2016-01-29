@@ -58,7 +58,7 @@ std::string MergeKernel::getName() const
 
 void MergeKernel::addSwitches(ProgramArgs& args)
 {
-    args.add("files,f", "input/output files", m_files);
+    args.add("files,f", "input/output files", m_files).setPositional();
 }
 
 

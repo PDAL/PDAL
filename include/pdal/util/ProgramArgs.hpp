@@ -22,8 +22,8 @@
 
 #pragma once
 
+#include <deque>
 #include <map>
-#include <queue>
 
 #include <pdal/util/Utils.hpp>
 
@@ -61,16 +61,14 @@ public:
     }
     bool set() const
         { return m_set; }
-    bool positional() const
-        { return m_positional; }
-    std::string name() const
-        { return m_longname; }
 
 public:
     virtual bool needsValue() const
         { return true; }
     virtual void setValue(const std::string& s) = 0;
     virtual void reset() = 0;
+    virtual size_t assignPositional(const std::deque<std::string> posList)
+        { return 0; }
 
 protected:
     std::string m_longname;
@@ -118,6 +116,23 @@ public:
         m_hidden = false;
     }
 
+    virtual size_t assignPositional(const std::deque<std::string> posList)
+    {
+        if (!m_positional || m_set)
+            return 0;
+
+        if (posList.empty())
+        {
+            std::ostringstream oss;
+
+            oss << "Missing value for positional argument '" <<
+                m_longname << "'.";
+            throw arg_error(oss.str());
+        }
+        setValue(posList.front());
+        return 1;
+    }
+
 private:
     T& m_var;
     T m_defaultVal;
@@ -158,6 +173,24 @@ public:
         m_var.clear();
         m_set = false;
         m_hidden = false;
+    }
+
+    virtual size_t assignPositional(const std::deque<std::string> posList)
+    {
+        if (!m_positional || m_set)
+            return 0;
+
+        size_t cnt;
+        for (cnt = 0; cnt < posList.size(); ++cnt)
+            try
+            {
+                setValue(posList[cnt]);
+            }
+            catch (arg_error&)
+            {
+                break;
+            }
+        return cnt;
     }
 
 private:
@@ -278,21 +311,9 @@ public:
         for (auto ai = m_args.begin(); ai != m_args.end(); ++ai)
         {
             Arg *arg = ai->get();
-            if (arg->positional() && !arg->set())
-            {
-std::cerr << "Found Positional arg = " << arg->name() << "!\n";
-                if (m_positional.empty())
-                {
-                    std::ostringstream oss;
-
-                    oss << "Missing value for positional argument '" <<
-                        arg->name() << "'.";
-                    throw arg_error(oss.str());
-                }
-std::cerr << "Setting value!\n";
-                arg->setValue(m_positional.front());
-                m_positional.pop();
-            }
+            size_t cnt = arg->assignPositional(m_positional);
+            while (cnt--)
+                m_positional.pop_front();
         }
     }
 
@@ -344,8 +365,7 @@ private:
             return parseLongArg(arg, value);
         else if (arg.size() && arg[0] == '-')
             return parseShortArg(arg, value);
-std::cerr << "Pushing positional = " << arg << "!\n";
-        m_positional.push(arg);
+        m_positional.push_back(arg);
         return 1;
     }
 
@@ -440,7 +460,7 @@ std::cerr << "Pushing positional = " << arg << "!\n";
 
     // Contains remaining arguments after positional argument have been
     // processed.
-    std::queue<std::string> m_positional;
+    std::deque<std::string> m_positional;
 };
 
 } // namespace pdal
