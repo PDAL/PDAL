@@ -128,10 +128,9 @@ class VArg : public Arg
 {
 public:
     VArg(const std::string& longname, const std::string& shortname,
-        const std::string& description, std::vector<T>& variable, T def) :
-        Arg(longname, shortname, description), m_var(variable),
-        m_defaultVal(def)
-    { m_var.push_back(m_defaultVal); }
+        const std::string& description, std::vector<T>& variable) :
+        Arg(longname, shortname, description), m_var(variable)
+    {}
 
     virtual void setValue(const std::string& s)
     {
@@ -157,14 +156,12 @@ public:
     virtual void reset()
     {
         m_var.clear();
-        m_var.push_back(m_defaultVal);
         m_set = false;
         m_hidden = false;
     }
 
 private:
     std::vector<T>& m_var;
-    T m_defaultVal;
 };
 
 template <>
@@ -220,19 +217,19 @@ public:
     }
 
     Arg& add(const std::string& name, const std::string& description,
-        std::vector<std::string>& var, std::string def)
+        std::vector<std::string>& var)
     {
-        return add<std::string>(name, description, var, def);
+        return add<std::string>(name, description, var);
     }
 
     template<typename T>
     Arg& add(const std::string& name, const std::string& description,
-        std::vector<T>& var, T def = T())
+        std::vector<T>& var)
     {
         std::string longname, shortname;
         splitName(name, longname, shortname);
 
-        Arg *arg = new VArg<T>(longname, shortname, description, var, def);
+        Arg *arg = new VArg<T>(longname, shortname, description, var);
         if (longname.size())
             m_longargs[longname] = arg;
         if (shortname.size())
@@ -283,6 +280,7 @@ public:
             Arg *arg = ai->get();
             if (arg->positional() && !arg->set())
             {
+std::cerr << "Found Positional arg = " << arg->name() << "!\n";
                 if (m_positional.empty())
                 {
                     std::ostringstream oss;
@@ -291,6 +289,7 @@ public:
                         arg->name() << "'.";
                     throw arg_error(oss.str());
                 }
+std::cerr << "Setting value!\n";
                 arg->setValue(m_positional.front());
                 m_positional.pop();
             }
@@ -345,6 +344,7 @@ private:
             return parseLongArg(arg, value);
         else if (arg.size() && arg[0] == '-')
             return parseShortArg(arg, value);
+std::cerr << "Pushing positional = " << arg << "!\n";
         m_positional.push(arg);
         return 1;
     }
