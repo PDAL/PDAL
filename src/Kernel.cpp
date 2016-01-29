@@ -561,7 +561,7 @@ void Kernel::addBasicSwitches(ProgramArgs& args)
     args.add("developer-debug",
         "Enable developer debug (don't trap exceptions)", m_hardCoreDebug);
     args.add("label", "A string to label the process with", m_label);
-    args.add("verbose,v", "Set verbose message level", m_verboseLevel, 0u);
+    args.add("verbose,v", "Set verbose message level", m_verboseLevel);
     args.add("version", "Show version info", m_showVersion);
 
     args.add("visualize", "Visualize result", m_visualize);

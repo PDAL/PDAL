@@ -70,12 +70,8 @@ void SmoothKernel::validateSwitches()
 
 void SmoothKernel::addSwitches(ProgramArgs& args)
 {
-    Arg *arg;
-
-    arg = args.add("input,i", "Input filename", m_inputFile);
-    arg->setPositional();
-    arg = args.add("output,o", "Output filename", m_outputFile);
-    arg->setPositional();
+    args.add("input,i", "Input filename", m_inputFile).setPositional();
+    args.add("output,o", "Output filename", m_outputFile).setPositional();
 }
 
 

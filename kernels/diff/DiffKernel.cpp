@@ -68,11 +68,11 @@ void DiffKernel::validateSwitches()
 
 void DiffKernel::addSwitches(ProgramArgs& args)
 {
-    Arg *arg;
-    arg = args.add("source", "Source filename", m_sourceFile);
-    arg->setPositional();
-    arg = args.add("candidate", "Candidate filename", m_candidateFile);
-    arg->setPositional();
+    Arg& source = args.add("source", "Source filename", m_sourceFile);
+    source.setPositional();
+    Arg& candidate = args.add("candidate", "Candidate filename",
+        m_candidateFile);
+    candidate.setPositional();
 }
 
 

@@ -81,14 +81,9 @@ void HeightAboveGroundKernel::validateSwitches()
 
 void HeightAboveGroundKernel::addSwitches(ProgramArgs& args)
 {
-    Arg *arg;
-
-    arg = args.add("input,i", "Input filename", m_input_file);
-    arg->setPositional();
-    arg = args.add("ground,g", "Ground filename", m_ground_file);
-    arg->setPositional();
-    arg = args.add("output,o", "Output filename", m_output_file);
-    arg->setPositional();
+    args.add("input,i", "Input filename", m_input_file).setPositional();
+    args.add("ground,g", "Ground filename", m_ground_file).setPositional();
+    args.add("output,o", "Output filename", m_output_file).setPositional();
     args.add("use_classification,c", "Use existing classification labels?",
         m_use_classification);
 }

@@ -70,10 +70,7 @@ void PipelineKernel::validateSwitches()
 
 void PipelineKernel::addSwitches(ProgramArgs& args)
 {
-    Arg *arg;
-
-    arg = args.add("input,i", "input file name", m_inputFile);
-    arg->setPositional();
+    args.add("input,i", "input file name", m_inputFile).setPositional();
     args.add("pipeline-serialization", "Output file for pipeline serialization",
         m_pipelineFile);
     args.add("validate", "Validate the pipeline (including serialization), "
@@ -83,9 +80,8 @@ void PipelineKernel::addSwitches(ProgramArgs& args)
         "information.  The file/FIFO must exist.  PDAL will not create "
         "the progress file.",
         m_progressFile);
-    arg = args.add("pointcloudschema", "dump PointCloudSchema XML output",
-        m_PointCloudSchemaOutput);
-    arg->setHidden();
+    args.add("pointcloudschema", "dump PointCloudSchema XML output",
+        m_PointCloudSchemaOutput).setHidden();
 }
 
 int PipelineKernel::execute()

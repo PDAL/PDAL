@@ -65,10 +65,7 @@ void RandomKernel::validateSwitches()
 
 void RandomKernel::addSwitches(ProgramArgs& args)
 {
-    Arg *arg;
-
-    arg = args.add("output,o", "Output file name", m_outputFile);
-    arg->setPositional();
+    args.add("output,o", "Output file name", m_outputFile).setPositional();
     args.add("compress,z",
         "Compress output data (if supported by output format)", m_bCompress);
     args.add("count", "How many points should we write?", m_numPointsToWrite);

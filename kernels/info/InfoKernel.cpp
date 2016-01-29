@@ -124,10 +124,7 @@ void InfoKernel::validateSwitches()
 
 void InfoKernel::addSwitches(ProgramArgs& args)
 {
-    Arg *arg;
-
-    arg = args.add("input,i", "input file name", m_inputFile);
-    arg->setPositional();
+    args.add("input,i", "input file name", m_inputFile).setPositional();
     args.add("all", "dump statistics, schema and metadata", m_showAll);
     args.add("point,p", "point to dump\n--point=\"1-5,10,100-200\"",
         m_pointIndexes);
@@ -147,9 +144,8 @@ void InfoKernel::addSwitches(ProgramArgs& args)
          m_pipelineFile);
     args.add("summary", "dump summary of the info", m_showSummary);
     args.add("metadata", "dump file metadata info", m_showMetadata);
-    arg = args.add("pointcloudschema", "dump PointCloudSchema XML output",
-        m_PointCloudSchemaOutput);
-    arg->setHidden();
+    args.add("pointcloudschema", "dump PointCloudSchema XML output",
+        m_PointCloudSchemaOutput).setHidden();
 }
 
 // Support for parsing point numbers.  Points can be specified singly or as

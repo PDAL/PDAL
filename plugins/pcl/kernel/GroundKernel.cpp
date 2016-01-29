@@ -89,17 +89,13 @@ void GroundKernel::validateSwitches()
 
 void GroundKernel::addSwitches(ProgramArgs& args)
 {
-    Arg *arg;
-
-    arg = args.add("input,i", "Input filename", m_inputFile);
-    arg->setPositional();
-    arg = args.add("output,o", "Output filename", m_outputFile);
-    arg->setPositional();
-    args.add("max_window_size", "Max window size, m_maxWindowSize, 33);
-    args.add("slope", "Slope", m_slope, 1);
+    args.add("input,i", "Input filename", m_inputFile).setPositional();
+    args.add("output,o", "Output filename", m_outputFile).setPositional();
+    args.add("max_window_size", "Max window size", m_maxWindowSize, 33.0);
+    args.add("slope", "Slope", m_slope, 1.0);
     args.add("max_distance", "Max distance", m_maxDistance, 2.5);
     args.add("initial_distance", "Initial distance", m_initialDistance, .15);
-    args.add("cell_size", "Cell size", m_cellSize, 1);
+    args.add("cell_size", "Cell size", m_cellSize, 1.0);
     args.add("classify", "Apply classification labels?", m_classify);
     args.add("extract", "extract ground returns?", m_extract);
     args.add("approximate,a", "use approximate algorithm? (much faster)",

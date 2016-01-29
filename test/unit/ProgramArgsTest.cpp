@@ -217,18 +217,15 @@ TEST(ProgramArgsTest, t4)
 TEST(ProgramArgsTest, positional)
 {
     ProgramArgs args;
-    Arg *arg;
 
     std::string m_foo;
     int m_bar;
     bool m_baz;
 
-    arg = args.add("foo,f", "Foo description", m_foo, "foo");
-    arg->setPositional();
-    arg = args.add("bar", "Foo description", m_bar, 23);
-    arg->setPositional();
-    arg = args.add("baz,z", "Foo description", m_baz);
-    EXPECT_THROW(arg->setPositional(), arg_error);
+    args.add("foo,f", "Foo description", m_foo, "foo").setPositional();
+    args.add("bar", "Foo description", m_bar, 23).setPositional();
+    Arg& baz = args.add("baz,z", "Foo description", m_baz);
+    EXPECT_THROW(baz.setPositional(), arg_error);
 
     // Go through exceptions procedurally.
 

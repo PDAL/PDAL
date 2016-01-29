@@ -71,14 +71,9 @@ void PCLKernel::validateSwitches()
 
 void PCLKernel::addSwitches(ProgramArgs& args)
 {
-    Arg *arg;
-
-    arg = args.add("input,i", "Input filename", m_inputFile);
-    arg->setPositional();
-    args.add("output,o", "Output filename", m_outputFile);
-    arg = arg->setPositional();
-    args.add("pcl,p", "PCL filename", m_pclFile);
-    arg = arg->setPositional();
+    args.add("input,i", "Input filename", m_inputFile).setPositional();
+    args.add("output,o", "Output filename", m_outputFile).setPositional();
+    args.add("pcl,p", "PCL filename", m_pclFile).setPositional();
     args.add("compress,z",
         "Compress output data (if supported by output format)",
         m_bCompress);

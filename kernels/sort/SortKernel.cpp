@@ -71,12 +71,8 @@ void SortKernel::validateSwitches()
 
 void SortKernel::addSwitches(ProgramArgs& args)
 {
-    Arg *arg;
-
-    arg = args.add("input,i", "Input filename", m_inputFile);
-    arg->setPositional();
-    arg = args.add("output,o", "Output filename", m_outputFile);
-    arg->setPositional();
+    args.add("input,i", "Input filename", m_inputFile).setPositional();
+    args.add("output,o", "Output filename", m_outputFile).setPositional();
     args.add("compress,z",
         "Compress output data (if supported by output format)", m_bCompress);
     args.add("metadata,m",

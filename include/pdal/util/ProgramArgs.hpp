@@ -49,10 +49,16 @@ protected:
     {}
 
 public:
-    void setHidden(bool hidden = true)
-        { m_hidden = true; }
-    virtual void setPositional()
-        { m_positional = true; }
+    Arg& setHidden(bool hidden = true)
+    {
+        m_hidden = true;
+        return *this;
+    }
+    virtual Arg& setPositional()
+    {
+        m_positional = true;
+        return *this;
+    }
     bool set() const
         { return m_set; }
     bool positional() const
@@ -117,6 +123,50 @@ private:
     T m_defaultVal;
 };
 
+template <typename T>
+class VArg : public Arg
+{
+public:
+    VArg(const std::string& longname, const std::string& shortname,
+        const std::string& description, std::vector<T>& variable, T def) :
+        Arg(longname, shortname, description), m_var(variable),
+        m_defaultVal(def)
+    { m_var.push_back(m_defaultVal); }
+
+    virtual void setValue(const std::string& s)
+    {
+        if (s.size() && s[0] == '-')
+        {
+            std::stringstream oss;
+            oss << "Argument '" << m_longname << "' needs a value and none "
+                "was provided.";
+            throw arg_error(oss.str());
+        }
+        m_rawVal = s;
+        T var;
+        if (!Utils::fromString(s, var))
+        {
+            std::ostringstream oss;
+            oss << "Invalid value for argument '" << m_longname << "'.";
+            throw arg_error(oss.str());
+        }
+        m_var.push_back(var);
+        m_set = true;
+    }
+
+    virtual void reset()
+    {
+        m_var.clear();
+        m_var.push_back(m_defaultVal);
+        m_set = false;
+        m_hidden = false;
+    }
+
+private:
+    std::vector<T>& m_var;
+    T m_defaultVal;
+};
+
 template <>
 class TArg<bool> : public Arg
 {
@@ -147,11 +197,12 @@ public:
         m_set = false;
         m_hidden = false;
     }
-    virtual void setPositional()
+    virtual Arg& setPositional()
     {
         std::ostringstream oss;
         oss << "Boolean argument '" << m_longname << "' can't be positional.";
         throw arg_error(oss.str());
+        return *this;
     }
 
 private:
@@ -162,36 +213,48 @@ private:
 class ProgramArgs
 {
 public:
-    Arg *add(const std::string& name, const std::string description,
+    Arg& add(const std::string& name, const std::string description,
         std::string& var, std::string def)
     {
         return add<std::string>(name, description, var, def);
     }
 
+    Arg& add(const std::string& name, const std::string& description,
+        std::vector<std::string>& var, std::string def)
+    {
+        return add<std::string>(name, description, var, def);
+    }
+
     template<typename T>
-    Arg *add(const std::string& name, const std::string description, T& var,
+    Arg& add(const std::string& name, const std::string& description,
+        std::vector<T>& var, T def = T())
+    {
+        std::string longname, shortname;
+        splitName(name, longname, shortname);
+
+        Arg *arg = new VArg<T>(longname, shortname, description, var, def);
+        if (longname.size())
+            m_longargs[longname] = arg;
+        if (shortname.size())
+            m_shortargs[shortname] = arg;
+        m_args.push_back(std::unique_ptr<Arg>(arg));
+        return *arg;
+    }
+
+    template<typename T>
+    Arg& add(const std::string& name, const std::string description, T& var,
         T def = T())
     {
-        // Arg names must be specified as "longname[,shortname]" where
-        // shortname is a single character.
-        std::vector<std::string> s = Utils::split(name, ',');
-        if (s.size() > 2)
-            throw arg_error("Invalid program argument specification");
-        if (s.size() == 2 && s[1].size() != 1)
-            throw arg_error("Short argument not specified as single character");
-        if (s.empty())
-            throw arg_error("No program argument provided.");
+        std::string longname, shortname;
+        splitName(name, longname, shortname);
 
-        if (s.size() == 1)
-            s.push_back("");
-
-        Arg *arg = new TArg<T>(s[0], s[1], description, var, def);
-        if (s[0].size())
-            m_longargs[s[0]] = arg;
-        if (s[1].size())
-            m_shortargs[s[1]] = arg;
+        Arg *arg = new TArg<T>(longname, shortname, description, var, def);
+        if (longname.size())
+            m_longargs[longname] = arg;
+        if (shortname.size())
+            m_shortargs[shortname] = arg;
         m_args.push_back(std::unique_ptr<Arg>(arg));
-        return arg;
+        return *arg;
     }
 
     void parse(int argc, char *argv[])
@@ -241,6 +304,24 @@ public:
     }
 
 private:
+    void splitName(const std::string& name, std::string& longname,
+        std::string& shortname)
+    {
+        // Arg names must be specified as "longname[,shortname]" where
+        // shortname is a single character.
+        std::vector<std::string> s = Utils::split(name, ',');
+        if (s.size() > 2)
+            throw arg_error("Invalid program argument specification");
+        if (s.size() == 2 && s[1].size() != 1)
+            throw arg_error("Short argument not specified as single character");
+        if (s.empty())
+            throw arg_error("No program argument provided.");
+        if (s.size() == 1)
+            s.push_back("");
+        longname = s[0];
+        shortname = s[1];
+    }
+
     Arg *findLongArg(const std::string& s)
     {
         auto si = m_longargs.find(s);

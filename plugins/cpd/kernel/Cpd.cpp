@@ -67,16 +67,14 @@ void CpdKernel::addSwitches(ProgramArgs& args)
 {
     using namespace cpd;
 
-    Arg *arg;
-
-    arg = args.add("filex,x", "input file containing the source points",
+    Arg& filex = args.add("filex,x", "input file containing the source points",
         m_filex);
-    arg->setPositional();
-    arg = args.add("filey,y", "input file containg target points, "
+    filex.setPositional();
+    Arg& filey = args.add("filey,y", "input file containg target points, "
         "i.e. the points that will be registered", m_filey);
-    arg->setPositional();
-    arg = args.add("output,o", "output file name", m_output);
-    arg->setPositional();
+    filey.setPositional();
+    Arg& output = args.add("output,o", "output file name", m_output);
+    output.setPositional();
     args.add("tolerance,t", "tolerance criterium", m_tolerance,
         DefaultTolerance);
     args.add("max-iterations,m", "maximum number of iterations allowed",
@@ -103,12 +101,12 @@ void CpdKernel::addSwitches(ProgramArgs& args)
     args.add("auto-z-exaggeration-ratio", 
         "The scaling ratio for the Z-exaggeration. Z's range will "
         "be scaled to this ratio of the extent of the smallest XY extent.",
-        m_auto_z_exaggeration_ratio, 5.0 / 8.0);
+        m_auto_z_exaggeration_ratio, (float)(5.0 / 8.0));
     args.add("chipped", "Run chipped registration", m_chipped);
     args.add("chip-capacity", "The maximum number of points in each "
         "chip (before buffer)", m_chip_capacity, 8000);
     args.add("chip-buffer", "The width of the buffer around each chip",
-        m_chip_buffer, 50.0);
+        m_chip_buffer, (float)50.0);
     args.add("sigma2",
         "The starting sigma2 value. To improve CPD runs, set to a bit "
         "more than you expect the average motion to be",

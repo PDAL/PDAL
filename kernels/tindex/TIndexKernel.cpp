@@ -94,14 +94,10 @@ TIndexKernel::TIndexKernel()
 
 void TIndexKernel::addSwitches(ProgramArgs& args)
 {
-    Arg *arg;
-
-    arg = args.add("tindex", "OGR-readable/writeable tile index output",
-        m_idxFilename);
-    arg->setPositional();
-    arg = args.add("filespec", "Build: Pattern of files to index. "
-        "Merge: Output filename", m_filespec);
-    arg->setPositional();
+    args.add("tindex", "OGR-readable/writeable tile index output",
+        m_idxFilename).setPositional();
+    args.add("filespec", "Build: Pattern of files to index. "
+        "Merge: Output filename", m_filespec).setPositional();
     args.add("fast_boundary", "Use extent instead of exact boundary",
         m_fastBoundary);
     args.add("lyr_name", "OGR layer name to write into datasource",

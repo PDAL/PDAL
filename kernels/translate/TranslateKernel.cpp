@@ -88,22 +88,12 @@ void TranslateKernel::validateSwitches()
 
 void TranslateKernel::addSwitches(ProgramArgs& args)
 {
-    Arg *arg;
-
-    arg = args.add("input,i", "Input filename", m_inputFile);
-    arg->setPositional();
-    arg = args.add("output,o", "Output filename", m_outputFile);
-    arg->setPositional();
+    args.add("input,i", "Input filename", m_inputFile).setPositional();
+    args.add("output,o", "Output filename", m_outputFile).setPositional();
     args.add("pipeline,p", "Pipeline output", m_pipelineOutput);
     args.add("reader,r", "Reader type", m_readerType);
-    //TODO - Accept multiple filters.
-//    args.add("filter,f", "Filter type", m_filterType);
+    args.add("filter,f", "Filter type", m_filterType);
     args.add("writer,w", "Writer type", m_writerType);
-
-    //ABELL - Think this should go away.
-    /**
-    addPositionalSwitch("filter", -1);
-    **/
 }
 
 int TranslateKernel::execute()
