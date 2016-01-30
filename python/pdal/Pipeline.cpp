@@ -36,9 +36,9 @@ void Pipeline::execute()
     m_schema = schema.xml();
 #endif
 
-    pdal::PipelineWriter writer(m_manager);
     strm.str("");
-    writer.writePipeline(strm);
+    pdal::PipelineWriter::writePipeline(m_manager.getStage(), strm);
+
     m_xml = strm.str();
 
 }

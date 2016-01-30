@@ -58,3 +58,7 @@ ${MAKECMD} -j ${NUMTHREADS} && \
     LD_LIBRARY_PATH=./lib && \
     PGUSER=postgres ctest -V && \
     ${MAKECMD} install
+
+cd /pdal/python
+python setup.py build
+python setup.py test
