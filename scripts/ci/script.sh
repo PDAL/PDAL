@@ -60,5 +60,6 @@ ${MAKECMD} -j ${NUMTHREADS} && \
     ${MAKECMD} install
 
 cd /pdal/python
+pip install packaging
 python setup.py build
 python setup.py test
