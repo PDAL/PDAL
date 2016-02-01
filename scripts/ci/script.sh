@@ -65,6 +65,6 @@ if [ "${OPTIONAL_COMPONENT_SWITCH}" == "ON" ]; then
     pip install packaging
     python setup.py build
     echo "current path: " `pwd`
-    export PDAL_TEST_DIR=/pdal/build/test
+    export PDAL_TEST_DIR=/pdal/_build/test
     python setup.py test
 fi
