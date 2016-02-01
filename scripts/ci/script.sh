@@ -59,8 +59,6 @@ ${MAKECMD} -j ${NUMTHREADS} && \
     PGUSER=postgres ctest -V && \
     ${MAKECMD} install && \
     /sbin/ldconfig
-if "$OPTIONAL_COMPONENT_SWITCH"=
-
 
 if [ "$(OPTIONAL_COMPONENT_SWITCH)" == "ON" ]; then
     cd /pdal/python
