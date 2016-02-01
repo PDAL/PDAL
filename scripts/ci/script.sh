@@ -59,9 +59,13 @@ ${MAKECMD} -j ${NUMTHREADS} && \
     PGUSER=postgres ctest -V && \
     ${MAKECMD} install && \
     /sbin/ldconfig
+if "$OPTIONAL_COMPONENT_SWITCH"=
 
-cd /pdal/python
-pip install packaging
-python setup.py build
-echo "current path: " `pwd`
-python setup.py test
+
+if [ "$(OPTIONAL_COMPONENT_SWITCH)" != 'ON' ]; then
+    cd /pdal/python
+    pip install packaging
+    python setup.py build
+    echo "current path: " `pwd`
+    python setup.py test
+fi
