@@ -60,7 +60,7 @@ ${MAKECMD} -j ${NUMTHREADS} && \
     ${MAKECMD} install && \
     /sbin/ldconfig
 
-if [ "$(OPTIONAL_COMPONENT_SWITCH)" == "ON" ]; then
+if [ "${OPTIONAL_COMPONENT_SWITCH}" == "ON" ]; then
     cd /pdal/python
     pip install packaging
     python setup.py build
