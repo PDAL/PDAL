@@ -62,7 +62,7 @@ void MergeKernel::addSwitches(ProgramArgs& args)
 }
 
 
-void MergeKernel::validateSwitches()
+void MergeKernel::validateSwitches(ProgramArgs& args)
 {
     if (m_files.size() < 2)
         throw pdal_error("Must specify an input and output file.");

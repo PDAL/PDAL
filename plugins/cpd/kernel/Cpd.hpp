@@ -54,7 +54,6 @@ public:
 private:
     CpdKernel() {};
     virtual void addSwitches(ProgramArgs& args);
-    void validateSwitches();
     PointViewPtr readFile(const std::string& filename, PointTableRef table,
         arma::mat& mat);
     cpd::Registration::ResultPtr chipThenRegister(

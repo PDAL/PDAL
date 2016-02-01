@@ -52,17 +52,6 @@ CREATE_SHARED_PLUGIN(1, 0, CpdKernel, Kernel, s_info)
 
 std::string CpdKernel::getName() const { return s_info.name; }
 
-void CpdKernel::validateSwitches()
-{
-    if (m_filex == "")
-        throw app_usage_error("--filex/-x required");
-    if (m_filey == "")
-        throw app_usage_error("--filey/-y required");
-    if (m_output == "")
-        throw app_usage_error("--output/-o required");
-}
-
-
 void CpdKernel::addSwitches(ProgramArgs& args)
 {
     using namespace cpd;

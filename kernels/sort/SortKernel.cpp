@@ -60,15 +60,6 @@ SortKernel::SortKernel() : m_bCompress(false), m_bForwardMetadata(false)
 {}
 
 
-void SortKernel::validateSwitches()
-{
-    if (m_inputFile == "")
-        throw app_usage_error("--input/-i required");
-    if (m_outputFile == "")
-        throw app_usage_error("--output/-o required");
-}
-
-
 void SortKernel::addSwitches(ProgramArgs& args)
 {
     args.add("input,i", "Input filename", m_inputFile).setPositional();

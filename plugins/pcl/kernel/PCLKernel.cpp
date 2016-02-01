@@ -55,18 +55,7 @@ PCLKernel::PCLKernel()
     : Kernel()
     , m_bCompress(false)
     , m_bForwardMetadata(false)
-{
-}
-
-void PCLKernel::validateSwitches()
-{
-    if (m_inputFile == "")
-        throw app_usage_error("--input/-i required");
-    if (m_outputFile == "")
-        throw app_usage_error("--output/-o required");
-    if (m_pclFile == "")
-        throw app_usage_error("--pcl/-p required");
-}
+{}
 
 
 void PCLKernel::addSwitches(ProgramArgs& args)

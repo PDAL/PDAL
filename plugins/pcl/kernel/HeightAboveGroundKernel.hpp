@@ -47,13 +47,10 @@ public:
     SET_KERNEL_NAME("height", "Height above ground")
     SET_KERNEL_LINK("http://pdal.io/kernels/kernels.height.html")
 
-    HeightAboveGroundKernel() : Kernel()
-    {}
-
     int execute();
 
 private:
-    void validateSwitches();
+    virtual void validateSwitches(ProgramArgs& args);
     virtual void addSwitches(ProgramArgs& args);
 
     bool m_use_classification;

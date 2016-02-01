@@ -70,7 +70,7 @@ InfoKernel::InfoKernel()
 {}
 
 
-void InfoKernel::validateSwitches()
+void InfoKernel::validateSwitches(ProgramArgs& args)
 {
     int functions = 0;
 
@@ -124,7 +124,7 @@ void InfoKernel::validateSwitches()
 
 void InfoKernel::addSwitches(ProgramArgs& args)
 {
-    args.add("input,i", "input file name", m_inputFile).setPositional();
+    args.add("input,i", "input file name", m_inputFile).setOptionalPositional();
     args.add("all", "dump statistics, schema and metadata", m_showAll);
     args.add("point,p", "point to dump\n--point=\"1-5,10,100-200\"",
         m_pointIndexes);

@@ -52,22 +52,6 @@ CREATE_SHARED_PLUGIN(1, 0, SmoothKernel, Kernel, s_info)
 
 std::string SmoothKernel::getName() const { return s_info.name; }
 
-void SmoothKernel::validateSwitches()
-{
-    if (m_inputFile == "")
-    {
-        throw app_usage_error("--input/-i required");
-    }
-
-    if (m_outputFile == "")
-    {
-        throw app_usage_error("--output/-o required");
-    }
-
-    return;
-}
-
-
 void SmoothKernel::addSwitches(ProgramArgs& args)
 {
     args.add("input,i", "Input filename", m_inputFile).setPositional();

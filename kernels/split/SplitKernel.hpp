@@ -52,7 +52,7 @@ public:
 
 private:
     void addSwitches(ProgramArgs& args);
-    void validateSwitches();
+    void validateSwitches(ProgramArgs& args);
 
     std::string m_inputFile;
     std::string m_outputFile;

@@ -56,13 +56,6 @@ RandomKernel::RandomKernel()
 }
 
 
-void RandomKernel::validateSwitches()
-{
-    if (m_outputFile == "")
-        throw app_usage_error("--output/-o required");
-}
-
-
 void RandomKernel::addSwitches(ProgramArgs& args)
 {
     args.add("output,o", "Output file name", m_outputFile).setPositional();

@@ -36,8 +36,6 @@
 
 #include "PCLConversions.hpp"
 
-#include <boost/program_options.hpp>
-
 #include <pcl/ModelCoefficients.h>
 #include <pcl/filters/project_inliers.h>
 #include <pcl/kdtree/kdtree_flann.h>
@@ -59,33 +57,30 @@
 #include <string>
 #include <vector>
 
-namespace po = boost::program_options;
-
 CREATE_KERNEL_PLUGIN(height, pdal::HeightAboveGroundKernel)
 
 namespace pdal
 {
 
-void HeightAboveGroundKernel::validateSwitches()
+void HeightAboveGroundKernel::validateSwitches(ProgramArgs& args)
 {
-    if (m_input_file == "")
-        throw app_usage_error("--input/-i required");
     if (m_ground_file == "" && !m_use_classification)
-        throw app_usage_error("--ground/-g or --use_classification/-c required");
-    if (m_output_file == "")
-        throw app_usage_error("--output/-o required");
+        throw pdal_error("Either option 'ground' or 'use_classification' "
+            "is required.");
 
     // should probably verify that the output is BPF
-    // should probably also verify that there is a classification dimension if --use_classification == true
+    // should probably also verify that there is a classification
+    // dimension if --use_classification == true
 }
 
 void HeightAboveGroundKernel::addSwitches(ProgramArgs& args)
 {
-    args.add("input,i", "Input filename", m_input_file).setPositional();
-    args.add("ground,g", "Ground filename", m_ground_file).setPositional();
-    args.add("output,o", "Output filename", m_output_file).setPositional();
     args.add("use_classification,c", "Use existing classification labels?",
         m_use_classification);
+    args.add("input,i", "Input filename", m_input_file).setPositional();
+    args.add("ground,g", "Ground filename", m_ground_file).setPositional();
+    args.add("output,o",
+        "Output filename", m_output_file).setOptionalPositional();
 }
 
 int HeightAboveGroundKernel::execute()

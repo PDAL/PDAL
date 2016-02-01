@@ -61,7 +61,6 @@ public:
 private:
     RandomKernel();
     void addSwitches(ProgramArgs& arg);
-    void validateSwitches();
 
     Stage& makeReader(Options readerOptions);
 

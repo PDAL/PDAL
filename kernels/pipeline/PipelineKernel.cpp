@@ -58,7 +58,7 @@ PipelineKernel::PipelineKernel() : m_validate(false), m_progressFd(-1)
 {}
 
 
-void PipelineKernel::validateSwitches()
+void PipelineKernel::validateSwitches(ProgramArgs& args)
 {
     if (m_usestdin)
         m_inputFile = "STDIN";
@@ -70,7 +70,7 @@ void PipelineKernel::validateSwitches()
 
 void PipelineKernel::addSwitches(ProgramArgs& args)
 {
-    args.add("input,i", "input file name", m_inputFile).setPositional();
+    args.add("input,i", "input file name", m_inputFile).setOptionalPositional();
     args.add("pipeline-serialization", "Output file for pipeline serialization",
         m_pipelineFile);
     args.add("validate", "Validate the pipeline (including serialization), "

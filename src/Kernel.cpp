@@ -55,8 +55,6 @@
 #include <boost/tokenizer.hpp>
 typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
 
-namespace po = boost::program_options;
-
 namespace pdal
 {
 
@@ -140,18 +138,6 @@ Kernel::Kernel()
 {}
 
 
-Kernel::~Kernel()
-{
-    for (auto & iter : m_public_options)
-    {
-        delete iter;
-    }
-    for (auto & iter : m_hidden_options)
-    {
-        delete iter;
-    }
-}
-
 std::ostream& operator<<(std::ostream& ostr, const Kernel& kernel)
 {
     ostr << "  Name: " << kernel.getName() << std::endl;
@@ -218,7 +204,7 @@ int Kernel::doStartup()
 }
 
 
-int Kernel::doExecution()
+int Kernel::doExecution(ProgramArgs& args)
 {
     if (m_reportDebug)
     {
@@ -228,7 +214,7 @@ int Kernel::doExecution()
 
     if (m_hardCoreDebug)
     {
-        int status = innerRun();
+        int status = innerRun(args);
         return status;
     }
 
@@ -236,7 +222,7 @@ int Kernel::doExecution()
 
     try
     {
-        status = innerRun();
+        status = innerRun(args);
     }
     catch (pdal::pdal_error const& e)
     {
@@ -287,13 +273,21 @@ int Kernel::run(int argc, char const * argv[], const std::string& appName)
 
     ProgramArgs args;
 
-    doSwitches(argc, argv, args);
+    try
+    {
+        doSwitches(argc, argv, args);
+    }
+    catch (const pdal_error& e)
+    {
+        Utils::printError(e.what());
+        return 1;
+    }
 
     int startup_status = doStartup();
     if (startup_status)
         return startup_status;
 
-    int execution_status = doExecution();
+    int execution_status = doExecution(args);
 
     // note we will try to shutdown cleanly even if we got an error condition
     // in the execution phase
@@ -322,16 +316,7 @@ void Kernel::collectExtraOptions()
 }
 
 
-bool Kernel::argumentSpecified(const std::string& name)
-{
-    auto ai = m_variablesMap.find(name);
-    if (ai == m_variablesMap.end())
-        return false;
-    return !(ai->second.defaulted());
-}
-
-
-int Kernel::innerRun()
+int Kernel::innerRun(ProgramArgs& args)
 {
     // handle the well-known options
     if (m_showVersion)
@@ -342,7 +327,7 @@ int Kernel::innerRun()
 
     if (m_showHelp)
     {
-        outputHelp();
+        outputHelp(args);
         return 0;
     }
 
@@ -352,13 +337,13 @@ int Kernel::innerRun()
     try
     {
         // do any user-level sanity checking
-        validateSwitches();
+        validateSwitches(args);
         collectExtraOptions();
     }
     catch (app_usage_error e)
     {
         Utils::printError(std::string("Usage error: ") + e.what());
-        outputHelp();
+        outputHelp(args);
         return 1;
     }
 
@@ -443,20 +428,6 @@ void Kernel::visualize(PointViewPtr input_view, PointViewPtr output_view) const
 */
 
 
-void Kernel::addSwitchSet(po::options_description* options)
-{
-    if (options)
-        m_public_options.push_back(options);
-}
-
-
-void Kernel::addHiddenSwitchSet(po::options_description* options)
-{
-    if (options)
-        m_hidden_options.push_back(options);
-}
-
-
 void Kernel::setCommonOptions(Options &options)
 {
     options.add("visualize", m_visualize);
@@ -474,7 +445,7 @@ void Kernel::setCommonOptions(Options &options)
 
     boost::char_separator<char> sep(",| ");
 
-    if (argumentExists("scale"))
+    if (!m_scales.empty())
     {
         std::vector<double> scales;
         tokenizer scale_tokens(m_scales, sep);
@@ -500,7 +471,7 @@ void Kernel::setCommonOptions(Options &options)
         }
     }
 
-    if (argumentExists("offset"))
+    if (!m_offsets.empty())
     {
         std::vector<std::string> offsets;
         tokenizer offset_tokens(m_offsets, sep);
@@ -528,15 +499,11 @@ void Kernel::setCommonOptions(Options &options)
 }
 
 
-void Kernel::outputHelp()
+void Kernel::outputHelp(ProgramArgs& args)
 {
     outputVersion();
 
-    for (auto const& iter : m_public_options)
-    {
-        std::cout << *iter;
-        std::cout << std::endl;
-    }
+    //ABELL - Fix me.
 
     std::cout <<"\nFor more information, see the full documentation for "
         "PDAL at http://pdal.io/\n" << std::endl << std::endl;
@@ -555,14 +522,15 @@ void Kernel::addBasicSwitches(ProgramArgs& args)
 {
     args.add("help,h", "Print help message", m_showHelp);
     args.add("options", "Show available options for a driver", m_showOptions);
-    args.add("debug,d", "Enable debug mode", m_isDebug);
+    args.add("version", "Show version info", m_showVersion);
     args.add("report-debug", "Report PDAL compilation DEBUG status",
         m_reportDebug, true);
+
+    args.add("debug,d", "Enable debug mode", m_isDebug);
     args.add("developer-debug",
         "Enable developer debug (don't trap exceptions)", m_hardCoreDebug);
     args.add("label", "A string to label the process with", m_label);
     args.add("verbose,v", "Set verbose message level", m_verboseLevel);
-    args.add("version", "Show version info", m_showVersion);
 
     args.add("visualize", "Visualize result", m_visualize);
     args.add("stdin,s", "Read pipeline XML from stdin", m_usestdin);

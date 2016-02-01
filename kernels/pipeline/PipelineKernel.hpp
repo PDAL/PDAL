@@ -57,7 +57,7 @@ public:
 private:
     PipelineKernel();
     void addSwitches(ProgramArgs& args);
-    void validateSwitches();
+    void validateSwitches(ProgramArgs& args);
 
     std::string m_inputFile;
     std::string m_pipelineFile;

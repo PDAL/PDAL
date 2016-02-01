@@ -95,7 +95,7 @@ TIndexKernel::TIndexKernel()
 void TIndexKernel::addSwitches(ProgramArgs& args)
 {
     args.add("tindex", "OGR-readable/writeable tile index output",
-        m_idxFilename).setPositional();
+        m_idxFilename).setOptionalPositional();
     args.add("filespec", "Build: Pattern of files to index. "
         "Merge: Output filename", m_filespec).setPositional();
     args.add("fast_boundary", "Use extent instead of exact boundary",
@@ -119,16 +119,13 @@ void TIndexKernel::addSwitches(ProgramArgs& args)
 }
 
 
-void TIndexKernel::validateSwitches()
+void TIndexKernel::validateSwitches(ProgramArgs& args)
 {
-    if (m_idxFilename.empty())
-        throw pdal_error("No index filename provided.");
-
     if (m_merge)
     {
         if (!m_wkt.empty() && !m_bounds.empty())
-            throw pdal_error("Can't specify both --polygon and "
-                "--bounds options.");
+            throw pdal_error("Can't specify both 'polygon' and "
+                "'bounds' options.");
         if (!m_bounds.empty())
             m_wkt = m_bounds.toWKT();
         if (m_filespec.empty())
@@ -137,23 +134,23 @@ void TIndexKernel::validateSwitches()
         invalidArgs.push_back("a_srs");
         invalidArgs.push_back("src_srs_name");
         for (auto arg : invalidArgs)
-            if (argumentSpecified(arg))
+            if (args.set(arg))
             {
                 std::ostringstream out;
 
-                out << "option '--" << arg << "' not supported during merge.";
+                out << "option '" << arg << "' not supported during merge.";
                 throw pdal_error(out.str());
             }
     }
     else
     {
         if (m_filespec.empty() && !m_usestdin)
-            throw pdal_error("No input pattern specified and STDIN not given");
-        if (argumentExists("polygon"))
-            throw pdal_error("--polygon option not supported when building "
+            throw pdal_error("No input pattern specified");
+        if (args.set("polygon"))
+            throw pdal_error("'polygon' option not supported when building "
                 "index.");
-        if (argumentExists("bounds"))
-            throw pdal_error("--bounds option not supported when building "
+        if (args.set("bounds"))
+            throw pdal_error("'bounds' option not supported when building "
                 "index.");
     }
 }

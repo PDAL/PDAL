@@ -125,27 +125,10 @@ vector<uint32_t> getListOfPoints(std::string p)
 
 } //namespace
 
-ViewKernel::ViewKernel()
-    : Kernel()
-    , m_inputFile("")
-{}
-
-
-void ViewKernel::validateSwitches()
-{
-    if (m_inputFile == "")
-    {
-        throw app_usage_error("--input/-i required");
-    }
-}
-
 
 void ViewKernel::addSwitches(ProgramArgs& args)
 {
-    Arg *arg;
-
-    arg = args.add("input,i", "Input filename", m_inputFile);
-    arg->setPositional();
+    args.add("input,i", "Input filename", m_inputFile).setPositional();
     args.add("point,p", "Point to dump", m_pointIndexes);
 }
 

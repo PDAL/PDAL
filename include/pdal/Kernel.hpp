@@ -34,16 +34,6 @@
 
 #pragma once
 
-
-#ifdef PDAL_COMPILER_MSVC
-#  pragma warning(push)
-#  pragma warning(disable: 4512)  // assignment operator could not be generated
-#endif
-#include <boost/program_options.hpp>
-#ifdef PDAL_COMPILER_MSVC
-#  pragma warning(pop)
-#endif
-
 #include <cstdint>
 #include <iosfwd>
 #include <map>
@@ -53,8 +43,6 @@
 
 #include <pdal/KernelSupport.hpp>
 #include <pdal/util/ProgramArgs.hpp>
-
-namespace po = boost::program_options;
 
 namespace pdal
 {
@@ -73,8 +61,10 @@ typedef std::shared_ptr<PointView> PointViewPtr;
 class PDAL_DLL Kernel
 {
     FRIEND_TEST(KernelTest, parseOption);
+
 public:
-    virtual ~Kernel();
+    virtual ~Kernel()
+    {}
 
     // call this, to start the machine
     int run(int argc, const char* argv[], const std::string& appName);
@@ -92,18 +82,18 @@ protected:
     Stage& makeWriter(const std::string& outputFile, Stage& parent);
 
 public:
-    virtual void addSwitches(ProgramArgs& args) {}
+    virtual void addSwitches(ProgramArgs& args)
+    {}
 
     // implement this, to do sanity checking of cmd line
     // will throw if the user gave us bad options
-    virtual void validateSwitches() {}
+    virtual void validateSwitches(ProgramArgs& args)
+    {}
 
     // implement this, to do your actual work
     // it will be wrapped in a global catch try/block for you
     virtual int execute() = 0;
 
-    void addSwitchSet(po::options_description* options);
-    void addHiddenSwitchSet(po::options_description* options);
     void setCommonOptions(Options &options);
 
     void setProgressShellCommand(std::vector<std::string> const& command)
@@ -144,23 +134,20 @@ protected:
         m_stages.push_back(std::unique_ptr<Stage>(s));
         return *s;
     }
-    bool argumentExists(const std::string& name)
-        { return (bool)m_variablesMap.count(name); }
-    bool argumentSpecified(const std::string& name);
 
     bool m_usestdin;
     Log m_log;
 
 private:
-    int innerRun();
-    void outputHelp();
+    int innerRun(ProgramArgs& args);
+    void outputHelp(ProgramArgs& args);
     void outputVersion();
     void addBasicSwitches(ProgramArgs& args);
     void collectExtraOptions();
 
     void doSwitches(int argc, const char *argv[], ProgramArgs& args);
     int doStartup();
-    int doExecution();
+    int doExecution(ProgramArgs& args);
     int doShutdown();
 
     static bool test_parseOption(std::string o, std::string& stage,
@@ -181,10 +168,6 @@ private:
     bool m_visualize;
     std::string m_label;
 
-    std::vector<po::options_description*> m_public_options;
-    std::vector<po::options_description*> m_hidden_options;
-    po::positional_options_description m_positionalOptions;
-    po::variables_map m_variablesMap;
     std::vector<std::string> m_extra_options;
     std::map<std::string, Options> m_extraStageOptions;
     std::vector<std::unique_ptr<Stage>> m_stages;

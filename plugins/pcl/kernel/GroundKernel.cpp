@@ -74,19 +74,6 @@ GroundKernel::GroundKernel()
     , m_approximate(false)
 {}
 
-void GroundKernel::validateSwitches()
-{
-    if (m_inputFile == "")
-    {
-        throw app_usage_error("--input/-i required");
-    }
-
-    if (m_outputFile == "")
-    {
-        throw app_usage_error("--output/-o required");
-    }
-}
-
 void GroundKernel::addSwitches(ProgramArgs& args)
 {
     args.add("input,i", "Input filename", m_inputFile).setPositional();

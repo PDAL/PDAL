@@ -250,6 +250,61 @@ TEST(ProgramArgsTest, positional)
     EXPECT_EQ(m_foo, "Flub");
     EXPECT_EQ(m_bar, 66);
     EXPECT_EQ(m_baz, false);
+}
 
+TEST(ProgramArgsTest, vector)
+{
+    ProgramArgs args;
 
+    std::string m_foo;
+    std::vector<int> m_bar;
+    bool m_baz;
+
+    args.add("foo,f", "Foo description", m_foo, "foo").setPositional();
+    args.add("bar", "Foo description", m_bar).setOptionalPositional();
+    args.add("baz,z", "Foo description", m_baz);
+
+    // Go through exceptions procedurally.
+
+    StringList s = toStringList("--bar 23 --bar 45 Foo -z");
+    args.parse(s);
+    EXPECT_EQ(m_foo, "Foo");
+    EXPECT_EQ(m_bar.size(), 2u);
+    EXPECT_EQ(m_baz, true);
+    EXPECT_EQ(m_bar[0], 23);
+    EXPECT_EQ(m_bar[1], 45);
+
+    args.reset();
+    s = toStringList("Foo");
+    args.parse(s);
+    EXPECT_EQ(m_bar.size(), 0u);
+    EXPECT_EQ(m_foo, "Foo");
+    EXPECT_EQ(m_baz, false);
+
+    args.reset();
+    s = toStringList("Fool 44 55 66");
+    args.parse(s);
+    EXPECT_EQ(m_foo, "Fool");
+    EXPECT_EQ(m_bar.size(), 3u);
+    EXPECT_EQ(m_bar[0], 44);
+    EXPECT_EQ(m_bar[1], 55);
+    EXPECT_EQ(m_bar[2], 66);
+    EXPECT_EQ(m_baz, false);
+}
+
+TEST(ProgramArgsTest, vectorfail)
+{
+    ProgramArgs args;
+
+    std::string m_foo;
+    std::vector<int> m_bar;
+    bool m_baz;
+
+    // Standard positional arg following optional positional arg disallowed.
+    args.add("bar", "Foo description", m_bar).setOptionalPositional();
+    args.add("foo,f", "Foo description", m_foo, "foo").setPositional();
+    args.add("baz,z", "Foo description", m_baz);
+
+    StringList s;
+    EXPECT_THROW(args.parse(s), arg_error);
 }

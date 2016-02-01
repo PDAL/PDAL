@@ -78,7 +78,7 @@ void SplitKernel::addSwitches(ProgramArgs& args)
 }
 
 
-void SplitKernel::validateSwitches()
+void SplitKernel::validateSwitches(ProgramArgs& args)
 {
 #ifdef WIN32
     char pathSeparator = '\\';

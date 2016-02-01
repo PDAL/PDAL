@@ -57,15 +57,6 @@ CREATE_STATIC_PLUGIN(1, 0, DiffKernel, Kernel, s_info)
 
 std::string DiffKernel::getName() const { return s_info.name; }
 
-void DiffKernel::validateSwitches()
-{
-    if (!m_sourceFile.size())
-        throw app_runtime_error("No source file given!");
-    if (!m_candidateFile.size())
-        throw app_runtime_error("No candidate file given!");
-}
-
-
 void DiffKernel::addSwitches(ProgramArgs& args)
 {
     Arg& source = args.add("source", "Source filename", m_sourceFile);

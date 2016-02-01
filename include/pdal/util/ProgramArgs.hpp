@@ -39,13 +39,29 @@ public:
     std::string m_error;
 };
 
+
+namespace
+{
+namespace PosType
+{
+
+enum Enum
+{
+    None,
+    Required,
+    Optional
+};
+
+} // namespace PosType
+} // unnamed namespace
+
 class Arg
 {
 protected:
     Arg(const std::string& longname, const std::string& shortname,
         const std::string& description) : m_longname(longname),
         m_shortname(shortname), m_description(description), m_set(false),
-        m_hidden(false), m_positional(false)
+        m_hidden(false), m_positional(PosType::None)
     {}
 
 public:
@@ -56,7 +72,12 @@ public:
     }
     virtual Arg& setPositional()
     {
-        m_positional = true;
+        m_positional = PosType::Required;
+        return *this;
+    }
+    virtual Arg& setOptionalPositional()
+    {
+        m_positional = PosType::Optional;
         return *this;
     }
     bool set() const
@@ -69,6 +90,8 @@ public:
     virtual void reset() = 0;
     virtual size_t assignPositional(const std::deque<std::string> posList)
         { return 0; }
+    PosType::Enum positional() const
+        { return m_positional; }
 
 protected:
     std::string m_longname;
@@ -77,7 +100,7 @@ protected:
     std::string m_rawVal;
     bool m_set;
     bool m_hidden;
-    bool m_positional;
+    PosType::Enum m_positional;
 };
 
 template <typename T>
@@ -118,16 +141,21 @@ public:
 
     virtual size_t assignPositional(const std::deque<std::string> posList)
     {
-        if (!m_positional || m_set)
+        if (m_positional == PosType::None || m_set)
             return 0;
 
         if (posList.empty())
         {
-            std::ostringstream oss;
-
-            oss << "Missing value for positional argument '" <<
-                m_longname << "'.";
-            throw arg_error(oss.str());
+            if (m_positional == PosType::Required)
+            {
+                std::ostringstream oss;
+            
+                oss << "Missing value for positional argument '" <<
+                    m_longname << "'.";
+                throw arg_error(oss.str());
+            }
+            else
+                return 0;
         }
         setValue(posList.front());
         return 1;
@@ -136,6 +164,56 @@ public:
 private:
     T& m_var;
     T m_defaultVal;
+};
+
+template <>
+class TArg<bool> : public Arg
+{
+public:
+    TArg(const std::string& longname, const std::string& shortname,
+        const std::string& description, bool& variable, bool def) :
+        Arg(longname, shortname, description), m_val(variable),
+        m_defaultVal(def)
+    {}
+
+    virtual bool needsValue() const
+        { return false; }
+    virtual void setValue(const std::string& s)
+    {
+        if (s.size() && s[0] == '-')
+        {
+            std::stringstream oss;
+            oss << "Argument '" << m_longname << "' needs a value and none "
+                "was provided.";
+            throw arg_error(oss.str());
+        }
+        m_val = !m_defaultVal;
+        m_set = true;
+    }
+    virtual void reset()
+    {
+        m_val = m_defaultVal;
+        m_set = false;
+        m_hidden = false;
+    }
+    virtual Arg& setPositional()
+    {
+        std::ostringstream oss;
+        oss << "Boolean argument '" << m_longname << "' can't be positional.";
+        throw arg_error(oss.str());
+        return *this;
+    }
+    virtual Arg& setOptionalPositional()
+    {
+        std::ostringstream oss;
+        oss << "Boolean argument '" << m_longname << "' can't be positional.";
+        throw arg_error(oss.str());
+        return *this;
+    }
+
+private:
+    bool& m_val;
+    bool m_defaultVal;
 };
 
 template <typename T>
@@ -177,7 +255,7 @@ public:
 
     virtual size_t assignPositional(const std::deque<std::string> posList)
     {
-        if (!m_positional || m_set)
+        if (m_positional == PosType::None || m_set)
             return 0;
 
         size_t cnt;
@@ -190,54 +268,19 @@ public:
             {
                 break;
             }
+        if (cnt == 0 && m_positional == PosType::Required)
+        {
+            std::ostringstream oss;
+
+            oss << "Missing value for positional argument '" <<
+                m_longname << "'.";
+            throw arg_error(oss.str());
+        }
         return cnt;
     }
 
 private:
     std::vector<T>& m_var;
-};
-
-template <>
-class TArg<bool> : public Arg
-{
-public:
-    TArg(const std::string& longname, const std::string& shortname,
-        const std::string& description, bool& variable, bool def) :
-        Arg(longname, shortname, description), m_val(variable),
-        m_defaultVal(def)
-    {}
-
-    virtual bool needsValue() const
-        { return false; }
-    virtual void setValue(const std::string& s)
-    {
-        if (s.size() && s[0] == '-')
-        {
-            std::stringstream oss;
-            oss << "Argument '" << m_longname << "' needs a value and none "
-                "was provided.";
-            throw arg_error(oss.str());
-        }
-        m_val = !m_defaultVal;
-        m_set = true;
-    }
-    virtual void reset()
-    {
-        m_val = m_defaultVal;
-        m_set = false;
-        m_hidden = false;
-    }
-    virtual Arg& setPositional()
-    {
-        std::ostringstream oss;
-        oss << "Boolean argument '" << m_longname << "' can't be positional.";
-        throw arg_error(oss.str());
-        return *this;
-    }
-
-private:
-    bool& m_val;
-    bool m_defaultVal;
 };
 
 class ProgramArgs
@@ -255,6 +298,14 @@ public:
         return add<std::string>(name, description, var);
     }
 
+    bool set(const std::string& name) const
+    {
+        Arg *arg = findLongArg(name);
+        if (arg)
+            return arg->set();
+        return false;
+    }
+
     template<typename T>
     Arg& add(const std::string& name, const std::string& description,
         std::vector<T>& var)
@@ -263,10 +314,8 @@ public:
         splitName(name, longname, shortname);
 
         Arg *arg = new VArg<T>(longname, shortname, description, var);
-        if (longname.size())
-            m_longargs[longname] = arg;
-        if (shortname.size())
-            m_shortargs[shortname] = arg;
+        addLongArg(longname, arg);
+        addShortArg(shortname, arg);
         m_args.push_back(std::unique_ptr<Arg>(arg));
         return *arg;
     }
@@ -279,10 +328,8 @@ public:
         splitName(name, longname, shortname);
 
         Arg *arg = new TArg<T>(longname, shortname, description, var, def);
-        if (longname.size())
-            m_longargs[longname] = arg;
-        if (shortname.size())
-            m_shortargs[shortname] = arg;
+        addLongArg(longname, arg);
+        addShortArg(shortname, arg);
         m_args.push_back(std::unique_ptr<Arg>(arg));
         return *arg;
     }
@@ -297,6 +344,8 @@ public:
 
     void parse(std::vector<std::string>& s)
     {
+        validate();
+
         for (size_t i = 0; i < s.size();)
         {
             std::string& arg = s[i];
@@ -342,7 +391,35 @@ private:
         shortname = s[1];
     }
 
-    Arg *findLongArg(const std::string& s)
+    void addLongArg(const std::string& name, Arg *arg)
+    {
+        if (name.empty())
+            return;
+        if (findLongArg(name))
+        {
+            std::ostringstream oss;
+
+            oss << "Argument --" << name << " already exists.";
+            throw arg_error(oss.str());
+        }
+        m_longargs[name] = arg;
+    }
+
+    void addShortArg(const std::string& name, Arg *arg)
+    {
+        if (name.empty())
+            return;
+        if (findShortArg(name[0]))
+        {
+            std::ostringstream oss;
+
+            oss << "Argument -" << name << " already exists.";
+            throw arg_error(oss.str());
+        }
+        m_shortargs[name] = arg;
+    }
+
+    Arg *findLongArg(const std::string& s) const
     {
         auto si = m_longargs.find(s);
         if (si != m_longargs.end())
@@ -350,7 +427,7 @@ private:
         return NULL;
     }
 
-    Arg *findShortArg(char c)
+    Arg *findShortArg(char c) const
     {
         std::string s(1, c);
         auto si = m_shortargs.find(s);
@@ -452,6 +529,22 @@ private:
             cnt = 0;
         }
         return cnt;
+    }
+
+    void validate()
+    {
+        // Make sure we don't have any required positional args after
+        // non-required positional args.
+        bool opt = false;
+        for (auto ai = m_args.begin(); ai != m_args.end(); ++ai)
+        {
+            Arg *arg = ai->get();
+            if (arg->positional() == PosType::Optional)
+                opt = true;
+            if (opt && (arg->positional() == PosType::Required))
+                throw arg_error("Found required positional argument after "
+                    "optional positional argument.");
+        }
     }
 
     std::vector<std::unique_ptr<Arg>> m_args;
