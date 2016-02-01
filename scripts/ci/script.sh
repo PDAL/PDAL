@@ -63,4 +63,5 @@ ${MAKECMD} -j ${NUMTHREADS} && \
 cd /pdal/python
 pip install packaging
 python setup.py build
+echo "current path: " `pwd`
 python setup.py test
