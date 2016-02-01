@@ -8,6 +8,8 @@ def fetch_xml(filename):
 
     fn = os.path.join(os.getcwd(), filename)
     print("full filename: ", fn)
+    directory = os.listdir('/pdal/python/../test/data/pipeline')
+    print (directory)
     output = ''
     with open(fn, 'rb') as f:
         output = f.read().decode('UTF-8')
