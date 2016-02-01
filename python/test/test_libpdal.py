@@ -1,9 +1,10 @@
 import pdal
 from pdal import libpdalpython
-# import pdal.libpdalpython
 import unittest
 
 def fetch_xml(filename):
+    import os
+    print("python pwd:", os.getcwd())
     output = ''
     with open(filename, 'rb') as f:
         output = f.read().decode('UTF-8')
