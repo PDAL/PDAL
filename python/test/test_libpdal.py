@@ -5,8 +5,11 @@ import unittest
 def fetch_xml(filename):
     import os
     print("python pwd:", os.getcwd())
+
+    fn = os.path.join(os.getcwd(), filename)
+    print("full filename: ", fn)
     output = ''
-    with open(filename, 'rb') as f:
+    with open(fn, 'rb') as f:
         output = f.read().decode('UTF-8')
     return output
 
