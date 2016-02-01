@@ -57,7 +57,8 @@ NUMTHREADS=2
 ${MAKECMD} -j ${NUMTHREADS} && \
     LD_LIBRARY_PATH=./lib && \
     PGUSER=postgres ctest -V && \
-    ${MAKECMD} install
+    ${MAKECMD} install && \
+    /sbin/ldconfig
 
 cd /pdal/python
 pip install packaging
