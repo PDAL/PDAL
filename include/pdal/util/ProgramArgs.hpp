@@ -92,6 +92,25 @@ public:
         { return 0; }
     PosType::Enum positional() const
         { return m_positional; }
+    std::string description() const
+        { return m_description; }
+    std::string nameDescrip() const
+    {
+        std::string s("--");
+        s += m_longname;
+        if (m_shortname.size())
+            s += ", -" + m_shortname;
+        return s;
+    }
+    std::string commandLine() const
+    {
+        std::string s;
+        if (m_positional == PosType::Required)
+            s =  m_longname;
+        else if (m_positional == PosType::Optional)
+            s += '[' + m_longname + ']';
+        return s;
+    }
 
 protected:
     std::string m_longname;
@@ -174,7 +193,7 @@ public:
         const std::string& description, bool& variable, bool def) :
         Arg(longname, shortname, description), m_val(variable),
         m_defaultVal(def)
-    {}
+    { m_val = m_defaultVal; }
 
     virtual bool needsValue() const
         { return false; }
@@ -280,8 +299,7 @@ public:
     }
 
 private:
-    std::vector<T>& m_var;
-};
+    std::vector<T>& m_var; };
 
 class ProgramArgs
 {
@@ -342,8 +360,42 @@ public:
         parse(s);
     }
 
+    void parseSimple(int argc, char *argv[])
+    {
+        std::vector<std::string> s;
+        for (size_t i = 0; i < (size_t)argc; ++i)
+            s.push_back(argv[i]);
+        parseSimple(s);
+    }
+
+
+    // This sets variables without throwing exceptions if problems are found.
+    void parseSimple(std::vector<std::string>& s)
+    {
+        m_positional.clear();
+        for (size_t i = 0; i < s.size();)
+        {
+            std::string& arg = s[i];
+            // This may be the value, or it may not.  We're passing it along
+            // just in case.  If there is no value, pass along "-" to make
+            // clear that there is none.
+            std::string value((i != s.size() - 1) ? s[i + 1] : "-");
+            try
+            {
+                i += parseArg(arg, value);
+            }
+            catch (arg_error& e)
+            {
+                i++;
+            }
+        }
+        reset();
+    }
+
+
     void parse(std::vector<std::string>& s)
     {
+        m_positional.clear();
         validate();
 
         for (size_t i = 0; i < s.size();)
@@ -356,7 +408,7 @@ public:
             i += parseArg(arg, value);
         }
 
-        // Go through things on the positional list looking for matches.
+        // Go through things looking for matches.
         for (auto ai = m_args.begin(); ai != m_args.end(); ++ai)
         {
             Arg *arg = ai->get();
@@ -370,6 +422,63 @@ public:
     {
         for (auto ai = m_args.begin(); ai != m_args.end(); ++ai)
             (*ai)->reset();
+    }
+
+    std::string commandLine() const
+    {
+        std::string s;
+
+        for (auto ai = m_args.begin(); ai != m_args.end(); ++ai)
+        {
+            std::string o = (*ai)->commandLine();
+            if (o.size())
+                s += o + " ";
+        }
+        if (s.size())
+            s = s.substr(0, s.size() - 1);
+        return s;
+    }
+
+    void dump(std::ostream& out, size_t indent, size_t totalWidth)
+    {
+        size_t namelen = 0;
+        std::vector<std::pair<std::string, std::string>> info;
+
+        for (auto ai = m_args.begin(); ai != m_args.end(); ++ai)
+        {
+            Arg *a = ai->get();
+            std::string nameDescrip = a->nameDescrip();
+
+            info.push_back(std::make_pair(nameDescrip, a->description()));
+            namelen = std::max(namelen, nameDescrip.size());
+        }
+        int secondIndent = indent + 4;
+        int postNameSpacing = 2;
+        int leadlen = namelen + indent + postNameSpacing;
+        int firstlen = (int)totalWidth - leadlen - 1;
+        int secondLen = totalWidth - secondIndent - 1;
+        bool skipfirst = (firstlen < 10);
+        if (skipfirst)
+            firstlen = secondLen;
+
+        for (auto i : info)
+        {
+            StringList descrip = Utils::wordWrap(i.second, secondLen, firstlen);
+
+            std::string name = i.first;
+            out << std::string(indent, ' ');
+            if (skipfirst)
+                out << name << std::endl;
+            else
+            {
+                name.resize(namelen, ' ');
+                out << name << std::string(postNameSpacing, ' ') <<
+                    descrip[0] << std::endl;
+            }
+            for (size_t i = 1; i < descrip.size(); ++i)
+                out << std::string(secondIndent, ' ') <<
+                    descrip[i] << std::endl;
+        }
     }
 
 private:

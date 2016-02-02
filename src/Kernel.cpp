@@ -129,7 +129,6 @@ Kernel::Kernel()
     , m_log("pdal", "stderr")
     , m_isDebug(false)
     , m_verboseLevel(0)
-    , m_showHelp(false)
     , m_showVersion(false)
     , m_showTime(false)
     , m_hardCoreDebug(false)
@@ -169,11 +168,14 @@ void Kernel::doSwitches(int argc, const char *argv[], ProgramArgs& args)
 
     try
     {
-        // add -h, -v, etc
         addBasicSwitches(args);
-        // add the options for the derived application
+
+        // parseSimple allows us to scan for the help option without
+        // raising exception about missing arguments and so on.
+        args.parseSimple(stringArgs);
         addSwitches(args);
-        args.parse(stringArgs);
+        if (!m_showHelp)
+            args.parse(stringArgs);
     }
     catch (arg_error& e)
     {
@@ -206,12 +208,6 @@ int Kernel::doStartup()
 
 int Kernel::doExecution(ProgramArgs& args)
 {
-    if (m_reportDebug)
-    {
-        std::cout << getPDALDebugInformation() << std::endl;
-        return 0;
-    }
-
     if (m_hardCoreDebug)
     {
         int status = innerRun(args);
@@ -283,6 +279,12 @@ int Kernel::run(int argc, char const * argv[], const std::string& appName)
         return 1;
     }
 
+    if (m_showHelp)
+    {
+        outputHelp(args);
+        return 0;
+    }
+
     int startup_status = doStartup();
     if (startup_status)
         return startup_status;
@@ -318,35 +320,19 @@ void Kernel::collectExtraOptions()
 
 int Kernel::innerRun(ProgramArgs& args)
 {
-    // handle the well-known options
-    if (m_showVersion)
-    {
-        outputVersion();
-        return 0;
-    }
-
-    if (m_showHelp)
-    {
-        outputHelp(args);
-        return 0;
-    }
-
-    if (m_showOptions)
-        return 0;
-
     try
     {
         // do any user-level sanity checking
         validateSwitches(args);
-        collectExtraOptions();
     }
-    catch (app_usage_error e)
+    catch (pdal_error e)
     {
-        Utils::printError(std::string("Usage error: ") + e.what());
+        Utils::printError(e.what());
         outputHelp(args);
-        return 1;
+        return -1;
     }
 
+    collectExtraOptions();
     return execute();
 }
 
@@ -501,30 +487,22 @@ void Kernel::setCommonOptions(Options &options)
 
 void Kernel::outputHelp(ProgramArgs& args)
 {
-    outputVersion();
+    std::cout << "usage: " << "pdal " << m_appName << " [options] " <<
+        args.commandLine() << std::endl;
+
+    std::cout << "options:" << std::endl;
+    args.dump(std::cout, 2, Utils::screenWidth());
 
     //ABELL - Fix me.
 
     std::cout <<"\nFor more information, see the full documentation for "
-        "PDAL at http://pdal.io/\n" << std::endl << std::endl;
-}
-
-
-void Kernel::outputVersion()
-{
-    std::cout << "pdal " << m_appName << " (" <<
-        GetFullVersionString() << ")\n";
-    std::cout << std::endl;
+        "PDAL at http://pdal.io/\n" << std::endl;
 }
 
 
 void Kernel::addBasicSwitches(ProgramArgs& args)
 {
     args.add("help,h", "Print help message", m_showHelp);
-    args.add("options", "Show available options for a driver", m_showOptions);
-    args.add("version", "Show version info", m_showVersion);
-    args.add("report-debug", "Report PDAL compilation DEBUG status",
-        m_reportDebug, true);
 
     args.add("debug,d", "Enable debug mode", m_isDebug);
     args.add("developer-debug",

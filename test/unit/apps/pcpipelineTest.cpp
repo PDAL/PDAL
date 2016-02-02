@@ -97,8 +97,11 @@ TEST(pipelineBaseTest, common_opts)
     int stat = pdal::Utils::run_shell_command(cmd + " -h", output);
     EXPECT_EQ(stat, 0);
 
-    stat = pdal::Utils::run_shell_command(cmd + " --version", output);
-    EXPECT_EQ(stat, 0);
+    // We used to accept --version as a kernel option, rather than an
+    // application option.  Make sure it now throws an error.
+    stat = pdal::Utils::run_shell_command(cmd + " --version 2>&1", output);
+    EXPECT_TRUE(output.find("Unexpected argument") != std::string::npos);
+    EXPECT_NE(stat, 0);
 }
 
 TEST(pipelineBaseTest, drop_color)

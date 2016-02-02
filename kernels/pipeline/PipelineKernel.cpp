@@ -64,7 +64,7 @@ void PipelineKernel::validateSwitches(ProgramArgs& args)
         m_inputFile = "STDIN";
 
     if (m_inputFile.empty())
-        throw app_usage_error("input file name required");
+        throw pdal_error("Input filename required.");
 }
 
 
