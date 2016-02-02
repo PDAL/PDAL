@@ -139,7 +139,8 @@ void outputOptions(std::string const& n)
         return;
     }
 
-    std::cout << n << std::endl;
+    std::string link = PluginManager::link(n);
+    std::cout << n << " -- " << link << std::endl;
     std::cout << headline << std::endl;
 
     std::vector<Option> options = s->getDefaultOptions().getOptions();

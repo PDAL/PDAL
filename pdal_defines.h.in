@@ -26,7 +26,6 @@
 /*
  * availability of 3rd-party libraries
  */
-#cmakedefine PDAL_HAVE_GEOS
 #cmakedefine PDAL_HAVE_HDF5
 #cmakedefine PDAL_HAVE_HEXER
 #cmakedefine PDAL_HAVE_LASZIP

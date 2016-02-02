@@ -150,6 +150,23 @@ StringList PluginManager::l_names(int typeMask)
     return l;
 }
 
+std::string PluginManager::link(const std::string& name)
+{
+    return s_instance.l_link(name);
+}
+
+
+std::string PluginManager::l_link(const std::string& name)
+{
+    std::string link;
+
+    std::lock_guard<std::mutex> lock(m_mutex);
+    auto ei = m_plugins.find(name);
+    if (ei != m_plugins.end())
+        link= ei->second.link;
+    return link;
+}
+
 
 std::string PluginManager::description(const std::string& name)
 {

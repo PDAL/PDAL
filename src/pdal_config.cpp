@@ -66,9 +66,7 @@
 #include <laszip/laszip.hpp>
 #endif
 
-#ifdef PDAL_HAVE_GEOS
 #include <geos_c.h>
-#endif
 
 #ifdef PDAL_HAVE_HEXER
 #include <hexer/hexer.hpp>
@@ -172,10 +170,8 @@ std::string getPDALDebugInformation()
     os << "Enabled libraries" << std::endl;
     os << headline << std::endl << std::endl;
 
-#ifdef PDAL_HAVE_GEOS
     os << "GEOS (" << GEOS_VERSION << ") - " <<
         "http://trac.osgeo.org/geos" << std::endl;
-#endif
 
     os << "GDAL (" << GDALVersionInfo("RELEASE_NAME") << ") - " <<
         "http://www.gdal.org" << std::endl;

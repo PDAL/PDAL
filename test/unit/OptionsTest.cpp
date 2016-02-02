@@ -64,7 +64,7 @@ TEST(OptionsTest, test_static_options)
     crop.setOptions(ops);
     crop.setInput(reader);
     auto opts = crop.getDefaultOptions();
-    EXPECT_EQ(opts.getOptions().size(), 3u);
+    EXPECT_EQ(opts.getOptions().size(), 4u);
     EXPECT_TRUE(opts.hasOption("bounds"));
     EXPECT_TRUE(opts.hasOption("inside"));
     EXPECT_TRUE(opts.hasOption("polygon"));

@@ -47,6 +47,11 @@ namespace gdal
 class ErrorHandler;
 }
 
+namespace geos
+{
+class ErrorHandler;
+}
+
 class PDAL_DLL GlobalEnvironment
 {
 public:
@@ -54,13 +59,32 @@ public:
     static void startup();
     static void shutdown();
 
-    void initializeGDAL(LogPtr log, bool bGDALDebugOutput = false);
+    void initializeGDAL(LogPtr log, bool bIsDebug = false);
+    void initializeGEOS(LogPtr log, bool bIsDebug = false);
+
+    geos::ErrorHandler* geos()
+    {
+        if (!m_geosDebug)
+        {
+            initializeGEOS(LogPtr(), false);
+        }
+        return m_geosDebug.get();
+    }
+    gdal::ErrorHandler* gdal()
+    {
+        if (!m_gdalDebug)
+        {
+            initializeGDAL(LogPtr(), false);
+        }
+        return m_gdalDebug.get();
+    }
 
 private:
     GlobalEnvironment();
     ~GlobalEnvironment();
 
     std::unique_ptr<gdal::ErrorHandler> m_gdalDebug;
+    std::unique_ptr<geos::ErrorHandler> m_geosDebug;
 
     GlobalEnvironment(const GlobalEnvironment&); // nope
     GlobalEnvironment& operator=(const GlobalEnvironment&); // nope

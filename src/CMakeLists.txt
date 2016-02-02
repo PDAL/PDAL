@@ -42,7 +42,7 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/Filter.hpp"
   "${PDAL_HEADERS_DIR}/FlexWriter.hpp"
   "${PDAL_HEADERS_DIR}/GDALUtils.hpp"
-  "${PDAL_HEADERS_DIR}/Geometry.hpp"
+  "${PDAL_HEADERS_DIR}/GEOSUtils.hpp"
   "${PDAL_HEADERS_DIR}/GlobalEnvironment.hpp"
   "${PDAL_HEADERS_DIR}/gitsha.h"
   "${PDAL_HEADERS_DIR}/KDIndex.hpp"
@@ -61,6 +61,7 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/PointTable.hpp"
   "${PDAL_HEADERS_DIR}/PointView.hpp"
   "${PDAL_HEADERS_DIR}/PointViewIter.hpp"
+  "${PDAL_HEADERS_DIR}/Polygon.hpp"
   "${PDAL_HEADERS_DIR}/QuadIndex.hpp"
   "${PDAL_HEADERS_DIR}/Reader.hpp"
   "${PDAL_HEADERS_DIR}/SpatialReference.hpp"
@@ -78,6 +79,7 @@ set(PDAL_BASE_CPP
   DynamicLibrary.cpp
   gitsha.cpp
   GDALUtils.cpp
+  GEOSUtils.cpp
   GlobalEnvironment.cpp
   Kernel.cpp
   KernelFactory.cpp
@@ -85,11 +87,10 @@ set(PDAL_BASE_CPP
   Log.cpp
   Options.cpp
   PDALUtils.cpp
-
   PointLayout.cpp
   PointTable.cpp
   PointView.cpp
-
+  Polygon.cpp
   PipelineManager.cpp
   PipelineReader.cpp
   PipelineWriter.cpp
@@ -212,4 +213,5 @@ endif()
 
 install(DIRECTORY "${PDAL_HEADERS_DIR}/"
   DESTINATION "${PDAL_INCLUDE_INSTALL_DIR}"
-  FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp")
+  PATTERN "/CMakeFiles/*" EXCLUDE
+  )

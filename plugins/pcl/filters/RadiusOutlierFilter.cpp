@@ -136,6 +136,14 @@ PointViewSet RadiusOutlierFilter::run(PointViewPtr input)
     pcl::PointIndicesPtr inliers(new pcl::PointIndices);
     ror.getRemovedIndices(*inliers);
 
+    PointViewSet viewSet;
+    if (inliers->indices.empty())
+    {
+        log()->get(LogLevel::Warning) << "Requested filter would remove all points. Try a larger radius/smaller minimum neighbors.\n";
+        viewSet.insert(input);
+        return viewSet;
+    }
+
     // inverse are the outliers
     std::vector<int> outliers(input->size()-inliers->indices.size());
     for (PointId i = 0, j = 0, k = 0; i < input->size(); ++i)
@@ -148,7 +156,6 @@ PointViewSet RadiusOutlierFilter::run(PointViewPtr input)
         outliers[k++] = i;
     }
 
-    PointViewSet viewSet;
     if (!outliers.empty() && (m_classify || m_extract))
     {
 
@@ -184,10 +191,10 @@ PointViewSet RadiusOutlierFilter::run(PointViewPtr input)
     else
     {
         if (outliers.empty())
-            log()->get(LogLevel::Debug2) << "Filtered cloud has no outliers!\n";
+            log()->get(LogLevel::Warning) << "Filtered cloud has no outliers!\n";
 
         if (!(m_classify || m_extract))
-            log()->get(LogLevel::Debug2) << "Must choose --classify or --extract\n";
+            log()->get(LogLevel::Warning) << "Must choose --classify or --extract\n";
 
         // return the input buffer unchanged
         viewSet.insert(input);

@@ -70,6 +70,7 @@ public:
     ~PluginManager();
 
     static std::string description(const std::string& name);
+    static std::string link(const std::string& name);
     static bool registerObject(const std::string& name,
         const PF_RegisterParams *params);
     static bool initializePlugin(PF_InitFunc initFunc);
@@ -93,6 +94,7 @@ private:
     void l_loadAll(int type);
     StringList l_names(int typeMask);
     std::string l_description(const std::string& name);
+    std::string l_link(const std::string& name);
 
     DynamicLibrary *loadLibrary(const std::string& path,
         std::string& errorString);

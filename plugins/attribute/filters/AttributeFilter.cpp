@@ -38,13 +38,11 @@
 #include <vector>
 
 #include <pdal/GlobalEnvironment.hpp>
-#include <pdal/GDALUtils.hpp>
 
 #include <pdal/StageFactory.hpp>
 #include <pdal/QuadIndex.hpp>
+#include <pdal/Polygon.hpp>
 
-#include <ogr_geometry.h>
-#include <geos_c.h>
 
 namespace pdal
 {
@@ -67,34 +65,6 @@ struct OGRDataSourceDeleter
     }
 };
 
-namespace
-{
-
-static void _GEOSErrorHandler(const char *fmt, ...)
-{
-    va_list args;
-
-    va_start(args, fmt);
-    char buf[1024];
-
-    vsnprintf(buf, sizeof(buf), fmt, args);
-
-    va_end(args);
-}
-
-static void _GEOSWarningHandler(const char *fmt, ...)
-{
-    va_list args;
-
-    char buf[1024];
-    vsnprintf(buf, sizeof(buf), fmt, args);
-    std::cout << "GEOS warning: " << buf << std::endl;
-
-    va_end(args);
-}
-
-} // unnamed namespace
-
 struct OGRFeatureDeleter
 {
     template <typename T>
@@ -108,6 +78,7 @@ struct OGRFeatureDeleter
 void AttributeFilter::initialize()
 {
     GlobalEnvironment::get().initializeGDAL(log(), isDebug());
+    GlobalEnvironment::get().initializeGEOS(log(), isDebug());
 }
 
 
@@ -195,63 +166,6 @@ void AttributeFilter::ready(PointTableRef table)
 }
 
 
-BOX3D computeBounds(GEOSContextHandle_t ctx, GEOSGeometry const *geometry)
-{
-    uint32_t numInputDims;
-    BOX3D output;
-
-
-    GEOSGeometry const* ring = GEOSGetExteriorRing_r(ctx,
-        geometry);
-    GEOSCoordSequence const* coords = GEOSGeom_getCoordSeq_r(ctx,
-        ring);
-
-    GEOSCoordSeq_getDimensions_r(ctx, coords, &numInputDims);
-
-    uint32_t count(0);
-    GEOSCoordSeq_getSize_r(ctx, coords, &count);
-
-    double x(0.0);
-    double y(0.0);
-    double z(0.0);
-    for (unsigned i = 0; i < count; ++i)
-    {
-        GEOSCoordSeq_getOrdinate_r(ctx, coords, i, 0, &x);
-        GEOSCoordSeq_getOrdinate_r(ctx, coords, i, 1, &y);
-        if (numInputDims > 2)
-            GEOSCoordSeq_getOrdinate_r(ctx, coords, i, 2, &z);
-        output.grow(x, y, z);
-    }
-    return output;
-}
-
-
-GEOSGeometry* createGEOSPoint(GEOSContextHandle_t ctx,
-    double x, double y, double z)
-{
-    int ret(0);
-
-    // precise filtering based on the geometry
-    GEOSCoordSequence* coords = GEOSCoordSeq_create_r(ctx, 1, 3);
-    if (!coords)
-        throw pdal_error("unable to allocate coordinate sequence");
-    ret = GEOSCoordSeq_setX_r(ctx, coords, 0, x);
-    if (!ret)
-        throw pdal_error("unable to set x for coordinate sequence");
-    ret = GEOSCoordSeq_setY_r(ctx, coords, 0, y);
-    if (!ret)
-        throw pdal_error("unable to set y for coordinate sequence");
-    ret = GEOSCoordSeq_setZ_r(ctx, coords, 0, z);
-    if (!ret)
-        throw pdal_error("unable to set z for coordinate sequence");
-
-    GEOSGeometry* p = GEOSGeom_createPoint_r(ctx, coords);
-    if (!p)
-        throw pdal_error("unable to allocate candidate test point");
-    return p;
-}
-
-
 void AttributeFilter::UpdateGEOSBuffer(PointView& view)
 {
     QuadIndex idx(view);
@@ -302,51 +216,20 @@ void AttributeFilter::UpdateGEOSBuffer(PointView& view)
             throw pdal::pdal_error(oss.str());
         }
 
-        OGRGeometry *ogr_g = (OGRGeometry*)geom;
-        if (!m_geosEnvironment)
-            m_geosEnvironment = initGEOS_r(_GEOSWarningHandler,
-                _GEOSErrorHandler);
-
-        // Convert the the GDAL geom to WKB in order to avoid the version
-        // context issues with exporting directoly to GEOS.
-        OGRwkbByteOrder bo =
-            GEOS_getWKBByteOrder() == GEOS_WKB_XDR ? wkbXDR : wkbNDR;
-        int wkbSize = ogr_g->WkbSize();
-        std::vector<unsigned char> wkb(wkbSize);
-
-        ogr_g->exportToWkb(bo, wkb.data());
-        GEOSGeometry *geos_g = GEOSGeomFromWKB_buf_r(m_geosEnvironment,
-            wkb.data(), wkbSize);
-
-        GEOSPreparedGeometry const* geos_pg = GEOSPrepare_r(m_geosEnvironment,
-            geos_g);
-        if (!geos_pg)
-        {
-            std::ostringstream oss;
-            oss << getName() << ": unable to prepare geometry for "
-                "index-accelerated intersection";
-            throw pdal_error(oss.str());
-        }
+        pdal::Polygon p(geom, view.spatialReference(), GlobalEnvironment::get().geos());
 
         // Compute a total bounds for the geometry. Query the QuadTree to
         // find out the points that are inside the bbox. Then test each
         // point in the bbox against the prepared geometry.
-        BOX3D box = computeBounds(m_geosEnvironment, geos_g);
+        BOX3D box = p.bounds();
         std::vector<PointId> ids = idx.getPoints(box);
+
+
         for (const auto& i : ids)
         {
-            double x = view.getFieldAs<double>(Dimension::Id::X, i);
-            double y = view.getFieldAs<double>(Dimension::Id::Y, i);
-            double z = view.getFieldAs<double>(Dimension::Id::Z, i);
-
-            GEOSGeometry* p = createGEOSPoint(m_geosEnvironment, x, y ,z);
-
-            if ((bool)(GEOSPreparedCovers_r(m_geosEnvironment, geos_pg, p)))
-            {
-                // We're in the poly, write the attribute value
+            PointRef ref(view, i);
+            if (p.covers(ref))
                 view.setField(m_dim, i, fieldVal);
-            }
-            GEOSGeom_destroy_r(m_geosEnvironment, p);
         }
         feature = OGRFeaturePtr(OGR_L_GetNextFeature(m_lyr),
             OGRFeatureDeleter());
@@ -366,9 +249,6 @@ void AttributeFilter::filter(PointView& view)
 
 void AttributeFilter::done(PointTableRef /*table*/)
 {
-    if (m_geosEnvironment)
-        finishGEOS_r(m_geosEnvironment);
-    m_geosEnvironment = 0;
 }
 
 } // namespace pdal
