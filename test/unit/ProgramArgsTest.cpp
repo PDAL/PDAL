@@ -40,6 +40,9 @@
 
 using namespace pdal;
 
+// No wordexp() on windows and I don't feel like doing something special.
+#ifndef _WIN32
+
 #define HANDLE_EXCEPTION(a) \
     EXPECT_THROW(a, arg_error)
 /**
@@ -308,3 +311,5 @@ TEST(ProgramArgsTest, vectorfail)
     StringList s;
     EXPECT_THROW(args.parse(s), arg_error);
 }
+
+#endif
