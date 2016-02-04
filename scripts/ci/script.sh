@@ -57,4 +57,14 @@ NUMTHREADS=2
 ${MAKECMD} -j ${NUMTHREADS} && \
     LD_LIBRARY_PATH=./lib && \
     PGUSER=postgres ctest -V && \
-    ${MAKECMD} install
+    ${MAKECMD} install && \
+    /sbin/ldconfig
+
+if [ "${OPTIONAL_COMPONENT_SWITCH}" == "ON" ]; then
+    cd /pdal/python
+    pip install packaging
+    python setup.py build
+    echo "current path: " `pwd`
+    export PDAL_TEST_DIR=/pdal/_build/test
+    python setup.py test
+fi
