@@ -32,10 +32,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/pdal_test_main.hpp>
+
 // No wordexp() on windows and I don't feel like doing something special.
 #ifndef _WIN32
-
-#include <pdal/pdal_test_main.hpp>
 
 #include <wordexp.h>
 #include <pdal/pdal_internal.hpp>
