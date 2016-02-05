@@ -29,6 +29,9 @@ install:
   # make the osgeo directory
   - ps: mkdir %OSGEODIR% | out-null
 
+  # make an install directory for packacing
+  - ps: mkdir C:\pdalbin | out-null
+
   # get the OSGeo installer
   - ps: wget http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe -OutFile C:\temp\osgeo4w-setup.exe | out-null
 
@@ -36,7 +39,7 @@ install:
   - C:\temp\osgeo4w-setup.exe -s http://download.osgeo.org/osgeo4w/ -a -q -P boost-devel,eigen,gdal,geos,hexer,iconv,laszip,libgeotiff,libtiff,libpq,libxml2,nitro,pcl,points2grid,proj,python-numpy,zlib -R %OSGEODIR% > nul
 
   # call our PDAL install script
-  - call .\\scripts\\appveyor\\install.cmd
+  - call .\\scripts\\appveyor\\config.cmd
 
 #cache:
 #  # this should cache our OSGeo4W install between jobs in the build matrix
@@ -46,6 +49,9 @@ build:
   parallel: true
   project: PDAL.sln
   verbosity: minimal
+
+#after_build:
+#  - call .\\scripts\\appveyor\\install.cmd
 
 notifications:
   - provider: Email
@@ -60,6 +66,22 @@ notifications:
     on_build_failure: true
     on_build_success: false
     on_build_status_changed: true
+
+artifacts:
+  - path: pdal\bin
+    name: pdal-master
+
+deploy:
+    # Amazon S3 deployment provider settings
+  - provider: S3
+    access_key_id:
+      secure: +qSWtlKwUGZmIoUR25u08KxPVmiEA7obV2SF+aJLRDs=
+    secret_access_key:
+      secure: 9OxM0f4/sBCrNE9XhRnHMnImz5FQe6q9aBJ6+0X1Cf8ZWu0akG+ZG2jBXs5t9dJ8
+    bucket: "pdal"
+    folder: "osgeo4w"
+    artifact: pdal-master
+    set_public: false
 
 #test_script:
 #  - "SET PATH=%OSGEODIR%\\bin;%PATH%"
