@@ -56,30 +56,21 @@ RandomKernel::RandomKernel()
 }
 
 
-void RandomKernel::validateSwitches()
+void RandomKernel::addSwitches(ProgramArgs& args)
 {
-    if (m_outputFile == "")
-        throw app_usage_error("--output/-o required");
-}
-
-
-void RandomKernel::addSwitches()
-{
-    po::options_description* file_options = new po::options_description("file options");
-
-    file_options->add_options()
-    ("output,o", po::value<std::string>(&m_outputFile)->default_value(""), "output file name")
-    ("compress,z", po::value<bool>(&m_bCompress)->zero_tokens()->implicit_value(true), "Compress output data (if supported by output format)")
-    ("count", po::value<uint64_t>(&m_numPointsToWrite)->default_value(0), "How many points should we write?")
-    ("bounds", po::value<BOX3D>(&m_bounds), "Extent (in XYZ to clip output to)")
-    ("mean", po::value< std::string >(&m_means), "A comma-separated or quoted, space-separated list of means (normal mode): \n--mean 0.0,0.0,0.0\n--mean \"0.0 0.0 0.0\"")
-    ("stdev", po::value< std::string >(&m_stdevs), "A comma-separated or quoted, space-separated list of standard deviations (normal mode): \n--stdev 0.0,0.0,0.0\n--stdev \"0.0 0.0 0.0\"")
-    ("distribution", po::value<std::string>(&m_distribution)->default_value("uniform"), "Distribution (uniform / normal)")
-    ;
-
-    addSwitchSet(file_options);
-
-    addPositionalSwitch("output", 1);
+    args.add("output,o", "Output file name", m_outputFile).setPositional();
+    args.add("compress,z",
+        "Compress output data (if supported by output format)", m_bCompress);
+    args.add("count", "How many points should we write?", m_numPointsToWrite);
+    args.add("bounds", "Extent (in XYZ to clip output to)", m_bounds);
+    args.add("mean", "A comma-separated or quoted, space-separated list "
+        "of means (normal mode): \n--mean 0.0,0.0,0.0\n--mean \"0.0 0.0 0.0\"",
+        m_means);
+    args.add("stdev", "A comma-separated or quoted, space-separated list "
+        "of standard deviations (normal mode): \n"
+        "--stdev 0.0,0.0,0.0\n--stdev \"0.0 0.0 0.0\"", m_stdevs);
+    args.add("distribution", "Distribution (uniform / normal)", m_distribution,
+        "uniform");
 }
 
 

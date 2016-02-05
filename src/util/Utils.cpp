@@ -469,12 +469,18 @@ std::string Utils::escapeJSON(const std::string &str)
 /// length.
 /// \param[in] inputString  String to split
 /// \param[in] lineLength  Maximum length of any of the output strings
+/// \param[in] firstLength  Maximum length of any of the output strings
 /// \return  List of string split from input.
 ///
-StringList Utils::wordWrap(std::string const& inputString, size_t lineLength)
+StringList Utils::wordWrap(std::string const& inputString, size_t lineLength,
+    size_t firstLength)
 {
     // stolen from http://stackoverflow.com/questions/5815227/fix-improve-word-wrap-function
 
+    if (firstLength == 0)
+        firstLength = lineLength;
+
+    size_t len = firstLength;
     StringList output;
 
     std::istringstream iss(inputString);
@@ -484,13 +490,13 @@ StringList Utils::wordWrap(std::string const& inputString, size_t lineLength)
         std::string word;
         iss >> word;
 
-        if (line.length() + word.length() > lineLength)
+        if (line.length() + word.length() > len)
         {
             output.push_back(line);
+            len = lineLength;
             line.clear();
         }
         line += word + " ";
-
     } while (iss);
 
     if (!line.empty())

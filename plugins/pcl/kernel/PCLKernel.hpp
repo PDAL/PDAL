@@ -49,8 +49,7 @@ public:
 
 private:
     PCLKernel();
-    void addSwitches();
-    void validateSwitches();
+    virtual void addSwitches(ProgramArgs& args);
 
     std::unique_ptr<PipelineManager> m_manager;
     std::shared_ptr<Stage> makeReader(Options readerOptions);

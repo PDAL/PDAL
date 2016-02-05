@@ -58,8 +58,7 @@ public:
 
 private:
     GroundKernel();
-    void addSwitches();
-    void validateSwitches();
+    virtual void addSwitches(ProgramArgs& args);
 
     std::shared_ptr<Stage> makeReader(Options readerOptions);
 

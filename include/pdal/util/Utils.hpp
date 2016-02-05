@@ -199,7 +199,7 @@ namespace Utils
     PDAL_DLL std::string replaceAll(std::string result,
         const std::string& replaceWhat, const std::string& replaceWithWhat);
     PDAL_DLL std::vector<std::string> wordWrap(std::string const& inputString,
-        size_t lineLength);
+        size_t lineLength, size_t firstLength = 0);
     PDAL_DLL std::string escapeJSON(const std::string &s);
     PDAL_DLL std::string demangle(const std::string& s);
     PDAL_DLL int screenWidth();

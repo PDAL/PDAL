@@ -36,8 +36,6 @@
 
 #include "PCLConversions.hpp"
 
-#include <boost/program_options.hpp>
-
 #include <pcl/ModelCoefficients.h>
 #include <pcl/filters/project_inliers.h>
 #include <pcl/kdtree/kdtree_flann.h>
@@ -59,40 +57,30 @@
 #include <string>
 #include <vector>
 
-namespace po = boost::program_options;
-
 CREATE_KERNEL_PLUGIN(height, pdal::HeightAboveGroundKernel)
 
 namespace pdal
 {
 
-void HeightAboveGroundKernel::validateSwitches()
+void HeightAboveGroundKernel::validateSwitches(ProgramArgs& args)
 {
-    if (m_input_file == "")
-        throw app_usage_error("--input/-i required");
     if (m_ground_file == "" && !m_use_classification)
-        throw app_usage_error("--ground/-g or --use_classification/-c required");
-    if (m_output_file == "")
-        throw app_usage_error("--output/-o required");
+        throw pdal_error("Either option 'ground' or 'use_classification' "
+            "is required.");
 
     // should probably verify that the output is BPF
-    // should probably also verify that there is a classification dimension if --use_classification == true
+    // should probably also verify that there is a classification
+    // dimension if --use_classification == true
 }
 
-void HeightAboveGroundKernel::addSwitches()
+void HeightAboveGroundKernel::addSwitches(ProgramArgs& args)
 {
-    po::options_description* options = new po::options_description("file options");
-    options->add_options()
-    ("input,i", po::value<std::string>(&m_input_file)->default_value(""), "input file name")
-    ("ground,g", po::value<std::string>(&m_ground_file)->default_value(""), "ground file name")
-    ("output,o", po::value<std::string>(&m_output_file)->default_value(""), "output file name")
-    ("use_classification,c", po::bool_switch(&m_use_classification)->default_value(false), "use existing classification labels?")
-    ;
-
-    addSwitchSet(options);
-    addPositionalSwitch("input", 1);
-    addPositionalSwitch("ground", 1);
-    addPositionalSwitch("output", 1);
+    args.add("use_classification,c", "Use existing classification labels?",
+        m_use_classification);
+    args.add("input,i", "Input filename", m_input_file).setPositional();
+    args.add("ground,g", "Ground filename", m_ground_file).setPositional();
+    args.add("output,o",
+        "Output filename", m_output_file).setOptionalPositional();
 }
 
 int HeightAboveGroundKernel::execute()

@@ -59,8 +59,7 @@ public:
 
 private:
     TranslateKernel();
-    void addSwitches();
-    void validateSwitches();
+    virtual void addSwitches(ProgramArgs& args);
 
     std::string m_inputFile;
     std::string m_outputFile;

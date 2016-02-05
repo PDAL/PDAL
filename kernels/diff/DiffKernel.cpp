@@ -57,38 +57,13 @@ CREATE_STATIC_PLUGIN(1, 0, DiffKernel, Kernel, s_info)
 
 std::string DiffKernel::getName() const { return s_info.name; }
 
-void DiffKernel::validateSwitches()
+void DiffKernel::addSwitches(ProgramArgs& args)
 {
-    if (!m_sourceFile.size())
-        throw app_runtime_error("No source file given!");
-    if (!m_candidateFile.size())
-        throw app_runtime_error("No candidate file given!");
-}
-
-
-void DiffKernel::addSwitches()
-{
-    namespace po = boost::program_options;
-
-    po::options_description* file_options =
-        new po::options_description("file options");
-
-    file_options->add_options()
-        ("source", po::value<std::string>(&m_sourceFile), "source file name")
-        ("candidate", po::value<std::string>(&m_candidateFile),
-            "candidate file name")
-    ;
-
-    addSwitchSet(file_options);
-    po::options_description* processing_options =
-        new po::options_description("processing options");
-
-    processing_options->add_options();
-
-    addSwitchSet(processing_options);
-
-    addPositionalSwitch("source", 1);
-    addPositionalSwitch("candidate", 2);
+    Arg& source = args.add("source", "Source filename", m_sourceFile);
+    source.setPositional();
+    Arg& candidate = args.add("candidate", "Candidate filename",
+        m_candidateFile);
+    candidate.setPositional();
 }
 
 

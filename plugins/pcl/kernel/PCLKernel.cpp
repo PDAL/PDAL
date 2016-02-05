@@ -55,45 +55,20 @@ PCLKernel::PCLKernel()
     : Kernel()
     , m_bCompress(false)
     , m_bForwardMetadata(false)
+{}
+
+
+void PCLKernel::addSwitches(ProgramArgs& args)
 {
-}
-
-void PCLKernel::validateSwitches()
-{
-    if (m_inputFile == "")
-        throw app_usage_error("--input/-i required");
-    if (m_outputFile == "")
-        throw app_usage_error("--output/-o required");
-    if (m_pclFile == "")
-        throw app_usage_error("--pcl/-p required");
-}
-
-
-void PCLKernel::addSwitches()
-{
-    po::options_description* file_options =
-        new po::options_description("file options");
-
-    file_options->add_options()
-    ("input,i", po::value<std::string>(&m_inputFile)->default_value(""),
-     "input file name")
-    ("output,o", po::value<std::string>(&m_outputFile)->default_value(""),
-     "output file name")
-    ("pcl,p", po::value<std::string>(&m_pclFile)->default_value(""),
-     "pcl file name")
-    ("compress,z",
-        po::value<bool>(&m_bCompress)->zero_tokens()->implicit_value(true),
-        "Compress output data (if supported by output format)")
-    ("metadata,m",
-        po::value< bool >(&m_bForwardMetadata)->implicit_value(true),
-        "Forward metadata (VLRs, header entries, etc) from previous stages")
-    ;
-
-    addSwitchSet(file_options);
-
-    addPositionalSwitch("input", 1);
-    addPositionalSwitch("output", 1);
-    addPositionalSwitch("pcl", 1);
+    args.add("input,i", "Input filename", m_inputFile).setPositional();
+    args.add("output,o", "Output filename", m_outputFile).setPositional();
+    args.add("pcl,p", "PCL filename", m_pclFile).setPositional();
+    args.add("compress,z",
+        "Compress output data (if supported by output format)",
+        m_bCompress);
+    args.add("metadata,m",
+        "Forward metadata (VLRs, header entries, etc) from previous stages",
+        m_bForwardMetadata);
 }
 
 

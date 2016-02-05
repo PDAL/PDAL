@@ -52,68 +52,54 @@ CREATE_SHARED_PLUGIN(1, 0, CpdKernel, Kernel, s_info)
 
 std::string CpdKernel::getName() const { return s_info.name; }
 
-void CpdKernel::validateSwitches()
-{
-    if (m_filex == "")
-        throw app_usage_error("--filex/-x required");
-    if (m_filey == "")
-        throw app_usage_error("--filey/-y required");
-    if (m_output == "")
-        throw app_usage_error("--output/-o required");
-}
-
-
-void CpdKernel::addSwitches()
+void CpdKernel::addSwitches(ProgramArgs& args)
 {
     using namespace cpd;
 
-    po::options_description* file_options =
-        new po::options_description("file options");
-
-    file_options->add_options()
-        ("filex,x", po::value<std::string>(&m_filex)->default_value(""),
-         "input file containing the source points")
-        ("filey,y", po::value<std::string>(&m_filey)->default_value(""),
-         "input file containg target points, i.e. the points that will be registered")
-        ("output,o", po::value<std::string>(&m_output)->default_value(""),
-         "output file name")
-        ("tolerance,t", po::value<float>(&m_tolerance)->default_value(DefaultTolerance),
-            "tolerance criterium")
-        ("max-iterations,m", po::value<int>(&m_max_it)->default_value(DefaultMaxIterations),
-            "maximum number of iterations allowed")
-        ("outliers,O", po::value<float>(&m_outliers)->default_value(DefaultOutliers),
-            "the weight of noise and outliers")
-        ("fgt,f", po::value<bool>(&m_fgt)->default_value(DefaultFgt),
-            "use a fast gauss transform (less accurate but faster)")
-        ("epsilon,e", po::value<float>(&m_epsilon)->default_value(DefaultEpsilon),
-            "tolerance level for the fast gauss transform")
-        ("beta,b", po::value<float>(&m_beta)->default_value(DefaultBeta),
-            "std of gaussian filter (Green's function, used for nonrigid registrations only)")
-        ("lambda,l", po::value<float>(&m_lambda)->default_value(DefaultLambda),
-            "regularization weight (used for nonrigid registrations only)")
-        ("numeig,n", po::value<arma::uword>(&m_numeig)->default_value(DefaultNumeig),
-            "number of eigenvectors/eigenvalues to find for nonrigid_lowrank registrations (if zero, default to N ^ (1/2) where N is the number of points in Y)")
-        ("bounds", po::value<BOX3D>(&m_bounds),
-            "Extent (in XYZ) to clip output to")
-        ("auto-z-exaggeration", po::value<bool>(&m_auto_z_exaggeration)->default_value(false),
-            "Use the domain of the XY dimensions to automatically exaggerate the Z dimensions")
-        ("auto-z-exaggeration-ratio", po::value<float>(&m_auto_z_exaggeration_ratio)->default_value(5.0 / 8.0),
-            "The scaling ratio for the Z-exaggeration. Z's range will be scaled to this ratio of the extent of the smallest XY extent.")
-        ("chipped", po::value<bool>(&m_chipped)->default_value(false),
-            "Run chipped registration")
-        ("chip-capacity", po::value<int>(&m_chip_capacity)->default_value(8000),
-            "The maximum number of points in each chip (before buffer)")
-        ("chip-buffer", po::value<float>(&m_chip_buffer)->default_value(50),
-            "The width of the buffer around each chip")
-        ("sigma2", po::value<float>(&m_sigma2)->default_value(DefaultSigma2),
-            "The starting sigma2 value. To improve CPD runs, set to a bit more than you expect the average motion to be")
-        ;
-
-    addSwitchSet(file_options);
-
-    addPositionalSwitch("filex", 1);
-    addPositionalSwitch("filey", 1);
-    addPositionalSwitch("output", 1);
+    Arg& filex = args.add("filex,x", "input file containing the source points",
+        m_filex);
+    filex.setPositional();
+    Arg& filey = args.add("filey,y", "input file containg target points, "
+        "i.e. the points that will be registered", m_filey);
+    filey.setPositional();
+    Arg& output = args.add("output,o", "output file name", m_output);
+    output.setPositional();
+    args.add("tolerance,t", "tolerance criterium", m_tolerance,
+        DefaultTolerance);
+    args.add("max-iterations,m", "maximum number of iterations allowed",
+        m_max_it, DefaultMaxIterations);
+    args.add("outliers,O", "the weight of noise and outliers",
+        m_outliers, DefaultOutliers);
+    args.add("fgt,f", "use a fast gauss transform (less accurate but faster)",
+        m_fgt, DefaultFgt);
+    args.add("epsilon,e", "tolerance level for the fast gauss transform",
+        m_epsilon, DefaultEpsilon);
+    args.add("beta,b", "std of gaussian filter (Green's function, used "
+        "for nonrigid registrations only)", m_beta, DefaultBeta);
+    args.add("lambda,l", "regularization weight (used for nonrigid "
+        "registrations only)", m_lambda, DefaultLambda);
+    args.add("numeig,n", "number of eigenvectors/eigenvalues to find for "
+        "nonrigid_lowrank registrations (if zero, default to N ^ (1/2) "
+        "where N is the number of points in Y)",
+        m_numeig, DefaultNumeig);
+    args.add("bounds", "Extent (in XYZ) to clip output to", m_bounds);
+    args.add("auto-z-exaggeration",
+        "Use the domain of the XY dimensions to automatically "
+        "exaggerate the Z dimensions",
+        m_auto_z_exaggeration);
+    args.add("auto-z-exaggeration-ratio", 
+        "The scaling ratio for the Z-exaggeration. Z's range will "
+        "be scaled to this ratio of the extent of the smallest XY extent.",
+        m_auto_z_exaggeration_ratio, (float)(5.0 / 8.0));
+    args.add("chipped", "Run chipped registration", m_chipped);
+    args.add("chip-capacity", "The maximum number of points in each "
+        "chip (before buffer)", m_chip_capacity, 8000);
+    args.add("chip-buffer", "The width of the buffer around each chip",
+        m_chip_buffer, (float)50.0);
+    args.add("sigma2",
+        "The starting sigma2 value. To improve CPD runs, set to a bit "
+        "more than you expect the average motion to be",
+        m_sigma2, DefaultSigma2);
 }
 
 

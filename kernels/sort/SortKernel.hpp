@@ -52,8 +52,7 @@ public:
 
 private:
     SortKernel();
-    void addSwitches();
-    void validateSwitches();
+    void addSwitches(ProgramArgs& args);
 
     Stage& makeReader(Options readerOptions);
 
