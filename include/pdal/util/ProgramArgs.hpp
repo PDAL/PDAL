@@ -42,17 +42,17 @@ public:
 
 namespace
 {
-/**
-  Positional type.  Either None, Optional or Required.
-*/
 namespace PosType
 {
 
+/**
+  Positional type.  Either None, Optional or Required.
+*/
 enum Enum
 {
-    None,
-    Required,
-    Optional
+    None,       ///< Not positional
+    Required,   ///< Required positional
+    Optional    ///< Optional positional
 };
 
 } // namespace PosType
