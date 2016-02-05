@@ -1,31 +1,36 @@
 import pdal
 from pdal import libpdalpython
-# import pdal.libpdalpython
 import unittest
 
-def fetch_xml(filename):
+class TestPDALArray(unittest.TestCase):
+  DATADIRECTORY = "../test"
+
+  def fetch_xml(self, filename):
+    import os
+    DATADIRECTORY = os.environ.get('PDAL_TEST_DIR')
+    if not DATADIRECTORY:
+        DATADIRECTORY = self.DATADIRECTORY
+    fn = DATADIRECTORY + os.path.sep +  filename
     output = ''
-    with open(filename, 'rb') as f:
+    with open(fn, 'rb') as f:
         output = f.read().decode('UTF-8')
     return output
 
-class TestPDALArray(unittest.TestCase):
-
   def test_construction(self):
     """Can we construct a PDAL pipeline"""
-    xml = fetch_xml('../test/data/pipeline/pipeline_read.xml')
+    xml = self.fetch_xml('/data/pipeline/pipeline_read.xml')
     r = libpdalpython.PyPipeline(xml)
 
   def test_execution(self):
     """Can we execute a PDAL pipeline"""
-    xml = fetch_xml('../test/data/pipeline/pipeline_read.xml')
+    xml = self.fetch_xml('/data/pipeline/pipeline_read.xml')
     r = libpdalpython.PyPipeline(xml)
     r.execute()
-    self.assertEqual(len(r.xml), 2184)
+    self.assertGreater(len(r.xml), 1000)
 
   def test_array(self):
     """Can we fetch PDAL data as a numpy array"""
-    xml = fetch_xml('../test/data/pipeline/pipeline_read.xml')
+    xml = self.fetch_xml('/data/pipeline/pipeline_read.xml')
     r = libpdalpython.PyPipeline(xml)
     r.execute()
     arrays = r.arrays()
@@ -37,7 +42,7 @@ class TestPDALArray(unittest.TestCase):
 
   def test_merged_arrays(self):
     """Can we fetch merged PDAL data """
-    xml = fetch_xml('../test/data/filters/chip.xml')
+    xml = self.fetch_xml('/data/filters/chip.xml')
     r = libpdalpython.PyPipeline(xml)
     r.execute()
     arrays = r.arrays()
