@@ -179,6 +179,13 @@ public:
         { return m_positional; }
 
     /**
+      Returns whether the argument is hidden or not.
+      \note  Not intended to be called from user code.
+    */
+    bool hidden() const
+        { return m_hidden; }
+
+    /**
       Returns the description of the argument.
       \note  Not intended to be called from user code.
     */
