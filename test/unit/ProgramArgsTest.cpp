@@ -32,6 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+// No wordexp() on windows and I don't feel like doing something special.
+#ifndef _WIN32
+
 #include <pdal/pdal_test_main.hpp>
 
 #include <wordexp.h>
@@ -39,9 +42,6 @@
 #include <pdal/util/ProgramArgs.hpp>
 
 using namespace pdal;
-
-// No wordexp() on windows and I don't feel like doing something special.
-#ifndef _WIN32
 
 #define HANDLE_EXCEPTION(a) \
     EXPECT_THROW(a, arg_error)
@@ -54,7 +54,6 @@ using namespace pdal;
         std::cerr << e.m_error << "\n";\
     }\
 **/
-
 
 
 namespace
