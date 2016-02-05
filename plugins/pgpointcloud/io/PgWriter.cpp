@@ -330,17 +330,20 @@ uint32_t PgWriter::SetupSchema(uint32_t srid)
 void PgWriter::DeleteTable(std::string const& schema_name,
                          std::string const& table_name)
 {
-    std::ostringstream oss;
+    std::ostringstream stmt;
+    std::ostringstream name;
 
-    oss << "DROP TABLE IF EXISTS ";
+    stmt << "DROP TABLE IF EXISTS ";
 
     if (schema_name.size())
     {
-        oss << schema_name << ".";
+        name << schema_name << ".";
     }
-    oss << table_name;
+    name << table_name;
+    stmt << pg_quote_identifier(name.str());
 
-    pg_execute(m_session, oss.str());
+
+    pg_execute(m_session, stmt.str());
 }
 
 
