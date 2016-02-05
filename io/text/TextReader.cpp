@@ -136,18 +136,23 @@ point_count_t TextReader::read(PointViewPtr view, point_count_t numPts)
         else
             fields = Utils::split2(buf, m_separator);
         if (fields.size() != m_dims.size())
-            log()->get(LogLevel::Error) << getName() << ": Line " << line <<
+        {
+            log()->get(LogLevel::Error) << "Line " << line <<
                " in '" << m_filename << "' contains " << fields.size() <<
-               " fields when " << m_dims.size() << " were expected.  Ingoring.";
+               " fields when " << m_dims.size() << " were expected.  "
+               "Ignoring." << std::endl;
+            continue;
+        }
 
         double d;
         for (size_t i = 0; i < fields.size(); ++i)
         {
             if (!Utils::fromString(fields[i], d))
             {
-                log()->get(LogLevel::Error) << getName() << ": Can't convert "
+                log()->get(LogLevel::Error) << "Can't convert "
                     "field '" << fields[i] << "' to numeric value on line " <<
-                    line << " in '" << m_filename << "'.  Setting to 0.";
+                    line << " in '" << m_filename << "'.  Setting to 0." <<
+                    std::endl;
                 d = 0;
             }
             view->setField(m_dims[i], idx, d);

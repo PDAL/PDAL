@@ -96,6 +96,7 @@ PDAL_ADD_TEST(pdal_io_qfit_test FILES io/qfit/QFITReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_sbet_reader_test FILES io/sbet/SbetReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_sbet_writer_test FILES io/sbet/SbetWriterTest.cpp)
 PDAL_ADD_TEST(pdal_io_terrasolid_test FILES io/terrasolid/TerrasolidReaderTest.cpp)
+PDAL_ADD_TEST(pdal_io_text_test FILES io/text/TextReaderTest.cpp)
 
 #
 # sources for the native filters
