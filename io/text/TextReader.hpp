@@ -55,12 +55,45 @@ public:
     {}
 
 private:
+    /**
+      Initialize the reader by opening the file and reading the header line.
+      Closes the file on completion.
+
+      \param table  Point table being initialized.
+    */
     virtual void initialize(PointTableRef table);
+
+    /**
+      Add dimensions found in the header line to the layout.
+
+      \param layout  Layout to which the dimenions are added.
+    */
     virtual void addDimensions(PointLayoutPtr layout);
+
+    /**
+      Reopen the file in preparation for reading.
+
+      \param table  Point table to make ready.
+    */
     virtual void ready(PointTableRef table);
+
+    /**
+      Read up to numPts points into the \ref view.
+
+      \param view  PointView in which to insert point data.
+      \param numPts  Maximum number of points to read.
+      \return  Number of points read.
+    */
     virtual point_count_t read(const PointViewPtr view, point_count_t numPts);
+
+    /**
+      Close input file.
+
+      \param table  PointTable we're done with.
+    */
     virtual void done(PointTableRef table);
 
+private:
     char m_separator;
     std::istream *m_istream;
     StringList m_dimNames;
