@@ -85,6 +85,7 @@ set(PDAL_BASE_CPP
   KernelFactory.cpp
   KernelSupport.cpp
   Log.cpp
+  Metadata.cpp
   Options.cpp
   PDALUtils.cpp
   PointLayout.cpp

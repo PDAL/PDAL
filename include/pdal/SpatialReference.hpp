@@ -93,8 +93,6 @@ public:
     /// available.
     std::string getWKT(WKTModeFlag mode_flag = eHorizontalOnly) const;
     std::string getWKT(WKTModeFlag mode_flag, bool pretty) const;
-    std::string getRawWKT() const
-        { return m_wkt; }
 
     /// Sets the SRS using GDAL's OGC WKT. If GDAL is not linked, this
     /// operation has no effect.
@@ -129,7 +127,9 @@ public:
     void dump() const;
 
     bool isGeographic() const;
+    bool isGeocentric() const;
     int computeUTMZone(const BOX3D& box) const;
+
     const std::string& getName() const;
     static int calculateZone(double lon, double lat);
 

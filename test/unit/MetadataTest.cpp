@@ -37,6 +37,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include <pdal/Metadata.hpp>
+#include <pdal/SpatialReference.hpp>
 
 using namespace pdal;
 

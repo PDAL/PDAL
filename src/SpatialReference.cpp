@@ -272,6 +272,14 @@ bool SpatialReference::isGeographic() const
     return output;
 }
 
+bool SpatialReference::isGeocentric() const
+{
+    OGRSpatialReferenceH current =
+        OSRNewSpatialReference(getWKT(eCompoundOK, false).c_str());
+    bool output = OSRIsGeocentric(current);
+    OSRDestroySpatialReference(current);
+    return output;
+}
 
 int SpatialReference::calculateZone(double lon, double lat)
 {
