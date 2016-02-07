@@ -170,6 +170,36 @@ Polygon::Polygon(OGRGeometryH g, const SpatialReference& srs, ErrorHandlerPtr ct
     prepare();
 
 }
+Polygon::Polygon(const BOX2D& box)
+: m_ctx(pdal::GlobalEnvironment::get().geos())
+{
+    GEOSCoordSequence* coords = GEOSCoordSeq_create_r((*m_ctx).ctx, 5, 2);
+    auto set_coordinate = [coords, this](int pt_num, const double&x, const double& y)
+    {
+        if (!GEOSCoordSeq_setX_r((*m_ctx).ctx, coords, pt_num, x))
+            throw pdal_error("unable to set x for coordinate sequence");
+        if (!GEOSCoordSeq_setY_r((*m_ctx).ctx, coords, pt_num, y))
+            throw pdal_error("unable to set y for coordinate sequence");
+
+    };
+
+    set_coordinate(0, box.minx, box.miny);
+    set_coordinate(1, box.minx, box.maxy);
+    set_coordinate(2, box.maxx, box.maxy);
+    set_coordinate(3, box.maxx, box.miny);
+    set_coordinate(4, box.minx, box.miny);
+
+
+    GEOSGeometry* ring = GEOSGeom_createLinearRing_r((*m_ctx).ctx, coords);
+    if (!ring)
+        throw pdal_error("unable to create linear ring from BOX2D");
+
+
+    m_geom = GEOSGeom_createPolygon_r((*m_ctx).ctx, ring, 0, 0);
+    if (!m_geom)
+        throw pdal_error("unable to create polygon from linearring in BOX2D constructor");
+    prepare();
+}
 
 Polygon Polygon::transform(const SpatialReference& ref) const
 {
