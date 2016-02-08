@@ -266,6 +266,30 @@ inline MetadataNode toMetadata(const PointViewPtr view)
     return node;
 }
 
+inline MetadataNode toMetadata(const BOX2D& bounds)
+{
+    MetadataNode output("bbox");
+    output.add("minx", bounds.minx);
+    output.add("miny", bounds.miny);
+    output.add("maxx", bounds.maxx);
+    output.add("maxy", bounds.maxy);
+    return output;
+}
+
+inline MetadataNode toMetadata(const BOX3D& bounds)
+{
+    MetadataNode output("bbox");
+    output.add("minx", bounds.minx);
+    output.add("miny", bounds.miny);
+    output.add("minz", bounds.minz);
+    output.add("maxx", bounds.maxx);
+    output.add("maxy", bounds.maxy);
+    output.add("maxz", bounds.maxz);
+    return output;
+}
+
+
+
 /// Outputs a string-based boost::property_tree::ptree representation
 /// of the BOX3D instance
 inline ptree toPTree(const BOX3D& bounds)

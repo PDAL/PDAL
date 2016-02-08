@@ -58,7 +58,7 @@ public:
     Polygon(const std::string& wkt_or_json,
            SpatialReference ref = SpatialReference(),
            ErrorHandlerPtr ctx = pdal::GlobalEnvironment::get().geos());
-    Polygon(const BOX2D&);
+    Polygon(const BOX3D&);
     Polygon(const Polygon&);
     Polygon(GEOSGeometry* g, const SpatialReference& srs, ErrorHandlerPtr ctx);
     Polygon(OGRGeometryH g, const SpatialReference& srs, ErrorHandlerPtr ctx);
@@ -72,6 +72,11 @@ public:
     void setSpatialReference( const SpatialReference& ref)
     {
         m_srs = ref;
+    }
+
+    const SpatialReference& getSpatialReference() const
+    {
+        return m_srs;
     }
 
     Polygon transform(const SpatialReference& ref) const;

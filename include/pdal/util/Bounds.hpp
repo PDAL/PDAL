@@ -202,6 +202,10 @@ public:
     BOX3D()
        { clear(); }
 
+    BOX3D(const BOX2D& box)
+      : BOX2D(box), minz(0.0), maxz(0.0)
+    {}
+
     BOX3D(const BOX3D& box) :
         BOX2D(box), minz(box.minz), maxz(box.maxz)
     {}

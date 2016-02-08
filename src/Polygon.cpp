@@ -170,7 +170,7 @@ Polygon::Polygon(OGRGeometryH g, const SpatialReference& srs, ErrorHandlerPtr ct
     prepare();
 
 }
-Polygon::Polygon(const BOX2D& box)
+Polygon::Polygon(const BOX3D& box)
 : m_ctx(pdal::GlobalEnvironment::get().geos())
 {
     GEOSCoordSequence* coords = GEOSCoordSeq_create_r((*m_ctx).ctx, 5, 2);
