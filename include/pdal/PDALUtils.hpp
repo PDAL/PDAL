@@ -279,6 +279,10 @@ inline MetadataNode toMetadata(const SpatialReference& ref)
     root.add("compoundwkt", ref.getWKT(SpatialReference::eCompoundOK, false));
     root.add("prettycompoundwkt", ref.getWKT(SpatialReference::eCompoundOK, true));
 
+    MetadataNode units = root.add("units");
+    units.add("vertical", ref.getVerticalUnits());
+    units.add("horizontal", ref.getVerticalUnits());
+
     return root;
 
 

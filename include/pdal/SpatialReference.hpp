@@ -115,7 +115,9 @@ public:
     std::string getProj4() const;
 
     std::string getHorizontal() const;
+    std::string getHorizontalUnits() const;
     std::string getVertical() const;
+    std::string getVerticalUnits() const;
 
     /// Sets the Proj.4 string describing the Spatial Reference System.
     /// If GDAL is linked, it uses GDAL's operations and methods to determine

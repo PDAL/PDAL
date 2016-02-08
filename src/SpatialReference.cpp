@@ -192,6 +192,33 @@ std::string SpatialReference::getVertical() const
     return tmp;
 }
 
+std::string SpatialReference::getVerticalUnits() const
+{
+    std::string tmp("");
+
+    std::string wkt = getWKT(eCompoundOK);
+    const char* poWKT = wkt.c_str();
+    OGRSpatialReference* poSRS =
+        (OGRSpatialReference*)OSRNewSpatialReference(m_wkt.c_str());
+    if (poSRS)
+    {
+        OGR_SRSNode* node = poSRS->GetAttrNode("VERT_CS");
+        if (node)
+        {
+            char* units(0);
+            double u = poSRS->GetLinearUnits(&units);
+            tmp = units;
+            CPLFree(units);
+
+            Utils::trim(tmp);
+
+        }
+    }
+
+    return tmp;
+}
+
+
 std::string SpatialReference::getHorizontal() const
 {
     std::string tmp("");
@@ -208,6 +235,26 @@ std::string SpatialReference::getHorizontal() const
         tmp = pszWKT;
         CPLFree(pszWKT);
         OSRDestroySpatialReference(poSRS);
+    }
+
+    return tmp;
+}
+
+std::string SpatialReference::getHorizontalUnits() const
+{
+    std::string tmp("");
+
+    std::string wkt = getWKT(eHorizontalOnly);
+    const char* poWKT = wkt.c_str();
+    OGRSpatialReference srs(NULL);
+    if (OGRERR_NONE == srs.importFromWkt(const_cast<char **>(&poWKT)))
+    {
+        char* units(0);
+        double u = srs.GetLinearUnits(&units);
+        tmp = units;
+        CPLFree(units);
+
+        Utils::trim(tmp);
     }
 
     return tmp;
