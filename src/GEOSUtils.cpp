@@ -112,7 +112,6 @@ void ErrorHandler::error(char const* msg)
 
 ErrorHandler::~ErrorHandler()
 {
-    std::cout << "context is going away" <<std::endl;
 #ifdef GEOS_finish_r
     GEOS_finish_r(ctx);
 #else
