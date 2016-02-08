@@ -245,6 +245,8 @@ public:
     int m_block_y;
 
     int m_band_count;
+    std::vector<bool> m_has_no_data;
+    std::vector<double> m_no_data;
     mutable std::vector<pdal::Dimension::Type::Enum> m_types;
     std::vector<std::array<double, 2>> m_block_sizes;
 
