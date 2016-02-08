@@ -266,6 +266,23 @@ inline MetadataNode toMetadata(const PointViewPtr view)
     return node;
 }
 
+inline MetadataNode toMetadata(const SpatialReference& ref)
+{
+    MetadataNode root("srs");
+    root.add("horizontal", ref.getHorizontal());
+    root.add("vertical", ref.getVertical());
+    root.add("isgeographic", ref.isGeographic());
+    root.add("isgeocentric", ref.isGeocentric());
+    root.add("proj4", ref.getProj4());
+    root.add("prettywkt", ref.getWKT(SpatialReference::eHorizontalOnly, true));
+    root.add("wkt", ref.getWKT(SpatialReference::eHorizontalOnly, false));
+    root.add("compoundwkt", ref.getWKT(SpatialReference::eCompoundOK, false));
+    root.add("prettycompoundwkt", ref.getWKT(SpatialReference::eCompoundOK, true));
+
+    return root;
+
+
+}
 inline MetadataNode toMetadata(const BOX2D& bounds)
 {
     MetadataNode output("bbox");

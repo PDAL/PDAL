@@ -413,23 +413,6 @@ void SpatialReference::dump() const
     std::cout << *this;
 }
 
-MetadataNode SpatialReference::toMetadata() const
-{
-
-    MetadataNode root("srs");
-    root.add("horizontal", getHorizontal());
-    root.add("vertical", getVertical());
-    root.add("isgeographic", isGeographic());
-    root.add("isgeocentric", isGeocentric());
-    root.add("proj4", getProj4());
-    root.add("prettywkt", getWKT(SpatialReference::eHorizontalOnly, true));
-    root.add("wkt", getWKT(SpatialReference::eHorizontalOnly, false));
-    root.add("compoundwkt", getWKT(SpatialReference::eCompoundOK, false));
-    root.add("prettycompoundwkt", getWKT(SpatialReference::eCompoundOK, true));
-
-    return root;
-}
-
 
 std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs)
 {

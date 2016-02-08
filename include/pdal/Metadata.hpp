@@ -673,7 +673,7 @@ public:
     MetadataNode getNode() const
         { return m_root; }
 
-    static std::string inferType(const std::string& val);
+    static std::string PDAL_DLL inferType(const std::string& val);
 private:
     MetadataNode m_root;
     MetadataNode m_private;
