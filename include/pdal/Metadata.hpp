@@ -67,7 +67,7 @@ typedef std::vector<MetadataNodeImplPtr> MetadataImplList;
 typedef std::map<std::string, MetadataImplList> MetadataSubnodes;
 typedef std::vector<MetadataNode> MetadataNodeList;
 
-class MetadataNodeImpl
+class PDAL_DLL MetadataNodeImpl
 {
     friend class MetadataNode;
 
