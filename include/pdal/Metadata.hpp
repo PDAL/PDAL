@@ -241,7 +241,7 @@ inline void MetadataNodeImpl::setValue<double>(const double& d)
 }
 
 template <>
-void MetadataNodeImpl::setValue(const SpatialReference& ref);
+void PDAL_DLL MetadataNodeImpl::setValue(const SpatialReference& ref);
 
 template <>
 inline void MetadataNodeImpl::setValue(const BOX3D& b)
