@@ -232,6 +232,8 @@ MetadataNode InfoKernel::dumpSummary(const QuickInfo& qi)
     MetadataNode summary;
     summary.add("num_points", qi.m_pointCount);
     summary.add("spatial_reference", qi.m_srs.getWKT());
+    MetadataNode srs = qi.m_srs.toMetadata();
+    summary.add(srs);
     MetadataNode bounds = summary.add("bounds");
     MetadataNode x = bounds.add("X");
     x.add("min", qi.m_bounds.minx);

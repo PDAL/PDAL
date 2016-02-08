@@ -40,6 +40,7 @@ namespace pdal
 {
 
 class PDAL_DLL BOX3D;
+class PDAL_DLL MetadataNode;
 
 /// A SpatialReference defines a model of the earth that is used to describe
 /// the location of points.
@@ -125,6 +126,7 @@ public:
     void setProj4(std::string const& v);
 
     void dump() const;
+    MetadataNode toMetadata() const;
 
     bool isGeographic() const;
     bool isGeocentric() const;
