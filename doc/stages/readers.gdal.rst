@@ -57,7 +57,7 @@ The following example writes a JPG as an `ASPRS LAS`_ file.
             </Option>
             <Filter type="filters.ferry">
                <Option name="dimensions">
-                    Red=band-1, Green=band-2, Blue=band-3
+                    band-1=Red, band-2=Green, band-3=Blue
                 </Option>
             <Reader type="readers.gdal">
                 <Option name="filename">

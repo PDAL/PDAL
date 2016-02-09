@@ -51,8 +51,8 @@ public:
     int execute();
 
 private:
-    void addSwitches();
-    void validateSwitches();
+    void addSwitches(ProgramArgs& args);
+    void validateSwitches(ProgramArgs& args);
 
     StringList m_files;
     std::string m_outputFile;

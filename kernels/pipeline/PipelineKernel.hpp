@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/Kernel.hpp>
-#include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineWriter.hpp>
 #include <pdal/util/FileUtils.hpp>
@@ -56,8 +55,8 @@ public:
 
 private:
     PipelineKernel();
-    void addSwitches();
-    void validateSwitches();
+    void addSwitches(ProgramArgs& args);
+    void validateSwitches(ProgramArgs& args);
 
     std::string m_inputFile;
     std::string m_pipelineFile;

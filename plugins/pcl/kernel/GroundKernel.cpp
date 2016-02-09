@@ -74,40 +74,19 @@ GroundKernel::GroundKernel()
     , m_approximate(false)
 {}
 
-void GroundKernel::validateSwitches()
+void GroundKernel::addSwitches(ProgramArgs& args)
 {
-    if (m_inputFile == "")
-    {
-        throw app_usage_error("--input/-i required");
-    }
-
-    if (m_outputFile == "")
-    {
-        throw app_usage_error("--output/-o required");
-    }
-}
-
-void GroundKernel::addSwitches()
-{
-    po::options_description* file_options = new po::options_description("file options");
-
-    file_options->add_options()
-    ("input,i", po::value<std::string>(&m_inputFile)->default_value(""), "input file name")
-    ("output,o", po::value<std::string>(&m_outputFile)->default_value(""), "output file name")
-    ("max_window_size", po::value<double>(&m_maxWindowSize)->default_value(33), "max window size")
-    ("slope", po::value<double>(&m_slope)->default_value(1), "slope")
-    ("max_distance", po::value<double>(&m_maxDistance)->default_value(2.5), "max distance")
-    ("initial_distance", po::value<double>(&m_initialDistance)->default_value(0.15, "0.15"), "initial distance")
-    ("cell_size", po::value<double>(&m_cellSize)->default_value(1), "cell size")
-    ("classify", po::bool_switch(&m_classify), "apply classification labels?")
-    ("extract", po::bool_switch(&m_extract), "extract ground returns?")
-    ("approximate,a", po::bool_switch(&m_approximate), "use approximate algorithm? (much faster)")
-    ;
-
-    addSwitchSet(file_options);
-
-    addPositionalSwitch("input", 1);
-    addPositionalSwitch("output", 1);
+    args.add("input,i", "Input filename", m_inputFile).setPositional();
+    args.add("output,o", "Output filename", m_outputFile).setPositional();
+    args.add("max_window_size", "Max window size", m_maxWindowSize, 33.0);
+    args.add("slope", "Slope", m_slope, 1.0);
+    args.add("max_distance", "Max distance", m_maxDistance, 2.5);
+    args.add("initial_distance", "Initial distance", m_initialDistance, .15);
+    args.add("cell_size", "Cell size", m_cellSize, 1.0);
+    args.add("classify", "Apply classification labels?", m_classify);
+    args.add("extract", "extract ground returns?", m_extract);
+    args.add("approximate,a", "use approximate algorithm? (much faster)",
+        m_approximate);
 }
 
 int GroundKernel::execute()

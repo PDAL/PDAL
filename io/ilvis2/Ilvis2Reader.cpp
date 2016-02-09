@@ -281,42 +281,6 @@ point_count_t Ilvis2Reader::read(PointViewPtr view, point_count_t count)
             m_cb(*view, idx);
         numRead++;
     }
-/**
-    for (; std::getline(m_stream, line) && numRead < count; m_lineNum++)
-    {
-        StringList s = Utils::split2(line, ' ');
-        if (s.size() != 12)
-        {
-            std::stringstream oss;
-            oss << getName() << ": Invalid format for line " << m_lineNum <<
-                ".  Expected 12 fields, got " << s.size() << ".";
-            throw pdal_error(oss.str());
-        }
-
-        double low_elev = convert<double>(s, "ELEVATION_LOW", 8);
-        double high_elev = convert<double>(s, "ELEVATION_HIGH", 11);
-
-        // write LOW point if specified, or for ALL
-        if (m_mapping == LOW || m_mapping == ALL)
-        {
-            readPoint(view, nextId, s, "LOW");
-            nextId++;
-        }
-
-        // If we have ALL mapping and the high elevation is different from that
-        // of the low elevation, add a second point with the high elevation.
-        if (m_mapping == HIGH || (m_mapping == ALL && low_elev != high_elev))
-        {
-            readPoint(view, nextId, s, "HIGH");
-            nextId++;
-        }
-        if (m_cb)
-            m_cb(*view, nextId);
-    }
-**/
-/**
-    numRead = nextId;
-**/
     if (!m_metadataFile.empty())
     {
         m_mdReader.readMetadataFile(m_metadataFile, &m_metadata);

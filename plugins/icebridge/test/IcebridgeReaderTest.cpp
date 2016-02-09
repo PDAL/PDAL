@@ -36,7 +36,6 @@
 
 #include <pdal/Options.hpp>
 #include <pdal/PointView.hpp>
-#include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/StageFactory.hpp>
 
@@ -141,10 +140,9 @@ TEST(IcebridgeReaderTest, testRead)
 TEST(IcebridgeReaderTest, testPipeline)
 {
     PipelineManager manager;
-    PipelineReader reader(manager);
 
     bool isWriter =
-        reader.readPipeline(Support::configuredpath("icebridge/pipeline.xml"));
+        manager.readPipeline(Support::configuredpath("icebridge/pipeline.xml"));
     EXPECT_TRUE(isWriter);
 
     point_count_t numPoints = manager.execute();

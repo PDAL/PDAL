@@ -74,7 +74,9 @@ TEST(pc2pcTest, pc2pcTest_test_common_opts)
     int stat = Utils::run_shell_command(cmd + " -h", output);
     EXPECT_EQ(stat, 0);
 
+    cmd = Support::binpath(Support::exename("pdal"));
     stat = Utils::run_shell_command(cmd + " --version", output);
+    EXPECT_TRUE(output.find("git-version") != std::string::npos);
     EXPECT_EQ(stat, 0);
 }
 

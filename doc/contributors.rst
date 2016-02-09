@@ -34,7 +34,7 @@ new feature development of PDAL over the past couple of years.
 .. _`Hobu`: http://hobu.co
 
 
-.. image:: http://radiantblue.com/wp-content/themes/radiantblue/images/logo.png
+.. image:: http://radiantblue.com/wp-content/uploads/2015/12/logo1.png
     :target: http://radiantblue.com
 
 `Michael Gerlek`_ from `RadiantBlue`_ helped bootstrap PDAL by providing its

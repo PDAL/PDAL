@@ -2,8 +2,6 @@
 
 #include "MyKernel.hpp"
 
-#include <boost/program_options.hpp>
-
 #include <pdal/Filter.hpp>
 #include <pdal/Kernel.hpp>
 #include <pdal/KernelFactory.hpp>
@@ -33,25 +31,10 @@ namespace pdal {
   MyKernel::MyKernel() : Kernel()
   {}
 
-  void MyKernel::validateSwitches()
+  void MyKernel::addSwitches(ProgramArgs& args)
   {
-    if (m_input_file == "")
-      throw pdal::app_usage_error("--input/-i required");
-    if (m_output_file == "")
-      throw pdal::app_usage_error("--output/-o required");
-  }
-
-  void MyKernel::addSwitches()
-  {
-    po::options_description* options = new po::options_description("file options");
-    options->add_options()
-    ("input,i", po::value<std::string>(&m_input_file)->default_value(""), "input file name")
-    ("output,o", po::value<std::string>(&m_output_file)->default_value(""), "output file name")
-    ;
-
-    addSwitchSet(options);
-    addPositionalSwitch("input", 1);
-    addPositionalSwitch("output", 1);
+      args.add("input,i", "Input filename", m_input_file).setPositional();
+      args.add("output,o", "Output filename", m_output_file).setPositional();
   }
 
   int MyKernel::execute()

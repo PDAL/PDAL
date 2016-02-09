@@ -25,20 +25,18 @@ Pipeline::Pipeline(std::string const& xml)
 
 void Pipeline::execute()
 {
-    pdal::PipelineReader reader(m_manager, false, 0 );
     std::stringstream strm;
     strm << m_xml;
-//     bool isWriter = reader.readPipeline(strm);
-    reader.readPipeline(strm);
+    m_manager.readPipeline(strm);
     m_manager.execute();
 #ifdef PDAL_HAVE_LIBXML2
     pdal::XMLSchema schema(m_manager.pointTable().layout());
     m_schema = schema.xml();
 #endif
 
-    pdal::PipelineWriter writer(m_manager);
     strm.str("");
-    writer.writePipeline(strm);
+    pdal::PipelineWriter::writePipeline(m_manager.getStage(), strm);
+
     m_xml = strm.str();
 
 }

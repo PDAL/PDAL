@@ -155,6 +155,16 @@ GDALError::Enum Raster::open()
     m_raster_y_size = GDALGetRasterYSize(m_ds);
     m_band_count = GDALGetRasterCount(m_ds);
 
+    m_no_data.clear();
+    m_has_no_data.clear();
+    for (int i = 0; i < m_band_count; ++i)
+    {
+        int fail = 0;
+        GDALRasterBandH band = GDALGetRasterBand(m_ds, i + 1);
+        double v = GDALGetRasterNoDataValue(band, &fail);
+        m_no_data.push_back(v);
+        m_has_no_data.push_back(!fail);
+    }
     if (computePDALDimensionTypes() == GDALError::InvalidBand)
         error = GDALError::InvalidBand;
     return error;
@@ -213,12 +223,19 @@ Dimension::Type::Enum convertGDALtoPDAL(GDALDataType t)
             return Unsigned32;
         case GDT_Int32:
             return Signed32;
-        case GDT_CFloat32:
+        case GDT_Float32:
             return Float;
-        case GDT_CFloat64:
+        case GDT_Float64:
             return Double;
-        default:
-            return None;
+        case GDT_CInt16:
+        case GDT_CInt32:
+        case GDT_CFloat32:
+        case GDT_CFloat64:
+            throw pdal_error("GDAL complex float type unsupported.");
+        case GDT_Unknown:
+            throw pdal_error("GDAL unknown type unsupported.");
+        case GDT_TypeCount:
+            throw pdal_error("Detected bad GDAL data type.");
     }
     return None;
 }
@@ -227,8 +244,11 @@ GDALError::Enum Raster::readBand(std::vector<uint8_t>& data, int nBand)
 {
     GDALError::Enum error = GDALError::None;
 
-    data.resize(m_raster_x_size * m_raster_y_size);
     GDALRasterBandH band = GDALGetRasterBand(m_ds, nBand);
+
+    GDALDataType t = GDALGetRasterDataType(band);
+    size_t size = GDALGetDataTypeSize(t);
+    data.resize(m_raster_x_size * m_raster_y_size * size);
     if (!band)
     {
         std::ostringstream oss;

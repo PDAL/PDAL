@@ -7,37 +7,26 @@
 
 #include <vector>
 
-struct Point
+void fillView(pdal::PointViewPtr view)
 {
-    double x;
-    double y;
-    double z;
-};
-
-std::vector<Point> getMyData()
-{
-    std::vector<Point> output;
-    Point p;
+    struct Point
+    {
+        double x;
+        double y;
+        double z;
+    };
 
     for (int i = 0; i < 1000; ++i)
     {
+        Point p;
+
         p.x = -93.0 + i*0.001;
         p.y = 42.0 + i*0.001;
         p.z = 106.0 + i;
-        output.push_back(p);
-    }
-    return output;
-}
 
-
-void fillView(pdal::PointViewPtr view, std::vector<Point> const& data)
-{
-    for (int i = 0; i < data.size(); ++i)
-    {
-        Point const& pt = data[i];
-        view->setField<double>(pdal::Dimension::Id::X, i, pt.x);
-        view->setField<double>(pdal::Dimension::Id::Y, i, pt.y);
-        view->setField<double>(pdal::Dimension::Id::Z, i, pt.z);
+        view->setField(pdal::Dimension::Id::X, i, pt.x);
+        view->setField(pdal::Dimension::Id::Y, i, pt.y);
+        view->setField(pdal::Dimension::Id::Z, i, pt.z);
     }
 }
 
@@ -54,21 +43,21 @@ int main(int argc, char* argv[])
     table.layout()->registerDim(Dimension::Id::Y);
     table.layout()->registerDim(Dimension::Id::Z);
 
-    {
-        PointViewPtr view(new PointView(table));
+    PointViewPtr view(new PointView(table));
 
-        std::vector<Point> data = getMyData();
-        fillView(view, data);
+    fillView(view);
 
-        BufferReader *reader = new BufferReader();
-        reader->addView(view);
+    BufferReader reader;
+    reader.addView(view);
 
-        StageFactory factory;
-        Stage *writer = factory.createStage("writers.las");
+    StageFactory factory;
 
-        writer->setInput(*reader);
-        writer->setOptions(options);
-        writer->prepare(table);
-        writer->execute(table);
-    }
+    // Set second argument to 'true' to let factory take ownership of
+    // stage and facilitate clean up.
+    Stage *writer = factory.createStage("writers.las", true);
+
+    writer->setInput(reader);
+    writer->setOptions(options);
+    writer->prepare(table);
+    writer->execute(table);
 }

@@ -52,8 +52,7 @@ public:
 
 private:
     SmoothKernel() {};
-    void addSwitches();
-    void validateSwitches();
+    virtual void addSwitches(ProgramArgs& args);
 
     std::shared_ptr<Stage> makeReader(Options readerOptions);
 

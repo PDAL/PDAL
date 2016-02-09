@@ -56,22 +56,13 @@ std::string MergeKernel::getName() const
 }
 
 
-void MergeKernel::addSwitches()
+void MergeKernel::addSwitches(ProgramArgs& args)
 {
-    po::options_description* file_options =
-        new po::options_description("file options");
-
-    file_options->add_options()
-        ("files,f", po::value<StringList>(&m_files)->multitoken(),
-         "input/output files")
-        ;
-
-    addSwitchSet(file_options);
-    addPositionalSwitch("files", 10000);
+    args.add("files,f", "input/output files", m_files).setPositional();
 }
 
 
-void MergeKernel::validateSwitches()
+void MergeKernel::validateSwitches(ProgramArgs& args)
 {
     if (m_files.size() < 2)
         throw pdal_error("Must specify an input and output file.");

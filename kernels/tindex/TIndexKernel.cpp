@@ -92,67 +92,40 @@ TIndexKernel::TIndexKernel()
 }
 
 
-void TIndexKernel::addSwitches()
+void TIndexKernel::addSwitches(ProgramArgs& args)
 {
-    namespace po = boost::program_options;
-
-    po::options_description* file_options =
-        new po::options_description("file options");
-
-    file_options->add_options()
-        ("tindex", po::value<std::string>(&m_idxFilename),
-            "OGR-readable/writeable tile index output")
-        ("filespec", po::value<std::string>(&m_filespec),
-            "Build: Pattern of files to index. Merge: Output filename")
-        ("fast_boundary", po::value<bool>(&m_fastBoundary)->
-            zero_tokens()->implicit_value(true),
-            "use extent instead of exact boundary")
-        ("lyr_name", po::value<std::string>(&m_layerName),
-            "OGR layer name to write into datasource")
-        ("tindex_name", po::value<std::string>(&m_tileIndexColumnName)->
-            default_value("location"), "Tile index column name")
-        ("driver,f", po::value<std::string>(&m_driverName)->
-            default_value("ESRI Shapefile"), "OGR driver name to use ")
-        ("t_srs", po::value<std::string>(&m_tgtSrsString)->
-            default_value("EPSG:4326"), "Target SRS of tile index")
-        ("a_srs", po::value<std::string>(&m_assignSrsString)->
-            default_value("EPSG:4326"),
-            "Assign SRS of tile with no SRS to this value")
-        ("bounds", po::value<BOX2D>(&m_bounds),
-            "Extent (in XYZ) to clip output to")
-        ("polygon", po::value<std::string>(&m_wkt),
-            "Well-known text of polygon to clip output")
-        ("write_absolute_path", po::value<bool>(&m_absPath)->
-            default_value(false),
-            "Write absolute rather than relative file paths")
-        ("merge", "Whether we're merging the entries in a tindex file.")
-    ;
-
-    addSwitchSet(file_options);
-    po::options_description* processing_options =
-        new po::options_description("processing options");
-
-    processing_options->add_options();
-
-    addSwitchSet(processing_options);
-
-    addPositionalSwitch("tindex", 1);
-    addPositionalSwitch("filespec", 1);
+    args.add("tindex", "OGR-readable/writeable tile index output",
+        m_idxFilename).setOptionalPositional();
+    args.add("filespec", "Build: Pattern of files to index. "
+        "Merge: Output filename", m_filespec).setPositional();
+    args.add("fast_boundary", "Use extent instead of exact boundary",
+        m_fastBoundary);
+    args.add("lyr_name", "OGR layer name to write into datasource",
+        m_layerName);
+    args.add("tindex_name", "Tile index column name", m_tileIndexColumnName,
+        "location");
+    args.add("driver,f", "OGR driver name to use ", m_driverName,
+        "ESRI Shapefile");
+    args.add("t_srs", "Target SRS of tile index", m_tgtSrsString,
+        "EPSG:4326");
+    args.add("a_srs", "Assign SRS of tile with no SRS to this value",
+        m_assignSrsString, "EPSG:4326");
+    args.add("bounds", "Extent (in XYZ) to clip output to", m_bounds);
+    args.add("polygon", "Well-known text of polygon to clip output", m_wkt);
+    args.add("write_absolute_path",
+        "Write absolute rather than relative file paths", m_absPath);
+    args.add("merge", "Whether we're merging the entries in a tindex file.",
+        m_merge);
 }
 
 
-void TIndexKernel::validateSwitches()
+void TIndexKernel::validateSwitches(ProgramArgs& args)
 {
-    m_merge = argumentExists("merge");
-
-    if (m_idxFilename.empty())
-        throw pdal_error("No index filename provided.");
-
     if (m_merge)
     {
         if (!m_wkt.empty() && !m_bounds.empty())
-            throw pdal_error("Can't specify both --polygon and "
-                "--bounds options.");
+            throw pdal_error("Can't specify both 'polygon' and "
+                "'bounds' options.");
         if (!m_bounds.empty())
             m_wkt = m_bounds.toWKT();
         if (m_filespec.empty())
@@ -161,23 +134,23 @@ void TIndexKernel::validateSwitches()
         invalidArgs.push_back("a_srs");
         invalidArgs.push_back("src_srs_name");
         for (auto arg : invalidArgs)
-            if (argumentSpecified(arg))
+            if (args.set(arg))
             {
                 std::ostringstream out;
 
-                out << "option '--" << arg << "' not supported during merge.";
+                out << "option '" << arg << "' not supported during merge.";
                 throw pdal_error(out.str());
             }
     }
     else
     {
         if (m_filespec.empty() && !m_usestdin)
-            throw pdal_error("No input pattern specified and STDIN not given");
-        if (argumentExists("polygon"))
-            throw pdal_error("--polygon option not supported when building "
+            throw pdal_error("No input pattern specified");
+        if (args.set("polygon"))
+            throw pdal_error("'polygon' option not supported when building "
                 "index.");
-        if (argumentExists("bounds"))
-            throw pdal_error("--bounds option not supported when building "
+        if (args.set("bounds"))
+            throw pdal_error("'bounds' option not supported when building "
                 "index.");
     }
 }

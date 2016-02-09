@@ -35,7 +35,6 @@
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/PipelineManager.hpp>
-#include <pdal/PipelineReader.hpp>
 
 #include "Support.hpp"
 
@@ -44,8 +43,7 @@ TEST(MergeTest, test1)
     using namespace pdal;
 
     PipelineManager mgr;
-    PipelineReader specReader(mgr);
-    specReader.readPipeline(Support::configuredpath("filters/merge.xml"));
+    mgr.readPipeline(Support::configuredpath("filters/merge.xml"));
     mgr.execute();
 
     PointViewSet viewSet = mgr.views();
@@ -60,8 +58,7 @@ TEST(MergeTest, test2)
     using namespace pdal;
 
     PipelineManager mgr;
-    PipelineReader specReader(mgr);
-    specReader.readPipeline(Support::configuredpath("filters/merge2.xml"));
+    mgr.readPipeline(Support::configuredpath("filters/merge2.xml"));
     mgr.execute();
 
     PointViewSet viewSet = mgr.views();
@@ -76,8 +73,7 @@ TEST(MergeTest, test3)
     using namespace pdal;
 
     PipelineManager mgr;
-    PipelineReader specReader(mgr);
-    specReader.readPipeline(Support::configuredpath("filters/merge3.xml"));
+    mgr.readPipeline(Support::configuredpath("filters/merge3.xml"));
 
     std::ostringstream oss;
     std::ostream& o = std::clog;

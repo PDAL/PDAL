@@ -57,7 +57,8 @@ TEST(Merge, pdalinfoTest_no_input)
     std::string output;
     EXPECT_EQ(Utils::run_shell_command(cmd, output), 1);
 
-    const std::string expected = "PDAL: Must specify an input and output file.";
+    const std::string expected = "PDAL: Missing value for positional "
+        "argument 'files'.";
     EXPECT_EQ(output.substr(0, expected.length()), expected);
 }
 
@@ -67,8 +68,7 @@ TEST(Merge, Simple)
     std::string file1(Support::datapath("las/utm15.las"));
     std::string file2(Support::datapath("las/utm17.las"));
     std::string outfile(Support::temppath("out.las"));
-    std::string cmd = appName() + " " + file1 + " " + file2 + " " + outfile +
-        " 2>/dev/null";
+    std::string cmd = appName() + " " + file1 + " " + file2 + " " + outfile;
 
     std::string output;
     EXPECT_EQ(Utils::run_shell_command(cmd, output), 0);

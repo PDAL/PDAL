@@ -74,8 +74,8 @@ public:
 
 private:
     InfoKernel();
-    void addSwitches(); // overrride
-    void validateSwitches(); // overrride
+    void addSwitches(ProgramArgs& args);
+    void validateSwitches(ProgramArgs& args);
 
     void dump(MetadataNode& root);
     MetadataNode dumpPoints(PointViewPtr inView) const;

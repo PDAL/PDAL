@@ -75,8 +75,8 @@ public:
 
 private:
     TIndexKernel();
-    void addSwitches(); // overrride
-    void validateSwitches(); // overrride
+    virtual void addSwitches(ProgramArgs& args);
+    virtual void validateSwitches(ProgramArgs& args);
 
     StringList glob(std::string& path);
     void createFile();

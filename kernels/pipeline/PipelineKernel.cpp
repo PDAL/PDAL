@@ -58,48 +58,30 @@ PipelineKernel::PipelineKernel() : m_validate(false), m_progressFd(-1)
 {}
 
 
-void PipelineKernel::validateSwitches()
+void PipelineKernel::validateSwitches(ProgramArgs& args)
 {
     if (m_usestdin)
         m_inputFile = "STDIN";
 
     if (m_inputFile.empty())
-        throw app_usage_error("input file name required");
+        throw pdal_error("Input filename required.");
 }
 
 
-void PipelineKernel::addSwitches()
+void PipelineKernel::addSwitches(ProgramArgs& args)
 {
-    po::options_description* file_options =
-        new po::options_description("file options");
-
-    file_options->add_options()
-        ("input,i", po::value<std::string>(&m_inputFile)->default_value(""),
-            "input file name")
-        ("pipeline-serialization",
-            po::value<std::string>(&m_pipelineFile)->default_value(""), "")
-        ("validate",
-            po::value<bool>(&m_validate)->zero_tokens()->implicit_value(true),
-            "Validate the pipeline (including serialization), but do not "
-            "execute writing of points")
-        ("progress", po::value<std::string>(&m_progressFile),
-            "Name of file or FIFO to which stages should write progress "
-            "information.  The file/FIFO must exist.  PDAL will not create "
-            "the progress file.")
-        ;
-
-    addSwitchSet(file_options);
-    addPositionalSwitch("input", 1);
-
-    po::options_description* hidden =
-        new po::options_description("Hidden options");
-    hidden->add_options()
-        ("pointcloudschema",
-         po::value<std::string>(&m_PointCloudSchemaOutput),
-        "dump PointCloudSchema XML output")
-            ;
-
-    addHiddenSwitchSet(hidden);
+    args.add("input,i", "input file name", m_inputFile).setOptionalPositional();
+    args.add("pipeline-serialization", "Output file for pipeline serialization",
+        m_pipelineFile);
+    args.add("validate", "Validate the pipeline (including serialization), "
+        "but do not write points", m_validate);
+    args.add("progress",
+        "Name of file or FIFO to which stages should write progress "
+        "information.  The file/FIFO must exist.  PDAL will not create "
+        "the progress file.",
+        m_progressFile);
+    args.add("pointcloudschema", "dump PointCloudSchema XML output",
+        m_PointCloudSchemaOutput).setHidden();
 }
 
 int PipelineKernel::execute()
@@ -110,9 +92,7 @@ int PipelineKernel::execute()
         m_progressFd = Utils::openProgress(m_progressFile);
 
     pdal::PipelineManager manager(m_progressFd);
-
-    pdal::PipelineReader reader(manager, isDebug(), getVerboseLevel());
-    bool isWriter = reader.readPipeline(m_inputFile);
+    bool isWriter = manager.readPipeline(m_inputFile);
     if (!isWriter)
         throw app_runtime_error("Pipeline file does not contain a writer. "
             "Use 'pdal info' to read the data.");

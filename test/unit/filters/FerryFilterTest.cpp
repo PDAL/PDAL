@@ -37,7 +37,6 @@
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/PipelineManager.hpp>
-#include <pdal/PipelineReader.hpp>
 #include <FauxReader.hpp>
 #include <FerryFilter.hpp>
 #include <LasReader.hpp>
@@ -56,8 +55,7 @@ TEST(FerryFilterTest, create)
 TEST(FerryFilterTest, test_ferry_copy)
 {
     PipelineManager mgr;
-    PipelineReader specReader(mgr);
-    specReader.readPipeline(Support::configuredpath("filters/ferry.xml"));
+    mgr.readPipeline(Support::configuredpath("filters/ferry.xml"));
 
     mgr.execute();
     ConstPointTableRef table(mgr.pointTable());
