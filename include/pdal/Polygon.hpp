@@ -58,6 +58,7 @@ public:
     Polygon(const std::string& wkt_or_json,
            SpatialReference ref = SpatialReference(),
            ErrorHandlerPtr ctx = pdal::GlobalEnvironment::get().geos());
+    Polygon(const BOX2D&);
     Polygon(const BOX3D&);
     Polygon(const Polygon&);
     Polygon(GEOSGeometry* g, const SpatialReference& srs, ErrorHandlerPtr ctx);
@@ -106,6 +107,7 @@ public:
         { return m_geom != NULL; }
 private:
 
+    void initializeFromBounds(const BOX3D& b);
     GEOSGeometry *m_geom;
     const GEOSPreparedGeometry *m_prepGeom;
 

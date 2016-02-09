@@ -170,8 +170,22 @@ Polygon::Polygon(OGRGeometryH g, const SpatialReference& srs, ErrorHandlerPtr ct
     prepare();
 
 }
+
+Polygon::Polygon(const BOX2D& box)
+: m_ctx(pdal::GlobalEnvironment::get().geos())
+{
+    BOX3D box3(box.minx, box.miny, 0.0,
+               box.maxx, box.maxy, 0.0);
+    initializeFromBounds(box3);
+}
+
 Polygon::Polygon(const BOX3D& box)
 : m_ctx(pdal::GlobalEnvironment::get().geos())
+{
+    initializeFromBounds(box);
+}
+
+void Polygon::initializeFromBounds(const BOX3D& box)
 {
     GEOSCoordSequence* coords = GEOSCoordSeq_create_r((*m_ctx).ctx, 5, 3);
     auto set_coordinate = [coords, this](int pt_num, const double&x, const double& y, const double& z)

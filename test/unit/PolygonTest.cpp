@@ -160,6 +160,35 @@ TEST(PolygonTest, bounds)
     EXPECT_FLOAT_EQ(b.maxz, 438.70996);
 }
 
+TEST(PolygonTest, bounds2d)
+{
+    BOX2D box(636539.12, 850511.81, 637589.94, 851528.5);
+    pdal::Polygon p(box);
+
+    BOX3D b = p.bounds();
+    EXPECT_FLOAT_EQ(b.minx, 636539.12);
+    EXPECT_FLOAT_EQ(b.miny, 850511.81);
+    EXPECT_FLOAT_EQ(b.minz, 0.0);
+    EXPECT_FLOAT_EQ(b.maxx, 637589.94);
+    EXPECT_FLOAT_EQ(b.maxy, 851528.5);
+    EXPECT_FLOAT_EQ(b.maxz, 0.0);
+}
+
+TEST(PolygonTest, bounds3d)
+{
+    BOX3D box(636539.12, 850511.81, 420.50977, 637589.94, 851528.5, 438.70996);
+    pdal::Polygon p(box);
+
+    BOX3D b = p.bounds();
+    EXPECT_FLOAT_EQ(b.minx, 636539.12);
+    EXPECT_FLOAT_EQ(b.miny, 850511.81);
+    EXPECT_FLOAT_EQ(b.minz, 420.50977);
+    EXPECT_FLOAT_EQ(b.maxx, 637589.94);
+    EXPECT_FLOAT_EQ(b.maxy, 851528.5);
+    EXPECT_FLOAT_EQ(b.maxz, 438.70996);
+}
+
+
 TEST(PolygonTest, streams)
 {
     pdal::Polygon p(getWKT());
