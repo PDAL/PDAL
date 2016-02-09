@@ -37,7 +37,6 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/PipelineManager.hpp>
-#include <pdal/PipelineReader.hpp>
 #include <pdal/StageFactory.hpp>
 #include <las/LasWriter.hpp>
 
