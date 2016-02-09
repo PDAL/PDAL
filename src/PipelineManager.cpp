@@ -33,9 +33,26 @@
 ****************************************************************************/
 
 #include <pdal/PipelineManager.hpp>
+#include "PipelineReader.hpp"
 
 namespace pdal
 {
+
+bool PipelineManager::readPipeline(std::istream& input)
+{
+    PipelineReader reader(*this);
+    
+    return reader.readPipeline(input);
+}
+
+
+bool PipelineManager::readPipeline(const std::string& filename)
+{
+    PipelineReader reader(*this);
+    
+    return reader.readPipeline(filename);
+}
+
 
 Stage& PipelineManager::addReader(const std::string& type)
 {

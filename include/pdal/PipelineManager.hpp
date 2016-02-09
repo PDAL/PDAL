@@ -60,6 +60,9 @@ public:
             m_progressFd(progressFd)
         {}
 
+    bool readPipeline(std::istream& input);
+    bool readPipeline(const std::string& filename);
+
     // Use these to manually add stages into the pipeline manager.
     Stage& addReader(const std::string& type);
     Stage& addFilter(const std::string& type);
