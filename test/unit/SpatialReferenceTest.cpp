@@ -35,6 +35,7 @@
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/SpatialReference.hpp>
+#include <pdal/Polygon.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <ReprojectionFilter.hpp>
 #include <MergeFilter.hpp>
@@ -396,4 +397,34 @@ TEST(SpatialReferenceTest, merge)
     Support::checkXYZ(Support::temppath("triple.las"),
         Support::datapath("las/test_epsg_4326x3.las"));
 }
+
 #endif
+
+TEST(SpatialReferenceTest, test_bounds)
+{
+
+#if GDAL_VERSION_MAJOR <=1
+    const std::string utm17_wkt = "PROJCS[\"WGS 84 / UTM zone 17N\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-81],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AUTHORITY[\"EPSG\",\"32617\"]]";
+#else
+    const std::string utm17_wkt = "PROJCS[\"WGS 84 / UTM zone 17N\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-81],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],AUTHORITY[\"EPSG\",\"32617\"]]";
+#endif
+
+    SpatialReference utm17(utm17_wkt);
+
+    std::string wgs84_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]";
+
+
+    SpatialReference wgs84(wgs84_wkt);
+    BOX2D box17(289814.15, 4320978.61, 289818.50, 4320980.59);
+    pdal::Polygon p(box17);
+    p.setSpatialReference(utm17);
+    pdal::Polygon p2 = p.transform(wgs84);
+
+    BOX3D b2 = p2.bounds();
+    EXPECT_FLOAT_EQ(b2.minx, -83.42759776);
+    EXPECT_FLOAT_EQ(b2.miny, 39.01259905);
+    EXPECT_FLOAT_EQ(b2.maxx, -83.427551);
+    EXPECT_FLOAT_EQ(b2.maxy, 39.01261687);
+
+}
+

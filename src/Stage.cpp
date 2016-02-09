@@ -37,6 +37,7 @@
 #include <pdal/Stage.hpp>
 #include <pdal/SpatialReference.hpp>
 #include <pdal/UserCallback.hpp>
+#include <pdal/PDALUtils.hpp>
 
 #include "StageRunner.hpp"
 
@@ -376,6 +377,7 @@ void Stage::setSpatialReference(MetadataNode& m,
     MetadataNode spatialNode = m.findChild(pred);
     if (spatialNode.empty())
     {
+        m.add(Utils::toMetadata(spatialRef));
         m.add("spatialreference",
            spatialRef.getWKT(SpatialReference::eHorizontalOnly, false),
            "SRS of this stage");
