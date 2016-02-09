@@ -97,7 +97,7 @@ public:
     bool valid() const;
     std::string validReason() const;
 
-    std::string wkt(double precision=8) const;
+    std::string wkt(double precision=8, bool bOutputZ=false) const;
     std::string json(double precision=8) const;
 
     BOX3D bounds() const;
