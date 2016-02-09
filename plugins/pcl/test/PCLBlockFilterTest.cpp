@@ -35,7 +35,6 @@
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/PipelineManager.hpp>
-#include <pdal/PipelineReader.hpp>
 #include <pdal/PluginManager.hpp>
 #include <pdal/StageFactory.hpp>
 
@@ -52,9 +51,7 @@ TEST(PCLBlockFilterTest, PCLBlockFilterTest_example_passthrough_xml)
     EXPECT_TRUE(filter.get());
 
     PipelineManager pipeline;
-    PipelineReader pipelineReader(pipeline);
-    pipelineReader.readPipeline(
-        Support::datapath("filters/pcl/passthrough.xml"));
+    pipeline.readPipeline(Support::datapath("filters/pcl/passthrough.xml"));
     pipeline.execute();
 
     PointViewSet viewSet = pipeline.views();

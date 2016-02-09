@@ -38,7 +38,6 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/PipelineManager.hpp>
-#include <pdal/PipelineReader.hpp>
 #include <pdal/StageFactory.hpp>
 #include <las/LasWriter.hpp>
 
@@ -128,8 +127,7 @@ TEST(NitfReaderTest, test_chipper)
     PointTable table;
 
     PipelineManager mgr;
-    PipelineReader specReader(mgr);
-    specReader.readPipeline(Support::configuredpath("nitf/chipper.xml"));
+    mgr.readPipeline(Support::configuredpath("nitf/chipper.xml"));
     //ABELL - need faux writer or something.
     /**
     mgr.execute();

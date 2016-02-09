@@ -35,8 +35,6 @@
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/Options.hpp>
-#include <pdal/PipelineReader.hpp>
-#include <pdal/PipelineManager.hpp>
 #include <pdal/PointView.hpp>
 
 #include <Ilvis2Reader.hpp>

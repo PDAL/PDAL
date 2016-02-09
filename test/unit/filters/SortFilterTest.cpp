@@ -38,7 +38,6 @@
 
 #include <SortFilter.hpp>
 #include <pdal/PipelineManager.hpp>
-#include <pdal/PipelineReader.hpp>
 #include <pdal/StageWrapper.hpp>
 #include "Support.hpp"
 
@@ -93,9 +92,8 @@ TEST(SortFilterTest, simple)
 TEST(SortFilterTest, pipeline)
 {
     PipelineManager mgr;
-    PipelineReader reader(mgr);
 
-    reader.readPipeline(Support::configuredpath("filters/sort.xml"));
+    mgr.readPipeline(Support::configuredpath("filters/sort.xml"));
     mgr.execute();
 
     PointViewSet viewSet = mgr.views();

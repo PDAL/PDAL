@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/PipelineReader.hpp>
+#include "PipelineReader.hpp"
 
 #include <pdal/Filter.hpp>
 #include <pdal/PipelineManager.hpp>
@@ -127,23 +127,6 @@ private:
     Cardinality m_cardinality; // num child stages allowed
     int m_numStages;
 };
-
-
-PipelineReader::PipelineReader(PipelineManager& manager, bool isDebug,
-        uint32_t verboseLevel) :
-    m_manager(manager) , m_isDebug(isDebug) , m_verboseLevel(verboseLevel)
-{
-    if (m_isDebug)
-    {
-        Option opt("debug", true);
-        m_baseOptions.add(opt);
-    }
-    if (m_verboseLevel)
-    {
-        Option opt("verbose", m_verboseLevel);
-        m_baseOptions.add(opt);
-    }
-}
 
 
 Option PipelineReader::parseElement_Option(const ptree& tree)
@@ -427,6 +410,8 @@ bool PipelineReader::parseElement_Pipeline(const ptree& tree)
 {
     Stage *stage = NULL;
     Stage *writer = NULL;
+
+    Options o(m_baseOptions);
 
     map_t attrs;
     collect_attributes(attrs, tree);

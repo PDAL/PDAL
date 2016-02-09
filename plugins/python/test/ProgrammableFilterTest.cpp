@@ -34,7 +34,6 @@
 
 #include <pdal/pdal_test_main.hpp>
 
-#include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/StageFactory.hpp>
 #include <stats/StatsFilter.hpp>
@@ -121,9 +120,8 @@ TEST_F(ProgrammableFilterTest, ProgrammableFilterTest_test1)
 TEST_F(ProgrammableFilterTest, pipeline)
 {
     PipelineManager manager;
-    PipelineReader reader(manager);
 
-    reader.readPipeline(
+    manager.readPipeline(
         Support::configuredpath("plang/programmable-update-y-dims.xml"));
     manager.execute();
     PointViewSet viewSet = manager.views();
