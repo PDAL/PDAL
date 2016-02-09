@@ -266,6 +266,12 @@ TEST(BoundsTest, test_wkt)
     std::string out2 = "POLYHEDRON Z ( ((1.1 2.2 3.3, 101.1 2.2 3.3, 101.1 102.2 3.3, 1.1 102.2 3.3, 1.1 2.2 3.3, )), ((1.1 2.2 3.3, 101.1 2.2 3.3, 101.1 2.2 103.3, 1.1 2.2 103.3, 1.1 2.2 3.3, )), ((101.1 2.2 3.3, 101.1 102.2 3.3, 101.1 102.2 103.3, 101.1 2.2 103.3, 101.1 2.2 3.3, )), ((101.1 102.2 3.3, 1.1 102.2 3.3, 1.1 102.2 103.3, 101.1 102.2 103.3, 101.1 102.2 3.3, )), ((1.1 102.2 3.3, 1.1 2.2 3.3, 1.1 2.2 103.3, 1.1 102.2 103.3, 1.1 102.2 3.3, )), ((1.1 2.2 103.3, 101.1 2.2 103.3, 101.1 102.2 103.3, 1.1 102.2 103.3, 1.1 2.2 103.3, )) )";
     EXPECT_EQ(b2.toWKT(1), out2);
 }
+TEST(BoundsTest, test_json)
+{
+    BOX2D b(1.1,2.2,101.1,102.2);
+    std::string out = "{\"bbox\":[1.1, 2.2, 101.1,102.2]}";
+    EXPECT_EQ(b.toGeoJSON(1), out);
+}
 
 TEST(BoundsTest, test_2d_input)
 {
@@ -285,7 +291,7 @@ TEST(BoundsTest, test_precisionloss)
     // when you do something like:
     //   options.getValueOrDefault<BOX3D>("bounds", BOX3D());
     std::ostringstream oss;
-    oss << b1; 
+    oss << b1;
 
     // convert it back
     std::istringstream iss(oss.str());

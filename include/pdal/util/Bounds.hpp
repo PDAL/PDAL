@@ -172,6 +172,19 @@ public:
         return oss.str();
     }
 
+    std::string toGeoJSON(uint32_t precision = 8) const
+    {
+        if (empty())
+            return std::string();
+
+        std::stringstream oss;
+
+        oss.precision(precision);
+        oss.setf(std::ios_base::fixed, std::ios_base::floatfield);
+        oss << "{\"bbox\":[" << minx << ", " << miny << ", " << maxx <<  "," << maxy << "]}";
+        return oss.str();
+    }
+
     /// Returns a staticly-allocated Bounds extent that represents infinity
     static const BOX2D& getDefaultSpatialExtent();
 };

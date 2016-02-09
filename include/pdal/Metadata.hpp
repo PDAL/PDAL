@@ -39,7 +39,6 @@
 #include <pdal/util/Bounds.hpp>
 #include <pdal/util/Utils.hpp>
 #include <pdal/util/Uuid.hpp>
-#include <pdal/SpatialReference.hpp>
 
 #include <map>
 #include <memory>
@@ -48,6 +47,8 @@
 
 namespace pdal
 {
+
+class SpatialReference;
 
 namespace MetadataType
 {
@@ -66,7 +67,7 @@ typedef std::vector<MetadataNodeImplPtr> MetadataImplList;
 typedef std::map<std::string, MetadataImplList> MetadataSubnodes;
 typedef std::vector<MetadataNode> MetadataNodeList;
 
-class MetadataNodeImpl
+class PDAL_DLL MetadataNodeImpl
 {
     friend class MetadataNode;
 
@@ -240,11 +241,7 @@ inline void MetadataNodeImpl::setValue<double>(const double& d)
 }
 
 template <>
-inline void MetadataNodeImpl::setValue(const SpatialReference& ref)
-{
-    m_type = "spatialreference";
-    m_value = Utils::toString(ref);
-}
+void PDAL_DLL MetadataNodeImpl::setValue(const SpatialReference& ref);
 
 template <>
 inline void MetadataNodeImpl::setValue(const BOX3D& b)
@@ -676,7 +673,7 @@ public:
     MetadataNode getNode() const
         { return m_root; }
 
-    inline static std::string inferType(const std::string& val);
+    static std::string PDAL_DLL inferType(const std::string& val);
 private:
     MetadataNode m_root;
     MetadataNode m_private;
@@ -684,62 +681,6 @@ private:
 };
 typedef std::shared_ptr<Metadata> MetadataPtr;
 
-inline std::string Metadata::inferType(const std::string& val)
-{
-    size_t pos;
-
-    long l = 0;
-    try
-    {
-        pos = 0;
-        l = std::stol(val, &pos);
-    }
-    catch (std::invalid_argument)
-    {}
-    if (pos == val.length())
-        return (l < 0 ? "nonNegativeInteger" : "integer");
-
-    try
-    {
-        pos = 0;
-        std::stod(val, &pos);
-    }
-    catch(std::invalid_argument)
-    {}
-
-    if (pos == val.length())
-        return "double";
-
-    BOX2D b2d;
-    std::istringstream iss1(val);
-    iss1 >> b2d;
-    if (iss1.good())
-        return "bounds";
-
-    BOX3D b3d;
-    std::istringstream iss2(val);
-    iss2 >> b3d;
-    if (iss2.good())
-        return "bounds";
-
-    if (val == "true" || val == "false")
-        return "boolean";
-
-    try
-    {
-        SpatialReference s(val);
-        return "spatialreference";
-    }
-    catch (pdal_error&)
-    {
-    }
-
-    Uuid uuid(val);
-    if (!uuid.isNull())
-        return "uuid";
-
-    return "string";
-}
 
 } // namespace pdal
 
