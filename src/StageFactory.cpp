@@ -111,6 +111,7 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
     drivers["sid"] = "readers.mrsid";
     drivers["tindex"] = "readers.tindex";
     drivers["txt"] = "readers.ilvis2";
+    drivers["h5"] = "readers.icebridge";
 
     if (ext == "")
         return "";

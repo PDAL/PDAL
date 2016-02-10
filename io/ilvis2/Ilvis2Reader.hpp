@@ -108,6 +108,7 @@ private:
     virtual void processOptions(const Options& options);
     virtual void initialize(PointTableRef table);
     virtual void ready(PointTableRef table);
+    virtual void done(PointTableRef table);
     virtual bool processOne(PointRef& point);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
 
