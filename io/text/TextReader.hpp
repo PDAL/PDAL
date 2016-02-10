@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Hobu Inc., hobu.inc@gmail.com
+* Copyright (c) 2016, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*     * Neither the name of Hobu, Inc. nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -34,57 +34,70 @@
 
 #pragma once
 
-#include <algorithm>
-#include <map>
-#include <vector>
+#include <istream>
+
+#include <pdal/Reader.hpp>
+
+extern "C" int32_t TextReader_ExitFunc();
+extern "C" PF_ExitFunc TextReader_InitPlugin();
 
 namespace pdal
 {
 
-namespace Utils
+class PDAL_DLL TextReader : public Reader
 {
+public:
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
 
-template<typename CONTAINER, typename VALUE>
-bool contains(const CONTAINER& cont, const VALUE& val)
-{
-    return std::find(cont.begin(), cont.end(), val) != cont.end();
-}
+    TextReader() : m_separator(' '), m_istream(NULL)
+    {}
 
+private:
+    /**
+      Initialize the reader by opening the file and reading the header line.
+      Closes the file on completion.
 
-template<typename KEY, typename VALUE>
-bool contains(const std::map<KEY, VALUE>& c, const KEY& v)
-{
-    return c.find(v) != c.end();
-}
+      \param table  Point table being initialized.
+    */
+    virtual void initialize(PointTableRef table);
 
+    /**
+      Add dimensions found in the header line to the layout.
 
-template<typename CONTAINER, typename VALUE>
-void remove(CONTAINER& v, const VALUE& val)
-{
-    v.erase(std::remove(v.begin(), v.end(), val), v.end());
-}
+      \param layout  Layout to which the dimenions are added.
+    */
+    virtual void addDimensions(PointLayoutPtr layout);
 
+    /**
+      Reopen the file in preparation for reading.
 
-template<typename CONTAINER, typename PREDICATE>
-void remove_if(CONTAINER& v, PREDICATE p)
-{
-    v.erase(std::remove_if(v.begin(), v.end(), p), v.end());
-}
-/**
-template<typename TYPE, typename VALUE>
-void remove(std::vector<TYPE>& v, const VALUE& val)
-{
-    v.erase(std::remove(v.begin(), v.end(), val), v.end());
-}
+      \param table  Point table to make ready.
+    */
+    virtual void ready(PointTableRef table);
 
+    /**
+      Read up to numPts points into the \ref view.
 
-template<typename TYPE, typename PREDICATE>
-void remove_if(std::vector<TYPE>& v, PREDICATE p)
-{
-    v.erase(std::remove_if(v.begin(), v.end(), p), v.end());
-}
-**/
+      \param view  PointView in which to insert point data.
+      \param numPts  Maximum number of points to read.
+      \return  Number of points read.
+    */
+    virtual point_count_t read(const PointViewPtr view, point_count_t numPts);
 
-} // namespace Utils
+    /**
+      Close input file.
+
+      \param table  PointTable we're done with.
+    */
+    virtual void done(PointTableRef table);
+
+private:
+    char m_separator;
+    std::istream *m_istream;
+    StringList m_dimNames;
+    Dimension::IdList m_dims;
+};
+
 } // namespace pdal
-
