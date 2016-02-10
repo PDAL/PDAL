@@ -2,14 +2,13 @@
 # Text driver CMake configuration
 #
 
-#
-# Text Writer
-#
 set(srcs
+    TextReader.cpp
     TextWriter.cpp
 )
 
 set(incs
+    TextReader.hpp
     TextWriter.hpp
 )
 
