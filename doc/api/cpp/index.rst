@@ -16,6 +16,7 @@ C++ API
    options
    pointview
    pointtable
+   programargs
    reader
    stage
    writer
