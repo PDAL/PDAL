@@ -111,8 +111,8 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
     drivers["sqlite"] = "readers.sqlite";
     drivers["sid"] = "readers.mrsid";
     drivers["tindex"] = "readers.tindex";
-//ABELL - seems wrong?
-//    drivers["txt"] = "readers.ilvis2";
+    drivers["txt"] = "readers.text";
+    drivers["h5"] = "readers.icebridge";
 
     if (ext == "")
         return "";
