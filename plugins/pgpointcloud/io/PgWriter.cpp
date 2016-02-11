@@ -303,7 +303,31 @@ uint32_t PgWriter::SetupSchema(uint32_t srid)
     }
 
     if (schema_count == 0)
-        pcid = 1;
+    {
+        // Try using the sequence
+        // pgpointcloud with the sequence is not yet
+        // released. See https://github.com/PDAL/PDAL/issues/1101 for
+        // SQL to create this sequence on the pointcloud_formats
+        // table.
+        char* have_seq = pg_query_once(m_session,
+                "select count(*) from pg_class where relname = 'pointcloud_formats_pcid_sq'");
+        int seq_count = atoi(have_seq);
+        if (seq_count)
+        {
+            // We have the sequence, use its nextval
+            char *pcid_str = pg_query_once(m_session,
+                    "SELECT nextval('pointcloud_formats_pcid_sq') FROM pointcloud_formats");
+            if (!pcid_str)
+                throw pdal_error("Unable to select nextval from pointcloud_formats_pcid_seq");
+            pcid = atoi(pcid_str);
+        }
+        else
+        {
+            // We don't have the sequence installed, all we can do is
+            // set to 1 and increment
+            pcid = 1;
+        }
+    }
     else
     {
         char *pcid_str = pg_query_once(m_session,
