@@ -76,7 +76,7 @@ std::string HeightFilter::getName() const
 
 void HeightFilter::addDimensions(PointLayoutPtr layout)
 {
-    m_heightDim = layout->registerOrAssignDim("Height", Dimension::Type::Double);
+    layout->registerDim(pdal::Dimension::Id::HeightAboveGround);
 }
 
 void HeightFilter::prepared(PointTableRef table)
@@ -169,11 +169,11 @@ void HeightFilter::filter(PointView& view)
         double ground_Z = view.getFieldAs<double>(Dimension::Id::Z, ground->indices[neighbors[0]]);
         double height = nonground_Z - ground_Z;
 
-        view.setField(m_heightDim, nonground[i], height);
+        view.setField(pdal::Dimension::Id::HeightAboveGround, nonground[i], height);
     }
 
     for (auto const& ground_idx : ground->indices)
-        view.setField(m_heightDim, ground_idx, 0.0);
+        view.setField(pdal::Dimension::Id::HeightAboveGround, ground_idx, 0.0);
 }
 
 
