@@ -286,11 +286,17 @@ void InfoKernel::setup(const std::string& filename)
     }
     if (m_boundary)
     {
+#ifndef PDAL_HAVE_HEXER
+        throw pdal_error("Unable to compute boundary -- "
+                "http://github.com/hobu/hexer is not linked. "
+                "See the \"boundary\" member in \"stats\" for a coarse bounding box");
+#else
         m_hexbinStage = &(m_manager->addFilter("filters.hexbin"));
         m_hexbinStage->setOptions(options);
         m_hexbinStage->setInput(*stage);
         stage = m_hexbinStage;
         Options readerOptions;
+#endif
     }
 }
 
@@ -352,14 +358,17 @@ void InfoKernel::dump(MetadataNode& root)
         assert(viewSet.size() == 1);
         root.add(dumpPoints(*viewSet.begin()).clone("points"));
     }
+
     if (m_queryPoint.size())
     {
         PointViewSet viewSet = m_manager->views();
         assert(viewSet.size() == 1);
         root.add(dumpQuery(*viewSet.begin()));
     }
+
     if (m_showMetadata)
         root.add(m_reader->getMetadata().clone("metadata"));
+
     if (m_boundary)
     {
         PointViewSet viewSet = m_manager->views();
