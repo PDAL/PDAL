@@ -61,7 +61,6 @@ public:
     std::string getName() const;
 
 private:
-    Dimension::Id::Enum m_heightDim;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void prepared(PointTableRef table);
