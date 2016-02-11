@@ -1638,7 +1638,7 @@ void DerivativeWriter::write(const PointViewPtr data)
     bool* prevSetCols = new bool[m_GRID_SIZE_X];
     bool* curSetCols = new bool[m_GRID_SIZE_X];
 
-    for (uint32_t y = 1; y < m_GRID_SIZE_Y; ++y)
+    for (uint32_t y = 1; y < m_GRID_SIZE_Y-1; ++y)
     {
         CleanRasterScanLine(tDemData, tDemData.row(1), m_GRID_SIZE_X, y,
                             prevSetCols, curSetCols);
