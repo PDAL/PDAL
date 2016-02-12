@@ -226,6 +226,13 @@ public:
     GDALError::Enum read(double x, double y, std::vector<double>& data);
     std::vector<pdal::Dimension::Type::Enum> getPDALDimensionTypes() const
        { return m_types; }
+    /**
+      Read a raster band (layer) into a vector.
+
+      \param band  Vector into which data will be read.  The vector will
+        be resized appropriately to hold the data.
+      \param nBand  Band number to read.  Band numbers start at 1.
+    */
     GDALError::Enum readBand(std::vector<uint8_t>& band, int nBand);
 
     void pixelToCoord(int column, int row, std::array<double, 2>& output) const;
@@ -241,12 +248,7 @@ public:
     int m_raster_x_size;
     int m_raster_y_size;
 
-    int m_block_x;
-    int m_block_y;
-
     int m_band_count;
-    std::vector<bool> m_has_no_data;
-    std::vector<double> m_no_data;
     mutable std::vector<pdal::Dimension::Type::Enum> m_types;
     std::vector<std::array<double, 2>> m_block_sizes;
 
