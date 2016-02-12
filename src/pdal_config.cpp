@@ -68,10 +68,6 @@
 
 #include <geos_c.h>
 
-#ifdef PDAL_HAVE_HEXER
-#include <hexer/hexer.hpp>
-#endif
-
 #ifdef PDAL_HAVE_LIBXML2
 #include <libxml/xmlversion.h>
 #endif
@@ -176,12 +172,6 @@ std::string getPDALDebugInformation()
     os << "GDAL (" << GDALVersionInfo("RELEASE_NAME") << ") - " <<
         "http://www.gdal.org" << std::endl;
 
-#ifdef PDAL_HAVE_HEXER
-    os << "Hexer (" << HEXER_VERSION_MAJOR << '.' << HEXER_VERSION_MINOR <<
-        '.' << HEXER_VERSION_PATCH << ") - " <<
-        "http://github.com/hobu/hexer" << std::endl;
-#endif
-
 #ifdef PDAL_HAVE_LASZIP
     os << "LASzip (" << LASZIP_VERSION_MAJOR << "." << LASZIP_VERSION_MINOR <<
         "." << LASZIP_VERSION_REVISION << ") - " <<
@@ -196,36 +186,6 @@ std::string getPDALDebugInformation()
 #ifdef PDAL_HAVE_LIBGEOTIFF
     os << "libgeotiff (" << LIBGEOTIFF_VERSION << ") - " <<
         "http://trac.osgeo.org/geotiff" << std::endl;
-#endif
-
-#ifdef PDAL_HAVE_MRSID
-    os << "MrSID - " << "http://www.lizardtech.com" << std::endl;
-#endif
-
-#ifdef PDAL_HAVE_NITRO
-    os << "Nitro - " << "http://github.com/hobu/nitro" << std::endl;
-#endif
-
-#ifdef PDAL_HAVE_ORACLE
-    os << "Oracle - " << "http://www.oracle.com" << std::endl;
-#endif
-
-#ifdef PDAL_HAVE_P2G
-    os << "Points2grid = " <<
-        "http://github.com/CRREL/points2grid" << std::endl;
-#endif
-
-#ifdef PDAL_HAVE_PYTHON
-    os << "Python - " << "http://www.python.org" << std::endl;
-#endif
-
-#ifdef PDAL_HAVE_SQLITE
-    os << "SQLite - " << "http://www.sqlite.org" << std::endl;
-#endif
-
-#ifdef PDAL_HAVE_POSTGRESQL
-    os << "PostgreSQL - " <<
-        "http://github.com/pramsey/pointcloud" << std::endl;
 #endif
 
     return os.str();
