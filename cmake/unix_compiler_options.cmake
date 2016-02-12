@@ -1,4 +1,4 @@
-set(PDAL_COMMON_CXX_FLAGS "-Wextra -Wall -Wno-unused-parameter -Wno-unused-variable -Wpointer-arith -Wcast-align -Wcast-qual -Wredundant-decls -Wno-long-long -Wno-unknown-pragmas -isystem /usr/local/include"
+set(PDAL_COMMON_CXX_FLAGS "-Werror -Wextra -Wall -Wno-unused-parameter -Wno-unused-variable -Wpointer-arith -Wcast-align -Wcast-qual -Wredundant-decls -Wno-long-long -Wno-unknown-pragmas -isystem /usr/local/include"
 )
 
 if (${CMAKE_CXX_COMPILER_ID} MATCHES "GNU")

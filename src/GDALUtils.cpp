@@ -211,7 +211,6 @@ int BandReader::readFullBlock(int x, int y, uint8_t *data)
 {
     if (GDALReadBlock(m_band, x, y, data) != CPLE_None)
         throw CantReadBlock();
-    GDALReadBlock(m_band, x, y, data);
     return m_xBlockSize * m_yBlockSize * m_eltSize;
 }
 
