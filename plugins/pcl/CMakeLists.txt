@@ -23,6 +23,13 @@
 
 find_package(PCL QUIET 1.7 REQUIRED)
 
+#
+# PCL has compiler issues.
+#
+if (NOT WIN32)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c99-extensions")
+endif()
+
 set_package_properties(PCL PROPERTIES DESCRIPTION "Point Cloud Library"
     URL "http://pointclouds.org" TYPE RECOMMENDED
     PURPOSE "Enables PCD reader/writer, PCLVisualizer, PCLBlock filter, and ground, pcl, smooth, and view kernels")
