@@ -527,7 +527,8 @@ int Utils::screenWidth()
     return 80;
 #else
     struct winsize ws;
-    ioctl(0, TIOCGWINSZ, &ws);
+    if (ioctl(0, TIOCGWINSZ, &ws))
+        return 80;
 
     return ws.ws_col;
 #endif

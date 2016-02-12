@@ -40,24 +40,6 @@ public:
 };
 
 
-namespace
-{
-namespace PosType
-{
-
-/**
-  Positional type.  Either None, Optional or Required.
-*/
-enum Enum
-{
-    None,       ///< Not positional
-    Required,   ///< Required positional
-    Optional    ///< Optional positional
-};
-
-} // namespace PosType
-} // unnamed namespace
-
 /**
    Description of an argument that can be parsed by \class ProgramArgs.
 
@@ -67,6 +49,17 @@ enum Enum
 */
 class Arg
 {
+public:
+/**
+  Positional type.  Either None, Optional or Required.
+*/
+enum class PosType
+{
+    None,       ///< Not positional
+    Required,   ///< Required positional
+    Optional    ///< Optional positional
+};
+
 protected:
     /**
       Constructor.
@@ -175,7 +168,7 @@ public:
       Returns the positional type of the argument.
       \note  Not intended to be called from user code.
     */
-    PosType::Enum positional() const
+    PosType positional() const
         { return m_positional; }
 
     /**
@@ -227,7 +220,7 @@ protected:
     std::string m_rawVal;
     bool m_set;
     bool m_hidden;
-    PosType::Enum m_positional;
+    PosType m_positional;
 };
 
 /**
@@ -538,7 +531,7 @@ public:
             {
                 break;
             }
-        if (cnt == 0 && m_positional == PosType::Required)
+        if (cnt == 0 && m_positional == Arg::PosType::Required)
         {
             std::ostringstream oss;
 
@@ -1065,9 +1058,9 @@ private:
         for (auto ai = m_args.begin(); ai != m_args.end(); ++ai)
         {
             Arg *arg = ai->get();
-            if (arg->positional() == PosType::Optional)
+            if (arg->positional() == Arg::PosType::Optional)
                 opt = true;
-            if (opt && (arg->positional() == PosType::Required))
+            if (opt && (arg->positional() == Arg::PosType::Required))
                 throw arg_error("Found required positional argument after "
                     "optional positional argument.");
         }
