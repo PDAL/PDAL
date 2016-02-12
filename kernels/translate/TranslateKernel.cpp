@@ -81,9 +81,9 @@ void TranslateKernel::addSwitches(ProgramArgs& args)
 {
     args.add("input,i", "Input filename", m_inputFile).setPositional();
     args.add("output,o", "Output filename", m_outputFile).setPositional();
+    args.add("filter,f", "Filter type", m_filterType).setOptionalPositional();
     args.add("pipeline,p", "Pipeline output", m_pipelineOutput);
     args.add("reader,r", "Reader type", m_readerType);
-    args.add("filter,f", "Filter type", m_filterType);
     args.add("writer,w", "Writer type", m_writerType);
 }
 
