@@ -40,6 +40,7 @@ namespace pdal
 {
 
 class PDAL_DLL BOX3D;
+class PDAL_DLL MetadataNode;
 
 /// A SpatialReference defines a model of the earth that is used to describe
 /// the location of points.
@@ -93,8 +94,6 @@ public:
     /// available.
     std::string getWKT(WKTModeFlag mode_flag = eHorizontalOnly) const;
     std::string getWKT(WKTModeFlag mode_flag, bool pretty) const;
-    std::string getRawWKT() const
-        { return m_wkt; }
 
     /// Sets the SRS using GDAL's OGC WKT. If GDAL is not linked, this
     /// operation has no effect.
@@ -116,7 +115,9 @@ public:
     std::string getProj4() const;
 
     std::string getHorizontal() const;
+    std::string getHorizontalUnits() const;
     std::string getVertical() const;
+    std::string getVerticalUnits() const;
 
     /// Sets the Proj.4 string describing the Spatial Reference System.
     /// If GDAL is linked, it uses GDAL's operations and methods to determine
@@ -127,9 +128,12 @@ public:
     void setProj4(std::string const& v);
 
     void dump() const;
+    MetadataNode toMetadata() const;
 
     bool isGeographic() const;
+    bool isGeocentric() const;
     int computeUTMZone(const BOX3D& box) const;
+
     const std::string& getName() const;
     static int calculateZone(double lon, double lat);
 

@@ -4,8 +4,8 @@
 Python installation
 ********************************************************************
 
-Since PDAL 1.0.0 there is a Python extension to execute pipelines
-and read its output as a numpy array.
+Beginning in PDAL 1.0.0, a Python extension to execute pipelines
+and read its output as a numpy array is available.
 
 To install it need to compile and install :ref:`PDAL <building>` and
 then install the PDAL Python extension

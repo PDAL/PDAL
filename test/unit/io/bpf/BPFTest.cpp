@@ -37,8 +37,6 @@
 #include <string.h>
 
 #include <pdal/Filter.hpp>
-#include <pdal/PipelineReader.hpp>
-#include <pdal/PipelineManager.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/util/Utils.hpp>
 #include <pdal/util/FileUtils.hpp>

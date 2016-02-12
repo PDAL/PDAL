@@ -38,6 +38,20 @@
 #include <pdal/Options.hpp>
 #include <pdal/StageFactory.hpp>
 
+#ifndef PDAL_HAVE_LIBXML2
+namespace pdal
+{
+  class Ilvis2MetadataReader
+  {
+  public:
+      inline void readMetadataFile(std::string filename, pdal::MetadataNode* m) {};
+  };
+}
+#else
+    #include "../../io/ilvis2/Ilvis2MetadataReader.hpp"
+#endif
+
+
 #include "Hdf5Handler.hpp"
 
 #include <vector>
@@ -71,9 +85,16 @@ private:
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
+    virtual void processOptions(const Options& options);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
     virtual void done(PointTableRef table);
     virtual bool eof();
+    virtual void initialize(PointTableRef table);
+
+    double convertLongitude(double longitude);
+
+    std::string m_metadataFile;
+    Ilvis2MetadataReader m_mdReader;
 
     IcebridgeReader& operator=(const IcebridgeReader&);   // Not implemented.
     IcebridgeReader(const IcebridgeReader&);              // Not implemented.

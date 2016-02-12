@@ -1,4 +1,3 @@
-#include <pdal/PipelineReader.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineWriter.hpp>
 #include <pdal/util/FileUtils.hpp>

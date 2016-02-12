@@ -35,6 +35,8 @@
 #pragma once
 
 #include <algorithm>
+#include <map>
+#include <vector>
 
 namespace pdal
 {
@@ -56,6 +58,19 @@ bool contains(const std::map<KEY, VALUE>& c, const KEY& v)
 }
 
 
+template<typename CONTAINER, typename VALUE>
+void remove(CONTAINER& v, const VALUE& val)
+{
+    v.erase(std::remove(v.begin(), v.end(), val), v.end());
+}
+
+
+template<typename CONTAINER, typename PREDICATE>
+void remove_if(CONTAINER& v, PREDICATE p)
+{
+    v.erase(std::remove_if(v.begin(), v.end(), p), v.end());
+}
+/**
 template<typename TYPE, typename VALUE>
 void remove(std::vector<TYPE>& v, const VALUE& val)
 {
@@ -68,6 +83,7 @@ void remove_if(std::vector<TYPE>& v, PREDICATE p)
 {
     v.erase(std::remove_if(v.begin(), v.end(), p), v.end());
 }
+**/
 
 } // namespace Utils
 } // namespace pdal

@@ -37,6 +37,7 @@
 #include <set>
 #include <vector>
 
+#include "pdal/SpatialReference.hpp"
 #include "pdal/Dimension.hpp"
 #include "pdal/PointContainer.hpp"
 #include "pdal/PointLayout.hpp"
@@ -176,7 +177,7 @@ protected:
 
 public:
     /// Called when a new point should be added.  Probably a no-op for
-    /// streaming. 
+    /// streaming.
     virtual PointId addPoint()
     { return 0; }
     /// Called when execute() is started.  Typically used to set buffer size

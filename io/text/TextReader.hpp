@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2015, Howard Butler (howard@hobu.co)
+* Copyright (c) 2016, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
+*     * Neither the name of Hobu, Inc. nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -32,91 +32,72 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/PointView.hpp>
+#pragma once
+
+#include <istream>
+
 #include <pdal/Reader.hpp>
-#include <pdal/util/IStream.hpp>
-#include <map>
 
-#ifndef PDAL_HAVE_LIBXML2
-namespace pdal
-{
-  class Ilvis2MetadataReader
-  {
-  public:
-      inline void readMetadataFile(std::string filename, pdal::MetadataNode* m) {};
-  };
-}
-#else
-    #include "Ilvis2MetadataReader.hpp"
-#endif
-
-extern "C" int32_t Ilvis2Reader_ExitFunc();
-extern "C" PF_ExitFunc Ilvis2Reader_InitPlugin();
+extern "C" int32_t TextReader_ExitFunc();
+extern "C" PF_ExitFunc TextReader_InitPlugin();
 
 namespace pdal
 {
-class PDAL_DLL Ilvis2Reader : public pdal::Reader
+
+class PDAL_DLL TextReader : public Reader
 {
 public:
-    enum IlvisMappingType
-    {
-      INVALID,
-      LOW,
-      HIGH,
-      ALL
-    };
-
-    class MappingParser
-    {
-      std::map<std::string, IlvisMappingType> mappingMap;
-
-      public:
-        MappingParser()
-        {
-            mappingMap["LOW"] = LOW;
-            mappingMap["HIGH"] = HIGH;
-            mappingMap["ALL"] = ALL;
-        }
-
-        IlvisMappingType parseMapping(const std::string &value)
-        { return mappingMap[value]; }
-    };
-
-    Ilvis2Reader() : Reader(), m_mapping(ALL)
-        {}
-
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
-    static Dimension::IdList getDefaultDimensions();
-
+    TextReader() : m_separator(' '), m_istream(NULL)
+    {}
 
 private:
-    std::ifstream m_stream;
-    MappingParser parser;
-    IlvisMappingType m_mapping;
-    StringList m_fields;
-    size_t m_lineNum;
-    bool m_resample;
-    PointLayoutPtr m_layout;
-    std::string m_metadataFile;
-    Ilvis2MetadataReader m_mdReader;
+    /**
+      Initialize the reader by opening the file and reading the header line.
+      Closes the file on completion.
 
-    virtual void addDimensions(PointLayoutPtr layout);
-    virtual void processOptions(const Options& options);
+      \param table  Point table being initialized.
+    */
     virtual void initialize(PointTableRef table);
+
+    /**
+      Add dimensions found in the header line to the layout.
+
+      \param layout  Layout to which the dimenions are added.
+    */
+    virtual void addDimensions(PointLayoutPtr layout);
+
+    /**
+      Reopen the file in preparation for reading.
+
+      \param table  Point table to make ready.
+    */
     virtual void ready(PointTableRef table);
+
+    /**
+      Read up to numPts points into the \ref view.
+
+      \param view  PointView in which to insert point data.
+      \param numPts  Maximum number of points to read.
+      \return  Number of points read.
+    */
+    virtual point_count_t read(const PointViewPtr view, point_count_t numPts);
+
+    /**
+      Close input file.
+
+      \param table  PointTable we're done with.
+    */
     virtual void done(PointTableRef table);
-    virtual bool processOne(PointRef& point);
-    virtual point_count_t read(PointViewPtr view, point_count_t count);
 
-    virtual void readPoint(PointRef& point, StringList s, std::string pointMap);
-
-    double convertLongitude(double longitude);
-
+private:
+    char m_separator;
+    std::istream *m_istream;
+    StringList m_dimNames;
+    Dimension::IdList m_dims;
 };
-
 
 } // namespace pdal

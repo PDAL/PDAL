@@ -49,12 +49,13 @@ class PipelineManager;
 
 class PDAL_DLL PipelineReader
 {
+    friend class PipelineManager;
+
 private:
     class StageParserContext;
 
-public:
-    PipelineReader(PipelineManager&, bool debug=false,
-        uint32_t verbose = 0);
+    PipelineReader(PipelineManager& manager) : m_manager(manager)
+    {}
 
     // Use this to fill in a pipeline manager with an XML file that
     // contains a <Writer> as the last pipeline stage.
@@ -64,7 +65,6 @@ public:
     bool readPipeline(const std::string& filename);
     bool readPipeline(std::istream& input);
 
-private:
     typedef std::map<std::string, std::string> map_t;
 
     bool parseElement_Pipeline(const boost::property_tree::ptree&);
@@ -79,10 +79,7 @@ private:
     void parse_attributes(map_t& attrs,
         const boost::property_tree::ptree& tree);
 
-private:
     PipelineManager& m_manager;
-    bool m_isDebug;
-    uint32_t m_verboseLevel;
     Options m_baseOptions;
     std::string m_inputXmlFile;
 

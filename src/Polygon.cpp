@@ -171,6 +171,52 @@ Polygon::Polygon(OGRGeometryH g, const SpatialReference& srs, ErrorHandlerPtr ct
 
 }
 
+Polygon::Polygon(const BOX2D& box)
+: m_ctx(pdal::GlobalEnvironment::get().geos())
+{
+    BOX3D box3(box.minx, box.miny, 0.0,
+               box.maxx, box.maxy, 0.0);
+    initializeFromBounds(box3);
+}
+
+Polygon::Polygon(const BOX3D& box)
+: m_ctx(pdal::GlobalEnvironment::get().geos())
+{
+    initializeFromBounds(box);
+}
+
+void Polygon::initializeFromBounds(const BOX3D& box)
+{
+    GEOSCoordSequence* coords = GEOSCoordSeq_create_r((*m_ctx).ctx, 5, 3);
+    auto set_coordinate = [coords, this](int pt_num, const double&x, const double& y, const double& z)
+    {
+        if (!GEOSCoordSeq_setX_r((*m_ctx).ctx, coords, pt_num, x))
+            throw pdal_error("unable to set x for coordinate sequence");
+        if (!GEOSCoordSeq_setY_r((*m_ctx).ctx, coords, pt_num, y))
+            throw pdal_error("unable to set y for coordinate sequence");
+        if (!GEOSCoordSeq_setZ_r((*m_ctx).ctx, coords, pt_num, z))
+            throw pdal_error("unable to set z for coordinate sequence");
+
+    };
+
+    set_coordinate(0, box.minx, box.miny, box.minz);
+    set_coordinate(1, box.minx, box.maxy, box.minz);
+    set_coordinate(2, box.maxx, box.maxy, box.maxz);
+    set_coordinate(3, box.maxx, box.miny, box.maxz);
+    set_coordinate(4, box.minx, box.miny, box.minz);
+
+
+    GEOSGeometry* ring = GEOSGeom_createLinearRing_r((*m_ctx).ctx, coords);
+    if (!ring)
+        throw pdal_error("unable to create linear ring from BOX2D");
+
+
+    m_geom = GEOSGeom_createPolygon_r((*m_ctx).ctx, ring, 0, 0);
+    if (!m_geom)
+        throw pdal_error("unable to create polygon from linearring in BOX2D constructor");
+    prepare();
+}
+
 Polygon Polygon::transform(const SpatialReference& ref) const
 {
     if (m_srs.empty())
@@ -180,7 +226,7 @@ Polygon Polygon::transform(const SpatialReference& ref) const
 
     gdal::SpatialRef fromRef(m_srs.getWKT());
     gdal::SpatialRef toRef(ref.getWKT());
-    gdal::Geometry geom(wkt(), fromRef);
+    gdal::Geometry geom(wkt(12, true), fromRef);
     geom.transform(toRef);
     Polygon output(geom.wkt(), ref, m_ctx);
     return output;
@@ -361,11 +407,14 @@ std::string Polygon::validReason() const
     return output;
 }
 
-std::string Polygon::wkt(double precision) const
+std::string Polygon::wkt(double precision, bool bOutputZ) const
 {
 
     GEOSWKTWriter *writer = GEOSWKTWriter_create_r((*m_ctx).ctx);
     GEOSWKTWriter_setRoundingPrecision_r((*m_ctx).ctx, writer, precision);
+    if (bOutputZ)
+        GEOSWKTWriter_setOutputDimension_r((*m_ctx).ctx, writer, 3);
+
     char *smoothWkt = GEOSWKTWriter_write_r((*m_ctx).ctx, writer, m_geom);
     std::string output(smoothWkt);
     GEOSFree_r((*m_ctx).ctx, smoothWkt);

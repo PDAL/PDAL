@@ -281,12 +281,17 @@ point_count_t Ilvis2Reader::read(PointViewPtr view, point_count_t count)
             m_cb(*view, idx);
         numRead++;
     }
+
+    return numRead;
+}
+
+void Ilvis2Reader::done(PointTableRef table)
+{
     if (!m_metadataFile.empty())
     {
         m_mdReader.readMetadataFile(m_metadataFile, &m_metadata);
     }
 
-    return numRead;
 }
 
 } // namespace pdal

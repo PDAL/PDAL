@@ -92,9 +92,7 @@ int PipelineKernel::execute()
         m_progressFd = Utils::openProgress(m_progressFile);
 
     pdal::PipelineManager manager(m_progressFd);
-
-    pdal::PipelineReader reader(manager, isDebug(), getVerboseLevel());
-    bool isWriter = reader.readPipeline(m_inputFile);
+    bool isWriter = manager.readPipeline(m_inputFile);
     if (!isWriter)
         throw app_runtime_error("Pipeline file does not contain a writer. "
             "Use 'pdal info' to read the data.");

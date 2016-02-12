@@ -38,10 +38,8 @@
 
 #include <pdal/pdal_export.hpp>
 #include <pdal/Options.hpp>
-/**
+#include <pdal/Polygon.hpp>
 #include <pdal/PDALUtils.hpp>
-#include <pdal/util/Utils.hpp>
-**/
 
 namespace pdal
 {
@@ -107,7 +105,7 @@ void StatsFilter::filter(PointView& view)
 
 void StatsFilter::done(PointTableRef table)
 {
-    extractMetadata();
+    extractMetadata(table);
 }
 
 
@@ -168,9 +166,9 @@ void StatsFilter::prepared(PointTableRef table)
         m_stats.insert(std::make_pair(layout->findDim(dv.first),
             Summary(dv.first, dv.second)));
 }
-    
 
-void StatsFilter::extractMetadata()
+
+void StatsFilter::extractMetadata(PointTableRef table)
 {
     uint32_t position(0);
 
@@ -181,6 +179,41 @@ void StatsFilter::extractMetadata()
         MetadataNode t = m_metadata.addList("statistic");
         t.add("position", position++);
         s.extractMetadata(t);
+    }
+
+    // If we have X, Y, & Z dims, output bboxes
+    auto xs = m_stats.find(Dimension::Id::X);
+    auto ys = m_stats.find(Dimension::Id::Y);
+    auto zs = m_stats.find(Dimension::Id::Z);
+    if (xs != m_stats.end() &&
+        ys != m_stats.end() &&
+        zs != m_stats.end())
+    {
+        BOX3D box(xs->second.minimum(), ys->second.minimum(), zs->second.minimum(),
+                  xs->second.maximum(), ys->second.maximum(), zs->second.maximum());
+        pdal::Polygon p(box);
+
+        MetadataNode mbox = Utils::toMetadata(box);
+        MetadataNode box_metadata = m_metadata.add("bbox");
+        MetadataNode metadata = box_metadata.add("native");
+        MetadataNode boundary = metadata.add("boundary", p.json());
+        MetadataNode bbox = metadata.add(mbox);
+        SpatialReference ref = table.anySpatialReference();
+        // if we don't get an SRS from the PointTableRef,
+        // we won't add another metadata node
+        if (!ref.empty())
+        {
+            p.setSpatialReference(ref);
+            SpatialReference epsg4326("EPSG:4326");
+            pdal::Polygon pdd = p.transform(epsg4326);
+            BOX3D ddbox = pdd.bounds();
+            MetadataNode epsg_4326_box = Utils::toMetadata(ddbox);
+            MetadataNode dddbox = box_metadata.add("EPSG:4326");
+            dddbox.add(epsg_4326_box);
+            MetadataNode ddboundary = dddbox.add("boundary", pdd.json());
+
+
+        }
     }
 }
 
