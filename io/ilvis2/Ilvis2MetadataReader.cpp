@@ -628,7 +628,8 @@ bool Ilvis2MetadataReader::nodeElementIs(xmlNodePtr node, std::string expected)
         return false;
     }
 
-    return (xmlStrcmp(node->name, (xmlChar*)expected.c_str()) == 0);
+    return xmlStrcmp(node->name,
+            reinterpret_cast<const xmlChar*>(expected.c_str())) == 0;
 }
 
 // Throws an error if the next element is not what it expects
