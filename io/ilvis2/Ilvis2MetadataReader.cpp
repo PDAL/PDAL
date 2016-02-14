@@ -102,75 +102,75 @@ void Ilvis2MetadataReader::parseGranuleURMetaData(xmlNodePtr node, MetadataNode*
     child = getNextElementNode(child);
     if (nodeElementIs(child, "CollectionMetaData"))
     {
-      parseCollectionMetaData(child, m);
-      child = getNextElementNode(child);
+        parseCollectionMetaData(child, m);
+        child = getNextElementNode(child);
     }
 
     if (nodeElementIs(child, "DataFiles"))
     {
-      parseDataFiles(child, m);
-      child = getNextElementNode(child);
+        parseDataFiles(child, m);
+        child = getNextElementNode(child);
     }
 
     if (nodeElementIs(child, "ECSDataGranule"))
     {
-      parseECSDataGranule(child, m);
-      child = getNextElementNode(child);
+        parseECSDataGranule(child, m);
+        child = getNextElementNode(child);
     }
 
     if (nodeElementIs(child, "RangeDateTime"))
     {
-      parseRangeDateTime(child, m);
-      child = getNextElementNode(child);
+        parseRangeDateTime(child, m);
+        child = getNextElementNode(child);
     }
 
     if (nodeElementIs(child, "SpatialDomainContainer"))
     {
-      parseSpatialDomainContainer(child, m);
-      child = getNextElementNode(child);
+        parseSpatialDomainContainer(child, m);
+        child = getNextElementNode(child);
     }
 
     while (nodeElementIs(child, "Platform"))
     {
-      MetadataNode plat = m->addList("Platform");
-      parsePlatform(child, &plat);
-      child = getNextElementNode(child);
+        MetadataNode plat = m->addList("Platform");
+        parsePlatform(child, &plat);
+        child = getNextElementNode(child);
     }
 
     while (nodeElementIs(child, "Campaign"))
     {
-      parseCampaign(child, m);
-      child = getNextElementNode(child);
+        parseCampaign(child, m);
+        child = getNextElementNode(child);
     }
 
     if (nodeElementIs(child, "PSAs"))
     {
-      parsePSAs(child, m);
-      child = getNextElementNode(child);
+        parsePSAs(child, m);
+        child = getNextElementNode(child);
     }
 
     if (nodeElementIs(child, "BrowseProduct"))
     {
-      parseXXProduct("Browse", child, m);
-      child = getNextElementNode(child);
+        parseXXProduct("Browse", child, m);
+        child = getNextElementNode(child);
     }
 
     if (nodeElementIs(child, "PHProduct"))
     {
-      parseXXProduct("PH", child, m);
-      child = getNextElementNode(child);
+        parseXXProduct("PH", child, m);
+        child = getNextElementNode(child);
     }
 
     if (nodeElementIs(child, "QAProduct"))
     {
-      parseXXProduct("QA", child, m);
-      child = getNextElementNode(child);
+        parseXXProduct("QA", child, m);
+        child = getNextElementNode(child);
     }
 
     if (nodeElementIs(child, "MPProduct"))
     {
-      parseXXProduct("MP", child, m);
-      child = getNextElementNode(child);
+        parseXXProduct("MP", child, m);
+        child = getNextElementNode(child);
     }
 
     assertEndOfElements(child);
@@ -203,9 +203,9 @@ void Ilvis2MetadataReader::parseDataFiles(xmlNodePtr node, MetadataNode * m)
 
     while(nodeElementIs(child, "DataFileContainer"))
     {
-      MetadataNode n = m->addList("DataFile");
-      parseDataFileContainer(child, &n);
-      child = getNextElementNode(child);
+        MetadataNode n = m->addList("DataFile");
+        parseDataFileContainer(child, &n);
+        child = getNextElementNode(child);
     }
 
     assertEndOfElements(child);
@@ -227,20 +227,20 @@ void Ilvis2MetadataReader::parseDataFileContainer(xmlNodePtr node, MetadataNode 
     child = getNextElementNode(child);
     if (nodeElementIs(child, "ChecksumType"))
     {
-      m->add("ChecksumType", extractString(child));
-      child = getNextElementNode(child);
+        m->add("ChecksumType", extractString(child));
+        child = getNextElementNode(child);
     }
 
     if (nodeElementIs(child, "Checksum"))
     {
-      m->add("Checksum", extractString(child));
-      child = getNextElementNode(child);
+        m->add("Checksum", extractString(child));
+        child = getNextElementNode(child);
     }
 
     if (nodeElementIs(child, "ChecksumOrigin"))
     {
-      m->add("ChecksumOrigin", extractString(child));
-      child = getNextElementNode(child);
+        m->add("ChecksumOrigin", extractString(child));
+        child = getNextElementNode(child);
     }
 
     assertEndOfElements(child);
@@ -254,8 +254,8 @@ void Ilvis2MetadataReader::parseECSDataGranule(xmlNodePtr node, MetadataNode * m
     xmlNodePtr child = getFirstChildElementNode(node);
     if (nodeElementIs(child, "SizeMBECSDataGranule"))
     {
-      m->add("SizeMBECSDataGranule", extractDouble(child));
-      child = getNextElementNode(child);
+        m->add("SizeMBECSDataGranule", extractDouble(child));
+        child = getNextElementNode(child);
     }
 
     assertElementIs(child, "LocalGranuleID");
@@ -264,8 +264,8 @@ void Ilvis2MetadataReader::parseECSDataGranule(xmlNodePtr node, MetadataNode * m
     child = getNextElementNode(child);
     if (nodeElementIs(child, "ProductionDateTime"))
     {
-      m->add("ProductionDateTime", extractString(child));
-      child = getNextElementNode(child);
+        m->add("ProductionDateTime", extractString(child));
+        child = getNextElementNode(child);
     }
 
     assertElementIs(child, "LocalVersionID");
@@ -308,11 +308,11 @@ void Ilvis2MetadataReader::parseSpatialDomainContainer(xmlNodePtr node, Metadata
     xmlNodePtr child = getFirstChildElementNode(node);
     if (nodeElementIs(child, "HorizontalSpatialDomainContainer"))
     {
-      xmlNodePtr subChild = getFirstChildElementNode(child);
-      assertElementIs(subChild, "GPolygon");
-      parseGPolygon(subChild, m);
+        xmlNodePtr subChild = getFirstChildElementNode(child);
+        assertElementIs(subChild, "GPolygon");
+        parseGPolygon(subChild, m);
 
-      child = getNextElementNode(child);
+        child = getNextElementNode(child);
     }
 
     assertEndOfElements(child);
@@ -336,52 +336,53 @@ void Ilvis2MetadataReader::parseGPolygon(xmlNodePtr node, MetadataNode * m)
 
     while (nodeElementIs(child, "Boundary"))
     {
-      // There must be at least 3 points to be valid per the schema.
-      int numPoints = countChildElements(child, "Point");
-      if (numPoints < 3)
-      {
-        std::ostringstream oss;
-        oss << "Found a polygon boundary with less than 3 points, invalid for this schema";
-        throw pdal_error(oss.str());
-      }
-
-      GEOSCoordSeq points = GEOSCoordSeq_create(numPoints+1, 2);
-      xmlNodePtr bdChild = getFirstChildElementNode(child);
-      int ptNum = 0;
-
-      while (nodeElementIs(bdChild, "Point"))
-      {
-        xmlNodePtr ptChild = getFirstChildElementNode(bdChild);
-        assertElementIs(ptChild, "PointLongitude");
-        double ptLon = extractDouble(ptChild);
-
-        ptChild = getNextElementNode(ptChild);
-        assertElementIs(ptChild, "PointLatitude");
-        double ptLat = extractDouble(ptChild);
-
-        ptChild = getNextElementNode(ptChild);
-        assertEndOfElements(ptChild);
-
-        GEOSCoordSeq_setX(points, ptNum, ptLon);
-        GEOSCoordSeq_setY(points, ptNum, ptLat);
-
-        // In the file, the loop is not closed; GEOS requires polygons
-        // to be closed, so we'll do it ourselves.
-        if (ptNum == 0)
+        // There must be at least 3 points to be valid per the schema.
+        int numPoints = countChildElements(child, "Point");
+        if (numPoints < 3)
         {
-          GEOSCoordSeq_setX(points, numPoints, ptLon);
-          GEOSCoordSeq_setY(points, numPoints, ptLat);
+            std::ostringstream oss;
+            oss << "Found a polygon boundary with less than 3 points, " <<
+                "invalid for this schema";
+            throw pdal_error(oss.str());
         }
 
-        ptNum += 1;
-        bdChild = getNextElementNode(bdChild);
-      }
+        GEOSCoordSeq points = GEOSCoordSeq_create(numPoints + 1, 2);
+        xmlNodePtr bdChild = getFirstChildElementNode(child);
+        int ptNum = 0;
 
-      GEOSGeom ring = GEOSGeom_createLinearRing(points);
-      poly[polyNum] = GEOSGeom_createPolygon(ring, NULL, 0);
+        while (nodeElementIs(bdChild, "Point"))
+        {
+            xmlNodePtr ptChild = getFirstChildElementNode(bdChild);
+            assertElementIs(ptChild, "PointLongitude");
+            double ptLon = extractDouble(ptChild);
 
-      polyNum += 1;
-      child = getNextElementNode(child);
+            ptChild = getNextElementNode(ptChild);
+            assertElementIs(ptChild, "PointLatitude");
+            double ptLat = extractDouble(ptChild);
+
+            ptChild = getNextElementNode(ptChild);
+            assertEndOfElements(ptChild);
+
+            GEOSCoordSeq_setX(points, ptNum, ptLon);
+            GEOSCoordSeq_setY(points, ptNum, ptLat);
+
+            // In the file, the loop is not closed; GEOS requires polygons
+            // to be closed, so we'll do it ourselves.
+            if (ptNum == 0)
+            {
+                GEOSCoordSeq_setX(points, numPoints, ptLon);
+                GEOSCoordSeq_setY(points, numPoints, ptLat);
+            }
+
+            ptNum += 1;
+            bdChild = getNextElementNode(bdChild);
+        }
+
+        GEOSGeom ring = GEOSGeom_createLinearRing(points);
+        poly[polyNum] = GEOSGeom_createPolygon(ring, NULL, 0);
+
+        polyNum += 1;
+        child = getNextElementNode(child);
     }
 
     assertEndOfElements(child);
@@ -389,11 +390,12 @@ void Ilvis2MetadataReader::parseGPolygon(xmlNodePtr node, MetadataNode * m)
     // If only one sub-polygon, just make a POLYGON WKT, else make it a MULTIPOLYGON
     if (numBoundaries > 1)
     {
-      fullPoly = GEOSGeom_createCollection(GEOS_MULTIPOLYGON, poly, numBoundaries);
+        fullPoly = GEOSGeom_createCollection(
+                GEOS_MULTIPOLYGON, poly, numBoundaries);
     }
     else
     {
-      fullPoly = poly[0];
+        fullPoly = poly[0];
     }
     GEOSWKTWriter * writer = GEOSWKTWriter_create();
     GEOSWKTWriter_setRoundingPrecision(writer, 5);
@@ -418,9 +420,9 @@ void Ilvis2MetadataReader::parsePlatform(xmlNodePtr node, MetadataNode * m)
     child = getNextElementNode(child);
     while(nodeElementIs(child, "Instrument"))
     {
-      MetadataNode inst = m->addList("Instrument");
-      parseInstrument(child, &inst);
-      child = getNextElementNode(child);
+        MetadataNode inst = m->addList("Instrument");
+        parseInstrument(child, &inst);
+        child = getNextElementNode(child);
     }
 
     assertEndOfElements(child);
@@ -439,15 +441,15 @@ void Ilvis2MetadataReader::parseInstrument(xmlNodePtr node, MetadataNode * m)
 
     while (nodeElementIs(child, "Sensor"))
     {
-      MetadataNode sens = m->addList("Sensor");
-      parseSensor(child, &sens);
-      child = getNextElementNode(child);
+        MetadataNode sens = m->addList("Sensor");
+        parseSensor(child, &sens);
+        child = getNextElementNode(child);
     }
 
     while (nodeElementIs(child, "OperationMode"))
     {
-      m->addList("OperationMode", extractString(child));
-      child = getNextElementNode(child);
+        m->addList("OperationMode", extractString(child));
+        child = getNextElementNode(child);
     }
 
     assertEndOfElements(child);
@@ -465,9 +467,9 @@ void Ilvis2MetadataReader::parseSensor(xmlNodePtr node, MetadataNode * m)
     child = getNextElementNode(child);
     while (nodeElementIs(child, "SensorCharacteristic"))
     {
-      MetadataNode n = m->addList("SensorCharacteristic");
-      parseSensorCharacteristic(child, &n);
-      child = getNextElementNode(child);
+        MetadataNode n = m->addList("SensorCharacteristic");
+        parseSensorCharacteristic(child, &n);
+        child = getNextElementNode(child);
     }
 
     assertEndOfElements(child);
@@ -512,9 +514,9 @@ void Ilvis2MetadataReader::parsePSAs(xmlNodePtr node, MetadataNode * m)
     xmlNodePtr child = getFirstChildElementNode(node);
     while (nodeElementIs(child, "PSA"))
     {
-      MetadataNode n = m->addList("PSA");
-      parsePSA(child, &n);
-      child = getNextElementNode(child);
+        MetadataNode n = m->addList("PSA");
+        parsePSA(child, &n);
+        child = getNextElementNode(child);
     }
 
     assertEndOfElements(child);
@@ -532,8 +534,8 @@ void Ilvis2MetadataReader::parsePSA(xmlNodePtr node, MetadataNode * m)
     child = getNextElementNode(child);
     while (nodeElementIs(child, "PSAValue"))
     {
-      m->addList("PSAValue", extractString(child));
-      child = getNextElementNode(child);
+        m->addList("PSAValue", extractString(child));
+        child = getNextElementNode(child);
     }
 
     assertEndOfElements(child);
@@ -553,8 +555,8 @@ void Ilvis2MetadataReader::parseXXProduct(std::string type, xmlNodePtr node, Met
     xmlNodePtr child = getFirstChildElementNode(node);
     while (nodeElementIs(child, fullSub))
     {
-      m->addList(mdName, extractString(child));
-      child = getNextElementNode(child);
+        m->addList(mdName, extractString(child));
+        child = getNextElementNode(child);
     }
 
     assertEndOfElements(child);
@@ -594,7 +596,7 @@ xmlNodePtr Ilvis2MetadataReader::getNextElementNode(xmlNodePtr node)
     node = node->next;
     while (node && node->type != XML_ELEMENT_NODE)
     {
-      node = node->next;
+        node = node->next;
     }
 
     return node;
@@ -623,7 +625,7 @@ bool Ilvis2MetadataReader::nodeElementIs(xmlNodePtr node, std::string expected)
 {
     if (!node)
     {
-      return false;
+        return false;
     }
 
     return (xmlStrcmp(node->name, (xmlChar*)expected.c_str()) == 0);
@@ -634,7 +636,7 @@ void Ilvis2MetadataReader::assertElementIs(xmlNodePtr node, std::string expected
 {
     if (!node || !nodeElementIs(node, expected))
     {
-      errWrongElement(node, expected);
+        errWrongElement(node, expected);
     }
 }
 
@@ -643,7 +645,7 @@ void Ilvis2MetadataReader::assertEndOfElements(xmlNodePtr node)
 {
     if (node)
     {
-      errExpectedEnd(node);
+        errExpectedEnd(node);
     }
 }
 
@@ -657,7 +659,7 @@ int Ilvis2MetadataReader::countChildElements(xmlNodePtr node, std::string childN
     {
         if (nodeElementIs(child, childName))
         {
-          ctr += 1;
+            ctr += 1;
         }
         child = getNextElementNode(child);
     }
@@ -681,6 +683,5 @@ void Ilvis2MetadataReader::errExpectedEnd(xmlNodePtr node)
     throw pdal_error(oss.str());
 }
 
-
-
 } // namespace pdal
+
