@@ -186,6 +186,7 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
     ${GEOS_LIBRARY}
     ${ZLIB_LIBRARIES}
     ${UTIL_LIB}
+    ${PDAL_BOOST_LIB_NAME}
 )
 
 if (WITH_GEOTIFF)

@@ -46,8 +46,8 @@ namespace pdal
 
 class PDAL_DLL NitfReader : public LasReader
 {
-typedef boost::iostreams::restriction<std::istream> RDevice;
-typedef boost::iostreams::stream<RDevice> RStream;
+typedef pdalboost::iostreams::restriction<std::istream> RDevice;
+typedef pdalboost::iostreams::stream<RDevice> RStream;
 
 public:
     NitfReader() : LasReader(), m_offset(0), m_length(0), m_istream(NULL)

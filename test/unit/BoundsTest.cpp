@@ -225,8 +225,8 @@ TEST(BoundsTest, BoundsTest_ptree)
 
     std::stringstream ss1(std::stringstream::in | std::stringstream::out);
 
-    boost::property_tree::ptree tree = Utils::toPTree(b2);
-    boost::property_tree::write_xml(ss1, tree);
+    pdalboost::property_tree::ptree tree = Utils::toPTree(b2);
+    pdalboost::property_tree::write_xml(ss1, tree);
 
     const std::string out1 = ss1.str();
 
@@ -247,11 +247,16 @@ TEST(BoundsTest, test_input)
     EXPECT_TRUE(r == rr);
 }
 
-TEST(BoundsTest, test_lexicalcast_whitespace)
+TEST(BoundsTest, test_parse)
 {
-    const BOX3D b1 = boost::lexical_cast<BOX3D>("([1,101],[2,102],[3,103])");
-    const BOX3D b2 =
-        boost::lexical_cast<BOX3D>("([1, 101], [2, 102], [3, 103])");
+    std::istringstream iss1("([1,101],[2,102],[3,103])");
+    std::istringstream iss2("([1, 101], [2, 102], [3, 103])");
+
+    BOX3D b1;
+    BOX3D b2;
+    
+    iss1 >> b1;
+    iss2 >> b2;
 
     EXPECT_EQ(b1, b2);
 }

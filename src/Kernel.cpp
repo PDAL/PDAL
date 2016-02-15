@@ -35,13 +35,11 @@
 #include <cctype>
 #include <iostream>
 
-#include <boost/algorithm/string.hpp>
-
+#include <pdal/pdal_config.hpp>
 #include <pdal/GlobalEnvironment.hpp>
 #include <pdal/Kernel.hpp>
-#include <pdal/PDALUtils.hpp>
-#include <pdal/pdal_config.hpp>
 #include <pdal/Options.hpp>
+#include <pdal/PDALUtils.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
@@ -51,9 +49,6 @@
 
 #include <memory>
 #include <vector>
-
-#include <boost/tokenizer.hpp>
-typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
 
 namespace pdal
 {
@@ -429,58 +424,58 @@ void Kernel::setCommonOptions(Options &options)
         options.add("log", "STDERR");
     }
 
-    boost::char_separator<char> sep(",| ");
+    auto pred = [](char c){ return (bool)strchr(",| ", c); };
 
     if (!m_scales.empty())
     {
         std::vector<double> scales;
-        tokenizer scale_tokens(m_scales, sep);
-        for (auto const& t : scale_tokens)
-            scales.push_back(boost::lexical_cast<double>(t));
-        if (scales.size())
+        StringList scaleTokens = Utils::split2(m_scales, pred);
+        for (std::string s : scaleTokens)
         {
-            if (scales.size() <= 1)
+            double val;
+
+            if (Utils::fromString(s, val))
+                scales.push_back(val);
+            else
             {
-                options.add<double >("scale_x", scales[0]);
-            }
-            else if (scales.size() <= 2)
-            {
-                options.add<double >("scale_x", scales[0]);
-                options.add<double >("scale_y", scales[1]);
-            }
-            else if (scales.size() <= 3)
-            {
-                options.add<double >("scale_x", scales[0]);
-                options.add<double >("scale_y", scales[1]);
-                options.add<double >("scale_z", scales[2]);
+                std::ostringstream oss;
+                oss << getName() << ": Invalid scale value '" << s << "'." <<
+                    std::endl;
+                throw pdal_error(oss.str());
             }
         }
+        if (scales.size() > 0)
+            options.add("scale_x", scales[0]);
+        if (scales.size() > 1)
+            options.add("scale_y", scales[1]);
+        if (scales.size() > 2)
+            options.add("scale_z", scales[2]);
     }
 
     if (!m_offsets.empty())
     {
-        std::vector<std::string> offsets;
-        tokenizer offset_tokens(m_offsets, sep);
-        for (auto const& t : offset_tokens)
-            offsets.push_back(boost::lexical_cast<std::string>(t));
-        if (offsets.size())
+        std::vector<double> offsets;
+        StringList offsetTokens = Utils::split2(m_offsets, pred);
+        for (std::string o : offsetTokens)
         {
-            if (offsets.size() <= 1)
+            double val;
+
+            if (Utils::fromString(o, val))
+                offsets.push_back(val);
+            else
             {
-                options.add<std::string>("offset_x", offsets[0]);
-            }
-            else if (offsets.size() <= 2)
-            {
-                options.add<std::string>("offset_x", offsets[0]);
-                options.add<std::string>("offset_y", offsets[1]);
-            }
-            else if (offsets.size() <= 3)
-            {
-                options.add<std::string>("offset_x", offsets[0]);
-                options.add<std::string>("offset_y", offsets[1]);
-                options.add<std::string>("offset_z", offsets[2]);
+                std::ostringstream oss;
+                oss << getName() << ": Invalid offset value '" << o << "'." <<
+                    std::endl;
+                throw pdal_error(oss.str());
             }
         }
+        if (offsets.size() > 0)
+            options.add("offset_x", offsets[0]);
+        if (offsets.size() > 1)
+            options.add("offset_y", offsets[1]);
+        if (offsets.size() > 2)
+            options.add("offset_z", offsets[2]);
     }
 }
 

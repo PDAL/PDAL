@@ -39,9 +39,6 @@
 #include <iostream>
 #include <map>
 
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/erase.hpp>
-
 #include <pcl/io/pcd_io.h>
 #include <pcl/io/impl/pcd_io.hpp>
 

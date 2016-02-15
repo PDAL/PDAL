@@ -2,6 +2,8 @@
 # Attribute filter CMake configuration
 #
 
+include_directories(${ROOT_DIR}/vendor/pdalboost)
+
 find_package(GEOS QUIET 3.3)
 set_package_properties(GEOS PROPERTIES PURPOSE "Enables attribute filter")
 

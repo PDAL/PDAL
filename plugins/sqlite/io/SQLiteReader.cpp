@@ -71,20 +71,14 @@ void SQLiteReader::initialize()
     catch (pdal_error const& e)
     {
         std::stringstream oss;
-        oss << "Unable to connect to database with error '" << e.what() << "'";
+        oss << getName() << ": Unable to connect to database with error '" <<
+            e.what() << "'";
         throw pdal_error(oss.str());
     }
-    try
-    {
-        setSpatialReference(
-            m_options.getValueOrThrow<pdal::SpatialReference>(
-                "spatialreference"));
-    }
-    catch (Option::not_found)
-    {
-        // If one wasn't set on the options, we'll ignore at this
-        setSpatialReference(fetchSpatialReference(m_query));
-    }
+
+    if (m_spatialRef.empty())
+        m_spatialRef = fetchSpatialReference(m_query);
+    setSpatialReference(m_spatialRef);
 
     m_patch = PatchPtr(new Patch());
 }
@@ -144,10 +138,8 @@ void SQLiteReader::processOptions(const Options& options)
     m_schemaFile = options.getValueOrDefault<std::string>(
         "xml_schema_dump", std::string());
 
-    if (options.hasOption("spatialreference"))
-        m_spatialRef = boost::optional<SpatialReference>(
-            options.getValueOrThrow<pdal::SpatialReference>(
-                "spatialreference"));
+    m_spatialRef =
+        options.getValueOrDefault<pdal::SpatialReference>( "spatialreference");
     m_query = options.getValueOrThrow<std::string>("query");
     m_connection = options.getValueOrDefault<std::string>("connection", "");
     m_modulename = options.getValueOrDefault<std::string>("module", "");
@@ -231,11 +223,12 @@ point_count_t SQLiteReader::readPatch(PointViewPtr view, point_count_t numPts)
     int32_t position = columns.find("POINTS")->second;
 
     MetadataNode comp = m_patch->m_metadata.findChild("compression");
-    m_patch->m_isCompressed = boost::iequals(comp.value(), "lazperf");
+    m_patch->m_isCompressed = Utils::iequals(comp.value(), "lazperf");
     m_patch->m_compVersion = m_patch->m_metadata.findChild("version").value();
 
     position = columns.find("NUM_POINTS")->second;
-    int32_t count = boost::lexical_cast<int32_t>((*r)[position].data);
+    int32_t count;
+    Utils::fromString((*r)[position].data, count);
     m_patch->remaining = count;
     m_patch->count = count;
 

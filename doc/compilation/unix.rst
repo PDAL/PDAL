@@ -315,5 +315,4 @@ configure your :ref:`dependencies`.
 .. _`Autoconf`: http://www.gnu.org/software/autoconf/
 .. _`LLVM`: http://llvm.org/
 .. _`OSGeo4W`: http://trac.osgeo.org/osgeo4w/
-.. _`Boost`: http://www.boost.org/
 

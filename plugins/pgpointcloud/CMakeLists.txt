@@ -3,6 +3,7 @@
 #
 
 include(${PDAL_CMAKE_DIR}/postgres.cmake)
+include_directories(${ROOT_DIR}/vendor/pdalboost)
 
 #
 # PgPointCloud Reader

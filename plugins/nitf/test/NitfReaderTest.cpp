@@ -34,8 +34,6 @@
 
 #include <pdal/pdal_test_main.hpp>
 
-#include <boost/uuid/uuid_io.hpp>
-
 #include <pdal/PointView.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/StageFactory.hpp>

@@ -1,3 +1,5 @@
+include(${PDAL_CMAKE_DIR}/test.cmake)
+
 if(BUILD_PLUGIN_ATTRIBUTE)
     add_subdirectory(attribute)
 endif()

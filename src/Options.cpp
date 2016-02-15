@@ -45,15 +45,13 @@ namespace pdal
 #if !defined(PDAL_COMPILER_MSVC)
 
 // explicit specialization:
-//   if insert a bool, we don't want it to be "0" or "1" (which is
-//   what lexical_cast would do)
+//   if insert a bool, we don't want it to be "0" or "1".
 template<> void Option::setValue(const bool& value)
 {
     m_value = value ? "true" : "false";
 }
 
 // explicit specialization:
-//   if we want to insert a string, we don't need lexical_cast
 template<> void Option::setValue(const std::string& value)
 {
     m_value = value;

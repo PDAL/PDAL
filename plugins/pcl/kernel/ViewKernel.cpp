@@ -73,14 +73,10 @@ vector<string> tokenize(const string s, char c)
 
 uint32_t parseInt(const string& s)
 {
-    try
-    {
-        return boost::lexical_cast<uint32_t>(s);
-    }
-    catch (boost::bad_lexical_cast)
-    {
+    uint32_t val;
+    if (!Utils::fromString(s, val))
         throw app_runtime_error(string("Invalid integer: ") + s);
-    }
+    return val;
 }
 
 

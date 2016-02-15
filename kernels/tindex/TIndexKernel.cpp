@@ -50,8 +50,6 @@
 
 #include <cpl_string.h>
 
-#include <boost/program_options.hpp>
-
 namespace
 {
 

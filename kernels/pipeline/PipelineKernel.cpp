@@ -38,8 +38,6 @@
 #include <pdal/XMLSchema.hpp>
 #endif
 
-#include <boost/program_options.hpp>
-
 #include <pdal/PDALUtils.hpp>
 
 namespace pdal

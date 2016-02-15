@@ -130,15 +130,13 @@ void HexBin::done(PointTableRef table)
         MetadataNode hexes = m_metadata.add("hexagons");
         for (HexIter hi = m_grid->hexBegin(); hi != m_grid->hexEnd(); ++hi)
         {
-            using namespace boost;
-
             HexInfo h = *hi;
 
             MetadataNode hex = hexes.addList("hexagon");
             hex.add("density", h.density());
 
-            hex.add("gridpos", lexical_cast<std::string>(h.xgrid()) + " " +
-                lexical_cast<std::string>(h.ygrid()));
+            hex.add("gridpos", Utils::toString(h.xgrid()) + " " +
+                Utils::toString((h.ygrid())));
             std::ostringstream oss;
             // Using stream limits precision (default 6)
             oss << "POINT (" << h.x() << " " << h.y() << ")";

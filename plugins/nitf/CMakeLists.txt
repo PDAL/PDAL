@@ -2,6 +2,8 @@
 # NITF plugin CMake configuration
 #
 
+include_directories(${ROOT_DIR}/vendor/pdalboost)
+
 include(${PDAL_CMAKE_DIR}/nitro.cmake)
 if (NOT NITRO_FOUND)
     message(FATAL_ERROR "Can't find NITRO support required by NITF.")

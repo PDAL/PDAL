@@ -32,11 +32,10 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <boost/algorithm/string.hpp>
-
 #include <pdal/Compression.hpp>
 #include <pdal/GDALUtils.hpp>
 #include <pdal/GlobalEnvironment.hpp>
+
 #include "OciReader.hpp"
 
 namespace pdal
@@ -54,10 +53,8 @@ std::string OciReader::getName() const { return s_info.name; }
 void OciReader::processOptions(const Options& options)
 {
     m_schemaFile = options.getValueOrDefault<std::string>("xml_schema_dump");
-    if (options.hasOption("spatialreference"))
-        m_spatialRef = boost::optional<SpatialReference>(
-            options.getValueOrThrow<pdal::SpatialReference>(
-                "spatialreference"));
+    m_spatialRef =
+        options.getValueOrDefault<pdal::SpatialReference>("spatialreference");
     m_query = options.getValueOrThrow<std::string>("query");
     m_connSpec = options.getValueOrDefault<std::string>("connection");
 
@@ -89,11 +86,11 @@ void OciReader::initialize()
         throw pdal_error("Unable to fetch a point cloud entry entry!");
     m_block->setFetched();
 
-    // Set the spatial reference from options or set the one from the block.
-    if (m_spatialRef)
-        setSpatialReference(*m_spatialRef);
-    else
-        setSpatialReference(fetchSpatialReference(m_stmt, m_block));
+    // If the spatial reference wasn't provided as an option, fetch it from
+    // the data source.
+    if (m_spatialRef.empty())
+        m_spatialRef = fetchSpatialReference(m_stmt, m_block);
+    setSpatialReference(m_spatialRef);
 }
 
 
@@ -110,27 +107,30 @@ void OciReader::defineBlock(Statement stmt, BlockPtr block) const
     while (stmt->GetNextField(iCol, szFieldName, &hType, &nSize,
         &nPrecision, &nScale, szTypeName))
     {
-        if (hType == SQLT_NTY && boost::iequals(szTypeName, "SDO_PC"))
+        std::string typeName = Utils::toupper(szTypeName);
+        std::string fieldName = Utils::toupper(szFieldName);
+
+        if (hType == SQLT_NTY && (typeName == "SDO_PC"))
             stmt->Define(&(block->pc));
-        else if (boost::iequals(szFieldName, "OBJ_ID"))
+        else if (fieldName == "OBJ_ID")
             stmt->Define(&(block->obj_id));
-        else if (boost::iequals(szFieldName, "BLK_ID"))
+        else if (fieldName == "BLK_ID")
             stmt->Define(&(block->blk_id));
-        else if (boost::iequals(szFieldName, "BLK_EXTENT"))
+        else if (fieldName == "BLK_EXTENT")
             stmt->Define(&(block->blk_extent));
-        else if (boost::iequals(szFieldName, "BLK_DOMAIN"))
+        else if (fieldName == "BLK_DOMAIN")
             stmt->Define(&(block->blk_domain));
-        else if (boost::iequals(szFieldName, "PCBLK_MIN_RES"))
+        else if (fieldName == "PCBLK_MIN_RES")
             stmt->Define(&(block->pcblk_min_res));
-        else if (boost::iequals(szFieldName, "PCBLK_MAX_RES"))
+        else if (fieldName == "PCBLK_MAX_RES")
             stmt->Define(&(block->pcblk_max_res));
-        else if (boost::iequals(szFieldName, "NUM_POINTS"))
+        else if (fieldName == "NUM_POINTS")
             stmt->Define(&(block->num_points));
-        else if (boost::iequals(szFieldName, "NUM_UNSORTED_POINTS"))
+        else if (fieldName == "NUM_UNSORTED_POINTS")
             stmt->Define(&(block->num_unsorted_points));
-        else if (boost::iequals(szFieldName, "PT_SORT_DIM"))
+        else if (fieldName == "PT_SORT_DIM")
             stmt->Define(&(block->pt_sort_dim));
-        else if (boost::iequals(szFieldName, "POINTS"))
+        else if (fieldName == "POINTS")
             stmt->Define(&(block->locator));
         iCol++;
     }

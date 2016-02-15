@@ -12,8 +12,8 @@
 #  pragma warning(disable: 4127)  // conditional expression is constant
 #endif
 
-#include <functional>
 #include <ostream>
+#include <string>
 
 namespace pdal
 {

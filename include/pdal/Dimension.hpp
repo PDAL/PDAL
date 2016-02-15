@@ -38,9 +38,8 @@
 #include <string>
 #include <vector>
 
-#include <boost/algorithm/string.hpp>
-
 #include <pdal/pdal_internal.hpp>
+#include <pdal/util/Utils.hpp>
 
 //NOTE: How to add a predefined dimension.
 //
@@ -371,7 +370,8 @@ inline std::string description(Id::Enum id)
 ///    if the name doesn't map to a predefined dimension.
 inline Id::Enum id(std::string s)
 {
-    boost::to_upper(s);
+    s = Utils::toupper(s);
+
     if (s == "X")
         return Id::X;
     else if (s == "Y")
@@ -822,7 +822,7 @@ inline std::string interpretationName(Type::Enum dimtype)
 /// \return  Corresponding type enumeration value.
 inline Type::Enum type(std::string s)
 {
-    boost::to_lower(s);
+    s = Utils::tolower(s);
 
     if (s == "int8_t" || s == "int8")
        return Type::Signed8;

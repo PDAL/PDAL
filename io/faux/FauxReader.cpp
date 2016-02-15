@@ -37,8 +37,6 @@
 #include <pdal/Options.hpp>
 #include <pdal/PointView.hpp>
 
-#include <boost/algorithm/string.hpp>
-
 #include <ctime>
 
 namespace pdal
@@ -86,7 +84,7 @@ void FauxReader::processOptions(const Options& options)
         bounds = options.getValueOrDefault<BOX3D>("bounds",
             BOX3D(0, 0, 0, 1, 1, 1));
     }
-    catch (boost::bad_lexical_cast)
+    catch (Option::cant_convert)
     {
         std::string s = options.getValueOrDefault<std::string>("bounds");
 

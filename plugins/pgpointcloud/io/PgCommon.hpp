@@ -35,8 +35,6 @@
 
 #pragma once
 
-#include <boost/algorithm/string.hpp>
-
 #include "libpq-fe.h"
 
 #include <pdal/Options.hpp>
@@ -47,13 +45,14 @@ namespace pdal
 {
 
 inline pdal::CompressionType::Enum getCompressionType(
-    std::string const& compression_type)
+    std::string compression_type)
 {
-    if (boost::iequals(compression_type, "dimensional"))
+    compression_type = Utils::tolower(compression_type);
+    if (compression_type == "dimensional")
         return CompressionType::Dimensional;
-    else if (boost::iequals(compression_type, "ght"))
+    else if (compression_type == "ght")
         return CompressionType::Ght;
-    else if (boost::iequals(compression_type, "laszperf"))
+    else if (compression_type == "laszperf")
         return CompressionType::Lazperf;
     return CompressionType::None;
 }

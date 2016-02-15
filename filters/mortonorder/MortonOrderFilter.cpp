@@ -34,6 +34,7 @@
 
 #include "MortonOrderFilter.hpp"
 
+#include <climits>
 #include <iostream>
 #include <limits>
 #include <map>

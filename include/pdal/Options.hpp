@@ -38,9 +38,6 @@
 #include <pdal/Metadata.hpp>
 #include <pdal/util/Utils.hpp>
 
-#include <boost/lexical_cast.hpp>
-#include <boost/optional.hpp>
-
 #include <map>
 #include <memory>
 #include <vector>
@@ -59,14 +56,8 @@ typedef std::multimap<std::string, Option> map_t;
 /*!
     \verbatim embed:rst
      An Option is just a record with three fields: name, value, and description.
-     The value is stored as a string, and we rely on boost::lexical_cast to do the
-     serialization magic for us.  This means that an object you insert as an option
-     value must satisfay the requirements for being lexically-castable:
-        - copy ctor
-        - operator=
-        - operator>>
-        - operator<<
-
+     The value is stored as a string.
+      
      Dumped as XML, it looks like this although of course that's not valid
      XML, since it has no single root element.
 
@@ -97,6 +88,15 @@ public:
         {}
     };
 
+    class cant_convert : public pdal_error
+    {
+    public:
+        cant_convert() : pdal_error("Can't convert option as requested.")
+        {}
+        cant_convert(const std::string& msg ) : pdal_error(msg)
+        {}
+    };
+
 /// @name Constructors
 
     Option()
@@ -108,13 +108,7 @@ public:
             std::string const& description = "") :
         m_name(name), m_description(description)
     {
-        try
-        {
-            setValue<T>(value);
-        }
-        catch (boost::bad_lexical_cast)
-        {
-        }
+        setValue<T>(value);
     }
 
     /// Equality operator
@@ -172,7 +166,7 @@ public:
         return m_description;
     }
 
-    /// @return the value of the Option as casted by boost::lexical_cast
+    /// @return the value of the Option.
     template<typename T>
     T getValue() const
     {
@@ -181,36 +175,25 @@ public:
         return t;
     }
 
-    /// sets the value of the Option to T after boost::lexical_cast'ing
-    /// it to a std::string
+    /// sets the value of the Option to T converted to a string.
     template<typename T> void setValue(const T& value)
     {
-        m_value = boost::lexical_cast<std::string>(value);
+        std::ostringstream oss;
+        oss << value;
+        m_value = oss.str();
     }
-
-/// @name pdal::Options access
-
-    /*! \return a boost::optional-wrapped const& of the Options set for this Option.
-    \verbatim embed:rst
-
-    .. note::
-
-            An Option may have an Options map of of
-            infinite depth (Option->Options->Option->Options...)
-    \endverbatim
-    */
 
     bool empty() const;
 
 #if defined(PDAL_COMPILER_MSVC)
     /// explicit specialization to insert a bool as "true" and "false" rather
-    /// than "0" or "1" (which is what lexical_cast would do)
+    /// than "0" or "1".
     template<> void setValue(const bool& value)
     {
         m_value = value ? "true" : "false";
     }
 
-    /// explicit specialization to insert a string so no lexical_cast happens
+    /// explicit specialization to insert a string so no stream is necessary.
     template<> void setValue(const std::string& value)
     {
         m_value = value;
@@ -228,7 +211,11 @@ private:
     template <typename T>
     void getValue(T& t) const
     {
-        t = boost::lexical_cast<T>(m_value);
+        std::istringstream iss(m_value);
+
+        iss >> t;
+        if (iss.fail())
+            throw cant_convert();
     }
 
     void getValue(StringList& values) const
@@ -245,21 +232,35 @@ private:
         else if (m_value == "false")
             value = false;
         else
-            value = boost::lexical_cast<bool>(m_value);
+        {
+            std::istringstream iss(m_value);
+
+            iss >> value;
+            if (iss.fail())
+                throw cant_convert();
+        }
     }
 
-    /// Avoid lexical cast.
     void getValue(std::string& value) const
-        { value = m_value; }
+        { value = m_value; } 
 
     void getValue(char& value)
-        { value = (char)std::stoi(m_value); }
+    {
+        if (!Utils::fromString(m_value, value))
+            throw cant_convert();
+    }
 
     void getValue(unsigned char& value) const
-        { value = (unsigned char)std::stoi(m_value); }
+    {
+        if (!Utils::fromString(m_value, value))
+            throw cant_convert();
+    }
 
     void getValue(signed char& value) const
-        { value = (signed char)std::stoi(m_value); }
+    {
+        if (!Utils::fromString(m_value, value))
+            throw cant_convert();
+    }
 };
 
 
@@ -267,10 +268,10 @@ private:
 #if !defined(PDAL_COMPILER_VC10)
 
 /// explicit specialization to insert a bool as "true" and "false" rather
-/// than "0" or "1" (which is what lexical_cast would do)
+/// than "0" or "1".
 template<> void Option::setValue(const bool& value);
 
-/// explicit specialization to insert a string so no lexical_cast happens
+/// explicit specialization to insert a string.
 template<> void Option::setValue(const std::string& value);
 #endif
 
@@ -380,7 +381,7 @@ public:
     // get value of an option, or throw not_found if option not present
     template<typename T> T getValueOrThrow(std::string const& name) const
     {
-        const Option& opt = getOption(name);  // might throw
+        const Option& opt = getOption(name);  // might throw Option::not_found
         return opt.getValue<T>();
     }
 
@@ -392,7 +393,8 @@ public:
 
         try
         {
-            const Option& opt = getOption(name);  // might throw
+            // might throw Option::not_found
+            const Option& opt = getOption(name);
             result = opt.getValue<T>();
         }
         catch (Option::not_found)

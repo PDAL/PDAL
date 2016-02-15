@@ -4,6 +4,8 @@
 
 include (${PDAL_CMAKE_DIR}/hdf5.cmake)
 
+include_directories(${ROOT_DIR}/vendor/pdalboost)
+
 if (NOT PDAL_HAVE_HDF5)
     message(FATAL "HDF5 not found but is required for Icebridge.")
 else()

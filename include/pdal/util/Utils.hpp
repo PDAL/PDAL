@@ -46,13 +46,11 @@
 #include <limits>
 #include <cstring>
 #include <sstream>
+#include <typeinfo>
 #include <vector>
 #include <map>
 
 #include "pdal_util_export.hpp"
-
-#include <boost/numeric/conversion/cast.hpp>
-#include <boost/lexical_cast.hpp>
 
 namespace pdal
 {
@@ -443,14 +441,16 @@ namespace Utils
     template<typename T>
     bool fromString(const std::string& from, T& to)
     {
-        try
-        {
-            to = boost::lexical_cast<T>(from);
-        }
-        catch (boost::bad_lexical_cast&)
-        {
-            return false;
-        }
+        std::istringstream iss(from);
+
+        iss >> to;
+        return !iss.fail();
+    }
+
+    template<>
+    inline bool fromString(const std::string& from, std::string& to)
+    {
+        to = from;
         return true;
     }
 

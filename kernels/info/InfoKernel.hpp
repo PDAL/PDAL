@@ -44,11 +44,6 @@
 #pragma GCC diagnostic ignored "-Wtautological-constant-out-of-range-compare"
 #endif
 
-#include <boost/property_tree/json_parser.hpp>
-#include <boost/tokenizer.hpp>
-
-typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-
 extern "C" int32_t InfoKernel_ExitFunc();
 extern "C" PF_ExitFunc InfoKernel_InitPlugin();
 

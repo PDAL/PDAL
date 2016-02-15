@@ -102,7 +102,7 @@ Layout/Organization of Source Tree
   #include "support.hpp"
 
 * #include lines should be grouped and arranged in this order: C++/std headers,
-  3rd-party headers (e.g. gdal or boost), pdal headers, local headers.  The
+  3rd-party headers (e.g. gdal), pdal headers, local headers.  The
   pdal headers may be further grouped by subdirectory, e.g. drivers/liblas,
   filters, etc.
 

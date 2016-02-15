@@ -10,13 +10,13 @@
 
 #pragma once
 
+#include <functional>
+
 #include <Python.h>
+
 #undef toupper
 #undef tolower
 #undef isspace
-
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
 
 namespace pdal
 {
@@ -35,7 +35,7 @@ public:
     void set_stdout(std::ostream* ostr);
     void reset_stdout();
 
-    typedef boost::function<void(std::string)> stdout_write_type;
+    typedef std::function<void(std::string)> stdout_write_type;
 
 private:
     void set_stdout(stdout_write_type write);

@@ -36,8 +36,6 @@
 
 #include <pdal/Metadata.hpp>
 
-#include <boost/algorithm/string.hpp>
-
 #include "MetadataReader.hpp"
 #include "tre_plugins.hpp"
 

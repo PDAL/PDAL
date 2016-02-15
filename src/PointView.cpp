@@ -37,8 +37,6 @@
 #include <pdal/PointView.hpp>
 #include <pdal/PointViewIter.hpp>
 
-#include <boost/lexical_cast.hpp>
-
 namespace pdal
 {
 

@@ -37,12 +37,6 @@
 #include <pdal/Kernel.hpp>
 #include <pdal/util/FileUtils.hpp>
 
-
-#define SEPARATORS ",| "
-
-#include <boost/tokenizer.hpp>
-typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-
 extern "C" int32_t RandomKernel_ExitFunc();
 extern "C" PF_ExitFunc RandomKernel_InitPlugin();
 

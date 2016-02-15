@@ -51,14 +51,13 @@ set(PDAL_BUILD_VERSION "2.0.0")
 if (APPLE OR WIN32)
     set(PDAL_LIB_NAME pdalcpp)
     set(PDAL_BASE_LIB_NAME pdalcpp)
-    set(PDAL_UTIL_LIB_NAME pdal_util)
-    set(PDAL_PLANG_LIB_NAME pdal_plang)
 else()
     set(PDAL_LIB_NAME pdalcpp)
     set(PDAL_BASE_LIB_NAME pdal_base)
-    set(PDAL_UTIL_LIB_NAME pdal_util)
-    set(PDAL_PLANG_LIB_NAME pdal_plang)
 endif()
+set(PDAL_UTIL_LIB_NAME pdal_util)
+set(PDAL_PLANG_LIB_NAME pdal_plang)
+set(PDAL_BOOST_LIB_NAME pdal_boost)
 
 set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 
@@ -215,7 +214,6 @@ set(PDAL_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 #  Dependencies.
 #------------------------------------------------------------------------------
 
-include(${PDAL_CMAKE_DIR}/boost.cmake)
 include(${PDAL_CMAKE_DIR}/gdal.cmake)
 include(${PDAL_CMAKE_DIR}/geos.cmake)  # Optional
 include(${PDAL_CMAKE_DIR}/geotiff.cmake)  # Optional
@@ -263,6 +261,17 @@ include_directories(vendor/rply-1.1.4)
 # PDAL_TARGET_OBJECTS is used to collect the driver object libraries
 set(PDAL_TARGET_OBJECTS "")
 
+add_subdirectory(plugins)
+
+include_directories(vendor/pdalboost)
+
+if (WITH_TESTS)
+    enable_testing()
+    add_subdirectory(vendor/gtest-1.7.0)
+    add_subdirectory(test)
+endif()
+
+add_subdirectory(vendor/pdalboost)
 add_subdirectory(src/util)
 add_subdirectory(io)
 add_subdirectory(filters)
@@ -273,18 +282,8 @@ if (BUILD_PLUGIN_PYTHON)
     add_subdirectory(src/plang)
 endif()
 
-if (WITH_TESTS)
-    enable_testing()
-    add_subdirectory(vendor/gtest-1.7.0)
-    add_subdirectory(test)
-    # Define "make check" as alias for "make test"
-    ADD_CUSTOM_TARGET(check COMMAND ctest)
-endif()
-  
-add_subdirectory(plugins)
-
-if(WITH_APPS)
-  add_subdirectory(apps)
+if (WITH_APPS)
+    add_subdirectory(apps)
 endif()
 
 #------------------------------------------------------------------------------
@@ -331,7 +330,9 @@ include(CPack)
 
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 
-export(TARGETS ${PDAL_BASE_LIB_NAME} ${PDAL_UTIL_LIB_NAME}
+export(TARGETS ${PDAL_BASE_LIB_NAME}
+    ${PDAL_UTIL_LIB_NAME}
+    ${PDAL_BOOST_LIB_NAME}
     FILE "${PDAL_BINARY_DIR}/PDALTargets.cmake")
 install(EXPORT PDALTargets DESTINATION lib/pdal/cmake)
 include(${PDAL_CMAKE_DIR}/config.cmake)

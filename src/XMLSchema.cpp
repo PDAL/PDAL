@@ -43,8 +43,6 @@
 #include <map>
 #include <algorithm>
 
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/erase.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
 #include <string.h>
@@ -275,12 +273,12 @@ bool XMLSchema::validate(xmlDocPtr doc, const std::string& xsd)
 
 std::string XMLSchema::remapOldNames(const std::string& input)
 {
-    if (boost::iequals(input, "Unnamed field 512") ||
-            boost::iequals(input, "Chipper Point ID"))
+    if (Utils::iequals(input, "Unnamed field 512") ||
+            Utils::iequals(input, "Chipper Point ID"))
         return std::string("Chipper:PointID");
 
-    if (boost::iequals(input, "Unnamed field 513") ||
-            boost::iequals(input, "Chipper Block ID"))
+    if (Utils::iequals(input, "Unnamed field 513") ||
+            Utils::iequals(input, "Chipper Block ID"))
         return std::string("Chipper:BlockID");
 
     return input;
@@ -304,7 +302,7 @@ bool XMLSchema::loadMetadata(xmlNode *startNode, MetadataNode& input)
     {
         if (node->type != XML_ELEMENT_NODE)
             continue;
-        if (boost::equals((const char*)node->name, "Metadata"))
+        if (std::string((const char*)node->name) == "Metadata")
         {
             const char *fieldname =
                 (const char*)xmlGetProp(node, (const xmlChar*)"name");
@@ -314,7 +312,7 @@ bool XMLSchema::loadMetadata(xmlNode *startNode, MetadataNode& input)
                 (const char*)xmlGetProp(node, (const xmlChar*) "description");
             const char *text = (const char*)xmlNodeGetContent(node);
 
-            if (!boost::iequals(fieldname, "root"))
+            if (!Utils::iequals(fieldname, "root"))
             {
                 if (!fieldname)
                 {
@@ -337,7 +335,7 @@ bool XMLSchema::load(xmlDocPtr doc)
     xmlNode* root = xmlDocGetRootElement(doc);
     // print_element_names(root);
 
-    if (!boost::iequals((const char*)root->name, "PointCloudSchema"))
+    if (!Utils::iequals((const char*)root->name, "PointCloudSchema"))
     {
         std::cerr << "First node of document was not named 'PointCloudSchema'";
         return false;
@@ -352,7 +350,7 @@ bool XMLSchema::load(xmlDocPtr doc)
         dimension = dimension->next)
     {
         // Read off orientation setting
-        if (boost::equals((const char*)dimension->name, "orientation"))
+        if (std::string((const char*)dimension->name) == "orientation")
         {
             xmlChar* n = xmlNodeListGetString(doc, dimension->children, 1);
             if (!n)
@@ -363,14 +361,14 @@ bool XMLSchema::load(xmlDocPtr doc)
             std::string orientation = std::string((const char*)n);
             xmlFree(n);
 
-            if (boost::iequals(orientation, "dimension"))
+            if (Utils::iequals(orientation, "dimension"))
                 m_orientation = Orientation::DimensionMajor;
             else
                 m_orientation = Orientation::PointMajor;
             continue;
         }
 
-        if (boost::equals((const char*)dimension->name, "metadata"))
+        if (std::string((const char*)dimension->name) == "metadata")
         {
             m_metadata = MetadataNode("root");
             if (!loadMetadata(dimension, m_metadata))
@@ -379,7 +377,7 @@ bool XMLSchema::load(xmlDocPtr doc)
         }
 
         if (dimension->type != XML_ELEMENT_NODE ||
-            !boost::iequals((const char*)dimension->name, "dimension"))
+            !Utils::iequals((const char*)dimension->name, "dimension"))
             continue;
 
         XMLDim dim;
@@ -390,7 +388,9 @@ bool XMLSchema::load(xmlDocPtr doc)
             if (properties->type != XML_ELEMENT_NODE)
                 continue;
 
-            if (boost::iequals((const char*)properties->name, "name"))
+            std::string propName = (const char *)properties->name;
+            propName = Utils::tolower(propName);
+            if (propName == "name")
             {
                 xmlChar *n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n)
@@ -401,7 +401,7 @@ bool XMLSchema::load(xmlDocPtr doc)
                 dim.m_name = remapOldNames(std::string((const char*)n));
                 xmlFree(n);
             }
-            if (boost::iequals((const char*)properties->name, "description"))
+            if (propName == "description")
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n)
@@ -412,7 +412,7 @@ bool XMLSchema::load(xmlDocPtr doc)
                 dim.m_description = std::string((const char*)n);
                 xmlFree(n);
             }
-            if (boost::iequals((const char*)properties->name, "interpretation"))
+            if (propName == "interpretation")
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n)
@@ -423,7 +423,7 @@ bool XMLSchema::load(xmlDocPtr doc)
                 dim.m_dimType.m_type = Dimension::type((const char*)n);
                 xmlFree(n);
             }
-            if (boost::iequals((const char*)properties->name, "minimum"))
+            if (propName == "minimum")
             {
                 xmlChar* n = xmlGetProp(properties, (const xmlChar*) "value");
                 if (!n)
@@ -434,7 +434,7 @@ bool XMLSchema::load(xmlDocPtr doc)
                 dim.m_min = std::atof((const char*)n);
                 xmlFree(n);
             }
-            if (boost::iequals((const char*)properties->name, "maximum"))
+            if (propName == "maximum")
             {
                 xmlChar* n = xmlGetProp(properties, (const xmlChar*) "value");
                 if (!n)
@@ -445,7 +445,7 @@ bool XMLSchema::load(xmlDocPtr doc)
                 dim.m_max = std::atof((const char*)n);
                 xmlFree(n);
             }
-            if (boost::iequals((const char*)properties->name, "position"))
+            if (propName == "position")
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n)
@@ -456,7 +456,7 @@ bool XMLSchema::load(xmlDocPtr doc)
                 dim.m_position = std::atoi((const char*)n);
                 xmlFree(n);
             }
-            if (boost::iequals((const char*)properties->name, "offset"))
+            if (propName == "offset")
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n)
@@ -467,7 +467,7 @@ bool XMLSchema::load(xmlDocPtr doc)
                 dim.m_dimType.m_xform.m_offset = std::atof((const char*)n);
                 xmlFree(n);
             }
-            if (boost::iequals((const char*)properties->name, "scale"))
+            if (propName == "scale")
             {
                 xmlChar* n = xmlNodeListGetString(doc, properties->children, 1);
                 if (!n)
@@ -531,9 +531,9 @@ XMLDim& XMLSchema::xmlDim(const std::string& name)
 namespace
 {
 
-boost::property_tree::ptree getMetadataEntry(const MetadataNode& input)
+pdalboost::property_tree::ptree getMetadataEntry(const MetadataNode& input)
 {
-    boost::property_tree::ptree entry;
+    pdalboost::property_tree::ptree entry;
 
     entry.put_value(input.value());
     entry.put("<xmlattr>.name", input.name());
@@ -620,18 +620,17 @@ void XMLSchema::writeXml(xmlTextWriterPtr w) const
         xmlTextWriterStartElementNS(w, (const xmlChar*) "pc",
             (const xmlChar*) "metadata", NULL);
 
-        boost::property_tree::ptree output;
+        pdalboost::property_tree::ptree output;
 
         for (auto m : m_metadata.children())
             output.add_child("Metadata", getMetadataEntry(m));
-
         std::ostringstream oss;
-        boost::property_tree::xml_parser::write_xml(oss, output);
+        pdalboost::property_tree::xml_parser::write_xml(oss, output);
         std::string xml = oss.str();
 
         // wipe off write_xml's xml declaration
-        boost::algorithm::erase_all(xml,
-            "<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+        xml = Utils::replaceAll(xml,
+            "<?xml version=\"1.0\" encoding=\"utf-8\"?>", "");
         xmlTextWriterWriteRawLen(w, (const xmlChar*) xml.c_str(), xml.size());
         xmlTextWriterEndElement(w);
     }
@@ -639,9 +638,9 @@ void XMLSchema::writeXml(xmlTextWriterPtr w) const
         (const xmlChar*)"orientation", NULL,
         (const xmlChar*)orientation.str().c_str());
 
-    xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc", (const xmlChar*)"version", NULL,
-                                (const xmlChar*)PDAL_XML_SCHEMA_VERSION);
-
+    xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc",
+        (const xmlChar*)"version", NULL,
+        (const xmlChar*)PDAL_XML_SCHEMA_VERSION);
 
     xmlTextWriterEndElement(w);
     xmlTextWriterFlush(w);

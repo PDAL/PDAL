@@ -5,11 +5,9 @@ set(SYSCONFIG_INSTALL_DIR etc/pdal/ CACHE PATH "sysconfig")
 include(CMakePackageConfigHelpers)
 
 set(PDAL_CONFIG_INCLUDE_DIRS
-  "${CMAKE_INSTALL_PREFIX}/include"
-  "${Boost_INCLUDE_DIRS}")
+  "${CMAKE_INSTALL_PREFIX}/include")
 set(PDAL_CONFIG_LIBRARY_DIRS
-  "${CMAKE_INSTALL_PREFIX}/lib"
-  "${Boost_LIBRARY_DIRS}")
+  "${CMAKE_INSTALL_PREFIX}/lib")
 
 configure_package_config_file(
   PDALConfig.cmake.in

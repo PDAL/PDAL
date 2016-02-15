@@ -10,8 +10,7 @@ Metadata
 
 Metadata is an important component of any data processing story. PDAL attempts
 to allow users to operate with metadata in a relatively free-form way, with
-its main Metadata utility, :cpp:class:`pdal::Metadata`, being a lightly
-wrapped `boost::property_tree`_.
+its main Metadata utility, :cpp:class:`pdal::Metadata`.
 
 The basic structure of a :cpp:class:`pdal::Metadata` instance is the following
 tree structure:
@@ -34,8 +33,7 @@ tree structure:
 Metadata Types
 ------------------------------------------------------------------------------
 
-:cpp:class:`pdal::Metadata` instances are essentially a specially-organized
-boost::property_tree, and as such, require that any classes that are added
+:cpp:class:`pdal::Metadata` instances require that any classes that are added
 to them be copy-constructable and have an ostream<< operator for them.  While
 these constraints mean they are all serializable to strings,
 :cpp:class:`pdal::Metadata` also keeps an explicit type variable, `type` for
@@ -227,5 +225,3 @@ little bit flatter...
         </Metadata>
       </Metadata>
     </Reader>
-
-.. _`boost::property_tree`: http://www.boost.org/doc/libs/release/libs/property_tree/

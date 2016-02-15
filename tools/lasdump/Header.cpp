@@ -35,9 +35,6 @@
 #include "Header.hpp"
 #include "Lasdump.hpp"
 
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
-
 namespace pdal
 {
 namespace lasdump
@@ -96,26 +93,17 @@ bool Header::valid() const
     return true;
 }
 
-
-void Header::get(ILeStream& in, boost::uuids::uuid& uuid)
+namespace
 {
-    union
-    {
-        char buf[16];
-        struct
-        {
-            uint32_t uidPart1;
-            uint16_t uidPart2;
-            uint16_t uidPart3;
-            char uidPart4[8];
-        };
-    } u;
+void get(ILeStream& in, Uuid& uuid)
+{
+    char buf[uuid.size];
 
-    in >> u.uidPart1 >> u.uidPart2 >> u.uidPart3;
-    in.get(u.uidPart4, sizeof(u.uidPart4));
-    memcpy(uuid.data, u.buf, sizeof(u.buf));
+    in.get(buf, uuid.size);
+    uuid.unpack(buf);
 }
 
+} // unnamed namespace;
 
 ILeStream& operator>>(ILeStream& in, Header& h)
 {
@@ -127,7 +115,7 @@ ILeStream& operator>>(ILeStream& in, Header& h)
     if (!h.signatureValid())
         throw Exception("Not a LAS/LAZ file.  Invalid file signature.");
     in >> h.m_sourceId >> h.m_globalEncoding;
-    Header::get(in, h.m_projectGuid);
+    get(in, h.m_projectGuid);
     in >> versionMajor >> h.m_versionMinor;
     in.get(h.m_systemId, 32);
 

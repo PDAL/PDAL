@@ -78,9 +78,6 @@ endmacro(PDAL_ADD_LIBRARY)
 macro(PDAL_ADD_EXECUTABLE _name)
     add_executable(${_name} ${ARGN})
 
-    # must link explicitly against boost.
-    target_link_libraries(${_name} ${Boost_LIBRARIES})
-
     set(PDAL_EXECUTABLES ${PDAL_EXECUTABLES} ${_name})
     install(TARGETS ${_name}
         EXPORT PDALTargets

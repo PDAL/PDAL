@@ -100,7 +100,14 @@ private:
     int m_outputFormat;
     std::string m_zName;
 
-    std::vector<boost::tuple<double, double, double> > m_coordinates;
+    typedef struct
+    {
+        double x;
+        double y;
+        double z;
+    } Coordinate;
+
+    std::vector<Coordinate> m_coordinates;
 };
 
 } // namespaces

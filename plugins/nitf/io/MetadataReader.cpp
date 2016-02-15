@@ -35,8 +35,7 @@
 #include "MetadataReader.hpp"
 
 #include <pdal/Metadata.hpp>
-
-#include <boost/algorithm/string.hpp>
+#include <pdal/util/Utils.hpp>
 
 #ifdef PDAL_COMPILER_GCC
 #  pragma GCC diagnostic ignored "-Wenum-compare"
@@ -54,13 +53,6 @@ MetadataReader::MetadataReader(::nitf::Record& record,
     m_node(node),
     m_showEmptyFields(showEmptyFields)
 {
-    return;
-}
-
-
-MetadataReader::~MetadataReader()
-{
-    return;
 }
 
 
@@ -158,7 +150,7 @@ void MetadataReader::writeField(const std::string& parentkey,
         throw pdal_error("error reading nitf (2)");
     }    
    
-    boost::algorithm::trim(v);
+    Utils::trim(v);
     const bool blank = (v.length() == 0);    
     if (!blank || (blank && m_showEmptyFields))
     {

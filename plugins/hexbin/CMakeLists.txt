@@ -2,6 +2,8 @@
 # HexBin plugin CMake configuration
 #
 
+include_directories(${ROOT_DIR}/vendor/pdalboost)
+
 find_package(Hexer)
 if (HEXER_FOUND)
     include_directories(${HEXER_INCLUDE_DIR})

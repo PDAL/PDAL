@@ -17,34 +17,6 @@ plugin architecture that loads them at runtime.
 Required Dependencies
 ------------------------------------------------------------------------------
 
-Boost
-..............................................................................
-
-PDAL attempts to constrain its code-love for Boost and not always try to use the
-latest and the greatest, but the instinct is hard to control. Specifically, PDAL
-takes advantage of a number of late-version features in boost::accumulators for
-statistics filtering, and as of this writing, it should be assumed that the
-minimum version required for Boost is 1.55. Other versions less than that may
-work with some minor modifications or ``#ifdef``'ing, but the PDAL developers
-currently track rather late versions of Boost.
-
-
-Packages Used
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-An list includes:
-
-* Accumulators
-* Filesystem
-* Program Options
-* Property Tree
-* IO Streams
-* System
-* String Algorithms
-* UUID
-
-
-
 GDAL
 ..............................................................................
 
