@@ -246,22 +246,24 @@ RUN rm -rf laszip laz-perf points2grid pcl nitro hexer 3.2.7.tar.gz eigen-eigen-
 RUN apt-get clean
 
 
-#RUN wget http://sourceforge.net/projects/arma/files/armadillo-6.400.3.tar.gz \
-#    && tar zxvf armadillo-6.400.3.tar.gz \
-#    && cd armadillo-6.400.3 \
-#    && cmake . -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
-#     && make \
-#     && make install
+RUN git clone https://github.com/gadomski/armadillo.git \
+    && cd armadillo/branch-5.600 \
+    && cmake . -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+    && make \
+    && make install
 
-#RUN git clone https://github.com/gadomski/fgt.git \
-#    && cd fgt \
-#    && cmake . -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
-#    && make \
-#    && make install
+ADD fgt-pr-13.patch /
 
-#RUN git clone https://github.com/hobu/cpd.git \
+RUN git clone https://github.com/gadomski/fgt.git \
+    && cd fgt \
+    && git checkout b3bcea4767fc0fd018bd280a1bc8e8d6c44c513e \
+    && patch -p1 < /fgt-pr-13.patch \
+    && cmake . -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+    && make \
+    && make install
+
+#RUN https://github.com/gadomski/cpd.git \
 #    && cd cpd \
-#    && git checkout armadillo-6 \
 #    && cmake . -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DFgt_DIR=/usr \
 #    && make \
 #    && make install

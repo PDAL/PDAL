@@ -1,0 +1,133 @@
+diff --git a/test/clustering_test.cpp b/test/clustering_test.cpp
+index 222fb82..80a0e21 100644
+--- a/test/clustering_test.cpp
++++ b/test/clustering_test.cpp
+@@ -43,13 +43,13 @@ TEST(GonzalezClustering, ReferenceImplementation) {
+         arma::conv_to<std::vector<arma::uword>>::from(
+             clustering.get_num_points());
+ 
+-    EXPECT_EQ(5000, clustering.get_indices().size());
+-    EXPECT_EQ(2, clustering.get_centers().n_cols);
+-    EXPECT_EQ(15, clustering.get_centers().n_rows);
++    EXPECT_EQ(5000u, clustering.get_indices().size());
++    EXPECT_EQ(2u, clustering.get_centers().n_cols);
++    EXPECT_EQ(15u, clustering.get_centers().n_rows);
+     EXPECT_EQ(expected_num_points, actual_num_points);
+-    EXPECT_EQ(15, clustering.get_radii().size());
++    EXPECT_EQ(15u, clustering.get_radii().size());
+     EXPECT_DOUBLE_EQ(0.079945937357691899, clustering.get_radius(0));
+     EXPECT_DOUBLE_EQ(0.18376119993077969, clustering.get_rx());
+-    EXPECT_EQ(6, clustering.get_p_max());
++    EXPECT_EQ(6u, clustering.get_p_max());
+ }
+ }
+diff --git a/test/constant_series_test.cpp b/test/constant_series_test.cpp
+index bb064fb..8d82994 100644
+--- a/test/constant_series_test.cpp
++++ b/test/constant_series_test.cpp
+@@ -31,7 +31,7 @@ TEST(ConstantSeries, ReferenceImplementation) {
+     arma::uword p_max = 70;
+     std::vector<double> series(get_p_max_total(d, p_max));
+     compute_constant_series(2, 70, series);
+-    EXPECT_EQ(2485, series.size());
++    EXPECT_EQ(2485u, series.size());
+     EXPECT_DOUBLE_EQ(1, series.at(0));
+     EXPECT_DOUBLE_EQ(2, series.at(1));
+     EXPECT_DOUBLE_EQ(2, series.at(2));
+diff --git a/test/direct_test.cpp b/test/direct_test.cpp
+index 050c029..4302303 100644
+--- a/test/direct_test.cpp
++++ b/test/direct_test.cpp
+@@ -34,7 +34,7 @@ TEST(Direct, OneTargetOneSource) {
+ 
+     Direct direct(source, 1);
+     arma::vec g = direct.compute(target);
+-    EXPECT_EQ(g.n_rows, 1);
++    EXPECT_EQ(g.n_rows, 1u);
+     EXPECT_DOUBLE_EQ(0.006737946999085467, g(0));
+ }
+ 
+@@ -47,7 +47,7 @@ TEST(Direct, TwoTargetsTwoSources) {
+ 
+     Direct direct(source, 0.2);
+     arma::vec g = direct.compute(target);
+-    EXPECT_EQ(g.n_rows, 2);
++    EXPECT_EQ(g.n_rows, 2u);
+     EXPECT_DOUBLE_EQ(0.2096121683000387, g(0));
+     EXPECT_DOUBLE_EQ(0.00040464667729846903, g(1));
+ }
+diff --git a/test/direct_tree_test.cpp b/test/direct_tree_test.cpp
+index e176176..7962ece 100644
+--- a/test/direct_tree_test.cpp
++++ b/test/direct_tree_test.cpp
+@@ -41,7 +41,7 @@ TEST(DirectTree, ReferenceImplementation)
+     DirectTree direct_tree(source, bandwidth, epsilon);
+     arma::vec g = direct_tree.compute(target, weights);
+ 
+-    EXPECT_EQ(1000, g.n_rows);
++    EXPECT_EQ(1000u, g.n_rows);
+     EXPECT_DOUBLE_EQ(557.19832513213646, g(0));
+ }
+ 
+diff --git a/test/ifgt_test.cpp b/test/ifgt_test.cpp
+index 7ec1082..50d9b36 100644
+--- a/test/ifgt_test.cpp
++++ b/test/ifgt_test.cpp
+@@ -33,7 +33,7 @@ TEST(ChooseIfgtParameters, LargeKLimit) {
+     double epsilon = 1e-6;
+     int k_limit = 189;
+     Ifgt::Parameters params = Ifgt::choose_parameters(d, h, epsilon, k_limit);
+-    EXPECT_EQ(13, params.num_clusters);
++    EXPECT_EQ(13u, params.num_clusters);
+     EXPECT_NEAR(1.1151, params.radius, 0.0001);
+ }
+ 
+@@ -44,7 +44,7 @@ TEST(ChooseIfgtParameters, SmallKLimit) {
+     double epsilon = 1e-3;
+     arma::uword k_limit = 50;
+     Ifgt::Parameters params = Ifgt::choose_parameters(d, h, epsilon, k_limit);
+-    EXPECT_EQ(15, params.num_clusters);
++    EXPECT_EQ(15u, params.num_clusters);
+     EXPECT_NEAR(1.051304, params.radius, 0.000001);
+ }
+ 
+@@ -53,7 +53,7 @@ TEST(ChooseIfgtParameters, NoBoundFound) {
+     int d = 3;
+     double h = 0.01;
+     double epsilon = 1e-2;
+-    int k_limit = 189;
++    unsigned int k_limit = 189;
+     Ifgt::Parameters params = Ifgt::choose_parameters(d, h, epsilon, k_limit);
+     EXPECT_EQ(k_limit, params.num_clusters);
+ }
+@@ -71,7 +71,7 @@ TEST(Ifgt, ReferenceImplementation) {
+     ifgt.set_clustering_starting_index(2);
+     arma::vec g = ifgt.compute(target, weights);
+ 
+-    EXPECT_EQ(5000, g.n_rows);
++    EXPECT_EQ(5000u, g.n_rows);
+     EXPECT_DOUBLE_EQ(2.071868804956274e+03, g(0));
+ }
+ 
+@@ -88,7 +88,7 @@ TEST(Ifgt, DataAdaptiveReferenceImplementation) {
+     ifgt.set_clustering_starting_index(2).use_data_adaptive_truncation(true);
+     arma::vec g = ifgt.compute(target, weights);
+ 
+-    EXPECT_EQ(5000, g.n_rows);
++    EXPECT_EQ(5000u, g.n_rows);
+     EXPECT_DOUBLE_EQ(2071.7022219052133, g(0));
+ }
+ }
+diff --git a/test/monomials_test.cpp b/test/monomials_test.cpp
+index eb839a3..b3029fa 100644
+--- a/test/monomials_test.cpp
++++ b/test/monomials_test.cpp
+@@ -34,7 +34,7 @@ TEST(Monomials, ReferenceImplementation) {
+     arma::rowvec monomials(get_p_max_total(2, p_max));
+     compute_monomials(dx / 0.4, p_max, monomials);
+ 
+-    EXPECT_EQ(2485, monomials.size());
++    EXPECT_EQ(2485u, monomials.size());
+     EXPECT_NEAR(1.0, monomials.at(0), 0.000001);
+     EXPECT_NEAR(0.798823, monomials.at(1), 0.000001);
+     EXPECT_NEAR(1.004649, monomials.at(2), 0.000001);
