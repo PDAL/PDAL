@@ -118,6 +118,10 @@ option(WITH_APPS "Choose if PDAL utilities should be built" TRUE)
 add_feature_info("PDAL application" WITH_APPS
     "the PDAL command line application")
 
+option(WITH_COMPLETION "Install bash completions scripts for command line?" FALSE)
+add_feature_info("Bash completion" WITH_COMPLETION
+    "completion for PDAL command line")
+
 option(BUILD_PLUGIN_ATTRIBUTE "Choose if Attribute filter is built" FALSE)
 add_feature_info("Attribute plugin" BUILD_PLUGIN_ATTRIBUTE
     "apply attributes to a subset of points")
@@ -280,7 +284,7 @@ if (WITH_TESTS)
     # Define "make check" as alias for "make test"
     ADD_CUSTOM_TARGET(check COMMAND ctest)
 endif()
-  
+
 add_subdirectory(plugins)
 
 if(WITH_APPS)
@@ -340,6 +344,8 @@ feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES)
 export(PACKAGE PDAL)
 
 # TODO: move under scripts/bash-completion ?
-if (IS_DIRECTORY /etc/bash_completion.d)
-    install(FILES "${PROJECT_SOURCE_DIR}/scripts/bash-completion/pdal" DESTINATION "${CMAKE_INSTALL_PREFIX}/etc/bash_completion.d")
+if (WITH_COMPLETION)
+    if (IS_DIRECTORY /etc/bash_completion.d)
+        install(FILES "${PROJECT_SOURCE_DIR}/scripts/bash-completion/pdal" DESTINATION "${CMAKE_INSTALL_PREFIX}/etc/bash_completion.d")
+    endif()
 endif()
