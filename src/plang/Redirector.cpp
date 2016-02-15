@@ -109,6 +109,9 @@ static PyTypeObject StdoutType =
     0, /* tp_weaklist */
     0, /* tp_del */
     0, /* tp_version_tag */
+#if PY_MAJOR_VERSION >= 3
+    0, /* tp_finalilzer */
+#endif
 };
 
 
