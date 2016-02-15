@@ -262,8 +262,8 @@ RUN git clone https://github.com/gadomski/fgt.git \
     && make \
     && make install
 
-#RUN https://github.com/gadomski/cpd.git \
-#    && cd cpd \
-#    && cmake . -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DFgt_DIR=/usr \
-#    && make \
-#    && make install
+RUN git clone https://github.com/gadomski/cpd.git \
+    && cd cpd \
+    && cmake . -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DFgt_DIR=/usr \
+    && make \
+    && make install
