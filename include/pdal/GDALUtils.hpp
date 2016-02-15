@@ -43,9 +43,6 @@
 #include <vector>
 #include <array>
 
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
-
 #include <cpl_port.h>
 #include <gdal.h>
 #include <cpl_vsi.h>
@@ -192,7 +189,7 @@ public:
     inline void setLogger(LogPtr logger) { m_log = logger; }
 
 private:
-    boost::function<void(CPLErr, int, char const*)> m_gdal_callback;
+    std::function<void(CPLErr, int, char const*)> m_gdal_callback;
     bool m_isDebug;
     pdal::LogPtr m_log;
 };

@@ -200,6 +200,8 @@ void outputOptions()
 
 int main(int argc, char* argv[])
 {
+    Log log("PDAL", "stderr");
+
     // No arguments, print basic usage, plugins will be loaded
     if (argc < 2)
     {
@@ -214,11 +216,11 @@ int main(int argc, char* argv[])
     loaded_kernels = PluginManager::names(PF_PluginType_Kernel);
 
     bool isValidKernel = false;
-    std::string command(argv[1]);
+    std::string command = Utils::tolower(argv[1]);
     std::string fullname;
     for (auto name : loaded_kernels)
     {
-        if (boost::iequals(argv[1], splitDriverName(name)))
+        if (command == splitDriverName(name))
         {
             fullname = name;
             isValidKernel = true;
@@ -235,7 +237,7 @@ int main(int argc, char* argv[])
 
         for (auto name : loaded_kernels)
         {
-            if (boost::iequals(argv[1], splitDriverName(name)))
+            if (command == splitDriverName(name))
             {
                 fullname = name;
                 isValidKernel = true;
@@ -260,44 +262,46 @@ int main(int argc, char* argv[])
     bool help = false;
     bool options = false;
     bool version = false;
-    std::string optString("all");  // --options will default to displaying information on all available stages
+
+    // --options will default to displaying information on all available stages
+    std::string optString("all");
+
     for (int i = 1; i < argc; ++i)
     {
-        if (boost::iequals(argv[i], "--debug"))
+        std::string arg = Utils::tolower(argv[i]);
+        if (arg == "--debug")
         {
             debug = true;
         }
-        else if (boost::iequals(argv[i], "--drivers"))
+        else if (arg == "--drivers")
         {
             drivers = true;
         }
-        else if (boost::iequals(argv[i], "--help") || boost::iequals(argv[i], "-h"))
+        else if ((arg == "--help") || (arg == "-h"))
         {
             help = true;
         }
-        else if (boost::algorithm::istarts_with(argv[i], "--options"))
+        else if (Utils::startsWith(arg, "--options"))
         {
-            std::vector<std::string> optionsVec;
-            // we are rather unsophisticated for now, only splitting on '=', no spaces allowed
-            boost::algorithm::split(optionsVec, argv[i],
-                boost::algorithm::is_any_of("="), boost::algorithm::token_compress_on);
+            StringList optionsVec = Utils::split2(arg, '=');
             options = true;
             if (optionsVec.size() == 2)
-                optString = optionsVec[1];
+                optString = Utils::tolower(optionsVec[1]);
         }
-        else if (boost::iequals(argv[i], "--version"))
+        else if (arg == "--version")
         {
             version = true;
         }
-        else if (boost::iequals(argv[i], "--list-commands"))
+        else if (arg == "--list-commands")
         {
             outputCommands();
             return 0;
         }
         else
         {
-            if (boost::algorithm::istarts_with(argv[i], "--"))
-                std::cerr << "Unknown option '" << argv[i] <<"' not recognized" << std::endl << std::endl;
+            if (arg == "--")
+                log.get(LogLevel::Warning) << "Unknown option '" << argv[i] <<
+                    "' not recognized" << std::endl << std::endl;
         }
     }
 
@@ -315,7 +319,7 @@ int main(int argc, char* argv[])
 
     if (options)
     {
-        if (boost::iequals(optString, "all"))
+        if (optString == "all")
             outputOptions();
         else
             outputOptions(optString);
@@ -335,7 +339,8 @@ int main(int argc, char* argv[])
     }
 
     if (!isValidKernel)
-        std::cerr << "Command '" << command <<"' not recognized" << std::endl << std::endl;
+        log.get(LogLevel::Error) << "Command '" << command <<
+            "' not recognized" << std::endl << std::endl;
     outputHelp();
     return 1;
 }

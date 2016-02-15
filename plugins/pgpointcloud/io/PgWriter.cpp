@@ -33,13 +33,12 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <boost/format.hpp>
-
 #include "PgWriter.hpp"
 
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/util/portable_endian.hpp>
 #include <pdal/XMLSchema.hpp>
 
 namespace pdal
@@ -512,20 +511,18 @@ void PgWriter::writeTile(const PointViewPtr view)
     CompressionType::Enum compression_v = CompressionType::None;
     uint32_t compression = htobe32(static_cast<uint32_t>(compression_v));
 
-#ifdef BOOST_LITTLE_ENDIAN
-    // needs to be 1 byte
-    options << boost::format("%02x") % 1;
-#elif BOOST_BIG_ENDIAN
-    // needs to be 1 byte
-    options << boost::format("%02x") % 0;
+#if BYTE_ORDER == LITTLE_ENDIAN
+    options << "01";
+#elif BYTE_ORDER == BIG_ENDIAN
+    options << "00";
 #endif
 
     // needs to be 4 bytes
-    options << boost::format("%08x") % pcid;
+    options << std::hex << std::setfill('0') << std::setw(8) << pcid;
     // needs to be 4 bytes
-    options << boost::format("%08x") % compression;
+    options << std::hex << std::setfill('0') << std::setw(8) << compression;
     // needs to be 4 bytes
-    options << boost::format("%08x") % num_points;
+    options << std::hex << std::setfill('0') << std::setw(8) << num_points;
 
     m_insert.append(options.str());
     m_insert.append(hexrep);

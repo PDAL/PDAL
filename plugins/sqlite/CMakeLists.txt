@@ -3,7 +3,8 @@
 #
 
 include (${PDAL_CMAKE_DIR}/sqlite.cmake)
-#
+include_directories(${ROOT_DIR}/vendor/pdalboost)
+
 # SQLite Reader
 #
 set(srcs io/SQLiteReader.cpp)

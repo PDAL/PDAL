@@ -38,6 +38,7 @@
 #include <pdal/util/Utils.hpp>
 
 #include <algorithm>
+#include <cfloat>
 #include <cmath>
 #include <iostream>
 #include <limits>
@@ -971,11 +972,11 @@ GDALDataset* DerivativeWriter::createFloat32GTIFF(std::string filename,
         {
             char **papszOptions = NULL;
 
-            boost::filesystem::path p(filename);
+            pdalboost::filesystem::path p(filename);
             p.replace_extension(".tif");
             GDALDataset *dataset;
             dataset = tpDriver->Create(p.string().c_str(), cols, rows, 1,
-                                       GDT_Float32, papszOptions);
+                GDT_Float32, papszOptions);
 
             BOX2D& extent = getBounds();
 

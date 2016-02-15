@@ -42,8 +42,6 @@
 #include <iostream>
 #include <map>
 
-#include <boost/tokenizer.hpp>
-
 namespace pdal
 {
 
@@ -118,23 +116,22 @@ void TextWriter::ready(PointTableRef table)
     m_stream->precision(m_precision);
     *m_stream << std::fixed;
 
-    typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-
     // Find the dimensions listed and put them on the id list.
-    boost::char_separator<char> separator(",");
-    boost::erase_all(m_dimOrder, " "); // Wipe off spaces
-    tokenizer sdims(m_dimOrder, separator);
-    for (tokenizer::iterator ti = sdims.begin(); ti != sdims.end(); ++ti)
+    StringList dimNames = Utils::split2(m_dimOrder, ',');
+    for (std::string dim : dimNames)
     {
-        Dimension::Id::Enum d = table.layout()->findDim(*ti);
+        Utils::trim(dim);
+        Dimension::Id::Enum d = table.layout()->findDim(dim);
         if (d == Dimension::Id::Unknown)
         {
             std::ostringstream oss;
-            oss << "Dimension not found with name '" << *ti <<"'";
+            oss << getName() << ": Dimension not found with name '" <<
+                dim << "'.";
             throw pdal_error(oss.str());
         }
         m_dims.push_back(d);
     }
+
     // Add the rest of the dimensions to the list if we're doing that.
     // Yes, this isn't efficient when, but it's simple.
     if (m_dimOrder.empty() || m_writeAllDims)

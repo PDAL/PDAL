@@ -34,7 +34,7 @@
 
 #include <pdal/pdal_test_main.hpp>
 
-#include <string.h>
+#include <array>
 
 #include <pdal/Filter.hpp>
 #include <pdal/PointView.hpp>

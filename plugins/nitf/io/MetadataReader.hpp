@@ -78,7 +78,6 @@ class PDAL_DLL MetadataReader
 {
 public:
     MetadataReader(::nitf::Record&, MetadataNode&, bool showEmptyFields=true);
-    ~MetadataReader();
 
     void read();
 

@@ -38,7 +38,6 @@
 #include <iostream>
 #include <algorithm>
 
-#include <boost/algorithm/string.hpp>
 #include <points2grid/Interpolation.hpp>
 
 namespace pdal
@@ -72,32 +71,36 @@ void P2gWriter::processOptions(const Options& options)
     {
         for (auto i = types.begin(); i != types.end(); ++i)
         {
-            if (boost::iequals(i->getValue<std::string>(), "min"))
+            std::string val = Utils::tolower(i->getValue<std::string>());
+
+            if (val == "min")
                 m_outputTypes |= OUTPUT_TYPE_MIN;
-            if (boost::iequals(i->getValue<std::string>(), "max"))
+            if (val == "max")
                 m_outputTypes |= OUTPUT_TYPE_MAX;
-            if (boost::iequals(i->getValue<std::string>(), "mean"))
+            if (val == "mean")
                 m_outputTypes |= OUTPUT_TYPE_MEAN;
-            if (boost::iequals(i->getValue<std::string>(), "idw"))
+            if (val == "idw")
                 m_outputTypes |= OUTPUT_TYPE_IDW;
-            if (boost::iequals(i->getValue<std::string>(), "den"))
+            if (val == "den")
                 m_outputTypes |= OUTPUT_TYPE_DEN;
-            if (boost::iequals(i->getValue<std::string>(), "std"))
+            if (val == "std")
                 m_outputTypes |= OUTPUT_TYPE_STD;
-            if (boost::iequals(i->getValue<std::string>(), "all"))
+            if (val == "all")
                 m_outputTypes = OUTPUT_TYPE_ALL;
         }
     }
 
     std::string output_format =
         options.getValueOrDefault<std::string>("output_format", "grid");
-    if (boost::iequals(output_format, "grid"))
+
+    std::string fmt = Utils::tolower(output_format);
+    if (fmt == "grid")
         m_outputFormat = OUTPUT_FORMAT_GRID_ASCII;
-    else if (boost::iequals(output_format, "asc"))
+    else if (fmt == "asc")
         m_outputFormat = OUTPUT_FORMAT_ARC_ASCII;
-    else if (boost::iequals(output_format, "tif"))
+    else if (fmt == "tif")
         m_outputFormat = OUTPUT_FORMAT_GDAL_GTIFF;
-    else if (boost::iequals(output_format, "all"))
+    else if (fmt == "all")
         m_outputFormat = OUTPUT_FORMAT_ALL;
     else
     {
@@ -156,7 +159,7 @@ void P2gWriter::write(const PointViewPtr view)
         double x = view->getFieldAs<double>(Dimension::Id::X, idx);
         double y = view->getFieldAs<double>(Dimension::Id::Y, idx);
         double z = view->getFieldAs<double>(Dimension::Id::Z, idx);
-        m_coordinates.push_back(boost::tuple<double, double, double>(x, y, z));
+        m_coordinates.push_back(Coordinate{x, y, z});
     }
 
     view->calculateBounds(m_bounds);
@@ -196,21 +199,14 @@ void P2gWriter::done(PointTableRef table)
         throw p2g_error("unable to initialize interpolator");
     }
 
-    int rc(0);
-
-    std::vector<boost::tuple<double, double, double> >::const_iterator i;
-    for (i = m_coordinates.begin(); i!= m_coordinates.end(); ++i)
+    for (auto coord : m_coordinates)
     {
-        double x = i->get<0>();
-        double y = i->get<1>();
-        x = x - m_bounds.minx;
-        y = y - m_bounds.miny;
+        double x = coord.x - m_bounds.minx;
+        double y = coord.y - m_bounds.miny;
+        double z = coord.z;
 
-        rc = m_interpolator->update(x, y, i->get<2>());
-        if (rc < 0)
-        {
+        if (m_interpolator->update(x, y, z) < 0)
             throw p2g_error("interp->update() error while processing ");
-        }
     }
 
     double adfGeoTransform[6];
@@ -225,9 +221,9 @@ void P2gWriter::done(PointTableRef table)
 
     log()->get(LogLevel::Debug) << "Output SRS  :'" << srs.getWKT() << "'" <<
         std::endl;
-    if ((rc = m_interpolator->finish(const_cast<char*>(m_filename.c_str()),
+    if (m_interpolator->finish(const_cast<char*>(m_filename.c_str()),
         m_outputFormat, m_outputTypes, adfGeoTransform,
-        srs.getWKT().c_str())) < 0)
+        srs.getWKT().c_str()) < 0)
     {
         throw p2g_error("interp->finish() error");
     }

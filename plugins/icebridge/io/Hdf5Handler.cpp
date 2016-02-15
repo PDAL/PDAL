@@ -36,9 +36,6 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/pdal_types.hpp>
 
-#include <boost/numeric/conversion/cast.hpp>
-
-
 namespace pdal
 {
 

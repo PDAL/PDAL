@@ -39,11 +39,7 @@
 #include <pdal/PDALUtils.hpp>
 #include <pdal/PointView.hpp>
 
-#include <boost/program_options.hpp>
-#include <boost/property_tree/json_parser.hpp>
-#include <boost/property_tree/xml_parser.hpp>
-
-using boost::property_tree::ptree;
+using pdalboost::property_tree::ptree;
 
 namespace pdal
 {

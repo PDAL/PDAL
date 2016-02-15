@@ -34,6 +34,7 @@
 
 #include <pdal/pdal_test_main.hpp>
 
+#include <array>
 #include <random>
 
 #include <boost/property_tree/xml_parser.hpp>

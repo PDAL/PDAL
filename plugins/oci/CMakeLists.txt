@@ -3,7 +3,10 @@
 #
 
 find_package(Oracle REQUIRED)
+
 include_directories(${ORACLE_INCLUDE_DIR})
+include_directories(${ROOT_DIR}/vendor/pdalboost)
+
 set(OCI_CONNECTION "scott/tiger@localhost/test" CACHE STRING
     "OCI connection string <username/password@instance>")
 

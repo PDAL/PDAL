@@ -38,8 +38,6 @@
 #include <array>
 #include <vector>
 
-#include <boost/property_tree/ptree.hpp>
-
 #include <pdal/Dimension.hpp>
 #include <pdal/util/Bounds.hpp>
 #include <pdal/util/Uuid.hpp>
@@ -97,7 +95,7 @@ public:
         { m_globalEncoding = globalEncoding; }
 
     /// Get project identifier.
-    /// \return Global Unique Identifier as an instance of liblas::guid class.
+    /// \return UUID
     Uuid projectId() const
         { return m_projectUuid; }
 

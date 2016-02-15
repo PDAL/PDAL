@@ -34,8 +34,6 @@
 
 #include "RandomKernel.hpp"
 
-#include <boost/program_options.hpp>
-
 namespace pdal
 {
 
@@ -98,64 +96,29 @@ Stage& RandomKernel::makeReader(Options readerOptions)
 int RandomKernel::execute()
 {
     Options readerOptions;
-    {
-        boost::char_separator<char> sep(SEPARATORS);
-        std::vector<double> means;
-        tokenizer mean_tokens(m_means, sep);
-        for (tokenizer::iterator t = mean_tokens.begin();
-            t != mean_tokens.end(); ++t)
-        {
-            means.push_back(boost::lexical_cast<double>(*t));
-        }
 
-        if (means.size())
-        {
-            readerOptions.add<double >("mean_x", means[0]);
-            readerOptions.add<double >("mean_y", means[1]);
-            readerOptions.add<double >("mean_z", means[2]);
-        }
+    setCommonOptions(readerOptions);
+    if (!m_bounds.empty())
+        readerOptions.add("bounds", m_bounds);
 
-        std::vector<double> stdevs;
-        tokenizer stdev_tokens(m_stdevs, sep);
-        for (tokenizer::iterator t = stdev_tokens.begin();
-            t != stdev_tokens.end(); ++t)
-        {
-            stdevs.push_back(boost::lexical_cast<double>(*t));
-        }
-
-        if (stdevs.size())
-        {
-            readerOptions.add<double >("stdev_x", stdevs[0]);
-            readerOptions.add<double >("stdev_y", stdevs[1]);
-            readerOptions.add<double >("stdev_z", stdevs[2]);
-        }
-
-        if (!m_bounds.empty())
-            readerOptions.add<BOX3D >("bounds", m_bounds);
-
-        if (boost::iequals(m_distribution, "uniform"))
-            readerOptions.add<std::string>("mode", "uniform");
-        else if (boost::iequals(m_distribution, "normal"))
-            readerOptions.add<std::string>("mode", "normal");
-        else if (boost::iequals(m_distribution, "random"))
-            readerOptions.add<std::string>("mode", "random");
-        else
-            throw pdal_error("invalid distribution: " + m_distribution);
-        readerOptions.add<int>("num_points", m_numPointsToWrite);
-        readerOptions.add<bool>("debug", isDebug());
-        readerOptions.add<uint32_t>("verbose", getVerboseLevel());
-    }
+    std::string distribution(Utils::tolower(m_distribution));
+    if (distribution == "uniform")
+        readerOptions.add("mode", "uniform");
+    else if (distribution == "normal")
+        readerOptions.add("mode", "normal");
+    else if (distribution == "random")
+        readerOptions.add("mode", "random");
+    else
+        throw pdal_error("invalid distribution: " + m_distribution);
+    readerOptions.add("num_points", m_numPointsToWrite);
 
     Options writerOptions;
-    {
-        writerOptions.add<std::string>("filename", m_outputFile);
-        setCommonOptions(writerOptions);
 
-        if (m_bCompress)
-        {
-            writerOptions.add<bool>("compression", true);
-        }
-    }
+    writerOptions.add("filename", m_outputFile);
+    setCommonOptions(writerOptions);
+
+    if (m_bCompress)
+        writerOptions.add("compression", true);
 
     Stage& writer = makeWriter(m_outputFile, makeReader(readerOptions));
     writer.setOptions(writerOptions);

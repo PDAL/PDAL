@@ -44,8 +44,6 @@
 #include <pdal/XMLSchema.hpp>
 #endif
 
-#include <boost/program_options.hpp>
-
 namespace pdal
 {
 
@@ -156,14 +154,11 @@ using namespace std;
 
 uint32_t parseInt(const string& s)
 {
-    try
-    {
-        return boost::lexical_cast<uint32_t>(s);
-    }
-    catch (boost::bad_lexical_cast)
-    {
+    uint32_t i;
+
+    if (!Utils::fromString(s, i))
         throw app_runtime_error(string("Invalid integer: ") + s);
-    }
+    return i;
 }
 
 
@@ -405,7 +400,11 @@ MetadataNode InfoKernel::dumpQuery(PointViewPtr inView) const
     std::vector<std::string> tokens = Utils::split2(location, seps);
     std::vector<double> values;
     for (auto ti = tokens.begin(); ti != tokens.end(); ++ti)
-        values.push_back(boost::lexical_cast<double>(*ti));
+    {
+        double d;
+        if (Utils::fromString(*ti, d))
+            values.push_back(d);
+    }
 
     if (values.size() != 2 && values.size() != 3)
         throw app_runtime_error("--points must be two or three values");

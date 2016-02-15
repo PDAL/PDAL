@@ -387,27 +387,6 @@ void Stage::setSpatialReference(MetadataNode& m,
     }
 }
 
-std::vector<Stage *> Stage::findStage(std::string name)
-{
-    std::vector<Stage *> output;
-
-    if (boost::iequals(getName(), name))
-        output.push_back(this);
-
-    for (auto const& stage : m_inputs)
-    {
-        if (boost::iequals(stage->getName(), name))
-            output.push_back(stage);
-        if (stage->getInputs().size())
-        {
-            auto hits = stage->findStage(name);
-            if (hits.size())
-                output.insert(output.end(), hits.begin(), hits.end());
-        }
-    }
-
-    return output;
-}
 
 std::ostream& operator<<(std::ostream& ostr, const Stage& stage)
 {

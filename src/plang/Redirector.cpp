@@ -12,8 +12,8 @@
 #  pragma warning(disable: 4127)  // conditional expression is constant
 #endif
 
-#include <functional>
 #include <ostream>
+#include <string>
 
 namespace pdal
 {
@@ -109,6 +109,9 @@ static PyTypeObject StdoutType =
     0, /* tp_weaklist */
     0, /* tp_del */
     0, /* tp_version_tag */
+#if PY_MAJOR_VERSION >= 3
+    0, /* tp_finalilzer */
+#endif
 };
 
 

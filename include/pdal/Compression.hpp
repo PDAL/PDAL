@@ -34,7 +34,6 @@
 #pragma once
 
 #include <pdal/pdal_internal.hpp>
-#include <boost/algorithm/string.hpp>
 
 #ifdef PDAL_HAVE_LAZPERF
 #include <laz-perf/common/common.hpp>

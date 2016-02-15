@@ -53,8 +53,9 @@ public:
     column() : null(true), blobBuf(0), blobLen(0){};
     template<typename T> column( T v) : null(false), blobBuf(0), blobLen(0)
     {
-        data = boost::lexical_cast<std::string>(v);
+        data = Utils::toString(v);
     }
+
     column(std::string v) : null(false), blobBuf(0), blobLen(0)
     {
         data = v;

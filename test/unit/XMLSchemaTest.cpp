@@ -33,7 +33,6 @@
 ****************************************************************************/
 
 #include <pdal/pdal_test_main.hpp>
-#include <boost/property_tree/ptree.hpp>
 
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Uuid.hpp>

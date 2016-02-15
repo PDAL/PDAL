@@ -39,8 +39,6 @@
 
 #include <pdal/PluginManager.hpp>
 
-#include <boost/filesystem.hpp>
-
 #include <pdal/pdal_defines.h>
 #include <pdal/util/Algorithm.hpp>
 #include <pdal/util/FileUtils.hpp>
@@ -190,26 +188,16 @@ void PluginManager::loadAll(const std::string& pluginDirectory, int type)
 {
     const bool pluginDirectoryValid = pluginDirectory.size() &&
         (FileUtils::fileExists(pluginDirectory) ||
-            boost::filesystem::is_directory(pluginDirectory));
+            FileUtils::isDirectory(pluginDirectory));
 
     if (pluginDirectoryValid)
     {
-        boost::filesystem::directory_iterator dir(pluginDirectory), it, end;
-
-        // Looks like directory_iterator doesn't support range-based for loop in
-        // Boost v1.55. It fails Travis anyway, so I reverted it.
-        for (it = dir; it != end; ++it)
+        StringList files = FileUtils::directoryList(pluginDirectory);
+        for (auto file : files)
         {
-            boost::filesystem::path full_path = it->path();
-
-            if (boost::filesystem::is_directory(full_path))
-                continue;
-
-            std::string ext = full_path.extension().string();
-            if (ext != dynamicLibraryExtension)
-                continue;
-
-            loadByPath(full_path.string(), type);
+            if ((FileUtils::extension(file) == dynamicLibraryExtension) &&
+                !FileUtils::isDirectory(file))
+                loadByPath(file, type);
         }
     }
 }
@@ -300,15 +288,10 @@ bool PluginManager::l_loadPlugin(const std::string& driverFileName)
     std::vector<std::string> driverPathVec;
     driverPathVec = Utils::split2(driverFileName, '.');
 
-    boost::filesystem::path full_path(driverFileName);
-
-    if (boost::filesystem::is_directory(full_path))
+    if ((FileUtils::extension(driverFileName) != dynamicLibraryExtension) ||
+            FileUtils::isDirectory(driverFileName))
         return false;
 
-    std::string ext = full_path.extension().string();
-    if (ext != dynamicLibraryExtension)
-        return false;
-    std::string stem = full_path.stem().string();
     std::vector<std::string> driverNameVec;
     driverNameVec = Utils::split2(driverPathVec[0], '_');
 
@@ -328,7 +311,7 @@ bool PluginManager::l_loadPlugin(const std::string& driverFileName)
     else
         throw pdal_error("Unknown plugin type '" + ptype + "'");
 
-    return loadByPath(full_path.string(), type);
+    return loadByPath(driverFileName, type);
 }
 
 
@@ -361,27 +344,18 @@ bool PluginManager::guessLoadByPath(const std::string& driverName)
     std::vector<std::string> pluginPathVec = Utils::split2(pluginDir, ':');
     for (const auto& pluginPath : pluginPathVec)
     {
-        boost::filesystem::path path(pluginPath);
-
-        if (!FileUtils::fileExists(path.string()) ||
-            !boost::filesystem::is_directory(path))
+        if (!FileUtils::fileExists(pluginPath) ||
+            !FileUtils::isDirectory(pluginPath))
             continue;
 
-        boost::filesystem::directory_iterator dir(path), it, end;
-        // Looks like directory_iterator doesn't support range-based for loop in
-        // Boost v1.55. It fails Travis anyway, so I reverted it.
-        for (it = dir; it != end; ++it)
+        StringList files = FileUtils::directoryList(pluginPath);
+        for (auto file : files)
         {
-            boost::filesystem::path full_path = it->path();
-
-            if (boost::filesystem::is_directory(full_path))
+            if ((FileUtils::extension(file) != dynamicLibraryExtension) ||
+                FileUtils::isDirectory(file))
                 continue;
 
-            std::string ext = full_path.extension().string();
-            if (ext != dynamicLibraryExtension)
-                continue;
-
-            std::string stem = full_path.stem().string();
+            std::string stem = FileUtils::stem(file);
             std::string::size_type pos = stem.find_last_of('_');
             if (pos == std::string::npos || pos == stem.size() - 1 ||
                     stem.substr(pos + 1) != driverNameVec[1])
@@ -399,7 +373,7 @@ bool PluginManager::guessLoadByPath(const std::string& driverName)
             else
                 type = PF_PluginType_Reader;
 
-            if (loadByPath(full_path.string(), type))
+            if (loadByPath(file, type))
                 return true;
         }
     }
@@ -419,18 +393,17 @@ bool PluginManager::loadByPath(const std::string& pluginPath, int type)
 
     bool loaded(false);
 
-    boost::filesystem::path path(pluginPath);
-    std::string pathname = Utils::tolower(path.filename().string());
+    std::string filename = Utils::tolower(FileUtils::getFilename(pluginPath));
 
     // If we are a valid type, and we're not yet already
     // loaded in the LibraryMap, load it.
 
     Log log("PDAL", "stderr");
 
-    if (pluginTypeValid(pathname, type) && !libraryLoaded(path.string()))
+    if (pluginTypeValid(filename, type) && !libraryLoaded(pluginPath))
     {
         std::string errorString;
-        auto completePath(boost::filesystem::complete(path).string());
+        auto completePath(FileUtils::toAbsolutePath(pluginPath));
 
         log.get(LogLevel::Debug) << "Attempting to load plugin '" <<
             completePath << "'." << std::endl;
@@ -494,8 +467,7 @@ DynamicLibrary *PluginManager::loadLibrary(const std::string& path,
     if (d)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
-        m_dynamicLibraryMap[boost::filesystem::complete(path).string()] =
-            DynLibPtr(d);
+        m_dynamicLibraryMap[FileUtils::toAbsolutePath(path)] = DynLibPtr(d);
     }
 
     return d;
@@ -505,7 +477,7 @@ bool PluginManager::libraryLoaded(const std::string& path)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    std::string p = boost::filesystem::complete(path).string();
+    std::string p = FileUtils::toAbsolutePath(path);
     return Utils::contains(m_dynamicLibraryMap, p);
 }
 

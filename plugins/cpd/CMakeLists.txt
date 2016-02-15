@@ -3,6 +3,10 @@
 # CPD is Coherent Point Drift: https://github.com/gadomski/cpd
 
 find_package(CPD 0.2 REQUIRED)
+find_package(Boost 1.53 REQUIRED COMPONENTS system)
+if (Boost_FOUND)
+    link_directories(${Boost_LIBRARY_DIRS})
+endif()
 
 set_package_properties(CPD PROPERTIES
     DESCRIPTION "Coherent Point Drift"
@@ -22,7 +26,8 @@ set(src
     )
 
 set(deps
-    cpd
+    Cpd::Library
+    ${Boost_LIBRARIES}
     )
 
 PDAL_ADD_PLUGIN(cpd_kernel_lib_name kernel cpd

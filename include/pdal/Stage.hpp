@@ -34,6 +34,8 @@
 
 #pragma once
 
+#include <list>
+
 #include <pdal/pdal_internal.hpp>
 #include <pdal/plugin.hpp>
 
@@ -101,21 +103,16 @@ public:
     virtual LogPtr log() const
         { return m_log; }
     bool isDebug() const
-        {
-            return m_options.getValueOrDefault<bool>("debug", false);
-        }
+        { return m_options.getValueOrDefault<bool>("debug", false); }
     bool isVerbose() const
         { return (getVerboseLevel() != 0 ); }
     uint32_t getVerboseLevel() const
-        {
-            return m_options.getValueOrDefault<uint32_t>("verbose", 0);
-        }
+        { return m_options.getValueOrDefault<uint32_t>("verbose", 0); }
     virtual std::string getName() const = 0;
     virtual std::string tagName() const
         { return getName(); }
     const std::vector<Stage*>& getInputs() const
         { return m_inputs; }
-    std::vector<Stage *> findStage(std::string name);
     virtual Options getDefaultOptions()
         { return Options(); }
     static Dimension::IdList getDefaultDimensions()

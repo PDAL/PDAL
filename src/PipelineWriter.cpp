@@ -39,7 +39,7 @@
 #include <pdal/Stage.hpp>
 #include <pdal/util/FileUtils.hpp>
 
-using namespace boost::property_tree;
+using namespace pdalboost::property_tree;
 
 namespace pdal
 {

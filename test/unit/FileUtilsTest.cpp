@@ -169,3 +169,21 @@ TEST(FileUtilsTest, filename)
     std::string filename = "/foo//bar//baz.c";
     EXPECT_EQ(FileUtils::getFilename(filename), "baz.c");
 }
+
+TEST(FileUtilsTest, extension)
+{
+    EXPECT_EQ(FileUtils::extension("/foo//bar//baz.c"), ".c");
+    EXPECT_EQ(FileUtils::extension("foobar"), "");
+    EXPECT_EQ(FileUtils::extension("/foo/bar"), "");
+    EXPECT_EQ(FileUtils::extension("/fo.o/b.ar.baz23"), ".baz23");
+}
+
+TEST(FileUtilsTest, stem)
+{
+    EXPECT_EQ(FileUtils::stem("/foo//bar//baz.c"), "baz");
+    EXPECT_EQ(FileUtils::stem("foobar"), "foobar");
+    EXPECT_EQ(FileUtils::stem("/foo/bar"), "bar");
+    EXPECT_EQ(FileUtils::stem("/fo.o/b.ar.baz23"), "b.ar");
+    EXPECT_EQ(FileUtils::stem("."), ".");
+    EXPECT_EQ(FileUtils::stem(".."), "..");
+}

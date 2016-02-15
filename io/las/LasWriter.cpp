@@ -387,7 +387,7 @@ MetadataNode LasWriter::findVlrMetadata(MetadataNode node,
             return n.name() == "user_id" &&
                 n.value() == userId;
         };
-        return (boost::algorithm::istarts_with(n.name(), "vlr") &&
+        return (Utils::startsWith(n.name(), "vlr") &&
             !n.findChild(recPred).empty() &&
             !n.findChild(userPred).empty());
     };

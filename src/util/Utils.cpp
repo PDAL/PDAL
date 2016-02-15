@@ -32,14 +32,12 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <boost/algorithm/string/erase.hpp>
-#include <boost/filesystem.hpp>
-
 #include <pdal/util/Utils.hpp>
 
 #include <cassert>
 #include <cstdlib>
 #include <cctype>
+#include <memory>
 #include <random>
 
 #ifndef _WIN32
@@ -373,22 +371,6 @@ int Utils::portable_pclose(FILE* fp)
 }
 
 
-// BUG:
-// Under unix, the pclose() operation causes the boost unit test system
-// to produce a fatal error iff the process started by popen returns a
-// nonzero status code.  For this reason, I've put all the "negative"
-// cmd line app tests under #ifdef PDAL_COMPILER_MSVC.
-//
-// This problem shows up on mpg's Ubuntu 11.4 machine (gcc 4.5.2, boost 1.47.0)
-// as well as on Hobu's machine.
-
-// Boost's unit test system has a flag on the execution monitor that catches
-// all signals --  p_catch_system_errors, and throws unittest errors when
-// it sees them. We can use --catch_system_errors=no as part of the invocation,
-// or manually turn them off in the execution monitor. -- hobu 7/12/2012
-//  boost::unit_test::unit_test_monitor.p_catch_system_errors.set (false);
-// #include <boost/test/unit_test_monitor.hpp>
-
 int Utils::run_shell_command(const std::string& cmd, std::string& output)
 {
     const int maxbuf = 4096;
@@ -396,7 +378,7 @@ int Utils::run_shell_command(const std::string& cmd, std::string& output)
 
     output = "";
 
-    const char* gdal_debug = ::pdal::Utils::getenv("CPL_DEBUG");
+    const char* gdal_debug = Utils::getenv("CPL_DEBUG");
     if (gdal_debug == 0)
     {
         pdal::Utils::putenv("CPL_DEBUG=OFF");

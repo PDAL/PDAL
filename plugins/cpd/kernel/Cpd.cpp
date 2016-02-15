@@ -107,9 +107,9 @@ PointViewPtr CpdKernel::readFile(const std::string& filename,
     PointTableRef table, arma::mat& mat)
 {
     Options opt;
-    opt.add<std::string>("filename", filename);
-    opt.add<bool>("debug", isDebug());
-    opt.add<boost::uint32_t>("verbose", getVerboseLevel());
+    opt.add("filename", filename);
+    opt.add("debug", isDebug());
+    opt.add("verbose", getVerboseLevel());
 
     Stage& reader = makeReader(filename);
     reader.setOptions(opt);

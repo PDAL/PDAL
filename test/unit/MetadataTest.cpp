@@ -34,8 +34,6 @@
 
 #include <pdal/pdal_test_main.hpp>
 
-#include <boost/algorithm/string.hpp>
-
 #include <pdal/Metadata.hpp>
 #include <pdal/SpatialReference.hpp>
 
@@ -178,7 +176,7 @@ TEST(MetadataTest, test_construction_with_srs)
     //         AUTHORITY[\"EPSG\",\"9122\"]],
     //     AUTHORITY[\"EPSG\",\"4326\"]]");
 
-    // std::cout << boost::lexical_cast<std::string>(m.getValue<SpatialReference>());
+    // std::cout << m.getValue<SpatialReference>();
 }
 
 
@@ -186,7 +184,8 @@ TEST(MetadataTest, test_metadata_copy)
 {
     MetadataNode m;
     MetadataNode m2 = m.add("val", 2u);
-    uint32_t t = boost::lexical_cast<uint32_t>(m2.value());
+    uint32_t t;
+    Utils::fromString(m2.value(), t);
     EXPECT_EQ(t, 2u);
 }
 
@@ -249,7 +248,7 @@ TEST(MetadataTest, test_vlr_metadata)
             return n.name() == "user_id" &&
                 n.value() == userId;
         };
-        return (boost::algorithm::istarts_with(n.name(), "vlr") &&
+        return (Utils::startsWith(n.name(), "vlr") &&
             !n.findChild(recPred).empty() &&
             !n.findChild(userPred).empty());
     };

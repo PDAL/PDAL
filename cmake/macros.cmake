@@ -78,9 +78,6 @@ endmacro(PDAL_ADD_LIBRARY)
 macro(PDAL_ADD_EXECUTABLE _name)
     add_executable(${_name} ${ARGN})
 
-    # must link explicitly against boost.
-    target_link_libraries(${_name} ${Boost_LIBRARIES})
-
     set(PDAL_EXECUTABLES ${PDAL_EXECUTABLES} ${_name})
     install(TARGETS ${_name}
         EXPORT PDALTargets
@@ -223,7 +220,11 @@ endmacro(DISSECT_VERSION)
 macro(SET_INSTALL_DIRS)
   string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
   if (NOT DEFINED PDAL_LIB_INSTALL_DIR)
-    set(PDAL_LIB_INSTALL_DIR lib)
+      if (DEFINED CMAKE_INSTALL_LIBDIR)
+          set(PDAL_LIB_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}")
+      else()
+          set(PDAL_LIB_INSTALL_DIR "lib")
+      endif()
   endif ()
     set(PDAL_INCLUDE_INSTALL_ROOT "include/")
     set(PDAL_INCLUDE_INSTALL_DIR

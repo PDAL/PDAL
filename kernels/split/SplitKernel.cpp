@@ -38,8 +38,6 @@
 #include <pdal/KernelSupport.hpp>
 #include <pdal/StageFactory.hpp>
 
-#include <boost/program_options.hpp>
-
 namespace pdal
 {
 

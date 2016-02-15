@@ -34,10 +34,9 @@
 
 #pragma once
 
-#include <pdal/Metadata.hpp>
-
 #include <boost/property_tree/json_parser.hpp>
 
+#include <pdal/Metadata.hpp>
 #include <pdal/Dimension.hpp>
 #include <pdal/pdal_defines.h>
 #include <pdal/pdal_export.hpp>
@@ -191,7 +190,7 @@ inline void insertDim(Inserter& ins, Dimension::Type::Enum type,
     }
 }
 
-using namespace boost::property_tree;
+using namespace pdalboost::property_tree;
 
 inline ptree toPTree(MetadataNode const& node)
 {
@@ -209,7 +208,7 @@ inline ptree toPTree(MetadataNode const& node)
         ptree pnode = toPTree(*n);
         if (node.kind() == MetadataType::Array)
         {
-            boost::optional<ptree&> opt =
+            pdalboost::optional<ptree&> opt =
                 tree.get_child_optional(path(node.name(), '/'));
             if (opt)
                 opt->push_back(std::make_pair("", pnode));
@@ -284,9 +283,9 @@ inline MetadataNode toMetadata(const SpatialReference& ref)
     units.add("horizontal", ref.getVerticalUnits());
 
     return root;
-
-
 }
+
+
 inline MetadataNode toMetadata(const BOX2D& bounds)
 {
     MetadataNode output("bbox");
@@ -308,8 +307,6 @@ inline MetadataNode toMetadata(const BOX3D& bounds)
     output.add("maxz", bounds.maxz);
     return output;
 }
-
-
 
 /// Outputs a string-based boost::property_tree::ptree representation
 /// of the BOX3D instance
@@ -335,7 +332,7 @@ inline ptree toPTree(const BOX3D& bounds)
     return tree;
 }
 
-/// Outputs a string-based boost::property_tree::ptree representation
+/// Outputs a string-based pdalboost::property_tree::ptree representation
 /// of the BOX2D instance
 inline ptree toPTree(const BOX2D& bounds)
 {

@@ -35,11 +35,11 @@
 #pragma once
 
 #include <array>
-
-#include <boost/uuid/uuid_generators.hpp>
+#include <cassert>
 
 #include <pdal/util/Bounds.hpp>
 #include <pdal/util/IStream.hpp>
+#include <pdal/util/Uuid.hpp>
 
 namespace pdal
 {
@@ -72,7 +72,7 @@ public:
 
     /// Get project identifier.
     /// \return Global Unique Identifier as an instance of liblas::guid class.
-    boost::uuids::uuid projectId() const
+    Uuid projectId() const
         { return m_projectGuid; }
 
     /// Get the LAS major version.
@@ -316,7 +316,7 @@ private:
     std::string m_fileSig;
     uint16_t m_sourceId;
     uint16_t m_globalEncoding;
-    boost::uuids::uuid m_projectGuid;
+    Uuid m_projectGuid;
     uint8_t m_versionMinor;
     std::string m_systemId;
     std::string m_softwareId;
@@ -336,8 +336,6 @@ private:
     uint32_t m_eVlrCount;
     BOX3D m_bounds;
     std::string m_compressionInfo;
-
-    static void get(ILeStream& in, boost::uuids::uuid& uuid);
 };
 
 } // namespace lasdump

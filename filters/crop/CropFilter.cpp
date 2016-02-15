@@ -65,11 +65,12 @@ void CropFilter::processOptions(const Options& options)
 {
     m_cropOutside = options.getValueOrDefault<bool>("outside", false);
     m_assignedSrs = options.getValueOrDefault<SpatialReference>("a_srs");
+
     try
     {
         m_bounds = options.getValues<BOX2D>("bounds");
     }
-    catch (boost::bad_lexical_cast)
+    catch (Option::cant_convert)
     {
         try
         {
@@ -77,7 +78,7 @@ void CropFilter::processOptions(const Options& options)
             for (auto& i: b3d)
                 m_bounds.push_back(i.to2d());
         }
-        catch (boost::bad_lexical_cast)
+        catch (Option::cant_convert)
         {
             std::ostringstream oss;
             oss << "Invalid bounds for " << getName() << ".  "

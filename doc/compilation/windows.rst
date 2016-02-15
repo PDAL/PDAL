@@ -63,8 +63,7 @@ Basic Build Steps
 ------------------------------------------------------------------------------
 
 Most users can use this procedure to build PDAL on Windows. We satisfy all
-dependencies using OSGeo4W and use the Boost subset that is included with the
-library.
+dependencies using OSGeo4W.
 
 0. If you plan to use LAZ support (compressed LAS), get the LASzip source code
 and build it (http://www.laszip.org). Add the directory with laszip.dll to
@@ -168,7 +167,6 @@ situations (including x64 support) where using OSGeo4W is inadequate.
    following external libraries. You'll need to get them and build them (or
    perhaps, download prebuilt binary packages).
 
-  - Boost (get version 1.4.8 or later from http://boost.org) [ required ]
   - GDAL (get version 1.6 or later from http://gdal.org) [ optional ]
   - LASZip (get version 1.0.1 or later from http://laszip.org) [ optional ]
   - libxml2 (http://libxml2.org) [ optional ]
@@ -177,53 +175,9 @@ situations (including x64 support) where using OSGeo4W is inadequate.
   - libtiff (optional)
   - libgeotiff (optional)
 
-  One option for all dependencies except Boost is OSGeo4W (free, win32
+  One option for all dependencies is OSGeo4W (free, win32
   installer, no x64 -- see "Basic Build Steps"_ above).
 
-  Boost Build Notes
-
-  Options for Boost include might include BoostPro (free win32 installer, no
-  x64) or the internal "BCP'ed" extract in PDAL. We say "might" because PDAL
-  requires Boost version 1.48 or later and at this writing that's not supported
-  by BoostPro. If you need to build Boost from source, the following notes will
-  be helpful.
-
-  Boost libraries include an "ABI" description as part of the name.
-  For example
-  ::
-
-
-      "libboost_filesystem-vc100-mt-gd-1_48.lib"
-                                    ^^  This is the <abi-tag>
-
-  <abi-tag> - This is a string of one or more characters. For us, the characters of interest are s, g, d.
-
-
-      s - indicates that the library is statically linked to the C++ Standard Library and Runtime Library.
-
-      g - indicates that the debug versions of the standard and runtime support libraries are linked against. On a typical Windows installation you will get a debug version of the runtime libraries to link against, but this need not be the case on Unix boxes.
-
-      d - indicates all debug symbols are available in the library, no inlining and optimization has been done while building the code.
-
-  This is particularly important on Windows. Unlike other platforms, CRT
-  configuration (debug vs release and statically linked vs shared dll), needs to
-  match you PDAL configuration.
-
-  After you get the Boost archive (source) from http://www.boost.org from the
-  root of the boost distribution run "bootstrap.bat" and then "b2" with the
-  appropriate options.
-
-  Our default release configuration uses /MD, so you want the release shared CRT, like "libboost_filesystem-vc100-mt-1_48.lib"::
-
-     c:\utils\boost_1_48_0>.\bootstrap.bat
-     c:\utils\boost_1_48_0>.\b2 variant=release link=static threading=multi runtime-link=shared stage
-
-  Our default debug configuration uses /MDd, so you want the debug shared CRT, like "libboost_filesystem-vc100-mt-gd-1_48.lib"::
-
-     c:\utils\boost_1_48_0>.\bootstrap.bat
-     c:\utils\boost_1_48_0>.\b2 variant=debug link=static threading=multi runtime-link=shared stage
-
-  Finally, we've seen problems with b2.exe if the path includes some paths that are quoted ("c:\\Program Files (x86)\\doxygen\\bin").  You can unquote or remove them from the %PATH% while building Boost.
 
 2. Having staged the above libs, you need to specify where they are by editing
    the appropriate lines in the "config.bat" file. Each dependency has a short
@@ -270,5 +224,4 @@ Troubleshooting
 * libtiff.dll errors - double check that other versions of the lib are not on the path. For example, ArcGIS installs a version of libtiff that is not compatible.
 * "ERROR 4: Unable to open EPSG support file gcs.csv" or GDAL_DATA variable errors - Set GDAL_DATA system variable to ``C:\OSGeo4W\share\gdal``
 * PROJ errors - Set PROJ_LIB system variable to ``C:\OSGeo4W\share\proj``
-* link failures due to _ITERATOR_DEBUG_LEVEL mismatches between (external) boost and PDAL.  Most likely problem is that you are mixing Release and Debug libs (e.g. PDAL is debug but Boost is release).  You can also set _ITERATOR_DEBUG_LEVEL=0 as in Project Pages / Configuration Properties / C,C++ / Preprocessor / Preprocessor Definitions.
 
