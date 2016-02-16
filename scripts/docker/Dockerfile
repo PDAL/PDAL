@@ -52,7 +52,7 @@ RUN cd /PDAL/python \
 
 RUN git clone https://github.com/PDAL/PRC.git \
     && cd PRC \
-    && git checkout ${branch} \
+    && git checkout master \
     && mkdir build \
     && cd build \
     && echo `pwd` \
