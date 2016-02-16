@@ -53,26 +53,19 @@ std::string SplitKernel::getName() const
     return s_info.name;
 }
 
-    double m_length;
-    double m_xOrigin;
-    double m_yOrigin;
 
 void SplitKernel::addSwitches(ProgramArgs& args)
 {
     Arg *arg;
 
-    Arg& length = args.add("length", "Edge length for splitter cells",
-        m_length, 0.0);
-    length.setPositional();
-    Arg& capacity = args.add("capacity", "Point capacity of chipper cells",
-        m_capacity);
-    capacity.setPositional();
+    args.add("input,i", "Input filename", m_inputFile).setPositional();
+    args.add("output,o", "Output filename", m_outputFile).setPositional();
+    args.add("length", "Edge length for splitter cells", m_length, 0.0);
+    args.add("capacity", "Point capacity of chipper cells", m_capacity);
     args.add("origin_x", "Origin in X axis for splitter cells", m_xOrigin,
         std::numeric_limits<double>::quiet_NaN());
     args.add("origin_y", "Origin in Y axis for splitter cells", m_yOrigin,
         std::numeric_limits<double>::quiet_NaN());
-    args.add("input,i", "Input filename", m_inputFile);
-    args.add("output,o", "Output filename", m_outputFile);
 }
 
 
