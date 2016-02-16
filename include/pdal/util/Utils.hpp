@@ -49,6 +49,7 @@
 #include <typeinfo>
 #include <vector>
 #include <map>
+#include <cstdint>
 
 #include "pdal_util_export.hpp"
 
