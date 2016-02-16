@@ -1,6 +1,6 @@
 FROM pdal/dependencies:latest
 MAINTAINER Howard Butler <howard@hobu.co>
-ARG branch=master
+#ARG branch=master
 
 ENV CC clang
 ENV CXX clang++
@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
 
 RUN git clone --depth=1 https://github.com/PDAL/PDAL \
 	&& cd PDAL \
-	&& git checkout ${branch} \
+	&& git checkout master \
 	&& mkdir build \
 	&& cd build \
 	&& cmake \
