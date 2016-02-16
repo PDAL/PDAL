@@ -19,7 +19,7 @@ RUN git clone --depth=1 https://github.com/PDAL/PDAL \
 	&& cd build \
 	&& cmake \
 		-DBUILD_PLUGIN_ATTRIBUTE=ON \
-		-DBUILD_PLUGIN_CPD=OFF \
+		-DBUILD_PLUGIN_CPD=ON \
 		-DBUILD_PLUGIN_GREYHOUND=ON \
 		-DBUILD_PLUGIN_HEXBIN=ON \
 		-DBUILD_PLUGIN_ICEBRIDGE=ON \
@@ -66,4 +66,4 @@ RUN cd /PRC/build \
     && make \
     && make install
 # cleanup
-RUN rm -rf laszip laz-perf points2grid pcl nitro hexer 3.2.7.tar.gz eigen-eigen-b30b87236a1b PDAL PRC
+RUN rm -rf laszip laz-perf points2grid pcl nitro hexer 3.2.7.tar.gz eigen-eigen-b30b87236a1b PDAL PRC fgt cpd

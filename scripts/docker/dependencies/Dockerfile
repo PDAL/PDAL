@@ -266,4 +266,8 @@ RUN git clone https://github.com/gadomski/cpd.git \
     && cd cpd \
     && cmake . -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DFgt_DIR=/usr \
     && make \
-    && make install
+    && make install \
+    && mv /usr/lib/cpd/cmake/CpdConfig.cmake /usr/lib/cpd/cmake/CPDConfig.cmake \
+    && mv /usr/lib/cpd/cmake/CpdConfigVersion.cmake /usr/lib/cpd/cmake/CPDConfigVersion.cmake
+
+
