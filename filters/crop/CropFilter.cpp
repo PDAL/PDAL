@@ -81,13 +81,23 @@ void CropFilter::processOptions(const Options& options)
         catch (Option::cant_convert)
         {
             std::ostringstream oss;
-            oss << "Invalid bounds for " << getName() << ".  "
+            oss << getName() << ": Invalid bounds provided as option.  "
                 "Format: '([xmin,xmax],[ymin,ymax])'.";
             throw pdal_error(oss.str());
         }
     }
 
-    m_polys = options.getValues<Polygon>("polygon");
+    try
+    {
+        m_polys = options.getValues<Polygon>("polygon");
+    }
+    catch (Option::cant_convert)
+    {
+        std::ostringstream oss;
+        oss << getName() << ": Invalid polygon specification as option.  "
+            "Must be valid GeoJSON/WTK";
+        throw pdal_error(oss.str());
+    }
     if (m_polys.size())
     {
         m_geoms.clear();
