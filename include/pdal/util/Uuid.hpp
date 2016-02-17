@@ -163,9 +163,10 @@ public:
 
     std::string unparse() const
     {
-        std::vector<char> buf(36);
+        std::vector<char> buf(36 + 1);
         const char fmt[] = "%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X";
 
+        // TODO: use snprintf after switch to C++11
         sprintf(buf.data(), fmt,
             m_data.time_low, m_data.time_mid, m_data.time_hi_and_version,
             m_data.clock_seq >> 8, m_data.clock_seq & 0xFF,
