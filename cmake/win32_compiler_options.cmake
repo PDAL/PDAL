@@ -12,6 +12,8 @@ if (MSVC)
       set(PDAL_COMPILER_VC8 1)
     endif()
 
+    add_definitions(-DBOOST_ALL_NO_LIB)
+
     # check for MSVC 8+
     if (NOT (MSVC_VERSION VERSION_LESS 1400))
         add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
