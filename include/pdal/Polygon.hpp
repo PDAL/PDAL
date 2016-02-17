@@ -43,17 +43,13 @@
 #include <pdal/SpatialReference.hpp>
 #include <pdal/GlobalEnvironment.hpp>
 
-
-
 namespace pdal
 {
-
 
 class PDAL_DLL Polygon
 {
     typedef geos::ErrorHandler* ErrorHandlerPtr;
 public:
-
     Polygon();
     Polygon(const std::string& wkt_or_json,
            SpatialReference ref = SpatialReference(),
@@ -64,7 +60,14 @@ public:
     Polygon(GEOSGeometry* g, const SpatialReference& srs, ErrorHandlerPtr ctx);
     Polygon(OGRGeometryH g, const SpatialReference& srs, ErrorHandlerPtr ctx);
     Polygon& operator=(const Polygon&);
+private:
+    Polygon(const std::string& wkt_or_json,
+           SpatialReference ref,
+           GEOSContextHandle_t ctx);
+    Polygon(GEOSGeometry* g, const SpatialReference& srs,
+        GEOSContextHandle_t ctx);
 
+public:
 
     ~Polygon();
     void update(const std::string& wkt_or_json,
@@ -112,7 +115,7 @@ private:
     const GEOSPreparedGeometry *m_prepGeom;
 
     SpatialReference m_srs;
-    ErrorHandlerPtr m_ctx;
+    GEOSContextHandle_t m_ctx;
 
     void prepare();
 
