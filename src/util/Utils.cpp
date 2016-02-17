@@ -149,6 +149,9 @@ void Utils::trimLeading(std::string& s)
 
 void Utils::trimTrailing(std::string& s)
 {
+    if (s.empty())
+        return;
+
     size_t pos = s.size() - 1;
     while (isspace(s[pos]))
     {
