@@ -55,7 +55,8 @@ TEST(PDALUtilsTest, options1)
     std::string testfile(Support::temppath("opts2json.txt"));
 
     {
-        std::ofstream out(testfile);
+        // Binary mode to avoid OS-specific translation of EOL
+        std::ofstream out(testfile, std::ios_base::binary);
         Utils::toJSON(ops, out);
     }
     EXPECT_TRUE(Support::compare_files(goodfile, testfile));
