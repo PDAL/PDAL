@@ -328,7 +328,7 @@ void Ilvis2MetadataReader::parseGPolygon(xmlNodePtr node, MetadataNode * m)
 
     // The number of boundaries is essentially the number of sub-polygons
     int numBoundaries = countChildElements(node, "Boundary");
-    GEOSGeom poly[numBoundaries];
+    std::vector<GEOSGeom> poly(numBoundaries); // size shall never change
     GEOSGeom fullPoly;
     int polyNum = 0;
 
@@ -391,7 +391,7 @@ void Ilvis2MetadataReader::parseGPolygon(xmlNodePtr node, MetadataNode * m)
     if (numBoundaries > 1)
     {
         fullPoly = GEOSGeom_createCollection(
-                GEOS_MULTIPOLYGON, poly, numBoundaries);
+                GEOS_MULTIPOLYGON, poly.data(), numBoundaries);
     }
     else
     {
