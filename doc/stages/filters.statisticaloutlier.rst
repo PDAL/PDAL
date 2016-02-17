@@ -13,10 +13,14 @@ iteration it will compute the average distance that each point has to its
 nearest k neighbors. The value of k can be set using ``mean_k``. Next, the mean
 and standard deviation of all these distances are computed in order to determine
 a distance threshold. The distance threshold will be equal to:
-:math:`mean + stddev_{mult} * stddev`. The multiplier for the standard deviation
-can be set using ``multiplier``. During the next iteration the points will be
-classified as inlier or outlier if their average neighbor distance is below or
-above this threshold respectively.
+
+.. math::
+
+    \hat{mean_k} + \sigma_{mult} * \sigma
+
+The multiplier for the standard deviation can be set using ``multiplier``.
+During the next iteration the points will be classified as inlier or outlier if
+their average neighbor distance is below or above this threshold respectively.
 
 .. figure:: filters.statisticaloutlier.img1.png
     :scale: 70 %

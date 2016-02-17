@@ -19,7 +19,7 @@ read from the raster and applied to any dimension name desired.
     `GDAL`_ is used to read the color information and any GDAL-readable
     `supported format`_ can be read.
 
-.. _`GDAL`: http://www.gdal.org
+.. _GDAL: http://www.gdal.org
 .. _`supported format`: www.gdal.org/formats_list.html
 
 The bands of the raster to apply to each are selected using the "band" option,
@@ -117,4 +117,3 @@ dimensions
   If not supplied, the scaling factor is 1.0.
   [Default: "Red:1:1.0, Green:2:1.0, Blue:3:1.0"]
 
-.. _GDAL: http://gdal.org
