@@ -34,8 +34,6 @@
 
 #pragma once
 
-#include <boost/property_tree/json_parser.hpp>
-
 #include <pdal/Metadata.hpp>
 #include <pdal/Dimension.hpp>
 #include <pdal/pdal_defines.h>
@@ -46,8 +44,9 @@
 #include <pdal/util/Inserter.hpp>
 #include <pdal/util/Extractor.hpp>
 
-#ifndef _WIN32
+#ifndef WIN32
 #include <sys/fcntl.h>
+#include <unistd.h>
 #endif
 
 namespace pdal
@@ -190,42 +189,41 @@ inline void insertDim(Inserter& ins, Dimension::Type::Enum type,
     }
 }
 
-using namespace pdalboost::property_tree;
 
-inline ptree toPTree(MetadataNode const& node)
-{
-    typedef ptree::path_type path;
-
-    ptree tree;
-    tree.put("name", node.name());
-    tree.put("description", node.description());
-    tree.put("type", node.type());
-    tree.put("value", node.value());
-
-    MetadataNodeList children = node.children();
-    for (auto n = children.begin(); n != children.end(); ++n)
-    {
-        ptree pnode = toPTree(*n);
-        if (node.kind() == MetadataType::Array)
-        {
-            pdalboost::optional<ptree&> opt =
-                tree.get_child_optional(path(node.name(), '/'));
-            if (opt)
-                opt->push_back(std::make_pair("", pnode));
-            else
-            {
-                tree.push_back(ptree::value_type(node.name(), ptree()));
-                auto& p = tree.get_child(path(node.name(), '/'));
-                p.push_back(std::make_pair("", pnode));
-
-            }
-        }
-        else if (node.name().size())
-            tree.push_back(std::make_pair(node.name(), pnode));
-    }
-    return tree;
-}
-
+// inline ptree toPTree(MetadataNode const& node)
+// {
+//     typedef ptree::path_type path;
+//
+//     ptree tree;
+//     tree.put("name", node.name());
+//     tree.put("description", node.description());
+//     tree.put("type", node.type());
+//     tree.put("value", node.value());
+//
+//     MetadataNodeList children = node.children();
+//     for (auto n = children.begin(); n != children.end(); ++n)
+//     {
+//         ptree pnode = toPTree(*n);
+//         if (node.kind() == MetadataType::Array)
+//         {
+//             pdalboost::optional<ptree&> opt =
+//                 tree.get_child_optional(path(node.name(), '/'));
+//             if (opt)
+//                 opt->push_back(std::make_pair("", pnode));
+//             else
+//             {
+//                 tree.push_back(ptree::value_type(node.name(), ptree()));
+//                 auto& p = tree.get_child(path(node.name(), '/'));
+//                 p.push_back(std::make_pair("", pnode));
+//
+//             }
+//         }
+//         else if (node.name().size())
+//             tree.push_back(std::make_pair(node.name(), pnode));
+//     }
+//     return tree;
+// }
+//
 
 inline MetadataNode toMetadata(PointTableRef table)
 {
@@ -310,89 +308,89 @@ inline MetadataNode toMetadata(const BOX3D& bounds)
 
 /// Outputs a string-based boost::property_tree::ptree representation
 /// of the BOX3D instance
-inline ptree toPTree(const BOX3D& bounds)
-{
-    ptree tree;
-    ptree x;
-    ptree y;
-    ptree z;
-
-    x.add("minimum", bounds.minx);
-    x.add("maximum", bounds.maxx);
-    tree.add_child("0", x);
-
-    y.add("minimum", bounds.miny);
-    y.add("maximum", bounds.maxy);
-    tree.add_child("1", y);
-
-    z.add("minimum", bounds.minz);
-    z.add("maximum", bounds.maxz);
-    tree.add_child("2", z);
-
-    return tree;
-}
-
-/// Outputs a string-based pdalboost::property_tree::ptree representation
-/// of the BOX2D instance
-inline ptree toPTree(const BOX2D& bounds)
-{
-    ptree tree;
-    ptree x;
-    ptree y;
-    ptree z;
-
-    x.add("minimum", bounds.minx);
-    x.add("maximum", bounds.maxx);
-    tree.add_child("0", x);
-
-    y.add("minimum", bounds.miny);
-    y.add("maximum", bounds.maxy);
-    tree.add_child("1", y);
-
-    return tree;
-}
-
-ptree toPTree(const Options& options);
-inline ptree toPTree(const Option& option)
-{
-    ptree t;
-    t.put("Name", option.getName());
-    t.put("Value", option.getValue<std::string>());
-    if (option.getDescription() != "")
-        t.put("Description", option.getDescription());
-
-    return t;
-}
-
-
-inline ptree toPTree(const Options& options)
-{
-    ptree tree;
-    std::vector<Option> opts = options.getOptions();
-    for (auto citer = opts.begin(); citer != opts.end(); ++citer)
-    {
-        const Option& option = *citer;
-        ptree subtree = toPTree(option);
-        tree.add_child("Option", subtree);
-    }
-    return tree;
-}
-
-
-
-inline ptree toPTree(const SpatialReference& ref)
-{
-    ptree srs;
-
-    srs.put("proj4", ref.getProj4());
-    srs.put("prettywkt", ref.getWKT(SpatialReference::eHorizontalOnly, true));
-    srs.put("wkt", ref.getWKT(SpatialReference::eHorizontalOnly, false));
-    srs.put("compoundwkt", ref.getWKT(SpatialReference::eCompoundOK, false));
-    srs.put("prettycompoundwkt", ref.getWKT(SpatialReference::eCompoundOK,
-       true));
-
-    return srs;
-}
+// inline ptree toPTree(const BOX3D& bounds)
+// {
+//     ptree tree;
+//     ptree x;
+//     ptree y;
+//     ptree z;
+//
+//     x.add("minimum", bounds.minx);
+//     x.add("maximum", bounds.maxx);
+//     tree.add_child("0", x);
+//
+//     y.add("minimum", bounds.miny);
+//     y.add("maximum", bounds.maxy);
+//     tree.add_child("1", y);
+//
+//     z.add("minimum", bounds.minz);
+//     z.add("maximum", bounds.maxz);
+//     tree.add_child("2", z);
+//
+//     return tree;
+// }
+//
+// /// Outputs a string-based pdalboost::property_tree::ptree representation
+// /// of the BOX2D instance
+// inline ptree toPTree(const BOX2D& bounds)
+// {
+//     ptree tree;
+//     ptree x;
+//     ptree y;
+//     ptree z;
+//
+//     x.add("minimum", bounds.minx);
+//     x.add("maximum", bounds.maxx);
+//     tree.add_child("0", x);
+//
+//     y.add("minimum", bounds.miny);
+//     y.add("maximum", bounds.maxy);
+//     tree.add_child("1", y);
+//
+//     return tree;
+// }
+//
+// ptree toPTree(const Options& options);
+// inline ptree toPTree(const Option& option)
+// {
+//     ptree t;
+//     t.put("Name", option.getName());
+//     t.put("Value", option.getValue<std::string>());
+//     if (option.getDescription() != "")
+//         t.put("Description", option.getDescription());
+//
+//     return t;
+// }
+//
+//
+// inline ptree toPTree(const Options& options)
+// {
+//     ptree tree;
+//     std::vector<Option> opts = options.getOptions();
+//     for (auto citer = opts.begin(); citer != opts.end(); ++citer)
+//     {
+//         const Option& option = *citer;
+//         ptree subtree = toPTree(option);
+//         tree.add_child("Option", subtree);
+//     }
+//     return tree;
+// }
+//
+//
+//
+// inline ptree toPTree(const SpatialReference& ref)
+// {
+//     ptree srs;
+//
+//     srs.put("proj4", ref.getProj4());
+//     srs.put("prettywkt", ref.getWKT(SpatialReference::eHorizontalOnly, true));
+//     srs.put("wkt", ref.getWKT(SpatialReference::eHorizontalOnly, false));
+//     srs.put("compoundwkt", ref.getWKT(SpatialReference::eCompoundOK, false));
+//     srs.put("prettycompoundwkt", ref.getWKT(SpatialReference::eCompoundOK,
+//        true));
+//
+//     return srs;
+// }
 
 inline int openProgress(const std::string& filename)
 {

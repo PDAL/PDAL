@@ -118,12 +118,12 @@ ostream *createFile(string const& filename, bool asBinary)
 bool directoryExists(const string& dirname)
 {
     return pdalboost::filesystem::exists(dirname);
-} 
+}
 
 
 bool createDirectory(const string& dirname)
 {
-    return pdalboost::filesystem::create_directory(dirname); 
+    return pdalboost::filesystem::create_directory(dirname);
 }
 
 
@@ -138,7 +138,8 @@ StringList directoryList(const string& dir)
     StringList files;
 
     pdalboost::filesystem::directory_iterator it(dir);
-    while (it != pdalboost::filesystem::directory_iterator{})
+    pdalboost::filesystem::directory_iterator end;
+    while (it != end)
     {
         files.push_back(it->path().string());
         it++;
@@ -198,7 +199,7 @@ bool fileExists(const string& name)
     string http = name.substr(0, 4);
     if (Utils::iequals(http, "http"))
         return true;
- 
+
     pdalboost::system::error_code ec;
     pdalboost::filesystem::exists(name, ec);
     return pdalboost::filesystem::exists(name) || isStdin(name);
@@ -345,7 +346,7 @@ std::string extension(const std::string& filename)
     auto idx = filename.find_last_of('.');
     if (idx == std::string::npos)
         return std::string();
-    return filename.substr(idx);   
+    return filename.substr(idx);
 }
 
 } // namespace FileUtils

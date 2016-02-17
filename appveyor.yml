@@ -50,8 +50,8 @@ build:
   project: PDAL.sln
   verbosity: minimal
 
-#after_build:
-#  - call .\\scripts\\appveyor\\install.cmd
+# after_build:
+#   - call .\\scripts\\appveyor\\install.cmd
 
 notifications:
   - provider: Email
@@ -67,21 +67,24 @@ notifications:
     on_build_success: false
     on_build_status_changed: true
 
+after_build:
+  - 7z a pdal.zip %APPVEYOR_BUILD_FOLDER%\bin\*.*
+
 artifacts:
-  - path: pdal\bin
-    name: pdal-master
+  - path: pdal.zip
+    name: pdalmaster
 
 deploy:
     # Amazon S3 deployment provider settings
   - provider: S3
     access_key_id:
-      secure: +qSWtlKwUGZmIoUR25u08KxPVmiEA7obV2SF+aJLRDs=
+      secure: 6DDLMtbxyT6amL3m5gmMObyL0ucWzIGxylinnYuMJPM=
     secret_access_key:
-      secure: 9OxM0f4/sBCrNE9XhRnHMnImz5FQe6q9aBJ6+0X1Cf8ZWu0akG+ZG2jBXs5t9dJ8
+      secure: cSqZlsaCxFwXgxJw0BLd7npMFvQk3Vbr74ZPLaBQWLKnOz1cKss9qab1SzSygwkh
     bucket: "pdal"
-    folder: "osgeo4w"
-    artifact: pdal-master
-    set_public: false
+    folder: "osgeo4w/"
+    artifact: pdalmaster
+    set_public: true
 
 #test_script:
 #  - "SET PATH=%OSGEODIR%\\bin;%PATH%"

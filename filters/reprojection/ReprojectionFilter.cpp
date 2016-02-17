@@ -205,8 +205,6 @@ PointViewSet ReprojectionFilter::run(PointViewPtr view)
 
     createTransform(view->spatialReference());
 
-    double x, y, z;
-
     PointRef point(*view, 0);
     for (PointId id = 0; id < view->size(); ++id)
     {

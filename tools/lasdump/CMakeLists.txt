@@ -41,5 +41,8 @@ if (LASZIP_FOUND)
         ${PDAL_UTIL_LIB_NAME}
         ${LASZIP_LIBRARIES}
     )
+    if (WIN32)
+        target_link_libraries(lasdump wsock32 ws2_32)
+    endif()
 endif()
 

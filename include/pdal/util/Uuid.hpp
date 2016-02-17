@@ -62,6 +62,12 @@
 #include "Inserter.hpp"
 #include "Extractor.hpp"
 
+#ifdef PDAL_COMPILER_MSVC
+#  pragma warning(push)
+#  pragma warning(disable: 4267 4244)  // ignore conversion warnings
+#endif
+
+
 namespace pdal
 {
 
@@ -91,7 +97,7 @@ inline bool operator < (const uuid& u1, const uuid& u2)
     return false;
 }
 
-PDAL_DLL class Uuid
+class PDAL_DLL Uuid
 {
     friend inline bool operator < (const Uuid& u1, const Uuid& u2);
 public:
@@ -227,4 +233,8 @@ inline std::istream& operator >> (std::istream& in, Uuid& u)
 }
 
 } // namespace pdal
+
+#ifdef PDAL_COMPILER_MSVC
+#  pragma warning(pop)
+#endif
 

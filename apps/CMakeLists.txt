@@ -37,8 +37,6 @@ set(PDAL_UTILITY pdal)
 # Configure build targets
 #------------------------------------------------------------------------------
 
-link_directories(${Boost_LIBRARY_DIRS})
-
 if(PDAL_UTILITY)
     set(srcs pdal.cpp)
 
@@ -70,7 +68,7 @@ endif(APPLE AND PDAL_BUNDLE)
 if(UNIX OR APPLE)
 
     set(PKGCONFIG_LIBRARY_DEFINITIONS "")
-    set(PDAL_INCLUDE_DEFINITIONS "-I${CMAKE_INSTALL_PREFIX}/include -I${Boost_INCLUDE_DIR} -I${GDAL_INCLUDE_DIR}")
+    set(PDAL_INCLUDE_DEFINITIONS "-I${CMAKE_INSTALL_PREFIX}/include -I${GDAL_INCLUDE_DIR}")
     set(PKGCONFIG_LIBRARY_DEFINITIONS "${PKGCONFIG_LIBRARY_DEFINITIONS} gdal")
 
     if(LIBXML2_FOUND)
@@ -78,10 +76,8 @@ if(UNIX OR APPLE)
         set(PDAL_INCLUDE_DEFINITIONS "${PDAL_INCLUDE_DEFINITIONS} -I${LIBXML2_INCLUDE_DIR}")
     endif()
 
-    if (GEOS_FOUND)
-        set(PKGCONFIG_LIBRARY_DEFINITIONS "${PKGCONFIG_LIBRARY_DEFINITIONS} geos")
-        set(PDAL_INCLUDE_DEFINITIONS "${PDAL_INCLUDE_DEFINITIONS} -I${GEOS_INCLUDE_DIR}")
-    endif()
+    set(PKGCONFIG_LIBRARY_DEFINITIONS "${PKGCONFIG_LIBRARY_DEFINITIONS} geos")
+    set(PDAL_INCLUDE_DEFINITIONS "${PDAL_INCLUDE_DEFINITIONS} -I${GEOS_INCLUDE_DIR}")
 
     if (LASZIP_FOUND)
         set(PDAL_INCLUDE_DEFINITIONS "${PDAL_INCLUDE_DEFINITIONS} -I${LASZIP_INCLUDE_DIR}")
@@ -93,7 +89,6 @@ if(UNIX OR APPLE)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/pdal.pc
         DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig/"
         PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
-
 
     # Autoconf compatibility variables to use the same script source.
     configure_file("${CMAKE_CURRENT_SOURCE_DIR}/pdal-config.in"

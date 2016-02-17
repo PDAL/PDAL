@@ -41,8 +41,6 @@
 
 #include <stdio.h>
 
-#include <boost/filesystem.hpp>
-
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/Stage.hpp>
@@ -294,10 +292,10 @@ void Support::checkXYZ(const std::string& file1, const std::string& file2)
 
     const std::string driver2 = f.inferReaderDriver(file2);
     EXPECT_NE(driver2, "") << "Can't find driver";
-    
+
     Stage *reader1 = f.createStage(driver1);
     EXPECT_NE(reader1, (Stage *)NULL) << "Couldn't create stage";
-    
+
     Stage *reader2 = f.createStage(driver2);
     EXPECT_NE(reader1, (Stage *)NULL) << "Couldn't create stage";
 

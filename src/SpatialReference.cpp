@@ -463,7 +463,7 @@ void SpatialReference::dump() const
 
 std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs)
 {
-    std::string wkt = Utils::toPTree(srs).get<std::string>("prettycompoundwkt");
+    std::string wkt = srs.getWKT(SpatialReference::eCompoundOK, true);
     ostr << wkt;
     return ostr;
 }

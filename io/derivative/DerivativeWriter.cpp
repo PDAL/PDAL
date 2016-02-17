@@ -334,7 +334,7 @@ double DerivativeWriter::determineAspectD8(Eigen::MatrixXd* data, int row,
     double tH = postSpacing;
     double tVal, tN, tS, tE, tW, tNW, tNE, tSW, tSE, nextTVal;
     double tSlopeVal = std::numeric_limits<double>::max(), tSlopeValDegree;
-    int tNextY, tNextX;
+//     int tNextY, tNextX;
     unsigned int j = 0;
 
     tVal = (*data)(row, col);

@@ -42,12 +42,11 @@ RUN git clone --depth=1 https://github.com/PDAL/PDAL \
 		-DCMAKE_BUILD_TYPE=Release \
 		.. \
 	&& make -j4 \
-	&& make install
+	&& make install \
+    && rm -rf PDAL
 
-RUN cd /PDAL/python \
-    && pip install packaging \
-    && python setup.py build \
-    && python setup.py install
+#RUN pip install packaging \
+#    && pip install PDAL
 
 
 RUN git clone https://github.com/PDAL/PRC.git \
@@ -60,10 +59,7 @@ RUN git clone https://github.com/PDAL/PRC.git \
     && cmake \
         -DCMAKE_BUILD_TYPE=Release \
         -DPDAL_DIR=/usr/lib/pdal/cmake \
-        ..
-
-RUN cd /PRC/build \
+        .. \
     && make \
-    && make install
-# cleanup
-RUN rm -rf laszip laz-perf points2grid pcl nitro hexer 3.2.7.tar.gz eigen-eigen-b30b87236a1b PDAL PRC fgt cpd
+    && make install \
+    && rm -rf PRC

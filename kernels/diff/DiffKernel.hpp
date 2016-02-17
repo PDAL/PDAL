@@ -38,8 +38,6 @@
 #include <pdal/Stage.hpp>
 #include <pdal/util/FileUtils.hpp>
 
-#include <boost/property_tree/ptree.hpp>
-
 extern "C" int32_t DiffKernel_ExitFunc();
 extern "C" PF_ExitFunc DiffKernel_InitPlugin();
 
@@ -61,8 +59,7 @@ private:
     virtual void addSwitches(ProgramArgs& args);
 
     void checkPoints(const PointView& source_data,
-        const PointView& candidate_data,
-        pdalboost::property_tree::ptree& errors);
+        const PointView& candidate_data, MetadataNode errors);
     std::string m_sourceFile;
     std::string m_candidateFile;
 };

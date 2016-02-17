@@ -56,8 +56,6 @@ std::string SplitKernel::getName() const
 
 void SplitKernel::addSwitches(ProgramArgs& args)
 {
-    Arg *arg;
-
     args.add("input,i", "Input filename", m_inputFile).setPositional();
     args.add("output,o", "Output filename", m_outputFile).setPositional();
     args.add("length", "Edge length for splitter cells", m_length, 0.0);
@@ -76,7 +74,7 @@ void SplitKernel::validateSwitches(ProgramArgs& args)
 #else
     char pathSeparator = '/';
 #endif
-    
+
     if (m_length && m_capacity)
         throw pdal_error("Can't specify for length and capacity.");
     if (!m_length && !m_capacity)

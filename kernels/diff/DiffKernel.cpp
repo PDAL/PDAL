@@ -39,7 +39,6 @@
 #include <pdal/PDALUtils.hpp>
 #include <pdal/PointView.hpp>
 
-using pdalboost::property_tree::ptree;
 
 namespace pdal
 {
@@ -64,7 +63,7 @@ void DiffKernel::addSwitches(ProgramArgs& args)
 
 
 void DiffKernel::checkPoints(const PointView& source_data,
-    const PointView& candidate_data, ptree& errors)
+    const PointView& candidate_data, MetadataNode errors)
 {
     uint32_t MAX_BADBYTES(20);
     uint32_t badbytes(0);
@@ -93,7 +92,7 @@ void DiffKernel::checkPoints(const PointView& source_data,
 
                 oss << "Point " << idx << " differs for dimension \"" <<
                     Dimension::name(sd) << "\" for source and candidate";
-                errors.put<std::string>("data.error", oss.str());
+                errors.add("data.error", oss.str());
                 badbytes++;
             }
         }
@@ -117,7 +116,7 @@ int DiffKernel::execute()
     source.prepare(sourceTable);
     PointViewSet sourceSet = source.execute(sourceTable);
 
-    ptree errors;
+    MetadataNode errors;
 
     PointTable candidateTable;
     Options candidateOptions;
@@ -139,9 +138,9 @@ int DiffKernel::execute()
         std::ostringstream oss;
 
         oss << "Source and candidate files do not have the same point count";
-        errors.put("count.error", oss.str());
-        errors.put("count.candidate", candidateView->size());
-        errors.put("count.source", sourceView->size());
+        errors.add("count.error", oss.str());
+        errors.add("count.candidate", candidateView->size());
+        errors.add("count.source", sourceView->size());
     }
 
     MetadataNode source_metadata = sourceTable.metadata();
@@ -151,10 +150,9 @@ int DiffKernel::execute()
         std::ostringstream oss;
 
         oss << "Source and candidate files do not have the same metadata count";
-        errors.put("metadata.error", oss.str());
-        errors.put_child("metadata.source", Utils::toPTree(source_metadata));
-        errors.put_child("metadata.candidate",
-            Utils::toPTree(candidate_metadata));
+        errors.add("metadata.error", oss.str());
+        errors.add(source_metadata);
+        errors.add(candidate_metadata);
     }
 
     if (candidateTable.layout()->dims().size() !=
@@ -164,28 +162,28 @@ int DiffKernel::execute()
 
         oss << "Source and candidate files do not have the same "
             "number of dimensions";
-        errors.put<std::string>("schema.error", oss.str());
+//         errors.put<std::string>("schema.error", oss.str());
         //Need to "ptree" the PointTable dimension list in some way
         // errors.put_child("schema.source", sourceTable.schema()->toPTree());
         // errors.put_child("schema.candidate",
         //     candidateTable.schema()->toPTree());
     }
 
-    if (errors.size())
-    {
-        write_json(std::cout, errors);
-        return 1;
-    }
-    else
+//     if (errors.size())
+//     {
+//         write_json(std::cout, errors);
+//         return 1;
+//     }
+//     else
     {
         // If we made it this far with no errors, now we'll
         // check the points.
-        checkPoints(*sourceView, *candidateView, errors);
-        if (errors.size())
-        {
-            write_json(std::cout, errors);
-            return 1;
-        }
+//         checkPoints(*sourceView, *candidateView, errors);
+//         if (errors.size())
+//         {
+//             write_json(std::cout, errors);
+//             return 1;
+//         }
     }
     return 0;
 }
