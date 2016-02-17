@@ -140,31 +140,26 @@ private:
     int m_xBlockSize, m_yBlockSize;  /// Size (x and y) of blocks
     int m_xBlockCnt, m_yBlockCnt;    /// Number of blocks in each direction
     size_t m_eltSize;                /// Size in bytes of each band element.
+    std::vector<uint8_t> m_buf;      /// Block read buffer.
 
     /*
-      Read a full block's worth of data.
+      Read a block's worth of data.
 
       \param x  X coordinate of block to read.
       \param y  Y coordinate of block to read.
       \param data  Pointer to vector in which to store data.  Vector must
         be sufficiently sized to hold all data.
-      \return  Number of bytes read into the buffer pointed to by \ref data.
     */
-    int readFullBlock(int x, int y, uint8_t *data);
-    /*
-      Read a partial block's worth of data.  This would also work for
-      full blocks, but is less efficient.
-
-      \param x  X coordinate of block to read.
-      \param y  Y coordinate of block to read.
-      \param data  Pointer to vector in which to store data.  Vector must
-        be sufficiently sized to hold all data.
-      \return  Number of bytes read into the buffer pointed to by \ref data.
-    */
-    int readPartialBlock(int x, int y, uint8_t *data);
+    void readBlock(int x, int y, uint8_t *data);
 };
 
 
+/*
+  Create a band reader for a single bad of a GDAL dataset.
+
+  \param ds  GDAL dataset handle.
+  \param bandNum  Band number (1-indexed).
+*/
 BandReader::BandReader(GDALDatasetH ds, int bandNum) : m_ds(ds),
     m_bandNum(bandNum), m_xBlockSize(0), m_yBlockSize(0)
 {
@@ -183,43 +178,40 @@ BandReader::BandReader(GDALDatasetH ds, int bandNum) : m_ds(ds),
 }
 
 
+/*
+  Read a raster band into an array.
+
+  \param ptData  Vector to contain raster (Y major - X varies fastest).
+    ptData is resized to fit data in the band.
+*/
 void BandReader::read(std::vector<uint8_t>& ptData)
 {
     GDALDataType t = GDALGetRasterDataType(m_band);
     m_eltSize = GDALGetDataTypeSize(t) / CHAR_BIT;
+    m_buf.resize(m_xBlockSize * m_yBlockSize * m_eltSize);
     ptData.resize(m_xTotalSize * m_yTotalSize * m_eltSize);
-
-    // If the raster size doesn't divide evenly into blocks in either
-    // dimension, store off the row/column number of the partial row/column,
-    // otherwise store -1.
-    int xPartialBlock = (m_xTotalSize % m_xBlockSize) ? (m_xBlockCnt - 1) : -1;
-    int yPartialBlock = (m_yTotalSize % m_yBlockSize) ? (m_yBlockCnt - 1) : -1;
 
     uint8_t *data = ptData.data();
     for (int y = 0; y < m_yBlockCnt; ++y)
         for (int x = 0; x < m_xBlockCnt; ++x)
-        {
-            if ((x == xPartialBlock) || (y == yPartialBlock))
-                data += readPartialBlock(x, y, data);
-            else
-                data += readFullBlock(x, y, data);
-        }
+            readBlock(x, y, data);
 }
 
 
-int BandReader::readFullBlock(int x, int y, uint8_t *data)
+/*
+  Read a block's worth of data.
+
+  Read data into a block-sized buffer.  Then copy data from the block buffer
+  into the destination array at the proper location to build a complete
+  raster.
+
+  \param x  X coordinate of the block to read.
+  \param y  Y coordinate of the block to read.
+  \param data  Pointer to the data vector that contains the raster information.
+*/
+void BandReader::readBlock(int x, int y, uint8_t *data)
 {
-    if (GDALReadBlock(m_band, x, y, data) != CPLE_None)
-        throw CantReadBlock();
-    return m_xBlockSize * m_yBlockSize * m_eltSize;
-}
-
-
-int BandReader::readPartialBlock(int x, int y, uint8_t *data)
-{
-    std::vector<uint8_t> buf(m_xBlockSize * m_yBlockSize * m_eltSize);
-
-    if (GDALReadBlock(m_band, x, y, buf.data()) != CPLE_None)
+    if (GDALReadBlock(m_band, x, y, m_buf.data()) != CPLE_None)
         throw CantReadBlock();
 
     int xWidth = 0;
@@ -228,23 +220,26 @@ int BandReader::readPartialBlock(int x, int y, uint8_t *data)
     if (xWidth == 0)
         xWidth = m_xBlockSize;
 
-    int yWidth = 0;
+    int yHeight = 0;
     if (y == m_yBlockCnt - 1)
-        yWidth = m_yTotalSize % m_yBlockSize;
-    if (yWidth == 0)
-        yWidth = m_yBlockSize;        
+        yHeight = m_yTotalSize % m_yBlockSize;
+    if (yHeight == 0)
+        yHeight = m_yBlockSize;
 
-    uint8_t *bp = buf.data();
+    uint8_t *bp = m_buf.data();
     // Go through rows copying data.  Increment the buffer pointer by the
-    // width of the row.  Increment the data pointer by the amount of data
-    // copied.
-    for (int col = 0; col < yWidth; ++col)
+    // width of the row.
+    for (int row = 0; row < yHeight; ++row)
     {
-        std::copy(bp, bp + (xWidth * m_eltSize), data);
+        int wholeRows = m_xTotalSize * ((y * m_yBlockSize) + row);
+        int partialRows = m_xBlockSize * x;
+        uint8_t *dp = data + ((wholeRows + partialRows) * m_eltSize);
+        std::copy(bp, bp + (xWidth * m_eltSize), dp);
+
+        // Blocks are always full-sized, even if only some of the data is valid,
+        // so we use m_xBlockSize instead of xWidth.
         bp += (m_xBlockSize * m_eltSize);
-        data += xWidth * m_eltSize;
     }
-    return xWidth * yWidth * m_eltSize;
 }
 
 
@@ -312,6 +307,11 @@ GDALError::Enum Raster::open()
 
 void Raster::pixelToCoord(int col, int row, std::array<double, 2>& output) const
 {
+    /**
+    double *xform = const_cast<double *>(m_forward_transform.data());
+    GDALApplyGeoTransform(xform, col, row, &output[0], &output[1]);
+    **/
+
     // from http://gis.stackexchange.com/questions/53617/how-to-find-lat-lon-values-for-every-pixel-in-a-geotiff-file
     double c = m_forward_transform[0];
     double a = m_forward_transform[1];
@@ -332,6 +332,7 @@ void Raster::pixelToCoord(int col, int row, std::array<double, 2>& output) const
     output[0] = a*col + b*row + a*0.5 + b*0.5 + c;
     output[1] = d*col + e*row + d*0.5 + e*0.5 + f;
 }
+
 
 // Determines the pixel/line position given an x/y.
 // No reprojection is done at this time.

@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/pdal_test_main.hpp>
+#include <fstream>
 
 #include "GDALReader.hpp"
 #include "Support.hpp"
@@ -76,7 +77,111 @@ TEST(GDALReaderTest, simple)
     };
 
     verify(0, .5, .5, 0, 0, 0);
-    verify(120000, 163.5, 195.5, 255, 213, 0);
-    verify(290000, 394.5, 410.5, 0, 255, 206);
-    verify(715154, 972.5, 734.5, 0, 0, 0);
+    verify(120000, 195.5, 163.5, 255, 213, 0);
+    verify(290000, 410.5, 394.5, 0, 255, 206);
+    verify(715154, 734.5, 972.5, 0, 0, 0);
+}
+
+struct Point
+{
+    double m_x;
+    double m_y;
+    double m_z;
+};
+
+std::ostream& operator << (std::ostream& o, const Point& p)
+{
+    o << p.m_x << "/" << p.m_y << "/" << p.m_z;
+    return o;
+}
+
+bool operator < (const Point& p1, const Point& p2)
+{
+    return (p1.m_x < p2.m_x ? true :
+            p1.m_x > p2.m_x ? false :
+            p1.m_y < p2.m_y ? true :
+            p1.m_y > p2.m_y ? false :
+            p1.m_z < p2.m_z ? true : false);
+}
+
+class GDALReaderTypeTest : public ::testing::Test
+{
+protected:
+    GDALReaderTypeTest()
+    {
+        std::string xyzFilename = Support::datapath("gdal/data.xyz");
+
+        std::ifstream in(xyzFilename);
+
+        while (true)
+        {
+            Point p;
+            in >> p.m_x >> p.m_y >> p.m_z;
+            if (in.eof())
+                break;
+            m_xyzPoints.push_back(p);
+        }
+    }
+
+    void compare(const std::string& path)
+    {
+        Options ro;
+        ro.add("filename", path);
+
+        GDALReader gr;
+        gr.setOptions(ro);
+
+        PointTable t;
+        gr.prepare(t);
+        Dimension::Id::Enum b1 = t.layout()->findDim("band-1");
+        PointViewSet s = gr.execute(t);
+        PointViewPtr v = *s.begin();
+
+        EXPECT_EQ(v->size(), m_xyzPoints.size());
+        for (PointId idx = 0; idx < v->size(); ++idx)
+        {
+            Point p;
+            p.m_x = v->getFieldAs<double>(Dimension::Id::X, idx);
+            p.m_y = v->getFieldAs<double>(Dimension::Id::Y, idx);
+            p.m_z = v->getFieldAs<double>(b1, idx);
+            m_gdalPoints.push_back(p);
+        }
+        std::sort(m_xyzPoints.begin(), m_xyzPoints.end());
+        std::sort(m_gdalPoints.begin(), m_gdalPoints.end());
+        for (size_t i = 0; i < m_gdalPoints.size(); ++i)
+        {
+            EXPECT_DOUBLE_EQ(m_xyzPoints[i].m_x, m_gdalPoints[i].m_x);
+            EXPECT_DOUBLE_EQ(m_xyzPoints[i].m_y, m_gdalPoints[i].m_y);
+            EXPECT_DOUBLE_EQ(m_xyzPoints[i].m_z, m_gdalPoints[i].m_z);
+        }
+    }
+
+private:
+    std::vector<Point> m_xyzPoints;    
+    std::vector<Point> m_gdalPoints;
+};
+
+TEST_F(GDALReaderTypeTest, byte)
+{
+    compare(Support::datapath("gdal/byte.tif"));
+}
+
+TEST_F(GDALReaderTypeTest, int16)
+{
+    compare(Support::datapath("gdal/int16.tif"));
+}
+
+TEST_F(GDALReaderTypeTest, int32)
+{
+    compare(Support::datapath("gdal/int32.tif"));
+}
+
+TEST_F(GDALReaderTypeTest, float32)
+{
+    compare(Support::datapath("gdal/float32.tif"));
+}
+
+TEST_F(GDALReaderTypeTest, float64)
+{
+    compare(Support::datapath("gdal/float64.tif"));
 }
