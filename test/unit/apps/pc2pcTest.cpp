@@ -55,12 +55,13 @@ static std::string appName()
 TEST(pc2pcTest, pc2pcTest_test_no_input)
 {
     std::string cmd = appName();
+    cmd += " 2>&1"; // pdal outputs to both, stdout and stderr
 
     std::string output;
     int stat = Utils::run_shell_command(cmd, output);
     EXPECT_EQ(stat, 1);
 
-    const std::string expected = "Usage error: --input";
+    const std::string expected = "PDAL: Missing value for positional argument 'input'.";
     EXPECT_EQ(output.substr(0, expected.length()), expected);
 }
 #endif
