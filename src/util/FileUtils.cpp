@@ -270,16 +270,7 @@ string toAbsolutePath(const string& filename, const string base)
 
 string getFilename(const string& path)
 {
-#ifdef _WIN32
-    char pathsep = '\\';
-#else
-    char pathsep = '/';
-#endif
-
-    string::size_type pos = path.find_last_of(pathsep);
-    if (pos == string::npos)
-        return path;
-    return path.substr(pos + 1);
+    return pdalboost::filesystem::path(path).filename().string();
 }
 
 
