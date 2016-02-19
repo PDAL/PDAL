@@ -26,7 +26,7 @@ find_package(PCL QUIET 1.7 REQUIRED)
 #
 # PCL has compiler issues.
 #
-if (NOT WIN32)
+if (PDAL_COMPILER_CLANG)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c99-extensions")
 endif()
 

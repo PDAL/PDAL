@@ -166,8 +166,31 @@ TEST(FileUtilsTest, test_isAbsolute)
 
 TEST(FileUtilsTest, filename)
 {
-    std::string filename = "/foo//bar//baz.c";
+    std::string filename = "";
+    EXPECT_EQ(FileUtils::getFilename(filename), "");
+
+    filename = "/";
+    EXPECT_EQ(FileUtils::getFilename(filename), "");
+
+    filename = "/foo/bar/";
+    EXPECT_EQ(FileUtils::getFilename(filename), "");
+
+    filename = "/foo//bar//baz.c";
     EXPECT_EQ(FileUtils::getFilename(filename), "baz.c");
+
+#ifdef _WIN32
+    filename = "C:/foo/bar/baz.c";
+    EXPECT_EQ(FileUtils::getFilename(filename), "baz.c");
+
+    filename = "C:\\foo\\bar\\baz.c";
+    EXPECT_EQ(FileUtils::getFilename(filename), "baz.c");
+
+    filename = "C:\\foo/bar\\meaw/baz.c";
+    EXPECT_EQ(FileUtils::getFilename(filename), "baz.c");
+#else
+    filename = "C:\\foo\\bar\\baz.c";
+    EXPECT_EQ(FileUtils::getFilename(filename), filename);
+#endif
 }
 
 TEST(FileUtilsTest, extension)

@@ -66,7 +66,7 @@ std::string DerivativeWriter::getName() const
 const double c_pi = 3.14159265358979323846; /*!< PI value */
 const float c_background = FLT_MIN;
 
-DerivativeWriter::DerivativeWriter() : m_primitive_type(0)
+DerivativeWriter::DerivativeWriter()
 {
     GDALAllRegister();
 }
@@ -76,6 +76,7 @@ void DerivativeWriter::processOptions(const Options& ops)
 {
     m_GRID_DIST_X = ops.getValueOrDefault<double>("grid_dist_x", 15.0);
     m_GRID_DIST_Y = ops.getValueOrDefault<double>("grid_dist_y", 15.0);
+    handleFilenameTemplate();
 
     // maybe we eventually introduce an option to do more than slope
     //std::vector<Option> types = ops.getOptions("output_type");
@@ -100,37 +101,59 @@ void DerivativeWriter::processOptions(const Options& ops)
     //            m_outputTypes = OUTPUT_TYPE_ALL;
     //    }
     //}
-    std::string primitiveType =
-        ops.getValueOrDefault<std::string>("primitive_type", "slope_d8");
-    std::string pt = Utils::tolower(primitiveType);
 
-    if (pt == "slope_d8")
-        m_primitive_type = SLOPE_D8;
-    else if (pt == "slope_fd")
-        m_primitive_type = SLOPE_FD;
-    else if (pt == "aspect_d8")
-        m_primitive_type = ASPECT_D8;
-    else if (pt == "aspect_fd")
-        m_primitive_type = ASPECT_FD;
-    else if (pt == "hillshade")
-        m_primitive_type = HILLSHADE;
-    else if (pt == "contour_curvature")
-        m_primitive_type = CONTOUR_CURVATURE;
-    else if (pt == "profile_curvature")
-        m_primitive_type = PROFILE_CURVATURE;
-    else if (pt == "tangential_curvature")
-        m_primitive_type = TANGENTIAL_CURVATURE;
-    else if (pt == "total_curvature")
-        m_primitive_type = TOTAL_CURVATURE;
-    else if (pt == "catchment_area")
-        m_primitive_type = CATCHMENT_AREA;
-    else
+    std::map<std::string, PrimitiveType> primtypes;
+    primtypes["slope_d8"] = SLOPE_D8;
+    primtypes["slope_fd"] = SLOPE_FD;
+    primtypes["aspect_d8"] = ASPECT_D8;
+    primtypes["aspect_fd"] = ASPECT_FD;
+    primtypes["hillshade"] = HILLSHADE;
+    primtypes["contour_curvature"] = CONTOUR_CURVATURE;
+    primtypes["profile_curvature"] = PROFILE_CURVATURE;
+    primtypes["tangential_curvature"] = TANGENTIAL_CURVATURE;
+    primtypes["total_curvature"] = TOTAL_CURVATURE;
+    primtypes["catchment_area"] = CATCHMENT_AREA;
+
+    std::string primTypes = ops.getValueOrDefault("primitive_type", "slope_d8");
+    StringList types = Utils::split2(primTypes, ',');
+
+    if (m_hashPos == std::string::npos && types.size() > 1)
     {
         std::ostringstream oss;
-        oss << "Unrecognized primitive type " << primitiveType;
+
+        oss << getName() << ": No template placeholder ('#') found in "
+            "filename '" << m_filename << "' when one is required with "
+            "multiple primitive types.";
         throw pdal_error(oss.str());
     }
 
+    for (std::string os : types)
+    {
+        Utils::trim(os);
+        std::string s = Utils::tolower(os);
+        auto pi = primtypes.find(s);
+        if (pi == primtypes.end())
+        {
+            std::ostringstream oss;
+            oss << getName() << ": Unrecognized primitive type '" << os <<
+                "'.";
+            throw pdal_error(oss.str());
+        }
+        TypeOutput to { pi->second, generateFilename(pi->first) };
+        m_primitiveTypes.push_back(to);
+    }
+}
+
+
+std::string
+DerivativeWriter::generateFilename(const std::string& primName) const
+{
+    // We've already checked during argument parsing that we have a valid
+    // template placeholder (#) if necessary.
+    std::string filename = m_filename;
+    if (m_hashPos != std::string::npos)
+        filename.replace(m_hashPos, 1, primName);
+    return filename;
 }
 
 
@@ -152,7 +175,8 @@ Options DerivativeWriter::getDefaultOptions()
     return options;
 }
 
-double DerivativeWriter::GetNeighbor(Eigen::MatrixXd* data, int row, int col, Direction d)
+double DerivativeWriter::GetNeighbor(Eigen::MatrixXd* data, int row, int col,
+    Direction d)
 {
     double val;
     switch (d)
@@ -187,6 +211,7 @@ double DerivativeWriter::GetNeighbor(Eigen::MatrixXd* data, int row, int col, Di
     }
     return val;
 }
+
 
 double DerivativeWriter::determineSlopeFD(Eigen::MatrixXd* data, int row,
         int col, double postSpacing, double valueToIgnore)
@@ -237,6 +262,7 @@ double DerivativeWriter::determineSlopeFD(Eigen::MatrixXd* data, int row,
     return tSlopeValDegree;
 }
 
+
 double DerivativeWriter::determineSlopeD8(Eigen::MatrixXd* data, int row,
         int col, double postSpacing, double valueToIgnore)
 {
@@ -258,13 +284,14 @@ double DerivativeWriter::determineSlopeD8(Eigen::MatrixXd* data, int row,
     double southeast = GetNeighbor(data, row, col, SOUTHEAST);
     double southwest = GetNeighbor(data, row, col, SOUTHWEST);
 
-    auto checkVal =
-        [val, &tSlopeVal, valueToIgnore, postSpacing](double neighbor, double phi)
+    auto checkVal = [val, &tSlopeVal, valueToIgnore, postSpacing]
+        (double neighbor, double phi)
     {
         if (neighbor != valueToIgnore)
         {
             neighbor = (val - neighbor) / (postSpacing * phi);
-            if (std::fabs(neighbor) > std::fabs(tSlopeVal) || tSlopeVal == valueToIgnore)
+            if ((std::fabs(neighbor) > std::fabs(tSlopeVal)) ||
+                (tSlopeVal == valueToIgnore))
                 tSlopeVal = neighbor;
         }
     };
@@ -325,6 +352,7 @@ double DerivativeWriter::determineAspectFD(Eigen::MatrixXd* data, int row,
 
     return 180.0 - std::atan(zY/zX) + 90.0 * (zX / std::fabs(zX));
 }
+
 
 double DerivativeWriter::determineAspectD8(Eigen::MatrixXd* data, int row,
         int col, double postSpacing)
@@ -1003,7 +1031,8 @@ GDALDataset* DerivativeWriter::createFloat32GTIFF(std::string filename,
 
 
 void DerivativeWriter::writeSlope(Eigen::MatrixXd* tDemData,
-                                  const PointViewPtr data, SlopeMethod method)
+        const PointViewPtr data, PrimitiveType method,
+        const std::string& filename)
 {
     BOX2D& extent = getBounds();
 
@@ -1011,7 +1040,7 @@ void DerivativeWriter::writeSlope(Eigen::MatrixXd* tDemData,
     double tPostSpacing = std::max(m_GRID_DIST_X, m_GRID_DIST_Y);
 
     GDALDataset *mpDstDS;
-    mpDstDS = createFloat32GTIFF(m_filename, m_GRID_SIZE_X, m_GRID_SIZE_Y);
+    mpDstDS = createFloat32GTIFF(filename, m_GRID_SIZE_X, m_GRID_SIZE_Y);
 
     // if we have a valid file
     if (mpDstDS)
@@ -1038,17 +1067,20 @@ void DerivativeWriter::writeSlope(Eigen::MatrixXd* tDemData,
                 //Compute Slope Value
                 switch (method)
                 {
-                    case SD8:
+                    case SLOPE_D8:
                         tSlopeValDegree = (float)determineSlopeD8(tDemData,
                                           tYOut, tXOut, tPostSpacing,
                                           c_background);
                         break;
 
-                    case SFD:
+                    case SLOPE_FD:
                         tSlopeValDegree = (double)determineSlopeFD(tDemData,
                                           tYOut, tXOut, tPostSpacing,
                                           c_background);
                         break;
+                    default:
+                        assert(false);
+                        return;
                 }
 
                 poRasterData[(tYIn * m_GRID_SIZE_X) + tXIn] =
@@ -1088,7 +1120,7 @@ void DerivativeWriter::writeSlope(Eigen::MatrixXd* tDemData,
 
 
 void DerivativeWriter::writeAspect(Eigen::MatrixXd* tDemData,
-                                   const PointViewPtr data, AspectMethod method)
+    const PointViewPtr data, PrimitiveType method, const std::string& filename)
 {
     BOX2D& extent = getBounds();
 
@@ -1096,7 +1128,7 @@ void DerivativeWriter::writeAspect(Eigen::MatrixXd* tDemData,
     double tPostSpacing = std::max(m_GRID_DIST_X, m_GRID_DIST_Y);
 
     GDALDataset *mpDstDS;
-    mpDstDS = createFloat32GTIFF(m_filename, m_GRID_SIZE_X, m_GRID_SIZE_Y);
+    mpDstDS = createFloat32GTIFF(filename, m_GRID_SIZE_X, m_GRID_SIZE_Y);
 
     // if we have a valid file
     if (mpDstDS)
@@ -1123,21 +1155,24 @@ void DerivativeWriter::writeAspect(Eigen::MatrixXd* tDemData,
                 //Compute Aspect Value
                 switch (method)
                 {
-                    case AD8:
+                    case ASPECT_D8:
                         tSlopeValDegree = (float)determineAspectD8(tDemData,
                                           tYOut, tXOut, tPostSpacing);
                         break;
-
-                    case SFD:
+                    case ASPECT_FD:
                         tSlopeValDegree = (float)determineAspectFD(tDemData,
-                                          tYOut, tXOut, tPostSpacing, c_background);
+                                tYOut, tXOut, tPostSpacing, c_background);
                         break;
+                    default:
+                        assert(false);
+                        return;
                 }
 
                 if (tSlopeValDegree == std::numeric_limits<double>::max())
                     poRasterData[(tYIn * m_GRID_SIZE_X) + tXIn] = c_background;
                 else
-                    poRasterData[(tYIn * m_GRID_SIZE_X) + tXIn] = tSlopeValDegree;
+                    poRasterData[(tYIn * m_GRID_SIZE_X) + tXIn] =
+                        tSlopeValDegree;
             }
         }
 
@@ -1168,7 +1203,7 @@ void DerivativeWriter::writeAspect(Eigen::MatrixXd* tDemData,
 
 
 void DerivativeWriter::writeCatchmentArea(Eigen::MatrixXd* tDemData,
-        const PointViewPtr data)
+        const PointViewPtr data, const std::string& filename)
 {
     Eigen::MatrixXd area(m_GRID_SIZE_Y, m_GRID_SIZE_X);
     area.setZero();
@@ -1179,7 +1214,7 @@ void DerivativeWriter::writeCatchmentArea(Eigen::MatrixXd* tDemData,
     double tPostSpacing = std::max(m_GRID_DIST_X, m_GRID_DIST_Y);
 
     GDALDataset *mpDstDS;
-    mpDstDS = createFloat32GTIFF(m_filename, m_GRID_SIZE_X, m_GRID_SIZE_Y);
+    mpDstDS = createFloat32GTIFF(filename, m_GRID_SIZE_X, m_GRID_SIZE_Y);
 
     // if we have a valid file
     if (mpDstDS)
@@ -1317,7 +1352,7 @@ void DerivativeWriter::writeCatchmentArea(Eigen::MatrixXd* tDemData,
 
 
 void DerivativeWriter::writeHillshade(Eigen::MatrixXd* tDemData,
-                                      const PointViewPtr data)
+    const PointViewPtr data, const std::string& filename)
 {
     BOX2D& extent = getBounds();
 
@@ -1325,7 +1360,7 @@ void DerivativeWriter::writeHillshade(Eigen::MatrixXd* tDemData,
     double tPostSpacing = std::max(m_GRID_DIST_X, m_GRID_DIST_Y);
 
     GDALDataset *mpDstDS;
-    mpDstDS = createFloat32GTIFF(m_filename, m_GRID_SIZE_X, m_GRID_SIZE_Y);
+    mpDstDS = createFloat32GTIFF(filename, m_GRID_SIZE_X, m_GRID_SIZE_Y);
 
     // if we have a valid file
     if (mpDstDS)
@@ -1405,9 +1440,8 @@ void DerivativeWriter::writeHillshade(Eigen::MatrixXd* tDemData,
 
 
 void DerivativeWriter::writeCurvature(Eigen::MatrixXd* tDemData,
-                                      const PointViewPtr data,
-                                      CurvatureType curveType,
-                                      double valueToIgnore)
+    const PointViewPtr data, PrimitiveType curveType, double valueToIgnore,
+    const std::string& filename)
 {
     BOX2D& extent = getBounds();
 
@@ -1415,91 +1449,90 @@ void DerivativeWriter::writeCurvature(Eigen::MatrixXd* tDemData,
     double tPostSpacing = std::max(m_GRID_DIST_X, m_GRID_DIST_Y);
 
     GDALDataset *mpDstDS;
-    mpDstDS = createFloat32GTIFF(m_filename, m_GRID_SIZE_X, m_GRID_SIZE_Y);
+    mpDstDS = createFloat32GTIFF(filename, m_GRID_SIZE_X, m_GRID_SIZE_Y);
 
     // if we have a valid file
-    if (mpDstDS)
+    if (!mpDstDS)
+        return;
+
+    // loop over the raster and determine max slope at each location
+    int tXStart = 1, tXEnd = m_GRID_SIZE_X - 1;
+    int tYStart = 1, tYEnd = m_GRID_SIZE_Y - 1;
+    std::vector<float> poRasterData(m_GRID_SIZE_X * m_GRID_SIZE_Y);
+    for (uint32_t i=0; i<m_GRID_SIZE_X*m_GRID_SIZE_Y; i++)
     {
-        // loop over the raster and determine max slope at each location
-        int tXStart = 1, tXEnd = m_GRID_SIZE_X - 1;
-        int tYStart = 1, tYEnd = m_GRID_SIZE_Y - 1;
-        float *poRasterData = new float[m_GRID_SIZE_X*m_GRID_SIZE_Y];
-        for (uint32_t i=0; i<m_GRID_SIZE_X*m_GRID_SIZE_Y; i++)
-        {
-            poRasterData[i] = c_background;
-        }
-
-        #pragma omp parallel for
-        for (int tXOut = tXStart; tXOut < tXEnd; tXOut++)
-        {
-            int tXIn = tXOut;
-            for (int tYOut = tYStart; tYOut < tYEnd; tYOut++)
-            {
-                int tYIn = tYOut;
-
-                double curve(0);
-
-                //Compute Slope Value
-                switch (curveType)
-                {
-                    case CONTOUR:
-                        curve = determineContourCurvature(tDemData,
-                                                          tYOut, tXOut,
-                                                          tPostSpacing,
-                                                          c_background);
-                        break;
-
-                    case PROFILE:
-                        curve = determineProfileCurvature(tDemData,
-                                                          tYOut, tXOut,
-                                                          tPostSpacing,
-                                                          c_background);
-                        break;
-
-                    case TANGENTIAL:
-                        curve = determineTangentialCurvature(tDemData,
-                                                             tYOut, tXOut,
-                                                             tPostSpacing,
-                                                             c_background);
-                        break;
-
-                    case TOTAL:
-                        curve = determineTotalCurvature(tDemData,
-                                                        tYOut, tXOut,
-                                                        tPostSpacing,
-                                                        c_background);
-                        break;
-                }
-
-                poRasterData[(tYOut * m_GRID_SIZE_X) + tXOut] = static_cast<float>(curve);
-            }
-        }
-
-        //stretchData(poRasterData);
-
-        // write the data
-        if (poRasterData)
-        {
-            GDALRasterBand *tBand = mpDstDS->GetRasterBand(1);
-
-            tBand->SetNoDataValue((double)c_background);
-
-            if (m_GRID_SIZE_X > 0 && m_GRID_SIZE_Y > 0)
-#if GDAL_VERSION_MAJOR <= 1
-                tBand->RasterIO(GF_Write, 0, 0, m_GRID_SIZE_X, m_GRID_SIZE_Y,
-                                poRasterData, m_GRID_SIZE_X, m_GRID_SIZE_Y,
-                                GDT_Float32, 0, 0);
-#else
-                int ret = tBand->RasterIO(GF_Write, 0, 0, m_GRID_SIZE_X, m_GRID_SIZE_Y,
-                                          poRasterData, m_GRID_SIZE_X, m_GRID_SIZE_Y,
-                                          GDT_Float32, 0, 0, 0);
-#endif
-        }
-
-        GDALClose((GDALDatasetH) mpDstDS);
-
-        delete [] poRasterData;
+        poRasterData[i] = c_background;
     }
+
+#pragma omp parallel for
+    for (int tXOut = tXStart; tXOut < tXEnd; tXOut++)
+    {
+        int tXIn = tXOut;
+        for (int tYOut = tYStart; tYOut < tYEnd; tYOut++)
+        {
+            int tYIn = tYOut;
+
+            double curve(0);
+
+            //Compute Slope Value
+            switch (curveType)
+            {
+                case CONTOUR_CURVATURE:
+                    curve = determineContourCurvature(tDemData,
+                            tYOut, tXOut,
+                            tPostSpacing,
+                            c_background);
+                    break;
+
+                case PROFILE_CURVATURE:
+                    curve = determineProfileCurvature(tDemData,
+                            tYOut, tXOut,
+                            tPostSpacing,
+                            c_background);
+                    break;
+
+                case TANGENTIAL_CURVATURE:
+                    curve = determineTangentialCurvature(tDemData,
+                            tYOut, tXOut,
+                            tPostSpacing,
+                            c_background);
+                    break;
+
+                case TOTAL_CURVATURE:
+                    curve = determineTotalCurvature(tDemData,
+                            tYOut, tXOut,
+                            tPostSpacing,
+                            c_background);
+                    break;
+                default:
+                    assert(false);
+                    return;
+            }
+
+            poRasterData[(tYOut * m_GRID_SIZE_X) + tXOut] =
+                static_cast<float>(curve);
+        }
+    }
+
+    //stretchData(poRasterData);
+
+    // write the data
+    GDALRasterBand *tBand = mpDstDS->GetRasterBand(1);
+
+    tBand->SetNoDataValue((double)c_background);
+
+    int ret;
+    if (m_GRID_SIZE_X > 0 && m_GRID_SIZE_Y > 0)
+#if GDAL_VERSION_MAJOR <= 1
+        ret = tBand->RasterIO(GF_Write, 0, 0, m_GRID_SIZE_X, m_GRID_SIZE_Y,
+                poRasterData.data(), m_GRID_SIZE_X, m_GRID_SIZE_Y,
+                GDT_Float32, 0, 0);
+#else
+        ret = tBand->RasterIO(GF_Write, 0, 0, m_GRID_SIZE_X, m_GRID_SIZE_Y,
+            poRasterData.data(), m_GRID_SIZE_X, m_GRID_SIZE_Y,
+            GDT_Float32, 0, 0, 0);
+#endif
+    GDALClose((GDALDatasetH) mpDstDS);
 }
 
 
@@ -1510,12 +1543,16 @@ void DerivativeWriter::write(const PointViewPtr data)
 
     // calculate grid based off bounds and post spacing
     calculateGridSizes();
-    log()->get(LogLevel::Debug2) << "X grid size: " << m_GRID_SIZE_X << std::endl;
-    log()->get(LogLevel::Debug2) << "Y grid size: " << m_GRID_SIZE_Y << std::endl;
+    log()->get(LogLevel::Debug2) << "X grid size: " <<
+        m_GRID_SIZE_X << std::endl;
+    log()->get(LogLevel::Debug2) << "Y grid size: " <<
+        m_GRID_SIZE_Y << std::endl;
 
     log()->floatPrecision(6);
-    log()->get(LogLevel::Debug2) << "X grid distance: " << m_GRID_DIST_X << std::endl;
-    log()->get(LogLevel::Debug2) << "Y grid distance: " << m_GRID_DIST_Y << std::endl;
+    log()->get(LogLevel::Debug2) << "X grid distance: " <<
+        m_GRID_DIST_X << std::endl;
+    log()->get(LogLevel::Debug2) << "Y grid distance: " <<
+        m_GRID_DIST_Y << std::endl;
     log()->clearFloat();
 
     BOX2D& extent = getBounds();
@@ -1636,61 +1673,45 @@ void DerivativeWriter::write(const PointViewPtr data)
         }
     };
 
-    bool* prevSetCols = new bool[m_GRID_SIZE_X];
-    bool* curSetCols = new bool[m_GRID_SIZE_X];
-
-    for (uint32_t y = 1; y < m_GRID_SIZE_Y-1; ++y)
     {
-        CleanRasterScanLine(tDemData, tDemData.row(1), m_GRID_SIZE_X, y,
-                            prevSetCols, curSetCols);
-        memcpy(prevSetCols, curSetCols, m_GRID_SIZE_X);
-        memset(curSetCols, 0, m_GRID_SIZE_X);
+        std::unique_ptr<bool> prevSetCols(new bool[m_GRID_SIZE_X]);
+        std::unique_ptr<bool> curSetCols(new bool[m_GRID_SIZE_X]);
+
+        for (uint32_t y = 1; y < m_GRID_SIZE_Y-1; ++y)
+        {
+            CleanRasterScanLine(tDemData, tDemData.row(1), m_GRID_SIZE_X, y,
+                prevSetCols.get(), curSetCols.get());
+            memcpy(prevSetCols.get(), curSetCols.get(), m_GRID_SIZE_X);
+            memset(curSetCols.get(), 0, m_GRID_SIZE_X);
+        }
     }
 
-    delete[] prevSetCols;
-    delete[] curSetCols;
-
-    switch (m_primitive_type)
+    for (TypeOutput& to : m_primitiveTypes)
     {
+        switch (to.m_type)
+        {
         case SLOPE_D8:
-            writeSlope(&tDemData, data, SD8);
-            break;
-
         case SLOPE_FD:
-            writeSlope(&tDemData, data, SFD);
+            writeSlope(&tDemData, data, to.m_type, to.m_filename);
             break;
-
         case ASPECT_D8:
-            writeAspect(&tDemData, data, AD8);
-            break;
-
         case ASPECT_FD:
-            writeAspect(&tDemData, data, AFD);
+            writeAspect(&tDemData, data, to.m_type, to.m_filename);
             break;
-
         case HILLSHADE:
-            writeHillshade(&tDemData, data);
+            writeHillshade(&tDemData, data, to.m_filename);
             break;
-
         case CONTOUR_CURVATURE:
-            writeCurvature(&tDemData, data, CONTOUR, c_background);
-            break;
-
         case PROFILE_CURVATURE:
-            writeCurvature(&tDemData, data, PROFILE, c_background);
-            break;
-
         case TANGENTIAL_CURVATURE:
-            writeCurvature(&tDemData, data, TANGENTIAL, c_background);
-            break;
-
         case TOTAL_CURVATURE:
-            writeCurvature(&tDemData, data, TOTAL, c_background);
+            writeCurvature(&tDemData, data, to.m_type, c_background,
+                to.m_filename);
             break;
-
         case CATCHMENT_AREA:
-            writeCatchmentArea(&tDemData, data);
+            writeCatchmentArea(&tDemData, data, to.m_filename);
             break;
+        }
     }
 }
 

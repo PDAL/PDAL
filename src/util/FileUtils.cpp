@@ -271,7 +271,7 @@ string toAbsolutePath(const string& filename, const string base)
 string getFilename(const string& path)
 {
 #ifdef _WIN32
-    char pathsep = '\\';
+    std::string pathsep("\\/");
 #else
     char pathsep = '/';
 #endif
