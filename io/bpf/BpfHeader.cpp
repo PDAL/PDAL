@@ -324,7 +324,7 @@ bool BpfUlemFile::write(OLeStream& stream)
     stream << m_len;
     stream.put(m_filename, 32);
 
-    std::ifstream in(m_filespec);
+    std::ifstream in(m_filespec, std::ios::binary);
     uint32_t len = m_len;
 
     const uint32_t MAX_BLOCKSIZE = 1000000;
