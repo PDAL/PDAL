@@ -41,7 +41,7 @@ Documentation
 
 
 Developers and Sponsorship
-------------------------------------------------------------------------------
+================================================================================
 
 PDAL is developed by `Howard Butler`_, `Michael Gerlek`_, `Andrew Bell`_,
 `Brad Chambers`_ and `others`_. Find out more about who contributes to

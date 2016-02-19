@@ -21,7 +21,7 @@ to use it to operate on your own data.
 .. seealso::
     The `What is Docker <https://www.docker.com/what-docker>`__ document describes
     in more detail what exactly Docker is. Think of it as a virtualization platform
-    that doesn't have to be "built" every time from scratch like :ref:`vagrant`.
+    that doesn't have to be "built" every time from scratch like a Vagrant build would.
 
 Getting Started
 ------------------------------------------------------------------------------
