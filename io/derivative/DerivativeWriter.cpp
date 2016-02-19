@@ -102,19 +102,17 @@ void DerivativeWriter::processOptions(const Options& ops)
     //    }
     //}
 
-    std::map<std::string, PrimitiveType> primtypes =
-    {
-        { "slope_d8", SLOPE_D8 },
-        { "slope_fd", SLOPE_FD },
-        { "aspect_d8", ASPECT_D8 },
-        { "aspect_fd", ASPECT_FD },
-        { "hillshade", HILLSHADE },
-        { "contour_curvature", CONTOUR_CURVATURE },
-        { "profile_curvature", PROFILE_CURVATURE },
-        { "tangential_curvature", TANGENTIAL_CURVATURE },
-        { "total_curvature", TOTAL_CURVATURE },
-        { "catchment_area", CATCHMENT_AREA }
-    };
+    std::map<std::string, PrimitiveType> primtypes;
+    primtypes["slope_d8"] = SLOPE_D8;
+    primtypes["slope_fd"] = SLOPE_FD;
+    primtypes["aspect_d8"] = ASPECT_D8;
+    primtypes["aspect_fd"] = ASPECT_FD;
+    primtypes["hillshade"] = HILLSHADE;
+    primtypes["contour_curvature"] = CONTOUR_CURVATURE;
+    primtypes["profile_curvature"] = PROFILE_CURVATURE;
+    primtypes["tangential_curvature"] = TANGENTIAL_CURVATURE;
+    primtypes["total_curvature"] = TOTAL_CURVATURE;
+    primtypes["catchment_area"] = CATCHMENT_AREA;
 
     std::string primTypes = ops.getValueOrDefault("primitive_type", "slope_d8");
     StringList types = Utils::split2(primTypes, ',');
