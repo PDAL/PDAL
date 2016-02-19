@@ -42,7 +42,7 @@ namespace pdal
 class PDAL_DLL FlexWriter : public Writer
 {
 protected:
-    FlexWriter() : m_hashPos(std::string::npos), m_filenum(1)
+    FlexWriter() : m_filenum(1)
     {}
 
     void validateFilename(PointTableRef table)
@@ -66,24 +66,7 @@ private:
             oss << "Can't write with " << getName() << " without filename.";
             throw pdal_error(oss.str());
         }
-        std::string::size_type suffixPos = m_filename.find_last_of('.');
-        m_hashPos = m_filename.find_first_of('#');
-        if (m_hashPos != std::string::npos)
-        {
-            if (m_hashPos > suffixPos)
-            {
-                throw pdal_error("File number placeholder ('#') is not "
-                    "allowed in filename suffix.");
-            }
-            if (m_filename.find_first_of('#', m_hashPos + 1) !=
-                std::string::npos)
-            {
-                std::ostringstream oss;
-                oss << getName() << " filename specification can only contain "
-                    "a single '#' placeholder.";
-                throw pdal_error(oss.str());
-            }
-        }
+        handleFilenameTemplate();
     }
 
     std::string generateFilename()
@@ -151,7 +134,6 @@ private:
     virtual void doneFile()
     {}
 
-    std::string::size_type m_hashPos;
     size_t m_filenum;
 
     FlexWriter& operator=(const FlexWriter&); // not implemented

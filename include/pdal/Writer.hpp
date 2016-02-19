@@ -52,7 +52,7 @@ class PDAL_DLL Writer : public Stage
 
 public:
     /// Constructs an end-stage consumer of a pipeline of data -- a writer
-    Writer()
+    Writer() : m_hashPos(std::string::npos)
         {}
 
 protected:
@@ -61,8 +61,10 @@ protected:
     XForm m_yXform;
     XForm m_zXform;
     StringList m_outputDims;
+    std::string::size_type m_hashPos;
 
     virtual void setAutoXForm(const PointViewPtr view);
+    void handleFilenameTemplate();
 
 private:
     virtual PointViewSet run(PointViewPtr view)

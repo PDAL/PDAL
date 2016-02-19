@@ -52,18 +52,6 @@ class BOX2D;
 
 class PDAL_DLL DerivativeWriter : public Writer
 {
-    enum SlopeMethod
-    {
-        SD8,
-        SFD
-    };
-
-    enum AspectMethod
-    {
-        AD8,
-        AFD
-    };
-
     enum PrimitiveType
     {
         SLOPE_D8,
@@ -78,14 +66,6 @@ class PDAL_DLL DerivativeWriter : public Writer
         CATCHMENT_AREA
     };
 
-    enum CurvatureType
-    {
-        CONTOUR,
-        PROFILE,
-        TANGENTIAL,
-        TOTAL
-    };
-
     enum Direction
     {
         NORTH,
@@ -96,6 +76,12 @@ class PDAL_DLL DerivativeWriter : public Writer
         NORTHWEST,
         SOUTHEAST,
         SOUTHWEST
+    };
+
+    struct TypeOutput
+    {
+        PrimitiveType m_type;
+        std::string m_filename;
     };
 
 public:
@@ -122,6 +108,7 @@ private:
         return m_bounds;
     }
 
+    std::string generateFilename(const std::string& primName) const;
     void calculateGridSizes();
     double determineSlopeFD(Eigen::MatrixXd* data, int row, int col,
                             double postSpacing, double valueToIgnore);
@@ -146,13 +133,16 @@ private:
                               double postSpacing);
     double GetNeighbor(Eigen::MatrixXd* data, int row, int col, Direction d);
     void writeSlope(Eigen::MatrixXd* dem, const PointViewPtr cloud,
-                    SlopeMethod method=SD8);
+        PrimitiveType method, const std::string& filename);
     void writeAspect(Eigen::MatrixXd* dem, const PointViewPtr cloud,
-                     AspectMethod method=AD8);
-    void writeCatchmentArea(Eigen::MatrixXd* dem, const PointViewPtr cloud);
-    void writeHillshade(Eigen::MatrixXd* dem, const PointViewPtr cloud);
+        PrimitiveType method, const std::string& filename);
+    void writeCatchmentArea(Eigen::MatrixXd* dem, const PointViewPtr cloud,
+        const std::string& filename);
+    void writeHillshade(Eigen::MatrixXd* dem, const PointViewPtr cloud,
+        const std::string& filename);
     void writeCurvature(Eigen::MatrixXd* dem, const PointViewPtr cloud,
-                        CurvatureType curveType, double valueToIgnore);
+        PrimitiveType curveType, double valueToIgnore,
+        const std::string& filename);
     GDALDataset* createFloat32GTIFF(std::string filename, int cols, int rows);
     void stretchData(float *data);
 
@@ -161,7 +151,7 @@ private:
     uint32_t m_GRID_SIZE_Y;
     double m_GRID_DIST_X;
     double m_GRID_DIST_Y;
-    unsigned int m_primitive_type;
+    std::vector<TypeOutput> m_primitiveTypes;
     BOX2D m_bounds;
     SpatialReference m_inSRS;
 

@@ -385,6 +385,12 @@ public:
         return opt.getValue<T>();
     }
 
+    std::string getValueOrDefault(std::string const& name,
+        const std::string& defaultValue) const
+    {
+        return getValueOrDefault<std::string>(name, defaultValue);
+    }
+
     // get value of an option, or use given default if option not present
     template<typename T>
     T getValueOrDefault(std::string const& name, const T& defaultValue) const
