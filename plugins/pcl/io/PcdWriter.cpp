@@ -34,6 +34,7 @@
 
 #include "PcdWriter.hpp"
 #include "point_types.hpp"
+#include "PCLConversions.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -63,6 +64,7 @@ void PcdWriter::processOptions(const Options& ops)
     m_filename = ops.getValueOrThrow<std::string>("filename");
     m_binary = ops.getValueOrDefault("binary", false);
     m_compressed = ops.getValueOrDefault("compression", false);
+    m_xyz = ops.getValueOrDefault("xyz", false);
 }
 
 
@@ -73,31 +75,20 @@ Options PcdWriter::getDefaultOptions()
     options.add("filename", "", "Filename to write PCD file to");
     options.add("binary", false, "Write binary data?");
     options.add("compression", false, "Write binary compressed data?");
+    options.add("xyz", false, "Write only XYZ dimensions?");
 
     return options;
 }
 
-
 void PcdWriter::write(const PointViewPtr view)
 {
-    pcl::PointCloud<XYZIRGBA>::Ptr cloud(new pcl::PointCloud<XYZIRGBA>);
-    BOX3D buffer_bounds;
-    view->calculateBounds(buffer_bounds);
-    pclsupport::PDALtoPCD(view, *cloud, buffer_bounds);
-
-    pcl::PCDWriter w;
-
-    if (m_compressed)
+    if (m_xyz)
     {
-        w.writeBinaryCompressed<XYZIRGBA>(m_filename, *cloud);
+        writeView<pcl::PointCloud<pcl::PointXYZ> >(view);
     }
-    else if (m_binary)
-    {
-        w.writeBinary<XYZIRGBA>(m_filename, *cloud);
-    } 
     else
     {
-        w.writeASCII<XYZIRGBA>(m_filename, *cloud);
+        writeView<pcl::PointCloud<XYZIRGBA> >(view);
     }
 }
 

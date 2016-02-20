@@ -38,6 +38,9 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/StageFactory.hpp>
 
+#include <pcl/io/pcd_io.h>
+#include <pcl/io/impl/pcd_io.hpp>
+
 #include <vector>
 #include <string>
 
@@ -59,12 +62,39 @@ public:
 private:
     virtual void processOptions(const Options&);
     virtual void write(const PointViewPtr view);
+    
+    template<typename CloudT>
+    inline void writeView(const PointViewPtr view); // implemented in header
 
     std::string m_filename;
     bool m_compressed;
     bool m_binary;
+    bool m_xyz;
     PcdWriter& operator=(const PcdWriter&); // not implemented
     PcdWriter(const PcdWriter&); // not implemented
 };
+
+
+template<typename CloudT>
+void PcdWriter::writeView(const PointViewPtr view)
+{
+    typedef typename CloudT::PointType PointT;
+    typename CloudT::Ptr cloud(new CloudT);
+    pclsupport::PDALtoPCD(view, *cloud);
+    pcl::PCDWriter w;
+    if (m_compressed)
+    {
+        w.writeBinaryCompressed<PointT>(m_filename, *cloud);
+    }
+    else if (m_binary)
+    {
+        w.writeBinary<PointT>(m_filename, *cloud);
+    }
+    else
+    {
+        w.writeASCII<PointT>(m_filename, *cloud);
+    }
+}
+
 
 } // namespaces
