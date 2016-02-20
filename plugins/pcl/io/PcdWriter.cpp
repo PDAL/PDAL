@@ -52,7 +52,7 @@ namespace pdal
 static PluginInfo const s_info = PluginInfo(
     "writers.pcd",
     "Write data in the Point Cloud Library (PCL) format.",
-    "http://pdal.io/stages/writers.pclvisualizer.html" );
+    "http://pdal.io/stages/writers.pcd.html" );
 
 CREATE_SHARED_PLUGIN(1, 0, PcdWriter, Writer, s_info)
 
@@ -61,6 +61,7 @@ std::string PcdWriter::getName() const { return s_info.name; }
 void PcdWriter::processOptions(const Options& ops)
 {
     m_filename = ops.getValueOrThrow<std::string>("filename");
+    m_binary = ops.getValueOrDefault("binary", false);
     m_compressed = ops.getValueOrDefault("compression", false);
 }
 
@@ -70,6 +71,7 @@ Options PcdWriter::getDefaultOptions()
     Options options;
 
     options.add("filename", "", "Filename to write PCD file to");
+    options.add("binary", false, "Write binary data?");
     options.add("compression", false, "Write binary compressed data?");
 
     return options;
@@ -86,9 +88,17 @@ void PcdWriter::write(const PointViewPtr view)
     pcl::PCDWriter w;
 
     if (m_compressed)
+    {
         w.writeBinaryCompressed<XYZIRGBA>(m_filename, *cloud);
+    }
+    else if (m_binary)
+    {
+        w.writeBinary<XYZIRGBA>(m_filename, *cloud);
+    } 
     else
+    {
         w.writeASCII<XYZIRGBA>(m_filename, *cloud);
+    }
 }
 
 

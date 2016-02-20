@@ -62,7 +62,7 @@ private:
 
     std::string m_filename;
     bool m_compressed;
-
+    bool m_binary;
     PcdWriter& operator=(const PcdWriter&); // not implemented
     PcdWriter(const PcdWriter&); // not implemented
 };
