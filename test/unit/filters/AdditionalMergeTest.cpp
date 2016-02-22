@@ -364,3 +364,191 @@ TEST(AdditionalMergeTest, reader_and_filter_writer_inputs_without_manager)
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
 }
+
+TEST(AdditionalMergeTest, merge_two_filters_with_manager)
+{
+    const char * outfile = "merge_two_filters_with_manager.las";
+    FileUtils::deleteFile(outfile);
+
+    PipelineManager mgr;
+
+    Options optsR;
+    optsR.add("filename", Support::datapath("las/1.2-with-color.las"));
+    Stage& reader1 = mgr.addReader("readers.las");
+    reader1.setOptions(optsR);
+    Stage& reader2 = mgr.addReader("readers.las");
+    reader2.setOptions(optsR);
+
+    Options optsF1;
+    optsF1.add("step", 3);
+    optsF1.add("offset", 1);
+    Stage& filter1 = mgr.addFilter("filters.decimation");
+    filter1.setInput(reader1);
+    filter1.setOptions(optsF1);
+
+    Options optsF2;
+    optsF2.add("step", 2);
+    optsF2.add("offset", 1);
+    Stage& filter2 = mgr.addFilter("filters.decimation");
+    filter2.setInput(reader2);
+    filter2.setOptions(optsF2);
+
+    Stage& merge = mgr.addFilter("filters.merge");
+    merge.setInput(filter1);
+    merge.setInput(filter2);
+
+    Options optsW;
+    optsW.add("filename", outfile, "file to write to");
+    Stage& writer = mgr.addWriter("writers.las");
+    writer.setInput(merge);
+    writer.setOptions(optsW);
+
+    std::cout << "E" << std::endl;
+    point_count_t np = mgr.execute();
+    std::cout << "Done" << std::endl;
+    EXPECT_EQ(888U, np);
+
+    EXPECT_TRUE(!std::ifstream(outfile).fail());
+}
+
+TEST(AdditionalMergeTest, merge_two_filters_without_manager)
+{
+  const char * outfile = "merge_two_filters_without_manager.las";
+  FileUtils::deleteFile(outfile);
+
+  Options optsR;
+  optsR.add("filename", Support::datapath("las/1.2-with-color.las"));
+  LasReader reader1;
+  reader1.setOptions(optsR);
+  LasReader reader2;
+  reader2.setOptions(optsR);
+
+  Options optsF1;
+  optsF1.add("step", 3);
+  optsF1.add("offset", 1);
+  DecimationFilter filter1;
+  filter1.setInput(reader1);
+  filter1.setOptions(optsF1);
+
+  Options optsF2;
+  optsF2.add("step", 2);
+  optsF2.add("offset", 1);
+  DecimationFilter filter2;
+  filter2.setInput(reader2);
+  filter2.setOptions(optsF2);
+
+  MergeFilter merge;
+  merge.setInput(filter1);
+  merge.setInput(filter2);
+
+  Options optsW;
+  optsW.add("filename", outfile, "file to write to");
+  LasWriter writer;
+  writer.setInput(merge);
+  writer.setOptions(optsW);
+
+  PointTable table;
+  writer.prepare(table);
+
+  std::cout << "E" << std::endl;
+  PointViewSet vs = writer.execute(table);
+  EXPECT_EQ(1u, vs.size());
+  point_count_t np = (*vs.begin())->size();
+  std::cout << "Done" << std::endl;
+  EXPECT_EQ(888U, np);
+
+  EXPECT_TRUE(!std::ifstream(outfile).fail());
+}
+
+TEST(AdditionalMergeTest, two_filters_writer_inputs_with_manager)
+{
+    const char * outfile = "two_filters_writer_inputs_with_manager.las";
+    FileUtils::deleteFile(outfile);
+
+    PipelineManager mgr;
+
+    Options optsR;
+    optsR.add("filename", Support::datapath("las/1.2-with-color.las"));
+    Stage& reader1 = mgr.addReader("readers.las");
+    reader1.setOptions(optsR);
+    Stage& reader2 = mgr.addReader("readers.las");
+    reader2.setOptions(optsR);
+
+    Options optsF1;
+    optsF1.add("step", 3);
+    optsF1.add("offset", 1);
+    Stage& filter1 = mgr.addFilter("filters.decimation");
+    filter1.setInput(reader1);
+    filter1.setOptions(optsF1);
+
+    Options optsF2;
+    optsF2.add("step", 2);
+    optsF2.add("offset", 1);
+    Stage& filter2 = mgr.addFilter("filters.decimation");
+    filter2.setInput(reader2);
+    filter2.setOptions(optsF2);
+
+    Options optsW;
+    optsW.add("filename", outfile, "file to write to");
+    Stage& writer = mgr.addWriter("writers.las");
+    writer.setInput(filter1);
+    writer.setInput(filter2);
+    writer.setOptions(optsW);
+
+    std::cout << "E" << std::endl;
+    point_count_t np = mgr.execute();
+    std::cout << "Done" << std::endl;
+    EXPECT_EQ(888U, np);
+
+    EXPECT_TRUE(!std::ifstream(outfile).fail());
+}
+
+TEST(AdditionalMergeTest, two_filters_writer_inputs_without_manager)
+{
+  const char * outfile = "two_filters_writer_inputs_without_manager.las";
+  FileUtils::deleteFile(outfile);
+
+  Options optsR;
+  optsR.add("filename", Support::datapath("las/1.2-with-color.las"));
+  LasReader reader1;
+  reader1.setOptions(optsR);
+  LasReader reader2;
+  reader2.setOptions(optsR);
+
+  Options optsF1;
+  optsF1.add("step", 3);
+  optsF1.add("offset", 1);
+  DecimationFilter filter1;
+  filter1.setInput(reader1);
+  filter1.setOptions(optsF1);
+
+  Options optsF2;
+  optsF2.add("step", 2);
+  optsF2.add("offset", 1);
+  DecimationFilter filter2;
+  filter2.setInput(reader2);
+  filter2.setOptions(optsF2);
+
+  Options optsW;
+  optsW.add("filename", outfile, "file to write to");
+  LasWriter writer;
+  writer.setInput(filter1);
+  writer.setInput(filter2);
+  writer.setOptions(optsW);
+
+  PointTable table;
+  writer.prepare(table);
+
+  std::cout << "E" << std::endl;
+  PointViewSet vs = writer.execute(table);
+  EXPECT_EQ(2u, vs.size());
+  point_count_t np = 0;
+  for (auto const& view : vs)
+  {
+      np += view->size();
+  }
+  std::cout << "Done" << std::endl;
+  EXPECT_EQ(888U, np);
+
+  EXPECT_TRUE(!std::ifstream(outfile).fail());
+}
