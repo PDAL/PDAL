@@ -310,8 +310,12 @@ TEST(AdditionalMergeTest, filter_and_reader_writer_inputs_without_manager)
 
     std::cout << "E" << std::endl;
     PointViewSet vs = writer.execute(table);
-    EXPECT_EQ(1u, vs.size());
-    point_count_t np = (*vs.begin())->size();
+    EXPECT_EQ(2u, vs.size());
+    point_count_t np = 0;
+    for (auto const& view : vs)
+    {
+        np += view->size();
+    }
     std::cout << "Done" << std::endl;
     EXPECT_EQ(1420U, np);
 
@@ -349,8 +353,12 @@ TEST(AdditionalMergeTest, reader_and_filter_writer_inputs_without_manager)
 
     std::cout << "E" << std::endl;
     PointViewSet vs = writer.execute(table);
-    EXPECT_EQ(1u, vs.size());
-    point_count_t np = (*vs.begin())->size();
+    EXPECT_EQ(2u, vs.size());
+    point_count_t np = 0;
+    for (auto const& view : vs)
+    {
+        np += view->size();
+    }
     std::cout << "Done" << std::endl;
     EXPECT_EQ(1420U, np);
 
