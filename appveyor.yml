@@ -6,7 +6,8 @@ platform:
   - x64
 
 init:
-  - SET PATH=C:\Python27-x64\;%PATH%
+  - set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%
+  - set PATH=C:\Python27-x64\;%PATH%
 
 configuration: Release
 
