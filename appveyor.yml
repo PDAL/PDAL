@@ -1,6 +1,6 @@
 version: 1.0.{build}
 
-os: Windows Server 2012
+os:  Visual Studio 2015
 
 platform:
   - x64
