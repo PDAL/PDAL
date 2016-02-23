@@ -2,24 +2,24 @@ version: 1.0.{build}
 
 os:  Visual Studio 2015
 
-platform:
-  - x64
+platform: x64
+
+configuration: Release
+
+matrix:
+  fast_finish: true
+
+environment:
+  OSGEO4W_ROOT: C:\OSGeo4W64
+
+  matrix:
+    - PDAL_OPTIONAL_COMPONENTS: OFF
+    - PDAL_OPTIONAL_COMPONENTS: ON
 
 init:
   - set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%
   - set PATH=C:\Python27-x64\;%PATH%
   - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-
-configuration: Release
-
-environment:
-  # set the directory to use for OSGeo4W install, our CMake find packages know
-  # to look here
-  OSGEODIR: C:\OSGeo4W64
-
-  matrix:
-    - PDAL_OPTIONAL_COMPONENTS: OFF
-    - PDAL_OPTIONAL_COMPONENTS: ON
 
 install:
   # make a temp directory for downloading osgeo4w-setup.exe
@@ -29,7 +29,7 @@ install:
   - ps: mkdir C:\temp | out-null
 
   # make the osgeo directory
-  - ps: mkdir %OSGEODIR% | out-null
+  - ps: mkdir %OSGEO4W_ROOT% | out-null
 
   # make an install directory for packacing
   - ps: mkdir C:\pdalbin | out-null
@@ -38,7 +38,7 @@ install:
   - ps: wget http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe -OutFile C:\temp\osgeo4w-setup.exe | out-null
 
   # and install our dependencies
-  - C:\temp\osgeo4w-setup.exe -s http://download.osgeo.org/osgeo4w/ -a -q -P boost-devel,eigen,gdal,geos,hexer,iconv,laszip,libgeotiff,libtiff,libpq,libxml2,nitro,pcl,points2grid,proj,python-numpy,zlib -R %OSGEODIR% > nul
+  - C:\temp\osgeo4w-setup.exe -s http://download.osgeo.org/osgeo4w/ -a -q -P boost-devel,eigen,gdal,geos,hexer,iconv,laszip,libgeotiff,libtiff,libpq,libxml2,nitro,pcl,points2grid,proj,python-numpy,zlib -R %OSGEO4W_ROOT% > nul
 
   # call our PDAL install script
   - call .\\scripts\\appveyor\\config.cmd
@@ -52,25 +52,13 @@ build:
   project: PDAL.sln
   verbosity: minimal
 
-# after_build:
-#   - call .\\scripts\\appveyor\\install.cmd
-
-notifications:
-  - provider: Email
-    on_build_success: false
-    on_build_failure: false
-    on_build_status_changed: false
-
-  - provider: Slack
-    auth_token:
-      secure: Ycvea4CbhP10k3tQwTr9vU2QMdYa4JusDfbCoOwkns2O87afn/G5eBsUakdM/eyW
-    channel: '#pdal'
-    on_build_failure: true
-    on_build_success: false
-    on_build_status_changed: true
-
 after_build:
   - 7z a pdal.zip %APPVEYOR_BUILD_FOLDER%\bin\*.*
+
+test_script:
+  - set PATH=%OSGEO4W_ROOT%\\bin;%PATH%
+  - echo %PATH%
+  - ctest -V --output-on-failure -C Release -R pdal_file_utils_test
 
 artifacts:
   - path: pdal.zip
@@ -88,10 +76,16 @@ deploy:
     artifact: pdalmaster
     set_public: true
 
-test_script:
-  - set PATH=%OSGEODIR%\\bin;%PATH%
-  - echo %PATH%
-  - ctest -V --output-on-failure -C Release -R pdal_file_utils_test
+notifications:
+  - provider: Email
+    on_build_success: false
+    on_build_failure: false
+    on_build_status_changed: false
 
-matrix:
-  fast_finish: true
+  - provider: Slack
+    auth_token:
+      secure: Ycvea4CbhP10k3tQwTr9vU2QMdYa4JusDfbCoOwkns2O87afn/G5eBsUakdM/eyW
+    channel: '#pdal'
+    on_build_failure: true
+    on_build_success: false
+    on_build_status_changed: true
