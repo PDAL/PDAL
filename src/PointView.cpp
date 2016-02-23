@@ -40,7 +40,7 @@
 namespace pdal
 {
 
-int PointView::m_lastId = 0;
+PDAL_DLL int PointView::m_lastId = 0;
 
 PointViewIter PointView::begin()
 {
