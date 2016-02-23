@@ -111,6 +111,10 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
         ${PDAL_ADD_PLUGIN_LINK_WITH})
 
     set_property(TARGET ${${_name}} PROPERTY FOLDER "Plugins/${_type}")
+    set_target_properties(${${_name}} PROPERTIES
+        VERSION "${PDAL_BUILD_VERSION}"
+        SOVERSION "${PDAL_API_VERSION}"
+        CLEAN_DIRECT_OUTPUT 1)
 
     install(TARGETS ${${_name}}
         RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR}
