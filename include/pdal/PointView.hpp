@@ -74,15 +74,13 @@ public:
     PointView(PointTableRef pointTable) : m_pointTable(pointTable),
         m_size(0), m_id(0)
     {
-        static int lastId = 0;
-        m_id = ++lastId;
+        m_id = ++m_lastId;
     }
 
     PointView(PointTableRef pointTable, const SpatialReference& srs) :
         m_pointTable(pointTable), m_size(0), m_id(0), m_spatialReference(srs)
     {
-        static int lastId = 0;
-        m_id = ++lastId;
+        m_id = ++m_lastId;
     }
 
     virtual ~PointView()
@@ -278,6 +276,8 @@ protected:
     SpatialReference m_spatialReference;
 
 private:
+    static int m_lastId;
+
     template<typename T_IN, typename T_OUT>
     bool convertAndSet(Dimension::Id::Enum dim, PointId idx, T_IN in);
 
