@@ -833,8 +833,6 @@ void OciWriter::setOrdinates(Statement statement, OCIArray* ordinates,
 
 void OciWriter::writePointMajor(PointViewPtr view, std::vector<char>& outbuf)
 {
-    m_callback->setTotal(view->size());
-    m_callback->invoke(0);
     if (m_compression)
     {
         outbuf.resize(0);
@@ -874,19 +872,15 @@ void OciWriter::writePointMajor(PointViewPtr view, std::vector<char>& outbuf)
         {
             size_t size = readPoint(*view.get(), idx, pos);
             totalSize += size;
-            if (idx % 100 == 0)
-                m_callback->invoke(idx);
             pos += size;
         }
         outbuf.resize(totalSize);
     }
-    m_callback->invoke(view->size());
 }
 
 
 void OciWriter::writeDimMajor(PointViewPtr view, std::vector<char>& outbuf)
 {
-    size_t clicks = 0;
     size_t interrupt = dbDimTypes().size() * 100;
     size_t totalSize = 0;
     char *pos = outbuf.data();
@@ -900,8 +894,6 @@ void OciWriter::writeDimMajor(PointViewPtr view, std::vector<char>& outbuf)
                 xmlDim.m_dimType.m_id, idx);
             pos += size;
             totalSize += size;
-            if (clicks++ % interrupt == 0)
-                m_callback->invoke(clicks / xmlDims.size());
         }
     }
     outbuf.resize(totalSize);

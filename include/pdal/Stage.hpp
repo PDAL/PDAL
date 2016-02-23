@@ -49,7 +49,6 @@
 #include <pdal/PointView.hpp>
 #include <pdal/QuickInfo.hpp>
 #include <pdal/SpatialReference.hpp>
-#include <pdal/UserCallback.hpp>
 
 #include <boost/property_tree/ptree.hpp>
 
@@ -123,12 +122,7 @@ public:
         { return m_metadata; }
     void serialize(MetadataNode root, PipelineWriter::TagMap& tags) const;
 
-    /// Sets the UserCallback to manage progress/cancel operations
-    void setUserCallback(UserCallback* userCallback)
-        { m_callback.reset(userCallback); }
-
 protected:
-    std::unique_ptr<UserCallback> m_callback;
     Options m_options;
     MetadataNode m_metadata;
     int m_progressFd;

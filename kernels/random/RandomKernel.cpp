@@ -126,13 +126,6 @@ int RandomKernel::execute()
 
     PointTable table;
 
-    UserCallback* callback;
-    if (!getProgressShellCommand().size())
-        callback = static_cast<UserCallback*>(new PercentageCallback);
-    else
-        callback = static_cast<UserCallback*>(
-            new ShellScriptCallback(getProgressShellCommand()));
-    writer.setUserCallback(callback);
     writer.prepare(table);
     PointViewSet viewSet = writer.execute(table);
 
