@@ -76,9 +76,7 @@ TEST(AdditionalMergeTest, merge_filter_and_reader_with_manager)
     writer.setInput(merge);
     writer.setOptions(optsW);
 
-    std::cout << "E" << std::endl;
     point_count_t np = mgr.execute();
-    std::cout << "Done" << std::endl;
     EXPECT_EQ(1420U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
@@ -115,9 +113,7 @@ TEST(AdditionalMergeTest, merge_reader_and_filter_with_manager)
     writer.setInput(merge);
     writer.setOptions(optsW);
 
-    std::cout << "E" << std::endl;
     point_count_t np = mgr.execute();
-    std::cout << "Done" << std::endl;
     EXPECT_EQ(1420U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
@@ -155,11 +151,9 @@ TEST(AdditionalMergeTest, merge_filter_and_reader_without_manager)
     PointTable table;
     writer.prepare(table);
 
-    std::cout << "E" << std::endl;
     PointViewSet vs = writer.execute(table);
     EXPECT_EQ(1u, vs.size());
     point_count_t np = (*vs.begin())->size();
-    std::cout << "Done" << std::endl;
     EXPECT_EQ(1420U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
@@ -197,11 +191,9 @@ TEST(AdditionalMergeTest, merge_reader_and_filter_without_manager)
     PointTable table;
     writer.prepare(table);
 
-    std::cout << "E" << std::endl;
     PointViewSet vs = writer.execute(table);
     EXPECT_EQ(1u, vs.size());
     point_count_t np = (*vs.begin())->size();
-    std::cout << "Done" << std::endl;
     EXPECT_EQ(1420U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
@@ -235,9 +227,7 @@ TEST(AdditionalMergeTest, filter_and_reader_writer_inputs_with_manager)
     writer.setInput(reader2);
     writer.setOptions(optsW);
 
-    std::cout << "E" << std::endl;
     point_count_t np = mgr.execute();
-    std::cout << "Done" << std::endl;
     EXPECT_EQ(1420U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
@@ -271,9 +261,7 @@ TEST(AdditionalMergeTest, reader_and_filter_writer_inputs_with_manager)
     writer.setInput(filter);
     writer.setOptions(optsW);
 
-    std::cout << "E" << std::endl;
     point_count_t np = mgr.execute();
-    std::cout << "Done" << std::endl;
     EXPECT_EQ(1420U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
@@ -308,7 +296,6 @@ TEST(AdditionalMergeTest, filter_and_reader_writer_inputs_without_manager)
     PointTable table;
     writer.prepare(table);
 
-    std::cout << "E" << std::endl;
     PointViewSet vs = writer.execute(table);
     EXPECT_EQ(2u, vs.size());
     point_count_t np = 0;
@@ -316,7 +303,6 @@ TEST(AdditionalMergeTest, filter_and_reader_writer_inputs_without_manager)
     {
         np += view->size();
     }
-    std::cout << "Done" << std::endl;
     EXPECT_EQ(1420U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
@@ -351,7 +337,6 @@ TEST(AdditionalMergeTest, reader_and_filter_writer_inputs_without_manager)
     PointTable table;
     writer.prepare(table);
 
-    std::cout << "E" << std::endl;
     PointViewSet vs = writer.execute(table);
     EXPECT_EQ(2u, vs.size());
     point_count_t np = 0;
@@ -359,7 +344,6 @@ TEST(AdditionalMergeTest, reader_and_filter_writer_inputs_without_manager)
     {
         np += view->size();
     }
-    std::cout << "Done" << std::endl;
     EXPECT_EQ(1420U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
@@ -403,10 +387,8 @@ TEST(AdditionalMergeTest, merge_two_filters_with_manager)
     writer.setInput(merge);
     writer.setOptions(optsW);
 
-    std::cout << "E" << std::endl;
     point_count_t np = mgr.execute();
-    std::cout << "Done" << std::endl;
-    EXPECT_EQ(888U, np);
+    EXPECT_EQ(887U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
 }
@@ -450,12 +432,10 @@ TEST(AdditionalMergeTest, merge_two_filters_without_manager)
   PointTable table;
   writer.prepare(table);
 
-  std::cout << "E" << std::endl;
   PointViewSet vs = writer.execute(table);
   EXPECT_EQ(1u, vs.size());
   point_count_t np = (*vs.begin())->size();
-  std::cout << "Done" << std::endl;
-  EXPECT_EQ(888U, np);
+  EXPECT_EQ(887U, np);
 
   EXPECT_TRUE(!std::ifstream(outfile).fail());
 }
@@ -495,10 +475,8 @@ TEST(AdditionalMergeTest, two_filters_writer_inputs_with_manager)
     writer.setInput(filter2);
     writer.setOptions(optsW);
 
-    std::cout << "E" << std::endl;
     point_count_t np = mgr.execute();
-    std::cout << "Done" << std::endl;
-    EXPECT_EQ(888U, np);
+    EXPECT_EQ(887U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
 }
@@ -539,7 +517,6 @@ TEST(AdditionalMergeTest, two_filters_writer_inputs_without_manager)
   PointTable table;
   writer.prepare(table);
 
-  std::cout << "E" << std::endl;
   PointViewSet vs = writer.execute(table);
   EXPECT_EQ(2u, vs.size());
   point_count_t np = 0;
@@ -547,8 +524,7 @@ TEST(AdditionalMergeTest, two_filters_writer_inputs_without_manager)
   {
       np += view->size();
   }
-  std::cout << "Done" << std::endl;
-  EXPECT_EQ(888U, np);
+  EXPECT_EQ(887U, np);
 
   EXPECT_TRUE(!std::ifstream(outfile).fail());
 }

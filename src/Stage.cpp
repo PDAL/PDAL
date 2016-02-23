@@ -46,7 +46,6 @@
 namespace pdal
 {
 
-
 Stage::Stage()
   : m_callback(new UserCallback), m_progressFd(-1)
 {
