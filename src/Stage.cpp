@@ -51,10 +51,6 @@ Stage::Stage() : m_progressFd(-1)
 }
 
 
-/// Only add options if an option with the same name doesn't already exist.
-///
-/// \param[in] ops  Options to add.
-///
 void Stage::addConditionalOptions(const Options& opts)
 {
     for (const auto& o : opts.getOptions())

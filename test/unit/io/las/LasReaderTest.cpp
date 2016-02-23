@@ -81,8 +81,6 @@ TEST(LasReaderTest, test_base_options)
     const std::string file(Support::datapath("las/1.2-with-color.las"));
 
     const Option opt_filename("filename", file);
-    const Option opt_verbose_string("verbose", "99");
-    const Option opt_verbose_uint8("verbose", 99);
     const Option opt_debug_string("debug", "true");
     const Option opt_debug_bool("debug", true);
 
@@ -92,29 +90,24 @@ TEST(LasReaderTest, test_base_options)
 
         LasReader reader;
         reader.setOptions(opts);
-        EXPECT_TRUE(reader.getVerboseLevel() == 0);
         EXPECT_TRUE(reader.isDebug() == false);
     }
 
     {
         Options opts;
         opts.add(opt_filename);
-        opts.add(opt_verbose_string);
         opts.add(opt_debug_string);
         LasReader reader;
         reader.setOptions(opts);
-        EXPECT_TRUE(reader.getVerboseLevel() == 99);
         EXPECT_TRUE(reader.isDebug() == true);
     }
 
     {
         Options opts;
         opts.add(opt_filename);
-        opts.add(opt_verbose_uint8);
         opts.add(opt_debug_bool);
         LasReader reader;
         reader.setOptions(opts);
-        EXPECT_TRUE(reader.getVerboseLevel() == 99);
         EXPECT_TRUE(reader.isDebug() == true);
     }
 }

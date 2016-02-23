@@ -58,6 +58,10 @@ namespace pdal
 class StageRunner;
 class StageWrapper;
 
+/**
+  A stage performs the actual processing in PDAL.  Stages may read data,
+  modify or filter read data, create metadata or write processed data.
+*/
 class PDAL_DLL Stage
 {
     FRIEND_TEST(OptionsTest, conditional);
@@ -68,64 +72,210 @@ public:
     virtual ~Stage()
         {}
 
+    /**
+      Add a stage to the input list of this stage.
+
+      \param input  Stage to use as input.
+    */
     void setInput(Stage& input)
         { m_inputs.push_back(&input); }
 
+    /**
+      Set a file descriptor to which progress information should be written.
+
+      \param fd  Progress file descriptor.
+    */
     void setProgressFd(int fd)
         { m_progressFd = fd; }
 
+    /**
+      Retrieve some basic point information without reading all data when
+      possible.  Usually implemented only by Readers.
+    */
     QuickInfo preview()
     {
         l_processOptions(m_options);
         processOptions(m_options);
         return inspect();
     }
+
+    /**
+      Prepare a stage for execution.  This function needs to be called on the
+      terminal stage of a pipeline (linked set of stages) before \ref execute
+      can be called.  Prepare recurses through all input stages.
+
+      \param table  PointTable being used for stage pipeline.
+    */
     void prepare(PointTableRef table);
+
+    /**
+      Execute a prepared pipeline (linked set of stages).
+
+      This performs the action associated with the stage by executing the
+      \ref run function of each stage in depth first order.  Each stage is run
+      to completion (all points are processed) before the next stages is run.o
+
+      \param table  Point table being used for stage pipeline.  This must be
+        the same \ref table used in the \ref prepare function.
+    */
     PointViewSet execute(PointTableRef table);
+
+    /**
+      Execute a prepared pipeline (linked set of stages) in streaming mode.
+
+      This performs the action associated with the stage by executing the
+      \ref processOne function of each stage in depth first order.  Points
+      are processed up to the capacity of the provided StreamPointTable.
+      Not all stages support streaming mode and an exception will be thrown
+      when attempting to \ref execute an unsupported stage.
+
+      Streaming points can reduce memory consumption, but may limit access
+      to algorithms that need to operate on full point sets.
+
+      \param table  Streming point table used for stage pipeline.  This must be
+        the same \ref table used in the \ref prepare function.
+
+    */
     void execute(StreamPointTable& table);
 
-    void setSpatialReference(SpatialReference const&);
+    /**
+      Set the spatial reference of a stage.
+
+      Set the spatial reference that will override that being carried by the
+      PointView being processed.  This is usually used when reprojecting data
+      to a new spatial reference.  The stage spatial reference will be carried
+      by PointViews processes by this stage to subsequent stages.
+
+      \param srs  Spatial reference to set.
+    */
+    void setSpatialReference(SpatialReference const& srs);
+
+    /**
+      Get the spatial reference of the stage.
+
+      Get the spatial reference that will override that being carried by the
+      PointView being processed.  This is usually used when reprojecting data
+      to a new spatial reference.  The stage spatial reference will be carried
+      by PointViews processes by this stage to subsequent stages.
+
+      \return  The stage's spatial reference.
+    */
     const SpatialReference& getSpatialReference() const;
+
+    /**
+      Set a stage's options.
+
+      Set the options on a stage, clearing all previously set options.
+
+      \param options  Options to set.
+    */
     void setOptions(Options options)
         { m_options = options; }
+
+    /**
+      Add options if an option with the same name doesn't already exist on
+      the stage.
+
+      \param opts  Options to add.
+    */
     void addConditionalOptions(const Options& opts);
+
+    /**
+      Add options to the existing option set.
+
+      \param opts  Options to add.
+    */
     void addOptions(const Options& opts)
     {
         for (const auto& o : opts.getOptions())
             m_options.add(o);
     }
+
+    /**
+      Remove options from a stage's option set.
+
+      \param opts  Options to remove.
+    */
     void removeOptions(const Options& opts)
     {
         for (const auto& o : opts.getOptions())
             m_options.remove(o);
     }
+
+    /**
+      Return the stage's log pointer.
+
+      \return  Log pointer.
+    */
     virtual LogPtr log() const
         { return m_log; }
+
+    /**
+      Determine whether the stage is in debug mode or not.
+
+      \return  The stage's debug state.
+    */
     bool isDebug() const
         { return m_options.getValueOrDefault<bool>("debug", false); }
-    bool isVerbose() const
-        { return (getVerboseLevel() != 0 ); }
-    uint32_t getVerboseLevel() const
-        { return m_options.getValueOrDefault<uint32_t>("verbose", 0); }
+
+    /**
+      Return the name of a stage.
+
+      \return  The stage's name.
+    */
     virtual std::string getName() const = 0;
+
+    /**
+      Return the tag name of a stage.
+
+      The tag name is used when writing a JSON pipeline.  It is generally
+      the same as the stage name, but a number is appended to maintain
+      uniqueness when stages appear more than once in a pipeline.
+      the same as
+
+      \return  The tag's name.
+    */
     virtual std::string tagName() const
         { return getName(); }
+
+    /**
+      Return a list of the stage's inputs.
+
+      \return  A vector pointers to input stages.
+    **/
     const std::vector<Stage*>& getInputs() const
         { return m_inputs; }
+
+    /**
+      Return the stage's accepted options.
+
+      \return  The options that a stage handles.
+    */
     virtual Options getDefaultOptions()
         { return Options(); }
-    static Dimension::IdList getDefaultDimensions()
-        { return Dimension::IdList(); }
-    static std::string s_getPluginVersion()
-        { return std::string(); }
-    inline MetadataNode getMetadata() const
+
+    /**
+      Get the stage's metadata node.
+
+      \return  Stage's metadata.
+    */
+    MetadataNode getMetadata() const
         { return m_metadata; }
+
+    /**
+      Serialize a stage by inserting apporpritate data into the provided
+      MetadataNode.  Used to dump a pipeline specification in a portable
+      format.
+
+      \param root  Node to which a stages meatdata should be added.
+      \param tags  Pipeline writer's current list of stage tags.
+    */
     void serialize(MetadataNode root, PipelineWriter::TagMap& tags) const;
 
 protected:
-    Options m_options;
-    MetadataNode m_metadata;
-    int m_progressFd;
+    Options m_options;          ///> Stage's options.
+    MetadataNode m_metadata;    ///> Stage's metadata.
+    int m_progressFd;           ///> Descriptor for progress info.
 
     void setSpatialReference(MetadataNode& m, SpatialReference const&);
 
