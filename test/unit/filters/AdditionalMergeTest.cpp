@@ -406,7 +406,7 @@ TEST(AdditionalMergeTest, merge_two_filters_with_manager)
     std::cout << "E" << std::endl;
     point_count_t np = mgr.execute();
     std::cout << "Done" << std::endl;
-    EXPECT_EQ(888U, np);
+    EXPECT_EQ(887U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
 }
@@ -455,7 +455,7 @@ TEST(AdditionalMergeTest, merge_two_filters_without_manager)
   EXPECT_EQ(1u, vs.size());
   point_count_t np = (*vs.begin())->size();
   std::cout << "Done" << std::endl;
-  EXPECT_EQ(888U, np);
+  EXPECT_EQ(887U, np);
 
   EXPECT_TRUE(!std::ifstream(outfile).fail());
 }
@@ -498,7 +498,7 @@ TEST(AdditionalMergeTest, two_filters_writer_inputs_with_manager)
     std::cout << "E" << std::endl;
     point_count_t np = mgr.execute();
     std::cout << "Done" << std::endl;
-    EXPECT_EQ(888U, np);
+    EXPECT_EQ(887U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
 }
@@ -548,7 +548,7 @@ TEST(AdditionalMergeTest, two_filters_writer_inputs_without_manager)
       np += view->size();
   }
   std::cout << "Done" << std::endl;
-  EXPECT_EQ(888U, np);
+  EXPECT_EQ(887U, np);
 
   EXPECT_TRUE(!std::ifstream(outfile).fail());
 }
