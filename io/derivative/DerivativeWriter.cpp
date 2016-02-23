@@ -139,7 +139,9 @@ void DerivativeWriter::processOptions(const Options& ops)
                 "'.";
             throw pdal_error(oss.str());
         }
-        TypeOutput to { pi->second, generateFilename(pi->first) };
+        TypeOutput to;
+        to.m_type = pi->second;
+        to.m_filename = generateFilename(pi->first) ;
         m_primitiveTypes.push_back(to);
     }
 }
