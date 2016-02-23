@@ -34,8 +34,8 @@ Quick Start
 
 .. note::
 
-    Instructions for getting started with PDAL using Vagrant and VirtualBox can
-    be found in the :ref:`vagrant` document.
+    Instructions for getting started with PDAL using :ref:`docker` also
+    include built-in PCL support.
 
 PDAL's Vagrant configuration now includes the PCL Block and all necessary
 dependencies. Assuming you've got Vagrant all set up, once you checkout the PDAL

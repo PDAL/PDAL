@@ -3,7 +3,8 @@
 readers.qfit
 ============
 
-The **QFIT reader** read from files in the `QFIT format`_ originated for the Airborne Topographic Mapper (ATM) project at NASA Goddard Space Flight Center.
+The **QFIT reader** read from files in the `QFIT format`_ originated for the
+Airborne Topographic Mapper (ATM) project at NASA Goddard Space Flight Center.
 
 
 Example
@@ -36,11 +37,11 @@ filename
   File to read from [Required]
 
 flip_coordinates
-  Flip coordinates from 0-360 to -180-180 [Default: **true**] 
+  Flip coordinates from 0-360 to -180-180 [Default: **true**]
 
 scale_z
-  Z scale. Use 0.001 to go from mm to m. [Default: **1**] 
-  
+  Z scale. Use 0.001 to go from mm to m. [Default: **1**]
+
 little_endian
   Are data in little endian format? This should be automatically detected by the driver.
 

@@ -1,26 +1,20 @@
 .. _filters.statisticaloutlier:
 
-===============================================================================
 filters.statisticaloutlier
-===============================================================================
+-------------------------------------------------------------------------------
 
 The Statistical Outlier filter passes data through the Point Cloud Library
 (`PCL`_) StatisticalOutlierRemoval algorithm.
 
-StatisticalOutlierRemoval uses point neighborhood statistics to filter outlier
-data. The algorithm iterates through the entire input twice. During the first
-iteration it will compute the average distance that each point has to its
-nearest k neighbors. The value of k can be set using ``mean_k``. Next, the mean
-and standard deviation of all these distances are computed in order to determine
-a distance threshold. The distance threshold will be equal to:
-
-.. math::
-
-    \hat{mean_k} + \sigma_{mult} * \sigma
-
-The multiplier for the standard deviation can be set using ``multiplier``.
-During the next iteration the points will be classified as inlier or outlier if
-their average neighbor distance is below or above this threshold respectively.
+``filters.statisticaloutlier`` uses point neighborhood statistics to filter
+outlier data. The algorithm iterates through the entire input twice. The first
+iteration is used to calculate the average of the distances from each point :math:`i`
+to its :math:`k` nearest neighbors or  :math:`AD_{i}`.  The second iteration is used to
+identify outliers based on the distribution of :math:`AD_{i}` values.  Points with an
+average neighbor distance greater than the mean plus 2 standard deviations are
+classified as outliers.  The value of :math:`k` can be set using :math:`\tt mean\_k`. By
+default, the distance threshold is set to :math:`\overline{AD}_{i} + 2 \hat{\sigma}`,
+but a value other than 2 can be chosen using :math:`\tt  multiplier`.
 
 .. figure:: filters.statisticaloutlier.img1.png
     :scale: 70 %
@@ -42,7 +36,7 @@ See [Rusu2008]_ for more information.
 .. _`PCL`: http://www.pointclouds.org
 
 Options
--------------------------------------------------------------------------------
+................................................................................
 
 mean_k
   Mean number of neighbors. [Default: **8**]

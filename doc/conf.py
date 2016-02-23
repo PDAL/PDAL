@@ -380,7 +380,13 @@ breathe_diagram = {
 pdf_documents = [
     ('index', u'PDAL-'+release, u'PDAL Documentation', u'Howard Butler\\Michael Gerlek\\The PDAL Development Team'),
 ]
-pdf_stylesheets = ['sphinx','kerning','a4']
+pdf_stylesheets = ['pdal']
 pdf_break_level = 3
-pdf_toc_depth = 5
-pdf_default_dpi = 144
+pdf_use_coverpage = True
+pdf_breakside = 'any'
+pdf_toc_depth = 3
+pdf_default_dpi = 200
+pdf_style_path = ['.' ]
+pdf_fit_mode="shrink"
+pdf_use_numbered_links = True
+pdf_fit_background_mode="scale"
