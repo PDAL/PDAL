@@ -49,13 +49,6 @@ public:
     SpatialReference m_srs;
     point_count_t m_pointCount;
     std::vector<std::string> m_dimNames;
-    bool m_valid;
-
-    QuickInfo() : m_pointCount(0), m_valid(false)
-        {}
-
-    bool valid() const
-        { return m_valid; }
 };
 
 } // namespace pdal

@@ -63,32 +63,31 @@ void BpfReader::processOptions(const Options&)
 }
 
 
-QuickInfo BpfReader::inspect()
+std::unique_ptr<QuickInfo> BpfReader::inspect()
 {
-    QuickInfo qi;
+    std::unique_ptr<QuickInfo> qi(new QuickInfo());
 
     initialize();
-    qi.m_valid = true;
-    qi.m_pointCount = m_header.m_numPts;
-    qi.m_srs = getSpatialReference();
+    qi->m_pointCount = m_header.m_numPts;
+    qi->m_srs = getSpatialReference();
     for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
     {
         BpfDimension& dim = *di;
-        qi.m_dimNames.push_back(dim.m_label);
+        qi->m_dimNames.push_back(dim.m_label);
         if (dim.m_label == "X")
         {
-            qi.m_bounds.minx = dim.m_min;
-            qi.m_bounds.maxx = dim.m_max;
+            qi->m_bounds.minx = dim.m_min;
+            qi->m_bounds.maxx = dim.m_max;
         }
         if (dim.m_label == "Y")
         {
-            qi.m_bounds.miny = dim.m_min;
-            qi.m_bounds.maxy = dim.m_max;
+            qi->m_bounds.miny = dim.m_min;
+            qi->m_bounds.maxy = dim.m_max;
         }
         if (dim.m_label == "Z")
         {
-            qi.m_bounds.minz = dim.m_min;
-            qi.m_bounds.maxz = dim.m_max;
+            qi->m_bounds.minz = dim.m_min;
+            qi->m_bounds.maxz = dim.m_max;
         }
     }
     return qi;

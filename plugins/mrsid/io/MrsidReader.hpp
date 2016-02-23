@@ -88,7 +88,7 @@ private:
     MrsidReader(const MrsidReader&); // not implemented
 
     void LayoutToPointInfo(const PointLayout &layout, LizardTech::PointInfo &pointInfo) const;
-    virtual QuickInfo inspect();
+    virtual std::unique_ptr<QuickInfo> inspect();
     virtual void ready(PointTableRef table)
         { ready(table, m_metadata); }
     virtual void ready(PointTableRef table, MetadataNode& m);
