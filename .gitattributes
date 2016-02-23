@@ -14,3 +14,8 @@
 # Denote all files that are truly binary and should not be modified.
 *.las binary
 *.laz binary
+
+# Declare files that must never have CRLF line endings on checkout,
+# otherwise tests will fail.
+test/data/bpf/bundle1 text eol=lf
+test/data/bpf/bundle2 text eol=lf
