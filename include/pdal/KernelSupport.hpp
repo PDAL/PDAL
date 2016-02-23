@@ -38,7 +38,6 @@
 
 #include <pdal/Options.hpp>
 #include <pdal/Stage.hpp>
-#include <pdal/UserCallback.hpp>
 #include <pdal/PipelineManager.hpp>
 
 namespace pdal
@@ -73,38 +72,6 @@ public:
 private:
     KernelSupport& operator=(const KernelSupport&); // not implemented
     KernelSupport(const KernelSupport&); // not implemented
-};
-
-
-class PDAL_DLL PercentageCallback : public pdal::UserCallback
-{
-public:
-    PercentageCallback(double major = 10.0, double minor = 2.0);
-    virtual void callback();
-
-protected:
-    double m_lastMajorPerc;
-    double m_lastMinorPerc;
-    bool m_done;
-};
-
-
-class PDAL_DLL HeartbeatCallback : public pdal::UserCallback
-{
-public:
-    virtual void callback()
-        { std::cerr << "."; }
-};
-
-
-class PDAL_DLL ShellScriptCallback : public PercentageCallback
-{
-public:
-    ShellScriptCallback(const std::vector<std::string>& command);
-    virtual void callback();
-
-private:
-    std::string m_command;
 };
 
 } // namespace pdal

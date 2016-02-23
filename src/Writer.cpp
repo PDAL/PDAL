@@ -34,7 +34,6 @@
 
 #include <pdal/Writer.hpp>
 #include <pdal/Stage.hpp>
-#include <pdal/UserCallback.hpp>
 
 #include <pdal/PipelineWriter.hpp>
 

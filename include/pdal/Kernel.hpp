@@ -96,15 +96,6 @@ public:
 
     void setCommonOptions(Options &options);
 
-    void setProgressShellCommand(std::vector<std::string> const& command)
-    {
-        m_heartbeat_shell_command = command;
-    }
-    std::vector<std::string> getProgressShellCommand()
-    {
-        return m_heartbeat_shell_command;
-    }
-
     const Options& extraStageOptions(const std::string& stage)
     {
         static Options nullOpts;
@@ -161,7 +152,6 @@ private:
     bool m_showTime;
     std::string m_appName;
     bool m_hardCoreDebug;
-    std::vector<std::string> m_heartbeat_shell_command;
     bool m_reportDebug;
     std::string m_scales;
     std::string m_offsets;

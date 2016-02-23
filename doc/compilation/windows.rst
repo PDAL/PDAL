@@ -16,8 +16,8 @@ Building Under Windows
 
 .. seealso::
 
-    :ref:`vagrant` contains an automated way to build PDAL and all of
-    its dependencies on Unix. If you just want to apply PDAL commandline
+    :ref:`docker` describes a way to get a PDAL build and all of
+    its dependencies. If you just want to apply PDAL commandline
     operations to data, this mechanism is likely to be much faster than
     compiling your own.
 

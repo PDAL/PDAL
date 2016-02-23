@@ -72,7 +72,6 @@ PDAL_ADD_TEST(pdal_spatial_reference_test FILES SpatialReferenceTest.cpp)
 PDAL_ADD_TEST(pdal_stage_factory_test FILES StageFactoryTest.cpp)
 PDAL_ADD_TEST(pdal_streaming_test FILES StreamingTest.cpp)
 PDAL_ADD_TEST(pdal_support_test FILES SupportTest.cpp)
-PDAL_ADD_TEST(pdal_user_callback_test FILES UserCallbackTest.cpp)
 PDAL_ADD_TEST(pdal_utils_test FILES UtilsTest.cpp)
 PDAL_ADD_TEST(pdal_uuid_test FILES UuidTest.cpp)
 

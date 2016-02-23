@@ -16,7 +16,7 @@ PDAL provides an API that can be used by programmers for integration into their
 own projects or to allow extension of existing capabilities.
 
 
-.. _the-pdal-model::
+.. _the-pdal-model:
 
 The PDAL model
 --------------------------------------------------------------------------------
@@ -343,7 +343,7 @@ point_count_t read(PointViewPtr view, point_count_t count)
     read.
 
 
-.. _implementing-a-filter::
+.. _implementing-a-filter:
 
 Implementing a Filter
 ................................................................................

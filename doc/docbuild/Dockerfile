@@ -7,7 +7,8 @@ RUN apt-get install -y cmake libjpeg8-dev zlib1g-dev texlive-latex-base texlive-
 RUN apt-get install -y git
 RUN apt-get install -y graphviz
 
-RUN pip install Sphinx rst2pdf breathe sphinx_bootstrap_theme awscli
+RUN pip install Sphinx breathe sphinx_bootstrap_theme awscli matplotlib
+RUN pip install --upgrade https://github.com/hobu/rst2pdf/zipball/master
 
 RUN useradd pdal
 RUN mkdir /home/pdal&& chown -R pdal: /home/pdal

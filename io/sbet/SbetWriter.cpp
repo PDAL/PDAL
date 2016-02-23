@@ -62,9 +62,6 @@ void SbetWriter::ready(PointTableRef)
 
 void SbetWriter::write(const PointViewPtr view)
 {
-    m_callback->setTotal(view->size());
-    m_callback->invoke(0);
-
     Dimension::IdList dims = getDefaultDimensions();
     for (PointId idx = 0; idx < view->size(); ++idx)
     {
@@ -75,10 +72,7 @@ void SbetWriter::write(const PointViewPtr view)
             *m_stream << (view->hasDim(dim) ?
                 view->getFieldAs<double>(dim, idx) : 0.0);
         }
-        if (idx % 100 == 0)
-            m_callback->invoke(idx + 1);
     }
-    m_callback->invoke(view->size());
 }
 
 } // namespace pdal

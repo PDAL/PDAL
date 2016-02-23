@@ -108,13 +108,6 @@ int SmoothKernel::execute()
     Stage& writer(Kernel::makeWriter(m_outputFile, *smoothStage));
     writer.setOptions(writerOptions);
 
-    std::vector<std::string> cmd = getProgressShellCommand();
-    UserCallback *callback =
-        cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
-        (UserCallback *)new HeartbeatCallback();
-
-    writer.setUserCallback(callback);
-    applyExtraStageOptionsRecursive(&writer);
     writer.prepare(table);
 
     // process the data, grabbing the PointViewSet for visualization of the

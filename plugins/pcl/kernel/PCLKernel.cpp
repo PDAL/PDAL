@@ -116,18 +116,12 @@ int PCLKernel::execute()
     if (m_bForwardMetadata)
         writerOptions.add("forward_metadata", true);
 
-    std::vector<std::string> cmd = getProgressShellCommand();
-    UserCallback *callback =
-        cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
-        (UserCallback *)new HeartbeatCallback();
-
     Stage& writer(Kernel::makeWriter(m_outputFile, *pclStage));
 
     // Some options are inferred by makeWriter based on filename
     // (compression, driver type, etc).
     writer.addOptions(writerOptions);
 
-    writer.setUserCallback(callback);
     applyExtraStageOptionsRecursive(&writer);
     writer.prepare(table);
 
