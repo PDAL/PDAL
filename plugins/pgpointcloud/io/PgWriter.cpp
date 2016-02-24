@@ -315,7 +315,7 @@ uint32_t PgWriter::SetupSchema(uint32_t srid)
         {
             // We have the sequence, use its nextval
             char *pcid_str = pg_query_once(m_session,
-                    "SELECT nextval('pointcloud_formats_pcid_seq') FROM pointcloud_formats");
+                    "SELECT nextval('pointcloud_formats_pcid_sq')");
             if (!pcid_str)
                 throw pdal_error("Unable to select nextval from pointcloud_formats_pcid_seq");
             pcid = atoi(pcid_str);
