@@ -59,7 +59,9 @@ after_build:
   - 7z a pdal.zip %APPVEYOR_BUILD_FOLDER%\bin\*.*
 
 test_script:
-  - set PATH=%OSGEO4W_ROOT%\\bin;%PATH%
+  # FIXME: Clear PATH to avoid OSGeo4W loading incompatible DLLs
+  - set PATH=
+  - set PATH=%OSGEO4W_ROOT%\bin;C:\Program Files (x86)\MSBuild\14.0\Bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Program Files\7-Zip;C:\Program Files\Microsoft Windows Performance Toolkit\;C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit\;C:\Python27;C:\Tools\GitVersion;C:\Program Files (x86)\CMake\bin;C:\Program Files\Git\cmd;C:\Program Files\Git\usr\bin;C:\Program Files\AppVeyor\BuildAgent\
   - echo %PATH%
   - ctest -V --output-on-failure -C Release -R pdal_config_test
 
