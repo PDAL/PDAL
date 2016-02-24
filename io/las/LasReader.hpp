@@ -56,13 +56,30 @@ class PointDimensions;
 
 class PDAL_DLL LasReader : public pdal::Reader
 {
-    friend class NitfReader;
-public:
-    LasReader() : pdal::Reader(), m_index(0), m_istream(NULL)
+protected:
+    class LasStreamIf
+    {
+    protected:
+        LasStreamIf()
         {}
 
-    virtual ~LasReader()
-        {  destroyStream(); }
+    public:
+        LasStreamIf(const std::string& filename)
+            { m_istream = FileUtils::openFile(filename); }
+
+        ~LasStreamIf()
+        {
+            if (m_istream)
+                FileUtils::closeFile(m_istream);
+        }
+
+        std::istream *m_istream;
+    };
+
+    friend class NitfReader;
+public:
+    LasReader() : pdal::Reader(), m_index(0)
+        {}
 
     static void * create();
     static int32_t destroy(void *);
@@ -75,23 +92,21 @@ public:
         { return m_lasHeader.pointCount(); }
 
 protected:
-    virtual std::istream *createStream()
+    virtual void createStream()
     {
-        m_istream = FileUtils::openFile(m_filename);
-        if (!m_istream)
+        if (m_streamIf)
+            std::cerr << "Attempt to create stream twice!\n";
+        m_streamIf.reset(new LasStreamIf(m_filename));
+        if (!m_streamIf->m_istream)
         {
             std::ostringstream oss;
             oss << "Unable to create open stream for '"
                 << m_filename <<"' with error '" << strerror(errno) <<"'";
             throw pdal_error(oss.str());
         }
-        return m_istream;
     }
-    virtual void destroyStream()
-    {
-        FileUtils::closeFile(m_istream);
-        m_istream = NULL;
-    }
+
+    std::unique_ptr<LasStreamIf> m_streamIf;
 
 private:
     LasError m_error;
@@ -101,7 +116,6 @@ private:
     std::unique_ptr<LazPerfVlrDecompressor> m_decompressor;
     std::vector<char> m_decompressorBuf;
     point_count_t m_index;
-    std::istream* m_istream;
     VlrList m_vlrs;
     std::vector<ExtraDim> m_extraDims;
     std::string m_compression;

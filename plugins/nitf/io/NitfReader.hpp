@@ -49,42 +49,55 @@ class PDAL_DLL NitfReader : public LasReader
 typedef pdalboost::iostreams::restriction<std::istream> RDevice;
 typedef pdalboost::iostreams::stream<RDevice> RStream;
 
+    class NitfStreamIf : public LasStreamIf
+    {
+    public:
+        NitfStreamIf(const std::string& filename, uint64_t offset, uint64_t len)
+        {
+            m_baseStream = FileUtils::openFile(filename);
+            if (m_baseStream)
+            {
+                m_rdevice.reset(new RDevice(*m_baseStream, offset, len));
+                m_rstream.reset(new RStream(*m_rdevice));
+                m_istream = m_rstream.get();
+            }
+        }
+
+        ~NitfStreamIf()
+        {
+            m_rstream.reset();
+            m_rdevice.reset();
+            if (m_baseStream)
+                FileUtils::closeFile(m_baseStream);
+            m_baseStream = NULL;
+            m_istream = NULL;
+        }
+
+    private:
+        std::istream *m_baseStream;
+        std::unique_ptr<RDevice> m_rdevice;
+        std::unique_ptr<RStream> m_rstream;
+    };
+
 public:
-    NitfReader() : LasReader(), m_offset(0), m_length(0), m_istream(NULL)
+    NitfReader() : LasReader(), m_offset(0), m_length(0)
     {}
-    ~NitfReader()
-        { destroyStream(); }
 
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
 
 protected:
-    virtual std::istream *createStream()
+    virtual void createStream()
     {
-        m_istream = FileUtils::openFile(m_filename);
-        if (!m_istream)
-            return NULL;
-        m_rdevice.reset(new RDevice(*m_istream, m_offset, m_length));
-        m_rstream.reset(new RStream(*m_rdevice));
-        return m_rstream.get();
-    }
-
-    virtual void destroyStream()
-    {
-        m_rstream.reset();
-        m_rdevice.reset();
-        FileUtils::closeFile(m_istream);
-        m_istream = NULL;
+        if (m_streamIf)
+            std::cerr << "Attempt to create stream twice!\n";
+        m_streamIf.reset(new NitfStreamIf(m_filename, m_offset, m_length));
     }
 
 private:
     uint64_t m_offset;
     uint64_t m_length;
-
-    std::istream *m_istream;
-    std::unique_ptr<RDevice> m_rdevice;
-    std::unique_ptr<RStream> m_rstream;
 
     virtual void initialize(PointTableRef table);
     NitfReader& operator=(const NitfReader&); // not implemented

@@ -130,10 +130,12 @@ QuickInfo LasReader::inspect()
 
 void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
 {
-    m_istream = createStream();
+    createStream();
 
-    m_istream->seekg(0);
-    ILeStream in(m_istream);
+    std::istream *stream(m_streamIf->m_istream);
+
+    stream->seekg(0);
+    ILeStream in(stream);
     in >> m_lasHeader;
 
     if (!m_lasHeader.pointFormatSupported())
@@ -146,7 +148,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
 
     // We need to read the VLRs in initialize() because they may contain an
     // extra-bytes VLR that is needed to determine dimensions.
-    m_istream->seekg(m_lasHeader.vlrOffset());
+    stream->seekg(m_lasHeader.vlrOffset());
     for (size_t i = 0; i < m_lasHeader.vlrCount(); ++i)
     {
         VariableLengthRecord r;
@@ -156,7 +158,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
 
     if (m_lasHeader.versionAtLeast(1, 4))
     {
-        m_istream->seekg(m_lasHeader.eVlrOffset());
+        stream->seekg(m_lasHeader.eVlrOffset());
         for (size_t i = 0; i < m_lasHeader.eVlrCount(); ++i)
         {
             ExtVariableLengthRecord r;
@@ -169,18 +171,16 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     MetadataNode forward = table.privateMetadata("lasforward");
     extractHeaderMetadata(forward, m);
     extractVlrMetadata(forward, m);
-    // The stream is closed because all stages are prepared() before they
-    // are run which results in all readers having files open simultaneously,
-    // which can be a problem on Windows, which has restrictive open
-    // file limits.
-    destroyStream();
-    m_istream = NULL;
+
+    m_streamIf.reset();
 }
 
 
 void LasReader::ready(PointTableRef table)
 {
-    m_istream = createStream();
+    createStream();
+    std::istream *stream(m_streamIf->m_istream);
+
     m_index = 0;
     if (m_lasHeader.compressed())
     {
@@ -195,11 +195,11 @@ void LasReader::ready(PointTableRef table)
             {
                 m_unzipper.reset(new LASunzipper());
 
-                m_istream->seekg(m_lasHeader.pointOffset(), std::ios::beg);
+                stream->seekg(m_lasHeader.pointOffset(), std::ios::beg);
 
                 // Once we open the zipper, don't touch the stream until the
                 // zipper is closed or bad things happen.
-                if (!m_unzipper->open(*m_istream, m_zipPoint->GetZipper()))
+                if (!m_unzipper->open(*stream, m_zipPoint->GetZipper()))
                 {
                     std::ostringstream oss;
                     const char* err = m_unzipper->get_error();
@@ -217,7 +217,7 @@ void LasReader::ready(PointTableRef table)
         {
             VariableLengthRecord *vlr = findVlr(LASZIP_USER_ID,
                 LASZIP_RECORD_ID);
-            m_decompressor.reset(new LazPerfVlrDecompressor(*m_istream,
+            m_decompressor.reset(new LazPerfVlrDecompressor(*stream,
                 vlr->data(), m_lasHeader.pointOffset()));
             m_decompressorBuf.resize(m_decompressor->pointSize());
         }
@@ -229,7 +229,7 @@ void LasReader::ready(PointTableRef table)
 #endif
     }
     else
-        m_istream->seekg(m_lasHeader.pointOffset());
+        stream->seekg(m_lasHeader.pointOffset());
 
     m_error.setLog(log());
 }
@@ -644,7 +644,7 @@ bool LasReader::processOne(PointRef& point)
     {
         std::vector<char> buf(m_lasHeader.pointLen());
 
-        m_istream->read(buf.data(), pointLen);
+        m_streamIf->m_istream->read(buf.data(), pointLen);
         loadPoint(point, buf.data(), pointLen);
     }
     m_index++;
@@ -717,20 +717,22 @@ point_count_t LasReader::read(PointViewPtr view, point_count_t count)
 point_count_t LasReader::readFileBlock(std::vector<char>& buf,
     point_count_t maxpoints)
 {
+    std::istream *stream(m_streamIf->m_istream);
+
     size_t ptLen = m_lasHeader.pointLen();
     point_count_t blockpoints = buf.size() / ptLen;
 
     blockpoints = std::min(maxpoints, blockpoints);
-    if (m_istream->eof())
+    if (stream->eof())
         throw invalid_stream("stream is done");
 
-    m_istream->read(buf.data(), blockpoints * ptLen);
-    if (m_istream->gcount() != (std::streamsize)(blockpoints * ptLen))
+    stream->read(buf.data(), blockpoints * ptLen);
+    if (stream->gcount() != (std::streamsize)(blockpoints * ptLen))
     {
         // we read fewer bytes than we asked for
         // because the file was either truncated
         // or the header is bunk.
-        blockpoints = m_istream->gcount() / ptLen;
+        blockpoints = stream->gcount() / ptLen;
     }
     return blockpoints;
 }
@@ -914,10 +916,7 @@ void LasReader::done(PointTableRef)
     m_zipPoint.reset();
     m_unzipper.reset();
 #endif
-    destroyStream();
-    // Reset stream to NULL because destroyStream is virtual and can't reset
-    // m_istream.
-    m_istream = NULL;
+    m_streamIf.reset();
 }
 
 } // namespace pdal
