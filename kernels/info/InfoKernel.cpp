@@ -256,26 +256,19 @@ MetadataNode InfoKernel::dumpSummary(const QuickInfo& qi)
 
 void InfoKernel::setup(const std::string& filename)
 {
-    Options readerOptions;
-
-    readerOptions.add("filename", filename);
-    if (!m_needPoints)
-        readerOptions.add("count", 0);
-
-    m_manager = KernelSupport::makePipeline(filename);
-    m_reader = m_manager->getStage();
-    Stage *stage = m_reader;
-
-    if (m_dimensions.size())
-        m_options.add("dimensions", m_dimensions, "List of dimensions");
-
-    Options options = m_options + readerOptions;
-    m_reader->setOptions(options);
+    m_manager = KernelSupport::makePipeline(filename, !m_needPoints);
+    Stage *stage = m_manager->getStage();
 
     if (m_showStats)
     {
         m_statsStage = &(m_manager->addFilter("filters.stats"));
-        m_statsStage->setOptions(options);
+        if (m_dimensions.size())
+        {
+            Options ops;
+            ops.add("dimensions", m_dimensions);
+            m_statsStage->addOptions(ops);
+        }
+
         m_statsStage->setInput(*stage);
         stage = m_statsStage;
     }
@@ -284,13 +277,11 @@ void InfoKernel::setup(const std::string& filename)
         m_hexbinStage = &(m_manager->addFilter("filters.hexbin"));
         if (!m_hexbinStage) {
             throw pdal_error("Unable to compute boundary -- "
-                    "http://github.com/hobu/hexer is not linked. "
-                    "See the \"boundary\" member in \"stats\" for a coarse bounding box");
+                "http://github.com/hobu/hexer is not linked. "
+                "See the \"boundary\" member in \"stats\" for a coarse "
+                "bounding box");
         }
-        m_hexbinStage->setOptions(options);
         m_hexbinStage->setInput(*stage);
-        stage = m_hexbinStage;
-        Options readerOptions;
     }
 }
 
