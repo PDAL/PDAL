@@ -498,7 +498,15 @@ SpatialReference LasReader::getSrsFromGeotiffVlr()
     // We must have a directory entry.
     if (!vlr)
         return srs;
-    geotiff.setShortKeys(vlr->recordId(), (void *)vlr->data(), vlr->dataLen());
+    if (!geotiff.setShortKeys(vlr->recordId(), (void *)vlr->data(),
+        vlr->dataLen()))
+    {
+        std::ostringstream oss;
+
+        oss << getName() << ": Invalid GeoTIFF directory record.  Can't "
+            "interpret spatial reference.";
+        throw pdal_error(oss.str());
+    }
 
     vlr = findVlr(TRANSFORM_USER_ID, GEOTIFF_DOUBLES_RECORD_ID);
     if (vlr)
