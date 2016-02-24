@@ -36,7 +36,6 @@
 #include "TranslateKernel.hpp"
 
 #include <pdal/KernelFactory.hpp>
-#include <pdal/KernelSupport.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/PipelineWriter.hpp>
@@ -108,7 +107,7 @@ int TranslateKernel::execute()
         std::string driver = factory.inferReaderDriver(m_inputFile);
 
         if (driver.empty())
-            throw app_runtime_error("Cannot determine input file type of " +
+            throw pdal_error("Cannot determine input file type of " +
                                     m_inputFile);
         m_manager->addReader(driver);
     }
@@ -160,8 +159,8 @@ int TranslateKernel::execute()
         std::string driver = factory.inferWriterDriver(m_outputFile);
 
         if (driver.empty())
-            throw app_runtime_error("Cannot determine output file type of " +
-                                    m_outputFile);
+            throw pdal_error("Cannot determine output file type of " +
+                m_outputFile);
         Options options = factory.inferWriterOptionsChanges(m_outputFile);
         writerOptions += options;
         m_manager->addWriter(driver);

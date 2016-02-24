@@ -36,7 +36,6 @@
 #include "GroundKernel.hpp"
 
 #include <pdal/KernelFactory.hpp>
-#include <pdal/KernelSupport.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/PointTable.hpp>

@@ -35,7 +35,7 @@
 #pragma once
 
 #include <pdal/Kernel.hpp>
-#include <pdal/KernelSupport.hpp>
+#include <pdal/PipelineManager.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/util/FileUtils.hpp>
@@ -78,6 +78,7 @@ private:
     void dumpPipeline() const;
     MetadataNode dumpSummary(const QuickInfo& qi);
     MetadataNode dumpQuery(PointViewPtr inView) const;
+    PipelineManagerPtr makePipeline(const std::string& filename, bool noPoints);
 
     std::string m_inputFile;
     bool m_showStats;

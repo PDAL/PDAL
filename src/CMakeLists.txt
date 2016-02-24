@@ -48,7 +48,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/KDIndex.hpp"
   "${PDAL_HEADERS_DIR}/KernelFactory.hpp"
   "${PDAL_HEADERS_DIR}/Kernel.hpp"
-  "${PDAL_HEADERS_DIR}/KernelSupport.hpp"
   "${PDAL_HEADERS_DIR}/Log.hpp"
   "${PDAL_HEADERS_DIR}/Metadata.hpp"
   "${PDAL_HEADERS_DIR}/Options.hpp"
@@ -82,7 +81,6 @@ set(PDAL_BASE_CPP
   GlobalEnvironment.cpp
   Kernel.cpp
   KernelFactory.cpp
-  KernelSupport.cpp
   Log.cpp
   Metadata.cpp
   Options.cpp

@@ -35,7 +35,6 @@
 #include "SortKernel.hpp"
 
 #include <buffer/BufferReader.hpp>
-#include <pdal/KernelSupport.hpp>
 #include <pdal/StageFactory.hpp>
 
 namespace pdal

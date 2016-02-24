@@ -35,19 +35,17 @@
 #include <pdal/pdal_test_main.hpp>
 #include "kernel/Cpd.hpp"
 
-#include <pdal/KernelFactory.hpp>
 #include <pdal/Filter.hpp>
+#include <pdal/KernelFactory.hpp>
+#include <pdal/PipelineManager.hpp>
 #include <pdal/Reader.hpp>
 #include "Support.hpp"
-
 
 namespace pdal
 {
 
-
 namespace
 {
-
 
 class CpdKernelTest : public ::testing::Test
 {
