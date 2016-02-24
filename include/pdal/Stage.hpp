@@ -273,9 +273,9 @@ public:
     void serialize(MetadataNode root, PipelineWriter::TagMap& tags) const;
 
 protected:
-    Options m_options;          ///> Stage's options.
-    MetadataNode m_metadata;    ///> Stage's metadata.
-    int m_progressFd;           ///> Descriptor for progress info.
+    Options m_options;          ///< Stage's options.
+    MetadataNode m_metadata;    ///< Stage's metadata.
+    int m_progressFd;           ///< Descriptor for progress info.
 
     void setSpatialReference(MetadataNode& m, SpatialReference const&);
 
@@ -289,7 +289,14 @@ private:
     Stage& operator=(const Stage&); // not implemented
     Stage(const Stage&); // not implemented
     void Construct();
+
     void l_processOptions(const Options& options);
+
+    /**
+      Process options.  Implement in subclass.
+
+      \param options  Options to process.
+    */
     virtual void processOptions(const Options& /*options*/)
         {}
     virtual void readerProcessOptions(const Options& /*options*/)
@@ -297,36 +304,100 @@ private:
     virtual void writerProcessOptions(const Options& /*options*/)
         {}
     void l_initialize(PointTableRef table);
+
+    /**
+      Get basic metadata (avoids reading points).  Implement in subclass.
+
+      \return  QuickInfo data.
+    */
     virtual QuickInfo inspect()
         { return QuickInfo(); }
+
+    /**
+      Initialize stage after options have been processed.  Implement in
+      subclass.  If you don't require the \ref table argument, you
+      can implement the version of this function that takes no arguments
+      instead of this function.
+
+      \param table  PointTable associated with pipeline.
+    */
     virtual void initialize(PointTableRef /*table*/)
         { initialize(); }
+
+    /**
+      Initialize stage after options have been processed.  Implement in
+      subclass.
+    */
     virtual void initialize()
         {}
+
+    /**
+      Add dimensions to a layout.
+
+      \param layout  Point layout.
+    */
     virtual void addDimensions(PointLayoutPtr /*layout*/)
         {}
+
+    /**
+      Functions called after dimensions have been added.  Implement in
+      subclass.
+
+      \param table  PointTable associated with pipeline.
+    */
     virtual void prepared(PointTableRef /*table*/)
         {}
+
+    /**
+      First part of the execute step.  Called after all stages have been
+      prepared.  Implement in subclass.
+
+      \param table  PointTable associated with the pipeline.
+    */
     virtual void ready(PointTableRef /*table*/)
         {}
-    virtual void done(PointTableRef /*table*/)
-        {}
+
+    /**
+      Process a single point (streaming mode).  Implement in sublcass.
+
+      \param point  Point to process.
+      \return  Readers return false when no more points are to be read.
+        Filters return false if a point is to be filtered-out (not passed
+        to subsequent stages).
+    */
     virtual bool processOne(PointRef& /*point*/)
     {
         std::ostringstream oss;
         oss << "Point streaming not supported for stage " << getName() << ".";
         throw pdal_error(oss.str());
     }
+
+    /**
+      Process all points in a view.  Implement in subclass.
+
+      \param view  PointView to process.
+    */
     virtual PointViewSet run(PointViewPtr /*view*/)
     {
         std::cerr << "Can't run stage = " << getName() << "!\n";
         return PointViewSet();
     }
+
+    /**
+      Called after all point views have been processed.  Implement in subclass.
+
+      \param table  PointTable associated with pipeline.
+    */
+    virtual void done(PointTableRef /*table*/)
+        {}
+
     void execute(StreamPointTable& table, std::list<Stage *>& stages);
+
+    /*
+      Test hook.
+    */
     const Options& getOptions() const
         { return m_options; }
 };
-
-PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const Stage&);
 
 } // namespace pdal
