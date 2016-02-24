@@ -38,16 +38,18 @@
 #include <pdal/plugin.hpp>
 #include <pdal/PluginManager.hpp>
 
-namespace {
+namespace pdal
+{
 
-typedef struct PluginInfo {
+struct PluginInfo
+{
     std::string name;
     std::string description;
     std::string link;
     PluginInfo(const std::string& n, const std::string& d, const std::string& l)
       : name(n), description(d), link(l)
     {}
-} PluginInfo;
+};
 
 }
 
