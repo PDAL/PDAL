@@ -61,7 +61,7 @@ after_build:
 test_script:
   - set PATH=%OSGEO4W_ROOT%\\bin;%PATH%
   - echo %PATH%
-  - ctest -V --output-on-failure -C Release -R pdal_file_utils_test
+  - ctest -V --output-on-failure -C Release -R pdal_config_test
 
 artifacts:
   - path: pdal.zip
