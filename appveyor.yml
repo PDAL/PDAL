@@ -1,6 +1,6 @@
 version: 1.0.{build}
 
-os:  Visual Studio 2015
+os: Visual Studio 2015
 
 platform: x64
 
@@ -16,6 +16,9 @@ environment:
     - PDAL_OPTIONAL_COMPONENTS: OFF
     - PDAL_OPTIONAL_COMPONENTS: ON
 
+on_finish:
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
 init:
   - set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%
   - set PATH=C:\Python27-x64\;%PATH%
@@ -27,28 +30,15 @@ install:
   # already been cloned, otherwise git would complain about a non-empty
   # directory
   - ps: mkdir C:\temp | out-null
-
-  # make the osgeo directory
-  - ps: mkdir %OSGEO4W_ROOT% | out-null
-
+  - ps: mkdir $env:OSGEO4W_ROOT | out-null
   # make an install directory for packacing
   - ps: mkdir C:\pdalbin | out-null
-
   # get the OSGeo installer
-  - ps: wget http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe -OutFile C:\temp\osgeo4w-setup.exe | out-null
-
+  - ps: (new-object net.webclient).DownloadFile("http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe", "C:\temp\osgeo4w-setup.exe")
   # and install our dependencies
-  ## TODO: Clean up packages list once GDAL deps are fixed https://trac.osgeo.org/osgeo4w/ticket/485
-  - C:\temp\osgeo4w-setup.exe -s http://download.osgeo.org/osgeo4w/ -a -q -r -P boost-devel,curl,eigen,expat,freexl,gdal,gdal110dll,gdal111dll,geos,hdf4,hdf5,hexer,iconv,laszip,libjpeg,libjpeg12,libgeotiff,libmysql,libpng,libpq,libtiff,libxml2,netcdf,nitro,ogdi,openjpeg,openssl,pcl,points2grid,proj,python-numpy,spatialite,sqlite3,zlib,xerces-c-vc10,xerces-c-vc9 -R %OSGEO4W_ROOT% > null
-  ## TODO: remove this work-around once szip is fixed https://trac.osgeo.org/osgeo4w/ticket/486
-  - ps: wget http://download.osgeo.org/osgeo4w/x86_64/release/szip/szip-2.1-1.tar.bz2 -OutFile C:\temp\szip-2.1-1.tar.bz2 | out-null
-  - 7z x -so C:\temp\szip-2.1-1.tar.bz2 | 7z x -si -ttar -o%OSGEO4W_ROOT%
+  - C:\temp\osgeo4w-setup.exe -q -k -r -A -s http://download.osgeo.org/osgeo4w/ -a x86_64 -P boost-devel,eigen,gdal,geos,hexer,iconv,laszip,libgeotiff,libpq,libtiff,libxml2,nitro,pcl,points2grid,proj,python-numpy,zlib -R %OSGEO4W_ROOT% > NUL
   # call our PDAL install script
   - call .\\scripts\\appveyor\\config.cmd
-
-#cache:
-#  # this should cache our OSGeo4W install between jobs in the build matrix
-#  - C:\OSGeo4W64
 
 build:
   parallel: true
