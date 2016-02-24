@@ -41,8 +41,8 @@ install:
   ## TODO: Clean up packages list once GDAL deps are fixed https://trac.osgeo.org/osgeo4w/ticket/485
   - C:\temp\osgeo4w-setup.exe -s http://download.osgeo.org/osgeo4w/ -a -q -r -P boost-devel,curl,eigen,expat,freexl,gdal,gdal110dll,gdal111dll,geos,hdf4,hdf5,hexer,iconv,laszip,libjpeg,libjpeg12,libgeotiff,libmysql,libpng,libpq,libtiff,libxml2,netcdf,nitro,ogdi,openjpeg,pcl,points2grid,proj,python-numpy,spatialite,sqlite3,zlib,xerces-c-vc10,xerces-c-vc9 -R %OSGEO4W_ROOT% > null
   ## TODO: remove this work-around once szip is fixed https://trac.osgeo.org/osgeo4w/ticket/486
-  - ps: wget http://download.osgeo.org/osgeo4w/x86_64/release/szip/szip-2.1-1.tar.bz2 -OutFile %OSGEO4W_ROOT%\szip-2.1-1.tar.bz2 | out-null
-  - 7z x -so szip-2.1-1.tar.bz2 | 7z x -si -ttar
+  - ps: wget http://download.osgeo.org/osgeo4w/x86_64/release/szip/szip-2.1-1.tar.bz2 -OutFile C:\temp\szip-2.1-1.tar.bz2 | out-null
+  - 7z x -so C:\temp\szip-2.1-1.tar.bz2 | 7z x -si -ttar -o%OSGEO4W_ROOT%
   # call our PDAL install script
   - call .\\scripts\\appveyor\\config.cmd
 
