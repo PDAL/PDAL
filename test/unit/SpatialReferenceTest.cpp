@@ -65,8 +65,8 @@ TEST(SpatialReferenceTest, test_ctor)
 {
     SpatialReference srs;
 
-    EXPECT_TRUE(srs.getProj4() == "");
-    EXPECT_TRUE(srs.getWKT() == "");
+    EXPECT_EQ(srs.getProj4(), "");
+    EXPECT_EQ(srs.getWKT(), "");
     EXPECT_TRUE(srs.empty());
 }
 
@@ -92,21 +92,21 @@ TEST(SpatialReferenceTest, test_proj4_roundtrip)
         ref.setProj4(proj4);
         EXPECT_TRUE(!ref.empty());
         const std::string ret = ref.getProj4();
-        EXPECT_TRUE(ret == proj4_out);
+        EXPECT_EQ(ret, proj4_out);
     }
 
     {
         SpatialReference ref;
         ref.setProj4(proj4_ellps);
         const std::string ret = ref.getProj4();
-        EXPECT_TRUE(ret == proj4_out);
+        EXPECT_EQ(ret, proj4_out);
     }
 
     {
         SpatialReference ref;
         ref.setProj4(proj4_out);
         const std::string ret = ref.getProj4();
-        EXPECT_TRUE(ret == proj4_out);
+        EXPECT_EQ(ret, proj4_out);
     }
 }
 
@@ -126,8 +126,8 @@ TEST(SpatialReferenceTest, test_userstring_roundtrip)
     std::string ret_proj = ref.getProj4();
     std::string ret_wkt = ref.getWKT();
 
-    EXPECT_TRUE(ret_proj == proj4);
-    EXPECT_TRUE(ret_wkt == wkt);
+    EXPECT_EQ(ret_proj, proj4);
+    EXPECT_EQ(ret_wkt, wkt);
 }
 
 
@@ -190,10 +190,10 @@ TEST(SpatialReferenceTest, test_read_srs)
 #else
     const std::string wkt = "PROJCS[\"WGS 84 / UTM zone 17N\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-81],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],AUTHORITY[\"EPSG\",\"32617\"]]";
 #endif
-    EXPECT_TRUE(ret_wkt == wkt);
+    EXPECT_EQ(ret_wkt, wkt);
 
     std::string proj4 = "+proj=utm +zone=17 +datum=WGS84 +units=m +no_defs";
-    EXPECT_TRUE(ret_proj4 == proj4);
+    EXPECT_EQ(ret_proj4, proj4);
 }
 #endif
 
@@ -217,7 +217,7 @@ TEST(SpatialReferenceTest, test_vertical_datums)
     SpatialReference ref;
     ref.setFromUserInput(wkt);
     const std::string wktCheck = ref.getWKT(SpatialReference::eCompoundOK);
-    EXPECT_TRUE(wkt == wktCheck); // just to make sure
+    EXPECT_EQ(wkt, wktCheck); // just to make sure
 
     PointTable table;
     // Write a very simple file with our SRS and one point.
@@ -268,7 +268,7 @@ TEST(SpatialReferenceTest, test_writing_vlr)
 
     ref.setFromUserInput("EPSG:4326");
     std::string wkt = ref.getWKT();
-    EXPECT_TRUE(wkt == reference_wkt);
+    EXPECT_EQ(wkt, reference_wkt);
 
     // Write a very simple file with our SRS and one point.
     {
@@ -331,7 +331,7 @@ TEST(SpatialReferenceTest, test_io)
     SpatialReference ref2;
     ss >> ref2;
 
-    EXPECT_TRUE(ref == ref2);
+    EXPECT_EQ(ref, ref2);
 }
 
 TEST(SpatialReferenceTest, test_vertical_and_horizontal)
