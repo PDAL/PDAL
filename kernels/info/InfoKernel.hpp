@@ -85,7 +85,6 @@ private:
     bool m_showAll;
     bool m_showMetadata;
     bool m_boundary;
-    pdal::Options m_options;
     std::string m_pointIndexes;
     std::string m_dimensions;
     std::string m_queryPoint;

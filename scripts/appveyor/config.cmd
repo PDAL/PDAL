@@ -1,6 +1,6 @@
 @echo off
 
-cmake -G "Visual Studio 11 2012 Win64" ^
+cmake -G "Visual Studio 14 2015 Win64" ^
     -DBUILD_PLUGIN_ATTRIBUTE=%PDAL_OPTIONAL_COMPONENTS% ^
     -DBUILD_PLUGIN_CPD=OFF ^
     -DBUILD_PLUGIN_GREYHOUND=OFF ^

@@ -65,9 +65,16 @@ public:
 class PDAL_DLL KernelSupport
 {
 public:
-    // makes a writer, from just the filename and some other
-    // options (and the input stage)
-    static PipelineManagerPtr makePipeline(const std::string& filename);
+    /**
+      Make a pipeline given a filename.
+
+      \param filename  A input filespec from which the reader can be inferred
+        or the name of a pipeline file itself.
+      \param noPoints  When a single-reader pipeline is created, add an
+        option to eliminate the reading of points.
+    */
+    static PipelineManagerPtr makePipeline(const std::string& filename,
+        bool noPoints);
 
 private:
     KernelSupport& operator=(const KernelSupport&); // not implemented
