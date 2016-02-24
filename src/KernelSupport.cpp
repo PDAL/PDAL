@@ -40,7 +40,8 @@
 namespace pdal
 {
 
-PipelineManagerPtr KernelSupport::makePipeline(const std::string& inputFile)
+PipelineManagerPtr KernelSupport::makePipeline(const std::string& inputFile,
+    bool noPoints)
 {
     if (!pdal::FileUtils::fileExists(inputFile))
         throw app_runtime_error("file not found: " + inputFile);
@@ -63,7 +64,12 @@ PipelineManagerPtr KernelSupport::makePipeline(const std::string& inputFile)
         if (driver.empty())
             throw app_runtime_error("Cannot determine input file type of " +
                 inputFile);
-        output->addReader(driver);
+        Stage& reader = output->addReader(driver);
+        Options ro;
+        ro.add("filename", inputFile);
+        if (noPoints)
+            ro.add("count", 0);
+        reader.setOptions(ro);
     }
     return output;
 }
