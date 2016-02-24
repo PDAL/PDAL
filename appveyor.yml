@@ -16,9 +16,6 @@ environment:
     - PDAL_OPTIONAL_COMPONENTS: OFF
     - PDAL_OPTIONAL_COMPONENTS: ON
 
-on_finish:
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-
 init:
   - set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%
   - set PATH=C:\Python27-x64\;%PATH%
