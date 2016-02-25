@@ -486,15 +486,16 @@ public:
 
     std::string jsonValue() const
     {
-        std::string val;
+        std::string v(Utils::escapeJSON(value()));
         if (m_impl->m_type == "string" || m_impl->m_type == "base64Binary" ||
             m_impl->m_type == "uuid")
         {
             std::string val("\"");
-            val += escapeQuotes(value()) + "\"";
+            val += escapeQuotes(v) + "\"";
             return val;
         }
-        return value();
+
+        return v;
     }
 
     std::string description() const
