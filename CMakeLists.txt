@@ -342,7 +342,7 @@ export(TARGETS ${PDAL_BASE_LIB_NAME}
     ${PDAL_UTIL_LIB_NAME}
     ${PDAL_BOOST_LIB_NAME}
     FILE "${PDAL_BINARY_DIR}/PDALTargets.cmake")
-install(EXPORT PDALTargets DESTINATION "${CMAKE_INSTALL_LIBDIR}/pdal/cmake")
+install(EXPORT PDALTargets DESTINATION "${PDAL_LIB_INSTALL_DIR}/pdal/cmake")
 include(${PDAL_CMAKE_DIR}/config.cmake)
 
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES)
