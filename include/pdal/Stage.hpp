@@ -50,8 +50,6 @@
 #include <pdal/QuickInfo.hpp>
 #include <pdal/SpatialReference.hpp>
 
-#include <boost/property_tree/ptree.hpp>
-
 namespace pdal
 {
 

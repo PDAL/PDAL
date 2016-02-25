@@ -40,6 +40,7 @@
 
 #include "StageRunner.hpp"
 
+#include <iterator>
 #include <memory>
 
 namespace pdal

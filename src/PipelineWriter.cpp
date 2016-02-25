@@ -39,6 +39,8 @@
 #include <pdal/Stage.hpp>
 #include <pdal/util/FileUtils.hpp>
 
+#include <boost/property_tree/ptree.hpp>
+
 using namespace pdalboost::property_tree;
 
 namespace pdal
