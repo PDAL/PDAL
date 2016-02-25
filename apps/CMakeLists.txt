@@ -87,7 +87,7 @@ if(UNIX OR APPLE)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/pdal.pc.in
                    ${CMAKE_CURRENT_BINARY_DIR}/pdal.pc @ONLY)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/pdal.pc
-        DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig/"
+        DESTINATION "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/pkgconfig/"
         PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
 
     # Autoconf compatibility variables to use the same script source.
