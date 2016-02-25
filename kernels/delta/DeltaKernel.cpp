@@ -35,6 +35,7 @@
 #include "DeltaKernel.hpp"
 
 #include <pdal/PDALUtils.hpp>
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {

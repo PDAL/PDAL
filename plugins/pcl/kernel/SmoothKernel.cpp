@@ -39,6 +39,7 @@
 
 #include <buffer/BufferReader.hpp>
 #include <pdal/KernelFactory.hpp>
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {

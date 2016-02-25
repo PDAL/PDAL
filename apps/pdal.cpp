@@ -34,6 +34,7 @@
 ****************************************************************************/
 
 #include <pdal/KernelFactory.hpp>
+#include <pdal/PluginManager.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_config.hpp>
 

@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <pdal/plugin.hpp>
 #include <pdal/util/OStream.hpp>
 #include <pdal/Writer.hpp>
 

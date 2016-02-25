@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
+#include <pdal/plugin.hpp>
 
 extern "C" int32_t MergeFilter_ExitFunc();
 extern "C" PF_ExitFunc MergeFilter_InitPlugin();

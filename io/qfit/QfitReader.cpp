@@ -169,6 +169,7 @@ Word #       Content
 #include <pdal/PointView.hpp>
 #include <pdal/util/Extractor.hpp>
 #include <pdal/util/portable_endian.hpp>
+#include <pdal/pdal_macros.hpp>
 
 #include <algorithm>
 #include <map>

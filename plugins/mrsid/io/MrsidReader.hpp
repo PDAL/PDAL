@@ -35,8 +35,8 @@
 #pragma once
 
 #include <pdal/Reader.hpp>
-
 #include <pdal/util/Bounds.hpp>
+#include <pdal/plugin.hpp>
 
 #include <lidar/PointSource.h>
 #include <lidar/PointData.h>

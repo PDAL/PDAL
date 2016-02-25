@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pdal/Kernel.hpp>
+#include <pdal/plugin.hpp>
 
 extern "C" int32_t SplitKernel_ExitFunc();
 extern "C" PF_ExitFunc SplitKernel_InitPlugin();

@@ -36,6 +36,7 @@
 
 #include <pdal/GlobalEnvironment.hpp>
 #include <pdal/PointView.hpp>
+#include <pdal/pdal_macros.hpp>
 
 #include <gdal.h>
 #include <ogr_spatialref.h>
@@ -206,7 +207,7 @@ bool ColorizationFilter::processOne(PointRef& point)
     double y = point.getFieldAs<double>(Dimension::Id::Y);
 
     if (m_raster->read(x, y, data) == gdal::GDALError::None)
-    { 
+    {
         int i(0);
         for (auto bi = m_bands.begin(); bi != m_bands.end(); ++bi)
         {

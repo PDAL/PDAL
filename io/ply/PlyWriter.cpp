@@ -36,6 +36,7 @@
 
 #include <sstream>
 
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {

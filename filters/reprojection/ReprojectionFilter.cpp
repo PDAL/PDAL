@@ -36,6 +36,7 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/GlobalEnvironment.hpp>
+#include <pdal/pdal_macros.hpp>
 
 #include <gdal.h>
 #include <ogr_spatialref.h>

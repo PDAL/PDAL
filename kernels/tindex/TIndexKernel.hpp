@@ -38,6 +38,7 @@
 #include <pdal/Kernel.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/plugin.hpp>
 
 
 extern "C" int32_t TIndexKernel_ExitFunc();

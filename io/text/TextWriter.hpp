@@ -38,6 +38,7 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/Writer.hpp>
+#include <pdal/plugin.hpp>
 
 #include <memory>
 #include <vector>

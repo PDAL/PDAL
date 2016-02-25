@@ -40,6 +40,7 @@
 #include <zlib.h>
 
 #include "BpfCompressor.hpp"
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {

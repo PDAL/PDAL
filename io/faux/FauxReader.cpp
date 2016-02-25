@@ -36,6 +36,7 @@
 
 #include <pdal/Options.hpp>
 #include <pdal/PointView.hpp>
+#include <pdal/pdal_macros.hpp>
 
 #include <ctime>
 

@@ -36,6 +36,7 @@
 
 #include <pdal/Filter.hpp>
 #include <pdal/Polygon.hpp>
+#include <pdal/plugin.hpp>
 
 extern "C" int32_t CropFilter_ExitFunc();
 extern "C" PF_ExitFunc CropFilter_InitPlugin();
