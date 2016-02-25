@@ -525,17 +525,16 @@ void Kernel::addBasicSwitches(ProgramArgs& args)
 Stage& Kernel::makeReader(const std::string& inputFile)
 {
     if (!FileUtils::fileExists(inputFile))
-        throw app_runtime_error("file not found: " + inputFile);
+        throw pdal_error("file not found: " + inputFile);
 
     StageFactory factory;
     std::string driver = factory.inferReaderDriver(inputFile);
     if (driver.empty())
-        throw app_runtime_error("Cannot determine input file type of " +
-            inputFile);
+        throw pdal_error("Cannot determine input file type of " + inputFile);
 
     Stage *stage = factory.createStage(driver);
     if (!stage)
-        throw app_runtime_error("reader creation failed");
+        throw pdal_error("reader creation failed");
     ownStage(stage);
     return *stage;
 }

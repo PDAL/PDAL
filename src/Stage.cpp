@@ -40,6 +40,7 @@
 
 #include "StageRunner.hpp"
 
+#include <iterator>
 #include <memory>
 
 namespace pdal
@@ -380,14 +381,5 @@ void Stage::setSpatialReference(MetadataNode& m,
     }
 }
 
-
-std::ostream& operator<<(std::ostream& ostr, const Stage& stage)
-{
-    ostr << "  Name: " << stage.getName() << std::endl;
-    ostr << "  Spatial Reference:" << std::endl;
-    ostr << "    WKT: " << stage.getSpatialReference().getWKT() << std::endl;
-
-    return ostr;
-}
-
 } // namespace pdal
+

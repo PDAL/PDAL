@@ -88,7 +88,7 @@ void PipelineKernel::addSwitches(ProgramArgs& args)
 int PipelineKernel::execute()
 {
     if (!FileUtils::fileExists(m_inputFile))
-        throw app_runtime_error("file not found: " + m_inputFile);
+        throw pdal_error("file not found: " + m_inputFile);
     if (m_progressFile.size())
         m_progressFd = Utils::openProgress(m_progressFile);
 
@@ -110,7 +110,7 @@ int PipelineKernel::execute()
     }
 
     if (!isWriter)
-        throw app_runtime_error("Pipeline file does not contain a writer. "
+        throw pdal_error("Pipeline file does not contain a writer. "
             "Use 'pdal info' to read the data.");
 
     applyExtraStageOptionsRecursive(manager.getStage());

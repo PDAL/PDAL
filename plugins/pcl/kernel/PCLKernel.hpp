@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pdal/Kernel.hpp>
+#include <pdal/PipelineManager.hpp>
 
 namespace pdal
 {

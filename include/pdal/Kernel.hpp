@@ -41,7 +41,7 @@
 #include <string>
 #include <vector>
 
-#include <pdal/KernelSupport.hpp>
+#include <pdal/Stage.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal

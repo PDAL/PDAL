@@ -60,9 +60,9 @@ public:
     ~GeotiffSupport();
 
     void resetTags();
-    void setShortKeys(int tag, void *data, int size);
-    void setDoubleKeys(int tag, void *data, int size);
-    void setAsciiKeys(int tag, void *data, int size);
+    bool setShortKeys(int tag, void *data, int size);
+    bool setDoubleKeys(int tag, void *data, int size);
+    bool setAsciiKeys(int tag, void *data, int size);
     size_t getKey(int tag, int *count, void **data_ptr) const;
     void setTags();
 

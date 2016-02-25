@@ -47,6 +47,7 @@
 #include <pdal/util/FileUtils.hpp>
 #include <merge/MergeFilter.hpp>
 #include <pdal/PDALUtils.hpp>
+#include <pdal/StageFactory.hpp>
 
 #include <cpl_string.h>
 

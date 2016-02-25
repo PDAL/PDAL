@@ -101,7 +101,7 @@ void GeotiffSupport::resetTags()
 }
 
 
-void GeotiffSupport::setShortKeys(int tag, void *data, int size)
+bool GeotiffSupport::setShortKeys(int tag, void *data, int size)
 {
     // Make sure struct is 16 bytes.
 #pragma pack(push)
@@ -116,19 +116,25 @@ void GeotiffSupport::setShortKeys(int tag, void *data, int size)
 #pragma pack(pop)
 
     ShortKeyHeader *header = (ShortKeyHeader *)data;
+    int declaredSize = (header->numKeys + 1) * 4;
+    if (size < declaredSize)
+        return false;
     ST_SetKey(m_tiff, tag, (1 + header->numKeys) * 4, STT_SHORT, data);
+    return true;
 }
 
 
-void GeotiffSupport::setDoubleKeys(int tag, void *data, int size)
+bool GeotiffSupport::setDoubleKeys(int tag, void *data, int size)
 {
     ST_SetKey(m_tiff, tag, size / sizeof(double), STT_DOUBLE, data);
+    return true;
 }
 
 
-void GeotiffSupport::setAsciiKeys(int tag, void *data, int size)
+bool GeotiffSupport::setAsciiKeys(int tag, void *data, int size)
 {
     ST_SetKey(m_tiff, tag, size, STT_ASCII, data);
+    return true;
 }
 
 

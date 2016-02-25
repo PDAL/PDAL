@@ -35,7 +35,6 @@
 #include "MergeKernel.hpp"
 
 #include <merge/MergeFilter.hpp>
-#include <pdal/KernelSupport.hpp>
 #include <pdal/StageFactory.hpp>
 
 namespace pdal

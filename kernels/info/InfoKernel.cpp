@@ -40,6 +40,7 @@
 #include <pdal/PipelineWriter.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/pdal_config.hpp>
+#include <pdal/StageFactory.hpp>
 #ifdef PDAL_HAVE_LIBXML2
 #include <pdal/XMLSchema.hpp>
 #endif
@@ -157,7 +158,7 @@ uint32_t parseInt(const string& s)
     uint32_t i;
 
     if (!Utils::fromString(s, i))
-        throw app_runtime_error(string("Invalid integer: ") + s);
+        throw pdal_error(string("Invalid integer: ") + s);
     return i;
 }
 
@@ -167,7 +168,7 @@ void addRange(const string& begin, const string& end, vector<PointId>& points)
     PointId low = parseInt(begin);
     PointId high = parseInt(end);
     if (low > high)
-        throw app_runtime_error(string("Range invalid: ") + begin + "-" + end);
+        throw pdal_error(string("Range invalid: ") + begin + "-" + end);
     while (low <= high)
         points.push_back(low++);
 }
@@ -189,7 +190,7 @@ vector<PointId> getListOfPoints(std::string p)
         else if (limits.size() == 2)
             addRange(limits[0], limits[1], output);
         else
-            throw app_runtime_error(string("Invalid point range: ") + s);
+            throw pdal_error(string("Invalid point range: ") + s);
     }
     return output;
 }
@@ -254,28 +255,55 @@ MetadataNode InfoKernel::dumpSummary(const QuickInfo& qi)
 }
 
 
+PipelineManagerPtr InfoKernel::makePipeline(const std::string& filename,
+    bool noPoints)
+{
+    if (!pdal::FileUtils::fileExists(filename))
+        throw pdal_error("File not found: " + filename);
+
+    PipelineManagerPtr output(new PipelineManager);
+
+    if (filename == "STDIN")
+    {
+        output->readPipeline(std::cin);
+    }
+    else if (FileUtils::extension(filename) == ".xml")
+    {
+        output->readPipeline(filename);
+    }
+    else
+    {
+        StageFactory factory;
+        std::string driver = factory.inferReaderDriver(filename);
+
+        if (driver.empty())
+            throw pdal_error("Cannot determine input file type of " + filename);
+        Stage& reader = output->addReader(driver);
+        Options ro;
+        ro.add("filename", filename);
+        if (noPoints)
+            ro.add("count", 0);
+        reader.setOptions(ro);
+        m_reader = &reader;
+    }
+    return output;
+}
+
 void InfoKernel::setup(const std::string& filename)
 {
-    Options readerOptions;
-
-    readerOptions.add("filename", filename);
-    if (!m_needPoints)
-        readerOptions.add("count", 0);
-
-    m_manager = KernelSupport::makePipeline(filename);
-    m_reader = m_manager->getStage();
-    Stage *stage = m_reader;
-
-    if (m_dimensions.size())
-        m_options.add("dimensions", m_dimensions, "List of dimensions");
-
-    Options options = m_options + readerOptions;
-    m_reader->setOptions(options);
+    m_manager = makePipeline(filename, !m_needPoints);
+    Stage *stage = m_manager->getStage();
 
     if (m_showStats)
     {
         m_statsStage = &(m_manager->addFilter("filters.stats"));
-        m_statsStage->setOptions(options);
+        if (m_dimensions.size())
+        {
+            Options ops;
+            ops.add("dimensions", m_dimensions);
+            m_statsStage->addOptions(ops);
+        }
+
         m_statsStage->setInput(*stage);
         stage = m_statsStage;
     }
@@ -284,13 +312,11 @@ void InfoKernel::setup(const std::string& filename)
         m_hexbinStage = &(m_manager->addFilter("filters.hexbin"));
         if (!m_hexbinStage) {
             throw pdal_error("Unable to compute boundary -- "
-                    "http://github.com/hobu/hexer is not linked. "
-                    "See the \"boundary\" member in \"stats\" for a coarse bounding box");
+                "http://github.com/hobu/hexer is not linked. "
+                "See the \"boundary\" member in \"stats\" for a coarse "
+                "bounding box");
         }
-        m_hexbinStage->setOptions(options);
         m_hexbinStage->setInput(*stage);
-        stage = m_hexbinStage;
-        Options readerOptions;
     }
 }
 
@@ -407,7 +433,7 @@ MetadataNode InfoKernel::dumpQuery(PointViewPtr inView) const
     }
 
     if (values.size() != 2 && values.size() != 3)
-        throw app_runtime_error("--points must be two or three values");
+        throw pdal_error("--points must be two or three values");
 
     PointViewPtr outView = inView->makeNew();
 
