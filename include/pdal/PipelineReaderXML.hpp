@@ -34,6 +34,8 @@
 
 #pragma once
 
+#include <boost/property_tree/ptree.hpp>
+
 #include <pdal/pdal_internal.hpp>
 #include <pdal/StageFactory.hpp>
 

@@ -369,6 +369,12 @@ bool PipelineReaderJSON::readPipeline(const std::string& filename)
     m_inputJSONFile = filename;
 
     std::istream* input = FileUtils::openFile(filename);
+    if (!input)
+    {
+        std::ostringstream oss;
+        oss << "Unable to open stream for file '" << filename << "'";
+        throw pdal_error(oss.str());
+    }
 
     bool isWriter = false;
 
