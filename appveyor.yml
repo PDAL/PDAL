@@ -16,7 +16,7 @@ environment:
     - PDAL_OPTIONAL_COMPONENTS: OFF
     - PDAL_OPTIONAL_COMPONENTS: ON
 
-# Should speed up repository cloning  
+# Should speed up repository cloning
 shallow_clone: true
 clone_depth: 5
 
@@ -81,9 +81,5 @@ notifications:
     on_build_status_changed: false
 
   - provider: Slack
-    auth_token:
-      secure: Ycvea4CbhP10k3tQwTr9vU2QMdYa4JusDfbCoOwkns2O87afn/G5eBsUakdM/eyW
-    channel: '#pdal'
-    on_build_failure: true
-    on_build_success: false
-    on_build_status_changed: true
+    incoming-webhook:
+      secure: KxbDvaPmsvNmYpsp0TH3m3hJr7PqQL1sxR8xILBzaF2Lbku03M3mJ/h787TvDGQGX3IlyZtfTP0wvSRqMl4nMmdvDQZoAe8+Gyfc7BOkYIg=
