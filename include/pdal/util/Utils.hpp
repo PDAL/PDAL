@@ -58,75 +58,69 @@ namespace pdal
 
 namespace Utils
 {
+    /**
+      Set a seed for random number generation.
+
+      \param seed  Seed value.
+    */
     PDAL_DLL void random_seed(unsigned int seed);
+
+    /**
+      Generate a random value in the range [minimum, maximum].
+
+      \param minimum  Lower value of range for random number generation.
+      \param maximum  Upper value of range for random number generation.
+    */
     PDAL_DLL double random(double minimum, double maximum);
-    PDAL_DLL double uniform(const double& minimum=0.0f,
-        const double& maximum=1.0f, uint32_t seed=0);
-    PDAL_DLL double normal(const double& mean=0.0f, const double& sigma=1.0f,
-        uint32_t seed=0);
 
-    // compares two values to within a given tolerance
-    // the value |tolerance| is compared to |actual - expected|
-    template<class T>
-    bool compare_approx(const T& actual, const T& expected, const T& tolerance)
+    /**
+      Generate values in a uniform distribution in the range [minimum, maximum]
+      using the provided seed value.
+
+      \param double  Lower value of range for random number generation.
+      \param double  Upper value of range for random number generation.
+      \param seed    Seed value for random number generation.
+    */
+    PDAL_DLL double uniform(const double& minimum, const double& maximum,
+        uint32_t seed);
+    /**
+      Generate values in a normal distribution in the range [minimum, maximum]
+      using the provided seed value.
+
+      \param double  Lower value of range for random number generation.
+      \param double  Upper value of range for random number generation.
+      \param seed    Seed value for random number generation.
+    */
+    PDAL_DLL double normal(const double& mean, const double& sigma,
+        uint32_t seed);
+
+    /**
+      Determine if two values are within a particular range of each other.
+
+      \param v1  First value to compare.
+      \param v2  Second value to compare.
+      \param tolerance  Maximum difference between \ref v1 and \ref v2
+    */
+    PDAL_DLL inline bool compare_approx(double v1, double v2, double tolerance)
     {
-        double diff = std::abs((double)actual - (double)expected);
-        return diff <= std::abs((double) tolerance);
+        double diff = std::abs(v1 - v2);
+        return diff <= std::abs(tolerance);
     }
 
-    // compares two values to within the datatype's epsilon
-    template<class T>
-    bool compare_distance(const T& actual, const T& expected)
-    {
-        const T epsilon = std::numeric_limits<T>::epsilon();
-        return compare_approx<T>(actual, expected, epsilon);
-    }
+    /**
+      Round double value to nearest integral value.
 
-    // From http://stackoverflow.com/questions/485525/round-for-float-in-c
+      \param r  Value to round
+      \return  Rounded value
+    */
     inline double sround(double r)
         { return (r > 0.0) ? floor(r + 0.5) : ceil(r - 0.5); }
 
-    inline std::vector<uint8_t>
-    hex_string_to_binary(std::string const& source)
-    {
-        // Stolen from http://stackoverflow.com/questions/7363774/  ...
-        //    c-converting-binary-data-to-a-hex-string-and-back
-        static int nibbles[] =
-            { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, 0,
-              10, 11, 12, 13, 14, 15 };
-        std::vector<unsigned char> retval;
-        for (auto it = source.begin(); it < source.end(); it += 2) {
-            unsigned char v = 0;
-            if (::isxdigit(*it))
-                v = (unsigned char)nibbles[::toupper(*it) - '0'] << 4;
-            if (it + 1 < source.end() && ::isxdigit(*(it + 1)))
-                v += (unsigned char)nibbles[::toupper(*(it + 1)) - '0'];
-            retval.push_back(v);
-        }
-        return retval;
-    }
+    /**
+      Convert a string to lowercase.
 
-    inline void binary_to_hex_stream(unsigned char* source,
-        std::ostream& destination, int start, int end )
-    {
-        static char syms[] = "0123456789ABCDEF";
-        for (int i = start; i != end; i++)
-            destination << syms[((source[i] >> 4) & 0xf)] <<
-                           syms[source[i] & 0xf];
-    }
-
-    inline std::string binary_to_hex_string(
-        const std::vector<unsigned char>& source)
-    {
-        static char syms[] = "0123456789ABCDEF";
-        std::stringstream ss;
-        for (std::vector<unsigned char>::const_iterator it = source.begin();
-                it != source.end(); it++)
-            ss << syms[((*it >> 4) & 0xf)] << syms[*it & 0xf];
-
-        return ss.str();
-    }
-
+      \return  Converted string.
+    **/
     inline std::string tolower(const std::string& s)
     {
         std::string out;
@@ -135,6 +129,11 @@ namespace Utils
         return out;
     }
 
+    /**
+      Convert a string to uppercase.
+
+      \return  Converted string.
+    */
     inline std::string toupper(const std::string& s)
     {
         std::string out;
@@ -143,6 +142,13 @@ namespace Utils
         return out;
     }
 
+    /**
+      Compare strings in a case-insensitive manner.
+
+      \param s  First string to compare.
+      \param s2  Second string to compare.
+      \return  Whether the strings are equal.
+    */
     inline bool iequals(const std::string& s, const std::string& s2)
     {
         if (s.length() != s2.length())
@@ -153,6 +159,13 @@ namespace Utils
         return true;
     }
 
+    /**
+      Determine if a string starts with a particular prefix.
+
+      \param s  String to check for prefix.
+      \param prefix  Prefix to search for.
+      \return  Whether the string begins with the prefix.
+    */
     inline bool startsWith(const std::string& s, const std::string& prefix)
     {
         if (prefix.size() > s.size())
@@ -160,6 +173,14 @@ namespace Utils
         return (strncmp(prefix.data(), s.data(), prefix.size()) == 0);
     }
 
+    /**
+      Generate a checksum that is the integer sum of the values of the bytes
+      in a buffer.
+
+      \param buf  Pointer to buffer.
+      \param size  Size of buffer.
+      \return  Generated checksum.
+    */
     inline int cksum(char *buf, size_t size)
     {
         int i = 0;
@@ -168,43 +189,208 @@ namespace Utils
         return i;
     }
 
-    PDAL_DLL char *getenv(const char *env);
+    /**
+      Fetch the value of an environment variable.
+
+      \param name  Name of environment varaible.
+      \return  Value of environment variable.
+    */
+    PDAL_DLL char *getenv(const char *name);
+
+    /**
+      Fetch the value of an environment variable.
+
+      \param name  Name of environment varaible.
+      \return  Value of environment variable.
+    */
     PDAL_DLL std::string getenv(std::string const& name);
+
+    /**
+      Set the value of an environment variable.
+
+      \param env  Name/value of environment varaible in the format NAME=VALUE.
+      \return  0 on success, -1 on failure
+    */
     PDAL_DLL int putenv(const char *env);
 
-    // aid to operator>> parsers
+    /**
+      Skip stream input until a non-space character is found.
+
+      \param s  Stream to process.
+    */
     PDAL_DLL void eatwhitespace(std::istream& s);
+
+    /**
+      Remove whitspace from the beginning of a string.
+
+      \param s  String to be trimmed.
+    */
     PDAL_DLL void trimLeading(std::string& s);
+
+    /**
+      Remove whitspace from the end of a string.
+
+      \param s  String to be trimmed.
+    */
     PDAL_DLL void trimTrailing(std::string& s);
+
+    /**
+      Remove whitespace from the beginning and end of a string.
+
+      \param s  String to be trimmed.
+    */
     inline void trim(std::string& s)
     {
         trimLeading(s);
         trimTrailing(s);
     }
-    // if char found, eats it and returns true; otherwise, don't eat it and
-    // then return false
+
+    /**
+      If specified character is at the current stream position, advance the
+      stream position by 1.
+
+      \param s  Stream to insect.
+      \param x  Character to check for.
+      \return \c true if the character is at the current stream position,
+        \c false otherwise.
+    */
     PDAL_DLL bool eatcharacter(std::istream& s, char x);
-    PDAL_DLL uint32_t getStreamPrecision(double scale);
+
+    /**
+      Convert a buffer to a string using base64 encoding.
+
+      \param buf  Pointer to buffer to encode.
+      \param size  Size of buffer.
+      \return  Encoded buffer.
+    */
     PDAL_DLL std::string base64_encode(const unsigned char *buf, size_t size);
+
+    /**
+      Convert a buffer to a string using base64 encoding.
+
+      \param bytes  Pointer to buffer to encode.
+      \return  Encoded buffer.
+    */
     inline std::string base64_encode(std::vector<uint8_t> const& bytes)
         { return base64_encode(bytes.data(), bytes.size()); }
+
+    /**
+      Decode a base64-encoded string into a buffer.
+
+      \param input  String to decode.
+      \return  Buffer containing decoded string.
+    */
     PDAL_DLL std::vector<uint8_t>
     base64_decode(std::string const& input);
 
+    /**
+      Start a process to run a command and open a pipe to which input can
+      be written and from which output can be read.
+
+      \param command  Command to run in subprocess.
+      \mode  Either 'r', 'w' or 'r+' to specify if the pipe should be opened
+        as read-only, write-only or read-write.
+      \return  Pointer to FILE for input/output from the subprocess.
+    */
     PDAL_DLL FILE* portable_popen(const std::string& command,
         const std::string& mode);
+    /**
+      Close file opened with \ref portable_popen.
+
+      \param fp  Pointer to file to close.
+      \return  0 on success, -1 on failure.
+    */
     PDAL_DLL int portable_pclose(FILE* fp);
+
+    /**
+      Create a subprocess and set the standard output of the command into the
+      provided output string.
+
+      \param cmd  Command to run.
+      \param output  String to which output from the command should be written,
+    */
     PDAL_DLL int run_shell_command(const std::string& cmd, std::string& output);
-    PDAL_DLL std::string replaceAll(std::string result,
-        const std::string& replaceWhat, const std::string& replaceWithWhat);
+
+    /**
+      Replace all instances of one string found in the input with another value.
+
+      \param input  Input string to modify.
+      \param replaceWhat  Token to locate in input string.
+      \param replaceWithWhat  Replacement for found tokens.
+      \return  Modified version of input string.
+    */
+    PDAL_DLL std::string replaceAll(std::string input,
+        const std::string& replaceWhat , const std::string& replaceWithWhat);
+
+    /**
+      Break a string into a list of strings to not exceed a specified length.
+      The first string can optionally have a maximum length other than that
+      of the rest of the strings.
+
+      \param inputString  String to split into substrings.
+      \param lineLength  Maximum length of substrings.
+      \param firstLength  When non-zero, the maximum length of the first
+        substring.  When zero, the first firstLength is assigned the value
+        provided in lineLength.
+      \return  List of substrings generated from the input string.
+    */
     PDAL_DLL std::vector<std::string> wordWrap(std::string const& inputString,
         size_t lineLength, size_t firstLength = 0);
+
+    /**
+      Add escape characters or otherwise transform an input string so as to
+      be a valid JSON string.
+
+      \param s  Input string.
+      \return  Valid JSON version of input string.
+    */
     PDAL_DLL std::string escapeJSON(const std::string &s);
+
+    /**
+      Demangle a C++ symbol into readable form.
+
+      \param s  String to demangle.
+      \return  Demangled symbol.
+    */
     PDAL_DLL std::string demangle(const std::string& s);
+
+    /**
+      Return the screen width of an associated tty.
+
+      \return  The tty screen width or 80 if on Windows or it can't be
+        determined.
+    */
     PDAL_DLL int screenWidth();
+
+    /**
+      Escape non-printing characters by using standard notation (i.e. \n)
+      or hex notation (\x10) as as necessary.
+
+      \param s  String to modify.
+      \return  Copy of input string with non-printing characters converted
+        to printable notation.
+    */
     PDAL_DLL std::string escapeNonprinting(const std::string& s);
+
+    /**
+      Convert an input buffer to a hexadecimal string representation similar
+      to the output of the UNIX command 'od'.  This is mostly used as an
+      occasional debugging aid.
+
+      \param buf  Point to buffer to dump.
+      \param count  Size of buffer.
+      \return  Buffer converted to hex string.
+    */
     PDAL_DLL std::string hexDump(const char *buf, size_t count);
 
+    /**
+      Count the number of characters in a string that meet a predicate.
+
+      \param s  String in which to start counting characters.
+      \param p  Position in input string at which to start counting.
+      \param pred  Unary predicte that tests a character.
+      \return  Then number of characters matching the predicate.
+    */
     template<typename PREDICATE>
     PDAL_DLL std::string::size_type
     extract(const std::string& s, std::string::size_type p, PREDICATE pred)
@@ -215,12 +401,15 @@ namespace Utils
         return count;
     }
 
-    /// Split a string into substrings.  Characters matching the predicate are
-    ///   discarded.
-    /// \param[in] s  String to split.
-    /// \param[in] p  Predicate returns true if a char in a string is a split
-    ///   location.
-    /// \return  Vector of substrings.
+    /**
+      Split a string into substrings based on a predicate.  Characters
+      matching the predicate are discarded.
+
+      \param s  String to split.
+      \param p  Unary predicate that returns true to indicate that a character
+        is a split location.
+      \return  Substrings.
+    */
     template<typename PREDICATE>
     PDAL_DLL std::vector<std::string> split(const std::string& s, PREDICATE p)
     {
@@ -236,6 +425,8 @@ namespace Utils
         {
             nextIt = std::find_if(it, end, p);
             result.push_back(std::string(it, nextIt));
+
+            // Avoid advancing the iterator past the end to avoid UB.
             if (nextIt != end)
                 it = nextIt + 1;
         } while (nextIt != end);
@@ -243,12 +434,15 @@ namespace Utils
         return result;
     }
 
-    /// Split a string into substrings.  Characters matching the predicate are
-    ///   discarded, as are empty strings otherwise produced by split().
-    /// \param[in] s  String to split.
-    /// \param[in] p  Predicate returns true if a char in a string is a split
-    ///   location.
-    /// \return  Vector of substrings.
+    /**
+      Split a string into substrings.  Characters matching the predicate are
+      discarded, as are empty strings otherwise produced by \ref split().
+
+      \param s  String to split.
+      \param p  Predicate returns true if a char in a string is a split
+        location.
+      \return  Vector of substrings.
+    */
     template<typename PREDICATE>
     PDAL_DLL std::vector<std::string> split2(const std::string& s, PREDICATE p)
     {
@@ -265,6 +459,8 @@ namespace Utils
             nextIt = std::find_if(it, end, p);
             if (it != nextIt)
                 result.push_back(std::string(it, nextIt));
+
+            // Avoid advancing the iterator past the end to avoid UB.
             if (nextIt != end)
                 it = nextIt + 1;
         } while (nextIt != end);
@@ -272,6 +468,14 @@ namespace Utils
         return result;
     }
 
+    /**
+      Split a string into substrings based a splitting character.  The
+      splitting characters are discarded.
+
+      \param s  String to split.
+      \param p  Character indicating split positions.
+      \return  Substrings.
+    */
     inline PDAL_DLL std::vector<std::string>
     split(const std::string& s, char tChar)
     {
@@ -279,7 +483,15 @@ namespace Utils
         return split(s, pred);
     }
 
+    /**
+      Split a string into substrings based a splitting character.  The
+      splitting characters are discarded as are empty strings otherwise
+      produced by \ref split().
 
+      \param s  String to split.
+      \param p  Character indicating split positions.
+      \return  Substrings.
+    */
     inline PDAL_DLL std::vector<std::string>
     split2(const std::string& s, char tChar)
     {
@@ -287,6 +499,12 @@ namespace Utils
         return split2(s, pred);
     }
 
+    /**
+      Return a string representation of a type specified by the template
+      argument.
+
+      \return  String representation of the type.
+    */
     template<typename T>
     std::string typeidName()
         { return Utils::demangle(typeid(T).name()); }
@@ -301,10 +519,13 @@ namespace Utils
         std::streambuf *m_buf;
     };
 
-    /// Redirect a stream to some other stream.
-    /// \param[in] out   Stream to redirect.
-    /// \param[in] dst   Destination stream.
-    /// \return  Context for stream restoration (see restore()).
+    /**
+      Redirect a stream to some other stream.
+
+      \param out   Stream to redirect.
+      \param dst   Destination stream.
+      \return  Context for stream restoration (see \ref restore()).
+    */
     inline RedirectStream redirect(std::ostream& out, std::ostream& dst)
     {
         RedirectStream redir;
@@ -315,11 +536,13 @@ namespace Utils
         return redir;
     }
 
+    /**
+      Redirect a stream to some file, by default /dev/null.
 
-    /// Redirect a stream to some file, by default /dev/null.
-    /// \param[in] out   Stream to redirect.
-    /// \param[in] file  Name of file where stream should be redirected.
-    /// \return  Context for stream restoration (see restore()).
+      \param out   Stream to redirect.
+      \param file  Name of file where stream should be redirected.
+      \return  Context for stream restoration (see \ref restore()).
+    */
     inline RedirectStream redirect(std::ostream& out,
         const std::string& file = "/dev/null")
     {
@@ -331,10 +554,13 @@ namespace Utils
         return redir;
     }
 
-    /// Restore a stream redirected with redirect().
-    /// \param[in] out  Stream to be restored.
-    /// \param[in] redir RedirectStream returned from corresponding
-    /// redirect() call.
+    /**
+      Restore a stream redirected with redirect().
+
+      \param out  Stream to be restored.
+      \param redir RedirectStream returned from corresponding
+        \ref redirect() call.
+    */
     inline void restore(std::ostream& out, RedirectStream redir)
     {
         out.rdbuf(redir.m_buf);
@@ -349,10 +575,14 @@ namespace Utils
     //  has the advantage of not requiring an exception to indicate an error.
     //  We should investigate incorporating a version of boost::numeric_cast
     //  that avoids the exception for an error.
-    // Determine whether a value of a given input type may be safely
-    // statically casted to the given output type without over/underflow.  If
-    // the output type is integral, inRange() will determine whether the
-    // rounded input value, rather than truncated, may be safely converted.
+    /**
+      Determine whether a double value may be safely converted to the given
+      output type without over/underflow.  If the output type is integral the
+      input will be rounded before being tested.
+
+      \param in  Value to range test.
+      \return  Whether value can be safely converted to template type.
+    */
     template<typename T_OUT>
     bool inRange(double in)
     {
@@ -366,6 +596,15 @@ namespace Utils
             in <= static_cast<double>(std::numeric_limits<T_OUT>::max()));
     }
 
+    /**
+      Determine whether a value may be safely converted to the given
+      output type without over/underflow.  If the output type is integral and
+      different from the input time, the value will be rounded before being
+      tested.
+
+      \param in  Value to range test.
+      \return  Whether value can be safely converted to template type.
+    */
     template<typename T_IN, typename T_OUT>
     bool inRange(T_IN in)
     {
@@ -373,6 +612,16 @@ namespace Utils
             inRange<T_OUT>(static_cast<double>(in));
     }
 
+    /**
+      Convert a numeric value from one type to another.  Floating point
+      values are rounded to the nearest integer before a conversion is
+      attempted.
+
+      \param in  Value to convert.
+      \param out  Converted value.
+      \return  \c true if the conversion was successful, \c false if the
+        datatypes/input value don't allow conversion.
+    */
     template<typename T_IN, typename T_OUT>
     bool numericCast(T_IN in, T_OUT& out)
     {
@@ -393,6 +642,12 @@ namespace Utils
         return false;
     }
 
+    /**
+      Convert a value to its string representation by writing to a stringstream.
+
+      \param from  Value to convert.
+      \return  String representation.
+    */
     template<typename T>
     std::string toString(const T& from)
     {
@@ -401,6 +656,12 @@ namespace Utils
         return oss.str();
     }
 
+    /**
+      Convert a double to string with a precision of 10 decimal places.
+
+      \param from  Value to convert.
+      \return  String representation of numeric value.
+    */
     inline std::string toString(double from)
     {
         std::ostringstream oss;
@@ -408,6 +669,12 @@ namespace Utils
         return oss.str();
     }
 
+    /**
+      Convert a float to string with a precision of 10 decimal places.
+
+      \param from  Value to convert.
+      \return  String representation of numeric value.
+    */
     inline std::string toString(float from)
     {
         std::ostringstream oss;
@@ -415,36 +682,103 @@ namespace Utils
         return oss.str();
     }
 
+    /**
+      Convert a long long int to string.
+
+      \param from  Value to convert.
+      \return  String representation of numeric value.
+    */
     inline std::string toString(long long from)
         { return std::to_string(from); }
 
+    /**
+      Convert an unsigned long long int to string.
+
+      \param from  Value to convert.
+      \return  String representation of numeric value.
+    */
     inline std::string toString(unsigned long from)
         { return std::to_string(from); }
 
+    /**
+      Convert a long int to string.
+
+      \param from  Value to convert.
+      \return  String representation of numeric value.
+    */
     inline std::string toString(long from)
         { return std::to_string(from); }
 
+    /**
+      Convert an unsigned int to string.
+
+      \param from  Value to convert.
+      \return  String representation of numeric value.
+    */
     inline std::string toString(unsigned int from)
         { return std::to_string(from); }
 
+    /**
+      Convert an int to string.
+
+      \param from  Value to convert.
+      \return  String representation of numeric value.
+    */
     inline std::string toString(int from)
         { return std::to_string(from); }
 
+    /**
+      Convert an unsigned short to string.
+
+      \param from  Value to convert.
+      \return  String representation of numeric value.
+    */
     inline std::string toString(unsigned short from)
         { return std::to_string((int)from); }
 
+    /**
+      Convert a short int to string.
+
+      \param from  Value to convert.
+      \return  String representation of numeric value.
+    */
     inline std::string toString(short from)
         { return std::to_string((int)from); }
 
+    /**
+      Convert a char (treated as numeric) to string.
+
+      \param from  Value to convert.
+      \return  String representation of numeric value.
+    */
     inline std::string toString(char from)
         { return std::to_string((int)from); }
 
+    /**
+      Convert an unsigned char (treated as numeric) to string.
+
+      \param from  Value to convert.
+      \return  String representation of numeric value.
+    */
     inline std::string toString(unsigned char from)
         { return std::to_string((int)from); }
 
+    /**
+      Convert a signed char (treated as numeric) to string.
+
+      \param from  Value to convert.
+      \return  String representation of numeric value.
+    */
     inline std::string toString(signed char from)
         { return std::to_string((int)from); }
 
+    /**
+      Convert a string to a value by reading from a string stream.
+
+      \param from  String to convert.
+      \param to  Converted value.
+      \return  \c true if the conversion was successful, \c false otherwise.
+    */
     template<typename T>
     bool fromString(const std::string& from, T& to)
     {
@@ -454,6 +788,7 @@ namespace Utils
         return !iss.fail();
     }
 
+    // Optimization of above.
     template<>
     inline bool fromString(const std::string& from, std::string& to)
     {
@@ -461,6 +796,13 @@ namespace Utils
         return true;
     }
 
+    /**
+      Convert a numeric string to a char numeric value.
+
+      \parm s  String to convert.
+      \param to  Converted numeric value.
+      \return  \c true if the conversion was successful, \c false otherwise.
+    */
     template<>
     inline bool fromString<char>(const std::string& s, char& to)
     {
@@ -474,6 +816,13 @@ namespace Utils
         return false;
     }
 
+    /**
+      Convert a numeric string to an unsigned char numeric value.
+
+      \parm s  String to convert.
+      \param to  Converted numeric value.
+      \return  \c true if the conversion was successful, \c false otherwise.
+    */
     template<>
     inline bool fromString<unsigned char>(const std::string& s,
         unsigned char& to)
@@ -488,6 +837,13 @@ namespace Utils
         return false;
     }
 
+    /**
+      Convert a numeric string to a signed char numeric value.
+
+      \parm s  String to convert.
+      \param to  Converted numeric value.
+      \return  \c true if the conversion was successful, \c false otherwise.
+    */
     template<>
     inline bool fromString<signed char>(const std::string& s, signed char& to)
     {

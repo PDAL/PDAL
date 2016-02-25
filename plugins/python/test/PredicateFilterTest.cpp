@@ -110,12 +110,12 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test1)
     const stats::Summary& statsY = stats->getStats(Dimension::Id::Y);
     const stats::Summary& statsZ = stats->getStats(Dimension::Id::Z);
 
-    EXPECT_TRUE(Utils::compare_approx<double>(statsX.minimum(), 0.0, 0.01));
-    EXPECT_TRUE(Utils::compare_approx<double>(statsY.minimum(), 0.0, 0.01));
-    EXPECT_TRUE(Utils::compare_approx<double>(statsZ.minimum(), 0.0, 0.01));
-    EXPECT_TRUE(Utils::compare_approx<double>(statsX.maximum(), 1.0, 0.01));
-    EXPECT_TRUE(Utils::compare_approx<double>(statsY.maximum(), 1.0, 0.01));
-    EXPECT_TRUE(Utils::compare_approx<double>(statsZ.maximum(), 1.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsX.minimum(), 0.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsY.minimum(), 0.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsZ.minimum(), 0.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsX.maximum(), 1.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsY.maximum(), 1.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsZ.maximum(), 1.0, 0.01));
 }
 
 TEST_F(PredicateFilterTest, PredicateFilterTest_test2)
@@ -168,12 +168,12 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test2)
     const stats::Summary& statsY = stats->getStats(Dimension::Id::Y);
     const stats::Summary& statsZ = stats->getStats(Dimension::Id::Z);
 
-    EXPECT_TRUE(Utils::compare_approx<double>(statsX.minimum(), 1.0, 0.01));
-    EXPECT_TRUE(Utils::compare_approx<double>(statsY.minimum(), 1.0, 0.01));
-    EXPECT_TRUE(Utils::compare_approx<double>(statsZ.minimum(), 1.0, 0.01));
-    EXPECT_TRUE(Utils::compare_approx<double>(statsX.maximum(), 2.0, 0.01));
-    EXPECT_TRUE(Utils::compare_approx<double>(statsY.maximum(), 2.0, 0.01));
-    EXPECT_TRUE(Utils::compare_approx<double>(statsZ.maximum(), 2.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsX.minimum(), 1.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsY.minimum(), 1.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsZ.minimum(), 1.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsX.maximum(), 2.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsY.maximum(), 2.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsZ.maximum(), 2.0, 0.01));
 }
 
 TEST_F(PredicateFilterTest, PredicateFilterTest_test3)
@@ -249,12 +249,12 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test3)
     const stats::Summary& statsY = stats->getStats(Dimension::Id::Y);
     const stats::Summary& statsZ = stats->getStats(Dimension::Id::Z);
 
-    EXPECT_TRUE(Utils::compare_approx<double>(statsX.minimum(), 0.5, 0.01));
-    EXPECT_TRUE(Utils::compare_approx<double>(statsY.minimum(), 0.5, 0.01));
-    EXPECT_TRUE(Utils::compare_approx<double>(statsZ.minimum(), 0.5, 0.01));
-    EXPECT_TRUE(Utils::compare_approx<double>(statsX.maximum(), 1.0, 0.01));
-    EXPECT_TRUE(Utils::compare_approx<double>(statsY.maximum(), 1.0, 0.01));
-    EXPECT_TRUE(Utils::compare_approx<double>(statsZ.maximum(), 1.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsX.minimum(), 0.5, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsY.minimum(), 0.5, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsZ.minimum(), 0.5, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsX.maximum(), 1.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsY.maximum(), 1.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsZ.maximum(), 1.0, 0.01));
 }
 
 TEST_F(PredicateFilterTest, PredicateFilterTest_test4)
