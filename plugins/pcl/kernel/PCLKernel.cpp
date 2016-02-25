@@ -100,9 +100,9 @@ int PCLKernel::execute()
     pclOptions.add<bool>("debug", isDebug());
     pclOptions.add<uint32_t>("verbose", getVerboseLevel());
 
-    std::shared_ptr<Stage> pclStage(new PCLBlock());
-    pclStage->setInput(*bufferReader);
-    pclStage->setOptions(pclOptions);
+    auto& pclStage = createStage("filters.pclblock");
+    pclStage.setInput(*bufferReader);
+    pclStage.setOptions(pclOptions);
 
     // the PCLBlock stage consumes the BufferReader rather than the
     // readerStage
@@ -116,7 +116,7 @@ int PCLKernel::execute()
     if (m_bForwardMetadata)
         writerOptions.add("forward_metadata", true);
 
-    Stage& writer(Kernel::makeWriter(m_outputFile, *pclStage));
+    Stage& writer(Kernel::makeWriter(m_outputFile, pclStage));
 
     // Some options are inferred by makeWriter based on filename
     // (compression, driver type, etc).

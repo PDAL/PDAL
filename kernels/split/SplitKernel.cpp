@@ -109,26 +109,22 @@ int SplitKernel::execute()
     Stage& reader = makeReader(m_inputFile);
     reader.setOptions(readerOpts);
 
-    std::unique_ptr<Stage> f;
-    StageFactory factory;
     Options filterOpts;
+    Stage& f = (m_length ? createStage("filters.splitter") : createStage("filters.chipper"));
     if (m_length)
     {
-        f.reset(factory.createStage("filters.splitter"));
         filterOpts.add("length", m_length);
         filterOpts.add("origin_x", m_xOrigin);
         filterOpts.add("origin_y", m_yOrigin);
     }
     else
     {
-        f.reset(factory.createStage("filters.chipper"));
         filterOpts.add("capacity", m_capacity);
     }
-    f->setInput(reader);
-    f->setOptions(filterOpts);
-
-    f->prepare(table);
-    PointViewSet pvSet = f->execute(table);
+    f.setInput(reader);
+    f.setOptions(filterOpts);
+    f.prepare(table);
+    PointViewSet pvSet = f.execute(table);
 
     int filenum = 1;
     for (auto& pvp : pvSet)

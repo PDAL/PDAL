@@ -48,8 +48,8 @@ using namespace pdal;
 TEST(FerryFilterTest, create)
 {
     StageFactory f;
-    std::unique_ptr<Stage> filter(f.createStage("filters.ferry"));
-    EXPECT_TRUE(filter.get());
+    Stage* filter(f.createStage("filters.ferry"));
+    EXPECT_TRUE(filter);
 }
 
 TEST(FerryFilterTest, test_ferry_copy)
@@ -131,7 +131,7 @@ TEST(FerryFilterTest, test_ferry_invalid)
     reader.setOptions(ops1);
 
     Options op1;
-    
+
     op1.add("dimensions", "X=X");
 
     FerryFilter f1;

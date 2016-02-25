@@ -89,7 +89,7 @@ TEST_F(ProgrammableFilterTest, ProgrammableFilterTest_test1)
     opts.add(module);
     opts.add(function);
 
-    std::unique_ptr<Stage> filter(f.createStage("filters.programmable"));
+    Stage* filter(f.createStage("filters.programmable"));
     filter->setOptions(opts);
     filter->setInput(reader);
 
@@ -167,7 +167,7 @@ TEST_F(ProgrammableFilterTest, add_dimension)
     opts.add(intensity);
     opts.add(scanDirection);
 
-    std::unique_ptr<Stage> filter(f.createStage("filters.programmable"));
+    Stage* filter(f.createStage("filters.programmable"));
     filter->setOptions(opts);
     filter->setInput(reader);
 
@@ -217,7 +217,7 @@ TEST_F(ProgrammableFilterTest, metadata)
     opts.add(module);
     opts.add(function);
 
-    std::unique_ptr<Stage> filter(f.createStage("filters.programmable"));
+    Stage* filter(f.createStage("filters.programmable"));
     filter->setOptions(opts);
     filter->setInput(reader);
 

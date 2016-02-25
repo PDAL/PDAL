@@ -47,14 +47,14 @@ TEST(AttributeFilterTest, value)
     ro.add("filename", Support::datapath("autzen/autzen-dd.las"));
 
     StageFactory factory;
-    Stage& r = *(factory.createStage("readers.las", true));
+    Stage& r = *(factory.createStage("readers.las"));
     r.setOptions(ro);
 
     Options fo;
     fo.add("dimension", "X");
     fo.add("value", 27.5);
 
-    Stage& f = *(factory.createStage("filters.attribute", true));
+    Stage& f = *(factory.createStage("filters.attribute"));
     f.setInput(r);
     f.setOptions(fo);
 
@@ -62,19 +62,19 @@ TEST(AttributeFilterTest, value)
 
     Options wo;
     wo.add("filename", tempfile);
-    Stage& w = *(factory.createStage("writers.las", true));
+    Stage& w = *(factory.createStage("writers.las"));
     w.setInput(f);
     w.setOptions(wo);
 
     FileUtils::deleteFile(tempfile);
     PointTable t1;
-    w.prepare(t1); 
+    w.prepare(t1);
     w.execute(t1);
 
     Options testOptions;
     testOptions.add("filename", tempfile);
 
-    Stage& test = *(factory.createStage("readers.las", true)); 
+    Stage& test = *(factory.createStage("readers.las"));
     test.setOptions(testOptions);
 
     PointTable t2;
@@ -91,7 +91,7 @@ TEST(AttributeFilterTest, datasource)
     ro.add("filename", Support::datapath("autzen/autzen-dd.las"));
 
     StageFactory factory;
-    Stage& r = *(factory.createStage("readers.las", true));
+    Stage& r = *(factory.createStage("readers.las"));
     r.setOptions(ro);
 
     Options fo;
@@ -99,7 +99,7 @@ TEST(AttributeFilterTest, datasource)
     fo.add("column", "cls");
     fo.add("datasource", Support::datapath("autzen/attributes.shp"));
 
-    Stage& f = *(factory.createStage("filters.attribute", true));
+    Stage& f = *(factory.createStage("filters.attribute"));
     f.setInput(r);
     f.setOptions(fo);
 
@@ -108,24 +108,24 @@ TEST(AttributeFilterTest, datasource)
     Options wo;
     wo.add("filename", tempfile);
     wo.add("forward", "all");
-    Stage& w = *(factory.createStage("writers.las", true));
+    Stage& w = *(factory.createStage("writers.las"));
     w.setInput(f);
     w.setOptions(wo);
 
     FileUtils::deleteFile(tempfile);
     PointTable t;
-    w.prepare(t); 
+    w.prepare(t);
     w.execute(t);
 
-// 
+//
 //
     Options testOptions;
     testOptions.add("filename", tempfile);
 
-    Stage& test = *(factory.createStage("readers.las", true)); 
+    Stage& test = *(factory.createStage("readers.las"));
     test.setOptions(testOptions);
 
-    Stage& c = *(factory.createStage("filters.crop", true));
+    Stage& c = *(factory.createStage("filters.crop"));
     c.setInput(test);
 
     Options o1;

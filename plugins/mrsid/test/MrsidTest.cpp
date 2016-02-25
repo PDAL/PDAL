@@ -61,8 +61,8 @@ TEST(MrsidReaderTest, test_one)
 
     PointTable table;
 
-    std::shared_ptr<Stage> sid_reader(f.createStage("readers.mrsid"));
-    EXPECT_TRUE(sid_reader.get());
+    Stage* sid_reader(f.createStage("readers.mrsid"));
+    EXPECT_TRUE(sid_reader);
     sid_reader->setOptions(sid_opts);
     sid_reader->prepare(table);
     PointViewSet pbSet = sid_reader->execute(table);

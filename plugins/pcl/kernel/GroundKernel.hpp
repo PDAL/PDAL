@@ -60,8 +60,6 @@ private:
     GroundKernel();
     virtual void addSwitches(ProgramArgs& args);
 
-    std::shared_ptr<Stage> makeReader(Options readerOptions);
-
     std::string m_inputFile;
     std::string m_outputFile;
     double m_maxWindowSize;
