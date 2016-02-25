@@ -51,9 +51,9 @@ TEST(MergeTest, test1)
 
     PointViewSet viewSet = mgr.views();
 
-    EXPECT_EQ(viewSet.size(), 1u);
+    EXPECT_EQ(1u, viewSet.size());
     PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 2130u);
+    EXPECT_EQ(2130u, view->size());
 }
 
 TEST(MergeTest, test2)
@@ -67,9 +67,9 @@ TEST(MergeTest, test2)
 
     PointViewSet viewSet = mgr.views();
 
-    EXPECT_EQ(viewSet.size(), 1u);
+    EXPECT_EQ(1u, viewSet.size());
     PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 2130u);
+    EXPECT_EQ(2130u, view->size());
 }
 
 TEST(MergeTest, test3)
@@ -91,9 +91,9 @@ TEST(MergeTest, test3)
 
     PointViewSet viewSet = mgr.views();
 
-    EXPECT_EQ(viewSet.size(), 1u);
+    EXPECT_EQ(1u, viewSet.size());
     PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 2130u);
+    EXPECT_EQ(2130u, view->size());
 }
 
 TEST(MergeTest, test4)
@@ -107,9 +107,9 @@ TEST(MergeTest, test4)
 
     PointViewSet viewSet = mgr.views();
 
-    EXPECT_EQ(viewSet.size(), 1u);
+    EXPECT_EQ(1u, viewSet.size());
     PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 2130u);
+    EXPECT_EQ(2130u, view->size());
 }
 
 TEST(MergeTest, test5)
@@ -123,9 +123,9 @@ TEST(MergeTest, test5)
 
     PointViewSet viewSet = mgr.views();
 
-    EXPECT_EQ(viewSet.size(), 1u);
+    EXPECT_EQ(1u, viewSet.size());
     PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 2130u);
+    EXPECT_EQ(2130u, view->size());
 }
 
 TEST(MergeTest, test6)
@@ -147,7 +147,7 @@ TEST(MergeTest, test6)
 
     PointViewSet viewSet = mgr.views();
 
-    EXPECT_EQ(viewSet.size(), 1u);
+    EXPECT_EQ(1u, viewSet.size());
     PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 2130u);
+    EXPECT_EQ(2130u, view->size());
 }
