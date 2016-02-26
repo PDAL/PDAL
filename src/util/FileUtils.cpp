@@ -37,11 +37,19 @@
 #include <iostream>
 #include <sstream>
 
-#include <boost/filesystem.hpp>
-
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Utils.hpp>
 #include <pdal/pdal_types.hpp>
+
+#if (defined(_MSC_VER) && _MSC_VER >= 1900) || defined(__cpp_lib_experimental_filesystem)
+#include <experimental/filesystem>
+namespace filesystem = std::experimental::filesystem;
+using filesystem_error_code = std::error_code;
+#else
+#include <boost/filesystem.hpp>
+namespace filesystem = pdalboost::filesystem;
+using filesystem_error_code = pdalboost::system::error_code;
+#endif
 
 using namespace std;
 
@@ -117,19 +125,19 @@ ostream *createFile(string const& filename, bool asBinary)
 
 bool directoryExists(const string& dirname)
 {
-    return pdalboost::filesystem::exists(dirname);
+    return filesystem::exists(dirname);
 }
 
 
 bool createDirectory(const string& dirname)
 {
-    return pdalboost::filesystem::create_directory(dirname);
+    return filesystem::create_directory(dirname);
 }
 
 
 void deleteDirectory(const string& dirname)
 {
-    pdalboost::filesystem::remove_all(dirname);
+    filesystem::remove_all(dirname);
 }
 
 
@@ -137,8 +145,8 @@ StringList directoryList(const string& dir)
 {
     StringList files;
 
-    pdalboost::filesystem::directory_iterator it(dir);
-    pdalboost::filesystem::directory_iterator end;
+    filesystem::directory_iterator it(dir);
+    filesystem::directory_iterator end;
     while (it != end)
     {
         files.push_back(it->path().string());
@@ -183,13 +191,13 @@ bool deleteFile(const string& file)
     if (!fileExists(file))
         return false;
 
-    return pdalboost::filesystem::remove(file);
+    return filesystem::remove(file);
 }
 
 
 void renameFile(const string& dest, const string& src)
 {
-    pdalboost::filesystem::rename(src, dest);
+    filesystem::rename(src, dest);
 }
 
 
@@ -200,15 +208,15 @@ bool fileExists(const string& name)
     if (Utils::iequals(http, "http"))
         return true;
 
-    pdalboost::system::error_code ec;
-    pdalboost::filesystem::exists(name, ec);
-    return pdalboost::filesystem::exists(name) || isStdin(name);
+    filesystem_error_code ec;
+    filesystem::exists(name, ec);
+    return filesystem::exists(name) || isStdin(name);
 }
 
 
 uintmax_t fileSize(const string& file)
 {
-    return pdalboost::filesystem::file_size(file);
+    return filesystem::file_size(file);
 }
 
 
@@ -225,7 +233,7 @@ string readFileIntoString(const string& filename)
 
 string getcwd()
 {
-    const pdalboost::filesystem::path p = pdalboost::filesystem::current_path();
+    const filesystem::path p = filesystem::current_path();
     return addTrailingSlash(p.string());
 }
 
@@ -253,7 +261,7 @@ string toAbsolutePath(const string& filename)
 // otherwise, make it absolute (relative to current working dir) and return that
 string toAbsolutePath(const string& filename)
 {
-    return pdalboost::filesystem::absolute(filename).string();
+    return filesystem::absolute(filename).string();
 }
 
 
@@ -265,7 +273,7 @@ string toAbsolutePath(const string& filename)
 string toAbsolutePath(const string& filename, const string base)
 {
     const string newbase = toAbsolutePath(base);
-    return pdalboost::filesystem::absolute(filename, newbase).string();
+    return filesystem::absolute(filename, newbase).string();
 }
 
 string getFilename(const string& path)
@@ -286,8 +294,8 @@ string getFilename(const string& path)
 // Get the directory part of a filename.
 string getDirectory(const string& path)
 {
-    const pdalboost::filesystem::path dir =
-         pdalboost::filesystem::path(path).parent_path();
+    const filesystem::path dir =
+         filesystem::path(path).parent_path();
     return addTrailingSlash(dir.string());
 }
 
@@ -308,13 +316,13 @@ string stem(const string& path)
 // Determine if the path represents a directory.
 bool isDirectory(const std::string& path)
 {
-    return pdalboost::filesystem::is_directory(path);
+    return filesystem::is_directory(path);
 }
 
 // Determine if the path is an absolute path
 bool isAbsolutePath(const string& path)
 {
-    return pdalboost::filesystem::path(path).is_absolute();
+    return filesystem::path(path).is_absolute();
 }
 
 
@@ -347,6 +355,13 @@ std::string extension(const std::string& filename)
     if (idx == std::string::npos)
         return std::string();
     return filename.substr(idx);
+}
+
+std::string replaceExtension(std::string const& path, std::string const& replacement)
+{
+    filesystem::path p(path);
+    p.replace_extension(replacement);
+    return p.string();
 }
 
 } // namespace FileUtils

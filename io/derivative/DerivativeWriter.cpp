@@ -44,8 +44,6 @@
 #include <iostream>
 #include <limits>
 
-#include <boost/filesystem.hpp>
-
 #include "gdal_priv.h" // For File I/O
 #include "gdal_version.h" // For version info
 #include "ogr_spatialref.h"  //For Geographic Information/Transformations
@@ -1003,10 +1001,9 @@ GDALDataset* DerivativeWriter::createFloat32GTIFF(std::string filename,
         {
             char **papszOptions = NULL;
 
-            pdalboost::filesystem::path p(filename);
-            p.replace_extension(".tif");
+            auto const p = FileUtils::replaceExtension(filename, ".tif");
             GDALDataset *dataset;
-            dataset = tpDriver->Create(p.string().c_str(), cols, rows, 1,
+            dataset = tpDriver->Create(p.c_str(), cols, rows, 1,
                 GDT_Float32, papszOptions);
 
             BOX2D& extent = getBounds();

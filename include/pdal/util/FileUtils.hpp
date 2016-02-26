@@ -106,12 +106,15 @@ namespace FileUtils
     // toAbsolutePath(base)
     PDAL_DLL std::string toAbsolutePath(const std::string& filename,
         const std::string base);
-    
+
     PDAL_DLL void fileTimes(const std::string& filename, struct tm *createTime,
         struct tm *modTime);
 
     /// Return the extension of the filename, including the separator (.).
     PDAL_DLL std::string extension(const std::string& path);
+
+    /// Replaces the extension of the filename with replacement or removes it if the default value is used.
+    PDAL_DLL std::string replaceExtension(std::string const& path, std::string const& replacement = {});
 
     /// Return the filename stripped of the extension.  . and .. are returned
     /// unchanged.
