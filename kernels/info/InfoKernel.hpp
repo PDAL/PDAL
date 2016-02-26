@@ -39,6 +39,7 @@
 #include <pdal/PointView.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/plugin.hpp>
 
 #ifdef __clang__
 #pragma GCC diagnostic ignored "-Wtautological-constant-out-of-range-compare"

@@ -37,6 +37,7 @@
 #include <istream>
 
 #include <pdal/Reader.hpp>
+#include <pdal/plugin.hpp>
 
 extern "C" int32_t TextReader_ExitFunc();
 extern "C" PF_ExitFunc TextReader_InitPlugin();

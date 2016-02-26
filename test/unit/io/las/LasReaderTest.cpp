@@ -72,8 +72,8 @@ TEST(LasReaderTest, create)
 {
     StageFactory f;
 
-    std::unique_ptr<Stage> s(f.createStage("readers.las"));
-    EXPECT_TRUE(s.get());
+    auto s = f.createStage("readers.las");
+    EXPECT_TRUE(s);
 }
 
 TEST(LasReaderTest, test_base_options)

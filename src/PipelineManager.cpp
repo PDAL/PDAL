@@ -56,31 +56,31 @@ bool PipelineManager::readPipeline(const std::string& filename)
 
 Stage& PipelineManager::addReader(const std::string& type)
 {
-    Stage *r = m_factory.createStage(type);
-    if (!r)
+    Stage *reader = m_factory.createStage(type);
+    if (!reader)
     {
         std::ostringstream ss;
         ss << "Couldn't create reader stage of type '" << type << "'.";
         throw pdal_error(ss.str());
     }
-    r->setProgressFd(m_progressFd);
-    m_stages.push_back(std::unique_ptr<Stage>(r));
-    return *r;
+    reader->setProgressFd(m_progressFd);
+    m_stages.push_back(reader);
+    return *reader;
 }
 
 
 Stage& PipelineManager::addFilter(const std::string& type)
 {
-    Stage *stage = m_factory.createStage(type);
-    if (!stage)
+    Stage *filter = m_factory.createStage(type);
+    if (!filter)
     {
         std::ostringstream ss;
         ss << "Couldn't create filter stage of type '" << type << "'.";
         throw pdal_error(ss.str());
     }
-    stage->setProgressFd(m_progressFd);
-    m_stages.push_back(std::unique_ptr<Stage>(stage));
-    return *stage;
+    filter->setProgressFd(m_progressFd);
+    m_stages.push_back(filter);
+    return *filter;
 }
 
 
@@ -94,7 +94,7 @@ Stage& PipelineManager::addWriter(const std::string& type)
         throw pdal_error(ss.str());
     }
     writer->setProgressFd(m_progressFd);
-    m_stages.push_back(std::unique_ptr<Stage>(writer));
+    m_stages.push_back(writer);
     return *writer;
 }
 
@@ -129,9 +129,8 @@ MetadataNode PipelineManager::getMetadata() const
 {
     MetadataNode output("stages");
 
-    for (auto si = m_stages.begin(); si != m_stages.end(); ++si)
+    for (auto s : m_stages)
     {
-        Stage *s = si->get();
         output.add(s->getMetadata());
     }
     return output;

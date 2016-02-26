@@ -36,6 +36,7 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/util/Utils.hpp>
+#include <pdal/pdal_macros.hpp>
 
 #include <algorithm>
 #include <cfloat>

@@ -52,8 +52,6 @@
 #include <stdio.h>
 #include <iomanip>
 
-//using namespace std;
-
 typedef std::vector<std::string> StringList;
 
 namespace pdal
@@ -133,7 +131,6 @@ void Utils::eatwhitespace(std::istream& s)
         // throw it away
         s.get();
     }
-    return;
 }
 
 
@@ -179,20 +176,10 @@ bool Utils::eatcharacter(std::istream& s, char x)
     return true;
 }
 
-uint32_t Utils::getStreamPrecision(double scale)
-{
-    double frac = 0;
-    double integer = 0;
-
-    frac = modf(scale, &integer);
-    return std::abs(floorl(log10(frac)));
-}
-
 
 std::string Utils::base64_encode(const unsigned char *bytes_to_encode,
     size_t in_len)
 {
-
     /*
         base64.cpp and base64.h
 
@@ -338,6 +325,7 @@ std::vector<uint8_t> Utils::base64_decode(std::string const& encoded_string)
     return ret;
 }
 
+
 FILE* Utils::portable_popen(const std::string& command, const std::string& mode)
 {
 #ifdef _WIN32
@@ -347,6 +335,7 @@ FILE* Utils::portable_popen(const std::string& command, const std::string& mode)
     return popen(command.c_str(), mode.c_str());
 #endif
 }
+
 
 int Utils::portable_pclose(FILE* fp)
 {
@@ -380,12 +369,6 @@ int Utils::run_shell_command(const std::string& cmd, std::string& output)
     char buf[maxbuf];
 
     output = "";
-
-    const char* gdal_debug = Utils::getenv("CPL_DEBUG");
-    if (gdal_debug == 0)
-    {
-        pdal::Utils::putenv("CPL_DEBUG=OFF");
-    }
 
     FILE* fp = portable_popen(cmd.c_str(), "r");
 
@@ -427,11 +410,8 @@ std::string Utils::escapeJSON(const std::string &str)
 
     escaped.erase
     (
-        remove_if
-        (
-            escaped.begin(),
-            escaped.end(),
-            [](const char c)
+        remove_if(
+            escaped.begin(), escaped.end(), [](const char c)
             {
                 return (c <= 31);
             }

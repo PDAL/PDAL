@@ -62,8 +62,8 @@ TEST(NitfReaderTest, test_one)
 
     PointTable table;
 
-    std::shared_ptr<Stage> nitf_reader(f.createStage("readers.nitf"));
-    EXPECT_TRUE(nitf_reader.get());
+    Stage* nitf_reader(f.createStage("readers.nitf"));
+    EXPECT_TRUE(nitf_reader);
     nitf_reader->setOptions(nitf_opts);
     nitf_reader->prepare(table);
     PointViewSet pbSet = nitf_reader->execute(table);
@@ -89,8 +89,8 @@ TEST(NitfReaderTest, test_one)
 
     PointTable table2;
 
-    std::shared_ptr<Stage> las_reader(f.createStage("readers.las"));
-    EXPECT_TRUE(las_reader.get());
+    Stage* las_reader(f.createStage("readers.las"));
+    EXPECT_TRUE(las_reader);
     las_reader->setOptions(las_opts);
     las_reader->prepare(table2);
     PointViewSet pbSet2 = las_reader->execute(table2);
@@ -176,8 +176,8 @@ TEST(NitfReaderTest, optionSrs)
 
     PointTable table;
 
-    std::shared_ptr<Stage> nitfReader(f.createStage("readers.nitf"));
-    EXPECT_TRUE(nitfReader.get());
+    Stage* nitfReader(f.createStage("readers.nitf"));
+    EXPECT_TRUE(nitfReader);
     nitfReader->setOptions(nitfOpts);
 
     Options lasOpts;

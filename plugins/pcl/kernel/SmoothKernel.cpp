@@ -39,6 +39,7 @@
 
 #include <buffer/BufferReader.hpp>
 #include <pdal/KernelFactory.hpp>
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {
@@ -97,15 +98,15 @@ int SmoothKernel::execute()
     smoothOptions.add("debug", isDebug());
     smoothOptions.add("verbose", getVerboseLevel());
 
-    std::shared_ptr<Stage> smoothStage(new PCLBlock());
-    smoothStage->setOptions(smoothOptions);
-    smoothStage->setInput(*bufferReader);
+    auto& smoothStage = createStage("filters.pclblock");
+    smoothStage.setOptions(smoothOptions);
+    smoothStage.setInput(*bufferReader);
 
     Options writerOptions;
     writerOptions.add("filename", m_outputFile);
     setCommonOptions(writerOptions);
 
-    Stage& writer(Kernel::makeWriter(m_outputFile, *smoothStage));
+    Stage& writer(Kernel::makeWriter(m_outputFile, smoothStage));
     writer.setOptions(writerOptions);
 
     writer.prepare(table);

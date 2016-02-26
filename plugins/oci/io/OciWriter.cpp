@@ -38,6 +38,7 @@
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/GlobalEnvironment.hpp>
+#include <pdal/pdal_macros.hpp>
 
 #include "OciWriter.hpp"
 

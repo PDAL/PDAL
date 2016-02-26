@@ -34,6 +34,7 @@
 ****************************************************************************/
 
 #include <pdal/KernelFactory.hpp>
+#include <pdal/PluginManager.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_config.hpp>
 
@@ -132,7 +133,7 @@ void outputOptions(std::string const& n)
     // Force plugin loading.
     StageFactory f(false);
 
-    std::unique_ptr<Stage> s(f.createStage(n));
+    Stage* s = f.createStage(n);
     if (!s)
     {
         std::cerr << "Unable to create stage " << n << "\n";

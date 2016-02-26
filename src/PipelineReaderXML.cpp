@@ -36,6 +36,7 @@
 
 #include <pdal/Filter.hpp>
 #include <pdal/PipelineManager.hpp>
+#include <pdal/PluginManager.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/util/FileUtils.hpp>
 

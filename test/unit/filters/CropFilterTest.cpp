@@ -51,8 +51,8 @@ using namespace pdal;
 TEST(CropFilterTest, create)
 {
     StageFactory f;
-    std::unique_ptr<Stage> filter(f.createStage("filters.crop"));
-    EXPECT_TRUE(filter.get());
+    Stage* filter(f.createStage("filters.crop"));
+    EXPECT_TRUE(filter);
 }
 
 TEST(CropFilterTest, test_crop)

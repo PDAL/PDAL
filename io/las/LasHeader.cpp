@@ -94,13 +94,13 @@ void LasHeader::setSummary(const SummaryData& summary)
 
 void LasHeader::setScale(double x, double y, double z)
 {
-    if (Utils::compare_distance(0.0, x))
+    if (x == 0)
         throw std::invalid_argument("X scale of 0.0 is invalid!");
 
-    if (Utils::compare_distance(0.0, y))
+    if (y == 0)
         throw std::invalid_argument("Y scale of 0.0 is invalid!");
 
-    if (Utils::compare_distance(0.0, z))
+    if (z == 0)
         throw std::invalid_argument("Z scale of 0.0 is invalid!");
 
     m_scales[0] = x;

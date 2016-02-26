@@ -33,6 +33,7 @@
  ****************************************************************************/
 
 #include "MortonOrderFilter.hpp"
+#include <pdal/pdal_macros.hpp>
 
 #include <climits>
 #include <iostream>

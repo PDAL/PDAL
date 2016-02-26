@@ -42,6 +42,7 @@
 #include <pdal/PipelineReaderXML.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {

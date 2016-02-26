@@ -45,8 +45,8 @@ using namespace pdal;
 TEST(DecimationFilterTest, create)
 {
     StageFactory f;
-    std::unique_ptr<Stage> filter(f.createStage("filters.decimation"));
-    EXPECT_TRUE(filter.get());
+    Stage* filter(f.createStage("filters.decimation"));
+    EXPECT_TRUE(filter);
 }
 
 TEST(DecimationFilterTest, DecimationFilterTest_test1)
@@ -105,7 +105,7 @@ TEST(DecimationFilterTest, stream)
     dec.setInput(reader);
 
     StreamCallbackFilter filter;
-    
+
     auto cb = [](PointRef& point)
     {
         static int i = 0;

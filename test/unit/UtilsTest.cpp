@@ -74,38 +74,27 @@ TEST(UtilsTest, test_comparators)
     bool ok;
 
     {
-        ok = Utils::compare_distance<float>(1.000001f, 1.0f);
+        ok = Utils::compare_approx(1.001f, 1.0f, 0.0001f);
         EXPECT_TRUE(!ok);
 
-        ok = Utils::compare_distance<float>(1.0000001f, 1.0f);
+        ok = Utils::compare_approx(1.001f, 1.0f, 0.001f);
+        EXPECT_TRUE(!ok);
+
+        ok = Utils::compare_approx(1.001f, 1.0f, 0.01f);
         EXPECT_TRUE(ok);
 
-        ok = Utils::compare_distance<float>(1.00000001f, 1.0f);
+        ok = Utils::compare_approx(1.001f, 1.0f, 0.1f);
         EXPECT_TRUE(ok);
     }
 
     {
-        ok = Utils::compare_approx<float>(1.001f, 1.0f, 0.0001f);
-        EXPECT_TRUE(!ok);
-
-        ok = Utils::compare_approx<float>(1.001f, 1.0f, 0.001f);
-        EXPECT_TRUE(!ok);
-
-        ok = Utils::compare_approx<float>(1.001f, 1.0f, 0.01f);
+        ok = Utils::compare_approx(10, 12, 2);
         EXPECT_TRUE(ok);
 
-        ok = Utils::compare_approx<float>(1.001f, 1.0f, 0.1f);
-        EXPECT_TRUE(ok);
-    }
-
-    {
-        ok = Utils::compare_approx<unsigned int>(10, 12, 2);
+        ok = Utils::compare_approx(10, 12, 3);
         EXPECT_TRUE(ok);
 
-        ok = Utils::compare_approx<unsigned int>(10, 12, 3);
-        EXPECT_TRUE(ok);
-
-        ok = Utils::compare_approx<unsigned int>(10, 12, 1);
+        ok = Utils::compare_approx(10, 12, 1);
         EXPECT_TRUE(!ok);
     }
 }

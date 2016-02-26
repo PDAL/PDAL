@@ -45,8 +45,8 @@ using namespace pdal;
 TEST(RangeFilterTest, createStage)
 {
     StageFactory f;
-    std::shared_ptr<Stage> filter(f.createStage("filters.range"));
-    EXPECT_TRUE(filter.get());
+    Stage* filter(f.createStage("filters.range"));
+    EXPECT_TRUE(filter);
 }
 
 TEST(RangeFilterTest, noLimits)

@@ -35,6 +35,7 @@
 #include "RandomKernel.hpp"
 
 #include <pdal/StageFactory.hpp>
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {
@@ -87,11 +88,9 @@ Stage& RandomKernel::makeReader(Options readerOptions)
         readerOptions.add<std::string>("log", "STDERR");
     }
 
-    StageFactory factory;
-    Stage& readerStage = ownStage(factory.createStage("readers.faux"));
-    readerStage.setOptions(readerOptions);
-
-    return readerStage;
+    auto& reader = createStage("readers.faux");
+    reader.setOptions(readerOptions);
+    return reader;
 }
 
 

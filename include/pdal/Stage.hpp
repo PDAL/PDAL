@@ -37,7 +37,6 @@
 #include <list>
 
 #include <pdal/pdal_internal.hpp>
-#include <pdal/plugin.hpp>
 
 #include <pdal/Dimension.hpp>
 #include <pdal/Log.hpp>
@@ -59,6 +58,11 @@ class StageWrapper;
 /**
   A stage performs the actual processing in PDAL.  Stages may read data,
   modify or filter read data, create metadata or write processed data.
+
+  Stages are linked with setInput() into a pipeline.  The pipeline is
+  run with by calling in sequence \ref prepare() and \ref execute() on the
+  stage at the end of the pipeline.  PipelineManager can also be used to
+  create and run a pipeline.
 */
 class PDAL_DLL Stage
 {

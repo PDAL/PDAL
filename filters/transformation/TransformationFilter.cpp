@@ -35,6 +35,7 @@
 #include "TransformationFilter.hpp"
 
 #include <pdal/pdal_export.hpp>
+#include <pdal/pdal_macros.hpp>
 
 #include <sstream>
 
@@ -96,7 +97,7 @@ bool TransformationFilter::processOne(PointRef& point)
     double y = point.getFieldAs<double>(Dimension::Id::Y);
     double z = point.getFieldAs<double>(Dimension::Id::Z);
 
-    point.setField(Dimension::Id::X, 
+    point.setField(Dimension::Id::X,
         x * m_matrix[0] + y * m_matrix[1] + z * m_matrix[2] + m_matrix[3]);
 
     point.setField(Dimension::Id::Y,

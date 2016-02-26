@@ -39,9 +39,10 @@
 
 #include <pdal/Log.hpp>
 
+#include <array>
+#include <functional>
 #include <sstream>
 #include <vector>
-#include <array>
 
 #include <cpl_port.h>
 #include <gdal.h>

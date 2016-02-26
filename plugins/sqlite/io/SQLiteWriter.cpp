@@ -37,6 +37,7 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_internal.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/pdal_macros.hpp>
 
 #include <iomanip>
 #include <sstream>
@@ -106,7 +107,7 @@ void SQLiteWriter::initialize()
         m_session = std::unique_ptr<SQLite>(new SQLite(m_connection, log()));
         m_session->connect(true);
         log()->get(LogLevel::Debug) << "Connected to database" << std::endl;
-        
+
         bool bHaveSpatialite = m_session->haveSpatialite();
         log()->get(LogLevel::Debug) << "Have spatialite?: " <<
             bHaveSpatialite << std::endl;

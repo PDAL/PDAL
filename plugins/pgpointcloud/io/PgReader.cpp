@@ -36,6 +36,7 @@
 #include "PgReader.hpp"
 #include <pdal/PointView.hpp>
 #include <pdal/XMLSchema.hpp>
+#include <pdal/pdal_macros.hpp>
 
 #include <iostream>
 

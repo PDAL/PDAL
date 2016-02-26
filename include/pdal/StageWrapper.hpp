@@ -11,10 +11,10 @@ namespace pdal
 class StageWrapper
 {
 public:
-    static void initialize(std::shared_ptr<Stage> s, PointTableRef table)
+    static void initialize(Stage& s, PointTableRef table)
     {
-        s->l_initialize(table);
-        s->initialize();
+        s.l_initialize(table);
+        s.initialize();
     }
     static void processOptions(Stage& s, const Options& options)
         { s.processOptions(options); }

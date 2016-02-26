@@ -44,6 +44,7 @@
 #include <pdal/util/Extractor.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/IStream.hpp>
+#include <pdal/pdal_macros.hpp>
 
 #include "GeotiffSupport.hpp"
 #include "LasHeader.hpp"

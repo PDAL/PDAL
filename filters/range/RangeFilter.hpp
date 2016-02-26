@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
+#include <pdal/plugin.hpp>
 
 #include <memory>
 #include <map>

@@ -95,7 +95,7 @@ bool parseOption(std::string o, std::string& stage, std::string& option,
     // Get stage_name.
     count = Utils::extract(o, pos, islcOrDigit);
     if (std::isdigit(o[pos]))
-        return false; 
+        return false;
     pos += count;
     stage = o.substr(0, pos);
     if (o[pos++] != '.')
@@ -355,8 +355,7 @@ void Kernel::visualize(PointViewPtr view)
     BufferReader bufferReader;
     bufferReader.addView(view);
 
-    StageFactory f;
-    Stage& writer = ownStage(f.createStage("writers.pclvisualizer"));
+    auto& writer = createStage("writers.pclvisualizer");
     writer.setInput(bufferReader);
 
     PointTable table;
@@ -521,49 +520,40 @@ void Kernel::addBasicSwitches(ProgramArgs& args)
          "\"1234 5678 91011\"", m_offsets);
 }
 
+Stage& Kernel::createStage(const std::string& name)
+{
+    Stage *stage = m_factory.createStage(name);
+    if (!stage)
+        throw pdal_error("stage creation failed for " + name);
+    return *stage;
+}
 
 Stage& Kernel::makeReader(const std::string& inputFile)
 {
     if (!FileUtils::fileExists(inputFile))
         throw pdal_error("file not found: " + inputFile);
 
-    StageFactory factory;
-    std::string driver = factory.inferReaderDriver(inputFile);
+    std::string driver = m_factory.inferReaderDriver(inputFile);
     if (driver.empty())
         throw pdal_error("Cannot determine input file type of " + inputFile);
 
-    Stage *stage = factory.createStage(driver);
-    if (!stage)
-        throw pdal_error("reader creation failed");
-    ownStage(stage);
-    return *stage;
+    return createStage(driver);
 }
-
 
 Stage& Kernel::makeWriter(const std::string& outputFile, Stage& parent)
 {
-    pdal::StageFactory factory;
-
-    std::string driver = factory.inferWriterDriver(outputFile);
+    std::string driver = m_factory.inferWriterDriver(outputFile);
     if (driver.empty())
         throw pdal_error("Cannot determine output file type of " +
             outputFile);
-    Options options = factory.inferWriterOptionsChanges(outputFile);
+    Options options = m_factory.inferWriterOptionsChanges(outputFile);
 
-    Stage *writer = factory.createStage(driver);
-    if (!writer)
-    {
-        std::ostringstream ss;
-        ss << "Error creating writer stage for file '" << outputFile << "'.";
-        throw pdal_error(ss.str());
-    }
-    ownStage(writer);
-    writer->setInput(parent);
-    writer->addOptions(options);
+    auto& writer = createStage(driver);
+    writer.setInput(parent);
+    writer.addOptions(options);
 
-    return *writer;
+    return writer;
 }
-
 
 bool Kernel::test_parseOption(std::string o, std::string& stage,
     std::string& option, std::string& value)
