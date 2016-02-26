@@ -91,7 +91,7 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test1)
     opts.add(module);
     opts.add(function);
 
-    std::unique_ptr<Stage> filter(f.createStage("filters.predicate"));
+    Stage* filter(f.createStage("filters.predicate"));
     filter->setOptions(opts);
     filter->setInput(reader);
 
@@ -149,7 +149,7 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test2)
     opts.add(module);
     opts.add(function);
 
-    std::unique_ptr<Stage> filter(f.createStage("filters.predicate"));
+    Stage* filter(f.createStage("filters.predicate"));
     filter->setOptions(opts);
     filter->setInput(reader);
 
@@ -209,7 +209,7 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test3)
     opts1.add(module1);
     opts1.add(function1);
 
-    std::unique_ptr<Stage> filter1(f.createStage("filters.predicate"));
+    Stage* filter1(f.createStage("filters.predicate"));
     filter1->setOptions(opts1);
     filter1->setInput(reader);
 
@@ -232,7 +232,7 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test3)
     opts2.add(module2);
     opts2.add(function2);
 
-    std::unique_ptr<Stage> filter2(f.createStage("filters.predicate"));
+    Stage* filter2(f.createStage("filters.predicate"));
     filter2->setOptions(opts2);
     filter2->setInput(*filter1);
 
@@ -288,7 +288,7 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test4)
     opts.add(module);
     opts.add(function);
 
-    std::unique_ptr<Stage> filter(f.createStage("filters.predicate"));
+    Stage* filter(f.createStage("filters.predicate"));
     filter->setOptions(opts);
     filter->setInput(reader);
 
@@ -343,7 +343,7 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test5)
     opts.add(module);
     opts.add(function);
 
-    std::unique_ptr<Stage> filter(f.createStage("filters.predicate"));
+    Stage* filter(f.createStage("filters.predicate"));
     filter->setOptions(opts);
     filter->setInput(reader);
 

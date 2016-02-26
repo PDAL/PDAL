@@ -49,8 +49,8 @@ TEST(PlyWriter, Constructor)
     PlyWriter writer1;
 
     StageFactory f;
-    std::unique_ptr<Stage> writer2(f.createStage("writers.ply"));
-    EXPECT_TRUE(writer2.get());
+    Stage* writer2(f.createStage("writers.ply"));
+    EXPECT_TRUE(writer2);
 }
 
 

@@ -105,7 +105,7 @@ void testReadWrite(bool compression, bool scaling)
         reader.setOptions(lasReadOpts);
 
         StageFactory f;
-        std::unique_ptr<Stage> sqliteWriter(f.createStage("writers.sqlite"));
+        Stage* sqliteWriter(f.createStage("writers.sqlite"));
         sqliteWriter->setOptions(sqliteOptions);
         sqliteWriter->setInput(reader);
 
@@ -113,11 +113,11 @@ void testReadWrite(bool compression, bool scaling)
         sqliteWriter->prepare(table);
         sqliteWriter->execute(table);
     }
-    
+
     {
         // Done - now read back.
         StageFactory f;
-        std::unique_ptr<Stage> sqliteReader(f.createStage("readers.sqlite"));
+        Stage* sqliteReader(f.createStage("readers.sqlite"));
         sqliteReader->setOptions(sqliteOptions);
 
         PointTable table2;

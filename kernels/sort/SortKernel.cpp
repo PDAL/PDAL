@@ -118,8 +118,7 @@ int SortKernel::execute()
     sortOptions.add<bool>("debug", isDebug());
     sortOptions.add<uint32_t>("verbose", getVerboseLevel());
 
-    StageFactory f;
-    Stage& sortStage = ownStage(f.createStage("filters.mortonorder"));
+    auto& sortStage = createStage("filters.mortonorder");
     sortStage.setInput(bufferReader);
     sortStage.setOptions(sortOptions);
 

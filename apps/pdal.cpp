@@ -132,7 +132,7 @@ void outputOptions(std::string const& n)
     // Force plugin loading.
     StageFactory f(false);
 
-    std::unique_ptr<Stage> s(f.createStage(n));
+    Stage* s = f.createStage(n);
     if (!s)
     {
         std::cerr << "Unable to create stage " << n << "\n";

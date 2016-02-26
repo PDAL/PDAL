@@ -67,8 +67,8 @@ public:
 TEST(TransformationMatrix, create)
 {
     StageFactory f;
-    std::unique_ptr<Stage> filter(f.createStage("filters.transformation"));
-    EXPECT_TRUE(filter.get());
+    Stage* filter(f.createStage("filters.transformation"));
+    EXPECT_TRUE(filter);
 }
 
 

@@ -70,8 +70,8 @@ TEST_F(MatlabWriterTest, constructor)
 TEST_F(MatlabWriterTest, findStage)
 {
     StageFactory factory;
-    std::unique_ptr<Stage> stage(factory.createStage("writers.matlab"));
-    EXPECT_TRUE(stage.get());
+    Stage* stage(factory.createStage("writers.matlab"));
+    EXPECT_TRUE(stage);
 }
 
 

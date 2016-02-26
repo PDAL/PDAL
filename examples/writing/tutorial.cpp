@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
 
     // Set second argument to 'true' to let factory take ownership of
     // stage and facilitate clean up.
-    Stage *writer = factory.createStage("writers.las", true);
+    Stage *writer = factory.createStage("writers.las");
 
     writer->setInput(reader);
     writer->setOptions(options);

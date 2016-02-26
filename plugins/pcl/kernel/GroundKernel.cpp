@@ -112,7 +112,7 @@ int GroundKernel::execute()
     groundOptions.add<uint32_t>("verbose", getVerboseLevel());
 
     StageFactory f;
-    std::unique_ptr<Stage> groundStage(f.createStage("filters.ground"));
+    Stage* groundStage(f.createStage("filters.ground"));
     groundStage->setOptions(groundOptions);
     groundStage->setInput(readerStage);
 
