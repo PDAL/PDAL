@@ -1,24 +1,11 @@
 {
-  "Pipeline": {
-    "Readers": [{
-      "type": "readers.las",
-      "options": [{
-        "name": "filename",
-        "value": "@CMAKE_SOURCE_DIR@/test/data/autzen/autzen-utm.las"
-      }]
-    }],
-    "Filters": [{
-      "type": "filters.programmable",
-      "options": [{
-        "name": "function",
-        "value": "myfunc"
-      }, {
-        "name": "module",
-        "value": "derive"
-      }, {
-        "name": "source",
-        "value": "import numpy as np\ndef myfunc(ins,outs):\nX = ins['Y']\nX1 = np.zeros(X.size, dtype=type(X[0])) + 314\nouts['Y'] = X1\nreturn True"
-      }]
-    }]
-  }
+  "pipeline":[
+    "@CMAKE_SOURCE_DIR@/test/data/autzen/autzen-utm.las",
+    {
+      "type":"filters.programmable",
+      "function":"myfunc",
+      "module":"derive",
+      "source":"import numpy as np\ndef myfunc(ins,outs):\n\tX = ins['Y']\n\tX1 = np.zeros(X.size, dtype=type(X[0])) + 314\n\touts['Y'] = X1\n\treturn True"
+    }
+  ]
 }

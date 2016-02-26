@@ -1,24 +1,11 @@
 {
-  "Pipeline": {
-    "Readers": [{
-      "type": "readers.las",
-      "options": [{
-        "name": "filename",
-        "value": "@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las"
-      }]
-    }],
-    "Filters": [{
-      "type": "filters.predicate",
-      "options": [{
-        "name": "module",
-        "value": "anything"
-      }, {
-        "name": "function",
-        "value": "fff"
-      }, {
-        "name": "source",
-        "value": "import numpy as np\ndef fff(ins,outs):\nX = ins['X']\nResult = np.equal(X, 637501.67)\n#print X\n#print Mask\nouts['Mask'] = Result\nreturn True"
-      }]
-    }]
-  }
+  "pipeline":[
+    "@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las",
+    {
+      "type":"filters.predicate",
+      "module":"anything",
+      "function":"fff",
+      "source":"import numpy as np\ndef fff(ins,outs):\n\tX = ins['X']\n\tResult = np.equal(X, 637501.67)\n\t#print X\n\t#print Mask\n\touts['Mask'] = Result\n\treturn True"
+    }
+  ]
 }

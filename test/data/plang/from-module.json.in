@@ -1,24 +1,11 @@
 {
-  "Pipeline": {
-    "Readers": [{
-      "type": "readers.las",
-      "options": [{
-        "name": "filename",
-        "value": "@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las"
-      }]
-    }],
-    "Filters": [{
+  "pipeline":[
+    "@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las",
+    {
       "type": "filters.predicate",
-      "options": [{
-        "name": "script",
-        "value": "@CMAKE_SOURCE_DIR@/test/data/plang/test1.py"
-      }, {
-        "name": "module",
-        "value": "anything"
-      }, {
-        "name": "function",
-        "value": "fff"
-      }]
-    }]
-  }
+      "script": "@CMAKE_SOURCE_DIR@/test/data/plang/test1.py",
+      "module": "anything",
+      "function": "fff"
+    }
+  ]
 }
