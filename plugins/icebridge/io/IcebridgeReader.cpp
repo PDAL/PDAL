@@ -35,6 +35,7 @@
 #include "IcebridgeReader.hpp"
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/PointView.hpp>
+#include <pdal/pdal_macros.hpp>
 
 #include <map>
 

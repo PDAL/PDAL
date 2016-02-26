@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <pdal/plugin.hpp>
 #include <pdal/Filter.hpp>
 
 #include <memory>

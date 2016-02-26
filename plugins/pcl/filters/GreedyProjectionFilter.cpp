@@ -43,6 +43,8 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/surface/gp3.h>
 
+#include <pdal/pdal_macros.hpp>
+
 namespace pdal
 {
 

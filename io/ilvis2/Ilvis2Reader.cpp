@@ -34,6 +34,7 @@
 
 #include "Ilvis2Reader.hpp"
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/pdal_macros.hpp>
 
 #include <algorithm>
 #include <cmath>

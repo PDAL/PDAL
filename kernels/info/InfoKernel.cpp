@@ -44,6 +44,7 @@
 #ifdef PDAL_HAVE_LIBXML2
 #include <pdal/XMLSchema.hpp>
 #endif
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {

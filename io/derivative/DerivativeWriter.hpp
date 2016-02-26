@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pdal/Writer.hpp>
+#include <pdal/plugin.hpp>
 
 #include <Eigen/Core>
 

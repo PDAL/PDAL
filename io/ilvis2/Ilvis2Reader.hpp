@@ -35,6 +35,7 @@
 #include <pdal/PointView.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/util/IStream.hpp>
+#include <pdal/plugin.hpp>
 #include <map>
 
 #ifndef PDAL_HAVE_LIBXML2

@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/KernelFactory.hpp>
+#include <pdal/PluginManager.hpp>
 
 #include <delta/DeltaKernel.hpp>
 #include <diff/DiffKernel.hpp>

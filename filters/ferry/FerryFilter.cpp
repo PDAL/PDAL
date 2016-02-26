@@ -35,6 +35,7 @@
 #include "FerryFilter.hpp"
 
 #include <pdal/pdal_export.hpp>
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {

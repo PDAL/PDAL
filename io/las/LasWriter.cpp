@@ -43,6 +43,7 @@
 #include <pdal/util/Inserter.hpp>
 #include <pdal/util/OStream.hpp>
 #include <pdal/util/Utils.hpp>
+#include <pdal/pdal_macros.hpp>
 
 #include "GeotiffSupport.hpp"
 #include "ZipPoint.hpp"

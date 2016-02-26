@@ -40,6 +40,7 @@
 #include <pdal/PointTable.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/pdal_macros.hpp>
 
 #include <pcl/point_types.h>
 #include <pcl/console/print.h>

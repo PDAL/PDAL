@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <pdal/plugin.hpp>
 #include <pdal/Reader.hpp>
 
 extern "C" int32_t FauxReader_ExitFunc();

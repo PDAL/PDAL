@@ -40,6 +40,7 @@
 #include <pdal/Options.hpp>
 #include <pdal/Polygon.hpp>
 #include <pdal/PDALUtils.hpp>
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {

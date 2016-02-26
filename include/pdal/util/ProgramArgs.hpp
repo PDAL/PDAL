@@ -24,6 +24,7 @@
 
 #include <deque>
 #include <map>
+#include <memory>
 
 #include <pdal/util/Utils.hpp>
 

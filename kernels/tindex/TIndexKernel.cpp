@@ -48,6 +48,7 @@
 #include <merge/MergeFilter.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/pdal_macros.hpp>
 
 #include <cpl_string.h>
 

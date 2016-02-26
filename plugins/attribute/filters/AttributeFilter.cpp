@@ -38,11 +38,10 @@
 #include <vector>
 
 #include <pdal/GlobalEnvironment.hpp>
-
 #include <pdal/StageFactory.hpp>
 #include <pdal/QuadIndex.hpp>
 #include <pdal/Polygon.hpp>
-
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {

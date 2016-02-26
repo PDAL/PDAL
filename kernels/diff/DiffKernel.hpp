@@ -37,6 +37,7 @@
 #include <pdal/Kernel.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/plugin.hpp>
 
 extern "C" int32_t DiffKernel_ExitFunc();
 extern "C" PF_ExitFunc DiffKernel_InitPlugin();
