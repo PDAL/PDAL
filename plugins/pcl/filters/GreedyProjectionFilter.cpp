@@ -52,7 +52,7 @@ static PluginInfo const s_info =
     PluginInfo("filters.greedyprojection", "Grid Projection filter",
                "http://pdal.io/stages/filters.greedyprojection.html");
 
-CREATE_SHARED_PLUGIN(1, 0, GreedyProjectionFilter, Filter, s_info)
+CREATE_SHARED_PLUGIN(1, 0, GreedyProjectionFilter, s_info)
 
 std::string GreedyProjectionFilter::getName() const
 {

@@ -55,7 +55,7 @@ static PluginInfo const s_info =
     PluginInfo("filters.radiusoutlier", "Radius outlier removal",
                "http://pdal.io/stages/filters.radiusoutlier.html");
 
-CREATE_SHARED_PLUGIN(1, 0, RadiusOutlierFilter, Filter, s_info)
+CREATE_SHARED_PLUGIN(1, 0, RadiusOutlierFilter, s_info)
 
 std::string RadiusOutlierFilter::getName() const
 {

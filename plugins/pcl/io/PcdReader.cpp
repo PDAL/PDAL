@@ -53,7 +53,7 @@ static PluginInfo const s_info = PluginInfo(
     "Read data in the Point Cloud Library (PCL) format.",
     "http://pdal.io/stages/readers.pclvisualizer.html" );
 
-CREATE_SHARED_PLUGIN(1, 0, PcdReader, Reader, s_info)
+CREATE_SHARED_PLUGIN(1, 0, PcdReader, s_info)
 
 std::string PcdReader::getName() const { return s_info.name; }
 

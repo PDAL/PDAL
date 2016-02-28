@@ -58,7 +58,7 @@ static PluginInfo const s_info = PluginInfo(
         "does not provide LAS 1.4 support at this time.",
     "http://pdal.io/stages/writers.las.html" );
 
-CREATE_STATIC_PLUGIN(1, 0, LasWriter, Writer, s_info)
+CREATE_STATIC_PLUGIN(1, 0, LasWriter, s_info)
 
 std::string LasWriter::getName() const { return s_info.name; }
 

@@ -137,7 +137,7 @@ static PluginInfo const s_info = PluginInfo(
         "http://pdal.io/stages/reader.ply.html");
 
 
-CREATE_STATIC_PLUGIN(1, 0, PlyReader, Reader, s_info);
+CREATE_STATIC_PLUGIN(1, 0, PlyReader, s_info);
 
 
 std::string PlyReader::getName() const

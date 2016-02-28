@@ -48,7 +48,7 @@ static PluginInfo const s_info = PluginInfo(
     "Pipeline Kernel",
     "http://pdal.io/kernels/kernels.pipeline.html" );
 
-CREATE_STATIC_PLUGIN(1, 0, PipelineKernel, Kernel, s_info)
+CREATE_STATIC_PLUGIN(1, 0, PipelineKernel, s_info)
 
 std::string PipelineKernel::getName() const { return s_info.name; }
 

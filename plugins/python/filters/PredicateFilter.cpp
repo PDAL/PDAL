@@ -47,7 +47,7 @@ static PluginInfo const s_info = PluginInfo(
     "Filter data using inline Python expressions.",
     "http://pdal.io/stages/filters.predicate.html" );
 
-CREATE_SHARED_PLUGIN(1, 0, PredicateFilter, Filter, s_info)
+CREATE_SHARED_PLUGIN(1, 0, PredicateFilter, s_info)
 
 std::string PredicateFilter::getName() const { return s_info.name; }
 

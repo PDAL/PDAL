@@ -56,7 +56,7 @@ static PluginInfo const s_info =
     PluginInfo("filters.ground", "Progressive morphological filter",
                "http://pdal.io/stages/filters.ground.html");
 
-CREATE_SHARED_PLUGIN(1, 0, GroundFilter, Filter, s_info)
+CREATE_SHARED_PLUGIN(1, 0, GroundFilter, s_info)
 
 std::string GroundFilter::getName() const
 {

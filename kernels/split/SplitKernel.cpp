@@ -46,7 +46,7 @@ static PluginInfo const s_info = PluginInfo(
     "Split Kernel",
     "http://pdal.io/kernels/kernels.split.html" );
 
-CREATE_STATIC_PLUGIN(1, 0, SplitKernel, Kernel, s_info)
+CREATE_STATIC_PLUGIN(1, 0, SplitKernel, s_info)
 
 std::string SplitKernel::getName() const
 {

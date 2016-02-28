@@ -38,6 +38,13 @@
 #include <pdal/plugin.hpp>
 #include <pdal/PluginManager.hpp>
 
+#include <pdal/Filter.hpp>
+#include <pdal/Kernel.hpp>
+#include <pdal/Reader.hpp>
+#include <pdal/Writer.hpp>
+
+#include <type_traits>
+
 namespace pdal
 {
 
@@ -51,9 +58,36 @@ struct PluginInfo
     {}
 };
 
+template <typename T, typename Enable = void>
+struct PluginType {};
+
+template <typename T>
+struct PluginType<T, typename std::enable_if<std::is_base_of<Filter, T>::value>::type>
+{
+    static int const type = PF_PluginType_Filter;
+};
+
+template <typename T>
+struct PluginType<T, typename std::enable_if<std::is_base_of<Kernel, T>::value>::type>
+{
+    static int const type = PF_PluginType_Kernel;
+};
+
+template <typename T>
+struct PluginType<T, typename std::enable_if<std::is_base_of<Reader, T>::value>::type>
+{
+    static int const type = PF_PluginType_Reader;
+};
+
+template <typename T>
+struct PluginType<T, typename std::enable_if<std::is_base_of<Writer, T>::value>::type>
+{
+    static int const type = PF_PluginType_Writer;
+};
+
 }
 
-#define CREATE_SHARED_PLUGIN(version_major, version_minor, T, type, info) \
+#define CREATE_SHARED_PLUGIN(version_major, version_minor, T, info) \
     extern "C" PDAL_DLL int32_t ExitFunc() \
     { return 0; } \
     extern "C" PDAL_DLL PF_ExitFunc PF_initPlugin() \
@@ -66,7 +100,7 @@ struct PluginInfo
         rp.destroyFunc = pdal::T::destroy; \
         rp.description = info.description; \
         rp.link = info.link; \
-        rp.pluginType = PF_PluginType_ ## type; \
+        rp.pluginType = pdal::PluginType<pdal::T>::type; \
         if (!pdal::PluginManager::registerObject(info.name, &rp)) \
             return NULL; \
         return ExitFunc; \
@@ -80,7 +114,7 @@ struct PluginInfo
         return 0; \
     }
 
-#define CREATE_STATIC_PLUGIN(version_major, version_minor, T, type, info) \
+#define CREATE_STATIC_PLUGIN(version_major, version_minor, T, info) \
     extern "C" PDAL_DLL int32_t T ## _ExitFunc() \
     { return 0; } \
     extern "C" PDAL_DLL PF_ExitFunc T ## _InitPlugin() \
@@ -93,7 +127,7 @@ struct PluginInfo
         rp.destroyFunc = pdal::T::destroy; \
         rp.description = info.description; \
         rp.link = info.link; \
-        rp.pluginType = PF_PluginType_ ## type; \
+        rp.pluginType = pdal::PluginType<pdal::T>::type; \
         if (!pdal::PluginManager::registerObject(info.name, &rp)) \
             return NULL; \
         return T ## _ExitFunc; \

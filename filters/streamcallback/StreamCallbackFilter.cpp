@@ -43,6 +43,6 @@ static PluginInfo const s_info = PluginInfo(
     "Provide a hook for a simple point-by-point callback.",
     "" );
 
-CREATE_STATIC_PLUGIN(1, 0, StreamCallbackFilter, Filter, s_info)
+CREATE_STATIC_PLUGIN(1, 0, StreamCallbackFilter, s_info)
 
 } // namespace pdal

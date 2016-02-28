@@ -74,7 +74,7 @@ static PluginInfo const s_info = PluginInfo(
     "TIndex Kernel",
     "http://pdal.io/kernels/kernels.tindex.html" );
 
-CREATE_STATIC_PLUGIN(1, 0, TIndexKernel, Kernel, s_info)
+CREATE_STATIC_PLUGIN(1, 0, TIndexKernel, s_info)
 
 std::string TIndexKernel::getName() const { return s_info.name; }
 

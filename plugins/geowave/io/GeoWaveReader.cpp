@@ -133,7 +133,7 @@ static PluginInfo const s_info = PluginInfo(
     "\"GeoWave\"  reader support. ",
     "http://pdal.io/stages/drivers.geowave.reader.html" );
 
-CREATE_SHARED_PLUGIN(1, 0, GeoWaveReader, Reader, s_info)
+CREATE_SHARED_PLUGIN(1, 0, GeoWaveReader, s_info)
 
 std::string pdal::GeoWaveReader::getName() const { return s_info.name; }
 

@@ -43,7 +43,7 @@ static PluginInfo const s_info = PluginInfo(
     "Sort data based on a given dimension.",
     "http://pdal.io/stages/filters.sort.html" );
 
-CREATE_STATIC_PLUGIN(1, 0, SortFilter, Filter, s_info)
+CREATE_STATIC_PLUGIN(1, 0, SortFilter, s_info)
 
 std::string SortFilter::getName() const { return s_info.name; }
 

@@ -55,7 +55,7 @@ static PluginInfo const s_info =
     PluginInfo("filters.statisticaloutlier", "Statistical outlier removal",
                "http://pdal.io/stages/filters.statisticaloutlier.html");
 
-CREATE_SHARED_PLUGIN(1, 0, StatisticalOutlierFilter, Filter, s_info)
+CREATE_SHARED_PLUGIN(1, 0, StatisticalOutlierFilter, s_info)
 
 std::string StatisticalOutlierFilter::getName() const
 {

@@ -47,7 +47,7 @@ static PluginInfo const s_info = PluginInfo(
     "Text Reader",
     "http://pdal.io/stages/readers.text.html" );
 
-CREATE_STATIC_PLUGIN(1, 0, TextReader, Reader, s_info)
+CREATE_STATIC_PLUGIN(1, 0, TextReader, s_info)
 
 std::string TextReader::getName() const { return s_info.name; }
 

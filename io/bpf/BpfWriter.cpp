@@ -52,7 +52,7 @@ static PluginInfo const s_info = PluginInfo(
         "processing chains.",
     "http://pdal.io/stages/writers.bpf.html" );
 
-CREATE_STATIC_PLUGIN(1, 0, BpfWriter, Writer, s_info)
+CREATE_STATIC_PLUGIN(1, 0, BpfWriter, s_info)
 
 std::string BpfWriter::getName() const { return s_info.name; }
 

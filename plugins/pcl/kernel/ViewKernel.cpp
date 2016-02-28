@@ -45,7 +45,7 @@ static PluginInfo const s_info = PluginInfo(
     "View Kernel",
     "http://pdal.io/kernels/kernels.view.html" );
 
-CREATE_SHARED_PLUGIN(1, 0, ViewKernel, Kernel, s_info)
+CREATE_SHARED_PLUGIN(1, 0, ViewKernel, s_info)
 
 std::string ViewKernel::getName() const { return s_info.name; }
 

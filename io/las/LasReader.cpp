@@ -101,7 +101,7 @@ static PluginInfo const s_info = PluginInfo(
         "compilation.",
     "http://pdal.io/stages/readers.las.html" );
 
-CREATE_STATIC_PLUGIN(1, 0, LasReader, Reader, s_info)
+CREATE_STATIC_PLUGIN(1, 0, LasReader, s_info)
 
 std::string LasReader::getName() const { return s_info.name; }
 

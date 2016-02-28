@@ -60,7 +60,7 @@ static PluginInfo const s_info =
                "combination.",
                "http://pdal.io/kernels/kernels.translate.html");
 
-CREATE_STATIC_PLUGIN(1, 0, TranslateKernel, Kernel, s_info)
+CREATE_STATIC_PLUGIN(1, 0, TranslateKernel, s_info)
 
 std::string TranslateKernel::getName() const
 {
