@@ -38,6 +38,7 @@
 #include <pdal/Filter.hpp>
 #include <pdal/KernelFactory.hpp>
 #include <pdal/PipelineManager.hpp>
+#include <pdal/PluginManager.hpp>
 #include <pdal/Reader.hpp>
 #include "Support.hpp"
 

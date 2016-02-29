@@ -272,7 +272,7 @@ void writeData(Orientation::Enum orient, bool scaling, bool compression = false)
     split.setInput(reader);
 
     Stage* writer(f.createStage("writers.oci"));
-    EXPECT_TRUE(writer.get());
+    EXPECT_TRUE(writer);
     writer->setOptions(options);
     writer->setInput(split);
 
@@ -350,7 +350,7 @@ void readData()
 
     StageFactory f;
     Stage* reader(f.createStage("readers.oci"));
-    EXPECT_TRUE(reader.get());
+    EXPECT_TRUE(reader);
 
     reader->setOptions(options);
 
