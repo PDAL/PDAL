@@ -37,8 +37,6 @@
 #include <pdal/plugin.hpp>
 #include <pdal/Filter.hpp>
 
-#include <boost/array.hpp>
-
 #include <gdal.h>
 #include <ogr_spatialref.h>
 #include <pdal/GDALUtils.hpp>

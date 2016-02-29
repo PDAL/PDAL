@@ -33,6 +33,7 @@
  ****************************************************************************/
 
 #include "kernel/Cpd.hpp"
+#include <pdal/pdal_macros.hpp>
 
 #include <pdal/KernelFactory.hpp>
 #include <pdal/StageFactory.hpp>
@@ -88,7 +89,7 @@ void CpdKernel::addSwitches(ProgramArgs& args)
         "Use the domain of the XY dimensions to automatically "
         "exaggerate the Z dimensions",
         m_auto_z_exaggeration);
-    args.add("auto-z-exaggeration-ratio", 
+    args.add("auto-z-exaggeration-ratio",
         "The scaling ratio for the Z-exaggeration. Z's range will "
         "be scaled to this ratio of the extent of the smallest XY extent.",
         m_auto_z_exaggeration_ratio, (float)(5.0 / 8.0));
@@ -122,11 +123,11 @@ PointViewPtr CpdKernel::readFile(const std::string& filename,
         boundsOptions.add("bounds", m_bounds);
         StageFactory f;
 
-        Stage& crop = ownStage(f.createStage("filters.crop"));
-        crop.setInput(reader);
-        crop.setOptions(boundsOptions);
-        crop.prepare(table);
-        viewSet = crop.execute(table);
+        Stage* crop = f.createStage("filters.crop");
+        crop->setInput(reader);
+        crop->setOptions(boundsOptions);
+        crop->prepare(table);
+        viewSet = crop->execute(table);
     }
     else
     {
