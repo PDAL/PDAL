@@ -37,6 +37,8 @@
 #include <pdal/Stage.hpp>
 #include <pdal/Options.hpp>
 
+#include <functional>
+
 namespace pdal
 {
 

@@ -34,6 +34,7 @@
 
 #include "NitfFile.hpp"
 #include "NitfReader.hpp"
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {

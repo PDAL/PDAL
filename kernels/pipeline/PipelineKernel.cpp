@@ -37,8 +37,8 @@
 #ifdef PDAL_HAVE_LIBXML2
 #include <pdal/XMLSchema.hpp>
 #endif
-
 #include <pdal/PDALUtils.hpp>
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {
@@ -105,7 +105,7 @@ int PipelineKernel::execute()
     {
 #ifdef PDAL_HAVE_LIBXML2
         XMLSchema schema(manager.pointTable().layout());
-        
+
         std::ostream *out = FileUtils::createFile(m_PointCloudSchemaOutput);
         std::string xml(schema.xml());
         out->write(xml.c_str(), xml.size());

@@ -33,8 +33,8 @@
 ****************************************************************************/
 
 #include "GreyhoundReader.hpp"
-
 #include "Exchanges.hpp"
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {

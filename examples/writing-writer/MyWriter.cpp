@@ -1,6 +1,7 @@
 // MyWriter.cpp
 
 #include "MyWriter.hpp"
+#include <pdal/pdal_macros.hpp>
 
 #include <boost/program_options.hpp>
 

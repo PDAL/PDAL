@@ -66,6 +66,8 @@ from the narrow array so that the approriate extrema of the block can
 be stored.
 **/
 
+#include <pdal/pdal_macros.hpp>
+
 namespace pdal
 {
 

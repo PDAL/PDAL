@@ -44,6 +44,7 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/pdal_macros.hpp>
 
 #include "PCLConversions.hpp"
 #include "point_types.hpp"

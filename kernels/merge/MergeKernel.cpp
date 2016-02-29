@@ -36,6 +36,7 @@
 
 #include <merge/MergeFilter.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {
@@ -74,7 +75,6 @@ int MergeKernel::execute()
 
     MergeFilter filter;
 
-    std::vector<std::unique_ptr<Stage>> m_readers;
     for (size_t i = 0; i < m_files.size(); ++i)
     {
         Options readerOpts;

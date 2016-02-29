@@ -40,6 +40,7 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/portable_endian.hpp>
 #include <pdal/XMLSchema.hpp>
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {

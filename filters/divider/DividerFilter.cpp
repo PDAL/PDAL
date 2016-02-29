@@ -32,6 +32,7 @@
  ****************************************************************************/
 
 #include "DividerFilter.hpp"
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {

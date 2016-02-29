@@ -60,7 +60,6 @@ TEST(SpatialReferenceTest, test_env_vars)
 #endif
 }
 
-
 TEST(SpatialReferenceTest, test_ctor)
 {
     SpatialReference srs;
@@ -70,7 +69,6 @@ TEST(SpatialReferenceTest, test_ctor)
     EXPECT_TRUE(srs.empty());
 }
 
-
 // Test round-tripping proj.4 string
 TEST(SpatialReferenceTest, test_proj4_roundtrip)
 {
@@ -78,35 +76,31 @@ TEST(SpatialReferenceTest, test_proj4_roundtrip)
     std::string proj4_ellps =
         "+proj=utm +zone=15 +ellps=WGS84 +datum=WGS84 +units=m +no_defs";
 
-#if GDAL_VERSION_MAJOR <=1
-    std::string proj4_out =
-        "+proj=utm +zone=15 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m "
-        "+no_defs";
-#else
-    std::string proj4_out = "+proj=utm +zone=15 +datum=WGS84 +units=m +no_defs";
-
-#endif
+    // List of possible outputs
+    std::vector<std::string> const proj4_out = {
+        "+proj=utm +zone=15 +datum=WGS84 +units=m +no_defs",
+        "+proj=utm +zone=15 +ellps=WGS84 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+    };
 
     {
         SpatialReference ref;
         ref.setProj4(proj4);
         EXPECT_TRUE(!ref.empty());
         const std::string ret = ref.getProj4();
-        EXPECT_EQ(ret, proj4_out);
     }
 
     {
         SpatialReference ref;
         ref.setProj4(proj4_ellps);
         const std::string ret = ref.getProj4();
-        EXPECT_EQ(ret, proj4_out);
+        EXPECT_TRUE(Utils::contains(proj4_out, ret));
     }
 
     {
         SpatialReference ref;
-        ref.setProj4(proj4_out);
+        ref.setProj4(proj4_out.front());
         const std::string ret = ref.getProj4();
-        EXPECT_EQ(ret, proj4_out);
+        EXPECT_TRUE(Utils::contains(proj4_out, ret));
     }
 }
 
@@ -185,12 +179,12 @@ TEST(SpatialReferenceTest, test_read_srs)
     const std::string ret_wkt = ref.getWKT();
     const std::string ret_proj4 = ref.getProj4();
 
-#if GDAL_VERSION_MAJOR <=1
-    const std::string wkt = "PROJCS[\"WGS 84 / UTM zone 17N\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-81],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AUTHORITY[\"EPSG\",\"32617\"]]";
-#else
-    const std::string wkt = "PROJCS[\"WGS 84 / UTM zone 17N\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-81],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],AUTHORITY[\"EPSG\",\"32617\"]]";
-#endif
-    EXPECT_EQ(ret_wkt, wkt);
+    // List of possible outputs
+    std::vector<std::string> const wkt_out = {
+        "PROJCS[\"WGS 84 / UTM zone 17N\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-81],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AUTHORITY[\"EPSG\",\"32617\"]]",
+        "PROJCS[\"WGS 84 / UTM zone 17N\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-81],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],AUTHORITY[\"EPSG\",\"32617\"]]"
+    };
+    EXPECT_TRUE(Utils::contains(wkt_out, ret_wkt));
 
     std::string proj4 = "+proj=utm +zone=17 +datum=WGS84 +units=m +no_defs";
     EXPECT_EQ(ret_proj4, proj4);
@@ -421,10 +415,9 @@ TEST(SpatialReferenceTest, test_bounds)
     pdal::Polygon p2 = p.transform(wgs84);
 
     BOX3D b2 = p2.bounds();
-    EXPECT_FLOAT_EQ(b2.minx, -83.42759776);
-    EXPECT_FLOAT_EQ(b2.miny, 39.01259905);
-    EXPECT_FLOAT_EQ(b2.maxx, -83.427551);
-    EXPECT_FLOAT_EQ(b2.maxy, 39.01261687);
+    EXPECT_FLOAT_EQ(static_cast<float>(b2.minx), -83.42759776f);
+    EXPECT_FLOAT_EQ(static_cast<float>(b2.miny), 39.01259905f);
+    EXPECT_FLOAT_EQ(static_cast<float>(b2.maxx), -83.427551f);
+    EXPECT_FLOAT_EQ(static_cast<float>(b2.maxy), 39.01261687f);
 
 }
-

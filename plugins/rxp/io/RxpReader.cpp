@@ -41,6 +41,7 @@
 #include "RxpReader.hpp"
 
 #include <pdal/StageFactory.hpp>
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {

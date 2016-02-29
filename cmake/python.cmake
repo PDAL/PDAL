@@ -1,7 +1,7 @@
 #
 # Python
 #
-find_package(PythonInterp QUIET )
+find_package(PythonInterp QUIET)
 find_package(PythonLibs QUIET 2.4)
 set_package_properties(PythonInterp PROPERTIES TYPE REQUIRED)
 if(PYTHONLIBS_FOUND)

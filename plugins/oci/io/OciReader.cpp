@@ -35,6 +35,7 @@
 #include <pdal/Compression.hpp>
 #include <pdal/GDALUtils.hpp>
 #include <pdal/GlobalEnvironment.hpp>
+#include <pdal/pdal_macros.hpp>
 
 #include "OciReader.hpp"
 

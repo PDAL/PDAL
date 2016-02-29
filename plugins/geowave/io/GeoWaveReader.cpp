@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include "GeoWaveReader.hpp"
+#include <pdal/pdal_macros.hpp>
 
 #include <jace/Jace.h>
 using jace::java_cast;
@@ -200,7 +201,7 @@ namespace pdal
         layout->registerDims(getDefaultDimensions());
 
         BasicAccumuloOperations accumuloOperations;
-        try 
+        try
         {
             accumuloOperations = java_new<BasicAccumuloOperations>(
                 java_new<String>(m_zookeeperUrl),
@@ -219,7 +220,7 @@ namespace pdal
             log()->get(LogLevel::Error) << "The credentials passed are invalid. " << e;
             return;
         }
-        
+
         AccumuloAdapterStore accumuloAdapterStore = java_new<AccumuloAdapterStore>(accumuloOperations);
 
         List attribs;
@@ -249,7 +250,7 @@ namespace pdal
             return;
 
         BasicAccumuloOperations accumuloOperations;
-        try 
+        try
         {
             accumuloOperations = java_new<BasicAccumuloOperations>(
                 java_new<String>(m_zookeeperUrl),
@@ -268,7 +269,7 @@ namespace pdal
             log()->get(LogLevel::Error) << "The credentials passed are invalid. " << e;
             return;
         }
-        
+
         AccumuloDataStore accumuloDataStore = java_new<AccumuloDataStore>(
             accumuloOperations);
 

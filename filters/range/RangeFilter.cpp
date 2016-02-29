@@ -35,6 +35,7 @@
 #include "RangeFilter.hpp"
 
 #include <pdal/util/Utils.hpp>
+#include <pdal/pdal_macros.hpp>
 
 #include <cctype>
 #include <limits>
@@ -60,7 +61,7 @@ namespace
 {
 
 RangeFilter::Range parseRange(const std::string& r)
-{ 
+{
     std::string::size_type pos, count;
     bool ilb = true;
     bool iub = true;

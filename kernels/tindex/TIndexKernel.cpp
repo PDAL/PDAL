@@ -48,6 +48,7 @@
 #include <merge/MergeFilter.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/pdal_macros.hpp>
 
 #include <cpl_string.h>
 
@@ -369,7 +370,7 @@ void TIndexKernel::mergeFile()
     {
         Stage *premerge = NULL;
         std::string driver = factory.inferReaderDriver(f.m_filename);
-        Stage *reader = factory.createStage(driver, true);
+        Stage *reader = factory.createStage(driver);
         if (!reader)
         {
             out << "Unable to create reader for file '" << f.m_filename << "'.";
@@ -382,7 +383,7 @@ void TIndexKernel::mergeFile()
 
         if (m_tgtSrsString != f.m_srs)
         {
-            Stage *repro = factory.createStage("filters.reprojection", true);
+            Stage *repro = factory.createStage("filters.reprojection");
             repro->setInput(*reader);
             Options reproOptions;
             reproOptions.add("out_srs", m_tgtSrsString);
@@ -395,7 +396,7 @@ void TIndexKernel::mergeFile()
         // can be used as a test here.
         if (!m_wkt.empty())
         {
-            Stage *crop = factory.createStage("filters.crop", true);
+            Stage *crop = factory.createStage("filters.crop");
             crop->setOptions(cropOptions);
             crop->setInput(*premerge);
             premerge = crop;
@@ -406,7 +407,7 @@ void TIndexKernel::mergeFile()
 
     std::string driver = factory.inferWriterDriver(m_filespec);
     Options factoryOptions = factory.inferWriterOptionsChanges(m_filespec);
-    Stage *writer = factory.createStage(driver, true);
+    Stage *writer = factory.createStage(driver);
     if (!writer)
     {
         out << "Unable to create reader for file '" << m_filespec << "'.";
@@ -520,7 +521,7 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
     StageFactory f;
 
     std::string driverName = f.inferReaderDriver(filename);
-    Stage *s = f.createStage(driverName, true);
+    Stage *s = f.createStage(driverName);
     Options ops;
     ops.add("filename", filename);
     setCommonOptions(ops);
@@ -547,7 +548,7 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
     {
         PointTable table;
 
-        Stage *hexer = f.createStage("filters.hexbin", true);
+        Stage *hexer = f.createStage("filters.hexbin");
         if (! hexer)
         {
 

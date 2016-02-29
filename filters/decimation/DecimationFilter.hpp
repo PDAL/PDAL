@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
+#include <pdal/plugin.hpp>
 
 extern "C" int32_t DecimationFilter_ExitFunc();
 extern "C" PF_ExitFunc DecimationFilter_InitPlugin();

@@ -216,13 +216,13 @@ TEST_F(OCITest, throughput)
     PointTable table;
 
     StageFactory f;
-    std::unique_ptr<Stage> reader(f.createStage("readers.nitf"));
+    Stage* reader(f.createStage("readers.nitf"));
     reader->setOptions(options);
 
     SplitFilter split(10000);
     split.setInput(*reader);
 
-    std::unique_ptr<Stage> writer(f.createStage("writers.oci"));
+    Stage* writer(f.createStage("writers.oci"));
     EXPECT_TRUE(writer.get());
     writer->setOptions(options);
     writer->setInput(split);
@@ -271,7 +271,7 @@ void writeData(Orientation::Enum orient, bool scaling, bool compression = false)
     SplitFilter split;
     split.setInput(reader);
 
-    std::unique_ptr<Stage> writer(f.createStage("writers.oci"));
+    Stage* writer(f.createStage("writers.oci"));
     EXPECT_TRUE(writer.get());
     writer->setOptions(options);
     writer->setInput(split);
@@ -302,7 +302,7 @@ void compare(const PointViewPtr candidate, std::string filename)
 
     EXPECT_EQ(source->size(), candidate->size());
     PointId limit = std::min(source->size(), candidate->size());
-    
+
     for (PointId i = 0; i < limit; ++i)
     {
         using namespace Dimension;
@@ -349,7 +349,7 @@ void readData()
     options.add("query", oss.str());
 
     StageFactory f;
-    std::unique_ptr<Stage> reader(f.createStage("readers.oci"));
+    Stage* reader(f.createStage("readers.oci"));
     EXPECT_TRUE(reader.get());
 
     reader->setOptions(options);

@@ -76,7 +76,7 @@ TEST(TerrasolidReader, Constructor)
     TerrasolidReader reader1;
 
     StageFactory f;
-    std::unique_ptr<Stage> reader2(f.createStage("readers.terrasolid"));
+    Stage* reader2(f.createStage("readers.terrasolid"));
 }
 
 

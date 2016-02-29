@@ -36,6 +36,7 @@
 
 #include <pdal/Filter.hpp>
 #include <pdal/PointViewIter.hpp>
+#include <pdal/plugin.hpp>
 
 extern "C" int32_t SortFilter_ExitFunc();
 extern "C" PF_ExitFunc SortFilter_InitPlugin();

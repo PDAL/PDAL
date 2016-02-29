@@ -40,6 +40,7 @@
 #include <merge/MergeFilter.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/GDALUtils.hpp>
+#include <pdal/plugin.hpp>
 
 extern "C" int32_t TIndexReader_ExitFunc();
 extern "C" PF_ExitFunc TIndexReader_InitPlugin();

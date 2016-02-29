@@ -383,7 +383,7 @@ TEST(PLangTest, log)
 
         reader.setOptions(reader_opts);
 
-        std::unique_ptr<Stage> xfilter(f.createStage("filters.programmable"));
+        Stage* xfilter(f.createStage("filters.programmable"));
         xfilter->setOptions(xfilter_opts);
         xfilter->setInput(reader);
 

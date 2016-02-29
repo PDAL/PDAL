@@ -59,7 +59,8 @@ void compare_contents(const std::string& las_file, const std::string& ntf_file)
 
     StageFactory f;
 
-    std::unique_ptr<Stage> las_reader(f.createStage("readers.las"));
+    Stage* las_reader(f.createStage("readers.las"));
+    EXPECT_TRUE(las_reader);
     las_reader->setOptions(las_opts);
     las_reader->prepare(lasPoints);
     PointViewSet lasViews = las_reader->execute(lasPoints);
@@ -74,7 +75,8 @@ void compare_contents(const std::string& las_file, const std::string& ntf_file)
     ntf_opts.add(ntf_opt);
 
     PointTable ntfPoints;
-    std::unique_ptr<Stage> ntf_reader(f.createStage("readers.nitf"));
+    Stage* ntf_reader(f.createStage("readers.nitf"));
+    EXPECT_TRUE(ntf_reader);
     ntf_reader->setOptions(ntf_opts);
     ntf_reader->prepare(ntfPoints);
     PointViewSet ntfViews = ntf_reader->execute(ntfPoints);
@@ -142,12 +144,12 @@ TEST(NitfWriterTest, test1)
         // writer_opts.add(verbose);
         writer_opts.add(writer_opt1);
 
-        std::unique_ptr<Stage> reader(f.createStage("readers.las"));
-        EXPECT_TRUE(reader.get());
+        Stage* reader(f.createStage("readers.las"));
+        EXPECT_TRUE(reader);
         reader->setOptions(reader_opts);
 
-        std::unique_ptr<Stage> writer(f.createStage("writers.nitf"));
-        EXPECT_TRUE(writer.get());
+        Stage* writer(f.createStage("writers.nitf"));
+        EXPECT_TRUE(writer);
         writer->setOptions(writer_opts);
         writer->setInput(*reader);
         {
@@ -198,7 +200,7 @@ TEST(NitfWriterTest, flex)
 
     PointTable table;
 
-    std::unique_ptr<Stage> reader(f.createStage("readers.nitf"));
+    Stage* reader(f.createStage("readers.nitf"));
     reader->setOptions(readerOps);
 
     reader->prepare(table);
@@ -228,7 +230,7 @@ TEST(NitfWriterTest, flex)
     Options writerOps;
     writerOps.add("filename", Support::temppath("test_#.ntf"));
 
-    std::unique_ptr<Stage> writer(f.createStage("writers.nitf"));
+    Stage* writer(f.createStage("writers.nitf"));
     writer->setOptions(writerOps);
     writer->setInput(reader2);
 
@@ -243,7 +245,7 @@ TEST(NitfWriterTest, flex)
         Options ops;
         ops.add("filename", filename);
 
-        std::unique_ptr<Stage> r(f.createStage("readers.nitf"));
+        Stage* r(f.createStage("readers.nitf"));
         r->setOptions(ops);
         EXPECT_EQ(r->preview().m_pointCount, vs[i]->size());
     }
@@ -260,7 +262,7 @@ TEST(NitfWriterTest, flex2)
 
     PointTable table;
 
-    std::unique_ptr<Stage> reader(f.createStage("readers.nitf"));
+    Stage* reader(f.createStage("readers.nitf"));
     reader->setOptions(readerOps);
 
     reader->prepare(table);
@@ -290,7 +292,7 @@ TEST(NitfWriterTest, flex2)
     Options writerOps;
     writerOps.add("filename", outfile);
 
-    std::unique_ptr<Stage> writer(f.createStage("writers.nitf"));
+    Stage* writer(f.createStage("writers.nitf"));
     writer->setOptions(writerOps);
     writer->setInput(reader2);
 
@@ -302,7 +304,7 @@ TEST(NitfWriterTest, flex2)
     Options ops;
     ops.add("filename", outfile);
 
-    std::unique_ptr<Stage> r(f.createStage("readers.nitf"));
+    Stage* r(f.createStage("readers.nitf"));
     r->setOptions(ops);
     EXPECT_EQ(r->preview().m_pointCount, v->size());
 }

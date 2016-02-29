@@ -34,8 +34,7 @@
 
 #include "TIndexReader.hpp"
 #include <pdal/GDALUtils.hpp>
-
-
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {
@@ -260,7 +259,7 @@ void TIndexReader::initialize()
                                     << " to merge filter" <<std::endl;
 
         std::string driver = m_factory.inferReaderDriver(f.m_filename);
-        Stage *reader = m_factory.createStage(driver, true);
+        Stage *reader = m_factory.createStage(driver);
         if (!reader)
         {
             std::stringstream out;
@@ -276,7 +275,7 @@ void TIndexReader::initialize()
         if (m_tgtSrsString != f.m_srs &&
             (m_tgtSrsString.size() && f.m_srs.size()))
         {
-            Stage *repro = m_factory.createStage("filters.reprojection", true);
+            Stage *repro = m_factory.createStage("filters.reprojection");
             repro->setInput(*reader);
             Options reproOptions;
             reproOptions.add("out_srs", m_tgtSrsString);
@@ -292,7 +291,7 @@ void TIndexReader::initialize()
         // can be used as a test here.
         if (!m_wkt.empty())
         {
-            Stage *crop = m_factory.createStage("filters.crop", true);
+            Stage *crop = m_factory.createStage("filters.crop");
             crop->setOptions(cropOptions);
             crop->setInput(*premerge);
             log()->get(LogLevel::Debug3) << "Cropping data with wkt '"

@@ -34,6 +34,7 @@
 
 #include "P2gWriter.hpp"
 #include <pdal/PointView.hpp>
+#include <pdal/pdal_macros.hpp>
 
 #include <iostream>
 #include <algorithm>

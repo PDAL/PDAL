@@ -37,7 +37,6 @@
 #include <list>
 
 #include <pdal/pdal_internal.hpp>
-#include <pdal/plugin.hpp>
 
 #include <pdal/Dimension.hpp>
 #include <pdal/Log.hpp>

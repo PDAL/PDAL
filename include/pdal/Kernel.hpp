@@ -41,7 +41,7 @@
 #include <string>
 #include <vector>
 
-#include <pdal/Stage.hpp>
+#include <pdal/StageFactory.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
@@ -78,6 +78,7 @@ public:
 protected:
     // this is protected; your derived class ctor will be the public entry point
     Kernel();
+    Stage& createStage(const std::string& name);
     Stage& makeReader(const std::string& inputFile);
     Stage& makeWriter(const std::string& outputFile, Stage& parent);
 
@@ -120,11 +121,6 @@ public:
     }
 
 protected:
-    Stage& ownStage(Stage *s)
-    {
-        m_stages.push_back(std::unique_ptr<Stage>(s));
-        return *s;
-    }
 
     bool m_usestdin;
     Log m_log;
@@ -160,7 +156,7 @@ private:
 
     std::vector<std::string> m_extra_options;
     std::map<std::string, Options> m_extraStageOptions;
-    std::vector<std::unique_ptr<Stage>> m_stages;
+    StageFactory m_factory;
 
     Kernel& operator=(const Kernel&); // not implemented
     Kernel(const Kernel&); // not implemented

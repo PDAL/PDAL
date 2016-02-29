@@ -72,9 +72,9 @@ public:
     bool isWriterPipeline() const
         { return (bool)getStage(); }
 
-    // return the pipeline reader endpoint (or NULL, if not a reader pipeline)
+    // return the pipeline reader endpoint (or nullptr, if not a reader pipeline)
     Stage* getStage() const
-        { return m_stages.empty() ? NULL : m_stages.back().get(); }
+        { return m_stages.empty() ? nullptr : m_stages.back(); }
 
     void prepare() const;
     point_count_t execute();
@@ -96,8 +96,7 @@ private:
 
     PointViewSet m_viewSet;
 
-    typedef std::vector<std::unique_ptr<Stage> > StagePtrList;
-    StagePtrList m_stages;
+    std::vector<Stage*> m_stages; // stage observer, never owner
     int m_progressFd;
 
     PipelineManager& operator=(const PipelineManager&); // not implemented

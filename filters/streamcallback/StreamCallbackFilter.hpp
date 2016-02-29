@@ -35,6 +35,9 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
+#include <pdal/plugin.hpp>
+
+#include <functional>
 
 extern "C" int32_t StreamCallbackFilter_ExitFunc();
 extern "C" PF_ExitFunc StreamCallbackFilter_InitPlugin();
