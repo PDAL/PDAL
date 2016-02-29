@@ -90,15 +90,6 @@ TEST(FileUtilsTest, test_readFileIntoString)
     EXPECT_TRUE(source == ref);
 }
 
-TEST(FileUtilsTest, test_getcwd)
-{
-#if 0
-    // this is hardcoded for mpg's environment
-    const std::string cwd = FileUtils::getcwd();
-    EXPECT_TRUE(cwd == "D:/dev/pdal/test/unit/");
-#endif
-}
-
 #ifdef _WIN32
 static const std::string drive = "A:";
 #else

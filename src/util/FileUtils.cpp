@@ -117,6 +117,7 @@ ostream *createFile(string const& filename, bool asBinary)
 
 bool directoryExists(const string& dirname)
 {
+    //ABELL - Seems we should be calling is_directory
     return pdalboost::filesystem::exists(dirname);
 }
 
@@ -220,13 +221,6 @@ string readFileIntoString(const string& filename)
         istreambuf_iterator<char>());
     closeFile(stream);
     return str;
-}
-
-
-string getcwd()
-{
-    const pdalboost::filesystem::path p = pdalboost::filesystem::current_path();
-    return addTrailingSlash(p.string());
 }
 
 

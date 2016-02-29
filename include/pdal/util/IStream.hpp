@@ -51,6 +51,8 @@ namespace pdal
 
 class IStreamMarker;
 
+/**
+*
 /// Stream wrapper for input of binary data.
 class PDAL_DLL IStream
 {

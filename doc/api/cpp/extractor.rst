@@ -1,11 +1,11 @@
-.. _cpp-pdal-bounds:
+.. _cpp-pdal-extractor:
 
 ******************************************************************************
-:cpp:class:`pdal::Bounds`
+:cpp:class:`pdal::Extractor`
 ******************************************************************************
 
 
-.. doxygenclass:: pdal::Bounds
+.. doxygenclass:: pdal::Extractor
    :members:
    :undoc-members:
 

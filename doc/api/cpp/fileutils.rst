@@ -1,11 +1,11 @@
-.. _cpp-pdal-bounds:
+.. _cpp-pdal-fileutils:
 
 ******************************************************************************
-:cpp:class:`pdal::Bounds`
+:cpp:class:`pdal::FileUtils`
 ******************************************************************************
 
 
-.. doxygenclass:: pdal::Bounds
+.. doxygenclass:: pdal::FileUtils
    :members:
    :undoc-members:
 
