@@ -49,7 +49,7 @@ static PluginInfo const s_info = PluginInfo(
     "CPD Kernel",
     "http://pdal.io/kernels/kernels.cpd.html" );
 
-CREATE_SHARED_PLUGIN(1, 0, CpdKernel, Kernel, s_info)
+CREATE_SHARED_PLUGIN(1, 0, CpdKernel, s_info)
 
 std::string CpdKernel::getName() const { return s_info.name; }
 
@@ -88,7 +88,7 @@ void CpdKernel::addSwitches(ProgramArgs& args)
         "Use the domain of the XY dimensions to automatically "
         "exaggerate the Z dimensions",
         m_auto_z_exaggeration);
-    args.add("auto-z-exaggeration-ratio", 
+    args.add("auto-z-exaggeration-ratio",
         "The scaling ratio for the Z-exaggeration. Z's range will "
         "be scaled to this ratio of the extent of the smallest XY extent.",
         m_auto_z_exaggeration_ratio, (float)(5.0 / 8.0));

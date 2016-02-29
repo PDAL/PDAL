@@ -51,7 +51,7 @@ static PluginInfo const s_info = PluginInfo(
         "http://pdal.io/stages/reader.gdal.html");
 
 
-CREATE_STATIC_PLUGIN(1, 0, GDALReader, Reader, s_info);
+CREATE_STATIC_PLUGIN(1, 0, GDALReader, s_info);
 
 
 std::string GDALReader::getName() const

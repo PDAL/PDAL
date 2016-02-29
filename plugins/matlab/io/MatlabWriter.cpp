@@ -45,7 +45,7 @@ static PluginInfo const s_info = PluginInfo(
     "http://pdal.io/stages/writers.matlab.html");
 
 
-CREATE_SHARED_PLUGIN(1, 0, MatlabWriter, Writer, s_info)
+CREATE_SHARED_PLUGIN(1, 0, MatlabWriter, s_info)
 std::string MatlabWriter::getName() const { return s_info.name; }
 
 

@@ -48,7 +48,7 @@ static PluginInfo const s_info = PluginInfo(
     "Split data based on a X/Y box length.",
     "http://pdal.io/stages/filters.splitter.html" );
 
-CREATE_STATIC_PLUGIN(1, 0, SplitterFilter, Filter, s_info)
+CREATE_STATIC_PLUGIN(1, 0, SplitterFilter, s_info)
 
 std::string SplitterFilter::getName() const { return s_info.name; }
 

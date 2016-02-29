@@ -46,7 +46,7 @@ static PluginInfo const s_info = PluginInfo(
     "Merge Kernel",
     "http://pdal.io/kernels/kernels.merge.html" );
 
-CREATE_STATIC_PLUGIN(1, 0, MergeKernel, Kernel, s_info)
+CREATE_STATIC_PLUGIN(1, 0, MergeKernel, s_info)
 
 std::string MergeKernel::getName() const
 {

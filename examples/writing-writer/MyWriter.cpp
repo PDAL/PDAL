@@ -14,7 +14,7 @@ namespace pdal
     "My Awesome Writer",
     "http://path/to/documentation" );
 
-  CREATE_SHARED_PLUGIN(1, 0, MyWriter, Writer, s_info);
+  CREATE_SHARED_PLUGIN(1, 0, MyWriter, s_info);
 
   std::string MyWriter::getName() const { return s_info.name; }
 

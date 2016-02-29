@@ -51,7 +51,7 @@ static PluginInfo const s_info =
     PluginInfo("filters.dartsample", "Dart sample filter",
                "http://pdal.io/stages/filters.dartsample.html");
 
-CREATE_SHARED_PLUGIN(1, 0, DartSampleFilter, Filter, s_info)
+CREATE_SHARED_PLUGIN(1, 0, DartSampleFilter, s_info)
 
 std::string DartSampleFilter::getName() const
 {

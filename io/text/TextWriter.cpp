@@ -51,7 +51,7 @@ static PluginInfo const s_info = PluginInfo(
     "Text Writer",
     "http://pdal.io/stages/writers.text.html" );
 
-CREATE_STATIC_PLUGIN(1, 0, TextWriter, Writer, s_info)
+CREATE_STATIC_PLUGIN(1, 0, TextWriter, s_info)
 
 std::string TextWriter::getName() const { return s_info.name; }
 

@@ -68,7 +68,7 @@ typedef pcl::PointCloud<pcl::PointXYZ> Cloud;
 static PluginInfo const s_info =
     PluginInfo("filters.height", "Height Filter", "");
 
-CREATE_SHARED_PLUGIN(1, 0, HeightFilter, Filter, s_info)
+CREATE_SHARED_PLUGIN(1, 0, HeightFilter, s_info)
 
 std::string HeightFilter::getName() const
 {

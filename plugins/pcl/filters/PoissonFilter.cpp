@@ -52,7 +52,7 @@ static PluginInfo const s_info =
     PluginInfo("filters.poisson", "Poisson filter",
                "http://pdal.io/stages/filters.poisson.html");
 
-CREATE_SHARED_PLUGIN(1, 0, PoissonFilter, Filter, s_info)
+CREATE_SHARED_PLUGIN(1, 0, PoissonFilter, s_info)
 
 std::string PoissonFilter::getName() const
 {

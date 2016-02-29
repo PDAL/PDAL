@@ -45,7 +45,7 @@ static PluginInfo const s_info = PluginInfo(
     "Random Kernel",
     "http://pdal.io/kernels/kernels.random.html" );
 
-CREATE_STATIC_PLUGIN(1, 0, RandomKernel, Kernel, s_info)
+CREATE_STATIC_PLUGIN(1, 0, RandomKernel, s_info)
 
 std::string RandomKernel::getName() const { return s_info.name; }
 

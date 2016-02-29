@@ -42,7 +42,7 @@ static PluginInfo const s_info = PluginInfo(
     "Randomize points in a view.",
     "http://pdal.io/stages/filters.randomize.html" );
 
-CREATE_STATIC_PLUGIN(1, 0, RandomizeFilter, Filter, s_info)
+CREATE_STATIC_PLUGIN(1, 0, RandomizeFilter, s_info)
 
 std::string RandomizeFilter::getName() const { return s_info.name; }
 

@@ -44,7 +44,7 @@ static PluginInfo const s_info = PluginInfo(
     "Greyhound Reader",
     "http://pdal.io/stages/readers.greyhound.html" );
 
-CREATE_SHARED_PLUGIN(1, 0, GreyhoundReader, Reader, s_info)
+CREATE_SHARED_PLUGIN(1, 0, GreyhoundReader, s_info)
 
 std::string GreyhoundReader::getName() const { return s_info.name; }
 

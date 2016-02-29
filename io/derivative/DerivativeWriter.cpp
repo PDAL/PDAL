@@ -57,7 +57,7 @@ static PluginInfo const s_info = PluginInfo(
                                      "Derivative writer",
                                      "http://pdal.io/stages/writers.derivative.html");
 
-CREATE_STATIC_PLUGIN(1, 0, DerivativeWriter, Writer, s_info)
+CREATE_STATIC_PLUGIN(1, 0, DerivativeWriter, s_info)
 
 std::string DerivativeWriter::getName() const
 {

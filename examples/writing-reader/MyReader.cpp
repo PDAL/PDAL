@@ -10,7 +10,7 @@ namespace pdal
     "My Awesome Reader",
     "http://link/to/documentation" );
 
-  CREATE_SHARED_PLUGIN(1, 0, MyReader, Reader, s_info)
+  CREATE_SHARED_PLUGIN(1, 0, MyReader, s_info)
 
   std::string MyReader::getName() const { return s_info.name; }
 

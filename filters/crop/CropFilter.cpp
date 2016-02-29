@@ -52,7 +52,7 @@ static PluginInfo const s_info = PluginInfo(
     "Filter points inside or outside a bounding box or a polygon if PDAL was built with GEOS support.",
     "http://pdal.io/stages/filters.crop.html" );
 
-CREATE_STATIC_PLUGIN(1, 0, CropFilter, Filter, s_info)
+CREATE_STATIC_PLUGIN(1, 0, CropFilter, s_info)
 
 std::string CropFilter::getName() const { return s_info.name; }
 

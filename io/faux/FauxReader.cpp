@@ -48,7 +48,7 @@ static PluginInfo const s_info = PluginInfo(
     "Faux Reader",
     "http://pdal.io/stages/readers.faux.html" );
 
-CREATE_STATIC_PLUGIN(1, 0, FauxReader, Reader, s_info)
+CREATE_STATIC_PLUGIN(1, 0, FauxReader, s_info)
 
 std::string FauxReader::getName() const { return s_info.name; }
 

@@ -49,7 +49,7 @@ static PluginInfo const s_info = PluginInfo(
     "Points2Grid Writer",
     "http://pdal.io/stages/writers.p2g.html" );
 
-CREATE_SHARED_PLUGIN(1, 0, P2gWriter, Writer, s_info)
+CREATE_SHARED_PLUGIN(1, 0, P2gWriter, s_info)
 
 std::string P2gWriter::getName() const { return s_info.name; }
 

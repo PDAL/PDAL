@@ -47,7 +47,7 @@ static PluginInfo const s_info = PluginInfo(
     "ILVIS2 Reader",
     "http://pdal.io/stages/readers.ilvis2.html" );
 
-CREATE_STATIC_PLUGIN(1, 0, Ilvis2Reader, Reader, s_info)
+CREATE_STATIC_PLUGIN(1, 0, Ilvis2Reader, s_info)
 
 std::string Ilvis2Reader::getName() const { return s_info.name; }
 

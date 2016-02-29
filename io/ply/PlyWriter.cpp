@@ -93,7 +93,7 @@ static PluginInfo const s_info = PluginInfo(
         "http://pdal.io/stages/writers.ply.html"
         );
 
-CREATE_STATIC_PLUGIN(1, 0, PlyWriter, Writer, s_info)
+CREATE_STATIC_PLUGIN(1, 0, PlyWriter, s_info)
 
 std::string PlyWriter::getName() const { return s_info.name; }
 
