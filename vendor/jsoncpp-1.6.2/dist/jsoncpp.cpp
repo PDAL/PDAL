@@ -6,28 +6,28 @@
 // //////////////////////////////////////////////////////////////////////
 
 /*
-The JsonCpp library's source code, including accompanying documentation,
+The JsonCpp library's source code, including accompanying documentation, 
 tests and demonstration applications, are licensed under the following
 conditions...
 
-The author (Baptiste Lepilleur) explicitly disclaims copyright in all
-jurisdictions which recognize such a disclaimer. In such jurisdictions,
+The author (Baptiste Lepilleur) explicitly disclaims copyright in all 
+jurisdictions which recognize such a disclaimer. In such jurisdictions, 
 this software is released into the Public Domain.
 
 In jurisdictions which do not recognize Public Domain property (e.g. Germany as of
 2010), this software is Copyright (c) 2007-2010 by Baptiste Lepilleur, and is
 released under the terms of the MIT License (see below).
 
-In jurisdictions which recognize Public Domain property, the user of this
-software may choose to accept it either as 1) Public Domain, 2) under the
-conditions of the MIT License (see below), or 3) under the terms of dual
+In jurisdictions which recognize Public Domain property, the user of this 
+software may choose to accept it either as 1) Public Domain, 2) under the 
+conditions of the MIT License (see below), or 3) under the terms of dual 
 Public Domain/MIT License conditions described here, as they choose.
 
 The MIT License is about as close to Public Domain as a license can get, and is
 described in clear, concise terms at:
 
    http://en.wikipedia.org/wiki/MIT_License
-
+   
 The full text of the MIT License follows:
 
 ========================================================================
@@ -3043,7 +3043,7 @@ Value::Int Value::asInt() const {
   case nullValue:
     return 0;
   case booleanValue:
-    return value_.bool_ ? static_cast<Value::Int>(1) : static_cast<Value::Int>(0);
+    return value_.bool_ ? 1 : 0;
   default:
     break;
   }
@@ -3065,7 +3065,7 @@ Value::UInt Value::asUInt() const {
   case nullValue:
     return 0;
   case booleanValue:
-    return value_.bool_ ? static_cast<Value::UInt>(1) : static_cast<Value::UInt>(0);
+    return value_.bool_ ? 1 : 0;
   default:
     break;
   }
@@ -5109,3 +5109,8 @@ std::ostream& operator<<(std::ostream& sout, Value const& root) {
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: src/lib_json/json_writer.cpp
 // //////////////////////////////////////////////////////////////////////
+
+
+
+
+
