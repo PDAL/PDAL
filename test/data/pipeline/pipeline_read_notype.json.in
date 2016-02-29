@@ -1,0 +1,9 @@
+{
+  "pipeline":[
+    "@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las",
+    {
+      "type":"filters.crop",
+      "bounds":"([0,1000000],[0,1000000],[0,1000000])"
+    }
+  ]
+}

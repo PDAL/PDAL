@@ -268,7 +268,7 @@ PipelineManagerPtr InfoKernel::makePipeline(const std::string& filename,
     {
         output->readPipeline(std::cin);
     }
-    else if (FileUtils::extension(filename) == ".xml")
+    else if (FileUtils::extension(filename) == ".xml" || FileUtils::extension(filename) == ".json")
     {
         output->readPipeline(filename);
     }

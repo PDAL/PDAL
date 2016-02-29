@@ -34,10 +34,13 @@
 
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReaderXML.hpp>
+#include <pdal/PipelineReaderJSON.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 namespace pdal
 {
 
+// TODO(chambbj): what to do about pipelines specified via STDIN?
 bool PipelineManager::readPipeline(std::istream& input)
 {
     PipelineReaderXML reader(*this);
@@ -48,9 +51,16 @@ bool PipelineManager::readPipeline(std::istream& input)
 
 bool PipelineManager::readPipeline(const std::string& filename)
 {
-    PipelineReaderXML reader(*this);
-
-    return reader.readPipeline(filename);
+    if (FileUtils::extension(filename) == ".xml")
+    {
+        PipelineReaderXML pipeReader(*this);
+        return pipeReader.readPipeline(filename);
+    }
+    else if (FileUtils::extension(filename) == ".json")
+    {
+        PipelineReaderJSON pipeReader(*this);
+        return pipeReader.readPipeline(filename);
+    }
 }
 
 

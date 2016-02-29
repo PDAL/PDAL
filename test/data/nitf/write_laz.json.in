@@ -1,0 +1,14 @@
+{
+  "pipeline":[
+    "@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las",
+    {
+      "filename":"@CMAKE_SOURCE_DIR@/test/temp/pdal-compressed.ntf",
+      "compression":true,
+      "FSCLASS":"U",
+      "OPHONE":5159664628,
+      "ONAME":"Howard Butler",
+      "IDATIM":20110516183337,
+      "FTITLE":"This is the title"
+    }
+  ]
+}
