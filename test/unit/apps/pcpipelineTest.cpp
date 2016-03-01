@@ -336,7 +336,7 @@ TEST(pipelineNitfTest, conversionJSON)
 TEST(pipelineNitfTest, las2nitf)
 { run_pipeline("nitf/las2nitf.xml"); }
 
-TEST(pipelineNitfTest, DISABLED_las2nitfJSON)
+TEST(pipelineNitfTest, las2nitfJSON)
 { run_pipeline("nitf/las2nitf.json"); }
 
 TEST(pipelineNitfTest, DISABLED_reader)
@@ -351,7 +351,7 @@ TEST(pipelineNitfTest, write_lazJSON)
 TEST(pipelineNitfTest, write_options)
 { run_pipeline("nitf/write_options.xml"); }
 
-TEST(pipelineNitfTest, DISABLED_write_optionsJSON)
+TEST(pipelineNitfTest, write_optionsJSON)
 { run_pipeline("nitf/write_options.json"); }
 
 // skip oracle tests for now

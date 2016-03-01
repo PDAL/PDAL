@@ -4,11 +4,11 @@
     {
       "filename":"@CMAKE_SOURCE_DIR@/test/temp/pdal-compressed.ntf",
       "compression":true,
-      "FSCLASS":"U",
-      "OPHONE":5159664628,
-      "ONAME":"Howard Butler",
-      "IDATIM":20110516183337,
-      "FTITLE":"This is the title"
+      "fsclas":"U",
+      "ophone":5159664628,
+      "oname":"Howard Butler",
+      "idatim":20110516183337,
+      "ftitle":"This is the title"
     }
   ]
 }
