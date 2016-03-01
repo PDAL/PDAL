@@ -214,11 +214,11 @@ PDAL_ADD_PLUGIN(smooth_libname kernel smooth
     FILES "${srcs}" "${incs}"
     LINK_WITH ${PCL_LIBRARIES} ${pclblock_libname})
 
-#if (WITH_TESTS)
-#    PDAL_ADD_TEST(pcltest
-#    FILES test/PCLBlockFilterTest.cpp
-#    LINK_WITH ${pclvisualizer_libname} ${pcd_reader_libname}
-#        ${pcd_writer_libname} ${pclblock_libname} $#{ground_filter_libname}
-#        ${pcl_libname} ${ground_kernel_libname} ${smooth_libname}
-#    )
-#endif()
+if (WITH_TESTS)
+    PDAL_ADD_TEST(pcltest
+    FILES test/PCLBlockFilterTest.cpp
+    LINK_WITH ${pclvisualizer_libname} ${pcd_reader_libname}
+        ${pcd_writer_libname} ${pclblock_libname} ${ground_filter_libname}
+        ${pcl_libname} ${ground_kernel_libname} ${smooth_libname}
+    )
+endif()

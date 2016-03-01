@@ -36,7 +36,6 @@
 
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineReaderJSON.hpp>
-#include <pdal/PipelineReaderXML.hpp>
 #include <pdal/PluginManager.hpp>
 #include <pdal/StageFactory.hpp>
 
@@ -46,29 +45,11 @@
 
 using namespace pdal;
 
-TEST(PCLBlockFilterTest, PCLBlockFilterTest_example_passthrough_xml)
+TEST(PCLBlockFilterTest, PCLBlockFilterTest_example_passthrough_json)
 {
     StageFactory f;
     Stage* filter(f.createStage("filters.pclblock"));
     EXPECT_TRUE(filter);
-
-    PipelineManager pipeline;
-    PipelineReaderXML pipelineReader(pipeline);
-    pipelineReader.readPipeline(
-        Support::configuredpath("filters/pcl/passthrough.xml"));
-    pipeline.execute();
-
-    PointViewSet viewSet = pipeline.views();
-    EXPECT_EQ(viewSet.size(), 1u);
-    PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 795u);
-}
-
-TEST(PCLBlockFilterTest, PCLBlockFilterTest_example_passthrough_json)
-{
-    StageFactory f;
-    std::unique_ptr<Stage> filter(f.createStage("filters.pclblock"));
-    EXPECT_TRUE(filter.get());
 
     PipelineManager pipeline;
     PipelineReaderJSON pipelineReader(pipeline);
