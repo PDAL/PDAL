@@ -227,8 +227,16 @@ void PipelineReaderJSON::parseElement_Pipeline(const Json::Value& tree)
         if (node.isString())
         {
             std::string filename = node.asString();
+            // surely not common, but if there is only one string, it must be a
+            // reader and not a writer
+            if (tree.size() == 1)
+            {
+                stage = parseReaderByFilename(filename);
+                curStageIsReader = true;
+                filenameIsSet = true;
+            }
             // all filenames assumed to be readers...
-            if (i < tree.size()-1)
+            else if (i < tree.size()-1)
             {
                 stage = parseReaderByFilename(filename);
                 curStageIsReader = true;

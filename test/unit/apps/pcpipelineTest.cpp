@@ -116,8 +116,11 @@ TEST(pipelineBaseTest, interpolate)
 TEST(pipelineBaseTest, interpolateJSON)
 { run_pipeline("pipeline/pipeline_interpolate.json"); }
 
-TEST(pipelineBaseTest, DISABLED_metadata_reader)
+TEST(pipelineBaseTest, metadata_reader)
 { run_info("pipeline/pipeline_metadata_reader.xml"); }
+
+TEST(pipelineBaseTest, metadata_readerJSON)
+{ run_info("pipeline/pipeline_metadata_reader.json"); }
 
 TEST(pipelineBaseTest, metadata_writer)
 { run_pipeline("pipeline/pipeline_metadata_writer.xml"); }
@@ -188,6 +191,9 @@ TEST(pipelineBpfTest, DISABLED_bpf2nitfJSON)
 TEST(pipelineFiltersTest, DISABLED_attribute)
 { run_pipeline("filters/attribute.xml"); }
 
+TEST(pipelineFiltersTest, attributeJSON)
+{ run_pipeline("filters/attribute.json"); }
+
 TEST(pipelineFiltersTest, chip)
 { run_pipeline("filters/chip.xml"); }
 
@@ -202,6 +208,10 @@ TEST(pipelineFiltersTest, chipperJSON)
 
 TEST(pipelineFiltersTest, DISABLED_colorize_multi)
 { run_pipeline("filters/colorize-multi.xml"); }
+
+// references a non-existent autzen-warped.tif
+TEST(pipelineFiltersTest, DISABLED_colorize_multiJSON)
+{ run_pipeline("filters/colorize-multi.json"); }
 
 TEST(pipelineFiltersTest, colorize)
 { run_pipeline("filters/colorize.xml"); }
@@ -230,8 +240,11 @@ TEST(pipelineFiltersTest, crop_wkt_2d_classification)
 TEST(pipelineFiltersTest, crop_wkt_2d_classificationJSON)
 { run_pipeline("filters/crop_wkt_2d_classification.json"); }
 
-TEST(pipelineFiltersTest, DISABLED_decimate)
+TEST(pipelineFiltersTest, decimate)
 { run_pipeline("filters/decimate.xml"); }
+
+TEST(pipelineFiltersTest, decimateJSON)
+{ run_pipeline("filters/decimate.json"); }
 
 TEST(pipelineFiltersTest, ferry)
 { run_pipeline("filters/ferry.xml"); }
@@ -281,8 +294,11 @@ TEST(pipelineFiltersTest, reproject)
 TEST(pipelineFiltersTest, reprojectJSON)
 { run_pipeline("filters/reproject.json"); }
 
-TEST(pipelineFiltersTest, DISABLED_sort)
+TEST(pipelineFiltersTest, sort)
 { run_info("filters/sort.xml"); }
+
+TEST(pipelineFiltersTest, sortJSON)
+{ run_info("filters/sort.json"); }
 
 TEST(pipelineFiltersTest, splitter)
 { run_pipeline("filters/splitter.xml"); }
@@ -305,8 +321,11 @@ TEST(pipelineHoleTest, cropJSON)
 TEST(pipelineIcebridgeTest, DISABLED_icebridge)
 { run_pipeline("icebridge/pipeline.xml"); }
 
-TEST(pipelineNitfTest, DISABLED_chipper)
+TEST(pipelineNitfTest, chipper)
 { run_info("nitf/chipper.xml"); }
+
+TEST(pipelineNitfTest, chipperJSON)
+{ run_info("nitf/chipper.json"); }
 
 TEST(pipelineNitfTest, conversion)
 { run_pipeline("nitf/conversion.xml"); }
@@ -317,7 +336,7 @@ TEST(pipelineNitfTest, conversionJSON)
 TEST(pipelineNitfTest, las2nitf)
 { run_pipeline("nitf/las2nitf.xml"); }
 
-TEST(pipelineNitfTest, DISABLED_las2nitfJSON)
+TEST(pipelineNitfTest, las2nitfJSON)
 { run_pipeline("nitf/las2nitf.json"); }
 
 TEST(pipelineNitfTest, DISABLED_reader)
@@ -332,7 +351,7 @@ TEST(pipelineNitfTest, write_lazJSON)
 TEST(pipelineNitfTest, write_options)
 { run_pipeline("nitf/write_options.xml"); }
 
-TEST(pipelineNitfTest, DISABLED_write_optionsJSON)
+TEST(pipelineNitfTest, write_optionsJSON)
 { run_pipeline("nitf/write_options.json"); }
 
 // skip oracle tests for now
