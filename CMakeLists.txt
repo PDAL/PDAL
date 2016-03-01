@@ -266,12 +266,14 @@ include_directories(vendor/rply-1.1.4)
 # PDAL_TARGET_OBJECTS is used to collect the driver object libraries
 set(PDAL_TARGET_OBJECTS "")
 
+if (WITH_TESTS)
+    enable_testing()
+endif()
 add_subdirectory(plugins)
 
 include_directories(vendor/pdalboost)
 
 if (WITH_TESTS)
-    enable_testing()
     if (MSVC)
         # Since tests link CRT dynamically (/MD[d]), require gtest to link dynamically too (default is /MT[d])
         option(gtest_force_shared_crt "Always use shared Visual C++ run-time DLL" ON)
