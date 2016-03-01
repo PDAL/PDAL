@@ -1,0 +1,24 @@
+{
+  "pipeline":[
+    {
+      "filename":"@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las",
+      "spatialreference":"EPSG:2993"
+    },
+    {
+      "type":"filters.decimation",
+      "step":2,
+      "offset":1
+    },
+    {
+      "type":"filters.colorization",
+      "raster":"@CMAKE_SOURCE_DIR@/test/data/autzen/autzen.jpg",
+      "dimensions":"Red:1:1,Green:2:1,Blue:3:1"
+    },
+    {
+      "type":"writers.text",
+      "filename":"@CMAKE_SOURCE_DIR@/test/temp/junk.txt",
+      "delimiter":",",
+      "write_header":false
+    }
+  ]
+}
