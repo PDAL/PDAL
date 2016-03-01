@@ -38,6 +38,7 @@
 #include <pdal/Filter.hpp>
 #include <pdal/KernelFactory.hpp>
 #include <pdal/PipelineManager.hpp>
+#include <pdal/PluginManager.hpp>
 #include <pdal/Reader.hpp>
 #include "Support.hpp"
 
@@ -102,7 +103,7 @@ protected:
 TEST_F(CpdKernelTest, Execution)
 {
     KernelFactory f;
-    void* stage= PluginManager::createObject("kernels.cpd");
+    void* stage = PluginManager::createObject("kernels.cpd");
 
     std::unique_ptr<Kernel> cpdKernel( static_cast<Kernel*>(stage));
     int argc = 7;
