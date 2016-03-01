@@ -265,10 +265,6 @@ include_directories(vendor/rply-1.1.4)
 # PDAL_TARGET_OBJECTS is used to collect the driver object libraries
 set(PDAL_TARGET_OBJECTS "")
 
-add_subdirectory(plugins)
-
-include_directories(vendor/pdalboost)
-
 if (WITH_TESTS)
     enable_testing()
     if (MSVC)
@@ -278,6 +274,10 @@ if (WITH_TESTS)
     add_subdirectory(vendor/gtest-1.7.0)
     add_subdirectory(test)
 endif()
+
+add_subdirectory(plugins)
+
+include_directories(vendor/pdalboost)
 
 add_subdirectory(vendor/pdalboost)
 add_subdirectory(src/util)
