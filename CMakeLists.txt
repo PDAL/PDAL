@@ -267,6 +267,12 @@ set(PDAL_TARGET_OBJECTS "")
 
 if (WITH_TESTS)
     enable_testing()
+endif()
+add_subdirectory(plugins)
+
+include_directories(vendor/pdalboost)
+
+if (WITH_TESTS)
     if (MSVC)
         # Since tests link CRT dynamically (/MD[d]), require gtest to link dynamically too (default is /MT[d])
         option(gtest_force_shared_crt "Always use shared Visual C++ run-time DLL" ON)
@@ -274,10 +280,6 @@ if (WITH_TESTS)
     add_subdirectory(vendor/gtest-1.7.0)
     add_subdirectory(test)
 endif()
-
-add_subdirectory(plugins)
-
-include_directories(vendor/pdalboost)
 
 add_subdirectory(vendor/pdalboost)
 add_subdirectory(src/util)
