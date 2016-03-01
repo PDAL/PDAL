@@ -208,9 +208,8 @@ Stage *PipelineReaderJSON::parseWriterByFilename(const std::string& filename)
 }
 
 
-bool PipelineReaderJSON::parseElement_Pipeline(const Json::Value& tree)
+void PipelineReaderJSON::parseElement_Pipeline(const Json::Value& tree)
 {
-    bool isWriter = false;
     StageFactory f;
     std::map<std::string, Stage*> tags;
     std::vector<Stage*> stages;
@@ -239,7 +238,6 @@ bool PipelineReaderJSON::parseElement_Pipeline(const Json::Value& tree)
             else
             {
                 stage = parseWriterByFilename(filename);
-                isWriter = true;
                 filenameIsSet = true;
             }
         }
@@ -259,7 +257,8 @@ bool PipelineReaderJSON::parseElement_Pipeline(const Json::Value& tree)
                     if (input.isString())
                         inputs.push_back(input.asString());
                     else
-                        throw pdal_error("Stage inputs must be specified as a string");
+                        throw pdal_error("Stage inputs must be specified as "
+                            "a string");
                 }
             }
 
@@ -277,7 +276,6 @@ bool PipelineReaderJSON::parseElement_Pipeline(const Json::Value& tree)
                 else if (Utils::startsWith(type, "writers."))
                 {
                     stage = &m_manager.addWriter(type);
-                    isWriter = true;
                 }
                 else
                     throw pdal_error("Could not determine type of " + type);
@@ -293,7 +291,6 @@ bool PipelineReaderJSON::parseElement_Pipeline(const Json::Value& tree)
                 else
                 {
                     stage = parseWriterByFilename(filename);
-                    isWriter = true;
                     filenameIsSet = true;
                 }
             }
@@ -345,12 +342,10 @@ bool PipelineReaderJSON::parseElement_Pipeline(const Json::Value& tree)
 
         i++;
     }
-
-    return isWriter;
 }
 
 
-bool PipelineReaderJSON::readPipeline(std::istream& input)
+void PipelineReaderJSON::readPipeline(std::istream& input)
 {
     Json::Value root;
     Json::Reader jsonReader;
@@ -360,11 +355,11 @@ bool PipelineReaderJSON::readPipeline(std::istream& input)
     Json::Value subtree = root["pipeline"];
     if (!subtree)
         throw pdal_error("PipelineReaderJSON: root element is not a Pipeline");
-    return parseElement_Pipeline(subtree);
+    parseElement_Pipeline(subtree);
 }
 
 
-bool PipelineReaderJSON::readPipeline(const std::string& filename)
+void PipelineReaderJSON::readPipeline(const std::string& filename)
 {
     m_inputJSONFile = filename;
 
@@ -376,11 +371,9 @@ bool PipelineReaderJSON::readPipeline(const std::string& filename)
         throw pdal_error(oss.str());
     }
 
-    bool isWriter = false;
-
     try
     {
-        isWriter = readPipeline(*input);
+        readPipeline(*input);
     }
     catch (const pdal_error& error)
     {
@@ -398,8 +391,6 @@ bool PipelineReaderJSON::readPipeline(const std::string& filename)
     FileUtils::closeFile(input);
 
     m_inputJSONFile = "";
-
-    return isWriter;
 }
 
 

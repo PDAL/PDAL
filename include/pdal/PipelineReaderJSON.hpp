@@ -58,16 +58,22 @@ public:
     PipelineReaderJSON(PipelineManager&, bool debug=false,
                    uint32_t verbose = 0);
 
-    // Use this to fill in a pipeline manager with a JSON file that
-    // contains a Writer as the last pipeline stage.
-    //
-    // returns true iff the JSON file is a writer pipeline (otherwise it is
-    // assumed to be a reader pipeline)
-    bool readPipeline(const std::string& filename);
-    bool readPipeline(std::istream& input);
+    /**
+      Read a JSON pipeline file into a PipelineManager.
+
+      \param filename  Filename to read.
+    */
+    void readPipeline(const std::string& filename);
+
+    /**
+      Read a JSON pipeline file from a stream into a PieplineManager.
+
+      \param input  Stream to read.
+    */
+    void readPipeline(std::istream& input);
 
 private:
-    bool parseElement_Pipeline(const Json::Value&);
+    void parseElement_Pipeline(const Json::Value&);
     Stage *parseReaderByFilename(const std::string& filename);
     Stage *parseWriterByFilename(const std::string& filename);
 

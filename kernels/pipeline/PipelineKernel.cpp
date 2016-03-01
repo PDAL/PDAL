@@ -93,27 +93,9 @@ int PipelineKernel::execute()
     if (m_progressFile.size())
         m_progressFd = Utils::openProgress(m_progressFile);
 
-    pdal::PipelineManager manager(m_progressFd);
+    PipelineManager manager(m_progressFd);
 
-    // TODO(chambbj): we want to get back to something like this, as implemented
-    // in https://github.com/PDAL/PDAL/commit/7668b140c17937fb3649e27ad181683429478cae
-    // bool isWriter = manager.readPipeline(m_inputFile);
-    bool isWriter = false;
-    if (FileUtils::extension(m_inputFile) == ".xml")
-    {
-        PipelineReaderXML pipeReader(manager, isDebug(), getVerboseLevel());
-        isWriter = pipeReader.readPipeline(m_inputFile);
-    }
-    else if (FileUtils::extension(m_inputFile) == ".json")
-    {
-        PipelineReaderJSON pipeReader(manager, isDebug(), getVerboseLevel());
-        isWriter = pipeReader.readPipeline(m_inputFile);
-    }
-
-    if (!isWriter)
-        throw pdal_error("Pipeline file does not contain a writer. "
-            "Use 'pdal info' to read the data.");
-
+    manager.readPipeline(m_inputFile);
     applyExtraStageOptionsRecursive(manager.getStage());
     manager.execute();
 

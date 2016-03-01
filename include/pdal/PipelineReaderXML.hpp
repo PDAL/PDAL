@@ -58,18 +58,24 @@ public:
     PipelineReaderXML(PipelineManager&, bool debug=false,
         uint32_t verbose = 0);
 
-    // Use this to fill in a pipeline manager with an XML file that
-    // contains a <Writer> as the last pipeline stage.
-    //
-    // returns true iff the xml file is a writer pipeline (otherwise it is
-    // assumed to be a reader pipeline)
-    bool readPipeline(const std::string& filename);
-    bool readPipeline(std::istream& input);
+    /**
+      Read an XML pipeline file into a PipelineManager.
+
+      \param filename  Filename to read from.
+    */
+    void readPipeline(const std::string& filename);
+
+    /**
+      Read an XML pipeline from a stream into a PipelineManager.
+      
+      \param input  Stream to read from.
+    */
+    void readPipeline(std::istream& input);
 
 private:
     typedef std::map<std::string, std::string> map_t;
 
-    bool parseElement_Pipeline(const pdalboost::property_tree::ptree&);
+    void parseElement_Pipeline(const pdalboost::property_tree::ptree&);
     Stage *parseElement_anystage(const std::string& name,
         const pdalboost::property_tree::ptree& subtree);
     Stage *parseElement_Reader(const pdalboost::property_tree::ptree& tree);

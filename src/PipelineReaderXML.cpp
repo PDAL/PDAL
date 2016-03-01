@@ -421,7 +421,7 @@ Stage *PipelineReaderXML::parseElement_Writer(const ptree& tree)
 }
 
 
-bool PipelineReaderXML::parseElement_Pipeline(const ptree& tree)
+void PipelineReaderXML::parseElement_Pipeline(const ptree& tree)
 {
     Stage *stage = NULL;
     Stage *writer = NULL;
@@ -437,8 +437,6 @@ bool PipelineReaderXML::parseElement_Pipeline(const ptree& tree)
     if (version != "1.0")
         throw pdal_error("PipelineReaderXML: unsupported pipeline xml version");
 
-    bool isWriter = false;
-
     for (auto iter = tree.begin(); iter != tree.end(); ++iter)
     {
         const std::string& name = iter->first;
@@ -451,7 +449,6 @@ bool PipelineReaderXML::parseElement_Pipeline(const ptree& tree)
         else if (name == "Writer")
         {
             writer = parseElement_Writer(subtree);
-            isWriter = true;
         }
         else if (name == "<xmlattr>")
         {
@@ -469,13 +466,11 @@ bool PipelineReaderXML::parseElement_Pipeline(const ptree& tree)
         throw pdal_error("PipelineReaderXML: extra nodes at front of "
             "writer pipeline");
     }
-
-    return isWriter;
 }
 
-bool PipelineReaderXML::readPipeline(std::istream& input)
-{
 
+void PipelineReaderXML::readPipeline(std::istream& input)
+{
     ptree tree;
 
     xml_parser::read_xml(input, tree, xml_parser::no_comments);
@@ -483,22 +478,19 @@ bool PipelineReaderXML::readPipeline(std::istream& input)
     pdalboost::optional<ptree> opt(tree.get_child_optional("Pipeline"));
     if (!opt.is_initialized())
         throw pdal_error("PipelineReaderXML: root element is not Pipeline");
-    ptree subtree = opt.get();
-    return parseElement_Pipeline(subtree);
+    parseElement_Pipeline(opt.get());
 }
 
 
-bool PipelineReaderXML::readPipeline(const std::string& filename)
+void PipelineReaderXML::readPipeline(const std::string& filename)
 {
     m_inputXmlFile = filename;
 
     std::istream* input = FileUtils::openFile(filename);
 
-    bool isWriter = false;
-
     try
     {
-        isWriter = readPipeline(*input);
+        readPipeline(*input);
     }
     catch (const pdal_error& error)
     {
@@ -516,8 +508,6 @@ bool PipelineReaderXML::readPipeline(const std::string& filename)
     FileUtils::closeFile(input);
 
     m_inputXmlFile = "";
-
-    return isWriter;
 }
 
 
