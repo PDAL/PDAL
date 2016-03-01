@@ -341,7 +341,6 @@ TEST(PLangTest, PLangTest_reentry)
 
 TEST(PLangTest, log)
 {
-    StageFactory f;
     // verify we can redirect the stdout inside the python script
 
     Options reader_opts;
@@ -379,6 +378,7 @@ TEST(PLangTest, log)
     }
 
     {
+        StageFactory f;
         FauxReader reader;
 
         reader.setOptions(reader_opts);

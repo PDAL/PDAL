@@ -223,7 +223,7 @@ TEST_F(OCITest, throughput)
     split.setInput(*reader);
 
     Stage* writer(f.createStage("writers.oci"));
-    EXPECT_TRUE(writer.get());
+    EXPECT_TRUE(writer);
     writer->setOptions(options);
     writer->setInput(split);
 

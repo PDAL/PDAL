@@ -123,7 +123,7 @@ PointViewPtr CpdKernel::readFile(const std::string& filename,
         boundsOptions.add("bounds", m_bounds);
         StageFactory f;
 
-        Stage* crop = f.createStage("filters.crop");
+        Stage *crop = f.createStage("filters.crop");
         crop->setInput(reader);
         crop->setOptions(boundsOptions);
         crop->prepare(table);
