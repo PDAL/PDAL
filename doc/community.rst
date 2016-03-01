@@ -45,6 +45,9 @@ take contributions in all forms, and we welcome those who are willing to roll
 up their sleeves and start filing tickets, pushing code, generating builds, and
 answering questions.
 
+There is also a public Gitter chat room integrated with the `GitHub`_ repository
+and available at https://gitter.im/PDAL/PDAL or Gitter client.
+
 .. seealso::
 
     :ref:`development_index` provides more information on how the PDAL software
