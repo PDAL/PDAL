@@ -1,0 +1,16 @@
+{
+  "pipeline": [
+    {
+      "filename": "@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las",
+      "tag": "A"
+    },
+    {
+      "filename": "@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las",
+      "tag": "B"
+    },
+    {
+      "type": "filters.merge",
+      "inputs": ["A", "B"]
+    }
+  ]
+}
