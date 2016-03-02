@@ -1,6 +1,0 @@
-{
-  "pipeline":[
-    "@CMAKE_SOURCE_DIR@/test/temp/out2.las",
-    "@CMAKE_SOURCE_DIR@/test/temp/out3.las"
-  ]
-}

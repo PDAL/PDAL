@@ -1,0 +1,24 @@
+{
+  "pipeline":[
+    {
+      "filename":"@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las",
+      "spatialreference":"PROJCS[\"NAD_1983_Oregon_Statewide_Lambert_Feet_Intl\",GEOGCS[\"GCS_North_American_1983\",DATUM[\"D_North_American_1983\",SPHEROID[\"GRS_1980\",6378137.0,298.257222101]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.017453292519943295]],PROJECTION[\"Lambert_Conformal_Conic_2SP\"],PARAMETER[\"False_Easting\",1312335.958005249],PARAMETER[\"False_Northing\",0.0],PARAMETER[\"Central_Meridian\",-120.5],PARAMETER[\"Standard_Parallel_1\",43.0],PARAMETER[\"Standard_Parallel_2\",45.5],PARAMETER[\"Latitude_Of_Origin\",41.75],UNIT[\"Foot\",0.3048]]"
+    },
+    {
+      "type":"filters.crop",
+      "bounds":"([0,1000000],[0,1000000],[0,1000000])"
+    },
+    {
+      "filename":"@CMAKE_SOURCE_DIR@/test/temp/pdal-compressed.ntf",
+      "compression":false,
+      "fsclas":"U",
+      "ophone":5159664628,
+      "oname":"Howard Butler",
+      "idatim":20110516183337,
+      "ftitle":"This is the title",
+      "fsctlh":"N",
+      "aimidb":"COUNTRY:US,ACQUISITION_DATE:Someday,MISSION_IDENTIFICATION:IDENT,LOCATION:Somewhere",
+      "acftb":"AC_MSN_ID:ID"
+    }
+  ]
+}

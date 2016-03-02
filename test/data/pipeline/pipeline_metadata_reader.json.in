@@ -1,5 +1,0 @@
-{
-  "pipeline":[
-    "@CMAKE_SOURCE_DIR@/test/data/las/interesting.las"
-  ]
-}

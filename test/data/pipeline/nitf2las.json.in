@@ -1,0 +1,6 @@
+{
+  "pipeline":[
+    "@CMAKE_SOURCE_DIR@/test/data/nitf/autzen-utm10.ntf",
+    "@CMAKE_SOURCE_DIR@/test/temp/nitf.las"
+  ]
+}

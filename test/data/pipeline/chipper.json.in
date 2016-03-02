@@ -1,0 +1,10 @@
+{
+  "pipeline":[
+    "@CMAKE_SOURCE_DIR@/test/data/autzen/autzen-utm.las",
+    {
+      "type":"filters.chipper",
+      "capacity":25
+    },
+    "@CMAKE_SOURCE_DIR@/test/temp/autzen-utm-chipped-25.las"
+  ]
+}
