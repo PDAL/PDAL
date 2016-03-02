@@ -112,7 +112,8 @@ public:
                 throw pdal_error("PipelineReaderJSON: "
                                  "expected child stage missing");
             if (m_numStages > 1)
-                throw pdal_error("PipelineReaderJSON: extra child stages found");
+                throw pdal_error("PipelineReaderJSON: extra child stages "
+                    "found");
         }
         if (m_cardinality == Many)
         {
@@ -221,7 +222,6 @@ void PipelineReaderJSON::parseElement_Pipeline(const Json::Value& tree)
         Stage* stage = NULL;
 
         bool curStageIsReader = false;
-        bool filenameIsSet = false;
 
         // strings are assumed to be filenames
         if (node.isString())
@@ -229,28 +229,21 @@ void PipelineReaderJSON::parseElement_Pipeline(const Json::Value& tree)
             std::string filename = node.asString();
             // surely not common, but if there is only one string, it must be a
             // reader and not a writer
-            if (tree.size() == 1)
+            // all filenames assumed to be readers except the last.
+            if (tree.size() == 1 || (i < tree.size()-1))
             {
                 stage = parseReaderByFilename(filename);
                 curStageIsReader = true;
-                filenameIsSet = true;
             }
-            // all filenames assumed to be readers...
-            else if (i < tree.size()-1)
-            {
-                stage = parseReaderByFilename(filename);
-                curStageIsReader = true;
-                filenameIsSet = true;
-            }
-            // ...except the last
             else
             {
                 stage = parseWriterByFilename(filename);
-                filenameIsSet = true;
             }
         }
         else
         {
+            bool filenameIsSet = false;
+
             std::string type, filename, tag;
             if (node.isMember("type"))
                 type = node["type"].asString();
@@ -335,8 +328,8 @@ void PipelineReaderJSON::parseElement_Pipeline(const Json::Value& tree)
             for (auto const& input : inputs)
             {
                 if (!tags[input])
-                    throw pdal_error("Invalid pipeline, undefined stage " + input);
-
+                    throw pdal_error("Invalid pipeline, undefined stage " +
+                        input);
                 stage->setInput(*tags[input]);
             }
         }
@@ -400,6 +393,5 @@ void PipelineReaderJSON::readPipeline(const std::string& filename)
 
     m_inputJSONFile = "";
 }
-
 
 } // namespace pdal
