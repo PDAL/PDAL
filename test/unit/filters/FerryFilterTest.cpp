@@ -38,8 +38,6 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <FauxReader.hpp>
-#include <pdal/PipelineReaderJSON.hpp>
-#include <pdal/PipelineReaderXML.hpp>
 #include <FerryFilter.hpp>
 #include <LasReader.hpp>
 #include <StreamCallbackFilter.hpp>
@@ -57,8 +55,7 @@ TEST(FerryFilterTest, create)
 TEST(FerryFilterTest, test_ferry_copy_xml)
 {
     PipelineManager mgr;
-    PipelineReaderXML specReader(mgr);
-    specReader.readPipeline(Support::configuredpath("filters/ferry.xml"));
+    mgr.readPipeline(Support::configuredpath("filters/ferry.xml"));
 
     mgr.execute();
     ConstPointTableRef table(mgr.pointTable());
@@ -129,8 +126,8 @@ TEST(FerryFilterTest, stream)
 TEST(FerryFilterTest, test_ferry_copy_json)
 {
     PipelineManager mgr;
-    PipelineReaderJSON specReader(mgr);
-    specReader.readPipeline(Support::configuredpath("filters/ferry.json"));
+
+    mgr.readPipeline(Support::configuredpath("filters/ferry.json"));
 
     mgr.execute();
     ConstPointTableRef table(mgr.pointTable());

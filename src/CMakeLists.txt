@@ -52,8 +52,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/Metadata.hpp"
   "${PDAL_HEADERS_DIR}/Options.hpp"
   "${PDAL_HEADERS_DIR}/PipelineManager.hpp"
-  "${PDAL_HEADERS_DIR}/PipelineReaderJSON.hpp"
-  "${PDAL_HEADERS_DIR}/PipelineReaderXML.hpp"
   "${PDAL_HEADERS_DIR}/PipelineWriter.hpp"
   "${PDAL_HEADERS_DIR}/PointContainer.hpp"
   "${PDAL_HEADERS_DIR}/PointLayout.hpp"
@@ -69,7 +67,8 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/StageFactory.hpp"
   "${PDAL_HEADERS_DIR}/StageWrapper.hpp"
   "${PDAL_HEADERS_DIR}/Writer.hpp"
-  #"${PDAL_SRC_DIR}/PipelineReader.hpp"
+  "${PDAL_SRC_DIR}/PipelineReaderJSON.hpp"
+  "${PDAL_SRC_DIR}/PipelineReaderXML.hpp"
   "${PDAL_SRC_DIR}/StageRunner.hpp"
     ${PDAL_XML_HEADER}
     ${DB_DRIVER_HEADERS}

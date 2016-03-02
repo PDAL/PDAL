@@ -35,8 +35,6 @@
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/PipelineManager.hpp>
-#include <pdal/PipelineReaderJSON.hpp>
-#include <pdal/PipelineReaderXML.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/StageWrapper.hpp>
 #include <stats/StatsFilter.hpp>
@@ -63,7 +61,6 @@ public:
 TEST_F(PredicateFilterTest, PredicateFilterTest_test1)
 {
     StageFactory f;
-
 
     BOX3D bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
     Options readerOps;
@@ -358,9 +355,8 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test5)
 TEST_F(PredicateFilterTest, PredicateFilterTest_PipelineXML)
 {
     PipelineManager mgr;
-    PipelineReaderXML reader(mgr);
 
-    reader.readPipeline(Support::configuredpath("plang/from-module.xml"));
+    mgr.readPipeline(Support::configuredpath("plang/from-module.xml"));
     point_count_t cnt = mgr.execute();
     EXPECT_EQ(cnt, 1u);
 }
@@ -368,9 +364,8 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_PipelineXML)
 TEST_F(PredicateFilterTest, PredicateFilterTest_PipelineJSON)
 {
     PipelineManager mgr;
-    PipelineReaderJSON reader(mgr);
 
-    reader.readPipeline(Support::configuredpath("plang/from-module.json"));
+    mgr.readPipeline(Support::configuredpath("plang/from-module.json"));
     point_count_t cnt = mgr.execute();
     EXPECT_EQ(cnt, 1u);
 }
@@ -378,9 +373,8 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_PipelineJSON)
 TEST_F(PredicateFilterTest, PredicateFilterTest_EmbedXML)
 {
     PipelineManager mgr;
-    PipelineReaderXML reader(mgr);
 
-    reader.readPipeline(Support::configuredpath("plang/predicate-embed.xml"));
+    mgr.readPipeline(Support::configuredpath("plang/predicate-embed.xml"));
     point_count_t cnt = mgr.execute();
     EXPECT_EQ(cnt, 1u);
 }
@@ -388,9 +382,8 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_EmbedXML)
 TEST_F(PredicateFilterTest, PredicateFilterTest_EmbedJSON)
 {
     PipelineManager mgr;
-    PipelineReaderJSON reader(mgr);
 
-    reader.readPipeline(Support::configuredpath("plang/predicate-embed.json"));
+    mgr.readPipeline(Support::configuredpath("plang/predicate-embed.json"));
     point_count_t cnt = mgr.execute();
     EXPECT_EQ(cnt, 1u);
 }

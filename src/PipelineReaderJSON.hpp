@@ -51,10 +51,11 @@ class PipelineManager;
 
 class PDAL_DLL PipelineReaderJSON
 {
+    friend class PipelineManager;
+
 private:
     class StageParserContext;
 
-public:
     PipelineReaderJSON(PipelineManager&, bool debug=false,
                    uint32_t verbose = 0);
 
@@ -66,18 +67,16 @@ public:
     void readPipeline(const std::string& filename);
 
     /**
-      Read a JSON pipeline file from a stream into a PieplineManager.
+      Read a JSON pipeline file from a stream into a PipelineManager.
 
       \param input  Stream to read.
     */
     void readPipeline(std::istream& input);
 
-private:
     void parseElement_Pipeline(const Json::Value&);
     Stage *parseReaderByFilename(const std::string& filename);
     Stage *parseWriterByFilename(const std::string& filename);
 
-private:
     PipelineManager& m_manager;
     bool m_isDebug;
     uint32_t m_verboseLevel;
