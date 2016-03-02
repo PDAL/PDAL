@@ -34,6 +34,7 @@
 
 #include <pdal/pdal_test_main.hpp>
 
+#include <pdal/StageFactory.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Utils.hpp>
 #include "Support.hpp"
@@ -60,19 +61,6 @@ static void run_pipeline(std::string const& pipeline)
     if (stat)
         std::cerr << output << std::endl;
 }
-
-// // pipeines with no writer will be invoked via `pdal info`
-// static void run_info(std::string const& pipeline)
-// {
-//     const std::string cmd = Support::binpath(Support::exename("pdal") + " info");
-//
-//     std::string output;
-//     std::string file(Support::configuredpath(pipeline));
-//     int stat = pdal::Utils::run_shell_command(cmd + " " + file, output);
-//     EXPECT_EQ(0, stat);
-//     if (stat)
-//         std::cerr << output << std::endl;
-// }
 
 #ifdef PDAL_COMPILER_MSVC
 TEST(pipelineBaseTest, no_input)
@@ -146,23 +134,87 @@ testing::Values(
   "pipeline/stats.json"
 ));
 
-INSTANTIATE_TEST_CASE_P(plugins, json,
+class jsonWithProgrammable : public testing::TestWithParam<const char*> {};
+
+TEST_P(jsonWithProgrammable, pipeline)
+{
+  pdal::StageFactory f;
+  pdal::Stage* s = f.createStage("filters.programmable");
+  if (s)
+      run_pipeline(GetParam());
+  else
+      std::cerr << "WARNING: could not create filters.programmable, skipping test" << std::endl;
+}
+
+INSTANTIATE_TEST_CASE_P(plugins, jsonWithProgrammable,
+testing::Values(
+  "pipeline/programmable-hag.json",
+  "pipeline/programmable-update-y-dims.json"
+));
+
+class jsonWithPredicate : public testing::TestWithParam<const char*> {};
+
+TEST_P(jsonWithPredicate, pipeline)
+{
+  pdal::StageFactory f;
+  pdal::Stage* s = f.createStage("filters.predicate");
+  if (s)
+      run_pipeline(GetParam());
+  else
+      std::cerr << "WARNING: could not create filters.predicate, skipping test" << std::endl;
+}
+
+INSTANTIATE_TEST_CASE_P(plugins, jsonWithPredicate,
+testing::Values(
+  "pipeline/from-module.json",
+  "pipeline/predicate-embed.json",
+  "pipeline/predicate-keep-ground-and-unclass.json",
+  "pipeline/predicate-keep-last-return.json",
+  "pipeline/predicate-keep-specified-returns.json"
+));
+
+class jsonWithNITF : public testing::TestWithParam<const char*> {};
+
+TEST_P(jsonWithNITF, pipeline)
+{
+  pdal::StageFactory f;
+  pdal::Stage* s1 = f.createStage("readers.nitf");
+  pdal::Stage* s2 = f.createStage("writers.nitf");
+  if (s1 && s2)
+      run_pipeline(GetParam());
+  else
+      std::cerr << "WARNING: could not create readers.nitf or writers.nitf, skipping test" << std::endl;
+}
+
+INSTANTIATE_TEST_CASE_P(plugins, jsonWithNITF,
 testing::Values(
   "pipeline/bpf2nitf.json",
-  "pipeline/from-module.json",
   "pipeline/las2nitf.json",
   "pipeline/las2nitf-2.json",
   "pipeline/las2nitf-crop-with-options.json",
   "pipeline/nitf2las.json",
-  "pipeline/nitf-chipper.json",
-  "pipeline/p2g-writer.json",
-  "pipeline/predicate-embed.json",
-  "pipeline/predicate-keep-ground-and-unclass.json",
-  "pipeline/predicate-keep-last-return.json",
-  "pipeline/predicate-keep-specified-returns.json",
-  "pipeline/programmable-hag.json",
-  "pipeline/programmable-update-y-dims.json"
+  "pipeline/nitf-chipper.json"
 ));
+
+class jsonWithP2G : public testing::TestWithParam<const char*> {};
+
+TEST_P(jsonWithP2G, pipeline)
+{
+  pdal::StageFactory f;
+  pdal::Stage* s = f.createStage("writers.p2g");
+  if (s)
+      run_pipeline(GetParam());
+  else
+      std::cerr << "WARNING: could not create writers.p2g, skipping test" << std::endl;
+}
+
+INSTANTIATE_TEST_CASE_P(plugins, jsonWithP2G,
+testing::Values(
+  "pipeline/p2g-writer.json"
+));
+
+
+
 
 // TEST(pipelineFiltersTest, DISABLED_crop_reproject)
 // { run_pipeline("filters/crop_reproject.xml"); }
