@@ -140,7 +140,7 @@ testing::Values(
   "pipeline/range_z_classification.json",
   "pipeline/range_classification.json",
   "pipeline/reproject.json",
-  "pipeline/sbet2txt.json"
+  "pipeline/sbet2txt.json",
   "pipeline/sort.json",
   "pipeline/splitter.json",
   "pipeline/stats.json"
