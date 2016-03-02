@@ -17,32 +17,7 @@
       "software_id":"forward",
       "system_id":"PDAL2NTF",
       "creation_doy":"forward",
-      "creation_year":"forward",
-
+      "creation_year":"forward"
     }
   ]
 }
-
-<?xml version="1.0" encoding="utf-8"?>
-<Pipeline version="1.0">
-    <Writer type="writers.nitf">
-        <Option name="metadata">
-            <Options>
-                <Option name="vlr">
-                    dGhpcyBpcyBzb21lIG5ldyB2bHIgdGV4dA==
-                    <Options>
-                        <Option name="record_id">
-                            4321
-                        </Option>
-                        <Option name="user_id">
-                            new VLR
-                        </Option>
-                        <Option name="description">
-                            a description of a new VLR
-                        </Option>
-                    </Options>
-                </Option>
-            </Options>
-        </Option>
-</Writer>
-</Pipeline>

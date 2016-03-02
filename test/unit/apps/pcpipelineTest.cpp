@@ -107,56 +107,29 @@ TEST(pipelineBaseTest, common_opts)
 TEST(pipelineBaseTest, drop_color)
 { run_pipeline("pipeline/drop_color.xml"); }
 
-TEST(pipelineBaseTest, drop_colorJSON)
-{ run_pipeline("pipeline/drop_color.json"); }
-
 TEST(pipelineBaseTest, interpolate)
 { run_pipeline("pipeline/pipeline_interpolate.xml"); }
-
-TEST(pipelineBaseTest, interpolateJSON)
-{ run_pipeline("pipeline/pipeline_interpolate.json"); }
 
 TEST(pipelineBaseTest, metadata_reader)
 { run_info("pipeline/pipeline_metadata_reader.xml"); }
 
-TEST(pipelineBaseTest, metadata_readerJSON)
-{ run_info("pipeline/pipeline_metadata_reader.json"); }
-
 TEST(pipelineBaseTest, metadata_writer)
 { run_pipeline("pipeline/pipeline_metadata_writer.xml"); }
-
-TEST(pipelineBaseTest, DISABLED_metadata_writerJSON)
-{ run_pipeline("pipeline/pipeline_metadata_writer.json"); }
 
 TEST(pipelineBaseTest, mississippi)
 { run_pipeline("pipeline/pipeline_mississippi.xml"); }
 
-TEST(pipelineBaseTest, mississippiJSON)
-{ run_pipeline("pipeline/pipeline_mississippi.json"); }
-
 TEST(pipelineBaseTest, mississippi_reverse)
 { run_pipeline("pipeline/pipeline_mississippi_reverse.xml"); }
-
-TEST(pipelineBaseTest, mississippi_reverseJSON)
-{ run_pipeline("pipeline/pipeline_mississippi_reverse.json"); }
 
 TEST(pipelineBaseTest, multioptions)
 { run_info("pipeline/pipeline_multioptions.xml"); }
 
-TEST(pipelineBaseTest, multioptionsJSON)
-{ run_info("pipeline/pipeline_multioptions.json"); }
-
 TEST(pipelineBaseTest, read)
 { run_info("pipeline/pipeline_read.xml"); }
 
-TEST(pipelineBaseTest, readJSON)
-{ run_info("pipeline/pipeline_read.json"); }
-
 TEST(pipelineBaseTest, read_notype)
 { run_info("pipeline/pipeline_read_notype.xml"); }
-
-TEST(pipelineBaseTest, read_notypeJSON)
-{ run_info("pipeline/pipeline_read_notype.json"); }
 
 TEST(pipelineBaseTest, readcomments)
 { run_info("pipeline/pipeline_readcomments.xml"); }
@@ -164,14 +137,8 @@ TEST(pipelineBaseTest, readcomments)
 TEST(pipelineBaseTest, write)
 { run_pipeline("pipeline/pipeline_write.xml"); }
 
-TEST(pipelineBaseTest, writeJSON)
-{ run_pipeline("pipeline/pipeline_write.json"); }
-
 TEST(pipelineBaseTest, write2)
 { run_pipeline("pipeline/pipeline_write2.xml"); }
-
-TEST(pipelineBaseTest, write2JSON)
-{ run_pipeline("pipeline/pipeline_write2.json"); }
 
 TEST(pipelineBaseTest, pipeline_writecomments)
 { run_pipeline("pipeline/pipeline_writecomments.xml"); }
@@ -179,45 +146,23 @@ TEST(pipelineBaseTest, pipeline_writecomments)
 TEST(pipelineBpfTest, bpf)
 { run_pipeline("bpf/bpf.xml"); }
 
-TEST(pipelineBpfTest, bpfJSON)
-{ run_pipeline("bpf/bpf.json"); }
-
 TEST(pipelineBpfTest, bpf2nitf)
 { run_pipeline("bpf/bpf2nitf.xml"); }
-
-TEST(pipelineBpfTest, DISABLED_bpf2nitfJSON)
-{ run_pipeline("bpf/bpf2nitf.json"); }
 
 TEST(pipelineFiltersTest, DISABLED_attribute)
 { run_pipeline("filters/attribute.xml"); }
 
-TEST(pipelineFiltersTest, attributeJSON)
-{ run_pipeline("filters/attribute.json"); }
-
 TEST(pipelineFiltersTest, chip)
 { run_pipeline("filters/chip.xml"); }
-
-TEST(pipelineFiltersTest, chipJSON)
-{ run_pipeline("filters/chip.json"); }
 
 TEST(pipelineFiltersTest, chipper)
 { run_pipeline("filters/chipper.xml"); }
 
-TEST(pipelineFiltersTest, chipperJSON)
-{ run_pipeline("filters/chipper.json"); }
-
 TEST(pipelineFiltersTest, DISABLED_colorize_multi)
 { run_pipeline("filters/colorize-multi.xml"); }
 
-// references a non-existent autzen-warped.tif
-TEST(pipelineFiltersTest, DISABLED_colorize_multiJSON)
-{ run_pipeline("filters/colorize-multi.json"); }
-
 TEST(pipelineFiltersTest, colorize)
 { run_pipeline("filters/colorize.xml"); }
-
-TEST(pipelineFiltersTest, colorizeJSON)
-{ run_pipeline("filters/colorize.json"); }
 
 TEST(pipelineFiltersTest, DISABLED_crop_reproject)
 { run_pipeline("filters/crop_reproject.xml"); }
@@ -225,98 +170,50 @@ TEST(pipelineFiltersTest, DISABLED_crop_reproject)
 TEST(pipelineFiltersTest, crop_wkt)
 { run_pipeline("filters/crop_wkt.xml"); }
 
-TEST(pipelineFiltersTest, crop_wktJSON)
-{ run_pipeline("filters/crop_wkt.json"); }
-
 TEST(pipelineFiltersTest, crop_wkt_2d)
 { run_pipeline("filters/crop_wkt_2d.xml"); }
-
-TEST(pipelineFiltersTest, crop_wkt_2dJSON)
-{ run_pipeline("filters/crop_wkt_2d.json"); }
 
 TEST(pipelineFiltersTest, crop_wkt_2d_classification)
 { run_pipeline("filters/crop_wkt_2d_classification.xml"); }
 
-TEST(pipelineFiltersTest, crop_wkt_2d_classificationJSON)
-{ run_pipeline("filters/crop_wkt_2d_classification.json"); }
-
 TEST(pipelineFiltersTest, decimate)
 { run_pipeline("filters/decimate.xml"); }
-
-TEST(pipelineFiltersTest, decimateJSON)
-{ run_pipeline("filters/decimate.json"); }
 
 TEST(pipelineFiltersTest, ferry)
 { run_pipeline("filters/ferry.xml"); }
 
-TEST(pipelineFiltersTest, ferryJSON)
-{ run_pipeline("filters/ferry.json"); }
-
 TEST(pipelineFiltersTest, hexbin_info)
 { run_info("filters/hexbin-info.xml"); }
-
-TEST(pipelineFiltersTest, hexbin_infoJSON)
-{ run_info("filters/hexbin-info.json"); }
 
 TEST(pipelineFiltersTest, hexbin)
 { run_pipeline("filters/hexbin.xml"); }
 
-TEST(pipelineFiltersTest, hexbinJSON)
-{ run_pipeline("filters/hexbin.json"); }
-
 TEST(pipelineFiltersTest, merge)
 { run_info("filters/merge.xml"); }
-
-TEST(pipelineFiltersTest, mergeJSON)
-{ run_info("filters/merge.json"); }
 
 TEST(pipelineFiltersTest, range_z)
 { run_info("filters/range_z.xml"); }
 
-TEST(pipelineFiltersTest, range_zJSON)
-{ run_info("filters/range_z.json"); }
-
 TEST(pipelineFiltersTest, range_z_classification)
 { run_info("filters/range_z_classification.xml"); }
-
-TEST(pipelineFiltersTest, range_z_classificationJSON)
-{ run_info("filters/range_z_classification.json"); }
 
 TEST(pipelineFiltersTest, range_classification)
 { run_info("filters/range_classification.xml"); }
 
-TEST(pipelineFiltersTest, range_classificationJSON)
-{ run_info("filters/range_classification.json"); }
-
 TEST(pipelineFiltersTest, reproject)
 { run_pipeline("filters/reproject.xml"); }
-
-TEST(pipelineFiltersTest, reprojectJSON)
-{ run_pipeline("filters/reproject.json"); }
 
 TEST(pipelineFiltersTest, sort)
 { run_info("filters/sort.xml"); }
 
-TEST(pipelineFiltersTest, sortJSON)
-{ run_info("filters/sort.json"); }
-
 TEST(pipelineFiltersTest, splitter)
 { run_pipeline("filters/splitter.xml"); }
-
-TEST(pipelineFiltersTest, splitterJSON)
-{ run_pipeline("filters/splitter.json"); }
 
 TEST(pipelineFiltersTest, stats)
 { run_pipeline("filters/stats.xml"); }
 
-TEST(pipelineFiltersTest, statsJSON)
-{ run_pipeline("filters/stats.json"); }
-
 TEST(pipelineHoleTest, crop)
 { run_pipeline("hole/crop.xml"); }
-
-TEST(pipelineHoleTest, cropJSON)
-{ run_pipeline("hole/crop.json"); }
 
 TEST(pipelineIcebridgeTest, DISABLED_icebridge)
 { run_pipeline("icebridge/pipeline.xml"); }
@@ -324,20 +221,11 @@ TEST(pipelineIcebridgeTest, DISABLED_icebridge)
 TEST(pipelineNitfTest, chipper)
 { run_info("nitf/chipper.xml"); }
 
-TEST(pipelineNitfTest, chipperJSON)
-{ run_info("nitf/chipper.json"); }
-
 TEST(pipelineNitfTest, conversion)
 { run_pipeline("nitf/conversion.xml"); }
 
-TEST(pipelineNitfTest, conversionJSON)
-{ run_pipeline("nitf/conversion.json"); }
-
 TEST(pipelineNitfTest, las2nitf)
 { run_pipeline("nitf/las2nitf.xml"); }
-
-TEST(pipelineNitfTest, las2nitfJSON)
-{ run_pipeline("nitf/las2nitf.json"); }
 
 TEST(pipelineNitfTest, DISABLED_reader)
 { run_info("nitf/reader.xml"); }
@@ -345,22 +233,13 @@ TEST(pipelineNitfTest, DISABLED_reader)
 TEST(pipelineNitfTest, write_laz)
 { run_pipeline("nitf/write_laz.xml"); }
 
-TEST(pipelineNitfTest, write_lazJSON)
-{ run_pipeline("nitf/write_laz.json"); }
-
 TEST(pipelineNitfTest, write_options)
 { run_pipeline("nitf/write_options.xml"); }
-
-TEST(pipelineNitfTest, write_optionsJSON)
-{ run_pipeline("nitf/write_options.json"); }
 
 // skip oracle tests for now
 
 TEST(pipelineP2gTest, writer)
 { run_pipeline("io/p2g-writer.xml"); }
-
-TEST(pipelineP2gTest, writerJSON)
-{ run_pipeline("io/p2g-writer.json"); }
 
 TEST(pipelinePLangTest, DISABLED_from_module)
 { run_info("plang/from-module.xml"); }
@@ -371,20 +250,11 @@ TEST(pipelinePLangTest, DISABLED_predicate_embed)
 TEST(pipelinePLangTest, predicate_keep_ground_and_unclass)
 { run_pipeline("plang/predicate-keep-ground-and-unclass.xml"); }
 
-TEST(pipelinePLangTest, predicate_keep_ground_and_unclassJSON)
-{ run_pipeline("plang/predicate-keep-ground-and-unclass.json"); }
-
 TEST(pipelinePLangTest, predicate_keep_last_return)
 { run_pipeline("plang/predicate-keep-last-return.xml"); }
 
-TEST(pipelinePLangTest, predicate_keep_last_returnJSON)
-{ run_pipeline("plang/predicate-keep-last-return.json"); }
-
 TEST(pipelinePLangTest, predicate_keep_specified_returns)
 { run_pipeline("plang/predicate-keep-specified-returns.xml"); }
-
-TEST(pipelinePLangTest, predicate_keep_specified_returnsJSON)
-{ run_pipeline("plang/predicate-keep-specified-returns.json"); }
 
 TEST(pipelinePLangTest, DISABLED_programmabled_update_y_dims)
 { run_info("plang/programmable-update-y-dims.xml"); }
@@ -404,9 +274,6 @@ TEST(pipelineQfitTest, DISABLED_reader)
 TEST(pipelineSbetTest, pipeline)
 { run_pipeline("sbet/pipeline.xml"); }
 
-TEST(pipelineSbetTest, pipelineJSON)
-{ run_pipeline("sbet/pipeline.json"); }
-
 // skip soci tests for now
 
 TEST(pipelineSQLiteTest, DISABLED_reader)
@@ -418,17 +285,8 @@ TEST(pipelineSQLiteTest, DISABLED_writer)
 TEST(pipelineTextTest, csv_writer)
 { run_pipeline("io/text-writer-csv.xml"); }
 
-TEST(pipelineTextTest, csv_writerJSON)
-{ run_pipeline("io/text-writer-csv.json"); }
-
 TEST(pipelineTextTest, geojson_writer)
 { run_pipeline("io/text-writer-geojson.xml"); }
 
-TEST(pipelineTextTest, geojson_writerJSON)
-{ run_pipeline("io/text-writer-geojson.json"); }
-
 TEST(pipelineTextTest, space_delimited_writer)
 { run_pipeline("io/text-writer-space-delimited.xml"); }
-
-TEST(pipelineTextTest, space_delimited_writerJSON)
-{ run_pipeline("io/text-writer-space-delimited.json"); }
