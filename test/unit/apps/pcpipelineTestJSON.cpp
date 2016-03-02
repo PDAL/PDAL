@@ -111,8 +111,8 @@ TEST_P(json, pipeline)
 
 INSTANTIATE_TEST_CASE_P(base, json,
 testing::Values(
-  "pipeline/drop_color.json",
-  "pipeline/pipeline_interpolate.json",
+  "pipeline/crop.json",
+  "pipeline/p2g-writer.json",
   "pipeline/pipeline_metadata_reader.json",
   "pipeline/pipeline_metadata_writer.json",
   "pipeline/pipeline_mississippi.json",
@@ -128,7 +128,6 @@ INSTANTIATE_TEST_CASE_P(io, json,
 testing::Values(
   "bpf/bpf.json",
   "bpf/bpf2nitf.json",
-  "io/p2g-writer.json",
   "io/text-writer-csv.json",
   "io/text-writer-geojson.json",
   "io/text-writer-space-delimited.json",
