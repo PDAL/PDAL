@@ -38,8 +38,6 @@
 #include <pdal/XMLSchema.hpp>
 #endif
 
-#include <pdal/PipelineReaderJSON.hpp>
-#include <pdal/PipelineReaderXML.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/pdal_macros.hpp>

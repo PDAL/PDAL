@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/PipelineReaderXML.hpp>
+#include "PipelineReaderXML.hpp"
 
 #include <pdal/Filter.hpp>
 #include <pdal/PipelineManager.hpp>

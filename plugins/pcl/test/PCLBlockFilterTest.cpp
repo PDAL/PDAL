@@ -35,7 +35,6 @@
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/PipelineManager.hpp>
-#include <pdal/PipelineReaderJSON.hpp>
 #include <pdal/PluginManager.hpp>
 #include <pdal/StageFactory.hpp>
 
@@ -52,8 +51,8 @@ TEST(PCLBlockFilterTest, PCLBlockFilterTest_example_passthrough_json)
     EXPECT_TRUE(filter);
 
     PipelineManager pipeline;
-    PipelineReaderJSON pipelineReader(pipeline);
-    pipelineReader.readPipeline(
+
+    pipeline.readPipeline(
         Support::configuredpath("filters/pcl/passthrough.json"));
     pipeline.execute();
 
