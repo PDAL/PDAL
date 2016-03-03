@@ -110,11 +110,8 @@ testing::Values(
   "pipeline/crop-hole.json",
   "pipeline/crop_wkt.json",
   "pipeline/crop_wkt_2d.json",
-  "pipeline/crop_wkt_2d_classification.json",
   "pipeline/decimate.json",
   "pipeline/ferry-reproject.json",
-  "pipeline/hexbin-info.json",
-  "pipeline/hexbin.json",
   "pipeline/las2csv.json",
   "pipeline/las2geojson.json",
   "pipeline/las2space-delimited.json",
@@ -127,7 +124,6 @@ testing::Values(
   "pipeline/range_z.json",
   "pipeline/range_z_classification.json",
   "pipeline/range_classification.json",
-  "pipeline/reproject.json",
   "pipeline/sbet2txt.json",
   "pipeline/sort.json",
   "pipeline/splitter.json",
@@ -166,11 +162,13 @@ TEST_P(jsonWithPredicate, pipeline)
 
 INSTANTIATE_TEST_CASE_P(plugins, jsonWithPredicate,
 testing::Values(
+  "pipeline/crop_wkt_2d_classification.json",
   "pipeline/from-module.json",
   "pipeline/predicate-embed.json",
   "pipeline/predicate-keep-ground-and-unclass.json",
   "pipeline/predicate-keep-last-return.json",
-  "pipeline/predicate-keep-specified-returns.json"
+  "pipeline/predicate-keep-specified-returns.json",
+  "pipeline/reproject.json"
 ));
 
 class jsonWithNITF : public testing::TestWithParam<const char*> {};
@@ -213,8 +211,23 @@ testing::Values(
   "pipeline/p2g-writer.json"
 ));
 
+class jsonWithHexer : public testing::TestWithParam<const char*> {};
 
+TEST_P(jsonWithHexer, pipeline)
+{
+  pdal::StageFactory f;
+  pdal::Stage* s = f.createStage("filters.hexbin");
+  if (s)
+      run_pipeline(GetParam());
+  else
+      std::cerr << "WARNING: could not create filters.hexbin, skipping test" << std::endl;
+}
 
+INSTANTIATE_TEST_CASE_P(plugins, jsonWithHexer,
+testing::Values(
+  "pipeline/hexbin-info.json",
+  "pipeline/hexbin.json"
+));
 
 // TEST(pipelineFiltersTest, DISABLED_crop_reproject)
 // { run_pipeline("filters/crop_reproject.xml"); }
