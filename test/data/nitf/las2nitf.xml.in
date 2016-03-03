@@ -21,11 +21,8 @@
         <Option name="system_id">
             PDAL2NTF
         </Option>
-        <Option name="creation_doy">
-            forward
-        </Option>
-        <Option name="creation_year">
-            forward
+        <Option name="forward">
+            creation_doy, creation_year
         </Option>
         <Reader type="readers.las">
             <Option name="filename">

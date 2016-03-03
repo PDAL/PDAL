@@ -3,10 +3,8 @@
     "@CMAKE_SOURCE_DIR@/test/data/las/interesting.las",
     {
       "filename":"@CMAKE_SOURCE_DIR@/test/temp/metadata-output.las",
-      "software_id":"forward",
-      "system_id":"SOMEVALUE",
-      "creation_doy":"forward",
-      "creation_year":"forward"
+      "forward":"software_id, creation_doy, creation_year",
+      "system_id":"SOMEVALUE"
     }
   ]
 }
