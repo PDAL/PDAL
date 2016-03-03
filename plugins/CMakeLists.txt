@@ -1,9 +1,5 @@
 include(${PDAL_CMAKE_DIR}/test.cmake)
 
-if(BUILD_PLUGIN_ATTRIBUTE)
-    add_subdirectory(attribute)
-endif()
-
 if(BUILD_PLUGIN_CPD)
     add_subdirectory(cpd)
 endif(BUILD_PLUGIN_CPD)
@@ -63,4 +59,3 @@ endif(BUILD_PLUGIN_RIVLIB)
 if(BUILD_PLUGIN_SQLITE)
     add_subdirectory(sqlite)
 endif()
-

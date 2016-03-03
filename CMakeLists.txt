@@ -121,10 +121,6 @@ option(WITH_COMPLETION "Install bash completions scripts for command line?" FALS
 add_feature_info("Bash completion" WITH_COMPLETION
     "completion for PDAL command line")
 
-option(BUILD_PLUGIN_ATTRIBUTE "Choose if Attribute filter is built" FALSE)
-add_feature_info("Attribute plugin" BUILD_PLUGIN_ATTRIBUTE
-    "apply attributes to a subset of points")
-
 option(BUILD_PLUGIN_CPD "Choose if Coherent Point Drift kernel is built" FALSE)
 add_feature_info("CPD plugin" BUILD_PLUGIN_CPD
     "run Coherent Point Drift on two datasets")
