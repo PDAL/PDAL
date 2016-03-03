@@ -138,11 +138,18 @@ For more on PDAL stages and their options, check the PDAL documentation on
   stages. Each ``tag`` must be unique.
 
 * A stage object may have a member with the name ``inputs`` whose value is an
-  array of strings. Each element in the array is the tag of another stage. If
-  ``inputs`` is not specified, the previous stage in the array will be used as
-  input. Reader stages will disregard the ``inputs`` member.
+  array of strings. Each element in the array is the tag of another stage to be
+  set as input to the current stage.
 
-* A ``tag`` mentioned as ``input`` to one stage must have been previously
+* Reader stages will disregard the ``inputs`` member.
+
+* If ``inputs`` is not specified for the first non-reader stage, all reader
+  stages leading up to the current stage will be used as inputs.
+
+* If ``inputs`` is not specified for any subsequent non-reader stages, the
+  previous stage in the array will be used as input.
+
+* A ``tag`` mentioned in another stage's ``inputs``  must have been previously
   defined in the ``pipeline`` array.
 
 * A reader or writer stage object may have a member with the name ``type`` whose
