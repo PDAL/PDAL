@@ -214,6 +214,9 @@ void PipelineReaderJSON::parseElement_Pipeline(const Json::Value& tree)
     StageFactory f;
     std::map<std::string, Stage*> tags;
     std::vector<Stage*> stages;
+    std::vector<Stage*> firstReaders;
+    bool onlyReaders = true;
+    bool firstNonReader = true;
 
     size_t i = 0;
     for (auto const& node : tree)
@@ -233,11 +236,14 @@ void PipelineReaderJSON::parseElement_Pipeline(const Json::Value& tree)
             if (tree.size() == 1 || (i < tree.size()-1))
             {
                 stage = parseReaderByFilename(filename);
+                if (onlyReaders)
+                    firstReaders.push_back(stage);
                 curStageIsReader = true;
             }
             else
             {
                 stage = parseWriterByFilename(filename);
+                onlyReaders = false;
             }
         }
         else
@@ -268,15 +274,19 @@ void PipelineReaderJSON::parseElement_Pipeline(const Json::Value& tree)
                 if (Utils::startsWith(type, "readers."))
                 {
                     stage = &m_manager.addReader(type);
+                    if (onlyReaders)
+                        firstReaders.push_back(stage);
                     curStageIsReader = true;
                 }
                 else if (Utils::startsWith(type, "filters."))
                 {
                     stage = &m_manager.addFilter(type);
+                    onlyReaders = false;
                 }
                 else if (Utils::startsWith(type, "writers."))
                 {
                     stage = &m_manager.addWriter(type);
+                    onlyReaders = false;
                 }
                 else
                     throw pdal_error("Could not determine type of " + type);
@@ -286,6 +296,8 @@ void PipelineReaderJSON::parseElement_Pipeline(const Json::Value& tree)
                 if (i < tree.size()-1)
                 {
                     stage = parseReaderByFilename(filename);
+                    if (onlyReaders)
+                        firstReaders.push_back(stage);
                     curStageIsReader = true;
                     filenameIsSet = true;
                 }
@@ -293,6 +305,7 @@ void PipelineReaderJSON::parseElement_Pipeline(const Json::Value& tree)
                 {
                     stage = parseWriterByFilename(filename);
                     filenameIsSet = true;
+                    onlyReaders = false;
                 }
             }
 
@@ -336,7 +349,18 @@ void PipelineReaderJSON::parseElement_Pipeline(const Json::Value& tree)
         else
         {
             if (i && !curStageIsReader)
-                stage->setInput(*stages[i-1]);
+            {
+                if (firstReaders.size() > 0 && firstNonReader)
+                {
+                    firstNonReader = false;
+                    for (Stage* s : firstReaders)
+                        stage->setInput(*s);
+                }
+                else
+                {
+                    stage->setInput(*stages[i-1]);
+                }
+            }
         }
 
         stages.push_back(stage);
