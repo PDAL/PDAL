@@ -34,11 +34,15 @@
 
 #pragma once
 
+#include <pdal/plugin.hpp>
 #include <pdal/Filter.hpp>
 
 #include <map>
 #include <memory>
 #include <string>
+
+extern "C" int32_t AttributeFilter_ExitFunc();
+extern "C" PF_ExitFunc AttributeFilter_InitPlugin();
 
 typedef struct GEOSContextHandle_HS *GEOSContextHandle_t;
 

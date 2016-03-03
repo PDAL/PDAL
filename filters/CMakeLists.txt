@@ -1,3 +1,4 @@
+add_subdirectory(attribute)
 add_subdirectory(chipper)
 add_subdirectory(colorization)
 add_subdirectory(crop)
