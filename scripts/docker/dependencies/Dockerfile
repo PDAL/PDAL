@@ -116,6 +116,7 @@ RUN git clone https://github.com/hobu/nitro \
     && rm -rf nitro
 
 RUN git clone https://github.com/LASzip/LASzip.git laszip \
+    && git checkout e7065cbc5bdbbe0c6e50c9d93d1cd346e9be6778 \
     && cd laszip \
     && mkdir build \
     && cd build \
