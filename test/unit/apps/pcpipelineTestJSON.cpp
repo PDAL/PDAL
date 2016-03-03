@@ -95,154 +95,156 @@ TEST(pipelineBaseTest, common_opts)
 class json : public testing::TestWithParam<const char*> {};
 
 TEST_P(json, pipeline)
-{ run_pipeline(GetParam()); }
+{
+    run_pipeline(GetParam());
+}
 
 INSTANTIATE_TEST_CASE_P(base, json,
-testing::Values(
-  // "autzen/autzen-interpolate.json",
-  "pipeline/attribute.json",
-  "pipeline/bpf2las.json",
-  "pipeline/chipper.json",
-  "pipeline/colorize-multi.json",
-  "pipeline/colorize.json",
-  "pipeline/crop.json",
-  "pipeline/crop_wkt.json",
-  "pipeline/crop_wkt_2d.json",
-  "pipeline/decimate.json",
-  "pipeline/ferry-reproject.json",
-  "pipeline/las2csv.json",
-  "pipeline/las2geojson.json",
-  "pipeline/las2space-delimited.json",
-  "pipeline/merge.json",
-  "pipeline/metadata_reader.json",
-  "pipeline/metadata_writer.json",
-  "pipeline/mississippi.json",
-  "pipeline/mississippi_reverse.json",
-  "pipeline/qfit2las.json",
-  "pipeline/range_z.json",
-  "pipeline/range_z_classification.json",
-  "pipeline/range_classification.json",
-  "pipeline/sbet2txt.json",
-  "pipeline/sort.json",
-  "pipeline/splitter.json",
-  "pipeline/stats.json"
-));
+                        testing::Values(
+                            // "autzen/autzen-interpolate.json",
+                            "pipeline/attribute.json",
+                            "pipeline/bpf2las.json",
+                            "pipeline/chipper.json",
+                            "pipeline/colorize-multi.json",
+                            "pipeline/colorize.json",
+                            "pipeline/crop.json",
+                            "pipeline/crop_wkt.json",
+                            "pipeline/crop_wkt_2d.json",
+                            "pipeline/decimate.json",
+                            "pipeline/ferry-reproject.json",
+                            "pipeline/las2csv.json",
+                            "pipeline/las2geojson.json",
+                            "pipeline/las2space-delimited.json",
+                            "pipeline/merge.json",
+                            "pipeline/metadata_reader.json",
+                            "pipeline/metadata_writer.json",
+                            "pipeline/mississippi.json",
+                            "pipeline/mississippi_reverse.json",
+                            "pipeline/qfit2las.json",
+                            "pipeline/range_z.json",
+                            "pipeline/range_z_classification.json",
+                            "pipeline/range_classification.json",
+                            "pipeline/sbet2txt.json",
+                            "pipeline/sort.json",
+                            "pipeline/splitter.json",
+                            "pipeline/stats.json"
+                        ));
 
 class jsonWithProgrammable : public testing::TestWithParam<const char*> {};
 
 TEST_P(jsonWithProgrammable, pipeline)
 {
-  pdal::StageFactory f;
-  pdal::Stage* s = f.createStage("filters.programmable");
-  if (s)
-      run_pipeline(GetParam());
-  else
-      std::cerr << "WARNING: could not create filters.programmable, skipping test" << std::endl;
+    pdal::StageFactory f;
+    pdal::Stage* s = f.createStage("filters.programmable");
+    if (s)
+        run_pipeline(GetParam());
+    else
+        std::cerr << "WARNING: could not create filters.programmable, skipping test" << std::endl;
 }
 
 INSTANTIATE_TEST_CASE_P(plugins, jsonWithProgrammable,
-testing::Values(
-  "pipeline/programmable-hag.json",
-  "pipeline/programmable-update-y-dims.json"
-));
+                        testing::Values(
+                            "pipeline/programmable-hag.json",
+                            "pipeline/programmable-update-y-dims.json"
+                        ));
 
 class jsonWithPredicate : public testing::TestWithParam<const char*> {};
 
 TEST_P(jsonWithPredicate, pipeline)
 {
-  pdal::StageFactory f;
-  pdal::Stage* s = f.createStage("filters.predicate");
-  if (s)
-      run_pipeline(GetParam());
-  else
-      std::cerr << "WARNING: could not create filters.predicate, skipping test" << std::endl;
+    pdal::StageFactory f;
+    pdal::Stage* s = f.createStage("filters.predicate");
+    if (s)
+        run_pipeline(GetParam());
+    else
+        std::cerr << "WARNING: could not create filters.predicate, skipping test" << std::endl;
 }
 
 INSTANTIATE_TEST_CASE_P(plugins, jsonWithPredicate,
-testing::Values(
-  "pipeline/crop_wkt_2d_classification.json",
-  "pipeline/from-module.json",
-  "pipeline/predicate-embed.json",
-  "pipeline/predicate-keep-ground-and-unclass.json",
-  "pipeline/predicate-keep-last-return.json",
-  "pipeline/predicate-keep-specified-returns.json",
-  "pipeline/reproject.json"
-));
+                        testing::Values(
+                            "pipeline/crop_wkt_2d_classification.json",
+                            "pipeline/from-module.json",
+                            "pipeline/predicate-embed.json",
+                            "pipeline/predicate-keep-ground-and-unclass.json",
+                            "pipeline/predicate-keep-last-return.json",
+                            "pipeline/predicate-keep-specified-returns.json",
+                            "pipeline/reproject.json"
+                        ));
 
 class jsonWithNITF : public testing::TestWithParam<const char*> {};
 
 TEST_P(jsonWithNITF, pipeline)
 {
-  pdal::StageFactory f;
-  pdal::Stage* s1 = f.createStage("readers.nitf");
-  pdal::Stage* s2 = f.createStage("writers.nitf");
-  if (s1 && s2)
-      run_pipeline(GetParam());
-  else
-      std::cerr << "WARNING: could not create readers.nitf or writers.nitf, skipping test" << std::endl;
+    pdal::StageFactory f;
+    pdal::Stage* s1 = f.createStage("readers.nitf");
+    pdal::Stage* s2 = f.createStage("writers.nitf");
+    if (s1 && s2)
+        run_pipeline(GetParam());
+    else
+        std::cerr << "WARNING: could not create readers.nitf or writers.nitf, skipping test" << std::endl;
 }
 
 INSTANTIATE_TEST_CASE_P(plugins, jsonWithNITF,
-testing::Values(
-  "pipeline/bpf2nitf.json",
-  "pipeline/las2nitf.json",
-  "pipeline/las2nitf-2.json",
-  "pipeline/las2nitf-crop-with-options.json",
-  "pipeline/nitf2las.json",
-  "pipeline/nitf-chipper.json"
-));
+                        testing::Values(
+                            "pipeline/bpf2nitf.json",
+                            "pipeline/las2nitf.json",
+                            "pipeline/las2nitf-2.json",
+                            "pipeline/las2nitf-crop-with-options.json",
+                            "pipeline/nitf2las.json",
+                            "pipeline/nitf-chipper.json"
+                        ));
 
 class jsonWithP2G : public testing::TestWithParam<const char*> {};
 
 TEST_P(jsonWithP2G, pipeline)
 {
-  pdal::StageFactory f;
-  pdal::Stage* s = f.createStage("writers.p2g");
-  if (s)
-      run_pipeline(GetParam());
-  else
-      std::cerr << "WARNING: could not create writers.p2g, skipping test" << std::endl;
+    pdal::StageFactory f;
+    pdal::Stage* s = f.createStage("writers.p2g");
+    if (s)
+        run_pipeline(GetParam());
+    else
+        std::cerr << "WARNING: could not create writers.p2g, skipping test" << std::endl;
 }
 
 INSTANTIATE_TEST_CASE_P(plugins, jsonWithP2G,
-testing::Values(
-  "pipeline/p2g-writer.json"
-));
+                        testing::Values(
+                            "pipeline/p2g-writer.json"
+                        ));
 
 class jsonWithHexer : public testing::TestWithParam<const char*> {};
 
 TEST_P(jsonWithHexer, pipeline)
 {
-  pdal::StageFactory f;
-  pdal::Stage* s = f.createStage("filters.hexbin");
-  if (s)
-      run_pipeline(GetParam());
-  else
-      std::cerr << "WARNING: could not create filters.hexbin, skipping test" << std::endl;
+    pdal::StageFactory f;
+    pdal::Stage* s = f.createStage("filters.hexbin");
+    if (s)
+        run_pipeline(GetParam());
+    else
+        std::cerr << "WARNING: could not create filters.hexbin, skipping test" << std::endl;
 }
 
 INSTANTIATE_TEST_CASE_P(plugins, jsonWithHexer,
-testing::Values(
-  "pipeline/hexbin-info.json",
-  "pipeline/hexbin.json"
-));
+                        testing::Values(
+                            "pipeline/hexbin-info.json",
+                            "pipeline/hexbin.json"
+                        ));
 
 class jsonWithLAZ : public testing::TestWithParam<const char*> {};
 
 TEST_P(jsonWithLAZ, pipeline)
 {
 #if defined PDAL_HAVE_LASZIP || defined PDAL_HAVE_LAZPERF
-      run_pipeline(GetParam());
-      #else
-      std::cerr << "WARNING: no LAZ support, skipping test" << std::endl;
-      #endif
+    run_pipeline(GetParam());
+#else
+    std::cerr << "WARNING: no LAZ support, skipping test" << std::endl;
+#endif
 }
 
 INSTANTIATE_TEST_CASE_P(plugins, jsonWithLAZ,
-testing::Values(
-  "pipeline/crop-stats.json",
-  "pipeline/crop-hole.json"
-));
+                        testing::Values(
+                            "pipeline/crop-stats.json",
+                            "pipeline/crop-hole.json"
+                        ));
 
 // TEST(pipelineFiltersTest, DISABLED_crop_reproject)
 // { run_pipeline("filters/crop_reproject.xml"); }
