@@ -91,9 +91,12 @@ public:
     class cant_convert : public pdal_error
     {
     public:
-        cant_convert() : pdal_error("Can't convert option as requested.")
+        cant_convert(const std::string& name, const std::string& value,
+            const std::string& type) :
+            pdal_error(std::string("Can't convert option '") + name +
+              "' with value '" + value + "' to type '" + type + "'.")
         {}
-        cant_convert(const std::string& msg ) : pdal_error(msg)
+        cant_convert(const std::string& msg) : pdal_error(msg)
         {}
     };
 
@@ -215,7 +218,7 @@ private:
 
         iss >> t;
         if (iss.fail())
-            throw cant_convert();
+            throw cant_convert(m_name, m_value, Utils::typeidName<T>());
     }
 
     void getValue(StringList& values) const
@@ -237,7 +240,7 @@ private:
 
             iss >> value;
             if (iss.fail())
-                throw cant_convert();
+                throw cant_convert(m_name, m_value, "bool");
         }
     }
 
@@ -247,19 +250,19 @@ private:
     void getValue(char& value)
     {
         if (!Utils::fromString(m_value, value))
-            throw cant_convert();
+            throw cant_convert(m_name, m_value, "char");
     }
 
     void getValue(unsigned char& value) const
     {
         if (!Utils::fromString(m_value, value))
-            throw cant_convert();
+            throw cant_convert(m_name, m_value, "unsigned char");
     }
 
     void getValue(signed char& value) const
     {
         if (!Utils::fromString(m_value, value))
-            throw cant_convert();
+            throw cant_convert(m_name, m_value, "signed char");
     }
 };
 

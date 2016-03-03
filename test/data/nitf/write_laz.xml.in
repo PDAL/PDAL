@@ -7,19 +7,19 @@
         <Option name="compression">
             true
         </Option>
-        <Option name="FSCLASS">
+        <Option name="fsclass">
             U
         </Option>
-        <Option name="OPHONE">
+        <Option name="ophone">
             5159664628
         </Option>
-        <Option name="ONAME">
+        <Option name="oname">
             Howard Butler
         </Option>
-        <Option name="IDATIM">
+        <Option name="idatim">
             20110516183337
         </Option>
-        <Option name="FTITLE">
+        <Option name="ftitle">
             This is the title
         </Option>
         <Reader type="readers.las">
