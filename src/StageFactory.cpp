@@ -37,6 +37,7 @@
 #include <pdal/util/FileUtils.hpp>
 
 // filters
+#include <attribute/AttributeFilter.hpp>
 #include <chipper/ChipperFilter.hpp>
 #include <colorization/ColorizationFilter.hpp>
 #include <crop/CropFilter.hpp>
@@ -191,6 +192,7 @@ StageFactory::StageFactory(bool no_plugins)
     }
 
     // filters
+    PluginManager::initializePlugin(AttributeFilter_InitPlugin);
     PluginManager::initializePlugin(ChipperFilter_InitPlugin);
     PluginManager::initializePlugin(ColorizationFilter_InitPlugin);
     PluginManager::initializePlugin(CropFilter_InitPlugin);
@@ -249,4 +251,3 @@ Stage *StageFactory::createStage(std::string const& stage_name)
 }
 
 } // namespace pdal
-

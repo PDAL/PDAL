@@ -18,7 +18,6 @@ RUN git clone --depth=1 https://github.com/PDAL/PDAL \
 	&& mkdir build \
 	&& cd build \
 	&& cmake \
-		-DBUILD_PLUGIN_ATTRIBUTE=ON \
 		-DBUILD_PLUGIN_CPD=ON \
 		-DBUILD_PLUGIN_GREYHOUND=ON \
 		-DBUILD_PLUGIN_HEXBIN=ON \
