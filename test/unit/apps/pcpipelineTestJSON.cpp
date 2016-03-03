@@ -69,7 +69,7 @@ TEST(pipelineBaseTest, no_input)
 
     std::string output;
     int stat = pdal::Utils::run_shell_command(cmd, output);
-    EXPECT_EQ(stat, 1);
+    EXPECT_EQ(1, stat);
 
     const std::string expected = "PDAL: Input filename required.";
     EXPECT_EQ(output.substr(0, expected.length()), expected);
