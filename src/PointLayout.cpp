@@ -54,10 +54,12 @@ PointLayout::PointLayout()
     }
 }
 
+
 void PointLayout::finalize()
 {
     m_finalized = true;
 }
+
 
 void PointLayout::registerDims(std::vector<Dimension::Id::Enum> ids)
 {
@@ -65,23 +67,28 @@ void PointLayout::registerDims(std::vector<Dimension::Id::Enum> ids)
         registerDim(*ii);
 }
 
+
 void PointLayout::registerDims(Dimension::Id::Enum *id)
 {
     while (*id != Dimension::Id::Unknown)
         registerDim(*id++);
 }
 
+
 void PointLayout::registerDim(Dimension::Id::Enum id)
 {
     registerDim(id, Dimension::defaultType(id));
 }
 
-void PointLayout::registerDim(Dimension::Id::Enum id, Dimension::Type::Enum type)
+
+void PointLayout::registerDim(Dimension::Id::Enum id,
+    Dimension::Type::Enum type)
 {
     Dimension::Detail dd = m_detail[id];
     dd.setType(resolveType(type, dd.type()));
     update(dd, Dimension::name(id));
 }
+
 
 Dimension::Id::Enum PointLayout::assignDim(const std::string& name,
     Dimension::Type::Enum type)
@@ -105,6 +112,7 @@ Dimension::Id::Enum PointLayout::assignDim(const std::string& name,
     return Dimension::Id::Unknown;
 }
 
+
 Dimension::Id::Enum PointLayout::registerOrAssignDim(const std::string name,
    Dimension::Type::Enum type)
 {
@@ -117,6 +125,7 @@ Dimension::Id::Enum PointLayout::registerOrAssignDim(const std::string name,
     return assignDim(name, type);
 }
 
+
 DimTypeList PointLayout::dimTypes() const
 {
     DimTypeList dimTypes;
@@ -127,11 +136,13 @@ DimTypeList PointLayout::dimTypes() const
     return dimTypes;
 }
 
+
 DimType PointLayout::findDimType(const std::string& name) const
 {
     Dimension::Id::Enum id = findDim(name);
     return DimType(id, dimType(id));
 }
+
 
 Dimension::Id::Enum PointLayout::findDim(const std::string& name) const
 {
@@ -141,12 +152,15 @@ Dimension::Id::Enum PointLayout::findDim(const std::string& name) const
     return findProprietaryDim(name);
 }
 
-Dimension::Id::Enum PointLayout::findProprietaryDim(const std::string& name) const
+
+Dimension::Id::Enum
+PointLayout::findProprietaryDim(const std::string& name) const
 {
     auto di = m_propIds.find(name);
     return (di != m_propIds.end() ? di->second :
         Dimension::Id::Unknown);
 }
+
 
 std::string PointLayout::dimName(Dimension::Id::Enum id) const
 {
@@ -160,41 +174,50 @@ std::string PointLayout::dimName(Dimension::Id::Enum id) const
     return "";
 }
 
+
 bool PointLayout::hasDim(Dimension::Id::Enum id) const
 {
     return m_detail[id].type() != Dimension::Type::None;
 }
+
 
 const Dimension::IdList& PointLayout::dims() const
 {
     return m_used;
 }
 
+
 Dimension::Type::Enum PointLayout::dimType(Dimension::Id::Enum id) const
 {
     return dimDetail(id)->type();
 }
+
 
 size_t PointLayout::dimSize(Dimension::Id::Enum id) const
 {
     return dimDetail(id)->size();
 }
 
+
 size_t PointLayout::dimOffset(Dimension::Id::Enum id) const
 {
     return dimDetail(id)->offset();
 }
+
 
 size_t PointLayout::pointSize() const
 {
     return m_pointSize;
 }
 
+
 const Dimension::Detail* PointLayout::dimDetail(Dimension::Id::Enum id) const
 {
     return &(m_detail[(size_t)id]);
 }
 
+
+// Update the point layout given dimension detail and the dimension's name.
 bool PointLayout::update(Dimension::Detail dd, const std::string& name)
 {
     if (m_finalized)
@@ -204,6 +227,7 @@ bool PointLayout::update(Dimension::Detail dd, const std::string& name)
 
     Dimension::DetailList detail;
 
+    // Update the list of used IDs.
     bool used = Utils::contains(m_used, dd.id());
     for (auto id : m_used)
     {
@@ -232,6 +256,7 @@ bool PointLayout::update(Dimension::Detail dd, const std::string& name)
             return d1.id() < d2.id();
         };
 
+        // Sort dimensions based on size and then on ID.
         int offset = 0;
         std::sort(detail.begin(), detail.end(), sorter);
         for (auto& d : detail)
@@ -248,15 +273,17 @@ bool PointLayout::update(Dimension::Detail dd, const std::string& name)
     if (!used)
         m_used.push_back(dd.id());
 
+    // Update the detail for the ID.
     for (auto& dtemp : detail)
         m_detail[dtemp.id()] = dtemp;
 
     return true;
 }
 
-Dimension::Type::Enum PointLayout::resolveType(
-        Dimension::Type::Enum t1,
-        Dimension::Type::Enum t2)
+
+// Given two types, find a type that can represent the values of both.
+Dimension::Type::Enum PointLayout::resolveType(Dimension::Type::Enum t1,
+    Dimension::Type::Enum t2)
 {
     using namespace Dimension;
     using namespace Dimension::BaseType;

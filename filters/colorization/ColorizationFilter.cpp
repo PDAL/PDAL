@@ -83,6 +83,7 @@ ColorizationFilter::BandInfo parseDim(const std::string& dim,
     std::string name;
     uint32_t band = defaultBand;
     double scale = 1.0;
+    bool foundBand = false;
 
     try
     {
@@ -91,9 +92,9 @@ ColorizationFilter::BandInfo parseDim(const std::string& dim,
         count = Utils::extract(dim, pos, (int(*)(int))std::isspace);
         pos += count;
 
-        count = Utils::extract(dim, pos, (int(*)(int))std::isalpha);
+        count = Dimension::extractName(dim, pos);
         if (count == 0)
-           throw std::string("No dimension name.");
+           throw std::string("No dimension name provided.");
         name = dim.substr(pos, count);
         pos += count;
 
@@ -108,6 +109,7 @@ ColorizationFilter::BandInfo parseDim(const std::string& dim,
             if (start == end)
                 band = defaultBand;
             pos += (end - start);
+            foundBand = true;
 
             count = Utils::extract(dim, pos, (int(*)(int))std::isspace);
             pos += count;
@@ -127,8 +129,13 @@ ColorizationFilter::BandInfo parseDim(const std::string& dim,
         pos += count;
 
         if (pos != dim.size())
-            throw std::string("Invalid characters following dimension "
-                "specification.");
+        {
+            std::ostringstream oss;
+
+            oss << "Invalid character '" << dim[pos] <<
+                "' following dimension specification.";
+            throw pdal_error(oss.str());
+        }
     }
     catch (std::string s)
     {
