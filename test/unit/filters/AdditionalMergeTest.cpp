@@ -80,6 +80,7 @@ TEST(AdditionalMergeTest, merge_filter_and_reader_with_manager)
     EXPECT_EQ(1420U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
+    FileUtils::deleteFile(outfile);
 }
 
 TEST(AdditionalMergeTest, merge_reader_and_filter_with_manager)
@@ -117,6 +118,7 @@ TEST(AdditionalMergeTest, merge_reader_and_filter_with_manager)
     EXPECT_EQ(1420U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
+    FileUtils::deleteFile(outfile);
 }
 
 TEST(AdditionalMergeTest, merge_filter_and_reader_without_manager)
@@ -157,6 +159,7 @@ TEST(AdditionalMergeTest, merge_filter_and_reader_without_manager)
     EXPECT_EQ(1420U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
+    FileUtils::deleteFile(outfile);
 }
 
 TEST(AdditionalMergeTest, merge_reader_and_filter_without_manager)
@@ -197,6 +200,7 @@ TEST(AdditionalMergeTest, merge_reader_and_filter_without_manager)
     EXPECT_EQ(1420U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
+    FileUtils::deleteFile(outfile);
 }
 
 TEST(AdditionalMergeTest, filter_and_reader_writer_inputs_with_manager)
@@ -231,6 +235,7 @@ TEST(AdditionalMergeTest, filter_and_reader_writer_inputs_with_manager)
     EXPECT_EQ(1420U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
+    FileUtils::deleteFile(outfile);
 }
 
 TEST(AdditionalMergeTest, reader_and_filter_writer_inputs_with_manager)
@@ -265,6 +270,7 @@ TEST(AdditionalMergeTest, reader_and_filter_writer_inputs_with_manager)
     EXPECT_EQ(1420U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
+    FileUtils::deleteFile(outfile);
 }
 
 TEST(AdditionalMergeTest, filter_and_reader_writer_inputs_without_manager)
@@ -306,6 +312,7 @@ TEST(AdditionalMergeTest, filter_and_reader_writer_inputs_without_manager)
     EXPECT_EQ(1420U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
+    FileUtils::deleteFile(outfile);
 }
 
 TEST(AdditionalMergeTest, reader_and_filter_writer_inputs_without_manager)
@@ -347,6 +354,7 @@ TEST(AdditionalMergeTest, reader_and_filter_writer_inputs_without_manager)
     EXPECT_EQ(1420U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
+    FileUtils::deleteFile(outfile);
 }
 
 TEST(AdditionalMergeTest, merge_two_filters_with_manager)
@@ -391,6 +399,7 @@ TEST(AdditionalMergeTest, merge_two_filters_with_manager)
     EXPECT_EQ(887U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
+    FileUtils::deleteFile(outfile);
 }
 
 TEST(AdditionalMergeTest, merge_two_filters_without_manager)
@@ -438,6 +447,7 @@ TEST(AdditionalMergeTest, merge_two_filters_without_manager)
   EXPECT_EQ(887U, np);
 
   EXPECT_TRUE(!std::ifstream(outfile).fail());
+    FileUtils::deleteFile(outfile);
 }
 
 TEST(AdditionalMergeTest, two_filters_writer_inputs_with_manager)
@@ -479,6 +489,7 @@ TEST(AdditionalMergeTest, two_filters_writer_inputs_with_manager)
     EXPECT_EQ(887U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
+    FileUtils::deleteFile(outfile);
 }
 
 TEST(AdditionalMergeTest, two_filters_writer_inputs_without_manager)
@@ -527,4 +538,5 @@ TEST(AdditionalMergeTest, two_filters_writer_inputs_without_manager)
   EXPECT_EQ(887U, np);
 
   EXPECT_TRUE(!std::ifstream(outfile).fail());
+    FileUtils::deleteFile(outfile);
 }
