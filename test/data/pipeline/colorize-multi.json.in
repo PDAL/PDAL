@@ -1,13 +1,13 @@
 {
   "pipeline":[
     {
-      "filename":"@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las",
+      "filename":"@CMAKE_SOURCE_DIR@/test/data/autzen/autzen.las",
       "spatialreference":"EPSG:2993"
     },
     {
       "type":"filters.colorization",
       "dimensions":"Red1:1:1.0,Green1:2:1.0,Blue1:3:256",
-      "raster":"autzen-warped.tif"
+      "raster":"@CMAKE_SOURCE_DIR@/test/data/autzen/autzen.jpg"
     },
     {
       "type":"filters.colorization",
