@@ -317,15 +317,16 @@ void NitfWriter::doneFile()
             if (v.size() != 2)
             {
                 std::ostringstream oss;
-                oss << "Invalid name/value for AIMDB '" << s <<
+                oss << "Invalid name/value for AIMIDB '" << s <<
                     "'.  Format: <name>:<value>.";
                 throw oss.str();
             }
             Utils::trim(v[0]);
             Utils::trim(v[1]);
             aimidbTre.setField(v[0], v[1]);
-            subheader.getExtendedSection().appendTRE(aimidbTre);
         }
+        if (m_aimidb.size())
+            subheader.getExtendedSection().appendTRE(aimidbTre);
 
         //ACFTB
         ::nitf::TRE acftbTre("ACFTB");
@@ -342,8 +343,9 @@ void NitfWriter::doneFile()
             Utils::trim(v[0]);
             Utils::trim(v[1]);
             acftbTre.setField(v[0], v[1]);
-            subheader.getExtendedSection().appendTRE(acftbTre);
         }
+        if (m_acftb.size())
+            subheader.getExtendedSection().appendTRE(acftbTre);
 
         ::nitf::Writer writer;
         ::nitf::IOHandle output_io(m_nitfFilename.c_str(),
