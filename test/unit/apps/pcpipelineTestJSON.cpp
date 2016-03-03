@@ -106,8 +106,6 @@ testing::Values(
   "pipeline/colorize-multi.json",
   "pipeline/colorize.json",
   "pipeline/crop.json",
-  "pipeline/crop-stats.json",
-  "pipeline/crop-hole.json",
   "pipeline/crop_wkt.json",
   "pipeline/crop_wkt_2d.json",
   "pipeline/decimate.json",
@@ -227,6 +225,23 @@ INSTANTIATE_TEST_CASE_P(plugins, jsonWithHexer,
 testing::Values(
   "pipeline/hexbin-info.json",
   "pipeline/hexbin.json"
+));
+
+class jsonWithLAZ : public testing::TestWithParam<const char*> {};
+
+TEST_P(jsonWithLAZ, pipeline)
+{
+#if defined PDAL_HAVE_LASZIP || defined PDAL_HAVE_LAZPERF
+      run_pipeline(GetParam());
+      #else
+      std::cerr << "WARNING: no LAZ support, skipping test" << std::endl;
+      #endif
+}
+
+INSTANTIATE_TEST_CASE_P(plugins, jsonWithLAZ,
+testing::Values(
+  "pipeline/crop-stats.json",
+  "pipeline/crop-hole.json"
 ));
 
 // TEST(pipelineFiltersTest, DISABLED_crop_reproject)
