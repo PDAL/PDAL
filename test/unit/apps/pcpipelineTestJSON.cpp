@@ -71,7 +71,7 @@ TEST(pipelineBaseTest, no_input)
     int stat = pdal::Utils::run_shell_command(cmd, output);
     EXPECT_EQ(stat, 1);
 
-    const std::string expected = "Usage error: input file name required";
+    const std::string expected = "PDAL: Input filename required.";
     EXPECT_EQ(output.substr(0, expected.length()), expected);
 }
 #endif
@@ -107,7 +107,7 @@ INSTANTIATE_TEST_CASE_P(base, json,
                             "pipeline/chipper.json",
                             "pipeline/colorize-multi.json",
                             "pipeline/colorize.json",
-                            "pipeline/crop.json",
+                            "pipeline/crop-hole.json",
                             "pipeline/crop_wkt.json",
                             "pipeline/crop_wkt_2d.json",
                             "pipeline/decimate.json",
@@ -242,8 +242,8 @@ TEST_P(jsonWithLAZ, pipeline)
 
 INSTANTIATE_TEST_CASE_P(plugins, jsonWithLAZ,
                         testing::Values(
-                            "pipeline/crop-stats.json",
-                            "pipeline/crop-hole.json"
+                            "pipeline/crop.json",
+                            "pipeline/crop-stats.json"
                         ));
 
 // TEST(pipelineFiltersTest, DISABLED_crop_reproject)
