@@ -164,7 +164,23 @@ TEST(ColorizationFilterTest, test3)
 {
     Options options;
 
-    options.add("dimensions", "Foo:1,Bar:2,Baz:3:255");
+    options.add("dimensions", "Foo:1,Bar_:2,Baz2:3:255");
+    options.add("raster", Support::datapath("autzen/autzen.jpg"),
+        "raster to read");
+
+    StringList dims;
+    dims.push_back("Foo");
+    dims.push_back("Bar_");
+    dims.push_back("Baz2");
+    testFile(options, dims, 210, 205, 47175);
+}
+
+// Check that dimension creation works.
+TEST(ColorizationFilterTest, test4)
+{
+    Options options;
+
+    options.add("dimensions", "Foo&:1,Bar:2,Baz:3:255");
     options.add("raster", Support::datapath("autzen/autzen.jpg"),
         "raster to read");
 
@@ -172,6 +188,7 @@ TEST(ColorizationFilterTest, test3)
     dims.push_back("Foo");
     dims.push_back("Bar");
     dims.push_back("Baz");
-    testFile(options, dims, 210, 205, 47175);
+    EXPECT_THROW(testFile(options, dims, 210, 205, 47175), pdal_error);
 }
+
 

@@ -335,28 +335,34 @@ inline std::string description(Id::Enum id)
     case Id::ClassFlags:
         return "Classification Flags";
     case Id::LvisLfid:
-        return "LVIS file ID, includes date and time of collection and file number.  "
-            "The second through sixth values represent modified Julian date of collection.";
+        return "LVIS file ID, includes date and time of collection and "
+            "file number.  The second through sixth values represent "
+            "modified Julian date of collection.";
     case Id::ShotNumber:
         return "Laser shot assigned during collection.";
     case Id::LongitudeCentroid:
-        return "Refers to the centroid longitude of the corresponding LVIS Level-1B waveform.";
+        return "Refers to the centroid longitude of the corresponding "
+            "LVIS Level-1B waveform.";
     case Id::LatitudeCentroid:
-        return "Refers to the centroid latitude of the corresponding LVIS Level-1B waveform.";
+        return "Refers to the centroid latitude of the corresponding "
+            "LVIS Level-1B waveform.";
     case Id::ElevationCentroid:
-        return "Refers to the centroid elevation of the corresponding LVIS Level-1B waveform.";
+        return "Refers to the centroid elevation of the corresponding "
+            "LVIS Level-1B waveform.";
     case Id::LongitudeLow:
         return "Longitude of the lowest detected mode within the waveform.";
     case Id::LatitudeLow:
         return "Latitude of the lowest detected mode within the waveform.";
     case Id::ElevationLow:
-        return "Mean Elevation of the lowest detected mode within the waveform.";
+        return "Mean Elevation of the lowest detected mode within the "
+            "waveform.";
     case Id::LongitudeHigh:
         return "Longitude of the highest detected mode within the waveform.";
     case Id::LatitudeHigh:
         return "Latitude of the highest detected mode within the waveform.";
     case Id::ElevationHigh:
-        return "Mean Elevation of the highest detected mode within the waveform.";
+        return "Mean Elevation of the highest detected mode within the "
+            "waveform.";
     case Id::Unknown:
         return "";
     }
@@ -490,7 +496,7 @@ inline Id::Enum id(std::string s)
         return Id::LongitudeLow;
     else if (s == "LATITUDE_LOW" || s == "LATITUDELOW")
         return Id::LatitudeLow;
-    else if (s == "ELEVATION_LOW" || s == "ELEVATIONCLOW")
+    else if (s == "ELEVATION_LOW" || s == "ELEVATIONLOW")
         return Id::ElevationLow;
     else if (s == "LONGITUDE_HIGH" || s == "LONGITUDEHIGH")
         return Id::LongitudeHigh;
@@ -818,7 +824,7 @@ inline std::string interpretationName(Type::Enum dimtype)
 
 
 /// Get the type corresponding to a type name.
-/// \param[in] s  Name of type.
+/// \param s  Name of type.
 /// \return  Corresponding type enumeration value.
 inline Type::Enum type(std::string s)
 {
@@ -845,6 +851,23 @@ inline Type::Enum type(std::string s)
     if (s == "double")
         return Type::Double;
     return Type::None;
+}
+
+
+/// Extract a dimension name of a string.  Dimension names start with an alpha
+/// and continue with numbers or underscores.
+/// \param s  String from which to extract dimension name.
+/// \param p  Position at which to start extracting.
+/// \return  Number of characters in the extracted name.
+inline std::size_t extractName(const std::string& s, std::string::size_type p)
+{
+    if (!std::isalpha(s[p++]))
+        return 0;
+    auto isvalid = [](int c)
+    {
+        return std::isalpha(c) || std::isdigit(c) || c == '_';
+    };
+    return Utils::extract(s, p, isvalid) + 1;
 }
 
 class Detail

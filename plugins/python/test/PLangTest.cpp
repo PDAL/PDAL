@@ -341,7 +341,6 @@ TEST(PLangTest, PLangTest_reentry)
 
 TEST(PLangTest, log)
 {
-    StageFactory f;
     // verify we can redirect the stdout inside the python script
 
     Options reader_opts;
@@ -363,11 +362,13 @@ TEST(PLangTest, log)
     {
         const Option source("source",
             "import numpy as np\n"
+            "import sys\n"
             "def xfunc(ins,outs):\n"
             "  X = ins['X']\n"
             "  print (\"Testing log output through python script.\")\n"
             "  X = X + 1.0\n"
             "  outs['X'] = X\n"
+            "  sys.stdout.flush()\n"
             "  return True\n"
             );
         const Option module("module", "xModule");
@@ -378,6 +379,7 @@ TEST(PLangTest, log)
         xfilter_opts.add(function);
     }
 
+    StageFactory f;
     {
         FauxReader reader;
 
