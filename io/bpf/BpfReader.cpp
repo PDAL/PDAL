@@ -34,6 +34,8 @@
 
 #include "BpfReader.hpp"
 
+#include <climits>
+
 #include <zlib.h>
 
 #include <pdal/Options.hpp>
