@@ -46,7 +46,9 @@
 #include <pdal/util/IStream.hpp>
 #include <pdal/pdal_macros.hpp>
 
+#ifdef PDAL_HAVE_LIBGEOTIFF
 #include "GeotiffSupport.hpp"
+#endif
 #include "LasHeader.hpp"
 #include "VariableLengthRecord.hpp"
 #include "ZipPoint.hpp"

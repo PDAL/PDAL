@@ -1,11 +1,10 @@
-.. _cpp-pdal-bounds:
+.. _cpp-pdal-istream:
 
 ******************************************************************************
-:cpp:class:`pdal::Bounds`
+:cpp:class:`pdal::IStream`
 ******************************************************************************
 
-
-.. doxygenclass:: pdal::Bounds
+.. doxygenclass:: pdal::IStream
    :members:
    :undoc-members:
 

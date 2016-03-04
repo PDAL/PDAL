@@ -1,11 +1,11 @@
-.. _cpp-pdal-bounds:
+.. _cpp-pdal-charbuf:
 
 ******************************************************************************
-:cpp:class:`pdal::Bounds`
+:cpp:class:`pdal::Charbuf`
 ******************************************************************************
 
 
-.. doxygenclass:: pdal::Bounds
+.. doxygenclass:: pdal::Charbuf
    :members:
    :undoc-members:
 

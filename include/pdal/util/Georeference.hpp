@@ -41,7 +41,6 @@ namespace pdal
 namespace georeference
 {
 
-
 struct Xyz
 {
     Xyz(double x, double y, double z)
@@ -83,10 +82,11 @@ inline RotationMatrix createIdentityMatrix()
     return RotationMatrix(1, 0, 0, 0, 1, 0, 0, 0, 1);
 }
 
-
 // Returns Latitude, Longitude, Height triplet with angles in radians
 PDAL_DLL Xyz georeferenceWgs84(double range, double scanAngle,
                       const RotationMatrix& boresightMatrix,
                       const RotationMatrix& imuMatrix, const Xyz& gpsPoint);
-}
-}
+
+} // namespace georeference
+} // namespace pdal
+

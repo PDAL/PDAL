@@ -117,6 +117,7 @@ ostream *createFile(string const& filename, bool asBinary)
 
 bool directoryExists(const string& dirname)
 {
+    //ABELL - Seems we should be calling is_directory
     return pdalboost::filesystem::exists(dirname);
 }
 

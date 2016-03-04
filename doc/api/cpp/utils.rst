@@ -1,12 +1,14 @@
-.. _cpp-pdal-bounds:
+.. _cpp-pdal-utils
+
+.. index:: Utils
 
 ******************************************************************************
-:cpp:class:`pdal::Bounds`
+:cpp:namespace:`pdal::Utils`
 ******************************************************************************
 
+:cpp:namespace:`pdal::Utils` is a set of utility functions.
 
-.. doxygenclass:: pdal::Bounds
+.. doxygennamespace:: pdal::Utils
    :members:
    :undoc-members:
-
 

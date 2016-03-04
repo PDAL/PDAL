@@ -51,19 +51,43 @@ namespace pdal
 
 class IStreamMarker;
 
-/// Stream wrapper for input of binary data.
+/**
+  Stream wrapper for input of binary data.
+*/
 class PDAL_DLL IStream
 {
 public:
+    /**
+      Default constructor.
+    */
     IStream() : m_stream(NULL), m_fstream(NULL)
         {}
+
+    /**
+      Construct an IStream from a filename.
+
+      \param filename  File from which to read.
+    */
     IStream(const std::string& filename) : m_stream(NULL), m_fstream(NULL)
         { open(filename); }
+
+    /**
+      Construct an IStream from an input stream pointer.
+
+      \param stream  Stream from which to read.
+    */
     IStream(std::istream *stream) : m_stream(stream), m_fstream(NULL)
         {}
+
     ~IStream()
         { delete m_fstream; }
 
+    /**
+      Open a file to extract.
+
+      \param filename  Filename.
+      \return  -1 if a stream is already assigned, 0 otherwise.
+    */
     int open(const std::string& filename)
     {
         if (m_stream)
@@ -72,31 +96,92 @@ public:
             std::ios_base::in | std::ios_base::binary);
         return 0;
     }
+
+    /**
+      Close the underlying stream.
+    */
     void close()
     {
         delete m_fstream;
         m_fstream = NULL;
         m_stream = NULL;
     }
+
+    /**
+      Return the state of the stream.
+
+      \return  The state of the underlying stream.
+    */
     operator bool ()
         { return (bool)(*m_stream); }
+
+    /**
+      Seek to a position in the underlying stream.
+
+      \param pos  Position to seek to,
+    */
     void seek(std::streampos pos)
         { m_stream->seekg(pos, std::istream::beg); }
-    void seek(std::streampos pos, std::ios_base::seekdir way)
-        { m_stream->seekg(pos, way); }
+
+
+    /**
+      Seek to an offset from a specified position.
+
+      \param off  Offset.
+      \param way  Absolute position for offset (beg, end or cur)
+    */
+    void seek(std::streampos off, std::ios_base::seekdir way)
+        { m_stream->seekg(off, way); }
+
+    /**
+      Skip relative to the current position.
+
+      \param offset  Offset from the current position.
+    */
     void skip(std::streamoff offset)
         { m_stream->seekg(offset, std::istream::cur); }
+
+    /**
+      Determine the position of the get pointer.
+
+      \return  Current get position.
+    */
     std::streampos position() const
         { return m_stream->tellg(); }
+
+    /**
+      Determine if the underlying stream is good.
+
+      \return  Whether the underlying stream is good.
+    */
     bool good() const
         { return m_stream->good(); }
+
+    /**
+      Fetch a pointer to the underlying stream.
+
+      \return  Pointer to the underlying stream.
+    */
     std::istream *stream()
         { return m_stream; }
+
+    /**
+      Temporarily push a stream to read from.
+
+      \param strm  New stream to read from.
+    */
     void pushStream(std::istream *strm)
     {
         m_streams.push(m_stream);
         m_stream = strm;
     }
+
+    /**
+      Pop the current stream and return it.  The last stream on the stack
+      cannot be popped.
+
+      \return  Pointer to the popped stream.
+    */
     std::istream *popStream()
     {
         // Can't pop the last stream for now.
@@ -108,6 +193,12 @@ public:
         return strm;
     }
 
+    /**
+      Fetch data from the stream into a string.
+
+      \param s  String to fill.
+      \param size  Number of bytes to extract.
+    */
     void get(std::string& s, size_t size)
     {
         // Could do this by appending to a string with a stream, but this
@@ -119,15 +210,37 @@ public:
         s = buf.get();
     }
 
+    /**
+      Fetch data from the stream into a vector of char.
+
+      \param buf  Buffer to fill.
+    */
     void get(std::vector<char>& buf)
         { m_stream->read(&buf[0], buf.size()); }
 
+    /**
+      Fetch data from the stream into a vector of unsigned char.
+
+      \param buf  Buffer to fill.
+    */
     void get(std::vector<unsigned char>& buf)
         { m_stream->read((char *)&buf[0], buf.size()); }
 
+    /**
+      Fetch data from the stream into the specified buffer of char.
+
+      \param buf  Buffer to fill.
+      \param size  Number of bytes to extract.
+    */
     void get(char *buf, size_t size)
         { m_stream->read(buf, size); }
 
+    /**
+      Fetch data from the stream into the specified buffer of unsigned char.
+
+      \param buf  Buffer to fill.
+      \param size  Number of bytes to extract.
+    */
     void get(unsigned char *buf, size_t size)
         { m_stream->read((char *)buf, size); }
 
@@ -140,30 +253,65 @@ private:
 	IStream(const IStream&);
 };
 
-/// Stream wrapper for input of binary data that converts from little-endian
-/// to host ordering.
+/**
+  Stream wrapper for input of binary data that converts from little-endian
+  to host ordering.
+*/
 class ILeStream : public IStream
 {
 public:
+    /**
+      Default constructor.
+    */
     ILeStream()
     {}
+
+    /**
+      Constructor that opens the file and maps it to a stream.
+
+      \param filename  Filename.
+    */
     ILeStream(const std::string& filename) : IStream(filename)
     {}
+
+    /**
+      Constructor that maps to a provided stream.
+
+      \param stream  Stream to extract from.
+    */
     ILeStream(std::istream *stream) : IStream(stream)
     {}
 
+    /**
+      Extract an unsigned byte from the stream.
+
+      \param v  unsigned byte to populate
+      \return  This stream.
+    */
     ILeStream& operator >> (uint8_t& v)
     {
         v = (uint8_t)m_stream->get();
         return *this;
     }
 
+    /**
+      Extract an unsigned byte from the stream.
+
+      \param v  unsigned byte to populate
+      \return  This stream.
+    */
     ILeStream& operator >> (int8_t& v)
     {
         v = (int8_t)m_stream->get();
         return *this;
     }
 
+    /**
+      Extract an unsigned short from the stream.
+
+      \param v  unsigned short to populate
+      \return  This stream.
+    */
     ILeStream& operator >> (uint16_t& v)
     {
         m_stream->read((char *)&v, sizeof(v));
@@ -171,6 +319,12 @@ public:
         return *this;
     }
 
+    /**
+      Extract an short from the stream.
+
+      \param v  short to populate
+      \return  This stream.
+    */
     ILeStream& operator >> (int16_t& v)
     {
         m_stream->read((char *)&v, sizeof(v));
@@ -178,6 +332,12 @@ public:
         return *this;
     }
 
+    /**
+      Extract an unsigned int from the stream.
+
+      \param v  unsigned int to populate
+      \return  This stream.
+    */
     ILeStream& operator >> (uint32_t& v)
     {
         m_stream->read((char *)&v, sizeof(v));
@@ -185,6 +345,12 @@ public:
         return *this;
     }
 
+    /**
+      Extract an int from the stream.
+
+      \param v  int to populate
+      \return  This stream.
+    */
     ILeStream& operator >> (int32_t& v)
     {
         m_stream->read((char *)&v, sizeof(v));
@@ -192,6 +358,12 @@ public:
         return *this;
     }
 
+    /**
+      Extract an unsigned long int from the stream.
+
+      \param v  unsigned long int to populate
+      \return  This stream.
+    */
     ILeStream& operator >> (uint64_t& v)
     {
         m_stream->read((char *)&v, sizeof(v));
@@ -199,6 +371,12 @@ public:
         return *this;
     }
 
+    /**
+      Extract a long int from the stream.
+
+      \param v  long int to populate
+      \return  This stream.
+    */
     ILeStream& operator >> (int64_t& v)
     {
         m_stream->read((char *)&v, sizeof(v));
@@ -206,6 +384,12 @@ public:
         return *this;
     }
 
+    /**
+      Extract a float from the stream.
+
+      \param v  float to populate
+      \return  This stream.
+    */
     ILeStream& operator >> (float& v)
     {
         m_stream->read((char *)&v, sizeof(v));
@@ -214,6 +398,12 @@ public:
         return *this;
     }
 
+    /**
+      Extract a double from the stream.
+
+      \param v  double to populate
+      \return  This stream.
+    */
     ILeStream& operator >> (double& v)
     {
         m_stream->read((char *)&v, sizeof(v));
@@ -224,9 +414,11 @@ public:
 };
 
 
-/// Stream wrapper for input of binary data that converts from
-/// either little-endian or big-endian to host ordering,
-/// depending on object settings
+/**
+  Stream wrapper for input of binary data that converts from either
+  little-endian or big-endian to host ordering, depending on object
+  settings.
+*/
 class ISwitchableStream : public IStream
 {
 public:
