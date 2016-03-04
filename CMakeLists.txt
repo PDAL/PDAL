@@ -121,10 +121,6 @@ option(WITH_COMPLETION "Install bash completions scripts for command line?" FALS
 add_feature_info("Bash completion" WITH_COMPLETION
     "completion for PDAL command line")
 
-option(BUILD_PLUGIN_ATTRIBUTE "Choose if Attribute filter is built" FALSE)
-add_feature_info("Attribute plugin" BUILD_PLUGIN_ATTRIBUTE
-    "apply attributes to a subset of points")
-
 option(BUILD_PLUGIN_CPD "Choose if Coherent Point Drift kernel is built" FALSE)
 add_feature_info("CPD plugin" BUILD_PLUGIN_CPD
     "run Coherent Point Drift on two datasets")
@@ -265,12 +261,14 @@ include_directories(vendor/rply-1.1.4)
 # PDAL_TARGET_OBJECTS is used to collect the driver object libraries
 set(PDAL_TARGET_OBJECTS "")
 
+if (WITH_TESTS)
+    enable_testing()
+endif()
 add_subdirectory(plugins)
 
 include_directories(vendor/pdalboost)
 
 if (WITH_TESTS)
-    enable_testing()
     if (MSVC)
         # Since tests link CRT dynamically (/MD[d]), require gtest to link dynamically too (default is /MT[d])
         option(gtest_force_shared_crt "Always use shared Visual C++ run-time DLL" ON)

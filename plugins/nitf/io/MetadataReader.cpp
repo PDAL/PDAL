@@ -361,8 +361,6 @@ void MetadataReader::doTRE(const std::string& key,
         
         ++iter;
     }
-
-    return;
 }
 
     
@@ -378,8 +376,6 @@ void MetadataReader::doExtensions(const std::string& key,
 
         ++iter;
     }
-
-    return;
 }
     
 

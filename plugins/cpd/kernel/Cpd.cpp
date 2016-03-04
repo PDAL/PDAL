@@ -35,6 +35,7 @@
 #include "kernel/Cpd.hpp"
 
 #include <pdal/KernelFactory.hpp>
+#include <pdal/pdal_macros.hpp>
 #include <pdal/StageFactory.hpp>
 
 #include "chipper/ChipperFilter.hpp"
@@ -122,11 +123,11 @@ PointViewPtr CpdKernel::readFile(const std::string& filename,
         boundsOptions.add("bounds", m_bounds);
         StageFactory f;
 
-        Stage& crop = ownStage(f.createStage("filters.crop"));
-        crop.setInput(reader);
-        crop.setOptions(boundsOptions);
-        crop.prepare(table);
-        viewSet = crop.execute(table);
+        Stage *crop = f.createStage("filters.crop");
+        crop->setInput(reader);
+        crop->setOptions(boundsOptions);
+        crop->prepare(table);
+        viewSet = crop->execute(table);
     }
     else
     {
