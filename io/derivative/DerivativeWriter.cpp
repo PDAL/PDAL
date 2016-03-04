@@ -1525,15 +1525,25 @@ void DerivativeWriter::writeCurvature(Eigen::MatrixXd* tDemData,
     tBand->SetNoDataValue((double)c_background);
 
     if (m_GRID_SIZE_X > 0 && m_GRID_SIZE_Y > 0)
+    {
+        int ret;
 #if GDAL_VERSION_MAJOR <= 1
-        tBand->RasterIO(GF_Write, 0, 0, m_GRID_SIZE_X, m_GRID_SIZE_Y,
+        ret = tBand->RasterIO(GF_Write, 0, 0, m_GRID_SIZE_X, m_GRID_SIZE_Y,
                 poRasterData.data(), m_GRID_SIZE_X, m_GRID_SIZE_Y,
                 GDT_Float32, 0, 0);
 #else
-        tBand->RasterIO(GF_Write, 0, 0, m_GRID_SIZE_X, m_GRID_SIZE_Y,
+        ret = tBand->RasterIO(GF_Write, 0, 0, m_GRID_SIZE_X, m_GRID_SIZE_Y,
             poRasterData.data(), m_GRID_SIZE_X, m_GRID_SIZE_Y,
             GDT_Float32, 0, 0, 0);
 #endif
+        if (ret != CE_None)
+        {
+            std::ostringstream oss;
+
+            oss << getName() << ": Error reading raster IO.";
+            throw pdal_error(oss.str());
+        }
+    }
     GDALClose((GDALDatasetH) mpDstDS);
 }
 
