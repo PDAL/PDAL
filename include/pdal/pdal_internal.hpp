@@ -42,8 +42,6 @@
 #include <pdal/pdal_defines.h>
 #include <pdal/pdal_types.hpp>
 
-#include <boost/version.hpp>
-
 // This is an extraction from the gtest header.  It allows us to make test
 // functions friends of classes without including the gtest headers.
 #ifndef FRIEND_TEST
