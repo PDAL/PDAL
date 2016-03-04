@@ -486,6 +486,9 @@ public:
 
     std::string jsonValue() const
     {
+        if (m_impl->m_type == "json")
+            return value();
+
         std::string v(Utils::escapeJSON(value()));
         if (m_impl->m_type == "string" || m_impl->m_type == "base64Binary" ||
             m_impl->m_type == "uuid")
