@@ -69,10 +69,10 @@ TEST(pipelineBaseTest, no_input)
 
     std::string output;
     int stat = pdal::Utils::run_shell_command(cmd, output);
-    EXPECT_EQ(1, stat);
+    EXPECT_EQ(-1, stat);
 
-    const std::string expected = "PDAL: Input filename required.";
-    EXPECT_EQ(output.substr(0, expected.length()), expected);
+    const std::string expected = "usage: pdal pipeline [options] [input]";
+    EXPECT_EQ(expected, output.substr(0, expected.length()));
 }
 #endif
 
