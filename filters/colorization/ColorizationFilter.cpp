@@ -83,7 +83,6 @@ ColorizationFilter::BandInfo parseDim(const std::string& dim,
     std::string name;
     uint32_t band = defaultBand;
     double scale = 1.0;
-    bool foundBand = false;
 
     try
     {
@@ -109,7 +108,6 @@ ColorizationFilter::BandInfo parseDim(const std::string& dim,
             if (start == end)
                 band = defaultBand;
             pos += (end - start);
-            foundBand = true;
 
             count = Utils::extract(dim, pos, (int(*)(int))std::isspace);
             pos += count;
