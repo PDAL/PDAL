@@ -224,6 +224,13 @@ string readFileIntoString(const string& filename)
 }
 
 
+string getcwd()
+{
+    const pdalboost::filesystem::path p = pdalboost::filesystem::current_path();
+    return addTrailingSlash(p.string());
+}
+
+
 /***
 // Non-boost alternative.  Requires file existence.
 string toAbsolutePath(const string& filename)

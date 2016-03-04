@@ -1,7 +1,11 @@
-.. _cpp-pdal-dimension:
+.. _cpp-pdal-istream:
 
 ******************************************************************************
-:cpp:namespace:`pdal::Dimension`
+:cpp:class:`pdal::IStream`
 ******************************************************************************
 
-.. doxygennamespace:: pdal::Dimension
+.. doxygenclass:: pdal::IStream
+   :members:
+   :undoc-members:
+
+

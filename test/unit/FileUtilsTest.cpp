@@ -112,7 +112,8 @@ TEST(FileUtilsTest, test_toAbsolutePath)
 
     const string root = FileUtils::getcwd();
 
-    // check 1-arg version: make absolute when file is relative, via current working dir
+    // check 1-arg version: make absolute when file is relative,
+    // via current working dir
     const string a = FileUtils::toAbsolutePath("foo.txt");
     compare_paths(a, root + "foo.txt");
 

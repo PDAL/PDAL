@@ -157,6 +157,13 @@ namespace FileUtils
     PDAL_DLL std::string readFileIntoString(const std::string& filename);
 
     /**
+      Get the current working directory with trailing separator.
+
+      \return  The current working directory.
+    */
+    PDAL_DLL std::string getcwd();
+
+    /**
       Return the file component of the given path,
       e.g. "d:/foo/bar/a.c" -> "a.c"
 
