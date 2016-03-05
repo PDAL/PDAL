@@ -30,6 +30,7 @@ init:
   - set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%
   - set PATH=%PYTHONHOME%;%PATH%
   - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+  - "ECHO %PYTHON_VERSION% %MINICONDA%"
 
 install:
   # make a temp directory for downloading osgeo4w-setup.exe
@@ -43,7 +44,13 @@ install:
   # get the OSGeo installer
   - ps: (new-object net.webclient).DownloadFile("http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe", "C:\temp\osgeo4w-setup.exe")
   # and install our dependencies
-  - C:\temp\osgeo4w-setup.exe -q -k -r -A -s http://download.osgeo.org/osgeo4w/ -a x86_64 -P boost-devel,eigen,gdal,geos,hexer,iconv,laszip,libgeotiff,libpq,libtiff,libxml2,nitro,pcl,points2grid,proj,python-numpy,zlib -R %OSGEO4W_ROOT% > NUL
+  - C:\temp\osgeo4w-setup.exe -q -k -r -A -s http://download.osgeo.org/osgeo4w/ -a x86_64 -P boost-devel,eigen,gdal,geos,hexer,iconv,laszip,libgeotiff,libpq,libtiff,libxml2,nitro,pcl,points2grid,proj,zlib -R %OSGEO4W_ROOT% > NUL
+  - "set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%"
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda info -a
+  - "conda create -q -n test-environment python=%PYTHON_VERSION% numpy"
+  - activate test-environment
   # call our PDAL install script
   - call .\\scripts\\appveyor\\config.cmd
 
