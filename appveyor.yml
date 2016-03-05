@@ -32,7 +32,6 @@ init:
   - set PATH=%PYTHONHOME%;%PATH%
   - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
   - set MINICONDA=C:\Miniconda-x64
-  - set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%
 
 install:
   # make a temp directory for downloading osgeo4w-setup.exe
@@ -47,11 +46,12 @@ install:
   - ps: (new-object net.webclient).DownloadFile("http://download.osgeo.org/osgeo4w/osgeo4w-setup-x86_64.exe", "C:\temp\osgeo4w-setup.exe")
   # and install our dependencies
   - C:\temp\osgeo4w-setup.exe -q -k -r -A -s http://download.osgeo.org/osgeo4w/ -a x86_64 -P boost-devel,eigen,gdal,geos,hexer,iconv,laszip,libgeotiff,libpq,libtiff,libxml2,nitro,pcl,points2grid,proj,zlib -R %OSGEO4W_ROOT% > NUL
+  - "set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%"
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
   - conda info -a
-  - "conda create -q -n test-environment python=%PYTHON_VERSION% numpy"
-  - activate test-environment
+  - "conda create -q -n test python=%PYTHON_VERSION% numpy"
+  - activate test
   # call our PDAL install script
   - call .\\scripts\\appveyor\\config.cmd
 
