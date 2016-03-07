@@ -48,7 +48,7 @@ install:
   - C:\temp\osgeo4w-setup.exe -q -k -r -A -s http://download.osgeo.org/osgeo4w/ -a x86_64 -P boost-devel,eigen,gdal,geos,hexer,iconv,laszip,libgeotiff,libpq,libtiff,libxml2,nitro,pcl,points2grid,proj,zlib -R %OSGEO4W_ROOT% > NUL
   - "set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%"
   - conda config --set always_yes yes --set changeps1 no
-  - conda update -q conda
+  # - conda update -q conda
   - conda info -a
   - "conda create -q -n test python=%PYTHON_VERSION% numpy"
   - activate test
