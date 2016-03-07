@@ -45,7 +45,9 @@
 #include <pdal/util/Utils.hpp>
 #include <pdal/pdal_macros.hpp>
 
+#ifdef PDAL_HAVE_LIBGEOTIFF
 #include "GeotiffSupport.hpp"
+#endif
 #include "ZipPoint.hpp"
 
 namespace pdal
