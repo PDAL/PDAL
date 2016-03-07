@@ -143,29 +143,14 @@ NitfWriter::NitfWriter()
 void NitfWriter::processOptions(const Options& options)
 {
     LasWriter::processOptions(options);
-    m_cLevel = options.getValueOrDefault<std::string>("clevel","03");
-    m_sType = options.getValueOrDefault<std::string>("stype","BF01");
-    m_oStationId = options.getValueOrDefault<std::string>("ostaid", "PDAL");
-    m_fileTitle = options.getValueOrDefault<std::string>("ftitle");
-    m_fileClass = options.getValueOrDefault<std::string>("fsclas","U");
-    m_origName = options.getValueOrDefault<std::string>("oname");
-    m_origPhone = options.getValueOrDefault<std::string>("ophone");
-    m_securityClass = options.getValueOrDefault<std::string>("fsclas","U");
-    m_securityControlAndHandling =
-        options.getValueOrDefault<std::string>("fsctlh");
-    m_securityClassificationSystem =
-        options.getValueOrDefault<std::string>("fsclsy");
-    m_imgSecurityClass = options.getValueOrDefault<std::string>("fsclas","U");
-    m_imgDate = options.getValueOrDefault<std::string>("idatim");
-    m_imgIdentifier2 = options.getValueOrDefault<std::string>("iid2");
-    m_sic = options.getValueOrDefault<std::string>("fscltx");
-    m_aimidb = options.getValueOrDefault<StringList>("aimidb");
-    m_acftb = options.getValueOrDefault<StringList>("acftb");
+    m_nitf.processOptions(options);
 }
 
 
 void NitfWriter::writeView(const PointViewPtr view)
 {
+    //ABELL - Think we can just get this from the LAS file header
+    //  when we're done.
     view->calculateBounds(m_bounds);
     LasWriter::writeView(view);
 }
@@ -174,8 +159,9 @@ void NitfWriter::writeView(const PointViewPtr view)
 void NitfWriter::readyFile(const std::string& filename,
     const SpatialReference& srs)
 {
+    m_nitf.setFilename(filename);
     m_error.setFilename(filename);
-    m_nitfFilename = filename;
+
     Utils::writeProgress(m_progressFd, "READYFILE", filename);
     prepOutput(&m_oss, srs);
 }
@@ -185,183 +171,31 @@ void NitfWriter::doneFile()
 {
     finishOutput();
 
+    std::streambuf *buf = m_oss.rdbuf();
+    long size = buf->pubseekoff(0, m_oss.end);
+    buf->pubseekoff(0, m_oss.beg);
+
+    std::vector<char> bytes(size);
+    buf->sgetn(bytes.data(), size);
+    m_oss.clear();
+    m_nitf.wrapData(bytes.data(), size);
+
+    BOX3D bounds =  reprojectBoxToDD(m_srs, m_bounds);
+
+    //NITF decimal degree values for corner coordinates only has a
+    // precision of 3 after the decimal. This may cause an invalid
+    // polygon due to rounding errors with a small tile. Therefore
+    // instead of rounding min values will use the floor value and
+    // max values will use the ceiling values.
+    bounds.minx = (floor(bounds.minx * 1000)) / 1000.0;
+    bounds.miny = (floor(bounds.miny * 1000)) / 1000.0;
+    bounds.maxx = (ceil(bounds.maxx * 1000)) / 1000.0;
+    bounds.maxy = (ceil(bounds.maxy * 1000)) / 1000.0;
+    m_nitf.setBounds(bounds);
+
     try
     {
-        ::nitf::Record record(NITF_VER_21);
-        ::nitf::FileHeader header = record.getHeader();
-        header.getFileHeader().set("NITF");
-        header.getComplianceLevel().set(m_cLevel);
-        header.getSystemType().set(m_sType);
-        header.getOriginStationID().set(m_oStationId);
-        if (m_fileTitle.empty())
-            m_fileTitle = m_nitfFilename;
-        header.getFileTitle().set(m_fileTitle);
-        header.getClassification().set(m_fileClass);
-        header.getMessageCopyNum().set("00000");
-        header.getMessageNumCopies().set("00000");
-        header.getEncrypted().set("0");
-        header.getBackgroundColor().setRawData(const_cast<char*>("000"), 3);
-        header.getOriginatorName().set(m_origName);
-        header.getOriginatorPhone().set(m_origPhone);
-        header.getSecurityGroup().getClassificationSystem().set(
-            m_securityClassificationSystem);
-        header.getSecurityGroup().getControlAndHandling().set(
-            m_securityControlAndHandling);
-        header.getSecurityGroup().getClassificationText().set(m_sic);
-
-        ::nitf::DESegment des = record.newDataExtensionSegment();
-
-        des.getSubheader().getFilePartType().set("DE");
-        des.getSubheader().getTypeID().set("LIDARA DES");
-        des.getSubheader().getVersion().set("01");
-        des.getSubheader().getSecurityClass().set(m_securityClass);
-        ::nitf::FileSecurity security = record.getHeader().getSecurityGroup();
-        des.getSubheader().setSecurityGroup(security.clone());
-
-        ::nitf::TRE usrHdr("LIDARA DES", "raw_data");
-        usrHdr.setField("raw_data", "not");
-        ::nitf::Field fld = usrHdr.getField("raw_data");
-        fld.setType(::nitf::Field::BINARY);
-
-        std::streambuf *buf = m_oss.rdbuf();
-        long size = buf->pubseekoff(0, m_oss.end);
-        buf->pubseekoff(0, m_oss.beg);
-
-        std::vector<char> bytes(size);
-        buf->sgetn(bytes.data(), size);
-        m_oss.clear();
-
-        des.getSubheader().setSubheaderFields(usrHdr);
-
-        ::nitf::ImageSegment image = record.newImageSegment();
-        ::nitf::ImageSubheader subheader = image.getSubheader();
-
-        BOX3D bounds =  reprojectBoxToDD(m_srs, m_bounds);
-
-        //NITF decimal degree values for corner coordinates only has a
-        // precision of 3 after the decimal. This may cause an invalid
-        // polygon due to rounding errors with a small tile. Therefore
-        // instead of rounding min values will use the floor value and
-        // max values will use the ceiling values.
-        bounds.minx = (floor(bounds.minx * 1000)) / 1000.0;
-        bounds.miny = (floor(bounds.miny * 1000)) / 1000.0;
-        bounds.maxx = (ceil(bounds.maxx * 1000)) / 1000.0;
-        bounds.maxy = (ceil(bounds.maxy * 1000)) / 1000.0;
-
-        double corners[4][2];
-        corners[0][0] = bounds.maxy;
-        corners[0][1] = bounds.minx;
-        corners[1][0] = bounds.maxy;
-        corners[1][1] = bounds.maxx;
-        corners[2][0] = bounds.miny;
-        corners[2][1] = bounds.maxx;
-        corners[3][0] = bounds.miny;
-        corners[3][1] = bounds.minx;
-        subheader.setCornersFromLatLons(NRT_CORNERS_DECIMAL, corners);
-
-        subheader.getImageSecurityClass().set(m_imgSecurityClass);
-        subheader.setSecurityGroup(security.clone());
-        if (m_imgDate.size())
-            subheader.getImageDateAndTime().set(m_imgDate);
-
-        ::nitf::BandInfo info;
-        ::nitf::LookupTable lt(0,0);
-        info.init("G",    /* The band representation, Nth band */
-                  " ",      /* The band subcategory */
-                  "N",      /* The band filter condition */
-                  "   ",    /* The band standard image filter code */
-                  0,        /* The number of look-up tables */
-                  0,        /* The number of entries/LUT */
-                  lt);     /* The look-up tables */
-
-        std::vector< ::nitf::BandInfo> bands;
-        bands.push_back(info);
-        subheader.setPixelInformation(
-            "INT",      /* Pixel value type */
-            8,         /* Number of bits/pixel */
-            8,         /* Actual number of bits/pixel */
-            "R",       /* Pixel justification */
-            "NODISPLY",     /* Image representation */
-            "VIS",     /* Image category */
-            1,         /* Number of bands */
-            bands);
-
-        subheader.setBlocking(
-            8,   /*!< The number of rows */
-            8,  /*!< The number of columns */
-            8, /*!< The number of rows/block */
-            8,  /*!< The number of columns/block */
-            "P");                /*!< Image mode */
-
-        //Image Header fields to set
-        subheader.getImageId().set("None");
-        subheader.getImageTitle().set(m_imgIdentifier2);
-
-        // 64 char string
-        std::string zeros(64, '0');
-
-        std::unique_ptr< ::nitf::BandSource> band(new ::nitf::MemorySource(
-            const_cast<char*>(zeros.c_str()),
-            zeros.size() /* memory size */,
-            0 /* starting offset */,
-            1 /* bytes per pixel */,
-            0 /*skip*/));
-        ::nitf::ImageSource iSource;
-        iSource.addBand(*band);
-
-        //AIMIDB
-        ::nitf::TRE aimidbTre("AIMIDB");
-        for (auto& s : m_aimidb)
-        {
-            StringList v = Utils::split2(s, ':');
-            if (v.size() != 2)
-            {
-                std::ostringstream oss;
-                oss << "Invalid name/value for AIMIDB '" << s <<
-                    "'.  Format: <name>:<value>.";
-                throw oss.str();
-            }
-            Utils::trim(v[0]);
-            Utils::trim(v[1]);
-            aimidbTre.setField(v[0], v[1]);
-        }
-        if (m_aimidb.size())
-            subheader.getExtendedSection().appendTRE(aimidbTre);
-
-        //ACFTB
-        ::nitf::TRE acftbTre("ACFTB");
-        for (auto& s : m_acftb)
-        {
-            StringList v = Utils::split2(s, ':');
-            if (v.size() != 2)
-            {
-                std::ostringstream oss;
-                oss << "Invalid name/value for ACFTB '" << s <<
-                    "'.  Format: <name>:<value>.";
-                throw oss.str();
-            }
-            Utils::trim(v[0]);
-            Utils::trim(v[1]);
-            acftbTre.setField(v[0], v[1]);
-        }
-        if (m_acftb.size())
-            subheader.getExtendedSection().appendTRE(acftbTre);
-
-        ::nitf::Writer writer;
-        ::nitf::IOHandle output_io(m_nitfFilename.c_str(),
-            NITF_ACCESS_WRITEONLY, NITF_CREATE);
-        writer.prepare(output_io, record);
-
-        ::nitf::SegmentWriter sWriter = writer.newDEWriter(0);
-
-        ::nitf::SegmentMemorySource sSource(bytes.data(), size, 0, 0, false);
-        sWriter.attachSource(sSource);
-
-        ::nitf::ImageWriter iWriter = writer.newImageWriter(0);
-        iWriter.attachSource(iSource);
-
-        writer.write();
-        output_io.close();
+        m_nitf.write();
     }
     catch (except::Throwable & t)
     {

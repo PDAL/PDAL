@@ -34,7 +34,9 @@
 
 #pragma once
 
+#include <pdal/Options.hpp>
 #include <pdal/pdal_internal.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include <vector>
 
@@ -77,25 +79,49 @@ namespace pdal
 class PDAL_DLL NitfFile
 {
 public:
+    NitfFile();
     NitfFile(const std::string& filename);
-    ~NitfFile();
 
-    void open();
-    void close();
-
+    void openExisting();
+    void setFilename(const std::string& filename)
+        { m_filename = filename; }
     void getLasOffset(uint64_t& offset, uint64_t& length);
-
     void extractMetadata(MetadataNode& metadata);
+    void wrapData(const char *buf, size_t size);
+    void wrapData(const std::string& filename);
+    void setArgs(ProgramArgs& args);
+    void setBounds(const BOX3D& bounds);
+    void processOptions(const Options& options);
+    void write();
 
 private:
     bool locateLidarImageSegment();
     bool locateLidarDataSegment();
 
-    ::nitf::Reader *m_reader;
-    ::nitf::IOHandle *m_io;
-    ::nitf::Record m_record;
+    std::unique_ptr<nitf::DataSource> m_source;
+    std::unique_ptr<nitf::IOHandle> m_io;
+    std::unique_ptr<nitf::IOHandle> m_inputHandle;
+    nitf::Record m_record;
 
-    const std::string m_filename;
+    std::string m_cLevel;
+    std::string m_sType;
+    std::string m_oStationId;
+    std::string m_fileTitle;
+    std::string m_fileClass;
+    std::string m_origName;
+    std::string m_origPhone;
+    std::string m_securityClass;
+    std::string m_securityControlAndHandling;
+    std::string m_securityClassificationSystem;
+    std::string m_imgSecurityClass;
+    std::string m_imgDate;
+    StringList m_aimidb;
+    StringList m_acftb;
+    std::string m_imgIdentifier2;
+    std::string m_sic;
+    BOX3D m_bounds;
+
+    std::string m_filename;
     bool m_validLidarSegments;
     ::nitf::Uint32 m_lidarImageSegment;
     ::nitf::Uint32 m_lidarDataSegment;

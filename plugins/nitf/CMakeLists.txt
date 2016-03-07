@@ -34,12 +34,16 @@ PDAL_ADD_PLUGIN(reader_libname reader nitf
 # NITF Writer
 #
 set(srcs
+    io/NitfFile.cpp
     io/NitfWriter.cpp
+    io/MetadataReader.cpp
     io/tre_plugins.cpp
 )
 
 set(incs
+    io/NitfFile.hpp
     io/NitfWriter.hpp
+    io/MetadataReader.hpp
     io/tre_plugins.hpp
 )
 

@@ -101,13 +101,11 @@ std::string NitfReader::getName() const { return s_info.name; }
 void NitfReader::initialize(PointTableRef table)
 {
     NitfFile nitf(m_filename);
-    nitf.open();
+    nitf.openExisting();
     nitf.getLasOffset(m_offset, m_length);
     nitf.extractMetadata(m_metadata);
     m_metadata.add("DESDATA_OFFSET", m_offset);
     m_metadata.add("DESDATA_LENGTH", m_length);
-
-    nitf.close();
 
     // Initialize the LAS stuff with its own metadata node.
     MetadataNode lasNode = m_metadata.add(LasReader::getName());

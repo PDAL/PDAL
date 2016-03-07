@@ -56,9 +56,16 @@ namespace pdal
 {
 
 
+NitfFile::NitfFile() :
+    m_validLidarSegments(false),
+    m_lidarImageSegment(0),
+    m_lidarDataSegment(0)
+{
+    register_tre_plugins();
+}
+
+
 NitfFile::NitfFile(const std::string& filename) :
-    m_reader(NULL),
-    m_io(NULL),
     m_filename(filename),
     m_validLidarSegments(false),
     m_lidarImageSegment(0),
@@ -68,22 +75,15 @@ NitfFile::NitfFile(const std::string& filename) :
 }
 
 
-NitfFile::~NitfFile()
-{
-    close();
-}
-
-
-void NitfFile::open()
+void NitfFile::openExisting()
 {
     if (::nitf::Reader::getNITFVersion(m_filename.c_str()) == NITF_VER_UNKNOWN)
         throw pdal_error("Unable to determine NITF file version");
 
     // read the major NITF data structures, courtesy Nitro
-    m_reader = new ::nitf::Reader();
     try
     {
-        m_io = new ::nitf::IOHandle(m_filename.c_str());
+        m_io.reset(new nitf::IOHandle(m_filename));
     }
     catch (::nitf::NITFException& e)
     {
@@ -91,13 +91,13 @@ void NitfFile::open()
     }
     try
     {
-        m_record = m_reader->read(*m_io);
+        nitf::Reader reader;
+        m_record = reader.read(*m_io);
     }
     catch (::nitf::NITFException& e)
     {
         throw pdal_error("unable to read NITF file (" + e.getMessage() + ")");
     }
-
 
     // find the image segment corresponding the the lidar data, if any
     const bool imageOK = locateLidarImageSegment();
@@ -119,17 +119,228 @@ void NitfFile::open()
 }
 
 
-void NitfFile::close()
+void NitfFile::setArgs(ProgramArgs& args)
 {
-    if (m_io)
-    {
-        m_io->close();
-        delete m_io;
-        m_io = NULL;
-    }
+    args.add("clevel", "Complexity level", m_cLevel, "03");
+    args.add("stype", "Standard type", m_sType, "BF01");
+    args.add("ostaid", "Origination station ID", m_oStationId, "PDAL");
+    args.add("ftitle", "File title", m_fileTitle);
+    args.add("fsclas", "", m_fileClass, "U");
+    args.add("oname", "Originator's name", m_origName);
+    args.add("ophone", "Originator's phone number", m_origPhone);
+    args.add("fsclas", "File security classification", m_securityClass, "U");
+    args.add("fsctlh", "File control and handling",
+        m_securityControlAndHandling);
+    args.add("fsclsy", "File security classification system",
+        m_securityClassificationSystem);
+    args.add("isclas", "File security classification", m_imgSecurityClass, "U");
+    args.add("idatim", "Image date and time", m_imgDate);
+    args.add("iid2", "Image identifier 2", m_imgIdentifier2);
+    args.add("fscltx", "File classification text", m_sic);
+    args.add("aimidb", "Additional (airborne) image ID", m_aimidb);
+    args.add("acftb", "Aircraft information", m_acftb);
+}
 
-    delete m_reader;
-    m_reader = NULL;
+
+void NitfFile::processOptions(const Options& options)
+{
+    m_cLevel = options.getValueOrDefault<std::string>("clevel","03");
+    m_sType = options.getValueOrDefault<std::string>("stype","BF01");
+    m_oStationId = options.getValueOrDefault<std::string>("ostaid", "PDAL");
+    m_fileTitle = options.getValueOrDefault<std::string>("ftitle");
+    m_fileClass = options.getValueOrDefault<std::string>("fsclas","U");
+    m_origName = options.getValueOrDefault<std::string>("oname");
+    m_origPhone = options.getValueOrDefault<std::string>("ophone");
+    m_securityClass = options.getValueOrDefault<std::string>("fsclas","U");
+    m_securityControlAndHandling =
+        options.getValueOrDefault<std::string>("fsctlh");
+    m_securityClassificationSystem =
+        options.getValueOrDefault<std::string>("fsclsy");
+    m_imgSecurityClass = options.getValueOrDefault<std::string>("isclas","U");
+    m_imgDate = options.getValueOrDefault<std::string>("idatim");
+    m_imgIdentifier2 = options.getValueOrDefault<std::string>("iid2");
+    m_sic = options.getValueOrDefault<std::string>("fscltx");
+    m_aimidb = options.getValueOrDefault<StringList>("aimidb");
+    m_acftb = options.getValueOrDefault<StringList>("acftb");
+}
+
+
+//NOTE: Throws except::Throwable.
+//
+void NitfFile::write()
+{
+    ::nitf::Record record(NITF_VER_21);
+    ::nitf::FileHeader header = record.getHeader();
+    header.getFileHeader().set("NITF");
+
+    header.getComplianceLevel().set(m_cLevel);
+    header.getSystemType().set(m_sType);
+    header.getOriginStationID().set(m_oStationId);
+    if (m_fileTitle.empty())
+        m_fileTitle = m_filename;
+    header.getFileTitle().set(m_fileTitle);
+    header.getClassification().set(m_fileClass);
+    header.getMessageCopyNum().set("00000");
+    header.getMessageNumCopies().set("00000");
+    header.getEncrypted().set("0");
+    header.getBackgroundColor().setRawData(const_cast<char*>("000"), 3);
+    header.getOriginatorName().set(m_origName);
+    header.getOriginatorPhone().set(m_origPhone);
+    header.getSecurityGroup().getClassificationSystem().set(
+        m_securityClassificationSystem);
+    header.getSecurityGroup().getControlAndHandling().set(
+       m_securityControlAndHandling);
+    header.getSecurityGroup().getClassificationText().set(m_sic);
+
+    ::nitf::DESegment des = record.newDataExtensionSegment();
+
+    des.getSubheader().getFilePartType().set("DE");
+    des.getSubheader().getTypeID().set("LIDARA DES");
+    des.getSubheader().getVersion().set("01");
+    des.getSubheader().getSecurityClass().set(m_securityClass);
+    ::nitf::FileSecurity security = record.getHeader().getSecurityGroup();
+    des.getSubheader().setSecurityGroup(security.clone());
+
+    ::nitf::TRE usrHdr("LIDARA DES", "raw_data");
+    usrHdr.setField("raw_data", "not");
+    ::nitf::Field fld = usrHdr.getField("raw_data");
+    fld.setType(::nitf::Field::BINARY);
+
+    des.getSubheader().setSubheaderFields(usrHdr);
+
+    ::nitf::ImageSegment image = record.newImageSegment();
+    ::nitf::ImageSubheader subheader = image.getSubheader();
+
+    double corners[4][2];
+    corners[0][0] = m_bounds.maxy;
+    corners[0][1] = m_bounds.minx;
+    corners[1][0] = m_bounds.maxy;
+    corners[1][1] = m_bounds.maxx;
+    corners[2][0] = m_bounds.miny;
+    corners[2][1] = m_bounds.maxx;
+    corners[3][0] = m_bounds.miny;
+    corners[3][1] = m_bounds.minx;
+    subheader.setCornersFromLatLons(NRT_CORNERS_DECIMAL, corners);
+    subheader.getImageSecurityClass().set(m_imgSecurityClass);
+    subheader.setSecurityGroup(security.clone());
+    if (m_imgDate.size())
+        subheader.getImageDateAndTime().set(m_imgDate);
+
+    ::nitf::BandInfo info;
+    ::nitf::LookupTable lt(0,0);
+    info.init("G",    /* The band representation, Nth band */
+              " ",      /* The band subcategory */
+              "N",      /* The band filter condition */
+              "   ",    /* The band standard image filter code */
+              0,        /* The number of look-up tables */
+              0,        /* The number of entries/LUT */
+              lt);     /* The look-up tables */
+
+    std::vector<::nitf::BandInfo> bands;
+    bands.push_back(info);
+    subheader.setPixelInformation(
+        "INT",      /* Pixel value type */
+        8,         /* Number of bits/pixel */
+        8,         /* Actual number of bits/pixel */
+        "R",       /* Pixel justification */
+        "NODISPLY",     /* Image representation */
+        "VIS",     /* Image category */
+        1,         /* Number of bands */
+        bands);
+
+    subheader.setBlocking(
+        8,   /*!< The number of rows */
+        8,   /*!< The number of columns */
+        8,   /*!< The number of rows/block */
+        8,   /*!< The number of columns/block */
+        "P");                /*!< Image mode */
+
+    //Image Header fields to set
+    subheader.getImageId().set("None");
+    subheader.getImageTitle().set(m_imgIdentifier2);
+
+    //AIMIDB
+    ::nitf::TRE aimidbTre("AIMIDB");
+    for (auto& s : m_aimidb)
+    {
+        StringList v = Utils::split2(s, ':');
+        if (v.size() != 2)
+        {
+            std::ostringstream oss;
+            oss << "Invalid name/value for AIMIDB '" << s <<
+                "'.  Format: <name>:<value>.";
+            throw oss.str();
+        }
+        Utils::trim(v[0]);
+        Utils::trim(v[1]);
+        aimidbTre.setField(v[0], v[1]);
+    }
+    if (m_aimidb.size())
+        subheader.getExtendedSection().appendTRE(aimidbTre);
+
+    //ACFTB
+    ::nitf::TRE acftbTre("ACFTB");
+    for (auto& s : m_acftb)
+    {
+        StringList v = Utils::split2(s, ':');
+        if (v.size() != 2)
+        {
+            std::ostringstream oss;
+            oss << "Invalid name/value for ACFTB '" << s <<
+                "'.  Format: <name>:<value>.";
+            throw oss.str();
+        }
+        Utils::trim(v[0]);
+        Utils::trim(v[1]);
+        acftbTre.setField(v[0], v[1]);
+    }
+    if (m_acftb.size())
+        subheader.getExtendedSection().appendTRE(acftbTre);
+
+    ::nitf::Writer writer;
+    ::nitf::IOHandle output_io(m_filename, NITF_ACCESS_WRITEONLY,
+        NITF_CREATE);
+    writer.prepare(output_io, record);
+
+    ::nitf::SegmentWriter sWriter = writer.newDEWriter(0);
+    sWriter.attachSource(*m_source);
+
+    // 64 char string
+    std::string zeros(64, '0');
+
+    ::nitf::MemorySource band(
+        const_cast<char*>(zeros.c_str()),
+        zeros.size() /* memory size */,
+        0 /* starting offset */,
+        1 /* bytes per pixel */,
+        0 /*skip*/);
+    ::nitf::ImageSource iSource;
+    iSource.addBand(band);
+
+    ::nitf::ImageWriter iWriter = writer.newImageWriter(0);
+    iWriter.attachSource(iSource);
+
+    writer.write();
+    output_io.close();
+}
+
+
+void NitfFile::setBounds(const BOX3D& bounds)
+{
+    m_bounds = bounds;
+}
+
+
+void NitfFile::wrapData(const char *buf, size_t size)
+{
+    m_source.reset(new ::nitf::SegmentMemorySource(buf, size, 0, 0, false));
+}
+
+
+void NitfFile::wrapData(const std::string& filename)
+{
+    m_inputHandle.reset(new nitf::IOHandle(filename));
+    m_source.reset(new nitf::SegmentFileSource(*m_inputHandle, 0, 0));
 }
 
 
