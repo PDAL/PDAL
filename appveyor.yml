@@ -26,7 +26,7 @@ on_finish:
 
 init:
   - set PYTHONHOME=C:\Python27-x64
-  - set PYTHONPATH=%PYTHONHOME%\Lib
+  - set PYTHONPATH=%PYTHONHOME%\Lib;%OSGEO4W_ROOT%\apps\Python27\lib\site-packages
   - set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%
   - set PATH=%PYTHONHOME%;%PATH%
   - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
