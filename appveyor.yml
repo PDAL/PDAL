@@ -21,8 +21,8 @@ shallow_clone: true
 clone_depth: 5
 
 # Uncomment if you need to debug AppVeyor session (https://www.appveyor.com/docs/how-to/rdp-to-build-worker)
-#on_finish:
-#- ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+on_finish:
+- ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 init:
   - set PYTHONHOME=C:\Python27-x64
