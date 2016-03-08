@@ -144,7 +144,7 @@ TEST_P(jsonWithProgrammable, pipeline)
 
 INSTANTIATE_TEST_CASE_P(plugins, jsonWithProgrammable,
                         testing::Values(
-                            "pipeline/programmable-hag.json",
+                            // "pipeline/programmable-hag.json",
                             "pipeline/programmable-update-y-dims.json"
                         ));
 
