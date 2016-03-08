@@ -37,7 +37,7 @@
 #include <pdal/StageFactory.hpp>
 #include <las/LasWriter.hpp>
 
-#include "NitfFile.hpp"
+#include "NitfFileWriter.hpp"
 
 namespace pdal
 {
@@ -53,7 +53,7 @@ public:
     std::string getName() const;
 
 private:
-    NitfFile m_nitf;
+    NitfFileWriter m_nitf;
     std::stringstream m_oss;
     BOX3D m_bounds;
 

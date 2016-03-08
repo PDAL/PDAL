@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "NitfFile.hpp"
+#include "NitfFileReader.hpp"
 #include "NitfReader.hpp"
 #include <pdal/pdal_macros.hpp>
 
@@ -100,8 +100,8 @@ std::string NitfReader::getName() const { return s_info.name; }
 
 void NitfReader::initialize(PointTableRef table)
 {
-    NitfFile nitf(m_filename);
-    nitf.openExisting();
+    NitfFileReader nitf(m_filename);
+    nitf.open();
     nitf.getLasOffset(m_offset, m_length);
     nitf.extractMetadata(m_metadata);
     m_metadata.add("DESDATA_OFFSET", m_offset);
