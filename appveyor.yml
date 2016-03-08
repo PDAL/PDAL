@@ -59,6 +59,8 @@ test_script:
   # FIXME: Clear PATH to avoid OSGeo4W loading incompatible DLLs
   - set PATH=
   - set PATH=%OSGEO4W_ROOT%\bin;C:\Program Files (x86)\MSBuild\14.0\Bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Program Files\7-Zip;C:\Program Files\Microsoft Windows Performance Toolkit\;C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit\;C:\Python27;C:\Tools\GitVersion;C:\Program Files (x86)\CMake\bin;C:\Program Files\Git\cmd;C:\Program Files\Git\usr\bin;C:\Program Files\AppVeyor\BuildAgent\
+  - set PYTHONHOME=C:\Python27-x64
+  - set PYTHONPATH=%PYTHONHOME%\Lib;%OSGEO4W_ROOT%\apps\Python27\lib\site-packages
   - echo %PATH%
   - set GDAL_DATA=%OSGEO4W_ROOT%\share\epsg_csv
   - set PROJ_LIB=%OSGEO4W_ROOT%\share\proj
