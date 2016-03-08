@@ -72,8 +72,8 @@
 // NOTES
 //
 // is it legal to write a LAZ file?
-// syntactically, how do we name all the LAS writer options that we will pass to the las writer?
-//
+// syntactically, how do we name all the LAS writer options that we will
+// pass to the las writer?
 
 namespace pdal
 {

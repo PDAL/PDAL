@@ -34,6 +34,8 @@
 
 #include "BpfWriter.hpp"
 
+#include <climits>
+
 #include <pdal/Options.hpp>
 #include <pdal/pdal_export.hpp>
 

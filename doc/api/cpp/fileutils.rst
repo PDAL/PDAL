@@ -1,12 +1,8 @@
 .. _cpp-pdal-fileutils:
 
 ******************************************************************************
-:cpp:class:`pdal::FileUtils`
+:cpp:namespace:: `pdal::FileUtils`
 ******************************************************************************
 
-
-.. doxygenclass:: pdal::FileUtils
-   :members:
-   :undoc-members:
-
+.. doxygennamespace:: pdal::FileUtils
 

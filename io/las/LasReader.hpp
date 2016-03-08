@@ -126,6 +126,14 @@ private:
         { initializeLocal(table, m_metadata); }
     virtual void initializeLocal(PointTableRef table, MetadataNode& m);
     virtual void addDimensions(PointLayoutPtr layout);
+    virtual QuickInfo inspect();
+    virtual void ready(PointTableRef table);
+    virtual point_count_t read(PointViewPtr view, point_count_t count);
+    virtual bool processOne(PointRef& point);
+    virtual void done(PointTableRef table);
+    virtual bool eof()
+        { return m_index >= getNumPoints(); }
+
     VariableLengthRecord *findVlr(const std::string& userId, uint16_t recordId);
     void setSrsFromVlrs(MetadataNode& m);
     void readExtraBytesVlr();
@@ -134,25 +142,15 @@ private:
     SpatialReference getSrsFromGeotiffVlr();
     void extractHeaderMetadata(MetadataNode& forward, MetadataNode& m);
     void extractVlrMetadata(MetadataNode& forward, MetadataNode& m);
-    virtual QuickInfo inspect();
-    virtual void ready(PointTableRef table);
-    virtual point_count_t read(PointViewPtr view, point_count_t count);
-    virtual bool processOne(PointRef& point);
-    virtual void done(PointTableRef table);
-    virtual bool eof()
-        { return m_index >= getNumPoints(); }
     void loadPoint(PointRef& point, char *buf, size_t bufsize);
     void loadPointV10(PointRef& point, char *buf, size_t bufsize);
     void loadPointV14(PointRef& point, char *buf, size_t bufsize);
     void loadExtraDims(LeExtractor& istream, PointRef& data);
-    point_count_t readFileBlock(
-            std::vector<char>& buf,
-            point_count_t maxPoints);
+    point_count_t readFileBlock(std::vector<char>& buf,
+        point_count_t maxPoints);
 
     LasReader& operator=(const LasReader&); // not implemented
     LasReader(const LasReader&); // not implemented
-    bool m_initialized;
-    bool m_skipWktVLR;
 };
 
 } // namespace pdal
