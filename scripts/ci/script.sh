@@ -45,6 +45,7 @@ cmake \
     -DLASZIP_INCLUDE_DIR:PATH=/usr/include \
     -DLASZIP_LIBRARY:FILEPATH=/usr/lib/liblaszip.so \
     -DWITH_TESTS=ON \
+    -DNUMPY_INCLUDE_DIR=/usr/lib/python2.7/dist-packages/numpy/core/include \ -DNUMPY_VERSION=1.8.2 \
     -G "$PDAL_CMAKE_GENERATOR" \
     ..
 
