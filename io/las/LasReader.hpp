@@ -88,9 +88,9 @@ public:
     Options getDefaultOptions();
 
     const LasHeader& header() const
-        { return m_lasHeader; }
+        { return m_header; }
     point_count_t getNumPoints() const
-        { return m_lasHeader.pointCount(); }
+        { return m_header.pointCount(); }
 
 protected:
     virtual void createStream()
@@ -111,13 +111,12 @@ protected:
 
 private:
     LasError m_error;
-    LasHeader m_lasHeader;
+    LasHeader m_header;
     std::unique_ptr<ZipPoint> m_zipPoint;
     std::unique_ptr<LASunzipper> m_unzipper;
     std::unique_ptr<LazPerfVlrDecompressor> m_decompressor;
     std::vector<char> m_decompressorBuf;
     point_count_t m_index;
-    VlrList m_vlrs;
     std::vector<ExtraDim> m_extraDims;
     std::string m_compression;
 
@@ -134,12 +133,8 @@ private:
     virtual bool eof()
         { return m_index >= getNumPoints(); }
 
-    VariableLengthRecord *findVlr(const std::string& userId, uint16_t recordId);
-    void setSrsFromVlrs(MetadataNode& m);
+    void setSrs(MetadataNode& m);
     void readExtraBytesVlr();
-    SpatialReference getSrsFromVlrs();
-    SpatialReference getSrsFromWktVlr();
-    SpatialReference getSrsFromGeotiffVlr();
     void extractHeaderMetadata(MetadataNode& forward, MetadataNode& m);
     void extractVlrMetadata(MetadataNode& forward, MetadataNode& m);
     void loadPoint(PointRef& point, char *buf, size_t bufsize);
