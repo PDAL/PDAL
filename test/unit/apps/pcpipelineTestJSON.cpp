@@ -130,47 +130,6 @@ INSTANTIATE_TEST_CASE_P(base, json,
                             "pipeline/stats.json"
                         ));
 
-class jsonWithProgrammable : public testing::TestWithParam<const char*> {};
-
-TEST_P(jsonWithProgrammable, pipeline)
-{
-    pdal::StageFactory f;
-    pdal::Stage* s = f.createStage("filters.programmable");
-    if (s)
-        run_pipeline(GetParam());
-    else
-        std::cerr << "WARNING: could not create filters.programmable, skipping test" << std::endl;
-}
-
-INSTANTIATE_TEST_CASE_P(plugins, jsonWithProgrammable,
-                        testing::Values(
-                            // "pipeline/programmable-hag.json",
-                            "pipeline/programmable-update-y-dims.json"
-                        ));
-
-class jsonWithPredicate : public testing::TestWithParam<const char*> {};
-
-TEST_P(jsonWithPredicate, pipeline)
-{
-    pdal::StageFactory f;
-    pdal::Stage* s = f.createStage("filters.predicate");
-    if (s)
-        run_pipeline(GetParam());
-    else
-        std::cerr << "WARNING: could not create filters.predicate, skipping test" << std::endl;
-}
-
-INSTANTIATE_TEST_CASE_P(plugins, jsonWithPredicate,
-                        testing::Values(
-                            "pipeline/crop_wkt_2d_classification.json",
-                            "pipeline/from-module.json",
-                            "pipeline/predicate-embed.json",
-                            "pipeline/predicate-keep-ground-and-unclass.json",
-                            "pipeline/predicate-keep-last-return.json",
-                            "pipeline/predicate-keep-specified-returns.json",
-                            "pipeline/reproject.json"
-                        ));
-
 class jsonWithNITF : public testing::TestWithParam<const char*> {};
 
 TEST_P(jsonWithNITF, pipeline)
