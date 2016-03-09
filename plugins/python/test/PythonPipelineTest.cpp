@@ -58,16 +58,11 @@ static void run_pipeline(std::string const& pipeline)
         std::cerr << output << std::endl;
 }
 
-class jsonWithProgrammable : public testing::TestWithParam<const char*> {
-public:
-    virtual void SetUp()
-    {
-        pdal::plang::Environment::get();
-    }
-};
+class jsonWithProgrammable : public testing::TestWithParam<const char*> {};
 
 TEST_P(jsonWithProgrammable, pipeline)
 {
+    pdal::plang::Environment::get();
     pdal::StageFactory f;
     pdal::Stage* s = f.createStage("filters.programmable");
     if (s)
@@ -82,16 +77,11 @@ INSTANTIATE_TEST_CASE_P(plugins, jsonWithProgrammable,
                             "pipeline/programmable-update-y-dims.json"
                         ));
 
-class jsonWithPredicate : public testing::TestWithParam<const char*> {
-public:
-    virtual void SetUp()
-    {
-        pdal::plang::Environment::get();
-    }
-};
+class jsonWithPredicate : public testing::TestWithParam<const char*> {};
 
 TEST_P(jsonWithPredicate, pipeline)
 {
+    pdal::plang::Environment::get();
     pdal::StageFactory f;
     pdal::Stage* s = f.createStage("filters.predicate");
     if (s)
