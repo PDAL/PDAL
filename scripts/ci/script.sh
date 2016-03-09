@@ -48,6 +48,8 @@ cmake \
     -G "$PDAL_CMAKE_GENERATOR" \
     ..
 
+cmake ..
+
 MAKECMD=ninja
 
 # Don't use ninja's default number of threads becuase it can
