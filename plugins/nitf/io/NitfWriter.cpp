@@ -194,7 +194,7 @@ void NitfWriter::doneFile()
         header.getSystemType().set(m_sType);
         header.getOriginStationID().set(m_oStationId);
         if (m_fileTitle.empty())
-            m_fileTitle = m_nitfFilename;
+            m_fileTitle = m_nitfFilename.substr(m_nitfFilename.find_last_of("/\\")+1);
         header.getFileTitle().set(m_fileTitle);
         header.getClassification().set(m_fileClass);
         header.getMessageCopyNum().set("00000");
