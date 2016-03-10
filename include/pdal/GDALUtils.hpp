@@ -36,6 +36,7 @@
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Dimension.hpp>
+#include <pdal/util/Bounds.hpp>
 
 #include <pdal/Log.hpp>
 
@@ -58,6 +59,10 @@ class SpatialReference;
 
 namespace gdal
 {
+
+PDAL_DLL bool reprojectBounds(BOX3D& box, const std::string& srcSrs,
+    const std::string& dstSrs);
+PDAL_DLL std::string lastError();
 
 typedef std::shared_ptr<void> RefPtr;
 

@@ -107,8 +107,6 @@ TEST(NitfWriterTest, test1)
 
     const std::string las_input(Support::datapath("las/1.2-with-color.las"));
     const std::string nitf_output(Support::temppath("temp_nitf.ntf"));
-    const std::string reference_output(
-        Support::datapath("nitf/write_test1.ntf"));
 
     FileUtils::deleteFile(nitf_output);
 
@@ -172,6 +170,8 @@ TEST(NitfWriterTest, test1)
     //  file is out of date, but some method of comparing the NITF wrapper
     //  instead of a byte-by-byte file diff is probably in order.
 /**
+    const std::string reference_output(
+        Support::datapath("nitf/write_test1.ntf"));
     bool filesSame = Support::compare_files(nitf_output, reference_output);
     EXPECT_TRUE(filesSame);
 **/
@@ -183,8 +183,7 @@ TEST(NitfWriterTest, test1)
     //  doesn't tell us much about the NITF wrapper.
     compare_contents(las_input, nitf_output);
 
-//    if (filesSame)
-        FileUtils::deleteFile(Support::temppath(nitf_output));
+    FileUtils::deleteFile(Support::temppath(nitf_output));
 }
 
 // Test that data from three input views gets written to separate output files.

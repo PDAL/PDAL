@@ -37,22 +37,10 @@
 
 #include "NitfWriter.hpp"
 
+#include <pdal/GDALUtils.hpp>
 #include <pdal/pdal_macros.hpp>
-
 #include <pdal/PointView.hpp>
-#include <pdal/GlobalEnvironment.hpp>
 
-#ifdef PDAL_COMPILER_GCC
-#  pragma GCC diagnostic push
-#  pragma GCC diagnostic ignored "-Wredundant-decls"
-#  pragma GCC diagnostic ignored "-Wextra"
-#  pragma GCC diagnostic ignored "-Wcast-qual"
-   // The following pragma doesn't actually work:
-   //   https://gcc.gnu.org/bugzilla/show_bug.cgi?id=61653
-   //#  pragma GCC diagnostic ignored "-Wliteral-suffix"
-#endif
-#include <ogr_spatialref.h>
-#include <cpl_conv.h>
 #ifdef PDAL_COMPILER_CLANG
 #  pragma clang diagnostic push
 #  pragma clang diagnostic ignored "-Wunused-private-field"
@@ -87,49 +75,23 @@ CREATE_SHARED_PLUGIN(1, 0, NitfWriter, Writer, s_info)
 
 std::string NitfWriter::getName() const { return s_info.name; }
 
-BOX3D reprojectBoxToDD(const SpatialReference& reference, const BOX3D& box)
+BOX3D NitfWriter::reprojectBoxToDD(const SpatialReference& reference,
+    const BOX3D& box)
 {
     if (reference.empty())
         return BOX3D();
 
     BOX3D output(box);
-
-    OGRSpatialReferenceH current =
-        OSRNewSpatialReference(reference.getWKT(SpatialReference::eCompoundOK,
-            false).c_str());
-    OGRSpatialReferenceH dd = OSRNewSpatialReference(0);
-
-    OGRErr err = OSRSetFromUserInput(dd, const_cast<char *>("EPSG:4326"));
-    if (err != OGRERR_NONE)
-        throw std::invalid_argument("could not import coordinate system "
-            "into OGRSpatialReference SetFromUserInput");
-
-    OGRCoordinateTransformationH transform =
-        OCTNewCoordinateTransformation(current, dd);
-
-    int ret = OCTTransform(transform, 1,
-        &output.minx, &output.miny, &output.minz);
-    if (ret == 0)
+    if (!gdal::reprojectBounds(output,
+        reference.getWKT(SpatialReference::eCompoundOK, false),
+        "EPSG:4326"))
     {
         std::ostringstream msg;
-        msg << "Could not project point for reprojectBoxToDD::min" <<
-            CPLGetLastErrorMsg() << ret;
+
+        msg << getName() << ": Couldn't reproject corner points to "
+            "geographic: " << gdal::lastError();
         throw pdal_error(msg.str());
     }
-
-    OCTTransform(transform, 1, &output.maxx, &output.maxy, &output.maxz);
-    if (ret == 0)
-    {
-        std::ostringstream msg;
-        msg << "Could not project point for reprojectBoxToDD::max" <<
-            CPLGetLastErrorMsg() << ret;
-        throw pdal_error(msg.str());
-    }
-
-    OCTDestroyCoordinateTransformation(transform);
-    OSRDestroySpatialReference(current);
-    OSRDestroySpatialReference(dd);
-
     return output;
 }
 
@@ -179,19 +141,7 @@ void NitfWriter::doneFile()
     buf->sgetn(bytes.data(), size);
     m_oss.clear();
     m_nitf.wrapData(bytes.data(), size);
-
-    BOX3D bounds =  reprojectBoxToDD(m_srs, m_bounds);
-
-    //NITF decimal degree values for corner coordinates only has a
-    // precision of 3 after the decimal. This may cause an invalid
-    // polygon due to rounding errors with a small tile. Therefore
-    // instead of rounding min values will use the floor value and
-    // max values will use the ceiling values.
-    bounds.minx = (floor(bounds.minx * 1000)) / 1000.0;
-    bounds.miny = (floor(bounds.miny * 1000)) / 1000.0;
-    bounds.maxx = (ceil(bounds.maxx * 1000)) / 1000.0;
-    bounds.maxy = (ceil(bounds.maxy * 1000)) / 1000.0;
-    m_nitf.setBounds(bounds);
+    m_nitf.setBounds(reprojectBoxToDD(m_srs, m_bounds));
 
     try
     {

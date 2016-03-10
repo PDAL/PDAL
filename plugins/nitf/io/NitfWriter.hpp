@@ -62,6 +62,7 @@ private:
         const SpatialReference& srs);
     virtual void doneFile();
     virtual void writeView(const PointViewPtr view);
+    BOX3D reprojectBoxToDD(const SpatialReference& reference, const BOX3D& box);
 
     NitfWriter& operator=(const NitfWriter&); // not implemented
     NitfWriter(const NitfWriter&); // not implemented

@@ -35,7 +35,6 @@
 #pragma once
 
 #include <pdal/Options.hpp>
-#include <pdal/pdal_internal.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include <vector>
@@ -96,7 +95,6 @@ public:
     std::string m_fileClass;
     std::string m_origName;
     std::string m_origPhone;
-    std::string m_securityClass;
     std::string m_securityControlAndHandling;
     std::string m_securityClassificationSystem;
     std::string m_imgSecurityClass;

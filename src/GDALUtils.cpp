@@ -39,6 +39,8 @@
 #include <functional>
 #include <map>
 
+#include <ogr_spatialref.h>
+
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127)  // conditional expression is constant
 #endif
@@ -47,6 +49,42 @@ namespace pdal
 {
 namespace gdal
 {
+
+/**
+  Reproject a bounds box from a source projection to a destination.
+
+  \param box  Bounds box to be reprojected in-place.
+  \param srcSrs  String in WKT or other suitable format of box coordinates.
+  \param dstSrs  String in WKT or other suitable format to which
+    coordinates should be projected.
+  \return  Whether the reprojection was successful or not.
+*/
+bool reprojectBounds(BOX3D& box, const std::string& srcSrs,
+    const std::string& dstSrs)
+{
+    OGRSpatialReference src;
+    OGRSpatialReference dst;
+
+    OGRErr srcOk = OSRSetFromUserInput(&src, srcSrs.c_str());
+    OGRErr dstOk = OSRSetFromUserInput(&dst, dstSrs.c_str());
+    if (srcOk != OGRERR_NONE || dstOk != OGRERR_NONE)
+        return false;
+
+    OGRCoordinateTransformationH transform =
+        OCTNewCoordinateTransformation(&src, &dst);
+
+    bool ok = (OCTTransform(transform, 1, &box.minx, &box.miny, &box.minz) &&
+        OCTTransform(transform, 1, &box.maxx, &box.maxy, &box.maxz));
+    OCTDestroyCoordinateTransformation(transform);
+    return ok;
+}
+
+
+std::string lastError()
+{
+    return CPLGetLastErrorMsg();
+}
+
 
 ErrorHandler::ErrorHandler(bool isDebug, pdal::LogPtr log)
     : m_isDebug(isDebug)

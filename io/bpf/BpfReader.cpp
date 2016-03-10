@@ -115,7 +115,7 @@ void BpfReader::initialize()
         return;
 
     uint32_t zone(abs(m_header.m_coordId));
-    std::string code("");
+    std::string code;
     if (m_header.m_coordId > 0)
         code = "EPSG:326" + Utils::toString(zone);
     else

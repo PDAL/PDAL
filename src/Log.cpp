@@ -50,18 +50,20 @@ Log::Log(std::string const& leaderString,
     , m_leader(leaderString)
 {
 
+    makeNullStream();
     if (Utils::iequals(outputName, "stdlog"))
         m_log = &std::clog;
     else if (Utils::iequals(outputName, "stderr"))
         m_log = &std::cerr;
     else if (Utils::iequals(outputName, "stdout"))
         m_log = &std::cout;
+    else if (Utils::iequals(outputName, "devnull"))
+        m_log = m_nullStream;
     else
     {
         m_log = FileUtils::createFile(outputName);
         m_deleteStreamOnCleanup = true;
     }
-    makeNullStream();
 }
 
 

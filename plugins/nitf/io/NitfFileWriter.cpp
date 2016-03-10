@@ -55,7 +55,6 @@ void NitfFileWriter::setArgs(ProgramArgs& args)
     args.add("fsclas", "", m_fileClass, "U");
     args.add("oname", "Originator's name", m_origName);
     args.add("ophone", "Originator's phone number", m_origPhone);
-    args.add("fsclas", "File security classification", m_securityClass, "U");
     args.add("fsctlh", "File control and handling",
         m_securityControlAndHandling);
     args.add("fsclsy", "File security classification system",
@@ -71,19 +70,18 @@ void NitfFileWriter::setArgs(ProgramArgs& args)
 
 void NitfFileWriter::processOptions(const Options& options)
 {
-    m_cLevel = options.getValueOrDefault<std::string>("clevel","03");
-    m_sType = options.getValueOrDefault<std::string>("stype","BF01");
+    m_cLevel = options.getValueOrDefault<std::string>("clevel", "03");
+    m_sType = options.getValueOrDefault<std::string>("stype", "BF01");
     m_oStationId = options.getValueOrDefault<std::string>("ostaid", "PDAL");
     m_fileTitle = options.getValueOrDefault<std::string>("ftitle");
-    m_fileClass = options.getValueOrDefault<std::string>("fsclas","U");
+    m_fileClass = options.getValueOrDefault<std::string>("fsclas", "U");
     m_origName = options.getValueOrDefault<std::string>("oname");
     m_origPhone = options.getValueOrDefault<std::string>("ophone");
-    m_securityClass = options.getValueOrDefault<std::string>("fsclas","U");
     m_securityControlAndHandling =
         options.getValueOrDefault<std::string>("fsctlh");
     m_securityClassificationSystem =
         options.getValueOrDefault<std::string>("fsclsy");
-    m_imgSecurityClass = options.getValueOrDefault<std::string>("isclas","U");
+    m_imgSecurityClass = options.getValueOrDefault<std::string>("isclas", "U");
     m_imgDate = options.getValueOrDefault<std::string>("idatim");
     m_imgIdentifier2 = options.getValueOrDefault<std::string>("iid2");
     m_sic = options.getValueOrDefault<std::string>("fscltx");
@@ -124,7 +122,9 @@ void NitfFileWriter::write()
     des.getSubheader().getFilePartType().set("DE");
     des.getSubheader().getTypeID().set("LIDARA DES");
     des.getSubheader().getVersion().set("01");
-    des.getSubheader().getSecurityClass().set(m_securityClass);
+    // We currently use the file classification for the subheader, since the
+    // only thing we're writing is the data extension.
+    des.getSubheader().getSecurityClass().set(m_fileClass);
     ::nitf::FileSecurity security = record.getHeader().getSecurityGroup();
     des.getSubheader().setSecurityGroup(security.clone());
 
@@ -255,6 +255,16 @@ void NitfFileWriter::write()
 void NitfFileWriter::setBounds(const BOX3D& bounds)
 {
     m_bounds = bounds;
+
+    //NITF decimal degree values for corner coordinates only has a
+    // precision of 3 after the decimal. This may cause an invalid
+    // polygon due to rounding errors with a small tile. Therefore
+    // instead of rounding min values will use the floor value and
+    // max values will use the ceiling values.
+    m_bounds.minx = (floor(m_bounds.minx * 1000)) / 1000.0;
+    m_bounds.miny = (floor(m_bounds.miny * 1000)) / 1000.0;
+    m_bounds.maxx = (ceil(m_bounds.maxx * 1000)) / 1000.0;
+    m_bounds.maxy = (ceil(m_bounds.maxy * 1000)) / 1000.0;
 }
 
 

@@ -149,8 +149,7 @@ INSTANTIATE_TEST_CASE_P(plugins, jsonWithNITF,
                             "pipeline/las2nitf.json",
                             "pipeline/las2nitf-2.json",
                             "pipeline/las2nitf-crop-with-options.json",
-                            "pipeline/nitf2las.json",
-                            "pipeline/nitf-chipper.json"
+                            "pipeline/nitf2las.json"
                         ));
 
 class jsonWithP2G : public testing::TestWithParam<const char*> {};
