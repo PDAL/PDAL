@@ -48,9 +48,9 @@ TEST(MergeTest, test1)
 
     PointViewSet viewSet = mgr.views();
 
-    EXPECT_EQ(viewSet.size(), 1u);
+    EXPECT_EQ(1u, viewSet.size());
     PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 2130u);
+    EXPECT_EQ(2130u, view->size());
 }
 
 TEST(MergeTest, test2)
@@ -63,9 +63,9 @@ TEST(MergeTest, test2)
 
     PointViewSet viewSet = mgr.views();
 
-    EXPECT_EQ(viewSet.size(), 1u);
+    EXPECT_EQ(1u, viewSet.size());
     PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 2130u);
+    EXPECT_EQ(2130u, view->size());
 }
 
 TEST(MergeTest, test3)
@@ -86,7 +86,60 @@ TEST(MergeTest, test3)
 
     PointViewSet viewSet = mgr.views();
 
-    EXPECT_EQ(viewSet.size(), 1u);
+    EXPECT_EQ(1u, viewSet.size());
     PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 2130u);
+    EXPECT_EQ(2130u, view->size());
+}
+
+TEST(MergeTest, test4)
+{
+    using namespace pdal;
+
+    PipelineManager mgr;
+    mgr.readPipeline(Support::configuredpath("filters/merge.json"));
+    mgr.execute();
+
+    PointViewSet viewSet = mgr.views();
+
+    EXPECT_EQ(1u, viewSet.size());
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(2130u, view->size());
+}
+
+TEST(MergeTest, test5)
+{
+    using namespace pdal;
+
+    PipelineManager mgr;
+    mgr.readPipeline(Support::configuredpath("filters/merge2.json"));
+    mgr.execute();
+
+    PointViewSet viewSet = mgr.views();
+
+    EXPECT_EQ(1u, viewSet.size());
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(2130u, view->size());
+}
+
+TEST(MergeTest, test6)
+{
+    using namespace pdal;
+
+    PipelineManager mgr;
+    mgr.readPipeline(Support::configuredpath("filters/merge3.json"));
+
+    std::ostringstream oss;
+    std::ostream& o = std::clog;
+    auto ctx = Utils::redirect(o, oss);
+
+    mgr.execute();
+    std::string s = oss.str();
+    EXPECT_TRUE(s.find("inconsistent spatial references") != s.npos);
+    Utils::restore(o, ctx);
+
+    PointViewSet viewSet = mgr.views();
+
+    EXPECT_EQ(1u, viewSet.size());
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(2130u, view->size());
 }

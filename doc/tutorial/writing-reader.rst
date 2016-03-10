@@ -201,12 +201,12 @@ readers.myreader.
 
 To test the reader, we will put it into a pipeline and output a text file.
 
-Please download the `pipeline-myreader.xml`_ and `test-reader-input.txt`_ files.
+Please download the `pipeline-myreader.json`_ and `test-reader-input.txt`_ files.
 
 In the directory with those two files, run
-``pdal pipeline pipeline-myreader.xml``.  You should have an output file
+``pdal pipeline pipeline-myreader.json``.  You should have an output file
 called ``output.txt``, which will have the same data as in the input file,
 except in a CSV style format, and with the Z values scaled by .001.
 
-.. _`pipeline-myreader.xml`: https://github.com/PDAL/PDAL/blob/master/examples/writing-reader/pipeline-myreader.xml?raw=true
+.. _`pipeline-myreader.json`: https://github.com/PDAL/PDAL/blob/master/examples/writing-reader/pipeline-myreader.json?raw=true
 .. _`test-reader-input.txt`: https://github.com/PDAL/PDAL/blob/master/examples/writing-reader/test-reader-input.txt?raw=true

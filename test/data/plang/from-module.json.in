@@ -1,0 +1,11 @@
+{
+  "pipeline":[
+    "@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las",
+    {
+      "type": "filters.predicate",
+      "script": "@CMAKE_SOURCE_DIR@/test/data/plang/test1.py",
+      "module": "anything",
+      "function": "fff"
+    }
+  ]
+}

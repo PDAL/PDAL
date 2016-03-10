@@ -1,0 +1,6 @@
+{
+  "pipeline": [
+    "@CMAKE_SOURCE_DIR@/test/data/sbet/2-points.sbet",
+    "@CMAKE_SOURCE_DIR@/test/temp/outfile.txt"
+  ]
+}

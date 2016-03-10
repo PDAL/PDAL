@@ -1,0 +1,11 @@
+{
+  "pipeline":[
+    "@CMAKE_SOURCE_DIR@/test/data/autzen/autzen-point-format-3.las",
+    {
+      "type":"writers.text",
+      "filename":"@CMAKE_SOURCE_DIR@/test/temp/autzen-point-format-3.txt",
+      "order":"Red,Green,X,Y,Blue,Z",
+      "keep_unspecified":false
+    }
+  ]
+}

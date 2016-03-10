@@ -1,0 +1,14 @@
+{
+  "pipeline": [
+    {
+      "filename": "@CMAKE_SOURCE_DIR@/test/data/nitf/autzen-utm10.ntf",
+      "spatialreference": "EPSG:32610",
+      "debug": "true",
+      "verbose": 7
+    },
+    {
+      "type": "filters.chipper",
+        "capacity": 15
+    }
+  ]
+}

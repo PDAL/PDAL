@@ -62,7 +62,6 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test1)
 {
     StageFactory f;
 
-
     BOX3D bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
     Options readerOps;
     readerOps.add("bounds", bounds);
@@ -353,7 +352,7 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test5)
     ASSERT_THROW(filter->execute(table), pdal::pdal_error);
 }
 
-TEST_F(PredicateFilterTest, PredicateFilterTest_Pipeline)
+TEST_F(PredicateFilterTest, PredicateFilterTest_PipelineXML)
 {
     PipelineManager mgr;
 
@@ -362,11 +361,29 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_Pipeline)
     EXPECT_EQ(cnt, 1u);
 }
 
-TEST_F(PredicateFilterTest, PredicateFilterTest_Embed)
+TEST_F(PredicateFilterTest, PredicateFilterTest_PipelineJSON)
+{
+    PipelineManager mgr;
+
+    mgr.readPipeline(Support::configuredpath("plang/from-module.json"));
+    point_count_t cnt = mgr.execute();
+    EXPECT_EQ(cnt, 1u);
+}
+
+TEST_F(PredicateFilterTest, PredicateFilterTest_EmbedXML)
 {
     PipelineManager mgr;
 
     mgr.readPipeline(Support::configuredpath("plang/predicate-embed.xml"));
+    point_count_t cnt = mgr.execute();
+    EXPECT_EQ(cnt, 1u);
+}
+
+TEST_F(PredicateFilterTest, PredicateFilterTest_EmbedJSON)
+{
+    PipelineManager mgr;
+
+    mgr.readPipeline(Support::configuredpath("plang/predicate-embed.json"));
     point_count_t cnt = mgr.execute();
     EXPECT_EQ(cnt, 1u);
 }

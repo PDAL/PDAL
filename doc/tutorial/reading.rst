@@ -162,7 +162,7 @@ topic.
     The :ref:`pipeline_command` document contains detailed examples and background
     information.
 
-The :ref:`pipeline_command` PDAL utility is one that takes in a ``.xml`` file
+The :ref:`pipeline_command` PDAL utility is one that takes in a ``.json`` file
 containing :ref:`pipeline <pipeline_command>` description that defines a PDAL
 processing pipeline. Options can be given at each :cpp:class:`pdal::Stage` of
 the pipeline to affect different aspects of the processing pipeline, and
@@ -172,24 +172,17 @@ effects.
 Simple conversion
 ..............................................................................
 
-The following `XML`_ document defines a :ref:`pipeline` that takes the ``file.las``
+The following `JSON`_ document defines a :ref:`pipeline` that takes the ``file.las``
 `ASPRS LAS`_ file and converts it to a new file called ``output.las``.
 
-::
+.. code-block:: json
 
-    <?xml version="1.0" encoding="utf-8"?>
-    <Pipeline version="1.0">
-        <Writer type="writers.las">
-            <Option name="filename">
-                output.las
-            </Option>
-            <Reader type="readers.las">
-                <Option name="filename">
-                    ./path/to/my/file.las
-                </Option>
-            </Reader>
-        </Writer>
-    </Pipeline>
+  {
+    "pipeline":[
+      "file.las",
+      "output.las"
+    ]
+  }
 
 Loop a directory and filter it through a pipeline
 ................................................................................
@@ -199,10 +192,9 @@ a pipeline, substituting the input and output as it goes.
 
 ::
 
-    ls *.las | cut -d. -f1 | xargs -P20 -I{} pdal pipeline -i /path/to/proj.xml --readers.las.filename={}.las --writers.las.filename=output/{}.laz
+    ls *.las | cut -d. -f1 | xargs -P20 -I{} pdal pipeline -i /path/to/proj.json --readers.las.filename={}.las --writers.las.filename=output/{}.laz
 
 .. _`JSON`: http://www.json.org/
-.. _`XML`: http://en.wikipedia.org/wiki/XML
 .. _`UUID`: http://en.wikipedia.org/wiki/Universally_unique_identifier
 .. _`interesting.las`: https://github.com/PDAL/PDAL/blob/master/test/data/interesting.las?raw=true
 .. _`ASPRS LAS`: http://www.asprs.org/a/society/committees/standards/lidar_exchange_format.html

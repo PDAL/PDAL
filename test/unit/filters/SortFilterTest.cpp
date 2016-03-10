@@ -89,11 +89,31 @@ TEST(SortFilterTest, simple)
         doSort(count);
 }
 
-TEST(SortFilterTest, pipeline)
+TEST(SortFilterTest, pipelineXML)
 {
     PipelineManager mgr;
 
     mgr.readPipeline(Support::configuredpath("filters/sort.xml"));
+    mgr.execute();
+
+    PointViewSet viewSet = mgr.views();
+
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+
+    for (PointId i = 1; i < view->size(); ++i)
+    {
+        double d1 = view->getFieldAs<double>(Dimension::Id::X, i - 1);
+        double d2 = view->getFieldAs<double>(Dimension::Id::X, i);
+        EXPECT_TRUE(d1 <= d2);
+    }
+}
+
+TEST(SortFilterTest, pipelineJSON)
+{
+    PipelineManager mgr;
+
+    mgr.readPipeline(Support::configuredpath("filters/sort.json"));
     mgr.execute();
 
     PointViewSet viewSet = mgr.views();

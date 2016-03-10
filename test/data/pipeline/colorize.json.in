@@ -1,0 +1,11 @@
+{
+  "pipeline":[
+    "@CMAKE_SOURCE_DIR@/test/data/autzen/autzen.las",
+    {
+      "type":"filters.colorization",
+      "dimensions":"Red, Green, Blue::256",
+      "raster":"@CMAKE_SOURCE_DIR@/test/data/autzen/autzen.jpg"
+    },
+    "@CMAKE_SOURCE_DIR@/test/temp/colorized.las"
+  ]
+}

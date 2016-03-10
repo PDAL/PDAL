@@ -1,0 +1,6 @@
+{
+  "pipeline":[
+    "@CMAKE_SOURCE_DIR@/test/data/las/mvk-thin.las",
+    "@CMAKE_SOURCE_DIR@/test/temp/out2.las"
+  ]
+}

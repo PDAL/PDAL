@@ -141,9 +141,7 @@ TEST(IcebridgeReaderTest, testPipeline)
 {
     PipelineManager manager;
 
-    bool isWriter =
-        manager.readPipeline(Support::configuredpath("icebridge/pipeline.xml"));
-    EXPECT_TRUE(isWriter);
+    manager.readPipeline(Support::configuredpath("icebridge/pipeline.xml"));
 
     point_count_t numPoints = manager.execute();
     EXPECT_EQ(numPoints, 2u);

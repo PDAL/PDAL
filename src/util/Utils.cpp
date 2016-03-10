@@ -372,6 +372,9 @@ int Utils::run_shell_command(const std::string& cmd, std::string& output)
 
     FILE* fp = portable_popen(cmd.c_str(), "r");
 
+    if (fp == NULL)
+        return 1;
+
     while (!feof(fp))
     {
         if (fgets(buf, maxbuf, fp) == NULL)

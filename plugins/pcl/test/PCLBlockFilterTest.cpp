@@ -44,22 +44,23 @@
 
 using namespace pdal;
 
-TEST(PCLBlockFilterTest, PCLBlockFilterTest_example_passthrough_xml)
+TEST(PCLBlockFilterTest, PCLBlockFilterTest_example_passthrough_json)
 {
     StageFactory f;
     Stage* filter(f.createStage("filters.pclblock"));
     EXPECT_TRUE(filter);
 
     PipelineManager pipeline;
-    pipeline.readPipeline(Support::datapath("filters/pcl/passthrough.xml"));
+
+    pipeline.readPipeline(
+        Support::configuredpath("filters/pcl/passthrough.json"));
     pipeline.execute();
 
     PointViewSet viewSet = pipeline.views();
     EXPECT_EQ(viewSet.size(), 1u);
     PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 81u);
+    EXPECT_EQ(view->size(), 795u);
 }
-
 
 static void test_filter(const std::string& jsonFile,
                         size_t expectedPointCount,

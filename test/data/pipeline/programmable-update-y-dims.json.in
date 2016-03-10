@@ -1,0 +1,11 @@
+{
+  "pipeline":[
+    "@CMAKE_SOURCE_DIR@/test/data/autzen/autzen-utm.las",
+    {
+      "type":"filters.programmable",
+      "function":"myfunc",
+      "module":"derive",
+      "source":"import numpy as np\ndef myfunc(ins,outs):\n\tX = ins['Y']\n\tX1 = np.zeros(X.size, dtype=type(X[0])) + 314\n\touts['Y'] = X1\n\treturn True"
+    }
+  ]
+}

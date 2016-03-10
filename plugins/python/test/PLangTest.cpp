@@ -401,8 +401,12 @@ TEST(PLangTest, log)
         Support::temppath("mylog_three.txt"),
         Support::datapath("logs/log_py.txt"));
 
-    if (ok)
-        FileUtils::deleteFile(Support::temppath("mylog_three.txt"));
+    // TODO: fails on Windows
+    // unknown file: error: C++ exception with description "pdalboost::filesystem::remove:
+    // The process cannot access the file because it is being used by another process:
+    // "C:/projects/pdal/test/data/../temp/mylog_three.txt"" thrown in the test body.
+    //if (ok)
+    //    FileUtils::deleteFile(Support::temppath("mylog_three.txt"));
 
     EXPECT_TRUE(ok);
 }

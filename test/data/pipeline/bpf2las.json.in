@@ -1,0 +1,14 @@
+{
+  "pipeline":[
+    "@CMAKE_SOURCE_DIR@/test/data/bpf/utm15.bpf",
+    {
+      "filename":"@CMAKE_SOURCE_DIR@/test/temp/out2.las",
+      "scale_x":0.01,
+      "offset_x":311898.23,
+      "scale_y":0.01,
+      "offset_y":4703909.84,
+      "scale_z":0.01,
+      "offset_z":7.385474
+    }
+  ]
+}

@@ -152,11 +152,15 @@ macro(PDAL_ADD_TEST _name)
     target_link_libraries(${_name} ${PDAL_BASE_LIB_NAME} gtest
         ${PDAL_ADD_TEST_LINK_WITH})
     add_test(NAME ${_name} COMMAND "${PROJECT_BINARY_DIR}/bin/${_name}" WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/..")
-    set_property(TEST ${_name} PROPERTY ENVIRONMENT
-      # Ensure plugins are loaded from build dir
-      # https://github.com/PDAL/PDAL/issues/840
-      "PDAL_DRIVER_PATH=${PROJECT_BINARY_DIR}/lib"
-    )
+    # Ensure plugins are loaded from build dir
+    # https://github.com/PDAL/PDAL/issues/840
+    if (WIN32)
+      set_property(TEST ${_name} PROPERTY ENVIRONMENT
+        "PDAL_DRIVER_PATH=${PROJECT_BINARY_DIR}/bin")
+    else()
+      set_property(TEST ${_name} PROPERTY ENVIRONMENT
+        "PDAL_DRIVER_PATH=${PROJECT_BINARY_DIR}/lib")
+    endif()
 endmacro(PDAL_ADD_TEST)
 
 ###############################################################################
