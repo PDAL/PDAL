@@ -282,7 +282,7 @@ void LasHeader::setSrsFromGeotiff()
     if (!vlr)
         return;
     if (!geotiff.setShortKeys(vlr->recordId(), (void *)vlr->data(),
-        vlr->dataLen()))
+        (int)vlr->dataLen()))
     {
         std::ostringstream oss;
 
@@ -294,11 +294,11 @@ void LasHeader::setSrsFromGeotiff()
     vlr = findVlr(TRANSFORM_USER_ID, GEOTIFF_DOUBLES_RECORD_ID);
     if (vlr)
         geotiff.setDoubleKeys(vlr->recordId(), (void *)vlr->data(),
-            vlr->dataLen());
+            (int)vlr->dataLen());
     vlr = findVlr(TRANSFORM_USER_ID, GEOTIFF_ASCII_RECORD_ID);
     if (vlr)
         geotiff.setAsciiKeys(vlr->recordId(), (void *)vlr->data(),
-            vlr->dataLen());
+            (int)vlr->dataLen());
 
     geotiff.setTags();
     std::string wkt(geotiff.getWkt(false, false));
@@ -401,7 +401,7 @@ OLeStream& operator<<(OLeStream& out, const LasHeader& h)
 {
     uint32_t legacyPointCount = 0;
     if (h.m_pointCount <= (std::numeric_limits<uint32_t>::max)())
-        legacyPointCount = h.m_pointCount;
+        legacyPointCount = (uint32_t)h.m_pointCount;
 
     out.put(h.m_fileSig, 4);
     if (h.versionEquals(1, 0))
