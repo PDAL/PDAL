@@ -309,9 +309,8 @@ void LasHeader::setSrsFromGeotiff()
         std::endl;
 #else
     if (findVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID))
-        m_log->get(LogLevel::Error) << getName() <<
-            ": Can't decode LAS GeoTiff VLR to SRS - PDAL not built "
-            "with GeoTiff." << std::endl;
+        m_log->get(LogLevel::Error) << "Can't decode LAS GeoTiff VLR to "
+            "SRS - PDAL not built with GeoTiff." << std::endl;
 #endif
 }
 
