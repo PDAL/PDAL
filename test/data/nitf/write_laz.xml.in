@@ -7,7 +7,7 @@
         <Option name="compression">
             true
         </Option>
-        <Option name="fsclass">
+        <Option name="fsclas">
             U
         </Option>
         <Option name="ophone">

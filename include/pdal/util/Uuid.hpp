@@ -151,9 +151,9 @@ public:
 
         cp = s.data();
         m_data.time_low = strtoul(cp, NULL, 16);
-        m_data.time_mid = strtoul(cp + 9, NULL, 16);
-        m_data.time_hi_and_version = strtoul(cp + 14, NULL, 16);
-        m_data.clock_seq = strtoul(cp + 19, NULL, 16);
+        m_data.time_mid = (uint16_t)strtoul(cp + 9, NULL, 16);
+        m_data.time_hi_and_version = (uint16_t)strtoul(cp + 14, NULL, 16);
+        m_data.clock_seq = (uint16_t)strtoul(cp + 19, NULL, 16);
 
         // Extract bytes as pairs of hex digits.
         cp = s.data() + 24;
@@ -162,7 +162,7 @@ public:
         for (size_t i = 0; i < 6; i++) {
             buf[0] = *cp++;
             buf[1] = *cp++;
-            m_data.node[i] = strtoul(buf, NULL, 16);
+            m_data.node[i] = (uint8_t)strtoul(buf, NULL, 16);
         }
         return true;
     }

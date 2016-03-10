@@ -575,7 +575,8 @@ void BpfReader::seekByteMajor(size_t dimIdx, size_t byteIdx, PointId ptIdx)
 }
 
 
-int BpfReader::inflate(char *buf, size_t insize, char *outbuf, size_t outsize)
+int BpfReader::inflate(char *buf, uint32_t insize,
+    char *outbuf, uint32_t outsize)
 {
    if (insize == 0)
         return 0;

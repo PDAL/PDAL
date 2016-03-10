@@ -105,7 +105,7 @@ private:
     size_t readBlock(std::vector<char>& outBuf, size_t index);
     bool eof();
 
-    int inflate(char *inbuf, size_t insize, char *outbuf, size_t outsize);
+    int inflate(char *inbuf, uint32_t insize, char *outbuf, uint32_t outsize);
 
     void seekPointMajor(PointId ptIdx);
     void seekDimMajor(size_t dimIdx, PointId ptIdx);

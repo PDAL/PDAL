@@ -1,0 +1,10 @@
+{
+  "pipeline":[
+    "@CMAKE_SOURCE_DIR@/test/data/las/interesting.las",
+    {
+      "filename":"@CMAKE_SOURCE_DIR@/test/temp/metadata-output.las",
+      "forward":"software_id, creation_doy, creation_year",
+      "system_id":"SOMEVALUE"
+    }
+  ]
+}

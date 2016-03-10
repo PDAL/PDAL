@@ -1,0 +1,19 @@
+{
+  "pipeline": [
+    {
+        "filename": "@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las",
+        "spatialreference": "EPSG:2027"
+    },
+    {
+        "filename": "@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las",
+        "spatialreference": "EPSG:2027"
+    },
+    {
+      "type": "filters.merge"
+    },
+    {
+      "type": "filters.reprojection",
+      "out_srs": "EPSG:2028"
+    }
+  ]
+}

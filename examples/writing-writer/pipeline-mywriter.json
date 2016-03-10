@@ -1,0 +1,11 @@
+{
+  "pipeline":[
+    "interesting.las",
+    {
+      "type":"writers.mywriter",
+      "filename":"output.txt",
+      "datafield":"Intensity",
+      "precision":0
+    }
+  ]
+}

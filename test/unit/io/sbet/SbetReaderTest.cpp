@@ -125,10 +125,22 @@ TEST(SbetReaderTest, testBadFile)
     EXPECT_THROW(reader->execute(table), pdal_error);
 }
 
-TEST(SbetReaderTest, testPipeline)
+TEST(SbetReaderTest, testPipelineXML)
 {
     PipelineManager manager;
+
     manager.readPipeline(Support::configuredpath("sbet/pipeline.xml"));
+
+    point_count_t numPoints = manager.execute();
+    EXPECT_EQ(numPoints, 2u);
+    FileUtils::deleteFile(Support::datapath("sbet/outfile.txt"));
+}
+
+TEST(SbetReaderTest, testPipelineJSON)
+{
+    PipelineManager manager;
+
+    manager.readPipeline(Support::configuredpath("sbet/pipeline.json"));
 
     point_count_t numPoints = manager.execute();
     EXPECT_EQ(numPoints, 2u);

@@ -40,6 +40,10 @@
 
 #include "SummaryData.hpp"
 
+#ifdef PDAL_HAVE_LIBGEOTIFF
+#include "GeotiffSupport.hpp"
+#endif
+
 namespace pdal
 {
 
@@ -199,6 +203,118 @@ Dimension::IdList LasHeader::usedDims() const
     return ids;
 }
 
+void LasHeader::setSrs()
+{
+    bool useWkt = false;
+
+    if (incompatibleSrs())
+    {
+        m_log->get(LogLevel::Error) << "Invalid SRS specification.  "
+            "GeoTiff not allowed with point formats 6 - 10." << std::endl;
+    }
+    else if (findVlr(TRANSFORM_USER_ID, WKT_RECORD_ID) &&
+        findVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID))
+    {
+        m_log->get(LogLevel::Error) << "File contains both "
+            "WKT and GeoTiff VLRs which is disallowed." << std::endl;
+    }
+    else
+        useWkt = (m_versionMinor >= 4);
+
+    return useWkt ? setSrsFromWkt() : setSrsFromGeotiff();
+}
+
+
+VariableLengthRecord *LasHeader::findVlr(const std::string& userId,
+    uint16_t recordId)
+{
+    for (auto vi = m_vlrs.begin(); vi != m_vlrs.end(); ++vi)
+    {
+        VariableLengthRecord& vlr = *vi;
+        if (vlr.matches(userId, recordId))
+            return &vlr;
+    }
+    return NULL;
+}
+
+
+void LasHeader::setSrsFromWkt()
+{
+    VariableLengthRecord *vlr = findVlr(TRANSFORM_USER_ID, WKT_RECORD_ID);
+    if (!vlr)
+        vlr = findVlr(LIBLAS_USER_ID, WKT_RECORD_ID);
+    if (!vlr || vlr->dataLen() == 0)
+        return;
+
+    // There is supposed to be a NULL byte at the end of the data,
+    // but sometimes there isn't because some people don't follow the
+    // rules.  If there is a NULL byte, don't stick it in the
+    // wkt string.
+    size_t len = vlr->dataLen();
+    const char *c = vlr->data() + len - 1;
+    if (*c == 0)
+        len--;
+    m_srs.setWKT(std::string(vlr->data(), len));
+}
+
+
+void LasHeader::setSrsFromGeotiff()
+{
+#ifdef PDAL_HAVE_LIBGEOTIFF
+
+// These are defined in geo_simpletags.h
+// We're not including that file because it includes
+// geotiff.h, which includes a ton of other stuff
+// that might conflict with the messy libgeotiff/GDAL
+// symbol mess
+
+#define STT_SHORT   1
+#define STT_DOUBLE  2
+#define STT_ASCII   3
+
+    GeotiffSupport geotiff;
+    geotiff.resetTags();
+
+    VariableLengthRecord *vlr;
+
+    vlr = findVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID);
+    // We must have a directory entry.
+    if (!vlr)
+        return;
+    if (!geotiff.setShortKeys(vlr->recordId(), (void *)vlr->data(),
+        (int)vlr->dataLen()))
+    {
+        std::ostringstream oss;
+
+        oss << "Invalid GeoTIFF directory record.  Can't "
+            "interpret spatial reference.";
+        throw pdal_error(oss.str());
+    }
+
+    vlr = findVlr(TRANSFORM_USER_ID, GEOTIFF_DOUBLES_RECORD_ID);
+    if (vlr)
+        geotiff.setDoubleKeys(vlr->recordId(), (void *)vlr->data(),
+            (int)vlr->dataLen());
+    vlr = findVlr(TRANSFORM_USER_ID, GEOTIFF_ASCII_RECORD_ID);
+    if (vlr)
+        geotiff.setAsciiKeys(vlr->recordId(), (void *)vlr->data(),
+            (int)vlr->dataLen());
+
+    geotiff.setTags();
+    std::string wkt(geotiff.getWkt(false, false));
+    if (wkt.size())
+        m_srs.setFromUserInput(geotiff.getWkt(false, false));
+
+    m_log->get(LogLevel::Debug5) << "GeoTIFF keys: " << geotiff.getText() <<
+        std::endl;
+#else
+    if (findVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID))
+        m_log->get(LogLevel::Error) << "Can't decode LAS GeoTiff VLR to "
+            "SRS - PDAL not built with GeoTiff." << std::endl;
+#endif
+}
+
+
 ILeStream& operator>>(ILeStream& in, LasHeader& h)
 {
     uint8_t versionMajor;
@@ -208,7 +324,8 @@ ILeStream& operator>>(ILeStream& in, LasHeader& h)
     in.get(h.m_fileSig, 4);
     if (!Utils::iequals(h.m_fileSig, "LASF"))
     {
-        throw pdal::pdal_error("File signature is not 'LASF', is this an LAS/LAZ file?");
+        throw pdal::pdal_error("File signature is not 'LASF', "
+            "is this an LAS/LAZ file?");
     }
     in >> h.m_sourceId >> h.m_globalEncoding;
     LasHeader::get(in, h.m_projectUuid);
@@ -254,6 +371,28 @@ ILeStream& operator>>(ILeStream& in, LasHeader& h)
             in >> h.m_pointCountByReturn[i];
     }
 
+    // Read regular VLRs.
+    in.seek(h.m_vlrOffset);
+    for (size_t i = 0; i < h.m_vlrCount; ++i)
+    {
+        VariableLengthRecord r;
+        in >> r;
+        h.m_vlrs.push_back(std::move(r));
+    }
+
+    // Read extended VLRs.
+    if (h.versionAtLeast(1, 4))
+    {
+        in.seek(h.m_eVlrOffset);
+        for (size_t i = 0; i < h.m_eVlrCount; ++i)
+        {
+            ExtVariableLengthRecord r;
+            in >> r;
+            h.m_vlrs.push_back(std::move(r));
+        }
+    }
+    h.setSrs();
+
     return in;
 }
 
@@ -262,7 +401,7 @@ OLeStream& operator<<(OLeStream& out, const LasHeader& h)
 {
     uint32_t legacyPointCount = 0;
     if (h.m_pointCount <= (std::numeric_limits<uint32_t>::max)())
-        legacyPointCount = h.m_pointCount;
+        legacyPointCount = (uint32_t)h.m_pointCount;
 
     out.put(h.m_fileSig, 4);
     if (h.versionEquals(1, 0))

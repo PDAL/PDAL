@@ -37,7 +37,9 @@
 #ifdef PDAL_HAVE_LIBXML2
 #include <pdal/XMLSchema.hpp>
 #endif
+
 #include <pdal/PDALUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/pdal_macros.hpp>
 
 namespace pdal
@@ -89,12 +91,9 @@ int PipelineKernel::execute()
     if (m_progressFile.size())
         m_progressFd = Utils::openProgress(m_progressFile);
 
-    pdal::PipelineManager manager(m_progressFd);
-    bool isWriter = manager.readPipeline(m_inputFile);
-    if (!isWriter)
-        throw pdal_error("Pipeline file does not contain a writer. "
-            "Use 'pdal info' to read the data.");
+    PipelineManager manager(m_progressFd);
 
+    manager.readPipeline(m_inputFile);
     applyExtraStageOptionsRecursive(manager.getStage());
     manager.execute();
 

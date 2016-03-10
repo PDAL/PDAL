@@ -1,0 +1,11 @@
+{
+  "pipeline":[
+    "@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las",
+    {
+      "type":"filters.predicate",
+      "module":"anything",
+      "function":"fff",
+      "source":"import numpy as np\ndef fff(ins,outs):\n\tX = ins['X']\n\tResult = np.equal(X, 637501.67)\n\t#print X\n\t#print Mask\n\touts['Mask'] = Result\n\treturn True"
+    }
+  ]
+}

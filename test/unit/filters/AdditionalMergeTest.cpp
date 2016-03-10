@@ -80,6 +80,7 @@ TEST(AdditionalMergeTest, merge_filter_and_reader_with_manager)
     EXPECT_EQ(1420U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
+    FileUtils::deleteFile(outfile);
 }
 
 TEST(AdditionalMergeTest, merge_reader_and_filter_with_manager)
@@ -117,6 +118,7 @@ TEST(AdditionalMergeTest, merge_reader_and_filter_with_manager)
     EXPECT_EQ(1420U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
+    FileUtils::deleteFile(outfile);
 }
 
 TEST(AdditionalMergeTest, merge_filter_and_reader_without_manager)
@@ -157,6 +159,7 @@ TEST(AdditionalMergeTest, merge_filter_and_reader_without_manager)
     EXPECT_EQ(1420U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
+    FileUtils::deleteFile(outfile);
 }
 
 TEST(AdditionalMergeTest, merge_reader_and_filter_without_manager)
@@ -197,6 +200,7 @@ TEST(AdditionalMergeTest, merge_reader_and_filter_without_manager)
     EXPECT_EQ(1420U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
+    FileUtils::deleteFile(outfile);
 }
 
 TEST(AdditionalMergeTest, filter_and_reader_writer_inputs_with_manager)
@@ -231,6 +235,7 @@ TEST(AdditionalMergeTest, filter_and_reader_writer_inputs_with_manager)
     EXPECT_EQ(1420U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
+    FileUtils::deleteFile(outfile);
 }
 
 TEST(AdditionalMergeTest, reader_and_filter_writer_inputs_with_manager)
@@ -265,6 +270,7 @@ TEST(AdditionalMergeTest, reader_and_filter_writer_inputs_with_manager)
     EXPECT_EQ(1420U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
+    FileUtils::deleteFile(outfile);
 }
 
 TEST(AdditionalMergeTest, filter_and_reader_writer_inputs_without_manager)
@@ -306,6 +312,7 @@ TEST(AdditionalMergeTest, filter_and_reader_writer_inputs_without_manager)
     EXPECT_EQ(1420U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
+    FileUtils::deleteFile(outfile);
 }
 
 TEST(AdditionalMergeTest, reader_and_filter_writer_inputs_without_manager)
@@ -347,6 +354,7 @@ TEST(AdditionalMergeTest, reader_and_filter_writer_inputs_without_manager)
     EXPECT_EQ(1420U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
+    FileUtils::deleteFile(outfile);
 }
 
 TEST(AdditionalMergeTest, merge_two_filters_with_manager)
@@ -391,53 +399,55 @@ TEST(AdditionalMergeTest, merge_two_filters_with_manager)
     EXPECT_EQ(887U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
+    FileUtils::deleteFile(outfile);
 }
 
 TEST(AdditionalMergeTest, merge_two_filters_without_manager)
 {
-  const char * outfile = "merge_two_filters_without_manager.las";
-  FileUtils::deleteFile(outfile);
+    const char * outfile = "merge_two_filters_without_manager.las";
+    FileUtils::deleteFile(outfile);
 
-  Options optsR;
-  optsR.add("filename", Support::datapath("las/1.2-with-color.las"));
-  LasReader reader1;
-  reader1.setOptions(optsR);
-  LasReader reader2;
-  reader2.setOptions(optsR);
+    Options optsR;
+    optsR.add("filename", Support::datapath("las/1.2-with-color.las"));
+    LasReader reader1;
+    reader1.setOptions(optsR);
+    LasReader reader2;
+    reader2.setOptions(optsR);
 
-  Options optsF1;
-  optsF1.add("step", 3);
-  optsF1.add("offset", 1);
-  DecimationFilter filter1;
-  filter1.setInput(reader1);
-  filter1.setOptions(optsF1);
+    Options optsF1;
+    optsF1.add("step", 3);
+    optsF1.add("offset", 1);
+    DecimationFilter filter1;
+    filter1.setInput(reader1);
+    filter1.setOptions(optsF1);
 
-  Options optsF2;
-  optsF2.add("step", 2);
-  optsF2.add("offset", 1);
-  DecimationFilter filter2;
-  filter2.setInput(reader2);
-  filter2.setOptions(optsF2);
+    Options optsF2;
+    optsF2.add("step", 2);
+    optsF2.add("offset", 1);
+    DecimationFilter filter2;
+    filter2.setInput(reader2);
+    filter2.setOptions(optsF2);
 
-  MergeFilter merge;
-  merge.setInput(filter1);
-  merge.setInput(filter2);
+    MergeFilter merge;
+    merge.setInput(filter1);
+    merge.setInput(filter2);
 
-  Options optsW;
-  optsW.add("filename", outfile, "file to write to");
-  LasWriter writer;
-  writer.setInput(merge);
-  writer.setOptions(optsW);
+    Options optsW;
+    optsW.add("filename", outfile, "file to write to");
+    LasWriter writer;
+    writer.setInput(merge);
+    writer.setOptions(optsW);
 
-  PointTable table;
-  writer.prepare(table);
+    PointTable table;
+    writer.prepare(table);
 
-  PointViewSet vs = writer.execute(table);
-  EXPECT_EQ(1u, vs.size());
-  point_count_t np = (*vs.begin())->size();
-  EXPECT_EQ(887U, np);
+    PointViewSet vs = writer.execute(table);
+    EXPECT_EQ(1u, vs.size());
+    point_count_t np = (*vs.begin())->size();
+    EXPECT_EQ(887U, np);
 
-  EXPECT_TRUE(!std::ifstream(outfile).fail());
+    EXPECT_TRUE(!std::ifstream(outfile).fail());
+    FileUtils::deleteFile(outfile);
 }
 
 TEST(AdditionalMergeTest, two_filters_writer_inputs_with_manager)
@@ -479,52 +489,54 @@ TEST(AdditionalMergeTest, two_filters_writer_inputs_with_manager)
     EXPECT_EQ(887U, np);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
+    FileUtils::deleteFile(outfile);
 }
 
 TEST(AdditionalMergeTest, two_filters_writer_inputs_without_manager)
 {
-  const char * outfile = "two_filters_writer_inputs_without_manager.las";
-  FileUtils::deleteFile(outfile);
+    const char * outfile = "two_filters_writer_inputs_without_manager.las";
+    FileUtils::deleteFile(outfile);
 
-  Options optsR;
-  optsR.add("filename", Support::datapath("las/1.2-with-color.las"));
-  LasReader reader1;
-  reader1.setOptions(optsR);
-  LasReader reader2;
-  reader2.setOptions(optsR);
+    Options optsR;
+    optsR.add("filename", Support::datapath("las/1.2-with-color.las"));
+    LasReader reader1;
+    reader1.setOptions(optsR);
+    LasReader reader2;
+    reader2.setOptions(optsR);
 
-  Options optsF1;
-  optsF1.add("step", 3);
-  optsF1.add("offset", 1);
-  DecimationFilter filter1;
-  filter1.setInput(reader1);
-  filter1.setOptions(optsF1);
+    Options optsF1;
+    optsF1.add("step", 3);
+    optsF1.add("offset", 1);
+    DecimationFilter filter1;
+    filter1.setInput(reader1);
+    filter1.setOptions(optsF1);
 
-  Options optsF2;
-  optsF2.add("step", 2);
-  optsF2.add("offset", 1);
-  DecimationFilter filter2;
-  filter2.setInput(reader2);
-  filter2.setOptions(optsF2);
+    Options optsF2;
+    optsF2.add("step", 2);
+    optsF2.add("offset", 1);
+    DecimationFilter filter2;
+    filter2.setInput(reader2);
+    filter2.setOptions(optsF2);
 
-  Options optsW;
-  optsW.add("filename", outfile, "file to write to");
-  LasWriter writer;
-  writer.setInput(filter1);
-  writer.setInput(filter2);
-  writer.setOptions(optsW);
+    Options optsW;
+    optsW.add("filename", outfile, "file to write to");
+    LasWriter writer;
+    writer.setInput(filter1);
+    writer.setInput(filter2);
+    writer.setOptions(optsW);
 
-  PointTable table;
-  writer.prepare(table);
+    PointTable table;
+    writer.prepare(table);
 
-  PointViewSet vs = writer.execute(table);
-  EXPECT_EQ(2u, vs.size());
-  point_count_t np = 0;
-  for (auto const& view : vs)
-  {
-      np += view->size();
-  }
-  EXPECT_EQ(887U, np);
+    PointViewSet vs = writer.execute(table);
+    EXPECT_EQ(2u, vs.size());
+    point_count_t np = 0;
+    for (auto const& view : vs)
+    {
+        np += view->size();
+    }
+    EXPECT_EQ(887U, np);
 
-  EXPECT_TRUE(!std::ifstream(outfile).fail());
+    EXPECT_TRUE(!std::ifstream(outfile).fail());
+    FileUtils::deleteFile(outfile);
 }
