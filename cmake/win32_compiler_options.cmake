@@ -26,11 +26,12 @@ if (MSVC)
         # numerous warnings when compiling in MSVC. We will ignore them for
         # now.
         add_definitions("/wd4290")
-	add_definitions("/wd4800")
+        add_definitions("/wd4800")
 
-        # Windows still warns about nameless struct/union, but we assume
-        # that all of our compilers support this
-        #add_definitions("/wd4201")
+        # Windows warns about integer narrowing like crazy and it's annoying.
+        # In most cases the programmer knows what they're doing.  A good
+        # static analysis tool would be better than turning this warning off.
+        add_definitions("/wd4267")
     endif()
 
     if (CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
