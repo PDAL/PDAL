@@ -1,0 +1,35 @@
+/*
+ * pdal_defines.h.in is used by cmake to generate pdal_defines.h
+ *
+ * Do not edit pdal_defines.h!
+ *
+ * Note this is a C-style header.  Do not use C++ syntax.
+ */
+#ifndef PDAL_DEFINES_H
+#define PDAL_DEFINES_H
+
+/*
+ * platform OS
+ */
+#cmakedefine PDAL_PLATFORM_WIN32
+#cmakedefine PDAL_PLATFORM_OSX
+#cmakedefine PDAL_PLATFORM_LINUX
+
+/*
+ * platform compiler
+ */
+#cmakedefine PDAL_COMPILER_MSVC
+#cmakedefine PDAL_COMPILER_VC12
+#cmakedefine PDAL_COMPILER_VC11
+#cmakedefine PDAL_COMPILER_VC10
+#cmakedefine PDAL_COMPILER_VC9
+#cmakedefine PDAL_COMPILER_VC8
+#cmakedefine PDAL_COMPILER_GCC
+#cmakedefine PDAL_COMPILER_CLANG
+
+/*
+ * built pdal app as application bundle on OSX?
+ */
+#cmakedefine PDAL_APP_BUNDLE
+
+#endif
