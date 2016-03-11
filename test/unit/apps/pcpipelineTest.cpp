@@ -68,7 +68,7 @@ static void run_info(std::string const& pipeline)
 
     std::string output;
     std::string file(Support::configuredpath(pipeline));
-    int stat = pdal::Utils::run_shell_command(cmd + " -s < " + file, output);
+    int stat = pdal::Utils::run_shell_command(cmd + " " + file, output);
     EXPECT_EQ(0, stat);
     if (stat)
         std::cerr << output << std::endl;
@@ -110,7 +110,7 @@ TEST(pipelineBaseTest, drop_color)
 TEST(pipelineBaseTest, interpolate)
 { run_pipeline("pipeline/pipeline_interpolate.xml"); }
 
-TEST(pipelineBaseTest, DISABLED_metadata_reader)
+TEST(pipelineBaseTest, metadata_reader)
 { run_info("pipeline/pipeline_metadata_reader.xml"); }
 
 TEST(pipelineBaseTest, metadata_writer)
@@ -176,7 +176,7 @@ TEST(pipelineFiltersTest, crop_wkt_2d)
 TEST(pipelineFiltersTest, crop_wkt_2d_classification)
 { run_pipeline("filters/crop_wkt_2d_classification.xml"); }
 
-TEST(pipelineFiltersTest, DISABLED_decimate)
+TEST(pipelineFiltersTest, decimate)
 { run_pipeline("filters/decimate.xml"); }
 
 TEST(pipelineFiltersTest, ferry)
@@ -203,7 +203,7 @@ TEST(pipelineFiltersTest, range_classification)
 TEST(pipelineFiltersTest, reproject)
 { run_pipeline("filters/reproject.xml"); }
 
-TEST(pipelineFiltersTest, DISABLED_sort)
+TEST(pipelineFiltersTest, sort)
 { run_info("filters/sort.xml"); }
 
 TEST(pipelineFiltersTest, splitter)
@@ -215,7 +215,7 @@ TEST(pipelineFiltersTest, stats)
 TEST(pipelineHoleTest, crop)
 { run_pipeline("hole/crop.xml"); }
 
-TEST(pipelineIcebridgeTest, icebridge)
+TEST(pipelineIcebridgeTest, DISABLED_icebridge)
 { run_pipeline("icebridge/pipeline.xml"); }
 
 TEST(pipelineNitfTest, chipper)

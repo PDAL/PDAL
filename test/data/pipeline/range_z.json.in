@@ -1,0 +1,10 @@
+{
+  "pipeline":[
+    "@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las",
+    {
+      "type":"filters.range",
+      "limits":"Z[400:500]"
+    },
+    "@CMAKE_SOURCE_DIR@/test/temp/only_z_400-500.las"
+  ]
+}

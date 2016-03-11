@@ -27,24 +27,19 @@ and the values of the band may be scaled before being written to the dimension.
 If the band range is 0-1, for example, it might make sense to scale by 256 to
 fit into a traditional 1-byte color value range.
 
-.. code-block:: xml
+.. code-block:: json
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.las">
-      <Option name="filename">colorized.las</Option>
-      <Filter type="filters.colorization">
-        <Option name="dimensions">
-          Red:1:1.0, Blue, Green::256.0
-        </Option>
-        <Option name="raster">aerial.tif</Option>
-        <Reader type="readers.las">
-          <Option name="filename">uncolored.las</Option>
-        </Reader>
-      </Filter>
-    </Writer>
-  </Pipeline>
-
+  {
+    "pipeline":[
+      "uncolored.las",
+      {
+        "type":"filters.colorization",
+        "dimensions":"Red:1:1.0, Blue, Green::256.0",
+        "raster":"aerial.tif"
+      },
+      "colorized.las"
+    ]
+  }
 
 Considerations
 --------------------------------------------------------------------------------
@@ -61,20 +56,18 @@ Consider a striped TIFF file of 286mb:
 
     -rw-r-----@  1 hobu  staff   286M Oct 29 16:58 orth-striped.tif
 
-::
+.. code-block:: json
 
-    <?xml version="1.0" encoding="utf-8"?>
-    <Pipeline version="1.0">
-    <Writer type="writers.las">
-      <Option name="filename">coloured-striped.las</Option>
-      <Filter type="filters.colorization">
-        <Option name="raster">orth-striped.tif</Option>
-        <Reader type="readers.las">
-          <Option name="filename">colourless.laz</Option>
-        </Reader>
-      </Filter>
-    </Writer>
-    </Pipeline>
+  {
+    "pipeline":[
+      "colourless.laz",
+      {
+        "type":"filters.colorization",
+        "raster":"orth-striped.tif"
+      },
+      "coloured-striped.las"
+    ]
+  }
 
 Simple application of the :ref:`filters.colorization` using the striped `TIFF`_
 with a 268mb :ref:`readers.las` file will take nearly 1:54.
@@ -83,7 +76,7 @@ with a 268mb :ref:`readers.las` file will take nearly 1:54.
 
 ::
 
-    [hobu@pyro knudsen (master)]$ time ~/dev/git/pdal/bin/pdal pipeline -i striped.xml
+    [hobu@pyro knudsen (master)]$ time ~/dev/git/pdal/bin/pdal pipeline -i striped.json
 
     real	1m53.477s
     user	1m20.018s
@@ -96,7 +89,7 @@ dramatically speeds up the color fetching:
 ::
 
     [hobu@pyro knudsen (master)]$ export GDAL_CACHEMAX=500
-    [hobu@pyro knudsen (master)]$ time ~/dev/git/pdal/bin/pdal pipeline striped.xml
+    [hobu@pyro knudsen (master)]$ time ~/dev/git/pdal/bin/pdal pipeline striped.json
 
     real	0m19.034s
     user	0m15.557s
@@ -116,4 +109,3 @@ dimensions
   begin at 1 and increment from the band number of the previous dimension.
   If not supplied, the scaling factor is 1.0.
   [Default: "Red:1:1.0, Green:2:1.0, Blue:3:1.0"]
-

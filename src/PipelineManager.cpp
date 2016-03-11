@@ -33,24 +33,34 @@
 ****************************************************************************/
 
 #include <pdal/PipelineManager.hpp>
-#include "PipelineReader.hpp"
+
+#include <pdal/util/FileUtils.hpp>
+
+#include "PipelineReaderXML.hpp"
+#include "PipelineReaderJSON.hpp"
 
 namespace pdal
 {
 
-bool PipelineManager::readPipeline(std::istream& input)
+// TODO(chambbj): what to do about pipelines specified via STDIN?
+void PipelineManager::readPipeline(std::istream& input)
 {
-    PipelineReader reader(*this);
-
-    return reader.readPipeline(input);
+    PipelineReaderXML(*this).readPipeline(input); 
 }
 
 
-bool PipelineManager::readPipeline(const std::string& filename)
+void PipelineManager::readPipeline(const std::string& filename)
 {
-    PipelineReader reader(*this);
-
-    return reader.readPipeline(filename);
+    if (FileUtils::extension(filename) == ".xml")
+    {
+        PipelineReaderXML pipeReader(*this);
+        return pipeReader.readPipeline(filename);
+    }
+    else if (FileUtils::extension(filename) == ".json")
+    {
+        PipelineReaderJSON pipeReader(*this);
+        return pipeReader.readPipeline(filename);
+    }
 }
 
 

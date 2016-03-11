@@ -1,0 +1,16 @@
+{
+  "pipeline":[
+    "@CMAKE_SOURCE_DIR@/test/data/autzen/autzen.las",
+    {
+      "type":"filters.ferry",
+      "dimensions":"Z=HAG"
+    },
+    {
+      "type":"filters.programmable",
+      "script":"@CMAKE_BINARY_DIR@/test/data/autzen/hag.py",
+      "function":"filter",
+      "module":"anything"
+    },
+    "@CMAKE_SOURCE_DIR@/test/temp/autzen-hag.las"
+  ]
+}

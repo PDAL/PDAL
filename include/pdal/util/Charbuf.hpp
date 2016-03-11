@@ -46,13 +46,13 @@ namespace pdal
 /**
   Allow a data buffer to be used at a std::streambuf.
 */
-class PDAL_DLL Charbuf : public std::streambuf
+class Charbuf : public std::streambuf
 {
 public:
     /**
       Construct an empty Charbuf.
     */
-    Charbuf() : m_bufOffset(0)
+    PDAL_DLL Charbuf() : m_bufOffset(0)
         {}
 
     /**
@@ -61,7 +61,7 @@ public:
       \param v  Byte vector to back streambuf.
       \param bufOffset  Offset in vector (ignore bytes before offset).
     */
-    Charbuf (std::vector<char>& v, pos_type bufOffset = 0)
+    PDAL_DLL Charbuf (std::vector<char>& v, pos_type bufOffset = 0)
         { initialize(v.data(), v.size(), bufOffset); }
 
     /**
@@ -71,7 +71,7 @@ public:
       \param count  Size of buffer.
       \param bufOffset  Offset in vector (ignore bytes before offset).
     */
-    Charbuf (char *buf, size_t count, pos_type bufOffset = 0)
+    PDAL_DLL Charbuf (char *buf, size_t count, pos_type bufOffset = 0)
         { initialize(buf, count, bufOffset); }
 
     /**
@@ -81,7 +81,7 @@ public:
       \param count  Size of buffer.
       \param bufOffset  Offset in vector (ignore bytes before offset).
     */
-    void initialize(char *buf, size_t count, pos_type bufOffset = 0);
+    PDAL_DLL void initialize(char *buf, size_t count, pos_type bufOffset = 0);
 
 protected:
     /**
@@ -91,7 +91,7 @@ protected:
       \param which  I/O mode [default: rw]
       \return  Current position adjusted for buffer offset.
     */
-    std::ios::pos_type seekpos(std::ios::pos_type pos,
+    PDAL_DLL std::ios::pos_type seekpos(std::ios::pos_type pos,
         std::ios_base::openmode which = std::ios_base::in | std::ios_base::out);
 
     /**
@@ -102,7 +102,7 @@ protected:
       \param which  I/O mode [default: rw]
       \return  Current position adjusted for buffer offset.
     */
-    std::ios::pos_type seekoff(std::ios::off_type off,
+    PDAL_DLL std::ios::pos_type seekoff(std::ios::off_type off,
         std::ios_base::seekdir dir,
         std::ios_base::openmode which = std::ios_base::in | std::ios_base::out);
 

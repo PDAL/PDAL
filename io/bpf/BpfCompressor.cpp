@@ -69,7 +69,7 @@ void BpfCompressor::startBlock()
 void BpfCompressor::compress()
 {
     // Note our position so that we know how much we've written.
-    std::size_t rawWritten = m_out.position();
+    uint32_t rawWritten = (uint32_t)m_out.position();
 
     // Pop our temp stream so that we can write the real output file.
     m_out.popStream();

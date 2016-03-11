@@ -72,9 +72,8 @@ void DartSampleFilter::processOptions(const Options& options)
 
 PointViewSet DartSampleFilter::run(PointViewPtr input)
 {
-    PointViewPtr output = input->makeNew();
     PointViewSet viewSet;
-    viewSet.insert(output);
+    PointViewPtr output = input->makeNew();
 
     log()->floatPrecision(2);
     log()->get(LogLevel::Info) << "DartSampleFilter (radius="
@@ -132,6 +131,7 @@ PointViewSet DartSampleFilter::run(PointViewPtr input)
                                <<  100*frac
                                << "%)\n";
 
+    viewSet.insert(output);
     return viewSet;
 }
 

@@ -159,13 +159,13 @@ writers.mywriter.
 
 To test the writer, we will put it into a pipeline and read in a LAS file and
 covert it to our output format.  For this example, use `interesting.las`_, and
-run it through `pipeline-mywriter.xml`_.
+run it through `pipeline-mywriter.json`_.
 
 If those files are in the same directory, you would just run the command
-``pdal pipeline pipeline-mywriter.xml``, and it will generate an output file
+``pdal pipeline pipeline-mywriter.json``, and it will generate an output file
 called output.txt, which will be in the proper format.  From there, if you
 wanted, you could run that output file through the MyReader that was created
 in the previous tutorial, as well.
 
 .. _`interesting.las`: https://github.com/PDAL/PDAL/blob/master/test/data/interesting.las?raw=true
-.. _`pipeline_mywriter.xml`: https://github.com/PDAL/PDAL/blob/master/examples/writing-writer/pipeline-mywriter.xml?raw=true
+.. _`pipeline_mywriter.json`: https://github.com/PDAL/PDAL/blob/master/examples/writing-writer/pipeline-mywriter.json?raw=true
