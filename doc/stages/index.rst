@@ -24,7 +24,7 @@ a network service like :ref:`readers.greyhound`.
     Database drivers typically return unstructured lists of dimensions.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :glob:
 
    readers.*
