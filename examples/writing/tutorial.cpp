@@ -24,9 +24,9 @@ void fillView(pdal::PointViewPtr view)
         p.y = 42.0 + i*0.001;
         p.z = 106.0 + i;
 
-        view->setField(pdal::Dimension::Id::X, i, pt.x);
-        view->setField(pdal::Dimension::Id::Y, i, pt.y);
-        view->setField(pdal::Dimension::Id::Z, i, pt.z);
+        view->setField(pdal::Dimension::Id::X, i, p.x);
+        view->setField(pdal::Dimension::Id::Y, i, p.y);
+        view->setField(pdal::Dimension::Id::Z, i, p.z);
     }
 }
 
