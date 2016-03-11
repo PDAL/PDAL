@@ -182,9 +182,18 @@ public:
     /**
       Returns the description of the argument.
       \note  Not intended to be called from user code.
+      \return  Argument description.
     */
     std::string description() const
         { return m_description; }
+
+    /**
+      Returns the longname of the argument.
+      \note  Not intended to be called from user code.
+      \return  Argument long name.
+    */
+    std::string longname() const
+        { return m_longname; }
 
     /**
       Returns text indicating the longname and shortname of the option
@@ -1001,8 +1010,8 @@ private:
     }
 
     /*
-      Parse an argument specified as a long argument (prefixed with "-")
-      Long arguments with values are specified as "-name value".
+      Parse an argument specified as a short argument (prefixed with "-")
+      Short arguments with values are specified as "-name value".
 
       \param name  Name of argument specified on command line.
       \param value  Potential value assigned to argument.
@@ -1042,6 +1051,11 @@ private:
         }
         else
             arg->setValue("true");
+
+        // If we were specifying a bunch of short options in a group
+        // (like -tswq), then rebuild the option name without the
+        // processed value ('t' in the example), and set cnt to 0 to
+        // say that the argument hasn't been consumed.
         if (name.size() > 2)
         {
             name = std::string(1, '-') + name.substr(2);
@@ -1063,8 +1077,12 @@ private:
             if (arg->positional() == Arg::PosType::Optional)
                 opt = true;
             if (opt && (arg->positional() == Arg::PosType::Required))
-                throw arg_error("Found required positional argument after "
-                    "optional positional argument.");
+            {
+                std::ostringstream oss;
+                oss << "Found required positional argument '" <<
+                    arg->longname() << "' after optional positional argument.";
+                throw arg_error(oss.str());
+            }
         }
     }
 
