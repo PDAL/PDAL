@@ -194,7 +194,7 @@ void NitfWriter::doneFile()
         header.getSystemType().set(m_sType);
         header.getOriginStationID().set(m_oStationId);
         if (m_fileTitle.empty())
-            m_fileTitle = m_nitfFilename.substr(m_nitfFilename.find_last_of("/\\")+1);
+        	m_fileTitle = FileUtils::getFilename(m_nitfFilename);
         header.getFileTitle().set(m_fileTitle);
         header.getClassification().set(m_fileClass);
         header.getMessageCopyNum().set("00000");
@@ -340,6 +340,14 @@ void NitfWriter::doneFile()
             aimidbTre.setField(v[0], v[1]);
         }
         subheader.getExtendedSection().appendTRE(aimidbTre);
+
+		//if IDATIM is empty set it equal to AIMIDB.ACQUISITION_DATE
+        if(!m_imgDate.size())
+        {
+        	m_imgDate=aimidbTre.getField("ACQUISITION_DATE").toString();
+			if (m_imgDate.size())
+				subheader.getImageDateAndTime().set(m_imgDate);
+        }
 
         //ACFTB
         ::nitf::TRE acftbTre("ACFTB");
