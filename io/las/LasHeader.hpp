@@ -380,7 +380,7 @@ public:
     const VlrList& vlrs() const
         { return m_vlrs; }
 
-    friend ILeStream& operator>>(ILeStream&, LasHeader& h);
+    PDAL_DLL friend ILeStream& operator>>(ILeStream&, LasHeader& h);
     friend OLeStream& operator<<(OLeStream&, const LasHeader& h);
     friend std::ostream& operator<<(std::ostream& ostr, const LasHeader& h);
 
