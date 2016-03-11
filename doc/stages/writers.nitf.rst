@@ -16,19 +16,42 @@ of imagery.  It supports various formats inside a generic wrapper.
 Example
 -------
 
+**Example One**
+
 .. code-block:: xml
 
   <?xml version="1.0" encoding="utf-8"?>
   <Pipeline version="1.0">
     <Writer type="writers.nitf">
-      <Option name="filename">mynitf.nitf</Option>
-      <Option name="oname">James Alexander</Option>
-      <Option name="ophone">646-322-3123</Option>
+      <Option name="filename">mynitf.ntf</Option>
+      <Option name="compression">laszip</Options>
+      <Option name="idatim">20160102220000</Option>
+      <Option name="forward">all</Option>
+      <Option name="acftb">SENSOR_ID:LIDAR,SENSOR_ID_TYPE:LILN</Option>
       <Reader type="readers.las">
         <Option name="filename">inputfile.las</Option>
       </Reader>
     </Writer>
   </Pipeline>
+
+**Example Two**
+
+.. code-block:: xml
+
+    <?xml version="1.0" encoding="utf-8"?>
+    <Pipeline version="1.0">
+      <Writer type="writers.nitf">
+        <Option name="filename">mynitf.ntf</Option>
+        <Option name="compression">laszip</Options>
+        <Option name="forward">all</Option>
+        <Option name="aimidb">ACQUISITION_DATE:20160102235900</Option>
+        <Option name="acftb">SENSOR_ID:BUCKEY,SENSOR_ID_TYPE:LILN</Option>
+    
+        <Reader type="readers.las">
+          <Option name="filename">inputfile.las</Option>
+        </Reader>
+      </Writer>
+    </Pipeline>
 
 
 Options
@@ -72,7 +95,8 @@ fsclsy
   File classification system (2 characters) [Default: <spaces>]
 
 idatim
-  Image date and time (format: 'CCYYMMDDhhmmss') [Default: <spaces>]
+  Image date and time (format: 'CCYYMMDDhhmmss'). Required. 
+  [Default: AIMIDB.ACQUISITION_DATE if set or <spaces>]
 
 iid2
   Image identifier 2 (80 characters) [Default: <spaces>]
@@ -82,11 +106,14 @@ fscltx
 
 aimidb
   Comma separated list of name/value pairs to complete the AIMIDB
-  (Additional Image ID) TRE record (format name:value) [Default: None]
-
+  (Additional Image ID) TRE record (format name:value). 
+  Required: ACQUISITION_DATE, will default to IDATIM value.
+  [Default: NITF defaults]
+  
 acftb
   Comma separated list of name/value pairs to complete the ACFTB
-  (Aircraft Information) TRE record (format name:value) [Default: None]
+  (Aircraft Information) TRE record (format name:value). Required: 
+  SENSOR_ID, SENSOR_ID_TYPE [Default: NITF defaults]
 
 
 .. _NITF: http://en.wikipedia.org/wiki/National_Imagery_Transmission_Format
