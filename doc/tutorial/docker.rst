@@ -77,7 +77,7 @@ whatever reason.
 
 ::
 
-    docker pull pdal/master
+    docker pull pdal/pdal
 
 .. note::
 
@@ -118,7 +118,7 @@ very first point of ``autzen.laz``.
 
 ::
 
-    docker run -v //c/Users/Howard:/data pdal/master pdal info //data/autzen.laz -p 0
+    docker run -v //c/Users/Howard:/data pdal/pdal pdal info //data/autzen.laz -p 0
 
 Here's a summary of what's going on with that command invocation
 
@@ -143,7 +143,7 @@ Here's a summary of what's going on with that command invocation
        The `Docker Volume <https://docs.docker.com/engine/userguide/dockervolumes/>`__
        document describes mounting volumes in more detail.
 
-4. ``pdal/master``: This is the Docker image we are going to run. We fetched it
+4. ``pdal/pdal``: This is the Docker image we are going to run. We fetched it
    with the command above. If it were not already fetched, Docker would attempt
    to fetch it when we run this command.
 
