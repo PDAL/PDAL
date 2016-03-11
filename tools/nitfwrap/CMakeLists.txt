@@ -36,5 +36,9 @@ set (HEADERS
 )
 
 add_executable(nitfwrap ${SOURCES} ${HEADERS})
-target_link_libraries(nitfwrap ${PDAL_LIB_NAME} ${PDAL_UTIL_LIB_NAME} ${NITRO_LIBRARIES})
+target_link_libraries(nitfwrap
+    ${PDAL_BASE_LIB_NAME}
+    ${PDAL_UTIL_LIB_NAME}
+    ${NITRO_LIBRARIES}
+)
 

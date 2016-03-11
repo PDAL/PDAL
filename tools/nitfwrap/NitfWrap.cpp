@@ -132,8 +132,7 @@ void NitfWrap::verify(BOX3D& bounds)
     {
         mark.rewind();
         if (!verifyBpf(in, bounds))
-            throw error("Input file must be LAS/LAZ or BPF in order to "
-                "wrap with NITF with nitfwrap.");
+            throw error("Input file must be LAS/LAZ or BPF.");
     }
 }
 
