@@ -10,6 +10,8 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/PointTable.hpp>
 
+#include <boost/program_options.hpp>
+
 #include <memory>
 #include <string>
 
