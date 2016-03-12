@@ -31,3 +31,6 @@ notifications:
       secure: AjatYRAUpsczjENkpHPFiLLZ/leDlzx4TH+oPQYZCpA4WpJdNRy0IB4oMR2IYiY+qz0nHDbeMTBvF0l8S6NknZAz20f8buf4IkrdXymBQBOTmLHMWbpgHuSCCu7xMwtG6thjMEmBOXm5UgCcdqvlchcaoAUunyprXQWgJwI+tHE=
     on_failure: always
     on_success: change
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/4c7f3edec32936d6a758
