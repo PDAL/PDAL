@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Andrew Bell (andrew.bell.ia@gmail.com)
+* Copyright (c) 2016, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -31,47 +31,59 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
-
 #pragma once
 
-#include <pdal/Filter.hpp>
+#include <hexer/hexer.hpp>
 
-#include <hexer/Mathpair.hpp>
-#include <hexer/HexGrid.hpp>
 #include <hexer/Processor.hpp>
+
+#include <hexer/hexer_defines.h>
+#include <hexer/Mathpair.hpp>
+#include <hexer/HexInfo.hpp>
+#include <hexer/export.hpp>
+#include <pdal/pdal_macros.hpp>
+
+
+
+#include "ogr_api.h"
+#include "gdal.h"
 
 namespace pdal
 {
-
-class PDAL_DLL HexBin : public Filter
+namespace hexdensity
 {
+
+
+namespace writer
+{
+
+
+class OGR
+{
+
+
 public:
-    HexBin() : Filter()
-        {}
+    OGR(std::string const& filename);
+    ~OGR();
 
-    static void * create();
-    static int32_t destroy(void *);
-    std::string getName() const { return "filters.hexbin"; }
+    void writeBoundary(hexer::HexGrid *grid);
+    void writeDensity(hexer::HexGrid *grid);
 
-    hexer::HexGrid const* grid() const { return m_grid.get(); }
 private:
+    std::string m_filename;
 
-    std::unique_ptr<hexer::HexGrid> m_grid;
-    std::string m_xDimName;
-    std::string m_yDimName;
-    uint32_t m_sampleSize;
-    int32_t m_density;
-    double m_edgeLength;
-    bool m_outputTesselation;
-    point_count_t m_count;
 
-    virtual void processOptions(const Options& options);
-    virtual void ready(PointTableRef table);
-    virtual void filter(PointView& view);
-    virtual void done(PointTableRef table);
+    OGRDataSourceH m_ds;
+    OGRLayerH m_layer;
 
-    HexBin& operator=(const HexBin&); // not implemented
-    HexBin(const HexBin&); // not implemented
+    void createLayer();
+    void collectPath(hexer::Path* path, OGRGeometryH polygon);
+    OGRGeometryH collectHexagon(hexer::HexInfo const& info, hexer::HexGrid const* grid);
+
 };
 
-} // namespace pdal
+} // writer
+
+} // namespace
+
+} //pdal

@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Andrew Bell (andrew.bell.ia@gmail.com)
+* Copyright (c) 2015, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -34,44 +34,41 @@
 
 #pragma once
 
-#include <pdal/Filter.hpp>
+#include <map>
 
-#include <hexer/Mathpair.hpp>
-#include <hexer/HexGrid.hpp>
-#include <hexer/Processor.hpp>
+#include <pdal/Kernel.hpp>
+#include <pdal/PointView.hpp>
+#include <pdal/PipelineManager.hpp>
+#include <pdal/plugin.hpp>
+
+extern "C" int32_t DensityKernel_ExitFunc();
+extern "C" PF_ExitFunc DensityKernel_InitPlugin();
 
 namespace pdal
 {
 
-class PDAL_DLL HexBin : public Filter
+
+class PDAL_DLL DensityKernel : public Kernel
 {
 public:
-    HexBin() : Filter()
-        {}
-
     static void * create();
     static int32_t destroy(void *);
-    std::string getName() const { return "filters.hexbin"; }
+    std::string getName() const;
+    int execute();
+    void setup(const std::string& filename);
 
-    hexer::HexGrid const* grid() const { return m_grid.get(); }
 private:
+    PipelineManagerPtr m_manager;
+    Stage *m_hexbinStage;
+    std::string m_inputFile;
+    std::string m_outputFile;
+    std::string m_layerName;
+    std::string m_driverName;
 
-    std::unique_ptr<hexer::HexGrid> m_grid;
-    std::string m_xDimName;
-    std::string m_yDimName;
-    uint32_t m_sampleSize;
-    int32_t m_density;
-    double m_edgeLength;
-    bool m_outputTesselation;
-    point_count_t m_count;
-
-    virtual void processOptions(const Options& options);
-    virtual void ready(PointTableRef table);
-    virtual void filter(PointView& view);
-    virtual void done(PointTableRef table);
-
-    HexBin& operator=(const HexBin&); // not implemented
-    HexBin(const HexBin&); // not implemented
+    DensityKernel();
+    void addSwitches(ProgramArgs& args);
+    PipelineManagerPtr makePipeline(const std::string& filename);
 };
 
 } // namespace pdal
+
