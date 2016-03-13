@@ -505,7 +505,7 @@ void Kernel::addBasicSwitches(ProgramArgs& args)
     args.add("verbose,v", "Set verbose message level", m_verboseLevel);
 
     args.add("visualize", "Visualize result", m_visualize);
-    args.add("stdin,s", "Read pipeline XML from stdin", m_usestdin);
+    args.add("stdin,s", "Read pipeline JSON from stdin", m_usestdin);
     /**
     args.add("heartbeat", "Shell command to run for every progress heartbeat",
         m_heartbeat_shell_command);
