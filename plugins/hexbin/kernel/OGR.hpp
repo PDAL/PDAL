@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2015, Howard Butler (howard@hobu.co)
+* Copyright (c) 2016, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -31,44 +31,60 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
-
 #pragma once
 
-#include <map>
+#include <hexer/hexer.hpp>
 
-#include <pdal/Kernel.hpp>
-#include <pdal/PointView.hpp>
-#include <pdal/PipelineManager.hpp>
-#include <pdal/plugin.hpp>
+#include <hexer/Processor.hpp>
 
-extern "C" int32_t DensityKernel_ExitFunc();
-extern "C" PF_ExitFunc DensityKernel_InitPlugin();
+#include <hexer/hexer_defines.h>
+#include <hexer/Mathpair.hpp>
+#include <hexer/HexInfo.hpp>
+#include <hexer/export.hpp>
+#include <pdal/pdal_macros.hpp>
+
+
+
+#include "ogr_api.h"
+#include "gdal.h"
 
 namespace pdal
 {
-
-
-class PDAL_DLL DensityKernel : public Kernel
+namespace hexdensity
 {
+
+
+namespace writer
+{
+
+
+class OGR
+{
+
+
 public:
-    static void * create();
-    static int32_t destroy(void *);
-    std::string getName() const;
-    int execute();
-    void setup(const std::string& filename);
+    OGR(std::string const& filename, std::string srs, std::string driver = "ESRI Shapefile");
+    ~OGR();
+
+    void writeBoundary(hexer::HexGrid *grid);
+    void writeDensity(hexer::HexGrid *grid);
 
 private:
-    PipelineManagerPtr m_manager;
-    Stage *m_hexbinStage;
-    std::string m_inputFile;
-    std::string m_outputFile;
-    std::string m_layerName;
-    std::string m_driverName;
+    std::string m_filename;
+    std::string m_driver;
+    std::string m_srs;
 
-    DensityKernel();
-    void addSwitches(ProgramArgs& args);
-    PipelineManagerPtr makePipeline(const std::string& filename);
+    OGRDataSourceH m_ds;
+    OGRLayerH m_layer;
+
+    void createLayer();
+    void collectPath(hexer::Path* path, OGRGeometryH polygon);
+    OGRGeometryH collectHexagon(hexer::HexInfo const& info, hexer::HexGrid const* grid);
+
 };
 
-} // namespace pdal
+} // writer
 
+} // namespace
+
+} //pdal

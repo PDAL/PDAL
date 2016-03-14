@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Howard Butler (howard@hobu.co)
+* Copyright (c) 2015, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -31,59 +31,40 @@
 * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
 * OF SUCH DAMAGE.
 ****************************************************************************/
+
 #pragma once
 
-#include <hexer/hexer.hpp>
 
-#include <hexer/Processor.hpp>
+#include <pdal/Kernel.hpp>
+#include <pdal/PipelineManager.hpp>
 
-#include <hexer/hexer_defines.h>
-#include <hexer/Mathpair.hpp>
-#include <hexer/HexInfo.hpp>
-#include <hexer/export.hpp>
-#include <pdal/pdal_macros.hpp>
-
-
-
-#include "ogr_api.h"
-#include "gdal.h"
 
 namespace pdal
 {
-namespace hexdensity
+
+
+class PDAL_DLL DensityKernel : public Kernel
 {
-
-
-namespace writer
-{
-
-
-class OGR
-{
-
-
 public:
-    OGR(std::string const& filename);
-    ~OGR();
-
-    void writeBoundary(hexer::HexGrid *grid);
-    void writeDensity(hexer::HexGrid *grid);
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+    int execute();
 
 private:
-    std::string m_filename;
+    PipelineManagerPtr m_manager;
+    Stage *m_hexbinStage;
+    std::string m_inputFile;
+    std::string m_outputFile;
+    std::string m_layerName;
+    std::string m_driverName;
+    std::string m_srs;
 
-
-    OGRDataSourceH m_ds;
-    OGRLayerH m_layer;
-
-    void createLayer();
-    void collectPath(hexer::Path* path, OGRGeometryH polygon);
-    OGRGeometryH collectHexagon(hexer::HexInfo const& info, hexer::HexGrid const* grid);
-
+    DensityKernel();
+    virtual void addSwitches(ProgramArgs& args);
+    void makePipeline(const std::string& filename);
+    void outputDensity(pdal::SpatialReference const& ref);
 };
 
-} // writer
+} // namespace pdal
 
-} // namespace
-
-} //pdal

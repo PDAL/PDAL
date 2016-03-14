@@ -145,3 +145,7 @@ python/*.egg*
 python/build/*
 python/pdal/libpdalpython.so
 python/pdal/libpdalpython.cpp
+test/data/*.json
+test/data/pipeline/*.json
+test/data/filters/*.json
+test/data/plang/*.json

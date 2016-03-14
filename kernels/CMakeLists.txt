@@ -1,6 +1,5 @@
 
 add_subdirectory(delta)
-add_subdirectory(density)
 add_subdirectory(diff)
 add_subdirectory(info)
 add_subdirectory(merge)
