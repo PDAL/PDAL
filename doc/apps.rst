@@ -6,12 +6,13 @@ Applications
 
 :Author: Howard Butler
 :Contact: howard at hobu.co
-:Date: 6/1/2015
+:Date: 03/13/2016
 
 PDAL contains consists of a single application, called ``pdal``. The ``pdal``
 application currently has the following subcommands:
 
 * :ref:`delta <delta_command>`
+* :ref:`density <density_command>`
 * :ref:`diff <diff_command>`
 * :ref:`ground <ground_command>`
 * :ref:`info <info_command>`
@@ -119,6 +120,20 @@ Example 2:
     5,0.00,0.00,0.00
     ....
 
+.. _density_command:
+
+delta command
+--------------------------------------------------------------------------------
+
+The density command produces a tessellated hexagonal OGR layer from the
+output of :ref:`filters.hexbin`.
+
+::
+
+    --input, -i        input point cloud file name
+    --output, -o       output vector data source
+    --lyr_name         OGR layer name to write into datasource
+    --driver, -f       OGR driver name to use
 
 .. _diff_command:
 

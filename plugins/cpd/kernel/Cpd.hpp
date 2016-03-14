@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include <cpd/nonrigid_lowrank.hpp>
+#include <cpd/nonrigid.hpp>
 
 #include <pdal/Kernel.hpp>
 #include <pdal/pdal_export.hpp>

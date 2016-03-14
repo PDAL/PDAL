@@ -34,7 +34,7 @@ def filter(ins,outs):
     Y = ins['Y']
     Z = ins['Z']
 
-    objs = wakeup('autzen-surface.tif.min.tif')
+    objs = wakeup('/Users/hobu/dev/git/pdal/test/data/autzen/autzen-surface.tif.min.tif')
     print (objs)
     for i in range(len(X)):
         x = X[i]
@@ -49,5 +49,5 @@ def filter(ins,outs):
     return True
 
 if __name__=='__main__':
-    objs = wakeup('autzen-surface.tif.min.tif')
+    objs = wakeup('/Users/hobu/dev/git/pdal/test/data/autzen/autzen-surface.tif.min.tif')
     print (read(636436,850412, objs))
