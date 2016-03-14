@@ -128,7 +128,6 @@ int DensityKernel::execute()
     applyExtraStageOptionsRecursive(m_manager->getStage());
     point_count_t output = m_manager->execute();
     PointTableRef table = m_manager->pointTable();
-    std::cout << "size: " << output << std::endl;
     outputDensity(table.anySpatialReference());
     return 0;
 }
