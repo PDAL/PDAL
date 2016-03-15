@@ -122,7 +122,7 @@ Example 2:
 
 .. _density_command:
 
-delta command
+density command
 --------------------------------------------------------------------------------
 
 The density command produces a tessellated hexagonal OGR layer from the
