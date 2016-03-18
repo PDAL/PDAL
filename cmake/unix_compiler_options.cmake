@@ -19,4 +19,4 @@ else()
     message(FATAL_ERROR "Unsupported C++ compiler")
 endif()
 
-set (CMAKE_CXX_FLAGS "${PDAL_COMMON_CXX_FLAGS} ${CXX_STANDARD}")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PDAL_COMMON_CXX_FLAGS} ${CXX_STANDARD}")
