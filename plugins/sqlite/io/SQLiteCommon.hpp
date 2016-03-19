@@ -459,7 +459,11 @@ public:
 
 #ifdef __linux__
         so_extension = "so";
+#ifdef MOD_SPATIALITE
         lib_extension = "mod_";
+#else
+        lib_extension = "lib";
+#endif
 #endif
 
 #ifdef _WIN32
