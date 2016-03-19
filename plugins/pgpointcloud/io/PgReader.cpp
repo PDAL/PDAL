@@ -46,7 +46,7 @@ namespace pdal
 static PluginInfo const s_info = PluginInfo(
     "readers.pgpointcloud",
     "Read data from pgpointcloud format. \"query\" option needs to be a \n" \
-        "SQL statment selecting the data.",
+        "SQL statement selecting the data.",
     "http://pdal.io/stages/readers.pgpointcloud.html" );
 
 CREATE_SHARED_PLUGIN(1, 0, PgReader, Reader, s_info)

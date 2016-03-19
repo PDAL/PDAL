@@ -260,7 +260,7 @@ inline std::string description(Id::Enum id)
     case Id::GpsTime:
         return "GPS time that the point was acquired";
     case Id::InternalTime:
-        return "Scanner's internal time when the point was aquired, in seconds";
+        return "Scanner's internal time when the point was acquired, in seconds";
     case Id::OffsetTime:
         return "Milliseconds from first acquired point";
     case Id::IsPpsLocked:
