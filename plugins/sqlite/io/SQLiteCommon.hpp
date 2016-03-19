@@ -459,7 +459,7 @@ public:
 
 #ifdef __linux__
         so_extension = "so";
-        lib_extension = "lib";
+        lib_extension = "mod_";
 #endif
 
 #ifdef _WIN32
