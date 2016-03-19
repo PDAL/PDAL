@@ -1,6 +1,7 @@
 import pdal
 from pdal import libpdalpython
 import unittest
+import os
 
 class TestPDALArray(unittest.TestCase):
   DATADIRECTORY = "../test"
@@ -16,11 +17,15 @@ class TestPDALArray(unittest.TestCase):
         output = f.read().decode('UTF-8')
     return output
 
+  @unittest.skipUnless(os.path.exists(os.path.join(DATADIRECTORY, '/data/pipeline/pipeline_read.xml')),
+                       "missing test data")
   def test_construction(self):
     """Can we construct a PDAL pipeline"""
     xml = self.fetch_xml('/data/pipeline/pipeline_read.xml')
     r = libpdalpython.PyPipeline(xml)
 
+  @unittest.skipUnless(os.path.exists(os.path.join(DATADIRECTORY, '/data/pipeline/pipeline_read.xml')),
+                       "missing test data")
   def test_execution(self):
     """Can we execute a PDAL pipeline"""
     xml = self.fetch_xml('/data/pipeline/pipeline_read.xml')
@@ -28,6 +33,8 @@ class TestPDALArray(unittest.TestCase):
     r.execute()
     self.assertGreater(len(r.xml), 1000)
 
+  @unittest.skipUnless(os.path.exists(os.path.join(DATADIRECTORY, '/data/pipeline/pipeline_read.xml')),
+                       "missing test data")
   def test_array(self):
     """Can we fetch PDAL data as a numpy array"""
     xml = self.fetch_xml('/data/pipeline/pipeline_read.xml')
@@ -40,6 +47,8 @@ class TestPDALArray(unittest.TestCase):
     self.assertAlmostEqual(a[0][0], 637012.24, 7)
     self.assertAlmostEqual(a[1064][2], 423.92, 7)
 
+  @unittest.skipUnless(os.path.exists(os.path.join(DATADIRECTORY, '/data/filters/chip.xml')),
+                       "missing test data")
   def test_merged_arrays(self):
     """Can we fetch merged PDAL data """
     xml = self.fetch_xml('/data/filters/chip.xml')
