@@ -108,7 +108,7 @@ extra_link_args = []
 
 from setuptools.extension import Extension as DistutilsExtension
 
-if pdal_config:
+if pdal_config and "clean" not in sys.argv:
     # Collect other options from PDAL
     for item in get_pdal_config('--includes').split():
         if item.startswith("-I"):
@@ -135,7 +135,7 @@ extensions = [DistutilsExtension("*",
                                    extra_compile_args=extra_compile_args,
                                    libraries=libraries,
                                    extra_link_args=extra_link_args,)]
-if USE_CYTHON:
+if USE_CYTHON and "clean" not in sys.argv:
     from Cython.Build import cythonize
     extensions= cythonize(extensions, language="c++")
 
