@@ -58,6 +58,10 @@
 #   define be64toh betoh64
 #   define le64toh letoh64
                    
+#elif defined(__FreeBSD_kernel__)
+     
+#   include <endian.h>
+      
 #elif defined(__WINDOWS__)
                     
 #   include <winsock2.h>
