@@ -38,6 +38,8 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/StageFactory.hpp>
 
+#include "PCLConversions.hpp"
+
 #include <pcl/io/pcd_io.h>
 #include <pcl/io/impl/pcd_io.hpp>
 
@@ -70,6 +72,10 @@ private:
     bool m_compressed;
     bool m_binary;
     bool m_xyz;
+    double m_offset_x;
+    double m_offset_y;
+    double m_offset_z;
+
     PcdWriter& operator=(const PcdWriter&); // not implemented
     PcdWriter(const PcdWriter&); // not implemented
 };
@@ -80,7 +86,9 @@ void PcdWriter::writeView(const PointViewPtr view)
 {
     typedef typename CloudT::PointType PointT;
     typename CloudT::Ptr cloud(new CloudT);
-    pclsupport::PDALtoPCD(view, *cloud);
+    BOX3D bounds;
+    bounds.grow(m_offset_x, m_offset_y, m_offset_z);
+    pclsupport::PDALtoPCD(view, *cloud, bounds);
     pcl::PCDWriter w;
     if (m_compressed)
     {

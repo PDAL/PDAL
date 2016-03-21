@@ -34,7 +34,6 @@
 
 #include "PcdWriter.hpp"
 #include "point_types.hpp"
-#include "PCLConversions.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -65,6 +64,9 @@ void PcdWriter::processOptions(const Options& ops)
     m_binary = ops.getValueOrDefault("binary", false);
     m_compressed = ops.getValueOrDefault("compression", false);
     m_xyz = ops.getValueOrDefault("xyz", false);
+    m_offset_x = ops.getValueOrDefault("offset_x", 0.0);
+    m_offset_y = ops.getValueOrDefault("offset_y", 0.0);
+    m_offset_z = ops.getValueOrDefault("offset_z", 0.0);
 }
 
 
@@ -76,6 +78,9 @@ Options PcdWriter::getDefaultOptions()
     options.add("binary", false, "Write binary data?");
     options.add("compression", false, "Write binary compressed data?");
     options.add("xyz", false, "Write only XYZ dimensions?");
+    options.add("offset_x", 0.0, "Offset to be subtracted from XYZ position");
+    options.add("offset_y", 0.0, "Offset to be subtracted from XYZ position");
+    options.add("offset_z", 0.0, "Offset to be subtracted from XYZ position");
 
     return options;
 }
