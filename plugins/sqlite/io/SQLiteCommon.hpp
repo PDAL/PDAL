@@ -457,7 +457,7 @@ public:
         lib_extension = "mod_";
 #endif
 
-#ifdef __linux__
+#if defined(__linux__) || defined(__FreeBSD_kernel__)
         so_extension = "so";
 #ifdef MOD_SPATIALITE
         lib_extension = "mod_";
