@@ -33,11 +33,6 @@
 #cmakedefine PDAL_HAVE_LIBGEOTIFF
 
 /*
- * platform endianness
- */
-#cmakedefine PDAL_ENDIAN_AWARE
-
-/*
  * Debug or Release build?
  */
 #define PDAL_BUILD_TYPE "@PDAL_BUILD_TYPE@"
@@ -65,7 +60,5 @@
  * built pdal app as application bundle on OSX?
  */
 #cmakedefine PDAL_APP_BUNDLE
-
-#define PDAL_PYTHON_LIBRARY "${PYTHON_LIBRARY}"
 
 #endif
