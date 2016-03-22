@@ -158,7 +158,7 @@ void TIndexKernel::validateSwitches(ProgramArgs& args)
 
 int TIndexKernel::execute()
 {
-    GlobalEnvironment::get().initializeGDAL(0);
+    GlobalEnvironment::get().initializeGDALErrors(0);
 
     if (m_merge)
         mergeFile();

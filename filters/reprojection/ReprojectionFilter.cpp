@@ -112,7 +112,7 @@ void ReprojectionFilter::processOptions(const Options& options)
 
 void ReprojectionFilter::initialize()
 {
-    GlobalEnvironment::get().initializeGDAL(log(), isDebug());
+    GlobalEnvironment::get().initializeGDALErrors(log(), isDebug());
 
     m_out_ref_ptr = OSRNewSpatialReference(0);
 

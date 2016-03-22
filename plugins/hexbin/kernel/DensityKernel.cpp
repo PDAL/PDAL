@@ -122,7 +122,8 @@ void DensityKernel::outputDensity(pdal::SpatialReference const& reference)
 int DensityKernel::execute()
 {
 
-    GlobalEnvironment::get().initializeGDAL(0);
+    GlobalEnvironment::get().initializeGDALErrors(0);
+    GlobalEnvironment::get().wakeGDALDrivers();
     std::string filename = m_usestdin ? std::string("STDIN") : m_inputFile;
     makePipeline(filename);
     applyExtraStageOptionsRecursive(m_manager->getStage());
