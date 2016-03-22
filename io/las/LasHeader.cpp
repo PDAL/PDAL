@@ -185,9 +185,7 @@ Dimension::IdList LasHeader::usedDims() const
         Id::ScanDirectionFlag, Id::EdgeOfFlightLine, Id::Classification,
         Id::UserData, Id::ScanAngleRank, Id::PointSourceId };
 
-    // This mess is because MSVC doesn't support initializer lists.
-    Dimension::IdList ids;
-    std::copy(std::begin(dims), std::end(dims), std::back_inserter(ids));
+    Dimension::IdList ids(std::begin(dims), std::end(dims));
 
     if (hasTime())
         ids.push_back(Id::GpsTime);
