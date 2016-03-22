@@ -76,8 +76,9 @@ struct OGRFeatureDeleter
 
 void AttributeFilter::initialize()
 {
-    GlobalEnvironment::get().initializeGDAL(log(), isDebug());
-    GlobalEnvironment::get().initializeGEOS(log(), isDebug());
+    GlobalEnvironment::get().initializeGDALErrors(log(), isDebug());
+    GlobalEnvironment::get().wakeGDALDrivers();
+    GlobalEnvironment::get().initializeGEOSErrors(log(), isDebug());
 }
 
 
