@@ -221,7 +221,17 @@ void LasHeader::setSrs()
     else
         useWkt = (m_versionMinor >= 4);
 
-    return useWkt ? setSrsFromWkt() : setSrsFromGeotiff();
+    try
+    {
+        if (useWkt)
+            setSrsFromWkt();
+        else
+            setSrsFromGeotiff();
+    }
+    catch (...)
+    {
+        m_log->get(LogLevel::Error) << "Could not create an SRS" << std::endl;
+    }
 }
 
 
@@ -303,7 +313,9 @@ void LasHeader::setSrsFromGeotiff()
     geotiff.setTags();
     std::string wkt(geotiff.getWkt(false, false));
     if (wkt.size())
-        m_srs.setFromUserInput(geotiff.getWkt(false, false));
+    {
+        m_srs.setFromUserInput(wkt);
+    }
 
     m_log->get(LogLevel::Debug5) << "GeoTIFF keys: " << geotiff.getText() <<
         std::endl;

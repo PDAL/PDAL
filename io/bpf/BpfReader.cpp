@@ -120,8 +120,16 @@ void BpfReader::initialize()
         code = "EPSG:326" + Utils::toString(zone);
     else
         code = "EPSG:327" + Utils::toString(zone);
-    SpatialReference srs(code);
-    setSpatialReference(srs);
+
+    try
+    {
+        SpatialReference srs(code);
+        setSpatialReference(srs);
+    }
+    catch (...)
+    {
+        log()->get(LogLevel::Error) << "Could not create an SRS" << std::endl;
+    }
 
     if (m_header.m_version >= 3)
     {
