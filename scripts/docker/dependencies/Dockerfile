@@ -254,32 +254,18 @@ RUN mkdir /vdatum \
 RUN rm -rf laszip laz-perf points2grid pcl nitro hexer 3.2.7.tar.gz eigen-eigen-b30b87236a1b gdal libgeotiff
 RUN apt-get clean
 
-
-RUN git clone https://github.com/gadomski/armadillo.git \
-    && cd armadillo/branch-5.600 \
-    && cmake . -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
-    && make \
-    && make install \
-    && rm -rf armadillo
-
-ADD fgt-pr-13.patch /
-
 RUN git clone https://github.com/gadomski/fgt.git \
     && cd fgt \
-    && git checkout b3bcea4767fc0fd018bd280a1bc8e8d6c44c513e \
-    && patch -p1 < /fgt-pr-13.patch \
-    && cmake . -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+    && git checkout v0.4.4 \
+    && cmake . -DEIGEN3_INCLUDE_DIR=/usr/include -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
     && make \
     && make install \
     && rm -rf fgt
 
 RUN git clone https://github.com/gadomski/cpd.git \
     && cd cpd \
-    && cmake . -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DFgt_DIR=/usr \
+    && git checkout v0.3.2 \
+    && cmake . -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
     && make \
     && make install \
-    && mv /usr/lib/cpd/cmake/CpdConfig.cmake /usr/lib/cpd/cmake/CPDConfig.cmake \
-    && mv /usr/lib/cpd/cmake/CpdConfigVersion.cmake /usr/lib/cpd/cmake/CPDConfigVersion.cmake \
     && rm -rf cpd
-
-
