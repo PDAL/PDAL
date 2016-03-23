@@ -52,34 +52,22 @@ ErrorHandler::ErrorHandler(bool isDebug, pdal::LogPtr log)
     : m_isDebug(isDebug)
     , m_log(log)
 {
-    if (m_isDebug)
-    {
-        const char* gdal_debug = ::pdal::Utils::getenv("CPL_DEBUG");
-        if (gdal_debug == 0)
-        {
-            pdal::Utils::putenv("CPL_DEBUG=ON");
-        }
-        m_gdal_callback = std::bind(&ErrorHandler::log, this,
-            std::placeholders::_1, std::placeholders::_2,
-            std::placeholders::_3);
-    }
-    else
-    {
-        m_gdal_callback = std::bind(&ErrorHandler::error, this,
-            std::placeholders::_1, std::placeholders::_2,
-            std::placeholders::_3);
-    }
-
+    if (m_isDebug && !Utils::getenv("CPL_DEBUG"))
+        Utils::putenv("CPL_DEBUG=ON");
     CPLPushErrorHandlerEx(&ErrorHandler::trampoline, this);
 }
 
-void ErrorHandler::log(::CPLErr code, int num, char const* msg)
+
+void ErrorHandler::handle(::CPLErr code, int num, char const* msg)
 {
     std::ostringstream oss;
 
     if (code == CE_Failure || code == CE_Fatal)
-        error(code, num, msg);
-    else if (code == CE_Debug)
+    {
+        oss << "GDAL Failure number = " << num << ": " << msg;
+        throw pdal_error(oss.str());
+    }
+    else if (m_isDebug && code == CE_Debug)
     {
         oss << "GDAL debug: " << msg;
         if (m_log)
@@ -87,22 +75,6 @@ void ErrorHandler::log(::CPLErr code, int num, char const* msg)
     }
 }
 
-
-void ErrorHandler::error(::CPLErr code, int num, char const* msg)
-{
-    std::ostringstream oss;
-    if (code == CE_Failure || code == CE_Fatal)
-    {
-        oss << "GDAL Failure number = " << num << ": " << msg;
-        throw pdal_error(oss.str());
-    }
-}
-
-
-ErrorHandler::~ErrorHandler()
-{
-    CPLPopErrorHandler();
-}
 
 struct InvalidBand {};
 struct CantReadBlock {};

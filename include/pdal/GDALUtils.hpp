@@ -165,35 +165,30 @@ private:
     RefPtr m_ref;
 };
 
+
 class PDAL_DLL ErrorHandler
 {
 public:
-
     ErrorHandler(bool isDebug, pdal::LogPtr log);
-    ~ErrorHandler();
+    ~ErrorHandler()
+        { CPLPopErrorHandler(); }
 
     static void CPL_STDCALL trampoline(::CPLErr code, int num, char const* msg)
     {
-        ErrorHandler* debug =
-            static_cast<ErrorHandler*>(CPLGetErrorHandlerUserData());
-        if (!debug)
-            return;
+        ErrorHandler* handler =
+            static_cast<ErrorHandler *>(CPLGetErrorHandlerUserData());
 
-        // if (!debug->m_log->get()) return;
-        debug->m_gdal_callback(code, num, msg);
+        if (handler)
+            handler->handle(code, num, msg);
     }
 
-    void log(::CPLErr code, int num, char const* msg);
-    void error(::CPLErr code, int num, char const* msg);
-
-    inline LogPtr getLogger() const { return m_log; }
-    inline void setLogger(LogPtr logger) { m_log = logger; }
+    void handle(::CPLErr code, int num, char const* msg);
 
 private:
-    std::function<void(CPLErr, int, char const*)> m_gdal_callback;
     bool m_isDebug;
     pdal::LogPtr m_log;
 };
+
 
 namespace GDALError
 {
