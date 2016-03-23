@@ -232,12 +232,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(NullWriter_InitPlugin);
 }
 
-/// Create a stage and return a pointer to the created stage.
-/// The factory takes ownership of any successfully created stage.
-///
-/// \param[in] stage_name  Type of stage to by created.
-/// \return  Pointer to created stage.
-///
+
 Stage *StageFactory::createStage(std::string const& stage_name)
 {
     static_assert(0 < sizeof(Stage), "");
@@ -251,13 +246,6 @@ Stage *StageFactory::createStage(std::string const& stage_name)
 }
 
 
-/**
-  Destroy a stage created by this factory.  This doesn't need to be
-  called unless you specifically want to destroy a stage as all stages
-  are destroyed when the factory is destroyed.
-
-  \param stage  Pointer to stage to destroy.
-*/
 void StageFactory::destroyStage(Stage *s)
 {
     for (auto it = m_ownedStages.begin(); it != m_ownedStages.end(); ++it)
