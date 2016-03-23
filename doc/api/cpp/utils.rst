@@ -3,7 +3,7 @@
 .. index:: Utils
 
 ******************************************************************************
-:cpp:namespace:`pdal::Utils`
+``pdal::Utils``
 ******************************************************************************
 
 :cpp:namespace:`pdal::Utils` is a set of utility functions.

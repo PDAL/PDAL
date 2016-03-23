@@ -10,6 +10,7 @@ The **Derivative Writer** supports writing of primary topographic attributes.
     This driver uses `GDAL`_ to write the data. Only the `GeoTIFF`_ driver
     is supported at this time.
 
+.. _`GDAL`: http://gdal.org
 .. _`GeoTiff`: http://www.gdal.org/frmt_gtiff.html
 
 Example

@@ -5,6 +5,11 @@ Download
 ******************************************************************************
 
 
+.. contents::
+   :depth: 3
+   :backlinks: none
+
+
 Current Release(s)
 ------------------------------------------------------------------------------
 
@@ -43,8 +48,16 @@ You can obtain a copy of the active source code by issuing the following command
 Binaries
 ------------------------------------------------------------------------------
 
+Docker
+................................................................................
+
 The fastest way to get going with PDAL is to use the Docker build. See the
-tutorial at :ref:`docker`.
+tutorial at :ref:`docker` for more information.
+
+::
+
+    docker pull pdal/pdal:1.2
+
 
 Windows
 ................................................................................
@@ -57,6 +70,11 @@ RPMs
 
 RPMs for PDAL are available at http://pdal.s3-website-us-east-1.amazonaws.com/rpms/
 
+Debian
+................................................................................
+
+Debian packages are now available on `Debian Unstable`_.
+
 .. _`OSGeo4W`: http://trac.osgeo.org/osgeo4w/
-.. _`DebianGIS`: http://wiki.debian.org/DebianGis
+.. _`Debian Unstable`: https://tracker.debian.org/pkg/pdal
 .. _`LASzip`: http://laszip.org
