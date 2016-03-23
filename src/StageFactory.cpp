@@ -250,4 +250,24 @@ Stage *StageFactory::createStage(std::string const& stage_name)
     return s;
 }
 
+
+/**
+  Destroy a stage created by this factory.  This doesn't need to be
+  called unless you specifically want to destroy a stage as all stages
+  are destroyed when the factory is destroyed.
+
+  \param stage  Pointer to stage to destroy.
+*/
+void StageFactory::destroyStage(Stage *s)
+{
+    for (auto it = m_ownedStages.begin(); it != m_ownedStages.end(); ++it)
+    {
+        if (s == it->get())
+        {
+            m_ownedStages.erase(it);
+            break;
+        }
+    }
+}
+
 } // namespace pdal
