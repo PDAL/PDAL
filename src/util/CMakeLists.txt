@@ -33,20 +33,11 @@ set(PDAL_UTIL_SOURCES
     ${PDAL_UTIL_HPP})
 
 PDAL_ADD_LIBRARY(${PDAL_UTIL_LIB_NAME} SHARED ${PDAL_UTIL_SOURCES})
-target_link_libraries(${PDAL_UTIL_LIB_NAME} ${PDAL_BOOST_LIB_NAME})
+target_link_libraries(${PDAL_UTIL_LIB_NAME} ${PDAL_BOOST_LIB_NAME} ${CMAKE_DL_LIBS})
 
 set_target_properties(${PDAL_UTIL_LIB_NAME} PROPERTIES
     VERSION "${PDAL_BUILD_VERSION}"
     SOVERSION "${PDAL_API_VERSION}"
     CLEAN_DIRECT_OUTPUT 1)
 
-if (NOT WIN32)
-    target_link_libraries(${PDAL_UTIL_LIB_NAME} dl)
-endif (NOT WIN32)
-
-if (NOT WIN32)
-    target_link_libraries(${PDAL_UTIL_LIB_NAME} dl)
-endif (NOT WIN32)
-
 set_property(GLOBAL PROPERTY _UTIL_INCLUDED TRUE)
-
