@@ -86,7 +86,7 @@ GlobalEnvironment::GlobalEnvironment()
     // own debug/Log settings, we can do that in initializeGDAL and
     // initializeGEOS
     initializeGEOSErrors(LogPtr(), false);
-    initializeGEOSErrors(LogPtr(), false);
+    initializeGDALErrors(LogPtr(), false);
 //     m_gdalErrorHandler.reset(new gdal::ErrorHandler(false, LogPtr()));
 //     m_geosErrorHandler.reset(new geos::ErrorHandler(false, LogPtr()));
 }
