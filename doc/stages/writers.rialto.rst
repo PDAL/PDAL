@@ -9,22 +9,26 @@ tiles <http://lists.osgeo.org/pipermail/pointdown/2015-February/000001.html>`__.
 Example
 -------
 
-.. code-block:: xml
+.. code-block:: json
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.rialto">
-      <Option name="filename">output.ria</Option>
-      <Option name="max_levels">18</Option>
-      <Option name="overwrite">true</Option>
-      <Filter type="filters.reprojection">
-        <Option name="out_srs">EPSG:4326</Option>
-        <Reader type="readers.las">
-          <Option name="filename">input.las</Option>
-        </Reader>
-      </Filter>
-    </Writer>
-  </Pipeline>
+    {
+      "pipeline":[
+        {
+          "type":"readers.las",
+          "filename":"inputfile.las"
+        },
+        {
+          "type":"filters.reprojection",
+          "out_srs":"EPSG:4326"
+        }
+        {
+          "type":"writers.rialto",
+          "max_levels":"18",
+          "overwrite":"true",
+          "filename":"outputfile.ria"
+        }
+      ]
+    }
 
 Options
 -------
@@ -41,4 +45,4 @@ max_levels
 
 overwrite
   Delete the target directory prior to writing results? [Default: false]
-  
+

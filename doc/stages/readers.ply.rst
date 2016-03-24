@@ -12,17 +12,21 @@ The ply reader can read ASCII and binary ply files.
 Example
 -------
 
-.. code-block:: xml
+.. code-block:: json
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.text">
-      <Option name="filename">outputfile.txt</Option>
-      <Reader type="readers.ply">
-        <Option name="filename">inputfile.ply</Option>
-      </Reader>
-    </Writer>
-  </Pipeline>
+    {
+      "pipeline":[
+        {
+          "type":"readers.ply",
+          "filename":"inputfile.ply"
+        },
+        {
+          "type":"writers.text",
+          "filename":"outputfile.txt"
+        }
+      ]
+    }
+
 
 Options
 -------

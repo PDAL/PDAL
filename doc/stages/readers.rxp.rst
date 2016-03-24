@@ -27,37 +27,8 @@ Example
 This example rescales the points, given in the scanner's own coordinate system, to values that can be written to a las file.
 Only points with a valid gps time, as determined by a pps pulse, are read from the rxp, since the ``sync_to_pps`` option is "true".
 
-.. code-block:: xml
+.. code-block:: python
 
-    <?xml version="1.0" encoding="utf-8"?>
-    <Pipeline version="1.0">
-        <Writer type="writers.las">
-            <Option name="filename">output.las</Option>
-            <Option name="discard_high_return_numbers">true</Option>
-            <Filter type="filters.scaling">
-                <Option name="dimension">
-                    X
-                    <Options>
-                        <Option name="scale">0.001</Option>
-                        <Option name="offset">0</Option>
-                    </Options>
-                </Option>
-                <Option name="dimension">
-                    Y
-                    <Options>
-                        <Option name="scale">0.001</Option>
-                        <Option name="offset">0</Option>
-                    </Options>
-                </Option>
-                <Option name="dimension">
-                    Z
-                    <Options>
-                        <Option name="scale">0.001</Option>
-                        <Option name="offset">0</Option>
-                    </Options>
-                </Option>
-                <Filter type="filters.programmable">
-                    <Option name="source">
     import numpy
     def reflectance_to_intensity(ins, outs):
         ref = ins["Reflectance"]
@@ -65,29 +36,42 @@ Only points with a valid gps time, as determined by a pps pulse, are read from t
         max = numpy.amax(ref)
         outs["Intensity"] = (65535 * (ref - min) / (max - min)).astype(numpy.uint16)
         return True
-                    </Option>
-                    <Option name="function">reflectance_to_intensity</Option>
-                    <Option name="module">pyrxp</Option>
-                    <Option name="add_dimension">Intensity</Option>
-                    <Reader type="readers.rxp">
-                        <Option name="filename">120304_204030.rxp</Option>
-                        <Option name="sync_to_pps">true</Option>
-                    </Reader>
-                </Filter>
-            </Filter>
-        </Writer>
-    </Pipeline>
+
+.. code-block:: json
+
+    {
+      "pipeline":[
+        {
+          "type":"readers.rxp",
+          "filename":"120304_204030.rxp",
+          "sync_to_pps":"true"
+        },
+        {
+          "type":"filters.programmable",
+          "source":"filter_rxp.py",
+          "function":"reflectance_to_intensity",
+          "add_dimension":"Intensity",
+          "module":"filter_rxp",
+        },
+        {
+          "type":"writers.las",
+          "filename":"outputfile.las"
+          "discard_high_return_numbers":"true"
+        }
+      ]
+    }
+
 
 A few things to note:
 
-- We use a ``filters.programmable`` to remap Reflectance values to Intensity values, scaling them so the entire range of Reflectance values fit into the Intensity field.
+- We use a :ref:`filters.programmable` to remap Reflectance values to Intensity values, scaling them so the entire range of Reflectance values fit into the Intensity field.
   This is analogous to the "Export reflectance as intensity" option in RiSCAN Pro.
   You could also explicitly set the minimum and maximum Reflectance values as you would in RiSCAN Pro using the same programmable filter.
   You could also use "Amplitude" instead of "Reflectance".
   If you do not need Intensity values in your output file, you can delete the programmable filter.
-- We set the ``discard_high_return_numbers`` option to ``true`` on the las writer.
+- We set the ``discard_high_return_numbers`` option to ``true`` on the :ref:`writers.las`.
   RXP files can contain more returns per shot than is supported by las, and so we need to explicitly tell the las writer to ignore those high return number points.
-  You could also use ``filters.predicate`` to filter those points earlier in the pipeline, or modify the return values with a ``filters.programmable``.
+  You could also use :ref:`filters.predicate` to filter those points earlier in the pipeline, or modify the return values with a :ref:`filters.programmable`.
 
 
 Options

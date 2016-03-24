@@ -11,22 +11,23 @@ supports both `GeoJSON`_ and `CSV`_ output.
 Example
 -------
 
-.. code-block:: xml
+.. code-block:: json
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.text">
-      <Option name="filename">output.js</Option>
-      <Option name="format">geojson</Option>
-      <Option name="order">X,Y,Z</Option>
-      <Option name="keep_unspecified">false</Option>
-      <Reader type="readers.qfit">
-        <Option name="filename">qfitfile.qi</Option>
-        <Option name="flip_coordinates">false</Option>
-        <Option name="scale_z">1.0</Option>
-      </Reader>
-    </Writer>
-  </Pipeline>
+    {
+      "pipeline":[
+        {
+          "type":"readers.las",
+          "filename":"inputfile.las"
+        },
+        {
+          "type":"writers.text",
+          "format":"geojson",
+          "order":"X,Y,Z",
+          "keep_unspecified":"false",
+          "filename":"outputfile.txt"
+        }
+      ]
+    }
 
 Options
 -------

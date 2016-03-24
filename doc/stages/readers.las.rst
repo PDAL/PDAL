@@ -48,17 +48,20 @@ the two supported decompressors, `LASzip`_ or `LAZperf`_.  See the
 Example
 -------
 
-.. code-block:: xml
+.. code-block:: json
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.text">
-      <Option name="filename">outputfile.txt</Option>
-      <Reader type="readers.las">
-        <Option name="filename">inputfile.las</Option>
-      </Reader>
-    </Writer>
-  </Pipeline>
+    {
+      "pipeline":[
+        {
+          "type":"readers.las",
+          "filename":"inputfile.las"
+        },
+        {
+          "type":"writers.text",
+          "filename":"outputfile.txt",
+        }
+      ]
+    }
 
 Options
 -------

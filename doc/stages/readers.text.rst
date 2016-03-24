@@ -41,17 +41,20 @@ This input file contains X, Y and Z value for 10 points.
 Example Pipeline
 ----------------
 
-.. code-block:: xml
+.. code-block:: json
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.text">
-      <Option name="filename">outputfile.txt</Option>
-      <Reader type="readers.text">
-        <Option name="filename">inputfile.txt</Option>
-      </Reader>
-    </Writer>
-  </Pipeline>
+    {
+      "pipeline":[
+        {
+          "type":"readers.qfit",
+          "filename":"inputfile.txt"
+        },
+        {
+          "type":"writers.text",
+          "filename":"outputfile.txt"
+        }
+      ]
+    }
 
 Options
 -------

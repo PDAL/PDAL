@@ -35,6 +35,27 @@ See [Rusu2008]_ for more information.
 
 .. _`PCL`: http://www.pointclouds.org
 
+Example
+................................................................................
+
+.. code-block:: json
+
+    {
+      "pipeline":[
+        "input.las",
+        {
+          "type":"filters.statisticaloutlier",
+          "mean_k":"12",
+          "multiplier":"2.2"
+        },
+        {
+          "type":"writers.las",
+          "filename":"output.las"
+        }
+      ]
+    }
+
+
 Options
 ................................................................................
 

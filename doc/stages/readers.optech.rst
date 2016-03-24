@@ -10,20 +10,24 @@ These files contain scan angles, ranges, IMU and GNSS information, and boresight
 Example
 -------
 
-.. code-block:: xml
+.. code-block:: json
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.text">
-      <Option name="filename">outputfile.txt</Option>
-      <Reader type="readers.optech">
-        <Option name="filename">inputfile.csd</Option>
-      </Reader>
-    </Writer>
-  </Pipeline>
+    {
+      "pipeline":[
+        {
+          "type":"readers.optech",
+          "filename":"input.csd"
+        },
+        {
+          "type":"writers.text",
+          "filename":"outputfile.txt"
+        }
+      ]
+    }
+
 
 Options
 -------
 
 filename
-  csd file to read [Required] 
+  csd file to read [Required]

@@ -10,12 +10,9 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/PointTable.hpp>
 
-#include <boost/program_options.hpp>
-
 #include <memory>
 #include <string>
 
-namespace po = boost::program_options;
 
 namespace pdal {
 
@@ -26,7 +23,6 @@ namespace pdal {
   };
 
   CREATE_SHARED_PLUGIN(1, 0, MyKernel, Kernel, s_info);
-
   std::string MyKernel::getName() const { return s_info.name; }
 
   MyKernel::MyKernel() : Kernel()

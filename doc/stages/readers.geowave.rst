@@ -12,25 +12,30 @@ configuring the GeoWave plugin can be found `here`_.
 Example
 -------
 
-.. code-block:: xml
+.. code-block:: json
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.text">
-      <Option name="filename">outputfile.txt</Option>
-      <Reader type="readers.geowave">
-        <Option name="zookeeper_url">zookeeper1:2181,zookeeper2:2181,zookeeper3:2181</Option>
-        <Option name="instance_name">GeoWave</Option>
-        <Option name="username">user</Option>
-        <Option name="password">pass</Option>
-        <Option name="table_namespace">PDAL_Table</Option>
-        <Option name="feature_type_name">PDAL_Point</Option>
-        <Option name="data_adapter">FeatureCollectionDataAdapter</Option>
-        <Option name="points_per_entry">5000u</Option>
-        <Option name="bounds">([0,1000000],[0,1000000],[0,100])</Option>
-      </Reader>
-    </Writer>
-  </Pipeline>
+    {
+      "pipeline":[
+        {
+          "type":"readers.geowave",
+          "zookeeper_url":"zookeeper1:2181,zookeeper2:2181,zookeeper3:2181",
+          "instance_name":"GeoWave",
+          "username":"user",
+          "password":"pass",
+          "table_namespace":"PDAL_Table",
+          "feature_type_name":"PDAL_Point",
+          "data_adapter":"FeatureCollectionDataAdapter",
+          "points_per_entry":"5000u",
+          "bounds":"([0,1000000],[0,1000000],[0,100])"
+          "filename":"./pdal/test/data/autzen/autzen.jpg"
+        },
+        {
+          "type":"writers.text",
+          "filename":"outputfile.txt"
+        }
+      ]
+    }
+
 
 
 Options

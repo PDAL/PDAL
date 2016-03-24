@@ -23,49 +23,29 @@ possible to generate all grid variants in one pass.
 Example
 -------
 
-.. code-block:: xml
+.. code-block:: json
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.p2g">
-      <Option name="grid_dist_x">
-        6.0
-      </Option>
-      <Option name="grid_dist_y">
-        6.0
-      </Option>
-      <Option name="radius">
-        8.4852813742385713
-      </Option>
-      <Option name="filename">
-        autzen_grid
-      </Option>
-      <Option name="output_type">
-        min
-      </Option>
-      <Option name="output_type">
-        max
-      </Option>
-      <Option name="output_type">
-        mean
-      </Option>
-      <Option name="output_type">
-        idw
-      </Option>
-      <Option name="output_type">
-        den
-      </Option>
-      <Option name="output_format">
-        grid
-      </Option>
-      <Reader type="readers.las">
-        <Option name="filename">
-            .a./1.2-with-color.las
-        </Option>
-      </Reader>
-    </Writer>
-  </Pipeline>
-
+    {
+      "pipeline":[
+        {
+          "type":"readers.las",
+          "filename":"inputfile.las"
+        },
+        {
+          "type":"writers.p2g",
+          "grid_dist_x":"6.0",
+          "grid_dist_y":"6.0",
+          "radius":"8.4852813742385713",
+          "filename":"autzen_grid",
+          "output_type":"min",
+          "output_type":"max",
+          "output_type":"mean",
+          "output_type":"idw",
+          "output_type":"den",
+          "output_format":"den",
+        }
+      ]
+    }
 Options
 -------
 

@@ -1,6 +1,5 @@
 .. _filters.greedyprojection:
 
-===============================================================================
 filters.greedyprojection
 ===============================================================================
 
@@ -13,6 +12,25 @@ surfaces and relatively smooth transitions between areas with different point
 densities.
 
 .. _`PCL`: http://www.pointclouds.org
+
+Example
+-------
+
+.. code-block:: json
+
+    {
+      "pipeline":[
+        "input.las",
+        {
+          "type":"filters.greedyprojection"
+        },
+        {
+          "type":"writers.las",
+          "filename":"output.las"
+        }
+      ]
+    }
+
 
 Options
 -------------------------------------------------------------------------------

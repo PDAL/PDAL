@@ -10,21 +10,21 @@ only supports writing of version 3 BPF format files.
 Example
 -------
 
-.. code-block:: xml
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.bpf">
-      <Option name="filename">
-        outputfile.bpf
-      </Option>
-      <Reader type="readers.las">
-        <Option name="filename">
-          inputfile.las
-        </Option>
-      </Reader>
-    </Writer>
-  </Pipeline>
+.. code-block:: json
+
+    {
+      "pipeline":[
+        {
+          "type":"readers.",s
+          "filename":"inputfile.las"
+        },
+        {
+          "type":"writers.bpf",
+          "filename":"outputfile.bpf"
+        }
+      ]
+    }
 
 Options
 -------

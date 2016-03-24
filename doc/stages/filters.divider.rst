@@ -18,20 +18,21 @@ Example
 
 This pipeline will create 10 output files from the input file readers.las.
 
-.. code-block:: xml
+.. code-block:: json
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.las">
-      <Option name="filename">out_#.las</Option>
-      <Filter type="filters.divider">
-        <Option name="count">10</Option>
-        <Reader type="readers.las">
-            <Option name="filename">example.las</Option>
-        </Reader>
-      </Filter>
-    </Writer>
-  </Pipeline>
+    {
+      "pipeline":[
+        "example.las",
+        {
+          "type":"filters.divider",
+          "count":"10"
+        },
+        {
+          "type":"writers.las",
+          "filename":"out_#.las"
+        }
+      ]
+    }
 
 Options
 -------

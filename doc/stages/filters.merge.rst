@@ -12,31 +12,26 @@ common.
 Example
 -------
 
-.. code-block:: xml
+.. code-block:: json
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.las">
-      <Option name="filename">
-        merged.las
-      </Option>
-      <Filter type="filters.merge">
-        <Reader type="readers.las">
-          <Option name="filename">
-            file1.las
-          </Option>
-        </Reader>
-        <Reader type="readers.las">
-          <Option name="filename">
-            file2.las
-          </Option>
-        </Reader>
-        <Reader type="readers.bpf">
-          <Option name="filename">
-            file3.bpf
-          </Option>
-        </Reader>
-      </Filter>
-    </Writer>
-  </Pipeline>
+    {
+      "pipeline": [
+        {
+          "filename": "/Users/hobu/dev/git/pdal/test/data/las/1.2-with-color.las",
+          "tag": "A"
+        },
+        {
+          "filename": "/Users/hobu/dev/git/pdal/test/data/las/1.2-with-color.las",
+          "tag": "B"
+        },
+        {
+          "type": "filters.merge",
+          "inputs": ["A", "B"]
+        },
+        {
+          "type": "writers.las",
+          "filename": "output.las"
+        }
+      ]
+    }
 

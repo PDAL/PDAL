@@ -14,6 +14,25 @@ described in [Li2010]_.
 
 .. _`PCL`: http://www.pointclouds.org
 
+Example
+-------------------------------------------------------------------------------
+
+.. code-block:: json
+
+    {
+      "pipeline":[
+        "input.las",
+        {
+          "type":"filters.gridprojection"
+        },
+        {
+          "type":"writers.las",
+          "filename":"output.las"
+        }
+      ]
+    }
+
+
 Options
 -------------------------------------------------------------------------------
 

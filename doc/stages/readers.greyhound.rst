@@ -8,19 +8,21 @@ The **Greyhound Reader** allows you to read point data from a `Greyhound`_ serve
 Example
 -------
 
-.. code-block:: xml
+.. code-block:: json
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.text">
-      <Option name="filename">output.txt</Option>
-      <Option name="spatialreference">EPSG:26910</Option>
-      <Reader type="readers.greyhound">
-        <Option name="url">greyhound.organization.com:8080</Option>
-        <Option name="pipeline_id">a87d0a50e03a880c75e9f872c925f984</Option>
-      </Reader>
-    </Writer>
-  </Pipeline>
+    {
+      "pipeline":[
+        {
+          "type":"readers.greyhound",
+          "url":"data.greyhound.io/resource/autzen"
+        },
+        {
+          "type":"writers.text",
+          "filename":"outputfile.txt"
+        }
+      ]
+    }
+
 
 Options
 -------
@@ -28,8 +30,6 @@ Options
 url
   Greyhound server URL string. [Required]
 
-pipeline_id
-  Greyhound pipelineId to read. [Required]
 
 
 .. _Greyhound: https://github.com/hobu/greyhound

@@ -13,30 +13,32 @@ binary-compressed format.
 Example
 -------
 
-.. code-block:: xml
+.. code-block:: json
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.pcd">
-      <Option name="filename">outputfile.pcd</Option>
-      
-      <Reader type="readers.pcd">
-        <Option name="filename">inputfile.pcd</Option>
-      </Reader>
-    </Writer>
-  </Pipeline>
+    {
+      "pipeline":[
+        {
+          "type":"readers.pcd",
+          "filename":"inputfile.pcd"
+        },
+        {
+          "type":"writers.pcd",
+          "filename":"outputfile.pcd"
+        }
+      ]
+    }
 
 Options
 -------
 
 filename
-  PCD file to write [Required] 
+  PCD file to write [Required]
 
 compression
   Apply compression to the PCD file? [Default: false]
-  
+
 
 
 .. _Point Cloud Data (PCD): http://pointclouds.org/documentation/tutorials/pcd_file_format.php
 .. _Point Cloud Library (PCL): http://pointclouds.org
- 
+

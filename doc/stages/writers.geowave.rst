@@ -13,29 +13,30 @@ configuring the GeoWave plugin can be found `here`_.
 Example
 --------------------------------------------------------------------------------
 
-.. code-block:: xml
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.geowave">
-      <Option name="zookeeper_url">zookeeper1:2181,zookeeper2:2181,zookeeper3:2181</Option>
-      <Option name="instance_name">GeoWave</Option>
-      <Option name="username">user</Option>
-      <Option name="password">pass</Option>
-      <Option name="table_namespace">PDAL_Table</Option>
-      <Option name="feature_type_name">PDAL_Point</Option>
-      <Option name="data_adapter">FeatureCollectionDataAdapter</Option>
-      <Option name="points_per_entry">5000u</Option>
-      <Filter type="filters.reprojection">
-        <Option name="out_srs">EPSG:4326</Option>
-        <Reader type="readers.qfit">
-          <Option name="filename">qfitfile.qi</Option>
-          <Option name="flip_coordinates">false</Option>
-          <Option name="scale_z">1.0</Option>
-        </Reader>
-      </Filter>
-    </Writer>
-  </Pipeline>
+.. code-block:: json
+
+    {
+      "pipeline":[
+        {
+          "type":"readers.qfit",
+          "filename":"inputfile.qi",
+          "flip_coordinates":"false",
+          "scale_z":"1.0"
+        },
+        {
+          "type":"writers.geowave",
+          "zookeeper_url":"zookeeper1:2181,zookeeper2:2181,zookeeper3:2181",
+          "instance_name":"GeoWave",
+          "username":"user",
+          "password":"pass",
+          "table_namespace":"PDAL_Table",
+          "feature_type_name":"PDAL_Point",
+          "data_adapter":"FeatureCollectionDataAdapter",
+          "points_per_entry":"5000u"
+        }
+      ]
+    }
 
 Options
 -------
