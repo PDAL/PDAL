@@ -119,11 +119,17 @@ void GlobalEnvironment::wakeGDALDrivers()
 
 void GlobalEnvironment::initializeGDALErrors(LogPtr log, bool isDebug)
 {
+    // Need to make sure that the current error handler is destroyed before
+    // we create a new one.
+    m_gdalErrorHandler.reset();
     m_gdalErrorHandler.reset(new gdal::ErrorHandler(isDebug, log));
 }
 
 void GlobalEnvironment::initializeGEOSErrors(LogPtr log, bool isDebug)
 {
+    // Need to make sure that the current error handler is destroyed before
+    // we create a new one.
+    m_geosErrorHandler.reset();
     m_geosErrorHandler.reset(new geos::ErrorHandler(isDebug, log));
 }
 
