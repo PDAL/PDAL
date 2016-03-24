@@ -95,7 +95,7 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
     std::map<std::string, std::string> drivers;
     drivers["bin"] = "readers.terrasolid";
     drivers["bpf"] = "readers.bpf";
-    drivers["cpd"] = "readers.optech";
+    drivers["csd"] = "readers.optech";
     drivers["greyhound"] = "readers.greyhound";
     drivers["icebridge"] = "readers.icebridge";
     drivers["las"] = "readers.las";

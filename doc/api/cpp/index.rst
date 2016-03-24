@@ -23,5 +23,6 @@ C++ API
    programargs
    reader
    stage
+   stagefactory
    utils
    writer

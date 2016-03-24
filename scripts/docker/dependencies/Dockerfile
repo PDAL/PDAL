@@ -257,15 +257,17 @@ RUN apt-get clean
 RUN git clone https://github.com/gadomski/fgt.git \
     && cd fgt \
     && git checkout v0.4.4 \
-    && cmake . -DEIGEN3_INCLUDE_DIR=/usr/include -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+    && cmake . -DWITH_TESTS=OFF -DBUILD_SHARED_LIBS=ON -DEIGEN3_INCLUDE_DIR=/usr/include -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
     && make \
     && make install \
+    && cd .. \
     && rm -rf fgt
 
 RUN git clone https://github.com/gadomski/cpd.git \
     && cd cpd \
     && git checkout v0.3.2 \
-    && cmake . -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+    && cmake . -DWITH_TESTS=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
     && make \
     && make install \
+    && cd .. \
     && rm -rf cpd
