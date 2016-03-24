@@ -37,38 +37,25 @@ In this scenario, we are altering the attributes of the dimension
 have their classification to match the 'CLS' field associated with that
 feature.
 
-.. code-block:: xml
+.. code-block:: json
 
-    <?xml version="2.0" encoding="utf-8"?>
-    <Pipeline version="1.0">
-        <Writer type="writers.las">
-            <Option name="filename">
-                attributed.las
-            </Option>
-            <Option name="forward">
-                all
-            </Option>
-            <Filter type="filters.attribute">
-                <Option name="dimension">
-                    Classification
-                </Option>
-                <Option name="datasource">
-                    ./test/data/autzen/attributes.shp
-                </Option>
-                <Option name="layer">
-                    attributes
-                </Option>
-                <Option name="column">
-                    CLS
-                </Option>
-                <Reader type="readers.las">
-                    <Option name="filename">
-                        ../autzen/autzen-dd.las
-                    </Option>
-                </Reader>
-            </Filter>
-        </Writer>
-    </Pipeline>
+    {
+      "pipeline":[
+        "autzen-dd.las",
+        {
+          "type":"filters.attribute",
+          "dimension":"Classification",
+          "datasource":"attributes.shp",
+          "layer":"attributes",
+          "column":"CLS"
+        },
+        {
+          "filename":"attributed.las",
+          "scale_x":0.0000001,
+          "scale_y":0.0000001
+        }
+      ]
+    }
 
 Example 2
 ---------
@@ -76,35 +63,25 @@ Example 2
 This pipeline sets the PointSourceId of all points from 'autzen-dd.las'
 to the value '26'.
 
-.. code-block:: xml
+.. code-block:: json
 
-    <?xml version="2.0" encoding="utf-8"?>
-    <Pipeline version="1.0">
-        <Writer type="writers.las">
-            <Option name="filename">
-                attributed.las
-            </Option>
-            <Option name="forward">
-                all
-            </Option>
-            <Filter type="filters.attribute">
-                <Option name="dimension">
-                    PointSourceId
-                </Option>
-                <Option name="value">
-                    26
-                </Option>
-                <Option name="datasource">
-                    ./test/data/autzen/attributes.shp
-                </Option>
-                <Reader type="readers.las">
-                    <Option name="filename">
-                        ../autzen/autzen-dd.las
-                    </Option>
-                </Reader>
-            </Filter>
-        </Writer>
-    </Pipeline>
+    {
+      "pipeline":[
+        "autzen-dd.las",
+        {
+          "type":"filters.attribute",
+          "dimension":"PointSourceId",
+          "value":26
+        },
+        {
+          "filename":"attributed.las",
+          "scale_x":0.0000001,
+          "scale_y":0.0000001
+        }
+      ]
+    }
+
+
 
 Example 3
 --------------------------------------------------------------------------------
@@ -114,38 +91,23 @@ This example sets the Intensity attribute to ``CLS`` values read from the
 
 .. _`OGR SQL`: http://www.gdal.org/ogr_sql_sqlite.html
 
-.. code-block:: xml
+.. code-block:: json
 
-    <?xml version="2.0" encoding="utf-8"?>
-    <Pipeline version="1.0">
-        <Writer type="writers.las">
-            <Option name="filename">
-                attributed.las
-            </Option>
-            <Option name="forward">
-                all
-            </Option>
-            <Filter type="filters.attribute">
-                <Option name="dimension">
-                    Intensity
-                </Option>
-                <Option name="datasource">
-                    ./test/data/autzen/attributes.shp
-                </Option>
-                <Option name="query">
-                    SELECT CLS FROM attributes where cls != 6
-                </Option>
-                <Option name="column">
-                    CLS
-                </Option>
-                <Reader type="readers.las">
-                    <Option name="filename">
-                        ../autzen/autzen-dd.las
-                    </Option>
-                </Reader>
-            </Filter>
-        </Writer>
-    </Pipeline>
+    {
+      "pipeline":[
+        "autzen-dd.las",
+        {
+          "type":"filters.attribute",
+          "dimension":"Intensity",
+          "datasource":"attributes.shp",
+          "query":"SELECT CLS FROM attributes where cls!=6",
+          "column":"CLS"
+        },
+        {
+          "filename":"attributed.las",
+        }
+      ]
+    }
 
 Options
 -------

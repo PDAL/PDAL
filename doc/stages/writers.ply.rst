@@ -19,28 +19,33 @@ You can choose from:
 Example
 -------
 
-.. code-block:: xml
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.ply">
-      <Option name="filename">outputfile.ply</Option>
-      <Option name="storage_mode">little endian</Option>
-      <Reader type="readers.las">
-        <Option name="filename">inputfile.las</Option>
-      </Reader>
-    </Writer>
-  </Pipeline>
+.. code-block:: json
+
+    {
+      "pipeline":[
+        {
+          "type":"readers.pcd",
+          "filename":"inputfile.pcd"
+        },
+        {
+          "type":"writers.ply",
+          "storage_mode":"little endian",
+          "filename":"outputfile.ply"
+        }
+      ]
+    }
+
 
 Options
 -------
 
 filename
-  ply file to write [Required] 
+  ply file to write [Required]
 
 storage_mode
   Type of ply file to write [default: host-ordered binary]
-  
+
 
 .. _polygon file format: http://paulbourke.net/dataformats/ply/
 .. _rply library: http://w3.impa.br/~diego/software/rply/

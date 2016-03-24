@@ -12,55 +12,58 @@ In order to create patches of the right size, the Pointcloud writer should be pr
 Example
 -------
 
-.. code-block:: xml
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.pgpointcloud">
-      <Option name="connection">
-        host='localhost' dbname='lidar' user='pramsey'
-      </Option>
-      <Option name="table">example</Option>
-      <Option name="compression">dimensional</Option>
-      <Option name="srid">26916</Option>
-      <Filter type="filters.chipper">
-        <Option name="capacity">400</Option>
-        <Reader type="readers.las">
-            <Option name="filename">example.las</Option>
-            <Option name="spatialreference">EPSG:26916</Option>
-        </Reader>
-      </Filter>
-    </Writer>
-  </Pipeline>
+.. code-block:: json
+
+    {
+      "pipeline":[
+        {
+          "type":"readers.las",
+          "filename":"inputfile.las",
+          "spatialreference":"EPSG:26916"
+        },
+        {
+          "type":"filters.chipper",
+          "capacity":400
+        }
+        {
+          "type":"writers.pgpointcloud",
+          "connection":"host=\'localhost\' dbname=\'lidar\' user=\'pramsey\'",
+          "table":"example",
+          "compression":"dimensional",
+          "srid":"26916"
+        }
+      ]
+    }
 
 Options
 -------
 
 connection
-  PostgreSQL connection string. In the form *"host=hostname dbname=database user=username password=pw port=5432"* [Required] 
+  PostgreSQL connection string. In the form *"host=hostname dbname=database user=username password=pw port=5432"* [Required]
 
 table
-  Database table to write to. [Required] 
+  Database table to write to. [Required]
 
 schema
   Database schema to write to. [Default: **public**]
 
 column
   Table column to put patches into. [Default: **pa**]
-  
+
 compression
   Patch compression type to use. [Default: **dimensional**]
-  
+
   * **none** applies no compression
   * **dimensional** applies dynamic compression to each dimension separately
   * **ght** applies a "geohash tree" compression by sorting the points into a prefix tree
-  
+
 overwrite
   To drop the table before writing set to 'true'. To append to the table set to 'false'. [Default: **true**]
 
 srid
   Spatial reference ID (relative to the `spatial_ref_sys` table in PostGIS) to store with the point cloud schema. [Default: **4326**]
-  
+
 pcid
   An optional existing PCID to use for the point cloud schema. If specified, the schema must be present. If not specified, a match will still be looked for, or a new schema will be inserted.
 
@@ -69,7 +72,7 @@ pre_sql
 
 post_sql
   Optional SQL to execute *after* running the translation. If the value references a file, the file is read and any SQL inside is executed. Otherwise the value is executed as SQL itself.
-  
+
 scale_x, scale_y, scale_z / offset_x, offset_y, offset_z
   If ANY of these options are specified the X, Y and Z dimensions are adjusted
   by subtracting the offset and then dividing the values by the specified

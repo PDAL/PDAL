@@ -14,19 +14,21 @@ for more information
 Example
 -------
 
-.. code-block:: xml
+.. code-block:: json
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.las">
-      <Option name="filename">output.las</Option>
-      <Reader type="readers.ilvis2">
-        <Option name="filename">
-          ILVIS2_GL2009_0414_R1401_042504.TXT
-        </Option>
-      </Reader>
-    </Writer>
-  </Pipeline>
+    {
+      "pipeline":[
+        {
+          "type":"readers.ilvis2",
+          "filename":"ILVIS2_GL2009_0414_R1401_042504.TXT",
+          "metadata":"ILVIS2_GL2009_0414_R1401_042504.xml"
+        },
+        {
+          "type":"writers.las",
+          "filename":"outputfile.las"
+        }
+      ]
+    }
 
 Options
 -------
@@ -37,3 +39,6 @@ filename
 mapping
   Which ILVIS2 field type to map to X, Y, Z dimensions
   'LOW', 'CENTROID', or 'HIGH' ['CENTROID']
+
+metadata
+  XML metadata file to coincidentally read [Optional]

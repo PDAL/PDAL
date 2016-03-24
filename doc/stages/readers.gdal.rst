@@ -24,21 +24,22 @@ that are center pixel, and each band is represented by "band-1", "band-2", or
 Basic Example
 --------------------------------------------------------------------------------
 
-.. code-block:: xml
+.. code-block:: json
 
-    <?xml version="1.0"?>
-    <Pipeline version="1.0">
-        <Writer type="writers.text">
-            <Option name="filename">
-                out.asc
-            </Option>
-            <Reader type="readers.gdal">
-                <Option name="filename">
-                    /Users/hobu/dev/git/pdal/test/data/autzen/autzen.jpg
-                </Option>
-            </Reader>
-        </Writer>
-    </Pipeline>
+    {
+      "pipeline":[
+        {
+          "type":"readers.gdal",
+          "filename":"./pdal/test/data/autzen/autzen.jpg"
+        },
+        {
+          "type":"writers.text",
+          "filename":"outputfile.txt"
+        }
+      ]
+    }
+
+
 
 LAS Example
 --------------------------------------------------------------------------------
@@ -47,26 +48,25 @@ The following example writes a JPG as an `ASPRS LAS`_ file.
 
 .. _`ASPRS LAS`: http://www.asprs.org/Committee-General/LASer-LAS-File-Format-Exchange-Activities.html
 
-.. code-block:: xml
+.. code-block:: json
 
-    <?xml version="1.0"?>
-    <Pipeline version="1.0">
-        <Writer type="writers.las">
-            <Option name="filename">
-                out.las
-            </Option>
-            <Filter type="filters.ferry">
-               <Option name="dimensions">
-                    band-1=Red, band-2=Green, band-3=Blue
-                </Option>
-            <Reader type="readers.gdal">
-                <Option name="filename">
-                    /Users/hobu/dev/git/pdal/test/data/autzen/autzen.jpg
-                </Option>
-            </Reader>
-        </Filter>
-        </Writer>
-    </Pipeline>
+    {
+      "pipeline":[
+        {
+          "type":"readers.gdal",
+          "filename":"./pdal/test/data/autzen/autzen.jpg"
+        },
+        {
+          "type":"filters.ferry"
+          "dimensions":"band-1=Red, band-2=Green, band-3=Blue",
+        },
+        {
+          "type":"writers.text",
+          "filename":"outputfile.txt"
+        }
+      ]
+    }
+
 
 
 Options

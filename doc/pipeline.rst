@@ -14,6 +14,12 @@ to an endpoint. This document describes some features and background of PDAL
 Pipelines and give some examples you can use to execute translation
 operations.
 
+.. seealso::
+
+    :ref:`pipeline_command` is used to invoke JSON pipeline operations
+    via the command line.
+
+
 Playing Dolls
 ------------------------------------------------------------------------------
 
@@ -38,38 +44,36 @@ is a consumer of data, and a Filter is an actor on data.
 
 .. note::
 
-   As a consumer, you are generally not supposed to worry about the underlying
+   As a C++ API consumer, you are generally not supposed to worry about the underlying
    storage of the PointView, but there might be times when you simply just
    "want the data." In those situations, you can use the
-   :cpp:class:`pdal::PointView::getBytes` method to stream out the raw storage.
+   :cpp:func:`pdal::PointView::getBytes` method to stream out the raw storage.
 
-.. _`Matryoshka dolls`: http://en.wikipedia.org/wiki/Matryoshka_doll
 
-A Basic Example
+Usage
 ------------------------------------------------------------------------------
 
 While pipeline objects are manipulable through C++ objects, the other, more
-convenient way is through an JSON syntax. The JSON syntax mirrors the Matryoshka
+convenient way is through an JSON syntax. The JSON syntax mirrors the
 arrangement of the Pipeline, with options and auxiliary metadata added on a
 per-stage basis.
 
 We have two use cases specifically in mind:
 
-    * a command-line application that reads an JSON file to allow a user to
-      easily construct arbitrary writer pipelines, as opposed to having to
-      build applications custom to individual needs with arbitrary options,
-      filters, etc.
+* a :ref:`command-line <pipeline_command>` application that reads an JSON
+  file to allow a user to easily construct arbitrary writer pipelines, as
+  opposed to having to build applications custom to individual needs with
+  arbitrary options, filters, etc.
 
-    * a user can provide JSON for a reader pipeline, construct it via a simple
-      call to the PipelineManager API, and then use the Stage read() function
-      to perform the read and then do any processing of the points.  This style
-      of operation is very appropriate for using PDAL from within environments
-      like Python where the focus is on just getting the points, as opposed to
-      complex pipeline construction.
+* a user can provide JSON for a reader pipeline, construct it via a simple call
+  to the PipelineManager API, and then use the :cpp:func:`pdal::Stage::read()`
+  function to perform the read and then do any processing of the points.  This
+  style of operation is very appropriate for using PDAL from within
+  environments like Python where the focus is on just getting the points, as
+  opposed to complex pipeline construction.
 
-Let's start with the following basic example:
 
-::
+.. code-block:: json
 
     {
       "pipeline":[
@@ -84,18 +88,6 @@ Let's start with the following basic example:
     https://github.com/PDAL/PDAL/blob/master/test/data/pipeline/ contains
     test suite pipeline files that provide an excellent example of the
     currently possible operations.
-
-Pipeline textual description
-..............................................................................
-
-The first element, Pipeline, tells us what we are and gives a version number.
-Next, we have the Writer element, and provides the `type` of writer stage
-that we are going to have as the endpoint of our pipeline (see more about this
-in `Stage Types`_). After that, we have an Option element, which provides the
-filename that the Writer is going to use when outputting the file. Then we
-have the final doll in our Matryoshka set, the Reader, which has a stage
-type of `readers.las` with its own Option giving a filename to use
-to read the file.
 
 
 Stage Types
@@ -117,20 +109,21 @@ PDAL. Readers follow the pattern of :ref:`readers.las` or
 .. note::
 
     Issuing the command ``pdal info --options`` will list all available
-    stages and their options.
+    stages and their options. See :ref:`info_command` for more.
 
 Options
 ------------------------------------------------------------------------------
 
 Options are the mechanism that PDAL uses to inform :cpp:class:`pdal::Stage`
-entities how to process data. A stage option can itself have options, going
-on ad infinitum. The following example sorts the data using a `Morton
-ordering`_ using :ref:`filters.mortonorder` and writes out a `LASzip`_ file as the result.
+entities how to process data. The following example sorts the data using a
+`Morton ordering`_ using :ref:`filters.mortonorder` and writes out a `LASzip`_
+file as the result. We use options to define the ``compression`` function
+for the :ref:`writers.las` :cpp:class:`pdal::Stage`.
 
 .. _`LASzip`: http://www.laszip.org
 .. _`Morton ordering`: http://en.wikipedia.org/wiki/Z-order_curve
 
-::
+.. code-block:: json
 
     {
       "pipeline":[

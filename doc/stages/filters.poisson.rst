@@ -13,6 +13,27 @@ Poisson is an implementation of the method described in [Kazhdan2006]_.
 
 .. _`PCL`: http://www.pointclouds.org
 
+Example
+-------------------------------------------------------------------------------
+
+.. code-block:: json
+
+    {
+      "pipeline":[
+        "dense.las",
+        {
+          "type":"filters.poisson",
+          "depth":"8",
+          "point_weight":"4"
+        },
+        {
+          "type":"writers.las",
+          "filename":"thinned.las",
+        }
+      ]
+    }
+
+
 Options
 -------------------------------------------------------------------------------
 

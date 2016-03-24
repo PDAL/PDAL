@@ -11,28 +11,26 @@ The output of the stats filter is metadata that can be stored by writers or
 used through the PDAL API.  Output from the stats filter can also be
 quickly obtained in JSON format by using the command ``pdal info --stats``.
 
+
 Example
--------
+................................................................................
 
-.. code-block:: xml
+.. code-block:: json
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.las">
-      <Option name="filename">
-        sorted.las
-      </Option>
-      <Filter type="filters.stats">
-        <Option name="dimensions">X,Y,Z,Classification</Option>
-        <Option name="enumerate">Classification</Option>
-        <Reader type="readers.las">
-          <Option name="filename">
-            unsorted.las
-          </Option>
-        </Reader>
-      </Filter>
-    </Writer>
-  </Pipeline>
+    {
+      "pipeline":[
+        "input.las",
+        {
+          "type":"filters.stats",
+          "dimensions":"X,Y,Z,Classification",
+          "enumerate":"Classification"
+        },
+        {
+          "type":"writers.las",
+          "filename":"output.las"
+        }
+      ]
+    }
 
 
 Options
