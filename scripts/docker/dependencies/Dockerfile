@@ -260,6 +260,7 @@ RUN git clone https://github.com/gadomski/fgt.git \
     && cmake . -DWITH_TESTS=OFF -DBUILD_SHARED_LIBS=ON -DEIGEN3_INCLUDE_DIR=/usr/include -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
     && make \
     && make install \
+    && cd .. \
     && rm -rf fgt
 
 RUN git clone https://github.com/gadomski/cpd.git \
@@ -268,4 +269,5 @@ RUN git clone https://github.com/gadomski/cpd.git \
     && cmake . -DWITH_TESTS=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
     && make \
     && make install \
+    && cd .. \
     && rm -rf cpd
