@@ -37,7 +37,6 @@ Example
       ]
     }
 
-.. code-block:: xml
 
 
 **Example Two**
