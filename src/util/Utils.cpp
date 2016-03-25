@@ -97,25 +97,33 @@ double Utils::normal(const double& mean, const double& sigma, uint32_t seed)
 }
 
 
-char* Utils::getenv(const char* env)
-{
-    return ::getenv(env);
-}
-
-
-std::string Utils::getenv(std::string const& name)
+int Utils::getenv(const std::string& name, std::string& val)
 {
     char* value = ::getenv(name.c_str());
-    return value ? std::string(value) : std::string();
+    if (value)
+        val = value;
+    else
+        val.clear();
+    return value ?  0 : -1;
 }
 
 
-int Utils::putenv(const char* env)
+int Utils::setenv(const std::string& env, const std::string& val)
 {
 #ifdef _WIN32
-    return ::_putenv(env);
+    return ::_putenv_s(env.c_str(), val.c_str()) ? -1 : 0;
 #else
-    return ::putenv(const_cast<char*>(env));
+    return ::setenv(env.c_str(), val.c_str(), 1);
+#endif
+}
+
+
+int Utils::unsetenv(const std::string& env)
+{
+#ifdef _WIN32
+    return ::_putenv_s(env.c_str(), "") ? -1 : 0;
+#else
+    return ::unsetenv(env.c_str());
 #endif
 }
 

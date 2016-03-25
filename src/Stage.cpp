@@ -32,6 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/GDALUtils.hpp>
 #include <pdal/GlobalEnvironment.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/Stage.hpp>
@@ -89,6 +90,14 @@ void Stage::serialize(MetadataNode root, PipelineWriter::TagMap& tags) const
     root.addList(anon);
 }
 
+QuickInfo Stage::preview()
+{
+    l_processOptions(m_options);
+    processOptions(m_options);
+    return inspect();
+}
+
+
 void Stage::prepare(PointTableRef table)
 {
     for (size_t i = 0; i < m_inputs.size(); ++i)
@@ -139,6 +148,7 @@ PointViewSet Stage::execute(PointTableRef table)
     table.clearSpatialReferences();
     for (auto const& it : views)
         table.addSpatialReference(it->spatialReference());
+    gdal::ErrorHandler::get().set(m_log, m_debug);
 
     // Do the ready operation and then start running all the views
     // through the stage.
@@ -329,6 +339,9 @@ void Stage::l_processOptions(const Options& options)
         }
     }
     m_log->setLevel((LogLevel::Enum)m_verbose);
+
+    gdal::ErrorHandler::get().set(m_log, m_debug);
+    GlobalEnvironment::get().initializeGEOSErrors(m_log, m_debug);
 
     // If the user gave us an SRS via options, take that.
     try

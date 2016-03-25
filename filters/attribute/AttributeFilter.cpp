@@ -74,11 +74,10 @@ struct OGRFeatureDeleter
     }
 };
 
+
 void AttributeFilter::initialize()
 {
-    GlobalEnvironment::get().initializeGDALErrors(log(), isDebug());
     GlobalEnvironment::get().wakeGDALDrivers();
-    GlobalEnvironment::get().initializeGEOSErrors(log(), isDebug());
 }
 
 

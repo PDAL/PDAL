@@ -75,20 +75,9 @@ void GlobalEnvironment::shutdown()
 }
 
 
-GlobalEnvironment::GlobalEnvironment()
-    : m_gdalErrorHandler()
-    , m_geosErrorHandler()
-    , m_gdalAwake(false)
+GlobalEnvironment::GlobalEnvironment() : m_gdalAwake(false)
 {
-    // Don't make this do lots of stuff. We are only going to
-    // bind our error handling junk when we wake things up. If
-    // some other stage wants to initialize GDAL or GEOS to their
-    // own debug/Log settings, we can do that in initializeGDAL and
-    // initializeGEOS
     initializeGEOSErrors(LogPtr(), false);
-    initializeGDALErrors(LogPtr(), false);
-//     m_gdalErrorHandler.reset(new gdal::ErrorHandler(false, LogPtr()));
-//     m_geosErrorHandler.reset(new geos::ErrorHandler(false, LogPtr()));
 }
 
 
@@ -105,25 +94,22 @@ void GlobalEnvironment::wakeGDALDrivers()
 
     auto init = [this]() -> void
     {
-        if (!m_gdalAwake)
-        {
-            GDALAllRegister();
-            OGRRegisterAll();
-            m_gdalAwake = true;
-
-        }
+        GDALAllRegister();
+        OGRRegisterAll();
+        m_gdalAwake = true;
     };
 
     std::call_once(flag, init);
 }
 
-void GlobalEnvironment::initializeGDALErrors(LogPtr log, bool isDebug)
+
+geos::ErrorHandler& GlobalEnvironment::geos()
 {
-    // Need to make sure that the current error handler is destroyed before
-    // we create a new one.
-    m_gdalErrorHandler.reset();
-    m_gdalErrorHandler.reset(new gdal::ErrorHandler(isDebug, log));
+    if (!m_geosErrorHandler)
+        initializeGEOSErrors(LogPtr(), false);
+    return *m_geosErrorHandler;
 }
+
 
 void GlobalEnvironment::initializeGEOSErrors(LogPtr log, bool isDebug)
 {

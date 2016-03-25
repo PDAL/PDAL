@@ -42,7 +42,6 @@
 #include <memory>
 #include <vector>
 
-#include <pdal/GlobalEnvironment.hpp>
 #include <pdal/KernelFactory.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <merge/MergeFilter.hpp>
@@ -158,8 +157,6 @@ void TIndexKernel::validateSwitches(ProgramArgs& args)
 
 int TIndexKernel::execute()
 {
-    GlobalEnvironment::get().initializeGDALErrors(0);
-
     if (m_merge)
         mergeFile();
     else

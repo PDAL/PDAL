@@ -58,7 +58,6 @@ std::string ColorizationFilter::getName() const { return s_info.name; }
 
 void ColorizationFilter::initialize()
 {
-    GlobalEnvironment::get().initializeGDALErrors(log(), isDebug());
     GlobalEnvironment::get().wakeGDALDrivers();
 }
 

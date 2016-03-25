@@ -58,34 +58,14 @@ public:
     static GlobalEnvironment& get();
     static void startup();
     static void shutdown();
-
-    void initializeGDALErrors(LogPtr log, bool bIsDebug = false);
     void initializeGEOSErrors(LogPtr log, bool bIsDebug = false);
-
     void wakeGDALDrivers();
-
-    geos::ErrorHandler* geos()
-    {
-        if (!m_geosErrorHandler)
-        {
-            initializeGEOSErrors(LogPtr(), false);
-        }
-        return m_geosErrorHandler.get();
-    }
-    gdal::ErrorHandler* gdal()
-    {
-        if (!m_gdalErrorHandler)
-        {
-            initializeGDALErrors(LogPtr(), false);
-        }
-        return m_gdalErrorHandler.get();
-    }
+    geos::ErrorHandler& geos();
 
 private:
     GlobalEnvironment();
     ~GlobalEnvironment();
 
-    std::unique_ptr<gdal::ErrorHandler> m_gdalErrorHandler;
     std::unique_ptr<geos::ErrorHandler> m_geosErrorHandler;
 
     bool m_gdalAwake;

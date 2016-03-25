@@ -48,26 +48,102 @@ namespace pdal
 namespace gdal
 {
 
-ErrorHandler::ErrorHandler(bool isDebug, pdal::LogPtr log)
-    : m_isDebug(isDebug)
-    , m_log(log)
+ErrorHandler ErrorHandler::m_instance;
+
+ErrorHandler& ErrorHandler::get()
 {
-    if (m_isDebug && !Utils::getenv("CPL_DEBUG"))
-        Utils::putenv("CPL_DEBUG=ON");
-    CPLPushErrorHandlerEx(&ErrorHandler::trampoline, this);
+    return m_instance;
 }
 
 
-void ErrorHandler::handle(::CPLErr code, int num, char const* msg)
+ErrorHandler::ErrorHandler() : m_throw(true), m_errorNum(0)
+{
+    std::string value;
+
+    auto cb = [](::CPLErr level, int num, const char *msg)
+    {
+        ErrorHandler::get().handle(level, num, msg);
+    };
+    m_cplSet = (Utils::getenv("CPL_DEBUG", value) == 0);
+    m_debug = m_cplSet;
+    CPLPushErrorHandler(cb);
+}
+
+
+ErrorHandler::~ErrorHandler()
+{
+    CPLPopErrorHandler();
+}
+
+
+void ErrorHandler::set(LogPtr log, bool debug, bool doThrow)
+{
+    setLog(log);
+    setDebug(debug);
+    setThrow(doThrow);
+}
+
+
+void ErrorHandler::set(LogPtr log, bool debug)
+{
+    setLog(log);
+    setDebug(debug);
+}
+
+
+void ErrorHandler::setLog(LogPtr log)
+{
+    m_log = log;
+}
+
+
+void ErrorHandler::setDebug(bool debug)
+{
+    m_debug = debug;
+    if (!m_cplSet)
+    {
+        if (debug)
+            Utils::setenv("CPL_DEBUG", "ON");
+        else
+            Utils::unsetenv("CPL_DEBUG");
+    }
+}
+
+
+void ErrorHandler::setThrow(bool doThrow)
+{
+    m_throw = doThrow;
+}
+
+
+bool ErrorHandler::willThrow() const
+{
+    return m_throw;
+}
+
+
+int ErrorHandler::errorNum()
+{
+    int errorNum = m_errorNum;
+    m_errorNum = 0;
+    return errorNum;
+}
+
+
+void ErrorHandler::handle(::CPLErr level, int num, char const* msg)
 {
     std::ostringstream oss;
 
-    if (code == CE_Failure || code == CE_Fatal)
+    m_errorNum = num;
+    if (level == CE_Failure || level == CE_Fatal)
     {
-        oss << "GDAL Failure number = " << num << ": " << msg;
-        throw pdal_error(oss.str());
+        oss << "GDAL failure (" << num << ") " << msg;
+        if (m_throw)
+            throw pdal_error(oss.str());
+        else if (m_log)
+            m_log->get(LogLevel::Error) << oss.str() << std::endl;
     }
-    else if (m_isDebug && code == CE_Debug)
+    else if (m_debug && level == CE_Debug)
     {
         oss << "GDAL debug: " << msg;
         if (m_log)

@@ -193,25 +193,28 @@ namespace Utils
       Fetch the value of an environment variable.
 
       \param name  Name of environment varaible.
-      \return  Value of environment variable.
+      \param name  Value of the environemnt variable if it exists, empty
+        otherwise.
+      \return  0 on success, -1 on failure
     */
-    PDAL_DLL char *getenv(const char *name);
-
-    /**
-      Fetch the value of an environment variable.
-
-      \param name  Name of environment varaible.
-      \return  Value of environment variable.
-    */
-    PDAL_DLL std::string getenv(std::string const& name);
+    PDAL_DLL int getenv(std::string const& name, std::string& val);
 
     /**
       Set the value of an environment variable.
 
-      \param env  Name/value of environment varaible in the format NAME=VALUE.
+      \param env  Name of environment variable.
+      \param val  Value of environment variable.
       \return  0 on success, -1 on failure
     */
-    PDAL_DLL int putenv(const char *env);
+    PDAL_DLL int setenv(const std::string& env, const std::string& val);
+
+    /**
+      Clear the value of an environment variable.
+
+      \param env  Name of the environment variable to clear.
+      \return  0 on success, -1 on failure
+    */
+    PDAL_DLL int unsetenv(const std::string& env);
 
     /**
       Skip stream input until a non-space character is found.

@@ -43,19 +43,18 @@ namespace pdal
 Polygon::Polygon()
     : m_geom(0)
     , m_prepGeom(0)
-    , m_ctx(pdal::GlobalEnvironment::get().geos()->ctx)
+    , m_ctx(pdal::GlobalEnvironment::get().geos().ctx)
 {
     m_geom = GEOSGeom_createEmptyPolygon_r(m_ctx);
 }
 
 
-Polygon::Polygon(const std::string& wkt_or_json,
-                   SpatialReference ref,
-                   ErrorHandlerPtr err)
+Polygon::Polygon(const std::string& wkt_or_json, SpatialReference ref,
+        geos::ErrorHandler& err)
     : m_geom(0)
     , m_prepGeom(0)
     , m_srs(ref)
-    , m_ctx(err->ctx)
+    , m_ctx(err.ctx)
 {
     update(wkt_or_json, ref);
 }
@@ -155,10 +154,10 @@ Polygon::Polygon(const Polygon& input)
 
 
 Polygon::Polygon(GEOSGeometry* g, const SpatialReference& srs,
-    ErrorHandlerPtr err)
-    : m_geom(GEOSGeom_clone_r(err->ctx, g))
+    geos::ErrorHandler& err)
+    : m_geom(GEOSGeom_clone_r(err.ctx, g))
     , m_srs(srs)
-    , m_ctx(err->ctx)
+    , m_ctx(err.ctx)
 {
     prepare();
 }
@@ -175,9 +174,7 @@ Polygon::Polygon(GEOSGeometry* g, const SpatialReference& srs,
 
 
 Polygon::Polygon(OGRGeometryH g, const SpatialReference& srs,
-    ErrorHandlerPtr err)
-    : m_srs(srs)
-    , m_ctx(err->ctx)
+    geos::ErrorHandler& err) : m_srs(srs) , m_ctx(err.ctx)
 {
     OGRwkbGeometryType t = OGR_G_GetGeometryType(g);
 
@@ -207,7 +204,7 @@ Polygon::Polygon(OGRGeometryH g, const SpatialReference& srs,
 
 }
 
-Polygon::Polygon(const BOX2D& box) : m_ctx(GlobalEnvironment::get().geos()->ctx)
+Polygon::Polygon(const BOX2D& box) : m_ctx(GlobalEnvironment::get().geos().ctx)
 {
     BOX3D box3(box.minx, box.miny, 0.0,
                box.maxx, box.maxy, 0.0);
@@ -215,7 +212,7 @@ Polygon::Polygon(const BOX2D& box) : m_ctx(GlobalEnvironment::get().geos()->ctx)
 }
 
 
-Polygon::Polygon(const BOX3D& box) : m_ctx(GlobalEnvironment::get().geos()->ctx)
+Polygon::Polygon(const BOX3D& box) : m_ctx(GlobalEnvironment::get().geos().ctx)
 {
     initializeFromBounds(box);
 }
@@ -347,6 +344,7 @@ double Polygon::area() const
     return output;
 }
 
+
 bool Polygon::covers(PointRef& ref) const
 {
     GEOSCoordSequence* coords = GEOSCoordSeq_create_r(m_ctx, 1, 3);
@@ -371,12 +369,11 @@ bool Polygon::covers(PointRef& ref) const
     GEOSGeom_destroy_r(m_ctx, p);
 
     return covers;
-
 }
+
 
 BOX3D Polygon::bounds() const
 {
-
     uint32_t numInputDims;
     BOX3D output;
 
@@ -408,16 +405,15 @@ BOX3D Polygon::bounds() const
     GEOSGeom_destroy_r(m_ctx, boundary);
 
     return output;
-
-
 }
+
 
 bool Polygon::equals(const Polygon& p, double tolerance) const
 {
-
-    char c = GEOSEqualsExact_r(m_ctx, m_geom, p.m_geom, tolerance);
-    return (bool) c;
+    return (bool) GEOSEqualsExact_r(m_ctx, m_geom, p.m_geom, tolerance);
 }
+
+
 
 bool Polygon::operator==(const Polygon& input) const
 {
@@ -430,6 +426,7 @@ bool Polygon::operator!=(const Polygon& input) const
     return !(this->equals(input));
 }
 
+
 bool Polygon::valid() const
 {
     int gtype = GEOSGeomTypeId_r(m_ctx, m_geom);
@@ -438,6 +435,7 @@ bool Polygon::valid() const
 
     return (bool)GEOSisValid_r(m_ctx, m_geom);
 }
+
 
 std::string Polygon::validReason() const
 {
@@ -451,9 +449,9 @@ std::string Polygon::validReason() const
     return output;
 }
 
+
 std::string Polygon::wkt(double precision, bool bOutputZ) const
 {
-
     GEOSWKTWriter *writer = GEOSWKTWriter_create_r(m_ctx);
     GEOSWKTWriter_setRoundingPrecision_r(m_ctx, writer, precision);
     if (bOutputZ)
@@ -464,15 +462,16 @@ std::string Polygon::wkt(double precision, bool bOutputZ) const
     GEOSFree_r(m_ctx, smoothWkt);
     GEOSWKTWriter_destroy_r(m_ctx, writer);
     return output;
-
 }
+
 
 std::string Polygon::json(double precision) const
 {
     std::ostringstream prec;
     prec << precision;
     char **papszOptions = NULL;
-    papszOptions = CSLSetNameValue( papszOptions, "COORDINATE_PRECISION", prec.str().c_str() );
+    papszOptions = CSLSetNameValue(papszOptions, "COORDINATE_PRECISION",
+        prec.str().c_str() );
 
     std::string w(wkt());
 

@@ -113,11 +113,12 @@ void PluginManager::loadAll(int type)
 
 void PluginManager::l_loadAll(PF_PluginType type)
 {
+    std::string pluginDir;
     std::string driver_path("PDAL_DRIVER_PATH");
-    std::string pluginDir = Utils::getenv(driver_path);
+    Utils::getenv(driver_path, pluginDir);
 
     // If we don't have a driver path, defaults are set.
-    if (pluginDir.size() == 0)
+    if (pluginDir.empty())
     {
         std::ostringstream oss;
         oss << PDAL_PLUGIN_INSTALL_PATH <<
@@ -326,11 +327,12 @@ bool PluginManager::guessLoadByPath(const std::string& driverName)
     std::string pluginName = "libpdal_plugin_" + driverNameVec[0] + "_" +
         driverNameVec[1];
 
+    std::string pluginDir;
     std::string driver_path("PDAL_DRIVER_PATH");
-    std::string pluginDir = Utils::getenv(driver_path);
+    Utils::getenv(driver_path, pluginDir);
 
     // Default path below if not set.
-    if (pluginDir.size() == 0)
+    if (pluginDir.empty())
     {
         std::ostringstream oss;
         oss << PDAL_PLUGIN_INSTALL_PATH <<

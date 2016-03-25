@@ -55,6 +55,8 @@ int CPL_DLL GTIFSetFromOGISDefn(GTIF*, const char*);
 
 PDAL_C_END
 
+#include <pdal/GDALUtils.hpp>
+
 struct StTiff : public ST_TIFF
 {};
 
@@ -177,21 +179,20 @@ std::string GeotiffSupport::getWkt(bool horizOnly, bool pretty) const
     GTIFDefn sGTIFDefn;
     char* pszWKT = 0;
 
+    gdal::ErrorHandler::ExceptionSuspender suspender;
+
     if (!m_gtiff)
-    {
         return std::string();
-    }
 
     if (!GTIFGetDefn(m_gtiff, &sGTIFDefn))
-    {
         return std::string();
-    }
 
     pszWKT = GTIFGetOGISDefn(m_gtiff, &sGTIFDefn);
 
     if (pretty)
     {
-        OGRSpatialReference* poSRS = (OGRSpatialReference*) OSRNewSpatialReference(NULL);
+        OGRSpatialReference* poSRS =
+            (OGRSpatialReference*) OSRNewSpatialReference(NULL);
         char *pszOrigWKT = pszWKT;
         poSRS->importFromWkt(&pszOrigWKT);
 
@@ -206,7 +207,8 @@ std::string GeotiffSupport::getWkt(bool horizOnly, bool pretty) const
             && horizOnly
             && strstr(pszWKT,"COMPD_CS") != NULL)
     {
-        OGRSpatialReference* poSRS = (OGRSpatialReference*) OSRNewSpatialReference(NULL);
+        OGRSpatialReference* poSRS =
+            (OGRSpatialReference*) OSRNewSpatialReference(NULL);
         char *pszOrigWKT = pszWKT;
         poSRS->importFromWkt(&pszOrigWKT);
 

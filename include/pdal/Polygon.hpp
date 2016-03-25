@@ -46,42 +46,39 @@
 namespace pdal
 {
 
+namespace geos { class ErrorHandler; }
+
 class PDAL_DLL Polygon
 {
-    typedef geos::ErrorHandler* ErrorHandlerPtr;
 public:
     Polygon();
     Polygon(const std::string& wkt_or_json,
            SpatialReference ref = SpatialReference(),
-           ErrorHandlerPtr ctx = pdal::GlobalEnvironment::get().geos());
+           geos::ErrorHandler& ctx = pdal::GlobalEnvironment::get().geos());
     Polygon(const BOX2D&);
     Polygon(const BOX3D&);
     Polygon(const Polygon&);
-    Polygon(GEOSGeometry* g, const SpatialReference& srs, ErrorHandlerPtr ctx);
-    Polygon(OGRGeometryH g, const SpatialReference& srs, ErrorHandlerPtr ctx);
+    Polygon(GEOSGeometry* g, const SpatialReference& srs,
+        geos::ErrorHandler& ctx);
+    Polygon(OGRGeometryH g, const SpatialReference& srs,
+        geos::ErrorHandler& ctx);
     Polygon& operator=(const Polygon&);
 private:
-    Polygon(const std::string& wkt_or_json,
-           SpatialReference ref,
-           GEOSContextHandle_t ctx);
+    Polygon(const std::string& wkt_or_json, SpatialReference ref,
+        GEOSContextHandle_t ctx);
     Polygon(GEOSGeometry* g, const SpatialReference& srs,
         GEOSContextHandle_t ctx);
 
 public:
-
     ~Polygon();
     void update(const std::string& wkt_or_json,
-                SpatialReference ref = SpatialReference());
+        SpatialReference ref = SpatialReference());
 
     void setSpatialReference( const SpatialReference& ref)
-    {
-        m_srs = ref;
-    }
+        { m_srs = ref; }
 
     const SpatialReference& getSpatialReference() const
-    {
-        return m_srs;
-    }
+        { return m_srs; }
 
     Polygon transform(const SpatialReference& ref) const;
 
@@ -90,7 +87,6 @@ public:
     bool operator!=(const Polygon& other) const;
     bool operator<(const Polygon& other) const
         { return wkt() < other.wkt(); }
-
 
     Polygon simplify(double distance_tolerance, double area_tolerance) const;
     double area() const;
@@ -108,8 +104,8 @@ public:
 
     operator bool () const
         { return m_geom != NULL; }
-private:
 
+private:
     void initializeFromBounds(const BOX3D& b);
     GEOSGeometry *m_geom;
     const GEOSPreparedGeometry *m_prepGeom;

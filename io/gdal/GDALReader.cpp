@@ -67,7 +67,6 @@ GDALReader::GDALReader()
 
 void GDALReader::initialize()
 {
-    GlobalEnvironment::get().initializeGDALErrors(log(), isDebug());
     GlobalEnvironment::get().wakeGDALDrivers();
     m_raster.reset(new gdal::Raster(m_filename));
 

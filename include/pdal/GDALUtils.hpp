@@ -169,24 +169,103 @@ private:
 class PDAL_DLL ErrorHandler
 {
 public:
-    ErrorHandler(bool isDebug, pdal::LogPtr log);
-    ~ErrorHandler()
-        { CPLPopErrorHandler(); }
-
-    static void CPL_STDCALL trampoline(::CPLErr code, int num, char const* msg)
+    class ExceptionSuspender
     {
-        ErrorHandler* handler =
-            static_cast<ErrorHandler *>(CPLGetErrorHandlerUserData());
+    public:
+        ExceptionSuspender()
+        {
+            doThrow = get().willThrow();
+            get().setThrow(false);
+        }
+        ~ExceptionSuspender()
+        {
+            get().setThrow(doThrow);
+        }
 
-        if (handler)
-            handler->handle(code, num, msg);
-    }
+    private:
+        bool doThrow;
+    };
 
-    void handle(::CPLErr code, int num, char const* msg);
+    /**
+      Get the singleton error handler.
+
+      \return  Reference to the error handler.
+    */
+    static ErrorHandler& get();
+
+    /**
+      Set the log and debug state of the error handler.  This is
+      a convenience and is equivalent to calling setLog() and setDebug().
+
+      \param log  Log to write to.
+      \param doDebug  Debug state of the error handler.
+    */
+    void set(LogPtr log, bool doDebug);
+
+    /**
+      Set the log, debug and throw states of the error handler.  This is
+      a convenience and is equivalent to calling setLog(), setDebug() and
+      setThrow().
+
+      \param log  Log to write to.
+      \param doDebug  Debug state of the error handler.
+      \param doThrow  Whether failures/fatals should cause an exception.
+    */
+    void set(LogPtr log, bool doDebug, bool doThrow);
+
+    /**
+      Set whether failures and fatal errors should be logged or cause an
+      exception.
+
+      \param doThrow  Whether failures/fatals should cause exceptions.
+    */
+    void setThrow(bool doThrow);
+
+    /**
+      Determine if the handler will throw exceptions on failures and fatal
+      errors.
+
+      \return  Whether failures/fatals will cause exceptions.
+    */
+    bool willThrow() const;
+
+    /**
+      Set the log to which error/debug messages should be written.
+
+      \param log  Log to write to.
+    */
+    void setLog(LogPtr log);
+
+    /**
+      Set the debug state of the error handler.  Setting to true will also
+      set the environment variable CPL_DEBUG to "ON".  This will force GDAL
+      to emit debug error messages which will be logged by this handler.
+
+      \param doDebug  Whether we're setting or clearing the debug state.
+    */
+    void setDebug(bool doDebug);
+
+    /**
+      Get the last error and clear the error last error value.
+
+      \return  The last error number.
+    */
+    int errorNum();
 
 private:
-    bool m_isDebug;
+    ErrorHandler();
+    ~ErrorHandler();
+
+    void handle(::CPLErr level, int num, const char *msg);
+
+private:
+    bool m_debug;
     pdal::LogPtr m_log;
+    bool m_throw;
+    int m_errorNum;
+    bool m_cplSet;
+
+    static ErrorHandler m_instance;
 };
 
 

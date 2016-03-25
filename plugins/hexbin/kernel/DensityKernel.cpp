@@ -53,10 +53,6 @@ CREATE_SHARED_PLUGIN(1, 0, DensityKernel, Kernel, s_info)
 std::string DensityKernel::getName() const { return s_info.name; }
 
 
-DensityKernel::DensityKernel()
-{
-}
-
 void DensityKernel::addSwitches(ProgramArgs& args)
 {
     args.add("input,i", "input point cloud file name", m_inputFile);
@@ -66,6 +62,7 @@ void DensityKernel::addSwitches(ProgramArgs& args)
     args.add("driver,f", "OGR driver name to use ", m_driverName,
         "ESRI Shapefile");
 }
+
 
 void DensityKernel::makePipeline(const std::string& filename)
 {
@@ -97,32 +94,30 @@ void DensityKernel::makePipeline(const std::string& filename)
     }
     Stage *stage = m_manager->getStage();
     m_hexbinStage = &(m_manager->addFilter("filters.hexbin"));
-    if (!m_hexbinStage) {
+    if (!m_hexbinStage)
         throw pdal_error("Unable to initialize filters.hexbin!");
-    }
     m_hexbinStage->setInput(*stage);
 }
 
+
 void DensityKernel::outputDensity(pdal::SpatialReference const& reference)
 {
-
-    pdal::HexBin* hexbin = static_cast<pdal::HexBin*>(m_hexbinStage);
+    HexBin* hexbin = static_cast<pdal::HexBin*>(m_hexbinStage);
     if (!hexbin)
         throw pdal::pdal_error("unable to fetch filters.hexbin stage!");
 
     hexer::HexGrid* grid = hexbin->grid();
 
-
-    pdal::hexdensity::writer::OGR writer(m_outputFile, reference.getWKT(), m_driverName);
+    hexdensity::writer::OGR writer(m_outputFile, reference.getWKT(),
+        m_driverName);
     writer.writeDensity(grid);
 //     writer.writeBoundary(grid);
-
 }
+
 
 int DensityKernel::execute()
 {
-
-    GlobalEnvironment::get().initializeGDALErrors(0);
+    //ABELL - Is this necessary here - isn't it done with the stages?
     GlobalEnvironment::get().wakeGDALDrivers();
     std::string filename = m_usestdin ? std::string("STDIN") : m_inputFile;
     makePipeline(filename);
@@ -133,5 +128,4 @@ int DensityKernel::execute()
     return 0;
 }
 
-
-}
+} // namespace pdal

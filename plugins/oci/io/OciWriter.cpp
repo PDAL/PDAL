@@ -75,7 +75,6 @@ OciWriter::OciWriter()
 
 void OciWriter::initialize()
 {
-    GlobalEnvironment::get().initializeGDALErrors(log(), isDebug());
     GlobalEnvironment::get().wakeGDALDrivers();
     m_connection = connect(m_connSpec);
     m_gtype = getGType();

@@ -60,7 +60,6 @@ private:
     std::string m_driverName;
     std::string m_srs;
 
-    DensityKernel();
     virtual void addSwitches(ProgramArgs& args);
     void makePipeline(const std::string& filename);
     void outputDensity(pdal::SpatialReference const& ref);

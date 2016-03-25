@@ -175,7 +175,6 @@ void TIndexReader::initialize()
     log()->get(LogLevel::Debug) << "Opening file " << m_filename <<
         std::endl;
 
-    GlobalEnvironment::get().initializeGDALErrors(log(), isDebug());
     GlobalEnvironment::get().wakeGDALDrivers();
 
     m_dataset = OGROpen(m_filename.c_str(), FALSE, NULL);
