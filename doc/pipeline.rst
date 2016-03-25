@@ -20,7 +20,15 @@ operations.
     via the command line.
 
 
-Playing Dolls
+.. warning::
+
+    As of PDAL 1.2, `JSON`_ is now the preferred specification language
+    for PDAL pipelines. XML read support is still available at 1.2, but
+    JSON is preferred.
+
+.. _`JSON`: http://www.json.org/
+
+Composing pipelines
 ------------------------------------------------------------------------------
 
 A `Pipeline` is composed as an array of :cpp:class:`pdal::Stage` , with the
