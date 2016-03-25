@@ -169,12 +169,40 @@ void HexBin::done(PointTableRef table)
         m_options.getValueOrDefault<double>("hole_cull_area_tolerance",
             6 * tolerance * tolerance);
 
-    pdal::Polygon p(polygon.str());
+    SpatialReference srs(table.anySpatialReference());
+    pdal::Polygon p(polygon.str(), srs);
+    pdal::Polygon density_p(polygon.str(), srs);
+
+    // If the SRS was geographic, use relevant
+    // UTM for area and density computation
+    if (srs.isGeographic())
+    {
+        // Compute a UTM polygon
+        BOX3D box = p.bounds();
+        int zone = SpatialReference::calculateZone(box.minx, box.miny);
+
+        auto makezone = [] (int zone) -> std::string
+        {
+
+            std::ostringstream z;
+            if (zone > 0)
+            {
+                z << "EPSG:269" << zone;
+            } else
+            {
+                z << "EPSG:327" << zone;
+            }
+            return z.str();
+        };
+
+        SpatialReference utm(makezone(zone));
+        density_p = p.transform(utm);
+    }
     pdal::Polygon smooth = p.simplify(tolerance, cull);
     std::string smooth_text = smooth.wkt(precision);
 
     m_metadata.add("boundary", smooth_text, "Approximated MULTIPOLYGON of domain");
-    double area = p.area();
+    double area = density_p.area();
 
 //    double density = (double) m_grid->densePointCount() / area ;
     double density = (double) m_count/ area ;
