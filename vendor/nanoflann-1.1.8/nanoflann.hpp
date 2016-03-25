@@ -38,6 +38,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <cstdio>  // for fwrite()
+#include <cstdlib> // for malloc()
 #include <cmath>   // for fabs(),...
 #include <limits>
 
