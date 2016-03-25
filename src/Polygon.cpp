@@ -380,7 +380,11 @@ BOX3D Polygon::bounds() const
     uint32_t numInputDims;
     BOX3D output;
 
-    GEOSGeometry* boundary = GEOSEnvelope_r(m_ctx, m_geom);
+    GEOSGeometry* boundary = GEOSGeom_clone_r(m_ctx, m_geom);
+
+    // Smash out multi*
+    if (GEOSGeomTypeId_r(m_ctx, m_geom) > 3)
+        boundary = GEOSEnvelope_r(m_ctx, m_geom);
 
     GEOSGeometry const* ring = GEOSGetExteriorRing_r(m_ctx, boundary);
     GEOSCoordSequence const* coords = GEOSGeom_getCoordSeq_r(m_ctx, ring);
