@@ -248,6 +248,7 @@ Stage *StageFactory::createStage(std::string const& stage_name)
 
 void StageFactory::destroyStage(Stage *s)
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     for (auto it = m_ownedStages.begin(); it != m_ownedStages.end(); ++it)
     {
         if (s == it->get())
