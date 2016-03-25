@@ -213,7 +213,7 @@ void LasHeader::setSrs()
     else if (findVlr(TRANSFORM_USER_ID, WKT_RECORD_ID) &&
         findVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID))
     {
-        m_log->get(LogLevel::Error) << "File contains both "
+        m_log->get(LogLevel::Debug) << "File contains both "
             "WKT and GeoTiff VLRs which is disallowed." << std::endl;
     }
     else
