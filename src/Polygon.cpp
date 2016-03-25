@@ -380,8 +380,9 @@ BOX3D Polygon::bounds() const
     uint32_t numInputDims;
     BOX3D output;
 
+    GEOSGeometry* boundary = GEOSEnvelope_r(m_ctx, m_geom);
 
-    GEOSGeometry const* ring = GEOSGetExteriorRing_r(m_ctx, m_geom);
+    GEOSGeometry const* ring = GEOSGetExteriorRing_r(m_ctx, boundary);
     GEOSCoordSequence const* coords = GEOSGeom_getCoordSeq_r(m_ctx, ring);
 
     GEOSCoordSeq_getDimensions_r(m_ctx, coords, &numInputDims);
@@ -400,6 +401,8 @@ BOX3D Polygon::bounds() const
             GEOSCoordSeq_getOrdinate_r(m_ctx, coords, i, 2, &z);
         output.grow(x, y, z);
     }
+    GEOSGeom_destroy_r(m_ctx, boundary);
+
     return output;
 
 
