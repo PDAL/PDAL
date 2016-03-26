@@ -1,3 +1,74 @@
+1.2.0:
+
+Changes of Note:
+
+- The GEOS library is now required to build PDAL.  In earlier versions it was
+  an optional component.
+- Boost is no longer a required component.  Unless you are building plugins
+  that require boost (notable PCL and Geowave), you no longer will need
+  boost installed on your system to build or run PDAL.
+- PDAL now builds on VS 2015.
+- The PipelineReader class has been removed and its functionality has been
+  merged into PipelineManager.
+- Plugin libraries now support Linux versioning.
+- Naming changes have been made to allow packaging with the Debian release.
+- filters.height now uses the dimension 'HeightAboveGround' instead of a
+  dimension named 'Height' to be compatible with the filters.heightaboveground.
+- Option names no longer contain lowercase characters.
+- PDAL now works with GDAL version 1.9 and later.
+- Stages created with the StageFactory are now owned by the factory.
+- filters.dartthrowing has been renamed filters.dartsample
+- 'pipeline-serialization' now produces JSON output instead of XML.
+
+Enhancements:
+
+- Pipelines may now be specified using a JSON syntax.  XML syntax is still
+  supported but users should switch to JSON when possible as the XML support
+  will be removed in a future version.
+- PDAL now can be built into a Docker container.
+- Many stages now support "streaming," which allows control of the number
+  of points stored in memory during processing.  See
+  Stage::execute(StreamPointTable&) for more information.
+- A basic text reader has been added.
+- Added support for the dimension 'ClassFlags' in readers.las.
+- The derivative writer can now produce output for multiple primitive types
+  with a single execution.
+- 'pdal info' now provides bounding box output instead of a more refined
+  boundary when the hexbin plugin isn't found.
+- Added 'pdal density' to provide a command-line interface to the
+  filters.hexbin density calcuations.
+- The icebridge reader can now load an associated metadata file.  The reader
+  also now marks the associated coordinate system as WGS84.
+- The stats filter now emits bounding box information in native and WGS84
+  projections.
+- PDAL command-line programs now (generally) check their argument lists for
+  correctness and report detected syntax errors.
+- 'pdal info' now provides spatial reference attributes in addition to
+  the actual well-known text.
+- Geometry can now be specified as GeoJSON as well as well-known-text in
+  most contexts.  Geometry optionally provides Z-dimension output.
+- Stage and plugin creation is now thread-safe (NOTE: Most of PDAL is
+  NOT thread-safe, so tread carefully).
+- Many, many documentation enhancements.
+
+Fixes:
+
+- A bug in generating PCIDs when with multiple simultaneous PDAL executions
+  to the same Postgres database has been fixed.
+- A fix a bug in generated SQL delete statements when certain table names
+  were used in the writers.postgres driver.
+- Properly escape quotes when generating JSON output.
+- Fix an off-by-one error when writing data with the derivative writer that
+  could lead to a crash.
+- Fixed a depedency error during builds that could lead to a failure to
+  properly load Python extensions on Linux.
+- Fixed a bug where passing certain options to 'pdal info' could be handled
+  in ambiguous ways.
+- Fixed bugs in the reading of raster data using readers.gdal.
+- Fixed population of the AIMIDB and ACFTB attributes in writers.nitf.
+- Corrected the parsing of some dimension names in filters.colorization.
+- Fixed a potential truncation in the GlobalEncoding dimension of readers.las.
+
 1.1.0:
 
 Enhancements:
