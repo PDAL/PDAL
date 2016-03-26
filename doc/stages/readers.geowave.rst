@@ -26,7 +26,7 @@ Example
           "feature_type_name":"PDAL_Point",
           "data_adapter":"FeatureCollectionDataAdapter",
           "points_per_entry":"5000u",
-          "bounds":"([0,1000000],[0,1000000],[0,100])"
+          "bounds":"([0,1000000],[0,1000000],[0,100])",
           "filename":"./pdal/test/data/autzen/autzen.jpg"
         },
         {
