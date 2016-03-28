@@ -5,9 +5,9 @@ Changes of Note:
 - The GEOS library is now required to build PDAL.  In earlier versions it was
   an optional component.
 - Boost is no longer a required component.  Unless you are building plugins
-  that require boost (notable PCL and Geowave), you no longer will need
+  that require boost (notably PCL and Geowave), you no longer will need
   boost installed on your system to build or run PDAL.
-- PDAL now builds on VS 2015.
+- PDAL now builds on Microsoft Visual Studio 2015.
 - The PipelineReader class has been removed and its functionality has been
   merged into PipelineManager.
 - Plugin libraries now support Linux versioning.
@@ -42,7 +42,7 @@ Enhancements:
 - The stats filter now emits bounding box information in native and WGS84
   projections.
 - PDAL command-line programs now (generally) check their argument lists for
-  correctness and report detected syntax errors.
+  correctness and report syntax errors.
 - 'pdal info' now provides spatial reference attributes in addition to
   the actual well-known text.
 - Geometry can now be specified as GeoJSON as well as well-known-text in
@@ -55,7 +55,7 @@ Fixes:
 
 - A bug in generating PCIDs when with multiple simultaneous PDAL executions
   to the same Postgres database has been fixed.
-- A fix a bug in generated SQL delete statements when certain table names
+- Fixed a bug in generated SQL delete statements when certain table names
   were used in the writers.postgres driver.
 - Properly escape quotes when generating JSON output.
 - Fix an off-by-one error when writing data with the derivative writer that
