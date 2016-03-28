@@ -43,6 +43,7 @@
 #ifndef _WIN32
 #include <cxxabi.h>
 #include <sys/ioctl.h>
+#include <sys/wait.h>  // WIFEXITED, WEXITSTATUS
 #endif
 
 #ifdef PDAL_COMPILER_MSVC
