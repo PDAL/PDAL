@@ -35,6 +35,7 @@
 #include <pdal/GEOSUtils.hpp>
 #include <pdal/Log.hpp>
 
+#include <cstdarg>
 #include <functional>
 #include <map>
 #include <sstream>
