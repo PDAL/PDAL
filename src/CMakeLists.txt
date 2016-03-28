@@ -43,7 +43,6 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/FlexWriter.hpp"
   "${PDAL_HEADERS_DIR}/GDALUtils.hpp"
   "${PDAL_HEADERS_DIR}/GEOSUtils.hpp"
-  "${PDAL_HEADERS_DIR}/GlobalEnvironment.hpp"
   "${PDAL_HEADERS_DIR}/gitsha.h"
   "${PDAL_HEADERS_DIR}/KDIndex.hpp"
   "${PDAL_HEADERS_DIR}/KernelFactory.hpp"
@@ -79,7 +78,6 @@ set(PDAL_BASE_CPP
   gitsha.cpp
   GDALUtils.cpp
   GEOSUtils.cpp
-  GlobalEnvironment.cpp
   Kernel.cpp
   KernelFactory.cpp
   Log.cpp

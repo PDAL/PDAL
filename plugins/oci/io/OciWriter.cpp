@@ -37,7 +37,6 @@
 #include <pdal/Compression.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/GlobalEnvironment.hpp>
 #include <pdal/pdal_macros.hpp>
 
 #include "OciWriter.hpp"
@@ -75,7 +74,7 @@ OciWriter::OciWriter()
 
 void OciWriter::initialize()
 {
-    GlobalEnvironment::get().wakeGDALDrivers();
+    gdal::registerDrivers();
     m_connection = connect(m_connSpec);
     m_gtype = getGType();
 }

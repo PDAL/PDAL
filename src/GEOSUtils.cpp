@@ -48,75 +48,113 @@ namespace pdal
 namespace geos
 {
 
-ErrorHandler::ErrorHandler(bool isDebug, LogPtr log)
-    : m_isDebug(isDebug)
-    , m_log(log)
+std::unique_ptr<ErrorHandler> ErrorHandler::m_instance;
 
+// Allocating here instead of just making a static because I'm not really
+// sure what GEOS_init_r does and when it can be called.  It doesn't hurt
+// anything.
+ErrorHandler& ErrorHandler::get()
 {
-    setup(isDebug, log);
+    if (!m_instance)
+        m_instance.reset(new ErrorHandler);
+    return *m_instance;
 }
 
-void ErrorHandler::setup(bool isDebug, LogPtr log)
+
+void ErrorHandler::vaErrorCb(const char *msg, ...)
 {
-    if (m_isDebug)
-        m_geos_callback = std::bind(&ErrorHandler::log, this, std::placeholders::_1 );
-    else
-        m_geos_callback = std::bind(&ErrorHandler::error, this, std::placeholders::_1 );
+    va_list args;
+    va_start(args, msg);
+    char buf[1024];
+    vsnprintf(buf, sizeof(buf), msg, args);
+    ErrorHandler::get().handle(buf, false);
+    va_end(args);
+}
 
-    // GEOS 3.5+ provides error handling context, so we will
-    // prefer to use that where possible. Otherwise, we will default to
-    // output to std::clog
-#ifndef GEOS_init_r
-    ctx = initGEOS_r(NULL, NULL);
-#else
-    ctx = GEOS_init_r();
-#endif
 
-#ifdef GEOSContext_setErrorMessageHandler_r
-    GEOSContext_setErrorMessageHandler_r(ctx, &ErrorHandler::error_trampoline, this);
-#else
-    GEOSContext_setErrorHandler_r(ctx, &ErrorHandler::error_trampoline);
-#endif
+void ErrorHandler::vaNoticeCb(const char *msg, ...)
+{
+    va_list args;
+    va_start(args, msg);
+    char buf[1024];
+    vsnprintf(buf, sizeof(buf), msg, args);
+    ErrorHandler::get().handle(buf, true);
+    va_end(args);
+}
 
-    if (m_isDebug)
+
+ErrorHandler::ErrorHandler() : m_debug(false)
+{
+#ifdef GEOS_init_r
+    m_ctx = GEOS_init_r();
+
+    auto errorCb [](const char *msg, void *userData)
     {
-#ifdef GEOSContext_setNoticeHandler_r
-        GEOSContext_setNoticeHandler_r(ctx, &ErrorHandler::notice_trampoline, this);
+        get()->handle(msg, false);
+    };
+    GEOSContext_setErrorMessageHandler_r(m_ctx, errorCb, NULL);
+
+    auto noticeCb [](const char *msg, void *userData)
+    {
+        get()->handle(msg, true);
+    };
+    GEOSContext_setNoticeMessageHandler_r(m_ctx, noticeCb, NULL);
 #else
-        GEOSContext_setErrorHandler_r(ctx, &ErrorHandler::notice_trampoline);
+    m_ctx = initGEOS_r(NULL, NULL);
+    GEOSContext_setErrorHandler_r(m_ctx, vaErrorCb);
+    GEOSContext_setNoticeHandler_r(m_ctx, vaNoticeCb);
 #endif
-    }
-}
-
-ErrorHandler::ErrorHandler(const ErrorHandler& other )
-{
-    setup(other.m_isDebug, other.m_log);
-}
-
-void ErrorHandler::log(char const* msg)
-{
-    std::ostringstream oss;
-    oss << "GEOS debug: " << msg;
-    if (m_log)
-        m_log->get(LogLevel::Debug) << oss.str() << std::endl;
-}
-
-
-void ErrorHandler::error(char const* msg)
-{
-    std::ostringstream oss;
-    oss << "GEOS failure: '" << msg <<"'";
-    throw pdal_error(oss.str());
 }
 
 
 ErrorHandler::~ErrorHandler()
 {
 #ifdef GEOS_finish_r
-    GEOS_finish_r(ctx);
+    GEOS_finish_r(m_ctx);
 #else
-    finishGEOS_r(ctx);
+    finishGEOS_r(m_ctx);
 #endif
+}
+
+
+void ErrorHandler::set(LogPtr log, bool debug)
+{
+    setLog(log);
+    setDebug(debug);
+}
+
+
+void ErrorHandler::setDebug(bool debug)
+{
+    m_debug = debug;
+}
+
+
+void ErrorHandler::setLog(LogPtr log)
+{
+    m_log = log;
+}
+
+
+void ErrorHandler::handle(const char *msg, bool notice)
+{
+    std::ostringstream oss;
+    if (!notice)
+    {
+        oss << "GEOS failure: '" << msg << "'";
+        throw pdal_error(oss.str());
+    }
+    else if (m_debug)
+    {
+        oss << "GEOS debug: " << msg;
+        if (m_log)
+            m_log->get(LogLevel::Debug) << oss.str() << std::endl;
+    }
+}
+
+GEOSContextHandle_t ErrorHandler::ctx() const
+{
+    return m_ctx;
 }
 
 } // namespace geos

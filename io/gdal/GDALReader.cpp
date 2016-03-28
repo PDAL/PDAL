@@ -35,11 +35,9 @@
 #include "GDALReader.hpp"
 
 #include <sstream>
-#include <algorithm>
 
-
+#include <pdal/GDALUtils.hpp>
 #include <pdal/PointView.hpp>
-#include <pdal/GlobalEnvironment.hpp>
 #include <pdal/pdal_macros.hpp>
 
 namespace pdal
@@ -67,7 +65,7 @@ GDALReader::GDALReader()
 
 void GDALReader::initialize()
 {
-    GlobalEnvironment::get().wakeGDALDrivers();
+    gdal::registerDrivers();
     m_raster.reset(new gdal::Raster(m_filename));
 
     m_raster->open();

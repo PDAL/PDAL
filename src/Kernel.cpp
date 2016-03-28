@@ -35,11 +35,11 @@
 #include <cctype>
 #include <iostream>
 
-#include <pdal/pdal_config.hpp>
-#include <pdal/GlobalEnvironment.hpp>
+#include <pdal/GDALUtils.hpp>
 #include <pdal/Kernel.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/PDALUtils.hpp>
+#include <pdal/pdal_config.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
@@ -181,22 +181,6 @@ void Kernel::doSwitches(int argc, const char *argv[], ProgramArgs& args)
 
 int Kernel::doStartup()
 {
-    try
-    {
-        pdal::GlobalEnvironment::startup();
-    }
-    catch (std::exception const& e)
-    {
-        const std::string s("Caught exception in initialization: ");
-        Utils::printError(s + e.what());
-        return 1;
-    }
-    catch (...)
-    {
-        Utils::printError("Caught unknown exception in initialization");
-        return 1;
-    }
-
     return 0;
 }
 
@@ -237,22 +221,7 @@ int Kernel::doExecution(ProgramArgs& args)
 
 int Kernel::doShutdown()
 {
-    try
-    {
-        pdal::GlobalEnvironment::shutdown();
-    }
-    catch (std::exception const& e)
-    {
-        const std::string s("Caught exception during shutdown: ");
-        Utils::printError(s + e.what());
-        return 1;
-    }
-    catch (...)
-    {
-        Utils::printError("Caught unknown exception during shutdown.");
-        return 1;
-    }
-
+    gdal::unregisterDrivers();
     return 0;
 }
 

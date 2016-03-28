@@ -34,7 +34,6 @@
 
 #include "ColorizationFilter.hpp"
 
-#include <pdal/GlobalEnvironment.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/pdal_macros.hpp>
 
@@ -58,7 +57,7 @@ std::string ColorizationFilter::getName() const { return s_info.name; }
 
 void ColorizationFilter::initialize()
 {
-    GlobalEnvironment::get().wakeGDALDrivers();
+    gdal::registerDrivers();
 }
 
 

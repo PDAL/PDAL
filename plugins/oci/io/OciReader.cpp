@@ -34,7 +34,6 @@
 
 #include <pdal/Compression.hpp>
 #include <pdal/GDALUtils.hpp>
-#include <pdal/GlobalEnvironment.hpp>
 #include <pdal/pdal_macros.hpp>
 
 #include "OciReader.hpp"
@@ -66,10 +65,10 @@ void OciReader::processOptions(const Options& options)
 void OciReader::initialize()
 {
     m_compression = false;
-    GlobalEnvironment::get().wakeGDALDrivers();
     m_connection = connect(m_connSpec);
     m_block = BlockPtr(new Block(m_connection));
 
+    gdal::registerDrivers();
     if (m_query.empty())
         throw pdal_error("'query' statement is empty. No data can be read "
             "from pdal::OciReader");

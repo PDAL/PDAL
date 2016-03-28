@@ -50,6 +50,26 @@ namespace gdal
 
 ErrorHandler ErrorHandler::m_instance;
 
+void registerDrivers()
+{
+    static std::once_flag flag;
+
+    auto init = []() -> void
+    {
+        GDALAllRegister();
+        OGRRegisterAll();
+    };
+
+    std::call_once(flag, init);
+}
+
+
+void unregisterDrivers()
+{
+    GDALDestroyDriverManager();
+}
+
+
 ErrorHandler& ErrorHandler::get()
 {
     return m_instance;

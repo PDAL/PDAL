@@ -59,6 +59,9 @@ class SpatialReference;
 namespace gdal
 {
 
+void registerDrivers();
+void unregisterDrivers();
+
 typedef std::shared_ptr<void> RefPtr;
 
 class SpatialRef
