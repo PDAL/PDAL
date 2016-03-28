@@ -389,7 +389,16 @@ void InfoKernel::dump(MetadataNode& root)
     }
 
     if (m_showMetadata)
-        root.add(m_reader->getMetadata().clone("metadata"));
+    {
+        // If we have a reader cached, this means we
+        // weren't reading a pipeline file directly. In that
+        // case, use the metadata from the reader (old behavior).
+        // Otherwise, return the full metadata of the entire pipeline
+        if (m_reader)
+            root.add(m_reader->getMetadata().clone("metadata"));
+        else
+            root.add(m_manager->getMetadata().clone("metadata"));
+    }
 
     if (m_boundary)
     {
