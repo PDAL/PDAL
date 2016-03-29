@@ -33,14 +33,12 @@
 ****************************************************************************/
 #pragma once
 
-#include <pdal/pdal_types.hpp>
-#include <pdal/Log.hpp>
-
-#include <cstdarg>
-#include <functional>
+#include <memory>
 
 #include <geos_c.h>
 
+#include <pdal/pdal_types.hpp>
+#include <pdal/Log.hpp>
 
 namespace pdal
 {
@@ -51,86 +49,59 @@ namespace geos
 class PDAL_DLL ErrorHandler
 {
 public:
-
-    ErrorHandler(bool isDebug, pdal::LogPtr log);
     ~ErrorHandler();
-    ErrorHandler(const ErrorHandler& other );
-    void setup(bool isDebug, pdal::LogPtr log);
 
+    /**
+      Get the singleton error handler.
 
-#ifdef GEOSGContext_setErrorMessageHandler_r
-    static void GEOS_DLL error_trampoline(const char* message, void* userdata)
-    {
-        ErrorHandler* debug =
-            static_cast<ErrorHandler*>(userdata);
-        if (!debug)
-            return;
-        debug->m_geos_callback(message);
-        if (!debug->m_log->get()) return;
-    }
-#else
+      \return  Reference to the error handler.
+    */
+    static ErrorHandler& get();
 
-    static void GEOS_DLL error_trampoline(const char* message, ...)
-    {
-    va_list args;
+    /**
+      Set the log and debug state of the error handler.  This is a convenience
+      and is equivalent to calling setLog() and setDebug().
 
-    va_start(args, message);
-    char buf[1024];
+      \param log  Log to write to.
+      \param doDebug  Debug state of the error handler.
+    */
+    void set(LogPtr log, bool doDebug);
 
-    vsnprintf(buf, sizeof(buf), message, args);
-    std::cerr<< "GEOS error: " << buf << std::endl;
+    /**
+      Set the log to which error/debug messages should be written.
 
-    va_end(args);
+      \param log  Log to write to.
+    */
+    void setLog(LogPtr log);
 
-    }
-#endif
+    /**
+      Set the debug state of the error handler.  If the error handler is set
+      to debug, output is logged instead of causing an exception.
 
-#ifdef GEOSContext_setNoticeHandler_r
-    static void GEOS_DLL notice_trampoline(const char* message, void* userdata)
-    {
-        ErrorHandler* debug =
-            static_cast<ErrorHandler*>(userdata);
-        if (!debug)
-            return;
-        debug->m_geos_callback(message);
-        if (!debug->m_log->get()) return;
-    }
-#else
+      \param debug  The debug state of the error handler.
+    */
+    void setDebug(bool debug);
+    
+    /**
+      Get the GEOS context handle.
 
-    static void GEOS_DLL notice_trampoline(const char* message, ...)
-    {
-    va_list args;
-
-    va_start(args, message);
-    char buf[1024];
-
-    vsnprintf(buf, sizeof(buf), message, args);
-    std::cerr<< "GEOS notice tramp: " << buf << std::endl;
-
-    va_end(args);
-
-    }
-#endif
-
-    void log(char const* msg);
-    void error(char const* msg);
-
-    GEOSContextHandle_t ctx;
-
-    inline LogPtr getLogger() const { return m_log; }
-    inline void setLogger(LogPtr logger) { m_log = logger; }
+      \return  The GEOS context handle.
+    */
+    GEOSContextHandle_t ctx() const;
 
 private:
-    std::function<void(const char*)> m_geos_callback;
-    bool m_isDebug;
-    pdal::LogPtr m_log;
+    ErrorHandler();
+
+    void handle(const char *msg, bool notice);
+    static void vaErrorCb(const char *msg, ...);
+    static void vaNoticeCb(const char *msg, ...);
+
+    GEOSContextHandle_t m_ctx;
+    bool m_debug;
+    LogPtr m_log;
+    static std::unique_ptr<ErrorHandler> m_instance;
 };
 
-
-
-
-
-
-} // end geos
+} // namespace geos
 } // namespace pdal
 

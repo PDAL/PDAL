@@ -33,15 +33,14 @@
 ****************************************************************************/
 #pragma once
 
-#include <pdal/pdal_types.hpp>
-#include <pdal/Log.hpp>
-#include <pdal/PointRef.hpp>
 #include <pdal/GDALUtils.hpp>
 #include <pdal/GEOSUtils.hpp>
+#include <pdal/Log.hpp>
+#include <pdal/PointRef.hpp>
+#include <pdal/SpatialReference.hpp>
 #include <pdal/util/Bounds.hpp>
 
-#include <pdal/SpatialReference.hpp>
-#include <pdal/GlobalEnvironment.hpp>
+#include <geos_c.h>
 
 namespace pdal
 {
@@ -54,7 +53,7 @@ public:
     Polygon();
     Polygon(const std::string& wkt_or_json,
            SpatialReference ref = SpatialReference(),
-           geos::ErrorHandler& ctx = pdal::GlobalEnvironment::get().geos());
+           geos::ErrorHandler& handler = geos::ErrorHandler::get());
     Polygon(const BOX2D&);
     Polygon(const BOX3D&);
     Polygon(const Polygon&);

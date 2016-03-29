@@ -40,7 +40,6 @@
 #include <pdal/pdal_macros.hpp>
 
 #include <pdal/PointView.hpp>
-#include <pdal/GlobalEnvironment.hpp>
 
 #ifdef PDAL_COMPILER_GCC
 #  pragma GCC diagnostic push

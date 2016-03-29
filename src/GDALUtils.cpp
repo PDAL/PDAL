@@ -38,6 +38,7 @@
 
 #include <functional>
 #include <map>
+#include <mutex>
 
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127)  // conditional expression is constant
@@ -49,6 +50,26 @@ namespace gdal
 {
 
 ErrorHandler ErrorHandler::m_instance;
+
+void registerDrivers()
+{
+    static std::once_flag flag;
+
+    auto init = []() -> void
+    {
+        GDALAllRegister();
+        OGRRegisterAll();
+    };
+
+    std::call_once(flag, init);
+}
+
+
+void unregisterDrivers()
+{
+    GDALDestroyDriverManager();
+}
+
 
 ErrorHandler& ErrorHandler::get()
 {

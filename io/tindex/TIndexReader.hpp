@@ -36,7 +36,6 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/Reader.hpp>
-#include <pdal/GlobalEnvironment.hpp>
 #include <merge/MergeFilter.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/GDALUtils.hpp>

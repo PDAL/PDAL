@@ -37,11 +37,11 @@
 #include <memory>
 #include <vector>
 
-#include <pdal/GlobalEnvironment.hpp>
-#include <pdal/StageFactory.hpp>
-#include <pdal/QuadIndex.hpp>
-#include <pdal/Polygon.hpp>
+#include <pdal/GDALUtils.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/Polygon.hpp>
+#include <pdal/QuadIndex.hpp>
+#include <pdal/StageFactory.hpp>
 
 namespace pdal
 {
@@ -77,7 +77,7 @@ struct OGRFeatureDeleter
 
 void AttributeFilter::initialize()
 {
-    GlobalEnvironment::get().wakeGDALDrivers();
+    gdal::registerDrivers();
 }
 
 
@@ -215,7 +215,8 @@ void AttributeFilter::UpdateGEOSBuffer(PointView& view)
             throw pdal::pdal_error(oss.str());
         }
 
-        pdal::Polygon p(geom, view.spatialReference(), GlobalEnvironment::get().geos());
+        pdal::Polygon p(geom, view.spatialReference(),
+            geos::ErrorHandler::get());
 
         // Compute a total bounds for the geometry. Query the QuadTree to
         // find out the points that are inside the bbox. Then test each

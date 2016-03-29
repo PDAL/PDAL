@@ -43,7 +43,7 @@ namespace pdal
 Polygon::Polygon()
     : m_geom(0)
     , m_prepGeom(0)
-    , m_ctx(pdal::GlobalEnvironment::get().geos().ctx)
+    , m_ctx(geos::ErrorHandler::get().ctx())
 {
     m_geom = GEOSGeom_createEmptyPolygon_r(m_ctx);
 }
@@ -54,7 +54,7 @@ Polygon::Polygon(const std::string& wkt_or_json, SpatialReference ref,
     : m_geom(0)
     , m_prepGeom(0)
     , m_srs(ref)
-    , m_ctx(err.ctx)
+    , m_ctx(err.ctx())
 {
     update(wkt_or_json, ref);
 }
@@ -155,9 +155,9 @@ Polygon::Polygon(const Polygon& input)
 
 Polygon::Polygon(GEOSGeometry* g, const SpatialReference& srs,
     geos::ErrorHandler& err)
-    : m_geom(GEOSGeom_clone_r(err.ctx, g))
+    : m_geom(GEOSGeom_clone_r(err.ctx(), g))
     , m_srs(srs)
-    , m_ctx(err.ctx)
+    , m_ctx(err.ctx())
 {
     prepare();
 }
@@ -174,7 +174,7 @@ Polygon::Polygon(GEOSGeometry* g, const SpatialReference& srs,
 
 
 Polygon::Polygon(OGRGeometryH g, const SpatialReference& srs,
-    geos::ErrorHandler& err) : m_srs(srs) , m_ctx(err.ctx)
+    geos::ErrorHandler& err) : m_srs(srs) , m_ctx(err.ctx())
 {
     OGRwkbGeometryType t = OGR_G_GetGeometryType(g);
 
@@ -204,7 +204,7 @@ Polygon::Polygon(OGRGeometryH g, const SpatialReference& srs,
 
 }
 
-Polygon::Polygon(const BOX2D& box) : m_ctx(GlobalEnvironment::get().geos().ctx)
+Polygon::Polygon(const BOX2D& box) : m_ctx(geos::ErrorHandler::get().ctx())
 {
     BOX3D box3(box.minx, box.miny, 0.0,
                box.maxx, box.maxy, 0.0);
@@ -212,7 +212,7 @@ Polygon::Polygon(const BOX2D& box) : m_ctx(GlobalEnvironment::get().geos().ctx)
 }
 
 
-Polygon::Polygon(const BOX3D& box) : m_ctx(GlobalEnvironment::get().geos().ctx)
+Polygon::Polygon(const BOX3D& box) : m_ctx(geos::ErrorHandler::get().ctx())
 {
     initializeFromBounds(box);
 }

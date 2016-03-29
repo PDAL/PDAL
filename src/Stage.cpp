@@ -33,7 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/GDALUtils.hpp>
-#include <pdal/GlobalEnvironment.hpp>
+#include <pdal/GEOSUtils.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/SpatialReference.hpp>
@@ -341,7 +341,7 @@ void Stage::l_processOptions(const Options& options)
     m_log->setLevel((LogLevel::Enum)m_verbose);
 
     gdal::ErrorHandler::get().set(m_log, m_debug);
-    GlobalEnvironment::get().initializeGEOSErrors(m_log, m_debug);
+    geos::ErrorHandler::get().set(m_log, m_debug);
 
     // If the user gave us an SRS via options, take that.
     try

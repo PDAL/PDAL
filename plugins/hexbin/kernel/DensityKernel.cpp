@@ -36,9 +36,9 @@
 #include "../filters/HexBin.hpp"
 #include "OGR.hpp"
 
+#include <pdal/GDALUtils.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/plugin.hpp>
-#include <pdal/GlobalEnvironment.hpp>
 
 namespace pdal
 {
@@ -117,8 +117,7 @@ void DensityKernel::outputDensity(pdal::SpatialReference const& reference)
 
 int DensityKernel::execute()
 {
-    //ABELL - Is this necessary here - isn't it done with the stages?
-    GlobalEnvironment::get().wakeGDALDrivers();
+    gdal::registerDrivers();
     std::string filename = m_usestdin ? std::string("STDIN") : m_inputFile;
     makePipeline(filename);
     applyExtraStageOptionsRecursive(m_manager->getStage());
