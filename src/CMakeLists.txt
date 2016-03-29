@@ -15,7 +15,6 @@
 #   PDAL_<dirname>_CPP - all the .cpp files for the given subdir/namespace
 #   ...
 
-
 set(PDAL_HPP "")
 set(PDAL_CPP "")
 
@@ -173,9 +172,7 @@ endif()
 # so that users only need link libpdalcpp.
 #
 if (APPLE)
-    set(UTIL_LIB "-Wl,-reexport_library,$<TARGET_SONAME_FILE:${PDAL_UTIL_LIB_NAME}>")
-else()
-    set(UTIL_LIB ${PDAL_UTIL_LIB_NAME})
+    set(REEXPORT_UTIL_LIB "-Wl,-reexport_library,$<TARGET_SONAME_FILE:${PDAL_UTIL_LIB_NAME}>")
 endif()
 
 target_link_libraries(${PDAL_BASE_LIB_NAME}
@@ -183,8 +180,9 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
     ${GDAL_LIBRARY}
     ${GEOS_LIBRARY}
     ${ZLIB_LIBRARIES}
-    ${UTIL_LIB}
     ${PDAL_BOOST_LIB_NAME}
+    ${PDAL_UTIL_LIB_NAME}
+    ${REEXPORT_UTIL_LIB}
 )
 
 if (WITH_GEOTIFF)
