@@ -87,13 +87,7 @@ ErrorHandler::ErrorHandler() : m_throw(true), m_errorNum(0)
     };
     m_cplSet = (Utils::getenv("CPL_DEBUG", value) == 0);
     m_debug = m_cplSet;
-    CPLPushErrorHandler(cb);
-}
-
-
-ErrorHandler::~ErrorHandler()
-{
-    CPLPopErrorHandler();
+    CPLSetErrorHandler(cb);
 }
 
 

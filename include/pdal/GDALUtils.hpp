@@ -257,7 +257,6 @@ public:
 
 private:
     ErrorHandler();
-    ~ErrorHandler();
 
     void handle(::CPLErr level, int num, const char *msg);
 
