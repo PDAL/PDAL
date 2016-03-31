@@ -157,6 +157,8 @@ void TIndexKernel::validateSwitches(ProgramArgs& args)
 
 int TIndexKernel::execute()
 {
+    gdal::registerDrivers();
+
     if (m_merge)
         mergeFile();
     else
