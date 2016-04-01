@@ -128,7 +128,8 @@ void PCDtoPDAL(CloudT &cloud, PointViewPtr view)
  * Converts PDAL data to PCD format.
  */
 template <typename CloudT>
-void PDALtoPCD(PointViewPtr view, CloudT &cloud, BOX3D const& bounds)
+void PDALtoPCD(PointViewPtr view, CloudT &cloud, BOX3D const& bounds,
+               double const& scale_x, double const& scale_y, double const& scale_z)
 {
     typedef typename pcl::traits::fieldList<typename CloudT::PointType>::type
         FieldList;
@@ -147,9 +148,9 @@ void PDALtoPCD(PointViewPtr view, CloudT &cloud, BOX3D const& bounds)
             double zd = view->getFieldAs<double>(Dimension::Id::Z, i) - bounds.minz;
 
             typename CloudT::PointType p = cloud.points[i];
-            p.x = (float)xd;
-            p.y = (float)yd;
-            p.z = (float)zd;
+            p.x = (float) (xd / scale_x);
+            p.y = (float) (yd / scale_y);
+            p.z = (float) (zd / scale_z);
             cloud.points[i] = p;
         }
     }
@@ -186,6 +187,18 @@ void PDALtoPCD(PointViewPtr view, CloudT &cloud, BOX3D const& bounds)
         }
     }
 }
+
+/**
+ * \brief Convert PDAL point cloud to PCD.
+ *
+ * Converts PDAL data to PCD format.
+ */
+template <typename CloudT>
+void PDALtoPCD(PointViewPtr view, CloudT &cloud, BOX3D const& bounds)
+{
+    PDALtoPCD(view, cloud, bounds, 1.0, 1.0, 1.0);
+}
+
 
 
 template <typename CloudT>

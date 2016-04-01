@@ -67,8 +67,22 @@ void PcdWriter::processOptions(const Options& ops)
     m_offset_x = ops.getValueOrDefault("offset_x", 0.0);
     m_offset_y = ops.getValueOrDefault("offset_y", 0.0);
     m_offset_z = ops.getValueOrDefault("offset_z", 0.0);
+    m_scale_x = ops.getValueOrDefault("scale_x", 1.0);
+    m_scale_y = ops.getValueOrDefault("scale_y", 1.0);
+    m_scale_z = ops.getValueOrDefault("scale_z", 1.0);
+    if (m_scale_x == 0.0)
+    {
+      m_scale_x = 1.0;
+    }
+    if (m_scale_y == 0.0)
+    {
+      m_scale_y = 1.0;
+    }
+    if (m_scale_z == 0.0)
+    {
+      m_scale_z = 1.0;
+    }
 }
-
 
 Options PcdWriter::getDefaultOptions()
 {
@@ -81,6 +95,9 @@ Options PcdWriter::getDefaultOptions()
     options.add("offset_x", 0.0, "Offset to be subtracted from XYZ position");
     options.add("offset_y", 0.0, "Offset to be subtracted from XYZ position");
     options.add("offset_z", 0.0, "Offset to be subtracted from XYZ position");
+    options.add("scale_x", 1.0, "Scale to divide from XYZ dimension");
+    options.add("scale_y", 1.0, "Scale to divide from XYZ dimension");
+    options.add("scale_z", 1.0, "Scale to divide from XYZ dimension");
 
     return options;
 }

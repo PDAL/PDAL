@@ -64,7 +64,7 @@ public:
 private:
     virtual void processOptions(const Options&);
     virtual void write(const PointViewPtr view);
-    
+
     template<typename CloudT>
     inline void writeView(const PointViewPtr view); // implemented in header
 
@@ -75,6 +75,9 @@ private:
     double m_offset_x;
     double m_offset_y;
     double m_offset_z;
+    double m_scale_x;
+    double m_scale_y;
+    double m_scale_z;
 
     PcdWriter& operator=(const PcdWriter&); // not implemented
     PcdWriter(const PcdWriter&); // not implemented
@@ -88,7 +91,7 @@ void PcdWriter::writeView(const PointViewPtr view)
     typename CloudT::Ptr cloud(new CloudT);
     BOX3D bounds;
     bounds.grow(m_offset_x, m_offset_y, m_offset_z);
-    pclsupport::PDALtoPCD(view, *cloud, bounds);
+    pclsupport::PDALtoPCD(view, *cloud, bounds, m_scale_x, m_scale_y, m_scale_z);
     pcl::PCDWriter w;
     if (m_compressed)
     {
