@@ -43,22 +43,24 @@ namespace pdal
 {
 
 // TODO(chambbj): what to do about pipelines specified via STDIN?
-void PipelineManager::readPipeline(std::istream& input)
+void PipelineManager::readPipeline(std::istream& input, bool debug,
+    uint32_t verbose)
 {
-    PipelineReaderXML(*this).readPipeline(input); 
+    PipelineReaderXML(*this, debug, verbose).readPipeline(input);
 }
 
 
-void PipelineManager::readPipeline(const std::string& filename)
+void PipelineManager::readPipeline(const std::string& filename, bool debug,
+    uint32_t verbose)
 {
     if (FileUtils::extension(filename) == ".xml")
     {
-        PipelineReaderXML pipeReader(*this);
+        PipelineReaderXML pipeReader(*this, debug, verbose);
         return pipeReader.readPipeline(filename);
     }
     else if (FileUtils::extension(filename) == ".json")
     {
-        PipelineReaderJSON pipeReader(*this);
+        PipelineReaderJSON pipeReader(*this, debug, verbose);
         return pipeReader.readPipeline(filename);
     }
 }
