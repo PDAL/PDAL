@@ -101,8 +101,17 @@ set(PDAL_BASE_CPP
   ${PDAL_XML_SRC}
   ${PDAL_LAZPERF_SRC}
   ${DB_DRIVER_SRCS}
-  ${PROJECT_SOURCE_DIR}/vendor/jsoncpp-1.6.2/dist/jsoncpp.cpp
 )
+
+find_package(JSONCPP)
+if(JSONCPP_FOUND)
+  include_directories(${JSONCPP_INCLUDE_DIR})
+else(JSONCPP_FOUND)
+  set(PDAL_BASE_CPP
+    ${PDAL_BASE_CPP}
+    ${PROJECT_SOURCE_DIR}/vendor/jsoncpp-1.6.2/dist/jsoncpp.cpp
+  )
+endif(JSONCPP_FOUND)
 
 list (APPEND PDAL_CPP ${PDAL_BASE_CPP} )
 list (APPEND PDAL_HPP ${PDAL_BASE_HPP} )
@@ -166,6 +175,10 @@ endif()
 if (PDAL_HAVE_LIBXML2)
     target_link_libraries(${PDAL_BASE_LIB_NAME} ${LIBXML2_LIBRARIES})
 endif()
+
+if(JSONCPP_FOUND)
+    target_link_libraries(${PDAL_BASE_LIB_NAME} ${JSONCPP_LIBRARY})
+endif(JSONCPP_FOUND)
 
 #
 # On OSX we reexport the symbols in libpdal_util.dylib into libpdalcpp.dylib
