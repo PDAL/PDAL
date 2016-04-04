@@ -49,7 +49,13 @@ namespace pdal
 namespace gdal
 {
 
+// Apple doesn't do TLS
+// http://stackoverflow.com/questions/28094794/why-does-apple-clang-disallow-c11-thread-local-when-official-clang-supports
+//
+#if defined(__APPLE__)
 ErrorHandler ErrorHandler::m_instance;
+#endif
+
 
 void registerDrivers()
 {
