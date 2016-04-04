@@ -146,19 +146,6 @@ T convert(const StringList& s, const std::string& name, size_t fieldno)
 }
 
 
-// If longitude between 0-180, just return it, degrees east; if between 180
-// and 360, subtract 360 to get negative value.
-double Ilvis2Reader::convertLongitude(double longitude)
-{
-    longitude = fmod(longitude, 360.0);
-    if (longitude <= -180)
-        longitude += 360;
-    else if (longitude > 180)
-        longitude -= 360;
-    return longitude;
-}
-
-
 void Ilvis2Reader::readPoint(PointRef& point, StringList s,
     std::string pointMap)
 {
@@ -169,19 +156,19 @@ void Ilvis2Reader::readPoint(PointRef& point, StringList s,
     point.setField(pdal::Dimension::Id::GpsTime,
         convert<double>(s, "GPSTIME", 2));
     point.setField(pdal::Dimension::Id::LongitudeCentroid,
-        convertLongitude(convert<double>(s, "LONGITUDE_CENTROID", 3)));
+        Utils::normalizeLongitude(convert<double>(s, "LONGITUDE_CENTROID", 3)));
     point.setField(pdal::Dimension::Id::LatitudeCentroid,
         convert<double>(s, "LATITUDE_CENTROID", 4));
     point.setField(pdal::Dimension::Id::ElevationCentroid,
         convert<double>(s, "ELEVATION_CENTROID", 5));
     point.setField(pdal::Dimension::Id::LongitudeLow,
-        convertLongitude(convert<double>(s, "LONGITUDE_LOW", 6)));
+        Utils::normalizeLongitude(convert<double>(s, "LONGITUDE_LOW", 6)));
     point.setField(pdal::Dimension::Id::LatitudeLow,
         convert<double>(s, "LATITUDE_LOW", 7));
     point.setField(pdal::Dimension::Id::ElevationLow,
         convert<double>(s, "ELEVATION_LOW", 8));
     point.setField(pdal::Dimension::Id::LongitudeHigh,
-        convertLongitude(convert<double>(s, "LONGITUDE_HIGH", 9)));
+        Utils::normalizeLongitude(convert<double>(s, "LONGITUDE_HIGH", 9)));
     point.setField(pdal::Dimension::Id::LatitudeHigh,
         convert<double>(s, "LATITUDE_HIGH", 10));
     point.setField(pdal::Dimension::Id::ElevationHigh,

@@ -540,6 +540,18 @@ std::string Utils::escapeNonprinting(const std::string& s)
     return out;
 }
 
+
+double Utils::normalizeLongitude(double longitude)
+{
+    longitude = fmod(longitude, 360.0);
+    if (longitude <= -180)
+        longitude += 360;
+    else if (longitude > 180)
+        longitude -= 360;
+    return longitude;
+}
+
+
 // Useful for debug on occasion.
 std::string Utils::hexDump(const char *buf, size_t count)
 {

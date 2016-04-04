@@ -376,6 +376,14 @@ namespace Utils
     PDAL_DLL std::string escapeNonprinting(const std::string& s);
 
     /**
+      Normalize longitude so that it's between (-180, 180].
+
+      \param longitude  Longitude to normalize.
+      \return  Normalized longitude.
+    */
+    PDAL_DLL double normalizeLongitude(double longitude);
+
+    /**
       Convert an input buffer to a hexadecimal string representation similar
       to the output of the UNIX command 'od'.  This is mostly used as an
       occasional debugging aid.

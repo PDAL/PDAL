@@ -91,8 +91,6 @@ private:
     virtual bool eof();
     virtual void initialize(PointTableRef table);
 
-    double convertLongitude(double longitude);
-
     std::string m_metadataFile;
     Ilvis2MetadataReader m_mdReader;
 
