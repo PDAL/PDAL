@@ -4,7 +4,7 @@
 
 include_directories(${ROOT_DIR}/vendor/pdalboost)
 
-find_package(Hexer)
+find_package(Hexer REQUIRED)
 if (HEXER_FOUND)
     include_directories(${HEXER_INCLUDE_DIR})
     add_definitions(-DHAVE_HEXER=1)
