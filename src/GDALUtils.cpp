@@ -140,15 +140,21 @@ bool ErrorHandler::willThrow() const
 int ErrorHandler::errorNum()
 {
     int errorNum = m_errorNum;
-    m_errorNum = 0;
+    reset();
     return errorNum;
 }
 
+void ErrorHandler::reset()
+{
+    CPLErrorReset();
+    m_errorNum = 0;
+}
 
 void ErrorHandler::handle(::CPLErr level, int num, char const* msg)
 {
     std::ostringstream oss;
 
+    reset();
     m_errorNum = num;
     if (level == CE_Failure || level == CE_Fatal)
     {
@@ -448,7 +454,7 @@ Dimension::Type::Enum convertGDALtoPDAL(GDALDataType t)
 
 GDALError::Enum Raster::readBand(std::vector<uint8_t>& points, int nBand)
 {
-    try 
+    try
     {
         BandReader(m_ds, nBand).read(points);
     }

@@ -258,6 +258,7 @@ public:
 private:
     ErrorHandler();
 
+    void reset();
     void handle(::CPLErr level, int num, const char *msg);
 
 private:
