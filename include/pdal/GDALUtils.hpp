@@ -268,15 +268,7 @@ private:
     int m_errorNum;
     bool m_cplSet;
 
-// Apple doesn't do TLS
-// http://stackoverflow.com/questions/28094794/why-does-apple-clang-disallow-c11-thread-local-when-official-clang-supports
-//
-#if !defined(__APPLE__)
-    static thread_local ErrorHandler m_instance;
-#else
-#warning "OSX does not support thread-local storage. Error handling is global"
     static ErrorHandler m_instance;
-#endif
 };
 
 
