@@ -71,7 +71,7 @@ file(MAKE_DIRECTORY "${PDAL_OUTPUT_BIN_DIR}")
 SET(CMAKE_SKIP_BUILD_RPATH FALSE )
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 if (APPLE)
-    SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+    SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 endif()
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 IF (APPLE)
@@ -275,6 +275,16 @@ if (WITH_TESTS)
         option(gtest_force_shared_crt "Always use shared Visual C++ run-time DLL" ON)
     endif()
     add_subdirectory(vendor/gtest-1.7.0)
+    # gtest 1.7.0 has some CMake warnings, so we silence these by setting the
+    # following properties.
+    set_target_properties(gtest PROPERTIES
+        MACOSX_RPATH ON
+        LIBRARY_OUTPUT_DIRECTORY "${gtest_BINARY_DIR}/src"
+        )
+    set_target_properties(gtest_main PROPERTIES
+        MACOSX_RPATH ON
+        LIBRARY_OUTPUT_DIRECTORY "${gtest_BINARY_DIR}/src"
+        )
     add_subdirectory(test)
 endif()
 
