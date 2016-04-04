@@ -109,7 +109,7 @@ TEST(IcebridgeReaderTest, testRead)
             0,
             141437548,     // time
             82.605319,      // latitude
-            301.406196,     // longitude
+            -58.593811,     // longitude
             18.678,         // elevation
             2408,           // xmtSig
             181,            // rcvSig
@@ -125,7 +125,7 @@ TEST(IcebridgeReaderTest, testRead)
             1,
             141437548,     // time
             82.605287,      // latitude
-            301.404862,     // longitude
+            -58.593811,     // longitude
             18.688,         // elevation
             2642,           // xmtSig
             173,            // rcvSig
