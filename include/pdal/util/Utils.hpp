@@ -327,8 +327,9 @@ namespace Utils
 
     /**
       Break a string into a list of strings to not exceed a specified length.
-      The first string can optionally have a maximum length other than that
-      of the rest of the strings.
+      Whitespace is condensed to a single space and each string is free of
+      whitespace at the beginning and end when possible.  Optionally, a line
+      length for the first line can be different from subsequent lines.
 
       \param inputString  String to split into substrings.
       \param lineLength  Maximum length of substrings.
@@ -338,6 +339,22 @@ namespace Utils
       \return  List of substrings generated from the input string.
     */
     PDAL_DLL std::vector<std::string> wordWrap(std::string const& inputString,
+        size_t lineLength, size_t firstLength = 0);
+
+    /**
+      Break a string into a list of strings to not exceed a specified length.
+      The concatanation of the returned substrings will yield the original
+      string.  The algorithm attempts to break the original string such that
+      each substring begins with a word.
+
+      \param inputString  String to split into substrings.
+      \param lineLength  Maximum length of substrings.
+      \param firstLength  When non-zero, the maximum length of the first
+        substring.  When zero, the first firstLength is assigned the value
+        provided in lineLength.
+      \return  List of substrings generated from the input string.
+    */
+    PDAL_DLL std::vector<std::string> wordWrap2(std::string const& inputString,
         size_t lineLength, size_t firstLength = 0);
 
     /**
