@@ -331,14 +331,8 @@ bool SpatialReference::isGeocentric() const
 
 int SpatialReference::calculateZone(double lon, double lat)
 {
-    // Force longitude [-180, 180)
-    lon = fmod(lon, 360.0);
-    if (lon < -180.0)
-        lon += 360.0;
-    else if (lon >= 180.0)
-        lon -= 360.0;
-
     int zone = 0;
+    lon = Utils::normalizeLongitude(lon);
 
     // Special Norway processing.
     if (lat >= 56.0 && lat < 64.0 && lon >= 3.0 && lon < 12.0 )

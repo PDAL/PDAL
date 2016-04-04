@@ -124,32 +124,6 @@ void IcebridgeReader::initialize(PointTableRef)
 }
 
 
-// If longitude between 0-180, just return it, degrees east; if between 180
-// and 360, subtract 360 to get negative value.
-double IcebridgeReader::convertLongitude(double longitude)
-{
-    longitude = fmod(longitude, 360.0);
-    if (longitude <= -180)
-        longitude += 360;
-    else if (longitude > 180)
-        longitude -= 360;
-    return longitude;
-}
-
-// If longitude between 0-180, just return it, degrees east; if between 180
-// and 360, subtract 360 to get negative value.
-double convertLongitude(double longitude)
-{
-    longitude = fmod(longitude, 360.0);
-    if (longitude <= -180)
-        longitude += 360;
-    else if (longitude > 180)
-        longitude -= 360;
-    return longitude;
-}
-
-
-
 point_count_t IcebridgeReader::read(PointViewPtr view, point_count_t count)
 {
     //All data we read for icebridge is currently 4 bytes wide, so
@@ -197,7 +171,7 @@ point_count_t IcebridgeReader::read(PointViewPtr view, point_count_t count)
                     // Longitude is 0-360. Convert
                     float *fval = (float *)p;
                     double dval = (double)(*fval);
-                    dval = convertLongitude(dval);
+                    dval = Utils::normalizeLongitude(dval);
                     for (PointId i = 0; i < count; ++i)
                     {
                         view->setField(*di, nextId++, dval);
