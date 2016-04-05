@@ -190,7 +190,7 @@ void HexBin::done(PointTableRef table)
                 z << "EPSG:269" << zone;
             } else
             {
-                z << "EPSG:327" << zone;
+                z << "EPSG:327" << abs(zone);
             }
             return z.str();
         };
