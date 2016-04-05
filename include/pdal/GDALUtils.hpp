@@ -172,23 +172,7 @@ private:
 class PDAL_DLL ErrorHandler
 {
 public:
-    class ExceptionSuspender
-    {
-    public:
-        ExceptionSuspender()
-        {
-            doThrow = getGlobalErrorHandler().willThrow();
-            getGlobalErrorHandler().setThrow(false);
-        }
-        ~ExceptionSuspender()
-        {
-            getGlobalErrorHandler().setThrow(doThrow);
-        }
-//
-    private:
-        bool doThrow;
-    };
-//
+
     /**
       Get the singleton error handler.
 
@@ -204,33 +188,6 @@ public:
       \param doDebug  Debug state of the error handler.
     */
     void set(LogPtr log, bool doDebug);
-
-    /**
-      Set the log, debug and throw states of the error handler.  This is
-      a convenience and is equivalent to calling setLog(), setDebug() and
-      setThrow().
-
-      \param log  Log to write to.
-      \param doDebug  Debug state of the error handler.
-      \param doThrow  Whether failures/fatals should cause an exception.
-    */
-    void set(LogPtr log, bool doDebug, bool doThrow);
-
-    /**
-      Set whether failures and fatal errors should be logged or cause an
-      exception.
-
-      \param doThrow  Whether failures/fatals should cause exceptions.
-    */
-    void setThrow(bool doThrow);
-
-    /**
-      Determine if the handler will throw exceptions on failures and fatal
-      errors.
-
-      \return  Whether failures/fatals will cause exceptions.
-    */
-    bool willThrow() const;
 
     /**
       Set the log to which error/debug messages should be written.
@@ -277,7 +234,6 @@ private:
 private:
     bool m_debug;
     pdal::LogPtr m_log;
-    bool m_throw;
     int m_errorNum;
     bool m_cplSet;
 

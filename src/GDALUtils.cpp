@@ -89,7 +89,7 @@ ErrorHandler::~ErrorHandler()
     CPLPopErrorHandler();
 }
 
-ErrorHandler::ErrorHandler() : m_throw(true), m_errorNum(0)
+ErrorHandler::ErrorHandler() : m_errorNum(0)
 {
     std::string value;
 
@@ -103,14 +103,6 @@ ErrorHandler::ErrorHandler() : m_throw(true), m_errorNum(0)
     m_callback = std::bind(&ErrorHandler::handle, this,
                 std::placeholders::_1, std::placeholders::_2,
                 std::placeholders::_3);
-}
-
-
-void ErrorHandler::set(LogPtr log, bool debug, bool doThrow)
-{
-    setLog(log);
-    setDebug(debug);
-    setThrow(doThrow);
 }
 
 
@@ -140,18 +132,6 @@ void ErrorHandler::setDebug(bool debug)
 }
 
 
-void ErrorHandler::setThrow(bool doThrow)
-{
-    m_throw = doThrow;
-}
-
-
-bool ErrorHandler::willThrow() const
-{
-    return m_throw;
-}
-
-
 int ErrorHandler::errorNum()
 {
     int errorNum = m_errorNum;
@@ -174,9 +154,9 @@ void ErrorHandler::handle(::CPLErr level, int num, char const* msg)
     if (level == CE_Failure || level == CE_Fatal)
     {
         oss << "GDAL failure (" << num << ") " << msg;
-        if (m_throw)
-            throw pdal_error(oss.str());
-        else if (m_log)
+//         if (m_throw)
+//             throw pdal_error(oss.str());
+        if (m_log)
             m_log->get(LogLevel::Error) << oss.str() << std::endl;
     }
     else if (m_debug && level == CE_Debug)
