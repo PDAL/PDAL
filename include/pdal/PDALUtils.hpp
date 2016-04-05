@@ -38,9 +38,6 @@
 #include <pdal/Dimension.hpp>
 #include <pdal/pdal_defines.h>
 #include <pdal/pdal_export.hpp>
-#include <pdal/PointTable.hpp>
-#include <pdal/PointView.hpp>
-#include <pdal/Options.hpp>
 #include <pdal/util/Inserter.hpp>
 #include <pdal/util/Extractor.hpp>
 
@@ -51,6 +48,7 @@
 
 namespace pdal
 {
+class Options;
 
 namespace Utils
 {
@@ -190,99 +188,6 @@ inline void insertDim(Inserter& ins, Dimension::Type::Enum type,
 }
 
 
-// inline ptree toPTree(MetadataNode const& node)
-// {
-//     typedef ptree::path_type path;
-//
-//     ptree tree;
-//     tree.put("name", node.name());
-//     tree.put("description", node.description());
-//     tree.put("type", node.type());
-//     tree.put("value", node.value());
-//
-//     MetadataNodeList children = node.children();
-//     for (auto n = children.begin(); n != children.end(); ++n)
-//     {
-//         ptree pnode = toPTree(*n);
-//         if (node.kind() == MetadataType::Array)
-//         {
-//             pdalboost::optional<ptree&> opt =
-//                 tree.get_child_optional(path(node.name(), '/'));
-//             if (opt)
-//                 opt->push_back(std::make_pair("", pnode));
-//             else
-//             {
-//                 tree.push_back(ptree::value_type(node.name(), ptree()));
-//                 auto& p = tree.get_child(path(node.name(), '/'));
-//                 p.push_back(std::make_pair("", pnode));
-//
-//             }
-//         }
-//         else if (node.name().size())
-//             tree.push_back(std::make_pair(node.name(), pnode));
-//     }
-//     return tree;
-// }
-//
-
-inline MetadataNode toMetadata(PointTableRef table)
-{
-    const PointLayoutPtr layout(table.layout());
-    MetadataNode root;
-
-    for (const auto& id : layout->dims())
-    {
-        MetadataNode dim("dimensions");
-        dim.add("name", layout->dimName(id));
-        Dimension::Type::Enum t = layout->dimType(id);
-        dim.add("type", Dimension::toName(Dimension::base(t)));
-        dim.add("size", layout->dimSize(id));
-        root.addList(dim);
-    }
-
-    return root;
-}
-
-
-inline MetadataNode toMetadata(const PointViewPtr view)
-{
-    MetadataNode node;
-
-    const Dimension::IdList& dims = view->dims();
-
-    for (PointId idx = 0; idx < view->size(); idx++)
-    {
-        MetadataNode pointnode = node.add(std::to_string(idx));
-        for (auto di = dims.begin(); di != dims.end(); ++di)
-        {
-            double v = view->getFieldAs<double>(*di, idx);
-            pointnode.add(Dimension::name(*di), v);
-        }
-    }
-
-    return node;
-}
-
-inline MetadataNode toMetadata(const SpatialReference& ref)
-{
-    MetadataNode root("srs");
-    root.add("horizontal", ref.getHorizontal());
-    root.add("vertical", ref.getVertical());
-    root.add("isgeographic", ref.isGeographic());
-    root.add("isgeocentric", ref.isGeocentric());
-    root.add("proj4", ref.getProj4());
-    root.add("prettywkt", ref.getWKT(SpatialReference::eHorizontalOnly, true));
-    root.add("wkt", ref.getWKT(SpatialReference::eHorizontalOnly, false));
-    root.add("compoundwkt", ref.getWKT(SpatialReference::eCompoundOK, false));
-    root.add("prettycompoundwkt", ref.getWKT(SpatialReference::eCompoundOK, true));
-
-    MetadataNode units = root.add("units");
-    units.add("vertical", ref.getVerticalUnits());
-    units.add("horizontal", ref.getVerticalUnits());
-
-    return root;
-}
-
 
 inline MetadataNode toMetadata(const BOX2D& bounds)
 {
@@ -305,92 +210,6 @@ inline MetadataNode toMetadata(const BOX3D& bounds)
     output.add("maxz", bounds.maxz);
     return output;
 }
-
-/// Outputs a string-based boost::property_tree::ptree representation
-/// of the BOX3D instance
-// inline ptree toPTree(const BOX3D& bounds)
-// {
-//     ptree tree;
-//     ptree x;
-//     ptree y;
-//     ptree z;
-//
-//     x.add("minimum", bounds.minx);
-//     x.add("maximum", bounds.maxx);
-//     tree.add_child("0", x);
-//
-//     y.add("minimum", bounds.miny);
-//     y.add("maximum", bounds.maxy);
-//     tree.add_child("1", y);
-//
-//     z.add("minimum", bounds.minz);
-//     z.add("maximum", bounds.maxz);
-//     tree.add_child("2", z);
-//
-//     return tree;
-// }
-//
-// /// Outputs a string-based pdalboost::property_tree::ptree representation
-// /// of the BOX2D instance
-// inline ptree toPTree(const BOX2D& bounds)
-// {
-//     ptree tree;
-//     ptree x;
-//     ptree y;
-//     ptree z;
-//
-//     x.add("minimum", bounds.minx);
-//     x.add("maximum", bounds.maxx);
-//     tree.add_child("0", x);
-//
-//     y.add("minimum", bounds.miny);
-//     y.add("maximum", bounds.maxy);
-//     tree.add_child("1", y);
-//
-//     return tree;
-// }
-//
-// ptree toPTree(const Options& options);
-// inline ptree toPTree(const Option& option)
-// {
-//     ptree t;
-//     t.put("Name", option.getName());
-//     t.put("Value", option.getValue<std::string>());
-//     if (option.getDescription() != "")
-//         t.put("Description", option.getDescription());
-//
-//     return t;
-// }
-//
-//
-// inline ptree toPTree(const Options& options)
-// {
-//     ptree tree;
-//     std::vector<Option> opts = options.getOptions();
-//     for (auto citer = opts.begin(); citer != opts.end(); ++citer)
-//     {
-//         const Option& option = *citer;
-//         ptree subtree = toPTree(option);
-//         tree.add_child("Option", subtree);
-//     }
-//     return tree;
-// }
-//
-//
-//
-// inline ptree toPTree(const SpatialReference& ref)
-// {
-//     ptree srs;
-//
-//     srs.put("proj4", ref.getProj4());
-//     srs.put("prettywkt", ref.getWKT(SpatialReference::eHorizontalOnly, true));
-//     srs.put("wkt", ref.getWKT(SpatialReference::eHorizontalOnly, false));
-//     srs.put("compoundwkt", ref.getWKT(SpatialReference::eCompoundOK, false));
-//     srs.put("prettycompoundwkt", ref.getWKT(SpatialReference::eCompoundOK,
-//        true));
-//
-//     return srs;
-// }
 
 inline int openProgress(const std::string& filename)
 {

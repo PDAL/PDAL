@@ -91,8 +91,8 @@ public:
     }
     virtual bool supportsView() const
         { return false; }
-
     MetadataNode privateMetadata(const std::string& name);
+    MetadataNode toMetadata() const;
 
 private:
     // Point data operations.

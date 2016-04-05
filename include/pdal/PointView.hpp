@@ -255,6 +255,7 @@ public:
         while (!m_temps.empty())
             m_temps.pop();
     }
+    MetadataNode toMetadata() const;
 
 protected:
     PointTableRef m_pointTable;

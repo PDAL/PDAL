@@ -449,6 +449,27 @@ int SpatialReference::computeUTMZone(const BOX3D& box) const
 }
 
 
+MetadataNode SpatialReference::toMetadata() const
+{
+    MetadataNode root("srs");
+    root.add("horizontal", getHorizontal());
+    root.add("vertical", getVertical());
+    root.add("isgeographic", isGeographic());
+    root.add("isgeocentric", isGeocentric());
+    root.add("proj4", getProj4());
+    root.add("prettywkt", getWKT(eHorizontalOnly, true));
+    root.add("wkt", getWKT(eHorizontalOnly, false));
+    root.add("compoundwkt", getWKT(eCompoundOK, false));
+    root.add("prettycompoundwkt", getWKT(eCompoundOK, true));
+
+    MetadataNode units = root.add("units");
+    units.add("vertical", getVerticalUnits());
+    units.add("horizontal", getVerticalUnits());
+
+    return root;
+}
+
+
 void SpatialReference::dump() const
 {
     std::cout << *this;

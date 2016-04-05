@@ -384,7 +384,7 @@ void Stage::setSpatialReference(MetadataNode& m,
     MetadataNode spatialNode = m.findChild(pred);
     if (spatialNode.empty())
     {
-        m.add(Utils::toMetadata(spatialRef));
+        m.add(spatialRef.toMetadata());
         m.add("spatialreference",
            spatialRef.getWKT(SpatialReference::eHorizontalOnly, false),
            "SRS of this stage");

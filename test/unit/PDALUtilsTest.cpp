@@ -36,6 +36,7 @@
 #include <sstream>
 
 #include <pdal/PDALUtils.hpp>
+#include <pdal/Options.hpp>
 #include "Support.hpp"
 
 using namespace pdal;
