@@ -185,13 +185,9 @@ void HexBin::done(PointTableRef table)
         {
 
             std::ostringstream z;
-            if (zone > 0)
-            {
-                z << "EPSG:269" << zone;
-            } else
-            {
-                z << "EPSG:327" << abs(zone);
-            }
+
+            // Use WGS84 UTM zones
+            z << "EPSG:327" << abs(zone);
             return z.str();
         };
 
