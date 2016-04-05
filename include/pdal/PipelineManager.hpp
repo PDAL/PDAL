@@ -60,8 +60,10 @@ public:
             m_progressFd(progressFd)
         {}
 
-    void readPipeline(std::istream& input);
-    void readPipeline(const std::string& filename);
+    void readPipeline(std::istream& input, bool debug=false,
+                   uint32_t verbose = 0);
+    void readPipeline(const std::string& filename, bool debug=false,
+                   uint32_t verbose = 0);
 
     // Use these to manually add stages into the pipeline manager.
     Stage& addReader(const std::string& type);
@@ -105,4 +107,3 @@ private:
 typedef std::unique_ptr<PipelineManager> PipelineManagerPtr;
 
 } // namespace pdal
-
