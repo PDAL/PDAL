@@ -10,4 +10,5 @@ set(PDAL_TOOLS_DIR ${ROOT_DIR}/tools)
 set(PDAL_KERNEL_DIR ${ROOT_DIR}/kernels)
 set(PDAL_FILTER_DIR ${ROOT_DIR}/filters)
 set(PDAL_IO_DIR ${ROOT_DIR}/io)
+set(PDAL_VENDOR_DIR ${ROOT_DIR}/vendor)
 
