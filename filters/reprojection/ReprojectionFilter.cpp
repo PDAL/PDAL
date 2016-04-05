@@ -36,6 +36,7 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/GDALUtils.hpp>
 
 #include <gdal.h>
 #include <ogr_spatialref.h>
@@ -54,8 +55,12 @@ CREATE_STATIC_PLUGIN(1, 0, ReprojectionFilter, Filter, s_info)
 
 std::string ReprojectionFilter::getName() const { return s_info.name; }
 
-ReprojectionFilter::ReprojectionFilter() : m_inferInputSRS(true),
-    m_in_ref_ptr(NULL), m_out_ref_ptr(NULL), m_transform_ptr(NULL)
+ReprojectionFilter::ReprojectionFilter()
+    : m_inferInputSRS(true)
+    , m_in_ref_ptr(NULL)
+    , m_out_ref_ptr(NULL)
+    , m_transform_ptr(NULL)
+    , m_errorHandler(new gdal::ErrorHandler())
 {}
 
 ReprojectionFilter::~ReprojectionFilter()

@@ -49,7 +49,7 @@ namespace pdal
 namespace gdal
 {
 
-ErrorHandler ErrorHandler::m_instance;
+static ErrorHandler* s_gdalErrorHandler= 0;
 
 void registerDrivers()
 {
@@ -71,23 +71,38 @@ void unregisterDrivers()
 }
 
 
-ErrorHandler& ErrorHandler::get()
+ErrorHandler& ErrorHandler::getGlobalErrorHandler()
 {
-    return m_instance;
+    static std::once_flag flag;
+
+    auto init = []()
+    {
+       s_gdalErrorHandler = new ErrorHandler();
+    };
+
+    std::call_once(flag, init);
+    return *s_gdalErrorHandler;
 }
 
+ErrorHandler::~ErrorHandler()
+{
+    CPLPopErrorHandler();
+}
 
 ErrorHandler::ErrorHandler() : m_throw(true), m_errorNum(0)
 {
     std::string value;
 
-    auto cb = [](::CPLErr level, int num, const char *msg)
-    {
-        ErrorHandler::get().handle(level, num, msg);
-    };
-    m_cplSet = (Utils::getenv("CPL_DEBUG", value) == 0);
+    // Will return thread-local setting
+    const char* set = CPLGetConfigOption("CPL_DEBUG", "");
+    m_cplSet = (bool)set ;
     m_debug = m_cplSet;
-    CPLSetErrorHandler(cb);
+
+    // Push on a thread-local error handler
+    CPLPushErrorHandlerEx(&ErrorHandler::trampoline, this);
+    m_callback = std::bind(&ErrorHandler::handle, this,
+                std::placeholders::_1, std::placeholders::_2,
+                std::placeholders::_3);
 }
 
 
@@ -118,9 +133,9 @@ void ErrorHandler::setDebug(bool debug)
     if (!m_cplSet)
     {
         if (debug)
-            Utils::setenv("CPL_DEBUG", "ON");
+            CPLSetThreadLocalConfigOption("CPL_DEBUG", "ON");
         else
-            Utils::unsetenv("CPL_DEBUG");
+            CPLSetThreadLocalConfigOption("CPL_DEBUG", NULL);
     }
 }
 

@@ -177,24 +177,24 @@ public:
     public:
         ExceptionSuspender()
         {
-            doThrow = get().willThrow();
-            get().setThrow(false);
+            doThrow = getGlobalErrorHandler().willThrow();
+            getGlobalErrorHandler().setThrow(false);
         }
         ~ExceptionSuspender()
         {
-            get().setThrow(doThrow);
+            getGlobalErrorHandler().setThrow(doThrow);
         }
-
+//
     private:
         bool doThrow;
     };
-
+//
     /**
       Get the singleton error handler.
 
       \return  Reference to the error handler.
     */
-    static ErrorHandler& get();
+    static ErrorHandler& getGlobalErrorHandler();
 
     /**
       Set the log and debug state of the error handler.  This is
@@ -255,11 +255,24 @@ public:
     */
     int errorNum();
 
-private:
+    static void CPL_STDCALL trampoline(::CPLErr code, int num, char const* msg)
+    {
+        ErrorHandler* handler =
+            static_cast<ErrorHandler*>(CPLGetErrorHandlerUserData());
+        if (!handler)
+            return;
+
+        handler->m_callback(code, num, msg);
+    }
+
     ErrorHandler();
+
+private:
+    ~ErrorHandler();
 
     void reset();
     void handle(::CPLErr level, int num, const char *msg);
+    std::function<void(CPLErr, int, char const*)> m_callback;
 
 private:
     bool m_debug;
@@ -268,7 +281,6 @@ private:
     int m_errorNum;
     bool m_cplSet;
 
-    static ErrorHandler m_instance;
 };
 
 
