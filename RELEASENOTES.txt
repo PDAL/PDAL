@@ -12,6 +12,10 @@ Fixes:
 
 - A failure that may have resulted when using filters.hexbin to calculate
   density in the southern hemisphere has been corrected.
+- A failure to create the index file with 'pdal tindex' and GDAL 2.X has
+  been fixed.
+- The '--tindex' option for the 'pdal tindex' command is now a positional
+  option as specified in the documentation.
 
 1.2.0:
 
