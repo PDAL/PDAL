@@ -92,7 +92,7 @@ Dimension::IdList IcebridgeReader::getDefaultDimensions()
     ids.push_back(Id::Z);
     ids.push_back(Id::StartPulse);
     ids.push_back(Id::ReflectedPulse);
-    ids.push_back(Id::ScanAngleRank);
+    ids.push_back(Id::Azimuth);
     ids.push_back(Id::Pitch);
     ids.push_back(Id::Roll);
     ids.push_back(Id::Pdop);

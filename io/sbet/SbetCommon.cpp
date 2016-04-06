@@ -57,7 +57,7 @@ Dimension::IdList fileDimensions()
     ids.push_back(Id::ZVelocity);
     ids.push_back(Id::Roll);
     ids.push_back(Id::Pitch);
-    ids.push_back(Id::PlatformHeading);
+    ids.push_back(Id::Azimuth);
     ids.push_back(Id::WanderAngle);
     ids.push_back(Id::XBodyAccel);
     ids.push_back(Id::YBodyAccel);
