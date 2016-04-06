@@ -216,9 +216,11 @@ bool TIndexKernel::isFileIndexed(const FieldIndexes& indexes,
     const FileInfo& fileInfo)
 {
     std::ostringstream qstring;
-    qstring << Utils::toupper(m_tileIndexColumnName) << "=\"" <<
-        fileInfo.m_filename << "\"";
-    OGRErr err = OGR_L_SetAttributeFilter(m_layer, qstring.str().c_str());
+
+    qstring << Utils::toupper(m_tileIndexColumnName) << "=" <<
+        "'" << fileInfo.m_filename << "'";
+    std::string query = qstring.str();
+    OGRErr err = OGR_L_SetAttributeFilter(m_layer, query.c_str());
     if (err != OGRERR_NONE)
     {
         std::ostringstream oss;
@@ -231,7 +233,6 @@ bool TIndexKernel::isFileIndexed(const FieldIndexes& indexes,
     OGR_L_ResetReading(m_layer);
     if (OGR_L_GetNextFeature(m_layer))
         output = true;
-
     OGR_L_ResetReading(m_layer);
     OGR_L_SetAttributeFilter(m_layer, NULL);
     return output;
