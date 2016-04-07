@@ -1,4 +1,4 @@
-FROM pdal/master
+FROM pdal/pdal
 MAINTAINER Pete Gadomski <pete.gadomski@gmail.com>
 
 COPY rivlib-2_2_1-x86_64-linux-gcc44 /

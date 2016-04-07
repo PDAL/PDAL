@@ -102,7 +102,7 @@ RUN git clone --depth=1 https://github.com/OSGeo/gdal.git \
             --with-epsilon=/usr \
     && make -j 4 \
     && make install \
-    && rm -rf gdal
+    && rm -rf /gdal
 
 RUN git clone https://github.com/hobu/nitro \
     && cd nitro \
@@ -113,7 +113,7 @@ RUN git clone https://github.com/hobu/nitro \
         .. \
     && make \
     && make install \
-    && rm -rf nitro
+    && rm -rf /nitro
 
 RUN git clone https://github.com/LASzip/LASzip.git laszip \
     && cd laszip \
@@ -126,7 +126,7 @@ RUN git clone https://github.com/LASzip/LASzip.git laszip \
         .. \
     && make \
     && make install \
-    && rm -rf laszip
+    && rm -rf /laszip
 
 
 RUN git clone https://github.com/hobu/hexer.git \
@@ -139,7 +139,7 @@ RUN git clone https://github.com/hobu/hexer.git \
         .. \
     && make \
     && make install \
-    && rm -rf hexer
+    && rm -rf /hexer
 
 RUN git clone https://github.com/CRREL/points2grid.git \
     && cd points2grid \
@@ -151,7 +151,7 @@ RUN git clone https://github.com/CRREL/points2grid.git \
         .. \
     && make \
     && make install \
-    && rm -rf points2grid
+    && rm -rf /points2grid
 
 RUN git clone  https://github.com/verma/laz-perf.git \
     && cd laz-perf \
@@ -163,12 +163,14 @@ RUN git clone  https://github.com/verma/laz-perf.git \
         .. \
     && make \
     && make install \
-    && rm -rf laz-perf
+    && rm -rf /laz-perf
 
 RUN wget http://bitbucket.org/eigen/eigen/get/3.2.7.tar.gz \
         && tar -xvf 3.2.7.tar.gz \
         && cp -R eigen-eigen-b30b87236a1b/Eigen/ /usr/include/Eigen/ \
-        && cp -R eigen-eigen-b30b87236a1b/unsupported/ /usr/include/unsupported/
+        && cp -R eigen-eigen-b30b87236a1b/unsupported/ /usr/include/unsupported/ \
+        && rm -rf /3.2.7.tar.gz \
+        && rm -rf /eigen-eigen-b30b87236a1b
 
 RUN git clone https://github.com/chambbj/pcl.git \
         && cd pcl \
@@ -220,7 +222,7 @@ RUN git clone https://github.com/chambbj/pcl.git \
                 .. \
         && make \
         && make install \
-        && rm -rf pcl
+        && rm -rf /pcl
 
 
 
@@ -230,7 +232,7 @@ RUN svn co -r 2691 https://svn.osgeo.org/metacrs/geotiff/trunk/libgeotiff/ \
     && ./configure --prefix=/usr \
     && make \
     && make install \
-    && rm -rf libgeotiff
+    && rm -rf /libgeotiff
 
 RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
         ninja-build \
@@ -251,17 +253,13 @@ RUN mkdir /vdatum \
     && wget http://download.osgeo.org/proj/vdatum/egm08_25/egm08_25.gtx && mv egm08_25.gtx /usr/share/proj \
     && rm -rf /vdatum
 
-RUN rm -rf laszip laz-perf points2grid pcl nitro hexer 3.2.7.tar.gz eigen-eigen-b30b87236a1b gdal libgeotiff
-RUN apt-get clean
-
 RUN git clone https://github.com/gadomski/fgt.git \
     && cd fgt \
     && git checkout v0.4.4 \
     && cmake . -DWITH_TESTS=OFF -DBUILD_SHARED_LIBS=ON -DEIGEN3_INCLUDE_DIR=/usr/include -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
     && make \
     && make install \
-    && cd .. \
-    && rm -rf fgt
+    && rm -rf /fgt
 
 RUN git clone https://github.com/gadomski/cpd.git \
     && cd cpd \
@@ -269,5 +267,7 @@ RUN git clone https://github.com/gadomski/cpd.git \
     && cmake . -DWITH_TESTS=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
     && make \
     && make install \
-    && cd .. \
-    && rm -rf cpd
+    && rm -rf /cpd
+
+RUN apt-get clean
+
