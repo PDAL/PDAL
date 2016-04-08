@@ -84,11 +84,6 @@ ErrorHandler& ErrorHandler::getGlobalErrorHandler()
     return *s_gdalErrorHandler;
 }
 
-ErrorHandler::~ErrorHandler()
-{
-    CPLPopErrorHandler();
-}
-
 ErrorHandler::ErrorHandler() : m_errorNum(0)
 {
     std::string value;
@@ -99,10 +94,7 @@ ErrorHandler::ErrorHandler() : m_errorNum(0)
     m_debug = m_cplSet;
 
     // Push on a thread-local error handler
-    CPLPushErrorHandlerEx(&ErrorHandler::trampoline, this);
-    m_callback = std::bind(&ErrorHandler::handle, this,
-                std::placeholders::_1, std::placeholders::_2,
-                std::placeholders::_3);
+    CPLSetErrorHandler(&ErrorHandler::trampoline);
 }
 
 
@@ -122,40 +114,28 @@ void ErrorHandler::setLog(LogPtr log)
 void ErrorHandler::setDebug(bool debug)
 {
     m_debug = debug;
-    if (!m_cplSet)
-    {
-        if (debug)
-            CPLSetThreadLocalConfigOption("CPL_DEBUG", "ON");
-        else
-            CPLSetThreadLocalConfigOption("CPL_DEBUG", NULL);
-    }
+
+    if (debug)
+        CPLSetThreadLocalConfigOption("CPL_DEBUG", "ON");
+    else
+        CPLSetThreadLocalConfigOption("CPL_DEBUG", NULL);
 }
 
 
 int ErrorHandler::errorNum()
 {
     int errorNum = m_errorNum;
-    reset();
     return errorNum;
-}
-
-void ErrorHandler::reset()
-{
-    CPLErrorReset();
-    m_errorNum = 0;
 }
 
 void ErrorHandler::handle(::CPLErr level, int num, char const* msg)
 {
     std::ostringstream oss;
 
-    reset();
     m_errorNum = num;
     if (level == CE_Failure || level == CE_Fatal)
     {
         oss << "GDAL failure (" << num << ") " << msg;
-//         if (m_throw)
-//             throw pdal_error(oss.str());
         if (m_log)
             m_log->get(LogLevel::Error) << oss.str() << std::endl;
     }

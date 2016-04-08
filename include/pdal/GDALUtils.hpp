@@ -214,22 +214,14 @@ public:
 
     static void CPL_STDCALL trampoline(::CPLErr code, int num, char const* msg)
     {
-        ErrorHandler* handler =
-            static_cast<ErrorHandler*>(CPLGetErrorHandlerUserData());
-        if (!handler)
-            return;
-
-        handler->m_callback(code, num, msg);
+        ErrorHandler::getGlobalErrorHandler().handle(code, num, msg);
     }
 
     ErrorHandler();
 
 private:
-    ~ErrorHandler();
 
-    void reset();
     void handle(::CPLErr level, int num, const char *msg);
-    std::function<void(CPLErr, int, char const*)> m_callback;
 
 private:
     bool m_debug;
