@@ -103,7 +103,9 @@ set(PDAL_BASE_CPP
   ${DB_DRIVER_SRCS}
 )
 
-find_package(JSONCPP)
+include(FindPkgConfig)
+
+pkg_search_module(JSONCPP jsoncpp>=1.6.2)
 if(JSONCPP_FOUND)
   include_directories(${JSONCPP_INCLUDE_DIR})
 else(JSONCPP_FOUND)
