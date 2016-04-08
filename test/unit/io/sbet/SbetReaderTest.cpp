@@ -66,7 +66,7 @@ void checkPoint(const PointView& data, PointId index, double time,
     checkDimension(Dimension::Id::ZVelocity, zvelocity);
     checkDimension(Dimension::Id::Roll, roll);
     checkDimension(Dimension::Id::Pitch, pitch);
-    checkDimension(Dimension::Id::PlatformHeading, heading);
+    checkDimension(Dimension::Id::Azimuth, heading);
     checkDimension(Dimension::Id::WanderAngle, wander);
     checkDimension(Dimension::Id::XBodyAccel, xaccel);
     checkDimension(Dimension::Id::YBodyAccel, yaccel);

@@ -1,3 +1,18 @@
+X.X.X:
+
+Changes of Note:
+
+- The dimension PlatformHeading has been renamed to Azimuth.  When looking
+  up a dimension by name, the string "platformheading" is still accepted and
+  returns Azimuth.
+
+Enhancements:
+
+Fixes:
+
+- A failure that may have resulted when using filters.hexbin to calculate
+  density in the southern hemisphere has been corrected.
+
 1.2.0:
 
 Changes of Note:

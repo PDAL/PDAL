@@ -92,5 +92,24 @@ char *PointTable::getPoint(PointId idx)
     return buf + pointsToBytes(idx % m_blockPtCnt);
 }
 
+
+MetadataNode BasePointTable::toMetadata() const
+{
+    const PointLayoutPtr l(layout());
+    MetadataNode root;
+
+    for (const auto& id : l->dims())
+    {
+        MetadataNode dim("dimensions");
+        dim.add("name", l->dimName(id));
+        Dimension::Type::Enum t = l->dimType(id);
+        dim.add("type", Dimension::toName(Dimension::base(t)));
+        dim.add("size", l->dimSize(id));
+        root.addList(dim);
+    }
+
+    return root;
+}
+
 } // namespace pdal
 

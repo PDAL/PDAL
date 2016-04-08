@@ -34,6 +34,8 @@
 
 #include <pdal/PDALUtils.hpp>
 
+#include <pdal/Options.hpp>
+
 using namespace std;
 
 namespace pdal

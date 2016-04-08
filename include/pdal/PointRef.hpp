@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <pdal/PDALUtils.hpp>
 #include <pdal/PointContainer.hpp>
 #include <pdal/PointLayout.hpp>
 #include <pdal/util/Utils.hpp>
@@ -102,7 +103,8 @@ public:
             oss << "Unable to fetch data and convert as requested: ";
             oss << Dimension::name(dim) << ":" <<
                 Dimension::interpretationName(type) <<
-                "(" << (double)val << ") -> " << Utils::typeidName<T>();
+                "(" << Utils::toDouble(e, type) << ") -> " <<
+                Utils::typeidName<T>();
             throw pdal_error(oss.str());
         }
         return val;

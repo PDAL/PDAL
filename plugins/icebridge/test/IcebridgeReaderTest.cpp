@@ -74,7 +74,7 @@ void checkPoint(
     checkDimension(data, index, Id::Z, elevation);
     checkDimension(data, index, Id::StartPulse, xmtSig);
     checkDimension(data, index, Id::ReflectedPulse, rcvSig);
-    checkDimension(data, index, Id::ScanAngleRank, azimuth);
+    checkDimension(data, index, Id::Azimuth, azimuth);
     checkDimension(data, index, Id::Pitch, pitch);
     checkDimension(data, index, Id::Roll, roll);
     checkDimension(data, index, Id::Pdop, gpsPdop);

@@ -169,7 +169,7 @@ enum Enum
     XVelocity,
     YVelocity,
     ZVelocity,
-    PlatformHeading,
+    Azimuth,
     WanderAngle,
     XBodyAccel,
     YBodyAccel,
@@ -304,8 +304,8 @@ inline std::string description(Id::Enum id)
         return "Y Velocity";
     case Id::ZVelocity:
         return "Z Velocity";
-    case Id::PlatformHeading:
-        return "Platform Heading";
+    case Id::Azimuth:
+        return "Scanner azimuth";
     case Id::WanderAngle:
         return "Wander Angle";
     case Id::XBodyAccel:
@@ -452,8 +452,8 @@ inline Id::Enum id(std::string s)
         return Id::YVelocity;
     else if (s == "ZVELOCITY")
         return Id::ZVelocity;
-    else if (s == "PLATFORMHEADING")
-        return Id::PlatformHeading;
+    else if (s == "AZIMUTH" || s == "PLATFORMHEADING")
+        return Id::Azimuth;
     else if (s == "WANDERANGLE")
         return Id::WanderAngle;
     else if (s == "XBODYACCEL")
@@ -588,8 +588,8 @@ inline std::string name(Id::Enum id)
         return "YVelocity";
     case Id::ZVelocity:
         return "ZVelocity";
-    case Id::PlatformHeading:
-        return "PlatformHeading";
+    case Id::Azimuth:
+        return "Azimuth";
     case Id::WanderAngle:
         return "WanderAngle";
     case Id::XBodyAccel:
@@ -731,7 +731,7 @@ inline Type::Enum defaultType(Id::Enum id)
         return Double;
     case Id::ZVelocity:
         return Double;
-    case Id::PlatformHeading:
+    case Id::Azimuth:
         return Double;
     case Id::WanderAngle:
         return Double;
