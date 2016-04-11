@@ -1,0 +1,14 @@
+{
+    "pipeline": [
+        "/data/exercises/analysis/ground/ground-filtered.laz",
+        {
+            "filename":"/data/exercises/analysis/dtm/dtm",
+            "output_format":"tif",
+            "output_type":"all",
+            "grid_dist_x":"2.0",
+            "grid_dist_y":"2.0",
+            "type": "writers.p2g"
+        }
+    ]
+}
+

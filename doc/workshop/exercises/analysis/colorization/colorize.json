@@ -1,0 +1,21 @@
+{
+    "pipeline": [
+        "/data/exercises/analysis/colorization/uncompahgre.laz",
+        {
+            "type": "filters.colorization",
+            "raster": "/data/exercises/analysis/colorization/casi-2015-04-29-weekly-mosaic.tif"
+        },
+        {
+            "type": "filters.range",
+            "limits": "Red[1:]"
+        },
+        {
+            "type": "writers.las",
+            "compression": "true",
+            "minor_version": "2",
+            "dataformat_id": "3",
+            "filename":"/data/exercises/analysis/colorization/uncompahgre-colored.laz"
+        }
+    ]
+}
+

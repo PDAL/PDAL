@@ -16,7 +16,7 @@ Example
     {
       "pipeline":[
         {
-          "type":"readers.",s
+          "type":"readers.bpf"
           "filename":"inputfile.las"
         },
         {
