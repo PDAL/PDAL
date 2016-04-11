@@ -49,16 +49,18 @@ class PDAL_DLL PipelineManager
 {
 public:
     PipelineManager() : m_tablePtr(new PointTable()), m_table(*m_tablePtr),
-            m_progressFd(-1)
+            m_progressFd(-1), m_input(nullptr)
         {}
     PipelineManager(int progressFd) : m_tablePtr(new PointTable()),
-            m_table(*m_tablePtr), m_progressFd(progressFd)
+            m_table(*m_tablePtr), m_progressFd(progressFd), m_input(nullptr)
         {}
-    PipelineManager(PointTableRef table) : m_table(table), m_progressFd(-1)
+    PipelineManager(PointTableRef table) : m_table(table), m_progressFd(-1),
+            m_input(nullptr)
         {}
     PipelineManager(PointTableRef table, int progressFd) : m_table(table),
-            m_progressFd(progressFd)
+            m_progressFd(progressFd), m_input(nullptr)
         {}
+    ~PipelineManager();
 
     void readPipeline(std::istream& input, bool debug=false,
                    uint32_t verbose = 0);
@@ -74,7 +76,8 @@ public:
     bool isWriterPipeline() const
         { return (bool)getStage(); }
 
-    // return the pipeline reader endpoint (or nullptr, if not a reader pipeline)
+    // return the pipeline reader endpoint (or nullptr, if not a reader
+    // pipeline)
     Stage* getStage() const
         { return m_stages.empty() ? nullptr : m_stages.back(); }
 
@@ -100,6 +103,7 @@ private:
 
     std::vector<Stage*> m_stages; // stage observer, never owner
     int m_progressFd;
+    std::istream *m_input;
 
     PipelineManager& operator=(const PipelineManager&); // not implemented
     PipelineManager(const PipelineManager&); // not implemented
