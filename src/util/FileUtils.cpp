@@ -42,6 +42,7 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Utils.hpp>
 #include <pdal/pdal_types.hpp>
+#include <arbiter.hpp>
 
 using namespace std;
 
@@ -76,17 +77,33 @@ namespace FileUtils
 
 istream *openFile(string const& filename, bool asBinary)
 {
-    if (isStdin(filename))
+    std::string name(filename);
+    if (isStdin(name))
         return &cin;
 
-    if (!FileUtils::fileExists(filename))
+#ifdef PDAL_ARIBITER_ENABLED
+    arbiter::Arbiter a;
+    if (a.isRemote(name))
+    {
+        // Open it with Arbiter
+        std::unique_ptr<arbiter::fs::LocalHandle> h = a.getLocalHandle(name);
+        if (h)
+        {
+            name = h->release(); // We own the temp file it created now.
+        }
+        else
+            return NULL;
+    }
+#endif
+
+    if (!FileUtils::fileExists(name))
         return NULL;
 
     ios::openmode mode = ios::in;
     if (asBinary)
         mode |= ios::binary;
 
-    ifstream *ifs = new ifstream(filename, mode);
+    ifstream *ifs = new ifstream(name, mode);
     if (!ifs->good())
     {
         delete ifs;
@@ -196,10 +213,15 @@ void renameFile(const string& dest, const string& src)
 
 bool fileExists(const string& name)
 {
-    // filename may actually be a greyhound uri + pipelineId
-    string http = name.substr(0, 4);
-    if (Utils::iequals(http, "http"))
+
+#ifdef PDAL_ARIBITER_ENABLED
+    // filename may actually be a URL, S3, dropbox, etc
+    arbiter::Arbiter a;
+    if (a.isRemote(name))
+    {
         return true;
+    }
+#endif
 
     pdalboost::system::error_code ec;
     pdalboost::filesystem::exists(name, ec);

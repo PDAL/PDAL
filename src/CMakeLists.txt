@@ -101,7 +101,6 @@ set(PDAL_BASE_CPP
   ${PDAL_XML_SRC}
   ${PDAL_LAZPERF_SRC}
   ${DB_DRIVER_SRCS}
-  ${PROJECT_SOURCE_DIR}/vendor/jsoncpp-1.6.2/dist/jsoncpp.cpp
 )
 
 list (APPEND PDAL_CPP ${PDAL_BASE_CPP} )
@@ -181,8 +180,11 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
     ${GEOS_LIBRARY}
     ${ZLIB_LIBRARIES}
     ${PDAL_BOOST_LIB_NAME}
+    ${PDAL_ARBITER_LIB_NAME}
+    ${PDAL_JSONCPP_LIB_NAME}
     ${PDAL_UTIL_LIB_NAME}
     ${REEXPORT_UTIL_LIB}
+    ${CURL_LIBRARIES}
 )
 
 if (WITH_GEOTIFF)
