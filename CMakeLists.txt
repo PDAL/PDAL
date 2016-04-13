@@ -150,9 +150,13 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
 
 include_directories(${PDAL_VENDOR_DIR}/arbiter)
 include_directories(${PDAL_VENDOR_DIR}/eigen-3.1.91)
-if (NOT PDAL_HAVE_JSONCPP)
+
+if (PDAL_HAVE_JSONCPP)
+    include_directories(${JSONCPP_INCLUDE_DIR})
+else()
     include_directories(${PDAL_VENDOR_DIR}/jsoncpp-1.6.2/dist)
 endif()
+
 include_directories(${PDAL_VENDOR_DIR}/nanoflann-1.1.8)
 include_directories(${PDAL_VENDOR_DIR}/rply-1.1.4)
 
