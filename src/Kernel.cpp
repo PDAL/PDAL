@@ -170,7 +170,10 @@ void Kernel::doSwitches(int argc, const char *argv[], ProgramArgs& args)
         args.parseSimple(stringArgs);
         addSwitches(args);
         if (!m_showHelp)
+        {
+            args.reset();
             args.parse(stringArgs);
+        }
     }
     catch (arg_error& e)
     {

@@ -84,20 +84,25 @@ TEST(ProgramArgsTest, t1)
     EXPECT_THROW(args.parse(s), arg_error);
 
     s = toStringList("--foo=TestFoo");
+    args.reset();
     args.parse(s);
     EXPECT_EQ(m_foo, "TestFoo");
 
     s = toStringList("--foo TestBar");
+    args.reset();
     args.parse(s);
     EXPECT_EQ(m_foo, "TestBar");
 
     s = toStringList("-f");
+    args.reset();
     EXPECT_THROW(args.parse(s), arg_error);
 
     s = toStringList("-f -g");
+    args.reset();
     EXPECT_THROW(args.parse(s), arg_error);
 
     s = toStringList("-f Gah");
+    args.reset();
     args.parse(s);
     EXPECT_EQ(m_foo, "Gah");
 }
