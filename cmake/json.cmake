@@ -4,10 +4,10 @@ if(EXISTS)
 endif()
 
 
-find_package(JSONCPP)
+find_package(JSONCPP 1.6.0)
 set_package_properties(JSONCPP PROPERTIES TYPE OPTIONAL)
 mark_as_advanced(CLEAR JSONCPP_INCLUDE_DIR)
-mark_as_advanced(CLEAR JSONCPP_LIBRARIES)
+mark_as_advanced(CLEAR JSONCPP_LIBRARY)
 include_directories(${JSONCPP_INCLUDE_DIR})
 set(PDAL_HAVE_JSONCPP 1)
 
