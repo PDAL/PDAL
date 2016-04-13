@@ -4,7 +4,7 @@ if(EXISTS)
 endif()
 
 
-find_package(JSONCPP 1.6.0)
+find_package(JSONCPP 1.6.2)
 set_package_properties(JSONCPP PROPERTIES TYPE OPTIONAL)
 mark_as_advanced(CLEAR JSONCPP_INCLUDE_DIR)
 mark_as_advanced(CLEAR JSONCPP_LIBRARY)
