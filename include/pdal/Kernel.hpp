@@ -78,9 +78,11 @@ public:
 protected:
     // this is protected; your derived class ctor will be the public entry point
     Kernel();
-    Stage& createStage(const std::string& name);
-    Stage& makeReader(const std::string& inputFile);
-    Stage& makeWriter(const std::string& outputFile, Stage& parent);
+    Stage& makeReader(const std::string& inputFile, std::string driver);
+    Stage& makeFilter(const std::string& driver, Stage& parent);
+    Stage& makeFilter(const std::string& driver);
+    Stage& makeWriter(const std::string& outputFile, Stage& parent,
+        std::string driver);
 
 public:
     virtual void addSwitches(ProgramArgs& args)
@@ -131,6 +133,7 @@ private:
     void outputVersion();
     void addBasicSwitches(ProgramArgs& args);
     void collectExtraOptions();
+    Stage& createStage(const std::string& name);
 
     void doSwitches(int argc, const char *argv[], ProgramArgs& args);
     int doStartup();

@@ -64,12 +64,7 @@ int SmoothKernel::execute()
 {
     PointTable table;
 
-    Options readerOptions;
-    readerOptions.add("filename", m_inputFile);
-    setCommonOptions(readerOptions);
-
-    Stage& readerStage(Kernel::makeReader(m_inputFile));
-    readerStage.setOptions(readerOptions);
+    Stage& readerStage(makeReader(m_inputFile, ""));
 
     // go ahead and prepare/execute on reader stage only to grab input
     // PointViewSet, this makes the input PointView available to both the
@@ -80,11 +75,13 @@ int SmoothKernel::execute()
     // the input PointViewSet will be used to populate a BufferReader that is
     // consumed by the processing pipeline
     PointViewPtr input_view = *viewSetIn.begin();
+
     std::shared_ptr<BufferReader> bufferReader(new BufferReader);
-    bufferReader->setOptions(readerOptions);
+    Options bufferOptions;
+    setCommonOptions(bufferOptions);
+    bufferReader->setOptions(bufferOptions);
     bufferReader->addView(input_view);
 
-    Options smoothOptions;
     std::ostringstream ss;
     ss << "{";
     ss << "  \"pipeline\": {";
@@ -93,21 +90,14 @@ int SmoothKernel::execute()
     ss << "      }]";
     ss << "    }";
     ss << "}";
-    std::string json = ss.str();
-    smoothOptions.add("json", json);
-    smoothOptions.add("debug", isDebug());
-    smoothOptions.add("verbose", getVerboseLevel());
 
-    auto& smoothStage = createStage("filters.pclblock");
-    smoothStage.setOptions(smoothOptions);
-    smoothStage.setInput(*bufferReader);
+    Options smoothOptions;
+    smoothOptions.add("json", ss.str());
 
-    Options writerOptions;
-    writerOptions.add("filename", m_outputFile);
-    setCommonOptions(writerOptions);
+    Stage& smoothStage = makeFilter("filters.pclblock", *bufferReader);
+    smoothStage.addOptions(smoothOptions);
 
-    Stage& writer(Kernel::makeWriter(m_outputFile, smoothStage));
-    writer.setOptions(writerOptions);
+    Stage& writer(Kernel::makeWriter(m_outputFile, smoothStage, ""));
 
     writer.prepare(table);
 

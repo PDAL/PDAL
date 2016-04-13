@@ -356,79 +356,50 @@ void TIndexKernel::mergeFile()
         OGR_F_Destroy(feature);
     }
 
-    StageFactory factory;
-
-    MergeFilter merge;
-
     Options cropOptions;
     if (!m_bounds.empty())
         cropOptions.add("bounds", m_bounds);
     else
         cropOptions.add("polygon", m_wkt);
 
+    Stage& merge = makeFilter("filters.merge");
     for (auto f : files)
     {
-        Stage *premerge = NULL;
-        std::string driver = factory.inferReaderDriver(f.m_filename);
-        Stage *reader = factory.createStage(driver);
-        if (!reader)
-        {
-            out << "Unable to create reader for file '" << f.m_filename << "'.";
-            throw pdal_error(out.str());
-        }
-        Options readerOptions;
-        readerOptions.add("filename", f.m_filename);
-        reader->setOptions(readerOptions);
-        premerge = reader;
+        Stage& reader = makeReader(f.m_filename, "");
+        Stage *premerge = &reader;
 
         if (m_tgtSrsString != f.m_srs)
         {
-            Stage *repro = factory.createStage("filters.reprojection");
-            repro->setInput(*reader);
+            Stage& repro = makeFilter("filters.reprojection", reader);
             Options reproOptions;
             reproOptions.add("out_srs", m_tgtSrsString);
             reproOptions.add("in_srs", f.m_srs);
-            repro->setOptions(reproOptions);
-            premerge = repro;
+            repro.addOptions(reproOptions);
+            premerge = &repro;
         }
 
         // WKT is set, even if we're using a bounding box for fitering, so
         // can be used as a test here.
         if (!m_wkt.empty())
         {
-            Stage *crop = factory.createStage("filters.crop");
-            crop->setOptions(cropOptions);
-            crop->setInput(*premerge);
-            premerge = crop;
+            Stage& crop = makeFilter("filters.crop", *premerge);
+            crop.addOptions(cropOptions);
+            premerge = &crop;
         }
-
         merge.setInput(*premerge);
     }
 
-    std::string driver = factory.inferWriterDriver(m_filespec);
-    Options factoryOptions = factory.inferWriterOptionsChanges(m_filespec);
-    Stage *writer = factory.createStage(driver);
-    if (!writer)
-    {
-        out << "Unable to create reader for file '" << m_filespec << "'.";
-        throw pdal_error(out.str());
-    }
-    writer->setInput(merge);
+    Stage& writer = makeWriter(m_filespec, merge, "");
 
-    applyExtraStageOptionsRecursive(writer);
-
-    Options writerOptions(factoryOptions);
-    setCommonOptions(writerOptions);
-
-    writerOptions.add("filename", m_filespec);
+    Options writerOptions;
     writerOptions.add("offset_x", "auto");
     writerOptions.add("offset_y", "auto");
     writerOptions.add("offset_z", "auto");
-    writer->addConditionalOptions(writerOptions);
+    writer.addConditionalOptions(writerOptions);
 
     PointTable table;
-    writer->prepare(table);
-    writer->execute(table);
+    writer.prepare(table);
+    writer.execute(table);
 }
 
 

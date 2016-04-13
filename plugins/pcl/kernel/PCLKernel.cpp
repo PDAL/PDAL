@@ -77,12 +77,7 @@ int PCLKernel::execute()
 {
     PointTable table;
 
-    Options readerOptions;
-    readerOptions.add<std::string>("filename", m_inputFile);
-    setCommonOptions(readerOptions);
-
-    Stage& readerStage(Kernel::makeReader(m_inputFile));
-    readerStage.setOptions(readerOptions);
+    Stage& readerStage(makeReader(m_inputFile, ""));
 
     // go ahead and prepare/execute on reader stage only to grab input
     // PointViewSet, this makes the input PointView available to both the
@@ -97,30 +92,21 @@ int PCLKernel::execute()
     bufferReader->addView(input_view);
 
     Options pclOptions;
-    pclOptions.add<std::string>("filename", m_pclFile);
-    pclOptions.add<bool>("debug", isDebug());
-    pclOptions.add<uint32_t>("verbose", getVerboseLevel());
+    pclOptions.add("filename", m_pclFile);
 
-    auto& pclStage = createStage("filters.pclblock");
-    pclStage.setInput(*bufferReader);
-    pclStage.setOptions(pclOptions);
+    Stage& pclStage = makeFilter("filters.pclblock", *bufferReader);
+    pclStage.addOptions(pclOptions);
 
     // the PCLBlock stage consumes the BufferReader rather than the
     // readerStage
 
     Options writerOptions;
-    writerOptions.add<std::string>("filename", m_outputFile);
-    setCommonOptions(writerOptions);
-
     if (m_bCompress)
         writerOptions.add<bool>("compression", true);
     if (m_bForwardMetadata)
         writerOptions.add("forward_metadata", true);
 
-    Stage& writer(Kernel::makeWriter(m_outputFile, pclStage));
-
-    // Some options are inferred by makeWriter based on filename
-    // (compression, driver type, etc).
+    Stage& writer(makeWriter(m_outputFile, pclStage, ""));
     writer.addOptions(writerOptions);
 
     applyExtraStageOptionsRecursive(&writer);

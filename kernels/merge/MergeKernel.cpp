@@ -77,22 +77,11 @@ int MergeKernel::execute()
 
     for (size_t i = 0; i < m_files.size(); ++i)
     {
-        Options readerOpts;
-        readerOpts.add("filename", m_files[i]);
-        readerOpts.add("debug", isDebug());
-        readerOpts.add("verbose", getVerboseLevel());
-
-        Stage& reader = makeReader(m_files[i]);
-        reader.setOptions(readerOpts);
-
+        Stage& reader = makeReader(m_files[i], "");
         filter.setInput(reader);
     }
 
-    Options writerOpts;
-
-    Stage& writer = makeWriter(m_outputFile, filter);
-    applyExtraStageOptionsRecursive(&writer);
-
+    Stage& writer = makeWriter(m_outputFile, filter, "");
     writer.prepare(table);
     writer.execute(table);
     return 0;

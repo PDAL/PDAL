@@ -500,29 +500,68 @@ Stage& Kernel::createStage(const std::string& name)
     return *stage;
 }
 
-Stage& Kernel::makeReader(const std::string& inputFile)
+Stage& Kernel::makeReader(const std::string& inputFile,
+    std::string driver)
 {
-    if (!FileUtils::fileExists(inputFile))
+    if (!inputFile.empty() && !FileUtils::fileExists(inputFile))
         throw pdal_error("file not found: " + inputFile);
 
-    std::string driver = m_factory.inferReaderDriver(inputFile);
     if (driver.empty())
-        throw pdal_error("Cannot determine input file type of " + inputFile);
+    {
+        driver = StageFactory::inferReaderDriver(inputFile);
+        if (driver.empty())
+            throw pdal_error("Cannot determine input file type of " +
+                inputFile);
+    }
+    Options options;
+    if (!inputFile.empty())
+        options.add("filename", inputFile);
+    setCommonOptions(options);
 
-    return createStage(driver);
+    Stage& reader = createStage(driver);
+    reader.setOptions(options);
+    return reader;
 }
 
-Stage& Kernel::makeWriter(const std::string& outputFile, Stage& parent)
+
+Stage& Kernel::makeFilter(const std::string& driver)
 {
-    std::string driver = m_factory.inferWriterDriver(outputFile);
+    Stage& filter = createStage(driver);
+
+    Options options;
+    setCommonOptions(options);
+    filter.setOptions(options);
+    return filter;
+}
+
+
+Stage& Kernel::makeFilter(const std::string& driver, Stage& parent)
+{
+    Stage& filter = makeFilter(driver);
+    filter.setInput(parent);
+
+    return filter;
+}
+
+
+Stage& Kernel::makeWriter(const std::string& outputFile, Stage& parent,
+    std::string driver)
+{
     if (driver.empty())
-        throw pdal_error("Cannot determine output file type of " +
-            outputFile);
-    Options options = m_factory.inferWriterOptionsChanges(outputFile);
+    {
+        driver = StageFactory::inferWriterDriver(outputFile);
+        if (driver.empty())
+            throw pdal_error("Cannot determine output file type of " +
+                outputFile);
+    }
+    Options options = StageFactory::inferWriterOptionsChanges(outputFile);
+    options.add("filename", outputFile);
+    setCommonOptions(options);
 
     auto& writer = createStage(driver);
     writer.setInput(parent);
-    writer.addOptions(options);
+    writer.setOptions(options);
+    applyExtraStageOptionsRecursive(&writer);
 
     return writer;
 }
