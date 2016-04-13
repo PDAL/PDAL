@@ -75,30 +75,10 @@ void RandomKernel::addSwitches(ProgramArgs& args)
 }
 
 
-Stage& RandomKernel::makeReader(Options readerOptions)
-{
-    if (isDebug())
-    {
-        readerOptions.add<bool>("debug", true);
-        uint32_t verbosity(getVerboseLevel());
-        if (!verbosity)
-            verbosity = 1;
-
-        readerOptions.add<uint32_t>("verbose", verbosity);
-        readerOptions.add<std::string>("log", "STDERR");
-    }
-
-    auto& reader = createStage("readers.faux");
-    reader.setOptions(readerOptions);
-    return reader;
-}
-
-
 int RandomKernel::execute()
 {
     Options readerOptions;
 
-    setCommonOptions(readerOptions);
     if (!m_bounds.empty())
         readerOptions.add("bounds", m_bounds);
 
@@ -114,19 +94,16 @@ int RandomKernel::execute()
     readerOptions.add("num_points", m_numPointsToWrite);
 
     Options writerOptions;
-
-    writerOptions.add("filename", m_outputFile);
-    setCommonOptions(writerOptions);
-
     if (m_bCompress)
         writerOptions.add("compression", true);
 
-    Stage& writer = makeWriter(m_outputFile, makeReader(readerOptions));
-    writer.setOptions(writerOptions);
-    applyExtraStageOptionsRecursive(&writer);
+    Stage& reader = makeReader("", "readers.faux");
+    reader.addOptions(readerOptions);
+
+    Stage& writer = makeWriter(m_outputFile, reader, "");
+    writer.addOptions(writerOptions);
 
     PointTable table;
-
     writer.prepare(table);
     PointViewSet viewSet = writer.execute(table);
 

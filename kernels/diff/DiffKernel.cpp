@@ -107,26 +107,15 @@ int DiffKernel::execute()
 {
     PointTable sourceTable;
 
-    Options sourceOptions;
-    sourceOptions.add<std::string>("filename", m_sourceFile);
-    sourceOptions.add<bool>("debug", isDebug());
-    sourceOptions.add<uint32_t>("verbose", getVerboseLevel());
-
-    Stage& source = makeReader(m_sourceFile);
-    source.setOptions(sourceOptions);
+    Stage& source = makeReader(m_sourceFile, "");
     source.prepare(sourceTable);
     PointViewSet sourceSet = source.execute(sourceTable);
 
     MetadataNode errors;
 
     PointTable candidateTable;
-    Options candidateOptions;
-    candidateOptions.add<std::string>("filename", m_candidateFile);
-    candidateOptions.add<bool>("debug", isDebug());
-    candidateOptions.add<uint32_t>("verbose", getVerboseLevel());
 
-    Stage& candidate = makeReader(m_candidateFile);
-    candidate.setOptions(candidateOptions);
+    Stage& candidate = makeReader(m_candidateFile, "");
     candidate.prepare(candidateTable);
     PointViewSet candidateSet = candidate.execute(candidateTable);
 

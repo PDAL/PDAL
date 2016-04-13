@@ -197,6 +197,7 @@ Stage *PipelineReaderJSON::parseWriterByFilename(const std::string& filename)
                              filename);
 
         options += StageFactory::inferWriterOptionsChanges(filename);
+        options.add("filename", filename);
         context.addType();
     }
     catch (Option::not_found)
