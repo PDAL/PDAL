@@ -39,7 +39,7 @@ namespace pdal {
     PointTable table;
     StageFactory f;
 
-    Stage& reader = makeReaer(m_input_file, "readers.las");
+    Stage& reader = makeReader(m_input_file, "readers.las");
 
     Stage& filter = makeFilter("filters.decimation", reader);
     Options filterOptions;
