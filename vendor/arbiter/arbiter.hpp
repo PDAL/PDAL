@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: 3b8c37ad2a13d48b5837e11c22b8ee44cbabc3c7
+// Git SHA: ba84f882c20f60805540d8a6001dc0cbd040d789
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -74,7 +74,8 @@ class HttpPool;
  *
  * Derived classes must override Driver::type,
  * Driver::put(std::string, const std::vector<char>&) const, and
- * Driver::get(std::string, std::vector<char>&) const - and may optionally
+ * Driver::get(std::string, std::vector<char>&) const,
+ * Driver::size(std::string) const - and may optionally
  * override Driver::glob if possible.
  */
 class Driver
@@ -117,6 +118,12 @@ public:
 
     /** Get string data. */
     std::string get(std::string path) const;
+
+    /** Get the file size in bytes, if available. */
+    virtual std::unique_ptr<std::size_t> tryGetSize(std::string path) const = 0;
+
+    /** Get the file size in bytes, or throw if it does not exist. */
+    std::size_t getSize(std::string path) const;
 
     /** Write string data. */
     void put(std::string path, const std::string& data) const;
@@ -291,6 +298,10 @@ public:
     static std::unique_ptr<Fs> create(HttpPool& pool, const Json::Value& json);
 
     virtual std::string type() const override { return "file"; }
+
+    virtual std::unique_ptr<std::size_t> tryGetSize(
+            std::string path) const override;
+
     virtual void put(
             std::string path,
             const std::vector<char>& data) const override;
@@ -401,6 +412,10 @@ public:
             const Json::Value& json);
 
     virtual std::string type() const override { return "http"; }
+
+    virtual std::unique_ptr<std::size_t> tryGetSize(
+            std::string path) const override;
+
     virtual void put(
             std::string path,
             const std::vector<char>& data) const override;
@@ -427,6 +442,7 @@ public:
     ~Curl();
 
     HttpResponse get(std::string path, Headers headers);
+    HttpResponse head(std::string path, Headers headers);
     HttpResponse put(
             std::string path,
             const std::vector<char>& data,
@@ -459,6 +475,10 @@ public:
     ~HttpResource();
 
     HttpResponse get(
+            std::string path,
+            Headers headers = Headers());
+
+    HttpResponse head(
             std::string path,
             Headers headers = Headers());
 
@@ -3197,6 +3217,10 @@ namespace crypto
 
 std::vector<char> hmacSha1(std::string key, std::string message);
 
+// These aren't really crypto, so if this file grows a bit more they can move.
+std::string encodeBase64(const std::vector<char>& data);
+std::string encodeAsHex(const std::vector<char>& data);
+
 } // namespace crypto
 } // namespace arbiter
 
@@ -3270,6 +3294,10 @@ public:
     static std::unique_ptr<S3> create(HttpPool& pool, const Json::Value& json);
 
     virtual std::string type() const override { return "s3"; }
+
+    virtual std::unique_ptr<std::size_t> tryGetSize(
+            std::string path) const override;
+
     virtual void put(
             std::string path,
             const std::vector<char>& data) const override;
@@ -3288,13 +3316,14 @@ private:
             std::string path,
             bool verbose) const override;
 
+    // V2.
     bool buildRequestAndGet(
             std::string rawPath,
             const Query& query,
             std::vector<char>& data,
             Headers = Headers()) const;
 
-    Headers httpGetHeaders(std::string filePath) const;
+    Headers httpGetHeaders(std::string filePath, std::string req = "GET") const;
     Headers httpPutHeaders(std::string filePath) const;
 
     std::string getHttpDate() const;
@@ -3312,7 +3341,13 @@ private:
             std::string contentType) const;
 
     std::vector<char> signString(std::string input) const;
-    std::string encodeBase64(std::vector<char> input) const;
+
+    // V4.
+    std::string buildCanonicalRequest(
+            std::string request,
+            std::string canonicalUri,
+            std::string canonicalQueryString,
+            std::string signedHeaders);
 
     HttpPool& m_pool;
     AwsAuth m_auth;
@@ -3391,6 +3426,10 @@ public:
 
 private:
     virtual bool get(std::string path, std::vector<char>& data) const override;
+
+    virtual std::unique_ptr<std::size_t> tryGetSize(
+            std::string path) const override;
+
     virtual std::vector<std::string> glob(
             std::string path,
             bool verbose) const override;
@@ -3463,6 +3502,9 @@ public:
     /** Passthrough to Driver::isRemote. */
     bool isRemote() const;
 
+    /** Negation of Endpoint::isRemote. */
+    bool isLocal() const;
+
     /** Passthrough to Driver::get. */
     std::string getSubpath(std::string subpath) const;
 
@@ -3522,19 +3564,6 @@ private:
 
 #if defined(_WIN32) || defined(WIN32) || defined(_MSC_VER)
 #define ARBITER_WINDOWS
-
-// from http://stackoverflow.com/questions/13977388/error-cannot-convert-const-wchar-t-13-to-lpcstr-aka-const-char-in-assi
-#ifndef UNICODE
-#define UNICODE
-#define UNICODE_WAS_UNDEFINED
-#endif
-
-#include <Windows.h>
-
-#ifdef UNICODE_WAS_UNDEFINED
-#undef UNICODE
-#endif
-
 #endif
 
 #ifndef ARBITER_IS_AMALGAMATION
@@ -3616,6 +3645,12 @@ public:
     /** Get data in binary form if accessible. */
     std::unique_ptr<std::vector<char>> tryGetBinary(std::string path) const;
 
+    /** Get file size in bytes or throw if inaccessible. */
+    std::size_t getSize(std::string path) const;
+
+    /** Get file size in bytes if accessible. */
+    std::unique_ptr<std::size_t> tryGetSize(std::string path) const;
+
     /** Write data to path. */
     void put(std::string path, const std::string& data) const;
 
@@ -3631,6 +3666,11 @@ public:
      * local filesystem.
      */
     bool isRemote(std::string path) const;
+
+    /** Returns true if this path is on the local filesystem, or false if it is
+     * remote.
+     */
+    bool isLocal(std::string path) const;
 
     /** @brief Resolve a possibly globbed path.
      *

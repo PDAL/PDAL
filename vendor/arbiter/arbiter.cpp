@@ -128,6 +128,16 @@ std::unique_ptr<std::vector<char>> Arbiter::tryGetBinary(std::string path) const
     return getDriver(path).tryGetBinary(stripType(path));
 }
 
+std::size_t Arbiter::getSize(const std::string path) const
+{
+    return getDriver(path).getSize(stripType(path));
+}
+
+std::unique_ptr<std::size_t> Arbiter::tryGetSize(const std::string path) const
+{
+    return getDriver(path).tryGetSize(stripType(path));
+}
+
 void Arbiter::put(const std::string path, const std::string& data) const
 {
     return getDriver(path).put(stripType(path), data);
@@ -152,6 +162,11 @@ void Arbiter::copy(const std::string from, const std::string to) const
 bool Arbiter::isRemote(const std::string path) const
 {
     return getDriver(path).isRemote();
+}
+
+bool Arbiter::isLocal(const std::string path) const
+{
+    return !isRemote(path);
 }
 
 std::vector<std::string> Arbiter::resolve(
@@ -194,6 +209,7 @@ std::unique_ptr<fs::LocalHandle> Arbiter::getLocalHandle(
         std::string name(path);
         std::replace(name.begin(), name.end(), '/', '-');
         std::replace(name.begin(), name.end(), '\\', '-');
+        std::replace(name.begin(), name.end(), ':', '_');
 
         tempEndpoint.putSubpath(name, getBinary(path));
 
@@ -310,7 +326,7 @@ std::vector<char> Driver::getBinary(std::string path) const
     return data;
 }
 
-std::unique_ptr<std::string> Driver::tryGet(std::string path) const
+std::unique_ptr<std::string> Driver::tryGet(const std::string path) const
 {
     std::unique_ptr<std::string> result;
     std::unique_ptr<std::vector<char>> data(tryGetBinary(path));
@@ -322,6 +338,12 @@ std::string Driver::get(const std::string path) const
 {
     const std::vector<char> data(getBinary(path));
     return std::string(data.begin(), data.end());
+}
+
+std::size_t Driver::getSize(const std::string path) const
+{
+    if (auto size = tryGetSize(path)) return *size;
+    else throw ArbiterError("Could not get size of " + path);
 }
 
 void Driver::put(std::string path, const std::string& data) const
@@ -420,6 +442,11 @@ std::string Endpoint::type() const
 bool Endpoint::isRemote() const
 {
     return m_driver.isRemote();
+}
+
+bool Endpoint::isLocal() const
+{
+    return !isRemote();
 }
 
 std::string Endpoint::getSubpath(const std::string subpath) const
@@ -524,6 +551,23 @@ namespace drivers
 std::unique_ptr<Fs> Fs::create(HttpPool&, const Json::Value&)
 {
     return std::unique_ptr<Fs>(new Fs());
+}
+
+std::unique_ptr<std::size_t> Fs::tryGetSize(std::string path) const
+{
+    std::unique_ptr<std::size_t> size;
+
+    path = fs::expandTilde(path);
+
+    std::ifstream stream(path, std::ios::in | std::ios::binary);
+
+    if (stream.good())
+    {
+        stream.seekg(0, std::ios::end);
+        size.reset(new std::size_t(stream.tellg()));
+    }
+
+    return size;
 }
 
 bool Fs::get(std::string path, std::vector<char>& data) const
@@ -682,13 +726,13 @@ std::string getTempPath()
     std::string result;
 
 #ifndef ARBITER_WINDOWS
-    result = getenv("TMPDIR");
-    if (result.empty()) result = getenv("TMP");
-    if (result.empty()) result = getenv("TEMP");
-    if (result.empty()) result = getenv("TEMPDIR");
-    if (result.empty()) result = "/tmp";
+    if (const char* t = getenv("TMPDIR"))   return t;
+    if (const char* t = getenv("TMP"))      return t;
+    if (const char* t = getenv("TEMP"))     return t;
+    if (const char* t = getenv("TEMPDIR"))  return t;
+    if (result.empty()) return "/tmp";
 #else
-    throw std::runtime_error("Windows getTempPath not done yet.");
+    throw ArbiterError("Windows getTempPath not done yet.");
 #endif
 
     return result;
@@ -734,7 +778,6 @@ LocalHandle::~LocalHandle()
 #include <algorithm>
 #include <cstring>
 #include <iostream>
-#include <sstream>
 
 namespace
 {
@@ -853,6 +896,25 @@ Http::Http(HttpPool& pool) : m_pool(pool) { }
 std::unique_ptr<Http> Http::create(HttpPool& pool, const Json::Value&)
 {
     return std::unique_ptr<Http>(new Http(pool));
+}
+
+std::unique_ptr<std::size_t> Http::tryGetSize(std::string path) const
+{
+    std::unique_ptr<std::size_t> size;
+
+    auto http(m_pool.acquire());
+    HttpResponse res(http.head(path));
+
+    if (res.ok())
+    {
+        if (res.headers().count("Content-Length"))
+        {
+            const std::string& str(res.headers().at("Content-Length"));
+            size.reset(new std::size_t(std::stoul(str)));
+        }
+    }
+
+    return size;
 }
 
 bool Http::get(std::string path, std::vector<char>& data) const
@@ -981,6 +1043,39 @@ HttpResponse Curl::get(std::string path, Headers headers)
     return HttpResponse(httpCode, data, receivedHeaders);
 }
 
+HttpResponse Curl::head(std::string path, Headers headers)
+{
+    int httpCode(0);
+    std::vector<char> data;
+
+    if (m_verbose) curl_easy_setopt(m_curl, CURLOPT_VERBOSE, 1L);
+
+    path = drivers::Http::sanitize(path);
+    init(path, headers);
+
+    // Register callback function and date pointer to consume the result.
+    curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, getCb);
+    curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, &data);
+
+    // Insert all headers into the request.
+    curl_easy_setopt(m_curl, CURLOPT_HTTPHEADER, m_headers);
+
+    // Set up callback and data pointer for received headers.
+    Headers receivedHeaders;
+    curl_easy_setopt(m_curl, CURLOPT_HEADERFUNCTION, headerCb);
+    curl_easy_setopt(m_curl, CURLOPT_HEADERDATA, &receivedHeaders);
+
+    // Specify a HEAD request.
+    curl_easy_setopt(m_curl, CURLOPT_NOBODY, 1L);
+
+    // Run the command.
+    curl_easy_perform(m_curl);
+    curl_easy_getinfo(m_curl, CURLINFO_RESPONSE_CODE, &httpCode);
+
+    curl_easy_reset(m_curl);
+    return HttpResponse(httpCode, data, receivedHeaders);
+}
+
 HttpResponse Curl::put(
         std::string path,
         const std::vector<char>& data,
@@ -1073,7 +1168,6 @@ HttpResponse Curl::post(
     return response;
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 
 HttpResource::HttpResource(
@@ -1092,13 +1186,21 @@ HttpResource::~HttpResource()
     m_pool.release(m_id);
 }
 
-HttpResponse HttpResource::get(
-        const std::string path,
-        const Headers headers)
+HttpResponse HttpResource::get(const std::string path, const Headers headers)
 {
     auto f([this, path, headers]()->HttpResponse
     {
         return m_curl.get(path, headers);
+    });
+
+    return exec(f);
+}
+
+HttpResponse HttpResource::head( const std::string path, const Headers headers)
+{
+    auto f([this, path, headers]()->HttpResponse
+    {
+        return m_curl.head(path, headers);
     });
 
     return exec(f);
@@ -1420,6 +1522,33 @@ std::unique_ptr<S3> S3::create(HttpPool& pool, const Json::Value& json)
     return s3;
 }
 
+std::unique_ptr<std::size_t> S3::tryGetSize(std::string rawPath) const
+{
+    std::unique_ptr<std::size_t> size;
+
+    rawPath = Http::sanitize(rawPath);
+    const Resource resource(rawPath);
+
+    const std::string path(resource.buildPath());
+
+    Headers headers(httpGetHeaders(rawPath, "HEAD"));
+
+    auto http(m_pool.acquire());
+
+    HttpResponse res(http.head(path, headers));
+
+    if (res.ok())
+    {
+        if (res.headers().count("Content-Length"))
+        {
+            const std::string& str(res.headers().at("Content-Length"));
+            size.reset(new std::size_t(std::stoul(str)));
+        }
+    }
+
+    return size;
+}
+
 bool S3::get(std::string rawPath, std::vector<char>& data) const
 {
     return buildRequestAndGet(rawPath, Query(), data);
@@ -1570,14 +1699,11 @@ std::vector<std::string> S3::glob(std::string path, bool verbose) const
     return results;
 }
 
-Headers S3::httpGetHeaders(std::string filePath) const
+Headers S3::httpGetHeaders(std::string filePath, std::string request) const
 {
     const std::string httpDate(getHttpDate());
     const std::string signedEncoded(
-            getSignedEncodedString(
-                "GET",
-                filePath,
-                httpDate));
+            getSignedEncodedString(request, filePath, httpDate));
 
     Headers headers;
 
@@ -1642,7 +1768,7 @@ std::string S3::getSignedEncodedString(
                 contentType));
 
     const std::vector<char> signedData(signString(toSign));
-    return encodeBase64(signedData);
+    return crypto::encodeBase64(signedData);
 }
 
 std::string S3::getStringToSign(
@@ -1662,55 +1788,6 @@ std::string S3::getStringToSign(
 std::vector<char> S3::signString(std::string input) const
 {
     return crypto::hmacSha1(m_auth.hidden(), input);
-}
-
-std::string S3::encodeBase64(std::vector<char> data) const
-{
-    std::vector<uint8_t> input;
-    for (std::size_t i(0); i < data.size(); ++i)
-    {
-        char c(data[i]);
-        input.push_back(*reinterpret_cast<uint8_t*>(&c));
-    }
-
-    const std::string vals(
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
-
-    std::size_t fullSteps(input.size() / 3);
-    while (input.size() % 3) input.push_back(0);
-    uint8_t* pos(input.data());
-    uint8_t* end(input.data() + fullSteps * 3);
-
-    std::string output(fullSteps * 4, '_');
-    std::size_t outIndex(0);
-
-    const uint32_t mask(0x3F);
-
-    while (pos != end)
-    {
-        uint32_t chunk((*pos) << 16 | *(pos + 1) << 8 | *(pos + 2));
-
-        output[outIndex++] = vals[(chunk >> 18) & mask];
-        output[outIndex++] = vals[(chunk >> 12) & mask];
-        output[outIndex++] = vals[(chunk >>  6) & mask];
-        output[outIndex++] = vals[chunk & mask];
-
-        pos += 3;
-    }
-
-    if (end != input.data() + input.size())
-    {
-        const std::size_t num(pos - end == 1 ? 2 : 3);
-        uint32_t chunk(*(pos) << 16 | *(pos + 1) << 8 | *(pos + 2));
-
-        output.push_back(vals[(chunk >> 18) & mask]);
-        output.push_back(vals[(chunk >> 12) & mask]);
-        if (num == 3) output.push_back(vals[(chunk >> 6) & mask]);
-    }
-
-    while (output.size() % 4) output.push_back('=');
-
-    return output;
 }
 
 
@@ -1798,6 +1875,7 @@ namespace
     const bool legacy(true);
 
     const std::string listUrl("https://api.dropboxapi.com/2/files/list_folder");
+    const std::string metaUrl("https://api.dropboxapi.com/2/files/get_metadata");
     const std::string continueListUrl(listUrl + "/continue");
 
     const auto ins([](unsigned char lhs, unsigned char rhs)
@@ -1869,6 +1947,38 @@ Headers Dropbox::httpPostHeaders() const
 bool Dropbox::get(const std::string rawPath, std::vector<char>& data) const
 {
     return buildRequestAndGet(rawPath, data);
+}
+
+std::unique_ptr<std::size_t> Dropbox::tryGetSize(
+        const std::string rawPath) const
+{
+    std::unique_ptr<std::size_t> result;
+
+    Headers headers(httpPostHeaders());
+
+    Json::Value json;
+    json["path"] = std::string("/" + Http::sanitize(rawPath));
+    const auto f(toSanitizedString(json));
+    const std::vector<char> postData(f.begin(), f.end());
+
+    auto http(m_pool.acquire());
+    HttpResponse res(http.post(metaUrl, postData, headers));
+
+    if (res.ok())
+    {
+        const auto data(res.data());
+
+        Json::Value json;
+        Json::Reader reader;
+        reader.parse(std::string(data.data(), data.size()), json, false);
+
+        if (json.isMember("size"))
+        {
+            result.reset(new std::size_t(json["size"].asUInt64()));
+        }
+    }
+
+    return result;
 }
 
 bool Dropbox::buildRequestAndGet(
@@ -1949,7 +2059,7 @@ std::string Dropbox::continueFileInfo(std::string cursor) const
 
     Json::Value json;
     json["cursor"] = cursor;
-    std::string f = toSanitizedString(json);
+    const std::string f(toSanitizedString(json));
 
     std::vector<char> postData(f.begin(), f.end());
     HttpResponse res(http.post(continueListUrl, postData, headers));
@@ -2119,6 +2229,11 @@ namespace crypto
 {
 namespace
 {
+    const std::string base64Vals(
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
+
+    const std::string hexVals("0123456789abcdef");
+
     const std::size_t block(64);
 
     std::vector<char> append(
@@ -2334,8 +2449,72 @@ std::vector<char> hmacSha1(std::string key, const std::string message)
     return sha1(append(okeypad, sha1(append(ikeypad, message))));
 }
 
+std::string encodeBase64(const std::vector<char>& data)
+{
+    std::vector<uint8_t> input;
+    for (std::size_t i(0); i < data.size(); ++i)
+    {
+        char c(data[i]);
+        input.push_back(*reinterpret_cast<uint8_t*>(&c));
+    }
+
+    std::size_t fullSteps(input.size() / 3);
+    while (input.size() % 3) input.push_back(0);
+    uint8_t* pos(input.data());
+    uint8_t* end(input.data() + fullSteps * 3);
+
+    std::string output(fullSteps * 4, '_');
+    std::size_t outIndex(0);
+
+    const uint32_t mask(0x3F);
+
+    while (pos != end)
+    {
+        uint32_t chunk((*pos) << 16 | *(pos + 1) << 8 | *(pos + 2));
+
+        output[outIndex++] = base64Vals[(chunk >> 18) & mask];
+        output[outIndex++] = base64Vals[(chunk >> 12) & mask];
+        output[outIndex++] = base64Vals[(chunk >>  6) & mask];
+        output[outIndex++] = base64Vals[chunk & mask];
+
+        pos += 3;
+    }
+
+    if (end != input.data() + input.size())
+    {
+        const std::size_t num(pos - end == 1 ? 2 : 3);
+        uint32_t chunk(*(pos) << 16 | *(pos + 1) << 8 | *(pos + 2));
+
+        output.push_back(base64Vals[(chunk >> 18) & mask]);
+        output.push_back(base64Vals[(chunk >> 12) & mask]);
+        if (num == 3) output.push_back(base64Vals[(chunk >> 6) & mask]);
+    }
+
+    while (output.size() % 4) output.push_back('=');
+
+    return output;
+}
+
+std::string encodeAsHex(const std::vector<char>& input)
+{
+    std::string output;
+    output.reserve(input.size() * 2);
+
+    uint8_t u(0);
+
+    for (const char c : input)
+    {
+        u = *reinterpret_cast<const uint8_t*>(&c);
+        output.push_back(hexVals[u >> 4]);
+        output.push_back(hexVals[u & 0x0F]);
+    }
+
+    return output;
+}
+
 } // namespace crypto
 } // namespace arbiter
+
 
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: arbiter/util/crypto.cpp
