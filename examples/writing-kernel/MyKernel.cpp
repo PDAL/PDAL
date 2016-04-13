@@ -39,16 +39,16 @@ namespace pdal {
     PointTable table;
     StageFactory f;
 
-    Stage& reader = makeReaer(m_input_file, "readers.las", "");
+    Stage& reader = makeReaer(m_input_file, "readers.las");
 
     Stage& filter = makeFilter("filters.decimation", reader);
     Options filterOptions;
     filterOptions.add("step", 10);
     filter.addOptions(filterOptions);
 
-    Stage& writer = makeWriter(m_output_file, "writers.text", filter);
-    writer->prepare(table);
-    writer->execute(table);
+    Stage& writer = makeWriter(m_output_file, filter, "writers.text");
+    writer.prepare(table);
+    writer.execute(table);
 
     return 0;
   }
