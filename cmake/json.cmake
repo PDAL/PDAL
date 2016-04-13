@@ -5,6 +5,7 @@ endif()
 
 
 find_package(JSONCPP 1.6.2)
+set_package_properties(JSONCPP PROPERTIES TYPE OPTIONAL)
 
 if (JSONCPP_FOUND)
     set_package_properties(JSONCPP PROPERTIES TYPE OPTIONAL)

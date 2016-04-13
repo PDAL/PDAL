@@ -14,8 +14,6 @@ if(UNIX)
   add_definitions("-fPIC")
 endif()
 
-add_definitions("-DARBITER_EXTERNAL_JSON")
-
 
 PDAL_ADD_LIBRARY(${PDAL_JSONCPP_LIB_NAME} STATIC "${PDAL_JSONCPP_SOURCES}")
 
