@@ -10,6 +10,10 @@ file(GLOB PDAL_JSONCPP_SOURCES
     "jsoncpp.cpp"
 )
 
+if(UNIX)
+  add_definitions("-fPIC")
+endif()
+
 
 PDAL_ADD_LIBRARY(${PDAL_JSONCPP_LIB_NAME} STATIC "${PDAL_JSONCPP_SOURCES}")
 
