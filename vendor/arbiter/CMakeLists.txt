@@ -11,6 +11,11 @@ file(GLOB PDAL_ARBITER_SOURCES
     "arbiter.hpp"
 )
 
+if(UNIX)
+  add_definitions("-fPIC")
+endif()
+
+
 PDAL_ADD_LIBRARY(${PDAL_ARBITER_LIB_NAME} STATIC "${PDAL_ARBITER_SOURCES}")
 target_link_libraries(${PDAL_ARBITER_LIB_NAME} )
 
