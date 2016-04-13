@@ -734,6 +734,7 @@ LocalHandle::~LocalHandle()
 #include <algorithm>
 #include <cstring>
 #include <iostream>
+#include <sstream>
 
 namespace
 {

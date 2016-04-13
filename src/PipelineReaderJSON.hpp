@@ -37,7 +37,7 @@
 #include <pdal/pdal_internal.hpp>
 #include <pdal/StageFactory.hpp>
 
-#include <json/json-forwards.h>
+#include <json/json.h>
 
 #include <vector>
 #include <string>

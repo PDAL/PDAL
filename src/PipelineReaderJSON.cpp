@@ -41,7 +41,6 @@
 #include <pdal/util/Utils.hpp>
 
 #include <json/json.h>
-#include <json/json-forwards.h>
 
 #include <memory>
 #include <vector>
