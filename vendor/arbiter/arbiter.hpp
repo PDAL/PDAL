@@ -3522,6 +3522,19 @@ private:
 
 #if defined(_WIN32) || defined(WIN32) || defined(_MSC_VER)
 #define ARBITER_WINDOWS
+
+// from http://stackoverflow.com/questions/13977388/error-cannot-convert-const-wchar-t-13-to-lpcstr-aka-const-char-in-assi
+#ifndef UNICODE
+#define UNICODE
+#define UNICODE_WAS_UNDEFINED
+#endif
+
+#include <Windows.h>
+
+#ifdef UNICODE_WAS_UNDEFINED
+#undef UNICODE
+#endif
+
 #endif
 
 #ifndef ARBITER_IS_AMALGAMATION
