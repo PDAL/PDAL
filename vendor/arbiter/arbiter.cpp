@@ -520,6 +520,15 @@ Endpoint Endpoint::getSubEndpoint(std::string subpath) const
 #include <glob.h>
 #include <sys/stat.h>
 #else
+
+#ifndef UNICODE
+#define UNICODE
+#endif
+
+#ifndef _UNICODE
+#define _UNICODE
+#endif
+
 #include <locale>
 #include <codecvt>
 #endif
@@ -642,19 +651,19 @@ std::vector<std::string> Fs::glob(std::string path, bool) const
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
     const std::wstring wide(converter.from_bytes(path));
 
-    WIN32_FIND_DATA data;
-    HANDLE hFind(FindFirstFile(wide.c_str(), &data));
+    LPWIN32_FIND_DATAW data;
+    HANDLE hFind(FindFirstFileW(wide.c_str(), data));
 
     if (hFind != INVALID_HANDLE_VALUE)
     {
         do
         {
-            if ((data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
+            if ((data->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
             {
-                results.push_back(converter.to_bytes(data.cFileName));
+                results.push_back(converter.to_bytes(data->cFileName));
             }
         }
-        while (FindNextFile(hFind, &data));
+        while (FindNextFileW(hFind, data));
     }
 #endif
 
@@ -703,16 +712,26 @@ std::string expandTilde(std::string in)
 
         static const std::string home(getenv("HOME"));
 #else
-        if (
-                !getenv("USERPROFILE") &&
-                !(getenv("HOMEDRIVE") && getenv("HOMEPATH")))
+        char* userProfile(nullptr);
+        char* homePath(nullptr);
+        char* homeDrive(nullptr);
+
+        std::size_t len(0);
+        errno_t err(0);
+
+        err = _dupenv_s(&userProfile, &len, "USERPROFILE");
+        err = _dupenv_s(&homeDrive, &len, "HOMEDRIVE");
+        err = _dupenv_s(&homePath, &len, "HOMEPATH");
+
+        if (!userProfile && !(homeDrive && homePath))
         {
             noHome();
         }
 
         static const std::string home(
-                getenv("USERPROFILE") ? getenv("USERPROFILE") :
-                    (getenv("HOMEDRIVE") + getenv("HOMEPATH"));
+                userProfile ?
+                    userProfile :
+                    std::string(homeDrive) + std::string(homePath));
 #endif
 
         out = home + in.substr(1);
@@ -2029,10 +2048,9 @@ bool Dropbox::buildRequestAndGet(
         }
         else
         {
-            std::ostringstream oss;
-            oss << "Data size check failed. State size was '" << size
-                << "' and downloaded size was '" << res.data().size() << "'";
-            throw ArbiterError(oss.str());
+            throw ArbiterError(
+                    "Data size check failed - got " + std::to_string(size) +
+                    " of " + std::to_string(res.data().size()) + " bytes.");
         }
     }
     else
