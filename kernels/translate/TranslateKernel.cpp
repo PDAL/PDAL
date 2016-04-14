@@ -88,42 +88,10 @@ void TranslateKernel::addSwitches(ProgramArgs& args)
 
 int TranslateKernel::execute()
 {
-    // setting common options for each stage propagates the debug flag and
-    // verbosity level
     Options readerOptions, filterOptions, writerOptions;
-    setCommonOptions(readerOptions);
-    setCommonOptions(filterOptions);
-    setCommonOptions(writerOptions);
 
-    m_manager = std::unique_ptr<PipelineManager>(new PipelineManager);
-
-    if (!m_readerType.empty())
-    {
-        m_manager->addReader(m_readerType);
-    }
-    else
-    {
-        StageFactory factory;
-        std::string driver = factory.inferReaderDriver(m_inputFile);
-
-        if (driver.empty())
-            throw pdal_error("Cannot determine input file type of " +
-                                    m_inputFile);
-        m_manager->addReader(driver);
-    }
-
-    if (m_manager == NULL)
-        throw pdal_error("Error making pipeline\n");
-
-    Stage* reader = m_manager->getStage();
-
-    if (reader == NULL)
-        throw pdal_error("Error getting reader\n");
-
-    readerOptions.add("filename", m_inputFile);
-    reader->setOptions(readerOptions);
-
-    Stage* stage = reader;
+    Stage& reader = m_manager.makeReader(m_inputFile, m_readerType);
+    Stage* stage = &reader;
 
     // add each filter provided on the command-line, updating the stage pointer
     for (auto const f : m_filterType)
@@ -133,55 +101,14 @@ int TranslateKernel::execute()
         if (!Utils::startsWith(f, "filters."))
             filter_name.insert(0, "filters.");
 
-        Stage* filter = &(m_manager->addFilter(filter_name));
-
-        if (filter == NULL)
-        {
-            std::ostringstream oss;
-            oss << "Unable to add filter " << filter_name << ".  Filter "
-              "is invalid or plugin could not be loaded.  Check "
-              "'pdal --drivers'.";
-            throw pdal_error("Error getting filter\n");
-        }
-
-        filter->setOptions(filterOptions);
-        filter->setInput(*stage);
-        stage = filter;
+        Stage& filter = m_manager.makeFilter(filter_name, *stage);
+        stage = &filter;
     }
 
-    if (!m_writerType.empty())
-    {
-        m_manager->addWriter(m_writerType);
-    }
-    else
-    {
-        StageFactory factory;
-        std::string driver = factory.inferWriterDriver(m_outputFile);
-
-        if (driver.empty())
-            throw pdal_error("Cannot determine output file type of " +
-                m_outputFile);
-        Options options = factory.inferWriterOptionsChanges(m_outputFile);
-        writerOptions += options;
-        m_manager->addWriter(driver);
-    }
-
-    Stage* writer = m_manager->getStage();
-
-    if (writer == NULL)
-        throw pdal_error("Error getting writer\n");
-
-    writerOptions.add("filename", m_outputFile);
-    writer->setOptions(writerOptions);
-    writer->setInput(*stage);
-
-    // be sure to recurse through any extra stage options provided by the user
-    applyExtraStageOptionsRecursive(writer);
-
-    m_manager->execute();
-
+    Stage& writer = m_manager.makeWriter(m_outputFile, *stage, m_writerType);
+    m_manager.execute();
     if (m_pipelineOutput.size() > 0)
-        PipelineWriter::writePipeline(m_manager->getStage(), m_pipelineOutput);
+        PipelineWriter::writePipeline(&writer, m_pipelineOutput);
 
     return 0;
 }

@@ -62,15 +62,21 @@ public:
         {}
     ~PipelineManager();
 
-    void readPipeline(std::istream& input, bool debug=false,
-                   uint32_t verbose = 0);
-    void readPipeline(const std::string& filename, bool debug=false,
-                   uint32_t verbose = 0);
+    void readPipeline(std::istream& input);
+    void readPipeline(const std::string& filename);
 
     // Use these to manually add stages into the pipeline manager.
     Stage& addReader(const std::string& type);
     Stage& addFilter(const std::string& type);
     Stage& addWriter(const std::string& type);
+
+    // These add stages, hook dependencies and set necessary options.
+    // They're preferable to the above as they're more flexible and safer.
+    Stage& makeReader(const std::string& inputFile, std::string driver);
+    Stage& makeFilter(const std::string& driver);
+    Stage& makeFilter(const std::string& driver, Stage& parent);
+    Stage& makeWriter(const std::string& outputFile, Stage& parent,
+        std::string driver);
 
     // returns true if the pipeline endpoint is a writer
     bool isWriterPipeline() const
@@ -93,11 +99,20 @@ public:
         { return m_table; }
 
     MetadataNode getMetadata() const;
+    Options& commonOptions()
+        { return m_commonOptions; }
+    OptionsMap& stageOptions()
+        { return m_stageOptions; }
+    Options& stageOptions(Stage& stage);
+    //ABELL - would like this to be private.
+    void setOptions(Stage& stage, const Options& addOps);
 
 private:
     StageFactory m_factory;
     std::unique_ptr<PointTable> m_tablePtr;
     PointTableRef m_table;
+    Options m_commonOptions;
+    OptionsMap m_stageOptions;
 
     PointViewSet m_viewSet;
 

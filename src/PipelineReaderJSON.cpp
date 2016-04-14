@@ -88,41 +88,30 @@ public:
         ++m_numStages;
     }
 
-    void addUnknown(const std::string& name)
-    {
-        throw pdal_error("PipelineReaderJSON: "
-                         "unknown child of element: " + name);
-    }
-
     void validate()
     {
         if (m_numTypes == 0)
-            throw pdal_error("PipelineReaderJSON: "
-                             "expected Type element missing");
+            throw pdal_error("JSON pipeline: Expected 'type' element missing");
         if (m_numTypes > 1)
-            throw pdal_error("PipelineReaderJSON: "
-                             "extra Type element found");
+            throw pdal_error("JSON pipeline: Extra Type element found");
 
         if (m_cardinality == None)
         {
             if (m_numStages != 0)
-                throw pdal_error("PipelineReaderJSON: "
-                                 "found child stages where none were expected");
+                throw pdal_error("JSON pipeline: Found child stages where "
+                    "none were expected");
         }
         if (m_cardinality == One)
         {
             if (m_numStages == 0)
-                throw pdal_error("PipelineReaderJSON: "
-                                 "expected child stage missing");
+                throw pdal_error("JSON pipeline: Expected child stage missing");
             if (m_numStages > 1)
-                throw pdal_error("PipelineReaderJSON: "
-                                 "extra child stages found");
+                throw pdal_error("JSON pipeline: Extra child stages found");
         }
         if (m_cardinality == Many)
         {
             if (m_numStages == 0)
-                throw pdal_error("PipelineReaderJSON: "
-                                 "expected child stage missing");
+                throw pdal_error("JSON pipeline: Expected child stage missing");
         }
     }
 
@@ -133,49 +122,26 @@ private:
 };
 
 
-PipelineReaderJSON::PipelineReaderJSON(PipelineManager& manager, bool isDebug,
-                                       uint32_t verboseLevel) :
-    m_manager(manager) , m_isDebug(isDebug) , m_verboseLevel(verboseLevel)
-{
-    if (m_isDebug)
-    {
-        Option opt("debug", true);
-        m_baseOptions.add(opt);
-    }
-    if (m_verboseLevel)
-    {
-        Option opt("verbose", m_verboseLevel);
-        m_baseOptions.add(opt);
-    }
-}
+PipelineReaderJSON::PipelineReaderJSON(PipelineManager& manager) :
+    m_manager(manager)
+{}
 
 
 Stage *PipelineReaderJSON::parseReaderByFilename(const std::string& filename)
 {
-    Options options;
-
     StageParserContext context;
-    std::string type;
 
-    try
-    {
-        type = StageFactory::inferReaderDriver(filename);
-        if (!type.empty())
-        {
-            context.addType();
-        }
-
-        Option opt("filename", filename);
-        options += opt;
-    }
-    catch (Option::not_found)
-    {}
-
+    std::string type = StageFactory::inferReaderDriver(filename);
+    if (!type.empty())
+        context.addType();
     context.setCardinality(StageParserContext::None);
     context.validate();
 
-    Stage& reader(m_manager.addReader(type));
-    reader.setOptions(options);
+    Stage& reader = m_manager.addReader(type);
+
+    Options ops;
+    ops.add("filename", filename);
+    reader.setOptions(ops);
 
     return &reader;
 }
@@ -183,32 +149,24 @@ Stage *PipelineReaderJSON::parseReaderByFilename(const std::string& filename)
 
 Stage *PipelineReaderJSON::parseWriterByFilename(const std::string& filename)
 {
-    Options options;
-
     StageParserContext context;
-    std::string type;
 
-    try
-    {
-        type = StageFactory::inferWriterDriver(filename);
-        if (type.empty())
-            throw pdal_error("PipelineReaderJSON: "
-                             "Cannot determine output file type of " +
-                             filename);
+    std::string type = StageFactory::inferWriterDriver(filename);
+    if (type.empty())
+        throw pdal_error("PipelineReaderJSON: "
+                "Cannot determine output file type of " +
+                filename);
 
-        options += StageFactory::inferWriterOptionsChanges(filename);
-        options.add("filename", filename);
-        context.addType();
-    }
-    catch (Option::not_found)
-    {}
+    Options options;
+    options.add("filename", filename);
+    options += StageFactory::inferWriterOptionsChanges(filename);
 
+    context.addType();
     context.setCardinality(StageParserContext::None);
     context.validate();
 
     Stage& writer(m_manager.addWriter(type));
-    writer.setOptions(options);
-
+    writer.addOptions(options);
     return &writer;
 }
 
@@ -224,8 +182,8 @@ void PipelineReaderJSON::parseElement_Pipeline(const Json::Value& tree)
     size_t i = 0;
     for (auto const& node : tree)
     {
-        std::vector<std::string> inputs;
         Stage* stage = NULL;
+        StringList sInputs;
 
         bool curStageIsReader = false;
 
@@ -251,79 +209,105 @@ void PipelineReaderJSON::parseElement_Pipeline(const Json::Value& tree)
         }
         else
         {
-            bool filenameIsSet = false;
-
-            std::string type, filename, tag;
+            Json::Value type, filename, tag, inputs;
             if (node.isMember("type"))
-                type = node["type"].asString();
+                type = node["type"];
             if (node.isMember("filename"))
-                filename = node["filename"].asString();
+                filename = node["filename"];
             if (node.isMember("tag"))
-                tag = node["tag"].asString();
+                tag = node["tag"];
             if (node.isMember("inputs"))
+                inputs = node["inputs"];
+
+            if (!inputs.isNull())
             {
                 for (auto const& input : node["inputs"])
                 {
                     if (input.isString())
-                        inputs.push_back(input.asString());
+                        sInputs.push_back(input.asString());
                     else
-                        throw pdal_error("PipelineReaderJSON: "
-                                         "Stage inputs must be specified as "
-                                         "a string");
+                        throw pdal_error("JSON pipeline: "
+                            "Stage inputs must be specified as a string");
                 }
             }
 
-            if (!type.empty())
+            std::string sFilename;
+            if (!filename.isNull())
             {
-                if (Utils::startsWith(type, "readers."))
+                if (!filename.isString())
+                    throw pdal_error("JSON pipeline: filenames must "
+                        "be specified as a string");
+                sFilename = filename.asString();
+            }
+
+            stage = NULL;
+            if (!type.isNull())
+            {
+                std::string sType;
+                if (type.isString())
+                    sType = type.asString();
+
+                // PipelineManager will throw if we can't create
+                // the requested stage type.
+                if (Utils::startsWith(sType, "readers."))
                 {
-                    stage = &m_manager.addReader(type);
+                    stage = &m_manager.addReader(sType);
                     if (onlyReaders)
                         firstReaders.push_back(stage);
                     curStageIsReader = true;
                 }
-                else if (Utils::startsWith(type, "filters."))
+                else if (Utils::startsWith(sType, "filters."))
                 {
-                    stage = &m_manager.addFilter(type);
+                    stage = &m_manager.addFilter(sType);
                     onlyReaders = false;
                 }
-                else if (Utils::startsWith(type, "writers."))
+                else if (Utils::startsWith(sType, "writers."))
                 {
-                    stage = &m_manager.addWriter(type);
+                    stage = &m_manager.addWriter(sType);
                     onlyReaders = false;
                 }
                 else
-                    throw pdal_error("PipelineReaderJSON: "
-                                     "Could not determine type of " + type);
+                    throw pdal_error("JSON pipeline: could not create stage "
+                        "for type " + sType);
             }
-            else if (!filename.empty())
+
+            if (!stage && !sFilename.empty())
             {
-                if (i < tree.size()-1)
+                // Anything other than the last entry in the tree is
+                // a reader.
+                if (i < tree.size() - 1)
                 {
-                    stage = parseReaderByFilename(filename);
+                    stage = parseReaderByFilename(sFilename);
                     if (onlyReaders)
                         firstReaders.push_back(stage);
                     curStageIsReader = true;
-                    filenameIsSet = true;
                 }
+                // If the last entry is a filename, then it's writer.
                 else
                 {
-                    stage = parseWriterByFilename(filename);
-                    filenameIsSet = true;
+                    stage = parseWriterByFilename(sFilename);
                     onlyReaders = false;
                 }
             }
 
-            if (!tag.empty())
-            {
-                if (tags[tag])
-                    throw pdal_error("PipelineReaderJSON: "
-                                     "Duplicate tag " + tag);
+            if (!stage)
+                throw pdal_error("JSON pipeline: Found neither a stage type "
+                    "nor a filename with which a stage type could be "
+                    "inferred.");
 
-                tags[tag] = stage;
+            if (!tag.isNull())
+            {
+                std::string sTag;
+                if (!tag.isString())
+                    throw pdal_error("JSON pipeline: tags must "
+                        "be specified as a string");
+                sTag = tag.asString();
+                if (tags.find(sTag) != tags.end())
+                    throw pdal_error("JSON pipeline: duplicate tag " + sTag);
+                tags[sTag] = stage;
             }
 
-            Options options(m_baseOptions);
+            Options options;
             for (auto const& name : node.getMemberNames())
             {
                 if (name.compare("type") == 0)
@@ -332,25 +316,25 @@ void PipelineReaderJSON::parseElement_Pipeline(const Json::Value& tree)
                     continue;
                 if (name.compare("tag") == 0)
                     continue;
-                if (filenameIsSet && name.compare("filename") == 0)
-                    continue;
 
-                Option opt(name, node[name].asString());
-                options.add(opt);
+                if (!node[name].isConvertibleTo(Json::stringValue))
+                    throw pdal_error("JSON pipeline: Value of stage option '" +
+                        name + "' must be convertible to a string.");
+                options.add(name, node[name].asString());
             }
 
-            stage->addOptions(options);
+            m_manager.setOptions(*stage, options);
         }
 
-        if (!inputs.empty())
+        if (!sInputs.empty())
         {
-            for (auto const& input : inputs)
+            for (auto const& input : sInputs)
             {
-                if (!tags[input])
-                    throw pdal_error("PipelineReaderJSON: "
-                                     "Invalid pipeline, undefined stage " +
-                                     input);
-                stage->setInput(*tags[input]);
+                auto ti = tags.find(input);
+                if (ti == tags.end())
+                    throw pdal_error("JSON pipeline: Invalid pipeline, "
+                        "undefined stage '" + input + "'");
+                stage->setInput(*(ti->second));
             }
         }
         else
@@ -382,11 +366,11 @@ void PipelineReaderJSON::readPipeline(std::istream& input)
     Json::Value root;
     Json::Reader jsonReader;
     if (!jsonReader.parse(input, root))
-        throw pdal_error("PipelineReaderJSON: unable to parse pipeline");
+        throw pdal_error("JSON pipeline: Unable to parse pipeline");
 
     Json::Value subtree = root["pipeline"];
     if (!subtree)
-        throw pdal_error("PipelineReaderJSON: root element is not a Pipeline");
+        throw pdal_error("JSON pipeline: Root element is not a Pipeline");
     parseElement_Pipeline(subtree);
 }
 
@@ -398,8 +382,8 @@ void PipelineReaderJSON::readPipeline(const std::string& filename)
     std::istream* input = FileUtils::openFile(filename);
     if (!input)
     {
-        throw pdal_error("PipelineReaderJSON: "
-                         "unable to open stream for file \"" + filename + "\"");
+        throw pdal_error("JSON pipeline: Unable to open stream for "
+            "file \"" + filename + "\"");
     }
 
     try
@@ -413,8 +397,8 @@ void PipelineReaderJSON::readPipeline(const std::string& filename)
     catch (...)
     {
         FileUtils::closeFile(input);
-        throw pdal_error("PipelineReaderJSON: "
-                         "unable to process pipeline file \""+ filename + "\". " "JSON is invalid.");
+        throw pdal_error("JSON pipeline: Unable to process pipeline "
+            "file \""+ filename + "\". JSON is invalid.");
     }
 
     FileUtils::closeFile(input);

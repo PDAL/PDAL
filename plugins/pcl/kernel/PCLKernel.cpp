@@ -109,7 +109,6 @@ int PCLKernel::execute()
     Stage& writer(makeWriter(m_outputFile, pclStage, ""));
     writer.addOptions(writerOptions);
 
-    applyExtraStageOptionsRecursive(&writer);
     writer.prepare(table);
 
     // process the data, grabbing the PointViewSet for visualization of the

@@ -41,7 +41,7 @@
 #include <string>
 #include <vector>
 
-#include <pdal/StageFactory.hpp>
+#include <pdal/PipelineManager.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
@@ -97,43 +97,17 @@ public:
     // it will be wrapped in a global catch try/block for you
     virtual int execute() = 0;
 
-    void setCommonOptions(Options &options);
-
-    const Options& extraStageOptions(const std::string& stage)
-    {
-        static Options nullOpts;
-
-        auto oi = m_extraStageOptions.find(stage);
-        if (oi == m_extraStageOptions.end())
-            return nullOpts;
-        return oi->second;
-    }
-
-    void applyExtraStageOptionsRecursive(Stage *s)
-    {
-        // if options provided via command-line, we assume they should overwrite
-        // existing options, remove first, and then add
-        Options ops = extraStageOptions(s->getName());
-
-        s->removeOptions(ops);
-        s->addOptions(ops);
-        auto stages = s->getInputs();
-        for (Stage *s : stages)
-            applyExtraStageOptionsRecursive(s);
-    }
-
 protected:
-
     bool m_usestdin;
     Log m_log;
+    PipelineManager m_manager;
 
 private:
     int innerRun(ProgramArgs& args);
     void outputHelp(ProgramArgs& args);
     void outputVersion();
     void addBasicSwitches(ProgramArgs& args);
-    void collectExtraOptions();
-    Stage& createStage(const std::string& name);
+    void parseCommonOptions();
 
     void doSwitches(int argc, const char *argv[], ProgramArgs& args);
     int doStartup();
@@ -156,10 +130,6 @@ private:
     std::string m_offsets;
     bool m_visualize;
     std::string m_label;
-
-    std::vector<std::string> m_extra_options;
-    std::map<std::string, Options> m_extraStageOptions;
-    StageFactory m_factory;
 
     Kernel& operator=(const Kernel&); // not implemented
     Kernel(const Kernel&); // not implemented

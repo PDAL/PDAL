@@ -85,8 +85,6 @@ void Stage::serialize(MetadataNode root, PipelineWriter::TagMap& tags) const
     m_options.toMetadata(anon);
     for (Stage *s : m_inputs)
         anon.addList("inputs", tagname(s));
-    if (m_metadata.hasChildren())
-        anon.add(m_metadata.clone("execution_metadata"));
     root.addList(anon);
 }
 

@@ -76,11 +76,13 @@ int SmoothKernel::execute()
     // consumed by the processing pipeline
     PointViewPtr input_view = *viewSetIn.begin();
 
-    std::shared_ptr<BufferReader> bufferReader(new BufferReader);
-    Options bufferOptions;
-    setCommonOptions(bufferOptions);
-    bufferReader->setOptions(bufferOptions);
-    bufferReader->addView(input_view);
+    PipelineManager manager;
+    manager.commonOptions() = m_manager.commonOptions();
+    manager.stageOptions() = m_manager.stageOptions();
+
+    BufferReader& bufferReader =
+        static_cast<BufferReader&>(manager.makeReader("", "readers.buffer"));
+    bufferReader.addView(input_view);
 
     std::ostringstream ss;
     ss << "{";
@@ -94,7 +96,7 @@ int SmoothKernel::execute()
     Options smoothOptions;
     smoothOptions.add("json", ss.str());
 
-    Stage& smoothStage = makeFilter("filters.pclblock", *bufferReader);
+    Stage& smoothStage = manager.makeFilter("filters.pclblock", bufferReader);
     smoothStage.addOptions(smoothOptions);
 
     Stage& writer(Kernel::makeWriter(m_outputFile, smoothStage, ""));

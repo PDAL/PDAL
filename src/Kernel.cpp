@@ -84,7 +84,6 @@ bool parseOption(std::string o, std::string& stage, std::string& option,
     // Get stage_type.
     count = Utils::extract(o, pos, islc);
     pos += count;
-
     std::string stage_type = o.substr(0, pos);
     if (stage_type != "readers" && stage_type != "writers" &&
         stage_type != "filters")
@@ -142,6 +141,7 @@ std::ostream& operator<<(std::ostream& ostr, const Kernel& kernel)
 void Kernel::doSwitches(int argc, const char *argv[], ProgramArgs& args)
 {
     StringList stringArgs;
+    OptionsMap& stageOptions = m_manager.stageOptions();
 
     // Scan the argument vector for extra stage options.  Pull them out and
     // stick them in the list.  Let the ProgramArgs handle everything else.
@@ -155,7 +155,7 @@ void Kernel::doSwitches(int argc, const char *argv[], ProgramArgs& args)
         if (parseOption(argv[i], stageName, opName, value))
         {
             Option op(opName, value);
-            m_extraStageOptions[stageName].add(op);
+            stageOptions[stageName].add(op);
         }
         else
             stringArgs.push_back(argv[i]);
@@ -270,21 +270,6 @@ int Kernel::run(int argc, char const * argv[], const std::string& appName)
 }
 
 
-void Kernel::collectExtraOptions()
-{
-    for (const auto& o : m_extra_options)
-    {
-        std::string stageName, opName, value;
-
-        if (parseOption(o, stageName, opName, value))
-        {
-            Option op(opName, value);
-            m_extraStageOptions[stageName].add(op);
-        }
-    }
-}
-
-
 int Kernel::innerRun(ProgramArgs& args)
 {
     try
@@ -299,7 +284,7 @@ int Kernel::innerRun(ProgramArgs& args)
         return -1;
     }
 
-    collectExtraOptions();
+    parseCommonOptions();
     return execute();
 }
 
@@ -324,11 +309,16 @@ bool Kernel::isVisualize() const
 
 void Kernel::visualize(PointViewPtr view)
 {
-    BufferReader bufferReader;
-    bufferReader.addView(view);
+    PipelineManager manager;
 
-    auto& writer = createStage("writers.pclvisualizer");
-    writer.setInput(bufferReader);
+    manager.commonOptions() = m_manager.commonOptions();
+    manager.stageOptions() = m_manager.stageOptions();
+
+    BufferReader& reader =
+        static_cast<BufferReader&>(manager.makeReader("", "readers.buffer"));
+    reader.addView(view);
+
+    Stage& writer = manager.makeWriter("", reader, "writers.pclvisualizer");
 
     PointTable table;
     writer.prepare(table);
@@ -347,20 +337,27 @@ void Kernel::visualize(PointViewPtr input_view, PointViewPtr output_view) const
     BOX3D const& output_bounds = output_view->calculateBounds();
 
     // Convert PointView to a PCL PointCloud
-    pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-    pclsupport::PDALtoPCD(const_cast<PointViewPtr>(*input_view), *input_cloud, input_bounds);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-    pclsupport::PDALtoPCD(const_cast<PointViewPtr>(*output_view), *output_cloud, output_bounds);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud(
+        new pcl::PointCloud<pcl::PointXYZ>);
+    pclsupport::PDALtoPCD(
+        const_cast<PointViewPtr>(*input_view), *input_cloud, input_bounds);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud(
+        new pcl::PointCloud<pcl::PointXYZ>);
+    pclsupport::PDALtoPCD(
+        const_cast<PointViewPtr>(*output_view), *output_cloud, output_bounds);
 
     // Create PCLVisualizer
-    std::shared_ptr<pcl::visualization::PCLVisualizer> p(new pcl::visualization::PCLVisualizer("3D Viewer"));
+    std::shared_ptr<pcl::visualization::PCLVisualizer> p(
+        new pcl::visualization::PCLVisualizer("3D Viewer"));
 
     // Set background to black
     p->setBackgroundColor(0, 0, 0);
 
     // Use Z dimension to colorize points
-    pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZ> input_color(input_cloud, "z");
-    pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZ> output_color(output_cloud, "z");
+    pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZ>
+        input_color(input_cloud, "z");
+    pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZ>
+        output_color(output_cloud, "z");
 
     // Add point cloud to the viewer with the Z dimension color handler
     p->createViewPort(0, 0, 0.5, 1, viewport);
@@ -380,9 +377,12 @@ void Kernel::visualize(PointViewPtr input_view, PointViewPtr output_view) const
 */
 
 
-void Kernel::setCommonOptions(Options &options)
+void Kernel::parseCommonOptions()
 {
-    options.add("visualize", m_visualize);
+    Options& options = m_manager.commonOptions();
+
+    if (m_visualize)
+        options.add("visualize", m_visualize);
 
     if (m_isDebug)
     {
@@ -478,10 +478,6 @@ void Kernel::addBasicSwitches(ProgramArgs& args)
 
     args.add("visualize", "Visualize result", m_visualize);
     args.add("stdin,s", "Read pipeline JSON from stdin", m_usestdin);
-    /**
-    args.add("heartbeat", "Shell command to run for every progress heartbeat",
-        m_heartbeat_shell_command);
-    **/
     args.add("scale",
          "A comma-separated or quoted, space-separated list of scales to "
          "set on the output file: \n--scale 0.1,0.1,0.00001\n--scale \""
@@ -492,6 +488,7 @@ void Kernel::addBasicSwitches(ProgramArgs& args)
          "\"1234 5678 91011\"", m_offsets);
 }
 
+/**
 Stage& Kernel::createStage(const std::string& name)
 {
     Stage *stage = m_factory.createStage(name);
@@ -499,72 +496,32 @@ Stage& Kernel::createStage(const std::string& name)
         throw pdal_error("stage creation failed for " + name);
     return *stage;
 }
+**/
 
-Stage& Kernel::makeReader(const std::string& inputFile,
-    std::string driver)
+Stage& Kernel::makeReader(const std::string& inputFile, std::string driver)
 {
-    if (!inputFile.empty() && !FileUtils::fileExists(inputFile))
-        throw pdal_error("file not found: " + inputFile);
-
-    if (driver.empty())
-    {
-        driver = StageFactory::inferReaderDriver(inputFile);
-        if (driver.empty())
-            throw pdal_error("Cannot determine input file type of " +
-                inputFile);
-    }
-    Options options;
-    if (!inputFile.empty())
-        options.add("filename", inputFile);
-    setCommonOptions(options);
-
-    Stage& reader = createStage(driver);
-    reader.setOptions(options);
-    return reader;
+    return m_manager.makeReader(inputFile, driver);
 }
 
 
 Stage& Kernel::makeFilter(const std::string& driver)
 {
-    Stage& filter = createStage(driver);
-
-    Options options;
-    setCommonOptions(options);
-    filter.setOptions(options);
-    return filter;
+    return m_manager.makeFilter(driver);
 }
 
 
 Stage& Kernel::makeFilter(const std::string& driver, Stage& parent)
 {
-    Stage& filter = makeFilter(driver);
-    filter.setInput(parent);
-
-    return filter;
+    return m_manager.makeFilter(driver, parent);
 }
 
 
 Stage& Kernel::makeWriter(const std::string& outputFile, Stage& parent,
     std::string driver)
 {
-    if (driver.empty())
-    {
-        driver = StageFactory::inferWriterDriver(outputFile);
-        if (driver.empty())
-            throw pdal_error("Cannot determine output file type of " +
-                outputFile);
-    }
-    Options options = StageFactory::inferWriterOptionsChanges(outputFile);
-    options.add("filename", outputFile);
-    setCommonOptions(options);
-
-    auto& writer = createStage(driver);
-    writer.setInput(parent);
-    writer.setOptions(options);
-    applyExtraStageOptionsRecursive(&writer);
-
-    return writer;
+    return m_manager.makeWriter(outputFile, parent, driver);
 }
+
 
 bool Kernel::test_parseOption(std::string o, std::string& stage,
     std::string& option, std::string& value)
