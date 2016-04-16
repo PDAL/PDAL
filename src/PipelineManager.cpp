@@ -214,12 +214,11 @@ Stage& PipelineManager::makeFilter(const std::string& driver, Stage& parent)
 {
     Stage& filter = makeFilter(driver);
     filter.setInput(parent);
-
     return filter;
 }
 
 
-Stage& PipelineManager::makeWriter(const std::string& outputFile, Stage& parent,
+Stage& PipelineManager::makeWriter(const std::string& outputFile,
     std::string driver)
 {
     if (driver.empty())
@@ -235,9 +234,16 @@ Stage& PipelineManager::makeWriter(const std::string& outputFile, Stage& parent,
         options.add("filename", outputFile);
 
     auto& writer = addWriter(driver);
-    writer.setInput(parent);
     setOptions(writer, options);
+    return writer;
+}
 
+
+Stage& PipelineManager::makeWriter(const std::string& outputFile,
+    std::string driver, Stage& parent)
+{
+    Stage& writer = makeWriter(outputFile, driver);
+    writer.setInput(parent);
     return writer;
 }
 

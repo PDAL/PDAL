@@ -105,7 +105,7 @@ int TranslateKernel::execute()
         stage = &filter;
     }
 
-    Stage& writer = m_manager.makeWriter(m_outputFile, *stage, m_writerType);
+    Stage& writer = m_manager.makeWriter(m_outputFile, m_writerType, *stage);
     m_manager.execute();
     if (m_pipelineOutput.size() > 0)
         PipelineWriter::writePipeline(&writer, m_pipelineOutput);

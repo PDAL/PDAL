@@ -94,7 +94,8 @@ public:
     void validate()
     {
         if (m_numTypes == 0)
-            throw pdal_error("PipelineReaderXML: expected Type element missing");
+            throw pdal_error("PipelineReaderXML: expected Type element "
+                "missing");
         if (m_numTypes > 1)
             throw pdal_error("PipelineReaderXML: extra Type element found");
 
@@ -247,30 +248,18 @@ Stage *PipelineReaderXML::parseElement_Reader(const ptree& tree)
     if (attrs.count("type"))
     {
         type = attrs["type"];
-        context.addType();
     }
 
     // If we aren't provided a type, try to infer the type from the filename
     // #278
-    if (context.getNumTypes() == 0)
-    {
-        try
-        {
-            const std::string filename = options.getValueOrThrow<std::string>("filename");
-            type = StageFactory::inferReaderDriver(filename);
-            if (!type.empty())
-            {
-                context.addType();
-            }
-        }
-        catch (Option::not_found)
-        {}
-    }
+    const std::string filename = options.getValueOrDefault("filename", "");
 
+    Stage& reader = m_manager.makeReader(filename, type);
+    reader.removeOptions(options);
+    reader.addOptions(options);
+
+    context.addType();
     context.validate();
-
-    Stage& reader(m_manager.addReader(type));
-    m_manager.setOptions(reader, options);
     return &reader;
 }
 
@@ -316,16 +305,15 @@ Stage *PipelineReaderXML::parseElement_Filter(const ptree& tree)
 
     std::string type;
     if (attrs.count("type"))
-    {
         type = attrs["type"];
-        context.addType();
-    }
 
-    Stage& filter(m_manager.addFilter(type));
-    m_manager.setOptions(filter, options);
+    Stage& filter = m_manager.makeFilter(type);
+    filter.removeOptions(options);
+    filter.addOptions(options);
     for (auto sp : prevStages)
         filter.setInput(*sp);
     context.setCardinality(StageParserContext::Many);
+    context.addType();
     context.validate();
     return &filter;
 }
@@ -400,10 +388,12 @@ Stage *PipelineReaderXML::parseElement_Writer(const ptree& tree)
     }
 
     context.validate();
-    Stage& writer(m_manager.addWriter(type));
+    std::string filename = options.getValueOrDefault("filename", "");
+    Stage& writer = m_manager.makeWriter(filename, type);
     for (auto sp : prevStages)
         writer.setInput(*sp);
-    m_manager.setOptions(writer, options);
+    writer.removeOptions(options);
+    writer.addOptions(options);
     return &writer;
 }
 

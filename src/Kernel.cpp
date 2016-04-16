@@ -318,7 +318,7 @@ void Kernel::visualize(PointViewPtr view)
         static_cast<BufferReader&>(manager.makeReader("", "readers.buffer"));
     reader.addView(view);
 
-    Stage& writer = manager.makeWriter("", reader, "writers.pclvisualizer");
+    Stage& writer = manager.makeWriter("", "writers.pclvisualizer", reader);
 
     PointTable table;
     writer.prepare(table);
@@ -519,7 +519,7 @@ Stage& Kernel::makeFilter(const std::string& driver, Stage& parent)
 Stage& Kernel::makeWriter(const std::string& outputFile, Stage& parent,
     std::string driver)
 {
-    return m_manager.makeWriter(outputFile, parent, driver);
+    return m_manager.makeWriter(outputFile, driver, parent);
 }
 
 
