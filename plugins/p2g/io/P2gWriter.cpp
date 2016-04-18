@@ -222,7 +222,7 @@ void P2gWriter::done(PointTableRef table)
 
     log()->get(LogLevel::Debug) << "Output SRS  :'" << srs.getWKT() << "'" <<
         std::endl;
-    if (m_interpolator->finish(const_cast<char*>(m_filename.c_str()),
+    if (m_interpolator->finish(m_filename.c_str(),
         m_outputFormat, m_outputTypes, adfGeoTransform,
         srs.getWKT().c_str()) < 0)
     {
