@@ -55,8 +55,7 @@ private:
     class StageParserContext;
 
 public:
-    PipelineReaderXML(PipelineManager&, bool debug=false,
-        uint32_t verbose = 0);
+    PipelineReaderXML(PipelineManager&);
 
     /**
       Read an XML pipeline file into a PipelineManager.
@@ -89,9 +88,6 @@ private:
 
 private:
     PipelineManager& m_manager;
-    bool m_isDebug;
-    uint32_t m_verboseLevel;
-    Options m_baseOptions;
     std::string m_inputXmlFile;
 
     PipelineReaderXML& operator=(const PipelineReaderXML&); // not implemented

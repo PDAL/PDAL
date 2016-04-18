@@ -489,18 +489,16 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
 {
     FileInfo fileInfo;
 
-    StageFactory f;
+    PipelineManager manager;
+    manager.commonOptions() = m_manager.commonOptions();
+    manager.stageOptions() = m_manager.stageOptions();
 
-    std::string driverName = f.inferReaderDriver(filename);
-    Stage *s = f.createStage(driverName);
-    Options ops;
-    ops.add("filename", filename);
-    setCommonOptions(ops);
-    s->setOptions(ops);
-    applyExtraStageOptionsRecursive(s);
+    // Need to make sure options get set.
+    Stage& reader = manager.makeReader(filename, "");
+
     if (m_fastBoundary)
     {
-        QuickInfo qi = s->preview();
+        QuickInfo qi = reader.preview();
 
         std::stringstream polygon;
         polygon << "POLYGON ((";
@@ -517,22 +515,11 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
     }
     else
     {
+        Stage& hexer = manager.makeFilter("filters.hexbin", reader);
+
         PointTable table;
-
-        Stage *hexer = f.createStage("filters.hexbin");
-        if (! hexer)
-        {
-
-            std::ostringstream oss;
-
-            oss << "Unable to create hexer stage to create boundaries. "
-                << "Is PDAL_DRIVER_PATH environment variable set?";
-            throw pdal_error(oss.str());
-        }
-        hexer->setInput(*s);
-
-        hexer->prepare(table);
-        PointViewSet set = hexer->execute(table);
+        hexer.prepare(table);
+        PointViewSet set = hexer.execute(table);
 
         MetadataNode m = table.metadata();
         m = m.findChild("filters.hexbin:boundary");

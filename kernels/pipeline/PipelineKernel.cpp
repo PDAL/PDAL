@@ -93,8 +93,7 @@ int PipelineKernel::execute()
 
     PipelineManager manager(m_progressFd);
 
-    manager.readPipeline(m_inputFile, isDebug(), getVerboseLevel());
-    applyExtraStageOptionsRecursive(manager.getStage());
+    manager.readPipeline(m_inputFile);
     manager.execute();
 
     if (m_pipelineFile.size() > 0)

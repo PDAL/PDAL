@@ -68,8 +68,6 @@ private:
     std::string m_readerType;
     std::vector<std::string> m_filterType;
     std::string m_writerType;
-
-    std::unique_ptr<PipelineManager> m_manager;
 };
 
 } // namespace pdal
