@@ -132,12 +132,7 @@ void ViewKernel::addSwitches(ProgramArgs& args)
 
 int ViewKernel::execute()
 {
-    Options readerOptions;
-    readerOptions.add("filename", m_inputFile);
-    setCommonOptions(readerOptions);
-
     Stage& readerStage(Kernel::makeReader(m_inputFile, ""));
-    readerStage.setOptions(readerOptions);
 
     PointTable table;
     readerStage.prepare(table);
