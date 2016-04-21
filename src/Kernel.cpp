@@ -35,7 +35,6 @@
 #include <cctype>
 #include <iostream>
 
-#include <pdal/GDALUtils.hpp>
 #include <pdal/Kernel.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/PDALUtils.hpp>
@@ -222,13 +221,6 @@ int Kernel::doExecution(ProgramArgs& args)
 }
 
 
-int Kernel::doShutdown()
-{
-    gdal::unregisterDrivers();
-    return 0;
-}
-
-
 // this just wraps ALL the code in total catch block
 int Kernel::run(int argc, char const * argv[], const std::string& appName)
 {
@@ -256,17 +248,7 @@ int Kernel::run(int argc, char const * argv[], const std::string& appName)
     if (startup_status)
         return startup_status;
 
-    int execution_status = doExecution(args);
-
-    // note we will try to shutdown cleanly even if we got an error condition
-    // in the execution phase
-
-    int shutdown_status = doShutdown();
-
-    if (execution_status)
-        return execution_status;
-
-    return shutdown_status;
+    return doExecution(args);
 }
 
 

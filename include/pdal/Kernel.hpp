@@ -112,7 +112,6 @@ private:
     void doSwitches(int argc, const char *argv[], ProgramArgs& args);
     int doStartup();
     int doExecution(ProgramArgs& args);
-    int doShutdown();
 
     static bool test_parseOption(std::string o, std::string& stage,
         std::string& option, std::string& value);
