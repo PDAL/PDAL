@@ -256,70 +256,50 @@ MetadataNode InfoKernel::dumpSummary(const QuickInfo& qi)
 }
 
 
-PipelineManagerPtr InfoKernel::makePipeline(const std::string& filename,
-    bool noPoints)
+void InfoKernel::makePipeline(const std::string& filename, bool noPoints)
 {
     if (!pdal::FileUtils::fileExists(filename))
         throw pdal_error("File not found: " + filename);
 
-    PipelineManagerPtr output(new PipelineManager);
-
     if (filename == "STDIN")
     {
-        output->readPipeline(std::cin);
+        m_manager.readPipeline(std::cin);
     }
     else if (FileUtils::extension(filename) == ".xml" ||
         FileUtils::extension(filename) == ".json")
     {
-        output->readPipeline(filename);
+        m_manager.readPipeline(filename);
     }
     else
     {
-        StageFactory factory;
-        std::string driver = factory.inferReaderDriver(filename);
-
-        if (driver.empty())
-            throw pdal_error("Cannot determine input file type of " + filename);
-        Stage& reader = output->addReader(driver);
-        Options ro;
-        ro.add("filename", filename);
+        Stage& reader = m_manager.makeReader(filename, "");
         if (noPoints)
-            ro.add("count", 0);
-        reader.setOptions(ro);
+        {
+            Options ops({"count", 0});
+            reader.addOptions(ops);
+        }
         m_reader = &reader;
     }
-    return output;
 }
+
 
 void InfoKernel::setup(const std::string& filename)
 {
-    m_manager = makePipeline(filename, !m_needPoints);
-    Stage *stage = m_manager->getStage();
+    makePipeline(filename, !m_needPoints);
 
+    Stage *stage = m_reader;
     if (m_showStats)
     {
-        m_statsStage = &(m_manager->addFilter("filters.stats"));
+        m_statsStage = &m_manager.makeFilter("filters.stats", *stage);
         if (m_dimensions.size())
         {
-            Options ops;
-            ops.add("dimensions", m_dimensions);
+            Options ops({"dimensions", m_dimensions});
             m_statsStage->addOptions(ops);
         }
-
-        m_statsStage->setInput(*stage);
         stage = m_statsStage;
     }
     if (m_boundary)
-    {
-        m_hexbinStage = &(m_manager->addFilter("filters.hexbin"));
-        if (!m_hexbinStage) {
-            throw pdal_error("Unable to compute boundary -- "
-                "http://github.com/hobu/hexer is not linked. "
-                "See the \"boundary\" member in \"stats\" for a coarse "
-                "bounding box");
-        }
-        m_hexbinStage->setInput(*stage);
-    }
+        m_hexbinStage = &m_manager.makeFilter("filters.hexbin", *stage);
 }
 
 
@@ -336,11 +316,10 @@ MetadataNode InfoKernel::run(const std::string& filename)
     }
     else
     {
-        applyExtraStageOptionsRecursive(m_manager->getStage());
         if (m_needPoints || m_showMetadata)
-            m_manager->execute();
+            m_manager.execute();
         else
-            m_manager->prepare();
+            m_manager.prepare();
         dump(root);
     }
     root.add("pdal_version", pdal::GetFullVersionString());
@@ -351,12 +330,12 @@ MetadataNode InfoKernel::run(const std::string& filename)
 void InfoKernel::dump(MetadataNode& root)
 {
     if (m_showSchema)
-        root.add(m_manager->pointTable().toMetadata().clone("schema"));
+        root.add(m_manager.pointTable().toMetadata().clone("schema"));
 
     if (m_PointCloudSchemaOutput.size() > 0)
     {
 #ifdef PDAL_HAVE_LIBXML2
-        XMLSchema schema(m_manager->pointTable().layout());
+        XMLSchema schema(m_manager.pointTable().layout());
 
         std::ostream *out = FileUtils::createFile(m_PointCloudSchemaOutput);
         std::string xml(schema.xml());
@@ -372,18 +351,18 @@ void InfoKernel::dump(MetadataNode& root)
         root.add(m_statsStage->getMetadata().clone("stats"));
 
     if (m_pipelineFile.size() > 0)
-        PipelineWriter::writePipeline(m_manager->getStage(), m_pipelineFile);
+        PipelineWriter::writePipeline(m_manager.getStage(), m_pipelineFile);
 
     if (m_pointIndexes.size())
     {
-        PointViewSet viewSet = m_manager->views();
+        PointViewSet viewSet = m_manager.views();
         assert(viewSet.size() == 1);
         root.add(dumpPoints(*viewSet.begin()).clone("points"));
     }
 
     if (m_queryPoint.size())
     {
-        PointViewSet viewSet = m_manager->views();
+        PointViewSet viewSet = m_manager.views();
         assert(viewSet.size() == 1);
         root.add(dumpQuery(*viewSet.begin()));
     }
@@ -397,12 +376,12 @@ void InfoKernel::dump(MetadataNode& root)
         if (m_reader)
             root.add(m_reader->getMetadata().clone("metadata"));
         else
-            root.add(m_manager->getMetadata().clone("metadata"));
+            root.add(m_manager.getMetadata().clone("metadata"));
     }
 
     if (m_boundary)
     {
-        PointViewSet viewSet = m_manager->views();
+        PointViewSet viewSet = m_manager.views();
         assert(viewSet.size() == 1);
         root.add(m_hexbinStage->getMetadata().clone("boundary"));
     }

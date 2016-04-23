@@ -72,14 +72,7 @@ void DeltaKernel::addSwitches(ProgramArgs& args)
 PointViewPtr DeltaKernel::loadSet(const std::string& filename,
     PointTable& table)
 {
-    Options ops;
-
-    ops.add<std::string>("filename", filename);
-    ops.add<bool>("debug", isDebug());
-    ops.add<uint32_t>("verbose", getVerboseLevel());
-
-    Stage& reader = makeReader(filename);
-    reader.setOptions(ops);
+    Stage& reader = makeReader(filename, "");
     reader.prepare(table);
     PointViewSet viewSet = reader.execute(table);
     assert(viewSet.size() == 1);

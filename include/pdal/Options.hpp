@@ -340,8 +340,18 @@ public:
 
     void toMetadata(MetadataNode& parent) const
     {
-        for (auto o : getOptions())
-            o.toMetadata(parent);
+        for (std::string& k : getKeys())
+        {
+            StringList l = getValues(k);
+            std::string vs;
+            for (auto vi = l.begin(); vi != l.end(); ++vi)
+            {
+               if (vi != l.begin())
+                   vs += ", ";
+               vs += *vi;
+            }
+            parent.add(k, vs);
+        }
     }
 
     // add an option (shortcut version, bypass need for an Option object)
@@ -379,6 +389,18 @@ public:
             s.insert(s.end(), t.begin(), t.end());
         }
         return s;
+    }
+
+    StringList getKeys() const
+    {
+        StringList keys;
+
+        for (auto it = m_options.begin(); it != m_options.end();
+            it = m_options.upper_bound(it->first))
+        {
+            keys.push_back(it->first);
+        }
+        return keys;
     }
 
     // get value of an option, or throw not_found if option not present
@@ -450,6 +472,7 @@ public:
 private:
     options::map_t m_options;
 };
+typedef std::map<std::string, Options> OptionsMap;
 
 PDAL_DLL std::ostream& operator<<(std::ostream& ostr, const Options&);
 

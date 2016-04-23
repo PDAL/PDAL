@@ -57,46 +57,8 @@ void DensityKernel::addSwitches(ProgramArgs& args)
 {
     args.add("input,i", "input point cloud file name", m_inputFile);
     args.add("output,o", "output vector data source", m_outputFile);
-    args.add("lyr_name", "OGR layer name to write into datasource",
-        m_layerName);
     args.add("driver,f", "OGR driver name to use ", m_driverName,
         "ESRI Shapefile");
-}
-
-
-void DensityKernel::makePipeline(const std::string& filename)
-{
-    if (!pdal::FileUtils::fileExists(filename))
-        throw pdal_error("File not found: " + filename);
-
-    m_manager = PipelineManagerPtr(new PipelineManager);
-
-    if (filename == "STDIN")
-    {
-        m_manager->readPipeline(std::cin);
-    }
-    else if (FileUtils::extension(filename) == ".xml" ||
-        FileUtils::extension(filename) == ".json")
-    {
-        m_manager->readPipeline(filename);
-    }
-    else
-    {
-        StageFactory factory;
-        std::string driver = factory.inferReaderDriver(filename);
-
-        if (driver.empty())
-            throw pdal_error("Cannot determine input file type of " + filename);
-        Stage& reader = m_manager->addReader(driver);
-        Options ro;
-        ro.add("filename", filename);
-        reader.setOptions(ro);
-    }
-    Stage *stage = m_manager->getStage();
-    m_hexbinStage = &(m_manager->addFilter("filters.hexbin"));
-    if (!m_hexbinStage)
-        throw pdal_error("Unable to initialize filters.hexbin!");
-    m_hexbinStage->setInput(*stage);
 }
 
 
@@ -118,12 +80,21 @@ void DensityKernel::outputDensity(pdal::SpatialReference const& reference)
 int DensityKernel::execute()
 {
     gdal::registerDrivers();
-    std::string filename = m_usestdin ? std::string("STDIN") : m_inputFile;
-    makePipeline(filename);
-    applyExtraStageOptionsRecursive(m_manager->getStage());
-    point_count_t output = m_manager->execute();
-    PointTableRef table = m_manager->pointTable();
-    outputDensity(table.anySpatialReference());
+
+    if (m_inputFile == "STDIN" ||
+        (FileUtils::extension(m_inputFile) == ".xml" ||
+        FileUtils::extension(m_inputFile) == ".json"))
+    {
+        m_manager.readPipeline(m_inputFile);
+    }
+    else
+    {
+        m_manager.makeReader(m_inputFile, "");
+    }
+    m_hexbinStage = &(m_manager.makeFilter("filters.hexbin",
+        *m_manager.getStage()));
+    m_manager.execute();
+    outputDensity(m_manager.pointTable().anySpatialReference());
     return 0;
 }
 

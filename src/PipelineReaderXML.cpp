@@ -94,7 +94,8 @@ public:
     void validate()
     {
         if (m_numTypes == 0)
-            throw pdal_error("PipelineReaderXML: expected Type element missing");
+            throw pdal_error("PipelineReaderXML: expected Type element "
+                "missing");
         if (m_numTypes > 1)
             throw pdal_error("PipelineReaderXML: extra Type element found");
 
@@ -127,21 +128,9 @@ private:
 };
 
 
-PipelineReaderXML::PipelineReaderXML(PipelineManager& manager, bool isDebug,
-        uint32_t verboseLevel) :
-    m_manager(manager) , m_isDebug(isDebug) , m_verboseLevel(verboseLevel)
-{
-    if (m_isDebug)
-    {
-        Option opt("debug", true);
-        m_baseOptions.add(opt);
-    }
-    if (m_verboseLevel)
-    {
-        Option opt("verbose", m_verboseLevel);
-        m_baseOptions.add(opt);
-    }
-}
+PipelineReaderXML::PipelineReaderXML(PipelineManager& manager) :
+    m_manager(manager)
+{}
 
 
 Option PipelineReaderXML::parseElement_Option(const ptree& tree)
@@ -222,8 +211,7 @@ Stage *PipelineReaderXML::parseElement_anystage(const std::string& name,
 
 Stage *PipelineReaderXML::parseElement_Reader(const ptree& tree)
 {
-    Options options(m_baseOptions);
-
+    Options options;
     StageParserContext context;
     context.setCardinality(StageParserContext::None);
 
@@ -260,37 +248,25 @@ Stage *PipelineReaderXML::parseElement_Reader(const ptree& tree)
     if (attrs.count("type"))
     {
         type = attrs["type"];
-        context.addType();
     }
 
     // If we aren't provided a type, try to infer the type from the filename
     // #278
-    if (context.getNumTypes() == 0)
-    {
-        try
-        {
-            const std::string filename = options.getValueOrThrow<std::string>("filename");
-            type = StageFactory::inferReaderDriver(filename);
-            if (!type.empty())
-            {
-                context.addType();
-            }
-        }
-        catch (Option::not_found)
-        {}
-    }
+    const std::string filename = options.getValueOrDefault("filename", "");
 
+    Stage& reader = m_manager.makeReader(filename, type);
+    reader.removeOptions(options);
+    reader.addOptions(options);
+
+    context.addType();
     context.validate();
-
-    Stage& reader(m_manager.addReader(type));
-    reader.setOptions(options);
     return &reader;
 }
 
 
 Stage *PipelineReaderXML::parseElement_Filter(const ptree& tree)
 {
-    Options options(m_baseOptions);
+    Options options;
 
     StageParserContext context;
 
@@ -329,16 +305,15 @@ Stage *PipelineReaderXML::parseElement_Filter(const ptree& tree)
 
     std::string type;
     if (attrs.count("type"))
-    {
         type = attrs["type"];
-        context.addType();
-    }
 
-    Stage& filter(m_manager.addFilter(type));
-    filter.setOptions(options);
+    Stage& filter = m_manager.makeFilter(type);
+    filter.removeOptions(options);
+    filter.addOptions(options);
     for (auto sp : prevStages)
         filter.setInput(*sp);
     context.setCardinality(StageParserContext::Many);
+    context.addType();
     context.validate();
     return &filter;
 }
@@ -369,7 +344,7 @@ void PipelineReaderXML::collect_attributes(map_t& attrs, const ptree& tree)
 
 Stage *PipelineReaderXML::parseElement_Writer(const ptree& tree)
 {
-    Options options(m_baseOptions);
+    Options options;
     StageParserContext context;
 
     map_t attrs;
@@ -413,10 +388,12 @@ Stage *PipelineReaderXML::parseElement_Writer(const ptree& tree)
     }
 
     context.validate();
-    Stage& writer(m_manager.addWriter(type));
+    std::string filename = options.getValueOrDefault("filename", "");
+    Stage& writer = m_manager.makeWriter(filename, type);
     for (auto sp : prevStages)
         writer.setInput(*sp);
-    writer.setOptions(options);
+    writer.removeOptions(options);
+    writer.addOptions(options);
     return &writer;
 }
 
@@ -425,8 +402,6 @@ void PipelineReaderXML::parseElement_Pipeline(const ptree& tree)
 {
     Stage *stage = NULL;
     Stage *writer = NULL;
-
-    Options o(m_baseOptions);
 
     map_t attrs;
     collect_attributes(attrs, tree);

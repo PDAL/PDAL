@@ -68,7 +68,7 @@ is no facility to "downsize" a dimension type to save memory.  Dimension.hpp
 can be examined to determine the default storage type of each predefined
 dimension.  In most cases knowledge of the storage data type for
 a dimension isn't required.  PDAL properly converts data to and from the
-internal storage type transparently.  Invalid conversion raise an exception.
+internal storage type transparently.  Invalid conversions raise an exception.
 
 When a storage type is explicitly requested for a dimension, PDAL examines the
 existing storage type and requested type and chooses the storage type so
@@ -82,9 +82,10 @@ requested type is a 16 bit unsigned integer (Unsigned16), PDAL will use a
 Point Layout
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-PDAL stores orientation information in a point layout structure (PointLayout
-object).  This structure contains information about what dimensions are stored
-in a structure containing points, like their names, types, and offsets.
+PDAL stores the set of dimension information in a point layout structure
+(PointLayout object).  It stores information about the physical layout of
+data of each point in memory and also stores the type and name of each
+dimension.
 
 Point Table
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -94,8 +95,8 @@ point table has an associated point layout describing its format.  All
 points in a single point table have the same dimensions and all operations on
 a PDAL pipeline make use of a single point table.  In addition to storing
 points, a point table also stores pipeline metadata that may get created as
-pipeline stages are executed.  Most functions receive a PointTablePtr object,
-which refers to the active point table.  A PointTablePtr can be stored
+pipeline stages are executed.  Most functions receive a PointTableRef object,
+which refers to the active point table.  A PointTableRef can be stored
 or copied cheaply.
 
 Point View
@@ -174,22 +175,28 @@ pipeline.
     allows an exception to be thrown in the case of an invalid option that can
     be properly interpreted by the pipeline.
 
-2) void initialize()
+2) void initialize() OR void initialize(PointTableRef)
 
     Some stages, particularly readers, may need to do things such as open files
     to extract header information before the next step in processing.  Other
     general processing that needs to take place before any stage is executed
-    should occur at this time.  Initialization that can be deferred until the
-    execution stage should be performed in the ready() method (see below).
+    should occur at this time.  If the initialization requires knowledge of
+    the point table, implement the function that accepts one, otherwise
+    implement the no-argument version.  Whether to place initialization code
+    at this step or in prepared() or ready() (see below) is a judgement call,
+    but detection of errors earlier in the process allows faster termination of
+    a pipeline.
 
 3) void addDimensions(PointLayoutPtr layout)
 
     This method allows stages to inform a point table's layout of the dimensions
-    that it would like as part of the record of each point.  Normally, only
+    that it would like as part of the record of each point.  Usually, only
     readers add dimensions to a point table, but there is no prohibition on
     filters or writers from adding dimensions if necessary.  Dimensions should
-    not be added to the layout of a pipeline’s point table except in this
+    not be added to the layout of a pipeline’s point layout except in this
     method.
+
+
 
 
 

@@ -33,6 +33,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/GDALUtils.hpp>
 #include <pdal/KernelFactory.hpp>
 #include <pdal/PluginManager.hpp>
 #include <pdal/StageFactory.hpp>
@@ -252,9 +253,16 @@ int main(int argc, char* argv[])
     {
         int count(argc - 2); // remove 'pdal' and the kernel name
         argv += 2;
-        void *kernel = PluginManager::createObject(fullname);
-        std::unique_ptr<Kernel> app(static_cast<Kernel *>(kernel));
-        return app->run(count, const_cast<char const **>(argv), command);
+
+        int ret = 0;
+        // Make sure kernel is destroyed before tearing down GDAL stuff.
+        {
+            void *kernel = PluginManager::createObject(fullname);
+            std::unique_ptr<Kernel> app(static_cast<Kernel *>(kernel));
+            ret = app->run(count, const_cast<char const **>(argv), command);
+        }
+        gdal::unregisterDrivers();
+        return ret;
     }
 
     // Otherwise, process the remaining args to see if they are supported

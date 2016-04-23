@@ -178,7 +178,6 @@ pdal::Options StageFactory::inferWriterOptionsChanges(
         options.add("format","PCD");
     }
 
-    options.add<std::string>("filename", filename);
     return options;
 }
 
