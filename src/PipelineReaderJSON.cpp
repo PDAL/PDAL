@@ -157,15 +157,10 @@ void PipelineReaderJSON::readPipeline(const std::string& filename)
     {
         readPipeline(*input);
     }
-    catch (const pdal_error& error)
-    {
-        throw error;
-    }
     catch (...)
     {
         FileUtils::closeFile(input);
-        throw pdal_error("JSON pipeline: Unable to process pipeline "
-            "file \""+ filename + "\". JSON is invalid.");
+        throw;
     }
 
     FileUtils::closeFile(input);
@@ -293,12 +288,12 @@ Options PipelineReaderJSON::extractOptions(Json::Value& node)
 
     for (const std::string& name : node.getMemberNames())
     {
-        if (node[name].isString() || node[name].isObject())
+        if (node[name].isString())
             options.add(name, node[name].asString());
         else if (node[name].isInt())
-            options.add(name, node[name].asInt());
+            options.add(name, node[name].asInt64());
         else if (node[name].isUInt())
-            options.add(name, node[name].asUInt());
+            options.add(name, node[name].asUInt64());
         else if (node[name].isDouble())
             options.add(name, node[name].asDouble());
         else if (node[name].isBool())
