@@ -293,10 +293,21 @@ Options PipelineReaderJSON::extractOptions(Json::Value& node)
 
     for (const std::string& name : node.getMemberNames())
     {
-        if (!node[name].isConvertibleTo(Json::stringValue))
+        if (node[name].isString() || node[name].isObject())
+            options.add(name, node[name].asString());
+        else if (node[name].isInt())
+            options.add(name, node[name].asInt());
+        else if (node[name].isUInt())
+            options.add(name, node[name].asUInt());
+        else if (node[name].isDouble())
+            options.add(name, node[name].asDouble());
+        else if (node[name].isBool())
+            options.add(name, node[name].asBool());
+        else if (node[name].isNull())
+            options.add(name, "");
+        else
             throw pdal_error("JSON pipeline: Value of stage option '" +
-                name + "' must be convertible to a string.");
-        options.add(name, node[name].asString());
+                name + "' cannot be converted.");
     }
     node.clear();
     return options;
