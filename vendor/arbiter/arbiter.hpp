@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: 016903b4aad620ed38d3f9598f83558841a28d14
+// Git SHA: a1c67eb0aba59e5c3c53f37a20b13cfac059b80b
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -420,7 +420,7 @@ public:
             std::string path,
             const std::vector<char>& data) const override;
 
-    static std::string sanitize(std::string path);
+    static std::string sanitize(std::string path, std::string exclusions = "/");
 
 private:
     virtual bool get(
@@ -3202,7 +3202,120 @@ namespace Xml = rapidxml;
 
 
 // //////////////////////////////////////////////////////////////////////
-// Beginning of content of file: arbiter/util/crypto.hpp
+// Beginning of content of file: arbiter/util/macros.hpp
+// //////////////////////////////////////////////////////////////////////
+
+#pragma once
+
+#define ROTLEFT(a,b) (((a) << (b)) | ((a) >> (32-(b))))
+#define ROTRIGHT(a,b) (((a) >> (b)) | ((a) << (32-(b))))
+
+// SHA256.
+#define CH(x,y,z) (((x) & (y)) ^ (~(x) & (z)))
+#define MAJ(x,y,z) (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
+#define EP0(x) (ROTRIGHT(x,2) ^ ROTRIGHT(x,13) ^ ROTRIGHT(x,22))
+#define EP1(x) (ROTRIGHT(x,6) ^ ROTRIGHT(x,11) ^ ROTRIGHT(x,25))
+#define SIG0(x) (ROTRIGHT(x,7) ^ ROTRIGHT(x,18) ^ ((x) >> 3))
+#define SIG1(x) (ROTRIGHT(x,17) ^ ROTRIGHT(x,19) ^ ((x) >> 10))
+
+// MD5.
+#define F(x,y,z) ((x & y) | (~x & z))
+#define G(x,y,z) ((x & z) | (y & ~z))
+#define H(x,y,z) (x ^ y ^ z)
+#define I(x,y,z) (y ^ (x | ~z))
+
+#define FF(a,b,c,d,m,s,t) { a += F(b,c,d) + m + t; \
+                            a = b + ROTLEFT(a,s); }
+#define GG(a,b,c,d,m,s,t) { a += G(b,c,d) + m + t; \
+                            a = b + ROTLEFT(a,s); }
+#define HH(a,b,c,d,m,s,t) { a += H(b,c,d) + m + t; \
+                            a = b + ROTLEFT(a,s); }
+#define II(a,b,c,d,m,s,t) { a += I(b,c,d) + m + t; \
+                            a = b + ROTLEFT(a,s); }
+
+
+// //////////////////////////////////////////////////////////////////////
+// End of content of file: arbiter/util/macros.hpp
+// //////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+// //////////////////////////////////////////////////////////////////////
+// Beginning of content of file: arbiter/util/md5.hpp
+// //////////////////////////////////////////////////////////////////////
+
+#pragma once
+
+#include <cstddef>
+#include <string>
+#include <vector>
+
+// MD5 implementation adapted from:
+//      https://github.com/B-Con/crypto-algorithms
+
+namespace arbiter
+{
+namespace crypto
+{
+
+std::string md5(const std::string& data);
+
+} // namespace crypto
+} // namespace arbiter
+
+
+// //////////////////////////////////////////////////////////////////////
+// End of content of file: arbiter/util/md5.hpp
+// //////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+// //////////////////////////////////////////////////////////////////////
+// Beginning of content of file: arbiter/util/sha256.hpp
+// //////////////////////////////////////////////////////////////////////
+
+#pragma once
+
+#include <cstddef>
+#include <string>
+#include <vector>
+
+// SHA256 implementation adapted from:
+//      https://github.com/B-Con/crypto-algorithms
+// HMAC:
+//      https://en.wikipedia.org/wiki/Hash-based_message_authentication_code
+
+namespace arbiter
+{
+namespace crypto
+{
+
+std::vector<char> sha256(const std::vector<char>& data);
+std::string sha256(const std::string& data);
+
+std::string hmacSha256(const std::string& key, const std::string& data);
+
+} // namespace crypto
+} // namespace arbiter
+
+
+// //////////////////////////////////////////////////////////////////////
+// End of content of file: arbiter/util/sha256.hpp
+// //////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+// //////////////////////////////////////////////////////////////////////
+// Beginning of content of file: arbiter/util/transforms.hpp
 // //////////////////////////////////////////////////////////////////////
 
 #pragma once
@@ -3215,18 +3328,18 @@ namespace arbiter
 namespace crypto
 {
 
-std::vector<char> hmacSha1(std::string key, std::string message);
-
-// These aren't really crypto, so if this file grows a bit more they can move.
 std::string encodeBase64(const std::vector<char>& data);
+std::string encodeBase64(const std::string& data);
+
 std::string encodeAsHex(const std::vector<char>& data);
+std::string encodeAsHex(const std::string& data);
 
 } // namespace crypto
 } // namespace arbiter
 
 
 // //////////////////////////////////////////////////////////////////////
-// End of content of file: arbiter/util/crypto.hpp
+// End of content of file: arbiter/util/transforms.hpp
 // //////////////////////////////////////////////////////////////////////
 
 
@@ -3270,7 +3383,7 @@ public:
      *      - Check for them in `~/.aws/credentials`.
      *      - If not found, try the environment settings.
      */
-    static std::unique_ptr<AwsAuth> find(std::string user = "");
+    static std::unique_ptr<AwsAuth> find(std::string profile = "");
 
     std::string access() const;
     std::string hidden() const;
@@ -3284,7 +3397,11 @@ private:
 class S3 : public CustomHeaderDriver
 {
 public:
-    S3(HttpPool& pool, AwsAuth awsAuth);
+    S3(
+            HttpPool& pool,
+            AwsAuth awsAuth,
+            std::string region = "us-east-1",
+            std::string serverSideEncryptionKey = "");
 
     /** Try to construct an S3 Driver.  Searches @p json primarily for the keys
      * `access` and `hidden` to construct an AwsAuth.  If not found, common
@@ -3292,6 +3409,7 @@ public:
      * AwsAuth::find).
      */
     static std::unique_ptr<S3> create(HttpPool& pool, const Json::Value& json);
+    static std::string extractProfile(const Json::Value& json);
 
     virtual std::string type() const override { return "s3"; }
 
@@ -3316,41 +3434,95 @@ private:
             std::string path,
             bool verbose) const override;
 
-    // V2.
-    bool buildRequestAndGet(
+    bool get(
             std::string rawPath,
             const Query& query,
-            std::vector<char>& data,
-            Headers = Headers()) const;
+            const Headers& headers,
+            std::vector<char>& data) const;
 
-    Headers httpGetHeaders(std::string filePath, std::string req = "GET") const;
-    Headers httpPutHeaders(std::string filePath) const;
+    struct Resource
+    {
+        Resource(std::string baseUrl, std::string fullPath);
 
-    std::string getHttpDate() const;
+        std::string buildPath(Query query = Query()) const;
+        std::string host() const;
 
-    std::string getSignedEncodedString(
-            std::string command,
-            std::string file,
-            std::string httpDate,
-            std::string contentType = "") const;
+        std::string baseUrl;
+        std::string bucket;
+        std::string object;
+    };
 
-    std::string getStringToSign(
-            std::string command,
-            std::string file,
-            std::string httpDate,
-            std::string contentType) const;
+    class FormattedTime
+    {
+    public:
+        FormattedTime();
 
-    std::vector<char> signString(std::string input) const;
+        const std::string& date() const { return m_date; }
+        const std::string& time() const { return m_time; }
 
-    // V4.
-    std::string buildCanonicalRequest(
-            std::string request,
-            std::string canonicalUri,
-            std::string canonicalQueryString,
-            std::string signedHeaders);
+        std::string amazonDate() const
+        {
+            return date() + 'T' + time() + 'Z';
+        }
+
+    private:
+        std::string formatTime(const std::string& format) const;
+
+        const std::string m_date;
+        const std::string m_time;
+    };
+
+    class AuthV4
+    {
+    public:
+        AuthV4(
+                std::string verb,
+                const std::string& region,
+                const Resource& resource,
+                const AwsAuth& auth,
+                const Query& query,
+                const Headers& headers,
+                const std::vector<char>& data);
+
+        const Headers& headers() const { return m_headers; }
+
+        const std::string& signedHeadersString() const
+        {
+            return m_signedHeadersString;
+        }
+
+    private:
+        std::string buildCanonicalRequest(
+                std::string verb,
+                const Resource& resource,
+                const Query& query,
+                const std::vector<char>& data) const;
+
+        std::string buildStringToSign(
+                const std::string& canonicalRequest) const;
+
+        std::string calculateSignature(
+                const std::string& stringToSign) const;
+
+        std::string getAuthHeader(
+                const std::string& signedHeadersString,
+                const std::string& signature) const;
+
+        const AwsAuth& m_auth;
+        const std::string m_region;
+        const FormattedTime m_formattedTime;
+
+        Headers m_headers;
+        std::string m_canonicalHeadersString;
+        std::string m_signedHeadersString;
+    };
 
     HttpPool& m_pool;
     AwsAuth m_auth;
+
+    std::string m_region;
+    std::string m_baseUrl;
+    std::unique_ptr<Headers> m_sseHeaders;
 };
 
 } // namespace drivers
