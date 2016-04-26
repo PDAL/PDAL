@@ -4,10 +4,6 @@
 Community
 ******************************************************************************
 
-:Author: Howard Butler
-:Contact: howard@hobu.co
-:Date: 10/27/2015
-
 PDAL's community interacts through `Mailing List`_, `GitHub`_, and `IRC`_.
 Please feel welcome to ask questions and participate in all of the venues.
 The `Mailing List`_ communication channel is for general questions, development

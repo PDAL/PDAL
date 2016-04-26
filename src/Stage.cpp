@@ -32,7 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/GlobalEnvironment.hpp>
+#include <pdal/GDALUtils.hpp>
+#include <pdal/GEOSUtils.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/SpatialReference.hpp>
@@ -84,10 +85,16 @@ void Stage::serialize(MetadataNode root, PipelineWriter::TagMap& tags) const
     m_options.toMetadata(anon);
     for (Stage *s : m_inputs)
         anon.addList("inputs", tagname(s));
-    if (m_metadata.hasChildren())
-        anon.add(m_metadata.clone("execution_metadata"));
     root.addList(anon);
 }
+
+QuickInfo Stage::preview()
+{
+    l_processOptions(m_options);
+    processOptions(m_options);
+    return inspect();
+}
+
 
 void Stage::prepare(PointTableRef table)
 {
@@ -139,6 +146,7 @@ PointViewSet Stage::execute(PointTableRef table)
     table.clearSpatialReferences();
     for (auto const& it : views)
         table.addSpatialReference(it->spatialReference());
+    gdal::ErrorHandler::get().set(m_log, m_debug);
 
     // Do the ready operation and then start running all the views
     // through the stage.
@@ -330,6 +338,9 @@ void Stage::l_processOptions(const Options& options)
     }
     m_log->setLevel((LogLevel::Enum)m_verbose);
 
+    gdal::ErrorHandler::get().set(m_log, m_debug);
+    geos::ErrorHandler::get().set(m_log, m_debug);
+
     // If the user gave us an SRS via options, take that.
     try
     {
@@ -371,7 +382,7 @@ void Stage::setSpatialReference(MetadataNode& m,
     MetadataNode spatialNode = m.findChild(pred);
     if (spatialNode.empty())
     {
-        m.add(Utils::toMetadata(spatialRef));
+        m.add(spatialRef.toMetadata());
         m.add("spatialreference",
            spatialRef.getWKT(SpatialReference::eHorizontalOnly, false),
            "SRS of this stage");

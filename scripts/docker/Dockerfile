@@ -18,7 +18,7 @@ RUN git clone --depth=1 https://github.com/PDAL/PDAL \
 	&& mkdir build \
 	&& cd build \
 	&& cmake \
-		-DBUILD_PLUGIN_CPD=ON \
+		-DBUILD_PLUGIN_CPD=OFF \
 		-DBUILD_PLUGIN_GREYHOUND=ON \
 		-DBUILD_PLUGIN_HEXBIN=ON \
 		-DBUILD_PLUGIN_ICEBRIDGE=ON \
@@ -42,7 +42,7 @@ RUN git clone --depth=1 https://github.com/PDAL/PDAL \
 		.. \
 	&& make -j4 \
 	&& make install \
-    && rm -rf PDAL
+    && rm -rf /PDAL
 
 #RUN pip install packaging \
 #    && pip install PDAL
@@ -61,4 +61,4 @@ RUN git clone https://github.com/PDAL/PRC.git \
         .. \
     && make \
     && make install \
-    && rm -rf PRC
+    && rm -rf /PRC

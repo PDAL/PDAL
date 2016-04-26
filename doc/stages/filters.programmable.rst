@@ -36,26 +36,27 @@ To filter points based on a `Python`_ function, use the
 Example
 -------
 
-.. code-block:: xml
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.las">
-      <Option name="filename">
-        file-filtered.las
-      </Option>
-      <Filter type="filters.programmable">
-        <Option name="script">multiply_z.py</Option>
-        <Option name="function">multiply_z</Option>
-        <Option name="module">anything</Option>  
-        <Reader type="readers.las">
-          <Option name="filename">
-            file-input.las
-          </Option>
-        </Reader>
-      </Filter>
-    </Writer>
-  </Pipeline>
+.. code-block:: json
+
+    {
+      "pipeline":[
+        "file-input.las",
+        {
+          "type":"filters.ground"
+        },
+        {
+          "type":"filters.programmable",
+          "script":"multiply_z.py",
+          "function":"multiply_z",
+          "module":"anything"
+        },
+        {
+          "type":"writers.las",
+          "filename":"file-filtered.las"
+        }
+      ]
+    }
 
 The XML pipeline file referenced the external `multiply_z.py` `Python`_ script,
 which scales up the Z coordinate by a factor of 10.

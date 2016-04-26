@@ -15,7 +15,6 @@
 #   PDAL_<dirname>_CPP - all the .cpp files for the given subdir/namespace
 #   ...
 
-
 set(PDAL_HPP "")
 set(PDAL_CPP "")
 
@@ -35,15 +34,15 @@ endif()
 #
 # base
 #
+#[[
 set(PDAL_BASE_HPP
+  "${PDAL_HEADERS_DIR}/Dimension.hpp"
   "${PDAL_HEADERS_DIR}/pdal_types.hpp"
   "${PDAL_HEADERS_DIR}/Compression.hpp"
-  "${PDAL_HEADERS_DIR}/Dimension.hpp"
   "${PDAL_HEADERS_DIR}/Filter.hpp"
   "${PDAL_HEADERS_DIR}/FlexWriter.hpp"
   "${PDAL_HEADERS_DIR}/GDALUtils.hpp"
   "${PDAL_HEADERS_DIR}/GEOSUtils.hpp"
-  "${PDAL_HEADERS_DIR}/GlobalEnvironment.hpp"
   "${PDAL_HEADERS_DIR}/gitsha.h"
   "${PDAL_HEADERS_DIR}/KDIndex.hpp"
   "${PDAL_HEADERS_DIR}/KernelFactory.hpp"
@@ -73,13 +72,13 @@ set(PDAL_BASE_HPP
     ${PDAL_XML_HEADER}
     ${DB_DRIVER_HEADERS}
 )
+]]
 
 set(PDAL_BASE_CPP
   DynamicLibrary.cpp
   gitsha.cpp
   GDALUtils.cpp
   GEOSUtils.cpp
-  GlobalEnvironment.cpp
   Kernel.cpp
   KernelFactory.cpp
   Log.cpp
@@ -175,9 +174,7 @@ endif()
 # so that users only need link libpdalcpp.
 #
 if (APPLE)
-    set(UTIL_LIB "-Wl,-reexport_library,$<TARGET_SONAME_FILE:${PDAL_UTIL_LIB_NAME}>")
-else()
-    set(UTIL_LIB ${PDAL_UTIL_LIB_NAME})
+    set(REEXPORT_UTIL_LIB "-Wl,-reexport_library,$<TARGET_SONAME_FILE:${PDAL_UTIL_LIB_NAME}>")
 endif()
 
 target_link_libraries(${PDAL_BASE_LIB_NAME}
@@ -185,8 +182,9 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
     ${GDAL_LIBRARY}
     ${GEOS_LIBRARY}
     ${ZLIB_LIBRARIES}
-    ${UTIL_LIB}
     ${PDAL_BOOST_LIB_NAME}
+    ${PDAL_UTIL_LIB_NAME}
+    ${REEXPORT_UTIL_LIB}
 )
 
 if (WITH_GEOTIFF)
@@ -214,4 +212,7 @@ endif()
 install(DIRECTORY "${PDAL_HEADERS_DIR}/"
   DESTINATION "${PDAL_INCLUDE_INSTALL_DIR}"
   PATTERN "/CMakeFiles/*" EXCLUDE
+  )
+install(FILES ${DIMENSION_OUTFILE} 
+  DESTINATION "${PDAL_INCLUDE_INSTALL_DIR}"
   )

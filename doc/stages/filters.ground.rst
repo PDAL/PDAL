@@ -1,6 +1,5 @@
 .. _filters.ground:
 
-===============================================================================
 filters.ground
 ===============================================================================
 
@@ -13,6 +12,25 @@ ProgressiveMorphologicalFilter is an implementation of the method described in
 .. [Zhang2003] Zhang, Keqi, et al. "A progressive morphological filter for removing nonground measurements from airborne LIDAR data." Geoscience and Remote Sensing, IEEE Transactions on 41.4 (2003): 872-882.
 
 .. _`PCL`: http://www.pointclouds.org
+
+
+Example
+-------
+
+.. code-block:: json
+
+    {
+      "pipeline":[
+        "input.las",
+        {
+          "type":"filters.ground"
+        },
+        {
+          "type":"writers.las",
+          "filename":"output.las"
+        }
+      ]
+    }
 
 Options
 -------------------------------------------------------------------------------

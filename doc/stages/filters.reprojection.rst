@@ -24,29 +24,36 @@ if you want to preserve the old coordinates for future processing, use a
 Example
 -------
 
-.. code-block:: xml
+.. code-block:: json
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.las">
-    <Option name="filename">example-geog.las</Option>
-    <Option name="scale_x">0.0000001</Option>
-    <Option name="scale_y">0.0000001</Option>
-    <Option name="scale_z">0.1</Option>
-    <Option name="offset_x">-100</Option>
-    <Option name="offset_y">40</Option>
-    <Option name="offset_z">0</Option>
-    <Option name="spatialreference">EPSG:4326</Option>
-      <Filter type="filters.reprojection">
-        <Option name="in_srs">EPSG:26916</Option>
-        <Option name="out_srs">EPSG:4326</Option>
-        <Reader type="readers.las">
-          <Option name="filename">example-utm.las</Option>
-          <Option name="spatialreference">EPSG:26916</Option>
-        </Reader>
-      </Filter>
-    </Writer>
-  </Pipeline>
+    {
+      "pipeline":[
+        {
+          "filename":"input.las",
+          "type":"readers.las",
+          "spatialreference":"EPSG:26916"
+        },
+        {
+          "type":"filters.range",
+          "limits":"Z[0:100],Classification[2:2]"
+        },
+        {
+          "type":"filters.reprojection",
+          "in_srs":"EPSG:26916",
+          "out_srs":"EPSG:4326"
+        },
+        {
+          "type":"writers.las",
+          "scale_x":"0.0000001",
+          "scale_y":"0.0000001",
+          "scale_z":"0.01",
+          "offset_x":"auto",
+          "offset_y":"auto",
+          "offset_z":"auto",
+          "filename":"example-geog.las"
+        }
+      ]
+    }
 
 Options
 -------

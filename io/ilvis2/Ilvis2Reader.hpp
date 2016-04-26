@@ -114,9 +114,6 @@ private:
     virtual point_count_t read(PointViewPtr view, point_count_t count);
 
     virtual void readPoint(PointRef& point, StringList s, std::string pointMap);
-
-    double convertLongitude(double longitude);
-
 };
 
 

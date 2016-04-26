@@ -42,7 +42,6 @@
 #include <memory>
 #include <vector>
 
-#include <pdal/GlobalEnvironment.hpp>
 #include <pdal/KernelFactory.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <merge/MergeFilter.hpp>
@@ -95,7 +94,7 @@ TIndexKernel::TIndexKernel()
 void TIndexKernel::addSwitches(ProgramArgs& args)
 {
     args.add("tindex", "OGR-readable/writeable tile index output",
-        m_idxFilename).setOptionalPositional();
+        m_idxFilename).setPositional();
     args.add("filespec", "Build: Pattern of files to index. "
         "Merge: Output filename", m_filespec).setPositional();
     args.add("fast_boundary", "Use extent instead of exact boundary",
@@ -158,7 +157,7 @@ void TIndexKernel::validateSwitches(ProgramArgs& args)
 
 int TIndexKernel::execute()
 {
-    GlobalEnvironment::get().initializeGDAL(0);
+    gdal::registerDrivers();
 
     if (m_merge)
         mergeFile();
@@ -217,9 +216,11 @@ bool TIndexKernel::isFileIndexed(const FieldIndexes& indexes,
     const FileInfo& fileInfo)
 {
     std::ostringstream qstring;
-    qstring << Utils::toupper(m_tileIndexColumnName) << "=\"" <<
-        fileInfo.m_filename << "\"";
-    OGRErr err = OGR_L_SetAttributeFilter(m_layer, qstring.str().c_str());
+
+    qstring << Utils::toupper(m_tileIndexColumnName) << "=" <<
+        "'" << fileInfo.m_filename << "'";
+    std::string query = qstring.str();
+    OGRErr err = OGR_L_SetAttributeFilter(m_layer, query.c_str());
     if (err != OGRERR_NONE)
     {
         std::ostringstream oss;
@@ -232,7 +233,6 @@ bool TIndexKernel::isFileIndexed(const FieldIndexes& indexes,
     OGR_L_ResetReading(m_layer);
     if (OGR_L_GetNextFeature(m_layer))
         output = true;
-
     OGR_L_ResetReading(m_layer);
     OGR_L_SetAttributeFilter(m_layer, NULL);
     return output;
@@ -356,79 +356,50 @@ void TIndexKernel::mergeFile()
         OGR_F_Destroy(feature);
     }
 
-    StageFactory factory;
-
-    MergeFilter merge;
-
     Options cropOptions;
     if (!m_bounds.empty())
         cropOptions.add("bounds", m_bounds);
     else
         cropOptions.add("polygon", m_wkt);
 
+    Stage& merge = makeFilter("filters.merge");
     for (auto f : files)
     {
-        Stage *premerge = NULL;
-        std::string driver = factory.inferReaderDriver(f.m_filename);
-        Stage *reader = factory.createStage(driver);
-        if (!reader)
-        {
-            out << "Unable to create reader for file '" << f.m_filename << "'.";
-            throw pdal_error(out.str());
-        }
-        Options readerOptions;
-        readerOptions.add("filename", f.m_filename);
-        reader->setOptions(readerOptions);
-        premerge = reader;
+        Stage& reader = makeReader(f.m_filename, "");
+        Stage *premerge = &reader;
 
         if (m_tgtSrsString != f.m_srs)
         {
-            Stage *repro = factory.createStage("filters.reprojection");
-            repro->setInput(*reader);
+            Stage& repro = makeFilter("filters.reprojection", reader);
             Options reproOptions;
             reproOptions.add("out_srs", m_tgtSrsString);
             reproOptions.add("in_srs", f.m_srs);
-            repro->setOptions(reproOptions);
-            premerge = repro;
+            repro.addOptions(reproOptions);
+            premerge = &repro;
         }
 
         // WKT is set, even if we're using a bounding box for fitering, so
         // can be used as a test here.
         if (!m_wkt.empty())
         {
-            Stage *crop = factory.createStage("filters.crop");
-            crop->setOptions(cropOptions);
-            crop->setInput(*premerge);
-            premerge = crop;
+            Stage& crop = makeFilter("filters.crop", *premerge);
+            crop.addOptions(cropOptions);
+            premerge = &crop;
         }
-
         merge.setInput(*premerge);
     }
 
-    std::string driver = factory.inferWriterDriver(m_filespec);
-    Options factoryOptions = factory.inferWriterOptionsChanges(m_filespec);
-    Stage *writer = factory.createStage(driver);
-    if (!writer)
-    {
-        out << "Unable to create reader for file '" << m_filespec << "'.";
-        throw pdal_error(out.str());
-    }
-    writer->setInput(merge);
+    Stage& writer = makeWriter(m_filespec, merge, "");
 
-    applyExtraStageOptionsRecursive(writer);
-
-    Options writerOptions(factoryOptions);
-    setCommonOptions(writerOptions);
-
-    writerOptions.add("filename", m_filespec);
+    Options writerOptions;
     writerOptions.add("offset_x", "auto");
     writerOptions.add("offset_y", "auto");
     writerOptions.add("offset_z", "auto");
-    writer->addConditionalOptions(writerOptions);
+    writer.addConditionalOptions(writerOptions);
 
     PointTable table;
-    writer->prepare(table);
-    writer->execute(table);
+    writer.prepare(table);
+    writer.execute(table);
 }
 
 
@@ -518,18 +489,16 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
 {
     FileInfo fileInfo;
 
-    StageFactory f;
+    PipelineManager manager;
+    manager.commonOptions() = m_manager.commonOptions();
+    manager.stageOptions() = m_manager.stageOptions();
 
-    std::string driverName = f.inferReaderDriver(filename);
-    Stage *s = f.createStage(driverName);
-    Options ops;
-    ops.add("filename", filename);
-    setCommonOptions(ops);
-    s->setOptions(ops);
-    applyExtraStageOptionsRecursive(s);
+    // Need to make sure options get set.
+    Stage& reader = manager.makeReader(filename, "");
+
     if (m_fastBoundary)
     {
-        QuickInfo qi = s->preview();
+        QuickInfo qi = reader.preview();
 
         std::stringstream polygon;
         polygon << "POLYGON ((";
@@ -546,22 +515,11 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
     }
     else
     {
+        Stage& hexer = manager.makeFilter("filters.hexbin", reader);
+
         PointTable table;
-
-        Stage *hexer = f.createStage("filters.hexbin");
-        if (! hexer)
-        {
-
-            std::ostringstream oss;
-
-            oss << "Unable to create hexer stage to create boundaries. "
-                << "Is PDAL_DRIVER_PATH environment variable set?";
-            throw pdal_error(oss.str());
-        }
-        hexer->setInput(*s);
-
-        hexer->prepare(table);
-        PointViewSet set = hexer->execute(table);
+        hexer.prepare(table);
+        PointViewSet set = hexer.execute(table);
 
         MetadataNode m = table.metadata();
         m = m.findChild("filters.hexbin:boundary");

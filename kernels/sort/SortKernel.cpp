@@ -70,40 +70,14 @@ void SortKernel::addSwitches(ProgramArgs& args)
 }
 
 
-Stage& SortKernel::makeReader(Options readerOptions)
-{
-    if (isDebug())
-    {
-        readerOptions.add<bool>("debug", true);
-        uint32_t verbosity(getVerboseLevel());
-        if (!verbosity)
-            verbosity = 1;
-
-        readerOptions.add<uint32_t>("verbose", verbosity);
-        readerOptions.add<std::string>("log", "STDERR");
-    }
-
-    Stage& stage = Kernel::makeReader(m_inputFile);
-    stage.setOptions(readerOptions);
-
-    return stage;
-}
-
-
 int SortKernel::execute()
 {
-    PointTable table;
-
-    Options readerOptions;
-    readerOptions.add("filename", m_inputFile);
-    readerOptions.add("debug", isDebug());
-    readerOptions.add("verbose", getVerboseLevel());
-
-    Stage& readerStage = makeReader(readerOptions);
+    Stage& readerStage = makeReader(m_inputFile, "");
 
     // go ahead and prepare/execute on reader stage only to grab input
     // PointViewSet, this makes the input PointView available to both the
     // processing pipeline and the visualizer
+    PointTable table;
     readerStage.prepare(table);
     PointViewSet viewSetIn = readerStage.execute(table);
 
@@ -112,33 +86,18 @@ int SortKernel::execute()
     PointViewPtr inView = *viewSetIn.begin();
 
     BufferReader bufferReader;
-    bufferReader.setOptions(readerOptions);
     bufferReader.addView(inView);
 
-    Options sortOptions;
-    sortOptions.add<bool>("debug", isDebug());
-    sortOptions.add<uint32_t>("verbose", getVerboseLevel());
+    Stage& sortStage = makeFilter("filters.mortonorder", bufferReader);
 
-    auto& sortStage = createStage("filters.mortonorder");
-    sortStage.setInput(bufferReader);
-    sortStage.setOptions(sortOptions);
-
+    Stage& writer = makeWriter(m_outputFile, sortStage, "");
     Options writerOptions;
-    writerOptions.add("filename", m_outputFile);
-    setCommonOptions(writerOptions);
-
     if (m_bCompress)
         writerOptions.add("compression", true);
     if (m_bForwardMetadata)
         writerOptions.add("forward_metadata", true);
-
-    Stage& writer = makeWriter(m_outputFile, sortStage);
-
-    // Some options are inferred by makeWriter based on filename
-    // (compression, driver type, etc).
     writer.addOptions(writerOptions);
 
-    applyExtraStageOptionsRecursive(&writer);
     writer.prepare(table);
 
     // process the data, grabbing the PointViewSet for visualization of the

@@ -10,29 +10,25 @@ The **Derivative Writer** supports writing of primary topographic attributes.
     This driver uses `GDAL`_ to write the data. Only the `GeoTIFF`_ driver
     is supported at this time.
 
+.. _`GDAL`: http://gdal.org
 .. _`GeoTiff`: http://www.gdal.org/frmt_gtiff.html
 
 Example
 -------
 
-.. code-block:: xml
+.. code-block:: json
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.derivative">
-      <Option name="filename">
-        outputfile.tiff
-      </Option>
-      <Option name="primitive_type">
-        slope_d8
-      </Option>
-      <Reader type="readers.las">
-        <Option name="filename">
-          inputfile.las
-        </Option>
-      </Reader>
-    </Writer>
-  </Pipeline>
+    {
+      "pipeline":[
+        "inputfile.las",
+        {
+          "type":"writers.derivative",
+          "filename":"outputfile.tiff",
+          "primitive_type":"slope_d8"
+        }
+      ]
+    }
+
 
 Options
 -------

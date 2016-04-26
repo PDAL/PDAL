@@ -34,19 +34,18 @@
 
 #pragma once
 
-#include <pdal/pdal_internal.hpp>
-#include <pdal/StageFactory.hpp>
-
 #include <json/json-forwards.h>
 
 #include <vector>
 #include <string>
 
+#include <pdal/Options.hpp>
+#include <pdal/StageFactory.hpp>
 
 namespace pdal
 {
 
-class Options;
+class Stage;
 class PipelineManager;
 
 class PDAL_DLL PipelineReaderJSON
@@ -54,33 +53,19 @@ class PDAL_DLL PipelineReaderJSON
     friend class PipelineManager;
 
 private:
-    class StageParserContext;
+    typedef std::map<std::string, Stage *> TagMap;
 
-    PipelineReaderJSON(PipelineManager&, bool debug=false,
-                   uint32_t verbose = 0);
-
-    /**
-      Read a JSON pipeline file into a PipelineManager.
-
-      \param filename  Filename to read.
-    */
+    PipelineReaderJSON(PipelineManager&);
     void readPipeline(const std::string& filename);
-
-    /**
-      Read a JSON pipeline file from a stream into a PipelineManager.
-
-      \param input  Stream to read.
-    */
     void readPipeline(std::istream& input);
-
-    void parseElement_Pipeline(const Json::Value&);
-    Stage *parseReaderByFilename(const std::string& filename);
-    Stage *parseWriterByFilename(const std::string& filename);
+    void parsePipeline(Json::Value&);
+    std::string extractType(Json::Value& node);
+    std::string extractFilename(Json::Value& node);
+    std::string extractTag(Json::Value& node, TagMap& tags);
+    std::vector<Stage *> extractInputs(Json::Value& node, TagMap& tags);
+    Options extractOptions(Json::Value& node);
 
     PipelineManager& m_manager;
-    bool m_isDebug;
-    uint32_t m_verboseLevel;
-    Options m_baseOptions;
     std::string m_inputJSONFile;
 
     PipelineReaderJSON& operator=(const PipelineReaderJSON&); // not implemented

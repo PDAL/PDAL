@@ -25,17 +25,20 @@ and types for convenience in file format transformation.
 Example
 -------
 
-.. code-block:: xml
+.. code-block:: json
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.las">
-      <Option name="filename">outputfile.las</Option>
-      <Reader type="readers.nitf">
-        <Option name="filename">mynitf.nitf</Option>
-      </Reader>
-    </Writer>
-  </Pipeline>
+    {
+      "pipeline":[
+        {
+          "type":"readers.nitf",
+          "filename":"mynitf.nitf"
+        },
+        {
+          "type":"writers.las",
+          "filename":"outputfile.las"
+        }
+      ]
+    }
 
 
 Options

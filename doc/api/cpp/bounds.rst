@@ -1,12 +1,15 @@
 .. _cpp-pdal-bounds:
 
 ******************************************************************************
-:cpp:class:`pdal::Bounds`
+:cpp:class:`pdal::BOX2D`
 ******************************************************************************
 
 
-.. doxygenclass:: pdal::Bounds
+.. doxygenclass:: pdal::BOX2D
    :members:
    :undoc-members:
 
+.. doxygenclass:: pdal::BOX3D
+   :members:
+   :undoc-members:
 

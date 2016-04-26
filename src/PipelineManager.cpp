@@ -42,10 +42,36 @@
 namespace pdal
 {
 
-// TODO(chambbj): what to do about pipelines specified via STDIN?
+PipelineManager::~PipelineManager()
+{
+    FileUtils::closeFile(m_input);
+}
+
+
 void PipelineManager::readPipeline(std::istream& input)
 {
-    PipelineReaderXML(*this).readPipeline(input); 
+    // Read stream into string.
+    std::string s(std::istreambuf_iterator<char>(input), {});
+
+    std::istringstream ss(s);
+    if (s.find("?xml") != std::string::npos)
+        PipelineReaderXML(*this).readPipeline(ss);
+    else if (s.find("\"pipeline\"") != std::string::npos)
+        PipelineReaderJSON(*this).readPipeline(ss);
+    else
+    {
+        try
+        {
+            PipelineReaderXML(*this).readPipeline(ss);
+        }
+        catch (pdal_error)
+        {
+            // Rewind to make sure the stream is properly positioned after
+            // attempting an XML pipeline.
+            ss.seekg(0);
+            PipelineReaderJSON(*this).readPipeline(ss);
+        }
+    }
 }
 
 
@@ -60,6 +86,12 @@ void PipelineManager::readPipeline(const std::string& filename)
     {
         PipelineReaderJSON pipeReader(*this);
         return pipeReader.readPipeline(filename);
+    }
+    else
+    {
+        FileUtils::closeFile(m_input);
+        m_input = FileUtils::openFile(filename);
+        readPipeline(*m_input);
     }
 }
 
@@ -144,6 +176,103 @@ MetadataNode PipelineManager::getMetadata() const
         output.add(s->getMetadata());
     }
     return output;
+}
+
+
+Stage& PipelineManager::makeReader(const std::string& inputFile,
+    std::string driver)
+{
+    if (!inputFile.empty() && !FileUtils::fileExists(inputFile))
+        throw pdal_error("file not found: " + inputFile);
+
+    if (driver.empty())
+    {
+        driver = StageFactory::inferReaderDriver(inputFile);
+        if (driver.empty())
+            throw pdal_error("Cannot determine input file type of " +
+                inputFile);
+    }
+    Options options;
+    if (!inputFile.empty())
+        options.add("filename", inputFile);
+
+    Stage& reader = addReader(driver);
+    setOptions(reader, options);
+    return reader;
+}
+
+
+Stage& PipelineManager::makeFilter(const std::string& driver)
+{
+    Stage& filter = addFilter(driver);
+    setOptions(filter, Options());
+    return filter;
+}
+
+
+Stage& PipelineManager::makeFilter(const std::string& driver, Stage& parent)
+{
+    Stage& filter = makeFilter(driver);
+    filter.setInput(parent);
+    return filter;
+}
+
+
+Stage& PipelineManager::makeWriter(const std::string& outputFile,
+    std::string driver)
+{
+    if (driver.empty())
+    {
+        driver = StageFactory::inferWriterDriver(outputFile);
+        if (driver.empty())
+            throw pdal_error("Cannot determine output file type of " +
+                outputFile);
+    }
+
+    Options options = StageFactory::inferWriterOptionsChanges(outputFile);
+    if (!outputFile.empty())
+        options.add("filename", outputFile);
+
+    auto& writer = addWriter(driver);
+    setOptions(writer, options);
+    return writer;
+}
+
+
+Stage& PipelineManager::makeWriter(const std::string& outputFile,
+    std::string driver, Stage& parent)
+{
+    Stage& writer = makeWriter(outputFile, driver);
+    writer.setInput(parent);
+    return writer;
+}
+
+
+void PipelineManager::setOptions(Stage& stage, const Options& addOps)
+{
+    // First apply common options.
+    stage.setOptions(m_commonOptions);
+
+    // Apply additional reader/writer options, making sure they replace any
+    // common options.
+    stage.removeOptions(addOps);
+    stage.addOptions(addOps);
+
+    // Apply options provided on the command line, overriding others.
+    Options& ops = stageOptions(stage);
+    stage.removeOptions(ops);
+    stage.addOptions(ops);
+}
+
+
+Options& PipelineManager::stageOptions(Stage& stage)
+{
+    static Options nullOpts;
+
+    auto oi = m_stageOptions.find(stage.getName());
+    if (oi == m_stageOptions.end())
+        return nullOpts;
+    return oi->second;
 }
 
 } // namespace pdal

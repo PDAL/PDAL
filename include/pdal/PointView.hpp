@@ -34,12 +34,13 @@
 
 #pragma once
 
-#include <pdal/util/Bounds.hpp>
-#include <pdal/pdal_internal.hpp>
+#include <pdal/DimDetail.hpp>
+#include <pdal/DimType.hpp>
 #include <pdal/PointContainer.hpp>
 #include <pdal/PointLayout.hpp>
 #include <pdal/PointRef.hpp>
 #include <pdal/PointTable.hpp>
+#include <pdal/util/Bounds.hpp>
 
 #include <memory>
 #include <queue>
@@ -255,6 +256,7 @@ public:
         while (!m_temps.empty())
             m_temps.pop();
     }
+    MetadataNode toMetadata() const;
 
 protected:
     PointTableRef m_pointTable;

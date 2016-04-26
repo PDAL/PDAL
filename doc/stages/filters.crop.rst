@@ -12,26 +12,23 @@ set for each input crop region.
 Example
 -------
 
-.. code-block:: xml
+.. code-block:: json
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.las">
-      <Option name="filename">
-        file-cropped.las
-      </Option>
-      <Filter type="filters.crop">
-        <Option name="bounds">
-          ([0,1000000],[0,1000000])
-        </Option>
-        <Reader type="readers.las">
-          <Option name="filename">
-            file-input.las
-          </Option>
-        </Reader>
-      </Filter>
-    </Writer>
-  </Pipeline>
+    {
+      "pipeline":[
+        "file-input.las",
+        {
+          "type":"filters.crop",
+          "bounds":"bounds",
+          "count":"([0,1000000],[0,1000000])"
+        },
+        {
+          "type":"writers.las",
+          "filename":"file-cropped.las"
+        }
+      ]
+    }
+
 
 
 Options
@@ -39,10 +36,10 @@ Options
 
 bounds
   The extent of the clipping rectangle, expressed in a string, eg: *([xmin, xmax], [ymin, ymax])*  This option can be specified more than once.
-  
+
 polygon
   The clipping polygon, expressed in a well-known text string, eg: *POLYGON((0 0, 5000 10000, 10000 0, 0 0))*  This option can be specified more than once.
-  
+
 outside
   Invert the cropping logic and only take points **outside** the cropping bounds or polygon. [Default: **false**]
-  
+

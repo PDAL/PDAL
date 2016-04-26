@@ -20,29 +20,22 @@ Example
 
 This example rotates the points around the z-axis while translating them.
 
-.. code-block:: xml
+.. code-block:: json
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.las">
-      <Option name="filename">
-        transformed.las
-      </Option>
-      <Filter type="filters.transformation">
-        <Option name="matrix">
-          0 -1  0  1
-          1  0  0  2
-          0  0  1  3
-          0  0  0  1
-        </Option>
-        <Reader type="readers.las">
-          <Option name="filename">
-            untransformed.las
-          </Option>
-        </Reader>
-      </Filter>
-    </Writer>
-  </Pipeline>
+    {
+      "pipeline":[
+        "untransformed.las",
+        {
+          "type":"filters.transformation",
+          "matrix":"0 -1  0  1  1  0  0  2  0  0  1  3  0  0  0  1",
+        },
+        {
+          "type":"writers.las",
+          "filename":"transformed.las"
+        }
+      ]
+    }
+
 
 
 Options

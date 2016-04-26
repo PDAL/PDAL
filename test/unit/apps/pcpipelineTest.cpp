@@ -44,18 +44,34 @@
 
 static std::string appName()
 {
-    const std::string app = Support::binpath(Support::exename("pdal") + " pipeline");
+    const std::string app = Support::binpath(Support::exename("pdal") +
+        " pipeline");
     return app;
 }
 
 // most pipelines (those with a writer) will be invoked via `pdal pipeline`
 static void run_pipeline(std::string const& pipeline)
 {
-    const std::string cmd = Support::binpath(Support::exename("pdal") + " pipeline");
+    const std::string cmd = Support::binpath(Support::exename("pdal") +
+        " pipeline");
 
     std::string output;
     std::string file(Support::configuredpath(pipeline));
     int stat = pdal::Utils::run_shell_command(cmd + " " + file, output);
+    EXPECT_EQ(0, stat);
+    if (stat)
+        std::cerr << output << std::endl;
+}
+
+// most pipelines (those with a writer) will be invoked via `pdal pipeline`
+static void run_pipeline_stdin(std::string const& pipeline)
+{
+    const std::string cmd = Support::binpath(Support::exename("pdal") +
+        " pipeline --stdin");
+
+    std::string output;
+    std::string file(Support::configuredpath(pipeline));
+    int stat = pdal::Utils::run_shell_command(cmd + " < " + file, output);
     EXPECT_EQ(0, stat);
     if (stat)
         std::cerr << output << std::endl;
@@ -136,6 +152,9 @@ TEST(pipelineBaseTest, readcomments)
 
 TEST(pipelineBaseTest, write)
 { run_pipeline("pipeline/pipeline_write.xml"); }
+
+TEST(pipelineBaseTest, writeStdin)
+{ run_pipeline_stdin("pipeline/pipeline_write.xml"); }
 
 TEST(pipelineBaseTest, write2)
 { run_pipeline("pipeline/pipeline_write2.xml"); }

@@ -5,6 +5,7 @@
 set(objs "")
 
 add_library(sbetcommon OBJECT SbetCommon.cpp SbetCommon.hpp)
+add_dependencies(sbetcommon generate_dimension_hpp)
 set(objs ${objs} $<TARGET_OBJECTS:sbetcommon>)
 
 #

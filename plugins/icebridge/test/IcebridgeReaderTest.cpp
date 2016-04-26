@@ -74,7 +74,7 @@ void checkPoint(
     checkDimension(data, index, Id::Z, elevation);
     checkDimension(data, index, Id::StartPulse, xmtSig);
     checkDimension(data, index, Id::ReflectedPulse, rcvSig);
-    checkDimension(data, index, Id::ScanAngleRank, azimuth);
+    checkDimension(data, index, Id::Azimuth, azimuth);
     checkDimension(data, index, Id::Pitch, pitch);
     checkDimension(data, index, Id::Roll, roll);
     checkDimension(data, index, Id::Pdop, gpsPdop);
@@ -109,7 +109,7 @@ TEST(IcebridgeReaderTest, testRead)
             0,
             141437548,     // time
             82.605319,      // latitude
-            301.406196,     // longitude
+            -58.593811,     // longitude
             18.678,         // elevation
             2408,           // xmtSig
             181,            // rcvSig
@@ -125,7 +125,7 @@ TEST(IcebridgeReaderTest, testRead)
             1,
             141437548,     // time
             82.605287,      // latitude
-            301.404862,     // longitude
+            -58.593811,     // longitude
             18.688,         // elevation
             2642,           // xmtSig
             173,            // rcvSig

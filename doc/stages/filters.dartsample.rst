@@ -1,7 +1,7 @@
-.. _filters.dartthrowing:
+.. _filters.dartsample:
 
 ===============================================================================
-filters.dartthrowing
+filters.dartsample
 ===============================================================================
 
 The practice of performing Poisson sampling via "Dart Throwing" was introduced

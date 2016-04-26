@@ -147,7 +147,7 @@ Compiling and Usage
 To compile this reader, we will use cmake.  Here is the CMakeLists.txt file we
 will use for this process:
 
-.. literalinclude:: ../../examples/writing-writer/CMakeLists.text
+.. literalinclude:: ../../examples/writing-writer/CMakeLists.txt
 
 If this file is in the directory with the MyWriter.hpp and MyWriter.cpp files,
 simply run ``cmake .`` followed by ``make``.  This will generate a file called
@@ -168,4 +168,4 @@ wanted, you could run that output file through the MyReader that was created
 in the previous tutorial, as well.
 
 .. _`interesting.las`: https://github.com/PDAL/PDAL/blob/master/test/data/interesting.las?raw=true
-.. _`pipeline_mywriter.json`: https://github.com/PDAL/PDAL/blob/master/examples/writing-writer/pipeline-mywriter.json?raw=true
+.. _`pipeline-mywriter.json`: https://github.com/PDAL/PDAL/blob/master/examples/writing-writer/pipeline-mywriter.json?raw=true

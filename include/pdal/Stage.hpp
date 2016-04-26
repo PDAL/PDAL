@@ -39,6 +39,7 @@
 #include <pdal/pdal_internal.hpp>
 
 #include <pdal/Dimension.hpp>
+#include <pdal/DimType.hpp>
 #include <pdal/Log.hpp>
 #include <pdal/Metadata.hpp>
 #include <pdal/Options.hpp>
@@ -94,12 +95,7 @@ public:
       Retrieve some basic point information without reading all data when
       possible.  Usually implemented only by Readers.
     */
-    QuickInfo preview()
-    {
-        l_processOptions(m_options);
-        processOptions(m_options);
-        return inspect();
-    }
+    QuickInfo preview();
 
     /**
       Prepare a stage for execution.  This function needs to be called on the

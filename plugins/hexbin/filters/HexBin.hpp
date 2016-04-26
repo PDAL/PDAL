@@ -53,6 +53,7 @@ public:
     static int32_t destroy(void *);
     std::string getName() const { return "filters.hexbin"; }
 
+    hexer::HexGrid* grid() const { return m_grid.get(); }
 private:
 
     std::unique_ptr<hexer::HexGrid> m_grid;

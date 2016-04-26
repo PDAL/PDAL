@@ -35,7 +35,6 @@
 #include "ReprojectionFilter.hpp"
 
 #include <pdal/PointView.hpp>
-#include <pdal/GlobalEnvironment.hpp>
 #include <pdal/pdal_macros.hpp>
 
 #include <gdal.h>
@@ -112,8 +111,6 @@ void ReprojectionFilter::processOptions(const Options& options)
 
 void ReprojectionFilter::initialize()
 {
-    GlobalEnvironment::get().initializeGDAL(log(), isDebug());
-
     m_out_ref_ptr = OSRNewSpatialReference(0);
 
     int result = OSRSetFromUserInput(m_out_ref_ptr,

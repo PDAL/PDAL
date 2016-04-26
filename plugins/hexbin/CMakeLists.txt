@@ -4,7 +4,7 @@
 
 include_directories(${ROOT_DIR}/vendor/pdalboost)
 
-find_package(Hexer)
+find_package(Hexer REQUIRED)
 if (HEXER_FOUND)
     include_directories(${HEXER_INCLUDE_DIR})
     add_definitions(-DHAVE_HEXER=1)
@@ -21,4 +21,13 @@ if (HEXER_FOUND)
             FILES test/HexbinFilterTest.cpp
             LINK_WITH ${libname})
     endif()
+
+
+    set(srcs kernel/DensityKernel.cpp kernel/OGR.cpp)
+    set(incs kernel/DensityKernel.hpp kernel/OGR.hpp)
+
+    PDAL_ADD_PLUGIN(density_kernel_libname kernel density
+        FILES "${srcs}" "${incs}"
+        LINK_WITH ${HEXER_LIBRARY} ${libname})
+
 endif()

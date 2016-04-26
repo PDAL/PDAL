@@ -16,6 +16,26 @@ on the parametric fit.
 
 .. _`PCL`: http://www.pointclouds.org
 
+Example
+-------------------------------------------------------------------------------
+
+.. code-block:: json
+
+    {
+      "pipeline":[
+        "input.las",
+        {
+          "type":"filters.movingleastsquares"
+        },
+        {
+          "type":"writers.las",
+          "filename":"output.las"
+        }
+      ]
+    }
+
+
+
 Options
 -------------------------------------------------------------------------------
 

@@ -92,39 +92,24 @@ int GroundKernel::execute()
 {
     PointTable table;
 
-    Options readerOptions;
-    readerOptions.add<std::string>("filename", m_inputFile);
-    setCommonOptions(readerOptions);
-
-    Stage& readerStage(Kernel::makeReader(m_inputFile));
-    readerStage.setOptions(readerOptions);
+    Stage& readerStage(makeReader(m_inputFile, ""));
 
     Options groundOptions;
-    groundOptions.add<double>("max_window_size", m_maxWindowSize);
-    groundOptions.add<double>("slope", m_slope);
-    groundOptions.add<double>("max_distance", m_maxDistance);
-    groundOptions.add<double>("initial_distance", m_initialDistance);
-    groundOptions.add<double>("cell_size", m_cellSize);
-    groundOptions.add<bool>("classify", m_classify);
-    groundOptions.add<bool>("extract", m_extract);
-    groundOptions.add<bool>("approximate", m_approximate);
-    groundOptions.add<bool>("debug", isDebug());
-    groundOptions.add<uint32_t>("verbose", getVerboseLevel());
+    groundOptions.add("max_window_size", m_maxWindowSize);
+    groundOptions.add("slope", m_slope);
+    groundOptions.add("max_distance", m_maxDistance);
+    groundOptions.add("initial_distance", m_initialDistance);
+    groundOptions.add("cell_size", m_cellSize);
+    groundOptions.add("classify", m_classify);
+    groundOptions.add("extract", m_extract);
+    groundOptions.add("approximate", m_approximate);
 
-    StageFactory f;
-    Stage* groundStage(f.createStage("filters.ground"));
-    groundStage->setOptions(groundOptions);
-    groundStage->setInput(readerStage);
+    Stage& groundStage = makeFilter("filters.ground", readerStage);
+    groundStage.addOptions(groundOptions);
 
     // setup the Writer and write the results
-    Options writerOptions;
-    writerOptions.add<std::string>("filename", m_outputFile);
-    setCommonOptions(writerOptions);
+    Stage& writer(makeWriter(m_outputFile, groundStage, ""));
 
-    Stage& writer(Kernel::makeWriter(m_outputFile, *groundStage));
-    writer.setOptions(writerOptions);
-
-    applyExtraStageOptionsRecursive(&writer);
     writer.prepare(table);
 
     // process the data, grabbing the PointViewSet for visualization of the

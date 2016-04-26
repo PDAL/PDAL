@@ -10,25 +10,22 @@ Airborne Topographic Mapper (ATM) project at NASA Goddard Space Flight Center.
 Example
 -------
 
-.. code-block:: xml
+.. code-block:: json
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.las">
-      <Option name="filename">output.las</Option>
-      <Reader type="readers.qfit">
-        <Option name="filename">
-          qfitfile.qi
-        </Option>
-        <Option name="flip_coordinates">
-          false
-        </Option>
-        <Option name="scale_z">
-          1.0
-        </Option>
-      </Reader>
-    </Writer>
-  </Pipeline>
+    {
+      "pipeline":[
+        {
+          "type":"readers.qfit",
+          "filename":"inputfile.qi",
+          "flip_coordinates":"false",
+          "scale_z":"1.0"
+        },
+        {
+          "type":"writers.las",
+          "filename":"outputfile.las"
+        }
+      ]
+    }
 
 Options
 -------

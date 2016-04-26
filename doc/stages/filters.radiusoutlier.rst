@@ -15,6 +15,26 @@ radius can be changed using ``radius``.
 
 .. _`PCL`: http://www.pointclouds.org
 
+Example
+-------------------------------------------------------------------------------
+
+.. code-block:: json
+
+    {
+      "pipeline":[
+        "input.las",
+        {
+          "type":"filters.radiusoutlier",
+          "min_neighbors":"4"
+        },
+        {
+          "type":"writers.las",
+          "filename":"output.las"
+        }
+      ]
+    }
+
+
 Options
 -------------------------------------------------------------------------------
 

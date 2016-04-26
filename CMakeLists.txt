@@ -28,14 +28,14 @@ mark_as_advanced(CMAKE_VERBOSE_MAKEFILE)
 
 # the next line is the ONLY place in the entire pdal system where
 # the version info is hard-coded
-set(PDAL_VERSION_STRING "1.1.0" CACHE STRING "PDAL version" FORCE)
+set(PDAL_VERSION_STRING "1.2.0" CACHE STRING "PDAL version" FORCE)
 
 DISSECT_VERSION()
 GET_OS_INFO()
 SET_INSTALL_DIRS()
 
-set(PDAL_API_VERSION "1")
-set(PDAL_BUILD_VERSION "2.0.0")
+set(PDAL_API_VERSION "2")
+set(PDAL_BUILD_VERSION "3.0.0")
 
 # Name of C++ library
 
@@ -67,24 +67,12 @@ set(PDAL_PLUGIN_INSTALL_PATH "${CMAKE_INSTALL_PREFIX}/${PDAL_LIB_INSTALL_DIR}")
 file(MAKE_DIRECTORY "${PDAL_OUTPUT_LIB_DIR}")
 file(MAKE_DIRECTORY "${PDAL_OUTPUT_BIN_DIR}")
 
-# per http://www.cmake.org/Wiki/CMake_RPATH_handling
-SET(CMAKE_SKIP_BUILD_RPATH FALSE )
-SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-if (APPLE)
-    SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-endif()
-SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-IF (APPLE)
-    SET(MACOSX_RPATH ON)
-endif()
-LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/${PDAL_LIB_INSTALL_DIR}" isSystemDir)
-IF("${isSystemDir}" STREQUAL "-1")
-    SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${PDAL_LIB_INSTALL_DIR}")
-ENDIF("${isSystemDir}" STREQUAL "-1")
+include(${PDAL_CMAKE_DIR}/rpath.cmake)
 
 # wipe lib/ drectory on clean. It will have plugins that could be out of date
 # in the next build
-set_directory_properties(PROPERTY ADDITIONAL_MAKE_CLEAN_FILES "${PDAL_OUTPUT_LIB_DIR}/*")
+set_directory_properties(PROPERTY ADDITIONAL_MAKE_CLEAN_FILES
+    "${PDAL_OUTPUT_LIB_DIR}/*")
 
 if(WIN32)
   add_definitions("-DPDAL_DLL_EXPORT=1")
@@ -92,7 +80,8 @@ if(WIN32)
     string(TOUPPER ${config} CONFIG)
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${CONFIG} "${PDAL_OUTPUT_LIB_DIR}")
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CONFIG} "${PDAL_OUTPUT_BIN_DIR}")
-    # ---[ Windows requires DLLs (shared libraries) to be installed in the same directory as executables
+    # ---[ Windows requires DLLs (shared libraries) to be installed in
+    # ---[ the same directory as executables
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CONFIG} "${PDAL_OUTPUT_BIN_DIR}")
   endforeach(config)
 else(WIN32)
@@ -103,106 +92,9 @@ endif(WIN32)
 
 set(PDAL_HEADERS_DIR "${PROJECT_SOURCE_DIR}/include/pdal")
 
-#------------------------------------------------------------------------------
-# misc user options
-#------------------------------------------------------------------------------
-if(DEFINED ENV{ORACLE_HOME})
-    set(DEFINED_ORACLE_HOME TRUE)
-else(DEFINED ENV{ORACLE_HOME})
-    set(DEFINED_ORACLE_HOME FALSE)
-endif(DEFINED ENV{ORACLE_HOME})
-
 # Choose package components
-option(WITH_APPS "Choose if PDAL utilities should be built" TRUE)
-add_feature_info("PDAL application" WITH_APPS
-    "the PDAL command line application")
 
-option(WITH_COMPLETION "Install bash completions scripts for command line?" FALSE)
-add_feature_info("Bash completion" WITH_COMPLETION
-    "completion for PDAL command line")
-
-option(BUILD_PLUGIN_CPD "Choose if Coherent Point Drift kernel is built" FALSE)
-add_feature_info("CPD plugin" BUILD_PLUGIN_CPD
-    "run Coherent Point Drift on two datasets")
-
-option(BUILD_PLUGIN_GEOWAVE "Choose if GeoWave support should be built" FALSE)
-add_feature_info("GeoWave plugin" BUILD_PLUGIN_GEOWAVE
-    "Read and Write data using GeoWave")
-
-option(BUILD_PLUGIN_GREYHOUND "Choose if Greyhound support should be built" FALSE)
-add_feature_info("Greyhound plugin" BUILD_PLUGIN_GREYHOUND
-    "read points from a Greyhound server")
-
-option(BUILD_PLUGIN_HEXBIN "Whether or not HexBin filter is built" FALSE)
-add_feature_info("Hexbin plugin" BUILD_PLUGIN_HEXBIN
-    "determine boundary and density of a point cloud")
-
-option(BUILD_PLUGIN_ICEBRIDGE "Choose if Icebridge support should be built" FALSE)
-add_feature_info("Icebridge plugin" BUILD_PLUGIN_ICEBRIDGE
-    "read data in the Icebridge format")
-
-option(BUILD_PLUGIN_MATLAB "Choose if Matlab support should be built" FALSE)
-add_feature_info("Matlab plugin" BUILD_PLUGIN_MATLAB
-    "write data to a .mat file")
-
-option(BUILD_PLUGIN_MRSID "Choose if MrSID/LiDAR support should be built" FALSE)
-add_feature_info("MrSID plugin" BUILD_PLUGIN_MRSID
-    "read data in the MrSID format")
-
-option(BUILD_PLUGIN_NITF "Choose if NITF support should be built (only install supported is from http://github.com/hobu/nitro)" FALSE)
-add_feature_info("NITF plugin" BUILD_PLUGIN_NITF
-    "read/write LAS data wrapped in NITF")
-
-option(BUILD_PLUGIN_OCI "Choose if OCI support should be built" ${DEFINED_ORACLE_HOME})
-option(BUILD_PLUGIN_P2G "Choose if Points2Grid support should be built" FALSE)
-option(BUILD_PLUGIN_PCL "Choose if PCL support should be built" FALSE)
-add_feature_info("PCL plugin" BUILD_PLUGIN_PCL
-    "provides PCL-based readers, writers, filters, and kernels")
-
-find_package(PostgreSQL QUIET)
-option(BUILD_PLUGIN_PGPOINTCLOUD "Choose if PostgreSQL PointCloud support should be built" ${POSTGRESQL_FOUND})
-add_feature_info("PostgreSQL PointCloud plugin" BUILD_PLUGIN_PGPOINTCLOUD
-    "read/write PostgreSQL PointCloud objects")
-
-option(BUILD_PLUGIN_SQLITE "Choose if SQLite database support should be built" FALSE)
-add_feature_info("SQLite plugin" BUILD_PLUGIN_SQLITE
-    "read/write SQLite objects")
-
-option(BUILD_PLUGIN_RIVLIB "Choose if RiVLib support should be built" FALSE)
-add_feature_info("RiVLib plugin" BUILD_PLUGIN_RIVLIB
-    "read data in the RXP format")
-
-option(BUILD_PLUGIN_PYTHON "Choose if Python support should be built" FALSE)
-add_feature_info("Python plugin" BUILD_PLUGIN_PYTHON
-    "add features that depend on python")
-
-option(WITH_TESTS "Choose if PDAL unit tests should be built" TRUE)
-add_feature_info("Unit tests" WITH_TESTS "PDAL unit tests")
-
-# Choose dependent options
-
-include(CMakeDependentOption)
-
-cmake_dependent_option(BUILD_PGPOINTCLOUD_TESTS "Choose if PostgreSQL PointCloud tests should be built" ON "BUILD_PLUGIN_PGPOINTCLOUD; WITH_TESTS" OFF)
-cmake_dependent_option(BUILD_SQLITE_TESTS "Choose if SQLite tests should be built" ON "BUILD_PLUGIN_SQLITE; WITH_TESTS" OFF)
-cmake_dependent_option(BUILD_OCI_TESTS "Choose if OCI tests should be built" ON "BUILD_PLUGIN_OCI; WITH_TESTS" OFF)
-cmake_dependent_option(BUILD_RIVLIB_TESTS "Choose if RiVLib tests should be built" ON "BUILD_PLUGIN_RIVLIB; WITH_TESTS" OFF)
-cmake_dependent_option(BUILD_PIPELINE_TESTS "Choose if pipeline tests should be built" OFF "WITH_APPS; WITH_TESTS" OFF)
-
-if(BUILD_PLUGIN_PGPOINTCLOUD OR BUILD_PLUGIN_OCI OR BUILD_PLUGIN_SQLITE)
-    include(${PDAL_CMAKE_DIR}/libxml2.cmake)
-endif()
-
-#------------------------------------------------------------------------------
-# test harness settings
-#------------------------------------------------------------------------------
-
-# Name of test suite runner
-set(PDAL_UNIT_TEST pdal_test)
-
-# Enable CTest and submissions to PDAL dashboard at CDash
-# http://my.cdash.org/index.php?project=PDAL
-option(ENABLE_CTEST "Enable CTest to support submissions of results to CDash at http://cdash.org" FALSE)
+include(${PDAL_CMAKE_DIR}/options.cmake)
 
 #------------------------------------------------------------------------------
 # General build settings
@@ -223,6 +115,9 @@ include(${PDAL_CMAKE_DIR}/threads.cmake)
 include(${PDAL_CMAKE_DIR}/zlib.cmake)
 include(${PDAL_CMAKE_DIR}/test.cmake)
 include(${PDAL_CMAKE_DIR}/ctest.cmake)
+if (BUILD_PLUGIN_PGPOINTCLOUD OR BUILD_PLUGIN_OCI OR BUILD_PLUGIN_SQLITE)
+    include(${PDAL_CMAKE_DIR}/libxml2.cmake)
+endif()
 
 #------------------------------------------------------------------------------
 # generate the pdal_defines.h header
@@ -250,10 +145,21 @@ configure_file(${pdal_defines_h_in} ${pdal_defines_h})
 PDAL_ADD_INCLUDES("" "" ${pdal_defines_h})
 include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
 
-include_directories(vendor/eigen-3.1.91)
-include_directories(vendor/jsoncpp-1.6.2/dist)
-include_directories(vendor/nanoflann-1.1.8)
-include_directories(vendor/rply-1.1.4)
+include_directories(${PDAL_VENDOR_DIR}/eigen-3.1.91)
+include_directories(${PDAL_VENDOR_DIR}/jsoncpp-1.6.2/dist)
+include_directories(${PDAL_VENDOR_DIR}/nanoflann-1.1.8)
+include_directories(${PDAL_VENDOR_DIR}/rply-1.1.4)
+
+#------------------------------------------------------------------------------
+# Custom command to generate Dimension.hpp from Dimension.json
+#------------------------------------------------------------------------------
+
+set(DIMENSION_INFILE ${PDAL_SRC_DIR}/Dimension.json)
+set(DIMENSION_OUTFILE ${CMAKE_CURRENT_BINARY_DIR}/include/pdal/Dimension.hpp)
+add_custom_command(OUTPUT ${DIMENSION_OUTFILE}
+    COMMAND dimbuilder ${DIMENSION_INFILE} ${DIMENSION_OUTFILE}
+        DEPENDS ${DIMENSION_INFILE} dimbuilder)
+add_custom_target(generate_dimension_hpp DEPENDS ${DIMENSION_OUTFILE})
 
 #------------------------------------------------------------------------------
 # subdirectory controls
@@ -265,19 +171,15 @@ set(PDAL_TARGET_OBJECTS "")
 if (WITH_TESTS)
     enable_testing()
 endif()
+
 add_subdirectory(plugins)
 
 include_directories(vendor/pdalboost)
-
 if (WITH_TESTS)
-    if (MSVC)
-        # Since tests link CRT dynamically (/MD[d]), require gtest to link dynamically too (default is /MT[d])
-        option(gtest_force_shared_crt "Always use shared Visual C++ run-time DLL" ON)
-    endif()
-    add_subdirectory(vendor/gtest-1.7.0)
+    include (${PDAL_CMAKE_DIR}/gtest.cmake)
     add_subdirectory(test)
 endif()
-
+add_subdirectory(dimbuilder)
 add_subdirectory(vendor/pdalboost)
 add_subdirectory(src/util)
 add_subdirectory(io)
@@ -288,52 +190,11 @@ add_subdirectory(tools)
 if (BUILD_PLUGIN_PYTHON)
     add_subdirectory(src/plang)
 endif()
-
 if (WITH_APPS)
     add_subdirectory(apps)
 endif()
 
-#------------------------------------------------------------------------------
-# CPACK controls
-#------------------------------------------------------------------------------
-
-SET(CPACK_PACKAGE_VERSION_MAJOR ${PDAL_VERSION_MAJOR})
-SET(CPACK_PACKAGE_VERSION_MINOR ${PDAL_VERSION_MINOR})
-SET(CPACK_PACKAGE_VERSION_PATCH ${PDAL_VERSION_MINOR})
-SET(CPACK_PACKAGE_NAME "PDAL")
-
-SET(CPACK_SOURCE_GENERATOR "TBZ2;TGZ")
-SET(CPACK_PACKAGE_VENDOR "PDAL Development Team")
-SET(CPACK_RESOURCE_FILE_LICENSE    "${PROJECT_SOURCE_DIR}/LICENSE.txt")
-
-set(CPACK_SOURCE_PACKAGE_FILE_NAME
-    "${CMAKE_PROJECT_NAME}-${PDAL_VERSION_STRING}-src")
-
-set(CPACK_SOURCE_IGNORE_FILES
-"/\\\\.gitattributes;/\\\\.vagrant;/\\\\.DS_Store;/CVS/;/\\\\.git/;\\\\.swp$;~$;\\\\.\\\\#;/\\\\#")
-
-list(APPEND CPACK_SOURCE_IGNORE_FILES "CMakeScripts/")
-list(APPEND CPACK_SOURCE_IGNORE_FILES "CMakeCache.txt")
-list(APPEND CPACK_SOURCE_IGNORE_FILES ".xcodeproj")
-list(APPEND CPACK_SOURCE_IGNORE_FILES "build.make")
-list(APPEND CPACK_SOURCE_IGNORE_FILES "_CPack_Packages")
-list(APPEND CPACK_SOURCE_IGNORE_FILES "cmake_install.cmake")
-list(APPEND CPACK_SOURCE_IGNORE_FILES "Testing")
-list(APPEND CPACK_SOURCE_IGNORE_FILES "PDAL.build/")
-list(APPEND CPACK_SOURCE_IGNORE_FILES "/bin/")
-list(APPEND CPACK_SOURCE_IGNORE_FILES "/lib/")
-list(APPEND CPACK_SOURCE_IGNORE_FILES "/build/")
-list(APPEND CPACK_SOURCE_IGNORE_FILES "Makefile")
-list(APPEND CPACK_SOURCE_IGNORE_FILES "CMakeFiles")
-list(APPEND CPACK_SOURCE_IGNORE_FILES "CTestTestfile.cmake")
-list(APPEND CPACK_SOURCE_IGNORE_FILES "/test/data/local/")
-list(APPEND CPACK_SOURCE_IGNORE_FILES "/doc/doxygen/")
-list(APPEND CPACK_SOURCE_IGNORE_FILES "/doc/build/")
-list(APPEND CPACK_SOURCE_IGNORE_FILES "/doc/presentations/")
-list(APPEND CPACK_SOURCE_IGNORE_FILES "/doc/_static/logo/dongle/")
-list(APPEND CPACK_SOURCE_IGNORE_FILES "/cmake/examples/")
-
-include(CPack)
+include (${PDAL_CMAKE_DIR}/cpack.cmake)
 
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 

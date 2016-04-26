@@ -17,22 +17,23 @@ data segmented into smaller blocks).
 Example
 -------
 
-.. code-block:: xml
+.. code-block:: json
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.pgpointcloud">
-      <Option name="connection">dbname='lidar' user='user'</Option>
-      <Filter type="filters.chipper">
-        <Option name="length">100</Option>
-        <Option name="origin_x">638900.0</Option>
-        <Option name="origin_y">835500.0</Option>
-        <Reader type="readers.las">
-            <Option name="filename">example.las</Option>
-        </Reader>
-      </Filter>
-    </Writer>
-  </Pipeline>
+    {
+      "pipeline":[
+        "input.las",
+        {
+          "type":"filters.splitter",
+          "length":"100",
+          "origin_x":"638900.0",
+          "origin_y":"835500.0"
+        },
+        {
+          "type":"writers.pgpointcloud",
+          "connection":"dbname='lidar' user='user'"
+        }
+      ]
+    }
 
 Options
 -------

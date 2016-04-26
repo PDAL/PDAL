@@ -174,9 +174,9 @@ std::string getTraceback()
         PyObject* output = PyObject_CallObject(tracebackFunction, args);
 
         // print error message
-        int n = PyList_Size(output);
+        Py_ssize_t n = PyList_Size(output);
 
-        for (int i = 0; i < n; i++)
+        for (Py_ssize_t i = 0; i < n; i++)
         {
             PyObject* l = PyList_GetItem(output, i);
             if (!l)
@@ -184,11 +184,11 @@ std::string getTraceback()
             PyObject* r = PyObject_Repr(l);
             if (!r)
                 throw pdal::pdal_error("unable to get repr in getTraceback");
-            Py_ssize_t size;
 #if PY_MAJOR_VERSION >= 3
-            char* d = PyUnicode_AsUTF8AndSize(r, &size);
+            Py_ssize_t size;
+            char *d = PyUnicode_AsUTF8AndSize(r, &size);
 #else
-            char* d = PyString_AsString(r);
+            char *d = PyString_AsString(r);
 #endif
             mssg << d;
         }
@@ -202,11 +202,11 @@ std::string getTraceback()
         PyObject* r = PyObject_Repr(value);
         if (!r)
             throw pdal::pdal_error("couldn't make string representation of traceback value");
-        Py_ssize_t size;
 #if PY_MAJOR_VERSION >= 3
-            char* d = PyUnicode_AsUTF8AndSize(r, &size);
+        Py_ssize_t size;
+        char *d = PyUnicode_AsUTF8AndSize(r, &size);
 #else
-            char* d = PyString_AsString(r);
+        char *d = PyString_AsString(r);
 #endif
         mssg << d;
     }
@@ -260,11 +260,11 @@ std::string readPythonString(PyObject* list, Py_ssize_t index)
     PyObject* r = PyObject_Repr(o);
     if (!r)
         throw pdal::pdal_error("unable to get repr in readPythonString");
-    Py_ssize_t size;
 #if PY_MAJOR_VERSION >= 3
-            char* d = PyUnicode_AsUTF8AndSize(r, &size);
+    Py_ssize_t size;
+    char *d = PyUnicode_AsUTF8AndSize(r, &size);
 #else
-            char* d = PyString_AsString(r);
+    char *d = PyString_AsString(r);
 #endif
     ss << d;
 

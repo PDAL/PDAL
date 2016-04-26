@@ -79,7 +79,7 @@ private:
     void dumpPipeline() const;
     MetadataNode dumpSummary(const QuickInfo& qi);
     MetadataNode dumpQuery(PointViewPtr inView) const;
-    PipelineManagerPtr makePipeline(const std::string& filename, bool noPoints);
+    void makePipeline(const std::string& filename, bool noPoints);
 
     std::string m_inputFile;
     bool m_showStats;
@@ -100,7 +100,6 @@ private:
     Stage *m_reader;
 
     MetadataNode m_tree;
-    PipelineManagerPtr m_manager;
 };
 
 } // namespace pdal

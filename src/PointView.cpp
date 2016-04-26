@@ -136,6 +136,25 @@ void PointView::calculateBounds(const PointViewSet& set, BOX3D& output)
 }
 
 
+MetadataNode PointView::toMetadata() const
+{
+    MetadataNode node;
+
+    const Dimension::IdList& dims = layout()->dims();
+
+    for (PointId idx = 0; idx < size(); idx++)
+    {
+        MetadataNode pointnode = node.add(std::to_string(idx));
+        for (auto di = dims.begin(); di != dims.end(); ++di)
+        {
+            double v = getFieldAs<double>(*di, idx);
+            pointnode.add(Dimension::name(*di), v);
+        }
+    }
+    return node;
+}
+
+
 void PointView::dump(std::ostream& ostr) const
 {
     using std::endl;

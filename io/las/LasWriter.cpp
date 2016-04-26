@@ -502,7 +502,7 @@ bool LasWriter::addWktVlr()
     std::vector<uint8_t> wktBytes(wkt.begin(), wkt.end());
     // This tacks a NULL to the end of the data, which is required by the spec.
     wktBytes.resize(wktBytes.size() + 1, 0);
-    addVlr(TRANSFORM_USER_ID, WKT_RECORD_ID, "OGC Tranformation Record",
+    addVlr(TRANSFORM_USER_ID, WKT_RECORD_ID, "OGC Transformation Record",
         wktBytes);
 
     // The data in the vector gets moved to the VLR, so we have to recreate it.

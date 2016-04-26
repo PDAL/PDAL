@@ -1,7 +1,8 @@
 .. _cpp-pdal-dimension:
 
 ******************************************************************************
-:cpp:namespace:: `pdal::Dimension`
+``pdal::Dimension``
 ******************************************************************************
 
 .. doxygennamespace:: pdal::Dimension
+    :undoc-members:

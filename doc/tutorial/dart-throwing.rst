@@ -10,7 +10,7 @@ Performing Poisson Sampling of Point Clouds Using Dart Throwing
 
 
 This tutorial will describe the creation of a new filter for sampling point
-cloud data, :ref:`filters.dartthrowing`.
+cloud data, :ref:`filters.dartsample`.
 
 Introduction
 -------------------------------------------------------------------------------

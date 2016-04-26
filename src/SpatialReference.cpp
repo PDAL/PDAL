@@ -331,14 +331,8 @@ bool SpatialReference::isGeocentric() const
 
 int SpatialReference::calculateZone(double lon, double lat)
 {
-    // Force longitude [-180, 180)
-    lon = fmod(lon, 360.0);
-    if (lon < -180.0)
-        lon += 360.0;
-    else if (lon >= 180.0)
-        lon -= 360.0;
-
     int zone = 0;
+    lon = Utils::normalizeLongitude(lon);
 
     // Special Norway processing.
     if (lat >= 56.0 && lat < 64.0 && lon >= 3.0 && lon < 12.0 )
@@ -452,6 +446,27 @@ int SpatialReference::computeUTMZone(const BOX3D& box) const
     OSRDestroySpatialReference(wgs84);
 
     return min_zone;
+}
+
+
+MetadataNode SpatialReference::toMetadata() const
+{
+    MetadataNode root("srs");
+    root.add("horizontal", getHorizontal());
+    root.add("vertical", getVertical());
+    root.add("isgeographic", isGeographic());
+    root.add("isgeocentric", isGeocentric());
+    root.add("proj4", getProj4());
+    root.add("prettywkt", getWKT(eHorizontalOnly, true));
+    root.add("wkt", getWKT(eHorizontalOnly, false));
+    root.add("compoundwkt", getWKT(eCompoundOK, false));
+    root.add("prettycompoundwkt", getWKT(eCompoundOK, true));
+
+    MetadataNode units = root.add("units");
+    units.add("vertical", getVerticalUnits());
+    units.add("horizontal", getVerticalUnits());
+
+    return root;
 }
 
 

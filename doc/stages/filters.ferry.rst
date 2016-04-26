@@ -20,40 +20,32 @@ stashing the pre-projection X and Y values into the
 `StatePlaneX` and `StatePlaneY` dimensions. Future
 processing, can then operate on these data.
 
-.. code-block:: xml
+.. code-block:: json
 
-    <?xml version="1.0" encoding="utf-8"?>
-    <Pipeline version="1.0">
-        <Writer type="writers.las">
-            <Option name="filename">
-                colorized.las
-            </Option>
-            <Filter type="filters.reprojection">
-                <Option name="out_srs">
-                    EPSG:4326+4326
-                </Option>
-                <Option name="scale_x">
-                    0.0000001
-                </Option>
-                <Option name="scale_y">
-                    0.0000001
-                </Option>
-                <Filter type="filters.ferry">
-                    <Option name="dimensions">
-                        X = StatePlaneX, Y=StatePlaneY
-                    </Option>
-                    <Reader type="readers.las">
-                        <Option name="filename">
-                            ../las/1.2-with-color.las
-                        </Option>
-                        <Option name="spatialreference">
-                            EPSG:2993
-                        </Option>
-                    </Reader>
-                </Filter>
-            </Filter>
-        </Writer>
-    </Pipeline>
+    {
+      "pipeline":[
+        "uncompressed.las",
+        {
+          "type":"readers.las",
+          "spatialreference":"EPSG:2993",
+          "filename":"../las/1.2-with-color.las"
+        },
+        {
+          "type":"filters.ferry",
+          "dimensions":"X = StatePlaneX, Y=StatePlaneY"
+        },
+        {
+          "type":"filters.reprojection",
+          "out_srs":"EPSG:4326+4326"
+        },
+        {
+          "type":"writers.las",
+          "scale_x":"0.0000001",
+          "scale_y":"0.0000001",
+          "filename":"colorized.las"
+        }
+      ]
+    }
 
 Options
 -------

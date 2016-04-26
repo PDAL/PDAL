@@ -41,7 +41,7 @@
 #include <string>
 #include <vector>
 
-#include <pdal/StageFactory.hpp>
+#include <pdal/PipelineManager.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
@@ -78,9 +78,11 @@ public:
 protected:
     // this is protected; your derived class ctor will be the public entry point
     Kernel();
-    Stage& createStage(const std::string& name);
-    Stage& makeReader(const std::string& inputFile);
-    Stage& makeWriter(const std::string& outputFile, Stage& parent);
+    Stage& makeReader(const std::string& inputFile, std::string driver);
+    Stage& makeFilter(const std::string& driver, Stage& parent);
+    Stage& makeFilter(const std::string& driver);
+    Stage& makeWriter(const std::string& outputFile, Stage& parent,
+        std::string driver);
 
 public:
     virtual void addSwitches(ProgramArgs& args)
@@ -95,47 +97,21 @@ public:
     // it will be wrapped in a global catch try/block for you
     virtual int execute() = 0;
 
-    void setCommonOptions(Options &options);
-
-    const Options& extraStageOptions(const std::string& stage)
-    {
-        static Options nullOpts;
-
-        auto oi = m_extraStageOptions.find(stage);
-        if (oi == m_extraStageOptions.end())
-            return nullOpts;
-        return oi->second;
-    }
-
-    void applyExtraStageOptionsRecursive(Stage *s)
-    {
-        // if options provided via command-line, we assume they should overwrite
-        // existing options, remove first, and then add
-        Options ops = extraStageOptions(s->getName());
-
-        s->removeOptions(ops);
-        s->addOptions(ops);
-        auto stages = s->getInputs();
-        for (Stage *s : stages)
-            applyExtraStageOptionsRecursive(s);
-    }
-
 protected:
-
     bool m_usestdin;
     Log m_log;
+    PipelineManager m_manager;
 
 private:
     int innerRun(ProgramArgs& args);
     void outputHelp(ProgramArgs& args);
     void outputVersion();
     void addBasicSwitches(ProgramArgs& args);
-    void collectExtraOptions();
+    void parseCommonOptions();
 
     void doSwitches(int argc, const char *argv[], ProgramArgs& args);
     int doStartup();
     int doExecution(ProgramArgs& args);
-    int doShutdown();
 
     static bool test_parseOption(std::string o, std::string& stage,
         std::string& option, std::string& value);
@@ -153,10 +129,6 @@ private:
     std::string m_offsets;
     bool m_visualize;
     std::string m_label;
-
-    std::vector<std::string> m_extra_options;
-    std::map<std::string, Options> m_extraStageOptions;
-    StageFactory m_factory;
 
     Kernel& operator=(const Kernel&); // not implemented
     Kernel(const Kernel&); // not implemented

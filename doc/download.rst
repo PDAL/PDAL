@@ -5,32 +5,37 @@ Download
 ******************************************************************************
 
 
+.. contents::
+   :depth: 3
+   :backlinks: none
+
+
 Current Release(s)
 ------------------------------------------------------------------------------
 
-* **2015-11-25** `PDAL-1.1.0-src.tar.gz`_ `Release Notes`_ (`md5`_)
+* **2016-03-31** `PDAL-1.2.0-src.tar.gz`_ `Release Notes`_ (`md5`_)
 
-.. _`Release Notes`: https://github.com/PDAL/PDAL/releases/tag/1.1.0
+.. _`Release Notes`: https://github.com/PDAL/PDAL/releases/tag/1.2.0
 
-.. _`PDAL-1.1.0-src.tar.gz`: http://download.osgeo.org/pdal/PDAL-1.1.0-src.tar.gz
-.. _`md5`: http://download.osgeo.org/pdal/PDAL-1.1.0-src.tar.gz.md5
+.. _`PDAL-1.2.0-src.tar.gz`: http://download.osgeo.org/pdal/PDAL-1.2.0-src.tar.gz
+.. _`md5`: http://download.osgeo.org/pdal/PDAL-1.2.0-src.tar.gz.md5
 .. _`DebianGIS`: http://wiki.debian.org/DebianGis
 
 
 Past Releases
 ------------------------------------------------------------------------------
 
+* **2015-11-25** `PDAL-1.1.0-src.tar.gz`_ `Release Notes`_ (`md5`_)
 
-* **2015-09-11** `PDAL-1.0.1-src.tar.gz`_ (`md5`_)
 
-.. _`PDAL-1.0.1-src.tar.gz`: http://download.osgeo.org/pdal/PDAL-1.0.1-src.tar.gz
+.. _`PDAL-1.1.0-src.tar.gz`: http://download.osgeo.org/pdal/PDAL-1.1.0-src.tar.gz
 
 
 
 .. _source:
 
 Development Source
-..............................................................................
+------------------------------------------------------------------------------
 
 The main repository for PDAL is located on github at https://github.com/PDAL/PDAL
 
@@ -43,8 +48,16 @@ You can obtain a copy of the active source code by issuing the following command
 Binaries
 ------------------------------------------------------------------------------
 
+Docker
+................................................................................
+
 The fastest way to get going with PDAL is to use the Docker build. See the
-tutorial at :ref:`docker`.
+tutorial at :ref:`docker` for more information.
+
+::
+
+    docker pull pdal/pdal:1.2
+
 
 Windows
 ................................................................................
@@ -57,6 +70,11 @@ RPMs
 
 RPMs for PDAL are available at http://pdal.s3-website-us-east-1.amazonaws.com/rpms/
 
+Debian
+................................................................................
+
+Debian packages are now available on `Debian Unstable`_.
+
 .. _`OSGeo4W`: http://trac.osgeo.org/osgeo4w/
-.. _`DebianGIS`: http://wiki.debian.org/DebianGis
+.. _`Debian Unstable`: https://tracker.debian.org/pkg/pdal
 .. _`LASzip`: http://laszip.org

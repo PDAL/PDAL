@@ -38,6 +38,7 @@
 
 #include <functional>
 #include <map>
+//#include <mutex>
 
 #include <ogr_spatialref.h>
 
@@ -52,7 +53,6 @@ namespace gdal
 
 /**
   Reproject a bounds box from a source projection to a destination.
-
   \param box  Bounds box to be reprojected in-place.
   \param srcSrs  String in WKT or other suitable format of box coordinates.
   \param dstSrs  String in WKT or other suitable format to which
@@ -86,38 +86,116 @@ std::string lastError()
 }
 
 
-ErrorHandler::ErrorHandler(bool isDebug, pdal::LogPtr log)
-    : m_isDebug(isDebug)
-    , m_log(log)
-{
-    if (m_isDebug)
-    {
-        const char* gdal_debug = ::pdal::Utils::getenv("CPL_DEBUG");
-        if (gdal_debug == 0)
-        {
-            pdal::Utils::putenv("CPL_DEBUG=ON");
-        }
-        m_gdal_callback = std::bind(&ErrorHandler::log, this,
-            std::placeholders::_1, std::placeholders::_2,
-            std::placeholders::_3);
-    }
-    else
-    {
-        m_gdal_callback = std::bind(&ErrorHandler::error, this,
-            std::placeholders::_1, std::placeholders::_2,
-            std::placeholders::_3);
-    }
+ErrorHandler ErrorHandler::m_instance;
 
-    CPLPushErrorHandlerEx(&ErrorHandler::trampoline, this);
+void registerDrivers()
+{
+    static std::once_flag flag;
+
+    auto init = []() -> void
+    {
+        GDALAllRegister();
+        OGRRegisterAll();
+    };
+
+    std::call_once(flag, init);
 }
 
-void ErrorHandler::log(::CPLErr code, int num, char const* msg)
+
+void unregisterDrivers()
+{
+    GDALDestroyDriverManager();
+}
+
+
+ErrorHandler& ErrorHandler::get()
+{
+    return m_instance;
+}
+
+
+ErrorHandler::ErrorHandler() : m_throw(true), m_errorNum(0)
+{
+    std::string value;
+
+    auto cb = [](::CPLErr level, int num, const char *msg)
+    {
+        ErrorHandler::get().handle(level, num, msg);
+    };
+    m_cplSet = (Utils::getenv("CPL_DEBUG", value) == 0);
+    m_debug = m_cplSet;
+    CPLSetErrorHandler(cb);
+}
+
+
+void ErrorHandler::set(LogPtr log, bool debug, bool doThrow)
+{
+    setLog(log);
+    setDebug(debug);
+    setThrow(doThrow);
+}
+
+
+void ErrorHandler::set(LogPtr log, bool debug)
+{
+    setLog(log);
+    setDebug(debug);
+}
+
+
+void ErrorHandler::setLog(LogPtr log)
+{
+    m_log = log;
+}
+
+
+void ErrorHandler::setDebug(bool debug)
+{
+    m_debug = debug;
+    if (!m_cplSet)
+    {
+        if (debug)
+            Utils::setenv("CPL_DEBUG", "ON");
+        else
+            Utils::unsetenv("CPL_DEBUG");
+    }
+}
+
+
+void ErrorHandler::setThrow(bool doThrow)
+{
+    m_throw = doThrow;
+}
+
+
+bool ErrorHandler::willThrow() const
+{
+    return m_throw;
+}
+
+
+int ErrorHandler::errorNum()
+{
+    int errorNum = m_errorNum;
+    m_errorNum = 0;
+    return errorNum;
+}
+
+
+void ErrorHandler::handle(::CPLErr level, int num, char const* msg)
 {
     std::ostringstream oss;
 
-    if (code == CE_Failure || code == CE_Fatal)
-        error(code, num, msg);
-    else if (code == CE_Debug)
+    m_errorNum = num;
+    if (level == CE_Failure || level == CE_Fatal)
+    {
+        oss << "GDAL failure (" << num << ") " << msg;
+        if (m_throw)
+            throw pdal_error(oss.str());
+        else if (m_log)
+            m_log->get(LogLevel::Error) << oss.str() << std::endl;
+    }
+    else if (m_debug && level == CE_Debug)
     {
         oss << "GDAL debug: " << msg;
         if (m_log)
@@ -125,22 +203,6 @@ void ErrorHandler::log(::CPLErr code, int num, char const* msg)
     }
 }
 
-
-void ErrorHandler::error(::CPLErr code, int num, char const* msg)
-{
-    std::ostringstream oss;
-    if (code == CE_Failure || code == CE_Fatal)
-    {
-        oss << "GDAL Failure number = " << num << ": " << msg;
-        throw pdal_error(oss.str());
-    }
-}
-
-
-ErrorHandler::~ErrorHandler()
-{
-    CPLPopErrorHandler();
-}
 
 struct InvalidBand {};
 struct CantReadBlock {};
@@ -532,7 +594,6 @@ void Raster::close()
 }
 
 } // namespace gdal
-
 
 std::string transformWkt(std::string wkt, const SpatialReference& from,
     const SpatialReference& to)

@@ -45,18 +45,33 @@
 
 static std::string appName()
 {
-    const std::string app = Support::binpath(Support::exename("pdal") + " pipeline");
+    const std::string app = Support::binpath(Support::exename("pdal") +
+        " pipeline");
     return app;
 }
 
 // most pipelines (those with a writer) will be invoked via `pdal pipeline`
 static void run_pipeline(std::string const& pipeline)
 {
-    const std::string cmd = Support::binpath(Support::exename("pdal") + " pipeline");
+    const std::string cmd = appName();
 
     std::string output;
     std::string file(Support::configuredpath(pipeline));
     int stat = pdal::Utils::run_shell_command(cmd + " " + file, output);
+    EXPECT_EQ(0, stat);
+    if (stat)
+        std::cerr << output << std::endl;
+}
+
+// most pipelines (those with a writer) will be invoked via `pdal pipeline`
+static void run_pipeline_stdin(std::string const& pipeline)
+{
+    const std::string cmd = appName();
+
+    std::string output;
+    std::string file(Support::configuredpath(pipeline));
+    int stat = pdal::Utils::run_shell_command(cmd + " --stdin < " + file,
+        output);
     EXPECT_EQ(0, stat);
     if (stat)
         std::cerr << output << std::endl;
@@ -97,6 +112,12 @@ class json : public testing::TestWithParam<const char*> {};
 TEST_P(json, pipeline)
 {
     run_pipeline(GetParam());
+}
+
+TEST(json, pipeline_stdin)
+{
+    run_pipeline_stdin("pipeline/las2csv.json");
+    run_pipeline_stdin("pipeline/bpf2las.json");
 }
 
 INSTANTIATE_TEST_CASE_P(base, json,
@@ -142,6 +163,7 @@ TEST_P(jsonWithNITF, pipeline)
     else
         std::cerr << "WARNING: could not create readers.nitf or writers.nitf, skipping test" << std::endl;
 }
+
 
 INSTANTIATE_TEST_CASE_P(plugins, jsonWithNITF,
                         testing::Values(

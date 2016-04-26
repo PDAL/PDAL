@@ -34,11 +34,10 @@
 
 #pragma once
 
-#include <cpd/nonrigid_lowrank.hpp>
+#include <cpd/matrix.hpp>
 
 #include <pdal/Kernel.hpp>
 #include <pdal/pdal_export.hpp>
-
 
 namespace pdal
 {
@@ -52,32 +51,23 @@ public:
     int execute();
 
 private:
-    CpdKernel() {};
+    CpdKernel() : Kernel() {};
     virtual void addSwitches(ProgramArgs& args);
-    PointViewPtr readFile(const std::string& filename, PointTableRef table,
-        arma::mat& mat);
-    cpd::Registration::ResultPtr chipThenRegister(
-        const cpd::NonrigidLowrank& reg, const arma::mat& X, const arma::mat& Y,
-        const PointViewPtr& bufX, PointTableRef table);
+    cpd::Matrix readFile(const std::string& filename);
 
+    std::string m_method;
     std::string m_filex;
     std::string m_filey;
     std::string m_output;
-    float m_tolerance;
-    int m_max_it;
-    float m_outliers;
-    bool m_fgt;
-    float m_epsilon;
-    float m_beta;
-    float m_lambda;
-    arma::uword m_numeig;
+    double m_tolerance;
+    size_t m_max_it;
+    double m_outliers;
+    bool m_no_reflections;
+    bool m_allow_scaling;
+    double m_beta;
+    double m_lambda;
     BOX3D m_bounds;
-    bool m_auto_z_exaggeration;
-    float m_auto_z_exaggeration_ratio;
-    bool m_chipped;
-    int m_chip_capacity;
-    float m_chip_buffer;
-    float m_sigma2;
+    double m_sigma2;
 };
 
 } // namespace pdal

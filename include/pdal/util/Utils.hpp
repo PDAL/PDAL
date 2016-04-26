@@ -193,25 +193,28 @@ namespace Utils
       Fetch the value of an environment variable.
 
       \param name  Name of environment varaible.
-      \return  Value of environment variable.
+      \param name  Value of the environemnt variable if it exists, empty
+        otherwise.
+      \return  0 on success, -1 on failure
     */
-    PDAL_DLL char *getenv(const char *name);
-
-    /**
-      Fetch the value of an environment variable.
-
-      \param name  Name of environment varaible.
-      \return  Value of environment variable.
-    */
-    PDAL_DLL std::string getenv(std::string const& name);
+    PDAL_DLL int getenv(std::string const& name, std::string& val);
 
     /**
       Set the value of an environment variable.
 
-      \param env  Name/value of environment varaible in the format NAME=VALUE.
+      \param env  Name of environment variable.
+      \param val  Value of environment variable.
       \return  0 on success, -1 on failure
     */
-    PDAL_DLL int putenv(const char *env);
+    PDAL_DLL int setenv(const std::string& env, const std::string& val);
+
+    /**
+      Clear the value of an environment variable.
+
+      \param env  Name of the environment variable to clear.
+      \return  0 on success, -1 on failure
+    */
+    PDAL_DLL int unsetenv(const std::string& env);
 
     /**
       Skip stream input until a non-space character is found.
@@ -324,8 +327,9 @@ namespace Utils
 
     /**
       Break a string into a list of strings to not exceed a specified length.
-      The first string can optionally have a maximum length other than that
-      of the rest of the strings.
+      Whitespace is condensed to a single space and each string is free of
+      whitespace at the beginning and end when possible.  Optionally, a line
+      length for the first line can be different from subsequent lines.
 
       \param inputString  String to split into substrings.
       \param lineLength  Maximum length of substrings.
@@ -335,6 +339,22 @@ namespace Utils
       \return  List of substrings generated from the input string.
     */
     PDAL_DLL std::vector<std::string> wordWrap(std::string const& inputString,
+        size_t lineLength, size_t firstLength = 0);
+
+    /**
+      Break a string into a list of strings to not exceed a specified length.
+      The concatanation of the returned substrings will yield the original
+      string.  The algorithm attempts to break the original string such that
+      each substring begins with a word.
+
+      \param inputString  String to split into substrings.
+      \param lineLength  Maximum length of substrings.
+      \param firstLength  When non-zero, the maximum length of the first
+        substring.  When zero, the first firstLength is assigned the value
+        provided in lineLength.
+      \return  List of substrings generated from the input string.
+    */
+    PDAL_DLL std::vector<std::string> wordWrap2(std::string const& inputString,
         size_t lineLength, size_t firstLength = 0);
 
     /**
@@ -371,6 +391,14 @@ namespace Utils
         to printable notation.
     */
     PDAL_DLL std::string escapeNonprinting(const std::string& s);
+
+    /**
+      Normalize longitude so that it's between (-180, 180].
+
+      \param longitude  Longitude to normalize.
+      \return  Normalized longitude.
+    */
+    PDAL_DLL double normalizeLongitude(double longitude);
 
     /**
       Convert an input buffer to a hexadecimal string representation similar

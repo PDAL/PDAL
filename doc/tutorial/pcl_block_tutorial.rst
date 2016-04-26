@@ -32,37 +32,9 @@ cloud processing pipelines.
 Quick Start
 ------------------------------------------------------------------------------
 
-.. note::
-
-    Instructions for getting started with PDAL using :ref:`docker` also
-    include built-in PCL support.
-
-PDAL's Vagrant configuration now includes the PCL Block and all necessary
-dependencies. Assuming you've got Vagrant all set up, once you checkout the PDAL
-source code, just do the following:
-
-::
-
-    $ cd pdal
-    $ vagrant up
-    $ vagrant ssh
-
-The ``vagrant up`` command will take a considerable amount of time, but once its
-completed you have a fully functional VM with both PCL and PDAL installed. Try
-entering
-
-::
-
-    $ pdal pipeline --version
-
-at the command line. You should see output similar to the following:
-
-::
-
-    ------------------------------------------------------------------------------------------
-    pdal pipeline (PDAL 0.9.9 (2c6aa8) with GeoTIFF 1.4.0 GDAL 1.9.2 LASzip 2.2.0 System )
-    ------------------------------------------------------------------------------------------
-
+The :ref:`quickstart` document describes how to use PDAL with Docker, which
+includes built-in PCL support. After you have worked through that document, you
+should be able to run any PDAL PCL operations.
 
 
 PDAL Pipeline kernel

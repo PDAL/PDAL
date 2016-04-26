@@ -34,8 +34,9 @@
 
 #include "NitfFileWriter.hpp"
 
-#include "tre_plugins.hpp"
+#include <pdal/util/FileUtils.hpp>
 
+#include "tre_plugins.hpp"
 
 namespace pdal
 {
@@ -102,7 +103,7 @@ void NitfFileWriter::write()
     header.getSystemType().set(m_sType);
     header.getOriginStationID().set(m_oStationId);
     if (m_fileTitle.empty())
-        m_fileTitle = m_filename;
+        m_fileTitle = FileUtils::getFilename(m_filename);
     header.getFileTitle().set(m_fileTitle);
     header.getClassification().set(m_fileClass);
     header.getMessageCopyNum().set("00000");
@@ -155,7 +156,7 @@ void NitfFileWriter::write()
 
     ::nitf::BandInfo info;
     ::nitf::LookupTable lt(0,0);
-    info.init("G",    /* The band representation, Nth band */
+    info.init(" ",    /* The band representation, Nth band */
               " ",      /* The band subcategory */
               "N",      /* The band filter condition */
               "   ",    /* The band standard image filter code */
@@ -180,7 +181,7 @@ void NitfFileWriter::write()
         8,   /*!< The number of columns */
         8,   /*!< The number of rows/block */
         8,   /*!< The number of columns/block */
-        "P");                /*!< Image mode */
+        "B");                /*!< Image mode */
 
     //Image Header fields to set
     subheader.getImageId().set("None");
@@ -188,6 +189,20 @@ void NitfFileWriter::write()
 
     //AIMIDB
     ::nitf::TRE aimidbTre("AIMIDB");
+
+    //LIDAR defaults
+    if (m_imgDate.size())
+        aimidbTre.setField("ACQUISITION_DATE", m_imgDate);
+    aimidbTre.setField("MISSION_NO", "UNKN");
+    aimidbTre.setField("MISSION_IDENTIFICATION", "NOT AVAIL.");
+    aimidbTre.setField("FLIGHT_NO", "00");
+    aimidbTre.setField("CURRENT_SEGMENT", "AA");
+    aimidbTre.setField("START_TILE_COLUMN", "001");
+    aimidbTre.setField("START_TILE_ROW", "00001");
+    aimidbTre.setField("END_SEGMENT", "00");
+    aimidbTre.setField("END_TILE_COLUMN", "001");
+    aimidbTre.setField("END_TILE_ROW", "00001");
+
     for (auto& s : m_aimidb)
     {
         StringList v = Utils::split2(s, ':');
@@ -202,11 +217,32 @@ void NitfFileWriter::write()
         Utils::trim(v[1]);
         aimidbTre.setField(v[0], v[1]);
     }
-    if (m_aimidb.size())
-        subheader.getExtendedSection().appendTRE(aimidbTre);
+    subheader.getExtendedSection().appendTRE(aimidbTre);
+
+    //if IDATIM is empty set it equal to AIMIDB.ACQUISITION_DATE
+    if (!m_imgDate.size())
+    {
+        m_imgDate = aimidbTre.getField("ACQUISITION_DATE").toString();
+        if (m_imgDate.size())
+            subheader.getImageDateAndTime().set(m_imgDate);
+    }
 
     //ACFTB
     ::nitf::TRE acftbTre("ACFTB");
+
+    //LIDAR defaults
+    acftbTre.setField("AC_MSN_ID", "NOT AVAILABLE");
+    acftbTre.setField("SCENE_SOURCE", " ");
+    if (m_imgDate.size()>7)
+        acftbTre.setField("PDATE", m_imgDate.substr(0,8));
+    acftbTre.setField("MPLAN", "999");
+    acftbTre.setField("LOC_ACCY", "000.00");
+    acftbTre.setField("ROW_SPACING", "0000000");
+    acftbTre.setField("ROW_SPACING_UNITS", "u");
+    acftbTre.setField("COL_SPACING", "0000000");
+    acftbTre.setField("COL_SPACING_UNITS", "u");
+    acftbTre.setField("FOCAL_LENGTH", "999.99");
+
     for (auto& s : m_acftb)
     {
         StringList v = Utils::split2(s, ':');
@@ -221,8 +257,7 @@ void NitfFileWriter::write()
         Utils::trim(v[1]);
         acftbTre.setField(v[0], v[1]);
     }
-    if (m_acftb.size())
-        subheader.getExtendedSection().appendTRE(acftbTre);
+    subheader.getExtendedSection().appendTRE(acftbTre);
 
     ::nitf::Writer writer;
     ::nitf::IOHandle output_io(m_filename, NITF_ACCESS_WRITEONLY,

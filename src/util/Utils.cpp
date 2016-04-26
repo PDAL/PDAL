@@ -43,6 +43,7 @@
 #ifndef _WIN32
 #include <cxxabi.h>
 #include <sys/ioctl.h>
+#include <sys/wait.h>  // WIFEXITED, WEXITSTATUS
 #endif
 
 #ifdef PDAL_COMPILER_MSVC
@@ -97,25 +98,33 @@ double Utils::normal(const double& mean, const double& sigma, uint32_t seed)
 }
 
 
-char* Utils::getenv(const char* env)
-{
-    return ::getenv(env);
-}
-
-
-std::string Utils::getenv(std::string const& name)
+int Utils::getenv(const std::string& name, std::string& val)
 {
     char* value = ::getenv(name.c_str());
-    return value ? std::string(value) : std::string();
+    if (value)
+        val = value;
+    else
+        val.clear();
+    return value ?  0 : -1;
 }
 
 
-int Utils::putenv(const char* env)
+int Utils::setenv(const std::string& env, const std::string& val)
 {
 #ifdef _WIN32
-    return ::_putenv(env);
+    return ::_putenv_s(env.c_str(), val.c_str()) ? -1 : 0;
 #else
-    return ::putenv(const_cast<char*>(env));
+    return ::setenv(env.c_str(), val.c_str(), 1);
+#endif
+}
+
+
+int Utils::unsetenv(const std::string& env)
+{
+#ifdef _WIN32
+    return ::_putenv_s(env.c_str(), "") ? -1 : 0;
+#else
+    return ::unsetenv(env.c_str());
 #endif
 }
 
@@ -433,42 +442,88 @@ std::string Utils::escapeJSON(const std::string &str)
     return escaped;
 }
 
-/// Break a string into a list of strings, none of which exceeds a specified
-/// length.
-/// \param[in] inputString  String to split
-/// \param[in] lineLength  Maximum length of any of the output strings
-/// \param[in] firstLength  Maximum length of any of the output strings
-/// \return  List of string split from input.
-///
-StringList Utils::wordWrap(std::string const& inputString, size_t lineLength,
+
+StringList Utils::wordWrap(std::string const& s, size_t lineLength,
     size_t firstLength)
 {
-    // stolen from http://stackoverflow.com/questions/5815227/fix-improve-word-wrap-function
+    std::vector<std::string> output;
+    if (s.empty())
+        return output;
 
     if (firstLength == 0)
         firstLength = lineLength;
 
     size_t len = firstLength;
-    StringList output;
 
-    std::istringstream iss(inputString);
+    std::istringstream iss(s);
     std::string line;
     do
     {
         std::string word;
         iss >> word;
 
-        if (line.length() + word.length() > len)
+        if ((line.length() + word.length() > len) && line.length())
         {
+            trimTrailing(line);
             output.push_back(line);
             len = lineLength;
             line.clear();
         }
+        while (word.length() > len)
+        {
+            output.push_back(word.substr(0, len));
+            word = word.substr(len);
+            len = lineLength;
+        }
         line += word + " ";
     } while (iss);
-
+    trimTrailing(line);
     if (!line.empty())
         output.push_back(line);
+    return output;
+}
+
+
+StringList Utils::wordWrap2(std::string const& s, size_t lineLength,
+    size_t firstLength)
+{
+    std::vector<std::string> output;
+    if (s.empty())
+        return output;
+
+    if (firstLength == 0)
+        firstLength = lineLength;
+
+    auto pushWord = [&s, &output](size_t start, size_t end)
+    {
+        if (start != end)
+            output.push_back(s.substr(start, end - start + 1));
+    };
+
+    size_t len = firstLength;
+    size_t startPos = 0;
+    while (true)
+    {
+        size_t endPos = std::min(startPos + len - 1, s.size() - 1);
+        if (endPos + 1 == s.size())
+        {
+            pushWord(startPos, endPos);
+            return output;
+        }
+        size_t pos = endPos;
+        while (pos > startPos)
+        {
+            if (std::isspace(s[pos]) && !std::isspace(s[pos + 1]))
+            {
+                endPos = pos;
+                break;
+            }
+            pos--;
+        }
+        pushWord(startPos, endPos);
+        len = lineLength;
+        startPos = endPos + 1;
+    }
     return output;
 }
 
@@ -530,6 +585,18 @@ std::string Utils::escapeNonprinting(const std::string& s)
     }
     return out;
 }
+
+
+double Utils::normalizeLongitude(double longitude)
+{
+    longitude = fmod(longitude, 360.0);
+    if (longitude <= -180)
+        longitude += 360;
+    else if (longitude > 180)
+        longitude -= 360;
+    return longitude;
+}
+
 
 // Useful for debug on occasion.
 std::string Utils::hexDump(const char *buf, size_t count)
