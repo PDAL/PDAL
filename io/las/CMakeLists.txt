@@ -33,6 +33,7 @@ set(incs
 set(objs "")
 
 add_library(lascommon OBJECT ${srcs} ${incs})
+add_dependencies(lascommon generate_dimension_hpp)
 set(objs ${objs} $<TARGET_OBJECTS:lascommon>)
 
 #
