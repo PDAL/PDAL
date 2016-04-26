@@ -831,7 +831,8 @@ public:
 
         for (auto i : info)
         {
-            StringList descrip = Utils::wordWrap(i.second, secondLen, firstlen);
+            std::vector<std::string> descrip =
+                Utils::wordWrap(i.second, secondLen, firstlen);
 
             std::string name = i.first;
             out << std::string(indent, ' ');

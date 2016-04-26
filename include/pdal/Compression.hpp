@@ -48,6 +48,7 @@
 #endif
 
 #include <pdal/Dimension.hpp>
+#include <pdal/DimType.hpp>
 #include <pdal/util/OStream.hpp>
 
 #include <map>

@@ -39,7 +39,8 @@
 #include <string>
 #include <vector>
 
-#include "pdal/Dimension.hpp"
+#include <pdal/DimDetail.hpp>
+#include <pdal/DimType.hpp>
 
 namespace pdal
 {

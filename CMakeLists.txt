@@ -151,6 +151,17 @@ include_directories(${PDAL_VENDOR_DIR}/nanoflann-1.1.8)
 include_directories(${PDAL_VENDOR_DIR}/rply-1.1.4)
 
 #------------------------------------------------------------------------------
+# Custom command to generate Dimension.hpp from Dimension.json
+#------------------------------------------------------------------------------
+
+set(DIMENSION_INFILE ${PDAL_SRC_DIR}/Dimension.json)
+set(DIMENSION_OUTFILE ${CMAKE_CURRENT_BINARY_DIR}/include/pdal/Dimension.hpp)
+add_custom_command(OUTPUT ${DIMENSION_OUTFILE}
+    COMMAND dimbuilder ${DIMENSION_INFILE} ${DIMENSION_OUTFILE}
+        DEPENDS ${DIMENSION_INFILE} dimbuilder)
+add_custom_target(generate_dimension_hpp DEPENDS ${DIMENSION_OUTFILE})
+
+#------------------------------------------------------------------------------
 # subdirectory controls
 #------------------------------------------------------------------------------
 
@@ -168,6 +179,7 @@ if (WITH_TESTS)
     include (${PDAL_CMAKE_DIR}/gtest.cmake)
     add_subdirectory(test)
 endif()
+add_subdirectory(dimbuilder)
 add_subdirectory(vendor/pdalboost)
 add_subdirectory(src/util)
 add_subdirectory(io)

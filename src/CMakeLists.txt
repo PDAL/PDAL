@@ -34,10 +34,11 @@ endif()
 #
 # base
 #
+#[[
 set(PDAL_BASE_HPP
+  "${PDAL_HEADERS_DIR}/Dimension.hpp"
   "${PDAL_HEADERS_DIR}/pdal_types.hpp"
   "${PDAL_HEADERS_DIR}/Compression.hpp"
-  "${PDAL_HEADERS_DIR}/Dimension.hpp"
   "${PDAL_HEADERS_DIR}/Filter.hpp"
   "${PDAL_HEADERS_DIR}/FlexWriter.hpp"
   "${PDAL_HEADERS_DIR}/GDALUtils.hpp"
@@ -71,6 +72,7 @@ set(PDAL_BASE_HPP
     ${PDAL_XML_HEADER}
     ${DB_DRIVER_HEADERS}
 )
+]]
 
 set(PDAL_BASE_CPP
   DynamicLibrary.cpp
@@ -210,4 +212,7 @@ endif()
 install(DIRECTORY "${PDAL_HEADERS_DIR}/"
   DESTINATION "${PDAL_INCLUDE_INSTALL_DIR}"
   PATTERN "/CMakeFiles/*" EXCLUDE
+  )
+install(FILES ${DIMENSION_OUTFILE} 
+  DESTINATION "${PDAL_INCLUDE_INSTALL_DIR}"
   )
