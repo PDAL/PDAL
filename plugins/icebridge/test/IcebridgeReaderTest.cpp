@@ -125,7 +125,7 @@ TEST(IcebridgeReaderTest, testRead)
             1,
             141437548,     // time
             82.605287,      // latitude
-            -58.593811,     // longitude
+            -58.595123,     // longitude
             18.688,         // elevation
             2642,           // xmtSig
             173,            // rcvSig
