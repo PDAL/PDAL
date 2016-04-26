@@ -168,12 +168,12 @@ point_count_t IcebridgeReader::read(PointViewPtr view, point_count_t count)
                 }
                 else if (*di == Dimension::Id::X)
                 {
-                    // Longitude is 0-360. Convert
                     float *fval = (float *)p;
-                    double dval = (double)(*fval);
-                    dval = Utils::normalizeLongitude(dval);
                     for (PointId i = 0; i < count; ++i)
                     {
+                        double dval = (double)(*fval);
+                        // Longitude is 0-360. Convert
+                        dval = Utils::normalizeLongitude(dval);
                         view->setField(*di, nextId++, dval);
                         fval++;
                     }
