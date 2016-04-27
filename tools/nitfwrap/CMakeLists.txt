@@ -5,10 +5,13 @@
 cmake_minimum_required(VERSION 2.8.6)
 
 if(NOT ROOT_DIR)
-    project(NTIFWRAP)
+    project(NITFWRAP)
     set(ROOT_DIR "${PROJECT_SOURCE_DIR}/../..")
 endif()
 include(${ROOT_DIR}/cmake/common.cmake NO_POLICY_SCOPE)
+if (PROJECT_NAME STREQUAL "NITFWRAP")
+    include(${PDAL_CMAKE_DIR}/dimension.cmake)
+endif()
 include(${PDAL_CMAKE_DIR}/nitro.cmake)
 
 set(pdal_defines_h_in "${CMAKE_CURRENT_SOURCE_DIR}/pdal_defines.h.in")
@@ -36,6 +39,7 @@ set (HEADERS
 )
 
 add_executable(nitfwrap ${SOURCES} ${HEADERS})
+add_dependencies(nitfwrap generate_dimension_hpp)
 target_link_libraries(nitfwrap
     ${PDAL_BASE_LIB_NAME}
     ${PDAL_UTIL_LIB_NAME}
