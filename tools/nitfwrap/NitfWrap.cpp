@@ -108,6 +108,7 @@ void NitfWrap::unwrap()
     NitfFileReader reader(m_inputFile);
     reader.open();
     reader.getLasOffset(offset, length);
+    std::cerr << "LAS offset/length = " << offset << "/" << length << "!\n";
     reader.close();
 
     // Open file file and seek to the beginning of the location.
@@ -144,14 +145,14 @@ void NitfWrap::unwrap()
         return;
     }
 
-    uint64_t bufsize = 1024 * 10;
+    uint64_t bufsize = 16;
     std::vector<char> buf(bufsize);
     std::ostream *out = FileUtils::createFile(m_outputFile);
     in->seekg(offset, std::istream::beg);
     while (length)
     {
         size_t size = std::min(length, bufsize);
-        in->get(buf.data(), size);
+        in->read(buf.data(), size);
         out->write(buf.data(), size);
         length -= size;
     }
