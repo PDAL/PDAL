@@ -46,6 +46,42 @@
 
 using namespace std;
 
+
+class PDAL_DLL ArbiterStream : public std::ofstream
+{
+public:
+    ArbiterStream( std::string path,
+                  std::ios::openmode mode)
+        : std::ofstream(getLocalTempFile(path).c_str(), mode)
+        , m_remotePath(path)
+    {
+
+    }
+    static std::string getLocalTempFile(std::string path)
+    {
+        std::string basename = arbiter::Arbiter::getTerminus(path);
+        std::string tempdir = arbiter::fs::getTempPath();
+
+        std::ostringstream p;
+        p << tempdir << basename;
+        std::string localpath = p.str();
+
+        return localpath;
+    }
+
+    virtual ~ArbiterStream()
+    {
+        close();
+        arbiter::Arbiter a;
+        a.put(m_remotePath, a.getBinary(getLocalTempFile(m_remotePath)));
+    }
+
+private:
+    std::string m_remotePath;
+};
+
+
+
 namespace pdal
 {
 
@@ -113,16 +149,34 @@ istream *openFile(string const& filename, bool asBinary)
 }
 
 
-ostream *createFile(string const& filename, bool asBinary)
+ostream *createFile(string const& name, bool asBinary)
 {
-    if (isStdout(filename))
+    if (isStdout(name))
         return &cout;
 
     ios::openmode mode = ios::out;
     if (asBinary)
         mode |= ios::binary;
 
-    ostream *ofs = new ofstream(filename, mode);
+#ifdef PDAL_ARIBITER_ENABLED
+    arbiter::Arbiter a;
+
+    if (a.isRemote(name))
+    {
+
+        ostream* ofs = new ArbiterStream(name, mode);
+        if (! ofs->good())
+        {
+            delete ofs;
+            return NULL;
+        }
+
+        return ofs;
+    }
+#endif
+
+
+    ostream *ofs = new ofstream(name, mode);
     if (! ofs->good())
     {
         delete ofs;

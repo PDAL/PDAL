@@ -380,11 +380,26 @@ TEST(UtilsTest, wordWrap2)
     EXPECT_EQ(output[1], std::string(10, ' '));
     EXPECT_EQ(output[2], std::string(8, ' '));
 }
-
-TEST(FileUtilsTest, fetchRemote)
-{
-#ifdef PDAL_ARIBITER_ENABLED
-    std::string name("http://www.liblas.org/samples/srs.laz");
-    std::istream* s = pdal::FileUtils::openFile(name);
-#endif
-}
+//
+// TEST(FileUtilsTest, fetchRemote)
+// {
+// #ifdef PDAL_ARIBITER_ENABLED
+//     std::string name("http://www.liblas.org/samples/srs.laz");
+//     std::istream* s = pdal::FileUtils::openFile(name);
+//
+//     std::string rname("s3://pdal/test.laz");
+//     std::ostream* t = pdal::FileUtils::createFile(rname);
+//     EXPECT_TRUE(t) << "remote stream was null!";
+//
+//     std::string junk("somejunk");
+//     *t << junk;
+//     delete t;
+//
+//     std::string rjunk("");
+//     std::istream* s2 = pdal::FileUtils::openFile(rname);
+//     *s2 >> rjunk;
+//     delete s2;
+//
+//     EXPECT_EQ(rjunk, junk);
+// #endif
+// }
