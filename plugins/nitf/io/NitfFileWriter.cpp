@@ -53,7 +53,7 @@ void NitfFileWriter::setArgs(ProgramArgs& args)
     args.add("stype", "Standard type", m_sType, "BF01");
     args.add("ostaid", "Origination station ID", m_oStationId, "PDAL");
     args.add("ftitle", "File title", m_fileTitle);
-    args.add("fsclas", "", m_fileClass, "U");
+    args.add("fsclas", "File/data segment classification", m_fileClass, "U");
     args.add("oname", "Originator's name", m_origName);
     args.add("ophone", "Originator's phone number", m_origPhone);
     args.add("fsctlh", "File control and handling",

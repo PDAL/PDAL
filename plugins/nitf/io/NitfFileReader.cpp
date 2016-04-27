@@ -110,6 +110,12 @@ void NitfFileReader::open()
 }
 
 
+void NitfFileReader::close()
+{
+    m_io.reset();
+}
+
+
 void NitfFileReader::getLasOffset(uint64_t& offset, uint64_t& length)
 {
     offset = 0;

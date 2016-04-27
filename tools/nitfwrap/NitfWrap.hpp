@@ -22,11 +22,13 @@ public:
 private:
     std::string m_inputFile;
     std::string m_outputFile;
-    NitfFileWriter m_nitf;
+    NitfFileWriter m_nitfWriter;
+    bool m_unwrap;
 
-    void parseArgs(std::vector<std::string>& args);
+    bool parseArgs(std::vector<std::string>& args);
+    void unwrap();
     void verify(BOX3D& bounds);
-    bool verifyLas(ILeStream& in, BOX3D& bounds);
+    bool verifyLas(ILeStream& in, BOX3D& bounds, bool& compressed);
     bool verifyBpf(ILeStream& in, BOX3D& bounds);
 };
 

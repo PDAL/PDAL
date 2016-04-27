@@ -28,12 +28,16 @@ include_directories(${PDAL_INCLUDE_DIR} ${PDAL_NITF_DIR})
 #
 set (SOURCES
     NitfWrap.cpp
+    ${PDAL_NITF_DIR}/MetadataReader.cpp
+    ${PDAL_NITF_DIR}/NitfFileReader.cpp
     ${PDAL_NITF_DIR}/NitfFileWriter.cpp
     ${PDAL_NITF_DIR}/tre_plugins.cpp
 )
 
 set (HEADERS
     NitfWrap.hpp
+    ${PDAL_NITF_DIR}/MetadataReader.hpp
+    ${PDAL_NITF_DIR}/NitfFileReader.hpp
     ${PDAL_NITF_DIR}/NitfFileWriter.hpp
     ${PDAL_NITF_DIR}/tre_plugins.hpp
 )

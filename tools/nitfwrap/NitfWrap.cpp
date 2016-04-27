@@ -35,6 +35,7 @@
 #include <string>
 #include <vector>
 
+#include <NitfFileReader.hpp>
 #include <pdal/Dimension.hpp>
 #include <pdal/GDALUtils.hpp>
 #include <bpf/BpfHeader.hpp>
@@ -66,25 +67,105 @@ namespace pdal
 namespace nitfwrap
 {
 
+namespace
+{
+
+void outputHelp(ProgramArgs& args)
+{
+    std::cout << "usage: nitfwrap [options] " << args.commandLine() <<
+        std::endl;
+    std::cout << "options:" << std::endl;
+    args.dump(std::cout, 2, Utils::screenWidth());
+}
+
+} // unnamed namespace
+
+
 NitfWrap::NitfWrap(std::vector<std::string>& args)
 {
-    BOX3D bounds;
+    if (!parseArgs(args))
+        return;
 
-    parseArgs(args);
-    m_nitf.setFilename(m_outputFile);
-    verify(bounds);
-    m_nitf.wrapData(m_inputFile);
-    m_nitf.write();
+    if (m_unwrap)
+        unwrap();
+    else
+    {
+        BOX3D bounds;
+        verify(bounds);
+
+        m_nitfWriter.setFilename(m_outputFile);
+        m_nitfWriter.setBounds(bounds);
+        m_nitfWriter.wrapData(m_inputFile);
+        m_nitfWriter.write();
+    }
 }
 
 
-void NitfWrap::parseArgs(std::vector<std::string>& argList)
+void NitfWrap::unwrap()
+{
+    // Use the NITF reader to get the offset and length
+    uint64_t offset, length;
+    NitfFileReader reader(m_inputFile);
+    reader.open();
+    reader.getLasOffset(offset, length);
+    reader.close();
+
+    // Open file file and seek to the beginning of the location.
+    std::istream *in = FileUtils::openFile(m_inputFile);
+    if (!in)
+    {
+        std::ostringstream oss;
+
+        oss << "Couldn't open input file '" << m_inputFile << "'.";
+        throw error(oss.str());
+    }
+    in->seekg(offset, std::istream::beg);
+
+    // Find out if this is a LAS or BPF file and make the output filename.
+    bool compressed;
+    BOX3D bounds;
+    ILeStream leIn(in);
+    if (verifyLas(leIn, bounds, compressed))
+    {
+        if (m_outputFile.empty())
+        {
+            m_outputFile = FileUtils::stem(m_inputFile);
+            m_outputFile += (compressed ? ".laz" : ".las");
+        }
+    }
+    else if (verifyBpf(leIn, bounds))
+    {
+        if (m_outputFile.empty())
+            m_outputFile = FileUtils::stem(m_inputFile) + ".bpf";
+    }
+    else
+    {
+        std::cerr << "Wrapped file isn't BPF or LAS.\n";
+        return;
+    }
+
+    uint64_t bufsize = 1024 * 10;
+    std::vector<char> buf(bufsize);
+    std::ostream *out = FileUtils::createFile(m_outputFile);
+    in->seekg(offset, std::istream::beg);
+    while (length)
+    {
+        size_t size = std::min(length, bufsize);
+        in->get(buf.data(), size);
+        out->write(buf.data(), size);
+        length -= size;
+    }
+    FileUtils::closeFile(out);
+}
+
+
+bool NitfWrap::parseArgs(std::vector<std::string>& argList)
 {
     ProgramArgs args;
 
     try
     {
-        m_nitf.setArgs(args);
+        m_nitfWriter.setArgs(args);
     }
     catch (arg_error& e)
     {
@@ -93,6 +174,7 @@ void NitfWrap::parseArgs(std::vector<std::string>& argList)
     args.add("input,i", "Input filename", m_inputFile).setPositional();
     args.add("output,o", "Output filename",
         m_outputFile).setOptionalPositional();
+    args.add("unwrap,u", "Unwrap NITF file", m_unwrap);
 
     try
     {
@@ -100,7 +182,9 @@ void NitfWrap::parseArgs(std::vector<std::string>& argList)
     }
     catch (arg_error& e)
     {
-        throw error(e.m_error);
+        std::cerr << "nitfwrap: " << e.m_error << std::endl;
+        outputHelp(args);
+        return false;
     }
 
     if (!FileUtils::fileExists(m_inputFile))
@@ -111,8 +195,11 @@ void NitfWrap::parseArgs(std::vector<std::string>& argList)
         throw error(oss.str());
     }
     if (m_outputFile.empty())
-        m_outputFile = FileUtils::stem(m_inputFile) + ".ntf";
+        if (!m_unwrap)
+            m_outputFile = FileUtils::stem(m_inputFile) + ".ntf";
+    return true;
 }
+
 
 void NitfWrap::verify(BOX3D& bounds)
 {
@@ -126,9 +213,10 @@ void NitfWrap::verify(BOX3D& bounds)
         throw error(oss.str());
     }
 
+    bool compression;
     ILeStream in(stream);
     IStreamMarker mark(in);
-    if (!verifyLas(in, bounds))
+    if (!verifyLas(in, bounds, compression))
     {
         mark.rewind();
         if (!verifyBpf(in, bounds))
@@ -137,7 +225,7 @@ void NitfWrap::verify(BOX3D& bounds)
 }
 
 
-bool NitfWrap::verifyLas(ILeStream& in, BOX3D& bounds)
+bool NitfWrap::verifyLas(ILeStream& in, BOX3D& bounds, bool& compressed)
 {
     LasHeader h;
 
@@ -149,6 +237,7 @@ bool NitfWrap::verifyLas(ILeStream& in, BOX3D& bounds)
     {
         return false;
     }
+    compressed = h.compressed();
     bounds = h.getBounds();
     gdal::reprojectBounds(bounds, h.srs().getWKT(), "EPSG:4326");
     return true;
