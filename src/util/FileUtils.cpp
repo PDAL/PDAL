@@ -57,9 +57,9 @@ public:
     {
 
     }
-    static std::string getLocalTempFile(std::string path)
+    static std::string getLocalTempFile(const std::string path)
     {
-        std::string basename = arbiter::Arbiter::getTerminus(path);
+        std::string basename = arbiter::util::getBasename(path);
         std::string tempdir = arbiter::fs::getTempPath();
 
         std::ostringstream p;
