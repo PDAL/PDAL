@@ -237,9 +237,6 @@ TEST(pipelineHoleTest, crop)
 TEST(pipelineIcebridgeTest, DISABLED_icebridge)
 { run_pipeline("icebridge/pipeline.xml"); }
 
-TEST(pipelineNitfTest, chipper)
-{ run_info("nitf/chipper.xml"); }
-
 TEST(pipelineNitfTest, conversion)
 { run_pipeline("nitf/conversion.xml"); }
 

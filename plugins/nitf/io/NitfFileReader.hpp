@@ -34,38 +34,69 @@
 
 #pragma once
 
-#include <pdal/StageFactory.hpp>
-#include <las/LasWriter.hpp>
+#include <pdal/Options.hpp>
+#include <pdal/pdal_internal.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
-#include "NitfFileWriter.hpp"
+#include <vector>
+
+#ifdef PDAL_COMPILER_GCC
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wredundant-decls"
+#  pragma GCC diagnostic ignored "-Wextra"
+#  pragma GCC diagnostic ignored "-Wcast-qual"
+   // The following pragma doesn't actually work:
+   //   https://gcc.gnu.org/bugzilla/show_bug.cgi?id=61653
+   //#  pragma GCC diagnostic ignored "-Wliteral-suffix"
+#endif
+#ifdef PDAL_COMPILER_CLANG
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wunused-private-field"
+#endif
+
+#include <nitro/c++/import/nitf.hpp>
+
+#ifdef PDAL_COMPILER_CLANG
+#  pragma clang diagnostic pop
+#endif
+#ifdef PDAL_COMPILER_GCC
+#  pragma GCC diagnostic pop
+#endif
+
+namespace pdal
+{
+    class MetadataNode;
+}
 
 namespace pdal
 {
 
-
-class PDAL_DLL NitfWriter : public LasWriter
+//
+// all the processing that is NITF-file specific goes in here
+//
+class PDAL_DLL NitfFileReader
 {
 public:
-    NitfWriter();
+    NitfFileReader(const std::string& filename);
+    NitfFileReader(const NitfFileReader&) = delete;
+    NitfFileReader& operator=(const NitfFileReader&) = delete;
 
-    static void * create();
-    static int32_t destroy(void *);
-    std::string getName() const;
+    void open();
+    void close();
+    void getLasOffset(uint64_t& offset, uint64_t& length);
+    void extractMetadata(MetadataNode& metadata);
 
 private:
-    NitfFileWriter m_nitf;
-    std::stringstream m_oss;
-    BOX3D m_bounds;
+    bool locateLidarImageSegment();
+    bool locateLidarDataSegment();
 
-    virtual void processOptions(const Options& options);
-    virtual void readyFile(const std::string& filename,
-        const SpatialReference& srs);
-    virtual void doneFile();
-    virtual void writeView(const PointViewPtr view);
-    BOX3D reprojectBoxToDD(const SpatialReference& reference, const BOX3D& box);
+    std::unique_ptr<nitf::IOHandle> m_io;
+    nitf::Record m_record;
 
-    NitfWriter& operator=(const NitfWriter&); // not implemented
-    NitfWriter(const NitfWriter&); // not implemented
+    std::string m_filename;
+    bool m_validLidarSegments;
+    nitf::Uint32 m_lidarDataSegment;
 };
 
-} // namespace pdal
+
+} // namespaces

@@ -201,11 +201,15 @@ uint32_t Support::diff_files(const std::string& file1,
             !pdal::FileUtils::fileExists(file2))
         return (std::numeric_limits<uint32_t>::max)();
 
-    std::istream* str1 = pdal::FileUtils::openFile(file1);
-    std::istream* str2 = pdal::FileUtils::openFile(file2);
+    std::istream* str1 = FileUtils::openFile(file1);
+    std::istream* str2 = FileUtils::openFile(file2);
 
-    return diff_files(*str1, *str2, ignorable_start, ignorable_length,
+    uint32_t ret = diff_files(*str1, *str2, ignorable_start, ignorable_length,
         num_ignorables);
+
+    FileUtils::closeFile(str1);
+    FileUtils::closeFile(str2);
+    return ret;
 }
 
 

@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "NitfFile.hpp"
+#include "NitfFileReader.hpp"
 
 #include <pdal/Metadata.hpp>
 
@@ -55,51 +55,42 @@ static const bool REQUIRE_LIDAR_SEGMENTS = true;
 namespace pdal
 {
 
-
-NitfFile::NitfFile(const std::string& filename) :
-    m_reader(NULL),
-    m_io(NULL),
+NitfFileReader::NitfFileReader(const std::string& filename) :
     m_filename(filename),
     m_validLidarSegments(false),
-    m_lidarImageSegment(0),
     m_lidarDataSegment(0)
 {
     register_tre_plugins();
 }
 
 
-NitfFile::~NitfFile()
+void NitfFileReader::open()
 {
-    close();
-}
-
-
-void NitfFile::open()
-{
-    if (::nitf::Reader::getNITFVersion(m_filename.c_str()) == NITF_VER_UNKNOWN)
+    if (nitf::Reader::getNITFVersion(m_filename.c_str()) == NITF_VER_UNKNOWN)
         throw pdal_error("Unable to determine NITF file version");
 
     // read the major NITF data structures, courtesy Nitro
-    m_reader = new ::nitf::Reader();
     try
     {
-        m_io = new ::nitf::IOHandle(m_filename.c_str());
+        m_io.reset(new nitf::IOHandle(m_filename));
     }
-    catch (::nitf::NITFException& e)
+    catch (nitf::NITFException& e)
     {
         throw pdal_error("unable to open NITF file (" + e.getMessage() + ")");
     }
     try
     {
-        m_record = m_reader->read(*m_io);
+        nitf::Reader reader;
+        m_record = reader.read(*m_io);
     }
-    catch (::nitf::NITFException& e)
+    catch (nitf::NITFException& e)
     {
         throw pdal_error("unable to read NITF file (" + e.getMessage() + ")");
     }
 
-
     // find the image segment corresponding the the lidar data, if any
+    // NOTE: We don't DO anything with the image segment, we just check
+    // that it exists.
     const bool imageOK = locateLidarImageSegment();
     if (REQUIRE_LIDAR_SEGMENTS && !imageOK)
     {
@@ -119,22 +110,13 @@ void NitfFile::open()
 }
 
 
-void NitfFile::close()
+void NitfFileReader::close()
 {
-    if (m_io)
-    {
-        m_io->close();
-        delete m_io;
-        m_io = NULL;
-    }
-
-    delete m_reader;
-    m_reader = NULL;
+    m_io.reset();
 }
 
 
-void NitfFile::getLasOffset(uint64_t& offset,
-                            uint64_t& length)
+void NitfFileReader::getLasOffset(uint64_t& offset, uint64_t& length)
 {
     offset = 0;
     length = 0;
@@ -142,30 +124,27 @@ void NitfFile::getLasOffset(uint64_t& offset,
     if (!m_validLidarSegments)
         return;
 
-    ::nitf::ListIterator iter = m_record.getDataExtensions().begin();
-    const ::nitf::Uint32 numSegs = m_record.getNumDataExtensions();
-    for (::nitf::Uint32 segNum=0; segNum<numSegs; segNum++)
+    nitf::List exts = m_record.getDataExtensions();
+    nitf::Uint32 segId = 0;
+    for (auto it = exts.begin(); it != exts.end(); ++it, ++segId)
     {
-        if (segNum == m_lidarDataSegment)
+        if (segId == m_lidarDataSegment)
         {
-            ::nitf::DESegment seg = *iter;
-            const ::nitf::Uint64 seg_offset = seg.getOffset();
-            const ::nitf::Uint64 seg_end = seg.getEnd();
+            // Strange iterator doesn't support ->
+            nitf::DESegment seg = *it;
+            nitf::Uint64 seg_offset = seg.getOffset();
+            nitf::Uint64 seg_end = seg.getEnd();
 
             offset = seg_offset;
             length = seg_end - seg_offset;
-
             return;
         }
-
-        iter++;
     }
-
     throw pdal_error("error reading nitf (1)");
 }
 
 
-void NitfFile::extractMetadata(MetadataNode& node)
+void NitfFileReader::extractMetadata(MetadataNode& node)
 {
     MetadataReader mr(m_record, node, SHOW_EMPTY_FIELDS);
     mr.read();
@@ -174,7 +153,7 @@ void NitfFile::extractMetadata(MetadataNode& node)
 
 // set the number of the first segment that is likely to be an image
 // of the lidar data, and return true iff we found one
-bool NitfFile::locateLidarImageSegment()
+bool NitfFileReader::locateLidarImageSegment()
 {
     // as per 3.2.3 (pag 19) and 3.2.4 (page 39)
 
@@ -197,7 +176,6 @@ bool NitfFile::locateLidarImageSegment()
         if (iid1 == "INTENSITY " || iid1 == "ELEVATION " ||
             iid1 == "None      ")
         {
-            m_lidarImageSegment = segNum;
             return true;
         }
 
@@ -210,7 +188,7 @@ bool NitfFile::locateLidarImageSegment()
 
 // set the number of the first segment that is likely to be the LAS
 // file, and return true iff we found it
-bool NitfFile::locateLidarDataSegment()
+bool NitfFileReader::locateLidarDataSegment()
 {
     // as per 3.2.5, page 59
 
@@ -245,5 +223,5 @@ bool NitfFile::locateLidarDataSegment()
     return false;
 }
 
+} // namespace pdal
 
-} // namespaces

@@ -34,7 +34,8 @@
 
 #pragma once
 
-#include <pdal/pdal_internal.hpp>
+#include <pdal/Options.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include <vector>
 
@@ -52,7 +53,6 @@
 #  pragma clang diagnostic ignored "-Wunused-private-field"
 #endif
 
-#define IMPORT_NITRO_API
 #include <nitro/c++/import/nitf.hpp>
 
 #ifdef PDAL_COMPILER_CLANG
@@ -64,44 +64,47 @@
 
 namespace pdal
 {
-    class MetadataNode;
-}
-
-
-namespace pdal
-{
 
 //
 // all the processing that is NITF-file specific goes in here
 //
-class PDAL_DLL NitfFile
+class PDAL_DLL NitfFileWriter
 {
 public:
-    NitfFile(const std::string& filename);
-    ~NitfFile();
+    NitfFileWriter();
+    NitfFileWriter(const NitfFileWriter&) = delete;
+    NitfFileWriter& operator=(const NitfFileWriter&) = delete;
 
-    void open();
-    void close();
+    void setFilename(const std::string& filename)
+        { m_filename = filename; }
+    void wrapData(const char *buf, size_t size);
+    void wrapData(const std::string& filename);
+    void addArgs(ProgramArgs& args);
+    void setBounds(const BOX3D& bounds);
+    void processOptions(const Options& options);
+    void write();
 
-    void getLasOffset(uint64_t& offset, uint64_t& length);
+    std::unique_ptr<nitf::DataSource> m_source;
+    std::unique_ptr<nitf::IOHandle> m_inputHandle;
 
-    void extractMetadata(MetadataNode& metadata);
+    std::string m_cLevel;
+    std::string m_sType;
+    std::string m_oStationId;
+    std::string m_fileTitle;
+    std::string m_fileClass;
+    std::string m_origName;
+    std::string m_origPhone;
+    std::string m_securityControlAndHandling;
+    std::string m_securityClassificationSystem;
+    std::string m_imgSecurityClass;
+    std::string m_imgDate;
+    StringList m_aimidb;
+    StringList m_acftb;
+    std::string m_imgIdentifier2;
+    std::string m_sic;
+    BOX3D m_bounds;
 
-private:
-    bool locateLidarImageSegment();
-    bool locateLidarDataSegment();
-
-    ::nitf::Reader *m_reader;
-    ::nitf::IOHandle *m_io;
-    ::nitf::Record m_record;
-
-    const std::string m_filename;
-    bool m_validLidarSegments;
-    ::nitf::Uint32 m_lidarImageSegment;
-    ::nitf::Uint32 m_lidarDataSegment;
-
-    NitfFile(const NitfFile&); // nope
-    NitfFile& operator=(const NitfFile&); // nope
+    std::string m_filename;
 };
 
 
