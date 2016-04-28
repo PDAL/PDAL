@@ -80,7 +80,7 @@ public:
         { m_filename = filename; }
     void wrapData(const char *buf, size_t size);
     void wrapData(const std::string& filename);
-    void setArgs(ProgramArgs& args);
+    void addArgs(ProgramArgs& args);
     void setBounds(const BOX3D& bounds);
     void processOptions(const Options& options);
     void write();

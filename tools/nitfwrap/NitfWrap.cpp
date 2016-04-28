@@ -168,18 +168,18 @@ bool NitfWrap::parseArgs(std::vector<std::string>& argList)
 {
     ProgramArgs args;
 
+    args.add("input,i", "Input filename", m_inputFile).setPositional();
+    args.add("output,o", "Output filename",
+        m_outputFile).setOptionalPositional();
+    args.add("unwrap,u", "Unwrap NITF file", m_unwrap);
     try
     {
-        m_nitfWriter.setArgs(args);
+        m_nitfWriter.addArgs(args);
     }
     catch (arg_error& e)
     {
         throw error(e.m_error);
     }
-    args.add("input,i", "Input filename", m_inputFile).setPositional();
-    args.add("output,o", "Output filename",
-        m_outputFile).setOptionalPositional();
-    args.add("unwrap,u", "Unwrap NITF file", m_unwrap);
 
     try
     {

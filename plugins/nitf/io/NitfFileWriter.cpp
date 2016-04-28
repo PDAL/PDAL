@@ -47,7 +47,7 @@ NitfFileWriter::NitfFileWriter()
 }
 
 
-void NitfFileWriter::setArgs(ProgramArgs& args)
+void NitfFileWriter::addArgs(ProgramArgs& args)
 {
     args.add("clevel", "Complexity level", m_cLevel, "03");
     args.add("stype", "Standard type", m_sType, "BF01");
