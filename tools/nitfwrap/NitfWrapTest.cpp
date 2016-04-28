@@ -68,8 +68,11 @@ TEST(NitfWrap, altPath)
 
     std::string output;
 
+    std::cerr << "Removing foo!\n";
     FileUtils::deleteFile("foo");
+    std::cerr << "Removing bar!\n";
     FileUtils::deleteFile("bar");
+    std::cerr << "Removing baz!\n";
     FileUtils::deleteFile("baz");
     Utils::run_shell_command("cp " + Support::datapath("las/simple.las") +
         " foo",  output);
@@ -77,8 +80,11 @@ TEST(NitfWrap, altPath)
     Utils::run_shell_command(exeName + " -u bar baz", output);
     uint32_t ret = Support::diff_files("foo", "baz");
     EXPECT_EQ(ret, 0u);
+    std::cerr << "Removing foo!\n";
     FileUtils::deleteFile("foo");
+    std::cerr << "Removing bar!\n";
     FileUtils::deleteFile("bar");
+    std::cerr << "Removing baz!\n";
     FileUtils::deleteFile("baz");
 }
 
