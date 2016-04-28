@@ -58,6 +58,7 @@ endif()
 set(PDAL_UTIL_LIB_NAME pdal_util)
 set(PDAL_PLANG_LIB_NAME pdal_plang)
 set(PDAL_BOOST_LIB_NAME pdal_boost)
+set(PDAL_ARBITER_LIB_NAME pdal_arbiter)
 
 set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 
@@ -108,16 +109,19 @@ set(PDAL_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 
 include(${PDAL_CMAKE_DIR}/gdal.cmake)
 include(${PDAL_CMAKE_DIR}/geos.cmake)
-include(${PDAL_CMAKE_DIR}/geotiff.cmake)  # Optional
+include(${PDAL_CMAKE_DIR}/geotiff.cmake)  # Optional (not really)
 include(${PDAL_CMAKE_DIR}/lazperf.cmake)  # Optional
 include(${PDAL_CMAKE_DIR}/laszip.cmake)  # Optional
 include(${PDAL_CMAKE_DIR}/threads.cmake)
 include(${PDAL_CMAKE_DIR}/zlib.cmake)
 include(${PDAL_CMAKE_DIR}/test.cmake)
 include(${PDAL_CMAKE_DIR}/ctest.cmake)
+include(${PDAL_CMAKE_DIR}/curl.cmake)
+include(${PDAL_CMAKE_DIR}/json.cmake)
 if (BUILD_PLUGIN_PGPOINTCLOUD OR BUILD_PLUGIN_OCI OR BUILD_PLUGIN_SQLITE)
     include(${PDAL_CMAKE_DIR}/libxml2.cmake)
 endif()
+include(${PDAL_CMAKE_DIR}/dimension.cmake)
 
 #------------------------------------------------------------------------------
 # generate the pdal_defines.h header
@@ -145,10 +149,19 @@ configure_file(${pdal_defines_h_in} ${pdal_defines_h})
 PDAL_ADD_INCLUDES("" "" ${pdal_defines_h})
 include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
 
+include_directories(${PDAL_VENDOR_DIR}/arbiter)
 include_directories(${PDAL_VENDOR_DIR}/eigen-3.1.91)
-include_directories(${PDAL_VENDOR_DIR}/jsoncpp-1.6.2/dist)
+
+if (PDAL_HAVE_JSONCPP)
+    include_directories(${JSONCPP_INCLUDE_DIR})
+else()
+    include_directories(${PDAL_VENDOR_DIR}/jsoncpp-1.6.2/dist)
+endif()
+
 include_directories(${PDAL_VENDOR_DIR}/nanoflann-1.1.8)
 include_directories(${PDAL_VENDOR_DIR}/rply-1.1.4)
+
+
 
 #------------------------------------------------------------------------------
 # subdirectory controls
@@ -168,7 +181,13 @@ if (WITH_TESTS)
     include (${PDAL_CMAKE_DIR}/gtest.cmake)
     add_subdirectory(test)
 endif()
+add_subdirectory(dimbuilder)
 add_subdirectory(vendor/pdalboost)
+add_subdirectory(vendor/arbiter)
+if (NOT PDAL_HAVE_JSONCPP)
+    set(PDAL_JSONCPP_LIB_NAME pdal_jsoncpp)
+    add_subdirectory(vendor/jsoncpp-1.6.2/dist)
+endif()
 add_subdirectory(src/util)
 add_subdirectory(io)
 add_subdirectory(filters)
@@ -189,6 +208,8 @@ add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 export(TARGETS ${PDAL_BASE_LIB_NAME}
     ${PDAL_UTIL_LIB_NAME}
     ${PDAL_BOOST_LIB_NAME}
+    ${PDAL_ARBITER_LIB_NAME}
+    ${PDAL_JSONCPP_LIB_NAME}
     FILE "${PDAL_BINARY_DIR}/PDALTargets.cmake")
 install(EXPORT PDALTargets DESTINATION "${PDAL_LIB_INSTALL_DIR}/pdal/cmake")
 include(${PDAL_CMAKE_DIR}/config.cmake)

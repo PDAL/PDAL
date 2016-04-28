@@ -79,30 +79,6 @@ void DerivativeWriter::processOptions(const Options& ops)
     m_GRID_DIST_Y = ops.getValueOrDefault<double>("grid_dist_y", 15.0);
     handleFilenameTemplate();
 
-    // maybe we eventually introduce an option to do more than slope
-    //std::vector<Option> types = ops.getOptions("output_type");
-
-    //if (!types.size())
-    //    m_outputTypes = OUTPUT_TYPE_ALL;
-    //else
-    //{
-    //    for (auto i = types.begin(); i != types.end(); ++i)
-    //    {
-    //        if (Utils::iequals(i->getValue<std::string>(), "min"))
-    //            m_outputTypes |= OUTPUT_TYPE_MIN;
-    //        if (Utils::iequals(i->getValue<std::string>(), "max"))
-    //            m_outputTypes |= OUTPUT_TYPE_MAX;
-    //        if (Utils::iequals(i->getValue<std::string>(), "mean"))
-    //            m_outputTypes |= OUTPUT_TYPE_MEAN;
-    //        if (Utils::iequals(i->getValue<std::string>(), "idw"))
-    //            m_outputTypes |= OUTPUT_TYPE_IDW;
-    //        if (Utils::iequals(i->getValue<std::string>(), "den"))
-    //            m_outputTypes |= OUTPUT_TYPE_DEN;
-    //        if (Utils::iequals(i->getValue<std::string>(), "all"))
-    //            m_outputTypes = OUTPUT_TYPE_ALL;
-    //    }
-    //}
-
     std::map<std::string, PrimitiveType> primtypes;
     primtypes["slope_d8"] = SLOPE_D8;
     primtypes["slope_fd"] = SLOPE_FD;

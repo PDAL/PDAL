@@ -35,7 +35,7 @@ Past Releases
 .. _source:
 
 Development Source
-..............................................................................
+------------------------------------------------------------------------------
 
 The main repository for PDAL is located on github at https://github.com/PDAL/PDAL
 

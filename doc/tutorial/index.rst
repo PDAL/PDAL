@@ -24,7 +24,6 @@ Using PDAL
 
    reading
    writing
-   docker
    pcl_block_tutorial
    pcl_ground
    clipping-with-shapefile

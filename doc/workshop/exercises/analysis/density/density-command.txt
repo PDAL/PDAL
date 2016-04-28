@@ -1,0 +1,5 @@
+docker run -v /c/Users/Howard/PDAL:/data -t pdal/pdal \
+       pdal density \
+       /data/exercises/analysis/density/uncompahgre.laz \
+       -o /data/exercises/analysis/density/density.sqlite \
+       -f SQLite

@@ -96,13 +96,7 @@ void CpdKernel::addSwitches(ProgramArgs& args)
 
 cpd::Matrix CpdKernel::readFile(const std::string& filename)
 {
-    Options opt;
-    opt.add("filename", filename);
-    opt.add("debug", isDebug());
-    opt.add("verbose", getVerboseLevel());
-
-    Stage& reader = makeReader(filename);
-    reader.setOptions(opt);
+    Stage& reader = makeReader(filename, "");
 
     PointTable table;
     PointViewSet viewSet;
@@ -110,13 +104,11 @@ cpd::Matrix CpdKernel::readFile(const std::string& filename)
     {
         Options boundsOptions;
         boundsOptions.add("bounds", m_bounds);
-        StageFactory f;
 
-        Stage *crop = f.createStage("filters.crop");
-        crop->setInput(reader);
-        crop->setOptions(boundsOptions);
-        crop->prepare(table);
-        viewSet = crop->execute(table);
+        Stage& crop = makeFilter("filters.crop", reader);
+        crop.setOptions(boundsOptions);
+        crop.prepare(table);
+        viewSet = crop.execute(table);
     }
     else
     {
@@ -227,12 +219,10 @@ int CpdKernel::execute()
     reader.addView(outView);
 
     Options writerOpts;
-    writerOpts.add<std::string>("filename", m_output);
-    writerOpts.add<std::string>("order", "X,Y,Z,XVelocity,YVelocity,ZVelocity");
-    writerOpts.add<bool>("keep_unspecified", false);
-    setCommonOptions(writerOpts);
+    writerOpts.add("order", "X,Y,Z,XVelocity,YVelocity,ZVelocity");
+    writerOpts.add("keep_unspecified", false);
 
-    Stage& writer = makeWriter(m_output, reader);
+    Stage& writer = makeWriter(m_output, reader, "");
     writer.addOptions(writerOpts);
     writer.prepare(outTable);
     writer.execute(outTable);

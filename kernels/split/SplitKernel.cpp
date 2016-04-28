@@ -102,16 +102,11 @@ int SplitKernel::execute()
 {
     PointTable table;
 
-    Options readerOpts;
-    readerOpts.add("filename", m_inputFile);
-    readerOpts.add("debug", isDebug());
-    readerOpts.add("verbose", getVerboseLevel());
-
-    Stage& reader = makeReader(m_inputFile);
-    reader.setOptions(readerOpts);
+    Stage& reader = makeReader(m_inputFile, "");
 
     Options filterOpts;
-    Stage& f = (m_length ? createStage("filters.splitter") : createStage("filters.chipper"));
+    std::string driver = (m_length ? "filters.splitter" : "filters.chipper");
+    Stage& f = makeFilter(driver, reader);
     if (m_length)
     {
         filterOpts.add("length", m_length);
@@ -122,8 +117,7 @@ int SplitKernel::execute()
     {
         filterOpts.add("capacity", m_capacity);
     }
-    f.setInput(reader);
-    f.setOptions(filterOpts);
+    f.addOptions(filterOpts);
     f.prepare(table);
     PointViewSet pvSet = f.execute(table);
 
@@ -134,7 +128,7 @@ int SplitKernel::execute()
         reader.addView(pvp);
 
         std::string filename = makeFilename(m_outputFile, filenum++);
-        Stage& writer = makeWriter(filename, reader);
+        Stage& writer = makeWriter(filename, reader, "");
 
         writer.prepare(table);
         writer.execute(table);

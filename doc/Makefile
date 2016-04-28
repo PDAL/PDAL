@@ -150,3 +150,6 @@ pdf:
 	$(SPHINXBUILD) -b pdf $(ALLSPHINXOPTS) $(BUILDDIR)/pdf
 	@echo
 	@echo "Build finished. The PDF files are in _build/pdf."
+
+docker:
+	docker run -v `pwd`/../:/data -w /data/doc pdal/docs make doxygen html latexpdf

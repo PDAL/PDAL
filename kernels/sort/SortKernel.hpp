@@ -55,8 +55,6 @@ private:
     SortKernel();
     void addSwitches(ProgramArgs& args);
 
-    Stage& makeReader(Options readerOptions);
-
     std::string m_inputFile;
     std::string m_outputFile;
     bool m_bCompress;

@@ -1,0 +1,5 @@
+docker run -v /c/Users/Howard/PDAL:/data -t pdal/pdal \
+    ls -alh /data/exercises/translation/interesting.laz
+
+docker run -v /c/Users/Howard/PDAL:/data -t pdal/pdal \
+    ls -alh /data/exercises/translation/interesting.las

@@ -34,10 +34,11 @@ endif()
 #
 # base
 #
+#[[
 set(PDAL_BASE_HPP
+  "${PDAL_HEADERS_DIR}/Dimension.hpp"
   "${PDAL_HEADERS_DIR}/pdal_types.hpp"
   "${PDAL_HEADERS_DIR}/Compression.hpp"
-  "${PDAL_HEADERS_DIR}/Dimension.hpp"
   "${PDAL_HEADERS_DIR}/Filter.hpp"
   "${PDAL_HEADERS_DIR}/FlexWriter.hpp"
   "${PDAL_HEADERS_DIR}/GDALUtils.hpp"
@@ -71,6 +72,7 @@ set(PDAL_BASE_HPP
     ${PDAL_XML_HEADER}
     ${DB_DRIVER_HEADERS}
 )
+]]
 
 set(PDAL_BASE_CPP
   DynamicLibrary.cpp
@@ -101,7 +103,6 @@ set(PDAL_BASE_CPP
   ${PDAL_XML_SRC}
   ${PDAL_LAZPERF_SRC}
   ${DB_DRIVER_SRCS}
-  ${PROJECT_SOURCE_DIR}/vendor/jsoncpp-1.6.2/dist/jsoncpp.cpp
 )
 
 list (APPEND PDAL_CPP ${PDAL_BASE_CPP} )
@@ -181,8 +182,11 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
     ${GEOS_LIBRARY}
     ${ZLIB_LIBRARIES}
     ${PDAL_BOOST_LIB_NAME}
+    ${PDAL_ARBITER_LIB_NAME}
+    ${PDAL_JSONCPP_LIB_NAME}
     ${PDAL_UTIL_LIB_NAME}
     ${REEXPORT_UTIL_LIB}
+    ${CURL_LIBRARIES}
 )
 
 if (WITH_GEOTIFF)
@@ -210,4 +214,7 @@ endif()
 install(DIRECTORY "${PDAL_HEADERS_DIR}/"
   DESTINATION "${PDAL_INCLUDE_INSTALL_DIR}"
   PATTERN "/CMakeFiles/*" EXCLUDE
+  )
+install(FILES ${DIMENSION_OUTFILE} 
+  DESTINATION "${PDAL_INCLUDE_INSTALL_DIR}"
   )

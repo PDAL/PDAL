@@ -33,10 +33,12 @@
 ****************************************************************************/
 
 #include <pdal/pdal_test_main.hpp>
+#include <pdal/pdal_defines.h>
 
 #include <sstream>
 
 #include <pdal/util/Utils.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 #include <vector>
 
@@ -270,7 +272,7 @@ TEST(UtilsTest, split2Char)
 TEST(UtilsTest, case)
 {
     std::string s("This is a test");
-    
+
     EXPECT_EQ("THIS IS A TEST", Utils::toupper(s));
     EXPECT_EQ("this is a test", Utils::tolower(s));
 
@@ -349,7 +351,7 @@ TEST(UtilsTest, wordWrap2)
 {
     std::string s;
     std::vector<std::string> output;
-    
+
     s = "This   is   a    test    1234567890abcdefghij1234 a   ";
     output = Utils::wordWrap2(s, 10, 12);
     EXPECT_EQ(output.size(), 6u);
@@ -378,3 +380,26 @@ TEST(UtilsTest, wordWrap2)
     EXPECT_EQ(output[1], std::string(10, ' '));
     EXPECT_EQ(output[2], std::string(8, ' '));
 }
+//
+// TEST(FileUtilsTest, fetchRemote)
+// {
+// #ifdef PDAL_ARIBITER_ENABLED
+//     std::string name("http://www.liblas.org/samples/srs.laz");
+//     std::istream* s = pdal::FileUtils::openFile(name);
+//
+//     std::string rname("s3://pdal/test.laz");
+//     std::ostream* t = pdal::FileUtils::createFile(rname);
+//     EXPECT_TRUE(t) << "remote stream was null!";
+//
+//     std::string junk("somejunk");
+//     *t << junk;
+//     delete t;
+//
+//     std::string rjunk("");
+//     std::istream* s2 = pdal::FileUtils::openFile(rname);
+//     *s2 >> rjunk;
+//     delete s2;
+//
+//     EXPECT_EQ(rjunk, junk);
+// #endif
+// }

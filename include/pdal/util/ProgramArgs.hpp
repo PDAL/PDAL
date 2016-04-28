@@ -271,6 +271,13 @@ public:
     */
     virtual void setValue(const std::string& s)
     {
+        if (m_set)
+        {
+            std::ostringstream oss;
+            oss << "Attempted to set value twice for argument '" <<
+                m_longname << "'.";
+            throw arg_error(oss.str());
+        }
         if (s.size() && s[0] == '-')
         {
             std::stringstream oss;
@@ -824,7 +831,8 @@ public:
 
         for (auto i : info)
         {
-            StringList descrip = Utils::wordWrap(i.second, secondLen, firstlen);
+            std::vector<std::string> descrip =
+                Utils::wordWrap(i.second, secondLen, firstlen);
 
             std::string name = i.first;
             out << std::string(indent, ' ');

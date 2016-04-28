@@ -55,8 +55,13 @@ endmacro(PDAL_ADD_INCLUDES)
 # _name The library name.
 # _component The part of PDAL that this library belongs to.
 # ARGN The source files for the library.
+#
+# The "generate_dimension_hpp" ensures that Dimension.hpp is built before
+#  attempting to build anything else in the library.
+#
 macro(PDAL_ADD_LIBRARY _name)
     add_library(${_name} ${PDAL_LIB_TYPE} ${ARGN})
+    add_dependencies(${_name} generate_dimension_hpp)
     set_property(TARGET ${_name} PROPERTY FOLDER "Libraries")
 
     install(TARGETS ${_name}
@@ -91,6 +96,10 @@ endmacro(PDAL_ADD_EXECUTABLE)
 # ARGN :
 #    FILES the srouce files for the plugin
 #    LINK_WITH link plugin with libraries
+#
+# The "generate_dimension_hpp" ensures that Dimension.hpp is built before
+#  attempting to build anything else in the "library".
+#
 macro(PDAL_ADD_PLUGIN _name _type _shortname)
     set(options)
     set(oneValueArgs)
@@ -180,6 +189,7 @@ macro(PDAL_ADD_DRIVER _type _name _srcs _incs _objs)
 		add_definitions("-fPIC")
 	endif()
     add_library(${libname} OBJECT ${_srcs} ${_incs})
+    add_dependencies(${libname} generate_dimension_hpp)
     set_property(TARGET ${libname} PROPERTY FOLDER "Drivers/${_type}")
 
     install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"

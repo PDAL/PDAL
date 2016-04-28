@@ -42,8 +42,45 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Utils.hpp>
 #include <pdal/pdal_types.hpp>
+#include <arbiter.hpp>
 
 using namespace std;
+
+
+class PDAL_DLL ArbiterStream : public std::ofstream
+{
+public:
+    ArbiterStream( std::string path,
+                  std::ios::openmode mode)
+        : std::ofstream(getLocalTempFile(path).c_str(), mode)
+        , m_remotePath(path)
+    {
+
+    }
+    static std::string getLocalTempFile(const std::string path)
+    {
+        std::string basename = arbiter::util::getBasename(path);
+        std::string tempdir = arbiter::fs::getTempPath();
+
+        std::ostringstream p;
+        p << tempdir << basename;
+        std::string localpath = p.str();
+
+        return localpath;
+    }
+
+    virtual ~ArbiterStream()
+    {
+        close();
+        arbiter::Arbiter a;
+        a.put(m_remotePath, a.getBinary(getLocalTempFile(m_remotePath)));
+    }
+
+private:
+    std::string m_remotePath;
+};
+
+
 
 namespace pdal
 {
@@ -76,17 +113,33 @@ namespace FileUtils
 
 istream *openFile(string const& filename, bool asBinary)
 {
-    if (isStdin(filename))
+    std::string name(filename);
+    if (isStdin(name))
         return &cin;
 
-    if (!FileUtils::fileExists(filename))
+#ifdef PDAL_ARIBITER_ENABLED
+    arbiter::Arbiter a;
+    if (a.isRemote(name))
+    {
+        // Open it with Arbiter
+        std::unique_ptr<arbiter::fs::LocalHandle> h = a.getLocalHandle(name);
+        if (h)
+        {
+            name = h->release(); // We own the temp file it created now.
+        }
+        else
+            return NULL;
+    }
+#endif
+
+    if (!FileUtils::fileExists(name))
         return NULL;
 
     ios::openmode mode = ios::in;
     if (asBinary)
         mode |= ios::binary;
 
-    ifstream *ifs = new ifstream(filename, mode);
+    ifstream *ifs = new ifstream(name, mode);
     if (!ifs->good())
     {
         delete ifs;
@@ -96,16 +149,34 @@ istream *openFile(string const& filename, bool asBinary)
 }
 
 
-ostream *createFile(string const& filename, bool asBinary)
+ostream *createFile(string const& name, bool asBinary)
 {
-    if (isStdout(filename))
+    if (isStdout(name))
         return &cout;
 
     ios::openmode mode = ios::out;
     if (asBinary)
         mode |= ios::binary;
 
-    ostream *ofs = new ofstream(filename, mode);
+#ifdef PDAL_ARIBITER_ENABLED
+    arbiter::Arbiter a;
+
+    if (a.isRemote(name))
+    {
+
+        ostream* ofs = new ArbiterStream(name, mode);
+        if (! ofs->good())
+        {
+            delete ofs;
+            return NULL;
+        }
+
+        return ofs;
+    }
+#endif
+
+
+    ostream *ofs = new ofstream(name, mode);
     if (! ofs->good())
     {
         delete ofs;
@@ -196,10 +267,15 @@ void renameFile(const string& dest, const string& src)
 
 bool fileExists(const string& name)
 {
-    // filename may actually be a greyhound uri + pipelineId
-    string http = name.substr(0, 4);
-    if (Utils::iequals(http, "http"))
+
+#ifdef PDAL_ARIBITER_ENABLED
+    // filename may actually be a URL, S3, dropbox, etc
+    arbiter::Arbiter a;
+    if (a.isRemote(name))
+    {
         return true;
+    }
+#endif
 
     pdalboost::system::error_code ec;
     pdalboost::filesystem::exists(name, ec);

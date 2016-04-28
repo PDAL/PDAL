@@ -91,19 +91,16 @@ int PipelineKernel::execute()
     if (m_progressFile.size())
         m_progressFd = Utils::openProgress(m_progressFile);
 
-    PipelineManager manager(m_progressFd);
-
-    manager.readPipeline(m_inputFile, isDebug(), getVerboseLevel());
-    applyExtraStageOptionsRecursive(manager.getStage());
-    manager.execute();
+    m_manager.readPipeline(m_inputFile);
+    m_manager.execute();
 
     if (m_pipelineFile.size() > 0)
-        PipelineWriter::writePipeline(manager.getStage(), m_pipelineFile);
+        PipelineWriter::writePipeline(m_manager.getStage(), m_pipelineFile);
 
     if (m_PointCloudSchemaOutput.size() > 0)
     {
 #ifdef PDAL_HAVE_LIBXML2
-        XMLSchema schema(manager.pointTable().layout());
+        XMLSchema schema(m_manager.pointTable().layout());
 
         std::ostream *out = FileUtils::createFile(m_PointCloudSchemaOutput);
         std::string xml(schema.xml());

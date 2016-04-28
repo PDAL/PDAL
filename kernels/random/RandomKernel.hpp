@@ -57,8 +57,6 @@ private:
     RandomKernel();
     void addSwitches(ProgramArgs& arg);
 
-    Stage& makeReader(Options readerOptions);
-
     std::string m_outputFile;
     bool m_bCompress;
     uint64_t m_numPointsToWrite;

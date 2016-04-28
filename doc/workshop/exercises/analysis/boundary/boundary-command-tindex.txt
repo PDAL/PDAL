@@ -1,0 +1,5 @@
+docker run -v /c/Users/Howard/PDAL:/data -t pdal/pdal \
+    pdal tindex \
+    --tindex /data/exercises/analysis/boundary/boundary.sqlite \
+    --filespec /data/exercises/analysis/density/uncompahgre.laz \
+    -f SQLite

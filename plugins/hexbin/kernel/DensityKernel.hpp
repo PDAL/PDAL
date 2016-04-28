@@ -52,16 +52,12 @@ public:
     int execute();
 
 private:
-    PipelineManagerPtr m_manager;
     Stage *m_hexbinStage;
     std::string m_inputFile;
     std::string m_outputFile;
-    std::string m_layerName;
     std::string m_driverName;
-    std::string m_srs;
 
     virtual void addSwitches(ProgramArgs& args);
-    void makePipeline(const std::string& filename);
     void outputDensity(pdal::SpatialReference const& ref);
 };
 
