@@ -108,7 +108,6 @@ void NitfWrap::unwrap()
     NitfFileReader reader(m_inputFile);
     reader.open();
     reader.getLasOffset(offset, length);
-    std::cerr << "LAS offset/length = " << offset << "/" << length << "!\n";
     reader.close();
 
     // Open file file and seek to the beginning of the location.
@@ -121,11 +120,12 @@ void NitfWrap::unwrap()
         throw error(oss.str());
     }
     in->seekg(offset, std::istream::beg);
-
+    
     // Find out if this is a LAS or BPF file and make the output filename.
     bool compressed;
     BOX3D bounds;
     ILeStream leIn(in);
+    IStreamMarker mark(leIn);
     if (verifyLas(leIn, bounds, compressed))
     {
         if (m_outputFile.empty())
@@ -134,15 +134,19 @@ void NitfWrap::unwrap()
             m_outputFile += (compressed ? ".laz" : ".las");
         }
     }
-    else if (verifyBpf(leIn, bounds))
-    {
-        if (m_outputFile.empty())
-            m_outputFile = FileUtils::stem(m_inputFile) + ".bpf";
-    }
     else
     {
-        std::cerr << "Wrapped file isn't BPF or LAS.\n";
-        return;
+        mark.rewind();
+        if (verifyBpf(leIn, bounds))
+        {
+            if (m_outputFile.empty())
+                m_outputFile = FileUtils::stem(m_inputFile) + ".bpf";
+        }
+        else
+        {
+            std::cerr << "Wrapped file isn't BPF or LAS.\n";
+            return;
+        }
     }
 
     uint64_t bufsize = 16;

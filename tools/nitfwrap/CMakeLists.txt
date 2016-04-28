@@ -20,12 +20,6 @@ configure_file(${pdal_defines_h_in} ${pdal_defines_h})
 
 set(PDAL_NITF_DIR ${ROOT_DIR}/plugins/nitf/io)
 
-include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
-include_directories(${PDAL_INCLUDE_DIR} ${PDAL_NITF_DIR})
-
-#
-# Right now we don't bother if we don't have LASzip.
-#
 set (SOURCES
     NitfWrap.cpp
     ${PDAL_NITF_DIR}/MetadataReader.cpp
@@ -49,4 +43,18 @@ target_link_libraries(nitfwrap
     ${PDAL_UTIL_LIB_NAME}
     ${NITRO_LIBRARIES}
 )
+target_include_directories(nitfwrap
+    PRIVATE
+    "${CMAKE_CURRENT_BINARY_DIR}/include"
+    "${PDAL_INCLUDE_DIR}"
+    "${PDAL_NITF_DIR}"
+)
+
+
+if (WITH_TESTS)
+    PDAL_ADD_TEST(
+        nitfwrap_test
+        FILES NitfWrapTest.cpp
+    )
+endif()
 
