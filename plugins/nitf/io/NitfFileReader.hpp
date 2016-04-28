@@ -54,7 +54,6 @@
 #  pragma clang diagnostic ignored "-Wunused-private-field"
 #endif
 
-#define IMPORT_NITRO_API
 #include <nitro/c++/import/nitf.hpp>
 
 #ifdef PDAL_COMPILER_CLANG
