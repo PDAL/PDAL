@@ -47,7 +47,7 @@ namespace pdal
 
 namespace gdal
 {
-    class Debug;
+    class ErrorHandler;
 }
 
 class PDAL_DLL ReprojectionFilter : public Filter
@@ -69,7 +69,6 @@ private:
 
     void updateBounds();
     void createTransform(const SpatialReference& srs);
-    bool transform(double& x, double& y, double& z);
 
     SpatialReference m_inSRS;
     SpatialReference m_outSRS;
@@ -80,8 +79,7 @@ private:
     ReferencePtr m_in_ref_ptr;
     ReferencePtr m_out_ref_ptr;
     TransformPtr m_transform_ptr;
-
-    bool m_cullBadPoints;
+    gdal::ErrorHandler* m_errorHandler;
 
     ReprojectionFilter& operator=(const ReprojectionFilter&); // not implemented
     ReprojectionFilter(const ReprojectionFilter&); // not implemented

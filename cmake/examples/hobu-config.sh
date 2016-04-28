@@ -9,8 +9,8 @@ P2G_HOME=$USR_LOCAL
 HEXER_HOME="/usr/local"
 SQLITE_HOME="/usr/local/opt/sqlite"
 SO_EXT=dylib
-# CC=/usr/local/bin/gcc-4.8
-# CXX=/usr/local/bin/g++-4.8
+#CC=/usr/local/bin/gcc-5
+#CXX=/usr/local/bin/g++-5
 
 ORACLE_HOME=$HOME/oracle
 LAZPERF_HOME=$USR_LOCAL

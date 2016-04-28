@@ -49,7 +49,7 @@ namespace pdal
 namespace gdal
 {
 
-ErrorHandler ErrorHandler::m_instance;
+static ErrorHandler* s_gdalErrorHandler= 0;
 
 void registerDrivers()
 {
@@ -71,31 +71,30 @@ void unregisterDrivers()
 }
 
 
-ErrorHandler& ErrorHandler::get()
+ErrorHandler& ErrorHandler::getGlobalErrorHandler()
 {
-    return m_instance;
+    static std::once_flag flag;
+
+    auto init = []()
+    {
+       s_gdalErrorHandler = new ErrorHandler();
+    };
+
+    std::call_once(flag, init);
+    return *s_gdalErrorHandler;
 }
 
-
-ErrorHandler::ErrorHandler() : m_throw(true), m_errorNum(0)
+ErrorHandler::ErrorHandler() : m_errorNum(0)
 {
     std::string value;
 
-    auto cb = [](::CPLErr level, int num, const char *msg)
-    {
-        ErrorHandler::get().handle(level, num, msg);
-    };
-    m_cplSet = (Utils::getenv("CPL_DEBUG", value) == 0);
+    // Will return thread-local setting
+    const char* set = CPLGetConfigOption("CPL_DEBUG", "");
+    m_cplSet = (bool)set ;
     m_debug = m_cplSet;
-    CPLSetErrorHandler(cb);
-}
 
-
-void ErrorHandler::set(LogPtr log, bool debug, bool doThrow)
-{
-    setLog(log);
-    setDebug(debug);
-    setThrow(doThrow);
+    // Push on a thread-local error handler
+    CPLSetErrorHandler(&ErrorHandler::trampoline);
 }
 
 
@@ -115,35 +114,19 @@ void ErrorHandler::setLog(LogPtr log)
 void ErrorHandler::setDebug(bool debug)
 {
     m_debug = debug;
-    if (!m_cplSet)
-    {
-        if (debug)
-            Utils::setenv("CPL_DEBUG", "ON");
-        else
-            Utils::unsetenv("CPL_DEBUG");
-    }
-}
 
-
-void ErrorHandler::setThrow(bool doThrow)
-{
-    m_throw = doThrow;
-}
-
-
-bool ErrorHandler::willThrow() const
-{
-    return m_throw;
+    if (debug)
+        CPLSetThreadLocalConfigOption("CPL_DEBUG", "ON");
+    else
+        CPLSetThreadLocalConfigOption("CPL_DEBUG", NULL);
 }
 
 
 int ErrorHandler::errorNum()
 {
     int errorNum = m_errorNum;
-    m_errorNum = 0;
     return errorNum;
 }
-
 
 void ErrorHandler::handle(::CPLErr level, int num, char const* msg)
 {
@@ -153,9 +136,7 @@ void ErrorHandler::handle(::CPLErr level, int num, char const* msg)
     if (level == CE_Failure || level == CE_Fatal)
     {
         oss << "GDAL failure (" << num << ") " << msg;
-        if (m_throw)
-            throw pdal_error(oss.str());
-        else if (m_log)
+        if (m_log)
             m_log->get(LogLevel::Error) << oss.str() << std::endl;
     }
     else if (m_debug && level == CE_Debug)
@@ -448,7 +429,7 @@ Dimension::Type::Enum convertGDALtoPDAL(GDALDataType t)
 
 GDALError::Enum Raster::readBand(std::vector<uint8_t>& points, int nBand)
 {
-    try 
+    try
     {
         BandReader(m_ds, nBand).read(points);
     }

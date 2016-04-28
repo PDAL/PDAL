@@ -36,6 +36,7 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/GDALUtils.hpp>
 
 #include <gdal.h>
 #include <ogr_spatialref.h>
@@ -54,8 +55,12 @@ CREATE_STATIC_PLUGIN(1, 0, ReprojectionFilter, Filter, s_info)
 
 std::string ReprojectionFilter::getName() const { return s_info.name; }
 
-ReprojectionFilter::ReprojectionFilter() : m_inferInputSRS(true),
-    m_in_ref_ptr(NULL), m_out_ref_ptr(NULL), m_transform_ptr(NULL)
+ReprojectionFilter::ReprojectionFilter()
+    : m_inferInputSRS(true)
+    , m_in_ref_ptr(NULL)
+    , m_out_ref_ptr(NULL)
+    , m_transform_ptr(NULL)
+    , m_errorHandler(new gdal::ErrorHandler())
 {}
 
 ReprojectionFilter::~ReprojectionFilter()
@@ -112,6 +117,8 @@ void ReprojectionFilter::processOptions(const Options& options)
 void ReprojectionFilter::initialize()
 {
     m_out_ref_ptr = OSRNewSpatialReference(0);
+    if (!m_out_ref_ptr)
+        throw pdal::pdal_error("Unable to allocate new OSR SpatialReference in initialize()!");
 
     int result = OSRSetFromUserInput(m_out_ref_ptr,
         m_outSRS.getWKT(pdal::SpatialReference::eCompoundOK).c_str());
@@ -150,6 +157,8 @@ void ReprojectionFilter::createTransform(const SpatialReference& srsSRS)
     if (m_in_ref_ptr)
         OSRDestroySpatialReference(m_in_ref_ptr);
     m_in_ref_ptr = OSRNewSpatialReference(0);
+    if (!m_in_ref_ptr)
+        throw pdal::pdal_error("Unable to allocate new OSR SpatialReference for input coordinate system in createTransform()!");
 
     int result =
         OSRSetFromUserInput(m_in_ref_ptr,
@@ -170,31 +179,10 @@ void ReprojectionFilter::createTransform(const SpatialReference& srsSRS)
     if (!m_transform_ptr)
     {
         std::ostringstream oss;
-        oss << getName() << ": Could not construct transformation.";
+        oss << getName() << ": Could not construct coordinate transformation object in createTransform";
         throw pdal_error(oss.str());
     }
 }
-
-
-bool ReprojectionFilter::transform(double& x, double& y, double& z)
-{
-    // OCTTransform will throw via GDAL error handler
-    // if there is an error. We don't expect the return value
-    // unless the GDAL handler gets shut off for whatever reason. In
-    // that case, we'll just throw.
-    if (OCTTransform(m_transform_ptr, 1, &x, &y, &z))
-    {
-        return true;
-    }
-    else
-    {
-        std::ostringstream msg;
-        msg << "Could not project point for ReprojectionTransform::" <<
-            CPLGetLastErrorMsg();
-        throw pdal_error(msg.str());
-    }
-}
-
 
 PointViewSet ReprojectionFilter::run(PointViewPtr view)
 {

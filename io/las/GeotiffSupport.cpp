@@ -179,8 +179,6 @@ std::string GeotiffSupport::getWkt(bool horizOnly, bool pretty) const
     GTIFDefn sGTIFDefn;
     char* pszWKT = 0;
 
-    gdal::ErrorHandler::ExceptionSuspender suspender;
-
     if (!m_gtiff)
         return std::string();
 
