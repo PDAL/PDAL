@@ -19,6 +19,32 @@ query point cloud data.  See :ref:`apps` for more information.
 
 The entire website is available as a single PDF at http://pdal.io/PDAL.pdf
 
+News
+--------------------------------------------------------------------------------
+
+**04-24-2016**
+................................................................................
+
+See `Howard Butler`_ and `Brad Chambers`_ give PDAL talks at
+`FOSS4GNA 2016`_ in Raleigh, NC May 2-5. Howard will be presenting `Point cloud web
+services with Greyhound, Entwine, and PDAL`_, and Brad will be presenting `Filtering
+point clouds with PDAL and PCL`_.
+
+
+.. note::
+
+    Catch up with Brad and Howard to get a PDAL sticker.
+
+    .. image:: ./images/iheartpdal.png
+        :scale: 60%
+
+.. _`Howard Butler`: http://github.com/hobu
+.. _`Brad Chambers`: http://github.com/chambbj
+.. _`FOSS4GNA 2016`: https://2016.foss4g-na.org
+.. _`Point cloud web services with Greyhound, Entwine, and PDAL`: https://2016.foss4g-na.org/session/point-cloud-web-services-greyhound-entwine-and-pdal
+.. _`Filtering point clouds with PDAL and PCL`: https://2016.foss4g-na.org/session/filtering-point-clouds-pdal-and-pcl
+
+
 Download
 --------------------------------------------------------------------------------
 

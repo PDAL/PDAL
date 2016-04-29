@@ -10,14 +10,9 @@ Introduction
 ------------------------------------------------------------------------------
 
 It's a giant pain to build everything yourself. To make it simpler to use PDAL, a
-build based on Docker is also available. This document describes how
-to use it to operate on your own data.
+build based on Docker is available. This document describes how
+to use it to print the first point of an :ref:`ASPRS LAS <readers.las>` file.
 
-
-.. seealso::
-    The `What is Docker <https://www.docker.com/what-docker>`__ document describes
-    in more detail what exactly Docker is. Think of it as a virtualization platform
-    that doesn't have to be "built" every time from scratch like a Vagrant build would.
 
 .. _docker:
 
@@ -25,27 +20,8 @@ Install Docker
 ------------------------------------------------------------------------------
 
 
-The Docker configuration that PDAL provides contains nearly
-every possible feature except for `Oracle Point Cloud`_ support. Things it
-includes are:
-
-* :ref:`filters.hexbin`
-* :ref:`filters.reprojection`
-* :ref:`readers.nitf` and :ref:`writers.nitf`
-* `LASzip`_ support in :ref:`readers.las` and :ref:`writers.las`
-* Interpolation with `Points2Grid`_ using :ref:`writers.p2g`
-* Python manipulation using :ref:`filters.predicate` and :ref:`filters.programmable`
-* `PCL`_ support via :ref:`filters.pclblock`, :ref:`readers.pcd`,
-  :ref:`writers.pcd`, :ref:`ground_command`, and :ref:`pcl_command`.
-
-.. seealso::
-
-    :ref:`apps` provides detailed information on using PDAL applications, and
-    :ref:`workshop` provides a full suite of exercises you can follow to learn
-    how to use PDAL with Docker.
-
-`Docker Toolbox`_.
-................................................................................
+The Docker configuration that PDAL provides contains nearly every possible
+feature except for `Oracle Point Cloud`_ support. Things it includes are:
 
 Docker starting documentation can be found at the following links. Read through
 them a bit for your platform so you have an idea what to expect.
@@ -61,6 +37,12 @@ them a bit for your platform so you have an idea what to expect.
     We will assume you are running on Windows, but the same commands should
     work in OSX or Linux too -- though definition of file paths might provide
     a significant difference.
+
+.. seealso::
+
+    :ref:`apps` provides detailed information on using PDAL applications, and
+    :ref:`workshop` provides a full suite of exercises you can follow to learn
+    how to use PDAL with Docker.
 
 Run Docker Quickstart Terminal
 ................................................................................
@@ -100,7 +82,7 @@ whatever reason.
 .. note::
 
     Other PDAL versions are provided at the same `Docker Hub`_ location,
-    with an expected tag name (ie ``pdal/1.2``, or ``pdal/1.x``) for
+    with an expected tag name (ie ``pdal/pdal:1.2``, or ``pdal/pdal:1.x``) for
     major PDAL versions. The PDAL Docker hub location at
     https://hub.docker.com/u/pdal/ has images and more information
     on this topic.
@@ -131,8 +113,10 @@ List the directory to be sure that it was downloaded
 Print the first point
 ------------------------------------------------------------------------------
 
-To test that we have a working system, we will print out the values of the
-very first point of ``autzen.laz``.
+Docker
+................................................................................
+
+Run the following command in the `Docker Quickstart Terminal`
 
 ::
 
@@ -166,13 +150,41 @@ Here's a summary of what's going on with that command invocation
    our container, which we mounted a ``/data`` directory in with the volume
    mount operation in Step #3. Our ``autzen.laz`` file resides there.
 
-   .. note::
 
-        The same note about the double slash described in Step #3 applies here
-        as well.
+Native
+................................................................................
+
+Run the following command in a terminal window:
+
+::
+
+    pdal info /data/autzen.laz -p 0
+
+
+Here's a summary of what's going on with that command invocation
+
+
+1. ``pdal``: We're finally going to run the ``pdal`` command :)
+
+2. ``info``: We want to run :ref:`info_command` on the data
+
+3. ``/data/autzen.laz``:  Read our ``autzen.laz`` file .
+
 
 .. image:: ./images/docker-print-one.png
 
+What's next?
+------------------------------------------------------------------------------
+
+Visit :ref:`apps` to find out how to utilize PDAL applications to process data
+on the command line yourself. Visit :ref:`development_index` to learn how to
+embed and use PDAL in your own applications. :ref:`readers` lists the formats
+that PDAL can read, :ref:`filters` lists the kinds of operations you can do
+with PDAL, and :ref:`writers` lists the formats PDAL can write.
+
+.. seealso::
+
+    :ref:`community` is a good source to reach out to when you're stuck.
 
 
 .. _`Points2Grid`: https://github.com/CRREL/points2grid
