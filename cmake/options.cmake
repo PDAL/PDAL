@@ -88,6 +88,8 @@ option(BUILD_PLUGIN_PYTHON
 add_feature_info("Python plugin" BUILD_PLUGIN_PYTHON
     "add features that depend on python")
 
+option(BUILD_TOOLS_NITFWRAP "Choose if nitfwrap tool should be built" FALSE)
+
 option(WITH_TESTS
     "Choose if PDAL unit tests should be built" TRUE)
 add_feature_info("Unit tests" WITH_TESTS "PDAL unit tests")
