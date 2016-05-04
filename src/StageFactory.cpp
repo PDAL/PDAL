@@ -37,17 +37,25 @@
 #include <pdal/util/FileUtils.hpp>
 
 // filters
+#include <approximatecoplanar/ApproximateCoplanarFilter.hpp>
 #include <attribute/AttributeFilter.hpp>
 #include <chipper/ChipperFilter.hpp>
 #include <colorization/ColorizationFilter.hpp>
 #include <crop/CropFilter.hpp>
 #include <decimation/DecimationFilter.hpp>
 #include <divider/DividerFilter.hpp>
+#include <eigenvalues/EigenvaluesFilter.hpp>
+#include <estimaterank/EstimateRankFilter.hpp>
 #include <ferry/FerryFilter.hpp>
+#include <hag/HAGFilter.hpp>
 #include <merge/MergeFilter.hpp>
 #include <mortonorder/MortonOrderFilter.hpp>
+#include <normal/NormalFilter.hpp>
+#include <outlier/OutlierFilter.hpp>
+#include <pmf/PMFFilter.hpp>
 #include <range/RangeFilter.hpp>
 #include <reprojection/ReprojectionFilter.hpp>
+#include <sample/SampleFilter.hpp>
 #include <sort/SortFilter.hpp>
 #include <splitter/SplitterFilter.hpp>
 #include <stats/StatsFilter.hpp>
@@ -230,17 +238,25 @@ StageFactory::StageFactory(bool no_plugins)
     }
 
     // filters
+    PluginManager::initializePlugin(ApproximateCoplanarFilter_InitPlugin);
     PluginManager::initializePlugin(AttributeFilter_InitPlugin);
     PluginManager::initializePlugin(ChipperFilter_InitPlugin);
     PluginManager::initializePlugin(ColorizationFilter_InitPlugin);
     PluginManager::initializePlugin(CropFilter_InitPlugin);
     PluginManager::initializePlugin(DecimationFilter_InitPlugin);
     PluginManager::initializePlugin(DividerFilter_InitPlugin);
+    PluginManager::initializePlugin(EigenvaluesFilter_InitPlugin);
+    PluginManager::initializePlugin(EstimateRankFilter_InitPlugin);
     PluginManager::initializePlugin(FerryFilter_InitPlugin);
+    PluginManager::initializePlugin(HAGFilter_InitPlugin);
     PluginManager::initializePlugin(MergeFilter_InitPlugin);
     PluginManager::initializePlugin(MortonOrderFilter_InitPlugin);
+    PluginManager::initializePlugin(NormalFilter_InitPlugin);
+    PluginManager::initializePlugin(OutlierFilter_InitPlugin);
+    PluginManager::initializePlugin(PMFFilter_InitPlugin);
     PluginManager::initializePlugin(RangeFilter_InitPlugin);
     PluginManager::initializePlugin(ReprojectionFilter_InitPlugin);
+    PluginManager::initializePlugin(SampleFilter_InitPlugin);
     PluginManager::initializePlugin(SortFilter_InitPlugin);
     PluginManager::initializePlugin(SplitterFilter_InitPlugin);
     PluginManager::initializePlugin(StatsFilter_InitPlugin);
