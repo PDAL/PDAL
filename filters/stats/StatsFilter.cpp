@@ -64,6 +64,10 @@ void Summary::extractMetadata(MetadataNode &m) const
     m.add("minimum", minimum(), "minimum");
     m.add("maximum", maximum(), "maximum");
     m.add("average", average(), "average");
+    m.add("stddev", stddev(), "standard deviation");
+    m.add("kurtosis", kurtosis(), "kurtosis");
+    m.add("skewness", skewness(), "skewness");
+    m.add("variance", variance(), "variance");
     m.add("name", m_name, "name");
     if (m_enumerate == Enumerate)
         for (auto& v : m_values)
