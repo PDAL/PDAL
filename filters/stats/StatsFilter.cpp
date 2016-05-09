@@ -173,14 +173,12 @@ void StatsFilter::extractMetadata(PointTableRef table)
 {
     uint32_t position(0);
 
-    point_count_t numPoints(0);
+    bool bNoPoints(true);
     for (auto di = m_stats.begin(); di != m_stats.end(); ++di)
     {
         const Summary& s = di->second;
-        // Cache the point count of one of the stats. If we
-        // don't have one we're not going to compute some stuff
-        if (!numPoints)
-            numPoints = s.count();
+
+        bNoPoints = (bool)s.count();
 
         MetadataNode t = m_metadata.addList("statistic");
         t.add("position", position++);
@@ -194,7 +192,7 @@ void StatsFilter::extractMetadata(PointTableRef table)
     if (xs != m_stats.end() &&
         ys != m_stats.end() &&
         zs != m_stats.end() &&
-        numPoints)
+        bNoPoints)
     {
         BOX3D box(xs->second.minimum(), ys->second.minimum(), zs->second.minimum(),
                   xs->second.maximum(), ys->second.maximum(), zs->second.maximum());
