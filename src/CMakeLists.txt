@@ -34,9 +34,7 @@ endif()
 #
 # base
 #
-#[[
 set(PDAL_BASE_HPP
-  "${PDAL_HEADERS_DIR}/Dimension.hpp"
   "${PDAL_HEADERS_DIR}/pdal_types.hpp"
   "${PDAL_HEADERS_DIR}/Compression.hpp"
   "${PDAL_HEADERS_DIR}/Filter.hpp"
@@ -72,7 +70,6 @@ set(PDAL_BASE_HPP
     ${PDAL_XML_HEADER}
     ${DB_DRIVER_HEADERS}
 )
-]]
 
 set(PDAL_BASE_CPP
   DynamicLibrary.cpp
