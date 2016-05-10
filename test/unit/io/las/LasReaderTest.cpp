@@ -265,8 +265,6 @@ TEST(LasReaderTest, inspect)
         qi.m_dimNames.end(), std::begin(dims)));
 }
 
-//ABELL - Find another way to do this.
-/**
 TEST(LasReaderTest, test_vlr)
 {
     PointTable table;
@@ -278,9 +276,15 @@ TEST(LasReaderTest, test_vlr)
     reader.prepare(table);
     reader.execute(table);
 
-    EXPECT_EQ(reader.header().getVLRs().getAll().size(), 390);
+    MetadataNode root = reader.getMetadata();
+    for (size_t i = 0; i < 390; ++i)
+    {
+        std::string name("vlr_");
+        name += std::to_string(i);
+        MetadataNode m = root.findChild(name);
+        EXPECT_TRUE(!m.value().empty()) << "No node " << i;
+    }
 }
-**/
 
 
 TEST(LasReaderTest, testInvalidFileSignature)
