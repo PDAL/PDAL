@@ -153,7 +153,7 @@ RUN git clone https://github.com/CRREL/points2grid.git \
     && make install \
     && rm -rf /points2grid
 
-RUN git clone  https://github.com/verma/laz-perf.git \
+RUN git clone  https://github.com/hobu/laz-perf.git \
     && cd laz-perf \
     && mkdir build \
     && cd build \
@@ -177,7 +177,7 @@ RUN git clone https://github.com/chambbj/pcl.git \
         && git checkout pcl-1.7.2-sans-opengl \
         && mkdir build \
         && cd build \
-        && cmake \
+        && CXXFLAGS="-std=c++11"  cmake \
                 -DBUILD_2d=ON \
                 -DBUILD_CUDA=OFF \
                 -DBUILD_GPU=OFF \
