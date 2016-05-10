@@ -83,6 +83,18 @@ void compare_contents(const std::string& las_file, const std::string& ntf_file)
     EXPECT_EQ(ntfViews.size(), 1u);
     PointViewPtr ntfView = *ntfViews.begin();
 
+    MetadataNode root = ntf_reader->getMetadata();
+    MetadataNode n = root.findChild("FH.FTITLE");
+    EXPECT_EQ(n.value(), "LiDAR from somewhere");
+    n = root.findChild("FH.ONAME");
+    EXPECT_EQ(n.value(), "Howard Butler");
+    n = root.findChild("FH.OPHONE");
+    EXPECT_EQ(n.value(), "5155554628");
+    n = root.findChild([](MetadataNode& m)
+        { return m.name() == "IM:0.IDATIM"; }
+    );
+    EXPECT_EQ(n.value(), "20110516183337");
+
     //
     // compare the two views
     //
@@ -129,7 +141,7 @@ TEST(NitfWriterTest, test1)
         Option cls("fsclas", "S");
         writer_opts.add(cls);
 
-        Option phone("ophone", "5159664628");
+        Option phone("ophone", "5155554628");
         writer_opts.add(phone);
 
         Option name("oname", "Howard Butler");
@@ -164,23 +176,8 @@ TEST(NitfWriterTest, test1)
     }
 
     //
-    // check the generated NITF
-    //
-    //ABELL - This doesn't work and is probably broken because the reference
-    //  file is out of date, but some method of comparing the NITF wrapper
-    //  instead of a byte-by-byte file diff is probably in order.
-/**
-    const std::string reference_output(
-        Support::datapath("nitf/write_test1.ntf"));
-    bool filesSame = Support::compare_files(nitf_output, reference_output);
-    EXPECT_TRUE(filesSame);
-**/
-
-    //
     // check the LAS contents against the source image
     //
-    //ABELL - This tells us that the packaged file (LAS) is fine, but it
-    //  doesn't tell us much about the NITF wrapper.
     compare_contents(las_input, nitf_output);
 
     FileUtils::deleteFile(Support::temppath(nitf_output));

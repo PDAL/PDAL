@@ -69,14 +69,14 @@ TEST(NitfReaderTest, test_one)
     PointViewPtr view = *pbSet.begin();
 
     // check metadata
-//ABELL
-/**
-    {
-        Metadata metadata = nitf_reader.getMetadata();
-        /////////////////////////////////////////////////EXPECT_EQ(metadatums.size(), 80u);
-        EXPECT_EQ(metadata.toPTree().get<std::string>("metadata.FH_FDT.value"), "20120323002946");
-    }
-**/
+    MetadataNode m = nitf_reader->getMetadata();
+    MetadataNode n = m.findChild(
+        [](MetadataNode& m){ return m.name() == "IM:0.IGEOLO"; }
+    );
+    EXPECT_EQ(n.value(),
+        "440344N1230429W440344N1230346W440300N1230346W440300N1230429W");
+    n = m.findChild("FH.FDT");
+    EXPECT_EQ(n.value(), "20120323002946");
 
     //
     // read LAS
