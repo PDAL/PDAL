@@ -305,7 +305,7 @@ void QfitReader::addDimensions(PointLayoutPtr layout)
     layout->registerDim(Id::Z);
     layout->registerDim(Id::StartPulse);
     layout->registerDim(Id::ReflectedPulse);
-    layout->registerDim(Id::ScanAngleRank);
+    layout->registerDim(Id::Azimuth);
     layout->registerDim(Id::Pitch);
     layout->registerDim(Id::Roll);
     m_size += 36;
@@ -381,7 +381,7 @@ point_count_t QfitReader::read(PointViewPtr data, point_count_t count)
             data->setField(Dimension::Id::StartPulse, nextId, start_pulse);
             data->setField(Dimension::Id::ReflectedPulse, nextId,
                 reflected_pulse);
-            data->setField(Dimension::Id::ScanAngleRank, nextId,
+            data->setField(Dimension::Id::Azimuth, nextId,
                 scan_angle / 1000.0);
             data->setField(Dimension::Id::Pitch, nextId, pitch / 1000.0);
             data->setField(Dimension::Id::Roll, nextId, roll / 1000.0);
@@ -438,7 +438,7 @@ Dimension::IdList QfitReader::getDefaultDimensions()
     ids.push_back(Dimension::Id::Z);
     ids.push_back(Dimension::Id::StartPulse);
     ids.push_back(Dimension::Id::ReflectedPulse);
-    ids.push_back(Dimension::Id::ScanAngleRank);
+    ids.push_back(Dimension::Id::Azimuth);
     ids.push_back(Dimension::Id::Pitch);
     ids.push_back(Dimension::Id::Roll);
     ids.push_back(Dimension::Id::Pdop);
