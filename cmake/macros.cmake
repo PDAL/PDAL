@@ -69,10 +69,6 @@ macro(PDAL_ADD_LIBRARY _name)
         RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR}
         LIBRARY DESTINATION ${PDAL_LIB_INSTALL_DIR}
         ARCHIVE DESTINATION ${PDAL_LIB_INSTALL_DIR})
-    if (APPLE)
-        set_target_properties(${_name} PROPERTIES INSTALL_NAME_DIR
-            "@executable_path/../lib")
-    endif()
 endmacro(PDAL_ADD_LIBRARY)
 
 ###############################################################################
