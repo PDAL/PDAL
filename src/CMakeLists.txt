@@ -170,7 +170,9 @@ endif()
 # so that users only need link libpdalcpp.
 #
 if (APPLE)
-    set(REEXPORT_UTIL_LIB "-Wl,-reexport_library,$<TARGET_FILE:${PDAL_UTIL_LIB_NAME}>")
+    set(UTIL_LIB "-Wl,-reexport_library,$<TARGET_FILE:${PDAL_UTIL_LIB_NAME}>")
+else()
+    set(UTIL_LIB ${PDAL_UTIL_LIB_NAME})
 endif()
 
 target_link_libraries(${PDAL_BASE_LIB_NAME}
@@ -181,8 +183,7 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
     ${PDAL_BOOST_LIB_NAME}
     ${PDAL_ARBITER_LIB_NAME}
     ${PDAL_JSONCPP_LIB_NAME}
-#    ${PDAL_UTIL_LIB_NAME}
-    ${REEXPORT_UTIL_LIB}
+    ${UTIL_LIB}
     ${CURL_LIBRARIES}
 )
 
