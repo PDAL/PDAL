@@ -19,8 +19,7 @@ Example
         "file-input.las",
         {
           "type":"filters.crop",
-          "bounds":"bounds",
-          "count":"([0,1000000],[0,1000000])"
+          "bounds":"([0,1000000],[0,1000000])"
         },
         {
           "type":"writers.las",
