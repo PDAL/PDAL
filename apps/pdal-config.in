@@ -3,7 +3,6 @@ prefix=@CMAKE_INSTALL_PREFIX@
 exec_prefix=@CMAKE_INSTALL_PREFIX@/bin
 libdir=@CMAKE_INSTALL_PREFIX@/lib
 
-
 usage()
 {
 	cat <<EOF
@@ -16,6 +15,7 @@ Options:
 	[--libs]
 	[--plugin-dir]
 	[--version]
+	[--python-version]
 EOF
 	exit $1
 }
@@ -59,6 +59,10 @@ case $1 in
 
   --version)
     echo @PDAL_VERSION_STRING@
+    ;;
+
+  --python-version)
+    echo @PYTHON_VERSION_STRING@
     ;;
 
   *)

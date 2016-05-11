@@ -17,25 +17,25 @@ cdef extern from "Pipeline.hpp" namespace "libpdalpython":
     cdef cppclass Pipeline:
         Pipeline(const char* ) except +
         void execute() except +
-        const char* getXML()
+        const char* getJSON()
         vector[Array*] getArrays() except +
 
 cdef class PyPipeline:
     cdef Pipeline *thisptr      # hold a c++ instance which we're wrapping
-    def __cinit__(self, unicode xml):
+    def __cinit__(self, unicode json):
         cdef char* x
         if PY_MAJOR_VERSION >= 3:
-            py_byte_string = xml.encode('UTF-8')
+            py_byte_string = json.encode('UTF-8')
             x= py_byte_string
             self.thisptr = new Pipeline(x)
         else:
-            self.thisptr = new Pipeline(xml)
+            self.thisptr = new Pipeline(json)
     def __dealloc__(self):
         del self.thisptr
 
-    property xml:
+    property json:
         def __get__(self):
-            return self.thisptr.getXML().decode('UTF-8')
+            return self.thisptr.getJSON().decode('UTF-8')
 
     def arrays(self):
         v = self.thisptr.getArrays()

@@ -9,8 +9,8 @@
 namespace libpdalpython
 {
 
-Pipeline::Pipeline(std::string const& xml)
-    : m_xml(xml)
+Pipeline::Pipeline(std::string const& json)
+    : m_json(json)
     , m_schema("")
     , m_manager(-1)
 {
@@ -26,7 +26,7 @@ Pipeline::Pipeline(std::string const& xml)
 void Pipeline::execute()
 {
     std::stringstream strm;
-    strm << m_xml;
+    strm << m_json;
     m_manager.readPipeline(strm);
     m_manager.execute();
 #ifdef PDAL_HAVE_LIBXML2
@@ -37,7 +37,7 @@ void Pipeline::execute()
     strm.str("");
     pdal::PipelineWriter::writePipeline(m_manager.getStage(), strm);
 
-    m_xml = strm.str();
+    m_json = strm.str();
 
 }
 
