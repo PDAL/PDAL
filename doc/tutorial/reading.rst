@@ -196,5 +196,5 @@ a pipeline, substituting the input and output as it goes.
 
 .. _`JSON`: http://www.json.org/
 .. _`UUID`: http://en.wikipedia.org/wiki/Universally_unique_identifier
-.. _`interesting.las`: https://github.com/PDAL/PDAL/blob/master/test/data/interesting.las?raw=true
+.. _`interesting.las`: https://github.com/PDAL/PDAL/blob/master/test/data/las/interesting.las?raw=true
 .. _`ASPRS LAS`: http://www.asprs.org/a/society/committees/standards/lidar_exchange_format.html

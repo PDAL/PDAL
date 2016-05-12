@@ -28,7 +28,7 @@ Example
         }
         {
           "type":"writers.pgpointcloud",
-          "connection":"host=\'localhost\' dbname=\'lidar\' user=\'pramsey\'",
+          "connection":"host='localhost' dbname='lidar' user='pramsey'",
           "table":"example",
           "compression":"dimensional",
           "srid":"26916"
