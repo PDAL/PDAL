@@ -64,10 +64,22 @@ void Summary::extractMetadata(MetadataNode &m) const
     m.add("minimum", minimum(), "minimum");
     m.add("maximum", maximum(), "maximum");
     m.add("average", average(), "average");
-    m.add("stddev", stddev(), "standard deviation");
-    m.add("kurtosis", kurtosis(), "kurtosis");
-    m.add("skewness", skewness(), "skewness");
-    m.add("variance", variance(), "variance");
+
+    double std = stddev();
+    if (!isinf(std) && !isnan(std))
+        m.add("stddev", std, "standard deviation");
+
+    double k = kurtosis();
+    if (!isinf(k) && !isnan(k))
+        m.add("kurtosis", k, "kurtosis");
+
+    double sk = skewness();
+    if (!isinf(sk) && !isnan(sk))
+        m.add("skewness", skewness(), "skewness");
+
+    double v = variance();
+    if (!isinf(v) && !isnan(v))
+        m.add("variance", v, "variance");
     m.add("name", m_name, "name");
     if (m_enumerate == Enumerate)
         for (auto& v : m_values)
