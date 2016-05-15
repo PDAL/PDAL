@@ -10,7 +10,7 @@
    
 #endif
     
-#if defined(__linux__) || defined(__CYGWIN__)
+#if defined(__linux__) || defined(__CYGWIN__) || defined(__GNU__)
      
 #   include <endian.h>
       
