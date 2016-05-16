@@ -383,7 +383,7 @@ TEST(UtilsTest, wordWrap2)
 //
 // TEST(FileUtilsTest, fetchRemote)
 // {
-// #ifdef PDAL_ARIBITER_ENABLED
+// #ifdef PDAL_ARBITER_ENABLED
 //     std::string name("http://www.liblas.org/samples/srs.laz");
 //     std::istream* s = pdal::FileUtils::openFile(name);
 //

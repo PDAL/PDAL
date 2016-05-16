@@ -47,26 +47,23 @@
 using namespace std;
 
 
+namespace pdal
+{
+
 class PDAL_DLL ArbiterStream : public std::ofstream
 {
 public:
-    ArbiterStream( std::string path,
-                  std::ios::openmode mode)
+    ArbiterStream(std::string path, std::ios::openmode mode)
         : std::ofstream(getLocalTempFile(path).c_str(), mode)
         , m_remotePath(path)
-    {
+    { }
 
-    }
     static std::string getLocalTempFile(const std::string path)
     {
-        std::string basename = arbiter::util::getBasename(path);
-        std::string tempdir = arbiter::fs::getTempPath();
+        const std::string tempdir(arbiter::fs::getTempPath());
+        const std::string basename(arbiter::util::getBasename(path));
 
-        std::ostringstream p;
-        p << tempdir << basename;
-        std::string localpath = p.str();
-
-        return localpath;
+        return arbiter::util::join(tempdir, basename);
     }
 
     virtual ~ArbiterStream()
@@ -80,10 +77,6 @@ private:
     std::string m_remotePath;
 };
 
-
-
-namespace pdal
-{
 
 namespace
 {
@@ -117,18 +110,19 @@ istream *openFile(string const& filename, bool asBinary)
     if (isStdin(name))
         return &cin;
 
-#ifdef PDAL_ARIBITER_ENABLED
+#ifdef PDAL_ARBITER_ENABLED
     arbiter::Arbiter a;
     if (a.isRemote(name))
     {
         // Open it with Arbiter
-        std::unique_ptr<arbiter::fs::LocalHandle> h = a.getLocalHandle(name);
-        if (h)
+        if (auto h = a.getLocalHandle(name))
         {
             name = h->release(); // We own the temp file it created now.
         }
         else
+        {
             return NULL;
+        }
     }
 #endif
 
@@ -158,14 +152,13 @@ ostream *createFile(string const& name, bool asBinary)
     if (asBinary)
         mode |= ios::binary;
 
-#ifdef PDAL_ARIBITER_ENABLED
+#ifdef PDAL_ARBITER_ENABLED
     arbiter::Arbiter a;
 
     if (a.isRemote(name))
     {
-
         ostream* ofs = new ArbiterStream(name, mode);
-        if (! ofs->good())
+        if (!ofs->good())
         {
             delete ofs;
             return NULL;
@@ -174,10 +167,8 @@ ostream *createFile(string const& name, bool asBinary)
         return ofs;
     }
 #endif
-
-
     ostream *ofs = new ofstream(name, mode);
-    if (! ofs->good())
+    if (!ofs->good())
     {
         delete ofs;
         return NULL;
@@ -268,7 +259,7 @@ void renameFile(const string& dest, const string& src)
 bool fileExists(const string& name)
 {
 
-#ifdef PDAL_ARIBITER_ENABLED
+#ifdef PDAL_ARBITER_ENABLED
     // filename may actually be a URL, S3, dropbox, etc
     arbiter::Arbiter a;
     if (a.isRemote(name))

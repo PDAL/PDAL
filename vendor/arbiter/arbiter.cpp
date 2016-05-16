@@ -61,6 +61,11 @@ SOFTWARE.
 #include <algorithm>
 #include <cstdlib>
 
+#ifdef ARBITER_CUSTOM_NAMESPACE
+namespace ARBITER_CUSTOM_NAMESPACE
+{
+#endif
+
 namespace arbiter
 {
 
@@ -262,6 +267,10 @@ std::string Arbiter::stripType(const std::string raw)
 
 } // namespace arbiter
 
+#ifdef ARBITER_CUSTOM_NAMESPACE
+}
+#endif
+
 
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: arbiter/arbiter.cpp
@@ -280,6 +289,11 @@ std::string Arbiter::stripType(const std::string raw)
 #include <arbiter/driver.hpp>
 
 #include <arbiter/arbiter.hpp>
+#endif
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+namespace ARBITER_CUSTOM_NAMESPACE
+{
 #endif
 
 namespace arbiter
@@ -363,6 +377,10 @@ std::vector<std::string> Driver::glob(std::string path, bool verbose) const
 
 } // namespace arbiter
 
+#ifdef ARBITER_CUSTOM_NAMESPACE
+}
+#endif
+
 
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: arbiter/driver.cpp
@@ -382,6 +400,11 @@ std::vector<std::string> Driver::glob(std::string path, bool verbose) const
 
 #include <arbiter/arbiter.hpp>
 #include <arbiter/driver.hpp>
+#endif
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+namespace ARBITER_CUSTOM_NAMESPACE
+{
 #endif
 
 namespace arbiter
@@ -470,6 +493,10 @@ Endpoint Endpoint::getSubEndpoint(std::string subpath) const
 
 } // namespace arbiter
 
+#ifdef ARBITER_CUSTOM_NAMESPACE
+}
+#endif
+
 
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: arbiter/endpoint.cpp
@@ -502,6 +529,11 @@ Endpoint Endpoint::getSubEndpoint(std::string subpath) const
 #include <cstdlib>
 #include <fstream>
 #include <stdexcept>
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+namespace ARBITER_CUSTOM_NAMESPACE
+{
+#endif
 
 namespace arbiter
 {
@@ -734,6 +766,10 @@ LocalHandle::~LocalHandle()
 } // namespace fs
 } // namespace arbiter
 
+#ifdef ARBITER_CUSTOM_NAMESPACE
+}
+#endif
+
 
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: arbiter/drivers/fs.cpp
@@ -761,6 +797,14 @@ LocalHandle::~LocalHandle()
 #include <algorithm>
 #include <cstring>
 #include <iostream>
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+namespace ARBITER_CUSTOM_NAMESPACE
+{
+#endif
+
+namespace arbiter
+{
 
 namespace
 {
@@ -868,10 +912,8 @@ namespace
         { '}', "%7D" },
         { '~', "%7E" }
     };
-}
+} // unnamed namespace
 
-namespace arbiter
-{
 namespace drivers
 {
 
@@ -1281,6 +1323,10 @@ void HttpPool::release(const std::size_t id)
 
 } // namespace arbiter
 
+#ifdef ARBITER_CUSTOM_NAMESPACE
+}
+#endif
+
 
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: arbiter/drivers/http.cpp
@@ -1318,6 +1364,11 @@ void HttpPool::release(const std::size_t id)
 #include <arbiter/util/md5.hpp>
 #include <arbiter/util/transforms.hpp>
 #include <arbiter/util/sha256.hpp>
+#endif
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+namespace ARBITER_CUSTOM_NAMESPACE
+{
 #endif
 
 namespace arbiter
@@ -1411,7 +1462,8 @@ namespace
                             std::remove_if(
                                 current.begin(),
                                 current.end(),
-                                [](char c) { return std::isspace(c); }));
+                                [](char c) { return std::isspace(c); }),
+                            current.end());
 
                     out.push_back(current);
                     return out;
@@ -1541,23 +1593,18 @@ S3::S3(
         HttpPool& pool,
         const AwsAuth auth,
         const std::string region,
-        const std::string sseKey)
+        const bool sse)
     : m_pool(pool)
     , m_auth(auth)
     , m_region(region)
     , m_baseUrl(getBaseUrl(region))
-    , m_sseHeaders()
+    , m_baseHeaders()
 {
-    if (!sseKey.empty())
+    if (sse)
     {
-        Headers h;
-        h["x-amz-server-side-encryption-customer-algorithm"] = "AES256";
-        h["x-amz-server-side-encryption-customer-key"] =
-            crypto::encodeBase64(sseKey);
-        h["x-amz-server-side-encryption-customer-key-MD5"] =
-            crypto::encodeBase64(crypto::md5(sseKey));
-
-        m_sseHeaders.reset(new Headers(h));
+        // This could grow to support other SSE schemes, like KMS and customer-
+        // supplied keys.
+        m_baseHeaders["x-amz-server-side-encryption"] = "AES256";
     }
 }
 
@@ -1567,7 +1614,7 @@ std::unique_ptr<S3> S3::create(HttpPool& pool, const Json::Value& json)
     std::unique_ptr<S3> s3;
 
     const std::string profile(extractProfile(json));
-    const std::string sseKey(json["sse"].asString());
+    const bool sse(json["sse"].asBool());
 
     if (!json.isNull() && json.isMember("access") & json.isMember("hidden"))
     {
@@ -1626,14 +1673,17 @@ std::unique_ptr<S3> S3::create(HttpPool& pool, const Json::Value& json)
         }
     }
 
-    s3.reset(new S3(pool, *auth, region, sseKey));
+    s3.reset(new S3(pool, *auth, region, sse));
 
     return s3;
 }
 
 std::string S3::extractProfile(const Json::Value& json)
 {
-    if (!json.isNull() && json.isMember("profile"))
+    if (
+            !json.isNull() &&
+            json.isMember("profile") &&
+            json["profile"].asString().size())
     {
         return json["profile"].asString();
     }
@@ -1710,7 +1760,7 @@ void S3::put(std::string rawPath, const std::vector<char>& data) const
 {
     const Resource resource(m_baseUrl, rawPath);
 
-    Headers headers(m_sseHeaders ? *m_sseHeaders : Headers());
+    Headers headers(m_baseHeaders);
     const AuthV4 authV4(
             "PUT",
             m_region,
@@ -1914,7 +1964,7 @@ std::string S3::AuthV4::buildCanonicalRequest(
                 Http::sanitize(q.first, "") + '=' +
                 Http::sanitize(q.second, ""));
 
-        return (s.size() ? "&" : "") + keyVal;
+        return s + (s.size() ? "&" : "") + keyVal;
     });
 
     const std::string canonicalQuery(
@@ -2048,6 +2098,10 @@ std::string S3::FormattedTime::formatTime(const std::string& format) const
 } // namespace drivers
 } // namespace arbiter
 
+#ifdef ARBITER_CUSTOM_NAMESPACE
+}
+#endif
+
 
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: arbiter/drivers/s3.cpp
@@ -2087,6 +2141,11 @@ std::string S3::FormattedTime::formatTime(const std::string& format) const
 
 #ifdef ARBITER_EXTERNAL_JSON
 #include <json/json.h>
+#endif
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+namespace ARBITER_CUSTOM_NAMESPACE
+{
 #endif
 
 namespace arbiter
@@ -2429,6 +2488,10 @@ std::string Dropbox::get(std::string rawPath, Headers headers) const
 } // namespace drivers
 } // namespace arbiter
 
+#ifdef ARBITER_CUSTOM_NAMESPACE
+}
+#endif
+
 
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: arbiter/drivers/dropbox.cpp
@@ -2450,6 +2513,11 @@ std::string Dropbox::get(std::string rawPath, Headers headers) const
 #ifndef ARBITER_IS_AMALGAMATION
 #include <arbiter/util/md5.hpp>
 #include <arbiter/util/macros.hpp>
+#endif
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+namespace ARBITER_CUSTOM_NAMESPACE
+{
 #endif
 
 namespace arbiter
@@ -2643,6 +2711,10 @@ std::string md5(const std::string& data)
 } // namespace crypto
 } // namespace arbiter
 
+#ifdef ARBITER_CUSTOM_NAMESPACE
+}
+#endif
+
 
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: arbiter/util/md5.cpp
@@ -2663,6 +2735,11 @@ std::string md5(const std::string& data)
 #ifndef ARBITER_IS_AMALGAMATION
 #include <arbiter/util/sha256.hpp>
 #include <arbiter/util/macros.hpp>
+#endif
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+namespace ARBITER_CUSTOM_NAMESPACE
+{
 #endif
 
 namespace arbiter
@@ -2881,6 +2958,10 @@ std::string hmacSha256(const std::string& rawKey, const std::string& data)
 } // namespace crypto
 } // namespace arbiter
 
+#ifdef ARBITER_CUSTOM_NAMESPACE
+}
+#endif
+
 
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: arbiter/util/sha256.cpp
@@ -2900,6 +2981,11 @@ std::string hmacSha256(const std::string& rawKey, const std::string& data)
 #endif
 
 #include <cstdint>
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+namespace ARBITER_CUSTOM_NAMESPACE
+{
+#endif
 
 namespace arbiter
 {
@@ -2989,6 +3075,10 @@ std::string encodeAsHex(const std::string& input)
 } // namespace crypto
 } // namespace arbiter
 
+#ifdef ARBITER_CUSTOM_NAMESPACE
+}
+#endif
+
 
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: arbiter/util/transforms.cpp
@@ -3007,6 +3097,11 @@ std::string encodeAsHex(const std::string& input)
 #include <arbiter/util/util.hpp>
 
 #include <arbiter/arbiter.hpp>
+#endif
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+namespace ARBITER_CUSTOM_NAMESPACE
+{
 #endif
 
 namespace arbiter
@@ -3044,6 +3139,10 @@ std::string getBasename(const std::string fullPath)
 
 } // namespace util
 } // namespace arbiter
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+}
+#endif
 
 
 // //////////////////////////////////////////////////////////////////////
