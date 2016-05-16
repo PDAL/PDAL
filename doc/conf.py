@@ -12,8 +12,13 @@
 # serve to show the default.
 
 import sys, os, re
+import time
 import datetime
-year = datetime.datetime.now().year
+if os.environ.get('SOURCE_DATE_EPOCH'):
+    year  = datetime.datetime.utcfromtimestamp(int(os.environ.get('SOURCE_DATE_EPOCH', time.gmtime()))).year
+    today = datetime.datetime.utcfromtimestamp(int(os.environ.get('SOURCE_DATE_EPOCH', time.gmtime()))).strftime('%B %d, %Y')
+else:
+    year  = datetime.datetime.now().year
 
 
 # If extensions (or modules to document with autodoc) are in another directory,
