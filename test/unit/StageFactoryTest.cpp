@@ -43,7 +43,7 @@
 namespace pdal
 {
 
-TEST(StageManagerTest, Load)
+TEST(StageFactoryTest, Load)
 {
     StageFactory f(false);
 
@@ -54,7 +54,7 @@ TEST(StageManagerTest, Load)
     ASSERT_TRUE(Utils::contains(ns, "writers.bpf"));
 }
 
-TEST(StageManagerTest, Load2)
+TEST(StageFactoryTest, Load2)
 {
     StageFactory f(false);
 
@@ -64,7 +64,7 @@ TEST(StageManagerTest, Load2)
     ASSERT_FALSE(Utils::contains(ns, "writers.bpf"));
 }
 
-TEST(StageManagerTest, Load3)
+TEST(StageFactoryTest, Load3)
 {
     StageFactory f(false);
 
@@ -74,7 +74,7 @@ TEST(StageManagerTest, Load3)
     ASSERT_FALSE(Utils::contains(ns, "writers.bpf"));
 }
 
-TEST(StageManagerTest, Load4)
+TEST(StageFactoryTest, Load4)
 {
     StageFactory f(false);
 
@@ -84,5 +84,23 @@ TEST(StageManagerTest, Load4)
     ASSERT_TRUE(Utils::contains(ns, "writers.bpf"));
 }
     
+TEST(StageFactoryTest, extensionTest)
+{
+    EXPECT_EQ(StageFactory::inferWriterDriver("foo.laz"), "writers.las");
+    EXPECT_EQ(StageFactory::inferWriterDriver("foo.las"), "writers.las");
+    EXPECT_EQ(StageFactory::inferWriterDriver("STDOUT"), "writers.text");
+    EXPECT_EQ(StageFactory::inferWriterDriver(""), "writers.text");
+
+    EXPECT_EQ(StageFactory::inferReaderDriver("foo.laz"), "readers.las");
+    EXPECT_EQ(StageFactory::inferReaderDriver("foo.las"), "readers.las");
+    EXPECT_EQ(StageFactory::inferReaderDriver("http://foo.bar.baz"),
+        "readers.greyhound");
+
+    StringList ext = { "las", "laz" };
+    EXPECT_EQ(StageFactory::extensions("writers.las"), ext);
+    ext = { "csv", "json", "txt", "xyz" };
+    EXPECT_EQ(StageFactory::extensions("writers.text"), ext);
+}
+
 } // namespace pdal
 

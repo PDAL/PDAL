@@ -84,81 +84,120 @@
 namespace pdal
 {
 
+StringList StageFactory::extensions(const std::string& driver)
+{
+    static std::map<std::string, StringList> exts =
+    {
+        { "readers.terrasolid", { "bin" } },
+        { "readers.bpf", { "bpf" }  },
+        { "readers.optech", { "csd" } },
+        { "readers.greyhound", { "greyhound" } },
+        { "readers.icebridge", { "icebridge" } },
+        { "readers.las", { "las", "laz" } },
+        { "readers.nitf", { "nitf", "nsf", "ntf" } },
+        { "readers.pcd", { "pcd" } },
+        { "readers.ply", { "ply" } },
+        { "readers.qfit", { "qi" } },
+        { "readers.rxp", { "rxp" } },
+        { "readers.sbet", { "sbet" } },
+        { "readers.sqlite", { "sqlite" } },
+        { "readers.mrsid", { "sid" } },
+        { "readers.tindex", { "tindex" } },
+        { "readers.txt", { "txt" } },
+        { "readers.icebridge", { "h5" } },
+
+        { "writers.bpf", { "bpf" } },
+        { "writers.text", { "csv", "json", "txt", "xyz" } },
+        { "writers.las", { "las", "laz" } },
+        { "writers.matlab", { "mat" } },
+        { "writers.nitf", { "nitf", "nsf", "ntf" } },
+        { "writers.pcd", { "pcd" } },
+        { "writers.pclvisualizer", { "pclvis" } },
+        { "writers.ply", { "ply" } },
+        { "writers.sbet", { "sbet" } },
+        { "writers.derivative", { "derivative" } },
+        { "writers.sqlite", { "sqlite" } },
+    };
+
+    return exts[driver];
+}
+
 std::string StageFactory::inferReaderDriver(const std::string& filename)
 {
+    static std::map<std::string, std::string> drivers =
+    {
+        { "bin", "readers.terrasolid" },
+        { "bpf", "readers.bpf" },
+        { "csd", "readers.optech" },
+        { "greyhound", "readers.greyhound" },
+        { "http", "readers.greyhound" },
+        { "icebridge", "readers.icebridge" },
+        { "las", "readers.las" },
+        { "laz", "readers.las" },
+        { "nitf", "readers.nitf" },
+        { "nsf", "readers.nitf" },
+        { "ntf", "readers.nitf" },
+        { "pcd", "readers.pcd" },
+        { "ply", "readers.ply" },
+        { "qi", "readers.qfit" },
+        { "rxp", "readers.rxp" },
+        { "sbet", "readers.sbet" },
+        { "sqlite", "readers.sqlite" },
+        { "sid", "readers.mrsid" },
+        { "tindex", "readers.tindex" },
+        { "txt", "readers.txt" },
+        { "h5", "readers.icebridge" }
+    };
+
+    std::string ext;
     // filename may actually be a greyhound uri + pipelineId
-    std::string http = filename.substr(0, 4);
-    if (Utils::iequals(http, "http"))
-        return "readers.greyhound";
+    if (Utils::iequals(filename.substr(0, 4), "http"))
+        ext = ".http";      // Make it look like an extension.
+    else
+        ext = FileUtils::extension(filename);
 
-    std::string ext = FileUtils::extension(filename);
-    std::map<std::string, std::string> drivers;
-    drivers["bin"] = "readers.terrasolid";
-    drivers["bpf"] = "readers.bpf";
-    drivers["csd"] = "readers.optech";
-    drivers["greyhound"] = "readers.greyhound";
-    drivers["icebridge"] = "readers.icebridge";
-    drivers["las"] = "readers.las";
-    drivers["laz"] = "readers.las";
-    drivers["nitf"] = "readers.nitf";
-    drivers["nsf"] = "readers.nitf";
-    drivers["ntf"] = "readers.nitf";
-    drivers["pcd"] = "readers.pcd";
-    drivers["ply"] = "readers.ply";
-    drivers["qi"] = "readers.qfit";
-    drivers["rxp"] = "readers.rxp";
-    drivers["sbet"] = "readers.sbet";
-    drivers["sqlite"] = "readers.sqlite";
-    drivers["sid"] = "readers.mrsid";
-    drivers["tindex"] = "readers.tindex";
-    drivers["txt"] = "readers.text";
-    drivers["h5"] = "readers.icebridge";
+    // Strip off '.' and make lowercase.
+    if (ext.length())
+        ext = Utils::tolower(ext.substr(1, ext.length() - 1));
 
-    if (ext == "")
-        return "";
-    ext = ext.substr(1, ext.length()-1);
-    if (ext == "")
-        return "";
-
-    ext = Utils::tolower(ext);
-    std::string driver = drivers[ext];
-    return driver; // will be "" if not found
+    return drivers[ext]; // will be "" if not found
 }
 
 
 std::string StageFactory::inferWriterDriver(const std::string& filename)
 {
-    std::string ext = Utils::tolower(FileUtils::extension(filename));
+    std::string ext;
 
-    std::map<std::string, std::string> drivers;
-    drivers["bpf"] = "writers.bpf";
-    drivers["csv"] = "writers.text";
-    drivers["json"] = "writers.text";
-    drivers["las"] = "writers.las";
-    drivers["laz"] = "writers.las";
-    drivers["mat"] = "writers.matlab";
-    drivers["ntf"] = "writers.nitf";
-    drivers["pcd"] = "writers.pcd";
-    drivers["pclviz"] = "writers.pclvisualizer";
-    drivers["ply"] = "writers.ply";
-    drivers["sbet"] = "writers.sbet";
-    drivers["derivative"] = "writers.derivative";
-    drivers["sqlite"] = "writers.sqlite";
-    drivers["txt"] = "writers.text";
-    drivers["xyz"] = "writers.text";
+    if (filename == "STDOUT")
+        ext = ".txt";
+    else
+        ext = Utils::tolower(FileUtils::extension(filename));
 
-    if (Utils::iequals(filename, "STDOUT"))
-        return drivers["txt"];
+    static std::map<std::string, std::string> drivers =
+    {
+        { "bpf", "writers.bpf" },
+        { "csv", "writers.text" },
+        { "json", "writers.text" },
+        { "las", "writers.las" },
+        { "laz", "writers.las" },
+        { "mat", "writers.matlab" },
+        { "ntf", "writers.nitf" },
+        { "pcd", "writers.pcd" },
+        { "pclviz", "writers.pclvisualizer" },
+        { "ply", "writers.ply" },
+        { "sbet", "writers.sbet" },
+        { "derivative", "writers.derivative" },
+        { "sqlite", "writers.sqlite" },
+        { "txt", "writers.text" },
+        { "xyz", "writers.text" },
+        { "", "writers.text" }
+    };
 
-    if (ext == "")
-        return drivers["txt"];
-    ext = ext.substr(1, ext.length()-1);
-    if (ext == "")
-        return drivers["txt"];
+    // Strip off '.' and make lowercase.
+    if (ext.length())
+        ext = Utils::tolower(ext.substr(1, ext.length() - 1));
 
-    ext = Utils::tolower(ext);
-    std::string driver = drivers[ext];
-    return driver; // will be "" if not found
+    return drivers[ext];
 }
 
 
