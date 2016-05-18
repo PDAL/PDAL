@@ -459,8 +459,66 @@ private:
   arguments are necessarily bound to variables that are vectors.
   \note  Doesn't properly support list-based boolean values.
 */
+class BaseVArg : public Arg
+{
+public:
+    /**
+      Constructor.
+
+      \param longname  Name of argument specified on command line with "--"
+        prefix.
+      \param shortname  Optional name of argument specified on command
+        line with "-" prefix.
+      \param description  Argument description.
+    */
+    BaseVArg(const std::string& longname, const std::string& shortname,
+        const std::string& description) : Arg(longname, shortname, description)
+    {}
+
+    /**
+      Set the argument's value from the positional list.
+
+      List-based arguments consume ALL positional arguments until
+      one is found that can't be converted to the type of the bound variable.
+      \note  Not intended to be called from user code.
+
+      \param posList  The list of positional strings specified on the command
+        line.
+      \return  The number of positional strings consumed by this argument.
+    */
+    virtual size_t assignPositional(const std::deque<std::string> posList)
+    {
+        if (m_positional == PosType::None || m_set)
+            return 0;
+
+        size_t cnt;
+        for (cnt = 0; cnt < posList.size(); ++cnt)
+            try
+            {
+                setValue(posList[cnt]);
+            }
+            catch (arg_error&)
+            {
+                break;
+            }
+        if (cnt == 0 && m_positional == Arg::PosType::Required)
+        {
+            std::ostringstream oss;
+
+            oss << "Missing value for positional argument '" <<
+                m_longname << "'.";
+            throw arg_error(oss.str());
+        }
+        return cnt;
+    }
+};
+
+/**
+  Description of a generic list-based (vector) argument.
+  \note  Doesn't properly support list-based boolean values.
+*/
 template <typename T>
-class VArg : public Arg
+class VArg : public BaseVArg
 {
 public:
     /**
@@ -475,7 +533,7 @@ public:
     */
     VArg(const std::string& longname, const std::string& shortname,
         const std::string& description, std::vector<T>& variable) :
-        Arg(longname, shortname, description), m_var(variable)
+        BaseVArg(longname, shortname, description), m_var(variable)
     {}
 
     /**
@@ -522,45 +580,73 @@ public:
         m_hidden = false;
     }
 
-    /**
-      Set the argument's value from the positional list.
+private:
+    std::vector<T>& m_var;
+};
 
-      List-based arguments consume ALL positional arguments until
-      one is found that can't be converted to the type of the bound variable.
+/**
+  Description of an argument tied to a string vector.
+*/
+template <>
+class VArg<std::string> : public BaseVArg
+{
+public:
+    /**
+      Constructor.
+
+      \param longname  Name of argument specified on command line with "--"
+        prefix.
+      \param shortname  Optional name of argument specified on command
+        line with "-" prefix.
+      \param description  Argument description.
+      \param variable  Variable to which the argument value(s) should be bound.
+    */
+    VArg(const std::string& longname, const std::string& shortname,
+        const std::string& description, std::vector<std::string>& variable) :
+        BaseVArg(longname, shortname, description), m_var(variable)
+    {}
+
+    /**
+      Set a an argument's value from a string.
+
+      Throws an arg_error exception if \a s can't be converted to
+      the argument's type.
       \note  Not intended to be called from user code.
 
-      \param posList  The list of positional strings specified on the command
-        line.
-      \return  The number of positional strings consumed by this argument.
+      \param s  Value to set.
     */
-    virtual size_t assignPositional(const std::deque<std::string> posList)
+    virtual void setValue(const std::string& s)
     {
-        if (m_positional == PosType::None || m_set)
-            return 0;
-
-        size_t cnt;
-        for (cnt = 0; cnt < posList.size(); ++cnt)
-            try
-            {
-                setValue(posList[cnt]);
-            }
-            catch (arg_error&)
-            {
-                break;
-            }
-        if (cnt == 0 && m_positional == Arg::PosType::Required)
+        std::vector<std::string> slist = Utils::split2(s, ',');
+        if ((s.size() && s[0] == '-') || slist.empty())
         {
-            std::ostringstream oss;
-
-            oss << "Missing value for positional argument '" <<
-                m_longname << "'.";
+            std::stringstream oss;
+            oss << "Argument '" << m_longname << "' needs a value and none "
+                "was provided.";
             throw arg_error(oss.str());
         }
-        return cnt;
+        m_rawVal = s;
+        m_var.reserve(m_var.size() + slist.size());
+        m_var.insert(m_var.end(), slist.begin(), slist.end());
+        m_set = true;
+    }
+
+    /**
+      Reset the argument's state.
+
+      Set the internal state of the argument and it's referenced variable
+      as if no command-line parsing had occurred.
+      \note  For testing.  Not intended to be called from user code.
+    */
+    virtual void reset()
+    {
+        m_var.clear();
+        m_set = false;
+        m_hidden = false;
     }
 
 private:
-    std::vector<T>& m_var;
+    std::vector<std::string>& m_var;
 };
 
 /**
