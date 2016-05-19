@@ -181,6 +181,21 @@ public:
         m_index->findNeighbors(resultSet, &pt[0], nanoflann::SearchParams(10));
         return output;
     }
+    
+    void knnSearch(double x, double y, double z, point_count_t k,
+        std::vector<PointId> *indices, std::vector<double> *sqr_dists)
+    {
+        k = std::min(m_buf.size(), k);
+        nanoflann::KNNResultSet<double, PointId, point_count_t> resultSet(k);
+        
+        resultSet.init(&indices->front(), &sqr_dists->front());
+        
+        std::vector<double> pt;
+        pt.push_back(x);
+        pt.push_back(y);
+        pt.push_back(z);
+        m_index->findNeighbors(resultSet, &pt[0], nanoflann::SearchParams(10));
+    }
 
     std::vector<PointId> radius(double x, double y, double z, double r) const
     {
@@ -331,4 +346,3 @@ bool KDIndex<3>::kdtree_get_bbox(BBOX& bb) const
 }
 
 } // namespace pdal
-

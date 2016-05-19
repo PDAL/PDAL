@@ -150,7 +150,7 @@ PDAL_ADD_INCLUDES("" "" ${pdal_defines_h})
 include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
 
 include_directories(${PDAL_VENDOR_DIR}/arbiter)
-include_directories(${PDAL_VENDOR_DIR}/eigen-3.1.91)
+include_directories(${PDAL_VENDOR_DIR}/eigen-3.2.8)
 
 if (PDAL_HAVE_JSONCPP)
     include_directories(${JSONCPP_INCLUDE_DIR})
