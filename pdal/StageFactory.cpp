@@ -39,6 +39,7 @@
 #include <filters/ApproximateCoplanarFilter.hpp>
 #include <filters/AttributeFilter.hpp>
 #include <filters/ChipperFilter.hpp>
+#include <filters/ClusterFilter.hpp>
 #include <filters/ColorizationFilter.hpp>
 #include <filters/ColorinterpFilter.hpp>
 #include <filters/ComputeRangeFilter.hpp>
@@ -235,6 +236,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(ApproximateCoplanarFilter_InitPlugin);
     PluginManager::initializePlugin(AttributeFilter_InitPlugin);
     PluginManager::initializePlugin(ChipperFilter_InitPlugin);
+    PluginManager::initializePlugin(ClusterFilter_InitPlugin);
     PluginManager::initializePlugin(ColorizationFilter_InitPlugin);
     PluginManager::initializePlugin(ColorinterpFilter_InitPlugin);
     PluginManager::initializePlugin(ComputeRangeFilter_InitPlugin);
