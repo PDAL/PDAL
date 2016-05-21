@@ -34,6 +34,7 @@
 
 #include "StatsFilter.hpp"
 
+#include <cmath>
 #include <unordered_map>
 
 #include <pdal/pdal_export.hpp>
