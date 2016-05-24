@@ -220,6 +220,7 @@ if (WITH_APPS)
         PDAL_ADD_TEST(pcpipeline_test FILES apps/pcpipelineTest.cpp)
         PDAL_ADD_TEST(pcpipeline_test_json FILES apps/pcpipelineTestJSON.cpp)
     endif()
+    PDAL_ADD_TEST(hausdorff_test FILES apps/HausdorffTest.cpp)
     PDAL_ADD_TEST(random_test FILES apps/RandomTest.cpp)
     target_include_directories(random_test PRIVATE
         ${PROJECT_SOURCE_DIR}/io/las)

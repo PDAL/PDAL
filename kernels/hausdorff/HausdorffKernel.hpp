@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2015, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,40 +32,36 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/KernelFactory.hpp>
-#include <pdal/PluginManager.hpp>
+#pragma once
 
-#include <../kernels/delta/DeltaKernel.hpp>
-#include <../kernels/diff/DiffKernel.hpp>
-#include <../kernels/hausdorff/HausdorffKernel.hpp>
-#include <../kernels/info/InfoKernel.hpp>
-#include <../kernels/merge/MergeKernel.hpp>
-#include <../kernels/pipeline/PipelineKernel.hpp>
-#include <../kernels/random/RandomKernel.hpp>
-#include <../kernels/sort/SortKernel.hpp>
-#include <../kernels/split/SplitKernel.hpp>
-#include <../kernels/tindex/TIndexKernel.hpp>
-#include <../kernels/translate/TranslateKernel.hpp>
+#include <pdal/Kernel.hpp>
+#include <pdal/Stage.hpp>
+#include <pdal/util/FileUtils.hpp>
+#include <pdal/plugin.hpp>
+
+extern "C" int32_t HausdorffKernel_ExitFunc();
+extern "C" PF_ExitFunc HausdorffKernel_InitPlugin();
 
 namespace pdal
 {
 
-KernelFactory::KernelFactory(bool no_plugins)
-{
-    if (!no_plugins)
-        PluginManager::loadAll(PF_PluginType_Kernel);
+class PointView;
 
-    PluginManager::initializePlugin(DeltaKernel_InitPlugin);
-    PluginManager::initializePlugin(DiffKernel_InitPlugin);
-    PluginManager::initializePlugin(HausdorffKernel_InitPlugin);
-    PluginManager::initializePlugin(InfoKernel_InitPlugin);
-    PluginManager::initializePlugin(MergeKernel_InitPlugin);
-    PluginManager::initializePlugin(PipelineKernel_InitPlugin);
-    PluginManager::initializePlugin(RandomKernel_InitPlugin);
-    PluginManager::initializePlugin(SortKernel_InitPlugin);
-    PluginManager::initializePlugin(SplitKernel_InitPlugin);
-    PluginManager::initializePlugin(TIndexKernel_InitPlugin);
-    PluginManager::initializePlugin(TranslateKernel_InitPlugin);
-}
+class PDAL_DLL HausdorffKernel : public Kernel
+{
+public:
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+    int execute(); // overrride
+
+
+private:
+    virtual void addSwitches(ProgramArgs& args);
+    PointViewPtr loadSet(const std::string& filename, PointTable& table);
+
+    std::string m_sourceFile;
+    std::string m_candidateFile;
+};
 
 } // namespace pdal

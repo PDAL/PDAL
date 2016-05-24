@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,40 +32,69 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/KernelFactory.hpp>
-#include <pdal/PluginManager.hpp>
+#include "HausdorffKernel.hpp"
 
-#include <../kernels/delta/DeltaKernel.hpp>
-#include <../kernels/diff/DiffKernel.hpp>
-#include <../kernels/hausdorff/HausdorffKernel.hpp>
-#include <../kernels/info/InfoKernel.hpp>
-#include <../kernels/merge/MergeKernel.hpp>
-#include <../kernels/pipeline/PipelineKernel.hpp>
-#include <../kernels/random/RandomKernel.hpp>
-#include <../kernels/sort/SortKernel.hpp>
-#include <../kernels/split/SplitKernel.hpp>
-#include <../kernels/tindex/TIndexKernel.hpp>
-#include <../kernels/translate/TranslateKernel.hpp>
+#include <memory>
+
+#include <pdal/PDALUtils.hpp>
+#include <pdal/PointView.hpp>
+#include <pdal/pdal_config.hpp>
+#include <pdal/pdal_macros.hpp>
+
 
 namespace pdal
 {
 
-KernelFactory::KernelFactory(bool no_plugins)
-{
-    if (!no_plugins)
-        PluginManager::loadAll(PF_PluginType_Kernel);
+static PluginInfo const s_info =
+    PluginInfo("kernels.hausdorff", "Hausdorff Kernel",
+               "http://pdal.io/kernels/kernels.hausdorff.html");
 
-    PluginManager::initializePlugin(DeltaKernel_InitPlugin);
-    PluginManager::initializePlugin(DiffKernel_InitPlugin);
-    PluginManager::initializePlugin(HausdorffKernel_InitPlugin);
-    PluginManager::initializePlugin(InfoKernel_InitPlugin);
-    PluginManager::initializePlugin(MergeKernel_InitPlugin);
-    PluginManager::initializePlugin(PipelineKernel_InitPlugin);
-    PluginManager::initializePlugin(RandomKernel_InitPlugin);
-    PluginManager::initializePlugin(SortKernel_InitPlugin);
-    PluginManager::initializePlugin(SplitKernel_InitPlugin);
-    PluginManager::initializePlugin(TIndexKernel_InitPlugin);
-    PluginManager::initializePlugin(TranslateKernel_InitPlugin);
+CREATE_STATIC_PLUGIN(1, 0, HausdorffKernel, Kernel, s_info)
+
+std::string HausdorffKernel::getName() const
+{
+    return s_info.name;
+}
+
+void HausdorffKernel::addSwitches(ProgramArgs& args)
+{
+    Arg& source = args.add("source", "Source filename", m_sourceFile);
+    source.setPositional();
+    Arg& candidate = args.add("candidate", "Candidate filename",
+                              m_candidateFile);
+    candidate.setPositional();
+}
+
+
+PointViewPtr HausdorffKernel::loadSet(const std::string& filename,
+                                      PointTable& table)
+{
+    Stage& reader = makeReader(filename, "");
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    assert(viewSet.size() == 1);
+    return *viewSet.begin();
+}
+
+
+int HausdorffKernel::execute()
+{
+    PointTable srcTable;
+    PointViewPtr srcView = loadSet(m_sourceFile, srcTable);
+
+    PointTable candTable;
+    PointViewPtr candView = loadSet(m_candidateFile, candTable);
+
+    double hausdorff = Utils::computeHausdorff(srcView, candView);
+
+    MetadataNode root;
+    root.add("filenames", m_sourceFile);
+    root.add("filenames", m_candidateFile);
+    root.add("hausdorff", hausdorff);
+    root.add("pdal_version", pdal::GetFullVersionString());
+    Utils::toJSON(root, std::cout);
+
+    return 0;
 }
 
 } // namespace pdal
