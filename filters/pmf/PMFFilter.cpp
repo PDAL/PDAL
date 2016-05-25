@@ -176,7 +176,7 @@ std::vector<PointId> PMFFilter::processGround(PointViewPtr view)
         for (PointId i = 0; i < groundIdx.size(); ++i)
             ground->appendPoint(*view, groundIdx[i]);
 
-        printf("      Iteration %d (height threshold = %f, window size = %f)...",
+        printf("      Iteration %ld (height threshold = %f, window size = %f)...",
                j, height_thresholds[j], window_sizes[j]);
 
         // Create new cloud to hold the filtered results. Apply the morphological
@@ -195,8 +195,6 @@ std::vector<PointId> PMFFilter::processGround(PointViewPtr view)
                 pt_indices.push_back(groundIdx[i]);
         }
         groundIdx.swap(pt_indices);
-
-        printf("ground now has %d points\n", groundIdx.size());
     }
 
     return groundIdx;
