@@ -47,15 +47,14 @@ namespace pdal
 */
 class PDAL_DLL BOX2D
 {
-protected:
-    static const double LOWEST;
-    static const double HIGHEST;
-
 public:
     double minx;  ///< Minimum X value.
     double maxx;  ///< Maximum X value.
     double miny;  ///< Minimum Y value.
     double maxy;  ///< Maximum Y value.
+
+    static const double LOWEST;
+    static const double HIGHEST;
 
     /**
       Construct an "empty" bounds box.
@@ -298,11 +297,13 @@ public:
     BOX3D()
        { clear(); }
 
-/**
     BOX3D(const BOX3D& box) :
         BOX2D(box), minz(box.minz), maxz(box.maxz)
     {}
-**/
+
+    explicit BOX3D(const BOX2D& box) :
+        BOX2D(box), minz(0), maxz(0)
+    {}
 
     /**
       Construct and initialize a bounds box.
@@ -546,6 +547,56 @@ public:
 };
 
 /**
+  Wrapper for BOX3D and BOX2D to allow extraction as either.  Typically used
+  to facilitate streaming either a BOX2D or BOX3D 
+*/
+class Bounds
+{
+public:
+    Bounds()
+    {}
+
+    Bounds(const BOX3D& box) : m_box(box)
+    {}
+    
+    Bounds(const BOX2D& box) : m_box(box)
+    {
+        m_box.minz = BOX2D::HIGHEST;
+        m_box.maxz = BOX2D::LOWEST;
+    }
+
+    BOX3D to3d() const
+    {
+        if (m_box.minz == BOX2D::HIGHEST && m_box.maxz == BOX2D::LOWEST)
+            return BOX3D();
+        return m_box;
+    }
+
+    BOX2D to2d() const
+        { return m_box.to2d(); }
+
+    bool is3d() const
+    {
+        return (m_box.minz != BOX2D::HIGHEST || m_box.maxz != BOX2D::LOWEST);
+    }
+
+    friend std::istream& operator >> (std::istream& in, Bounds& bounds);
+
+private:
+    BOX3D m_box;
+
+    void set(const BOX3D& box)
+        { m_box = box; }
+
+    void set(const BOX2D& box)
+    {
+        m_box = BOX3D(box);
+        m_box.minz = BOX2D::HIGHEST;
+        m_box.maxz = BOX2D::LOWEST;
+    }
+};
+
+/**
   Write a 2D bounds box to a stream in a format used by PDAL options.
 
   \param ostr  Stream to write to.
@@ -609,5 +660,7 @@ extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX2D& bounds);
   \param bounds  Bounds box to populate.
 */
 extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX3D& bounds);
+
+PDAL_DLL std::istream& operator >> (std::istream& in, Bounds& bounds);
 
 } // namespace pdal

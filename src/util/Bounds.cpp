@@ -249,4 +249,23 @@ std::istream& operator>>(std::istream& istr, BOX3D& bounds)
     return istr;
 }
 
+std::istream& operator>>(std::istream& in, Bounds& bounds)
+{
+    std::streampos start = in.tellg();
+    BOX3D b3d;
+    in >> b3d;
+    if (in.fail())
+    {
+        in.clear();
+        in.seekg(start);
+        BOX2D b2d;
+        in >> b2d;
+        if (!in.fail())
+            bounds.set(b2d);
+    }
+    else
+        bounds.set(b3d);
+    return in;
+}
+
 } // namespace pdal

@@ -305,3 +305,46 @@ TEST(BoundsTest, test_precisionloss)
 
     EXPECT_DOUBLE_EQ(b2.minx, 0.123456789);
 }
+
+TEST(BoundsTest, b1)
+{
+    std::string s("([0,1],[0,1])");
+    std::istringstream iss(s);
+
+    Bounds b;
+
+    iss >> b;
+    EXPECT_FALSE(b.is3d());
+    EXPECT_TRUE(b.to3d().empty());
+
+    BOX2D box = b.to2d();
+    EXPECT_EQ(box.minx, 0.0);
+    EXPECT_EQ(box.miny, 0.0);
+    EXPECT_EQ(box.maxx, 1.0);
+    EXPECT_EQ(box.maxy, 1.0);
+}
+
+TEST(BoundsTest, b2)
+{
+    std::string s("([0,1],[0,1], [0,2])");
+    std::istringstream iss(s);
+
+    Bounds b;
+
+    iss >> b;
+    EXPECT_TRUE(b.is3d());
+
+    BOX2D box = b.to2d();
+    EXPECT_EQ(box.minx, 0.0);
+    EXPECT_EQ(box.miny, 0.0);
+    EXPECT_EQ(box.maxx, 1.0);
+    EXPECT_EQ(box.maxy, 1.0);
+
+    BOX3D box3 = b.to3d();
+    EXPECT_EQ(box3.minx, 0.0);
+    EXPECT_EQ(box3.miny, 0.0);
+    EXPECT_EQ(box3.maxx, 1.0);
+    EXPECT_EQ(box3.maxy, 1.0);
+    EXPECT_EQ(box3.minz, 0.0);
+    EXPECT_EQ(box3.maxz, 2.0);
+}
