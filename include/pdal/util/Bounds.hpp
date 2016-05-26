@@ -53,9 +53,6 @@ public:
     double miny;  ///< Minimum Y value.
     double maxy;  ///< Maximum Y value.
 
-    static const double LOWEST;
-    static const double HIGHEST;
-
     /**
       Construct an "empty" bounds box.
     */
@@ -556,44 +553,20 @@ public:
     Bounds()
     {}
 
-    Bounds(const BOX3D& box) : m_box(box)
-    {}
-    
-    Bounds(const BOX2D& box) : m_box(box)
-    {
-        m_box.minz = BOX2D::HIGHEST;
-        m_box.maxz = BOX2D::LOWEST;
-    }
+    Bounds(const BOX3D& box);
+    Bounds(const BOX2D& box);
 
-    BOX3D to3d() const
-    {
-        if (m_box.minz == BOX2D::HIGHEST && m_box.maxz == BOX2D::LOWEST)
-            return BOX3D();
-        return m_box;
-    }
-
-    BOX2D to2d() const
-        { return m_box.to2d(); }
-
-    bool is3d() const
-    {
-        return (m_box.minz != BOX2D::HIGHEST || m_box.maxz != BOX2D::LOWEST);
-    }
+    BOX3D to3d() const;
+    BOX2D to2d() const;
+    bool is3d() const;
 
     friend PDAL_DLL std::istream& operator >> (std::istream& in, Bounds& bounds);
 
 private:
     BOX3D m_box;
 
-    void set(const BOX3D& box)
-        { m_box = box; }
-
-    void set(const BOX2D& box)
-    {
-        m_box = BOX3D(box);
-        m_box.minz = BOX2D::HIGHEST;
-        m_box.maxz = BOX2D::LOWEST;
-    }
+    void set(const BOX3D& box);
+    void set(const BOX2D& box);
 };
 
 /**
