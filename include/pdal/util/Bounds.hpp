@@ -580,7 +580,7 @@ public:
         return (m_box.minz != BOX2D::HIGHEST || m_box.maxz != BOX2D::LOWEST);
     }
 
-    friend std::istream& operator >> (std::istream& in, Bounds& bounds);
+    friend PDAL_DLL std::istream& operator >> (std::istream& in, Bounds& bounds);
 
 private:
     BOX3D m_box;
