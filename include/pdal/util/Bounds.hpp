@@ -550,7 +550,7 @@ public:
   Wrapper for BOX3D and BOX2D to allow extraction as either.  Typically used
   to facilitate streaming either a BOX2D or BOX3D 
 */
-class Bounds
+class PDAL_DLL Bounds
 {
 public:
     Bounds()
