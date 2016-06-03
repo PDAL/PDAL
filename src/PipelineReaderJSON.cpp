@@ -253,7 +253,7 @@ std::vector<Stage *> PipelineReaderJSON::extractInputs(Json::Value& node,
 
     if (node.isMember("inputs"))
     {
-        Json::Value& val = node["filename"];
+        Json::Value& val = node["inputs"];
         if (!val.isNull())
         {
             for (const Json::Value& input : node["inputs"])
