@@ -44,16 +44,16 @@ struct DimType
 {
     DimType() : m_id(Dimension::Id::Unknown), m_type(Dimension::Type::None)
     {}
-    DimType(Dimension::Id::Enum id, Dimension::Type::Enum type,
+    DimType(Dimension::Id id, Dimension::Type type,
         double scale = 1.0, double offset = 0.0) :
         m_id(id), m_type(type), m_xform(scale, offset)
     {}
-    DimType(Dimension::Id::Enum id, Dimension::Type::Enum type, XForm xform) :
+    DimType(Dimension::Id id, Dimension::Type type, XForm xform) :
         m_id(id), m_type(type), m_xform(xform)
     {}
 
-    Dimension::Id::Enum m_id;
-    Dimension::Type::Enum m_type;
+    Dimension::Id m_id;
+    Dimension::Type m_type;
     XForm m_xform;  // A convenience for some formats.
 };
 typedef std::vector<DimType> DimTypeList;

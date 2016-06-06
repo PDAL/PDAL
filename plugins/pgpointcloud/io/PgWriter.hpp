@@ -92,13 +92,13 @@ private:
     std::string m_table_name;
     std::string m_column_name;
     std::string m_connection;
-    CompressionType::Enum m_patch_compression_type;
+    CompressionType m_patch_compression_type;
     uint32_t m_patch_capacity;
     uint32_t m_srid;
     uint32_t m_pcid;
     bool m_overwrite;
     std::string m_insert;
-    Orientation::Enum m_orientation;
+    Orientation m_orientation;
     std::string m_pre_sql;
     std::string m_post_sql;
 

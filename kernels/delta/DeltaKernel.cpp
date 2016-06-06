@@ -93,7 +93,7 @@ int DeltaKernel::execute()
     PointLayoutPtr candLayout = candTable.layout();
 
     Dimension::IdList ids = srcLayout->dims();
-    for (Dimension::Id::Enum dim : ids)
+    for (Dimension::Id dim : ids)
     {
         std::string name = srcLayout->dimName(dim);
         if (!m_allDims)
@@ -105,7 +105,7 @@ int DeltaKernel::execute()
         dims[name] = d;
     }
     ids = candLayout->dims();
-    for (Dimension::Id::Enum dim : ids)
+    for (Dimension::Id dim : ids)
     {
         std::string name = candLayout->dimName(dim);
         auto di = dims.find(name);

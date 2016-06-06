@@ -82,7 +82,7 @@ void ProgrammableFilter::addDimensions(PointLayoutPtr layout)
 {
     for (auto it = m_addDimensions.cbegin(); it != m_addDimensions.cend(); ++it)
     {
-        Dimension::Id::Enum id = layout->registerOrAssignDim(*it,
+        Dimension::Id id = layout->registerOrAssignDim(*it,
                                     pdal::Dimension::Type::Double);
     }
 }

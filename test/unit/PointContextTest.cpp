@@ -139,7 +139,7 @@ TEST(PointContext, userBuffer)
         bool update(Dimension::DetailList& /*detail*/, Dimension::Detail *cur,
             const std::string& /*name*/)
         {
-            Dimension::Id::Enum id = cur->id();
+            Dimension::Id id = cur->id();
 
             if (id != Dimension::Id::X && id != Dimension::Id::Y &&
                 id != Dimension::Id::Z)

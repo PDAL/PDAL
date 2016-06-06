@@ -196,8 +196,8 @@ TEST_F(ProgrammableFilterTest, add_dimension)
 
     PointLayoutPtr layout(table.layout());
 
-    Dimension::Id::Enum int_id = layout->findDim("AddedIntensity");
-    Dimension::Id::Enum psid_id = layout->findDim("AddedPointSourceId");
+    Dimension::Id int_id = layout->findDim("AddedIntensity");
+    Dimension::Id psid_id = layout->findDim("AddedPointSourceId");
 
     for (unsigned int i = 0; i < view->size(); ++i)
     {

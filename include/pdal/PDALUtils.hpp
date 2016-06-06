@@ -59,41 +59,41 @@ inline void printError(const std::string& s)
     std::cerr << std::endl;
 }
 
-inline double toDouble(const Everything& e, Dimension::Type::Enum type)
+inline double toDouble(const Everything& e, Dimension::Type type)
 {
-    using namespace Dimension::Type;
+    using Type = Dimension::Type;
 
     double d = 0;
     switch (type)
     {
-    case Unsigned8:
+    case Type::Unsigned8:
         d = e.u8;
         break;
-    case Unsigned16:
+    case Type::Unsigned16:
         d = e.u16;
         break;
-    case Unsigned32:
+    case Type::Unsigned32:
         d = e.u32;
         break;
-    case Unsigned64:
+    case Type::Unsigned64:
         d = e.u64;
         break;
-    case Signed8:
+    case Type::Signed8:
         d = e.s8;
         break;
-    case Signed16:
+    case Type::Signed16:
         d = e.s16;
         break;
-    case Signed32:
+    case Type::Signed32:
         d = e.s32;
         break;
-    case Signed64:
+    case Type::Signed64:
         d = e.s64;
         break;
-    case Float:
+    case Type::Float:
         d = e.f;
         break;
-    case Double:
+    case Type::Double:
         d = e.d;
         break;
     default:
@@ -102,87 +102,87 @@ inline double toDouble(const Everything& e, Dimension::Type::Enum type)
     return d;
 }
 
-inline Everything extractDim(Extractor& ext, Dimension::Type::Enum type)
+inline Everything extractDim(Extractor& ext, Dimension::Type type)
 {
-    using namespace Dimension::Type;
+    using Type = Dimension::Type;
 
     Everything e;
     switch (type)
     {
-        case Unsigned8:
+        case Type::Unsigned8:
             ext >> e.u8;
             break;
-        case Unsigned16:
+        case Type::Unsigned16:
             ext >> e.u16;
             break;
-        case Unsigned32:
+        case Type::Unsigned32:
             ext >> e.u32;
             break;
-        case Unsigned64:
+        case Type::Unsigned64:
             ext >> e.u64;
             break;
-        case Signed8:
+        case Type::Signed8:
             ext >> e.s8;
             break;
-        case Signed16:
+        case Type::Signed16:
             ext >> e.s16;
             break;
-        case Signed32:
+        case Type::Signed32:
             ext >> e.s32;
             break;
-        case Signed64:
+        case Type::Signed64:
             ext >> e.s64;
             break;
-        case Float:
+        case Type::Float:
             ext >> e.f;
             break;
-        case Double:
+        case Type::Double:
             ext >> e.d;
             break;
-        case None:
+        case Type::None:
             break;
     }
     return e;
 }
 
-inline void insertDim(Inserter& ins, Dimension::Type::Enum type,
+inline void insertDim(Inserter& ins, Dimension::Type type,
     const Everything& e)
 {
-    using namespace Dimension::Type;
+    using Type = Dimension::Type;
 
     switch (type)
     {
-        case Unsigned8:
+        case Type::Unsigned8:
             ins << e.u8;
             break;
-        case Unsigned16:
+        case Type::Unsigned16:
             ins << e.u16;
             break;
-        case Unsigned32:
+        case Type::Unsigned32:
             ins << e.u32;
             break;
-        case Unsigned64:
+        case Type::Unsigned64:
             ins << e.u64;
             break;
-        case Signed8:
+        case Type::Signed8:
             ins << e.s8;
             break;
-        case Signed16:
+        case Type::Signed16:
             ins << e.s16;
             break;
-        case Signed32:
+        case Type::Signed32:
             ins << e.s32;
             break;
-        case Signed64:
+        case Type::Signed64:
             ins << e.s64;
             break;
-        case Float:
+        case Type::Float:
             ins << e.f;
             break;
-        case Double:
+        case Type::Double:
             ins << e.d;
             break;
-        case None:
+        case Type::None:
             break;
     }
 }

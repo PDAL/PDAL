@@ -200,7 +200,7 @@ bool RangeFilter::dimensionPasses(double v, const Range& r) const
 // common case.
 bool RangeFilter::processOne(PointRef& point)
 {
-    Dimension::Id::Enum lastId = m_range_list.front().m_id;
+    Dimension::Id lastId = m_range_list.front().m_id;
     bool passes = false;
     for (auto const& r : m_range_list)
     {

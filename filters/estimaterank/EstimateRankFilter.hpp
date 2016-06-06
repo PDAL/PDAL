@@ -66,7 +66,7 @@ public:
 private:
     int m_knn;
     double m_thresh;
-    Dimension::Id::Enum m_rank;
+    Dimension::Id m_rank;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void processOptions(const Options& options);

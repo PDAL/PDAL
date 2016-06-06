@@ -53,7 +53,7 @@ struct DimSpec
 {
     std::string m_name;
     std::string m_description;
-    Dimension::Type::Enum m_type;
+    Dimension::Type m_type;
     std::vector<std::string> m_altNames;
 };
 

@@ -43,6 +43,7 @@
 
 #include "BpfCompressor.hpp"
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/Utils.hpp>
 
 namespace pdal
 {
@@ -75,8 +76,8 @@ Options BpfWriter::getDefaultOptions()
 void BpfWriter::processOptions(const Options& options)
 {
     bool compression = options.getValueOrDefault("compression", false);
-    m_header.m_compression = compression ? BpfCompression::Zlib :
-        BpfCompression::None;
+    m_header.m_compression = Utils::toNative(
+            compression ? BpfCompression::Zlib : BpfCompression::None);
 
     std::string encodedHeader =
         options.getValueOrDefault<std::string>("header_data");
@@ -94,12 +95,12 @@ void BpfWriter::processOptions(const Options& options)
         m_header.m_pointFormat = BpfFormat::DimMajor;
     if (options.hasOption("coord_id"))
     {
-        m_header.m_coordType = BpfCoordType::UTM;
+        m_header.m_coordType = Utils::toNative(BpfCoordType::UTM);
         m_header.m_coordId = options.getValueOrThrow<int>("coord_id");
     }
     else
     {
-        m_header.m_coordType = BpfCoordType::None;
+        m_header.m_coordType = Utils::toNative(BpfCoordType::None);
         m_header.m_coordId = 0;
     }
     StringList files = options.getValues<std::string>("bundledfile");
@@ -187,7 +188,7 @@ void BpfWriter::loadBpfDimensions(PointLayoutPtr layout)
     {
        for (std::string& s : m_outputDims)
        {
-           Dimension::Id::Enum id = layout->findDim(s);
+           Dimension::Id id = layout->findDim(s);
            if (id == Dimension::Id::Unknown)
            {
                std::ostringstream oss;

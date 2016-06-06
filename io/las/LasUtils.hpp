@@ -41,21 +41,16 @@
 namespace pdal
 {
 
-namespace LasCompression
-{
-
-enum Enum
+enum class LasCompression
 {
     LasZip,
     LazPerf,
     None
 };
 
-}
-
 struct ExtraDim
 {
-    ExtraDim(const std::string name, Dimension::Type::Enum type,
+    ExtraDim(const std::string name, Dimension::Type type,
             double scale = 1.0, double offset = 0.0) :
         m_name(name), m_dimType(Dimension::Id::Unknown, type, scale, offset),
         m_size(0)
@@ -107,7 +102,7 @@ public:
         }
     }
 
-    ExtraBytesIf(const std::string& name, Dimension::Type::Enum type,
+    ExtraBytesIf(const std::string& name, Dimension::Type type,
             const std::string& description) :
         m_type(type), m_name(name), m_description(description), m_size(0)
     {
@@ -129,7 +124,7 @@ public:
     std::vector<ExtraDim> toExtraDims();
 
 private:
-    Dimension::Type::Enum m_type;
+    Dimension::Type m_type;
     unsigned m_fieldCnt; // Must be 0 - 3;
     double m_scale[3];
     double m_offset[3];

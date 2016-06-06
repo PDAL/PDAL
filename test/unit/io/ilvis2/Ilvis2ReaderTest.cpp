@@ -46,7 +46,7 @@ using namespace pdal;
 void checkPoint(const PointView& data, PointId index, double time,
     double latitude, double longitude, double altitude)
 {
-    auto checkDimension = [&data,index](Dimension::Id::Enum dim,
+    auto checkDimension = [&data,index](Dimension::Id dim,
         double expected)
     {
         double actual = data.getFieldAs<double>(dim, index);

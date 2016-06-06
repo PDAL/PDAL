@@ -56,7 +56,7 @@ public:
 
 private:
     // Dimension on which to sort.
-    Dimension::Id::Enum m_dim;
+    Dimension::Id m_dim;
     // Dimension name.
     std::string m_dimName;
 

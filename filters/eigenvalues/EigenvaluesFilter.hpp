@@ -65,7 +65,7 @@ public:
 
 private:
     int m_knn;
-    Dimension::Id::Enum m_e0, m_e1, m_e2;
+    Dimension::Id m_e0, m_e1, m_e2;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void processOptions(const Options& options);

@@ -69,7 +69,7 @@ void SbetWriter::write(const PointViewPtr view)
         for (auto di = dims.begin(); di != dims.end(); ++di)
         {
             // If a dimension doesn't exist, write 0.
-            Dimension::Id::Enum dim = *di;
+            Dimension::Id dim = *di;
             *m_stream << (view->hasDim(dim) ?
                 view->getFieldAs<double>(dim, idx) : 0.0);
         }

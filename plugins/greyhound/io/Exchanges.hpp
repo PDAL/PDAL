@@ -54,13 +54,13 @@ namespace exchanges
 
 struct DimData
 {
-    DimData(Dimension::Id::Enum id, Dimension::Type::Enum type)
+    DimData(Dimension::Id id, Dimension::Type type)
         : id(id)
         , type(type)
     { }
 
-    const Dimension::Id::Enum id;
-    const Dimension::Type::Enum type;
+    const Dimension::Id id;
+    const Dimension::Type type;
 };
 
 class Exchange : public WebSocketExchange

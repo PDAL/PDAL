@@ -100,7 +100,7 @@ private:
     std::string m_curFilename;
     std::set<std::string> m_forwards;
     bool m_forwardVlrs;
-    LasCompression::Enum m_compression;
+    LasCompression m_compression;
     std::vector<char> m_pointBuf;
 
     NumHeaderVal<uint8_t, 1, 1> m_majorVersion;

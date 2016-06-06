@@ -158,7 +158,7 @@ void OCISchemaGenericErrorHandler
 }
 
 XMLSchema::XMLSchema(std::string xml, std::string xsd,
-    Orientation::Enum orientation) : m_orientation(orientation)
+    Orientation orientation) : m_orientation(orientation)
 {
     xmlDocPtr doc = init(xml, xsd);
     if (doc)
@@ -170,13 +170,13 @@ XMLSchema::XMLSchema(std::string xml, std::string xsd,
 
 
 XMLSchema::XMLSchema(const XMLDimList& dims, MetadataNode m,
-    Orientation::Enum orientation) : m_orientation(orientation), m_dims(dims),
+    Orientation orientation) : m_orientation(orientation), m_dims(dims),
     m_metadata(m)
 {}
 
 
 XMLSchema::XMLSchema(const PointLayoutPtr& layout, MetadataNode m,
-    Orientation::Enum orientation) : m_orientation(orientation), m_metadata(m)
+    Orientation orientation) : m_orientation(orientation), m_metadata(m)
 {
     DimTypeList dimTypes = layout->dimTypes();
     for (DimType& d : dimTypes)
@@ -495,7 +495,7 @@ bool XMLSchema::load(xmlDocPtr doc)
 }
 
 
-XMLDim& XMLSchema::xmlDim(Dimension::Id::Enum id)
+XMLDim& XMLSchema::xmlDim(Dimension::Id id)
 {
     static XMLDim nullDim;
 
@@ -506,7 +506,7 @@ XMLDim& XMLSchema::xmlDim(Dimension::Id::Enum id)
 }
 
 
-const XMLDim& XMLSchema::xmlDim(Dimension::Id::Enum id) const
+const XMLDim& XMLSchema::xmlDim(Dimension::Id id) const
 {
     static XMLDim nullDim;
 

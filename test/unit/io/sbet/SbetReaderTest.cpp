@@ -50,7 +50,7 @@ void checkPoint(const PointView& data, PointId index, double time,
     double heading, double wander, double xaccel, double yaccel,
     double zaccel, double xangrate, double yangrate, double zangrate)
 {
-    auto checkDimension = [&data,index](Dimension::Id::Enum dim,
+    auto checkDimension = [&data,index](Dimension::Id dim,
         double expected)
     {
         double actual = data.getFieldAs<double>(dim, index);

@@ -55,7 +55,7 @@ protected:
     virtual void setAutoXForm(const PointViewPtr view);
     XMLDimList dbDimTypes() const
         { return m_dbDims; }
-    size_t readField(const PointView& view, char *pos, Dimension::Id::Enum id,
+    size_t readField(const PointView& view, char *pos, Dimension::Id id,
         PointId idx);
     size_t readPoint(const PointView& view, PointId idx, char *outbuf);
     size_t packedPointSize() const

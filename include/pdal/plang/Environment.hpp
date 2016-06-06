@@ -74,7 +74,7 @@ public:
     void reset_stdout();
 
     static EnvironmentPtr get();
-    static int getPythonDataType(Dimension::Type::Enum t);
+    static int getPythonDataType(Dimension::Type t);
 
 private:
     Redirector m_redirector;

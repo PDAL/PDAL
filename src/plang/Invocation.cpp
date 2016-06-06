@@ -152,7 +152,7 @@ void Invocation::resetArguments()
 
 
 void Invocation::insertArgument(std::string const& name, uint8_t* data,
-    Dimension::Type::Enum t, point_count_t count)
+    Dimension::Type t, point_count_t count)
 {
     npy_intp mydims = count;
     int nd = 1;
@@ -176,7 +176,7 @@ void Invocation::insertArgument(std::string const& name, uint8_t* data,
 
 
 void *Invocation::extractResult(std::string const& name,
-    Dimension::Type::Enum t)
+    Dimension::Type t)
 {
     PyObject* xarr = PyDict_GetItemString(m_varsOut, name.c_str());
     if (!xarr)
@@ -201,7 +201,7 @@ void *Invocation::extractResult(std::string const& name,
     }
 
     using namespace Dimension;
-    BaseType::Enum b = Dimension::base(t);
+    BaseType b = Dimension::base(t);
     if (dtype->kind == 'i' && b != BaseType::Signed)
     {
         std::ostringstream oss;

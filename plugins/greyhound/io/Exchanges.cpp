@@ -172,11 +172,11 @@ bool GetSchema::check()
                 const Json::Value& jsonDim(
                         jsonDimArray[static_cast<Json::ArrayIndex>(i)]);
 
-                const Dimension::Id::Enum id(
+                const Dimension::Id id(
                         Dimension::id(jsonDim["name"].asString()));
 
-                const Dimension::Type::Enum type(
-                    static_cast<Dimension::Type::Enum>(
+                const Dimension::Type type(
+                    static_cast<Dimension::Type>(
                         static_cast<int>(Dimension::fromName(
                             jsonDim["type"].asString())) |
                         std::stoi(jsonDim["size"].asString())));

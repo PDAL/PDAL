@@ -838,7 +838,7 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
     double y = (yOrig - m_yXform.m_offset) / m_yXform.m_scale;
     double z = (zOrig - m_zXform.m_offset) / m_zXform.m_scale;
 
-    auto converter = [this](double d, Dimension::Id::Enum dim) -> int32_t
+    auto converter = [this](double d, Dimension::Id dim) -> int32_t
     {
         int32_t i;
 

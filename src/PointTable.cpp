@@ -47,7 +47,7 @@ MetadataNode BasePointTable::privateMetadata(const std::string& name)
 }
 
 
-void SimplePointTable::setFieldInternal(Dimension::Id::Enum id, PointId idx,
+void SimplePointTable::setFieldInternal(Dimension::Id id, PointId idx,
     const void *value)
 {
     const Dimension::Detail *d = m_layoutRef.dimDetail(id);
@@ -57,7 +57,7 @@ void SimplePointTable::setFieldInternal(Dimension::Id::Enum id, PointId idx,
 }
 
 
-void SimplePointTable::getFieldInternal(Dimension::Id::Enum id, PointId idx,
+void SimplePointTable::getFieldInternal(Dimension::Id id, PointId idx,
     void *value) const
 {
     const Dimension::Detail *d = m_layoutRef.dimDetail(id);
@@ -102,7 +102,7 @@ MetadataNode BasePointTable::toMetadata() const
     {
         MetadataNode dim("dimensions");
         dim.add("name", l->dimName(id));
-        Dimension::Type::Enum t = l->dimType(id);
+        Dimension::Type t = l->dimType(id);
         dim.add("type", Dimension::toName(Dimension::base(t)));
         dim.add("size", l->dimSize(id));
         root.addList(dim);

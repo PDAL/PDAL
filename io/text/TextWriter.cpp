@@ -122,7 +122,7 @@ void TextWriter::ready(PointTableRef table)
     for (std::string dim : dimNames)
     {
         Utils::trim(dim);
-        Dimension::Id::Enum d = table.layout()->findDim(dim);
+        Dimension::Id d = table.layout()->findDim(dim);
         if (d == Dimension::Id::Unknown)
         {
             std::ostringstream oss;

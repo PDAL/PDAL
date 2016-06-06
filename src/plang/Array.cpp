@@ -102,14 +102,14 @@ PyObject* Array::buildNumpyDescription(PointViewPtr view) const
 
     for (Dimension::IdList::size_type i=0; i < dims.size(); ++i)
     {
-        Dimension::Id::Enum id = (dims[i]);
-        Dimension::Type::Enum t = view->dimType(id);
+        Dimension::Id id = (dims[i]);
+        Dimension::Type t = view->dimType(id);
         npy_intp stride = view->dimSize(id);
 
         std::string name = view->dimName(id);
 
         std::string kind("i");
-        Dimension::BaseType::Enum b = Dimension::base(t);
+        Dimension::BaseType b = Dimension::base(t);
         if (b == Dimension::BaseType::Unsigned)
             kind = "u";
         else if (b == Dimension::BaseType::Floating)

@@ -73,7 +73,7 @@ public:
 
       \param ids  Vector of IDs to register.
     */
-    void registerDims(std::vector<Dimension::Id::Enum> ids);
+    void registerDims(std::vector<Dimension::Id> ids);
 
     /**
       Register a list of dimensions.
@@ -81,7 +81,7 @@ public:
       \param id  Pointer to list of IDs to register.  The last ID in the list
         must have the value Unknown.
     */
-    void registerDims(Dimension::Id::Enum *id);
+    void registerDims(Dimension::Id *id);
 
     /**
       Register use of a standard dimension (declare that a point will contain
@@ -89,7 +89,7 @@ public:
 
       \param id  ID of dimension to be registered.
     */
-    void registerDim(Dimension::Id::Enum id);
+    void registerDim(Dimension::Id id);
 
     /**
       Register use of a standard dimension (declare that a point will contain
@@ -100,7 +100,7 @@ public:
       \param id  ID of dimension to be registered.
       \param type  Minimum type to assign to the dimension.
     */
-    void registerDim(Dimension::Id::Enum id, Dimension::Type::Enum type);
+    void registerDim(Dimension::Id id, Dimension::Type type);
 
     /**
       Assign a non-existing (proprietary) dimension with the given name and
@@ -114,8 +114,8 @@ public:
       \param type  Minimum type to assign to the dimension.
       \return  ID of the new or existing dimension, or Unknown on failure.
     */
-    Dimension::Id::Enum assignDim( const std::string& name,
-        Dimension::Type::Enum type);
+    Dimension::Id assignDim( const std::string& name,
+        Dimension::Type type);
 
     /**
       Register a dimension if one already exists with the given name using the
@@ -126,8 +126,8 @@ public:
         accomodate values of this type.
       \return  ID of dimension registered or assigned.
     */
-    Dimension::Id::Enum registerOrAssignDim(const std::string name,
-        Dimension::Type::Enum type);
+    Dimension::Id registerOrAssignDim(const std::string name,
+        Dimension::Type type);
 
     /**
       Get a list of DimType objects that define the layout.
@@ -151,7 +151,7 @@ public:
       \param name  Name of the dimension.
       \return  ID of the dimension or Unknown.
     */
-    Dimension::Id::Enum findDim(const std::string& name) const;
+    Dimension::Id findDim(const std::string& name) const;
 
     /**
       Get the ID of a proprietary dimension given its name.
@@ -159,7 +159,7 @@ public:
       \param name  Name of the dimension.
       \return  ID of the dimension or Unknown.
     */
-    Dimension::Id::Enum findProprietaryDim(const std::string& name) const;
+    Dimension::Id findProprietaryDim(const std::string& name) const;
 
     /**
       Get the name of a dimension give its ID.  A dimension may have more
@@ -168,7 +168,7 @@ public:
       \param id  ID of the dimension.
       \return  A name associated with the dimension, or a NULL string.
     */
-    std::string dimName(Dimension::Id::Enum id) const;
+    std::string dimName(Dimension::Id id) const;
 
     /**
       Determine if the PointLayout uses the dimension with the given ID.
@@ -176,7 +176,7 @@ public:
       \param id  ID of the dimension to check.
       \return \c true if the layout uses the dimension, \c false otherwise.
     */
-    bool hasDim(Dimension::Id::Enum id) const;
+    bool hasDim(Dimension::Id id) const;
 
     /**
       Get a reference to vector of the IDs of currently used dimensions.
@@ -191,7 +191,7 @@ public:
       \param id  ID of the dimension.
       \return  Type of the dimension.
     */
-    Dimension::Type::Enum dimType(Dimension::Id::Enum id) const;
+    Dimension::Type dimType(Dimension::Id id) const;
 
     /**
       Get the current size in bytes of the dimension.
@@ -199,7 +199,7 @@ public:
       \param id  ID of the dimension.
       \return  Size of the dimension in bytes.
     */
-    size_t dimSize(Dimension::Id::Enum id) const;
+    size_t dimSize(Dimension::Id id) const;
 
     /**
       Get the offset of the dimension in the layout.
@@ -207,7 +207,7 @@ public:
       \param id  ID of the dimension.
       \return  Offset of the dimension in bytes.
     */
-    size_t dimOffset(Dimension::Id::Enum id) const;
+    size_t dimOffset(Dimension::Id id) const;
 
     /**
       Get number of bytes that make up a point.  Returns the sum of the dimSize
@@ -223,18 +223,18 @@ public:
       \param id  ID of the dimension.
       \return  A pointer a dimension's detail.
     */
-    const Dimension::Detail *dimDetail(Dimension::Id::Enum id) const;
+    const Dimension::Detail *dimDetail(Dimension::Id id) const;
 
 private:
     virtual bool update(Dimension::Detail dd, const std::string& name);
 
-    Dimension::Type::Enum resolveType( Dimension::Type::Enum t1,
-        Dimension::Type::Enum t2);
+    Dimension::Type resolveType( Dimension::Type t1,
+        Dimension::Type t2);
 
 protected:
     std::vector<Dimension::Detail> m_detail;
     Dimension::IdList m_used;
-    std::map<std::string, Dimension::Id::Enum> m_propIds;
+    std::map<std::string, Dimension::Id> m_propIds;
     int m_nextFree;
     std::size_t m_pointSize;
     bool m_finalized;

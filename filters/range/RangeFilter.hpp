@@ -72,7 +72,7 @@ public:
             {}
 
         std::string m_name;
-        Dimension::Id::Enum m_id;
+        Dimension::Id m_id;
         double m_lower_bound;
         double m_upper_bound;
         bool m_inclusive_lower_bound;

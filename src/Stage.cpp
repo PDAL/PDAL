@@ -336,7 +336,7 @@ void Stage::l_processOptions(const Options& options)
             m_log.reset(new Log(getName(), v));
         }
     }
-    m_log->setLevel((LogLevel::Enum)m_verbose);
+    m_log->setLevel((LogLevel)m_verbose);
 
     gdal::ErrorHandler::getGlobalErrorHandler().set(m_log, m_debug);
 

@@ -146,7 +146,7 @@ TEST(XMLSchemaTest, copy)
     XMLDimList dims = s1.xmlDims();
     for (auto di = dims.begin(); di != dims.end(); ++di)
     {
-        Dimension::Id::Enum id =
+        Dimension::Id id =
             table.layout()->registerOrAssignDim(
                     di->m_name,
                     di->m_dimType.m_type);
@@ -252,8 +252,8 @@ TEST(XMLSchemaTest, nonstandard)
 
     XMLDimList dims;
 
-    XMLDim d1(DimType((Dimension::Id::Enum)543, Type::Signed32), "FOOBAR");
-    XMLDim d2(DimType((Dimension::Id::Enum)545, Type::Signed32), "BARFOO");
+    XMLDim d1(DimType((Dimension::Id)543, Type::Signed32), "FOOBAR");
+    XMLDim d2(DimType((Dimension::Id)545, Type::Signed32), "BARFOO");
 
     dims.push_back(d1);
     dims.push_back(d2);

@@ -86,7 +86,7 @@ private:
 	int32_t m_block_id;
 	uint32_t m_srid;
 	int64_t m_num_points;
-    Orientation::Enum m_orientation;
+    Orientation m_orientation;
     bool m_pack;
     std::string m_block_table;
     std::string m_cloud_table;

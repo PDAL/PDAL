@@ -121,7 +121,7 @@ int readPlyCallback(p_ply_argument argument)
 
     CallbackContext * context = static_cast<CallbackContext *>(contextAsVoid);
     double value = ply_get_argument_value(argument);
-    Dimension::Id::Enum dimension = context->dimensionMap.at(propertyName);
+    Dimension::Id dimension = context->dimensionMap.at(propertyName);
     context->view->setField(dimension, index, value);
 
     return 1;
@@ -196,7 +196,7 @@ void PlyReader::initialize()
         // For now, we'll just use PDAL's built in dimension matching.
         // We could be smarter about this, e.g. by using the length
         // and value type attributes.
-        Dimension::Id::Enum dim = Dimension::id(name);
+        Dimension::Id dim = Dimension::id(name);
         if (dim != Dimension::Id::Unknown)
         {
             m_vertexDimensions[name] = dim;

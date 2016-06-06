@@ -180,7 +180,7 @@ Dimension::IdList LasHeader::usedDims() const
 {
     using namespace Dimension;
 
-    Dimension::Id::Enum dims[] = { Id::ReturnNumber, Id::NumberOfReturns,
+    Dimension::Id dims[] = { Id::ReturnNumber, Id::NumberOfReturns,
         Id::X, Id::Y, Id::Z, Id::Intensity, Id::ScanChannel,
         Id::ScanDirectionFlag, Id::EdgeOfFlightLine, Id::Classification,
         Id::UserData, Id::ScanAngleRank, Id::PointSourceId };

@@ -91,7 +91,7 @@ DimTypeList DbReader::dbDimTypes() const
 }
 
 
-size_t DbReader::dimOffset(Dimension::Id::Enum id) const
+size_t DbReader::dimOffset(Dimension::Id id) const
 {
     size_t offset = 0;
     for (auto di = m_dims.begin(); di != m_dims.end(); ++di)

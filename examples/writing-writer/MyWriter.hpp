@@ -34,7 +34,7 @@ namespace pdal{
     int m_precision;
 
     FileStreamPtr m_stream;
-    Dimension::Id::Enum m_dataDim;
+    Dimension::Id m_dataDim;
   };
 
 } // namespace pdal

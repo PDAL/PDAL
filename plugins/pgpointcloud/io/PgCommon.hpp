@@ -44,7 +44,7 @@
 namespace pdal
 {
 
-inline pdal::CompressionType::Enum getCompressionType(
+inline pdal::CompressionType getCompressionType(
     std::string compression_type)
 {
     compression_type = Utils::tolower(compression_type);

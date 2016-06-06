@@ -121,9 +121,9 @@ protected:
         { return m_layoutRef.pointSize() * numPts; }
 
 private:
-    virtual void setFieldInternal(Dimension::Id::Enum id, PointId idx,
+    virtual void setFieldInternal(Dimension::Id id, PointId idx,
         const void *value);
-    virtual void getFieldInternal(Dimension::Id::Enum id, PointId idx,
+    virtual void getFieldInternal(Dimension::Id id, PointId idx,
         void *value) const;
 
     // The number of points in each memory block.

@@ -37,6 +37,8 @@
 
 #pragma once
 
+#include <pdal/pdal_types.hpp>
+
 #include <pdal/PointView.hpp>
 
 #include <pcl/io/pcd_io.h>
@@ -50,7 +52,7 @@ namespace pclsupport
 {
 
 template<typename CLOUDFETCH>
-void setValues(PointViewPtr view, Dimension::Id::Enum dim, size_t numPts,
+void setValues(PointViewPtr view, Dimension::Id dim, size_t numPts,
     CLOUDFETCH fetcher)
 {
     for (size_t i = 0; i < numPts; ++i)
@@ -179,7 +181,7 @@ void PDALtoPCD(PointViewPtr view, CloudT &cloud, BOX3D const& bounds)
             uint8_t b = view->getFieldAs<uint8_t>(Dimension::Id::Blue, i);
             pcl::for_each_type<FieldList> (
                 pcl::SetIfFieldExists<typename CloudT::PointType, uint32_t> (
-                    p, "rgba", ((uint8_t)r) << 16 | ((uint8_t)g) << 8 | ((uint8_t)b)
+                    p, "rgba", (r << 16) | (g << 8) | b
                 )
             );
             cloud.points[i] = p;
@@ -195,6 +197,32 @@ void PDALtoPCD(PointViewPtr view, CloudT &cloud)
     PDALtoPCD(view, cloud, buffer_bounds);
 }
 
+
+inline void setLogLevel(LogLevel level)
+{
+    // PCL should provide console output at similar verbosity level as PDAL
+    switch (level)
+    {
+        case LogLevel::Error:
+            pcl::console::setVerbosityLevel(pcl::console::L_ALWAYS);
+            break;
+        case LogLevel::Warning:
+            pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
+            break;
+        case LogLevel::Info:
+            pcl::console::setVerbosityLevel(pcl::console::L_WARN);
+            break;
+        case LogLevel::Debug:
+            pcl::console::setVerbosityLevel(pcl::console::L_INFO);
+            break;
+        case LogLevel::Debug1:
+            pcl::console::setVerbosityLevel(pcl::console::L_DEBUG);
+            break;
+        default:
+            pcl::console::setVerbosityLevel(pcl::console::L_VERBOSE);
+            break;
+    }
+}
 
 }  // namespace pcl
 }  // namespace pdal

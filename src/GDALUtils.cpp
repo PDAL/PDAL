@@ -340,9 +340,9 @@ Raster::Raster(const std::string& filename)
 }
 
 
-GDALError::Enum Raster::open()
+GDALError Raster::open()
 {
-    GDALError::Enum error = GDALError::None;
+    GDALError error = GDALError::None;
     if (m_ds)
         return error;
 
@@ -431,25 +431,24 @@ bool Raster::getPixelAndLinePosition(double x, double y,
 }
 
 
-Dimension::Type::Enum convertGDALtoPDAL(GDALDataType t)
+Dimension::Type convertGDALtoPDAL(GDALDataType t)
 {
-    using namespace Dimension::Type;
     switch (t)
     {
         case GDT_Byte:
-            return Unsigned8;
+            return Dimension::Type::Unsigned8;
         case GDT_UInt16:
-            return Unsigned16;
+            return Dimension::Type::Unsigned16;
         case GDT_Int16:
-            return Signed16;
+            return Dimension::Type::Signed16;
         case GDT_UInt32:
-            return Unsigned32;
+            return Dimension::Type::Unsigned32;
         case GDT_Int32:
-            return Signed32;
+            return Dimension::Type::Signed32;
         case GDT_Float32:
-            return Float;
+            return Dimension::Type::Float;
         case GDT_Float64:
-            return Double;
+            return Dimension::Type::Double;
         case GDT_CInt16:
         case GDT_CInt32:
         case GDT_CFloat32:
@@ -460,11 +459,11 @@ Dimension::Type::Enum convertGDALtoPDAL(GDALDataType t)
         case GDT_TypeCount:
             throw pdal_error("Detected bad GDAL data type.");
     }
-    return None;
+    return Dimension::Type::None;
 }
 
 
-GDALError::Enum Raster::readBand(std::vector<uint8_t>& points, int nBand)
+GDALError Raster::readBand(std::vector<uint8_t>& points, int nBand)
 {
     try
     {
@@ -489,7 +488,7 @@ GDALError::Enum Raster::readBand(std::vector<uint8_t>& points, int nBand)
 }
 
 
-GDALError::Enum Raster::computePDALDimensionTypes()
+GDALError Raster::computePDALDimensionTypes()
 {
     if (!m_ds)
         return GDALError::NotOpen;
@@ -517,7 +516,7 @@ GDALError::Enum Raster::computePDALDimensionTypes()
 }
 
 
-GDALError::Enum Raster::read(double x, double y, std::vector<double>& data)
+GDALError Raster::read(double x, double y, std::vector<double>& data)
 {
     if (!m_ds)
         return GDALError::NotOpen;
