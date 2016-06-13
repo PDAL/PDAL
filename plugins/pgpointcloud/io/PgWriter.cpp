@@ -107,7 +107,7 @@ void PgWriter::processOptions(const Options& options)
     m_pre_sql = options.getValueOrDefault<std::string>("pre_sql");
     // Post-SQL can be *either* a SQL file to execute, *or* a SQL statement
     // to execute. We find out which one here.
-    std::string post_sql = options.getValueOrDefault<std::string>("post_sql");
+    m_post_sql = options.getValueOrDefault<std::string>("post_sql");
 }
 
 //
