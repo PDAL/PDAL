@@ -34,11 +34,12 @@
 
 #include "SplitterFilter.hpp"
 
-#include <pdal/pdal_macros.hpp>
-
 #include <cmath>
 #include <iostream>
 #include <limits>
+
+#include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -52,23 +53,13 @@ CREATE_STATIC_PLUGIN(1, 0, SplitterFilter, Filter, s_info)
 
 std::string SplitterFilter::getName() const { return s_info.name; }
 
-void SplitterFilter::processOptions(const Options& options)
+void SplitterFilter::addArgs(ProgramArgs& args)
 {
-    m_length = options.getValueOrDefault<double>("length", 1000.0);
-    m_xOrigin = options.getValueOrDefault<double>("origin_x",
+    args.add("length", "Edge length of cell", m_length, 1000.0);
+    args.add("origin_x", "X origin for a cell", m_xOrigin,
         std::numeric_limits<double>::quiet_NaN());
-    m_yOrigin = options.getValueOrDefault<double>("origin_y",
+    args.add("origin_y", "Y origin for a cell", m_yOrigin,
         std::numeric_limits<double>::quiet_NaN());
-}
-
-
-Options SplitterFilter::getDefaultOptions()
-{
-    Options options;
-    Option length("length", 1000.0, "Splitter length");
-    options.add(length);
-
-    return options;
 }
 
 

@@ -42,6 +42,7 @@
 
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -54,24 +55,6 @@ static PluginInfo const s_info = PluginInfo(
 CREATE_SHARED_PLUGIN(1, 0, RxpReader, Reader, s_info)
 
 std::string RxpReader::getName() const { return s_info.name; }
-
-std::string extractRivlibURI(const Options& options)
-{
-    if (options.hasOption("filename"))
-    {
-        if (options.hasOption("rdtp"))
-        {
-            throw pdal_error("Cannot create URI when both filename "
-                "and rdtp are provided");
-        }
-        return "file:" + options.getValueOrThrow<std::string>("filename");
-    }
-    else
-    {
-        return "rdtp://" + options.getValueOrThrow<std::string>("rdtp");
-    }
-}
-
 
 Dimension::IdList getRxpDimensions(bool syncToPps, bool minimal)
 {
@@ -98,20 +81,35 @@ Dimension::IdList getRxpDimensions(bool syncToPps, bool minimal)
 }
 
 
-Options RxpReader::getDefaultOptions()
+void RxpReader::addArgs(ProgramArgs& args)
 {
-    Options options;
-    options.add("sync_to_pps", DEFAULT_SYNC_TO_PPS, "");
-    options.add("minimal", DEFAULT_MINIMAL, "");
-    return options;
+    m_fileArg = args.add("filename", "Output filename", m_filename);
+    m_rdtpArg = args.add("rdtp", "", m_filename);
+    args.add("sync_to_pps", "Sync to PPS", m_syncToPps, DEFAULT_SYNC_TO_PPS);
 }
 
-
-void RxpReader::processOptions(const Options& options)
+void RxpReader::initialize()
 {
-    m_uri = extractRivlibURI(options);
-    m_syncToPps = options.getValueOrDefault<bool>("sync_to_pps",
-                                                  DEFAULT_SYNC_TO_PPS);
+    if (m_fileArg->set() && m_rdtpArg.set())
+    {
+        std::ostringstream oss;
+
+        oss << getName() << "Cannot create URI when both 'filename' "
+            "and 'rdtp' are provided";
+        throw pdal_error(oss.str());
+    }
+    if (!m_fileArg->set() && !m_rdtpArg.set())
+    {
+        std::ostringstream oss;
+
+        oss << getName() << "One of 'rdtp' or 'filename' must be provided.";
+        throw pdal_error(oss.str());
+    }
+
+    if (m_fileArg->set())
+        m_uri = "file: " + m_filename;
+    else
+        m_uri = "rdtp:// + m_filename;
 }
 
 

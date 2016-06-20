@@ -37,6 +37,7 @@
 #include <sstream>
 
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -105,9 +106,18 @@ PlyWriter::PlyWriter()
 {}
 
 
-void PlyWriter::processOptions(const Options& options)
+void PlyWriter::addArgs(ProgramArgs& args)
 {
-    std::string storageMode = options.getValueOrDefault<std::string>("storage_mode", "default");
+    args.add("filename", "Output filename", m_filename).setPositional();
+    args.add("storage_mode", "PLY Storage mode", m_storageModeSpec, "default");
+}
+
+
+void PlyWriter::initialize()
+{
+    std::string storageMode(m_storageModeSpec);
+    storageMode = Utils::tolower(storageMode);
+
     if (storageMode == "ascii")
     {
         m_storageMode = PLY_ASCII;
@@ -127,8 +137,9 @@ void PlyWriter::processOptions(const Options& options)
     else
     {
         std::stringstream ss;
-        ss << "Unknown storage mode '" << storageMode <<
-            "'. Known storage modes are: 'ascii', 'little endian', 'big endian', and 'default'";
+        ss << "Unknown storage mode '" << m_storageModeSpec <<
+            "'. Known storage modes are: 'ascii', 'little endian', "
+            "'big endian', and 'default'";
         throw pdal_error(ss.str());
     }
 }
@@ -136,7 +147,8 @@ void PlyWriter::processOptions(const Options& options)
 
 void PlyWriter::ready(PointTableRef table)
 {
-    m_ply = ply_create(m_filename.c_str(), m_storageMode, createErrorCallback, 0, nullptr);
+    m_ply = ply_create(m_filename.c_str(), m_storageMode, createErrorCallback,
+        0, nullptr);
     if (!m_ply)
     {
         std::stringstream ss;

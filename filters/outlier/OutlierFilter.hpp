@@ -65,8 +65,6 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
-
 private:
     std::string m_method;
     int m_minK;
@@ -77,7 +75,7 @@ private:
     bool m_extract;
 
     virtual void addDimensions(PointLayoutPtr layout);
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
     Indices processRadius(PointViewPtr inView);
     Indices processStatistical(PointViewPtr inView);
     virtual PointViewSet run(PointViewPtr view);

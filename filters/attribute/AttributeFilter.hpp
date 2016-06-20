@@ -61,28 +61,27 @@ typedef std::shared_ptr<void> OGRDSPtr;
 typedef std::shared_ptr<void> OGRFeaturePtr;
 typedef std::shared_ptr<void> OGRGeometryPtr;
 
+class Arg;
+
 class PDAL_DLL AttributeFilter : public Filter
 {
 public:
-    AttributeFilter() : Filter(), m_ds(0), m_lyr(0)
+    AttributeFilter() : m_ds(0), m_lyr(0)
     {}
 
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const { return "filters.attribute"; }
 
-    Options getDefaultOptions();
-
 private:
+    virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
-    virtual void processOptions(const Options&);
     virtual void prepared(PointTableRef table);
     virtual void ready(PointTableRef table);
     virtual void filter(PointView& view);
-    virtual void done(PointTableRef table);
 
-    AttributeFilter& operator=(const AttributeFilter&); // not implemented
-    AttributeFilter(const AttributeFilter&); // not implemented
+    AttributeFilter& operator=(const AttributeFilter&) = delete;
+    AttributeFilter(const AttributeFilter&) = delete;
 
     typedef std::shared_ptr<void> OGRDSPtr;
 
@@ -90,6 +89,11 @@ private:
     OGRLayerH m_lyr;
     std::string m_dimName;
     double m_value;
+    Arg *m_valArg;
+    Arg *m_dsArg;
+    Arg *m_colArg;
+    Arg *m_queryArg;
+    Arg *m_layerArg;
     std::string m_datasource;
     std::string m_column;
     std::string m_query;

@@ -46,6 +46,15 @@
 
 using namespace pdal;
 
+namespace
+{
+
+static std::string connectString(TestConfig::oracleConnection());
+static const std::string baseTableName("PDAL_TEST_BASE");
+static const std::string blockTableName("PDAL_TEST_BLOCKS");
+
+}
+
 GTEST_API_ int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);
@@ -57,7 +66,7 @@ GTEST_API_ int main(int argc, char **argv)
             auto pos = s.find_first_of('=');
             if (pos == std::string::npos)
                 throw pdal_error("Invalid command line connection string.");
-            TestConfig::g_oracle_connection = s.substr(pos + 1);
+            connectString = s.substr(pos + 1);
             break;
         }
     }
@@ -67,23 +76,30 @@ GTEST_API_ int main(int argc, char **argv)
 
 bool ShouldRunTest()
 {
-    return TestConfig::g_oracle_connection.size() > 0;
+    return connectString.size() > 0;
 }
 
 
-Options getOCIOptions()
+Options readerOptions()
+{
+    Options options;
+
+    options.add("connection", connectString);
+    options.add("xml_schema_dump", "pcs-oracle-xml-schema-dump.xml");
+    return options;
+}
+
+Options writerOptions()
 {
     Options options;
 
     options.add("overwrite", false);
-    options.add("connection", std::string(TestConfig::g_oracle_connection));
-    options.add("block_table_name", "PDAL_TEST_BLOCKS");
-    options.add("base_table_name", "PDAL_TEST_BASE");
+    options.add("connection", connectString);
+    options.add("block_table_name", blockTableName);
+    options.add("base_table_name", baseTableName);
     options.add("cloud_column_name", "CLOUD");
     options.add("srid", 26910);
     options.add("disable_cloud_trigger", true);
-    options.add("filename", Support::datapath("autzen/autzen-utm.las"));
-    options.add("xml_schema_dump", "pcs-oracle-xml-schema-dump.xml");
     return options;
 }
 
@@ -122,21 +138,15 @@ class OCITest : public testing::Test
 protected:
     virtual void SetUp()
     {
-        m_options = getOCIOptions();
-
         connect();
         cleanup();
 
-        std::string base_table_name =
-            m_options.getValueOrThrow<std::string>("base_table_name");
-        std::string create_pc_table("CREATE TABLE " + base_table_name +
+        std::string create_pc_table("CREATE TABLE " + baseTableName +
             " (id number, CLOUD SDO_PC, DESCRIPTION VARCHAR2(20), HEADER "
             "BLOB, BOUNDARY SDO_GEOMETRY)");
         run(create_pc_table);
 
-        std::string block_table_name =
-            m_options.getValueOrThrow<std::string>("block_table_name");
-        std::string create_block_table = "CREATE TABLE " + block_table_name +
+        std::string create_block_table = "CREATE TABLE " + blockTableName +
             " AS SELECT * FROM MDSYS.SDO_PC_BLK_TABLE";
         run(create_block_table);
     }
@@ -144,13 +154,13 @@ protected:
     void connect()
     {
         if (!m_connection.get())
-            m_connection = pdal::connect(TestConfig::g_oracle_connection);
+            m_connection = pdal::connect(connectString);
         if (!m_connection.get() || !m_connection->Succeeded())
         {
             std::ostringstream oss;
 
             oss << "Couldn't connect via OCI using spec '" <<
-                TestConfig::g_oracle_connection << "'";
+                connectString << "'";
             throw pdal_error(oss.str());
         }
     }
@@ -161,7 +171,6 @@ protected:
         statement->Execute();
     }
 
-    Options m_options;
     Connection m_connection;
 
     virtual void TearDown()
@@ -170,67 +179,17 @@ protected:
 
     void cleanup()
     {
-        std::string base_table_name =
-            m_options.getValueOrThrow<std::string>("base_table_name");
-        std::string block_table_name =
-            m_options.getValueOrThrow<std::string>("block_table_name");
-
-        std::string drop_base_table = "DROP TABLE " + base_table_name;
-        std::string drop_block_table = "DROP TABLE " + block_table_name;
+        std::string drop_base_table = "DROP TABLE " + baseTableName;
+        std::string drop_block_table = "DROP TABLE " + blockTableName;
         run(drop_base_table);
         run(drop_block_table);
 
         std::string cleanup_metadata = "DELETE FROM USER_SDO_GEOM_METADATA "
-            "WHERE TABLE_NAME ='" + block_table_name + "'";
+            "WHERE TABLE_NAME ='" + blockTableName + "'";
         run(cleanup_metadata);
     }
 
 };
-
-/**
-TEST_F(OCITest, throughput)
-{
-    Options options;
-
-    options.add("capacity", 10000);
-    options.add("connection", std::string(TestConfig::g_oracle_connection));
-    options.add("block_table_name", "PDAL_TEST_BLOCKS");
-    options.add("base_table_name", "PDAL_TEST_BASE");
-    options.add("cloud_column_name", "CLOUD");
-    options.add("srid", 26910);
-    options.add("disable_cloud_trigger", true);
-    options.add("store_dimensional_orientation", false);
-    options.add("filename", "/Volumes/acbell-lidar1/big.ntf");
-
-    {
-        options.add("offset_x", "auto");
-        options.add("offset_y", "auto");
-        options.add("offset_z", "auto");
-        options.add("scale_x", 1e-6);
-        options.add("scale_y", 1e-6);
-        options.add("scale_z", 1e-6);
-    }
-    //if (compression)
-        options.add("compression", true);
-
-    PointTable table;
-
-    StageFactory f;
-    Stage* reader(f.createStage("readers.nitf"));
-    reader->setOptions(options);
-
-    SplitFilter split(10000);
-    split.setInput(*reader);
-
-    Stage* writer(f.createStage("writers.oci"));
-    EXPECT_TRUE(writer);
-    writer->setOptions(options);
-    writer->setInput(split);
-
-    writer->prepare(table);
-    writer->execute(table);
-}
-***/
 
 
 void writeData(Orientation::Enum orient, bool scaling, bool compression = false)
@@ -238,10 +197,10 @@ void writeData(Orientation::Enum orient, bool scaling, bool compression = false)
     Options options;
 
     options.add("capacity", 10000);
-    options.add("connection", std::string(TestConfig::g_oracle_connection));
+    options.add("connection", std::string(connectString));
     options.add("debug", "true");
-    options.add("block_table_name", "PDAL_TEST_BLOCKS");
-    options.add("base_table_name", "PDAL_TEST_BASE");
+    options.add("block_table_name", blockTableName);
+    options.add("base_table_name", baseTableName);
     options.add("cloud_column_name", "CLOUD");
     options.add("srid", 26910);
     options.add("disable_cloud_trigger", true);
@@ -345,7 +304,7 @@ void readData()
            "FROM PDAL_TEST_BLOCKS l, PDAL_TEST_BASE b "
         "WHERE b.id = l.obj_id ORDER BY l.blk_id ";
 
-    Options options = getOCIOptions();
+    Options options = readerOptions();
     options.add("query", oss.str());
 
     StageFactory f;

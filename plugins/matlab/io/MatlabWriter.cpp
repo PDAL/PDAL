@@ -49,14 +49,6 @@ CREATE_SHARED_PLUGIN(1, 0, MatlabWriter, Writer, s_info)
 std::string MatlabWriter::getName() const { return s_info.name; }
 
 
-MatlabWriter::MatlabWriter()
-{}
-
-
-void MatlabWriter::processOptions(const Options& options)
-{}
-
-
 void MatlabWriter::prepared(PointTableRef table)
 {
     if (m_outputDims.empty())

@@ -43,7 +43,7 @@ extern "C" PF_ExitFunc FauxReader_InitPlugin();
 namespace pdal
 {
 
-enum Mode
+enum class Mode
 {
     Constant,
     Random,
@@ -51,6 +51,27 @@ enum Mode
     Uniform,
     Normal
 };
+
+inline std::istream& operator>>(std::istream& in, Mode& m)
+{
+    std::string s;
+
+    in >> s;
+    s = Utils::tolower(s);
+    if (s == "constant")
+        m = Mode::Constant;
+    else if (s == "random")
+        m = Mode::Random;
+    else if (s == "ramp")
+        m = Mode::Ramp;
+    else if (s  == "uniform")
+        m = Mode::Uniform;
+    else if (s == "normal")
+        m = Mode::Normal;
+    else
+        in.setstate(std::ios::failbit);
+    return in;
+}
 
 
 // The FauxReader doesn't read from disk, but instead just makes up data for its
@@ -84,23 +105,16 @@ enum Mode
 class PDAL_DLL FauxReader : public Reader
 {
 public:
-    FauxReader();
+    FauxReader()
+    {}
 
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
 
-    static Dimension::IdList getDefaultDimensions();
-    Options getDefaultOptions();
-
 private:
     Mode m_mode;
-    double m_minX;
-    double m_maxX;
-    double m_minY;
-    double m_maxY;
-    double m_minZ;
-    double m_maxZ;
+    BOX3D m_bounds;
     double m_mean_x;
     double m_mean_y;
     double m_mean_z;
@@ -116,7 +130,8 @@ private:
     point_count_t m_index;
     uint32_t m_seed;
 
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
+    virtual void initialize();
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
     virtual bool processOne(PointRef& point);

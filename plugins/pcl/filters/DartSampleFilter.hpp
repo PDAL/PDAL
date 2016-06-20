@@ -50,12 +50,10 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
-
 private:
     double m_radius;
 
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
     virtual PointViewSet run(PointViewPtr view);
 
     DartSampleFilter& operator=(const DartSampleFilter&); // not implemented

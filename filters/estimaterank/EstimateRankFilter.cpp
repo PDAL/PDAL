@@ -37,6 +37,7 @@
 #include <pdal/Eigen.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include <string>
 #include <vector>
@@ -55,19 +56,13 @@ std::string EstimateRankFilter::getName() const
     return s_info.name;
 }
 
-Options EstimateRankFilter::getDefaultOptions()
+
+void EstimateRankFilter::addArgs(ProgramArgs& args)
 {
-    Options options;
-    options.add("knn", 8, "k-Nearest Neighbors");
-    options.add("thresh", 0.01, "Threshold");
-    return options;
+    args.add("knn", "k-Nearest Neighbors", m_knn, 8);
+    args.add("thresh", "Threshold", m_thresh, 0.01);
 }
 
-void EstimateRankFilter::processOptions(const Options& options)
-{
-    m_knn = options.getValueOrDefault<int>("knn", 8);
-    m_thresh = options.getValueOrDefault<double>("thresh", 0.01);
-}
 
 void EstimateRankFilter::addDimensions(PointLayoutPtr layout)
 {

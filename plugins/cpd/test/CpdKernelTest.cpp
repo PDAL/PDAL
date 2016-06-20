@@ -71,7 +71,8 @@ protected:
         reader.setOptions(readerOptions);
 
         Options transformationOptions;
-        transformationOptions.add("matrix", "1 0 0 1\n0 1 0 2\n0 0 1 3\n0 0 0 1");
+        transformationOptions.add("matrix",
+            "1 0 0 1\n0 1 0 2\n0 0 1 3\n0 0 0 1");
         Stage& filter = mrManager.addFilter("filters.transformation");
         filter.setInput(reader);
         filter.setOptions(transformationOptions);

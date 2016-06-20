@@ -60,6 +60,7 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/Polygon.hpp"
   "${PDAL_HEADERS_DIR}/QuadIndex.hpp"
   "${PDAL_HEADERS_DIR}/Reader.hpp"
+  "${PDAL_HEADERS_DIR}/Scaling.hpp"
   "${PDAL_HEADERS_DIR}/SpatialReference.hpp"
   "${PDAL_HEADERS_DIR}/Stage.hpp"
   "${PDAL_HEADERS_DIR}/StageFactory.hpp"
@@ -95,6 +96,7 @@ set(PDAL_BASE_CPP
   PluginManager.cpp
   QuadIndex.cpp
   Reader.cpp
+  Scaling.cpp
   SpatialReference.cpp
   Stage.cpp
   StageFactory.cpp

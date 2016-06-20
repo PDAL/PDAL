@@ -53,7 +53,7 @@ public:
         BOX3D bounds(1, 2, 3, 4, 5, 6);
         Options readerOpts;
         readerOpts.add("mode", "constant");
-        readerOpts.add("num_points", 3);
+        readerOpts.add("count", 3);
         readerOpts.add("bounds", bounds);
         m_reader.setOptions(readerOpts);
         m_filter.setInput(m_reader);

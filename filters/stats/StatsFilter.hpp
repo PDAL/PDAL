@@ -116,7 +116,8 @@ public:
         delta_n2 = delta_n * delta_n;
         term1 = delta * delta_n * n1;
         M1 += delta_n;
-        M4 += term1 * delta_n2 * (n*n - 3*n + 3) + 6 * delta_n2 * M2 - 4 * delta_n * M3;
+        M4 += term1 * delta_n2 * (n*n - 3*n + 3) +
+            (6 * delta_n2 * M2) - (4 * delta_n * M3);
         M3 += term1 * delta_n * (n - 2) - 3 * delta_n * M2;
         M2 += term1;
     }
@@ -152,7 +153,7 @@ public:
 private:
     StatsFilter& operator=(const StatsFilter&); // not implemented
     StatsFilter(const StatsFilter&); // not implemented
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
     virtual bool processOne(PointRef& point);
     virtual void prepared(PointTableRef table);
     virtual void done(PointTableRef table);

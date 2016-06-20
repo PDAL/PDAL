@@ -73,13 +73,29 @@ DerivativeWriter::DerivativeWriter()
 }
 
 
-void DerivativeWriter::processOptions(const Options& ops)
+void DerivativeWriter::addArgs(ProgramArgs& args)
 {
-    m_GRID_DIST_X = ops.getValueOrDefault<double>("grid_dist_x", 15.0);
-    m_GRID_DIST_Y = ops.getValueOrDefault<double>("grid_dist_y", 15.0);
-    handleFilenameTemplate();
+    args.add("grid_dist_x", "X grid distance", m_GRID_DIST_X, 15.0);
+    args.add("grid_dist_y", "Y grid distance", m_GRID_DIST_Y, 15.0);
+    args.add("primitive_type", "Primitive type", m_primTypesSpec);
+}
 
-    std::map<std::string, PrimitiveType> primtypes;
+
+void DerivativeWriter::initialize()
+{
+    static std::map<std::string, PrimitiveType> primtypes =
+        { {"slope_d8", SLOPE_D8},
+          {"slope_fd", SLOPE_FD},
+          {"aspect_d8", ASPECT_D8},
+          {"aspect_fd", ASPECT_FD},
+          {"hillshade", HILLSHADE},
+          {"contour_curvature", CONTOUR_CURVATURE},
+          {"profile_curvature", PROFILE_CURVATURE},
+          {"tangential_curvature", TANGENTIAL_CURVATURE},
+          {"total_curvature", TOTAL_CURVATURE},
+          {"catchment_area", CATCHMENT_AREA}
+        };
+/**
     primtypes["slope_d8"] = SLOPE_D8;
     primtypes["slope_fd"] = SLOPE_FD;
     primtypes["aspect_d8"] = ASPECT_D8;
@@ -90,11 +106,13 @@ void DerivativeWriter::processOptions(const Options& ops)
     primtypes["tangential_curvature"] = TANGENTIAL_CURVATURE;
     primtypes["total_curvature"] = TOTAL_CURVATURE;
     primtypes["catchment_area"] = CATCHMENT_AREA;
+**/
 
-    std::string primTypes = ops.getValueOrDefault("primitive_type", "slope_d8");
-    StringList types = Utils::split2(primTypes, ',');
+    if (m_primTypesSpec.empty())
+        m_primTypesSpec.push_back("slope_d8");
 
-    if (m_hashPos == std::string::npos && types.size() > 1)
+    handleFilenameTemplate();
+    if (m_hashPos == std::string::npos && m_primTypesSpec.size() > 1)
     {
         std::ostringstream oss;
 
@@ -104,9 +122,8 @@ void DerivativeWriter::processOptions(const Options& ops)
         throw pdal_error(oss.str());
     }
 
-    for (std::string os : types)
+    for (std::string os : m_primTypesSpec)
     {
-        Utils::trim(os);
         std::string s = Utils::tolower(os);
         auto pi = primtypes.find(s);
         if (pi == primtypes.end())
@@ -118,9 +135,11 @@ void DerivativeWriter::processOptions(const Options& ops)
         }
         TypeOutput to;
         to.m_type = pi->second;
-        to.m_filename = generateFilename(pi->first) ;
+        to.m_filename = generateFilename(pi->first);
         m_primitiveTypes.push_back(to);
     }
+
+    setBounds(BOX2D());
 }
 
 
@@ -135,24 +154,6 @@ DerivativeWriter::generateFilename(const std::string& primName) const
     return filename;
 }
 
-
-void DerivativeWriter::initialize()
-{
-
-    setBounds(BOX2D());
-}
-
-
-Options DerivativeWriter::getDefaultOptions()
-{
-    Options options;
-
-    options.add("grid_dist_x", 15.0, "X grid distance");
-    options.add("grid_dist_y", 15.0, "Y grid distance");
-    options.add("primitive_type", "slope_d8", "Primitive type");
-
-    return options;
-}
 
 double DerivativeWriter::GetNeighbor(Eigen::MatrixXd* data, int row, int col,
     Direction d)

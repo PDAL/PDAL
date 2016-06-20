@@ -52,7 +52,7 @@ using namespace std;
 
 string Support::datapath()
 {
-    return TestConfig::g_data_path;
+    return TestConfig::dataPath();
 }
 
 std::string Support::datapath(const std::string& file)
@@ -62,7 +62,7 @@ std::string Support::datapath(const std::string& file)
 
 string Support::configuredpath()
 {
-    return TestConfig::g_configured_path;
+    return TestConfig::configuredPath();
 }
 
 std::string Support::configuredpath(const std::string& file)
@@ -72,7 +72,7 @@ std::string Support::configuredpath(const std::string& file)
 
 std::string Support::temppath()
 {
-    return TestConfig::g_data_path + "../temp/";
+    return TestConfig::dataPath() + "../temp/";
 }
 
 std::string Support::temppath(const std::string& file)
@@ -82,7 +82,7 @@ std::string Support::temppath(const std::string& file)
 
 std::string Support::binpath()
 {
-    std::string binpath = TestConfig::g_binary_path;
+    std::string binpath = TestConfig::binaryPath();
 
 #ifdef PDAL_APP_BUNDLE
     return binpath + "/pdal.app/Contents/MacOS/";

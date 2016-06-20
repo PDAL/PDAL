@@ -44,6 +44,7 @@
 #include <pcl/surface/poisson.h>
 
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -59,22 +60,12 @@ std::string PoissonFilter::getName() const
     return s_info.name;
 }
 
-Options PoissonFilter::getDefaultOptions()
+void PoissonFilter::addArgs(ProgramArgs& args)
 {
-    Options options;
-    options.add("depth", 8, "Maximum depth of the tree used for reconstruction");
-    options.add("point_weight", 4.0,
-                "Importance of interpolation of point samples in the screened "\
-                "Poisson equation");
-    return options;
-}
-
-/** \brief This method processes the PointView through the given pipeline. */
-
-void PoissonFilter::processOptions(const Options& options)
-{
-    m_depth = options.getValueOrDefault<int>("depth", 8);
-    m_point_weight = options.getValueOrDefault<float>("point_weight", 4.0);
+    args.add("depth", "Maximum depth of the tree used for reconstruction",
+        m_depth, 8);
+    args.add("point_weight", "Importance of interpolation of point "
+        "samples in the screened Poisson equation", m_point_weight, 4.0f);
 }
 
 PointViewSet PoissonFilter::run(PointViewPtr input)

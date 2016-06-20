@@ -38,6 +38,7 @@
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include "OciWriter.hpp"
 
@@ -72,21 +73,11 @@ OciWriter::OciWriter()
 {}
 
 
-void OciWriter::initialize()
-{
-    gdal::registerDrivers();
-    m_connection = connect(m_connSpec);
-    m_gtype = getGType();
-}
-
-
+/**
 Options OciWriter::getDefaultOptions()
 {
     Options options;
 
-    Option is3d("is3d",  false,
-        "Should we use 3D objects (include the z dimension) for SDO_PC "
-        "PC_EXTENT, BLK_EXTENT, and indexing");
     Option solid("solid", false,
         "Define the point cloud's PC_EXTENT geometry gtype as (1,1007,3) "
         "instead of the normal (1,1003,3), and use gtype 3008/2008 vs "
@@ -185,6 +176,7 @@ Options OciWriter::getDefaultOptions()
 
     return options;
 }
+**/
 
 
 void OciWriter::runCommand(std::ostringstream const& command)
@@ -636,17 +628,6 @@ void OciWriter::createPCEntry()
             m_baseTableName << " table. Does the table exist? " << e.what();
         throw pdal_error(oss.str());
     }
-
-    try
-    {
-        Option& pc_id = m_options.getOptionByRef("pc_id");
-        pc_id.setValue(m_pc_id);
-    }
-    catch (Option::not_found)
-    {
-        Option pc_id("pc_id", m_pc_id, "Point Cloud Id");
-        m_options.add(pc_id);
-    }
 }
 
 
@@ -661,60 +642,90 @@ bool OciWriter::isValidWKT(std::string const& input)
 }
 
 
-void OciWriter::processOptions(const Options& options)
+void OciWriter::addArgs(ProgramArgs& args)
 {
-    m_3d = getDefaultedOption<bool>(options, "is3d");
-    m_precision = getDefaultedOption<uint32_t>(options,
-        "stream_output_precision");
-    m_createIndex = options.getValueOrDefault<bool>("create_index", true);
-    m_overwrite = getDefaultedOption<bool>(options, "overwrite");
-    m_reenableCloudTrigger =
-        options.getValueOrDefault<bool>("reenable_cloud_trigger", false);
-    m_disableCloudTrigger =
-        options.getValueOrDefault<bool>("disable_cloud_trigger", false);
-    m_trace = options.getValueOrDefault<bool>("do_trace", false);
-    m_solid = getDefaultedOption<bool>(options, "solid");
-    m_srid = options.getValueOrThrow<uint32_t>("srid");
-    m_baseTableBounds =
-        getDefaultedOption<BOX3D>(options, "base_table_bounds");
-    m_baseTableName = Utils::toupper(
-        options.getValueOrThrow<std::string>("base_table_name"));
-    m_blockTableName = Utils::toupper(
-        options.getValueOrThrow<std::string>("block_table_name"));
-    m_cloudColumnName = Utils::toupper(
-        options.getValueOrThrow<std::string>("cloud_column_name"));
-    m_blockTablePartitionColumn = Utils::toupper(
-        getDefaultedOption<std::string>(options,
-            "block_table_partition_column"));
-    m_blockTablePartitionValue =
-        getDefaultedOption<uint32_t>(options, "block_table_partition_value");
-    m_baseTableAuxColumns =
-        getDefaultedOption<std::string>(options, "base_table_aux_columns");
-    m_baseTableAuxValues =
-        getDefaultedOption<std::string>(options, "base_table_aux_values");
-    m_baseTableBoundaryColumn =
-        getDefaultedOption<std::string>(options, "base_table_boundary_column");
-    m_baseTableBoundaryWkt =
-        getDefaultedOption<std::string>(options, "base_table_boundary_wkt");
+    args.add("base_table_name", "Base table name",
+        m_baseTableName).setPositional();
+    args.add("block_table_name", "Block table name",
+        m_blockTableName).setPositional();
+    args.add("cloud_column_name", "Cloud column name",
+        m_cloudColumnName).setPositional();
+    args.add("capacity", "Points per block", m_capacity).setPositional();
 
-    m_chunkCount =
-        options.getValueOrDefault<uint32_t>("blob_chunk_count", 16);
-    m_streamChunks = options.getValueOrDefault<bool>("stream_chunks", false);
+    args.add("is3d", "Should we use 3D objects (include the z dimension) "
+        "for SDO_PC PC_EXTENT, BLK_EXTENT, and indexing", m_3d);
+    args.add("stream_output_precision", "The number of digits past the "
+        "decimal place for outputting floats/doubles to streams. This "
+        "is used for creating the SDO_PC object and adding the index "
+        "entry to the USER_SDO_GEOM_METADATA for the block table",
+        m_precision, 8U);
+    args.add("create_index", "Whether an index should be created",
+        m_createIndex, true);
+    args.add("overwrite", "Wipe the block table and recreate it before "
+        "loading data", m_overwrite, false);
+    args.add("reenable_cloud_trigger", "Reenable cloud trigger",
+        m_reenableCloudTrigger);
+    args.add("disable_cloud_trigger", "Disable cloud trigger",
+        m_disableCloudTrigger);
+    args.add("do_trace", "Trace processing", m_trace);
+    args.add("solid", "Define the point cloud's PC_EXTENT geometry "
+        "gtype as (1,1007,3) instead of the normal (1,1003,3), and use "
+        "gtype 3008/2008 vs  3003/2003 for BLK_EXTENT geometry values.",
+        m_solid);
+    args.add("srid", "SRID", m_srid);
+    args.add("base_table_bounds", "A bounding box, given in the Oracle "
+        "SRID specified in 'srid' to set on the PC_EXTENT object of the "
+        "SDO_PC. If none is specified, the cumulated bounds of all of "
+        "the block data are used.", m_baseTableBounds);
+    args.add("block_table_partition_column", "The column name for which "
+        "'block_table_partition_value' will be placed in the "
+        "'block_table_name'", m_blockTablePartitionColumn);
+    args.add("block_table_partition_value", "Integer value to use to "
+        "assign partition IDs in the block table. Used in conjunction "
+        "with 'block_table_partition_column'", m_blockTablePartitionValue);
+    args.add("base_table_aux_columns", "Quoted, comma-separated list of "
+        "columns to add to the SQL that gets executed as part of the "
+        "point cloud insertion into the 'base_table_name' table",
+        m_baseTableAuxColumns);
+    args.add("base_table_aux_values", "Quoted, comma-separated values that "
+        "correspond to 'base_table_aux_columns', entries that will get "
+        "inserted as part of the creation of the SDO_PC entry in the "
+        "'base_table_name' table", m_baseTableAuxValues);
+    args.add("base_table_boundary_column", "The SDO_GEOMETRY column in "
+        "'base_table_name' in which to insert the WKT in "
+        "'base_table_boundary_wkt' representing a boundary for the SDO_PC "
+        "object. Note this is not the same as the 'base_table_bounds', "
+        "which is just a bounding box that is placed on the SDO_PC object "
+        "itself.", m_baseTableBoundaryColumn);
+    args.add("base_table_boundary_wkt", "WKT, in the form of a string or "
+        "a file location, to insert into the SDO_GEOMTRY column defined "
+        "by 'base_table_boundary_column'", m_baseTableBoundaryWkt);
+    args.add("blob_chunk_count", "Blob chunk count", m_chunkCount, 16U);
+    args.add("stream_chunks", "Stream chunks", m_streamChunks);
+    args.add("store_dimensional_orientation", "Point major(default) or "
+        "dimension major storage", m_dimInterleaved);
+    args.add("connection", "Database connection string", m_connSpec);
+    args.add("compression", "Set to turn compression on", m_compression);
+    args.add("pre_sql", "SQL to run before query", m_preSql);
+    args.add("post_block_sql", "SQL to run when stage is done", m_postBlockSql);
+}
 
-    bool dimInterleaved =
-        options.getValueOrDefault<bool>("store_dimensional_orientation", false);
-    m_orientation = dimInterleaved ? Orientation::DimensionMajor :
+
+void OciWriter::initialize()
+{
+    m_baseTableName = Utils::toupper(m_baseTableName);
+    m_blockTableName = Utils::toupper(m_blockTableName);
+    m_cloudColumnName = Utils::toupper(m_cloudColumnName);
+    m_orientation = m_dimInterleaved ? Orientation::DimensionMajor :
         Orientation::PointMajor;
-    m_capacity = options.getValueOrThrow<uint32_t>("capacity");
-    m_connSpec = options.getValueOrDefault<std::string>("connection", "");
-    m_compression = options.getValueOrDefault<bool>("compression", false);
 
     if (m_compression && (m_orientation == Orientation::DimensionMajor))
         throw pdal_error("LAZperf compression not supported for "
             "dimension-major point storage.");
 
-    m_preSql = options.getValueOrDefault<std::string>("pre_sql");
-    m_postBlockSql = options.getValueOrDefault<std::string>("post_block_sql");
+    gdal::registerDrivers();
+    m_connection = connect(m_connSpec);
+    m_gtype = getGType();
 }
 
 

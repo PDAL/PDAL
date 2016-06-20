@@ -50,13 +50,11 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
-
 private:
     int m_depth;
     float m_point_weight;
 
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
     virtual PointViewSet run(PointViewPtr view);
 
     PoissonFilter& operator=(const PoissonFilter&); // not implemented

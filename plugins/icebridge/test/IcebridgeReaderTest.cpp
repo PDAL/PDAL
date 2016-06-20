@@ -93,7 +93,7 @@ TEST(IcebridgeReaderTest, testRead)
     Stage* reader(f.createStage("readers.icebridge"));
     EXPECT_TRUE(reader);
 
-    Option filename("filename", getFilePath(), "");
+    Option filename("filename", getFilePath());
     Options options(filename);
     reader->setOptions(options);
 

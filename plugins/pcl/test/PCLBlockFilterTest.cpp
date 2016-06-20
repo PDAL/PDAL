@@ -73,21 +73,16 @@ static void test_filter(const std::string& jsonFile,
     const std::string& autzenThin = "autzen/autzen-thin.las";
     const std::string& autzen = useThin ? autzenThin : autzenThick;
 
-    Option filename("filename", Support::datapath(autzen));
-    Option debug("debug", true, "");
-    Option verbose("verbose", 9, "");
-
-    options.add(filename);
-    options.add(debug);
-    options.add(verbose);
+    options.add("filename", Support::datapath(autzen));
+    options.add("debug", true);
+    options.add("verbose", 9);
 
     Stage* reader(f.createStage("readers.las"));
     EXPECT_TRUE(reader);
     reader->setOptions(options);
 
-    Option fname("filename", Support::datapath(jsonFile));
     Options filter_options;
-    filter_options.add(fname);
+    filter_options.add("filename", Support::datapath(jsonFile));
 
     Stage* pcl_block(f.createStage("filters.pclblock"));
     EXPECT_TRUE(pcl_block);

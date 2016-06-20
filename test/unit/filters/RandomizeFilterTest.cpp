@@ -48,7 +48,7 @@ TEST(RandomizeFilterTest, simple)
     Options readerOps;
     readerOps.add("bounds", BOX3D(1, 1, 1, count, count, count));
     readerOps.add("mode", "ramp");
-    readerOps.add("num_points", count);
+    readerOps.add("count", count);
 
     FauxReader r;
     r.setOptions(readerOps);

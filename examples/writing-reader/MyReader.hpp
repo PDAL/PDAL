@@ -17,7 +17,6 @@ namespace pdal
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
     static Dimension::IdList getDefaultDimensions();
 
   private:
@@ -26,7 +25,7 @@ namespace pdal
     double m_scale_z;
 
     virtual void addDimensions(PointLayoutPtr layout);
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
     virtual void ready(PointTableRef table);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
     virtual void done(PointTableRef table);

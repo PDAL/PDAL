@@ -48,19 +48,15 @@ class PDAL_DLL MortonOrderFilter : public pdal::Filter
 public:
     MortonOrderFilter()
     {}
+    MortonOrderFilter& operator=(const MortonOrderFilter&) = delete;
+    MortonOrderFilter(const MortonOrderFilter&) = delete;
 
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
-
 private:
-    virtual void processOptions(const Options& ) {};
     virtual PointViewSet run(PointViewPtr view);
-
-    MortonOrderFilter& operator=(const MortonOrderFilter&); // not implemented
-    MortonOrderFilter(const MortonOrderFilter&); // not implemented
 };
 
 } // namespace pdal

@@ -52,6 +52,7 @@ class UserCallback;
 class PDAL_DLL Writer : public Stage
 {
     friend class WriterWrapper;
+    friend class DbWriter;
     friend class FlexWriter;
 
 public:
@@ -63,18 +64,8 @@ public:
 
 protected:
     std::string m_filename;  ///< Output filename
-    XForm m_xXform;          ///< X-dimension transform (scale/offset)
-    XForm m_yXform;          ///< Y-dimension transform (scale/offset)
-    XForm m_zXform;          ///< Z-dimension transform (scale/offset)
     StringList m_outputDims; ///< List of dimensions to write
     std::string::size_type m_hashPos;
-
-    /**
-      Compute an automatic scale/offset for points in the PointView.
-
-      \param view  PointView on which scale should be computed.
-    */
-    virtual void setAutoXForm(const PointViewPtr view);
 
     /**
       Locate template placeholder ('#') and validate filename with respect
@@ -90,7 +81,9 @@ private:
         viewSet.insert(view);
         return viewSet;
     }
-    virtual void writerProcessOptions(const Options& options);
+    virtual void writerAddArgs(ProgramArgs& args);
+    virtual void writerInitialize(PointTableRef table)
+    {}
 
     /**
       Write the point in a PointView.  This is a simplification of the

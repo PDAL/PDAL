@@ -33,6 +33,7 @@
 
 #pragma once
 
+#include <pdal/Scaling.hpp>
 #include <pdal/Writer.hpp>
 #include <pdal/XMLSchema.hpp>
 
@@ -68,10 +69,12 @@ protected:
 private:
     virtual void prepared(PointTableRef table);
     virtual void ready(PointTableRef table);
+    virtual void writerAddArgs(ProgramArgs& args);
 
     DimTypeList m_dimTypes;
     XMLDimList m_dbDims;
     std::unordered_map<int, DimType> m_dimMap;
+    Scaling m_scaling;
     std::pair<int, int> m_xOffsets;
     std::pair<int, int> m_yOffsets;
     std::pair<int, int> m_zOffsets;

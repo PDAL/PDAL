@@ -41,16 +41,26 @@
 namespace pdal
 {
 
-namespace LasCompression
-{
-
-enum Enum
+enum class LasCompression
 {
     LasZip,
     LazPerf,
     None
 };
 
+inline std::istream& operator >> (std::istream& in, LasCompression& c)
+{
+    std::string s;
+
+    in >> s;
+    s = Utils::toupper(s);
+    if (s == "LASZIP"  || s == "TRUE")
+        c = LasCompression::LasZip;
+    else if (s == "LAZPERF")
+        c = LasCompression::LazPerf;
+    else
+        c = LasCompression::None;
+    return in;
 }
 
 struct ExtraDim

@@ -38,6 +38,7 @@
 #include <pdal/Stage.hpp>
 #include <pdal/SpatialReference.hpp>
 #include <pdal/PDALUtils.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include "StageRunner.hpp"
 
@@ -47,24 +48,14 @@
 namespace pdal
 {
 
-Stage::Stage() : m_progressFd(-1)
-{
-    Construct();
-}
+Stage::Stage() : m_progressFd(-1), m_debug(false), m_verbose(0)
+{}
 
 
 void Stage::addConditionalOptions(const Options& opts)
 {
     for (const auto& o : opts.getOptions())
-        if (!m_options.hasOption(o.getName()))
-            m_options.add(o);
-}
-
-
-void Stage::Construct()
-{
-    m_debug = false;
-    m_verbose = 0;
+        m_options.addConditional(o);
 }
 
 
@@ -88,23 +79,41 @@ void Stage::serialize(MetadataNode root, PipelineWriter::TagMap& tags) const
     root.addList(anon);
 }
 
+
+void Stage::handleOptions()
+{
+    try
+    {
+        l_addArgs(*m_args);
+        addArgs(*m_args);
+        StringList cmdline = m_options.toCommandLine();
+        m_args->parse(cmdline);
+    }
+    catch (arg_error error)
+    {
+        throw pdal_error(error.m_error);
+    }
+    setupLog();
+}
+
+
 QuickInfo Stage::preview()
 {
-    l_processOptions(m_options);
-    processOptions(m_options);
+    m_args.reset(new ProgramArgs);
+    handleOptions();
     return inspect();
 }
 
 
 void Stage::prepare(PointTableRef table)
 {
+    m_args.reset(new ProgramArgs);
     for (size_t i = 0; i < m_inputs.size(); ++i)
     {
         Stage *prev = m_inputs[i];
         prev->prepare(table);
     }
-    l_processOptions(m_options);
-    processOptions(m_options);
+    handleOptions();
     l_initialize(table);
     initialize(table);
     addDimensions(table.layout());
@@ -303,31 +312,30 @@ void Stage::execute(StreamPointTable& table, std::list<Stage *>& stages)
 }
 
 
-void Stage::l_initialize(PointTableRef table)
+void Stage::l_addArgs(ProgramArgs& args)
 {
-    m_metadata = table.metadata().add(getName());
+    args.add("debug", "Debug on/off", m_debug);
+    args.add("verbose", "Debug output level", m_verbose, 0U);
+    args.add("log", "Debug output filename", m_logname);
+    readerAddArgs(args);
+    writerAddArgs(args);
 }
 
 
-void Stage::l_processOptions(const Options& options)
+void Stage::setupLog()
 {
-    m_debug = options.getValueOrDefault<bool>("debug", false);
-    m_verbose = options.getValueOrDefault<uint32_t>("verbose", 0);
-    if (m_debug && !m_verbose)
-        m_verbose = 1;
-
     if (m_inputs.empty())
     {
-        std::string logname =
-            options.getValueOrDefault<std::string>("log", "stdlog");
-        m_log = std::shared_ptr<pdal::Log>(new Log(getName(), logname));
+        if (m_logname.empty())
+            m_log.reset(new Log(getName(), "stdlog"));
+        else
+            m_log.reset(new Log(getName(), m_logname));
     }
     else
     {
-        if (options.hasOption("log"))
+        if (m_logname.size())
         {
-            std::string logname = options.getValueOrThrow<std::string>("log");
-            m_log.reset(new Log(getName(), logname));
+            m_log.reset(new Log(getName(), m_logname));
         }
         else
         {
@@ -336,28 +344,26 @@ void Stage::l_processOptions(const Options& options)
             m_log.reset(new Log(getName(), v));
         }
     }
+    if (m_debug && !m_verbose)
+        m_verbose = 1;
     m_log->setLevel((LogLevel::Enum)m_verbose);
 
     gdal::ErrorHandler::getGlobalErrorHandler().set(m_log, m_debug);
-
-    // If the user gave us an SRS via options, take that.
-    try
-    {
-        m_spatialReference = options.
-            getValueOrThrow<pdal::SpatialReference>("spatialreference");
-    }
-    catch (pdal_error const&)
-    {
-        // If one wasn't set on the options, we'll ignore at this
-        // point.  Maybe another stage might forward/set it later.
-    }
-
-    // Process reader-specific options.
-    readerProcessOptions(options);
-    // Process writer-specific options.
-    writerProcessOptions(options);
 }
 
+
+void Stage::l_initialize(PointTableRef table)
+{
+    m_metadata = table.metadata().add(getName());
+    writerInitialize(table);
+}
+
+
+void Stage::addSpatialReferenceArg(ProgramArgs& args)
+{
+    args.add("spatialreference", "Spatial reference to apply to data",
+        m_spatialReference);
+}
 
 const SpatialReference& Stage::getSpatialReference() const
 {

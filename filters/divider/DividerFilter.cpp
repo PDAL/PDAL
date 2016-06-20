@@ -47,38 +47,57 @@ CREATE_STATIC_PLUGIN(1, 0, DividerFilter, Filter, s_info)
 
 std::string DividerFilter::getName() const { return s_info.name; }
 
-void DividerFilter::processOptions(const Options& options)
+std::istream& operator >> (std::istream& in, DividerFilter::Mode& mode)
 {
-    std::string mode = options.getValueOrDefault<std::string>("mode");
-    mode = Utils::tolower(mode);
-    if (mode.empty() || mode == "partition")
-        m_mode = Mode::Partition;
-    else if (mode == "round_robin")
-        m_mode = Mode::RoundRobin;
+    std::string s;
+    in >> s;
+    
+    s = Utils::tolower(s);
+    if (s == "round_robin")
+        mode = DividerFilter::Mode::RoundRobin;
+    else if (s == "partition")
+        mode = DividerFilter::Mode::Partition;
     else
     {
         std::ostringstream oss;
-        oss << getName() << ": Invalid 'mode' option '" << mode << "'. "
+        oss << "filters.divider: Invalid 'mode' option '" << s << "'. "
             "Valid options are 'partition' and 'round_robin'";
         throw pdal_error(oss.str());
     }
-    if (options.hasOption("count") && options.hasOption("capacity"))
+    return in;
+}
+
+
+void DividerFilter::addArgs(ProgramArgs& args)
+{
+    args.add("mode", "A mode of ‘partition’ will write sequential points "
+        "to an output view until the view meets its predetermined size. "
+        "‘round_robin’ mode will iterate through the output views as it "
+        "writes sequential points.", m_mode, DividerFilter::Mode::Partition);
+    m_cntArg = &args.add("count", "Number of output views", m_size);
+    m_capArg = &args.add("capacity", "Maximum number of points in each "
+        "output view", m_size);
+}
+
+
+void DividerFilter::initialize()
+{
+    if (m_cntArg->set() && m_capArg->set())
     {
         std::ostringstream oss;
         oss << getName() << ": Can't specify both option 'count' and "
             "option 'capacity.";
         throw pdal_error(oss.str());
     }
-    if (!options.hasOption("count") && !options.hasOption("capacity"))
+    if (!m_cntArg->set() && !m_capArg->set())
     {
         std::ostringstream oss;
         oss << getName() << ": Must specify either option 'count' or "
-            "option 'capacity.";
+            "option 'capacity'.";
         throw pdal_error(oss.str());
     }
-    if (options.hasOption("count"))
+    if (m_cntArg->set())
     {
-        m_size = options.getValueOrThrow<int>("count");
         m_sizeMode = SizeMode::Count;
         if (m_size < 2 || m_size > 1000)
         {
@@ -88,11 +107,8 @@ void DividerFilter::processOptions(const Options& options)
             throw pdal_error(oss.str());
         }
     }
-    if (options.hasOption("capacity"))
-    {
-        m_size = options.getValueOrThrow<point_count_t>("capacity");
+    if (m_capArg->set())
         m_sizeMode = SizeMode::Capacity;
-    }
 }
 
 
@@ -112,6 +128,7 @@ PointViewSet DividerFilter::run(PointViewPtr inView)
 
     if (m_mode == Mode::Partition)
     {
+std::cerr << "Partition!\n";
         point_count_t limit = ((inView->size() - 1) / m_size) + 1;
         unsigned viewNum = 0;
         for (PointId i = 0; i < inView->size();)
@@ -123,6 +140,7 @@ PointViewSet DividerFilter::run(PointViewPtr inView)
     }
     else // RoundRobin
     {
+std::cerr << "Round robin!\n";
         unsigned viewNum = 0;
         for (PointId i = 0; i < inView->size(); ++i)
         {

@@ -11,7 +11,6 @@
       "grid_dist_x":6.0,
       "grid_dist_y":6.0,
       "radius":8.4852813742385713,
-      "chunk_size":1234,
       "filename":"@CMAKE_SOURCE_DIR@/test/temp/autzen_grid",
       "output_type":"min",
       "output_type":"max",

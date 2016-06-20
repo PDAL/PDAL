@@ -102,10 +102,10 @@ NitfWriter::NitfWriter()
 }
 
 
-void NitfWriter::processOptions(const Options& options)
+void NitfWriter::addArgs(ProgramArgs& args)
 {
-    LasWriter::processOptions(options);
-    m_nitf.processOptions(options);
+    LasWriter::addArgs(args);
+    m_nitf.addArgs(args);
 }
 
 

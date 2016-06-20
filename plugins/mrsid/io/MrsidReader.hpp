@@ -59,12 +59,12 @@ class PDAL_DLL MrsidReader : public pdal::Reader
 public:
     virtual ~MrsidReader(){};
     MrsidReader();
+    MrsidReader& operator=(const MrsidReader&) = delete;
+    MrsidReader(const MrsidReader&) = delete;
 
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
-
-    Options getDefaultOptions();
 
     point_count_t getNumPoints() const
         { if (m_PS)
@@ -74,7 +74,6 @@ public:
         }
 
 protected:
-    virtual void initialize();
     virtual void addDimensions(PointLayoutPtr layout);
 private:
     LizardTech::MG4PointReader *m_PS;
@@ -84,10 +83,9 @@ private:
 
     point_count_t m_index;
 
-    MrsidReader& operator=(const MrsidReader&); // not implemented
-    MrsidReader(const MrsidReader&); // not implemented
-
-    void LayoutToPointInfo(const PointLayout &layout, LizardTech::PointInfo &pointInfo) const;
+    virtual void initialize();
+    void LayoutToPointInfo(const PointLayout &layout,
+        LizardTech::PointInfo &pointInfo) const;
     virtual QuickInfo inspect();
     virtual void ready(PointTableRef table)
         { ready(table, m_metadata); }

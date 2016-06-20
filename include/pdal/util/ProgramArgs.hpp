@@ -120,6 +120,16 @@ public:
         return *this;
     }
     /**
+      Provide error text for the argument to override the default.
+
+      \param error  Error text.
+    */
+    virtual Arg& setErrorText(const std::string& error)
+    {
+        m_error = error;
+        return *this;
+    }
+    /**
       Return whether the argument was set during command-line parsing.
     */
     bool set() const
@@ -231,6 +241,7 @@ protected:
     bool m_set;
     bool m_hidden;
     PosType m_positional;
+    std::string m_error;
 };
 
 /**
@@ -289,8 +300,13 @@ public:
         if (!Utils::fromString(s, m_var))
         {
             std::ostringstream oss;
-            oss << "Invalid value for argument '" << m_longname << "'.";
-            throw arg_error(oss.str());
+            if (m_error.size())
+                throw arg_error(m_error);
+            else
+            {
+                oss << "Invalid value for argument '" << m_longname << "'.";
+                throw arg_error(oss.str());
+            }
         }
         m_set = true;
     }
@@ -387,8 +403,9 @@ public:
     /**
       Set a an argument's value from a string.
 
-      \note  The string argument is ingored.  The value that is set is 'true'
-        if the variable's default value is 'false', and vice-versa.
+      \note  The argumet is either 'true' or 'false'.  True means that we're
+        setting the option, which sets the negative of the default value.
+        False sets the option to the default value (essentially a no-op).
       \note  Not intended to be called from user code.
 
       \param s  Value to set [ignored].
@@ -402,7 +419,7 @@ public:
                 "was provided.";
             throw arg_error(oss.str());
         }
-        m_val = !m_defaultVal;
+        m_val = (s == "true") ? !m_defaultVal : m_defaultVal;
         m_set = true;
     }
 
@@ -534,7 +551,10 @@ public:
     VArg(const std::string& longname, const std::string& shortname,
         const std::string& description, std::vector<T>& variable) :
         BaseVArg(longname, shortname, description), m_var(variable)
-    {}
+    {
+        // Clearing the vector resets to "default" value.
+        m_var.clear();
+    }
 
     /**
       Set a an argument's value from a string.
@@ -618,11 +638,14 @@ public:
     virtual void setValue(const std::string& s)
     {
         std::vector<std::string> slist = Utils::split2(s, ',');
+        for (auto& ts : slist)
+            Utils::trim(ts);
+
         if ((s.size() && s[0] == '-') || slist.empty())
         {
-            std::stringstream oss;
-            oss << "Argument '" << m_longname << "' needs a value and none "
-                "was provided.";
+            std::ostringstream oss;
+
+            oss << "Missing value for argument '" << m_longname << "'.";
             throw arg_error(oss.str());
         }
         m_rawVal = s;
@@ -1090,12 +1113,17 @@ private:
         {
             if (attachedValue)
             {
-                std::ostringstream oss;
-                oss << "Value '" << value << "' provided for argument '" <<
-                    name << "' when none is expected.";
-                throw arg_error(oss.str());
+                if (value != "true" && value != "false")
+                {
+                    std::ostringstream oss;
+                    oss << "Value '" << value << "' provided for argument '" <<
+                        name << "' when none is expected.";
+                    throw arg_error(oss.str());
+                }
             }
-            arg->setValue("true");
+            else
+                value = "true";
+            arg->setValue(value);
             return 1;
         }
 

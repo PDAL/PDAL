@@ -99,6 +99,9 @@ TEST(LasReaderTest, test_base_options)
         opts.add(opt_debug_string);
         LasReader reader;
         reader.setOptions(opts);
+
+        PointTable table;
+        reader.prepare(table);
         EXPECT_TRUE(reader.isDebug() == true);
     }
 
@@ -108,6 +111,9 @@ TEST(LasReaderTest, test_base_options)
         opts.add(opt_debug_bool);
         LasReader reader;
         reader.setOptions(opts);
+
+        PointTable table;
+        reader.prepare(table);
         EXPECT_TRUE(reader.isDebug() == true);
     }
 }

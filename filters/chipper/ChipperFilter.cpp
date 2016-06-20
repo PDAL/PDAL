@@ -67,6 +67,7 @@ be stored.
 **/
 
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -80,18 +81,10 @@ CREATE_STATIC_PLUGIN(1, 0, ChipperFilter, Filter, s_info)
 
 std::string ChipperFilter::getName() const { return s_info.name; }
 
-void ChipperFilter::processOptions(const Options& options)
+void ChipperFilter::addArgs(ProgramArgs& args)
 {
-    m_threshold = options.getValueOrDefault<uint32_t>("capacity", 5000u);
-}
-
-
-Options ChipperFilter::getDefaultOptions()
-{
-    Options options;
-    Option capacity("capacity", 5000u, "Tile capacity");
-    options.add(capacity);
-    return options;
+    args.add("capacity", "Maximum number of points per cell", m_threshold,
+        5000u);
 }
 
 

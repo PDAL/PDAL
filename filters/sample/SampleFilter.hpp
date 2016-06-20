@@ -52,22 +52,19 @@ class PDAL_DLL SampleFilter : public pdal::Filter
 public:
     SampleFilter() : Filter()
     {}
+    SampleFilter& operator=(const SampleFilter&) = delete;
+    SampleFilter(const SampleFilter&) = delete;
 
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
-
 private:
     double m_radius;
 
     virtual void addDimensions(PointLayoutPtr layout);
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
     virtual PointViewSet run(PointViewPtr view);
-
-    SampleFilter& operator=(const SampleFilter&); // not implemented
-    SampleFilter(const SampleFilter&); // not implemented
 };
 
 } // namespace pdal

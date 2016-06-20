@@ -80,8 +80,8 @@ TEST(XMLSchemaTest, read)
     };
 
     std::string xml =
-        ReadXML(TestConfig::g_data_path+"../../schemas/6-dim-schema.xml");
-    std::string xsd = ReadXML(TestConfig::g_data_path+"../../schemas/LAS.xsd");
+        ReadXML(TestConfig::dataPath() + "../../schemas/6-dim-schema.xml");
+    std::string xsd = ReadXML(TestConfig::dataPath() + "../../schemas/LAS.xsd");
 
     XMLSchema s(xml, xsd);
     XMLDimList dims = s.xmlDims();
@@ -91,43 +91,43 @@ TEST(XMLSchemaTest, read)
     XMLDim dim = getDim(dims, "X");
     DimType dt = dim.m_dimType;
     EXPECT_EQ(dim.m_name,  "X");
-    EXPECT_FLOAT_EQ(dt.m_xform.m_scale, .01);
-    EXPECT_FLOAT_EQ(dt.m_xform.m_offset, 0.0);
+    EXPECT_FLOAT_EQ(dt.m_xform.m_scale.m_val, .01);
+    EXPECT_FLOAT_EQ(dt.m_xform.m_offset.m_val, 0.0);
     EXPECT_EQ(dt.m_type, Dimension::Type::Signed32);
 
     dim = getDim(dims, "Y");
     dt = dim.m_dimType;
     EXPECT_EQ(dim.m_name, "Y");
-    EXPECT_FLOAT_EQ(dt.m_xform.m_scale, .01);
-    EXPECT_FLOAT_EQ(dt.m_xform.m_offset, 0.0);
+    EXPECT_FLOAT_EQ(dt.m_xform.m_scale.m_val, .01);
+    EXPECT_FLOAT_EQ(dt.m_xform.m_offset.m_val, 0.0);
     EXPECT_EQ(dt.m_type, Dimension::Type::Signed32);
 
     dim = getDim(dims, "Z");
     dt = dim.m_dimType;
     EXPECT_EQ(dim.m_name, "Z");
-    EXPECT_FLOAT_EQ(dt.m_xform.m_scale, .01);
-    EXPECT_FLOAT_EQ(dt.m_xform.m_offset, 0.0);
+    EXPECT_FLOAT_EQ(dt.m_xform.m_scale.m_val, .01);
+    EXPECT_FLOAT_EQ(dt.m_xform.m_offset.m_val, 0.0);
     EXPECT_EQ(dt.m_type, Dimension::Type::Signed32);
 
     dim = getDim(dims, "Intensity");
     dt = dim.m_dimType;
     EXPECT_EQ(dim.m_name, "Intensity");
-    EXPECT_FLOAT_EQ(dt.m_xform.m_scale, 1.0);
-    EXPECT_FLOAT_EQ(dt.m_xform.m_offset, 0.0);
+    EXPECT_FLOAT_EQ(dt.m_xform.m_scale.m_val, 1.0);
+    EXPECT_FLOAT_EQ(dt.m_xform.m_offset.m_val, 0.0);
     EXPECT_EQ(dt.m_type, Dimension::Type::Unsigned16);
 
     dim = getDim(dims, "ReturnNumber");
     dt = dim.m_dimType;
     EXPECT_EQ(dim.m_name, "ReturnNumber");
-    EXPECT_FLOAT_EQ(dt.m_xform.m_scale, 1.0);
-    EXPECT_FLOAT_EQ(dt.m_xform.m_offset, 0.0);
+    EXPECT_FLOAT_EQ(dt.m_xform.m_scale.m_val, 1.0);
+    EXPECT_FLOAT_EQ(dt.m_xform.m_offset.m_val, 0.0);
     EXPECT_EQ(dt.m_type, Dimension::Type::Unsigned8);
 
     dim = getDim(dims, "NumberOfReturns");
     dt = dim.m_dimType;
     EXPECT_EQ(dim.m_name, "NumberOfReturns");
-    EXPECT_FLOAT_EQ(dt.m_xform.m_scale, 1.0);
-    EXPECT_FLOAT_EQ(dt.m_xform.m_offset, 0.0);
+    EXPECT_FLOAT_EQ(dt.m_xform.m_scale.m_val, 1.0);
+    EXPECT_FLOAT_EQ(dt.m_xform.m_offset.m_val, 0.0);
     EXPECT_EQ(dt.m_type, Dimension::Type::Unsigned8);
 }
 
@@ -136,9 +136,9 @@ TEST(XMLSchemaTest, copy)
 {
     using namespace pdal;
 
-    std::string xml = ReadXML(TestConfig::g_data_path +
+    std::string xml = ReadXML(TestConfig::dataPath() +
         "../../schemas/16-dim-schema.xml");
-    std::string xsd = ReadXML(TestConfig::g_data_path+"../../schemas/LAS.xsd");
+    std::string xsd = ReadXML(TestConfig::dataPath() + "../../schemas/LAS.xsd");
 
     XMLSchema s1(xml, xsd);
 
@@ -186,9 +186,9 @@ TEST(XMLSchemaTest, utf8)
 {
     using namespace pdal;
 
-    std::string inFilename(TestConfig::g_data_path +
+    std::string inFilename(TestConfig::dataPath() +
         "../../schemas/utf8-schema.xml");
-    std::string inXsdFilename(TestConfig::g_data_path +
+    std::string inXsdFilename(TestConfig::dataPath() +
         "../../schemas/LAS.xsd");
     std::string xml = ReadXML(inFilename);
     std::string xsd = ReadXML(inXsdFilename);
@@ -237,13 +237,17 @@ TEST(XMLSchemaTest, precision)
     // Order of dimensions should be maintained.
     DimType d = dims[0].m_dimType;
     EXPECT_EQ(d.m_type, d1.m_dimType.m_type);
-    EXPECT_DOUBLE_EQ(d.m_xform.m_offset, d1.m_dimType.m_xform.m_offset);
-    EXPECT_DOUBLE_EQ(d.m_xform.m_scale, d1.m_dimType.m_xform.m_scale);
+    EXPECT_DOUBLE_EQ(d.m_xform.m_offset.m_val,
+        d1.m_dimType.m_xform.m_offset.m_val);
+    EXPECT_DOUBLE_EQ(d.m_xform.m_scale.m_val,
+        d1.m_dimType.m_xform.m_scale.m_val);
 
     d = dims[1].m_dimType;
     EXPECT_EQ(d.m_type, d2.m_dimType.m_type);
-    EXPECT_DOUBLE_EQ(d.m_xform.m_offset, d2.m_dimType.m_xform.m_offset);
-    EXPECT_DOUBLE_EQ(d.m_xform.m_scale, d2.m_dimType.m_xform.m_scale);
+    EXPECT_DOUBLE_EQ(d.m_xform.m_offset.m_val,
+        d2.m_dimType.m_xform.m_offset.m_val);
+    EXPECT_DOUBLE_EQ(d.m_xform.m_scale.m_val,
+        d2.m_dimType.m_xform.m_scale.m_val);
 }
 
 TEST(XMLSchemaTest, nonstandard)

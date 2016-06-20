@@ -75,23 +75,7 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
     static Dimension::IdList getDefaultDimensions();
-
-    std::string getFileName() const;
-
-    std::size_t getPointDataOffset() const
-        { return m_offset; }
-    uint32_t getPointDataSize() const
-        { return m_size; }
-    point_count_t getNumPoints() const
-        { return m_numPoints; }
-    bool eof()
-        { return m_index >= m_numPoints; }
-
-    // this is called by the stage's iterator
-    point_count_t processBuffer(PointViewPtr view, std::istream& stream,
-        point_count_t count) const;
 
 private:
     QFIT_Format_Type m_format;
@@ -105,15 +89,15 @@ private:
     std::unique_ptr<IStream> m_istream;
     point_count_t m_index;
 
-    virtual void processOptions(const Options& ops);
+    virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
     virtual point_count_t read(PointViewPtr buf, point_count_t count);
     virtual void done(PointTableRef table);
 
-    QfitReader& operator=(const QfitReader&); // not implemented
-    QfitReader(const QfitReader&); // not implemented
+    QfitReader& operator=(const QfitReader&) = delete;
+    QfitReader(const QfitReader&) = delete;
 };
 
 } // namespace pdal

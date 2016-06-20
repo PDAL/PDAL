@@ -48,20 +48,17 @@ extern "C" PF_ExitFunc MatlabWriter_InitPlugin();
 namespace pdal
 {
 
-
 class PDAL_DLL MatlabWriter : public Writer
 {
 public:
-
     static void* create();
     static int32_t destroy(void*);
     std::string getName() const;
 
-    MatlabWriter();
+    MatlabWriter()
+    {}
 
 private:
-
-    virtual void processOptions(const Options& options);
     virtual void prepared(PointTableRef table);
     virtual void ready(PointTableRef table);
     virtual void write(const PointViewPtr view);

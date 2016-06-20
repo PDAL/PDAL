@@ -57,8 +57,6 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
-
 private:
     int m_meanK;
     double m_multiplier;
@@ -66,7 +64,7 @@ private:
     bool m_extract;
 
     virtual void addDimensions(PointLayoutPtr layout);
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
     virtual PointViewSet run(PointViewPtr view);
 
     StatisticalOutlierFilter& operator=(const StatisticalOutlierFilter&); // not implemented

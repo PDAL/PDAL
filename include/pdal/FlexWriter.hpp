@@ -34,6 +34,7 @@
 #pragma once
 
 #include <pdal/PDALUtils.hpp>
+#include <pdal/Scaling.hpp>
 #include <pdal/Writer.hpp>
 
 namespace pdal
@@ -56,16 +57,12 @@ protected:
         }
     }
 
+    Scaling m_scaling;
+
 private:
-    virtual void writerProcessOptions(const Options& options)
+    virtual void writerInitialize(PointTableRef table)
     {
-        Writer::writerProcessOptions(options);
-        if (m_filename.empty())
-        {
-            std::ostringstream oss;
-            oss << "Can't write with " << getName() << " without filename.";
-            throw pdal_error(oss.str());
-        }
+        Writer::writerInitialize(table);
         handleFilenameTemplate();
     }
 

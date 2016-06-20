@@ -44,6 +44,7 @@
 #include <pdal/util/OStream.hpp>
 #include <pdal/util/Utils.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #ifdef PDAL_HAVE_LIBGEOTIFF
 #include "GeotiffSupport.hpp"
@@ -65,79 +66,62 @@ CREATE_STATIC_PLUGIN(1, 0, LasWriter, Writer, s_info)
 std::string LasWriter::getName() const { return s_info.name; }
 
 LasWriter::LasWriter() : m_ostream(NULL), m_compression(LasCompression::None)
-{
-    m_majorVersion.setDefault(1);
-    m_minorVersion.setDefault(2);
-    m_dataformatId.setDefault(3);
-    m_filesourceId.setDefault(0);
-    m_globalEncoding.setDefault(0);
-    m_systemId.setDefault(m_lasHeader.getSystemIdentifier());
-    m_softwareId.setDefault(GetDefaultSoftwareId());
+{}
 
+
+void LasWriter::addArgs(ProgramArgs& args)
+{
     std::time_t now;
     std::time(&now);
     std::tm* ptm = std::gmtime(&now);
     uint16_t year = ptm->tm_year + 1900;
     uint16_t doy = ptm->tm_yday;
 
-    m_creationDoy.setDefault(doy);
-    m_creationYear.setDefault(year);
-    m_scaleX.setDefault(".01");
-    m_scaleY.setDefault(".01");
-    m_scaleZ.setDefault(".01");
-    m_offsetX.setDefault("0");
-    m_offsetY.setDefault("0");
-    m_offsetZ.setDefault("0");
+    args.add("filename", "Output filename", m_filename).setPositional();
+    args.add("a_srs", "Spatial reference to use to write output", m_aSrs);
+    args.add("compression", "Compression to use for output ('LASZIP' or "
+        "'LAZPERF')", m_compression, LasCompression::None);
+    args.add("discard_high_return_numbers", "Discard points with out-of-spec "
+        "return numbers.", m_discardHighReturnNumbers);
+    args.add("extra_dims", "Dimensions to write above those in point format",
+        m_extraDimSpec);
+    args.add("forward", "Dimensions to forward from LAS reader", m_forwardSpec);
+
+    args.add("major_version", "LAS major version", m_majorVersion,
+        decltype(m_majorVersion)(1));
+    args.add("minor_version", "LAS minor version", m_minorVersion,
+        decltype(m_minorVersion)(2));
+    args.add("dataformat_id", "Point format", m_dataformatId,
+        decltype(m_dataformatId)(3));
+    args.add("format", "Point format", m_dataformatId,
+        decltype(m_dataformatId)(3));
+    args.add("global_encoding", "Global encoding byte", m_globalEncoding);
+    args.add("project_id", "Project ID", m_projectId);
+    args.add("system_id", "System ID", m_systemId,
+        decltype(m_systemId)(m_lasHeader.getSystemIdentifier()));
+    args.add("software_id", "Software ID", m_softwareId,
+        decltype(m_softwareId)(GetDefaultSoftwareId()));
+    args.add("creation_doy", "Creation day of year", m_creationDoy,
+        decltype(m_creationDoy)(doy));
+    args.add("creation_year", "Creation year", m_creationYear,
+        decltype(m_creationYear)(year));
+    args.add("scale_x", "X scale factor", m_scaleX, decltype(m_scaleX)(".01"));
+    args.add("scale_y", "Y scale factor", m_scaleY, decltype(m_scaleY)(".01"));
+    args.add("scale_z", "Z scale factor", m_scaleZ, decltype(m_scaleZ)(".01"));
+    args.add("offset_x", "X offset", m_offsetX);
+    args.add("offset_y", "Y offset", m_offsetY);
+    args.add("offset_z", "Z offset", m_offsetZ);
 }
 
-
-Options LasWriter::getDefaultOptions()
+void LasWriter::initialize()
 {
-    Options options;
-    LasHeader header;
-
-    options.add("filename", "", "Output file specification.");
-    options.add("compression", "none", "Compression engine to use ('laszip' "
-        "or 'lazperf'.");
-    options.add("major_version", 1, "LAS Major version");
-    options.add("minor_version", 2, "LAS Minor version");
-    options.add("dataformat_id", 3, "Point format to write");
-    options.add("filesource_id", 0, "File Source ID for this file");
-    options.add("global_encoding", 0, "Global encoding bits");
-    options.add("system_id", header.getSystemIdentifier(),
-        "System ID for this file");
-    options.add("software_id", GetDefaultSoftwareId(),
-        "Software ID for this file");
-
-    std::time_t now;
-    std::time(&now);
-    std::tm* ptm = std::gmtime(&now);
-    uint16_t year = ptm->tm_year + 1900;
-    uint16_t doy = ptm->tm_yday;
-
-    options.add("creation_doy", doy, "Day of Year for file");
-    options.add("creation_year", year, "4-digit year value for file");
-    options.add("extra_dims", "", "Extra dimensions not part of the LAS "
-        "point format to be added to each point.");
-
-    return options;
-}
-
-
-void LasWriter::processOptions(const Options& options)
-{
-    if (options.hasOption("a_srs"))
-        setSpatialReference(options.getValueOrDefault<std::string>("a_srs"));
-
-    std::string compression =
-        options.getValueOrDefault<std::string>("compression");
-    compression = Utils::toupper(compression);
-    if (compression == "LASZIP" || compression == "TRUE")
+    std::string ext = FileUtils::extension(m_filename);
+    ext = Utils::tolower(ext);
+    if ((ext == ".laz") && (m_compression == LasCompression::None))
         m_compression = LasCompression::LasZip;
-    else if (compression == "LAZPERF")
-        m_compression = LasCompression::LazPerf;
-    else
-        m_compression = LasCompression::None;
+
+    if (!m_aSrs.empty())
+        setSpatialReference(m_aSrs);
     if (m_compression != LasCompression::None)
         m_lasHeader.setCompressed(true);
 #if !defined(PDAL_HAVE_LASZIP) && !defined(PDAL_HAVE_LAZPERF)
@@ -145,14 +129,8 @@ void LasWriter::processOptions(const Options& options)
         throw pdal_error("Can't write LAZ output.  "
             "PDAL not built with LASzip or LAZperf.");
 #endif
-
-    m_discardHighReturnNumbers = options.getValueOrDefault(
-        "discard_high_return_numbers", false);
-    StringList extraDims = options.getValueOrDefault<StringList>("extra_dims");
-    m_extraDims = LasUtils::parse(extraDims);
-
-    fillForwardList(options);
-    getHeaderOptions(options);
+    m_extraDims = LasUtils::parse(m_extraDimSpec);
+    fillForwardList();
 }
 
 
@@ -195,40 +173,26 @@ void LasWriter::prepared(PointTableRef table)
 
 // Get header info from options and store in map for processing with
 // metadata.
-void LasWriter::fillForwardList(const Options &options)
+void LasWriter::fillForwardList()
 {
-    StringList forwards = options.getValues("forward");
+    static const StringList header = {
+        "dataformat_id", "major_version", "minor_version", "filesource_id",
+        "global_encoding", "project_id", "system_id", "software_id",
+        "creation_doy", "creation_year"
+    };
 
-    StringList header;
-    header.push_back("dataformat_id");
-    header.push_back("major_version");
-    header.push_back("minor_version");
-    header.push_back("filesource_id");
-    header.push_back("global_encoding");
-    header.push_back("project_id");
-    header.push_back("system_id");
-    header.push_back("software_id");
-    header.push_back("creation_doy");
-    header.push_back("creation_year");
+    static const StringList scale = { "scale_x", "scale_y", "scale_z" };
 
-    StringList scale;
-    scale.push_back("scale_x");
-    scale.push_back("scale_y");
-    scale.push_back("scale_z");
+    static const StringList offset = { "offset_x", "offset_y", "offset_z" };
 
-    StringList offset;
-    offset.push_back("offset_x");
-    offset.push_back("offset_y");
-    offset.push_back("offset_z");
-
-    StringList all;
+    static StringList all;
     all.insert(all.begin(), header.begin(), header.end());
     all.insert(all.begin(), scale.begin(), scale.end());
     all.insert(all.begin(), offset.begin(), offset.end());
 
     // Build the forward list, replacing special keywords with the proper
     // field names.
-    for (auto& name : forwards)
+    for (auto& name : m_forwardSpec)
     {
         if (name == "all")
         {
@@ -256,37 +220,6 @@ void LasWriter::fillForwardList(const Options &options)
             throw pdal_error(oss.str());
         }
     }
-}
-
-
-template<typename T>
-void setHeaderOption(const std::string& name, T& headerVal, const Options& ops)
-{
-    if (ops.hasOption(name))
-        headerVal.setVal(ops.getValueOrDefault<typename T::type>(name));
-}
-
-
-// Get header info from options and store in map for processing with
-// metadata.
-void LasWriter::getHeaderOptions(const Options &options)
-{
-    setHeaderOption("major_version", m_majorVersion, options);
-    setHeaderOption("minor_version", m_minorVersion, options);
-    setHeaderOption("dataformat_id", m_dataformatId, options);
-    setHeaderOption("format", m_dataformatId, options);
-    setHeaderOption("global_encoding", m_globalEncoding, options);
-    setHeaderOption("project_id", m_projectId, options);
-    setHeaderOption("system_id", m_systemId, options);
-    setHeaderOption("software_id", m_softwareId, options);
-    setHeaderOption("creation_doy", m_creationDoy, options);
-    setHeaderOption("creation_year", m_creationYear, options);
-    setHeaderOption("scale_x", m_scaleX, options);
-    setHeaderOption("scale_y", m_scaleY, options);
-    setHeaderOption("scale_z", m_scaleZ, options);
-    setHeaderOption("offset_x", m_offsetX, options);
-    setHeaderOption("offset_y", m_offsetY, options);
-    setHeaderOption("offset_z", m_offsetZ, options);
 }
 
 
@@ -599,12 +532,12 @@ void LasWriter::handleHeaderForwards(MetadataNode& forward)
     handleHeaderForward("offset_y", m_offsetY, forward);
     handleHeaderForward("offset_z", m_offsetZ, forward);
 
-    m_xXform.setScale(m_scaleX.val());
-    m_yXform.setScale(m_scaleY.val());
-    m_zXform.setScale(m_scaleZ.val());
-    m_xXform.setOffset(m_offsetX.val());
-    m_yXform.setOffset(m_offsetY.val());
-    m_zXform.setOffset(m_offsetZ.val());
+    m_scaling.m_xXform.m_scale.set(m_scaleX.val());
+    m_scaling.m_yXform.m_scale.set(m_scaleY.val());
+    m_scaling.m_zXform.m_scale.set(m_scaleZ.val());
+    m_scaling.m_xXform.m_offset.set(m_offsetX.val());
+    m_scaling.m_yXform.m_offset.set(m_offsetY.val());
+    m_scaling.m_zXform.m_offset.set(m_offsetZ.val());
 }
 
 /// Fill the LAS header with values as provided in options or forwarded
@@ -613,9 +546,7 @@ void LasWriter::fillHeader()
 {
     const uint16_t WKT_MASK = (1 << 4);
 
-    m_lasHeader.setScale(m_xXform.m_scale, m_yXform.m_scale, m_zXform.m_scale);
-    m_lasHeader.setOffset(m_xXform.m_offset, m_yXform.m_offset,
-        m_zXform.m_offset);
+    m_lasHeader.setScaling(m_scaling);
     m_lasHeader.setVlrCount(m_vlrs.size());
     m_lasHeader.setEVlrCount(m_eVlrs.size());
 
@@ -731,7 +662,7 @@ void LasWriter::writeView(const PointViewPtr view)
 {
     Utils::writeProgress(m_progressFd, "READYVIEW",
         std::to_string(view->size()));
-    setAutoXForm(view);
+    m_scaling.setAutoXForm(view);
 
     size_t pointLen = m_lasHeader.pointLen();
 
@@ -830,14 +761,6 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
             m_error.numReturnsWarning(numberOfReturns);
     }
 
-    double xOrig = point.getFieldAs<double>(Id::X);
-    double yOrig = point.getFieldAs<double>(Id::Y);
-    double zOrig = point.getFieldAs<double>(Id::Z);
-
-    double x = (xOrig - m_xXform.m_offset) / m_xXform.m_scale;
-    double y = (yOrig - m_yXform.m_offset) / m_yXform.m_scale;
-    double z = (zOrig - m_zXform.m_offset) / m_zXform.m_scale;
-
     auto converter = [this](double d, Dimension::Id::Enum dim) -> int32_t
     {
         int32_t i;
@@ -852,6 +775,13 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
         }
         return i;
     };
+
+    double xOrig = point.getFieldAs<double>(Id::X);
+    double yOrig = point.getFieldAs<double>(Id::Y);
+    double zOrig = point.getFieldAs<double>(Id::Z);
+    double x = m_scaling.m_xXform.toScaled(xOrig);
+    double y = m_scaling.m_yXform.toScaled(yOrig);
+    double z = m_scaling.m_zXform.toScaled(zOrig);
 
     ostream << converter(x, Id::X);
     ostream << converter(y, Id::Y);
@@ -974,10 +904,7 @@ void LasWriter::finishOutput()
     }
 
     // Reset the offset/scale since it may have been auto-computed
-    m_lasHeader.setOffset(m_xXform.m_offset, m_yXform.m_offset,
-        m_zXform.m_offset);
-    m_lasHeader.setScale(m_xXform.m_scale, m_yXform.m_scale,
-        m_zXform.m_scale);
+    m_lasHeader.setScaling(m_scaling);
 
     // The summary is calculated as points are written.
     m_lasHeader.setSummary(*m_summaryData);

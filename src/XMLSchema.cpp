@@ -464,7 +464,7 @@ bool XMLSchema::load(xmlDocPtr doc)
                     std::cerr << "Unable to fetch offset value!";
                     return false;
                 }
-                dim.m_dimType.m_xform.m_offset = std::atof((const char*)n);
+                dim.m_dimType.m_xform.m_offset.set((const char*)n);
                 xmlFree(n);
             }
             if (propName == "scale")
@@ -475,7 +475,7 @@ bool XMLSchema::load(xmlDocPtr doc)
                     std::cerr << "Unable to fetch scale value!";
                     return false;
                 }
-                dim.m_dimType.m_xform.m_scale = std::atof((const char*)n);
+                dim.m_dimType.m_xform.m_scale.set((const char*)n);
                 xmlFree(n);
             }
         }
@@ -578,14 +578,14 @@ void XMLSchema::writeXml(xmlTextWriterPtr w) const
             std::ostringstream out;
             out.precision(15);
 
-            out << xform.m_scale;
+            out << xform.m_scale.m_val;
             std::string scale = out.str();
 
             out.str(std::string());
-            out << xform.m_offset;
+            out << xform.m_offset.m_val;
             std::string offset = out.str();
 
-            out << xform.m_scale;
+            out << xform.m_scale.m_val;
             xmlTextWriterWriteElementNS(w, (const xmlChar*)"pc",
                 (const xmlChar *)"scale", NULL,
                 (const xmlChar *)scale.data());

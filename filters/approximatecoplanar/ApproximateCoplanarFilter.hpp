@@ -56,12 +56,13 @@ class PDAL_DLL ApproximateCoplanarFilter : public Filter
 public:
     ApproximateCoplanarFilter() : Filter()
     {}
+    ApproximateCoplanarFilter& operator=(
+        const ApproximateCoplanarFilter&) = delete;
+    ApproximateCoplanarFilter(const ApproximateCoplanarFilter&) = delete;
 
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
-
-    Options getDefaultOptions();
 
 private:
     int m_knn;
@@ -70,11 +71,8 @@ private:
     Dimension::Id::Enum m_coplanar;
 
     virtual void addDimensions(PointLayoutPtr layout);
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
     virtual void filter(PointView& view);
-
-    ApproximateCoplanarFilter& operator=(const ApproximateCoplanarFilter&); // not implemented
-    ApproximateCoplanarFilter(const ApproximateCoplanarFilter&); // not implemented
 };
 
 } // namespace pdal

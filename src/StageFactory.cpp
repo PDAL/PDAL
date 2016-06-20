@@ -209,26 +209,6 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
 }
 
 
-pdal::Options StageFactory::inferWriterOptionsChanges(
-    const std::string& filename)
-{
-    std::string ext = FileUtils::extension(filename);
-    ext = Utils::tolower(ext);
-    Options options;
-
-    if (Utils::iequals(ext,".laz"))
-        options.add("compression", true);
-
-    if (Utils::iequals(ext, ".pcd") &&
-        PluginManager::createObject("writers.pcd"))
-    {
-        options.add("format","PCD");
-    }
-
-    return options;
-}
-
-
 StageFactory::StageFactory(bool no_plugins)
 {
     if (!no_plugins)

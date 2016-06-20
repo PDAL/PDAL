@@ -23,8 +23,7 @@
       434.609375,636539.155163229792379 851056.63721774588339
       422.6396484375,636889.412951239268295 851528.512293258565478
       422.7001953125))",
-      "outside":false,
-      "x_dim":"readers.las.X"
+      "outside":false
     },
     {
       "filename":"@CMAKE_SOURCE_DIR@/test/temp/crop-wkt.las",

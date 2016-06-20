@@ -167,9 +167,10 @@ Word #       Content
 #include "QfitReader.hpp"
 
 #include <pdal/PointView.hpp>
+#include <pdal/pdal_macros.hpp>
 #include <pdal/util/Extractor.hpp>
 #include <pdal/util/portable_endian.hpp>
-#include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include <algorithm>
 #include <map>
@@ -269,30 +270,14 @@ void QfitReader::initialize()
 }
 
 
-Options QfitReader::getDefaultOptions()
+void QfitReader::addArgs(ProgramArgs& args)
 {
-    Options options;
-    Option filename("filename", "", "file to read from");
-    Option flip_coordinates("flip_coordinates", true,
-        "Flip coordinates from 0-360 to -180-180");
-    Option convert_z_units("scale_z", 0.001f,
-        "Z scale. Use 0.001 to go from mm to m");
-    Option little_endian("little_endian", false,
-        "Are data in little endian format?");
-    options.add(filename);
-    options.add(flip_coordinates);
-    options.add(convert_z_units);
-    options.add(little_endian);
-    return options;
+    args.add("flip_coordinates", "Flip coordinates from 0-360 to -180-180",
+        m_flip_x);
+    args.add("scale_z", "Z scale. Use 0.001 to go from mm to m",
+        m_scale_z, 0.001);
 }
-
-
-void QfitReader::processOptions(const Options& ops)
-{
-    m_flip_x = ops.getValueOrDefault("flip_coordinates", true);
-    m_scale_z = ops.getValueOrDefault("scale_z", 0.001);
-}
-
+    
 
 void QfitReader::addDimensions(PointLayoutPtr layout)
 {
@@ -340,7 +325,7 @@ void QfitReader::ready(PointTableRef)
     }
     m_index = 0;
     m_istream.reset(new IStream(m_filename));
-    m_istream->seek(getPointDataOffset());
+    m_istream->seek(m_offset);
 }
 
 

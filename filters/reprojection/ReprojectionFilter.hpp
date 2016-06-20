@@ -61,7 +61,7 @@ public:
     std::string getName() const;
 
 private:
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
     virtual void ready(PointTableRef table);
     virtual PointViewSet run(PointViewPtr view);

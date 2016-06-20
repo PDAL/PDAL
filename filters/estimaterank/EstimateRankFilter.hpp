@@ -56,12 +56,12 @@ class PDAL_DLL EstimateRankFilter : public Filter
 public:
     EstimateRankFilter() : Filter()
     {}
+    EstimateRankFilter& operator=(const EstimateRankFilter&) = delete;
+    EstimateRankFilter(const EstimateRankFilter&) = delete;
 
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
-
-    Options getDefaultOptions();
 
 private:
     int m_knn;
@@ -69,11 +69,8 @@ private:
     Dimension::Id::Enum m_rank;
 
     virtual void addDimensions(PointLayoutPtr layout);
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
     virtual void filter(PointView& view);
-
-    EstimateRankFilter& operator=(const EstimateRankFilter&); // not implemented
-    EstimateRankFilter(const EstimateRankFilter&); // not implemented
 };
 
 } // namespace pdal

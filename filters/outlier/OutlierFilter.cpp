@@ -37,6 +37,7 @@
 #include <pdal/KDIndex.hpp>
 #include <pdal/util/Utils.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include <string>
 #include <vector>
@@ -56,29 +57,16 @@ std::string OutlierFilter::getName() const
 }
 
 
-Options OutlierFilter::getDefaultOptions()
+void OutlierFilter::addArgs(ProgramArgs& args)
 {
-    Options options;
-    options.add("method", "statistical", "Method [default: statistical]");
-    options.add("min_k", 2, "Minimum number of neighbors in radius");
-    options.add("radius", 1, "Radius");
-    options.add("mean_k", 8, "Mean number of neighbors");
-    options.add("multiplier", 2, "Standard deviation threshold");
-    options.add("classify", true, "Apply classification labels?");
-    options.add("extract", false, "Extract ground returns?");
-    return options;
-}
-
-
-void OutlierFilter::processOptions(const Options& options)
-{
-    m_method = options.getValueOrDefault<std::string>("method", "statistical");
-    m_minK = options.getValueOrDefault<int>("min_k", 2);
-    m_radius = options.getValueOrDefault<double>("radius", 1);
-    m_meanK = options.getValueOrDefault<int>("mean_k", 8);
-    m_multiplier = options.getValueOrDefault<double>("multiplier", 2);
-    m_classify = options.getValueOrDefault<bool>("classify", true);
-    m_extract = options.getValueOrDefault<bool>("extract", false);
+    args.add("method", "Method [default: statistical]", m_method,
+        "statistical");
+    args.add("min_k", "Minimum number of neighbors in radius", m_minK, 2);
+    args.add("radius", "Radius", m_radius, 1.0);
+    args.add("mean_k", "Mean number of neighbors", m_meanK, 8);
+    args.add("multiplier", "Standard deviation threshold", m_meanK, 8);
+    args.add("classify", "Apply classification labels?", m_classify, true);
+    args.add("extract", "Extract ground returns?", m_extract);
 }
 
 

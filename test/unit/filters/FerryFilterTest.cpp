@@ -88,7 +88,7 @@ TEST(FerryFilterTest, stream)
     Options ro;
     ro.add("mode", "ramp");
     ro.add("bounds", BOX3D(0, 0, 0, 99, 99, 99));
-    ro.add("num_points", 100);
+    ro.add("count", 100);
 
     r.setOptions(ro);
 

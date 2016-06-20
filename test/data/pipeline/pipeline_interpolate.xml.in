@@ -10,9 +10,6 @@
         <Option name="radius">
             8.4852813742385713
         </Option>
-        <Option name="chunk_size">
-            1234
-        </Option>
         <Option name="filename">
             @CMAKE_SOURCE_DIR@/test/temp/autzen_grid
         </Option>
