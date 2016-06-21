@@ -1283,7 +1283,6 @@ void DerivativeWriter::writeCatchmentArea(Eigen::MatrixXd* tDemData,
 //             float val = data[(tYOut * m_GRID_SIZE_X) + tXOut];
 //             if (val != c_background && !_isnanf(val))
 //             {
-//                 //std::cerr << val << std::endl;
 //                 mean += val;
 //                 nvals++;
 //             }
@@ -1308,15 +1307,11 @@ void DerivativeWriter::writeCatchmentArea(Eigen::MatrixXd* tDemData,
 //     stdev /= (nvals - 1);
 //     stdev = std::sqrt(stdev);
 //
-//     std::cerr << mean << ", " << stdev << ", " << nvals << std::endl;
-//
 //     // pass #3: scale to +/- 2x standard deviations from mean
 //     double min_val = mean - 2*stdev;
 //     double max_val = mean + 2*stdev;
 //     double range = max_val - min_val;
 //     double scale = 256.0 / range;
-//
-//     std::cerr << min_val << " < " << max_val << std::endl;
 //
 //     #pragma omp parallel for
 //

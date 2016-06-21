@@ -181,6 +181,13 @@ public:
     void addConditionalOptions(const Options& opts);
 
     /**
+      Add a stage's options to a ProgramArgs set.
+
+      \param args  ProgramArgs to add to.
+    */
+    void addAllArgs(ProgramArgs& args);
+
+    /**
       Add options to the existing option set.
 
       \param opts  Options to add.

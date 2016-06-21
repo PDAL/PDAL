@@ -959,6 +959,35 @@ public:
         }
     }
 
+    /**
+      Write a verbose description of arguments to an output stream.  Each
+      argument is on its own line.  The argument's description follows
+      on subsequent lines.
+
+      \param out  Stream to which output should be written.
+      \param nameIndent  Number of characters to indent argument lines.
+      \param descripIndent  Number of characters to indent description lines.
+      \param totalWidth  Total line width.
+
+    */
+    void dump2(std::ostream& out, size_t nameIndent, size_t descripIndent,
+        size_t totalWidth)
+    {
+        size_t width = totalWidth - descripIndent;
+        for (auto ai = m_args.begin(); ai != m_args.end(); ++ai)
+        {
+            Arg *a = ai->get();
+            out << std::string(nameIndent, ' ') << a->longname() << std::endl;
+            std::vector<std::string> descrip =
+                Utils::wordWrap(a->description(), width);
+            if (descrip.empty())
+                descrip.push_back("<no description available>");
+            for (std::string& s : descrip)
+                out << std::string(descripIndent, ' ') << s << std::endl;
+            out << std::endl;
+        }
+    }
+
 private:
     /*
       Split an argument name into longname and shortname.

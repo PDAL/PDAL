@@ -77,30 +77,6 @@ void CropFilter::addArgs(ProgramArgs& args)
 
 void CropFilter::initialize()
 {
-    // This should probably be encapsulated in some helper class and moved
-    // to addArgs().
-/**
-    for (std::string bounds : m_boundsTxt)
-    {
-        std::cerr << "bound = " << bounds << "!\n";
-        BOX2D b2d;
-        std::istringstream iss(bounds);
-        iss >> b2d;
-        if (!iss.fail())
-            m_bounds.push_back(b2d);
-        else
-        {
-            std::istringstream iss(bounds);
-            BOX3D b3d;
-            iss >> b3d;
-            if (iss.fail())
-                throw pdal_error("Invalid bounds provided as option.  "
-                    "Format: '([xmin,xmax],[ymin,ymax])'.");
-            m_bounds.push_back(b3d.to2d());
-        }
-    }
-**/
-
     // Set geometry from polygons.
     if (m_polys.size())
     {

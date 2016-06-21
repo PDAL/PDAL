@@ -128,7 +128,6 @@ PointViewSet DividerFilter::run(PointViewPtr inView)
 
     if (m_mode == Mode::Partition)
     {
-std::cerr << "Partition!\n";
         point_count_t limit = ((inView->size() - 1) / m_size) + 1;
         unsigned viewNum = 0;
         for (PointId i = 0; i < inView->size();)
@@ -140,7 +139,6 @@ std::cerr << "Partition!\n";
     }
     else // RoundRobin
     {
-std::cerr << "Round robin!\n";
         unsigned viewNum = 0;
         for (PointId i = 0; i < inView->size(); ++i)
         {

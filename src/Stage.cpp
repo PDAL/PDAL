@@ -79,13 +79,25 @@ void Stage::serialize(MetadataNode root, PipelineWriter::TagMap& tags) const
     root.addList(anon);
 }
 
-
-void Stage::handleOptions()
+void Stage::addAllArgs(ProgramArgs& args)
 {
     try
     {
-        l_addArgs(*m_args);
-        addArgs(*m_args);
+        l_addArgs(args);
+        addArgs(args);
+    }
+    catch (arg_error error)
+    {
+        throw pdal_error(error.m_error);
+    }
+}
+
+
+void Stage::handleOptions()
+{
+    addAllArgs(*m_args);
+    try
+    {
         StringList cmdline = m_options.toCommandLine();
         m_args->parse(cmdline);
     }

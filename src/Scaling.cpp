@@ -38,7 +38,6 @@ namespace pdal
 
 void Scaling::addArgs(ProgramArgs& args)
 {
-    std::cerr << "Add scaling args!\n";
     m_xOffArg = &args.add("offset_x", "X offset", m_xXform.m_offset);
     m_yOffArg = &args.add("offset_y", "Y offset", m_yXform.m_offset);
     m_zOffArg = &args.add("offset_z", "Z offset", m_zXform.m_offset);
