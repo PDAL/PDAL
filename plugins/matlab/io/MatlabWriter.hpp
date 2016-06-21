@@ -59,11 +59,13 @@ public:
     {}
 
 private:
+    virtual void addArgs(ProgramArgs& args);
     virtual void prepared(PointTableRef table);
     virtual void ready(PointTableRef table);
     virtual void write(const PointViewPtr view);
     virtual void done(PointTableRef table);
 
+    StringList m_outputDims; ///< List of dimensions to write
     // Can't use unique_ptr b/c MATFile is an incomplete type.
     MATFile * m_matfile;
     DimTypeList m_dimTypes;

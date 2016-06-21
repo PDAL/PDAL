@@ -68,6 +68,7 @@ SQLiteWriter::SQLiteWriter() :
 
 void SQLiteWriter::addArgs(ProgramArgs& args)
 {
+    DbWriter::doAddArgs(args);
     args.add("block_table_name", "Block table name",
         m_block_table).setPositional();
     args.add("cloud_table_name", "Cloud table name",

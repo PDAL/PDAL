@@ -64,7 +64,6 @@ public:
 
 protected:
     std::string m_filename;  ///< Output filename
-    StringList m_outputDims; ///< List of dimensions to write
     std::string::size_type m_hashPos;
 
     /**
@@ -81,7 +80,6 @@ private:
         viewSet.insert(view);
         return viewSet;
     }
-    virtual void writerAddArgs(ProgramArgs& args);
     virtual void writerInitialize(PointTableRef table)
     {}
 

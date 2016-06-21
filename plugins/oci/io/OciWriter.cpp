@@ -644,6 +644,7 @@ bool OciWriter::isValidWKT(std::string const& input)
 
 void OciWriter::addArgs(ProgramArgs& args)
 {
+    DbWriter::doAddArgs(args);
     args.add("base_table_name", "Base table name",
         m_baseTableName).setPositional();
     args.add("block_table_name", "Block table name",

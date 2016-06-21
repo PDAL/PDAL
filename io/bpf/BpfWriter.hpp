@@ -60,6 +60,7 @@ public:
     std::string getName() const;
 
 private:
+    StringList m_outputDims; ///< List of dimensions to write
     OLeStream m_stream;
     BpfHeader m_header;
     BpfDimensionList m_dims;

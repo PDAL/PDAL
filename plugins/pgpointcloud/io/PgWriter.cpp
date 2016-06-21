@@ -86,6 +86,7 @@ PgWriter::~PgWriter()
 
 void PgWriter::addArgs(ProgramArgs& args)
 {
+    DbWriter::doAddArgs(args);
     args.add("connection", "Connection string", m_connection).setPositional();
     args.add("table", "Table name", m_table_name);
     args.add("column", "Column name", m_column_name, "pa");

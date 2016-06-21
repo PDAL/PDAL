@@ -65,11 +65,13 @@ protected:
     // Allows subclass access to ready() without the mess of friends.
     void doReady(PointTableRef table)
         { DbWriter::ready(table); }
+    void doAddArgs(ProgramArgs& args)
+        { DbWriter::addArgs(args); }
 
 private:
+    void addArgs(ProgramArgs& args);
     virtual void prepared(PointTableRef table);
     virtual void ready(PointTableRef table);
-    virtual void writerAddArgs(ProgramArgs& args);
 
     DimTypeList m_dimTypes;
     XMLDimList m_dbDims;
@@ -79,10 +81,9 @@ private:
     std::pair<int, int> m_yOffsets;
     std::pair<int, int> m_zOffsets;
 
-    // Size of point data as read from PointTable.
-    size_t m_packedPointSize;
-    // Size of point data as written to DB.
-    size_t m_dbPointSize;
+    StringList m_outputDims; ///< List of dimensions to write
+    size_t m_packedPointSize; ///< Size of point data as read from PointTable.
+    size_t m_dbPointSize; ///< Size of point data as written to DB
     bool m_locationScaling;
 
     DbWriter& operator=(const DbWriter&); // not implemented

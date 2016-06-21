@@ -70,6 +70,7 @@ void BpfWriter::addArgs(ProgramArgs& args)
     args.add("coord_id", "UTM coordinate ID", m_header.m_coordId, -9999);
     args.add("bundledfile", "List of files to bundle in output",
         m_bundledFilesSpec);
+    args.add("output_dims", "Output dimensions", m_outputDims);
     m_scaling.addArgs(args);
 }
 

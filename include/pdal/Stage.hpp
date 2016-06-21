@@ -296,8 +296,6 @@ private:
 
     virtual void readerAddArgs(ProgramArgs& /*args*/)
         {}
-    virtual void writerAddArgs(ProgramArgs& /*args*/)
-        {}
     void l_addArgs(ProgramArgs& args);
 
     virtual void writerInitialize(PointTableRef /*table*/)

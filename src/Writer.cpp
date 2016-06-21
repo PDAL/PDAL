@@ -44,13 +44,6 @@
 namespace pdal
 {
 
-void Writer::writerAddArgs(ProgramArgs& args)
-{
-//    args.add("filename", "Output filename", m_filename).setPositional();
-    args.add("output_dims", "Output dimensions", m_outputDims);
-}
-
-
 void Writer::handleFilenameTemplate()
 {
     std::string::size_type suffixPos = m_filename.find_last_of('.');

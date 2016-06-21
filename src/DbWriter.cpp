@@ -35,9 +35,9 @@
 namespace pdal
 {
 
-void DbWriter::writerAddArgs(ProgramArgs& args)
+void DbWriter::addArgs(ProgramArgs& args)
 {
-    Writer::writerAddArgs(args);
+    args.add("output_dims", "Output dimensions", m_outputDims);
     m_scaling.addArgs(args);
 }
 

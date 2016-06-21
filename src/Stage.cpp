@@ -330,7 +330,6 @@ void Stage::l_addArgs(ProgramArgs& args)
     args.add("verbose", "Debug output level", m_verbose, 0U);
     args.add("log", "Debug output filename", m_logname);
     readerAddArgs(args);
-    writerAddArgs(args);
 }
 
 
