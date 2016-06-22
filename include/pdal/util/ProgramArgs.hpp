@@ -419,8 +419,12 @@ public:
                 "was provided.";
             throw arg_error(oss.str());
         }
-        m_val = (s == "true") ? !m_defaultVal : m_defaultVal;
-        m_set = true;
+        if (s == "invert")
+            m_val = !m_defaultVal;
+        else if (s == "true")
+            m_val = true;
+        else
+            m_val = false;
     }
 
     /**
@@ -1151,7 +1155,7 @@ private:
                 }
             }
             else
-                value = "true";
+                value = "invert";
             arg->setValue(value);
             return 1;
         }
