@@ -47,8 +47,7 @@ using namespace pdal;
 Options defaultRxpReaderOptions()
 {
     Options options;
-    Option filename("filename",
-        testDataPath() + "130501_232206_cut.rxp", "");
+    Option filename("filename", testDataPath() + "130501_232206_cut.rxp");
     options.add(filename);
     return options;
 }
@@ -131,7 +130,7 @@ TEST(RxpReaderTest, testRead)
 TEST(RxpReaderTest, testNoPpsSync)
 {
     Options options = defaultRxpReaderOptions();
-    Option syncToPps("sync_to_pps", "false", "");
+    Option syncToPps("sync_to_pps", false);
     options.add(syncToPps);
     RxpReader reader;
     reader.setOptions(options);
@@ -144,23 +143,4 @@ TEST(RxpReaderTest, testNoPpsSync)
 
     checkPoint(view, 0, 0.0705248788, -0.0417557284, 0.0304775704, 31.917255942733149,
             0.14050000667339191, 0.689999998, -14.4898596, 3, false, 1, 1);
-}
-
-TEST(RxpReaderTest, testURILogic)
-{
-    Option fileOption("filename", "foobar", "");
-    Options fileOptions(fileOption);
-    EXPECT_EQ(extractRivlibURI(fileOptions), "file:foobar");
-
-    Option rdtpOption("rdtp", "192.168.0.33", "");
-    Options rdtpOptions(rdtpOption);
-    EXPECT_EQ(extractRivlibURI(rdtpOptions), "rdtp://192.168.0.33");
-
-    Options emptyOptions;
-    EXPECT_THROW(extractRivlibURI(emptyOptions), Option::not_found);
-
-    Options bothOptions;
-    bothOptions.add(fileOption);
-    bothOptions.add(rdtpOption);
-    EXPECT_THROW(extractRivlibURI(bothOptions), pdal_error);
 }

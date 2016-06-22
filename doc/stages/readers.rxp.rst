@@ -78,33 +78,21 @@ Options
 -------
 
 filename
-  File to read from [Required if rdtp is not provided]
+  File to read from, or rdtp URI for network-accessible scanner. [Required]
 
 rdtp
-  URI for a network-assessable scanner [Required if filename is not provided]
+  Boolean to switch from file-based reading to RDTP-based. [default: false]
 
 sync_to_pps
   If "true", ensure all incoming points have a valid pps timestamp, usually provided by some sort of GPS clock.
   If "false", use the scanner's internal time.
-  Defaults to "true"
+  [default: true]
 
 minimal
   If "true", only write X, Y, Z, and time values to the data stream.
   If "false", write all available values as derived from the rxp file.
   Use this feature to reduce the memory footprint of a PDAL run, if you don't need any values but the points themselves.
-  Defaults to "false".
-
-inclination_fix
-  *EXPERIMENTAL*: If "true", use inclination values in the rxp file to dynamically correct for inclination changes throughout the scan, using a moving average of 2 * ``inclination_fix_window`` inclination readings (see below).
-  This is an experimental feature that will remove some points from the data stream and modify many others.
-  Use with caution.
-  If "false", disable this feature.
-  Defaults to "false".
-
-inclination_fix_window
-  *EXPERIMENTAL*: Sets the half-size of the inclination fix window (see above).
-  Use of this feature should be considered highly experimental.
-
+  [default: false]
 
 .. _RIEGL Laser Measurement Systems: http://www.riegl.com
 .. _RIEGL download pages: http://www.riegl.com/members-area/software-downloads/libraries/

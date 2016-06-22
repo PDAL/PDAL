@@ -53,6 +53,7 @@ namespace pdal
 
 
 const bool DEFAULT_SYNC_TO_PPS = true;
+const bool DEFAULT_IS_RDTP = false;
 const bool DEFAULT_MINIMAL = false;
 
 
@@ -87,12 +88,10 @@ private:
     virtual point_count_t read(PointViewPtr view, point_count_t count);
     virtual void done(PointTableRef table);
 
-    Arg *m_fileArg;
-    Arg *m_rdtpArg;
-    std::string m_filename;
     std::string m_uri;
     bool m_syncToPps;
     bool m_minimal;
+    bool m_isRdtp;
     std::unique_ptr<RxpPointcloud> m_pointcloud;
 };
 
