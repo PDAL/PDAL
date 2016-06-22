@@ -69,28 +69,6 @@ void NitfFileWriter::addArgs(ProgramArgs& args)
 }
 
 
-void NitfFileWriter::processOptions(const Options& options)
-{
-    m_cLevel = options.getValueOrDefault<std::string>("clevel", "03");
-    m_sType = options.getValueOrDefault<std::string>("stype", "BF01");
-    m_oStationId = options.getValueOrDefault<std::string>("ostaid", "PDAL");
-    m_fileTitle = options.getValueOrDefault<std::string>("ftitle");
-    m_fileClass = options.getValueOrDefault<std::string>("fsclas", "U");
-    m_origName = options.getValueOrDefault<std::string>("oname");
-    m_origPhone = options.getValueOrDefault<std::string>("ophone");
-    m_securityControlAndHandling =
-        options.getValueOrDefault<std::string>("fsctlh");
-    m_securityClassificationSystem =
-        options.getValueOrDefault<std::string>("fsclsy");
-    m_imgSecurityClass = options.getValueOrDefault<std::string>("isclas", "U");
-    m_imgDate = options.getValueOrDefault<std::string>("idatim");
-    m_imgIdentifier2 = options.getValueOrDefault<std::string>("iid2");
-    m_sic = options.getValueOrDefault<std::string>("fscltx");
-    m_aimidb = options.getValueOrDefault<StringList>("aimidb");
-    m_acftb = options.getValueOrDefault<StringList>("acftb");
-}
-
-
 //NOTE: Throws except::Throwable.
 //
 void NitfFileWriter::write()

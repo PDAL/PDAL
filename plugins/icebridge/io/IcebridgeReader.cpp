@@ -36,6 +36,7 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include <map>
 
@@ -72,14 +73,6 @@ CREATE_SHARED_PLUGIN(1, 0, IcebridgeReader, Reader, s_info)
 
 std::string IcebridgeReader::getName() const { return s_info.name; }
 
-Options IcebridgeReader::getDefaultOptions()
-{
-    Options options;
-    options.add("filename", "", "file to read from");
-    return options;
-}
-
-
 Dimension::IdList IcebridgeReader::getDefaultDimensions()
 {
     Dimension::IdList ids;
@@ -112,15 +105,6 @@ void IcebridgeReader::ready(PointTableRef table)
 {
     m_hdf5Handler.initialize(m_filename, hdf5Columns);
     m_index = 0;
-}
-
-void IcebridgeReader::initialize(PointTableRef)
-{
-    // Data are WGS84 (4326) with ITRF2000 datum (6656)
-    // See http://nsidc.org/data/docs/daac/icebridge/ilvis2/index.html for
-    // background
-    SpatialReference ref("EPSG:4326");
-    setSpatialReference(m_metadata, ref);
 }
 
 
@@ -201,17 +185,25 @@ point_count_t IcebridgeReader::read(PointViewPtr view, point_count_t count)
     return count;
 }
 
-void IcebridgeReader::processOptions(const Options& options)
+void IcebridgeReader::addArgs(ProgramArgs& args)
 {
-    m_metadataFile =
-        options.getValueOrDefault<std::string>("metadata", "");
-    if (!m_metadataFile.empty() && ! FileUtils::fileExists(m_metadataFile))
+    args.add("metadata", "Metadata file", m_metadataFile);
+}
+
+void IcebridgeReader::initialize()
+{
+    if (!m_metadataFile.empty() && !FileUtils::fileExists(m_metadataFile))
     {
         std::ostringstream oss;
         oss << "Invalid metadata file: '" << m_metadataFile << "'";
         throw pdal_error(oss.str());
     }
 
+    // Data are WGS84 (4326) with ITRF2000 datum (6656)
+    // See http://nsidc.org/data/docs/daac/icebridge/ilvis2/index.html for
+    // background
+    SpatialReference ref("EPSG:4326");
+    setSpatialReference(m_metadata, ref);
 }
 
 void IcebridgeReader::done(PointTableRef table)

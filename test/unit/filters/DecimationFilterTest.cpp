@@ -56,7 +56,7 @@ TEST(DecimationFilterTest, DecimationFilterTest_test1)
     Options ops;
     ops.add("bounds", srcBounds);
     ops.add("mode", "random");
-    ops.add("num_points", 30);
+    ops.add("count", 30);
     FauxReader reader;
     reader.setOptions(ops);
 
@@ -91,7 +91,7 @@ TEST(DecimationFilterTest, stream)
     Options ops;
     ops.add("bounds", srcBounds);
     ops.add("mode", "ramp");
-    ops.add("num_points", 100);
+    ops.add("count", 100);
     FauxReader reader;
     reader.setOptions(ops);
 

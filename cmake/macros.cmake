@@ -145,7 +145,6 @@ macro(PDAL_ADD_TEST _name)
     include_directories(${PROJECT_BINARY_DIR}/test/unit)
     set(common_srcs
         ${PROJECT_SOURCE_DIR}/test/unit/Support.cpp
-        ${PROJECT_SOURCE_DIR}/test/unit/TestConfig.cpp
     )
     if (WIN32)
         list(APPEND ${PDAL_ADD_TEST_FILES} ${PDAL_TARGET_OBJECTS})

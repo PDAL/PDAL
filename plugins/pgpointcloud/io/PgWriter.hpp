@@ -52,18 +52,14 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
-
 private:
+    PgWriter& operator=(const PgWriter&) = delete;
+    PgWriter(const PgWriter&) = delete;
 
-
-    PgWriter& operator=(const PgWriter&); // not implemented
-    PgWriter(const PgWriter&); // not implemented
-
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
+    virtual void initialize();
     virtual void write(const PointViewPtr view);
     virtual void done(PointTableRef table);
-    virtual void initialize();
 
     void writeInit();
     void writeTile(const PointViewPtr view);
@@ -92,6 +88,7 @@ private:
     std::string m_table_name;
     std::string m_column_name;
     std::string m_connection;
+    std::string m_compressionSpec;
     CompressionType::Enum m_patch_compression_type;
     uint32_t m_patch_capacity;
     uint32_t m_srid;

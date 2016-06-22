@@ -89,16 +89,18 @@ public:
     std::string getName() const;
 
 private:
+    StringList m_rangeSpec;
     std::vector<Range> m_range_list;
 
-    virtual void processOptions(const Options&options);
+    virtual void addArgs(ProgramArgs& args);
+    virtual void initialize();
     virtual void prepared(PointTableRef table);
     virtual bool processOne(PointRef& point);
     virtual PointViewSet run(PointViewPtr view);
     bool dimensionPasses(double v, const Range& r) const;
 
-    RangeFilter& operator=(const RangeFilter&); // not implemented
-    RangeFilter(const RangeFilter&); // not implemented
+    RangeFilter& operator=(const RangeFilter&) = delete;
+    RangeFilter(const RangeFilter&) = delete;
 };
 
 } // namespace pdal

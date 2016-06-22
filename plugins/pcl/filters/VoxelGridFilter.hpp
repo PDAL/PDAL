@@ -45,21 +45,18 @@ class PDAL_DLL VoxelGridFilter : public Filter
 public:
     VoxelGridFilter() : Filter()
     {}
+    VoxelGridFilter& operator=(const VoxelGridFilter&) = delete;
+    VoxelGridFilter(const VoxelGridFilter&) = delete;
 
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
-
 private:
     double m_leaf_x, m_leaf_y, m_leaf_z;
 
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
     virtual PointViewSet run(PointViewPtr view);
-
-    VoxelGridFilter& operator=(const VoxelGridFilter&); // not implemented
-    VoxelGridFilter(const VoxelGridFilter&); // not implemented
 };
 
 } // namespace pdal

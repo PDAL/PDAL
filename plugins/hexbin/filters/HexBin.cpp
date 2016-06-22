@@ -51,17 +51,19 @@ static PluginInfo const s_info = PluginInfo(
 
 CREATE_SHARED_PLUGIN(1, 0, HexBin, Filter, s_info)
 
-void HexBin::processOptions(const Options& options)
+void HexBin::addArgs(ProgramArgs& args)
 {
-    m_sampleSize = options.getValueOrDefault<uint32_t>("sample_size", 5000);
-    m_density = options.getValueOrDefault<uint32_t>("threshold", 15);
-    m_outputTesselation = options.getValueOrDefault<bool>("output_tesselation", false);
-
-    if (options.hasOption("edge_length"))
-        m_edgeLength = options.getValueOrDefault<double>("edge_length", 0.0);
-    else
-        // Backward compatability.
-        m_edgeLength = options.getValueOrDefault<double>("edge_size", 0.0);
+    args.add("sample_size", "Sample size for auto-edge length calculation",
+        m_sampleSize, 5000U);
+    args.add("threshold", "Required cell density", m_density, 15);
+    args.add("output_tesselation", "Write tesselation to output metadata",
+        m_outputTesselation);
+    args.add("edge_size", "Synonym for 'edge_length' (deprecated)",
+        m_edgeLength);
+    args.add("edge_length", "Length of hex edge", m_edgeLength);
+    args.add("precision", "Output precision", m_precision, 8U);
+    m_cullArg = &args.add("hole_cull_area_tolerance", "Tolerance area to "
+        "apply to holes before cull", m_cullArea);
 }
 
 
@@ -120,10 +122,9 @@ void HexBin::done(PointTableRef table)
     m_metadata.add("hex_offsets", offsets.str(), "Offset of hex corners from "
         "hex centers.");
 
-    uint32_t precision  = m_options.getValueOrDefault<uint32_t>("precision", 8);
     std::ostringstream polygon;
     polygon.setf(std::ios_base::fixed, std::ios_base::floatfield);
-    polygon.precision(precision);
+    polygon.precision(m_precision);
     m_grid->toWKT(polygon);
 
     if (m_outputTesselation)
@@ -165,9 +166,7 @@ void HexBin::done(PointTableRef table)
     ***/
     double tolerance = 1.1 * m_grid->height() / 2;
 
-    double cull =
-        m_options.getValueOrDefault<double>("hole_cull_area_tolerance",
-            6 * tolerance * tolerance);
+    double cull = m_cullArg->set() ? m_cullArea : (6 * tolerance * tolerance);
 
     SpatialReference srs(table.anySpatialReference());
     pdal::Polygon p(polygon.str(), srs);
@@ -195,7 +194,7 @@ void HexBin::done(PointTableRef table)
         density_p = p.transform(utm);
     }
     pdal::Polygon smooth = p.simplify(tolerance, cull);
-    std::string smooth_text = smooth.wkt(precision);
+    std::string smooth_text = smooth.wkt(m_precision);
 
     m_metadata.add("boundary", smooth_text, "Approximated MULTIPOLYGON of domain");
     double area = density_p.area();

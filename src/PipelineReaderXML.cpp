@@ -149,15 +149,14 @@ Option PipelineReaderXML::parseElement_Option(const ptree& tree)
     std::string name = attrs["name"];
     std::string value = tree.get_value<std::string>();
     Utils::trim(value);
-    Option option(name, value);
 
     // filenames in the XML are fixed up as follows:
     //   - if absolute path, leave it alone
     //   - if relative path, make it absolute using the XML file's directory
     // The toAbsolutePath function does exactly that magic for us.
-    if (option.getName() == "filename")
+    if (name == "filename")
     {
-        std::string path = option.getValue<std::string>();
+        std::string path = value;
 #ifndef _WIN32
         wordexp_t result;
         if (wordexp(path.c_str(), &result, 0) == 0)
@@ -175,13 +174,13 @@ Option PipelineReaderXML::parseElement_Option(const ptree& tree)
 
             assert(FileUtils::isAbsolutePath(path));
         }
-        option.setValue(path);
+        return Option(name, path);
     }
-    else if (option.getName() == "plugin")
+    else if (name == "plugin")
     {
-       PluginManager::loadPlugin(option.getValue<std::string>());
+       PluginManager::loadPlugin(value);
     }
-    return option;
+    return Option(name, value);
 }
 
 
@@ -213,6 +212,7 @@ Stage *PipelineReaderXML::parseElement_Reader(const ptree& tree)
 {
     Options options;
     StageParserContext context;
+    std::string filename;
     context.setCardinality(StageParserContext::None);
 
     map_t attrs;
@@ -231,6 +231,8 @@ Stage *PipelineReaderXML::parseElement_Reader(const ptree& tree)
         else if (name == "Option")
         {
             Option option = parseElement_Option(subtree);
+            if (option.getName() == "filename")
+                filename = option.getValue();
             options.add(option);
         }
         else if (name == "Metadata")
@@ -249,10 +251,6 @@ Stage *PipelineReaderXML::parseElement_Reader(const ptree& tree)
     {
         type = attrs["type"];
     }
-
-    // If we aren't provided a type, try to infer the type from the filename
-    // #278
-    const std::string filename = options.getValueOrDefault("filename", "");
 
     Stage& reader = m_manager.makeReader(filename, type);
     reader.removeOptions(options);
@@ -346,6 +344,7 @@ Stage *PipelineReaderXML::parseElement_Writer(const ptree& tree)
 {
     Options options;
     StageParserContext context;
+    std::string filename;
 
     map_t attrs;
     collect_attributes(attrs, tree);
@@ -363,6 +362,8 @@ Stage *PipelineReaderXML::parseElement_Writer(const ptree& tree)
         else if (name == "Option")
         {
             Option option = parseElement_Option(subtree);
+            if (option.getName() == "filename")
+                filename = option.getValue();
             options.add(option);
         }
         else if (name == "Metadata")
@@ -388,7 +389,6 @@ Stage *PipelineReaderXML::parseElement_Writer(const ptree& tree)
     }
 
     context.validate();
-    std::string filename = options.getValueOrDefault("filename", "");
     Stage& writer = m_manager.makeWriter(filename, type);
     for (auto sp : prevStages)
         writer.setInput(*sp);

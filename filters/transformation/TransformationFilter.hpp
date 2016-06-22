@@ -40,13 +40,13 @@
 #include <pdal/Filter.hpp>
 #include <pdal/pdal_export.hpp>
 #include <pdal/plugin.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 extern "C" int32_t TransformationFilter_ExitFunc();
 extern "C" PF_ExitFunc TransformationFilter_InitPlugin();
 
 namespace pdal
 {
-
 
 // Transformation matrices are assumed to be stored in row-major order
 typedef std::array<double, 16> TransformationMatrix;
@@ -68,10 +68,13 @@ public:
 private:
     TransformationFilter& operator=(const TransformationFilter&); // not implemented
     TransformationFilter(const TransformationFilter&); // not implemented
-    virtual void processOptions(const Options& options);
+
+    virtual void addArgs(ProgramArgs& args);
+    virtual void initialize();
     virtual bool processOne(PointRef& point);
     virtual void filter(PointView& view);
 
+    std::string m_matrixSpec;
     TransformationMatrix m_matrix;
 };
 

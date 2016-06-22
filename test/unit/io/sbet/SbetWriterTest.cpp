@@ -44,8 +44,8 @@ using namespace pdal;
 Options makeReaderOptions()
 {
     Options options;
-    Option filename("filename", Support::datapath("sbet/2-points.sbet"), "");
-    options.add(filename);
+    options.add("filename", Support::datapath("sbet/2-points.sbet"));
+
     return options;
 }
 
@@ -53,8 +53,7 @@ Options makeReaderOptions()
 Options makeWriterOptions()
 {
     Options options;
-    Option filename("filename", Support::temppath("SbetWriterTest.sbet"), "");
-    options.add(filename);
+    options.add("filename", Support::temppath("SbetWriterTest.sbet"));
     return options;
 }
 

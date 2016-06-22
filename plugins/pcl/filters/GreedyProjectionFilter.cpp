@@ -59,24 +59,6 @@ std::string GreedyProjectionFilter::getName() const
     return s_info.name;
 }
 
-Options GreedyProjectionFilter::getDefaultOptions()
-{
-    Options options;
-    // options.add("leaf_x", 1.0, "Leaf size in X dimension");
-    // options.add("leaf_y", 1.0, "Leaf size in Y dimension");
-    // options.add("leaf_z", 1.0, "Leaf size in Z dimension");
-    return options;
-}
-
-/** \brief This method processes the PointView through the given pipeline. */
-
-void GreedyProjectionFilter::processOptions(const Options& options)
-{
-    // m_leaf_x = options.getValueOrDefault<double>("leaf_x", 1.0);
-    // m_leaf_y = options.getValueOrDefault<double>("leaf_y", 1.0);
-    // m_leaf_z = options.getValueOrDefault<double>("leaf_z", 1.0);
-}
-
 PointViewSet GreedyProjectionFilter::run(PointViewPtr input)
 {
     PointViewPtr output = input->makeNew();

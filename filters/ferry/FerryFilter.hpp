@@ -56,19 +56,19 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
-
 private:
-    virtual void processOptions(const Options&);
+    virtual void addArgs(ProgramArgs& args);
+    virtual void initialize();
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void prepared(PointTableRef table);
     virtual void ready(PointTableRef table);
     virtual bool processOne(PointRef& point);
     virtual void filter(PointView& view);
 
-    FerryFilter& operator=(const FerryFilter&); // not implemented
-    FerryFilter(const FerryFilter&); // not implemented
+    FerryFilter& operator=(const FerryFilter&) = delete;
+    FerryFilter(const FerryFilter&) = delete;
 
+    StringList m_dimSpec;
     std::map<std::string, std::string> m_name_map;
     std::map< Dimension::Id::Enum ,  Dimension::Id::Enum > m_dimensions_map;
 };

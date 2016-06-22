@@ -115,7 +115,7 @@ void DbReader::writeField(PointView& view, const char *pos, const DimType& dim,
 
         memcpy(&e, pos, Dimension::size(dim.m_type));
         double d = Utils::toDouble(e, dim.m_type);
-        d = (d * dim.m_xform.m_scale) + dim.m_xform.m_offset;
+        d = (d * dim.m_xform.m_scale.m_val) + dim.m_xform.m_offset.m_val;
         view.setField(dim.m_id, idx, d);
     }
     else

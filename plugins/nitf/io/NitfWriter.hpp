@@ -57,7 +57,7 @@ private:
     std::stringstream m_oss;
     BOX3D m_bounds;
 
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
     virtual void readyFile(const std::string& filename,
         const SpatialReference& srs);
     virtual void doneFile();

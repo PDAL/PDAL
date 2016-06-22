@@ -91,15 +91,6 @@ public:
     static std::string inferWriterDriver(const std::string& filename);
 
     /**
-      modify options based upon expectations implicit in a given filename.
-      e.g. output files ending in .laz should be compressed
-
-      \param filename  Name of file for which options should be inferred.
-      \return  Inferred options.
-    */  
-    static pdal::Options inferWriterOptionsChanges(const std::string& filename);
-
-    /**
       Create a stage and return a pointer to the created stage.
       The factory takes ownership of any successfully created stage.
 

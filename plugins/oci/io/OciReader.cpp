@@ -35,6 +35,7 @@
 #include <pdal/Compression.hpp>
 #include <pdal/GDALUtils.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include "OciReader.hpp"
 
@@ -50,17 +51,17 @@ CREATE_SHARED_PLUGIN(1, 0, OciReader, Reader, s_info)
 
 std::string OciReader::getName() const { return s_info.name; }
 
-void OciReader::processOptions(const Options& options)
+void OciReader::addArgs(ProgramArgs& args)
 {
-    m_schemaFile = options.getValueOrDefault<std::string>("xml_schema_dump");
-    m_spatialRef =
-        options.getValueOrDefault<pdal::SpatialReference>("spatialreference");
-    m_query = options.getValueOrThrow<std::string>("query");
-    m_connSpec = options.getValueOrDefault<std::string>("connection");
-
-    m_updatePointSourceId =  options.getValueOrDefault<bool>(
-        "populate_pointsourceid", false);
+    args.add("query", "SQL query to retrieve points", m_query).setPositional();
+    args.add("xml_schema_dump", "File to which schema should be written",
+        m_schemaFile);
+    args.add("connection", "Connection string", m_connSpec);
+    args.add("populate_pointsourceid", "Set point source ID",
+        m_updatePointSourceId);
+    addSpatialReferenceArg(args);
 }
+
 
 void OciReader::initialize()
 {
@@ -134,27 +135,6 @@ void OciReader::defineBlock(Statement stmt, BlockPtr block) const
             stmt->Define(&(block->locator));
         iCol++;
     }
-}
-
-
-Options OciReader::getDefaultOptions()
-{
-    Options options;
-
-    Option connection("connection", std::string(), "Oracle connection "
-        "string to connect to database");
-
-    Option query("query", std::string(), "SELECT statement that returns "
-        "an SDO_PC object as its first and only queried item.");
-
-    Option xml_schema_dump("xml_schema_dump", std::string(),
-        "Filename to dump the XML schema to.");
-
-    options.add(connection);
-    options.add(query);
-    options.add(xml_schema_dump);
-
-    return options;
 }
 
 

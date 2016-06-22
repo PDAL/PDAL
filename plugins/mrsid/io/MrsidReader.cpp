@@ -37,6 +37,7 @@
 #include <lidar/MG4PointReader.h>
 #include <lidar/FileIO.h>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -56,6 +57,7 @@ MrsidReader::MrsidReader()
     , m_initialized(false)
 {
 }
+
 
 void MrsidReader::done(PointTableRef)
 {
@@ -158,14 +160,6 @@ void MrsidReader::ready(PointTableRef table, MetadataNode& m)
 {
     m_index = 0;
 }
-
-Options MrsidReader::getDefaultOptions()
-{
-    Options options;
-    options.add("filename", "", "file to read from");
-    return options;
-}
-
 
 QuickInfo MrsidReader::inspect()
 {

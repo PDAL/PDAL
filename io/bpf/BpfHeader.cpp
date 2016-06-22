@@ -42,6 +42,23 @@
 namespace pdal
 {
 
+std::istream& operator>>(std::istream& in, BpfFormat& format)
+{
+    std::string s;
+
+    in >> s;
+    s = Utils::toupper(s);
+    if (s == "POINT")
+        format = BpfFormat::PointMajor;
+    else if (s == "BYTE")
+        format = BpfFormat::ByteMajor;
+    else if ((s == "DIM") || (s == "DIMENSION"))
+        format = BpfFormat::DimMajor;
+    else
+        in.setstate(std::ios::failbit);
+    return in;
+}
+
 ILeStream& operator >> (ILeStream& stream, BpfMuellerMatrix& m)
 {
     for (size_t i = 0; i < (sizeof(m.m_vals) / sizeof(m.m_vals[0])); ++i)

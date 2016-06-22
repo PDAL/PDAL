@@ -55,7 +55,6 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
     SpatialReference fetchSpatialReference(std::string const& query) const;
     SQLite& getSession()
         { return *m_session.get(); }
@@ -73,7 +72,7 @@ private:
     bool b_doneQuery;
 
     virtual void initialize();
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
     point_count_t read(PointViewPtr view, point_count_t count);

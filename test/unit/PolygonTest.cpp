@@ -204,14 +204,4 @@ TEST(PolygonTest, streams)
 
 }
 
-TEST(PolygonTest, options)
-{
-    pdal::Option op("polygon", getWKT(), "");
-
-    Polygon p = op.getValue<Polygon>();
-
-}
-
-
-
 } // namespace pdal

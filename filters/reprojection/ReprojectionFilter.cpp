@@ -37,6 +37,7 @@
 #include <pdal/PointView.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/GDALUtils.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include <gdal.h>
 #include <ogr_spatialref.h>
@@ -73,52 +74,22 @@ ReprojectionFilter::~ReprojectionFilter()
         OSRDestroySpatialReference(m_out_ref_ptr);
 }
 
-void ReprojectionFilter::processOptions(const Options& options)
-{
-    try
-    {
-       m_outSRS = options.getValueOrThrow<pdal::SpatialReference>("out_srs");
-    }
-    catch (std::invalid_argument)
-    {
-        std::string srs = options.getValueOrDefault<std::string>("out_srs", "");
-        std::ostringstream oss;
-        oss << "Stage " << getName() << " has invalid spatial reference "
-            "specification for 'out_srs' option: '" << srs << "'.";
-        throw pdal_error(oss.str());
-    }
-    catch (Option::not_found)
-    {
-        std::ostringstream oss;
-        oss << "Stage " << getName() << " missing required option 'out_srs'.";
-        throw Option::not_found(oss.str());
-    }
 
-    if (options.hasOption("in_srs"))
-    {
-        try
-        {
-            m_inSRS = options.getValueOrThrow<pdal::SpatialReference>("in_srs");
-            m_inferInputSRS = false;
-        }
-        catch (std::invalid_argument)
-        {
-            std::string srs =
-                options.getValueOrDefault<std::string>("in_srs", "");
-            std::ostringstream oss;
-            oss << "Stage " << getName() << " has invalid spatial reference "
-                "specification for 'in_srs' option: '" << srs << "'.";
-            throw pdal_error(oss.str());
-        }
-    }
+void ReprojectionFilter::addArgs(ProgramArgs& args)
+{
+    args.add("out_srs", "Output spatial reference", m_outSRS).setPositional();
+    args.add("in_srs", "Input spatial reference", m_inSRS);
 }
 
 
 void ReprojectionFilter::initialize()
 {
+    m_inferInputSRS = !m_inSRS.valid();
+
     m_out_ref_ptr = OSRNewSpatialReference(0);
     if (!m_out_ref_ptr)
-        throw pdal::pdal_error("Unable to allocate new OSR SpatialReference in initialize()!");
+        throw pdal::pdal_error("Unable to allocate new OSR SpatialReference "
+            "in initialize()!");
 
     int result = OSRSetFromUserInput(m_out_ref_ptr,
         m_outSRS.getWKT(pdal::SpatialReference::eCompoundOK).c_str());

@@ -137,48 +137,6 @@ void toJSON(const MetadataNode& m, std::ostream& o, int level)
     // should be done?
 }
 
-
-void toJSON(const Options& opts, std::ostream& o, int level);
-void toJSON(const Option& opt, std::ostream& o, int level)
-{
-    std::string indent(level * 2, ' ');
-    std::string indent2((level + 1) * 2, ' ');
-
-    std::string quote("\"");
-    std::string name = quote + opt.getName() + quote;
-    std::string description = quote + opt.getDescription() + quote;
-    std::string value = quote + opt.getValue<std::string>() + quote;
-
-    o << indent << name << " :" << endl;
-    o << indent << "{" << endl;
-    o << indent2 << "\"value\" : " << value << "," << endl;
-    o << indent2 << "\"description\" : " << description << endl;
-
-    o << indent << "}";
-}
-
-
-void toJSON(const Options& opts, std::ostream& o, int level)
-{
-    const std::string indent(level * 2, ' ');
-
-    std::vector<Option> optList = opts.getOptions();
-    if (optList.empty())
-        return;
-
-    o << indent << "\"options\" :" << endl;
-    o << indent << "{" << endl;
-    for (auto oi = optList.begin(); oi != optList.end(); ++oi)
-    {
-        Option& opt = *oi;
-        toJSON(opt, o, level + 1);
-        if (oi != optList.rbegin().base() - 1)
-            o << ",";
-        o << endl;
-    }
-    o << indent << "}" << endl;
-}
-
 } // unnamed namespace
 
 namespace Utils
@@ -206,21 +164,6 @@ void toJSON(const MetadataNode& m, std::ostream& o)
         o << "}";
     }
     o << std::endl;
-}
-
-std::string toJSON(const Options& opts)
-{
-    std::ostringstream o;
-
-    toJSON(opts, o);
-    return o.str();
-}
-
-void toJSON(const Options& opts, std::ostream& o)
-{
-    o << "{" << endl;
-    pdal::toJSON(opts, o, 1);
-    o << "}" << endl;
 }
 
 } // namespace Utils

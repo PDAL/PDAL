@@ -65,7 +65,7 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test1)
     BOX3D bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
     Options readerOps;
     readerOps.add("bounds", bounds);
-    readerOps.add("num_points", 1000);
+    readerOps.add("count", 1000);
     readerOps.add("mode", "ramp");
 
     FauxReader reader;
@@ -125,7 +125,7 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test2)
     BOX3D bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
     Options readerOps;
     readerOps.add("bounds", bounds);
-    readerOps.add("num_points", 1000);
+    readerOps.add("count", 1000);
     readerOps.add("mode", "ramp");
 
     FauxReader reader;
@@ -183,7 +183,7 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test3)
     BOX3D bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
     Options readerOpts;
     readerOpts.add("bounds", bounds);
-    readerOpts.add("num_points", 1000);
+    readerOpts.add("count", 1000);
     readerOpts.add("mode", "ramp");
 
     FauxReader reader;
@@ -264,7 +264,7 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test4)
     BOX3D bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
     Options readerOpts;
     readerOpts.add("bounds", bounds);
-    readerOpts.add("num_points", 1000);
+    readerOpts.add("count", 1000);
     readerOpts.add("mode", "ramp");
 
     FauxReader reader;
@@ -319,7 +319,7 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test5)
     BOX3D bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
     Options readerOpts;
     readerOpts.add("bounds", bounds);
-    readerOpts.add("num_points", 1000);
+    readerOpts.add("count", 1000);
     readerOpts.add("mode", "ramp");
 
     FauxReader reader;

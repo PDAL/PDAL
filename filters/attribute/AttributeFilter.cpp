@@ -42,6 +42,7 @@
 #include <pdal/Polygon.hpp>
 #include <pdal/QuadIndex.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -75,39 +76,33 @@ struct OGRFeatureDeleter
 };
 
 
+void AttributeFilter::addArgs(ProgramArgs& args)
+{
+    args.add("dimension", "Dimension on which to filter", m_dimName).
+        setPositional();
+    m_valArg = &args.add("value", "Value to set on matching points", m_value,
+        std::numeric_limits<double>::quiet_NaN());
+    m_dsArg = &args.add("datasource", "OGR-readable datasource for Polygon or "
+        "Multipolygon data", m_datasource);
+    m_colArg = &args.add("column", "OGR datasource column from which to "
+        "read the attribute.", m_column);
+    m_queryArg = &args.add("query", "OGR SQL query to execute on the "
+        "datasource to fetch geometry and attributes", m_query);
+    m_layerArg = &args.add("layer", "Datasource layer to use", m_layer);
+}
+
+
 void AttributeFilter::initialize()
 {
-    gdal::registerDrivers();
-}
-
-
-Options AttributeFilter::getDefaultOptions()
-{
-    Options options;
-
-    options.add("dimension", "Classification");
-    options.add("datasource", "source");
-
-    return options;
-}
-
-
-void AttributeFilter::processOptions(const Options& options)
-{
-    if (!options.hasOption("dimension"))
-    {
-        std::ostringstream oss;
-        oss << getName() << ": option 'dimension' must be specified.";
-        throw pdal_error(oss.str());
-    }
-    if (options.hasOption("value") && options.hasOption("datasource"))
+    if (m_valArg->set() && m_dsArg->set())
     {
         std::ostringstream oss;
         oss << getName() << ": options 'value' and 'datasource' mutually "
             "exclusive.";
         throw pdal_error(oss.str());
     }
-    if (!options.hasOption("value") && !options.hasOption("datasource"))
+
+    if (!m_valArg->set() && !m_dsArg->set())
     {
         std::ostringstream oss;
         oss << getName() << ": Either option 'value' or 'datasource' must "
@@ -115,24 +110,18 @@ void AttributeFilter::processOptions(const Options& options)
         throw pdal_error(oss.str());
     }
 
-    std::string ops[] = { "column", "query", "layer" };
-    for (auto& op : ops)
+    Arg *args[] = { m_colArg, m_queryArg, m_layerArg };
+    for (auto& a : args)
     {
-        if (options.hasOption("value") && options.hasOption(op))
+        if (m_valArg->set() && a->set())
         {
             std::ostringstream oss;
-            oss << getName() << ": option 'op' invalid with option 'value'.";
+            oss << getName() << ": option '" << a->longname() << "' invalid "
+                "with option 'value'.";
             throw pdal_error(oss.str());
         }
     }
-
-    m_dimName = options.getValueOrDefault<std::string>("dimension");
-    m_value = options.getValueOrDefault<double>("value",
-        std::numeric_limits<double>::quiet_NaN());
-    m_datasource = options.getValueOrDefault<std::string>("datasource");
-    m_column = options.getValueOrDefault<std::string>("column");
-    m_query = options.getValueOrDefault<std::string>("query");
-    m_layer = options.getValueOrDefault<std::string>("layer");
+    gdal::registerDrivers();
 }
 
 
@@ -246,9 +235,5 @@ void AttributeFilter::filter(PointView& view)
         UpdateGEOSBuffer(view);
 }
 
-
-void AttributeFilter::done(PointTableRef /*table*/)
-{
-}
-
 } // namespace pdal
+

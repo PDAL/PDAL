@@ -71,7 +71,7 @@ TEST(AdditionalMergeTest, merge_filter_and_reader_with_manager)
     merge.setInput(reader2);
 
     Options optsW;
-    optsW.add("filename", outfile, "file to write to");
+    optsW.add("filename", outfile);
     Stage& writer = mgr.addWriter("writers.las");
     writer.setInput(merge);
     writer.setOptions(optsW);
@@ -109,7 +109,7 @@ TEST(AdditionalMergeTest, merge_reader_and_filter_with_manager)
     merge.setInput(filter);
 
     Options optsW;
-    optsW.add("filename", outfile, "file to write to");
+    optsW.add("filename", outfile);
     Stage& writer = mgr.addWriter("writers.las");
     writer.setInput(merge);
     writer.setOptions(optsW);
@@ -145,7 +145,7 @@ TEST(AdditionalMergeTest, merge_filter_and_reader_without_manager)
     merge.setInput(reader2);
 
     Options optsW;
-    optsW.add("filename", outfile, "file to write to");
+    optsW.add("filename", outfile);
     LasWriter writer;
     writer.setInput(merge);
     writer.setOptions(optsW);
@@ -186,7 +186,7 @@ TEST(AdditionalMergeTest, merge_reader_and_filter_without_manager)
     merge.setInput(filter);
 
     Options optsW;
-    optsW.add("filename", outfile, "file to write to");
+    optsW.add("filename", outfile);
     LasWriter writer;
     writer.setInput(merge);
     writer.setOptions(optsW);
@@ -225,7 +225,7 @@ TEST(AdditionalMergeTest, filter_and_reader_writer_inputs_with_manager)
     filter.setOptions(optsF);
 
     Options optsW;
-    optsW.add("filename", outfile, "file to write to");
+    optsW.add("filename", outfile);
     Stage& writer = mgr.addWriter("writers.las");
     writer.setInput(filter);
     writer.setInput(reader2);
@@ -260,7 +260,7 @@ TEST(AdditionalMergeTest, reader_and_filter_writer_inputs_with_manager)
     filter.setOptions(optsF);
 
     Options optsW;
-    optsW.add("filename", outfile, "file to write to");
+    optsW.add("filename", outfile);
     Stage& writer = mgr.addWriter("writers.las");
     writer.setInput(reader2);
     writer.setInput(filter);
@@ -293,7 +293,7 @@ TEST(AdditionalMergeTest, filter_and_reader_writer_inputs_without_manager)
     filter.setOptions(optsF);
 
     Options optsW;
-    optsW.add("filename", outfile, "file to write to");
+    optsW.add("filename", outfile);
     LasWriter writer;
     writer.setInput(filter);
     writer.setInput(reader2);
@@ -335,7 +335,7 @@ TEST(AdditionalMergeTest, reader_and_filter_writer_inputs_without_manager)
     filter.setOptions(optsF);
 
     Options optsW;
-    optsW.add("filename", outfile, "file to write to");
+    optsW.add("filename", outfile);
     LasWriter writer;
     writer.setInput(reader2);
     writer.setInput(filter);
@@ -390,7 +390,7 @@ TEST(AdditionalMergeTest, merge_two_filters_with_manager)
     merge.setInput(filter2);
 
     Options optsW;
-    optsW.add("filename", outfile, "file to write to");
+    optsW.add("filename", outfile);
     Stage& writer = mgr.addWriter("writers.las");
     writer.setInput(merge);
     writer.setOptions(optsW);
@@ -433,7 +433,7 @@ TEST(AdditionalMergeTest, merge_two_filters_without_manager)
     merge.setInput(filter2);
 
     Options optsW;
-    optsW.add("filename", outfile, "file to write to");
+    optsW.add("filename", outfile);
     LasWriter writer;
     writer.setInput(merge);
     writer.setOptions(optsW);
@@ -479,7 +479,7 @@ TEST(AdditionalMergeTest, two_filters_writer_inputs_with_manager)
     filter2.setOptions(optsF2);
 
     Options optsW;
-    optsW.add("filename", outfile, "file to write to");
+    optsW.add("filename", outfile);
     Stage& writer = mgr.addWriter("writers.las");
     writer.setInput(filter1);
     writer.setInput(filter2);
@@ -519,7 +519,7 @@ TEST(AdditionalMergeTest, two_filters_writer_inputs_without_manager)
     filter2.setOptions(optsF2);
 
     Options optsW;
-    optsW.add("filename", outfile, "file to write to");
+    optsW.add("filename", outfile);
     LasWriter writer;
     writer.setInput(filter1);
     writer.setInput(filter2);

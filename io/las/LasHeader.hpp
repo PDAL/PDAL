@@ -55,6 +55,7 @@ class ILeStream;
 typedef uint8_t PointFormat;
 std::string GetDefaultSoftwareId();
 class SummaryData;
+class Scaling;
 
 class PDAL_DLL LasHeader
 {
@@ -260,8 +261,8 @@ public:
     double scaleZ() const
         { return m_scales[2]; }
 
-    /// Set values of scale factor for X, Y and Z coordinates.
-    void setScale(double x, double y, double z);
+    /// Set values of scale/offset factor for X, Y and Z coordinates.
+    void setScaling(const Scaling& scaling);
 
     /// Get X coordinate offset.
     double offsetX() const

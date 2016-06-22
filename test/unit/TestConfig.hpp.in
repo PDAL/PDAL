@@ -42,14 +42,21 @@
 
 #include <string>
 
-struct TestConfig 
+namespace TestConfig 
 {
-    TestConfig();
-    static std::string g_data_path;
-    static std::string g_configured_path;
-    static std::string g_binary_path;
-    static std::string g_oracle_connection;
-};
 
+inline std::string dataPath()
+    { return UNITTEST_TESTCONFIG_DATA_PATH; }
+
+inline std::string configuredPath()
+    { return UNITTEST_TESTCONFIG_CONFIGURED_PATH; }
+
+inline std::string binaryPath()
+    { return UNITTEST_TESTCONFIG_BINARY_PATH; }
+
+inline std::string oracleConnection()
+    { return UNITTEST_TESTCONFIG_OCI_CONNECTION; }
+
+}
 
 #endif

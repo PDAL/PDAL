@@ -91,7 +91,7 @@ int RandomKernel::execute()
         readerOptions.add("mode", "random");
     else
         throw pdal_error("invalid distribution: " + m_distribution);
-    readerOptions.add("num_points", m_numPointsToWrite);
+    readerOptions.add("count", m_numPointsToWrite);
 
     Options writerOptions;
     if (m_bCompress)

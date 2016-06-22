@@ -33,17 +33,16 @@
 ****************************************************************************/
 
 #include <pdal/Reader.hpp>
-#include <pdal/PipelineWriter.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
 
-void Reader::readerProcessOptions(const Options& options)
+void Reader::readerAddArgs(ProgramArgs& args)
 {
-    if (options.hasOption("filename"))
-        m_filename = options.getValueOrThrow<std::string>("filename");
-    if (options.hasOption("count"))
-        m_count = options.getValueOrThrow<point_count_t>("count");
+    args.add("filename", "Name of file to read", m_filename);
+    args.add("count", "Maximum number of points read", m_count,
+        std::numeric_limits<point_count_t>::max());
 }
 
 } // namespace pdal

@@ -36,6 +36,7 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -49,14 +50,14 @@ CREATE_STATIC_PLUGIN(1, 0, DecimationFilter, Filter,  s_info)
 
 std::string DecimationFilter::getName() const { return s_info.name; }
 
-void DecimationFilter::processOptions(const Options& options)
+void DecimationFilter::addArgs(ProgramArgs& args)
 {
-    m_step = options.getValueOrDefault<uint32_t>("step", 1);
-    m_offset = options.getValueOrDefault<uint32_t>("offset", 0);
-    m_limit = options.getValueOrDefault<point_count_t>("limit",
-        std::numeric_limits<point_count_t>::max());
+    args.add("step", "Points to delete between each kept point", m_step, 1U);
+    args.add("offset", "Index of first point to consider including in output",
+        m_offset);
+    args.add("limit", "Index of last point to consider including in output",
+        m_limit, std::numeric_limits<point_count_t>::max());
 }
-
 
 PointViewSet DecimationFilter::run(PointViewPtr inView)
 {

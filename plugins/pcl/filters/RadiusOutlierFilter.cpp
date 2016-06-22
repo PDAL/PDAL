@@ -41,6 +41,7 @@
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include <pcl/point_types.h>
 #include <pcl/console/print.h>
@@ -62,22 +63,13 @@ std::string RadiusOutlierFilter::getName() const
     return s_info.name;
 }
 
-Options RadiusOutlierFilter::getDefaultOptions()
+void RadiusOutlierFilter::addArgs(ProgramArgs& args)
 {
-    Options options;
-    options.add("min_neighbors", 2, "Minimum number of neighbors in radius");
-    options.add("radius", 1, "Radius");
-    options.add("classify", true, "Apply classification labels?");
-    options.add("extract", false, "Extract ground returns?");
-    return options;
-}
-
-void RadiusOutlierFilter::processOptions(const Options& options)
-{
-    m_min_neighbors = options.getValueOrDefault<int>("min_neighbors", 2);
-    m_radius = options.getValueOrDefault<double>("radius", 1);
-    m_classify = options.getValueOrDefault<bool>("classify", true);
-    m_extract = options.getValueOrDefault<bool>("extract", false);
+    args.add("min_neighbors", "Minimum number of neighbors in radius",
+        m_min_neighbors, 2);
+    args.add("radius", "Radius", m_radius, 1.0);
+    args.add("classify", "Apply classification labels?", m_classify, true);
+    args.add("extract", "Extract ground returns?", m_extract);
 }
 
 void RadiusOutlierFilter::addDimensions(PointLayoutPtr layout)

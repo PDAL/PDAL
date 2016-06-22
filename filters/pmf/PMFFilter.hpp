@@ -60,8 +60,6 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
-
 private:
     double m_maxWindowSize;
     double m_slope;
@@ -73,7 +71,7 @@ private:
     bool m_approximate;
 
     virtual void addDimensions(PointLayoutPtr layout);
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
     std::vector<double> morphOpen(PointViewPtr view, float radius);
     std::vector<PointId> processGround(PointViewPtr view);
     virtual PointViewSet run(PointViewPtr view);

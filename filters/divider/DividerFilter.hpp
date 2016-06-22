@@ -35,6 +35,7 @@
 
 #include <pdal/Filter.hpp>
 #include <pdal/plugin.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 extern "C" int32_t DividerFilter_ExitFunc();
 extern "C" PF_ExitFunc DividerFilter_InitPlugin();
@@ -55,28 +56,34 @@ public:
     std::string getName() const;
 
 private:
-
-    enum Mode
+    enum class Mode
     {
         Partition,
         RoundRobin
     };
 
-    enum SizeMode
+    enum class SizeMode
     {
         Count,
         Capacity
     };
 
+    Arg *m_cntArg;
+    Arg *m_capArg;
     Mode m_mode;
     SizeMode m_sizeMode;
     point_count_t m_size;
 
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
+    virtual void initialize();
     virtual PointViewSet run(PointViewPtr view);
 
     DividerFilter& operator=(const DividerFilter&); // not implemented
     DividerFilter(const DividerFilter&); // not implemented
+
+    friend std::istream& operator>>(std::istream& in,
+        DividerFilter::Mode& mode);
+
 };
 
 } // namespace pdal

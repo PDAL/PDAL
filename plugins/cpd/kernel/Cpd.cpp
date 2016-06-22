@@ -219,10 +219,13 @@ int CpdKernel::execute()
     reader.addView(outView);
 
     Options writerOpts;
-    writerOpts.add("order", "X,Y,Z,XVelocity,YVelocity,ZVelocity");
-    writerOpts.add("keep_unspecified", false);
 
     Stage& writer = makeWriter(m_output, reader, "");
+    if (writer.getName() == "writers.text")   
+    {
+        writerOpts.add("order", "X,Y,Z,XVelocity,YVelocity,ZVelocity");
+        writerOpts.add("keep_unspecified", false);
+    }
     writer.addOptions(writerOpts);
     writer.prepare(outTable);
     writer.execute(outTable);

@@ -45,10 +45,6 @@
 #include <memory>
 #include <vector>
 
-#ifndef _WIN32
-#include <wordexp.h>
-#endif
-
 namespace pdal
 {
 

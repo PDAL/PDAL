@@ -89,8 +89,10 @@ public:
     Stage* getStage() const
         { return m_stages.empty() ? nullptr : m_stages.back(); }
 
+    QuickInfo preview() const;
     void prepare() const;
     point_count_t execute();
+    void validateStageOptions() const;
 
     // Get the resulting point views.
     const PointViewSet& views() const

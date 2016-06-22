@@ -7,7 +7,6 @@
     },
     {
       "type":"filters.stats",
-      "exact_dimensions":"Classification",
       "dimensions":"readers.las.X, readers.las.Y, readers.las.Z, Classification"
     },
     {

@@ -42,6 +42,7 @@
 #include <pcl/io/pcd_io.h>
 
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -57,12 +58,10 @@ std::string PCLBlock::getName() const
     return s_info.name;
 }
 
-/** \brief This method processes the PointView through the given pipeline. */
-
-void PCLBlock::processOptions(const Options& options)
+void PCLBlock::addArgs(ProgramArgs& args)
 {
-    m_filename = options.getValueOrDefault<std::string>("filename", "");
-    m_json = options.getValueOrDefault<std::string>("json", "");
+    args.add("filename", "Output filename", m_filename);
+    args.add("json", "JSON pipeline", m_json);
 }
 
 PointViewSet PCLBlock::run(PointViewPtr input)

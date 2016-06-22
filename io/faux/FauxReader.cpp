@@ -37,6 +37,7 @@
 #include <pdal/Options.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include <ctime>
 
@@ -52,73 +53,22 @@ CREATE_STATIC_PLUGIN(1, 0, FauxReader, Reader, s_info)
 
 std::string FauxReader::getName() const { return s_info.name; }
 
-static Mode string2mode(const std::string& str)
+void FauxReader::addArgs(ProgramArgs& args)
 {
-    std::string lstr = Utils::tolower(str);
-    if (lstr == "constant")
-        return Constant;
-    if (lstr == "random")
-        return Random;
-    if (lstr == "ramp")
-        return Ramp;
-    if (lstr == "uniform")
-        return Uniform;
-    if (lstr == "normal")
-        return Normal;
-    std::ostringstream oss;
-    oss << s_info.name << ": Invalid 'mode' option: '" << str << "'.";
-    throw pdal_error(oss.str());
+    args.add("bounds", "X/Y/Z limits", m_bounds, BOX3D(0, 0, 0, 1, 1, 1));
+    args.add("mean_x", "X mean", m_mean_x);
+    args.add("mean_y", "Y mean", m_mean_y);
+    args.add("mean_z", "Z mean", m_mean_z);
+    args.add("stdev_x", "X standard deviation", m_stdev_x, 1.0);
+    args.add("stdev_y", "Y standard deviation", m_stdev_y, 1.0);
+    args.add("stdev_z", "Z standard deviation", m_stdev_z, 1.0);
+    args.add("mode", "Point creation mode", m_mode);
+    args.add("number_of_returns", "Max number of returns", m_numReturns);
 }
 
 
-FauxReader::FauxReader()
-    : pdal::Reader()
+void FauxReader::initialize()
 {
-    m_count = 0;
-}
-
-void FauxReader::processOptions(const Options& options)
-{
-    BOX3D bounds;
-    try
-    {
-        bounds = options.getValueOrDefault<BOX3D>("bounds",
-            BOX3D(0, 0, 0, 1, 1, 1));
-    }
-    catch (Option::cant_convert)
-    {
-        std::string s = options.getValueOrDefault<std::string>("bounds");
-
-        std::ostringstream oss;
-        oss << getName() << ": Invalid 'bounds' specification: '" << s <<
-            "'.  Format: '([xmin,xmax],[ymin,ymax],[zmin,zmax])'.";
-        throw pdal_error(oss.str());
-    }
-    m_minX = bounds.minx;
-    m_maxX = bounds.maxx;
-    m_minY = bounds.miny;
-    m_maxY = bounds.maxy;
-    m_minZ = bounds.minz;
-    m_maxZ = bounds.maxz;
-
-    // For backward compatibility.
-    if (m_count == 0)
-        m_count = options.getValueOrThrow<point_count_t>("num_points");
-    if (m_count == 0)
-    {
-        std::ostringstream oss;
-        oss << getName() << ": Option 'count' must be non-zero.";
-        throw pdal_error(oss.str());
-    }
-
-    m_mean_x = options.getValueOrDefault<double>("mean_x",0.0);
-    m_mean_y = options.getValueOrDefault<double>("mean_y",0.0);
-    m_mean_z = options.getValueOrDefault<double>("mean_z",0.0);
-    m_stdev_x = options.getValueOrDefault<double>("stdev_x",1.0);
-    m_stdev_y = options.getValueOrDefault<double>("stdev_y",1.0);
-    m_stdev_z = options.getValueOrDefault<double>("stdev_z",1.0);
-    m_mode = string2mode(options.getValueOrThrow<std::string>("mode"));
-    m_numReturns = options.getValueOrDefault("number_of_returns", 0);
     if (m_numReturns > 10)
     {
         std::ostringstream oss;
@@ -128,9 +78,9 @@ void FauxReader::processOptions(const Options& options)
     }
     if (m_count > 1)
     {
-        m_delX = (m_maxX - m_minX) / (m_count - 1);
-        m_delY = (m_maxY - m_minY) / (m_count - 1);
-        m_delZ = (m_maxZ - m_minZ) / (m_count - 1);
+        m_delX = (m_bounds.maxx - m_bounds.minx) / (m_count - 1);
+        m_delY = (m_bounds.maxy - m_bounds.miny) / (m_count - 1);
+        m_delZ = (m_bounds.maxz - m_bounds.minz) / (m_count - 1);
     }
     else
     {
@@ -141,18 +91,12 @@ void FauxReader::processOptions(const Options& options)
 }
 
 
-Options FauxReader::getDefaultOptions()
-{
-    Options options;
-    Option count("num_points", 10, "Number of points");
-    options.add(count);
-    return options;
-}
-
-
 void FauxReader::addDimensions(PointLayoutPtr layout)
 {
-    layout->registerDims(getDefaultDimensions());
+    Dimension::IdList ids = { Dimension::Id::X, Dimension::Id::Y,
+        Dimension::Id::Z, Dimension::Id::OffsetTime };
+
+    layout->registerDims(ids);
     if (m_numReturns > 0)
     {
         layout->registerDim(Dimension::Id::ReturnNumber);
@@ -160,17 +104,6 @@ void FauxReader::addDimensions(PointLayoutPtr layout)
     }
 }
 
-
-Dimension::IdList FauxReader::getDefaultDimensions()
-{
-    Dimension::IdList ids;
-
-    ids.push_back(Dimension::Id::X);
-    ids.push_back(Dimension::Id::Y);
-    ids.push_back(Dimension::Id::Z);
-    ids.push_back(Dimension::Id::OffsetTime);
-    return ids;
-}
 
 void FauxReader::ready(PointTableRef /*table*/)
 {
@@ -192,27 +125,27 @@ bool FauxReader::processOne(PointRef& point)
 
     switch (m_mode)
     {
-    case Random:
-        x = Utils::random(m_minX, m_maxX);
-        y = Utils::random(m_minY, m_maxY);
-        z = Utils::random(m_minZ, m_maxZ);
+    case Mode::Random:
+        x = Utils::random(m_bounds.minx, m_bounds.maxx);
+        y = Utils::random(m_bounds.miny, m_bounds.maxy);
+        z = Utils::random(m_bounds.minz, m_bounds.maxz);
         break;
-    case Constant:
-        x = m_minX;
-        y = m_minY;
-        z = m_minZ;
+    case Mode::Constant:
+        x = m_bounds.minx;
+        y = m_bounds.miny;
+        z = m_bounds.minz;
         break;
-    case Ramp:
-        x = m_minX + m_delX * m_index;
-        y = m_minY + m_delY * m_index;
-        z = m_minZ + m_delZ * m_index;
+    case Mode::Ramp:
+        x = m_bounds.minx + m_delX * m_index;
+        y = m_bounds.miny+ m_delY * m_index;
+        z = m_bounds.minz + m_delZ * m_index;
         break;
-    case Uniform:
-        x = Utils::uniform(m_minX, m_maxX, m_seed++);
-        y = Utils::uniform(m_minY, m_maxY, m_seed++);
-        z = Utils::uniform(m_minZ, m_maxZ, m_seed++);
+    case Mode::Uniform:
+        x = Utils::uniform(m_bounds.minx, m_bounds.maxx, m_seed++);
+        y = Utils::uniform(m_bounds.miny, m_bounds.maxy, m_seed++);
+        z = Utils::uniform(m_bounds.minz, m_bounds.maxz, m_seed++);
         break;
-    case Normal:
+    case Mode::Normal:
         x = Utils::normal(m_mean_x, m_stdev_x, m_seed++);
         y = Utils::normal(m_mean_y, m_stdev_y, m_seed++);
         z = Utils::normal(m_mean_z, m_stdev_z, m_seed++);

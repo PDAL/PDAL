@@ -60,42 +60,43 @@ std::string splitDriverName(std::string const& name)
     return out;
 }
 
-void outputVersion()
+
+void outputVersion(std::ostream& out)
 {
-    std::cout << headline << std::endl;
-    std::cout << "pdal " << GetFullVersionString() << std::endl;
-    std::cout << headline << std::endl;
-    std::cout << std::endl;
+    out << headline << std::endl;
+    out << "pdal " << GetFullVersionString() << std::endl;
+    out << headline << std::endl;
+    out << std::endl;
 }
 
-void outputHelp()
-{
-    std::cout << "Usage: pdal <command> [--debug] [--drivers] [--help] "
-        "[--options[=<driver name>]] [--version]" << std::endl << std::endl;
-    std::cout << "  --debug      Show debug information" << std::endl;
-    std::cout << "  --drivers    Show drivers" << std::endl;
-    std::cout << "  -h [--help]  Print help message" << std::endl;
-    std::cout << "  --options [=arg(=all)]" << std::endl;
-    std::cout << "               Show driver options" << std::endl;
-    std::cout << "  --version    Show version info" << std::endl;
-    std::cout << std::endl;
 
-    std::cout << "The following commands are available:" << std::endl;
+void outputHelp(std::ostream& out)
+{
+    out << "Usage: pdal <command> [--debug] [--drivers] [--help] "
+        "[--options[=<driver name>]] [--version]" << std::endl << std::endl;
+    out << "  --debug      Show debug information" << std::endl;
+    out << "  --drivers    Show drivers" << std::endl;
+    out << "  -h [--help]  Print help message" << std::endl;
+    out << "  --options [=arg(=all)]" << std::endl;
+    out << "               Show driver options" << std::endl;
+    out << "  --version    Show version info" << std::endl;
+    out << std::endl;
+
+    out << "The following commands are available:" << std::endl;
 
     KernelFactory f(false);
     StringList loaded_kernels = PluginManager::names(PF_PluginType_Kernel);
 
     for (auto name : loaded_kernels)
-        std::cout << "   - " << splitDriverName(name) << std::endl;
-    std::cout << "See http://pdal.io/apps.html for more detail" << std::endl;
+        out << "   - " << splitDriverName(name) << std::endl;
+    out << "See http://pdal.io/apps.html for more detail" << std::endl;
 }
 
-void outputDrivers()
+
+void outputDrivers(std::ostream& out)
 {
     // Force plugin loading.
     StageFactory f(false);
-
-    std::ostringstream strm;
 
     int nameColLen(25);
     int descripColLen(Utils::screenWidth() - nameColLen - 1);
@@ -103,13 +104,13 @@ void outputDrivers()
     std::string tablehead(std::string(nameColLen, '=') + ' ' +
         std::string(descripColLen, '='));
 
-    strm << std::endl;
-    strm << tablehead << std::endl;
-    strm << std::left << std::setw(nameColLen) << "Name" <<
+    out << std::endl;
+    out << tablehead << std::endl;
+    out << std::left << std::setw(nameColLen) << "Name" <<
         " Description" << std::endl;
-    strm << tablehead << std::endl;
+    out << tablehead << std::endl;
 
-    strm << std::left;
+    out << std::left;
 
     StringList stages = PluginManager::names(PF_PluginType_Filter |
         PF_PluginType_Reader | PF_PluginType_Writer);
@@ -119,17 +120,16 @@ void outputDrivers()
         StringList lines = Utils::wordWrap(descrip, descripColLen - 1);
         for (size_t i = 0; i < lines.size(); ++i)
         {
-            strm << std::setw(nameColLen) << name << " " <<
+            out << std::setw(nameColLen) << name << " " <<
                 lines[i] << std::endl;
             name.clear();
         }
     }
 
-    strm << tablehead << std::endl;
-    std::cout << strm.str() << std::endl;
+    out << tablehead << std::endl << std::endl;
 }
 
-void outputOptions(std::string const& n)
+void outputOptions(std::string const& n, std::ostream& out)
 {
     // Force plugin loading.
     StageFactory f(false);
@@ -142,53 +142,27 @@ void outputOptions(std::string const& n)
     }
 
     std::string link = PluginManager::link(n);
-    std::cout << n << " -- " << link << std::endl;
-    std::cout << headline << std::endl;
+    out << n << " -- " << link << std::endl;
+    out << headline << std::endl;
 
-    std::vector<Option> options = s->getDefaultOptions().getOptions();
-    if (options.empty())
-    {
-        std::cout << "No options" << std::endl << std::endl;
-        return;
-    }
+    ProgramArgs args;
 
-    for (auto const& opt : options)
-    {
-        std::string name = opt.getName();
-        std::string defVal = Utils::escapeNonprinting(
-            opt.getValue<std::string>());
-        std::string description = opt.getDescription();
-
-        std::cout << name;
-        if (!defVal.empty())
-            std::cout << " [" << defVal << "]";
-        std::cout << std::endl;
-
-        if (!description.empty())
-        {
-            StringList lines =
-                Utils::wordWrap(description, headline.size() - 6);
-            for (std::string& line : lines)
-                std::cout << "    " << line << std::endl;
-        }
-        std::cout << std::endl;
-    }
+    s->addAllArgs(args);
+    args.dump2(out, 2, 6, headline.size());
 }
 
 
-void outputCommands()
+void outputCommands(std::ostream& out)
 {
     KernelFactory f(false);
     std::vector<std::string> loaded_kernels;
     loaded_kernels = PluginManager::names(PF_PluginType_Kernel);
     for (auto name : loaded_kernels)
-    {
-        std::cout << splitDriverName(name) << std::endl;
-    }
+        out << splitDriverName(name) << std::endl;
 }
 
 
-void outputOptions()
+void outputOptions(std::ostream& out)
 {
     // Force plugin loading.
     StageFactory f(false);
@@ -196,7 +170,10 @@ void outputOptions()
     StringList nv = PluginManager::names(PF_PluginType_Filter |
         PF_PluginType_Reader | PF_PluginType_Writer);
     for (auto const& n : nv)
-        outputOptions(n);
+    {
+        outputOptions(n, out);
+        out << std::endl;
+    }
 }
 
 
@@ -204,10 +181,12 @@ int main(int argc, char* argv[])
 {
     Log log("PDAL", "stderr");
 
+    std::ostream& out = std::cout;
+
     // No arguments, print basic usage, plugins will be loaded
     if (argc < 2)
     {
-        outputHelp();
+        outputHelp(out);
         return 1;
     }
 
@@ -303,7 +282,7 @@ int main(int argc, char* argv[])
         }
         else if (arg == "--list-commands")
         {
-            outputCommands();
+            outputCommands(out);
             return 0;
         }
         else
@@ -316,22 +295,22 @@ int main(int argc, char* argv[])
 
     if (version)
     {
-        outputVersion();
+        outputVersion(out);
         return 0;
     }
 
     if (drivers)
     {
-        outputDrivers();
+        outputDrivers(out);
         return 0;
     }
 
     if (options)
     {
         if (optString == "all")
-            outputOptions();
+            outputOptions(out);
         else
-            outputOptions(optString);
+            outputOptions(optString, out);
         return 0;
     }
 
@@ -343,14 +322,14 @@ int main(int argc, char* argv[])
 
     if (help)
     {
-        outputHelp();
+        outputHelp(out);
         return 0;
     }
 
     if (!isValidKernel)
         log.get(LogLevel::Error) << "Command '" << command <<
             "' not recognized" << std::endl << std::endl;
-    outputHelp();
+    outputHelp(out);
     return 1;
 }
 

@@ -36,6 +36,7 @@
 
 #include <pdal/pdal_export.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -49,24 +50,16 @@ CREATE_STATIC_PLUGIN(1, 0, FerryFilter, Filter, s_info)
 
 std::string FerryFilter::getName() const { return s_info.name; }
 
-Options FerryFilter::getDefaultOptions()
+void FerryFilter::addArgs(ProgramArgs& args)
 {
-    Options options;
-
-    options.add("dimensions", "", "Dimensions to copy (<in>=<out>,...)");
-
-    return options;
+    args.add("dimensions", "List of dimensions to ferry",
+        m_dimSpec).setPositional();
 }
 
 
-void FerryFilter::processOptions(const Options& options)
+void FerryFilter::initialize()
 {
-    if (options.hasOption("dimension"))
-        throw pdal_error("Option 'dimension' no longer supported.  Use "
-            "'dimensions' instead.");
-
-    StringList dims = options.getValueOrThrow<StringList>("dimensions");
-    for (auto& dim : dims)
+    for (auto& dim : m_dimSpec)
     {
         StringList s = Utils::split2(dim, '=');
         if (s.size() != 2)

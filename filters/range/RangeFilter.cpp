@@ -34,8 +34,9 @@
 
 #include "RangeFilter.hpp"
 
-#include <pdal/util/Utils.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
+#include <pdal/util/Utils.hpp>
 
 #include <cctype>
 #include <limits>
@@ -151,14 +152,16 @@ bool operator < (const RangeFilter::Range& r1, const RangeFilter::Range& r2)
 }
 
 
-void RangeFilter::processOptions(const Options& options)
+void RangeFilter::addArgs(ProgramArgs& args)
 {
-    StringList rangeString = options.getValueOrDefault<StringList>("limits");
+    args.add("limits", "Range limits", m_rangeSpec).setPositional();
+}
 
-    if (rangeString.empty())
-        throw pdal_error("filters.range missing required 'limits' option.");
 
-    for (auto const& r : rangeString)
+void RangeFilter::initialize()
+{
+    // Would be better to have the range know how to read from an input stream.
+    for (auto const& r : m_rangeSpec)
         m_range_list.push_back(parseRange(r));
 }
 

@@ -81,7 +81,6 @@ public:
     void wrapData(const std::string& filename);
     void addArgs(ProgramArgs& args);
     void setBounds(const BOX3D& bounds);
-    void processOptions(const Options& options);
     void write();
 
     std::unique_ptr<nitf::DataSource> m_source;
