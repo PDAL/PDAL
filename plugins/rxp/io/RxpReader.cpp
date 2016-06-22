@@ -83,33 +83,13 @@ Dimension::IdList getRxpDimensions(bool syncToPps, bool minimal)
 
 void RxpReader::addArgs(ProgramArgs& args)
 {
-    m_fileArg = args.add("filename", "Output filename", m_filename);
-    m_rdtpArg = args.add("rdtp", "", m_filename);
+    args.add("rdtp", "", m_isRdtp, DEFAULT_IS_RDTP);
     args.add("sync_to_pps", "Sync to PPS", m_syncToPps, DEFAULT_SYNC_TO_PPS);
 }
 
 void RxpReader::initialize()
 {
-    if (m_fileArg->set() && m_rdtpArg.set())
-    {
-        std::ostringstream oss;
-
-        oss << getName() << "Cannot create URI when both 'filename' "
-            "and 'rdtp' are provided";
-        throw pdal_error(oss.str());
-    }
-    if (!m_fileArg->set() && !m_rdtpArg.set())
-    {
-        std::ostringstream oss;
-
-        oss << getName() << "One of 'rdtp' or 'filename' must be provided.";
-        throw pdal_error(oss.str());
-    }
-
-    if (m_fileArg->set())
-        m_uri = "file: " + m_filename;
-    else
-        m_uri = "rdtp:// + m_filename;
+    m_uri = m_isRdtp ? "rdtp://" + m_filename : "file:" + m_filename;
 }
 
 
