@@ -148,7 +148,8 @@ INSTANTIATE_TEST_CASE_P(base, json,
                             "pipeline/sbet2txt.json",
                             "pipeline/sort.json",
                             "pipeline/splitter.json",
-                            "pipeline/stats.json"
+                            "pipeline/stats.json",
+                            "pipeline/transformation.json"
                         ));
 
 class jsonWithNITF : public testing::TestWithParam<const char*> {};
