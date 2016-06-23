@@ -321,7 +321,7 @@ public:
                 m_longname << "'.";
             throw arg_error(oss.str());
         }
-        if (s.size() && s[0] == '-')
+        if (s.empty())
         {
             std::stringstream oss;
             oss << "Argument '" << m_longname << "' needs a value and none "
@@ -453,7 +453,7 @@ public:
     TArg(const std::string& longname, const std::string& shortname,
         const std::string& description, bool& variable) :
         Arg(longname, shortname, description), m_val(variable),
-        m_defaultProvided(false)
+        m_defaultVal(false), m_defaultProvided(false)
     { m_val = m_defaultVal; }
 
     /**
@@ -930,9 +930,9 @@ public:
         {
             std::string& arg = s[i];
             // This may be the value, or it may not.  We're passing it along
-            // just in case.  If there is no value, pass along "-" to make
+            // just in case.  If there is no value, pass along "" to make
             // clear that there is none.
-            std::string value((i != s.size() - 1) ? s[i + 1] : "-");
+            std::string value((i != s.size() - 1) ? s[i + 1] : "");
             try
             {
                 i += parseArg(arg, value);
@@ -960,9 +960,9 @@ public:
         {
             std::string& arg = s[i];
             // This may be the value, or it may not.  We're passing it along
-            // just in case.  If there is no value, pass along "-" to make
+            // just in case.  If there is no value, pass along "" to make
             // clear that there is none.
-            std::string value((i != s.size() - 1) ? s[i + 1] : "-");
+            std::string value((i != s.size() - 1) ? s[i + 1] : "");
             i += parseArg(arg, value);
         }
 
@@ -1241,6 +1241,13 @@ private:
                 attachedValue = true;
             }
         }
+        else if (value.size() && value[0] == '-')
+        {
+            // If a value starts with a '-' and isn't attached to a name,
+            // we assume it's an option and not a value.
+            value.clear();
+        }
+
         Arg *arg = findLongArg(name);
         if (!arg)
         {
@@ -1299,8 +1306,16 @@ private:
         {
             if (name.size() == 2)
             {
+                // If the value starts with a '-', assume it's an option
+                // rather than a value.
+                if (value.size() && value[0] == '-')
+                {
+                    value.clear();
+                    cnt = 1;
+                }
+                else
+                    cnt = 2;
                 arg->setValue(value);
-                cnt = 2;
             }
             else
             {
