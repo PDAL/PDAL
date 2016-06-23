@@ -48,7 +48,7 @@ enum class LasCompression
     None
 };
 
-inline std::istream& operator >> (std::istream& in, LasCompression& c)
+inline std::istream& operator>>(std::istream& in, LasCompression& c)
 {
     std::string s;
 
@@ -61,6 +61,20 @@ inline std::istream& operator >> (std::istream& in, LasCompression& c)
     else
         c = LasCompression::None;
     return in;
+}
+
+inline std::ostream& operator<<(std::ostream& out, const LasCompression& c)
+{
+    switch (c)
+    {
+    case LasCompression::LasZip:
+        out << "LasZip";
+    case LasCompression::LazPerf:
+        out << "LazPerf";
+    case LasCompression::None:
+        out << "None";
+    }
+    return out;
 }
 
 struct ExtraDim

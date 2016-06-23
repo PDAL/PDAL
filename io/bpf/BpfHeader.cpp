@@ -59,6 +59,20 @@ std::istream& operator>>(std::istream& in, BpfFormat& format)
     return in;
 }
 
+std::ostream& operator<<(std::ostream& out, const BpfFormat& format)
+{
+    switch (format)
+    {
+    case BpfFormat::PointMajor:
+        out << "Point";
+    case BpfFormat::ByteMajor:
+        out << "Byte";
+    case BpfFormat::DimMajor:
+        out << "Dimension";
+    }
+    return out;
+}
+
 ILeStream& operator >> (ILeStream& stream, BpfMuellerMatrix& m)
 {
     for (size_t i = 0; i < (sizeof(m.m_vals) / sizeof(m.m_vals[0])); ++i)

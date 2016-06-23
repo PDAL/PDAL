@@ -102,7 +102,9 @@ struct XForm
             return true;
         }
 
-        friend std::istream& operator>>(std::istream& in,XFormComponent& xfc);
+        friend std::istream& operator>>(std::istream& in, XFormComponent& xfc);
+        friend std::ostream& operator<<(std::ostream& in,
+            const XFormComponent& xfc);
     };
 
     XForm() : m_scale(1.0), m_offset(0.0)
@@ -126,7 +128,7 @@ struct XForm
     }
 };
 
-inline std::istream& operator >> (std::istream& in, XForm::XFormComponent& xfc)
+inline std::istream& operator>>(std::istream& in, XForm::XFormComponent& xfc)
 {
     std::string sval;
 
@@ -134,7 +136,16 @@ inline std::istream& operator >> (std::istream& in, XForm::XFormComponent& xfc)
     if (!xfc.set(sval))
         in.setstate(std::ios_base::failbit);
     return in;
+}
 
+inline std::ostream& operator<<(std::ostream& out,
+    const XForm::XFormComponent& xfc)
+{
+    if (xfc.m_auto)
+        out << "auto";
+    else
+        out << xfc.m_val;
+    return out;
 }
 
 namespace LogLevel

@@ -47,7 +47,7 @@ CREATE_STATIC_PLUGIN(1, 0, DividerFilter, Filter, s_info)
 
 std::string DividerFilter::getName() const { return s_info.name; }
 
-std::istream& operator >> (std::istream& in, DividerFilter::Mode& mode)
+std::istream& operator>>(std::istream& in, DividerFilter::Mode& mode)
 {
     std::string s;
     in >> s;
@@ -65,6 +65,19 @@ std::istream& operator >> (std::istream& in, DividerFilter::Mode& mode)
         throw pdal_error(oss.str());
     }
     return in;
+}
+
+
+std::ostream& operator<<(std::ostream& out, const DividerFilter::Mode& mode)
+{
+    switch (mode)
+    {
+    case DividerFilter::Mode::RoundRobin:
+        out << "round_robin";
+    case DividerFilter::Mode::Partition:
+        out << "partition";
+    }
+    return out;    
 }
 
 

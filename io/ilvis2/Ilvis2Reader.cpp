@@ -70,6 +70,24 @@ std::istream& operator >> (std::istream& in, Ilvis2Reader::IlvisMapping& mval)
 }
 
 
+std::ostream& operator<<(std::ostream& out,
+    const Ilvis2Reader::IlvisMapping& mval)
+{
+    switch (mval)
+    {
+    case Ilvis2Reader::IlvisMapping::INVALID:
+        out << "Invalid";
+    case Ilvis2Reader::IlvisMapping::LOW:
+        out << "Low";
+    case Ilvis2Reader::IlvisMapping::HIGH:
+        out << "High";
+    case Ilvis2Reader::IlvisMapping::ALL:
+        out << "All";
+    }
+    return out;
+}
+
+
 void Ilvis2Reader::addArgs(ProgramArgs& args)
 {
     args.add("mapping", "Mapping for values", m_mapping, IlvisMapping::ALL);

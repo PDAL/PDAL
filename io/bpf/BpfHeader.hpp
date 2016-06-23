@@ -99,6 +99,7 @@ enum class BpfFormat
 };
 
 std::istream& operator >> (std::istream& in, BpfFormat& format);
+std::ostream& operator << (std::ostream& in, const BpfFormat& format);
 
 enum class BpfCoordType
 {

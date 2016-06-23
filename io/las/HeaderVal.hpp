@@ -88,7 +88,7 @@ std::cerr << "Setting header val = " << (double)val << "!\n";
 #pragma GCC diagnostic pop
     }
 
-    T val()
+    T val() const
         { return (this->m_valSet ? this->m_val : this->m_defVal); }
 };
 
@@ -103,6 +103,14 @@ inline std::istream& operator>>(std::istream& in, NumHeaderVal<T, MIN, MAX>& h)
     if (!Utils::fromString(s, t) || !h.setVal(t))
         in.setstate(std::ios::failbit);
     return in;
+}
+
+template<typename T, T MIN, T MAX>
+inline std::ostream& operator<<(std::ostream& out,
+    const NumHeaderVal<T, MIN, MAX>& h)
+{
+    out << h.val();
+    return out;
 }
 
 class DoubleHeaderVal : public BaseHeaderVal<double>
@@ -157,7 +165,7 @@ public:
         return val.length() <= LEN;
     }
 
-    std::string val()
+    std::string val() const
         { return m_valSet ? m_val : m_defVal; }
 };
 
@@ -169,6 +177,14 @@ inline std::istream& operator>>(std::istream& in, StringHeaderVal<LEN>& h)
     if (!h.setVal(s))
         in.setstate(std::ios::failbit);
     return in;
+}
+
+template <size_t LEN>
+inline std::ostream& operator<<(std::ostream& out,
+    const StringHeaderVal<LEN>& h)
+{
+    out << h.val();
+    return out;
 }
 
 class UuidHeaderVal : public BaseHeaderVal<Uuid>
@@ -189,7 +205,7 @@ public:
         return true;
     }
 
-    Uuid val()
+    Uuid val() const
         { return m_valSet ? m_val : m_defVal; }
 };
 
@@ -200,6 +216,12 @@ inline std::istream& operator>>(std::istream& in, UuidHeaderVal& h)
     if (!h.setVal(u))
         in.setstate(std::ios::failbit);
     return in;
+}
+
+inline std::ostream& operator<<(std::ostream& out, const UuidHeaderVal& h)
+{
+    out << h.val();
+    return out;
 }
 
 } // namespace pdal
