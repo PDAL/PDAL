@@ -54,7 +54,6 @@
             true
         </Option>
         <Filter type="filters.stats">
-           <Option name="exact_dimensions">Classification</Option>
            <Option name="dimensions">readers.las.X, readers.las.Y, readers.las.Z, Classification</Option>        
                 <Filter type="filters.chipper">
                     <Option name="capacity">

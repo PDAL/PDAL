@@ -64,7 +64,7 @@ void OutlierFilter::addArgs(ProgramArgs& args)
     args.add("min_k", "Minimum number of neighbors in radius", m_minK, 2);
     args.add("radius", "Radius", m_radius, 1.0);
     args.add("mean_k", "Mean number of neighbors", m_meanK, 8);
-    args.add("multiplier", "Standard deviation threshold", m_meanK, 8);
+    args.add("multiplier", "Standard deviation threshold", m_multiplier, 2.0);
     args.add("classify", "Apply classification labels?", m_classify, true);
     args.add("extract", "Extract ground returns?", m_extract);
 }

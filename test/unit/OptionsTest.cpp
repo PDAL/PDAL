@@ -101,4 +101,42 @@ TEST(OptionsTest, valid)
     EXPECT_FALSE(Option::nameValid("1foo_123_bar_baz", false));
 }
 
+TEST(OptionsTest, programargs)
+{
+    ProgramArgs args;
+
+    bool falseDef, trueDef;
+
+    args.add("falsedef", "False default", falseDef);
+    args.add("truedef", "True default", trueDef, true);
+
+    Options ops;
+    ops.add("falsedef", false);
+    ops.add("truedef", false);
+
+    StringList cmdLine = ops.toCommandLine();
+    args.parse(cmdLine);
+
+    EXPECT_EQ(falseDef, false);
+    EXPECT_EQ(trueDef, false);
+
+    Options ops2;
+    ops2.add("falsedef", true);
+    ops2.add("truedef", true);
+
+    cmdLine = ops2.toCommandLine();
+    args.reset();
+    args.parse(cmdLine);
+
+    EXPECT_EQ(falseDef, true);
+    EXPECT_EQ(trueDef, true);
+
+    cmdLine.clear();
+    args.reset();
+    args.parse(cmdLine);
+
+    EXPECT_EQ(falseDef, false);
+    EXPECT_EQ(trueDef, true);
+}
+
 } // namespace pdal

@@ -75,7 +75,6 @@ public:
 
     bool setVal(T val)
     {
-std::cerr << "Setting header val = " << (double)val << "!\n";
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wtype-limits"
         if (val >= MIN && val <= MAX)
@@ -158,7 +157,6 @@ public:
 
     bool setVal(std::string val)
     {
-        std::cerr << "Setting header val = " << val << "!\n";
         m_valSet = true;
         m_val = val;
         m_val.resize(std::min(m_val.length(), LEN));
