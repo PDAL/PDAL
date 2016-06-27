@@ -258,6 +258,8 @@ inline void writeProgress(int fd, const std::string& type,
 
 std::string PDAL_DLL toJSON(const MetadataNode& m);
 void PDAL_DLL toJSON(const MetadataNode& m, std::ostream& o);
+std::ostream *createFile(const std::string& path, bool asBinary);
+bool fileExists(const std::string& path);
 
 } // namespace Utils
 } // namespace pdal

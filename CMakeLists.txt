@@ -187,6 +187,9 @@ add_subdirectory(vendor/arbiter)
 if (NOT PDAL_HAVE_JSONCPP)
     set(PDAL_JSONCPP_LIB_NAME pdal_jsoncpp)
     add_subdirectory(vendor/jsoncpp-1.6.2/dist)
+    set(JSON_CPP_LINK_TYPE PRIVATE)
+else()
+    set(JSON_CPP_LINK_TYPE PUBLIC)
 endif()
 add_subdirectory(src/util)
 add_subdirectory(io)
@@ -208,9 +211,6 @@ add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 
 export(TARGETS ${PDAL_BASE_LIB_NAME}
     ${PDAL_UTIL_LIB_NAME}
-    ${PDAL_BOOST_LIB_NAME}
-    ${PDAL_ARBITER_LIB_NAME}
-    ${PDAL_JSONCPP_LIB_NAME}
     FILE "${PDAL_BINARY_DIR}/PDALTargets.cmake")
 install(EXPORT PDALTargets DESTINATION "${PDAL_LIB_INSTALL_DIR}/pdal/cmake")
 include(${PDAL_CMAKE_DIR}/config.cmake)
