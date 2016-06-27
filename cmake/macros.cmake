@@ -112,7 +112,9 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
     endif()
 
     add_library(${${_name}} SHARED ${PDAL_ADD_PLUGIN_FILES})
-    target_link_libraries(${${_name}} ${PDAL_LIB_NAME}
+    target_link_libraries(${${_name}}
+        ${PDAL_BASE_LIB_NAME}
+        ${PDAL_UTIL_LIB_NAME}
         ${PDAL_ADD_PLUGIN_LINK_WITH})
 
     set_property(TARGET ${${_name}} PROPERTY FOLDER "Plugins/${_type}")
@@ -153,7 +155,8 @@ macro(PDAL_ADD_TEST _name)
     add_executable(${_name} ${PDAL_ADD_TEST_FILES} ${common_srcs})
     set_target_properties(${_name} PROPERTIES COMPILE_DEFINITIONS PDAL_DLL_IMPORT)
     set_property(TARGET ${_name} PROPERTY FOLDER "Tests")
-    target_link_libraries(${_name} ${PDAL_LIB_NAME} gtest
+    target_link_libraries(${_name}
+        ${PDAL_BASE_LIB_NAME} ${PDAL_UTIL_LIB_NAME} gtest
         ${PDAL_ADD_TEST_LINK_WITH})
     add_test(NAME ${_name} COMMAND "${PROJECT_BINARY_DIR}/bin/${_name}" WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/..")
     # Ensure plugins are loaded from build dir
