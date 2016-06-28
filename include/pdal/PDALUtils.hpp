@@ -76,7 +76,7 @@ inline double toDouble(const Everything& e, Dimension::Type::Enum type)
         d = e.u32;
         break;
     case Unsigned64:
-        d = e.u64;
+        d = (double)e.u64;
         break;
     case Signed8:
         d = e.s8;
@@ -88,7 +88,7 @@ inline double toDouble(const Everything& e, Dimension::Type::Enum type)
         d = e.s32;
         break;
     case Signed64:
-        d = e.s64;
+        d = (double)e.s64;
         break;
     case Float:
         d = e.f;
