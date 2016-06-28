@@ -110,16 +110,16 @@ std::string Support::exename(const std::string& name)
 uint32_t Support::diff_text_files(const std::string& file1,
     const std::string& file2, int32_t ignoreLine1)
 {
-    if (!Utils::fileExists(file1) || !Utils::fileExists(file2))
+    if (!pdal::Utils::fileExists(file1) || !pdal::Utils::fileExists(file2))
         return (std::numeric_limits<uint32_t>::max)();
 
-    std::istream* str1 = Utils::openFile(file1, false);
-    std::istream* str2 = Utils::openFile(file2, false);
+    std::istream* str1 = pdal::Utils::openFile(file1, false);
+    std::istream* str2 = pdal::Utils::openFile(file2, false);
 
     int32_t diffs = diff_text_files(*str1, *str2, ignoreLine1);
 
-    Utils::closeFile(str1);
-    Utils::closeFile(str2);
+    pdal::Utils::closeFile(str1);
+    pdal::Utils::closeFile(str2);
     return diffs;
 }
 
@@ -196,17 +196,17 @@ uint32_t Support::diff_files(const std::string& file1,
     const std::string& file2, uint32_t* ignorable_start,
     uint32_t* ignorable_length, uint32_t num_ignorables)
 {
-    if (!Utils::fileExists(file1) || !Utils::fileExists(file2))
+    if (!pdal::Utils::fileExists(file1) || !pdal::Utils::fileExists(file2))
         return (std::numeric_limits<uint32_t>::max)();
 
-    std::istream* str1 = Utils::openFile(file1);
-    std::istream* str2 = Utils::openFile(file2);
+    std::istream* str1 = pdal::Utils::openFile(file1);
+    std::istream* str2 = pdal::Utils::openFile(file2);
 
     uint32_t ret = diff_files(*str1, *str2, ignorable_start, ignorable_length,
         num_ignorables);
 
-    Utils::closeFile(str1);
-    Utils::closeFile(str2);
+    pdal::Utils::closeFile(str1);
+    pdal::Utils::closeFile(str2);
     return ret;
 }
 
@@ -412,3 +412,4 @@ void Support::compareBounds(const BOX3D& p, const BOX3D& q)
     EXPECT_FLOAT_EQ(p.maxy, q.maxy);
     EXPECT_FLOAT_EQ(p.maxz, q.maxz);
 }
+
