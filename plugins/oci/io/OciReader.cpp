@@ -35,6 +35,7 @@
 #include <pdal/Compression.hpp>
 #include <pdal/GDALUtils.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/PDALUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include "OciReader.hpp"
@@ -232,7 +233,7 @@ void OciReader::addDimensions(PointLayoutPtr layout)
     if (m_schemaFile.size())
     {
         std::string pcSchema = schema.xml();
-        std::ostream *out = FileUtils::createFile(m_schemaFile);
+        std::ostream *out = Utils::createFile(m_schemaFile);
         out->write(pcSchema.c_str(), pcSchema.size());
         FileUtils::closeFile(out);
     }

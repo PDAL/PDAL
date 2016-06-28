@@ -41,8 +41,8 @@
 
 #include <stdio.h>
 
-#include <pdal/util/FileUtils.hpp>
 #include <pdal/Options.hpp>
+#include <pdal/PDALUtils.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/StageFactory.hpp>
 #include "TestConfig.hpp"
@@ -110,17 +110,16 @@ std::string Support::exename(const std::string& name)
 uint32_t Support::diff_text_files(const std::string& file1,
     const std::string& file2, int32_t ignoreLine1)
 {
-    if (!pdal::FileUtils::fileExists(file1) ||
-            !pdal::FileUtils::fileExists(file2))
+    if (!Utils::fileExists(file1) || !Utils::fileExists(file2))
         return (std::numeric_limits<uint32_t>::max)();
 
-    std::istream* str1 = pdal::FileUtils::openFile(file1, false);
-    std::istream* str2 = pdal::FileUtils::openFile(file2, false);
+    std::istream* str1 = Utils::openFile(file1, false);
+    std::istream* str2 = Utils::openFile(file2, false);
 
     int32_t diffs = diff_text_files(*str1, *str2, ignoreLine1);
 
-    pdal::FileUtils::closeFile(str1);
-    pdal::FileUtils::closeFile(str2);
+    Utils::closeFile(str1);
+    Utils::closeFile(str2);
     return diffs;
 }
 
@@ -197,18 +196,17 @@ uint32_t Support::diff_files(const std::string& file1,
     const std::string& file2, uint32_t* ignorable_start,
     uint32_t* ignorable_length, uint32_t num_ignorables)
 {
-    if (!pdal::FileUtils::fileExists(file1) ||
-            !pdal::FileUtils::fileExists(file2))
+    if (!Utils::fileExists(file1) || !Utils::fileExists(file2))
         return (std::numeric_limits<uint32_t>::max)();
 
-    std::istream* str1 = FileUtils::openFile(file1);
-    std::istream* str2 = FileUtils::openFile(file2);
+    std::istream* str1 = Utils::openFile(file1);
+    std::istream* str2 = Utils::openFile(file2);
 
     uint32_t ret = diff_files(*str1, *str2, ignorable_start, ignorable_length,
         num_ignorables);
 
-    FileUtils::closeFile(str1);
-    FileUtils::closeFile(str2);
+    Utils::closeFile(str1);
+    Utils::closeFile(str2);
     return ret;
 }
 

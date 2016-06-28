@@ -299,13 +299,24 @@ std::istream *openFile(const std::string& path, bool asBinary)
 }
 
 /**
-  Close a file (or write to remote filesystem).
+  Close an output stream.
 
   \param out  Stream to close.
 */
 void closeFile(std::ostream *out)
 {
     FileUtils::closeFile(out);
+}
+
+
+/**
+  Close an input stream.
+
+  \param out  Stream to close.
+*/
+void closeFile(std::istream *in)
+{
+    FileUtils::closeFile(in);
 }
 
 
