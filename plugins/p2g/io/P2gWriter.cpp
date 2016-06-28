@@ -62,6 +62,7 @@ void P2gWriter::addArgs(ProgramArgs& args)
     args.add("fill_window_size", "Fill window size", m_fill_window_size, 3U);
     args.add("output_type", "Output type", m_outputTypeSpec);
     args.add("output_format", "Output format", m_outputFormatSpec, "grid");
+    args.add("bounds", "Output raster bounds", m_bounds);
 
 }
 
@@ -138,7 +139,9 @@ void P2gWriter::write(const PointViewPtr view)
         m_coordinates.push_back(Coordinate{x, y, z});
     }
 
-    view->calculateBounds(m_bounds);
+    if (m_bounds.empty()) {
+        view->calculateBounds(m_bounds);
+    }
 }
 
 void P2gWriter::done(PointTableRef table)
