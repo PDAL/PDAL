@@ -32,9 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/PDALUtils.hpp>
+#include <arbiter.hpp>
 
+#include <pdal/PDALUtils.hpp>
 #include <pdal/Options.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 using namespace std;
 
@@ -164,6 +166,178 @@ void toJSON(const MetadataNode& m, std::ostream& o)
         o << "}";
     }
     o << std::endl;
+}
+
+namespace
+{
+
+std::string tempFilename(const std::string& path)
+{
+    const std::string tempdir(arbiter::fs::getTempPath());
+    const std::string basename(arbiter::util::getBasename(path));
+
+    return arbiter::util::join(tempdir, basename);
+};
+
+// RAII handling of a temp file to make sure file gets deleted.
+class TempFile
+{
+public:
+    TempFile(const std::string path) : m_filename(path)
+    {}
+
+    virtual ~TempFile()
+        { FileUtils::deleteFile(m_filename); }
+
+    const std::string& filename()
+        { return m_filename; }
+
+private:
+    std::string m_filename;
+};
+
+class ArbiterOutStream : public std::ofstream
+{
+public:
+    ArbiterOutStream(const std::string& localPath,
+            const std::string& remotePath, std::ios::openmode mode) :
+        std::ofstream(localPath, mode), m_remotePath(remotePath),
+        m_localFile(localPath)
+    {}
+
+    virtual ~ArbiterOutStream()
+    {
+        close();
+        arbiter::Arbiter a;
+        a.put(m_remotePath, a.getBinary(m_localFile.filename()));
+    }
+
+private:
+    std::string m_remotePath;
+    TempFile m_localFile;
+};
+
+class ArbiterInStream : public std::ifstream
+{
+public:
+    ArbiterInStream(const std::string& localPath, const std::string& remotePath,
+            std::ios::openmode mode) :
+        m_localFile(localPath)
+    {
+        arbiter::Arbiter a;
+        a.put(localPath, a.getBinary(remotePath));
+        open(localPath, mode);
+    }
+
+private:
+    TempFile m_localFile;
+};
+
+}  // unnamed namespace
+
+/**
+  Create a file (may be on a supported remote filesystem).
+
+  \param path  Path to file to create.
+  \param asBinary  Whether the file should be written in binary mode.
+  \return  Pointer to the created stream, or NULL.
+*/
+std::ostream *createFile(const std::string& path, bool asBinary)
+{
+    bool remote(false);
+
+    // If we error, assume that we're local.
+    try
+    {
+        remote = arbiter::Arbiter().isRemote(path);
+    }
+    catch (arbiter::ArbiterError)
+    {}
+
+    ostream *ofs(nullptr);
+    if (remote)
+    {
+        try
+        {
+            ofs = new ArbiterOutStream(tempFilename(path), path,
+                asBinary ? ios::out | ios::binary : ios::out);
+        }
+        catch (arbiter::ArbiterError)
+        {}
+        if (ofs && !ofs->good())
+        {
+            delete ofs;
+            ofs = nullptr;
+        }
+    }
+    else
+        ofs = FileUtils::createFile(path, asBinary);
+    return ofs;
+}
+
+
+/**
+  Open a file (potentially on a remote filesystem).
+
+  \param path  Path (potentially remote) of file to open.
+  \param asBinary  Whether the file should be opened binary.
+  \return  Pointer to stream opened for input.
+*/
+std::istream *openFile(const std::string& path, bool asBinary)
+{
+    try
+    {
+        if (arbiter::Arbiter().isRemote(path))
+            return new ArbiterInStream(tempFilename(path), path,
+                asBinary ? ios::in | ios::binary : ios::in);
+    }
+    catch (arbiter::ArbiterError)
+    {
+        return nullptr;
+    }
+    return FileUtils::openFile(path, asBinary);
+}
+
+/**
+  Close an output stream.
+
+  \param out  Stream to close.
+*/
+void closeFile(std::ostream *out)
+{
+    FileUtils::closeFile(out);
+}
+
+
+/**
+  Close an input stream.
+
+  \param out  Stream to close.
+*/
+void closeFile(std::istream *in)
+{
+    FileUtils::closeFile(in);
+}
+
+
+/**
+  Check to see if a file exists.
+
+  \param path  Path to file.
+  \return  Whether the file exists or not.
+*/
+bool fileExists(const std::string& path)
+{
+    try
+    {
+        arbiter::Arbiter().getSize(path);
+        return true;
+    }
+    catch (arbiter::ArbiterError)
+    {}
+
+    // Arbiter doesn't handle our STDIN hacks.
+    return FileUtils::fileExists(path);
 }
 
 } // namespace Utils

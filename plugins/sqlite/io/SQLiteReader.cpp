@@ -35,6 +35,7 @@
 #include "SQLiteReader.hpp"
 #include <pdal/PointView.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/PDALUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
@@ -170,9 +171,9 @@ void SQLiteReader::addDimensions(PointLayoutPtr layout)
 
     if (m_schemaFile.size())
     {
-        std::ostream* out = FileUtils::createFile(m_schemaFile);
+        std::ostream* out = Utils::createFile(m_schemaFile);
         out->write(s.data.c_str(), s.data.size());
-        FileUtils::closeFile(out);
+        Utils::closeFile(out);
     }
 
     XMLSchema schema(s.data);

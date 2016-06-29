@@ -42,41 +42,12 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Utils.hpp>
 #include <pdal/pdal_types.hpp>
-#include <arbiter.hpp>
 
 using namespace std;
 
 
 namespace pdal
 {
-
-class PDAL_DLL ArbiterStream : public std::ofstream
-{
-public:
-    ArbiterStream(std::string path, std::ios::openmode mode)
-        : std::ofstream(getLocalTempFile(path).c_str(), mode)
-        , m_remotePath(path)
-    { }
-
-    static std::string getLocalTempFile(const std::string path)
-    {
-        const std::string tempdir(arbiter::fs::getTempPath());
-        const std::string basename(arbiter::util::getBasename(path));
-
-        return arbiter::util::join(tempdir, basename);
-    }
-
-    virtual ~ArbiterStream()
-    {
-        close();
-        arbiter::Arbiter a;
-        a.put(m_remotePath, a.getBinary(getLocalTempFile(m_remotePath)));
-    }
-
-private:
-    std::string m_remotePath;
-};
-
 
 namespace
 {
@@ -110,22 +81,6 @@ istream *openFile(string const& filename, bool asBinary)
     if (isStdin(name))
         return &cin;
 
-#ifdef PDAL_ARBITER_ENABLED
-    arbiter::Arbiter a;
-    if (a.isRemote(name))
-    {
-        // Open it with Arbiter
-        if (auto h = a.getLocalHandle(name))
-        {
-            name = h->release(); // We own the temp file it created now.
-        }
-        else
-        {
-            return NULL;
-        }
-    }
-#endif
-
     if (!FileUtils::fileExists(name))
         return NULL;
 
@@ -152,21 +107,6 @@ ostream *createFile(string const& name, bool asBinary)
     if (asBinary)
         mode |= ios::binary;
 
-#ifdef PDAL_ARBITER_ENABLED
-    arbiter::Arbiter a;
-
-    if (a.isRemote(name))
-    {
-        ostream* ofs = new ArbiterStream(name, mode);
-        if (!ofs->good())
-        {
-            delete ofs;
-            return NULL;
-        }
-
-        return ofs;
-    }
-#endif
     ostream *ofs = new ofstream(name, mode);
     if (!ofs->good())
     {
@@ -258,16 +198,6 @@ void renameFile(const string& dest, const string& src)
 
 bool fileExists(const string& name)
 {
-
-#ifdef PDAL_ARBITER_ENABLED
-    // filename may actually be a URL, S3, dropbox, etc
-    arbiter::Arbiter a;
-    if (a.isRemote(name))
-    {
-        return true;
-    }
-#endif
-
     pdalboost::system::error_code ec;
     pdalboost::filesystem::exists(name, ec);
     return pdalboost::filesystem::exists(name) || isStdin(name);

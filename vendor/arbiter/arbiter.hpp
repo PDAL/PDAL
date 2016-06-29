@@ -3444,10 +3444,13 @@ namespace util
             Paths&&... paths)
     {
         std::string next(joinImpl(false, std::forward<Paths>(paths)...));
+
+        // Peel slashes off the front of 'next'
         while (next.size() && isSlash(next.front())) next = next.substr(1);
 
         if (first)
         {
+            // Pop slash unless there are two at the end.
             if (
                     current.size() > 1 &&
                     isSlash(current.back()) &&
@@ -3458,6 +3461,7 @@ namespace util
         }
         else
         {
+            // Pop slashes off the back of current.
             while (current.size() && isSlash(current.back()))
             {
                 current.pop_back();
