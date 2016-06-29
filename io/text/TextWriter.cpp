@@ -35,9 +35,10 @@
 #include "TextWriter.hpp"
 
 #include <pdal/pdal_export.hpp>
+#include <pdal/PDALUtils.hpp>
 #include <pdal/PointView.hpp>
-#include <pdal/util/Algorithm.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/Algorithm.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include <iostream>
@@ -63,7 +64,7 @@ struct FileStreamDeleter
         if (ptr)
         {
             ptr->flush();
-            FileUtils::closeFile(ptr);
+            Utils::closeFile(ptr);
         }
     }
 };
@@ -88,7 +89,7 @@ void TextWriter::addArgs(ProgramArgs& args)
 
 void TextWriter::initialize(PointTableRef table)
 {
-    m_stream = FileStreamPtr(FileUtils::createFile(m_filename, true),
+    m_stream = FileStreamPtr(Utils::createFile(m_filename, true),
         FileStreamDeleter());
     if (!m_stream)
     {

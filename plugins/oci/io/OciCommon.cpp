@@ -37,7 +37,7 @@
 #include <iostream>
 
 #include <pdal/Dimension.hpp>
-#include <pdal/util/FileUtils.hpp>
+#include <pdal/PDALUtils.hpp>
 
 namespace pdal
 {
@@ -48,13 +48,13 @@ Connection connect(std::string connSpec)
 
     std::string connection(connSpec);
 
-    if (FileUtils::fileExists(connection))
+    if (Utils::fileExists(connection))
     {
         std::istream::pos_type size;
-        std::istream* input = FileUtils::openFile(connection, true);
+        std::istream* input = Utils::openFile(connection, true);
         if (!input->good())
         {
-            FileUtils::closeFile(input);
+            Utils::closeFile(input);
             throw pdal_error("Unable to open connection filename for Oracle!");
         }
 
@@ -70,7 +70,7 @@ Connection connect(std::string connSpec)
         }
         connection = output;
 
-        FileUtils::closeFile(input);
+        Utils::closeFile(input);
     }
 
     Connection con;

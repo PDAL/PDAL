@@ -35,6 +35,7 @@
 #include "PipelineReaderXML.hpp"
 
 #include <pdal/Filter.hpp>
+#include <pdal/PDALUtils.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PluginManager.hpp>
 #include <pdal/Options.hpp>
@@ -461,7 +462,7 @@ void PipelineReaderXML::readPipeline(const std::string& filename)
 {
     m_inputXmlFile = filename;
 
-    std::istream* input = FileUtils::openFile(filename);
+    std::istream* input = Utils::openFile(filename);
 
     try
     {
@@ -473,14 +474,14 @@ void PipelineReaderXML::readPipeline(const std::string& filename)
     }
     catch (...)
     {
-        FileUtils::closeFile(input);
+        Utils::closeFile(input);
         std::ostringstream oss;
         oss << "Unable to process pipeline file \"" << filename << "\"." <<
             "  XML is invalid.";
         throw pdal_error(oss.str());
     }
 
-    FileUtils::closeFile(input);
+    Utils::closeFile(input);
 
     m_inputXmlFile = "";
 }
