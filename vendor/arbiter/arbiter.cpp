@@ -95,17 +95,25 @@ void Arbiter::init(const Json::Value& json)
 {
     using namespace drivers;
 
-    auto fs(Fs::create(m_pool, json["file"]));
-    if (fs) m_drivers["file"] = std::move(fs);
+    auto fs(Fs::create(json["file"]));
+    if (fs) m_drivers[fs->type()] = std::move(fs);
+
+    auto test(Test::create(json["test"]));
+    if (test) m_drivers[test->type()] = std::move(test);
 
     auto http(Http::create(m_pool, json["http"]));
-    if (http) m_drivers["http"] = std::move(http);
+    if (http) m_drivers[http->type()] = std::move(http);
 
     auto s3(S3::create(m_pool, json["s3"]));
-    if (s3) m_drivers["s3"] = std::move(s3);
+    if (s3) m_drivers[s3->type()] = std::move(s3);
 
     auto dropbox(Dropbox::create(m_pool, json["dropbox"]));
-    if (dropbox) m_drivers["dropbox"] = std::move(dropbox);
+    if (dropbox) m_drivers[dropbox->type()] = std::move(dropbox);
+}
+
+bool Arbiter::hasDriver(const std::string path) const
+{
+    return m_drivers.count(getType(path));
 }
 
 void Arbiter::addDriver(const std::string type, std::unique_ptr<Driver> driver)
@@ -154,14 +162,146 @@ void Arbiter::put(const std::string path, const std::vector<char>& data) const
     return getDriver(path).put(stripType(path), data);
 }
 
-void Arbiter::copy(const std::string from, const std::string to) const
+std::string Arbiter::get(
+        const std::string path,
+        const http::Headers headers,
+        const http::Query query) const
 {
-    const Endpoint outEndpoint(getEndpoint(to));
-    const auto paths(resolve(from));
+    return getHttpDriver(path).get(stripType(path), headers, query);
+}
 
-    for (const auto& path : paths)
+std::unique_ptr<std::string> Arbiter::tryGet(
+        const std::string path,
+        const http::Headers headers,
+        const http::Query query) const
+{
+    return getHttpDriver(path).tryGet(stripType(path), headers, query);
+}
+
+std::vector<char> Arbiter::getBinary(
+        const std::string path,
+        const http::Headers headers,
+        const http::Query query) const
+{
+    return getHttpDriver(path).getBinary(stripType(path), headers, query);
+}
+
+std::unique_ptr<std::vector<char>> Arbiter::tryGetBinary(
+        const std::string path,
+        const http::Headers headers,
+        const http::Query query) const
+{
+    return getHttpDriver(path).tryGetBinary(stripType(path), headers, query);
+}
+
+void Arbiter::put(
+        const std::string path,
+        const std::string& data,
+        const http::Headers headers,
+        const http::Query query) const
+{
+    return getHttpDriver(path).put(stripType(path), data, headers, query);
+}
+
+void Arbiter::put(
+        const std::string path,
+        const std::vector<char>& data,
+        const http::Headers headers,
+        const http::Query query) const
+{
+    return getHttpDriver(path).put(stripType(path), data, headers, query);
+}
+
+void Arbiter::copy(
+        const std::string src,
+        const std::string dst,
+        const bool verbose) const
+{
+    if (src.empty()) throw ArbiterError("Cannot copy from empty source");
+    if (dst.empty()) throw ArbiterError("Cannot copy to empty destination");
+
+    // Globify the source path if it's a directory.  In this case, the source
+    // already ends with a slash.
+    const std::string srcToResolve(src + (util::isDirectory(src) ? "**" : ""));
+
+    if (srcToResolve.back() != '*')
     {
-        outEndpoint.putSubpath(util::getBasename(path), getBinary(path));
+        // The source is a single file.
+        copyFile(src, dst, verbose);
+    }
+    else
+    {
+        // We'll need this to mirror the directory structure in the output.
+        // All resolved paths will contain this common prefix, so we can
+        // determine any nested paths from recursive resolutions by stripping
+        // that common portion.
+        const Endpoint& srcEndpoint(getEndpoint(util::stripPostfixing(src)));
+        const std::string commonPrefix(srcEndpoint.prefixedRoot());
+
+        const Endpoint dstEndpoint(getEndpoint(dst));
+
+        if (srcEndpoint.prefixedRoot() == dstEndpoint.prefixedRoot())
+        {
+            throw ArbiterError("Cannot copy directory to itself");
+        }
+
+        int i(0);
+        const auto paths(resolve(srcToResolve, verbose));
+
+        for (const auto& path : paths)
+        {
+            const std::string subpath(path.substr(commonPrefix.size()));
+
+            if (verbose)
+            {
+                std::cout <<
+                    ++i << " / " << paths.size() << ": " <<
+                    path << " -> " << dstEndpoint.fullPath(subpath) <<
+                    std::endl;
+            }
+
+            if (dstEndpoint.isLocal())
+            {
+                fs::mkdirp(util::getNonBasename(dstEndpoint.fullPath(subpath)));
+            }
+
+            dstEndpoint.put(subpath, getBinary(path));
+        }
+    }
+}
+
+void Arbiter::copyFile(
+        const std::string file,
+        const std::string dst,
+        const bool verbose) const
+{
+    if (dst.empty()) throw ArbiterError("Cannot copy to empty destination");
+
+    const Endpoint dstEndpoint(getEndpoint(dst));
+
+    if (util::isDirectory(dst))
+    {
+        // If the destination is a directory, maintain the basename of the
+        // source file.
+        const std::string basename(util::getBasename(file));
+        if (verbose)
+        {
+            std::cout <<
+                file << " -> " <<
+                dstEndpoint.type() + "://" + dstEndpoint.fullPath(basename) <<
+                std::endl;
+        }
+
+        if (dstEndpoint.isLocal()) fs::mkdirp(dst);
+
+        dstEndpoint.put(util::getBasename(file), getBinary(file));
+    }
+    else
+    {
+        if (verbose) std::cout << file << " -> " << dst << std::endl;
+
+        if (dstEndpoint.isLocal()) fs::mkdirp(util::getNonBasename(dst));
+        put(dst, getBinary(file));
     }
 }
 
@@ -173,6 +313,16 @@ bool Arbiter::isRemote(const std::string path) const
 bool Arbiter::isLocal(const std::string path) const
 {
     return !isRemote(path);
+}
+
+bool Arbiter::exists(const std::string path) const
+{
+    return tryGetSize(path).get() != nullptr;
+}
+
+bool Arbiter::isHttpDerived(const std::string path) const
+{
+    return tryGetHttpDriver(path) != nullptr;
 }
 
 std::vector<std::string> Arbiter::resolve(
@@ -199,6 +349,17 @@ const Driver& Arbiter::getDriver(const std::string path) const
     return *m_drivers.at(type);
 }
 
+const drivers::Http* Arbiter::tryGetHttpDriver(const std::string path) const
+{
+    return dynamic_cast<const drivers::Http*>(&getDriver(path));
+}
+
+const drivers::Http& Arbiter::getHttpDriver(const std::string path) const
+{
+    if (auto d = tryGetHttpDriver(path)) return *d;
+    else throw ArbiterError("Cannot get driver for " + path + " as HTTP");
+}
+
 std::unique_ptr<fs::LocalHandle> Arbiter::getLocalHandle(
         const std::string path,
         const Endpoint& tempEndpoint) const
@@ -217,7 +378,7 @@ std::unique_ptr<fs::LocalHandle> Arbiter::getLocalHandle(
         std::replace(name.begin(), name.end(), '\\', '-');
         std::replace(name.begin(), name.end(), ':', '_');
 
-        tempEndpoint.putSubpath(name, getBinary(path));
+        tempEndpoint.put(name, getBinary(path));
 
         localHandle.reset(
                 new fs::LocalHandle(tempEndpoint.root() + name, true));
@@ -265,6 +426,14 @@ std::string Arbiter::stripType(const std::string raw)
     return result;
 }
 
+std::string Arbiter::getExtension(const std::string path)
+{
+    const std::size_t pos(path.find_last_of('.'));
+
+    if (pos != std::string::npos) return path.substr(pos + 1);
+    else return std::string();
+}
+
 } // namespace arbiter
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
@@ -299,18 +468,10 @@ namespace ARBITER_CUSTOM_NAMESPACE
 namespace arbiter
 {
 
-std::unique_ptr<std::vector<char>> Driver::tryGetBinary(std::string path) const
+std::string Driver::get(const std::string path) const
 {
-    std::unique_ptr<std::vector<char>> data(new std::vector<char>());
-    if (!get(path, *data)) data.reset();
-    return data;
-}
-
-std::vector<char> Driver::getBinary(std::string path) const
-{
-    std::vector<char> data;
-    if (!get(path, data)) throw ArbiterError("Could not read file " + path);
-    return data;
+    const std::vector<char> data(getBinary(path));
+    return std::string(data.begin(), data.end());
 }
 
 std::unique_ptr<std::string> Driver::tryGet(const std::string path) const
@@ -321,10 +482,18 @@ std::unique_ptr<std::string> Driver::tryGet(const std::string path) const
     return result;
 }
 
-std::string Driver::get(const std::string path) const
+std::vector<char> Driver::getBinary(std::string path) const
 {
-    const std::vector<char> data(getBinary(path));
-    return std::string(data.begin(), data.end());
+    std::vector<char> data;
+    if (!get(path, data)) throw ArbiterError("Could not read file " + path);
+    return data;
+}
+
+std::unique_ptr<std::vector<char>> Driver::tryGetBinary(std::string path) const
+{
+    std::unique_ptr<std::vector<char>> data(new std::vector<char>());
+    if (!get(path, *data)) data.reset();
+    return data;
 }
 
 std::size_t Driver::getSize(const std::string path) const
@@ -362,7 +531,8 @@ std::vector<std::string> Driver::resolve(
     }
     else
     {
-        if (type() != "fs") path = type() + "://" + path;
+        if (isRemote()) path = type() + "://" + path;
+        else path = fs::expandTilde(path);
 
         results.push_back(path);
     }
@@ -430,6 +600,11 @@ std::string Endpoint::root() const
     return m_root;
 }
 
+std::string Endpoint::prefixedRoot() const
+{
+    return softPrefix() + root();
+}
+
 std::string Endpoint::type() const
 {
     return m_driver.type();
@@ -445,40 +620,104 @@ bool Endpoint::isLocal() const
     return !isRemote();
 }
 
-std::string Endpoint::getSubpath(const std::string subpath) const
+bool Endpoint::isHttpDerived() const
+{
+    return tryGetHttpDriver() != nullptr;
+}
+
+std::string Endpoint::get(const std::string subpath) const
 {
     return m_driver.get(fullPath(subpath));
 }
 
-std::unique_ptr<std::string> Endpoint::tryGetSubpath(const std::string subpath)
+std::unique_ptr<std::string> Endpoint::tryGet(const std::string subpath)
     const
 {
     return m_driver.tryGet(fullPath(subpath));
 }
 
-std::vector<char> Endpoint::getSubpathBinary(const std::string subpath) const
+std::vector<char> Endpoint::getBinary(const std::string subpath) const
 {
     return m_driver.getBinary(fullPath(subpath));
 }
 
-std::unique_ptr<std::vector<char>> Endpoint::tryGetSubpathBinary(
+std::unique_ptr<std::vector<char>> Endpoint::tryGetBinary(
         const std::string subpath) const
 {
     return m_driver.tryGetBinary(fullPath(subpath));
 }
 
-void Endpoint::putSubpath(
-        const std::string subpath,
-        const std::string& data) const
+std::size_t Endpoint::getSize(const std::string subpath) const
+{
+    return m_driver.getSize(fullPath(subpath));
+}
+
+std::unique_ptr<std::size_t> Endpoint::tryGetSize(
+        const std::string subpath) const
+{
+    return m_driver.tryGetSize(fullPath(subpath));
+}
+
+void Endpoint::put(const std::string subpath, const std::string& data) const
 {
     m_driver.put(fullPath(subpath), data);
 }
 
-void Endpoint::putSubpath(
+void Endpoint::put(
         const std::string subpath,
         const std::vector<char>& data) const
 {
     m_driver.put(fullPath(subpath), data);
+}
+
+std::string Endpoint::get(
+        const std::string subpath,
+        const http::Headers headers,
+        const http::Query query) const
+{
+    return getHttpDriver().get(fullPath(subpath), headers, query);
+}
+
+std::unique_ptr<std::string> Endpoint::tryGet(
+        const std::string subpath,
+        const http::Headers headers,
+        const http::Query query) const
+{
+    return getHttpDriver().tryGet(fullPath(subpath), headers, query);
+}
+
+std::vector<char> Endpoint::getBinary(
+        const std::string subpath,
+        const http::Headers headers,
+        const http::Query query) const
+{
+    return getHttpDriver().getBinary(fullPath(subpath), headers, query);
+}
+
+std::unique_ptr<std::vector<char>> Endpoint::tryGetBinary(
+        const std::string subpath,
+        const http::Headers headers,
+        const http::Query query) const
+{
+    return getHttpDriver().tryGetBinary(fullPath(subpath), headers, query);
+}
+
+void Endpoint::put(
+        const std::string path,
+        const std::string& data,
+        const http::Headers headers,
+        const http::Query query) const
+{
+    getHttpDriver().put(path, data, headers, query);
+}
+
+void Endpoint::put(
+        const std::string path,
+        const std::vector<char>& data,
+        const http::Headers headers,
+        const http::Query query) const
+{
+    getHttpDriver().put(path, data, headers, query);
 }
 
 std::string Endpoint::fullPath(const std::string& subpath) const
@@ -486,9 +725,30 @@ std::string Endpoint::fullPath(const std::string& subpath) const
     return m_root + subpath;
 }
 
+std::string Endpoint::prefixedFullPath(const std::string& subpath) const
+{
+     return softPrefix() + fullPath(subpath);
+}
+
 Endpoint Endpoint::getSubEndpoint(std::string subpath) const
 {
     return Endpoint(m_driver, m_root + subpath);
+}
+
+std::string Endpoint::softPrefix() const
+{
+    return isRemote() ? type() + "://" : "";
+}
+
+const drivers::Http* Endpoint::tryGetHttpDriver() const
+{
+    return dynamic_cast<const drivers::Http*>(&m_driver);
+}
+
+const drivers::Http& Endpoint::getHttpDriver() const
+{
+    if (auto d = tryGetHttpDriver()) return *d;
+    else throw ArbiterError("Cannot get driver of type " + type() + " as HTTP");
 }
 
 } // namespace arbiter
@@ -514,6 +774,7 @@ Endpoint Endpoint::getSubEndpoint(std::string subpath) const
 #ifndef ARBITER_IS_AMALGAMATION
 #include <arbiter/arbiter.hpp>
 #include <arbiter/drivers/fs.hpp>
+#include <arbiter/util/util.hpp>
 #endif
 
 #ifndef ARBITER_WINDOWS
@@ -526,9 +787,9 @@ Endpoint Endpoint::getSubEndpoint(std::string subpath) const
 #include <windows.h>
 #endif
 
+#include <algorithm>
 #include <cstdlib>
 #include <fstream>
-#include <stdexcept>
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
 namespace ARBITER_CUSTOM_NAMESPACE
@@ -546,16 +807,35 @@ namespace
             std::ofstream::out |
             std::ofstream::trunc);
 
-    void noHome()
+    const std::string home(([]()
     {
-        throw ArbiterError("No home directory found");
-    }
+        std::string s;
+
+#ifndef ARBITER_WINDOWS
+        if (auto home = util::env("HOME")) s = *home;
+#else
+        if (auto userProfile = util::env("USERPROFILE"))
+        {
+            s = *userProfile;
+        }
+        else
+        {
+            auto homeDrive(util::env("HOMEDRIVE"));
+            auto homePath(util::env("HOMEPATH"));
+
+            if (homeDrive && homePath) s = homeDrive + homePath;
+        }
+#endif
+        if (s.empty()) std::cout << "No home directory found" << std::endl;
+
+        return s;
+    })());
 }
 
 namespace drivers
 {
 
-std::unique_ptr<Fs> Fs::create(HttpPool&, const Json::Value&)
+std::unique_ptr<Fs> Fs::create(const Json::Value&)
 {
     return std::unique_ptr<Fs>(new Fs());
 }
@@ -615,17 +895,27 @@ void Fs::put(std::string path, const std::vector<char>& data) const
     }
 }
 
-std::vector<std::string> Fs::glob(std::string path, bool) const
+std::vector<std::string> Fs::glob(std::string path, bool verbose) const
 {
     std::vector<std::string> results;
 
-#ifndef ARBITER_WINDOWS
     path = fs::expandTilde(path);
 
+    const bool recursive(([&path]()
+    {
+        if (path.size() > 2 && path[path.size() - 2] == '*')
+        {
+            path.pop_back();
+            return true;
+        }
+        else return false;
+    })());
+
+#ifndef ARBITER_WINDOWS
     glob_t buffer;
     struct stat info;
 
-    ::glob(path.c_str(), GLOB_NOSORT | GLOB_TILDE, 0, &buffer);
+    ::glob(path.c_str(), GLOB_NOSORT | GLOB_MARK, 0, &buffer);
 
     for (std::size_t i(0); i < buffer.gl_pathc; ++i)
     {
@@ -635,7 +925,17 @@ std::vector<std::string> Fs::glob(std::string path, bool) const
         {
             if (S_ISREG(info.st_mode))
             {
+                if (verbose && results.size() % 10000 == 0)
+                {
+                    std::cout << "." << std::flush;
+                }
+
                 results.push_back(val);
+            }
+            else if (recursive && S_ISDIR(info.st_mode))
+            {
+                const auto nested(glob(val + "**", verbose));
+                results.insert(results.end(), nested.begin(), nested.end());
             }
         }
         else
@@ -660,6 +960,7 @@ std::vector<std::string> Fs::glob(std::string path, bool) const
             {
                 results.push_back(converter.to_bytes(data->cFileName));
             }
+            // TODO Recurse if necessary.
         }
         while (FindNextFileW(hFind, data));
     }
@@ -673,13 +974,39 @@ std::vector<std::string> Fs::glob(std::string path, bool) const
 namespace fs
 {
 
-bool mkdirp(std::string dir)
+bool mkdirp(std::string raw)
 {
-    dir = expandTilde(dir);
-
 #ifndef ARBITER_WINDOWS
-    const bool err(::mkdir(dir.c_str(), S_IRWXU | S_IRGRP | S_IROTH));
-    return (!err || errno == EEXIST);
+    const std::string dir(([&raw]()
+    {
+        std::string s(expandTilde(raw));
+
+        // Remove consecutive slashes.  For Windows, we'll need to be careful
+        // not to remove drive letters like C:\\.
+        const auto end = std::unique(s.begin(), s.end(), [](char l, char r){
+            return util::isSlash(l) && util::isSlash(r);
+        });
+
+        s = std::string(s.begin(), end);
+        if (s.size() && util::isSlash(s.back())) s.pop_back();
+        return s;
+    })());
+
+    auto it(dir.begin());
+    const auto end(dir.cend());
+
+    do
+    {
+        it = std::find_if(++it, end, util::isSlash);
+
+        const std::string cur(dir.begin(), it);
+        const bool err(::mkdir(cur.c_str(), S_IRWXU | S_IRGRP | S_IROTH));
+        if (err && errno != EEXIST) return false;
+    }
+    while (it != end);
+
+    return true;
+
 #else
     throw ArbiterError("Windows mkdirp not done yet.");
 #endif
@@ -702,35 +1029,7 @@ std::string expandTilde(std::string in)
 
     if (!in.empty() && in.front() == '~')
     {
-#ifndef ARBITER_WINDOWS
-        if (!getenv("HOME"))
-        {
-            noHome();
-        }
-
-        static const std::string home(getenv("HOME"));
-#else
-        char* userProfile(nullptr);
-        char* homePath(nullptr);
-        char* homeDrive(nullptr);
-
-        std::size_t len(0);
-        errno_t err(0);
-
-        err = _dupenv_s(&userProfile, &len, "USERPROFILE");
-        err = _dupenv_s(&homeDrive, &len, "HOMEDRIVE");
-        err = _dupenv_s(&homePath, &len, "HOMEPATH");
-
-        if (!userProfile && !(homeDrive && homePath))
-        {
-            noHome();
-        }
-
-        static const std::string home(
-                userProfile ?
-                    userProfile :
-                    std::string(homeDrive) + std::string(homePath));
-#endif
+        if (home.empty()) throw ArbiterError("No home directory found");
 
         out = home + in.substr(1);
     }
@@ -741,10 +1040,10 @@ std::string expandTilde(std::string in)
 std::string getTempPath()
 {
 #ifndef ARBITER_WINDOWS
-    if (const char* t = getenv("TMPDIR"))   return t;
-    if (const char* t = getenv("TMP"))      return t;
-    if (const char* t = getenv("TEMP"))     return t;
-    if (const char* t = getenv("TEMPDIR"))  return t;
+    if (const auto t = util::env("TMPDIR"))     return *t;
+    if (const auto t = util::env("TMP"))        return *t;
+    if (const auto t = util::env("TEMP"))       return *t;
+    if (const auto t = util::env("TEMPDIR"))    return *t;
     return "/tmp";
 #else
     std::vector<char> path(MAX_PATH, '\0');
@@ -805,121 +1104,14 @@ namespace ARBITER_CUSTOM_NAMESPACE
 
 namespace arbiter
 {
-
-namespace
-{
-    struct PutData
-    {
-        PutData(const std::vector<char>& data)
-            : data(data)
-            , offset(0)
-        { }
-
-        const std::vector<char>& data;
-        std::size_t offset;
-    };
-
-    std::size_t getCb(
-            const char* in,
-            std::size_t size,
-            std::size_t num,
-            std::vector<char>* out)
-    {
-        const std::size_t fullBytes(size * num);
-        const std::size_t startSize(out->size());
-
-        out->resize(out->size() + fullBytes);
-        std::memcpy(out->data() + startSize, in, fullBytes);
-
-        return fullBytes;
-    }
-
-    std::size_t putCb(
-            char* out,
-            std::size_t size,
-            std::size_t num,
-            PutData* in)
-    {
-        const std::size_t fullBytes(
-                std::min(
-                    size * num,
-                    in->data.size() - in->offset));
-        std::memcpy(out, in->data.data() + in->offset, fullBytes);
-
-        in->offset += fullBytes;
-        return fullBytes;
-    }
-
-    std::size_t headerCb(
-            const char *buffer,
-            std::size_t size,
-            std::size_t num,
-            arbiter::Headers* out)
-    {
-        const std::size_t fullBytes(size * num);
-
-        std::string data(buffer, fullBytes);
-        data.erase(std::remove(data.begin(), data.end(), '\n'), data.end());
-        data.erase(std::remove(data.begin(), data.end(), '\r'), data.end());
-
-        const std::size_t split(data.find_first_of(":"));
-
-        // No colon means it isn't a header with data.
-        if (split == std::string::npos) return fullBytes;
-
-        const std::string key(data.substr(0, split));
-        const std::string val(data.substr(split + 1, data.size()));
-
-        (*out)[key] = val;
-
-        return fullBytes;
-    }
-
-    size_t eatLogging(void *out, size_t size, size_t num, void *in)
-    {
-        return size * num;
-    }
-
-    const bool followRedirect(true);
-
-    const std::size_t defaultHttpTimeout(60 * 5);
-
-    const std::map<char, std::string> sanitizers
-    {
-        { ' ', "%20" },
-        { '!', "%21" },
-        { '"', "%22" },
-        { '#', "%23" },
-        { '$', "%24" },
-        { '\'', "%27" },
-        { '(', "%28" },
-        { ')', "%29" },
-        { '*', "%2A" },
-        { '+', "%2B" },
-        { ',', "%2C" },
-        { '/', "%2F" },
-        { ';', "%3B" },
-        { '<', "%3C" },
-        { '>', "%3E" },
-        { '@', "%40" },
-        { '[', "%5B" },
-        { '\\', "%5C" },
-        { ']', "%5D" },
-        { '^', "%5E" },
-        { '`', "%60" },
-        { '{', "%7B" },
-        { '|', "%7C" },
-        { '}', "%7D" },
-        { '~', "%7E" }
-    };
-} // unnamed namespace
-
 namespace drivers
 {
 
-Http::Http(HttpPool& pool) : m_pool(pool) { }
+using namespace http;
 
-std::unique_ptr<Http> Http::create(HttpPool& pool, const Json::Value&)
+Http::Http(Pool& pool) : m_pool(pool) { }
+
+std::unique_ptr<Http> Http::create(Pool& pool, const Json::Value&)
 {
     return std::unique_ptr<Http>(new Http(pool));
 }
@@ -929,26 +1121,79 @@ std::unique_ptr<std::size_t> Http::tryGetSize(std::string path) const
     std::unique_ptr<std::size_t> size;
 
     auto http(m_pool.acquire());
-    HttpResponse res(http.head(path));
+    Response res(http.head(path));
 
-    if (res.ok())
+    if (res.ok() && res.headers().count("Content-Length"))
     {
-        if (res.headers().count("Content-Length"))
-        {
-            const std::string& str(res.headers().at("Content-Length"));
-            size.reset(new std::size_t(std::stoul(str)));
-        }
+        const std::string& str(res.headers().at("Content-Length"));
+        size.reset(new std::size_t(std::stoul(str)));
     }
 
     return size;
 }
 
-bool Http::get(std::string path, std::vector<char>& data) const
+std::string Http::get(
+        std::string path,
+        Headers headers,
+        Query query) const
+{
+    const auto data(getBinary(path, headers, query));
+    return std::string(data.begin(), data.end());
+}
+
+std::unique_ptr<std::string> Http::tryGet(
+        std::string path,
+        Headers headers,
+        Query query) const
+{
+    std::unique_ptr<std::string> result;
+    auto data(tryGetBinary(path, headers, query));
+    if (data) result.reset(new std::string(data->begin(), data->end()));
+    return result;
+}
+
+std::vector<char> Http::getBinary(
+        std::string path,
+        Headers headers,
+        Query query) const
+{
+    std::vector<char> data;
+    if (!get(path, data, headers, query))
+    {
+        throw ArbiterError("Could not read from " + path);
+    }
+    return data;
+}
+
+std::unique_ptr<std::vector<char>> Http::tryGetBinary(
+        std::string path,
+        Headers headers,
+        Query query) const
+{
+    std::unique_ptr<std::vector<char>> data(new std::vector<char>());
+    if (!get(path, *data, headers, query)) data.reset();
+    return data;
+}
+
+void Http::put(
+        std::string path,
+        const std::string& data,
+        const Headers headers,
+        const Query query) const
+{
+    put(path, std::vector<char>(data.begin(), data.end()), headers, query);
+}
+
+bool Http::get(
+        std::string path,
+        std::vector<char>& data,
+        const Headers headers,
+        const Query query) const
 {
     bool good(false);
 
     auto http(m_pool.acquire());
-    HttpResponse res(http.get(path));
+    Response res(http.get(path, headers, query));
 
     if (res.ok())
     {
@@ -959,367 +1204,55 @@ bool Http::get(std::string path, std::vector<char>& data) const
     return good;
 }
 
-void Http::put(std::string path, const std::vector<char>& data) const
+void Http::put(
+        const std::string path,
+        const std::vector<char>& data,
+        const Headers headers,
+        const Query query) const
 {
     auto http(m_pool.acquire());
 
-    if (!http.put(path, data).ok())
+    if (!http.put(path, data, headers, query).ok())
     {
         throw ArbiterError("Couldn't HTTP PUT to " + path);
     }
 }
 
-std::string Http::sanitize(const std::string path, const std::string exclusions)
+Response Http::internalGet(
+        const std::string path,
+        const Headers headers,
+        const Query query) const
 {
-    std::string result;
+    return m_pool.acquire().get(path, headers, query);
+}
 
-    for (const auto c : path)
-    {
-        auto it(sanitizers.find(c));
+Response Http::internalPut(
+        const std::string path,
+        const std::vector<char>& data,
+        const Headers headers,
+        const Query query) const
+{
+    return m_pool.acquire().put(path, data, headers, query);
+}
 
-        if (it == sanitizers.end() || exclusions.find(c) != std::string::npos)
-        {
-            result += c;
-        }
-        else
-        {
-            result += it->second;
-        }
-    }
+Response Http::internalHead(
+        const std::string path,
+        const Headers headers,
+        const Query query) const
+{
+    return m_pool.acquire().head(path, headers, query);
+}
 
-    return result;
+Response Http::internalPost(
+        const std::string path,
+        const std::vector<char>& data,
+        const Headers headers,
+        const Query query) const
+{
+    return m_pool.acquire().post(path, data, headers, query);
 }
 
 } // namespace drivers
-
-Curl::Curl(bool verbose, std::size_t timeout)
-    : m_curl(0)
-    , m_headers(0)
-    , m_verbose(verbose)
-    , m_timeout(timeout)
-    , m_data()
-{
-    m_curl = curl_easy_init();
-}
-
-Curl::~Curl()
-{
-    curl_easy_cleanup(m_curl);
-    curl_slist_free_all(m_headers);
-    m_headers = 0;
-}
-
-void Curl::init(std::string path, const Headers& headers)
-{
-    // Reset our curl instance and header list.
-    curl_slist_free_all(m_headers);
-    m_headers = 0;
-
-    // Set path.
-    curl_easy_setopt(m_curl, CURLOPT_URL, path.c_str());
-
-    // Needed for multithreaded Curl usage.
-    curl_easy_setopt(m_curl, CURLOPT_NOSIGNAL, 1L);
-
-    // Substantially faster DNS lookups without IPv6.
-    curl_easy_setopt(m_curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
-
-    // Don't wait forever.
-    curl_easy_setopt(m_curl, CURLOPT_TIMEOUT, m_timeout);
-
-    // Configuration options.
-    if (followRedirect) curl_easy_setopt(m_curl, CURLOPT_FOLLOWLOCATION, 1L);
-
-    // Insert supplied headers.
-    for (const auto& h : headers)
-    {
-        m_headers = curl_slist_append(
-                m_headers,
-                (h.first + ": " + h.second).c_str());
-    }
-}
-
-HttpResponse Curl::get(std::string path, Headers headers)
-{
-    int httpCode(0);
-    std::vector<char> data;
-
-    if (m_verbose) curl_easy_setopt(m_curl, CURLOPT_VERBOSE, 1L);
-
-    path = drivers::Http::sanitize(path);
-    init(path, headers);
-
-    // Register callback function and date pointer to consume the result.
-    curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, getCb);
-    curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, &data);
-
-    // Insert all headers into the request.
-    curl_easy_setopt(m_curl, CURLOPT_HTTPHEADER, m_headers);
-
-    // Set up callback and data pointer for received headers.
-    Headers receivedHeaders;
-    curl_easy_setopt(m_curl, CURLOPT_HEADERFUNCTION, headerCb);
-    curl_easy_setopt(m_curl, CURLOPT_HEADERDATA, &receivedHeaders);
-
-    // Run the command.
-    curl_easy_perform(m_curl);
-    curl_easy_getinfo(m_curl, CURLINFO_RESPONSE_CODE, &httpCode);
-
-    curl_easy_reset(m_curl);
-    return HttpResponse(httpCode, data, receivedHeaders);
-}
-
-HttpResponse Curl::head(std::string path, Headers headers)
-{
-    int httpCode(0);
-    std::vector<char> data;
-
-    if (m_verbose) curl_easy_setopt(m_curl, CURLOPT_VERBOSE, 1L);
-
-    path = drivers::Http::sanitize(path);
-    init(path, headers);
-
-    // Register callback function and date pointer to consume the result.
-    curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, getCb);
-    curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, &data);
-
-    // Insert all headers into the request.
-    curl_easy_setopt(m_curl, CURLOPT_HTTPHEADER, m_headers);
-
-    // Set up callback and data pointer for received headers.
-    Headers receivedHeaders;
-    curl_easy_setopt(m_curl, CURLOPT_HEADERFUNCTION, headerCb);
-    curl_easy_setopt(m_curl, CURLOPT_HEADERDATA, &receivedHeaders);
-
-    // Specify a HEAD request.
-    curl_easy_setopt(m_curl, CURLOPT_NOBODY, 1L);
-
-    // Run the command.
-    curl_easy_perform(m_curl);
-    curl_easy_getinfo(m_curl, CURLINFO_RESPONSE_CODE, &httpCode);
-
-    curl_easy_reset(m_curl);
-    return HttpResponse(httpCode, data, receivedHeaders);
-}
-
-HttpResponse Curl::put(
-        std::string path,
-        const std::vector<char>& data,
-        Headers headers)
-{
-    path = drivers::Http::sanitize(path);
-    init(path, headers);
-
-    if (m_verbose) curl_easy_setopt(m_curl, CURLOPT_VERBOSE, 1L);
-
-    int httpCode(0);
-
-    std::unique_ptr<PutData> putData(new PutData(data));
-
-    // Register callback function and data pointer to create the request.
-    curl_easy_setopt(m_curl, CURLOPT_READFUNCTION, putCb);
-    curl_easy_setopt(m_curl, CURLOPT_READDATA, putData.get());
-
-    // Insert all headers into the request.
-    curl_easy_setopt(m_curl, CURLOPT_HTTPHEADER, m_headers);
-
-    // Specify that this is a PUT request.
-    curl_easy_setopt(m_curl, CURLOPT_PUT, 1L);
-
-    // Must use this for binary data, otherwise curl will use strlen(), which
-    // will likely be incorrect.
-    curl_easy_setopt(
-            m_curl,
-            CURLOPT_INFILESIZE_LARGE,
-            static_cast<curl_off_t>(data.size()));
-
-    // Hide Curl's habit of printing things to console even with verbose set
-    // to false.
-    curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, eatLogging);
-
-    // Run the command.
-    curl_easy_perform(m_curl);
-    curl_easy_getinfo(m_curl, CURLINFO_RESPONSE_CODE, &httpCode);
-
-    curl_easy_reset(m_curl);
-    return HttpResponse(httpCode);
-}
-
-HttpResponse Curl::post(
-        std::string path,
-        const std::vector<char>& data,
-        Headers headers)
-{
-    path = drivers::Http::sanitize(path);
-    init(path, headers);
-    if (m_verbose) curl_easy_setopt(m_curl, CURLOPT_VERBOSE, 1L);
-
-    int httpCode(0);
-
-    std::unique_ptr<PutData> putData(new PutData(data));
-    std::vector<char> writeData;
-
-    // Register callback function and data pointer to create the request.
-    curl_easy_setopt(m_curl, CURLOPT_READFUNCTION, putCb);
-    curl_easy_setopt(m_curl, CURLOPT_READDATA, putData.get());
-
-    // Register callback function and data pointer to consume the result.
-    curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, getCb);
-    curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, &writeData);
-
-    // Insert all headers into the request.
-    curl_easy_setopt(m_curl, CURLOPT_HTTPHEADER, m_headers);
-
-    // Set up callback and data pointer for received headers.
-    Headers receivedHeaders;
-    curl_easy_setopt(m_curl, CURLOPT_HEADERFUNCTION, headerCb);
-    curl_easy_setopt(m_curl, CURLOPT_HEADERDATA, &receivedHeaders);
-
-    // Specify that this is a POST request.
-    curl_easy_setopt(m_curl, CURLOPT_POST, 1L);
-
-    // Must use this for binary data, otherwise curl will use strlen(), which
-    // will likely be incorrect.
-    curl_easy_setopt(
-            m_curl,
-            CURLOPT_INFILESIZE_LARGE,
-            static_cast<curl_off_t>(data.size()));
-
-    // Run the command.
-    curl_easy_perform(m_curl);
-    curl_easy_getinfo(m_curl, CURLINFO_RESPONSE_CODE, &httpCode);
-
-    curl_easy_reset(m_curl);
-    HttpResponse response(httpCode, writeData, receivedHeaders);
-    return response;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-HttpResource::HttpResource(
-        HttpPool& pool,
-        Curl& curl,
-        const std::size_t id,
-        const std::size_t retry)
-    : m_pool(pool)
-    , m_curl(curl)
-    , m_id(id)
-    , m_retry(retry)
-{ }
-
-HttpResource::~HttpResource()
-{
-    m_pool.release(m_id);
-}
-
-HttpResponse HttpResource::get(const std::string path, const Headers headers)
-{
-    auto f([this, path, headers]()->HttpResponse
-    {
-        return m_curl.get(path, headers);
-    });
-
-    return exec(f);
-}
-
-HttpResponse HttpResource::head( const std::string path, const Headers headers)
-{
-    auto f([this, path, headers]()->HttpResponse
-    {
-        return m_curl.head(path, headers);
-    });
-
-    return exec(f);
-}
-
-HttpResponse HttpResource::put(
-        std::string path,
-        const std::vector<char>& data,
-        Headers headers)
-{
-    auto f([this, path, &data, headers]()->HttpResponse
-    {
-        return m_curl.put(path, data, headers);
-    });
-
-    return exec(f);
-}
-
-HttpResponse HttpResource::post(
-        std::string path,
-        const std::vector<char>& data,
-        Headers headers)
-{
-    auto f([this, path, &data, headers]()->HttpResponse
-    {
-        return m_curl.post(path, data, headers);
-    });
-
-    return exec(f);
-}
-
-HttpResponse HttpResource::exec(std::function<HttpResponse()> f)
-{
-    HttpResponse res;
-    std::size_t tries(0);
-
-    do
-    {
-        res = f();
-    }
-    while (res.serverError() && tries++ < m_retry);
-
-    return res;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-HttpPool::HttpPool(
-        const std::size_t concurrent,
-        const std::size_t retry,
-        const Json::Value& json)
-    : m_curls(concurrent)
-    , m_available(concurrent)
-    , m_retry(retry)
-    , m_mutex()
-    , m_cv()
-{
-    const bool verbose(
-            json.isMember("arbiter") ?
-                json["arbiter"]["verbose"].asBool() : false);
-
-    const std::size_t timeout(
-            json.isMember("http") && json["http"]["timeout"].asUInt64() ?
-                json["http"]["timeout"].asUInt64() : defaultHttpTimeout);
-
-    for (std::size_t i(0); i < concurrent; ++i)
-    {
-        m_available[i] = i;
-        m_curls[i].reset(new Curl(verbose, timeout));
-    }
-}
-
-HttpResource HttpPool::acquire()
-{
-    std::unique_lock<std::mutex> lock(m_mutex);
-    m_cv.wait(lock, [this]()->bool { return !m_available.empty(); });
-
-    const std::size_t id(m_available.back());
-    Curl& curl(*m_curls[id]);
-
-    m_available.pop_back();
-
-    return HttpResource(*this, curl, id, m_retry);
-}
-
-void HttpPool::release(const std::size_t id)
-{
-    std::unique_lock<std::mutex> lock(m_mutex);
-    m_available.push_back(id);
-    lock.unlock();
-
-    m_cv.notify_one();
-}
 
 } // namespace arbiter
 
@@ -1362,8 +1295,9 @@ void HttpPool::release(const std::size_t id)
 #include <arbiter/drivers/fs.hpp>
 #include <arbiter/third/xml/xml.hpp>
 #include <arbiter/util/md5.hpp>
-#include <arbiter/util/transforms.hpp>
 #include <arbiter/util/sha256.hpp>
+#include <arbiter/util/transforms.hpp>
+#include <arbiter/util/util.hpp>
 #endif
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
@@ -1390,20 +1324,6 @@ namespace
 
     std::string line(const std::string& data) { return data + "\n"; }
     const std::vector<char> empty;
-
-    std::string getQueryString(const Query& query)
-    {
-        std::string result;
-
-        bool first(true);
-        for (const auto& q : query)
-        {
-            result += (first ? "?" : "&") + q.first + "=" + q.second;
-            first = false;
-        }
-
-        return result;
-    }
 
     typedef Xml::xml_node<> XmlNode;
     const std::string badResponse("Unexpected contents in AWS response");
@@ -1498,103 +1418,14 @@ namespace
 namespace drivers
 {
 
-AwsAuth::AwsAuth(const std::string access, const std::string hidden)
-    : m_access(access)
-    , m_hidden(hidden)
-{ }
-
-std::unique_ptr<AwsAuth> AwsAuth::find(std::string profile)
-{
-    std::unique_ptr<AwsAuth> auth;
-
-    const std::string credFile("~/.aws/credentials");
-
-    // First, try reading credentials file.
-    if (std::unique_ptr<std::string> cred = fsDriver.tryGet(credFile))
-    {
-        const std::vector<std::string> lines(condense(split(*cred)));
-
-        if (lines.size() >= 3)
-        {
-            std::size_t i(0);
-
-            const std::string profileFind("[" + profile + "]");
-            const std::string accessFind("aws_access_key_id=");
-            const std::string hiddenFind("aws_secret_access_key=");
-
-            while (i < lines.size() - 2 && !auth)
-            {
-                if (lines[i].find(profileFind) != std::string::npos)
-                {
-                    const std::string& accessLine(lines[i + 1]);
-                    const std::string& hiddenLine(lines[i + 2]);
-
-                    std::size_t accessPos(accessLine.find(accessFind));
-                    std::size_t hiddenPos(hiddenLine.find(hiddenFind));
-
-                    if (
-                            accessPos != std::string::npos &&
-                            hiddenPos != std::string::npos)
-                    {
-                        const std::string access(
-                                accessLine.substr(
-                                    accessPos + accessFind.size(),
-                                    accessLine.find(';')));
-
-                        const std::string hidden(
-                                hiddenLine.substr(
-                                    hiddenPos + hiddenFind.size(),
-                                    hiddenLine.find(';')));
-
-                        auth.reset(new AwsAuth(access, hidden));
-                    }
-                }
-
-                ++i;
-            }
-        }
-    }
-
-    // Fall back to environment settings.
-    if (!auth)
-    {
-        if (getenv("AWS_ACCESS_KEY_ID") && getenv("AWS_SECRET_ACCESS_KEY"))
-        {
-            auth.reset(
-                    new AwsAuth(
-                        getenv("AWS_ACCESS_KEY_ID"),
-                        getenv("AWS_SECRET_ACCESS_KEY")));
-        }
-        else if (
-                getenv("AMAZON_ACCESS_KEY_ID") &&
-                getenv("AMAZON_SECRET_ACCESS_KEY"))
-        {
-            auth.reset(
-                    new AwsAuth(
-                        getenv("AMAZON_ACCESS_KEY_ID"),
-                        getenv("AMAZON_SECRET_ACCESS_KEY")));
-        }
-    }
-
-    return auth;
-}
-
-std::string AwsAuth::access() const
-{
-    return m_access;
-}
-
-std::string AwsAuth::hidden() const
-{
-    return m_hidden;
-}
+using namespace http;
 
 S3::S3(
-        HttpPool& pool,
-        const AwsAuth auth,
+        Pool& pool,
+        const S3::Auth& auth,
         const std::string region,
         const bool sse)
-    : m_pool(pool)
+    : Http(pool)
     , m_auth(auth)
     , m_region(region)
     , m_baseUrl(getBaseUrl(region))
@@ -1608,9 +1439,9 @@ S3::S3(
     }
 }
 
-std::unique_ptr<S3> S3::create(HttpPool& pool, const Json::Value& json)
+std::unique_ptr<S3> S3::create(Pool& pool, const Json::Value& json)
 {
-    std::unique_ptr<AwsAuth> auth;
+    std::unique_ptr<Auth> auth;
     std::unique_ptr<S3> s3;
 
     const std::string profile(extractProfile(json));
@@ -1619,24 +1450,43 @@ std::unique_ptr<S3> S3::create(HttpPool& pool, const Json::Value& json)
     if (!json.isNull() && json.isMember("access") & json.isMember("hidden"))
     {
         auth.reset(
-                new AwsAuth(
+                new Auth(
                     json["access"].asString(),
                     json["hidden"].asString()));
     }
     else
     {
-        auth = AwsAuth::find(profile);
+        auth = Auth::find(profile);
     }
 
     if (!auth) return s3;
 
     // Try to get the region from the config file, or default to US standard.
     std::string region("us-east-1");
+    bool regionFound(false);
 
-    if (std::unique_ptr<std::string> config = fsDriver.tryGet("~/.aws/config"))
+    const std::string configPath(
+            util::env("AWS_CONFIG_FILE") ?
+                *util::env("AWS_CONFIG_FILE") : "~/.aws/config");
+
+    if (auto p = util::env("AWS_REGION"))
+    {
+        region = *p;
+        regionFound = true;
+    }
+    else if (auto p = util::env("AWS_DEFAULT_REGION"))
+    {
+        region = *p;
+        regionFound = true;
+    }
+    else if (!json.isNull() && json.isMember("region"))
+    {
+        region = json["region"].asString();
+        regionFound = true;
+    }
+    else if (std::unique_ptr<std::string> config = fsDriver.tryGet(configPath))
     {
         const std::vector<std::string> lines(condense(split(*config)));
-        bool regionFound(false);
 
         if (lines.size() >= 3)
         {
@@ -1650,27 +1500,48 @@ std::unique_ptr<S3> S3::create(HttpPool& pool, const Json::Value& json)
             {
                 if (lines[i].find(profileFind) != std::string::npos)
                 {
-                    const std::string& outputLine(lines[i + 1]);
-                    const std::string& regionLine(lines[i + 2]);
-
-                    std::size_t outputPos(outputLine.find(outputFind));
-                    std::size_t regionPos(regionLine.find(regionFind));
-
-                    if (
-                            outputPos != std::string::npos &&
-                            regionPos != std::string::npos)
+                    auto parse([&](
+                                const std::string& outputLine,
+                                const std::string& regionLine)
                     {
-                        region = regionLine.substr(
-                                regionPos + regionFind.size(),
-                                regionLine.find(';'));
+                        std::size_t outputPos(outputLine.find(outputFind));
+                        std::size_t regionPos(regionLine.find(regionFind));
 
-                        regionFound = true;
-                    }
+                        if (
+                                outputPos != std::string::npos &&
+                                regionPos != std::string::npos)
+                        {
+                            region = regionLine.substr(
+                                    regionPos + regionFind.size(),
+                                    regionLine.find(';'));
+
+                            return true;
+                        }
+
+                        return false;
+                    });
+
+
+                    const std::string& l1(lines[i + 1]);
+                    const std::string& l2(lines[i + 2]);
+
+                    regionFound = parse(l1, l2) || parse(l2, l1);
                 }
 
                 ++i;
             }
         }
+    }
+    else
+    {
+        std::cout <<
+            "~/.aws/config not found - using region us-east-1" << std::endl;
+    }
+
+    if (!regionFound)
+    {
+        std::cout <<
+            "Region not found in ~/.aws/config - using us-east-1" << std::endl;
     }
 
     s3.reset(new S3(pool, *auth, region, sse));
@@ -1680,7 +1551,15 @@ std::unique_ptr<S3> S3::create(HttpPool& pool, const Json::Value& json)
 
 std::string S3::extractProfile(const Json::Value& json)
 {
-    if (
+    if (auto p = util::env("AWS_PROFILE"))
+    {
+        return *p;
+    }
+    else if (auto p = util::env("AWS_DEFAULT_PROFILE"))
+    {
+        return *p;
+    }
+    else if (
             !json.isNull() &&
             json.isMember("profile") &&
             json["profile"].asString().size())
@@ -1689,7 +1568,7 @@ std::string S3::extractProfile(const Json::Value& json)
     }
     else
     {
-        return getenv("AWS_PROFILE") ? getenv("AWS_PROFILE") : "default";
+        return "default";
     }
 }
 
@@ -1698,7 +1577,7 @@ std::unique_ptr<std::size_t> S3::tryGetSize(std::string rawPath) const
     std::unique_ptr<std::size_t> size;
 
     const Resource resource(m_baseUrl, rawPath);
-    const AuthV4 authV4(
+    const ApiV4 apiV4(
             "HEAD",
             m_region,
             resource,
@@ -1707,8 +1586,7 @@ std::unique_ptr<std::size_t> S3::tryGetSize(std::string rawPath) const
             Headers(),
             empty);
 
-    auto http(m_pool.acquire());
-    HttpResponse res(http.head(resource.buildPath(), authV4.headers()));
+    Response res(Http::internalHead(resource.url(), apiV4.headers()));
 
     if (res.ok() && res.headers().count("Content-Length"))
     {
@@ -1719,19 +1597,14 @@ std::unique_ptr<std::size_t> S3::tryGetSize(std::string rawPath) const
     return size;
 }
 
-bool S3::get(std::string rawPath, std::vector<char>& data) const
-{
-    return get(rawPath, Query(), Headers(), data);
-}
-
 bool S3::get(
-        std::string rawPath,
-        const Query& query,
-        const Headers& headers,
-        std::vector<char>& data) const
+        const std::string rawPath,
+        std::vector<char>& data,
+        const Headers headers,
+        const Query query) const
 {
     const Resource resource(m_baseUrl, rawPath);
-    const AuthV4 authV4(
+    const ApiV4 apiV4(
             "GET",
             m_region,
             resource,
@@ -1740,8 +1613,11 @@ bool S3::get(
             headers,
             empty);
 
-    auto http(m_pool.acquire());
-    HttpResponse res(http.get(resource.buildPath(query), authV4.headers()));
+    Response res(
+            Http::internalGet(
+                resource.url(),
+                apiV4.headers(),
+                apiV4.query()));
 
     if (res.ok())
     {
@@ -1756,22 +1632,32 @@ bool S3::get(
     }
 }
 
-void S3::put(std::string rawPath, const std::vector<char>& data) const
+void S3::put(
+        const std::string rawPath,
+        const std::vector<char>& data,
+        const Headers userHeaders,
+        const Query query) const
 {
     const Resource resource(m_baseUrl, rawPath);
 
     Headers headers(m_baseHeaders);
-    const AuthV4 authV4(
+    headers.insert(userHeaders.begin(), userHeaders.end());
+
+    const ApiV4 apiV4(
             "PUT",
             m_region,
             resource,
             m_auth,
-            Query(),
+            query,
             headers,
             data);
 
-    auto http(m_pool.acquire());
-    HttpResponse res(http.put(resource.buildPath(), data, authV4.headers()));
+    Response res(
+            Http::internalPut(
+                resource.url(),
+                data,
+                apiV4.headers(),
+                apiV4.query()));
 
     if (!res.ok())
     {
@@ -1805,7 +1691,7 @@ std::vector<std::string> S3::glob(std::string path, bool verbose) const
     {
         if (verbose) std::cout << "." << std::flush;
 
-        if (!get(resource.bucket + "/", query, Headers(), data))
+        if (!get(resource.bucket + "/", data, Headers(), query))
         {
             throw ArbiterError("Couldn't S3 GET " + resource.bucket);
         }
@@ -1881,11 +1767,11 @@ std::vector<std::string> S3::glob(std::string path, bool verbose) const
     return results;
 }
 
-S3::AuthV4::AuthV4(
+S3::ApiV4::ApiV4(
         const std::string verb,
         const std::string& region,
         const Resource& resource,
-        const AwsAuth& auth,
+        const S3::Auth& auth,
         const Query& query,
         const Headers& headers,
         const std::vector<char>& data)
@@ -1893,6 +1779,7 @@ S3::AuthV4::AuthV4(
     , m_region(region)
     , m_formattedTime()
     , m_headers(headers)
+    , m_query(query)
     , m_signedHeadersString()
 {
     m_headers["Host"] = resource.host();
@@ -1950,19 +1837,19 @@ S3::AuthV4::AuthV4(
             getAuthHeader(m_signedHeadersString, signature);
 }
 
-std::string S3::AuthV4::buildCanonicalRequest(
+std::string S3::ApiV4::buildCanonicalRequest(
         const std::string verb,
         const Resource& resource,
         const Query& query,
         const std::vector<char>& data) const
 {
-    const std::string canonicalUri(Http::sanitize("/" + resource.object));
+    const std::string canonicalUri(sanitize("/" + resource.object));
 
     auto canonicalizeQuery([](const std::string& s, const Query::value_type& q)
     {
         const std::string keyVal(
-                Http::sanitize(q.first, "") + '=' +
-                Http::sanitize(q.second, ""));
+                sanitize(q.first, "") + '=' +
+                sanitize(q.second, ""));
 
         return s + (s.size() ? "&" : "") + keyVal;
     });
@@ -1983,7 +1870,7 @@ std::string S3::AuthV4::buildCanonicalRequest(
         crypto::encodeAsHex(crypto::sha256(data));
 }
 
-std::string S3::AuthV4::buildStringToSign(
+std::string S3::ApiV4::buildStringToSign(
         const std::string& canonicalRequest) const
 {
     return
@@ -1993,7 +1880,7 @@ std::string S3::AuthV4::buildStringToSign(
         crypto::encodeAsHex(crypto::sha256(canonicalRequest));
 }
 
-std::string S3::AuthV4::calculateSignature(
+std::string S3::ApiV4::calculateSignature(
         const std::string& stringToSign) const
 {
     const std::string kDate(
@@ -2009,7 +1896,7 @@ std::string S3::AuthV4::calculateSignature(
     return crypto::encodeAsHex(crypto::hmacSha256(kSigning, stringToSign));
 }
 
-std::string S3::AuthV4::getAuthHeader(
+std::string S3::ApiV4::getAuthHeader(
         const std::string& signedHeadersString,
         const std::string& signature) const
 {
@@ -2021,36 +1908,12 @@ std::string S3::AuthV4::getAuthHeader(
         "Signature=" + signature;
 }
 
-
-
-
-// These functions allow a caller to directly pass additional headers into
-// their GET request.  This is only applicable when using the S3 driver
-// directly, as these are not available through the Arbiter.
-
-std::vector<char> S3::getBinary(std::string rawPath, Headers headers) const
-{
-    std::vector<char> data;
-    if (!get(Arbiter::stripType(rawPath), Query(), headers, data))
-    {
-        throw ArbiterError("Couldn't S3 GET " + rawPath);
-    }
-
-    return data;
-}
-
-std::string S3::get(std::string rawPath, Headers headers) const
-{
-    std::vector<char> data(getBinary(rawPath, headers));
-    return std::string(data.begin(), data.end());
-}
-
 S3::Resource::Resource(std::string baseUrl, std::string fullPath)
     : baseUrl(baseUrl)
     , bucket()
     , object()
 {
-    fullPath = Http::sanitize(fullPath);
+    fullPath = sanitize(fullPath);
     const std::size_t split(fullPath.find("/"));
 
     bucket = fullPath.substr(0, split);
@@ -2061,10 +1924,9 @@ S3::Resource::Resource(std::string baseUrl, std::string fullPath)
     }
 }
 
-std::string S3::Resource::buildPath(Query query) const
+std::string S3::Resource::url() const
 {
-    const std::string queryString(getQueryString(query));
-    return "https://" + bucket + baseUrl + object + queryString;
+    return "https://" + bucket + baseUrl + object;
 }
 
 std::string S3::Resource::host() const
@@ -2095,6 +1957,88 @@ std::string S3::FormattedTime::formatTime(const std::string& format) const
         throw ArbiterError("Could not format time");
     }
 }
+
+S3::Auth::Auth(const std::string access, const std::string hidden)
+    : m_access(access)
+    , m_hidden(hidden)
+{ }
+
+std::unique_ptr<S3::Auth> S3::Auth::find(std::string profile)
+{
+    std::unique_ptr<S3::Auth> auth;
+
+    auto access(util::env("AWS_ACCESS_KEY_ID"));
+    auto hidden(util::env("AWS_SECRET_ACCESS_KEY"));
+
+    if (access && hidden)
+    {
+        auth.reset(new S3::Auth(*access, *hidden));
+        return auth;
+    }
+
+    access = util::env("AMAZON_ACCESS_KEY_ID");
+    hidden = util::env("AMAZON_SECRET_ACCESS_KEY");
+
+    if (access && hidden)
+    {
+        auth.reset(new S3::Auth(*access, *hidden));
+        return auth;
+    }
+
+    const std::string credFile("~/.aws/credentials");
+
+    // First, try reading credentials file.
+    if (std::unique_ptr<std::string> cred = fsDriver.tryGet(credFile))
+    {
+        const std::vector<std::string> lines(condense(split(*cred)));
+
+        if (lines.size() >= 3)
+        {
+            std::size_t i(0);
+
+            const std::string profileFind("[" + profile + "]");
+            const std::string accessFind("aws_access_key_id=");
+            const std::string hiddenFind("aws_secret_access_key=");
+
+            while (i < lines.size() - 2 && !auth)
+            {
+                if (lines[i].find(profileFind) != std::string::npos)
+                {
+                    const std::string& accessLine(lines[i + 1]);
+                    const std::string& hiddenLine(lines[i + 2]);
+
+                    std::size_t accessPos(accessLine.find(accessFind));
+                    std::size_t hiddenPos(hiddenLine.find(hiddenFind));
+
+                    if (
+                            accessPos != std::string::npos &&
+                            hiddenPos != std::string::npos)
+                    {
+                        const std::string access(
+                                accessLine.substr(
+                                    accessPos + accessFind.size(),
+                                    accessLine.find(';')));
+
+                        const std::string hidden(
+                                hiddenLine.substr(
+                                    hiddenPos + hiddenFind.size(),
+                                    hiddenLine.find(';')));
+
+                        auth.reset(new S3::Auth(access, hidden));
+                    }
+                }
+
+                ++i;
+            }
+        }
+    }
+
+    return auth;
+}
+
+std::string S3::Auth::access() const { return m_access; }
+std::string S3::Auth::hidden() const { return m_hidden; }
+
 } // namespace drivers
 } // namespace arbiter
 
@@ -2154,13 +2098,7 @@ namespace arbiter
 namespace
 {
     const std::string baseGetUrl("https://content.dropboxapi.com/");
-    const std::string getUrlV1(baseGetUrl + "1/files/auto/");
-    const std::string getUrlV2(baseGetUrl + "2/files/download");
-
-    // We still need to use API V1 for GET requests since V2 is poorly
-    // documented and doesn't correctly support the Range header.  Hopefully
-    // we can switch to V2 at some point.
-    const bool legacy(true);
+    const std::string getUrl(baseGetUrl + "2/files/download");
 
     const std::string listUrl("https://api.dropboxapi.com/2/files/list_folder");
     const std::string metaUrl("https://api.dropboxapi.com/2/files/get_metadata");
@@ -2186,20 +2124,20 @@ namespace
 namespace drivers
 {
 
-Dropbox::Dropbox(HttpPool& pool, const DropboxAuth auth)
-    : m_pool(pool)
+using namespace http;
+
+Dropbox::Dropbox(Pool& pool, const Dropbox::Auth& auth)
+    : Http(pool)
     , m_auth(auth)
 { }
 
-std::unique_ptr<Dropbox> Dropbox::create(
-        HttpPool& pool,
-        const Json::Value& json)
+std::unique_ptr<Dropbox> Dropbox::create(Pool& pool, const Json::Value& json)
 {
     std::unique_ptr<Dropbox> dropbox;
 
     if (!json.isNull() && json.isMember("token"))
     {
-        dropbox.reset(new Dropbox(pool, DropboxAuth(json["token"].asString())));
+        dropbox.reset(new Dropbox(pool, Auth(json["token"].asString())));
     }
 
     return dropbox;
@@ -2211,11 +2149,8 @@ Headers Dropbox::httpGetHeaders() const
 
     headers["Authorization"] = "Bearer " + m_auth.token();
 
-    if (!legacy)
-    {
-        headers["Transfer-Encoding"] = "";
-        headers["Expect"] = "";
-    }
+    headers["Transfer-Encoding"] = "";
+    headers["Expect"] = "";
 
     return headers;
 }
@@ -2232,11 +2167,6 @@ Headers Dropbox::httpPostHeaders() const
     return headers;
 }
 
-bool Dropbox::get(const std::string rawPath, std::vector<char>& data) const
-{
-    return buildRequestAndGet(rawPath, data);
-}
-
 std::unique_ptr<std::size_t> Dropbox::tryGetSize(
         const std::string rawPath) const
 {
@@ -2245,12 +2175,11 @@ std::unique_ptr<std::size_t> Dropbox::tryGetSize(
     Headers headers(httpPostHeaders());
 
     Json::Value json;
-    json["path"] = std::string("/" + Http::sanitize(rawPath));
+    json["path"] = std::string("/" + sanitize(rawPath));
     const auto f(toSanitizedString(json));
     const std::vector<char> postData(f.begin(), f.end());
 
-    auto http(m_pool.acquire());
-    HttpResponse res(http.post(metaUrl, postData, headers));
+    Response res(Http::internalPost(metaUrl, postData, headers));
 
     if (res.ok())
     {
@@ -2269,71 +2198,66 @@ std::unique_ptr<std::size_t> Dropbox::tryGetSize(
     return result;
 }
 
-bool Dropbox::buildRequestAndGet(
+bool Dropbox::get(
         const std::string rawPath,
         std::vector<char>& data,
-        const Headers userHeaders) const
+        const Headers userHeaders,
+        const Query query) const
 {
-    const std::string path(Http::sanitize(rawPath));
+    const std::string path(sanitize(rawPath));
 
     Headers headers(httpGetHeaders());
 
-    if (!legacy)
-    {
-        Json::Value json;
-        json["path"] = std::string("/" + path);
-        headers["Dropbox-API-Arg"] = toSanitizedString(json);
-    }
+    Json::Value json;
+    json["path"] = std::string("/" + path);
+    headers["Dropbox-API-Arg"] = toSanitizedString(json);
 
     headers.insert(userHeaders.begin(), userHeaders.end());
 
-    auto http(m_pool.acquire());
-
-    HttpResponse res(
-            legacy ?
-                http.get(getUrlV1 + path, headers) :
-                http.get(getUrlV2, headers));
+    const Response res(Http::internalGet(getUrl, headers, query));
 
     if (res.ok())
     {
-        if (
-                (legacy && !res.headers().count("Content-Length")) ||
-                (!legacy && !res.headers().count("original-content-length")))
+        if (!userHeaders.count("Range"))
         {
-            return false;
-        }
+            if (!res.headers().count("size")) return false;
 
-        const std::size_t size(
-                std::stol(
-                    legacy ?
-                        res.headers().at("Content-Length") :
-                        res.headers().at("original-content-length")));
+            const std::size_t size(std::stoul(res.headers().at("size")));
+            data = res.data();
 
-        data = res.data();
-
-        if (size == res.data().size())
-        {
-            return true;
+            if (size == data.size()) return true;
+            else
+            {
+                std::cout <<
+                    "Data size check failed - got " <<
+                    size << " of " << res.data().size() << " bytes." <<
+                    std::endl;
+            }
         }
         else
         {
-            throw ArbiterError(
-                    "Data size check failed - got " + std::to_string(size) +
-                    " of " + std::to_string(res.data().size()) + " bytes.");
+            data = res.data();
+            return true;
         }
     }
     else
     {
-        std::string message(res.data().data(), res.data().size());
-        throw ArbiterError(
-                "Server response: " + std::to_string(res.code()) + " - '" +
-                message + "'");
+        const auto data(res.data());
+        std::string message(data.data(), data.size());
+
+        std::cout <<
+                "Server response: " << res.code() << " - '" << message << "'" <<
+                std::endl;
     }
 
     return false;
 }
 
-void Dropbox::put(std::string rawPath, const std::vector<char>& data) const
+void Dropbox::put(
+        const std::string rawPath,
+        const std::vector<char>& data,
+        const Headers headers,
+        const Query query) const
 {
     throw ArbiterError("PUT not yet supported for " + type());
 }
@@ -2342,14 +2266,12 @@ std::string Dropbox::continueFileInfo(std::string cursor) const
 {
     Headers headers(httpPostHeaders());
 
-    auto http(m_pool.acquire());
-
     Json::Value json;
     json["cursor"] = cursor;
     const std::string f(toSanitizedString(json));
 
     std::vector<char> postData(f.begin(), f.end());
-    HttpResponse res(http.post(continueListUrl, postData, headers));
+    Response res(Http::internalPost(continueListUrl, postData, headers));
 
     if (res.ok())
     {
@@ -2370,12 +2292,10 @@ std::vector<std::string> Dropbox::glob(std::string rawPath, bool verbose) const
 {
     std::vector<std::string> results;
 
-    const std::string path(
-            Http::sanitize(rawPath.substr(0, rawPath.size() - 2)));
+    const std::string path(sanitize(rawPath.substr(0, rawPath.size() - 2)));
 
     auto listPath = [this](std::string path)->std::string
     {
-        auto http(m_pool.acquire());
         Headers headers(httpPostHeaders());
 
         Json::Value request;
@@ -2384,10 +2304,12 @@ std::vector<std::string> Dropbox::glob(std::string rawPath, bool verbose) const
         request["include_media_info"] = false;
         request["include_deleted"] = false;
 
-        std::string f = toSanitizedString(request);
-
+        const std::string f(toSanitizedString(request));
         std::vector<char> postData(f.begin(), f.end());
-        HttpResponse res(http.post(listUrl, postData, headers));
+
+        // Can't fully qualify this protected method within the lambda due to a
+        // GCC bug: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=61148
+        Response res(internalPost(listUrl, postData, headers));
 
         if (res.ok())
         {
@@ -2461,30 +2383,6 @@ std::vector<std::string> Dropbox::glob(std::string rawPath, bool verbose) const
     return results;
 }
 
-
-
-// These functions allow a caller to directly pass additional headers into
-// their GET request.  This is only applicable when using the Dropbox driver
-// directly, as these are not available through the Arbiter.
-
-std::vector<char> Dropbox::getBinary(std::string rawPath, Headers headers) const
-{
-    std::vector<char> data;
-    const std::string stripped(Arbiter::stripType(rawPath));
-    if (!buildRequestAndGet(stripped, data, headers))
-    {
-        throw ArbiterError("Couldn't Dropbox GET " + rawPath);
-    }
-
-    return data;
-}
-
-std::string Dropbox::get(std::string rawPath, Headers headers) const
-{
-    std::vector<char> data(getBinary(rawPath, headers));
-    return std::string(data.begin(), data.end());
-}
-
 } // namespace drivers
 } // namespace arbiter
 
@@ -2495,6 +2393,514 @@ std::string Dropbox::get(std::string rawPath, Headers headers) const
 
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: arbiter/drivers/dropbox.cpp
+// //////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+// //////////////////////////////////////////////////////////////////////
+// Beginning of content of file: arbiter/util/http.cpp
+// //////////////////////////////////////////////////////////////////////
+
+#ifndef ARBITER_IS_AMALGAMATION
+#include <arbiter/util/http.hpp>
+#endif
+
+#include <numeric>
+
+#include <curl/curl.h>
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+namespace ARBITER_CUSTOM_NAMESPACE
+{
+#endif
+
+namespace arbiter
+{
+namespace http
+{
+
+namespace
+{
+    struct PutData
+    {
+        PutData(const std::vector<char>& data)
+            : data(data)
+            , offset(0)
+        { }
+
+        const std::vector<char>& data;
+        std::size_t offset;
+    };
+
+    std::size_t getCb(
+            const char* in,
+            std::size_t size,
+            std::size_t num,
+            std::vector<char>* out)
+    {
+        const std::size_t fullBytes(size * num);
+        const std::size_t startSize(out->size());
+
+        out->resize(out->size() + fullBytes);
+        std::memcpy(out->data() + startSize, in, fullBytes);
+
+        return fullBytes;
+    }
+
+    std::size_t putCb(
+            char* out,
+            std::size_t size,
+            std::size_t num,
+            PutData* in)
+    {
+        const std::size_t fullBytes(
+                std::min(
+                    size * num,
+                    in->data.size() - in->offset));
+        std::memcpy(out, in->data.data() + in->offset, fullBytes);
+
+        in->offset += fullBytes;
+        return fullBytes;
+    }
+
+    std::size_t headerCb(
+            const char *buffer,
+            std::size_t size,
+            std::size_t num,
+            http::Headers* out)
+    {
+        const std::size_t fullBytes(size * num);
+
+        std::string data(buffer, fullBytes);
+        data.erase(std::remove(data.begin(), data.end(), '\n'), data.end());
+        data.erase(std::remove(data.begin(), data.end(), '\r'), data.end());
+
+        const std::size_t split(data.find_first_of(":"));
+
+        // No colon means it isn't a header with data.
+        if (split == std::string::npos) return fullBytes;
+
+        const std::string key(data.substr(0, split));
+        const std::string val(data.substr(split + 1, data.size()));
+
+        (*out)[key] = val;
+
+        return fullBytes;
+    }
+
+    std::size_t eatLogging(void *out, size_t size, size_t num, void *in)
+    {
+        return size * num;
+    }
+
+    const std::map<char, std::string> sanitizers
+    {
+        { ' ', "%20" },
+        { '!', "%21" },
+        { '"', "%22" },
+        { '#', "%23" },
+        { '$', "%24" },
+        { '\'', "%27" },
+        { '(', "%28" },
+        { ')', "%29" },
+        { '*', "%2A" },
+        { '+', "%2B" },
+        { ',', "%2C" },
+        { '/', "%2F" },
+        { ';', "%3B" },
+        { '<', "%3C" },
+        { '>', "%3E" },
+        { '@', "%40" },
+        { '[', "%5B" },
+        { '\\', "%5C" },
+        { ']', "%5D" },
+        { '^', "%5E" },
+        { '`', "%60" },
+        { '{', "%7B" },
+        { '|', "%7C" },
+        { '}', "%7D" },
+        { '~', "%7E" }
+    };
+
+    const bool followRedirect(true);
+    const std::size_t defaultHttpTimeout(60 * 5);
+} // unnamed namespace
+
+std::string sanitize(const std::string path, const std::string exclusions)
+{
+    std::string result;
+
+    for (const auto c : path)
+    {
+        const auto it(sanitizers.find(c));
+
+        if (it == sanitizers.end() || exclusions.find(c) != std::string::npos)
+        {
+            result += c;
+        }
+        else
+        {
+            result += it->second;
+        }
+    }
+
+    return result;
+}
+
+std::string buildQueryString(const Query& query)
+{
+    return std::accumulate(
+            query.begin(),
+            query.end(),
+            std::string(),
+            [](const std::string& out, const Query::value_type& keyVal)
+            {
+                const char sep(out.empty() ? '?' : '&');
+                return out + sep + keyVal.first + '=' + keyVal.second;
+            });
+}
+
+Curl::Curl(bool verbose, std::size_t timeout)
+    : m_curl(0)
+    , m_headers(0)
+    , m_verbose(verbose)
+    , m_timeout(timeout)
+    , m_data()
+{
+    m_curl = curl_easy_init();
+}
+
+Curl::~Curl()
+{
+    curl_easy_cleanup(m_curl);
+    curl_slist_free_all(m_headers);
+    m_headers = 0;
+}
+
+void Curl::init(
+        const std::string rawPath,
+        const Headers& headers,
+        const Query& query)
+{
+    // Reset our curl instance and header list.
+    curl_slist_free_all(m_headers);
+    m_headers = 0;
+
+    // Set path.
+    const std::string path(sanitize(rawPath + buildQueryString(query)));
+    curl_easy_setopt(m_curl, CURLOPT_URL, path.c_str());
+
+    // Needed for multithreaded Curl usage.
+    curl_easy_setopt(m_curl, CURLOPT_NOSIGNAL, 1L);
+
+    // Substantially faster DNS lookups without IPv6.
+    curl_easy_setopt(m_curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+
+    // Don't wait forever.
+    curl_easy_setopt(m_curl, CURLOPT_TIMEOUT, m_timeout);
+
+    // Configuration options.
+    if (followRedirect) curl_easy_setopt(m_curl, CURLOPT_FOLLOWLOCATION, 1L);
+
+    // Insert supplied headers.
+    for (const auto& h : headers)
+    {
+        m_headers = curl_slist_append(
+                m_headers,
+                (h.first + ": " + h.second).c_str());
+    }
+}
+
+Response Curl::get(std::string path, Headers headers, Query query)
+{
+    int httpCode(0);
+    std::vector<char> data;
+
+    init(path, headers, query);
+    if (m_verbose) curl_easy_setopt(m_curl, CURLOPT_VERBOSE, 1L);
+
+    // Register callback function and date pointer to consume the result.
+    curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, getCb);
+    curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, &data);
+
+    // Insert all headers into the request.
+    curl_easy_setopt(m_curl, CURLOPT_HTTPHEADER, m_headers);
+
+    // Set up callback and data pointer for received headers.
+    Headers receivedHeaders;
+    curl_easy_setopt(m_curl, CURLOPT_HEADERFUNCTION, headerCb);
+    curl_easy_setopt(m_curl, CURLOPT_HEADERDATA, &receivedHeaders);
+
+    // Run the command.
+    curl_easy_perform(m_curl);
+    curl_easy_getinfo(m_curl, CURLINFO_RESPONSE_CODE, &httpCode);
+
+    curl_easy_reset(m_curl);
+    return Response(httpCode, data, receivedHeaders);
+}
+
+Response Curl::head(std::string path, Headers headers, Query query)
+{
+    int httpCode(0);
+    std::vector<char> data;
+
+    init(path, headers, query);
+    if (m_verbose) curl_easy_setopt(m_curl, CURLOPT_VERBOSE, 1L);
+
+    // Register callback function and date pointer to consume the result.
+    curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, getCb);
+    curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, &data);
+
+    // Insert all headers into the request.
+    curl_easy_setopt(m_curl, CURLOPT_HTTPHEADER, m_headers);
+
+    // Set up callback and data pointer for received headers.
+    Headers receivedHeaders;
+    curl_easy_setopt(m_curl, CURLOPT_HEADERFUNCTION, headerCb);
+    curl_easy_setopt(m_curl, CURLOPT_HEADERDATA, &receivedHeaders);
+
+    // Specify a HEAD request.
+    curl_easy_setopt(m_curl, CURLOPT_NOBODY, 1L);
+
+    // Run the command.
+    curl_easy_perform(m_curl);
+    curl_easy_getinfo(m_curl, CURLINFO_RESPONSE_CODE, &httpCode);
+
+    curl_easy_reset(m_curl);
+    return Response(httpCode, data, receivedHeaders);
+}
+
+Response Curl::put(
+        std::string path,
+        const std::vector<char>& data,
+        Headers headers,
+        Query query)
+{
+    init(path, headers, query);
+    if (m_verbose) curl_easy_setopt(m_curl, CURLOPT_VERBOSE, 1L);
+
+    int httpCode(0);
+
+    std::unique_ptr<PutData> putData(new PutData(data));
+
+    // Register callback function and data pointer to create the request.
+    curl_easy_setopt(m_curl, CURLOPT_READFUNCTION, putCb);
+    curl_easy_setopt(m_curl, CURLOPT_READDATA, putData.get());
+
+    // Insert all headers into the request.
+    curl_easy_setopt(m_curl, CURLOPT_HTTPHEADER, m_headers);
+
+    // Specify that this is a PUT request.
+    curl_easy_setopt(m_curl, CURLOPT_PUT, 1L);
+
+    // Must use this for binary data, otherwise curl will use strlen(), which
+    // will likely be incorrect.
+    curl_easy_setopt(
+            m_curl,
+            CURLOPT_INFILESIZE_LARGE,
+            static_cast<curl_off_t>(data.size()));
+
+    // Hide Curl's habit of printing things to console even with verbose set
+    // to false.
+    curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, eatLogging);
+
+    // Run the command.
+    curl_easy_perform(m_curl);
+    curl_easy_getinfo(m_curl, CURLINFO_RESPONSE_CODE, &httpCode);
+
+    curl_easy_reset(m_curl);
+    return Response(httpCode);
+}
+
+Response Curl::post(
+        std::string path,
+        const std::vector<char>& data,
+        Headers headers,
+        Query query)
+{
+    init(path, headers, query);
+    if (m_verbose) curl_easy_setopt(m_curl, CURLOPT_VERBOSE, 1L);
+
+    int httpCode(0);
+
+    std::unique_ptr<PutData> putData(new PutData(data));
+    std::vector<char> writeData;
+
+    // Register callback function and data pointer to create the request.
+    curl_easy_setopt(m_curl, CURLOPT_READFUNCTION, putCb);
+    curl_easy_setopt(m_curl, CURLOPT_READDATA, putData.get());
+
+    // Register callback function and data pointer to consume the result.
+    curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, getCb);
+    curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, &writeData);
+
+    // Insert all headers into the request.
+    curl_easy_setopt(m_curl, CURLOPT_HTTPHEADER, m_headers);
+
+    // Set up callback and data pointer for received headers.
+    Headers receivedHeaders;
+    curl_easy_setopt(m_curl, CURLOPT_HEADERFUNCTION, headerCb);
+    curl_easy_setopt(m_curl, CURLOPT_HEADERDATA, &receivedHeaders);
+
+    // Specify that this is a POST request.
+    curl_easy_setopt(m_curl, CURLOPT_POST, 1L);
+
+    // Must use this for binary data, otherwise curl will use strlen(), which
+    // will likely be incorrect.
+    curl_easy_setopt(
+            m_curl,
+            CURLOPT_INFILESIZE_LARGE,
+            static_cast<curl_off_t>(data.size()));
+
+    // Run the command.
+    curl_easy_perform(m_curl);
+    curl_easy_getinfo(m_curl, CURLINFO_RESPONSE_CODE, &httpCode);
+
+    curl_easy_reset(m_curl);
+    Response response(httpCode, writeData, receivedHeaders);
+    return response;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+Resource::Resource(
+        Pool& pool,
+        Curl& curl,
+        const std::size_t id,
+        const std::size_t retry)
+    : m_pool(pool)
+    , m_curl(curl)
+    , m_id(id)
+    , m_retry(retry)
+{ }
+
+Resource::~Resource()
+{
+    m_pool.release(m_id);
+}
+
+Response Resource::get(
+        const std::string path,
+        const Headers headers,
+        const Query query)
+{
+    return exec([this, path, headers, query]()->Response
+    {
+        return m_curl.get(path, headers, query);
+    });
+}
+
+Response Resource::head(
+        const std::string path,
+        const Headers headers,
+        const Query query)
+{
+    return exec([this, path, headers, query]()->Response
+    {
+        return m_curl.head(path, headers, query);
+    });
+}
+
+Response Resource::put(
+        std::string path,
+        const std::vector<char>& data,
+        const Headers headers,
+        const Query query)
+{
+    return exec([this, path, &data, headers, query]()->Response
+    {
+        return m_curl.put(path, data, headers, query);
+    });
+}
+
+Response Resource::post(
+        std::string path,
+        const std::vector<char>& data,
+        const Headers headers,
+        const Query query)
+{
+    return exec([this, path, &data, headers, query]()->Response
+    {
+        return m_curl.post(path, data, headers, query);
+    });
+}
+
+Response Resource::exec(std::function<Response()> f)
+{
+    Response res;
+    std::size_t tries(0);
+
+    do
+    {
+        res = f();
+    }
+    while (res.serverError() && tries++ < m_retry);
+
+    return res;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+Pool::Pool(
+        const std::size_t concurrent,
+        const std::size_t retry,
+        const Json::Value& json)
+    : m_curls(concurrent)
+    , m_available(concurrent)
+    , m_retry(retry)
+    , m_mutex()
+    , m_cv()
+{
+    const bool verbose(
+            json.isMember("arbiter") ?
+                json["arbiter"]["verbose"].asBool() : false);
+
+    const std::size_t timeout(
+            json.isMember("http") && json["http"]["timeout"].asUInt64() ?
+                json["http"]["timeout"].asUInt64() : defaultHttpTimeout);
+
+    for (std::size_t i(0); i < concurrent; ++i)
+    {
+        m_available[i] = i;
+        m_curls[i].reset(new Curl(verbose, timeout));
+    }
+}
+
+Resource Pool::acquire()
+{
+    std::unique_lock<std::mutex> lock(m_mutex);
+    m_cv.wait(lock, [this]()->bool { return !m_available.empty(); });
+
+    const std::size_t id(m_available.back());
+    Curl& curl(*m_curls[id]);
+
+    m_available.pop_back();
+
+    return Resource(*this, curl, id, m_retry);
+}
+
+void Pool::release(const std::size_t id)
+{
+    std::unique_lock<std::mutex> lock(m_mutex);
+    m_available.push_back(id);
+    lock.unlock();
+
+    m_cv.notify_one();
+}
+
+} // namepace http
+} // namespace arbiter
+
+#ifdef ARBITER_CUSTOM_NAMESPACE
+}
+#endif
+
+
+// //////////////////////////////////////////////////////////////////////
+// End of content of file: arbiter/util/http.cpp
 // //////////////////////////////////////////////////////////////////////
 
 
@@ -3109,11 +3515,9 @@ namespace arbiter
 namespace util
 {
 
-std::string getBasename(const std::string fullPath)
+std::string stripPostfixing(const std::string path)
 {
-    std::string result(fullPath);
-
-    std::string stripped(Arbiter::stripType(fullPath));
+    std::string stripped(path);
 
     for (std::size_t i(0); i < 2; ++i)
     {
@@ -3125,6 +3529,15 @@ std::string getBasename(const std::string fullPath)
     // Pop trailing slash, in which case the result is the innermost directory.
     while (!stripped.empty() && isSlash(stripped.back())) stripped.pop_back();
 
+    return stripped;
+}
+
+std::string getBasename(const std::string fullPath)
+{
+    std::string result(fullPath);
+
+    const std::string stripped(stripPostfixing(Arbiter::stripType(fullPath)));
+
     // Now do the real slash searching.
     const std::size_t pos(stripped.rfind('/'));
 
@@ -3133,6 +3546,40 @@ std::string getBasename(const std::string fullPath)
         const std::string sub(stripped.substr(pos + 1));
         if (!sub.empty()) result = sub;
     }
+
+    return result;
+}
+
+std::string getNonBasename(const std::string fullPath)
+{
+    std::string result("");
+
+    const std::string stripped(stripPostfixing(Arbiter::stripType(fullPath)));
+
+    // Now do the real slash searching.
+    const std::size_t pos(stripped.rfind('/'));
+
+    if (pos != std::string::npos)
+    {
+        const std::string sub(stripped.substr(0, pos));
+        result = sub;
+    }
+
+    return result;
+}
+
+std::unique_ptr<std::string> env(const std::string& var)
+{
+    std::unique_ptr<std::string> result;
+
+#ifndef ARBITER_WINDOWS
+    if (const char* c = getenv(var.c_str())) result.reset(new std::string(c));
+#else
+    char* c(nullptr);
+    std::size_t size(0);
+
+    if (!_dupenv_s(&c, size, var.c_str())) result.reset(new std::string(c));
+#endif
 
     return result;
 }

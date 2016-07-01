@@ -244,15 +244,8 @@ private:
 */
 std::ostream *createFile(const std::string& path, bool asBinary)
 {
-    bool remote(false);
-
-    // If we error, assume that we're local.
-    try
-    {
-        remote = arbiter::Arbiter().isRemote(path);
-    }
-    catch (arbiter::ArbiterError)
-    {}
+    arbiter::Arbiter a;
+    const bool remote(a.hasDriver(path) && a.isRemote(path));
 
     ostream *ofs(nullptr);
     if (remote)
@@ -285,15 +278,18 @@ std::ostream *createFile(const std::string& path, bool asBinary)
 */
 std::istream *openFile(const std::string& path, bool asBinary)
 {
-    try
+    arbiter::Arbiter a;
+    if (a.hasDriver(path) && a.isRemote(path))
     {
-        if (arbiter::Arbiter().isRemote(path))
+        try
+        {
             return new ArbiterInStream(tempFilename(path), path,
                 asBinary ? ios::in | ios::binary : ios::in);
-    }
-    catch (arbiter::ArbiterError)
-    {
-        return nullptr;
+        }
+        catch (arbiter::ArbiterError)
+        {
+            return nullptr;
+        }
     }
     return FileUtils::openFile(path, asBinary);
 }
@@ -328,13 +324,11 @@ void closeFile(std::istream *in)
 */
 bool fileExists(const std::string& path)
 {
-    try
+    arbiter::Arbiter a;
+    if (a.hasDriver(path) && a.isRemote(path) && a.exists(path))
     {
-        arbiter::Arbiter().getSize(path);
         return true;
     }
-    catch (arbiter::ArbiterError)
-    {}
 
     // Arbiter doesn't handle our STDIN hacks.
     return FileUtils::fileExists(path);
