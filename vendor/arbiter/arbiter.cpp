@@ -823,7 +823,7 @@ namespace
             auto homeDrive(util::env("HOMEDRIVE"));
             auto homePath(util::env("HOMEPATH"));
 
-            if (homeDrive && homePath) s = homeDrive + homePath;
+            if (homeDrive && homePath) s = *homeDrive + *homePath;
         }
 #endif
         if (s.empty()) std::cout << "No home directory found" << std::endl;
@@ -3578,7 +3578,7 @@ std::unique_ptr<std::string> env(const std::string& var)
     char* c(nullptr);
     std::size_t size(0);
 
-    if (!_dupenv_s(&c, size, var.c_str())) result.reset(new std::string(c));
+    if (!_dupenv_s(&c, &size, var.c_str())) result.reset(new std::string(c));
 #endif
 
     return result;
