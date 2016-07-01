@@ -88,28 +88,7 @@ PointViewSet PoissonFilter::run(PointViewPtr input)
     Cloud::Ptr cloud(new Cloud);
     pclsupport::PDALtoPCD(input, *cloud, buffer_bounds);
 
-    int level = log()->getLevel();
-    switch (level)
-    {
-        case 0:
-            pcl::console::setVerbosityLevel(pcl::console::L_ALWAYS);
-            break;
-        case 1:
-            pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
-            break;
-        case 2:
-            pcl::console::setVerbosityLevel(pcl::console::L_WARN);
-            break;
-        case 3:
-            pcl::console::setVerbosityLevel(pcl::console::L_INFO);
-            break;
-        case 4:
-            pcl::console::setVerbosityLevel(pcl::console::L_DEBUG);
-            break;
-        default:
-            pcl::console::setVerbosityLevel(pcl::console::L_VERBOSE);
-            break;
-    }
+    pclsupport::setLogLevel(log()->getLevel());
 
     // pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointNormal>::Ptr cloud_with_normals(new pcl::PointCloud<pcl::PointNormal>);

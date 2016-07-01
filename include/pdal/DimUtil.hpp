@@ -44,18 +44,15 @@ namespace pdal
 namespace Dimension
 {
 
-namespace BaseType
-{
-enum Enum
+enum class BaseType
 {
     None = 0x000,
     Signed = 0x100,
     Unsigned = 0x200,
     Floating = 0x400
 };
-}
 
-inline BaseType::Enum fromName(std::string name)
+inline BaseType fromName(std::string name)
 {
     if (name == "signed")
         return BaseType::Signed;
@@ -66,7 +63,7 @@ inline BaseType::Enum fromName(std::string name)
     return BaseType::None;
 }
 
-inline std::string toName(BaseType::Enum b)
+inline std::string toName(BaseType b)
 {
     switch (b)
     {
@@ -81,32 +78,29 @@ inline std::string toName(BaseType::Enum b)
     }
 }
 
-namespace Type
-{
-enum Enum
+enum class Type
 {
     None = 0,
-    Unsigned8 = BaseType::Unsigned | 1,
-    Signed8 = BaseType::Signed | 1,
-    Unsigned16 = BaseType::Unsigned | 2,
-    Signed16 = BaseType::Signed | 2,
-    Unsigned32 = BaseType::Unsigned | 4,
-    Signed32 = BaseType::Signed | 4,
-    Unsigned64 = BaseType::Unsigned | 8,
-    Signed64 = BaseType::Signed | 8,
-    Float = BaseType::Floating | 4,
-    Double = BaseType::Floating | 8
+    Unsigned8 = Utils::toNative(BaseType::Unsigned) | 1,
+    Signed8 = Utils::toNative(BaseType::Signed) | 1,
+    Unsigned16 = Utils::toNative(BaseType::Unsigned) | 2,
+    Signed16 = Utils::toNative(BaseType::Signed) | 2,
+    Unsigned32 = Utils::toNative(BaseType::Unsigned) | 4,
+    Signed32 = Utils::toNative(BaseType::Signed) | 4,
+    Unsigned64 = Utils::toNative(BaseType::Unsigned )| 8,
+    Signed64 = Utils::toNative(BaseType::Signed) | 8,
+    Float = Utils::toNative(BaseType::Floating) | 4,
+    Double = Utils::toNative(BaseType::Floating) | 8
 };
+
+inline std::size_t size(Type t)
+{
+    return Utils::toNative(t) & 0xFF;
 }
 
-inline size_t size(Type::Enum t)
+inline BaseType base(Type t)
 {
-    return t & 0xFF;
-}
-
-inline BaseType::Enum base(Type::Enum t)
-{
-    return BaseType::Enum(t & 0xFF00);
+    return BaseType(Utils::toNative(t) & 0xFF00);
 }
 
 static const int COUNT = std::numeric_limits<uint16_t>::max();
@@ -115,7 +109,7 @@ static const int PROPRIETARY = 0xFF00;
 /// Get a string reresentation of a datatype.
 /// \param[in] dimtype  Dimension type.
 /// \return  String representation of dimension type.
-inline std::string interpretationName(Type::Enum dimtype)
+inline std::string interpretationName(Type dimtype)
 {
     switch (dimtype)
     {
@@ -149,7 +143,7 @@ inline std::string interpretationName(Type::Enum dimtype)
 /// Get the type corresponding to a type name.
 /// \param s  Name of type.
 /// \return  Corresponding type enumeration value.
-inline Type::Enum type(std::string s)
+inline Type type(std::string s)
 {
     s = Utils::tolower(s);
 

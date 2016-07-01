@@ -137,7 +137,6 @@ void TIndexReader::addArgs(ProgramArgs& args)
 
 void TIndexReader::addDimensions(PointLayoutPtr layout)
 {
-    using namespace pdal::Dimension::Type;
     layout->registerDim(pdal::Dimension::Id::X);
     layout->registerDim(pdal::Dimension::Id::Y);
     layout->registerDim(pdal::Dimension::Id::Z);

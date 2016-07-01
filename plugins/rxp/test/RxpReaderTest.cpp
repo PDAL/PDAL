@@ -55,7 +55,7 @@ Options defaultRxpReaderOptions()
 template <typename T>
 void checkDimensionClose(const PointViewPtr view,
                          std::size_t index,
-                         Dimension::Id::Enum dim,
+                         Dimension::Id dim,
                          T expected)
 {
     T actual = view->getFieldAs<T>(dim, index);
@@ -65,7 +65,7 @@ void checkDimensionClose(const PointViewPtr view,
 template <typename T>
 void checkDimensionEqual(const PointViewPtr view,
                          std::size_t index,
-                         Dimension::Id::Enum dim,
+                         Dimension::Id dim,
                          T expected)
 {
     T actual = view->getFieldAs<T>(dim, index);

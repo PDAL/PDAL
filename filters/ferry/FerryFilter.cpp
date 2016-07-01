@@ -109,8 +109,8 @@ void FerryFilter::ready(PointTableRef table)
     const PointLayoutPtr layout(table.layout());
     for (const auto& dim_par : m_name_map)
     {
-        Dimension::Id::Enum f = layout->findDim(dim_par.first);
-        Dimension::Id::Enum t = layout->findDim(dim_par.second);
+        Dimension::Id f = layout->findDim(dim_par.first);
+        Dimension::Id t = layout->findDim(dim_par.second);
         m_dimensions_map.insert(std::make_pair(f,t));
     }
 }

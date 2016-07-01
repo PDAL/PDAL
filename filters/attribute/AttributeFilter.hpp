@@ -98,7 +98,7 @@ private:
     std::string m_column;
     std::string m_query;
     std::string m_layer;
-    Dimension::Id::Enum m_dim;
+    Dimension::Id m_dim;
 
     void UpdateGEOSBuffer(PointView& view);
 

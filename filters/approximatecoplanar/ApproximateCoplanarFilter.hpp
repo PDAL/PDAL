@@ -68,7 +68,7 @@ private:
     int m_knn;
     double m_thresh1;
     double m_thresh2;
-    Dimension::Id::Enum m_coplanar;
+    Dimension::Id m_coplanar;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void addArgs(ProgramArgs& args);

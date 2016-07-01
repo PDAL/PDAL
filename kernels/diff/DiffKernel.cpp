@@ -80,12 +80,12 @@ void DiffKernel::checkPoints(const PointView& source_data,
     {
         for (size_t d = 0; d < sourceDims.size(); ++d)
         {
-            Dimension::Id::Enum sd = sourceDims[d];
-            Dimension::Id::Enum cd = candidateDims[d];
+            Dimension::Id sd = sourceDims[d];
+            Dimension::Id cd = candidateDims[d];
 
             source_data.getRawField(sd, idx, (void *)sbuf);
             candidate_data.getRawField(cd, idx, (void *)cbuf);
-            Dimension::Type::Enum t = Dimension::defaultType(cd);
+            Dimension::Type t = Dimension::defaultType(cd);
             size_t size = Dimension::size(t);
             if (memcmp(sbuf, cbuf, size))
             {

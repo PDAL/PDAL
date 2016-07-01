@@ -190,7 +190,7 @@ void Ilvis2Reader::readPoint(PointRef& point, StringList s,
         convert<double>(s, "ELEVATION_HIGH", 11));
 
     double x, y, z;
-    pdal::Dimension::Id::Enum xd, yd, zd;
+    pdal::Dimension::Id xd, yd, zd;
 
     xd = m_layout->findDim("LONGITUDE_" + pointMap);
     yd = m_layout->findDim("LATITUDE_" + pointMap);

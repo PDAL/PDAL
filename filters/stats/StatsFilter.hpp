@@ -147,7 +147,7 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    const stats::Summary& getStats(Dimension::Id::Enum d) const;
+    const stats::Summary& getStats(Dimension::Id d) const;
     void reset();
 
 private:
@@ -163,7 +163,7 @@ private:
     StringList m_dimNames;
     StringList m_enums;
     StringList m_counts;
-    std::map<Dimension::Id::Enum, stats::Summary> m_stats;
+    std::map<Dimension::Id, stats::Summary> m_stats;
 };
 
 } // namespace pdal

@@ -49,16 +49,16 @@ public:
         m_container(container), m_layout(*container.layout()), m_idx(idx)
     {}
 
-    bool hasDim(Dimension::Id::Enum dim) const
+    bool hasDim(Dimension::Id dim) const
     { return m_layout.hasDim(dim); }
 
     template<class T>
-    T getFieldAs(Dimension::Id::Enum dim) const
+    T getFieldAs(Dimension::Id dim) const
     {
         T val(0);
         bool success = true;
         Everything e;
-        Dimension::Type::Enum type = m_layout.dimDetail(dim)->type();
+        Dimension::Type type = m_layout.dimDetail(dim)->type();
 
         m_container.getFieldInternal(dim, m_idx, &e);
         switch (type)
@@ -111,9 +111,9 @@ public:
     }
 
     template<typename T>
-    void setField(Dimension::Id::Enum dim, T val)
+    void setField(Dimension::Id dim, T val)
     {
-        Dimension::Type::Enum type = m_layout.dimDetail(dim)->type();
+        Dimension::Type type = m_layout.dimDetail(dim)->type();
         Everything e;
         bool success = false;
 
@@ -158,10 +158,10 @@ public:
 
     void setPointId(PointId idx)
         { m_idx = idx; }
-    inline void getField(char *val, Dimension::Id::Enum d,
-        Dimension::Type::Enum type) const;
-    inline void setField(Dimension::Id::Enum dim,
-        Dimension::Type::Enum type, const void *val);
+    inline void getField(char *val, Dimension::Id d,
+        Dimension::Type type) const;
+    inline void setField(Dimension::Id dim,
+        Dimension::Type type, const void *val);
 
     /// Fill a buffer with point data specified by the dimension list.
     /// \param[in] dims  List of dimensions/types to retrieve.
@@ -197,8 +197,8 @@ private:
     PointId m_idx;
 };
 
-inline void PointRef::getField(char *val, Dimension::Id::Enum d,
-    Dimension::Type::Enum type) const
+inline void PointRef::getField(char *val, Dimension::Id d,
+    Dimension::Type type) const
 {
     Everything e;
 
@@ -240,8 +240,8 @@ inline void PointRef::getField(char *val, Dimension::Id::Enum d,
     memcpy(val, &e, Dimension::size(type));
 }
 
-inline void PointRef::setField(Dimension::Id::Enum dim,
-    Dimension::Type::Enum type, const void *val)
+inline void PointRef::setField(Dimension::Id dim,
+    Dimension::Type type, const void *val)
 {
     Everything e;
 

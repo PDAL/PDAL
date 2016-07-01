@@ -65,7 +65,7 @@ namespace pdal
 namespace
 {
 
-std::string getTypename(Dimension::Type::Enum type)
+std::string getTypename(Dimension::Type type)
 {
     switch (type)
     {
@@ -185,7 +185,7 @@ void DimBuilder::extractDim(Json::Value& dim)
     DimSpec d;
 
     // Get dimension name.
-    Json::Value name = dim.removeMember("name"); 
+    Json::Value name = dim.removeMember("name");
     if (name.isNull())
         throw dimbuilder_error("Dimension missing name.");
     if (!name.isString())
@@ -194,7 +194,7 @@ void DimBuilder::extractDim(Json::Value& dim)
     validateDimension(d.m_name);
 
     // Get dimension description.
-    Json::Value description = dim.removeMember("description"); 
+    Json::Value description = dim.removeMember("description");
     if (description.isNull())
     {
         std::ostringstream oss;
@@ -213,7 +213,7 @@ void DimBuilder::extractDim(Json::Value& dim)
     d.m_description = description.asString();
 
     // Get dimension type
-    Json::Value type = dim.removeMember("type"); 
+    Json::Value type = dim.removeMember("type");
     if (type.isNull())
     {
         std::ostringstream oss;
@@ -252,7 +252,7 @@ void DimBuilder::extractDim(Json::Value& dim)
     if (dim.size() > 0)
     {
         std::ostringstream oss;
-       
+
         oss << "Unexpected member '" << dim.getMemberNames()[0] << "' when "
             "reading dimension '" << d.m_name << "'.";
         throw dimbuilder_error(oss.str());
@@ -310,9 +310,7 @@ void DimBuilder::writeFooter(std::ostream& out)
 
 void DimBuilder::writeIds(std::ostream& out)
 {
-    out << "namespace Id\n";
-    out << "{\n";
-    out << "enum Enum\n";
+    out << "enum class Id\n";
     out << "{\n";
     out << "    Unknown,\n";
     for (auto di = m_dims.begin(); di != m_dims.end(); ++di)
@@ -324,8 +322,7 @@ void DimBuilder::writeIds(std::ostream& out)
         out << "\n";
     }
     out << "};\n";
-    out << "} // namespace Id\n";
-    out << "typedef std::vector<Id::Enum> IdList;\n";
+    out << "typedef std::vector<Id> IdList;\n";
     out << "\n";
 }
 
@@ -335,7 +332,7 @@ void DimBuilder::writeDescriptions(std::ostream& out)
     out << "/// Get a description of a predefined dimension.\n";
     out << "/// \\param[in] id  Dimension ID.\n";
     out << "/// \\return  Dimension description.\n";
-    out << "inline std::string description(Id::Enum id)\n";
+    out << "inline std::string description(Id id)\n";
     out << "{\n";
     out << "    switch (id)\n";
     out << "    {\n";
@@ -377,7 +374,7 @@ void DimBuilder::writeNameToId(std::ostream& out)
     out << "/// \\return  Dimension ID associated with the name.  "
         "Id::Unknown is returned\n";
     out << "///    if the name doesn't map to a predefined dimension.\n";
-    out << "inline Id::Enum id(std::string s)\n";
+    out << "inline Id id(std::string s)\n";
     out << "{\n";
     out << "    s = Utils::toupper(s);\n";
     out << "\n";
@@ -402,7 +399,7 @@ void DimBuilder::writeIdToName(std::ostream& out)
     out << "/// Get the name of a predefined dimension.\n";
     out << "/// \\param[in] id  Dimension ID\n";
     out << "/// \\return  Dimension name.\n";
-    out << "inline std::string name(Id::Enum id)\n";
+    out << "inline std::string name(Id id)\n";
     out << "{\n";
     out << "    switch (id)\n";
     out << "    {\n";
@@ -425,16 +422,14 @@ void DimBuilder::writeTypes(std::ostream& out)
     out << "/// \\return  The dimension's default storage type.  An "
         "exception is thrown if\n";
     out << "///   the id doesn't represent a predefined dimension.\n";
-    out << "inline Type::Enum defaultType(Id::Enum id)\n";
+    out << "inline Type defaultType(Id id)\n";
     out << "{\n";
-    out << "    using namespace Type;\n";
-    out << "\n";
     out << "    switch (id)\n";
     out << "    {\n";
     for (auto& d : m_dims)
     {
         out << "    case Id::" << d.m_name << ":\n";
-        out << "        return " << getTypename(d.m_type) << ";\n";
+        out << "        return Type::" << getTypename(d.m_type) << ";\n";
     }
     out << "    case Id::Unknown:\n";
     out << "        throw pdal_error(\"No type found for undefined "

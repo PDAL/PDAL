@@ -103,7 +103,7 @@ bool StatsFilter::processOne(PointRef& point)
 {
     for (auto p = m_stats.begin(); p != m_stats.end(); ++p)
     {
-        Dimension::Id::Enum d = p->first;
+        Dimension::Id d = p->first;
         Summary& c = p->second;
         c.insert(point.getFieldAs<double>(d));
     }
@@ -243,11 +243,11 @@ void StatsFilter::extractMetadata(PointTableRef table)
 }
 
 
-const Summary& StatsFilter::getStats(Dimension::Id::Enum dim) const
+const Summary& StatsFilter::getStats(Dimension::Id dim) const
 {
     for (auto di = m_stats.begin(); di != m_stats.end(); ++di)
     {
-        Dimension::Id::Enum d = di->first;
+        Dimension::Id d = di->first;
         if (d == dim)
             return di->second;
     }

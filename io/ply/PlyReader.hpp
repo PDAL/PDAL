@@ -51,7 +51,7 @@ namespace pdal
 {
 
 
-typedef std::map<std::string, Dimension::Id::Enum> DimensionMap;
+typedef std::map<std::string, Dimension::Id> DimensionMap;
 
 
 class PDAL_DLL PlyReader : public Reader

@@ -94,11 +94,11 @@ class PDAL_DLL XMLSchema
 {
 public:
     XMLSchema(std::string xml, std::string xsd = "",
-        Orientation::Enum orientation = Orientation::PointMajor);
+        Orientation orientation = Orientation::PointMajor);
     XMLSchema(const XMLDimList& dims, MetadataNode m = MetadataNode(),
-        Orientation::Enum orientation = Orientation::PointMajor);
+        Orientation orientation = Orientation::PointMajor);
     XMLSchema(const PointLayoutPtr& pointTable, MetadataNode m = MetadataNode(),
-        Orientation::Enum orientation = Orientation::PointMajor);
+        Orientation orientation = Orientation::PointMajor);
     XMLSchema() : m_orientation(Orientation::PointMajor)
     {}
 
@@ -112,25 +112,25 @@ public:
 
     MetadataNode getMetadata() const
         { return m_metadata;}
-    void setId(const std::string& name, Dimension::Id::Enum id)
+    void setId(const std::string& name, Dimension::Id id)
         { xmlDim(name).m_dimType.m_id = id; }
-    void setXForm(Dimension::Id::Enum id, XForm xform)
+    void setXForm(Dimension::Id id, XForm xform)
         { xmlDim(id).m_dimType.m_xform = xform; }
-    XForm xForm(Dimension::Id::Enum id) const
+    XForm xForm(Dimension::Id id) const
         { return xmlDim(id).m_dimType.m_xform; }
-    void setOrientation(Orientation::Enum orientation)
+    void setOrientation(Orientation orientation)
         { m_orientation = orientation; }
-    Orientation::Enum orientation() const
+    Orientation orientation() const
         { return m_orientation; }
 
 private:
-    Orientation::Enum m_orientation;
+    Orientation m_orientation;
     XMLDimList m_dims;
     void* m_global_context;
     MetadataNode m_metadata;
 
-    XMLDim& xmlDim(Dimension::Id::Enum id);
-    const XMLDim& xmlDim(Dimension::Id::Enum id) const;
+    XMLDim& xmlDim(Dimension::Id id);
+    const XMLDim& xmlDim(Dimension::Id id) const;
     XMLDim& xmlDim(const std::string& name);
     xmlDocPtr init(const std::string& xml, const std::string& xsd);
     bool validate(xmlDocPtr doc, const std::string& xsd);

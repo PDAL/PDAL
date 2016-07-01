@@ -31,6 +31,7 @@
 ****************************************************************************/
 
 #include <pdal/DbWriter.hpp>
+#include <pdal/util/Utils.hpp>
 
 namespace pdal
 {
@@ -82,13 +83,19 @@ void DbWriter::ready(PointTableRef /*table*/)
 
     auto cmp = [](const XMLDim& d1, const XMLDim& d2) -> bool
     {
-        long id1 = d1.m_dimType.m_id;
-        long id2 = d2.m_dimType.m_id;
+        long id1 = Utils::toNative(d1.m_dimType.m_id);
+        long id2 = Utils::toNative(d2.m_dimType.m_id);
+
+        const auto isXyz([](long native)->bool
+        {
+            const Id e(static_cast<Id>(native));
+            return (e == Id::X || e == Id::Y || e == Id::Z);
+        });
 
         // Put X, Y and Z at the end of the list.
-        if (id1 == Id::X || id1 == Id::Y || id1 == Id::Z)
+        if (isXyz(id1))
             id1 += 1000000;
-        if (id2 == Id::X || id2 == Id::Y || id2 == Id::Z)
+        if (isXyz(id2))
             id2 += 1000000;
         return id1 < id2;
     };
@@ -111,7 +118,7 @@ void DbWriter::ready(PointTableRef /*table*/)
         m_dimTypes.push_back(xmlDim.m_dimType);
         DimType& dt = m_dimTypes.back();
         // Dim types are stored in the map to allow fast access in readField.
-        m_dimMap[(int)dt.m_id] = dt;
+        m_dimMap[Utils::toNative(dt.m_id)] = dt;
 
         if (m_locationScaling)
         {
@@ -166,7 +173,7 @@ void DbWriter::setAutoXForm(const PointViewPtr view)
 /// \param[in] idx      Index of point to read.
 /// \return  Size of field as read.
 size_t DbWriter::readField(const PointView& view, char *pos,
-    Dimension::Id::Enum id, PointId idx)
+    Dimension::Id id, PointId idx)
 {
     using namespace Dimension;
 
@@ -178,7 +185,7 @@ size_t DbWriter::readField(const PointView& view, char *pos,
     // scaling.
     view.getField(pos, id, dt.m_type, idx);
 
-    auto iconvert = [pos](const XForm& xform, Dimension::Id::Enum dim)
+    auto iconvert = [pos](const XForm& xform, Dimension::Id dim)
     {
         double d;
         int32_t i;
@@ -231,7 +238,7 @@ size_t DbWriter::readPoint(const PointView& view, PointId idx, char *outbuf)
     // Read the data for the output dimensions from the view into the outbuf.
     view.getPackedPoint(m_dimTypes, idx, outbuf);
 
-    auto iconvert = [](const XForm& xform, Id::Enum dim,
+    auto iconvert = [](const XForm& xform, Id dim,
         const char *inpos, char *outpos)
     {
         double d;

@@ -133,7 +133,7 @@ TEST(Compression, Simple)
 TEST(Compression, types)
 {
     using namespace Dimension;
-    Type::Enum types[] = {
+    Type types[] = {
         Type::Unsigned8, Type::Unsigned16, Type::Unsigned32, Type::Unsigned64,
         Type::Signed8, Type::Signed16, Type::Signed32, Type::Signed64,
         Type::Float, Type::Double

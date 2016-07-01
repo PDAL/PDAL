@@ -462,7 +462,7 @@ void PgWriter::writeTile(const PointViewPtr view)
 
     uint32_t num_points = htobe32(view->size());
     int32_t pcid = htobe32(m_pcid);
-    CompressionType::Enum compression_v = CompressionType::None;
+    CompressionType compression_v = CompressionType::None;
     uint32_t compression = htobe32(static_cast<uint32_t>(compression_v));
 
 #if BYTE_ORDER == LITTLE_ENDIAN

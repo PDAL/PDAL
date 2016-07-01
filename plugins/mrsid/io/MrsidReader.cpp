@@ -68,7 +68,7 @@ void MrsidReader::done(PointTableRef)
     m_iter = 0;
 }
 
-pdal::Dimension::Type::Enum getPDALType(LizardTech::DataType t)
+pdal::Dimension::Type getPDALType(LizardTech::DataType t)
 {
 
    using namespace Dimension;
@@ -130,7 +130,7 @@ void MrsidReader::addDimensions(PointLayoutPtr layout)
             name = translated->second.c_str();
 
         LizardTech::DataType t = channel.getDataType();
-        Dimension::Type::Enum pdal_type = getPDALType(t);
+        Dimension::Type pdal_type = getPDALType(t);
         layout->registerOrAssignDim(name, pdal_type);
     }
     m_layout = layout;
@@ -198,7 +198,7 @@ void MrsidReader::LayoutToPointInfo(const PointLayout &layout, LizardTech::Point
     for (unsigned int idx=0; idx<dims.size(); idx++)
     {
         std::string name = layout.dimName(dims[idx]);
-        Dimension::Type::Enum t = layout.dimType(dims[idx]);
+        Dimension::Type t = layout.dimType(dims[idx]);
         size_t size = layout.dimSize(dims[idx]);
 
         if (Utils::iequals(name, "EdgeOfFlightLine")) name = CHANNEL_NAME_EdgeFlightLine;
@@ -256,9 +256,9 @@ point_count_t MrsidReader::read(PointViewPtr view, point_count_t count)
     {
         for (Dimension::IdList::size_type i=0; i < dims.size(); i++)
         {
-            Dimension::Id::Enum const& d = dims[i];
+            Dimension::Id const& d = dims[i];
             std::string name = m_layout->dimName(d);
-            Dimension::Type::Enum t = m_layout->dimType(d);
+            Dimension::Type t = m_layout->dimType(d);
 
             if (Utils::iequals(name, "X") &&
                 m_pointInfo.hasChannel(CHANNEL_NAME_X))

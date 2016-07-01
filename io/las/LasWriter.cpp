@@ -761,7 +761,7 @@ bool LasWriter::fillPointBuf(PointRef& point, LeInserter& ostream)
             m_error.numReturnsWarning(numberOfReturns);
     }
 
-    auto converter = [this](double d, Dimension::Id::Enum dim) -> int32_t
+    auto converter = [this](double d, Dimension::Id dim) -> int32_t
     {
         int32_t i;
 

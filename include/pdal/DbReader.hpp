@@ -54,14 +54,14 @@ protected:
     void writePoint(PointView& view, PointId idx, const char *buf);
     size_t packedPointSize() const
         { return m_packedPointSize; }
-    size_t dimOffset(Dimension::Id::Enum id) const;
-    Orientation::Enum orientation() const
+    size_t dimOffset(Dimension::Id id) const;
+    Orientation orientation() const
         { return m_orientation; }
 
 private:
     PointLayoutPtr m_layout;
     XMLDimList m_dims;
-    Orientation::Enum m_orientation;
+    Orientation m_orientation;
     size_t m_packedPointSize;
 
     DbReader& operator=(const DbReader&); // not implemented

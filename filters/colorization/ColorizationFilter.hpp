@@ -68,7 +68,7 @@ public:
         std::string m_name;
         uint32_t m_band;
         double m_scale;
-        Dimension::Id::Enum m_dim;
+        Dimension::Id m_dim;
     };
 
 

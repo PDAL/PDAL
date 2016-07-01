@@ -75,7 +75,7 @@ struct BpfMuellerMatrix
         for (size_t i = 12; i < 16; ++i)
             std::cerr << m_vals[i] << '\t';
         std::cerr << "\n\n";
-        
+
     }
 
     void apply(double& x, double& y, double& z)
@@ -129,7 +129,7 @@ struct BpfDimension
     double m_min;
     double m_max;
     std::string m_label;
-    Dimension::Id::Enum m_id;
+    Dimension::Id m_id;
 
     static bool read(ILeStream& stream, std::vector<BpfDimension>& dims,
         size_t start);
@@ -140,9 +140,9 @@ typedef std::vector<BpfDimension> BpfDimensionList;
 struct BpfHeader
 {
     BpfHeader() : m_version(0), m_len(176), m_numDim(0),
-        m_compression((uint8_t) BpfCompression::None), m_numPts(0),
-        m_coordType((int32_t)BpfCoordType::None), m_coordId(0), m_spacing(0.0),
-        m_startTime(0.0), m_endTime(0.0)
+        m_compression(Utils::toNative(BpfCompression::None)), m_numPts(0),
+        m_coordType(Utils::toNative(BpfCoordType::None)), m_coordId(0),
+        m_spacing(0.0), m_startTime(0.0), m_endTime(0.0)
     {}
 
     int32_t m_version;

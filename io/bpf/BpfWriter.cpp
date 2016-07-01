@@ -44,6 +44,7 @@
 
 #include "BpfCompressor.hpp"
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/Utils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
@@ -77,17 +78,17 @@ void BpfWriter::addArgs(ProgramArgs& args)
 
 void BpfWriter::initialize()
 {
-    m_header.m_compression =
-        (uint8_t)(m_compression ? BpfCompression::Zlib : BpfCompression::None);
+    m_header.m_compression = Utils::toNative(
+            m_compression ? BpfCompression::Zlib : BpfCompression::None);
     m_extraData = Utils::base64_decode(m_extraDataSpec);
     if (m_header.m_coordId == -9999)
     {
         m_header.m_coordId = 0;
-        m_header.m_coordType = (int32_t)BpfCoordType::None;
+        m_header.m_coordType = Utils::toNative(BpfCoordType::None);
     }
     else
     {
-        m_header.m_coordType = (int32_t)BpfCoordType::UTM;
+        m_header.m_coordType = Utils::toNative(BpfCoordType::UTM);
     }
 
     for (auto file : m_bundledFilesSpec)
@@ -171,7 +172,7 @@ void BpfWriter::loadBpfDimensions(PointLayoutPtr layout)
     {
        for (std::string& s : m_outputDims)
        {
-           Dimension::Id::Enum id = layout->findDim(s);
+           Dimension::Id id = layout->findDim(s);
            if (id == Dimension::Id::Unknown)
            {
                std::ostringstream oss;

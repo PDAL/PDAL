@@ -169,7 +169,7 @@ void ColorizationFilter::ready(PointTableRef table)
 
     m_raster.reset(new gdal::Raster(m_rasterFilename));
 
-    GDALError::Enum error = m_raster->open();
+    GDALError error = m_raster->open();
     if (error != GDALError::None)
     {
         if (error == GDALError::NoTransform ||

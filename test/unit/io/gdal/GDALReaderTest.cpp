@@ -55,9 +55,9 @@ TEST(GDALReaderTest, simple)
     PointViewSet s = gr.execute(t);
     PointViewPtr v = *s.begin();
     PointLayoutPtr l = t.layout();
-    Dimension::Id::Enum id1 = l->findDim("band-1");
-    Dimension::Id::Enum id2 = l->findDim("band-2");
-    Dimension::Id::Enum id3 = l->findDim("band-3");
+    Dimension::Id id1 = l->findDim("band-1");
+    Dimension::Id id2 = l->findDim("band-2");
+    Dimension::Id id3 = l->findDim("band-3");
     EXPECT_EQ(v->size(), (size_t)(735 * 973));
 
     auto verify = [v, id1, id2, id3]
@@ -133,7 +133,7 @@ protected:
 
         PointTable t;
         gr.prepare(t);
-        Dimension::Id::Enum b1 = t.layout()->findDim("band-1");
+        Dimension::Id b1 = t.layout()->findDim("band-1");
         PointViewSet s = gr.execute(t);
         PointViewPtr v = *s.begin();
 

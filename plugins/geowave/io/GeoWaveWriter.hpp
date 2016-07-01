@@ -71,7 +71,7 @@ namespace pdal
         bool m_useFeatCollDataAdapter;
         uint32_t m_pointsPerEntry;
         Dimension::IdList m_dims;
-        std::vector<Dimension::Type::Enum> m_dimTypes;
+        std::vector<Dimension::Type> m_dimTypes;
     };
 
 } // namespace pdal

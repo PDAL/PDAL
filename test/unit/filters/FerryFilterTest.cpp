@@ -66,8 +66,8 @@ TEST(FerryFilterTest, test_ferry_copy_xml)
     PointViewPtr view = *viewSet.begin();
     EXPECT_EQ(view->size(), 1065u);
 
-    Dimension::Id::Enum state_plane_x = table.layout()->findDim("StatePlaneX");
-    Dimension::Id::Enum state_plane_y = table.layout()->findDim("StatePlaneY");
+    Dimension::Id state_plane_x = table.layout()->findDim("StatePlaneX");
+    Dimension::Id state_plane_y = table.layout()->findDim("StatePlaneY");
 
     double lon = view->getFieldAs<double>(Dimension::Id::X, 0);
     double lat = view->getFieldAs<double>(Dimension::Id::Y, 0);
@@ -138,8 +138,8 @@ TEST(FerryFilterTest, test_ferry_copy_json)
     PointViewPtr view = *viewSet.begin();
     EXPECT_EQ(view->size(), 1065u);
 
-    Dimension::Id::Enum state_plane_x = table.layout()->findDim("StatePlaneX");
-    Dimension::Id::Enum state_plane_y = table.layout()->findDim("StatePlaneY");
+    Dimension::Id state_plane_x = table.layout()->findDim("StatePlaneX");
+    Dimension::Id state_plane_y = table.layout()->findDim("StatePlaneY");
 
     double lon = view->getFieldAs<double>(Dimension::Id::X, 0);
     double lat = view->getFieldAs<double>(Dimension::Id::Y, 0);

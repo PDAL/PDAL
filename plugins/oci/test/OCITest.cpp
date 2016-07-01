@@ -192,7 +192,7 @@ protected:
 };
 
 
-void writeData(Orientation::Enum orient, bool scaling, bool compression = false)
+void writeData(Orientation orient, bool scaling, bool compression = false)
 {
     Options options;
 

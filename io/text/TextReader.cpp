@@ -91,7 +91,7 @@ void TextReader::addDimensions(PointLayoutPtr layout)
 {
     for (auto name : m_dimNames)
     {
-        Dimension::Id::Enum id = layout->registerOrAssignDim(name,
+        Dimension::Id id = layout->registerOrAssignDim(name,
             Dimension::Type::Double);
         m_dims.push_back(id);
     }

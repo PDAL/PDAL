@@ -45,7 +45,7 @@ using namespace pdal;
 
 template <typename T>
 void checkDimension(const PointView& data, std::size_t index,
-    Dimension::Id::Enum dim, T expected)
+    Dimension::Id dim, T expected)
 {
     float actual = data.getFieldAs<T>(dim, index);
     EXPECT_FLOAT_EQ(expected, actual);

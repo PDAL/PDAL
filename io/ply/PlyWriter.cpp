@@ -53,30 +53,29 @@ void createErrorCallback(p_ply ply, const char* message)
 }
 
 
-e_ply_type getPlyType(Dimension::Type::Enum type)
+e_ply_type getPlyType(Dimension::Type type)
 {
-    using namespace Dimension::Type;
     switch (type)
     {
-    case Unsigned8:
+    case Dimension::Type::Unsigned8:
         return PLY_UINT8;
-    case Signed8:
+    case Dimension::Type::Signed8:
         return PLY_INT8;
-    case Unsigned16:
+    case Dimension::Type::Unsigned16:
         return PLY_UINT16;
-    case Signed16:
+    case Dimension::Type::Signed16:
         return PLY_INT16;
-    case Unsigned32:
+    case Dimension::Type::Unsigned32:
         return PLY_UIN32;
-    case Signed32:
+    case Dimension::Type::Signed32:
         return PLY_INT32;
-    case Unsigned64:
+    case Dimension::Type::Unsigned64:
         return PLY_FLOAT64;
-    case Signed64:
+    case Dimension::Type::Signed64:
         return PLY_FLOAT64;
-    case Float:
+    case Dimension::Type::Float:
         return PLY_FLOAT32;
-    case Double:
+    case Dimension::Type::Double:
         return PLY_FLOAT64;
     default:
         // I went back and forth about throwing here, but since it's not

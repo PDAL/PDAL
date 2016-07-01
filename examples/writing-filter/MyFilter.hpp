@@ -26,7 +26,7 @@ public:
 
 private:
     double m_value;
-    Dimension::Id::Enum m_myDimension;
+    Dimension::Id m_myDimension;
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void addArgs(ProgramArgs& args);

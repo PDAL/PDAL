@@ -56,25 +56,25 @@ public:
 
     void setOffset(int offset)
         { m_offset = offset; }
-    void setType(Type::Enum type)
+    void setType(Type type)
         { m_type = type; }
-    void setId(Id::Enum id)
+    void setId(Id id)
         { m_id = id; }
-    Id::Enum id() const
+    Id id() const
         { return m_id; }
     int offset() const
         { return m_offset; }
-    Type::Enum type() const
+    Type type() const
         { return m_type; }
     size_t size() const
         { return Dimension::size(m_type); }
-    BaseType::Enum base() const
+    BaseType base() const
         { return Dimension::base(m_type); }
 
 private:
-    Id::Enum m_id;
+    Id m_id;
     int m_offset;
-    Type::Enum m_type;
+    Type m_type;
 };
 typedef std::vector<Detail> DetailList;
 

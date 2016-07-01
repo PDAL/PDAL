@@ -236,10 +236,8 @@ private:
 };
 
 
-namespace GDALError
-{
 
-enum Enum
+enum class GDALError
 {
     None,
     NotOpen,
@@ -251,19 +249,17 @@ enum Enum
     CantReadBlock
 };
 
-} // namespace GDALError
-
 class PDAL_DLL Raster
 {
 
 public:
     Raster(const std::string& filename);
     ~Raster();
-    GDALError::Enum open();
+    GDALError open();
     void close();
 
-    GDALError::Enum read(double x, double y, std::vector<double>& data);
-    std::vector<pdal::Dimension::Type::Enum> getPDALDimensionTypes() const
+    GDALError read(double x, double y, std::vector<double>& data);
+    std::vector<pdal::Dimension::Type> getPDALDimensionTypes() const
        { return m_types; }
     /**
       Read a raster band (layer) into a vector.
@@ -272,7 +268,7 @@ public:
         be resized appropriately to hold the data.
       \param nBand  Band number to read.  Band numbers start at 1.
     */
-    GDALError::Enum readBand(std::vector<uint8_t>& band, int nBand);
+    GDALError readBand(std::vector<uint8_t>& band, int nBand);
 
     void pixelToCoord(int column, int row, std::array<double, 2>& output) const;
     SpatialReference getSpatialRef() const;
@@ -288,7 +284,7 @@ public:
     int m_raster_y_size;
 
     int m_band_count;
-    mutable std::vector<pdal::Dimension::Type::Enum> m_types;
+    mutable std::vector<pdal::Dimension::Type> m_types;
     std::vector<std::array<double, 2>> m_block_sizes;
 
     GDALDatasetH m_ds;
@@ -297,7 +293,7 @@ public:
 private:
     bool getPixelAndLinePosition(double x, double y,
         int32_t& pixel, int32_t& line);
-    GDALError::Enum computePDALDimensionTypes();
+    GDALError computePDALDimensionTypes();
 };
 
 } // namespace gdal

@@ -92,29 +92,7 @@ PointViewSet StatisticalOutlierFilter::run(PointViewPtr input)
     input->calculateBounds(bounds);
     pclsupport::PDALtoPCD(input, *cloud, bounds);
 
-    // PCL should provide console output at similar verbosity level as PDAL
-    int level = log()->getLevel();
-    switch (level)
-    {
-        case 0:
-            pcl::console::setVerbosityLevel(pcl::console::L_ALWAYS);
-            break;
-        case 1:
-            pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
-            break;
-        case 2:
-            pcl::console::setVerbosityLevel(pcl::console::L_WARN);
-            break;
-        case 3:
-            pcl::console::setVerbosityLevel(pcl::console::L_INFO);
-            break;
-        case 4:
-            pcl::console::setVerbosityLevel(pcl::console::L_DEBUG);
-            break;
-        default:
-            pcl::console::setVerbosityLevel(pcl::console::L_VERBOSE);
-            break;
-    }
+    pclsupport::setLogLevel(log()->getLevel());
 
     // setup the outlier filter
     pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor(true);

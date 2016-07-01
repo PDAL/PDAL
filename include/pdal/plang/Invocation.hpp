@@ -62,10 +62,10 @@ public:
     // adds the new variable to the arguments dictionary
     void insertArgument(std::string const& name,
                         uint8_t* data,
-                        Dimension::Type::Enum t,
+                        Dimension::Type t,
                         point_count_t count);
     void *extractResult(const std::string& name,
-                        Dimension::Type::Enum dataType);
+                        Dimension::Type dataType);
 
     bool hasOutputVariable(const std::string& name) const;
 
