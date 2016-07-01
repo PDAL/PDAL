@@ -54,17 +54,16 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
-
 private:
     plang::Script* m_script;
     plang::BufferedInvocation *m_pythonMethod;
     std::string m_source;
+    std::string m_scriptFile;
     std::string m_module;
     std::string m_function;
-    std::vector<std::string> m_addDimensions;
+    StringList m_addDimensions;
 
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
     virtual void filter(PointView& view);

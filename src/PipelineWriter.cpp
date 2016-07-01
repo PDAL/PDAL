@@ -37,7 +37,6 @@
 #include <pdal/Metadata.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/Stage.hpp>
-#include <pdal/util/FileUtils.hpp>
 
 namespace pdal
 {
@@ -76,9 +75,9 @@ namespace PipelineWriter
 
 PDAL_DLL void writePipeline(Stage *stage, const std::string& filename)
 {
-    std::ostream *out = FileUtils::createFile(filename, false);
+    std::ostream *out = Utils::createFile(filename, false);
     writePipeline(stage, *out);
-    FileUtils::closeFile(out);
+    Utils::closeFile(out);
 }
 
 PDAL_DLL void writePipeline(Stage *stage, std::ostream& strm)

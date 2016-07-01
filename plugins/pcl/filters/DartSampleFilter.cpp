@@ -43,6 +43,7 @@
 #include <pcl/io/pcd_io.h>
 
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -58,16 +59,9 @@ std::string DartSampleFilter::getName() const
     return s_info.name;
 }
 
-Options DartSampleFilter::getDefaultOptions()
+void DartSampleFilter::addArgs(ProgramArgs& args)
 {
-    Options options;
-    options.add("radius", 1.0, "Minimum distance criterion");
-    return options;
-}
-
-void DartSampleFilter::processOptions(const Options& options)
-{
-    m_radius = options.getValueOrDefault<double>("radius", 1.0);
+    args.add("radius", "Minimum distance criterion", m_radius, 1.0);
 }
 
 PointViewSet DartSampleFilter::run(PointViewPtr input)

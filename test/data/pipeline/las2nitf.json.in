@@ -13,7 +13,6 @@
       "idatim":"20131206140713",
       "fscltx":"SIC:0 CH_FO",
       "ftitle":"output.ntf",
-      "geolob":"GEOLOB00048017898386021508996+063.7163336371+034.",
       "forward":"software_id, creation_doy, creation_year",
       "system_id":"PDAL2NTF"
     }

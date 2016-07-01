@@ -35,6 +35,7 @@
 #include "Ilvis2Reader.hpp"
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -51,41 +52,48 @@ CREATE_STATIC_PLUGIN(1, 0, Ilvis2Reader, Reader, s_info)
 
 std::string Ilvis2Reader::getName() const { return s_info.name; }
 
-Options Ilvis2Reader::getDefaultOptions()
+std::istream& operator >> (std::istream& in, Ilvis2Reader::IlvisMapping& mval)
 {
-    Options options;
-    options.add("mapping", "all", "The point to extract from the shot: "
-        "low, high, or all.  'all' creates 1 or 2 points per shot, "
-        "depending on if LOW and HIGH are the same.");
-    options.add("filename", "", "The file to read from");
-    options.add("metadata", "", "The metadata file to read from");
+    std::string s;
 
-    return options;
+    in >> s;
+    s = Utils::toupper(s);
+    
+    static std::map<std::string, Ilvis2Reader::IlvisMapping> m =
+        { { "INVALID", Ilvis2Reader::IlvisMapping::INVALID }, 
+          { "LOW", Ilvis2Reader::IlvisMapping::LOW }, 
+          { "HIGH", Ilvis2Reader::IlvisMapping::HIGH }, 
+          { "ALL", Ilvis2Reader::IlvisMapping::ALL } };
+
+    mval = m[s];
+    return in;
 }
 
-void Ilvis2Reader::processOptions(const Options& options)
-{
-    std::string mapping =
-        options.getValueOrDefault<std::string>("mapping", "all");
-    mapping = Utils::toupper(mapping);
-    m_mapping = parser.parseMapping(mapping);
-    if (m_mapping == INVALID)
-    {
-        std::ostringstream oss;
-        oss << "Invalid value for option for mapping: '" <<
-            mapping << "'.  Value values are 'low', 'high' and 'all'.";
-        throw pdal_error(oss.str());
-    }
 
-    m_metadataFile =
-        options.getValueOrDefault<std::string>("metadata", "");
-    if (!m_metadataFile.empty() && ! FileUtils::fileExists(m_metadataFile))
+std::ostream& operator<<(std::ostream& out,
+    const Ilvis2Reader::IlvisMapping& mval)
+{
+    switch (mval)
     {
-        std::ostringstream oss;
-        oss << "Invalid metadata file: '" << m_metadataFile << "'";
-        throw pdal_error(oss.str());
+    case Ilvis2Reader::IlvisMapping::INVALID:
+        out << "Invalid";
+    case Ilvis2Reader::IlvisMapping::LOW:
+        out << "Low";
+    case Ilvis2Reader::IlvisMapping::HIGH:
+        out << "High";
+    case Ilvis2Reader::IlvisMapping::ALL:
+        out << "All";
     }
+    return out;
 }
+
+
+void Ilvis2Reader::addArgs(ProgramArgs& args)
+{
+    args.add("mapping", "Mapping for values", m_mapping, IlvisMapping::ALL);
+    args.add("metadata", "Metadata file", m_metadataFile);
+}
+
 
 void Ilvis2Reader::addDimensions(PointLayoutPtr layout)
 {
@@ -122,6 +130,13 @@ Dimension::IdList Ilvis2Reader::getDefaultDimensions()
 
 void Ilvis2Reader::initialize(PointTableRef)
 {
+    if (!m_metadataFile.empty() && !FileUtils::fileExists(m_metadataFile))
+    {
+        std::ostringstream oss;
+        oss << "Invalid metadata file: '" << m_metadataFile << "'";
+        throw pdal_error(oss.str());
+    }
+
     // Data are WGS84 (4326) with ITRF2000 datum (6656)
     // See http://nsidc.org/data/docs/daac/icebridge/ilvis2/index.html for
     // background
@@ -239,16 +254,16 @@ bool Ilvis2Reader::processOne(PointRef& point)
     double high_elev = convert<double>(m_fields, "ELEVATION_HIGH", 11);
 
     // write LOW point if specified, or for ALL
-    if (m_mapping == LOW || m_mapping == ALL)
+    if (m_mapping == IlvisMapping::LOW || m_mapping == IlvisMapping::ALL)
     {
         readPoint(point, m_fields, "LOW");
         // If we have ALL mapping and the high elevation is different
         // from that of the low elevation, we'll a second point with the
         // high elevation.
-        if (m_mapping == ALL && (low_elev != high_elev))
+        if (m_mapping == IlvisMapping::ALL && (low_elev != high_elev))
             m_resample = true;
     }
-    else if (m_mapping == HIGH)
+    else if (m_mapping == IlvisMapping::HIGH)
         readPoint(point, m_fields, "HIGH");
     return true;
 }
@@ -272,6 +287,7 @@ point_count_t Ilvis2Reader::read(PointViewPtr view, point_count_t count)
 
     return numRead;
 }
+
 
 void Ilvis2Reader::done(PointTableRef table)
 {

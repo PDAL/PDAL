@@ -37,6 +37,7 @@
 #include <pdal/Filter.hpp>
 #include <pdal/PointViewIter.hpp>
 #include <pdal/plugin.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 extern "C" int32_t SortFilter_ExitFunc();
 extern "C" PF_ExitFunc SortFilter_InitPlugin();
@@ -60,8 +61,11 @@ private:
     // Dimension name.
     std::string m_dimName;
 
-    virtual void processOptions(const Options& options)
-        { m_dimName = options.getValueOrThrow<std::string>("dimension"); }
+    virtual void addArgs(ProgramArgs& args)
+    {
+        args.add("dimension", "Dimension on which to sort", m_dimName).
+            setPositional();
+    }
 
     virtual void ready(PointTableRef table)
         { m_dim = table.layout()->findDim(m_dimName); }
@@ -77,8 +81,8 @@ private:
         std::sort(view.begin(), view.end(), cmp);
     }
 
-    SortFilter& operator=(const SortFilter&); // not implemented
-    SortFilter(const SortFilter&); // not implemented
+    SortFilter& operator=(const SortFilter&) = delete;
+    SortFilter(const SortFilter&) = delete;
 };
 
 } // namespace pdal

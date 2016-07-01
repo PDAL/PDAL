@@ -53,7 +53,7 @@ TEST(SplitterTest, test_tile_filter)
     r.setOptions(ops1);
 
     Options o;
-    Option length("length", 1000, "length");
+    Option length("length", 1000);
     o.add(length);
 
     // create the tile filter and prepare

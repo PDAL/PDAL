@@ -62,10 +62,9 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
-
 private:
-    virtual void processOptions(const Options&);
+    virtual void addArgs(ProgramArgs& args);
+    virtual void initialize(PointTableRef table);
     virtual void ready(PointTableRef table);
     virtual void write(const PointViewPtr view);
     virtual void done(PointTableRef table);

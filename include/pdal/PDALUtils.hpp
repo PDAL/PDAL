@@ -76,7 +76,7 @@ inline double toDouble(const Everything& e, Dimension::Type type)
         d = e.u32;
         break;
     case Type::Unsigned64:
-        d = e.u64;
+        d = (double)e.u64;
         break;
     case Type::Signed8:
         d = e.s8;
@@ -88,7 +88,7 @@ inline double toDouble(const Everything& e, Dimension::Type type)
         d = e.s32;
         break;
     case Type::Signed64:
-        d = e.s64;
+        d = (double)e.s64;
         break;
     case Type::Float:
         d = e.f;
@@ -258,8 +258,12 @@ inline void writeProgress(int fd, const std::string& type,
 
 std::string PDAL_DLL toJSON(const MetadataNode& m);
 void PDAL_DLL toJSON(const MetadataNode& m, std::ostream& o);
-std::string PDAL_DLL toJSON(const Options& opts);
-void PDAL_DLL toJSON(const Options& opts, std::ostream& o);
+std::istream PDAL_DLL *openFile(const std::string& path, bool asBinary = true);
+std::ostream PDAL_DLL *createFile(const std::string& path,
+    bool asBinary = true);
+void PDAL_DLL closeFile(std::istream *in);
+void PDAL_DLL closeFile(std::ostream *out);
+bool PDAL_DLL fileExists(const std::string& path);
 
 } // namespace Utils
 } // namespace pdal

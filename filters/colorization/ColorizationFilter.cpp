@@ -36,6 +36,7 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include <gdal.h>
 #include <ogr_spatialref.h>
@@ -53,22 +54,6 @@ static PluginInfo const s_info = PluginInfo(
 CREATE_STATIC_PLUGIN(1, 0, ColorizationFilter, Filter, s_info)
 
 std::string ColorizationFilter::getName() const { return s_info.name; }
-
-
-void ColorizationFilter::initialize()
-{
-    gdal::registerDrivers();
-}
-
-
-Options ColorizationFilter::getDefaultOptions()
-{
-    Options options;
-
-    options.add("dimensions", "Red:1:1.0, Green:2:1.0, Blue:3");
-
-    return options;
-}
 
 namespace
 {
@@ -146,29 +131,27 @@ ColorizationFilter::BandInfo parseDim(const std::string& dim,
 
 } // unnamed namespace
 
-void ColorizationFilter::processOptions(const Options& options)
+void ColorizationFilter::addArgs(ProgramArgs& args)
 {
-    m_rasterFilename = options.getValueOrThrow<std::string>("raster");
+    args.add("raster", "Raster filename", m_rasterFilename);
+    args.add("dimensions", "Dimensions to use for colorization", m_dimSpec);
+}
 
-    if (options.hasOption("dimension") && !options.hasOption("dimensions"))
-        throw pdal_error("Option 'dimension' no longer supported.  Use "
-            "'dimensions' instead.");
 
-    StringList defaultDims;
-    defaultDims.push_back("Red");
-    defaultDims.push_back("Green");
-    defaultDims.push_back("Blue");
-
-    StringList dims =
-        options.getValueOrDefault<StringList>("dimensions", defaultDims);
+void ColorizationFilter::initialize()
+{
+    if (m_dimSpec.empty())
+        m_dimSpec = { "Red", "Green", "Blue" };
 
     uint32_t defaultBand = 1;
-    for (std::string& dim : dims)
+    for (std::string& dim : m_dimSpec)
     {
         BandInfo bi = parseDim(dim, defaultBand);
         defaultBand = bi.m_band + 1;
         m_bands.push_back(bi);
     }
+
+    gdal::registerDrivers();
 }
 
 

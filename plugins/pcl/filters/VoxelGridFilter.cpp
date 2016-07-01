@@ -43,6 +43,7 @@
 #include <pcl/filters/voxel_grid.h>
 
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -58,22 +59,12 @@ std::string VoxelGridFilter::getName() const
     return s_info.name;
 }
 
-Options VoxelGridFilter::getDefaultOptions()
-{
-    Options options;
-    options.add("leaf_x", 1.0, "Leaf size in X dimension");
-    options.add("leaf_y", 1.0, "Leaf size in Y dimension");
-    options.add("leaf_z", 1.0, "Leaf size in Z dimension");
-    return options;
-}
 
-/** \brief This method processes the PointView through the given pipeline. */
-
-void VoxelGridFilter::processOptions(const Options& options)
+void VoxelGridFilter::addArgs(ProgramArgs& args)
 {
-    m_leaf_x = options.getValueOrDefault<double>("leaf_x", 1.0);
-    m_leaf_y = options.getValueOrDefault<double>("leaf_y", 1.0);
-    m_leaf_z = options.getValueOrDefault<double>("leaf_z", 1.0);
+    args.add("leaf_x", "Leaf size in X dimension", m_leaf_x, 1.0);
+    args.add("leaf_y", "Leaf size in Y dimension", m_leaf_y, 1.0);
+    args.add("leaf_z", "Leaf size in Z dimension", m_leaf_z, 1.0);
 }
 
 PointViewSet VoxelGridFilter::run(PointViewPtr input)

@@ -8,12 +8,6 @@
             <Option name="out_srs">
                 EPSG:4326+4326
             </Option>
-            <Option name="scale_x">
-                0.0000001
-            </Option>
-            <Option name="scale_y">
-                0.0000001
-            </Option>
             <Filter type="filters.ferry">
                 <Option name="dimensions">
                     X=StatePlaneX, Y=StatePlaneY

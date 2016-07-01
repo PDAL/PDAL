@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Pipeline version="1.0">
     <Writer type="writers.las">
-        <Option name="metadata">
-            <Options/>
-          </Option>
         <Option name="filename">
             @CMAKE_SOURCE_DIR@/test/temp/pdal-compressed.laz
         </Option>
@@ -14,7 +11,6 @@
             2
         </Option>        
         <Filter type="filters.stats">
-            <Option name="exact_dimensions">Classification</Option>
             <Option name="dimensions">readers.las.X, readers.las.Y, readers.las.Z, Classification</Option>
             <Filter type="filters.crop">
                 <Option name="bounds">

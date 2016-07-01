@@ -85,9 +85,15 @@ TransformationMatrix transformationMatrixFromString(const std::string& s)
 }
 
 
-void TransformationFilter::processOptions(const Options& options)
+void TransformationFilter::addArgs(ProgramArgs& args)
 {
-    m_matrix = transformationMatrixFromString(options.getValueOrThrow<std::string>("matrix"));
+    args.add("matrix", "Transformation matrix", m_matrixSpec).setPositional();
+}
+
+
+void TransformationFilter::initialize()
+{
+    m_matrix = transformationMatrixFromString(m_matrixSpec);
 }
 
 

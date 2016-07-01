@@ -37,6 +37,7 @@
 #include <pdal/Eigen.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include <Eigen/Dense>
 
@@ -57,17 +58,12 @@ std::string EigenvaluesFilter::getName() const
     return s_info.name;
 }
 
-Options EigenvaluesFilter::getDefaultOptions()
+
+void EigenvaluesFilter::addArgs(ProgramArgs& args)
 {
-    Options options;
-    options.add("knn", 8, "k-Nearest Neighbors");
-    return options;
+    args.add("knn", "k-Nearest neighbors", m_knn, 8);
 }
 
-void EigenvaluesFilter::processOptions(const Options& options)
-{
-    m_knn = options.getValueOrDefault<int>("knn", 8);
-}
 
 void EigenvaluesFilter::addDimensions(PointLayoutPtr layout)
 {

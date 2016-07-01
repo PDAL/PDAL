@@ -37,17 +37,13 @@
 #include <pdal/Filter.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/Options.hpp>
-#include <pdal/util/FileUtils.hpp>
+#include <pdal/PDALUtils.hpp>
 #include <pdal/util/Utils.hpp>
 
 #include <json/json.h>
 
 #include <memory>
 #include <vector>
-
-#ifndef _WIN32
-#include <wordexp.h>
-#endif
 
 namespace pdal
 {
@@ -146,7 +142,7 @@ void PipelineReaderJSON::readPipeline(const std::string& filename)
 {
     m_inputJSONFile = filename;
 
-    std::istream* input = FileUtils::openFile(filename);
+    std::istream* input = Utils::openFile(filename);
     if (!input)
     {
         throw pdal_error("JSON pipeline: Unable to open stream for "
@@ -159,11 +155,11 @@ void PipelineReaderJSON::readPipeline(const std::string& filename)
     }
     catch (...)
     {
-        FileUtils::closeFile(input);
+        Utils::closeFile(input);
         throw;
     }
 
-    FileUtils::closeFile(input);
+    Utils::closeFile(input);
     m_inputJSONFile = "";
 }
 

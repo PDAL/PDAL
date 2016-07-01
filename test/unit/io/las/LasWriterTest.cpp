@@ -665,10 +665,11 @@ TEST(LasWriterTest, fix1063_1064_1065)
 
     FileUtils::deleteFile(outfile);
 
-
     std::string cmd = "pdal translate --writers.las.forward=all "
         "--writers.las.a_srs=\"EPSG:4326\" " + infile + " " + outfile;
     std::string output;
+    std::cerr << "*** Shell command = " <<
+        Support::binpath(cmd) << "!\n";
     Utils::run_shell_command(Support::binpath(cmd), output);
 
     Options o;

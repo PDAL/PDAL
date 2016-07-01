@@ -45,6 +45,7 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/IStream.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #ifdef PDAL_HAVE_LIBGEOTIFF
 #include "GeotiffSupport.hpp"
@@ -68,33 +69,14 @@ public:
 
 } // unnamed namespace
 
-void LasReader::processOptions(const Options& options)
+void LasReader::addArgs(ProgramArgs& args)
 {
-    StringList extraDims = options.getValueOrDefault<StringList>("extra_dims");
-    m_extraDims = LasUtils::parse(extraDims);
-
-    m_compression = options.getValueOrDefault<std::string>("compression",
-        "LASZIP");
-    std::string compression = Utils::toupper(m_compression);
-#ifndef PDAL_HAVE_LAZPERF
-    if (compression == "LAZPERF")
-        throw pdal_error("Can't decompress with LAZperf.  PDAL not built "
-            "with LAZperf.");
-#endif
-    if (compression != "LAZPERF" && compression != "LASZIP")
-    {
-        std::ostringstream oss;
-
-        oss << "Invalid value for option for compression: '" <<
-            m_compression << "'.  Value values are 'lazperf' and 'laszip'.";
-        throw pdal_error(oss.str());
-    }
-
-    // Set case-corrected value.
-    m_compression = compression;
-
-    m_error.setFilename(m_filename);
+    addSpatialReferenceArg(args);
+    args.add("extra_dims", "Dimensions to assign to extra byte data",
+        m_extraDimSpec);
+    args.add("compression", "Decompressor to use", m_compression, "LASZIP");
 }
+
 
 static PluginInfo const s_info = PluginInfo(
     "readers.las",
@@ -133,6 +115,27 @@ QuickInfo LasReader::inspect()
 
 void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
 {
+    m_extraDims = LasUtils::parse(m_extraDimSpec);
+
+    std::string compression = Utils::toupper(m_compression);
+#ifndef PDAL_HAVE_LAZPERF
+    if (compression == "LAZPERF")
+        throw pdal_error("Can't decompress with LAZperf.  PDAL not built "
+            "with LAZperf.");
+#endif
+    if (compression != "LAZPERF" && compression != "LASZIP")
+    {
+        std::ostringstream oss;
+
+        oss << "Invalid value for option for compression: '" <<
+            m_compression << "'.  Value values are 'lazperf' and 'laszip'.";
+        throw pdal_error(oss.str());
+    }
+
+    // Set case-corrected value.
+    m_compression = compression;
+    m_error.setFilename(m_filename);
+
     m_error.setLog(log());
     m_header.setLog(log());
     createStream();
@@ -226,16 +229,6 @@ void LasReader::ready(PointTableRef table)
     }
     else
         stream->seekg(m_header.pointOffset());
-}
-
-
-Options LasReader::getDefaultOptions()
-{
-    Options options;
-    options.add("filename", "", "file to read from");
-    options.add("extra_dims", "", "Extra dimensions not part of the LAS "
-        "point format to be read from each point.");
-    return options;
 }
 
 
@@ -781,8 +774,8 @@ void LasReader::loadExtraDims(LeExtractor& istream, PointRef& point)
         if (dim.m_dimType.m_xform.nonstandard())
         {
             double d = Utils::toDouble(e, dim.m_dimType.m_type);
-            d = d * dim.m_dimType.m_xform.m_scale +
-                dim.m_dimType.m_xform.m_offset;
+            d = d * dim.m_dimType.m_xform.m_scale.m_val +
+                dim.m_dimType.m_xform.m_offset.m_val;
             point.setField(dim.m_dimType.m_id, d);
         }
         else

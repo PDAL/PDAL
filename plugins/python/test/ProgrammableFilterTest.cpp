@@ -61,7 +61,7 @@ TEST_F(ProgrammableFilterTest, ProgrammableFilterTest_test1)
 
     Options ops;
     ops.add("bounds", bounds);
-    ops.add("num_points", 10);
+    ops.add("count", 10);
     ops.add("mode", "ramp");
 
     FauxReader reader;
@@ -161,7 +161,7 @@ TEST_F(ProgrammableFilterTest, add_dimension)
 
     Options ops;
     ops.add("bounds", bounds);
-    ops.add("num_points", 10);
+    ops.add("count", 10);
     ops.add("mode", "ramp");
 
     FauxReader reader;
@@ -215,7 +215,7 @@ TEST_F(ProgrammableFilterTest, metadata)
 
     Options ops;
     ops.add("bounds", bounds);
-    ops.add("num_points", 10);
+    ops.add("count", 10);
     ops.add("mode", "ramp");
 
     FauxReader reader;

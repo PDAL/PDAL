@@ -98,6 +98,8 @@ enum class BpfFormat
     ByteMajor
 };
 
+std::istream& operator >> (std::istream& in, BpfFormat& format);
+std::ostream& operator << (std::ostream& in, const BpfFormat& format);
 
 enum class BpfCoordType
 {
@@ -106,8 +108,6 @@ enum class BpfCoordType
     TCR,
     ENU
 };
-
-
 
 enum class BpfCompression
 {
@@ -210,6 +210,14 @@ struct BpfUlemFile
     std::string m_filename;
     std::vector<char> m_buf;
     std::string m_filespec;
+
+    BpfUlemFile() : m_len(0)
+    {}
+
+    BpfUlemFile(uint32_t len, const std::string& filename,
+            const std::string& filespec) :
+        m_len(len), m_filename(filename), m_filespec(filespec)
+    {}
 
     bool read(ILeStream& stream);
     bool write(OLeStream& stream);

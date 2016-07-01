@@ -48,7 +48,8 @@
 // most pipelines (those with a writer) will be invoked via `pdal pipeline`
 static void run_pipeline(std::string const& pipeline)
 {
-    const std::string cmd = Support::binpath(Support::exename("pdal") + " pipeline");
+    const std::string cmd = Support::binpath(Support::exename("pdal") +
+        " pipeline");
 
     std::string output;
     std::string file(Support::configuredpath(pipeline));

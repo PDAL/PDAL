@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2015, Hobu Inc., hobu@hobu.co
+* Copyright (c) 2016, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -31,35 +31,58 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/pdal_test_main.hpp>
+#pragma once
 
-#include <sstream>
+#include <pdal/PointView.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
-#include <pdal/PDALUtils.hpp>
-#include <pdal/Options.hpp>
-#include "Support.hpp"
-
-using namespace pdal;
-
-TEST(PDALUtilsTest, options1)
+namespace pdal
 {
-    Options ops;
-    ops.add("testa", "This is a test");
-    ops.add("testb", 56);
-    ops.add("testc", 27.5, "Testing testc");
 
-    Option op35("testd", 3.5);
+class ProgramArgs;
 
-    ops.add("teste", "Testing option test e");
+/**
+  Scaling provides support for transforming X/Y/Z values from double to
+  scaled integers and vice versa.
+*/
+class PDAL_DLL Scaling
+{
+public:
+    XForm m_xXform;          ///< X-dimension transform (scale/offset)
+    XForm m_yXform;          ///< Y-dimension transform (scale/offset)
+    XForm m_zXform;          ///< Z-dimension transform (scale/offset)
+    Arg *m_xOffArg;
+    Arg *m_yOffArg;
+    Arg *m_zOffArg;
+    Arg *m_xScaleArg;
+    Arg *m_yScaleArg;
+    Arg *m_zScaleArg;
 
-    std::string goodfile(Support::datapath("misc/opts2json.txt"));
-    std::string testfile(Support::temppath("opts2json.txt"));
+    /**
+       Determine if any of the transformations are non-standard.
 
+       \return  Whether any transforms are non-standard.
+    */
+    bool nonstandard() const
     {
-        // Binary mode to avoid OS-specific translation of EOL
-        std::ofstream out(testfile, std::ios_base::binary);
-        Utils::toJSON(ops, out);
+        return m_xXform.nonstandard() || m_yXform.nonstandard() ||
+            m_zXform.nonstandard();
     }
-    EXPECT_TRUE(Support::compare_files(goodfile, testfile));
-}
+
+    /**
+      Compute an automatic scale/offset for points in the PointView.
+
+      \param view  PointView on which scale should be computed.
+    */
+    virtual void setAutoXForm(const PointViewPtr view);
+
+    /**
+      Add option/command-line arguments for transform variables.
+
+      \param args  Argument set to add to.
+    */
+    void addArgs(ProgramArgs& args);
+};
+
+} // namespace pdal
 

@@ -35,8 +35,9 @@
 
 #include "LasHeader.hpp"
 
-#include <pdal/util/Utils.hpp>
 #include <pdal/pdal_config.hpp>
+#include <pdal/Scaling.hpp>
+#include <pdal/util/Utils.hpp>
 
 #include "SummaryData.hpp"
 
@@ -96,28 +97,27 @@ void LasHeader::setSummary(const SummaryData& summary)
 }
 
 
-void LasHeader::setScale(double x, double y, double z)
+void LasHeader::setScaling(const Scaling& scaling)
 {
-    if (x == 0)
+    const double& xs = scaling.m_xXform.m_scale.m_val;
+    const double& ys = scaling.m_yXform.m_scale.m_val;
+    const double& zs = scaling.m_zXform.m_scale.m_val;
+    if (xs == 0)
         throw std::invalid_argument("X scale of 0.0 is invalid!");
 
-    if (y == 0)
+    if (ys == 0)
         throw std::invalid_argument("Y scale of 0.0 is invalid!");
 
-    if (z == 0)
+    if (zs == 0)
         throw std::invalid_argument("Z scale of 0.0 is invalid!");
 
-    m_scales[0] = x;
-    m_scales[1] = y;
-    m_scales[2] = z;
-}
+    m_scales[0] = xs;
+    m_scales[1] = ys;
+    m_scales[2] = zs;
 
-
-void LasHeader::setOffset(double x, double y, double z)
-{
-    m_offsets[0] = x;
-    m_offsets[1] = y;
-    m_offsets[2] = z;
+    m_offsets[0] = scaling.m_xXform.m_offset.m_val;
+    m_offsets[1] = scaling.m_yXform.m_offset.m_val;
+    m_offsets[2] = scaling.m_zXform.m_offset.m_val;
 }
 
 

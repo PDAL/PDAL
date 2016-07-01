@@ -56,13 +56,15 @@ public:
     PlyWriter();
 
 private:
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
+    virtual void initialize();
     virtual void ready(PointTableRef table);
     virtual void write(const PointViewPtr data);
     virtual void done(PointTableRef table);
 
     p_ply m_ply;
     PointViewPtr m_pointCollector;
+    std::string m_storageModeSpec;
     e_ply_storage_mode m_storageMode;
 
 };

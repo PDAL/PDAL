@@ -42,6 +42,7 @@
 
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -54,24 +55,6 @@ static PluginInfo const s_info = PluginInfo(
 CREATE_SHARED_PLUGIN(1, 0, RxpReader, Reader, s_info)
 
 std::string RxpReader::getName() const { return s_info.name; }
-
-std::string extractRivlibURI(const Options& options)
-{
-    if (options.hasOption("filename"))
-    {
-        if (options.hasOption("rdtp"))
-        {
-            throw pdal_error("Cannot create URI when both filename "
-                "and rdtp are provided");
-        }
-        return "file:" + options.getValueOrThrow<std::string>("filename");
-    }
-    else
-    {
-        return "rdtp://" + options.getValueOrThrow<std::string>("rdtp");
-    }
-}
-
 
 Dimension::IdList getRxpDimensions(bool syncToPps, bool minimal)
 {
@@ -98,20 +81,15 @@ Dimension::IdList getRxpDimensions(bool syncToPps, bool minimal)
 }
 
 
-Options RxpReader::getDefaultOptions()
+void RxpReader::addArgs(ProgramArgs& args)
 {
-    Options options;
-    options.add("sync_to_pps", DEFAULT_SYNC_TO_PPS, "");
-    options.add("minimal", DEFAULT_MINIMAL, "");
-    return options;
+    args.add("rdtp", "", m_isRdtp, DEFAULT_IS_RDTP);
+    args.add("sync_to_pps", "Sync to PPS", m_syncToPps, DEFAULT_SYNC_TO_PPS);
 }
 
-
-void RxpReader::processOptions(const Options& options)
+void RxpReader::initialize()
 {
-    m_uri = extractRivlibURI(options);
-    m_syncToPps = options.getValueOrDefault<bool>("sync_to_pps",
-                                                  DEFAULT_SYNC_TO_PPS);
+    m_uri = m_isRdtp ? "rdtp://" + m_filename : "file:" + m_filename;
 }
 
 

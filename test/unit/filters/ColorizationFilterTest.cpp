@@ -132,8 +132,7 @@ TEST(ColorizationFilterTest, test1)
     Options options;
 
     options.add("dimensions", "Red, Green,Blue::255  ");
-    options.add("raster", Support::datapath("autzen/autzen.jpg"),
-        "raster to read");
+    options.add("raster", Support::datapath("autzen/autzen.jpg"));
 
     StringList dims;
     dims.push_back("Red");
@@ -148,8 +147,7 @@ TEST(ColorizationFilterTest, test2)
 {
     Options options;
 
-    options.add("raster", Support::datapath("autzen/autzen.jpg"),
-        "raster to read");
+    options.add("raster", Support::datapath("autzen/autzen.jpg"));
 
     StringList dims;
     dims.push_back("Red");
@@ -165,8 +163,7 @@ TEST(ColorizationFilterTest, test3)
     Options options;
 
     options.add("dimensions", "Foo:1,Bar_:2,Baz2:3:255");
-    options.add("raster", Support::datapath("autzen/autzen.jpg"),
-        "raster to read");
+    options.add("raster", Support::datapath("autzen/autzen.jpg"));
 
     StringList dims;
     dims.push_back("Foo");
@@ -181,8 +178,7 @@ TEST(ColorizationFilterTest, test4)
     Options options;
 
     options.add("dimensions", "Foo&:1,Bar:2,Baz:3:255");
-    options.add("raster", Support::datapath("autzen/autzen.jpg"),
-        "raster to read");
+    options.add("raster", Support::datapath("autzen/autzen.jpg"));
 
     StringList dims;
     dims.push_back("Foo");

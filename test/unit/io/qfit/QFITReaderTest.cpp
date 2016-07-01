@@ -64,11 +64,9 @@ TEST(QFITReaderTest, test_10_word)
 {
     Options options;
 
-    options.add("filename", Support::datapath("qfit/10-word.qi"),
-        "Input filename for reader to use");
-    options.add("flip_coordinates", false,
-        "Flip coordinates from 0-360 to -180-180");
-    options.add("scale_z", 0.001f, "Z scale from mm to m");
+    options.add("filename", Support::datapath("qfit/10-word.qi"));
+    options.add("flip_coordinates", false);
+    options.add("scale_z", 0.001f);
     options.add("count", 3);
 
     std::shared_ptr<QfitReader> reader(new QfitReader);
@@ -91,11 +89,9 @@ TEST(QFITReaderTest, test_14_word)
 {
     Options options;
 
-    options.add("filename", Support::datapath("qfit/14-word.qi"),
-        "Input filename for reader to use");
-    options.add("flip_coordinates", false,
-        "Flip coordinates from 0-360 to -180-180");
-    options.add("scale_z", 0.001f, "Z scale from mm to m");
+    options.add("filename", Support::datapath("qfit/14-word.qi"));
+    options.add("flip_coordinates", false);
+    options.add("scale_z", 0.001f);
     options.add("count", 3);
 
     PointTable table;

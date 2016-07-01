@@ -37,6 +37,7 @@
 #include <pdal/KDIndex.hpp>
 #include <pdal/util/Utils.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include <string>
 #include <vector>
@@ -56,17 +57,9 @@ std::string SampleFilter::getName() const
 }
 
 
-Options SampleFilter::getDefaultOptions()
+void SampleFilter::addArgs(ProgramArgs& args)
 {
-    Options options;
-    options.add("radius", 1, "Radius");
-    return options;
-}
-
-
-void SampleFilter::processOptions(const Options& options)
-{
-    m_radius = options.getValueOrDefault<double>("radius", 1);
+    args.add("radius", "Radius", m_radius, 1.0);
 }
 
 

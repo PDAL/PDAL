@@ -49,10 +49,12 @@
 #include <pdal/PointView.hpp>
 #include <pdal/QuickInfo.hpp>
 #include <pdal/SpatialReference.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
 
+class ProgramArgs;
 class StageRunner;
 class StageWrapper;
 
@@ -179,6 +181,13 @@ public:
     void addConditionalOptions(const Options& opts);
 
     /**
+      Add a stage's options to a ProgramArgs set.
+
+      \param args  ProgramArgs to add to.
+    */
+    void addAllArgs(ProgramArgs& args);
+
+    /**
       Add options to the existing option set.
 
       \param opts  Options to add.
@@ -214,7 +223,7 @@ public:
       \return  The stage's debug state.
     */
     bool isDebug() const
-        { return m_options.getValueOrDefault<bool>("debug", false); }
+        { return m_debug; }
 
     /**
       Return the name of a stage.
@@ -245,14 +254,6 @@ public:
         { return m_inputs; }
 
     /**
-      Return the stage's accepted options.
-
-      \return  The options that a stage handles.
-    */
-    virtual Options getDefaultOptions()
-        { return Options(); }
-
-    /**
       Get the stage's metadata node.
 
       \return  Stage's metadata.
@@ -276,31 +277,30 @@ protected:
     int m_progressFd;           ///< Descriptor for progress info.
 
     void setSpatialReference(MetadataNode& m, SpatialReference const&);
+    void addSpatialReferenceArg(ProgramArgs& args);
 
 private:
     bool m_debug;
     uint32_t m_verbose;
+    std::string m_logname;
     std::vector<Stage *> m_inputs;
     LogPtr m_log;
     SpatialReference m_spatialReference;
+    std::unique_ptr<ProgramArgs> m_args;
 
     Stage& operator=(const Stage&); // not implemented
     Stage(const Stage&); // not implemented
-    void Construct();
 
-    void l_processOptions(const Options& options);
+    void setupLog();
+    void handleOptions();
 
-    /**
-      Process options.  Implement in subclass.
+    virtual void readerAddArgs(ProgramArgs& /*args*/)
+        {}
+    void l_addArgs(ProgramArgs& args);
 
-      \param options  Options to process.
-    */
-    virtual void processOptions(const Options& /*options*/)
+    virtual void writerInitialize(PointTableRef /*table*/)
         {}
-    virtual void readerProcessOptions(const Options& /*options*/)
-        {}
-    virtual void writerProcessOptions(const Options& /*options*/)
-        {}
+
     void l_initialize(PointTableRef table);
 
     /**
@@ -310,6 +310,22 @@ private:
     */
     virtual QuickInfo inspect()
         { return QuickInfo(); }
+
+    /**
+      Add arguments(options) handled by this stage.  Implement in subclass.
+
+      \param args  ProgramArgs object to which arguments should be added.
+    */
+    virtual void addArgs(ProgramArgs& /*args*/)
+    {}
+
+    /**
+      Process options.  Implement in subclass.
+
+      \param options  Options to process.
+    */
+    virtual void processOptions(const Options& /*options*/)
+        {}
 
     /**
       Initialize stage after options have been processed.  Implement in

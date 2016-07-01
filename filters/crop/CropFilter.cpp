@@ -40,6 +40,7 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/Polygon.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include <sstream>
 #include <cstdarg>
@@ -62,43 +63,21 @@ CropFilter::CropFilter() : pdal::Filter()
 }
 
 
-void CropFilter::processOptions(const Options& options)
+void CropFilter::addArgs(ProgramArgs& args)
 {
-    m_cropOutside = options.getValueOrDefault<bool>("outside", false);
-    m_assignedSrs = options.getValueOrDefault<SpatialReference>("a_srs");
+    args.add("outside", "Whether we keep points inside or outside of the "
+        "bounding region", m_cropOutside);
+    args.add("a_srs", "Spatial reference for bounding region", m_assignedSrs);
+    args.add("bounds", "Bounds box for cropped points", m_bounds);
+    args.add("polygon", "Bounding polying for cropped points", m_polys).
+        setErrorText("Invalid polygon specification.  "
+            "Must be valid GeoJSON/WKT");
+}
 
-    try
-    {
-        m_bounds = options.getValues<BOX2D>("bounds");
-    }
-    catch (Option::cant_convert)
-    {
-        try
-        {
-            std::vector<BOX3D>  b3d = options.getValues<BOX3D>("bounds");
-            for (auto& i: b3d)
-                m_bounds.push_back(i.to2d());
-        }
-        catch (Option::cant_convert)
-        {
-            std::ostringstream oss;
-            oss << getName() << ": Invalid bounds provided as option.  "
-                "Format: '([xmin,xmax],[ymin,ymax])'.";
-            throw pdal_error(oss.str());
-        }
-    }
 
-    try
-    {
-        m_polys = options.getValues<Polygon>("polygon");
-    }
-    catch (Option::cant_convert)
-    {
-        std::ostringstream oss;
-        oss << getName() << ": Invalid polygon specification as option.  "
-            "Must be valid GeoJSON/WTK";
-        throw pdal_error(oss.str());
-    }
+void CropFilter::initialize()
+{
+    // Set geometry from polygons.
     if (m_polys.size())
     {
         m_geoms.clear();
@@ -114,20 +93,6 @@ void CropFilter::processOptions(const Options& options)
             m_geoms.push_back(g);
         }
     }
-}
-
-
-Options CropFilter::getDefaultOptions()
-{
-    Options options;
-    options.add("bounds", BOX2D(), "bounds to crop to");
-    options.add("a_srs", "", "Assign coordinate system to polygon");
-    options.add("polygon", std::string(""), "WKT or GeoJSON Polygon/MultiPolygon string to "
-        "use to filter points");
-    options.add("inside", true, "Keep points that are inside or outside "
-        "the given polygon");
-
-    return options;
 }
 
 
@@ -149,7 +114,7 @@ bool CropFilter::processOne(PointRef& point)
             return false;
 
     for (auto& box : m_bounds)
-        if (!crop(point, box))
+        if (!crop(point, box.to2d()))
             return false;
 
     return true;
@@ -186,7 +151,7 @@ PointViewSet CropFilter::run(PointViewPtr view)
     for (auto& box : m_bounds)
     {
         PointViewPtr outView = view->makeNew();
-        crop(box, *view, *outView);
+        crop(box.to2d(), *view, *outView);
         viewSet.insert(outView);
     }
     return viewSet;

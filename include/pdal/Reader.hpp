@@ -49,7 +49,7 @@ class PDAL_DLL Reader : public Stage
 public:
     typedef std::function<void(PointView&, PointId)> PointReadFunc;
 
-    Reader() : m_count(std::numeric_limits<point_count_t>::max())
+    Reader()
     {}
 
     void setReadCb(PointReadFunc cb)
@@ -59,6 +59,8 @@ protected:
     std::string m_filename;
     point_count_t m_count;
     PointReadFunc m_cb;
+    Arg *m_filenameArg;
+    Arg *m_countArg;
 
 private:
     virtual PointViewSet run(PointViewPtr view)
@@ -70,7 +72,7 @@ private:
         viewSet.insert(view);
         return viewSet;
     }
-    virtual void readerProcessOptions(const Options& options);
+    virtual void readerAddArgs(ProgramArgs& args);
     virtual point_count_t read(PointViewPtr /*view*/, point_count_t /*num*/)
         { return 0; }
 };

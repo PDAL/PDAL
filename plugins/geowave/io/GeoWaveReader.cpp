@@ -34,6 +34,7 @@
 
 #include "GeoWaveReader.hpp"
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include <jace/Jace.h>
 using jace::java_cast;
@@ -143,57 +144,48 @@ std::string pdal::GeoWaveReader::getName() const { return s_info.name; }
 
 namespace pdal
 {
-
-    Options GeoWaveReader::getDefaultOptions()
+    void GeoWaveReader::addArgs(ProgramArgs& args)
     {
-        Options options;
-
-        Option zookeeperUrl("zookeeper_url", "", "The comma-delimited URLs for all zookeeper servers, this will be directly used to instantiate a ZookeeperInstance");
-        Option instanceName("instance_name", "", "The zookeeper instance name, this will be directly used to instantiate a ZookeeperInstance");
-        Option username("username", "", "The username for the account to establish an Accumulo connector");
-        Option password("password", "", "The password for the account to establish an Accumulo connector");
-        Option tableNamespace("table_namespace", "", "The table name to be used when interacting with GeoWave");
-        Option featureTypeName("feature_type_name", "", "The feature type name to be used when interacting with GeoWave");
-        Option dataAdapter("data_adapter", "FeatureDataAdapter", "FeatureCollectionDataAdapter stores multiple points per Accumulo entry.  FeatureDataAdapter stores a single point per Accumulo entry.");
-        Option pointsPerEntry("points_per_entry", 5000u, "Sets the maximum number of points per Accumulo entry when using FeatureCollectionDataAdapter.");
-        Option bounds("bounds", "", "The extent of the bounding rectangle to use to query points, expressed as a string, eg: ([xmin, xmax], [ymin, ymax], [zmin, zmax])");
-
-        options.add(zookeeperUrl);
-        options.add(instanceName);
-        options.add(username);
-        options.add(password);
-        options.add(tableNamespace);
-        options.add(featureTypeName);
-        options.add(dataAdapter);
-        options.add(pointsPerEntry);
-        options.add(bounds);
-
-        return options;
+        args.add("zookeeper_url", "The comma-delimited URLs for all "
+            "zookeeper servers, this will be directly used to instantiate "
+            "a ZookeeperInstance", m_zookeeperUrl).setPositional();
+        args.add("instance_name", "The zookeeper instance name, this "
+            "will be directly used to instantiate a ZookeeperInstance",
+            m_instanceName).setPositional();
+        args.add("username", "The username for the account to establish "
+            "an Accumulo connector", m_username).setPositional();
+        args.add("password", "The password for the account to establish "
+            "an Accumulo connector", m_password).setPositional();
+        args.add("table_namespace", "The table name to be used when "
+            "interacting with GeoWave", m_tableNamespace).setPositional();
+        args.add("feature_type_name", "The feature type name to be used "
+            "when interacting with GeoWave", m_featureTypeName, "PDAL_Point");
+        args.add("data_adapter", "FeatureCollectionDataAdapter stores "
+            "multiple points per Accumulo entry.  FeatureDataAdapter stores "
+            "a single point per Accumulo entry.", m_dataAdapter,
+            "FeatureCollectionDataAdapter");
+        args.add("points_per_entry", "The maximum number of points per "
+            "Accumulo entry when using FeatureCollectionDataAdapter.",
+            m_pointsPerEntry, 5000U);
+        args.add("bounds", "The extent of the bounding rectangle to use "
+            "to query points, expressed as a string, eg: "
+            "([xmin, xmax], [ymin, ymax], [zmin, zmax])", m_bounds);
     }
 
     void GeoWaveReader::initialize()
     {
+        m_useFeatCollDataAdapter = (m_dataAdapter != "FeatureDataAdapter");
+
         if (!jace::isRunning())
         {
             int status = createJvm();
             if (status == 0)
-                log()->get(LogLevel::Debug) << "JVM Creation Successful" << std::endl;
+                log()->get(LogLevel::Debug) << "JVM Creation Successful" <<
+                std::endl;
             else
-                log()->get(LogLevel::Error) << "JVM Creation Failed: Error ["  << status << "]" << std::endl;
+                log()->get(LogLevel::Error) << "JVM Creation Failed: "
+                    "Error ["  << status << "]" << std::endl;
         }
-    }
-
-    void GeoWaveReader::processOptions(const Options& ops)
-    {
-        m_zookeeperUrl = ops.getValueOrThrow<std::string>("zookeeper_url");
-        m_instanceName = ops.getValueOrThrow<std::string>("instance_name");
-        m_username = ops.getValueOrThrow<std::string>("username");
-        m_password = ops.getValueOrThrow<std::string>("password");
-        m_tableNamespace = ops.getValueOrThrow<std::string>("table_namespace");
-        m_featureTypeName =  ops.getValueOrDefault<std::string>("feature_type_name", "PDAL_Point");
-        m_useFeatCollDataAdapter = !(ops.getValueOrDefault<std::string>("data_adapter", "FeatureCollectionDataAdapter").compare("FeatureDataAdapter") == 0);
-        m_pointsPerEntry = ops.getValueOrDefault<uint32_t>("points_per_Entry", 5000u);
-        m_bounds = ops.getValueOrDefault<BOX3D>("bounds", BOX3D());
     }
 
     void GeoWaveReader::addDimensions(PointLayoutPtr layout)

@@ -31,7 +31,7 @@ The ``pipeline`` command is used to execute :ref:`pipeline` JSON. See
 
     ::
 
-        $ pdal pipeline -i translate.xml --writers.las.filename=output.laz \
+        $ pdal pipeline translate.json --writers.las.filename=output.laz \
             --readers.las.filename=input.las
 
 

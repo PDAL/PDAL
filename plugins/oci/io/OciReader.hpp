@@ -49,16 +49,16 @@ class PDAL_DLL OciReader : public DbReader
 public:
     OciReader()
     {}
+    OciReader& operator=(const OciReader&) = delete;
+    OciReader(const OciReader&) = delete;
 
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
-
 private:
+    virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
-    virtual void processOptions(const Options& options);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table)
         { m_atEnd = false; }
@@ -92,9 +92,6 @@ private:
     bool m_atEnd;
     std::map<int32_t, XMLSchema> m_schemas;
     bool m_compression;
-
-    OciReader& operator=(const OciReader&); // not implemented
-    OciReader(const OciReader&); // not implemented
 };
 
 } // namespace pdal

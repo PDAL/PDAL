@@ -37,10 +37,11 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
-#include <pdal/util/FileUtils.hpp>
-#include <pdal/util/portable_endian.hpp>
 #include <pdal/XMLSchema.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/FileUtils.hpp>
+#include <pdal/util/portable_endian.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -83,78 +84,30 @@ PgWriter::~PgWriter()
 }
 
 
-void PgWriter::processOptions(const Options& options)
+void PgWriter::addArgs(ProgramArgs& args)
 {
-    // If we don't know the table name, we're SOL
-    m_table_name = options.getValueOrThrow<std::string>("table");
-
-    // Schema and column name can be defaulted safely
-    m_column_name = options.getValueOrDefault<std::string>("column", "pa");
-    m_schema_name = options.getValueOrDefault<std::string>("schema");
-    //
-    // Read compression type and turn into an integer
-    std::string compression_str =
-        options.getValueOrDefault<std::string>("compression", "dimensional");
-    m_patch_compression_type = getCompressionType(compression_str);
-
-    // Connection string needs to exist and actually work
-    m_connection = options.getValueOrThrow<std::string>("connection");
-
-    // Read other preferences
-    m_overwrite = options.getValueOrDefault<bool>("overwrite", true);
-    m_srid = options.getValueOrDefault<uint32_t>("srid", 4326);
-    m_pcid = options.getValueOrDefault<uint32_t>("pcid", 0);
-    m_pre_sql = options.getValueOrDefault<std::string>("pre_sql");
-    // Post-SQL can be *either* a SQL file to execute, *or* a SQL statement
-    // to execute. We find out which one here.
-    std::string post_sql = options.getValueOrDefault<std::string>("post_sql");
+    DbWriter::doAddArgs(args);
+    args.add("connection", "Connection string", m_connection).setPositional();
+    args.add("table", "Table name", m_table_name);
+    args.add("column", "Column name", m_column_name, "pa");
+    args.add("schema", "Schema name", m_schema_name);
+    args.add("compression", "Compression type", m_compressionSpec,
+        "dimensional");
+    args.add("overwrite", "Whether data should be overwritten", m_overwrite,
+        true);
+    args.add("srid", "SRID", m_srid, 4326U);
+    args.add("pcid", "PCID", m_pcid);
+    args.add("pre_sql", "SQL to execute before query", m_pre_sql);
+    args.add("post_sql", "SQL to execute after query", m_post_sql);
 }
 
-//
-// Called from PDAL core during start-up. Do everything
-// here that you are going to absolutely require later.
-// Optional things you can defer or attempt to initialize
-// here.
-//
+
 void PgWriter::initialize()
 {
+    m_patch_compression_type = getCompressionType(m_compressionSpec);
     m_session = pg_connect(m_connection);
 }
 
-//
-// Called from somewhere (?) in PDAL core presumably to provide a user-friendly
-// means of editing the reader options.
-//
-Options PgWriter::getDefaultOptions()
-{
-    Options options;
-
-    Option table("table", "", "table to write to");
-    Option schema("schema", "", "schema table resides in");
-    Option column("column", "", "column to write to");
-    Option compression("compression", "dimensional",
-        "patch compression format to use (none, dimensional, ght)");
-    Option overwrite("overwrite", true, "replace any existing table");
-    Option srid("srid", 4326, "spatial reference id to store data in");
-    Option pcid("pcid", 0, "use this existing pointcloud schema id, if it "
-        "exists");
-    Option pre_sql("pre_sql", "", "before the pipeline runs, read and "
-        "execute this SQL file, or run this SQL command");
-    Option post_sql("post_sql", "", "after the pipeline runs, read and "
-        "execute this SQL file, or run this SQL command");
-
-    options.add(table);
-    options.add(schema);
-    options.add(column);
-    options.add(compression);
-    options.add(overwrite);
-    options.add(srid);
-    options.add(pcid);
-    options.add(pre_sql);
-    options.add(post_sql);
-
-    return options;
-}
 
 void PgWriter::writeInit()
 {

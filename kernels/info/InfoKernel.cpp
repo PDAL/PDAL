@@ -258,7 +258,7 @@ MetadataNode InfoKernel::dumpSummary(const QuickInfo& qi)
 
 void InfoKernel::makePipeline(const std::string& filename, bool noPoints)
 {
-    if (!pdal::FileUtils::fileExists(filename))
+    if (!pdal::Utils::fileExists(filename))
         throw pdal_error("File not found: " + filename);
 
     if (filename == "STDIN")
@@ -337,10 +337,10 @@ void InfoKernel::dump(MetadataNode& root)
 #ifdef PDAL_HAVE_LIBXML2
         XMLSchema schema(m_manager.pointTable().layout());
 
-        std::ostream *out = FileUtils::createFile(m_PointCloudSchemaOutput);
+        std::ostream *out = Utils::createFile(m_PointCloudSchemaOutput);
         std::string xml(schema.xml());
         out->write(xml.c_str(), xml.size());
-        FileUtils::closeFile(out);
+        Utils::closeFile(out);
 #else
         std::cerr << "libxml2 support not enabled, no schema is produced" <<
             std::endl;

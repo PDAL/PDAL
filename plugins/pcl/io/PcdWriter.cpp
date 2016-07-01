@@ -45,6 +45,7 @@
 #include "PCLConversions.hpp"
 #include <pdal/PointView.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -58,21 +59,11 @@ CREATE_SHARED_PLUGIN(1, 0, PcdWriter, Writer, s_info)
 
 std::string PcdWriter::getName() const { return s_info.name; }
 
-void PcdWriter::processOptions(const Options& ops)
+void PcdWriter::addArgs(ProgramArgs& args)
 {
-    m_filename = ops.getValueOrThrow<std::string>("filename");
-    m_compressed = ops.getValueOrDefault("compression", false);
-}
-
-
-Options PcdWriter::getDefaultOptions()
-{
-    Options options;
-
-    options.add("filename", "", "Filename to write PCD file to");
-    options.add("compression", false, "Write binary compressed data?");
-
-    return options;
+    args.add("filename", "Output filename", m_filename).setPositional();
+    args.add("compression", "Whether compressed output should be written",
+        m_compressed);
 }
 
 

@@ -33,7 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/Log.hpp>
-#include <pdal/util/Utils.hpp>
+#include <pdal/PDALUtils.hpp>
 
 #include <fstream>
 #include <ostream>
@@ -59,7 +59,7 @@ Log::Log(std::string const& leaderString,
         m_log = m_nullStream;
     else
     {
-        m_log = FileUtils::createFile(outputName);
+        m_log = Utils::createFile(outputName);
         m_deleteStreamOnCleanup = true;
     }
 }

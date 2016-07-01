@@ -85,7 +85,6 @@ public:
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
-    Options getDefaultOptions();
 
     const LasHeader& header() const
         { return m_header; }
@@ -117,10 +116,11 @@ private:
     std::unique_ptr<LazPerfVlrDecompressor> m_decompressor;
     std::vector<char> m_decompressorBuf;
     point_count_t m_index;
+    StringList m_extraDimSpec;
     std::vector<ExtraDim> m_extraDims;
     std::string m_compression;
 
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
     virtual void initialize(PointTableRef table)
         { initializeLocal(table, m_metadata); }
     virtual void initializeLocal(PointTableRef table, MetadataNode& m);

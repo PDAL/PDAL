@@ -36,6 +36,7 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -49,9 +50,9 @@ CREATE_STATIC_PLUGIN(1, 0, SbetWriter, Writer, s_info)
 
 std::string SbetWriter::getName() const { return s_info.name; }
 
-void SbetWriter::processOptions(const Options& options)
+void SbetWriter::addArgs(ProgramArgs& args)
 {
-    m_filename = options.getOption("filename").getValue<std::string>();
+    args.add("filename", "Output filename", m_filename).setPositional();
 }
 
 

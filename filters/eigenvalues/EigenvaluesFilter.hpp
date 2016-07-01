@@ -56,23 +56,20 @@ class PDAL_DLL EigenvaluesFilter : public Filter
 public:
     EigenvaluesFilter() : Filter()
     {}
+    EigenvaluesFilter& operator=(const EigenvaluesFilter&) = delete;
+    EigenvaluesFilter(const EigenvaluesFilter&) = delete;
 
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
-
-    Options getDefaultOptions();
 
 private:
     int m_knn;
     Dimension::Id m_e0, m_e1, m_e2;
 
     virtual void addDimensions(PointLayoutPtr layout);
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
     virtual void filter(PointView& view);
-
-    EigenvaluesFilter& operator=(const EigenvaluesFilter&); // not implemented
-    EigenvaluesFilter(const EigenvaluesFilter&); // not implemented
 };
 
 } // namespace pdal

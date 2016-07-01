@@ -50,13 +50,6 @@ CREATE_STATIC_PLUGIN(1, 0, SbetReader, Reader, s_info)
 
 std::string SbetReader::getName() const { return s_info.name; }
 
-Options SbetReader::getDefaultOptions()
-{
-    Options options;
-    return options;
-}
-
-
 void SbetReader::addDimensions(PointLayoutPtr layout)
 {
     layout->registerDims(getDefaultDimensions());

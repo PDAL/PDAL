@@ -53,48 +53,50 @@ CREATE_SHARED_PLUGIN(1, 0, P2gWriter, Writer, s_info)
 
 std::string P2gWriter::getName() const { return s_info.name; }
 
-void P2gWriter::processOptions(const Options& options)
+void P2gWriter::addArgs(ProgramArgs& args)
 {
-    m_GRID_DIST_X = options.getValueOrDefault<double>("grid_dist_x", 6.0);
-    m_GRID_DIST_Y = options.getValueOrDefault<double>("grid_dist_y", 6.0);
-    m_zName = options.getValueOrDefault<std::string>("z", "Z");
-    m_RADIUS = options.getValueOrDefault<double>("radius",
-        8.4852813742385713);
-    m_fill_window_size = options.getValueOrDefault<uint32_t>(
-        "fill_window_size", 3);
-    m_filename = options.getValueOrThrow<std::string>("filename");
+    args.add("filename", "Output filename", m_filename).setPositional();
+    args.add("grid_dist_x", "X grid distance", m_GRID_DIST_X, 6.0);
+    args.add("grid_dist_y", "Y grid distance", m_GRID_DIST_Y, 6.0);
+    args.add("radius", "Radius", m_RADIUS, 8.4852813742385713);
+    args.add("fill_window_size", "Fill window size", m_fill_window_size, 3U);
+    args.add("output_type", "Output type", m_outputTypeSpec);
+    args.add("output_format", "Output format", m_outputFormatSpec, "grid");
 
-    std::vector<Option> types = options.getOptions("output_type");
+}
 
-    if (!types.size())
-        m_outputTypes = OUTPUT_TYPE_ALL;
-    else
+void P2gWriter::initialize()
+{
+    m_outputTypes = 0;
+    for (std::string& type : m_outputTypeSpec)
     {
-        for (auto i = types.begin(); i != types.end(); ++i)
+        std::string val = Utils::tolower(type);
+        if (val == "min")
+            m_outputTypes |= OUTPUT_TYPE_MIN;
+        else if (val == "max")
+            m_outputTypes |= OUTPUT_TYPE_MAX;
+        else if (val == "mean")
+            m_outputTypes |= OUTPUT_TYPE_MEAN;
+        else if (val == "idw")
+            m_outputTypes |= OUTPUT_TYPE_IDW;
+        else if (val == "den")
+            m_outputTypes |= OUTPUT_TYPE_DEN;
+        else if (val == "std")
+            m_outputTypes |= OUTPUT_TYPE_STD;
+        else if (val == "all")
+            m_outputTypes = OUTPUT_TYPE_ALL;
+        else
         {
-            std::string val = Utils::tolower(i->getValue<std::string>());
+            std::ostringstream oss;
 
-            if (val == "min")
-                m_outputTypes |= OUTPUT_TYPE_MIN;
-            if (val == "max")
-                m_outputTypes |= OUTPUT_TYPE_MAX;
-            if (val == "mean")
-                m_outputTypes |= OUTPUT_TYPE_MEAN;
-            if (val == "idw")
-                m_outputTypes |= OUTPUT_TYPE_IDW;
-            if (val == "den")
-                m_outputTypes |= OUTPUT_TYPE_DEN;
-            if (val == "std")
-                m_outputTypes |= OUTPUT_TYPE_STD;
-            if (val == "all")
-                m_outputTypes = OUTPUT_TYPE_ALL;
+            oss << "Unrecognized output type '" << type << "'."; 
+            throw p2g_error(oss.str());
         }
     }
+    if (m_outputTypes == 0)
+        m_outputTypes = OUTPUT_TYPE_ALL;
 
-    std::string output_format =
-        options.getValueOrDefault<std::string>("output_format", "grid");
-
-    std::string fmt = Utils::tolower(output_format);
+    std::string fmt = Utils::tolower(m_outputFormatSpec);
     if (fmt == "grid")
         m_outputFormat = OUTPUT_FORMAT_GRID_ASCII;
     else if (fmt == "asc")
@@ -106,21 +108,15 @@ void P2gWriter::processOptions(const Options& options)
     else
     {
         std::ostringstream oss;
-        oss << "Unrecognized output format " << output_format;
-        throw p2g_error("Unrecognized output format");
+
+        oss << "Unrecognized output format '" << m_outputFormatSpec << "'";
+        throw p2g_error(oss.str());
     }
 }
 
 
 void P2gWriter::ready(PointTableRef table)
 {
-/*
-    double min_x = (std::numeric_limits<double>::max)();
-    double max_x = (std::numeric_limits<double>::min)();
-    double min_y = (std::numeric_limits<double>::max)();
-    double max_y = (std::numeric_limits<double>::min)();
-    setBounds(pdal::Bounds<double>(min_x, min_y, max_x, max_y));
-*/
     if (!table.spatialReferenceUnique())
     {
         std::ostringstream oss;
@@ -129,27 +125,6 @@ void P2gWriter::ready(PointTableRef table)
             "references.";
         throw pdal_error(oss.str());
     }
-}
-
-
-Options P2gWriter::getDefaultOptions()
-{
-    Options options;
-
-    Option grid_x("grid_dist_x", 6.0, "X grid distance");
-    Option grid_y("grid_dist_y", 6.0, "Y grid distance");
-
-    double default_radius = (double) sqrt(2.0) * grid_x.getValue<double>();
-    Option radius("radius", default_radius);
-
-    Option fill_window_size("fill_window_size", 3);
-    Option dim_z("z", "Z", "Name of Z dimension to interpolate");
-    options.add(dim_z);
-    options.add(grid_x);
-    options.add(grid_y);
-    options.add(radius);
-    options.add(fill_window_size);
-    return options;
 }
 
 

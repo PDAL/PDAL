@@ -52,12 +52,12 @@ class PDAL_DLL RadiusOutlierFilter : public Filter
 public:
     RadiusOutlierFilter() : Filter()
     {}
+    RadiusOutlierFilter& operator=(const RadiusOutlierFilter&) = delete;
+    RadiusOutlierFilter(const RadiusOutlierFilter&) = delete;
 
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
-
-    Options getDefaultOptions();
 
 private:
     int m_min_neighbors;
@@ -66,11 +66,8 @@ private:
     bool m_extract;
 
     virtual void addDimensions(PointLayoutPtr layout);
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
     virtual PointViewSet run(PointViewPtr view);
-
-    RadiusOutlierFilter& operator=(const RadiusOutlierFilter&); // not implemented
-    RadiusOutlierFilter(const RadiusOutlierFilter&); // not implemented
 };
 
 } // namespace pdal

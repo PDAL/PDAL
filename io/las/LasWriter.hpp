@@ -75,8 +75,6 @@ public:
 
     LasWriter();
 
-    Options getDefaultOptions();
-
 protected:
     void prepOutput(std::ostream *out, const SpatialReference& srs);
     void finishOutput();
@@ -94,14 +92,17 @@ private:
     std::ostream *m_ostream;
     std::vector<VariableLengthRecord> m_vlrs;
     std::vector<ExtVariableLengthRecord> m_eVlrs;
+    StringList m_extraDimSpec;
     std::vector<ExtraDim> m_extraDims;
     uint16_t m_extraByteLen;
     SpatialReference m_srs;
     std::string m_curFilename;
+    StringList m_forwardSpec;
     std::set<std::string> m_forwards;
     bool m_forwardVlrs;
     LasCompression m_compression;
     std::vector<char> m_pointBuf;
+    SpatialReference m_aSrs;
 
     NumHeaderVal<uint8_t, 1, 1> m_majorVersion;
     NumHeaderVal<uint8_t, 1, 4> m_minorVersion;
@@ -114,7 +115,7 @@ private:
     StringHeaderVal<32> m_systemId;
     StringHeaderVal<32> m_softwareId;
     NumHeaderVal<uint16_t, 0, 366> m_creationDoy;
-    // MSVC doesn't see numeric_limits::max() as constexpr do doesn't allow
+    // MSVC doesn't see numeric_limits::max() as constexpr so doesn't allow
     // them as defaults for templates.  Remove when possible.
     NumHeaderVal<uint16_t, 0, 65535> m_creationYear;
     StringHeaderVal<20> m_scaleX;
@@ -125,7 +126,8 @@ private:
     StringHeaderVal<20> m_offsetZ;
     MetadataNode m_forwardMetadata;
 
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
+    virtual void initialize();
     virtual void prepared(PointTableRef table);
     virtual void readyTable(PointTableRef table);
     virtual void readyFile(const std::string& filename,
@@ -134,8 +136,7 @@ private:
     virtual bool processOne(PointRef& point);
     virtual void doneFile();
 
-    void fillForwardList(const Options& options);
-    void getHeaderOptions(const Options& options);
+    void fillForwardList();
     template <typename T>
     void handleHeaderForward(const std::string& s, T& headerVal,
         const MetadataNode& base);

@@ -27,7 +27,7 @@ This example rotates the points around the z-axis while translating them.
         "untransformed.las",
         {
           "type":"filters.transformation",
-          "matrix":"0 -1  0  1  1  0  0  2  0  0  1  3  0  0  0  1",
+          "matrix":"0 -1  0  1  1  0  0  2  0  0  1  3  0  0  0  1"
         },
         {
           "type":"writers.las",

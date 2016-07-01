@@ -56,8 +56,8 @@ private:
     SQLiteWriter& operator=(const SQLiteWriter&); // not implemented
     SQLiteWriter(const SQLiteWriter&); // not implemented
 
+    virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
-    virtual void processOptions(const Options& options);
     virtual void write(const PointViewPtr view);
     virtual void done(PointTableRef table);
 
@@ -85,16 +85,18 @@ private:
 	int32_t m_obj_id;
 	int32_t m_block_id;
 	uint32_t m_srid;
-	int64_t m_num_points;
-    Orientation m_orientation;
-    bool m_pack;
+    std::string m_preSql;
+    std::string m_postSql;
     std::string m_block_table;
     std::string m_cloud_table;
     std::string m_cloud_column;
     std::string m_connection;
     std::string m_modulename;
+    std::string m_cloudBoundary;
+    long m_pcId;
     bool m_is3d;
     bool m_doCompression;;
+    bool m_overwrite;
     PatchPtr m_patch;
 };
 

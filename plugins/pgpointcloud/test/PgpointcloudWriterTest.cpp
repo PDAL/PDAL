@@ -84,8 +84,6 @@ Options getDbOptions()
     options.add(Option("connection", getTestDBTempConn()));
     options.add(Option("table", "4dal-\"test\"-table")); // intentional quotes
     options.add(Option("column", "p\"a")); // intentional quotes
-    options.add(Option("srid", "4326"));
-    options.add(Option("capacity", "10000"));
 
     return options;
 }
@@ -184,18 +182,14 @@ namespace
 void optionsWrite(const Options& writerOps)
 {
     StageFactory f;
-    Stage* writer(f.createStage("writers.pgpointcloud"));
     Stage* reader(f.createStage("readers.las"));
-
-    EXPECT_TRUE(writer);
-    EXPECT_TRUE(reader);
-    if (!writer || !reader)
-        return;
 
     const std::string file(Support::datapath("las/1.2-with-color.las"));
     Options options;
     options.add("filename", file);
     reader->setOptions(options);
+
+    Stage* writer(f.createStage("writers.pgpointcloud"));
     writer->setOptions(writerOps);
     writer->setInput(*reader);
 

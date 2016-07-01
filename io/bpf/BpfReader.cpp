@@ -56,16 +56,6 @@ CREATE_STATIC_PLUGIN(1, 0, BpfReader, Reader, s_info)
 
 std::string BpfReader::getName() const { return s_info.name; }
 
-void BpfReader::processOptions(const Options&)
-{
-    if (m_filename.empty())
-        throw pdal_error("Can't read BPF file without filename.");
-
-    // Logfile doesn't get set until options are processed.
-    m_header.setLog(log());
-}
-
-
 QuickInfo BpfReader::inspect()
 {
     QuickInfo qi;
@@ -103,6 +93,12 @@ QuickInfo BpfReader::inspect()
 // the dimensions in the PointView.
 void BpfReader::initialize()
 {
+    if (m_filename.empty())
+        throw pdal_error("Can't read BPF file without filename.");
+
+    // Logfile doesn't get set until options are processed.
+    m_header.setLog(log());
+
     m_stream.open(m_filename);
 
     // Resets the stream position in case it was already open.

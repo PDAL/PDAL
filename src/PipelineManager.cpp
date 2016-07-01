@@ -33,8 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/PipelineManager.hpp>
-
-#include <pdal/util/FileUtils.hpp>
+#include <pdal/PDALUtils.hpp>
 
 #include "PipelineReaderXML.hpp"
 #include "PipelineReaderJSON.hpp"
@@ -44,7 +43,7 @@ namespace pdal
 
 PipelineManager::~PipelineManager()
 {
-    FileUtils::closeFile(m_input);
+    Utils::closeFile(m_input);
 }
 
 
@@ -89,8 +88,8 @@ void PipelineManager::readPipeline(const std::string& filename)
     }
     else
     {
-        FileUtils::closeFile(m_input);
-        m_input = FileUtils::openFile(filename);
+        Utils::closeFile(m_input);
+        m_input = Utils::openFile(filename);
         readPipeline(*m_input);
     }
 }
@@ -141,8 +140,43 @@ Stage& PipelineManager::addWriter(const std::string& type)
 }
 
 
+void PipelineManager::validateStageOptions() const
+{
+    // Make sure that the options specified are for relevant stages.
+    for (auto& si : m_stageOptions)
+    {
+        const std::string& stageName = si.first;
+        auto it = std::find_if(m_stages.begin(), m_stages.end(),
+            [stageName](Stage *s)
+            { return (s->getName() == stageName); });
+
+        // If the option stage name matches no created stage, then error.
+        if (it == m_stages.end())
+        {
+            std::ostringstream oss;
+            oss << "Argument references invalid/unused stage: '" <<
+                stageName << "'.";
+            throw pdal_error(oss.str());
+        }
+    }
+}
+
+
+QuickInfo PipelineManager::preview() const
+{
+    QuickInfo qi;
+
+    validateStageOptions();
+    Stage *s = getStage();
+    if (s)
+       qi = s->preview();
+    return qi;
+}
+
+
 void PipelineManager::prepare() const
 {
+    validateStageOptions();
     Stage *s = getStage();
     if (s)
        s->prepare(m_table);
@@ -182,7 +216,7 @@ MetadataNode PipelineManager::getMetadata() const
 Stage& PipelineManager::makeReader(const std::string& inputFile,
     std::string driver)
 {
-    if (!inputFile.empty() && !FileUtils::fileExists(inputFile))
+    if (!inputFile.empty() && !Utils::fileExists(inputFile))
         throw pdal_error("file not found: " + inputFile);
 
     if (driver.empty())
@@ -229,7 +263,7 @@ Stage& PipelineManager::makeWriter(const std::string& outputFile,
                 outputFile);
     }
 
-    Options options = StageFactory::inferWriterOptionsChanges(outputFile);
+    Options options;
     if (!outputFile.empty())
         options.add("filename", outputFile);
 

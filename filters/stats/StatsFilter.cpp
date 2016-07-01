@@ -42,6 +42,7 @@
 #include <pdal/Polygon.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -127,11 +128,13 @@ void StatsFilter::done(PointTableRef table)
 }
 
 
-void StatsFilter::processOptions(const Options& options)
+void StatsFilter::addArgs(ProgramArgs& args)
 {
-    m_dimNames = options.getValueOrDefault<StringList>("dimensions");
-    m_enums = options.getValueOrDefault<StringList>("enumerate");
-    m_counts = options.getValueOrDefault<StringList>("count");
+    args.add("dimensions", "Dimensions on which to calculate statistics",
+        m_dimNames);
+    args.add("enumerate", "Dimensions whose values should be enumerated",
+        m_enums);
+    args.add("count", "Dimensions whose values should be counted", m_counts);
 }
 
 

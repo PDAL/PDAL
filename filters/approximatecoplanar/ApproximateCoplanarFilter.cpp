@@ -37,6 +37,7 @@
 #include <pdal/Eigen.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include <Eigen/Dense>
 
@@ -57,21 +58,14 @@ std::string ApproximateCoplanarFilter::getName() const
     return s_info.name;
 }
 
-Options ApproximateCoplanarFilter::getDefaultOptions()
+
+void ApproximateCoplanarFilter::addArgs(ProgramArgs& args)
 {
-    Options options;
-    options.add("knn", 8, "k-Nearest Neighbors");
-    options.add("thresh1", 25, "Threshold 1");
-    options.add("thresh2", 6, "Threshold 2");
-    return options;
+    args.add("knn", "k-Nearest Neighbors", m_knn, 8);
+    args.add("thresh1", "Threshold 1", m_thresh1, 25.0);
+    args.add("thresh2", "Threshold 2", m_thresh1, 6.0);
 }
 
-void ApproximateCoplanarFilter::processOptions(const Options& options)
-{
-    m_knn = options.getValueOrDefault<int>("knn", 8);
-    m_thresh1 = options.getValueOrDefault<double>("thresh1", 25);
-    m_thresh2 = options.getValueOrDefault<double>("thresh2", 6);
-}
 
 void ApproximateCoplanarFilter::addDimensions(PointLayoutPtr layout)
 {

@@ -35,6 +35,7 @@
 #include "GeoWaveWriter.hpp"
 
 #include <pdal/util/Algorithm.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include <jace/Jace.h>
 using jace::java_cast;
@@ -149,46 +150,34 @@ std::string pdal::GeoWaveWriter::getName() const { return s_info.name; }
 
 namespace pdal
 {
-
-    Options GeoWaveWriter::getDefaultOptions()
+    void GeoWaveWriter::addArgs(ProgramArgs& args)
     {
-        Options options;
-
-        Option zookeeperUrl("zookeeper_url", "", "The comma-delimited URLs for all zookeeper servers, this will be directly used to instantiate a ZookeeperInstance.");
-        Option instanceName("instance_name", "", "The zookeeper instance name, this will be directly used to instantiate a ZookeeperInstance.");
-        Option username("username", "", "The username for the account to establish an Accumulo connector.");
-        Option password("password", "", "The password for the account to establish an Accumulo connector.");
-        Option tableNamespace("table_namespace", "", "The table name to be used when interacting with GeoWave.");
-        Option featureTypeName("feature_type_name", "PDAL_Point", "The feature type name to be used when interacting with GeoWave.");
-        Option dataAdapter("data_adapter", "FeatureDataAdapter", "FeatureCollectionDataAdapter stores multiple points per Accumulo entry.  FeatureDataAdapter stores a single point per Accumulo entry.");
-        Option pointsPerEntry("points_per_entry", 5000u, "Sets the maximum number of points per Accumulo entry when using FeatureCollectionDataAdapter.");
-
-        options.add(zookeeperUrl);
-        options.add(instanceName);
-        options.add(username);
-        options.add(password);
-        options.add(tableNamespace);
-        options.add(featureTypeName);
-        options.add(dataAdapter);
-        options.add(pointsPerEntry);
-
-        return options;
-    }
-
-    void GeoWaveWriter::processOptions(const Options& ops)
-    {
-        m_zookeeperUrl = ops.getValueOrThrow<std::string>("zookeeper_url");
-        m_instanceName = ops.getValueOrThrow<std::string>("instance_name");
-        m_username = ops.getValueOrThrow<std::string>("username");
-        m_password = ops.getValueOrThrow<std::string>("password");
-        m_tableNamespace = ops.getValueOrThrow<std::string>("table_namespace");
-        m_featureTypeName = ops.getValueOrDefault<std::string>("feature_type_name", "PDAL_Point");
-        m_useFeatCollDataAdapter = !(ops.getValueOrDefault<std::string>("data_adapter", "FeatureCollectionDataAdapter").compare("FeatureDataAdapter") == 0);
-        m_pointsPerEntry = ops.getValueOrDefault<uint32_t>("points_per_entry", 5000u);
+        args.add("zookeeper_url", "The comma-delimited URLs for all "
+            "zookeeper servers, this will be directly used to instantiate "
+            "a ZookeeperInstance.", m_zookeeperUrl).setPositional();
+        args.add("instance_name", "The zookeeper instance name, this will "
+            "be directly used to instantiate a ZookeeperInstance.",
+            m_instanceName).setPositional();
+        args.add("username", "The username for the account to establish "
+            "an Accumulo connector.", m_username).setPositional();
+        args.add("password", "The password for the account to establish "
+            "an Accumulo connector.", m_password).setPositional();
+        args.add("table_namespace", " "The table name to be used when "
+            "interacting with GeoWave.", m_tableNamespace).setPositional();
+        args.add("feature_type_name", "The feature type name to be used "
+            "when interacting with GeoWave.", m_featureTypeName, "PDAL_Point");
+        args.add("data_adapter", "FeatureCollectionDataAdapter stores "
+            "multiple points per Accumulo entry.  FeatureDataAdapter stores "
+            "a single point per Accumulo entry.", m_dataAdapter,
+            "FeatureCollectionDataAdapter");
+        args.add("points_per_entry", "Sets the maximum number of points "
+            "per Accumulo entry when using FeatureCollectionDataAdapter.",
+            m_pointsPerEntry, 5000U);
     }
 
     void GeoWaveWriter::initialize()
     {
+        m_useFeatCollDataAdapter = (m_dataAdapter != "FeatureDataAdapter");
         if (!jace::isRunning())
         {
             int status = createJvm();

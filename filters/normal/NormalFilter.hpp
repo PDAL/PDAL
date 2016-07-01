@@ -56,23 +56,21 @@ class PDAL_DLL NormalFilter : public Filter
 public:
     NormalFilter() : Filter()
     {}
+    NormalFilter& operator=(const NormalFilter&) = delete;
+    NormalFilter(const NormalFilter&) = delete;
 
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
-
-    Options getDefaultOptions();
 
 private:
     int m_knn;
     Dimension::Id m_nx, m_ny, m_nz, m_curvature;
 
     virtual void addDimensions(PointLayoutPtr layout);
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
     virtual void filter(PointView& view);
 
-    NormalFilter& operator=(const NormalFilter&); // not implemented
-    NormalFilter(const NormalFilter&); // not implemented
 };
 
 } // namespace pdal

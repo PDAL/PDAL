@@ -347,7 +347,7 @@ TEST(PLangTest, log)
     {
         BOX3D bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
         Option opt1("bounds", bounds);
-        Option opt2("num_points", 750);
+        Option opt2("count", 750);
         Option opt3("mode", "constant");
 
         reader_opts.add(opt1);

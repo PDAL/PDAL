@@ -74,28 +74,26 @@ public:
 
     ColorizationFilter()
     {}
+    ColorizationFilter& operator=(const ColorizationFilter&) = delete;
+    ColorizationFilter(const ColorizationFilter&) = delete;
 
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
-
 private:
+    virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
-    virtual void processOptions(const Options&);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
     virtual bool processOne(PointRef& point);
     virtual void filter(PointView& view);
 
+    StringList m_dimSpec;
     std::string m_rasterFilename;
     std::vector<BandInfo> m_bands;
 
     std::unique_ptr<gdal::Raster> m_raster;
-
-    ColorizationFilter& operator=(const ColorizationFilter&); // not implemented
-    ColorizationFilter(const ColorizationFilter&); // not implemented
 };
 
 } // namespace pdal

@@ -48,6 +48,35 @@ enum class LasCompression
     None
 };
 
+inline std::istream& operator>>(std::istream& in, LasCompression& c)
+{
+    std::string s;
+
+    in >> s;
+    s = Utils::toupper(s);
+    if (s == "LASZIP"  || s == "TRUE")
+        c = LasCompression::LasZip;
+    else if (s == "LAZPERF")
+        c = LasCompression::LazPerf;
+    else
+        c = LasCompression::None;
+    return in;
+}
+
+inline std::ostream& operator<<(std::ostream& out, const LasCompression& c)
+{
+    switch (c)
+    {
+    case LasCompression::LasZip:
+        out << "LasZip";
+    case LasCompression::LazPerf:
+        out << "LazPerf";
+    case LasCompression::None:
+        out << "None";
+    }
+    return out;
+}
+
 struct ExtraDim
 {
     ExtraDim(const std::string name, Dimension::Type type,

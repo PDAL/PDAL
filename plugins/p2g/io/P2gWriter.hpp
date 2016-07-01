@@ -72,18 +72,16 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
-
 private:
-    P2gWriter& operator=(const P2gWriter&); // not implemented
+    P2gWriter& operator=(const P2gWriter&) = delete;
 
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
+    virtual void initialize();
     virtual void ready(PointTableRef table);
     virtual void write(const PointViewPtr view);
     virtual void done(PointTableRef table);
 
     std::unique_ptr<OutCoreInterp> m_interpolator;
-    uint64_t m_pointCount;
 
     uint32_t m_GRID_SIZE_X;
     uint32_t m_GRID_SIZE_Y;
@@ -92,13 +90,14 @@ private:
     double m_GRID_DIST_Y;
 
     double m_RADIUS;
+    StringList m_outputTypeSpec;
+    std::string m_outputFormatSpec;
     unsigned int m_outputTypes;
     uint32_t m_fill_window_size;
     BOX3D m_bounds;
 
     std::string m_filename;
     int m_outputFormat;
-    std::string m_zName;
 
     typedef struct
     {

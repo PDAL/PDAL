@@ -38,12 +38,14 @@
 
 #include <pdal/Options.hpp>
 #include <pdal/pdal_export.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include <zlib.h>
 
 #include "BpfCompressor.hpp"
 #include <pdal/pdal_macros.hpp>
 #include <pdal/util/Utils.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -59,52 +61,37 @@ CREATE_STATIC_PLUGIN(1, 0, BpfWriter, Writer, s_info)
 
 std::string BpfWriter::getName() const { return s_info.name; }
 
-Options BpfWriter::getDefaultOptions()
+void BpfWriter::addArgs(ProgramArgs& args)
 {
-    Options ops;
-
-    ops.add("filename", "", "Filename for BPF output");
-    ops.add("compression", false, "Whether zlib compression should be used");
-    ops.add("format", "dimension", "Point output format: "
-        "non-interleaved(\"dimension\"), interleaved(\"point\") or "
-        "byte-segregated(\"byte\")");
-    ops.add("coord_id", 0, "Coordinate ID (UTM zone).");
-    return ops;
+    args.add("filename", "Output filename", m_filename).setPositional();
+    args.add("compression", "Output compression", m_compression);
+    args.add("header_data", "Base64-encoded header data", m_extraDataSpec);
+    args.add("format", "Output format", m_header.m_pointFormat,
+        BpfFormat::DimMajor);
+    args.add("coord_id", "UTM coordinate ID", m_header.m_coordId, -9999);
+    args.add("bundledfile", "List of files to bundle in output",
+        m_bundledFilesSpec);
+    args.add("output_dims", "Output dimensions", m_outputDims);
+    m_scaling.addArgs(args);
 }
 
 
-void BpfWriter::processOptions(const Options& options)
+void BpfWriter::initialize()
 {
-    bool compression = options.getValueOrDefault("compression", false);
     m_header.m_compression = Utils::toNative(
-            compression ? BpfCompression::Zlib : BpfCompression::None);
-
-    std::string encodedHeader =
-        options.getValueOrDefault<std::string>("header_data");
-    m_extraData = Utils::base64_decode(encodedHeader);
-
-    std::string fileFormat =
-        options.getValueOrDefault<std::string>("format", "POINT");
-    std::transform(fileFormat.begin(), fileFormat.end(), fileFormat.begin(),
-        ::toupper);
-    if (fileFormat.find("POINT") != std::string::npos)
-        m_header.m_pointFormat = BpfFormat::PointMajor;
-    else if (fileFormat.find("BYTE") != std::string::npos)
-        m_header.m_pointFormat = BpfFormat::ByteMajor;
+            m_compression ? BpfCompression::Zlib : BpfCompression::None);
+    m_extraData = Utils::base64_decode(m_extraDataSpec);
+    if (m_header.m_coordId == -9999)
+    {
+        m_header.m_coordId = 0;
+        m_header.m_coordType = Utils::toNative(BpfCoordType::None);
+    }
     else
-        m_header.m_pointFormat = BpfFormat::DimMajor;
-    if (options.hasOption("coord_id"))
     {
         m_header.m_coordType = Utils::toNative(BpfCoordType::UTM);
-        m_header.m_coordId = options.getValueOrThrow<int>("coord_id");
     }
-    else
-    {
-        m_header.m_coordType = Utils::toNative(BpfCoordType::None);
-        m_header.m_coordId = 0;
-    }
-    StringList files = options.getValues<std::string>("bundledfile");
-    for (auto file : files)
+
+    for (auto file : m_bundledFilesSpec)
     {
         if (!FileUtils::fileExists(file))
         {
@@ -122,10 +109,7 @@ void BpfWriter::processOptions(const Options& options)
             throw pdal_error(oss.str());
         }
 
-        BpfUlemFile ulemFile;
-        ulemFile.m_len = size;
-        ulemFile.m_filespec = file;
-        ulemFile.m_filename = FileUtils::getFilename(file);
+        BpfUlemFile ulemFile(size, FileUtils::getFilename(file), file);
         if (ulemFile.m_filename.length() > 32)
         {
             std::ostringstream oss;
@@ -141,12 +125,12 @@ void BpfWriter::processOptions(const Options& options)
     // unexpected quantization of the coordinates. Instead, we force use of
     // auto offset to subtract the minimum value in XYZ, unless of course, the
     // user chooses to override with their own offset.
-    if (!options.hasOption("offset_x"))
-        m_xXform.m_autoOffset = true;
-    if (!options.hasOption("offset_y"))
-        m_yXform.m_autoOffset = true;
-    if (!options.hasOption("offset_z"))
-        m_zXform.m_autoOffset = true;
+    if (!m_scaling.m_xOffArg->set())
+        m_scaling.m_xXform.m_offset.m_auto = true;
+    if (!m_scaling.m_yOffArg->set())
+        m_scaling.m_yXform.m_offset.m_auto = true;
+    if (!m_scaling.m_zOffArg->set())
+        m_scaling.m_zXform.m_offset.m_auto = true;
 }
 
 
@@ -174,9 +158,9 @@ void BpfWriter::readyFile(const std::string& filename, const SpatialReference&)
 
     m_header.m_len = m_stream.position();
 
-    m_header.m_xform.m_vals[0] = m_xXform.m_scale;
-    m_header.m_xform.m_vals[5] = m_yXform.m_scale;
-    m_header.m_xform.m_vals[10] = m_zXform.m_scale;
+    m_header.m_xform.m_vals[0] = m_scaling.m_xXform.m_scale.m_val;
+    m_header.m_xform.m_vals[5] = m_scaling.m_yXform.m_scale.m_val;
+    m_header.m_xform.m_vals[10] = m_scaling.m_zXform.m_scale.m_val;
 }
 
 
@@ -224,15 +208,15 @@ void BpfWriter::loadBpfDimensions(PointLayoutPtr layout)
 
 void BpfWriter::writeView(const PointViewPtr dataShared)
 {
-    setAutoXForm(dataShared);
+    m_scaling.setAutoXForm(dataShared);
 
     // Avoid reference count overhead internally.
     const PointView* data(dataShared.get());
 
     // We know that X, Y and Z are dimensions 0, 1 and 2.
-    m_dims[0].m_offset = m_xXform.m_offset;
-    m_dims[1].m_offset = m_yXform.m_offset;
-    m_dims[2].m_offset = m_zXform.m_offset;
+    m_dims[0].m_offset = m_scaling.m_xXform.m_offset.m_val;
+    m_dims[1].m_offset = m_scaling.m_yXform.m_offset.m_val;
+    m_dims[2].m_offset = m_scaling.m_zXform.m_offset.m_val;
 
     switch (m_header.m_pointFormat)
     {
@@ -350,11 +334,11 @@ double BpfWriter::getAdjustedValue(const PointView* data,
     bpfDim.m_max = std::max(bpfDim.m_max, d);
 
     if (bpfDim.m_id == Dimension::Id::X)
-        d /= m_xXform.m_scale;
+        d /= m_scaling.m_xXform.m_scale.m_val;
     else if (bpfDim.m_id == Dimension::Id::Y)
-        d /= m_yXform.m_scale;
+        d /= m_scaling.m_yXform.m_scale.m_val;
     else if (bpfDim.m_id == Dimension::Id::Z)
-        d /= m_zXform.m_scale;
+        d /= m_scaling.m_zXform.m_scale.m_val;
     return (d - bpfDim.m_offset);
 }
 

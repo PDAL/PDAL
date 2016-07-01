@@ -36,9 +36,12 @@
 
 #include <stdint.h>
 #include <cstdlib>
+#include <istream>
 #include <stdexcept>
 #include <string>
 #include <vector>
+
+#include <iostream>
 
 namespace pdal
 {
@@ -63,43 +66,87 @@ typedef union
 
 struct XForm
 {
-public:
-    XForm() : m_scale(1.0), m_autoScale(false), m_offset(0.0),
-        m_autoOffset(false)
+    struct XFormComponent
+    {
+        XFormComponent() : m_val(0.0), m_auto(false)
+        {}
+
+        XFormComponent(double val) : m_val(val), m_auto(false)
+        {}
+
+        double m_val;
+        bool m_auto;
+
+        bool set(const std::string& sval)
+        {
+            if (sval == "auto")
+                m_auto = true;
+            else
+            {
+                size_t pos;
+                try
+                {
+                    m_val = std::stod(sval, &pos);
+                }
+                catch (...)
+                {
+                    // Set error condition.
+                    pos = sval.size() + 1;
+                }
+                if (pos != sval.size())
+                {
+                    m_val = 0;
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        friend std::istream& operator>>(std::istream& in, XFormComponent& xfc);
+        friend std::ostream& operator<<(std::ostream& in,
+            const XFormComponent& xfc);
+    };
+
+    XForm() : m_scale(1.0), m_offset(0.0)
     {}
 
-    XForm(double scale, double offset) : m_scale(scale), m_autoScale(false),
-        m_offset(offset), m_autoOffset(false)
+    XForm(double scale, double offset) : m_scale(scale), m_offset(offset)
     {}
 
-    double m_scale;
-    // Whether a scale value should be determined by examining the data.
-    bool m_autoScale;
-    double m_offset;
-    // Whether an offset value should be determined by examining the data.
-    bool m_autoOffset;
+    // Scale component of the transform.
+    XFormComponent m_scale;
+    // Offset component of the transform.
+    XFormComponent m_offset;
+    
+    double toScaled(double val) const
+        { return (val - m_offset.m_val) / m_scale.m_val; }
 
     bool nonstandard() const
     {
-        return m_autoScale || m_autoOffset || m_scale != 1.0 || m_offset != 0.0;
-    }
-
-    void setOffset(const std::string& sval)
-    {
-        if (sval == "auto")
-            m_autoOffset = true;
-        else
-            m_offset = std::strtod(sval.c_str(), NULL);
-    }
-
-    void setScale(const std::string& sval)
-    {
-        if (sval == "auto")
-            m_autoScale = true;
-        else
-            m_scale = std::strtod(sval.c_str(), NULL);
+        return m_scale.m_auto || m_offset.m_auto ||
+            m_scale.m_val != 1.0 || m_offset.m_val != 0.0;
     }
 };
+
+inline std::istream& operator>>(std::istream& in, XForm::XFormComponent& xfc)
+{
+    std::string sval;
+
+    in >> sval;
+    if (!xfc.set(sval))
+        in.setstate(std::ios_base::failbit);
+    return in;
+}
+
+inline std::ostream& operator<<(std::ostream& out,
+    const XForm::XFormComponent& xfc)
+{
+    if (xfc.m_auto)
+        out << "auto";
+    else
+        out << xfc.m_val;
+    return out;
+}
 
 enum class LogLevel
 {

@@ -35,6 +35,8 @@
 #include "SQLiteReader.hpp"
 #include <pdal/PointView.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/PDALUtils.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -85,22 +87,6 @@ void SQLiteReader::initialize()
 }
 
 
-Options SQLiteReader::getDefaultOptions()
-{
-    Options options;
-
-    Option connection("connection", "",
-        "Connection string to connect to database");
-    Option query("query", "",
-        "SELECT statement that returns point cloud");
-
-    options.add(connection);
-    options.add(query);
-
-    return options;
-}
-
-
 pdal::SpatialReference
 SQLiteReader::fetchSpatialReference(std::string const& query) const
 {
@@ -134,16 +120,16 @@ SQLiteReader::fetchSpatialReference(std::string const& query) const
         return pdal::SpatialReference();
 }
 
-void SQLiteReader::processOptions(const Options& options)
-{
-    m_schemaFile = options.getValueOrDefault<std::string>(
-        "xml_schema_dump", std::string());
 
-    m_spatialRef =
-        options.getValueOrDefault<pdal::SpatialReference>( "spatialreference");
-    m_query = options.getValueOrThrow<std::string>("query");
-    m_connection = options.getValueOrDefault<std::string>("connection", "");
-    m_modulename = options.getValueOrDefault<std::string>("module", "");
+void SQLiteReader::addArgs(ProgramArgs& args)
+{
+    args.add("spatialreference", "Spatial reference to apply to points if "
+       "one doesnt exist", m_spatialRef);
+    args.add("query", "SELECT statement that returns point cloud", m_query);
+    args.add("connection", "Database connection string", m_connection);
+    args.add("module", "Spatialite module name", m_modulename);
+    args.add("xml_schema_dump", "File to write point clould schema",
+        m_schemaFile);
 }
 
 
@@ -185,9 +171,9 @@ void SQLiteReader::addDimensions(PointLayoutPtr layout)
 
     if (m_schemaFile.size())
     {
-        std::ostream* out = FileUtils::createFile(m_schemaFile);
+        std::ostream* out = Utils::createFile(m_schemaFile);
         out->write(s.data.c_str(), s.data.size());
-        FileUtils::closeFile(out);
+        Utils::closeFile(out);
     }
 
     XMLSchema schema(s.data);
