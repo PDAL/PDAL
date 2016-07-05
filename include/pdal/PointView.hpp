@@ -476,7 +476,6 @@ void PointView::setField(Dimension::Id::Enum dim, PointId idx, T val)
         ok = convertAndSet<T, double>(dim, idx, val);
         break;
     case Dimension::Type::Signed8:
-//        setFieldInternal(dim, idx, &val);
         ok = convertAndSet<T, int8_t>(dim, idx, val);
         break;
     case Dimension::Type::Signed16:
@@ -489,7 +488,6 @@ void PointView::setField(Dimension::Id::Enum dim, PointId idx, T val)
         ok = convertAndSet<T, int64_t>(dim, idx, val);
         break;
     case Dimension::Type::Unsigned8:
-//        setFieldInternal(dim, idx, &val);
         ok = convertAndSet<T, uint8_t>(dim, idx, val);
         break;
     case Dimension::Type::Unsigned16:
