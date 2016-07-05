@@ -466,7 +466,7 @@ void LasReader::addDimensions(PointLayoutPtr layout)
 
     for (auto& dim : m_extraDims)
     {
-        Dimension::Type::Enum type = dim.m_dimType.m_type;
+        Dimension::Type type = dim.m_dimType.m_type;
         if (type == Dimension::Type::None)
             continue;
         if (dim.m_dimType.m_xform.nonstandard())

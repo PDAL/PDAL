@@ -355,9 +355,10 @@ void Stage::setupLog()
             m_log.reset(new Log(getName(), v));
         }
     }
+
     if (m_debug && !m_verbose)
         m_verbose = 1;
-    m_log->setLevel((LogLevel::Enum)m_verbose);
+    m_log->setLevel((LogLevel)m_verbose);
 
     gdal::ErrorHandler::getGlobalErrorHandler().set(m_log, m_debug);
 }

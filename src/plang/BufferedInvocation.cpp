@@ -59,7 +59,7 @@ void BufferedInvocation::begin(PointView& view, MetadataNode m)
 
     for (auto di = dims.begin(); di != dims.end(); ++di)
     {
-        Dimension::Id::Enum d = *di;
+        Dimension::Id d = *di;
         const Dimension::Detail *dd = layout->dimDetail(d);
         void *data = malloc(dd->size() * view.size());
         m_buffers.push_back(data);  // Hold pointer for deallocation
@@ -92,7 +92,7 @@ void BufferedInvocation::end(PointView& view, MetadataNode m)
 
     for (auto di = dims.begin(); di != dims.end(); ++di)
     {
-        Dimension::Id::Enum d = *di;
+        Dimension::Id d = *di;
         const Dimension::Detail *dd = layout->dimDetail(d);
         std::string name = layout->dimName(*di);
         auto found = std::find(names.begin(), names.end(), name);

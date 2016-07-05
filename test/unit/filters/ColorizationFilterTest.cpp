@@ -100,9 +100,9 @@ void testFileStreamed(const Options& filterOps, StringList dimNames,
     f2.prepare(table);
 
     PointLayoutPtr layout = table.layout();
-    Dimension::Id::Enum id1 = layout->findDim(dimNames[0]);
-    Dimension::Id::Enum id2 = layout->findDim(dimNames[1]);
-    Dimension::Id::Enum id3 = layout->findDim(dimNames[2]);
+    Dimension::Id id1 = layout->findDim(dimNames[0]);
+    Dimension::Id id2 = layout->findDim(dimNames[1]);
+    Dimension::Id id3 = layout->findDim(dimNames[2]);
 
     auto cb = [expectedRed, expectedGreen, expectedBlue, id1, id2, id3]
         (PointRef& point)

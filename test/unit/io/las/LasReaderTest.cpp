@@ -320,37 +320,37 @@ TEST(LasReaderTest, extraBytes)
     DimTypeList dimTypes = layout->dimTypes();
     EXPECT_EQ(dimTypes.size(), (size_t)25);
 
-    Dimension::Id::Enum color0 = layout->findProprietaryDim("Colors0");
+    Dimension::Id color0 = layout->findProprietaryDim("Colors0");
     EXPECT_EQ(layout->dimType(color0), Dimension::Type::Unsigned16);
-    Dimension::Id::Enum color1 = layout->findProprietaryDim("Colors1");
+    Dimension::Id color1 = layout->findProprietaryDim("Colors1");
     EXPECT_EQ(layout->dimType(color1), Dimension::Type::Unsigned16);
-    Dimension::Id::Enum color2 = layout->findProprietaryDim("Colors2");
+    Dimension::Id color2 = layout->findProprietaryDim("Colors2");
     EXPECT_EQ(layout->dimType(color2), Dimension::Type::Unsigned16);
 
-    Dimension::Id::Enum flag0 = layout->findProprietaryDim("Flags0");
+    Dimension::Id flag0 = layout->findProprietaryDim("Flags0");
     EXPECT_EQ(layout->dimType(flag0), Dimension::Type::Signed8);
-    Dimension::Id::Enum flag1 = layout->findProprietaryDim("Flags1");
+    Dimension::Id flag1 = layout->findProprietaryDim("Flags1");
     EXPECT_EQ(layout->dimType(flag1), Dimension::Type::Signed8);
 
-    Dimension::Id::Enum intense2 = layout->findProprietaryDim("Intensity");
+    Dimension::Id intense2 = layout->findProprietaryDim("Intensity");
     EXPECT_EQ(layout->dimType(intense2), Dimension::Type::Unsigned32);
 
-    Dimension::Id::Enum time2 = layout->findProprietaryDim("Time");
+    Dimension::Id time2 = layout->findProprietaryDim("Time");
     EXPECT_EQ(layout->dimType(time2), Dimension::Type::Unsigned64);
 
     PointViewSet viewSet = reader.execute(table);
     EXPECT_EQ(viewSet.size(), (size_t)1);
     PointViewPtr view = *viewSet.begin();
 
-    Dimension::Id::Enum red = layout->findDim("Red");
-    Dimension::Id::Enum green = layout->findDim("Green");
-    Dimension::Id::Enum blue = layout->findDim("Blue");
+    Dimension::Id red = layout->findDim("Red");
+    Dimension::Id green = layout->findDim("Green");
+    Dimension::Id blue = layout->findDim("Blue");
 
-    Dimension::Id::Enum returnNum = layout->findDim("ReturnNumber");
-    Dimension::Id::Enum numReturns = layout->findDim("NumberOfReturns");
+    Dimension::Id returnNum = layout->findDim("ReturnNumber");
+    Dimension::Id numReturns = layout->findDim("NumberOfReturns");
 
-    Dimension::Id::Enum intensity = layout->findDim("Intensity");
-    Dimension::Id::Enum time = layout->findDim("GpsTime");
+    Dimension::Id intensity = layout->findDim("Intensity");
+    Dimension::Id time = layout->findDim("GpsTime");
 
     for (PointId idx = 0; idx < view->size(); ++idx)
     {

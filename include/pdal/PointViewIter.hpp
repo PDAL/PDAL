@@ -80,7 +80,7 @@ public:
         return *this;
     }
 
-    bool compare(Dimension::Id::Enum dim, const PointIdxRef& p) const
+    bool compare(Dimension::Id dim, const PointIdxRef& p) const
         { return m_buf->compare(dim, m_id, p.m_id); }
 
     void swap(PointIdxRef& p)

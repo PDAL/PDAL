@@ -148,9 +148,7 @@ inline std::ostream& operator<<(std::ostream& out,
     return out;
 }
 
-namespace LogLevel
-{
-enum Enum
+enum class LogLevel
 {
     Error = 0,
     Warning,
@@ -162,16 +160,12 @@ enum Enum
     Debug4,
     Debug5
 };
-} // namespace LogLevel
 
-namespace Orientation
-{
-enum Enum
+enum class Orientation
 {
     PointMajor,
     DimensionMajor
 };
-} // namespace Orientation
 
 class pdal_error : public std::runtime_error
 {

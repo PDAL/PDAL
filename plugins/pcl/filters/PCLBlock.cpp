@@ -75,9 +75,9 @@ PointViewSet PCLBlock::run(PointViewPtr input)
         log()->floatPrecision(8);
 
     log()->get(LogLevel::Debug2) <<
-                                 input->getFieldAs<double>(Dimension::Id::X, 0) << ", " <<
-                                 input->getFieldAs<double>(Dimension::Id::Y, 0) << ", " <<
-                                 input->getFieldAs<double>(Dimension::Id::Z, 0) << std::endl;
+         input->getFieldAs<double>(Dimension::Id::X, 0) << ", " <<
+         input->getFieldAs<double>(Dimension::Id::Y, 0) << ", " <<
+         input->getFieldAs<double>(Dimension::Id::Z, 0) << std::endl;
     log()->get(LogLevel::Debug2) << "Process PCLBlock..." << std::endl;
 
     BOX3D buffer_bounds;
@@ -89,30 +89,9 @@ PointViewSet PCLBlock::run(PointViewPtr input)
     pclsupport::PDALtoPCD(input, *cloud, buffer_bounds);
 
     log()->get(LogLevel::Debug2) << cloud->points[0].x << ", " <<
-                                 cloud->points[0].y << ", " << cloud->points[0].z << std::endl;
+        cloud->points[0].y << ", " << cloud->points[0].z << std::endl;
 
-    int level = log()->getLevel();
-    switch (level)
-    {
-        case 0:
-            pcl::console::setVerbosityLevel(pcl::console::L_ALWAYS);
-            break;
-        case 1:
-            pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
-            break;
-        case 2:
-            pcl::console::setVerbosityLevel(pcl::console::L_WARN);
-            break;
-        case 3:
-            pcl::console::setVerbosityLevel(pcl::console::L_INFO);
-            break;
-        case 4:
-            pcl::console::setVerbosityLevel(pcl::console::L_DEBUG);
-            break;
-        default:
-            pcl::console::setVerbosityLevel(pcl::console::L_VERBOSE);
-            break;
-    }
+    pclsupport::setLogLevel(log()->getLevel());
 
     pcl::Pipeline<pcl::PointXYZ> pipeline;
     pipeline.setInputCloud(cloud);

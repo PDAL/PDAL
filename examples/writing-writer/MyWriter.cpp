@@ -56,7 +56,7 @@ namespace pdal
     m_stream->precision(m_precision);
     *m_stream << std::fixed;
 
-    Dimension::Id::Enum d = table.layout()->findDim(m_datafield);
+    Dimension::Id d = table.layout()->findDim(m_datafield);
     if (d == Dimension::Id::Unknown)
     {
       std::ostringstream oss;

@@ -227,7 +227,7 @@ double KDIndex<2>::kdtree_get_pt(const PointId idx, int dim) const
     if (idx >= m_buf.size())
         return 0.0;
 
-    Dimension::Id::Enum id = Dimension::Id::Unknown;
+    Dimension::Id id = Dimension::Id::Unknown;
     switch (dim)
     {
     case 0:
@@ -250,7 +250,7 @@ double KDIndex<3>::kdtree_get_pt(const PointId idx, int dim) const
     if (idx >= m_buf.size())
         return 0.0;
 
-    Dimension::Id::Enum id = Dimension::Id::Unknown;
+    Dimension::Id id = Dimension::Id::Unknown;
     switch (dim)
     {
     case 0:

@@ -73,14 +73,14 @@ public:
     /** @name Logging level
     */
     /// @return the logging level of the pdal::Log instance
-    LogLevel::Enum getLevel()
+    LogLevel getLevel()
     {
         return m_level;
     }
 
     /// Sets the logging level of the pdal::Log instance
     /// @param v logging level to use for get() comparison operations
-    void setLevel(LogLevel::Enum v)
+    void setLevel(LogLevel v)
     {
         m_level = v;
     }
@@ -91,7 +91,7 @@ public:
         { m_leader = leader; }
 
     /// @return A string representing the LogLevel
-    std::string getLevelString(LogLevel::Enum v) const;
+    std::string getLevelString(LogLevel v) const;
 
     /** @name Log stream operations
     */
@@ -106,7 +106,7 @@ public:
     /// @param level logging level to request
     /// If the logging level asked for with
     /// pdal::Log::get is less than the logging level of the pdal::Log instance
-    std::ostream& get(LogLevel::Enum level = LogLevel::Info);
+    std::ostream& get(LogLevel level = LogLevel::Info);
 
     /// Sets the floating point precision
     void floatPrecision(int level);
@@ -124,7 +124,7 @@ private:
 
     void makeNullStream();
 
-    LogLevel::Enum m_level;
+    LogLevel m_level;
     bool m_deleteStreamOnCleanup;
     std::string m_leader;
 };

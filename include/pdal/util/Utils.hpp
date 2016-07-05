@@ -35,21 +35,22 @@
 #pragma once
 
 #include <algorithm>
-#include <string>
 #include <cassert>
 #include <cctype>
-#include <stdexcept>
 #include <cmath>
+#include <cstdint>
+#include <cstring>
 #include <fstream>
 #include <iomanip>
 #include <istream>
 #include <limits>
-#include <cstring>
-#include <sstream>
-#include <typeinfo>
-#include <vector>
 #include <map>
-#include <cstdint>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <typeinfo>
+#include <type_traits>
+#include <vector>
 
 #include "pdal_util_export.hpp"
 
@@ -891,6 +892,12 @@ namespace Utils
             return true;
         }
         return false;
+    }
+
+    template<typename E>
+    constexpr typename std::underlying_type<E>::type toNative(E e)
+    {
+        return static_cast<typename std::underlying_type<E>::type>(e);
     }
 
 } // namespace Utils

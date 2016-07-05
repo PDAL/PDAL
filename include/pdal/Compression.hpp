@@ -109,10 +109,7 @@ size_t addFields(LasZipEngine& engine, const DimTypeList& dims)
 } // anonymous namespace
 
 
-namespace CompressionType
-{
-
-enum Enum
+enum class CompressionType
 {
     None = 0,
     Ght = 1,
@@ -120,9 +117,6 @@ enum Enum
     Lazperf = 3,
     Unknown = 256
 };
-
-} // namespace CompressionType
-
 
 // This is a utility input/output buffer for the compressor/decompressor.
 template <typename CTYPE = unsigned char>
@@ -235,7 +229,7 @@ public:
         // First time through.
         if (!m_encoder || !m_compressor)
         {
-            // Get the position 
+            // Get the position
             m_chunkInfoPos = m_stream.tellp();
             // Seek over the chunk info offset value
             m_stream.seekp(sizeof(uint64_t), std::ios::cur);

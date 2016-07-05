@@ -57,8 +57,7 @@ the elements that make up a point a dimension.  PDAL predefines the dimensions
 that are in common use by the formats that it currently supports.  Readers may
 register their use of a predefined dimension or may have PDAL create a
 dimension with a name and type as requested.  Dimensions are described by the
-enumeration pdal::Dimension::Id::Enum and associated functions in
-Dimension.hpp.
+enumeration pdal::Dimension::Id and associated functions in Dimension.hpp.
 
 PDAL has a default type (Double, Float, Signed32, etc.) for each of its
 predefined dimensions which is believed to be sufficient to accurately
@@ -250,7 +249,7 @@ If dimensions are determined as named entities from a point cloud source,
 it may not be known whether the dimensions are predefined or not.  In this
 case the function registerOrAssignDim() can be used.  When a dimension is
 assigned, rather than registered, the reader needs to inform PDAL of the
-type of the variable using the enumeration Dimension::Type::Enum.
+type of the variable using the enumeration Dimension::Type.
 
 In this example, the reader informs the point table's layout that it will
 reference the dimensions X, Y and Z.
@@ -277,7 +276,7 @@ precision floating point.
         for (auto di = header.names.begin(), di != header.names.end(); ++di)
         {
             std::string dimName = *di;
-            Dimension::Id::Enum id = layout->registerOrAssignDim(
+            Dimension::Id id = layout->registerOrAssignDim(
                 dimName,
                 Dimension::Type::Double);
         }

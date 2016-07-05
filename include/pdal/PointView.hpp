@@ -113,24 +113,24 @@ public:
         { return PointRef(*this, id); }
 
     template<class T>
-    T getFieldAs(Dimension::Id::Enum dim, PointId pointIndex) const;
+    T getFieldAs(Dimension::Id dim, PointId pointIndex) const;
 
-    inline void getField(char *pos, Dimension::Id::Enum d,
-        Dimension::Type::Enum type, PointId id) const;
+    inline void getField(char *pos, Dimension::Id d,
+        Dimension::Type type, PointId id) const;
 
     template<typename T>
-    void setField(Dimension::Id::Enum dim, PointId idx, T val);
+    void setField(Dimension::Id dim, PointId idx, T val);
 
-    inline void setField(Dimension::Id::Enum dim, Dimension::Type::Enum type,
+    inline void setField(Dimension::Id dim, Dimension::Type type,
         PointId idx, const void *val);
 
     template <typename T>
-    bool compare(Dimension::Id::Enum dim, PointId id1, PointId id2)
+    bool compare(Dimension::Id dim, PointId id1, PointId id2)
     {
         return (getFieldInternal<T>(dim, id1) < getFieldInternal<T>(dim, id2));
     }
 
-    bool compare(Dimension::Id::Enum dim, PointId id1, PointId id2)
+    bool compare(Dimension::Id dim, PointId id1, PointId id2)
     {
         const Dimension::Detail *dd = layout()->dimDetail(dim);
 
@@ -173,7 +173,7 @@ public:
         }
     }
 
-    void getRawField(Dimension::Id::Enum dim, PointId idx, void *buf) const
+    void getRawField(Dimension::Id dim, PointId idx, void *buf) const
     {
         getFieldInternal(dim, idx, buf);
     }
@@ -194,17 +194,17 @@ public:
     static void calculateBounds(const PointViewSet&, BOX3D& box);
 
     void dump(std::ostream& ostr) const;
-    bool hasDim(Dimension::Id::Enum id) const
+    bool hasDim(Dimension::Id id) const
         { return layout()->hasDim(id); }
-    std::string dimName(Dimension::Id::Enum id) const
+    std::string dimName(Dimension::Id id) const
         { return layout()->dimName(id); }
     Dimension::IdList dims() const
         { return layout()->dims(); }
     std::size_t pointSize() const
         { return layout()->pointSize(); }
-    std::size_t dimSize(Dimension::Id::Enum id) const
+    std::size_t dimSize(Dimension::Id id) const
         { return layout()->dimSize(id); }
-    Dimension::Type::Enum dimType(Dimension::Id::Enum id) const
+    Dimension::Type dimType(Dimension::Id id) const
          { return layout()->dimType(id);}
     DimTypeList dimTypes() const
         { return layout()->dimTypes(); }
@@ -272,16 +272,16 @@ private:
     static int m_lastId;
 
     template<typename T_IN, typename T_OUT>
-    bool convertAndSet(Dimension::Id::Enum dim, PointId idx, T_IN in);
+    bool convertAndSet(Dimension::Id dim, PointId idx, T_IN in);
 
-    virtual void setFieldInternal(Dimension::Id::Enum dim, PointId idx,
+    virtual void setFieldInternal(Dimension::Id dim, PointId idx,
         const void *buf);
-    virtual void getFieldInternal(Dimension::Id::Enum dim, PointId idx,
+    virtual void getFieldInternal(Dimension::Id dim, PointId idx,
         void *buf) const
     { m_pointTable.getFieldInternal(dim, m_index[idx], buf); }
 
     template<class T>
-    T getFieldInternal(Dimension::Id::Enum dim, PointId pointIndex) const;
+    T getFieldInternal(Dimension::Id dim, PointId pointIndex) const;
     inline PointId getTemp(PointId id);
     void freeTemp(PointId id)
         { m_temps.push(id); }
@@ -294,7 +294,7 @@ struct PointViewLess
 };
 
 template <class T>
-T PointView::getFieldInternal(Dimension::Id::Enum dim, PointId id) const
+T PointView::getFieldInternal(Dimension::Id dim, PointId id) const
 {
     T t;
 
@@ -302,8 +302,8 @@ T PointView::getFieldInternal(Dimension::Id::Enum dim, PointId id) const
     return t;
 }
 
-inline void PointView::getField(char *pos, Dimension::Id::Enum d,
-    Dimension::Type::Enum type, PointId id) const
+inline void PointView::getField(char *pos, Dimension::Id d,
+    Dimension::Type type, PointId id) const
 {
     Everything e;
 
@@ -345,8 +345,8 @@ inline void PointView::getField(char *pos, Dimension::Id::Enum d,
     memcpy(pos, &e, Dimension::size(type));
 }
 
-inline void PointView::setField(Dimension::Id::Enum dim,
-    Dimension::Type::Enum type, PointId idx, const void *val)
+inline void PointView::setField(Dimension::Id dim,
+    Dimension::Type type, PointId idx, const void *val)
 {
     Everything e;
 
@@ -389,7 +389,7 @@ inline void PointView::setField(Dimension::Id::Enum dim,
 }
 
 template <class T>
-inline T PointView::getFieldAs(Dimension::Id::Enum dim,
+inline T PointView::getFieldAs(Dimension::Id dim,
     PointId pointIndex) const
 {
     assert(pointIndex < m_size);
@@ -450,7 +450,7 @@ inline T PointView::getFieldAs(Dimension::Id::Enum dim,
 
 
 template<typename T_IN, typename T_OUT>
-bool PointView::convertAndSet(Dimension::Id::Enum dim, PointId idx, T_IN in)
+bool PointView::convertAndSet(Dimension::Id dim, PointId idx, T_IN in)
 {
     T_OUT out;
 
@@ -462,7 +462,7 @@ bool PointView::convertAndSet(Dimension::Id::Enum dim, PointId idx, T_IN in)
 
 
 template<typename T>
-void PointView::setField(Dimension::Id::Enum dim, PointId idx, T val)
+void PointView::setField(Dimension::Id dim, PointId idx, T val)
 {
     const Dimension::Detail *dd = layout()->dimDetail(dim);
 
@@ -515,7 +515,7 @@ void PointView::setField(Dimension::Id::Enum dim, PointId idx, T val)
 }
 
 /**
-void PointView::setFieldInternal(Dimension::Id::Enum dim, PointId idx,
+void PointView::setFieldInternal(Dimension::Id dim, PointId idx,
     const void *value)
 {
     PointId rawId = 0;

@@ -120,7 +120,7 @@ int readPlyCallback(p_ply_argument argument)
 
     CallbackContext * context = static_cast<CallbackContext *>(contextAsVoid);
     double value = ply_get_argument_value(argument);
-    Dimension::Id::Enum dimension = context->dimensionMap.at(propertyName);
+    Dimension::Id dimension = context->dimensionMap.at(propertyName);
     context->view->setField(dimension, index, value);
 
     return 1;
@@ -178,7 +178,7 @@ void PlyReader::initialize()
         throw pdal_error(ss.str());
     }
 
-    static std::map<int, Dimension::Type::Enum> types =
+    static std::map<int, Dimension::Type> types =
     {
         { PLY_INT8, Dimension::Type::Signed8 },
         { PLY_UINT8, Dimension::Type::Unsigned8 },
@@ -227,7 +227,7 @@ void PlyReader::addDimensions(PointLayoutPtr layout)
     for (auto it : m_vertexTypes)
     {
         const std::string& name = it.first;
-        const Dimension::Type::Enum& type = it.second;
+        const Dimension::Type& type = it.second;
 
         m_vertexDimensions[name] = layout->registerOrAssignDim(name, type);
     }

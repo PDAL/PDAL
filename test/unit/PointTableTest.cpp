@@ -118,7 +118,7 @@ TEST(PointTable, userView)
             { return 0; }
         char *getPoint(PointId idx)
             { return NULL; }
-        void setFieldInternal(Dimension::Id::Enum id, PointId idx,
+        void setFieldInternal(Dimension::Id id, PointId idx,
             const void *value)
         {
             if (id == Dimension::Id::X)
@@ -128,7 +128,7 @@ TEST(PointTable, userView)
             else if (id == Dimension::Id::Z)
                m_z = *(const double *)value;
         }
-        void getFieldInternal(Dimension::Id::Enum id, PointId idx,
+        void getFieldInternal(Dimension::Id id, PointId idx,
             void *value) const
         {
             if (id == Dimension::Id::X)

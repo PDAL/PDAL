@@ -50,7 +50,6 @@ extern "C" PF_ExitFunc PlyReader_InitPlugin();
 namespace pdal
 {
 
-
 class PDAL_DLL PlyReader : public Reader
 {
 public:
@@ -58,7 +57,7 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    typedef std::map<std::string, Dimension::Id::Enum> DimensionMap;
+    typedef std::map<std::string, Dimension::Id> DimensionMap;
 
     PlyReader();
 
@@ -74,7 +73,7 @@ private:
     p_ply m_ply;
 
     DimensionMap m_vertexDimensions;
-    std::map<std::string, Dimension::Type::Enum> m_vertexTypes;
+    std::map<std::string, Dimension::Type> m_vertexTypes;
 };
 }
 

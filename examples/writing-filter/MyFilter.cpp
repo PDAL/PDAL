@@ -31,7 +31,8 @@ void MyFilter::addArgs(ProgramArgs& args)
 void MyFilter::addDimensions(PointLayoutPtr layout)
 {
     layout->registerDim(Dimension::Id::Intensity);
-    m_myDimension = layout->registerOrAssignDim("MyDimension", Dimension::Type::Unsigned8);
+    m_myDimension = layout->registerOrAssignDim("MyDimension",
+            Dimension::Type::Unsigned8);
 }
 
 PointViewSet MyFilter::run(PointViewPtr input)

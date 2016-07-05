@@ -52,9 +52,9 @@ void createErrorCallback(p_ply ply, const char* message)
 }
 
 
-e_ply_type getPlyType(Dimension::Type::Enum type)
+e_ply_type getPlyType(Dimension::Type type)
 {
-    static std::map<Dimension::Type::Enum, e_ply_type> types =
+    static std::map<Dimension::Type, e_ply_type> types =
     {
         { Dimension::Type::Unsigned8, PLY_UINT8 },
         { Dimension::Type::Signed8, PLY_INT8 },

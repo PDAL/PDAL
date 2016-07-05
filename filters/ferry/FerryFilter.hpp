@@ -70,7 +70,7 @@ private:
 
     StringList m_dimSpec;
     std::map<std::string, std::string> m_name_map;
-    std::map< Dimension::Id::Enum ,  Dimension::Id::Enum > m_dimensions_map;
+    std::map<Dimension::Id, Dimension::Id> m_dimensions_map;
 };
 
 } // namespace pdal

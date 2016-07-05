@@ -52,7 +52,7 @@ namespace pdal
 {
 
 
-Dimension::Id::Enum getTimeDimensionId(bool syncToPps);
+Dimension::Id getTimeDimensionId(bool syncToPps);
 
 
 class PDAL_DLL RxpPointcloud : public scanlib::pointcloud

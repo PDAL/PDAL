@@ -436,10 +436,8 @@ TEST(PointViewTest, issue1264)
 {
     PointTable t;
     PointLayoutPtr layout(t.layout());
-    Dimension::Id::Enum foo = layout->assignDim("foo",
-        Dimension::Type::Unsigned8);
-    Dimension::Id::Enum bar = layout->assignDim("bar",
-        Dimension::Type::Signed8);
+    Dimension::Id foo = layout->assignDim("foo", Dimension::Type::Unsigned8);
+    Dimension::Id bar = layout->assignDim("bar", Dimension::Type::Signed8);
     layout->finalize();
 
     PointView v(t);

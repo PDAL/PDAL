@@ -66,7 +66,7 @@ PointViewIter PointView::end()
 }
 
 
-void PointView::setFieldInternal(Dimension::Id::Enum dim, PointId idx,
+void PointView::setFieldInternal(Dimension::Id dim, PointId idx,
     const void *buf)
 {
     PointId rawId = 0;
@@ -169,7 +169,7 @@ void PointView::dump(std::ostream& ostr) const
 
         for (auto di = dims.begin(); di != dims.end(); ++di)
         {
-            Dimension::Id::Enum d = *di;
+            Dimension::Id d = *di;
             const Dimension::Detail *dd = layout->dimDetail(d);
             ostr << Dimension::name(d) << " (" <<
                 Dimension::interpretationName(dd->type()) << ") : ";

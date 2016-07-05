@@ -46,7 +46,7 @@ namespace pdal
 {
 
 
-Dimension::Id::Enum getTimeDimensionId(bool syncToPps)
+Dimension::Id getTimeDimensionId(bool syncToPps)
 {
     return syncToPps ? Dimension::Id::GpsTime : Dimension::Id::InternalTime;
 }
@@ -120,7 +120,7 @@ void RxpPointcloud::on_echo_transformed(echo_type echo)
 
     point_count_t idx = m_view->size();
     unsigned int returnNumber = 1;
-    Id::Enum timeId = getTimeDimensionId(m_syncToPps);
+    Id timeId = getTimeDimensionId(m_syncToPps);
     for (const auto& t : targets)
     {
         m_view->setField(Id::X, idx, t.vertex[0]);

@@ -120,7 +120,7 @@ private:
     uint32_t m_chunkCount;
     uint32_t m_capacity;
     bool m_streamChunks;
-    Orientation::Enum m_orientation;
+    Orientation m_orientation;
     std::string m_connSpec;
     std::string m_preSql;
     std::string m_postBlockSql;

@@ -150,7 +150,7 @@ void BpfReader::addDimensions(PointLayoutPtr layout)
 {
     for (size_t i = 0; i < m_dims.size(); ++i)
     {
-        Dimension::Type::Enum type = Dimension::Type::Float;
+        Dimension::Type type = Dimension::Type::Float;
 
         BpfDimension& dim = m_dims[i];
         if (dim.m_label == "X" ||
