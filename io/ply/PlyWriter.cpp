@@ -44,7 +44,6 @@ namespace pdal
 namespace
 {
 
-
 void createErrorCallback(p_ply ply, const char* message)
 {
     std::stringstream ss;
@@ -55,37 +54,22 @@ void createErrorCallback(p_ply ply, const char* message)
 
 e_ply_type getPlyType(Dimension::Type::Enum type)
 {
-    using namespace Dimension::Type;
-    switch (type)
+    static std::map<Dimension::Type::Enum, e_ply_type> types =
     {
-    case Unsigned8:
-        return PLY_UINT8;
-    case Signed8:
-        return PLY_INT8;
-    case Unsigned16:
-        return PLY_UINT16;
-    case Signed16:
-        return PLY_INT16;
-    case Unsigned32:
-        return PLY_UIN32;
-    case Signed32:
-        return PLY_INT32;
-    case Unsigned64:
-        return PLY_FLOAT64;
-    case Signed64:
-        return PLY_FLOAT64;
-    case Float:
-        return PLY_FLOAT32;
-    case Double:
-        return PLY_FLOAT64;
-    default:
-        // I went back and forth about throwing here, but since it's not
-        // wrong to fall back onto a double (just bad, b/c it can take up
-        // extra space), I chose to default rather than throw.
-        return PLY_FLOAT64;
-    }
+        { Dimension::Type::Unsigned8, PLY_UINT8 },
+        { Dimension::Type::Signed8, PLY_INT8 },
+        { Dimension::Type::Unsigned16, PLY_UINT16 },
+        { Dimension::Type::Signed16, PLY_INT16 },
+        { Dimension::Type::Unsigned32, PLY_UINT32 },
+        { Dimension::Type::Signed32, PLY_INT32 },
+        { Dimension::Type::Float, PLY_FLOAT32 },
+        { Dimension::Type::Double, PLY_FLOAT64 }
+    };
+
+    return types[type];
 }
-}
+
+} // unnamed namespace
 
 
 static PluginInfo const s_info = PluginInfo(

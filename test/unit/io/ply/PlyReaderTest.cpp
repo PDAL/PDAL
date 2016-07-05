@@ -81,6 +81,35 @@ TEST(PlyReader, ReadText)
 }
 
 
+TEST(PlyReader, ReadTextExtraDims)
+{
+    PlyReader reader;
+    Options options;
+    options.add("filename", Support::datapath("ply/text_extradim.ply"));
+    reader.setOptions(options);
+
+    PointTable table;
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 1u);
+
+    PointLayout *layout = view->layout();
+    EXPECT_FLOAT_EQ(view->getFieldAs<float>(Dimension::Id::X, 0), -2.64944f);
+    EXPECT_FLOAT_EQ(view->getFieldAs<float>(Dimension::Id::Y, 0), -13.0955f);
+    EXPECT_FLOAT_EQ(view->getFieldAs<float>(Dimension::Id::Z, 0), 0.00640115f);
+    EXPECT_EQ(view->getFieldAs<float>(layout->findDim("nx"), 0), -0.0237552f);
+    EXPECT_EQ(view->getFieldAs<float>(layout->findDim("ny"), 0), -0.00902114f);
+    EXPECT_EQ(view->getFieldAs<double>(layout->findDim("nz"), 0), .999665f);
+    EXPECT_EQ(view->getFieldAs<int>(Dimension::Id::Red, 0), 63);
+    EXPECT_EQ(view->getFieldAs<int>(Dimension::Id::Green, 0), 200);
+    EXPECT_EQ(view->getFieldAs<int>(Dimension::Id::Blue, 0), 64);
+    EXPECT_EQ(view->getFieldAs<int>(Dimension::Id::Alpha, 0), 255);
+    EXPECT_EQ(view->getFieldAs<double>(layout->findDim("omg"), 0), 1234);
+}
+
+
 TEST(PlyReader, ReadBinary)
 {
     PlyReader reader;
