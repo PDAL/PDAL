@@ -139,7 +139,7 @@ PointViewSet CropFilter::run(PointViewPtr view)
         // prepare the crop polygon.
         if (srs != m_lastSrs)
         {
-            geom.m_geom.transform(srs);
+            geom.m_geom = geom.m_geom.transform(srs);
         }
 
         PointViewPtr outView = view->makeNew();
