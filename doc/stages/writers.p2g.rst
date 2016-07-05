@@ -70,3 +70,8 @@ output_format
 
 z
   Name of the 'z' dimension to use. [Default: 'Z']
+
+bounds
+  Custom bounds for output raster(s).
+  If not provided, bounds will be calculated from the bounds of the input data.
+  [Default: **none**]
