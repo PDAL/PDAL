@@ -105,6 +105,11 @@ TEST(ProgramArgsTest, t1)
     args.reset();
     args.parse(s);
     EXPECT_EQ(m_foo, "Gah");
+
+    s = toStringList("--foo=-Foo");
+    args.reset();
+    args.parse(s);
+    EXPECT_EQ(m_foo, "-Foo");
 }
 
 TEST(ProgramArgsTest, t2)

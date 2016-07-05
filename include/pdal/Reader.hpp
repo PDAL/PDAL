@@ -59,6 +59,8 @@ protected:
     std::string m_filename;
     point_count_t m_count;
     PointReadFunc m_cb;
+    Arg *m_filenameArg;
+    Arg *m_countArg;
 
 private:
     virtual PointViewSet run(PointViewPtr view)

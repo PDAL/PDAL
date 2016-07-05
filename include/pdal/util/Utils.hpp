@@ -685,6 +685,14 @@ namespace Utils
     }
 
     /**
+      Convert a bool to a string.
+    */
+    inline std::string toString(bool from)
+    {
+        return from ? "true" : "false";
+    }
+
+    /**
       Convert a double to string with a precision of 10 decimal places.
 
       \param from  Value to convert.

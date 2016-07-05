@@ -39,7 +39,6 @@
 #endif
 
 #include <pdal/PDALUtils.hpp>
-#include <pdal/util/FileUtils.hpp>
 #include <pdal/pdal_macros.hpp>
 
 namespace pdal
@@ -86,7 +85,7 @@ void PipelineKernel::addSwitches(ProgramArgs& args)
 
 int PipelineKernel::execute()
 {
-    if (!FileUtils::fileExists(m_inputFile))
+    if (!Utils::fileExists(m_inputFile))
         throw pdal_error("file not found: " + m_inputFile);
     if (m_progressFile.size())
         m_progressFd = Utils::openProgress(m_progressFile);
@@ -102,10 +101,10 @@ int PipelineKernel::execute()
 #ifdef PDAL_HAVE_LIBXML2
         XMLSchema schema(m_manager.pointTable().layout());
 
-        std::ostream *out = FileUtils::createFile(m_PointCloudSchemaOutput);
+        std::ostream *out = Utils::createFile(m_PointCloudSchemaOutput);
         std::string xml(schema.xml());
         out->write(xml.c_str(), xml.size());
-        FileUtils::closeFile(out);
+        Utils::closeFile(out);
 #else
         std::cerr << "libxml2 support not available, no schema is produced" <<
             std::endl;

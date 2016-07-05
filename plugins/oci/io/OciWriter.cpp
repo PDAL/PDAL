@@ -33,11 +33,11 @@
 ****************************************************************************/
 
 
-#include <pdal/util/FileUtils.hpp>
 #include <pdal/Compression.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/PDALUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include "OciWriter.hpp"
@@ -388,7 +388,7 @@ bool OciWriter::isGeographic(int32_t srid)
 
 std::string OciWriter::loadSQLData(std::string const& filename)
 {
-    if (!FileUtils::fileExists(filename))
+    if (!Utils::fileExists(filename))
     {
         std::ostringstream oss;
         oss << filename << " does not exist";
@@ -396,10 +396,10 @@ std::string OciWriter::loadSQLData(std::string const& filename)
     }
 
     std::istream::pos_type size;
-    std::istream* input = FileUtils::openFile(filename, true);
+    std::istream* input = Utils::openFile(filename, true);
     if (!input->good())
     {
-        FileUtils::closeFile(input);
+        Utils::closeFile(input);
         return std::string();
     }
 
@@ -414,7 +414,7 @@ std::string OciWriter::loadSQLData(std::string const& filename)
             output = line;
     }
 
-    FileUtils::closeFile(input);
+    Utils::closeFile(input);
 
     return output;
 }
@@ -426,7 +426,7 @@ void OciWriter::runFileSQL(std::string const& sql)
         return;
 
     std::ostringstream oss;
-    if (!FileUtils::fileExists(sql))
+    if (!Utils::fileExists(sql))
         oss << sql;
     else
         // Our "sql" is really the filename in the ptree
@@ -584,7 +584,7 @@ void OciWriter::createPCEntry()
     std::ostringstream wkt_s;
     if (!m_baseTableBoundaryColumn.empty())
     {
-        if (!FileUtils::fileExists(m_baseTableBoundaryWkt))
+        if (!Utils::fileExists(m_baseTableBoundaryWkt))
         {
             if (!isValidWKT(m_baseTableBoundaryWkt))
             {

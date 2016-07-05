@@ -97,5 +97,7 @@ private:
     virtual void readPoint(PointRef& point, StringList s, std::string pointMap);
 };
 
+std::ostream& operator<<(std::ostream& out,
+    const Ilvis2Reader::IlvisMapping& mval);
 
 } // namespace pdal

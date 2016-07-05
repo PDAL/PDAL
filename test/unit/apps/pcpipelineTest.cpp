@@ -303,6 +303,3 @@ TEST(pipelineTextTest, csv_writer)
 
 TEST(pipelineTextTest, geojson_writer)
 { run_pipeline("io/text-writer-geojson.xml"); }
-
-TEST(pipelineTextTest, space_delimited_writer)
-{ run_pipeline("io/text-writer-space-delimited.xml"); }

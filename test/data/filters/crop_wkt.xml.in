@@ -33,7 +33,6 @@
             <Option name="outside">
                 false
             </Option>
-            <Option name="x_dim">readers.las.X</Option>
             <Reader type="readers.las">
                 <!-- <Option name="filename">
                     @CMAKE_SOURCE_DIR@/test/data/autzen-colorized-1.2-3.las

@@ -83,7 +83,8 @@ private:
 
     friend std::istream& operator>>(std::istream& in,
         DividerFilter::Mode& mode);
-
+    friend std::ostream& operator<<(std::ostream& in,
+        const DividerFilter::Mode& mode);
 };
 
 } // namespace pdal

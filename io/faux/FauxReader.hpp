@@ -73,6 +73,23 @@ inline std::istream& operator>>(std::istream& in, Mode& m)
     return in;
 }
 
+inline std::ostream& operator<<(std::ostream& out, const Mode& m)
+{
+    switch (m)
+    {
+    case Mode::Constant:
+        out << "Constant";
+    case Mode::Random:
+        out << "Random";
+    case Mode::Ramp:
+        out << "Ramp";
+    case Mode::Uniform:
+        out << "Uniform";            
+    case Mode::Normal:
+        out << "Normal";
+    }
+    return out;
+}
 
 // The FauxReader doesn't read from disk, but instead just makes up data for its
 // points.  The reader is constructed with a given bounding box and a given

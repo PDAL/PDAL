@@ -51,15 +51,14 @@ namespace pdal
 {
 
 
-typedef std::map<std::string, Dimension::Id::Enum> DimensionMap;
-
-
 class PDAL_DLL PlyReader : public Reader
 {
 public:
     static void *create();
     static int32_t destroy(void *);
     std::string getName() const;
+
+    typedef std::map<std::string, Dimension::Id::Enum> DimensionMap;
 
     PlyReader();
 
@@ -73,8 +72,9 @@ private:
     virtual void done(PointTableRef table);
 
     p_ply m_ply;
-    DimensionMap m_vertexDimensions;
 
+    DimensionMap m_vertexDimensions;
+    std::map<std::string, Dimension::Type::Enum> m_vertexTypes;
 };
 }
 

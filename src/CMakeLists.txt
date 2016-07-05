@@ -162,11 +162,11 @@ set_target_properties(${PDAL_BASE_LIB_NAME} PROPERTIES VERSION "${PDAL_BUILD_VER
     CLEAN_DIRECT_OUTPUT 1)
 
 if (WITH_LASZIP)
-    target_link_libraries(${PDAL_BASE_LIB_NAME} ${LASZIP_LIBRARY})
+    target_link_libraries(${PDAL_BASE_LIB_NAME} PUBLIC ${LASZIP_LIBRARY})
 endif()
 
 if (PDAL_HAVE_LIBXML2)
-    target_link_libraries(${PDAL_BASE_LIB_NAME} ${LIBXML2_LIBRARIES})
+    target_link_libraries(${PDAL_BASE_LIB_NAME} PUBLIC ${LIBXML2_LIBRARIES})
 endif()
 
 #
@@ -174,29 +174,37 @@ endif()
 # so that users only need link libpdalcpp.
 #
 if (APPLE)
-    set(UTIL_LIB "-Wl,-reexport_library,$<TARGET_FILE:${PDAL_UTIL_LIB_NAME}>")
-else()
-    set(UTIL_LIB ${PDAL_UTIL_LIB_NAME})
+    set(PDAL_REEXPORT "-Wl,-reexport_library,$<TARGET_FILE:${PDAL_UTIL_LIB_NAME}>")
+    #
+    # This allows the rpath reference for the reexported library (above) to
+    # be found.
+    #
+    set(PDAL_LIBDIR "-L$<TARGET_FILE_DIR:${PDAL_UTIL_LIB_NAME}>")
 endif()
 
 target_link_libraries(${PDAL_BASE_LIB_NAME}
-    ${CMAKE_THREAD_LIBS_INIT}
-    ${GDAL_LIBRARY}
-    ${GEOS_LIBRARY}
-    ${ZLIB_LIBRARIES}
-    ${PDAL_BOOST_LIB_NAME}
-    ${PDAL_ARBITER_LIB_NAME}
-    ${PDAL_JSONCPP_LIB_NAME}
-    ${UTIL_LIB}
-    ${CURL_LIBRARIES}
+    PUBLIC
+        ${CMAKE_THREAD_LIBS_INIT}
+        ${GDAL_LIBRARY}
+        ${GEOS_LIBRARY}
+        ${ZLIB_LIBRARIES}
+        ${CURL_LIBRARIES}
+    PRIVATE
+        ${PDAL_REEXPORT}
+        ${PDAL_UTIL_LIB_NAME}
+        ${PDAL_ARBITER_LIB_NAME}
+    ${JSON_CPP_LINK_TYPE}
+        ${PDAL_JSONCPP_LIB_NAME}
+    INTERFACE
+        ${PDAL_LIBDIR}
 )
 
 if (WITH_GEOTIFF)
-    target_link_libraries(${PDAL_BASE_LIB_NAME} ${GEOTIFF_LIBRARY})
+    target_link_libraries(${PDAL_BASE_LIB_NAME} PUBLIC ${GEOTIFF_LIBRARY})
 endif()
 
-if(WIN32)
-    target_link_libraries(${PDAL_BASE_LIB_NAME} ws2_32)
+if (WIN32)
+    target_link_libraries(${PDAL_BASE_LIB_NAME} PUBLIC ws2_32)
 endif()
 
 ###############################################################################

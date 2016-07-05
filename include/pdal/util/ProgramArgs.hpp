@@ -134,6 +134,21 @@ public:
     */
     bool set() const
         { return m_set; }
+    /**
+      Return whether a default value was provided for the argument.
+
+      \return  Whether a default was provided.
+    */
+    virtual bool defaultProvided() const
+        { return false; }
+    /**
+      Return a string representation of an Arg's default value, or an
+      empty string if none exists.
+
+      \return  Default value as a string.
+    */
+    virtual std::string defaultVal() const
+        { return std::string(); }
 
 public:
     /**
@@ -253,7 +268,7 @@ class TArg : public Arg
 {
 public:
     /**
-      Constructor.
+      Constructor that takes a default argument.
 
       \param longname  Name of argument specified on command line with "--"
         prefix.
@@ -267,7 +282,24 @@ public:
     TArg(const std::string& longname, const std::string& shortname,
         const std::string& description, T& variable, T def) :
         Arg(longname, shortname, description), m_var(variable),
-        m_defaultVal(def)
+        m_defaultVal(def), m_defaultProvided(true)
+    { m_var = m_defaultVal; }
+
+    /**
+      Constructor.
+
+      \param longname  Name of argument specified on command line with "--"
+        prefix.
+      \param shortname  Optional name of argument specified on command
+        line with "-" prefix.
+      \param description  Argument description.
+      \param variable  Variable to which the value of the argument should
+        be bound.
+    */
+    TArg(const std::string& longname, const std::string& shortname,
+        const std::string& description, T& variable) :
+        Arg(longname, shortname, description), m_var(variable),
+        m_defaultVal(T()), m_defaultProvided(false)
     { m_var = m_defaultVal; }
 
     /**
@@ -289,7 +321,7 @@ public:
                 m_longname << "'.";
             throw arg_error(oss.str());
         }
-        if (s.size() && s[0] == '-')
+        if (s.empty())
         {
             std::stringstream oss;
             oss << "Argument '" << m_longname << "' needs a value and none "
@@ -358,10 +390,26 @@ public:
         setValue(posList.front());
         return 1;
     }
+    /**
+      Return whether a default value was provided for the argument.
+
+      \return  Whether a default was provided.
+    */
+    virtual bool defaultProvided() const
+        { return m_defaultProvided; }
+
+    /**
+      Return a string representation of an Arg's default value.
+
+      \return  Default value as a string.
+    */
+    virtual std::string defaultVal() const
+        { return Utils::toString(m_defaultVal); }
 
 private:
     T& m_var;
     T m_defaultVal;
+    bool m_defaultProvided;
 };
 
 /**
@@ -374,7 +422,7 @@ class TArg<bool> : public Arg
 {
 public:
     /**
-      Constructor for boolean arguments.
+      Constructor for boolean arguments with default value.
 
       \param longname  Name of argument specified on command line with "--"
         prefix.
@@ -388,7 +436,24 @@ public:
     TArg(const std::string& longname, const std::string& shortname,
         const std::string& description, bool& variable, bool def) :
         Arg(longname, shortname, description), m_val(variable),
-        m_defaultVal(def)
+        m_defaultVal(def), m_defaultProvided(true)
+    { m_val = m_defaultVal; }
+
+    /**
+      Constructor for boolean arguments without default value.
+
+      \param longname  Name of argument specified on command line with "--"
+        prefix.
+      \param shortname  Optional name of argument specified on command
+        line with "-" prefix.
+      \param description  Argument description.
+      \param variable  bool variable to which the value of the argument should
+        be bound.
+    */
+    TArg(const std::string& longname, const std::string& shortname,
+        const std::string& description, bool& variable) :
+        Arg(longname, shortname, description), m_val(variable),
+        m_defaultVal(false), m_defaultProvided(false)
     { m_val = m_defaultVal; }
 
     /**
@@ -419,7 +484,12 @@ public:
                 "was provided.";
             throw arg_error(oss.str());
         }
-        m_val = (s == "true") ? !m_defaultVal : m_defaultVal;
+        if (s == "invert")
+            m_val = !m_defaultVal;
+        else if (s == "true")
+            m_val = true;
+        else
+            m_val = false;
         m_set = true;
     }
 
@@ -464,10 +534,25 @@ public:
         throw arg_error(oss.str());
         return *this;
     }
+    /**
+      Return whether a default value was provided for the argument.
+
+      \return  Whether a default was provided.
+    */
+    virtual bool defaultProvided() const
+        { return m_defaultProvided; }
+    /**
+      Return a string representation of an Arg's default value.
+
+      \return  Default value as a string.
+    */
+    virtual std::string defaultVal() const
+        { return Utils::toString(m_defaultVal); }
 
 private:
     bool& m_val;
     bool m_defaultVal;
+    bool m_defaultProvided;
 };
 
 /**
@@ -751,7 +836,7 @@ public:
     }
 
     /**
-      Add an argument to the list of arguments.
+      Add an argument to the list of arguments with a default.
 
       \param name  Name of argument.  Argument names are specified as
         "longname[,shortname]", where shortname is an optional one-character
@@ -764,12 +849,35 @@ public:
     */
     template<typename T>
     Arg& add(const std::string& name, const std::string description, T& var,
-        T def = T())
+        T def)
     {
         std::string longname, shortname;
         splitName(name, longname, shortname);
 
         Arg *arg = new TArg<T>(longname, shortname, description, var, def);
+        addLongArg(longname, arg);
+        addShortArg(shortname, arg);
+        m_args.push_back(std::unique_ptr<Arg>(arg));
+        return *arg;
+    }
+
+    /**
+      Add an argument to the list of arguments.
+
+      \param name  Name of argument.  Argument names are specified as
+        "longname[,shortname]", where shortname is an optional one-character
+        abbreviation.
+      \param description  Description of the argument.
+      \param var  Reference to variable to bind to argument.
+      \return  Reference to the new argument.
+    */
+    template<typename T>
+    Arg& add(const std::string& name, const std::string description, T& var)
+    {
+        std::string longname, shortname;
+        splitName(name, longname, shortname);
+
+        Arg *arg = new TArg<T>(longname, shortname, description, var);
         addLongArg(longname, arg);
         addShortArg(shortname, arg);
         m_args.push_back(std::unique_ptr<Arg>(arg));
@@ -822,9 +930,9 @@ public:
         {
             std::string& arg = s[i];
             // This may be the value, or it may not.  We're passing it along
-            // just in case.  If there is no value, pass along "-" to make
+            // just in case.  If there is no value, pass along "" to make
             // clear that there is none.
-            std::string value((i != s.size() - 1) ? s[i + 1] : "-");
+            std::string value((i != s.size() - 1) ? s[i + 1] : "");
             try
             {
                 i += parseArg(arg, value);
@@ -852,9 +960,9 @@ public:
         {
             std::string& arg = s[i];
             // This may be the value, or it may not.  We're passing it along
-            // just in case.  If there is no value, pass along "-" to make
+            // just in case.  If there is no value, pass along "" to make
             // clear that there is none.
-            std::string value((i != s.size() - 1) ? s[i + 1] : "-");
+            std::string value((i != s.size() - 1) ? s[i + 1] : "");
             i += parseArg(arg, value);
         }
 
@@ -977,7 +1085,10 @@ public:
         for (auto ai = m_args.begin(); ai != m_args.end(); ++ai)
         {
             Arg *a = ai->get();
-            out << std::string(nameIndent, ' ') << a->longname() << std::endl;
+            out << std::string(nameIndent, ' ') << a->longname();
+            if (a->defaultProvided())
+                out << " [" << a->defaultVal() << "]";
+            out << std::endl;
             std::vector<std::string> descrip =
                 Utils::wordWrap(a->description(), width);
             if (descrip.empty())
@@ -1130,6 +1241,13 @@ private:
                 attachedValue = true;
             }
         }
+        else if (value.size() && value[0] == '-')
+        {
+            // If a value starts with a '-' and isn't attached to a name,
+            // we assume it's an option and not a value.
+            value.clear();
+        }
+
         Arg *arg = findLongArg(name);
         if (!arg)
         {
@@ -1151,7 +1269,7 @@ private:
                 }
             }
             else
-                value = "true";
+                value = "invert";
             arg->setValue(value);
             return 1;
         }
@@ -1188,8 +1306,16 @@ private:
         {
             if (name.size() == 2)
             {
+                // If the value starts with a '-', assume it's an option
+                // rather than a value.
+                if (value.size() && value[0] == '-')
+                {
+                    value.clear();
+                    cnt = 1;
+                }
+                else
+                    cnt = 2;
                 arg->setValue(value);
-                cnt = 2;
             }
             else
             {

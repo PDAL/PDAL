@@ -33,8 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/PipelineManager.hpp>
-
-#include <pdal/util/FileUtils.hpp>
+#include <pdal/PDALUtils.hpp>
 
 #include "PipelineReaderXML.hpp"
 #include "PipelineReaderJSON.hpp"
@@ -44,7 +43,7 @@ namespace pdal
 
 PipelineManager::~PipelineManager()
 {
-    FileUtils::closeFile(m_input);
+    Utils::closeFile(m_input);
 }
 
 
@@ -89,8 +88,8 @@ void PipelineManager::readPipeline(const std::string& filename)
     }
     else
     {
-        FileUtils::closeFile(m_input);
-        m_input = FileUtils::openFile(filename);
+        Utils::closeFile(m_input);
+        m_input = Utils::openFile(filename);
         readPipeline(*m_input);
     }
 }
@@ -217,7 +216,7 @@ MetadataNode PipelineManager::getMetadata() const
 Stage& PipelineManager::makeReader(const std::string& inputFile,
     std::string driver)
 {
-    if (!inputFile.empty() && !FileUtils::fileExists(inputFile))
+    if (!inputFile.empty() && !Utils::fileExists(inputFile))
         throw pdal_error("file not found: " + inputFile);
 
     if (driver.empty())

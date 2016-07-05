@@ -37,7 +37,7 @@ typedef enum e_ply_storage_mode_ {
 /* ply data type */
 typedef enum e_ply_type {
     PLY_INT8, PLY_UINT8, PLY_INT16, PLY_UINT16,
-    PLY_INT32, PLY_UIN32, PLY_FLOAT32, PLY_FLOAT64,
+    PLY_INT32, PLY_UINT32, PLY_FLOAT32, PLY_FLOAT64,
     PLY_CHAR, PLY_UCHAR, PLY_SHORT, PLY_USHORT,
     PLY_INT, PLY_UINT, PLY_FLOAT, PLY_DOUBLE,
     PLY_LIST    /* has to be the last in enum */

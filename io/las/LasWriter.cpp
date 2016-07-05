@@ -233,7 +233,7 @@ void LasWriter::readyTable(PointTableRef table)
 void LasWriter::readyFile(const std::string& filename,
     const SpatialReference& srs)
 {
-    std::ostream *out = FileUtils::createFile(filename, true);
+    std::ostream *out = Utils::createFile(filename, true);
     if (!out)
     {
         std::stringstream out;

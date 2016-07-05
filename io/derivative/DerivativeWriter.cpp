@@ -35,6 +35,7 @@
 #include "DerivativeWriter.hpp"
 
 #include <pdal/PointView.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Utils.hpp>
 #include <pdal/pdal_macros.hpp>
 
@@ -43,8 +44,6 @@
 #include <cmath>
 #include <iostream>
 #include <limits>
-
-#include <boost/filesystem.hpp>
 
 #include "gdal_priv.h" // For File I/O
 #include "gdal_version.h" // For version info
@@ -980,10 +979,9 @@ GDALDataset* DerivativeWriter::createFloat32GTIFF(std::string filename,
         {
             char **papszOptions = NULL;
 
-            pdalboost::filesystem::path p(filename);
-            p.replace_extension(".tif");
+            std::string path = FileUtils::stem(filename) + ".tif";
             GDALDataset *dataset;
-            dataset = tpDriver->Create(p.string().c_str(), cols, rows, 1,
+            dataset = tpDriver->Create(path.c_str(), cols, rows, 1,
                 GDT_Float32, papszOptions);
 
             BOX2D& extent = getBounds();

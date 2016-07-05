@@ -14,7 +14,6 @@
         <Option name="idatim" type="string">20131206140713</Option>
         <Option name="fscltx" type="string">SIC:0 CH_FO</Option>
         <Option name="ftitle" type="string">output.ntf</Option>
-        <Option name="geolob" type="string">GEOLOB00048017898386021508996+063.7163336371+034.</Option>
         <Option name="software_id">
             forward
         </Option>
