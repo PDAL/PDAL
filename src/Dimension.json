@@ -2,7 +2,7 @@
     {
     "name": "X",
     "type": "double",
-    "description": "Y coordinate"
+    "description": "X coordinate"
     },
     {
     "name": "Y",
