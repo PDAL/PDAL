@@ -148,7 +148,7 @@ MetadataNode PointView::toMetadata() const
         for (auto di = dims.begin(); di != dims.end(); ++di)
         {
             double v = getFieldAs<double>(*di, idx);
-            pointnode.add(Dimension::name(*di), v);
+            pointnode.add(layout()->dimName(*di), v);
         }
     }
     return node;
