@@ -216,14 +216,11 @@ MetadataNode PipelineManager::getMetadata() const
 Stage& PipelineManager::makeReader(const std::string& inputFile,
     std::string driver)
 {
-    if (!inputFile.empty() && !Utils::fileExists(inputFile))
-        throw pdal_error("file not found: " + inputFile);
-
     if (driver.empty())
     {
         driver = StageFactory::inferReaderDriver(inputFile);
         if (driver.empty())
-            throw pdal_error("Cannot determine input file type of " +
+            throw pdal_error("Cannot determine reader for input file: " +
                 inputFile);
     }
     Options options;
@@ -259,7 +256,7 @@ Stage& PipelineManager::makeWriter(const std::string& outputFile,
     {
         driver = StageFactory::inferWriterDriver(outputFile);
         if (driver.empty())
-            throw pdal_error("Cannot determine output file type of " +
+            throw pdal_error("Cannot determine writer for output file: " +
                 outputFile);
     }
 
