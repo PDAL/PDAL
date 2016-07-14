@@ -42,7 +42,7 @@ Example
           "output_type":"mean",
           "output_type":"idw",
           "output_type":"den",
-          "output_format":"den",
+          "output_format":"asc",
         }
       ]
     }
