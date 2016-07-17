@@ -37,6 +37,7 @@ RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
         libboost-thread1.58-dev \
         subversion \
         clang \
+        clang-3.6 \
         libproj-dev \
         libc6-dev \
         libnetcdf-dev \
@@ -62,6 +63,7 @@ RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
         python-pip \
     && rm -rf /var/lib/apt/lists/*
 
+RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang03.6 20 && update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.6 20
 
 RUN git clone --depth=1 https://github.com/OSGeo/gdal.git \
     &&    cd gdal/gdal \
