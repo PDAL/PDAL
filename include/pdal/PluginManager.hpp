@@ -39,6 +39,7 @@
 
 #pragma once
 
+#include <pdal/Log.hpp>
 #include <pdal/pdal_internal.hpp>
 #include <pdal/plugin.hpp>
 
@@ -104,6 +105,7 @@ private:
     ExitFuncVec m_exitFuncVec;
     RegistrationInfoMap m_plugins;
     std::mutex m_mutex;
+    Log m_log;
 
     // Disable copy/assignment.
     PluginManager(const PluginManager&);
