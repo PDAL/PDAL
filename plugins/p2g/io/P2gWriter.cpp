@@ -200,6 +200,14 @@ void P2gWriter::done(PointTableRef table)
 
     log()->get(LogLevel::Debug) << "Output SRS  :'" << srs.getWKT() << "'" <<
         std::endl;
+
+    // Strip off the extension if it was provided so that we don't get
+    // file.asc.type.asc or file.asc.asc, as point2grid appends a file
+    // extension.
+    std::string extension = FileUtils::extension(m_filename);
+    if (extension == ".asc" || extension == ".grid" || extension == ".tif")
+        m_filename = m_filename.substr(0, m_filename.find_last_of("."));
+
     if (m_interpolator->finish(m_filename.c_str(),
         m_outputFormat, m_outputTypes, adfGeoTransform,
         srs.getWKT().c_str()) < 0)
