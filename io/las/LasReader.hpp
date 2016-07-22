@@ -37,6 +37,7 @@
 #include <pdal/pdal_export.hpp>
 #include <pdal/plugin.hpp>
 #include <pdal/Compression.hpp>
+#include <pdal/PDALUtils.hpp>
 #include <pdal/Reader.hpp>
 
 #include "LasError.hpp"
@@ -66,12 +67,12 @@ protected:
 
     public:
         LasStreamIf(const std::string& filename)
-            { m_istream = FileUtils::openFile(filename); }
+            { m_istream = Utils::openFile(filename); }
 
         ~LasStreamIf()
         {
             if (m_istream)
-                FileUtils::closeFile(m_istream);
+                Utils::closeFile(m_istream);
         }
 
         std::istream *m_istream;
