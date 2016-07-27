@@ -62,6 +62,11 @@ TEST(KernelTest, parseOption)
     ok = Kernel::test_parseOption("--read1ers.las.foobar=baz",
         stage, option, value);
     EXPECT_FALSE(ok);
+
+    ok = Kernel::test_parseOption("--readers.p2g.foobar",
+        stage, option, value);
+    EXPECT_TRUE(ok);
+    EXPECT_EQ(value, "");
 }
 
 }

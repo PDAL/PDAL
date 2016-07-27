@@ -58,6 +58,7 @@ namespace
 bool parseOption(std::string o, std::string& stage, std::string& option,
     std::string& value)
 {
+    value.clear();
     if (o.size() < 2)
         return false;
     if (o[0] != '-' || o[1] != '-')
@@ -87,7 +88,7 @@ bool parseOption(std::string o, std::string& stage, std::string& option,
     if (stage_type != "readers" && stage_type != "writers" &&
         stage_type != "filters")
         return false;
-    if (o[pos++] != '.')
+    if (pos >= o.length() || o[pos++] != '.')
         return false;
 
     // Get stage_name.
@@ -96,7 +97,7 @@ bool parseOption(std::string o, std::string& stage, std::string& option,
         return false;
     pos += count;
     stage = o.substr(0, pos);
-    if (o[pos++] != '.')
+    if (pos >= o.length() || o[pos++] != '.')
         return false;
 
     // Get option name.
@@ -105,8 +106,10 @@ bool parseOption(std::string o, std::string& stage, std::string& option,
     pos += count;
     option = o.substr(optionStart, count);
 
-    if (o[pos++] != '=')
-        return false;
+    // We've gotten a good option name, so return true, even if the value
+    // is missing.  The caller can handle the missing value if desired.
+    if (pos >= o.length() || o[pos++] != '=')
+        return true;
 
     // The command-line parser takes care of quotes around an argument
     // value and such.  May want to do something to handle escaped characters?
@@ -153,6 +156,14 @@ void Kernel::doSwitches(int argc, const char *argv[], ProgramArgs& args)
 
         if (parseOption(argv[i], stageName, opName, value))
         {
+            if (value.empty())
+            {
+                std::ostringstream oss;
+                oss << "Stage option '" << stageName << "." << opName <<
+                    "' must be specified " << " as --" << stageName << "." <<
+                    opName << "=<value>" << ".";
+                throw pdal_error(oss.str());
+            }
             Option op(opName, value);
             stageOptions[stageName].add(op);
         }
