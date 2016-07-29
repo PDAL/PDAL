@@ -272,7 +272,7 @@ void InfoKernel::makePipeline(const std::string& filename, bool noPoints)
     }
     else
     {
-        Stage& reader = m_manager.makeReader(filename, "");
+        Stage& reader = m_manager.makeReader(filename, m_driverOverride);
         if (noPoints)
         {
             Options ops({"count", 0});
