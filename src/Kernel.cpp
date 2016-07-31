@@ -130,6 +130,7 @@ Kernel::Kernel()
     , m_hardCoreDebug(false)
     , m_reportDebug(false)
     , m_visualize(false)
+    , m_driverOverride("")
 {}
 
 
@@ -471,6 +472,7 @@ void Kernel::addBasicSwitches(ProgramArgs& args)
 
     args.add("visualize", "Visualize result", m_visualize);
     args.add("stdin,s", "Read pipeline JSON from stdin", m_usestdin);
+    args.add("driver", "Override reader driver", m_driverOverride, "");
     args.add("scale",
          "A comma-separated or quoted, space-separated list of scales to "
          "set on the output file: \n--scale 0.1,0.1,0.00001\n--scale \""

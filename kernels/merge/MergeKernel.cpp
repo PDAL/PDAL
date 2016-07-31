@@ -77,7 +77,7 @@ int MergeKernel::execute()
 
     for (size_t i = 0; i < m_files.size(); ++i)
     {
-        Stage& reader = makeReader(m_files[i], "");
+        Stage& reader = makeReader(m_files[i], m_driverOverride);
         filter.setInput(reader);
     }
 

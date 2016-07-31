@@ -107,7 +107,7 @@ int DiffKernel::execute()
 {
     PointTable sourceTable;
 
-    Stage& source = makeReader(m_sourceFile, "");
+    Stage& source = makeReader(m_sourceFile, m_driverOverride);
     source.prepare(sourceTable);
     PointViewSet sourceSet = source.execute(sourceTable);
 
@@ -115,7 +115,7 @@ int DiffKernel::execute()
 
     PointTable candidateTable;
 
-    Stage& candidate = makeReader(m_candidateFile, "");
+    Stage& candidate = makeReader(m_candidateFile, m_driverOverride);
     candidate.prepare(candidateTable);
     PointViewSet candidateSet = candidate.execute(candidateTable);
 
