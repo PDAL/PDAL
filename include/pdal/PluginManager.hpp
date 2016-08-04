@@ -61,6 +61,8 @@ class DynamicLibrary;
 
 class PDAL_DLL PluginManager
 {
+    FRIEND_TEST(PluginManagerTest, SearchPaths);
+
     typedef std::shared_ptr<DynamicLibrary> DynLibPtr;
     typedef std::map<std::string, DynLibPtr> DynamicLibraryMap;
     typedef std::vector<PF_ExitFunc> ExitFuncVec;
@@ -96,9 +98,10 @@ private:
     StringList l_names(int typeMask);
     std::string l_description(const std::string& name);
     std::string l_link(const std::string& name);
-
     DynamicLibrary *loadLibrary(const std::string& path,
         std::string& errorString);
+
+    static StringList test_pluginSearchPaths();
 
     PF_PluginAPI_Version m_version;
     DynamicLibraryMap m_dynamicLibraryMap;

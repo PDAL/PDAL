@@ -130,7 +130,6 @@ Kernel::Kernel()
     , m_hardCoreDebug(false)
     , m_reportDebug(false)
     , m_visualize(false)
-    , m_driverOverride("")
 {}
 
 

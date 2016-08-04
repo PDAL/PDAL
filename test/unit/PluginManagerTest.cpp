@@ -36,6 +36,7 @@
 
 #include <pdal/PluginManager.hpp>
 #include <pdal/Filter.hpp>
+#include <pdal/util/Algorithm.hpp>
 
 #include "Support.hpp"
 
@@ -107,6 +108,33 @@ TEST(PluginManagerTest, CreateObject)
 {
     std::unique_ptr<DummyPlugin> p((DummyPlugin*)PluginManager::createObject(DummyPlugin::name));
     EXPECT_NE(p.get(), nullptr);
+}
+
+TEST(PluginManagerTest, SearchPaths)
+{
+    std::string curPath;
+    int set = Utils::getenv("PDAL_DRIVER_PATH", curPath);
+    Utils::unsetenv("PDAL_DRIVER_PATH");
+
+    StringList paths = PluginManager::test_pluginSearchPaths();
+    EXPECT_EQ(paths.size(), 4U);
+    EXPECT_TRUE(Utils::contains(paths, "/usr/local/lib"));
+    EXPECT_TRUE(Utils::contains(paths, "./lib"));
+    EXPECT_TRUE(Utils::contains(paths, "../lib"));
+    EXPECT_TRUE(Utils::contains(paths, "../bin"));
+
+    Utils::setenv("PDAL_DRIVER_PATH", "/foo/bar://baz");
+    paths = PluginManager::test_pluginSearchPaths();
+    EXPECT_EQ(paths.size(), 2U);
+    EXPECT_TRUE(Utils::contains(paths, "/foo/bar"));
+    EXPECT_TRUE(Utils::contains(paths, "//baz"));
+    Utils::setenv("PDAL_DRIVER_PATH", "/this/is/a/path");
+    paths = PluginManager::test_pluginSearchPaths();
+    EXPECT_EQ(paths.size(), 1U);
+    EXPECT_TRUE(Utils::contains(paths, "/this/is/a/path"));
+
+    if (set == 0)
+        Utils::setenv("PDAL_DRIVER_PATH", curPath);
 }
 
 } // namespace pdal

@@ -87,7 +87,7 @@ StringList pluginSearchPaths()
     Utils::getenv("PDAL_DRIVER_PATH", envOverride);
 
     if (!envOverride.empty())
-        searchPaths.push_back(envOverride);
+        searchPaths = Utils::split2(envOverride, ':');
     else
     {
         searchPaths.push_back(PDAL_PLUGIN_INSTALL_PATH);
@@ -140,6 +140,13 @@ void PluginManager::l_loadAll(PF_PluginType type)
     for (const auto& pluginPath : pluginSearchPaths())
         loadAll(pluginPath, type);
 }
+
+
+StringList PluginManager::test_pluginSearchPaths()
+{
+    return pluginSearchPaths();
+}
+
 
 StringList PluginManager::names(int typeMask)
 {
