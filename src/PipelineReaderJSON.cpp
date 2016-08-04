@@ -36,6 +36,7 @@
 
 #include <pdal/Filter.hpp>
 #include <pdal/PipelineManager.hpp>
+#include <pdal/PluginManager.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/util/Utils.hpp>
@@ -284,6 +285,15 @@ Options PipelineReaderJSON::extractOptions(Json::Value& node)
 
     for (const std::string& name : node.getMemberNames())
     {
+        if (name == "plugin")
+        {
+            PluginManager::loadPlugin(node[name].asString());
+
+            // Don't actually put a "plugin" option on
+            // any stage
+            continue;
+        }
+
         if (node[name].isString())
             options.add(name, node[name].asString());
         else if (node[name].isInt())
