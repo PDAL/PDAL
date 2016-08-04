@@ -365,7 +365,7 @@ void TIndexKernel::mergeFile()
     Stage& merge = makeFilter("filters.merge");
     for (auto f : files)
     {
-        Stage& reader = makeReader(f.m_filename, "");
+        Stage& reader = makeReader(f.m_filename, m_driverOverride);
         Stage *premerge = &reader;
 
         if (m_tgtSrsString != f.m_srs)

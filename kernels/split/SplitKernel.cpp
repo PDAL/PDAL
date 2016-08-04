@@ -102,7 +102,7 @@ int SplitKernel::execute()
 {
     PointTable table;
 
-    Stage& reader = makeReader(m_inputFile, "");
+    Stage& reader = makeReader(m_inputFile, m_driverOverride);
 
     Options filterOpts;
     std::string driver = (m_length ? "filters.splitter" : "filters.chipper");

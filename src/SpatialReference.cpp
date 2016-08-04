@@ -206,9 +206,13 @@ std::string SpatialReference::getVerticalUnits() const
         if (node)
         {
             char* units(0);
+
+            // The returned value remains internal to the OGRSpatialReference and should not
+            //        be freed, or modified. It may be invalidated on the next
+            //        OGRSpatialReference call.
+
             double u = poSRS->GetLinearUnits(&units);
             tmp = units;
-            CPLFree(units);
 
             Utils::trim(tmp);
 
@@ -246,15 +250,21 @@ std::string SpatialReference::getHorizontalUnits() const
 
     std::string wkt = getWKT(eHorizontalOnly);
     const char* poWKT = wkt.c_str();
-    OGRSpatialReference srs(NULL);
-    if (OGRERR_NONE == srs.importFromWkt(const_cast<char **>(&poWKT)))
+    OGRSpatialReference* poSRS =
+        (OGRSpatialReference*)OSRNewSpatialReference(m_wkt.c_str());
+    if (poSRS)
     {
         char* units(0);
-        double u = srs.GetLinearUnits(&units);
+
+        // The returned value remains internal to the OGRSpatialReference and should not
+        //        be freed, or modified. It may be invalidated on the next
+        //        OGRSpatialReference call.
+
+        double u = poSRS->GetLinearUnits(&units);
         tmp = units;
-        CPLFree(units);
 
         Utils::trim(tmp);
+
     }
 
     return tmp;
@@ -464,7 +474,7 @@ MetadataNode SpatialReference::toMetadata() const
 
     MetadataNode units = root.add("units");
     units.add("vertical", getVerticalUnits());
-    units.add("horizontal", getVerticalUnits());
+    units.add("horizontal", getHorizontalUnits());
 
     return root;
 }

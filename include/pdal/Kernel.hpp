@@ -101,6 +101,7 @@ protected:
     bool m_usestdin;
     Log m_log;
     PipelineManager m_manager;
+    std::string m_driverOverride;
 
 private:
     int innerRun(ProgramArgs& args);

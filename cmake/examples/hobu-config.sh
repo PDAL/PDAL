@@ -2,7 +2,7 @@ USR_LOCAL="/usr/local"
 USR="/usr"
 TIFF_HOME=$USR_LOCAL
 LASZIP_HOME=$USR_LOCAL
-LIBXML2_HOME=/usr/local/Cellar/libxml2/2.9.2/
+LIBXML2_HOME=/usr/local/Cellar/libxml2/2.9.4/
 WEBSOCKETPP_HOME=/Users/hobu/dev/git/websocketpp
 GEOTIFF_HOME=$USR_LOCAL
 P2G_HOME=$USR_LOCAL
@@ -16,7 +16,7 @@ ORACLE_HOME=$HOME/oracle
 LAZPERF_HOME=$USR_LOCAL
 export ORACLE_HOME
 CONFIG="Unix Makefiles"
-#CONFIG="Ninja"
+#CONFIG="Ninja" /usr/local/Cellar/hdf5/1.8.16_1/
 
 if ! [ -z "$1" ]; then
     CONFIG="$1"
@@ -34,11 +34,11 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DBUILD_PLUGIN_NITF=ON \
         -DBUILD_PLUGIN_P2G=ON \
         -DBUILD_PLUGIN_PYTHON=ON \
-        -DBUILD_PLUGIN_MRSID=ON \
+        -DBUILD_PLUGIN_MRSID=OFF \
         -DBUILD_PLUGIN_CPD=ON \
         -DBUILD_PLUGIN_ICEBRIDGE=ON \
         -DBUILD_PLUGIN_PCL=ON \
-        -DBUILD_PLUGIN_GREYHOUND=OFF \
+        -DBUILD_PLUGIN_GREYHOUND=ON \
         -DWITH_LAZPERF=ON \
         -DMRSID_INCLUDE_DIR=/Users/hobu/dev/release/mrsid/Lidar_DSDK/include \
         -DMRSID_LIBRARY=/Users/hobu/dev/release/mrsid/Lidar_DSDK/lib/liblti_lidar_dsdk.dylib \
@@ -56,8 +56,8 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DSQLITE3_INCLUDE_DIR=${SQLITE_HOME}/include \
         -DSQLITE3_LIBRARY=${SQLITE_HOME}/lib/libsqlite3.${SO_EXT} \
         -DPYTHON_EXECUTABLE=/usr/local/bin/python3 \
-        -DPYTHON_LIBRARY=/usr/local/Cellar/python3/3.5.0/Frameworks/Python.framework/Versions/3.5/lib/libpython3.5.dylib \
-        -DPYTHON_INCLUDE_DIR=/usr/local/Cellar/python3/3.5.0/Frameworks/Python.framework/Versions/3.5/include/python3.5m/ \
+        -DPYTHON_LIBRARY=/usr/local/Cellar/python3/3.5.2/Frameworks/Python.framework/Versions/3.5/lib/libpython3.5.dylib \
+        -DPYTHON_INCLUDE_DIR=/usr/local/Cellar/python3/3.5.2/Frameworks/Python.framework/Versions/3.5/include/python3.5m/ \
         -DOCI_CONNECTION="grid/grid@localhost/vm" \
         -DPGPOINTCLOUD_TEST_DB_HOST="localhost"
 

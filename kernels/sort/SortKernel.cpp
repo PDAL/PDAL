@@ -72,7 +72,7 @@ void SortKernel::addSwitches(ProgramArgs& args)
 
 int SortKernel::execute()
 {
-    Stage& readerStage = makeReader(m_inputFile, "");
+    Stage& readerStage = makeReader(m_inputFile, m_driverOverride);
 
     // go ahead and prepare/execute on reader stage only to grab input
     // PointViewSet, this makes the input PointView available to both the
