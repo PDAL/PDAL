@@ -70,6 +70,7 @@
 #include <optech/OptechReader.hpp>
 #include <buffer/BufferReader.hpp>
 #include <ply/PlyReader.hpp>
+#include <pts/PtsReader.hpp>
 #include <qfit/QfitReader.hpp>
 #include <sbet/SbetReader.hpp>
 #include <terrasolid/TerrasolidReader.hpp>
@@ -105,6 +106,7 @@ StringList StageFactory::extensions(const std::string& driver)
         { "readers.nitf", { "nitf", "nsf", "ntf" } },
         { "readers.pcd", { "pcd" } },
         { "readers.ply", { "ply" } },
+        { "readers.pts", { "pts" } },
         { "readers.qfit", { "qi" } },
         { "readers.rxp", { "rxp" } },
         { "readers.sbet", { "sbet" } },
@@ -147,6 +149,7 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
         { "ntf", "readers.nitf" },
         { "pcd", "readers.pcd" },
         { "ply", "readers.ply" },
+        { "pts", "readers.pts" },
         { "qi", "readers.qfit" },
         { "rxp", "readers.rxp" },
         { "sbet", "readers.sbet" },
@@ -250,6 +253,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(LasReader_InitPlugin);
     PluginManager::initializePlugin(OptechReader_InitPlugin);
     PluginManager::initializePlugin(PlyReader_InitPlugin);
+    PluginManager::initializePlugin(PtsReader_InitPlugin);
     PluginManager::initializePlugin(QfitReader_InitPlugin);
     PluginManager::initializePlugin(SbetReader_InitPlugin);
     PluginManager::initializePlugin(TerrasolidReader_InitPlugin);
