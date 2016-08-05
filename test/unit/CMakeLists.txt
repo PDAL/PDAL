@@ -26,6 +26,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/io/las
     ${PROJECT_SOURCE_DIR}/io/optech
     ${PROJECT_SOURCE_DIR}/io/ply
+    ${PROJECT_SOURCE_DIR}/io/pts
     ${PROJECT_SOURCE_DIR}/io/qfit
     ${PROJECT_SOURCE_DIR}/io/sbet
     ${PROJECT_SOURCE_DIR}/io/text
@@ -92,6 +93,7 @@ PDAL_ADD_TEST(pdal_io_las_writer_test FILES io/las/LasWriterTest.cpp)
 PDAL_ADD_TEST(pdal_io_optech_test FILES io/optech/OptechReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_ply_reader_test FILES io/ply/PlyReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_ply_writer_test FILES io/ply/PlyWriterTest.cpp)
+PDAL_ADD_TEST(pdal_io_pts_reader_test FILES io/pts/PtsReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_qfit_test FILES io/qfit/QFITReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_sbet_reader_test FILES io/sbet/SbetReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_sbet_writer_test FILES io/sbet/SbetWriterTest.cpp)
