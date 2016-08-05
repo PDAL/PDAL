@@ -19,15 +19,15 @@ returns. The ``ground`` command invokes `Point Cloud Library
 
 ::
 
-    --input [-i] arg       Non-positional option for specifying input filename
-    --output [-o] arg      Non-positional option for specifying output filename
-    --maxWindowSize arg    max window size [33]
-    --slope arg            slope [1]
-    --maxDistance arg      max distance [2.5]
-    --initialDistance arg  initial distance [0.15]
-    --cellSize arg         cell size [1]
-    --classify             apply classification labels? [true]
-    --extract              extract ground returns? [false]
-    --approximate [-a]     Use significantly faster approximate algorithm? [false]
+    --input [-i] arg        Non-positional option for specifying input filename
+    --output [-o] arg       Non-positional option for specifying output filename
+    --max_window_size arg   max window size [33]
+    --slope arg             slope [1]
+    --max_distance arg      max distance [2.5]
+    --initial_distance arg  initial distance [0.15]
+    --cell_size arg         cell size [1]
+    --classify              apply classification labels? [true]
+    --extract               extract ground returns? [false]
+    --approximate [-a]      Use significantly faster approximate algorithm? [false]
 
 .. _`ProgressiveMorphologicalFilter`: http://pointclouds.org/documentation/tutorials/progressive_morphological_filtering.php#progressive-morphological-filtering.
