@@ -277,7 +277,7 @@ the :ref:`writers.p2g` with only the ground returns.
               "classify":false
           },
           {
-              "type":"p2g",
+              "type":"writers.p2g",
               "filename":"autzen-surface.tif",
               "output_type":"min",
               "output_format":"tif",
