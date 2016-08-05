@@ -282,18 +282,6 @@ int Kernel::innerRun(ProgramArgs& args)
 }
 
 
-bool Kernel::isDebug() const
-{
-    return m_isDebug;
-}
-
-
-uint32_t Kernel::getVerboseLevel() const
-{
-    return m_verboseLevel;
-}
-
-
 bool Kernel::isVisualize() const
 {
     return m_visualize;

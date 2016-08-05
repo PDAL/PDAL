@@ -69,8 +69,7 @@ public:
     // call this, to start the machine
     int run(int argc, const char* argv[], const std::string& appName);
 
-    bool isDebug() const;
-    uint32_t getVerboseLevel() const;
+//    bool isDebug() const;
     virtual std::string getName() const = 0;
     bool isVisualize() const;
     void visualize(PointViewPtr view);
