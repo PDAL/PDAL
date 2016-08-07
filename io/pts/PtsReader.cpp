@@ -78,7 +78,7 @@ void PtsReader::addDimensions(PointLayoutPtr layout)
     m_dims.push_back(Dimension::Id::X);
     m_dims.push_back(Dimension::Id::Y);
     m_dims.push_back(Dimension::Id::Z);
-    m_dims.push_back(Dimension::Id::Reflectance);
+    m_dims.push_back(Dimension::Id::Intensity);
     m_dims.push_back(Dimension::Id::Red);
     m_dims.push_back(Dimension::Id::Green);
     m_dims.push_back(Dimension::Id::Blue);
@@ -145,6 +145,10 @@ point_count_t PtsReader::read(PointViewPtr view, point_count_t numPts)
                     line << " in '" << m_filename << "'.  Setting to 0." <<
                     std::endl;
                 d = 0;
+            }
+            if (i == 3) // Intensity field in PTS is -2048 to 2047, we map to 0 4095
+            {
+                d += 2048;
             }
             view->setField(m_dims[i], idx, d);
         }
