@@ -76,7 +76,7 @@ void SplitKernel::validateSwitches(ProgramArgs& args)
 #endif
 
     if (m_length && m_capacity)
-        throw pdal_error("Can't specify for length and capacity.");
+        throw pdal_error("Can't specify both length and capacity.");
     if (!m_length && !m_capacity)
         m_capacity = 100000;
     if (m_outputFile.back() == pathSeparator)
