@@ -90,13 +90,12 @@ int SortKernel::execute()
 
     Stage& sortStage = makeFilter("filters.mortonorder", bufferReader);
 
-    Stage& writer = makeWriter(m_outputFile, sortStage, "");
     Options writerOptions;
     if (m_bCompress)
         writerOptions.add("compression", true);
     if (m_bForwardMetadata)
         writerOptions.add("forward_metadata", true);
-    writer.addOptions(writerOptions);
+    Stage& writer = makeWriter(m_outputFile, sortStage, "", writerOptions);
 
     writer.prepare(table);
 

@@ -93,11 +93,9 @@ int SmoothKernel::execute()
     ss << "    }";
     ss << "}";
 
-    Options smoothOptions;
-    smoothOptions.add("json", ss.str());
-
-    Stage& smoothStage = manager.makeFilter("filters.pclblock", bufferReader);
-    smoothStage.addOptions(smoothOptions);
+    Options filterOptions({"json", ss.str()});
+    Stage& smoothStage = manager.makeFilter("filters.pclblock", bufferReader,
+        filterOptions);
 
     Stage& writer(Kernel::makeWriter(m_outputFile, smoothStage, ""));
 
@@ -109,7 +107,6 @@ int SmoothKernel::execute()
 
     if (isVisualize())
         visualize(*viewSetOut.begin());
-    //visualize(*viewSetIn.begin(), *viewSetOut.begin());
 
     return 0;
 }

@@ -48,79 +48,79 @@ TEST(PipelineManagerTest, basic)
 
     PipelineManager mgr;
 
-    std::cout << "R" << std::endl;
     Options optsR;
     optsR.add("filename", Support::datapath("las/1.2-with-color.las"));
     Stage& reader = mgr.addReader("readers.las");
     reader.setOptions(optsR);
 
-    std::cout << "W" << std::endl;
     Options optsW;
     optsW.add("filename", outfile);
     Stage& writer = mgr.addWriter("writers.las");
     writer.setInput(reader);
     writer.setOptions(optsW);
 
-    std::cout << "E" << std::endl;
     point_count_t np = mgr.execute();
-    std::cout << "Done" << std::endl;
     EXPECT_EQ(np, 1065U);
 
     EXPECT_TRUE(!std::ifstream(outfile).fail());
     FileUtils::deleteFile(outfile);
 }
 
-
-//ABELL - Mosaic
-/**
-TEST(PipelineManagerTest, PipelineManagerTest_test2)
+// Make sure that when we add an option at the command line, it overrides
+// a pipeline option.
+TEST(PipelineManagerTest, OptionOrder)
 {
-    FileUtils::deleteFile("temp.las");
+    std::string cmd = Support::binpath(Support::exename("pdal") +
+        " pipeline");
 
+    std::string file(Support::configuredpath("pipeline/sort2.json"));
+
+    std::string output;
+    int stat = Utils::run_shell_command(cmd + " " + file, output);
+    EXPECT_EQ(stat, 0);
+
+    StageFactory f;
+    Stage *r = f.createStage("readers.las");
+
+    Options o;
+    o.add("filename", Support::temppath("sorted.las"));
+    r->setOptions(o);
+    
+    PointTable t;
+    r->prepare(t);
+    PointViewSet s = r->execute(t);
+    EXPECT_EQ(s.size(), 1U);
+    PointViewPtr v = *(s.begin());
+
+    double prev = std::numeric_limits<double>::lowest();
+    for (PointId idx = 0; idx < v->size(); ++idx)
     {
-        PipelineManager mgr;
-
-        Options optsR1;
-        optsR1.add("filename", Support::datapath("1.2-with-color.las"));
-        std::shared_ptr<Stage> reader1(mgr.addReader("readers.las", optsR1));
-
-        Options optsR2;
-        optsR2.add("filename", Support::datapath("1.2-with-color.las"));
-        std::shared_ptr<Stage> reader2(mgr.addReader("readers.las", optsR2));
-
-        Options optsMF;
-        std::vector<std::shared_ptr<Stage> > vec;
-        vec.push_back(reader1);
-        vec.push_back(reader2);
-        MultiFilter* multifilter = mgr.addMultiFilter("filters.mosaic", vec, optsMF);
-
-        Options optsF;
-        optsF.add("bounds", Bounds<double>(0,0,0,1000000,1000000,1000000));
-        Filter* filter = mgr.addFilter("filters.crop", multifilter, optsF);
-
-        Options optsW;
-        optsW.add("filename", "temp.las", "file to write to");
-        std::shared_ptr<Stage> writer(mgr.addWriter("writers.las", *filter, optsW));
-        point_count_t np = mgr.execute();
-
-        EXPECT_TRUE(np == 1065 * 2);
-
-        std::vector<std::shared_ptr<Stage> > reader1_inputs = reader1->getInputs();
-        std::vector<std::shared_ptr<Stage> > reader2_inputs = reader2->getInputs();
-        std::vector<std::shared_ptr<Stage> > multifilter_inputs = multifilter->getInputs();
-        std::vector<std::shared_ptr<Stage> > filter_inputs = filter->getInputs();
-        std::vector<std::shared_ptr<Stage> > writer_inputs = writer->getInputs();
-
-        EXPECT_TRUE(reader1_inputs.size() == 0);
-        EXPECT_TRUE(reader2_inputs.size() == 0);
-        EXPECT_TRUE(multifilter_inputs.size() == 2);
-        EXPECT_TRUE(multifilter_inputs[0] == reader1);
-        EXPECT_TRUE(multifilter_inputs[1] == reader2);
-        EXPECT_TRUE(filter_inputs.size() == 1);
-        EXPECT_TRUE(filter_inputs[0] == multifilter);
-        EXPECT_TRUE(writer_inputs.size() == 1);
+        double d = v->getFieldAs<double>(Dimension::Id::X, idx);
+        EXPECT_GE(d, prev);
+        prev = d;
     }
+    FileUtils::deleteFile(Support::temppath("sorted.las"));
 
-    FileUtils::deleteFile("temp.las");
+    stat = Utils::run_shell_command(cmd + " " + file +
+        " --filters.sort.dimension=Y", output);
+    EXPECT_EQ(stat, 0);
+
+    Stage *r2 = f.createStage("readers.las");
+    r2->setOptions(o);
+
+    PointTable t2;
+    r2->prepare(t2);
+    s = r2->execute(t2);
+    EXPECT_EQ(s.size(), 1U);
+    v = *(s.begin());
+
+    prev = std::numeric_limits<double>::lowest();
+    for (PointId idx = 0; idx < v->size(); ++idx)
+    {
+        double d = v->getFieldAs<double>(Dimension::Id::Y, idx);
+        EXPECT_GE(d, prev);
+        prev = d;
+    }
+    FileUtils::deleteFile(Support::temppath("sorted.las"));
 }
-**/
+

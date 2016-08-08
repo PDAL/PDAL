@@ -76,6 +76,7 @@ void PipelineManager::readPipeline(std::istream& input)
 
 void PipelineManager::readPipeline(const std::string& filename)
 {
+std::cerr << "Reading pipeline!\n";
     if (FileUtils::extension(filename) == ".xml")
     {
         PipelineReaderXML pipeReader(*this);
@@ -216,6 +217,15 @@ MetadataNode PipelineManager::getMetadata() const
 Stage& PipelineManager::makeReader(const std::string& inputFile,
     std::string driver)
 {
+    static Options nullOpts;
+
+    return makeReader(inputFile, driver, nullOpts);
+}
+
+
+Stage& PipelineManager::makeReader(const std::string& inputFile,
+    std::string driver, Options options)
+{
     if (driver.empty())
     {
         driver = StageFactory::inferReaderDriver(inputFile);
@@ -223,9 +233,8 @@ Stage& PipelineManager::makeReader(const std::string& inputFile,
             throw pdal_error("Cannot determine reader for input file: " +
                 inputFile);
     }
-    Options options;
     if (!inputFile.empty())
-        options.add("filename", inputFile);
+        options.replace("filename", inputFile);
 
     Stage& reader = addReader(driver);
     setOptions(reader, options);
@@ -235,15 +244,35 @@ Stage& PipelineManager::makeReader(const std::string& inputFile,
 
 Stage& PipelineManager::makeFilter(const std::string& driver)
 {
+    static Options nullOps;
+
     Stage& filter = addFilter(driver);
-    setOptions(filter, Options());
+    setOptions(filter, nullOps);
+    return filter;
+}
+
+
+Stage& PipelineManager::makeFilter(const std::string& driver, Options options)
+{
+    Stage& filter = addFilter(driver);
+    setOptions(filter, options);
     return filter;
 }
 
 
 Stage& PipelineManager::makeFilter(const std::string& driver, Stage& parent)
 {
-    Stage& filter = makeFilter(driver);
+    static Options nullOps;
+
+    return makeFilter(driver, parent, nullOps);
+}
+
+
+Stage& PipelineManager::makeFilter(const std::string& driver, Stage& parent,
+    Options options)
+{
+    Stage& filter = addFilter(driver);
+    setOptions(filter, options);
     filter.setInput(parent);
     return filter;
 }
@@ -251,6 +280,14 @@ Stage& PipelineManager::makeFilter(const std::string& driver, Stage& parent)
 
 Stage& PipelineManager::makeWriter(const std::string& outputFile,
     std::string driver)
+{
+    static Options nullOps;
+
+    return makeWriter(outputFile, driver, nullOps);
+}
+
+Stage& PipelineManager::makeWriter(const std::string& outputFile,
+    std::string driver, Options options)
 {
     if (driver.empty())
     {
@@ -260,9 +297,8 @@ Stage& PipelineManager::makeWriter(const std::string& outputFile,
                 outputFile);
     }
 
-    Options options;
     if (!outputFile.empty())
-        options.add("filename", outputFile);
+        options.replace("filename", outputFile);
 
     auto& writer = addWriter(driver);
     setOptions(writer, options);
@@ -273,7 +309,15 @@ Stage& PipelineManager::makeWriter(const std::string& outputFile,
 Stage& PipelineManager::makeWriter(const std::string& outputFile,
     std::string driver, Stage& parent)
 {
-    Stage& writer = makeWriter(outputFile, driver);
+    static Options nullOps;
+
+    return makeWriter(outputFile, driver, parent, nullOps);
+}
+
+Stage& PipelineManager::makeWriter(const std::string& outputFile,
+    std::string driver, Stage& parent, Options options)
+{
+    Stage& writer = makeWriter(outputFile, driver, options);
     writer.setInput(parent);
     return writer;
 }

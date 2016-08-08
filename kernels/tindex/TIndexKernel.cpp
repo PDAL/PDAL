@@ -370,11 +370,11 @@ void TIndexKernel::mergeFile()
 
         if (m_tgtSrsString != f.m_srs)
         {
-            Stage& repro = makeFilter("filters.reprojection", reader);
             Options reproOptions;
             reproOptions.add("out_srs", m_tgtSrsString);
             reproOptions.add("in_srs", f.m_srs);
-            repro.addOptions(reproOptions);
+            Stage& repro = makeFilter("filters.reprojection", reader,
+                reproOptions);
             premerge = &repro;
         }
 
@@ -382,20 +382,17 @@ void TIndexKernel::mergeFile()
         // can be used as a test here.
         if (!m_wkt.empty())
         {
-            Stage& crop = makeFilter("filters.crop", *premerge);
-            crop.addOptions(cropOptions);
+            Stage& crop = makeFilter("filters.crop", *premerge, cropOptions);
             premerge = &crop;
         }
         merge.setInput(*premerge);
     }
 
-    Stage& writer = makeWriter(m_filespec, merge, "");
-
     Options writerOptions;
     writerOptions.add("offset_x", "auto");
     writerOptions.add("offset_y", "auto");
     writerOptions.add("offset_z", "auto");
-    writer.addConditionalOptions(writerOptions);
+    Stage& writer = makeWriter(m_filespec, merge, "", writerOptions);
 
     PointTable table;
     writer.prepare(table);

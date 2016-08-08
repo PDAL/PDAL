@@ -134,6 +134,12 @@ public:
     // if option name not present, just returns
     void remove(const Option& option);
 
+    void replace(const Option& option)
+    {
+        remove(option);
+        add(option);
+    }
+
     void toMetadata(MetadataNode& parent) const
     {
         for (std::string& k : getKeys())
@@ -167,6 +173,24 @@ public:
     {
         Option opt(name, value);
         add(opt);
+    }
+
+    template<typename T> void replace(const std::string& name, T value)
+    {
+        Option opt(name, value);
+        replace(opt);
+    }
+
+    void replace(const std::string& name, const std::string& value)
+    {
+        Option opt(name, value);
+        replace(opt);
+    }
+
+    void replace(const std::string& name, const bool& value)
+    {
+        Option opt(name, value);
+        replace(opt);
     }
 
     StringList getValues(const std::string& name) const

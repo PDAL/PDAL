@@ -91,11 +91,9 @@ int PCLKernel::execute()
     std::shared_ptr<BufferReader> bufferReader(new BufferReader);
     bufferReader->addView(input_view);
 
-    Options pclOptions;
-    pclOptions.add("filename", m_pclFile);
-
-    Stage& pclStage = makeFilter("filters.pclblock", *bufferReader);
-    pclStage.addOptions(pclOptions);
+    Options filterOptions({"filename", m_pclFile});
+    Stage& pclStage = makeFilter("filters.pclblock", *bufferReader,
+        filterOptions);
 
     // the PCLBlock stage consumes the BufferReader rather than the
     // readerStage
@@ -106,8 +104,7 @@ int PCLKernel::execute()
     if (m_bForwardMetadata)
         writerOptions.add("forward_metadata", true);
 
-    Stage& writer(makeWriter(m_outputFile, pclStage, ""));
-    writer.addOptions(writerOptions);
+    Stage& writer(makeWriter(m_outputFile, pclStage, "", writerOptions));
 
     writer.prepare(table);
 

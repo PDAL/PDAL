@@ -92,16 +92,12 @@ int RandomKernel::execute()
     else
         throw pdal_error("invalid distribution: " + m_distribution);
     readerOptions.add("count", m_numPointsToWrite);
+    Stage& reader = makeReader("", "readers.faux", readerOptions);
 
     Options writerOptions;
     if (m_bCompress)
         writerOptions.add("compression", true);
-
-    Stage& reader = makeReader("", "readers.faux");
-    reader.addOptions(readerOptions);
-
-    Stage& writer = makeWriter(m_outputFile, reader, "");
-    writer.addOptions(writerOptions);
+    Stage& writer = makeWriter(m_outputFile, reader, "", writerOptions);
 
     PointTable table;
     writer.prepare(table);

@@ -152,29 +152,8 @@ int DiffKernel::execute()
 
         oss << "Source and candidate files do not have the same "
             "number of dimensions";
-//         errors.put<std::string>("schema.error", oss.str());
-        //Need to "ptree" the PointTable dimension list in some way
-        // errors.put_child("schema.source", sourceTable.schema()->toPTree());
-        // errors.put_child("schema.candidate",
-        //     candidateTable.schema()->toPTree());
     }
 
-//     if (errors.size())
-//     {
-//         write_json(std::cout, errors);
-//         return 1;
-//     }
-//     else
-    {
-        // If we made it this far with no errors, now we'll
-        // check the points.
-//         checkPoints(*sourceView, *candidateView, errors);
-//         if (errors.size())
-//         {
-//             write_json(std::cout, errors);
-//             return 1;
-//         }
-    }
     return 0;
 }
 
