@@ -117,11 +117,11 @@ TEST(PluginManagerTest, SearchPaths)
     Utils::unsetenv("PDAL_DRIVER_PATH");
 
     StringList paths = PluginManager::test_pluginSearchPaths();
-    EXPECT_EQ(paths.size(), 5U);
     EXPECT_TRUE(Utils::contains(paths, "/usr/local/lib"));
     EXPECT_TRUE(Utils::contains(paths, "./lib"));
     EXPECT_TRUE(Utils::contains(paths, "../lib"));
     EXPECT_TRUE(Utils::contains(paths, "../bin"));
+    EXPECT_TRUE(Utils::contains(paths, PDAL_PLUGIN_INSTALL_PATH));
 
     Utils::setenv("PDAL_DRIVER_PATH", "/foo/bar://baz");
     paths = PluginManager::test_pluginSearchPaths();
