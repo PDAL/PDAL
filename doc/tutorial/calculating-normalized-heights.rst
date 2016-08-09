@@ -164,7 +164,7 @@ we run the following PDAL CLI command
 ::
 
     $ pdal translate autzen.laz autzen-height.bpf height \
-      --writers.bpf.output_dims="X,Y,Z,Height"
+      --writers.bpf.output_dims="X,Y,Z,HeightAboveGround"
 
 The result, when colored by the normalized height instead of elevation is
 
@@ -179,7 +179,7 @@ If you'd like to overwrite your Z values, follow the height filter with :ref:`fi
 ::
 
     $ pdal translate input.laz output-height-as-Z.bpf height ferry \
-      --writers.bpf.output_dims="X,Y,Z" --filters.ferry.dimensions="Height=Z"
+      --writers.bpf.output_dims="X,Y,Z" --filters.ferry.dimensions="HeightAboveGround=Z"
 
 Example #3
 -------------------------------------------------------------------------------
@@ -189,4 +189,4 @@ If you don't yet have points classified as ground, start with :ref:`filters.grou
 ::
 
     $ pdal translate input.laz output-ground-height.bpf ground height \
-      --writers.bpf.output_dims="X,Y,Z,Height"
+      --writers.bpf.output_dims="X,Y,Z,HeightAboveGround"
