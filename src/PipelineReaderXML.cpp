@@ -253,9 +253,7 @@ Stage *PipelineReaderXML::parseElement_Reader(const ptree& tree)
         type = attrs["type"];
     }
 
-    Stage& reader = m_manager.makeReader(filename, type);
-    reader.removeOptions(options);
-    reader.addOptions(options);
+    Stage& reader = m_manager.makeReader(filename, type, options);
 
     context.addType();
     context.validate();
@@ -306,9 +304,7 @@ Stage *PipelineReaderXML::parseElement_Filter(const ptree& tree)
     if (attrs.count("type"))
         type = attrs["type"];
 
-    Stage& filter = m_manager.makeFilter(type);
-    filter.removeOptions(options);
-    filter.addOptions(options);
+    Stage& filter = m_manager.makeFilter(type, options);
     for (auto sp : prevStages)
         filter.setInput(*sp);
     context.setCardinality(StageParserContext::Many);
@@ -390,11 +386,9 @@ Stage *PipelineReaderXML::parseElement_Writer(const ptree& tree)
     }
 
     context.validate();
-    Stage& writer = m_manager.makeWriter(filename, type);
+    Stage& writer = m_manager.makeWriter(filename, type, options);
     for (auto sp : prevStages)
         writer.setInput(*sp);
-    writer.removeOptions(options);
-    writer.addOptions(options);
     return &writer;
 }
 

@@ -104,8 +104,8 @@ int GroundKernel::execute()
     groundOptions.add("extract", m_extract);
     groundOptions.add("approximate", m_approximate);
 
-    Stage& groundStage = makeFilter("filters.ground", readerStage);
-    groundStage.addOptions(groundOptions);
+    Stage& groundStage = makeFilter("filters.ground", readerStage,
+        groundOptions);
 
     // setup the Writer and write the results
     Stage& writer(makeWriter(m_outputFile, groundStage, ""));
@@ -118,7 +118,6 @@ int GroundKernel::execute()
 
     if (isVisualize())
         visualize(*viewSetOut.begin());
-    //visualize(*viewSetIn.begin(), *viewSetOut.begin());
 
     return 0;
 }

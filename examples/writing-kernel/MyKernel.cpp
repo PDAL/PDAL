@@ -41,10 +41,12 @@ namespace pdal {
 
     Stage& reader = makeReader(m_input_file, "readers.las");
 
-    Stage& filter = makeFilter("filters.decimation", reader);
+    // Options should be added in the call to makeFilter, makeReader,
+    // or makeWriter so that the system can override them with those
+    // provided on the command line when applicable.
     Options filterOptions;
     filterOptions.add("step", 10);
-    filter.addOptions(filterOptions);
+    Stage& filter = makeFilter("filters.decimation", reader, filterOptions);
 
     Stage& writer = makeWriter(m_output_file, filter, "writers.text");
     writer.prepare(table);

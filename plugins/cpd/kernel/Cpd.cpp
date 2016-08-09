@@ -219,14 +219,12 @@ int CpdKernel::execute()
     reader.addView(outView);
 
     Options writerOpts;
-
-    Stage& writer = makeWriter(m_output, reader, "");
-    if (writer.getName() == "writers.text")   
+    if (StageFactory::inferReaderDriver(m_output) == "writers.text")   
     {
         writerOpts.add("order", "X,Y,Z,XVelocity,YVelocity,ZVelocity");
         writerOpts.add("keep_unspecified", false);
     }
-    writer.addOptions(writerOpts);
+    Stage& writer = makeWriter(m_output, reader, "", writerOpts);
     writer.prepare(outTable);
     writer.execute(outTable);
 

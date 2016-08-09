@@ -78,10 +78,16 @@ protected:
     // this is protected; your derived class ctor will be the public entry point
     Kernel();
     Stage& makeReader(const std::string& inputFile, std::string driver);
+    Stage& makeReader(const std::string& inputFile, std::string driver,
+        Options options);
     Stage& makeFilter(const std::string& driver, Stage& parent);
+    Stage& makeFilter(const std::string& driver, Stage& parent,
+        Options options);
     Stage& makeFilter(const std::string& driver);
     Stage& makeWriter(const std::string& outputFile, Stage& parent,
         std::string driver);
+    Stage& makeWriter(const std::string& outputFile, Stage& parent,
+        std::string driver, Options options);
 
 public:
     virtual void addSwitches(ProgramArgs& args)

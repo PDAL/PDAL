@@ -36,7 +36,6 @@
 #include "TranslateKernel.hpp"
 
 #include <pdal/KernelFactory.hpp>
-#include <pdal/Options.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/PipelineWriter.hpp>
 #include <pdal/PointTable.hpp>
@@ -88,8 +87,6 @@ void TranslateKernel::addSwitches(ProgramArgs& args)
 
 int TranslateKernel::execute()
 {
-    Options readerOptions, filterOptions, writerOptions;
-
     Stage& reader = m_manager.makeReader(m_inputFile, m_readerType);
     Stage* stage = &reader;
 

@@ -272,12 +272,10 @@ void InfoKernel::makePipeline(const std::string& filename, bool noPoints)
     }
     else
     {
-        Stage& reader = m_manager.makeReader(filename, m_driverOverride);
+        Options ops;
         if (noPoints)
-        {
-            Options ops({"count", 0});
-            reader.addOptions(ops);
-        }
+            ops.add("count", 0);
+        Stage& reader = m_manager.makeReader(filename, m_driverOverride, ops);
         m_reader = &reader;
     }
 }
@@ -290,12 +288,11 @@ void InfoKernel::setup(const std::string& filename)
     Stage *stage = m_reader;
     if (m_showStats)
     {
-        m_statsStage = &m_manager.makeFilter("filters.stats", *stage);
+        Options filterOptions;
         if (m_dimensions.size())
-        {
-            Options ops({"dimensions", m_dimensions});
-            m_statsStage->addOptions(ops);
-        }
+            filterOptions.add({"dimensions", m_dimensions});
+        m_statsStage = &m_manager.makeFilter("filters.stats", *stage,
+            filterOptions);
         stage = m_statsStage;
     }
     if (m_boundary)

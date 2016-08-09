@@ -93,7 +93,7 @@ void PipelineReaderJSON::parsePipeline(Json::Value& tree)
         if ((type.empty() && (i == 0 || i != last)) ||
             Utils::startsWith(type, "readers."))
         {
-            s = &m_manager.makeReader(filename, type);
+            s = &m_manager.makeReader(filename, type, options);
             if (specifiedInputs.size())
                 throw pdal_error("JSON pipeline: Inputs not permitted for "
                     " reader: '" + filename + "'.");
@@ -101,24 +101,23 @@ void PipelineReaderJSON::parsePipeline(Json::Value& tree)
         }
         else if (type.empty() || Utils::startsWith(type, "writers."))
         {
-            s = &m_manager.makeWriter(filename, type);
+            s = &m_manager.makeWriter(filename, type, options);
             for (Stage *ts : inputs)
                 s->setInput(*ts);
             inputs.clear();
         }
         else
         {
-            s = &m_manager.makeFilter(type);
+            if (filename.size())
+                options.add("filename", filename);
+            s = &m_manager.makeFilter(type, options);
             for (Stage *ts : inputs)
                 s->setInput(*ts);
             inputs.clear();
             inputs.push_back(s);
-            if (filename.size())
-                options.add("filename", filename);
         }
         // s should be valid at this point.  makeXXX will throw if the stage
         // couldn't be constructed.
-        s->addOptions(options);
         if (tag.size())
             tags[tag] = s;
     }

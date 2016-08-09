@@ -486,6 +486,13 @@ Stage& Kernel::makeReader(const std::string& inputFile, std::string driver)
 }
 
 
+Stage& Kernel::makeReader(const std::string& inputFile, std::string driver,
+    Options options)
+{
+    return m_manager.makeReader(inputFile, driver, options);
+}
+
+
 Stage& Kernel::makeFilter(const std::string& driver)
 {
     return m_manager.makeFilter(driver);
@@ -498,10 +505,24 @@ Stage& Kernel::makeFilter(const std::string& driver, Stage& parent)
 }
 
 
+Stage& Kernel::makeFilter(const std::string& driver, Stage& parent,
+    Options options)
+{
+    return m_manager.makeFilter(driver, parent, options);
+}
+
+
 Stage& Kernel::makeWriter(const std::string& outputFile, Stage& parent,
     std::string driver)
 {
     return m_manager.makeWriter(outputFile, driver, parent);
+}
+
+
+Stage& Kernel::makeWriter(const std::string& outputFile, Stage& parent,
+    std::string driver, Options options)
+{
+    return m_manager.makeWriter(outputFile, driver, parent, options);
 }
 
 
