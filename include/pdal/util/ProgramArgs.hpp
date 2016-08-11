@@ -925,7 +925,9 @@ public:
     */
     void parseSimple(std::vector<std::string>& s)
     {
-        m_positional.clear();
+        UnmatchedList unmatched;
+        bool matched;
+
         for (size_t i = 0; i < s.size();)
         {
             std::string& arg = s[i];
@@ -935,12 +937,32 @@ public:
             std::string value((i != s.size() - 1) ? s[i + 1] : "");
             try
             {
-                i += parseArg(arg, value);
+                i += parseArg(arg, value, matched);
+                if (!matched)
+                    unmatched.push_back(arg);
             }
-            catch (arg_error& )
+            catch (arg_error&)
             {
                 i++;
             }
+        }
+
+        // Go through args and assign those unset to items from the command
+        // line not already consumed.
+        for (auto ai = m_args.begin(); ai != m_args.end(); ++ai)
+        {
+            Arg *arg = ai->get();
+            size_t cnt = 0;
+            try
+            {
+                cnt = arg->assignPositional(unmatched);
+            }
+            catch (arg_error&)
+            {
+                cnt = 1;
+            }
+            while (cnt-- && unmatched.size())
+                unmatched.pop_front();
         }
     }
 
@@ -953,7 +975,9 @@ public:
     */
     void parse(std::vector<std::string>& s)
     {
-        m_positional.clear();
+        UnmatchedList unmatched;
+        bool matched;
+
         validate();
 
         for (size_t i = 0; i < s.size();)
@@ -963,16 +987,19 @@ public:
             // just in case.  If there is no value, pass along "" to make
             // clear that there is none.
             std::string value((i != s.size() - 1) ? s[i + 1] : "");
-            i += parseArg(arg, value);
+            i += parseArg(arg, value, matched);
+            if (!matched)
+                unmatched.push_back(arg);
         }
 
-        // Go through things looking for matches.
+        // Go through args and assign those unset to items from the command
+        // line not already consumed.
         for (auto ai = m_args.begin(); ai != m_args.end(); ++ai)
         {
             Arg *arg = ai->get();
-            size_t cnt = arg->assignPositional(m_positional);
+            size_t cnt = arg->assignPositional(unmatched);
             while (cnt--)
-                m_positional.pop_front();
+                unmatched.pop_front();
         }
     }
 
@@ -1199,16 +1226,18 @@ private:
 
       \param arg  Name of argument specified on command line.
       \param value  Potential value assigned to argument.
+      \param matched[out] Whether we matched the arg or not.
       \return  Number of strings consumed (1 for positional arguments or
         arguments that don't take values or 2 otherwise).
     */
-    int parseArg(std::string& arg, std::string value)
+    int parseArg(std::string& arg, std::string value, bool& matched)
     {
+        matched = true;
         if (arg.size() > 1 && arg[0] == '-' && arg[1] == '-')
             return parseLongArg(arg, value);
         else if (arg.size() && arg[0] == '-')
             return parseShortArg(arg, value);
-        m_positional.push_back(arg);
+        matched = false;
         return 1;
     }
 
@@ -1368,10 +1397,10 @@ private:
     std::map<std::string, Arg *> m_longargs;  /// Map from longname to args
 
     /*
-      Contains remaining arguments after positional argument have been
+      Contains remaining arguments after non-positional argument have been
       processed.
     */
-    std::deque<std::string> m_positional;
+    typedef std::deque<std::string> UnmatchedList;
 };
 
 } // namespace pdal

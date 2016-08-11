@@ -361,4 +361,47 @@ TEST(ProgramArgsTest, vectorfail)
     EXPECT_THROW(args.parse(s), arg_error);
 }
 
+TEST(ProgramArgsTest, parseSimple)
+{
+    ProgramArgs args;
+
+    std::string m_foo;
+    int m_bar;
+    bool m_baz;
+    StringList m_vec;
+
+    args.add("foo,f", "Foo description", m_foo, "foo").setPositional();
+    args.add("vec", "Vec description", m_vec).setPositional();
+    args.add("bar", "Foo description", m_bar, 23);
+    args.add("baz,z", "Foo description", m_baz);
+
+    StringList s = toStringList("--foo TEst --bar=45 -z");
+    args.parseSimple(s);
+    EXPECT_EQ(m_foo, "TEst");
+    EXPECT_EQ(m_bar, 45);
+    EXPECT_EQ(m_baz, true);
+
+    args.reset();
+    s = toStringList("-zf FooTest --bar=55");
+    args.parseSimple(s);
+    EXPECT_EQ(m_foo, "FooTest");
+    EXPECT_EQ(m_bar, 55);
+    EXPECT_EQ(m_baz, true);
+
+    args.reset();
+    s = toStringList("");
+    EXPECT_EQ(m_foo, "foo");
+    EXPECT_EQ(m_bar, 23);
+    EXPECT_EQ(m_baz, false);
+
+    s = toStringList("--bar 55 Foo Barf Vec");
+    args.parseSimple(s);
+    EXPECT_EQ(m_foo, "Foo");
+    EXPECT_EQ(m_bar, 55);
+    EXPECT_EQ(m_baz, false);
+
+    s = toStringList("--bar 55 Foo Barf");
+    EXPECT_THROW(args.parse(s), arg_error);
+}
+
 #endif
