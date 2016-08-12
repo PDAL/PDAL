@@ -40,6 +40,73 @@ public:
     std::string m_error;
 };
 
+namespace
+{
+
+struct ProvidedVal
+{
+public:
+    ProvidedVal(const std::string& s) : m_val(s), m_consumed(false)
+    {}
+
+    std::string m_val;
+    bool m_consumed;
+};
+typedef std::deque<ProvidedVal> ProvidedValList;
+
+class ArgValList
+{
+    struct ArgVal
+    {
+        std::string m_val;
+        bool m_consumed;
+
+        ArgVal(const std::string& s) :
+            m_val(s), m_consumed(false)
+        {}
+    };
+
+public:
+    ArgValList(const std::vector<std::string>& slist) : m_unconsumedStart(0)
+    {
+        for (const std::string& s : slist)
+            add(s);
+    }
+
+    void add(const std::string& s)
+    {
+        if (s.empty())
+            return;
+        if (s.size() > 1 && s[0] == '-' && s[1] != '-')
+            for (size_t i = 1; i < s.size(); i++)
+                m_vals.push_back({std::string("-") + s[i]});
+        else
+            m_vals.push_back({s});
+    }
+
+    void consume(size_t i)
+    {
+        m_vals[i].m_consumed = true;
+        if (i == m_unconsumedStart)
+            while (i < m_vals.size() && consumed(++i))
+                m_unconsumedStart++;
+    }
+
+    size_t size() const
+        { return m_vals.size(); }
+    const std::string& operator[](size_t i) const
+        { return m_vals[i].m_val; }
+    bool consumed(size_t i) const
+        { return m_vals[i].m_consumed; }
+    size_t firstUnconsumed() const
+        { return m_unconsumedStart; }
+private:
+    std::vector<ArgVal> m_vals;
+    size_t m_unconsumedStart;
+};
+
+} // unnamed namespace
+
 
 /**
    Description of an argument that can be parsed by \class ProgramArgs.
@@ -180,15 +247,13 @@ public:
     virtual void reset() = 0;
 
     /**
-      Set the argument's value from the positional list.
+      Set the argument's value from the list of command-line args.
       \note  Not intended to be called from user code.
 
-      \param posList  The list of positional strings specified on the command
-        line.
-      \return  The number of positional strings consumed by this argument.
+      \param vals  The list of command-line argument values.
     */
-    virtual size_t assignPositional(const std::deque<std::string> posList)
-        { return 0; }
+    virtual void assignPositional(ArgValList& vals)
+    {}
 
     /**
       Returns the positional type of the argument.
@@ -358,38 +423,37 @@ public:
     }
 
     /**
-      Set the argument's value from the positional list.
+      Set the argument's value from the command-line args.
 
       If no value is provided for a required positional option, an arg_error
       exception is thrown.
       \note  Not intended to be called from user code.
 
-      \param posList  The list of positional strings specified on the command
-        line.
-      \return  The number of positional strings consumed by this argument
-        (always 0 or 1).
+      \param vals  The list of command-line args.
     */
-    virtual size_t assignPositional(const std::deque<std::string> posList)
+    virtual void assignPositional(ArgValList& vals)
     {
         if (m_positional == PosType::None || m_set)
-            return 0;
-
-        if (posList.empty())
+            return;
+        for (size_t i = vals.firstUnconsumed(); i < vals.size(); ++i)
         {
-            if (m_positional == PosType::Required)
-            {
-                std::ostringstream oss;
-
-                oss << "Missing value for positional argument '" <<
-                    m_longname << "'.";
-                throw arg_error(oss.str());
-            }
-            else
-                return 0;
+            const std::string& val = vals[i];
+            if ((val.size() && val[0] == '-') || vals.consumed(i))
+                continue;
+            setValue(val);
+            vals.consume(i);
+            return;
         }
-        setValue(posList.front());
-        return 1;
+        if (m_positional == PosType::Required)
+        {
+            std::ostringstream oss;
+
+            oss << "Missing value for positional argument '" <<
+                m_longname << "'.";
+            throw arg_error(oss.str());
+        }
     }
+
     /**
       Return whether a default value was provided for the argument.
 
@@ -578,32 +642,37 @@ public:
     {}
 
     /**
-      Set the argument's value from the positional list.
+      Set the argument's value from the command-line args.
 
       List-based arguments consume ALL positional arguments until
       one is found that can't be converted to the type of the bound variable.
       \note  Not intended to be called from user code.
 
-      \param posList  The list of positional strings specified on the command
-        line.
-      \return  The number of positional strings consumed by this argument.
+      \param vals  The list of command-line args.
     */
-    virtual size_t assignPositional(const std::deque<std::string> posList)
+    virtual void assignPositional(ArgValList& vals)
     {
         if (m_positional == PosType::None || m_set)
-            return 0;
+            return;
 
-        size_t cnt;
-        for (cnt = 0; cnt < posList.size(); ++cnt)
+        int cnt = 0;
+        for (size_t i = vals.firstUnconsumed(); i < vals.size(); ++i)
+        {
+            const std::string& val = vals[i];
+            if ((val.size() && val[0] == '-') || vals.consumed(i))
+                continue;
             try
             {
-                setValue(posList[cnt]);
+                setValue(val);
+                vals.consume(i);
+                cnt++;
             }
             catch (arg_error&)
             {
                 break;
             }
-        if (cnt == 0 && m_positional == Arg::PosType::Required)
+        }
+        if (cnt == 0 && m_positional == PosType::Required)
         {
             std::ostringstream oss;
 
@@ -611,7 +680,6 @@ public:
                 m_longname << "'.";
             throw arg_error(oss.str());
         }
-        return cnt;
     }
 };
 
@@ -765,6 +833,7 @@ private:
 */
 class ProgramArgs
 {
+
 public:
     /**
       Add a string argument to the list of arguments.
@@ -884,37 +953,23 @@ public:
         return *arg;
     }
 
-    /**
-      Parse a command line as specified by its argument list.  Parsing
-      validates the argument vector and assigns values to variables bound
-      to added arguments.
-
-      \param argc  Number of entries in the argument list.
-      \param argv  List of strings that constitute the argument list.
-    */
-    void parse(int argc, char *argv[])
+    ProvidedValList toExpandedList(std::vector<std::string>& cmdLine)
     {
-        std::vector<std::string> s;
-        for (size_t i = 0; i < (size_t)argc; ++i)
-            s.push_back(argv[i]);
-        parse(s);
+        ProvidedValList l;
+
+        for (std::string& s : cmdLine)
+        {
+            if (s.size() > 1 && s[0] == '-' && s[1] != '-')
+            {
+                for (size_t i = 1; i < s.size(); ++i)
+                    l.push_back(std::string("-") + s[i]);
+            }        
+            else
+                l.push_back({s});
+        }
+        return l;
     }
 
-    /**
-      Parse a command line as specified by its argument vector.  No validation
-      occurs and no exceptions are raised, but assignments are made
-      to bound variables where possible.
-
-      \param argc  Number of entries in the argument list.
-      \param argv  List of strings that constitute the argument list.
-    */
-    void parseSimple(int argc, char *argv[])
-    {
-        std::vector<std::string> s;
-        for (size_t i = 0; i < (size_t)argc; ++i)
-            s.push_back(argv[i]);
-        parseSimple(s);
-    }
 
     /**
       Parse a command line as specified by its argument vector.  No validation
@@ -925,21 +980,23 @@ public:
     */
     void parseSimple(std::vector<std::string>& s)
     {
-        UnmatchedList unmatched;
-        bool matched;
+        ArgValList vals(s);
 
-        for (size_t i = 0; i < s.size();)
+        for (size_t i = 0; i < vals.size();)
         {
-            std::string& arg = s[i];
+            const std::string& arg = vals[i];
             // This may be the value, or it may not.  We're passing it along
             // just in case.  If there is no value, pass along "" to make
             // clear that there is none.
-            std::string value((i != s.size() - 1) ? s[i + 1] : "");
+            std::string value((i != vals.size() - 1) ? vals[i + 1] : "");
             try
             {
-                i += parseArg(arg, value, matched);
+                int matched = parseArg(arg, value);
                 if (!matched)
-                    unmatched.push_back(arg);
+                    i++;
+                else
+                    while (matched--)
+                        vals.consume(i++);
             }
             catch (arg_error&)
             {
@@ -952,17 +1009,12 @@ public:
         for (auto ai = m_args.begin(); ai != m_args.end(); ++ai)
         {
             Arg *arg = ai->get();
-            size_t cnt = 0;
             try
             {
-                cnt = arg->assignPositional(unmatched);
+                arg->assignPositional(vals);
             }
             catch (arg_error&)
-            {
-                cnt = 1;
-            }
-            while (cnt-- && unmatched.size())
-                unmatched.pop_front();
+            {}
         }
     }
 
@@ -975,21 +1027,21 @@ public:
     */
     void parse(std::vector<std::string>& s)
     {
-        UnmatchedList unmatched;
-        bool matched;
-
         validate();
-
-        for (size_t i = 0; i < s.size();)
+        ArgValList vals(s);
+        for (size_t i = 0; i < vals.size();)
         {
-            std::string& arg = s[i];
+            const std::string& arg = vals[i];
             // This may be the value, or it may not.  We're passing it along
             // just in case.  If there is no value, pass along "" to make
             // clear that there is none.
-            std::string value((i != s.size() - 1) ? s[i + 1] : "");
-            i += parseArg(arg, value, matched);
+            std::string value((i != vals.size() - 1) ? vals[i + 1] : "");
+            size_t matched = parseArg(arg, value);
             if (!matched)
-                unmatched.push_back(arg);
+                i++;
+            else
+                while (matched--)
+                    vals.consume(i++);
         }
 
         // Go through args and assign those unset to items from the command
@@ -997,9 +1049,7 @@ public:
         for (auto ai = m_args.begin(); ai != m_args.end(); ++ai)
         {
             Arg *arg = ai->get();
-            size_t cnt = arg->assignPositional(unmatched);
-            while (cnt--)
-                unmatched.pop_front();
+            arg->assignPositional(vals);
         }
     }
 
@@ -1226,19 +1276,16 @@ private:
 
       \param arg  Name of argument specified on command line.
       \param value  Potential value assigned to argument.
-      \param matched[out] Whether we matched the arg or not.
       \return  Number of strings consumed (1 for positional arguments or
         arguments that don't take values or 2 otherwise).
     */
-    int parseArg(std::string& arg, std::string value, bool& matched)
+    int parseArg(const std::string& arg, const std::string& value)
     {
-        matched = true;
         if (arg.size() > 1 && arg[0] == '-' && arg[1] == '-')
             return parseLongArg(arg, value);
         else if (arg.size() && arg[0] == '-')
             return parseShortArg(arg, value);
-        matched = false;
-        return 1;
+        return 0;
     }
 
     /*
@@ -1251,14 +1298,15 @@ private:
       \return  Number of strings consumed (1 for positional arguments or
         arguments that don't take values or 2 otherwise).
     */
-    int parseLongArg(std::string name, std::string value)
+    int parseLongArg(const std::string& inName, const std::string& inValue)
     {
         bool attachedValue = false;
 
-        if (name.size() == 2)
+        if (inName.size() == 2)
             throw arg_error("No argument found following '--'.");
 
-        name = name.substr(2);
+        std::string name = inName.substr(2);
+        std::string value = inValue;
 
         std::size_t pos = name.find_first_of("=");
         if (pos != std::string::npos)
@@ -1316,12 +1364,11 @@ private:
       \return  Number of strings consumed (1 for positional arguments or
         arguments that don't take values or 2 otherwise).
     */
-    int parseShortArg(std::string& name, std::string value)
+    int parseShortArg(const std::string& name, const std::string& value)
     {
-        int cnt = 1;
-
         if (name.size() == 1)
             throw arg_error("No argument found following '-'.");
+        assert(name.size() == 2);
 
         Arg *arg = findShortArg(name[1]);
         if (!arg)
@@ -1331,41 +1378,28 @@ private:
             throw arg_error(oss.str());
         }
 
+        int cnt;
         if (arg->needsValue())
         {
-            if (name.size() == 2)
+            // If the value starts with a '-', assume it's an option
+            // rather than a value.
+            if (value.empty() || value[0] == '-')
             {
-                // If the value starts with a '-', assume it's an option
-                // rather than a value.
-                if (value.size() && value[0] == '-')
-                {
-                    value.clear();
-                    cnt = 1;
-                }
-                else
-                    cnt = 2;
-                arg->setValue(value);
+                std::ostringstream oss;
+                oss << "Short option '" << name << "' expects value "
+                    "but none directly follows.";
+                throw arg_error(oss.str());
             }
             else
             {
-                std::ostringstream oss;
-
-                oss << "Short option '" << name[1] << "' expects value "
-                    "but appears in option group '" << name << "'.";
-                throw arg_error(oss.str());
+                cnt = 2;
+                arg->setValue(value);
             }
         }
         else
-            arg->setValue("true");
-
-        // If we were specifying a bunch of short options in a group
-        // (like -tswq), then rebuild the option name without the
-        // processed value ('t' in the example), and set cnt to 0 to
-        // say that the argument hasn't been consumed.
-        if (name.size() > 2)
         {
-            name = std::string(1, '-') + name.substr(2);
-            cnt = 0;
+            arg->setValue("true");
+            cnt = 1;
         }
         return cnt;
     }
@@ -1395,12 +1429,6 @@ private:
     std::vector<std::unique_ptr<Arg>> m_args;  /// Storage for arguments
     std::map<std::string, Arg *> m_shortargs;  /// Map from shortname to args
     std::map<std::string, Arg *> m_longargs;  /// Map from longname to args
-
-    /*
-      Contains remaining arguments after non-positional argument have been
-      processed.
-    */
-    typedef std::deque<std::string> UnmatchedList;
 };
 
 } // namespace pdal

@@ -119,7 +119,10 @@ bool DimBuilder::parseArgs(int argc, char *argv[])
         "provided JSON.", m_output).setPositional();
     try
     {
-        args.parse(argc, argv);
+        std::vector<std::string> s;
+        for (int i = 0; i < argc; ++i)
+            s.push_back(argv[i]);
+        args.parse(s);
     }
     catch (arg_error& err)
     {
