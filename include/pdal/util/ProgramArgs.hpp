@@ -92,6 +92,16 @@ public:
                 m_unconsumedStart++;
     }
 
+    std::vector<std::string> unconsumedArgs() const
+    {
+        std::vector<std::string> remainingVals;
+
+        for (size_t i = firstUnconsumed(); i < size(); ++i)
+            if (!consumed(i))
+                remainingVals.push_back(m_vals[i].m_val);
+        return remainingVals;
+    }
+
     size_t size() const
         { return m_vals.size(); }
     const std::string& operator[](size_t i) const
@@ -1016,6 +1026,7 @@ public:
             catch (arg_error&)
             {}
         }
+        s = vals.unconsumedArgs();
     }
 
     /**

@@ -394,11 +394,17 @@ TEST(ProgramArgsTest, parseSimple)
     EXPECT_EQ(m_bar, 23);
     EXPECT_EQ(m_baz, false);
 
-    s = toStringList("--bar 55 Foo Barf Vec");
+    s = toStringList("--bar 55 Foo Barf --holy=Holy --cow=Moo Vec");
     args.parseSimple(s);
     EXPECT_EQ(m_foo, "Foo");
     EXPECT_EQ(m_bar, 55);
     EXPECT_EQ(m_baz, false);
+    EXPECT_EQ(m_vec.size(), 2U);
+    EXPECT_EQ(m_vec[0], "Barf");
+    EXPECT_EQ(m_vec[1], "Vec");
+    EXPECT_EQ(s.size(), 2U);
+    EXPECT_EQ(s[0], "--holy=Holy");
+    EXPECT_EQ(s[1], "--cow=Moo");
 
     s = toStringList("--bar 55 Foo Barf");
     EXPECT_THROW(args.parse(s), arg_error);
