@@ -76,7 +76,6 @@ void PipelineManager::readPipeline(std::istream& input)
 
 void PipelineManager::readPipeline(const std::string& filename)
 {
-std::cerr << "Reading pipeline!\n";
     if (FileUtils::extension(filename) == ".xml")
     {
         PipelineReaderXML pipeReader(*this);

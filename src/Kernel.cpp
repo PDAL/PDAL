@@ -177,7 +177,10 @@ void Kernel::doSwitches(int argc, const char *argv[], ProgramArgs& args)
 
         // parseSimple allows us to scan for the help option without
         // raising exception about missing arguments and so on.
-        args.parseSimple(stringArgs);
+        // It also removes consumed args from the arg list, so for now,
+        // parse a copy that will be ignored by parse().
+        StringList simpleArgs(stringArgs);
+        args.parseSimple(simpleArgs);
         addSwitches(args);
         if (!m_showHelp)
         {
