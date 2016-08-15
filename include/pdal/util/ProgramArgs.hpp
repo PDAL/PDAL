@@ -22,9 +22,9 @@
 
 #pragma once
 
-#include <deque>
 #include <map>
 #include <memory>
+#include <vector>
 
 #include <pdal/util/Utils.hpp>
 
@@ -42,17 +42,6 @@ public:
 
 namespace
 {
-
-struct ProvidedVal
-{
-public:
-    ProvidedVal(const std::string& s) : m_val(s), m_consumed(false)
-    {}
-
-    std::string m_val;
-    bool m_consumed;
-};
-typedef std::deque<ProvidedVal> ProvidedValList;
 
 class ArgValList
 {
@@ -962,24 +951,6 @@ public:
         m_args.push_back(std::unique_ptr<Arg>(arg));
         return *arg;
     }
-
-    ProvidedValList toExpandedList(std::vector<std::string>& cmdLine)
-    {
-        ProvidedValList l;
-
-        for (std::string& s : cmdLine)
-        {
-            if (s.size() > 1 && s[0] == '-' && s[1] != '-')
-            {
-                for (size_t i = 1; i < s.size(); ++i)
-                    l.push_back(std::string("-") + s[i]);
-            }        
-            else
-                l.push_back({s});
-        }
-        return l;
-    }
-
 
     /**
       Parse a command line as specified by its argument vector.  No validation

@@ -173,20 +173,18 @@ void Kernel::doSwitches(int argc, const char *argv[], ProgramArgs& args)
 
     try
     {
-        addBasicSwitches(args);
-
         // parseSimple allows us to scan for the help option without
         // raising exception about missing arguments and so on.
         // It also removes consumed args from the arg list, so for now,
         // parse a copy that will be ignored by parse().
-        StringList simpleArgs(stringArgs);
-        args.parseSimple(simpleArgs);
+        ProgramArgs hargs;
+        hargs.add("help,h", "Print help message", m_showHelp);
+        hargs.parseSimple(stringArgs);
+
+        addBasicSwitches(args);
         addSwitches(args);
         if (!m_showHelp)
-        {
-            args.reset();
             args.parse(stringArgs);
-        }
     }
     catch (arg_error& e)
     {
@@ -452,8 +450,6 @@ void Kernel::outputHelp(ProgramArgs& args)
 
 void Kernel::addBasicSwitches(ProgramArgs& args)
 {
-    args.add("help,h", "Print help message", m_showHelp);
-
     args.add("debug,d", "Enable debug mode", m_isDebug);
     args.add("developer-debug",
         "Enable developer debug (don't trap exceptions)", m_hardCoreDebug);
