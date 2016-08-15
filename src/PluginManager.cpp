@@ -91,8 +91,8 @@ StringList pluginSearchPaths()
     else
     {
         searchPaths.push_back(PDAL_PLUGIN_INSTALL_PATH);
-        StringList standardPaths = { "/usr/local/lib", "./lib",
-            "../lib", "../bin" };
+        StringList standardPaths = { "./lib", "../lib", "../bin",
+            PDAL_PLUGIN_INSTALL_PATH };
         for (std::string& s : standardPaths)
         {
             if (FileUtils::toAbsolutePath(s) !=
