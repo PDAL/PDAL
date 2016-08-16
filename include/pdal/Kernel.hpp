@@ -103,7 +103,6 @@ public:
     virtual int execute() = 0;
 
 protected:
-    bool m_usestdin;
     Log m_log;
     PipelineManager m_manager;
     std::string m_driverOverride;

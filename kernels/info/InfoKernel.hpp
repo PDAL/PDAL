@@ -94,6 +94,7 @@ private:
     bool m_showSummary;
     bool m_needPoints;
     std::string m_PointCloudSchemaOutput;
+    bool m_usestdin;
 
     Stage *m_statsStage;
     Stage *m_hexbinStage;

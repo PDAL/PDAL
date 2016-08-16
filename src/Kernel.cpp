@@ -120,9 +120,8 @@ bool parseOption(std::string o, std::string& stage, std::string& option,
 } // unnamed namespace
 
 
-Kernel::Kernel()
-    : m_usestdin(false)
-    , m_log("pdal", "stderr")
+Kernel::Kernel() :
+    m_log("pdal", "stderr")
     , m_isDebug(false)
     , m_verboseLevel(0)
     , m_showVersion(false)
@@ -457,7 +456,6 @@ void Kernel::addBasicSwitches(ProgramArgs& args)
     args.add("verbose,v", "Set verbose message level", m_verboseLevel);
 
     args.add("visualize", "Visualize result", m_visualize);
-    args.add("stdin,s", "Read pipeline JSON from stdin", m_usestdin);
     args.add("driver", "Override reader driver", m_driverOverride, "");
     args.add("scale",
          "A comma-separated or quoted, space-separated list of scales to "

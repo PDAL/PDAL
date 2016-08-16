@@ -81,6 +81,7 @@ void PipelineKernel::addSwitches(ProgramArgs& args)
         m_progressFile);
     args.add("pointcloudschema", "dump PointCloudSchema XML output",
         m_PointCloudSchemaOutput).setHidden();
+    args.add("stdin,s", "Read pipeline from standard input", m_usestdin);
 }
 
 int PipelineKernel::execute()

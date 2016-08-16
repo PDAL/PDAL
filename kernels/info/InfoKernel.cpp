@@ -146,6 +146,7 @@ void InfoKernel::addSwitches(ProgramArgs& args)
     args.add("metadata", "dump file metadata info", m_showMetadata);
     args.add("pointcloudschema", "dump PointCloudSchema XML output",
         m_PointCloudSchemaOutput).setHidden();
+    args.add("stdin,s", "Read a pipeline file from standard input", m_usestdin);
 }
 
 // Support for parsing point numbers.  Points can be specified singly or as

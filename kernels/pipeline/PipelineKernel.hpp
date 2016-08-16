@@ -65,6 +65,7 @@ private:
     std::string m_PointCloudSchemaOutput;
     std::string m_progressFile;
     int m_progressFd;
+    bool m_usestdin;
 };
 
 } // pdal

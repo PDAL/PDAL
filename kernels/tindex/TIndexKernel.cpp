@@ -115,6 +115,8 @@ void TIndexKernel::addSwitches(ProgramArgs& args)
         "Write absolute rather than relative file paths", m_absPath);
     args.add("merge", "Whether we're merging the entries in a tindex file.",
         m_merge);
+    args.add("stdin,s", "Read filespec pattern from standard input",
+        m_usestdin);
 }
 
 
