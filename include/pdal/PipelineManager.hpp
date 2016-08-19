@@ -99,6 +99,10 @@ public:
     Stage* getStage() const
         { return m_stages.empty() ? nullptr : m_stages.back(); }
 
+    // Set the log to be available to stages.
+    void setLog(LogPtr& log)
+        { m_log = log; }
+
     QuickInfo preview() const;
     void prepare() const;
     point_count_t execute();
@@ -131,6 +135,7 @@ private:
     std::vector<Stage*> m_stages; // stage observer, never owner
     int m_progressFd;
     std::istream *m_input;
+    LogPtr m_log;
 
     PipelineManager& operator=(const PipelineManager&); // not implemented
     PipelineManager(const PipelineManager&); // not implemented

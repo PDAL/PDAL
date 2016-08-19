@@ -104,6 +104,7 @@ Stage& PipelineManager::addReader(const std::string& type)
         ss << "Couldn't create reader stage of type '" << type << "'.";
         throw pdal_error(ss.str());
     }
+    reader->setLog(m_log);
     reader->setProgressFd(m_progressFd);
     m_stages.push_back(reader);
     return *reader;
@@ -119,6 +120,7 @@ Stage& PipelineManager::addFilter(const std::string& type)
         ss << "Couldn't create filter stage of type '" << type << "'.";
         throw pdal_error(ss.str());
     }
+    filter->setLog(m_log);
     filter->setProgressFd(m_progressFd);
     m_stages.push_back(filter);
     return *filter;
@@ -134,6 +136,7 @@ Stage& PipelineManager::addWriter(const std::string& type)
         ss << "Couldn't create writer stage of type '" << type << "'.";
         throw pdal_error(ss.str());
     }
+    writer->setLog(m_log);
     writer->setProgressFd(m_progressFd);
     m_stages.push_back(writer);
     return *writer;

@@ -210,6 +210,14 @@ public:
     }
 
     /**
+      Set the stage's log.
+
+      \param log  Log pointer.
+    */
+    void setLog(LogPtr& log)
+        { m_log = log; }
+
+    /**
       Return the stage's log pointer.
 
       \return  Log pointer.
