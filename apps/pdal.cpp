@@ -274,8 +274,14 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
             if (m_help)
                 cmdArgs.push_back("--help");
             void *obj = PluginManager::createObject(name);
-            std::unique_ptr<Kernel> kernel(static_cast<Kernel *>(obj));
+            Kernel *kernel(static_cast<Kernel *>(obj));
+            // This shouldn't throw.  If it does, it's something awful, so
+            // not cleaning up seems inconsequential.
             ret = kernel->run(cmdArgs, log);
+            delete kernel;
+            // IMPORTANT - The kernel must be destroyed before GDAL
+            //  drivers are unregistered or GDAL will attempt to destroy
+            //  resources more than once, resulting in a crash.
             gdal::unregisterDrivers();
         }
         else
