@@ -246,7 +246,7 @@ bool PluginManager::l_initializePlugin(PF_InitFunc initFunc)
 }
 
 
-PluginManager::PluginManager()
+PluginManager::PluginManager() : m_log(new Log("PDAL", &std::clog))
 {
     m_version.major = 1;
     m_version.minor = 0;
