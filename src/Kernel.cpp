@@ -121,12 +121,8 @@ bool parseOption(std::string o, std::string& stage, std::string& option,
 
 
 Kernel::Kernel() :
-    m_isDebug(false)
-    , m_verboseLevel(0)
-    , m_showVersion(false)
-    , m_showTime(false)
+    m_showTime(false)
     , m_hardCoreDebug(false)
-    , m_reportDebug(false)
     , m_visualize(false)
 {}
 
@@ -364,17 +360,6 @@ void Kernel::parseCommonOptions()
     if (m_visualize)
         options.add("visualize", m_visualize);
 
-    if (m_isDebug)
-    {
-        options.add("debug", true);
-        uint32_t verbosity(m_verboseLevel);
-        if (!verbosity)
-            verbosity = 1;
-
-        options.add("verbose", verbosity);
-        options.add("log", "STDERR");
-    }
-
     auto pred = [](char c){ return (bool)strchr(",| ", c); };
 
     if (!m_scales.empty())
@@ -448,11 +433,9 @@ void Kernel::outputHelp(ProgramArgs& args)
 
 void Kernel::addBasicSwitches(ProgramArgs& args)
 {
-    args.add("debug,d", "Enable debug mode", m_isDebug);
     args.add("developer-debug",
         "Enable developer debug (don't trap exceptions)", m_hardCoreDebug);
     args.add("label", "A string to label the process with", m_label);
-    args.add("verbose,v", "Set verbose message level", m_verboseLevel);
 
     args.add("visualize", "Visualize result", m_visualize);
     args.add("driver", "Override reader driver", m_driverOverride, "");

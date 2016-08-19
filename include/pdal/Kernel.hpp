@@ -120,14 +120,10 @@ private:
     static bool test_parseOption(std::string o, std::string& stage,
         std::string& option, std::string& value);
 
-    bool m_isDebug;
-    uint32_t m_verboseLevel;
     bool m_showHelp;
     bool m_showOptions;
-    bool m_showVersion;
     bool m_showTime;
     bool m_hardCoreDebug;
-    bool m_reportDebug;
     std::string m_scales;
     std::string m_offsets;
     bool m_visualize;
