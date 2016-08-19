@@ -81,6 +81,7 @@ public:
     static void loadAll(int type);
     static void *createObject(const std::string& objectType);
     static StringList names(int typeMask);
+    static void setLog(LogPtr& log);
 
 private:
     // These functions return true if successful.
@@ -108,7 +109,7 @@ private:
     ExitFuncVec m_exitFuncVec;
     RegistrationInfoMap m_plugins;
     std::mutex m_mutex;
-    Log m_log;
+    LogPtr m_log;
 
     // Disable copy/assignment.
     PluginManager(const PluginManager&);

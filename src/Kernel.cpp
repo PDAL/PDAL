@@ -121,8 +121,7 @@ bool parseOption(std::string o, std::string& stage, std::string& option,
 
 
 Kernel::Kernel() :
-    m_log("pdal", "stderr")
-    , m_isDebug(false)
+    m_isDebug(false)
     , m_verboseLevel(0)
     , m_showVersion(false)
     , m_showTime(false)
@@ -139,21 +138,21 @@ std::ostream& operator<<(std::ostream& ostr, const Kernel& kernel)
 }
 
 
-void Kernel::doSwitches(int argc, const char *argv[], ProgramArgs& args)
+void Kernel::doSwitches(const StringList& cmdArgs, ProgramArgs& args)
 {
-    StringList stringArgs;
     OptionsMap& stageOptions = m_manager.stageOptions();
+    StringList stringArgs;
 
     // Scan the argument vector for extra stage options.  Pull them out and
     // stick them in the list.  Let the ProgramArgs handle everything else.
     // NOTE: This depends on the format being "option=value" rather than
     //   "option value".  This is what we've always expected, so no problem,
     //   but it would be better to be more flexible.
-    for (int i = 0; i < argc; ++i)
+    for (size_t i = 0; i < cmdArgs.size(); ++i)
     {
         std::string stageName, opName, value;
 
-        if (parseOption(argv[i], stageName, opName, value))
+        if (parseOption(cmdArgs[i], stageName, opName, value))
         {
             if (value.empty())
             {
@@ -167,7 +166,7 @@ void Kernel::doSwitches(int argc, const char *argv[], ProgramArgs& args)
             stageOptions[stageName].add(op);
         }
         else
-            stringArgs.push_back(argv[i]);
+            stringArgs.push_back(cmdArgs[i]);
     }
 
     try
@@ -233,15 +232,15 @@ int Kernel::doExecution(ProgramArgs& args)
 
 
 // this just wraps ALL the code in total catch block
-int Kernel::run(int argc, char const * argv[], const std::string& appName)
+int Kernel::run(const StringList& cmdArgs, LogPtr& log)
 {
-    m_appName = appName;
+    m_log = log;
 
     ProgramArgs args;
 
     try
     {
-        doSwitches(argc, argv, args);
+        doSwitches(cmdArgs, args);
     }
     catch (const pdal_error& e)
     {
@@ -434,7 +433,7 @@ void Kernel::parseCommonOptions()
 
 void Kernel::outputHelp(ProgramArgs& args)
 {
-    std::cout << "usage: " << "pdal " << m_appName << " [options] " <<
+    std::cout << "usage: " << "pdal " << getName() << " [options] " <<
         args.commandLine() << std::endl;
 
     std::cout << "options:" << std::endl;

@@ -108,13 +108,9 @@ TEST_F(CpdKernelTest, Execution)
     std::unique_ptr<Kernel> cpdKernel(static_cast<Kernel*>(stage));
 
     int argc = 4;
-    const char * argv[4] = {
-        "rigid",
-        m_x.c_str(),
-        m_y.c_str(),
-        m_outfile.c_str()
-    };
-    int retval = cpdKernel->run(argc, argv, "cpd");
+    LogPtr log(new Log("pdal cpd", &std::clog));
+    StringList argv { "rigid", m_x, m_y, m_outfile };
+    int retval = cpdKernel->run(argv, log);
     EXPECT_EQ(0, retval);
 }
 

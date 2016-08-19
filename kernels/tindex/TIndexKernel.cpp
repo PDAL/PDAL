@@ -87,7 +87,7 @@ TIndexKernel::TIndexKernel()
     , m_fastBoundary(false)
 
 {
-    m_log.setLeader("pdal tindex");
+    m_log->setLeader("pdal tindex");
 }
 
 
@@ -291,9 +291,9 @@ void TIndexKernel::createFile()
         if (!isFileIndexed(indexes, info))
         {
             if (createFeature(indexes, info))
-                m_log.get(LogLevel::Info) << "Indexed file " << f << std::endl;
+                m_log->get(LogLevel::Info) << "Indexed file " << f << std::endl;
             else
-                m_log.get(LogLevel::Error) << "Failed to create feature for "
+                m_log->get(LogLevel::Error) << "Failed to create feature for "
                     "file '" << f << "'" << std::endl;
 
         }
@@ -461,7 +461,7 @@ bool TIndexKernel::createFeature(const FieldIndexes& indexes,
         {}
         if (err != OGRERR_NONE)
         {
-            m_log.get(LogLevel::Warning) << "Unable to convert SRS to "
+            m_log->get(LogLevel::Warning) << "Unable to convert SRS to "
                 "proj.4 format for file '" << fileInfo.m_filename << "'" <<
                 std::endl;
             return false;
@@ -578,7 +578,7 @@ bool TIndexKernel::createLayer(std::string const& layername)
 
     SpatialRef srs(m_tgtSrsString);
     if (!srs)
-        m_log.get(LogLevel::Error) << "Unable to import srs for layer "
+        m_log->get(LogLevel::Error) << "Unable to import srs for layer "
            "creation" << std::endl;
 
     m_layer = OGR_DS_CreateLayer(m_dataset, m_layerName.c_str(),

@@ -67,9 +67,8 @@ public:
     {}
 
     // call this, to start the machine
-    int run(int argc, const char* argv[], const std::string& appName);
+    int run(const StringList& cmdArgs, LogPtr& log);
 
-//    bool isDebug() const;
     virtual std::string getName() const = 0;
     bool isVisualize() const;
     void visualize(PointViewPtr view);
@@ -103,7 +102,7 @@ public:
     virtual int execute() = 0;
 
 protected:
-    Log m_log;
+    LogPtr m_log;
     PipelineManager m_manager;
     std::string m_driverOverride;
 
@@ -114,7 +113,7 @@ private:
     void addBasicSwitches(ProgramArgs& args);
     void parseCommonOptions();
 
-    void doSwitches(int argc, const char *argv[], ProgramArgs& args);
+    void doSwitches(const StringList& cmdArgs, ProgramArgs& args);
     int doStartup();
     int doExecution(ProgramArgs& args);
 
@@ -127,7 +126,6 @@ private:
     bool m_showOptions;
     bool m_showVersion;
     bool m_showTime;
-    std::string m_appName;
     bool m_hardCoreDebug;
     bool m_reportDebug;
     std::string m_scales;

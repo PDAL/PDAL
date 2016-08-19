@@ -1079,7 +1079,7 @@ public:
       \param totalWidth  Total width to assume for formatting output.
         Typically this is the width of a terminal window.
     */
-    void dump(std::ostream& out, size_t indent, size_t totalWidth)
+    void dump(std::ostream& out, size_t indent, size_t totalWidth) const
     {
         size_t namelen = 0;
         std::vector<std::pair<std::string, std::string>> info;
@@ -1138,7 +1138,7 @@ public:
 
     */
     void dump2(std::ostream& out, size_t nameIndent, size_t descripIndent,
-        size_t totalWidth)
+        size_t totalWidth) const
     {
         size_t width = totalWidth - descripIndent;
         for (auto ai = m_args.begin(); ai != m_args.end(); ++ai)
