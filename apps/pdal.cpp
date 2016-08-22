@@ -277,6 +277,7 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
             Kernel *kernel(static_cast<Kernel *>(obj));
             // This shouldn't throw.  If it does, it's something awful, so
             // not cleaning up seems inconsequential.
+            log->setLeader("pdal" + m_command);
             ret = kernel->run(cmdArgs, log);
             delete kernel;
             // IMPORTANT - The kernel must be destroyed before GDAL

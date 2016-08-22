@@ -86,9 +86,7 @@ TIndexKernel::TIndexKernel()
     , m_layer(NULL)
     , m_fastBoundary(false)
 
-{
-    m_log->setLeader("pdal tindex");
-}
+{}
 
 
 void TIndexKernel::addSwitches(ProgramArgs& args)
