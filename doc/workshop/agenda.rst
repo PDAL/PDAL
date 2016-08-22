@@ -23,16 +23,16 @@ Materials
 Slides
 ................................................................................
 
-* `Slides <https://hobu.co/workshops/unavco/slides/>`__
+* `Slides <http://www.pdal.io/workshop/slides/>`__
 
 Workshop Materials
 ................................................................................
 
-These materials are available at https://hobu.co/workshops/unavco/ as both
+These materials are available at http://pdal.io/workshop/ as both
 a PDF and an HTML website.
 
-* `PDF download <https://hobu.co/workshops/unavco/PDAL-UNAVCO-ShortCourse.pdf>`__
-* `Website <https://hobu.co/workshops/unavco>`__
+* `PDF download <http://pdal.io/PDAL.pdf>`__
+* `Website <http://pdal.io/workshop/>`__
 
 USB Example Data Drive
 ................................................................................
@@ -45,4 +45,4 @@ to follow along with these examples.
 .. note::
 
     A drive image is available for download at
-    https://hobu.co/workshops/unavco/image/PDAL.zip
+    https://s3.amazonaws.com/pdal/workshop/PDAL.zip
