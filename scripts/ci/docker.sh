@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# pdal/dock image has all of the Sphinx
-# dependencies need to build PDAL's docs
+# pdal/doc image has all of the Sphinx
+# dependencies need to build Entwine's docs
 
 docker pull pdal/dependencies
 docker pull pdal/docs
