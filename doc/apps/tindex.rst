@@ -24,7 +24,7 @@ result in ``tindex``.  The ``tindex`` is a vector file or database that
 will be created by ``pdal`` as necessary to store the file index.
 The type of the index
 file can be specified by specifying the OGR code for the format using the
-``--driver`` option.  If no driver is specified, the format defaults to "ESRI
+``--ogrdriver`` option.  If no driver is specified, the format defaults to "ESRI
 Shapefile".  Any filetype that can be handled by
 `OGR <http://www.gdal.org/ogr_formats.html>`_ is acceptable.
 
@@ -42,7 +42,7 @@ quoted to prevent shell expansion of wildcard characters.
                                the base name of the first file indexed.
     --tindex_name              Name of the field in the feature in which to store the
                                indexed file name. ["location"]
-    --driver                   OGR driver name. ["ESRI Shapefile"]
+    --ogrdriver                OGR driver name. ["ESRI Shapefile"]
     --t_srs                    Spatial reference system in which to store index vector
                                data. ["EPSG:4326"]
     --a_srs                    Spatial reference assumed to be the reference for the

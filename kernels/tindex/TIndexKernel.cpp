@@ -101,7 +101,7 @@ void TIndexKernel::addSwitches(ProgramArgs& args)
         m_layerName);
     args.add("tindex_name", "Tile index column name", m_tileIndexColumnName,
         "location");
-    args.add("driver,f", "OGR driver name to use ", m_driverName,
+    args.add("ogrdriver,f", "OGR driver name to use ", m_driverName,
         "ESRI Shapefile");
     args.add("t_srs", "Target SRS of tile index", m_tgtSrsString,
         "EPSG:4326");
