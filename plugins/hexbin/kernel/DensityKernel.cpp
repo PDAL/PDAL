@@ -57,7 +57,7 @@ void DensityKernel::addSwitches(ProgramArgs& args)
 {
     args.add("input,i", "input point cloud file name", m_inputFile);
     args.add("output,o", "output vector data source", m_outputFile);
-    args.add("driver,f", "OGR driver name to use ", m_driverName,
+    args.add("ogrdriver,f", "OGR driver name to use ", m_driverName,
         "ESRI Shapefile");
 }
 
