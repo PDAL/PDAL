@@ -326,8 +326,6 @@ void Stage::execute(StreamPointTable& table, std::list<Stage *>& stages)
 
 void Stage::l_addArgs(ProgramArgs& args)
 {
-    args.add("debug", "Debug on/off", m_debug);
-    args.add("verbose", "Debug output level", m_verbose, 0U);
     args.add("log", "Debug output filename", m_logname);
     readerAddArgs(args);
 }
@@ -335,32 +333,19 @@ void Stage::l_addArgs(ProgramArgs& args)
 
 void Stage::setupLog()
 {
-    if (m_inputs.empty())
-    {
-        if (m_logname.empty())
-            m_log.reset(new Log(getName(), "stdlog"));
-        else
-            m_log.reset(new Log(getName(), m_logname));
-    }
-    else
-    {
-        if (m_logname.size())
-        {
-            m_log.reset(new Log(getName(), m_logname));
-        }
-        else
-        {
-            // We know we're not empty at this point
-            std::ostream* v = m_inputs[0]->log()->getLogStream();
-            m_log.reset(new Log(getName(), v));
-        }
-    }
+    LogLevel l(LogLevel::Error);
 
-    if (m_debug && !m_verbose)
-        m_verbose = 1;
-    m_log->setLevel((LogLevel)m_verbose);
+    if (m_log)
+        l = m_log->getLevel();
 
-    gdal::ErrorHandler::getGlobalErrorHandler().set(m_log, m_debug);
+    if (!m_logname.empty())
+        m_log.reset(new Log(getName(), m_logname));
+    else if (!m_log)
+        m_log.reset(new Log(getName(), "stdlog"));
+    m_log->setLevel(l);
+
+    bool debug(l > LogLevel::Debug);
+    gdal::ErrorHandler::getGlobalErrorHandler().set(m_log, debug);
 }
 
 

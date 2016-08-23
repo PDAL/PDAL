@@ -199,7 +199,7 @@ void App::addArgs(ProgramArgs& args)
     args.add("command", "The PDAL command", m_command).setPositional();
     args.add("debug", "Sets the output level to 3 (option deprecated)",
         m_debug);
-    args.add("verbose", "Sets the output level (0-8)", m_logLevel, -1);
+    args.add("verbose,v", "Sets the output level (0-8)", m_logLevel, -1);
     args.add("drivers", "List available drivers", m_showDrivers);
     args.add("help,h", "Display help text", m_help);
     args.add("list-commands", "List available commands", m_showCommands);
@@ -277,7 +277,7 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
             Kernel *kernel(static_cast<Kernel *>(obj));
             // This shouldn't throw.  If it does, it's something awful, so
             // not cleaning up seems inconsequential.
-            log->setLeader("pdal" + m_command);
+            log->setLeader("pdal " + m_command);
             ret = kernel->run(cmdArgs, log);
             delete kernel;
             // IMPORTANT - The kernel must be destroyed before GDAL

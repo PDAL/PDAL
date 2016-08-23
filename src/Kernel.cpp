@@ -231,6 +231,7 @@ int Kernel::doExecution(ProgramArgs& args)
 int Kernel::run(const StringList& cmdArgs, LogPtr& log)
 {
     m_log = log;
+    m_manager.setLog(m_log);
 
     ProgramArgs args;
 
