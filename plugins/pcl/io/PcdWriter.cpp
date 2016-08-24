@@ -63,6 +63,7 @@ void PcdWriter::processOptions(const Options& ops)
     m_filename = ops.getValueOrThrow<std::string>("filename");
     std::string compression = ops.getValueOrDefault("compression", "ascii");
     m_xyz = ops.getValueOrDefault("xyz", false);
+    m_subtract_minimum = ops.getValueOrDefault("subtract_minimum", true);
     m_offset_x = ops.getValueOrDefault("offset_x", 0.0);
     m_offset_y = ops.getValueOrDefault("offset_y", 0.0);
     m_offset_z = ops.getValueOrDefault("offset_z", 0.0);
@@ -104,6 +105,7 @@ Options PcdWriter::getDefaultOptions()
     options.add("filename", "", "Filename to write PCD file to");
     options.add("compression", "ascii", "Level of PCD compression to use (ascii, binary, compressed)");
     options.add("xyz", false, "Write only XYZ dimensions?");
+    options.add("subtract_minimum", true, "Set origin to minimum of XYZ dimension");
     options.add("offset_x", 0.0, "Offset to be subtracted from XYZ position");
     options.add("offset_y", 0.0, "Offset to be subtracted from XYZ position");
     options.add("offset_z", 0.0, "Offset to be subtracted from XYZ position");

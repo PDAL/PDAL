@@ -71,6 +71,7 @@ private:
     std::string m_filename;
     uint8_t m_compression;
     bool m_xyz;
+    bool m_subtract_minimum;
     double m_offset_x;
     double m_offset_y;
     double m_offset_z;
@@ -89,7 +90,17 @@ void PcdWriter::writeView(const PointViewPtr view)
     typedef typename CloudT::PointType PointT;
     typename CloudT::Ptr cloud(new CloudT);
     BOX3D bounds;
-    bounds.grow(m_offset_x, m_offset_y, m_offset_z);
+    if (m_subtract_minimum)
+    {
+        view->calculateBounds(bounds);
+        bounds.grow(bounds.minx + m_offset_x,
+                    bounds.miny + m_offset_y,
+                    bounds.minz + m_offset_z);
+    }
+    else
+    {
+        bounds.grow(m_offset_x, m_offset_y, m_offset_z);
+    }
     pclsupport::PDALtoPCD(view, *cloud, bounds, m_scale_x, m_scale_y, m_scale_z);
     pcl::PCDWriter w;
     switch (m_compression)
