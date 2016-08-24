@@ -69,8 +69,7 @@ private:
     inline void writeView(const PointViewPtr view); // implemented in header
 
     std::string m_filename;
-    bool m_compressed;
-    bool m_binary;
+    uint8_t m_compression;
     bool m_xyz;
     double m_offset_x;
     double m_offset_y;
@@ -93,17 +92,11 @@ void PcdWriter::writeView(const PointViewPtr view)
     bounds.grow(m_offset_x, m_offset_y, m_offset_z);
     pclsupport::PDALtoPCD(view, *cloud, bounds, m_scale_x, m_scale_y, m_scale_z);
     pcl::PCDWriter w;
-    if (m_compressed)
+    switch (m_compression)
     {
-        w.writeBinaryCompressed<PointT>(m_filename, *cloud);
-    }
-    else if (m_binary)
-    {
-        w.writeBinary<PointT>(m_filename, *cloud);
-    }
-    else
-    {
-        w.writeASCII<PointT>(m_filename, *cloud);
+        case 0 : w.writeASCII<PointT>(m_filename, *cloud); break;
+        case 1 : w.writeBinary<PointT>(m_filename, *cloud); break;
+        case 2 : w.writeBinaryCompressed<PointT>(m_filename, *cloud); break;
     }
 }
 

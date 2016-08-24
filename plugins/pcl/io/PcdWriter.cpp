@@ -61,8 +61,7 @@ std::string PcdWriter::getName() const { return s_info.name; }
 void PcdWriter::processOptions(const Options& ops)
 {
     m_filename = ops.getValueOrThrow<std::string>("filename");
-    m_binary = ops.getValueOrDefault("binary", false);
-    m_compressed = ops.getValueOrDefault("compression", false);
+    std::string compression = ops.getValueOrDefault("compression", "ascii");
     m_xyz = ops.getValueOrDefault("xyz", false);
     m_offset_x = ops.getValueOrDefault("offset_x", 0.0);
     m_offset_y = ops.getValueOrDefault("offset_y", 0.0);
@@ -70,6 +69,20 @@ void PcdWriter::processOptions(const Options& ops)
     m_scale_x = ops.getValueOrDefault("scale_x", 1.0);
     m_scale_y = ops.getValueOrDefault("scale_y", 1.0);
     m_scale_z = ops.getValueOrDefault("scale_z", 1.0);
+
+    if (compression == "binary")
+    {
+      m_compression = 1;
+    }
+    else if (compression == "compressed")
+    {
+      m_compression = 2;
+    }
+    else  // including "ascii"
+    {
+      m_compression = 0;
+    }
+
     if (m_scale_x == 0.0)
     {
       m_scale_x = 1.0;
@@ -89,8 +102,7 @@ Options PcdWriter::getDefaultOptions()
     Options options;
 
     options.add("filename", "", "Filename to write PCD file to");
-    options.add("binary", false, "Write binary data?");
-    options.add("compression", false, "Write binary compressed data?");
+    options.add("compression", "ascii", "Level of PCD compression to use (ascii, binary, compressed)");
     options.add("xyz", false, "Write only XYZ dimensions?");
     options.add("offset_x", 0.0, "Offset to be subtracted from XYZ position");
     options.add("offset_y", 0.0, "Offset to be subtracted from XYZ position");
