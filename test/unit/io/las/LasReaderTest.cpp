@@ -76,48 +76,6 @@ TEST(LasReaderTest, create)
     EXPECT_TRUE(s);
 }
 
-TEST(LasReaderTest, test_base_options)
-{
-    const std::string file(Support::datapath("las/1.2-with-color.las"));
-
-    const Option opt_filename("filename", file);
-    const Option opt_debug_string("debug", "true");
-    const Option opt_debug_bool("debug", true);
-
-    {
-        Options opts;
-        opts.add(opt_filename);
-
-        LasReader reader;
-        reader.setOptions(opts);
-        EXPECT_TRUE(reader.isDebug() == false);
-    }
-
-    {
-        Options opts;
-        opts.add(opt_filename);
-        opts.add(opt_debug_string);
-        LasReader reader;
-        reader.setOptions(opts);
-
-        PointTable table;
-        reader.prepare(table);
-        EXPECT_TRUE(reader.isDebug() == true);
-    }
-
-    {
-        Options opts;
-        opts.add(opt_filename);
-        opts.add(opt_debug_bool);
-        LasReader reader;
-        reader.setOptions(opts);
-
-        PointTable table;
-        reader.prepare(table);
-        EXPECT_TRUE(reader.isDebug() == true);
-    }
-}
-
 
 TEST(LasReaderTest, header)
 {

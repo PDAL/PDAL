@@ -9,8 +9,7 @@
         "spatialreference": "EPSG:2028"
     },
     {
-      "type": "filters.merge",
-      "verbose": "5"
+      "type": "filters.merge"
     }
   ]
 }

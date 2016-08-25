@@ -28,12 +28,6 @@
             <Option name="connection">
                 host='localhost' dbname='lidar' user='hobu'
             </Option>
-            <Option name="debug">
-                true
-            </Option>
-            <Option name="verbose">
-                3
-            </Option>
         </Reader>
     </Writer>
 </Pipeline>

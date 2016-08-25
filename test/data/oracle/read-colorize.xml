@@ -54,12 +54,6 @@
                 <Option name="connection">
                     lidar/lidar@lidar.hobu.biz/lidar
                 </Option>
-                <Option name="debug">
-                    true
-                </Option>
-                <Option name="verbose">
-                    3
-                </Option>
             </Reader>
         </Filter>
     </Writer>

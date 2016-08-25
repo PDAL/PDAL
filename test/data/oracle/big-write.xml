@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Pipeline version="1.0">
     <Writer type="writers.oci">
-        <Option name="debug">
-            true
-        </Option>
-        <Option name="verbose">
-            1
-        </Option>
         <Option name="connection">
             grid/grid@localhost/vm
         </Option>
