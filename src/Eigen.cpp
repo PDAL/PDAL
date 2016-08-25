@@ -34,6 +34,7 @@
 
 #include <pdal/Eigen.hpp>
 #include <pdal/PointView.hpp>
+#include <pdal/util/Bounds.hpp>
 
 #include <Eigen/Dense>
 
@@ -69,7 +70,7 @@ Eigen::Matrix3f computeCovariance(PointView& view, std::vector<PointId> ids)
 
     auto n = ids.size();
 
-    auto centroid = computeCentroid(view, ids);
+    Vector3f centroid = computeCentroid(view, ids);
 
     // demean the neighborhood
     MatrixXf A(3, n);
@@ -89,12 +90,54 @@ uint8_t computeRank(PointView& view, std::vector<PointId> ids, double threshold)
 {
     using namespace Eigen;
 
-    auto B = computeCovariance(view, ids);
+    Matrix3f B = computeCovariance(view, ids);
 
     JacobiSVD<Matrix3f> svd(B);
     svd.setThreshold(threshold);
     
     return static_cast<uint8_t>(svd.rank());
+}
+
+Eigen::MatrixXd createDSM(PointView& view, int rows, int cols, double cell_size,
+                          BOX2D bounds)
+{
+    using namespace Dimension;
+    using namespace Eigen;
+    
+    MatrixXd ZImin(rows, cols);
+    ZImin.setConstant(std::numeric_limits<double>::quiet_NaN());
+
+    int maxrow = bounds.miny + rows * cell_size;
+    
+    auto clamp = [](int t, int min, int max)
+    {
+        return ((t < min) ? min : ((t > max) ? max : t));
+    };
+    
+    auto getColIndex = [&bounds, &cell_size](double x)
+    {
+        return static_cast<int>(floor((x - bounds.minx) / cell_size));
+    };
+
+    auto getRowIndex = [&maxrow, &cell_size](double y)
+    {
+        return static_cast<int>(floor((maxrow - y) / cell_size));
+    };
+    
+    for (PointId i = 0; i < view.size(); ++i)
+    {
+        double x = view.getFieldAs<double>(Id::X, i);
+        double y = view.getFieldAs<double>(Id::Y, i);
+        double z = view.getFieldAs<double>(Id::Z, i);
+
+        int c = clamp(getColIndex(x), 0, cols-1);
+        int r = clamp(getRowIndex(y), 0, rows-1);
+
+        if (z < ZImin(r, c) || std::isnan(ZImin(r, c)))
+            ZImin(r, c) = z;
+    }
+
+    return ZImin;
 }
 
 } // namespace pdal

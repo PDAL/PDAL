@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pdal/pdal_internal.hpp>
+#include <pdal/util/Bounds.hpp>
 
 #include <Eigen/Dense>
 
@@ -131,4 +132,9 @@ PDAL_DLL Eigen::Matrix3f computeCovariance(PointView& view, std::vector<PointId>
  * \return the estimated rank.
  */
 PDAL_DLL uint8_t computeRank(PointView& view, std::vector<PointId> ids, double threshold);
+
+// createDSM returns a matrix with minimum Z values from the provided
+// PointView.
+PDAL_DLL Eigen::MatrixXd createDSM(PointView& view, int rows, int cols,
+                                   double cell_size, BOX2D bounds);
 } // namespace pdal

@@ -56,6 +56,7 @@
 #include <range/RangeFilter.hpp>
 #include <reprojection/ReprojectionFilter.hpp>
 #include <sample/SampleFilter.hpp>
+#include <smrf/SMRFilter.hpp>
 #include <sort/SortFilter.hpp>
 #include <splitter/SplitterFilter.hpp>
 #include <stats/StatsFilter.hpp>
@@ -240,6 +241,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(RangeFilter_InitPlugin);
     PluginManager::initializePlugin(ReprojectionFilter_InitPlugin);
     PluginManager::initializePlugin(SampleFilter_InitPlugin);
+    PluginManager::initializePlugin(SMRFilter_InitPlugin);
     PluginManager::initializePlugin(SortFilter_InitPlugin);
     PluginManager::initializePlugin(SplitterFilter_InitPlugin);
     PluginManager::initializePlugin(StatsFilter_InitPlugin);
