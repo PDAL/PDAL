@@ -53,33 +53,53 @@ namespace pdal
 static PluginInfo const s_info = PluginInfo(
     "writers.pcd",
     "Write data in the Point Cloud Library (PCL) format.",
-    "http://pdal.io/stages/writers.pclvisualizer.html" );
+    "http://pdal.io/stages/writers.pcd.html" );
 
 CREATE_SHARED_PLUGIN(1, 0, PcdWriter, Writer, s_info)
 
 std::string PcdWriter::getName() const { return s_info.name; }
 
+
 void PcdWriter::addArgs(ProgramArgs& args)
 {
-    args.add("filename", "Output filename", m_filename).setPositional();
-    args.add("compression", "Whether compressed output should be written",
-        m_compressed);
-}
 
+    std::string compression;
+    args.add("filename", "Filename to write PCD file to", m_filename);
+    args.add("compression","Level of PCD compression to use (ascii, binary, compressed)", compression, "ascii");
+    args.add("xyz", "Write only XYZ dimensions?", m_xyz, false);
+    args.add("subtract_minimum", "Set origin to minimum of XYZ dimension", m_subtract_minimum, true);
+    args.add("offset_x", "Offset to be subtracted from XYZ position", m_offset_x, 0.0);
+    args.add("offset_y", "Offset to be subtracted from XYZ position", m_offset_y, 0.0);
+    args.add("offset_z", "Offset to be subtracted from XYZ position", m_offset_z, 0.0);
+    args.add("scale_x", "Scale to divide from XYZ dimension", m_scale_x, 1.0);
+    args.add("scale_y", "Scale to divide from XYZ dimension", m_scale_y, 1.0);
+    args.add("scale_z", "Scale to divide from XYZ dimension", m_scale_z, 1.0);
+
+    if (compression == "binary")
+    {
+      m_compression = 1;
+    }
+    else if (compression == "compressed")
+    {
+      m_compression = 2;
+    }
+    else  // including "ascii"
+    {
+      m_compression = 0;
+    }
+
+}
 
 void PcdWriter::write(const PointViewPtr view)
 {
-    pcl::PointCloud<XYZIRGBA>::Ptr cloud(new pcl::PointCloud<XYZIRGBA>);
-    BOX3D buffer_bounds;
-    view->calculateBounds(buffer_bounds);
-    pclsupport::PDALtoPCD(view, *cloud, buffer_bounds);
-
-    pcl::PCDWriter w;
-
-    if (m_compressed)
-        w.writeBinaryCompressed<XYZIRGBA>(m_filename, *cloud);
+    if (m_xyz)
+    {
+        writeView<pcl::PointCloud<pcl::PointXYZ> >(view);
+    }
     else
-        w.writeASCII<XYZIRGBA>(m_filename, *cloud);
+    {
+        writeView<pcl::PointCloud<XYZIRGBA> >(view);
+    }
 }
 
 
