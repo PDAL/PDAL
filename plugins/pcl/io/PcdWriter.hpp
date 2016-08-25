@@ -38,6 +38,11 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/StageFactory.hpp>
 
+#include "PCLConversions.hpp"
+
+#include <pcl/io/pcd_io.h>
+#include <pcl/io/impl/pcd_io.hpp>
+
 #include <vector>
 #include <string>
 
@@ -58,11 +63,51 @@ private:
     virtual void addArgs(ProgramArgs& args);
     virtual void write(const PointViewPtr view);
 
+    template<typename CloudT>
+    inline void writeView(const PointViewPtr view); // implemented in header
+
     std::string m_filename;
-    bool m_compressed;
+    uint8_t m_compression;
+    bool m_xyz;
+    bool m_subtract_minimum;
+    double m_offset_x;
+    double m_offset_y;
+    double m_offset_z;
+    double m_scale_x;
+    double m_scale_y;
+    double m_scale_z;
 
     PcdWriter& operator=(const PcdWriter&); // not implemented
     PcdWriter(const PcdWriter&); // not implemented
 };
+
+
+template<typename CloudT>
+void PcdWriter::writeView(const PointViewPtr view)
+{
+    typedef typename CloudT::PointType PointT;
+    typename CloudT::Ptr cloud(new CloudT);
+    BOX3D bounds;
+    if (m_subtract_minimum)
+    {
+        view->calculateBounds(bounds);
+        bounds.grow(bounds.minx + m_offset_x,
+                    bounds.miny + m_offset_y,
+                    bounds.minz + m_offset_z);
+    }
+    else
+    {
+        bounds.grow(m_offset_x, m_offset_y, m_offset_z);
+    }
+    pclsupport::PDALtoPCD(view, *cloud, bounds, m_scale_x, m_scale_y, m_scale_z);
+    pcl::PCDWriter w;
+    switch (m_compression)
+    {
+        case 0 : w.writeASCII<PointT>(m_filename, *cloud); break;
+        case 1 : w.writeBinary<PointT>(m_filename, *cloud); break;
+        case 2 : w.writeBinaryCompressed<PointT>(m_filename, *cloud); break;
+    }
+}
+
 
 } // namespaces
