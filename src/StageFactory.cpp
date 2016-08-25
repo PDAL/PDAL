@@ -49,6 +49,7 @@
 #include <ferry/FerryFilter.hpp>
 #include <hag/HAGFilter.hpp>
 #include <merge/MergeFilter.hpp>
+#include <mongus/MongusFilter.hpp>
 #include <mortonorder/MortonOrderFilter.hpp>
 #include <normal/NormalFilter.hpp>
 #include <outlier/OutlierFilter.hpp>
@@ -234,6 +235,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(FerryFilter_InitPlugin);
     PluginManager::initializePlugin(HAGFilter_InitPlugin);
     PluginManager::initializePlugin(MergeFilter_InitPlugin);
+    PluginManager::initializePlugin(MongusFilter_InitPlugin);
     PluginManager::initializePlugin(MortonOrderFilter_InitPlugin);
     PluginManager::initializePlugin(NormalFilter_InitPlugin);
     PluginManager::initializePlugin(OutlierFilter_InitPlugin);
