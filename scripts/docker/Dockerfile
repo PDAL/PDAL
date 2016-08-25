@@ -141,6 +141,8 @@ RUN apt-get update && apt-get install -y \
     libpq5 \
     libdapclient6v5 \
     libspatialite7 \
+    libsqlite3-mod-spatialite \
+    spatialite-bin \
     libmysqlclient20 \
     libtiff5 \
     libboost-system1.58.0 \

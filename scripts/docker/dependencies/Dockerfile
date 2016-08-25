@@ -60,49 +60,50 @@ RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
         ninja \
         cython \
         python-pip \
+        libgdal1-dev \
     && rm -rf /var/lib/apt/lists/*
 
 
-RUN git clone --depth=1 https://github.com/OSGeo/gdal.git \
-    &&    cd gdal/gdal \
-    && ./configure --prefix=/usr \
-            --mandir=/usr/share/man \
-            --includedir=/usr/include/gdal \
-            --with-threads \
-            --with-grass=no \
-            --with-hide-internal-symbols=yes \
-            --with-rename-internal-libtiff-symbols=yes \
-            --with-rename-internal-libgeotiff-symbols=yes \
-            --with-libtiff=internal \
-            --with-geotiff=internal \
-            --with-webp \
-            --with-jasper \
-            --with-netcdf \
-            --with-hdf5=/usr/lib/x86_64-linux-gnu/hdf5/serial/ \
-            --with-xerces \
-            --with-geos \
-            --with-sqlite3 \
-            --with-curl \
-            --with-pg \
-            --with-mysql \
-            --with-python \
-            --with-odbc \
-            --with-ogdi \
-            --with-dods-root=/usr \
-            --with-spatialite=/usr \
-            --with-cfitsio=no \
-            --with-ecw=no \
-            --with-mrsid=no \
-            --with-poppler=yes \
-            --with-openjpeg=yes \
-            --with-freexl=yes \
-            --with-libkml=yes \
-            --with-armadillo=yes \
-            --with-liblzma=yes \
-            --with-epsilon=/usr \
-    && make -j 4 \
-    && make install \
-    && rm -rf /gdal
+#RUN git clone --depth=1 https://github.com/OSGeo/gdal.git \
+#    &&    cd gdal/gdal \
+#    && ./configure --prefix=/usr \
+#            --mandir=/usr/share/man \
+#            --includedir=/usr/include/gdal \
+#            --with-threads \
+#            --with-grass=no \
+#            --with-hide-internal-symbols=yes \
+#            --with-rename-internal-libtiff-symbols=yes \
+#            --with-rename-internal-libgeotiff-symbols=yes \
+#            --with-libtiff=internal \
+#            --with-geotiff=internal \
+#            --with-webp \
+#            --with-jasper \
+#            --with-netcdf \
+#            --with-hdf5=/usr/lib/x86_64-linux-gnu/hdf5/serial/ \
+#            --with-xerces \
+#            --with-geos \
+#            --with-sqlite3 \
+#            --with-curl \
+#            --with-pg \
+#            --with-mysql \
+#            --with-python \
+#            --with-odbc \
+#            --with-ogdi \
+#            --with-dods-root=/usr \
+#            --with-spatialite=/usr \
+#            --with-cfitsio=no \
+#            --with-ecw=no \
+#            --with-mrsid=no \
+#            --with-poppler=yes \
+#            --with-openjpeg=yes \
+#            --with-freexl=yes \
+#            --with-libkml=yes \
+#            --with-armadillo=yes \
+#            --with-liblzma=yes \
+#            --with-epsilon=/usr \
+#    && make -j 4 \
+#    && make install \
+#    && rm -rf /gdal
 
 RUN git clone https://github.com/hobu/nitro \
     && cd nitro \
