@@ -1,4 +1,4 @@
-FROM ubuntu:15.04
+FROM ubuntu:16.04
 MAINTAINER Howard Butler <howard@hobu.co>
 
 RUN apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 16126D3A3E5C1192
@@ -30,13 +30,14 @@ RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
         libhdf5-dev \
         subversion \
         libjsoncpp-dev \
-        libboost-filesystem1.55-dev \
-        libboost-iostreams1.55-dev \
-        libboost-program-options1.55-dev \
-        libboost-system1.55-dev \
-        libboost-thread1.55-dev \
+        libboost-filesystem1.58-dev \
+        libboost-iostreams1.58-dev \
+        libboost-program-options1.58-dev \
+        libboost-system1.58-dev \
+        libboost-thread1.58-dev \
         subversion \
         clang \
+        clang-3.6 \
         libproj-dev \
         libc6-dev \
         libnetcdf-dev \
@@ -60,49 +61,51 @@ RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
         ninja \
         cython \
         python-pip \
+        libgdal1-dev \
     && rm -rf /var/lib/apt/lists/*
 
 
-RUN git clone --depth=1 https://github.com/OSGeo/gdal.git \
-    &&    cd gdal/gdal \
-    && ./configure --prefix=/usr \
-            --mandir=/usr/share/man \
-            --includedir=/usr/include/gdal \
-            --with-threads \
-            --with-grass=no \
-            --with-hide-internal-symbols=yes \
-            --with-rename-internal-libtiff-symbols=yes \
-            --with-rename-internal-libgeotiff-symbols=yes \
-            --with-libtiff=internal \
-            --with-geotiff=internal \
-            --with-webp \
-            --with-jasper \
-            --with-netcdf \
-            --with-hdf5=/usr/lib/x86_64-linux-gnu/hdf5/serial/ \
-            --with-xerces \
-            --with-geos \
-            --with-sqlite3 \
-            --with-curl \
-            --with-pg \
-            --with-mysql \
-            --with-python \
-            --with-odbc \
-            --with-ogdi \
-            --with-dods-root=/usr \
-            --with-spatialite=/usr \
-            --with-cfitsio=no \
-            --with-ecw=no \
-            --with-mrsid=no \
-            --with-poppler=yes \
-            --with-openjpeg=yes \
-            --with-freexl=yes \
-            --with-libkml=yes \
-            --with-armadillo=yes \
-            --with-liblzma=yes \
-            --with-epsilon=/usr \
-    && make -j 4 \
-    && make install \
-    && rm -rf /gdal
+
+#RUN git clone --depth=1 https://github.com/OSGeo/gdal.git \
+#    &&    cd gdal/gdal \
+#    && ./configure --prefix=/usr \
+#            --mandir=/usr/share/man \
+#            --includedir=/usr/include/gdal \
+#            --with-threads \
+#            --with-grass=no \
+#            --with-hide-internal-symbols=yes \
+#            --with-rename-internal-libtiff-symbols=yes \
+#            --with-rename-internal-libgeotiff-symbols=yes \
+#            --with-libtiff=internal \
+#            --with-geotiff=internal \
+#            --with-webp \
+#            --with-jasper \
+#            --with-netcdf \
+#            --with-hdf5=/usr/lib/x86_64-linux-gnu/hdf5/serial/ \
+#            --with-xerces \
+#            --with-geos \
+#            --with-sqlite3 \
+#            --with-curl \
+#            --with-pg \
+#            --with-mysql \
+#            --with-python \
+#            --with-odbc \
+#            --with-ogdi \
+#            --with-dods-root=/usr \
+#            --with-spatialite=/usr \
+#            --with-cfitsio=no \
+#            --with-ecw=no \
+#            --with-mrsid=no \
+#            --with-poppler=yes \
+#            --with-openjpeg=yes \
+#            --with-freexl=yes \
+#            --with-libkml=yes \
+#            --with-armadillo=yes \
+#            --with-liblzma=yes \
+#            --with-epsilon=/usr \
+#    && make -j 4 \
+#    && make install \
+#    && rm -rf /gdal
 
 RUN git clone https://github.com/hobu/nitro \
     && cd nitro \
@@ -172,12 +175,12 @@ RUN wget http://bitbucket.org/eigen/eigen/get/3.2.7.tar.gz \
         && rm -rf /3.2.7.tar.gz \
         && rm -rf /eigen-eigen-b30b87236a1b
 
-RUN git clone https://github.com/chambbj/pcl.git \
+RUN git clone https://github.com/PointCloudLibrary/pcl.git \
         && cd pcl \
-        && git checkout pcl-1.7.2-sans-opengl \
+        && git checkout pcl-1.8.0 \
         && mkdir build \
         && cd build \
-        && CXXFLAGS="-std=c++11"  cmake \
+        && CC="clang" CXX="clang++" CXXFLAGS="-std=c++11"  cmake \
                 -DBUILD_2d=ON \
                 -DBUILD_CUDA=OFF \
                 -DBUILD_GPU=OFF \
@@ -217,10 +220,18 @@ RUN git clone https://github.com/chambbj/pcl.git \
                 -DWITH_QT=OFF \
                 -DWITH_VTK=OFF \
                 -DWITH_PCAP=OFF \
+                -DWITH_OPENNI=OFF \
+                -DWITH_OPENNI2=OFF \
+                -DWITH_FZAPI=OFF \
+                -DWITH_ENSENSO=OFF \
+                -DWITH_DAVIDSDK=OFF \
+                -DWITH_DSSDK=OFF \
+                -DWITH_RSSDK=OFF \
+                -DWITH_OPENGL=OFF \
                 -DCMAKE_INSTALL_PREFIX=/usr \
                 -DCMAKE_BUILD_TYPE="Release" \
                 .. \
-        && make \
+        && make -j 4\
         && make install \
         && rm -rf /pcl
 
@@ -240,18 +251,18 @@ RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
         unzip \
     && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir /vdatum \
-    && cd /vdatum \
-    && wget http://download.osgeo.org/proj/vdatum/usa_geoid2012.zip && unzip -j -u usa_geoid2012.zip -d /usr/share/proj \
-    && wget http://download.osgeo.org/proj/vdatum/usa_geoid2009.zip && unzip -j -u usa_geoid2009.zip -d /usr/share/proj \
-    && wget http://download.osgeo.org/proj/vdatum/usa_geoid2003.zip && unzip -j -u usa_geoid2003.zip -d /usr/share/proj \
-    && wget http://download.osgeo.org/proj/vdatum/usa_geoid1999.zip && unzip -j -u usa_geoid1999.zip -d /usr/share/proj \
-    && wget http://download.osgeo.org/proj/vdatum/vertcon/vertconc.gtx && mv vertconc.gtx /usr/share/proj \
-    && wget http://download.osgeo.org/proj/vdatum/vertcon/vertcone.gtx && mv vertcone.gtx /usr/share/proj \
-    && wget http://download.osgeo.org/proj/vdatum/vertcon/vertconw.gtx && mv vertconw.gtx /usr/share/proj \
-    && wget http://download.osgeo.org/proj/vdatum/egm96_15/egm96_15.gtx && mv egm96_15.gtx /usr/share/proj \
-    && wget http://download.osgeo.org/proj/vdatum/egm08_25/egm08_25.gtx && mv egm08_25.gtx /usr/share/proj \
-    && rm -rf /vdatum
+#RUN mkdir /vdatum \
+#    && cd /vdatum \
+#    && wget http://download.osgeo.org/proj/vdatum/usa_geoid2012.zip && unzip -j -u usa_geoid2012.zip -d /usr/share/proj \
+#    && wget http://download.osgeo.org/proj/vdatum/usa_geoid2009.zip && unzip -j -u usa_geoid2009.zip -d /usr/share/proj \
+#    && wget http://download.osgeo.org/proj/vdatum/usa_geoid2003.zip && unzip -j -u usa_geoid2003.zip -d /usr/share/proj \
+#    && wget http://download.osgeo.org/proj/vdatum/usa_geoid1999.zip && unzip -j -u usa_geoid1999.zip -d /usr/share/proj \
+#    && wget http://download.osgeo.org/proj/vdatum/vertcon/vertconc.gtx && mv vertconc.gtx /usr/share/proj \
+#    && wget http://download.osgeo.org/proj/vdatum/vertcon/vertcone.gtx && mv vertcone.gtx /usr/share/proj \
+#    && wget http://download.osgeo.org/proj/vdatum/vertcon/vertconw.gtx && mv vertconw.gtx /usr/share/proj \
+#    && wget http://download.osgeo.org/proj/vdatum/egm96_15/egm96_15.gtx && mv egm96_15.gtx /usr/share/proj \
+#    && wget http://download.osgeo.org/proj/vdatum/egm08_25/egm08_25.gtx && mv egm08_25.gtx /usr/share/proj \
+#    && rm -rf /vdatum
 
 RUN git clone https://github.com/gadomski/fgt.git \
     && cd fgt \
@@ -269,5 +280,8 @@ RUN git clone https://github.com/gadomski/cpd.git \
     && make install \
     && rm -rf /cpd
 
-RUN apt-get clean
+
+
+
+#RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.6 20 && update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.6 20
 
