@@ -1,4 +1,4 @@
-FROM ubuntu:15.04
+FROM ubuntu:xenial
 MAINTAINER Howard Butler <howard@hobu.co>
 
 RUN apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 16126D3A3E5C1192
@@ -30,13 +30,14 @@ RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
         libhdf5-dev \
         subversion \
         libjsoncpp-dev \
-        libboost-filesystem1.55-dev \
-        libboost-iostreams1.55-dev \
-        libboost-program-options1.55-dev \
-        libboost-system1.55-dev \
-        libboost-thread1.55-dev \
+        libboost-filesystem1.58-dev \
+        libboost-iostreams1.58-dev \
+        libboost-program-options1.58-dev \
+        libboost-system1.58-dev \
+        libboost-thread1.58-dev \
         subversion \
         clang \
+        clang-3.6 \
         libproj-dev \
         libc6-dev \
         libnetcdf-dev \
@@ -62,6 +63,7 @@ RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
         python-pip \
     && rm -rf /var/lib/apt/lists/*
 
+RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang03.6 20 && update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.6 20
 
 RUN git clone --depth=1 https://github.com/OSGeo/gdal.git \
     &&    cd gdal/gdal \
