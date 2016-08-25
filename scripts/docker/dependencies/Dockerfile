@@ -173,9 +173,9 @@ RUN wget http://bitbucket.org/eigen/eigen/get/3.2.7.tar.gz \
         && rm -rf /3.2.7.tar.gz \
         && rm -rf /eigen-eigen-b30b87236a1b
 
-RUN git clone https://github.com/chambbj/pcl.git \
+RUN git clone https://github.com/PointCloudLibrary/pcl.git \
         && cd pcl \
-        && git checkout pcl-1.7.2-sans-opengl \
+        && git checkout pcl-1.8.0 \
         && mkdir build \
         && cd build \
         && CXXFLAGS="-std=c++11"  cmake \
@@ -218,6 +218,14 @@ RUN git clone https://github.com/chambbj/pcl.git \
                 -DWITH_QT=OFF \
                 -DWITH_VTK=OFF \
                 -DWITH_PCAP=OFF \
+                -DWITH_OPENNI=OFF \
+                -DWITH_OPENNI2=OFF \
+                -DWITH_FZAPI=OFF \
+                -DWITH_ENSENSO=OFF \
+                -DWITH_DAVIDSDK=OFF \
+                -DWITH_DSSDK=OFF \
+                -DWITH_RSSDK=OFF \
+                -DWITH_OPENGL=OFF \
                 -DCMAKE_INSTALL_PREFIX=/usr \
                 -DCMAKE_BUILD_TYPE="Release" \
                 .. \
