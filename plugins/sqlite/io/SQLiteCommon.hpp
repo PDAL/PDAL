@@ -183,7 +183,6 @@ public:
         if (bWrite)
         {
             m_log->get(LogLevel::Debug3) << "Connecting db for write"<< std::endl;
-            std::cerr << "Open for create!\n";
             flags |= SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
         }
         else
@@ -195,7 +194,6 @@ public:
         int status = sqlite3_open_v2(m_connection.c_str(), &m_session, flags, 0);
         if (status != SQLITE_OK)
         {
-            std::cerr << "Connection = " << m_connection << "!\n";
             error("Unable to open database", "connect");
         }
     }
@@ -488,7 +486,7 @@ public:
         if (module_name.size())
             oss << module_name;
         else
-            oss << lib_extension << "spatialite" << "." << so_extension;
+            oss << lib_extension << "spatialite";
         oss << "')";
         execute(oss.str());
         oss.str("");
