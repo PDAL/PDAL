@@ -94,7 +94,6 @@ void testReadWrite(bool compression, bool scaling)
 
     StageFactory f;
     {
-    std::cerr << "*** Writing data!\n";
     Options lasReadOpts;
     lasReadOpts.add("filename", Support::datapath("las/1.2-with-color.las"));
     lasReadOpts.add("count", 11);
