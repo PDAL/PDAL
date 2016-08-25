@@ -14,12 +14,6 @@
             <Option name="sample_size">
                 5000
             </Option>
-            <Option name="x_dim">
-                readers.las.X
-            </Option>
-            <Option name="y_dim">
-                Y
-            </Option>
             <Option name="precision">
                 4
             </Option>

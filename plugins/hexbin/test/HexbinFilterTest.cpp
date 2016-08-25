@@ -61,23 +61,20 @@ TEST(HexbinFilterTest, HexbinFilterTest_test_1)
 
     Options options;
     options.add("filename", Support::datapath("las/hextest.las"));
-    options.add("output_tesselation", true);
-    options.add("sample_size", 5000, "Number of samples to use "
-        "when estimating hexagon edge size. Specify 0.0 for edge_size if "
-        "you want to compute one.");
-    options.add("threshold", 1, "Number of points necessary inside "
-        "a hexagon to be considered full");
-    options.add("edge_length", 0.666666666, "The edge size of the hexagon to "
-        "use in situations where you do not want to estimate based on "
-        "a sample");
 
-    std::unique_ptr<Stage> reader(f.createStage("readers.las"));
-    EXPECT_TRUE(reader.get());
+    Stage* reader(f.createStage("readers.las"));
+    EXPECT_TRUE(reader);
     reader->setOptions(options);
 
-    std::unique_ptr<Stage> hexbin(f.createStage("filters.hexbin"));
-    EXPECT_TRUE(hexbin.get());
-    hexbin->setOptions(options);
+    Stage* hexbin(f.createStage("filters.hexbin"));
+
+    Options hexOptions;
+    hexOptions.add("output_tesselation", true);
+    hexOptions.add("sample_size", 5000);
+    hexOptions.add("threshold", 1);
+    hexOptions.add("edge_length", 0.666666666);
+    EXPECT_TRUE(hexbin);
+    hexbin->setOptions(hexOptions);
     hexbin->setInput(*reader);
 
     PointTable table;

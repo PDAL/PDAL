@@ -37,6 +37,8 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_internal.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include <iomanip>
 #include <sstream>
@@ -61,39 +63,33 @@ SQLiteWriter::SQLiteWriter() :
     , m_sdo_pc_is_initialized(false)
     , m_obj_id(0)
     , m_block_id(0)
-    , m_srid(0)
-    , m_num_points(0)
-    , m_orientation(Orientation::PointMajor)
-    , m_is3d(false)
-    , m_doCompression(false)
 {}
 
 
-void SQLiteWriter::processOptions(const Options& options)
+void SQLiteWriter::addArgs(ProgramArgs& args)
 {
-    m_connection =
-        options.getValueOrDefault<std::string>("connection", "");
-    if (!m_connection.size())
-    {
-        m_connection =
-            options.getValueOrDefault<std::string>("filename", "");
-
-        if (!m_connection.size())
-        throw pdal_error("unable to connect to database, "
-            "no connection string was given!");
-    }
-    m_block_table =
-        options.getValueOrThrow<std::string>("block_table_name");
-    m_cloud_table =
-        options.getValueOrThrow<std::string>("cloud_table_name");
-    m_cloud_column =
-        options.getValueOrDefault<std::string>("cloud_column_name", "id");
-    m_modulename =
-        options.getValueOrDefault<std::string>("module", "");
-    m_srid =
-        m_options.getValueOrDefault<uint32_t>("srid", 4326);
-    m_is3d = m_options.getValueOrDefault<bool>("is3d", false);
-    m_doCompression = m_options.getValueOrDefault<bool>("compression", false);
+    DbWriter::doAddArgs(args);
+    args.add("block_table_name", "Block table name",
+        m_block_table).setPositional();
+    args.add("cloud_table_name", "Cloud table name",
+        m_cloud_table).setPositional();
+    args.add("connection", "SQL conneciton string",
+        m_connection).setPositional();
+    args.add("cloud_column_name", "Cloud column name", m_cloud_column, "id");
+    args.add("module", "Module name", m_modulename);
+    args.add("srid", "SRID", m_srid, 4326U);
+    args.add("pcid", "PCID", m_pcId);
+    args.add("is3d", "Whether a Z dimension should be written", m_is3d);
+    args.add("compression", "Whether blocks should be compressed",
+        m_doCompression);
+    args.add("overwrite", "Whether existing data should be overwritten",
+        m_overwrite);
+    args.add("pre_sql", "SQL to be executed before running the translation, "
+        "or the name of a file containing such SQL", m_preSql);
+    args.add("post_sql", "SQL to be executed after running the translation, "
+        "or the name of a file containing such SQL", m_postSql);
+    args.add("clound_boundary_wkt", "Boundary of points to be written",
+        m_cloudBoundary);
 }
 
 
@@ -106,7 +102,7 @@ void SQLiteWriter::initialize()
         m_session = std::unique_ptr<SQLite>(new SQLite(m_connection, log()));
         m_session->connect(true);
         log()->get(LogLevel::Debug) << "Connected to database" << std::endl;
-        
+
         bool bHaveSpatialite = m_session->haveSpatialite();
         log()->get(LogLevel::Debug) << "Have spatialite?: " <<
             bHaveSpatialite << std::endl;
@@ -166,7 +162,7 @@ void SQLiteWriter::writeInit()
                          << bHaveCloudTable
                          <<"'"<< std::endl;
 
-    if (m_options.getValueOrDefault<bool>("overwrite", true))
+    if (m_overwrite)
     {
         if (bHaveBlockTable)
         {
@@ -180,17 +176,15 @@ void SQLiteWriter::writeInit()
         }
     }
 
-    std::string pre_sql =
-        m_options.getValueOrDefault<std::string>("pre_sql", "");
-    if (pre_sql.size())
+    if (m_preSql.size())
     {
-        std::string sql = FileUtils::readFileIntoString(pre_sql);
+        std::string sql = FileUtils::readFileIntoString(m_preSql);
         if (!sql.size())
         {
             // if there was no file to read because the data in pre_sql was
             // actually the sql code the user wanted to run instead of the
             // filename to open, we'll use that instead.
-            sql = pre_sql;
+            sql = m_preSql;
         }
         m_session->execute(sql);
     }
@@ -208,7 +202,6 @@ void SQLiteWriter::writeInit()
     CreateCloud();
     m_sdo_pc_is_initialized = true;
 }
-
 
 
 void SQLiteWriter::CreateBlockTable()
@@ -389,17 +382,15 @@ void SQLiteWriter::done(PointTableRef table)
         CreateIndexes(m_block_table, "extent", m_is3d);
     }
 
-    std::string post_sql =
-        m_options.getValueOrDefault<std::string>("post_sql", "");
-    if (post_sql.size())
+    if (m_postSql.size())
     {
-        std::string sql = FileUtils::readFileIntoString(post_sql);
+        std::string sql = FileUtils::readFileIntoString(m_postSql);
         if (!sql.size())
         {
-            // if there was no file to read because the data in post_sql was
+            // if there was no file to read because the data in m_postSql was
             // actually the sql code the user wanted to run instead of the
             // filename to open, we'll use that instead.
-            sql = post_sql;
+            sql = m_postSql;
         }
         m_session->execute(sql);
     }
@@ -415,20 +406,8 @@ void SQLiteWriter::CreateCloud()
 
     ostringstream oss;
 
-    bool pack =
-        m_options.getValueOrDefault<bool>("pack_ignored_fields", true);
-
-    string bounds = m_options.getValueOrDefault<string>(
-        "cloud_boundary_wkt", "");
-    if (bounds.size())
-    {
-        log()->get(LogLevel::Debug2) << "have cloud_boundary_wkt of size " <<
-            bounds.size() << std::endl;
-        bounds = loadGeometryWKT(bounds);
-    }
-
-    string cloud_column =
-        m_options.getValueOrDefault<string>("cloud_column", "id");
+    if (m_cloudBoundary.size())
+        m_cloudBoundary = loadGeometryWKT(m_cloudBoundary);
 
     oss << "INSERT INTO " << Utils::tolower(m_cloud_table) << "(" <<
         " block_table, schema) VALUES ('" <<
@@ -456,22 +435,13 @@ void SQLiteWriter::CreateCloud()
     m_obj_id = id;
 
     log()->get(LogLevel::Debug) << "Point cloud id was " << id << std::endl;
-    try
-    {
-        Option& pc_id = m_options.getOptionByRef("pc_id");
-        pc_id.setValue(id);
-    }
-    catch (Option::not_found)
-    {
-        Option pc_id("pc_id", id, "Point Cloud Id");
-        m_options.add(pc_id);
-    }
-    if (bounds.size())
+    m_pcId = id;
+    if (m_cloudBoundary.size())
     {
         records rs;
         row r;
 
-        r.push_back(column(bounds));
+        r.push_back(column(m_cloudBoundary));
         r.push_back(column(m_srid));
         r.push_back(column(id));
         rs.push_back(r);

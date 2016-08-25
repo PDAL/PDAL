@@ -34,12 +34,6 @@ def filter(ins,outs):
                 <Option name="spatialreference">
                     EPSG:2993
                 </Option>
-                <Option name="debug">
-                    true
-                </Option>
-                <Option name="verbose">
-                    6
-                </Option>
             </Reader>
         </Filter>
     </Writer>

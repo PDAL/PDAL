@@ -38,6 +38,7 @@
 #include <pdal/Kernel.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/plugin.hpp>
 
 
 extern "C" int32_t TIndexKernel_ExitFunc();
@@ -112,6 +113,7 @@ private:
     std::string m_tgtSrsString;
     std::string m_assignSrsString;
     bool m_fastBoundary;
+    bool m_usestdin;
 };
 
 } // namespace pdal

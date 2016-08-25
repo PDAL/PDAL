@@ -80,11 +80,7 @@ TEST(ReprojectionFilterTest, ReprojectionFilterTest_test_1)
         reader.setOptions(ops1);
 
         Options options;
-        Option debug("debug", true, "");
-        Option verbose("verbose", 9, "");
-        Option out_srs("out_srs", out_ref.getWKT(),
-            "Output SRS to reproject to");
-        options.add(out_srs);
+        options.add("out_srs", out_ref.getWKT());
 
         ReprojectionFilter reprojectionFilter;
         reprojectionFilter.setOptions(options);

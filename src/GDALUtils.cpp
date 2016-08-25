@@ -38,6 +38,9 @@
 
 #include <functional>
 #include <map>
+#include <mutex>
+
+#include <ogr_spatialref.h>
 
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127)  // conditional expression is constant
@@ -48,38 +51,132 @@ namespace pdal
 namespace gdal
 {
 
-ErrorHandler::ErrorHandler(bool isDebug, pdal::LogPtr log)
-    : m_isDebug(isDebug)
-    , m_log(log)
+/**
+  Reproject a bounds box from a source projection to a destination.
+  \param box  Bounds box to be reprojected in-place.
+  \param srcSrs  String in WKT or other suitable format of box coordinates.
+  \param dstSrs  String in WKT or other suitable format to which
+    coordinates should be projected.
+  \return  Whether the reprojection was successful or not.
+*/
+bool reprojectBounds(BOX3D& box, const std::string& srcSrs,
+    const std::string& dstSrs)
 {
-    if (m_isDebug)
-    {
-        const char* gdal_debug = ::pdal::Utils::getenv("CPL_DEBUG");
-        if (gdal_debug == 0)
-        {
-            pdal::Utils::putenv("CPL_DEBUG=ON");
-        }
-        m_gdal_callback = std::bind(&ErrorHandler::log, this,
-            std::placeholders::_1, std::placeholders::_2,
-            std::placeholders::_3);
-    }
-    else
-    {
-        m_gdal_callback = std::bind(&ErrorHandler::error, this,
-            std::placeholders::_1, std::placeholders::_2,
-            std::placeholders::_3);
-    }
+    OGRSpatialReference src;
+    OGRSpatialReference dst;
 
-    CPLPushErrorHandlerEx(&ErrorHandler::trampoline, this);
+    OGRErr srcOk = OSRSetFromUserInput(&src, srcSrs.c_str());
+    OGRErr dstOk = OSRSetFromUserInput(&dst, dstSrs.c_str());
+    if (srcOk != OGRERR_NONE || dstOk != OGRERR_NONE)
+        return false;
+
+    OGRCoordinateTransformationH transform =
+        OCTNewCoordinateTransformation(&src, &dst);
+
+    bool ok = (OCTTransform(transform, 1, &box.minx, &box.miny, &box.minz) &&
+        OCTTransform(transform, 1, &box.maxx, &box.maxy, &box.maxz));
+    OCTDestroyCoordinateTransformation(transform);
+    return ok;
 }
 
-void ErrorHandler::log(::CPLErr code, int num, char const* msg)
+
+std::string lastError()
+{
+    return CPLGetLastErrorMsg();
+}
+
+
+static ErrorHandler* s_gdalErrorHandler= 0;
+
+void registerDrivers()
+{
+    static std::once_flag flag;
+
+    auto init = []() -> void
+    {
+        GDALAllRegister();
+        OGRRegisterAll();
+    };
+
+    std::call_once(flag, init);
+}
+
+
+void unregisterDrivers()
+{
+    GDALDestroyDriverManager();
+}
+
+
+ErrorHandler& ErrorHandler::getGlobalErrorHandler()
+{
+    static std::once_flag flag;
+
+    auto init = []()
+    {
+       s_gdalErrorHandler = new ErrorHandler();
+    };
+
+    std::call_once(flag, init);
+    return *s_gdalErrorHandler;
+}
+
+ErrorHandler::ErrorHandler() : m_errorNum(0)
+{
+    std::string value;
+
+    // Will return thread-local setting
+    const char* set = CPLGetConfigOption("CPL_DEBUG", "");
+    m_cplSet = (bool)set ;
+    m_debug = m_cplSet;
+
+    // Push on a thread-local error handler
+    CPLSetErrorHandler(&ErrorHandler::trampoline);
+}
+
+
+void ErrorHandler::set(LogPtr log, bool debug)
+{
+    setLog(log);
+    setDebug(debug);
+}
+
+
+void ErrorHandler::setLog(LogPtr log)
+{
+    m_log = log;
+}
+
+
+void ErrorHandler::setDebug(bool debug)
+{
+    m_debug = debug;
+
+    if (debug)
+        CPLSetThreadLocalConfigOption("CPL_DEBUG", "ON");
+    else
+        CPLSetThreadLocalConfigOption("CPL_DEBUG", NULL);
+}
+
+
+int ErrorHandler::errorNum()
+{
+    int errorNum = m_errorNum;
+    return errorNum;
+}
+
+void ErrorHandler::handle(::CPLErr level, int num, char const* msg)
 {
     std::ostringstream oss;
 
-    if (code == CE_Failure || code == CE_Fatal)
-        error(code, num, msg);
-    else if (code == CE_Debug)
+    m_errorNum = num;
+    if (level == CE_Failure || level == CE_Fatal)
+    {
+        oss << "GDAL failure (" << num << ") " << msg;
+        if (m_log)
+            m_log->get(LogLevel::Error) << oss.str() << std::endl;
+    }
+    else if (m_debug && level == CE_Debug)
     {
         oss << "GDAL debug: " << msg;
         if (m_log)
@@ -87,22 +184,6 @@ void ErrorHandler::log(::CPLErr code, int num, char const* msg)
     }
 }
 
-
-void ErrorHandler::error(::CPLErr code, int num, char const* msg)
-{
-    std::ostringstream oss;
-    if (code == CE_Failure || code == CE_Fatal)
-    {
-        oss << "GDAL Failure number = " << num << ": " << msg;
-        throw pdal_error(oss.str());
-    }
-}
-
-
-ErrorHandler::~ErrorHandler()
-{
-    CPLPopErrorHandler();
-}
 
 struct InvalidBand {};
 struct CantReadBlock {};
@@ -259,9 +340,9 @@ Raster::Raster(const std::string& filename)
 }
 
 
-GDALError::Enum Raster::open()
+GDALError Raster::open()
 {
-    GDALError::Enum error = GDALError::None;
+    GDALError error = GDALError::None;
     if (m_ds)
         return error;
 
@@ -350,25 +431,24 @@ bool Raster::getPixelAndLinePosition(double x, double y,
 }
 
 
-Dimension::Type::Enum convertGDALtoPDAL(GDALDataType t)
+Dimension::Type convertGDALtoPDAL(GDALDataType t)
 {
-    using namespace Dimension::Type;
     switch (t)
     {
         case GDT_Byte:
-            return Unsigned8;
+            return Dimension::Type::Unsigned8;
         case GDT_UInt16:
-            return Unsigned16;
+            return Dimension::Type::Unsigned16;
         case GDT_Int16:
-            return Signed16;
+            return Dimension::Type::Signed16;
         case GDT_UInt32:
-            return Unsigned32;
+            return Dimension::Type::Unsigned32;
         case GDT_Int32:
-            return Signed32;
+            return Dimension::Type::Signed32;
         case GDT_Float32:
-            return Float;
+            return Dimension::Type::Float;
         case GDT_Float64:
-            return Double;
+            return Dimension::Type::Double;
         case GDT_CInt16:
         case GDT_CInt32:
         case GDT_CFloat32:
@@ -379,13 +459,13 @@ Dimension::Type::Enum convertGDALtoPDAL(GDALDataType t)
         case GDT_TypeCount:
             throw pdal_error("Detected bad GDAL data type.");
     }
-    return None;
+    return Dimension::Type::None;
 }
 
 
-GDALError::Enum Raster::readBand(std::vector<uint8_t>& points, int nBand)
+GDALError Raster::readBand(std::vector<uint8_t>& points, int nBand)
 {
-    try 
+    try
     {
         BandReader(m_ds, nBand).read(points);
     }
@@ -408,7 +488,7 @@ GDALError::Enum Raster::readBand(std::vector<uint8_t>& points, int nBand)
 }
 
 
-GDALError::Enum Raster::computePDALDimensionTypes()
+GDALError Raster::computePDALDimensionTypes()
 {
     if (!m_ds)
         return GDALError::NotOpen;
@@ -436,7 +516,7 @@ GDALError::Enum Raster::computePDALDimensionTypes()
 }
 
 
-GDALError::Enum Raster::read(double x, double y, std::vector<double>& data)
+GDALError Raster::read(double x, double y, std::vector<double>& data)
 {
     if (!m_ds)
         return GDALError::NotOpen;
@@ -494,7 +574,6 @@ void Raster::close()
 }
 
 } // namespace gdal
-
 
 std::string transformWkt(std::string wkt, const SpatialReference& from,
     const SpatialReference& to)

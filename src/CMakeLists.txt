@@ -15,7 +15,6 @@
 #   PDAL_<dirname>_CPP - all the .cpp files for the given subdir/namespace
 #   ...
 
-
 set(PDAL_HPP "")
 set(PDAL_CPP "")
 
@@ -38,17 +37,15 @@ endif()
 set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/pdal_types.hpp"
   "${PDAL_HEADERS_DIR}/Compression.hpp"
-  "${PDAL_HEADERS_DIR}/Dimension.hpp"
+  "${PDAL_HEADERS_DIR}/Eigen.hpp"
   "${PDAL_HEADERS_DIR}/Filter.hpp"
   "${PDAL_HEADERS_DIR}/FlexWriter.hpp"
   "${PDAL_HEADERS_DIR}/GDALUtils.hpp"
   "${PDAL_HEADERS_DIR}/GEOSUtils.hpp"
-  "${PDAL_HEADERS_DIR}/GlobalEnvironment.hpp"
   "${PDAL_HEADERS_DIR}/gitsha.h"
   "${PDAL_HEADERS_DIR}/KDIndex.hpp"
   "${PDAL_HEADERS_DIR}/KernelFactory.hpp"
   "${PDAL_HEADERS_DIR}/Kernel.hpp"
-  "${PDAL_HEADERS_DIR}/KernelSupport.hpp"
   "${PDAL_HEADERS_DIR}/Log.hpp"
   "${PDAL_HEADERS_DIR}/Metadata.hpp"
   "${PDAL_HEADERS_DIR}/Options.hpp"
@@ -63,13 +60,14 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/Polygon.hpp"
   "${PDAL_HEADERS_DIR}/QuadIndex.hpp"
   "${PDAL_HEADERS_DIR}/Reader.hpp"
+  "${PDAL_HEADERS_DIR}/Scaling.hpp"
   "${PDAL_HEADERS_DIR}/SpatialReference.hpp"
   "${PDAL_HEADERS_DIR}/Stage.hpp"
   "${PDAL_HEADERS_DIR}/StageFactory.hpp"
   "${PDAL_HEADERS_DIR}/StageWrapper.hpp"
-  "${PDAL_HEADERS_DIR}/UserCallback.hpp"
   "${PDAL_HEADERS_DIR}/Writer.hpp"
-  "${PDAL_SRC_DIR}/PipelineReader.hpp"
+  "${PDAL_SRC_DIR}/PipelineReaderJSON.hpp"
+  "${PDAL_SRC_DIR}/PipelineReaderXML.hpp"
   "${PDAL_SRC_DIR}/StageRunner.hpp"
     ${PDAL_XML_HEADER}
     ${DB_DRIVER_HEADERS}
@@ -77,13 +75,12 @@ set(PDAL_BASE_HPP
 
 set(PDAL_BASE_CPP
   DynamicLibrary.cpp
+  Eigen.cpp
   gitsha.cpp
   GDALUtils.cpp
   GEOSUtils.cpp
-  GlobalEnvironment.cpp
   Kernel.cpp
   KernelFactory.cpp
-  KernelSupport.cpp
   Log.cpp
   Metadata.cpp
   Options.cpp
@@ -93,11 +90,13 @@ set(PDAL_BASE_CPP
   PointView.cpp
   Polygon.cpp
   PipelineManager.cpp
-  PipelineReader.cpp
+  PipelineReaderJSON.cpp
+  PipelineReaderXML.cpp
   PipelineWriter.cpp
   PluginManager.cpp
   QuadIndex.cpp
   Reader.cpp
+  Scaling.cpp
   SpatialReference.cpp
   Stage.cpp
   StageFactory.cpp
@@ -163,11 +162,11 @@ set_target_properties(${PDAL_BASE_LIB_NAME} PROPERTIES VERSION "${PDAL_BUILD_VER
     CLEAN_DIRECT_OUTPUT 1)
 
 if (WITH_LASZIP)
-    target_link_libraries(${PDAL_BASE_LIB_NAME} ${LASZIP_LIBRARY})
+    target_link_libraries(${PDAL_BASE_LIB_NAME} PUBLIC ${LASZIP_LIBRARY})
 endif()
 
 if (PDAL_HAVE_LIBXML2)
-    target_link_libraries(${PDAL_BASE_LIB_NAME} ${LIBXML2_LIBRARIES})
+    target_link_libraries(${PDAL_BASE_LIB_NAME} PUBLIC ${LIBXML2_LIBRARIES})
 endif()
 
 #
@@ -175,26 +174,37 @@ endif()
 # so that users only need link libpdalcpp.
 #
 if (APPLE)
-    set(UTIL_LIB "-Wl,-reexport_library,$<TARGET_SONAME_FILE:${PDAL_UTIL_LIB_NAME}>")
-else()
-    set(UTIL_LIB ${PDAL_UTIL_LIB_NAME})
+    set(PDAL_REEXPORT "-Wl,-reexport_library,$<TARGET_FILE:${PDAL_UTIL_LIB_NAME}>")
+    #
+    # This allows the rpath reference for the reexported library (above) to
+    # be found.
+    #
+    set(PDAL_LIBDIR "-L$<TARGET_FILE_DIR:${PDAL_UTIL_LIB_NAME}>")
 endif()
 
 target_link_libraries(${PDAL_BASE_LIB_NAME}
-    ${CMAKE_THREAD_LIBS_INIT}
-    ${GDAL_LIBRARY}
-    ${GEOS_LIBRARY}
-    ${ZLIB_LIBRARIES}
-    ${UTIL_LIB}
-    ${PDAL_BOOST_LIB_NAME}
+    PUBLIC
+        ${CMAKE_THREAD_LIBS_INIT}
+        ${GDAL_LIBRARY}
+        ${GEOS_LIBRARY}
+        ${ZLIB_LIBRARIES}
+        ${CURL_LIBRARIES}
+    PRIVATE
+        ${PDAL_REEXPORT}
+        ${PDAL_UTIL_LIB_NAME}
+        ${PDAL_ARBITER_LIB_NAME}
+    ${JSON_CPP_LINK_TYPE}
+        ${PDAL_JSONCPP_LIB_NAME}
+    INTERFACE
+        ${PDAL_LIBDIR}
 )
 
 if (WITH_GEOTIFF)
-    target_link_libraries(${PDAL_BASE_LIB_NAME} ${GEOTIFF_LIBRARY})
+    target_link_libraries(${PDAL_BASE_LIB_NAME} PUBLIC ${GEOTIFF_LIBRARY})
 endif()
 
-if(WIN32)
-    target_link_libraries(${PDAL_BASE_LIB_NAME} ws2_32)
+if (WIN32)
+    target_link_libraries(${PDAL_BASE_LIB_NAME} PUBLIC ws2_32)
 endif()
 
 ###############################################################################
@@ -214,4 +224,7 @@ endif()
 install(DIRECTORY "${PDAL_HEADERS_DIR}/"
   DESTINATION "${PDAL_INCLUDE_INSTALL_DIR}"
   PATTERN "/CMakeFiles/*" EXCLUDE
+  )
+install(FILES ${DIMENSION_OUTFILE} 
+  DESTINATION "${PDAL_INCLUDE_INSTALL_DIR}"
   )

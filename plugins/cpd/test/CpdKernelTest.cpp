@@ -35,19 +35,19 @@
 #include <pdal/pdal_test_main.hpp>
 #include "kernel/Cpd.hpp"
 
-#include <pdal/KernelFactory.hpp>
 #include <pdal/Filter.hpp>
+#include <pdal/KernelFactory.hpp>
+#include <pdal/PipelineManager.hpp>
+#include <pdal/PluginManager.hpp>
 #include <pdal/Reader.hpp>
+#include "LasReader.hpp"
 #include "Support.hpp"
-
 
 namespace pdal
 {
 
-
 namespace
 {
-
 
 class CpdKernelTest : public ::testing::Test
 {
@@ -71,7 +71,8 @@ protected:
         reader.setOptions(readerOptions);
 
         Options transformationOptions;
-        transformationOptions.add("matrix", "0.36 0.48 -0.8 1\n-0.8 0.6 0.0 2\n0.48 0.64 0.60 3\n0 0 0 1");
+        transformationOptions.add("matrix",
+            "1 0 0 1\n0 1 0 2\n0 0 1 3\n0 0 0 1");
         Stage& filter = mrManager.addFilter("filters.transformation");
         filter.setInput(reader);
         filter.setOptions(transformationOptions);
@@ -97,31 +98,20 @@ protected:
 
 };
 
-
 } // namespace
 
 
 TEST_F(CpdKernelTest, Execution)
 {
     KernelFactory f;
-    void* stage= PluginManager::createObject("kernels.cpd");
+    void *stage = PluginManager::createObject("kernels.cpd");
+    std::unique_ptr<Kernel> cpdKernel(static_cast<Kernel*>(stage));
 
-    std::unique_ptr<Kernel> cpdKernel( static_cast<Kernel*>(stage));
-    int argc = 7;
-    const char * argv[7] = {
-        "cpd",
-        "-x",
-        m_x.c_str(),
-        "-y",
-        m_y.c_str(),
-        "-o",
-        m_outfile.c_str()
-    };
-
-    int retval = cpdKernel->run(argc, argv, "cpd");
+    int argc = 4;
+    LogPtr log(new Log("pdal cpd", &std::clog));
+    StringList argv { "rigid", m_x, m_y, m_outfile };
+    int retval = cpdKernel->run(argv, log);
     EXPECT_EQ(0, retval);
 }
 
-
 } // namespace pdal
-

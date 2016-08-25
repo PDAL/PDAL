@@ -36,12 +36,13 @@
 
 #include <sstream>
 
+#include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
 namespace
 {
-
 
 void createErrorCallback(p_ply ply, const char* message)
 {
@@ -51,39 +52,24 @@ void createErrorCallback(p_ply ply, const char* message)
 }
 
 
-e_ply_type getPlyType(Dimension::Type::Enum type)
+e_ply_type getPlyType(Dimension::Type type)
 {
-    using namespace Dimension::Type;
-    switch (type)
+    static std::map<Dimension::Type, e_ply_type> types =
     {
-    case Unsigned8:
-        return PLY_UINT8;
-    case Signed8:
-        return PLY_INT8;
-    case Unsigned16:
-        return PLY_UINT16;
-    case Signed16:
-        return PLY_INT16;
-    case Unsigned32:
-        return PLY_UIN32;
-    case Signed32:
-        return PLY_INT32;
-    case Unsigned64:
-        return PLY_FLOAT64;
-    case Signed64:
-        return PLY_FLOAT64;
-    case Float:
-        return PLY_FLOAT32;
-    case Double:
-        return PLY_FLOAT64;
-    default:
-        // I went back and forth about throwing here, but since it's not
-        // wrong to fall back onto a double (just bad, b/c it can take up
-        // extra space), I chose to default rather than throw.
-        return PLY_FLOAT64;
-    }
+        { Dimension::Type::Unsigned8, PLY_UINT8 },
+        { Dimension::Type::Signed8, PLY_INT8 },
+        { Dimension::Type::Unsigned16, PLY_UINT16 },
+        { Dimension::Type::Signed16, PLY_INT16 },
+        { Dimension::Type::Unsigned32, PLY_UINT32 },
+        { Dimension::Type::Signed32, PLY_INT32 },
+        { Dimension::Type::Float, PLY_FLOAT32 },
+        { Dimension::Type::Double, PLY_FLOAT64 }
+    };
+
+    return types[type];
 }
-}
+
+} // unnamed namespace
 
 
 static PluginInfo const s_info = PluginInfo(
@@ -104,9 +90,18 @@ PlyWriter::PlyWriter()
 {}
 
 
-void PlyWriter::processOptions(const Options& options)
+void PlyWriter::addArgs(ProgramArgs& args)
 {
-    std::string storageMode = options.getValueOrDefault<std::string>("storage_mode", "default");
+    args.add("filename", "Output filename", m_filename).setPositional();
+    args.add("storage_mode", "PLY Storage mode", m_storageModeSpec, "default");
+}
+
+
+void PlyWriter::initialize()
+{
+    std::string storageMode(m_storageModeSpec);
+    storageMode = Utils::tolower(storageMode);
+
     if (storageMode == "ascii")
     {
         m_storageMode = PLY_ASCII;
@@ -126,8 +121,9 @@ void PlyWriter::processOptions(const Options& options)
     else
     {
         std::stringstream ss;
-        ss << "Unknown storage mode '" << storageMode <<
-            "'. Known storage modes are: 'ascii', 'little endian', 'big endian', and 'default'";
+        ss << "Unknown storage mode '" << m_storageModeSpec <<
+            "'. Known storage modes are: 'ascii', 'little endian', "
+            "'big endian', and 'default'";
         throw pdal_error(ss.str());
     }
 }
@@ -135,7 +131,8 @@ void PlyWriter::processOptions(const Options& options)
 
 void PlyWriter::ready(PointTableRef table)
 {
-    m_ply = ply_create(m_filename.c_str(), m_storageMode, createErrorCallback, 0, nullptr);
+    m_ply = ply_create(m_filename.c_str(), m_storageMode, createErrorCallback,
+        0, nullptr);
     if (!m_ply)
     {
         std::stringstream ss;

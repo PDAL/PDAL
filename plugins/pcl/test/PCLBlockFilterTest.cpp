@@ -44,22 +44,23 @@
 
 using namespace pdal;
 
-TEST(PCLBlockFilterTest, PCLBlockFilterTest_example_passthrough_xml)
+TEST(PCLBlockFilterTest, PCLBlockFilterTest_example_passthrough_json)
 {
     StageFactory f;
-    std::unique_ptr<Stage> filter(f.createStage("filters.pclblock"));
-    EXPECT_TRUE(filter.get());
+    Stage* filter(f.createStage("filters.pclblock"));
+    EXPECT_TRUE(filter);
 
     PipelineManager pipeline;
-    pipeline.readPipeline(Support::datapath("filters/pcl/passthrough.xml"));
+
+    pipeline.readPipeline(
+        Support::configuredpath("filters/pcl/passthrough.json"));
     pipeline.execute();
 
     PointViewSet viewSet = pipeline.views();
     EXPECT_EQ(viewSet.size(), 1u);
     PointViewPtr view = *viewSet.begin();
-    EXPECT_EQ(view->size(), 81u);
+    EXPECT_EQ(view->size(), 795u);
 }
-
 
 static void test_filter(const std::string& jsonFile,
                         size_t expectedPointCount,
@@ -72,24 +73,17 @@ static void test_filter(const std::string& jsonFile,
     const std::string& autzenThin = "autzen/autzen-thin.las";
     const std::string& autzen = useThin ? autzenThin : autzenThick;
 
-    Option filename("filename", Support::datapath(autzen));
-    Option debug("debug", true, "");
-    Option verbose("verbose", 9, "");
+    options.add("filename", Support::datapath(autzen));
 
-    options.add(filename);
-    options.add(debug);
-    options.add(verbose);
-
-    std::unique_ptr<Stage> reader(f.createStage("readers.las"));
-    EXPECT_TRUE(reader.get());
+    Stage* reader(f.createStage("readers.las"));
+    EXPECT_TRUE(reader);
     reader->setOptions(options);
 
-    Option fname("filename", Support::datapath(jsonFile));
     Options filter_options;
-    filter_options.add(fname);
+    filter_options.add("filename", Support::datapath(jsonFile));
 
-    std::shared_ptr<Stage> pcl_block(f.createStage("filters.pclblock"));
-    EXPECT_TRUE(pcl_block.get());
+    Stage* pcl_block(f.createStage("filters.pclblock"));
+    EXPECT_TRUE(pcl_block);
     pcl_block->setOptions(filter_options);
     pcl_block->setInput(*reader);
 

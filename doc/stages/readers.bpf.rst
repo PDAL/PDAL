@@ -19,17 +19,18 @@ be metadata and is UTF-encoded and added to the reader's metadata.
 Example
 ------------------------------------------------------------------------------
 
-.. code-block:: xml
+.. code-block:: json
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.text">
-      <Option name="filename">outputfile.txt</Option>
-      <Reader type="readers.bpf">
-        <Option name="filename">inputfile.bpf</Option>
-      </Reader>
-    </Writer>
-  </Pipeline>
+    {
+      "pipeline":[
+        "inputfile.bpf",
+        {
+          "type":"writers.text",
+          "filename":"outputfile.txt"
+        }
+      ]
+    }
+
 
 Options
 ------------------------------------------------------------------------------

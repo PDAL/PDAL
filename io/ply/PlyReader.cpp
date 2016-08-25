@@ -37,17 +37,17 @@
 #include <sstream>
 
 #include <pdal/PointView.hpp>
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {
 namespace
 {
 
-
 struct CallbackContext
 {
     PointViewPtr view;
-    DimensionMap dimensionMap;
+    PlyReader::DimensionMap dimensionMap;
 };
 
 
@@ -120,14 +120,13 @@ int readPlyCallback(p_ply_argument argument)
 
     CallbackContext * context = static_cast<CallbackContext *>(contextAsVoid);
     double value = ply_get_argument_value(argument);
-    Dimension::Id::Enum dimension = context->dimensionMap.at(propertyName);
+    Dimension::Id dimension = context->dimensionMap.at(propertyName);
     context->view->setField(dimension, index, value);
 
     return 1;
 }
 
-
-}
+} // unnamed namespace
 
 
 static PluginInfo const s_info = PluginInfo(
@@ -179,6 +178,27 @@ void PlyReader::initialize()
         throw pdal_error(ss.str());
     }
 
+    static std::map<int, Dimension::Type> types =
+    {
+        { PLY_INT8, Dimension::Type::Signed8 },
+        { PLY_UINT8, Dimension::Type::Unsigned8 },
+        { PLY_INT16, Dimension::Type::Signed16 },
+        { PLY_UINT16, Dimension::Type::Unsigned16 },
+        { PLY_INT32, Dimension::Type::Signed32 },
+        { PLY_UINT32, Dimension::Type::Unsigned32 },
+        { PLY_FLOAT32, Dimension::Type::Float },
+        { PLY_FLOAT64, Dimension::Type::Double },
+
+        { PLY_CHAR, Dimension::Type::Signed8 },
+        { PLY_UCHAR, Dimension::Type::Unsigned8 },
+        { PLY_SHORT, Dimension::Type::Signed16 },
+        { PLY_USHORT, Dimension::Type::Unsigned16 },
+        { PLY_INT, Dimension::Type::Signed32 },
+        { PLY_UINT, Dimension::Type::Unsigned32 },
+        { PLY_FLOAT, Dimension::Type::Float },
+        { PLY_DOUBLE, Dimension::Type::Double }
+    };
+
     p_ply_property property = nullptr;
     while ((property = ply_get_next_property(vertex_element, property)))
     {
@@ -186,7 +206,8 @@ void PlyReader::initialize()
         e_ply_type type;
         e_ply_type length_type;
         e_ply_type value_type;
-        if (!ply_get_property_info(property, &name, &type, &length_type, &value_type))
+        if (!ply_get_property_info(property, &name, &type,
+            &length_type, &value_type))
         {
             std::stringstream ss;
             ss << "Error reading property info in " << m_filename << ".";
@@ -195,11 +216,7 @@ void PlyReader::initialize()
         // For now, we'll just use PDAL's built in dimension matching.
         // We could be smarter about this, e.g. by using the length
         // and value type attributes.
-        Dimension::Id::Enum dim = Dimension::id(name);
-        if (dim != Dimension::Id::Unknown)
-        {
-            m_vertexDimensions[name] = dim;
-        }
+        m_vertexTypes[name] = types[type];
     }
     ply_close(ply);
 }
@@ -207,9 +224,12 @@ void PlyReader::initialize()
 
 void PlyReader::addDimensions(PointLayoutPtr layout)
 {
-    for (auto it : m_vertexDimensions)
+    for (auto it : m_vertexTypes)
     {
-        layout->registerDim(it.second);
+        const std::string& name = it.first;
+        const Dimension::Type& type = it.second;
+
+        m_vertexDimensions[name] = layout->registerOrAssignDim(name, type);
     }
 }
 
@@ -255,4 +275,4 @@ void PlyReader::done(PointTableRef table)
     }
 }
 
-}
+} // namespace pdal

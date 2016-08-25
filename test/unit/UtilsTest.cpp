@@ -33,6 +33,7 @@
 ****************************************************************************/
 
 #include <pdal/pdal_test_main.hpp>
+#include <pdal/pdal_defines.h>
 
 #include <sstream>
 
@@ -74,38 +75,27 @@ TEST(UtilsTest, test_comparators)
     bool ok;
 
     {
-        ok = Utils::compare_distance<float>(1.000001f, 1.0f);
+        ok = Utils::compare_approx(1.001f, 1.0f, 0.0001f);
         EXPECT_TRUE(!ok);
 
-        ok = Utils::compare_distance<float>(1.0000001f, 1.0f);
+        ok = Utils::compare_approx(1.001f, 1.0f, 0.001f);
+        EXPECT_TRUE(!ok);
+
+        ok = Utils::compare_approx(1.001f, 1.0f, 0.01f);
         EXPECT_TRUE(ok);
 
-        ok = Utils::compare_distance<float>(1.00000001f, 1.0f);
+        ok = Utils::compare_approx(1.001f, 1.0f, 0.1f);
         EXPECT_TRUE(ok);
     }
 
     {
-        ok = Utils::compare_approx<float>(1.001f, 1.0f, 0.0001f);
-        EXPECT_TRUE(!ok);
-
-        ok = Utils::compare_approx<float>(1.001f, 1.0f, 0.001f);
-        EXPECT_TRUE(!ok);
-
-        ok = Utils::compare_approx<float>(1.001f, 1.0f, 0.01f);
+        ok = Utils::compare_approx(10, 12, 2);
         EXPECT_TRUE(ok);
 
-        ok = Utils::compare_approx<float>(1.001f, 1.0f, 0.1f);
-        EXPECT_TRUE(ok);
-    }
-
-    {
-        ok = Utils::compare_approx<unsigned int>(10, 12, 2);
+        ok = Utils::compare_approx(10, 12, 3);
         EXPECT_TRUE(ok);
 
-        ok = Utils::compare_approx<unsigned int>(10, 12, 3);
-        EXPECT_TRUE(ok);
-
-        ok = Utils::compare_approx<unsigned int>(10, 12, 1);
+        ok = Utils::compare_approx(10, 12, 1);
         EXPECT_TRUE(!ok);
     }
 }
@@ -281,7 +271,7 @@ TEST(UtilsTest, split2Char)
 TEST(UtilsTest, case)
 {
     std::string s("This is a test");
-    
+
     EXPECT_EQ("THIS IS A TEST", Utils::toupper(s));
     EXPECT_EQ("this is a test", Utils::tolower(s));
 
@@ -328,4 +318,64 @@ TEST(UtilsTest, escapeNonprinting)
     std::string s("CTRL-N,A,B,R,V: \n\a\b\r\v\x12\xe\x01");
     std::string out = Utils::escapeNonprinting(s);
     EXPECT_EQ(out, "CTRL-N,A,B,R,V: \\n\\a\\b\\r\\v\\x12\\x0e\\x01");
+}
+
+TEST(UtilsTest, wordWrap)
+{
+    std::string s;
+    std::vector<std::string> output;
+
+    s = "This   is   a    test    1234567890abcdefghij1234 a   ";
+    output = Utils::wordWrap(s, 10, 12);
+    EXPECT_EQ(output.size(), 5u);
+    EXPECT_EQ(output[0], "This is a");
+    EXPECT_EQ(output[1], "test");
+    EXPECT_EQ(output[2], "1234567890");
+    EXPECT_EQ(output[3], "abcdefghij");
+    EXPECT_EQ(output[4], "1234 a");
+
+    s = "";
+    output = Utils::wordWrap(s, 10, 12);
+    EXPECT_EQ(output.size(), 0u);
+
+    s = "012345678901abcdefghij01234567";
+    output = Utils::wordWrap(s, 10, 12);
+    EXPECT_EQ(output.size(), 3u);
+    EXPECT_EQ(output[0], "012345678901");
+    EXPECT_EQ(output[1], "abcdefghij");
+    EXPECT_EQ(output[2], "01234567");
+}
+
+TEST(UtilsTest, wordWrap2)
+{
+    std::string s;
+    std::vector<std::string> output;
+
+    s = "This   is   a    test    1234567890abcdefghij1234 a   ";
+    output = Utils::wordWrap2(s, 10, 12);
+    EXPECT_EQ(output.size(), 6u);
+    EXPECT_EQ(output[0], "This   is   ");
+    EXPECT_EQ(output[1], "a    ");
+    EXPECT_EQ(output[2], "test    ");
+    EXPECT_EQ(output[3], "1234567890");
+    EXPECT_EQ(output[4], "abcdefghij");
+    EXPECT_EQ(output[5], "1234 a   ");
+
+    s = "";
+    output = Utils::wordWrap2(s, 10, 12);
+    EXPECT_EQ(output.size(), 0u);
+
+    s = "012345678901abcdefghij01234567";
+    output = Utils::wordWrap2(s, 10, 12);
+    EXPECT_EQ(output.size(), 3u);
+    EXPECT_EQ(output[0], "012345678901");
+    EXPECT_EQ(output[1], "abcdefghij");
+    EXPECT_EQ(output[2], "01234567");
+
+    s = std::string(30, ' ');
+    output = Utils::wordWrap2(s, 10, 12);
+    EXPECT_EQ(output.size(), 3u);
+    EXPECT_EQ(output[0], std::string(12, ' '));
+    EXPECT_EQ(output[1], std::string(10, ' '));
+    EXPECT_EQ(output[2], std::string(8, ' '));
 }

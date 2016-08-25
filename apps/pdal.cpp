@@ -33,7 +33,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/GDALUtils.hpp>
 #include <pdal/KernelFactory.hpp>
+#include <pdal/PluginManager.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_config.hpp>
 
@@ -48,52 +50,70 @@ using namespace pdal;
 
 std::string headline(Utils::screenWidth(), '-');
 
-std::string splitDriverName(std::string const& name)
+class App
 {
-    std::string out;
+public:
+    App() : m_out(std::cout)
+    {}
 
-    StringList names = Utils::split2(name, '.');
-    if (names.size() == 2)
-        out = names[1];
-    return out;
+    int execute(StringList& cmdArgs, LogPtr& log);
+
+private:
+    void outputVersion();
+    void outputHelp(const ProgramArgs& args);
+    void outputDrivers();
+    void outputCommands();
+    void outputOptions();
+    void outputOptions(const std::string& stageName);
+    void addArgs(ProgramArgs& args);
+    std::string findKernel();
+
+    std::ostream& m_out;
+
+    std::string m_command;
+    bool m_debug;
+    int m_logLevel;
+    bool m_showDrivers;
+    bool m_help;
+    bool m_showCommands;
+    bool m_showVersion;
+    std::string m_showOptions;
+};
+
+
+void App::outputVersion()
+{
+    m_out << headline << std::endl;
+    m_out << "pdal " << GetFullVersionString() << std::endl;
+    m_out << headline << std::endl;
+    m_out << std::endl;
 }
 
-void outputVersion()
-{
-    std::cout << headline << std::endl;
-    std::cout << "pdal " << GetFullVersionString() << std::endl;
-    std::cout << headline << std::endl;
-    std::cout << std::endl;
-}
 
-void outputHelp()
+void App::outputHelp(const ProgramArgs& args)
 {
-    std::cout << "Usage: pdal <command> [--debug] [--drivers] [--help] "
-        "[--options[=<driver name>]] [--version]" << std::endl << std::endl;
-    std::cout << "  --debug      Show debug information" << std::endl;
-    std::cout << "  --drivers    Show drivers" << std::endl;
-    std::cout << "  -h [--help]  Print help message" << std::endl;
-    std::cout << "  --options [=arg(=all)]" << std::endl;
-    std::cout << "               Show driver options" << std::endl;
-    std::cout << "  --version    Show version info" << std::endl;
-    std::cout << std::endl;
+    m_out << "Usage:" << std::endl;
+    m_out << "  pdal <options>" << std::endl;
+    m_out << "  pdal <command> <command options>" << std::endl;
 
-    std::cout << "The following commands are available:" << std::endl;
+    args.dump(m_out, 2, 80);
+    m_out << std::endl;
+
+    m_out << "The following commands are available:" << std::endl;
 
     KernelFactory f(false);
     StringList loaded_kernels = PluginManager::names(PF_PluginType_Kernel);
 
     for (auto name : loaded_kernels)
-        std::cout << "   - " << splitDriverName(name) << std::endl;
-    std::cout << "See http://pdal.io/apps.html for more detail" << std::endl;
+        m_out << "   - " << name << std::endl;
+    m_out << "See http://pdal.io/apps.html for more detail" << std::endl;
 }
 
-void outputDrivers()
+
+void App::outputDrivers()
 {
     // Force plugin loading.
     StageFactory f(false);
-
-    std::ostringstream strm;
 
     int nameColLen(25);
     int descripColLen(Utils::screenWidth() - nameColLen - 1);
@@ -101,13 +121,13 @@ void outputDrivers()
     std::string tablehead(std::string(nameColLen, '=') + ' ' +
         std::string(descripColLen, '='));
 
-    strm << std::endl;
-    strm << tablehead << std::endl;
-    strm << std::left << std::setw(nameColLen) << "Name" <<
+    m_out << std::endl;
+    m_out << tablehead << std::endl;
+    m_out << std::left << std::setw(nameColLen) << "Name" <<
         " Description" << std::endl;
-    strm << tablehead << std::endl;
+    m_out << tablehead << std::endl;
 
-    strm << std::left;
+    m_out << std::left;
 
     StringList stages = PluginManager::names(PF_PluginType_Filter |
         PF_PluginType_Reader | PF_PluginType_Writer);
@@ -117,76 +137,49 @@ void outputDrivers()
         StringList lines = Utils::wordWrap(descrip, descripColLen - 1);
         for (size_t i = 0; i < lines.size(); ++i)
         {
-            strm << std::setw(nameColLen) << name << " " <<
+            m_out << std::setw(nameColLen) << name << " " <<
                 lines[i] << std::endl;
             name.clear();
         }
     }
 
-    strm << tablehead << std::endl;
-    std::cout << strm.str() << std::endl;
-}
-
-void outputOptions(std::string const& n)
-{
-    // Force plugin loading.
-    StageFactory f(false);
-
-    std::unique_ptr<Stage> s(f.createStage(n));
-    if (!s)
-    {
-        std::cerr << "Unable to create stage " << n << "\n";
-        return;
-    }
-
-    std::string link = PluginManager::link(n);
-    std::cout << n << " -- " << link << std::endl;
-    std::cout << headline << std::endl;
-
-    std::vector<Option> options = s->getDefaultOptions().getOptions();
-    if (options.empty())
-    {
-        std::cout << "No options" << std::endl << std::endl;
-        return;
-    }
-
-    for (auto const& opt : options)
-    {
-        std::string name = opt.getName();
-        std::string defVal = Utils::escapeNonprinting(
-            opt.getValue<std::string>());
-        std::string description = opt.getDescription();
-
-        std::cout << name;
-        if (!defVal.empty())
-            std::cout << " [" << defVal << "]";
-        std::cout << std::endl;
-
-        if (!description.empty())
-        {
-            StringList lines =
-                Utils::wordWrap(description, headline.size() - 6);
-            for (std::string& line : lines)
-                std::cout << "    " << line << std::endl;
-        }
-        std::cout << std::endl;
-    }
+    m_out << tablehead << std::endl << std::endl;
 }
 
 
-void outputCommands()
+void App::outputCommands()
 {
     KernelFactory f(false);
     std::vector<std::string> loaded_kernels;
     loaded_kernels = PluginManager::names(PF_PluginType_Kernel);
     for (auto name : loaded_kernels)
-    {
-        std::cout << splitDriverName(name) << std::endl;
-    }
+        m_out << name << std::endl;
 }
 
 
-void outputOptions()
+void App::outputOptions(std::string const& stageName)
+{
+    // Force plugin loading.
+    StageFactory f(false);
+
+    Stage* s = f.createStage(stageName);
+    if (!s)
+    {
+        std::cerr << "Unable to create stage " << stageName << "\n";
+        return;
+    }
+
+    m_out << stageName << " -- " << PluginManager::link(stageName) << std::endl;
+    m_out << headline << std::endl;
+
+    ProgramArgs args;
+
+    s->addAllArgs(args);
+    args.dump2(m_out, 2, 6, headline.size());
+}
+
+
+void App::outputOptions()
 {
     // Force plugin loading.
     StageFactory f(false);
@@ -194,154 +187,123 @@ void outputOptions()
     StringList nv = PluginManager::names(PF_PluginType_Filter |
         PF_PluginType_Reader | PF_PluginType_Writer);
     for (auto const& n : nv)
+    {
         outputOptions(n);
+        m_out << std::endl;
+    }
+}
+
+
+void App::addArgs(ProgramArgs& args)
+{
+    args.add("command", "The PDAL command", m_command).setPositional();
+    args.add("debug", "Sets the output level to 3 (option deprecated)",
+        m_debug);
+    args.add("verbose,v", "Sets the output level (0-8)", m_logLevel, -1);
+    args.add("drivers", "List available drivers", m_showDrivers);
+    args.add("help,h", "Display help text", m_help);
+    args.add("list-commands", "List available commands", m_showCommands);
+    args.add("version", "Show program version", m_showVersion);
+    args.add("options", "Show options for specified driver (or 'all')",
+        m_showOptions);
 }
 
 
 int main(int argc, char* argv[])
 {
-    Log log("PDAL", "stderr");
+    LogPtr log(new Log("PDAL", "stderr"));
 
-    // No arguments, print basic usage, plugins will be loaded
-    if (argc < 2)
+    App pdal;
+
+    StringList cmdArgs;
+    for (int i = 1; i < argc; ++i)
+        cmdArgs.push_back(argv[i]);
+    return pdal.execute(cmdArgs, log);
+}
+
+
+std::string App::findKernel()
+{
+    StringList loadedKernels;
+
+    auto kernelSurname = [](const std::string& name)
     {
-        outputHelp();
-        return 1;
-    }
+        StringList names = Utils::split2(name, '.');
+        return names.size() == 2 ? names[1] : std::string();
+    };
 
+    KernelFactory f(true);
     // Discover available kernels without plugins, and test to see if
     // the positional option 'command' is a valid kernel
-    KernelFactory f(true);
-    std::vector<std::string> loaded_kernels;
-    loaded_kernels = PluginManager::names(PF_PluginType_Kernel);
+    loadedKernels = PluginManager::names(PF_PluginType_Kernel);
+    for (auto& name : loadedKernels)
+        if (m_command == kernelSurname(name))
+            return name;
 
-    bool isValidKernel = false;
-    std::string command = Utils::tolower(argv[1]);
-    std::string fullname;
-    for (auto name : loaded_kernels)
+    // Force loading of plugins.
+    KernelFactory f2(false);
+    loadedKernels = PluginManager::names(PF_PluginType_Kernel);
+    for (auto& name : loadedKernels)
+        if (m_command == kernelSurname(name))
+            return name;
+
+    return std::string();
+}
+
+
+int App::execute(StringList& cmdArgs, LogPtr& log)
+{
+    ProgramArgs args;
+
+    addArgs(args);
+    args.parseSimple(cmdArgs);
+
+    if (m_logLevel >= (int)LogLevel::Error)
+        log->setLevel((LogLevel)m_logLevel);
+    else if (m_debug)
+        log->setLevel(LogLevel::Debug);
+    PluginManager::setLog(log);
+
+    m_command = Utils::tolower(m_command);
+    if (!m_command.empty())
     {
-        if (command == splitDriverName(name))
+        int ret = 0;
+        std::string name(findKernel());
+        if (name.size())
         {
-            fullname = name;
-            isValidKernel = true;
-            break;
-        }
-    }
-
-    // If the kernel was not available, then light up the plugins and retry
-    if (!isValidKernel)
-    {
-        KernelFactory f(false);
-        loaded_kernels.clear();
-        loaded_kernels = PluginManager::names(PF_PluginType_Kernel);
-
-        for (auto name : loaded_kernels)
-        {
-            if (command == splitDriverName(name))
-            {
-                fullname = name;
-                isValidKernel = true;
-                break;
-            }
-        }
-    }
-
-    // Dispatch execution to the kernel, passing all remaining args
-    if (isValidKernel)
-    {
-        int count(argc - 2); // remove 'pdal' and the kernel name
-        argv += 2;
-        void *kernel = PluginManager::createObject(fullname);
-        std::unique_ptr<Kernel> app(static_cast<Kernel *>(kernel));
-        return app->run(count, const_cast<char const **>(argv), command);
-    }
-
-    // Otherwise, process the remaining args to see if they are supported
-    bool debug = false;
-    bool drivers = false;
-    bool help = false;
-    bool options = false;
-    bool version = false;
-
-    // --options will default to displaying information on all available stages
-    std::string optString("all");
-
-    for (int i = 1; i < argc; ++i)
-    {
-        std::string arg = Utils::tolower(argv[i]);
-        if (arg == "--debug")
-        {
-            debug = true;
-        }
-        else if (arg == "--drivers")
-        {
-            drivers = true;
-        }
-        else if ((arg == "--help") || (arg == "-h"))
-        {
-            help = true;
-        }
-        else if (Utils::startsWith(arg, "--options"))
-        {
-            StringList optionsVec = Utils::split2(arg, '=');
-            options = true;
-            if (optionsVec.size() == 2)
-                optString = Utils::tolower(optionsVec[1]);
-        }
-        else if (arg == "--version")
-        {
-            version = true;
-        }
-        else if (arg == "--list-commands")
-        {
-            outputCommands();
-            return 0;
+            if (m_help)
+                cmdArgs.push_back("--help");
+            void *obj = PluginManager::createObject(name);
+            Kernel *kernel(static_cast<Kernel *>(obj));
+            // This shouldn't throw.  If it does, it's something awful, so
+            // not cleaning up seems inconsequential.
+            log->setLeader("pdal " + m_command);
+            ret = kernel->run(cmdArgs, log);
+            delete kernel;
+            // IMPORTANT - The kernel must be destroyed before GDAL
+            //  drivers are unregistered or GDAL will attempt to destroy
+            //  resources more than once, resulting in a crash.
+            gdal::unregisterDrivers();
         }
         else
-        {
-            if (arg == "--")
-                log.get(LogLevel::Warning) << "Unknown option '" << argv[i] <<
-                    "' not recognized" << std::endl << std::endl;
-        }
+            log->get(LogLevel::Error) << "Command '" << m_command <<
+                "' not recognized" << std::endl << std::endl;
+        return ret;
     }
 
-    if (version)
-    {
+    if (m_showVersion)
         outputVersion();
-        return 0;
-    }
-
-    if (drivers)
-    {
+    else if (m_showDrivers)
         outputDrivers();
-        return 0;
-    }
-
-    if (options)
+    else if (m_showOptions.size())
     {
-        if (optString == "all")
+        if (m_showOptions == "all")
             outputOptions();
         else
-            outputOptions(optString);
-        return 0;
+            outputOptions(m_showOptions);
     }
-
-    if (debug)
-    {
-        std::cerr << getPDALDebugInformation() << std::endl;
-        return 0;
-    }
-
-    if (help)
-    {
-        outputHelp();
-        return 0;
-    }
-
-    if (!isValidKernel)
-        log.get(LogLevel::Error) << "Command '" << command <<
-            "' not recognized" << std::endl << std::endl;
-    outputHelp();
-    return 1;
+    else
+        outputHelp(args);
+    return 0;
 }
 

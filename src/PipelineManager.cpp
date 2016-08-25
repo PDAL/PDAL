@@ -33,54 +33,97 @@
 ****************************************************************************/
 
 #include <pdal/PipelineManager.hpp>
-#include "PipelineReader.hpp"
+#include <pdal/PDALUtils.hpp>
+
+#include "PipelineReaderXML.hpp"
+#include "PipelineReaderJSON.hpp"
 
 namespace pdal
 {
 
-bool PipelineManager::readPipeline(std::istream& input)
+PipelineManager::~PipelineManager()
 {
-    PipelineReader reader(*this);
-    
-    return reader.readPipeline(input);
+    Utils::closeFile(m_input);
 }
 
 
-bool PipelineManager::readPipeline(const std::string& filename)
+void PipelineManager::readPipeline(std::istream& input)
 {
-    PipelineReader reader(*this);
-    
-    return reader.readPipeline(filename);
+    // Read stream into string.
+    std::string s(std::istreambuf_iterator<char>(input), {});
+
+    std::istringstream ss(s);
+    if (s.find("?xml") != std::string::npos)
+        PipelineReaderXML(*this).readPipeline(ss);
+    else if (s.find("\"pipeline\"") != std::string::npos)
+        PipelineReaderJSON(*this).readPipeline(ss);
+    else
+    {
+        try
+        {
+            PipelineReaderXML(*this).readPipeline(ss);
+        }
+        catch (pdal_error)
+        {
+            // Rewind to make sure the stream is properly positioned after
+            // attempting an XML pipeline.
+            ss.seekg(0);
+            PipelineReaderJSON(*this).readPipeline(ss);
+        }
+    }
+}
+
+
+void PipelineManager::readPipeline(const std::string& filename)
+{
+    if (FileUtils::extension(filename) == ".xml")
+    {
+        PipelineReaderXML pipeReader(*this);
+        return pipeReader.readPipeline(filename);
+    }
+    else if (FileUtils::extension(filename) == ".json")
+    {
+        PipelineReaderJSON pipeReader(*this);
+        return pipeReader.readPipeline(filename);
+    }
+    else
+    {
+        Utils::closeFile(m_input);
+        m_input = Utils::openFile(filename);
+        readPipeline(*m_input);
+    }
 }
 
 
 Stage& PipelineManager::addReader(const std::string& type)
 {
-    Stage *r = m_factory.createStage(type);
-    if (!r)
+    Stage *reader = m_factory.createStage(type);
+    if (!reader)
     {
         std::ostringstream ss;
         ss << "Couldn't create reader stage of type '" << type << "'.";
         throw pdal_error(ss.str());
     }
-    r->setProgressFd(m_progressFd);
-    m_stages.push_back(std::unique_ptr<Stage>(r));
-    return *r;
+    reader->setLog(m_log);
+    reader->setProgressFd(m_progressFd);
+    m_stages.push_back(reader);
+    return *reader;
 }
 
 
 Stage& PipelineManager::addFilter(const std::string& type)
 {
-    Stage *stage = m_factory.createStage(type);
-    if (!stage)
+    Stage *filter = m_factory.createStage(type);
+    if (!filter)
     {
         std::ostringstream ss;
         ss << "Couldn't create filter stage of type '" << type << "'.";
         throw pdal_error(ss.str());
     }
-    stage->setProgressFd(m_progressFd);
-    m_stages.push_back(std::unique_ptr<Stage>(stage));
-    return *stage;
+    filter->setLog(m_log);
+    filter->setProgressFd(m_progressFd);
+    m_stages.push_back(filter);
+    return *filter;
 }
 
 
@@ -93,14 +136,50 @@ Stage& PipelineManager::addWriter(const std::string& type)
         ss << "Couldn't create writer stage of type '" << type << "'.";
         throw pdal_error(ss.str());
     }
+    writer->setLog(m_log);
     writer->setProgressFd(m_progressFd);
-    m_stages.push_back(std::unique_ptr<Stage>(writer));
+    m_stages.push_back(writer);
     return *writer;
+}
+
+
+void PipelineManager::validateStageOptions() const
+{
+    // Make sure that the options specified are for relevant stages.
+    for (auto& si : m_stageOptions)
+    {
+        const std::string& stageName = si.first;
+        auto it = std::find_if(m_stages.begin(), m_stages.end(),
+            [stageName](Stage *s)
+            { return (s->getName() == stageName); });
+
+        // If the option stage name matches no created stage, then error.
+        if (it == m_stages.end())
+        {
+            std::ostringstream oss;
+            oss << "Argument references invalid/unused stage: '" <<
+                stageName << "'.";
+            throw pdal_error(oss.str());
+        }
+    }
+}
+
+
+QuickInfo PipelineManager::preview() const
+{
+    QuickInfo qi;
+
+    validateStageOptions();
+    Stage *s = getStage();
+    if (s)
+       qi = s->preview();
+    return qi;
 }
 
 
 void PipelineManager::prepare() const
 {
+    validateStageOptions();
     Stage *s = getStage();
     if (s)
        s->prepare(m_table);
@@ -129,12 +208,148 @@ MetadataNode PipelineManager::getMetadata() const
 {
     MetadataNode output("stages");
 
-    for (auto si = m_stages.begin(); si != m_stages.end(); ++si)
+    for (auto s : m_stages)
     {
-        Stage *s = si->get();
         output.add(s->getMetadata());
     }
     return output;
+}
+
+
+Stage& PipelineManager::makeReader(const std::string& inputFile,
+    std::string driver)
+{
+    static Options nullOpts;
+
+    return makeReader(inputFile, driver, nullOpts);
+}
+
+
+Stage& PipelineManager::makeReader(const std::string& inputFile,
+    std::string driver, Options options)
+{
+    if (driver.empty())
+    {
+        driver = StageFactory::inferReaderDriver(inputFile);
+        if (driver.empty())
+            throw pdal_error("Cannot determine reader for input file: " +
+                inputFile);
+    }
+    if (!inputFile.empty())
+        options.replace("filename", inputFile);
+
+    Stage& reader = addReader(driver);
+    setOptions(reader, options);
+    return reader;
+}
+
+
+Stage& PipelineManager::makeFilter(const std::string& driver)
+{
+    static Options nullOps;
+
+    Stage& filter = addFilter(driver);
+    setOptions(filter, nullOps);
+    return filter;
+}
+
+
+Stage& PipelineManager::makeFilter(const std::string& driver, Options options)
+{
+    Stage& filter = addFilter(driver);
+    setOptions(filter, options);
+    return filter;
+}
+
+
+Stage& PipelineManager::makeFilter(const std::string& driver, Stage& parent)
+{
+    static Options nullOps;
+
+    return makeFilter(driver, parent, nullOps);
+}
+
+
+Stage& PipelineManager::makeFilter(const std::string& driver, Stage& parent,
+    Options options)
+{
+    Stage& filter = addFilter(driver);
+    setOptions(filter, options);
+    filter.setInput(parent);
+    return filter;
+}
+
+
+Stage& PipelineManager::makeWriter(const std::string& outputFile,
+    std::string driver)
+{
+    static Options nullOps;
+
+    return makeWriter(outputFile, driver, nullOps);
+}
+
+Stage& PipelineManager::makeWriter(const std::string& outputFile,
+    std::string driver, Options options)
+{
+    if (driver.empty())
+    {
+        driver = StageFactory::inferWriterDriver(outputFile);
+        if (driver.empty())
+            throw pdal_error("Cannot determine writer for output file: " +
+                outputFile);
+    }
+
+    if (!outputFile.empty())
+        options.replace("filename", outputFile);
+
+    auto& writer = addWriter(driver);
+    setOptions(writer, options);
+    return writer;
+}
+
+
+Stage& PipelineManager::makeWriter(const std::string& outputFile,
+    std::string driver, Stage& parent)
+{
+    static Options nullOps;
+
+    return makeWriter(outputFile, driver, parent, nullOps);
+}
+
+Stage& PipelineManager::makeWriter(const std::string& outputFile,
+    std::string driver, Stage& parent, Options options)
+{
+    Stage& writer = makeWriter(outputFile, driver, options);
+    writer.setInput(parent);
+    return writer;
+}
+
+
+void PipelineManager::setOptions(Stage& stage, const Options& addOps)
+{
+    // First apply common options.
+    stage.setOptions(m_commonOptions);
+
+    // Apply additional reader/writer options, making sure they replace any
+    // common options.
+    stage.removeOptions(addOps);
+    stage.addOptions(addOps);
+
+    // Apply options provided on the command line, overriding others.
+    Options& ops = stageOptions(stage);
+    stage.removeOptions(ops);
+    stage.addOptions(ops);
+}
+
+
+Options& PipelineManager::stageOptions(Stage& stage)
+{
+    static Options nullOpts;
+
+    auto oi = m_stageOptions.find(stage.getName());
+    if (oi == m_stageOptions.end())
+        return nullOpts;
+    return oi->second;
 }
 
 } // namespace pdal

@@ -35,8 +35,8 @@
 #include "SplitKernel.hpp"
 
 #include <buffer/BufferReader.hpp>
-#include <pdal/KernelSupport.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {
@@ -76,7 +76,7 @@ void SplitKernel::validateSwitches(ProgramArgs& args)
 #endif
 
     if (m_length && m_capacity)
-        throw pdal_error("Can't specify for length and capacity.");
+        throw pdal_error("Can't specify both length and capacity.");
     if (!m_length && !m_capacity)
         m_capacity = 100000;
     if (m_outputFile.back() == pathSeparator)
@@ -102,34 +102,23 @@ int SplitKernel::execute()
 {
     PointTable table;
 
-    Options readerOpts;
-    readerOpts.add("filename", m_inputFile);
-    readerOpts.add("debug", isDebug());
-    readerOpts.add("verbose", getVerboseLevel());
+    Stage& reader = makeReader(m_inputFile, m_driverOverride);
 
-    Stage& reader = makeReader(m_inputFile);
-    reader.setOptions(readerOpts);
-
-    std::unique_ptr<Stage> f;
-    StageFactory factory;
     Options filterOpts;
+    std::string driver = (m_length ? "filters.splitter" : "filters.chipper");
     if (m_length)
     {
-        f.reset(factory.createStage("filters.splitter"));
         filterOpts.add("length", m_length);
         filterOpts.add("origin_x", m_xOrigin);
         filterOpts.add("origin_y", m_yOrigin);
     }
     else
     {
-        f.reset(factory.createStage("filters.chipper"));
         filterOpts.add("capacity", m_capacity);
     }
-    f->setInput(reader);
-    f->setOptions(filterOpts);
-
-    f->prepare(table);
-    PointViewSet pvSet = f->execute(table);
+    Stage& f = makeFilter(driver, reader, filterOpts);
+    f.prepare(table);
+    PointViewSet pvSet = f.execute(table);
 
     int filenum = 1;
     for (auto& pvp : pvSet)
@@ -138,7 +127,7 @@ int SplitKernel::execute()
         reader.addView(pvp);
 
         std::string filename = makeFilename(m_outputFile, filenum++);
-        Stage& writer = makeWriter(filename, reader);
+        Stage& writer = makeWriter(filename, reader, "");
 
         writer.prepare(table);
         writer.execute(table);

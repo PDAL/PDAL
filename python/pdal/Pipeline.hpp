@@ -25,12 +25,12 @@ public:
     ~Pipeline(){};
 
     void execute();
-    inline const char* getXML() const { return m_xml.c_str(); }
+    inline const char* getJSON() const { return m_json.c_str(); }
     inline const char* getSchema() const { return m_schema.c_str(); }
     std::vector<PArray> getArrays() const;
 
 private:
-    std::string m_xml;
+    std::string m_json;
     std::string m_schema;
     pdal::PipelineManager m_manager; // no progress reporting
 

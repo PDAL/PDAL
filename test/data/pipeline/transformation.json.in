@@ -1,0 +1,12 @@
+{
+  "pipeline":[
+    {
+      "filename":"@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las"
+    },
+    {
+      "type":"filters.transformation",
+      "matrix": "-1 0 0 1 0 1 0 2 0 0 1 3 0 0 0 1"
+    },
+    "@CMAKE_SOURCE_DIR@/test/temp/out2.las"
+  ]
+}

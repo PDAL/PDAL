@@ -341,14 +341,13 @@ TEST(PLangTest, PLangTest_reentry)
 
 TEST(PLangTest, log)
 {
-    StageFactory f;
     // verify we can redirect the stdout inside the python script
 
     Options reader_opts;
     {
         BOX3D bounds(1.0, 2.0, 3.0, 101.0, 102.0, 103.0);
         Option opt1("bounds", bounds);
-        Option opt2("num_points", 750);
+        Option opt2("count", 750);
         Option opt3("mode", "constant");
 
         reader_opts.add(opt1);
@@ -363,11 +362,13 @@ TEST(PLangTest, log)
     {
         const Option source("source",
             "import numpy as np\n"
+            "import sys\n"
             "def xfunc(ins,outs):\n"
             "  X = ins['X']\n"
             "  print (\"Testing log output through python script.\")\n"
             "  X = X + 1.0\n"
             "  outs['X'] = X\n"
+            "  sys.stdout.flush()\n"
             "  return True\n"
             );
         const Option module("module", "xModule");
@@ -378,12 +379,13 @@ TEST(PLangTest, log)
         xfilter_opts.add(function);
     }
 
+    StageFactory f;
     {
         FauxReader reader;
 
         reader.setOptions(reader_opts);
 
-        std::unique_ptr<Stage> xfilter(f.createStage("filters.programmable"));
+        Stage* xfilter(f.createStage("filters.programmable"));
         xfilter->setOptions(xfilter_opts);
         xfilter->setInput(reader);
 
@@ -399,8 +401,12 @@ TEST(PLangTest, log)
         Support::temppath("mylog_three.txt"),
         Support::datapath("logs/log_py.txt"));
 
-    if (ok)
-        FileUtils::deleteFile(Support::temppath("mylog_three.txt"));
+    // TODO: fails on Windows
+    // unknown file: error: C++ exception with description "pdalboost::filesystem::remove:
+    // The process cannot access the file because it is being used by another process:
+    // "C:/projects/pdal/test/data/../temp/mylog_three.txt"" thrown in the test body.
+    //if (ok)
+    //    FileUtils::deleteFile(Support::temppath("mylog_three.txt"));
 
     EXPECT_TRUE(ok);
 }

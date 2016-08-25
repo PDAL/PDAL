@@ -76,6 +76,7 @@ find_library(JSONCPP_LIBRARY
 	${_jsoncppnames}
 	PATHS
 	"${JSONCPP_ROOT_DIR}/libs"
+	/usr/lib/${CMAKE_LIBRARY_ARCHITECTURE}
 	PATH_SUFFIXES
 	${_pathsuffixes})
 
@@ -84,6 +85,7 @@ find_path(JSONCPP_INCLUDE_DIR
 	json/json.h
 	PATHS
 	"${JSONCPP_ROOT_DIR}"
+	/usr/include/jsoncpp
 	PATH_SUFFIXES
 	include)
 

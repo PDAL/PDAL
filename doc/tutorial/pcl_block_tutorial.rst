@@ -32,37 +32,9 @@ cloud processing pipelines.
 Quick Start
 ------------------------------------------------------------------------------
 
-.. note::
-
-    Instructions for getting started with PDAL using Vagrant and VirtualBox can
-    be found in the :ref:`vagrant` document.
-
-PDAL's Vagrant configuration now includes the PCL Block and all necessary
-dependencies. Assuming you've got Vagrant all set up, once you checkout the PDAL
-source code, just do the following:
-
-::
-
-    $ cd pdal
-    $ vagrant up
-    $ vagrant ssh
-
-The ``vagrant up`` command will take a considerable amount of time, but once its
-completed you have a fully functional VM with both PCL and PDAL installed. Try
-entering
-
-::
-
-    $ pdal pipeline --version
-
-at the command line. You should see output similar to the following:
-
-::
-
-    ------------------------------------------------------------------------------------------
-    pdal pipeline (PDAL 0.9.9 (2c6aa8) with GeoTIFF 1.4.0 GDAL 1.9.2 LASzip 2.2.0 System )
-    ------------------------------------------------------------------------------------------
-
+The :ref:`quickstart` document describes how to use PDAL with Docker, which
+includes built-in PCL support. After you have worked through that document, you
+should be able to run any PDAL PCL operations.
 
 
 PDAL Pipeline kernel
@@ -79,43 +51,31 @@ The :ref:`filters.pclblock` is implemented as a PDAL filter stage and as such is
 easily accessed via the PDAL pipeline. It accepts a single, required option -
 the name of the `JSON`_ file describing the PCL Block.
 
-A sample pipeline XML which reads/writes LAS and has a single PCL Block filter
+A sample pipeline JSON which reads/writes LAS and has a single PCL Block filter
 is shown below.
 
-.. code-block:: xml
+.. code-block:: json
 
-    <?xml version="1.0" encoding="utf-8"?>
-    <Pipeline version="1.0">
-        <Writer type="writers.las">
-            <Option name="filename">
-                ../../../temp/foo.las
-            </Option>
-            <Filter type="filters.pclblock">
-                <Option name="filename">
-                    ./passthrough.json
-                </Option>
-                <Reader type="readers.las">
-                    <Option name="filename">
-                        ../../autzen/autzen-point-format-3.las
-                    </Option>
-                </Reader>
-            </Filter>
-        </Writer>
-    </Pipeline>
-
+  {
+    "pipeline":[
+      "autzen-point-format-3.las",
+      {
+        "type":"filters.pclblock",
+        "filename":"passthrough.json"
+      },
+      "foo.las"
+    ]
+  }
 
 And is run from the command line thusly.
 
 ::
 
-    $ cd pdal # your PDAL source tree
-    $ cd test/data
-    $ ../../bin/pdal pipeline -i filters/pcl/passthrough.xml -v4
+    $ pdal pipeline passthrough.json
 
 This simple pipeline reads the input LAS (``autzen-point-format-3.las``), passes
 it through the PCL Block (``passthrough.json``), and writes the output LAS
-(``foo.las``). Note that the file paths are interpreted relative to the
-directory containing the XML file.
+(``foo.las``).
 
 When run, it should produce output similar to this:
 
@@ -147,7 +107,7 @@ PDAL PCL kernel
 ------------------------------------------------------------------------------
 
 For users that would like to bypass the creation (and subsequent modification)
-of the pipeline XML for every file they wish to process, there is another
+of the pipeline JSON for every file they wish to process, there is another
 option: the ``pdal pcl`` command.
 
 ::
@@ -166,7 +126,7 @@ the command is
     $ pdal pcl -i <input cloud> -p <PCL Block JSON> -o <output cloud>
 
 where the JSON file specified with ``-p`` is the same file that would be
-embedded in the pipeline XML file. This can be useful when the pipeline does not
+embedded in the pipeline JSON file. This can be useful when the pipeline does not
 change frequently, but the input/output filenames do.
 
 For example, the above `pdal pipeline` example can be written with `pdal pcl`

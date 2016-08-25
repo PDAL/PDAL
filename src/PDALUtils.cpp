@@ -32,7 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <arbiter.hpp>
+
 #include <pdal/PDALUtils.hpp>
+#include <pdal/Options.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 using namespace std;
 
@@ -135,48 +139,6 @@ void toJSON(const MetadataNode& m, std::ostream& o, int level)
     // should be done?
 }
 
-
-void toJSON(const Options& opts, std::ostream& o, int level);
-void toJSON(const Option& opt, std::ostream& o, int level)
-{
-    std::string indent(level * 2, ' ');
-    std::string indent2((level + 1) * 2, ' ');
-
-    std::string quote("\"");
-    std::string name = quote + opt.getName() + quote;
-    std::string description = quote + opt.getDescription() + quote;
-    std::string value = quote + opt.getValue<std::string>() + quote;
-
-    o << indent << name << " :" << endl;
-    o << indent << "{" << endl;
-    o << indent2 << "\"value\" : " << value << "," << endl;
-    o << indent2 << "\"description\" : " << description << endl;
-
-    o << indent << "}";
-}
-
-
-void toJSON(const Options& opts, std::ostream& o, int level)
-{
-    const std::string indent(level * 2, ' ');
-
-    std::vector<Option> optList = opts.getOptions();
-    if (optList.empty())
-        return;
-
-    o << indent << "\"options\" :" << endl;
-    o << indent << "{" << endl;
-    for (auto oi = optList.begin(); oi != optList.end(); ++oi)
-    {
-        Option& opt = *oi;
-        toJSON(opt, o, level + 1);
-        if (oi != optList.rbegin().base() - 1)
-            o << ",";
-        o << endl;
-    }
-    o << indent << "}" << endl;
-}
-
 } // unnamed namespace
 
 namespace Utils
@@ -206,19 +168,170 @@ void toJSON(const MetadataNode& m, std::ostream& o)
     o << std::endl;
 }
 
-std::string toJSON(const Options& opts)
+namespace
 {
-    std::ostringstream o;
 
-    toJSON(opts, o);
-    return o.str();
+std::string tempFilename(const std::string& path)
+{
+    const std::string tempdir(arbiter::fs::getTempPath());
+    const std::string basename(arbiter::util::getBasename(path));
+
+    return arbiter::util::join(tempdir, basename);
+};
+
+// RAII handling of a temp file to make sure file gets deleted.
+class TempFile
+{
+public:
+    TempFile(const std::string path) : m_filename(path)
+    {}
+
+    virtual ~TempFile()
+        { FileUtils::deleteFile(m_filename); }
+
+    const std::string& filename()
+        { return m_filename; }
+
+private:
+    std::string m_filename;
+};
+
+class ArbiterOutStream : public std::ofstream
+{
+public:
+    ArbiterOutStream(const std::string& localPath,
+            const std::string& remotePath, std::ios::openmode mode) :
+        std::ofstream(localPath, mode), m_remotePath(remotePath),
+        m_localFile(localPath)
+    {}
+
+    virtual ~ArbiterOutStream()
+    {
+        close();
+        arbiter::Arbiter a;
+        a.put(m_remotePath, a.getBinary(m_localFile.filename()));
+    }
+
+private:
+    std::string m_remotePath;
+    TempFile m_localFile;
+};
+
+class ArbiterInStream : public std::ifstream
+{
+public:
+    ArbiterInStream(const std::string& localPath, const std::string& remotePath,
+            std::ios::openmode mode) :
+        m_localFile(localPath)
+    {
+        arbiter::Arbiter a;
+        a.put(localPath, a.getBinary(remotePath));
+        open(localPath, mode);
+    }
+
+private:
+    TempFile m_localFile;
+};
+
+}  // unnamed namespace
+
+/**
+  Create a file (may be on a supported remote filesystem).
+
+  \param path  Path to file to create.
+  \param asBinary  Whether the file should be written in binary mode.
+  \return  Pointer to the created stream, or NULL.
+*/
+std::ostream *createFile(const std::string& path, bool asBinary)
+{
+    arbiter::Arbiter a;
+    const bool remote(a.hasDriver(path) && a.isRemote(path));
+
+    ostream *ofs(nullptr);
+    if (remote)
+    {
+        try
+        {
+            ofs = new ArbiterOutStream(tempFilename(path), path,
+                asBinary ? ios::out | ios::binary : ios::out);
+        }
+        catch (arbiter::ArbiterError)
+        {}
+        if (ofs && !ofs->good())
+        {
+            delete ofs;
+            ofs = nullptr;
+        }
+    }
+    else
+        ofs = FileUtils::createFile(path, asBinary);
+    return ofs;
 }
 
-void toJSON(const Options& opts, std::ostream& o)
+
+/**
+  Open a file (potentially on a remote filesystem).
+
+  \param path  Path (potentially remote) of file to open.
+  \param asBinary  Whether the file should be opened binary.
+  \return  Pointer to stream opened for input.
+*/
+std::istream *openFile(const std::string& path, bool asBinary)
 {
-    o << "{" << endl;
-    pdal::toJSON(opts, o, 1);
-    o << "}" << endl;
+    arbiter::Arbiter a;
+    if (a.hasDriver(path) && a.isRemote(path))
+    {
+        try
+        {
+            return new ArbiterInStream(tempFilename(path), path,
+                asBinary ? ios::in | ios::binary : ios::in);
+        }
+        catch (arbiter::ArbiterError)
+        {
+            return nullptr;
+        }
+    }
+    return FileUtils::openFile(path, asBinary);
+}
+
+/**
+  Close an output stream.
+
+  \param out  Stream to close.
+*/
+void closeFile(std::ostream *out)
+{
+    FileUtils::closeFile(out);
+}
+
+
+/**
+  Close an input stream.
+
+  \param out  Stream to close.
+*/
+void closeFile(std::istream *in)
+{
+    FileUtils::closeFile(in);
+}
+
+
+/**
+  Check to see if a file exists.
+
+  \param path  Path to file.
+  \return  Whether the file exists or not.
+*/
+bool fileExists(const std::string& path)
+{
+    arbiter::Arbiter a;
+    if (a.hasDriver(path) && a.isRemote(path) && a.exists(path))
+    {
+        return true;
+    }
+
+    // Arbiter doesn't handle our STDIN hacks.
+    return FileUtils::fileExists(path);
 }
 
 } // namespace Utils

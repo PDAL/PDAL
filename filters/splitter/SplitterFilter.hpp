@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
+#include <pdal/plugin.hpp>
 
 extern "C" int32_t SplitterFilter_ExitFunc();
 extern "C" PF_ExitFunc SplitterFilter_InitPlugin();
@@ -52,14 +53,12 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
-
 private:
     double m_length;
     double m_xOrigin;
     double m_yOrigin;
 
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
     virtual PointViewSet run(PointViewPtr view);
 
     SplitterFilter& operator=(const SplitterFilter&); // not implemented

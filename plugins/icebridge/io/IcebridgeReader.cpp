@@ -35,6 +35,8 @@
 #include "IcebridgeReader.hpp"
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/PointView.hpp>
+#include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include <map>
 
@@ -71,14 +73,6 @@ CREATE_SHARED_PLUGIN(1, 0, IcebridgeReader, Reader, s_info)
 
 std::string IcebridgeReader::getName() const { return s_info.name; }
 
-Options IcebridgeReader::getDefaultOptions()
-{
-    Options options;
-    options.add("filename", "", "file to read from");
-    return options;
-}
-
-
 Dimension::IdList IcebridgeReader::getDefaultDimensions()
 {
     Dimension::IdList ids;
@@ -91,7 +85,7 @@ Dimension::IdList IcebridgeReader::getDefaultDimensions()
     ids.push_back(Id::Z);
     ids.push_back(Id::StartPulse);
     ids.push_back(Id::ReflectedPulse);
-    ids.push_back(Id::ScanAngleRank);
+    ids.push_back(Id::Azimuth);
     ids.push_back(Id::Pitch);
     ids.push_back(Id::Roll);
     ids.push_back(Id::Pdop);
@@ -112,29 +106,6 @@ void IcebridgeReader::ready(PointTableRef table)
     m_hdf5Handler.initialize(m_filename, hdf5Columns);
     m_index = 0;
 }
-
-void IcebridgeReader::initialize(PointTableRef)
-{
-    // Data are WGS84 (4326) with ITRF2000 datum (6656)
-    // See http://nsidc.org/data/docs/daac/icebridge/ilvis2/index.html for
-    // background
-    SpatialReference ref("EPSG:4326");
-    setSpatialReference(m_metadata, ref);
-}
-
-
-// If longitude between 0-180, just return it, degrees east; if between 180
-// and 360, subtract 360 to get negative value.
-double IcebridgeReader::convertLongitude(double longitude)
-{
-    longitude = fmod(longitude, 360.0);
-    if (longitude <= -180)
-        longitude += 360;
-    else if (longitude > 180)
-        longitude -= 360;
-    return longitude;
-}
-
 
 
 point_count_t IcebridgeReader::read(PointViewPtr view, point_count_t count)
@@ -179,6 +150,19 @@ point_count_t IcebridgeReader::read(PointViewPtr view, point_count_t count)
                         fval++;
                     }
                 }
+                else if (*di == Dimension::Id::X)
+                {
+                    float *fval = (float *)p;
+                    for (PointId i = 0; i < count; ++i)
+                    {
+                        double dval = (double)(*fval);
+                        // Longitude is 0-360. Convert
+                        dval = Utils::normalizeLongitude(dval);
+                        view->setField(*di, nextId++, dval);
+                        fval++;
+                    }
+
+                }
                 else
                 {
                     float *fval = (float *)p;
@@ -201,17 +185,25 @@ point_count_t IcebridgeReader::read(PointViewPtr view, point_count_t count)
     return count;
 }
 
-void IcebridgeReader::processOptions(const Options& options)
+void IcebridgeReader::addArgs(ProgramArgs& args)
 {
-    m_metadataFile =
-        options.getValueOrDefault<std::string>("metadata", "");
-    if (!m_metadataFile.empty() && ! FileUtils::fileExists(m_metadataFile))
+    args.add("metadata", "Metadata file", m_metadataFile);
+}
+
+void IcebridgeReader::initialize()
+{
+    if (!m_metadataFile.empty() && !FileUtils::fileExists(m_metadataFile))
     {
         std::ostringstream oss;
         oss << "Invalid metadata file: '" << m_metadataFile << "'";
         throw pdal_error(oss.str());
     }
 
+    // Data are WGS84 (4326) with ITRF2000 datum (6656)
+    // See http://nsidc.org/data/docs/daac/icebridge/ilvis2/index.html for
+    // background
+    SpatialReference ref("EPSG:4326");
+    setSpatialReference(m_metadata, ref);
 }
 
 void IcebridgeReader::done(PointTableRef table)

@@ -3,6 +3,7 @@
 #
 
 include (${PDAL_CMAKE_DIR}/sqlite.cmake)
+include (${PDAL_CMAKE_DIR}/spatialite.cmake)
 include_directories(${ROOT_DIR}/vendor/pdalboost)
 
 # SQLite Reader

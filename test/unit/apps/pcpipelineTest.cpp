@@ -44,18 +44,34 @@
 
 static std::string appName()
 {
-    const std::string app = Support::binpath(Support::exename("pdal") + " pipeline");
+    const std::string app = Support::binpath(Support::exename("pdal") +
+        " pipeline");
     return app;
 }
 
 // most pipelines (those with a writer) will be invoked via `pdal pipeline`
 static void run_pipeline(std::string const& pipeline)
 {
-    const std::string cmd = Support::binpath(Support::exename("pdal") + " pipeline");
+    const std::string cmd = Support::binpath(Support::exename("pdal") +
+        " pipeline");
 
     std::string output;
     std::string file(Support::configuredpath(pipeline));
     int stat = pdal::Utils::run_shell_command(cmd + " " + file, output);
+    EXPECT_EQ(0, stat);
+    if (stat)
+        std::cerr << output << std::endl;
+}
+
+// most pipelines (those with a writer) will be invoked via `pdal pipeline`
+static void run_pipeline_stdin(std::string const& pipeline)
+{
+    const std::string cmd = Support::binpath(Support::exename("pdal") +
+        " pipeline --stdin");
+
+    std::string output;
+    std::string file(Support::configuredpath(pipeline));
+    int stat = pdal::Utils::run_shell_command(cmd + " < " + file, output);
     EXPECT_EQ(0, stat);
     if (stat)
         std::cerr << output << std::endl;
@@ -68,7 +84,7 @@ static void run_info(std::string const& pipeline)
 
     std::string output;
     std::string file(Support::configuredpath(pipeline));
-    int stat = pdal::Utils::run_shell_command(cmd + " -s < " + file, output);
+    int stat = pdal::Utils::run_shell_command(cmd + " " + file, output);
     EXPECT_EQ(0, stat);
     if (stat)
         std::cerr << output << std::endl;
@@ -96,12 +112,6 @@ TEST(pipelineBaseTest, common_opts)
     std::string output;
     int stat = pdal::Utils::run_shell_command(cmd + " -h", output);
     EXPECT_EQ(stat, 0);
-
-    // We used to accept --version as a kernel option, rather than an
-    // application option.  Make sure it now throws an error.
-    stat = pdal::Utils::run_shell_command(cmd + " --version 2>&1", output);
-    EXPECT_TRUE(output.find("Unexpected argument") != std::string::npos);
-    EXPECT_NE(stat, 0);
 }
 
 TEST(pipelineBaseTest, drop_color)
@@ -110,7 +120,7 @@ TEST(pipelineBaseTest, drop_color)
 TEST(pipelineBaseTest, interpolate)
 { run_pipeline("pipeline/pipeline_interpolate.xml"); }
 
-TEST(pipelineBaseTest, DISABLED_metadata_reader)
+TEST(pipelineBaseTest, metadata_reader)
 { run_info("pipeline/pipeline_metadata_reader.xml"); }
 
 TEST(pipelineBaseTest, metadata_writer)
@@ -136,6 +146,9 @@ TEST(pipelineBaseTest, readcomments)
 
 TEST(pipelineBaseTest, write)
 { run_pipeline("pipeline/pipeline_write.xml"); }
+
+TEST(pipelineBaseTest, writeStdin)
+{ run_pipeline_stdin("pipeline/pipeline_write.xml"); }
 
 TEST(pipelineBaseTest, write2)
 { run_pipeline("pipeline/pipeline_write2.xml"); }
@@ -176,7 +189,7 @@ TEST(pipelineFiltersTest, crop_wkt_2d)
 TEST(pipelineFiltersTest, crop_wkt_2d_classification)
 { run_pipeline("filters/crop_wkt_2d_classification.xml"); }
 
-TEST(pipelineFiltersTest, DISABLED_decimate)
+TEST(pipelineFiltersTest, decimate)
 { run_pipeline("filters/decimate.xml"); }
 
 TEST(pipelineFiltersTest, ferry)
@@ -203,7 +216,7 @@ TEST(pipelineFiltersTest, range_classification)
 TEST(pipelineFiltersTest, reproject)
 { run_pipeline("filters/reproject.xml"); }
 
-TEST(pipelineFiltersTest, DISABLED_sort)
+TEST(pipelineFiltersTest, sort)
 { run_info("filters/sort.xml"); }
 
 TEST(pipelineFiltersTest, splitter)
@@ -215,11 +228,8 @@ TEST(pipelineFiltersTest, stats)
 TEST(pipelineHoleTest, crop)
 { run_pipeline("hole/crop.xml"); }
 
-TEST(pipelineIcebridgeTest, icebridge)
+TEST(pipelineIcebridgeTest, DISABLED_icebridge)
 { run_pipeline("icebridge/pipeline.xml"); }
-
-TEST(pipelineNitfTest, chipper)
-{ run_info("nitf/chipper.xml"); }
 
 TEST(pipelineNitfTest, conversion)
 { run_pipeline("nitf/conversion.xml"); }
@@ -287,6 +297,3 @@ TEST(pipelineTextTest, csv_writer)
 
 TEST(pipelineTextTest, geojson_writer)
 { run_pipeline("io/text-writer-geojson.xml"); }
-
-TEST(pipelineTextTest, space_delimited_writer)
-{ run_pipeline("io/text-writer-space-delimited.xml"); }

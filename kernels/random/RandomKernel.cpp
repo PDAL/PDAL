@@ -34,6 +34,9 @@
 
 #include "RandomKernel.hpp"
 
+#include <pdal/StageFactory.hpp>
+#include <pdal/pdal_macros.hpp>
+
 namespace pdal
 {
 
@@ -72,32 +75,10 @@ void RandomKernel::addSwitches(ProgramArgs& args)
 }
 
 
-Stage& RandomKernel::makeReader(Options readerOptions)
-{
-    if (isDebug())
-    {
-        readerOptions.add<bool>("debug", true);
-        uint32_t verbosity(getVerboseLevel());
-        if (!verbosity)
-            verbosity = 1;
-
-        readerOptions.add<uint32_t>("verbose", verbosity);
-        readerOptions.add<std::string>("log", "STDERR");
-    }
-
-    StageFactory factory;
-    Stage& readerStage = ownStage(factory.createStage("readers.faux"));
-    readerStage.setOptions(readerOptions);
-
-    return readerStage;
-}
-
-
 int RandomKernel::execute()
 {
     Options readerOptions;
 
-    setCommonOptions(readerOptions);
     if (!m_bounds.empty())
         readerOptions.add("bounds", m_bounds);
 
@@ -110,29 +91,15 @@ int RandomKernel::execute()
         readerOptions.add("mode", "random");
     else
         throw pdal_error("invalid distribution: " + m_distribution);
-    readerOptions.add("num_points", m_numPointsToWrite);
+    readerOptions.add("count", m_numPointsToWrite);
+    Stage& reader = makeReader("", "readers.faux", readerOptions);
 
     Options writerOptions;
-
-    writerOptions.add("filename", m_outputFile);
-    setCommonOptions(writerOptions);
-
     if (m_bCompress)
         writerOptions.add("compression", true);
-
-    Stage& writer = makeWriter(m_outputFile, makeReader(readerOptions));
-    writer.setOptions(writerOptions);
-    applyExtraStageOptionsRecursive(&writer);
+    Stage& writer = makeWriter(m_outputFile, reader, "", writerOptions);
 
     PointTable table;
-
-    UserCallback* callback;
-    if (!getProgressShellCommand().size())
-        callback = static_cast<UserCallback*>(new PercentageCallback);
-    else
-        callback = static_cast<UserCallback*>(
-            new ShellScriptCallback(getProgressShellCommand()));
-    writer.setUserCallback(callback);
     writer.prepare(table);
     PointViewSet viewSet = writer.execute(table);
 

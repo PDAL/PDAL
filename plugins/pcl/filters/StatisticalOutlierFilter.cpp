@@ -40,6 +40,8 @@
 #include <pdal/PointTable.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include <pcl/point_types.h>
 #include <pcl/console/print.h>
@@ -61,23 +63,15 @@ std::string StatisticalOutlierFilter::getName() const
     return s_info.name;
 }
 
-Options StatisticalOutlierFilter::getDefaultOptions()
+
+void StatisticalOutlierFilter::addArgs(ProgramArgs& args)
 {
-    Options options;
-    options.add("mean_k", 8, "Mean number of neighbors");
-    options.add("multiplier", 2, "Standard deviation threshold");
-    options.add("classify", true, "Apply classification labels?");
-    options.add("extract", false, "Extract ground returns?");
-    return options;
+    args.add("mean_k", "Mean number of neighbors", m_meanK, 8);
+    args.add("multiplier", "Standard deviation threshold", m_multiplier, 2.0);
+    args.add("classify", "Apply classification labels?", m_classify, true);
+    args.add("extract", "Extrac ground returns?", m_extract);
 }
 
-void StatisticalOutlierFilter::processOptions(const Options& options)
-{
-    m_meanK = options.getValueOrDefault<int>("mean_k", 8);
-    m_multiplier = options.getValueOrDefault<double>("multiplier", 2);
-    m_classify = options.getValueOrDefault<bool>("classify", true);
-    m_extract = options.getValueOrDefault<bool>("extract", false);
-}
 
 void StatisticalOutlierFilter::addDimensions(PointLayoutPtr layout)
 {
@@ -98,29 +92,7 @@ PointViewSet StatisticalOutlierFilter::run(PointViewPtr input)
     input->calculateBounds(bounds);
     pclsupport::PDALtoPCD(input, *cloud, bounds);
 
-    // PCL should provide console output at similar verbosity level as PDAL
-    int level = log()->getLevel();
-    switch (level)
-    {
-        case 0:
-            pcl::console::setVerbosityLevel(pcl::console::L_ALWAYS);
-            break;
-        case 1:
-            pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
-            break;
-        case 2:
-            pcl::console::setVerbosityLevel(pcl::console::L_WARN);
-            break;
-        case 3:
-            pcl::console::setVerbosityLevel(pcl::console::L_INFO);
-            break;
-        case 4:
-            pcl::console::setVerbosityLevel(pcl::console::L_DEBUG);
-            break;
-        default:
-            pcl::console::setVerbosityLevel(pcl::console::L_VERBOSE);
-            break;
-    }
+    pclsupport::setLogLevel(log()->getLevel());
 
     // setup the outlier filter
     pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor(true);

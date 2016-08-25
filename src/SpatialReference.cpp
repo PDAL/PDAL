@@ -206,9 +206,13 @@ std::string SpatialReference::getVerticalUnits() const
         if (node)
         {
             char* units(0);
+
+            // The returned value remains internal to the OGRSpatialReference and should not
+            //        be freed, or modified. It may be invalidated on the next
+            //        OGRSpatialReference call.
+
             double u = poSRS->GetLinearUnits(&units);
             tmp = units;
-            CPLFree(units);
 
             Utils::trim(tmp);
 
@@ -246,15 +250,21 @@ std::string SpatialReference::getHorizontalUnits() const
 
     std::string wkt = getWKT(eHorizontalOnly);
     const char* poWKT = wkt.c_str();
-    OGRSpatialReference srs(NULL);
-    if (OGRERR_NONE == srs.importFromWkt(const_cast<char **>(&poWKT)))
+    OGRSpatialReference* poSRS =
+        (OGRSpatialReference*)OSRNewSpatialReference(m_wkt.c_str());
+    if (poSRS)
     {
         char* units(0);
-        double u = srs.GetLinearUnits(&units);
+
+        // The returned value remains internal to the OGRSpatialReference and should not
+        //        be freed, or modified. It may be invalidated on the next
+        //        OGRSpatialReference call.
+
+        double u = poSRS->GetLinearUnits(&units);
         tmp = units;
-        CPLFree(units);
 
         Utils::trim(tmp);
+
     }
 
     return tmp;
@@ -331,14 +341,8 @@ bool SpatialReference::isGeocentric() const
 
 int SpatialReference::calculateZone(double lon, double lat)
 {
-    // Force longitude [-180, 180)
-    lon = fmod(lon, 360.0);
-    if (lon < -180.0)
-        lon += 360.0;
-    else if (lon >= 180.0)
-        lon -= 360.0;
-
     int zone = 0;
+    lon = Utils::normalizeLongitude(lon);
 
     // Special Norway processing.
     if (lat >= 56.0 && lat < 64.0 && lon >= 3.0 && lon < 12.0 )
@@ -452,6 +456,27 @@ int SpatialReference::computeUTMZone(const BOX3D& box) const
     OSRDestroySpatialReference(wgs84);
 
     return min_zone;
+}
+
+
+MetadataNode SpatialReference::toMetadata() const
+{
+    MetadataNode root("srs");
+    root.add("horizontal", getHorizontal());
+    root.add("vertical", getVertical());
+    root.add("isgeographic", isGeographic());
+    root.add("isgeocentric", isGeocentric());
+    root.add("proj4", getProj4());
+    root.add("prettywkt", getWKT(eHorizontalOnly, true));
+    root.add("wkt", getWKT(eHorizontalOnly, false));
+    root.add("compoundwkt", getWKT(eCompoundOK, false));
+    root.add("prettycompoundwkt", getWKT(eCompoundOK, true));
+
+    MetadataNode units = root.add("units");
+    units.add("vertical", getVerticalUnits());
+    units.add("horizontal", getHorizontalUnits());
+
+    return root;
 }
 
 

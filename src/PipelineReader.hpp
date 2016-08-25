@@ -40,6 +40,7 @@
 #include <vector>
 #include <string>
 
+#include <boost/property_tree/ptree.hpp>
 
 namespace pdal
 {
@@ -81,7 +82,7 @@ private:
 
     PipelineManager& m_manager;
     Options m_baseOptions;
-    std::string m_inputXmlFile;
+//    std::string m_inputXmlFile;
 
     PipelineReader& operator=(const PipelineReader&); // not implemented
     PipelineReader(const PipelineReader&); // not implemented

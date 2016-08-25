@@ -36,6 +36,7 @@
 
 #include <pdal/Kernel.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/plugin.hpp>
 
 extern "C" int32_t RandomKernel_ExitFunc();
 extern "C" PF_ExitFunc RandomKernel_InitPlugin();
@@ -55,8 +56,6 @@ public:
 private:
     RandomKernel();
     void addSwitches(ProgramArgs& arg);
-
-    Stage& makeReader(Options readerOptions);
 
     std::string m_outputFile;
     bool m_bCompress;

@@ -47,38 +47,66 @@ namespace pdal
 
 class Options;
 
+/**
+  This class provides a mechanism for creating Stage objects given a driver
+  name.  Creates stages are owned by the factory and destroyed when the
+  factory is destroyed.  Stages can be explicitly destroyed with destroyStage()
+  if desired.
 
-// This class provides a mechanism for creating Stage objects using only a
-// string (the stage type name) and an Options block.
-//
-// We keep a list of (stage type name, creation function) pairs, which
-// acts as a registry of creator functions.  The list is initialized with
-// the core stages we know about (I wish C++ had anonymous functions.).
-// We allow the user to add his own "external" drivers to the registry list
-// as well.
-//
-// We use 4 different functions for each kind of operation, since we have
-// 4 types of derived classes from Stage and they all have slightly different
-// parameters.  That makes it kinda messy.
-
+  \note  Stage creation is thread-safe.
+*/
 class PDAL_DLL StageFactory
 {
 public:
+    /**
+      Create a stage factory.
+
+      \param no_plugins  Don't load plugins or allowed them to be created
+        with this factory.
+    */
     StageFactory(bool no_plugins = true);
 
-    // infer the driver to use based on filename extension
-    // returns "" if no driver found
+    /**
+      Return the file extensions associated with a driver.
+
+      \param driver  Name of the driver whose extensions should be returned.
+    */
+    static StringList extensions(const std::string& driver);
+
+    /**
+      Infer the reader to use based on a filename.
+
+      \param filename  Filename that should be analyzed to determine a driver.
+      \return  Driver name or empty string if no reader can be inferred from
+        the filename.
+    */
     static std::string inferReaderDriver(const std::string& filename);
 
-    // infer the driver to use based on filename extension
-    // returns "" if no driver found
+    /**
+      Infer the writer to use based on filename extension.
+
+      \return  Driver name or empty string if no writer can be inferred from
+        the filename.
+    */
     static std::string inferWriterDriver(const std::string& filename);
 
-    // modify options based upon expectations implicit in a given filename
-    // e.g. output files ending in .laz should be compressed
-    static pdal::Options inferWriterOptionsChanges(const std::string& filename);
+    /**
+      Create a stage and return a pointer to the created stage.
+      The factory takes ownership of any successfully created stage.
 
-    Stage *createStage(const std::string& type, bool ownStage = false);
+      \param stage_name  Type of stage to by created.
+      \return  Pointer to created stage.
+    */
+    Stage *createStage(const std::string& type);
+
+    /**
+      Destroy a stage created by this factory.  This doesn't need to be
+      called unless you specifically want to destroy a stage as all stages
+      are destroyed when the factory is destroyed.
+
+      \param stage  Pointer to stage to destroy.
+    */
+    void destroyStage(Stage *stage);
 
 private:
     StageFactory& operator=(const StageFactory&); // not implemented

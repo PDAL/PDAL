@@ -37,6 +37,8 @@
 #include "ProgrammableFilter.hpp"
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -50,40 +52,21 @@ CREATE_SHARED_PLUGIN(1, 0, ProgrammableFilter, Filter, s_info)
 
 std::string ProgrammableFilter::getName() const { return s_info.name; }
 
-Options ProgrammableFilter::getDefaultOptions()
+void ProgrammableFilter::addArgs(ProgramArgs& args)
 {
-    Options options;
-    options.add("script", "");
-    options.add("module", "");
-    options.add("function", "");
-    return options;
-}
-
-
-void ProgrammableFilter::processOptions(const Options& options)
-{
-    m_source = options.getValueOrDefault<std::string>("source", "");
-    if (m_source.empty())
-        m_source = FileUtils::readFileIntoString(
-            options.getValueOrThrow<std::string>("script"));
-    m_module = options.getValueOrThrow<std::string>("module");
-    m_function = options.getValueOrThrow<std::string>("function");
-
-    auto addDims = options.getOptions("add_dimension");
-    for (auto it = addDims.cbegin(); it != addDims.cend(); ++it)
-    {
-        m_addDimensions.push_back(it->getValue<std::string>());
-    }
+    args.add("source", "Python script to run", m_source);
+    args.add("script", "File containing script to run", m_scriptFile);
+    args.add("module", "Python module containing the function to run",
+        m_module);
+    args.add("function", "Function to call", m_function);
+    args.add("add_dimension", "Dimensions to add", m_addDimensions);
 }
 
 
 void ProgrammableFilter::addDimensions(PointLayoutPtr layout)
 {
-    for (auto it = m_addDimensions.cbegin(); it != m_addDimensions.cend(); ++it)
-    {
-        Dimension::Id::Enum id = layout->registerOrAssignDim(*it,
-                                    pdal::Dimension::Type::Double);
-    }
+    for (const std::string& s : m_addDimensions)
+        layout->registerOrAssignDim(s, pdal::Dimension::Type::Double);
 }
 
 

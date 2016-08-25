@@ -45,14 +45,15 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/Reader.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 #include "RxpPointcloud.hpp"
-
 
 namespace pdal
 {
 
 
 const bool DEFAULT_SYNC_TO_PPS = true;
+const bool DEFAULT_IS_RDTP = false;
 const bool DEFAULT_MINIMAL = false;
 
 
@@ -65,7 +66,6 @@ class PDAL_DLL RxpReader : public pdal::Reader
 public:
     RxpReader()
         : pdal::Reader()
-        , m_uri("")
         , m_syncToPps(DEFAULT_SYNC_TO_PPS)
         , m_minimal(false)
         , m_pointcloud()
@@ -75,14 +75,14 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
     static Dimension::IdList getDefaultDimensions()
     {
         return getRxpDimensions(DEFAULT_SYNC_TO_PPS, DEFAULT_MINIMAL);
     }
 
 private:
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
+    virtual void initialize();
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
@@ -91,8 +91,8 @@ private:
     std::string m_uri;
     bool m_syncToPps;
     bool m_minimal;
+    bool m_isRdtp;
     std::unique_ptr<RxpPointcloud> m_pointcloud;
-
 };
 
 

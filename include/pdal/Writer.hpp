@@ -44,26 +44,32 @@ namespace pdal
 class Writer;
 class UserCallback;
 
-/// End-stage consumer of PDAL pipeline
+/**
+  A Writer is a terminal stage for a PDAL pipeline.  It usually writes output
+  to a file, but this isn't a requirement.  The class provides support for
+  some operations common for producing point output.
+*/
 class PDAL_DLL Writer : public Stage
 {
     friend class WriterWrapper;
+    friend class DbWriter;
     friend class FlexWriter;
 
 public:
-    /// Constructs an end-stage consumer of a pipeline of data -- a writer
+    /**
+      Construct a writer.
+    */
     Writer() : m_hashPos(std::string::npos)
         {}
 
 protected:
-    std::string m_filename;
-    XForm m_xXform;
-    XForm m_yXform;
-    XForm m_zXform;
-    StringList m_outputDims;
+    std::string m_filename;  ///< Output filename
     std::string::size_type m_hashPos;
 
-    virtual void setAutoXForm(const PointViewPtr view);
+    /**
+      Locate template placeholder ('#') and validate filename with respect
+      to placeholder.
+    */
     void handleFilenameTemplate();
 
 private:
@@ -74,7 +80,13 @@ private:
         viewSet.insert(view);
         return viewSet;
     }
-    virtual void writerProcessOptions(const Options& options);
+    virtual void writerInitialize(PointTableRef table)
+    {}
+
+    /**
+      Write the point in a PointView.  This is a simplification of the
+      \ref run() interface for convenience.  Impelment in subclass if desired.
+    */
     virtual void write(const PointViewPtr /*view*/)
         { std::cerr << "Can't write with stage = " << getName() << "!\n"; }
 

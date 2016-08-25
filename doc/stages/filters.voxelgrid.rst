@@ -15,6 +15,26 @@ approximated (i.e., *downsampled*) with their centroid. This approach is a bit
 slower than approximating them with the center of the voxel, but it represents
 the underlying surface more accurately.
 
+Example
+-------
+
+
+.. code-block:: json
+
+    {
+      "pipeline":[
+        "untransformed.las",
+        {
+          "type":"filters.voxelgrid"
+        },
+        {
+          "type":"writers.las",
+          "filename":"transformed.las"
+        }
+      ]
+    }
+
+
 .. seealso::
 
     :ref:`filters.decimation` does simple every-other-X -style decimation.

@@ -44,7 +44,7 @@ namespace pdal
   class Ilvis2MetadataReader
   {
   public:
-      inline void readMetadataFile(std::string filename, pdal::MetadataNode* m) {};
+      inline void readMetadataFile(std::string filename, MetadataNode* m) {};
   };
 }
 #else
@@ -76,7 +76,6 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
     static Dimension::IdList getDefaultDimensions();
 
 private:
@@ -84,14 +83,12 @@ private:
     point_count_t m_index;
 
     virtual void addDimensions(PointLayoutPtr layout);
+    virtual void addArgs(ProgramArgs& args);
+    virtual void initialize();
     virtual void ready(PointTableRef table);
-    virtual void processOptions(const Options& options);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
     virtual void done(PointTableRef table);
     virtual bool eof();
-    virtual void initialize(PointTableRef table);
-
-    double convertLongitude(double longitude);
 
     std::string m_metadataFile;
     Ilvis2MetadataReader m_mdReader;

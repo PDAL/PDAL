@@ -36,12 +36,15 @@
 
 #include <pdal/Filter.hpp>
 #include <pdal/Polygon.hpp>
+#include <pdal/plugin.hpp>
 
 extern "C" int32_t CropFilter_ExitFunc();
 extern "C" PF_ExitFunc CropFilter_InitPlugin();
 
 namespace pdal
 {
+
+class ProgramArgs;
 
 // removes any points outside of the given range
 // updates the header accordingly
@@ -54,10 +57,9 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
-
 private:
-    std::vector<BOX2D> m_bounds;
+    std::vector<std::string> m_boundsTxt;
+    std::vector<Bounds> m_bounds;
     bool m_cropOutside;
     std::vector<Polygon> m_polys;
     SpatialReference m_assignedSrs;
@@ -74,7 +76,8 @@ private:
 
     std::vector<GeomPkg> m_geoms;
 
-    virtual void processOptions(const Options& options);
+    void addArgs(ProgramArgs& args);
+    virtual void initialize();
     virtual void ready(PointTableRef table);
     virtual bool processOne(PointRef& point);
     virtual PointViewSet run(PointViewPtr view);

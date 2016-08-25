@@ -36,6 +36,8 @@
 
 #include "SbetReader.hpp"
 
+#include <pdal/pdal_macros.hpp>
+
 namespace pdal
 {
 
@@ -47,13 +49,6 @@ static PluginInfo const s_info = PluginInfo(
 CREATE_STATIC_PLUGIN(1, 0, SbetReader, Reader, s_info)
 
 std::string SbetReader::getName() const { return s_info.name; }
-
-Options SbetReader::getDefaultOptions()
-{
-    Options options;
-    return options;
-}
-
 
 void SbetReader::addDimensions(PointLayoutPtr layout)
 {
@@ -81,7 +76,7 @@ bool SbetReader::processOne(PointRef& point)
     {
         double d;
         *m_stream >> d;
-        Dimension::Id::Enum dim = *di;
+        Dimension::Id dim = *di;
         point.setField(dim, d);
     }
     return (m_stream->good());

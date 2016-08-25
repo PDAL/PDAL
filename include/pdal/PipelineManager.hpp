@@ -49,35 +49,64 @@ class PDAL_DLL PipelineManager
 {
 public:
     PipelineManager() : m_tablePtr(new PointTable()), m_table(*m_tablePtr),
-            m_progressFd(-1)
+            m_progressFd(-1), m_input(nullptr)
         {}
     PipelineManager(int progressFd) : m_tablePtr(new PointTable()),
-            m_table(*m_tablePtr), m_progressFd(progressFd)
+            m_table(*m_tablePtr), m_progressFd(progressFd), m_input(nullptr)
         {}
-    PipelineManager(PointTableRef table) : m_table(table), m_progressFd(-1)
+    PipelineManager(PointTableRef table) : m_table(table), m_progressFd(-1),
+            m_input(nullptr)
         {}
     PipelineManager(PointTableRef table, int progressFd) : m_table(table),
-            m_progressFd(progressFd)
+            m_progressFd(progressFd), m_input(nullptr)
         {}
+    ~PipelineManager();
 
-    bool readPipeline(std::istream& input);
-    bool readPipeline(const std::string& filename);
+    void readPipeline(std::istream& input);
+    void readPipeline(const std::string& filename);
 
     // Use these to manually add stages into the pipeline manager.
     Stage& addReader(const std::string& type);
     Stage& addFilter(const std::string& type);
     Stage& addWriter(const std::string& type);
 
+    // These add stages, hook dependencies and set necessary options.
+    // They're preferable to the above as they're more flexible and safer.
+    Stage& makeReader(const std::string& inputFile, std::string driver);
+    Stage& makeReader(const std::string& inputFile, std::string driver,
+        Options options);
+
+    Stage& makeFilter(const std::string& driver);
+    Stage& makeFilter(const std::string& driver, Options options);
+    Stage& makeFilter(const std::string& driver, Stage& parent);
+    Stage& makeFilter(const std::string& driver, Stage& parent,
+        Options options);
+
+    Stage& makeWriter(const std::string& outputFile, std::string driver);
+    Stage& makeWriter(const std::string& outputFile, std::string driver,
+        Options options);
+    Stage& makeWriter(const std::string& outputFile, std::string driver,
+        Stage& parent);
+    Stage& makeWriter(const std::string& outputFile, std::string driver,
+        Stage& parent, Options options);
+
     // returns true if the pipeline endpoint is a writer
     bool isWriterPipeline() const
         { return (bool)getStage(); }
 
-    // return the pipeline reader endpoint (or NULL, if not a reader pipeline)
+    // return the pipeline reader endpoint (or nullptr, if not a reader
+    // pipeline)
     Stage* getStage() const
-        { return m_stages.empty() ? NULL : m_stages.back().get(); }
+        { return m_stages.empty() ? nullptr : m_stages.back(); }
 
+    // Set the log to be available to stages.
+    void setLog(LogPtr& log)
+        { m_log = log; }
+
+    QuickInfo preview() const;
     void prepare() const;
     point_count_t execute();
+    void validateStageOptions() const;
 
     // Get the resulting point views.
     const PointViewSet& views() const
@@ -88,17 +117,25 @@ public:
         { return m_table; }
 
     MetadataNode getMetadata() const;
+    Options& commonOptions()
+        { return m_commonOptions; }
+    OptionsMap& stageOptions()
+        { return m_stageOptions; }
+    Options& stageOptions(Stage& stage);
 
 private:
+    void setOptions(Stage& stage, const Options& addOps);
+
     StageFactory m_factory;
     std::unique_ptr<PointTable> m_tablePtr;
     PointTableRef m_table;
-
+    Options m_commonOptions;
+    OptionsMap m_stageOptions;
     PointViewSet m_viewSet;
-
-    typedef std::vector<std::unique_ptr<Stage> > StagePtrList;
-    StagePtrList m_stages;
+    std::vector<Stage*> m_stages; // stage observer, never owner
     int m_progressFd;
+    std::istream *m_input;
+    LogPtr m_log;
 
     PipelineManager& operator=(const PipelineManager&); // not implemented
     PipelineManager(const PipelineManager&); // not implemented
@@ -106,4 +143,3 @@ private:
 typedef std::unique_ptr<PipelineManager> PipelineManagerPtr;
 
 } // namespace pdal
-

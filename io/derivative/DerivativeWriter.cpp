@@ -35,15 +35,15 @@
 #include "DerivativeWriter.hpp"
 
 #include <pdal/PointView.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Utils.hpp>
+#include <pdal/pdal_macros.hpp>
 
 #include <algorithm>
 #include <cfloat>
 #include <cmath>
 #include <iostream>
 #include <limits>
-
-#include <boost/filesystem.hpp>
 
 #include "gdal_priv.h" // For File I/O
 #include "gdal_version.h" // For version info
@@ -72,37 +72,29 @@ DerivativeWriter::DerivativeWriter()
 }
 
 
-void DerivativeWriter::processOptions(const Options& ops)
+void DerivativeWriter::addArgs(ProgramArgs& args)
 {
-    m_GRID_DIST_X = ops.getValueOrDefault<double>("grid_dist_x", 15.0);
-    m_GRID_DIST_Y = ops.getValueOrDefault<double>("grid_dist_y", 15.0);
-    handleFilenameTemplate();
+    args.add("grid_dist_x", "X grid distance", m_GRID_DIST_X, 15.0);
+    args.add("grid_dist_y", "Y grid distance", m_GRID_DIST_Y, 15.0);
+    args.add("primitive_type", "Primitive type", m_primTypesSpec);
+}
 
-    // maybe we eventually introduce an option to do more than slope
-    //std::vector<Option> types = ops.getOptions("output_type");
 
-    //if (!types.size())
-    //    m_outputTypes = OUTPUT_TYPE_ALL;
-    //else
-    //{
-    //    for (auto i = types.begin(); i != types.end(); ++i)
-    //    {
-    //        if (Utils::iequals(i->getValue<std::string>(), "min"))
-    //            m_outputTypes |= OUTPUT_TYPE_MIN;
-    //        if (Utils::iequals(i->getValue<std::string>(), "max"))
-    //            m_outputTypes |= OUTPUT_TYPE_MAX;
-    //        if (Utils::iequals(i->getValue<std::string>(), "mean"))
-    //            m_outputTypes |= OUTPUT_TYPE_MEAN;
-    //        if (Utils::iequals(i->getValue<std::string>(), "idw"))
-    //            m_outputTypes |= OUTPUT_TYPE_IDW;
-    //        if (Utils::iequals(i->getValue<std::string>(), "den"))
-    //            m_outputTypes |= OUTPUT_TYPE_DEN;
-    //        if (Utils::iequals(i->getValue<std::string>(), "all"))
-    //            m_outputTypes = OUTPUT_TYPE_ALL;
-    //    }
-    //}
-
-    std::map<std::string, PrimitiveType> primtypes;
+void DerivativeWriter::initialize()
+{
+    static std::map<std::string, PrimitiveType> primtypes =
+        { {"slope_d8", SLOPE_D8},
+          {"slope_fd", SLOPE_FD},
+          {"aspect_d8", ASPECT_D8},
+          {"aspect_fd", ASPECT_FD},
+          {"hillshade", HILLSHADE},
+          {"contour_curvature", CONTOUR_CURVATURE},
+          {"profile_curvature", PROFILE_CURVATURE},
+          {"tangential_curvature", TANGENTIAL_CURVATURE},
+          {"total_curvature", TOTAL_CURVATURE},
+          {"catchment_area", CATCHMENT_AREA}
+        };
+/**
     primtypes["slope_d8"] = SLOPE_D8;
     primtypes["slope_fd"] = SLOPE_FD;
     primtypes["aspect_d8"] = ASPECT_D8;
@@ -113,11 +105,13 @@ void DerivativeWriter::processOptions(const Options& ops)
     primtypes["tangential_curvature"] = TANGENTIAL_CURVATURE;
     primtypes["total_curvature"] = TOTAL_CURVATURE;
     primtypes["catchment_area"] = CATCHMENT_AREA;
+**/
 
-    std::string primTypes = ops.getValueOrDefault("primitive_type", "slope_d8");
-    StringList types = Utils::split2(primTypes, ',');
+    if (m_primTypesSpec.empty())
+        m_primTypesSpec.push_back("slope_d8");
 
-    if (m_hashPos == std::string::npos && types.size() > 1)
+    handleFilenameTemplate();
+    if (m_hashPos == std::string::npos && m_primTypesSpec.size() > 1)
     {
         std::ostringstream oss;
 
@@ -127,9 +121,8 @@ void DerivativeWriter::processOptions(const Options& ops)
         throw pdal_error(oss.str());
     }
 
-    for (std::string os : types)
+    for (std::string os : m_primTypesSpec)
     {
-        Utils::trim(os);
         std::string s = Utils::tolower(os);
         auto pi = primtypes.find(s);
         if (pi == primtypes.end())
@@ -139,9 +132,13 @@ void DerivativeWriter::processOptions(const Options& ops)
                 "'.";
             throw pdal_error(oss.str());
         }
-        TypeOutput to { pi->second, generateFilename(pi->first) };
+        TypeOutput to;
+        to.m_type = pi->second;
+        to.m_filename = generateFilename(pi->first);
         m_primitiveTypes.push_back(to);
     }
+
+    setBounds(BOX2D());
 }
 
 
@@ -156,24 +153,6 @@ DerivativeWriter::generateFilename(const std::string& primName) const
     return filename;
 }
 
-
-void DerivativeWriter::initialize()
-{
-
-    setBounds(BOX2D());
-}
-
-
-Options DerivativeWriter::getDefaultOptions()
-{
-    Options options;
-
-    options.add("grid_dist_x", 15.0, "X grid distance");
-    options.add("grid_dist_y", 15.0, "Y grid distance");
-    options.add("primitive_type", "slope_d8", "Primitive type");
-
-    return options;
-}
 
 double DerivativeWriter::GetNeighbor(Eigen::MatrixXd* data, int row, int col,
     Direction d)
@@ -1000,10 +979,9 @@ GDALDataset* DerivativeWriter::createFloat32GTIFF(std::string filename,
         {
             char **papszOptions = NULL;
 
-            pdalboost::filesystem::path p(filename);
-            p.replace_extension(".tif");
+            std::string path = FileUtils::stem(filename) + ".tif";
             GDALDataset *dataset;
-            dataset = tpDriver->Create(p.string().c_str(), cols, rows, 1,
+            dataset = tpDriver->Create(path.c_str(), cols, rows, 1,
                 GDT_Float32, papszOptions);
 
             BOX2D& extent = getBounds();
@@ -1303,7 +1281,6 @@ void DerivativeWriter::writeCatchmentArea(Eigen::MatrixXd* tDemData,
 //             float val = data[(tYOut * m_GRID_SIZE_X) + tXOut];
 //             if (val != c_background && !_isnanf(val))
 //             {
-//                 //std::cerr << val << std::endl;
 //                 mean += val;
 //                 nvals++;
 //             }
@@ -1328,15 +1305,11 @@ void DerivativeWriter::writeCatchmentArea(Eigen::MatrixXd* tDemData,
 //     stdev /= (nvals - 1);
 //     stdev = std::sqrt(stdev);
 //
-//     std::cerr << mean << ", " << stdev << ", " << nvals << std::endl;
-//
 //     // pass #3: scale to +/- 2x standard deviations from mean
 //     double min_val = mean - 2*stdev;
 //     double max_val = mean + 2*stdev;
 //     double range = max_val - min_val;
 //     double scale = 256.0 / range;
-//
-//     std::cerr << min_val << " < " << max_val << std::endl;
 //
 //     #pragma omp parallel for
 //
@@ -1521,8 +1494,9 @@ void DerivativeWriter::writeCurvature(Eigen::MatrixXd* tDemData,
 
     tBand->SetNoDataValue((double)c_background);
 
-    int ret;
     if (m_GRID_SIZE_X > 0 && m_GRID_SIZE_Y > 0)
+    {
+        int ret;
 #if GDAL_VERSION_MAJOR <= 1
         ret = tBand->RasterIO(GF_Write, 0, 0, m_GRID_SIZE_X, m_GRID_SIZE_Y,
                 poRasterData.data(), m_GRID_SIZE_X, m_GRID_SIZE_Y,
@@ -1532,6 +1506,14 @@ void DerivativeWriter::writeCurvature(Eigen::MatrixXd* tDemData,
             poRasterData.data(), m_GRID_SIZE_X, m_GRID_SIZE_Y,
             GDT_Float32, 0, 0, 0);
 #endif
+        if (ret != CE_None)
+        {
+            std::ostringstream oss;
+
+            oss << getName() << ": Error reading raster IO.";
+            throw pdal_error(oss.str());
+        }
+    }
     GDALClose((GDALDatasetH) mpDstDS);
 }
 

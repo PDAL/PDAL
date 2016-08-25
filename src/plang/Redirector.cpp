@@ -24,6 +24,7 @@ struct Stdout
 {
     PyObject_HEAD
     Redirector::stdout_write_type write;
+    Redirector::stdout_flush_type flush;
 };
 
 
@@ -45,9 +46,13 @@ static PyObject* Stdout_write(PyObject* self, PyObject* args)
 }
 
 
-static PyObject* Stdout_flush(PyObject* /*self*/, PyObject* /*args*/)
+static PyObject* Stdout_flush(PyObject* self, PyObject* /*args*/)
 {
-    // no-op
+    Stdout *selfimpl = reinterpret_cast<Stdout *>(self);
+    if (selfimpl->flush)
+    {
+        selfimpl->flush();
+    }
     return Py_BuildValue("");
 }
 
@@ -55,7 +60,7 @@ static PyObject* Stdout_flush(PyObject* /*self*/, PyObject* /*args*/)
 static PyMethodDef Stdout_methods[] =
 {
     {"write", Stdout_write, METH_VARARGS, "sys.stdout.write"},
-    {"flush", Stdout_flush, METH_VARARGS, "sys.stdout.write"},
+    {"flush", Stdout_flush, METH_VARARGS, "sys.stdout.flush"},
     {0, 0, 0, 0} // sentinel
 };
 
@@ -176,31 +181,27 @@ PyObject* Redirector::init()
 }
 
 
-static void my2argwriterfunction(std::ostream* ostr, const std::string& mssg)
-{
-    *ostr << mssg;
-}
-
-
 void Redirector::set_stdout(std::ostream* ostr)
 {
-    stdout_write_type my1argwriterfunction = std::bind(&my2argwriterfunction, ostr, std::placeholders::_1);
-    this->set_stdout(my1argwriterfunction);
+    stdout_write_type writeFunc = [ostr](std::string msg) { *ostr << msg; };
+    stdout_flush_type flushFunc = [ostr]{ ostr->flush(); };
 
-    return;
+    this->set_stdout(writeFunc, flushFunc);
 }
 
 
-void Redirector::set_stdout(stdout_write_type write)
+void Redirector::set_stdout(stdout_write_type write, stdout_flush_type flush)
 {
     if (!m_stdout)
     {
-        m_stdout_saved = PySys_GetObject(const_cast<char*>("stdout")); // borrowed
+        m_stdout_saved =
+            PySys_GetObject(const_cast<char*>("stdout")); // borrowed
         m_stdout = StdoutType.tp_new(&StdoutType, 0, 0);
     }
 
     Stdout* impl = reinterpret_cast<Stdout*>(m_stdout);
     impl->write = write;
+    impl->flush = flush;
     PySys_SetObject(const_cast<char*>("stdout"), m_stdout);
 }
 

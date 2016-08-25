@@ -43,16 +43,20 @@
 namespace pdal
 {
 
+namespace
+{
+    using DT = Dimension::Type;
+    const Dimension::Type lastypes[] = {
+        DT::None, DT::Unsigned8, DT::Signed8, DT::Unsigned16, DT::Signed16,
+        DT::Unsigned32, DT::Signed32, DT::Unsigned64, DT::Signed64,
+        DT::Float, DT::Double
+    };
+}
+
 uint8_t ExtraBytesIf::lasType()
 {
-    using namespace Dimension::Type;
-    
     uint8_t lastype = 0;
 
-    Dimension::Type::Enum lastypes[] = {
-        None, Unsigned8, Signed8, Unsigned16, Signed16,
-        Unsigned32, Signed32, Unsigned64, Signed64, Float, Double
-    };
     for (size_t i = 0; i < sizeof(lastypes) / sizeof(lastypes[0]); ++i)
         if (m_type == lastypes[i])
         {
@@ -67,8 +71,6 @@ uint8_t ExtraBytesIf::lasType()
 
 void ExtraBytesIf::setType(uint8_t lastype)
 {
-    using namespace Dimension::Type;
-
     m_fieldCnt = 1;
     while (lastype > 10)
     {
@@ -76,12 +78,8 @@ void ExtraBytesIf::setType(uint8_t lastype)
         lastype -= 10;
     }
 
-    Dimension::Type::Enum lastypes[] = {
-        None, Unsigned8, Signed8, Unsigned16, Signed16,
-        Unsigned32, Signed32, Unsigned64, Signed64, Float, Double
-    };
     m_type = lastypes[lastype];
-    if (m_type == None)
+    if (m_type == Dimension::Type::None)
         m_fieldCnt = 0;
 }
 
@@ -141,7 +139,7 @@ void ExtraBytesIf::readFrom(const char *buf)
     extractor.get(m_description, 32);
 
     setType(type);
-    if (m_type == 0)
+    if (m_type == Dimension::Type::None)
         m_size = options;
     if (!(options & SCALE_MASK))
         for (size_t i = 0; i < 3; ++i)
@@ -206,7 +204,7 @@ std::vector<ExtraDim> parse(const StringList& dimString)
         }
         Utils::trim(s[0]);
         Utils::trim(s[1]);
-        Dimension::Type::Enum type = Dimension::type(s[1]);
+        Dimension::Type type = Dimension::type(s[1]);
         if (type == Dimension::Type::None)
         {
             std::ostringstream oss;

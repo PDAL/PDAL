@@ -33,6 +33,7 @@
  ****************************************************************************/
 
 #include "MortonOrderFilter.hpp"
+#include <pdal/pdal_macros.hpp>
 
 #include <climits>
 #include <iostream>
@@ -50,13 +51,6 @@ static PluginInfo const s_info = PluginInfo(
 CREATE_STATIC_PLUGIN(1, 0, MortonOrderFilter, Filter, s_info)
 
 std::string MortonOrderFilter::getName() const { return s_info.name; }
-
-Options MortonOrderFilter::getDefaultOptions()
-{
-    Options options;
-    return options;
-}
-
 
 //This used to be a lambda, but the VS compiler exploded, I guess.
 typedef std::pair<double, double> Coord;

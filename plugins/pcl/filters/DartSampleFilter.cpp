@@ -42,6 +42,9 @@
 #include <pcl/point_types.h>
 #include <pcl/io/pcd_io.h>
 
+#include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
+
 namespace pdal
 {
 
@@ -56,23 +59,15 @@ std::string DartSampleFilter::getName() const
     return s_info.name;
 }
 
-Options DartSampleFilter::getDefaultOptions()
+void DartSampleFilter::addArgs(ProgramArgs& args)
 {
-    Options options;
-    options.add("radius", 1.0, "Minimum distance criterion");
-    return options;
-}
-
-void DartSampleFilter::processOptions(const Options& options)
-{
-    m_radius = options.getValueOrDefault<double>("radius", 1.0);
+    args.add("radius", "Minimum distance criterion", m_radius, 1.0);
 }
 
 PointViewSet DartSampleFilter::run(PointViewPtr input)
 {
-    PointViewPtr output = input->makeNew();
     PointViewSet viewSet;
-    viewSet.insert(output);
+    PointViewPtr output = input->makeNew();
 
     log()->floatPrecision(2);
     log()->get(LogLevel::Info) << "DartSampleFilter (radius="
@@ -85,28 +80,7 @@ PointViewSet DartSampleFilter::run(PointViewPtr input)
     Cloud::Ptr cloud(new Cloud);
     pclsupport::PDALtoPCD(input, *cloud, buffer_bounds);
 
-    int level = log()->getLevel();
-    switch (level)
-    {
-        case 0:
-            pcl::console::setVerbosityLevel(pcl::console::L_ALWAYS);
-            break;
-        case 1:
-            pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
-            break;
-        case 2:
-            pcl::console::setVerbosityLevel(pcl::console::L_WARN);
-            break;
-        case 3:
-            pcl::console::setVerbosityLevel(pcl::console::L_INFO);
-            break;
-        case 4:
-            pcl::console::setVerbosityLevel(pcl::console::L_DEBUG);
-            break;
-        default:
-            pcl::console::setVerbosityLevel(pcl::console::L_VERBOSE);
-            break;
-    }
+    pclsupport::setLogLevel(log()->getLevel());
 
     pcl::DartSample<pcl::PointXYZ> ds;
     ds.setInputCloud(cloud);
@@ -130,6 +104,7 @@ PointViewSet DartSampleFilter::run(PointViewPtr input)
                                <<  100*frac
                                << "%)\n";
 
+    viewSet.insert(output);
     return viewSet;
 }
 

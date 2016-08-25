@@ -35,7 +35,9 @@
 #pragma once
 
 #include <pdal/pdal_export.hpp>
+#include <pdal/plugin.hpp>
 #include <pdal/Compression.hpp>
+#include <pdal/PDALUtils.hpp>
 #include <pdal/Reader.hpp>
 
 #include "LasError.hpp"
@@ -56,69 +58,74 @@ class PointDimensions;
 
 class PDAL_DLL LasReader : public pdal::Reader
 {
-    friend class NitfReader;
-public:
-    LasReader() : pdal::Reader(), m_index(0), m_istream(NULL)
+protected:
+    class LasStreamIf
+    {
+    protected:
+        LasStreamIf()
         {}
 
-    virtual ~LasReader()
-        {  destroyStream(); }
+    public:
+        LasStreamIf(const std::string& filename)
+            { m_istream = Utils::openFile(filename); }
+
+        ~LasStreamIf()
+        {
+            if (m_istream)
+                Utils::closeFile(m_istream);
+        }
+
+        std::istream *m_istream;
+    };
+
+    friend class NitfReader;
+public:
+    LasReader() : pdal::Reader(), m_index(0)
+        {}
 
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
-    Options getDefaultOptions();
 
     const LasHeader& header() const
-        { return m_lasHeader; }
+        { return m_header; }
     point_count_t getNumPoints() const
-        { return m_lasHeader.pointCount(); }
+        { return m_header.pointCount(); }
 
 protected:
-    virtual std::istream *createStream()
+    virtual void createStream()
     {
-        m_istream = FileUtils::openFile(m_filename);
-        if (!m_istream)
+        if (m_streamIf)
+            std::cerr << "Attempt to create stream twice!\n";
+        m_streamIf.reset(new LasStreamIf(m_filename));
+        if (!m_streamIf->m_istream)
         {
             std::ostringstream oss;
             oss << "Unable to create open stream for '"
                 << m_filename <<"' with error '" << strerror(errno) <<"'";
             throw pdal_error(oss.str());
         }
-        return m_istream;
     }
-    virtual void destroyStream()
-    {
-        FileUtils::closeFile(m_istream);
-        m_istream = NULL;
-    }
+
+    std::unique_ptr<LasStreamIf> m_streamIf;
 
 private:
     LasError m_error;
-    LasHeader m_lasHeader;
+    LasHeader m_header;
     std::unique_ptr<ZipPoint> m_zipPoint;
     std::unique_ptr<LASunzipper> m_unzipper;
     std::unique_ptr<LazPerfVlrDecompressor> m_decompressor;
     std::vector<char> m_decompressorBuf;
     point_count_t m_index;
-    std::istream* m_istream;
-    VlrList m_vlrs;
+    StringList m_extraDimSpec;
     std::vector<ExtraDim> m_extraDims;
     std::string m_compression;
 
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
     virtual void initialize(PointTableRef table)
         { initializeLocal(table, m_metadata); }
     virtual void initializeLocal(PointTableRef table, MetadataNode& m);
     virtual void addDimensions(PointLayoutPtr layout);
-    VariableLengthRecord *findVlr(const std::string& userId, uint16_t recordId);
-    void setSrsFromVlrs(MetadataNode& m);
-    void readExtraBytesVlr();
-    SpatialReference getSrsFromVlrs();
-    SpatialReference getSrsFromWktVlr();
-    SpatialReference getSrsFromGeotiffVlr();
-    void extractHeaderMetadata(MetadataNode& forward, MetadataNode& m);
-    void extractVlrMetadata(MetadataNode& forward, MetadataNode& m);
     virtual QuickInfo inspect();
     virtual void ready(PointTableRef table);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
@@ -126,18 +133,20 @@ private:
     virtual void done(PointTableRef table);
     virtual bool eof()
         { return m_index >= getNumPoints(); }
+
+    void setSrs(MetadataNode& m);
+    void readExtraBytesVlr();
+    void extractHeaderMetadata(MetadataNode& forward, MetadataNode& m);
+    void extractVlrMetadata(MetadataNode& forward, MetadataNode& m);
     void loadPoint(PointRef& point, char *buf, size_t bufsize);
     void loadPointV10(PointRef& point, char *buf, size_t bufsize);
     void loadPointV14(PointRef& point, char *buf, size_t bufsize);
     void loadExtraDims(LeExtractor& istream, PointRef& data);
-    point_count_t readFileBlock(
-            std::vector<char>& buf,
-            point_count_t maxPoints);
+    point_count_t readFileBlock(std::vector<char>& buf,
+        point_count_t maxPoints);
 
     LasReader& operator=(const LasReader&); // not implemented
     LasReader(const LasReader&); // not implemented
-    bool m_initialized;
-    bool m_skipWktVLR;
 };
 
 } // namespace pdal

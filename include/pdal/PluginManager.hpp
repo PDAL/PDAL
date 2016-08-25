@@ -39,6 +39,7 @@
 
 #pragma once
 
+#include <pdal/Log.hpp>
 #include <pdal/pdal_internal.hpp>
 #include <pdal/plugin.hpp>
 
@@ -60,6 +61,8 @@ class DynamicLibrary;
 
 class PDAL_DLL PluginManager
 {
+    FRIEND_TEST(PluginManagerTest, SearchPaths);
+
     typedef std::shared_ptr<DynamicLibrary> DynLibPtr;
     typedef std::map<std::string, DynLibPtr> DynamicLibraryMap;
     typedef std::vector<PF_ExitFunc> ExitFuncVec;
@@ -78,6 +81,7 @@ public:
     static void loadAll(int type);
     static void *createObject(const std::string& objectType);
     static StringList names(int typeMask);
+    static void setLog(LogPtr& log);
 
 private:
     // These functions return true if successful.
@@ -95,15 +99,17 @@ private:
     StringList l_names(int typeMask);
     std::string l_description(const std::string& name);
     std::string l_link(const std::string& name);
-
     DynamicLibrary *loadLibrary(const std::string& path,
         std::string& errorString);
+
+    static StringList test_pluginSearchPaths();
 
     PF_PluginAPI_Version m_version;
     DynamicLibraryMap m_dynamicLibraryMap;
     ExitFuncVec m_exitFuncVec;
     RegistrationInfoMap m_plugins;
     std::mutex m_mutex;
+    LogPtr m_log;
 
     // Disable copy/assignment.
     PluginManager(const PluginManager&);

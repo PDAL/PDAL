@@ -26,6 +26,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/io/las
     ${PROJECT_SOURCE_DIR}/io/optech
     ${PROJECT_SOURCE_DIR}/io/ply
+    ${PROJECT_SOURCE_DIR}/io/pts
     ${PROJECT_SOURCE_DIR}/io/qfit
     ${PROJECT_SOURCE_DIR}/io/sbet
     ${PROJECT_SOURCE_DIR}/io/text
@@ -62,8 +63,8 @@ PDAL_ADD_TEST(pdal_kernel_test FILES KernelTest.cpp)
 PDAL_ADD_TEST(pdal_log_test FILES LogTest.cpp)
 PDAL_ADD_TEST(pdal_metadata_test FILES MetadataTest.cpp)
 PDAL_ADD_TEST(pdal_options_test FILES OptionsTest.cpp)
-PDAL_ADD_TEST(pdal_pdalutils_test FILES PDALUtilsTest.cpp)
 PDAL_ADD_TEST(pdal_pipeline_manager_test FILES PipelineManagerTest.cpp)
+PDAL_ADD_TEST(pdal_plugin_manager_test FILES PluginManagerTest.cpp)
 PDAL_ADD_TEST(pdal_point_view_test FILES PointViewTest.cpp)
 PDAL_ADD_TEST(pdal_point_table_test FILES PointTableTest.cpp)
 PDAL_ADD_TEST(pdal_program_arg_test FILES ProgramArgsTest.cpp)
@@ -72,7 +73,6 @@ PDAL_ADD_TEST(pdal_spatial_reference_test FILES SpatialReferenceTest.cpp)
 PDAL_ADD_TEST(pdal_stage_factory_test FILES StageFactoryTest.cpp)
 PDAL_ADD_TEST(pdal_streaming_test FILES StreamingTest.cpp)
 PDAL_ADD_TEST(pdal_support_test FILES SupportTest.cpp)
-PDAL_ADD_TEST(pdal_user_callback_test FILES UserCallbackTest.cpp)
 PDAL_ADD_TEST(pdal_utils_test FILES UtilsTest.cpp)
 PDAL_ADD_TEST(pdal_uuid_test FILES UuidTest.cpp)
 
@@ -93,6 +93,7 @@ PDAL_ADD_TEST(pdal_io_las_writer_test FILES io/las/LasWriterTest.cpp)
 PDAL_ADD_TEST(pdal_io_optech_test FILES io/optech/OptechReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_ply_reader_test FILES io/ply/PlyReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_ply_writer_test FILES io/ply/PlyWriterTest.cpp)
+PDAL_ADD_TEST(pdal_io_pts_reader_test FILES io/pts/PtsReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_qfit_test FILES io/qfit/QFITReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_sbet_reader_test FILES io/sbet/SbetReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_sbet_writer_test FILES io/sbet/SbetWriterTest.cpp)
@@ -102,6 +103,7 @@ PDAL_ADD_TEST(pdal_io_text_test FILES io/text/TextReaderTest.cpp)
 #
 # sources for the native filters
 #
+PDAL_ADD_TEST(pdal_filters_attribute_test FILES filters/AttributeFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_chipper_test FILES filters/ChipperTest.cpp)
 PDAL_ADD_TEST(pdal_filters_colorization_test FILES filters/ColorizationFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_crop_test FILES filters/CropFilterTest.cpp)
@@ -109,6 +111,7 @@ PDAL_ADD_TEST(pdal_filters_decimation_test FILES filters/DecimationFilterTest.cp
 PDAL_ADD_TEST(pdal_filters_divider_test FILES filters/DividerFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_ferry_test FILES filters/FerryFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_merge_test FILES filters/MergeTest.cpp)
+PDAL_ADD_TEST(pdal_filters_additional_merge_test FILES filters/AdditionalMergeTest.cpp)
 PDAL_ADD_TEST(pdal_filters_reprojection_test FILES filters/ReprojectionFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_range_test FILES filters/RangeFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_randomize_test FILES filters/RandomizeFilterTest.cpp)
@@ -129,6 +132,7 @@ if (WITH_APPS)
     if (BUILD_PIPELINE_TESTS)
         PDAL_ADD_TEST(pcpipeline_test FILES apps/pcpipelineTest.cpp)
     endif()
+    PDAL_ADD_TEST(pcpipeline_test_json FILES apps/pcpipelineTestJSON.cpp)
     PDAL_ADD_TEST(random_test FILES apps/RandomTest.cpp)
 endif(WITH_APPS)
 

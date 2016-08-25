@@ -34,8 +34,9 @@
 
 #include "ColorizationFilter.hpp"
 
-#include <pdal/GlobalEnvironment.hpp>
 #include <pdal/PointView.hpp>
+#include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include <gdal.h>
 #include <ogr_spatialref.h>
@@ -53,22 +54,6 @@ static PluginInfo const s_info = PluginInfo(
 CREATE_STATIC_PLUGIN(1, 0, ColorizationFilter, Filter, s_info)
 
 std::string ColorizationFilter::getName() const { return s_info.name; }
-
-
-void ColorizationFilter::initialize()
-{
-    GlobalEnvironment::get().initializeGDAL(log());
-}
-
-
-Options ColorizationFilter::getDefaultOptions()
-{
-    Options options;
-
-    options.add("dimensions", "Red:1:1.0, Green:2:1.0, Blue:3");
-
-    return options;
-}
 
 namespace
 {
@@ -90,9 +75,9 @@ ColorizationFilter::BandInfo parseDim(const std::string& dim,
         count = Utils::extract(dim, pos, (int(*)(int))std::isspace);
         pos += count;
 
-        count = Utils::extract(dim, pos, (int(*)(int))std::isalpha);
+        count = Dimension::extractName(dim, pos);
         if (count == 0)
-           throw std::string("No dimension name.");
+           throw std::string("No dimension name provided.");
         name = dim.substr(pos, count);
         pos += count;
 
@@ -126,8 +111,13 @@ ColorizationFilter::BandInfo parseDim(const std::string& dim,
         pos += count;
 
         if (pos != dim.size())
-            throw std::string("Invalid characters following dimension "
-                "specification.");
+        {
+            std::ostringstream oss;
+
+            oss << "Invalid character '" << dim[pos] <<
+                "' following dimension specification.";
+            throw pdal_error(oss.str());
+        }
     }
     catch (std::string s)
     {
@@ -141,29 +131,27 @@ ColorizationFilter::BandInfo parseDim(const std::string& dim,
 
 } // unnamed namespace
 
-void ColorizationFilter::processOptions(const Options& options)
+void ColorizationFilter::addArgs(ProgramArgs& args)
 {
-    m_rasterFilename = options.getValueOrThrow<std::string>("raster");
+    args.add("raster", "Raster filename", m_rasterFilename);
+    args.add("dimensions", "Dimensions to use for colorization", m_dimSpec);
+}
 
-    if (options.hasOption("dimension") && !options.hasOption("dimensions"))
-        throw pdal_error("Option 'dimension' no longer supported.  Use "
-            "'dimensions' instead.");
 
-    StringList defaultDims;
-    defaultDims.push_back("Red");
-    defaultDims.push_back("Green");
-    defaultDims.push_back("Blue");
-
-    StringList dims =
-        options.getValueOrDefault<StringList>("dimensions", defaultDims);
+void ColorizationFilter::initialize()
+{
+    if (m_dimSpec.empty())
+        m_dimSpec = { "Red", "Green", "Blue" };
 
     uint32_t defaultBand = 1;
-    for (std::string& dim : dims)
+    for (std::string& dim : m_dimSpec)
     {
         BandInfo bi = parseDim(dim, defaultBand);
         defaultBand = bi.m_band + 1;
         m_bands.push_back(bi);
     }
+
+    gdal::registerDrivers();
 }
 
 
@@ -181,7 +169,7 @@ void ColorizationFilter::ready(PointTableRef table)
 
     m_raster.reset(new gdal::Raster(m_rasterFilename));
 
-    GDALError::Enum error = m_raster->open();
+    GDALError error = m_raster->open();
     if (error != GDALError::None)
     {
         if (error == GDALError::NoTransform ||
@@ -206,7 +194,7 @@ bool ColorizationFilter::processOne(PointRef& point)
     double y = point.getFieldAs<double>(Dimension::Id::Y);
 
     if (m_raster->read(x, y, data) == gdal::GDALError::None)
-    { 
+    {
         int i(0);
         for (auto bi = m_bands.begin(); bi != m_bands.end(); ++bi)
         {

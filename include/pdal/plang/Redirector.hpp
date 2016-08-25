@@ -36,9 +36,10 @@ public:
     void reset_stdout();
 
     typedef std::function<void(std::string)> stdout_write_type;
+    typedef std::function<void()> stdout_flush_type;
 
 private:
-    void set_stdout(stdout_write_type write);
+    void set_stdout(stdout_write_type write, stdout_flush_type flush);
 
     // Internal state
     PyObject* m_stdout;

@@ -1,0 +1,9 @@
+{
+  "pipeline":[
+    "@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las",
+    {
+      "type":"filters.stats"
+    },
+    "@CMAKE_SOURCE_DIR@/test/temp/pdal-stats.las"
+  ]
+}

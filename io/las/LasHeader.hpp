@@ -39,6 +39,7 @@
 #include <vector>
 
 #include <pdal/Dimension.hpp>
+#include <pdal/Log.hpp>
 #include <pdal/util/Bounds.hpp>
 #include <pdal/util/Uuid.hpp>
 #include <pdal/pdal_config.hpp>
@@ -54,6 +55,7 @@ class ILeStream;
 typedef uint8_t PointFormat;
 std::string GetDefaultSoftwareId();
 class SummaryData;
+class Scaling;
 
 class PDAL_DLL LasHeader
 {
@@ -259,8 +261,8 @@ public:
     double scaleZ() const
         { return m_scales[2]; }
 
-    /// Set values of scale factor for X, Y and Z coordinates.
-    void setScale(double x, double y, double z);
+    /// Set values of scale/offset factor for X, Y and Z coordinates.
+    void setScaling(const Scaling& scaling);
 
     /// Get X coordinate offset.
     double offsetX() const
@@ -363,17 +365,23 @@ public:
         { m_eVlrCount = count; }
     uint32_t eVlrCount() const
         { return m_eVlrCount; }
-
     std::string const& compressionInfo() const
         { return m_compressionInfo; }
     void setCompressionInfo(std::string const& info)
         { m_compressionInfo = info; }
+    SpatialReference srs() const
+        { return m_srs; }
 
     void setSummary(const SummaryData& summary);
     bool valid() const;
     Dimension::IdList usedDims() const;
+    VariableLengthRecord *findVlr(const std::string& userId, uint16_t recordId);
+    void setLog(LogPtr log)
+        { m_log = log; }
+    const VlrList& vlrs() const
+        { return m_vlrs; }
 
-    friend ILeStream& operator>>(ILeStream&, LasHeader& h);
+    PDAL_DLL friend ILeStream& operator>>(ILeStream&, LasHeader& h);
     friend OLeStream& operator<<(OLeStream&, const LasHeader& h);
     friend std::ostream& operator<<(std::ostream& ostr, const LasHeader& h);
 
@@ -401,6 +409,14 @@ private:
     uint32_t m_eVlrCount;
     BOX3D m_bounds;
     std::string m_compressionInfo;
+    LogPtr m_log;
+    SpatialReference m_srs;
+    VlrList m_vlrs;
+    VlrList m_eVlrs;
+
+    void setSrs();
+    void setSrsFromWkt();
+    void setSrsFromGeotiff();
 
     static void get(ILeStream& in, Uuid& uuid);
     static void put(OLeStream& in, Uuid uuid);

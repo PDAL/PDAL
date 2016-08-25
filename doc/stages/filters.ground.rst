@@ -1,6 +1,5 @@
 .. _filters.ground:
 
-===============================================================================
 filters.ground
 ===============================================================================
 
@@ -14,10 +13,29 @@ ProgressiveMorphologicalFilter is an implementation of the method described in
 
 .. _`PCL`: http://www.pointclouds.org
 
+
+Example
+-------
+
+.. code-block:: json
+
+    {
+      "pipeline":[
+        "input.las",
+        {
+          "type":"filters.ground"
+        },
+        {
+          "type":"writers.las",
+          "filename":"output.las"
+        }
+      ]
+    }
+
 Options
 -------------------------------------------------------------------------------
 
-maxWindowSize
+max_window_size
   Maximum window size. [Default: **33**]
 
 slope

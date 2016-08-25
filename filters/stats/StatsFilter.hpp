@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
+#include <pdal/plugin.hpp>
 
 extern "C" int32_t StatsFilter_ExitFunc();
 extern "C" PF_ExitFunc StatsFilter_InitPlugin();
@@ -67,6 +68,14 @@ public:
         { return m_max; }
     double average() const
         { return m_avg; }
+    double variance() const
+        { return M2/(m_cnt - 1.0); }
+    double stddev() const
+        { return std::sqrt(variance()); }
+    double skewness() const
+        { return std::sqrt(double(m_cnt)) * M3 / std::pow(M2, 1.5); }
+    double kurtosis() const
+        { return double(m_cnt)*M4 / (M2*M2) - 3.0; }
     point_count_t count() const
         { return m_cnt; }
     std::string name() const
@@ -82,16 +91,35 @@ public:
         m_min = (std::numeric_limits<double>::max)();
         m_cnt = 0;
         m_avg = 0.0;
+        M1 = M2 = M3 = M4 = 0.0;
     }
 
     void insert(double value)
     {
+        double delta, delta_n, delta_n2, term1;
+
+        point_count_t n1(m_cnt);
+
         m_cnt++;
+        point_count_t n(m_cnt);
         m_min = (std::min)(m_min, value);
         m_max = (std::max)(m_max, value);
         m_avg += (value - m_avg) / m_cnt;
         if (m_enumerate != NoEnum)
             m_values[value]++;
+
+        // stolen from http://www.johndcook.com/blog/skewness_kurtosis/
+
+        n1 = n;
+        delta = value - M1;
+        delta_n = delta / n;
+        delta_n2 = delta_n * delta_n;
+        term1 = delta * delta_n * n1;
+        M1 += delta_n;
+        M4 += term1 * delta_n2 * (n*n - 3*n + 3) +
+            (6 * delta_n2 * M2) - (4 * delta_n * M3);
+        M3 += term1 * delta_n * (n - 2) - 3 * delta_n * M2;
+        M2 += term1;
     }
 
 private:
@@ -102,6 +130,7 @@ private:
     double m_avg;
     EnumMap m_values;
     point_count_t m_cnt;
+    double M1, M2, M3, M4;
 };
 
 } // namespace stats
@@ -118,13 +147,13 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    const stats::Summary& getStats(Dimension::Id::Enum d) const;
+    const stats::Summary& getStats(Dimension::Id d) const;
     void reset();
 
 private:
     StatsFilter& operator=(const StatsFilter&); // not implemented
     StatsFilter(const StatsFilter&); // not implemented
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
     virtual bool processOne(PointRef& point);
     virtual void prepared(PointTableRef table);
     virtual void done(PointTableRef table);
@@ -134,7 +163,7 @@ private:
     StringList m_dimNames;
     StringList m_enums;
     StringList m_counts;
-    std::map<Dimension::Id::Enum, stats::Summary> m_stats;
+    std::map<Dimension::Id, stats::Summary> m_stats;
 };
 
 } // namespace pdal

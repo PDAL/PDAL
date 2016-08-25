@@ -12,24 +12,21 @@ Note that this output array can get very large very quickly.
 Example
 -------
 
-.. code-block:: xml
+.. code-block:: json
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.matlab">
-      <Option name="filename">
-        outputfile.mat
-      </Option>
-      <Option name="output_dims">
-        X,Y,Z,Intensity
-      </Option>
-      <Reader type="readers.las">
-        <Option name="filename">
-          inputfile.las
-        </Option>
-      </Reader>
-    </Writer>
-  </Pipeline>
+    {
+      "pipeline":[
+        {
+          "type":"readers.las",
+          "filename":"inputfile.las"
+        },
+        {
+          "type":"writers.matlab",
+          "output_dims":"X,Y,Z,Intensity",
+          "filename":"outputfile.mat"
+        }
+      ]
+    }
 
 Options
 -------

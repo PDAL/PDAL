@@ -37,6 +37,7 @@
 #include <istream>
 
 #include <pdal/Reader.hpp>
+#include <pdal/plugin.hpp>
 
 extern "C" int32_t TextReader_ExitFunc();
 extern "C" PF_ExitFunc TextReader_InitPlugin();
@@ -84,7 +85,7 @@ private:
       \param numPts  Maximum number of points to read.
       \return  Number of points read.
     */
-    virtual point_count_t read(const PointViewPtr view, point_count_t numPts);
+    virtual point_count_t read(PointViewPtr view, point_count_t numPts);
 
     /**
       Close input file.

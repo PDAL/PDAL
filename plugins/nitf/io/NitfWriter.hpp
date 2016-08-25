@@ -37,6 +37,8 @@
 #include <pdal/StageFactory.hpp>
 #include <las/LasWriter.hpp>
 
+#include "NitfFileWriter.hpp"
+
 namespace pdal
 {
 
@@ -51,31 +53,16 @@ public:
     std::string getName() const;
 
 private:
-    virtual void processOptions(const Options& options);
+    NitfFileWriter m_nitf;
+    std::stringstream m_oss;
+    BOX3D m_bounds;
+
+    virtual void addArgs(ProgramArgs& args);
     virtual void readyFile(const std::string& filename,
         const SpatialReference& srs);
     virtual void doneFile();
     virtual void writeView(const PointViewPtr view);
-
-    std::string m_nitfFilename;
-    BOX3D m_bounds;
-    std::string m_cLevel;
-    std::string m_sType;
-    std::string m_oStationId;
-    std::string m_fileTitle;
-    std::string m_fileClass;
-    std::string m_origName;
-    std::string m_origPhone;
-    std::string m_securityClass;
-    std::string m_securityControlAndHandling;
-    std::string m_securityClassificationSystem;
-    std::string m_imgSecurityClass;
-    std::string m_imgDate;
-    StringList m_aimidb;
-    StringList m_acftb;
-    std::string m_imgIdentifier2;
-    std::string m_sic;
-    std::stringstream m_oss;
+    BOX3D reprojectBoxToDD(const SpatialReference& reference, const BOX3D& box);
 
     NitfWriter& operator=(const NitfWriter&); // not implemented
     NitfWriter(const NitfWriter&); // not implemented

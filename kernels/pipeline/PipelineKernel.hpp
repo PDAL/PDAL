@@ -38,6 +38,7 @@
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PipelineWriter.hpp>
 #include <pdal/util/FileUtils.hpp>
+#include <pdal/plugin.hpp>
 
 extern "C" int32_t PipelineKernel_ExitFunc();
 extern "C" PF_ExitFunc PipelineKernel_InitPlugin();
@@ -64,6 +65,7 @@ private:
     std::string m_PointCloudSchemaOutput;
     std::string m_progressFile;
     int m_progressFd;
+    bool m_usestdin;
 };
 
 } // pdal

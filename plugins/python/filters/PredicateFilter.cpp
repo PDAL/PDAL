@@ -37,6 +37,8 @@
 #include "PredicateFilter.hpp"
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -50,29 +52,21 @@ CREATE_SHARED_PLUGIN(1, 0, PredicateFilter, Filter, s_info)
 
 std::string PredicateFilter::getName() const { return s_info.name; }
 
-void PredicateFilter::processOptions(const Options& options)
+void PredicateFilter::addArgs(ProgramArgs& args)
 {
-    m_source = options.getValueOrDefault<std::string>("source", "");
-    if (m_source.empty())
-        m_source = FileUtils::readFileIntoString(
-            options.getValueOrThrow<std::string>("script"));
-    m_module = options.getValueOrThrow<std::string>("module");
-    m_function = options.getValueOrThrow<std::string>("function");
-}
-
-
-Options PredicateFilter::getDefaultOptions()
-{
-    Options options;
-    options.add("script", "");
-    options.add("module", "");
-    options.add("function", "");
-    return options;
+    args.add("source", "Python script to run", m_source);
+    args.add("script", "File containing script to run", m_scriptFile);
+    args.add("module", "Python module containing the function to run",
+        m_module);
+    args.add("function", "Function to call", m_function);
 }
 
 
 void PredicateFilter::ready(PointTableRef table)
 {
+    if (m_source.empty())
+        m_source = FileUtils::readFileIntoString(m_scriptFile);
+
     plang::Environment::get()->set_stdout(log()->getLogStream());
     m_script = new plang::Script(m_source, m_module, m_function);
     m_pythonMethod = new plang::BufferedInvocation(*m_script);

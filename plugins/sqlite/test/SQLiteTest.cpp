@@ -47,100 +47,94 @@
 
 using namespace pdal;
 
-Options getSQLITEOptions()
+std::string tempFilename(Support::temppath(
+    "temp-SqliteWriterTest_test_simple_las.sqlite"));
+
+Options getWriterOptions()
 {
     Options options;
 
-    options.add("capacity", 15U, "capacity");
-    options.add("overwrite", true, "overwrite");
-    options.add("connection",
-        Support::temppath("temp-SqliteWriterTest_test_simple_las.sqlite"),
-        "connection");
-    options.add("block_table_name", "PDAL_TEST_BLOCKS", "block_table_name");
+    options.add("overwrite", true);
+    options.add("connection", tempFilename);
+    options.add("block_table_name", "PDAL_TEST_BLOCKS");
     options.add("cloud_table_name", "PDAL_TEST_BASE");
     options.add("is3d", false);
     options.add("srid", 4326);
-    options.add("out_srs", "EPSG:4269");
-    options.add("filename", Support::datapath("las/1.2-with-color.las"));
+    options.add("cloud_column_name", "CLOUD");
+
+    return options;
+}
+
+Options getReaderOptions()
+{
+    Options options;
+
+    options.add("spatialreference", "EPSG:2926");
+    options.add("connection", tempFilename);
     options.add("query", "SELECT b.schema, l.cloud, l.block_id, "
         "l.num_points, l.bbox, l.extent, l.points, b.cloud "
         "FROM PDAL_TEST_BLOCKS l, PDAL_TEST_BASE b "
         "WHERE l.cloud = b.cloud and l.cloud in (1) "
-        "order by l.cloud", "");
-    options.add("spatialreference", "EPSG:2926");
-    options.add("pack_ignored_fields", true);
-    options.add("cloud_column_name", "CLOUD");
-//     options.add("xml_schema_dump", "sqlite-xml-schema-dump.xml");
-    options.add("type", "sqlite");
+        "order by l.cloud");
 
     return options;
 }
 
 void testReadWrite(bool compression, bool scaling)
 {
-    // remove file from earlier run, if needed
-    std::string tempFilename =
-        getSQLITEOptions().getValueOrThrow<std::string>("connection");
-
     FileUtils::deleteFile(tempFilename);
 
-    Options sqliteOptions = getSQLITEOptions();
+    Options writerOptions = getWriterOptions();
     if (scaling)
     {
-        sqliteOptions.add("scale_x", 0.01);
-        sqliteOptions.add("scale_y", 0.01);
+        writerOptions.add("scale_x", 0.01);
+        writerOptions.add("scale_y", 0.01);
     }
-    sqliteOptions.add("compression", compression, "");
+    writerOptions.add("compression", compression);
+
+    StageFactory f;
+    {
+    Options lasReadOpts;
+    lasReadOpts.add("filename", Support::datapath("las/1.2-with-color.las"));
+    lasReadOpts.add("count", 11);
+
+    LasReader reader;
+    reader.setOptions(lasReadOpts);
+
+    Stage* sqliteWriter(f.createStage("writers.sqlite"));
+    sqliteWriter->setOptions(writerOptions);
+    sqliteWriter->setInput(reader);
+
+    PointTable table;
+    sqliteWriter->prepare(table);
+    sqliteWriter->execute(table);
+    }
 
     {
-        // remove file from earlier run, if needed
-        std::string temp_filename =
-        sqliteOptions.getValueOrThrow<std::string>("connection");
+    Stage* sqliteReader(f.createStage("readers.sqlite"));
+    sqliteReader->setOptions(getReaderOptions());
 
-        Options lasReadOpts;
-        lasReadOpts.add("filename", Support::datapath("las/1.2-with-color.las"));
-        lasReadOpts.add("count", 11);
+    PointTable table2;
+    sqliteReader->prepare(table2);
+    PointViewSet viewSet = sqliteReader->execute(table2);
+    EXPECT_EQ(viewSet.size(), 1U);
+    PointViewPtr view = *viewSet.begin();
 
-        LasReader reader;
-        reader.setOptions(lasReadOpts);
+    using namespace Dimension;
 
-        StageFactory f;
-        std::unique_ptr<Stage> sqliteWriter(f.createStage("writers.sqlite"));
-        sqliteWriter->setOptions(sqliteOptions);
-        sqliteWriter->setInput(reader);
-
-        PointTable table;
-        sqliteWriter->prepare(table);
-        sqliteWriter->execute(table);
-    }
-    
+    uint16_t reds[] = {68, 54, 112, 178, 134, 99, 90, 106, 106, 100, 64};
+    for (PointId idx = 0; idx < 11; idx++)
     {
-        // Done - now read back.
-        StageFactory f;
-        std::unique_ptr<Stage> sqliteReader(f.createStage("readers.sqlite"));
-        sqliteReader->setOptions(sqliteOptions);
-
-        PointTable table2;
-        sqliteReader->prepare(table2);
-        PointViewSet viewSet = sqliteReader->execute(table2);
-        EXPECT_EQ(viewSet.size(), 1U);
-        PointViewPtr view = *viewSet.begin();
-
-        using namespace Dimension;
-
-        uint16_t reds[] = {68, 54, 112, 178, 134, 99, 90, 106, 106, 100, 64};
-        for (PointId idx = 0; idx < 11; idx++)
-        {
-            uint16_t r = view->getFieldAs<uint16_t>(Id::Red, idx);
-            EXPECT_EQ(r, reds[idx]);
-        }
-        int32_t x = view->getFieldAs<int32_t>(Id::X, 10);
-        EXPECT_EQ(x, 636038);
-        double xd = view->getFieldAs<double>(Id::X, 10);
-        EXPECT_FLOAT_EQ(xd, 636037.53);
+        uint16_t r = view->getFieldAs<uint16_t>(Id::Red, idx);
+        EXPECT_EQ(r, reds[idx]);
+    }
+    int32_t x = view->getFieldAs<int32_t>(Id::X, 10);
+    EXPECT_EQ(x, 636038);
+    double xd = view->getFieldAs<double>(Id::X, 10);
+    EXPECT_FLOAT_EQ(xd, 636037.53);
     }
 
-    FileUtils::deleteFile(tempFilename);
+//    FileUtils::deleteFile(tempFilename);
 }
 
 
@@ -177,14 +171,14 @@ TEST(SQLiteTest, Issue895)
 
     FileUtils::deleteFile(filename);
 
-    bool ok;
     const char* sql;
 
     // make a DB, put a table in it
     {
         SQLite db(filename, LogPtr(log));
         db.connect(true);
-        sql = "CREATE TABLE MyTable (id INTEGER PRIMARY KEY AUTOINCREMENT, data)";
+        sql = "CREATE TABLE MyTable (id INTEGER PRIMARY KEY AUTOINCREMENT, "
+            "data)";
         db.execute(sql);
     }
 
@@ -209,8 +203,7 @@ TEST(SQLiteTest, Issue895)
             EXPECT_TRUE(foundMine || foundTheirs);
         }
 
-        ok = db.next();
-        EXPECT_TRUE(ok);
+        EXPECT_TRUE(db.next());
 
         {
             const row* r = db.get();
@@ -221,8 +214,7 @@ TEST(SQLiteTest, Issue895)
             EXPECT_TRUE(foundMine && foundTheirs);
         }
 
-        ok = db.next();
-        EXPECT_FALSE(ok);
+        EXPECT_FALSE(db.next());
     }
 
     // open the DB, ask if the tables exist
@@ -230,11 +222,9 @@ TEST(SQLiteTest, Issue895)
         SQLite db(filename, LogPtr(log));
         db.connect(false);
 
-        ok = db.doesTableExist("MyTable");
-        EXPECT_TRUE(ok);
+        EXPECT_TRUE(db.doesTableExist("MyTable"));
 
-        ok = db.doesTableExist("sqlite_sequence");
-        EXPECT_TRUE(ok);
+        EXPECT_TRUE(db.doesTableExist("sqlite_sequence"));
     }
 }
 
@@ -258,7 +248,7 @@ TEST(SQLiteTest, testSpatialite)
 
     EXPECT_TRUE(db.haveSpatialite());
 
-    FileUtils::deleteFile(filename);
+//    FileUtils::deleteFile(filename);
 }
 
 
@@ -281,5 +271,5 @@ TEST(SQLiteTest, testVersionInfo)
     const std::string q = db.getSpatialiteVersion();
     EXPECT_EQ(q[0], '4'); // 4.2.0 as of this commit
 
-    FileUtils::deleteFile(filename);
+//    FileUtils::deleteFile(filename);
 }

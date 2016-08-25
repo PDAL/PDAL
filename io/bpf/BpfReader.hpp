@@ -43,6 +43,7 @@
 #include <pdal/util/Charbuf.hpp>
 #include <pdal/util/IStream.hpp>
 #include <pdal/pdal_export.hpp>
+#include <pdal/plugin.hpp>
 
 #include "BpfHeader.hpp"
 
@@ -81,7 +82,6 @@ private:
     /// Streambuf for deflated data.
     Charbuf m_charbuf;
 
-    virtual void processOptions(const Options& options);
     virtual QuickInfo inspect();
     virtual void initialize();
     virtual void addDimensions(PointLayoutPtr Layout);
@@ -89,7 +89,6 @@ private:
     virtual bool processOne(PointRef& point);
     virtual point_count_t read(PointViewPtr data, point_count_t num);
     virtual void done(PointTableRef table);
-
 
     bool readUlemData();
     bool readUlemFiles();
@@ -103,8 +102,7 @@ private:
     point_count_t readByteMajor(PointViewPtr data, point_count_t count);
     size_t readBlock(std::vector<char>& outBuf, size_t index);
     bool eof();
-
-    int inflate(char *inbuf, size_t insize, char *outbuf, size_t outsize);
+    int inflate(char *inbuf, uint32_t insize, char *outbuf, uint32_t outsize);
 
     void seekPointMajor(PointId ptIdx);
     void seekDimMajor(size_t dimIdx, PointId ptIdx);

@@ -1,0 +1,331 @@
+{ "dimensions": [
+    {
+    "name": "X",
+    "type": "double",
+    "description": "X coordinate"
+    },
+    {
+    "name": "Y",
+    "type": "double",
+    "description": "Y coordinate"
+    },
+    {
+    "name": "Z",
+    "type": "double",
+    "description": "Z coordinate"
+    },
+    {
+    "name": "Intensity",
+    "type": "uint16",
+    "description": "Representation of the pulse return magnitude"
+    },
+    {
+    "name": "Amplitude",
+    "type": "float",
+    "description": "This is the ratio of the received power to the power received at the detection limit expressed in dB"
+    },
+    {
+    "name": "Reflectance",
+    "type": "float",
+    "description": "Ratio of the received power to the power that would be received from a white diffuse target at the same distance expressed in dB. The reflectance represents a range independent property of the target.  The surface normal of this target is assumed to be in parallel to the laser beam direction."
+    },
+    {
+    "name": "ReturnNumber",
+    "type": "uint8",
+    "description": "Pulse return number for a given output pulse. A given output laser pulse can have many returns, and they must be marked in order, starting with 1"
+    },
+    {
+    "name": "NumberOfReturns",
+    "type": "uint8",
+    "description": "Total number of returns for a given pulse."
+    },
+    {
+    "name": "ScanDirectionFlag",
+    "type": "uint8",
+    "description": "Direction at which the scanner mirror was traveling at the time of the output pulse. A value of 1 is a positive scan direction, and a bit value of 0 is a negative scan direction, where positive scan direction is a scan moving from the left side of the in-track direction to the right side and negative the opposite"
+    },
+    {
+    "name": "EdgeOfFlightLine",
+    "type": "uint8",
+    "description": "Indicates the end of scanline before a direction change with a value of 1 - 0 otherwise"
+    },
+    {
+    "name": "Classification",
+    "type": "uint8",
+    "description": "ASPRS classification.  0 for no classification.  See LAS specification for details."
+    },
+    {
+    "name": "ScanAngleRank",
+    "alt_names": "ScanAngle",
+    "type": "float",
+    "description": "Angle degree at which the laster point was output from the system, including the roll of the aircraft.  The scan angle is based on being nadir, and -90 the left side of the aircraft in the direction of flight"
+    },
+    {
+    "name": "UserData",
+    "type": "uint8",
+    "description": "Unspecified user data"
+    },
+    {
+    "name": "PointSourceId",
+    "type": "uint16",
+    "description": "File source ID from which the point originated.  Zero indicates that the point originated in the current file"
+    },
+    {
+    "name": "Red",
+    "type": "uint16",
+    "description": "Red image channel value"
+    },
+    {
+    "name": "Green",
+    "type": "uint16",
+    "description": "Green image channel value"
+    },
+    {
+    "name": "Blue",
+    "type": "uint16",
+    "description": "Blue image channel value"
+    },
+    {
+    "name": "GpsTime",
+    "type": "double",
+    "description": "GPS time that the point was acquired"
+    },
+    {
+    "name": "InternalTime",
+    "type": "double",
+    "description": "Scanner's internal time when the point was acquired, in seconds"
+    },
+    {
+    "name": "OffsetTime",
+    "alt_names": "Time",
+    "type": "uint32",
+    "description": "Milliseconds from first acquired point"
+    },
+    {
+    "name": "IsPpsLocked",
+    "type": "uint8",
+    "description": "The external PPS signal was found to be synchronized at the time of the current laser shot."
+    },
+    {
+    "name": "StartPulse",
+    "type": "int32",
+    "description": "Relative pulse signal strength"
+    },
+    {
+    "name": "ReflectedPulse",
+    "type": "int32",
+    "description": "Relative reflected pulse signal strength"
+    },
+    {
+    "name": "Pdop",
+    "type": "float",
+    "description": "GPS PDOP (dilution of precision)"
+    },
+    {
+    "name": "Pitch",
+    "type": "float",
+    "description": "Pitch in degrees"
+    },
+    {
+    "name": "Roll",
+    "type": "float",
+    "description": "Roll in degrees"
+    },
+    {
+    "name": "PulseWidth",
+    "type": "float",
+    "description": "Laser received pulse width (digitizer samples)"
+    },
+    {
+    "name": "Deviation",
+    "type": "float",
+    "description": "A larger value for deviation indicates larger distortion."
+    },
+    {
+    "name": "PassiveSignal",
+    "type": "int32",
+    "description": "Relative passive signal"
+    },
+    {
+    "name": "BackgroundRadiation",
+    "type": "float",
+    "description": "A measure of background radiation."
+    },
+    {
+    "name": "PassiveX",
+    "type": "double",
+    "description": "Passive X footprint"
+    },
+    {
+    "name": "PassiveY",
+    "type": "double",
+    "description": "Passive Y footprint"
+    },
+    {
+    "name": "PassiveZ",
+    "type": "double",
+    "description": "Passive Z footprint"
+    },
+    {
+    "name": "XVelocity",
+    "type": "double",
+    "description": "X Velocity"
+    },
+    {
+    "name": "YVelocity",
+    "type": "double",
+    "description": "Y Velocity"
+    },
+    {
+    "name": "ZVelocity",
+    "type": "double",
+    "description": "Z Velocity"
+    },
+    {
+    "name": "Azimuth",
+    "alt_names": "PlatformHeading",
+    "type": "double",
+    "description": "Scanner azimuth"
+    },
+    {
+    "name": "WanderAngle",
+    "type": "double",
+    "description": "Wander Angle"
+    },
+    {
+    "name": "XBodyAccel",
+    "type": "double",
+    "description": "X Body Acceleration"
+    },
+    {
+    "name": "YBodyAccel",
+    "type": "double",
+    "description": "Y Body Acceleration"
+    },
+    {
+    "name": "ZBodyAccel",
+    "type": "double",
+    "description": "Z Body Acceleration"
+    },
+    {
+    "name": "XBodyAngRate",
+    "type": "double",
+    "description": "X Body Angle Rate"
+    },
+    {
+    "name": "YBodyAngRate",
+    "type": "double",
+    "description": "Y Body Angle Rate"
+    },
+    {
+    "name": "ZBodyAngRate",
+    "type": "double",
+    "description": "Z Body Angle Rate"
+    },
+    {
+    "name": "Flag",
+    "type": "uint8",
+    "description": "Flag"
+    },
+    {
+    "name": "Mark",
+    "type": "uint8",
+    "description": "Mark"
+    },
+    {
+    "name": "Alpha",
+    "type": "uint16",
+    "description": "Alpha"
+    },
+    {
+    "name": "EchoRange",
+    "type": "double",
+    "description": "Echo Range"
+    },
+    {
+    "name": "ScanChannel",
+    "type": "uint8",
+    "description": "Scan Channel"
+    },
+    {
+    "name": "Infrared",
+    "alt_names": "NearInfrared",
+    "type": "uint16",
+    "description": "Infrared"
+    },
+    {
+    "name": "HeightAboveGround",
+    "type": "double",
+    "description": "Height Above Ground"
+    },
+    {
+    "name": "ClassFlags",
+    "type": "uint8",
+    "description": "Class Flags"
+    },
+    {
+    "name": "LvisLfid",
+    "alt_names": "Lvis_Lfid",
+    "type": "uint64",
+    "description": "LVIS_LFID"
+    },
+    {
+    "name": "ShotNumber",
+    "type": "uint64",
+    "description": "Shot Number"
+    },
+    {
+    "name": "LongitudeCentroid",
+    "alt_names": "Longitude_Centroid",
+    "type": "double",
+    "description": "Longitude Centroid"
+    },
+    {
+    "name": "LatitudeCentroid",
+    "alt_names": "Latitude_Centroid",
+    "type": "double",
+    "description": "Latitude Centroid"
+    },
+    {
+    "name": "ElevationCentroid",
+    "alt_names": "Elevation_Centroid",
+    "type": "double",
+    "description": "Elevation Centroid"
+    },
+    {
+    "name": "LongitudeLow",
+    "alt_names": "Longitude_Low",
+    "type": "double",
+    "description": "Longitude Low"
+    },
+    {
+    "name": "LatitudeLow",
+    "alt_names": "Latitude_Low",
+    "type": "double",
+    "description": "Latitude Low"
+    },
+    {
+    "name": "ElevationLow",
+    "alt_names": "Elevation_Low",
+    "type": "double",
+    "description": "Elevation Low"
+    },
+    {
+    "name": "LongitudeHigh",
+    "alt_names": "Longitude_High",
+    "type": "double",
+    "description": "Longitude High"
+    },
+    {
+    "name": "LatitudeHigh",
+    "alt_names": "Latitude_High",
+    "type": "double",
+    "description": "Latitude High"
+    },
+    {
+    "name": "ElevationHigh",
+    "alt_names": "Elevation_High",
+    "type": "double",
+    "description": "Elevation High"
+    }
+] }

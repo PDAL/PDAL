@@ -1,0 +1,17 @@
+{
+  "pipeline":[
+    "@CMAKE_SOURCE_DIR@/test/data/autzen/autzen.las",
+    {
+      "type":"filters.pclblock",
+      "filename":"@CMAKE_SOURCE_DIR@/test/data/autzen/autzen-APMF.json"
+    },
+    {
+      "type":"writers.p2g",
+      "filename":"@CMAKE_SOURCE_DIR@/test/data/autzen/autzen-surface.tif",
+      "output_type":"min",
+      "output_format":"tif",
+      "grid_dist_x":1.0,
+      "grid_dist_y":1.0
+    }
+  ]
+}

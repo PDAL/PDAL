@@ -40,8 +40,8 @@
 #include <pdal/Dimension.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/StageFactory.hpp>
-
 #include <pdal/GDALUtils.hpp>
+#include <pdal/plugin.hpp>
 
 extern "C" int32_t GDALReader_ExitFunc();
 extern "C" PF_ExitFunc GDALReader_InitPlugin();
@@ -51,7 +51,7 @@ namespace pdal
 {
 
 
-typedef std::map<std::string, Dimension::Id::Enum> DimensionMap;
+typedef std::map<std::string, Dimension::Id> DimensionMap;
 
 
 

@@ -33,8 +33,9 @@
 ****************************************************************************/
 
 #include "GreyhoundReader.hpp"
-
 #include "Exchanges.hpp"
+#include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -67,19 +68,21 @@ GreyhoundReader::~GreyhoundReader()
 
 void GreyhoundReader::initialize()
 {
+    m_wsClient.initialize(m_url);
+
     // Create remote PDAL session.
     exchanges::CreateSession createExchange(m_pipelineId);
     m_wsClient.exchange(createExchange);
     m_sessionId = createExchange.getSession();
 }
 
-void GreyhoundReader::processOptions(const Options& options)
-{
-    m_url = options.getValueOrThrow<std::string>("url");
-    m_pipelineId = options.getValueOrThrow<std::string>("pipeline_id");
 
-    m_wsClient.initialize(m_url);
+void GreyhoundReader::addArgs(ProgramArgs& args)
+{
+    args.add("url", "URL", m_url).setPositional();
+    args.add("pipeline_id", "Pipeline ID", m_pipelineId).setPositional();
 }
+
 
 void GreyhoundReader::addDimensions(PointLayoutPtr layout)
 {

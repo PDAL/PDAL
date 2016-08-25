@@ -13,7 +13,8 @@ PDAL can be extended through the development of filter functions.
 
 .. seealso::
 
-    For more on filters and their role in PDAL, please refer to :ref:`the-pdal-model` and :ref:`implementing-a-filter`.
+    For more on filters and their role in PDAL, please refer to
+    :ref:`overview`.
 
 Every filter stage in PDAL is implemented as a plugin (sometimes referred to as a "driver"). Filters native to PDAL, such as :ref:`filters.ferry`, are implemented as _static_ filters and are statically linked into the PDAL library. Filters that require extra/optional dependencies, or are external to the core PDAL codebase altogether, such as :ref:`filters.ground`, are implemented as _shared_ filters, and are built as individual shared libraries, discoverable by PDAL at runtime.
 

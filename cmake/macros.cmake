@@ -55,8 +55,13 @@ endmacro(PDAL_ADD_INCLUDES)
 # _name The library name.
 # _component The part of PDAL that this library belongs to.
 # ARGN The source files for the library.
+#
+# The "generate_dimension_hpp" ensures that Dimension.hpp is built before
+#  attempting to build anything else in the library.
+#
 macro(PDAL_ADD_LIBRARY _name)
     add_library(${_name} ${PDAL_LIB_TYPE} ${ARGN})
+    add_dependencies(${_name} generate_dimension_hpp)
     set_property(TARGET ${_name} PROPERTY FOLDER "Libraries")
 
     install(TARGETS ${_name}
@@ -64,10 +69,6 @@ macro(PDAL_ADD_LIBRARY _name)
         RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR}
         LIBRARY DESTINATION ${PDAL_LIB_INSTALL_DIR}
         ARCHIVE DESTINATION ${PDAL_LIB_INSTALL_DIR})
-    if (APPLE)
-        set_target_properties(${_name} PROPERTIES INSTALL_NAME_DIR
-            "@executable_path/../lib")
-    endif()
 endmacro(PDAL_ADD_LIBRARY)
 
 ###############################################################################
@@ -91,6 +92,10 @@ endmacro(PDAL_ADD_EXECUTABLE)
 # ARGN :
 #    FILES the srouce files for the plugin
 #    LINK_WITH link plugin with libraries
+#
+# The "generate_dimension_hpp" ensures that Dimension.hpp is built before
+#  attempting to build anything else in the "library".
+#
 macro(PDAL_ADD_PLUGIN _name _type _shortname)
     set(options)
     set(oneValueArgs)
@@ -107,10 +112,16 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
     endif()
 
     add_library(${${_name}} SHARED ${PDAL_ADD_PLUGIN_FILES})
-    target_link_libraries(${${_name}} ${PDAL_BASE_LIB_NAME}
+    target_link_libraries(${${_name}}
+        ${PDAL_BASE_LIB_NAME}
+        ${PDAL_UTIL_LIB_NAME}
         ${PDAL_ADD_PLUGIN_LINK_WITH})
 
     set_property(TARGET ${${_name}} PROPERTY FOLDER "Plugins/${_type}")
+    set_target_properties(${${_name}} PROPERTIES
+        VERSION "${PDAL_BUILD_VERSION}"
+        SOVERSION "${PDAL_API_VERSION}"
+        CLEAN_DIRECT_OUTPUT 1)
 
     install(TARGETS ${${_name}}
         RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR}
@@ -136,7 +147,6 @@ macro(PDAL_ADD_TEST _name)
     include_directories(${PROJECT_BINARY_DIR}/test/unit)
     set(common_srcs
         ${PROJECT_SOURCE_DIR}/test/unit/Support.cpp
-        ${PROJECT_SOURCE_DIR}/test/unit/TestConfig.cpp
     )
     if (WIN32)
         list(APPEND ${PDAL_ADD_TEST_FILES} ${PDAL_TARGET_OBJECTS})
@@ -145,14 +155,19 @@ macro(PDAL_ADD_TEST _name)
     add_executable(${_name} ${PDAL_ADD_TEST_FILES} ${common_srcs})
     set_target_properties(${_name} PROPERTIES COMPILE_DEFINITIONS PDAL_DLL_IMPORT)
     set_property(TARGET ${_name} PROPERTY FOLDER "Tests")
-    target_link_libraries(${_name} ${PDAL_BASE_LIB_NAME} gtest
+    target_link_libraries(${_name}
+        ${PDAL_BASE_LIB_NAME} ${PDAL_UTIL_LIB_NAME} gtest
         ${PDAL_ADD_TEST_LINK_WITH})
     add_test(NAME ${_name} COMMAND "${PROJECT_BINARY_DIR}/bin/${_name}" WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/..")
-    set_property(TEST ${_name} PROPERTY ENVIRONMENT
-      # Ensure plugins are loaded from build dir
-      # https://github.com/PDAL/PDAL/issues/840
-      "PDAL_DRIVER_PATH=${PROJECT_BINARY_DIR}/lib"
-    )
+    # Ensure plugins are loaded from build dir
+    # https://github.com/PDAL/PDAL/issues/840
+    if (WIN32)
+      set_property(TEST ${_name} PROPERTY ENVIRONMENT
+        "PDAL_DRIVER_PATH=${PROJECT_BINARY_DIR}/bin")
+    else()
+      set_property(TEST ${_name} PROPERTY ENVIRONMENT
+        "PDAL_DRIVER_PATH=${PROJECT_BINARY_DIR}/lib")
+    endif()
 endmacro(PDAL_ADD_TEST)
 
 ###############################################################################
@@ -172,6 +187,7 @@ macro(PDAL_ADD_DRIVER _type _name _srcs _incs _objs)
 		add_definitions("-fPIC")
 	endif()
     add_library(${libname} OBJECT ${_srcs} ${_incs})
+    add_dependencies(${libname} generate_dimension_hpp)
     set_property(TARGET ${libname} PROPERTY FOLDER "Drivers/${_type}")
 
     install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"

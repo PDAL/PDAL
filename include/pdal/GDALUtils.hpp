@@ -36,12 +36,14 @@
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Dimension.hpp>
+#include <pdal/util/Bounds.hpp>
 
 #include <pdal/Log.hpp>
 
+#include <array>
+#include <functional>
 #include <sstream>
 #include <vector>
-#include <array>
 
 #include <cpl_port.h>
 #include <gdal.h>
@@ -57,6 +59,12 @@ class SpatialReference;
 
 namespace gdal
 {
+
+PDAL_DLL void registerDrivers();
+PDAL_DLL void unregisterDrivers();
+PDAL_DLL bool reprojectBounds(BOX3D& box, const std::string& srcSrs,
+    const std::string& dstSrs);
+PDAL_DLL std::string lastError();
 
 typedef std::shared_ptr<void> RefPtr;
 
@@ -164,40 +172,72 @@ private:
     RefPtr m_ref;
 };
 
+
 class PDAL_DLL ErrorHandler
 {
 public:
 
-    ErrorHandler(bool isDebug, pdal::LogPtr log);
-    ~ErrorHandler();
+    /**
+      Get the singleton error handler.
+
+      \return  Reference to the error handler.
+    */
+    static ErrorHandler& getGlobalErrorHandler();
+
+    /**
+      Set the log and debug state of the error handler.  This is
+      a convenience and is equivalent to calling setLog() and setDebug().
+
+      \param log  Log to write to.
+      \param doDebug  Debug state of the error handler.
+    */
+    void set(LogPtr log, bool doDebug);
+
+    /**
+      Set the log to which error/debug messages should be written.
+
+      \param log  Log to write to.
+    */
+    void setLog(LogPtr log);
+
+    /**
+      Set the debug state of the error handler.  Setting to true will also
+      set the environment variable CPL_DEBUG to "ON".  This will force GDAL
+      to emit debug error messages which will be logged by this handler.
+
+      \param doDebug  Whether we're setting or clearing the debug state.
+    */
+    void setDebug(bool doDebug);
+
+    /**
+      Get the last error and clear the error last error value.
+
+      \return  The last error number.
+    */
+    int errorNum();
 
     static void CPL_STDCALL trampoline(::CPLErr code, int num, char const* msg)
     {
-        ErrorHandler* debug =
-            static_cast<ErrorHandler*>(CPLGetErrorHandlerUserData());
-        if (!debug)
-            return;
-
-        // if (!debug->m_log->get()) return;
-        debug->m_gdal_callback(code, num, msg);
+        ErrorHandler::getGlobalErrorHandler().handle(code, num, msg);
     }
 
-    void log(::CPLErr code, int num, char const* msg);
-    void error(::CPLErr code, int num, char const* msg);
-
-    inline LogPtr getLogger() const { return m_log; }
-    inline void setLogger(LogPtr logger) { m_log = logger; }
+    ErrorHandler();
 
 private:
-    std::function<void(CPLErr, int, char const*)> m_gdal_callback;
-    bool m_isDebug;
+
+    void handle(::CPLErr level, int num, const char *msg);
+
+private:
+    bool m_debug;
     pdal::LogPtr m_log;
+    int m_errorNum;
+    bool m_cplSet;
+
 };
 
-namespace GDALError
-{
 
-enum Enum
+
+enum class GDALError
 {
     None,
     NotOpen,
@@ -209,19 +249,17 @@ enum Enum
     CantReadBlock
 };
 
-} // namespace GDALError
-
 class PDAL_DLL Raster
 {
 
 public:
     Raster(const std::string& filename);
     ~Raster();
-    GDALError::Enum open();
+    GDALError open();
     void close();
 
-    GDALError::Enum read(double x, double y, std::vector<double>& data);
-    std::vector<pdal::Dimension::Type::Enum> getPDALDimensionTypes() const
+    GDALError read(double x, double y, std::vector<double>& data);
+    std::vector<pdal::Dimension::Type> getPDALDimensionTypes() const
        { return m_types; }
     /**
       Read a raster band (layer) into a vector.
@@ -230,7 +268,7 @@ public:
         be resized appropriately to hold the data.
       \param nBand  Band number to read.  Band numbers start at 1.
     */
-    GDALError::Enum readBand(std::vector<uint8_t>& band, int nBand);
+    GDALError readBand(std::vector<uint8_t>& band, int nBand);
 
     void pixelToCoord(int column, int row, std::array<double, 2>& output) const;
     SpatialReference getSpatialRef() const;
@@ -246,7 +284,7 @@ public:
     int m_raster_y_size;
 
     int m_band_count;
-    mutable std::vector<pdal::Dimension::Type::Enum> m_types;
+    mutable std::vector<pdal::Dimension::Type> m_types;
     std::vector<std::array<double, 2>> m_block_sizes;
 
     GDALDatasetH m_ds;
@@ -255,7 +293,7 @@ public:
 private:
     bool getPixelAndLinePosition(double x, double y,
         int32_t& pixel, int32_t& line);
-    GDALError::Enum computePDALDimensionTypes();
+    GDALError computePDALDimensionTypes();
 };
 
 } // namespace gdal

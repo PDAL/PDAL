@@ -35,7 +35,9 @@
 #include "ReprojectionFilter.hpp"
 
 #include <pdal/PointView.hpp>
-#include <pdal/GlobalEnvironment.hpp>
+#include <pdal/pdal_macros.hpp>
+#include <pdal/GDALUtils.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include <gdal.h>
 #include <ogr_spatialref.h>
@@ -54,8 +56,12 @@ CREATE_STATIC_PLUGIN(1, 0, ReprojectionFilter, Filter, s_info)
 
 std::string ReprojectionFilter::getName() const { return s_info.name; }
 
-ReprojectionFilter::ReprojectionFilter() : m_inferInputSRS(true),
-    m_in_ref_ptr(NULL), m_out_ref_ptr(NULL), m_transform_ptr(NULL)
+ReprojectionFilter::ReprojectionFilter()
+    : m_inferInputSRS(true)
+    , m_in_ref_ptr(NULL)
+    , m_out_ref_ptr(NULL)
+    , m_transform_ptr(NULL)
+    , m_errorHandler(new gdal::ErrorHandler())
 {}
 
 ReprojectionFilter::~ReprojectionFilter()
@@ -68,52 +74,22 @@ ReprojectionFilter::~ReprojectionFilter()
         OSRDestroySpatialReference(m_out_ref_ptr);
 }
 
-void ReprojectionFilter::processOptions(const Options& options)
-{
-    try
-    {
-       m_outSRS = options.getValueOrThrow<pdal::SpatialReference>("out_srs");
-    }
-    catch (std::invalid_argument)
-    {
-        std::string srs = options.getValueOrDefault<std::string>("out_srs", "");
-        std::ostringstream oss;
-        oss << "Stage " << getName() << " has invalid spatial reference "
-            "specification for 'out_srs' option: '" << srs << "'.";
-        throw pdal_error(oss.str());
-    }
-    catch (Option::not_found)
-    {
-        std::ostringstream oss;
-        oss << "Stage " << getName() << " missing required option 'out_srs'.";
-        throw Option::not_found(oss.str());
-    }
 
-    if (options.hasOption("in_srs"))
-    {
-        try
-        {
-            m_inSRS = options.getValueOrThrow<pdal::SpatialReference>("in_srs");
-            m_inferInputSRS = false;
-        }
-        catch (std::invalid_argument)
-        {
-            std::string srs =
-                options.getValueOrDefault<std::string>("in_srs", "");
-            std::ostringstream oss;
-            oss << "Stage " << getName() << " has invalid spatial reference "
-                "specification for 'in_srs' option: '" << srs << "'.";
-            throw pdal_error(oss.str());
-        }
-    }
+void ReprojectionFilter::addArgs(ProgramArgs& args)
+{
+    args.add("out_srs", "Output spatial reference", m_outSRS).setPositional();
+    args.add("in_srs", "Input spatial reference", m_inSRS);
 }
 
 
 void ReprojectionFilter::initialize()
 {
-    GlobalEnvironment::get().initializeGDAL(log(), isDebug());
+    m_inferInputSRS = !m_inSRS.valid();
 
     m_out_ref_ptr = OSRNewSpatialReference(0);
+    if (!m_out_ref_ptr)
+        throw pdal::pdal_error("Unable to allocate new OSR SpatialReference "
+            "in initialize()!");
 
     int result = OSRSetFromUserInput(m_out_ref_ptr,
         m_outSRS.getWKT(pdal::SpatialReference::eCompoundOK).c_str());
@@ -152,6 +128,8 @@ void ReprojectionFilter::createTransform(const SpatialReference& srsSRS)
     if (m_in_ref_ptr)
         OSRDestroySpatialReference(m_in_ref_ptr);
     m_in_ref_ptr = OSRNewSpatialReference(0);
+    if (!m_in_ref_ptr)
+        throw pdal::pdal_error("Unable to allocate new OSR SpatialReference for input coordinate system in createTransform()!");
 
     int result =
         OSRSetFromUserInput(m_in_ref_ptr,
@@ -172,31 +150,10 @@ void ReprojectionFilter::createTransform(const SpatialReference& srsSRS)
     if (!m_transform_ptr)
     {
         std::ostringstream oss;
-        oss << getName() << ": Could not construct transformation.";
+        oss << getName() << ": Could not construct coordinate transformation object in createTransform";
         throw pdal_error(oss.str());
     }
 }
-
-
-bool ReprojectionFilter::transform(double& x, double& y, double& z)
-{
-    // OCTTransform will throw via GDAL error handler
-    // if there is an error. We don't expect the return value
-    // unless the GDAL handler gets shut off for whatever reason. In
-    // that case, we'll just throw.
-    if (OCTTransform(m_transform_ptr, 1, &x, &y, &z))
-    {
-        return true;
-    }
-    else
-    {
-        std::ostringstream msg;
-        msg << "Could not project point for ReprojectionTransform::" <<
-            CPLGetLastErrorMsg();
-        throw pdal_error(msg.str());
-    }
-}
-
 
 PointViewSet ReprojectionFilter::run(PointViewPtr view)
 {

@@ -34,6 +34,8 @@
 
 #include "MatlabWriter.hpp"
 
+#include <pdal/pdal_macros.hpp>
+#include <pdal/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -49,12 +51,10 @@ CREATE_SHARED_PLUGIN(1, 0, MatlabWriter, Writer, s_info)
 std::string MatlabWriter::getName() const { return s_info.name; }
 
 
-MatlabWriter::MatlabWriter()
-{}
-
-
-void MatlabWriter::processOptions(const Options& options)
-{}
+void MatlabWriter::addArgs(ProgramArgs& args)
+{
+    args.add("output_dims", "Output dimensions", m_outputDims);
+}
 
 
 void MatlabWriter::prepared(PointTableRef table)

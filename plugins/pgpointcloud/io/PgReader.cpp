@@ -36,6 +36,8 @@
 #include "PgReader.hpp"
 #include <pdal/PointView.hpp>
 #include <pdal/XMLSchema.hpp>
+#include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include <iostream>
 
@@ -45,7 +47,7 @@ namespace pdal
 static PluginInfo const s_info = PluginInfo(
     "readers.pgpointcloud",
     "Read data from pgpointcloud format. \"query\" option needs to be a \n" \
-        "SQL statment selecting the data.",
+        "SQL statement selecting the data.",
     "http://pdal.io/stages/readers.pgpointcloud.html" );
 
 CREATE_SHARED_PLUGIN(1, 0, PgReader, Reader, s_info)
@@ -65,40 +67,14 @@ PgReader::~PgReader()
 }
 
 
-Options PgReader::getDefaultOptions()
+void PgReader::addArgs(ProgramArgs& args)
 {
-    Options ops;
-
-    ops.add("connection", "", "Connection string to connect to database");
-    ops.add("table", "", "Table to read out of");
-    ops.add("schema", "", "Schema to read out of");
-    ops.add("column", "", "Column to read out of");
-    ops.add("where", "", "SQL where clause to filter query");
-    ops.add("spatialreference", "",
-        "override the source data spatialreference");
-
-    return ops;
-}
-
-
-void PgReader::processOptions(const Options& options)
-{
-    // If we don't know the table name, we're SOL
-    m_table_name = options.getValueOrThrow<std::string>("table");
-
-    // Connection string needs to exist and actually work
-    m_connection = options.getValueOrThrow<std::string>("connection");
-
-    // Schema and column name can be defaulted safely
-    m_column_name = options.getValueOrDefault<std::string>("column", "pa");
-    m_schema_name = options.getValueOrDefault<std::string>("schema", "");
-
-    // Read other preferences
-    m_where = options.getValueOrDefault<std::string>("where", "");
-
-    // Spatial reference.
-    setSpatialReference(options.getValueOrDefault<SpatialReference>(
-        "spatialreference", SpatialReference()));
+    args.add("table", "Table name", m_table_name).setPositional();
+    args.add("connection", "Connection string", m_connection);
+    args.add("column", "Column name", m_column_name, "pa");
+    args.add("schema", "Schema name", m_schema_name);
+    args.add("where", "Where clause for selection", m_where);
+    addSpatialReferenceArg(args);
 }
 
 

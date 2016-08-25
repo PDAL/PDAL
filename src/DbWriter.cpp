@@ -31,9 +31,16 @@
 ****************************************************************************/
 
 #include <pdal/DbWriter.hpp>
+#include <pdal/util/Utils.hpp>
 
 namespace pdal
 {
+
+void DbWriter::addArgs(ProgramArgs& args)
+{
+    args.add("output_dims", "Output dimensions", m_outputDims);
+    m_scaling.addArgs(args);
+}
 
 // Build the list of dimensions for the output schema.
 // Placing this here allows validation of dimensions before execution begins.
@@ -72,18 +79,23 @@ void DbWriter::ready(PointTableRef /*table*/)
 
     // Determine if X, Y and Z values should be written as Signed32 along with
     // a scale factor and offset instead of being written as Double.
-    m_locationScaling = (m_xXform.nonstandard() || m_yXform.nonstandard() ||
-        m_zXform.nonstandard());
+    m_locationScaling = m_scaling.nonstandard();
 
     auto cmp = [](const XMLDim& d1, const XMLDim& d2) -> bool
     {
-        long id1 = d1.m_dimType.m_id;
-        long id2 = d2.m_dimType.m_id;
+        long id1 = Utils::toNative(d1.m_dimType.m_id);
+        long id2 = Utils::toNative(d2.m_dimType.m_id);
+
+        const auto isXyz([](long native)->bool
+        {
+            const Id e(static_cast<Id>(native));
+            return (e == Id::X || e == Id::Y || e == Id::Z);
+        });
 
         // Put X, Y and Z at the end of the list.
-        if (id1 == Id::X || id1 == Id::Y || id1 == Id::Z)
+        if (isXyz(id1))
             id1 += 1000000;
-        if (id2 == Id::X || id2 == Id::Y || id2 == Id::Z)
+        if (isXyz(id2))
             id2 += 1000000;
         return id1 < id2;
     };
@@ -106,25 +118,25 @@ void DbWriter::ready(PointTableRef /*table*/)
         m_dimTypes.push_back(xmlDim.m_dimType);
         DimType& dt = m_dimTypes.back();
         // Dim types are stored in the map to allow fast access in readField.
-        m_dimMap[(int)dt.m_id] = dt;
+        m_dimMap[Utils::toNative(dt.m_id)] = dt;
 
         if (m_locationScaling)
         {
             if (xmlDim.m_dimType.m_id == Id::X)
             {
-                xmlDim.m_dimType.m_xform = m_xXform;
+                xmlDim.m_dimType.m_xform = m_scaling.m_xXform;
                 xmlDim.m_dimType.m_type = Type::Signed32;
                 m_xOffsets = std::make_pair(m_packedPointSize, m_dbPointSize);
             }
             if (xmlDim.m_dimType.m_id == Id::Y)
             {
-                xmlDim.m_dimType.m_xform = m_yXform;
+                xmlDim.m_dimType.m_xform = m_scaling.m_yXform;
                 xmlDim.m_dimType.m_type = Type::Signed32;
                 m_yOffsets = std::make_pair(m_packedPointSize, m_dbPointSize);
             }
             if (xmlDim.m_dimType.m_id == Id::Z)
             {
-                xmlDim.m_dimType.m_xform = m_zXform;
+                xmlDim.m_dimType.m_xform = m_scaling.m_zXform;
                 xmlDim.m_dimType.m_type = Type::Signed32;
                 m_zOffsets = std::make_pair(m_packedPointSize, m_dbPointSize);
             }
@@ -140,15 +152,15 @@ void DbWriter::setAutoXForm(const PointViewPtr view)
 {
     using namespace Dimension;
 
-    Writer::setAutoXForm(view);
+    m_scaling.setAutoXForm(view);
     for (auto& xmlDim : m_dbDims)
     {
         if (xmlDim.m_dimType.m_id == Id::X)
-            xmlDim.m_dimType.m_xform = m_xXform;
+            xmlDim.m_dimType.m_xform = m_scaling.m_xXform;
         if (xmlDim.m_dimType.m_id == Id::Y)
-            xmlDim.m_dimType.m_xform = m_yXform;
+            xmlDim.m_dimType.m_xform = m_scaling.m_yXform;
         if (xmlDim.m_dimType.m_id == Id::Z)
-            xmlDim.m_dimType.m_xform = m_zXform;
+            xmlDim.m_dimType.m_xform = m_scaling.m_zXform;
     }
 }
 
@@ -161,7 +173,7 @@ void DbWriter::setAutoXForm(const PointViewPtr view)
 /// \param[in] idx      Index of point to read.
 /// \return  Size of field as read.
 size_t DbWriter::readField(const PointView& view, char *pos,
-    Dimension::Id::Enum id, PointId idx)
+    Dimension::Id id, PointId idx)
 {
     using namespace Dimension;
 
@@ -173,13 +185,14 @@ size_t DbWriter::readField(const PointView& view, char *pos,
     // scaling.
     view.getField(pos, id, dt.m_type, idx);
 
-    auto iconvert = [pos](const XForm& xform, Dimension::Id::Enum dim)
+    auto iconvert = [pos](const XForm& xform, Dimension::Id dim)
     {
         double d;
         int32_t i;
 
         memcpy(&d, pos, sizeof(double));
-        d = (d - xform.m_offset) / xform.m_scale;
+
+        d = xform.toScaled(d);
         if (!Utils::numericCast(d, i))
         {
             std::ostringstream oss;
@@ -195,17 +208,17 @@ size_t DbWriter::readField(const PointView& view, char *pos,
         // For X, Y or Z.
         if (id == Id::X)
         {
-            iconvert(m_xXform, Id::X);
+            iconvert(m_scaling.m_xXform, Id::X);
             size = sizeof(int32_t);
         }
         else if (id == Id::Y)
         {
-            iconvert(m_yXform, Id::Y);
+            iconvert(m_scaling.m_yXform, Id::Y);
             size = sizeof(int32_t);
         }
         else if (id == Id::Z)
         {
-            iconvert(m_zXform, Id::Z);
+            iconvert(m_scaling.m_zXform, Id::Z);
             size = sizeof(int32_t);
         }
     }
@@ -225,14 +238,14 @@ size_t DbWriter::readPoint(const PointView& view, PointId idx, char *outbuf)
     // Read the data for the output dimensions from the view into the outbuf.
     view.getPackedPoint(m_dimTypes, idx, outbuf);
 
-    auto iconvert = [](const XForm& xform, Id::Enum dim,
+    auto iconvert = [](const XForm& xform, Id dim,
         const char *inpos, char *outpos)
     {
         double d;
         int32_t i;
 
         memcpy(&d, inpos, sizeof(double));
-        d = (d - xform.m_offset) / xform.m_scale;
+        d = xform.toScaled(d);
         if (!Utils::numericCast(d, i))
         {
             std::ostringstream oss;
@@ -244,13 +257,13 @@ size_t DbWriter::readPoint(const PointView& view, PointId idx, char *outbuf)
     };
 
     if (m_xOffsets.first >= 0)
-        iconvert(m_xXform, Id::X, outbuf + m_xOffsets.first,
+        iconvert(m_scaling.m_xXform, Id::X, outbuf + m_xOffsets.first,
             outbuf + m_xOffsets.second);
     if (m_yOffsets.first >= 0)
-        iconvert(m_yXform, Id::Y, outbuf + m_yOffsets.first,
+        iconvert(m_scaling.m_yXform, Id::Y, outbuf + m_yOffsets.first,
             outbuf + m_yOffsets.second);
     if (m_zOffsets.first >= 0)
-        iconvert(m_zXform, Id::Z, outbuf + m_zOffsets.first,
+        iconvert(m_scaling.m_zXform, Id::Z, outbuf + m_zOffsets.first,
             outbuf + m_zOffsets.second);
     return m_dbPointSize;
 }

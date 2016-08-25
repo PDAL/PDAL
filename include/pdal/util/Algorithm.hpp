@@ -44,46 +44,56 @@ namespace pdal
 namespace Utils
 {
 
+/**
+  Determine if a container contains a value.
+
+  \param cont  Container.
+  \param val  Value.
+  \return \c true if the value is in the container, \c false otherwise.
+*/
 template<typename CONTAINER, typename VALUE>
 bool contains(const CONTAINER& cont, const VALUE& val)
 {
     return std::find(cont.begin(), cont.end(), val) != cont.end();
 }
 
+/**
+  Determine if a map contains a key.
 
+  \param c  Map.
+  \param v  Key value.
+  \return \c true if the value is in the container, \c false otherwise.
+*/
 template<typename KEY, typename VALUE>
 bool contains(const std::map<KEY, VALUE>& c, const KEY& v)
 {
     return c.find(v) != c.end();
 }
 
-
-template<typename CONTAINER, typename VALUE>
-void remove(CONTAINER& v, const VALUE& val)
-{
-    v.erase(std::remove(v.begin(), v.end(), val), v.end());
-}
-
-
-template<typename CONTAINER, typename PREDICATE>
-void remove_if(CONTAINER& v, PREDICATE p)
-{
-    v.erase(std::remove_if(v.begin(), v.end(), p), v.end());
-}
 /**
-template<typename TYPE, typename VALUE>
-void remove(std::vector<TYPE>& v, const VALUE& val)
+  Remove all instances of a value from a container.
+
+  \param cont  Container.
+  \param v  Value to remove.
+*/
+template<typename CONTAINER, typename VALUE>
+void remove(CONTAINER& cont, const VALUE& val)
 {
-    v.erase(std::remove(v.begin(), v.end(), val), v.end());
+    cont.erase(std::remove(cont.begin(), cont.end(), val), cont.end());
 }
 
 
-template<typename TYPE, typename PREDICATE>
-void remove_if(std::vector<TYPE>& v, PREDICATE p)
+/**
+  Remove all instances matching a unary predicate from a container.
+
+  \param cont  Container.
+  \param p  Predicate indicating whether a value should be removed.
+*/
+template<typename CONTAINER, typename PREDICATE>
+void remove_if(CONTAINER& cont, PREDICATE p)
 {
-    v.erase(std::remove_if(v.begin(), v.end(), p), v.end());
+    cont.erase(std::remove_if(cont.begin(), cont.end(), p), cont.end());
 }
-**/
 
 } // namespace Utils
 } // namespace pdal

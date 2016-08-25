@@ -37,6 +37,7 @@
 #include <pdal/Reader.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/Bounds.hpp>
+#include <pdal/plugin.hpp>
 
 #include <geos_c.h>
 
@@ -57,11 +58,9 @@ namespace pdal
         static int32_t destroy(void *);
         std::string getName() const;
 
-	Options getDefaultOptions();
-
     private:
         virtual void initialize();
-        virtual void processOptions(const Options& ops);
+        virtual void addArgs(ProgramArgs& args);
         virtual void addDimensions(PointLayoutPtr layout);
         virtual void ready(PointTableRef table);
         virtual point_count_t read(PointViewPtr view, point_count_t count);
@@ -76,9 +75,9 @@ namespace pdal
         std::string m_password;
         std::string m_tableNamespace;
         std::string m_featureTypeName;
+        std::string m_dataAdapter;
         bool m_useFeatCollDataAdapter;
         uint32_t m_pointsPerEntry;
-
         BOX3D m_bounds;
 
         CloseableIterator m_iterator;

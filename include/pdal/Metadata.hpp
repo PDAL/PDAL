@@ -50,14 +50,11 @@ namespace pdal
 
 class SpatialReference;
 
-namespace MetadataType
-{
-enum Enum
+enum class MetadataType
 {
     Instance,
     Array
 };
-} // namespace MetadataType
 
 class Metadata;
 class MetadataNode;
@@ -174,7 +171,7 @@ private:
         return nc_this->subnodes(name);
     }
 
-    MetadataType::Enum nodeType(const std::string& name) const
+    MetadataType nodeType(const std::string& name) const
     {
         const MetadataImplList& l = subnodes(name);
         if (l.size())
@@ -189,7 +186,7 @@ private:
     std::string m_descrip;
     std::string m_type;
     std::string m_value;
-    MetadataType::Enum m_kind;
+    MetadataType m_kind;
     MetadataSubnodes m_subnodes;
 };
 
@@ -448,7 +445,7 @@ public:
     std::string type() const
         { return m_impl->m_type; }
 
-    MetadataType::Enum kind() const
+    MetadataType kind() const
         { return m_impl->m_kind; }
 
     std::string name() const
@@ -486,15 +483,19 @@ public:
 
     std::string jsonValue() const
     {
-        std::string val;
+        if (m_impl->m_type == "json")
+            return value();
+
+        std::string v(Utils::escapeJSON(value()));
         if (m_impl->m_type == "string" || m_impl->m_type == "base64Binary" ||
             m_impl->m_type == "uuid")
         {
             std::string val("\"");
-            val += escapeQuotes(value()) + "\"";
+            val += escapeQuotes(v) + "\"";
             return val;
         }
-        return value();
+
+        return v;
     }
 
     std::string description() const

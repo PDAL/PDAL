@@ -47,7 +47,7 @@ MetadataNode BasePointTable::privateMetadata(const std::string& name)
 }
 
 
-void SimplePointTable::setFieldInternal(Dimension::Id::Enum id, PointId idx,
+void SimplePointTable::setFieldInternal(Dimension::Id id, PointId idx,
     const void *value)
 {
     const Dimension::Detail *d = m_layoutRef.dimDetail(id);
@@ -57,7 +57,7 @@ void SimplePointTable::setFieldInternal(Dimension::Id::Enum id, PointId idx,
 }
 
 
-void SimplePointTable::getFieldInternal(Dimension::Id::Enum id, PointId idx,
+void SimplePointTable::getFieldInternal(Dimension::Id id, PointId idx,
     void *value) const
 {
     const Dimension::Detail *d = m_layoutRef.dimDetail(id);
@@ -90,6 +90,25 @@ char *PointTable::getPoint(PointId idx)
 {
     char *buf = m_blocks[idx / m_blockPtCnt];
     return buf + pointsToBytes(idx % m_blockPtCnt);
+}
+
+
+MetadataNode BasePointTable::toMetadata() const
+{
+    const PointLayoutPtr l(layout());
+    MetadataNode root;
+
+    for (const auto& id : l->dims())
+    {
+        MetadataNode dim("dimensions");
+        dim.add("name", l->dimName(id));
+        Dimension::Type t = l->dimType(id);
+        dim.add("type", Dimension::toName(Dimension::base(t)));
+        dim.add("size", l->dimSize(id));
+        root.addList(dim);
+    }
+
+    return root;
 }
 
 } // namespace pdal

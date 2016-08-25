@@ -39,6 +39,7 @@
 #endif
 
 #include <pdal/PDALUtils.hpp>
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {
@@ -80,36 +81,31 @@ void PipelineKernel::addSwitches(ProgramArgs& args)
         m_progressFile);
     args.add("pointcloudschema", "dump PointCloudSchema XML output",
         m_PointCloudSchemaOutput).setHidden();
+    args.add("stdin,s", "Read pipeline from standard input", m_usestdin);
 }
 
 int PipelineKernel::execute()
 {
-    if (!FileUtils::fileExists(m_inputFile))
-        throw app_runtime_error("file not found: " + m_inputFile);
+    if (!Utils::fileExists(m_inputFile))
+        throw pdal_error("file not found: " + m_inputFile);
     if (m_progressFile.size())
         m_progressFd = Utils::openProgress(m_progressFile);
 
-    pdal::PipelineManager manager(m_progressFd);
-    bool isWriter = manager.readPipeline(m_inputFile);
-    if (!isWriter)
-        throw app_runtime_error("Pipeline file does not contain a writer. "
-            "Use 'pdal info' to read the data.");
-
-    applyExtraStageOptionsRecursive(manager.getStage());
-    manager.execute();
+    m_manager.readPipeline(m_inputFile);
+    m_manager.execute();
 
     if (m_pipelineFile.size() > 0)
-        PipelineWriter::writePipeline(manager.getStage(), m_pipelineFile);
+        PipelineWriter::writePipeline(m_manager.getStage(), m_pipelineFile);
 
     if (m_PointCloudSchemaOutput.size() > 0)
     {
 #ifdef PDAL_HAVE_LIBXML2
-        XMLSchema schema(manager.pointTable().layout());
-        
-        std::ostream *out = FileUtils::createFile(m_PointCloudSchemaOutput);
+        XMLSchema schema(m_manager.pointTable().layout());
+
+        std::ostream *out = Utils::createFile(m_PointCloudSchemaOutput);
         std::string xml(schema.xml());
         out->write(xml.c_str(), xml.size());
-        FileUtils::closeFile(out);
+        Utils::closeFile(out);
 #else
         std::cerr << "libxml2 support not available, no schema is produced" <<
             std::endl;

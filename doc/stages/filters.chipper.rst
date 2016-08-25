@@ -37,20 +37,21 @@ data segmented into smaller blocks).
 Example
 -------
 
-.. code-block:: xml
+.. code-block:: json
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.pgpointcloud">
-      <Option name="connection">dbname='lidar' user='user'</Option>
-      <Filter type="filters.chipper">
-        <Option name="capacity">400</Option>
-        <Reader type="readers.las">
-            <Option name="filename">example.las</Option>
-        </Reader>
-      </Filter>
-    </Writer>
-  </Pipeline>
+    {
+      "pipeline":[
+        "example.las",
+        {
+          "type":"filters.chipper",
+          "capacity":"400",
+        },
+        {
+          "type":"writers.pgpointcloud",
+          "connection":"dbname='lidar' user='user'"
+        }
+      ]
+    }
 
 Options
 -------

@@ -59,7 +59,8 @@ void compare_contents(const std::string& las_file, const std::string& ntf_file)
 
     StageFactory f;
 
-    std::unique_ptr<Stage> las_reader(f.createStage("readers.las"));
+    Stage* las_reader(f.createStage("readers.las"));
+    EXPECT_TRUE(las_reader);
     las_reader->setOptions(las_opts);
     las_reader->prepare(lasPoints);
     PointViewSet lasViews = las_reader->execute(lasPoints);
@@ -74,12 +75,25 @@ void compare_contents(const std::string& las_file, const std::string& ntf_file)
     ntf_opts.add(ntf_opt);
 
     PointTable ntfPoints;
-    std::unique_ptr<Stage> ntf_reader(f.createStage("readers.nitf"));
+    Stage* ntf_reader(f.createStage("readers.nitf"));
+    EXPECT_TRUE(ntf_reader);
     ntf_reader->setOptions(ntf_opts);
     ntf_reader->prepare(ntfPoints);
     PointViewSet ntfViews = ntf_reader->execute(ntfPoints);
     EXPECT_EQ(ntfViews.size(), 1u);
     PointViewPtr ntfView = *ntfViews.begin();
+
+    MetadataNode root = ntf_reader->getMetadata();
+    MetadataNode n = root.findChild("FH.FTITLE");
+    EXPECT_EQ(n.value(), "LiDAR from somewhere");
+    n = root.findChild("FH.ONAME");
+    EXPECT_EQ(n.value(), "Howard Butler");
+    n = root.findChild("FH.OPHONE");
+    EXPECT_EQ(n.value(), "5155554628");
+    n = root.findChild([](MetadataNode& m)
+        { return m.name() == "IM:0.IDATIM"; }
+    );
+    EXPECT_EQ(n.value(), "20110516183337");
 
     //
     // compare the two views
@@ -105,8 +119,6 @@ TEST(NitfWriterTest, test1)
 
     const std::string las_input(Support::datapath("las/1.2-with-color.las"));
     const std::string nitf_output(Support::temppath("temp_nitf.ntf"));
-    const std::string reference_output(
-        Support::datapath("nitf/write_test1.ntf"));
 
     FileUtils::deleteFile(nitf_output);
 
@@ -129,7 +141,7 @@ TEST(NitfWriterTest, test1)
         Option cls("fsclas", "S");
         writer_opts.add(cls);
 
-        Option phone("ophone", "5159664628");
+        Option phone("ophone", "5155554628");
         writer_opts.add(phone);
 
         Option name("oname", "Howard Butler");
@@ -142,12 +154,12 @@ TEST(NitfWriterTest, test1)
         // writer_opts.add(verbose);
         writer_opts.add(writer_opt1);
 
-        std::unique_ptr<Stage> reader(f.createStage("readers.las"));
-        EXPECT_TRUE(reader.get());
+        Stage* reader(f.createStage("readers.las"));
+        EXPECT_TRUE(reader);
         reader->setOptions(reader_opts);
 
-        std::unique_ptr<Stage> writer(f.createStage("writers.nitf"));
-        EXPECT_TRUE(writer.get());
+        Stage* writer(f.createStage("writers.nitf"));
+        EXPECT_TRUE(writer);
         writer->setOptions(writer_opts);
         writer->setInput(*reader);
         {
@@ -164,25 +176,11 @@ TEST(NitfWriterTest, test1)
     }
 
     //
-    // check the generated NITF
-    //
-    //ABELL - This doesn't work and is probably broken because the reference
-    //  file is out of date, but some method of comparing the NITF wrapper
-    //  instead of a byte-by-byte file diff is probably in order.
-/**
-    bool filesSame = Support::compare_files(nitf_output, reference_output);
-    EXPECT_TRUE(filesSame);
-**/
-
-    //
     // check the LAS contents against the source image
     //
-    //ABELL - This tells us that the packaged file (LAS) is fine, but it
-    //  doesn't tell us much about the NITF wrapper.
     compare_contents(las_input, nitf_output);
 
-//    if (filesSame)
-        FileUtils::deleteFile(Support::temppath(nitf_output));
+    FileUtils::deleteFile(Support::temppath(nitf_output));
 }
 
 // Test that data from three input views gets written to separate output files.
@@ -198,7 +196,7 @@ TEST(NitfWriterTest, flex)
 
     PointTable table;
 
-    std::unique_ptr<Stage> reader(f.createStage("readers.nitf"));
+    Stage* reader(f.createStage("readers.nitf"));
     reader->setOptions(readerOps);
 
     reader->prepare(table);
@@ -228,7 +226,7 @@ TEST(NitfWriterTest, flex)
     Options writerOps;
     writerOps.add("filename", Support::temppath("test_#.ntf"));
 
-    std::unique_ptr<Stage> writer(f.createStage("writers.nitf"));
+    Stage* writer(f.createStage("writers.nitf"));
     writer->setOptions(writerOps);
     writer->setInput(reader2);
 
@@ -243,7 +241,7 @@ TEST(NitfWriterTest, flex)
         Options ops;
         ops.add("filename", filename);
 
-        std::unique_ptr<Stage> r(f.createStage("readers.nitf"));
+        Stage* r(f.createStage("readers.nitf"));
         r->setOptions(ops);
         EXPECT_EQ(r->preview().m_pointCount, vs[i]->size());
     }
@@ -260,7 +258,7 @@ TEST(NitfWriterTest, flex2)
 
     PointTable table;
 
-    std::unique_ptr<Stage> reader(f.createStage("readers.nitf"));
+    Stage* reader(f.createStage("readers.nitf"));
     reader->setOptions(readerOps);
 
     reader->prepare(table);
@@ -290,7 +288,7 @@ TEST(NitfWriterTest, flex2)
     Options writerOps;
     writerOps.add("filename", outfile);
 
-    std::unique_ptr<Stage> writer(f.createStage("writers.nitf"));
+    Stage* writer(f.createStage("writers.nitf"));
     writer->setOptions(writerOps);
     writer->setInput(reader2);
 
@@ -302,7 +300,7 @@ TEST(NitfWriterTest, flex2)
     Options ops;
     ops.add("filename", outfile);
 
-    std::unique_ptr<Stage> r(f.createStage("readers.nitf"));
+    Stage* r(f.createStage("readers.nitf"));
     r->setOptions(ops);
     EXPECT_EQ(r->preview().m_pointCount, v->size());
 }

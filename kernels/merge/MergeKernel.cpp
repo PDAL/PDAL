@@ -35,8 +35,8 @@
 #include "MergeKernel.hpp"
 
 #include <merge/MergeFilter.hpp>
-#include <pdal/KernelSupport.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {
@@ -75,25 +75,13 @@ int MergeKernel::execute()
 
     MergeFilter filter;
 
-    std::vector<std::unique_ptr<Stage>> m_readers;
     for (size_t i = 0; i < m_files.size(); ++i)
     {
-        Options readerOpts;
-        readerOpts.add("filename", m_files[i]);
-        readerOpts.add("debug", isDebug());
-        readerOpts.add("verbose", getVerboseLevel());
-
-        Stage& reader = makeReader(m_files[i]);
-        reader.setOptions(readerOpts);
-
+        Stage& reader = makeReader(m_files[i], m_driverOverride);
         filter.setInput(reader);
     }
 
-    Options writerOpts;
-
-    Stage& writer = makeWriter(m_outputFile, filter);
-    applyExtraStageOptionsRecursive(&writer);
-
+    Stage& writer = makeWriter(m_outputFile, filter, "");
     writer.prepare(table);
     writer.execute(table);
     return 0;

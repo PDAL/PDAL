@@ -1,0 +1,14 @@
+{
+  "pipeline":[
+    {
+      "filename":"@CMAKE_SOURCE_DIR@/test/data/qfit/14-word.qi",
+      "flip_coordinates":true,
+      "scale_z":0.001,
+      "spatialreference":"EPSG:4269+3855",
+      "log":"stdlog"
+    },
+    {
+      "filename":"@CMAKE_SOURCE_DIR@/test/temp/out2.las"
+    }
+  ]
+}

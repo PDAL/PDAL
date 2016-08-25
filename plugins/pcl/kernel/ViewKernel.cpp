@@ -35,6 +35,7 @@
 #include "ViewKernel.hpp"
 
 #include <pdal/KernelFactory.hpp>
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {
@@ -75,7 +76,7 @@ uint32_t parseInt(const string& s)
 {
     uint32_t val;
     if (!Utils::fromString(s, val))
-        throw app_runtime_error(string("Invalid integer: ") + s);
+        throw pdal_error(string("Invalid integer: ") + s);
     return val;
 }
 
@@ -92,7 +93,7 @@ void addRange(const string& begin, const string& end,
     uint32_t low = parseInt(begin);
     uint32_t high = parseInt(end);
     if (low > high)
-        throw app_runtime_error(string("Range invalid: ") + begin + "-" + end);
+        throw pdal_error(string("Range invalid: ") + begin + "-" + end);
     while (low <= high)
         points.push_back(low++);
 }
@@ -114,7 +115,7 @@ vector<uint32_t> getListOfPoints(std::string p)
         else if (limits.size() == 2)
             addRange(limits[0], limits[1], output);
         else
-            throw app_runtime_error(string("Invalid point range: ") + s);
+            throw pdal_error(string("Invalid point range: ") + s);
     }
     return output;
 }
@@ -131,12 +132,7 @@ void ViewKernel::addSwitches(ProgramArgs& args)
 
 int ViewKernel::execute()
 {
-    Options readerOptions;
-    readerOptions.add<std::string>("filename", m_inputFile);
-    setCommonOptions(readerOptions);
-
-    Stage& readerStage(Kernel::makeReader(m_inputFile));
-    readerStage.setOptions(readerOptions);
+    Stage& readerStage(Kernel::makeReader(m_inputFile, ""));
 
     PointTable table;
     readerStage.prepare(table);

@@ -13,14 +13,14 @@ endif()
 # NITF Reader
 #
 set(srcs
-    io/NitfFile.cpp
+    io/NitfFileReader.cpp
     io/MetadataReader.cpp
     io/tre_plugins.cpp
     io/NitfReader.cpp
 )
 
 set(incs
-    io/NitfFile.hpp
+    io/NitfFileReader.hpp
     io/MetadataReader.hpp
     io/tre_plugins.hpp
     io/NitfReader.hpp
@@ -34,12 +34,16 @@ PDAL_ADD_PLUGIN(reader_libname reader nitf
 # NITF Writer
 #
 set(srcs
+    io/NitfFileWriter.cpp
     io/NitfWriter.cpp
+    io/MetadataReader.cpp
     io/tre_plugins.cpp
 )
 
 set(incs
+    io/NitfFileWriter.hpp
     io/NitfWriter.hpp
+    io/MetadataReader.hpp
     io/tre_plugins.hpp
 )
 

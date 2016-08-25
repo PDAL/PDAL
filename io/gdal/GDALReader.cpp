@@ -35,11 +35,10 @@
 #include "GDALReader.hpp"
 
 #include <sstream>
-#include <algorithm>
 
-
+#include <pdal/GDALUtils.hpp>
 #include <pdal/PointView.hpp>
-#include <pdal/GlobalEnvironment.hpp>
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {
@@ -66,7 +65,7 @@ GDALReader::GDALReader()
 
 void GDALReader::initialize()
 {
-    GlobalEnvironment::get().initializeGDAL(log());
+    gdal::registerDrivers();
     m_raster.reset(new gdal::Raster(m_filename));
 
     m_raster->open();
@@ -134,7 +133,7 @@ point_count_t GDALReader::read(PointViewPtr view, point_count_t num)
     }
 
     std::vector<uint8_t> band;
-    std::vector<Dimension::Type::Enum> band_types =
+    std::vector<Dimension::Type> band_types =
         m_raster->getPDALDimensionTypes();
 
     for (int b = 0; b < m_raster->m_band_count; ++b)
@@ -146,7 +145,7 @@ point_count_t GDALReader::read(PointViewPtr view, point_count_t num)
         log()->get(LogLevel::Info) << "Read band '" << oss.str() << "'" <<
             std::endl;
 
-        Dimension::Id::Enum d = view->layout()->findDim(oss.str());
+        Dimension::Id d = view->layout()->findDim(oss.str());
         size_t dimSize = Dimension::size(band_types[b]);
         uint8_t* p = band.data();
         for (point_count_t i = 0; i < count; ++i)

@@ -45,6 +45,7 @@
 
 using namespace std;
 
+
 namespace pdal
 {
 
@@ -76,17 +77,18 @@ namespace FileUtils
 
 istream *openFile(string const& filename, bool asBinary)
 {
-    if (isStdin(filename))
+    std::string name(filename);
+    if (isStdin(name))
         return &cin;
 
-    if (!FileUtils::fileExists(filename))
+    if (!FileUtils::fileExists(name))
         return NULL;
 
     ios::openmode mode = ios::in;
     if (asBinary)
         mode |= ios::binary;
 
-    ifstream *ifs = new ifstream(filename, mode);
+    ifstream *ifs = new ifstream(name, mode);
     if (!ifs->good())
     {
         delete ifs;
@@ -96,17 +98,17 @@ istream *openFile(string const& filename, bool asBinary)
 }
 
 
-ostream *createFile(string const& filename, bool asBinary)
+ostream *createFile(string const& name, bool asBinary)
 {
-    if (isStdout(filename))
+    if (isStdout(name))
         return &cout;
 
     ios::openmode mode = ios::out;
     if (asBinary)
         mode |= ios::binary;
 
-    ostream *ofs = new ofstream(filename, mode);
-    if (! ofs->good())
+    ostream *ofs = new ofstream(name, mode);
+    if (!ofs->good())
     {
         delete ofs;
         return NULL;
@@ -117,6 +119,7 @@ ostream *createFile(string const& filename, bool asBinary)
 
 bool directoryExists(const string& dirname)
 {
+    //ABELL - Seems we should be calling is_directory
     return pdalboost::filesystem::exists(dirname);
 }
 
@@ -195,11 +198,6 @@ void renameFile(const string& dest, const string& src)
 
 bool fileExists(const string& name)
 {
-    // filename may actually be a greyhound uri + pipelineId
-    string http = name.substr(0, 4);
-    if (Utils::iequals(http, "http"))
-        return true;
-
     pdalboost::system::error_code ec;
     pdalboost::filesystem::exists(name, ec);
     return pdalboost::filesystem::exists(name) || isStdin(name);

@@ -100,9 +100,9 @@ void testFileStreamed(const Options& filterOps, StringList dimNames,
     f2.prepare(table);
 
     PointLayoutPtr layout = table.layout();
-    Dimension::Id::Enum id1 = layout->findDim(dimNames[0]);
-    Dimension::Id::Enum id2 = layout->findDim(dimNames[1]);
-    Dimension::Id::Enum id3 = layout->findDim(dimNames[2]);
+    Dimension::Id id1 = layout->findDim(dimNames[0]);
+    Dimension::Id id2 = layout->findDim(dimNames[1]);
+    Dimension::Id id3 = layout->findDim(dimNames[2]);
 
     auto cb = [expectedRed, expectedGreen, expectedBlue, id1, id2, id3]
         (PointRef& point)
@@ -132,8 +132,7 @@ TEST(ColorizationFilterTest, test1)
     Options options;
 
     options.add("dimensions", "Red, Green,Blue::255  ");
-    options.add("raster", Support::datapath("autzen/autzen.jpg"),
-        "raster to read");
+    options.add("raster", Support::datapath("autzen/autzen.jpg"));
 
     StringList dims;
     dims.push_back("Red");
@@ -148,8 +147,7 @@ TEST(ColorizationFilterTest, test2)
 {
     Options options;
 
-    options.add("raster", Support::datapath("autzen/autzen.jpg"),
-        "raster to read");
+    options.add("raster", Support::datapath("autzen/autzen.jpg"));
 
     StringList dims;
     dims.push_back("Red");
@@ -164,14 +162,29 @@ TEST(ColorizationFilterTest, test3)
 {
     Options options;
 
-    options.add("dimensions", "Foo:1,Bar:2,Baz:3:255");
-    options.add("raster", Support::datapath("autzen/autzen.jpg"),
-        "raster to read");
+    options.add("dimensions", "Foo:1,Bar_:2,Baz2:3:255");
+    options.add("raster", Support::datapath("autzen/autzen.jpg"));
+
+    StringList dims;
+    dims.push_back("Foo");
+    dims.push_back("Bar_");
+    dims.push_back("Baz2");
+    testFile(options, dims, 210, 205, 47175);
+}
+
+// Check that dimension creation works.
+TEST(ColorizationFilterTest, test4)
+{
+    Options options;
+
+    options.add("dimensions", "Foo&:1,Bar:2,Baz:3:255");
+    options.add("raster", Support::datapath("autzen/autzen.jpg"));
 
     StringList dims;
     dims.push_back("Foo");
     dims.push_back("Bar");
     dims.push_back("Baz");
-    testFile(options, dims, 210, 205, 47175);
+    EXPECT_THROW(testFile(options, dims, 210, 205, 47175), pdal_error);
 }
+
 

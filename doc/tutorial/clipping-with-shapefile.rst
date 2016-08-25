@@ -112,44 +112,25 @@ Pipeline
 A PDAL :ref:`pipeline` is how you define a set of actions to happen to data
 as they are read, filtered, and written.
 
-.. code-block:: xml
+.. code-block:: json
 
-    <?xml version="2.0" encoding="utf-8"?>
-    <Pipeline version="1.0">
-        <Writer type="writers.las">
-            <Option name="filename">
-                output.las
-            </Option>
-            <Filter type="filters.range">
-                <Option name="limits">
-                   Classification[5:5]
-                 </Option>
-                <Filter type="filters.attribute">
-                    <Option name="dimension">
-                        Classification
-                    </Option>
-                    <Option name="datasource">
-                        attributes.vrt
-                    </Option>
-                    <Option name="layer">
-                        OGRGeoJSON
-                    </Option>
-                    <Option name="column">
-                        CLS
-                    </Option>
-                    <Reader type="readers.las">
-                        <Option name="filename">
-                            autzen.laz
-                        </Option>
-                    </Reader>
-                </Filter>
-            </Filter>
-        </Writer>
-    </Pipeline>
-
-
-:ref:`Pipeline <pipeline>` files are read inside-out, so we will start with the
-:ref:`readers.las` and move up until we hit the :ref:`writers.las`.
+  {
+    "pipeline":[
+      "autzen.laz",
+      {
+        "type":"filters.attribute",
+        "dimension":"Classification",
+        "datasource":"attributes.vrt",
+        "layer":"OGRGeoJSON",
+        "column":"CLS"
+      },
+      {
+        "type":"filters.range",
+        "limits":"Classification[5:5]"
+      },
+      "output.las"
+    ]
+  }
 
 * :ref:`readers.las`: Define a reader that can read `ASPRS LAS`_ or `LASzip`_
   data.
@@ -173,14 +154,14 @@ as they are read, filtered, and written.
 Processing
 -------------------------------------------------------------------------------
 
-1) Save the pipeline to a file called ``shape-clip.xml`` in the same directory as
+1) Save the pipeline to a file called ``shape-clip.json`` in the same directory as
    your ``attributes.json`` and ``autzen.laz`` files.
 
 2) Call ``pdal pipeline`` on the :ref:`pipeline`.
 
     ::
 
-        $ pdal pipeline shape-clip.xml
+        $ pdal pipeline shape-clip.json
 
 3) Visualize ``output.las`` in an environment capable of viewing it. http://plas.io
    or `CloudCompare`_ should do the trick.

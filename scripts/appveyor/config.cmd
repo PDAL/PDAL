@@ -1,7 +1,6 @@
 @echo off
 
-cmake -G "Visual Studio 11 2012 Win64" ^
-    -DBUILD_PLUGIN_ATTRIBUTE=%PDAL_OPTIONAL_COMPONENTS% ^
+cmake -G "Visual Studio 14 2015 Win64" ^
     -DBUILD_PLUGIN_CPD=OFF ^
     -DBUILD_PLUGIN_GREYHOUND=OFF ^
     -DBUILD_PLUGIN_HEXBIN=OFF ^
@@ -21,7 +20,7 @@ cmake -G "Visual Studio 11 2012 Win64" ^
     -DWITH_GEOTIFF=%PDAL_OPTIONAL_COMPONENTS% ^
     -DWITH_LASZIP=%PDAL_OPTIONAL_COMPONENTS% ^
     -DWITH_TESTS=ON ^
-    -DNUMPY_INCLUDE_DIR=%OSGEODIR%\apps\python27\lib\site-packages\numpy\core\include ^
+    -DNUMPY_INCLUDE_DIR=%OSGEO4W_ROOT%\apps\python27\lib\site-packages\numpy\core\include ^
 	-DNUMPY_VERSION=1.8.1 ^
     -Dgtest_force_shared_crt=ON ^
     -DCMAKE_INSTALL_PREFIX=C:\pdalbin ^

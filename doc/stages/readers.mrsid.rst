@@ -9,17 +9,20 @@ decompress and read data.
 Example
 -------
 
-.. code-block:: xml
+.. code-block:: json
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.las">
-      <Option name="filename">outputfile.las</Option>
-      <Reader type="readers.mrsid">
-        <Option name="filename">myfile.sid</Option>
-      </Reader>
-    </Writer>
-  </Pipeline>
+    {
+      "pipeline":[
+        {
+          "type":"readers.mrsid",
+          "filename":"myfile.sid"
+        },
+        {
+          "type":"writers.las",
+          "filename":"outputfile.las"
+        }
+      ]
+    }
 
 
 Options

@@ -35,26 +35,51 @@
 #pragma once
 
 #include <pdal/Dimension.hpp>
+#include <pdal/DimType.hpp>
 #include <string>
 
 namespace pdal
 {
 
-namespace LasCompression
-{
-
-enum Enum
+enum class LasCompression
 {
     LasZip,
     LazPerf,
     None
 };
 
+inline std::istream& operator>>(std::istream& in, LasCompression& c)
+{
+    std::string s;
+
+    in >> s;
+    s = Utils::toupper(s);
+    if (s == "LASZIP"  || s == "TRUE")
+        c = LasCompression::LasZip;
+    else if (s == "LAZPERF")
+        c = LasCompression::LazPerf;
+    else
+        c = LasCompression::None;
+    return in;
+}
+
+inline std::ostream& operator<<(std::ostream& out, const LasCompression& c)
+{
+    switch (c)
+    {
+    case LasCompression::LasZip:
+        out << "LasZip";
+    case LasCompression::LazPerf:
+        out << "LazPerf";
+    case LasCompression::None:
+        out << "None";
+    }
+    return out;
 }
 
 struct ExtraDim
 {
-    ExtraDim(const std::string name, Dimension::Type::Enum type,
+    ExtraDim(const std::string name, Dimension::Type type,
             double scale = 1.0, double offset = 0.0) :
         m_name(name), m_dimType(Dimension::Id::Unknown, type, scale, offset),
         m_size(0)
@@ -106,7 +131,7 @@ public:
         }
     }
 
-    ExtraBytesIf(const std::string& name, Dimension::Type::Enum type,
+    ExtraBytesIf(const std::string& name, Dimension::Type type,
             const std::string& description) :
         m_type(type), m_name(name), m_description(description), m_size(0)
     {
@@ -128,7 +153,7 @@ public:
     std::vector<ExtraDim> toExtraDims();
 
 private:
-    Dimension::Type::Enum m_type;
+    Dimension::Type m_type;
     unsigned m_fieldCnt; // Must be 0 - 3;
     double m_scale[3];
     double m_offset[3];

@@ -1,0 +1,17 @@
+{
+    "pipeline": [
+        "/data/exercises/analysis/clipping/autzen.laz",
+        {
+            "column": "CLS",
+            "datasource": "/data/exercises/analysis/clipping/attributes.vrt",
+            "dimension": "Classification",
+            "layer": "OGRGeoJSON",
+            "type": "filters.attribute"
+        },
+        {
+            "limits": "Classification[6:6]",
+            "type": "filters.range"
+        },
+        "/data/exercises/analysis/clipping/stadium.las"
+    ]
+}

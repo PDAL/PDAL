@@ -55,6 +55,8 @@ int CPL_DLL GTIFSetFromOGISDefn(GTIF*, const char*);
 
 PDAL_C_END
 
+#include <pdal/GDALUtils.hpp>
+
 struct StTiff : public ST_TIFF
 {};
 
@@ -101,7 +103,7 @@ void GeotiffSupport::resetTags()
 }
 
 
-void GeotiffSupport::setShortKeys(int tag, void *data, int size)
+bool GeotiffSupport::setShortKeys(int tag, void *data, int size)
 {
     // Make sure struct is 16 bytes.
 #pragma pack(push)
@@ -116,19 +118,25 @@ void GeotiffSupport::setShortKeys(int tag, void *data, int size)
 #pragma pack(pop)
 
     ShortKeyHeader *header = (ShortKeyHeader *)data;
+    int declaredSize = (header->numKeys + 1) * 4;
+    if (size < declaredSize)
+        return false;
     ST_SetKey(m_tiff, tag, (1 + header->numKeys) * 4, STT_SHORT, data);
+    return true;
 }
 
 
-void GeotiffSupport::setDoubleKeys(int tag, void *data, int size)
+bool GeotiffSupport::setDoubleKeys(int tag, void *data, int size)
 {
     ST_SetKey(m_tiff, tag, size / sizeof(double), STT_DOUBLE, data);
+    return true;
 }
 
 
-void GeotiffSupport::setAsciiKeys(int tag, void *data, int size)
+bool GeotiffSupport::setAsciiKeys(int tag, void *data, int size)
 {
     ST_SetKey(m_tiff, tag, size, STT_ASCII, data);
+    return true;
 }
 
 
@@ -172,20 +180,17 @@ std::string GeotiffSupport::getWkt(bool horizOnly, bool pretty) const
     char* pszWKT = 0;
 
     if (!m_gtiff)
-    {
         return std::string();
-    }
 
     if (!GTIFGetDefn(m_gtiff, &sGTIFDefn))
-    {
         return std::string();
-    }
 
     pszWKT = GTIFGetOGISDefn(m_gtiff, &sGTIFDefn);
 
     if (pretty)
     {
-        OGRSpatialReference* poSRS = (OGRSpatialReference*) OSRNewSpatialReference(NULL);
+        OGRSpatialReference* poSRS =
+            (OGRSpatialReference*) OSRNewSpatialReference(NULL);
         char *pszOrigWKT = pszWKT;
         poSRS->importFromWkt(&pszOrigWKT);
 
@@ -200,7 +205,8 @@ std::string GeotiffSupport::getWkt(bool horizOnly, bool pretty) const
             && horizOnly
             && strstr(pszWKT,"COMPD_CS") != NULL)
     {
-        OGRSpatialReference* poSRS = (OGRSpatialReference*) OSRNewSpatialReference(NULL);
+        OGRSpatialReference* poSRS =
+            (OGRSpatialReference*) OSRNewSpatialReference(NULL);
         char *pszOrigWKT = pszWKT;
         poSRS->importFromWkt(&pszOrigWKT);
 

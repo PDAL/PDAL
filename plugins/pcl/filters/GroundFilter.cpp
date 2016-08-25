@@ -40,6 +40,7 @@
 #include <pdal/PointTable.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/pdal_macros.hpp>
 
 #include <pcl/point_types.h>
 #include <pcl/console/print.h>
@@ -62,30 +63,16 @@ std::string GroundFilter::getName() const
     return s_info.name;
 }
 
-Options GroundFilter::getDefaultOptions()
+void GroundFilter::addArgs(ProgramArgs& args)
 {
-    Options options;
-    options.add("max_window_size", 33, "Maximum window size");
-    options.add("slope", 1, "Slope");
-    options.add("max_distance", 2.5, "Maximum distance");
-    options.add("initial_distance", 0.15, "Initial distance");
-    options.add("cell_size", 1, "Cell Size");
-    options.add("classify", true, "Apply classification labels?");
-    options.add("extract", false, "Extract ground returns?");
-    options.add("approximate", false, "Use approximate algorithm?");
-    return options;
-}
-
-void GroundFilter::processOptions(const Options& options)
-{
-    m_maxWindowSize = options.getValueOrDefault<double>("max_window_size", 33);
-    m_slope = options.getValueOrDefault<double>("slope", 1);
-    m_maxDistance = options.getValueOrDefault<double>("max_distance", 2.5);
-    m_initialDistance = options.getValueOrDefault<double>("initial_distance", 0.15);
-    m_cellSize = options.getValueOrDefault<double>("cell_size", 1);
-    m_classify = options.getValueOrDefault<bool>("classify", true);
-    m_extract = options.getValueOrDefault<bool>("extract", false);
-    m_approximate = options.getValueOrDefault<bool>("approximate", false);
+    args.add("max_window_size", "Maximum window size", m_maxWindowSize, 33.0);
+    args.add("slope", "Slope", m_slope, 1.0);
+    args.add("max_distance", "Maximum distance", m_maxDistance, 2.5);
+    args.add("initial_distance", "Initial distance", m_initialDistance, 0.15);
+    args.add("cell_size", "Cell size", m_cellSize, 1.0);
+    args.add("classify", "Apply the classification labels?", m_classify, true);
+    args.add("extract", "Extract ground returns?", m_extract);
+    args.add("approximate", "Use approximate algorithm?", m_approximate);
 }
 
 void GroundFilter::addDimensions(PointLayoutPtr layout)
@@ -107,29 +94,7 @@ PointViewSet GroundFilter::run(PointViewPtr input)
     input->calculateBounds(bounds);
     pclsupport::PDALtoPCD(input, *cloud, bounds);
 
-    // PCL should provide console output at similar verbosity level as PDAL
-    int level = log()->getLevel();
-    switch (level)
-    {
-        case 0:
-            pcl::console::setVerbosityLevel(pcl::console::L_ALWAYS);
-            break;
-        case 1:
-            pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
-            break;
-        case 2:
-            pcl::console::setVerbosityLevel(pcl::console::L_WARN);
-            break;
-        case 3:
-            pcl::console::setVerbosityLevel(pcl::console::L_INFO);
-            break;
-        case 4:
-            pcl::console::setVerbosityLevel(pcl::console::L_DEBUG);
-            break;
-        default:
-            pcl::console::setVerbosityLevel(pcl::console::L_VERBOSE);
-            break;
-    }
+    pclsupport::setLogLevel(log()->getLevel());
 
     // setup the PMF filter
     pcl::PointIndicesPtr idx(new pcl::PointIndices);

@@ -23,8 +23,7 @@ esac
 
 
 cmake \
-    -DBUILD_PLUGIN_ATTRIBUTE=$OPTIONAL_COMPONENT_SWITCH \
-    -DBUILD_PLUGIN_CPD=OFF \
+    -DBUILD_PLUGIN_CPD=$OPTIONAL_COMPONENT_SWITCH \
     -DBUILD_PLUGIN_GREYHOUND=OFF \
     -DBUILD_PLUGIN_HEXBIN=$OPTIONAL_COMPONENT_SWITCH \
     -DBUILD_PLUGIN_ICEBRIDGE=$OPTIONAL_COMPONENT_SWITCH \
@@ -49,6 +48,8 @@ cmake \
     -G "$PDAL_CMAKE_GENERATOR" \
     ..
 
+cmake ..
+
 MAKECMD=ninja
 
 # Don't use ninja's default number of threads becuase it can
@@ -67,4 +68,14 @@ if [ "${OPTIONAL_COMPONENT_SWITCH}" == "ON" ]; then
     echo "current path: " `pwd`
     export PDAL_TEST_DIR=/pdal/_build/test
     python setup.py test
+    
+    # Build all examples
+    for EXAMPLE in writing writing-filter writing-kernel writing-reader writing-writer
+    do
+        cd /pdal/examples/$EXAMPLE
+        mkdir -p _build || exit 1
+        cd _build || exit 1
+        cmake -G "$PDAL_CMAKE_GENERATOR" .. && \
+        ${MAKECMD}
+    done
 fi

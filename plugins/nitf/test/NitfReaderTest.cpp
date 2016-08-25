@@ -60,8 +60,8 @@ TEST(NitfReaderTest, test_one)
 
     PointTable table;
 
-    std::shared_ptr<Stage> nitf_reader(f.createStage("readers.nitf"));
-    EXPECT_TRUE(nitf_reader.get());
+    Stage* nitf_reader(f.createStage("readers.nitf"));
+    EXPECT_TRUE(nitf_reader);
     nitf_reader->setOptions(nitf_opts);
     nitf_reader->prepare(table);
     PointViewSet pbSet = nitf_reader->execute(table);
@@ -69,14 +69,14 @@ TEST(NitfReaderTest, test_one)
     PointViewPtr view = *pbSet.begin();
 
     // check metadata
-//ABELL
-/**
-    {
-        Metadata metadata = nitf_reader.getMetadata();
-        /////////////////////////////////////////////////EXPECT_EQ(metadatums.size(), 80u);
-        EXPECT_EQ(metadata.toPTree().get<std::string>("metadata.FH_FDT.value"), "20120323002946");
-    }
-**/
+    MetadataNode m = nitf_reader->getMetadata();
+    MetadataNode n = m.findChild(
+        [](MetadataNode& m){ return m.name() == "IM:0.IGEOLO"; }
+    );
+    EXPECT_EQ(n.value(),
+        "440344N1230429W440344N1230346W440300N1230346W440300N1230429W");
+    n = m.findChild("FH.FDT");
+    EXPECT_EQ(n.value(), "20120323002946");
 
     //
     // read LAS
@@ -87,8 +87,8 @@ TEST(NitfReaderTest, test_one)
 
     PointTable table2;
 
-    std::shared_ptr<Stage> las_reader(f.createStage("readers.las"));
-    EXPECT_TRUE(las_reader.get());
+    Stage* las_reader(f.createStage("readers.las"));
+    EXPECT_TRUE(las_reader);
     las_reader->setOptions(las_opts);
     las_reader->prepare(table2);
     PointViewSet pbSet2 = las_reader->execute(table2);
@@ -116,28 +116,6 @@ TEST(NitfReaderTest, test_one)
     }
 }
 
-
-TEST(NitfReaderTest, test_chipper)
-{
-    Option option("filename", Support::configuredpath("nitf/chipper.xml"));
-    Options options(option);
-
-    PointTable table;
-
-    PipelineManager mgr;
-    mgr.readPipeline(Support::configuredpath("nitf/chipper.xml"));
-    //ABELL - need faux writer or something.
-    /**
-    mgr.execute();
-    StageSequentialIterator* iter = reader.createSequentialIterator(data);
-    const uint32_t num_read = iter->read(data);
-    EXPECT_EQ(num_read, 13u);
-
-    uint32_t num_blocks = chipper->GetBlockCount();
-    EXPECT_EQ(num_blocks, 8u);
-    **/
-}
-
 TEST(NitfReaderTest, optionSrs)
 {
     StageFactory f;
@@ -151,8 +129,8 @@ TEST(NitfReaderTest, optionSrs)
 
     PointTable table;
 
-    std::shared_ptr<Stage> nitfReader(f.createStage("readers.nitf"));
-    EXPECT_TRUE(nitfReader.get());
+    Stage* nitfReader(f.createStage("readers.nitf"));
+    EXPECT_TRUE(nitfReader);
     nitfReader->setOptions(nitfOpts);
 
     Options lasOpts;

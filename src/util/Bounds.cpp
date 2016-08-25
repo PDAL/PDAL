@@ -85,8 +85,13 @@ void readpair(std::istream& istr, double& low, double& high)
 namespace pdal
 {
 
-const double BOX2D::LOWEST = (std::numeric_limits<double>::lowest)();
-const double BOX2D::HIGHEST = (std::numeric_limits<double>::max)();
+namespace
+{
+
+const double LOWEST = (std::numeric_limits<double>::lowest)();
+const double HIGHEST = (std::numeric_limits<double>::max)();
+
+}
     
 void BOX2D::clear()
 {
@@ -141,6 +146,46 @@ const BOX3D& BOX3D::getDefaultSpatialExtent()
     return v;
 }    
 
+Bounds::Bounds(const BOX3D& box) : m_box(box)
+{}
+
+
+Bounds::Bounds(const BOX2D& box) : m_box(box)
+{
+    m_box.minz = HIGHEST;
+    m_box.maxz = LOWEST;
+}
+
+BOX3D Bounds::to3d() const
+{
+    if (m_box.minz == HIGHEST && m_box.maxz == LOWEST)
+        return BOX3D();
+    return m_box;
+}
+
+BOX2D Bounds::to2d() const
+{
+    return m_box.to2d();
+}
+
+bool Bounds::is3d() const
+{
+    return (m_box.minz != HIGHEST || m_box.maxz != LOWEST);
+}
+
+
+void Bounds::set(const BOX3D& box)
+{
+    m_box = box;
+}
+
+
+void Bounds::set(const BOX2D& box)
+{
+    m_box = BOX3D(box);
+    m_box.minz = HIGHEST;
+    m_box.maxz = LOWEST;
+}
 
 std::istream& operator>>(std::istream& istr, BOX2D& bounds)
 {
@@ -247,6 +292,25 @@ std::istream& operator>>(std::istream& istr, BOX3D& bounds)
         bounds.maxz = v[5];
     }
     return istr;
+}
+
+std::istream& operator>>(std::istream& in, Bounds& bounds)
+{
+    std::streampos start = in.tellg();
+    BOX3D b3d;
+    in >> b3d;
+    if (in.fail())
+    {
+        in.clear();
+        in.seekg(start);
+        BOX2D b2d;
+        in >> b2d;
+        if (!in.fail())
+            bounds.set(b2d);
+    }
+    else
+        bounds.set(b3d);
+    return in;
 }
 
 } // namespace pdal

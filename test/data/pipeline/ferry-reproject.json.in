@@ -1,0 +1,17 @@
+{
+  "pipeline":[
+    {
+      "filename": "@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las",
+      "spatialreference": "EPSG:2993"
+    },
+    {
+      "type": "filters.ferry",
+      "dimensions": "X=StatePlaneX, Y=StatePlaneY"
+    },
+    {
+      "type": "filters.reprojection",
+      "out_srs": "EPSG:4326+4326"
+    },
+    "@CMAKE_SOURCE_DIR@/test/temp/colorized.las"
+  ]
+}

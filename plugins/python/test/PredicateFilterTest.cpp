@@ -62,11 +62,10 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test1)
 {
     StageFactory f;
 
-
     BOX3D bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
     Options readerOps;
     readerOps.add("bounds", bounds);
-    readerOps.add("num_points", 1000);
+    readerOps.add("count", 1000);
     readerOps.add("mode", "ramp");
 
     FauxReader reader;
@@ -91,7 +90,7 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test1)
     opts.add(module);
     opts.add(function);
 
-    std::unique_ptr<Stage> filter(f.createStage("filters.predicate"));
+    Stage* filter(f.createStage("filters.predicate"));
     filter->setOptions(opts);
     filter->setInput(reader);
 
@@ -110,12 +109,12 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test1)
     const stats::Summary& statsY = stats->getStats(Dimension::Id::Y);
     const stats::Summary& statsZ = stats->getStats(Dimension::Id::Z);
 
-    EXPECT_TRUE(Utils::compare_approx<double>(statsX.minimum(), 0.0, 0.01));
-    EXPECT_TRUE(Utils::compare_approx<double>(statsY.minimum(), 0.0, 0.01));
-    EXPECT_TRUE(Utils::compare_approx<double>(statsZ.minimum(), 0.0, 0.01));
-    EXPECT_TRUE(Utils::compare_approx<double>(statsX.maximum(), 1.0, 0.01));
-    EXPECT_TRUE(Utils::compare_approx<double>(statsY.maximum(), 1.0, 0.01));
-    EXPECT_TRUE(Utils::compare_approx<double>(statsZ.maximum(), 1.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsX.minimum(), 0.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsY.minimum(), 0.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsZ.minimum(), 0.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsX.maximum(), 1.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsY.maximum(), 1.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsZ.maximum(), 1.0, 0.01));
 }
 
 TEST_F(PredicateFilterTest, PredicateFilterTest_test2)
@@ -126,7 +125,7 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test2)
     BOX3D bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
     Options readerOps;
     readerOps.add("bounds", bounds);
-    readerOps.add("num_points", 1000);
+    readerOps.add("count", 1000);
     readerOps.add("mode", "ramp");
 
     FauxReader reader;
@@ -149,7 +148,7 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test2)
     opts.add(module);
     opts.add(function);
 
-    std::unique_ptr<Stage> filter(f.createStage("filters.predicate"));
+    Stage* filter(f.createStage("filters.predicate"));
     filter->setOptions(opts);
     filter->setInput(reader);
 
@@ -168,12 +167,12 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test2)
     const stats::Summary& statsY = stats->getStats(Dimension::Id::Y);
     const stats::Summary& statsZ = stats->getStats(Dimension::Id::Z);
 
-    EXPECT_TRUE(Utils::compare_approx<double>(statsX.minimum(), 1.0, 0.01));
-    EXPECT_TRUE(Utils::compare_approx<double>(statsY.minimum(), 1.0, 0.01));
-    EXPECT_TRUE(Utils::compare_approx<double>(statsZ.minimum(), 1.0, 0.01));
-    EXPECT_TRUE(Utils::compare_approx<double>(statsX.maximum(), 2.0, 0.01));
-    EXPECT_TRUE(Utils::compare_approx<double>(statsY.maximum(), 2.0, 0.01));
-    EXPECT_TRUE(Utils::compare_approx<double>(statsZ.maximum(), 2.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsX.minimum(), 1.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsY.minimum(), 1.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsZ.minimum(), 1.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsX.maximum(), 2.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsY.maximum(), 2.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsZ.maximum(), 2.0, 0.01));
 }
 
 TEST_F(PredicateFilterTest, PredicateFilterTest_test3)
@@ -184,7 +183,7 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test3)
     BOX3D bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
     Options readerOpts;
     readerOpts.add("bounds", bounds);
-    readerOpts.add("num_points", 1000);
+    readerOpts.add("count", 1000);
     readerOpts.add("mode", "ramp");
 
     FauxReader reader;
@@ -209,7 +208,7 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test3)
     opts1.add(module1);
     opts1.add(function1);
 
-    std::unique_ptr<Stage> filter1(f.createStage("filters.predicate"));
+    Stage* filter1(f.createStage("filters.predicate"));
     filter1->setOptions(opts1);
     filter1->setInput(reader);
 
@@ -232,7 +231,7 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test3)
     opts2.add(module2);
     opts2.add(function2);
 
-    std::unique_ptr<Stage> filter2(f.createStage("filters.predicate"));
+    Stage* filter2(f.createStage("filters.predicate"));
     filter2->setOptions(opts2);
     filter2->setInput(*filter1);
 
@@ -249,12 +248,12 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test3)
     const stats::Summary& statsY = stats->getStats(Dimension::Id::Y);
     const stats::Summary& statsZ = stats->getStats(Dimension::Id::Z);
 
-    EXPECT_TRUE(Utils::compare_approx<double>(statsX.minimum(), 0.5, 0.01));
-    EXPECT_TRUE(Utils::compare_approx<double>(statsY.minimum(), 0.5, 0.01));
-    EXPECT_TRUE(Utils::compare_approx<double>(statsZ.minimum(), 0.5, 0.01));
-    EXPECT_TRUE(Utils::compare_approx<double>(statsX.maximum(), 1.0, 0.01));
-    EXPECT_TRUE(Utils::compare_approx<double>(statsY.maximum(), 1.0, 0.01));
-    EXPECT_TRUE(Utils::compare_approx<double>(statsZ.maximum(), 1.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsX.minimum(), 0.5, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsY.minimum(), 0.5, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsZ.minimum(), 0.5, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsX.maximum(), 1.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsY.maximum(), 1.0, 0.01));
+    EXPECT_TRUE(Utils::compare_approx(statsZ.maximum(), 1.0, 0.01));
 }
 
 TEST_F(PredicateFilterTest, PredicateFilterTest_test4)
@@ -265,7 +264,7 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test4)
     BOX3D bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
     Options readerOpts;
     readerOpts.add("bounds", bounds);
-    readerOpts.add("num_points", 1000);
+    readerOpts.add("count", 1000);
     readerOpts.add("mode", "ramp");
 
     FauxReader reader;
@@ -288,7 +287,7 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test4)
     opts.add(module);
     opts.add(function);
 
-    std::unique_ptr<Stage> filter(f.createStage("filters.predicate"));
+    Stage* filter(f.createStage("filters.predicate"));
     filter->setOptions(opts);
     filter->setInput(reader);
 
@@ -320,7 +319,7 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test5)
     BOX3D bounds(0.0, 0.0, 0.0, 2.0, 2.0, 2.0);
     Options readerOpts;
     readerOpts.add("bounds", bounds);
-    readerOpts.add("num_points", 1000);
+    readerOpts.add("count", 1000);
     readerOpts.add("mode", "ramp");
 
     FauxReader reader;
@@ -343,7 +342,7 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test5)
     opts.add(module);
     opts.add(function);
 
-    std::unique_ptr<Stage> filter(f.createStage("filters.predicate"));
+    Stage* filter(f.createStage("filters.predicate"));
     filter->setOptions(opts);
     filter->setInput(reader);
 
@@ -353,7 +352,7 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_test5)
     ASSERT_THROW(filter->execute(table), pdal::pdal_error);
 }
 
-TEST_F(PredicateFilterTest, PredicateFilterTest_Pipeline)
+TEST_F(PredicateFilterTest, PredicateFilterTest_PipelineXML)
 {
     PipelineManager mgr;
 
@@ -362,11 +361,29 @@ TEST_F(PredicateFilterTest, PredicateFilterTest_Pipeline)
     EXPECT_EQ(cnt, 1u);
 }
 
-TEST_F(PredicateFilterTest, PredicateFilterTest_Embed)
+TEST_F(PredicateFilterTest, PredicateFilterTest_PipelineJSON)
+{
+    PipelineManager mgr;
+
+    mgr.readPipeline(Support::configuredpath("plang/from-module.json"));
+    point_count_t cnt = mgr.execute();
+    EXPECT_EQ(cnt, 1u);
+}
+
+TEST_F(PredicateFilterTest, PredicateFilterTest_EmbedXML)
 {
     PipelineManager mgr;
 
     mgr.readPipeline(Support::configuredpath("plang/predicate-embed.xml"));
+    point_count_t cnt = mgr.execute();
+    EXPECT_EQ(cnt, 1u);
+}
+
+TEST_F(PredicateFilterTest, PredicateFilterTest_EmbedJSON)
+{
+    PipelineManager mgr;
+
+    mgr.readPipeline(Support::configuredpath("plang/predicate-embed.json"));
     point_count_t cnt = mgr.execute();
     EXPECT_EQ(cnt, 1u);
 }

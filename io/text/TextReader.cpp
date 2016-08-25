@@ -32,10 +32,12 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <pdal/PDALUtils.hpp>
 #include <pdal/util/Algorithm.hpp>
-#include <pdal/util/FileUtils.hpp>
 
 #include "TextReader.hpp"
+
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {
@@ -51,7 +53,7 @@ std::string TextReader::getName() const { return s_info.name; }
 
 void TextReader::initialize(PointTableRef table)
 {
-    m_istream = FileUtils::openFile(m_filename);
+    m_istream = Utils::openFile(m_filename);
     if (!m_istream)
     {
         std::ostringstream oss;
@@ -81,7 +83,7 @@ void TextReader::initialize(PointTableRef table)
     }
     else
         m_dimNames = Utils::split2(buf, m_separator);
-    FileUtils::closeFile(m_istream);
+    Utils::closeFile(m_istream);
 }
 
 
@@ -89,7 +91,7 @@ void TextReader::addDimensions(PointLayoutPtr layout)
 {
     for (auto name : m_dimNames)
     {
-        Dimension::Id::Enum id = layout->registerOrAssignDim(name,
+        Dimension::Id id = layout->registerOrAssignDim(name,
             Dimension::Type::Double);
         m_dims.push_back(id);
     }
@@ -98,7 +100,7 @@ void TextReader::addDimensions(PointLayoutPtr layout)
 
 void TextReader::ready(PointTableRef table)
 {
-    m_istream = FileUtils::openFile(m_filename);
+    m_istream = Utils::openFile(m_filename);
     if (!m_istream)
     {
         std::ostringstream oss;
@@ -166,7 +168,7 @@ point_count_t TextReader::read(PointViewPtr view, point_count_t numPts)
 
 void TextReader::done(PointTableRef table)
 {
-    FileUtils::closeFile(m_istream);
+    Utils::closeFile(m_istream);
 }
 
 

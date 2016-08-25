@@ -432,6 +432,31 @@ TEST(PointViewTest, order)
     }
 }
 
+TEST(PointViewTest, issue1264)
+{
+    PointTable t;
+    PointLayoutPtr layout(t.layout());
+    Dimension::Id foo = layout->assignDim("foo", Dimension::Type::Unsigned8);
+    Dimension::Id bar = layout->assignDim("bar", Dimension::Type::Signed8);
+    layout->finalize();
+
+    PointView v(t);
+    double d(250.0);
+    v.setField(foo, 0, d);
+    d = v.getFieldAs<double>(foo, 0);
+    EXPECT_DOUBLE_EQ(d, 250.0);
+    d = 123.0;
+    v.setField(bar, 0, d);
+    d = v.getFieldAs<double>(bar, 0);
+    EXPECT_DOUBLE_EQ(d, 123.0);
+    d = -120.23456;
+    v.setField(bar, 0, d);
+    d = v.getFieldAs<double>(bar, 0);
+    EXPECT_DOUBLE_EQ(d, -120.0);
+    d = 260.0;
+    EXPECT_THROW(v.setField(foo, 0, d), pdal_error);
+}
+
 // Per discussions with @abellgithub (https://github.com/gadomski/PDAL/commit/c1d54e56e2de841d37f2a1b1c218ed723053f6a9#commitcomment-14415138)
 // we only do bounds checking on `PointView`s when in debug mode.
 #ifndef NDEBUG

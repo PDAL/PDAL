@@ -1,6 +1,8 @@
 // MyReader.cpp
 
 #include "MyReader.hpp"
+#include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -13,17 +15,9 @@ namespace pdal
 
   std::string MyReader::getName() const { return s_info.name; }
 
-  Options MyReader::getDefaultOptions()
+  void MyReader::addArgs(ProgramArgs& args)
   {
-    Options options;
-    Option z_scale("z_scale", 1.0);
-    options.add(z_scale);
-    return options;
-  }
-
-  void MyReader::processOptions(const Options& options)
-  {
-    m_scale_z = options.getValueOrDefault<double>("z_scale", 1.0);
+    args.add("z_scale", "Z Scaling", m_scale_z, 1.0);
   }
 
   void MyReader::addDimensions(PointLayoutPtr layout)

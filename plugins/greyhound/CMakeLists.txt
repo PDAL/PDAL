@@ -2,8 +2,8 @@
 # Greyhound plugin CMake configuration
 #
 
-find_package(JSONCPP)
 find_package(WEBSOCKETPP)
+
 if(JSONCPP_FOUND AND WEBSOCKETPP_FOUND)
     # add JSONCPP stuff
     include_directories(${JSONCPP_INCLUDE_DIR})

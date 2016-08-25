@@ -217,11 +217,11 @@ TEST(LasWriterTest, extra_dims)
     reader2.prepare(readTable);
     viewSet = reader2.execute(readTable);
     pb = *viewSet.begin();
-    Dimension::Id::Enum r1 = readTable.layout()->findDim("R1");
+    Dimension::Id r1 = readTable.layout()->findDim("R1");
     EXPECT_TRUE(r1 != Dimension::Id::Unknown);
-    Dimension::Id::Enum b1 = readTable.layout()->findDim("B1");
+    Dimension::Id b1 = readTable.layout()->findDim("B1");
     EXPECT_TRUE(b1 != Dimension::Id::Unknown);
-    Dimension::Id::Enum g1 = readTable.layout()->findDim("G1");
+    Dimension::Id g1 = readTable.layout()->findDim("G1");
     EXPECT_TRUE(g1 != Dimension::Id::Unknown);
     EXPECT_EQ(pb->size(), (size_t)1065);
     size_t j = 0;
@@ -264,9 +264,9 @@ TEST(LasWriterTest, all_extra_dims)
 
     PointTable t2;
     r.prepare(t2);
-    Dimension::Id::Enum foo = t2.layout()->findDim("Foo");
-    Dimension::Id::Enum bar = t2.layout()->findDim("Bar");
-    Dimension::Id::Enum baz = t2.layout()->findDim("Baz");
+    Dimension::Id foo = t2.layout()->findDim("Foo");
+    Dimension::Id bar = t2.layout()->findDim("Bar");
+    Dimension::Id baz = t2.layout()->findDim("Baz");
 
     PointViewSet s = r.execute(t2);
     EXPECT_EQ(s.size(), 1u);
@@ -665,10 +665,11 @@ TEST(LasWriterTest, fix1063_1064_1065)
 
     FileUtils::deleteFile(outfile);
 
-
     std::string cmd = "pdal translate --writers.las.forward=all "
         "--writers.las.a_srs=\"EPSG:4326\" " + infile + " " + outfile;
     std::string output;
+    std::cerr << "*** Shell command = " <<
+        Support::binpath(cmd) << "!\n";
     Utils::run_shell_command(Support::binpath(cmd), output);
 
     Options o;

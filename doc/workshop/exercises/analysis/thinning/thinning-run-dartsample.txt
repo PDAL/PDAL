@@ -1,0 +1,6 @@
+docker run -v /c/Users/Howard/PDAL:/data -t pdal/pdal \
+       pdal translate \
+       /data/exercises/analysis/density/uncompahgre.laz \
+       /data/exercises/analysis/thinning/uncompahgre-thin.laz \
+       dartsample \
+       --filters.dartsample.radius=20

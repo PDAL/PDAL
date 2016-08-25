@@ -37,16 +37,25 @@
 #include <pdal/util/FileUtils.hpp>
 
 // filters
+#include <approximatecoplanar/ApproximateCoplanarFilter.hpp>
+#include <attribute/AttributeFilter.hpp>
 #include <chipper/ChipperFilter.hpp>
 #include <colorization/ColorizationFilter.hpp>
 #include <crop/CropFilter.hpp>
 #include <decimation/DecimationFilter.hpp>
 #include <divider/DividerFilter.hpp>
+#include <eigenvalues/EigenvaluesFilter.hpp>
+#include <estimaterank/EstimateRankFilter.hpp>
 #include <ferry/FerryFilter.hpp>
+#include <hag/HAGFilter.hpp>
 #include <merge/MergeFilter.hpp>
 #include <mortonorder/MortonOrderFilter.hpp>
+#include <normal/NormalFilter.hpp>
+#include <outlier/OutlierFilter.hpp>
+#include <pmf/PMFFilter.hpp>
 #include <range/RangeFilter.hpp>
 #include <reprojection/ReprojectionFilter.hpp>
+#include <sample/SampleFilter.hpp>
 #include <sort/SortFilter.hpp>
 #include <splitter/SplitterFilter.hpp>
 #include <stats/StatsFilter.hpp>
@@ -61,6 +70,7 @@
 #include <optech/OptechReader.hpp>
 #include <buffer/BufferReader.hpp>
 #include <ply/PlyReader.hpp>
+#include <pts/PtsReader.hpp>
 #include <qfit/QfitReader.hpp>
 #include <sbet/SbetReader.hpp>
 #include <terrasolid/TerrasolidReader.hpp>
@@ -83,102 +93,122 @@
 namespace pdal
 {
 
+StringList StageFactory::extensions(const std::string& driver)
+{
+    static std::map<std::string, StringList> exts =
+    {
+        { "readers.terrasolid", { "bin" } },
+        { "readers.bpf", { "bpf" }  },
+        { "readers.optech", { "csd" } },
+        { "readers.greyhound", { "greyhound" } },
+        { "readers.icebridge", { "icebridge" } },
+        { "readers.las", { "las", "laz" } },
+        { "readers.nitf", { "nitf", "nsf", "ntf" } },
+        { "readers.pcd", { "pcd" } },
+        { "readers.ply", { "ply" } },
+        { "readers.pts", { "pts" } },
+        { "readers.qfit", { "qi" } },
+        { "readers.rxp", { "rxp" } },
+        { "readers.sbet", { "sbet" } },
+        { "readers.sqlite", { "sqlite" } },
+        { "readers.mrsid", { "sid" } },
+        { "readers.tindex", { "tindex" } },
+        { "readers.txt", { "txt" } },
+        { "readers.icebridge", { "h5" } },
+
+        { "writers.bpf", { "bpf" } },
+        { "writers.text", { "csv", "json", "txt", "xyz" } },
+        { "writers.las", { "las", "laz" } },
+        { "writers.matlab", { "mat" } },
+        { "writers.nitf", { "nitf", "nsf", "ntf" } },
+        { "writers.pcd", { "pcd" } },
+        { "writers.pclvisualizer", { "pclvis" } },
+        { "writers.ply", { "ply" } },
+        { "writers.sbet", { "sbet" } },
+        { "writers.derivative", { "derivative" } },
+        { "writers.sqlite", { "sqlite" } },
+    };
+
+    return exts[driver];
+}
+
 std::string StageFactory::inferReaderDriver(const std::string& filename)
 {
+    static std::map<std::string, std::string> drivers =
+    {
+        { "bin", "readers.terrasolid" },
+        { "bpf", "readers.bpf" },
+        { "csd", "readers.optech" },
+        { "greyhound", "readers.greyhound" },
+        { "http", "readers.greyhound" },
+        { "icebridge", "readers.icebridge" },
+        { "las", "readers.las" },
+        { "laz", "readers.las" },
+        { "nitf", "readers.nitf" },
+        { "nsf", "readers.nitf" },
+        { "ntf", "readers.nitf" },
+        { "pcd", "readers.pcd" },
+        { "ply", "readers.ply" },
+        { "pts", "readers.pts" },
+        { "qi", "readers.qfit" },
+        { "rxp", "readers.rxp" },
+        { "sbet", "readers.sbet" },
+        { "sqlite", "readers.sqlite" },
+        { "sid", "readers.mrsid" },
+        { "tindex", "readers.tindex" },
+        { "txt", "readers.txt" },
+        { "h5", "readers.icebridge" }
+    };
+
+    std::string ext;
     // filename may actually be a greyhound uri + pipelineId
-    std::string http = filename.substr(0, 4);
-    if (Utils::iequals(http, "http"))
-        return "readers.greyhound";
+    if (Utils::iequals(filename.substr(0, 4), "http"))
+        ext = ".http";      // Make it look like an extension.
+    else
+        ext = FileUtils::extension(filename);
 
-    std::string ext = FileUtils::extension(filename);
-    std::map<std::string, std::string> drivers;
-    drivers["bin"] = "readers.terrasolid";
-    drivers["bpf"] = "readers.bpf";
-    drivers["cpd"] = "readers.optech";
-    drivers["greyhound"] = "readers.greyhound";
-    drivers["icebridge"] = "readers.icebridge";
-    drivers["las"] = "readers.las";
-    drivers["laz"] = "readers.las";
-    drivers["nitf"] = "readers.nitf";
-    drivers["nsf"] = "readers.nitf";
-    drivers["ntf"] = "readers.nitf";
-    drivers["pcd"] = "readers.pcd";
-    drivers["ply"] = "readers.ply";
-    drivers["qi"] = "readers.qfit";
-    drivers["rxp"] = "readers.rxp";
-    drivers["sbet"] = "readers.sbet";
-    drivers["sqlite"] = "readers.sqlite";
-    drivers["sid"] = "readers.mrsid";
-    drivers["tindex"] = "readers.tindex";
-    drivers["txt"] = "readers.text";
-    drivers["h5"] = "readers.icebridge";
+    // Strip off '.' and make lowercase.
+    if (ext.length())
+        ext = Utils::tolower(ext.substr(1, ext.length() - 1));
 
-    if (ext == "")
-        return "";
-    ext = ext.substr(1, ext.length()-1);
-    if (ext == "")
-        return "";
-
-    ext = Utils::tolower(ext);
-    std::string driver = drivers[ext];
-    return driver; // will be "" if not found
+    return drivers[ext]; // will be "" if not found
 }
 
 
 std::string StageFactory::inferWriterDriver(const std::string& filename)
 {
-    std::string ext = Utils::tolower(FileUtils::extension(filename));
+    std::string ext;
 
-    std::map<std::string, std::string> drivers;
-    drivers["bpf"] = "writers.bpf";
-    drivers["csv"] = "writers.text";
-    drivers["json"] = "writers.text";
-    drivers["las"] = "writers.las";
-    drivers["laz"] = "writers.las";
-    drivers["mat"] = "writers.matlab";
-    drivers["ntf"] = "writers.nitf";
-    drivers["pcd"] = "writers.pcd";
-    drivers["pclviz"] = "writers.pclvisualizer";
-    drivers["ply"] = "writers.ply";
-    drivers["sbet"] = "writers.sbet";
-    drivers["derivative"] = "writers.derivative";
-    drivers["sqlite"] = "writers.sqlite";
-    drivers["txt"] = "writers.text";
-    drivers["xyz"] = "writers.text";
+    if (filename == "STDOUT")
+        ext = ".txt";
+    else
+        ext = Utils::tolower(FileUtils::extension(filename));
 
-    if (Utils::iequals(filename, "STDOUT"))
-        return drivers["txt"];
-
-    if (ext == "")
-        return drivers["txt"];
-    ext = ext.substr(1, ext.length()-1);
-    if (ext == "")
-        return drivers["txt"];
-
-    ext = Utils::tolower(ext);
-    std::string driver = drivers[ext];
-    return driver; // will be "" if not found
-}
-
-
-pdal::Options StageFactory::inferWriterOptionsChanges(
-    const std::string& filename)
-{
-    std::string ext = FileUtils::extension(filename);
-    ext = Utils::tolower(ext);
-    Options options;
-
-    if (Utils::iequals(ext,".laz"))
-        options.add("compression", true);
-
-    if (Utils::iequals(ext, ".pcd") &&
-        PluginManager::createObject("writers.pcd"))
+    static std::map<std::string, std::string> drivers =
     {
-        options.add("format","PCD");
-    }
+        { "bpf", "writers.bpf" },
+        { "csv", "writers.text" },
+        { "json", "writers.text" },
+        { "las", "writers.las" },
+        { "laz", "writers.las" },
+        { "mat", "writers.matlab" },
+        { "ntf", "writers.nitf" },
+        { "pcd", "writers.pcd" },
+        { "pclviz", "writers.pclvisualizer" },
+        { "ply", "writers.ply" },
+        { "sbet", "writers.sbet" },
+        { "derivative", "writers.derivative" },
+        { "sqlite", "writers.sqlite" },
+        { "txt", "writers.text" },
+        { "xyz", "writers.text" },
+        { "", "writers.text" }
+    };
 
-    options.add<std::string>("filename", filename);
-    return options;
+    // Strip off '.' and make lowercase.
+    if (ext.length())
+        ext = Utils::tolower(ext.substr(1, ext.length() - 1));
+
+    return drivers[ext];
 }
 
 
@@ -191,16 +221,25 @@ StageFactory::StageFactory(bool no_plugins)
     }
 
     // filters
+    PluginManager::initializePlugin(ApproximateCoplanarFilter_InitPlugin);
+    PluginManager::initializePlugin(AttributeFilter_InitPlugin);
     PluginManager::initializePlugin(ChipperFilter_InitPlugin);
     PluginManager::initializePlugin(ColorizationFilter_InitPlugin);
     PluginManager::initializePlugin(CropFilter_InitPlugin);
     PluginManager::initializePlugin(DecimationFilter_InitPlugin);
     PluginManager::initializePlugin(DividerFilter_InitPlugin);
+    PluginManager::initializePlugin(EigenvaluesFilter_InitPlugin);
+    PluginManager::initializePlugin(EstimateRankFilter_InitPlugin);
     PluginManager::initializePlugin(FerryFilter_InitPlugin);
+    PluginManager::initializePlugin(HAGFilter_InitPlugin);
     PluginManager::initializePlugin(MergeFilter_InitPlugin);
     PluginManager::initializePlugin(MortonOrderFilter_InitPlugin);
+    PluginManager::initializePlugin(NormalFilter_InitPlugin);
+    PluginManager::initializePlugin(OutlierFilter_InitPlugin);
+    PluginManager::initializePlugin(PMFFilter_InitPlugin);
     PluginManager::initializePlugin(RangeFilter_InitPlugin);
     PluginManager::initializePlugin(ReprojectionFilter_InitPlugin);
+    PluginManager::initializePlugin(SampleFilter_InitPlugin);
     PluginManager::initializePlugin(SortFilter_InitPlugin);
     PluginManager::initializePlugin(SplitterFilter_InitPlugin);
     PluginManager::initializePlugin(StatsFilter_InitPlugin);
@@ -214,6 +253,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(LasReader_InitPlugin);
     PluginManager::initializePlugin(OptechReader_InitPlugin);
     PluginManager::initializePlugin(PlyReader_InitPlugin);
+    PluginManager::initializePlugin(PtsReader_InitPlugin);
     PluginManager::initializePlugin(QfitReader_InitPlugin);
     PluginManager::initializePlugin(SbetReader_InitPlugin);
     PluginManager::initializePlugin(TerrasolidReader_InitPlugin);
@@ -231,18 +271,11 @@ StageFactory::StageFactory(bool no_plugins)
 }
 
 
-/// Create a stage and return a pointer to the created stage.  Caller takes
-/// ownership unless the ownStage argument is true.
-///
-/// \param[in] stage_name  Type of stage to by created.
-/// \param[in] ownStage    Whether the factory should own the stage.
-/// \return  Pointer to created stage.
-///
-Stage *StageFactory::createStage(std::string const& stage_name,
-    bool ownStage)
+Stage *StageFactory::createStage(std::string const& stage_name)
 {
+    static_assert(0 < sizeof(Stage), "");
     Stage *s = static_cast<Stage*>(PluginManager::createObject(stage_name));
-    if (s && ownStage)
+    if (s)
     {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_ownedStages.push_back(std::unique_ptr<Stage>(s));
@@ -250,5 +283,18 @@ Stage *StageFactory::createStage(std::string const& stage_name,
     return s;
 }
 
-} // namespace pdal
 
+void StageFactory::destroyStage(Stage *s)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    for (auto it = m_ownedStages.begin(); it != m_ownedStages.end(); ++it)
+    {
+        if (s == it->get())
+        {
+            m_ownedStages.erase(it);
+            break;
+        }
+    }
+}
+
+} // namespace pdal

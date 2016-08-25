@@ -46,7 +46,7 @@ TEST(DividerFilterTest, partition_count)
     Options readerOps;
     readerOps.add("bounds", BOX3D(1, 1, 1, count, count, count));
     readerOps.add("mode", "ramp");
-    readerOps.add("num_points", count);
+    readerOps.add("count", count);
 
     FauxReader r;
     r.setOptions(readerOps);
@@ -83,7 +83,7 @@ TEST(DividerFilterTest, partition_capacity)
     Options readerOps;
     readerOps.add("bounds", BOX3D(1, 1, 1, count, count, count));
     readerOps.add("mode", "ramp");
-    readerOps.add("num_points", count);
+    readerOps.add("count", count);
 
     FauxReader r;
     r.setOptions(readerOps);
@@ -120,7 +120,7 @@ TEST(DividerFilterTest, round_robin_count)
     Options readerOps;
     readerOps.add("bounds", BOX3D(1, 1, 1, count, count, count));
     readerOps.add("mode", "ramp");
-    readerOps.add("num_points", count);
+    readerOps.add("count", count);
 
     FauxReader r;
     r.setOptions(readerOps);
@@ -165,7 +165,7 @@ TEST(DividerFilterTest, round_robin_capacity)
     Options readerOps;
     readerOps.add("bounds", BOX3D(1, 1, 1, count, count, count));
     readerOps.add("mode", "ramp");
-    readerOps.add("num_points", count);
+    readerOps.add("count", count);
 
     FauxReader r;
     r.setOptions(readerOps);

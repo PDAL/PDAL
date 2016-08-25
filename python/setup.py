@@ -108,8 +108,26 @@ extra_link_args = []
 
 from setuptools.extension import Extension as DistutilsExtension
 
-if pdal_config:
+if pdal_config and "clean" not in sys.argv:
     # Collect other options from PDAL
+    try:
+
+        # Running against different major versions is going to fail.
+        # Minor versions might too, depending on numpy.
+        for item in get_pdal_config('--python-version').split():
+            if item:
+                # 2.7.4 or 3.5.2
+                built_version = item.split('.')
+                built_major = int(built_version[0])
+                running_major = int(sys.version_info[0])
+                if built_major != running_major:
+                    message = "Version mismatch. PDAL Python support was compiled against version %d.x but setup is running version is %d.x. "
+                    raise Exception(message % (built_major, running_major))
+
+    # older versions of pdal-config do not include --python-version switch
+    except ValueError:
+        pass
+
     for item in get_pdal_config('--includes').split():
         if item.startswith("-I"):
             include_dirs.extend(item[2:].split(":"))
@@ -135,7 +153,7 @@ extensions = [DistutilsExtension("*",
                                    extra_compile_args=extra_compile_args,
                                    libraries=libraries,
                                    extra_link_args=extra_link_args,)]
-if USE_CYTHON:
+if USE_CYTHON and "clean" not in sys.argv:
     from Cython.Build import cythonize
     extensions= cythonize(extensions, language="c++")
 

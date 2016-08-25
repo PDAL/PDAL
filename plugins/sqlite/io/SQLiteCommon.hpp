@@ -183,6 +183,7 @@ public:
         if (bWrite)
         {
             m_log->get(LogLevel::Debug3) << "Connecting db for write"<< std::endl;
+            std::cerr << "Open for create!\n";
             flags |= SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
         }
         else
@@ -194,6 +195,7 @@ public:
         int status = sqlite3_open_v2(m_connection.c_str(), &m_session, flags, 0);
         if (status != SQLITE_OK)
         {
+            std::cerr << "Connection = " << m_connection << "!\n";
             error("Unable to open database", "connect");
         }
     }
@@ -457,9 +459,13 @@ public:
         lib_extension = "mod_";
 #endif
 
-#ifdef __linux__
+#if defined(__linux__) || defined(__FreeBSD_kernel__)
         so_extension = "so";
+#ifdef MOD_SPATIALITE
+        lib_extension = "mod_";
+#else
         lib_extension = "lib";
+#endif
 #endif
 
 #ifdef _WIN32

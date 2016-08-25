@@ -43,7 +43,6 @@
 #include <pdal/util/Algorithm.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Utils.hpp>
-#include <pdal/Log.hpp>
 
 #include "DynamicLibrary.hpp"
 
@@ -61,7 +60,7 @@ static PluginManager s_instance;
 
 #if defined(__APPLE__) && defined(__MACH__)
     const std::string dynamicLibraryExtension(".dylib");
-#elif defined __linux__
+#elif defined(__linux__) || defined(__FreeBSD_kernel__) || defined(__GNU__)
     const std::string dynamicLibraryExtension(".so");
 #elif defined _WIN32
     const std::string dynamicLibraryExtension(".dll");
@@ -79,6 +78,31 @@ bool pluginTypeValid(std::string pathname, PF_PluginType type)
         (Utils::startsWith(pathname, "libpdal_plugin_writer") &&
             type & PF_PluginType_Writer));
 }
+
+StringList pluginSearchPaths()
+{
+    StringList searchPaths;
+    std::string envOverride;
+
+    Utils::getenv("PDAL_DRIVER_PATH", envOverride);
+
+    if (!envOverride.empty())
+        searchPaths = Utils::split2(envOverride, ':');
+    else
+    {
+        searchPaths.push_back(PDAL_PLUGIN_INSTALL_PATH);
+        StringList standardPaths = { "./lib", "../lib", "../bin",
+            PDAL_PLUGIN_INSTALL_PATH };
+        for (std::string& s : standardPaths)
+        {
+            if (FileUtils::toAbsolutePath(s) !=
+                FileUtils::toAbsolutePath(PDAL_PLUGIN_INSTALL_PATH))
+                searchPaths.push_back(s);
+        }
+    }
+    return searchPaths;
+}
+
 
 } // unnamed namespace;
 
@@ -113,27 +137,26 @@ void PluginManager::loadAll(int type)
 
 void PluginManager::l_loadAll(PF_PluginType type)
 {
-    std::string driver_path("PDAL_DRIVER_PATH");
-    std::string pluginDir = Utils::getenv(driver_path);
-
-    // If we don't have a driver path, defaults are set.
-    if (pluginDir.size() == 0)
-    {
-        std::ostringstream oss;
-        oss << PDAL_PLUGIN_INSTALL_PATH <<
-            ":/usr/local/lib:./lib:../lib:../bin";
-        pluginDir = oss.str();
-    }
-
-    std::vector<std::string> pluginPathVec = Utils::split2(pluginDir, ':');
-
-    for (const auto& pluginPath : pluginPathVec)
+    for (const auto& pluginPath : pluginSearchPaths())
         loadAll(pluginPath, type);
 }
+
+
+StringList PluginManager::test_pluginSearchPaths()
+{
+    return pluginSearchPaths();
+}
+
 
 StringList PluginManager::names(int typeMask)
 {
     return s_instance.l_names(typeMask);
+}
+
+
+void PluginManager::setLog(LogPtr& log)
+{
+    s_instance.m_log = log;
 }
 
 
@@ -192,6 +215,8 @@ void PluginManager::loadAll(const std::string& pluginDirectory, int type)
 
     if (pluginDirectoryValid)
     {
+        m_log->get(LogLevel::Debug) << "Loading plugins from directory " <<
+            pluginDirectory << std::endl;
         StringList files = FileUtils::directoryList(pluginDirectory);
         for (auto file : files)
         {
@@ -221,7 +246,7 @@ bool PluginManager::l_initializePlugin(PF_InitFunc initFunc)
 }
 
 
-PluginManager::PluginManager()
+PluginManager::PluginManager() : m_log(new Log("PDAL", &std::clog))
 {
     m_version.major = 1;
     m_version.minor = 0;
@@ -231,7 +256,7 @@ PluginManager::PluginManager()
 PluginManager::~PluginManager()
 {
     if (!shutdown())
-        Log("PDAL", "stderr").get(LogLevel::Error) <<
+        m_log->get(LogLevel::Error) <<
             "Error destroying PluginManager" << std::endl;
 }
 
@@ -323,27 +348,10 @@ bool PluginManager::guessLoadByPath(const std::string& driverName)
     std::vector<std::string> driverNameVec;
     driverNameVec = Utils::split2(driverName, '.');
 
-    std::string pluginName = "libpdal_plugin_" + driverNameVec[0] + "_" +
-        driverNameVec[1];
-
-    std::string driver_path("PDAL_DRIVER_PATH");
-    std::string pluginDir = Utils::getenv(driver_path);
-
-    // Default path below if not set.
-    if (pluginDir.size() == 0)
+    for (const auto& pluginPath : pluginSearchPaths())
     {
-        std::ostringstream oss;
-        oss << PDAL_PLUGIN_INSTALL_PATH <<
-            ":/usr/local/lib:./lib:../lib:../bin";
-        pluginDir = oss.str();
-    }
-
-    Log("PDAL", "stderr").get(LogLevel::Debug) <<
-        "Plugin search path '" << pluginDir << "'" << std::endl;
-
-    std::vector<std::string> pluginPathVec = Utils::split2(pluginDir, ':');
-    for (const auto& pluginPath : pluginPathVec)
-    {
+        m_log->get(LogLevel::Debug) <<
+           "Plugin search path: '" << pluginPath << "'" << std::endl;
         if (!FileUtils::fileExists(pluginPath) ||
             !FileUtils::isDirectory(pluginPath))
             continue;
@@ -398,29 +406,28 @@ bool PluginManager::loadByPath(const std::string& pluginPath, int type)
     // If we are a valid type, and we're not yet already
     // loaded in the LibraryMap, load it.
 
-    Log log("PDAL", "stderr");
-
     if (pluginTypeValid(filename, type) && !libraryLoaded(pluginPath))
     {
         std::string errorString;
         auto completePath(FileUtils::toAbsolutePath(pluginPath));
 
-        log.get(LogLevel::Debug) << "Attempting to load plugin '" <<
+        m_log->get(LogLevel::Debug) << "Attempting to load plugin '" <<
             completePath << "'." << std::endl;
 
         if (DynamicLibrary *d = loadLibrary(completePath, errorString))
         {
-            log.get(LogLevel::Debug) << "Loaded plugin '" << completePath <<
+            m_log->get(LogLevel::Debug) << "Loaded plugin '" << completePath <<
                 "'." << std::endl;
             if (PF_InitFunc initFunc =
                     (PF_InitFunc)(d->getSymbol("PF_initPlugin")))
             {
                 loaded = initializePlugin(initFunc);
-                log.get(LogLevel::Debug) << "Initialized plugin '" <<
+                m_log->get(LogLevel::Debug) << "Initialized plugin '" <<
                     completePath << "'." << std::endl;
             }
             else
-                log.get(LogLevel::Error) << "Failed to initialize plugin '" <<
+                m_log->get(LogLevel::Error) <<
+                    "Failed to initialize plugin function for plugin '" <<
                     completePath << "'." << std::endl;
         }
     }
@@ -468,6 +475,11 @@ DynamicLibrary *PluginManager::loadLibrary(const std::string& path,
     {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_dynamicLibraryMap[FileUtils::toAbsolutePath(path)] = DynLibPtr(d);
+    }
+    else
+    {
+        m_log->get(LogLevel::Error) << "Can't load library " << path <<
+            ": " << errorString;
     }
 
     return d;

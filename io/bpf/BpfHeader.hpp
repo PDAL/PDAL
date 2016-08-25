@@ -75,7 +75,7 @@ struct BpfMuellerMatrix
         for (size_t i = 12; i < 16; ++i)
             std::cerr << m_vals[i] << '\t';
         std::cerr << "\n\n";
-        
+
     }
 
     void apply(double& x, double& y, double& z)
@@ -91,37 +91,31 @@ struct BpfMuellerMatrix
 ILeStream& operator >> (ILeStream& stream, BpfMuellerMatrix& m);
 OLeStream& operator << (OLeStream& stream, BpfMuellerMatrix& m);
 
-namespace BpfFormat
-{
-enum Enum
+enum class BpfFormat
 {
     DimMajor,
     PointMajor,
     ByteMajor
 };
-}
 
-namespace BpfCoordType
-{
-enum Enum
+std::istream& operator >> (std::istream& in, BpfFormat& format);
+std::ostream& operator << (std::ostream& in, const BpfFormat& format);
+
+enum class BpfCoordType
 {
     None,
     UTM,
     TCR,
     ENU
 };
-}
 
-namespace BpfCompression
-{
-enum Enum
+enum class BpfCompression
 {
     None,
     QuickLZ,
     FastLZ,
     Zlib
 };
-}
 
 struct BpfDimension
 {
@@ -135,7 +129,7 @@ struct BpfDimension
     double m_min;
     double m_max;
     std::string m_label;
-    Dimension::Id::Enum m_id;
+    Dimension::Id m_id;
 
     static bool read(ILeStream& stream, std::vector<BpfDimension>& dims,
         size_t start);
@@ -146,16 +140,16 @@ typedef std::vector<BpfDimension> BpfDimensionList;
 struct BpfHeader
 {
     BpfHeader() : m_version(0), m_len(176), m_numDim(0),
-        m_compression(BpfCompression::None), m_numPts(0),
-        m_coordType(BpfCoordType::None), m_coordId(0), m_spacing(0.0),
-        m_startTime(0.0), m_endTime(0.0)
+        m_compression(Utils::toNative(BpfCompression::None)), m_numPts(0),
+        m_coordType(Utils::toNative(BpfCoordType::None)), m_coordId(0),
+        m_spacing(0.0), m_startTime(0.0), m_endTime(0.0)
     {}
 
     int32_t m_version;
     std::string m_ver;
     int32_t m_len;
     int32_t m_numDim;
-    BpfFormat::Enum m_pointFormat;
+    BpfFormat m_pointFormat;
     uint8_t m_compression;
     int32_t m_numPts;
     int32_t m_coordType;
@@ -167,13 +161,14 @@ struct BpfHeader
     std::vector<BpfDimension> m_staticDims;
     LogPtr m_log;
 
-    void setLog(const LogPtr& log)
+    PDAL_DLL void setLog(const LogPtr& log)
          { m_log = log; }
-    bool read(ILeStream& stream);
+    PDAL_DLL bool read(ILeStream& stream);
     bool write(OLeStream& stream);
     bool readV3(ILeStream& stream);
     bool readV1(ILeStream& stream);
-    bool readDimensions(ILeStream& stream, std::vector<BpfDimension>& dims);
+    PDAL_DLL bool readDimensions(ILeStream& stream,
+        std::vector<BpfDimension>& dims);
     void writeDimensions(OLeStream& stream, std::vector<BpfDimension>& dims);
     void dump();
 };
@@ -215,6 +210,14 @@ struct BpfUlemFile
     std::string m_filename;
     std::vector<char> m_buf;
     std::string m_filespec;
+
+    BpfUlemFile() : m_len(0)
+    {}
+
+    BpfUlemFile(uint32_t len, const std::string& filename,
+            const std::string& filespec) :
+        m_len(len), m_filename(filename), m_filespec(filespec)
+    {}
 
     bool read(ILeStream& stream);
     bool write(OLeStream& stream);

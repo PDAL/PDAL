@@ -35,12 +35,13 @@
 #include "TextWriter.hpp"
 
 #include <pdal/pdal_export.hpp>
+#include <pdal/PDALUtils.hpp>
 #include <pdal/PointView.hpp>
+#include <pdal/pdal_macros.hpp>
 #include <pdal/util/Algorithm.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
-#include <algorithm>
 #include <iostream>
-#include <map>
 
 namespace pdal
 {
@@ -63,30 +64,32 @@ struct FileStreamDeleter
         if (ptr)
         {
             ptr->flush();
-            FileUtils::closeFile(ptr);
+            Utils::closeFile(ptr);
         }
     }
 };
 
 
-Options TextWriter::getDefaultOptions()
+void TextWriter::addArgs(ProgramArgs& args)
 {
-    Options options;
-
-    options.add("delimiter", ",", "Delimiter to use for writing text");
-    options.add("newline", "\n", "Newline character to use for additional "
-        "lines");
-    options.add("quote_header", true, "Write dimension names in quotes");
-    options.add("filename", "", "Filename to write CSV file to");
-
-    return options;
+    args.add("filename", "Output filename", m_filename);
+    args.add("format", "Output format", m_outputType, "csv");
+    args.add("jscallback", "", m_callback);
+    args.add("keep_unspecified", "Write all dimensions", m_writeAllDims, true);
+    args.add("order", "Dimension order", m_dimOrder);
+    args.add("write_header", "Whether a header should be written",
+        m_writeHeader, true);
+    args.add("newline", "String to use as newline", m_newline, "\n");
+    args.add("delimiter", "Dimension delimiter", m_delimiter, ",");
+    args.add("quote_header", "Whether a header should be quoted",
+        m_quoteHeader, true);
+    args.add("precision", "Output precision", m_precision, 3);
 }
 
 
-void TextWriter::processOptions(const Options& ops)
+void TextWriter::initialize(PointTableRef table)
 {
-    m_filename = ops.getValueOrThrow<std::string>("filename");
-    m_stream = FileStreamPtr(FileUtils::createFile(m_filename, true),
+    m_stream = FileStreamPtr(Utils::createFile(m_filename, true),
         FileStreamDeleter());
     if (!m_stream)
     {
@@ -95,19 +98,7 @@ void TextWriter::processOptions(const Options& ops)
             "' for output.";
         throw pdal_error(out.str());
     }
-    m_outputType = ops.getValueOrDefault<std::string>("format", "csv");
     m_outputType = Utils::toupper(m_outputType);
-    m_callback = ops.getValueOrDefault<std::string>("jscallback", "");
-    m_writeAllDims = ops.getValueOrDefault<bool>("keep_unspecified", true);
-    m_dimOrder = ops.getValueOrDefault<std::string>("order", "");
-    m_writeHeader = ops.getValueOrDefault<bool>("write_header", true);
-    m_newline = ops.getValueOrDefault<std::string>("newline", "\n");
-    m_delimiter = ops.getValueOrDefault<std::string>("delimiter", ",");
-    if (m_delimiter.empty())
-        m_delimiter = " ";
-    m_quoteHeader = ops.getValueOrDefault<bool>("quote_header", true);
-    m_packRgb = ops.getValueOrDefault<bool>("pack_rgb", true);
-    m_precision = ops.getValueOrDefault<int>("precision", 3);
 }
 
 
@@ -121,7 +112,7 @@ void TextWriter::ready(PointTableRef table)
     for (std::string dim : dimNames)
     {
         Utils::trim(dim);
-        Dimension::Id::Enum d = table.layout()->findDim(dim);
+        Dimension::Id d = table.layout()->findDim(dim);
         if (d == Dimension::Id::Unknown)
         {
             std::ostringstream oss;

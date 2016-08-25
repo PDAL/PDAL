@@ -34,10 +34,13 @@
 
 #include "BpfReader.hpp"
 
+#include <climits>
+
 #include <zlib.h>
 
 #include <pdal/Options.hpp>
 #include <pdal/pdal_export.hpp>
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {
@@ -52,16 +55,6 @@ static PluginInfo const s_info = PluginInfo(
 CREATE_STATIC_PLUGIN(1, 0, BpfReader, Reader, s_info)
 
 std::string BpfReader::getName() const { return s_info.name; }
-
-void BpfReader::processOptions(const Options&)
-{
-    if (m_filename.empty())
-        throw pdal_error("Can't read BPF file without filename.");
-
-    // Logfile doesn't get set until options are processed.
-    m_header.setLog(log());
-}
-
 
 QuickInfo BpfReader::inspect()
 {
@@ -100,6 +93,12 @@ QuickInfo BpfReader::inspect()
 // the dimensions in the PointView.
 void BpfReader::initialize()
 {
+    if (m_filename.empty())
+        throw pdal_error("Can't read BPF file without filename.");
+
+    // Logfile doesn't get set until options are processed.
+    m_header.setLog(log());
+
     m_stream.open(m_filename);
 
     // Resets the stream position in case it was already open.
@@ -112,7 +111,7 @@ void BpfReader::initialize()
         return;
 
     uint32_t zone(abs(m_header.m_coordId));
-    std::string code("");
+    std::string code;
     if (m_header.m_coordId > 0)
         code = "EPSG:326" + Utils::toString(zone);
     else
@@ -151,7 +150,7 @@ void BpfReader::addDimensions(PointLayoutPtr layout)
 {
     for (size_t i = 0; i < m_dims.size(); ++i)
     {
-        Dimension::Type::Enum type = Dimension::Type::Float;
+        Dimension::Type type = Dimension::Type::Float;
 
         BpfDimension& dim = m_dims[i];
         if (dim.m_label == "X" ||
@@ -572,7 +571,8 @@ void BpfReader::seekByteMajor(size_t dimIdx, size_t byteIdx, PointId ptIdx)
 }
 
 
-int BpfReader::inflate(char *buf, size_t insize, char *outbuf, size_t outsize)
+int BpfReader::inflate(char *buf, uint32_t insize,
+    char *outbuf, uint32_t outsize)
 {
    if (insize == 0)
         return 0;

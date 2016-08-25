@@ -41,7 +41,7 @@
 #include <string>
 #include <vector>
 
-#include <pdal/KernelSupport.hpp>
+#include <pdal/PipelineManager.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
@@ -67,10 +67,8 @@ public:
     {}
 
     // call this, to start the machine
-    int run(int argc, const char* argv[], const std::string& appName);
+    int run(const StringList& cmdArgs, LogPtr& log);
 
-    bool isDebug() const;
-    uint32_t getVerboseLevel() const;
     virtual std::string getName() const = 0;
     bool isVisualize() const;
     void visualize(PointViewPtr view);
@@ -78,8 +76,17 @@ public:
 protected:
     // this is protected; your derived class ctor will be the public entry point
     Kernel();
-    Stage& makeReader(const std::string& inputFile);
-    Stage& makeWriter(const std::string& outputFile, Stage& parent);
+    Stage& makeReader(const std::string& inputFile, std::string driver);
+    Stage& makeReader(const std::string& inputFile, std::string driver,
+        Options options);
+    Stage& makeFilter(const std::string& driver, Stage& parent);
+    Stage& makeFilter(const std::string& driver, Stage& parent,
+        Options options);
+    Stage& makeFilter(const std::string& driver);
+    Stage& makeWriter(const std::string& outputFile, Stage& parent,
+        std::string driver);
+    Stage& makeWriter(const std::string& outputFile, Stage& parent,
+        std::string driver, Options options);
 
 public:
     virtual void addSwitches(ProgramArgs& args)
@@ -94,83 +101,33 @@ public:
     // it will be wrapped in a global catch try/block for you
     virtual int execute() = 0;
 
-    void setCommonOptions(Options &options);
-
-    void setProgressShellCommand(std::vector<std::string> const& command)
-    {
-        m_heartbeat_shell_command = command;
-    }
-    std::vector<std::string> getProgressShellCommand()
-    {
-        return m_heartbeat_shell_command;
-    }
-
-    const Options& extraStageOptions(const std::string& stage)
-    {
-        static Options nullOpts;
-
-        auto oi = m_extraStageOptions.find(stage);
-        if (oi == m_extraStageOptions.end())
-            return nullOpts;
-        return oi->second;
-    }
-
-    void applyExtraStageOptionsRecursive(Stage *s)
-    {
-        // if options provided via command-line, we assume they should overwrite
-        // existing options, remove first, and then add
-        Options ops = extraStageOptions(s->getName());
-
-        s->removeOptions(ops);
-        s->addOptions(ops);
-        auto stages = s->getInputs();
-        for (Stage *s : stages)
-            applyExtraStageOptionsRecursive(s);
-    }
-
 protected:
-    Stage& ownStage(Stage *s)
-    {
-        m_stages.push_back(std::unique_ptr<Stage>(s));
-        return *s;
-    }
-
-    bool m_usestdin;
-    Log m_log;
+    LogPtr m_log;
+    PipelineManager m_manager;
+    std::string m_driverOverride;
 
 private:
     int innerRun(ProgramArgs& args);
     void outputHelp(ProgramArgs& args);
     void outputVersion();
     void addBasicSwitches(ProgramArgs& args);
-    void collectExtraOptions();
+    void parseCommonOptions();
 
-    void doSwitches(int argc, const char *argv[], ProgramArgs& args);
+    void doSwitches(const StringList& cmdArgs, ProgramArgs& args);
     int doStartup();
     int doExecution(ProgramArgs& args);
-    int doShutdown();
 
     static bool test_parseOption(std::string o, std::string& stage,
         std::string& option, std::string& value);
 
-    bool m_isDebug;
-    uint32_t m_verboseLevel;
     bool m_showHelp;
     bool m_showOptions;
-    bool m_showVersion;
     bool m_showTime;
-    std::string m_appName;
     bool m_hardCoreDebug;
-    std::vector<std::string> m_heartbeat_shell_command;
-    bool m_reportDebug;
     std::string m_scales;
     std::string m_offsets;
     bool m_visualize;
     std::string m_label;
-
-    std::vector<std::string> m_extra_options;
-    std::map<std::string, Options> m_extraStageOptions;
-    std::vector<std::unique_ptr<Stage>> m_stages;
 
     Kernel& operator=(const Kernel&); // not implemented
     Kernel(const Kernel&); // not implemented

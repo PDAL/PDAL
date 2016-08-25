@@ -34,8 +34,8 @@
 
 #include "TIndexReader.hpp"
 #include <pdal/GDALUtils.hpp>
-
-
+#include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -48,29 +48,6 @@ static PluginInfo const s_info = PluginInfo(
 CREATE_STATIC_PLUGIN(1, 0, TIndexReader, Reader, s_info)
 
 std::string TIndexReader::getName() const { return s_info.name; }
-
-Options TIndexReader::getDefaultOptions()
-{
-    Options options;
-    Option sql("sql", "", "OGR-compatible SQL statement for querying tile index layer");
-    options.add(sql);
-    Option polygon("polygon", "", "WKT Polygon or MultiPolygon describing spatial extent to query");
-    options.add(polygon);
-    Option bounds("bounds", "", "PDAL-style bounds to limit query window (exclusive of --polygon)");
-    options.add(bounds);
-    Option lyr_name("lyr_name", "", "OGR layer name from which to read tile index layer");
-    options.add(lyr_name);
-    Option tindex_name("tindex_name", "", "OGR column name from which to read tile index location");
-    options.add(tindex_name);
-    Option a_srs("a_srs", "", "Override SRS of geometry in the tile index");
-    options.add(a_srs);
-    Option t_srs("t_srs", "", "Transform SRS of tile index geometry");
-    options.add(t_srs);
-    Option srs_column("srs_column", "", "Column to use for SRS");
-    options.add(srs_column);
-    return options;
-}
-
 
 TIndexReader::FieldIndexes TIndexReader::getFields()
 {
@@ -132,33 +109,34 @@ std::vector<TIndexReader::FileInfo> TIndexReader::getFiles()
 }
 
 
-void TIndexReader::processOptions(const Options& options)
+void TIndexReader::addArgs(ProgramArgs& args)
 {
-    m_layerName = options.getValueOrDefault<std::string>("lyr_name", "pdal");
-    m_srsColumnName = options.getValueOrDefault<std::string>("srs_column",
-        "srs");
-    m_tileIndexColumnName =
-        options.getValueOrDefault<std::string>("tindex_name", "location");
-    m_sql = options.getValueOrDefault<std::string>("sql", "");
-
-    BOX2D boundary = options.getValueOrDefault<BOX2D>("boundary", BOX2D());
-    m_wkt = boundary.toWKT();
-    if (m_wkt.empty())
-        m_wkt = options.getValueOrDefault<std::string>("wkt");
-
-    m_tgtSrsString = options.getValueOrDefault<std::string>("t_srs",
+    args.add("lyr_name", "OGR layer name from which to read tile index layer",
+        m_layerName, "pdal");
+    args.add("srs_column", "Column to use for SRS", m_srsColumnName, "srs");
+    args.add("tindex_name", "OGR column name from which to read tile "
+        "index location", m_tileIndexColumnName, "location");
+    args.add("sql", "OGR-compatible SQL statement for querying tile "
+        "index layer", m_sql);
+    args.add("bounds", "PDAL-style bounds to limit query window (exclusive "
+        "of --polygon)", m_bounds);
+    args.add("wkt", "Well-known text description of bounds to limit query",
+        m_wkt);
+    args.add("t_srs", "Transform SRS of tile index geometry", m_tgtSrsString,
         "EPSG:4326");
-    m_filterSRS = options.getValueOrDefault<std::string>("filter_srs");
-    m_attributeFilter = options.getValueOrDefault<std::string>("where");
-    m_dialect = options.getValueOrDefault<std::string>("dialect", "OGRSQL");
-
-    m_out_ref.reset(new gdal::SpatialRef());
+    args.add("filter_srs", "Transforms any wkt or boundary option to "
+        "this coordinate system before filtering or reading data.",
+        m_filterSRS);
+    args.add("where", "OGR SQL filter clause to use on the layer. It only "
+        "works in combination with tile index layers that are defined "
+        "with lyr_name", m_attributeFilter);
+    args.add("dialect", "OGR SQL dialect to use when querying tile "
+        "index layer", m_dialect, "OGRSQL");
 }
 
 
 void TIndexReader::addDimensions(PointLayoutPtr layout)
 {
-    using namespace pdal::Dimension::Type;
     layout->registerDim(pdal::Dimension::Id::X);
     layout->registerDim(pdal::Dimension::Id::Y);
     layout->registerDim(pdal::Dimension::Id::Z);
@@ -173,10 +151,14 @@ pdal::Dimension::IdList TIndexReader::getDefaultDimensions()
 
 void TIndexReader::initialize()
 {
+    if (!m_bounds.empty())
+        m_wkt = m_bounds.toWKT();
+    m_out_ref.reset(new gdal::SpatialRef());
+
     log()->get(LogLevel::Debug) << "Opening file " << m_filename <<
         std::endl;
 
-    GlobalEnvironment::get().initializeGDAL(log(), isDebug());
+    gdal::registerDrivers();
     m_dataset = OGROpen(m_filename.c_str(), FALSE, NULL);
     if (!m_dataset)
     {
@@ -260,7 +242,7 @@ void TIndexReader::initialize()
                                     << " to merge filter" <<std::endl;
 
         std::string driver = m_factory.inferReaderDriver(f.m_filename);
-        Stage *reader = m_factory.createStage(driver, true);
+        Stage *reader = m_factory.createStage(driver);
         if (!reader)
         {
             std::stringstream out;
@@ -276,7 +258,7 @@ void TIndexReader::initialize()
         if (m_tgtSrsString != f.m_srs &&
             (m_tgtSrsString.size() && f.m_srs.size()))
         {
-            Stage *repro = m_factory.createStage("filters.reprojection", true);
+            Stage *repro = m_factory.createStage("filters.reprojection");
             repro->setInput(*reader);
             Options reproOptions;
             reproOptions.add("out_srs", m_tgtSrsString);
@@ -292,7 +274,7 @@ void TIndexReader::initialize()
         // can be used as a test here.
         if (!m_wkt.empty())
         {
-            Stage *crop = m_factory.createStage("filters.crop", true);
+            Stage *crop = m_factory.createStage("filters.crop");
             crop->setOptions(cropOptions);
             crop->setInput(*premerge);
             log()->get(LogLevel::Debug3) << "Cropping data with wkt '"

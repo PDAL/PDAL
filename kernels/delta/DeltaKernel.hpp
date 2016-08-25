@@ -39,6 +39,7 @@
 #include <pdal/KDIndex.hpp>
 #include <pdal/Kernel.hpp>
 #include <pdal/PointView.hpp>
+#include <pdal/plugin.hpp>
 
 extern "C" int32_t DeltaKernel_ExitFunc();
 extern "C" PF_ExitFunc DeltaKernel_InitPlugin();
@@ -49,8 +50,8 @@ namespace pdal
 struct DimIndex
 {
     std::string m_name;
-    Dimension::Id::Enum m_srcId;
-    Dimension::Id::Enum m_candId;
+    Dimension::Id m_srcId;
+    Dimension::Id m_candId;
     double m_min;
     double m_max;
     double m_avg;

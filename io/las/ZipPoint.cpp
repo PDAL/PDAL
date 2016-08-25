@@ -49,7 +49,8 @@ namespace pdal
 ZipPoint::ZipPoint(VariableLengthRecord *vlr) :
     m_zip(new LASzip()), m_lz_point(NULL), m_lz_point_size(0)
 {
-    if (!vlr || !m_zip->unpack((unsigned char *)vlr->data(), vlr->dataLen()))
+    if (!vlr || !m_zip->unpack((unsigned char *)vlr->data(),
+        (int)vlr->dataLen()))
     {
         std::ostringstream oss;
         const char* err = m_zip->get_error();

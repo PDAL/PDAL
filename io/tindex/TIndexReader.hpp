@@ -36,10 +36,10 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/Reader.hpp>
-#include <pdal/GlobalEnvironment.hpp>
 #include <merge/MergeFilter.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/GDALUtils.hpp>
+#include <pdal/plugin.hpp>
 
 extern "C" int32_t TIndexReader_ExitFunc();
 extern "C" PF_ExitFunc TIndexReader_InitPlugin();
@@ -73,13 +73,11 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
     static Dimension::IdList getDefaultDimensions();
 
 private:
-
     virtual void addDimensions(PointLayoutPtr layout);
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
     virtual void ready(PointTableRef table);
     virtual PointViewSet run(PointViewPtr view);
@@ -93,7 +91,7 @@ private:
     std::string m_filterSRS;
     std::string m_attributeFilter;
     std::string m_dialect;
-    BOX2D m_boundary;
+    BOX2D m_bounds;
     std::string m_sql;
 
     std::unique_ptr<gdal::SpatialRef> m_out_ref;

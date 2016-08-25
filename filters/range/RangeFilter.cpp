@@ -34,6 +34,8 @@
 
 #include "RangeFilter.hpp"
 
+#include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 #include <pdal/util/Utils.hpp>
 
 #include <cctype>
@@ -60,7 +62,7 @@ namespace
 {
 
 RangeFilter::Range parseRange(const std::string& r)
-{ 
+{
     std::string::size_type pos, count;
     bool ilb = true;
     bool iub = true;
@@ -150,14 +152,16 @@ bool operator < (const RangeFilter::Range& r1, const RangeFilter::Range& r2)
 }
 
 
-void RangeFilter::processOptions(const Options& options)
+void RangeFilter::addArgs(ProgramArgs& args)
 {
-    StringList rangeString = options.getValueOrDefault<StringList>("limits");
+    args.add("limits", "Range limits", m_rangeSpec).setPositional();
+}
 
-    if (rangeString.empty())
-        throw pdal_error("filters.range missing required 'limits' option.");
 
-    for (auto const& r : rangeString)
+void RangeFilter::initialize()
+{
+    // Would be better to have the range know how to read from an input stream.
+    for (auto const& r : m_rangeSpec)
         m_range_list.push_back(parseRange(r));
 }
 
@@ -199,7 +203,7 @@ bool RangeFilter::dimensionPasses(double v, const Range& r) const
 // common case.
 bool RangeFilter::processOne(PointRef& point)
 {
-    Dimension::Id::Enum lastId = m_range_list.front().m_id;
+    Dimension::Id lastId = m_range_list.front().m_id;
     bool passes = false;
     for (auto const& r : m_range_list)
     {

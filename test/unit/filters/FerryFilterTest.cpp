@@ -48,11 +48,11 @@ using namespace pdal;
 TEST(FerryFilterTest, create)
 {
     StageFactory f;
-    std::unique_ptr<Stage> filter(f.createStage("filters.ferry"));
-    EXPECT_TRUE(filter.get());
+    Stage* filter(f.createStage("filters.ferry"));
+    EXPECT_TRUE(filter);
 }
 
-TEST(FerryFilterTest, test_ferry_copy)
+TEST(FerryFilterTest, test_ferry_copy_xml)
 {
     PipelineManager mgr;
     mgr.readPipeline(Support::configuredpath("filters/ferry.xml"));
@@ -66,8 +66,8 @@ TEST(FerryFilterTest, test_ferry_copy)
     PointViewPtr view = *viewSet.begin();
     EXPECT_EQ(view->size(), 1065u);
 
-    Dimension::Id::Enum state_plane_x = table.layout()->findDim("StatePlaneX");
-    Dimension::Id::Enum state_plane_y = table.layout()->findDim("StatePlaneY");
+    Dimension::Id state_plane_x = table.layout()->findDim("StatePlaneX");
+    Dimension::Id state_plane_y = table.layout()->findDim("StatePlaneY");
 
     double lon = view->getFieldAs<double>(Dimension::Id::X, 0);
     double lat = view->getFieldAs<double>(Dimension::Id::Y, 0);
@@ -88,7 +88,7 @@ TEST(FerryFilterTest, stream)
     Options ro;
     ro.add("mode", "ramp");
     ro.add("bounds", BOX3D(0, 0, 0, 99, 99, 99));
-    ro.add("num_points", 100);
+    ro.add("count", 100);
 
     r.setOptions(ro);
 
@@ -123,6 +123,36 @@ TEST(FerryFilterTest, stream)
     c.execute(t);
 }
 
+TEST(FerryFilterTest, test_ferry_copy_json)
+{
+    PipelineManager mgr;
+
+    mgr.readPipeline(Support::configuredpath("filters/ferry.json"));
+
+    mgr.execute();
+    ConstPointTableRef table(mgr.pointTable());
+
+    PointViewSet viewSet = mgr.views();
+
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+    EXPECT_EQ(view->size(), 1065u);
+
+    Dimension::Id state_plane_x = table.layout()->findDim("StatePlaneX");
+    Dimension::Id state_plane_y = table.layout()->findDim("StatePlaneY");
+
+    double lon = view->getFieldAs<double>(Dimension::Id::X, 0);
+    double lat = view->getFieldAs<double>(Dimension::Id::Y, 0);
+
+    double x = view->getFieldAs<double>(state_plane_x, 0);
+    double y = view->getFieldAs<double>(state_plane_y, 0);
+
+    EXPECT_DOUBLE_EQ(-117.2501328350574, lon);
+    EXPECT_DOUBLE_EQ(49.341077824192915, lat);
+    EXPECT_DOUBLE_EQ(637012.24, x);
+    EXPECT_DOUBLE_EQ(849028.31, y);
+}
+
 TEST(FerryFilterTest, test_ferry_invalid)
 {
     Options ops1;
@@ -131,7 +161,7 @@ TEST(FerryFilterTest, test_ferry_invalid)
     reader.setOptions(ops1);
 
     Options op1;
-    
+
     op1.add("dimensions", "X=X");
 
     FerryFilter f1;
@@ -173,4 +203,3 @@ TEST(FerryFilterTest, test_ferry_invalid)
     // Make sure we reject bad option format.
     EXPECT_THROW(f4.prepare(table), pdal_error);
 }
-

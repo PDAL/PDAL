@@ -40,6 +40,20 @@
 namespace pdal
 {
 
+int PointView::m_lastId = 0;
+
+PointView::PointView(PointTableRef pointTable) : m_pointTable(pointTable),
+m_size(0), m_id(0)
+{
+	m_id = ++m_lastId;
+}
+
+PointView::PointView(PointTableRef pointTable, const SpatialReference& srs) :
+	m_pointTable(pointTable), m_size(0), m_id(0), m_spatialReference(srs)
+{
+	m_id = ++m_lastId;
+}
+
 PointViewIter PointView::begin()
 {
     return PointViewIter(this, 0);
@@ -52,7 +66,7 @@ PointViewIter PointView::end()
 }
 
 
-void PointView::setFieldInternal(Dimension::Id::Enum dim, PointId idx,
+void PointView::setFieldInternal(Dimension::Id dim, PointId idx,
     const void *buf)
 {
     PointId rawId = 0;
@@ -122,6 +136,25 @@ void PointView::calculateBounds(const PointViewSet& set, BOX3D& output)
 }
 
 
+MetadataNode PointView::toMetadata() const
+{
+    MetadataNode node;
+
+    const Dimension::IdList& dims = layout()->dims();
+
+    for (PointId idx = 0; idx < size(); idx++)
+    {
+        MetadataNode pointnode = node.add(std::to_string(idx));
+        for (auto di = dims.begin(); di != dims.end(); ++di)
+        {
+            double v = getFieldAs<double>(*di, idx);
+            pointnode.add(layout()->dimName(*di), v);
+        }
+    }
+    return node;
+}
+
+
 void PointView::dump(std::ostream& ostr) const
 {
     using std::endl;
@@ -136,7 +169,7 @@ void PointView::dump(std::ostream& ostr) const
 
         for (auto di = dims.begin(); di != dims.end(); ++di)
         {
-            Dimension::Id::Enum d = *di;
+            Dimension::Id d = *di;
             const Dimension::Detail *dd = layout->dimDetail(d);
             ostr << Dimension::name(d) << " (" <<
                 Dimension::interpretationName(dd->type()) << ") : ";

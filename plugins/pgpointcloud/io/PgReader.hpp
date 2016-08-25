@@ -89,7 +89,6 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
     virtual point_count_t getNumPoints() const;
     point_count_t getMaxPoints() const;
     std::string getDataQuery() const;
@@ -99,7 +98,7 @@ public:
 
 private:
     virtual void addDimensions(PointLayoutPtr layout);
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
     virtual void ready(PointTableRef table);
     virtual void initialize();
     virtual point_count_t read(PointViewPtr view, point_count_t count);

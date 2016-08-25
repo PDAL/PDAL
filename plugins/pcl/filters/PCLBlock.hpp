@@ -54,7 +54,7 @@ private:
     std::string m_filename;
     std::string m_json;
 
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
     virtual PointViewSet run(PointViewPtr view);
 
     PCLBlock& operator=(const PCLBlock&); // not implemented

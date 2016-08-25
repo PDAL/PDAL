@@ -50,7 +50,7 @@ void checkPoint(const PointView& data, PointId index, double time,
     double heading, double wander, double xaccel, double yaccel,
     double zaccel, double xangrate, double yangrate, double zangrate)
 {
-    auto checkDimension = [&data,index](Dimension::Id::Enum dim,
+    auto checkDimension = [&data,index](Dimension::Id dim,
         double expected)
     {
         double actual = data.getFieldAs<double>(dim, index);
@@ -66,7 +66,7 @@ void checkPoint(const PointView& data, PointId index, double time,
     checkDimension(Dimension::Id::ZVelocity, zvelocity);
     checkDimension(Dimension::Id::Roll, roll);
     checkDimension(Dimension::Id::Pitch, pitch);
-    checkDimension(Dimension::Id::PlatformHeading, heading);
+    checkDimension(Dimension::Id::Azimuth, heading);
     checkDimension(Dimension::Id::WanderAngle, wander);
     checkDimension(Dimension::Id::XBodyAccel, xaccel);
     checkDimension(Dimension::Id::YBodyAccel, yaccel);
@@ -78,15 +78,16 @@ void checkPoint(const PointView& data, PointId index, double time,
 
 TEST(SbetReaderTest, testRead)
 {
-    Option filename("filename", Support::datapath("sbet/2-points.sbet"), "");
-    Options options(filename);
-    std::shared_ptr<SbetReader> reader(new SbetReader);
-    reader->setOptions(options);
+    Options options;
+    options.add("filename", Support::datapath("sbet/2-points.sbet"));
+
+    SbetReader reader;
+    reader.setOptions(options);
 
     PointTable table;
 
-    reader->prepare(table);
-    PointViewSet viewSet = reader->execute(table);
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
     EXPECT_EQ(viewSet.size(), 1u);
     PointViewPtr view = *viewSet.begin();
 
@@ -116,19 +117,32 @@ TEST(SbetReaderTest, testRead)
 
 TEST(SbetReaderTest, testBadFile)
 {
-    Option filename("filename", Support::datapath("sbet/badfile.sbet"), "");
-    Options options(filename);
-    std::shared_ptr<SbetReader> reader(new SbetReader);
-    reader->setOptions(options);
+    Options options;
+    options.add("filename", Support::datapath("sbet/badfile.sbet"));
+
+    SbetReader reader;
+    reader.setOptions(options);
     PointTable table;
-    reader->prepare(table);
-    EXPECT_THROW(reader->execute(table), pdal_error);
+    reader.prepare(table);
+    EXPECT_THROW(reader.execute(table), pdal_error);
 }
 
-TEST(SbetReaderTest, testPipeline)
+TEST(SbetReaderTest, testPipelineXML)
 {
     PipelineManager manager;
+
     manager.readPipeline(Support::configuredpath("sbet/pipeline.xml"));
+
+    point_count_t numPoints = manager.execute();
+    EXPECT_EQ(numPoints, 2u);
+    FileUtils::deleteFile(Support::datapath("sbet/outfile.txt"));
+}
+
+TEST(SbetReaderTest, testPipelineJSON)
+{
+    PipelineManager manager;
+
+    manager.readPipeline(Support::configuredpath("sbet/pipeline.json"));
 
     point_count_t numPoints = manager.execute();
     EXPECT_EQ(numPoints, 2u);

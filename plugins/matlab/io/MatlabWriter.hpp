@@ -39,7 +39,7 @@
 #include <mat.h>
 
 #include <pdal/Writer.hpp>
-
+#include <pdal/plugin.hpp>
 
 extern "C" int32_t MatlabWriter_ExitFunc();
 extern "C" PF_ExitFunc MatlabWriter_InitPlugin();
@@ -48,25 +48,24 @@ extern "C" PF_ExitFunc MatlabWriter_InitPlugin();
 namespace pdal
 {
 
-
 class PDAL_DLL MatlabWriter : public Writer
 {
 public:
-
     static void* create();
     static int32_t destroy(void*);
     std::string getName() const;
 
-    MatlabWriter();
+    MatlabWriter()
+    {}
 
 private:
-
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
     virtual void prepared(PointTableRef table);
     virtual void ready(PointTableRef table);
     virtual void write(const PointViewPtr view);
     virtual void done(PointTableRef table);
 
+    StringList m_outputDims; ///< List of dimensions to write
     // Can't use unique_ptr b/c MATFile is an incomplete type.
     MATFile * m_matfile;
     DimTypeList m_dimTypes;

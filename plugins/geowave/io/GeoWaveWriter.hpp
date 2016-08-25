@@ -53,11 +53,9 @@ namespace pdal
         static int32_t destroy(void *);
         std::string getName() const;
 
-        Options getDefaultOptions();
-
     private:
+        virtual void addArgs(ProgramArgs& args);
         virtual void initialize();
-        virtual void processOptions(const Options&);
         virtual void ready(PointTableRef table);
         virtual void write(const PointViewPtr view);
 
@@ -69,10 +67,11 @@ namespace pdal
         std::string m_password;
         std::string m_tableNamespace;
         std::string m_featureTypeName;
+        std::string m_dataAdapter;
         bool m_useFeatCollDataAdapter;
         uint32_t m_pointsPerEntry;
         Dimension::IdList m_dims;
-        std::vector<Dimension::Type::Enum> m_dimTypes;
+        std::vector<Dimension::Type> m_dimTypes;
     };
 
 } // namespace pdal

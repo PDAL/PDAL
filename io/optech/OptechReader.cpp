@@ -39,8 +39,10 @@
 #include <cstring>
 #include <sstream>
 
+#include <pdal/PDALUtils.hpp>
 #include <pdal/SpatialReference.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {
@@ -103,7 +105,7 @@ const CsdHeader& OptechReader::getHeader() const { return m_header; }
 
 void OptechReader::initialize()
 {
-    ILeStream stream(FileUtils::openFile(m_filename));
+    ILeStream stream(Utils::openFile(m_filename));
     if (!stream)
     {
         std::stringstream ss;

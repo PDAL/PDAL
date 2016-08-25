@@ -1,0 +1,21 @@
+{
+  "pipeline":[
+    {
+      "filename":"@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las",
+      "spatialreference":"@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las.wkt"
+    },
+    {
+      "type":"writers.p2g",
+      "grid_dist_x":6.0,
+      "grid_dist_y":6.0,
+      "radius":8.4852813742385713,
+      "filename":"@CMAKE_SOURCE_DIR@/test/temp/autzen_grid",
+      "output_type":"min",
+      "output_type":"max",
+      "output_type":"mean",
+      "output_type":"idw",
+      "output_type":"den",
+      "output_format":"asc"
+    }
+  ]
+}

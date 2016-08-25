@@ -35,6 +35,8 @@
 #include "SbetWriter.hpp"
 
 #include <pdal/PointView.hpp>
+#include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -48,9 +50,9 @@ CREATE_STATIC_PLUGIN(1, 0, SbetWriter, Writer, s_info)
 
 std::string SbetWriter::getName() const { return s_info.name; }
 
-void SbetWriter::processOptions(const Options& options)
+void SbetWriter::addArgs(ProgramArgs& args)
 {
-    m_filename = options.getOption("filename").getValue<std::string>();
+    args.add("filename", "Output filename", m_filename).setPositional();
 }
 
 
@@ -62,23 +64,17 @@ void SbetWriter::ready(PointTableRef)
 
 void SbetWriter::write(const PointViewPtr view)
 {
-    m_callback->setTotal(view->size());
-    m_callback->invoke(0);
-
     Dimension::IdList dims = getDefaultDimensions();
     for (PointId idx = 0; idx < view->size(); ++idx)
     {
         for (auto di = dims.begin(); di != dims.end(); ++di)
         {
             // If a dimension doesn't exist, write 0.
-            Dimension::Id::Enum dim = *di;
+            Dimension::Id dim = *di;
             *m_stream << (view->hasDim(dim) ?
                 view->getFieldAs<double>(dim, idx) : 0.0);
         }
-        if (idx % 100 == 0)
-            m_callback->invoke(idx + 1);
     }
-    m_callback->invoke(view->size());
 }
 
 } // namespace pdal

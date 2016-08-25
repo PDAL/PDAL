@@ -38,6 +38,7 @@
 
 #include <buffer/BufferReader.hpp>
 #include <pdal/KernelFactory.hpp>
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {
@@ -76,12 +77,7 @@ int PCLKernel::execute()
 {
     PointTable table;
 
-    Options readerOptions;
-    readerOptions.add<std::string>("filename", m_inputFile);
-    setCommonOptions(readerOptions);
-
-    Stage& readerStage(Kernel::makeReader(m_inputFile));
-    readerStage.setOptions(readerOptions);
+    Stage& readerStage(makeReader(m_inputFile, ""));
 
     // go ahead and prepare/execute on reader stage only to grab input
     // PointViewSet, this makes the input PointView available to both the
@@ -95,40 +91,21 @@ int PCLKernel::execute()
     std::shared_ptr<BufferReader> bufferReader(new BufferReader);
     bufferReader->addView(input_view);
 
-    Options pclOptions;
-    pclOptions.add<std::string>("filename", m_pclFile);
-    pclOptions.add<bool>("debug", isDebug());
-    pclOptions.add<uint32_t>("verbose", getVerboseLevel());
-
-    std::shared_ptr<Stage> pclStage(new PCLBlock());
-    pclStage->setInput(*bufferReader);
-    pclStage->setOptions(pclOptions);
+    Options filterOptions({"filename", m_pclFile});
+    Stage& pclStage = makeFilter("filters.pclblock", *bufferReader,
+        filterOptions);
 
     // the PCLBlock stage consumes the BufferReader rather than the
     // readerStage
 
     Options writerOptions;
-    writerOptions.add<std::string>("filename", m_outputFile);
-    setCommonOptions(writerOptions);
-
     if (m_bCompress)
         writerOptions.add<bool>("compression", true);
     if (m_bForwardMetadata)
         writerOptions.add("forward_metadata", true);
 
-    std::vector<std::string> cmd = getProgressShellCommand();
-    UserCallback *callback =
-        cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
-        (UserCallback *)new HeartbeatCallback();
+    Stage& writer(makeWriter(m_outputFile, pclStage, "", writerOptions));
 
-    Stage& writer(Kernel::makeWriter(m_outputFile, *pclStage));
-
-    // Some options are inferred by makeWriter based on filename
-    // (compression, driver type, etc).
-    writer.addOptions(writerOptions);
-
-    writer.setUserCallback(callback);
-    applyExtraStageOptionsRecursive(&writer);
     writer.prepare(table);
 
     // process the data, grabbing the PointViewSet for visualization of the

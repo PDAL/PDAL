@@ -45,8 +45,8 @@ using namespace pdal;
 TEST(RangeFilterTest, createStage)
 {
     StageFactory f;
-    std::shared_ptr<Stage> filter(f.createStage("filters.range"));
-    EXPECT_TRUE(filter.get());
+    Stage* filter(f.createStage("filters.range"));
+    EXPECT_TRUE(filter);
 }
 
 TEST(RangeFilterTest, noLimits)
@@ -64,7 +64,7 @@ TEST(RangeFilterTest, singleDimension)
     Options ops;
     ops.add("bounds", srcBounds);
     ops.add("mode", "ramp");
-    ops.add("num_points", 10);
+    ops.add("count", 10);
 
     FauxReader reader;
     reader.setOptions(ops);
@@ -95,7 +95,7 @@ TEST(RangeFilterTest, multipleDimensions)
     Options ops;
     ops.add("bounds", srcBounds);
     ops.add("mode", "ramp");
-    ops.add("num_points", 10);
+    ops.add("count", 10);
 
     FauxReader reader;
     reader.setOptions(ops);
@@ -130,7 +130,7 @@ TEST(RangeFilterTest, multipleDimsBusted)
     Options ops;
     ops.add("bounds", srcBounds);
     ops.add("mode", "ramp");
-    ops.add("num_points", 1);
+    ops.add("count", 1);
 
     FauxReader reader;
     reader.setOptions(ops);
@@ -169,7 +169,7 @@ TEST(RangeFilterTest, onlyMin)
     Options ops;
     ops.add("bounds", srcBounds);
     ops.add("mode", "ramp");
-    ops.add("num_points", 10);
+    ops.add("count", 10);
 
     FauxReader reader;
     reader.setOptions(ops);
@@ -202,7 +202,7 @@ TEST(RangeFilterTest, onlyMax)
     Options ops;
     ops.add("bounds", srcBounds);
     ops.add("mode", "ramp");
-    ops.add("num_points", 10);
+    ops.add("count", 10);
 
     StageFactory f;
     FauxReader reader;
@@ -236,7 +236,7 @@ TEST(RangeFilterTest, negation)
     Options ops;
     ops.add("bounds", srcBounds);
     ops.add("mode", "ramp");
-    ops.add("num_points", 10);
+    ops.add("count", 10);
 
     StageFactory f;
     FauxReader reader;
@@ -271,7 +271,7 @@ TEST(RangeFilterTest, equals)
     Options ops;
     ops.add("bounds", srcBounds);
     ops.add("mode", "ramp");
-    ops.add("num_points", 10);
+    ops.add("count", 10);
 
     FauxReader reader;
     reader.setOptions(ops);
@@ -300,7 +300,7 @@ TEST(RangeFilterTest, negativeValues)
     Options ops;
     ops.add("bounds", srcBounds);
     ops.add("mode", "ramp");
-    ops.add("num_points", 21);
+    ops.add("count", 21);
 
     FauxReader reader;
     reader.setOptions(ops);
@@ -329,7 +329,7 @@ TEST(RangeFilterTest, simple_logic)
     Options ops;
     ops.add("bounds", BOX3D(1, 101, 201, 10, 110, 210));
     ops.add("mode", "ramp");
-    ops.add("num_points", 10);
+    ops.add("count", 10);
 
     FauxReader reader;
     reader.setOptions(ops);
@@ -360,7 +360,7 @@ TEST(RangeFilterTest, stream_logic)
     Options ops;
     ops.add("bounds", BOX3D(1, 101, 201, 10, 110, 210));
     ops.add("mode", "ramp");
-    ops.add("num_points", 10);
+    ops.add("count", 10);
 
     FauxReader reader;
     reader.setOptions(ops);

@@ -1,0 +1,10 @@
+{
+  "pipeline":[
+    {
+      "type":"readers.myreader",
+      "filename":"test-reader-input.txt",
+      "z_scale":0.001
+    },
+    "output.txt"
+  ]
+}

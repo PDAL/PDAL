@@ -50,47 +50,29 @@ classified 1 or 2 to be dropped from the point stream.
 Example
 -------
 
-.. code-block:: xml
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.las">
-      <Option name="filename">
-        file-cropped.las
-      </Option>
-      <Filter type="filters.predicate">
-      <Option name="function">filter</Option>
-      <Option name="module">anything</Option>
-      <Option name="source">
+.. code-block:: json
 
-  import numpy as np
+    {
+      "pipeline":[
+        "file-input.las",
+        {
+          "type":"filters.ground"
+        },
+        {
+          "type":"filters.predicate",
+          "script":"filter_pdal.py",
+          "function":"filter",
+          "module":"anything"
+        },
+        {
+          "type":"writers.las",
+          "filename":"file-filtered.las"
+        }
+      ]
+    }
 
-  def filter(ins,outs):
-     cls = ins['Classification']
 
-     keep_classes = [1,2]
-
-     # Use the first test for our base array.
-     keep = np.equal(cls, keep_classes[0])
-
-     # For 1:n, test each predicate and join back
-     # to our existing predicate array
-     for k in range(1,len(keep_classes)):
-         t = np.equal(cls, keep_classes[k])
-         keep = keep + t
-
-     outs['Mask'] = keep
-     return True
-
-          </Option>
-          <Reader type="readers.las">
-            <Option name="filename">
-              file-input.las
-            </Option>
-          </Reader>
-        </Filter>
-      </Writer>
-    </Pipeline>
 
 
 Options

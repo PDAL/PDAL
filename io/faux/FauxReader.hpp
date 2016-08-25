@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <pdal/plugin.hpp>
 #include <pdal/Reader.hpp>
 
 extern "C" int32_t FauxReader_ExitFunc();
@@ -42,7 +43,7 @@ extern "C" PF_ExitFunc FauxReader_InitPlugin();
 namespace pdal
 {
 
-enum Mode
+enum class Mode
 {
     Constant,
     Random,
@@ -51,6 +52,44 @@ enum Mode
     Normal
 };
 
+inline std::istream& operator>>(std::istream& in, Mode& m)
+{
+    std::string s;
+
+    in >> s;
+    s = Utils::tolower(s);
+    if (s == "constant")
+        m = Mode::Constant;
+    else if (s == "random")
+        m = Mode::Random;
+    else if (s == "ramp")
+        m = Mode::Ramp;
+    else if (s  == "uniform")
+        m = Mode::Uniform;
+    else if (s == "normal")
+        m = Mode::Normal;
+    else
+        in.setstate(std::ios::failbit);
+    return in;
+}
+
+inline std::ostream& operator<<(std::ostream& out, const Mode& m)
+{
+    switch (m)
+    {
+    case Mode::Constant:
+        out << "Constant";
+    case Mode::Random:
+        out << "Random";
+    case Mode::Ramp:
+        out << "Ramp";
+    case Mode::Uniform:
+        out << "Uniform";            
+    case Mode::Normal:
+        out << "Normal";
+    }
+    return out;
+}
 
 // The FauxReader doesn't read from disk, but instead just makes up data for its
 // points.  The reader is constructed with a given bounding box and a given
@@ -83,23 +122,16 @@ enum Mode
 class PDAL_DLL FauxReader : public Reader
 {
 public:
-    FauxReader();
+    FauxReader()
+    {}
 
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
 
-    static Dimension::IdList getDefaultDimensions();
-    Options getDefaultOptions();
-
 private:
     Mode m_mode;
-    double m_minX;
-    double m_maxX;
-    double m_minY;
-    double m_maxY;
-    double m_minZ;
-    double m_maxZ;
+    BOX3D m_bounds;
     double m_mean_x;
     double m_mean_y;
     double m_mean_z;
@@ -115,7 +147,8 @@ private:
     point_count_t m_index;
     uint32_t m_seed;
 
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
+    virtual void initialize();
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
     virtual bool processOne(PointRef& point);

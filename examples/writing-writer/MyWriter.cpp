@@ -1,10 +1,8 @@
 // MyWriter.cpp
 
 #include "MyWriter.hpp"
-
-#include <boost/program_options.hpp>
-
-namespace po = boost::program_options;
+#include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -31,22 +29,17 @@ namespace pdal
   };
 
 
-  Options MyWriter::getDefaultOptions()
+  void MyWriter::addArgs(ProgramArgs& args)
   {
-    Options options;
-
-    options.add("newline", "\n", "Newline character to use for additional lines");
-    options.add("filename", "", "filename to write output to");
-    options.add("datafield", "", "field to use as the User Data field");
-    options.add("precision", 3, "Precision to use for data fields");
-
-    return options;
+    // setPositional() Makes the argument required.
+    args.add("filename", "Output filename", m_filename).setPositional();  
+    args.add("newline", "Line terminator", m_newline, "\n");
+    args.add("datafield", "Data field", m_datafield, "UserData");
+    args.add("precision", "Precision", m_precision, 3);
   }
 
-
-  void MyWriter::processOptions(const Options& options)
+  void MyWriter::initialize()
   {
-    m_filename = options.getValueOrThrow<std::string>("filename");
     m_stream = FileStreamPtr(FileUtils::createFile(m_filename, true),
       FileStreamDeleter());
     if (!m_stream)
@@ -56,19 +49,14 @@ namespace pdal
         "' for output.";
       throw pdal_error(out.str());
     }
-
-    m_newline = options.getValueOrDefault<std::string>("newline", "\n");
-    m_datafield = options.getValueOrDefault<std::string>("datafield", "UserData");
-    m_precision = options.getValueOrDefault<int>("precision", 3);
   }
-
 
   void MyWriter::ready(PointTableRef table)
   {
     m_stream->precision(m_precision);
     *m_stream << std::fixed;
 
-    Dimension::Id::Enum d = table.layout()->findDim(m_datafield);
+    Dimension::Id d = table.layout()->findDim(m_datafield);
     if (d == Dimension::Id::Unknown)
     {
       std::ostringstream oss;

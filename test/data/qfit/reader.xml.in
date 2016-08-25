@@ -4,12 +4,6 @@
         <Option name="filename">
             @CMAKE_SOURCE_DIR@/test/data/qfit/14-word.qi
         </Option>
-        <Option name="debug">
-            true
-        </Option>
-        <Option name="verbose">
-            1
-        </Option>
         <Option name="flip_coordinates">
             true
         </Option>

@@ -90,15 +90,6 @@ TEST(FileUtilsTest, test_readFileIntoString)
     EXPECT_TRUE(source == ref);
 }
 
-TEST(FileUtilsTest, test_getcwd)
-{
-#if 0
-    // this is hardcoded for mpg's environment
-    const std::string cwd = FileUtils::getcwd();
-    EXPECT_TRUE(cwd == "D:/dev/pdal/test/unit/");
-#endif
-}
-
 #ifdef _WIN32
 static const std::string drive = "A:";
 #else
@@ -121,7 +112,8 @@ TEST(FileUtilsTest, test_toAbsolutePath)
 
     const string root = FileUtils::getcwd();
 
-    // check 1-arg version: make absolute when file is relative, via current working dir
+    // check 1-arg version: make absolute when file is relative,
+    // via current working dir
     const string a = FileUtils::toAbsolutePath("foo.txt");
     compare_paths(a, root + "foo.txt");
 

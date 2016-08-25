@@ -38,6 +38,7 @@
 
 #include <pdal/PDALUtils.hpp>
 #include <pdal/PointView.hpp>
+#include <pdal/pdal_macros.hpp>
 
 
 namespace pdal
@@ -79,12 +80,12 @@ void DiffKernel::checkPoints(const PointView& source_data,
     {
         for (size_t d = 0; d < sourceDims.size(); ++d)
         {
-            Dimension::Id::Enum sd = sourceDims[d];
-            Dimension::Id::Enum cd = candidateDims[d];
+            Dimension::Id sd = sourceDims[d];
+            Dimension::Id cd = candidateDims[d];
 
             source_data.getRawField(sd, idx, (void *)sbuf);
             candidate_data.getRawField(cd, idx, (void *)cbuf);
-            Dimension::Type::Enum t = Dimension::defaultType(cd);
+            Dimension::Type t = Dimension::defaultType(cd);
             size_t size = Dimension::size(t);
             if (memcmp(sbuf, cbuf, size))
             {
@@ -106,26 +107,15 @@ int DiffKernel::execute()
 {
     PointTable sourceTable;
 
-    Options sourceOptions;
-    sourceOptions.add<std::string>("filename", m_sourceFile);
-    sourceOptions.add<bool>("debug", isDebug());
-    sourceOptions.add<uint32_t>("verbose", getVerboseLevel());
-
-    Stage& source = makeReader(m_sourceFile);
-    source.setOptions(sourceOptions);
+    Stage& source = makeReader(m_sourceFile, m_driverOverride);
     source.prepare(sourceTable);
     PointViewSet sourceSet = source.execute(sourceTable);
 
     MetadataNode errors;
 
     PointTable candidateTable;
-    Options candidateOptions;
-    candidateOptions.add<std::string>("filename", m_candidateFile);
-    candidateOptions.add<bool>("debug", isDebug());
-    candidateOptions.add<uint32_t>("verbose", getVerboseLevel());
 
-    Stage& candidate = makeReader(m_candidateFile);
-    candidate.setOptions(candidateOptions);
+    Stage& candidate = makeReader(m_candidateFile, m_driverOverride);
     candidate.prepare(candidateTable);
     PointViewSet candidateSet = candidate.execute(candidateTable);
 
@@ -162,29 +152,8 @@ int DiffKernel::execute()
 
         oss << "Source and candidate files do not have the same "
             "number of dimensions";
-//         errors.put<std::string>("schema.error", oss.str());
-        //Need to "ptree" the PointTable dimension list in some way
-        // errors.put_child("schema.source", sourceTable.schema()->toPTree());
-        // errors.put_child("schema.candidate",
-        //     candidateTable.schema()->toPTree());
     }
 
-//     if (errors.size())
-//     {
-//         write_json(std::cout, errors);
-//         return 1;
-//     }
-//     else
-    {
-        // If we made it this far with no errors, now we'll
-        // check the points.
-//         checkPoints(*sourceView, *candidateView, errors);
-//         if (errors.size())
-//         {
-//             write_json(std::cout, errors);
-//             return 1;
-//         }
-    }
     return 0;
 }
 

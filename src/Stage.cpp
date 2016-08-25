@@ -32,44 +32,30 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/GlobalEnvironment.hpp>
+#include <pdal/GDALUtils.hpp>
+#include <pdal/GEOSUtils.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/SpatialReference.hpp>
-#include <pdal/UserCallback.hpp>
 #include <pdal/PDALUtils.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include "StageRunner.hpp"
 
+#include <iterator>
 #include <memory>
 
 namespace pdal
 {
 
-
-Stage::Stage()
-  : m_callback(new UserCallback), m_progressFd(-1)
-{
-    Construct();
-}
+Stage::Stage() : m_progressFd(-1), m_debug(false), m_verbose(0)
+{}
 
 
-/// Only add options if an option with the same name doesn't already exist.
-///
-/// \param[in] ops  Options to add.
-///
 void Stage::addConditionalOptions(const Options& opts)
 {
     for (const auto& o : opts.getOptions())
-        if (!m_options.hasOption(o.getName()))
-            m_options.add(o);
-}
-
-
-void Stage::Construct()
-{
-    m_debug = false;
-    m_verbose = 0;
+        m_options.addConditional(o);
 }
 
 
@@ -90,20 +76,56 @@ void Stage::serialize(MetadataNode root, PipelineWriter::TagMap& tags) const
     m_options.toMetadata(anon);
     for (Stage *s : m_inputs)
         anon.addList("inputs", tagname(s));
-    if (m_metadata.hasChildren())
-        anon.add(m_metadata.clone("execution_metadata"));
     root.addList(anon);
 }
 
+void Stage::addAllArgs(ProgramArgs& args)
+{
+    try
+    {
+        l_addArgs(args);
+        addArgs(args);
+    }
+    catch (arg_error error)
+    {
+        throw pdal_error(error.m_error);
+    }
+}
+
+
+void Stage::handleOptions()
+{
+    addAllArgs(*m_args);
+    try
+    {
+        StringList cmdline = m_options.toCommandLine();
+        m_args->parse(cmdline);
+    }
+    catch (arg_error error)
+    {
+        throw pdal_error(error.m_error);
+    }
+    setupLog();
+}
+
+
+QuickInfo Stage::preview()
+{
+    m_args.reset(new ProgramArgs);
+    handleOptions();
+    return inspect();
+}
+
+
 void Stage::prepare(PointTableRef table)
 {
+    m_args.reset(new ProgramArgs);
     for (size_t i = 0; i < m_inputs.size(); ++i)
     {
         Stage *prev = m_inputs[i];
         prev->prepare(table);
     }
-    l_processOptions(m_options);
-    processOptions(m_options);
+    handleOptions();
     l_initialize(table);
     initialize(table);
     addDimensions(table.layout());
@@ -145,6 +167,7 @@ PointViewSet Stage::execute(PointTableRef table)
     table.clearSpatialReferences();
     for (auto const& it : views)
         table.addSpatialReference(it->spatialReference());
+    gdal::ErrorHandler::getGlobalErrorHandler().set(m_log, m_debug);
 
     // Do the ready operation and then start running all the views
     // through the stage.
@@ -301,59 +324,43 @@ void Stage::execute(StreamPointTable& table, std::list<Stage *>& stages)
 }
 
 
+void Stage::l_addArgs(ProgramArgs& args)
+{
+    args.add("log", "Debug output filename", m_logname);
+    readerAddArgs(args);
+}
+
+
+void Stage::setupLog()
+{
+    LogLevel l(LogLevel::Error);
+
+    if (m_log)
+        l = m_log->getLevel();
+
+    if (!m_logname.empty())
+        m_log.reset(new Log(getName(), m_logname));
+    else if (!m_log)
+        m_log.reset(new Log(getName(), "stdlog"));
+    m_log->setLevel(l);
+
+    bool debug(l > LogLevel::Debug);
+    gdal::ErrorHandler::getGlobalErrorHandler().set(m_log, debug);
+}
+
+
 void Stage::l_initialize(PointTableRef table)
 {
     m_metadata = table.metadata().add(getName());
+    writerInitialize(table);
 }
 
 
-void Stage::l_processOptions(const Options& options)
+void Stage::addSpatialReferenceArg(ProgramArgs& args)
 {
-    m_debug = options.getValueOrDefault<bool>("debug", false);
-    m_verbose = options.getValueOrDefault<uint32_t>("verbose", 0);
-    if (m_debug && !m_verbose)
-        m_verbose = 1;
-
-    if (m_inputs.empty())
-    {
-        std::string logname =
-            options.getValueOrDefault<std::string>("log", "stdlog");
-        m_log = std::shared_ptr<pdal::Log>(new Log(getName(), logname));
-    }
-    else
-    {
-        if (options.hasOption("log"))
-        {
-            std::string logname = options.getValueOrThrow<std::string>("log");
-            m_log.reset(new Log(getName(), logname));
-        }
-        else
-        {
-            // We know we're not empty at this point
-            std::ostream* v = m_inputs[0]->log()->getLogStream();
-            m_log.reset(new Log(getName(), v));
-        }
-    }
-    m_log->setLevel((LogLevel::Enum)m_verbose);
-
-    // If the user gave us an SRS via options, take that.
-    try
-    {
-        m_spatialReference = options.
-            getValueOrThrow<pdal::SpatialReference>("spatialreference");
-    }
-    catch (pdal_error const&)
-    {
-        // If one wasn't set on the options, we'll ignore at this
-        // point.  Maybe another stage might forward/set it later.
-    }
-
-    // Process reader-specific options.
-    readerProcessOptions(options);
-    // Process writer-specific options.
-    writerProcessOptions(options);
+    args.add("spatialreference", "Spatial reference to apply to data",
+        m_spatialReference);
 }
-
 
 const SpatialReference& Stage::getSpatialReference() const
 {
@@ -377,7 +384,7 @@ void Stage::setSpatialReference(MetadataNode& m,
     MetadataNode spatialNode = m.findChild(pred);
     if (spatialNode.empty())
     {
-        m.add(Utils::toMetadata(spatialRef));
+        m.add(spatialRef.toMetadata());
         m.add("spatialreference",
            spatialRef.getWKT(SpatialReference::eHorizontalOnly, false),
            "SRS of this stage");
@@ -387,14 +394,5 @@ void Stage::setSpatialReference(MetadataNode& m,
     }
 }
 
-
-std::ostream& operator<<(std::ostream& ostr, const Stage& stage)
-{
-    ostr << "  Name: " << stage.getName() << std::endl;
-    ostr << "  Spatial Reference:" << std::endl;
-    ostr << "    WKT: " << stage.getSpatialReference().getWKT() << std::endl;
-
-    return ostr;
-}
-
 } // namespace pdal
+

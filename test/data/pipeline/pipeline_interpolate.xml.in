@@ -10,9 +10,6 @@
         <Option name="radius">
             8.4852813742385713
         </Option>
-        <Option name="chunk_size">
-            1234
-        </Option>
         <Option name="filename">
             @CMAKE_SOURCE_DIR@/test/temp/autzen_grid
         </Option>
@@ -46,12 +43,6 @@
             </Option>
             <Option name="spatialreference">
                 @CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las.wkt
-            </Option>
-            <Option name="debug">
-                true
-            </Option>
-            <Option name="verbose">
-                6
             </Option>
         </Reader>
     </Writer>

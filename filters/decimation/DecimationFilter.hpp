@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
+#include <pdal/plugin.hpp>
 
 extern "C" int32_t DecimationFilter_ExitFunc();
 extern "C" PF_ExitFunc DecimationFilter_InitPlugin();
@@ -59,7 +60,7 @@ private:
     point_count_t m_limit;
     PointId m_index;
 
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
     void ready(PointTableRef table)
         { m_index = 0; }
     bool processOne(PointRef& point);

@@ -43,32 +43,80 @@
 namespace pdal
 {
 
-// Turns a vector into a streambuf.
-class PDAL_DLL Charbuf : public std::streambuf
+/**
+  Allow a data buffer to be used at a std::streambuf.
+*/
+class Charbuf : public std::streambuf
 {
 public:
-    Charbuf() : m_bufOffset(0)
+    /**
+      Construct an empty Charbuf.
+    */
+    PDAL_DLL Charbuf() : m_bufOffset(0)
         {}
-    Charbuf (std::vector<char>& v, pos_type bufOffset = 0)
+
+    /**
+      Construct a Charbuf that wraps a byte vector.
+
+      \param v  Byte vector to back streambuf.
+      \param bufOffset  Offset in vector (ignore bytes before offset).
+    */
+    PDAL_DLL Charbuf (std::vector<char>& v, pos_type bufOffset = 0)
         { initialize(v.data(), v.size(), bufOffset); }
-    Charbuf (char *buf, size_t count, pos_type bufOffset = 0)
+
+    /**
+      Construct a Charbuf that wraps a byte buffer.
+
+      \param buf  Buffer to back streambuf.
+      \param count  Size of buffer.
+      \param bufOffset  Offset in vector (ignore bytes before offset).
+    */
+    PDAL_DLL Charbuf (char *buf, size_t count, pos_type bufOffset = 0)
         { initialize(buf, count, bufOffset); }
 
-    void initialize(char *buf, size_t count, pos_type bufOffset = 0);
+    /**
+      Set a buffer to back a Charbuf.
+
+      \param buf  Buffer to back streambuf.
+      \param count  Size of buffer.
+      \param bufOffset  Offset in vector (ignore bytes before offset).
+    */
+    PDAL_DLL void initialize(char *buf, size_t count, pos_type bufOffset = 0);
 
 protected:
-    std::ios::pos_type seekpos(std::ios::pos_type pos,
+    /**
+      Seek to a position in the buffer.
+
+      \param pos  Position to seek to.
+      \param which  I/O mode [default: rw]
+      \return  Current position adjusted for buffer offset.
+    */
+    PDAL_DLL std::ios::pos_type seekpos(std::ios::pos_type pos,
         std::ios_base::openmode which = std::ios_base::in | std::ios_base::out);
-    std::ios::pos_type seekoff(std::ios::off_type off,
+
+    /**
+      Seek to a position based on an offset from a position.
+
+      \param off  Offset from current position.
+      \param dir  Offset basis (beg, cur or end)
+      \param which  I/O mode [default: rw]
+      \return  Current position adjusted for buffer offset.
+    */
+    PDAL_DLL std::ios::pos_type seekoff(std::ios::off_type off,
         std::ios_base::seekdir dir,
         std::ios_base::openmode which = std::ios_base::in | std::ios_base::out);
 
 private:
-    // The offset allows one to use offsets when seeking that refer not to
-    // the positions in the backing vector, but to some other reference point.
+    /**
+      Offset that allows one to seek to positions not based on the beginning
+      of the backing vector, but to some other reference point.
+    */
     std::ios::pos_type m_bufOffset;
-    // For the put pointer, it seems we need the beginning of the buffer
-    // in order to deal with offsets.
+
+    /**
+      For the put pointer, it seems we need the beginning of the buffer
+      in order to deal with offsets.
+    */
     char *m_buf;
 };
 

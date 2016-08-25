@@ -17,66 +17,96 @@ In addition to the library code, PDAL provides a suite of command-line
 applications that users can conveniently use to process, filter, translate, and
 query point cloud data.  See :ref:`apps` for more information.
 
+The entire website is available as a single PDF at http://pdal.io/PDAL.pdf
 
-Documentation
-=================
+News
+--------------------------------------------------------------------------------
+
+**04-24-2016**
+................................................................................
+
+See `Howard Butler`_ and `Brad Chambers`_ give PDAL talks at
+`FOSS4GNA 2016`_ in Raleigh, NC May 2-5. Howard will be presenting `Point cloud web
+services with Greyhound, Entwine, and PDAL`_, and Brad will be presenting `Filtering
+point clouds with PDAL and PCL`_.
+
+
+.. note::
+
+    Catch up with Brad and Howard to get a PDAL sticker.
+
+    .. image:: ./images/iheartpdal.png
+        :scale: 60%
+
+.. _`Howard Butler`: http://github.com/hobu
+.. _`Brad Chambers`: http://github.com/chambbj
+.. _`FOSS4GNA 2016`: https://2016.foss4g-na.org
+.. _`Point cloud web services with Greyhound, Entwine, and PDAL`: https://2016.foss4g-na.org/session/point-cloud-web-services-greyhound-entwine-and-pdal
+.. _`Filtering point clouds with PDAL and PCL`: https://2016.foss4g-na.org/session/filtering-point-clouds-pdal-and-pcl
+
+
+Download
+--------------------------------------------------------------------------------
 
 .. toctree::
    :maxdepth: 2
 
    download
-   compilation/index
-   apps
+
+Community
+--------------------------------------------------------------------------------
+
+.. toctree::
+   :maxdepth: 2
+
    community
-   stages/index
-   tutorial/index
-   tutorial/docker
+
+Usage
+--------------------------------------------------------------------------------
+
+.. toctree::
+   :maxdepth: 2
+   :glob:
+
+   apps/index
+   quickstart
+   stages/readers
+   stages/writers
+   stages/filters
    pipeline
-   faq
+   tutorial/index
+
+Workshop
+--------------------------------------------------------------------------------
+
+.. toctree::
+   :maxdepth: 2
+
+   Workshop <workshop/index>
+
+Development
+--------------------------------------------------------------------------------
+
+.. toctree::
+   :maxdepth: 2
+
    development/index
    api/index
-   metadata
-   contributors
+   faq
    copyright
 
-
-Developers and Sponsorship
-------------------------------------------------------------------------------
-
-PDAL is developed by `Howard Butler`_, `Michael Gerlek`_, `Andrew Bell`_,
-`Brad Chambers`_ and `others`_. Find out more about who contributes to
-PDAL at :ref:`contributors`.
-
-
-.. note::
-
-    PDAL should not be confused with `PCL`_ (Point Cloud Library).  PCL is a
-    library specifically designed to provide algorithmic analysis and
-    modification of point clouds.  PDAL provides a limited interface to the
-    facilities of PCL, but does not in general attempt to duplicate its
-    capabilites.  PDAL is focused more on data access and translation than
-    PCL. See :ref:`filters.pclblock` for more background.
 
 
 
 
 Indices and tables
-==================
+--------------------------------------------------------------------------------
 
 * :ref:`genindex`
 * :ref:`search`
 
-.. _`PCL`: http://pointclouds.org
 .. _`GDAL`: http://www.gdal.org
 .. _`BSD`: http://www.opensource.org/licenses/bsd-license.php
 .. _`point cloud data`: http://en.wikipedia.org/wiki/Point_cloud
 .. _`LIDAR`: http://en.wikipedia.org/wiki/LIDAR
-.. _`U.S. Army Cold Regions Research and Engineering Laboratory` : http://www.crrel.usace.army.mil/
-.. _`Howard Butler`: http://github.com/hobu
-.. _`Andrew Bell`: http://github.com/abellgithub
-.. _`Michael Gerlek`: http://github.com/mpgerlek
-.. _`Brad Chambers`: http://github.com/chambbj
-.. _`others`: http://github.com/PDAL/PDAL/graphs/contributors
-
-
 

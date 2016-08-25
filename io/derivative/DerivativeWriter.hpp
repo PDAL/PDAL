@@ -35,6 +35,8 @@
 #pragma once
 
 #include <pdal/Writer.hpp>
+#include <pdal/plugin.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include <Eigen/Core>
 
@@ -91,10 +93,8 @@ public:
 
     DerivativeWriter();
 
-    Options getDefaultOptions();
-
 private:
-    virtual void processOptions(const Options& ops);
+    virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
     virtual void write(const PointViewPtr view);
 
@@ -151,6 +151,7 @@ private:
     uint32_t m_GRID_SIZE_Y;
     double m_GRID_DIST_X;
     double m_GRID_DIST_Y;
+    StringList m_primTypesSpec;
     std::vector<TypeOutput> m_primitiveTypes;
     BOX2D m_bounds;
     SpatialReference m_inSRS;

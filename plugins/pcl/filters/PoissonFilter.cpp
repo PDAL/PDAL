@@ -43,6 +43,9 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/surface/poisson.h>
 
+#include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
+
 namespace pdal
 {
 
@@ -57,22 +60,12 @@ std::string PoissonFilter::getName() const
     return s_info.name;
 }
 
-Options PoissonFilter::getDefaultOptions()
+void PoissonFilter::addArgs(ProgramArgs& args)
 {
-    Options options;
-    options.add("depth", 8, "Maximum depth of the tree used for reconstruction");
-    options.add("point_weight", 4.0,
-                "Importance of interpolation of point samples in the screened "\
-                "Poisson equation");
-    return options;
-}
-
-/** \brief This method processes the PointView through the given pipeline. */
-
-void PoissonFilter::processOptions(const Options& options)
-{
-    m_depth = options.getValueOrDefault<int>("depth", 8);
-    m_point_weight = options.getValueOrDefault<float>("point_weight", 4.0);
+    args.add("depth", "Maximum depth of the tree used for reconstruction",
+        m_depth, 8);
+    args.add("point_weight", "Importance of interpolation of point "
+        "samples in the screened Poisson equation", m_point_weight, 4.0f);
 }
 
 PointViewSet PoissonFilter::run(PointViewPtr input)
@@ -95,28 +88,7 @@ PointViewSet PoissonFilter::run(PointViewPtr input)
     Cloud::Ptr cloud(new Cloud);
     pclsupport::PDALtoPCD(input, *cloud, buffer_bounds);
 
-    int level = log()->getLevel();
-    switch (level)
-    {
-        case 0:
-            pcl::console::setVerbosityLevel(pcl::console::L_ALWAYS);
-            break;
-        case 1:
-            pcl::console::setVerbosityLevel(pcl::console::L_ERROR);
-            break;
-        case 2:
-            pcl::console::setVerbosityLevel(pcl::console::L_WARN);
-            break;
-        case 3:
-            pcl::console::setVerbosityLevel(pcl::console::L_INFO);
-            break;
-        case 4:
-            pcl::console::setVerbosityLevel(pcl::console::L_DEBUG);
-            break;
-        default:
-            pcl::console::setVerbosityLevel(pcl::console::L_VERBOSE);
-            break;
-    }
+    pclsupport::setLogLevel(log()->getLevel());
 
     // pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointNormal>::Ptr cloud_with_normals(new pcl::PointCloud<pcl::PointNormal>);

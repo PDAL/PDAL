@@ -10,24 +10,21 @@ Sorts the XY data using `Morton ordering`_.
 Example
 -------
 
-.. code-block:: xml
+.. code-block:: json
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.las">
-      <Option name="filename">
-        sorted.las
-      </Option>
-      <Filter type="filters.mortonorder">
-        <Reader type="readers.las">
-          <Option name="filename">
-            unsorted.las
-          </Option>
-        </Reader>
-      </Filter>
-    </Writer>
-  </Pipeline>
-
+    {
+      "pipeline":[
+        "uncompressed.las",
+        {
+          "type":"filters.mortonorder"
+        },
+        {
+          "type":"writers.las",
+          "filename":"compressed.laz",
+          "compression":"true"
+        }
+      ]
+    }
 
 
 Notes

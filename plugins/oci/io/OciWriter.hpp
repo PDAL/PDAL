@@ -53,19 +53,8 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
-
 private:
-    template<typename T>
-    T getDefaultedOption(const Options& options,
-        const std::string& option_name)
-    {
-        T default_value =
-            getDefaultOptions().getOption(option_name).getValue<T>();
-        return options.getValueOrDefault<T>(option_name, default_value);
-    }
-
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
     virtual void ready(PointTableRef table);
     virtual void write(const PointViewPtr view);
@@ -114,6 +103,7 @@ private:
     bool m_overwrite;
     bool m_trace;
     bool m_compression;
+    bool m_dimInterleaved;
 
     std::string m_baseTableName;
     std::string m_cloudColumnName;
@@ -130,7 +120,7 @@ private:
     uint32_t m_chunkCount;
     uint32_t m_capacity;
     bool m_streamChunks;
-    Orientation::Enum m_orientation;
+    Orientation m_orientation;
     std::string m_connSpec;
     std::string m_preSql;
     std::string m_postBlockSql;

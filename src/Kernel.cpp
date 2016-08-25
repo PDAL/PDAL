@@ -35,11 +35,10 @@
 #include <cctype>
 #include <iostream>
 
-#include <pdal/pdal_config.hpp>
-#include <pdal/GlobalEnvironment.hpp>
 #include <pdal/Kernel.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/PDALUtils.hpp>
+#include <pdal/pdal_config.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
@@ -59,6 +58,7 @@ namespace
 bool parseOption(std::string o, std::string& stage, std::string& option,
     std::string& value)
 {
+    value.clear();
     if (o.size() < 2)
         return false;
     if (o[0] != '-' || o[1] != '-')
@@ -84,21 +84,20 @@ bool parseOption(std::string o, std::string& stage, std::string& option,
     // Get stage_type.
     count = Utils::extract(o, pos, islc);
     pos += count;
-
     std::string stage_type = o.substr(0, pos);
     if (stage_type != "readers" && stage_type != "writers" &&
         stage_type != "filters")
         return false;
-    if (o[pos++] != '.')
+    if (pos >= o.length() || o[pos++] != '.')
         return false;
 
     // Get stage_name.
     count = Utils::extract(o, pos, islcOrDigit);
     if (std::isdigit(o[pos]))
-        return false; 
+        return false;
     pos += count;
     stage = o.substr(0, pos);
-    if (o[pos++] != '.')
+    if (pos >= o.length() || o[pos++] != '.')
         return false;
 
     // Get option name.
@@ -107,8 +106,10 @@ bool parseOption(std::string o, std::string& stage, std::string& option,
     pos += count;
     option = o.substr(optionStart, count);
 
-    if (o[pos++] != '=')
-        return false;
+    // We've gotten a good option name, so return true, even if the value
+    // is missing.  The caller can handle the missing value if desired.
+    if (pos >= o.length() || o[pos++] != '=')
+        return true;
 
     // The command-line parser takes care of quotes around an argument
     // value and such.  May want to do something to handle escaped characters?
@@ -119,15 +120,9 @@ bool parseOption(std::string o, std::string& stage, std::string& option,
 } // unnamed namespace
 
 
-Kernel::Kernel()
-    : m_usestdin(false)
-    , m_log("pdal", "stderr")
-    , m_isDebug(false)
-    , m_verboseLevel(0)
-    , m_showVersion(false)
-    , m_showTime(false)
+Kernel::Kernel() :
+    m_showTime(false)
     , m_hardCoreDebug(false)
-    , m_reportDebug(false)
     , m_visualize(false)
 {}
 
@@ -139,8 +134,9 @@ std::ostream& operator<<(std::ostream& ostr, const Kernel& kernel)
 }
 
 
-void Kernel::doSwitches(int argc, const char *argv[], ProgramArgs& args)
+void Kernel::doSwitches(const StringList& cmdArgs, ProgramArgs& args)
 {
+    OptionsMap& stageOptions = m_manager.stageOptions();
     StringList stringArgs;
 
     // Scan the argument vector for extra stage options.  Pull them out and
@@ -148,26 +144,38 @@ void Kernel::doSwitches(int argc, const char *argv[], ProgramArgs& args)
     // NOTE: This depends on the format being "option=value" rather than
     //   "option value".  This is what we've always expected, so no problem,
     //   but it would be better to be more flexible.
-    for (int i = 0; i < argc; ++i)
+    for (size_t i = 0; i < cmdArgs.size(); ++i)
     {
         std::string stageName, opName, value;
 
-        if (parseOption(argv[i], stageName, opName, value))
+        if (parseOption(cmdArgs[i], stageName, opName, value))
         {
+            if (value.empty())
+            {
+                std::ostringstream oss;
+                oss << "Stage option '" << stageName << "." << opName <<
+                    "' must be specified " << " as --" << stageName << "." <<
+                    opName << "=<value>" << ".";
+                throw pdal_error(oss.str());
+            }
             Option op(opName, value);
-            m_extraStageOptions[stageName].add(op);
+            stageOptions[stageName].add(op);
         }
         else
-            stringArgs.push_back(argv[i]);
+            stringArgs.push_back(cmdArgs[i]);
     }
 
     try
     {
-        addBasicSwitches(args);
-
         // parseSimple allows us to scan for the help option without
         // raising exception about missing arguments and so on.
-        args.parseSimple(stringArgs);
+        // It also removes consumed args from the arg list, so for now,
+        // parse a copy that will be ignored by parse().
+        ProgramArgs hargs;
+        hargs.add("help,h", "Print help message", m_showHelp);
+        hargs.parseSimple(stringArgs);
+
+        addBasicSwitches(args);
         addSwitches(args);
         if (!m_showHelp)
             args.parse(stringArgs);
@@ -181,22 +189,6 @@ void Kernel::doSwitches(int argc, const char *argv[], ProgramArgs& args)
 
 int Kernel::doStartup()
 {
-    try
-    {
-        pdal::GlobalEnvironment::startup();
-    }
-    catch (std::exception const& e)
-    {
-        const std::string s("Caught exception in initialization: ");
-        Utils::printError(s + e.what());
-        return 1;
-    }
-    catch (...)
-    {
-        Utils::printError("Caught unknown exception in initialization");
-        return 1;
-    }
-
     return 0;
 }
 
@@ -235,38 +227,17 @@ int Kernel::doExecution(ProgramArgs& args)
 }
 
 
-int Kernel::doShutdown()
-{
-    try
-    {
-        pdal::GlobalEnvironment::shutdown();
-    }
-    catch (std::exception const& e)
-    {
-        const std::string s("Caught exception during shutdown: ");
-        Utils::printError(s + e.what());
-        return 1;
-    }
-    catch (...)
-    {
-        Utils::printError("Caught unknown exception during shutdown.");
-        return 1;
-    }
-
-    return 0;
-}
-
-
 // this just wraps ALL the code in total catch block
-int Kernel::run(int argc, char const * argv[], const std::string& appName)
+int Kernel::run(const StringList& cmdArgs, LogPtr& log)
 {
-    m_appName = appName;
+    m_log = log;
+    m_manager.setLog(m_log);
 
     ProgramArgs args;
 
     try
     {
-        doSwitches(argc, argv, args);
+        doSwitches(cmdArgs, args);
     }
     catch (const pdal_error& e)
     {
@@ -284,32 +255,7 @@ int Kernel::run(int argc, char const * argv[], const std::string& appName)
     if (startup_status)
         return startup_status;
 
-    int execution_status = doExecution(args);
-
-    // note we will try to shutdown cleanly even if we got an error condition
-    // in the execution phase
-
-    int shutdown_status = doShutdown();
-
-    if (execution_status)
-        return execution_status;
-
-    return shutdown_status;
-}
-
-
-void Kernel::collectExtraOptions()
-{
-    for (const auto& o : m_extra_options)
-    {
-        std::string stageName, opName, value;
-
-        if (parseOption(o, stageName, opName, value))
-        {
-            Option op(opName, value);
-            m_extraStageOptions[stageName].add(op);
-        }
-    }
+    return doExecution(args);
 }
 
 
@@ -327,20 +273,8 @@ int Kernel::innerRun(ProgramArgs& args)
         return -1;
     }
 
-    collectExtraOptions();
+    parseCommonOptions();
     return execute();
-}
-
-
-bool Kernel::isDebug() const
-{
-    return m_isDebug;
-}
-
-
-uint32_t Kernel::getVerboseLevel() const
-{
-    return m_verboseLevel;
 }
 
 
@@ -352,12 +286,16 @@ bool Kernel::isVisualize() const
 
 void Kernel::visualize(PointViewPtr view)
 {
-    BufferReader bufferReader;
-    bufferReader.addView(view);
+    PipelineManager manager;
 
-    StageFactory f;
-    Stage& writer = ownStage(f.createStage("writers.pclvisualizer"));
-    writer.setInput(bufferReader);
+    manager.commonOptions() = m_manager.commonOptions();
+    manager.stageOptions() = m_manager.stageOptions();
+
+    BufferReader& reader =
+        static_cast<BufferReader&>(manager.makeReader("", "readers.buffer"));
+    reader.addView(view);
+
+    Stage& writer = manager.makeWriter("", "writers.pclvisualizer", reader);
 
     PointTable table;
     writer.prepare(table);
@@ -376,20 +314,27 @@ void Kernel::visualize(PointViewPtr input_view, PointViewPtr output_view) const
     BOX3D const& output_bounds = output_view->calculateBounds();
 
     // Convert PointView to a PCL PointCloud
-    pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-    pclsupport::PDALtoPCD(const_cast<PointViewPtr>(*input_view), *input_cloud, input_bounds);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-    pclsupport::PDALtoPCD(const_cast<PointViewPtr>(*output_view), *output_cloud, output_bounds);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud(
+        new pcl::PointCloud<pcl::PointXYZ>);
+    pclsupport::PDALtoPCD(
+        const_cast<PointViewPtr>(*input_view), *input_cloud, input_bounds);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud(
+        new pcl::PointCloud<pcl::PointXYZ>);
+    pclsupport::PDALtoPCD(
+        const_cast<PointViewPtr>(*output_view), *output_cloud, output_bounds);
 
     // Create PCLVisualizer
-    std::shared_ptr<pcl::visualization::PCLVisualizer> p(new pcl::visualization::PCLVisualizer("3D Viewer"));
+    std::shared_ptr<pcl::visualization::PCLVisualizer> p(
+        new pcl::visualization::PCLVisualizer("3D Viewer"));
 
     // Set background to black
     p->setBackgroundColor(0, 0, 0);
 
     // Use Z dimension to colorize points
-    pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZ> input_color(input_cloud, "z");
-    pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZ> output_color(output_cloud, "z");
+    pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZ>
+        input_color(input_cloud, "z");
+    pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZ>
+        output_color(output_cloud, "z");
 
     // Add point cloud to the viewer with the Z dimension color handler
     p->createViewPort(0, 0, 0.5, 1, viewport);
@@ -409,20 +354,12 @@ void Kernel::visualize(PointViewPtr input_view, PointViewPtr output_view) const
 */
 
 
-void Kernel::setCommonOptions(Options &options)
+void Kernel::parseCommonOptions()
 {
-    options.add("visualize", m_visualize);
+    Options& options = m_manager.commonOptions();
 
-    if (m_isDebug)
-    {
-        options.add("debug", true);
-        uint32_t verbosity(m_verboseLevel);
-        if (!verbosity)
-            verbosity = 1;
-
-        options.add("verbose", verbosity);
-        options.add("log", "STDERR");
-    }
+    if (m_visualize)
+        options.add("visualize", m_visualize);
 
     auto pred = [](char c){ return (bool)strchr(",| ", c); };
 
@@ -482,7 +419,7 @@ void Kernel::setCommonOptions(Options &options)
 
 void Kernel::outputHelp(ProgramArgs& args)
 {
-    std::cout << "usage: " << "pdal " << m_appName << " [options] " <<
+    std::cout << "usage: " << "pdal " << getName() << " [options] " <<
         args.commandLine() << std::endl;
 
     std::cout << "options:" << std::endl;
@@ -497,20 +434,12 @@ void Kernel::outputHelp(ProgramArgs& args)
 
 void Kernel::addBasicSwitches(ProgramArgs& args)
 {
-    args.add("help,h", "Print help message", m_showHelp);
-
-    args.add("debug,d", "Enable debug mode", m_isDebug);
     args.add("developer-debug",
         "Enable developer debug (don't trap exceptions)", m_hardCoreDebug);
     args.add("label", "A string to label the process with", m_label);
-    args.add("verbose,v", "Set verbose message level", m_verboseLevel);
 
     args.add("visualize", "Visualize result", m_visualize);
-    args.add("stdin,s", "Read pipeline XML from stdin", m_usestdin);
-    /**
-    args.add("heartbeat", "Shell command to run for every progress heartbeat",
-        m_heartbeat_shell_command);
-    **/
+    args.add("driver", "Override reader driver", m_driverOverride, "");
     args.add("scale",
          "A comma-separated or quoted, space-separated list of scales to "
          "set on the output file: \n--scale 0.1,0.1,0.00001\n--scale \""
@@ -521,48 +450,59 @@ void Kernel::addBasicSwitches(ProgramArgs& args)
          "\"1234 5678 91011\"", m_offsets);
 }
 
-
-Stage& Kernel::makeReader(const std::string& inputFile)
+/**
+Stage& Kernel::createStage(const std::string& name)
 {
-    if (!FileUtils::fileExists(inputFile))
-        throw app_runtime_error("file not found: " + inputFile);
-
-    StageFactory factory;
-    std::string driver = factory.inferReaderDriver(inputFile);
-    if (driver.empty())
-        throw app_runtime_error("Cannot determine input file type of " +
-            inputFile);
-
-    Stage *stage = factory.createStage(driver);
+    Stage *stage = m_factory.createStage(name);
     if (!stage)
-        throw app_runtime_error("reader creation failed");
-    ownStage(stage);
+        throw pdal_error("stage creation failed for " + name);
     return *stage;
+}
+**/
+
+Stage& Kernel::makeReader(const std::string& inputFile, std::string driver)
+{
+    return m_manager.makeReader(inputFile, driver);
 }
 
 
-Stage& Kernel::makeWriter(const std::string& outputFile, Stage& parent)
+Stage& Kernel::makeReader(const std::string& inputFile, std::string driver,
+    Options options)
 {
-    pdal::StageFactory factory;
+    return m_manager.makeReader(inputFile, driver, options);
+}
 
-    std::string driver = factory.inferWriterDriver(outputFile);
-    if (driver.empty())
-        throw pdal_error("Cannot determine output file type of " +
-            outputFile);
-    Options options = factory.inferWriterOptionsChanges(outputFile);
 
-    Stage *writer = factory.createStage(driver);
-    if (!writer)
-    {
-        std::ostringstream ss;
-        ss << "Error creating writer stage for file '" << outputFile << "'.";
-        throw pdal_error(ss.str());
-    }
-    ownStage(writer);
-    writer->setInput(parent);
-    writer->addOptions(options);
+Stage& Kernel::makeFilter(const std::string& driver)
+{
+    return m_manager.makeFilter(driver);
+}
 
-    return *writer;
+
+Stage& Kernel::makeFilter(const std::string& driver, Stage& parent)
+{
+    return m_manager.makeFilter(driver, parent);
+}
+
+
+Stage& Kernel::makeFilter(const std::string& driver, Stage& parent,
+    Options options)
+{
+    return m_manager.makeFilter(driver, parent, options);
+}
+
+
+Stage& Kernel::makeWriter(const std::string& outputFile, Stage& parent,
+    std::string driver)
+{
+    return m_manager.makeWriter(outputFile, driver, parent);
+}
+
+
+Stage& Kernel::makeWriter(const std::string& outputFile, Stage& parent,
+    std::string driver, Options options)
+{
+    return m_manager.makeWriter(outputFile, driver, parent, options);
 }
 
 

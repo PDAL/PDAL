@@ -4,19 +4,25 @@
 C++ API
 ******************************************************************************
 
-
 .. toctree::
    :maxdepth: 2
 
-   dimension
+   algorithm
    bounds
+   charbuf
+   dimension
+   extractor
+   fileutils
    filter
+   istream
    log
    metadata
    options
-   pointview
    pointtable
+   pointview
    programargs
    reader
    stage
+   stagefactory
+   utils
    writer

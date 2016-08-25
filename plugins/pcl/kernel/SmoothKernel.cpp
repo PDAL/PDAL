@@ -39,6 +39,7 @@
 
 #include <buffer/BufferReader.hpp>
 #include <pdal/KernelFactory.hpp>
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {
@@ -63,12 +64,7 @@ int SmoothKernel::execute()
 {
     PointTable table;
 
-    Options readerOptions;
-    readerOptions.add("filename", m_inputFile);
-    setCommonOptions(readerOptions);
-
-    Stage& readerStage(Kernel::makeReader(m_inputFile));
-    readerStage.setOptions(readerOptions);
+    Stage& readerStage(makeReader(m_inputFile, ""));
 
     // go ahead and prepare/execute on reader stage only to grab input
     // PointViewSet, this makes the input PointView available to both the
@@ -79,11 +75,15 @@ int SmoothKernel::execute()
     // the input PointViewSet will be used to populate a BufferReader that is
     // consumed by the processing pipeline
     PointViewPtr input_view = *viewSetIn.begin();
-    std::shared_ptr<BufferReader> bufferReader(new BufferReader);
-    bufferReader->setOptions(readerOptions);
-    bufferReader->addView(input_view);
 
-    Options smoothOptions;
+    PipelineManager manager;
+    manager.commonOptions() = m_manager.commonOptions();
+    manager.stageOptions() = m_manager.stageOptions();
+
+    BufferReader& bufferReader =
+        static_cast<BufferReader&>(manager.makeReader("", "readers.buffer"));
+    bufferReader.addView(input_view);
+
     std::ostringstream ss;
     ss << "{";
     ss << "  \"pipeline\": {";
@@ -92,29 +92,13 @@ int SmoothKernel::execute()
     ss << "      }]";
     ss << "    }";
     ss << "}";
-    std::string json = ss.str();
-    smoothOptions.add("json", json);
-    smoothOptions.add("debug", isDebug());
-    smoothOptions.add("verbose", getVerboseLevel());
 
-    std::shared_ptr<Stage> smoothStage(new PCLBlock());
-    smoothStage->setOptions(smoothOptions);
-    smoothStage->setInput(*bufferReader);
+    Options filterOptions({"json", ss.str()});
+    Stage& smoothStage = manager.makeFilter("filters.pclblock", bufferReader,
+        filterOptions);
 
-    Options writerOptions;
-    writerOptions.add("filename", m_outputFile);
-    setCommonOptions(writerOptions);
+    Stage& writer(Kernel::makeWriter(m_outputFile, smoothStage, ""));
 
-    Stage& writer(Kernel::makeWriter(m_outputFile, *smoothStage));
-    writer.setOptions(writerOptions);
-
-    std::vector<std::string> cmd = getProgressShellCommand();
-    UserCallback *callback =
-        cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
-        (UserCallback *)new HeartbeatCallback();
-
-    writer.setUserCallback(callback);
-    applyExtraStageOptionsRecursive(&writer);
     writer.prepare(table);
 
     // process the data, grabbing the PointViewSet for visualization of the
@@ -123,7 +107,6 @@ int SmoothKernel::execute()
 
     if (isVisualize())
         visualize(*viewSetOut.begin());
-    //visualize(*viewSetIn.begin(), *viewSetOut.begin());
 
     return 0;
 }

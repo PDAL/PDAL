@@ -84,8 +84,6 @@ Options getDbOptions()
     options.add(Option("connection", getTestDBTempConn()));
     options.add(Option("table", "4dal-\"test\"-table")); // intentional quotes
     options.add(Option("column", "p\"a")); // intentional quotes
-    options.add(Option("srid", "4326"));
-    options.add(Option("capacity", "10000"));
 
     return options;
 }
@@ -184,18 +182,14 @@ namespace
 void optionsWrite(const Options& writerOps)
 {
     StageFactory f;
-    std::unique_ptr<Stage> writer(f.createStage("writers.pgpointcloud"));
-    std::unique_ptr<Stage> reader(f.createStage("readers.las"));
-
-    EXPECT_TRUE(writer.get());
-    EXPECT_TRUE(reader.get());
-    if (!writer.get() || !reader.get())
-        return;
+    Stage* reader(f.createStage("readers.las"));
 
     const std::string file(Support::datapath("las/1.2-with-color.las"));
     Options options;
     options.add("filename", file);
     reader->setOptions(options);
+
+    Stage* writer(f.createStage("writers.pgpointcloud"));
     writer->setOptions(writerOps);
     writer->setInput(*reader);
 
@@ -251,8 +245,8 @@ TEST_F(PgpointcloudWriterTest, writeXYZ)
     optionsWrite(ops);
 
     PointTable table;
-    std::unique_ptr<Stage> reader(
-        StageFactory().createStage("readers.pgpointcloud"));
+    StageFactory factory;
+    Stage* reader(factory.createStage("readers.pgpointcloud"));
     reader->setOptions(getDbOptions());
 
     reader->prepare(table);
@@ -271,8 +265,8 @@ TEST_F(PgpointcloudWriterTest, writetNoPointcloudExtension)
     }
 
     StageFactory f;
-    std::unique_ptr<Stage> writer(f.createStage("writers.pgpointcloud"));
-    EXPECT_TRUE(writer.get());
+    Stage* writer(f.createStage("writers.pgpointcloud"));
+    EXPECT_TRUE(writer);
 
     executeOnTestDb("DROP EXTENSION pointcloud");
 
@@ -280,8 +274,8 @@ TEST_F(PgpointcloudWriterTest, writetNoPointcloudExtension)
 
     const Option opt_filename("filename", file);
 
-    std::unique_ptr<Stage> reader(f.createStage("readers.las"));
-    EXPECT_TRUE(reader.get());
+    Stage* reader(f.createStage("readers.las"));
+    EXPECT_TRUE(reader);
     Options options;
     options.add(opt_filename);
     reader->setOptions(options);

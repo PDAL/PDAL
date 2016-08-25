@@ -7,6 +7,7 @@
 #include <pdal/PointTable.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -22,22 +23,16 @@ std::string MyFilter::getName() const
     return s_info.name;
 }
 
-Options MyFilter::getDefaultOptions()
+void MyFilter::addArgs(ProgramArgs& args)
 {
-    Options options;
-    options.add("param", 1.0, "My parameter");
-    return options;
-}
-
-void MyFilter::processOptions(const pdal::Options& options)
-{
-    m_value = options.getValueOrDefault<double>("param", 1.0);
+    args.add("param", "Some parameter", m_value, 1.0);
 }
 
 void MyFilter::addDimensions(PointLayoutPtr layout)
 {
     layout->registerDim(Dimension::Id::Intensity);
-    m_myDimension = layout->registerOrAssignDim("MyDimension", Dimension::Type::Unsigned8);
+    m_myDimension = layout->registerOrAssignDim("MyDimension",
+            Dimension::Type::Unsigned8);
 }
 
 PointViewSet MyFilter::run(PointViewPtr input)

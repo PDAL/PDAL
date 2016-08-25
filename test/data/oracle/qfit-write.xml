@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Pipeline version="1.0">
     <Writer type="writers.oci">
-        <Option name="debug">
-            true
-        </Option>
-        <Option name="verbose">
-            1
-        </Option>
         <Option name="connection">
             lidar/lidar@oracle.hobu.biz/lidar
         </Option>
@@ -59,12 +53,6 @@
 	    <Reader type="readers.qfit">
 		<Option name="filename">
 		    ../qfit/14-word.qi
-		</Option>
-		<Option name="debug">
-		    true
-		</Option>
-		<Option name="verbose">
-		    1
 		</Option>
 		<Option name="flip_coordinates">
 		    true

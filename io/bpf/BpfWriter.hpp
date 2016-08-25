@@ -42,6 +42,7 @@
 #include <pdal/pdal_export.hpp>
 #include <pdal/FlexWriter.hpp>
 #include <pdal/util/OStream.hpp>
+#include <pdal/plugin.hpp>
 
 #include <vector>
 
@@ -58,16 +59,19 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
-
 private:
+    StringList m_outputDims; ///< List of dimensions to write
     OLeStream m_stream;
     BpfHeader m_header;
     BpfDimensionList m_dims;
     std::vector<uint8_t> m_extraData;
     std::vector<BpfUlemFile> m_bundledFiles;
+    bool m_compression;
+    std::string m_extraDataSpec;
+    StringList m_bundledFilesSpec;
 
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
+    virtual void initialize();
     virtual void prepared(PointTableRef table);
     virtual void readyFile(const std::string& filename,
         const SpatialReference& srs);

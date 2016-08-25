@@ -51,8 +51,8 @@ using namespace pdal;
 TEST(CropFilterTest, create)
 {
     StageFactory f;
-    std::unique_ptr<Stage> filter(f.createStage("filters.crop"));
-    EXPECT_TRUE(filter.get());
+    Stage* filter(f.createStage("filters.crop"));
+    EXPECT_TRUE(filter);
 }
 
 TEST(CropFilterTest, test_crop)
@@ -60,7 +60,7 @@ TEST(CropFilterTest, test_crop)
     BOX3D srcBounds(0.0, 0.0, 0.0, 10.0, 100.0, 1000.0);
     Options opts;
     opts.add("bounds", srcBounds);
-    opts.add("num_points", 1000);
+    opts.add("count", 1000);
     opts.add("mode", "ramp");
     FauxReader reader;
     reader.setOptions(opts);
@@ -125,8 +125,8 @@ TEST(CropFilterTest, test_crop_polygon)
     reader.setOptions(ops1);
 
     Options options;
-    Option debug("debug", true, "");
-    Option verbose("verbose", 9, "");
+    Option debug("debug", true);
+    Option verbose("verbose", 9);
 
     std::istream* wkt_stream =
         FileUtils::openFile(Support::datapath("autzen/autzen-selection.wkt"));
@@ -136,7 +136,7 @@ TEST(CropFilterTest, test_crop_polygon)
 
     std::string wkt(strbuf.str());
 
-    Option polygon("polygon", wkt, "");
+    Option polygon("polygon", wkt);
     options.add(polygon);
 
     CropFilter crop;
@@ -156,16 +156,20 @@ TEST(CropFilterTest, test_crop_polygon)
 
 TEST(CropFilterTest, test_crop_polygon_reprojection)
 {
-    Options options;
+    Options readOptions;
 
-    options.add("spatialreference", Support::datapath("autzen/autzen-srs.wkt"));
-    options.add("out_srs", "EPSG:4326");
-    options.add("x_dim", std::string("readers.las.X"));
-    options.add("y_dim", std::string("readers.las.Y"));
-    options.add("z_dim", std::string("readers.las.Z"));
-    options.add("scale_x", 0.0000001f);
-    options.add("scale_y", 0.0000001f);
-    options.add("filename", Support::datapath("las/1.2-with-color.las"));
+    readOptions.add("filename", Support::datapath("las/1.2-with-color.las"));
+    readOptions.add("spatialreference", Support::datapath("autzen/autzen-srs.wkt"));
+
+    LasReader reader;
+    reader.setOptions(readOptions);
+
+    Options reproOptions;
+    reproOptions.add("out_srs", "EPSG:4326");
+
+    ReprojectionFilter reprojection;
+    reprojection.setOptions(reproOptions);
+    reprojection.setInput(reader);
 
     std::istream* wkt_stream = FileUtils::openFile(
         Support::datapath("autzen/autzen-selection-dd.wkt"));
@@ -173,18 +177,11 @@ TEST(CropFilterTest, test_crop_polygon_reprojection)
     strbuf << wkt_stream->rdbuf();
     std::string wkt(strbuf.str());
 
-    Option polygon("polygon", wkt);
-    options.add(polygon);
-
-    LasReader reader;
-    reader.setOptions(options);
-
-    ReprojectionFilter reprojection;
-    reprojection.setOptions(options);
-    reprojection.setInput(reader);
+    Options cropOptions;
+    cropOptions.add("polygon", wkt);
 
     CropFilter crop;
-    crop.setOptions(options);
+    crop.setOptions(cropOptions);
     crop.setInput(reprojection);
 
     PointTable table;

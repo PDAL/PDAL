@@ -1,0 +1,18 @@
+{
+  "pipeline":[
+    "@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las",
+    {
+      "type":"filters.crop",
+      "bounds":"([0,1000000],[0,1000000],[0,1000000])"
+    },
+    {
+      "type":"filters.stats",
+      "dimensions":"readers.las.X, readers.las.Y, readers.las.Z, Classification"
+    },
+    {
+      "filename":"@CMAKE_SOURCE_DIR@/test/temp/pdal-compressed.laz",
+      "compression":true,
+      "format":2
+    }
+  ]
+}

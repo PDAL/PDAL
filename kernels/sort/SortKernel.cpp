@@ -35,8 +35,8 @@
 #include "SortKernel.hpp"
 
 #include <buffer/BufferReader.hpp>
-#include <pdal/KernelSupport.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {
@@ -70,40 +70,14 @@ void SortKernel::addSwitches(ProgramArgs& args)
 }
 
 
-Stage& SortKernel::makeReader(Options readerOptions)
-{
-    if (isDebug())
-    {
-        readerOptions.add<bool>("debug", true);
-        uint32_t verbosity(getVerboseLevel());
-        if (!verbosity)
-            verbosity = 1;
-
-        readerOptions.add<uint32_t>("verbose", verbosity);
-        readerOptions.add<std::string>("log", "STDERR");
-    }
-
-    Stage& stage = Kernel::makeReader(m_inputFile);
-    stage.setOptions(readerOptions);
-
-    return stage;
-}
-
-
 int SortKernel::execute()
 {
-    PointTable table;
-
-    Options readerOptions;
-    readerOptions.add("filename", m_inputFile);
-    readerOptions.add("debug", isDebug());
-    readerOptions.add("verbose", getVerboseLevel());
-
-    Stage& readerStage = makeReader(readerOptions);
+    Stage& readerStage = makeReader(m_inputFile, m_driverOverride);
 
     // go ahead and prepare/execute on reader stage only to grab input
     // PointViewSet, this makes the input PointView available to both the
     // processing pipeline and the visualizer
+    PointTable table;
     readerStage.prepare(table);
     PointViewSet viewSetIn = readerStage.execute(table);
 
@@ -112,40 +86,17 @@ int SortKernel::execute()
     PointViewPtr inView = *viewSetIn.begin();
 
     BufferReader bufferReader;
-    bufferReader.setOptions(readerOptions);
     bufferReader.addView(inView);
 
-    Options sortOptions;
-    sortOptions.add<bool>("debug", isDebug());
-    sortOptions.add<uint32_t>("verbose", getVerboseLevel());
-
-    StageFactory f;
-    Stage& sortStage = ownStage(f.createStage("filters.mortonorder"));
-    sortStage.setInput(bufferReader);
-    sortStage.setOptions(sortOptions);
+    Stage& sortStage = makeFilter("filters.mortonorder", bufferReader);
 
     Options writerOptions;
-    writerOptions.add("filename", m_outputFile);
-    setCommonOptions(writerOptions);
-
     if (m_bCompress)
         writerOptions.add("compression", true);
     if (m_bForwardMetadata)
         writerOptions.add("forward_metadata", true);
+    Stage& writer = makeWriter(m_outputFile, sortStage, "", writerOptions);
 
-    std::vector<std::string> cmd = getProgressShellCommand();
-    UserCallback *callback =
-        cmd.size() ? (UserCallback *)new ShellScriptCallback(cmd) :
-        (UserCallback *)new HeartbeatCallback();
-
-    Stage& writer = makeWriter(m_outputFile, sortStage);
-
-    // Some options are inferred by makeWriter based on filename
-    // (compression, driver type, etc).
-    writer.addOptions(writerOptions);
-    writer.setUserCallback(callback);
-
-    applyExtraStageOptionsRecursive(&writer);
     writer.prepare(table);
 
     // process the data, grabbing the PointViewSet for visualization of the

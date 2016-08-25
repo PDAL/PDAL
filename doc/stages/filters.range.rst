@@ -12,26 +12,23 @@ Pipeline Example
 This example passes through all points whose Z value is in the range [0,100]
 and whose classification equals 2 (corresponding to ground in LAS).
 
-.. code-block:: xml
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.las">
-      <Option name="filename">
-        filtered.las
-      </Option>
-      <Filter type="filters.range">
-        <Option name="limits">
-          Z[0:100],Classification[2:2]
-        </Option>
-        <Reader type="readers.las">
-          <Option name="filename">
-            input.las
-          </Option>
-        </Reader>
-      </Filter>
-    </Writer>
-  </Pipeline>
+.. code-block:: json
+
+    {
+      "pipeline":[
+        "input.las",
+        {
+          "type":"filters.range",
+          "limits":"Z[0:100],Classification[2:2]"
+        },
+        {
+          "type":"writers.las",
+          "filename":"filtered.las"
+        }
+      ]
+    }
+
 
 Command-line Example
 --------------------

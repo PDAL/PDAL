@@ -72,51 +72,8 @@ TEST(LasReaderTest, create)
 {
     StageFactory f;
 
-    std::unique_ptr<Stage> s(f.createStage("readers.las"));
-    EXPECT_TRUE(s.get());
-}
-
-TEST(LasReaderTest, test_base_options)
-{
-    const std::string file(Support::datapath("las/1.2-with-color.las"));
-
-    const Option opt_filename("filename", file);
-    const Option opt_verbose_string("verbose", "99");
-    const Option opt_verbose_uint8("verbose", 99);
-    const Option opt_debug_string("debug", "true");
-    const Option opt_debug_bool("debug", true);
-
-    {
-        Options opts;
-        opts.add(opt_filename);
-
-        LasReader reader;
-        reader.setOptions(opts);
-        EXPECT_TRUE(reader.getVerboseLevel() == 0);
-        EXPECT_TRUE(reader.isDebug() == false);
-    }
-
-    {
-        Options opts;
-        opts.add(opt_filename);
-        opts.add(opt_verbose_string);
-        opts.add(opt_debug_string);
-        LasReader reader;
-        reader.setOptions(opts);
-        EXPECT_TRUE(reader.getVerboseLevel() == 99);
-        EXPECT_TRUE(reader.isDebug() == true);
-    }
-
-    {
-        Options opts;
-        opts.add(opt_filename);
-        opts.add(opt_verbose_uint8);
-        opts.add(opt_debug_bool);
-        LasReader reader;
-        reader.setOptions(opts);
-        EXPECT_TRUE(reader.getVerboseLevel() == 99);
-        EXPECT_TRUE(reader.isDebug() == true);
-    }
+    auto s = f.createStage("readers.las");
+    EXPECT_TRUE(s);
 }
 
 
@@ -272,8 +229,6 @@ TEST(LasReaderTest, inspect)
         qi.m_dimNames.end(), std::begin(dims)));
 }
 
-//ABELL - Find another way to do this.
-/**
 TEST(LasReaderTest, test_vlr)
 {
     PointTable table;
@@ -285,9 +240,15 @@ TEST(LasReaderTest, test_vlr)
     reader.prepare(table);
     reader.execute(table);
 
-    EXPECT_EQ(reader.header().getVLRs().getAll().size(), 390);
+    MetadataNode root = reader.getMetadata();
+    for (size_t i = 0; i < 390; ++i)
+    {
+        std::string name("vlr_");
+        name += std::to_string(i);
+        MetadataNode m = root.findChild(name);
+        EXPECT_TRUE(!m.value().empty()) << "No node " << i;
+    }
 }
-**/
 
 
 TEST(LasReaderTest, testInvalidFileSignature)
@@ -317,37 +278,37 @@ TEST(LasReaderTest, extraBytes)
     DimTypeList dimTypes = layout->dimTypes();
     EXPECT_EQ(dimTypes.size(), (size_t)25);
 
-    Dimension::Id::Enum color0 = layout->findProprietaryDim("Colors0");
+    Dimension::Id color0 = layout->findProprietaryDim("Colors0");
     EXPECT_EQ(layout->dimType(color0), Dimension::Type::Unsigned16);
-    Dimension::Id::Enum color1 = layout->findProprietaryDim("Colors1");
+    Dimension::Id color1 = layout->findProprietaryDim("Colors1");
     EXPECT_EQ(layout->dimType(color1), Dimension::Type::Unsigned16);
-    Dimension::Id::Enum color2 = layout->findProprietaryDim("Colors2");
+    Dimension::Id color2 = layout->findProprietaryDim("Colors2");
     EXPECT_EQ(layout->dimType(color2), Dimension::Type::Unsigned16);
 
-    Dimension::Id::Enum flag0 = layout->findProprietaryDim("Flags0");
+    Dimension::Id flag0 = layout->findProprietaryDim("Flags0");
     EXPECT_EQ(layout->dimType(flag0), Dimension::Type::Signed8);
-    Dimension::Id::Enum flag1 = layout->findProprietaryDim("Flags1");
+    Dimension::Id flag1 = layout->findProprietaryDim("Flags1");
     EXPECT_EQ(layout->dimType(flag1), Dimension::Type::Signed8);
 
-    Dimension::Id::Enum intense2 = layout->findProprietaryDim("Intensity");
+    Dimension::Id intense2 = layout->findProprietaryDim("Intensity");
     EXPECT_EQ(layout->dimType(intense2), Dimension::Type::Unsigned32);
 
-    Dimension::Id::Enum time2 = layout->findProprietaryDim("Time");
+    Dimension::Id time2 = layout->findProprietaryDim("Time");
     EXPECT_EQ(layout->dimType(time2), Dimension::Type::Unsigned64);
 
     PointViewSet viewSet = reader.execute(table);
     EXPECT_EQ(viewSet.size(), (size_t)1);
     PointViewPtr view = *viewSet.begin();
 
-    Dimension::Id::Enum red = layout->findDim("Red");
-    Dimension::Id::Enum green = layout->findDim("Green");
-    Dimension::Id::Enum blue = layout->findDim("Blue");
+    Dimension::Id red = layout->findDim("Red");
+    Dimension::Id green = layout->findDim("Green");
+    Dimension::Id blue = layout->findDim("Blue");
 
-    Dimension::Id::Enum returnNum = layout->findDim("ReturnNumber");
-    Dimension::Id::Enum numReturns = layout->findDim("NumberOfReturns");
+    Dimension::Id returnNum = layout->findDim("ReturnNumber");
+    Dimension::Id numReturns = layout->findDim("NumberOfReturns");
 
-    Dimension::Id::Enum intensity = layout->findDim("Intensity");
-    Dimension::Id::Enum time = layout->findDim("GpsTime");
+    Dimension::Id intensity = layout->findDim("Intensity");
+    Dimension::Id time = layout->findDim("GpsTime");
 
     for (PointId idx = 0; idx < view->size(); ++idx)
     {

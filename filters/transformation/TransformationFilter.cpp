@@ -35,6 +35,7 @@
 #include "TransformationFilter.hpp"
 
 #include <pdal/pdal_export.hpp>
+#include <pdal/pdal_macros.hpp>
 
 #include <sstream>
 
@@ -84,9 +85,15 @@ TransformationMatrix transformationMatrixFromString(const std::string& s)
 }
 
 
-void TransformationFilter::processOptions(const Options& options)
+void TransformationFilter::addArgs(ProgramArgs& args)
 {
-    m_matrix = transformationMatrixFromString(options.getValueOrThrow<std::string>("matrix"));
+    args.add("matrix", "Transformation matrix", m_matrixSpec).setPositional();
+}
+
+
+void TransformationFilter::initialize()
+{
+    m_matrix = transformationMatrixFromString(m_matrixSpec);
 }
 
 
@@ -96,7 +103,7 @@ bool TransformationFilter::processOne(PointRef& point)
     double y = point.getFieldAs<double>(Dimension::Id::Y);
     double z = point.getFieldAs<double>(Dimension::Id::Z);
 
-    point.setField(Dimension::Id::X, 
+    point.setField(Dimension::Id::X,
         x * m_matrix[0] + y * m_matrix[1] + z * m_matrix[2] + m_matrix[3]);
 
     point.setField(Dimension::Id::Y,

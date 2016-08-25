@@ -15,62 +15,118 @@ The hexbin filter reads a point stream and writes out a metadata record that con
 
 ::
 
-    $ pdal hexbin-pipeline.xml --pipeline-serialization hexbin-out.xml
+    $ pdal pipeline hexbin-pipeline.json --pipeline-serialization hexbin-out.json
 
 After running with the pipeline serialization option, the output file looks like this:
 
-.. code-block:: xml
+.. code-block:: json
 
-  <PointView>
-    <Metadata name="pointbuffer" type="blank">
-      <Metadata name="filters.hexbin" type="blank">
-        <Metadata name="edge_size" type="double">
-          0.002218331916495204
-        </Metadata>
-        <Metadata name="threshold" type="nonNegativeInteger">
-          15
-        </Metadata>
-        <Metadata name="sample_size" type="nonNegativeInteger">
-          5000
-        </Metadata>
-        <Metadata name="boundary" type="string">
-          MULTIPOLYGON (((
-          -80.8466 35.2183, -80.8460 35.2194,
-          -80.8447 35.2194, -80.8441 35.2205,
-          -80.8428 35.2205, -80.8421 35.2216,
-          ...
-          -80.8498 35.2194, -80.8486 35.2194,
-          -80.8479 35.2183, -80.8466 35.2183
-          )))
-        </Metadata>
-      </Metadata>
-    </Metadata>
-  </PointView>
+  {
+    "pipeline":
+    [
+      {
+        "execution_metadata":
+        {
+          "comp_spatialreference": "",
+          "compressed": false,
+          "count": 1065,
+          "creation_doy": 0,
+          "creation_year": 0,
+          "dataformat_id": 3,
+          "dataoffset": 229,
+          "filesource_id": 0,
+          "global_encoding": 0,
+          "global_encoding_base64": "AAA=",
+          "header_size": 227,
+          "major_version": 1,
+          "maxx": 638982.55,
+          "maxy": 853535.43,
+          "maxz": 586.38,
+          "minor_version": 2,
+          "minx": 635619.85,
+          "miny": 848899.7,
+          "minz": 406.59,
+          "offset_x": 0,
+          "offset_y": 0,
+          "offset_z": 0,
+          "project_id": "00000000-0000-0000-0000-000000000000",
+          "scale_x": 0.01,
+          "scale_y": 0.01,
+          "scale_z": 0.01,
+          "software_id": "TerraScan",
+          "spatialreference": "",
+          "srs":
+          {
+            "compoundwkt": "",
+            "horizontal": "",
+            "isgeocentric": false,
+            "isgeographic": false,
+            "prettycompoundwkt": "",
+            "prettywkt": "",
+            "proj4": "",
+            "units":
+            {
+              "horizontal": "",
+              "vertical": ""
+            },
+            "vertical": "",
+            "wkt": ""
+          },
+          "system_id": ""
+        },
+        "filename": "1.2-with-color.las",
+        "tag": "readers.las1",
+        "type": "readers.las"
+      },
+      {
+        "execution_metadata":
+        {
+          "area": 40981005.83,
+          "boundary": "MULTIPOLYGON (((636019.34031678 847308.55730142, 639990.93904966 850748.06269858, 638998.03936644 855907.32079433, 633040.64126713 852467.81539716, 636019.34031678 847308.55730142)))",
+          "density": 2.598764912e-05,
+          "edge_length": 0,
+          "estimated_edge": 3439.505397,
+          "hex_offsets": "MULTIPOINT (0 0, -992.9 1719.75, 0 3439.51, 1985.8 3439.51, 2978.7 1719.75, 1985.8 0)",
+          "sample_size": 5000,
+          "threshold": 10
+        },
+        "inputs":
+        [
+          "readers.las1"
+        ],
+        "tag": "filters.hexbin1",
+        "threshold": "10",
+        "type": "filters.hexbin"
+      },
+      {
+        "filename": "file-output.las",
+        "inputs":
+        [
+          "filters.hexbin1"
+        ],
+        "tag": "writers.las1",
+        "type": "writers.las"
+      }
+    ]
+  }
 
 In addition, if you have defined a writer you will have the usual point data output file.
 
 Example
 -------
 
-.. code-block:: xml
+.. code-block:: json
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.las">
-      <Option name="filename">
-        file-output.las
-      </Option>
-      <Filter type="filters.hexbin">
-        <Option name="threshold">10</Option>
-        <Reader type="readers.las">
-          <Option name="filename">
-            file-input.las
-          </Option>
-        </Reader>
-      </Filter>
-    </Writer>
-  </Pipeline>
-
+  {
+    "pipeline":[
+      "1.2-with-color.las",
+      {
+        "type":"filters.hexbin",
+        "threshold":10
+      },
+      "file-output.las"
+    ]
+  }
 
 Options
 -------
@@ -88,14 +144,3 @@ threshold
 
 precision
   Coordinate precision to use in writing out the well-known text of the boundary polygon. [Default: **8**]
-
-
-
-
-
-
-
-
-
-
-

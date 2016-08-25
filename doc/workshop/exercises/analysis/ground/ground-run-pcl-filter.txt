@@ -1,0 +1,5 @@
+docker run -v /c/Users/Howard/PDAL:/data -t pdal/pdal \
+   pdal pcl \
+   /data/exercises/analysis/ground/CSite1_orig-utm.laz \
+   -o /data/exercises/analysis/ground/ground-filtered.laz \
+   -p /data/exercises/analysis/ground/filter.json

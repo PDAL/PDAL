@@ -35,39 +35,27 @@ Given a tile index that was generated with the following scenario:
 Use the following :ref:`pipeline` example to read and automatically
 merge the data.
 
-.. code-block:: xml
 
-    <?xml version="1.0"?>
-    <Pipeline version="1.0">
-        <Writer type="writers.las">
-            <Option name="filename">
-                out.las
-            </Option>
-            <Reader type="readers.tindex">
-                <Option name="sql">
-                    SELECT * from pdal
-                </Option>
-               <Option name="filter_srs">
-                    +proj=lcc +lat_1=43 +lat_2=45.5 +lat_0=41.75 +lon_0=-120.5 +x_0=399999.9999999999 +y_0=0 +ellps=GRS80 +units=ft +no_defs
-                </Option>
-               <Option name="merge">
-                   true
-                </Option>
-                <Option name="filename">
-                    /Users/hobu/dev/git/pdal/test/temp/index.sqlite
-                </Option>
-                <Option name="where">
-                    location LIKE '%nteresting.las%'
-                </Option>
-                <Option name="boundary">
-                    ([635629.85, 638982.55], [848999.70 , 853535.43])
-                </Option>
-                <Option name="polygon">
-                    POLYGON ((635629.85000000 848999.70000000, 635629.85000000 853535.43000000, 638982.55000000 853535.43000000, 638982.55000000 848999.70000000, 635629.85000000 848999.70000000))
-                </Option>
-            </Reader>
-        </Writer>
-    </Pipeline>
+.. code-block:: json
+
+    {
+      "pipeline":[
+        {
+          "type":"readers.tindex",
+          "sql":"SELECT * from pdal",
+          "filter_srs":"+proj=lcc +lat_1=43 +lat_2=45.5 +lat_0=41.75 +lon_0=-120.5 +x_0=399999.9999999999 +y_0=0 +ellps=GRS80 +units=ft +no_defs",
+          "merge":"true",
+          "filename":"index.sqlite",
+          "where":"location LIKE \'%nteresting.las%\'",
+          "boundary":"([635629.85, 638982.55], [848999.70 , 853535.43])",
+          "polygon":"POLYGON ((635629.85000000 848999.70000000, 635629.85000000 853535.43000000, 638982.55000000 853535.43000000, 638982.55000000 848999.70000000, 635629.85000000 848999.70000000))"
+        },
+        {
+          "type":"writers.las",
+          "filename":"outputfile.las"
+        }
+      ]
+    }
 
 
 Options

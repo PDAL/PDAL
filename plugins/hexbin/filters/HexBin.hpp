@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pdal/Filter.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 #include <hexer/Mathpair.hpp>
 #include <hexer/HexGrid.hpp>
@@ -53,18 +54,22 @@ public:
     static int32_t destroy(void *);
     std::string getName() const { return "filters.hexbin"; }
 
+    hexer::HexGrid* grid() const { return m_grid.get(); }
 private:
 
     std::unique_ptr<hexer::HexGrid> m_grid;
     std::string m_xDimName;
     std::string m_yDimName;
+    uint32_t m_precision;
     uint32_t m_sampleSize;
+    double m_cullArea;
+    Arg *m_cullArg;
     int32_t m_density;
     double m_edgeLength;
     bool m_outputTesselation;
     point_count_t m_count;
 
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
     virtual void ready(PointTableRef table);
     virtual void filter(PointView& view);
     virtual void done(PointTableRef table);

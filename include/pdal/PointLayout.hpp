@@ -39,7 +39,8 @@
 #include <string>
 #include <vector>
 
-#include "pdal/Dimension.hpp"
+#include <pdal/DimDetail.hpp>
+#include <pdal/DimType.hpp>
 
 namespace pdal
 {
@@ -47,67 +48,193 @@ namespace pdal
 class PDAL_DLL PointLayout
 {
 public:
+    /**
+      Default constructor.
+    */
     PointLayout();
     virtual ~PointLayout() {}
 
+    /**
+      Mark a layout as finalized.  Dimensions can't be added to a finalized
+      PointLayout.
+    */
     void finalize();
+
+    /**
+      Determine if the PointLayout is finalized.
+
+      \return  Whether the PointLayout is finalized.
+    */
     bool finalized() const
         { return m_finalized; }
 
-    void registerDims(std::vector<Dimension::Id::Enum> ids);
-    void registerDims(Dimension::Id::Enum *id);
-    void registerDim(Dimension::Id::Enum id);
+    /**
+      Register a vector of dimensions.
 
-    // Register the dimension with the requested type if it hasn't already
-    // been registered with a "larger" type.  If the type of the dimension
-    // is already larger, this does nothing.
-    void registerDim(Dimension::Id::Enum id, Dimension::Type::Enum type);
+      \param ids  Vector of IDs to register.
+    */
+    void registerDims(std::vector<Dimension::Id> ids);
 
-    // The type and size are REQUESTS, not absolutes.  If someone else
-    // has already registered with the same name, you get the existing
-    // dimension size/type.
-    Dimension::Id::Enum assignDim(
-            const std::string& name,
-            Dimension::Type::Enum type);
+    /**
+      Register a list of dimensions.
 
-    Dimension::Id::Enum registerOrAssignDim(
-            const std::string name,
-            Dimension::Type::Enum type);
+      \param id  Pointer to list of IDs to register.  The last ID in the list
+        must have the value Unknown.
+    */
+    void registerDims(Dimension::Id *id);
 
+    /**
+      Register use of a standard dimension (declare that a point will contain
+      data for this dimension).  Use the default type for the dimension.
+
+      \param id  ID of dimension to be registered.
+    */
+    void registerDim(Dimension::Id id);
+
+    /**
+      Register use of a standard dimension (declare that a point will contain
+      data for this dimension) if it hasn't already been registered with a
+      "larger" type.  It the dimension already exists with a larger type, this
+      does nothing.
+
+      \param id  ID of dimension to be registered.
+      \param type  Minimum type to assign to the dimension.
+    */
+    void registerDim(Dimension::Id id, Dimension::Type type);
+
+    /**
+      Assign a non-existing (proprietary) dimension with the given name and
+      type.  No check is made to see if the dimension exists as a standard
+      (non-propietary) dimension.  If the dimension has already been
+      assigned as a proprietary dimension, update the type but use the
+      existing Id.  If the dimension has already been assigned with a 
+      larger type, this does nothing.
+
+      \param name  Name of the proprietary dimension to add.
+      \param type  Minimum type to assign to the dimension.
+      \return  ID of the new or existing dimension, or Unknown on failure.
+    */
+    Dimension::Id assignDim( const std::string& name,
+        Dimension::Type type);
+
+    /**
+      Register a dimension if one already exists with the given name using the
+      provided type.  If the dimension doesn't already exist, create it.
+
+      \param name  Name of the dimension to register or assign.
+      \param type  Requested type of the dimension.  Dimension will at least
+        accomodate values of this type.
+      \return  ID of dimension registered or assigned.
+    */
+    Dimension::Id registerOrAssignDim(const std::string name,
+        Dimension::Type type);
+
+    /**
+      Get a list of DimType objects that define the layout.
+
+      \return  A list of DimType objects.
+    */
     DimTypeList dimTypes() const;
+
+    /**
+      Get a DimType structure for a named dimension.
+
+      \param name  Name of the dimension
+      \return  A DimType associated with the named dimension.  Returns a
+        DimType with an Unknown ID if the dimension isn't part of the layout.
+    */
     DimType findDimType(const std::string& name) const;
-    Dimension::Id::Enum findDim(const std::string& name) const;
-    Dimension::Id::Enum findProprietaryDim(const std::string& name) const;
-    std::string dimName(Dimension::Id::Enum id) const;
 
-    // @return whether or not the PointLayout contains a given id
-    bool hasDim(Dimension::Id::Enum id) const;
+    /**
+      Get the ID of a dimension (standard or proprietary) given its name.
 
-    // @return reference to vector of currently used dimensions
+      \param name  Name of the dimension.
+      \return  ID of the dimension or Unknown.
+    */
+    Dimension::Id findDim(const std::string& name) const;
+
+    /**
+      Get the ID of a proprietary dimension given its name.
+
+      \param name  Name of the dimension.
+      \return  ID of the dimension or Unknown.
+    */
+    Dimension::Id findProprietaryDim(const std::string& name) const;
+
+    /**
+      Get the name of a dimension give its ID.  A dimension may have more
+      than one name.  The first one associated with the ID is returned.
+
+      \param id  ID of the dimension.
+      \return  A name associated with the dimension, or a NULL string.
+    */
+    std::string dimName(Dimension::Id id) const;
+
+    /**
+      Determine if the PointLayout uses the dimension with the given ID.
+      
+      \param id  ID of the dimension to check.
+      \return \c true if the layout uses the dimension, \c false otherwise.
+    */
+    bool hasDim(Dimension::Id id) const;
+
+    /**
+      Get a reference to vector of the IDs of currently used dimensions.
+
+      \return  Vector of IDs of dimensions that are part of the layout.
+    */
     const Dimension::IdList& dims() const;
 
-    // @return the current type for a given id
-    Dimension::Type::Enum dimType(Dimension::Id::Enum id) const;
+    /**
+      Get the type of a dimension.
+      
+      \param id  ID of the dimension.
+      \return  Type of the dimension.
+    */
+    Dimension::Type dimType(Dimension::Id id) const;
 
-    // @return the current size in bytes of the dimension
-    //         with the given id.
-    size_t dimSize(Dimension::Id::Enum id) const;
-    size_t dimOffset(Dimension::Id::Enum id) const;
+    /**
+      Get the current size in bytes of the dimension.
+      
+      \param id  ID of the dimension.
+      \return  Size of the dimension in bytes.
+    */
+    size_t dimSize(Dimension::Id id) const;
+
+    /**
+      Get the offset of the dimension in the layout.
+
+      \param id  ID of the dimension.
+      \return  Offset of the dimension in bytes.
+    */
+    size_t dimOffset(Dimension::Id id) const;
+
+    /**
+      Get number of bytes that make up a point.  Returns the sum of the dimSize
+      for all dimensions in the layout.
+
+      \return  Size of a point in bytes.
+    */
     size_t pointSize() const;
 
-    const Dimension::Detail *dimDetail(Dimension::Id::Enum id) const;
+    /**
+      Get a pointer to a dimension's detail information.
+
+      \param id  ID of the dimension.
+      \return  A pointer a dimension's detail.
+    */
+    const Dimension::Detail *dimDetail(Dimension::Id id) const;
 
 private:
     virtual bool update(Dimension::Detail dd, const std::string& name);
 
-    Dimension::Type::Enum resolveType(
-            Dimension::Type::Enum t1,
-            Dimension::Type::Enum t2);
+    Dimension::Type resolveType( Dimension::Type t1,
+        Dimension::Type t2);
 
 protected:
     std::vector<Dimension::Detail> m_detail;
     Dimension::IdList m_used;
-    std::map<std::string, Dimension::Id::Enum> m_propIds;
+    std::map<std::string, Dimension::Id> m_propIds;
     int m_nextFree;
     std::size_t m_pointSize;
     bool m_finalized;

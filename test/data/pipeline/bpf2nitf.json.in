@@ -1,0 +1,20 @@
+{
+  "pipeline":[
+    "@CMAKE_SOURCE_DIR@/test/data/bpf/utm15.bpf",
+    {
+      "filename":"@CMAKE_SOURCE_DIR@/test/temp/output.ntf",
+      "scale_x":0.01,
+      "offset_x":311898.23,
+      "scale_y":0.01,
+      "offset_y":4703909.84,
+      "scale_z":0.01,
+      "offset_z":7.385474,
+      "fsclas":"U",
+      "idatim":"20131206140713",
+      "fscltx":"SIC:0 CH_FO",
+      "ftitle":"output.ntf",
+      "forward":"software_id, creation_doy, creation_year",
+      "system_id":"PDAL2NTF"
+    }
+  ]
+}

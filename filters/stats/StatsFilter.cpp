@@ -34,12 +34,15 @@
 
 #include "StatsFilter.hpp"
 
+#include <cmath>
 #include <unordered_map>
 
 #include <pdal/pdal_export.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/Polygon.hpp>
 #include <pdal/PDALUtils.hpp>
+#include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -63,6 +66,22 @@ void Summary::extractMetadata(MetadataNode &m) const
     m.add("minimum", minimum(), "minimum");
     m.add("maximum", maximum(), "maximum");
     m.add("average", average(), "average");
+
+    double std = stddev();
+    if (!std::isinf(std) && !std::isnan(std))
+        m.add("stddev", std, "standard deviation");
+
+    double k = kurtosis();
+    if (!std::isinf(k) && !std::isnan(k))
+        m.add("kurtosis", k, "kurtosis");
+
+    double sk = skewness();
+    if (!std::isinf(sk) && !std::isnan(sk))
+        m.add("skewness", skewness(), "skewness");
+
+    double v = variance();
+    if (!std::isinf(v) && !std::isnan(v))
+        m.add("variance", v, "variance");
     m.add("name", m_name, "name");
     if (m_enumerate == Enumerate)
         for (auto& v : m_values)
@@ -84,7 +103,7 @@ bool StatsFilter::processOne(PointRef& point)
 {
     for (auto p = m_stats.begin(); p != m_stats.end(); ++p)
     {
-        Dimension::Id::Enum d = p->first;
+        Dimension::Id d = p->first;
         Summary& c = p->second;
         c.insert(point.getFieldAs<double>(d));
     }
@@ -109,11 +128,13 @@ void StatsFilter::done(PointTableRef table)
 }
 
 
-void StatsFilter::processOptions(const Options& options)
+void StatsFilter::addArgs(ProgramArgs& args)
 {
-    m_dimNames = options.getValueOrDefault<StringList>("dimensions");
-    m_enums = options.getValueOrDefault<StringList>("enumerate");
-    m_counts = options.getValueOrDefault<StringList>("count");
+    args.add("dimensions", "Dimensions on which to calculate statistics",
+        m_dimNames);
+    args.add("enumerate", "Dimensions whose values should be enumerated",
+        m_enums);
+    args.add("count", "Dimensions whose values should be counted", m_counts);
 }
 
 
@@ -172,9 +193,12 @@ void StatsFilter::extractMetadata(PointTableRef table)
 {
     uint32_t position(0);
 
+    bool bNoPoints(true);
     for (auto di = m_stats.begin(); di != m_stats.end(); ++di)
     {
         const Summary& s = di->second;
+
+        bNoPoints = (bool)s.count();
 
         MetadataNode t = m_metadata.addList("statistic");
         t.add("position", position++);
@@ -187,7 +211,8 @@ void StatsFilter::extractMetadata(PointTableRef table)
     auto zs = m_stats.find(Dimension::Id::Z);
     if (xs != m_stats.end() &&
         ys != m_stats.end() &&
-        zs != m_stats.end())
+        zs != m_stats.end() &&
+        bNoPoints)
     {
         BOX3D box(xs->second.minimum(), ys->second.minimum(), zs->second.minimum(),
                   xs->second.maximum(), ys->second.maximum(), zs->second.maximum());
@@ -218,11 +243,11 @@ void StatsFilter::extractMetadata(PointTableRef table)
 }
 
 
-const Summary& StatsFilter::getStats(Dimension::Id::Enum dim) const
+const Summary& StatsFilter::getStats(Dimension::Id dim) const
 {
     for (auto di = m_stats.begin(); di != m_stats.end(); ++di)
     {
-        Dimension::Id::Enum d = di->first;
+        Dimension::Id d = di->first;
         if (d == dim)
             return di->second;
     }

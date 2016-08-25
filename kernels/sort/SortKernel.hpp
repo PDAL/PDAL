@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pdal/Kernel.hpp>
+#include <pdal/plugin.hpp>
 
 extern "C" int32_t SortKernel_ExitFunc();
 extern "C" PF_ExitFunc SortKernel_InitPlugin();
@@ -53,8 +54,6 @@ public:
 private:
     SortKernel();
     void addSwitches(ProgramArgs& args);
-
-    Stage& makeReader(Options readerOptions);
 
     std::string m_inputFile;
     std::string m_outputFile;

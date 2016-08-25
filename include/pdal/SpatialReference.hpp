@@ -59,31 +59,66 @@ class PDAL_DLL SpatialReference
 public:
     enum WKTModeFlag
     {
-        eHorizontalOnly = 1,
-        eCompoundOK = 2
+        eHorizontalOnly = 1,  ///<  Only Consider horizontal SRS.
+        eCompoundOK = 2       ///<  Consider horizontal and vertical SRS
     };
 
-    /// Default constructor.
+    /**
+      Constructor.  Create an empty SRS.
+    */
     SpatialReference()
     {}
 
-    // calls setFromUserInput() with the given string
-    SpatialReference(const std::string& userInput);
+    /**
+      Construct a spatial reference from well-known text.
 
+      \param wkt  Well-known text from which to construct SRS.
+    */
+    SpatialReference(const std::string& wkt);
+
+    /**
+      Determine if this spatial reference is the same as another.
+
+      \param other  SRS to compare with this one.
+      \return  \c true if the SRSs match
+    */
     bool equals(const SpatialReference& other) const;
+
+    /**
+      See \ref equals.
+    */
     bool operator==(const SpatialReference& other) const;
+
+    /**
+      Determine if this spatial reference is different from another.
+
+      \param other  SRS to compare with this one.
+      \return \c true if the SRSs don't match.
+    */
     bool operator!=(const SpatialReference& other) const;
+
+    /**
+       Determine if the well-known text representation of this SRS is
+       lexographically less than that of another.
+
+       \param other  SRS to compare with this one.
+       \return  \c true if this SRS is lexographically less.
+    */
     bool operator<(const SpatialReference& other) const
         { return m_wkt < other.m_wkt; }
 
-    // Returns true iff the object doesn't contain a valid srs.
-    // (this is a cleaner way of saying "getWKT() == "")
+    /**
+      Returns true iff the object doesn't contain a valid srs.
+
+      \return  Whether the SRS is empty.
+    */
     bool empty() const;
 
 
     // Returns true of OSR can validate the SRS
     bool valid() const;
 
+    // (this is a cleaner way of saying "getWKT() == "")
     /// Returns the OGC WKT describing Spatial Reference System.
     /// If GDAL is linked, it uses GDAL's operations and methods to determine
     /// the WKT.  If GDAL is not linked, no WKT is returned.

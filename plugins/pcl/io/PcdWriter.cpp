@@ -45,6 +45,7 @@
 #include "PCLConversions.hpp"
 #include <pdal/PointView.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal
 {
@@ -58,18 +59,21 @@ CREATE_SHARED_PLUGIN(1, 0, PcdWriter, Writer, s_info)
 
 std::string PcdWriter::getName() const { return s_info.name; }
 
-void PcdWriter::processOptions(const Options& ops)
+
+void PcdWriter::addArgs(ProgramArgs& args)
 {
-    m_filename = ops.getValueOrThrow<std::string>("filename");
-    std::string compression = ops.getValueOrDefault("compression", "ascii");
-    m_xyz = ops.getValueOrDefault("xyz", false);
-    m_subtract_minimum = ops.getValueOrDefault("subtract_minimum", true);
-    m_offset_x = ops.getValueOrDefault("offset_x", 0.0);
-    m_offset_y = ops.getValueOrDefault("offset_y", 0.0);
-    m_offset_z = ops.getValueOrDefault("offset_z", 0.0);
-    m_scale_x = ops.getValueOrDefault("scale_x", 1.0);
-    m_scale_y = ops.getValueOrDefault("scale_y", 1.0);
-    m_scale_z = ops.getValueOrDefault("scale_z", 1.0);
+
+    std::string compression;
+    args.add("filename", "Filename to write PCD file to", m_filename);
+    args.add("compression","Level of PCD compression to use (ascii, binary, compressed)", compression, "ascii");
+    args.add("xyz", "Write only XYZ dimensions?", m_xyz, false);
+    args.add("subtract_minimum", "Set origin to minimum of XYZ dimension", m_subtract_minimum, true);
+    args.add("offset_x", "Offset to be subtracted from XYZ position", m_offset_x, 0.0);
+    args.add("offset_y", "Offset to be subtracted from XYZ position", m_offset_y, 0.0);
+    args.add("offset_z", "Offset to be subtracted from XYZ position", m_offset_z, 0.0);
+    args.add("scale_x", "Scale to divide from XYZ dimension", m_scale_x, 1.0);
+    args.add("scale_y", "Scale to divide from XYZ dimension", m_scale_y, 1.0);
+    args.add("scale_z", "Scale to divide from XYZ dimension", m_scale_z, 1.0);
 
     if (compression == "binary")
     {
@@ -84,36 +88,6 @@ void PcdWriter::processOptions(const Options& ops)
       m_compression = 0;
     }
 
-    if (m_scale_x == 0.0)
-    {
-      m_scale_x = 1.0;
-    }
-    if (m_scale_y == 0.0)
-    {
-      m_scale_y = 1.0;
-    }
-    if (m_scale_z == 0.0)
-    {
-      m_scale_z = 1.0;
-    }
-}
-
-Options PcdWriter::getDefaultOptions()
-{
-    Options options;
-
-    options.add("filename", "", "Filename to write PCD file to");
-    options.add("compression", "ascii", "Level of PCD compression to use (ascii, binary, compressed)");
-    options.add("xyz", false, "Write only XYZ dimensions?");
-    options.add("subtract_minimum", true, "Set origin to minimum of XYZ dimension");
-    options.add("offset_x", 0.0, "Offset to be subtracted from XYZ position");
-    options.add("offset_y", 0.0, "Offset to be subtracted from XYZ position");
-    options.add("offset_z", 0.0, "Offset to be subtracted from XYZ position");
-    options.add("scale_x", 1.0, "Scale to divide from XYZ dimension");
-    options.add("scale_y", 1.0, "Scale to divide from XYZ dimension");
-    options.add("scale_z", 1.0, "Scale to divide from XYZ dimension");
-
-    return options;
 }
 
 void PcdWriter::write(const PointViewPtr view)

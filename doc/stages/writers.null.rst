@@ -9,18 +9,22 @@ a **null writer**.
 Example
 -------
 
-.. code-block:: xml
+.. code-block:: json
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.null">
-      <Filter type="filters.hexbin">
-        <Reader type="readers.las">
-          <Option name="filename">simple.las</Option>
-        </Reader>
-      </Filter>
-    </Writer>
-  </Pipeline>
+    {
+      "pipeline":[
+        {
+          "type":"readers.las",
+          "filename":"inputfile.las"
+        },
+        {
+          "type":"filters.hexbin"
+        },
+        {
+          "type":"writers.null",
+        }
+      ]
+    }
 
 When used with an option that forces metadata output, like
 --pipeline-serialization, this pipeline will create a hex boundary for

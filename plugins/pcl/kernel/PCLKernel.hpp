@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pdal/Kernel.hpp>
+#include <pdal/PipelineManager.hpp>
 
 namespace pdal
 {
@@ -52,7 +53,6 @@ private:
     virtual void addSwitches(ProgramArgs& args);
 
     std::unique_ptr<PipelineManager> m_manager;
-    std::shared_ptr<Stage> makeReader(Options readerOptions);
 
     std::string m_inputFile;
     std::string m_outputFile;

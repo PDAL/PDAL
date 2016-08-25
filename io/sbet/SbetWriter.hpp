@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <pdal/plugin.hpp>
 #include <pdal/util/OStream.hpp>
 #include <pdal/Writer.hpp>
 
@@ -59,7 +60,7 @@ private:
     std::unique_ptr<OLeStream> m_stream;
     std::string m_filename;
 
-    virtual void processOptions(const Options& options);
+    virtual void addArgs(ProgramArgs& args);
     virtual void ready(PointTableRef table);
     virtual void write(const PointViewPtr view);
 };

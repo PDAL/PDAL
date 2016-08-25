@@ -50,12 +50,9 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
-
 private:
     // double m_leaf_x, m_leaf_y, m_leaf_z;
 
-    virtual void processOptions(const Options& options);
     virtual PointViewSet run(PointViewPtr view);
 
     GreedyProjectionFilter& operator=(const GreedyProjectionFilter&); // not implemented

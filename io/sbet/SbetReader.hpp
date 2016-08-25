@@ -37,6 +37,7 @@
 #include <pdal/PointView.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/util/IStream.hpp>
+#include <pdal/plugin.hpp>
 
 #include "SbetCommon.hpp"
 
@@ -56,7 +57,6 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    Options getDefaultOptions();
     static Dimension::IdList getDefaultDimensions()
         { return fileDimensions(); }
 

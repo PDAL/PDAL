@@ -58,7 +58,7 @@ TEST(ChipperTest, test_construction)
         // need to scope the writer, so that's it dtor can use the stream
 
         Options options;
-        Option capacity("capacity", 15, "capacity");
+        Option capacity("capacity", 15);
         options.add(capacity);
 
         ChipperFilter chipper;
@@ -131,7 +131,7 @@ TEST(ChipperTest, test_ordering)
     Option filename("filename", source_filename, "");
     options.add(filename);
 
-    Option capacity("capacity", 25,"capacity");
+    Option capacity("capacity", 25);
     options.add(capacity);
 
     LasReader candidate_reader(options);

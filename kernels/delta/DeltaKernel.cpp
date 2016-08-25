@@ -35,6 +35,7 @@
 #include "DeltaKernel.hpp"
 
 #include <pdal/PDALUtils.hpp>
+#include <pdal/pdal_macros.hpp>
 
 namespace pdal
 {
@@ -71,14 +72,7 @@ void DeltaKernel::addSwitches(ProgramArgs& args)
 PointViewPtr DeltaKernel::loadSet(const std::string& filename,
     PointTable& table)
 {
-    Options ops;
-
-    ops.add<std::string>("filename", filename);
-    ops.add<bool>("debug", isDebug());
-    ops.add<uint32_t>("verbose", getVerboseLevel());
-
-    Stage& reader = makeReader(filename);
-    reader.setOptions(ops);
+    Stage& reader = makeReader(filename, m_driverOverride);
     reader.prepare(table);
     PointViewSet viewSet = reader.execute(table);
     assert(viewSet.size() == 1);
@@ -99,7 +93,7 @@ int DeltaKernel::execute()
     PointLayoutPtr candLayout = candTable.layout();
 
     Dimension::IdList ids = srcLayout->dims();
-    for (Dimension::Id::Enum dim : ids)
+    for (Dimension::Id dim : ids)
     {
         std::string name = srcLayout->dimName(dim);
         if (!m_allDims)
@@ -111,7 +105,7 @@ int DeltaKernel::execute()
         dims[name] = d;
     }
     ids = candLayout->dims();
-    for (Dimension::Id::Enum dim : ids)
+    for (Dimension::Id dim : ids)
     {
         std::string name = candLayout->dimName(dim);
         auto di = dims.find(name);

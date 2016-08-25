@@ -38,6 +38,7 @@
 #include <pdal/Kernel.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/pdal_export.hpp>
+#include <pdal/plugin.hpp>
 
 #include <memory>
 #include <string>
@@ -67,8 +68,6 @@ private:
     std::string m_readerType;
     std::vector<std::string> m_filterType;
     std::string m_writerType;
-
-    std::unique_ptr<PipelineManager> m_manager;
 };
 
 } // namespace pdal

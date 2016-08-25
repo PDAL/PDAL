@@ -5,7 +5,6 @@
 #include <pdal/Filter.hpp>
 #include <pdal/Kernel.hpp>
 #include <pdal/KernelFactory.hpp>
-#include <pdal/KernelSupport.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/StageFactory.hpp>
@@ -14,7 +13,6 @@
 #include <memory>
 #include <string>
 
-namespace po = boost::program_options;
 
 namespace pdal {
 
@@ -25,7 +23,6 @@ namespace pdal {
   };
 
   CREATE_SHARED_PLUGIN(1, 0, MyKernel, Kernel, s_info);
-
   std::string MyKernel::getName() const { return s_info.name; }
 
   MyKernel::MyKernel() : Kernel()
@@ -42,24 +39,18 @@ namespace pdal {
     PointTable table;
     StageFactory f;
 
-    Stage * reader = f.createStage("readers.las");
-    Options readerOptions;
-    readerOptions.add("filename", m_input_file);
-    reader->setOptions(readerOptions);
+    Stage& reader = makeReader(m_input_file, "readers.las");
 
-    Stage * filter = f.createStage("filters.decimation");
+    // Options should be added in the call to makeFilter, makeReader,
+    // or makeWriter so that the system can override them with those
+    // provided on the command line when applicable.
     Options filterOptions;
     filterOptions.add("step", 10);
-    filter->setOptions(filterOptions);
-    filter->setInput(*reader);
+    Stage& filter = makeFilter("filters.decimation", reader, filterOptions);
 
-    Stage * writer = f.createStage("writers.text");
-    Options writerOptions;
-    writerOptions.add("filename", m_output_file);
-    writer->setOptions(writerOptions);
-    writer->setInput(*filter);
-    writer->prepare(table);
-    writer->execute(table);
+    Stage& writer = makeWriter(m_output_file, filter, "writers.text");
+    writer.prepare(table);
+    writer.execute(table);
 
     return 0;
   }

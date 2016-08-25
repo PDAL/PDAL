@@ -45,7 +45,7 @@ using namespace pdal;
 
 template <typename T>
 void checkDimension(const PointView& data, std::size_t index,
-    Dimension::Id::Enum dim, T expected)
+    Dimension::Id dim, T expected)
 {
     float actual = data.getFieldAs<T>(dim, index);
     EXPECT_FLOAT_EQ(expected, actual);
@@ -74,7 +74,7 @@ void checkPoint(
     checkDimension(data, index, Id::Z, elevation);
     checkDimension(data, index, Id::StartPulse, xmtSig);
     checkDimension(data, index, Id::ReflectedPulse, rcvSig);
-    checkDimension(data, index, Id::ScanAngleRank, azimuth);
+    checkDimension(data, index, Id::Azimuth, azimuth);
     checkDimension(data, index, Id::Pitch, pitch);
     checkDimension(data, index, Id::Roll, roll);
     checkDimension(data, index, Id::Pdop, gpsPdop);
@@ -90,10 +90,10 @@ std::string getFilePath()
 TEST(IcebridgeReaderTest, testRead)
 {
     StageFactory f;
-    std::unique_ptr<Stage> reader(f.createStage("readers.icebridge"));
-    EXPECT_TRUE(reader.get());
+    Stage* reader(f.createStage("readers.icebridge"));
+    EXPECT_TRUE(reader);
 
-    Option filename("filename", getFilePath(), "");
+    Option filename("filename", getFilePath());
     Options options(filename);
     reader->setOptions(options);
 
@@ -109,7 +109,7 @@ TEST(IcebridgeReaderTest, testRead)
             0,
             141437548,     // time
             82.605319,      // latitude
-            301.406196,     // longitude
+            -58.593811,     // longitude
             18.678,         // elevation
             2408,           // xmtSig
             181,            // rcvSig
@@ -125,7 +125,7 @@ TEST(IcebridgeReaderTest, testRead)
             1,
             141437548,     // time
             82.605287,      // latitude
-            301.404862,     // longitude
+            -58.595123,     // longitude
             18.688,         // elevation
             2642,           // xmtSig
             173,            // rcvSig
@@ -141,9 +141,7 @@ TEST(IcebridgeReaderTest, testPipeline)
 {
     PipelineManager manager;
 
-    bool isWriter =
-        manager.readPipeline(Support::configuredpath("icebridge/pipeline.xml"));
-    EXPECT_TRUE(isWriter);
+    manager.readPipeline(Support::configuredpath("icebridge/pipeline.xml"));
 
     point_count_t numPoints = manager.execute();
     EXPECT_EQ(numPoints, 2u);

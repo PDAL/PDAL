@@ -42,41 +42,18 @@
 namespace pdal
 {
 
-#if !defined(PDAL_COMPILER_MSVC)
-
-// explicit specialization:
-//   if insert a bool, we don't want it to be "0" or "1".
-template<> void Option::setValue(const bool& value)
+std::string Option::toArg() const
 {
-    m_value = value ? "true" : "false";
+    return std::string(2, '-') + getName() + '=' + getValue();
 }
-
-// explicit specialization:
-template<> void Option::setValue(const std::string& value)
-{
-    m_value = value;
-}
-#endif
 
 
 void Option::toMetadata(MetadataNode& parent) const
 {
-    parent.add(getName(), getValue<std::string>());
+    parent.add(getName(), getValue());
 }
 
 //---------------------------------------------------------------------------
-
-
-Options::Options(const Options& rhs)
-    : m_options(rhs.m_options)
-{}
-
-
-Options::Options(const Option& opt)
-{
-    add(opt);
-}
-
 
 bool Option::nameValid(const std::string& name, bool reportError)
 {
@@ -95,7 +72,15 @@ bool Option::nameValid(const std::string& name, bool reportError)
 void Options::add(const Option& option)
 {
     assert(Option::nameValid(option.getName(), true));
-    m_options.insert(std::pair<std::string, Option>(option.getName(), option));
+    m_options.insert({ option.getName(), option });
+}
+
+
+void Options::addConditional(const Option& option)
+{
+    assert(Option::nameValid(option.getName(), true));
+    if (m_options.find(option.getName()) == m_options.end())
+        m_options.insert({ option.getName(), option });
 }
 
 
@@ -104,34 +89,6 @@ void Options::remove(const Option& option)
     m_options.erase(option.getName());
 }
 
-
-Option& Options::getOptionByRef(const std::string& name)
-{
-    auto iter = m_options.find(name);
-    if (iter == m_options.end())
-    {
-        std::ostringstream oss;
-        oss << "Options::getOptionByRef: Required option '" << name <<
-            "' was not found on this stage";
-        throw Option::not_found(oss.str());
-    }
-    return iter->second;
-}
-
-
-const Option& Options::getOption(const std::string& name) const
-{
-    assert(Option::nameValid(name, true));
-    auto iter = m_options.find(name);
-    if (iter == m_options.end())
-    {
-        std::ostringstream oss;
-        oss << "Options::getOption: Required option '" << name <<
-            "' was not found on this stage";
-        throw Option::not_found(oss.str());
-    }
-    return iter->second;
-}
 
 std::vector<Option> Options::getOptions(std::string const& name) const
 {
@@ -157,16 +114,21 @@ std::vector<Option> Options::getOptions(std::string const& name) const
 }
 
 
-bool Options::hasOption(std::string const& name) const
+/**
+  Convert options to a string list appropriate for parsing with ProgramArgs.
+
+  \return  List of options as argument strings.
+*/
+StringList Options::toCommandLine() const
 {
-    try
+    StringList s;
+
+    for (const auto& op : m_options)
     {
-        (void)getOption(name);
-        return true;
+        const Option& o = op.second;
+        s.push_back(o.toArg());
     }
-    catch (Option::not_found)
-    {}
-    return false;
+    return s;
 }
 
 } // namespace pdal

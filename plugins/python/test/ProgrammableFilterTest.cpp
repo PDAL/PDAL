@@ -61,7 +61,7 @@ TEST_F(ProgrammableFilterTest, ProgrammableFilterTest_test1)
 
     Options ops;
     ops.add("bounds", bounds);
-    ops.add("num_points", 10);
+    ops.add("count", 10);
     ops.add("mode", "ramp");
 
     FauxReader reader;
@@ -89,7 +89,7 @@ TEST_F(ProgrammableFilterTest, ProgrammableFilterTest_test1)
     opts.add(module);
     opts.add(function);
 
-    std::unique_ptr<Stage> filter(f.createStage("filters.programmable"));
+    Stage* filter(f.createStage("filters.programmable"));
     filter->setOptions(opts);
     filter->setInput(reader);
 
@@ -117,7 +117,7 @@ TEST_F(ProgrammableFilterTest, ProgrammableFilterTest_test1)
     EXPECT_DOUBLE_EQ(statsZ.maximum(), 3.14);
 }
 
-TEST_F(ProgrammableFilterTest, pipeline)
+TEST_F(ProgrammableFilterTest, pipelineXML)
 {
     PipelineManager manager;
 
@@ -135,6 +135,23 @@ TEST_F(ProgrammableFilterTest, pipeline)
     }
 }
 
+TEST_F(ProgrammableFilterTest, pipelineJSON)
+{
+    PipelineManager manager;
+
+    manager.readPipeline(
+        Support::configuredpath("plang/programmable-update-y-dims.json"));
+    manager.execute();
+    PointViewSet viewSet = manager.views();
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr view = *viewSet.begin();
+
+    for (PointId idx = 0; idx < 10; ++idx)
+    {
+        int32_t y = view->getFieldAs<int32_t>(Dimension::Id::Y, idx);
+        EXPECT_EQ(y, 314);
+    }
+}
 
 TEST_F(ProgrammableFilterTest, add_dimension)
 {
@@ -144,7 +161,7 @@ TEST_F(ProgrammableFilterTest, add_dimension)
 
     Options ops;
     ops.add("bounds", bounds);
-    ops.add("num_points", 10);
+    ops.add("count", 10);
     ops.add("mode", "ramp");
 
     FauxReader reader;
@@ -167,7 +184,7 @@ TEST_F(ProgrammableFilterTest, add_dimension)
     opts.add(intensity);
     opts.add(scanDirection);
 
-    std::unique_ptr<Stage> filter(f.createStage("filters.programmable"));
+    Stage* filter(f.createStage("filters.programmable"));
     filter->setOptions(opts);
     filter->setInput(reader);
 
@@ -179,8 +196,8 @@ TEST_F(ProgrammableFilterTest, add_dimension)
 
     PointLayoutPtr layout(table.layout());
 
-    Dimension::Id::Enum int_id = layout->findDim("AddedIntensity");
-    Dimension::Id::Enum psid_id = layout->findDim("AddedPointSourceId");
+    Dimension::Id int_id = layout->findDim("AddedIntensity");
+    Dimension::Id psid_id = layout->findDim("AddedPointSourceId");
 
     for (unsigned int i = 0; i < view->size(); ++i)
     {
@@ -198,7 +215,7 @@ TEST_F(ProgrammableFilterTest, metadata)
 
     Options ops;
     ops.add("bounds", bounds);
-    ops.add("num_points", 10);
+    ops.add("count", 10);
     ops.add("mode", "ramp");
 
     FauxReader reader;
@@ -217,7 +234,7 @@ TEST_F(ProgrammableFilterTest, metadata)
     opts.add(module);
     opts.add(function);
 
-    std::unique_ptr<Stage> filter(f.createStage("filters.programmable"));
+    Stage* filter(f.createStage("filters.programmable"));
     filter->setOptions(opts);
     filter->setInput(reader);
 

@@ -50,7 +50,8 @@ if(PDAL_UTILITY)
     else (APPLE AND PDAL_BUNDLE)
         add_executable(${PDAL_UTILITY} ${srcs})
     endif(APPLE AND PDAL_BUNDLE)
-    target_link_libraries(${PDAL_UTILITY} ${PDAL_BASE_LIB_NAME})
+    target_link_libraries(${PDAL_UTILITY} ${PDAL_BASE_LIB_NAME}
+        ${PDAL_UTIL_LIB_NAME})
 endif()
 
 #------------------------------------------------------------------------------
@@ -87,7 +88,7 @@ if(UNIX OR APPLE)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/pdal.pc.in
                    ${CMAKE_CURRENT_BINARY_DIR}/pdal.pc @ONLY)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/pdal.pc
-        DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig/"
+        DESTINATION "${PDAL_LIB_INSTALL_DIR}/pkgconfig/"
         PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
 
     # Autoconf compatibility variables to use the same script source.
