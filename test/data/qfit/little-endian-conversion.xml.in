@@ -11,12 +11,6 @@
             <Option name="filename">
                 @CMAKE_SOURCE_DIR@/test/data/qfit/20101120_000244.ATM4BT2.qi
             </Option>
-            <Option name="debug">
-                true
-            </Option>
-            <Option name="verbose">
-                1
-            </Option>
             <Option name="flip_coordinates">
                 true
             </Option>

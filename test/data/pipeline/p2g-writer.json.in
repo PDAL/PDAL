@@ -2,9 +2,7 @@
   "pipeline":[
     {
       "filename":"@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las",
-      "spatialreference":"@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las.wkt",
-      "debug":true,
-      "verbose":6
+      "spatialreference":"@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las.wkt"
     },
     {
       "type":"writers.p2g",

@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <Pipeline version="1.0">
         <Filter type="filters.merge">
-            <Option name="verbose">5</Option>
             <Reader type="readers.las">
                 <Option name="spatialreference">EPSG:2028</Option>
                 <Option name="filename">

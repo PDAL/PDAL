@@ -74,8 +74,6 @@ static void test_filter(const std::string& jsonFile,
     const std::string& autzen = useThin ? autzenThin : autzenThick;
 
     options.add("filename", Support::datapath(autzen));
-    options.add("debug", true);
-    options.add("verbose", 9);
 
     Stage* reader(f.createStage("readers.las"));
     EXPECT_TRUE(reader);

@@ -1,9 +1,7 @@
 {
   "pipeline":[
     {
-      "filename":"@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las",
-      "debug":true,
-      "verbose":6
+      "filename":"@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las"
     },
     {
       "type":"filters.transformation",

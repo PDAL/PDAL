@@ -198,7 +198,6 @@ void writeData(Orientation orient, bool scaling, bool compression = false)
 
     options.add("capacity", 10000);
     options.add("connection", std::string(connectString));
-    options.add("debug", "true");
     options.add("block_table_name", blockTableName);
     options.add("base_table_name", baseTableName);
     options.add("cloud_column_name", "CLOUD");
@@ -358,4 +357,3 @@ TEST_F(OCITest, point_major_scaled)
     writeData(Orientation::PointMajor, true);
     readData();
 }
-

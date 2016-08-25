@@ -44,12 +44,6 @@
             <Option name="spatialreference">
                 @CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las.wkt
             </Option>
-            <Option name="debug">
-                true
-            </Option>
-            <Option name="verbose">
-                6
-            </Option>
         </Reader>
     </Writer>
 </Pipeline>
