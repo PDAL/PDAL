@@ -6,8 +6,6 @@ ENV CC clang
 ENV CXX clang++
 
 RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
-        cython \
-        python-pip \
         libhpdf-dev \
     && rm -rf /var/lib/apt/lists/*
 

@@ -37,6 +37,7 @@ RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
         libboost-thread1.58-dev \
         subversion \
         clang \
+        clang-3.6 \
         libproj-dev \
         libc6-dev \
         libnetcdf-dev \
@@ -62,6 +63,7 @@ RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
         python-pip \
         libgdal1-dev \
     && rm -rf /var/lib/apt/lists/*
+
 
 
 #RUN git clone --depth=1 https://github.com/OSGeo/gdal.git \
@@ -178,7 +180,7 @@ RUN git clone https://github.com/PointCloudLibrary/pcl.git \
         && git checkout pcl-1.8.0 \
         && mkdir build \
         && cd build \
-        && CXXFLAGS="-std=c++11"  cmake \
+        && CC="clang" CXX="clang++" CXXFLAGS="-std=c++11"  cmake \
                 -DBUILD_2d=ON \
                 -DBUILD_CUDA=OFF \
                 -DBUILD_GPU=OFF \
@@ -229,7 +231,7 @@ RUN git clone https://github.com/PointCloudLibrary/pcl.git \
                 -DCMAKE_INSTALL_PREFIX=/usr \
                 -DCMAKE_BUILD_TYPE="Release" \
                 .. \
-        && make \
+        && make -j 4\
         && make install \
         && rm -rf /pcl
 
@@ -280,4 +282,6 @@ RUN git clone https://github.com/gadomski/cpd.git \
 
 
 
+
+#RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.6 20 && update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.6 20
 
