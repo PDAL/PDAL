@@ -1061,7 +1061,7 @@ void SMRFilter::writeMatrix(MatrixXd data, std::string filename,
         {
             for (auto r = rs; r < re; ++r)
             {
-                if (data(r, c) == 0.0 || std::isnan<double>(data(r, c) || data(r, c) == std::numeric_limits<double>::max()))
+                if (data(r, c) == 0.0 || std::isnan(data(r, c)) || data(r, c) == std::numeric_limits<double>::max())
                     continue;
                 poRasterData[(r * cols) + c] =
                     data(r, c);
