@@ -10,7 +10,7 @@ Changes of Note:
   up a dimension by name, the string "platformheading" is still accepted and
   returns Azimuth.
 - Errors detected by GDAL are no longer thrown as exceptions.  A log message
-  is emitted instead. 
+  is emitted instead.
 - Well-known dimensions are now added to PDAL by editing a JSON file,
   Dimension.json.
 - Linking with PDAL using CMake no longer requires explicit linking with
@@ -38,6 +38,15 @@ Enhancements:
   for a file without regard to its extension.
 - The PDAL_DRIVER_PATH environment variable now accepts a list of locations
   to search for drivers.
+- Beta release quality drivers improvements in readers.greyhound
+- Beta quality implementation of Mongus and Zalik ground filter
+- Experimental implementation of Pingel et al. ground filter
+- writers.pcd enhancements by Logan Byers (binary, compression) -- requires
+  PCL
+- Docker images upgraded ti Ubuntu Xenial
+- Cyclone PTS reader -- readers.pts
+- skewness, kurtosis, stddev, and variance added to filters.stats output
+- Python API now available https://pypi.python.org/pypi/pdal
 
 Fixes:
 
