@@ -275,7 +275,7 @@ void GreyhoundReader::addArgs(ProgramArgs& args)
     args.add("depth_begin", "Beginning depth to query", m_depthBegin);
     args.add("depth_end", "Ending depth to query", m_depthEnd);
     args.add("retries", "How many times to retry", m_retryCount, 1u);
-    args.add("split_threshold", "Point count for which to start splitting queries", m_splitCountThreshold, 50000llu);
+    args.add("split_threshold", "Point count for which to start splitting queries", m_splitCountThreshold, (point_count_t)50000llu);
 }
 
 

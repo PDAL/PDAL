@@ -87,8 +87,8 @@ void PCDtoPDAL(CloudT &cloud, PointViewPtr view, BOX3D const& bounds)
     {
         for (size_t i = 0; i < cloud.points.size(); ++i)
         {
-            float f;
-            bool hasIntensity = true;
+            float f(0.0);
+            bool hasIntensity(true);
 
             typename CloudT::PointType p = cloud.points[i];
             pcl::for_each_type<FieldList>
@@ -102,7 +102,7 @@ void PCDtoPDAL(CloudT &cloud, PointViewPtr view, BOX3D const& bounds)
     {
         for (size_t i = 0; i < cloud.points.size(); ++i)
         {
-            uint32_t v;
+            uint32_t v(0);
 
             typename CloudT::PointType p = cloud.points[i];
             pcl::for_each_type<FieldList>

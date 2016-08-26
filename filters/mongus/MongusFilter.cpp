@@ -199,7 +199,7 @@ void MongusFilter::writeMatrix(Eigen::MatrixXd data, std::string filename, doubl
 
     GDALAllRegister();
 
-    GDALDataset *mpDstDS;
+    GDALDataset *mpDstDS(0);
 
     char **papszMetadata;
 
@@ -345,7 +345,7 @@ std::vector<PointId> MongusFilter::processGround(PointViewPtr view)
     cz.setConstant(std::numeric_limits<double>::max());
 
     // find initial set of Z minimums at native resolution
-    for (auto i = 0; i < np; ++i)
+    for (point_count_t i = 0; i < np; ++i)
     {
         using namespace Dimension;
         double x = view->getFieldAs<double>(Id::X, i);
@@ -636,7 +636,7 @@ std::vector<PointId> MongusFilter::processGround(PointViewPtr view)
     // apply final filtering (top hat) using raw points against TPS
 
     // ...the LiDAR points are filtered only at the bottom level.
-    for (auto i = 0; i < np; ++i)
+    for (point_count_t i = 0; i < np; ++i)
     {
         using namespace Dimension;
 
