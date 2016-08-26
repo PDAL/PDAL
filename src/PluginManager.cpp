@@ -90,15 +90,14 @@ StringList pluginSearchPaths()
         searchPaths = Utils::split2(envOverride, ':');
     else
     {
-        searchPaths.push_back(PDAL_PLUGIN_INSTALL_PATH);
-        StringList standardPaths = { "./lib", "../lib", "../bin",
-            PDAL_PLUGIN_INSTALL_PATH };
+        StringList standardPaths = { "./lib", "../lib", "../bin" };
         for (std::string& s : standardPaths)
         {
             if (FileUtils::toAbsolutePath(s) !=
                 FileUtils::toAbsolutePath(PDAL_PLUGIN_INSTALL_PATH))
                 searchPaths.push_back(s);
         }
+        searchPaths.push_back(PDAL_PLUGIN_INSTALL_PATH);
     }
     return searchPaths;
 }
@@ -430,6 +429,9 @@ bool PluginManager::loadByPath(const std::string& pluginPath, int type)
                     "Failed to initialize plugin function for plugin '" <<
                     completePath << "'." << std::endl;
         }
+        else
+            m_log->get(LogLevel::Error) << "Plugin '" << completePath <<
+                "' found but failed to load: " << errorString << std::endl;
     }
 
     return loaded;

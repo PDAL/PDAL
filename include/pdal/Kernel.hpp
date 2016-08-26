@@ -70,6 +70,11 @@ public:
     int run(const StringList& cmdArgs, LogPtr& log);
 
     virtual std::string getName() const = 0;
+    std::string getShortName() const
+    {
+        StringList names = Utils::split2(getName(), '.');
+        return names.size() == 2 ? names[1] : std::string();
+    }
     bool isVisualize() const;
     void visualize(PointViewPtr view);
 

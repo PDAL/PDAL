@@ -77,19 +77,17 @@ static void run_pipeline_stdin(std::string const& pipeline)
         std::cerr << output << std::endl;
 }
 
-#ifdef PDAL_COMPILER_MSVC
 TEST(pipelineBaseTest, no_input)
 {
     const std::string cmd = appName();
 
     std::string output;
     int stat = pdal::Utils::run_shell_command(cmd, output);
-    EXPECT_EQ(-1, stat);
+    EXPECT_NE(0, stat);
 
     const std::string expected = "usage: pdal pipeline [options] [input]";
     EXPECT_EQ(expected, output.substr(0, expected.length()));
 }
-#endif
 
 
 TEST(pipelineBaseTest, common_opts)

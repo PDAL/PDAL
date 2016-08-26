@@ -419,7 +419,7 @@ void Kernel::parseCommonOptions()
 
 void Kernel::outputHelp(ProgramArgs& args)
 {
-    std::cout << "usage: " << "pdal " << getName() << " [options] " <<
+    std::cout << "usage: " << "pdal " << getShortName() << " [options] " <<
         args.commandLine() << std::endl;
 
     std::cout << "options:" << std::endl;
