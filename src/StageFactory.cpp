@@ -142,7 +142,6 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
         { "bpf", "readers.bpf" },
         { "csd", "readers.optech" },
         { "greyhound", "readers.greyhound" },
-        { "http", "readers.greyhound" },
         { "icebridge", "readers.icebridge" },
         { "las", "readers.las" },
         { "laz", "readers.las" },
@@ -162,10 +161,12 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
         { "h5", "readers.icebridge" }
     };
 
+    static const std::string ghPrefix("greyhound://");
+
     std::string ext;
     // filename may actually be a greyhound uri + pipelineId
-    if (Utils::iequals(filename.substr(0, 4), "http"))
-        ext = ".http";      // Make it look like an extension.
+    if (Utils::iequals(filename.substr(0, ghPrefix.size()), ghPrefix))
+        ext = ".greyhound";      // Make it look like an extension.
     else
         ext = FileUtils::extension(filename);
 
