@@ -153,4 +153,6 @@ RUN apt-get update && apt-get install -y \
     libboost-serialization1.58.0 \
     libboost-chrono1.58.0 \
     libboost-atomic1.58.0 \
-    libboost-regex1.58.0
+    libboost-regex1.58.0 \
+    libgdal1i \
+    libflann1.8
