@@ -537,7 +537,7 @@ point_count_t GreyhoundReader::readLevel(
     }
 #else
 
-    raise pdal_error("uncompressed not implemented!");
+    throw pdal_error("uncompressed not implemented!");
 #endif
     return numRead;
 }
