@@ -27,6 +27,7 @@ RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
         automake \
         libtool \
         libspatialite-dev \
+        libsqlite3-mod-spatialite \
         libhdf5-dev \
         subversion \
         libjsoncpp-dev \
@@ -280,6 +281,10 @@ RUN git clone https://github.com/gadomski/cpd.git \
     && make install \
     && rm -rf /cpd
 
+RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
+        libhpdf-dev \
+    python-setuptools \
+    && rm -rf /var/lib/apt/lists/*
 
 
 
