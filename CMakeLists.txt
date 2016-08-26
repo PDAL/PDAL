@@ -151,17 +151,10 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
 
 include_directories(${PDAL_VENDOR_DIR}/arbiter)
 include_directories(${PDAL_VENDOR_DIR}/eigen-3.2.8)
-
-if (PDAL_HAVE_JSONCPP)
-    include_directories(${JSONCPP_INCLUDE_DIR})
-else()
-    include_directories(${PDAL_VENDOR_DIR}/jsoncpp-1.6.2/dist)
-endif()
+include_directories(${PDAL_JSONCPP_INCLUDE_DIR})
 
 include_directories(${PDAL_VENDOR_DIR}/nanoflann-1.1.8)
 include_directories(${PDAL_VENDOR_DIR}/rply-1.1.4)
-
-
 
 #------------------------------------------------------------------------------
 # subdirectory controls
@@ -185,12 +178,7 @@ add_subdirectory(dimbuilder)
 add_subdirectory(vendor/pdalboost)
 add_subdirectory(vendor/arbiter)
 if (NOT PDAL_HAVE_JSONCPP)
-    set(PDAL_JSONCPP_LIB_NAME pdal_jsoncpp)
     add_subdirectory(vendor/jsoncpp-1.6.2/dist)
-    set(JSON_CPP_LINK_TYPE PRIVATE)
-else()
-    set(PDAL_JSONCPP_LIB_NAME ${JSONCPP_LIBRARY})
-    set(JSON_CPP_LINK_TYPE PUBLIC)
 endif()
 add_subdirectory(src/util)
 add_subdirectory(io)

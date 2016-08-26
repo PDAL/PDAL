@@ -2,7 +2,7 @@
 # Greyhound plugin CMake configuration
 #
 
-include_directories(${JSONCPP_INCLUDE_DIR})
+include_directories(${PDAL_JSONCPP_INCLUDE_DIR})
 add_definitions(-DHAVE_JSONCPP=1)
 
 set(srcs
@@ -20,7 +20,7 @@ set(incs
 
 PDAL_ADD_PLUGIN(libname reader greyhound
     FILES "${srcs}" "${incs}"
-    LINK_WITH ${JSONCPP_LIBRARY})
+    LINK_WITH ${PDAL_JSONCPP_LIB_NAME})
 
 set(srcs
     test/GreyhoundReaderTest.cpp

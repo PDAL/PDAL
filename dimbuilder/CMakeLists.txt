@@ -13,11 +13,12 @@ endif()
 
 include(${ROOT_DIR}/cmake/common.cmake NO_POLICY_SCOPE)
 
-include_directories(${ROOT_DIR}/vendor/jsoncpp-1.6.2/dist)
+include_directories(${PDAL_JSONCPP_INCLUDE_DIR})
+
 
 set (SOURCES
     DimBuilder.cpp
-    ${ROOT_DIR}/vendor/jsoncpp-1.6.2/dist/jsoncpp.cpp
+    ${PDAL_JSONCPP_SRC}
     ${PDAL_UTIL_DIR}/Utils.cpp
 )
 
@@ -27,4 +28,6 @@ set (HEADERS
 )
 
 add_executable(dimbuilder ${SOURCES} ${HEADERS})
-
+if (PDAL_HAVE_JSON_CPP)
+    target_link_libraries(dimbuilder ${PDAL_JSONCPP_LIB_NAME})
+endif()
