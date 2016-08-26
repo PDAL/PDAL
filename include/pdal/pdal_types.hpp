@@ -46,8 +46,8 @@
 namespace pdal
 {
 
-typedef uint32_t PointId;
-typedef uint32_t point_count_t;
+typedef uint64_t PointId;
+typedef uint64_t point_count_t;
 typedef std::vector<std::string> StringList;
 
 typedef union
@@ -117,7 +117,7 @@ struct XForm
     XFormComponent m_scale;
     // Offset component of the transform.
     XFormComponent m_offset;
-    
+
     double toScaled(double val) const
         { return (val - m_offset.m_val) / m_scale.m_val; }
 

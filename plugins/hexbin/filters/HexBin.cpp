@@ -201,8 +201,30 @@ void HexBin::done(PointTableRef table)
 
 //    double density = (double) m_grid->densePointCount() / area ;
     double density = (double) m_count/ area ;
-    m_metadata.add("density", density, "Number of points per square unit");
+    m_metadata.add("density", density, "Number of points per square unit (total area)");
     m_metadata.add("area", area, "Area in square units of tessellated polygon");
+
+    double moving_avg(0.0);
+    double avg_count(0.0);
+
+    double hex_area(((3 * SQRT_3)/2.0) * (m_grid->height() * m_grid->height()));
+    int n(0);
+    point_count_t totalCount(0);
+    double totalArea(0.0);
+    for (HexIter hi = m_grid->hexBegin(); hi != m_grid->hexEnd(); ++hi)
+    {
+        HexInfo h = *hi;
+        totalCount += h.density();
+        totalArea += hex_area;
+        ++n;
+    }
+
+    double avg_density = totalArea /(double) totalCount;
+    m_metadata.add("avg_pt_per_sq_unit", avg_density, "Number of points per square unit (tessellated area within inclusions)");
+
+    double avg_spacing = std::sqrt(1/density);
+    m_metadata.add("avg_pt_spacing", avg_spacing, "Avg point spacing (x/y units)");
+
 }
 
 } // namespace pdal

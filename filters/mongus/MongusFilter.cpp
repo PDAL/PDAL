@@ -45,8 +45,6 @@
 #include "gdal_version.h" // For version info
 #include "ogr_spatialref.h"  //For Geographic Information/Transformations
 
-#include <math>
-
 namespace pdal
 {
 

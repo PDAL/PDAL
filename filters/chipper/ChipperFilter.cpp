@@ -84,7 +84,7 @@ std::string ChipperFilter::getName() const { return s_info.name; }
 void ChipperFilter::addArgs(ProgramArgs& args)
 {
     args.add("capacity", "Maximum number of points per cell", m_threshold,
-        5000u);
+        (PointId) 5000u);
 }
 
 

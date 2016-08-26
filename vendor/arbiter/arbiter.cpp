@@ -1532,13 +1532,13 @@ std::unique_ptr<S3> S3::create(Pool& pool, const Json::Value& json)
             }
         }
     }
-    else
+    else if (json["verbose"].asBool())
     {
         std::cout <<
             "~/.aws/config not found - using region us-east-1" << std::endl;
     }
 
-    if (!regionFound)
+    if (!regionFound && json["verbose"].asBool())
     {
         std::cout <<
             "Region not found in ~/.aws/config - using us-east-1" << std::endl;
@@ -3578,11 +3578,13 @@ std::unique_ptr<std::string> env(const std::string& var)
     char* c(nullptr);
     std::size_t size(0);
 
-    int envd = _dupenv_s(&c, &size, var.c_str());
-    if (c)
+    if (!_dupenv_s(&c, &size, var.c_str()))
     {
-        result.reset(new std::string(c));
-        free(c);
+        if (c)
+        {
+            result.reset(new std::string(c));
+            free(c);
+        }
     }
 #endif
 

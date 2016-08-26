@@ -664,10 +664,10 @@ void LasWriter::writeView(const PointViewPtr view)
         std::to_string(view->size()));
     m_scaling.setAutoXForm(view);
 
-    size_t pointLen = m_lasHeader.pointLen();
+    point_count_t pointLen = m_lasHeader.pointLen();
 
     // Make a buffer of at most a meg.
-    m_pointBuf.resize(std::min((size_t)1000000, pointLen * view->size()));
+    m_pointBuf.resize(std::min((point_count_t)1000000, pointLen * view->size()));
 
     const PointView& viewRef(*view.get());
 

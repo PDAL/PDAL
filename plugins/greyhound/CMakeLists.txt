@@ -2,34 +2,32 @@
 # Greyhound plugin CMake configuration
 #
 
-find_package(WEBSOCKETPP)
+include_directories(${JSONCPP_INCLUDE_DIR})
+add_definitions(-DHAVE_JSONCPP=1)
 
-if(JSONCPP_FOUND AND WEBSOCKETPP_FOUND)
-    # add JSONCPP stuff
-    include_directories(${JSONCPP_INCLUDE_DIR})
-    add_definitions(-DHAVE_JSONCPP=1)
+set(srcs
+    io/CompressionStream.cpp
+    io/GreyhoundReader.cpp
+    io/bbox.cpp
+)
 
-    # add WEBSOCKETPP stuff
-    include_directories(${WEBSOCKETPP_INCLUDE_DIR})
-    add_definitions(-D_WEBSOCKETPP_NULLPTR_TOKEN_=0)
-    add_definitions(-D_WEBSOCKETPP_CPP11_RANDOM_DEVICE_=1)
-    add_definitions(-DHAVE_WEBSOCKETPP=1)
+set(incs
+    io/CompressionStream.hpp
+    io/GreyhoundReader.hpp
+    io/bbox.hpp
+    io/point.hpp
+)
 
-    set(srcs
-        io/CompressionStream.cpp
-        io/Exchanges.cpp
-        io/GreyhoundReader.cpp
-        io/WebSocketClient.cpp
-    )
+PDAL_ADD_PLUGIN(libname reader greyhound
+    FILES "${srcs}" "${incs}"
+    LINK_WITH ${JSONCPP_LIBRARY})
 
-    set(incs
-        io/CompressionStream.hpp
-        io/Exchanges.hpp
-        io/GreyhoundReader.hpp
-        io/WebSocketClient.hpp
-    )
+set(srcs
+    test/GreyhoundReaderTest.cpp
+)
 
-    PDAL_ADD_PLUGIN(libname reader greyhound
-        FILES "${srcs}" "${incs}"
-        LINK_WITH ${JSONCPP_LIBRARY})
-endif()
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
+PDAL_ADD_TEST(greyhoundreadertest
+    FILES "${srcs}"
+    LINK_WITH ${libname} )

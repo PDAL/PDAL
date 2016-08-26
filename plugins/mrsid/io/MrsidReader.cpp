@@ -38,6 +38,7 @@
 #include <lidar/FileIO.h>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/DimUtil.hpp>
 
 namespace pdal
 {
@@ -72,33 +73,32 @@ pdal::Dimension::Type getPDALType(LizardTech::DataType t)
 {
 
    using namespace Dimension;
-   using namespace Dimension::Type;
    using namespace LizardTech;
    switch (t)
    {
        case DATATYPE_SINT8:
-           return Signed8;
+           return Type::Signed8;
        case DATATYPE_UINT8:
-           return Unsigned8;
+           return Type::Unsigned8;
        case DATATYPE_SINT16:
-           return Signed16;
+           return Type::Signed16;
        case DATATYPE_UINT16:
-           return Unsigned16;
+           return Type::Unsigned16;
        case DATATYPE_SINT32:
-           return Signed32;
+           return Type::Signed32;
        case DATATYPE_UINT32:
-           return Unsigned32;
+           return Type::Unsigned32;
        case DATATYPE_SINT64:
-           return Signed64;
+           return Type::Signed64;
        case DATATYPE_UINT64:
-           return Unsigned64;
+           return Type::Unsigned64;
        case DATATYPE_FLOAT32:
-           return Float;
+           return Type::Float;
        case DATATYPE_FLOAT64:
-           return Double;
+           return Type::Double;
 
        default:
-           return Double;
+           return Type::Double;
    }
 }
 
@@ -191,7 +191,6 @@ QuickInfo MrsidReader::inspect()
 void MrsidReader::LayoutToPointInfo(const PointLayout &layout, LizardTech::PointInfo &pointInfo) const
 {
     using namespace pdal::Dimension;
-    using namespace pdal::Dimension::Type;
     const Dimension::IdList& dims = layout.dims();
 
     pointInfo.init(dims.size());
@@ -210,25 +209,25 @@ void MrsidReader::LayoutToPointInfo(const PointLayout &layout, LizardTech::Point
         if (Utils::iequals(name, "ReturnNumber")) name = CHANNEL_NAME_ReturnNum;
         if (Utils::iequals(name, "NumberOfReturns")) name = CHANNEL_NAME_NumReturns;
 
-        if (t == Double)
+        if (t == Type::Double)
             pointInfo.getChannel(idx).init(name.c_str(), LizardTech::DATATYPE_FLOAT64, 64);
-        else if (t == Float)
+        else if (t == Type::Float)
             pointInfo.getChannel(idx).init(name.c_str(), LizardTech::DATATYPE_FLOAT32, 32);
-        else if (t == Signed64)
+        else if (t == Type::Signed64)
             pointInfo.getChannel(idx).init(name.c_str(), LizardTech::DATATYPE_SINT64, 64);
-        else if (t == Signed32)
+        else if (t == Type::Signed32)
             pointInfo.getChannel(idx).init(name.c_str(), LizardTech::DATATYPE_SINT32, 32);
-        else if (t == Signed16)
+        else if (t == Type::Signed16)
             pointInfo.getChannel(idx).init(name.c_str(), LizardTech::DATATYPE_SINT16, 16);
-        else if (t == Signed8)
+        else if (t == Type::Signed8)
             pointInfo.getChannel(idx).init(name.c_str(), LizardTech::DATATYPE_SINT8, 8);
-        else if (t == Unsigned64)
+        else if (t == Type::Unsigned64)
             pointInfo.getChannel(idx).init(name.c_str(), LizardTech::DATATYPE_UINT64, 64);
-        else if (t == Unsigned32)
+        else if (t == Type::Unsigned32)
             pointInfo.getChannel(idx).init(name.c_str(), LizardTech::DATATYPE_UINT32, 32);
-        else if (t == Unsigned16)
+        else if (t == Type::Unsigned16)
             pointInfo.getChannel(idx).init(name.c_str(), LizardTech::DATATYPE_UINT16, 16);
-        else if (t == Unsigned8)
+        else if (t == Type::Unsigned8)
             pointInfo.getChannel(idx).init(name.c_str(), LizardTech::DATATYPE_UINT8, 8);
     }
 }
@@ -243,7 +242,7 @@ T getData(LizardTech::PointData& points, const char* channelId, point_count_t po
 
 point_count_t MrsidReader::read(PointViewPtr view, point_count_t count)
 {
-    using namespace pdal::Dimension::Type;
+    using namespace pdal::Dimension;
 
     LizardTech::PointData points;
     LayoutToPointInfo(*m_layout, m_pointInfo);
@@ -263,12 +262,12 @@ point_count_t MrsidReader::read(PointViewPtr view, point_count_t count)
             if (Utils::iequals(name, "X") &&
                 m_pointInfo.hasChannel(CHANNEL_NAME_X))
             {
-                if (t == Double)
+                if (t == Type::Double)
                 {
                     view->setField<double>( d,
                                             pointIndex,
                                             getData<double>(points, CHANNEL_NAME_X, pointIndex));
-                } else if (t == Signed32)
+                } else if (t == Type::Signed32)
                 {
                     view->setField<int32_t>(d,
                                             pointIndex,
@@ -277,12 +276,12 @@ point_count_t MrsidReader::read(PointViewPtr view, point_count_t count)
             } else if (Utils::iequals(name, "Y") &&
                        m_pointInfo.hasChannel(CHANNEL_NAME_Y))
             {
-                if (t == Double)
+                if (t == Type::Double)
                 {
                     view->setField<double>( d,
                                             pointIndex,
                                             getData<double>(points, CHANNEL_NAME_Y, pointIndex));
-                } else if (t == Signed32)
+                } else if (t == Type::Signed32)
                 {
                     view->setField<int32_t>(d,
                                             pointIndex,
@@ -291,12 +290,12 @@ point_count_t MrsidReader::read(PointViewPtr view, point_count_t count)
             } else if (Utils::iequals(name, "Z") &&
                        m_pointInfo.hasChannel(CHANNEL_NAME_Z))
             {
-                if (t == Double)
+                if (t == Type::Double)
                 {
                     view->setField<double>( d,
                                             pointIndex,
                                             getData<double>(points, CHANNEL_NAME_Z, pointIndex));
-                } else if (t == Signed32)
+                } else if (t == Type::Signed32)
                 {
                     view->setField<int32_t>(d,
                                             pointIndex,

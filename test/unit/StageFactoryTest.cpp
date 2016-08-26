@@ -83,7 +83,7 @@ TEST(StageFactoryTest, Load4)
     ASSERT_FALSE(Utils::contains(ns, "readers.las"));
     ASSERT_TRUE(Utils::contains(ns, "writers.bpf"));
 }
-    
+
 TEST(StageFactoryTest, extensionTest)
 {
     EXPECT_EQ(StageFactory::inferWriterDriver("foo.laz"), "writers.las");
@@ -93,7 +93,8 @@ TEST(StageFactoryTest, extensionTest)
 
     EXPECT_EQ(StageFactory::inferReaderDriver("foo.laz"), "readers.las");
     EXPECT_EQ(StageFactory::inferReaderDriver("foo.las"), "readers.las");
-    EXPECT_EQ(StageFactory::inferReaderDriver("http://foo.bar.baz"),
+    EXPECT_EQ(StageFactory::inferReaderDriver("http://foo.laz"), "readers.las");
+    EXPECT_EQ(StageFactory::inferReaderDriver("greyhound://foo.bar.baz"),
         "readers.greyhound");
 
     StringList ext = { "las", "laz" };

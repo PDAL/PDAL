@@ -36,14 +36,18 @@
 
 #include <pdal/Reader.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/util/Bounds.hpp>
+#include <arbiter.hpp>
 
-#include "WebSocketClient.hpp"
+#include "dir.hpp"
+#include "bbox.hpp"
 
 namespace pdal
 {
 
 class PDAL_DLL GreyhoundReader : public pdal::Reader
 {
+
 public:
     GreyhoundReader();
     ~GreyhoundReader();
@@ -54,19 +58,48 @@ public:
 
 private:
     std::string m_url;
-    std::string m_pipelineId;
+    std::string m_resource;
     std::string m_sessionId;
-    PointLayoutPtr m_layout;
-    WebSocketClient m_wsClient;
     point_count_t m_numPoints;
     point_count_t m_index;
+    BOX3D m_queryBounds;
+    BOX3D m_conformingBounds;
+//     BOX3D m_bounds;
+    uint32_t m_depthBegin;
+    uint32_t m_depthEnd;
+    uint32_t m_baseDepth;
+    uint32_t m_stopSplittingDepth;
+    uint32_t m_split;
+    uint32_t m_retryCount;
+    Json::Value m_resourceInfo;
+    uint32_t m_timeout;
+    point_count_t m_splitCountThreshold;
 
-    virtual void initialize();
+    virtual void initialize(PointTableRef table);
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
     virtual point_count_t read(PointViewPtr view, point_count_t count);
     virtual bool eof() const;
+    virtual QuickInfo inspect();
+    virtual void done(PointTableRef table);
+
+    Json::Value fetch(const std::string& url) const;
+    DimTypeList getSchema(const Json::Value& jsondata) const;
+    BOX3D getBounds(const Json::Value& jsondata, const std::string& memberName) const;
+    point_count_t readLevel(PointViewPtr view, point_count_t count, BOX3D bounds, uint32_t readBegin, uint32_t readEnd);
+//     BOX3D zoom(BOX3D bounds, BOX3D fullBox, int& split) const;
+
+    Json::Value fetchHierarchy(BOX3D bounds, uint32_t depthBegin, uint32_t depthEnd)  const;
+
+    point_count_t readDirection(const greyhound::BBox& currentBox,
+                                            const greyhound::BBox& queryBox,
+                                            uint32_t& depthBegin,
+                                            uint32_t& depthEnd,
+                                            point_count_t count,
+                                            PointViewPtr view,
+                                            const Json::Value& hierarchy);
+    DimTypeList m_dimData;
 };
 
 } // namespace pdal
