@@ -34,7 +34,7 @@
 #include <string>
 #include <vector>
 
-#include <json/json-forwards.h>
+#include <json/forwards.h>
 
 #include <pdal/DimUtil.hpp>
 
