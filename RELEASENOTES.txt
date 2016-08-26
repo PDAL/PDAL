@@ -43,7 +43,7 @@ Enhancements:
 - Experimental implementation of Pingel et al. ground filter
 - writers.pcd enhancements by Logan Byers (binary, compression) -- requires
   PCL
-- Docker images upgraded ti Ubuntu Xenial
+- Docker images upgraded to Ubuntu Xenial
 - Cyclone PTS reader -- readers.pts
 - skewness, kurtosis, stddev, and variance added to filters.stats output
 - Python API now available https://pypi.python.org/pypi/pdal
