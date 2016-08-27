@@ -92,6 +92,7 @@ std::string getTypename(Dimension::Type type)
     case Dimension::Type::Double:
         return "Double";
     }
+    return "None";
 }
 
 void validateDimension(const std::string& dimName)
