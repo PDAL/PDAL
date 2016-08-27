@@ -73,7 +73,7 @@ void SQLiteWriter::addArgs(ProgramArgs& args)
         m_block_table).setPositional();
     args.add("cloud_table_name", "Cloud table name",
         m_cloud_table).setPositional();
-    args.add("connection", "SQL conneciton string",
+    args.add("connection", "SQL connection string",
         m_connection).setPositional();
     args.add("cloud_column_name", "Cloud column name", m_cloud_column, "id");
     args.add("module", "Module name", m_modulename);

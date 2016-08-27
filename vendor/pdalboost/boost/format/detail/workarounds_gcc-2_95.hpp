@@ -29,7 +29,7 @@
 #ifndef BOOST_FORMAT_WORKAROUNDS_GCC295_H
 #define BOOST_FORMAT_WORKAROUNDS_GCC295_H
 
-// SGI STL doesnt have <ostream> and others, so we need iostream.
+// SGI STL doesn't have <ostream> and others, so we need iostream.
 #include <iostream> 
 #define BOOST_FORMAT_OSTREAM_DEFINED
 

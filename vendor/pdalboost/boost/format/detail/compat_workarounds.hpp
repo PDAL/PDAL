@@ -17,7 +17,7 @@
 //  and compiler-specific switches)
 
 // Non-conformant Std-libs fail to supply conformant traits (std::char_traits,
-//  std::allocator) and/or  the std::string doesnt support them.
+//  std::allocator) and/or  the std::string doesn't support them.
 // We don't want to have hundreds of #ifdef workarounds, so we define 
 // replacement traits.
 // But both char_traits and allocator traits are visible in the interface, 
