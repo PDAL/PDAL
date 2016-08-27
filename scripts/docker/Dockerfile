@@ -156,4 +156,6 @@ RUN apt-get update && apt-get install -y \
     libboost-atomic1.58.0 \
     libboost-regex1.58.0 \
     libgdal1i \
-    libflann1.8
+    libflann1.8 \
+    libpython2.7 \
+    libhdf5-cpp-11
