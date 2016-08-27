@@ -79,7 +79,7 @@ namespace pdalboost {
 #endif
 
 
-// ***  hide std::locale if it doesnt exist. 
+// ***  hide std::locale if it doesn't exist. 
 // this typedef is either std::locale or int, avoids placing ifdefs everywhere
 namespace pdalboost { namespace io { namespace detail {
 #if ! defined(BOOST_NO_STD_LOCALE)

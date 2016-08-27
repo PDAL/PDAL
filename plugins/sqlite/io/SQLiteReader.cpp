@@ -124,7 +124,7 @@ SQLiteReader::fetchSpatialReference(std::string const& query) const
 void SQLiteReader::addArgs(ProgramArgs& args)
 {
     args.add("spatialreference", "Spatial reference to apply to points if "
-       "one doesnt exist", m_spatialRef);
+       "one doesn't exist", m_spatialRef);
     args.add("query", "SELECT statement that returns point cloud", m_query);
     args.add("connection", "Database connection string", m_connection);
     args.add("module", "Spatialite module name", m_modulename);
