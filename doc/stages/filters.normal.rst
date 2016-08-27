@@ -10,9 +10,9 @@ is taken as the eigenvector corresponding to the smallest eigenvalue. The
 curvature is computed as
 
 .. math::
-  
-  curvature = \frac{\lambda_0}{\lambda_0 + \lambda_1 _+ \lambda_2}
-  
+
+  curvature = \frac{\lambda_0}{\lambda_0 + \lambda_1 + \lambda_2}
+
 where :math:`\lambda_i` are the eigenvalues sorted in ascending order.
 
 The filter produces four new dimensions (``NormalX``, ``NormalY``, ``NormalZ``,
