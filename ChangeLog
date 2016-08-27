@@ -7078,8 +7078,8 @@
 	* Howard Butler <hobu.inc@gmail.com> decruft (14:40:34)
 	* Howard Butler <hobu.inc@gmail.com> decruft (14:40:25)
 	* Howard Butler <hobu.inc@gmail.com> used cached byte positions to avoid per-point map lookup of positions for getField queries (14:40:00)
-	* Howard Butler <hobu.inc@gmail.com> use inplacereprojfilter because the scalingfilter combo doesnt work right now (14:39:03)
-	* Howard Butler <hobu.inc@gmail.com> use inplacereprojfilter because the scalingfilter combo doesnt work right now (14:38:18)
+	* Howard Butler <hobu.inc@gmail.com> use inplacereprojfilter because the scalingfilter combo doesn't work right now (14:39:03)
+	* Howard Butler <hobu.inc@gmail.com> use inplacereprojfilter because the scalingfilter combo doesn't work right now (14:38:18)
 	* Howard Butler <hobu.inc@gmail.com> add getField specialization for fetching based on a pointIndex and Schema::getByteOffset() output (14:36:06)
 	* Howard Butler <hobu.inc@gmail.com> no longer include tuple, not used (14:34:57)
 
