@@ -22,6 +22,9 @@ Changes of Note:
   '--debug' option is deprecated, and if specified on the command line is
   equivalent to '--verbose=3'.  One can enable logging programmatically by
   calling setLog() on a PipelineManager or a specific stage.
+- pdal::Dimension types are now C++11 enumeration classes. The change may
+  require editing any Stage implementations you might have and removing the
+  extraneous ::Enum type specification.
 
 Enhancements:
 
