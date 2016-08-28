@@ -9,9 +9,16 @@ Quickstart
 Introduction
 ------------------------------------------------------------------------------
 
-It's a giant pain to build everything yourself. To make it simpler to use PDAL, a
-build based on Docker is available. This document describes how
-to use it to print the first point of an :ref:`ASPRS LAS <readers.las>` file.
+It's a giant pain to build everything yourself. The quickest way to start using
+PDAL is to leverage builds that were constructed by the PDAL development team
+using `Docker`_. Docker is a containerization technology that allows you to
+run pre-built software in a way that is isolated from your system. Think of
+it like a binary that doesn't depend on your operating system's configuration
+to be able to run.
+
+This exercise will print the first point of an :ref:`ASPRS LAS <readers.las>` file.
+It will utilize the PDAL :ref:`command line application <apps>` to inspect the
+file.
 
 
 .. _docker:
@@ -19,16 +26,12 @@ to use it to print the first point of an :ref:`ASPRS LAS <readers.las>` file.
 Install Docker
 ------------------------------------------------------------------------------
 
-
-The Docker configuration that PDAL provides contains nearly every possible
-feature except for `Oracle Point Cloud`_ support. Things it includes are:
-
 Docker starting documentation can be found at the following links. Read through
 them a bit for your platform so you have an idea what to expect.
 
-* `Windows <http://docs.docker.com/windows/started/>`__
-* `OSX <http://docs.docker.com/mac/started/>`__
-* `Linux <http://docs.docker.com/linux/started/>`__
+* `Windows <https://docs.docker.com/docker-for-windows/>`__
+* `OSX <https://docs.docker.com/docker-for-mac/>`__
+* `Linux <https://docs.docker.com/engine/installation/linux/>`__
 
 .. _`Docker Toolbox`: https://www.docker.com/docker-toolbox
 
@@ -38,31 +41,27 @@ them a bit for your platform so you have an idea what to expect.
     work in OSX or Linux too -- though definition of file paths might provide
     a significant difference.
 
-.. seealso::
+Enable Docker access to your machine
+................................................................................
 
-    :ref:`apps` provides detailed information on using PDAL applications, and
-    :ref:`workshop` provides a full suite of exercises you can follow to learn
-    how to use PDAL with Docker.
+In order for Docker to be able to interact with data on your machine, you must
+make sure to tell it to be able to read your drive(s). Right-click on the
+little Docker whale icon in you System Tray, choose Settings, and click
+the Shared box by your C drive:
+
+.. image:: ./images/docker-quickstart-share.png
+
 
 Run Docker Quickstart Terminal
 ................................................................................
 
 `Docker`_ is most easily accessed using a terminal window that it configures
-with environment variables and such. Double-click on the "Docker Quickstart Terminal"
-link on your desktop (Windows) or run the "Docker Quickstart Terminal" application
-(Mac).
-
-After some text scrolls by, you should see something like the following image
-:
-
-.. image:: ./images/docker-quickstart-terminal.png
-
-To be sure Docker is working correctly and everything is happy,
-issue the following command and confirm that it reports similar information:
+with environment variables and such. Run PowerShell or `cmd.exe` and issue
+a simple `info` command to verify that things are operating correctly:
 
 ::
 
-    docker-machine env default
+    docker info
 
 .. image:: ./images/docker-quickstart-env.png
 
@@ -77,12 +76,15 @@ whatever reason.
 
 ::
 
-    docker pull pdal/pdal
+    docker pull pdal/pdal:1.3
+
+
+.. image:: ./images/docker-quickstart-pull.png
 
 .. note::
 
     Other PDAL versions are provided at the same `Docker Hub`_ location,
-    with an expected tag name (ie ``pdal/pdal:1.2``, or ``pdal/pdal:1.x``) for
+    with an expected tag name (ie ``pdal/pdal:1.3``, or ``pdal/pdal:1.x``) for
     major PDAL versions. The PDAL Docker hub location at
     https://hub.docker.com/u/pdal/ has images and more information
     on this topic.
@@ -93,34 +95,26 @@ Fetch Sample Data
 ------------------------------------------------------------------------------
 
 We need some sample data to play with, so we're going to download
-the ``autzen.laz`` file to your ``C:/Users/Howard`` drive. Inside the
-`Docker Quickstart Terminal`, issue the following ``curl`` command:
+the ``autzen.laz`` file to your ``C:/Users/hobu/Downloads`` fold.
+Inside your terminal, issue the following command:
 
 ::
 
-    curl -O http://www.liblas.org/samples/autzen/autzen.laz
-
-.. note::
-
-    That's a capital Oh, not a zero.
-
-List the directory to be sure that it was downloaded
+    explorer.exe http://www.liblas.org/samples/autzen/autzen.laz
 
 ::
 
-    ls *.laz
+    cd C:/Users/hobu/Downloads
+    copy autzen.laz ..
+
 
 Print the first point
 ------------------------------------------------------------------------------
 
-Docker
-................................................................................
-
-Run the following command in the `Docker Quickstart Terminal`
 
 ::
 
-    docker run -v /c/Users/Howard:/data pdal/pdal pdal info /data/autzen.laz -p 0
+    docker run -v /c/Users/hobu:/data pdal/pdal:1.3 pdal info /data/autzen.laz -p 0
 
 Here's a summary of what's going on with that command invocation
 
@@ -129,7 +123,7 @@ Here's a summary of what's going on with that command invocation
 
 2. ``run``: Tells docker we're going to run an image
 
-3. ``-v /c/Users/Howard:/data``: Maps our home directory to a directory called
+3. ``-v /c/Users/hobu:/data``: Maps our home directory to a directory called
    ``/data`` inside the container.
 
 
@@ -138,7 +132,7 @@ Here's a summary of what's going on with that command invocation
        The `Docker Volume <https://docs.docker.com/engine/userguide/dockervolumes/>`__
        document describes mounting volumes in more detail.
 
-4. ``pdal/pdal``: This is the Docker image we are going to run. We fetched it
+4. ``pdal/pdal:1.3``: This is the Docker image we are going to run. We fetched it
    with the command above. If it were not already fetched, Docker would attempt
    to fetch it when we run this command.
 
@@ -151,36 +145,23 @@ Here's a summary of what's going on with that command invocation
    mount operation in Step #3. Our ``autzen.laz`` file resides there.
 
 
-Native
-................................................................................
-
-Run the following command in a terminal window:
-
-::
-
-    pdal info /data/autzen.laz -p 0
-
-
-Here's a summary of what's going on with that command invocation
-
-
-1. ``pdal``: We're finally going to run the ``pdal`` command :)
-
-2. ``info``: We want to run :ref:`info_command` on the data
-
-3. ``/data/autzen.laz``:  Read our ``autzen.laz`` file .
-
-
 .. image:: ./images/docker-print-one.png
 
 What's next?
 ------------------------------------------------------------------------------
 
-Visit :ref:`apps` to find out how to utilize PDAL applications to process data
-on the command line yourself. Visit :ref:`development_index` to learn how to
-embed and use PDAL in your own applications. :ref:`readers` lists the formats
-that PDAL can read, :ref:`filters` lists the kinds of operations you can do
-with PDAL, and :ref:`writers` lists the formats PDAL can write.
+* Visit :ref:`apps` to find out how to utilize PDAL applications to process
+  data on the command line yourself.
+* Visit :ref:`development_index` to learn how to embed and use PDAL in your own
+  applications.
+* :ref:`readers` lists the formats that PDAL can read, :ref:`filters` lists the
+  kinds of operations you can do with PDAL, and :ref:`writers` lists the
+  formats PDAL can write.
+* :ref:`tutorial` contains a number of walk-through tutorials for achieving
+  many tasks with PDAL.
+* :ref:`The PDAL workshop <workshop>` contains numerous hands-on examples with screenshots and
+  example data of how to use PDAL :ref:`apps` to tackle point cloud data
+  processing tasks.
 
 .. seealso::
 
