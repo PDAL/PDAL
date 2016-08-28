@@ -209,7 +209,9 @@ export(PACKAGE PDAL)
 
 # TODO: move under scripts/bash-completion ?
 if (WITH_COMPLETION)
-    if (IS_DIRECTORY /etc/bash_completion.d)
+    if (IS_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/bash-completion/completions)
+        install(FILES "${PROJECT_SOURCE_DIR}/scripts/bash-completion/pdal" DESTINATION "${CMAKE_INSTALL_PREFIX}/share/bash-completion/completions")
+    elseif (IS_DIRECTORY /etc/bash_completion.d)
         install(FILES "${PROJECT_SOURCE_DIR}/scripts/bash-completion/pdal" DESTINATION "${CMAKE_INSTALL_PREFIX}/etc/bash_completion.d")
     endif()
 endif()
