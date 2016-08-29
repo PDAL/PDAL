@@ -22,13 +22,19 @@ The entire website is available as a single PDF at http://pdal.io/PDAL.pdf
 News
 --------------------------------------------------------------------------------
 
-**04-24-2016**
+**08-29-2016**
 ................................................................................
 
-See `Howard Butler`_ and `Brad Chambers`_ give PDAL talks at
-`FOSS4GNA 2016`_ in Raleigh, NC May 2-5. Howard will be presenting `Point cloud web
-services with Greyhound, Entwine, and PDAL`_, and Brad will be presenting `Filtering
-point clouds with PDAL and PCL`_.
+PDAL 1.3.0 has been released. Visit :ref:`download` to obtain a copy of the
+source code, or follow the :ref:`quickstart` to get going in a hurry with
+`Docker`_.
+
+.. _`Docker`: http://www.docker.org
+
+.. See `Howard Butler`_ and `Brad Chambers`_ give PDAL talks at
+    `FOSS4GNA 2016`_ in Raleigh, NC May 2-5. Howard will be presenting `Point cloud web
+    services with Greyhound, Entwine, and PDAL`_, and Brad will be presenting `Filtering
+    point clouds with PDAL and PCL`_.
 
 
 .. note::
