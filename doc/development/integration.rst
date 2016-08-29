@@ -17,7 +17,7 @@ Status
 .. |travisstatus| image:: https://travis-ci.org/PDAL/PDAL.png?branch=master
    :target: https://travis-ci.org/PDAL/PDAL
 
-.. |appveyorstatus| image:: https://ci.appveyor.com/api/projects/status/github/pdal/pdal?branch=master&svg=true
+.. |appveyorstatus| image:: https://ci.appveyor.com/api/projects/status/6dehrm0v22cw58d3/branch/master?svg=true
    :target: https://ci.appveyor.com/project/hobu/pdal
 
 .. _travis:
