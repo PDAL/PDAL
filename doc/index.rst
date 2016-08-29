@@ -31,19 +31,6 @@ source code, or follow the :ref:`quickstart` to get going in a hurry with
 
 .. _`Docker`: http://www.docker.org
 
-.. See `Howard Butler`_ and `Brad Chambers`_ give PDAL talks at
-    `FOSS4GNA 2016`_ in Raleigh, NC May 2-5. Howard will be presenting `Point cloud web
-    services with Greyhound, Entwine, and PDAL`_, and Brad will be presenting `Filtering
-    point clouds with PDAL and PCL`_.
-
-
-.. note::
-
-    Catch up with Brad and Howard to get a PDAL sticker.
-
-    .. image:: ./images/iheartpdal.png
-        :scale: 60%
-
 .. _`Howard Butler`: http://github.com/hobu
 .. _`Brad Chambers`: http://github.com/chambbj
 .. _`FOSS4GNA 2016`: https://2016.foss4g-na.org
