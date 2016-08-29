@@ -9,7 +9,7 @@ points for which the following is true:
 
 .. math::
 
-  \lambda_1 > (thresh_1 * \lambda_0) \text{ \&\& } (\lambda_1 * thresh_2) > \lambda_2
+  \lambda_1 > (thresh_1 * \lambda_0) \&\& (\lambda_1 * thresh_2) > \lambda_2
 
 where :math:`\lambda_0`, :math:`\lambda_1`, :math:`\lambda_2` are the
 eigenvalues in ascending order. The threshold values :math:`thresh_1` and
