@@ -84,7 +84,7 @@ void BpfWriter::initialize()
     if (m_header.m_coordId == -9999)
     {
         m_header.m_coordId = 0;
-        m_header.m_coordType = Utils::toNative(BpfCoordType::None);
+        m_header.m_coordType = Utils::toNative(BpfCoordType::Cartesian);
     }
     else
     {
