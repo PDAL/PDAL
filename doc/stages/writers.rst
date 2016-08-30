@@ -8,9 +8,9 @@ dimension type, while others only understand fixed dimension names.
 
 .. note::
 
-    Some writers can only consume known dimension names, while PDAL doesn't
-    yet have a registery for the dimension types, you can see the
-    base dimension types at https://github.com/PDAL/PDAL/blob/master/include/pdal/Dimension.hpp
+    Some writers can only consume known dimension names. PDAL utilizes a
+    ``Dimension.json`` file that describes PDAL dimensions and types.
+    You can see it at https://github.com/PDAL/PDAL/blob/master/src/Dimension.json
 
 .. toctree::
    :maxdepth: 1
