@@ -46,6 +46,22 @@ Download
 
    download
 
+Quickstart
+--------------------------------------------------------------------------------
+
+.. toctree::
+   :maxdepth: 2
+
+   quickstart
+
+Applications
+--------------------------------------------------------------------------------
+
+.. toctree::
+   :maxdepth: 2
+
+   apps/index
+
 Community
 --------------------------------------------------------------------------------
 
@@ -54,19 +70,25 @@ Community
 
    community
 
-Usage
+Drivers
 --------------------------------------------------------------------------------
 
 .. toctree::
    :maxdepth: 2
    :glob:
 
-   apps/index
-   quickstart
+   pipeline
    stages/readers
    stages/writers
    stages/filters
-   pipeline
+
+Tutorials
+--------------------------------------------------------------------------------
+
+.. toctree::
+   :maxdepth: 2
+   :glob:
+
    tutorial/index
 
 Workshop

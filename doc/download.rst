@@ -29,6 +29,7 @@ Past Releases
 * **2015-11-25** `PDAL-1.1.0-src.tar.gz`_ `Release Notes`_
 
 
+.. _`PDAL-1.2.0-src.tar.gz`: http://download.osgeo.org/pdal/PDAL-1.2.0-src.tar.gz
 .. _`PDAL-1.1.0-src.tar.gz`: http://download.osgeo.org/pdal/PDAL-1.1.0-src.tar.gz
 
 
