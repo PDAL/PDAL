@@ -3,8 +3,8 @@
 Readers
 =======
 
-Readers provide data to :ref:`pipeline` operations. Readers might be a simple
-file type, like :ref:`readers.las`, a complex database like :ref:`readers.oci`, or
+Readers are data providers to :ref:`pipeline` operations. A reader might provide a simple
+file type, like :ref:`readers.text`, a complex database like :ref:`readers.oci`, or
 a network service like :ref:`readers.greyhound`.
 
 .. note::
