@@ -44,7 +44,7 @@
 #include <points2grid/config.h>
 #include <points2grid/Interpolation.hpp>
 #include <points2grid/Global.hpp>
-#include <points2grid/OutCoreInterp.hpp>
+#include <points2grid/InCoreInterp.hpp>
 
 namespace pdal
 {
@@ -81,7 +81,7 @@ private:
     virtual void write(const PointViewPtr view);
     virtual void done(PointTableRef table);
 
-    std::unique_ptr<OutCoreInterp> m_interpolator;
+    std::unique_ptr<InCoreInterp> m_interpolator;
 
     uint32_t m_GRID_SIZE_X;
     uint32_t m_GRID_SIZE_Y;
@@ -98,15 +98,6 @@ private:
 
     std::string m_filename;
     int m_outputFormat;
-
-    typedef struct
-    {
-        double x;
-        double y;
-        double z;
-    } Coordinate;
-
-    std::vector<Coordinate> m_coordinates;
 };
 
 } // namespaces
