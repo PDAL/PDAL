@@ -8,9 +8,8 @@ dimension type, while others only understand fixed dimension names.
 
 .. note::
 
-    Some writers can only consume known dimension names. PDAL utilizes a
-    ``Dimension.json`` file that describes PDAL dimensions and types.
-    You can see it at https://github.com/PDAL/PDAL/blob/master/src/Dimension.json
+    PDAL predefined dimension names can be found in the dimension registry:
+    https://github.com/PDAL/PDAL/blob/master/src/Dimension.json
 
 .. toctree::
    :maxdepth: 1
