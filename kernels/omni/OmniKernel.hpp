@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2015, Brad Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,40 +32,41 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/KernelFactory.hpp>
-#include <pdal/PluginManager.hpp>
+#pragma once
 
-#include <delta/DeltaKernel.hpp>
-#include <diff/DiffKernel.hpp>
-#include <info/InfoKernel.hpp>
-#include <merge/MergeKernel.hpp>
-#include <omni/OmniKernel.hpp>
-#include <pipeline/PipelineKernel.hpp>
-#include <random/RandomKernel.hpp>
-#include <sort/SortKernel.hpp>
-#include <split/SplitKernel.hpp>
-#include <tindex/TIndexKernel.hpp>
-#include <translate/TranslateKernel.hpp>
+#include <pdal/Kernel.hpp>
+#include <pdal/pdal_export.hpp>
+
+#include <memory>
+#include <string>
+
+extern "C" int32_t OmniKernel_ExitFunc();
+extern "C" PF_ExitFunc OmniKernel_InitPlugin();
 
 namespace pdal
 {
 
-KernelFactory::KernelFactory(bool no_plugins)
-{
-    if (!no_plugins)
-        PluginManager::loadAll(PF_PluginType_Kernel);
+class Options;
+class Stage;
 
-    PluginManager::initializePlugin(DeltaKernel_InitPlugin);
-    PluginManager::initializePlugin(DiffKernel_InitPlugin);
-    PluginManager::initializePlugin(InfoKernel_InitPlugin);
-    PluginManager::initializePlugin(MergeKernel_InitPlugin);
-    PluginManager::initializePlugin(OmniKernel_InitPlugin);
-    PluginManager::initializePlugin(PipelineKernel_InitPlugin);
-    PluginManager::initializePlugin(RandomKernel_InitPlugin);
-    PluginManager::initializePlugin(SortKernel_InitPlugin);
-    PluginManager::initializePlugin(SplitKernel_InitPlugin);
-    PluginManager::initializePlugin(TIndexKernel_InitPlugin);
-    PluginManager::initializePlugin(TranslateKernel_InitPlugin);
-}
+class PDAL_DLL OmniKernel : public Kernel
+{
+public:
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
+    int execute();
+
+private:
+    OmniKernel();
+    void addSwitches();
+    void validateSwitches();
+
+    std::shared_ptr<Stage> makeReader(Options readerOptions);
+
+    std::string m_inputFile;
+    std::string m_outputFile;
+    std::string m_filterType;
+};
 
 } // namespace pdal
