@@ -54,6 +54,10 @@ if(PDAL_UTILITY)
         ${PDAL_UTIL_LIB_NAME})
 endif()
 
+if(NOT PDAL_EMBED_BOOST)
+    target_link_libraries(${PDAL_UTILITY} ${BOOST_LINKAGE} ${Boost_LIBRARIES})
+endif()
+
 #------------------------------------------------------------------------------
 # Targets installation
 #------------------------------------------------------------------------------
