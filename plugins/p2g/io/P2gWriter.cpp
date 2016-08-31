@@ -129,64 +129,41 @@ void P2gWriter::ready(PointTableRef table)
 }
 
 
+// The P2G writer will only work with a single point view at the current time.
+// Merge point views before writing.
 void P2gWriter::write(const PointViewPtr view)
 {
-    for (point_count_t idx = 0; idx < view->size(); idx++)
-    {
-        double x = view->getFieldAs<double>(Dimension::Id::X, idx);
-        double y = view->getFieldAs<double>(Dimension::Id::Y, idx);
-        double z = view->getFieldAs<double>(Dimension::Id::Z, idx);
-        m_coordinates.push_back(Coordinate{x, y, z});
-    }
-
-    if (m_bounds.empty()) {
-        view->calculateBounds(m_bounds);
-    }
-}
-
-void P2gWriter::done(PointTableRef table)
-{
-    // If we never got any points, we're done.
-    if (! m_coordinates.size()) return;
-
-    m_GRID_SIZE_X = (int)(ceil((m_bounds.maxx - m_bounds.minx)/m_GRID_DIST_X)) + 1;
-    m_GRID_SIZE_Y = (int)(ceil((m_bounds.maxy - m_bounds.miny)/m_GRID_DIST_Y)) + 1;
-
-    log()->get(LogLevel::Debug) << "X grid size: " << m_GRID_SIZE_X << std::endl;
-    log()->get(LogLevel::Debug) << "Y grid size: " << m_GRID_SIZE_Y << std::endl;
-
-
+    view->calculateBounds(m_bounds);
+    m_GRID_SIZE_X = (int)(ceil((m_bounds.maxx - m_bounds.minx) /
+        m_GRID_DIST_X)) + 1;
+    m_GRID_SIZE_Y = (int)(ceil((m_bounds.maxy - m_bounds.miny) /
+        m_GRID_DIST_Y)) + 1;
     log()->floatPrecision(6);
     log()->get(LogLevel::Debug) << "X grid distance: " << m_GRID_DIST_X << std::endl;
     log()->get(LogLevel::Debug) << "Y grid distance: " << m_GRID_DIST_Y << std::endl;
     log()->clearFloat();
 
-    std::unique_ptr<OutCoreInterp> p(new OutCoreInterp(m_GRID_DIST_X,
-                                       m_GRID_DIST_Y,
-                                       m_GRID_SIZE_X,
-                                       m_GRID_SIZE_Y,
-                                       m_RADIUS * m_RADIUS,
-                                       m_bounds.minx,
-                                       m_bounds.maxx,
-                                       m_bounds.miny,
-                                       m_bounds.maxy,
-                                       m_fill_window_size));
-    m_interpolator.swap(p);
+    m_interpolator.reset(new InCoreInterp(m_GRID_DIST_X, m_GRID_DIST_Y,
+        m_GRID_SIZE_X, m_GRID_SIZE_Y, m_RADIUS * m_RADIUS,
+        m_bounds.minx, m_bounds.maxx, m_bounds.miny, m_bounds.maxy,
+        m_fill_window_size));
+    m_interpolator->init();
 
-    if (m_interpolator->init() < 0)
+    for (point_count_t idx = 0; idx < view->size(); idx++)
     {
-        throw p2g_error("unable to initialize interpolator");
-    }
-
-    for (auto coord : m_coordinates)
-    {
-        double x = coord.x - m_bounds.minx;
-        double y = coord.y - m_bounds.miny;
-        double z = coord.z;
-
+        double x = view->getFieldAs<double>(Dimension::Id::X, idx) -
+            m_bounds.minx;
+        double y = view->getFieldAs<double>(Dimension::Id::Y, idx) -
+            m_bounds.miny;
+        double z = view->getFieldAs<double>(Dimension::Id::Z, idx);
         if (m_interpolator->update(x, y, z) < 0)
-            throw p2g_error("interp->update() error while processing ");
+            throw p2g_error("interp->update() error while processing");
     }
+
+}
+
+void P2gWriter::done(PointTableRef table)
+{
 
     double adfGeoTransform[6];
     adfGeoTransform[0] = m_bounds.minx - 0.5*m_GRID_DIST_X;
