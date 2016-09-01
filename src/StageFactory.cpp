@@ -48,6 +48,8 @@
 #include <estimaterank/EstimateRankFilter.hpp>
 #include <ferry/FerryFilter.hpp>
 #include <hag/HAGFilter.hpp>
+#include <iqr/IQRFilter.hpp>
+#include <mad/MADFilter.hpp>
 #include <merge/MergeFilter.hpp>
 #include <mongus/MongusFilter.hpp>
 #include <mortonorder/MortonOrderFilter.hpp>
@@ -235,6 +237,8 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(EstimateRankFilter_InitPlugin);
     PluginManager::initializePlugin(FerryFilter_InitPlugin);
     PluginManager::initializePlugin(HAGFilter_InitPlugin);
+    PluginManager::initializePlugin(IQRFilter_InitPlugin);
+    PluginManager::initializePlugin(MADFilter_InitPlugin);
     PluginManager::initializePlugin(MergeFilter_InitPlugin);
     PluginManager::initializePlugin(MongusFilter_InitPlugin);
     PluginManager::initializePlugin(MortonOrderFilter_InitPlugin);
