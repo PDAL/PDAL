@@ -60,7 +60,6 @@ void MADFilter::addArgs(ProgramArgs& args)
         m_dimName);
 }
 
-// ready or prepared to make sure dim exists? does addArgs come first? (i think so)
 void MADFilter::prepared(PointTableRef table)
 {
     PointLayoutPtr layout(table.layout());
