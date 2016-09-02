@@ -39,6 +39,7 @@
 
 #include <las/LasReader.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 namespace pdal
 {

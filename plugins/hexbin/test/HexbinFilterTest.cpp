@@ -37,6 +37,7 @@
 #include <pdal/SpatialReference.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/PointView.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 #include "Support.hpp"
 

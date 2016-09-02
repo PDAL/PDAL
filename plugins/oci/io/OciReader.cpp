@@ -36,6 +36,7 @@
 #include <pdal/GDALUtils.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/PDALUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include "OciReader.hpp"

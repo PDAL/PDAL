@@ -45,7 +45,6 @@ Log::Log(std::string const& leaderString,
          std::string const& outputName)
     : m_level(LogLevel::Error)
     , m_deleteStreamOnCleanup(false)
-    , m_leader(leaderString)
 {
 
     makeNullStream();
@@ -62,6 +61,7 @@ Log::Log(std::string const& leaderString,
         m_log = Utils::createFile(outputName);
         m_deleteStreamOnCleanup = true;
     }
+    m_leaders.push(leaderString);
 }
 
 
@@ -69,10 +69,10 @@ Log::Log(std::string const& leaderString,
          std::ostream* v)
     : m_level(LogLevel::Error)
     , m_deleteStreamOnCleanup(false)
-    , m_leader(leaderString)
 {
     m_log = v;
     makeNullStream();
+    m_leaders.push(leaderString);
 }
 
 
@@ -121,7 +121,7 @@ std::ostream& Log::get(LogLevel level)
     const auto nativeDebug(Utils::toNative(LogLevel::Debug));
     if (incoming <= stored)
     {
-        *m_log << "(" << m_leader << " "<< getLevelString(level) <<": " <<
+        *m_log << "(" << leader() << " "<< getLevelString(level) <<": " <<
             incoming << "): " <<
             std::string(incoming < nativeDebug ? 0 : incoming - nativeDebug,
                     '\t');

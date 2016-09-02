@@ -113,7 +113,10 @@ QuickInfo Stage::preview()
 {
     m_args.reset(new ProgramArgs);
     handleOptions();
-    return inspect();
+    pushLogLeader();
+    QuickInfo qi = inspect();
+    popLogLeader();
+    return qi;
 }
 
 
@@ -126,15 +129,18 @@ void Stage::prepare(PointTableRef table)
         prev->prepare(table);
     }
     handleOptions();
+    pushLogLeader();
     l_initialize(table);
     initialize(table);
     addDimensions(table.layout());
     prepared(table);
+    popLogLeader();
 }
 
 
 PointViewSet Stage::execute(PointTableRef table)
 {
+    pushLogLeader();
     table.finalize();
 
     PointViewSet views;
@@ -194,7 +200,8 @@ PointViewSet Stage::execute(PointTableRef table)
                 v->setSpatialReference(srs);
         outViews.insert(temp.begin(), temp.end());
     }
-    done(table);
+    l_done(table);
+    popLogLeader();
     return outViews;
 }
 
@@ -281,6 +288,7 @@ void Stage::execute(StreamPointTable& table, std::list<Stage *>& stages)
         PointRef point(table, idx);
         point_count_t pointLimit = table.capacity();
 
+        reader->pushLogLeader();
         // When we get false back from a reader, we're done, so set
         // the point limit to the number of points processed in this loop
         // of the table.
@@ -291,6 +299,7 @@ void Stage::execute(StreamPointTable& table, std::list<Stage *>& stages)
             if (finished)
                 pointLimit = idx;
         }
+        reader->popLogLeader();
         srs = reader->getSpatialReference();
         if (!srs.empty())
             table.setSpatialReference(srs);
@@ -300,6 +309,7 @@ void Stage::execute(StreamPointTable& table, std::list<Stage *>& stages)
         // processed by subsequent filters.
         for (Stage *s : filters)
         {
+            s->pushLogLeader();
             for (PointId idx = 0; idx < pointLimit; idx++)
             {
                 if (skips[idx])
@@ -311,6 +321,7 @@ void Stage::execute(StreamPointTable& table, std::list<Stage *>& stages)
             srs = s->getSpatialReference();
             if (!srs.empty())
                 table.setSpatialReference(srs);
+            s->popLogLeader();
         }
 
         // Yes, vector<bool> is terrible.  Can do something better later.
@@ -320,9 +331,17 @@ void Stage::execute(StreamPointTable& table, std::list<Stage *>& stages)
     }
 
     for (Stage *s : stages)
-        s->done(table);
+    {
+        s->pushLogLeader();
+        s->l_done(table);
+        s->popLogLeader();
+    }
 }
 
+void Stage::l_done(PointTableRef table)
+{
+    done(table);
+}
 
 void Stage::l_addArgs(ProgramArgs& args)
 {
@@ -336,13 +355,21 @@ void Stage::setupLog()
     LogLevel l(LogLevel::Error);
 
     if (m_log)
+    {
         l = m_log->getLevel();
+        m_logLeader = m_log->leader();
+    }
 
     if (!m_logname.empty())
-        m_log.reset(new Log(getName(), m_logname));
+        m_log.reset(new Log("", m_logname));
     else if (!m_log)
-        m_log.reset(new Log(getName(), "stdlog"));
+        m_log.reset(new Log("", "stdlog"));
     m_log->setLevel(l);
+
+    // Add the stage name to the existing leader.
+    if (m_logLeader.size())
+        m_logLeader += " ";
+    m_logLeader += getName();
 
     bool debug(l > LogLevel::Debug);
     gdal::ErrorHandler::getGlobalErrorHandler().set(m_log, debug);

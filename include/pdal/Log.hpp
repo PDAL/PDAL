@@ -34,17 +34,15 @@
 
 #pragma once
 
-#include <pdal/pdal_internal.hpp>
+#include <memory> // shared_ptr
+#include <stack>
 
-#include <pdal/util/FileUtils.hpp>
-#include <iosfwd>
-#include <memory>
+#include <pdal/pdal_internal.hpp>
 
 // Adapted from http://drdobbs.com/cpp/201804215
 
 namespace pdal
 {
-
 
 /// pdal::Log is a logging object that is provided by pdal::Stage to
 /// facilitate logging operations.
@@ -85,10 +83,27 @@ public:
         m_level = v;
     }
 
-    /// Set the leader string.
+    /// Set the leader string (deprecated).
     /// \param[in]  leader  Leader string.
     void setLeader(const std::string& leader)
-        { m_leader = leader; }
+        { pushLeader(leader); }
+
+    /// Push the leader string onto the stack.
+    /// \param  leader  Leader string
+    void pushLeader(const std::string& leader)
+        { m_leaders.push(leader); }
+
+    /// Get the leader string.
+    /// \return  The current leader string.
+    std::string leader() const
+        { return m_leaders.empty() ? std::string() : m_leaders.top(); }
+
+    /// Pop the current leader string.
+    void popLeader()
+    {
+        if (!m_leaders.empty())
+            m_leaders.pop();
+    }
 
     /// @return A string representing the LogLevel
     std::string getLevelString(LogLevel v) const;
@@ -126,7 +141,7 @@ private:
 
     LogLevel m_level;
     bool m_deleteStreamOnCleanup;
-    std::string m_leader;
+    std::stack<std::string> m_leaders;
 };
 
 typedef std::shared_ptr<Log> LogPtr;
