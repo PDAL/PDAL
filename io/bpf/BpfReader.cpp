@@ -111,9 +111,9 @@ void BpfReader::initialize()
         return;
 
     std::string code("");
-    if (m_header.m_coordType == BpfCoordType::Cartesian)
+    if (m_header.m_coordType == static_cast<int>(BpfCoordType::Cartesian))
        code = std::string("EPSG:4326");
-    else if (m_header.m_coordType == BpfCoordType::UTM)
+    else if (m_header.m_coordType == static_cast<int>(BpfCoordType::UTM))
     {
        uint32_t zone(abs(m_header.m_coordId));
 
