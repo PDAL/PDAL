@@ -2,6 +2,7 @@
 
 #include "MyWriter.hpp"
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 namespace pdal

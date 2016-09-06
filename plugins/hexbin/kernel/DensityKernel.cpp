@@ -39,6 +39,7 @@
 #include <pdal/GDALUtils.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/plugin.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 namespace pdal
 {

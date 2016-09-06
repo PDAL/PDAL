@@ -40,6 +40,7 @@
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PluginManager.hpp>
 #include <pdal/Reader.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include "LasReader.hpp"
 #include "Support.hpp"
 

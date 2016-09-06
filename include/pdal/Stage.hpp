@@ -226,6 +226,18 @@ public:
         { return m_log; }
 
     /**
+      Push the stage's leader into the log.
+    */
+    void pushLogLeader() const
+        { m_log->pushLeader(m_logLeader); }
+
+    /**
+        Pop the stage's leader from the log.
+    */
+    void popLogLeader() const
+        { m_log->popLeader(); }
+
+    /**
       Determine whether the stage is in debug mode or not.
 
       \return  The stage's debug state.
@@ -293,6 +305,7 @@ private:
     std::string m_logname;
     std::vector<Stage *> m_inputs;
     LogPtr m_log;
+    std::string m_logLeader;
     SpatialReference m_spatialReference;
     std::unique_ptr<ProgramArgs> m_args;
 
@@ -305,6 +318,7 @@ private:
     virtual void readerAddArgs(ProgramArgs& /*args*/)
         {}
     void l_addArgs(ProgramArgs& args);
+    void l_done(PointTableRef table);
 
     virtual void writerInitialize(PointTableRef /*table*/)
         {}

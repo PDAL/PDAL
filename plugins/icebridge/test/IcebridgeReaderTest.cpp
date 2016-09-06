@@ -38,6 +38,7 @@
 #include <pdal/PointView.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 #include "Support.hpp"
 

@@ -37,6 +37,7 @@
 #include <pdal/Options.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PointView.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 #include <SbetReader.hpp>
 

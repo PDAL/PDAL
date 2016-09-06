@@ -39,6 +39,7 @@
 #include <buffer/BufferReader.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include "Support.hpp"
 
 using namespace pdal;

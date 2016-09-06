@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -13,7 +13,7 @@
 *       notice, this list of conditions and the following disclaimer in
 *       the documentation and/or other materials provided
 *       with the distribution.
-*     * Neither the name of Hobu, Inc. or Flaxen Consulting LLC nor the
+*     * Neither the name of Hobu, Inc. or Flaxen Geo Consulting nor the
 *       names of its contributors may be used to endorse or promote
 *       products derived from this software without specific prior
 *       written permission.
@@ -34,75 +34,42 @@
 
 #pragma once
 
-#include <boost/iostreams/stream.hpp>
-#include <boost/iostreams/restrict.hpp>
+#include <pdal/Filter.hpp>
+#include <pdal/plugin.hpp>
 
-#include <las/LasReader.hpp>
-#include <pdal/StageFactory.hpp>
-#include <pdal/util/FileUtils.hpp>
+#include <string>
+
+extern "C" int32_t IQRFilter_ExitFunc();
+extern "C" PF_ExitFunc IQRFilter_InitPlugin();
 
 namespace pdal
 {
 
+class ProgramArgs;
+class PointTable;
+class PointView;
 
-class PDAL_DLL NitfReader : public LasReader
+class PDAL_DLL IQRFilter : public Filter
 {
-typedef pdalboost::iostreams::restriction<std::istream> RDevice;
-typedef pdalboost::iostreams::stream<RDevice> RStream;
-
-    class NitfStreamIf : public LasStreamIf
-    {
-    public:
-        NitfStreamIf(const std::string& filename, uint64_t offset, uint64_t len)
-        {
-            m_baseStream = FileUtils::openFile(filename);
-            if (m_baseStream)
-            {
-                m_rdevice.reset(new RDevice(*m_baseStream, offset, len));
-                m_rstream.reset(new RStream(*m_rdevice));
-                m_istream = m_rstream.get();
-            }
-        }
-
-        ~NitfStreamIf()
-        {
-            m_rstream.reset();
-            m_rdevice.reset();
-            if (m_baseStream)
-                FileUtils::closeFile(m_baseStream);
-            m_baseStream = NULL;
-            m_istream = NULL;
-        }
-
-    private:
-        std::istream *m_baseStream;
-        std::unique_ptr<RDevice> m_rdevice;
-        std::unique_ptr<RStream> m_rstream;
-    };
-
 public:
-    NitfReader() : LasReader(), m_offset(0), m_length(0)
+    IQRFilter() : Filter()
     {}
 
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
 
-protected:
-    virtual void createStream()
-    {
-        if (m_streamIf)
-            std::cerr << "Attempt to create stream twice!\n";
-        m_streamIf.reset(new NitfStreamIf(m_filename, m_offset, m_length));
-    }
-
 private:
-    uint64_t m_offset;
-    uint64_t m_length;
+    double m_multiplier;
+    std::string m_dimName;
+    Dimension::Id m_dimId;
 
-    virtual void initialize(PointTableRef table);
-    NitfReader& operator=(const NitfReader&); // not implemented
-    NitfReader(const NitfReader&); // not implemented
+    virtual void addArgs(ProgramArgs& args);
+    virtual void prepared(PointTableRef table);
+    virtual PointViewSet run(PointViewPtr view);
+
+    IQRFilter& operator=(const IQRFilter&); // not implemented
+    IQRFilter(const IQRFilter&); // not implemented
 };
 
 } // namespace pdal
