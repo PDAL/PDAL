@@ -290,11 +290,11 @@ void LasHeader::setSrsFromGeotiff()
     }
 
     vlr = findVlr(TRANSFORM_USER_ID, GEOTIFF_DOUBLES_RECORD_ID);
-    if (vlr)
+    if (vlr && !vlr->isEmpty())
         geotiff.setDoubleKeys(vlr->recordId(), (void *)vlr->data(),
             (int)vlr->dataLen());
     vlr = findVlr(TRANSFORM_USER_ID, GEOTIFF_ASCII_RECORD_ID);
-    if (vlr)
+    if (vlr && !vlr->isEmpty())
         geotiff.setAsciiKeys(vlr->recordId(), (void *)vlr->data(),
             (int)vlr->dataLen());
 

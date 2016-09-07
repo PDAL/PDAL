@@ -89,6 +89,8 @@ public:
         { return (const char *)m_data.data(); }
     char* data()
         { return (char *)m_data.data(); }
+    bool isEmpty() const
+        { return m_data.size() == 0; }
     uint64_t dataLen() const
         { return m_data.size(); }
     void setDataLen(uint64_t size)
