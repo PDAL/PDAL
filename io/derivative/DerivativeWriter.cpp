@@ -74,6 +74,7 @@ DerivativeWriter::DerivativeWriter()
 
 void DerivativeWriter::addArgs(ProgramArgs& args)
 {
+    args.add("filename", "Output filename", m_filename).setPositional();
     args.add("grid_dist_x", "X grid distance", m_GRID_DIST_X, 15.0);
     args.add("grid_dist_y", "Y grid distance", m_GRID_DIST_Y, 15.0);
     args.add("primitive_type", "Primitive type", m_primTypesSpec);
