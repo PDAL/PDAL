@@ -400,7 +400,8 @@ public:
                 throw arg_error(m_error);
             else
             {
-                oss << "Invalid value for argument '" << m_longname << "'.";
+                oss << "Invalid value '" << s << "' for argument '" <<
+                    m_longname << "'.";
                 throw arg_error(oss.str());
             }
         }
