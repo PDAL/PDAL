@@ -493,3 +493,20 @@ TEST(LasReaderTest, LasHeaderIncorrentPointcount)
 
     EXPECT_EQ(1064u, view->size());
 }
+
+TEST(LasReaderTest, EmptyGeotiffVlr)
+{
+    PointTable table;
+
+    Options readOps;
+    readOps.add("filename", Support::datapath("las/1.2-empty-geotiff-vlrs.las"));
+    LasReader reader;
+    reader.setOptions(readOps);
+
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    PointViewPtr view = *viewSet.begin();
+
+    EXPECT_EQ(43u, view->size());
+
+}
