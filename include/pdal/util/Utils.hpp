@@ -894,6 +894,28 @@ namespace Utils
         return false;
     }
 
+    /**
+      Specialization conversion from string to double to handle Nan.
+
+      \param s  String to be converted.
+      \param d  Converted value.
+      \return  \c true if the conversion was successful, \c false otherwise.
+    */
+    template<>
+    inline bool fromString<double>(const std::string& s, double& d)
+    {
+        if (s == "nan" || s == "NaN")
+        {
+            d = std::numeric_limits<double>::quiet_NaN();   
+            return true;
+        }
+
+        std::istringstream iss(s);
+
+        iss >> d;
+        return !iss.fail();
+    }
+
     template<typename E>
     constexpr typename std::underlying_type<E>::type toNative(E e)
     {

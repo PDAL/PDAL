@@ -139,4 +139,18 @@ TEST(OptionsTest, programargs)
     EXPECT_EQ(trueDef, true);
 }
 
+TEST(OptionsTest, nan)
+{
+    ProgramArgs args;
+    double value;
+
+    args.add("value", "Not a number", value);
+
+    Options ops;
+    ops.add("value", std::numeric_limits<double>::quiet_NaN());
+
+    StringList cmdline = ops.toCommandLine();
+    EXPECT_NO_THROW(args.parse(cmdline));
+}
+
 } // namespace pdal
