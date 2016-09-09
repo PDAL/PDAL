@@ -103,7 +103,7 @@ std::ostream& operator << (std::ostream& in, const BpfFormat& format);
 
 enum class BpfCoordType
 {
-    None,
+    Cartesian,
     UTM,
     TCR,
     ENU
@@ -141,7 +141,7 @@ struct BpfHeader
 {
     BpfHeader() : m_version(0), m_len(176), m_numDim(0),
         m_compression(Utils::toNative(BpfCompression::None)), m_numPts(0),
-        m_coordType(Utils::toNative(BpfCoordType::None)), m_coordId(0),
+        m_coordType(Utils::toNative(BpfCoordType::Cartesian)), m_coordId(0),
         m_spacing(0.0), m_startTime(0.0), m_endTime(0.0)
     {}
 
