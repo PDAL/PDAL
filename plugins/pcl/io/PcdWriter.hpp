@@ -1,5 +1,6 @@
 /******************************************************************************
 * Copyright (c) 2014, Brad Chambers (brad.chambers@gmail.com)
+* Copytight (c) 2016, Logan Byers (logan.c.byers@gmail.com)
 *
 * All rights reserved.
 *
@@ -67,6 +68,7 @@ private:
     inline void writeView(const PointViewPtr view); // implemented in header
 
     std::string m_filename;
+    std::string m_compression_string;
     uint8_t m_compression;
     bool m_xyz;
     bool m_subtract_minimum;
@@ -101,6 +103,20 @@ void PcdWriter::writeView(const PointViewPtr view)
     }
     pclsupport::PDALtoPCD(view, *cloud, bounds, m_scale_x, m_scale_y, m_scale_z);
     pcl::PCDWriter w;
+
+    if (m_compression_string == "binary")
+    {
+      m_compression = 1;
+    }
+    else if (m_compression_string == "compressed")
+    {
+      m_compression = 2;
+    }
+    else  // including "ascii"
+    {
+      m_compression = 0;
+    }
+
     switch (m_compression)
     {
         case 0 : w.writeASCII<PointT>(m_filename, *cloud); break;
