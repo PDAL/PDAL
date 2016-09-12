@@ -12,6 +12,6 @@ if (WITH_TESTS)
     add_definitions(/D _VARIADIC_MAX=10)
   endif()
 
-  include_directories(${ROOT_DIR}/vendor/gtest-1.7.0/include
-      ${ROOT_DIR}/vendor/gtest-1.7.0)
+  include_directories(${ROOT_DIR}/vendor/gtest/include
+      ${ROOT_DIR}/vendor/gtest)
 endif()
