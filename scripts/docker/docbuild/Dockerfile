@@ -1,4 +1,6 @@
-FROM ubuntu:15.10
+FROM ubuntu:16.04
+
+ADD http://www.timeapi.org/utc/now /tmp/bust-cache
 
 RUN apt-get -y update && apt-get install -y \
     python-dev python-pip g++ doxygen dvipng \
@@ -6,7 +8,7 @@ RUN apt-get -y update && apt-get install -y \
     texlive-latex-extra git \
     graphviz python-matplotlib
 
-RUN pip install Sphinx==1.4 breathe \
+RUN pip install Sphinx breathe \
     sphinx_bootstrap_theme awscli sphinxcontrib-bibtex \
     sphinx_rtd_theme
 
