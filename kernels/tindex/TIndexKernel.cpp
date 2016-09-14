@@ -37,6 +37,8 @@
 #ifndef WIN32
 #include <glob.h>
 #include <time.h>
+#else
+#include <windows.h>
 #endif
 
 #include <memory>
@@ -194,6 +196,30 @@ StringList TIndexKernel::glob(std::string& path)
         filenames.push_back(filename);
     }
     globfree(&glob_result);
+#else
+    WIN32_FIND_DATA ffd;
+    HANDLE handle = FindFirstFile(path.c_str(), &ffd);
+
+    if (INVALID_HANDLE_VALUE == handle)
+        return filenames;
+
+    size_t found = path.find_last_of("/\\");
+    std::string dir = path.substr(0, found);
+
+    if (m_absPath)
+    {
+        TCHAR full_dir[4192] = TEXT("");
+        GetFullPathName(dir.c_str(), 4192, full_dir, NULL);
+        dir = full_dir;
+    }
+
+    do
+    {
+        std::string filename = dir + "\\" + ffd.cFileName;
+        filenames.push_back(filename);
+    } while (FindNextFile(handle, &ffd) != 0);
+
+    FindClose(handle);
 #endif
 
     return filenames;
