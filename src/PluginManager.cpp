@@ -90,7 +90,7 @@ StringList pluginSearchPaths()
         searchPaths = Utils::split2(envOverride, ':');
     else
     {
-        StringList standardPaths = { "./lib", "../lib", "../bin" };
+        StringList standardPaths = { ".", "./lib", "../lib", "./bin", "../bin" };
         for (std::string& s : standardPaths)
         {
             if (FileUtils::toAbsolutePath(s) !=
