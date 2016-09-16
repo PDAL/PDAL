@@ -549,6 +549,7 @@ GDALError Raster::open()
     if (m_ds)
         return error;
 
+#if (GDAL_VERSION_MAJOR > 1)
     const char ** driverP = NULL;
     const char *drivers[2] = {0};
     if (!m_drivername.empty())
@@ -559,6 +560,9 @@ GDALError Raster::open()
 
     m_ds = (GDALDataset *)GDALOpenEx(m_filename.c_str(), GA_ReadOnly, driverP,
         nullptr, nullptr);
+#else
+    m_ds = (GDALDataset *)GDALOpen(m_filename.c_str(), GA_ReadOnly);
+#endif
     if (m_ds == NULL)
     {
         m_errorMsg = "Unable to open GDAL datasource '" + m_filename + "'.";
