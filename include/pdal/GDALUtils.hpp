@@ -337,8 +337,6 @@ public:
 
     /**
       Get a vector of dimensions that map to the bands of a raster. 
-
-      \return  Vector of dimensions representing the datatype of each band.
     */
     std::vector<pdal::Dimension::Type> getPDALDimensionTypes() const
        { return m_types; }

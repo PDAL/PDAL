@@ -68,6 +68,11 @@ void GDALWriter::addArgs(ProgramArgs& args)
 }
 
 
+void GDALWriter::initialize()
+{
+    gdal::registerDrivers();
+}
+
 void GDALWriter::ready(PointTableRef table)
 {
     if (!table.spatialReferenceUnique())

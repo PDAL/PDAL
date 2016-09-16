@@ -502,7 +502,6 @@ GDALError Raster::open(int width, int height, int numBands,
         return GDALError::NotInvertible;
     }
 
-    GDALAllRegister();
     GDALDriver *driver = GetGDALDriverManager()->GetDriverByName(
         m_drivername.data());
     if (!driver)
@@ -550,10 +549,15 @@ GDALError Raster::open()
     if (m_ds)
         return error;
 
+    const char ** driverP = NULL;
     const char *drivers[2] = {0};
     if (!m_drivername.empty())
+    {
         drivers[0] = m_drivername.c_str();
-    m_ds = (GDALDataset *)GDALOpenEx(m_filename.c_str(), GA_ReadOnly, drivers,
+        driverP = drivers;
+    }
+
+    m_ds = (GDALDataset *)GDALOpenEx(m_filename.c_str(), GA_ReadOnly, driverP,
         nullptr, nullptr);
     if (m_ds == NULL)
     {
