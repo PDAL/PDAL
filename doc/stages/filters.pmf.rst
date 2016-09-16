@@ -31,7 +31,7 @@ Example
 Options
 -------------------------------------------------------------------------------
 
-maxWindowSize
+max_window_size
   Maximum window size. [Default: **33**]
 
 slope

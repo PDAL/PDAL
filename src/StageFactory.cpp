@@ -49,6 +49,7 @@
 #include <ferry/FerryFilter.hpp>
 #include <hag/HAGFilter.hpp>
 #include <iqr/IQRFilter.hpp>
+#include <lof/LOFFilter.hpp>
 #include <mad/MADFilter.hpp>
 #include <merge/MergeFilter.hpp>
 #include <mongus/MongusFilter.hpp>
@@ -240,6 +241,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(FerryFilter_InitPlugin);
     PluginManager::initializePlugin(HAGFilter_InitPlugin);
     PluginManager::initializePlugin(IQRFilter_InitPlugin);
+    PluginManager::initializePlugin(LOFFilter_InitPlugin);
     PluginManager::initializePlugin(MADFilter_InitPlugin);
     PluginManager::initializePlugin(MergeFilter_InitPlugin);
     PluginManager::initializePlugin(MongusFilter_InitPlugin);

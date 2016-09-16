@@ -96,7 +96,7 @@ PointViewSet MADFilter::run(PointViewPtr view)
 
     std::vector<double> a(view->size());
     for (PointId j = 0; j < view->size(); ++j)
-        a[j] = std::fabs(view->getFieldAs<double>(Id::Z, j)-m);
+        a[j] = std::fabs(view->getFieldAs<double>(m_dimId, j)-m);
 
     double mad = median(a)*1.4862;
     log()->get(LogLevel::Debug) << "MAD: " << mad << std::endl;

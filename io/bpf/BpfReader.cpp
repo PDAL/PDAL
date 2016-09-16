@@ -110,12 +110,26 @@ void BpfReader::initialize()
     if (!m_header.readDimensions(m_stream, m_dims))
         return;
 
-    uint32_t zone(abs(m_header.m_coordId));
-    std::string code;
-    if (m_header.m_coordId > 0)
-        code = "EPSG:326" + Utils::toString(zone);
+    std::string code("");
+    if (m_header.m_coordType == static_cast<int>(BpfCoordType::Cartesian))
+       code = std::string("EPSG:4326");
+    else if (m_header.m_coordType == static_cast<int>(BpfCoordType::UTM))
+    {
+       uint32_t zone(abs(m_header.m_coordId));
+
+       if (m_header.m_coordId > 0 && m_header.m_coordId <= 60)
+          code = std::string("EPSG:326") + (zone < 10 ? "0" : "") + Utils::toString(zone);
+       else if (m_header.m_coordId < 0 && m_header.m_coordId >= -60)
+          code = std::string("EPSG:327") + (zone < 10 ? "0" : "") + Utils::toString(zone);
+       else
+          throw pdal_error("BPF file contains an invalid UTM zone");
+    }
     else
-        code = "EPSG:327" + Utils::toString(zone);
+    {
+       //BPF supports something called Terrestrial Centered Rotational (BpfCoordType::TCR) and East North Up (BpfCoordType::ENU)
+       //which we can figure out when we run into a file with these coordinate systems.
+       throw pdal_error("BPF file contains unsupported coordinate system");
+    }
     SpatialReference srs(code);
     setSpatialReference(srs);
 
