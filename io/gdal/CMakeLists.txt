@@ -1,5 +1,6 @@
 set(src
     GDALReader.cpp
+    GDALWriter.cpp
 )
 
 set(inc

@@ -79,5 +79,6 @@ private:
     point_count_t m_index;
 
 };
-}
+
+} // namespace pdal
 
