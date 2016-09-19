@@ -338,7 +338,13 @@ Band::Band(GDALDataset *ds, int bandNum, const std::string& name) : m_ds(ds),
         throw InvalidBand();
 
     if (name.size())
+    {
         m_band->SetDescription(name.data());
+        // We don't care about offset, but this sets the flag to indicate
+        // that the metadata has changed.
+        m_band->SetOffset(m_band->GetOffset(NULL) + .00001);
+        m_band->SetOffset(m_band->GetOffset(NULL) - .00001);
+    }
 
     m_xTotalSize = m_band->GetXSize();
     m_yTotalSize = m_band->GetYSize();
