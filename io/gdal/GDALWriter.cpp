@@ -110,10 +110,10 @@ void GDALWriter::done(PointTableRef table)
 {
     std::array<double, 6> pixelToPos;
 
-    pixelToPos[0] = m_bounds.minx - (m_edgeLength / 2);
+    pixelToPos[0] = m_bounds.minx;
     pixelToPos[1] = m_edgeLength;
     pixelToPos[2] = 0;
-    pixelToPos[3] = m_bounds.maxy + (m_edgeLength / 2);
+    pixelToPos[3] = m_bounds.maxy;
     pixelToPos[4] = 0;
     pixelToPos[5] = -m_edgeLength;
     gdal::Raster raster(m_filename, m_drivername, table.spatialReference(),

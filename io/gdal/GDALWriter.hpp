@@ -60,12 +60,18 @@ public:
         { return x / m_edgeLength; }
 
     int verticalIndex(double y)
-        { return y / m_edgeLength; }
+        { return m_height - (y / m_edgeLength) - 1; }
+
+    double horizontalPos(size_t i)
+        { return (i + .5) * m_edgeLength; }
+
+    double verticalPos(size_t j)
+        { return (m_height - (j + .5)) * m_edgeLength; }
 
     double distance(size_t i, size_t j, double x, double y)
     {
-        double x1 = ((i + .5) * m_edgeLength);
-        double y1 = ((j + .5) * m_edgeLength);
+        double x1 = horizontalPos(i);
+        double y1 = verticalPos(j);
         return sqrt(pow(x1 - x, 2) + pow(y1 - y, 2));
     }
 
