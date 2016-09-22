@@ -39,6 +39,7 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 namespace pdal
 {
@@ -72,6 +73,8 @@ void ProgrammableFilter::addDimensions(PointLayoutPtr layout)
 
 void ProgrammableFilter::ready(PointTableRef table)
 {
+    if (m_source.empty())
+        m_source = FileUtils::readFileIntoString(m_scriptFile);
     plang::Environment::get()->set_stdout(log()->getLogStream());
     m_script = new plang::Script(m_source, m_module, m_function);
     m_pythonMethod = new plang::BufferedInvocation(*m_script);
