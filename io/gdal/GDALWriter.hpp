@@ -221,7 +221,7 @@ public:
         {
             if (m_count[i])
             {
-                m_stdDev[i] /= m_count[i];
+                m_stdDev[i] = sqrt(m_stdDev[i] / m_count[i]);
                 m_idw[i] /= m_idwDist[i]; 
             }
             else

@@ -527,8 +527,9 @@ GDALError Raster::open(int width, int height, int numBands,
         return GDALError::InvalidDriver;
     }
 
+    const char *options[2] = { "INTERLEAVE=BAND" };
     m_ds = driver->Create(m_filename.data(), m_width, m_height, m_numBands,
-        toGdalType(type), NULL);
+        toGdalType(type), (char **)options);
     if (m_ds == NULL)
     {
         m_errorMsg = "Unable to open GDAL datasource '" + m_filename + "'.";
