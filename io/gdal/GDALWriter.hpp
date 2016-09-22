@@ -90,7 +90,7 @@ public:
             return (uint8_t *)m_mean.data();
         if (name == "idw")
             return (uint8_t *)m_idw.data();
-        if (name == "den")
+        if (name == "stdev")
             return (uint8_t *)m_stdDev.data();
         throw pdal_error("Requested invalid grid data '" + name + "'.");
     }
@@ -189,6 +189,10 @@ public:
 
     void update(int x, int y, double val, double dist)
     {
+        // See
+        // https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
+        // https://en.wikipedia.org/wiki/Inverse_distance_weighting
+
         size_t offset = (y * m_width) + x;
 
         double& count = m_count[offset];
@@ -217,6 +221,9 @@ public:
 
     void finalize()
     {
+        // See
+        // https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
+        // https://en.wikipedia.org/wiki/Inverse_distance_weighting
         for (size_t i = 0; i < m_count.size(); ++i)
         {
             if (m_count[i])
@@ -273,6 +280,7 @@ private:
     BOX2D m_bounds;
     double m_edgeLength;
     double m_radius;
+    StringList m_options;
     GridPtr m_grid;
 };
 

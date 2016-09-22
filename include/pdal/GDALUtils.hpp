@@ -250,6 +250,7 @@ enum class GDALError
     InvalidDriver,
     DriverNotFound,
     CantCreate,
+    InvalidOption,
     CantWriteBlock
 };
 
@@ -296,9 +297,10 @@ public:
       \param numBands  Number of bands in the raster.
       \param type  Datatype (int, float, etc.) of the raster data.
       \param noData  Value that indiciates no data in a raster cell.
+      \param options  GDAL driver options.
     */
     GDALError open(int width, int height, int numBands, Dimension::Type type,
-        double noData);
+        double noData, StringList options = StringList());
 
     /**
       Close the raster and deallocate the underlying dataset.

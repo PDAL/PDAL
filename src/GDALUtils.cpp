@@ -491,7 +491,7 @@ Raster::Raster(const std::string& filename, const std::string& drivername,
 
 
 GDALError Raster::open(int width, int height, int numBands,
-    Dimension::Type type, double noData)
+    Dimension::Type type, double noData, StringList options)
 {
     if (m_drivername.empty())
         m_drivername = "GTiff";
@@ -527,9 +527,22 @@ GDALError Raster::open(int width, int height, int numBands,
         return GDALError::InvalidDriver;
     }
 
-    const char *options[2] = { "INTERLEAVE=BAND" };
+    std::vector<const char *> opts;
+
+    for (size_t i = 0; i < options.size(); ++i)
+    {
+        if (options[i].find("INTERLEAVE") == 0)
+        {
+            m_errorMsg = "INTERLEAVE GDAL driver option not supported.";
+            return GDALError::InvalidOption;
+        }
+        opts.push_back(options[i].data());
+    }
+    opts.push_back("INTERLEAVE=BAND");
+    opts.push_back(NULL);
+
     m_ds = driver->Create(m_filename.data(), m_width, m_height, m_numBands,
-        toGdalType(type), (char **)options);
+        toGdalType(type), const_cast<char **>(opts.data()));
     if (m_ds == NULL)
     {
         m_errorMsg = "Unable to open GDAL datasource '" + m_filename + "'.";

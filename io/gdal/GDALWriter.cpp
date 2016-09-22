@@ -65,6 +65,8 @@ void GDALWriter::addArgs(ProgramArgs& args)
     args.add("radius", "Radius from cell center to use to locate influencing "
         "points", m_radius).setPositional();
     args.add("gdaldriver", "GDAL writer driver name", m_drivername, "GTiff");
+    args.add("gdalopts", "GDAL driver options (name=value,name=value...)",
+        m_options);
 }
 
 
@@ -130,7 +132,7 @@ void GDALWriter::done(PointTableRef table)
     raster.writeBand(m_grid->data("mean"), 3, "mean");
     raster.writeBand(m_grid->data("idw"), 4, "idw");
     raster.writeBand(m_grid->data("count"), 5, "count");
-    raster.writeBand(m_grid->data("den"), 6, "den");
+    raster.writeBand(m_grid->data("stdev"), 6, "stdev");
 }
 
 } // namespace pdal
