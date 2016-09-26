@@ -50,7 +50,6 @@ static PluginInfo const s_info = PluginInfo(
 
 CREATE_STATIC_PLUGIN(1, 0, GDALWriter, Writer, s_info);
 
-
 std::string GDALWriter::getName() const
 {
     return s_info.name;
@@ -67,11 +66,43 @@ void GDALWriter::addArgs(ProgramArgs& args)
     args.add("gdaldriver", "GDAL writer driver name", m_drivername, "GTiff");
     args.add("gdalopts", "GDAL driver options (name=value,name=value...)",
         m_options);
+    args.add("output_type", "Statistics produced ('min', 'max', 'mean', "
+        "'idw', 'count', 'stdev' or 'all')", m_outputTypeString);
 }
 
 
 void GDALWriter::initialize()
 {
+    for (auto& ts : m_outputTypeString)
+    {
+       Utils::trim(ts);
+        if (ts == "all")
+        {
+            m_outputTypes = ~0;
+            break;
+        }
+        if (ts == "min")
+            m_outputTypes |= Grid::statMin;
+        else if (ts == "max")
+            m_outputTypes |= Grid::statMax;
+        else if (ts == "count")
+            m_outputTypes |= Grid::statCount;
+        else if (ts == "mean")
+            m_outputTypes |= Grid::statMean;
+        else if (ts == "idw")
+            m_outputTypes |= Grid::statIdw;
+        else if (ts == "stdev")
+            m_outputTypes |= Grid::statStdDev;
+        else
+        {
+            std::ostringstream oss;
+            oss << "Invalid writers.gdal output type: '" << ts << "'.";
+            throw pdal_error(oss.str());
+        }
+    }
+    if (m_outputTypes == 0)
+        m_outputTypes = ~0;
+
     gdal::registerDrivers();
 }
 
@@ -93,7 +124,8 @@ void GDALWriter::write(const PointViewPtr view)
     view->calculateBounds(m_bounds);
     size_t width = ceil((m_bounds.maxx - m_bounds.minx) / m_edgeLength) + 1;
     size_t height = ceil((m_bounds.maxy - m_bounds.miny) / m_edgeLength) + 1;
-    m_grid.reset(new Grid(width, height, m_edgeLength, m_radius, -9999.0));
+    m_grid.reset(new Grid(width, height, m_edgeLength, m_radius, -9999.0,
+        m_outputTypes));
 
     for (PointId idx = 0; idx < view->size(); ++idx)
     {
@@ -127,12 +159,26 @@ void GDALWriter::done(PointTableRef table)
         m_grid->numBands(), Dimension::Type::Double, m_grid->noData());
     if (err != gdal::GDALError::None)
         throw pdal_error(raster.errorMsg());
-    raster.writeBand(m_grid->data("min"), 1, "min");
-    raster.writeBand(m_grid->data("max"), 2, "max");
-    raster.writeBand(m_grid->data("mean"), 3, "mean");
-    raster.writeBand(m_grid->data("idw"), 4, "idw");
-    raster.writeBand(m_grid->data("count"), 5, "count");
-    raster.writeBand(m_grid->data("stdev"), 6, "stdev");
+    int bandNum = 1;
+    uint8_t *buf;
+    buf = m_grid->data("min");
+    if (buf)
+        raster.writeBand(buf, bandNum++, "min");
+    buf = m_grid->data("max");
+    if (buf)
+        raster.writeBand(buf, bandNum++, "max");
+    buf = m_grid->data("mean");
+    if (buf)
+        raster.writeBand(buf, bandNum++, "mean");
+    buf = m_grid->data("idw");
+    if (buf)
+        raster.writeBand(buf, bandNum++, "idw");
+    buf = m_grid->data("count");
+    if (buf)
+        raster.writeBand(buf, bandNum++, "count");
+    buf = m_grid->data("stdev");
+    if (buf)
+        raster.writeBand(buf, bandNum++, "stdev");
 }
 
 } // namespace pdal

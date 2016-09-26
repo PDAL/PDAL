@@ -45,16 +45,37 @@ namespace pdal
 class Grid
 {
 public:
+    static const int statCount = 1;
+    static const int statMin = 2;
+    static const int statMax = 4;
+    static const int statMean = 8;
+    static const int statStdDev = 16;
+    static const int statIdw = 32;
+
     Grid(size_t width, size_t height, double edgeLength, double radius,
-            double noData) :
+            double noData, int outputTypes) :
         m_width(width), m_height(height), m_edgeLength(edgeLength),
-        m_radius(radius), m_noData(noData),
-        m_count(width * height),
-        m_min(width * height, std::numeric_limits<double>::max()),
-        m_max(width * height, std::numeric_limits<double>::lowest()),
-        m_mean(width * height), m_stdDev(width * height),
-        m_idw(width * height), m_idwDist(width * height)
-    {}
+        m_radius(radius), m_noData(noData), m_outputTypes(outputTypes)
+    {
+        size_t size(width * height);
+
+        m_count.reset(new DataVec(size));
+        if (m_outputTypes & statMin)
+            m_min.reset(new DataVec(size,
+                std::numeric_limits<double>::max()));
+        if (m_outputTypes & statMax)
+            m_max.reset(new DataVec(size,
+                std::numeric_limits<double>::lowest()));
+        if (m_outputTypes & statIdw)
+        {
+            m_idw.reset(new DataVec(size));
+            m_idwDist.reset(new DataVec(size));
+        }
+        if ((m_outputTypes & statMean) || (m_outputTypes & statStdDev))
+            m_mean.reset(new DataVec(size));
+        if (m_outputTypes & statStdDev)
+            m_stdDev.reset(new DataVec(size));
+    }
 
     int horizontalIndex(double x)
         { return x / m_edgeLength; }
@@ -76,23 +97,45 @@ public:
     }
 
     int numBands() const
-        { return 6; }
+    {
+        int num = 0;
+
+        if (m_outputTypes & statCount)
+            num++;
+        if (m_outputTypes & statMin)
+            num++;
+        if (m_outputTypes & statMax)
+            num++;
+        if (m_outputTypes & statMean)
+            num++;
+        if (m_outputTypes & statIdw)
+            num++;
+        if (m_outputTypes & statStdDev)
+            num++;
+        return num;
+    }
 
     uint8_t *data(const std::string& name)
     {
         if (name == "count")
-            return (uint8_t *)m_count.data();
+            return (m_outputTypes & statCount ?
+                (uint8_t *)m_count->data() : nullptr);
         if (name == "min")
-            return (uint8_t *)m_min.data();
+            return (m_outputTypes & statMin ?
+                (uint8_t *)m_min->data() : nullptr);
         if (name == "max")
-            return (uint8_t *)m_max.data();
+            return (m_outputTypes & statMax ?
+                (uint8_t *)m_max->data() : nullptr);
         if (name == "mean")
-            return (uint8_t *)m_mean.data();
+            return (m_outputTypes & statMean ?
+                (uint8_t *)m_mean->data() : nullptr);
         if (name == "idw")
-            return (uint8_t *)m_idw.data();
+            return (m_outputTypes & statIdw ?
+                (uint8_t *)m_idw->data() : nullptr);
         if (name == "stdev")
-            return (uint8_t *)m_stdDev.data();
-        throw pdal_error("Requested invalid grid data '" + name + "'.");
+            return (m_outputTypes & statStdDev ?
+                (uint8_t *)m_stdDev->data() : nullptr);
+        return nullptr;
     }
 
     void addPoint(double x, double y, double z)
@@ -195,28 +238,42 @@ public:
 
         size_t offset = (y * m_width) + x;
 
-        double& count = m_count[offset];
+        double& count = (*m_count)[offset];
         count++;
 
-        double& min = m_min[offset];
-        min = std::min(val, min);
+        if (m_min)
+        {
+            double& min = (*m_min)[offset];
+            min = std::min(val, min);
+        }
 
-        double& max = m_max[offset];
-        max = std::max(val, max);
+        if (m_max)
+        {
+            double& max = (*m_max)[offset];
+            max = std::max(val, max);
+        }
 
-        double& mean = m_mean[offset];
-        double delta = val - mean;
+        if (m_mean)
+        {
+            double& mean = (*m_mean)[offset];
+            double delta = val - mean;
+            if (m_stdDev)
+            {
+                mean += delta / count;
 
-        mean += delta / count;
+                double& stdDev = (*m_stdDev)[offset];
+                stdDev += delta * (val - mean);
+            }
+        }
 
-        double& stdDev = m_stdDev[offset];
-        stdDev += delta * (val - mean);
+        if (m_idw)
+        {
+            double& idw = (*m_idw)[offset];
+            idw += val / dist;
 
-        double& idw = m_idw[offset];
-        idw += val / dist;
-
-        double& idwDist = m_idwDist[offset];
-        idwDist += 1 / dist; 
+            double& idwDist = (*m_idwDist)[offset];
+            idwDist += 1 / dist;
+        }
     }
 
     void finalize()
@@ -224,19 +281,25 @@ public:
         // See
         // https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
         // https://en.wikipedia.org/wiki/Inverse_distance_weighting
-        for (size_t i = 0; i < m_count.size(); ++i)
-        {
-            if (m_count[i])
-            {
-                m_stdDev[i] = sqrt(m_stdDev[i] / m_count[i]);
-                m_idw[i] /= m_idwDist[i]; 
-            }
-            else
-            {
-                m_min[i] = m_noData;
-                m_max[i] = m_noData;
-            }
-        }
+        if (m_stdDev)
+            for (size_t i = 0; i < m_count->size(); ++i)
+                if ((*m_count)[i])
+                    (*m_stdDev)[i] = sqrt((*m_stdDev)[i] / (*m_count)[i]);
+
+        if (m_idw)
+            for (size_t i = 0; i < m_count->size(); ++i)
+                if ((*m_count)[i])
+                    (*m_idw)[i] /= (*m_idwDist)[i];
+
+        if (m_min)
+            for (size_t i = 0; i < m_count->size(); ++i)
+                if (!(*m_count)[i])
+                    (*m_min)[i] = m_noData;
+
+        if (m_max)
+            for (size_t i = 0; i < m_count->size(); ++i)
+                if (!(*m_count)[i])
+                    (*m_max)[i] = m_noData;
     }
 
     size_t width() const
@@ -252,13 +315,18 @@ private:
     double m_edgeLength;
     double m_radius;
     double m_noData;
-    std::vector<double> m_count;
-    std::vector<double> m_min;
-    std::vector<double> m_max;
-    std::vector<double> m_mean;
-    std::vector<double> m_stdDev;
-    std::vector<double> m_idw;
-    std::vector<double> m_idwDist;
+
+    typedef std::vector<double> DataVec;
+    typedef std::unique_ptr<DataVec> DataPtr;
+    DataPtr m_count;
+    DataPtr m_min;
+    DataPtr m_max;
+    DataPtr m_mean;
+    DataPtr m_stdDev;
+    DataPtr m_idw;
+    DataPtr m_idwDist;
+
+    int m_outputTypes;
 };
 typedef std::unique_ptr<Grid> GridPtr;
 
@@ -281,6 +349,8 @@ private:
     double m_edgeLength;
     double m_radius;
     StringList m_options;
+    StringList m_outputTypeString;
+    int m_outputTypes;
     GridPtr m_grid;
 };
 
