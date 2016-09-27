@@ -54,8 +54,9 @@ public:
 
     Grid(size_t width, size_t height, double edgeLength, double radius,
             double noData, int outputTypes) :
-        m_width(width), m_height(height), m_edgeLength(edgeLength),
-        m_radius(radius), m_noData(noData), m_outputTypes(outputTypes)
+        m_width(width), m_height(height), m_windowSize(0),
+        m_edgeLength(edgeLength), m_radius(radius), m_noData(noData),
+        m_outputTypes(outputTypes)
     {
         size_t size(width * height);
 
@@ -76,6 +77,16 @@ public:
         if (m_outputTypes & statStdDev)
             m_stdDev.reset(new DataVec(size));
     }
+
+    // Find an index into the actual storage given a grid coordinate.
+    size_t index(size_t i, size_t j)
+        { return (j * m_width) + i; }
+
+    bool empty(size_t i, size_t j)
+        { return empty(index(i, j)); }
+
+    bool empty(size_t idx)
+        { return ((*m_count)[idx] <= 0); }
 
     int horizontalIndex(double x)
         { return x / m_edgeLength; }
@@ -230,13 +241,13 @@ public:
             update(iOrigin, jOrigin, z, d);
     }
 
-    void update(int x, int y, double val, double dist)
+    void update(int i, int j, double val, double dist)
     {
         // See
         // https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
         // https://en.wikipedia.org/wiki/Inverse_distance_weighting
 
-        size_t offset = (y * m_width) + x;
+        size_t offset = index(i, j);
 
         double& count = (*m_count)[offset];
         count++;
@@ -283,23 +294,108 @@ public:
         // https://en.wikipedia.org/wiki/Inverse_distance_weighting
         if (m_stdDev)
             for (size_t i = 0; i < m_count->size(); ++i)
-                if ((*m_count)[i])
+                if (!empty(i))
                     (*m_stdDev)[i] = sqrt((*m_stdDev)[i] / (*m_count)[i]);
 
         if (m_idw)
             for (size_t i = 0; i < m_count->size(); ++i)
-                if ((*m_count)[i])
+                if (!empty(i))
                     (*m_idw)[i] /= (*m_idwDist)[i];
 
-        if (m_min)
+        if (m_windowSize > 0)
+            windowFill();
+        else
             for (size_t i = 0; i < m_count->size(); ++i)
-                if (!(*m_count)[i])
-                    (*m_min)[i] = m_noData;
+                if (empty(i))
+                    fillNodata(i);
+        
+    }
 
+    void fillNodata(size_t i)
+    {
+        if (m_min)
+            (*m_min)[i] = m_noData;
         if (m_max)
-            for (size_t i = 0; i < m_count->size(); ++i)
-                if (!(*m_count)[i])
-                    (*m_max)[i] = m_noData;
+            (*m_max)[i] = m_noData;
+        if (m_mean)
+            (*m_mean)[i] = m_noData;
+        if (m_idw)
+            (*m_idw)[i] = m_noData;
+        if (m_stdDev)
+            (*m_stdDev)[i] = m_noData;
+    }
+
+    // This is a last resort value-filling algorithm that does inverse-distance
+    // weighting of the values around an empty cell.
+    void windowFill()
+    {
+        for (size_t i = 0; i < width(); ++i)
+            for (size_t j = 0; j < height(); ++j)
+                if (empty(i, j))
+                    windowFill(i, j);
+    }
+
+    void windowFill(size_t dstI, size_t dstJ)
+    {
+        size_t istart = std::max(0UL, dstI - m_windowSize);
+        size_t iend = std::min(width(), dstI + m_windowSize + 1);
+        size_t jstart = std::max(0UL, dstJ - m_windowSize);
+        size_t jend = std::min(height(), dstJ + m_windowSize + 1);
+
+        double distSum = 0;
+        size_t dstIdx = index(dstI, dstJ);
+
+        // Initialize to 0 (rather than numeric_limits::max/lowest) since we're
+        // going to accumulate and average.
+        if (m_min)
+            (*m_min)[dstIdx] = 0;
+        if (m_max)
+            (*m_max)[dstIdx] = 0;
+
+        for (size_t i = istart; i < iend; ++i)
+            for (size_t j = jstart; j < jend; ++j)
+            {
+                size_t srcIdx = index(i, j);
+                if (i == j || empty(srcIdx))
+                    continue;
+                // The ternaries just avoid underflow UB.  We're just trying to
+                // find the distance from j to dstJ or i to dstI.
+                double distance = std::max(j > dstJ ? j - dstJ : dstJ - j,
+                                           i > dstI ? i - dstJ : dstJ - i);
+                windowFillCell(srcIdx, dstIdx, distance);
+                distSum += (1 / distance);
+            }
+
+        // Divide summed values by the (inverse) distance sum.
+        if (distSum > 0)
+        {
+            if (m_min)
+                (*m_min)[dstIdx] /= distSum;
+            if (m_max)
+                (*m_max)[dstIdx] /= distSum;
+            if (m_mean)
+                (*m_mean)[dstIdx] /= distSum;
+            if (m_idw)
+                (*m_idw)[dstIdx] /= distSum;
+            if (m_stdDev)
+                (*m_stdDev)[dstIdx] /= distSum;
+        }
+        else
+            fillNodata(dstIdx);
+    }
+
+    void windowFillCell(size_t srcIdx, size_t dstIdx, double distance)
+    {
+        if (m_min)
+            (*m_min)[dstIdx] += (*m_min)[srcIdx] / distance;
+        if (m_max)
+            (*m_max)[dstIdx] += (*m_max)[srcIdx] / distance;
+        if (m_mean)
+            (*m_mean)[dstIdx] += (*m_mean)[srcIdx] / distance;
+        if (m_idw)
+            (*m_idw)[dstIdx] += (*m_idw)[srcIdx] / distance;
+        if (m_stdDev)
+            (*m_stdDev)[dstIdx] += (*m_stdDev)[srcIdx] / distance;
     }
 
     size_t width() const
@@ -312,6 +408,7 @@ public:
 private:
     size_t m_width;
     size_t m_height;
+    size_t m_windowSize;
     double m_edgeLength;
     double m_radius;
     double m_noData;
