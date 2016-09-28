@@ -33,11 +33,11 @@
 ****************************************************************************/
 
 #include <pdal/PipelineManager.hpp>
+#include <pdal/PipelineReaderJSON.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/util/FileUtils.hpp>
 
 #include "PipelineReaderXML.hpp"
-#include "PipelineReaderJSON.hpp"
 
 namespace pdal
 {

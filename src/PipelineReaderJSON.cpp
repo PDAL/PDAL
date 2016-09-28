@@ -32,9 +32,9 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "PipelineReaderJSON.hpp"
 
 #include <pdal/Filter.hpp>
+#include <pdal/PipelineReaderJSON.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/PluginManager.hpp>
 #include <pdal/Options.hpp>
