@@ -4,7 +4,7 @@ writers.gdal
 ================================================================================
 
 The `GDAL`_ writer creates a raster from a point cloud using an interpolation
-algorithm.  Output is produced using `GDAL`_ and can therefore use any `driver
+algorithm.  Output is produced using GDAL and can therefore use any `driver
 that supports creation of rasters`_.
 
 .. _`GDAL`: http://gdal.org
@@ -21,9 +21,9 @@ potentially contributes to the raster's value.
     those that may be within the bounds of the raster cell.
 
 The GDAL writer creates rasters using the data in the 'Z' dimension of the 
-points.  One can precede the GDAL writer with the ferry filter
-(:ref:`filters.ferry`) in order to copy data from some other dimension to
-the 'Z' dimension if desired.
+points.  In a :ref:`pipeline_command` one can precede the GDAL writer with
+the ferry filter (:ref:`filters.ferry`) in order to copy data from some
+other dimension to the 'Z' dimension if desired.
 
 The writer will creates up to six rasters based on different statistics in
 the output dataset.  The order of the layers in the dataset is as follows:
