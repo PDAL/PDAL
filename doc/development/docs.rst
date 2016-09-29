@@ -37,7 +37,7 @@ Python dependencies should be installed from PyPI_ with ``pip`` or
 
 .. code-block:: bash
 
-    (sudo) pip install sphinx breathe
+    (sudo) pip install sphinx sphinxconfig-bibtex breathe
 
 .. note::
 
