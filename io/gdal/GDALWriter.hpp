@@ -53,8 +53,8 @@ public:
     static const int statIdw = 32;
 
     Grid(size_t width, size_t height, double edgeLength, double radius,
-            double noData, int outputTypes) :
-        m_width(width), m_height(height), m_windowSize(0),
+            double noData, int outputTypes, size_t windowSize) :
+        m_width(width), m_height(height), m_windowSize(windowSize),
         m_edgeLength(edgeLength), m_radius(radius), m_noData(noData),
         m_outputTypes(outputTypes)
     {
@@ -447,6 +447,7 @@ private:
     double m_radius;
     StringList m_options;
     StringList m_outputTypeString;
+    size_t m_windowSize;
     int m_outputTypes;
     GridPtr m_grid;
 };

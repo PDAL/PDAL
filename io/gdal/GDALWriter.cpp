@@ -68,6 +68,8 @@ void GDALWriter::addArgs(ProgramArgs& args)
         m_options);
     args.add("output_type", "Statistics produced ('min', 'max', 'mean', "
         "'idw', 'count', 'stdev' or 'all')", m_outputTypeString);
+    args.add("window_size", "Cell distance for fallback interpolation",
+        m_windowSize);
 }
 
 
@@ -125,7 +127,7 @@ void GDALWriter::write(const PointViewPtr view)
     size_t width = ceil((m_bounds.maxx - m_bounds.minx) / m_edgeLength) + 1;
     size_t height = ceil((m_bounds.maxy - m_bounds.miny) / m_edgeLength) + 1;
     m_grid.reset(new Grid(width, height, m_edgeLength, m_radius, -9999.0,
-        m_outputTypes));
+        m_outputTypes, m_windowSize));
 
     for (PointId idx = 0; idx < view->size(); ++idx)
     {
