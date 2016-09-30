@@ -66,6 +66,12 @@ Cells that have no value after interpolation are given the empty value of -9999.
 Basic Example
 --------------------------------------------------------------------------------
 
+This  pipeline reads the file autzen_trim.las and creates a Geotiff dataset
+called outputfile.tif.  Since output_type isn't specified, it creates six
+raster bands ("min", "max", "mean", "idx", "count" and "stdev") in the output
+dataset.  The raster cells are 10x10 and the radius used to locate points
+whose values contribute to the cell value is 14.14.
+
 .. code-block:: json
 
     {
@@ -91,6 +97,7 @@ edge_length
 
 radius
     Radius about cell center bounding points to use to calculate a cell value.
+    [Required]
 
 gdaldriver
     Name of the GDAL driver to use to write the output. [Default: "GTiff"]
@@ -103,10 +110,10 @@ gdalopts
 output_type
     A comma separated list of statistics for which to produce raster layers.
     The supported values are "min", "max", "mean", "idw", "count", "stdev"
-    and "all".  The options may be specified more than once. [Default: "all"]
+    and "all".  The option may be specified more than once. [Default: "all"]
 
 window_size
     The maximum distance from a donor cell to a target cell when applying
-    a fallback interpolation method.  See the stage description for more
+    the fallback interpolation method.  See the stage description for more
     information. [Default: 0]
 
