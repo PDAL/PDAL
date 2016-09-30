@@ -83,11 +83,6 @@ void TextReader::initialize(PointTableRef table)
     }
     else
         m_dimNames = Utils::split2(buf, m_separator);
-    for (auto f: m_dimNames)
-    {
-        log()->get(LogLevel::Error) << "field '" << f << "'" << std::endl;
-
-    }
     Utils::closeFile(m_istream);
 }
 
