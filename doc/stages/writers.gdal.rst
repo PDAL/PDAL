@@ -52,11 +52,11 @@ stdev
 
 If no points fall within the circle about a raster cell, a secondary
 algorithm can be used to attempt to provide a value after the standard
-interpolation is complete.  If the window_size option is set to a non-zero
+interpolation is complete.  If the window_size_ option is set to a non-zero
 value, a square of rasters surrounding an empty cell, and the value of each
 non-empty surrounding is averaged using inverse distance weighting to provide
-a value for the subject cell.  The value provided for :ref:`window_size` is the
-horizontal or vertical distance that a donor cell may be in order to
+a value for the subject cell.  The value provided for window_size is the
+maximum horizontal or vertical distance that a donor cell may be in order to
 contribute to the subject cell (A window_size of 1 essentially creates a 3x3
 array around the subject cell.  A window_size of 2 creates a 5x5 array, and
 so on.)
@@ -107,10 +107,14 @@ gdalopts
     format is name=value,name=value,...  The option may be specified
     any number of times.
 
+.. _output_type:
+
 output_type
     A comma separated list of statistics for which to produce raster layers.
     The supported values are "min", "max", "mean", "idw", "count", "stdev"
     and "all".  The option may be specified more than once. [Default: "all"]
+
+.. _window_size:
 
 window_size
     The maximum distance from a donor cell to a target cell when applying
