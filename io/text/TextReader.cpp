@@ -38,6 +38,7 @@
 #include "TextReader.hpp"
 
 #include <pdal/pdal_macros.hpp>
+#include <pdal/util/Algorithm.hpp>
 
 namespace pdal
 {
@@ -93,6 +94,14 @@ void TextReader::addDimensions(PointLayoutPtr layout)
     {
         Dimension::Id id = layout->registerOrAssignDim(name,
             Dimension::Type::Double);
+        if (Utils::contains(m_dims, id))
+        {
+            std::ostringstream oss;
+
+            oss << getName() << ": Duplicate dimension '" << name <<
+                "' detected in input file '" << m_filename << "'.";
+            throw pdal_error(oss.str());
+        }
         m_dims.push_back(id);
     }
 }
