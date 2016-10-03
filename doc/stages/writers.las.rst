@@ -107,11 +107,11 @@ system_id
   String identifying the system that created this LAS file. [Default: "PDAL"]
 
 a_srs
-  The spatial reference system of the file to be written. Can be an EPSG string (eg "EPSG:268910") or a WKT string. [Default: Not set]
+  The spatial reference system of the file to be written. Can be an EPSG string (e.g. "EPSG:268910") or a WKT string. [Default: Not set]
 
 global_encoding
   Various indicators to describe the data.  See the LAS documentation.  Note
-  that PDAL will always set bit four when creating LAS version output.
+  that PDAL will always set bit four when creating LAS version 1.4 output.
   [Default: 0]
 
 project_id
