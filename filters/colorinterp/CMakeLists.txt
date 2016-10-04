@@ -11,6 +11,7 @@ set(srcs
 
 set(incs
     ColorinterpFilter.hpp
+    color-ramps.hpp
 )
 
 PDAL_ADD_DRIVER(filter colorinterp "${srcs}" "${incs}" objects)

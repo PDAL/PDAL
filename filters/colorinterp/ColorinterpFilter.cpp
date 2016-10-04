@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2012, Howard Butler, hobu.inc@gmail.com
+* Copyright (c) 2016, Howard Butler, hobu.inc@gmail.com
 *
 * All rights reserved.
 *
@@ -35,16 +35,22 @@
 #include "ColorinterpFilter.hpp"
 
 #include <pdal/PointView.hpp>
+#include <pdal/GDALUtils.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include <gdal.h>
+#include <cpl_vsi.h>
 #include <ogr_spatialref.h>
 
 #include <array>
 
+#include "color-ramps.hpp"
+
 namespace pdal
 {
+
+static std::vector<std::string> ramps = {"awesome_green", "black_orange", "blue_hue", "blue_red", "heat_map", "pestel_shades", "blue_orange"};
 
 static PluginInfo const s_info = PluginInfo(
     "filters.colorinterp",
@@ -56,67 +62,82 @@ CREATE_STATIC_PLUGIN(1, 0, ColorinterpFilter, Filter, s_info)
 std::string ColorinterpFilter::getName() const { return s_info.name; }
 
 
+#define GETRAMP(name) \
+    if (pdal::Utils::iequals(#name, rampFilename)) \
+    { \
+        VSILFILE* vsifile; \
+        GByte* location(0); \
+        int size (0); \
+        location = name; \
+        size = sizeof(name); \
+        rampFilename = "/vsimem/" + std::string(#name) + ".png"; \
+        vsifile = VSIFileFromMemBuffer(rampFilename.c_str(), location, size, FALSE); \
+    }
+//
+std::shared_ptr<pdal::gdal::Raster> openRamp(std::string& rampFilename)
+{
+    // If the user] selected a default ramp name, it will be opened by
+    // one of these macros if it matches. Otherwise, we just open with the
+    // GDALOpen'able the user gave us
+    GETRAMP(awesome_green);
+    GETRAMP(black_orange);
+    GETRAMP(blue_hue);
+    GETRAMP(blue_red);
+    GETRAMP(heat_map);
+    GETRAMP(pestel_shades);
+
+    std::shared_ptr<pdal::gdal::Raster> output (new pdal::gdal::Raster(rampFilename.c_str()));
+    return output;
+}
+
 void ColorinterpFilter::addArgs(ProgramArgs& args)
 {
     std::string dimension;
     args.add("dimension", "Dimension to interpolate", dimension, "Z");
     args.add("minimum", "Minimum value to use for scaling", m_min);
     args.add("maximum", "Maximum value to use for scaling", m_max);
-
+    args.add("ramp", "GDAL-readable color ramp image to use", m_colorramp, "something");
+    args.add("invert", "Invert the ramp direction", m_invertRamp, false);
     m_interpDim = Dimension::id(dimension);
-
 }
 
-void interpolateColor(double value, double minValue, double maxValue, double& red, double& green, double& blue)
+void ColorinterpFilter::addDimensions(PointLayoutPtr layout)
 {
-    // initialize to white
-    red = 1.0;
-    green = 1.0;
-    blue = 1.0;
+    layout->registerOrAssignDim("Red",
+        Dimension::defaultType(Dimension::Id::Red));
+    layout->registerOrAssignDim("Green",
+        Dimension::defaultType(Dimension::Id::Green));
+    layout->registerOrAssignDim("Blue",
+        Dimension::defaultType(Dimension::Id::Blue));
+}
 
-    if (value < minValue)
-    {
-        value = minValue;
-    }
+void ColorinterpFilter::initialize()
+{
+    gdal::registerDrivers();
 
-    if (value > maxValue)
-    {
-        value = maxValue;
-    }
+    m_raster = openRamp(m_colorramp);
+    m_raster->open();
 
-    double dv = maxValue - minValue;
-
-    if (value < (minValue + (0.25 * dv)))
-    {
-        red = 0;
-        green = 4 * (value - minValue) / dv;
-    }
-    else if (value < (minValue + (0.5 * dv)))
-    {
-        red = 0;
-        blue = 1 + (4 * (minValue + (0.25 * dv) - value) / dv);
-    }
-    else if (value < (minValue + (0.75 * dv)))
-    {
-        red = 4 * (value - minValue - (0.5 * dv)) / dv;
-        blue = 0;
-    }
-    else
-    {
-        green = 1 + (4 * (minValue + (0.75 * dv) - value) / dv);
-        blue = 0;
-    }
-
-    return;
+    log()->get(LogLevel::Debug) << getName() << "raster connection: " << m_raster->m_filename << std::endl;
 }
 
 bool ColorinterpFilter::processOne(PointRef& point)
 {
 
-    double v = point.getFieldAs<double>(Dimension::Id::Z);
+    double v = point.getFieldAs<double>(m_interpDim);
     double red(1.0), green(1.0), blue(1.0);
 
-    interpolateColor(v, m_min, m_max, red, blue, green);
+    size_t img_width = m_redBand.size();
+    double factor = (v - m_min) / (m_max - m_min);
+
+    if (m_invertRamp)
+        factor = 1 - factor;
+
+    size_t position(std::floor(factor) * img_width);
+
+    red = m_redBand[position];
+    blue = m_blueBand[position];
+    green = m_greenBand[position];
 
     point.setField(Dimension::Id::Red, red);
     point.setField(Dimension::Id::Green, green);
@@ -127,7 +148,25 @@ bool ColorinterpFilter::processOne(PointRef& point)
 
 void ColorinterpFilter::filter(PointView& view)
 {
+    if (m_min == 0.0 && m_max == 0.0)
+    {
+        pdal::stats::Summary summary(pdal::Dimension::name(m_interpDim), pdal::stats::Summary::NoEnum);
+        for (PointId idx = 0; idx < view.size(); ++idx)
+        {
+            double v = view.getFieldAs<double>(m_interpDim, idx);
+            summary.insert(v);
+        }
+
+        m_min = summary.minimum();
+        m_max = summary.maximum();
+    }
+
+    m_raster->readBand(m_redBand, 1);
+    m_raster->readBand(m_greenBand, 2 );
+    m_raster->readBand(m_blueBand, 3);
+
     PointRef point = view.point(0);
+
     for (PointId idx = 0; idx < view.size(); ++idx)
     {
         point.setPointId(idx);

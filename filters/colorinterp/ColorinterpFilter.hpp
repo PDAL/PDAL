@@ -36,6 +36,7 @@
 
 #include <pdal/plugin.hpp>
 #include <pdal/Filter.hpp>
+#include "../stats/StatsFilter.hpp"
 
 #include <gdal.h>
 #include <ogr_spatialref.h>
@@ -58,7 +59,7 @@ class PDAL_DLL ColorinterpFilter : public Filter
 public:
 
     ColorinterpFilter()
-        : m_interpDim(Dimension::Id::Z), m_min(0.0), m_max(0.0)
+        : m_interpDim(Dimension::Id::Z), m_min(0.0), m_max(0.0), m_rampFilename("/vsimem/colorramp.png"), m_invertRamp(false)
     {}
     ColorinterpFilter& operator=(const ColorinterpFilter&) = delete;
     ColorinterpFilter(const ColorinterpFilter&) = delete;
@@ -71,11 +72,20 @@ private:
     virtual void addArgs(ProgramArgs& args);
     virtual bool processOne(PointRef& point);
     virtual void filter(PointView& view);
+    virtual void initialize();
+    virtual void addDimensions(PointLayoutPtr layout);
 
 
     Dimension::Id m_interpDim;
     double m_min;
     double m_max;
+    std::string m_colorramp;
+    std::shared_ptr<pdal::gdal::Raster> m_raster;
+    std::string m_rampFilename;
+    std::vector<uint8_t> m_redBand;
+    std::vector<uint8_t> m_greenBand;
+    std::vector<uint8_t> m_blueBand;
+    bool m_invertRamp;
 };
 
 } // namespace pdal
