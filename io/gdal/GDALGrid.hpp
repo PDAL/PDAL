@@ -33,8 +33,9 @@
 ****************************************************************************/
 
 #include <math.h>
-#include <vector>
+#include <memory>
 #include <string>
+#include <vector>
 
 namespace pdal
 {
