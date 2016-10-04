@@ -512,7 +512,7 @@ GDALError Raster::open(int width, int height, int numBands,
         m_drivername.data());
     if (!driver)
     {
-        m_errorMsg = "Driver '" + m_drivername + "' not found!\n";
+        m_errorMsg = "Driver '" + m_drivername + "' not found.";
         return GDALError::DriverNotFound;
     }
 

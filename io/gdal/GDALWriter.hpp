@@ -32,6 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <algorithm>
+
 #include <pdal/PointView.hpp>
 #include <pdal/Writer.hpp>
 #include <pdal/plugin.hpp>
@@ -337,9 +339,9 @@ public:
 
     void windowFill(size_t dstI, size_t dstJ)
     {
-        size_t istart = std::max(0UL, dstI - m_windowSize);
+        size_t istart = dstI > m_windowSize ? dstI - m_windowSize : (size_t)0;
         size_t iend = std::min(width(), dstI + m_windowSize + 1);
-        size_t jstart = std::max(0UL, dstJ - m_windowSize);
+        size_t jstart = dstJ > m_windowSize ? dstJ - m_windowSize : (size_t)0;
         size_t jend = std::min(height(), dstJ + m_windowSize + 1);
 
         double distSum = 0;
@@ -356,12 +358,12 @@ public:
             for (size_t j = jstart; j < jend; ++j)
             {
                 size_t srcIdx = index(i, j);
-                if (i == j || empty(srcIdx))
+                if ((srcIdx == dstIdx) || empty(srcIdx))
                     continue;
                 // The ternaries just avoid underflow UB.  We're just trying to
                 // find the distance from j to dstJ or i to dstI.
                 double distance = std::max(j > dstJ ? j - dstJ : dstJ - j,
-                                           i > dstI ? i - dstJ : dstJ - i);
+                                           i > dstI ? i - dstI : dstI - i);
                 windowFillCell(srcIdx, dstIdx, distance);
                 distSum += (1 / distance);
             }

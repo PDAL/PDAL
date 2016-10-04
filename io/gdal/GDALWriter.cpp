@@ -124,8 +124,8 @@ void GDALWriter::ready(PointTableRef table)
 void GDALWriter::write(const PointViewPtr view)
 {
     view->calculateBounds(m_bounds);
-    size_t width = ceil((m_bounds.maxx - m_bounds.minx) / m_edgeLength) + 1;
-    size_t height = ceil((m_bounds.maxy - m_bounds.miny) / m_edgeLength) + 1;
+    size_t width = ((m_bounds.maxx - m_bounds.minx) / m_edgeLength) + 1;
+    size_t height = ((m_bounds.maxy - m_bounds.miny) / m_edgeLength) + 1;
     m_grid.reset(new Grid(width, height, m_edgeLength, m_radius, -9999.0,
         m_outputTypes, m_windowSize));
 
@@ -149,7 +149,7 @@ void GDALWriter::done(PointTableRef table)
     pixelToPos[0] = m_bounds.minx;
     pixelToPos[1] = m_edgeLength;
     pixelToPos[2] = 0;
-    pixelToPos[3] = m_bounds.maxy;
+    pixelToPos[3] = m_bounds.miny + (m_edgeLength * m_grid->height());
     pixelToPos[4] = 0;
     pixelToPos[5] = -m_edgeLength;
     gdal::Raster raster(m_filename, m_drivername, table.spatialReference(),
