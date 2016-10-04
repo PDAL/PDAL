@@ -84,17 +84,17 @@ void GDALWriter::initialize()
             break;
         }
         if (ts == "min")
-            m_outputTypes |= Grid::statMin;
+            m_outputTypes |= GDALGrid::statMin;
         else if (ts == "max")
-            m_outputTypes |= Grid::statMax;
+            m_outputTypes |= GDALGrid::statMax;
         else if (ts == "count")
-            m_outputTypes |= Grid::statCount;
+            m_outputTypes |= GDALGrid::statCount;
         else if (ts == "mean")
-            m_outputTypes |= Grid::statMean;
+            m_outputTypes |= GDALGrid::statMean;
         else if (ts == "idw")
-            m_outputTypes |= Grid::statIdw;
+            m_outputTypes |= GDALGrid::statIdw;
         else if (ts == "stdev")
-            m_outputTypes |= Grid::statStdDev;
+            m_outputTypes |= GDALGrid::statStdDev;
         else
         {
             std::ostringstream oss;
@@ -126,7 +126,7 @@ void GDALWriter::write(const PointViewPtr view)
     view->calculateBounds(m_bounds);
     size_t width = ((m_bounds.maxx - m_bounds.minx) / m_edgeLength) + 1;
     size_t height = ((m_bounds.maxy - m_bounds.miny) / m_edgeLength) + 1;
-    m_grid.reset(new Grid(width, height, m_edgeLength, m_radius, -9999.0,
+    m_grid.reset(new GDALGrid(width, height, m_edgeLength, m_radius, -9999.0,
         m_outputTypes, m_windowSize));
 
     for (PointId idx = 0; idx < view->size(); ++idx)
