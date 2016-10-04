@@ -34,6 +34,8 @@
 
 #include "GDALGrid.hpp"
 
+#include <limits>
+
 namespace pdal
 {
 
