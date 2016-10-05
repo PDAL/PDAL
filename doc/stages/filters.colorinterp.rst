@@ -104,18 +104,25 @@ Options
 
 ramp
   The raster file to use for the color ramp. Any format supported by `GDAL`_ may be read.
-  Alternatively, one of the default color ramp names can be used.
+  Alternatively, one of the default color ramp names can be used. [Default: ``pestel_shades``]
 
 dimension
-  A dimension name to use for the values to interpolate colors. Default is ``Z``.
+  A dimension name to use for the values to interpolate colors. [Default: ``Z``]
 
 minimum
-  The minimum value to use to scale the data
+  The minimum value to use to scale the data. If none is specified, one is
+  computed from the data.
 
 maximum
-  The maximum value to use to scale the data
+  The maximum value to use to scale the data. If none is specified, one is
+  computed from the data.
 
 invert
-  Invert the direction of the ramp?
+  Invert the direction of the ramp? [Default: false]
+
+stddev
+  Color based on the given number of standard deviations from the median. If
+  set, ``minimum`` and ``maximum`` will be computed from the median and setting
+  them will have no effect.
 
 .. _`GDAL`: http://www.gdal.org

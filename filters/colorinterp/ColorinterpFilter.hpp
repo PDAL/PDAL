@@ -59,7 +59,12 @@ class PDAL_DLL ColorinterpFilter : public Filter
 public:
 
     ColorinterpFilter()
-        : m_interpDim(Dimension::Id::Z), m_min(0.0), m_max(0.0), m_rampFilename("/vsimem/colorramp.png"), m_invertRamp(false)
+        : m_interpDim(Dimension::Id::Z)
+        , m_min(0.0)
+        , m_max(0.0)
+        , m_rampFilename("/vsimem/colorramp.png")
+        , m_invertRamp(false)
+        , m_stdDevThreshold(0.0)
     {}
     ColorinterpFilter& operator=(const ColorinterpFilter&) = delete;
     ColorinterpFilter(const ColorinterpFilter&) = delete;
@@ -86,6 +91,7 @@ private:
     std::vector<uint8_t> m_greenBand;
     std::vector<uint8_t> m_blueBand;
     bool m_invertRamp;
+    double m_stdDevThreshold;
 };
 
 } // namespace pdal
