@@ -53,6 +53,9 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
+    GDALWriter() : m_outputTypes(0)
+    {}
+
 private:
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
