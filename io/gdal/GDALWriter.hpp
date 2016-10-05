@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2015, Howard Butler <howard@hobu.co>
+* Copyright (c) 2016, Hobu Inc. (info@hobu.co)
 *
 * All rights reserved.
 *
@@ -32,53 +32,46 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <algorithm>
 
-#include <string>
-
-
-#include <pdal/Dimension.hpp>
-#include <pdal/Reader.hpp>
-#include <pdal/StageFactory.hpp>
-#include <pdal/GDALUtils.hpp>
+#include <pdal/PointView.hpp>
+#include <pdal/Writer.hpp>
 #include <pdal/plugin.hpp>
 
-extern "C" int32_t GDALReader_ExitFunc();
-extern "C" PF_ExitFunc GDALReader_InitPlugin();
+#include "GDALGrid.hpp"
 
+extern "C" int32_t GDALWriter_ExitFunc();
+extern "C" PF_ExitFunc GDALWriter_InitPlugin();
 
 namespace pdal
 {
 
-
-typedef std::map<std::string, Dimension::Id> DimensionMap;
-
-
-
-class PDAL_DLL GDALReader : public Reader
+class PDAL_DLL GDALWriter : public Writer
 {
 public:
-    static void *create();
+    static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
 
-    GDALReader();
-
-    static Dimension::IdList getDefaultDimensions();
+    GDALWriter() : m_outputTypes(0)
+    {}
 
 private:
+    virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
-    virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
-    virtual point_count_t read(PointViewPtr view, point_count_t num);
-    virtual void done(PointTableRef table)
-        { m_raster->close(); }
-    virtual QuickInfo inspect();
+    virtual void write(const PointViewPtr data);
+    virtual void done(PointTableRef table);
 
-    std::unique_ptr<gdal::Raster> m_raster;
-    point_count_t m_index;
-
+    std::string m_drivername;
+    BOX2D m_bounds;
+    double m_edgeLength;
+    double m_radius;
+    StringList m_options;
+    StringList m_outputTypeString;
+    size_t m_windowSize;
+    int m_outputTypes;
+    GDALGridPtr m_grid;
 };
 
-} // namespace pdal
-
+}

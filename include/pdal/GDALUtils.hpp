@@ -36,6 +36,7 @@
 
 #include <pdal/pdal_internal.hpp>
 #include <pdal/Dimension.hpp>
+#include <pdal/SpatialReference.hpp>
 #include <pdal/util/Bounds.hpp>
 
 #include <pdal/Log.hpp>
@@ -46,7 +47,7 @@
 #include <vector>
 
 #include <cpl_port.h>
-#include <gdal.h>
+#include <gdal_priv.h>
 #include <cpl_vsi.h>
 #include <cpl_conv.h>
 #include <ogr_api.h>
@@ -137,7 +138,7 @@ public:
         }
         OGRErr err = OGR_G_CreateFromWkt(&p_wkt, ref, &geom);
         if (err != OGRERR_NONE)
-            throw pdal::pdal_error("unable to construct OGR geometry from wkt!");
+            throw pdal::pdal_error("Unable to construct OGR geometry from wkt");
         newRef(geom);
     }
 
@@ -236,7 +237,6 @@ private:
 };
 
 
-
 enum class GDALError
 {
     None,
@@ -246,51 +246,162 @@ enum class GDALError
     InvalidBand,
     NoTransform,
     NotInvertible,
-    CantReadBlock
+    CantReadBlock,
+    InvalidDriver,
+    DriverNotFound,
+    CantCreate,
+    InvalidOption,
+    CantWriteBlock
 };
 
 class PDAL_DLL Raster
 {
 
 public:
-    Raster(const std::string& filename);
+    /**
+      Constructor.
+
+      \param filename  Filename of raster file.
+      \param drivername  Optional name of driver to use to open raster file.
+    */
+    Raster(const std::string& filename, const std::string& drivername = "");
+
+    /**
+      Constructor.
+
+      \param filename  Filename of raster file.
+      \param drivername  Optional name of driver to use to open raster file.
+      \param srs  SpatialReference of the raster.
+      \param pixelToPos  Transformation matrix to convert raster positions to
+        geolocations.
+    */
+    Raster(const std::string& filename, const std::string& drivername,
+        const SpatialReference& srs, const std::array<double, 6> pixelToPos);
+
+
+    /**
+      Destructor.  Closes an open raster.
+    */
     ~Raster();
+
+    /**
+      Open raster file for reading.
+    */
     GDALError open();
+
+    /**
+      Open a raster for writing.
+
+      \param width  Width of the raster in cells (X direction)
+      \param height  Height of the raster in cells (Y direction)
+      \param numBands  Number of bands in the raster.
+      \param type  Datatype (int, float, etc.) of the raster data.
+      \param noData  Value that indiciates no data in a raster cell.
+      \param options  GDAL driver options.
+    */
+    GDALError open(int width, int height, int numBands, Dimension::Type type,
+        double noData, StringList options = StringList());
+
+    /**
+      Close the raster and deallocate the underlying dataset.
+    */
     void close();
 
-    GDALError read(double x, double y, std::vector<double>& data);
-    std::vector<pdal::Dimension::Type> getPDALDimensionTypes() const
-       { return m_types; }
     /**
-      Read a raster band (layer) into a vector.
+      Read an entire raster band (layer) into a vector.
 
       \param band  Vector into which data will be read.  The vector will
         be resized appropriately to hold the data.
       \param nBand  Band number to read.  Band numbers start at 1.
+      \return Error code or GDALError::None.
     */
     GDALError readBand(std::vector<uint8_t>& band, int nBand);
 
+    /**
+      Write an entire raster band (layer) into raster to be written with GDAL.
+
+      \param data  Linearized raster data to be written.
+      \param nBand  Band number to write.
+      \param name  Name of the raster band.
+    */
+    GDALError writeBand(const uint8_t *data, int nBand,
+        const std::string& name = "");
+
+    /**
+      Read the data for each band at x/y into a vector of doubles.  x and y
+      are transformed to the basis of the raster before the data is fetched.
+
+      \param x  X position to read
+      \param y  Y position to read
+      \param data  Vector in which to store data.
+    */
+    GDALError read(double x, double y, std::vector<double>& data);
+
+    /**
+      Get a vector of dimensions that map to the bands of a raster. 
+    */
+    std::vector<pdal::Dimension::Type> getPDALDimensionTypes() const
+       { return m_types; }
+
+    /**
+      Convert an X/Y raster position into geo-located position using the
+      raster's transformation matrix.
+
+      \param column  raster column whose position should be calculated
+      \param row  raster row whose position should be calculated
+      \param[out]  Array containing the geo-located position of the pixel.
+    */
     void pixelToCoord(int column, int row, std::array<double, 2>& output) const;
+
+    /**
+      Get the spatial reference associated with the raster.
+
+      \return  The associated spatial reference.
+    */
     SpatialReference getSpatialRef() const;
+
+    /**
+      Get the most recent error message.
+    */
     std::string errorMsg() const
         { return m_errorMsg; }
 
+    /**
+      Get the number of bands in the raster.
+
+      \return  The number of bands in the raster.
+    */
+    int bandCount() const
+        { return m_numBands; }
+
+    /**
+      Get the width of the raster (X direction)
+    */
+    int width() const
+        { return m_width; }
+
+    /**
+      Get the height of the raster (Y direction)
+    */
+    int height() const
+        { return m_height; }
+
+private:
     std::string m_filename;
 
-    std::array<double, 6> m_forward_transform;
-    std::array<double, 6> m_inverse_transform;
+    int m_width;
+    int m_height;
+    int m_numBands;
+    std::string m_drivername;
+    std::array<double, 6> m_forwardTransform;
+    std::array<double, 6> m_inverseTransform;
+    SpatialReference m_srs;
+    GDALDataset *m_ds;
 
-    int m_raster_x_size;
-    int m_raster_y_size;
-
-    int m_band_count;
+    std::string m_errorMsg;
     mutable std::vector<pdal::Dimension::Type> m_types;
     std::vector<std::array<double, 2>> m_block_sizes;
 
-    GDALDatasetH m_ds;
-    std::string m_errorMsg;
-
-private:
     bool getPixelAndLinePosition(double x, double y,
         int32_t& pixel, int32_t& line);
     GDALError computePDALDimensionTypes();
@@ -301,7 +412,6 @@ private:
 
 PDAL_DLL std::string transformWkt(std::string wkt, const SpatialReference& from,
     const SpatialReference& to);
-
 
 } // namespace pdal
 

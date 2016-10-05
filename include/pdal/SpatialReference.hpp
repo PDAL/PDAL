@@ -118,10 +118,7 @@ public:
     // Returns true of OSR can validate the SRS
     bool valid() const;
 
-    // (this is a cleaner way of saying "getWKT() == "")
     /// Returns the OGC WKT describing Spatial Reference System.
-    /// If GDAL is linked, it uses GDAL's operations and methods to determine
-    /// the WKT.  If GDAL is not linked, no WKT is returned.
     /// \param mode_flag May be eHorizontalOnly indicating the WKT will not
     /// include vertical coordinate system info (the default), or
     /// eCompoundOK indicating the the returned WKT may be a compound
@@ -130,8 +127,7 @@ public:
     std::string getWKT(WKTModeFlag mode_flag = eHorizontalOnly) const;
     std::string getWKT(WKTModeFlag mode_flag, bool pretty) const;
 
-    /// Sets the SRS using GDAL's OGC WKT. If GDAL is not linked, this
-    /// operation has no effect.
+    /// Sets the SRS using GDAL's OGC WKT.
     /// \param v - a string containing the WKT string.
     void setWKT(std::string const& v)
         { m_wkt = v; }
