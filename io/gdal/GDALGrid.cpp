@@ -34,6 +34,7 @@
 
 #include "GDALGrid.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <limits>
 #include <iostream>
