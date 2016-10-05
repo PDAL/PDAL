@@ -60,6 +60,7 @@ public:
 
     ColorinterpFilter()
         : m_interpDim(Dimension::Id::Z)
+        , m_interpDimString("Z")
         , m_min(0.0)
         , m_max(0.0)
         , m_rampFilename("/vsimem/colorramp.png")
@@ -75,13 +76,13 @@ public:
 
 private:
     virtual void addArgs(ProgramArgs& args);
-    virtual bool processOne(PointRef& point);
     virtual void filter(PointView& view);
     virtual void initialize();
     virtual void addDimensions(PointLayoutPtr layout);
 
 
     Dimension::Id m_interpDim;
+    std::string m_interpDimString;
     double m_min;
     double m_max;
     std::string m_colorramp;

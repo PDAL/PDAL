@@ -61,7 +61,9 @@ CREATE_STATIC_PLUGIN(1, 0, ColorinterpFilter, Filter, s_info)
 
 std::string ColorinterpFilter::getName() const { return s_info.name; }
 
-
+// The VSIFILE* that VSIFileFromMemBuffer creates in this
+// macro is never cleaned up. We're opening seven PNGs in the
+// color-ramps.hpp header. We always open them so they're available.
 #define GETRAMP(name) \
     if (pdal::Utils::iequals(#name, rampFilename)) \
     { \
@@ -97,24 +99,17 @@ std::shared_ptr<pdal::gdal::Raster> openRamp(std::string& rampFilename)
 
 void ColorinterpFilter::addArgs(ProgramArgs& args)
 {
-    std::string dimension;
-    args.add("dimension", "Dimension to interpolate", dimension, "Z");
+    args.add("dimension", "Dimension to interpolate", m_interpDimString, "Z");
     args.add("minimum", "Minimum value to use for scaling", m_min);
     args.add("maximum", "Maximum value to use for scaling", m_max);
     args.add("ramp", "GDAL-readable color ramp image to use", m_colorramp, "pestel_shades");
     args.add("invert", "Invert the ramp direction", m_invertRamp, false);
     args.add("stddev", "Compute minimum/maximum given this many standard deviations", m_stdDevThreshold, 0.0);
-    m_interpDim = Dimension::id(dimension);
 }
 
 void ColorinterpFilter::addDimensions(PointLayoutPtr layout)
 {
-    layout->registerOrAssignDim("Red",
-        Dimension::defaultType(Dimension::Id::Red));
-    layout->registerOrAssignDim("Green",
-        Dimension::defaultType(Dimension::Id::Green));
-    layout->registerOrAssignDim("Blue",
-        Dimension::defaultType(Dimension::Id::Blue));
+    layout->registerDims({Dimension::Id::Red, Dimension::Id::Green, Dimension::Id::Blue});
 }
 
 void ColorinterpFilter::initialize()
@@ -126,42 +121,16 @@ void ColorinterpFilter::initialize()
 
     log()->get(LogLevel::Debug) << getName() << " raster connection: "
                                              << m_raster->m_filename << std::endl;
-}
 
-bool ColorinterpFilter::processOne(PointRef& point)
-{
-
-    double v = point.getFieldAs<double>(m_interpDim);
-    double red(1.0), green(1.0), blue(1.0);
-
-    size_t img_width = m_redBand.size();
-    double factor = (v - m_min) / (m_max - m_min);
-
-    if (m_invertRamp)
-        factor = 1 - factor;
-
-    size_t position(std::floor(factor * img_width));
-
-    // Don't color points whose computed position
-    // would fall outside the image
-    if (position > img_width)
-    {
-        return false;
-    }
-
-    red = m_redBand[position];
-    blue = m_blueBand[position];
-    green = m_greenBand[position];
-
-    point.setField(Dimension::Id::Red, red);
-    point.setField(Dimension::Id::Green, green);
-    point.setField(Dimension::Id::Blue, blue);
-
-    return false;
+    m_interpDim = Dimension::id(m_interpDimString);
+    if (m_interpDim == Dimension::Id::Unknown)
+        throw pdal_error("Dimension name is not known!");
 }
 
 void ColorinterpFilter::filter(PointView& view)
 {
+    // If the user set a stddev value, we use that
+    // over anything else
     if ( m_stdDevThreshold != 0.0)
     {
         std::vector<double> values(view.size());
@@ -192,6 +161,9 @@ void ColorinterpFilter::filter(PointView& view)
         log()->get(LogLevel::Debug) << getName() << " maximum " << m_max << std::endl;
 
     }
+
+    // If the user didn't set min/max values and hadn't set a stddev, we
+    // compute them.
     else if ((m_min == 0.0 && m_max == 0.0) )
     {
         pdal::stats::Summary summary(pdal::Dimension::name(m_interpDim), pdal::stats::Summary::NoEnum);
@@ -209,12 +181,35 @@ void ColorinterpFilter::filter(PointView& view)
     m_raster->readBand(m_greenBand, 2 );
     m_raster->readBand(m_blueBand, 3);
 
-    PointRef point = view.point(0);
 
     for (PointId idx = 0; idx < view.size(); ++idx)
     {
-        point.setPointId(idx);
-        processOne(point);
+
+        double v = view.getFieldAs<double>(m_interpDim, idx);
+
+        size_t img_width = m_redBand.size();
+        double factor = (v - m_min) / (m_max - m_min);
+
+        if (m_invertRamp)
+            factor = 1 - factor;
+
+        size_t position(std::floor(factor * img_width));
+
+        // Don't color points whose computed position
+        // would fall outside the image
+        if (position > img_width)
+        {
+            continue;
+        }
+
+        double red = m_redBand[position];
+        double blue = m_blueBand[position];
+        double green = m_greenBand[position];
+
+        view.setField(Dimension::Id::Red, idx, red);
+        view.setField(Dimension::Id::Green, idx, green);
+        view.setField(Dimension::Id::Blue, idx, blue);
+
     }
 }
 
