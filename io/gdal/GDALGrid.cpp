@@ -34,7 +34,9 @@
 
 #include "GDALGrid.hpp"
 
+#include <cmath>
 #include <limits>
+#include <iostream>
 
 namespace pdal
 {
@@ -88,22 +90,22 @@ uint8_t *GDALGrid::data(const std::string& name)
 {
     if (name == "count")
         return (m_outputTypes & statCount ?
-                (uint8_t *)m_count->data() : nullptr);
+            (uint8_t *)m_count->data() : nullptr);
     if (name == "min")
         return (m_outputTypes & statMin ?
-                (uint8_t *)m_min->data() : nullptr);
+            (uint8_t *)m_min->data() : nullptr);
     if (name == "max")
         return (m_outputTypes & statMax ?
-                (uint8_t *)m_max->data() : nullptr);
+            (uint8_t *)m_max->data() : nullptr);
     if (name == "mean")
         return (m_outputTypes & statMean ?
-                (uint8_t *)m_mean->data() : nullptr);
+            (uint8_t *)m_mean->data() : nullptr);
     if (name == "idw")
         return (m_outputTypes & statIdw ?
-                (uint8_t *)m_idw->data() : nullptr);
+            (uint8_t *)m_idw->data() : nullptr);
     if (name == "stdev")
         return (m_outputTypes & statStdDev ?
-                (uint8_t *)m_stdDev->data() : nullptr);
+            (uint8_t *)m_stdDev->data() : nullptr);
     return nullptr;
 }
 
@@ -261,10 +263,10 @@ void GDALGrid::update(int i, int j, double val, double dist)
     {
         double& mean = (*m_mean)[offset];
         double delta = val - mean;
+
+        mean += delta / count;
         if (m_stdDev)
         {
-            mean += delta / count;
-
             double& stdDev = (*m_stdDev)[offset];
             stdDev += delta * (val - mean);
         }
@@ -273,10 +275,23 @@ void GDALGrid::update(int i, int j, double val, double dist)
     if (m_idw)
     {
         double& idw = (*m_idw)[offset];
-        idw += val / dist;
-
         double& idwDist = (*m_idwDist)[offset];
-        idwDist += 1 / dist;
+
+        // If the distance is 0, we set the idwDist to nan to signal that
+        // we should ignore the distance and take the value as is.
+        if (!std::isnan(idwDist))
+        {
+            if (dist == 0)
+            {
+                idw = val;
+                idwDist = std::numeric_limits<double>::quiet_NaN();   
+            }
+            else
+            {
+                idw += val / dist;
+                idwDist += 1 / dist;
+            }
+        }
     }
 }
 
@@ -293,7 +308,12 @@ void GDALGrid::finalize()
     if (m_idw)
         for (size_t i = 0; i < m_count->size(); ++i)
             if (!empty(i))
-                (*m_idw)[i] /= (*m_idwDist)[i];
+            {
+                double& distSum = (*m_idwDist)[i];
+
+                if (!std::isnan(distSum))
+                    (*m_idw)[i] /= distSum;
+            }
 
     if (m_windowSize > 0)
         windowFill();

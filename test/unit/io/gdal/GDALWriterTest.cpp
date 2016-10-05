@@ -109,7 +109,7 @@ TEST(GDALWriterTest, min)
     wo.add("filename", outfile);
 
     const std::string output = 
-        "5.000 -9999.000     7.000     8.000     9.000 "
+        "5.000 -9999.000     7.000     8.000     8.900 "
         "4.000 -9999.000     6.000     7.000     8.000 "
         "3.000     4.000     5.000     5.500     6.500 "
         "2.000     3.000     4.000     4.500     5.500 "
@@ -131,7 +131,7 @@ TEST(GDALWriterTest, minWindow)
     wo.add("window_size", 2);
 
     const std::string output = 
-        "5.000     5.464     7.000     8.000     9.000 "
+        "5.000     5.464     7.000     8.000     8.900 "
         "4.000     4.857     6.000     7.000     8.000 "
         "3.000     4.000     5.000     5.500     6.500 "
         "2.000     3.000     4.000     4.500     5.500 "
@@ -152,7 +152,7 @@ TEST(GDALWriterTest, max)
     wo.add("filename", outfile);
 
     const std::string output = 
-        "5.000 -9999.000     7.000     8.000     9.000 "
+        "5.000 -9999.000     7.000     8.000     9.100 "
         "4.000 -9999.000     6.000     7.000     8.000 "
         "3.000     4.000     5.000     6.000     7.000 "
         "2.000     3.000     4.000     5.500     6.500 "
@@ -174,7 +174,7 @@ TEST(GDALWriterTest, maxWindow)
     wo.add("window_size", 2);
 
     const std::string output = 
-        "5.000     5.500     7.000     8.000     9.000 "
+        "5.000     5.500     7.000     8.000     9.100 "
         "4.000     4.929     6.000     7.000     8.000 "
         "3.000     4.000     5.000     6.000     7.000 "
         "2.000     3.000     4.000     5.500     6.500 "
@@ -183,7 +183,6 @@ TEST(GDALWriterTest, maxWindow)
     RunGdalReader(wo, outfile, output);
 }
 
-/**
 TEST(GDALWriterTest, mean)
 {
     std::string outfile = Support::temppath("tmp.tif");
@@ -196,13 +195,81 @@ TEST(GDALWriterTest, mean)
     wo.add("filename", outfile);
 
     const std::string output = 
-        "5.000     5.500     7.000     8.000     9.000 "
-        "4.000     4.929     6.000     7.000     8.000 "
+        "5.000 -9999.000     7.000     8.000     8.967 "
+        "4.000 -9999.000     6.000     7.000     8.000 "
+        "3.000     4.000     5.000     5.750     6.750 "
+        "2.000     3.000     4.000     4.875     5.875 "
+        "1.000     2.000     3.000     4.250     5.250 ";
+
+    RunGdalReader(wo, outfile, output);
+}
+
+TEST(GDALWriterTest, meanWindow)
+{
+    std::string outfile = Support::temppath("tmp.tif");
+
+    Options wo;
+    wo.add("gdaldriver", "GTiff");
+    wo.add("output_type", "mean");
+    wo.add("edge_length", 1);
+    wo.add("radius", .7071);
+    wo.add("filename", outfile);
+    wo.add("window_size", 2);
+
+    const std::string output = 
+        "5.000     5.482     7.000     8.000     8.967 "
+        "4.000     4.887     6.000     7.000     8.000 "
+        "3.000     4.000     5.000     5.750     6.750 "
+        "2.000     3.000     4.000     4.875     5.875 "
+        "1.000     2.000     3.000     4.250     5.250 ";
+
+    RunGdalReader(wo, outfile, output);
+}
+
+// Since all our data has a value at the point center, this isn't much of
+// a test, except for the special case where this is handled.  Perhaps we
+// should change the data.
+TEST(GDALWriterTest, idw)
+{
+    std::string outfile = Support::temppath("tmp.tif");
+
+    Options wo;
+    wo.add("gdaldriver", "GTiff");
+    wo.add("output_type", "idw");
+    wo.add("edge_length", 1);
+    wo.add("radius", .7071);
+    wo.add("filename", outfile);
+
+    const std::string output = 
+        "5.000 -9999.000     7.000     8.000     9.000 "
+        "4.000 -9999.000     6.000     7.000     8.000 "
         "3.000     4.000     5.000     6.000     7.000 "
-        "2.000     3.000     4.000     5.500     6.500 "
-        "1.000     2.000     3.000     4.500     5.500 ";
+        "2.000     3.000     4.000     5.000     6.000 "
+        "1.000     2.000     3.000     4.000     5.000 ";
+
+    RunGdalReader(wo, outfile, output);
+}
+
+/**
+TEST(GDALWriterTest, idwWindow)
+{
+    std::string outfile = Support::temppath("tmp.tif");
+
+    Options wo;
+    wo.add("gdaldriver", "GTiff");
+    wo.add("output_type", "idw");
+    wo.add("edge_length", 1);
+    wo.add("radius", .7071);
+    wo.add("filename", outfile);
+    wo.add("window_size", 2);
+
+    const std::string output = 
+        "5.000 -9999.000     7.000     8.000     9.000 "
+        "4.000 -9999.000     6.000     7.000     8.000 "
+        "3.000     4.000     5.000     6.000     7.000 "
+        "2.000     3.000     4.000     5.000     6.000 "
+        "1.000     2.000     3.000     4.000     5.000 ";
 
     RunGdalReader(wo, outfile, output);
 }
 **/
-
