@@ -66,6 +66,8 @@ public:
         , m_rampFilename("/vsimem/colorramp.png")
         , m_invertRamp(false)
         , m_stdDevThreshold(0.0)
+        , m_useMAD(false)
+        , m_madMultiplier(1.4862)
     {}
     ColorinterpFilter& operator=(const ColorinterpFilter&) = delete;
     ColorinterpFilter(const ColorinterpFilter&) = delete;
@@ -93,6 +95,8 @@ private:
     std::vector<uint8_t> m_blueBand;
     bool m_invertRamp;
     double m_stdDevThreshold;
+    bool m_useMAD;
+    double m_madMultiplier;
 };
 
 } // namespace pdal

@@ -44,6 +44,8 @@
 #include <ogr_spatialref.h>
 
 #include <array>
+#include <algorithm>
+#include <cmath>
 
 #include "color-ramps.hpp"
 
@@ -104,7 +106,9 @@ void ColorinterpFilter::addArgs(ProgramArgs& args)
     args.add("maximum", "Maximum value to use for scaling", m_max);
     args.add("ramp", "GDAL-readable color ramp image to use", m_colorramp, "pestel_shades");
     args.add("invert", "Invert the ramp direction", m_invertRamp, false);
-    args.add("stddev", "Compute minimum/maximum given this many standard deviations", m_stdDevThreshold, 0.0);
+    args.add("mad", "Use Median Absolute Deviation to compute ramp bounds in combination with 'k' ", m_useMAD, false);
+    args.add("mad_multiplier", "MAD threshold multiplier", m_madMultiplier, 1.4862);
+    args.add("k", "Number of deviations to compute minimum/maximum ", m_stdDevThreshold, 0.0);
 }
 
 void ColorinterpFilter::addDimensions(PointLayoutPtr layout)
@@ -129,8 +133,12 @@ void ColorinterpFilter::initialize()
 
 void ColorinterpFilter::filter(PointView& view)
 {
-    // If the user set a stddev value, we use that
-    // over anything else
+    double median(0.0);
+    double mad(0.0);
+
+    // If the user set a 'k' value, we use that
+    // defaulting to using a computed stddev if we
+    // were not told to use MAD.
     if ( m_stdDevThreshold != 0.0)
     {
         std::vector<double> values(view.size());
@@ -143,22 +151,41 @@ void ColorinterpFilter::filter(PointView& view)
             values[idx] = v;
         }
 
-        auto median = [](std::vector<double> vals)
+        auto compute_median = [](std::vector<double> vals)
         {
             std::nth_element(vals.begin(), vals.begin()+vals.size()/2, vals.end());
 
             return *(vals.begin()+vals.size()/2);
         };
 
-        double med = median(values);
-        double threshold = (m_stdDevThreshold * summary.stddev());
-        m_min = med - threshold;
-        m_max = med + threshold;
+        median = compute_median(values);
+        if (m_useMAD)
+        {
+             std::transform(values.begin(), values.end(), values.begin(),
+                   [median](double v) { return std::fabs(v - median); });
+             mad = compute_median(values);
 
-        log()->get(LogLevel::Debug) << getName() << " stddev threshold " << threshold << std::endl;
-        log()->get(LogLevel::Debug) << getName() << " median " << med << std::endl;
-        log()->get(LogLevel::Debug) << getName() << " minimum " << m_min << std::endl;
-        log()->get(LogLevel::Debug) << getName() << " maximum " << m_max << std::endl;
+             mad = mad * m_madMultiplier;
+             double threshold = m_stdDevThreshold * mad;
+             m_min = median - threshold;
+             m_max = median + threshold;
+
+             log()->get(LogLevel::Debug) << getName() << " mad " << mad << std::endl;
+             log()->get(LogLevel::Debug) << getName() << " median " << median << std::endl;
+             log()->get(LogLevel::Debug) << getName() << " minimum " << m_min << std::endl;
+             log()->get(LogLevel::Debug) << getName() << " maximum " << m_max << std::endl;
+        }
+        else
+        {
+             double threshold = (m_stdDevThreshold * summary.stddev());
+             m_min = median - threshold;
+             m_max = median + threshold;
+
+             log()->get(LogLevel::Debug) << getName() << " stddev threshold " << threshold << std::endl;
+             log()->get(LogLevel::Debug) << getName() << " median " << median << std::endl;
+             log()->get(LogLevel::Debug) << getName() << " minimum " << m_min << std::endl;
+             log()->get(LogLevel::Debug) << getName() << " maximum " << m_max << std::endl;
+        }
 
     }
 
@@ -180,6 +207,7 @@ void ColorinterpFilter::filter(PointView& view)
     m_raster->readBand(m_redBand, 1);
     m_raster->readBand(m_greenBand, 2 );
     m_raster->readBand(m_blueBand, 3);
+
 
 
     for (PointId idx = 0; idx < view.size(); ++idx)

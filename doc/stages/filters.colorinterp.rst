@@ -4,15 +4,25 @@ filters.colorinterp
 ====================
 
 The color interpolation filter assigns scaled RGB values from an image based on
-a given dimension.  You can provide your own `GDAL`_-readable image for the
-scale color factors. :ref:`filters.colorinterp` will use the entire band to
-scale the colors. The default ramps provided by PDAL are 256x1 RGB images, and
-might be a good starting point for creating your own scale factors. See
-`Default Ramps`_ for more information.
+a given dimension.  It provides three possible approaches:
 
+1. You provide a ``minimum`` and ``maximum``, and the data are scaled for the
+   given ``dimension`` accordingly.
 
-After applying this filter, RGB values for the point cloud are scaled based on the
-image provided by the ``ramp``.
+2. You provide a ``k`` and a ``mad`` setting, and the scaling is set based on
+   Median Absolute Deviation.
+
+3. You provide a ``k`` setting and the scaling is set based on the
+   ``k``-number of standard deviations from the median.
+
+You can provide your own `GDAL`_-readable image for the scale color factors,
+but a number of pre-defined ramps are embedded in PDAL.  The default ramps
+provided by PDAL are 256x1 RGB images, and might be a good starting point for
+creating your own scale factors. See `Default Ramps`_ for more information.
+
+.. note::
+
+    :ref:`filters.colorinterp` will use the entire band to scale the colors.
 
 .. code-block:: json
 
@@ -22,8 +32,8 @@ image provided by the ``ramp``.
       {
         "type":"filters.colorinterp",
         "ramp":"pestel_shades",
-        "minimum":0,
-        "maximum":100,
+        "mad":true,
+        "k":1.8,
         "dimension":"Z"
       },
       "colorized.las"
@@ -111,18 +121,28 @@ dimension
 
 minimum
   The minimum value to use to scale the data. If none is specified, one is
-  computed from the data.
+  computed from the data. If one is specified but a ``k`` value is also
+  provided, the ``k`` value will be used.
 
 maximum
   The maximum value to use to scale the data. If none is specified, one is
-  computed from the data.
+  computed from the data. If one is specified but a ``k`` value is also
+  provided, the ``k`` value will be used.
 
 invert
   Invert the direction of the ramp? [Default: false]
 
-stddev
+k
   Color based on the given number of standard deviations from the median. If
   set, ``minimum`` and ``maximum`` will be computed from the median and setting
   them will have no effect.
+
+mad
+  If true, ``minimum`` and ``maximum`` will be computed by the median absolute
+  deviation. See :ref:`filters.mad` for discussion. [Default: false]
+
+mad_multiplier
+  MAD threshold multiplier. Used in conjunction with ``k`` to threshold the
+  diferencing. [Default: 1.4862]
 
 .. _`GDAL`: http://www.gdal.org
