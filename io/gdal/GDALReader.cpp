@@ -70,7 +70,7 @@ void GDALReader::initialize()
 
     m_raster->open();
     setSpatialReference(m_raster->getSpatialRef());
-    m_count = m_raster->m_raster_x_size * m_raster->m_raster_y_size;
+    m_count = m_raster->width() * m_raster->height();
     m_raster->close();
 }
 
@@ -84,9 +84,10 @@ QuickInfo GDALReader::inspect()
     initialize();
 
     m_raster = std::unique_ptr<gdal::Raster>(new gdal::Raster(m_filename));
-    m_raster->open();
+    if (m_raster->open() == gdal::GDALError::CantOpen)
+        throw pdal_error("Couldn't open raster file '" + m_filename + "'.");
 
-    qi.m_pointCount = m_raster->m_raster_x_size * m_raster->m_raster_y_size;
+    qi.m_pointCount = m_raster->width() * m_raster->height();
     // qi.m_bounds = ???;
     qi.m_srs = m_raster->getSpatialRef();
     qi.m_valid = true;
@@ -99,7 +100,7 @@ void GDALReader::addDimensions(PointLayoutPtr layout)
 {
     layout->registerDim(pdal::Dimension::Id::X);
     layout->registerDim(pdal::Dimension::Id::Y);
-    for (int i = 0; i < m_raster->m_band_count; ++i)
+    for (int i = 0; i < m_raster->bandCount(); ++i)
     {
         std::ostringstream oss;
         oss << "band-" << (i + 1);
@@ -111,7 +112,8 @@ void GDALReader::addDimensions(PointLayoutPtr layout)
 void GDALReader::ready(PointTableRef table)
 {
     m_index = 0;
-    m_raster->open();
+    if (m_raster->open() == gdal::GDALError::CantOpen)
+        throw pdal_error("Couldn't open raster file '" + m_filename + "'.");
 }
 
 
@@ -121,9 +123,9 @@ point_count_t GDALReader::read(PointViewPtr view, point_count_t num)
     PointId nextId = view->size();
 
     std::array<double, 2> coords;
-    for (int row = 0; row < m_raster->m_raster_y_size; ++row)
+    for (int row = 0; row < m_raster->height(); ++row)
     {
-        for (int col = 0; col < m_raster->m_raster_x_size; ++col)
+        for (int col = 0; col < m_raster->width(); ++col)
         {
             m_raster->pixelToCoord(col, row, coords);
             view->setField(Dimension::Id::X, nextId, coords[0]);
@@ -136,7 +138,7 @@ point_count_t GDALReader::read(PointViewPtr view, point_count_t num)
     std::vector<Dimension::Type> band_types =
         m_raster->getPDALDimensionTypes();
 
-    for (int b = 0; b < m_raster->m_band_count; ++b)
+    for (int b = 0; b < m_raster->bandCount(); ++b)
     {
         // Bands count from 1
         m_raster->readBand(band, b + 1);

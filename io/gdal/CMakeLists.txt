@@ -1,10 +1,8 @@
 set(src
     GDALReader.cpp
+    GDALWriter.cpp
+    GDALGrid.cpp
 )
 
-set(inc
-    GDALReader.hpp
-)
-
-PDAL_ADD_DRIVER(reader gdal "${src}" "${inc}" objs)
+PDAL_ADD_DRIVER(reader gdal "${src}" "${incs}" objs)
 set(PDAL_TARGET_OBJECTS ${PDAL_TARGET_OBJECTS} ${objs} PARENT_SCOPE)

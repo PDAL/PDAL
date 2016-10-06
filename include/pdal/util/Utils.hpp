@@ -906,7 +906,7 @@ namespace Utils
     {
         if (s == "nan" || s == "NaN")
         {
-            d = std::numeric_limits<double>::quiet_NaN();   
+            d = std::numeric_limits<double>::quiet_NaN();
             return true;
         }
 
