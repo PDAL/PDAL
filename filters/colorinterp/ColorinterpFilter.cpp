@@ -124,7 +124,7 @@ void ColorinterpFilter::initialize()
     m_raster->open();
 
     log()->get(LogLevel::Debug) << getName() << " raster connection: "
-                                             << m_raster->m_filename << std::endl;
+                                             << m_raster->filename() << std::endl;
 
     m_interpDim = Dimension::id(m_interpDimString);
     if (m_interpDim == Dimension::Id::Unknown)

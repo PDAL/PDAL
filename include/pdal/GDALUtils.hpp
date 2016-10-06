@@ -338,7 +338,7 @@ public:
     GDALError read(double x, double y, std::vector<double>& data);
 
     /**
-      Get a vector of dimensions that map to the bands of a raster. 
+      Get a vector of dimensions that map to the bands of a raster.
     */
     std::vector<pdal::Dimension::Type> getPDALDimensionTypes() const
        { return m_types; }
@@ -385,6 +385,8 @@ public:
     */
     int height() const
         { return m_height; }
+
+    std::string const& filename() { return m_filename; }
 
 private:
     std::string m_filename;
