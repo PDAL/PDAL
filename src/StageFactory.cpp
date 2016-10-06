@@ -85,6 +85,7 @@
 
 // writers
 #include <bpf/BpfWriter.hpp>
+#include <gdal/GDALWriter.hpp>
 #include <las/LasWriter.hpp>
 #include <ply/PlyWriter.hpp>
 #include <sbet/SbetWriter.hpp>
@@ -208,7 +209,8 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
         { "sqlite", "writers.sqlite" },
         { "txt", "writers.text" },
         { "xyz", "writers.text" },
-        { "", "writers.text" }
+        { "", "writers.text" },
+        { "tif", "writers.gdal" }
     };
 
     // Strip off '.' and make lowercase.
@@ -275,6 +277,7 @@ StageFactory::StageFactory(bool no_plugins)
 
     // writers
     PluginManager::initializePlugin(BpfWriter_InitPlugin);
+    PluginManager::initializePlugin(GDALWriter_InitPlugin);
     PluginManager::initializePlugin(LasWriter_InitPlugin);
     PluginManager::initializePlugin(PlyWriter_InitPlugin);
     PluginManager::initializePlugin(SbetWriter_InitPlugin);

@@ -42,6 +42,20 @@
 
 using namespace pdal;
 
+TEST(GDALReaderTest, badfile)
+{
+    Options ro;
+    ro.add("filename", Support::datapath("png/autzen-foo.png"));
+
+    GDALReader gr;
+    gr.setOptions(ro);
+
+    PointTable t;
+    gr.prepare(t);
+    EXPECT_THROW(gr.execute(t), pdal_error);
+}
+
+
 TEST(GDALReaderTest, simple)
 {
     Options ro;
