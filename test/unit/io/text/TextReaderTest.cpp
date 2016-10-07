@@ -97,3 +97,14 @@ TEST(TextReaderTest, t3)
     compareTextLas(Support::datapath("text/utm17_3.txt"),
         Support::datapath("las/utm17.las"));
 }
+
+TEST(TextReaderTest, badheader)
+{
+    TextReader t;
+    Options to;
+    to.add("filename", Support::datapath("text/badheader.txt"));
+    t.setOptions(to);
+
+    PointTable tt;
+    EXPECT_THROW(t.prepare(tt), pdal_error);
+}

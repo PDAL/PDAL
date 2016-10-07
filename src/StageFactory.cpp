@@ -84,6 +84,7 @@
 
 // writers
 #include <bpf/BpfWriter.hpp>
+#include <gdal/GDALWriter.hpp>
 #include <las/LasWriter.hpp>
 #include <ply/PlyWriter.hpp>
 #include <sbet/SbetWriter.hpp>
@@ -118,7 +119,7 @@ StringList StageFactory::extensions(const std::string& driver)
         { "readers.sqlite", { "sqlite" } },
         { "readers.mrsid", { "sid" } },
         { "readers.tindex", { "tindex" } },
-        { "readers.txt", { "txt" } },
+        { "readers.text", { "txt" } },
         { "readers.icebridge", { "h5" } },
 
         { "writers.bpf", { "bpf" } },
@@ -160,7 +161,7 @@ std::string StageFactory::inferReaderDriver(const std::string& filename)
         { "sqlite", "readers.sqlite" },
         { "sid", "readers.mrsid" },
         { "tindex", "readers.tindex" },
-        { "txt", "readers.txt" },
+        { "txt", "readers.text" },
         { "h5", "readers.icebridge" }
     };
 
@@ -207,7 +208,8 @@ std::string StageFactory::inferWriterDriver(const std::string& filename)
         { "sqlite", "writers.sqlite" },
         { "txt", "writers.text" },
         { "xyz", "writers.text" },
-        { "", "writers.text" }
+        { "", "writers.text" },
+        { "tif", "writers.gdal" }
     };
 
     // Strip off '.' and make lowercase.
@@ -273,6 +275,7 @@ StageFactory::StageFactory(bool no_plugins)
 
     // writers
     PluginManager::initializePlugin(BpfWriter_InitPlugin);
+    PluginManager::initializePlugin(GDALWriter_InitPlugin);
     PluginManager::initializePlugin(LasWriter_InitPlugin);
     PluginManager::initializePlugin(PlyWriter_InitPlugin);
     PluginManager::initializePlugin(SbetWriter_InitPlugin);
