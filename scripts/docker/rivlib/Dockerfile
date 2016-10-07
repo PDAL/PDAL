@@ -1,7 +1,8 @@
-FROM pdal/pdal
+FROM pdal/dependencies
 MAINTAINER Pete Gadomski <pete.gadomski@gmail.com>
 
-COPY rivlib-2_2_1-x86_64-linux-gcc44 /
+COPY rivlib-2_3_0-x86_64-linux-gcc55.zip /
+RUN unzip rivlib-2_3_0-x86_64-linux-gcc55.zip
 
 RUN git clone --depth=1 https://github.com/PDAL/PDAL \
 	&& cd PDAL \
@@ -20,7 +21,7 @@ RUN git clone --depth=1 https://github.com/PDAL/PDAL \
 		-DBUILD_PLUGIN_PCL=ON \
 		-DBUILD_PLUGIN_PGPOINTCLOUD=ON \
 		-DBUILD_PLUGIN_SQLITE=ON \
-        -DRiVLib_DIR=/rivlib-2_2_1-x86_64-linux-gcc44/cmake \
+        -DRiVLib_DIR=/rivlib-2_3_0-x86_64-linux-gcc55/cmake \
 		-DBUILD_PLUGIN_RIVLIB=ON \
 		-DBUILD_PLUGIN_PYTHON=ON \
 		-DCMAKE_INSTALL_PREFIX=/usr \
