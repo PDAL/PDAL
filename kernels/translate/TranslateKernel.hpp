@@ -68,6 +68,7 @@ private:
     std::string m_readerType;
     std::vector<std::string> m_filterType;
     std::string m_writerType;
+    std::string m_filterJSON;
 };
 
 } // namespace pdal

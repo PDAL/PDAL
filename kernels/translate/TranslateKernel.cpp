@@ -42,6 +42,9 @@
 #include <pdal/PointView.hpp>
 #include <pdal/Stage.hpp>
 #include <pdal/StageFactory.hpp>
+#include <pdal/PipelineReaderJSON.hpp>
+#include <pdal/util/FileUtils.hpp>
+#include <json/json.h>
 
 #include <memory>
 #include <string>
@@ -73,6 +76,7 @@ TranslateKernel::TranslateKernel()
     , m_pipelineOutput("")
     , m_readerType("")
     , m_writerType("")
+    , m_filterJSON("")
 {}
 
 void TranslateKernel::addSwitches(ProgramArgs& args)
@@ -80,6 +84,7 @@ void TranslateKernel::addSwitches(ProgramArgs& args)
     args.add("input,i", "Input filename", m_inputFile).setPositional();
     args.add("output,o", "Output filename", m_outputFile).setPositional();
     args.add("filter,f", "Filter type", m_filterType).setOptionalPositional();
+    args.add("json", "JSON array of filters", m_filterJSON).setOptionalPositional();
     args.add("pipeline,p", "Pipeline output", m_pipelineOutput);
     args.add("reader,r", "Reader type", m_readerType);
     args.add("writer,w", "Writer type", m_writerType);
@@ -89,6 +94,9 @@ int TranslateKernel::execute()
 {
     Stage& reader = m_manager.makeReader(m_inputFile, m_readerType);
     Stage* stage = &reader;
+
+    if (m_filterJSON.size() && m_filterType.size())
+        throw pdal_error("Cannot set --filter options and json filter blocks at the same time");
 
     // add each filter provided on the command-line, updating the stage pointer
     for (auto const f : m_filterType)
@@ -100,6 +108,29 @@ int TranslateKernel::execute()
 
         Stage& filter = m_manager.makeFilter(filter_name, *stage);
         stage = &filter;
+    }
+
+
+    if (!m_filterJSON.empty())
+    {
+        std::string json("");
+        if (pdal::FileUtils::fileExists(m_filterJSON))
+            json = pdal::FileUtils::readFileIntoString(m_filterJSON);
+
+        if (json.empty())
+            json = m_filterJSON;
+
+        Json::Reader jsonReader;
+        Json::Value filters;
+        jsonReader.parse(json, filters);
+
+        if (!filters.size())
+            throw pdal_error("Unable to parse JSON into an array!");
+
+        PipelineReaderJSON pipelineReader(m_manager);
+        pipelineReader.parsePipeline(filters);
+
+
     }
 
     Stage& writer = m_manager.makeWriter(m_outputFile, m_writerType, *stage);
