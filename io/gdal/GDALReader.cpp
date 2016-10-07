@@ -69,10 +69,6 @@ void GDALReader::initialize()
     m_raster.reset(new gdal::Raster(m_filename));
 
     m_raster->open();
-<<<<<<< HEAD
-    setSpatialReference(m_raster->getSpatialRef());
-    m_count = m_raster->width() * m_raster->height();
-=======
     try
     {
         setSpatialReference(m_raster->getSpatialRef());
@@ -82,8 +78,7 @@ void GDALReader::initialize()
         log()->get(LogLevel::Error) << "Could not create an SRS" << std::endl;
     }
 
-    m_count = m_raster->m_raster_x_size * m_raster->m_raster_y_size;
->>>>>>> db442a7... For inspectable Readers, try-catch around SRS init.
+    m_count = m_raster->width() * m_raster->height();
     m_raster->close();
 }
 
