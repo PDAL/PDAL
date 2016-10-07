@@ -63,6 +63,7 @@ private:
     double m_multiplier;
     std::string m_dimName;
     Dimension::Id m_dimId;
+    double m_madMultiplier;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void prepared(PointTableRef table);
