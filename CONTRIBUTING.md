@@ -39,6 +39,7 @@ Fixes #123.
 * [General GitHub documentation](http://help.github.com/)
 * [GitHub pull request documentation](http://help.github.com/send-pull-requests/)
 * #pdal IRC channel on freenode.org
+* [PDAL Gitter channel](https://gitter.im/PDAL/PDAL)
 
 ## Acknowledgements
 
