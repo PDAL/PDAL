@@ -537,10 +537,11 @@ std::string Utils::demangle(const std::string& s)
     int status;
     std::unique_ptr<char[], void (*)(void*)> result(
             abi::__cxa_demangle(s.c_str(), 0, 0, &status), std::free);
-    return std::string(result.get());
-#else
-    return s;
+    if (status == 0)
+        return std::string(result.get());
 #endif
+
+    return s;
 }
 
 

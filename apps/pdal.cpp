@@ -50,7 +50,6 @@
 #include <execinfo.h>
 #include <unistd.h>
 #include <dlfcn.h>
-#include <cxxabi.h>
 #endif
 
 using namespace pdal;
@@ -241,8 +240,7 @@ int main(int argc, char* argv[])
 
             if (dladdr(buffer[i], &info))
             {
-                char* demangled = abi::__cxa_demangle(info.dli_sname, nullptr,
-                        0, &status);
+                const std::string demangled(Utils::demangle(info.dli_sname));
 
                 const std::size_t offset(
                         static_cast<char*>(buffer[i]) -
@@ -257,11 +255,8 @@ int main(int argc, char* argv[])
                     prefix = symbol.substr(0, pos);
                 }
 
-                lines.push_back(prefix +
-                        (status == 0 ? demangled : info.dli_sname) + " + " +
+                lines.push_back(prefix + demangled + " + " +
                         std::to_string(offset));
-
-                free(demangled);
             }
             else
             {
