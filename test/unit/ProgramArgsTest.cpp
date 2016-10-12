@@ -268,13 +268,13 @@ TEST(ProgramArgsTest, vector)
 
     std::string m_foo;
     std::vector<int> m_bar;
+    std::vector<int> m_flub;
     bool m_baz;
 
     args.add("foo,f", "Foo description", m_foo, "foo").setPositional();
     args.add("bar", "Foo description", m_bar).setOptionalPositional();
     args.add("baz,z", "Foo description", m_baz);
-
-    // Go through exceptions procedurally.
+    args.add("flub", "Flub description", m_flub, {1, 3, 5});
 
     StringList s = toStringList("--bar 23 --bar 45 Foo -z");
     args.parse(s);
@@ -283,6 +283,10 @@ TEST(ProgramArgsTest, vector)
     EXPECT_EQ(m_baz, true);
     EXPECT_EQ(m_bar[0], 23);
     EXPECT_EQ(m_bar[1], 45);
+    EXPECT_EQ(m_flub.size(), 3u);
+    EXPECT_EQ(m_flub[0], 1);
+    EXPECT_EQ(m_flub[1], 3);
+    EXPECT_EQ(m_flub[2], 5);
 
     args.reset();
     s = toStringList("Foo");
@@ -290,6 +294,7 @@ TEST(ProgramArgsTest, vector)
     EXPECT_EQ(m_bar.size(), 0u);
     EXPECT_EQ(m_foo, "Foo");
     EXPECT_EQ(m_baz, false);
+    EXPECT_EQ(m_flub.size(), 3u);
 
     args.reset();
     s = toStringList("Fool 44 55 66");
@@ -300,6 +305,18 @@ TEST(ProgramArgsTest, vector)
     EXPECT_EQ(m_bar[1], 55);
     EXPECT_EQ(m_bar[2], 66);
     EXPECT_EQ(m_baz, false);
+    EXPECT_EQ(m_flub.size(), 3u);
+
+    args.reset();
+    s = toStringList("--bar 23 --flub 2 Foo -z --flub 4");
+    args.parse(s);
+    EXPECT_EQ(m_foo, "Foo");
+    EXPECT_EQ(m_bar.size(), 1u);
+    EXPECT_EQ(m_baz, true);
+    EXPECT_EQ(m_bar[0], 23);
+    EXPECT_EQ(m_flub.size(), 2u);
+    EXPECT_EQ(m_flub[0], 2);
+    EXPECT_EQ(m_flub[1], 4);
 }
 
 TEST(ProgramArgsTest, stringvector)

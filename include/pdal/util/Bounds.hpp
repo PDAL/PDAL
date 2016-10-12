@@ -560,7 +560,10 @@ public:
     BOX2D to2d() const;
     bool is3d() const;
 
-    friend PDAL_DLL std::istream& operator >> (std::istream& in, Bounds& bounds);
+    friend PDAL_DLL std::istream& operator >> (std::istream& in,
+        Bounds& bounds);
+    friend PDAL_DLL std::ostream& operator << (std::ostream& out,
+        const Bounds& bounds);
 
 private:
     BOX3D m_box;
@@ -635,5 +638,6 @@ extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX2D& bounds);
 extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX3D& bounds);
 
 PDAL_DLL std::istream& operator >> (std::istream& in, Bounds& bounds);
+PDAL_DLL std::ostream& operator << (std::ostream& in, Bounds& bounds);
 
 } // namespace pdal

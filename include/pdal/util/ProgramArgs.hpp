@@ -66,6 +66,9 @@ public:
     {
         if (s.empty())
             return;
+
+        // Turn a short arg list into a set of short args: -afv -> -a -f -v
+        // so that each argval represents a single arg.
         if (s.size() > 1 && s[0] == '-' && s[1] != '-')
             for (size_t i = 1; i < s.size(); i++)
                 m_vals.push_back({std::string("-") + s[i]});
@@ -638,7 +641,8 @@ public:
       \param description  Argument description.
     */
     BaseVArg(const std::string& longname, const std::string& shortname,
-        const std::string& description) : Arg(longname, shortname, description)
+        const std::string& description) : Arg(longname, shortname, description),
+        m_defaultProvided(false)
     {}
 
     /**
@@ -681,6 +685,17 @@ public:
             throw arg_error(oss.str());
         }
     }
+
+    /**
+      Return whether a default value was provided for the argument.
+
+      \return  Whether a default was provided.
+    */
+    virtual bool defaultProvided() const
+        { return m_defaultProvided; }
+
+protected:
+    bool m_defaultProvided;
 };
 
 /**
@@ -692,7 +707,28 @@ class VArg : public BaseVArg
 {
 public:
     /**
-      Constructor.
+      Constructor for arguments with default value.
+
+      \param longname  Name of argument specified on command line with "--"
+        prefix.
+      \param shortname  Optional name of argument specified on command
+        line with "-" prefix.
+      \param description  Argument description.
+      \param variable  Variable to which the argument value(s) should be bound.
+      \param def  Default value.
+    */
+    VArg(const std::string& longname, const std::string& shortname,
+        const std::string& description, std::vector<T>& variable,
+        std::vector<T> def) :
+        BaseVArg(longname, shortname, description), m_var(variable),
+        m_defaultVal(def)
+    {
+        m_var = def;
+        m_defaultProvided = true;
+    }
+
+    /**
+      Constructor for arguments without default value.
 
       \param longname  Name of argument specified on command line with "--"
         prefix.
@@ -735,6 +771,8 @@ public:
             oss << "Invalid value for argument '" << m_longname << "'.";
             throw arg_error(oss.str());
         }
+        if (!m_set)
+            m_var.clear();
         m_var.push_back(var);
         m_set = true;
     }
@@ -748,13 +786,33 @@ public:
     */
     virtual void reset()
     {
-        m_var.clear();
+        m_var = m_defaultVal;
         m_set = false;
         m_hidden = false;
     }
 
+    /**
+      Return a string representation of an Arg's default value, or an
+      empty string if none exists.
+
+      \return  Default value as a string.
+    */
+    virtual std::string defaultVal() const
+    {
+        std::string s;
+
+        for (size_t i = 0; i < m_defaultVal.size(); ++i)
+        {
+            if (i > 0)
+                s += ", ";
+            s += Utils::toString(m_defaultVal[i]);
+        }
+        return s;
+    }
+
 private:
     std::vector<T>& m_var;
+    std::vector<T> m_defaultVal;
 };
 
 /**
@@ -765,7 +823,28 @@ class VArg<std::string> : public BaseVArg
 {
 public:
     /**
-      Constructor.
+      Constructor for arguments wit default value.
+
+      \param longname  Name of argument specified on command line with "--"
+        prefix.
+      \param shortname  Optional name of argument specified on command
+        line with "-" prefix.
+      \param description  Argument description.
+      \param variable  Variable to which the argument value(s) should be bound.
+      \param def  Default value.
+    */
+    VArg(const std::string& longname, const std::string& shortname,
+        const std::string& description, std::vector<std::string>& variable,
+        std::vector<std::string> def) :
+        BaseVArg(longname, shortname, description), m_var(variable),
+        m_defaultVal(def)
+    {
+        m_var = def;
+        m_defaultProvided = true;
+    }
+
+    /**
+      Constructor for arguments without default value.
 
       \param longname  Name of argument specified on command line with "--"
         prefix.
@@ -802,6 +881,8 @@ public:
             throw arg_error(oss.str());
         }
         m_rawVal = s;
+        if (!m_set)
+            m_var.clear();
         m_var.reserve(m_var.size() + slist.size());
         m_var.insert(m_var.end(), slist.begin(), slist.end());
         m_set = true;
@@ -816,13 +897,33 @@ public:
     */
     virtual void reset()
     {
-        m_var.clear();
+        m_var = m_defaultVal;
         m_set = false;
         m_hidden = false;
     }
 
+    /**
+      Return a string representation of an Arg's default value, or an
+      empty string if none exists.
+
+      \return  Default value as a string.
+    */
+    virtual std::string defaultVal() const
+    {
+        std::string s;
+
+        for (size_t i = 0; i < m_defaultVal.size(); ++i)
+        {
+            if (i > 0)
+                s += ", ";
+            s += m_defaultVal[i];
+        }
+        return s;
+    }
+
 private:
     std::vector<std::string>& m_var;
+    std::vector<std::string> m_defaultVal;
 };
 
 /**
@@ -905,6 +1006,30 @@ public:
     }
 
     /**
+      Add a list-based (vector) argument with a default.
+
+      \param name  Name of argument.  Argument names are specified as
+        "longname[,shortname]", where shortname is an optional one-character
+        abbreviation.
+      \param description  Description of the argument.
+      \param var  Reference to variable to bind to argument.
+      \return  Reference to the new argument.
+    */
+    template<typename T>
+    Arg& add(const std::string& name, const std::string& description,
+        std::vector<T>& var, std::vector<T> def)
+    {
+        std::string longname, shortname;
+        splitName(name, longname, shortname);
+
+        Arg *arg = new VArg<T>(longname, shortname, description, var, def);
+        addLongArg(longname, arg);
+        addShortArg(shortname, arg);
+        m_args.push_back(std::unique_ptr<Arg>(arg));
+        return *arg;
+    }
+
+    /**
       Add an argument to the list of arguments with a default.
 
       \param name  Name of argument.  Argument names are specified as
@@ -912,8 +1037,7 @@ public:
         abbreviation.
       \param description  Description of the argument.
       \param var  Reference to variable to bind to argument.
-      \param def  Default value of argument.  If not specified, a
-        default-constructed value is used.
+      \param def  Default value of argument.
       \return  Reference to the new argument.
     */
     template<typename T>

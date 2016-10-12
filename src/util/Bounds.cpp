@@ -313,4 +313,13 @@ std::istream& operator>>(std::istream& in, Bounds& bounds)
     return in;
 }
 
+std::ostream& operator<<(std::ostream& out, const Bounds& bounds)
+{
+    if (bounds.is3d())
+        out << bounds.to3d();
+    else
+        out << bounds.to2d();
+    return out;
+}
+
 } // namespace pdal
