@@ -69,7 +69,15 @@ void GDALReader::initialize()
     m_raster.reset(new gdal::Raster(m_filename));
 
     m_raster->open();
-    setSpatialReference(m_raster->getSpatialRef());
+    try
+    {
+        setSpatialReference(m_raster->getSpatialRef());
+    }
+    catch (...)
+    {
+        log()->get(LogLevel::Error) << "Could not create an SRS" << std::endl;
+    }
+
     m_count = m_raster->width() * m_raster->height();
     m_raster->close();
 }

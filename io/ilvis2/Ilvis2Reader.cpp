@@ -208,6 +208,11 @@ void Ilvis2Reader::readPoint(PointRef& point, StringList s,
 
 void Ilvis2Reader::ready(PointTableRef table)
 {
+    if (!m_metadataFile.empty())
+    {
+        m_mdReader.readMetadataFile(m_metadataFile, &m_metadata);
+    }
+
     static const int HeaderSize = 2;
     std::string line;
 
@@ -291,10 +296,7 @@ point_count_t Ilvis2Reader::read(PointViewPtr view, point_count_t count)
 
 void Ilvis2Reader::done(PointTableRef table)
 {
-    if (!m_metadataFile.empty())
-    {
-        m_mdReader.readMetadataFile(m_metadataFile, &m_metadata);
-    }
+
 
 }
 

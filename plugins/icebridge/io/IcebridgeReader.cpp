@@ -105,6 +105,10 @@ void IcebridgeReader::ready(PointTableRef table)
 {
     m_hdf5Handler.initialize(m_filename, hdf5Columns);
     m_index = 0;
+    if (!m_metadataFile.empty())
+    {
+        m_mdReader.readMetadataFile(m_metadataFile, &m_metadata);
+    }
 }
 
 
@@ -209,11 +213,6 @@ void IcebridgeReader::initialize()
 void IcebridgeReader::done(PointTableRef table)
 {
     m_hdf5Handler.close();
-    if (!m_metadataFile.empty())
-    {
-        m_mdReader.readMetadataFile(m_metadataFile, &m_metadata);
-    }
-
 }
 
 

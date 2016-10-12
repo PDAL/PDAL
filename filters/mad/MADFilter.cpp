@@ -58,6 +58,7 @@ void MADFilter::addArgs(ProgramArgs& args)
     args.add("k", "Number of deviations", m_multiplier, 2.0);
     args.add("dimension", "Dimension on which to calculate statistics",
         m_dimName);
+    args.add("mad_multiplier", "MAD threshold multiplier", m_madMultiplier, 1.4862);
 }
 
 void MADFilter::prepared(PointTableRef table)
@@ -80,10 +81,9 @@ PointViewSet MADFilter::run(PointViewPtr view)
     PointViewSet viewSet;
     PointViewPtr output = view->makeNew();
 
-    auto median = [](std::vector<double> vals)
+    auto estimate_median = [](std::vector<double> vals)
     {
         std::nth_element(vals.begin(), vals.begin()+vals.size()/2, vals.end());
-
         return *(vals.begin()+vals.size()/2);
     };
 
@@ -91,26 +91,24 @@ PointViewSet MADFilter::run(PointViewPtr view)
     for (PointId j = 0; j < view->size(); ++j)
         z[j] = view->getFieldAs<double>(m_dimId, j);
 
-    double m = median(z);
-    log()->get(LogLevel::Debug) << "Median value: " << m << std::endl;
+    double median = estimate_median(z);
+    log()->get(LogLevel::Debug) << getName() << " estimated median value: " << median << std::endl;
 
-    std::vector<double> a(view->size());
-    for (PointId j = 0; j < view->size(); ++j)
-        a[j] = std::fabs(view->getFieldAs<double>(m_dimId, j)-m);
-
-    double mad = median(a)*1.4862;
-    log()->get(LogLevel::Debug) << "MAD: " << mad << std::endl;
+    std::transform(z.begin(), z.end(), z.begin(),
+       [median](double v) { return std::fabs(v - median); });
+    double mad = estimate_median(z)*m_madMultiplier;
+    log()->get(LogLevel::Debug) << getName() << " mad " << mad << std::endl;
 
     for (PointId j = 0; j < view->size(); ++j)
     {
-        if (a[j]/mad < m_multiplier)
+        if (z[j]/mad < m_multiplier)
             output->appendPoint(*view, j);
     }
-    
-    double low_fence = m - m_multiplier * mad;
-    double hi_fence = m + m_multiplier * mad;
-    
-    log()->get(LogLevel::Debug) << "Cropping " << m_dimName
+
+    double low_fence = median - m_multiplier * mad;
+    double hi_fence = median + m_multiplier * mad;
+
+    log()->get(LogLevel::Debug) << getName() << " cropping " << m_dimName
                                 << " in the range (" << low_fence
                                 << "," << hi_fence << ")" << std::endl;
 

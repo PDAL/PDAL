@@ -133,6 +133,16 @@ void BpfReader::initialize()
     SpatialReference srs(code);
     setSpatialReference(srs);
 
+    try
+    {
+        SpatialReference srs(code);
+        setSpatialReference(srs);
+    }
+    catch (...)
+    {
+        log()->get(LogLevel::Error) << "Could not create an SRS" << std::endl;
+    }
+
     if (m_header.m_version >= 3)
     {
         readUlemData();

@@ -1,6 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
-* Copyright (c) 2015, Brad Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2016, Howard Butler, howard@hobu.co
 *
 * All rights reserved.
 *
@@ -35,40 +34,69 @@
 
 #pragma once
 
-#include <pdal/Kernel.hpp>
-#include <pdal/PipelineManager.hpp>
-#include <pdal/pdal_export.hpp>
 #include <pdal/plugin.hpp>
+#include <pdal/Filter.hpp>
+#include "../stats/StatsFilter.hpp"
 
-#include <memory>
-#include <string>
-#include <vector>
+#include <gdal.h>
+#include <ogr_spatialref.h>
+#include <pdal/GDALUtils.hpp>
 
-extern "C" int32_t TranslateKernel_ExitFunc();
-extern "C" PF_ExitFunc TranslateKernel_InitPlugin();
+#include <map>
+
+extern "C" int32_t ColorinterpFilter_ExitFunc();
+extern "C" PF_ExitFunc ColorinterpFilter_InitPlugin();
 
 namespace pdal
 {
 
-class PDAL_DLL TranslateKernel : public Kernel
+// Interpolates color ramp into Red, Green, and Blue dimensions
+// for a given dimension
+// specified dimensions. It also supports scaling the data by a multiplier
+// on a per-dimension basis.
+class PDAL_DLL ColorinterpFilter : public Filter
 {
 public:
+
+    ColorinterpFilter()
+        : m_interpDim(Dimension::Id::Z)
+        , m_interpDimString("Z")
+        , m_min(0.0)
+        , m_max(0.0)
+        , m_rampFilename("/vsimem/colorramp.png")
+        , m_invertRamp(false)
+        , m_stdDevThreshold(0.0)
+        , m_useMAD(false)
+        , m_madMultiplier(1.4862)
+    {}
+    ColorinterpFilter& operator=(const ColorinterpFilter&) = delete;
+    ColorinterpFilter(const ColorinterpFilter&) = delete;
+
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
-    int execute();
 
 private:
-    TranslateKernel();
-    virtual void addSwitches(ProgramArgs& args);
+    virtual void addArgs(ProgramArgs& args);
+    virtual void filter(PointView& view);
+    virtual void initialize();
+    virtual void addDimensions(PointLayoutPtr layout);
 
-    std::string m_inputFile;
-    std::string m_outputFile;
-    std::string m_pipelineOutput;
-    std::string m_readerType;
-    std::vector<std::string> m_filterType;
-    std::string m_writerType;
-    std::string m_filterJSON;
+
+    Dimension::Id m_interpDim;
+    std::string m_interpDimString;
+    double m_min;
+    double m_max;
+    std::string m_colorramp;
+    std::shared_ptr<pdal::gdal::Raster> m_raster;
+    std::string m_rampFilename;
+    std::vector<uint8_t> m_redBand;
+    std::vector<uint8_t> m_greenBand;
+    std::vector<uint8_t> m_blueBand;
+    bool m_invertRamp;
+    double m_stdDevThreshold;
+    bool m_useMAD;
+    double m_madMultiplier;
 };
 
 } // namespace pdal

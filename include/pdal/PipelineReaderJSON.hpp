@@ -55,13 +55,15 @@ class PDAL_DLL PipelineReaderJSON
 {
     friend class PipelineManager;
 
+public:
+    PipelineReaderJSON(PipelineManager&);
+    void parsePipeline(Json::Value&);
+
 private:
     typedef std::map<std::string, Stage *> TagMap;
 
-    PipelineReaderJSON(PipelineManager&);
     void readPipeline(const std::string& filename);
     void readPipeline(std::istream& input);
-    void parsePipeline(Json::Value&);
     std::string extractType(Json::Value& node);
     std::string extractFilename(Json::Value& node);
     std::string extractTag(Json::Value& node, TagMap& tags);
