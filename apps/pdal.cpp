@@ -46,6 +46,13 @@
 #include <string>
 #include <vector>
 
+#ifndef _WIN32
+#include <execinfo.h>
+#include <unistd.h>
+#include <dlfcn.h>
+#include <cxxabi.h>
+#endif
+
 using namespace pdal;
 
 std::string headline(Utils::screenWidth(), '-');
@@ -208,17 +215,76 @@ void App::addArgs(ProgramArgs& args)
         m_showOptions);
 }
 
+namespace
+{
+    LogPtr logPtr(new Log("PDAL", "stderr"));
+}
 
 int main(int argc, char* argv[])
 {
-    LogPtr log(new Log("PDAL", "stderr"));
+#ifndef _WIN32
+    signal(SIGSEGV, [](int sig)
+    {
+        logPtr->get(LogLevel::Error) << "Got error " << sig << std::endl;
+
+        void* buffer[32];
+        const std::size_t size(backtrace(buffer, 32));
+        char** symbols(backtrace_symbols(buffer, size));
+
+        int status(0);
+        std::vector<std::string> lines;
+
+        for (std::size_t i(0); i < size; ++i)
+        {
+            std::string symbol(symbols[i]);
+            Dl_info info;
+
+            if (dladdr(buffer[i], &info))
+            {
+                char* demangled = abi::__cxa_demangle(info.dli_sname, nullptr,
+                        0, &status);
+
+                const std::size_t offset(
+                        static_cast<char*>(buffer[i]) -
+                        static_cast<char*>(info.dli_saddr));
+
+                // Replace the address and mangled name with a human-readable
+                // name.
+                std::string prefix(std::to_string(i) + "  ");
+                const std::size_t pos(symbol.find("0x"));
+                if (pos != std::string::npos)
+                {
+                    prefix = symbol.substr(0, pos);
+                }
+
+                lines.push_back(prefix +
+                        (status == 0 ? demangled : info.dli_sname) + " + " +
+                        std::to_string(offset));
+
+                free(demangled);
+            }
+            else
+            {
+                lines.push_back(symbol);
+            }
+        }
+
+        for (const auto& l : lines)
+        {
+            logPtr->get(LogLevel::Debug) << l << std::endl;
+        }
+
+        free(symbols);
+        exit(1);
+    });
+#endif
 
     App pdal;
 
     StringList cmdArgs;
     for (int i = 1; i < argc; ++i)
         cmdArgs.push_back(argv[i]);
-    return pdal.execute(cmdArgs, log);
+    return pdal.execute(cmdArgs, logPtr);
 }
 
 
