@@ -67,7 +67,7 @@ void GDALWriter::addArgs(ProgramArgs& args)
     args.add("gdalopts", "GDAL driver options (name=value,name=value...)",
         m_options);
     args.add("output_type", "Statistics produced ('min', 'max', 'mean', "
-        "'idw', 'count', 'stdev' or 'all')", m_outputTypeString);
+        "'idw', 'count', 'stdev' or 'all')", m_outputTypeString, {"all"} );
     args.add("window_size", "Cell distance for fallback interpolation",
         m_windowSize);
 }
@@ -102,8 +102,6 @@ void GDALWriter::initialize()
             throw pdal_error(oss.str());
         }
     }
-    if (m_outputTypes == 0)
-        m_outputTypes = ~0;
 
     gdal::registerDrivers();
 }
