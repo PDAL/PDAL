@@ -56,7 +56,7 @@ RUN git clone https://github.com/PDAL/PRC.git \
     && cmake \
         -DCMAKE_BUILD_TYPE=Release \
         -DPDAL_DIR=/usr/lib/pdal/cmake \
-        -DCMAKE_BUILD_PREFIX=/usr \
+        -DCMAKE_INSTALL_PREFIX=/usr \
         .. \
     && make \
     && make install \

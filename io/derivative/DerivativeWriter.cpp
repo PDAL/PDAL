@@ -77,7 +77,7 @@ void DerivativeWriter::addArgs(ProgramArgs& args)
     args.add("filename", "Output filename", m_filename).setPositional();
     args.add("grid_dist_x", "X grid distance", m_GRID_DIST_X, 15.0);
     args.add("grid_dist_y", "Y grid distance", m_GRID_DIST_Y, 15.0);
-    args.add("primitive_type", "Primitive type", m_primTypesSpec);
+    args.add("primitive_type", "Primitive type", m_primTypesSpec, {"slope_d8"});
 }
 
 
@@ -95,21 +95,6 @@ void DerivativeWriter::initialize()
           {"total_curvature", TOTAL_CURVATURE},
           {"catchment_area", CATCHMENT_AREA}
         };
-/**
-    primtypes["slope_d8"] = SLOPE_D8;
-    primtypes["slope_fd"] = SLOPE_FD;
-    primtypes["aspect_d8"] = ASPECT_D8;
-    primtypes["aspect_fd"] = ASPECT_FD;
-    primtypes["hillshade"] = HILLSHADE;
-    primtypes["contour_curvature"] = CONTOUR_CURVATURE;
-    primtypes["profile_curvature"] = PROFILE_CURVATURE;
-    primtypes["tangential_curvature"] = TANGENTIAL_CURVATURE;
-    primtypes["total_curvature"] = TOTAL_CURVATURE;
-    primtypes["catchment_area"] = CATCHMENT_AREA;
-**/
-
-    if (m_primTypesSpec.empty())
-        m_primTypesSpec.push_back("slope_d8");
 
     handleFilenameTemplate();
     if (m_hashPos == std::string::npos && m_primTypesSpec.size() > 1)

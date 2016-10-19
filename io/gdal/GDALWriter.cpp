@@ -59,7 +59,7 @@ std::string GDALWriter::getName() const
 void GDALWriter::addArgs(ProgramArgs& args)
 {
     args.add("filename", "Output filename", m_filename).setPositional();
-    args.add("edge_length", "Length of cell edges (cells are square)",
+    args.add("resolution", "Cell edge size, in units of X/Y",
         m_edgeLength).setPositional();
     args.add("radius", "Radius from cell center to use to locate influencing "
         "points", m_radius).setPositional();
@@ -67,9 +67,11 @@ void GDALWriter::addArgs(ProgramArgs& args)
     args.add("gdalopts", "GDAL driver options (name=value,name=value...)",
         m_options);
     args.add("output_type", "Statistics produced ('min', 'max', 'mean', "
-        "'idw', 'count', 'stdev' or 'all')", m_outputTypeString);
+        "'idw', 'count', 'stdev' or 'all')", m_outputTypeString, {"all"} );
     args.add("window_size", "Cell distance for fallback interpolation",
         m_windowSize);
+    args.add("nodata", "No data value", m_noData, -9999.0);
+    args.add("dimension", "Dimension to use", m_interpDimString, "Z");
 }
 
 
@@ -102,10 +104,12 @@ void GDALWriter::initialize()
             throw pdal_error(oss.str());
         }
     }
-    if (m_outputTypes == 0)
-        m_outputTypes = ~0;
 
     gdal::registerDrivers();
+
+    m_interpDim = Dimension::id(m_interpDimString);
+    if (m_interpDim == Dimension::Id::Unknown)
+        throw pdal_error("Dimension name is not known!");
 }
 
 void GDALWriter::ready(PointTableRef table)
@@ -126,7 +130,7 @@ void GDALWriter::write(const PointViewPtr view)
     view->calculateBounds(m_bounds);
     size_t width = ((m_bounds.maxx - m_bounds.minx) / m_edgeLength) + 1;
     size_t height = ((m_bounds.maxy - m_bounds.miny) / m_edgeLength) + 1;
-    m_grid.reset(new GDALGrid(width, height, m_edgeLength, m_radius, -9999.0,
+    m_grid.reset(new GDALGrid(width, height, m_edgeLength, m_radius, m_noData,
         m_outputTypes, m_windowSize));
 
     for (PointId idx = 0; idx < view->size(); ++idx)
@@ -135,7 +139,7 @@ void GDALWriter::write(const PointViewPtr view)
             m_bounds.minx;
         double y = view->getFieldAs<double>(Dimension::Id::Y, idx) -
             m_bounds.miny;
-        double z = view->getFieldAs<double>(Dimension::Id::Z, idx);
+        double z = view->getFieldAs<double>(m_interpDim, idx);
 
         m_grid->addPoint(x, y, z);
    }
@@ -154,7 +158,7 @@ void GDALWriter::done(PointTableRef table)
     pixelToPos[5] = -m_edgeLength;
     gdal::Raster raster(m_filename, m_drivername, table.spatialReference(),
         pixelToPos);
-    
+
     m_grid->finalize();
 
     gdal::GDALError err = raster.open(m_grid->width(), m_grid->height(),

@@ -95,8 +95,21 @@ void HexBin::filter(PointView& view)
 void HexBin::done(PointTableRef table)
 {
     m_grid->processSample();
-    m_grid->findShapes();
-    m_grid->findParentPaths();
+
+    try
+    {
+        m_grid->findShapes();
+        m_grid->findParentPaths();
+    }
+    catch (hexer::hexer_error& e)
+    {
+        m_metadata.add("error", e.what(), "Hexer threw an error and was unable to compute a boundary");
+        m_metadata.add("boundary", "MULTIPOLYGON EMPTY", "Empty polygon -- unable to compute boundary");
+
+        return;
+
+    }
+
 
     std::ostringstream offsets;
     offsets << "MULTIPOINT (";

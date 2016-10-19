@@ -113,7 +113,7 @@ PointViewSet SplitterFilter::run(PointViewPtr inView)
     }
 
     // Pull the buffers out of the map and stick them in the standard
-    // output set, setting the bounds as we go.
+    // output set.
     for (auto bi = viewMap.begin(); bi != viewMap.end(); ++bi)
         viewSet.insert(bi->second);
     return viewSet;

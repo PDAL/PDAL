@@ -406,7 +406,7 @@ MetadataNode InfoKernel::dumpQuery(PointViewPtr inView) const
     else
         count = 0;
     if (count == 0)
-        throw pdal_error("Invalid location specificiation. "
+        throw pdal_error("Invalid location specification. "
             "--query=\"X,Y[/count]\"");
 
     auto seps = [](char c){ return (c == ',' || c == '|' || c == ' '); };

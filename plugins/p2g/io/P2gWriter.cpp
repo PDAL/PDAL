@@ -61,7 +61,7 @@ void P2gWriter::addArgs(ProgramArgs& args)
     args.add("grid_dist_y", "Y grid distance", m_GRID_DIST_Y, 6.0);
     args.add("radius", "Radius", m_RADIUS, 8.4852813742385713);
     args.add("fill_window_size", "Fill window size", m_fill_window_size, 3U);
-    args.add("output_type", "Output type", m_outputTypeSpec);
+    args.add("output_type", "Output type", m_outputTypeSpec, {"all"});
     args.add("output_format", "Output format", m_outputFormatSpec, "grid");
     args.add("bounds", "Output raster bounds", m_bounds);
 
@@ -95,8 +95,6 @@ void P2gWriter::initialize()
             throw p2g_error(oss.str());
         }
     }
-    if (m_outputTypes == 0)
-        m_outputTypes = OUTPUT_TYPE_ALL;
 
     std::string fmt = Utils::tolower(m_outputFormatSpec);
     if (fmt == "grid")
