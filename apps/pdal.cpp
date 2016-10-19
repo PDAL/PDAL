@@ -47,6 +47,7 @@
 #include <vector>
 
 #ifndef _WIN32
+#include <csignal>
 #include <execinfo.h>
 #include <unistd.h>
 #include <dlfcn.h>
