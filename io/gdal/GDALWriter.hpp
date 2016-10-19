@@ -72,6 +72,7 @@ private:
     size_t m_windowSize;
     int m_outputTypes;
     GDALGridPtr m_grid;
+    double m_noData;
 };
 
 }
