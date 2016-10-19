@@ -207,6 +207,10 @@ if (WIN32)
     target_link_libraries(${PDAL_BASE_LIB_NAME} PUBLIC ws2_32)
 endif()
 
+if (UNIX)
+    target_link_libraries(${PDAL_BASE_LIB_NAME} PUBLIC dl)
+endif()
+
 ###############################################################################
 # Targets installation
 

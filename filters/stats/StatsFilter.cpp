@@ -142,7 +142,11 @@ void StatsFilter::prepared(PointTableRef table)
 {
     PointLayoutPtr layout(table.layout());
     std::unordered_map<std::string, Summary::EnumType> dims;
-    std::ostream& out = log()->get(LogLevel::Warning);
+
+    auto getWarn([this]()->std::ostream&
+    {
+        return log()->get(LogLevel::Warning);
+    });
 
     // Add dimensions to the list.
     if (m_dimNames.empty())
@@ -155,7 +159,7 @@ void StatsFilter::prepared(PointTableRef table)
         for (auto& s : m_dimNames)
         {
             if (layout->findDim(s) == Dimension::Id::Unknown)
-                out << "Dimension '" << s << "' listed in --dimensions "
+                getWarn() << "Dimension '" << s << "' listed in --dimensions "
                     "option does not exist.  Ignoring." << std::endl;
             else
                 dims[s] = Summary::NoEnum;
@@ -166,7 +170,7 @@ void StatsFilter::prepared(PointTableRef table)
     for (auto& s : m_enums)
     {
         if (dims.find(s) == dims.end())
-            out << "Dimension '" << s << "' listed in --enumerate option "
+            getWarn() << "Dimension '" << s << "' listed in --enumerate option "
                 "does not exist.  Ignoring." << std::endl;
         else
             dims[s] = Summary::Enumerate;
@@ -176,7 +180,7 @@ void StatsFilter::prepared(PointTableRef table)
     for (auto& s : m_counts)
     {
         if (dims.find(s) == dims.end())
-            out << "Dimension '" << s << "' listed in --count option "
+            getWarn() << "Dimension '" << s << "' listed in --count option "
                 "does not exist.  Ignoring." << std::endl;
         else
             dims[s] = Summary::Count;
