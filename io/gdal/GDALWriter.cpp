@@ -71,6 +71,7 @@ void GDALWriter::addArgs(ProgramArgs& args)
     args.add("window_size", "Cell distance for fallback interpolation",
         m_windowSize);
     args.add("nodata", "No data value", m_noData, -9999.0);
+    args.add("dimension", "Dimension to use", m_interpDimString, "Z");
 }
 
 
@@ -105,6 +106,10 @@ void GDALWriter::initialize()
     }
 
     gdal::registerDrivers();
+
+    m_interpDim = Dimension::id(m_interpDimString);
+    if (m_interpDim == Dimension::Id::Unknown)
+        throw pdal_error("Dimension name is not known!");
 }
 
 void GDALWriter::ready(PointTableRef table)
@@ -134,7 +139,7 @@ void GDALWriter::write(const PointViewPtr view)
             m_bounds.minx;
         double y = view->getFieldAs<double>(Dimension::Id::Y, idx) -
             m_bounds.miny;
-        double z = view->getFieldAs<double>(Dimension::Id::Z, idx);
+        double z = view->getFieldAs<double>(m_interpDim, idx);
 
         m_grid->addPoint(x, y, z);
    }

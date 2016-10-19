@@ -104,11 +104,11 @@ TEST(GDALWriterTest, min)
     Options wo;
     wo.add("gdaldriver", "GTiff");
     wo.add("output_type", "min");
-    wo.add("edge_length", 1);
+    wo.add("resolution", 1);
     wo.add("radius", .7071);
     wo.add("filename", outfile);
 
-    const std::string output = 
+    const std::string output =
         "5.000 -9999.000     7.000     8.000     8.900 "
         "4.000 -9999.000     6.000     7.000     8.000 "
         "3.000     4.000     5.000     5.500     6.500 "
@@ -125,12 +125,12 @@ TEST(GDALWriterTest, minWindow)
     Options wo;
     wo.add("gdaldriver", "GTiff");
     wo.add("output_type", "min");
-    wo.add("edge_length", 1);
+    wo.add("resolution", 1);
     wo.add("radius", .7071);
     wo.add("filename", outfile);
     wo.add("window_size", 2);
 
-    const std::string output = 
+    const std::string output =
         "5.000     5.464     7.000     8.000     8.900 "
         "4.000     4.857     6.000     7.000     8.000 "
         "3.000     4.000     5.000     5.500     6.500 "
@@ -147,11 +147,11 @@ TEST(GDALWriterTest, max)
     Options wo;
     wo.add("gdaldriver", "GTiff");
     wo.add("output_type", "max");
-    wo.add("edge_length", 1);
+    wo.add("resolution", 1);
     wo.add("radius", .7071);
     wo.add("filename", outfile);
 
-    const std::string output = 
+    const std::string output =
         "5.000 -9999.000     7.000     8.000     9.100 "
         "4.000 -9999.000     6.000     7.000     8.000 "
         "3.000     4.000     5.000     6.000     7.000 "
@@ -168,12 +168,12 @@ TEST(GDALWriterTest, maxWindow)
     Options wo;
     wo.add("gdaldriver", "GTiff");
     wo.add("output_type", "max");
-    wo.add("edge_length", 1);
+    wo.add("resolution", 1);
     wo.add("radius", .7071);
     wo.add("filename", outfile);
     wo.add("window_size", 2);
 
-    const std::string output = 
+    const std::string output =
         "5.000     5.500     7.000     8.000     9.100 "
         "4.000     4.929     6.000     7.000     8.000 "
         "3.000     4.000     5.000     6.000     7.000 "
@@ -190,11 +190,11 @@ TEST(GDALWriterTest, mean)
     Options wo;
     wo.add("gdaldriver", "GTiff");
     wo.add("output_type", "mean");
-    wo.add("edge_length", 1);
+    wo.add("resolution", 1);
     wo.add("radius", .7071);
     wo.add("filename", outfile);
 
-    const std::string output = 
+    const std::string output =
         "5.000 -9999.000     7.000     8.000     8.967 "
         "4.000 -9999.000     6.000     7.000     8.000 "
         "3.000     4.000     5.000     5.750     6.750 "
@@ -211,12 +211,12 @@ TEST(GDALWriterTest, meanWindow)
     Options wo;
     wo.add("gdaldriver", "GTiff");
     wo.add("output_type", "mean");
-    wo.add("edge_length", 1);
+    wo.add("resolution", 1);
     wo.add("radius", .7071);
     wo.add("filename", outfile);
     wo.add("window_size", 2);
 
-    const std::string output = 
+    const std::string output =
         "5.000     5.482     7.000     8.000     8.967 "
         "4.000     4.887     6.000     7.000     8.000 "
         "3.000     4.000     5.000     5.750     6.750 "
@@ -233,11 +233,11 @@ TEST(GDALWriterTest, idw)
     Options wo;
     wo.add("gdaldriver", "GTiff");
     wo.add("output_type", "idw");
-    wo.add("edge_length", 1);
+    wo.add("resolution", 1);
     wo.add("radius", .7071);
     wo.add("filename", outfile);
 
-    const std::string output = 
+    const std::string output =
         "5.000 -9999.000     7.000     8.000     9.000 "
         "4.000 -9999.000     6.000     7.000     8.000 "
         "3.000     4.000     5.000     6.000     7.000 "
@@ -254,12 +254,12 @@ TEST(GDALWriterTest, idwWindow)
     Options wo;
     wo.add("gdaldriver", "GTiff");
     wo.add("output_type", "idw");
-    wo.add("edge_length", 1);
+    wo.add("resolution", 1);
     wo.add("radius", .7071);
     wo.add("filename", outfile);
     wo.add("window_size", 2);
 
-    const std::string output = 
+    const std::string output =
         "5.000     5.500     7.000     8.000     9.000 "
         "4.000     4.905     6.000     7.000     8.000 "
         "3.000     4.000     5.000     6.000     7.000 "
@@ -276,11 +276,11 @@ TEST(GDALWriterTest, count)
     Options wo;
     wo.add("gdaldriver", "GTiff");
     wo.add("output_type", "count");
-    wo.add("edge_length", 1);
+    wo.add("resolution", 1);
     wo.add("radius", .7071);
     wo.add("filename", outfile);
 
-    const std::string output = 
+    const std::string output =
         "1.000     0.000     1.000     1.000     3.000 "
         "1.000     0.000     1.000     1.000     1.000 "
         "1.000     1.000     1.000     2.000     2.000 "
@@ -297,11 +297,11 @@ TEST(GDALWriterTest, stdev)
     Options wo;
     wo.add("gdaldriver", "GTiff");
     wo.add("output_type", "stdev");
-    wo.add("edge_length", 1);
+    wo.add("resolution", 1);
     wo.add("radius", .7071);
     wo.add("filename", outfile);
 
-    const std::string output = 
+    const std::string output =
         "0.000 -9999.000     0.000     0.000     0.094 "
         "0.000 -9999.000     0.000     0.000     0.000 "
         "0.000     0.000     0.000     0.250     0.250 "
@@ -318,12 +318,12 @@ TEST(GDALWriterTest, stdevWindow)
     Options wo;
     wo.add("gdaldriver", "GTiff");
     wo.add("output_type", "stdev");
-    wo.add("edge_length", 1);
+    wo.add("resolution", 1);
     wo.add("radius", .7071);
     wo.add("filename", outfile);
     wo.add("window_size", 2);
 
-    const std::string output = 
+    const std::string output =
         "0.000     0.018     0.000     0.000     0.094 "
         "0.000     0.032     0.000     0.000     0.000 "
         "0.000     0.000     0.000     0.250     0.250 "
