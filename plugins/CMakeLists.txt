@@ -8,7 +8,7 @@ if(BUILD_PLUGIN_GEOWAVE)
     add_subdirectory(geowave)
 endif(BUILD_PLUGIN_GEOWAVE)
 
-if(BUILD_PLUGIN_GREYHOUND)
+if(BUILD_PLUGIN_GREYHOUND AND CURL_FOUND)
     add_subdirectory(greyhound)
 endif()
 
