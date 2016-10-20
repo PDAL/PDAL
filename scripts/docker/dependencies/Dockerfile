@@ -1,6 +1,10 @@
 FROM ubuntu:16.04
 MAINTAINER Howard Butler <howard@hobu.co>
 
+ENV CC gcc
+ENV CXX g++
+
+
 RUN apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 16126D3A3E5C1192
 RUN apt-get update -qq
 RUN apt-get -qq remove postgis
@@ -65,6 +69,7 @@ RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
         libgdal1-dev \
     && rm -rf /var/lib/apt/lists/*
 
+RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.6 20 && update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.6 20
 
 
 #RUN git clone --depth=1 https://github.com/OSGeo/gdal.git \
@@ -149,7 +154,7 @@ RUN git clone https://github.com/CRREL/points2grid.git \
     && cd points2grid \
     && mkdir build \
     && cd build \
-    && cmake \
+    && CXXFLAGS="-std=c++11" cmake \
         -DCMAKE_INSTALL_PREFIX=/usr \
         -DCMAKE_BUILD_TYPE="Release" \
         .. \
