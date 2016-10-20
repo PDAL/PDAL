@@ -74,7 +74,7 @@ std::string ColorinterpFilter::getName() const { return s_info.name; }
         location = name; \
         size = sizeof(name); \
         rampFilename = "/vsimem/" + std::string(#name) + ".png"; \
-        VSIFileFromMemBuffer(rampFilename.c_str(), location, size, FALSE); \
+        (void)VSIFileFromMemBuffer(rampFilename.c_str(), location, size, FALSE); \
     }
 //
 std::shared_ptr<pdal::gdal::Raster> openRamp(std::string& rampFilename)
