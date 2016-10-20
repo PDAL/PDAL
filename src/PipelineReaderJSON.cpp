@@ -129,7 +129,11 @@ void PipelineReaderJSON::readPipeline(std::istream& input)
     Json::Value root;
     Json::Reader jsonReader;
     if (!jsonReader.parse(input, root))
-        throw pdal_error("JSON pipeline: Unable to parse pipeline");
+    {
+        std::string err = "JSON pipeline: Unable to parse pipeline:\n";
+        err += jsonReader.getFormattedErrorMessages();
+        throw pdal_error(err);
+    }
 
     Json::Value& subtree = root["pipeline"];
     if (!subtree)
