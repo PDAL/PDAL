@@ -32,7 +32,11 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <arbiter.hpp>
+#include <pdal/PDALUtils.hpp>
+
+#ifdef PDAL_ARBITER_ENABLED
+    #include <arbiter.hpp>
+#endif
 
 #include <pdal/PDALUtils.hpp>
 #include <pdal/Options.hpp>
@@ -173,10 +177,14 @@ namespace
 
 std::string tempFilename(const std::string& path)
 {
+#ifdef PDAL_ARBITER_ENABLED
     const std::string tempdir(arbiter::fs::getTempPath());
     const std::string basename(arbiter::util::getBasename(path));
 
     return arbiter::util::join(tempdir, basename);
+#else
+    throw pdal_error("Arbiter is not enabled for this configuration (tempFilename)!");
+#endif
 };
 
 // RAII handling of a temp file to make sure file gets deleted.
@@ -207,9 +215,13 @@ public:
 
     virtual ~ArbiterOutStream()
     {
+#ifdef PDAL_ARBITER_ENABLED
         close();
         arbiter::Arbiter a;
         a.put(m_remotePath, a.getBinary(m_localFile.filename()));
+#else
+        throw pdal_error("Arbiter is not enabled for this configuration!");
+#endif
     }
 
 private:
@@ -224,9 +236,13 @@ public:
             std::ios::openmode mode) :
         m_localFile(localPath)
     {
+#ifdef PDAL_ARBITER_ENABLED
         arbiter::Arbiter a;
         a.put(localPath, a.getBinary(remotePath));
         open(localPath, mode);
+#else
+        throw pdal_error("Arbiter is not enabled for this configuration!");
+#endif
     }
 
 private:
@@ -244,10 +260,12 @@ private:
 */
 std::ostream *createFile(const std::string& path, bool asBinary)
 {
+    ostream *ofs(nullptr);
+
+#ifdef PDAL_ARBITER_ENABLED
     arbiter::Arbiter a;
     const bool remote(a.hasDriver(path) && a.isRemote(path));
 
-    ostream *ofs(nullptr);
     if (remote)
     {
         try
@@ -264,6 +282,7 @@ std::ostream *createFile(const std::string& path, bool asBinary)
         }
     }
     else
+#endif
         ofs = FileUtils::createFile(path, asBinary);
     return ofs;
 }
@@ -278,6 +297,7 @@ std::ostream *createFile(const std::string& path, bool asBinary)
 */
 std::istream *openFile(const std::string& path, bool asBinary)
 {
+#ifdef PDAL_ARBITER_ENABLED
     arbiter::Arbiter a;
     if (a.hasDriver(path) && a.isRemote(path))
     {
@@ -291,6 +311,7 @@ std::istream *openFile(const std::string& path, bool asBinary)
             return nullptr;
         }
     }
+#endif
     return FileUtils::openFile(path, asBinary);
 }
 
@@ -324,11 +345,13 @@ void closeFile(std::istream *in)
 */
 bool fileExists(const std::string& path)
 {
+#ifdef PDAL_ARBITER_ENABLED
     arbiter::Arbiter a;
     if (a.hasDriver(path) && a.isRemote(path) && a.exists(path))
     {
         return true;
     }
+#endif
 
     // Arbiter doesn't handle our STDIN hacks.
     return FileUtils::fileExists(path);
