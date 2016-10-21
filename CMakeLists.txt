@@ -58,7 +58,7 @@ endif()
 set(PDAL_UTIL_LIB_NAME pdal_util)
 set(PDAL_PLANG_LIB_NAME pdal_plang)
 set(PDAL_BOOST_LIB_NAME pdal_boost)
-set(PDAL_ARBITER_LIB_NAME pdal_arbiter)
+#set(PDAL_ARBITER_LIB_NAME pdal_arbiter)
 
 set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 
@@ -117,6 +117,11 @@ include(${PDAL_CMAKE_DIR}/zlib.cmake)
 include(${PDAL_CMAKE_DIR}/test.cmake)
 include(${PDAL_CMAKE_DIR}/ctest.cmake)
 include(${PDAL_CMAKE_DIR}/curl.cmake)
+
+if (CURL_FOUND)
+    set(PDAL_ARBITER_LIB_NAME pdal_arbiter)
+endif()
+
 include(${PDAL_CMAKE_DIR}/json.cmake)
 if (BUILD_PLUGIN_PGPOINTCLOUD OR BUILD_PLUGIN_OCI OR BUILD_PLUGIN_SQLITE)
     include(${PDAL_CMAKE_DIR}/libxml2.cmake)
