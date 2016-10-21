@@ -45,9 +45,23 @@ namespace pdal
 
 class PDAL_DLL SplitterFilter : public pdal::Filter
 {
+private:
+    //This used to be a lambda, but the VS compiler exploded, I guess.
+    typedef std::pair<int, int> Coord;
+    class CoordCompare
+    {
+    public:
+        bool operator () (const Coord& c1, const Coord& c2) const
+        {
+            return c1.first < c2.first ? true :
+                c1.first > c2.first ? false :
+                c1.second < c2.second ? true :
+                false;
+        };
+    };
+
 public:
-    SplitterFilter() : Filter()
-        {}
+    SplitterFilter();
 
     static void * create();
     static int32_t destroy(void *);
@@ -57,6 +71,7 @@ private:
     double m_length;
     double m_xOrigin;
     double m_yOrigin;
+    std::map<Coord, PointViewPtr, CoordCompare> m_viewMap;
 
     virtual void addArgs(ProgramArgs& args);
     virtual PointViewSet run(PointViewPtr view);
