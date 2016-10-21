@@ -1,9 +1,8 @@
 FROM pdal/dependencies:latest
 MAINTAINER Howard Butler <howard@hobu.co>
-#ARG branch=master
 
-ENV CC clang
-ENV CXX clang++
+ENV CC gcc
+ENV CXX g++
 
 RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
         libhpdf-dev \
