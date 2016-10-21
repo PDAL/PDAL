@@ -73,15 +73,30 @@ void NitfFileWriter::addArgs(ProgramArgs& args)
 //
 void NitfFileWriter::write()
 {
+    if (m_fileTitle.empty())
+        m_fileTitle = FileUtils::getFilename(m_filename);
+
     ::nitf::Record record(NITF_VER_21);
     ::nitf::FileHeader header = record.getHeader();
-    header.getFileHeader().set("NITF");
 
+    // This check would be better in an initialize() function, but we can't
+    // because this is a flex writer and we don't know the filename
+    // until the execute() step.
+    if (m_fileTitle.size() > header.getFileTitle().getLength())
+    {
+        std::ostringstream oss;
+
+        oss << "writers.nitf: Can't write file.  " <<
+            "FTITLE field (usually filename) can't be longer than " <<
+            header.getFileTitle().getLength() << ".  Use 'ftitle' option " <<
+            "to set appropriately sized FTITLE.";
+        throw pdal_error(oss.str());
+    }
+
+    header.getFileHeader().set("NITF");
     header.getComplianceLevel().set(m_cLevel);
     header.getSystemType().set(m_sType);
     header.getOriginStationID().set(m_oStationId);
-    if (m_fileTitle.empty())
-        m_fileTitle = FileUtils::getFilename(m_filename);
     header.getFileTitle().set(m_fileTitle);
     header.getClassification().set(m_fileClass);
     header.getMessageCopyNum().set("00000");

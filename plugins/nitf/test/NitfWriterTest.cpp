@@ -305,3 +305,27 @@ TEST(NitfWriterTest, flex2)
     r->setOptions(ops);
     EXPECT_EQ(r->preview().m_pointCount, v->size());
 }
+
+TEST(NitfWriterTest, longFtitle)
+{
+    StageFactory f;
+
+    Stage *r = f.createStage("readers.las");
+
+    Options ro;
+    ro.add("filename", Support::datapath("nitf/autzen-utm10.las"));
+
+    r->setOptions(ro);
+
+    Stage *w = f.createStage("writers.nitf");
+
+    Options wo;
+    wo.add("filename", "aaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbccccccccccccccccccccccddddddddddddddeeeeeeeeeeee");
+
+    w->setOptions(wo);
+    w->setInput(*r);
+
+    PointTable t;
+    w->prepare(t);
+    EXPECT_THROW(w->execute(t), pdal_error);
+}
