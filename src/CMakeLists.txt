@@ -182,7 +182,6 @@ if (APPLE)
     set(PDAL_LIBDIR "-L$<TARGET_FILE_DIR:${PDAL_UTIL_LIB_NAME}>")
 endif()
 
-message(INFO, "PDAL_ARBITER_LIB_NAME: ${PDAL_ARBITER_LIB_NAME}")
 target_link_libraries(${PDAL_BASE_LIB_NAME}
     PUBLIC
         ${CMAKE_THREAD_LIBS_INIT}
