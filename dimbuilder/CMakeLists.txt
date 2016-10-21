@@ -28,4 +28,6 @@ set (HEADERS
 )
 
 add_executable(dimbuilder ${SOURCES} ${HEADERS})
-target_link_libraries(dimbuilder ${PDAL_JSONCPP_LIB_NAME})
+if (PDAL_HAVE_JSONCPP)
+    target_link_libraries(dimbuilder ${PDAL_JSONCPP_LIB_NAME})
+endif()
