@@ -26,9 +26,6 @@ export NUMTHREADS
 
 # pdal_test segfaults when built against external g++-built boost,
 # and I haven't found a good boost package built with clang yet
-if [[ "$CXX" == "clang++" ]]
-then
-    export PDAL_CMAKE_GENERATOR="Ninja"
-else
-    export PDAL_CMAKE_GENERATOR="Unix Makefiles"
-fi
+export PDAL_CMAKE_GENERATOR="Unix Makefiles"
+
+#    export PDAL_CMAKE_GENERATOR="Unix Makefiles"
