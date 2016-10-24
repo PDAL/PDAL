@@ -1,7 +1,8 @@
 #!/bin/bash -e
 # Builds and tests PDAL
 
-$(CXX) --version
+clang --version
+gcc --version
 
 cd /pdal
 source ./scripts/ci/common.sh
