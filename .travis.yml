@@ -10,7 +10,7 @@ services:
     docker
 
 compiler:
-  - clang
+  - gcc
 
 env:
   - PDAL_OPTIONAL_COMPONENTS=all
