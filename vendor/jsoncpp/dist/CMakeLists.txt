@@ -10,12 +10,20 @@ file(GLOB PDAL_JSONCPP_SOURCES
     "jsoncpp.cpp"
 )
 
-if(UNIX)
-  add_definitions("-fPIC")
+PDAL_ADD_LIBRARY(${PDAL_JSONCPP_LIB_NAME} STATIC "${PDAL_JSONCPP_SOURCES}")
+
+if (UNIX)
+    target_compile_options(${PDAL_JSONCPP_LIB_NAME} PRIVATE -fPIC)
 endif()
 
+#
+# This forces dll_export on the symbols so that they're available from any
+# DLL that the JSON library gets linked with.
+#
+if (WIN32)
+    target_compile_options(${PDAL_JSONCPP_LIB_NAME} PRIVATE -DJSON_DLL_BUILD)
+endif()
 
-PDAL_ADD_LIBRARY(${PDAL_JSONCPP_LIB_NAME} STATIC "${PDAL_JSONCPP_SOURCES}")
 
 set_target_properties(${PDAL_JSONCPP_LIB_NAME} PROPERTIES
     VERSION "${PDAL_BUILD_VERSION}"
