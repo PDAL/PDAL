@@ -1040,9 +1040,9 @@ namespace
         std::vector<std::string> paths;
         paths.push_back(dir);
 
-        for (const auto& dir : globOne(dir + '*').dirs)
+        for (const auto& d : globOne(dir + '*').dirs)
         {
-            const auto next(walk(dir));
+            const auto next(walk(d));
             paths.insert(paths.end(), next.begin(), next.end());
         }
 
