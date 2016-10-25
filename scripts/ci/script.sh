@@ -2,6 +2,7 @@
 # Builds and tests PDAL
 
 clang --version
+gcc --version
 
 cd /pdal
 source ./scripts/ci/common.sh
@@ -50,7 +51,7 @@ cmake \
 
 cmake ..
 
-MAKECMD=ninja
+MAKECMD=make
 
 # Don't use ninja's default number of threads becuase it can
 # saturate Travis's available memory.
@@ -68,7 +69,7 @@ if [ "${OPTIONAL_COMPONENT_SWITCH}" == "ON" ]; then
     echo "current path: " `pwd`
     export PDAL_TEST_DIR=/pdal/_build/test
     python setup.py test
-    
+
     # Build all examples
     for EXAMPLE in writing writing-filter writing-kernel writing-reader writing-writer
     do

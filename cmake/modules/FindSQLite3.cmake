@@ -5,7 +5,8 @@
 # SQLITE3_FOUND = if the library found
 # SQLITE3_LIBRARY = full path to the library
 # SQLITE3_LIBRARIES = full path to the library
-# SSQLITE3_INCLUDE_DIR = where to find the library headers
+# SQLITE3_HAS_LOAD_EXTENSION = was sqlite3 compiled with load extension?
+# SQLITE3_INCLUDE_DIR = where to find the library headers
 #
 # Copyright (c) 2009 Mateusz Loskot <mateusz@loskot.net>
 #
@@ -45,6 +46,17 @@ find_library(SQLITE3_LIBRARY
   $ENV{SQLITE_ROOT}/lib
   ${SQLITE_ROOT_DIR}/lib
   $ENV{OSGEO4W_ROOT}/lib)
+
+# If sqlite3 was compiled with `OMIT_LOAD_EXTENSION`, PDAL compilation will fail due
+# to a missing symbol, `_sqlite3_enable_load_extension`.
+include(CheckCXXSourceRuns)
+unset(SQLITE3_HAS_LOAD_EXTENSION CACHE)
+set(CMAKE_REQUIRED_INCLUDES "${SQLITE3_INCLUDE_DIR}")
+set(CMAKE_REQUIRED_LIBRARIES "${SQLITE3_LIBRARY}")
+check_cxx_source_runs("#include <sqlite3.h>
+int main(int argc, char** argv) {
+    return sqlite3_compileoption_used(\"OMIT_LOAD_EXTENSION\");
+}" SQLITE3_HAS_LOAD_EXTENSION)
 
 set(SQLITE3_LIBRARIES ${SQLITE3_LIBRARY})
 
