@@ -62,3 +62,17 @@ if (BUILD_PGPOINTCLOUD_TESTS)
         FILES "${srcs}"
         LINK_WITH ${reader_libname} ${writer_libname})
 endif()
+
+
+#
+# PgFlatPointCloud Writer
+#
+set(srcs io/PgFlatWriter.cpp)
+set(incs
+    io/PgCommon.hpp
+    io/PgFlatWriter.hpp
+)
+
+PDAL_ADD_PLUGIN(writer_libname writer pgflatpointcloud
+    FILES "${srcs}" "${incs}"
+    LINK_WITH ${POSTGRESQL_LIBRARIES})

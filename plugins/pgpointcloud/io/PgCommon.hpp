@@ -96,6 +96,13 @@ inline void pg_execute(PGconn* session, std::string const& sql)
     PQclear(result);
 }
 
+inline void pg_put_copy_data(PGconn* session, const void *ptr, std::size_t size)
+{
+  if (PQputCopyData (session, (const char *) ptr, size) != 1) {
+    throw pdal_error("PQputCopyData failed");
+  }
+}
+
 inline void pg_begin(PGconn* session)
 {
     std::string sql = "BEGIN";
