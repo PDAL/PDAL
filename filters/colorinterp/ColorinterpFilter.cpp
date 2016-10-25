@@ -69,13 +69,12 @@ std::string ColorinterpFilter::getName() const { return s_info.name; }
 #define GETRAMP(name) \
     if (pdal::Utils::iequals(#name, rampFilename)) \
     { \
-        VSILFILE* vsifile; \
         GByte* location(0); \
         int size (0); \
         location = name; \
         size = sizeof(name); \
         rampFilename = "/vsimem/" + std::string(#name) + ".png"; \
-        vsifile = VSIFileFromMemBuffer(rampFilename.c_str(), location, size, FALSE); \
+        (void)VSIFileFromMemBuffer(rampFilename.c_str(), location, size, FALSE); \
     }
 //
 std::shared_ptr<pdal::gdal::Raster> openRamp(std::string& rampFilename)

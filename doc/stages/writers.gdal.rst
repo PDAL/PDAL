@@ -20,13 +20,10 @@ potentially contributes to the raster's value.
     it is possible that some points will not be considered at all, including
     those that may be within the bounds of the raster cell.
 
-The GDAL writer creates rasters using the data in the 'Z' dimension of the 
-points.  In a :ref:`pipeline_command` one can precede the GDAL writer with
-the ferry filter (:ref:`filters.ferry`) in order to copy data from some
-other dimension to the 'Z' dimension if desired.
-
-The writer will creates up to six rasters based on different statistics in
-the output dataset.  The order of the layers in the dataset is as follows:
+The GDAL writer creates rasters using the data specified in the ``dimension``
+option (defaults to `Z`).The writer will creates up to six rasters based on
+different statistics in the output dataset.  The order of the layers in the
+dataset is as follows:
 
 min
     Give the cell the minimum value of all points within the given radius.
@@ -78,7 +75,7 @@ whose values contribute to the cell value is 14.14.
       "pipeline":[
         "pdal/test/data/las/autzen_trim.las",
         {
-          "edge_length": 10,
+          "resolution": 10,
           "radius": 14.14,
           "filename":"outputfile.tif"
         }
@@ -92,8 +89,8 @@ Options
 filename
     Name of output file. [Required]
 
-edge_length
-    Length of raster cell edges.  [Required]
+resolution
+    Length of raster cell edges in X/Y units.  [Required]
 
 radius
     Radius about cell center bounding points to use to calculate a cell value.
@@ -125,3 +122,5 @@ window_size
     the fallback interpolation method.  See the stage description for more
     information. [Default: 0]
 
+dimension
+  A dimension name to use for the interpolation. [Default: ``Z``]

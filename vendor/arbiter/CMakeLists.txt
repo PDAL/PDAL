@@ -1,6 +1,11 @@
 #
 # Make sure we don't attempt to add a library more than once
 #
+
+if (NOT PDAL_ARBITER_ENABLED)
+    return()
+endif()
+
 get_property(EXISTS GLOBAL PROPERTY _PDALARBITER_INCLUDED)
 if (EXISTS)
     return()

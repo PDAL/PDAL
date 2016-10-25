@@ -51,6 +51,9 @@ static PluginInfo const s_info = PluginInfo(
 
 CREATE_STATIC_PLUGIN(1, 0, SplitterFilter, Filter, s_info)
 
+SplitterFilter::SplitterFilter() : m_viewMap(CoordCompare())
+{}
+
 std::string SplitterFilter::getName() const { return s_info.name; }
 
 void SplitterFilter::addArgs(ProgramArgs& args)
@@ -63,31 +66,11 @@ void SplitterFilter::addArgs(ProgramArgs& args)
 }
 
 
-//This used to be a lambda, but the VS compiler exploded, I guess.
-typedef std::pair<int, int> Coord;
-namespace
-{
-class CoordCompare
-{
-public:
-    bool operator () (const Coord& c1, const Coord& c2) const
-    {
-        return c1.first < c2.first ? true :
-            c1.first > c2.first ? false :
-            c1.second < c2.second ? true :
-            false;
-    };
-};
-}
-
 PointViewSet SplitterFilter::run(PointViewPtr inView)
 {
     PointViewSet viewSet;
     if (!inView->size())
         return viewSet;
-
-    CoordCompare compare;
-    std::map<Coord, PointViewPtr, CoordCompare> viewMap(compare);
 
     // Use the location of the first point as the origin, unless specified.
     // (!= test == isnan(), which doesn't exist on windows)
@@ -101,20 +84,27 @@ PointViewSet SplitterFilter::run(PointViewPtr inView)
     for (PointId idx = 0; idx < inView->size(); idx++)
     {
         double x = inView->getFieldAs<double>(Dimension::Id::X, idx);
-        int xpos = (x - m_xOrigin) / m_length;
+        x -= m_xOrigin;
+        int xpos = x / m_length;
+        if (x < 0)
+            xpos--;
+
         double y = inView->getFieldAs<double>(Dimension::Id::Y, idx);
-        int ypos = (y - m_yOrigin) / m_length;
+        y -= m_yOrigin;
+        int ypos = y / m_length;
+        if (y < 0)
+            ypos--;
 
         Coord loc(xpos, ypos);
-        PointViewPtr& outView = viewMap[loc];
+        PointViewPtr& outView = m_viewMap[loc];
         if (!outView)
             outView = inView->makeNew();
         outView->appendPoint(*inView.get(), idx);
     }
 
     // Pull the buffers out of the map and stick them in the standard
-    // output set, setting the bounds as we go.
-    for (auto bi = viewMap.begin(); bi != viewMap.end(); ++bi)
+    // output set.
+    for (auto bi = m_viewMap.begin(); bi != m_viewMap.end(); ++bi)
         viewSet.insert(bi->second);
     return viewSet;
 }

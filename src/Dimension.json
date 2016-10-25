@@ -327,5 +327,15 @@
     "alt_names": "Elevation_High",
     "type": "double",
     "description": "Elevation High"
+    },
+    {
+    "name": "PointId",
+    "type": "uint32",
+    "description": "An explicit representation of point ordering within a file, which allows this usually-implicit information to be preserved when reordering points."
+    },
+    {
+    "name": "OriginId",
+    "type": "uint32",
+    "description": "A file source ID from which the point originated.  This ID is global to a derivative dataset which may be aggregated from multiple files."
     }
 ] }

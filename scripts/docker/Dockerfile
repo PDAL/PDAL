@@ -1,9 +1,8 @@
 FROM pdal/dependencies:latest
 MAINTAINER Howard Butler <howard@hobu.co>
-#ARG branch=master
 
-ENV CC clang
-ENV CXX clang++
+ENV CC gcc
+ENV CXX g++
 
 RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
         libhpdf-dev \
@@ -56,7 +55,7 @@ RUN git clone https://github.com/PDAL/PRC.git \
     && cmake \
         -DCMAKE_BUILD_TYPE=Release \
         -DPDAL_DIR=/usr/lib/pdal/cmake \
-        -DCMAKE_BUILD_PREFIX=/usr \
+        -DCMAKE_INSTALL_PREFIX=/usr \
         .. \
     && make \
     && make install \

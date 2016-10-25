@@ -63,7 +63,7 @@ void ApproximateCoplanarFilter::addArgs(ProgramArgs& args)
 {
     args.add("knn", "k-Nearest Neighbors", m_knn, 8);
     args.add("thresh1", "Threshold 1", m_thresh1, 25.0);
-    args.add("thresh2", "Threshold 2", m_thresh1, 6.0);
+    args.add("thresh2", "Threshold 2", m_thresh2, 6.0);
 }
 
 
@@ -95,12 +95,12 @@ void ApproximateCoplanarFilter::filter(PointView& view)
         if (solver.info() != Success)
             throw pdal_error("Cannot perform eigen decomposition.");
         auto ev = solver.eigenvalues();
-
+        
         // test eigenvalues to label points that are approximately coplanar
         if ((ev[1] > m_thresh1 * ev[0]) && (m_thresh2 * ev[1] > ev[2]))
-            view.setField(m_coplanar, i, 1);
+            view.setField(m_coplanar, i, 1u);
         else
-            view.setField(m_coplanar, i, 0);
+            view.setField(m_coplanar, i, 0u);
     }
 }
 

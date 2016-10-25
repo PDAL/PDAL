@@ -76,15 +76,27 @@ TEST(SplitterTest, test_tile_filter)
     StageWrapper::done(s, table);
 
     std::vector<PointViewPtr> views;
+    std::map<PointViewPtr, BOX2D> bounds;
+
     for (auto it = viewSet.begin(); it != viewSet.end(); ++it)
-        views.push_back(*it);
-
-    auto sorter = [](PointViewPtr p1, PointViewPtr p2)
     {
-        BOX2D b1, b2;
+        BOX2D b;
+        PointViewPtr v = *it;
+        v->calculateBounds(b);
+        EXPECT_TRUE(b.maxx - b.minx <= 1000);    
+        EXPECT_TRUE(b.maxy - b.miny <= 1000);    
 
-        p1->calculateBounds(b1);
-        p2->calculateBounds(b2);
+        for (auto& p : bounds)
+            EXPECT_FALSE(p.second.overlaps(b));
+
+        bounds[v] = b;
+        views.push_back(v);
+    }
+
+    auto sorter = [&bounds](PointViewPtr p1, PointViewPtr p2)
+    {
+        BOX2D b1 = bounds[p1];
+        BOX2D b2 = bounds[p2];
 
         return b1.minx < b2.minx ?  true :
             b1.minx > b2.minx ? false :
@@ -92,9 +104,9 @@ TEST(SplitterTest, test_tile_filter)
     };
     std::sort(views.begin(), views.end(), sorter);
 
-    EXPECT_EQ(views.size(), 15u);
-    size_t counts[] = {24, 27, 26, 27, 10, 166, 142, 76, 141, 132, 63, 70, 67,
-        34, 60 };
+    EXPECT_EQ(views.size(), 24u);
+    size_t counts[] = {24, 25, 2, 26, 27, 10, 82, 68, 43, 57, 7, 71, 73,
+        61, 33, 84, 74, 4, 59, 70, 67, 34, 60, 4 };
     for (size_t i = 0; i < views.size(); ++i)
     {
         PointViewPtr view = views[i];
