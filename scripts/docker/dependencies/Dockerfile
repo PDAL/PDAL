@@ -292,6 +292,10 @@ RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 
+RUN git clone https://github.com/ninja-build/ninja.git \
+    && cd ninja \
+    && ./configure.py --bootstrap \
+    && cp ninja /usr/bin
 
 #RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.6 20 && update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.6 20
 
