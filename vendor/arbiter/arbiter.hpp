@@ -1,7 +1,7 @@
 /// Arbiter amalgamated header (https://github.com/connormanning/arbiter).
 /// It is intended to be used with #include "arbiter.hpp"
 
-// Git SHA: 4bbe7fc3c79a8b3843f50de195630f110a4a0e24
+// Git SHA: cd131541ad9af8dc231444f050d08d1210fdc244
 
 // //////////////////////////////////////////////////////////////////////
 // Beginning of content of file: LICENSE
@@ -149,13 +149,20 @@ class Curl
 public:
     ~Curl();
 
-    http::Response get(std::string path, Headers headers, Query query);
+    http::Response get(
+            std::string path,
+            Headers headers,
+            Query query,
+            std::size_t reserve);
+
     http::Response head(std::string path, Headers headers, Query query);
+
     http::Response put(
             std::string path,
             const std::vector<char>& data,
             Headers headers,
             Query query);
+
     http::Response post(
             std::string path,
             const std::vector<char>& data,
@@ -187,7 +194,8 @@ public:
     http::Response get(
             std::string path,
             Headers headers = Headers(),
-            Query query = Query());
+            Query query = Query(),
+            std::size_t reserve = 0);
 
     http::Response head(
             std::string path,
@@ -345,6 +353,11 @@ public:
     /** Write string data. */
     void put(std::string path, const std::string& data) const;
 
+    /** Copy a file, where @p src and @p dst must both be of this driver
+     * type.  Type-prefixes must be stripped from the input parameters.
+     */
+    virtual void copy(std::string src, std::string dst) const;
+
     /** @brief Resolve a possibly globbed path.
      *
      * See Arbiter::resolve for details.
@@ -450,6 +463,9 @@ namespace fs
     /** @brief Get temporary path from environment. */
     std::string getTempPath();
 
+    /** @brief Resolve a possible wildcard path. */
+    std::vector<std::string> glob(std::string path);
+
     /** @brief A scoped local filehandle for a possibly remote path.
      *
      * This is an RAII style pseudo-filehandle.  It manages the scope of a
@@ -521,6 +537,8 @@ public:
             bool verbose) const override;
 
     virtual bool isRemote() const override { return false; }
+
+    virtual void copy(std::string src, std::string dst) const override;
 
 protected:
     virtual bool get(std::string path, std::vector<char>& data) const override;
@@ -666,7 +684,8 @@ protected:
     http::Response internalGet(
             std::string path,
             http::Headers headers = http::Headers(),
-            http::Query query = http::Query()) const;
+            http::Query query = http::Query(),
+            std::size_t reserve = 0) const;
 
     http::Response internalPut(
             std::string path,
@@ -694,6 +713,24 @@ private:
     }
 
     http::Pool& m_pool;
+};
+
+/** @brief HTTPS driver.  Identical to the HTTP driver except for its type
+ * string.
+ */
+class Https : public Http
+{
+public:
+    Https(http::Pool& pool) : Http(pool) { }
+
+    static std::unique_ptr<Https> create(
+            http::Pool& pool,
+            const Json::Value& json)
+    {
+        return std::unique_ptr<Https>(new Https(pool));
+    }
+
+    virtual std::string type() const override { return "https"; }
 };
 
 } // namespace drivers
@@ -3752,7 +3789,8 @@ public:
             http::Pool& pool,
             const Auth& auth,
             std::string region = "us-east-1",
-            bool sse = false);
+            bool sse = false,
+            bool precheck = false);
 
     /** Try to construct an S3 Driver.  Searches @p json primarily for the keys
      * `access` and `hidden` to construct an S3::Auth.  If not found, common
@@ -3779,6 +3817,8 @@ public:
             const std::vector<char>& data,
             http::Headers headers,
             http::Query query) const override;
+
+    virtual void copy(std::string src, std::string dst) const override;
 
     /** @brief AWS authentication information. */
     class Auth
@@ -3823,10 +3863,15 @@ private:
 
         std::string url() const;
         std::string host() const;
+        std::string baseUrl() const { return m_baseUrl; }
+        std::string bucket() const { return m_bucket; }
+        std::string object() const;
 
-        std::string baseUrl;
-        std::string bucket;
-        std::string object;
+    private:
+        std::string m_baseUrl;
+        std::string m_bucket;
+        std::string m_object;
+        bool m_virtualHosted;
     };
 
     class FormattedTime
@@ -3901,6 +3946,7 @@ private:
     std::string m_region;
     std::string m_baseUrl;
     http::Headers m_baseHeaders;
+    bool m_precheck;
 };
 
 } // namespace drivers
@@ -4577,9 +4623,6 @@ public:
     http::Pool& httpPool() { return m_pool; }
 
 private:
-    // Registers all available default Driver instances.
-    void init(const Json::Value& json);
-
     const drivers::Http* tryGetHttpDriver(std::string path) const;
     const drivers::Http& getHttpDriver(std::string path) const;
 

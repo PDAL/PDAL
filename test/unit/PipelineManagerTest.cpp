@@ -85,7 +85,7 @@ TEST(PipelineManagerTest, OptionOrder)
     Options o;
     o.add("filename", Support::temppath("sorted.las"));
     r->setOptions(o);
-    
+
     PointTable t;
     r->prepare(t);
     PointViewSet s = r->execute(t);
@@ -122,5 +122,36 @@ TEST(PipelineManagerTest, OptionOrder)
         prev = d;
     }
     FileUtils::deleteFile(Support::temppath("sorted.las"));
+}
+
+// Make sure that when we add an option at the command line, it overrides
+// a pipeline option.
+TEST(PipelineManagerTest, InputGlobbing)
+{
+    std::string cmd = Support::binpath(Support::exename("pdal") +
+        " pipeline");
+
+    std::string file(Support::configuredpath("pipeline/glob.json"));
+
+    std::string output;
+    int stat = Utils::run_shell_command(cmd + " " + file, output);
+    EXPECT_EQ(stat, 0);
+
+    StageFactory f;
+    Stage *r = f.createStage("readers.las");
+
+    Options o;
+    o.add("filename", Support::temppath("globbed.las"));
+    r->setOptions(o);
+
+    PointTable t;
+    r->prepare(t);
+    PointViewSet s = r->execute(t);
+    EXPECT_EQ(s.size(), 1U);
+    PointViewPtr v = *(s.begin());
+
+    EXPECT_EQ(v->size(), 10653U);
+
+    FileUtils::deleteFile(Support::temppath("globbed.las"));
 }
 
