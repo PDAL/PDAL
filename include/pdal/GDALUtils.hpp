@@ -136,9 +136,33 @@ public:
         {
             ref = NULL;
         }
-        OGRErr err = OGR_G_CreateFromWkt(&p_wkt, ref, &geom);
-        if (err != OGRERR_NONE)
-            throw pdal::pdal_error("Unable to construct OGR geometry from wkt");
+        bool isJson = wkt.find("{") != wkt.npos ||
+                      wkt.find("}") != wkt.npos;
+
+        if (!isJson)
+        {
+            OGRErr err = OGR_G_CreateFromWkt(&p_wkt, ref, &geom);
+            if (err != OGRERR_NONE)
+            {
+                std::cout << "wkt: " << wkt << std::endl;
+                std::ostringstream oss;
+                oss << "unable to construct OGR Geometry";
+                oss << " '" << CPLGetLastErrorMsg() << "'";
+                throw pdal::pdal_error(oss.str());
+            }
+        }
+        else
+        {
+            // Assume it is GeoJSON and try constructing from that
+            geom = OGR_G_CreateGeometryFromJson(p_wkt);
+
+            if (!geom)
+                throw pdal_error("Unable to create geometry from "
+                    "input GeoJSON");
+
+            OGR_G_AssignSpatialReference(geom, ref);
+        }
+
         newRef(geom);
     }
 
