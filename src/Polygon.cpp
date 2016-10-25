@@ -413,6 +413,36 @@ bool Polygon::equals(const Polygon& p, double tolerance) const
     return (bool) GEOSEqualsExact_r(m_ctx, m_geom, p.m_geom, tolerance);
 }
 
+bool Polygon::covers(const Polygon& p) const
+{
+    return (bool) GEOSCovers_r(m_ctx, m_geom, p.m_geom);
+}
+
+bool Polygon::overlaps(const Polygon& p) const
+{
+    return (bool) GEOSOverlaps_r(m_ctx, m_geom, p.m_geom);
+}
+
+bool Polygon::contains(const Polygon& p) const
+{
+    return (bool) GEOSContains_r(m_ctx, m_geom, p.m_geom);
+}
+
+bool Polygon::touches(const Polygon& p) const
+{
+    return (bool) GEOSTouches_r(m_ctx, m_geom, p.m_geom);
+}
+
+bool Polygon::within(const Polygon& p) const
+{
+    return (bool) GEOSWithin_r(m_ctx, m_geom, p.m_geom);
+}
+
+bool Polygon::crosses(const Polygon& p) const
+{
+    return (bool) GEOSCrosses_r(m_ctx, m_geom, p.m_geom);
+}
+
 
 
 bool Polygon::operator==(const Polygon& input) const
