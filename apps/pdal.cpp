@@ -48,9 +48,7 @@
 
 #ifndef _WIN32
 #include <csignal>
-#include <execinfo.h>
 #include <unistd.h>
-#include <dlfcn.h>
 #endif
 
 using namespace pdal;
@@ -222,59 +220,6 @@ namespace
 
 int main(int argc, char* argv[])
 {
-#ifndef _WIN32
-    signal(SIGSEGV, [](int sig)
-    {
-        logPtr->get(LogLevel::Error) << "Got error " << sig << std::endl;
-
-        void* buffer[32];
-        const std::size_t size(backtrace(buffer, 32));
-        char** symbols(backtrace_symbols(buffer, size));
-
-        int status(0);
-        std::vector<std::string> lines;
-
-        for (std::size_t i(0); i < size; ++i)
-        {
-            std::string symbol(symbols[i]);
-            Dl_info info;
-
-            if (dladdr(buffer[i], &info))
-            {
-                const std::string demangled(Utils::demangle(info.dli_sname));
-
-                const std::size_t offset(
-                        static_cast<char*>(buffer[i]) -
-                        static_cast<char*>(info.dli_saddr));
-
-                // Replace the address and mangled name with a human-readable
-                // name.
-                std::string prefix(std::to_string(i) + "  ");
-                const std::size_t pos(symbol.find("0x"));
-                if (pos != std::string::npos)
-                {
-                    prefix = symbol.substr(0, pos);
-                }
-
-                lines.push_back(prefix + demangled + " + " +
-                        std::to_string(offset));
-            }
-            else
-            {
-                lines.push_back(symbol);
-            }
-        }
-
-        for (const auto& l : lines)
-        {
-            logPtr->get(LogLevel::Debug) << l << std::endl;
-        }
-
-        free(symbols);
-        exit(1);
-    });
-#endif
-
     App pdal;
 
     StringList cmdArgs;
@@ -325,6 +270,20 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
     else if (m_debug)
         log->setLevel(LogLevel::Debug);
     PluginManager::setLog(log);
+#ifndef _WIN32
+    if (m_debug)
+    {
+        signal(SIGSEGV, [](int sig)
+        {
+            logPtr->get(LogLevel::Debug) << "Segmentation fault (signal 11)\n";
+            StringList lines = Utils::backtrace();
+
+            for (const auto& l : lines)
+                logPtr->get(LogLevel::Debug) << l << std::endl;
+            exit(1);
+        });
+    }
+#endif
 
     m_command = Utils::tolower(m_command);
     if (!m_command.empty())

@@ -413,6 +413,13 @@ namespace Utils
     PDAL_DLL std::string hexDump(const char *buf, size_t count);
 
     /**
+      Generate a backtrace as a list of strings.
+
+      \return  List of functions at the point of the call.
+    */
+    PDAL_DLL std::vector<std::string> backtrace();
+
+    /**
       Count the number of characters in a string that meet a predicate.
 
       \param s  String in which to start counting characters.
@@ -916,6 +923,13 @@ namespace Utils
         return !iss.fail();
     }
 
+    /**
+      Return the argument cast to its underlying type.  Typically used on
+      an enum.
+
+      \param e  Variable for which to find the underlying type.
+      \return  Converted variable.
+    */
     template<typename E>
     constexpr typename std::underlying_type<E>::type toNative(E e)
     {
