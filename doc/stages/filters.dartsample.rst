@@ -17,11 +17,6 @@ is kept in tact (the same cannot be said for :ref:`filters.voxelgrid`).
     :ref:`filters.decimation` and :ref:`filters.voxelgrid` also perform
     decimation.
 
-.. [Cook1986] Cook, Robert L. "Stochastic sampling in computer graphics." *ACM Transactions on Graphics (TOG)* 5.1 (1986): 51-72.
-
-.. [Dippe1985] Dippé, Mark AZ, and Erling Henry Wold. "Antialiasing through stochastic sampling." *ACM Siggraph Computer Graphics* 19.3 (1985): 69-78.
-
-.. [Mesh2009] ALoopingIcon. "Meshing Point Clouds." *MESHLAB STUFF*. n.p., 7 Sept. 2009. Web. 13 Nov. 2015.
 
 Options
 -------------------------------------------------------------------------------
