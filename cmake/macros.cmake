@@ -53,7 +53,6 @@ endmacro(PDAL_ADD_INCLUDES)
 ###############################################################################
 # Add a library target.
 # _name The library name.
-# _component The part of PDAL that this library belongs to.
 # ARGN The source files for the library.
 #
 # The "generate_dimension_hpp" ensures that Dimension.hpp is built before
@@ -70,6 +69,22 @@ macro(PDAL_ADD_LIBRARY _name)
         LIBRARY DESTINATION ${PDAL_LIB_INSTALL_DIR}
         ARCHIVE DESTINATION ${PDAL_LIB_INSTALL_DIR})
 endmacro(PDAL_ADD_LIBRARY)
+
+###############################################################################
+# Add a free library target (one that doesn't depend on PDAL).
+# _name The library name.
+# ARGN The source files for the library.
+#
+macro(PDAL_ADD_FREE_LIBRARY _name)
+    add_library(${_name} ${PDAL_LIB_TYPE} ${ARGN})
+    set_property(TARGET ${_name} PROPERTY FOLDER "Libraries")
+
+    install(TARGETS ${_name}
+        EXPORT PDALTargets
+        RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR}
+        LIBRARY DESTINATION ${PDAL_LIB_INSTALL_DIR}
+        ARCHIVE DESTINATION ${PDAL_LIB_INSTALL_DIR})
+endmacro(PDAL_ADD_FREE_LIBRARY)
 
 ###############################################################################
 # Add an executable target.
