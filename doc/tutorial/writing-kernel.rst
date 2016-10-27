@@ -6,7 +6,7 @@ Writing a kernel
 
 :Author: Bradley Chambers
 :Contact: brad.chambers@gmail.com
-:Date: 01/21/2015
+:Date: 10/16/2016
 
 
 PDAL's command-line application can be extended through the development of
