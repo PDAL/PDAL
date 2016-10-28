@@ -22,12 +22,14 @@ PDAL_ADD_PLUGIN(libname reader greyhound
     FILES "${srcs}" "${incs}"
     LINK_WITH ${PDAL_JSONCPP_LIB_NAME})
 
-set(srcs
-    test/GreyhoundReaderTest.cpp
-)
+if (WITH_TESTS)
+    set(srcs
+        test/GreyhoundReaderTest.cpp
+    )
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+    include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-PDAL_ADD_TEST(greyhoundreadertest
-    FILES "${srcs}"
-    LINK_WITH ${libname} )
+    PDAL_ADD_TEST(greyhoundreadertest
+        FILES "${srcs}"
+        LINK_WITH ${libname} )
+endif()
