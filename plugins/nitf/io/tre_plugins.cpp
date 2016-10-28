@@ -155,7 +155,10 @@ void register_tre_handler(NITF_PLUGIN_INIT_FUNCTION init, NITF_PLUGIN_TRE_HANDLE
 {
   nitf_Error error;
   if (!nitf_PluginRegistry_registerTREHandler(init, handler, &error))
-    throw ::nitf::NITFException(&error);
+  {
+      ::nitf::NITFException ex(&error);
+      throw pdal_error(ex.toString());
+  }
 }
 
 void register_tre_plugins()

@@ -117,7 +117,9 @@ void SQLiteWriter::initialize()
     catch (pdal_error const& e)
     {
         std::stringstream oss;
-        oss << "Unable to connect to database with error '" << e.what() << "'";
+        oss << getName();
+        oss << ": Unable to connect to database with error '" <<
+            e.what() << "'";
         throw pdal_error(oss.str());
     }
 
@@ -343,7 +345,7 @@ SQLiteWriter::loadGeometryWKT(std::string const& filename_or_wkt) const
         if (!IsValidGeometryWKT(filename_or_wkt))
         {
             std::ostringstream oss;
-            oss << "WKT for not valid and '" << filename_or_wkt
+            oss << getName() << ": WKT for not valid and '" << filename_or_wkt
                 << "' doesn't exist as a file";
             throw pdal::pdal_error(oss.str());
         }
@@ -355,7 +357,7 @@ SQLiteWriter::loadGeometryWKT(std::string const& filename_or_wkt) const
         if (!IsValidGeometryWKT(wkt))
         {
             std::ostringstream oss;
-            oss << "WKT for was from file '" << filename_or_wkt
+            oss << getName() << ": WKT for was from file '" << filename_or_wkt
                 << "' is not valid";
             throw pdal::pdal_error(oss.str());
         }

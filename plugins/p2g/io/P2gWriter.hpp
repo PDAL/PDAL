@@ -49,17 +49,6 @@
 namespace pdal
 {
 
-
-class p2g_error : public pdal_error
-{
-public:
-    p2g_error(std::string const& msg)
-        : pdal_error(msg)
-    {}
-};
-
-
-
 class CoreInterp;
 
 class PDAL_DLL P2gWriter : public Writer

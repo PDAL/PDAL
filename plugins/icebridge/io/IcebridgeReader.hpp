@@ -59,13 +59,6 @@ namespace pdal
 namespace pdal
 {
 
-class icebridge_error : public pdal_error
-{
-public:
-    icebridge_error(std::string const& msg) : pdal_error(msg)
-    { }
-};
-
 class PDAL_DLL IcebridgeReader : public pdal::Reader
 {
 public:

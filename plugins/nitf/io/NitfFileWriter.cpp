@@ -202,9 +202,9 @@ void NitfFileWriter::write()
         if (v.size() != 2)
         {
             std::ostringstream oss;
-            oss << "Invalid name/value for AIMIDB '" << s <<
+            oss << "writers.nitf: Invalid name/value for AIMIDB '" << s <<
                 "'.  Format: <name>:<value>.";
-            throw oss.str();
+            throw pdal_error(oss.str());
         }
         Utils::trim(v[0]);
         Utils::trim(v[1]);
@@ -242,9 +242,9 @@ void NitfFileWriter::write()
         if (v.size() != 2)
         {
             std::ostringstream oss;
-            oss << "Invalid name/value for ACFTB '" << s <<
+            oss << "writers.nitf: Invalid name/value for ACFTB '" << s <<
                 "'.  Format: <name>:<value>.";
-            throw oss.str();
+            throw pdal_error(oss.str());
         }
         Utils::trim(v[0]);
         Utils::trim(v[1]);

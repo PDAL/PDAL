@@ -358,7 +358,7 @@ int Utils::portable_pclose(FILE* fp)
     status = pclose(fp);
     if (status == -1)
     {
-        throw std::runtime_error("error executing command");
+        throw std::runtime_error("Error closing pipe for subprocess");
     }
     if (WIFEXITED(status) != 0)
     {

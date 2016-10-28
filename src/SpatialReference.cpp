@@ -194,7 +194,7 @@ std::string SpatialReference::getVertical() const
 
 std::string SpatialReference::getVerticalUnits() const
 {
-    std::string tmp("");
+    std::string tmp;
 
     std::string wkt = getWKT(eCompoundOK);
     const char* poWKT = wkt.c_str();
@@ -207,10 +207,9 @@ std::string SpatialReference::getVerticalUnits() const
         {
             char* units(0);
 
-            // The returned value remains internal to the OGRSpatialReference and should not
-            //        be freed, or modified. It may be invalidated on the next
-            //        OGRSpatialReference call.
-
+            // 'units' remains internal to the OGRSpatialReference
+            // and should not be freed, or modified. It may be invalidated
+            // on the next OGRSpatialReference call.
             double u = poSRS->GetLinearUnits(&units);
             tmp = units;
 
@@ -278,7 +277,8 @@ void SpatialReference::setProj4(std::string const& v)
     OGRSpatialReference srs(NULL);
     if (OGRERR_NONE != srs.importFromProj4(const_cast<char *>(poProj4)))
     {
-        throw std::invalid_argument("could not import proj4 into OSRSpatialReference SetProj4");
+        throw pdal_error("Could not import proj4 into OSRSpatialReference "
+            "SetProj4");
     }
 
     srs.exportToWkt(&poWKT);
@@ -380,7 +380,7 @@ int SpatialReference::computeUTMZone(const BOX3D& box) const
     OGRSpatialReferenceH current =
         OSRNewSpatialReference(getWKT(eHorizontalOnly, false).c_str());
     if (! current)
-        throw std::invalid_argument("Could not fetch current SRS");
+        throw pdal_error("Could not fetch current SRS");
 
     OGRSpatialReferenceH wgs84 = OSRNewSpatialReference(0);
 
@@ -390,7 +390,7 @@ int SpatialReference::computeUTMZone(const BOX3D& box) const
         OSRDestroySpatialReference(wgs84);
         std::ostringstream msg;
         msg << "Could not import GDAL input spatial reference for WGS84";
-        throw std::runtime_error(msg.str());
+        throw pdal_error(msg.str());
     }
 
     void* transform = OCTNewCoordinateTransformation(current, wgs84);
@@ -399,7 +399,7 @@ int SpatialReference::computeUTMZone(const BOX3D& box) const
     {
         OSRDestroySpatialReference(current);
         OSRDestroySpatialReference(wgs84);
-        throw std::invalid_argument("could not comput transform from "
+        throw pdal_error("Could not comput transform from "
             "coordinate system to WGS84");
     }
 

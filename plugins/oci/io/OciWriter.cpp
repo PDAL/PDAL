@@ -376,9 +376,10 @@ bool OciWriter::isGeographic(int32_t srid)
     catch (pdal_error const& e)
     {
         std::ostringstream oss;
-        oss << "Failed to fetch geographicness of srid " << srid << std::endl;
+        oss << getName();
+        oss << ": Failed to fetch geographicness of srid " << srid << std::endl;
         oss << e.what() << std::endl;
-        throw std::runtime_error(oss.str());
+        throw pdal_error(oss.str());
     }
 
     std::string k = Utils::toupper(kind.get());
@@ -1021,10 +1022,11 @@ void OciWriter::writeTile(const PointViewPtr view)
     catch (std::runtime_error const& e)
     {
         std::ostringstream oss;
-        oss << "Failed to insert block # into '" << m_blockTableName <<
+        oss << getName();
+        oss << ": Failed to insert block # into '" << m_blockTableName <<
             "' table. Does the table exist? "  << std::endl;
         oss << e.what() << std::endl;
-        throw std::runtime_error(oss.str());
+        throw pdal_error(oss.str());
     }
 
     if (m_streamChunks)
@@ -1127,10 +1129,11 @@ void OciWriter::updatePCExtent()
     catch (std::runtime_error const& e)
     {
         std::ostringstream oss;
-        oss << "Failed to update cloud extent in '" << m_baseTableName <<
+        oss << getName();
+        oss << ": Failed to update cloud extent in '" << m_baseTableName <<
             "' table with id " << m_pc_id << ". Does the table exist? " <<
             std::endl << e.what() << std::endl;
-        throw std::runtime_error(oss.str());
+        throw pdal_error(oss.str());
     }
     m_connection->Commit();
 }

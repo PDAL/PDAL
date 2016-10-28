@@ -122,7 +122,8 @@ void Polygon::prepare()
     {
         m_prepGeom = GEOSPrepare_r(m_ctx, m_geom);
         if (!m_prepGeom)
-            throw pdal_error("unable to prepare geometry for index-accelerated access");
+            throw pdal_error("unable to prepare geometry for "
+                "index-accelerated access");
     }
 }
 
@@ -321,8 +322,8 @@ Polygon Polygon::simplify(double distance_tolerance,
 
         GEOSGeometry* p = GEOSGeom_createPolygon_r(m_ctx, exterior,
             keep_rings.data(), keep_rings.size());
-        if (p == NULL) throw
-            pdal::pdal_error("smooth polygon could not be created!" );
+        if (p == NULL)
+            throw pdal_error("smooth polygon could not be created!" );
         geometries.push_back(p);
     }
 
