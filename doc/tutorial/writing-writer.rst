@@ -6,7 +6,7 @@ Writing a writer
 
 :Authors: Bradley Chambers, Scott Lewis
 :Contact: brad.chambers@gmail.com
-:Date: 11/18/2015
+:Date: 10/26/2016
 
 
 PDAL's command-line application can be extended through the development of
@@ -19,6 +19,7 @@ First, we provide a full listing of the writer header.
 
 .. literalinclude:: ../../examples/writing-writer/MyWriter.hpp
    :language: cpp
+   :linenos:
 
 In your MyWriter class, you will declare the necessary methods and variables
 needed to make the writer work and meet the plugin specifications.
@@ -26,6 +27,7 @@ needed to make the writer work and meet the plugin specifications.
 .. literalinclude:: ../../examples/writing-writer/MyWriter.hpp
    :language: cpp
    :lines: 11
+   :linenos:
 
 FileStreamPtr is defined to make the declaration of the stream easier to manage
 later on.
@@ -36,22 +38,17 @@ later on.
 
 These three methods are required to fulfill the specs for defining a new plugin.
 
-.. literalinclude:: ../../examples/writing-writer/MyWriter.hpp
-   :language: cpp
-   :lines: 23
-
-This method will be used to specify default options for the Writer.
 
 .. literalinclude:: ../../examples/writing-writer/MyWriter.hpp
    :language: cpp
-   :lines: 26-29
+   :lines: 24-28
 
 These methods are used during various phases of the pipeline.  There are also
 more methods, which will not be covered in this tutorial.
 
 .. literalinclude:: ../../examples/writing-writer/MyWriter.hpp
    :language: cpp
-   :lines: 31-37
+   :lines: 30-36
 
 These are variables our Writer will use, such as the file to write to, the
 newline character to use, the name of the data field to use to write the MyData
@@ -68,13 +65,14 @@ We will start with a full listing of the writer source.
 
 .. literalinclude:: ../../examples/writing-writer/MyWriter.cpp
    :language: cpp
+   :linenos:
 
 In the writer implementation, we will use a macro defined in pdal_macros,
 which is included in the include chain we are using.
 
 .. literalinclude:: ../../examples/writing-writer/MyWriter.cpp
    :language: cpp
-   :lines: 11-16
+   :lines: 10-15
 
 Here we define a struct with information regarding the writer, such as the
 name, a description, and a path to documentation.  We then use the macro
@@ -88,27 +86,30 @@ also possible, but requires some extra steps and will not be covered here.
 
 .. literalinclude:: ../../examples/writing-writer/MyWriter.cpp
    :language: cpp
-   :lines: 20-31
+   :lines: 19-30
+   :linenos:
 
 This struct is used for helping with the FileStreamPtr for cleanup.
 
 .. literalinclude:: ../../examples/writing-writer/MyWriter.cpp
    :language: cpp
-   :lines: 34-44
+   :lines: 33-40
+   :linenos:
 
-This method sets various default parameters.  They can be overridden via the
-pipeline, if desired.
+This method defines the arguments the writer provides and binds them to
+private variables.
 
 .. literalinclude:: ../../examples/writing-writer/MyWriter.cpp
    :language: cpp
    :lines: 47-63
 
-This method processes the options, including the default options given, and in
-this case also opens the output file stream for use.
+This method initializes our file stream in preparation for writing.
+
 
 .. literalinclude:: ../../examples/writing-writer/MyWriter.cpp
    :language: cpp
-   :lines: 66-82
+   :lines: 55-70
+   :linenos:
 
 The ready method is used to prepare the writer for any number of PointViews that
 may be passed in.  In this case, we are setting the precision for our double
@@ -117,7 +118,8 @@ and writing the header of the output file.
 
 .. literalinclude:: ../../examples/writing-writer/MyWriter.cpp
    :language: cpp
-   :lines: 85-101
+   :lines: 74-90
+   :linenos:
 
 This method is the main method for writing.  In our case, we are writing a very
 simple file, with data in the format of X:Y:Z:MyData.  We loop through each
@@ -136,7 +138,8 @@ to the output stream.
 
 .. literalinclude:: ../../examples/writing-writer/MyWriter.cpp
    :language: cpp
-   :lines: 104-107
+   :lines: 93-96
+   :linenos:
 
 This method is called when the writing is done.  In this case, it simply cleans
 up the output stream by resetting it.
@@ -148,6 +151,7 @@ To compile this reader, we will use cmake.  Here is the CMakeLists.txt file we
 will use for this process:
 
 .. literalinclude:: ../../examples/writing-writer/CMakeLists.txt
+    :linenos:
 
 If this file is in the directory with the MyWriter.hpp and MyWriter.cpp files,
 simply run ``cmake .`` followed by ``make``.  This will generate a file called

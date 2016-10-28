@@ -77,21 +77,11 @@ namespace
     const std::size_t httpRetryCount(8);
 }
 
-Arbiter::Arbiter()
-    : m_drivers()
-    , m_pool(concurrentHttpReqs, httpRetryCount, Json::Value())
-{
-    init(Json::Value());
-}
+Arbiter::Arbiter() : Arbiter(Json::Value()) { }
 
 Arbiter::Arbiter(const Json::Value& json)
     : m_drivers()
     , m_pool(concurrentHttpReqs, httpRetryCount, json)
-{
-    init(json);
-}
-
-void Arbiter::init(const Json::Value& json)
 {
     using namespace drivers;
 
@@ -103,6 +93,9 @@ void Arbiter::init(const Json::Value& json)
 
     auto http(Http::create(m_pool, json["http"]));
     if (http) m_drivers[http->type()] = std::move(http);
+
+    auto https(Https::create(m_pool, json["http"]));
+    if (https) m_drivers[https->type()] = std::move(https);
 
     auto s3(S3::create(m_pool, json["s3"]));
     if (s3) m_drivers[s3->type()] = std::move(s3);
@@ -272,7 +265,7 @@ void Arbiter::copy(
 
 void Arbiter::copyFile(
         const std::string file,
-        const std::string dst,
+        std::string dst,
         const bool verbose) const
 {
     if (dst.empty()) throw ArbiterError("Cannot copy to empty destination");
@@ -283,24 +276,22 @@ void Arbiter::copyFile(
     {
         // If the destination is a directory, maintain the basename of the
         // source file.
-        const std::string basename(util::getBasename(file));
-        if (verbose)
-        {
-            std::cout <<
-                file << " -> " <<
-                dstEndpoint.type() + "://" + dstEndpoint.fullPath(basename) <<
-                std::endl;
-        }
+        dst += util::getBasename(file);
+    }
 
-        if (dstEndpoint.isLocal()) fs::mkdirp(dst);
+    if (verbose) std::cout << file << " -> " << dst << std::endl;
 
-        dstEndpoint.put(util::getBasename(file), getBinary(file));
+    if (dstEndpoint.isLocal()) fs::mkdirp(util::getNonBasename(dst));
+
+    if (getEndpoint(file).type() == dstEndpoint.type())
+    {
+        // If this copy is within the same driver domain, defer to the
+        // hopefully specialized copy method.
+        getDriver(file).copy(stripType(file), stripType(dst));
     }
     else
     {
-        if (verbose) std::cout << file << " -> " << dst << std::endl;
-
-        if (dstEndpoint.isLocal()) fs::mkdirp(util::getNonBasename(dst));
+        // Otherwise do a GET/PUT for the copy.
         put(dst, getBinary(file));
     }
 }
@@ -505,6 +496,11 @@ std::size_t Driver::getSize(const std::string path) const
 void Driver::put(std::string path, const std::string& data) const
 {
     put(path, std::vector<char>(data.begin(), data.end()));
+}
+
+void Driver::copy(std::string src, std::string dst) const
+{
+    put(dst, getBinary(src));
 }
 
 std::vector<std::string> Driver::resolve(
@@ -790,6 +786,8 @@ const drivers::Http& Endpoint::getHttpDriver() const
 #include <algorithm>
 #include <cstdlib>
 #include <fstream>
+#include <ios>
+#include <istream>
 
 #ifdef ARBITER_CUSTOM_NAMESPACE
 namespace ARBITER_CUSTOM_NAMESPACE
@@ -895,78 +893,30 @@ void Fs::put(std::string path, const std::vector<char>& data) const
     }
 }
 
+void Fs::copy(std::string src, std::string dst) const
+{
+    src = fs::expandTilde(src);
+    dst = fs::expandTilde(dst);
+
+    std::ifstream instream(src, std::ifstream::in | std::ifstream::binary);
+    if (!instream.good())
+    {
+        throw ArbiterError("Could not open " + src + " for reading");
+    }
+    instream >> std::noskipws;
+
+    std::ofstream outstream(dst, binaryTruncMode);
+    if (!outstream.good())
+    {
+        throw ArbiterError("Could not open " + dst + " for writing");
+    }
+
+    outstream << instream.rdbuf();
+}
+
 std::vector<std::string> Fs::glob(std::string path, bool verbose) const
 {
-    std::vector<std::string> results;
-
-    path = fs::expandTilde(path);
-
-    const bool recursive(([&path]()
-    {
-        if (path.size() > 2 && path[path.size() - 2] == '*')
-        {
-            path.pop_back();
-            return true;
-        }
-        else return false;
-    })());
-
-#ifndef ARBITER_WINDOWS
-    glob_t buffer;
-    struct stat info;
-
-    ::glob(path.c_str(), GLOB_NOSORT | GLOB_MARK, 0, &buffer);
-
-    for (std::size_t i(0); i < buffer.gl_pathc; ++i)
-    {
-        const std::string val(buffer.gl_pathv[i]);
-
-        if (stat(val.c_str(), &info) == 0)
-        {
-            if (S_ISREG(info.st_mode))
-            {
-                if (verbose && results.size() % 10000 == 0)
-                {
-                    std::cout << "." << std::flush;
-                }
-
-                results.push_back(val);
-            }
-            else if (recursive && S_ISDIR(info.st_mode))
-            {
-                const auto nested(glob(val + "**", verbose));
-                results.insert(results.end(), nested.begin(), nested.end());
-            }
-        }
-        else
-        {
-            throw ArbiterError("Error globbing - POSIX stat failed");
-        }
-    }
-
-    globfree(&buffer);
-#else
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-    const std::wstring wide(converter.from_bytes(path));
-
-    LPWIN32_FIND_DATAW data{};
-    HANDLE hFind(FindFirstFileW(wide.c_str(), data));
-
-    if (hFind != INVALID_HANDLE_VALUE)
-    {
-        do
-        {
-            if ((data->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
-            {
-                results.push_back(converter.to_bytes(data->cFileName));
-            }
-            // TODO Recurse if necessary.
-        }
-        while (FindNextFileW(hFind, data));
-    }
-#endif
-
-    return results;
+    return fs::glob(path);
 }
 
 } // namespace drivers
@@ -1021,6 +971,120 @@ bool remove(std::string filename)
 #else
     throw ArbiterError("Windows remove not done yet.");
 #endif
+}
+
+namespace
+{
+    struct Globs
+    {
+        std::vector<std::string> files;
+        std::vector<std::string> dirs;
+    };
+
+    Globs globOne(std::string path)
+    {
+        Globs results;
+
+#ifndef ARBITER_WINDOWS
+        glob_t buffer;
+        struct stat info;
+
+        ::glob(path.c_str(), GLOB_NOSORT | GLOB_MARK, 0, &buffer);
+
+        for (std::size_t i(0); i < buffer.gl_pathc; ++i)
+        {
+            const std::string val(buffer.gl_pathv[i]);
+
+            if (stat(val.c_str(), &info) == 0)
+            {
+                if (S_ISREG(info.st_mode)) results.files.push_back(val);
+                else if (S_ISDIR(info.st_mode)) results.dirs.push_back(val);
+            }
+            else
+            {
+                throw ArbiterError("Error globbing - POSIX stat failed");
+            }
+        }
+
+        globfree(&buffer);
+#else
+        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+        const std::wstring wide(converter.from_bytes(path));
+
+        LPWIN32_FIND_DATAW data{};
+        HANDLE hFind(FindFirstFileW(wide.c_str(), data));
+
+        if (hFind != INVALID_HANDLE_VALUE)
+        {
+            do
+            {
+                if ((data->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
+                {
+                    results.files.push_back(
+                            converter.to_bytes(data->cFileName));
+                }
+                else
+                {
+                    results.dirs.push_back(converter.to_bytes(data->cFileName));
+                }
+            }
+            while (FindNextFileW(hFind, data));
+        }
+#endif
+
+        return results;
+    }
+
+    std::vector<std::string> walk(std::string dir)
+    {
+        std::vector<std::string> paths;
+        paths.push_back(dir);
+
+        for (const auto& d : globOne(dir + '*').dirs)
+        {
+            const auto next(walk(d));
+            paths.insert(paths.end(), next.begin(), next.end());
+        }
+
+        return paths;
+    }
+}
+
+std::vector<std::string> glob(std::string path)
+{
+    std::vector<std::string> results;
+
+    path = fs::expandTilde(path);
+
+    if (path.find('*') == std::string::npos)
+    {
+        results.push_back(path);
+        return results;
+    }
+
+    std::vector<std::string> dirs;
+
+    const std::size_t recPos(path.find("**"));
+    if (recPos != std::string::npos)
+    {
+        // Convert this recursive glob into multiple non-recursive ones.
+        const auto pre(path.substr(0, recPos));     // Cut off before the '*'.
+        const auto post(path.substr(recPos + 1));   // Includes the second '*'.
+
+        for (const auto d : walk(pre)) dirs.push_back(d + post);
+    }
+    else
+    {
+        dirs.push_back(path);
+    }
+
+    for (const auto& p : dirs)
+    {
+        Globs globs(globOne(p));
+        results.insert(results.end(), globs.files.begin(), globs.files.end());
+    }
+
+    return results;
 }
 
 std::string expandTilde(std::string in)
@@ -1221,9 +1285,10 @@ void Http::put(
 Response Http::internalGet(
         const std::string path,
         const Headers headers,
-        const Query query) const
+        const Query query,
+        const std::size_t reserve) const
 {
-    return m_pool.acquire().get(path, headers, query);
+    return m_pool.acquire().get(path, headers, query, reserve);
 }
 
 Response Http::internalPut(
@@ -1316,8 +1381,8 @@ namespace
     std::string getBaseUrl(const std::string& region)
     {
         // https://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
-        if (region == "us-east-1") return ".s3.amazonaws.com/";
-        else return ".s3-" + region + ".amazonaws.com/";
+        if (region == "us-east-1") return "s3.amazonaws.com/";
+        else return "s3-" + region + ".amazonaws.com/";
     }
 
     drivers::Fs fsDriver;
@@ -1334,7 +1399,7 @@ namespace
                 in.begin(),
                 in.end(),
                 std::string(),
-                [](const std::string& out, const char c)
+                [](const std::string& out, const char c) -> std::string
                 {
                     return out + static_cast<char>(::tolower(c));
                 });
@@ -1348,7 +1413,7 @@ namespace
                 in.begin(),
                 in.end(),
                 std::string(),
-                [](const std::string& out, const char c)
+                [](const std::string& out, const char c) -> std::string
                 {
                     if (
                         std::isspace(c) &&
@@ -1424,12 +1489,14 @@ S3::S3(
         Pool& pool,
         const S3::Auth& auth,
         const std::string region,
-        const bool sse)
+        const bool sse,
+        const bool precheck)
     : Http(pool)
     , m_auth(auth)
     , m_region(region)
     , m_baseUrl(getBaseUrl(region))
     , m_baseHeaders()
+    , m_precheck(precheck)
 {
     if (sse)
     {
@@ -1446,6 +1513,7 @@ std::unique_ptr<S3> S3::create(Pool& pool, const Json::Value& json)
 
     const std::string profile(extractProfile(json));
     const bool sse(json["sse"].asBool());
+    const bool precheck(json["precheck"].asBool());
 
     if (!json.isNull() && json.isMember("access") & json.isMember("hidden"))
     {
@@ -1544,7 +1612,7 @@ std::unique_ptr<S3> S3::create(Pool& pool, const Json::Value& json)
             "Region not found in ~/.aws/config - using us-east-1" << std::endl;
     }
 
-    s3.reset(new S3(pool, *auth, region, sse));
+    s3.reset(new S3(pool, *auth, region, sse, precheck));
 
     return s3;
 }
@@ -1603,6 +1671,10 @@ bool S3::get(
         const Headers headers,
         const Query query) const
 {
+    std::unique_ptr<std::size_t> size(
+            m_precheck && !headers.count("Range") ?
+                tryGetSize(rawPath) : nullptr);
+
     const Resource resource(m_baseUrl, rawPath);
     const ApiV4 apiV4(
             "GET",
@@ -1617,7 +1689,8 @@ bool S3::get(
             Http::internalGet(
                 resource.url(),
                 apiV4.headers(),
-                apiV4.query()));
+                apiV4.query(),
+                size ? *size : 0));
 
     if (res.ok())
     {
@@ -1667,6 +1740,14 @@ void S3::put(
     }
 }
 
+void S3::copy(const std::string src, const std::string dst) const
+{
+    Headers headers;
+    const Resource resource(m_baseUrl, src);
+    headers["x-amz-copy-source"] = resource.bucket() + '/' + resource.object();
+    put(dst, std::vector<char>(), headers, Query());
+}
+
 std::vector<std::string> S3::glob(std::string path, bool verbose) const
 {
     std::vector<std::string> results;
@@ -1677,8 +1758,8 @@ std::vector<std::string> S3::glob(std::string path, bool verbose) const
 
     // https://docs.aws.amazon.com/AmazonS3/latest/API/RESTBucketGET.html
     const Resource resource(m_baseUrl, path);
-    const std::string& bucket(resource.bucket);
-    const std::string& object(resource.object);
+    const std::string& bucket(resource.bucket());
+    const std::string& object(resource.object());
 
     Query query;
 
@@ -1691,9 +1772,9 @@ std::vector<std::string> S3::glob(std::string path, bool verbose) const
     {
         if (verbose) std::cout << "." << std::flush;
 
-        if (!get(resource.bucket + "/", data, Headers(), query))
+        if (!get(resource.bucket() + "/", data, Headers(), query))
         {
-            throw ArbiterError("Couldn't S3 GET " + resource.bucket);
+            throw ArbiterError("Couldn't S3 GET " + resource.bucket());
         }
 
         data.push_back('\0');
@@ -1843,7 +1924,7 @@ std::string S3::ApiV4::buildCanonicalRequest(
         const Query& query,
         const std::vector<char>& data) const
 {
-    const std::string canonicalUri(sanitize("/" + resource.object));
+    const std::string canonicalUri(sanitize("/" + resource.object()));
 
     auto canonicalizeQuery([](const std::string& s, const Query::value_type& q)
     {
@@ -1909,29 +1990,61 @@ std::string S3::ApiV4::getAuthHeader(
 }
 
 S3::Resource::Resource(std::string baseUrl, std::string fullPath)
-    : baseUrl(baseUrl)
-    , bucket()
-    , object()
+    : m_baseUrl(baseUrl)
+    , m_bucket()
+    , m_object()
+    , m_virtualHosted(true)
 {
     fullPath = sanitize(fullPath);
     const std::size_t split(fullPath.find("/"));
 
-    bucket = fullPath.substr(0, split);
+    m_bucket = fullPath.substr(0, split);
 
     if (split != std::string::npos)
     {
-        object = fullPath.substr(split + 1);
+        m_object = fullPath.substr(split + 1);
     }
+
+    m_virtualHosted = m_bucket.find_first_of('.') == std::string::npos;
 }
 
 std::string S3::Resource::url() const
 {
-    return "https://" + bucket + baseUrl + object;
+    // We can't use virtual-host style paths if the bucket contains dots.
+    if (m_virtualHosted)
+    {
+        return "https://" + m_bucket + "." + m_baseUrl + m_object;
+    }
+    else
+    {
+        return "https://" + m_baseUrl + m_bucket + "/" + m_object;
+    }
+}
+
+std::string S3::Resource::object() const
+{
+    // We can't use virtual-host style paths if the bucket contains dots.
+    if (m_virtualHosted)
+    {
+        return m_object;
+    }
+    else
+    {
+        return m_bucket + "/" + m_object;
+    }
 }
 
 std::string S3::Resource::host() const
 {
-    return bucket + baseUrl.substr(0, baseUrl.size() - 1); // Pop slash.
+    if (m_virtualHosted)
+    {
+        // Pop slash.
+        return m_bucket + "." + m_baseUrl.substr(0, m_baseUrl.size() - 1);
+    }
+    else
+    {
+        return m_baseUrl.substr(0, m_baseUrl.size() - 1);
+    }
 }
 
 S3::FormattedTime::FormattedTime()
@@ -2220,18 +2333,38 @@ bool Dropbox::get(
     {
         if (!userHeaders.count("Range"))
         {
-            if (!res.headers().count("size")) return false;
+            if (!res.headers().count("dropbox-api-result"))
+            {
+                std::cout << "No dropbox-api-result header found" << std::endl;
+                return false;
+            }
 
-            const std::size_t size(std::stoul(res.headers().at("size")));
-            data = res.data();
+            Json::Value apiJson;
+            Json::Reader reader;
+            if (reader.parse(res.headers().at("dropbox-api-result"), apiJson))
+            {
+                if (!apiJson.isMember("size"))
+                {
+                    std::cout << "No size found in API result" << std::endl;
+                    return false;
+                }
 
-            if (size == data.size()) return true;
+                const std::size_t size(apiJson["size"].asUInt64());
+                data = res.data();
+
+                if (size == data.size()) return true;
+                else
+                {
+                    std::cout <<
+                        "Data size check failed - got " <<
+                        size << " of " << res.data().size() << " bytes." <<
+                        std::endl;
+                }
+            }
             else
             {
-                std::cout <<
-                    "Data size check failed - got " <<
-                    size << " of " << res.data().size() << " bytes." <<
-                    std::endl;
+                std::cout << "Could not parse API result: " <<
+                    reader.getFormattedErrorMessages() << std::endl;
             }
         }
         else
@@ -2408,6 +2541,7 @@ std::vector<std::string> Dropbox::glob(std::string rawPath, bool verbose) const
 #include <arbiter/util/http.hpp>
 #endif
 
+#include <iostream>
 #include <numeric>
 
 #include <curl/curl.h>
@@ -2614,15 +2748,21 @@ void Curl::init(
     }
 }
 
-Response Curl::get(std::string path, Headers headers, Query query)
+Response Curl::get(
+        std::string path,
+        Headers headers,
+        Query query,
+        const std::size_t reserve)
 {
-    int httpCode(0);
+    long httpCode(0);
     std::vector<char> data;
+
+    if (reserve) data.reserve(reserve);
 
     init(path, headers, query);
     if (m_verbose) curl_easy_setopt(m_curl, CURLOPT_VERBOSE, 1L);
 
-    // Register callback function and date pointer to consume the result.
+    // Register callback function and data pointer to consume the result.
     curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, getCb);
     curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, &data);
 
@@ -2644,13 +2784,13 @@ Response Curl::get(std::string path, Headers headers, Query query)
 
 Response Curl::head(std::string path, Headers headers, Query query)
 {
-    int httpCode(0);
+    long httpCode(0);
     std::vector<char> data;
 
     init(path, headers, query);
     if (m_verbose) curl_easy_setopt(m_curl, CURLOPT_VERBOSE, 1L);
 
-    // Register callback function and date pointer to consume the result.
+    // Register callback function and data pointer to consume the result.
     curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, getCb);
     curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, &data);
 
@@ -2682,7 +2822,7 @@ Response Curl::put(
     init(path, headers, query);
     if (m_verbose) curl_easy_setopt(m_curl, CURLOPT_VERBOSE, 1L);
 
-    int httpCode(0);
+    long httpCode(0);
 
     std::unique_ptr<PutData> putData(new PutData(data));
 
@@ -2724,7 +2864,7 @@ Response Curl::post(
     init(path, headers, query);
     if (m_verbose) curl_easy_setopt(m_curl, CURLOPT_VERBOSE, 1L);
 
-    int httpCode(0);
+    long httpCode(0);
 
     std::unique_ptr<PutData> putData(new PutData(data));
     std::vector<char> writeData;
@@ -2785,11 +2925,12 @@ Resource::~Resource()
 Response Resource::get(
         const std::string path,
         const Headers headers,
-        const Query query)
+        const Query query,
+        const std::size_t reserve)
 {
-    return exec([this, path, headers, query]()->Response
+    return exec([this, path, headers, query, reserve]()->Response
     {
-        return m_curl.get(path, headers, query);
+        return m_curl.get(path, headers, query, reserve);
     });
 }
 
@@ -3564,6 +3705,9 @@ std::string getNonBasename(const std::string fullPath)
         const std::string sub(stripped.substr(0, pos));
         result = sub;
     }
+
+    const std::string type(Arbiter::getType(fullPath));
+    if (type != "file") result = type + "://" + result;
 
     return result;
 }

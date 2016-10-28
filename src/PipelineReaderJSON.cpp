@@ -93,14 +93,19 @@ void PipelineReaderJSON::parsePipeline(Json::Value& tree)
         if ((type.empty() && (i == 0 || i != last)) ||
             Utils::startsWith(type, "readers."))
         {
-            s = &m_manager.makeReader(filename, type, options);
-            if (specifiedInputs.size())
-                throw pdal_error("JSON pipeline: Inputs not permitted for "
-                    " reader: '" + filename + "'.");
-            inputs.push_back(s);
+            for (const std::string& path : Utils::maybeGlob(filename))
+            {
+                s = &m_manager.makeReader(path, type, options);
+
+                if (specifiedInputs.size())
+                    throw pdal_error("JSON pipeline: Inputs not permitted for "
+                        " reader: '" + filename + "'.");
+                inputs.push_back(s);
+            }
         }
         else if (type.empty() || Utils::startsWith(type, "writers."))
         {
+            filename = Utils::expandTilde(filename);
             s = &m_manager.makeWriter(filename, type, options);
             for (Stage *ts : inputs)
                 s->setInput(*ts);

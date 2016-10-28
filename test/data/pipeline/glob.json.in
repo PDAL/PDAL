@@ -1,0 +1,7 @@
+{
+  "pipeline": [
+    "@CMAKE_SOURCE_DIR@/test/data/autzen/thin*.las",
+    "@CMAKE_SOURCE_DIR@/test/temp/globbed.las"
+  ]
+}
+
