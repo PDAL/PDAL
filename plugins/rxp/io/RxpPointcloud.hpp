@@ -62,6 +62,9 @@ public:
             const std::string& uri,
             bool isSyncToPps,
             bool m_minimal,
+            bool m_reflectanceAsIntensity,
+            float m_minReflectance,
+            float m_maxReflectance,
             PointTableRef table);
     virtual ~RxpPointcloud();
 
@@ -82,6 +85,9 @@ private:
     point_count_t m_idx;
     bool m_syncToPps;
     bool m_minimal;
+    bool m_reflectanceAsIntensity;
+    float m_minReflectance;
+    float m_maxReflectance;
     std::shared_ptr<scanlib::basic_rconnection> m_rc;
     scanlib::decoder_rxpmarker m_dec;
     scanlib::buffer m_rxpbuf;
