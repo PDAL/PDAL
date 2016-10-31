@@ -31,7 +31,7 @@ but a value other than 2 can be chosen using :math:`\tt  multiplier`.
 
 See [Rusu2008]_ for more information.
 
-.. [Rusu2008] Rusu, Radu Bogdan, et al. "Towards 3D point cloud based object maps for household environments." Robotics and Autonomous Systems 56.11 (2008): 927-941.
+
 
 .. _`PCL`: http://www.pointclouds.org
 

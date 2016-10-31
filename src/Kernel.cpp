@@ -360,60 +360,6 @@ void Kernel::parseCommonOptions()
 
     if (m_visualize)
         options.add("visualize", m_visualize);
-
-    auto pred = [](char c){ return (bool)strchr(",| ", c); };
-
-    if (!m_scales.empty())
-    {
-        std::vector<double> scales;
-        StringList scaleTokens = Utils::split2(m_scales, pred);
-        for (std::string s : scaleTokens)
-        {
-            double val;
-
-            if (Utils::fromString(s, val))
-                scales.push_back(val);
-            else
-            {
-                std::ostringstream oss;
-                oss << getName() << ": Invalid scale value '" << s << "'." <<
-                    std::endl;
-                throw pdal_error(oss.str());
-            }
-        }
-        if (scales.size() > 0)
-            options.add("scale_x", scales[0]);
-        if (scales.size() > 1)
-            options.add("scale_y", scales[1]);
-        if (scales.size() > 2)
-            options.add("scale_z", scales[2]);
-    }
-
-    if (!m_offsets.empty())
-    {
-        std::vector<double> offsets;
-        StringList offsetTokens = Utils::split2(m_offsets, pred);
-        for (std::string o : offsetTokens)
-        {
-            double val;
-
-            if (Utils::fromString(o, val))
-                offsets.push_back(val);
-            else
-            {
-                std::ostringstream oss;
-                oss << getName() << ": Invalid offset value '" << o << "'." <<
-                    std::endl;
-                throw pdal_error(oss.str());
-            }
-        }
-        if (offsets.size() > 0)
-            options.add("offset_x", offsets[0]);
-        if (offsets.size() > 1)
-            options.add("offset_y", offsets[1]);
-        if (offsets.size() > 2)
-            options.add("offset_z", offsets[2]);
-    }
 }
 
 
@@ -440,25 +386,7 @@ void Kernel::addBasicSwitches(ProgramArgs& args)
 
     args.add("visualize", "Visualize result", m_visualize);
     args.add("driver", "Override reader driver", m_driverOverride, "");
-    args.add("scale",
-         "A comma-separated or quoted, space-separated list of scales to "
-         "set on the output file: \n--scale 0.1,0.1,0.00001\n--scale \""
-         "0.1 0.1 0.00001\"", m_scales);
-    args.add("offset",
-         "A comma-separated or quoted, space-separated list of offsets to "
-         "set on the output file: \n--offset 0,0,0\n--offset "
-         "\"1234 5678 91011\"", m_offsets);
 }
-
-/**
-Stage& Kernel::createStage(const std::string& name)
-{
-    Stage *stage = m_factory.createStage(name);
-    if (!stage)
-        throw pdal_error("stage creation failed for " + name);
-    return *stage;
-}
-**/
 
 Stage& Kernel::makeReader(const std::string& inputFile, std::string driver)
 {

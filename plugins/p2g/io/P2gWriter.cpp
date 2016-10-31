@@ -91,8 +91,8 @@ void P2gWriter::initialize()
         {
             std::ostringstream oss;
 
-            oss << "Unrecognized output type '" << type << "'."; 
-            throw p2g_error(oss.str());
+            oss << getName() << ": Unrecognized output type '" << type << "'."; 
+            throw pdal_error(oss.str());
         }
     }
 
@@ -109,8 +109,9 @@ void P2gWriter::initialize()
     {
         std::ostringstream oss;
 
-        oss << "Unrecognized output format '" << m_outputFormatSpec << "'";
-        throw p2g_error(oss.str());
+        oss << getName();
+        oss << ": Unrecognized output format '" << m_outputFormatSpec << "'";
+        throw pdal_error(oss.str());
     }
 }
 
@@ -156,9 +157,13 @@ void P2gWriter::write(const PointViewPtr view)
             m_bounds.miny;
         double z = view->getFieldAs<double>(Dimension::Id::Z, idx);
         if (m_interpolator->update(x, y, z) < 0)
-            throw p2g_error("interp->update() error while processing");
-    }
+        {
+            std::ostringstream oss;
 
+            oss << getName() << ": interp->update() error while processing";
+            throw pdal_error(oss.str());
+        }
+    }
 }
 
 void P2gWriter::done(PointTableRef table)
@@ -188,7 +193,10 @@ void P2gWriter::done(PointTableRef table)
         m_outputFormat, m_outputTypes, adfGeoTransform,
         srs.getWKT().c_str()) < 0)
     {
-        throw p2g_error("interp->finish() error");
+        ostringstream oss;
+
+        oss << getName() << ": interp->finish() error";
+        throw pdal_error(oss.str());
     }
 }
 

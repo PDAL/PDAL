@@ -183,7 +183,9 @@ point_count_t IcebridgeReader::read(PointViewPtr view, point_count_t count)
         }
         catch(...)
         {
-            throw icebridge_error("Error fetching column data");
+            std::ostringstream oss;
+            oss << getName() << ": Error fetching column data.";
+            throw pdal_error(oss.str());
         }
     }
     return count;

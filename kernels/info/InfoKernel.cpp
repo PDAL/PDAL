@@ -265,11 +265,13 @@ void InfoKernel::makePipeline(const std::string& filename, bool noPoints)
     if (filename == "STDIN")
     {
         m_manager.readPipeline(std::cin);
+        m_reader = m_manager.getStage();
     }
     else if (FileUtils::extension(filename) == ".xml" ||
         FileUtils::extension(filename) == ".json")
     {
         m_manager.readPipeline(filename);
+        m_reader = m_manager.getStage();
     }
     else
     {
@@ -279,6 +281,8 @@ void InfoKernel::makePipeline(const std::string& filename, bool noPoints)
         Stage& reader = m_manager.makeReader(filename, m_driverOverride, ops);
         m_reader = &reader;
     }
+    if (!m_reader)
+        throw pdal_error("Pipeline contains no valid stages.");
 }
 
 

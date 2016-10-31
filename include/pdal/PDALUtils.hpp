@@ -264,6 +264,8 @@ std::ostream PDAL_DLL *createFile(const std::string& path,
 void PDAL_DLL closeFile(std::istream *in);
 void PDAL_DLL closeFile(std::ostream *out);
 bool PDAL_DLL fileExists(const std::string& path);
+std::string PDAL_DLL expandTilde(const std::string& path);
+std::vector<std::string> PDAL_DLL maybeGlob(const std::string& path);
 
 } // namespace Utils
 } // namespace pdal

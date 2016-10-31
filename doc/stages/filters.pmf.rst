@@ -7,8 +7,6 @@ The Progressive Morphological Filter (PMF) is a method of segmenting ground and
 non-ground returns. This filter is an implementation of the method described in
 [Zhang2003]_.
 
-.. [Zhang2003] Zhang, Keqi, et al. "A progressive morphological filter for removing nonground measurements from airborne LIDAR data." Geoscience and Remote Sensing, IEEE Transactions on 41.4 (2003): 872-882.
-
 
 Example
 -------

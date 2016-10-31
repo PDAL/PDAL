@@ -81,6 +81,7 @@ Drivers
    stages/readers
    stages/writers
    stages/filters
+   dimensions
 
 Tutorials
 --------------------------------------------------------------------------------
@@ -109,6 +110,11 @@ Development
    api/index
    faq
    copyright
+
+.. toctree::
+   :includehidden:
+
+   references
 
 
 

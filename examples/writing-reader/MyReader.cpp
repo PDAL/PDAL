@@ -88,7 +88,8 @@ namespace pdal
       if (s.size() != 4)
       {
         std::stringstream oss;
-        oss << "Unable to split proper number of fields.  Expected 4, got " << s.size();
+        oss << "Unable to split proper number of fields.  Expected 4, got "
+            << s.size();
         throw pdal_error(oss.str());
       }
 
@@ -103,7 +104,9 @@ namespace pdal
       view->setField(Dimension::Id::Z, nextId, z);
 
       name = "MyData";
-      view->setField(layout->findProprietaryDim(name), nextId, convert<unsigned int>(s, name, 3));
+      view->setField(layout->findProprietaryDim(name),
+                     nextId,
+                     convert<unsigned int>(s, name, 3));
 
       nextId++;
       if (m_cb)

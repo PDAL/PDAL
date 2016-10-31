@@ -122,7 +122,8 @@ void Polygon::prepare()
     {
         m_prepGeom = GEOSPrepare_r(m_ctx, m_geom);
         if (!m_prepGeom)
-            throw pdal_error("unable to prepare geometry for index-accelerated access");
+            throw pdal_error("unable to prepare geometry for "
+                "index-accelerated access");
     }
 }
 
@@ -321,8 +322,8 @@ Polygon Polygon::simplify(double distance_tolerance,
 
         GEOSGeometry* p = GEOSGeom_createPolygon_r(m_ctx, exterior,
             keep_rings.data(), keep_rings.size());
-        if (p == NULL) throw
-            pdal::pdal_error("smooth polygon could not be created!" );
+        if (p == NULL)
+            throw pdal_error("smooth polygon could not be created!" );
         geometries.push_back(p);
     }
 
@@ -411,6 +412,36 @@ BOX3D Polygon::bounds() const
 bool Polygon::equals(const Polygon& p, double tolerance) const
 {
     return (bool) GEOSEqualsExact_r(m_ctx, m_geom, p.m_geom, tolerance);
+}
+
+bool Polygon::covers(const Polygon& p) const
+{
+    return (bool) GEOSCovers_r(m_ctx, m_geom, p.m_geom);
+}
+
+bool Polygon::overlaps(const Polygon& p) const
+{
+    return (bool) GEOSOverlaps_r(m_ctx, m_geom, p.m_geom);
+}
+
+bool Polygon::contains(const Polygon& p) const
+{
+    return (bool) GEOSContains_r(m_ctx, m_geom, p.m_geom);
+}
+
+bool Polygon::touches(const Polygon& p) const
+{
+    return (bool) GEOSTouches_r(m_ctx, m_geom, p.m_geom);
+}
+
+bool Polygon::within(const Polygon& p) const
+{
+    return (bool) GEOSWithin_r(m_ctx, m_geom, p.m_geom);
+}
+
+bool Polygon::crosses(const Polygon& p) const
+{
+    return (bool) GEOSCrosses_r(m_ctx, m_geom, p.m_geom);
 }
 
 

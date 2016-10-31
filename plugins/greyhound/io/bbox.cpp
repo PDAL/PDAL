@@ -14,6 +14,8 @@
 #include <numeric>
 #include <iostream>
 
+#include <pdal/pdal_types.hpp>
+
 #include "range.hpp"
 #include "point.hpp"
 
@@ -52,9 +54,10 @@ BBox::BBox(const Json::Value& json)
 {
     if (!json.isArray() || (json.size() != 4 && json.size() != 6))
     {
-        std::string what(
-                "Invalid JSON BBox specification: " + json.toStyledString());
-        throw std::runtime_error(what);
+        std::ostringstream oss;
+        oss << "readers.greyhound: Invalid JSON BBox specification: " <<
+            json.toStyledString();
+        throw pdal_error(oss.str());
     }
 
     m_is3d = (json.size() == 6);

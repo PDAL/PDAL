@@ -226,8 +226,9 @@ void PointView::dump(std::ostream& ostr) const
                     ostr << getFieldInternal<double>(d, idx);
                     break;
                 }
-            default:
-                throw;
+            case Dimension::Type::None:
+                ostr << "NONE";
+                break;
             }
             ostr << endl;
         }

@@ -129,8 +129,6 @@ private:
     bool m_showOptions;
     bool m_showTime;
     bool m_hardCoreDebug;
-    std::string m_scales;
-    std::string m_offsets;
     bool m_visualize;
     std::string m_label;
 
