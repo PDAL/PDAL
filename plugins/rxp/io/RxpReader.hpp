@@ -55,7 +55,9 @@ namespace pdal
 const bool DEFAULT_SYNC_TO_PPS = true;
 const bool DEFAULT_IS_RDTP = false;
 const bool DEFAULT_MINIMAL = false;
-
+const bool DEFAULT_REFLECTANCE_AS_INTENSITY = true;
+const float DEFAULT_MIN_REFLECTANCE = -25.0;
+const float DEFAULT_MAX_REFLECTANCE = 5.0;
 
 std::string extractRivlibURI(const Options& options);
 Dimension::IdList getRxpDimensions(bool syncToPps, bool minimal);
@@ -68,6 +70,9 @@ public:
         : pdal::Reader()
         , m_syncToPps(DEFAULT_SYNC_TO_PPS)
         , m_minimal(false)
+        , m_reflectanceAsIntensity(DEFAULT_REFLECTANCE_AS_INTENSITY)
+        , m_minReflectance(DEFAULT_MIN_REFLECTANCE)
+        , m_maxReflectance(DEFAULT_MAX_REFLECTANCE)
         , m_pointcloud()
     {}
 
@@ -92,6 +97,9 @@ private:
     bool m_syncToPps;
     bool m_minimal;
     bool m_isRdtp;
+    bool m_reflectanceAsIntensity;
+    float m_minReflectance;
+    float m_maxReflectance;
     std::unique_ptr<RxpPointcloud> m_pointcloud;
 };
 

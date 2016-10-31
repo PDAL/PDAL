@@ -56,12 +56,18 @@ RxpPointcloud::RxpPointcloud(
         const std::string& uri,
         bool syncToPps,
         bool minimal,
+        bool reflectanceAsIntensity,
+        float minReflectance,
+        float maxReflectance,
         PointTableRef table)
     : scanlib::pointcloud(syncToPps)
     , m_view(new PointView(table))
     , m_idx(0)
     , m_syncToPps(syncToPps)
     , m_minimal(minimal)
+    , m_reflectanceAsIntensity(reflectanceAsIntensity)
+    , m_minReflectance(minReflectance)
+    , m_maxReflectance(maxReflectance)
     , m_rc(scanlib::basic_rconnection::create(uri))
     , m_dec(m_rc)
 {}
@@ -137,6 +143,18 @@ void RxpPointcloud::on_echo_transformed(echo_type echo)
             m_view->setField(Id::Deviation, idx, t.deviation);
             m_view->setField(Id::BackgroundRadiation, idx, t.background_radiation);
             m_view->setField(Id::IsPpsLocked, idx, t.is_pps_locked);
+        }
+        if (m_reflectanceAsIntensity) {
+            uint16_t intensity;
+            if (t.reflectance > m_maxReflectance) {
+                intensity = std::numeric_limits<uint16_t>::max();
+            } else if (t.reflectance < m_minReflectance) {
+                intensity = 0;
+            } else {
+                intensity = uint16_t(std::roundf(double(std::numeric_limits<uint16_t>::max()) * 
+                        (t.reflectance - m_minReflectance) / (m_maxReflectance - m_minReflectance)));
+            }
+            m_view->setField(Id::Intensity, idx, intensity);
         }
         ++idx, ++returnNumber;
     }

@@ -26,52 +26,30 @@ Example
 
 This example rescales the points, given in the scanner's own coordinate system, to values that can be written to a las file.
 Only points with a valid gps time, as determined by a pps pulse, are read from the rxp, since the ``sync_to_pps`` option is "true".
-
-.. code-block:: python
-
-    import numpy
-    def reflectance_to_intensity(ins, outs):
-        ref = ins["Reflectance"]
-        min = numpy.amin(ref)
-        max = numpy.amax(ref)
-        outs["Intensity"] = (65535 * (ref - min) / (max - min)).astype(numpy.uint16)
-        return True
+Reflectance values are mapped to intensity values using sensible defaults.
 
 .. code-block:: json
 
     {
       "pipeline":[
         {
-          "type":"readers.rxp",
-          "filename":"120304_204030.rxp",
-          "sync_to_pps":"true"
+          "type": "readers.rxp",
+          "filename": "120304_204030.rxp",
+          "sync_to_pps": "true",
+          "reflectance_as_intensity": "true"
         },
         {
-          "type":"filters.programmable",
-          "source":"filter_rxp.py",
-          "function":"reflectance_to_intensity",
-          "add_dimension":"Intensity",
-          "module":"filter_rxp",
-        },
-        {
-          "type":"writers.las",
-          "filename":"outputfile.las"
-          "discard_high_return_numbers":"true"
+          "type": "writers.las",
+          "filename": "outputfile.las",
+          "discard_high_return_numbers": "true"
         }
       ]
     }
 
 
-A few things to note:
-
-- We use a :ref:`filters.programmable` to remap Reflectance values to Intensity values, scaling them so the entire range of Reflectance values fit into the Intensity field.
-  This is analogous to the "Export reflectance as intensity" option in RiSCAN Pro.
-  You could also explicitly set the minimum and maximum Reflectance values as you would in RiSCAN Pro using the same programmable filter.
-  You could also use "Amplitude" instead of "Reflectance".
-  If you do not need Intensity values in your output file, you can delete the programmable filter.
-- We set the ``discard_high_return_numbers`` option to ``true`` on the :ref:`writers.las`.
-  RXP files can contain more returns per shot than is supported by las, and so we need to explicitly tell the las writer to ignore those high return number points.
-  You could also use :ref:`filters.predicate` to filter those points earlier in the pipeline, or modify the return values with a :ref:`filters.programmable`.
+We set the ``discard_high_return_numbers`` option to ``true`` on the :ref:`writers.las`.
+RXP files can contain more returns per shot than is supported by las, and so we need to explicitly tell the las writer to ignore those high return number points.
+You could also use :ref:`filters.predicate` to filter those points earlier in the pipeline, or modify the return values with a :ref:`filters.programmable`.
 
 
 Options
@@ -93,6 +71,18 @@ minimal
   If "false", write all available values as derived from the rxp file.
   Use this feature to reduce the memory footprint of a PDAL run, if you don't need any values but the points themselves.
   [default: false]
+
+reflectance_as_intensity
+  If "true", maps reflectance values onto intensity values using a range from -25dB to 5dB.
+  [default: true]
+
+min_reflectance
+  The low end of the reflectance-to-intensity map.
+  [default: -25.0]
+
+max_reflectance
+  The high end of the reflectance-to-intensity map.
+  [default: 5.0]
 
 .. _RIEGL Laser Measurement Systems: http://www.riegl.com
 .. _RIEGL download pages: http://www.riegl.com/members-area/software-downloads/libraries/

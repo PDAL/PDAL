@@ -32,6 +32,8 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
+#include <limits>
+
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/Options.hpp>
@@ -143,4 +145,19 @@ TEST(RxpReaderTest, testNoPpsSync)
 
     checkPoint(view, 0, 0.0705248788, -0.0417557284, 0.0304775704, 31.917255942733149,
             0.14050000667339191, 0.689999998, -14.4898596, 3, false, 1, 1);
+}
+
+TEST(RxpReaderTest, testReflectanceAsIntensity)
+{
+    Options options = defaultRxpReaderOptions();
+    options.add("reflectance_as_intensity", true);
+    options.add("max_reflectance", 3.0);
+    RxpReader reader;
+    reader.setOptions(options);
+    PointTable table;
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    PointViewPtr view = *viewSet.begin();
+    uint16_t intensity = view->getFieldAs<uint16_t>(Dimension::Id::Intensity, 0);
+    EXPECT_EQ(std::numeric_limits<uint16_t>::max(), intensity);
 }
