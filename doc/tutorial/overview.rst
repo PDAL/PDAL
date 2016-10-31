@@ -6,7 +6,7 @@ PDAL Architecture Overview
 
 :Author: Andrew Bell
 :Contact: andrew@hobu.co
-:Date: 9/3/2014
+:Date: 5/15/2016
 
 PDAL is a set of applications and library to facilitate translation of point
 cloud data between various formats.  In addition, it provides some facilities
@@ -56,14 +56,20 @@ formats provide this information in a header or preamble.  PDAL calls each of
 the elements that make up a point a dimension.  PDAL predefines the dimensions
 that are in common use by the formats that it currently supports.  Readers may
 register their use of a predefined dimension or may have PDAL create a
+<<<<<<< Updated upstream
 dimension with a name and type as requested.  Dimensions are described by the
 enumeration pdal::Dimension::Id and associated functions in Dimension.hpp.
+=======
+dimension with a name and type as requested.  Dimensions are described in a
+JSON file, Dimension.json.
+>>>>>>> Stashed changes
 
 PDAL has a default type (Double, Float, Signed32, etc.) for each of its
 predefined dimensions which is believed to be sufficient to accurately
 hold the necessary data.  Only when the default data type is deemed
 insufficient should a request be made to "upgrade" a storage datatype.  There
-is no facility to "downsize" a dimension type to save memory.  Dimension.hpp
+is no simple facility to "downsize" a dimension type to save memory, though
+it can be done by creating a custom PointLayout object.  Dimension.json
 can be examined to determine the default storage type of each predefined
 dimension.  In most cases knowledge of the storage data type for
 a dimension isn't required.  PDAL properly converts data to and from the
@@ -98,10 +104,16 @@ pipeline stages are executed.  Most functions receive a PointTableRef object,
 which refers to the active point table.  A PointTableRef can be stored
 or copied cheaply.
 
+A subclass of PointTable called StreamingPointTable exists to allow a pipeline
+to run without loading all points in memory.  A StreamingPointTable holds a
+fixed number of points.  Some filters can't operate in streaming mode and
+an attempt to run a pipeline with a stage that doesn't support streaming
+will raise an exception.
+
 Point View
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A point view (PointView object) stores references to points.  All storage
+A point view (PointView object) stores references to points.  Storage
 and retrieval of points is done through a point view rather than directly
 through a point table.  Point data is accessed from a point view through a
 point ID (type PointId), which is an integer value.  The first point reference
@@ -118,9 +130,16 @@ existing reference to a destination point view. The point ID of the appended
 point in the destination view may be different than the point ID of the same
 point in the source view.  The point ID of an appended point reference is the
 same as the size of the point view after the operation.  Note that appending a
-point reference does not create a new point, rather, it creates another
+point reference does not create a new point.  Rather, it creates another
 reference to an existing point.  There are currently no built-in facilities for
 creating copies of points.
+
+Point Reference
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Some functions take a reference to a single point (PointRef object).
+In streaming mode, stages implement the processOne() function which operates
+on a point reference instead of a point view.
 
 Making a Stage (Reader, Filter or Writer):
 ................................................................................
@@ -129,27 +148,8 @@ All stages (Stage object) share a common interface, though readers, filters and
 writers each have a simplified interface if the generic stage interface is more
 complex than necessary.  One should create a new stage by creating a subclass of
 reader (Reader object), filter (Filter or MultiFilter object) or writer (Writer
-object).  When a pipeline is created, each stage is created using its default
+object).  When a pipeline is made, each stage is created using its default
 constructor.
-
-Each stage class should invoke two or three public macros to allow the stage to
-be hooked into the PDAL infrastructure:
-
-    SET_STAGE_NAME(<name>, <description>)
-
-    name:  A character array (string) constant that will be used to reference
-    the stage from the command line.  Typically, readers are named
-    “readers.<something>”, filters are “filters.<something>” and writers
-    are ”writers.<something>”.
-
-    description: A character array (string) constant that may be more meaningful
-    than the name.  It appears in some debug and informational output.
-
-    SET_STAGE_LINK(<http_link>)  [optional]:
-
-    http_link:  A character array (string) constant that references a web site
-    containing documentation about the stage.  It allows the information to be
-    integrated into PDAL’s web site and user information.
 
 When a pipeline is started, each of its stages is processed in two distinct
 steps.  First, all stages are prepared.
@@ -157,7 +157,8 @@ steps.  First, all stages are prepared.
 Stage Preparation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Preparation of a stage consists of executing the following private virtual
+Preparation of a stage is done by calling the prepare() function of the stage
+at the end of the pipeline.  prepare() executes the following private virtual
 functions calls, none of which need to be implemented in a stage unless desired.
 Each stage is guaranteed to be prepared after all stages that precede it in the
 pipeline.
@@ -195,19 +196,21 @@ pipeline.
     not be added to the layout of a pipeline’s point layout except in this
     method.
 
+4) void prepared(PointTableRef)
 
-
+    Called after dimensions are added.  It can be used to verify state and
+    raise exceptions before stage execution.
 
 
 Stage Execution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 After all stages are prepared, processing continues with the execution of each
-stage.  Each stage will be executed only after all stages preceding it in a
-pipeline have been executed.  A stage is executed by invoking the following
-private virtual methods.  It is important to note that ready() and done() are
-called only once for each stage while run() is called once for each point view
-to be processed by the stage.
+stage by calling execute().  Each stage will be executed only after all stages
+preceding it in a pipeline have been executed.  A stage is executed by
+invoking the following private virtual methods.  It is important to note
+that ready() and done() are called only once for each stage while run()
+is called once for each point view to be processed by the stage.
 
 1) void ready(PointTablePtr table)
 
@@ -234,7 +237,28 @@ to be processed by the stage.
     a closing of databases, writing file footers, rewriting headers or
     closing or renaming files.
 
+Streaming Stage Execution
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+PDAL normally processes all points through each stage before passing the
+points to the next stage.  This means that all point data is held in memory
+during processing.  There are some situations that may make this undesirable.
+As an alternative, PDAL allows execution of data with a point table that
+contains a fixed number of points (StreamPointTable).  When a StreamPointTable
+is passed to the execute() function, the private run() function detailed above
+isn't called, and instead processOne() is called.  If a StreamPointTable is
+passed to execute() but a pipeline stage doesn't implement processOne(),
+an exception is thrown.
+
+bool processOne(PointRef& ref)
+
+    This method allows processing of a single point.  A reader will typically
+    read a point from an input source.  When a reader returns 'false' from
+    this function, it indicates that there are no more points to be read.
+    When a filter returns 'false' from this funciton, it indicates
+    that the point just processed should be filtered out and not passed
+    to subsequent stages for processing.
+    
 Implementing a Reader
 ................................................................................
 
@@ -282,6 +306,10 @@ precision floating point.
         }
     }
 
+If a reader implements initialize() and opens a source file during the function,
+the file should be closed again before exiting the function to ensure that
+filehandles aren't exhausted when processing a large number of files.
+
 Readers should use the ready() function to reset the input data to a state
 where the first point can be read from the source.  The done() function
 should be used to free resources or reset the state initialized in ready().
@@ -324,7 +352,7 @@ point_count_t read(PointViewPtr view, point_count_t count)
             {
                 double x, y, z;
 
-                // Read X, Y and from input source.
+                // Read X, Y and Z from input source.
                 x = m_file.read<double>(pos);
                 pos += sizeof(double);
                 y = m_file.read<double>(pos);
@@ -348,6 +376,53 @@ point_count_t read(PointViewPtr view, point_count_t count)
     input so that subsequent calls to read() will result in all points being
     read.
 
+    Here's the same function written so that streaming can be supported:
+
+    ::
+
+        point_count_t MyFormat::read(PointViewPtr view, point_count_t count)
+        {
+            // Determine the number of points remaining in the input.
+            point_count_t remainingInput = m_totalNumPts - m_index;
+
+            // Determine the number of points to read.
+            count = std::min(count, remainingInput);
+
+            // Determine the ID of the next point in the point view
+            PointId nextId = view->size();
+
+            // Determine the current input position.
+            auto pos = m_pointSize * m_index;
+
+            point_count_t remaining = count;
+            while (remaining--)
+            {
+                PointRef point(view->point(nextId));
+               
+                processOne(point);
+                nextId++;
+            }
+            m_index += count;
+            return count;
+        }
+
+        bool MyFormat::processOne(PointRef& point)
+        {
+            double x, y, z;
+
+            // Read X, Y and Z from input source.
+            x = m_file.read<double>(pos);
+            pos += sizeof(double);
+            y = m_file.read<double>(pos);
+            pos += sizeof(double);
+            z = m_file.read<double>(pos);
+            pos += sizeof(double);
+
+            point.setField(Dimension::Id::X, x);
+            point.setField(Dimension::Id::Y, y);
+            point.setField(Dimension::Id::Z, z);
+            return m_file.ok();
+        }
 
 .. _implementing-a-filter:
 
@@ -387,10 +462,10 @@ void filter(PointViewPtr view)
             }
         }
 
-    The filter simply loops through the points, retrieving the X, Y and Z values
-    of each point, transforms those value using a reprojection algorithm and
-    then stores the transformed values in the point table using the point
-    view’s setField() function.
+    The filter simply loops through the points, retrieving the X, Y and Z
+    values of each point, transforms those value using a reprojection
+    algorithm and then stores the transformed values in the point table
+    using the point view’s setField() function.
 
     A filter may need to use the run() function instead of filter(), typically
     because it needs to create multiple output point views from a single input
@@ -446,4 +521,11 @@ call to ready().
             out << setw(10) << view->getFieldAs<double>(Dimension::Id::Y, id);
             out << setw(10) << view->getFieldAs<double>(Dimension::Id::Z, id);
         }
+    }
+
+    bool processOne(PointRef& point)
+    {
+        out << setw(10) << point.getFieldAs<double>(Dimension::Id::X);
+        out << setw(10) << point.getFieldAs<double>(Dimension::Id::Y);
+        out << setw(10) << point.getFieldAs<double>(Dimension::Id::Z);
     }
