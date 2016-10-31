@@ -343,7 +343,7 @@ spatial reference system.
               "spatialreference":"EPSG:2027"
           },
           {
-              "type":"merge"
+              "type":"filters.merge"
           },
           {
               "type":"reprojection",
@@ -363,9 +363,6 @@ multiple input LAS files from a given directory.
   {
       "pipeline":[
           "/path/to/data/\*.las",
-          {
-              "type":"merge"
-          },
           "output.las"
       ]
   }
