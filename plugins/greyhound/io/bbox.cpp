@@ -13,6 +13,7 @@
 #include <limits>
 #include <numeric>
 #include <iostream>
+#include <sstream>
 
 #include <pdal/pdal_types.hpp>
 
