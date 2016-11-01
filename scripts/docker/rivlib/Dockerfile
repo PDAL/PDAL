@@ -4,7 +4,7 @@ MAINTAINER Pete Gadomski <pete.gadomski@gmail.com>
 COPY rivlib-2_3_0-x86_64-linux-gcc55.zip /
 RUN unzip rivlib-2_3_0-x86_64-linux-gcc55.zip
 
-RUN git clone --depth=1 https://github.com/PDAL/PDAL \
+RUN CC="gcc" CXX="g++" git clone --depth=1 https://github.com/PDAL/PDAL \
 	&& cd PDAL \
 	&& git checkout master \
 	&& mkdir build \
