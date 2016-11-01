@@ -42,3 +42,5 @@ polygon
 outside
   Invert the cropping logic and only take points **outside** the cropping bounds or polygon. [Default: **false**]
 
+num_threads
+  Number of threads to use for the crop operation [Default: 1]
