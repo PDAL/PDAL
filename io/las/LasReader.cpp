@@ -72,7 +72,7 @@ void LasReader::addArgs(ProgramArgs& args)
     addSpatialReferenceArg(args);
     args.add("extra_dims", "Dimensions to assign to extra byte data",
         m_extraDimSpec);
-    args.add("compression", "Decompressor to use", m_compression, "LASZIP");
+    args.add("compression", "Decompressor to use", m_compression, "EITHER");
 }
 
 
@@ -116,11 +116,26 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
     m_extraDims = LasUtils::parse(m_extraDimSpec);
 
     std::string compression = Utils::toupper(m_compression);
-#ifndef PDAL_HAVE_LAZPERF
+#if defined(PDAL_HAVE_LAZPERF) && defined(PDAL_HAVE_LASZIP)
+    if (compression == "EITHER")
+        compression = "LASZIP";
+#endif
+#if !defined(PDAL_HAVE_LAZPERF) && defined(PDAL_HAVE_LASZIP)
+    if (compression == "EITHER")
+        compression = "LASZIP";
     if (compression == "LAZPERF")
         throw pdal_error("Can't decompress with LAZperf.  PDAL not built "
             "with LAZperf.");
 #endif
+#if defined(PDAL_HAVE_LAZPERF) && !defined(PDAL_HAVE_LASZIP)
+    if (compression == "EITHER")
+        compression = "LAZPERF";
+    if (compression == "LASZIP")
+        throw pdal_error("Can't decompress with LASzip.  PDAL not built "
+            "with LASzip.");
+#endif
+
+#if defined(PDAL_HAVE_LAZPERF) || defined(PDAL_HAVE_LASZIP)
     if (compression != "LAZPERF" && compression != "LASZIP")
     {
         std::ostringstream oss;
@@ -129,6 +144,7 @@ void LasReader::initializeLocal(PointTableRef table, MetadataNode& m)
             m_compression << "'.  Value values are 'lazperf' and 'laszip'.";
         throw pdal_error(oss.str());
     }
+#endif
 
     // Set case-corrected value.
     m_compression = compression;
