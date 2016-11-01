@@ -92,23 +92,6 @@ void TranslateKernel::addSwitches(ProgramArgs& args)
 
 int TranslateKernel::execute()
 {
-    Stage& reader = m_manager.makeReader(m_inputFile, m_readerType);
-    Stage* stage = &reader;
-
-    if (m_filterJSON.size() && m_filterType.size())
-        throw pdal_error("Cannot set --filter options and json filter blocks at the same time");
-
-    // add each filter provided on the command-line, updating the stage pointer
-    for (auto const f : m_filterType)
-    {
-        std::string filter_name(f);
-
-        if (!Utils::startsWith(f, "filters."))
-            filter_name.insert(0, "filters.");
-
-        Stage& filter = m_manager.makeFilter(filter_name, *stage);
-        stage = &filter;
-    }
 
 
     if (!m_filterJSON.empty())
@@ -124,20 +107,58 @@ int TranslateKernel::execute()
         Json::Value filters;
         jsonReader.parse(json, filters);
 
+        Json::Value root;
+        Json::Value pipeline(Json::arrayValue);
+        Json::Value reader(m_inputFile);
+        Json::Value writer(m_outputFile);
+        pipeline.append(reader);
+        for (Json::ArrayIndex i = 0; i < filters.size(); ++i)
+        {
+            pipeline.append(filters[i]);
+        }
+
+        pipeline.append(writer);
+
+        root["pipeline"] = pipeline;
+
+        std::stringstream pipeline_str;
+        pipeline_str << root;
+
         if (!filters.size())
             throw pdal_error("Unable to parse JSON into an array!");
 
-        PipelineReaderJSON pipelineReader(m_manager);
-        pipelineReader.parsePipeline(filters);
-        stage = m_manager.getStage();
-        reader.setInput(*stage);
+        m_manager.readPipeline(pipeline_str);
+
+        if (m_pipelineOutput.size() > 0)
+            PipelineWriter::writePipeline(m_manager.getStage(), m_pipelineOutput);
 
     }
+    else
+    {
+        Stage& reader = m_manager.makeReader(m_inputFile, m_readerType);
+        Stage* stage = &reader;
 
-    Stage& writer = m_manager.makeWriter(m_outputFile, m_writerType, *stage);
+        if (m_filterJSON.size() && m_filterType.size())
+            throw pdal_error("Cannot set --filter options and json filter blocks at the same time");
+
+        // add each filter provided on the command-line, updating the stage pointer
+        for (auto const f : m_filterType)
+        {
+            std::string filter_name(f);
+
+            if (!Utils::startsWith(f, "filters."))
+                filter_name.insert(0, "filters.");
+
+            Stage& filter = m_manager.makeFilter(filter_name, *stage);
+            stage = &filter;
+        }
+        Stage& writer = m_manager.makeWriter(m_outputFile, m_writerType, *stage);
+        if (m_pipelineOutput.size() > 0)
+            PipelineWriter::writePipeline(&writer, m_pipelineOutput);
+    }
+
     m_manager.execute();
-    if (m_pipelineOutput.size() > 0)
-        PipelineWriter::writePipeline(&writer, m_pipelineOutput);
+
 
     return 0;
 }
