@@ -40,7 +40,7 @@ creating your own scale factors. See `Default Ramps`_ for more information.
     ]
   }
 
-.. figure:: ../images/pestel_scaled_plasio.png
+.. figure:: ../images/pestel_scaled_helheim.png
     :scale: 80%
 
     Image data with interpolated colors based on ``Z`` dimension and ``pestel_shades``
