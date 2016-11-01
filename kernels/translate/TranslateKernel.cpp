@@ -130,7 +130,7 @@ int TranslateKernel::execute()
         PipelineReaderJSON pipelineReader(m_manager);
         pipelineReader.parsePipeline(filters);
         stage = m_manager.getStage();
-
+        reader.setInput(*stage);
 
     }
 
