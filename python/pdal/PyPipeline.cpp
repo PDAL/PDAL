@@ -1,4 +1,4 @@
-#include "Pipeline.hpp"
+#include "PyPipeline.hpp"
 #ifdef PDAL_HAVE_LIBXML2
 #include <pdal/XMLSchema.hpp>
 #endif
@@ -10,9 +10,7 @@ namespace libpdalpython
 {
 
 Pipeline::Pipeline(std::string const& json)
-    : m_json(json)
-    , m_schema("")
-    , m_manager(-1)
+    : m_executor(json)
 {
     auto initNumpy = []()
     {
@@ -23,28 +21,16 @@ Pipeline::Pipeline(std::string const& json)
     initNumpy();
 }
 
-void Pipeline::execute()
+int64_t Pipeline::execute()
 {
-    std::stringstream strm;
-    strm << m_json;
-    m_manager.readPipeline(strm);
-    m_manager.execute();
-#ifdef PDAL_HAVE_LIBXML2
-    pdal::XMLSchema schema(m_manager.pointTable().layout());
-    m_schema = schema.xml();
-#endif
-
-    strm.str("");
-    pdal::PipelineWriter::writePipeline(m_manager.getStage(), strm);
-
-    m_json = strm.str();
+    return m_executor.execute();
 
 }
 
 std::vector<PArray> Pipeline::getArrays() const
 {
     std::vector<PArray> output;
-    const pdal::PointViewSet& pvset = m_manager.views();
+    const pdal::PointViewSet& pvset = m_executor.manager().views();
 
 
     for (auto i: pvset)

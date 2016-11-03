@@ -13,7 +13,7 @@ cdef extern from "pdal/plang/Array.hpp" namespace "pdal::plang":
     cdef cppclass Array:
         void* getPythonArray() except+
 
-cdef extern from "Pipeline.hpp" namespace "libpdalpython":
+cdef extern from "PyPipeline.hpp" namespace "libpdalpython":
     cdef cppclass Pipeline:
         Pipeline(const char* ) except +
         void execute() except +
