@@ -92,11 +92,6 @@ void SMRFilter::addDimensions(PointLayoutPtr layout)
     layout->registerDim(Dimension::Id::Classification);
 }
 
-int SMRFilter::clamp(int t, int min, int max)
-{
-    return ((t < min) ? min : ((t > max) ? max : t));
-}
-
 int SMRFilter::getColIndex(double x, double cell_size)
 {
     return static_cast<int>(floor((x - m_bounds.minx) / cell_size));
@@ -105,64 +100,6 @@ int SMRFilter::getColIndex(double x, double cell_size)
 int SMRFilter::getRowIndex(double y, double cell_size)
 {
     return static_cast<int>(floor((m_maxRow - y) / cell_size));
-}
-
-MatrixXd SMRFilter::matrixOpen(MatrixXd data, int radius)
-{
-    MatrixXd data2 = padMatrix(data, radius);
-
-    int nrows = data2.rows();
-    int ncols = data2.cols();
-
-    // first min, then max of min
-    MatrixXd minZ = MatrixXd::Constant(nrows, ncols,
-                                       std::numeric_limits<double>::max());
-    MatrixXd maxZ = MatrixXd::Constant(nrows, ncols,
-                                       std::numeric_limits<double>::lowest());
-    for (int c = 0; c < ncols; ++c)
-    {
-        for (int r = 0; r < nrows; ++r)
-        {
-            int cs = clamp(c-radius, 0, ncols-1);
-            int ce = clamp(c+radius, 0, ncols-1);
-            int rs = clamp(r-radius, 0, nrows-1);
-            int re = clamp(r+radius, 0, nrows-1);
-
-            for (int col = cs; col <= ce; ++col)
-            {
-                for (int row = rs; row <= re; ++row)
-                {
-                    if ((row-r)*(row-r)+(col-c)*(col-c) > radius*radius)
-                        continue;
-                    if (data2(row, col) < minZ(r, c))
-                        minZ(r, c) = data2(row, col);
-                }
-            }
-        }
-    }
-    for (int c = 0; c < ncols; ++c)
-    {
-        for (int r = 0; r < nrows; ++r)
-        {
-            int cs = clamp(c-radius, 0, ncols-1);
-            int ce = clamp(c+radius, 0, ncols-1);
-            int rs = clamp(r-radius, 0, nrows-1);
-            int re = clamp(r+radius, 0, nrows-1);
-
-            for (int col = cs; col <= ce; ++col)
-            {
-                for (int row = rs; row <= re; ++row)
-                {
-                    if ((row-r)*(row-r)+(col-c)*(col-c) > radius*radius)
-                        continue;
-                    if (minZ(row, col) > maxZ(r, c))
-                        maxZ(r, c) = minZ(row, col);
-                }
-            }
-        }
-    }
-
-    return maxZ.block(radius, radius, data.rows(), data.cols());
 }
 
 MatrixXd SMRFilter::inpaintKnn(MatrixXd cx, MatrixXd cy, MatrixXd cz)
@@ -250,22 +187,6 @@ MatrixXd SMRFilter::inpaintKnn(MatrixXd cx, MatrixXd cy, MatrixXd cz)
     }
 
     return out;
-}
-
-MatrixXd SMRFilter::padMatrix(MatrixXd data, int radius)
-{
-    MatrixXd data2 = MatrixXd::Zero(data.rows()+2*radius, data.cols()+2*radius);
-    data2.block(radius, radius, data.rows(), data.cols()) = data;
-    data2.block(radius, 0, data.rows(), radius) =
-        data.block(0, 0, data.rows(), radius).rowwise().reverse();
-    data2.block(radius, data.cols()+radius, data.rows(), radius) =
-        data.block(0, data.cols()-radius, data.rows(), radius).rowwise().reverse();
-    data2.block(0, 0, radius, data2.cols()) =
-        data2.block(radius, 0, radius, data2.cols()).colwise().reverse();
-    data2.block(data.rows()+radius, 0, radius, data2.cols()) =
-        data2.block(data2.rows()-radius, 0, radius, data2.cols()).colwise().reverse();
-
-    return data2;
 }
 
 std::vector<PointId> SMRFilter::processGround(PointViewPtr view)

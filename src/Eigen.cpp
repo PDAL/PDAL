@@ -42,7 +42,7 @@
 
 namespace pdal
 {
-  
+
 int clamp(int t, int min, int max)
 {
     return ((t < min) ? min : ((t > max) ? max : t));
@@ -99,7 +99,7 @@ uint8_t computeRank(PointView& view, std::vector<PointId> ids, double threshold)
 
     JacobiSVD<Matrix3f> svd(B);
     svd.setThreshold(threshold);
-    
+
     return static_cast<uint8_t>(svd.rank());
 }
 
@@ -108,17 +108,17 @@ Eigen::MatrixXd createDSM(PointView& view, int rows, int cols, double cell_size,
 {
     using namespace Dimension;
     using namespace Eigen;
-    
+
     MatrixXd ZImin(rows, cols);
     ZImin.setConstant(std::numeric_limits<double>::quiet_NaN());
 
     int maxrow = bounds.miny + rows * cell_size;
-    
+
     auto clamp = [](int t, int min, int max)
     {
         return ((t < min) ? min : ((t > max) ? max : t));
     };
-    
+
     auto getColIndex = [&bounds, &cell_size](double x)
     {
         return static_cast<int>(floor((x - bounds.minx) / cell_size));
@@ -128,7 +128,7 @@ Eigen::MatrixXd createDSM(PointView& view, int rows, int cols, double cell_size,
     {
         return static_cast<int>(floor((maxrow - y) / cell_size));
     };
-    
+
     for (PointId i = 0; i < view.size(); ++i)
     {
         double x = view.getFieldAs<double>(Id::X, i);
@@ -154,7 +154,7 @@ Eigen::MatrixXd matrixClose(Eigen::MatrixXd data, int radius)
     int nrows = data2.rows();
     int ncols = data2.cols();
 
-    // first min, then max of min
+    // first max, then min of max
     MatrixXd minZ = MatrixXd::Constant(nrows, ncols,
                                        std::numeric_limits<double>::max());
     MatrixXd maxZ = MatrixXd::Constant(nrows, ncols,
@@ -283,9 +283,11 @@ Eigen::MatrixXd padMatrix(Eigen::MatrixXd d, int r)
     return out;
 }
 
-PDAL_DLL Eigen::MatrixXd pointViewToEigen(const PointView& view) {
+PDAL_DLL Eigen::MatrixXd pointViewToEigen(const PointView& view)
+{
     Eigen::MatrixXd matrix(view.size(), 3);
-    for (PointId i = 0; i < view.size(); ++i) {
+    for (PointId i = 0; i < view.size(); ++i)
+    {
         matrix(i, 0) = view.getFieldAs<double>(Dimension::Id::X, i);
         matrix(i, 1) = view.getFieldAs<double>(Dimension::Id::Y, i);
         matrix(i, 2) = view.getFieldAs<double>(Dimension::Id::Z, i);

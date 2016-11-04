@@ -45,8 +45,19 @@ namespace pdal
 {
 class PointView;
 
+/**
+ * \brief Clamp value to given bounds.
+ *
+ * Clamps the input value t to bounds specified by min and max. Used to ensure
+ * that row and column indices remain within valid bounds.
+ *
+ * \param t the input value.
+ * \param min the lower bound.
+ * \param max the upper bound.
+ * \return the value to clamped to the given bounds.
+ */
 PDAL_DLL int clamp(int t, int min, int max);
-    
+
 /**
  * \brief Compute the centroid of a collection of points.
  *
@@ -72,7 +83,8 @@ PDAL_DLL int clamp(int t, int min, int max);
  * \param ids a vector of PointIds specifying a subset of points.
  * \return the 3D centroid of the XYZ dimensions.
  */
-PDAL_DLL Eigen::Vector3f computeCentroid(PointView& view, std::vector<PointId> ids);
+PDAL_DLL Eigen::Vector3f computeCentroid(PointView& view,
+                                         std::vector<PointId> ids);
 
 /**
  * \brief Compute the covariance matrix of a collection of points.
@@ -99,7 +111,8 @@ PDAL_DLL Eigen::Vector3f computeCentroid(PointView& view, std::vector<PointId> i
  * \param ids a vector of PointIds specifying a subset of points.
  * \return the covariance matrix of the XYZ dimensions.
  */
-PDAL_DLL Eigen::Matrix3f computeCovariance(PointView& view, std::vector<PointId> ids);
+PDAL_DLL Eigen::Matrix3f computeCovariance(PointView& view, 
+                                           std::vector<PointId> ids);
 
 /**
  * \brief Compute the rank of a collection of points.
@@ -133,17 +146,48 @@ PDAL_DLL Eigen::Matrix3f computeCovariance(PointView& view, std::vector<PointId>
  * \param ids a vector of PointIds specifying a subset of points.
  * \return the estimated rank.
  */
-PDAL_DLL uint8_t computeRank(PointView& view, std::vector<PointId> ids, double threshold);
+PDAL_DLL uint8_t computeRank(PointView& view, std::vector<PointId> ids,
+                             double threshold);
 
-// createDSM returns a matrix with minimum Z values from the provided
-// PointView.
+// createDSM returns a matrix with minimum Z values from the provided PointView.
 PDAL_DLL Eigen::MatrixXd createDSM(PointView& view, int rows, int cols,
                                    double cell_size, BOX2D bounds);
 
+/**
+ * /brief Perform a morphological closing of the input matrix.
+ *
+ * Performs a morphological closing of the input matrix using a circular
+ * structuring element of given radius. Data will be symmetrically padded at its
+ * edges.
+ *
+ * /param data the input matrix.
+ * /param radius the radius of the circular structuring element.
+ * /return the morphological closing of the input radius.
+ */
 PDAL_DLL Eigen::MatrixXd matrixClose(Eigen::MatrixXd data, int radius);
 
+/**
+ * /brief Perform a morphological opening of the input matrix.
+ *
+ * Performs a morphological opening of the input matrix using a circular
+ * structuring element of given radius. Data will be symmetrically padded at its
+ * edges.
+ *
+ * /param data the input matrix.
+ * /param radius the radius of the circular structuring element.
+ * /return the morphological opening of the input radius.
+ */
 PDAL_DLL Eigen::MatrixXd matrixOpen(Eigen::MatrixXd data, int radius);
 
+/**
+ * /brief Pad input matrix symmetrically.
+ *
+ * Symmetrically pads the input matrix with given radius.
+ *
+ * /param d the input matrix.
+ * /param r the radius of the padding.
+ * /return the padded matrix.
+ */
 PDAL_DLL Eigen::MatrixXd padMatrix(Eigen::MatrixXd d, int r);
 
 /**
