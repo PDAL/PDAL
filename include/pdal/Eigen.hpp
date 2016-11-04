@@ -45,6 +45,8 @@ namespace pdal
 {
 class PointView;
 
+PDAL_DLL int clamp(int t, int min, int max);
+    
 /**
  * \brief Compute the centroid of a collection of points.
  *
@@ -133,6 +135,17 @@ PDAL_DLL Eigen::Matrix3f computeCovariance(PointView& view, std::vector<PointId>
  */
 PDAL_DLL uint8_t computeRank(PointView& view, std::vector<PointId> ids, double threshold);
 
+// createDSM returns a matrix with minimum Z values from the provided
+// PointView.
+PDAL_DLL Eigen::MatrixXd createDSM(PointView& view, int rows, int cols,
+                                   double cell_size, BOX2D bounds);
+
+PDAL_DLL Eigen::MatrixXd matrixClose(Eigen::MatrixXd data, int radius);
+
+PDAL_DLL Eigen::MatrixXd matrixOpen(Eigen::MatrixXd data, int radius);
+
+PDAL_DLL Eigen::MatrixXd padMatrix(Eigen::MatrixXd d, int r);
+
 /**
  * \brief Converts a PointView into an Eigen::MatrixXd.
  *
@@ -141,8 +154,4 @@ PDAL_DLL uint8_t computeRank(PointView& view, std::vector<PointId> ids, double t
  */
 PDAL_DLL Eigen::MatrixXd pointViewToEigen(const PointView& view);
 
-// createDSM returns a matrix with minimum Z values from the provided
-// PointView.
-PDAL_DLL Eigen::MatrixXd createDSM(PointView& view, int rows, int cols,
-                                   double cell_size, BOX2D bounds);
 } // namespace pdal

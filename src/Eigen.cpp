@@ -42,6 +42,11 @@
 
 namespace pdal
 {
+  
+int clamp(int t, int min, int max)
+{
+    return ((t < min) ? min : ((t > max) ? max : t));
+}
 
 Eigen::Vector3f computeCentroid(PointView& view, std::vector<PointId> ids)
 {
@@ -138,6 +143,144 @@ Eigen::MatrixXd createDSM(PointView& view, int rows, int cols, double cell_size,
     }
 
     return ZImin;
+}
+
+Eigen::MatrixXd matrixClose(Eigen::MatrixXd data, int radius)
+{
+    using namespace Eigen;
+
+    MatrixXd data2 = padMatrix(data, radius);
+
+    int nrows = data2.rows();
+    int ncols = data2.cols();
+
+    // first min, then max of min
+    MatrixXd minZ = MatrixXd::Constant(nrows, ncols,
+                                       std::numeric_limits<double>::max());
+    MatrixXd maxZ = MatrixXd::Constant(nrows, ncols,
+                                       std::numeric_limits<double>::lowest());
+    for (auto c = 0; c < ncols; ++c)
+    {
+        for (auto r = 0; r < nrows; ++r)
+        {
+            int cs = clamp(c-radius, 0, ncols-1);
+            int ce = clamp(c+radius, 0, ncols-1);
+            int rs = clamp(r-radius, 0, nrows-1);
+            int re = clamp(r+radius, 0, nrows-1);
+
+            for (auto col = cs; col <= ce; ++col)
+            {
+                for (auto row = rs; row <= re; ++row)
+                {
+                    if ((row-r)*(row-r)+(col-c)*(col-c) > radius*radius)
+                        continue;
+                    if (data2(row, col) > maxZ(r, c))
+                        maxZ(r, c) = data2(row, col);
+                }
+            }
+        }
+    }
+    for (auto c = 0; c < ncols; ++c)
+    {
+        for (auto r = 0; r < nrows; ++r)
+        {
+            int cs = clamp(c-radius, 0, ncols-1);
+            int ce = clamp(c+radius, 0, ncols-1);
+            int rs = clamp(r-radius, 0, nrows-1);
+            int re = clamp(r+radius, 0, nrows-1);
+
+            for (auto col = cs; col <= ce; ++col)
+            {
+                for (auto row = rs; row <= re; ++row)
+                {
+                    if ((row-r)*(row-r)+(col-c)*(col-c) > radius*radius)
+                        continue;
+                    if (maxZ(row, col) < minZ(r, c))
+                        minZ(r, c) = maxZ(row, col);
+                }
+            }
+        }
+    }
+
+    return minZ.block(radius, radius, data.rows(), data.cols());
+}
+
+Eigen::MatrixXd matrixOpen(Eigen::MatrixXd data, int radius)
+{
+    using namespace Eigen;
+
+    MatrixXd data2 = padMatrix(data, radius);
+
+    int nrows = data2.rows();
+    int ncols = data2.cols();
+
+    // first min, then max of min
+    MatrixXd minZ = MatrixXd::Constant(nrows, ncols,
+                                       std::numeric_limits<double>::max());
+    MatrixXd maxZ = MatrixXd::Constant(nrows, ncols,
+                                       std::numeric_limits<double>::lowest());
+    for (auto c = 0; c < ncols; ++c)
+    {
+        for (auto r = 0; r < nrows; ++r)
+        {
+            int cs = clamp(c-radius, 0, ncols-1);
+            int ce = clamp(c+radius, 0, ncols-1);
+            int rs = clamp(r-radius, 0, nrows-1);
+            int re = clamp(r+radius, 0, nrows-1);
+
+            for (auto col = cs; col <= ce; ++col)
+            {
+                for (auto row = rs; row <= re; ++row)
+                {
+                    if ((row-r)*(row-r)+(col-c)*(col-c) > radius*radius)
+                        continue;
+                    if (data2(row, col) < minZ(r, c))
+                        minZ(r, c) = data2(row, col);
+                }
+            }
+        }
+    }
+    for (auto c = 0; c < ncols; ++c)
+    {
+        for (auto r = 0; r < nrows; ++r)
+        {
+            int cs = clamp(c-radius, 0, ncols-1);
+            int ce = clamp(c+radius, 0, ncols-1);
+            int rs = clamp(r-radius, 0, nrows-1);
+            int re = clamp(r+radius, 0, nrows-1);
+
+            for (auto col = cs; col <= ce; ++col)
+            {
+                for (auto row = rs; row <= re; ++row)
+                {
+                    if ((row-r)*(row-r)+(col-c)*(col-c) > radius*radius)
+                        continue;
+                    if (minZ(row, col) > maxZ(r, c))
+                        maxZ(r, c) = minZ(row, col);
+                }
+            }
+        }
+    }
+
+    return maxZ.block(radius, radius, data.rows(), data.cols());
+}
+
+Eigen::MatrixXd padMatrix(Eigen::MatrixXd d, int r)
+{
+    using namespace Eigen;
+
+    MatrixXd out = MatrixXd::Zero(d.rows()+2*r, d.cols()+2*r);
+    out.block(r, r, d.rows(), d.cols()) = d;
+    out.block(r, 0, d.rows(), r) =
+        d.block(0, 0, d.rows(), r).rowwise().reverse();
+    out.block(r, d.cols()+r, d.rows(), r) =
+        d.block(0, d.cols()-r, d.rows(), r).rowwise().reverse();
+    out.block(0, 0, r, out.cols()) =
+        out.block(r, 0, r, out.cols()).colwise().reverse();
+    out.block(d.rows()+r, 0, r, out.cols()) =
+        out.block(out.rows()-r, 0, r, out.cols()).colwise().reverse();
+
+    return out;
 }
 
 PDAL_DLL Eigen::MatrixXd pointViewToEigen(const PointView& view) {

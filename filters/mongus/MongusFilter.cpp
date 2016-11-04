@@ -35,6 +35,7 @@
 #include "MongusFilter.hpp"
 
 #include <pdal/pdal_macros.hpp>
+#include <pdal/Eigen.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <buffer/BufferReader.hpp>
 #include <pdal/util/ProgramArgs.hpp>
@@ -71,11 +72,6 @@ void MongusFilter::addArgs(ProgramArgs& args)
 void MongusFilter::addDimensions(PointLayoutPtr layout)
 {
     layout->registerDim(Dimension::Id::Classification);
-}
-
-int MongusFilter::clamp(int t, int min, int max)
-{
-    return ((t < min) ? min : ((t > max) ? max : t));
 }
 
 int MongusFilter::getColIndex(double x, double cell_size)
@@ -692,144 +688,6 @@ void MongusFilter::downsampleMin(Eigen::MatrixXd *cx, Eigen::MatrixXd *cy,
             }
         }
     }
-}
-
-Eigen::MatrixXd MongusFilter::padMatrix(Eigen::MatrixXd d, int r)
-{
-    using namespace Eigen;
-
-    MatrixXd out = MatrixXd::Zero(d.rows()+2*r, d.cols()+2*r);
-    out.block(r, r, d.rows(), d.cols()) = d;
-    out.block(r, 0, d.rows(), r) =
-        d.block(0, 0, d.rows(), r).rowwise().reverse();
-    out.block(r, d.cols()+r, d.rows(), r) =
-        d.block(0, d.cols()-r, d.rows(), r).rowwise().reverse();
-    out.block(0, 0, r, out.cols()) =
-        out.block(r, 0, r, out.cols()).colwise().reverse();
-    out.block(d.rows()+r, 0, r, out.cols()) =
-        out.block(out.rows()-r, 0, r, out.cols()).colwise().reverse();
-
-    return out;
-}
-
-Eigen::MatrixXd MongusFilter::matrixOpen(Eigen::MatrixXd data, int radius)
-{
-    using namespace Eigen;
-
-    MatrixXd data2 = padMatrix(data, radius);
-
-    int nrows = data2.rows();
-    int ncols = data2.cols();
-
-    // first min, then max of min
-    MatrixXd minZ = MatrixXd::Constant(nrows, ncols,
-                                       std::numeric_limits<double>::max());
-    MatrixXd maxZ = MatrixXd::Constant(nrows, ncols,
-                                       std::numeric_limits<double>::lowest());
-    for (auto c = 0; c < ncols; ++c)
-    {
-        for (auto r = 0; r < nrows; ++r)
-        {
-            int cs = clamp(c-radius, 0, ncols-1);
-            int ce = clamp(c+radius, 0, ncols-1);
-            int rs = clamp(r-radius, 0, nrows-1);
-            int re = clamp(r+radius, 0, nrows-1);
-
-            for (auto col = cs; col <= ce; ++col)
-            {
-                for (auto row = rs; row <= re; ++row)
-                {
-                    if ((row-r)*(row-r)+(col-c)*(col-c) > radius*radius)
-                        continue;
-                    if (data2(row, col) < minZ(r, c))
-                        minZ(r, c) = data2(row, col);
-                }
-            }
-        }
-    }
-    for (auto c = 0; c < ncols; ++c)
-    {
-        for (auto r = 0; r < nrows; ++r)
-        {
-            int cs = clamp(c-radius, 0, ncols-1);
-            int ce = clamp(c+radius, 0, ncols-1);
-            int rs = clamp(r-radius, 0, nrows-1);
-            int re = clamp(r+radius, 0, nrows-1);
-
-            for (auto col = cs; col <= ce; ++col)
-            {
-                for (auto row = rs; row <= re; ++row)
-                {
-                    if ((row-r)*(row-r)+(col-c)*(col-c) > radius*radius)
-                        continue;
-                    if (minZ(row, col) > maxZ(r, c))
-                        maxZ(r, c) = minZ(row, col);
-                }
-            }
-        }
-    }
-
-    return maxZ.block(radius, radius, data.rows(), data.cols());
-}
-
-Eigen::MatrixXd MongusFilter::matrixClose(Eigen::MatrixXd data, int radius)
-{
-    using namespace Eigen;
-
-    MatrixXd data2 = padMatrix(data, radius);
-
-    int nrows = data2.rows();
-    int ncols = data2.cols();
-
-    // first min, then max of min
-    MatrixXd minZ = MatrixXd::Constant(nrows, ncols,
-                                       std::numeric_limits<double>::max());
-    MatrixXd maxZ = MatrixXd::Constant(nrows, ncols,
-                                       std::numeric_limits<double>::lowest());
-    for (auto c = 0; c < ncols; ++c)
-    {
-        for (auto r = 0; r < nrows; ++r)
-        {
-            int cs = clamp(c-radius, 0, ncols-1);
-            int ce = clamp(c+radius, 0, ncols-1);
-            int rs = clamp(r-radius, 0, nrows-1);
-            int re = clamp(r+radius, 0, nrows-1);
-
-            for (auto col = cs; col <= ce; ++col)
-            {
-                for (auto row = rs; row <= re; ++row)
-                {
-                    if ((row-r)*(row-r)+(col-c)*(col-c) > radius*radius)
-                        continue;
-                    if (data2(row, col) > maxZ(r, c))
-                        maxZ(r, c) = data2(row, col);
-                }
-            }
-        }
-    }
-    for (auto c = 0; c < ncols; ++c)
-    {
-        for (auto r = 0; r < nrows; ++r)
-        {
-            int cs = clamp(c-radius, 0, ncols-1);
-            int ce = clamp(c+radius, 0, ncols-1);
-            int rs = clamp(r-radius, 0, nrows-1);
-            int re = clamp(r+radius, 0, nrows-1);
-
-            for (auto col = cs; col <= ce; ++col)
-            {
-                for (auto row = rs; row <= re; ++row)
-                {
-                    if ((row-r)*(row-r)+(col-c)*(col-c) > radius*radius)
-                        continue;
-                    if (maxZ(row, col) < minZ(r, c))
-                        minZ(r, c) = maxZ(row, col);
-                }
-            }
-        }
-    }
-
-    return minZ.block(radius, radius, data.rows(), data.cols());
 }
 
 PointViewSet MongusFilter::run(PointViewPtr view)
