@@ -34,7 +34,7 @@
 
 #include "SMRFilter.hpp"
 
-#include <pdal/Eigen.hpp>
+#include <pdal/EigenUtils.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <buffer/BufferReader.hpp>

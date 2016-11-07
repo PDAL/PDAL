@@ -34,7 +34,7 @@
 
 #include <pdal/pdal_test_main.hpp>
 
-#include <pdal/Eigen.hpp>
+#include <pdal/EigenUtils.hpp>
 #include <pdal/PointView.hpp>
 
 using namespace pdal;

@@ -34,7 +34,7 @@
 
 #include "ApproximateCoplanarFilter.hpp"
 
-#include <pdal/Eigen.hpp>
+#include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>

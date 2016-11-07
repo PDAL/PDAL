@@ -32,7 +32,7 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/Eigen.hpp>
+#include <pdal/EigenUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/util/Bounds.hpp>
 #include <pdal/util/Utils.hpp>
