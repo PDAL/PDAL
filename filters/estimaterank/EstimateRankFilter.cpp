@@ -34,7 +34,7 @@
 
 #include "EstimateRankFilter.hpp"
 
-#include <pdal/Eigen.hpp>
+#include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
@@ -82,7 +82,7 @@ void EstimateRankFilter::filter(PointView& view)
         double z = view.getFieldAs<double>(Dimension::Id::Z, i);
         auto ids = kdi.neighbors(x, y, z, m_knn);
 
-        view.setField(m_rank, i, computeRank(view, ids, m_thresh));
+        view.setField(m_rank, i, eigen::computeRank(view, ids, m_thresh));
     }
 }
 
