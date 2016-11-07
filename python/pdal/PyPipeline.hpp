@@ -3,9 +3,11 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/plang/Array.hpp>
 
+
 #include "PipelineExecutor.hpp"
 
 #include <string>
+#include <sstream>
 #undef toupper
 #undef tolower
 #undef isspace
@@ -18,21 +20,47 @@
 
 namespace libpdalpython
 {
-//     typedef std::shared_ptr<pdal::plang::Array> PArray;
+
+class python_error : public std::runtime_error
+{
+public:
+    inline python_error(std::string const& msg) : std::runtime_error(msg)
+        {}
+};
+
     typedef pdal::plang::Array* PArray;
 
 class Pipeline {
 public:
     Pipeline(std::string const& xml);
-    ~Pipeline(){};
+    ~Pipeline();
 
     int64_t execute();
-    inline const char* getJSON() const { return m_executor.getJSON(); }
-    inline const char* getSchema() const { return m_executor.getSchema(); }
+    inline std::string getPipeline() const
+    {
+        return m_executor.getPipeline();
+    }
+    inline std::string getMetadata() const
+    {
+        return m_executor.getMetadata();
+    }
+    inline std::string getSchema() const
+    {
+        return m_executor.getSchema();
+    }
+    inline std::string getLog() const
+    {
+        return m_executor.getLog();
+    }
     std::vector<PArray> getArrays() const;
 
+
+    void setLogLevel(int level);
+    int getLogLevel() const;
+
 private:
-    pdal::executor::Pipeline m_executor;
+
+    pdal::executor::PipelineExecutor m_executor;
 
 };
 

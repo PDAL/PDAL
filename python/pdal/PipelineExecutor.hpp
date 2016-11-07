@@ -9,23 +9,35 @@ namespace pdal
 namespace executor
 {
 
-class Pipeline {
+class PipelineExecutor {
 public:
-    Pipeline(std::string const& json);
-    ~Pipeline(){};
+    PipelineExecutor(std::string const& json);
+    ~PipelineExecutor(){};
 
     int64_t execute();
-    inline const char* getJSON() const { return m_json.c_str(); }
-    inline const char* getSchema() const { return m_schema.c_str(); }
-    PipelineManager const& manager() const { return m_manager; }
+    bool executed() const { return m_executed; }
+
+    std::string getPipeline() const;
+    std::string getMetadata() const;
+    std::string getSchema() const;
+    std::string getLog() const;
+    void setLogLevel(int level);
+    int getLogLevel() const;
+
+    PipelineManager const& getManagerConst() const { return m_manager; }
+    PipelineManager & getManager() { return m_manager; }
 
 
 //     std::vector<PArray> getArrays() const;
 
 private:
+    void setLogStream(std::ostream& strm);
+
     std::string m_json;
-    std::string m_schema;
     pdal::PipelineManager m_manager; // no progress reporting
+    bool m_executed;
+    std::stringstream m_logStream;
+    pdal::LogLevel m_logLevel;
 
 };
 
