@@ -39,6 +39,7 @@
 #include <pdal/PipelineManager.hpp>
 #include <buffer/BufferReader.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/util/Utils.hpp>
 
 #include <Eigen/Dense>
 
@@ -111,11 +112,11 @@ Eigen::MatrixXd MongusFilter::computeSpline(Eigen::MatrixXd x_prev,
             int inner_col = std::floor(outer_col/2);
             int inner_row = std::floor(outer_row/2);
 
-            int cs = clamp(inner_col-radius, 0, z_prev.cols()-1);
-            int ce = clamp(inner_col+radius, 0, z_prev.cols()-1);
+            int cs = Utils::clamp(inner_col-radius, 0, static_cast<int>(z_prev.cols()-1));
+            int ce = Utils::clamp(inner_col+radius, 0, static_cast<int>(z_prev.cols()-1));
             int col_size = ce - cs + 1;
-            int rs = clamp(inner_row-radius, 0, z_prev.rows()-1);
-            int re = clamp(inner_row+radius, 0, z_prev.rows()-1);
+            int rs = Utils::clamp(inner_row-radius, 0, static_cast<int>(z_prev.rows()-1));
+            int re = Utils::clamp(inner_row+radius, 0, static_cast<int>(z_prev.rows()-1));
             int row_size = re - rs + 1;
 
             MatrixXd Xn = x_prev.block(rs, cs, row_size, col_size);
@@ -348,8 +349,8 @@ std::vector<PointId> MongusFilter::processGround(PointViewPtr view)
         double y = view->getFieldAs<double>(Id::Y, i);
         double z = view->getFieldAs<double>(Id::Z, i);
 
-        int c = clamp(getColIndex(x, m_cellSize), 0, m_numCols-1);
-        int r = clamp(getRowIndex(y, m_cellSize), 0, m_numRows-1);
+        int c = Utils::clamp(getColIndex(x, m_cellSize), 0, m_numCols-1);
+        int r = Utils::clamp(getRowIndex(y, m_cellSize), 0, m_numRows-1);
 
         if (z < cz(r, c))
         {
@@ -640,8 +641,8 @@ std::vector<PointId> MongusFilter::processGround(PointViewPtr view)
         double y = view->getFieldAs<double>(Id::Y, i);
         double z = view->getFieldAs<double>(Id::Z, i);
 
-        int c = clamp(getColIndex(x, cur_cell_size), 0, m_numCols-1);
-        int r = clamp(getRowIndex(y, cur_cell_size), 0, m_numRows-1);
+        int c = Utils::clamp(getColIndex(x, cur_cell_size), 0, m_numCols-1);
+        int r = Utils::clamp(getRowIndex(y, cur_cell_size), 0, m_numRows-1);
 
         double res = z - surface(r, c);
         if (res < 1.0)

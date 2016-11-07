@@ -35,6 +35,7 @@
 #include <pdal/Eigen.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/util/Bounds.hpp>
+#include <pdal/util/Utils.hpp>
 
 #include <Eigen/Dense>
 
@@ -42,11 +43,6 @@
 
 namespace pdal
 {
-
-int clamp(int t, int min, int max)
-{
-    return ((t < min) ? min : ((t > max) ? max : t));
-}
 
 Eigen::Vector3f computeCentroid(PointView& view, std::vector<PointId> ids)
 {
@@ -114,11 +110,6 @@ Eigen::MatrixXd createDSM(PointView& view, int rows, int cols, double cell_size,
 
     int maxrow = bounds.miny + rows * cell_size;
 
-    auto clamp = [](int t, int min, int max)
-    {
-        return ((t < min) ? min : ((t > max) ? max : t));
-    };
-
     auto getColIndex = [&bounds, &cell_size](double x)
     {
         return static_cast<int>(floor((x - bounds.minx) / cell_size));
@@ -135,8 +126,8 @@ Eigen::MatrixXd createDSM(PointView& view, int rows, int cols, double cell_size,
         double y = view.getFieldAs<double>(Id::Y, i);
         double z = view.getFieldAs<double>(Id::Z, i);
 
-        int c = clamp(getColIndex(x), 0, cols-1);
-        int r = clamp(getRowIndex(y), 0, rows-1);
+        int c = Utils::clamp(getColIndex(x), 0, cols-1);
+        int r = Utils::clamp(getRowIndex(y), 0, rows-1);
 
         if (z < ZImin(r, c) || std::isnan(ZImin(r, c)))
             ZImin(r, c) = z;
@@ -163,10 +154,10 @@ Eigen::MatrixXd matrixClose(Eigen::MatrixXd data, int radius)
     {
         for (auto r = 0; r < nrows; ++r)
         {
-            int cs = clamp(c-radius, 0, ncols-1);
-            int ce = clamp(c+radius, 0, ncols-1);
-            int rs = clamp(r-radius, 0, nrows-1);
-            int re = clamp(r+radius, 0, nrows-1);
+            int cs = Utils::clamp(c-radius, 0, ncols-1);
+            int ce = Utils::clamp(c+radius, 0, ncols-1);
+            int rs = Utils::clamp(r-radius, 0, nrows-1);
+            int re = Utils::clamp(r+radius, 0, nrows-1);
 
             for (auto col = cs; col <= ce; ++col)
             {
@@ -184,10 +175,10 @@ Eigen::MatrixXd matrixClose(Eigen::MatrixXd data, int radius)
     {
         for (auto r = 0; r < nrows; ++r)
         {
-            int cs = clamp(c-radius, 0, ncols-1);
-            int ce = clamp(c+radius, 0, ncols-1);
-            int rs = clamp(r-radius, 0, nrows-1);
-            int re = clamp(r+radius, 0, nrows-1);
+            int cs = Utils::clamp(c-radius, 0, ncols-1);
+            int ce = Utils::clamp(c+radius, 0, ncols-1);
+            int rs = Utils::clamp(r-radius, 0, nrows-1);
+            int re = Utils::clamp(r+radius, 0, nrows-1);
 
             for (auto col = cs; col <= ce; ++col)
             {
@@ -223,10 +214,10 @@ Eigen::MatrixXd matrixOpen(Eigen::MatrixXd data, int radius)
     {
         for (auto r = 0; r < nrows; ++r)
         {
-            int cs = clamp(c-radius, 0, ncols-1);
-            int ce = clamp(c+radius, 0, ncols-1);
-            int rs = clamp(r-radius, 0, nrows-1);
-            int re = clamp(r+radius, 0, nrows-1);
+            int cs = Utils::clamp(c-radius, 0, ncols-1);
+            int ce = Utils::clamp(c+radius, 0, ncols-1);
+            int rs = Utils::clamp(r-radius, 0, nrows-1);
+            int re = Utils::clamp(r+radius, 0, nrows-1);
 
             for (auto col = cs; col <= ce; ++col)
             {
@@ -244,10 +235,10 @@ Eigen::MatrixXd matrixOpen(Eigen::MatrixXd data, int radius)
     {
         for (auto r = 0; r < nrows; ++r)
         {
-            int cs = clamp(c-radius, 0, ncols-1);
-            int ce = clamp(c+radius, 0, ncols-1);
-            int rs = clamp(r-radius, 0, nrows-1);
-            int re = clamp(r+radius, 0, nrows-1);
+            int cs = Utils::clamp(c-radius, 0, ncols-1);
+            int ce = Utils::clamp(c+radius, 0, ncols-1);
+            int rs = Utils::clamp(r-radius, 0, nrows-1);
+            int re = Utils::clamp(r+radius, 0, nrows-1);
 
             for (auto col = cs; col <= ce; ++col)
             {

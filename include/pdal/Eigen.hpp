@@ -46,19 +46,6 @@ namespace pdal
 class PointView;
 
 /**
- * \brief Clamp value to given bounds.
- *
- * Clamps the input value t to bounds specified by min and max. Used to ensure
- * that row and column indices remain within valid bounds.
- *
- * \param t the input value.
- * \param min the lower bound.
- * \param max the upper bound.
- * \return the value to clamped to the given bounds.
- */
-PDAL_DLL int clamp(int t, int min, int max);
-
-/**
  * \brief Compute the centroid of a collection of points.
  *
  * Computes the 3D centroid of a collection of points (specified by PointId)
@@ -149,7 +136,19 @@ PDAL_DLL Eigen::Matrix3f computeCovariance(PointView& view,
 PDAL_DLL uint8_t computeRank(PointView& view, std::vector<PointId> ids,
                              double threshold);
 
-// createDSM returns a matrix with minimum Z values from the provided PointView.
+/**
+ * /brief Create matrix of minimum Z values.
+ *
+ * Create a DSM from the provided PointVieew, where each cell contains the
+ * minimum Z value of all contributing elevations.
+ *
+ * /param view the input PointView.
+ * /param rows the number of rows.
+ * /param cols the number of columns.
+ * /param cell_size the edge length of raster cell.
+ * /param bounds the 2D bounds of the PointView.
+ * /return the matrix of minimum Z values.
+ */
 PDAL_DLL Eigen::MatrixXd createDSM(PointView& view, int rows, int cols,
                                    double cell_size, BOX2D bounds);
 

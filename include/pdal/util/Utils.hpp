@@ -60,6 +60,23 @@ namespace pdal
 namespace Utils
 {
     /**
+     * \brief Clamp value to given bounds.
+     *
+     * Clamps the input value t to bounds specified by min and max. Used to ensure
+     * that row and column indices remain within valid bounds.
+     *
+     * \param t the input value.
+     * \param min the lower bound.
+     * \param max the upper bound.
+     * \return the value to clamped to the given bounds.
+     */
+    template <class T>
+    PDAL_DLL const T& clamp(const T& t, const T& min, const T& max)
+    {
+        return ((t < min) ? min : ((t > max) ? max : t));
+    }
+      
+    /**
       Set a seed for random number generation.
 
       \param seed  Seed value.
@@ -938,4 +955,3 @@ namespace Utils
 
 } // namespace Utils
 } // namespace pdal
-
