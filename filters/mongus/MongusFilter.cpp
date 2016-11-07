@@ -365,9 +365,9 @@ std::vector<PointId> MongusFilter::processGround(PointViewPtr view)
     // In our case, 2D structural elements of circular shape are employed and
     // sufficient accuracy is achieved by using a larger window size for opening
     // (W11) than for closing (W9).
-    MatrixXd mo = matrixOpen(cz, 11);
+    MatrixXd mo = eigen::matrixOpen(cz, 11);
     writeControl(cx, cy, mo, "grid_open.laz");
-    MatrixXd mc = matrixClose(mo, 9);
+    MatrixXd mc = eigen::matrixClose(mo, 9);
     writeControl(cx, cy, mc, "grid_close.laz");
 
     // ...in order to minimize the distortions caused by such filtering, the

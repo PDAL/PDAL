@@ -262,8 +262,8 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
     // these latter techniques were nearly the same with regards to total error,
     // with the spring technique performing slightly better than the k-nearest
     // neighbor (KNN) approach.
-    MatrixXd ZImin = createDSM(*view.get(), m_numRows, m_numCols, m_cellSize,
-                               m_bounds);
+    MatrixXd ZImin = eigen::createDSM(*view.get(), m_numRows, m_numCols,
+                                      m_cellSize, m_bounds);
     writeMatrix(ZImin, "zimin.tif", m_cellSize, view);
 
     // MatrixXd ZImin_painted = inpaintKnn(cx, cy, ZImin);
@@ -297,7 +297,7 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
     MatrixXi isNetCell = MatrixXi::Zero(m_numRows, m_numCols);
     if (m_cutNet > 0.0)
     {
-        MatrixXd bigOpen = matrixOpen(ZImin, 2*std::ceil(m_cutNet / m_cellSize));
+        MatrixXd bigOpen = eigen::matrixOpen(ZImin, 2*std::ceil(m_cutNet / m_cellSize));
         for (auto c = 0; c < m_numCols; c += std::ceil(m_cutNet/m_cellSize))
         {
             for (auto r = 0; r < m_numRows; ++r)
@@ -412,14 +412,14 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
 
     auto diffX = [&](MatrixXd mat)
     {
-        MatrixXd data = padMatrix(mat, 1);
+        MatrixXd data = eigen::padMatrix(mat, 1);
         MatrixXd data2 = data.rightCols(data.cols()-1) - data.leftCols(data.cols()-1);
         return data2.block(1, 1, mat.rows(), mat.cols());
     };
 
     auto diffY = [&](MatrixXd mat)
     {
-        MatrixXd data = padMatrix(mat, 1);
+        MatrixXd data = eigen::padMatrix(mat, 1);
         MatrixXd data2 = data.bottomRows(data.rows()-1) - data.topRows(data.rows()-1);
         return data2.block(1, 1, mat.rows(), mat.cols());
     };
@@ -506,7 +506,7 @@ MatrixXi SMRFilter::progressiveFilter(MatrixXd const& ZImin, double cell_size,
     {
         // On the first iteration, the minimum surface (ZImin) is opened using a
         // disk-shaped structuring element with a radius of one pixel.
-        MatrixXd mo = matrixOpen(ZIlocal, radius);
+        MatrixXd mo = eigen::matrixOpen(ZIlocal, radius);
 
         // An elevation threshold is then calculated, where the value is equal
         // to the supplied slope tolerance parameter multiplied by the product

@@ -50,7 +50,7 @@ TEST(EigenTest, PointViewToEigen) {
     pointView.setField(Dimension::Id::Z, 0, 3.0);
     Eigen::MatrixXd expected(1, 3);
     expected << 1.0, 2.0, 3.0;
-    Eigen::MatrixXd actual = pointViewToEigen(pointView);
+    Eigen::MatrixXd actual = eigen::pointViewToEigen(pointView);
     ASSERT_EQ(1, actual.rows());
     ASSERT_EQ(3, actual.cols());
     EXPECT_EQ(expected, actual);

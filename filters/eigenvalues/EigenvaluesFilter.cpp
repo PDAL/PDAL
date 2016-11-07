@@ -88,7 +88,7 @@ void EigenvaluesFilter::filter(PointView& view)
         auto ids = kdi.neighbors(x, y, z, m_knn);
 
         // compute covariance of the neighborhood
-        auto B = computeCovariance(view, ids);
+        auto B = eigen::computeCovariance(view, ids);
 
         // perform the eigen decomposition
         SelfAdjointEigenSolver<Matrix3f> solver(B);

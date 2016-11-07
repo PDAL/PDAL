@@ -45,6 +45,9 @@ namespace pdal
 {
 class PointView;
 
+namespace eigen
+{
+
 /**
  * \brief Compute the centroid of a collection of points.
  *
@@ -196,5 +199,7 @@ PDAL_DLL Eigen::MatrixXd padMatrix(Eigen::MatrixXd d, int r);
  * the API. It is not currently used in the PDAL codebase itself.
  */
 PDAL_DLL Eigen::MatrixXd pointViewToEigen(const PointView& view);
+
+} // namespace eigen
 
 } // namespace pdal

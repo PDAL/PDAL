@@ -43,6 +43,9 @@
 
 namespace pdal
 {
+  
+namespace eigen
+{
 
 Eigen::Vector3f computeCentroid(PointView& view, std::vector<PointId> ids)
 {
@@ -285,5 +288,7 @@ PDAL_DLL Eigen::MatrixXd pointViewToEigen(const PointView& view)
     }
     return matrix;
 }
+
+} // namespace eigen
 
 } // namespace pdal
