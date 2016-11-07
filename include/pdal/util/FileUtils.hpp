@@ -250,7 +250,7 @@ namespace FileUtils
       \param filespec  File specification to expand.
       \return  List of files that correspond to provided file specification.
     */
-    std::vector<std::string> glob(std::string filespec);
+    PDAL_DLL std::vector<std::string> glob(std::string filespec);
 }
 
 } // namespace pdal

@@ -38,6 +38,8 @@
 #include <sstream>
 #ifndef WIN32
 #include <glob.h>
+#else
+#include <Windows.h>
 #endif
 
 #include <boost/filesystem.hpp>
