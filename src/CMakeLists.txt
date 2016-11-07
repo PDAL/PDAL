@@ -198,6 +198,12 @@ target_link_libraries(${PDAL_BASE_LIB_NAME}
     INTERFACE
         ${PDAL_LIBDIR}
 )
+# This allows downstream projects to use GDAL_INCLUDE_DIR simply by linking
+# against PDAL_BASE_LIB_NAME.
+target_include_directories(${PDAL_BASE_LIB_NAME}
+    INTERFACE
+        ${GDAL_INCLUDE_DIR}
+)
 
 if (WITH_GEOTIFF)
     target_link_libraries(${PDAL_BASE_LIB_NAME} PUBLIC ${GEOTIFF_LIBRARY})

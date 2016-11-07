@@ -79,7 +79,6 @@ private:
     virtual void addSwitches(ProgramArgs& args);
     virtual void validateSwitches(ProgramArgs& args);
 
-    StringList glob(std::string& path);
     void createFile();
     void mergeFile();
     bool openDataset(const std::string& filename);

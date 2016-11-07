@@ -202,3 +202,41 @@ TEST(FileUtilsTest, stem)
     EXPECT_EQ(FileUtils::stem("."), ".");
     EXPECT_EQ(FileUtils::stem(".."), "..");
 }
+
+TEST(FileUtilsTest, glob)
+{
+    auto TP = [](const std::string s)
+    {
+        return Support::temppath(s);
+    };
+
+    auto filenames = [&TP]()
+    {
+        std::vector<std::string> names;
+        std::string name;
+        for (int i = 0; i < 5; ++i)
+        {
+            std::string name;
+            name = TP(std::string("foo") + std::to_string(i) + ".glob");
+            names.push_back(name);
+            name = TP(std::string("bar") + std::to_string(i) + ".glob");
+            names.push_back(name);
+        }
+        return names;
+    };
+
+    for (std::string& file : filenames())
+        FileUtils::deleteFile(file);
+
+    for (std::string& file : filenames())
+        FileUtils::createFile(file);
+
+    EXPECT_EQ(FileUtils::glob(TP("*.glob")).size(), 10u);
+    EXPECT_EQ(FileUtils::glob(TP("foo1.glob")).size(), 1u);
+
+    for (std::string& file : filenames())
+        FileUtils::deleteFile(file);
+
+    EXPECT_EQ(FileUtils::glob(TP("*.glob")).size(), 0u);
+    EXPECT_EQ(FileUtils::glob(TP("foo1.glob")).size(), 0u);
+}

@@ -140,4 +140,14 @@ Eigen::MatrixXd createDSM(PointView& view, int rows, int cols, double cell_size,
     return ZImin;
 }
 
+PDAL_DLL Eigen::MatrixXd pointViewToEigen(const PointView& view) {
+    Eigen::MatrixXd matrix(view.size(), 3);
+    for (PointId i = 0; i < view.size(); ++i) {
+        matrix(i, 0) = view.getFieldAs<double>(Dimension::Id::X, i);
+        matrix(i, 1) = view.getFieldAs<double>(Dimension::Id::Y, i);
+        matrix(i, 2) = view.getFieldAs<double>(Dimension::Id::Z, i);
+    }
+    return matrix;
+}
+
 } // namespace pdal

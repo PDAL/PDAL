@@ -133,6 +133,14 @@ PDAL_DLL Eigen::Matrix3f computeCovariance(PointView& view, std::vector<PointId>
  */
 PDAL_DLL uint8_t computeRank(PointView& view, std::vector<PointId> ids, double threshold);
 
+/**
+ * \brief Converts a PointView into an Eigen::MatrixXd.
+ *
+ * This method exists (as of this writing) purely as a convencience method in
+ * the API. It is not currently used in the PDAL codebase itself.
+ */
+PDAL_DLL Eigen::MatrixXd pointViewToEigen(const PointView& view);
+
 // createDSM returns a matrix with minimum Z values from the provided
 // PointView.
 PDAL_DLL Eigen::MatrixXd createDSM(PointView& view, int rows, int cols,
