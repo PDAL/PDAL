@@ -228,8 +228,10 @@ TEST(FileUtilsTest, glob)
     for (std::string& file : filenames())
         FileUtils::deleteFile(file);
 
-    for (std::string& file : filenames())
-        FileUtils::createFile(file);
+    for (std::string& file : filenames()) {
+        auto f = FileUtils::createFile(file);
+        FileUtils::closeFile(f);
+    }
 
     EXPECT_EQ(FileUtils::glob(TP("*.glob")).size(), 10u);
     EXPECT_EQ(FileUtils::glob(TP("foo1.glob")).size(), 1u);
