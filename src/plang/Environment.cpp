@@ -115,13 +115,10 @@ Environment::Environment()
         Py_Initialize();
     } else
     {
-
-        PyObject* imported = PyImport_AddModule("redirector");
-        if (!imported)
-            throw pdal_error("unable to add redirector module!");
-
-        PyImport_ImportModule("redirector");
         m_redirector.init();
+        PyObject* added  = PyImport_AddModule("redirector");
+        if (!added)
+            throw pdal_error("unable to add redirector module!");
     }
 
     initNumpy();

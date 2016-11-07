@@ -1,11 +1,6 @@
 #include "PipelineExecutor.hpp"
 #include <pdal/PDALUtils.hpp>
 
-#ifdef PDAL_HAVE_LIBXML2
-#include <pdal/XMLSchema.hpp>
-#endif
-
-
 namespace pdal
 {
 
@@ -18,6 +13,7 @@ PipelineExecutor::PipelineExecutor(std::string const& json)
 {
 }
 
+
 std::string PipelineExecutor::getPipeline() const
 {
     if (!m_executed)
@@ -27,6 +23,7 @@ std::string PipelineExecutor::getPipeline() const
     pdal::PipelineWriter::writePipeline(m_manager.getStage(), strm);
     return strm.str();
 }
+
 
 std::string PipelineExecutor::getMetadata() const
 {
@@ -39,6 +36,7 @@ std::string PipelineExecutor::getMetadata() const
     return strm.str();
 }
 
+
 std::string PipelineExecutor::getSchema() const
 {
     if (!m_executed)
@@ -48,10 +46,6 @@ std::string PipelineExecutor::getSchema() const
     MetadataNode root = m_manager.pointTable().toMetadata().clone("schema");
     pdal::Utils::toJSON(root, strm);
     return strm.str();
-// #ifdef PDAL_HAVE_LIBXML2
-//     pdal::XMLSchema schema(m_manager.pointTable().layout());
-//     m_schema = schema.xml();
-// #endif
 }
 
 
@@ -67,6 +61,7 @@ int64_t PipelineExecutor::execute()
     return count;
 }
 
+
 void PipelineExecutor::setLogStream(std::ostream& strm)
 {
 
@@ -75,21 +70,26 @@ void PipelineExecutor::setLogStream(std::ostream& strm)
     m_manager.setLog(log);
 
 }
+
+
 void PipelineExecutor::setLogLevel(int level)
 {
     m_logLevel = static_cast<pdal::LogLevel>(level);
     setLogStream(m_logStream);
 }
 
+
 int PipelineExecutor::getLogLevel() const
 {
     return static_cast<int>(m_logLevel);
 }
 
+
 std::string PipelineExecutor::getLog() const
 {
     return m_logStream.str();
 }
+
 
 }} //namespace pdal::executor
 
