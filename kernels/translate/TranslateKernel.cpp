@@ -166,7 +166,7 @@ void TranslateKernel::makeArgPipeline()
 
 int TranslateKernel::execute()
 {
-    std::ostream *metaOut;
+    std::ostream *metaOut(nullptr);
 
     if (m_metadataFile.size())
     {
