@@ -1536,13 +1536,8 @@ void DerivativeWriter::write(const PointViewPtr data)
         double y = data->getFieldAs<double>(Dimension::Id::Y, idx);
         double z = data->getFieldAs<double>(Dimension::Id::Z, idx);
 
-        auto clamp = [](double t, double min, double max)
-        {
-            return ((t < min) ? min : ((t > max) ? max : t));
-        };
-
-        int xIndex = clamp(static_cast<int>(floor((x - extent.minx) / m_GRID_DIST_X)), 0, m_GRID_SIZE_X-1);
-        int yIndex = clamp(static_cast<int>(floor((yMax - y) / m_GRID_DIST_Y)), 0, m_GRID_SIZE_Y-1);
+        int xIndex = Utils::clamp<uint32_t>(static_cast<uint32_t>(floor((x - extent.minx) / m_GRID_DIST_X)), 0, m_GRID_SIZE_X-1);
+        int yIndex = Utils::clamp<uint32_t>(static_cast<uint32_t>(floor((yMax - y) / m_GRID_DIST_Y)), 0, m_GRID_SIZE_Y-1);
 
         double tDemValue = tDemData(yIndex, xIndex);
 

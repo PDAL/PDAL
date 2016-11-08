@@ -76,7 +76,6 @@ private:
 
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void addArgs(ProgramArgs& args);
-    int clamp(int t, int min, int max);
     int getColIndex(double x, double cell_size);
     int getRowIndex(double y, double cell_size);
     void writeMatrix(Eigen::MatrixXd data, std::string filename,
@@ -87,9 +86,6 @@ private:
                                   Eigen::MatrixXd x_samp,
                                   Eigen::MatrixXd y_samp);
     void writeControl(Eigen::MatrixXd cx, Eigen::MatrixXd cy, Eigen::MatrixXd cz, std::string filename);
-    Eigen::MatrixXd padMatrix(Eigen::MatrixXd data, int radius);
-    Eigen::MatrixXd matrixOpen(Eigen::MatrixXd data, int radius);
-    Eigen::MatrixXd matrixClose(Eigen::MatrixXd data, int radius);
     void downsampleMin(Eigen::MatrixXd *cx, Eigen::MatrixXd *cy,
                        Eigen::MatrixXd* cz, Eigen::MatrixXd *dcx,
                        Eigen::MatrixXd *dcy, Eigen::MatrixXd* dcz,

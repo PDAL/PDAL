@@ -37,7 +37,7 @@ endif()
 set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/pdal_types.hpp"
   "${PDAL_HEADERS_DIR}/Compression.hpp"
-  "${PDAL_HEADERS_DIR}/Eigen.hpp"
+  "${PDAL_HEADERS_DIR}/EigenUtils.hpp"
   "${PDAL_HEADERS_DIR}/Filter.hpp"
   "${PDAL_HEADERS_DIR}/FlexWriter.hpp"
   "${PDAL_HEADERS_DIR}/GDALUtils.hpp"
@@ -75,7 +75,7 @@ set(PDAL_BASE_HPP
 
 set(PDAL_BASE_CPP
   DynamicLibrary.cpp
-  Eigen.cpp
+  EigenUtils.cpp
   gitsha.cpp
   GDALUtils.cpp
   GEOSUtils.cpp
