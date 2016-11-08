@@ -68,18 +68,19 @@ cdef class PyPipeline:
 
 
 
-    def arrays(self):
-        v = self.thisptr.getArrays()
-        output = []
-        cdef vector[Array*].iterator it = v.begin()
-        cdef Array* a
-        while it != v.end():
-            ptr = deref(it)
-            a = ptr#.get()
-            o = a.getPythonArray()
-            output.append(<object>o)
-            inc(it)
-        return output
+    property arrays:
+        def __get__(self):
+            v = self.thisptr.getArrays()
+            output = []
+            cdef vector[Array*].iterator it = v.begin()
+            cdef Array* a
+            while it != v.end():
+                ptr = deref(it)
+                a = ptr#.get()
+                o = a.getPythonArray()
+                output.append(<object>o)
+                inc(it)
+            return output
 
     def execute(self):
         if not self.thisptr:
