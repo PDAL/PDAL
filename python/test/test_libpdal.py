@@ -21,40 +21,40 @@ class TestPDALArray(unittest.TestCase):
         output = f.read().decode('UTF-8')
     return output
 
-  @unittest.skipUnless(os.path.exists(os.path.join(DATADIRECTORY, 'data/pipeline/pipeline_read.json')),
-                       os.path.join(DATADIRECTORY, 'data/pipeline/pipeline_read.json'))
+  @unittest.skipUnless(os.path.exists(os.path.join(DATADIRECTORY, 'data/pipeline/sort.json')),
+                       os.path.join(DATADIRECTORY, 'data/pipeline/sort.json'))
   def test_construction(self):
     """Can we construct a PDAL pipeline"""
-    json = self.fetch_json('/data/pipeline/pipeline_read.json')
+    json = self.fetch_json('/data/pipeline/sort.json')
     r = libpdalpython.PyPipeline(json)
 
-  @unittest.skipUnless(os.path.exists(os.path.join(DATADIRECTORY, 'data/pipeline/pipeline_read.json')),
+  @unittest.skipUnless(os.path.exists(os.path.join(DATADIRECTORY, 'data/pipeline/sort.json')),
                        "missing test data")
   def test_execution(self):
     """Can we execute a PDAL pipeline"""
-    x = self.fetch_json('/data/pipeline/pipeline_read.json')
+    x = self.fetch_json('/data/pipeline/sort.json')
     r = libpdalpython.PyPipeline(x)
     r.execute()
     import sys
     self.assertGreater(len(r.pipeline), 200)
 
-  @unittest.skipUnless(os.path.exists(os.path.join(DATADIRECTORY, 'data/pipeline/pipeline_read.json')),
+  @unittest.skipUnless(os.path.exists(os.path.join(DATADIRECTORY, 'data/pipeline/sort.json')),
                        "missing test data")
   def test_array(self):
     """Can we fetch PDAL data as a numpy array"""
-    json = self.fetch_json('/data/pipeline/pipeline_read.json')
+    json = self.fetch_json('/data/pipeline/sort.json')
     r = libpdalpython.PyPipeline(json)
     r.execute()
     arrays = r.arrays()
     self.assertEqual(len(arrays), 1)
 
     a = arrays[0]
-    self.assertAlmostEqual(a[0][0], 637012.24, 7)
-    self.assertAlmostEqual(a[1064][2], 423.92, 7)
+    self.assertAlmostEqual(a[0][0], 635619.85, 7)
+    self.assertAlmostEqual(a[1064][2], 456.92, 7)
 
   def test_metadata(self):
     """Can we fetch PDAL metadata"""
-    json = self.fetch_json('/data/pipeline/pipeline_read.json')
+    json = self.fetch_json('/data/pipeline/sort.json')
     r = libpdalpython.PyPipeline(json)
     r.execute()
     metadata = r.metadata
@@ -65,7 +65,7 @@ class TestPDALArray(unittest.TestCase):
 
   def test_no_execute(self):
     """Does fetching arrays without executing throw an exception"""
-    json = self.fetch_json('/data/pipeline/pipeline_read.json')
+    json = self.fetch_json('/data/pipeline/sort.json')
     r = libpdalpython.PyPipeline(json)
     with self.assertRaises(RuntimeError):
         r.arrays()
@@ -81,7 +81,7 @@ class TestPDALArray(unittest.TestCase):
 
   def test_schema(self):
     """Fetching a schema works"""
-    json = self.fetch_json('/data/pipeline/pipeline_read.json')
+    json = self.fetch_json('/data/pipeline/sort.json')
     r = libpdalpython.PyPipeline(json)
     r.execute()
     self.assertEqual(r.schema['schema']['dimensions'][0]['name'], 'X')
