@@ -31,7 +31,7 @@ sorts it by the ``X`` dimension:
     pipeline.loglevel = 9 #really noisy
     count = pipeline.execute()
     arrays = pipeline.arrays
-    metadata = r.metadata
+    metadata = pipeline.metadata
     log = pipeline.log
 
 
