@@ -37,12 +37,12 @@ if (LASZIP_FOUND)
     )
 
     add_executable(lasdump ${SOURCES} ${HEADERS})
-    target_link_libraries(lasdump
+    target_link_libraries(lasdump PRIVATE
         ${PDAL_UTIL_LIB_NAME}
         ${LASZIP_LIBRARIES}
     )
     if (WIN32)
-        target_link_libraries(lasdump wsock32 ws2_32)
+        target_link_libraries(lasdump PRIVATE wsock32 ws2_32)
     endif()
 endif()
 

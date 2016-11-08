@@ -23,5 +23,5 @@ set (SOURCES
 add_executable(dimbuilder ${SOURCES})
 target_link_libraries(dimbuilder PRIVATE ${PDAL_UTIL_LIB_NAME})
 if (PDAL_HAVE_JSONCPP)
-    target_link_libraries(dimbuilder ${PDAL_JSONCPP_LIB_NAME})
+    target_link_libraries(dimbuilder PRIVATE ${PDAL_JSONCPP_LIB_NAME})
 endif()
