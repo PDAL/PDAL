@@ -26,7 +26,7 @@ set_target_properties(${PDAL_PLANG_LIB_NAME} PROPERTIES
     SOVERSION "${PDAL_API_VERSION}"
     CLEAN_DIRECT_OUTPUT 1)
 
-target_link_libraries(${PDAL_PLANG_LIB_NAME}
+target_link_libraries(${PDAL_PLANG_LIB_NAME} PUBLIC
     ${PDAL_BASE_LIB_NAME}
     ${PDAL_UTIL_LIB_NAME}
     ${PYTHON_LIBRARY})

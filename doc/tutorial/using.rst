@@ -30,7 +30,7 @@ Begin by creating a file named CMakeLists.txt that contains:
   add_definitions(${PDAL_DEFINITIONS})
   set(CMAKE_CXX_FLAGS "-std=c++11")
   add_executable(tutorial tutorial.cpp)
-  target_link_libraries(tutorial ${PDAL_LIBRARIES})
+  target_link_libraries(tutorial PRIVATE ${PDAL_LIBRARIES})
 
 CMakeLists explained
 -------------------------------------------------------------------------------
@@ -88,7 +88,7 @@ We use the `add_executable` command to tell CMake to create an executable named
 
 .. code-block:: cmake
 
-  target_link_libraries(tutorial ${PDAL_LIBRARIES})
+  target_link_libraries(tutorial PRIVATE ${PDAL_LIBRARIES})
 
 We assume that the tutorial executable makes calls to PDAL functions. To make
 the linker aware of the PDAL libraries, we use `target_link_libraries` to link
