@@ -357,38 +357,5 @@ bool fileExists(const std::string& path)
     return FileUtils::fileExists(path);
 }
 
-/**
-  If the path starts with a tilde, expansion will be performed.  Otherwise,
-  the input is returned unmodified.
-
-  \param path  Path to file.
-  \return  Fully-qualified filename, if one can be determined, or the original
-  path if not.
-*/
-std::string expandTilde(const std::string& path)
-{
-#ifdef PDAL_ARBITER_ENABLED
-    return arbiter::fs::expandTilde(path);
-#endif
-    return path;
-}
-
-/**
-  If the path is a wildcard path, resolve it to all matching files.  Otherwise
-  return the original input in a one-length vector.  A double-asterisk
-  represents a recursive search, a single-asterisk is non-recursive.
-
-  \param path  Path to a file or a wildcard.
-  \return  A vector of file paths, matching the input wildcard, if applicable.
-  Otherwise, a vector of size one containing the input path.
-*/
-std::vector<std::string> maybeGlob(const std::string& path)
-{
-#ifdef PDAL_ARBITER_ENABLED
-    return arbiter::fs::glob(path);
-#endif
-    return std::vector<std::string>{ path };
-}
-
 } // namespace Utils
 } // namespace pdal

@@ -8,4 +8,4 @@ include_directories(/Users/chambbj/loki/pdal/repo/filters)
 
 set(CMAKE_CXX_FLAGS "-std=c++11")
 add_library(pdal_plugin_filter_myfilter SHARED MyFilter.cpp)
-target_link_libraries(pdal_plugin_filter_myfilter ${PDAL_LIBRARIES})
+target_link_libraries(pdal_plugin_filter_myfilter PRIVATE ${PDAL_LIBRARIES})

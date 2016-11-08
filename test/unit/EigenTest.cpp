@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2016, Peter J. Gadomski <pete.gadomski@gmail.com>
 *
 * All rights reserved.
 *
@@ -32,58 +32,26 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "EstimateRankFilter.hpp"
+#include <pdal/pdal_test_main.hpp>
 
 #include <pdal/EigenUtils.hpp>
-#include <pdal/KDIndex.hpp>
-#include <pdal/pdal_macros.hpp>
-#include <pdal/util/ProgramArgs.hpp>
+#include <pdal/PointView.hpp>
 
-#include <string>
-#include <vector>
+using namespace pdal;
 
-namespace pdal
-{
-
-static PluginInfo const s_info =
-    PluginInfo("filters.estimaterank", "EstimateRank Filter", 
-               "http://pdal.io/stages/filters.estimaterank.html");
-
-CREATE_STATIC_PLUGIN(1, 0, EstimateRankFilter, Filter, s_info)
-
-std::string EstimateRankFilter::getName() const
-{
-    return s_info.name;
+TEST(EigenTest, PointViewToEigen) {
+    PointTable table;
+    table.layout()->registerDim(Dimension::Id::X);
+    table.layout()->registerDim(Dimension::Id::Y);
+    table.layout()->registerDim(Dimension::Id::Z);
+    PointView pointView(table);
+    pointView.setField(Dimension::Id::X, 0, 1.0);
+    pointView.setField(Dimension::Id::Y, 0, 2.0);
+    pointView.setField(Dimension::Id::Z, 0, 3.0);
+    Eigen::MatrixXd expected(1, 3);
+    expected << 1.0, 2.0, 3.0;
+    Eigen::MatrixXd actual = eigen::pointViewToEigen(pointView);
+    ASSERT_EQ(1, actual.rows());
+    ASSERT_EQ(3, actual.cols());
+    EXPECT_EQ(expected, actual);
 }
-
-
-void EstimateRankFilter::addArgs(ProgramArgs& args)
-{
-    args.add("knn", "k-Nearest Neighbors", m_knn, 8);
-    args.add("thresh", "Threshold", m_thresh, 0.01);
-}
-
-
-void EstimateRankFilter::addDimensions(PointLayoutPtr layout)
-{
-    m_rank = layout->registerOrAssignDim("Rank", Dimension::Type::Unsigned8);
-}
-
-void EstimateRankFilter::filter(PointView& view)
-{
-    KD3Index kdi(view);
-    kdi.build();
-
-    for (PointId i = 0; i < view.size(); ++i)
-    {
-        // find the k-nearest neighbors
-        double x = view.getFieldAs<double>(Dimension::Id::X, i);
-        double y = view.getFieldAs<double>(Dimension::Id::Y, i);
-        double z = view.getFieldAs<double>(Dimension::Id::Z, i);
-        auto ids = kdi.neighbors(x, y, z, m_knn);
-
-        view.setField(m_rank, i, eigen::computeRank(view, ids, m_thresh));
-    }
-}
-
-} // namespace pdal

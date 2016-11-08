@@ -34,11 +34,12 @@
 
 #include "SMRFilter.hpp"
 
-#include <pdal/Eigen.hpp>
+#include <pdal/EigenUtils.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <buffer/BufferReader.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/util/Utils.hpp>
 
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
@@ -92,11 +93,6 @@ void SMRFilter::addDimensions(PointLayoutPtr layout)
     layout->registerDim(Dimension::Id::Classification);
 }
 
-int SMRFilter::clamp(int t, int min, int max)
-{
-    return ((t < min) ? min : ((t > max) ? max : t));
-}
-
 int SMRFilter::getColIndex(double x, double cell_size)
 {
     return static_cast<int>(floor((x - m_bounds.minx) / cell_size));
@@ -105,64 +101,6 @@ int SMRFilter::getColIndex(double x, double cell_size)
 int SMRFilter::getRowIndex(double y, double cell_size)
 {
     return static_cast<int>(floor((m_maxRow - y) / cell_size));
-}
-
-MatrixXd SMRFilter::matrixOpen(MatrixXd data, int radius)
-{
-    MatrixXd data2 = padMatrix(data, radius);
-
-    int nrows = data2.rows();
-    int ncols = data2.cols();
-
-    // first min, then max of min
-    MatrixXd minZ = MatrixXd::Constant(nrows, ncols,
-                                       std::numeric_limits<double>::max());
-    MatrixXd maxZ = MatrixXd::Constant(nrows, ncols,
-                                       std::numeric_limits<double>::lowest());
-    for (int c = 0; c < ncols; ++c)
-    {
-        for (int r = 0; r < nrows; ++r)
-        {
-            int cs = clamp(c-radius, 0, ncols-1);
-            int ce = clamp(c+radius, 0, ncols-1);
-            int rs = clamp(r-radius, 0, nrows-1);
-            int re = clamp(r+radius, 0, nrows-1);
-
-            for (int col = cs; col <= ce; ++col)
-            {
-                for (int row = rs; row <= re; ++row)
-                {
-                    if ((row-r)*(row-r)+(col-c)*(col-c) > radius*radius)
-                        continue;
-                    if (data2(row, col) < minZ(r, c))
-                        minZ(r, c) = data2(row, col);
-                }
-            }
-        }
-    }
-    for (int c = 0; c < ncols; ++c)
-    {
-        for (int r = 0; r < nrows; ++r)
-        {
-            int cs = clamp(c-radius, 0, ncols-1);
-            int ce = clamp(c+radius, 0, ncols-1);
-            int rs = clamp(r-radius, 0, nrows-1);
-            int re = clamp(r+radius, 0, nrows-1);
-
-            for (int col = cs; col <= ce; ++col)
-            {
-                for (int row = rs; row <= re; ++row)
-                {
-                    if ((row-r)*(row-r)+(col-c)*(col-c) > radius*radius)
-                        continue;
-                    if (minZ(row, col) > maxZ(r, c))
-                        maxZ(r, c) = minZ(row, col);
-                }
-            }
-        }
-    }
-
-    return maxZ.block(radius, radius, data.rows(), data.cols());
 }
 
 MatrixXd SMRFilter::inpaintKnn(MatrixXd cx, MatrixXd cy, MatrixXd cz)
@@ -182,11 +120,11 @@ MatrixXd SMRFilter::inpaintKnn(MatrixXd cx, MatrixXd cy, MatrixXd cz)
             while (!enough)
             {
                 // log()->get(LogLevel::Debug) << r << "\t" << c << "\t" << radius << std::endl;
-                int cs = clamp(c-radius, 0, m_numCols-1);
-                int ce = clamp(c+radius, 0, m_numCols-1);
+                int cs = Utils::clamp(c-radius, 0, m_numCols-1);
+                int ce = Utils::clamp(c+radius, 0, m_numCols-1);
                 int col_size = ce - cs + 1;
-                int rs = clamp(r-radius, 0, m_numRows-1);
-                int re = clamp(r+radius, 0, m_numRows-1);
+                int rs = Utils::clamp(r-radius, 0, m_numRows-1);
+                int re = Utils::clamp(r+radius, 0, m_numRows-1);
                 int row_size = re - rs + 1;
 
                 // MatrixXd Xn = cx.block(rs, cs, row_size, col_size);
@@ -250,22 +188,6 @@ MatrixXd SMRFilter::inpaintKnn(MatrixXd cx, MatrixXd cy, MatrixXd cz)
     }
 
     return out;
-}
-
-MatrixXd SMRFilter::padMatrix(MatrixXd data, int radius)
-{
-    MatrixXd data2 = MatrixXd::Zero(data.rows()+2*radius, data.cols()+2*radius);
-    data2.block(radius, radius, data.rows(), data.cols()) = data;
-    data2.block(radius, 0, data.rows(), radius) =
-        data.block(0, 0, data.rows(), radius).rowwise().reverse();
-    data2.block(radius, data.cols()+radius, data.rows(), radius) =
-        data.block(0, data.cols()-radius, data.rows(), radius).rowwise().reverse();
-    data2.block(0, 0, radius, data2.cols()) =
-        data2.block(radius, 0, radius, data2.cols()).colwise().reverse();
-    data2.block(data.rows()+radius, 0, radius, data2.cols()) =
-        data2.block(data2.rows()-radius, 0, radius, data2.cols()).colwise().reverse();
-
-    return data2;
 }
 
 std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
@@ -340,8 +262,8 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
     // these latter techniques were nearly the same with regards to total error,
     // with the spring technique performing slightly better than the k-nearest
     // neighbor (KNN) approach.
-    MatrixXd ZImin = createDSM(*view.get(), m_numRows, m_numCols, m_cellSize,
-                               m_bounds);
+    MatrixXd ZImin = eigen::createDSM(*view.get(), m_numRows, m_numCols,
+                                      m_cellSize, m_bounds);
     writeMatrix(ZImin, "zimin.tif", m_cellSize, view);
 
     // MatrixXd ZImin_painted = inpaintKnn(cx, cy, ZImin);
@@ -375,7 +297,7 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
     MatrixXi isNetCell = MatrixXi::Zero(m_numRows, m_numCols);
     if (m_cutNet > 0.0)
     {
-        MatrixXd bigOpen = matrixOpen(ZImin, 2*std::ceil(m_cutNet / m_cellSize));
+        MatrixXd bigOpen = eigen::matrixOpen(ZImin, 2*std::ceil(m_cutNet / m_cellSize));
         for (auto c = 0; c < m_numCols; c += std::ceil(m_cutNet/m_cellSize))
         {
             for (auto r = 0; r < m_numRows; ++r)
@@ -490,14 +412,14 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
 
     auto diffX = [&](MatrixXd mat)
     {
-        MatrixXd data = padMatrix(mat, 1);
+        MatrixXd data = eigen::padMatrix(mat, 1);
         MatrixXd data2 = data.rightCols(data.cols()-1) - data.leftCols(data.cols()-1);
         return data2.block(1, 1, mat.rows(), mat.cols());
     };
 
     auto diffY = [&](MatrixXd mat)
     {
-        MatrixXd data = padMatrix(mat, 1);
+        MatrixXd data = eigen::padMatrix(mat, 1);
         MatrixXd data2 = data.bottomRows(data.rows()-1) - data.topRows(data.rows()-1);
         return data2.block(1, 1, mat.rows(), mat.cols());
     };
@@ -526,8 +448,8 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
         double y = view->getFieldAs<double>(Id::Y, i);
         double z = view->getFieldAs<double>(Id::Z, i);
 
-        int c = clamp(getColIndex(x, m_cellSize), 0, m_numCols-1);
-        int r = clamp(getRowIndex(y, m_cellSize), 0, m_numRows-1);
+        int c = Utils::clamp(getColIndex(x, m_cellSize), 0, m_numCols-1);
+        int r = Utils::clamp(getRowIndex(y, m_cellSize), 0, m_numRows-1);
 
         // author uses spline interpolation to get value from ZIpro and gsurfs
 
@@ -584,7 +506,7 @@ MatrixXi SMRFilter::progressiveFilter(MatrixXd const& ZImin, double cell_size,
     {
         // On the first iteration, the minimum surface (ZImin) is opened using a
         // disk-shaped structuring element with a radius of one pixel.
-        MatrixXd mo = matrixOpen(ZIlocal, radius);
+        MatrixXd mo = eigen::matrixOpen(ZIlocal, radius);
 
         // An elevation threshold is then calculated, where the value is equal
         // to the supplied slope tolerance parameter multiplied by the product
@@ -697,11 +619,11 @@ MatrixXd SMRFilter::TPS(MatrixXd cx, MatrixXd cy, MatrixXd cz)
             // neighbourhood is used in our case) of the cell being filtered.
             int radius = 3;
 
-            int cs = clamp(outer_col-radius, 0, m_numCols-1);
-            int ce = clamp(outer_col+radius, 0, m_numCols-1);
+            int cs = Utils::clamp(outer_col-radius, 0, m_numCols-1);
+            int ce = Utils::clamp(outer_col+radius, 0, m_numCols-1);
             int col_size = ce - cs + 1;
-            int rs = clamp(outer_row-radius, 0, m_numRows-1);
-            int re = clamp(outer_row+radius, 0, m_numRows-1);
+            int rs = Utils::clamp(outer_row-radius, 0, m_numRows-1);
+            int re = Utils::clamp(outer_row+radius, 0, m_numRows-1);
             int row_size = re - rs + 1;
 
             MatrixXd Xn = cx.block(rs, cs, row_size, col_size);
@@ -857,11 +779,11 @@ MatrixXd SMRFilter::expandingTPS(MatrixXd cx, MatrixXd cy, MatrixXd cz)
             while (!solution)
             {
                 // std::cerr << radius;
-                int cs = clamp(outer_col-radius, 0, m_numCols-1);
-                int ce = clamp(outer_col+radius, 0, m_numCols-1);
+                int cs = Utils::clamp(outer_col-radius, 0, m_numCols-1);
+                int ce = Utils::clamp(outer_col+radius, 0, m_numCols-1);
                 int col_size = ce - cs + 1;
-                int rs = clamp(outer_row-radius, 0, m_numRows-1);
-                int re = clamp(outer_row+radius, 0, m_numRows-1);
+                int rs = Utils::clamp(outer_row-radius, 0, m_numRows-1);
+                int re = Utils::clamp(outer_row+radius, 0, m_numRows-1);
                 int row_size = re - rs + 1;
 
                 MatrixXd Xn = cx.block(rs, cs, row_size, col_size);

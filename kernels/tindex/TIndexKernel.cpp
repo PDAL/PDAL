@@ -34,13 +34,6 @@
 
 #include "TIndexKernel.hpp"
 
-#ifndef WIN32
-#include <glob.h>
-#include <time.h>
-#else
-#include <windows.h>
-#endif
-
 #include <memory>
 #include <vector>
 
@@ -180,52 +173,6 @@ int TIndexKernel::execute()
 }
 
 
-StringList TIndexKernel::glob(std::string& path)
-{
-    StringList filenames;
-
-#ifndef WIN32
-    glob_t glob_result;
-
-    ::glob(path.c_str(), GLOB_TILDE, NULL, &glob_result);
-    for (unsigned int i = 0; i < glob_result.gl_pathc; ++i)
-    {
-        std::string filename = glob_result.gl_pathv[i];
-        if (m_absPath)
-            filename = FileUtils::toAbsolutePath(filename);
-        filenames.push_back(filename);
-    }
-    globfree(&glob_result);
-#else
-    WIN32_FIND_DATA ffd;
-    HANDLE handle = FindFirstFile(path.c_str(), &ffd);
-
-    if (INVALID_HANDLE_VALUE == handle)
-        return filenames;
-
-    size_t found = path.find_last_of("/\\");
-    std::string dir = path.substr(0, found);
-
-    if (m_absPath)
-    {
-        TCHAR full_dir[4192] = TEXT("");
-        GetFullPathName(dir.c_str(), 4192, full_dir, NULL);
-        dir = full_dir;
-    }
-
-    do
-    {
-        std::string filename = dir + "\\" + ffd.cFileName;
-        filenames.push_back(filename);
-    } while (FindNextFile(handle, &ffd) != 0);
-
-    FindClose(handle);
-#endif
-
-    return filenames;
-}
-
-
 StringList readSTDIN()
 {
     std::string line;
@@ -268,7 +215,7 @@ bool TIndexKernel::isFileIndexed(const FieldIndexes& indexes,
 void TIndexKernel::createFile()
 {
     if (!m_usestdin)
-        m_files = glob(m_filespec);
+        m_files = FileUtils::glob(m_filespec);
     else
         m_files = readSTDIN();
 

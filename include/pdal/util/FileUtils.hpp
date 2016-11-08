@@ -243,6 +243,14 @@ namespace FileUtils
       \return  Stem of filename.
     */
     PDAL_DLL std::string stem(const std::string& path);
+
+    /**
+      Expand a filespec to a list of files.
+
+      \param filespec  File specification to expand.
+      \return  List of files that correspond to provided file specification.
+    */
+    PDAL_DLL std::vector<std::string> glob(std::string filespec);
 }
 
 } // namespace pdal
