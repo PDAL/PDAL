@@ -32,66 +32,97 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include "PyPipeline.hpp"
-#ifdef PDAL_HAVE_LIBXML2
-#include <pdal/XMLSchema.hpp>
-#endif
+#include <pdal/PipelineExecutor.hpp>
+#include <pdal/PDALUtils.hpp>
 
-
-namespace libpdalpython
+namespace pdal
 {
 
-Pipeline::Pipeline(std::string const& json)
-    : m_executor(json)
-{
-    auto initNumpy = []()
-    {
-#undef NUMPY_IMPORT_ARRAY_RETVAL
-#define NUMPY_IMPORT_ARRAY_RETVAL
-        import_array();
-    };
 
-    initNumpy();
-}
-
-Pipeline::~Pipeline()
+PipelineExecutor::PipelineExecutor(std::string const& json)
+    : m_json(json)
+    , m_executed(false)
+    , m_logLevel(pdal::LogLevel::Error)
 {
 }
 
-void Pipeline::setLogLevel(int level)
+
+std::string PipelineExecutor::getPipeline() const
 {
-    m_executor.setLogLevel(level);
+    if (!m_executed)
+        throw pdal_error("Pipeline has not been executed!");
+
+    std::stringstream strm;
+    pdal::PipelineWriter::writePipeline(m_manager.getStage(), strm);
+    return strm.str();
 }
 
-int Pipeline::getLogLevel() const
+
+std::string PipelineExecutor::getMetadata() const
 {
-    return static_cast<int>(m_executor.getLogLevel());
+    if (!m_executed)
+        throw pdal_error("Pipeline has not been executed!");
+
+    std::stringstream strm;
+    MetadataNode root = m_manager.getMetadata().clone("metadata");
+    pdal::Utils::toJSON(root, strm);
+    return strm.str();
 }
 
-int64_t Pipeline::execute()
-{
 
-    int64_t count = m_executor.execute();
+std::string PipelineExecutor::getSchema() const
+{
+    if (!m_executed)
+        throw pdal_error("Pipeline has not been executed!");
+
+    std::stringstream strm;
+    MetadataNode root = m_manager.pointTable().toMetadata().clone("schema");
+    pdal::Utils::toJSON(root, strm);
+    return strm.str();
+}
+
+
+int64_t PipelineExecutor::execute()
+{
+    std::stringstream strm;
+    strm << m_json;
+    m_manager.readPipeline(strm);
+    point_count_t count = m_manager.execute();
+
+    m_executed = true;
+
     return count;
-
 }
 
-std::vector<PArray> Pipeline::getArrays() const
+
+void PipelineExecutor::setLogStream(std::ostream& strm)
 {
-    std::vector<PArray> output;
 
-    if (!m_executor.executed())
-        throw python_error("call execute() before fetching arrays");
+    LogPtr log = pdal::LogPtr(new pdal::Log("pypipeline", &strm));
+    log->setLevel(m_logLevel);
+    m_manager.setLog(log);
 
-    const pdal::PointViewSet& pvset = m_executor.getManagerConst().views();
-
-    for (auto i: pvset)
-    {
-        PArray array = new pdal::plang::Array;
-        array->update(i);
-        output.push_back(array);
-    }
-    return output;
 }
-} //namespace libpdalpython
+
+
+void PipelineExecutor::setLogLevel(int level)
+{
+    m_logLevel = static_cast<pdal::LogLevel>(level);
+    setLogStream(m_logStream);
+}
+
+
+int PipelineExecutor::getLogLevel() const
+{
+    return static_cast<int>(m_logLevel);
+}
+
+
+std::string PipelineExecutor::getLog() const
+{
+    return m_logStream.str();
+}
+
+
+} //namespace pdal
 

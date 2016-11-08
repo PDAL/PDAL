@@ -145,7 +145,7 @@ DEBUG=False
 if DEBUG:
     extra_compile_args += ['-g','-O0']
 
-sources=['pdal/libpdalpython'+ext,"pdal/PipelineExecutor.cpp", "pdal/PyPipeline.cpp"  ]
+sources=['pdal/libpdalpython'+ext, "pdal/PyPipeline.cpp"  ]
 extensions = [DistutilsExtension("*",
                                    sources,
                                    include_dirs=include_dirs,
