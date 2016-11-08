@@ -70,6 +70,7 @@ public:
     ~Pipeline();
 
     int64_t execute();
+    bool validate();
     inline std::string getPipeline() const
     {
         return m_executor.getPipeline();

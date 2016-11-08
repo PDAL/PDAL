@@ -34,6 +34,9 @@ class Pipeline(object):
     def execute(self):
         return self.p.execute()
 
+    def validate(self):
+        return self.p.validate()
+
     def get_arrays(self):
         return self.p.arrays
     arrays = property(get_arrays)

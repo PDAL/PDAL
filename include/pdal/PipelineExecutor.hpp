@@ -73,6 +73,13 @@ public:
     int64_t execute();
 
     /**
+      Validate the pipeline
+
+      \return does PDAL think the pipeline is valid?
+    */
+    bool validate();
+
+    /**
       \return the transliterated pipeline
     */
     std::string getPipeline() const;

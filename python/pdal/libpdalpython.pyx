@@ -3,6 +3,7 @@
 from libcpp.vector cimport vector
 from libcpp.string cimport string
 from libc.stdint cimport uint32_t, int64_t
+from libcpp cimport bool
 from cpython.version cimport PY_MAJOR_VERSION
 cimport numpy as np
 np.import_array()
@@ -19,6 +20,7 @@ cdef extern from "PyPipeline.hpp" namespace "libpdalpython":
     cdef cppclass Pipeline:
         Pipeline(const char* ) except +
         int64_t execute() except +
+        bool validate() except +
         string getPipeline() except +
         string getMetadata() except +
         string getSchema() except +
@@ -66,8 +68,6 @@ cdef class PyPipeline:
             j = self.thisptr.getSchema().decode('UTF-8')
             return json.loads(j)
 
-
-
     property arrays:
         def __get__(self):
             v = self.thisptr.getArrays()
@@ -87,3 +87,7 @@ cdef class PyPipeline:
             raise Exception("C++ Pipeline object not constructed!")
         return self.thisptr.execute()
 
+    def validate(self):
+        if not self.thisptr:
+            raise Exception("C++ Pipeline object not constructed!")
+        return self.thisptr.validate()

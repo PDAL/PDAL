@@ -6,6 +6,17 @@ DATADIRECTORY = os.environ.get('PDAL_TEST_DIR')
 if not DATADIRECTORY:
     DATADIRECTORY = "../test"
 
+bad_json = """
+{
+  "pipeline": [
+    "nofile.las",
+    {
+        "type": "filters.sort",
+        "dimension": "X"
+    }
+  ]
+}
+"""
 
 class TestPipeline(unittest.TestCase):
 
@@ -35,6 +46,13 @@ class TestPipeline(unittest.TestCase):
         r = pdal.Pipeline(x)
         r.execute()
         self.assertGreater(len(r.pipeline), 200)
+
+    def test_validate(self):
+        """Do we complain with bad pipelines"""
+        x = self.fetch_json('/data/pipeline/bad/pipeline_bad01.xml')
+        r = pdal.Pipeline(bad_json)
+        with self.assertRaises(RuntimeError):
+            r.validate()
 
     @unittest.skipUnless(os.path.exists(os.path.join(DATADIRECTORY, 'data/pipeline/sort.json')),
                          "missing test data")

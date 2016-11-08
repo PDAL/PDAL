@@ -82,6 +82,16 @@ std::string PipelineExecutor::getSchema() const
 }
 
 
+bool PipelineExecutor::validate()
+{
+    std::stringstream strm;
+    strm << m_json;
+    m_manager.readPipeline(strm);
+    m_manager.prepare();
+
+    return true;
+}
+
 int64_t PipelineExecutor::execute()
 {
     std::stringstream strm;

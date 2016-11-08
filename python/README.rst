@@ -28,6 +28,7 @@ sorts it by the ``X`` dimension:
 
     import pdal
     pipeline = pdal.Pipeline(pipeline)
+    pipeline.validate() # check if our JSON and options were good
     pipeline.loglevel = 9 #really noisy
     count = pipeline.execute()
     arrays = pipeline.arrays

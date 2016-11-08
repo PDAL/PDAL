@@ -73,7 +73,11 @@ int64_t Pipeline::execute()
 
     int64_t count = m_executor.execute();
     return count;
+}
 
+bool Pipeline::validate()
+{
+    return m_executor.validate();
 }
 
 std::vector<PArray> Pipeline::getArrays() const
