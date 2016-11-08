@@ -6,4 +6,4 @@ include_directories(${PDAL_INCLUDE_DIRS})
 
 set(CMAKE_CXX_FLAGS "-std=c++11")
 add_executable(tutorial tutorial.cpp)
-target_link_libraries(tutorial ${PDAL_LIBRARIES})
+target_link_libraries(tutorial PRIVATE ${PDAL_LIBRARIES})
