@@ -143,6 +143,7 @@ void BpfWriter::prepared(PointTableRef table)
 
 void BpfWriter::readyFile(const std::string& filename, const SpatialReference&)
 {
+    m_curFilename = filename;
     m_stream.open(filename);
     m_header.m_version = 3;
     m_header.m_numDim = m_dims.size();
@@ -352,6 +353,7 @@ void BpfWriter::doneFile()
     m_header.write(m_stream);
     m_header.writeDimensions(m_stream, m_dims);
     m_stream.close();
+    getMetadata().addList("filename", m_curFilename);
 }
 
 } //namespace pdal

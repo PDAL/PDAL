@@ -198,6 +198,7 @@ void P2gWriter::done(PointTableRef table)
         oss << getName() << ": interp->finish() error";
         throw pdal_error(oss.str());
     }
+    getMetadata().addList("filename", m_filename);
 }
 
 } // namespaces
