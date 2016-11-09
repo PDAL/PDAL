@@ -10,16 +10,18 @@ from the command-line.
 
 ::
 
-    $ pdal translate <input> <output>
+    $ pdal translate [options] input output [filter]
 
 ::
 
-    -i [ --input ] arg    input file name
-    -o [ --output ] arg   output file name
-    -p [ --pipeline ] arg pipeline output
-    -r [ --reader ] arg   reader type
-    -f [ --filter ] arg   filter type
-    -w [ --writer ] arg   writer type
+    --input, -i        Input filename
+    --output, -o       Output filename
+    --filter, -f       Filter type
+    --json             JSON array of filters
+    --pipeline, -p     Pipeline output
+    --metadata, -m     Dump metadata output to the specified file
+    --reader, -r       Reader type
+    --writer, -w       Writer type
 
 The ``--input`` and ``--output`` file names are required options.
 
@@ -27,9 +29,22 @@ The ``--pipeline`` file name is optional. If given, the pipeline constructed
 from the command-line arguments will be written to disk for reuse in the
 :ref:`pipeline_command`.
 
-The ``--filter`` flag is optional. It is used to specify the driver used to
+The ``--json`` flag can use used to specify a JSON array of filters
+as if they were being specified in a :ref:`pipeline_command`.  If a filename
+follows the flag, the file is opened and it is assumed that the file
+contains a valid JSON array of filter specifications.  If the flag value
+is not a filename, the value is taken to be a literal JSON string that is
+the array of filters.  The flag
+can't be used if filters are listed on the command line or explicitly
+with the ``--filter`` option.
+
+The ``--filter`` flag is optional. It is used to specify drivers used to
 filter the data. ``--filter`` accepts multiple arguments if provided, thus
-constructing a multi-stage filtering operation.
+constructing a multi-stage filtering operation.  Filters can't be specified
+using this method and with the ``--json`` flag.
+
+The ``--metadata`` flag accepts a filename for the output of metadata
+associated with the execution of the translate operation.
 
 If no ``--reader`` or ``--writer`` type are given, PDAL will attempt to infer
 the correct drivers from the input and output file name extensions respectively.
@@ -72,5 +87,16 @@ stage-specific parameters as shown.
         --filters.pclblock.json="{\"pipeline\":{\"filters\":[{\"name\":\"VoxelGrid\"}]}}" \
         --filters.ground.approximate=true --filters.ground.extract=true
 
+Example 3:
+--------------------------------------------------------------------------------
 
+This command reads the input text file "myfile" and writes an output LAS file
+"output.las", processing the data through the stats filter.  The metadata
+output (including the output from the stats filter) is written to the file
+"meta.json".
+
+::
+
+    $ pdal translate myfile output.las --metadata=meta.json -r readers.text \
+        --json="[ { \"type\":\"filters.stats\" } ]"
 
