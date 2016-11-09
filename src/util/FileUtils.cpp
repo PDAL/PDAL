@@ -86,7 +86,7 @@ istream *openFile(string const& filename, bool asBinary)
         return &cin;
 
     if (!FileUtils::fileExists(name))
-        return NULL;
+        return nullptr;
 
     ios::openmode mode = ios::in;
     if (asBinary)
@@ -96,7 +96,7 @@ istream *openFile(string const& filename, bool asBinary)
     if (!ifs->good())
     {
         delete ifs;
-        return NULL;
+        return nullptr;
     }
     return ifs;
 }
@@ -115,7 +115,7 @@ ostream *createFile(string const& name, bool asBinary)
     if (!ofs->good())
     {
         delete ofs;
-        return NULL;
+        return nullptr;
     }
     return ofs;
 }

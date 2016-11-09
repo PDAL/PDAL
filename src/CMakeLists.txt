@@ -49,6 +49,7 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/Log.hpp"
   "${PDAL_HEADERS_DIR}/Metadata.hpp"
   "${PDAL_HEADERS_DIR}/Options.hpp"
+  "${PDAL_HEADERS_DIR}/PipelineExecutor.hpp"
   "${PDAL_HEADERS_DIR}/PipelineManager.hpp"
   "${PDAL_HEADERS_DIR}/PipelineReaderJSON.hpp"
   "${PDAL_HEADERS_DIR}/PipelineWriter.hpp"
@@ -89,6 +90,7 @@ set(PDAL_BASE_CPP
   PointTable.cpp
   PointView.cpp
   Polygon.cpp
+  PipelineExecutor.cpp
   PipelineManager.cpp
   PipelineReaderJSON.cpp
   PipelineReaderXML.cpp

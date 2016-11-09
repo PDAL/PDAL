@@ -2,6 +2,8 @@
 
 from libcpp.vector cimport vector
 from libcpp.string cimport string
+from libc.stdint cimport uint32_t, int64_t
+from libcpp cimport bool
 from cpython.version cimport PY_MAJOR_VERSION
 cimport numpy as np
 np.import_array()
@@ -9,16 +11,23 @@ np.import_array()
 from cpython cimport PyObject, Py_INCREF
 from cython.operator cimport dereference as deref, preincrement as inc
 
+
 cdef extern from "pdal/plang/Array.hpp" namespace "pdal::plang":
     cdef cppclass Array:
         void* getPythonArray() except+
 
-cdef extern from "Pipeline.hpp" namespace "libpdalpython":
+cdef extern from "PyPipeline.hpp" namespace "libpdalpython":
     cdef cppclass Pipeline:
         Pipeline(const char* ) except +
-        void execute() except +
-        const char* getJSON()
+        int64_t execute() except +
+        bool validate() except +
+        string getPipeline() except +
+        string getMetadata() except +
+        string getSchema() except +
+        string getLog() except +
         vector[Array*] getArrays() except +
+        int getLogLevel()
+        void setLogLevel(int)
 
 cdef class PyPipeline:
     cdef Pipeline *thisptr      # hold a c++ instance which we're wrapping
@@ -33,25 +42,52 @@ cdef class PyPipeline:
     def __dealloc__(self):
         del self.thisptr
 
-    property json:
+    property pipeline:
         def __get__(self):
-            return self.thisptr.getJSON().decode('UTF-8')
+            return self.thisptr.getPipeline().decode('UTF-8')
 
-    def arrays(self):
-        v = self.thisptr.getArrays()
-        output = []
-        cdef vector[Array*].iterator it = v.begin()
-        cdef Array* a
-        while it != v.end():
-            ptr = deref(it)
-            a = ptr#.get()
-            o = a.getPythonArray()
-            output.append(<object>o)
-            inc(it)
-        return output
+    property metadata:
+        def __get__(self):
+            return self.thisptr.getMetadata().decode('UTF-8')
+
+    property loglevel:
+        def __get__(self):
+            return self.thisptr.getLogLevel()
+        def __set__(self, v):
+            self.thisptr.setLogLevel(v)
+
+    property log:
+        def __get__(self):
+
+            return self.thisptr.getLog().decode('UTF-8')
+
+    property schema:
+        def __get__(self):
+            import json
+
+            j = self.thisptr.getSchema().decode('UTF-8')
+            return json.loads(j)
+
+    property arrays:
+        def __get__(self):
+            v = self.thisptr.getArrays()
+            output = []
+            cdef vector[Array*].iterator it = v.begin()
+            cdef Array* a
+            while it != v.end():
+                ptr = deref(it)
+                a = ptr#.get()
+                o = a.getPythonArray()
+                output.append(<object>o)
+                inc(it)
+            return output
 
     def execute(self):
         if not self.thisptr:
             raise Exception("C++ Pipeline object not constructed!")
-        self.thisptr.execute()
+        return self.thisptr.execute()
 
+    def validate(self):
+        if not self.thisptr:
+            raise Exception("C++ Pipeline object not constructed!")
+        return self.thisptr.validate()
