@@ -74,6 +74,7 @@ private:
     virtual void addArgs(ProgramArgs& args);
     std::vector<double> morphOpen(PointViewPtr view, float radius);
     std::vector<PointId> processGround(PointViewPtr view);
+    std::vector<PointId> processGroundApprox(PointViewPtr view);
     virtual PointViewSet run(PointViewPtr view);
 
     PMFFilter& operator=(const PMFFilter&); // not implemented

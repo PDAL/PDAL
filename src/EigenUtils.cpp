@@ -111,26 +111,14 @@ Eigen::MatrixXd createDSM(PointView& view, int rows, int cols, double cell_size,
     MatrixXd ZImin(rows, cols);
     ZImin.setConstant(std::numeric_limits<double>::quiet_NaN());
 
-    int maxrow = bounds.miny + rows * cell_size;
-
-    auto getColIndex = [&bounds, &cell_size](double x)
-    {
-        return static_cast<int>(floor((x - bounds.minx) / cell_size));
-    };
-
-    auto getRowIndex = [&maxrow, &cell_size](double y)
-    {
-        return static_cast<int>(floor((maxrow - y) / cell_size));
-    };
-
     for (PointId i = 0; i < view.size(); ++i)
     {
         double x = view.getFieldAs<double>(Id::X, i);
         double y = view.getFieldAs<double>(Id::Y, i);
         double z = view.getFieldAs<double>(Id::Z, i);
 
-        int c = Utils::clamp(getColIndex(x), 0, cols-1);
-        int r = Utils::clamp(getRowIndex(y), 0, rows-1);
+        int c = Utils::clamp(static_cast<int>(floor(x-bounds.minx)/cell_size), 0, cols-1);
+        int r = Utils::clamp(static_cast<int>(floor(y-bounds.miny)/cell_size), 0, rows-1);
 
         if (z < ZImin(r, c) || std::isnan(ZImin(r, c)))
             ZImin(r, c) = z;
@@ -148,17 +136,17 @@ Eigen::MatrixXd matrixClose(Eigen::MatrixXd data, int radius)
     int nrows = data2.rows();
     int ncols = data2.cols();
 
-    // first max, then min of max
     MatrixXd minZ = MatrixXd::Constant(nrows, ncols,
                                        std::numeric_limits<double>::max());
     MatrixXd maxZ = MatrixXd::Constant(nrows, ncols,
                                        std::numeric_limits<double>::lowest());
     for (auto c = 0; c < ncols; ++c)
     {
+        int cs = Utils::clamp(c-radius, 0, ncols-1);
+        int ce = Utils::clamp(c+radius, 0, ncols-1);
+      
         for (auto r = 0; r < nrows; ++r)
         {
-            int cs = Utils::clamp(c-radius, 0, ncols-1);
-            int ce = Utils::clamp(c+radius, 0, ncols-1);
             int rs = Utils::clamp(r-radius, 0, nrows-1);
             int re = Utils::clamp(r+radius, 0, nrows-1);
 
@@ -176,10 +164,11 @@ Eigen::MatrixXd matrixClose(Eigen::MatrixXd data, int radius)
     }
     for (auto c = 0; c < ncols; ++c)
     {
+        int cs = Utils::clamp(c-radius, 0, ncols-1);
+        int ce = Utils::clamp(c+radius, 0, ncols-1);
+      
         for (auto r = 0; r < nrows; ++r)
         {
-            int cs = Utils::clamp(c-radius, 0, ncols-1);
-            int ce = Utils::clamp(c+radius, 0, ncols-1);
             int rs = Utils::clamp(r-radius, 0, nrows-1);
             int re = Utils::clamp(r+radius, 0, nrows-1);
 
@@ -208,17 +197,17 @@ Eigen::MatrixXd matrixOpen(Eigen::MatrixXd data, int radius)
     int nrows = data2.rows();
     int ncols = data2.cols();
 
-    // first min, then max of min
     MatrixXd minZ = MatrixXd::Constant(nrows, ncols,
                                        std::numeric_limits<double>::max());
     MatrixXd maxZ = MatrixXd::Constant(nrows, ncols,
                                        std::numeric_limits<double>::lowest());
     for (auto c = 0; c < ncols; ++c)
     {
+        int cs = Utils::clamp(c-radius, 0, ncols-1);
+        int ce = Utils::clamp(c+radius, 0, ncols-1);
+      
         for (auto r = 0; r < nrows; ++r)
         {
-            int cs = Utils::clamp(c-radius, 0, ncols-1);
-            int ce = Utils::clamp(c+radius, 0, ncols-1);
             int rs = Utils::clamp(r-radius, 0, nrows-1);
             int re = Utils::clamp(r+radius, 0, nrows-1);
 
@@ -236,10 +225,11 @@ Eigen::MatrixXd matrixOpen(Eigen::MatrixXd data, int radius)
     }
     for (auto c = 0; c < ncols; ++c)
     {
+        int cs = Utils::clamp(c-radius, 0, ncols-1);
+        int ce = Utils::clamp(c+radius, 0, ncols-1);
+      
         for (auto r = 0; r < nrows; ++r)
         {
-            int cs = Utils::clamp(c-radius, 0, ncols-1);
-            int ce = Utils::clamp(c+radius, 0, ncols-1);
             int rs = Utils::clamp(r-radius, 0, nrows-1);
             int re = Utils::clamp(r+radius, 0, nrows-1);
 
