@@ -50,7 +50,9 @@ ILeStream& operator>>(ILeStream& in, VariableLengthRecord& v)
     in >> v.m_recordId >> dataLen;
     in.get(v.m_description, 32);
     v.m_data.resize(dataLen);
-    in.get(v.m_data);
+    if (v.m_data.size() > 0) {
+        in.get(v.m_data);
+    }
 
     return in;
 }
@@ -77,7 +79,9 @@ ILeStream& operator>>(ILeStream& in, ExtVariableLengthRecord& v)
     in >> v.m_recordId >> dataLen;
     in.get(v.m_description, 32);
     v.m_data.resize(dataLen);
-    in.get(v.m_data);
+    if (v.m_data.size() > 0) {
+        in.get(v.m_data);
+    }
 
     return in;
 }
