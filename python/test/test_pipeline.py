@@ -6,7 +6,7 @@ DATADIRECTORY = os.environ.get('PDAL_TEST_DIR')
 if not DATADIRECTORY:
     DATADIRECTORY = "../test"
 
-bad_json = """
+bad_json = u"""
 {
   "pipeline": [
     "nofile.las",
@@ -49,7 +49,6 @@ class TestPipeline(unittest.TestCase):
 
     def test_validate(self):
         """Do we complain with bad pipelines"""
-        x = self.fetch_json('/data/pipeline/bad/pipeline_bad01.xml')
         r = pdal.Pipeline(bad_json)
         with self.assertRaises(RuntimeError):
             r.validate()
