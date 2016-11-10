@@ -59,7 +59,8 @@ std::string StatsFilter::getName() const { return s_info.name; }
 namespace stats
 {
 
-void Summary::extractMetadata(MetadataNode &m) const
+
+void Summary::extractMetadata(MetadataNode &m)
 {
     uint32_t cnt = static_cast<uint32_t>(count());
     m.add("count", cnt, "count");
@@ -84,16 +85,45 @@ void Summary::extractMetadata(MetadataNode &m) const
         m.add("variance", v, "variance");
     m.add("name", m_name, "name");
     if (m_enumerate == Enumerate)
+    {
         for (auto& v : m_values)
             m.addList("values", v.first);
+    }
+    else if (m_enumerate == Global)
+    {
+        computeGlobalStats();
+        m.add("median", m_median);
+        m.add("mad", m_mad);
+    }
     else if (m_enumerate == Count)
+    {
         for (auto& v : m_values)
         {
             std::string val =
                 std::to_string(v.first) + "/" + std::to_string(v.second);
             m.addList("counts", val);
         }
+    }
 }
+
+void Summary::computeGlobalStats()
+{
+    auto compute_median = [](std::vector<double> vals)
+    {
+        std::nth_element(vals.begin(), vals.begin()+vals.size()/2, vals.end());
+
+        return *(vals.begin()+vals.size()/2);
+    };
+
+    // TODO add quantiles
+    m_median = compute_median(m_data);
+    std::transform(m_data.begin(), m_data.end(), m_data.begin(),
+       [this](double v) { return std::fabs(v - this->m_median); });
+    m_mad = compute_median(m_data);
+
+
+}
+
 
 } // namespace stats
 
@@ -134,6 +164,8 @@ void StatsFilter::addArgs(ProgramArgs& args)
         m_dimNames);
     args.add("enumerate", "Dimensions whose values should be enumerated",
         m_enums);
+    args.add("global", "Dimensions to compute global stats (median, mad, mode)",
+        m_global);
     args.add("count", "Dimensions whose values should be counted", m_counts);
 }
 
@@ -176,7 +208,7 @@ void StatsFilter::prepared(PointTableRef table)
             dims[s] = Summary::Enumerate;
     }
 
-    // Set the enumeration flag for those dimensions specified.
+    // Set the count flag for those dimensions specified.
     for (auto& s : m_counts)
     {
         if (dims.find(s) == dims.end())
@@ -186,6 +218,15 @@ void StatsFilter::prepared(PointTableRef table)
             dims[s] = Summary::Count;
     }
 
+    // Set the global flag for those dimensions specified.
+    for (auto& s : m_global)
+    {
+        if (dims.find(s) == dims.end())
+            getWarn() << "Dimension '" << s << "' listed in --global option "
+                "does not exist.  Ignoring." << std::endl;
+        else
+            dims[s] = Summary::Global;
+    }
     // Create the summary objects.
     for (auto& dv : dims)
         m_stats.insert(std::make_pair(layout->findDim(dv.first),
@@ -200,7 +241,7 @@ void StatsFilter::extractMetadata(PointTableRef table)
     bool bNoPoints(true);
     for (auto di = m_stats.begin(); di != m_stats.end(); ++di)
     {
-        const Summary& s = di->second;
+        Summary& s = di->second;
 
         bNoPoints = (bool)s.count();
 
