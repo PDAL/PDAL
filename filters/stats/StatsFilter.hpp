@@ -52,10 +52,12 @@ public:
     {
         NoEnum,
         Enumerate,
-        Count
+        Count,
+        Global
     };
 
 typedef std::map<double, point_count_t> EnumMap;
+typedef std::vector<double> DataVector;
 
 public:
     Summary(std::string name, EnumType enumerate) :
@@ -76,6 +78,10 @@ public:
         { return std::sqrt(double(m_cnt)) * M3 / std::pow(M2, 1.5); }
     double kurtosis() const
         { return double(m_cnt)*M4 / (M2*M2) - 3.0; }
+    double median() const
+        { return m_median; }
+    double mad() const
+        { return m_mad; }
     point_count_t count() const
         { return m_cnt; }
     std::string name() const
@@ -83,7 +89,8 @@ public:
     const EnumMap& values() const
         { return m_values; }
 
-    void extractMetadata(MetadataNode &m) const;
+    void extractMetadata(MetadataNode &m);
+    void computeGlobalStats();
 
     void reset()
     {
@@ -91,6 +98,8 @@ public:
         m_min = (std::numeric_limits<double>::max)();
         m_cnt = 0;
         m_avg = 0.0;
+        m_median = 0.0;
+        m_mad = 0.0;
         M1 = M2 = M3 = M4 = 0.0;
     }
 
@@ -107,6 +116,12 @@ public:
         m_avg += (value - m_avg) / m_cnt;
         if (m_enumerate != NoEnum)
             m_values[value]++;
+        if (m_enumerate == Global)
+        {
+            if (m_data.capacity() - m_data.size() < 10000)
+                m_data.reserve(m_data.capacity() + m_cnt);
+            m_data.push_back(value);
+        }
 
         // stolen from http://www.johndcook.com/blog/skewness_kurtosis/
 
@@ -128,7 +143,10 @@ private:
     double m_max;
     double m_min;
     double m_avg;
+    double m_mad;
+    double m_median;
     EnumMap m_values;
+    DataVector m_data;
     point_count_t m_cnt;
     double M1, M2, M3, M4;
 };
@@ -163,6 +181,7 @@ private:
     StringList m_dimNames;
     StringList m_enums;
     StringList m_counts;
+    StringList m_global;
     std::map<Dimension::Id, stats::Summary> m_stats;
 };
 

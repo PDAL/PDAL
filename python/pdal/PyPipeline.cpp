@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2016, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -32,53 +32,70 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include "PyPipeline.hpp"
+#ifdef PDAL_HAVE_LIBXML2
+#include <pdal/XMLSchema.hpp>
+#endif
 
-#include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
 
-#include <memory>
-
-extern "C" int32_t PMFFilter_ExitFunc();
-extern "C" PF_ExitFunc PMFFilter_InitPlugin();
-
-namespace pdal
+namespace libpdalpython
 {
 
-class Options;
-class PointLayout;
-class PointTable;
-class PointView;
-
-class PDAL_DLL PMFFilter : public Filter
+Pipeline::Pipeline(std::string const& json)
+    : m_executor(json)
 {
-public:
-    PMFFilter() : Filter()
-    {}
+    auto initNumpy = []()
+    {
+#undef NUMPY_IMPORT_ARRAY_RETVAL
+#define NUMPY_IMPORT_ARRAY_RETVAL
+        import_array();
+    };
 
-    static void * create();
-    static int32_t destroy(void *);
-    std::string getName() const;
+    initNumpy();
+}
 
-private:
-    double m_maxWindowSize;
-    double m_slope;
-    double m_maxDistance;
-    double m_initialDistance;
-    double m_cellSize;
-    bool m_classify;
-    bool m_extract;
-    bool m_approximate;
+Pipeline::~Pipeline()
+{
+}
 
-    virtual void addDimensions(PointLayoutPtr layout);
-    virtual void addArgs(ProgramArgs& args);
-    std::vector<double> morphOpen(PointViewPtr view, float radius);
-    std::vector<PointId> processGround(PointViewPtr view);
-    std::vector<PointId> processGroundApprox(PointViewPtr view);
-    virtual PointViewSet run(PointViewPtr view);
+void Pipeline::setLogLevel(int level)
+{
+    m_executor.setLogLevel(level);
+}
 
-    PMFFilter& operator=(const PMFFilter&); // not implemented
-    PMFFilter(const PMFFilter&); // not implemented
-};
+int Pipeline::getLogLevel() const
+{
+    return static_cast<int>(m_executor.getLogLevel());
+}
 
-} // namespace pdal
+int64_t Pipeline::execute()
+{
+
+    int64_t count = m_executor.execute();
+    return count;
+}
+
+bool Pipeline::validate()
+{
+    return m_executor.validate();
+}
+
+std::vector<PArray> Pipeline::getArrays() const
+{
+    std::vector<PArray> output;
+
+    if (!m_executor.executed())
+        throw python_error("call execute() before fetching arrays");
+
+    const pdal::PointViewSet& pvset = m_executor.getManagerConst().views();
+
+    for (auto i: pvset)
+    {
+        PArray array = new pdal::plang::Array;
+        array->update(i);
+        output.push_back(array);
+    }
+    return output;
+}
+} //namespace libpdalpython
+

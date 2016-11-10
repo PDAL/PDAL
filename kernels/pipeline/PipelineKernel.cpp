@@ -92,6 +92,16 @@ int PipelineKernel::execute()
         m_progressFd = Utils::openProgress(m_progressFile);
 
     m_manager.readPipeline(m_inputFile);
+
+    if (m_validate)
+    {
+        // Validate the options of the pipeline we were
+        // given, and once we succeed, we're done
+        m_manager.prepare();
+        Utils::closeProgress(m_progressFd);
+        return 0;
+    }
+
     m_manager.execute();
 
     if (m_pipelineFile.size() > 0)

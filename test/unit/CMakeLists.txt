@@ -137,6 +137,7 @@ if (WITH_APPS)
     endif()
     PDAL_ADD_TEST(pcpipeline_test_json FILES apps/pcpipelineTestJSON.cpp)
     PDAL_ADD_TEST(random_test FILES apps/RandomTest.cpp)
+    PDAL_ADD_TEST(translate_test FILES apps/TranslateTest.cpp)
 endif(WITH_APPS)
 
 if(LIBXML2_FOUND)

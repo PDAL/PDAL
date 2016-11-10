@@ -109,9 +109,18 @@ Environment::Environment()
         import_array();
     };
 
-    PyImport_AppendInittab(const_cast<char*>("redirector"), redirector_init);
+    if (!Py_IsInitialized())
+    {
+        PyImport_AppendInittab(const_cast<char*>("redirector"), redirector_init);
+        Py_Initialize();
+    } else
+    {
+        m_redirector.init();
+        PyObject* added  = PyImport_AddModule("redirector");
+        if (!added)
+            throw pdal_error("unable to add redirector module!");
+    }
 
-    Py_Initialize();
     initNumpy();
     PyImport_ImportModule("redirector");
 }
