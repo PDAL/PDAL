@@ -43,6 +43,10 @@
 #include <sstream>
 #include <string>
 
+#ifdef _MSC_VER
+using namespace std::string_literals;
+#endif
+
 using namespace pdal;
 
 static int runTranslate(std::string const& cmdline, std::string& output)
