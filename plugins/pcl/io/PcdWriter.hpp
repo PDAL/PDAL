@@ -63,6 +63,7 @@ public:
 private:
     virtual void addArgs(ProgramArgs& args);
     virtual void write(const PointViewPtr view);
+    virtual void done(PointTableRef table);
 
     template<typename CloudT>
     inline void writeView(const PointViewPtr view); // implemented in header

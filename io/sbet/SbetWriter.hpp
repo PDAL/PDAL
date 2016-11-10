@@ -63,6 +63,7 @@ private:
     virtual void addArgs(ProgramArgs& args);
     virtual void ready(PointTableRef table);
     virtual void write(const PointViewPtr view);
+    virtual void done(PointTableRef table);
 };
 
 } // namespace pdal

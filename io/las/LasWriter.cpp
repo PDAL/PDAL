@@ -879,7 +879,7 @@ void LasWriter::doneFile()
 {
     finishOutput();
     Utils::writeProgress(m_progressFd, "DONEFILE", m_curFilename);
-    m_curFilename.clear();
+    getMetadata().addList("filename", m_curFilename);
     delete m_ostream;
     m_ostream = NULL;
 }

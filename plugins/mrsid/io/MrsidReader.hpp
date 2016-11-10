@@ -75,7 +75,9 @@ public:
 
 protected:
     virtual void addDimensions(PointLayoutPtr layout);
+
 private:
+    std::string m_filename;
     LizardTech::MG4PointReader *m_PS;
     LizardTech::PointIterator *m_iter;
     LizardTech::PointInfo m_pointInfo;
@@ -87,6 +89,7 @@ private:
     void LayoutToPointInfo(const PointLayout &layout,
         LizardTech::PointInfo &pointInfo) const;
     virtual QuickInfo inspect();
+    virtual void addArgs(ProgramArgs& args);
     virtual void ready(PointTableRef table)
         { ready(table, m_metadata); }
     virtual void ready(PointTableRef table, MetadataNode& m);

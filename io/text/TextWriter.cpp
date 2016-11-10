@@ -245,6 +245,7 @@ void TextWriter::write(const PointViewPtr view)
 void TextWriter::done(PointTableRef /*table*/)
 {
     writeFooter();
+    getMetadata().addList("filename", m_filename);
 }
 
 } // namespace pdal

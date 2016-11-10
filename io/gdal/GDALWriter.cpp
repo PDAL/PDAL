@@ -185,6 +185,8 @@ void GDALWriter::done(PointTableRef table)
     buf = m_grid->data("stdev");
     if (buf)
         raster.writeBand(buf, bandNum++, "stdev");
+
+    getMetadata().addList("filename", m_filename);
 }
 
 } // namespace pdal
