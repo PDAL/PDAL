@@ -42,6 +42,7 @@
 #include <chipper/ChipperFilter.hpp>
 #include <colorization/ColorizationFilter.hpp>
 #include <colorinterp/ColorinterpFilter.hpp>
+#include <computerange/ComputeRangeFilter.hpp>
 #include <crop/CropFilter.hpp>
 #include <decimation/DecimationFilter.hpp>
 #include <divider/DividerFilter.hpp>
@@ -235,6 +236,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(ChipperFilter_InitPlugin);
     PluginManager::initializePlugin(ColorizationFilter_InitPlugin);
     PluginManager::initializePlugin(ColorinterpFilter_InitPlugin);
+    PluginManager::initializePlugin(ComputeRangeFilter_InitPlugin);
     PluginManager::initializePlugin(CropFilter_InitPlugin);
     PluginManager::initializePlugin(DecimationFilter_InitPlugin);
     PluginManager::initializePlugin(DividerFilter_InitPlugin);
