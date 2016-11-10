@@ -69,6 +69,7 @@ private:
     bool m_compression;
     std::string m_extraDataSpec;
     StringList m_bundledFilesSpec;
+    std::string m_curFilename;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();

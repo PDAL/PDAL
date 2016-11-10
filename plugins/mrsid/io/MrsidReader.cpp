@@ -56,7 +56,12 @@ MrsidReader::MrsidReader()
     : pdal::Reader()
     , m_PS(0), m_iter(NULL)
     , m_initialized(false)
+{}
+
+
+void MrsidReader::addArgs(ProgramArgs& args)
 {
+    args.add("filename", "Output filename", m_filename).setPositional();
 }
 
 
@@ -67,6 +72,7 @@ void MrsidReader::done(PointTableRef)
     m_initialized = false;
     m_PS = 0;
     m_iter = 0;
+    getMetadata().addList("filename", m_filename);
 }
 
 pdal::Dimension::Type getPDALType(LizardTech::DataType t)

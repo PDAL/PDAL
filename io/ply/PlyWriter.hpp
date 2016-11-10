@@ -41,10 +41,8 @@
 extern "C" int32_t PlyWriter_ExitFunc();
 extern "C" PF_ExitFunc PlyWriter_InitPlugin();
 
-
 namespace pdal
 {
-
 
 class PDAL_DLL PlyWriter : public Writer
 {
@@ -62,12 +60,12 @@ private:
     virtual void write(const PointViewPtr data);
     virtual void done(PointTableRef table);
 
+    std::string m_filename;
     p_ply m_ply;
     PointViewPtr m_pointCollector;
     std::string m_storageModeSpec;
     e_ply_storage_mode m_storageMode;
 
 };
-
 
 }

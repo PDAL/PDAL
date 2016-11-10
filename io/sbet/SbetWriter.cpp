@@ -77,4 +77,10 @@ void SbetWriter::write(const PointViewPtr view)
     }
 }
 
+
+void SbetWriter::done(PointTableRef table)
+{
+    getMetadata().addList("filename", m_filename);
+}
+
 } // namespace pdal

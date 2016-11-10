@@ -59,18 +59,15 @@ public:
     /**
       Construct a writer.
     */
-    Writer() : m_hashPos(std::string::npos)
+    Writer()
         {}
 
 protected:
-    std::string m_filename;  ///< Output filename
-    std::string::size_type m_hashPos;
-
     /**
       Locate template placeholder ('#') and validate filename with respect
       to placeholder.
     */
-    void handleFilenameTemplate();
+    std::string::size_type handleFilenameTemplate(const std::string& filename);
 
 private:
     virtual PointViewSet run(PointViewPtr view)

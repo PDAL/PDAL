@@ -108,7 +108,8 @@ private:
         return m_bounds;
     }
 
-    std::string generateFilename(const std::string& primName) const;
+    std::string generateFilename(const std::string& primName,
+        std::string::size_type hashPos) const;
     void calculateGridSizes();
     double determineSlopeFD(Eigen::MatrixXd* data, int row, int col,
                             double postSpacing, double valueToIgnore);
@@ -146,6 +147,7 @@ private:
     GDALDataset* createFloat32GTIFF(std::string filename, int cols, int rows);
     void stretchData(float *data);
 
+    std::string m_filename;
     uint64_t m_pointCount;
     uint32_t m_GRID_SIZE_X;
     uint32_t m_GRID_SIZE_Y;
