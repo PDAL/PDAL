@@ -1,7 +1,9 @@
 #include "Pipeline.hpp"
+#include "PipelineManager.cpp"
 #ifdef PDAL_HAVE_LIBXML2
 #include <pdal/XMLSchema.hpp>
 #endif
+
 
 namespace libpdaljava
 {
@@ -25,11 +27,13 @@ void Pipeline::execute()
     strm.str("");
     pdal::PipelineWriter::writePipeline(m_manager.getStage(), strm);
     m_json = strm.str();
+
+    std::cout << m_manager.views().size() << std::endl;
 }
 
-pdal::PointViewSet Pipeline::getPointViews() const
+pdal::PointViewSet Pipeline::getArrays() const
 {
-    return m_manager.views();
+    pdal::PointViewSet ps = m_manager.views();
 }
 }
 //namespace libpdaljava

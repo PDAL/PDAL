@@ -1,5 +1,9 @@
 package com.azavea.pdal
 
-trait PointViewIterator extends Iterator[PointView] {
+class PointViewIterator extends Iterator[PointView] with Native {
   @native def layout: PointLayout
+
+  override def hasNext: Boolean = ???
+
+  override def next(): PointView = ???
 }

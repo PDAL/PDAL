@@ -4,6 +4,7 @@
 #include "accessors.h"
 
 using libpdaljava::Pipeline;
+using pdal::PointViewSet;
 
 JNIEXPORT void JNICALL Java_com_azavea_pdal_Pipeline_initialise
   (JNIEnv *env, jobject obj)
@@ -24,6 +25,15 @@ JNIEXPORT void JNICALL Java_com_azavea_pdal_Pipeline_execute
 {
     Pipeline *p = getHandle<Pipeline>(env, obj);
     p->execute();
+}
+
+JNIEXPORT jobject JNICALL Java_com_azavea_pdal_Pipeline_pointViews__
+  (JNIEnv *env, jobject obj)
+{
+    Pipeline *p = getHandle<Pipeline>(env, obj);
+    PointViewSet ps = p->getPointViews();
+
+
 }
 
 JNIEXPORT jint JNICALL Java_com_azavea_pdal_Pipeline_test

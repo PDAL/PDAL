@@ -1,3 +1,3 @@
 package com.azavea.pdal
 
-trait PointLayout
+trait PointLayout extends Native

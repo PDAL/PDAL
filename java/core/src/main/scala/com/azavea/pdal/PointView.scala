@@ -1,6 +1,9 @@
 package com.azavea.pdal
 
-trait PointView {
+import ch.jodersky.jni.nativeLoader
+
+@nativeLoader("pdaljni0")
+class PointView extends Native {
   // This grabs the points into some
   // class that contains members which represent
   // the data contained in the layout.

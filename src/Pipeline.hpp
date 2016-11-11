@@ -25,7 +25,7 @@ public:
     void execute();
     inline const char* getJSON() const { return m_json.c_str(); }
     inline const char* getSchema() const { return m_schema.c_str(); }
-    pdal::PointViewSet getPointViews() const;
+    pdal::PointViewSet getArrays() const;
     inline int test() const { return 22; }
 
 private:

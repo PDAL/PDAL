@@ -13,7 +13,7 @@ object Main {
     val p = Pipeline(string)
     println(s"p.ptr: ${p.ptr}")
     val result = p.test()
-    println(result)
+    println(s"java: $result")
     p.execute()
     p.dispose()
     println(s"p.ptr: ${p.ptr}")
