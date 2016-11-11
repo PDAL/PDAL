@@ -19,6 +19,8 @@ set PDAL_DIR=.
 
 :: Where is your OSGeo4W installed (recommended basic way to satisfy dependent libs)
 set OSGEO4W_DIR=C:\OSGeo4W64
+set PATH=%PATH%;%OSGEO4W_DIR%\bin;C:\projects\pdal\build\src\util
+
 set BOOST=%OSGEO4W_DIR%
 
 :: Where is boost installed?
@@ -70,7 +72,10 @@ REM set PYTHON_LIBRARY=%OSGEO4W_DIR\apps\python27\libs\python27.lib
 
 
 if EXIST CMakeCache.txt del CMakeCache.txt
+
+rmdir /s /q build
 del /S /Q CMakeFiles
+mkdir build
 cd %PDAL_DIR%/build
 cmake -G %GENERATOR% ^
 	-DBOOST_INCLUDEDIR=%BOOST%\include\boost-1_56  -DCMAKE_INSTALL_PREFIX=C:\dev\PDAL\built ^
@@ -91,7 +96,7 @@ cmake -G %GENERATOR% ^
     -DCMAKE_BUILD_TYPE=%BUILD_TYPE% ^
     -DCMAKE_VERBOSE_MAKEFILE=OFF ^
 	-DBUILD_PLUGIN_SQLITE=ON ^
-	-DBUILD_PLUGIN_PCL=ON ^
+	-DBUILD_PLUGIN_PCL=OFF ^
     ..
 cd ..
 
