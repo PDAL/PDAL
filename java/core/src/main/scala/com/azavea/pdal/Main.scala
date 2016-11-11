@@ -1,6 +1,8 @@
 package com.azavea.pdal
 
 object Main {
+  val iter: Iterator[Int] = Set(2).toIterator
+
   def getJson(resource: String): String = {
     val source = scala.io.Source.fromFile(resource)
     val json = source.getLines.mkString(" ")
@@ -16,6 +18,8 @@ object Main {
     val result = p.test
     println(s"java: $result")
     p.execute
+    val pv = p.pointViews()
+    println(s"pv.ptr: ${pv.ptr}")
     println(s"p.getLogLevel: ${p.getLogLevel}")
     println(s"p.getMetadata: ${p.getMetadata}")
     println(s"p.getSchema: ${p.getSchema}")

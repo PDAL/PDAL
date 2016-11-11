@@ -15,6 +15,22 @@ extern "C" {
 JNIEXPORT jobject JNICALL Java_com_azavea_pdal_PointViewIterator_layout
   (JNIEnv *, jobject);
 
+/*
+ * Class:     com_azavea_pdal_PointViewIterator
+ * Method:    hasNext
+ * Signature: ()Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_azavea_pdal_PointViewIterator_hasNext
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     com_azavea_pdal_PointViewIterator
+ * Method:    next
+ * Signature: ()Lcom/azavea/pdal/PointView;
+ */
+JNIEXPORT jobject JNICALL Java_com_azavea_pdal_PointViewIterator_next
+  (JNIEnv *, jobject);
+
 #ifdef __cplusplus
 }
 #endif

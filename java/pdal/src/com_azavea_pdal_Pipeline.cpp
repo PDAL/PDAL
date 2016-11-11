@@ -5,6 +5,8 @@
 
 using libpdaljava::Pipeline;
 using pdal::PointViewSet;
+using pdal::PointView;
+using pdal::PointViewPtr;
 
 JNIEXPORT void JNICALL Java_com_azavea_pdal_Pipeline_initialise
   (JNIEnv *env, jobject obj)
@@ -73,7 +75,40 @@ JNIEXPORT jobject JNICALL Java_com_azavea_pdal_Pipeline_pointViews__
   (JNIEnv *env, jobject obj)
 {
     Pipeline *p = getHandle<Pipeline>(env, obj);
-    PointViewSet ps = p->getPointViews();
+    PointViewSet pvset = p->getPointViews();
+
+    jclass pviClass = env->FindClass("com/azavea/pdal/PointViewIterator");
+    jmethodID pviCtor = env->GetMethodID(pviClass, "<init>", "()V");
+    jobject pvi = env->NewObject(pviClass, pviCtor);
+
+    //std::set<PointViewPtr>::iterator itb = pvset.begin();
+    //std::set<PointViewPtr>::iterator ite = pvset.end();
+
+    setHandle(env, pvi, &pvset);
+
+    return pvi;
+
+    /*for (auto i: pvset)
+    {
+        jclass featClass = env->FindClass("com/azavea/pdal/PointView");
+        jmethodID ctor = env->GetMethodID(featClass, "<init>", "()V");
+        jobject pv = env->NewObject(featClass, ctor);
+
+
+        PointViewPtr psv = i;
+        long psvl = (long) &*psv; // &*psv; // pdal::PointView * // &* converts shared pointer to pointer
+
+        std::cout << psvl << std::endl;
+
+        setHandle(env, pv, &*psv);
+
+        return pv;
+
+        //PArray array = new pdal::plang::Array;
+        //array->update(i);
+        //output.push_back(array);
+    }*/
+
 }
 
 JNIEXPORT jint JNICALL Java_com_azavea_pdal_Pipeline_test
