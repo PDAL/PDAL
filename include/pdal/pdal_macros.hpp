@@ -107,16 +107,3 @@ struct PluginInfo
         return 0; \
     }
 
-#ifdef _WIN32
-inline long lround(double d)
-{
-    long l;
-
-    if (d < 0)
-        l = (long)ceil(d - .5);
-    else
-        l = (long)floor(d + .5);
-    return l;
-}
-#endif
-
