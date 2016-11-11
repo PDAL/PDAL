@@ -63,7 +63,7 @@ int argCount(PyObject *function)
     PyObject *inArgs = PyTuple_New(1);
     PyTuple_SetItem(inArgs, 0, function);
     PyObject *outArgs = PyObject_CallObject(getargFunc, inArgs);
-    PyObject *arglist = PyTuple_GetItem(outArgs, 0);
+    PyObject *arglist = PyTuple_GetItem(outArgs, (Py_ssize_t)0);
     return PyList_Size(arglist);
 }
 
