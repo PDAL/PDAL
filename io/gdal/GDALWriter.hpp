@@ -63,6 +63,7 @@ private:
     virtual void write(const PointViewPtr data);
     virtual void done(PointTableRef table);
 
+    std::string m_filename;
     std::string m_drivername;
     BOX2D m_bounds;
     double m_edgeLength;

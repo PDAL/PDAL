@@ -44,28 +44,29 @@
 namespace pdal
 {
 
-void Writer::handleFilenameTemplate()
+std::string::size_type Writer::handleFilenameTemplate(
+    const std::string& filename)
 {
-    std::string::size_type suffixPos = m_filename.find_last_of('.');
-    m_hashPos = m_filename.find_first_of('#');
-    if (m_hashPos != std::string::npos)
+    std::string::size_type suffixPos = filename.find_last_of('.');
+    std::string::size_type hashPos = filename.find_first_of('#');
+    if (hashPos == std::string::npos)
+        return hashPos;
+
+    if (hashPos > suffixPos)
     {
-        if (m_hashPos > suffixPos)
-        {
-            std::ostringstream oss;
-            oss << getName() << ": Filename template placeholder ('#') is not "
-                "allowed in filename suffix.";
-            throw pdal_error(oss.str());
-        }
-        if (m_filename.find_first_of('#', m_hashPos + 1) !=
-                std::string::npos)
-        {
-            std::ostringstream oss;
-            oss << getName() << ": Filename specification can only contain "
-                "a single '#' template placeholder.";
-            throw pdal_error(oss.str());
-        }
+        std::ostringstream oss;
+        oss << getName() << ": Filename template placeholder ('#') is not "
+            "allowed in filename suffix.";
+        throw pdal_error(oss.str());
     }
+    if (filename.find_first_of('#', hashPos + 1) != std::string::npos)
+    {
+        std::ostringstream oss;
+        oss << getName() << ": Filename specification can only contain "
+            "a single '#' template placeholder.";
+        throw pdal_error(oss.str());
+    }
+    return hashPos;
 }
 
 } // namespace pdal

@@ -70,95 +70,129 @@ std::string TranslateKernel::getName() const
 }
 
 TranslateKernel::TranslateKernel()
-    : Kernel()
-    , m_inputFile("")
-    , m_outputFile("")
-    , m_pipelineOutput("")
-    , m_readerType("")
-    , m_writerType("")
-    , m_filterJSON("")
 {}
 
 void TranslateKernel::addSwitches(ProgramArgs& args)
 {
-    args.add("input,i", "Input filename", m_inputFile).setPositional();
-    args.add("output,o", "Output filename", m_outputFile).setPositional();
-    args.add("filter,f", "Filter type", m_filterType).setOptionalPositional();
-    args.add("json", "JSON array of filters", m_filterJSON).setOptionalPositional();
+    args.add("input,i", "Input filename", m_inputFile).
+        setPositional();
+    args.add("output,o", "Output filename", m_outputFile).
+        setPositional();
+    args.add("filter,f", "Filter type", m_filterType).
+        setOptionalPositional();
+    args.add("json", "JSON array of filters", m_filterJSON);
     args.add("pipeline,p", "Pipeline output", m_pipelineOutput);
+    args.add("metadata,m", "Dump metadata output to the specified file",
+        m_metadataFile);
     args.add("reader,r", "Reader type", m_readerType);
     args.add("writer,w", "Writer type", m_writerType);
 }
 
-int TranslateKernel::execute()
+/*
+  Build a pipeline from a JSON filter specification.
+*/
+void TranslateKernel::makeJSONPipeline()
 {
+    std::string json;
 
+    if (pdal::FileUtils::fileExists(m_filterJSON))
+        json = pdal::FileUtils::readFileIntoString(m_filterJSON);
 
-    if (!m_filterJSON.empty())
+    if (json.empty())
+        json = m_filterJSON;
+
+    Json::Reader jsonReader;
+    Json::Value filters;
+    jsonReader.parse(json, filters);
+    if (filters.type() != Json::arrayValue || filters.empty())
+        throw pdal_error("JSON must be an array of filter specifications");
+
+    Json::Value pipeline(Json::arrayValue);
+
+    // Add the input file, the filters (as provided) and the output file.
+    if (m_readerType.size())
     {
-        std::string json("");
-        if (pdal::FileUtils::fileExists(m_filterJSON))
-            json = pdal::FileUtils::readFileIntoString(m_filterJSON);
-
-        if (json.empty())
-            json = m_filterJSON;
-
-        Json::Reader jsonReader;
-        Json::Value filters;
-        jsonReader.parse(json, filters);
-
-        Json::Value root;
-        Json::Value pipeline(Json::arrayValue);
-        Json::Value reader(m_inputFile);
-        Json::Value writer(m_outputFile);
-        pipeline.append(reader);
-        for (Json::ArrayIndex i = 0; i < filters.size(); ++i)
-        {
-            pipeline.append(filters[i]);
-        }
-
-        pipeline.append(writer);
-
-        root["pipeline"] = pipeline;
-
-        std::stringstream pipeline_str;
-        pipeline_str << root;
-
-        if (!filters.size())
-            throw pdal_error("Unable to parse JSON into an array!");
-
-        m_manager.readPipeline(pipeline_str);
-
-        if (m_pipelineOutput.size() > 0)
-            PipelineWriter::writePipeline(m_manager.getStage(), m_pipelineOutput);
-
+        Json::Value node(Json::objectValue);
+        node["filename"] = m_inputFile;
+        node["type"] = m_readerType;
+        pipeline.append(node);
     }
     else
+        pipeline.append(Json::Value(m_inputFile));
+    for (Json::ArrayIndex i = 0; i < filters.size(); ++i)
+        pipeline.append(filters[i]);
+    if (m_writerType.size())
     {
-        Stage& reader = m_manager.makeReader(m_inputFile, m_readerType);
-        Stage* stage = &reader;
+        Json::Value node(Json::objectValue);
+        node["filename"] = m_outputFile;
+        node["type"] = m_writerType;
+        pipeline.append(node);
+    }
+    else
+        pipeline.append(Json::Value(m_outputFile));
 
-        if (m_filterJSON.size() && m_filterType.size())
-            throw pdal_error("Cannot set --filter options and json filter blocks at the same time");
+    Json::Value root;
+    root["pipeline"] = pipeline;
 
-        // add each filter provided on the command-line, updating the stage pointer
-        for (auto const f : m_filterType)
-        {
-            std::string filter_name(f);
+    std::stringstream pipeline_str;
+    pipeline_str << root;
+    m_manager.readPipeline(pipeline_str);
+}
 
-            if (!Utils::startsWith(f, "filters."))
-                filter_name.insert(0, "filters.");
 
-            Stage& filter = m_manager.makeFilter(filter_name, *stage);
-            stage = &filter;
-        }
-        Stage& writer = m_manager.makeWriter(m_outputFile, m_writerType, *stage);
-        if (m_pipelineOutput.size() > 0)
-            PipelineWriter::writePipeline(&writer, m_pipelineOutput);
+/*
+  Build a pipeline from filters specified as command-line arguments.
+*/
+void TranslateKernel::makeArgPipeline()
+{
+    Stage& reader = m_manager.makeReader(m_inputFile, m_readerType);
+    Stage* stage = &reader;
+
+    // add each filter provided on the command-line,
+    // updating the stage pointer
+    for (auto const f : m_filterType)
+    {
+        std::string filter_name(f);
+
+        if (!Utils::startsWith(f, "filters."))
+            filter_name.insert(0, "filters.");
+
+        Stage& filter = m_manager.makeFilter(filter_name, *stage);
+        stage = &filter;
+    }
+    m_manager.makeWriter(m_outputFile, m_writerType, *stage);
+}
+
+
+int TranslateKernel::execute()
+{
+    std::ostream *metaOut(nullptr);
+
+    if (m_metadataFile.size())
+    {
+        metaOut = FileUtils::createFile(m_metadataFile);
+        if (! metaOut)
+            throw pdal_error("Couldn't output metadata output file '" +
+                m_metadataFile + "'.");
     }
 
-    m_manager.execute();
+    if (m_filterJSON.size() && m_filterType.size())
+        throw pdal_error("Cannot set both --filter options and --json options");
 
+    if (!m_filterJSON.empty())
+        makeJSONPipeline();
+    else
+        makeArgPipeline();
+
+    if (m_pipelineOutput.size() > 0)
+        PipelineWriter::writePipeline(m_manager.getStage(), m_pipelineOutput);
+    m_manager.execute();
+    if (metaOut)
+    {
+        MetadataNode m = m_manager.getMetadata();
+        *metaOut << Utils::toJSON(m);
+        FileUtils::closeFile(metaOut);
+    }
 
     return 0;
 }

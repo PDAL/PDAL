@@ -96,8 +96,8 @@ void DerivativeWriter::initialize()
           {"catchment_area", CATCHMENT_AREA}
         };
 
-    handleFilenameTemplate();
-    if (m_hashPos == std::string::npos && m_primTypesSpec.size() > 1)
+    auto hashPos = handleFilenameTemplate(m_filename);
+    if (hashPos == std::string::npos && m_primTypesSpec.size() > 1)
     {
         std::ostringstream oss;
 
@@ -120,7 +120,7 @@ void DerivativeWriter::initialize()
         }
         TypeOutput to;
         to.m_type = pi->second;
-        to.m_filename = generateFilename(pi->first);
+        to.m_filename = generateFilename(pi->first, hashPos);
         m_primitiveTypes.push_back(to);
     }
 
@@ -128,14 +128,12 @@ void DerivativeWriter::initialize()
 }
 
 
-std::string
-DerivativeWriter::generateFilename(const std::string& primName) const
+std::string DerivativeWriter::generateFilename(const std::string& primName,
+    std::string::size_type hashPos) const
 {
-    // We've already checked during argument parsing that we have a valid
-    // template placeholder (#) if necessary.
     std::string filename = m_filename;
-    if (m_hashPos != std::string::npos)
-        filename.replace(m_hashPos, 1, primName);
+    if (hashPos != std::string::npos)
+        filename.replace(hashPos, 1, primName);
     return filename;
 }
 
@@ -958,39 +956,41 @@ GDALDataset* DerivativeWriter::createFloat32GTIFF(std::string filename,
     GDALDriver* tpDriver = GetGDALDriverManager()->GetDriverByName(pszFormat);
 
     // try to create a file of the requested format
-    if (tpDriver != NULL)
-    {
-        papszMetadata = tpDriver->GetMetadata();
-        if (CSLFetchBoolean(papszMetadata, GDAL_DCAP_CREATE, FALSE))
-        {
-            char **papszOptions = NULL;
+    if (tpDriver == NULL)
+        return NULL;
 
-            std::string path = FileUtils::stem(filename) + ".tif";
-            GDALDataset *dataset;
-            dataset = tpDriver->Create(path.c_str(), cols, rows, 1,
-                GDT_Float32, papszOptions);
+    papszMetadata = tpDriver->GetMetadata();
+    if (!CSLFetchBoolean(papszMetadata, GDAL_DCAP_CREATE, FALSE))
+        return NULL;
 
-            BOX2D& extent = getBounds();
+    char **papszOptions = NULL;
 
-            // set the geo transformation
-            double adfGeoTransform[6];
-            adfGeoTransform[0] = extent.minx; // - 0.5*m_GRID_DIST_X;
-            adfGeoTransform[1] = m_GRID_DIST_X;
-            adfGeoTransform[2] = 0.0;
-            adfGeoTransform[3] = extent.maxy; // + 0.5*m_GRID_DIST_Y;
-            adfGeoTransform[4] = 0.0;
-            adfGeoTransform[5] = -1 * m_GRID_DIST_Y;
-            dataset->SetGeoTransform(adfGeoTransform);
+    std::string path = FileUtils::stem(filename) + ".tif";
+    GDALDataset *dataset;
+    dataset = tpDriver->Create(path.c_str(), cols, rows, 1,
+            GDT_Float32, papszOptions);
+    if (!dataset)
+        return NULL;
 
-            // set the projection
-            log()->get(LogLevel::Debug5) << m_inSRS.getWKT() << std::endl;
-            dataset->SetProjection(m_inSRS.getWKT().c_str());
+    BOX2D& extent = getBounds();
 
-            if (dataset)
-                return dataset;
-        }
-    }
-    return NULL;
+    // set the geo transformation
+    double adfGeoTransform[6];
+    adfGeoTransform[0] = extent.minx; // - 0.5*m_GRID_DIST_X;
+    adfGeoTransform[1] = m_GRID_DIST_X;
+    adfGeoTransform[2] = 0.0;
+    adfGeoTransform[3] = extent.maxy; // + 0.5*m_GRID_DIST_Y;
+    adfGeoTransform[4] = 0.0;
+    adfGeoTransform[5] = -1 * m_GRID_DIST_Y;
+    dataset->SetGeoTransform(adfGeoTransform);
+
+    // set the projection
+    log()->get(LogLevel::Debug5) << m_inSRS.getWKT() << std::endl;
+    dataset->SetProjection(m_inSRS.getWKT().c_str());
+
+    getMetadata().addList("filename", path);
+
+    return dataset;
 }
 
 
@@ -1007,79 +1007,81 @@ void DerivativeWriter::writeSlope(Eigen::MatrixXd* tDemData,
     mpDstDS = createFloat32GTIFF(filename, m_GRID_SIZE_X, m_GRID_SIZE_Y);
 
     // if we have a valid file
-    if (mpDstDS)
+    if (!mpDstDS)
+        return;
+
+    // loop over the raster and determine max slope at each location
+    int tXStart = 1, tXEnd = m_GRID_SIZE_X - 1;
+    int tYStart = 1, tYEnd = m_GRID_SIZE_Y - 1;
+    float *poRasterData = new float[m_GRID_SIZE_X*m_GRID_SIZE_Y];
+    for (uint32_t i=0; i<m_GRID_SIZE_X*m_GRID_SIZE_Y; i++)
     {
-        // loop over the raster and determine max slope at each location
-        int tXStart = 1, tXEnd = m_GRID_SIZE_X - 1;
-        int tYStart = 1, tYEnd = m_GRID_SIZE_Y - 1;
-        float *poRasterData = new float[m_GRID_SIZE_X*m_GRID_SIZE_Y];
-        for (uint32_t i=0; i<m_GRID_SIZE_X*m_GRID_SIZE_Y; i++)
-        {
-            poRasterData[i] = c_background;
-        }
-
-        #pragma omp parallel for
-        for (int tXOut = tXStart; tXOut < tXEnd; tXOut++)
-        {
-            int tXIn = tXOut;
-            for (int tYOut = tYStart; tYOut < tYEnd; tYOut++)
-            {
-                int tYIn = tYOut;
-
-                float tSlopeValDegree(0);
-
-                //Compute Slope Value
-                switch (method)
-                {
-                    case SLOPE_D8:
-                        tSlopeValDegree = (float)determineSlopeD8(tDemData,
-                                          tYOut, tXOut, tPostSpacing,
-                                          c_background);
-                        break;
-
-                    case SLOPE_FD:
-                        tSlopeValDegree = (double)determineSlopeFD(tDemData,
-                                          tYOut, tXOut, tPostSpacing,
-                                          c_background);
-                        break;
-                    default:
-                        assert(false);
-                        return;
-                }
-
-                poRasterData[(tYIn * m_GRID_SIZE_X) + tXIn] =
-                    std::tan(tSlopeValDegree*c_pi/180.0)*100.0;
-            }
-        }
-
-        // write the data
-        if (poRasterData)
-        {
-            GDALRasterBand *tBand = mpDstDS->GetRasterBand(1);
-
-            tBand->SetNoDataValue((double)c_background);
-
-            if (m_GRID_SIZE_X > 0 && m_GRID_SIZE_Y > 0)
-// #define STR_HELPER(x) #x
-// #define STR(x) STR_HELPER(x)
-//
-// #pragma message "content of GDAL_VERSION_MAJOR:" STR(GDAL_VERSION_MAJOR)
-#if GDAL_VERSION_MAJOR <= 1
-                tBand->RasterIO(GF_Write, 0, 0, m_GRID_SIZE_X, m_GRID_SIZE_Y,
-                                poRasterData, m_GRID_SIZE_X, m_GRID_SIZE_Y,
-                                GDT_Float32, 0, 0);
-#else
-
-                int ret = tBand->RasterIO(GF_Write, 0, 0, m_GRID_SIZE_X, m_GRID_SIZE_Y,
-                                          poRasterData, m_GRID_SIZE_X, m_GRID_SIZE_Y,
-                                          GDT_Float32, 0, 0, 0);
-#endif
-        }
-
-        GDALClose((GDALDatasetH) mpDstDS);
-
-        delete [] poRasterData;
+        poRasterData[i] = c_background;
     }
+
+#pragma omp parallel for
+    for (int tXOut = tXStart; tXOut < tXEnd; tXOut++)
+    {
+        int tXIn = tXOut;
+        for (int tYOut = tYStart; tYOut < tYEnd; tYOut++)
+        {
+            int tYIn = tYOut;
+
+            float tSlopeValDegree(0);
+
+            //Compute Slope Value
+            switch (method)
+            {
+                case SLOPE_D8:
+                    tSlopeValDegree = (float)determineSlopeD8(tDemData,
+                            tYOut, tXOut, tPostSpacing,
+                            c_background);
+                    break;
+
+                case SLOPE_FD:
+                    tSlopeValDegree = (double)determineSlopeFD(tDemData,
+                            tYOut, tXOut, tPostSpacing,
+                            c_background);
+                    break;
+                default:
+                    assert(false);
+                    return;
+            }
+
+            poRasterData[(tYIn * m_GRID_SIZE_X) + tXIn] =
+                std::tan(tSlopeValDegree*c_pi/180.0)*100.0;
+        }
+    }
+
+    // write the data
+    //ABELL - How can this test not pass?
+    if (poRasterData)
+    {
+        GDALRasterBand *tBand = mpDstDS->GetRasterBand(1);
+
+        tBand->SetNoDataValue((double)c_background);
+
+        if (m_GRID_SIZE_X > 0 && m_GRID_SIZE_Y > 0)
+            // #define STR_HELPER(x) #x
+            // #define STR(x) STR_HELPER(x)
+            //
+            // #pragma message "content of GDAL_VERSION_MAJOR:" STR(GDAL_VERSION_MAJOR)
+#if GDAL_VERSION_MAJOR <= 1
+            tBand->RasterIO(GF_Write, 0, 0, m_GRID_SIZE_X, m_GRID_SIZE_Y,
+                    poRasterData, m_GRID_SIZE_X, m_GRID_SIZE_Y,
+                    GDT_Float32, 0, 0);
+#else
+        // Unused return code deals with function requirement to handle
+        // return code.
+        int ret = tBand->RasterIO(GF_Write, 0, 0, m_GRID_SIZE_X, m_GRID_SIZE_Y,
+                poRasterData, m_GRID_SIZE_X, m_GRID_SIZE_Y,
+                GDT_Float32, 0, 0, 0);
+#endif
+    }
+
+    GDALClose((GDALDatasetH) mpDstDS);
+
+    delete [] poRasterData;
 }
 
 

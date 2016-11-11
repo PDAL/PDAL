@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Peter J. Gadomski (pete.gadomski@gmail.com)
+* Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -34,36 +34,41 @@
 
 #pragma once
 
+#include <pdal/Filter.hpp>
 #include <pdal/plugin.hpp>
-#include <pdal/util/OStream.hpp>
-#include <pdal/Writer.hpp>
 
-#include "SbetCommon.hpp"
+#include <memory>
 
-extern "C" int32_t SbetWriter_ExitFunc();
-extern "C" PF_ExitFunc SbetWriter_InitPlugin();
+extern "C" int32_t KDistanceFilter_ExitFunc();
+extern "C" PF_ExitFunc KDistanceFilter_InitPlugin();
 
 namespace pdal
 {
 
-class PDAL_DLL SbetWriter : public Writer
+class PointLayout;
+class PointView;
+class ProgramArgs;
+
+class PDAL_DLL KDistanceFilter : public Filter
 {
 public:
+    KDistanceFilter() : Filter()
+    {}
+
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
 
-    static Dimension::IdList getDefaultDimensions()
-        { return fileDimensions(); }
-
 private:
-    std::unique_ptr<OLeStream> m_stream;
-    std::string m_filename;
-
+    Dimension::Id m_kdist;
+    int m_k;
+    
     virtual void addArgs(ProgramArgs& args);
-    virtual void ready(PointTableRef table);
-    virtual void write(const PointViewPtr view);
-    virtual void done(PointTableRef table);
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void filter(PointView& view);
+
+    KDistanceFilter& operator=(const KDistanceFilter&); // not implemented
+    KDistanceFilter(const KDistanceFilter&); // not implemented
 };
 
 } // namespace pdal

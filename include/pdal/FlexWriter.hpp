@@ -46,9 +46,13 @@ protected:
     FlexWriter() : m_filenum(1)
     {}
 
+    std::string m_filename;
+    Scaling m_scaling;
+
     void validateFilename(PointTableRef table)
     {
-        if (!table.supportsView() && (m_hashPos != std::string::npos))
+        if (!table.supportsView() &&
+            (m_filename.find('#') != std::string::npos))
         {
             std::ostringstream oss;
             oss << getName() << ": Can't write with template-based "
@@ -57,13 +61,13 @@ protected:
         }
     }
 
-    Scaling m_scaling;
-
 private:
+    std::string::size_type m_hashPos;
+
     virtual void writerInitialize(PointTableRef table)
     {
         Writer::writerInitialize(table);
-        handleFilenameTemplate();
+        m_hashPos = handleFilenameTemplate(m_filename);
     }
 
     std::string generateFilename()
