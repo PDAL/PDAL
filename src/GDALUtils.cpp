@@ -109,6 +109,9 @@ GDALDataType toGdalType(Dimension::Type t)
         throw pdal_error("PDAL 64-bit integer type unsupported.");
     case Dimension::Type::None:
         throw pdal_error("PDAL 'none' type unsupported.");
+	default:
+        throw pdal_error("Unrecognized PDAL dimension type.");
+	
     }
 }
 
