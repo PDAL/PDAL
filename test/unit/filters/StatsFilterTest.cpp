@@ -298,9 +298,9 @@ TEST(Stats, global)
 
     const stats::Summary& statsZ = filter.getStats(Dimension::Id::Z);
 
-    EXPECT_FLOAT_EQ(statsZ.median(), 555.55554);
-    EXPECT_FLOAT_EQ(statsZ.mad(), 333.33333);
-    EXPECT_FLOAT_EQ(statsZ.minimum(), 0.0);
-    EXPECT_FLOAT_EQ(statsZ.maximum(), 1000.0);
+    EXPECT_DOUBLE_EQ(statsZ.median(), 555.55554);
+	EXPECT_DOUBLE_EQ(statsZ.mad(), 333.33333);
+	EXPECT_DOUBLE_EQ(statsZ.minimum(), 0.0);
+	EXPECT_DOUBLE_EQ(statsZ.maximum(), 1000.0);
 
 }
