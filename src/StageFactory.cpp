@@ -50,6 +50,7 @@
 #include <ferry/FerryFilter.hpp>
 #include <hag/HAGFilter.hpp>
 #include <iqr/IQRFilter.hpp>
+#include <kdistance/KDistanceFilter.hpp>
 #include <lof/LOFFilter.hpp>
 #include <mad/MADFilter.hpp>
 #include <merge/MergeFilter.hpp>
@@ -58,6 +59,7 @@
 #include <normal/NormalFilter.hpp>
 #include <outlier/OutlierFilter.hpp>
 #include <pmf/PMFFilter.hpp>
+#include <radialdensity/RadialDensityFilter.hpp>
 #include <range/RangeFilter.hpp>
 #include <reprojection/ReprojectionFilter.hpp>
 #include <sample/SampleFilter.hpp>
@@ -243,6 +245,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(FerryFilter_InitPlugin);
     PluginManager::initializePlugin(HAGFilter_InitPlugin);
     PluginManager::initializePlugin(IQRFilter_InitPlugin);
+    PluginManager::initializePlugin(KDistanceFilter_InitPlugin);
     PluginManager::initializePlugin(LOFFilter_InitPlugin);
     PluginManager::initializePlugin(MADFilter_InitPlugin);
     PluginManager::initializePlugin(MergeFilter_InitPlugin);
@@ -251,6 +254,7 @@ StageFactory::StageFactory(bool no_plugins)
     PluginManager::initializePlugin(NormalFilter_InitPlugin);
     PluginManager::initializePlugin(OutlierFilter_InitPlugin);
     PluginManager::initializePlugin(PMFFilter_InitPlugin);
+    PluginManager::initializePlugin(RadialDensityFilter_InitPlugin);
     PluginManager::initializePlugin(RangeFilter_InitPlugin);
     PluginManager::initializePlugin(ReprojectionFilter_InitPlugin);
     PluginManager::initializePlugin(SampleFilter_InitPlugin);

@@ -73,10 +73,11 @@ endmacro(PDAL_ADD_LIBRARY)
 ###############################################################################
 # Add a free library target (one that doesn't depend on PDAL).
 # _name The library name.
+# _library_type Shared or static
 # ARGN The source files for the library.
 #
-macro(PDAL_ADD_FREE_LIBRARY _name)
-    add_library(${_name} ${PDAL_LIB_TYPE} ${ARGN})
+macro(PDAL_ADD_FREE_LIBRARY _name _library_type)
+    add_library(${_name} ${_library_type} ${ARGN})
     set_property(TARGET ${_name} PROPERTY FOLDER "Libraries")
 
     install(TARGETS ${_name}

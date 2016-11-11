@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Hobu Inc. (info@hobu.co)
+* Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,52 +32,65 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <algorithm>
+#include "KDistanceFilter.hpp"
 
-#include <pdal/PointView.hpp>
-#include <pdal/Writer.hpp>
-#include <pdal/plugin.hpp>
+#include <pdal/KDIndex.hpp>
+#include <pdal/pdal_macros.hpp>
 
-#include "GDALGrid.hpp"
-
-extern "C" int32_t GDALWriter_ExitFunc();
-extern "C" PF_ExitFunc GDALWriter_InitPlugin();
+#include <string>
+#include <vector>
 
 namespace pdal
 {
 
-class PDAL_DLL GDALWriter : public Writer
+static PluginInfo const s_info =
+    PluginInfo("filters.kdistance", "K-Distance Filter",
+               "http://pdal.io/stages/filters.kdistance.html");
+
+CREATE_STATIC_PLUGIN(1, 0, KDistanceFilter, Filter, s_info)
+
+std::string KDistanceFilter::getName() const
 {
-public:
-    static void * create();
-    static int32_t destroy(void *);
-    std::string getName() const;
-
-    GDALWriter() : m_outputTypes(0)
-    {}
-
-private:
-    virtual void addArgs(ProgramArgs& args);
-    virtual void initialize();
-    virtual void prepared(PointTableRef table);
-    virtual void ready(PointTableRef table);
-    virtual void write(const PointViewPtr data);
-    virtual void done(PointTableRef table);
-
-    std::string m_filename;
-    std::string m_drivername;
-    BOX2D m_bounds;
-    double m_edgeLength;
-    double m_radius;
-    StringList m_options;
-    StringList m_outputTypeString;
-    size_t m_windowSize;
-    int m_outputTypes;
-    GDALGridPtr m_grid;
-    double m_noData;
-    Dimension::Id m_interpDim;
-    std::string m_interpDimString;
-
-};
-
+    return s_info.name;
 }
+
+void KDistanceFilter::addArgs(ProgramArgs& args)
+{
+    args.add("k", "k neighbors", m_k, 10);
+}
+
+void KDistanceFilter::addDimensions(PointLayoutPtr layout)
+{
+    using namespace Dimension;
+    m_kdist = layout->registerOrAssignDim("KDistance", Type::Double);
+}
+
+void KDistanceFilter::filter(PointView& view)
+{
+    using namespace Dimension;
+    
+    // Build the 3D KD-tree.
+    log()->get(LogLevel::Debug) << "Building 3D KD-tree...\n";
+    KD3Index index(view);
+    index.build();
+    
+    // Increment the minimum number of points, as knnSearch will be returning
+    // the neighbors along with the query point.
+    m_k++;
+  
+    // Compute the k-distance for each point. The k-distance is the Euclidean
+    // distance to k-th nearest neighbor.
+    log()->get(LogLevel::Debug) << "Computing k-distances...\n";
+    for (PointId i = 0; i < view.size(); ++i)
+    {
+        double x = view.getFieldAs<double>(Id::X, i);
+        double y = view.getFieldAs<double>(Id::Y, i);
+        double z = view.getFieldAs<double>(Id::Z, i);
+        std::vector<PointId> indices(m_k);
+        std::vector<double> sqr_dists(m_k);
+        index.knnSearch(x, y, z, m_k, &indices, &sqr_dists);
+        view.setField(m_kdist, i, std::sqrt(sqr_dists[m_k-1]));
+    }
+}
+
+} // namespace pdal

@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Hobu Inc. (info@hobu.co)
+* Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,52 +32,61 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <algorithm>
+#include "RadialDensityFilter.hpp"
 
-#include <pdal/PointView.hpp>
-#include <pdal/Writer.hpp>
-#include <pdal/plugin.hpp>
+#include <pdal/KDIndex.hpp>
+#include <pdal/pdal_macros.hpp>
 
-#include "GDALGrid.hpp"
-
-extern "C" int32_t GDALWriter_ExitFunc();
-extern "C" PF_ExitFunc GDALWriter_InitPlugin();
+#include <string>
+#include <vector>
 
 namespace pdal
 {
 
-class PDAL_DLL GDALWriter : public Writer
+static PluginInfo const s_info =
+    PluginInfo("filters.radialdensity", "RadialDensity Filter",
+               "http://pdal.io/stages/filters.radialdensity.html");
+
+CREATE_STATIC_PLUGIN(1, 0, RadialDensityFilter, Filter, s_info)
+
+std::string RadialDensityFilter::getName() const
 {
-public:
-    static void * create();
-    static int32_t destroy(void *);
-    std::string getName() const;
-
-    GDALWriter() : m_outputTypes(0)
-    {}
-
-private:
-    virtual void addArgs(ProgramArgs& args);
-    virtual void initialize();
-    virtual void prepared(PointTableRef table);
-    virtual void ready(PointTableRef table);
-    virtual void write(const PointViewPtr data);
-    virtual void done(PointTableRef table);
-
-    std::string m_filename;
-    std::string m_drivername;
-    BOX2D m_bounds;
-    double m_edgeLength;
-    double m_radius;
-    StringList m_options;
-    StringList m_outputTypeString;
-    size_t m_windowSize;
-    int m_outputTypes;
-    GDALGridPtr m_grid;
-    double m_noData;
-    Dimension::Id m_interpDim;
-    std::string m_interpDimString;
-
-};
-
+    return s_info.name;
 }
+
+void RadialDensityFilter::addArgs(ProgramArgs& args)
+{
+    args.add("radius", "Radius", m_rad, 1.0);
+}
+
+void RadialDensityFilter::addDimensions(PointLayoutPtr layout)
+{
+    using namespace Dimension;
+    m_rdens = layout->registerOrAssignDim("RadialDensity", Type::Double);
+}
+
+void RadialDensityFilter::filter(PointView& view)
+{
+    using namespace Dimension;
+    
+    // Build the 3D KD-tree.
+    log()->get(LogLevel::Debug) << "Building 3D KD-tree...\n";
+    KD3Index index(view);
+    index.build();
+ 
+    // Search for neighboring points within the specified radius. The number of
+    // neighbors (which includes the query point) is normalized by the volume
+    // of the search sphere and recorded as the density.
+    log()->get(LogLevel::Debug) << "Computing densities...\n";
+    double factor = 1.0 / ((4.0 / 3.0) * 3.14159 * (m_rad * m_rad * m_rad));
+    for (PointId i = 0; i < view.size(); ++i)
+    {
+        double x = view.getFieldAs<double>(Id::X, i);
+        double y = view.getFieldAs<double>(Id::Y, i);
+        double z = view.getFieldAs<double>(Id::Z, i);
+        std::vector<PointId> pts = index.radius(x, y, z, m_rad);
+        view.setField(m_rdens, i, pts.size() * factor);
+    } 
+}
+
+} // namespace pdal

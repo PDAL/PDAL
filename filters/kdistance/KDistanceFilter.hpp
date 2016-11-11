@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Hobu Inc. (info@hobu.co)
+* Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,52 +32,43 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <algorithm>
+#pragma once
 
-#include <pdal/PointView.hpp>
-#include <pdal/Writer.hpp>
+#include <pdal/Filter.hpp>
 #include <pdal/plugin.hpp>
 
-#include "GDALGrid.hpp"
+#include <memory>
 
-extern "C" int32_t GDALWriter_ExitFunc();
-extern "C" PF_ExitFunc GDALWriter_InitPlugin();
+extern "C" int32_t KDistanceFilter_ExitFunc();
+extern "C" PF_ExitFunc KDistanceFilter_InitPlugin();
 
 namespace pdal
 {
 
-class PDAL_DLL GDALWriter : public Writer
+class PointLayout;
+class PointView;
+class ProgramArgs;
+
+class PDAL_DLL KDistanceFilter : public Filter
 {
 public:
+    KDistanceFilter() : Filter()
+    {}
+
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
 
-    GDALWriter() : m_outputTypes(0)
-    {}
-
 private:
+    Dimension::Id m_kdist;
+    int m_k;
+    
     virtual void addArgs(ProgramArgs& args);
-    virtual void initialize();
-    virtual void prepared(PointTableRef table);
-    virtual void ready(PointTableRef table);
-    virtual void write(const PointViewPtr data);
-    virtual void done(PointTableRef table);
+    virtual void addDimensions(PointLayoutPtr layout);
+    virtual void filter(PointView& view);
 
-    std::string m_filename;
-    std::string m_drivername;
-    BOX2D m_bounds;
-    double m_edgeLength;
-    double m_radius;
-    StringList m_options;
-    StringList m_outputTypeString;
-    size_t m_windowSize;
-    int m_outputTypes;
-    GDALGridPtr m_grid;
-    double m_noData;
-    Dimension::Id m_interpDim;
-    std::string m_interpDimString;
-
+    KDistanceFilter& operator=(const KDistanceFilter&); // not implemented
+    KDistanceFilter(const KDistanceFilter&); // not implemented
 };
 
-}
+} // namespace pdal
