@@ -86,18 +86,18 @@ TEST(BoundsTest, test_copy)
 TEST(BoundsTest, test_accessor)
 {
     BOX2D b1(1,2,3,4);
-    EXPECT_FLOAT_EQ(b1.minx, 1);
-    EXPECT_FLOAT_EQ(b1.miny, 2);
-    EXPECT_FLOAT_EQ(b1.maxx, 3);
-    EXPECT_FLOAT_EQ(b1.maxy, 4);
+	EXPECT_DOUBLE_EQ(b1.minx, 1.0);
+    EXPECT_DOUBLE_EQ(b1.miny, 2.0);
+	EXPECT_DOUBLE_EQ(b1.maxx, 3.0);
+	EXPECT_DOUBLE_EQ(b1.maxy, 4.0);
 
     BOX3D b2(1,2,3,4,5,6);
-    EXPECT_FLOAT_EQ(b2.minx, 1);
-    EXPECT_FLOAT_EQ(b2.miny, 2);
-    EXPECT_FLOAT_EQ(b2.minz, 3);
-    EXPECT_FLOAT_EQ(b2.maxx, 4);
-    EXPECT_FLOAT_EQ(b2.maxy, 5);
-    EXPECT_FLOAT_EQ(b2.maxz, 6);
+	EXPECT_DOUBLE_EQ(b2.minx, 1.0);
+	EXPECT_DOUBLE_EQ(b2.miny, 2.0);
+	EXPECT_DOUBLE_EQ(b2.minz, 3.0);
+	EXPECT_DOUBLE_EQ(b2.maxx, 4.0);
+	EXPECT_DOUBLE_EQ(b2.maxy, 5.0);
+	EXPECT_DOUBLE_EQ(b2.maxz, 6.0);
 }
 
 TEST(BoundsTest, test_clip)
@@ -121,10 +121,10 @@ TEST(BoundsTest, test_clip)
     // .clip() can make an invalid bounds, this should be fixed.
     BOX2D r6(20,6, 40,8);
 
-    EXPECT_FLOAT_EQ(r1.minx, 20);
-    EXPECT_FLOAT_EQ(r1.maxx, 6);
-    EXPECT_FLOAT_EQ(r1.miny, 40);
-    EXPECT_FLOAT_EQ(r1.maxy, 8);
+	EXPECT_DOUBLE_EQ(r1.minx, 20);
+	EXPECT_DOUBLE_EQ(r1.maxx, 6);
+	EXPECT_DOUBLE_EQ(r1.miny, 40);
+	EXPECT_DOUBLE_EQ(r1.maxy, 8);
 
 //ABELL - Need BOX3D example.
 }
