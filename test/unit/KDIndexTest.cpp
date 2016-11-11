@@ -94,6 +94,25 @@ TEST(KDIndex, neighbors2D)
     EXPECT_EQ(ids[2], 3u);
     EXPECT_EQ(ids[3], 0u);
     EXPECT_EQ(ids[4], 4u);
+
+    // Search by PointId
+    ids = index.neighbors(0, 5);
+    EXPECT_EQ(ids.size(), 5u);
+    EXPECT_EQ(ids[0], 0u);
+    EXPECT_EQ(ids[1], 1u);
+    EXPECT_EQ(ids[2], 2u);
+    EXPECT_EQ(ids[3], 3u);
+    EXPECT_EQ(ids[4], 4u);
+
+    // Search by PointRef
+    PointRef point = view.point(0);
+    ids = index.neighbors(point, 5);
+    EXPECT_EQ(ids.size(), 5u);
+    EXPECT_EQ(ids[0], 0u);
+    EXPECT_EQ(ids[1], 1u);
+    EXPECT_EQ(ids[2], 2u);
+    EXPECT_EQ(ids[3], 3u);
+    EXPECT_EQ(ids[4], 4u);
 }
 
 TEST(KDIndex, neighbors3D)
@@ -158,6 +177,25 @@ TEST(KDIndex, neighbors3D)
     EXPECT_EQ(ids[1], 1u);
     EXPECT_EQ(ids[2], 3u);
     EXPECT_EQ(ids[3], 0u);
+    EXPECT_EQ(ids[4], 4u);
+
+    // Search by PointId
+    ids = index.neighbors(0, 5);
+    EXPECT_EQ(ids.size(), 5u);
+    EXPECT_EQ(ids[0], 0u);
+    EXPECT_EQ(ids[1], 1u);
+    EXPECT_EQ(ids[2], 2u);
+    EXPECT_EQ(ids[3], 3u);
+    EXPECT_EQ(ids[4], 4u);
+
+    // Search by PointRef
+    PointRef point = view.point(0);
+    ids = index.neighbors(point, 5);
+    EXPECT_EQ(ids.size(), 5u);
+    EXPECT_EQ(ids[0], 0u);
+    EXPECT_EQ(ids[1], 1u);
+    EXPECT_EQ(ids[2], 2u);
+    EXPECT_EQ(ids[3], 3u);
     EXPECT_EQ(ids[4], 4u);
 }
 
@@ -236,6 +274,21 @@ TEST(KDIndex, radius2D)
     EXPECT_EQ(ids[2], 3u);
     EXPECT_EQ(ids[3], 0u);
     EXPECT_EQ(ids[4], 4u);
+
+    // Search by PointId
+    ids = index.radius(0, 4.25);
+    EXPECT_EQ(ids.size(), 3u);
+    EXPECT_EQ(ids[0], 0u);
+    EXPECT_EQ(ids[1], 1u);
+    EXPECT_EQ(ids[2], 2u);
+
+    // Search by PointRef
+    PointRef point = view.point(0);
+    ids = index.radius(point, 4.25);
+    EXPECT_EQ(ids.size(), 3u);
+    EXPECT_EQ(ids[0], 0u);
+    EXPECT_EQ(ids[1], 1u);
+    EXPECT_EQ(ids[2], 2u);
 }
 
 TEST(KDIndex, radius3D)
@@ -286,5 +339,20 @@ TEST(KDIndex, radius3D)
     EXPECT_EQ(ids[2], 3u);
     EXPECT_EQ(ids[3], 0u);
     EXPECT_EQ(ids[4], 4u);
+
+    // Search by PointId
+    ids = index.radius(0, 5.2);
+    EXPECT_EQ(ids.size(), 3u);
+    EXPECT_EQ(ids[0], 0u);
+    EXPECT_EQ(ids[1], 1u);
+    EXPECT_EQ(ids[2], 2u);
+
+    // Search by PointRef
+    PointRef point = view.point(0);
+    ids = index.radius(point, 5.2);
+    EXPECT_EQ(ids.size(), 3u);
+    EXPECT_EQ(ids[0], 0u);
+    EXPECT_EQ(ids[1], 1u);
+    EXPECT_EQ(ids[2], 2u);
 }
 

@@ -78,13 +78,12 @@ TEST(translateTest, t2)
     std::string in = Support::datapath("las/autzen_trim.las");
     std::string out = Support::temppath("out.las");
 
-    const char *json = R"foo(
-        [
-        { \"type\":\"filters.stats\" },
-        { \"type\":\"filters.range\",
-          \"limits\":\"Z[0:100]\" }
-        ]
-    )foo";
+    const char *json = " \
+        [ \
+        { \\\"type\\\":\\\"filters.stats\\\" }, \
+        { \\\"type\\\":\\\"filters.range\\\", \
+          \\\"limits\\\":\\\"Z[0:100]\\\" } \
+        ]";
 
     EXPECT_EQ(runTranslate(in + " " + out +
         " --json=\"" + json + "\"", output), 0);
@@ -95,11 +94,10 @@ TEST(translateTest, t2)
     EXPECT_EQ(runTranslate(in + " " + out + " -r readers.las -w writers.las "
         " --json=\"" + json + "\"", output), 0);
 
-    const char *json2 = R"foo(
-        { \"type\":\"filters.stats\" },
-        { \"type\":\"filters.range\",
-          \"limits\":\"Z[0:100]\" }
-    )foo";
+    const char *json2 = " \
+        { \\\"type\\\":\\\"filters.stats\\\" }, \
+        { \\\"type\\\":\\\"filters.range\\\", \
+          \\\"limits\\\":\\\"Z[0:100]\\\" }";
 
     EXPECT_NE(runTranslate(in + " " + out +
         " --json=\"" + json2 + "\"", output), 0);
