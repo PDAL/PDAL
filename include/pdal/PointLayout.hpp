@@ -226,7 +226,7 @@ public:
     PDAL_DLL const Dimension::Detail *dimDetail(Dimension::Id id) const;
 
 private:
-    virtual bool update(Dimension::Detail dd, const std::string& name);
+    PDAL_DLL virtual bool update(Dimension::Detail dd, const std::string& name);
 
     Dimension::Type resolveType( Dimension::Type t1,
         Dimension::Type t2);
