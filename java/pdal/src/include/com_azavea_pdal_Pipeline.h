@@ -95,6 +95,14 @@ JNIEXPORT void JNICALL Java_com_azavea_pdal_Pipeline_setLogLevel
 JNIEXPORT jint JNICALL Java_com_azavea_pdal_Pipeline_getLogLevel
   (JNIEnv *, jobject);
 
+/*
+ * Class:     com_azavea_pdal_Pipeline
+ * Method:    getLog
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_com_azavea_pdal_Pipeline_getLog
+  (JNIEnv *, jobject);
+
 #ifdef __cplusplus
 }
 #endif

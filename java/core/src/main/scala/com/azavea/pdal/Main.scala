@@ -19,6 +19,7 @@ object Main {
     println(s"p.getLogLevel: ${p.getLogLevel}")
     println(s"p.getMetadata: ${p.getMetadata}")
     println(s"p.getSchema: ${p.getSchema}")
+    println(s"p.getLog: ${p.getLog}")
     p.dispose()
     println(s"p.ptr: ${p.ptr}")
   }

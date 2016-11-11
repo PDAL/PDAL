@@ -62,6 +62,13 @@ JNIEXPORT jint JNICALL Java_com_azavea_pdal_Pipeline_getLogLevel
     return p->getLogLevel();
 }
 
+JNIEXPORT jstring JNICALL Java_com_azavea_pdal_Pipeline_getLog
+  (JNIEnv *env, jobject obj)
+{
+    Pipeline *p = getHandle<Pipeline>(env, obj);
+    return env->NewStringUTF(p->getLog().c_str());
+}
+
 JNIEXPORT jobject JNICALL Java_com_azavea_pdal_Pipeline_pointViews__
   (JNIEnv *env, jobject obj)
 {

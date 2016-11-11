@@ -20,6 +20,7 @@ class Pipeline(val json: String) extends Native {
   @native def validate(): Boolean
   @native def setLogLevel(i: Int): Unit
   @native def getLogLevel: Int
+  @native def getLog: String
 }
 
 object Pipeline {
