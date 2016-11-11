@@ -59,6 +59,7 @@ public:
 private:
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
+    virtual void prepared(PointTableRef table);
     virtual void ready(PointTableRef table);
     virtual void write(const PointViewPtr data);
     virtual void done(PointTableRef table);
