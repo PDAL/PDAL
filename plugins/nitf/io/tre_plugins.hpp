@@ -36,7 +36,9 @@
 
 #include <pdal/pdal_internal.hpp>
 
+#ifndef IMPORT_NITRO_API
 #define IMPORT_NITRO_API
+#endif
 #include <nitro/c++/import/nitf.hpp>
 #include <nitro/c++/except/Trace.h>
 

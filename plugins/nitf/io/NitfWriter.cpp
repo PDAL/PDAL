@@ -46,7 +46,9 @@
 #  pragma clang diagnostic ignored "-Wunused-private-field"
 #endif
 
+#ifndef IMPORT_NITRO_API
 #define IMPORT_NITRO_API
+#endif
 #include <nitro/c++/import/nitf.hpp>
 #include "tre_plugins.hpp"
 
