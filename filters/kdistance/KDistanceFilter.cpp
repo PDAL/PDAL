@@ -83,12 +83,9 @@ void KDistanceFilter::filter(PointView& view)
     log()->get(LogLevel::Debug) << "Computing k-distances...\n";
     for (PointId i = 0; i < view.size(); ++i)
     {
-        double x = view.getFieldAs<double>(Id::X, i);
-        double y = view.getFieldAs<double>(Id::Y, i);
-        double z = view.getFieldAs<double>(Id::Z, i);
         std::vector<PointId> indices(m_k);
         std::vector<double> sqr_dists(m_k);
-        index.knnSearch(x, y, z, m_k, &indices, &sqr_dists);
+        index.knnSearch(i, m_k, &indices, &sqr_dists);
         view.setField(m_kdist, i, std::sqrt(sqr_dists[m_k-1]));
     }
 }

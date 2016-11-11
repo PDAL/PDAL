@@ -148,11 +148,8 @@ MetadataNode DeltaKernel::dump(PointViewPtr& srcView, PointViewPtr& candView,
 
     for (PointId id = 0; id < srcView->size(); ++id)
     {
-        double x = srcView->getFieldAs<double>(Dimension::Id::X, id);
-        double y = srcView->getFieldAs<double>(Dimension::Id::Y, id);
-        double z = srcView->getFieldAs<double>(Dimension::Id::Z, id);
-
-        PointId candId = index.neighbor(x, y, z);
+        PointRef point = srcView->point(id);
+        PointId candId = index.neighbor(point);
 
         // It may be faster to put in a special case to avoid having to
         // fetch X, Y and Z, more than once but this is simpler and
@@ -197,10 +194,8 @@ MetadataNode DeltaKernel::dumpDetail(PointViewPtr& srcView,
 
     for (PointId id = 0; id < srcView->size(); ++id)
     {
-        double x = srcView->getFieldAs<double>(Dimension::Id::X, id);
-        double y = srcView->getFieldAs<double>(Dimension::Id::Y, id);
-        double z = srcView->getFieldAs<double>(Dimension::Id::Z, id);
-        PointId candId = index.neighbor(x, y, z);
+        PointRef point = srcView->point(id);
+        PointId candId = index.neighbor(point);
 
         MetadataNode delta = root.add("delta");
         delta.add("i", id);

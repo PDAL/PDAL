@@ -100,10 +100,9 @@ void HAGFilter::filter(PointView& view)
     // neighbor (2D) in the ground view.
     for (PointId i = 0; i < ngView->size(); ++i)
     {
-        double x0 = ngView->getFieldAs<double>(Dimension::Id::X, i);
-        double y0 = ngView->getFieldAs<double>(Dimension::Id::Y, i);
-        double z0 = ngView->getFieldAs<double>(Dimension::Id::Z, i);
-        auto ids = kdi.neighbors(x0, y0, 1);
+        PointRef point = ngView->point(i);
+        double z0 = point.getFieldAs<double>(Dimension::Id::Z);
+        auto ids = kdi.neighbors(point, 1);
         double z1 = gView->getFieldAs<double>(Dimension::Id::Z, ids[0]);
         view.setField(Dimension::Id::HeightAboveGround, ngIdx[i], z0 - z1);
     }
