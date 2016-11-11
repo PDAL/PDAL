@@ -106,7 +106,7 @@ inline Everything extractDim(Extractor& ext, Dimension::Type type)
 {
     using Type = Dimension::Type;
 
-    Everything e;
+	Everything e{ 0 };
     switch (type)
     {
         case Type::Unsigned8:
