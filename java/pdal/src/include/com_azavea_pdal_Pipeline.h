@@ -55,6 +55,46 @@ JNIEXPORT jint JNICALL Java_com_azavea_pdal_Pipeline_test
 JNIEXPORT void JNICALL Java_com_azavea_pdal_Pipeline_dispose
   (JNIEnv *, jobject);
 
+/*
+ * Class:     com_azavea_pdal_Pipeline
+ * Method:    getMetadata
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_com_azavea_pdal_Pipeline_getMetadata
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     com_azavea_pdal_Pipeline
+ * Method:    getSchema
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_com_azavea_pdal_Pipeline_getSchema
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     com_azavea_pdal_Pipeline
+ * Method:    validate
+ * Signature: ()Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_azavea_pdal_Pipeline_validate
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     com_azavea_pdal_Pipeline
+ * Method:    setLogLevel
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_com_azavea_pdal_Pipeline_setLogLevel
+  (JNIEnv *, jobject, jint);
+
+/*
+ * Class:     com_azavea_pdal_Pipeline
+ * Method:    getLogLevel
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_com_azavea_pdal_Pipeline_getLogLevel
+  (JNIEnv *, jobject);
+
 #ifdef __cplusplus
 }
 #endif

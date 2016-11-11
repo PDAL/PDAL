@@ -1,8 +1,8 @@
 #include <jni.h>
 #include <string>
 
-#ifndef _HANDLE_H_INCLUDED_
-#define _HANDLE_H_INCLUDED_
+#ifndef _ACCESSORS_H_INCLUDED_
+#define _ACCESSORS_H_INCLUDED_
 
 jfieldID getHandleField(JNIEnv *env, jobject obj);
 

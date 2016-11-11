@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "com_azavea_pdal_Pipeline.h"
-#include "Pipeline.hpp"
-#include "accessors.h"
+#include "JavaPipeline.hpp"
+#include "Accessors.h"
 
 using libpdaljava::Pipeline;
 

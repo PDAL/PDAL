@@ -15,6 +15,11 @@ class Pipeline(val json: String) extends Native {
   @native def pointViews(layout: PointLayout): PointViewIterator
   @native def test(): Int
   @native def dispose(): Unit
+  @native def getMetadata(): String
+  @native def getSchema(): String
+  @native def validate(): Boolean
+  @native def setLogLevel(i: Int): Unit
+  @native def getLogLevel: Int
 }
 
 object Pipeline {
