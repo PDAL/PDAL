@@ -332,7 +332,7 @@ bool PgWriter::CheckPointCloudExists()
     {
         pg_execute(m_session, q);
     }
-    catch (pdal_error const &e)
+    catch (pdal_error const &)
     {
         return false;
     }
