@@ -362,7 +362,7 @@ int SpatialReference::calculateZone(double lon, double lat)
     // Everywhere else.
     else
     {
-        zone = floor((lon + 180.0) / 6) + 1;
+        zone = (int) floor((lon + 180.0) / 6) + 1;
         if (lat < 0)
             zone = -zone;
     }

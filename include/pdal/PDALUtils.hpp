@@ -46,6 +46,11 @@
 #include <unistd.h>
 #endif
 
+#ifdef PDAL_COMPILER_MSVC
+//#  pragma warning(disable: 4127)  // conditional expression is constant
+#endif
+
+
 namespace pdal
 {
 class Options;
@@ -106,7 +111,7 @@ inline Everything extractDim(Extractor& ext, Dimension::Type type)
 {
     using Type = Dimension::Type;
 
-    Everything e;
+	Everything e;
     switch (type)
     {
         case Type::Unsigned8:

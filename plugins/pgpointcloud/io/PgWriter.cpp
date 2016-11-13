@@ -193,12 +193,11 @@ uint32_t PgWriter::SetupSchema(uint32_t srid)
     {
         oss << "SELECT Count(pcid) FROM pointcloud_formats WHERE pcid = " <<
             m_pcid;
-        char *count_str = pg_query_once(m_session, oss.str());
-        if (!count_str)
+        std::string count_str = pg_query_once(m_session, oss.str());
+        if (count_str.empty())
             throw pdal_error("Unable to count pcid's in table "
                 "`pointcloud_formats`");
-        schema_count = atoi(count_str);
-        free(count_str);
+        schema_count = atoi(count_str.c_str());
         oss.str("");
         if (schema_count == 0)
         {
@@ -212,12 +211,11 @@ uint32_t PgWriter::SetupSchema(uint32_t srid)
     // Do we have any existing schemas in the POINTCLOUD_FORMATS table?
     uint32_t pcid = 0;
     oss << "SELECT Count(pcid) FROM pointcloud_formats";
-    char *schema_count_str = pg_query_once(m_session, oss.str());
-    if (!schema_count_str)
+    std::string schema_count_str = pg_query_once(m_session, oss.str());
+    if (schema_count_str.empty())
         throw pdal_error("Unable to count pcid's in table "
             "`pointcloud_formats`");
-    schema_count = atoi(schema_count_str);
-    free(schema_count_str);
+    schema_count = atoi(schema_count_str.c_str());
     oss.str("");
 
     // Create an XML output schema.
@@ -262,17 +260,17 @@ uint32_t PgWriter::SetupSchema(uint32_t srid)
         // released. See https://github.com/PDAL/PDAL/issues/1101 for
         // SQL to create this sequence on the pointcloud_formats
         // table.
-        char* have_seq = pg_query_once(m_session,
+        std::string have_seq = pg_query_once(m_session,
                 "select count(*) from pg_class where relname = 'pointcloud_formats_pcid_sq'");
-        int seq_count = atoi(have_seq);
+        int seq_count = atoi(have_seq.c_str());
         if (seq_count)
         {
             // We have the sequence, use its nextval
-            char *pcid_str = pg_query_once(m_session,
+            std::string pcid_str = pg_query_once(m_session,
                     "SELECT nextval('pointcloud_formats_pcid_sq')");
-            if (!pcid_str)
+            if (pcid_str.empty())
                 throw pdal_error("Unable to select nextval from pointcloud_formats_pcid_seq");
-            pcid = atoi(pcid_str);
+            pcid = atoi(pcid_str.c_str());
         }
         else
         {
@@ -283,12 +281,12 @@ uint32_t PgWriter::SetupSchema(uint32_t srid)
     }
     else
     {
-        char *pcid_str = pg_query_once(m_session,
+        std::string pcid_str = pg_query_once(m_session,
                 "SELECT Max(pcid)+1 AS pcid FROM pointcloud_formats");
-        if (!pcid_str)
+        if (pcid_str.empty())
             throw pdal_error("Unable to get the max pcid from "
                 "`pointcloud_formats`");
-        pcid = atoi(pcid_str);
+        pcid = atoi(pcid_str.c_str());
     }
 
     const char* paramValues = xml.c_str();
@@ -334,7 +332,7 @@ bool PgWriter::CheckPointCloudExists()
     {
         pg_execute(m_session, q);
     }
-    catch (pdal_error const &e)
+    catch (pdal_error const &)
     {
         return false;
     }
@@ -352,7 +350,7 @@ bool PgWriter::CheckPostGISExists()
     {
         pg_execute(m_session, q);
     }
-    catch (pdal_error const &e)
+    catch (pdal_error const &)
     {
         return false;
     }
@@ -369,11 +367,10 @@ bool PgWriter::CheckTableExists(std::string const& name)
     log()->get(LogLevel::Debug) << "checking for table '" << name <<
         "' existence ... " << std::endl;
 
-    char *count_str = pg_query_once(m_session, oss.str());
-    if (!count_str)
+    std::string count_str = pg_query_once(m_session, oss.str());
+    if (count_str.empty())
         throw pdal_error("Unable to check for the existence of `pg_table`");
-    int count = atoi(count_str);
-    free(count_str);
+    int count = atoi(count_str.c_str());
 
     if (count == 1)
         return true;

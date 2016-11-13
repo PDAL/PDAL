@@ -113,7 +113,7 @@ public:
     OCILobLocator *locator;
     Connection m_connection;
     sdo_pc* pc;
-    int32_t m_num_remaining;
+    point_count_t m_num_remaining;
     bool m_fetched;  // Set when fetched but not initialized
 };
 typedef std::shared_ptr<Block> BlockPtr;
