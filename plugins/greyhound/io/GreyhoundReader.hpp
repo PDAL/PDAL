@@ -75,7 +75,7 @@ private:
     std::size_t m_baseDepth;
     std::size_t m_sparseDepth;
     Json::Value m_info;
-    std::unique_ptr<Json::Value> m_schema;
+    Json::Value m_schema;
     std::string m_filterString;
     std::unique_ptr<greyhound::Point> m_scale;
     std::unique_ptr<greyhound::Point> m_offset;
@@ -105,7 +105,7 @@ private:
     virtual void initialize(PointTableRef table) override;
     virtual void addArgs(ProgramArgs& args) override;
     virtual void addDimensions(PointLayoutPtr layout) override;
-    virtual void ready(PointTableRef table) override { }
+    virtual void prepared(PointTableRef table) override;
     virtual point_count_t read(PointViewPtr view, point_count_t count) override;
     virtual QuickInfo inspect() override;
     virtual void done(PointTableRef table) override { }

@@ -82,9 +82,20 @@ namespace
         return Json::writeString(builder, json);
     }
 
-    DimTypeList extractSchema(const Json::Value& json)
+    DimTypeList schemaToDims(const Json::Value& json)
     {
         DimTypeList output;
+
+        // XYZ might be natively stored as integral values, typically when the
+        // disk-storage for Entwine is scaled/offset.  Since we're abstracting
+        // this out, always ask for XYZ as doubles.
+        auto isXyz([](Dimension::Id id)
+        {
+            return
+                id == Dimension::Id::X ||
+                id == Dimension::Id::Y ||
+                id == Dimension::Id::Z;
+        });
 
         if (!json.isNull() && json.isArray())
         {
@@ -100,13 +111,32 @@ namespace
                 const int size(jsonDim["size"].asUInt64());
 
                 const Dimension::Type type(
-                        static_cast<Dimension::Type>(baseType | size));
+                        isXyz(id) ?
+                            Dimension::Type::Double :
+                            static_cast<Dimension::Type>(baseType | size));
 
                 output.emplace_back(id, type);
             }
         }
 
         return output;
+    }
+
+    Json::Value layoutToSchema(const PointLayout& layout)
+    {
+        Json::Value result;
+
+        for (const Dimension::Id& id : layout.dims())
+        {
+            const auto& d(*layout.dimDetail(id));
+            Json::Value j;
+            j["name"] = Dimension::name(d.id());
+            j["type"] = Dimension::toName(base(d.type()));
+            j["size"] = static_cast<int>(Dimension::size(d.type()));
+            result.append(j);
+        }
+
+        return result;
     }
 
     greyhound::Bounds zoom(
@@ -269,26 +299,7 @@ void GreyhoundReader::initialize(PointTableRef table)
             std::endl;
     }
 
-    bool modifiedSchema(false);
-    m_schema.reset(new Json::Value(m_info["schema"]));
-
-    for (auto& dim : *m_schema)
-    {
-        const std::string name(dim["name"].asString());
-        if (name == "X" || name == "Y" || name == "Z")
-        {
-            if (dim["type"] != "floating" || dim["size"] != 8)
-            {
-                modifiedSchema = true;
-                dim["type"] = "floating";
-                dim["size"] = 8;
-            }
-        }
-    }
-
-    if (!modifiedSchema) m_schema.reset();
-
-    m_dims = extractSchema(m_schema ? *m_schema : m_info["schema"]);
+    m_dims = schemaToDims(m_info["schema"]);
     m_baseDepth = m_info["baseDepth"].asUInt64();
     m_sparseDepth = std::log(m_info["numPoints"].asUInt64()) / std::log(4) + 1;
 
@@ -305,6 +316,17 @@ void GreyhoundReader::addArgs(ProgramArgs& args)
     args.add("tile_path", "Index-optimized tile selection", m_pathsArg);
     args.add("filter", "Query filter", m_filterArg);
     args.add("threads", "Number of threads for HTTP requests", m_threadsArg, 4);
+}
+
+void GreyhoundReader::prepared(PointTableRef table)
+{
+    // Note that we must construct the schema (which drives the formatting of
+    // Greyhound's responses) here, rather than just from the 'info' that comes
+    // back from Greyhound.  This is because other Reader instances may add
+    // dimensions that don't exist in this resource.  Greyhound will zero-fill
+    // these in the responses, which will compress to pretty much nothing.
+    m_schema = layoutToSchema(*table.layout());
+    log()->get(LogLevel::Debug) << "Schema: " << m_schema << std::endl;
 }
 
 void GreyhoundReader::addDimensions(PointLayoutPtr layout)
@@ -601,10 +623,7 @@ point_count_t GreyhoundReader::fetchData(
         log()->get(LogLevel::Debug) << "Reading: " << url.str() << std::endl;
     }
 
-    if (m_schema)
-    {
-        url << "&schema=" << arbiter::http::sanitize(write(*m_schema));
-    }
+    url << "&schema=" << arbiter::http::sanitize(write(m_schema));
 
     auto response(m_arbiter->getBinary(url.str()));
     const std::size_t pointSize(view.layout()->pointSize());
@@ -635,6 +654,11 @@ point_count_t GreyhoundReader::fetchData(
     }
 
     lock.unlock();
+
+    // Because we are requesting the data in the exact PointLayout of our
+    // PointView, we can just decompress directly into that memory.  Any
+    // non-existent dimensions (for example those added by other readers in the
+    // pipeline) will be zero-filled.
 
 #ifdef PDAL_HAVE_LAZPERF
     SignedLazPerfBuf buffer(response);
