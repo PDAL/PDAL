@@ -1,0 +1,22 @@
+{
+  "pipeline": [
+    {
+      "filename": "@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las",
+      "tag": "A"
+    },
+    {
+      "filename": "@CMAKE_SOURCE_DIR@/test/data/las/1.2-with-color.las",
+      "tag": "B"
+    },
+    {
+      "type":"writers.las",
+      "filename": "out1.las",
+      "inputs": ["A", "B"]
+    },
+    {
+      "type":"writers.las",
+      "filename": "out2.las",
+      "inputs": "A"
+    }
+  ]
+}
