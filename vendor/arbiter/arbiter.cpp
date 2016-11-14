@@ -1419,7 +1419,7 @@ namespace
                         std::isspace(c) &&
                         (out.empty() || std::isspace(out.back())))
                     {
-                        return out;
+                        return out + "";
                     }
                     else
                     {
