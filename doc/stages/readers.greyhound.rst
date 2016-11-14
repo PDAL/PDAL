@@ -77,7 +77,7 @@ _`filter`
 
 .. code-block:: json
 
-    filter={"$or":[
+    {"$or":[
         {"Red":{"$gt":200}},
         {"Blue":{"$gt":120,"$lt":130}},
         {"Classification":{"$nin":[2,3]}}

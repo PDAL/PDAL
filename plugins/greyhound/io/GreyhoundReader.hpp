@@ -86,6 +86,7 @@ private:
     std::size_t m_taskId = 0;
     std::queue<std::function<void()>> m_tasks;
     std::map<std::size_t, std::function<void()>> m_running;
+    std::unique_ptr<std::string> m_error;
 
     void inc(point_count_t n)
     {

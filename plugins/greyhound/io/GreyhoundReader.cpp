@@ -431,7 +431,23 @@ void GreyhoundReader::launchPooledReads(
 
             pool.add([this, taskId, &task]()
             {
-                task();
+                try
+                {
+                    task();
+                }
+                catch (std::runtime_error& e)
+                {
+                    std::lock_guard<std::mutex> lock(m_mutex);
+                    m_error.reset(new std::string(
+                                std::string("Greyhound read failed: ") +
+                                e.what()));
+                }
+                catch (...)
+                {
+                    std::lock_guard<std::mutex> lock(m_mutex);
+                    m_error.reset(new std::string(
+                                "Greyhound read failed: unknown error"));
+                }
 
                 std::lock_guard<std::mutex> lock(m_mutex);
                 m_running.erase(taskId);
@@ -442,6 +458,10 @@ void GreyhoundReader::launchPooledReads(
             lock.unlock();
             std::this_thread::sleep_for(std::chrono::milliseconds(500));
         }
+
+        // If any tasks failed, rethrow in the main thread.
+        lock.lock();
+        if (m_error) throw pdal_error(*m_error);
     }
 }
 
