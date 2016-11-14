@@ -87,7 +87,7 @@ enum class Type
     Signed16 = Utils::toNative(BaseType::Signed) | 2,
     Unsigned32 = Utils::toNative(BaseType::Unsigned) | 4,
     Signed32 = Utils::toNative(BaseType::Signed) | 4,
-    Unsigned64 = Utils::toNative(BaseType::Unsigned )| 8,
+    Unsigned64 = Utils::toNative(BaseType::Unsigned) | 8,
     Signed64 = Utils::toNative(BaseType::Signed) | 8,
     Float = Utils::toNative(BaseType::Floating) | 4,
     Double = Utils::toNative(BaseType::Floating) | 8
