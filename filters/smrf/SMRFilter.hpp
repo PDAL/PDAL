@@ -79,23 +79,13 @@ private:
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
 
-    // clamp is used to help ensure that row and column indices remain
-    // within valid bounds.
-    int clamp(int t, int min, int max);
-
     // getColIndex gets the corresponding column index for a given x.
     int getColIndex(double x, double cell_size);
 
     // getRowIndex gets the corresponding row index for a given y.
     int getRowIndex(double y, double cell_size);
 
-    // matrixOpen applies a morphological opening with the given radius.
-    MatrixXd matrixOpen(MatrixXd data, int radius);
-
     MatrixXd inpaintKnn(MatrixXd cx, MatrixXd cy, MatrixXd cz);
-
-    // padMatrx pads the matrix symmetrically with given radius.
-    MatrixXd padMatrix(MatrixXd data, int radius);
 
     // processGround implements the SMRF algorithm, returning a vector
     // of ground indices.

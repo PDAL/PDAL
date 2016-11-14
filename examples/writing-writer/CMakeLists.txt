@@ -6,4 +6,4 @@ include_directories(${PDAL_INCLUDE_DIRS})
 
 set(CMAKE_CXX_FLAGS "-std=c++11")
 add_library(pdal_plugin_writer_mywriter SHARED MyWriter.cpp)
-target_link_libraries(pdal_plugin_writer_mywriter ${PDAL_LIBRARIES})
+target_link_libraries(pdal_plugin_writer_mywriter PRIVATE ${PDAL_LIBRARIES})

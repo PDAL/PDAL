@@ -36,6 +36,11 @@
 
 #include <iostream>
 #include <sstream>
+#ifndef WIN32
+#include <glob.h>
+#else
+#include <Windows.h>
+#endif
 
 #include <boost/filesystem.hpp>
 
@@ -44,7 +49,6 @@
 #include <pdal/pdal_types.hpp>
 
 using namespace std;
-
 
 namespace pdal
 {
@@ -82,7 +86,7 @@ istream *openFile(string const& filename, bool asBinary)
         return &cin;
 
     if (!FileUtils::fileExists(name))
-        return NULL;
+        return nullptr;
 
     ios::openmode mode = ios::in;
     if (asBinary)
@@ -92,7 +96,7 @@ istream *openFile(string const& filename, bool asBinary)
     if (!ifs->good())
     {
         delete ifs;
-        return NULL;
+        return nullptr;
     }
     return ifs;
 }
@@ -111,7 +115,7 @@ ostream *createFile(string const& name, bool asBinary)
     if (!ofs->good())
     {
         delete ofs;
-        return NULL;
+        return nullptr;
     }
     return ofs;
 }
@@ -136,9 +140,9 @@ void deleteDirectory(const string& dirname)
 }
 
 
-StringList directoryList(const string& dir)
+std::vector<std::string> directoryList(const string& dir)
 {
-    StringList files;
+    std::vector<std::string> files;
 
     pdalboost::filesystem::directory_iterator it(dir);
     pdalboost::filesystem::directory_iterator end;
@@ -183,9 +187,6 @@ void closeFile(istream* in)
 
 bool deleteFile(const string& file)
 {
-    if (!fileExists(file))
-        return false;
-
     return pdalboost::filesystem::remove(file);
 }
 
@@ -345,6 +346,40 @@ std::string extension(const std::string& filename)
     if (idx == std::string::npos)
         return std::string();
     return filename.substr(idx);
+}
+
+
+std::vector<std::string> glob(std::string path)
+{
+    std::vector<std::string> filenames;
+#ifdef WIN32
+    WIN32_FIND_DATA ffd;
+    HANDLE handle = FindFirstFile(path.c_str(), &ffd);
+
+    if (INVALID_HANDLE_VALUE == handle)
+        return filenames;
+
+    size_t found = path.find_last_of("/\\");
+    std::string dir = path.substr(0, found);
+
+    do
+    {
+        std::string filename = dir + "\\" + ffd.cFileName;
+        filenames.push_back(filename);
+    } while (FindNextFile(handle, &ffd) != 0);
+    FindClose(handle);
+#else
+    glob_t glob_result;
+
+    ::glob(path.c_str(), GLOB_NOSORT, NULL, &glob_result);
+    for (unsigned int i = 0; i < glob_result.gl_pathc; ++i)
+    {
+        std::string filename = glob_result.gl_pathv[i];
+        filenames.push_back(filename);
+    }
+    globfree(&glob_result);
+#endif
+    return filenames;
 }
 
 } // namespace FileUtils

@@ -80,7 +80,7 @@ public:
     {
         m_vals[i].m_consumed = true;
         if (i == m_unconsumedStart)
-            while (i < m_vals.size() && consumed(++i))
+            while (i < m_vals.size() - 1 && consumed(++i))
                 m_unconsumedStart++;
     }
 

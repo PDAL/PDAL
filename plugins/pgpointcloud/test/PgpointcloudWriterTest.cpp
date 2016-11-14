@@ -112,7 +112,7 @@ protected:
         {
             executeOnMasterDb(createDbSql.str());
         }
-        catch( const pdal_error& error )
+        catch( const pdal_error& )
         {
             m_bSkipTests = true;
             return;
@@ -124,7 +124,7 @@ protected:
         {
             executeOnTestDb("CREATE EXTENSION pointcloud");
         }
-        catch( const pdal_error& error )
+        catch( const pdal_error& )
         {
             m_bSkipTests = true;
             return;

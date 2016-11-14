@@ -34,7 +34,7 @@
 
 #include "ApproximateCoplanarFilter.hpp"
 
-#include <pdal/Eigen.hpp>
+#include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
@@ -82,13 +82,10 @@ void ApproximateCoplanarFilter::filter(PointView& view)
     for (PointId i = 0; i < view.size(); ++i)
     {
         // find the k-nearest neighbors
-        double x = view.getFieldAs<double>(Dimension::Id::X, i);
-        double y = view.getFieldAs<double>(Dimension::Id::Y, i);
-        double z = view.getFieldAs<double>(Dimension::Id::Z, i);
-        auto ids = kdi.neighbors(x, y, z, m_knn);
+        auto ids = kdi.neighbors(i, m_knn);
 
         // compute covariance of the neighborhood
-        auto B = computeCovariance(view, ids);
+        auto B = eigen::computeCovariance(view, ids);
 
         // perform the eigen decomposition
         SelfAdjointEigenSolver<Matrix3f> solver(B);

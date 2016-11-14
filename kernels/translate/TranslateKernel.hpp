@@ -61,14 +61,17 @@ public:
 private:
     TranslateKernel();
     virtual void addSwitches(ProgramArgs& args);
+    void makeJSONPipeline();
+    void makeArgPipeline();
 
     std::string m_inputFile;
     std::string m_outputFile;
     std::string m_pipelineOutput;
     std::string m_readerType;
-    std::vector<std::string> m_filterType;
+    StringList m_filterType;
     std::string m_writerType;
     std::string m_filterJSON;
+    std::string m_metadataFile;
 };
 
 } // namespace pdal

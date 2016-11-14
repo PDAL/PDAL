@@ -157,13 +157,12 @@ uint32_t PgReader::fetchPcid() const
             pg_quote_literal(m_schema_name);
     }
 
-    char *pcid_str = pg_query_once(m_session, oss.str());
+    std::string pcid_str = pg_query_once(m_session, oss.str());
 
     uint32_t pcid = 0;
-    if (pcid_str)
+    if (pcid_str.size())
     {
-       pcid = atoi(pcid_str);
-       free(pcid_str);
+       pcid = atoi(pcid_str.c_str());
     }
 
     if (!pcid) // Are pcid == 0 valid?
@@ -192,12 +191,11 @@ void PgReader::addDimensions(PointLayoutPtr layout)
     std::ostringstream oss;
     oss << "SELECT schema FROM pointcloud_formats WHERE pcid = " << pcid;
 
-    char *xmlStr = pg_query_once(m_session, oss.str());
-    if (!xmlStr)
+    std::string xmlStr = pg_query_once(m_session, oss.str());
+    if (xmlStr.empty())
         throw pdal_error("Unable to fetch schema from `pointcloud_formats`");
 
     loadSchema(layout, xmlStr);
-    free(xmlStr);
 }
 
 
@@ -211,11 +209,11 @@ pdal::SpatialReference PgReader::fetchSpatialReference() const
     std::ostringstream oss;
     oss << "SELECT srid FROM pointcloud_formats WHERE pcid = " << pcid;
 
-    char *srid_str = pg_query_once(m_session, oss.str());
-    if (! srid_str)
+    std::string srid_str = pg_query_once(m_session, oss.str());
+    if (srid_str.empty())
         throw pdal_error("Unable to fetch srid for this table and column");
 
-    int32_t srid = atoi(srid_str);
+    int32_t srid = atoi(srid_str.c_str());
     log()->get(LogLevel::Debug) << "     got SRID = " << srid << std::endl;
 
     oss.str("");

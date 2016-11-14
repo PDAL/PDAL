@@ -484,7 +484,7 @@ std::string Polygon::validReason() const
 std::string Polygon::wkt(double precision, bool bOutputZ) const
 {
     GEOSWKTWriter *writer = GEOSWKTWriter_create_r(m_ctx);
-    GEOSWKTWriter_setRoundingPrecision_r(m_ctx, writer, precision);
+    GEOSWKTWriter_setRoundingPrecision_r(m_ctx, writer, (int)precision);
     if (bOutputZ)
         GEOSWKTWriter_setOutputDimension_r(m_ctx, writer, 3);
 

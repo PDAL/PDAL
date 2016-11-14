@@ -197,10 +197,9 @@ void PlyWriter::done(PointTableRef table)
     }
 
     if (!ply_close(m_ply))
-    {
         throw pdal_error("Error closing ply file");
-    }
-}
 
+    getMetadata().addList("filename", m_filename);
+}
 
 }

@@ -59,10 +59,12 @@ public:
 private:
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
+    virtual void prepared(PointTableRef table);
     virtual void ready(PointTableRef table);
     virtual void write(const PointViewPtr data);
     virtual void done(PointTableRef table);
 
+    std::string m_filename;
     std::string m_drivername;
     BOX2D m_bounds;
     double m_edgeLength;

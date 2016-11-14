@@ -53,6 +53,7 @@ std::string MatlabWriter::getName() const { return s_info.name; }
 
 void MatlabWriter::addArgs(ProgramArgs& args)
 {
+    args.add("filename", "Output filename", m_filename).setPositional();
     args.add("output_dims", "Output dimensions", m_outputDims);
 }
 
@@ -122,7 +123,8 @@ void MatlabWriter::write(const PointViewPtr view)
     mxArray * points = mxCreateDoubleMatrix(nPoints, nDimensions, mxREAL);
     if (!points) {
         std::stringstream ss;
-        ss << "Could not create a points array with dimensions " << nPoints << "x" << nDimensions;
+        ss << "Could not create a points array with dimensions " <<
+            nPoints << "x" << nDimensions;
         throw pdal_error(ss.str());
     }
 
@@ -158,6 +160,7 @@ void MatlabWriter::done(PointTableRef table)
         ss << "Unsuccessful write: " << m_filename;
         throw pdal_error(ss.str());
     }
+    getMetadata().addList("filename", m_filename);
 }
 
 

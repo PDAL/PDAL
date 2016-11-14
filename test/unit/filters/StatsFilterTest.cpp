@@ -271,3 +271,36 @@ TEST(Stats, enum)
         d += (100.0 / 9);
     }
 }
+
+TEST(Stats, global)
+{
+    BOX3D bounds(1.0, 0.0, 0.0, 10.0, 100.0, 1000.0);
+    Options ops;
+    ops.add("bounds", bounds);
+    ops.add("count", 10);
+    ops.add("mode", "ramp");
+
+    FauxReader reader;
+    reader.setOptions(ops);
+
+    Options filterOps;
+    filterOps.add("dimensions", "X, Y, Z");
+    filterOps.add("global", "Z, Y, X");
+    filterOps.add("count", "Y");
+
+    StatsFilter filter;
+    filter.setInput(reader);
+    filter.setOptions(filterOps);
+
+    PointTable table;
+    filter.prepare(table);
+    filter.execute(table);
+
+    const stats::Summary& statsZ = filter.getStats(Dimension::Id::Z);
+
+    EXPECT_DOUBLE_EQ(statsZ.median(), 555.55555555555554);
+	EXPECT_DOUBLE_EQ(statsZ.mad(), 333.33333333333331);
+	EXPECT_DOUBLE_EQ(statsZ.minimum(), 0.0);
+	EXPECT_DOUBLE_EQ(statsZ.maximum(), 1000.0);
+
+}

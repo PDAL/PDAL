@@ -34,9 +34,12 @@
 
 #include "PMFFilter.hpp"
 
+#include <pdal/EigenUtils.hpp>
 #include <pdal/KDIndex.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+
+#include <Eigen/Dense>
 
 namespace pdal
 {
@@ -85,9 +88,7 @@ std::vector<double> PMFFilter::morphOpen(PointViewPtr view, float radius)
     // erode
     for (PointId i = 0; i < np; ++i)
     {
-        double x = view->getFieldAs<double>(Dimension::Id::X, i);
-        double y = view->getFieldAs<double>(Dimension::Id::Y, i);
-        auto ids = index.radius(x, y, radius);
+        auto ids = index.radius(i, radius);
 
         // neighborMap.insert(std::pair<PointId, std::vector<PointId>(i, ids));
         neighborMap[i] = ids;
@@ -120,70 +121,158 @@ std::vector<double> PMFFilter::morphOpen(PointViewPtr view, float radius)
 
 std::vector<PointId> PMFFilter::processGround(PointViewPtr view)
 {
-    point_count_t np(view->size());
-
     // Compute the series of window sizes and height thresholds
-    std::vector<float> height_thresholds;
-    std::vector<float> window_sizes;
-    int iteration = 0;
-    float window_size = 0.0f;
-    float height_threshold = 0.0f;
+    std::vector<float> htvec;
+    std::vector<float> wsvec;
+    int iter = 0;
+    float ws = 0.0f;
+    float ht = 0.0f;
 
-    while (window_size < m_maxWindowSize)
+    while (ws < m_maxWindowSize)
     {
         // Determine the initial window size.
         if (1) // exponential
-            window_size = m_cellSize * (2.0f * std::pow(2, iteration) + 1.0f);
+            ws = m_cellSize * (2.0f * std::pow(2, iter) + 1.0f);
         else
-            window_size = m_cellSize * (2.0f * (iteration+1) * 2 + 1.0f);
+            ws = m_cellSize * (2.0f * (iter+1) * 2 + 1.0f);
 
         // Calculate the height threshold to be used in the next iteration.
-        if (iteration == 0)
-            height_threshold = m_initialDistance;
+        if (iter == 0)
+            ht = m_initialDistance;
         else
-            height_threshold = m_slope * (window_size - window_sizes[iteration-1]) * m_cellSize + m_initialDistance;
+            ht = m_slope * (ws - wsvec[iter-1]) * m_cellSize + m_initialDistance;
 
         // Enforce max distance on height threshold
-        if (height_threshold > m_maxDistance)
-            height_threshold = m_maxDistance;
+        if (ht > m_maxDistance)
+            ht = m_maxDistance;
 
-        window_sizes.push_back(window_size);
-        height_thresholds.push_back(height_threshold);
+        wsvec.push_back(ws);
+        htvec.push_back(ht);
 
-        iteration++;
+        iter++;
     }
 
     std::vector<PointId> groundIdx;
-    for (PointId i = 0; i < np; ++i)
+    for (PointId i = 0; i < view->size(); ++i)
         groundIdx.push_back(i);
 
     // Progressively filter ground returns using morphological open
-    for (size_t j = 0; j < window_sizes.size(); ++j)
+    for (size_t j = 0; j < wsvec.size(); ++j)
     {
         // Limit filtering to those points currently considered ground returns
         PointViewPtr ground = view->makeNew();
         for (PointId i = 0; i < groundIdx.size(); ++i)
             ground->appendPoint(*view, groundIdx[i]);
 
-        printf("      Iteration %ld (height threshold = %f, window size = %f)...",
-               j, height_thresholds[j], window_sizes[j]);
+        log()->get(LogLevel::Debug) <<  "Iteration " << j
+                                    << " (height threshold = " << htvec[j]
+                                    << ", window size = " << wsvec[j]
+                                    << ")...\n";
 
-        // Create new cloud to hold the filtered results. Apply the morphological
-        // opening operation at the current window size.
-        auto maxZ = morphOpen(ground, window_sizes[j]*0.5);
+        // Create new cloud to hold the filtered results. Apply the
+        // morphological opening operation at the current window size.
+        auto maxZ = morphOpen(ground, wsvec[j]*0.5);
 
         // Find indices of the points whose difference between the source and
         // filtered point clouds is less than the current height threshold.
-        std::vector<PointId> pt_indices;
+        std::vector<PointId> groundNewIdx;
         for (PointId i = 0; i < ground->size(); ++i)
         {
             double z0 = ground->getFieldAs<double>(Dimension::Id::Z, i);
-            double z1 = maxZ[i];
-            float diff = z0 - z1;
-            if (diff < height_thresholds[j])
-                pt_indices.push_back(groundIdx[i]);
+            float diff = z0 - maxZ[i];
+            if (diff < htvec[j])
+                groundNewIdx.push_back(groundIdx[i]);
         }
-        groundIdx.swap(pt_indices);
+        groundIdx.swap(groundNewIdx);
+        
+        log()->get(LogLevel::Debug) << "Ground now has " << groundIdx.size()
+                                    << " points.\n";
+    }
+
+    return groundIdx;
+}
+
+std::vector<PointId> PMFFilter::processGroundApprox(PointViewPtr view)
+{
+    using namespace Eigen;
+
+    BOX2D bounds;
+    view->calculateBounds(bounds);
+
+    double extent_x = floor(bounds.maxx) - ceil(bounds.minx);
+    double extent_y = floor(bounds.maxy) - ceil(bounds.miny);
+
+    int cols = static_cast<int>(ceil(extent_x/m_cellSize)) + 1;
+    int rows = static_cast<int>(ceil(extent_y/m_cellSize)) + 1;
+
+    // Compute the series of window sizes and height thresholds
+    std::vector<float> htvec;
+    std::vector<float> wsvec;
+    int iter = 0;
+    float ws = 0.0f;
+    float ht = 0.0f;
+
+    while (ws < m_maxWindowSize)
+    {
+        // Determine the initial window size.
+        if (1) // exponential
+            ws = m_cellSize * (2.0f * std::pow(2, iter) + 1.0f);
+        else
+            ws = m_cellSize * (2.0f * (iter+1) * 2 + 1.0f);
+
+        // Calculate the height threshold to be used in the next iteration.
+        if (iter == 0)
+            ht = m_initialDistance;
+        else
+            ht = m_slope * (ws - wsvec[iter-1]) * m_cellSize + m_initialDistance;
+
+        // Enforce max distance on height threshold
+        if (ht > m_maxDistance)
+            ht = m_maxDistance;
+
+        wsvec.push_back(ws);
+        htvec.push_back(ht);
+
+        iter++;
+    }
+
+    std::vector<PointId> groundIdx;
+    for (PointId i = 0; i < view->size(); ++i)
+        groundIdx.push_back(i);
+
+    MatrixXd ZImin = eigen::createDSM(*view.get(), rows, cols, m_cellSize,
+                                      bounds);
+
+    // Progressively filter ground returns using morphological open
+    for (size_t j = 0; j < wsvec.size(); ++j)
+    {
+        log()->get(LogLevel::Debug) <<  "Iteration " << j
+                                    << " (height threshold = " << htvec[j]
+                                    << ", window size = " << wsvec[j]
+                                    << ")...\n";
+
+        MatrixXd mo = eigen::matrixOpen(ZImin, 0.5*(wsvec[j]-1));
+
+        std::vector<PointId> groundNewIdx;
+        for (auto p_idx : groundIdx)
+        {
+            double x = view->getFieldAs<double>(Dimension::Id::X, p_idx);
+            double y = view->getFieldAs<double>(Dimension::Id::Y, p_idx);
+            double z = view->getFieldAs<double>(Dimension::Id::Z, p_idx);
+
+            int r = static_cast<int>(std::floor((y-bounds.miny) / m_cellSize));
+            int c = static_cast<int>(std::floor((x-bounds.minx) / m_cellSize));
+
+            float diff = z - mo(r, c);
+            if (diff < htvec[j])
+                groundNewIdx.push_back(p_idx);
+        }
+
+        ZImin.swap(mo);
+        groundIdx.swap(groundNewIdx);
+        
+        log()->get(LogLevel::Debug) << "Ground now has " << groundIdx.size()
+                                    << " points.\n";
     }
 
     return groundIdx;
@@ -196,7 +285,11 @@ PointViewSet PMFFilter::run(PointViewPtr input)
         log()->floatPrecision(8);
     log()->get(LogLevel::Debug2) << "Process PMFFilter...\n";
 
-    auto idx = processGround(input);
+    std::vector<PointId> idx;
+    if (m_approximate)
+        idx = processGroundApprox(input);
+    else
+        idx = processGround(input);
 
     PointViewSet viewSet;
     if (!idx.empty() && (m_classify || m_extract))
@@ -204,7 +297,8 @@ PointViewSet PMFFilter::run(PointViewPtr input)
 
         if (m_classify)
         {
-            log()->get(LogLevel::Debug2) << "Labeled " << idx.size() << " ground returns!\n";
+            log()->get(LogLevel::Debug2) << "Labeled " << idx.size()
+                                         << " ground returns!\n";
 
             // set the classification label of ground returns as 2
             // (corresponding to ASPRS LAS specification)
@@ -218,7 +312,8 @@ PointViewSet PMFFilter::run(PointViewPtr input)
 
         if (m_extract)
         {
-            log()->get(LogLevel::Debug2) << "Extracted " << idx.size() << " ground returns!\n";
+            log()->get(LogLevel::Debug2) << "Extracted " << idx.size()
+                                         << " ground returns!\n";
 
             // create new PointView containing only ground returns
             PointViewPtr output = input->makeNew();

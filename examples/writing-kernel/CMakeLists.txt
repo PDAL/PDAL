@@ -8,4 +8,4 @@ include_directories(/Users/chambbj/loki/pdal/repo/kernels)
 
 set(CMAKE_CXX_FLAGS "-std=c++11")
 add_library(pdal_plugin_kernel_mykernel SHARED MyKernel.cpp)
-target_link_libraries(pdal_plugin_kernel_mykernel ${PDAL_LIBRARIES})
+target_link_libraries(pdal_plugin_kernel_mykernel PRIVATE ${PDAL_LIBRARIES})

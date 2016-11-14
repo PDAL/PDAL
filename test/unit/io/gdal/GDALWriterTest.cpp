@@ -37,6 +37,7 @@
 #include <pdal/util/FileUtils.hpp>
 
 #include "GDALWriter.hpp"
+#include "LasReader.hpp"
 #include "TextReader.hpp"
 #include "Support.hpp"
 
@@ -48,7 +49,7 @@ using namespace pdal;
 namespace
 {
 
-void RunGdalReader(const Options& wo, const std::string& outfile,
+void runGdalWriter(const Options& wo, const std::string& outfile,
     const std::string& values)
 {
     FileUtils::deleteFile(outfile);
@@ -115,7 +116,7 @@ TEST(GDALWriterTest, min)
         "2.000     3.000     4.000     4.500     5.500 "
         "1.000     2.000     3.000     4.000     5.000 ";
 
-    RunGdalReader(wo, outfile, output);
+    runGdalWriter(wo, outfile, output);
 }
 
 TEST(GDALWriterTest, minWindow)
@@ -137,7 +138,7 @@ TEST(GDALWriterTest, minWindow)
         "2.000     3.000     4.000     4.500     5.500 "
         "1.000     2.000     3.000     4.000     5.000 ";
 
-    RunGdalReader(wo, outfile, output);
+    runGdalWriter(wo, outfile, output);
 }
 
 TEST(GDALWriterTest, max)
@@ -158,7 +159,7 @@ TEST(GDALWriterTest, max)
         "2.000     3.000     4.000     5.500     6.500 "
         "1.000     2.000     3.000     4.500     5.500 ";
 
-    RunGdalReader(wo, outfile, output);
+    runGdalWriter(wo, outfile, output);
 }
 
 TEST(GDALWriterTest, maxWindow)
@@ -180,7 +181,7 @@ TEST(GDALWriterTest, maxWindow)
         "2.000     3.000     4.000     5.500     6.500 "
         "1.000     2.000     3.000     4.500     5.500 ";
 
-    RunGdalReader(wo, outfile, output);
+    runGdalWriter(wo, outfile, output);
 }
 
 TEST(GDALWriterTest, mean)
@@ -201,7 +202,7 @@ TEST(GDALWriterTest, mean)
         "2.000     3.000     4.000     4.875     5.875 "
         "1.000     2.000     3.000     4.250     5.250 ";
 
-    RunGdalReader(wo, outfile, output);
+    runGdalWriter(wo, outfile, output);
 }
 
 TEST(GDALWriterTest, meanWindow)
@@ -223,7 +224,7 @@ TEST(GDALWriterTest, meanWindow)
         "2.000     3.000     4.000     4.875     5.875 "
         "1.000     2.000     3.000     4.250     5.250 ";
 
-    RunGdalReader(wo, outfile, output);
+    runGdalWriter(wo, outfile, output);
 }
 
 TEST(GDALWriterTest, idw)
@@ -244,7 +245,7 @@ TEST(GDALWriterTest, idw)
         "2.000     3.000     4.000     5.000     6.000 "
         "1.000     2.000     3.000     4.000     5.000 ";
 
-    RunGdalReader(wo, outfile, output);
+    runGdalWriter(wo, outfile, output);
 }
 
 TEST(GDALWriterTest, idwWindow)
@@ -266,7 +267,7 @@ TEST(GDALWriterTest, idwWindow)
         "2.000     3.000     4.000     5.000     6.000 "
         "1.000     2.000     3.000     4.000     5.000 ";
 
-    RunGdalReader(wo, outfile, output);
+    runGdalWriter(wo, outfile, output);
 }
 
 TEST(GDALWriterTest, count)
@@ -287,7 +288,7 @@ TEST(GDALWriterTest, count)
         "1.000     1.000     1.000     4.000     4.000 "
         "1.000     1.000     1.000     2.000     2.000 ";
 
-    RunGdalReader(wo, outfile, output);
+    runGdalWriter(wo, outfile, output);
 }
 
 TEST(GDALWriterTest, stdev)
@@ -308,7 +309,7 @@ TEST(GDALWriterTest, stdev)
         "0.000     0.000     0.000     0.415     0.415 "
         "0.000     0.000     0.000     0.250     0.250 ";
 
-    RunGdalReader(wo, outfile, output);
+    runGdalWriter(wo, outfile, output);
 }
 
 TEST(GDALWriterTest, stdevWindow)
@@ -330,5 +331,45 @@ TEST(GDALWriterTest, stdevWindow)
         "0.000     0.000     0.000     0.415     0.415 "
         "0.000     0.000     0.000     0.250     0.250 ";
 
-    RunGdalReader(wo, outfile, output);
+    runGdalWriter(wo, outfile, output);
+}
+
+TEST(GDALWriterTest, additionalDim)
+{
+    std::string outfile(Support::temppath("out.tif"));
+
+    FileUtils::deleteFile(outfile);
+
+    LasReader r;
+    Options ro;
+
+    ro.add("filename", Support::datapath("las/extrabytes.las"));
+
+    GDALWriter w;
+    Options wo;
+
+    wo.add("dimension", "Flags1");
+    wo.add("resolution", 2);
+    wo.add("radius", 2.7);
+    wo.add("filename", outfile);
+
+    r.setOptions(ro);
+    w.setOptions(wo);
+    w.setInput(r);
+
+    PointTable t;
+
+    EXPECT_NO_THROW(w.prepare(t));
+
+    Options wo2;
+
+    wo2.add("dimension", "Flag55");
+    wo2.add("resolution", 2);
+    wo2.add("radius", 2.7);
+    wo2.add("filename", outfile);
+
+    w.setOptions(wo2);
+
+    PointTable t2;
+    EXPECT_THROW(w.prepare(t2), pdal_error);
 }
