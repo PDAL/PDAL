@@ -107,14 +107,14 @@ public:
       type.  No check is made to see if the dimension exists as a standard
       (non-propietary) dimension.  If the dimension has already been
       assigned as a proprietary dimension, update the type but use the
-      existing Id.  If the dimension has already been assigned with a 
+      existing Id.  If the dimension has already been assigned with a
       larger type, this does nothing.
 
       \param name  Name of the proprietary dimension to add.
       \param type  Minimum type to assign to the dimension.
       \return  ID of the new or existing dimension, or Unknown on failure.
     */
-    Dimension::Id assignDim( const std::string& name,
+    Dimension::Id assignDim(const std::string& name,
         Dimension::Type type);
 
     /**
@@ -172,7 +172,7 @@ public:
 
     /**
       Determine if the PointLayout uses the dimension with the given ID.
-      
+
       \param id  ID of the dimension to check.
       \return \c true if the layout uses the dimension, \c false otherwise.
     */
@@ -187,7 +187,7 @@ public:
 
     /**
       Get the type of a dimension.
-      
+
       \param id  ID of the dimension.
       \return  Type of the dimension.
     */
@@ -195,7 +195,7 @@ public:
 
     /**
       Get the current size in bytes of the dimension.
-      
+
       \param id  ID of the dimension.
       \return  Size of the dimension in bytes.
     */
