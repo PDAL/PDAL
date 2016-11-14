@@ -63,28 +63,30 @@ void ComputeRangeFilter::prepared(PointTableRef table)
     using namespace Dimension;
 
     const PointLayoutPtr layout(table.layout());
-    if (layout->findDim("Frame Number") == Id::Unknown)
-        throw pdal_error("ComputeRangeFilter: missing Frame Number dimension in input PointView");
-    if (layout->findDim("Pixel Number") == Id::Unknown)
-        throw pdal_error("ComputeRangeFilter: missing Pixel Number dimension in input PointView");
 
-    m_pixelNumber = layout->registerOrAssignDim("Pixel Number", Type::Double);
-    m_frameNumber = layout->registerOrAssignDim("Frame Number", Type::Double);
+    m_frameNumber = layout->findDim("Frame Number");
+    if (m_frameNumber == Id::Unknown)
+        throw pdal_error("ComputeRangeFilter: missing Frame Number dimension in input PointView");
+
+    m_pixelNumber = layout->findDim("Pixel Number");
+    if (m_pixelNumber == Id::Unknown)
+        throw pdal_error("ComputeRangeFilter: missing Pixel Number dimension in input PointView");
 }
 
 void ComputeRangeFilter::filter(PointView& view)
 {
     using namespace Dimension;
-  
+
     // Sensor coordinates are provided for each frame. The pixel number -5 is
     // used to flag the sensor position.
     log()->get(LogLevel::Debug) << "Stash sensor positions...\n";
-    struct sp {
-      double sx, sy, sz;
+    struct sp
+    {
+        double sx, sy, sz;
     };
     std::map<int, sp> smap;
     for (PointId i = 0; i < view.size(); ++i)
-    {  
+    {
         int f = view.getFieldAs<int>(m_frameNumber, i);
         int p = view.getFieldAs<int>(m_pixelNumber, i);
         if (p == -5)
@@ -94,7 +96,7 @@ void ComputeRangeFilter::filter(PointView& view)
             smap[f].sz = view.getFieldAs<double>(Id::Z, i);
         }
     }
-    
+
     // For each XYZ coordinate, we look up the sensor position for the
     // corresponding frame and compute the Euclidean distance. This is
     // recorded in the Range dimension.
