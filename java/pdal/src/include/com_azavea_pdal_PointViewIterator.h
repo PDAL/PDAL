@@ -9,6 +9,14 @@ extern "C" {
 #endif
 /*
  * Class:     com_azavea_pdal_PointViewIterator
+ * Method:    dispose
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_com_azavea_pdal_PointViewIterator_dispose
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     com_azavea_pdal_PointViewIterator
  * Method:    layout
  * Signature: ()Lcom/azavea/pdal/PointLayout;
  */

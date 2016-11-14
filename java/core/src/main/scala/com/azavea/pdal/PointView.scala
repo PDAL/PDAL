@@ -8,4 +8,6 @@ class PointView extends Native {
   // class that contains members which represent
   // the data contained in the layout.
   @native def points[T]: Iterable[T]
+
+  @native def dispose(): Unit
 }

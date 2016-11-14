@@ -4,9 +4,9 @@
 #ifndef _ACCESSORS_H_INCLUDED_
 #define _ACCESSORS_H_INCLUDED_
 
-jfieldID getHandleField(JNIEnv *env, jobject obj);
+jfieldID getHandleField(JNIEnv *, jobject);
 
-std::string getJson(JNIEnv *env, jobject obj);
+std::string getJson(JNIEnv *, jobject);
 
 template <typename T>
 T *getHandle(JNIEnv *env, jobject obj)
@@ -21,5 +21,4 @@ void setHandle(JNIEnv *env, jobject obj, T *t)
     jlong handle = reinterpret_cast<jlong>(t);
     env->SetLongField(obj, getHandleField(env, obj), handle);
 }
-
 #endif

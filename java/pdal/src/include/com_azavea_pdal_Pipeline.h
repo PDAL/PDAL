@@ -9,6 +9,14 @@ extern "C" {
 #endif
 /*
  * Class:     com_azavea_pdal_Pipeline
+ * Method:    dispose
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_com_azavea_pdal_Pipeline_dispose
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     com_azavea_pdal_Pipeline
  * Method:    initialise
  * Signature: ()V
  */
@@ -45,14 +53,6 @@ JNIEXPORT jobject JNICALL Java_com_azavea_pdal_Pipeline_pointViews__Lcom_azavea_
  * Signature: ()I
  */
 JNIEXPORT jint JNICALL Java_com_azavea_pdal_Pipeline_test
-  (JNIEnv *, jobject);
-
-/*
- * Class:     com_azavea_pdal_Pipeline
- * Method:    dispose
- * Signature: ()V
- */
-JNIEXPORT void JNICALL Java_com_azavea_pdal_Pipeline_dispose
   (JNIEnv *, jobject);
 
 /*
