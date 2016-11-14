@@ -1,5 +1,7 @@
 package com.azavea.pdal
 
+import collection.JavaConverters._
+
 object Main {
   val iter: Iterator[Int] = Set(2).toIterator
 
@@ -25,6 +27,9 @@ object Main {
     println(s"pv1.ptr: ${pv1.ptr}")
     println(s"pvi.hasNext: ${pvi.hasNext}")
     println(s"pvi.ptr: ${pvi.ptr}")
+    pv1.test()
+    val layout = pv1.layout
+    println(layout.dimTypes().asScala)
     //pvi.next()
     //println(s"pvi.hasNext: ${pvi.hasNext}")
     //println(s"pv1.ptr: ${pv1.ptr}")

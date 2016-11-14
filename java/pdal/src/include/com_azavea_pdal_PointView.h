@@ -9,10 +9,26 @@ extern "C" {
 #endif
 /*
  * Class:     com_azavea_pdal_PointView
- * Method:    dispose
- * Signature: ()V
+ * Method:    layout
+ * Signature: ()Lcom/azavea/pdal/PointLayout;
  */
-JNIEXPORT void JNICALL Java_com_azavea_pdal_PointView_dispose
+JNIEXPORT jobject JNICALL Java_com_azavea_pdal_PointView_layout
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     com_azavea_pdal_PointView
+ * Method:    size
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_com_azavea_pdal_PointView_size
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     com_azavea_pdal_PointView
+ * Method:    empty
+ * Signature: ()Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_azavea_pdal_PointView_empty
   (JNIEnv *, jobject);
 
 /*
@@ -21,6 +37,22 @@ JNIEXPORT void JNICALL Java_com_azavea_pdal_PointView_dispose
  * Signature: ()Lscala/collection/Iterable;
  */
 JNIEXPORT jobject JNICALL Java_com_azavea_pdal_PointView_points
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     com_azavea_pdal_PointView
+ * Method:    dispose
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_com_azavea_pdal_PointView_dispose
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     com_azavea_pdal_PointView
+ * Method:    test
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_com_azavea_pdal_PointView_test
   (JNIEnv *, jobject);
 
 #ifdef __cplusplus

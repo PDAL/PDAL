@@ -1,3 +1,6 @@
 package com.azavea.pdal
 
-trait PointLayout extends Native
+class PointLayout extends Native {
+  @native def dimTypes(): java.util.ArrayList[String]
+  @native def dispose(): Unit
+}
