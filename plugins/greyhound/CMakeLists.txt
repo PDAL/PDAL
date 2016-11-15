@@ -8,14 +8,17 @@ add_definitions(-DHAVE_JSONCPP=1)
 set(srcs
     io/CompressionStream.cpp
     io/GreyhoundReader.cpp
-    io/bbox.cpp
+    io/bounds.cpp
+    io/pool.cpp
 )
 
 set(incs
     io/CompressionStream.hpp
     io/GreyhoundReader.hpp
-    io/bbox.hpp
+    io/bounds.hpp
+    io/dir.hpp
     io/point.hpp
+    io/pool.hpp
 )
 
 PDAL_ADD_PLUGIN(libname reader greyhound
