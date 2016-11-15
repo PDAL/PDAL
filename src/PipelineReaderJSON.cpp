@@ -111,7 +111,6 @@ void PipelineReaderJSON::parsePipeline(Json::Value& tree)
         else if (type.empty() || Utils::startsWith(type, "writers."))
         {
             s = &m_manager.makeWriter(filename, type, options);
-            std::cerr << "Made writer with input size = " << inputs.size() << "!\n";
             for (Stage *ts : inputs)
                 s->setInput(*ts);
             inputs.clear();
