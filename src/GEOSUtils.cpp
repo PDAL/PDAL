@@ -87,6 +87,8 @@ void ErrorHandler::vaNoticeCb(const char *msg, ...)
 ErrorHandler::ErrorHandler() : m_debug(false)
 {
 #ifdef GEOS_init_r
+// #ifdef GEOS_CAPI_VERSION_MINOR > 10
+
     m_ctx = GEOS_init_r();
 
     auto errorCb [](const char *msg, void *userData)

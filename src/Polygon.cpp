@@ -41,90 +41,71 @@ namespace pdal
 {
 
 Polygon::Polygon()
-    : m_geom(0)
-    , m_prepGeom(0)
-    , m_ctx(geos::ErrorHandler::get().ctx())
+    : Geometry ()
 {
-    m_geom = GEOSGeom_createEmptyPolygon_r(m_ctx);
+    m_geom = GEOSGeom_createEmptyPolygon_r(m_geoserr.ctx());
 }
 
 
-Polygon::Polygon(const std::string& wkt_or_json, SpatialReference ref,
-        geos::ErrorHandler& err)
-    : m_geom(0)
-    , m_prepGeom(0)
-    , m_srs(ref)
-    , m_ctx(err.ctx())
+Polygon::Polygon(const std::string& wkt_or_json, SpatialReference ref)
+    : Geometry(wkt_or_json, ref)
 {
-    update(wkt_or_json, ref);
 }
 
 
-Polygon::Polygon(const std::string& wkt_or_json, SpatialReference ref,
-    GEOSContextHandle_t ctx)
-    : m_geom(0)
-    , m_prepGeom(0)
-    , m_srs(ref)
-    , m_ctx(ctx)
-{
-    update(wkt_or_json, ref);
-}
+// Polygon::Polygon(const std::string& wkt_or_json, SpatialReference ref,
+//     GEOSContextHandle_t ctx)
+//     : Geometry(wkt_or_json, ref, ctx)
+//
+// {
+// }
 
 
 Polygon::~Polygon()
 {
-    if (m_geom)
-        GEOSGeom_destroy_r(m_ctx, m_geom);
-    if (m_prepGeom)
-        GEOSPreparedGeom_destroy_r(m_ctx, m_prepGeom);
-    m_geom = 0;
-    m_prepGeom = 0;
+//     if (m_geom)
+//         GEOSGeom_destroy_r(m_geoserr.ctx(), m_geom);
+//     if (m_prepGeom)
+//         GEOSPreparedGeom_destroy_r(m_geoserr.ctx(), m_prepGeom);
+//     m_geom = 0;
+//     m_prepGeom = 0;
 }
 
 
-void Polygon::update(const std::string& wkt_or_json, SpatialReference ref)
+
+// Polygon& Polygon::operator=(const Polygon& input)
+// {
+//
+//     if (&input!= this)
+//     {
+//         m_geoserr.ctx() = input.m_geoserr.ctx();
+//         m_srs = input.m_srs;
+//         m_geom = GEOSGeom_clone_r(m_geoserr.ctx(), input.m_geom);
+//         prepare();
+//     }
+//     return *this;
+//
+//
+// }
+//
+Polygon::Polygon(const Polygon& input)
+    : Geometry(input)
 {
-    bool isJson = wkt_or_json.find("{") != wkt_or_json.npos ||
-                  wkt_or_json.find("}") != wkt_or_json.npos;
-
-    if (!isJson)
-    {
-        m_geom = GEOSGeomFromWKT_r(m_ctx, wkt_or_json.c_str());
-        if (!m_geom)
-            throw pdal_error("Unable to create geometry from input WKT");
-    }
-    else
-    {
-        // Assume it is GeoJSON and try constructing from that
-        OGRGeometryH json = OGR_G_CreateGeometryFromJson(wkt_or_json.c_str());
-
-        if (!json)
-            throw pdal_error("Unable to create geometry from "
-                "input GeoJSON");
-
-        char* gdal_wkt(0);
-        OGRErr err = OGR_G_ExportToWkt(json, &gdal_wkt);
-        m_geom = GEOSGeomFromWKT_r(m_ctx, gdal_wkt);
-        //ABELL - Why should this ever throw?  Is it worth catching if
-        //  we don't know why?
-        if (!m_geom)
-            throw pdal_error("Unable to create GEOS geometry from OGR WKT!");
-        OGRFree(gdal_wkt);
-        OGR_G_DestroyGeometry(json);
-    }
-    prepare();
+//     assert(input.m_geom != 0);
+//     m_geom = GEOSGeom_clone_r(m_geoserr.ctx(), input.m_geom);
+//     assert(m_geom != 0);
+//     m_prepGeom = 0;
+//     prepare();
 }
 
-
-void Polygon::prepare()
+Polygon::Polygon(const Geometry& input)
+    : Geometry(input)
 {
-    if (m_geom)
-    {
-        m_prepGeom = GEOSPrepare_r(m_ctx, m_geom);
-        if (!m_prepGeom)
-            throw pdal_error("unable to prepare geometry for "
-                "index-accelerated access");
-    }
+//     assert(input.m_geom != 0);
+//     m_geom = GEOSGeom_clone_r(m_geoserr.ctx(), input.m_geom);
+//     assert(m_geom != 0);
+//     m_prepGeom = 0;
+//     prepare();
 }
 
 Polygon& Polygon::operator=(const Polygon& input)
@@ -132,9 +113,9 @@ Polygon& Polygon::operator=(const Polygon& input)
 
     if (&input!= this)
     {
-        m_ctx = input.m_ctx;
+        m_geoserr = input.m_geoserr;
         m_srs = input.m_srs;
-        m_geom = GEOSGeom_clone_r(m_ctx, input.m_geom);
+        m_geom = GEOSGeom_clone_r(m_geoserr.ctx(), input.m_geom);
         prepare();
     }
     return *this;
@@ -142,40 +123,22 @@ Polygon& Polygon::operator=(const Polygon& input)
 
 }
 
-Polygon::Polygon(const Polygon& input)
-    : m_srs(input.m_srs)
-    , m_ctx(input.m_ctx)
+
+
+Polygon::Polygon(GEOSGeometry* g, const SpatialReference& srs)
+    : Geometry(g, srs)
 {
-    assert(input.m_geom != 0);
-    m_geom = GEOSGeom_clone_r(m_ctx, input.m_geom);
-    assert(m_geom != 0);
-    m_prepGeom = 0;
-    prepare();
 }
 
 
-Polygon::Polygon(GEOSGeometry* g, const SpatialReference& srs,
-    geos::ErrorHandler& err)
-    : m_geom(GEOSGeom_clone_r(err.ctx(), g))
-    , m_srs(srs)
-    , m_ctx(err.ctx())
-{
-    prepare();
-}
+// Polygon::Polygon(GEOSGeometry* g, const SpatialReference& srs,
+//     GEOSContextHandle_t ctx)
+//     : Geometry(g, srs, ctx)
+// {
+// }
 
 
-Polygon::Polygon(GEOSGeometry* g, const SpatialReference& srs,
-    GEOSContextHandle_t ctx)
-    : m_geom(GEOSGeom_clone_r(ctx, g))
-    , m_srs(srs)
-    , m_ctx(ctx)
-{
-    prepare();
-}
-
-
-Polygon::Polygon(OGRGeometryH g, const SpatialReference& srs,
-    geos::ErrorHandler& err) : m_srs(srs) , m_ctx(err.ctx())
+Polygon::Polygon(OGRGeometryH g, const SpatialReference& srs) : Geometry(g, srs)
 {
     OGRwkbGeometryType t = OGR_G_GetGeometryType(g);
 
@@ -200,12 +163,12 @@ Polygon::Polygon(OGRGeometryH g, const SpatialReference& srs,
     std::vector<unsigned char> wkb(wkbSize);
 
     ogr_g->exportToWkb(bo, wkb.data());
-    m_geom = GEOSGeomFromWKB_buf_r(m_ctx, wkb.data(), wkbSize);
+    m_geom = GEOSGeomFromWKB_buf_r(m_geoserr.ctx(), wkb.data(), wkbSize);
     prepare();
 
 }
 
-Polygon::Polygon(const BOX2D& box) : m_ctx(geos::ErrorHandler::get().ctx())
+Polygon::Polygon(const BOX2D& box) : Geometry ()
 {
     BOX3D box3(box.minx, box.miny, 0.0,
                box.maxx, box.maxy, 0.0);
@@ -213,7 +176,8 @@ Polygon::Polygon(const BOX2D& box) : m_ctx(geos::ErrorHandler::get().ctx())
 }
 
 
-Polygon::Polygon(const BOX3D& box) : m_ctx(geos::ErrorHandler::get().ctx())
+Polygon::Polygon(const BOX3D& box) : Geometry ()
+
 {
     initializeFromBounds(box);
 }
@@ -221,15 +185,15 @@ Polygon::Polygon(const BOX3D& box) : m_ctx(geos::ErrorHandler::get().ctx())
 
 void Polygon::initializeFromBounds(const BOX3D& box)
 {
-    GEOSCoordSequence* coords = GEOSCoordSeq_create_r(m_ctx, 5, 3);
+    GEOSCoordSequence* coords = GEOSCoordSeq_create_r(m_geoserr.ctx(), 5, 3);
     auto set_coordinate = [coords, this](int pt_num, const double&x,
         const double& y, const double& z)
     {
-        if (!GEOSCoordSeq_setX_r(m_ctx, coords, pt_num, x))
+        if (!GEOSCoordSeq_setX_r(m_geoserr.ctx(), coords, pt_num, x))
             throw pdal_error("unable to set x for coordinate sequence");
-        if (!GEOSCoordSeq_setY_r(m_ctx, coords, pt_num, y))
+        if (!GEOSCoordSeq_setY_r(m_geoserr.ctx(), coords, pt_num, y))
             throw pdal_error("unable to set y for coordinate sequence");
-        if (!GEOSCoordSeq_setZ_r(m_ctx, coords, pt_num, z))
+        if (!GEOSCoordSeq_setZ_r(m_geoserr.ctx(), coords, pt_num, z))
             throw pdal_error("unable to set z for coordinate sequence");
     };
 
@@ -240,12 +204,12 @@ void Polygon::initializeFromBounds(const BOX3D& box)
     set_coordinate(4, box.minx, box.miny, box.minz);
 
 
-    GEOSGeometry* ring = GEOSGeom_createLinearRing_r(m_ctx, coords);
+    GEOSGeometry* ring = GEOSGeom_createLinearRing_r(m_geoserr.ctx(), coords);
     if (!ring)
         throw pdal_error("unable to create linear ring from BOX2D");
 
 
-    m_geom = GEOSGeom_createPolygon_r(m_ctx, ring, 0, 0);
+    m_geom = GEOSGeom_createPolygon_r(m_geoserr.ctx(), ring, 0, 0);
     if (!m_geom)
         throw pdal_error("unable to create polygon from linear ring in "
             "BOX2D constructor");
@@ -264,7 +228,7 @@ Polygon Polygon::transform(const SpatialReference& ref) const
     gdal::SpatialRef toRef(ref.getWKT());
     gdal::Geometry geom(wkt(12, true), fromRef);
     geom.transform(toRef);
-    return Polygon(geom.wkt(), ref, m_ctx);
+    return Geometry(geom.wkt(), ref);
 }
 
 
@@ -272,46 +236,46 @@ Polygon Polygon::simplify(double distance_tolerance,
     double area_tolerance) const
 {
     GEOSGeometry *smoothed =
-        GEOSTopologyPreserveSimplify_r(m_ctx, m_geom, distance_tolerance);
+        GEOSTopologyPreserveSimplify_r(m_geoserr.ctx(), m_geom, distance_tolerance);
     if (!smoothed)
         throw pdal_error("Unable to simplify input geometry!");
 
     std::vector<GEOSGeometry*> geometries;
 
-    int numGeom = GEOSGetNumGeometries_r(m_ctx, smoothed);
+    int numGeom = GEOSGetNumGeometries_r(m_geoserr.ctx(), smoothed);
     for (int n = 0; n < numGeom; ++n)
     {
-        const GEOSGeometry* m = GEOSGetGeometryN_r(m_ctx, smoothed, n);
+        const GEOSGeometry* m = GEOSGetGeometryN_r(m_geoserr.ctx(), smoothed, n);
         if (!m)
             throw pdal::pdal_error("Unable to Get GeometryN");
 
-        const GEOSGeometry* ering = GEOSGetExteriorRing_r(m_ctx, m);
+        const GEOSGeometry* ering = GEOSGetExteriorRing_r(m_geoserr.ctx(), m);
         if (!ering)
             throw pdal::pdal_error("Unable to Get Exterior Ring");
 
-        GEOSGeometry* exterior = GEOSGeom_clone_r(m_ctx,
-            GEOSGetExteriorRing_r(m_ctx, m));
+        GEOSGeometry* exterior = GEOSGeom_clone_r(m_geoserr.ctx(),
+            GEOSGetExteriorRing_r(m_geoserr.ctx(), m));
         if (!exterior)
             throw pdal::pdal_error("Unable to clone exterior ring!");
 
         std::vector<GEOSGeometry*> keep_rings;
-        int numRings = GEOSGetNumInteriorRings_r(m_ctx, m);
+        int numRings = GEOSGetNumInteriorRings_r(m_geoserr.ctx(), m);
         for (int i = 0; i < numRings; ++i)
         {
             double area(0.0);
 
             const GEOSGeometry* iring =
-                GEOSGetInteriorRingN_r(m_ctx, m, i);
+                GEOSGetInteriorRingN_r(m_geoserr.ctx(), m, i);
             if (!iring)
                 throw pdal::pdal_error("Unable to Get Interior Ring");
 
-            GEOSGeometry* cring = GEOSGeom_clone_r(m_ctx, iring);
+            GEOSGeometry* cring = GEOSGeom_clone_r(m_geoserr.ctx(), iring);
             if (!cring)
                 throw pdal::pdal_error("Unable to clone interior ring!");
-            GEOSGeometry* aring = GEOSGeom_createPolygon_r(m_ctx, cring,
+            GEOSGeometry* aring = GEOSGeom_createPolygon_r(m_geoserr.ctx(), cring,
                 NULL, 0);
 
-            int errored = GEOSArea_r(m_ctx, aring, &area);
+            int errored = GEOSArea_r(m_geoserr.ctx(), aring, &area);
             if (errored == 0)
                 throw pdal::pdal_error("Unable to get area of ring!");
             if (area > area_tolerance)
@@ -320,18 +284,18 @@ Polygon Polygon::simplify(double distance_tolerance,
             }
         }
 
-        GEOSGeometry* p = GEOSGeom_createPolygon_r(m_ctx, exterior,
+        GEOSGeometry* p = GEOSGeom_createPolygon_r(m_geoserr.ctx(), exterior,
             keep_rings.data(), keep_rings.size());
         if (p == NULL)
             throw pdal_error("smooth polygon could not be created!" );
         geometries.push_back(p);
     }
 
-    GEOSGeometry* o = GEOSGeom_createCollection_r(m_ctx, GEOS_MULTIPOLYGON,
+    GEOSGeometry* o = GEOSGeom_createCollection_r(m_geoserr.ctx(), GEOS_MULTIPOLYGON,
         geometries.data(), geometries.size());
-    Polygon p(o, m_srs, m_ctx);
-    GEOSGeom_destroy_r(m_ctx, smoothed);
-    GEOSGeom_destroy_r(m_ctx, o);
+    Geometry p(o, m_srs);
+    GEOSGeom_destroy_r(m_geoserr.ctx(), smoothed);
+    GEOSGeom_destroy_r(m_geoserr.ctx(), o);
 
     return p;
 }
@@ -339,7 +303,7 @@ Polygon Polygon::simplify(double distance_tolerance,
 double Polygon::area() const
 {
     double output(0.0);
-    int errored = GEOSArea_r(m_ctx, m_geom, &output);
+    int errored = GEOSArea_r(m_geoserr.ctx(), m_geom, &output);
     if (errored == 0)
         throw pdal::pdal_error("Unable to get area of ring!");
     return output;
@@ -348,7 +312,7 @@ double Polygon::area() const
 
 bool Polygon::covers(PointRef& ref) const
 {
-    GEOSCoordSequence* coords = GEOSCoordSeq_create_r(m_ctx, 1, 3);
+    GEOSCoordSequence* coords = GEOSCoordSeq_create_r(m_geoserr.ctx(), 1, 3);
     if (!coords)
         throw pdal_error("Unable to allocate coordinate sequence");
 
@@ -356,191 +320,74 @@ bool Polygon::covers(PointRef& ref) const
     const double y = ref.getFieldAs<double>(Dimension::Id::Y);
     const double z = ref.getFieldAs<double>(Dimension::Id::Z);
 
-    if (!GEOSCoordSeq_setX_r(m_ctx, coords, 0, x))
+    if (!GEOSCoordSeq_setX_r(m_geoserr.ctx(), coords, 0, x))
         throw pdal_error("unable to set x for coordinate sequence");
-    if (!GEOSCoordSeq_setY_r(m_ctx, coords, 0, y))
+    if (!GEOSCoordSeq_setY_r(m_geoserr.ctx(), coords, 0, y))
         throw pdal_error("unable to set y for coordinate sequence");
-    if (!GEOSCoordSeq_setZ_r(m_ctx, coords, 0, z))
+    if (!GEOSCoordSeq_setZ_r(m_geoserr.ctx(), coords, 0, z))
         throw pdal_error("unable to set z for coordinate sequence");
-    GEOSGeometry* p = GEOSGeom_createPoint_r(m_ctx, coords);
+    GEOSGeometry* p = GEOSGeom_createPoint_r(m_geoserr.ctx(), coords);
     if (!p)
         throw pdal_error("unable to allocate candidate test point");
 
-    bool covers = (bool)(GEOSPreparedCovers_r(m_ctx, m_prepGeom, p));
-    GEOSGeom_destroy_r(m_ctx, p);
+    bool covers = (bool)(GEOSPreparedCovers_r(m_geoserr.ctx(), m_prepGeom, p));
+    GEOSGeom_destroy_r(m_geoserr.ctx(), p);
 
     return covers;
 }
 
-
-BOX3D Polygon::bounds() const
-{
-    uint32_t numInputDims;
-    BOX3D output;
-
-    GEOSGeometry* boundary = GEOSGeom_clone_r(m_ctx, m_geom);
-
-    // Smash out multi*
-    if (GEOSGeomTypeId_r(m_ctx, m_geom) > 3)
-        boundary = GEOSEnvelope_r(m_ctx, m_geom);
-
-    GEOSGeometry const* ring = GEOSGetExteriorRing_r(m_ctx, boundary);
-    GEOSCoordSequence const* coords = GEOSGeom_getCoordSeq_r(m_ctx, ring);
-
-    GEOSCoordSeq_getDimensions_r(m_ctx, coords, &numInputDims);
-
-    uint32_t count(0);
-    GEOSCoordSeq_getSize_r(m_ctx, coords, &count);
-
-    double x(0.0);
-    double y(0.0);
-    double z(0.0);
-    for (unsigned i = 0; i < count; ++i)
-    {
-        GEOSCoordSeq_getOrdinate_r(m_ctx, coords, i, 0, &x);
-        GEOSCoordSeq_getOrdinate_r(m_ctx, coords, i, 1, &y);
-        if (numInputDims > 2)
-            GEOSCoordSeq_getOrdinate_r(m_ctx, coords, i, 2, &z);
-        output.grow(x, y, z);
-    }
-    GEOSGeom_destroy_r(m_ctx, boundary);
-
-    return output;
-}
-
-
-bool Polygon::equals(const Polygon& p, double tolerance) const
-{
-    return (bool) GEOSEqualsExact_r(m_ctx, m_geom, p.m_geom, tolerance);
-}
-
 bool Polygon::covers(const Polygon& p) const
 {
-    return (bool) GEOSCovers_r(m_ctx, m_geom, p.m_geom);
+    return (bool) GEOSCovers_r(m_geoserr.ctx(), m_geom, p.m_geom);
 }
 
 bool Polygon::overlaps(const Polygon& p) const
 {
-    return (bool) GEOSOverlaps_r(m_ctx, m_geom, p.m_geom);
+    return (bool) GEOSOverlaps_r(m_geoserr.ctx(), m_geom, p.m_geom);
 }
 
 bool Polygon::contains(const Polygon& p) const
 {
-    return (bool) GEOSContains_r(m_ctx, m_geom, p.m_geom);
+    return (bool) GEOSContains_r(m_geoserr.ctx(), m_geom, p.m_geom);
 }
 
 bool Polygon::touches(const Polygon& p) const
 {
-    return (bool) GEOSTouches_r(m_ctx, m_geom, p.m_geom);
+    return (bool) GEOSTouches_r(m_geoserr.ctx(), m_geom, p.m_geom);
 }
 
 bool Polygon::within(const Polygon& p) const
 {
-    return (bool) GEOSWithin_r(m_ctx, m_geom, p.m_geom);
+    return (bool) GEOSWithin_r(m_geoserr.ctx(), m_geom, p.m_geom);
 }
 
 bool Polygon::crosses(const Polygon& p) const
 {
-    return (bool) GEOSCrosses_r(m_ctx, m_geom, p.m_geom);
+    return (bool) GEOSCrosses_r(m_geoserr.ctx(), m_geom, p.m_geom);
 }
 
 
-
-bool Polygon::operator==(const Polygon& input) const
-{
-    return this->equals(input);
-}
-
-
-bool Polygon::operator!=(const Polygon& input) const
-{
-    return !(this->equals(input));
-}
-
-
-bool Polygon::valid() const
-{
-    int gtype = GEOSGeomTypeId_r(m_ctx, m_geom);
-    if (gtype != GEOS_POLYGON && gtype != GEOS_MULTIPOLYGON)
-        return false;
-
-    return (bool)GEOSisValid_r(m_ctx, m_geom);
-}
-
-
-std::string Polygon::validReason() const
-{
-    int gtype = GEOSGeomTypeId_r(m_ctx, m_geom);
-    if (gtype != GEOS_POLYGON && gtype != GEOS_MULTIPOLYGON)
-        return std::string("Geometry is not Polygon or MultiPolygon");
-
-    char *reason = GEOSisValidReason_r(m_ctx, m_geom);
-    std::string output(reason);
-    GEOSFree_r(m_ctx, reason);
-    return output;
-}
-
-
-std::string Polygon::wkt(double precision, bool bOutputZ) const
-{
-    GEOSWKTWriter *writer = GEOSWKTWriter_create_r(m_ctx);
-    GEOSWKTWriter_setRoundingPrecision_r(m_ctx, writer, (int)precision);
-    if (bOutputZ)
-        GEOSWKTWriter_setOutputDimension_r(m_ctx, writer, 3);
-
-    char *smoothWkt = GEOSWKTWriter_write_r(m_ctx, writer, m_geom);
-    std::string output(smoothWkt);
-    GEOSFree_r(m_ctx, smoothWkt);
-    GEOSWKTWriter_destroy_r(m_ctx, writer);
-    return output;
-}
-
-
-std::string Polygon::json(double precision) const
-{
-    std::ostringstream prec;
-    prec << precision;
-    char **papszOptions = NULL;
-    papszOptions = CSLSetNameValue(papszOptions, "COORDINATE_PRECISION",
-        prec.str().c_str() );
-
-    std::string w(wkt());
-
-    gdal::SpatialRef srs(m_srs.getWKT(pdal::SpatialReference::eCompoundOK));
-    gdal::Geometry g(w, srs);
-
-    char* json = OGR_G_ExportToJsonEx(g.get(), papszOptions);
-
-    std::string output(json);
-    OGRFree(json);
-    return output;
-}
-
-
-std::ostream& operator<<(std::ostream& ostr, const Polygon& p)
-{
-    ostr << p.wkt();
-    return ostr;
-}
-
-
-std::istream& operator>>(std::istream& istr, Polygon& p)
-{
-
-    std::ostringstream oss;
-    oss << istr.rdbuf();
-
-    std::string wkt = oss.str();
-
-    try
-    {
-        p.update(wkt);
-    }
-    catch (pdal_error)
-    {
-        istr.setstate(std::ios::failbit);
-    }
-    return istr;
-}
-
+// std::ostream& operator<<(std::ostream& ostr, const Polygon& p)
+// {
+//     Geometry g (p);
+//     ostr << g;
+//     return ostr;
+// }
+//
+// std::istream& operator>>(std::istream& istr, Polygon& p)
+// {
+//     std::ostringstream oss;
+//     oss << istr.rdbuf();
+//     std::string wkt = oss.str();
+//     try
+//     {
+//         p.update(wkt);
+//     }
+//     catch (pdal_error)
+//     {
+//         istr.setstate(std::ios::failbit);
+//     }
+//     return istr;
+// }
+//
 } // namespace geos

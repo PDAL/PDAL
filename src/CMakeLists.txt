@@ -40,6 +40,7 @@ set(PDAL_BASE_HPP
   "${PDAL_HEADERS_DIR}/EigenUtils.hpp"
   "${PDAL_HEADERS_DIR}/Filter.hpp"
   "${PDAL_HEADERS_DIR}/FlexWriter.hpp"
+  "${PDAL_HEADERS_DIR}/Geometry.hpp"
   "${PDAL_HEADERS_DIR}/GDALUtils.hpp"
   "${PDAL_HEADERS_DIR}/GEOSUtils.hpp"
   "${PDAL_HEADERS_DIR}/gitsha.h"
@@ -78,6 +79,7 @@ set(PDAL_BASE_CPP
   DynamicLibrary.cpp
   EigenUtils.cpp
   gitsha.cpp
+  Geometry.cpp
   GDALUtils.cpp
   GEOSUtils.cpp
   Kernel.cpp

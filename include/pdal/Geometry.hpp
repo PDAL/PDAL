@@ -33,11 +33,12 @@
 ****************************************************************************/
 #pragma once
 
+#include <pdal/GDALUtils.hpp>
+#include <pdal/GEOSUtils.hpp>
 #include <pdal/Log.hpp>
 #include <pdal/PointRef.hpp>
 #include <pdal/SpatialReference.hpp>
 #include <pdal/util/Bounds.hpp>
-#include <pdal/Geometry.hpp>
 
 #include <geos_c.h>
 
@@ -46,47 +47,80 @@ namespace pdal
 
 namespace geos { class ErrorHandler; }
 
-class PDAL_DLL Polygon : public Geometry
+class PDAL_DLL Geometry
 {
 public:
-    Polygon();
-    Polygon(const std::string& wkt_or_json,
+    Geometry();
+    Geometry(const std::string& wkt_or_json,
            SpatialReference ref = SpatialReference());
-    Polygon(const BOX2D&);
-    Polygon(const BOX3D&);
-    Polygon(const Polygon&);
-    Polygon(const Geometry&);
-    Polygon(GEOSGeometry* g, const SpatialReference& srs);
-    Polygon(OGRGeometryH g, const SpatialReference& srs);
-    Polygon& operator=(const Polygon&);
+    Geometry(const Geometry&);
+
+
+    Geometry(GEOSGeometry* g, const SpatialReference& srs);
+    Geometry(OGRGeometryH g, const SpatialReference& srs);
+
+//     Geometry(const std::string& wkt_or_json, SpatialReference ref,
+//         GEOSContextHandle_t ctx);
+//     Geometry(GEOSGeometry* g, const SpatialReference& srs,
+//         GEOSContextHandle_t ctx);
+
+
+    Geometry& operator=(const Geometry&);
 
     OGRGeometryH getOGRHandle();
 
-    ~Polygon();
 
-    Polygon simplify(double distance_tolerance, double area_tolerance) const;
-    Polygon transform(const SpatialReference& ref) const;
-    double area() const;
+    virtual ~Geometry();
+    void update(const std::string& wkt_or_json,
+        SpatialReference ref = SpatialReference());
 
-    bool covers(PointRef& ref) const;
-    bool equal(const Polygon& p) const;
-    bool covers(const Polygon& p) const;
-    bool overlaps(const Polygon& p) const;
-    bool contains(const Polygon& p) const;
-    bool touches(const Polygon& p) const;
-    bool within(const Polygon& p) const;
-    bool crosses(const Polygon& p) const;
+    void setSpatialReference( const SpatialReference& ref)
+        { m_srs = ref; }
 
-private:
-    void initializeFromBounds(const BOX3D& b);
+    const SpatialReference& getSpatialReference() const
+        { return m_srs; }
+
+    Geometry transform(const SpatialReference& ref) const;
+
+    bool equals(const Geometry& other, double tolerance=0.0001) const;
+    bool operator==(const Geometry& other) const;
+    bool operator!=(const Geometry& other) const;
+    bool operator<(const Geometry& other) const
+        { return wkt() < other.wkt(); }
 
 
+    virtual  bool valid() const;
+    virtual std::string validReason() const;
+
+    std::string wkt(double precision=8, bool bOutputZ=false) const;
+    std::string json(double precision=8) const;
+
+    BOX3D bounds() const;
+
+    operator bool () const
+        { return m_geom != NULL; }
+
+protected:
+    GEOSGeometry *m_geom;
+    const GEOSPreparedGeometry *m_prepGeom;
+
+    SpatialReference m_srs;
+    geos::ErrorHandler& m_geoserr;
+//    gdal::ErrorHandler m_gdalerr;
+//     GEOSContextHandle_t m_geosctx;
+
+    void prepare();
+
+    friend PDAL_DLL std::ostream& operator<<(std::ostream& ostr,
+        const Geometry& p);
+    friend PDAL_DLL std::istream& operator>>(std::istream& istr,
+        Geometry& p);
 };
 
-//
-// PDAL_DLL std::ostream& operator<<(std::ostream& ostr,
-//     const Polygon& p);
-// PDAL_DLL std::istream& operator>>(std::istream& istr, Polygon& p);
+
+PDAL_DLL std::ostream& operator<<(std::ostream& ostr,
+    const Geometry& p);
+PDAL_DLL std::istream& operator>>(std::istream& istr, Geometry& p);
 
 } // namespace pdal
 

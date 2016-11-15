@@ -209,38 +209,34 @@ void CropFilter::crop(const GeomPkg& g, PointView& input, PointView& output)
 
 void CropFilter::crop(const cropfilter::Point& point, double distance, PointView& input, PointView& output)
 {
+
     bool bIs3D = point.is3d();
-
-    for (auto& point: m_points)
+    if (bIs3D)
     {
-        bool bIs3D = point.is3d();
-        if (bIs3D)
+        cropfilter::Point3D p = point.to3d();
+        KD3Index index(input);
+        index.build();
+        std::vector<PointId> points = index.radius(p.x, p.y, p.z, m_distance);
+        for (PointId idx = 0; idx < points.size(); ++idx)
         {
-            cropfilter::Point3D p = point.to3d();
-            KD3Index index(input);
-            index.build();
-            std::vector<PointId> points = index.radius(p.x, p.y, p.z, m_distance);
-            for (PointId idx = 0; idx < points.size(); ++idx)
-            {
-                if (!m_cropOutside)
-                    output.appendPoint(input, idx);
-            }
+            if (!m_cropOutside)
+                output.appendPoint(input, idx);
+        }
+    }
+
+    else
+    {
+        cropfilter::Point2D p = point.to2d();
+        KD2Index index(input);
+        index.build();
+        std::vector<PointId> points = index.radius(p.x, p.y, m_distance);
+
+        for (PointId idx = 0; idx < points.size(); ++idx)
+        {
+            if (!m_cropOutside)
+                output.appendPoint(input, idx);
         }
 
-        else
-        {
-            cropfilter::Point2D p = point.to2d();
-            KD2Index index(input);
-            index.build();
-            std::vector<PointId> points = index.radius(p.x, p.y, m_distance);
-
-            for (PointId idx = 0; idx < points.size(); ++idx)
-            {
-                if (!m_cropOutside)
-                    output.appendPoint(input, idx);
-            }
-
-        }
     }
 }
 
