@@ -13,7 +13,6 @@ class Pipeline(val json: String) extends Native {
     * only containing the data contained in the supplied layout
     */
   @native def pointViews(layout: PointLayout): PointViewIterator
-  @native def test(): Int
   @native def dispose(): Unit
   @native def getMetadata(): String
   @native def getSchema(): String

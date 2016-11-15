@@ -6,8 +6,6 @@
 
 jfieldID getHandleField(JNIEnv *, jobject);
 
-std::string getJson(JNIEnv *, jobject);
-
 template <typename T>
 T *getHandle(JNIEnv *env, jobject obj)
 {

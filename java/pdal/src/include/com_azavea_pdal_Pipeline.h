@@ -41,14 +41,6 @@ JNIEXPORT jobject JNICALL Java_com_azavea_pdal_Pipeline_pointViews__Lcom_azavea_
 
 /*
  * Class:     com_azavea_pdal_Pipeline
- * Method:    test
- * Signature: ()I
- */
-JNIEXPORT jint JNICALL Java_com_azavea_pdal_Pipeline_test
-  (JNIEnv *, jobject);
-
-/*
- * Class:     com_azavea_pdal_Pipeline
  * Method:    dispose
  * Signature: ()V
  */

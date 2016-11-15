@@ -49,25 +49,19 @@ JNIEXPORT jbyteArray JNICALL Java_com_azavea_pdal_PointView_getPackedPoint
 
     PointLayoutPtr pl = pv->layout();
 
-    // always return all dim sized points?!
-    //std::size_t bufSize = pl->pointSize();
-    //char *buf = new char[bufSize];
-
     jint len = env->CallIntMethod(dims, arrayList.arraySize);
-
     // not the best logic to allocate only necessary memory amount
     std::size_t bufSize = pl->pointSize();
     if(pl->dimTypes().size() != len)
     {
         bufSize = 0;
         for (jint i = 0; i < len; i++) {
-            jobject jDimType = static_cast<jobject>(env->CallObjectMethod(dims, arrayList.arrayGet, i));
+            jobject jDimType = (jobject) env->CallObjectMethod(dims, arrayList.arrayGet, i);
             jclass cDimType = env->GetObjectClass(jDimType);
             jfieldID ftype = env->GetFieldID(cDimType, "type", "Ljava/lang/String;");
 
             jstring jtype = (jstring) env->GetObjectField(jDimType, ftype);
-            std::string stype = std::string(env->GetStringUTFChars(jtype, 0));
-            Type type = pdal::Dimension::type(stype);
+            Type type = pdal::Dimension::type(std::string(env->GetStringUTFChars(jtype, 0)));
             bufSize += pdal::Dimension::size(type);
         }
     }
@@ -75,7 +69,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_azavea_pdal_PointView_getPackedPoint
     char *buf = new char[bufSize];
 
     for (jint i = 0; i < len; i++) {
-        jobject jDimType = static_cast<jobject>(env->CallObjectMethod(dims, arrayList.arrayGet, i));
+        jobject jDimType = (jobject) env->CallObjectMethod(dims, arrayList.arrayGet, i);
         jclass cDimType = env->GetObjectClass(jDimType);
         jfieldID fid = env->GetFieldID(cDimType, "id", "Ljava/lang/String;");
         jfieldID ftype = env->GetFieldID(cDimType, "type", "Ljava/lang/String;");
@@ -83,18 +77,15 @@ JNIEXPORT jbyteArray JNICALL Java_com_azavea_pdal_PointView_getPackedPoint
         jstring jid = (jstring) env->GetObjectField(jDimType, fid);
         jstring jtype = (jstring) env->GetObjectField(jDimType, ftype);
 
-        std::string sid = std::string(env->GetStringUTFChars(jid, 0));
-        std::string stype = std::string(env->GetStringUTFChars(jtype, 0));
-
-        Id id = pdal::Dimension::id(sid);
-        Type type = pdal::Dimension::type(stype);
+        Id id = pdal::Dimension::id(std::string(env->GetStringUTFChars(jid, 0)));
+        Type type = pdal::Dimension::type(std::string(env->GetStringUTFChars(jtype, 0)));
 
         pv->getField(buf, id, type, idx);
         buf += pdal::Dimension::size(type);
     }
 
     jbyteArray array = env->NewByteArray(bufSize);
-    env->SetByteArrayRegion (array, 0, bufSize, reinterpret_cast<jbyte*>(buf));
+    env->SetByteArrayRegion (array, 0, bufSize, reinterpret_cast<jbyte *>(buf));
 
     return array;
 }
@@ -107,25 +98,19 @@ JNIEXPORT jbyteArray JNICALL Java_com_azavea_pdal_PointView_getPackedPoints
 
     PointLayoutPtr pl = pv->layout();
 
-    // always return all dim sized points?!
-    //std::size_t bufSize = pl->pointSize();
-    //char *buf = new char[bufSize];
-
     jint len = env->CallIntMethod(dims, arrayList.arraySize);
-
     // not the best logic to allocate only necessary memory amount
     std::size_t bufSize = pl->pointSize();
     if(pl->dimTypes().size() != len)
     {
         bufSize = 0;
         for (jint i = 0; i < len; i++) {
-            jobject jDimType = static_cast<jobject>(env->CallObjectMethod(dims, arrayList.arrayGet, i));
+            jobject jDimType = (jobject) env->CallObjectMethod(dims, arrayList.arrayGet, i);
             jclass cDimType = env->GetObjectClass(jDimType);
             jfieldID ftype = env->GetFieldID(cDimType, "type", "Ljava/lang/String;");
 
             jstring jtype = (jstring) env->GetObjectField(jDimType, ftype);
-            std::string stype = std::string(env->GetStringUTFChars(jtype, 0));
-            Type type = pdal::Dimension::type(stype);
+            Type type = pdal::Dimension::type(std::string(env->GetStringUTFChars(jtype, 0)));
             bufSize += pdal::Dimension::size(type);
         }
     }
@@ -135,7 +120,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_azavea_pdal_PointView_getPackedPoints
 
     for (int idx = 0; idx < pv->size(); idx++) {
         for (jint i = 0; i < len; i++) {
-            jobject jDimType = static_cast<jobject>(env->CallObjectMethod(dims, arrayList.arrayGet, i));
+            jobject jDimType = (jobject) env->CallObjectMethod(dims, arrayList.arrayGet, i);
             jclass cDimType = env->GetObjectClass(jDimType);
             jfieldID fid = env->GetFieldID(cDimType, "id", "Ljava/lang/String;");
             jfieldID ftype = env->GetFieldID(cDimType, "type", "Ljava/lang/String;");
@@ -143,11 +128,8 @@ JNIEXPORT jbyteArray JNICALL Java_com_azavea_pdal_PointView_getPackedPoints
             jstring jid = (jstring) env->GetObjectField(jDimType, fid);
             jstring jtype = (jstring) env->GetObjectField(jDimType, ftype);
 
-            std::string sid = std::string(env->GetStringUTFChars(jid, 0));
-            std::string stype = std::string(env->GetStringUTFChars(jtype, 0));
-
-            Id id = pdal::Dimension::id(sid);
-            Type type = pdal::Dimension::type(stype);
+            Id id = pdal::Dimension::id(std::string(env->GetStringUTFChars(jid, 0)));
+            Type type = pdal::Dimension::type(std::string(env->GetStringUTFChars(jtype, 0)));
 
             pv->getField(buf, id, type, idx);
             buf += pdal::Dimension::size(type);
@@ -155,7 +137,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_azavea_pdal_PointView_getPackedPoints
     }
 
     jbyteArray array = env->NewByteArray(bufSize);
-    env->SetByteArrayRegion (array, 0, bufSize, reinterpret_cast<jbyte*>(buf));
+    env->SetByteArrayRegion (array, 0, bufSize, reinterpret_cast<jbyte *>(buf));
 
     return array;
 }
@@ -166,11 +148,4 @@ JNIEXPORT void JNICALL Java_com_azavea_pdal_PointView_dispose
     PointView *pv = getHandle<PointView>(env, obj);
     setHandle<int>(env, obj, 0);
     delete pv;
-}
-
-JNIEXPORT void JNICALL Java_com_azavea_pdal_PointView_test
-  (JNIEnv *env, jobject obj)
-{
-    PointView *pv = getHandle<PointView>(env, obj);
-    std::cout << pv->size() << std::endl;
 }

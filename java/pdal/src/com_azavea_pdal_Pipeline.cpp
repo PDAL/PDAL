@@ -18,7 +18,10 @@ using pdal::PointViewPtr;
 JNIEXPORT void JNICALL Java_com_azavea_pdal_Pipeline_initialise
   (JNIEnv *env, jobject obj)
 {
-    setHandle(env, obj, new Pipeline(getJson(env, obj)));
+    jclass c = env->GetObjectClass(obj);
+    jfieldID fid = env->GetFieldID(c, "json", "Ljava/lang/String;");
+    jstring jstr = (jstring) env->GetObjectField(obj, fid);
+    setHandle(env, obj, new Pipeline(std::string(env->GetStringUTFChars(jstr, 0))));
 }
 
 JNIEXPORT void JNICALL Java_com_azavea_pdal_Pipeline_dispose
@@ -93,13 +96,4 @@ JNIEXPORT jobject JNICALL Java_com_azavea_pdal_Pipeline_pointViews__
     setHandle(env, pvi, it);
 
     return pvi;
-}
-
-JNIEXPORT jint JNICALL Java_com_azavea_pdal_Pipeline_test
-  (JNIEnv *env, jobject obj)
-{
-    std::cout << "Hello from C!" << std::endl;
-    std::cout << getJson(env, obj) << std::endl;
-    Pipeline *p = getHandle<Pipeline>(env, obj);
-    return 22;
 }

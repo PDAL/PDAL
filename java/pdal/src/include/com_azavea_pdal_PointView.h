@@ -55,14 +55,6 @@ JNIEXPORT jbyteArray JNICALL Java_com_azavea_pdal_PointView_getPackedPoints
 JNIEXPORT void JNICALL Java_com_azavea_pdal_PointView_dispose
   (JNIEnv *, jobject);
 
-/*
- * Class:     com_azavea_pdal_PointView
- * Method:    test
- * Signature: ()V
- */
-JNIEXPORT void JNICALL Java_com_azavea_pdal_PointView_test
-  (JNIEnv *, jobject);
-
 #ifdef __cplusplus
 }
 #endif

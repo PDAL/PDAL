@@ -2,6 +2,8 @@ package com.azavea.pdal
 
 import collection.JavaConverters._
 
+/** Test object should be removed from this PR and replaced with tests */
+
 object Main {
   val iter: Iterator[Int] = Set(2).toIterator
 
@@ -17,8 +19,6 @@ object Main {
     val p = Pipeline(string)
     p.setLogLevel(9)
     println(s"p.ptr: ${p.ptr}")
-    val result = p.test
-    println(s"java: $result")
     p.execute
     val pvi = p.pointViews()
     println(s"pvi.ptr: ${pvi.ptr}")
@@ -27,10 +27,10 @@ object Main {
     println(s"pv1.ptr: ${pv1.ptr}")
     println(s"pvi.hasNext: ${pvi.hasNext}")
     println(s"pvi.ptr: ${pvi.ptr}")
-    pv1.test()
+    println(s"pv1.size: ${pv1.size}")
+    println(s"pv1.getPackedPoints.size: ${pv1.getPackedPoints.length}")
     val layout = pv1.layout
     val list = layout.dimTypes().asScala
-
     val list2 = pv1.getPackedPoint(layout.dimTypes(), 0)
     println(s"list2.length: ${list2.length}")
     val list3 = pv1.getPackedPoint(java.util.Arrays.asList(layout.dimTypes().asScala.take(1):_*), 0)
