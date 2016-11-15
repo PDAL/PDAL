@@ -30,12 +30,12 @@ object Main {
     println(s"pv1.size: ${pv1.size}")
     println(s"pv1.getPackedPoints.size: ${pv1.getPackedPoints.length}")
     val layout = pv1.layout
-    val list = layout.dimTypes().asScala
+    val list = layout.dimTypes()
     val list2 = pv1.getPackedPoint(layout.dimTypes(), 0)
     println(s"list2.length: ${list2.length}")
-    val list3 = pv1.getPackedPoint(java.util.Arrays.asList(layout.dimTypes().asScala.take(1):_*), 0)
+    val list3 = pv1.getPackedPoint(layout.dimTypes().take(1), 0)
     println(s"list3.length: ${list3.length}")
-    println(list)
+    println(list.toList)
     println(layout.findDimType("X"))
     println(layout.dimSize(layout.findDimType("X")))
     println(layout.pointSize())

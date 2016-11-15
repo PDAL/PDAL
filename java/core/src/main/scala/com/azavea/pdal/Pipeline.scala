@@ -4,7 +4,7 @@ import ch.jodersky.jni.nativeLoader
 
 @nativeLoader("pdaljni0")
 class Pipeline(val json: String) extends Native {
-  // System.load("/abs_path_to/libpdaljni0.dylib")
+  //System.load("/abs_path_to/libpdaljni0.dylib")
 
   @native def initialise(): Unit
   @native def execute(): Unit

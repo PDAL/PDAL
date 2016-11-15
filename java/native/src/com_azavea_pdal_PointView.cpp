@@ -2,10 +2,8 @@
 #include "com_azavea_pdal_PointView.h"
 #include "JavaPipeline.hpp"
 #include "Accessors.hpp"
-#include "ArrayList.hpp"
 
 using libpdaljava::Pipeline;
-using libpdaljava::ArrayList;
 using pdal::PointView;
 using pdal::PointLayoutPtr;
 using pdal::Dimension::Type;
@@ -42,21 +40,20 @@ JNIEXPORT jboolean JNICALL Java_com_azavea_pdal_PointView_empty
 }
 
 JNIEXPORT jbyteArray JNICALL Java_com_azavea_pdal_PointView_getPackedPoint
-  (JNIEnv *env, jobject obj, jobject dims, jlong idx)
+  (JNIEnv *env, jobject obj, jobjectArray dims, jlong idx)
 {
-    ArrayList arrayList = ArrayList(env);
     PointView *pv = getHandle<PointView>(env, obj);
 
     PointLayoutPtr pl = pv->layout();
 
-    jint len = env->CallIntMethod(dims, arrayList.arraySize);
+    jint len = env->GetArrayLength(dims);
     // not the best logic to allocate only necessary memory amount
     std::size_t bufSize = pl->pointSize();
     if(pl->dimTypes().size() != len)
     {
         bufSize = 0;
         for (jint i = 0; i < len; i++) {
-            jobject jDimType = (jobject) env->CallObjectMethod(dims, arrayList.arrayGet, i);
+            jobject jDimType = (jobject) env->GetObjectArrayElement(dims, i);
             jclass cDimType = env->GetObjectClass(jDimType);
             jfieldID ftype = env->GetFieldID(cDimType, "type", "Ljava/lang/String;");
 
@@ -69,7 +66,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_azavea_pdal_PointView_getPackedPoint
     char *buf = new char[bufSize];
 
     for (jint i = 0; i < len; i++) {
-        jobject jDimType = (jobject) env->CallObjectMethod(dims, arrayList.arrayGet, i);
+        jobject jDimType = (jobject) env->GetObjectArrayElement(dims, i);
         jclass cDimType = env->GetObjectClass(jDimType);
         jfieldID fid = env->GetFieldID(cDimType, "id", "Ljava/lang/String;");
         jfieldID ftype = env->GetFieldID(cDimType, "type", "Ljava/lang/String;");
@@ -91,21 +88,20 @@ JNIEXPORT jbyteArray JNICALL Java_com_azavea_pdal_PointView_getPackedPoint
 }
 
 JNIEXPORT jbyteArray JNICALL Java_com_azavea_pdal_PointView_getPackedPoints
-  (JNIEnv *env, jobject obj, jobject dims)
+  (JNIEnv *env, jobject obj, jobjectArray dims)
 {
-    ArrayList arrayList = ArrayList(env);
     PointView *pv = getHandle<PointView>(env, obj);
 
     PointLayoutPtr pl = pv->layout();
 
-    jint len = env->CallIntMethod(dims, arrayList.arraySize);
+    jint len = env->GetArrayLength(dims);
     // not the best logic to allocate only necessary memory amount
     std::size_t bufSize = pl->pointSize();
     if(pl->dimTypes().size() != len)
     {
         bufSize = 0;
         for (jint i = 0; i < len; i++) {
-            jobject jDimType = (jobject) env->CallObjectMethod(dims, arrayList.arrayGet, i);
+            jobject jDimType = (jobject) env->GetObjectArrayElement(dims, i);
             jclass cDimType = env->GetObjectClass(jDimType);
             jfieldID ftype = env->GetFieldID(cDimType, "type", "Ljava/lang/String;");
 
@@ -120,7 +116,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_azavea_pdal_PointView_getPackedPoints
 
     for (int idx = 0; idx < pv->size(); idx++) {
         for (jint i = 0; i < len; i++) {
-            jobject jDimType = (jobject) env->CallObjectMethod(dims, arrayList.arrayGet, i);
+            jobject jDimType = (jobject) env->GetObjectArrayElement(dims, i);
             jclass cDimType = env->GetObjectClass(jDimType);
             jfieldID fid = env->GetFieldID(cDimType, "id", "Ljava/lang/String;");
             jfieldID ftype = env->GetFieldID(cDimType, "type", "Ljava/lang/String;");

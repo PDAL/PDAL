@@ -7,7 +7,7 @@ class PointView extends Native {
   @native def layout: PointLayout
   @native def size(): Int
   @native def empty(): Boolean
-  @native def getPackedPoint(dims: java.util.List[DimType], idx: Long): Array[Byte]
-  @native def getPackedPoints(dims: java.util.List[DimType]): Array[Byte]
+  @native def getPackedPoint(dims: Array[DimType], idx: Long): Array[Byte]
+  @native def getPackedPoints(dims: Array[DimType]): Array[Byte]
   @native def dispose(): Unit
 }

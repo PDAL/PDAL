@@ -34,18 +34,18 @@ JNIEXPORT jboolean JNICALL Java_com_azavea_pdal_PointView_empty
 /*
  * Class:     com_azavea_pdal_PointView
  * Method:    getPackedPoint
- * Signature: (Ljava/util/List;J)[B
+ * Signature: ([Lcom/azavea/pdal/DimType;J)[B
  */
 JNIEXPORT jbyteArray JNICALL Java_com_azavea_pdal_PointView_getPackedPoint
-  (JNIEnv *, jobject, jobject, jlong);
+  (JNIEnv *, jobject, jobjectArray, jlong);
 
 /*
  * Class:     com_azavea_pdal_PointView
  * Method:    getPackedPoints
- * Signature: (Ljava/util/List;)[B
+ * Signature: ([Lcom/azavea/pdal/DimType;)[B
  */
 JNIEXPORT jbyteArray JNICALL Java_com_azavea_pdal_PointView_getPackedPoints
-  (JNIEnv *, jobject, jobject);
+  (JNIEnv *, jobject, jobjectArray);
 
 /*
  * Class:     com_azavea_pdal_PointView

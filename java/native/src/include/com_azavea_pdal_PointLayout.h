@@ -10,9 +10,9 @@ extern "C" {
 /*
  * Class:     com_azavea_pdal_PointLayout
  * Method:    dimTypes
- * Signature: ()Ljava/util/List;
+ * Signature: ()[Lcom/azavea/pdal/DimType;
  */
-JNIEXPORT jobject JNICALL Java_com_azavea_pdal_PointLayout_dimTypes
+JNIEXPORT jobjectArray JNICALL Java_com_azavea_pdal_PointLayout_dimTypes
   (JNIEnv *, jobject);
 
 /*
