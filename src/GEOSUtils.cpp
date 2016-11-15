@@ -86,20 +86,21 @@ void ErrorHandler::vaNoticeCb(const char *msg, ...)
 
 ErrorHandler::ErrorHandler() : m_debug(false)
 {
-#ifdef GEOS_init_r
-// #ifdef GEOS_CAPI_VERSION_MINOR > 10
+// #ifdef GEOS_init_r
+
+#if (GEOS_CAPI_VERSION_MINOR >= 9)
 
     m_ctx = GEOS_init_r();
 
-    auto errorCb [](const char *msg, void *userData)
+    auto errorCb = [](const char *msg, void *userData)
     {
-        get()->handle(msg, false);
+        get().handle(msg, false);
     };
     GEOSContext_setErrorMessageHandler_r(m_ctx, errorCb, NULL);
 
-    auto noticeCb [](const char *msg, void *userData)
+    auto noticeCb = [](const char *msg, void *userData)
     {
-        get()->handle(msg, true);
+        get().handle(msg, true);
     };
     GEOSContext_setNoticeMessageHandler_r(m_ctx, noticeCb, NULL);
 #else
