@@ -248,6 +248,20 @@ public:
     char *getPoint(PointId id)
         { return m_pointTable.getPoint(m_index[id]); }
 
+    /// Provides access to the memory storing the point data.  Though this
+    /// function is public, other access methods are safer and preferred.
+    char *getOrAddPoint(PointId id)
+    {
+        if (id == size())
+        {
+            m_index.push_back(m_pointTable.addPoint());
+            ++m_size;
+            assert(m_temps.empty());
+        }
+
+        return m_pointTable.getPoint(m_index.at(id));
+    }
+
     // The standard idiom is swapping with a stack-created empty queue, but
     // that invokes the ctor and probably allocates.  We've probably only got
     // one or two things in our queue, so just pop until we're empty.

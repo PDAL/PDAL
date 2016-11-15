@@ -77,7 +77,7 @@ private:
 
     std::string m_command;
     bool m_debug;
-    int m_logLevel;
+    LogLevel m_logLevel;
     bool m_showDrivers;
     bool m_help;
     bool m_showCommands;
@@ -204,7 +204,8 @@ void App::addArgs(ProgramArgs& args)
     args.add("command", "The PDAL command", m_command).setPositional();
     args.add("debug", "Sets the output level to 3 (option deprecated)",
         m_debug);
-    args.add("verbose,v", "Sets the output level (0-8)", m_logLevel, -1);
+    args.add("verbose,v", "Sets the output level (0-8)", m_logLevel,
+        LogLevel::None);
     args.add("drivers", "List available drivers", m_showDrivers);
     args.add("help,h", "Display help text", m_help);
     args.add("list-commands", "List available commands", m_showCommands);
@@ -263,10 +264,18 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
     ProgramArgs args;
 
     addArgs(args);
-    args.parseSimple(cmdArgs);
+    try
+    {
+        args.parseSimple(cmdArgs);
+    }
+    catch (arg_val_error const& e)
+    {
+        Utils::printError(e.what());
+        return -1;
+    }
 
-    if (m_logLevel >= (int)LogLevel::Error)
-        log->setLevel((LogLevel)m_logLevel);
+    if (m_logLevel != LogLevel::None)
+        log->setLevel(m_logLevel);
     else if (m_debug)
         log->setLevel(LogLevel::Debug);
     PluginManager::setLog(log);

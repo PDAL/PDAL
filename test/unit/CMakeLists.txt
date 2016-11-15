@@ -127,6 +127,7 @@ PDAL_ADD_TEST(pdal_filters_transformation_test FILES filters/TransformationFilte
 # conditionally append apps/libxml2 sources
 #
 if (WITH_APPS)
+    PDAL_ADD_TEST(pdal_app_test FILES apps/AppTest.cpp)
     if (LASZIP_FOUND)
         PDAL_ADD_TEST(pdal_merge_test FILES apps/MergeTest.cpp)
     endif()

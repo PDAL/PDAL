@@ -37,7 +37,18 @@ public:
     arg_error(const std::string& error) : m_error(error)
     {}
 
+    std::string what() const
+        { return m_error; }
+
     std::string m_error;
+};
+
+// Specifically, an error in the argument's value.
+class arg_val_error : public arg_error
+{
+public:
+    arg_val_error(const std::string& error) : arg_error(error)
+    {}
 };
 
 namespace
@@ -386,26 +397,26 @@ public:
             std::ostringstream oss;
             oss << "Attempted to set value twice for argument '" <<
                 m_longname << "'.";
-            throw arg_error(oss.str());
+            throw arg_val_error(oss.str());
         }
         if (s.empty())
         {
             std::stringstream oss;
             oss << "Argument '" << m_longname << "' needs a value and none "
                 "was provided.";
-            throw arg_error(oss.str());
+            throw arg_val_error(oss.str());
         }
         m_rawVal = s;
         if (!Utils::fromString(s, m_var))
         {
             std::ostringstream oss;
             if (m_error.size())
-                throw arg_error(m_error);
+                throw arg_val_error(m_error);
             else
             {
                 oss << "Invalid value '" << s << "' for argument '" <<
                     m_longname << "'.";
-                throw arg_error(oss.str());
+                throw arg_val_error(oss.str());
             }
         }
         m_set = true;
@@ -549,7 +560,7 @@ public:
             std::stringstream oss;
             oss << "Argument '" << m_longname << "' needs a value and none "
                 "was provided.";
-            throw arg_error(oss.str());
+            throw arg_val_error(oss.str());
         }
         if (s == "invert")
             m_val = !m_defaultVal;
@@ -761,7 +772,7 @@ public:
             std::stringstream oss;
             oss << "Argument '" << m_longname << "' needs a value and none "
                 "was provided.";
-            throw arg_error(oss.str());
+            throw arg_val_error(oss.str());
         }
         m_rawVal = s;
         T var;
@@ -769,7 +780,7 @@ public:
         {
             std::ostringstream oss;
             oss << "Invalid value for argument '" << m_longname << "'.";
-            throw arg_error(oss.str());
+            throw arg_val_error(oss.str());
         }
         if (!m_set)
             m_var.clear();
@@ -878,7 +889,7 @@ public:
             std::ostringstream oss;
 
             oss << "Missing value for argument '" << m_longname << "'.";
-            throw arg_error(oss.str());
+            throw arg_val_error(oss.str());
         }
         m_rawVal = s;
         if (!m_set)
@@ -1104,6 +1115,10 @@ public:
                     while (matched--)
                         vals.consume(i++);
             }
+            catch (arg_val_error&)
+            {
+                throw;
+            }
             catch (arg_error&)
             {
                 i++;
@@ -1118,6 +1133,10 @@ public:
             try
             {
                 arg->assignPositional(vals);
+            }
+            catch (arg_val_error&)
+            {
+                throw;
             }
             catch (arg_error&)
             {}

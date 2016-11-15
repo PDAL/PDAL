@@ -141,8 +141,10 @@ public:
         { return m_id == i.m_id; }
     bool operator!=(const PointViewIter& i)
         { return m_id != i.m_id; }
-    bool operator>=(const PointViewIter& i)
+    bool operator<=(const PointViewIter& i)
         { return m_id <= i.m_id; }
+    bool operator>=(const PointViewIter& i)
+        { return m_id >= i.m_id; }
     bool operator<(const PointViewIter& i)
         { return m_id < i.m_id; }
     bool operator>(const PointViewIter& i)
