@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <cassert>
 #include <memory> // shared_ptr
 #include <stack>
 
@@ -80,6 +81,7 @@ public:
     /// @param v logging level to use for get() comparison operations
     void setLevel(LogLevel v)
     {
+        assert(v != LogLevel::None);
         m_level = v;
     }
 

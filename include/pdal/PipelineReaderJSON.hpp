@@ -69,6 +69,8 @@ private:
     std::string extractTag(Json::Value& node, TagMap& tags);
     std::vector<Stage *> extractInputs(Json::Value& node, TagMap& tags);
     Options extractOptions(Json::Value& node);
+    void handleInputTag(const std::string& tag, const TagMap& tags,
+        std::vector<Stage *>& inputs);
 
     PipelineManager& m_manager;
     std::string m_inputJSONFile;

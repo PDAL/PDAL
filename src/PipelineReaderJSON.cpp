@@ -56,7 +56,7 @@ PipelineReaderJSON::PipelineReaderJSON(PipelineManager& manager) :
 
 void PipelineReaderJSON::parsePipeline(Json::Value& tree)
 {
-    std::map<std::string, Stage*> tags;
+    TagMap tags;
     std::vector<Stage*> inputs;
 
     Json::ArrayIndex last = tree.size() - 1;
@@ -111,6 +111,7 @@ void PipelineReaderJSON::parsePipeline(Json::Value& tree)
         else if (type.empty() || Utils::startsWith(type, "writers."))
         {
             s = &m_manager.makeWriter(filename, type, options);
+            std::cerr << "Made writer with input size = " << inputs.size() << "!\n";
             for (Stage *ts : inputs)
                 s->setInput(*ts);
             inputs.clear();
@@ -125,7 +126,7 @@ void PipelineReaderJSON::parsePipeline(Json::Value& tree)
             inputs.clear();
             inputs.push_back(s);
         }
-        // s should be valid at this point.  makeXXX will throw if the stage
+        // 's' should be valid at this point.  makeXXX will throw if the stage
         // couldn't be constructed.
         if (tag.size())
             tags[tag] = s;
@@ -254,6 +255,18 @@ std::string PipelineReaderJSON::extractTag(Json::Value& node, TagMap& tags)
 }
 
 
+void PipelineReaderJSON::handleInputTag(const std::string& tag,
+    const TagMap& tags, std::vector<Stage *>& inputs)
+{
+    auto ii = tags.find(tag);
+    if (ii == tags.end())
+        throw pdal_error("JSON pipeline: Invalid pipeline: "
+            "undefined stage tag '" + tag + "'.");
+    else
+        inputs.push_back(ii->second);
+}
+
+
 std::vector<Stage *> PipelineReaderJSON::extractInputs(Json::Value& node,
     TagMap& tags)
 {
@@ -263,25 +276,21 @@ std::vector<Stage *> PipelineReaderJSON::extractInputs(Json::Value& node,
     if (node.isMember("inputs"))
     {
         Json::Value& val = node["inputs"];
-        if (!val.isNull())
+        if (val.isString())
+            handleInputTag(val.asString(), tags, inputs);
+        else if (val.isArray())
         {
             for (const Json::Value& input : node["inputs"])
             {
-                if (input.isString())
-                {
-                    std::string tag = input.asString();
-                    auto ii = tags.find(tag);
-                    if (ii == tags.end())
-                        throw pdal_error("JSON pipeline: Invalid pipeline: "
-                            "undefined stage tag '" + tag + "'.");
-                    else
-                        inputs.push_back(ii->second);
-                }
-                else
+                if (!input.isString())
                     throw pdal_error("JSON pipeline: 'inputs' tag must "
-                        " be specified as a string.");
+                            " be specified as a string or array of strings.");
+                handleInputTag(input.asString(), tags, inputs);
             }
         }
+        else
+            throw pdal_error("JSON pipeline: 'inputs' tag must "
+                    " be specified as a string or array of strings.");
         node.removeMember("inputs");
         if (node.isMember("inputs"))
             throw pdal_error("JSON pipeline: found duplicate 'inputs' "
