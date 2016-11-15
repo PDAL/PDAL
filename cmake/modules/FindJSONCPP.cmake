@@ -35,7 +35,7 @@ set(_pathsuffixes
 	msvc80
 	msvc90
 	linux-gcc)
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
 	execute_process(COMMAND
 		${CMAKE_CXX_COMPILER}
 		-dumpversion

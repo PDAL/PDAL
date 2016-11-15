@@ -47,6 +47,7 @@ class Options;
 
 class PDAL_DLL PipelineManager
 {
+    FRIEND_TEST(json, tags);
 public:
     PipelineManager() : m_tablePtr(new PointTable()), m_table(*m_tablePtr),
             m_progressFd(-1), m_input(nullptr)

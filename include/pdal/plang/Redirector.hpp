@@ -11,6 +11,12 @@
 #pragma once
 
 #include <functional>
+#include <pdal/pdal_defines.h>
+
+#ifdef PDAL_COMPILER_MSVC
+#  pragma warning(disable: 4127) // conditional expression is constant
+#define HAVE_ROUND // inconsistent dll linkage otherwise
+#endif
 
 #include <Python.h>
 

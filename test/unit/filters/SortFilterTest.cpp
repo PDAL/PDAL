@@ -36,6 +36,8 @@
 
 #include <random>
 
+#include <LasReader.hpp>
+#include <LasWriter.hpp>
 #include <SortFilter.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/StageWrapper.hpp>
@@ -125,6 +127,42 @@ TEST(SortFilterTest, pipelineJSON)
     {
         double d1 = view->getFieldAs<double>(Dimension::Id::X, i - 1);
         double d2 = view->getFieldAs<double>(Dimension::Id::X, i);
+        EXPECT_TRUE(d1 <= d2);
+    }
+}
+
+TEST(SortFilterTest, issue1382)
+{
+    LasReader r;
+    Options ro;
+
+    ro.add("filename", Support::datapath("autzen/autzen-utm.las"));
+    r.setOptions(ro);
+
+    SortFilter f;
+    Options fo;
+
+    fo.add("dimension", "Z");
+    f.setOptions(fo);
+    f.setInput(r);
+
+    LasWriter w;
+    Options wo;
+
+    wo.add("filename", Support::temppath("out.las"));
+    w.setOptions(wo);
+    w.setInput(f);
+
+    PointTable t;
+
+    w.prepare(t);
+    PointViewSet s = w.execute(t);
+    PointViewPtr v = *s.begin();
+
+    for (PointId i = 1; i < v->size(); ++i)
+    {
+        double d1 = v->getFieldAs<double>(Dimension::Id::Z, i - 1);
+        double d2 = v->getFieldAs<double>(Dimension::Id::Z, i);
         EXPECT_TRUE(d1 <= d2);
     }
 }

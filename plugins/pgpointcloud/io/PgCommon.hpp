@@ -108,7 +108,7 @@ inline void pg_commit(PGconn* session)
     pg_execute(session, sql);
 }
 
-inline char* pg_query_once(PGconn* session, std::string const& sql)
+inline std::string pg_query_once(PGconn* session, std::string const& sql)
 {
     PGresult *result = PQexec(session, sql.c_str());
 
@@ -120,7 +120,9 @@ inline char* pg_query_once(PGconn* session, std::string const& sql)
         return NULL;
     }
 
-    char *str = strdup(PQgetvalue(result, 0, 0));
+	int len = PQgetlength(result, 0, 0);
+    char *value = PQgetvalue(result, 0, 0);
+	std::string str(value, len);
     PQclear(result);
     return str;
 }

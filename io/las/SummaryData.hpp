@@ -50,7 +50,7 @@ public:
     SummaryData();
 
     void addPoint(double x, double y, double z, int returnNumber);
-    uint32_t getTotalNumPoints() const
+    point_count_t getTotalNumPoints() const
         { return m_totalNumPoints; }
     BOX3D getBounds() const;
     point_count_t getReturnCount(int returnNumber) const;

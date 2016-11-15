@@ -131,7 +131,7 @@ void testReadWrite(bool compression, bool scaling)
     int32_t x = view->getFieldAs<int32_t>(Id::X, 10);
     EXPECT_EQ(x, 636038);
     double xd = view->getFieldAs<double>(Id::X, 10);
-    EXPECT_FLOAT_EQ(xd, 636037.53);
+	EXPECT_DOUBLE_EQ(xd, 636037.53);
     }
 
 //    FileUtils::deleteFile(tempFilename);

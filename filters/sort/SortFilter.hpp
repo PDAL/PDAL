@@ -67,14 +67,20 @@ private:
             setPositional();
     }
 
-    virtual void ready(PointTableRef table)
-        { m_dim = table.layout()->findDim(m_dimName); }
+    virtual void prepared(PointTableRef table)
+    {
+        m_dim = table.layout()->findDim(m_dimName);
+        if (m_dim == Dimension::Id::Unknown)
+        {
+            std::ostringstream oss;
+            oss << getName() << ": Invalid sort dimension '" << m_dimName <<
+                "'.";
+            throw oss.str();
+        }
+    }
 
     virtual void filter(PointView& view)
     {
-        if (m_dim == Dimension::Id::Unknown)
-            return;
-
         auto cmp = [this](const PointIdxRef& p1, const PointIdxRef& p2)
             { return p1.compare(m_dim, p2); };
 

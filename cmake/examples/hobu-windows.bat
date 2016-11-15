@@ -19,16 +19,6 @@ set PDAL_DIR=.
 
 :: Where is your OSGeo4W installed (recommended basic way to satisfy dependent libs)
 set OSGEO4W_DIR=C:\OSGeo4W64
-set BOOST=%OSGEO4W_DIR%
-
-:: Where is boost installed?
-rem set BOOST_DIR=c:\utils\boost_1_49_0
-REM set BOOST_DIR=%PDAL_DIR%\boost
-
-:: CARIS
-REM set CARIS_ENABLED=ON
-set CARIS_INCLUDE_DIR=%CARIS_DIR%\include
-set CARIS_LIBRARY=%CARIS_DIR%\caris.lib
 
 :: GDAL
 set GDAL_ENABLED=ON
@@ -63,39 +53,42 @@ set LIBXML2_LIBRARIES=%OSGEO4W_DIR%\lib\libxml2.lib
 
 :: Python
 set PYTHON_ENABLED=ON
-REM set PYTHON_EXECUTABLE=%OSGEO4W_DIR\bin\python27.exe
-REM set PYTHON_INCLUDE_DIR=%OSGEO4W_DIR\apps\python27\include
-REM set PYTHON_LIBRARY=%OSGEO4W_DIR\apps\python27\libs\python27.lib
+set PYTHON_EXECUTABLE=%OSGEO4W_DIR\bin\python27.exe
+set PYTHON_INCLUDE_DIR=%OSGEO4W_DIR\apps\python27\include
+set PYTHON_LIBRARY=%OSGEO4W_DIR\apps\python27\libs\python27.lib
 
 
 
 if EXIST CMakeCache.txt del CMakeCache.txt
-del /S /Q CMakeFiles
-cd %PDAL_DIR%/build
-cmake -G %GENERATOR% ^
-	-DBOOST_INCLUDEDIR=%BOOST%\include\boost-1_56  -DCMAKE_INSTALL_PREFIX=C:\dev\PDAL\built ^
-	-DBOOST_LIBRARYDIR=%BOOST%\lib -DCMAKE_BUILD_TYPE=Release  -DBoost_DEBUG=ON   -DBoost_COMPILER="-vc110" ^
-    -DWITH_GEOTIFF=%GEOTIFF_ENABLED% ^
-    -DBUILD_PLUGIN_OCI=%ORACLE_ENABLED% ^
+
+cmake -G "Visual Studio 14 2015 Win64" ^
+    -DBUILD_PLUGIN_CPD=OFF ^
+    -DBUILD_PLUGIN_GREYHOUND=OFF ^
+    -DBUILD_PLUGIN_HEXBIN=ON ^
+    -DBUILD_PLUGIN_ICEBRIDGE=OFF ^
+    -DBUILD_PLUGIN_MRSID=OFF ^
+    -DBUILD_PLUGIN_NITF=ON ^
+    -DBUILD_PLUGIN_OCI=ON ^
+    -DBUILD_PLUGIN_P2G=ON ^
+    -DBUILD_PLUGIN_PCL=OFF ^
     -DBUILD_PLUGIN_PGPOINTCLOUD=ON ^
-    -DWITH_LASZIP=%LASZIP_ENABLED% ^
-    -DWITH_LIBXML2=%LIBXML2_ENABLED% ^
-	-DWITH_PYTHON=%PYTHON_ENABLED% ^
-	-DBUILD_PLUGIN_NITF=ON ^
-	-DBUILD_PLUGIN_HEXBIN=ON ^
+    -DBUILD_PLUGIN_SQLITE=ON ^
+    -DBUILD_PLUGIN_RIVLIB=OFF ^
+    -DBUILD_PLUGIN_PYTHON=ON ^
+    -DENABLE_CTEST=OFF ^
+    -DWITH_APPS=ON ^
+    -DWITH_LAZPERF=%PDAL_OPTIONAL_COMPONENTS% ^
+    -DWITH_GEOTIFF=ON ^
+    -DWITH_LASZIP=ON ^
+    -DWITH_TESTS=ON ^
 	-DPYTHON_EXECUTABLE=%OSGEO4W_DIR%\bin\python.exe ^
 	-DPYTHON_INCLUDE_DIR=%OSGEO4W_DIR%\apps\python27\include ^
 	-DPYTHON_LIBRARY=%OSGEO4W_DIR%\apps\python27\libs\python27.lib ^
 	-DNUMPY_INCLUDE_DIR=%OSGEO4W_DIR%\apps\python27\lib\site-packages\numpy\core\include ^
-	-DNUMPY_VERSION=1.8.1 ^
+	-DNUMPY_VERSION=1.11.1 ^
+    -Dgtest_force_shared_crt=ON ^
+    -DCMAKE_INSTALL_PREFIX=C:\pdalbin ^
     -DCMAKE_BUILD_TYPE=%BUILD_TYPE% ^
     -DCMAKE_VERBOSE_MAKEFILE=OFF ^
-	-DBUILD_PLUGIN_SQLITE=ON ^
-	-DBUILD_PLUGIN_PCL=ON ^
-    ..
-cd ..
-
-rem    -DBOOST_INCLUDEDIR=%BOOST_DIR% ^
-rem 	-DNUMPY_INCLUDE_DIR=%OSGEO4W_DIR%\apps\python27\lib\site-packages\numpy\core\include ^
-rem 	-DPYTHONPATH=%OSGEO4W_DIR%\apps\python27\lib\site-packages ^
-rem 	-DPYTHON_LIBRARY=%PYTHON_LIBRARY% ^
+    .
+	
