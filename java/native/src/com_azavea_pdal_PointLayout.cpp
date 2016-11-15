@@ -79,7 +79,8 @@ JNIEXPORT jlong JNICALL Java_com_azavea_pdal_PointLayout_pointSize
 JNIEXPORT void JNICALL Java_com_azavea_pdal_PointLayout_dispose
   (JNIEnv *env, jobject obj)
 {
-    PointLayout *pl = getHandle<PointLayout>(env, obj);
+    // A bit unclear why we can't remove this pointer, probably wrapping here makes sense as well
+    // PointLayout *pl = getHandle<PointLayout>(env, obj);
     setHandle<int>(env, obj, 0);
-    delete pl;
+    // delete pl;
 }

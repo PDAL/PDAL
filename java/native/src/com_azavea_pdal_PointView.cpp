@@ -1,10 +1,14 @@
 #include <stdio.h>
 #include "com_azavea_pdal_PointView.h"
 #include "JavaPipeline.hpp"
+#include "PointViewRawPtr.hpp"
 #include "Accessors.hpp"
 
 using libpdaljava::Pipeline;
+using libpdaljava::PointViewRawPtr;
+
 using pdal::PointView;
+using pdal::PointViewPtr;
 using pdal::PointLayoutPtr;
 using pdal::Dimension::Type;
 using pdal::Dimension::Id;
@@ -13,7 +17,8 @@ using pdal::PointId;
 JNIEXPORT jobject JNICALL Java_com_azavea_pdal_PointView_layout
   (JNIEnv *env, jobject obj)
 {
-    PointView *pv = getHandle<PointView>(env, obj);
+    PointViewRawPtr *pvrp = getHandle<PointViewRawPtr>(env, obj);
+    PointViewPtr pv = pvrp->shared_pointer;
     PointLayoutPtr pl = pv->layout();
 
     jclass pvlClass = env->FindClass("com/azavea/pdal/PointLayout");
@@ -28,21 +33,24 @@ JNIEXPORT jobject JNICALL Java_com_azavea_pdal_PointView_layout
 JNIEXPORT jint JNICALL Java_com_azavea_pdal_PointView_size
   (JNIEnv *env, jobject obj)
 {
-    PointView *pv = getHandle<PointView>(env, obj);
+    PointViewRawPtr *pvrp = getHandle<PointViewRawPtr>(env, obj);
+    PointViewPtr pv = pvrp->shared_pointer;
     return pv->size();
 }
 
 JNIEXPORT jboolean JNICALL Java_com_azavea_pdal_PointView_empty
   (JNIEnv *env, jobject obj)
 {
-    PointView *pv = getHandle<PointView>(env, obj);
+    PointViewRawPtr *pvrp = getHandle<PointViewRawPtr>(env, obj);
+    PointViewPtr pv = pvrp->shared_pointer;
     return pv->empty();
 }
 
 JNIEXPORT jbyteArray JNICALL Java_com_azavea_pdal_PointView_getPackedPoint
   (JNIEnv *env, jobject obj, jobjectArray dims, jlong idx)
 {
-    PointView *pv = getHandle<PointView>(env, obj);
+    PointViewRawPtr *pvrp = getHandle<PointViewRawPtr>(env, obj);
+    PointViewPtr pv = pvrp->shared_pointer;
 
     PointLayoutPtr pl = pv->layout();
 
@@ -90,7 +98,8 @@ JNIEXPORT jbyteArray JNICALL Java_com_azavea_pdal_PointView_getPackedPoint
 JNIEXPORT jbyteArray JNICALL Java_com_azavea_pdal_PointView_getPackedPoints
   (JNIEnv *env, jobject obj, jobjectArray dims)
 {
-    PointView *pv = getHandle<PointView>(env, obj);
+    PointViewRawPtr *pvrp = getHandle<PointViewRawPtr>(env, obj);
+    PointViewPtr pv = pvrp->shared_pointer;
 
     PointLayoutPtr pl = pv->layout();
 
@@ -141,7 +150,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_azavea_pdal_PointView_getPackedPoints
 JNIEXPORT void JNICALL Java_com_azavea_pdal_PointView_dispose
   (JNIEnv *env, jobject obj)
 {
-    PointView *pv = getHandle<PointView>(env, obj);
+    PointViewRawPtr *pvrp = getHandle<PointViewRawPtr>(env, obj);
     setHandle<int>(env, obj, 0);
-    delete pv;
+    delete pvrp;
 }

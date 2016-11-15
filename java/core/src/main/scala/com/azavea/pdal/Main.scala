@@ -27,6 +27,7 @@ object Main {
     println(s"pv1.ptr: ${pv1.ptr}")
     println(s"pvi.hasNext: ${pvi.hasNext}")
     println(s"pvi.ptr: ${pvi.ptr}")
+    println(s"pv1.ptr: ${pv1.ptr}")
     println(s"pv1.size: ${pv1.size}")
     println(s"pv1.getPackedPoints.size: ${pv1.getPackedPoints.length}")
     val layout = pv1.layout
@@ -47,7 +48,13 @@ object Main {
     //println(s"p.getMetadata: ${p.getMetadata}")
     //println(s"p.getSchema: ${p.getSchema}")
     //println(s"p.getLog: ${p.getLog}")
+    layout.dispose()
+    pv1.dispose()
+    pvi.dispose()
     p.dispose()
+    println(s"layout.ptr: ${layout.ptr}")
+    println(s"pv1.ptr: ${pv1.ptr}")
+    println(s"pvi.ptr: ${pvi.ptr}")
     println(s"p.ptr: ${p.ptr}")
   }
 

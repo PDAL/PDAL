@@ -2,9 +2,11 @@
 #include "com_azavea_pdal_PointViewIterator.h"
 #include "JavaPipeline.hpp"
 #include "JavaIterator.hpp"
+#include "PointViewRawPtr.hpp"
 #include "Accessors.hpp"
 
 using libpdaljava::PointViewIterator;
+using libpdaljava::PointViewRawPtr;
 
 using pdal::PointViewSet;
 using pdal::PointView;
@@ -29,7 +31,9 @@ JNIEXPORT jobject JNICALL Java_com_azavea_pdal_PointViewIterator_next
     jmethodID jpvCtor = env->GetMethodID(jpvClass, "<init>", "()V");
     jobject jpv = env->NewObject(jpvClass, jpvCtor);
 
-    setHandle(env, jpv, &*pvptr);
+    PointViewRawPtr *pvrp = new PointViewRawPtr(pvptr);
+
+    setHandle(env, jpv, pvrp);
 
     return jpv;
 }
