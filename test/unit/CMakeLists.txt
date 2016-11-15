@@ -33,6 +33,7 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/io/terrasolid
     ${PROJECT_SOURCE_DIR}/filters/chipper
     ${PROJECT_SOURCE_DIR}/filters/colorization
+    ${PROJECT_SOURCE_DIR}/filters/computerange
     ${PROJECT_SOURCE_DIR}/filters/crop
     ${PROJECT_SOURCE_DIR}/filters/decimation
     ${PROJECT_SOURCE_DIR}/filters/divider
@@ -109,6 +110,7 @@ PDAL_ADD_TEST(pdal_io_text_writer_test FILES io/text/TextWriterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_attribute_test FILES filters/AttributeFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_chipper_test FILES filters/ChipperTest.cpp)
 PDAL_ADD_TEST(pdal_filters_colorization_test FILES filters/ColorizationFilterTest.cpp)
+PDAL_ADD_TEST(pdal_filters_computerange_test FILES filters/ComputeRangeFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_crop_test FILES filters/CropFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_decimation_test FILES filters/DecimationFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_divider_test FILES filters/DividerFilterTest.cpp)
