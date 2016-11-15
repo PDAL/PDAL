@@ -36,6 +36,7 @@
 
 #include <pdal/pdal_internal.hpp>
 #include <iosfwd>
+#include <limits>
 
 namespace pdal
 {
