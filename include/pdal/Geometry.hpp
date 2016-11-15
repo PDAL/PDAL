@@ -51,26 +51,19 @@ class PDAL_DLL Geometry
 {
 public:
     Geometry();
+    virtual ~Geometry();
     Geometry(const std::string& wkt_or_json,
            SpatialReference ref = SpatialReference());
-    Geometry(const Geometry&);
-
 
     Geometry(GEOSGeometry* g, const SpatialReference& srs);
     Geometry(OGRGeometryH g, const SpatialReference& srs);
 
-//     Geometry(const std::string& wkt_or_json, SpatialReference ref,
-//         GEOSContextHandle_t ctx);
-//     Geometry(GEOSGeometry* g, const SpatialReference& srs,
-//         GEOSContextHandle_t ctx);
-
-
+    Geometry(const Geometry&);
     Geometry& operator=(const Geometry&);
 
     OGRGeometryH getOGRHandle();
 
 
-    virtual ~Geometry();
     void update(const std::string& wkt_or_json,
         SpatialReference ref = SpatialReference());
 
@@ -106,8 +99,6 @@ protected:
 
     SpatialReference m_srs;
     geos::ErrorHandler& m_geoserr;
-//    gdal::ErrorHandler m_gdalerr;
-//     GEOSContextHandle_t m_geosctx;
 
     void prepare();
 
@@ -116,11 +107,6 @@ protected:
     friend PDAL_DLL std::istream& operator>>(std::istream& istr,
         Geometry& p);
 };
-
-
-PDAL_DLL std::ostream& operator<<(std::ostream& ostr,
-    const Geometry& p);
-PDAL_DLL std::istream& operator>>(std::istream& istr, Geometry& p);
 
 } // namespace pdal
 

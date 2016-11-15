@@ -60,25 +60,14 @@ Geometry::Geometry(const std::string& wkt_or_json, SpatialReference ref)
 }
 
 
-// Geometry::Geometry(const std::string& wkt_or_json, SpatialReference ref,
-//     GEOSContextHandle_t ctx)
-//     : m_geom(0)
-//     , m_prepGeom(0)
-//     , m_srs(ref)
-//     , m_geoserr.ctx()(ctx)
-// {
-//     update(wkt_or_json, ref);
-// }
-//
-
 Geometry::~Geometry()
 {
-//     if (m_geom)
-//         GEOSGeom_destroy_r(m_geoserr.ctx(), m_geom);
-//     if (m_prepGeom)
-//         GEOSPreparedGeom_destroy_r(m_geoserr.ctx(), m_prepGeom);
-//     m_geom = 0;
-//     m_prepGeom = 0;
+    if (m_geom)
+        GEOSGeom_destroy_r(m_geoserr.ctx(), m_geom);
+    if (m_prepGeom)
+        GEOSPreparedGeom_destroy_r(m_geoserr.ctx(), m_prepGeom);
+    m_geom = 0;
+    m_prepGeom = 0;
 }
 
 
@@ -131,6 +120,7 @@ void Geometry::prepare()
     }
 }
 
+
 Geometry& Geometry::operator=(const Geometry& input)
 {
 
@@ -142,9 +132,8 @@ Geometry& Geometry::operator=(const Geometry& input)
         prepare();
     }
     return *this;
-
-
 }
+
 
 Geometry::Geometry(const Geometry& input)
     : m_srs(input.m_srs)
@@ -166,32 +155,14 @@ Geometry::Geometry(GEOSGeometry* g, const SpatialReference& srs)
 }
 
 
-// Geometry::Geometry(GEOSGeometry* g, const SpatialReference& srs,
-//     GEOSContextHandle_t ctx)
-//     : m_geom(GEOSGeom_clone_r(ctx, g))
-//     , m_srs(srs)
-//     , m_geoserr.ctx()(ctx)
-// {
-//     prepare();
-// }
-//
-
-Geometry::Geometry(OGRGeometryH g, const SpatialReference& srs) : m_srs(srs),  m_geoserr(geos::ErrorHandler::get())
+Geometry::Geometry(OGRGeometryH g, const SpatialReference& srs)
+    : m_srs(srs)
+    , m_geoserr(geos::ErrorHandler::get())
 {
-    OGRwkbGeometryType t = OGR_G_GetGeometryType(g);
-
-//     if (!(t == wkbPolygon ||
-//         t == wkbMultiPolygon ||
-//         t == wkbPolygon25D ||
-//         t == wkbMultiPolygon25D))
-//     {
-//         std::ostringstream oss;
-//         oss << "pdal::Polygon cannot construct geometry because "
-//             "OGR geometry is not Polygon or MultiPolygon!";
-//         throw pdal::pdal_error(oss.str());
-//     }
 
     OGRGeometry *ogr_g = (OGRGeometry*)g;
+
+    // FIXME: Use GEOSWKBWriter
     //
     // Convert the the GDAL geom to WKB in order to avoid the version
     // context issues with exporting directoly to GEOS.
@@ -205,7 +176,6 @@ Geometry::Geometry(OGRGeometryH g, const SpatialReference& srs) : m_srs(srs),  m
     prepare();
 
 }
-
 
 
 
@@ -224,8 +194,6 @@ Geometry Geometry::transform(const SpatialReference& ref) const
 }
 
 
-
-
 BOX3D Geometry::bounds() const
 {
     uint32_t numInputDims;
@@ -236,7 +204,6 @@ BOX3D Geometry::bounds() const
     // Smash out multi*
     if (GEOSGeomTypeId_r(m_geoserr.ctx(), m_geom) > 3)
         boundary = GEOSEnvelope_r(m_geoserr.ctx(), m_geom);
-//     GEOSGeometry*  boundary = GEOSEnvelope_r(m_geoserr.ctx(), m_geom);
 
     GEOSGeometry const* ring = GEOSGetExteriorRing_r(m_geoserr.ctx(), boundary);
     GEOSCoordSequence const* coords = GEOSGeom_getCoordSeq_r(m_geoserr.ctx(), ring);

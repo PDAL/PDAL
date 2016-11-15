@@ -43,7 +43,6 @@ namespace pdal
 Polygon::Polygon()
     : Geometry ()
 {
-    m_geom = GEOSGeom_createEmptyPolygon_r(m_geoserr.ctx());
 }
 
 
@@ -53,60 +52,21 @@ Polygon::Polygon(const std::string& wkt_or_json, SpatialReference ref)
 }
 
 
-// Polygon::Polygon(const std::string& wkt_or_json, SpatialReference ref,
-//     GEOSContextHandle_t ctx)
-//     : Geometry(wkt_or_json, ref, ctx)
-//
-// {
-// }
-
-
 Polygon::~Polygon()
 {
-//     if (m_geom)
-//         GEOSGeom_destroy_r(m_geoserr.ctx(), m_geom);
-//     if (m_prepGeom)
-//         GEOSPreparedGeom_destroy_r(m_geoserr.ctx(), m_prepGeom);
-//     m_geom = 0;
-//     m_prepGeom = 0;
 }
 
 
-
-// Polygon& Polygon::operator=(const Polygon& input)
-// {
-//
-//     if (&input!= this)
-//     {
-//         m_geoserr.ctx() = input.m_geoserr.ctx();
-//         m_srs = input.m_srs;
-//         m_geom = GEOSGeom_clone_r(m_geoserr.ctx(), input.m_geom);
-//         prepare();
-//     }
-//     return *this;
-//
-//
-// }
-//
 Polygon::Polygon(const Polygon& input)
     : Geometry(input)
 {
-//     assert(input.m_geom != 0);
-//     m_geom = GEOSGeom_clone_r(m_geoserr.ctx(), input.m_geom);
-//     assert(m_geom != 0);
-//     m_prepGeom = 0;
-//     prepare();
 }
 
 Polygon::Polygon(const Geometry& input)
     : Geometry(input)
 {
-//     assert(input.m_geom != 0);
-//     m_geom = GEOSGeom_clone_r(m_geoserr.ctx(), input.m_geom);
-//     assert(m_geom != 0);
-//     m_prepGeom = 0;
-//     prepare();
 }
+
 
 Polygon& Polygon::operator=(const Polygon& input)
 {
@@ -119,23 +79,13 @@ Polygon& Polygon::operator=(const Polygon& input)
         prepare();
     }
     return *this;
-
-
 }
-
 
 
 Polygon::Polygon(GEOSGeometry* g, const SpatialReference& srs)
     : Geometry(g, srs)
 {
 }
-
-
-// Polygon::Polygon(GEOSGeometry* g, const SpatialReference& srs,
-//     GEOSContextHandle_t ctx)
-//     : Geometry(g, srs, ctx)
-// {
-// }
 
 
 Polygon::Polygon(OGRGeometryH g, const SpatialReference& srs) : Geometry(g, srs)
@@ -367,27 +317,4 @@ bool Polygon::crosses(const Polygon& p) const
 }
 
 
-// std::ostream& operator<<(std::ostream& ostr, const Polygon& p)
-// {
-//     Geometry g (p);
-//     ostr << g;
-//     return ostr;
-// }
-//
-// std::istream& operator>>(std::istream& istr, Polygon& p)
-// {
-//     std::ostringstream oss;
-//     oss << istr.rdbuf();
-//     std::string wkt = oss.str();
-//     try
-//     {
-//         p.update(wkt);
-//     }
-//     catch (pdal_error)
-//     {
-//         istr.setstate(std::ios::failbit);
-//     }
-//     return istr;
-// }
-//
 } // namespace geos
