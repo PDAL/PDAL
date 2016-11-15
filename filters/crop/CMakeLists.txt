@@ -7,10 +7,12 @@
 #
 set(srcs
     CropFilter.cpp
+    Point.cpp
 )
 
 set(incs
     CropFilter.hpp
+    Point.hpp
 )
 
 PDAL_ADD_DRIVER(filter crop "${srcs}" "${incs}" objects)

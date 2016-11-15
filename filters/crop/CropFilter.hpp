@@ -37,6 +37,7 @@
 #include <pdal/Filter.hpp>
 #include <pdal/Polygon.hpp>
 #include <pdal/plugin.hpp>
+#include "Point.hpp"
 
 extern "C" int32_t CropFilter_ExitFunc();
 extern "C" PF_ExitFunc CropFilter_InitPlugin();
@@ -58,12 +59,13 @@ public:
     std::string getName() const;
 
 private:
-    std::vector<std::string> m_boundsTxt;
     std::vector<Bounds> m_bounds;
     bool m_cropOutside;
     std::vector<Polygon> m_polys;
     SpatialReference m_assignedSrs;
     SpatialReference m_lastSrs;
+    double m_distance;
+    std::vector<cropfilter::Point> m_points;
 
     struct GeomPkg
     {
@@ -85,9 +87,11 @@ private:
     void crop(const BOX2D& box, PointView& input, PointView& output);
     bool crop(PointRef& point, const GeomPkg& g);
     void crop(const GeomPkg& g, PointView& input, PointView& output);
+    void crop(const cropfilter::Point& point, double distance, PointView& input, PointView& output);
 
     CropFilter& operator=(const CropFilter&); // not implemented
     CropFilter(const CropFilter&); // not implemented
 };
 
 } // namespace pdal
+
