@@ -46,7 +46,6 @@ public:
     }
     pdal::PointViewSet getPointViews() const;
 
-
     void setLogLevel(int level);
     int getLogLevel() const;
 

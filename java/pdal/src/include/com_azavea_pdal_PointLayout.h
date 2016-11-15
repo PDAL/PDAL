@@ -10,9 +10,41 @@ extern "C" {
 /*
  * Class:     com_azavea_pdal_PointLayout
  * Method:    dimTypes
- * Signature: ()Ljava/util/ArrayList;
+ * Signature: ()Ljava/util/List;
  */
 JNIEXPORT jobject JNICALL Java_com_azavea_pdal_PointLayout_dimTypes
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     com_azavea_pdal_PointLayout
+ * Method:    findDimType
+ * Signature: (Ljava/lang/String;)Lcom/azavea/pdal/DimType;
+ */
+JNIEXPORT jobject JNICALL Java_com_azavea_pdal_PointLayout_findDimType
+  (JNIEnv *, jobject, jstring);
+
+/*
+ * Class:     com_azavea_pdal_PointLayout
+ * Method:    dimSize
+ * Signature: (Ljava/lang/String;)J
+ */
+JNIEXPORT jlong JNICALL Java_com_azavea_pdal_PointLayout_dimSize
+  (JNIEnv *, jobject, jstring);
+
+/*
+ * Class:     com_azavea_pdal_PointLayout
+ * Method:    dimOffset
+ * Signature: (Ljava/lang/String;)J
+ */
+JNIEXPORT jlong JNICALL Java_com_azavea_pdal_PointLayout_dimOffset
+  (JNIEnv *, jobject, jstring);
+
+/*
+ * Class:     com_azavea_pdal_PointLayout
+ * Method:    pointSize
+ * Signature: ()J
+ */
+JNIEXPORT jlong JNICALL Java_com_azavea_pdal_PointLayout_pointSize
   (JNIEnv *, jobject);
 
 /*

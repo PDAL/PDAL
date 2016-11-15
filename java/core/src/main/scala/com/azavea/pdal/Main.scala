@@ -29,7 +29,16 @@ object Main {
     println(s"pvi.ptr: ${pvi.ptr}")
     pv1.test()
     val layout = pv1.layout
-    println(layout.dimTypes().asScala)
+    val list = layout.dimTypes().asScala
+
+    val list2 = pv1.getPackedPoint(layout.dimTypes(), 0)
+    println(s"list2.length: ${list2.length}")
+    val list3 = pv1.getPackedPoint(java.util.Arrays.asList(layout.dimTypes().asScala.take(1):_*), 0)
+    println(s"list3.length: ${list3.length}")
+    println(list)
+    println(layout.findDimType("X"))
+    println(layout.dimSize(layout.findDimType("X")))
+    println(layout.pointSize())
     //pvi.next()
     //println(s"pvi.hasNext: ${pvi.hasNext}")
     //println(s"pv1.ptr: ${pv1.ptr}")

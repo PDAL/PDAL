@@ -1,0 +1,8 @@
+{
+  "pipeline":[
+    {
+      "filename":"/Users/daunnc/subversions/git/github/pomadchin/pdal-jni/data/1.2-with-color.las",
+      "spatialreference":"EPSG:2993"
+    }
+  ]
+}
