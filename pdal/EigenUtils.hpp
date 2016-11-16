@@ -760,6 +760,21 @@ PDAL_DLL double computeSlopeFD(const Eigen::MatrixBase<Derived>& data,
     return 100.0 * std::sqrt(p);
 }
 
+/**
+  Thin Plate Spline interpolation.
+
+  \param x the x coordinate of the input data.
+  \param y the y coordinate of the input data.
+  \param z the z coordinate of the input data.
+  \param xx the x coordinate of the points to be interpolated.
+  \param yy the y coordinate of the points to be interpolated.
+  \return the values of the interpolated data at xx and yy.
+*/
+PDAL_DLL Eigen::MatrixXd computeSpline(Eigen::MatrixXd x, Eigen::MatrixXd y,
+                                       Eigen::MatrixXd z, Eigen::MatrixXd xx,
+                                       Eigen::MatrixXd yy);
+
+
 } // namespace eigen
 
 } // namespace pdal

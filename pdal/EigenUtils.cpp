@@ -105,6 +105,106 @@ uint8_t computeRank(PointView& view, std::vector<PointId> ids, double threshold)
     return static_cast<uint8_t>(svd.rank());
 }
 
+Eigen::MatrixXd computeSpline(Eigen::MatrixXd x, Eigen::MatrixXd y,
+                              Eigen::MatrixXd z, Eigen::MatrixXd xx,
+                              Eigen::MatrixXd yy)
+{
+    using namespace Eigen;
+
+    int num_rows = xx.rows();
+    int num_cols = xx.cols();
+
+    MatrixXd S = MatrixXd::Zero(num_rows, num_cols);
+
+    for (auto col = 0; col < num_cols; ++col)
+    {
+        for (auto row = 0; row < num_rows; ++row)
+        {
+            // Further optimizations are achieved by estimating only the
+            // interpolated surface within a local neighbourhood (e.g. a 7 x 7
+            // neighbourhood is used in our case) of the cell being filtered.
+            int radius = 3;
+
+            int c = std::floor(col/2);
+            int r = std::floor(row/2);
+
+            int cs = Utils::clamp(c-radius, 0, static_cast<int>(z.cols()-1));
+            int ce = Utils::clamp(c+radius, 0, static_cast<int>(z.cols()-1));
+            int col_size = ce - cs + 1;
+            int rs = Utils::clamp(r-radius, 0, static_cast<int>(z.rows()-1));
+            int re = Utils::clamp(r+radius, 0, static_cast<int>(z.rows()-1));
+            int row_size = re - rs + 1;
+
+            MatrixXd Xn = x.block(rs, cs, row_size, col_size);
+            MatrixXd Yn = y.block(rs, cs, row_size, col_size);
+            MatrixXd Hn = z.block(rs, cs, row_size, col_size);
+
+            int nsize = row_size * col_size;
+            VectorXd T = VectorXd::Zero(nsize);
+            MatrixXd P = MatrixXd::Zero(nsize, 3);
+            MatrixXd K = MatrixXd::Zero(nsize, nsize);
+
+            for (auto id = 0; id < nsize; ++id)
+            {
+                double xj = Xn(id);
+                double yj = Yn(id);
+                double zj = Hn(id);
+                if (std::isnan(xj) || std::isnan(yj) || std::isnan(zj))
+                    continue;
+                T(id) = zj;
+                P.row(id) << 1, xj, yj;
+                for (auto id2 = 0; id2 < nsize; ++id2)
+                {
+                    if (id == id2)
+                        continue;
+                    double xk = Xn(id2);
+                    double yk = Yn(id2);
+                    double zk = Hn(id2);
+                    if (std::isnan(xk) || std::isnan(yk) || std::isnan(zk))
+                        continue;
+                    double rsqr = (xj - xk) * (xj - xk) + (yj - yk) * (yj - yk);
+                    if (rsqr == 0.0)
+                        continue;
+                    K(id, id2) = rsqr * std::log10(std::sqrt(rsqr));
+                }
+            }
+
+            MatrixXd A = MatrixXd::Zero(nsize+3, nsize+3);
+            A.block(0,0,nsize,nsize) = K;
+            A.block(0,nsize,nsize,3) = P;
+            A.block(nsize,0,3,nsize) = P.transpose();
+
+            VectorXd b = VectorXd::Zero(nsize+3);
+            b.head(nsize) = T;
+
+            VectorXd x = A.fullPivHouseholderQr().solve(b);
+
+            Vector3d a = x.tail(3);
+            VectorXd w = x.head(nsize);
+
+            double sum = 0.0;
+            double xi2 = xx(row, col);
+            double yi2 = yy(row, col);
+            for (auto j = 0; j < nsize; ++j)
+            {
+                double xj = Xn(j);
+                double yj = Yn(j);
+                double zj = Hn(j);
+                if (std::isnan(xj) || std::isnan(yj) || std::isnan(zj))
+                    continue;
+                double rsqr = (xj - xi2) * (xj - xi2) + (yj - yi2) * (yj - yi2);
+                if (rsqr == 0.0)
+                    continue;
+                sum += w(j) * rsqr * std::log10(std::sqrt(rsqr));
+            }
+
+            S(row, col) = a(0) + a(1)*xi2 + a(2)*yi2 + sum;
+        }
+    }
+
+    return S;
+}
+
 Eigen::MatrixXd createMinMatrix(PointView& view, int rows, int cols,
                                 double cell_size, BOX2D bounds)
 {
