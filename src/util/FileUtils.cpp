@@ -360,12 +360,13 @@ std::vector<std::string> glob(std::string path)
         return filenames;
 
     size_t found = path.find_last_of("/\\");
-    std::string dir = path.substr(0, found);
-
     do
     {
-        std::string filename = dir + "\\" + ffd.cFileName;
-        filenames.push_back(filename);
+        if (found == std::string::npos)
+            filenames.push_back(ffd.cFileName);
+        else
+            filenames.push_back(path.substr(0, found) + "\\" + ffd.cFileName);
+
     } while (FindNextFile(handle, &ffd) != 0);
     FindClose(handle);
 #else
