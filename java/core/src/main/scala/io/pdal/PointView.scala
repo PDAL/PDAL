@@ -1,4 +1,4 @@
-package com.azavea.pdal
+package io.pdal
 
 class PointView extends Native {
   def getPackedPoint(idx: Long): Array[Byte] = getPackedPoint(layout.dimTypes(), idx)

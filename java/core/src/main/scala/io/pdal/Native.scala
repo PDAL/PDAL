@@ -1,4 +1,4 @@
-package com.azavea.pdal
+package io.pdal
 
 trait Native {
   protected var nativeHandle = 0l // C++ pointer

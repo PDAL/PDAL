@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 
-#include "com_azavea_pdal_Pipeline.h"
+#include "io_pdal_Pipeline.h"
 #include "JavaPipeline.hpp"
 #include "JavaIterator.hpp"
 #include "Accessors.hpp"
@@ -15,7 +15,7 @@ using pdal::PointView;
 using pdal::PointViewLess;
 using pdal::PointViewPtr;
 
-JNIEXPORT void JNICALL Java_com_azavea_pdal_Pipeline_initialise
+JNIEXPORT void JNICALL Java_io_pdal_Pipeline_initialise
   (JNIEnv *env, jobject obj)
 {
     jclass c = env->GetObjectClass(obj);
@@ -24,7 +24,7 @@ JNIEXPORT void JNICALL Java_com_azavea_pdal_Pipeline_initialise
     setHandle(env, obj, new Pipeline(std::string(env->GetStringUTFChars(jstr, 0))));
 }
 
-JNIEXPORT void JNICALL Java_com_azavea_pdal_Pipeline_dispose
+JNIEXPORT void JNICALL Java_io_pdal_Pipeline_dispose
   (JNIEnv *env, jobject obj)
 {
     Pipeline *p = getHandle<Pipeline>(env, obj);
@@ -32,62 +32,62 @@ JNIEXPORT void JNICALL Java_com_azavea_pdal_Pipeline_dispose
     delete p;
 }
 
-JNIEXPORT void JNICALL Java_com_azavea_pdal_Pipeline_execute
+JNIEXPORT void JNICALL Java_io_pdal_Pipeline_execute
   (JNIEnv *env, jobject obj)
 {
     Pipeline *p = getHandle<Pipeline>(env, obj);
     p->execute();
 }
 
-JNIEXPORT jstring JNICALL Java_com_azavea_pdal_Pipeline_getMetadata
+JNIEXPORT jstring JNICALL Java_io_pdal_Pipeline_getMetadata
   (JNIEnv *env, jobject obj)
 {
     Pipeline *p = getHandle<Pipeline>(env, obj);
     return env->NewStringUTF(p->getMetadata().c_str());
 }
 
-JNIEXPORT jstring JNICALL Java_com_azavea_pdal_Pipeline_getSchema
+JNIEXPORT jstring JNICALL Java_io_pdal_Pipeline_getSchema
   (JNIEnv *env, jobject obj)
 {
     Pipeline *p = getHandle<Pipeline>(env, obj);
     return env->NewStringUTF(p->getSchema().c_str());
 }
 
-JNIEXPORT jboolean JNICALL Java_com_azavea_pdal_Pipeline_validate
+JNIEXPORT jboolean JNICALL Java_io_pdal_Pipeline_validate
   (JNIEnv *env, jobject obj)
 {
     Pipeline *p = getHandle<Pipeline>(env, obj);
     return p->validate();
 }
 
-JNIEXPORT void JNICALL Java_com_azavea_pdal_Pipeline_setLogLevel
+JNIEXPORT void JNICALL Java_io_pdal_Pipeline_setLogLevel
   (JNIEnv *env, jobject obj, jint i)
 {
     Pipeline *p = getHandle<Pipeline>(env, obj);
     p->setLogLevel(i);
 }
 
-JNIEXPORT jint JNICALL Java_com_azavea_pdal_Pipeline_getLogLevel
+JNIEXPORT jint JNICALL Java_io_pdal_Pipeline_getLogLevel
   (JNIEnv *env, jobject obj)
 {
     Pipeline *p = getHandle<Pipeline>(env, obj);
     return p->getLogLevel();
 }
 
-JNIEXPORT jstring JNICALL Java_com_azavea_pdal_Pipeline_getLog
+JNIEXPORT jstring JNICALL Java_io_pdal_Pipeline_getLog
   (JNIEnv *env, jobject obj)
 {
     Pipeline *p = getHandle<Pipeline>(env, obj);
     return env->NewStringUTF(p->getLog().c_str());
 }
 
-JNIEXPORT jobject JNICALL Java_com_azavea_pdal_Pipeline_pointViews__
+JNIEXPORT jobject JNICALL Java_io_pdal_Pipeline_pointViews__
   (JNIEnv *env, jobject obj)
 {
     Pipeline *p = getHandle<Pipeline>(env, obj);
     PointViewSet pvset = p->getPointViews();
 
-    jclass pviClass = env->FindClass("com/azavea/pdal/PointViewIterator");
+    jclass pviClass = env->FindClass("io/pdal/PointViewIterator");
     jmethodID pviCtor = env->GetMethodID(pviClass, "<init>", "()V");
     jobject pvi = env->NewObject(pviClass, pviCtor);
 

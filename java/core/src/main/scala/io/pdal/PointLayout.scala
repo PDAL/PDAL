@@ -1,4 +1,4 @@
-package com.azavea.pdal
+package io.pdal
 
 class PointLayout extends Native {
   def dimSize(dimType: DimType): Long = dimSize(dimType.id)

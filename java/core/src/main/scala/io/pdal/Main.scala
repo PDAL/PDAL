@@ -1,4 +1,4 @@
-package com.azavea.pdal
+package io.pdal
 
 import collection.JavaConverters._
 

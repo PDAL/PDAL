@@ -1,4 +1,4 @@
-package com.azavea.pdal
+package io.pdal
 
 class PointViewIterator extends Iterator[PointView] with Native {
   @native def hasNext: Boolean
