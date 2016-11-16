@@ -113,15 +113,13 @@ JNIEXPORT jstring JNICALL Java_io_pdal_PointView_getCrsWKT
     PointViewPtr pv = pvrp->shared_pointer;
 
     pdal::SpatialReference::WKTModeFlag enumFlag;
-
-    switch(mode_flag)
+    if(mode_flag > 2 && mode_flag < 1)
     {
-        case 2:
-            enumFlag = (pdal::SpatialReference::WKTModeFlag) mode_flag;
-            break;
-        default:
-            enumFlag = (pdal::SpatialReference::WKTModeFlag) 1;
-            break;
+        enumFlag = (pdal::SpatialReference::WKTModeFlag) 1;
+    }
+    else
+    {
+        enumFlag = (pdal::SpatialReference::WKTModeFlag) mode_flag;
     }
 
     return env->NewStringUTF(pv->spatialReference().getWKT(enumFlag, pretty).c_str());

@@ -13,10 +13,12 @@ class PointView extends Native {
   /**
     * Reads a packed point by point id from a set of packed points
     */
-  def get(packedPoints: Array[Byte], i: Int): Array[Byte] = {
-    val from = (i * layout.pointSize()).toInt
+  def get(packedPoints: Array[Byte], i: Int): Array[Byte] = get(packedPoints, layout.dimTypes(), i)
+  def get(packedPoints: Array[Byte], dims: Array[DimType], i: Int): Array[Byte] = {
+    val pointSize = dims.map(layout.dimSize(_)).sum
+    val from = (i * pointSize).toInt
     val to = {
-      val t = (from + layout.pointSize()).toInt
+      val t = (from + pointSize).toInt
       if(t > length) length else t
     }
 
