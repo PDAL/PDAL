@@ -14,6 +14,7 @@ using pdal::PointLayoutPtr;
 using pdal::Dimension::Type;
 using pdal::Dimension::Id;
 using pdal::PointId;
+using pdal::DimTypeList;
 
 /// Converts JavaArray of DimTypes (In Java interpretation DimType is a pair of strings)
 /// into pdal::DimTypeList (vector of DimTypes), puts dim size into bufSize
@@ -40,6 +41,28 @@ void convertDimTypeJavaArrayToVector(JNIEnv *env, jobjectArray dims, std::size_t
 
         *bufSize += pdal::Dimension::size(type);
         dimTypes->insert(dimTypes->begin() + i, pdal::DimType(id, type, jscale, joffset));
+    }
+}
+
+/// Fill a buffer with point data specified by the dimension list, accounts index
+/// Using this functions it is possible to pack all points into one buffer
+/// \param[in] pv    pdal::PointView pointer.
+/// \param[in] dims  List of dimensions/types to retrieve.
+/// \param[in] idx   Index of point to get.
+/// \param[in] buf   Pointer to buffer to fill.
+void getPackedPoint(PointViewPtr pv, const pdal::DimTypeList& dims, pdal::PointId idx, char *buf)
+{
+    std::size_t from = idx * (pv->layout()->pointSize());
+    if(from >= pv->size())
+    {
+        return;
+    }
+
+    buf += from;
+    for (auto di = dims.begin(); di != dims.end(); ++di)
+    {
+        pv->getField(buf, di->m_id, di->m_type, idx);
+        buf += pdal::Dimension::size(di->m_type);
     }
 }
 
@@ -148,7 +171,7 @@ JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getPackedPoints
     char *buf = new char[bufSize];
 
     for (int idx = 0; idx < pv->size(); idx++) {
-        pv->getPackedPoint(dimTypes, idx, buf);
+        getPackedPoint(pv, dimTypes, idx, buf);
     }
 
     jbyteArray array = env->NewByteArray(bufSize);

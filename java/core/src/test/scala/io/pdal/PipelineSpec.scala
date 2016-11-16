@@ -80,19 +80,27 @@ class PipelineSpec extends FunSpec with Matchers with BeforeAndAfterAll {
       val arr = pv.getPackedPoint(Array(DimType.X, DimType.Y), 0)
       val (xarr, yarr) = arr.take(layout.dimSize(DimType.X).toInt) -> arr.drop(layout.dimSize(DimType.Y).toInt)
 
-      ByteBuffer.wrap(xarr).order(ByteOrder.LITTLE_ENDIAN).getDouble should be (pv.getX(0))
-      ByteBuffer.wrap(yarr).order(ByteOrder.LITTLE_ENDIAN).getDouble should be (pv.getY(0))
+      ByteBuffer.wrap(xarr).order(ByteOrder.nativeOrder()).getDouble should be (pv.getX(0))
+      ByteBuffer.wrap(yarr).order(ByteOrder.nativeOrder()).getDouble should be (pv.getY(0))
 
       layout.dispose()
       pv.dispose()
       pvi.dispose()
     }
 
-    it("should read the whole packedpoint and grab only one dim") {
+    it("should read the whole packed point and grab only one dim") {
       val pvi = pipeline.pointViews()
       val pv = pvi.next()
       val arr = pv.getPackedPoint(0)
-      pv.get(arr)(DimType.Y).getDouble should be (pv.getY(0))
+      pv.get(arr, DimType.Y).getDouble should be (pv.getY(0))
+      pv.dispose()
+      pvi.dispose()
+    }
+
+    it("should read all packed points and grab only one point out of it") {
+      val pvi = pipeline.pointViews()
+      val pv = pvi.next()
+      pv.get(pv.getPackedPoints, 3) should be (pv.getPackedPoint(3))
       pv.dispose()
       pvi.dispose()
     }
