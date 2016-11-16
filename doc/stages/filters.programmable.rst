@@ -58,7 +58,7 @@ Example
       ]
     }
 
-The XML pipeline file referenced the external `multiply_z.py` `Python`_ script,
+The JSON pipeline file referenced the external `multiply_z.py` `Python`_ script,
 which scales up the Z coordinate by a factor of 10.
 
 .. code-block:: python
