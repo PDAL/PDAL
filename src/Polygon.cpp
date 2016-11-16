@@ -75,7 +75,10 @@ Polygon& Polygon::operator=(const Polygon& input)
     {
         m_geoserr = input.m_geoserr;
         m_srs = input.m_srs;
-        m_geom = GEOSGeom_clone_r(m_geoserr.ctx(), input.m_geom);
+        geos::GeometryDeleter geom_del(m_geoserr);
+        GEOSGeomPtr p(GEOSGeom_clone_r(m_geoserr.ctx(), input.m_geom.get()), geom_del);
+        m_geom.swap(p);
+
         prepare();
     }
     return *this;
@@ -113,7 +116,9 @@ Polygon::Polygon(OGRGeometryH g, const SpatialReference& srs) : Geometry(g, srs)
     std::vector<unsigned char> wkb(wkbSize);
 
     ogr_g->exportToWkb(bo, wkb.data());
-    m_geom = GEOSGeomFromWKB_buf_r(m_geoserr.ctx(), wkb.data(), wkbSize);
+    geos::GeometryDeleter geom_del(m_geoserr);
+    GEOSGeomPtr p(GEOSGeomFromWKB_buf_r(m_geoserr.ctx(), wkb.data(), wkbSize), geom_del);
+    m_geom.swap(p);
     prepare();
 
 }
@@ -159,8 +164,10 @@ void Polygon::initializeFromBounds(const BOX3D& box)
         throw pdal_error("unable to create linear ring from BOX2D");
 
 
-    m_geom = GEOSGeom_createPolygon_r(m_geoserr.ctx(), ring, 0, 0);
-    if (!m_geom)
+    geos::GeometryDeleter geom_del(m_geoserr);
+    GEOSGeomPtr p(GEOSGeom_createPolygon_r(m_geoserr.ctx(), ring, 0, 0), geom_del);
+    m_geom.swap(p);
+    if (!m_geom.get())
         throw pdal_error("unable to create polygon from linear ring in "
             "BOX2D constructor");
     prepare();
@@ -186,7 +193,7 @@ Polygon Polygon::simplify(double distance_tolerance,
     double area_tolerance) const
 {
     GEOSGeometry *smoothed =
-        GEOSTopologyPreserveSimplify_r(m_geoserr.ctx(), m_geom, distance_tolerance);
+        GEOSTopologyPreserveSimplify_r(m_geoserr.ctx(), m_geom.get(), distance_tolerance);
     if (!smoothed)
         throw pdal_error("Unable to simplify input geometry!");
 
@@ -253,7 +260,7 @@ Polygon Polygon::simplify(double distance_tolerance,
 double Polygon::area() const
 {
     double output(0.0);
-    int errored = GEOSArea_r(m_geoserr.ctx(), m_geom, &output);
+    int errored = GEOSArea_r(m_geoserr.ctx(), m_geom.get(), &output);
     if (errored == 0)
         throw pdal::pdal_error("Unable to get area of ring!");
     return output;
@@ -288,32 +295,32 @@ bool Polygon::covers(PointRef& ref) const
 
 bool Polygon::covers(const Polygon& p) const
 {
-    return (bool) GEOSCovers_r(m_geoserr.ctx(), m_geom, p.m_geom);
+    return (bool) GEOSCovers_r(m_geoserr.ctx(), m_geom.get(), p.m_geom.get());
 }
 
 bool Polygon::overlaps(const Polygon& p) const
 {
-    return (bool) GEOSOverlaps_r(m_geoserr.ctx(), m_geom, p.m_geom);
+    return (bool) GEOSOverlaps_r(m_geoserr.ctx(), m_geom.get(), p.m_geom.get());
 }
 
 bool Polygon::contains(const Polygon& p) const
 {
-    return (bool) GEOSContains_r(m_geoserr.ctx(), m_geom, p.m_geom);
+    return (bool) GEOSContains_r(m_geoserr.ctx(), m_geom.get(), p.m_geom.get());
 }
 
 bool Polygon::touches(const Polygon& p) const
 {
-    return (bool) GEOSTouches_r(m_geoserr.ctx(), m_geom, p.m_geom);
+    return (bool) GEOSTouches_r(m_geoserr.ctx(), m_geom.get(), p.m_geom.get());
 }
 
 bool Polygon::within(const Polygon& p) const
 {
-    return (bool) GEOSWithin_r(m_geoserr.ctx(), m_geom, p.m_geom);
+    return (bool) GEOSWithin_r(m_geoserr.ctx(), m_geom.get(), p.m_geom.get());
 }
 
 bool Polygon::crosses(const Polygon& p) const
 {
-    return (bool) GEOSCrosses_r(m_geoserr.ctx(), m_geom, p.m_geom);
+    return (bool) GEOSCrosses_r(m_geoserr.ctx(), m_geom.get(), p.m_geom.get());
 }
 
 

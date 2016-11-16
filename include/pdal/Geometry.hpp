@@ -42,10 +42,44 @@
 
 #include <geos_c.h>
 
+#include <memory>
+
 namespace pdal
 {
 
-namespace geos { class ErrorHandler; }
+namespace geos {
+
+class ErrorHandler;
+
+
+struct GeometryDeleter
+{
+    explicit GeometryDeleter(pdal::geos::ErrorHandler& ctx)
+    : ctx(ctx)
+    {}
+
+    GeometryDeleter() : ctx(geos::ErrorHandler::get()) {};
+
+    GeometryDeleter& operator=(const GeometryDeleter& other)
+    {
+       if (&other!= this)
+           ctx = other.ctx;
+       return *this;
+    }
+
+    GeometryDeleter(const GeometryDeleter& other) : ctx(other.ctx) {};
+
+    void operator()(GEOSGeometry* geometry) const
+    {
+        GEOSGeom_destroy_r(ctx.ctx(), geometry);
+    }
+    pdal::geos::ErrorHandler& ctx;
+};
+
+} // namespace geos
+
+
+typedef std::unique_ptr<GEOSGeometry, geos::GeometryDeleter> GEOSGeomPtr;
 
 class PDAL_DLL Geometry
 {
@@ -94,7 +128,8 @@ public:
         { return m_geom != NULL; }
 
 protected:
-    GEOSGeometry *m_geom;
+
+    GEOSGeomPtr m_geom;
     const GEOSPreparedGeometry *m_prepGeom;
 
     SpatialReference m_srs;
