@@ -88,6 +88,15 @@ class PipelineSpec extends FunSpec with Matchers with BeforeAndAfterAll {
       pvi.dispose()
     }
 
+    it("should read the whole packedpoint and grab only one dim") {
+      val pvi = pipeline.pointViews()
+      val pv = pvi.next()
+      val arr = pv.getPackedPoint(0)
+      pv.get(arr)(DimType.Y).getDouble should be (pv.getY(0))
+      pv.dispose()
+      pvi.dispose()
+    }
+
     it("should read a valid value by name") {
       val pvi = pipeline.pointViews()
       val pv = pvi.next()
