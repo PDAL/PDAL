@@ -6,6 +6,7 @@
 using pdal::PointLayout;
 using pdal::DimTypeList;
 using pdal::DimType;
+using pdal::XForm;
 
 JNIEXPORT jobjectArray JNICALL Java_io_pdal_PointLayout_dimTypes
   (JNIEnv *env, jobject obj)
@@ -14,7 +15,7 @@ JNIEXPORT jobjectArray JNICALL Java_io_pdal_PointLayout_dimTypes
     DimTypeList dimTypes = pl->dimTypes();
 
     jclass dtClass = env->FindClass("io/pdal/DimType");
-    jmethodID dtCtor = env->GetMethodID(dtClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;)V");
+    jmethodID dtCtor = env->GetMethodID(dtClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;DD)V");
 
     jobjectArray result = env->NewObjectArray(dimTypes.size(), dtClass, NULL);
 
@@ -23,7 +24,8 @@ JNIEXPORT jobjectArray JNICALL Java_io_pdal_PointLayout_dimTypes
         auto dt = dimTypes.at(i);
         jstring id = env->NewStringUTF(pdal::Dimension::name(dt.m_id).c_str());
         jstring type = env->NewStringUTF(pdal::Dimension::interpretationName(dt.m_type).c_str());
-        jobject element = env->NewObject(dtClass, dtCtor, id, type);
+        XForm xform = dt.m_xform;
+        jobject element = env->NewObject(dtClass, dtCtor, id, type, xform.m_scale, xform.m_offset);
 
         env->SetObjectArrayElement(result, i, element);
 
@@ -43,10 +45,11 @@ JNIEXPORT jobject JNICALL Java_io_pdal_PointLayout_findDimType
     DimType dt = pl->findDimType(fid);
     jstring id = env->NewStringUTF(pdal::Dimension::name(dt.m_id).c_str());
     jstring type = env->NewStringUTF(pdal::Dimension::interpretationName(dt.m_type).c_str());
+    XForm xform = dt.m_xform;
 
     jclass dtClass = env->FindClass("io/pdal/DimType");
-    jmethodID dtCtor = env->GetMethodID(dtClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;)V");
-    jobject result = env->NewObject(dtClass, dtCtor, id, type);
+    jmethodID dtCtor = env->GetMethodID(dtClass, "<init>", "(Ljava/lang/String;Ljava/lang/String;DD)V");
+    jobject result = env->NewObject(dtClass, dtCtor, id, type, xform.m_scale, xform.m_offset);
 
     return result;
 }

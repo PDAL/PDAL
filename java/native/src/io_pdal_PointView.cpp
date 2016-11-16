@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <vector>
 #include "io_pdal_PointView.h"
 #include "JavaPipeline.hpp"
 #include "PointViewRawPtr.hpp"
@@ -13,6 +14,34 @@ using pdal::PointLayoutPtr;
 using pdal::Dimension::Type;
 using pdal::Dimension::Id;
 using pdal::PointId;
+
+/// Converts JavaArray of DimTypes (In Java interpretation DimType is a pair of strings)
+/// into pdal::DimTypeList (vector of DimTypes), puts dim size into bufSize
+/// \param[in] env       JNI environment
+/// \param[in] dims      JavaArray of DimTypes
+/// \param[in] bufSize   Dims sum size
+/// \param[in] dimTypes  Vector of DimTypes
+void convertDimTypeJavaToVector(JNIEnv *env, jobjectArray dims, std::size_t *bufSize, pdal::DimTypeList *dimTypes) {
+    for (jint i = 0; i < env->GetArrayLength(dims); i++) {
+        jobject jDimType = (jobject) env->GetObjectArrayElement(dims, i);
+        jclass cDimType = env->GetObjectClass(jDimType);
+        jfieldID fid = env->GetFieldID(cDimType, "id", "Ljava/lang/String;");
+        jfieldID ftype = env->GetFieldID(cDimType, "type", "Ljava/lang/String;");
+        jfieldID fscale = env->GetFieldID(cDimType, "scale", "D");
+        jfieldID foffset = env->GetFieldID(cDimType, "offset", "D");
+
+        jstring jid = (jstring) env->GetObjectField(jDimType, fid);
+        jstring jtype = (jstring) env->GetObjectField(jDimType, ftype);
+        jdouble jscale = env->GetDoubleField(jDimType, fscale);
+        jdouble joffset = env->GetDoubleField(jDimType, foffset);
+
+        Id id = pdal::Dimension::id(std::string(env->GetStringUTFChars(jid, 0)));
+        Type type = pdal::Dimension::type(std::string(env->GetStringUTFChars(jtype, 0)));
+
+        *bufSize += pdal::Dimension::size(type);
+        dimTypes->insert(dimTypes->begin() + i, pdal::DimType(id, type, jscale, joffset));
+    }
+}
 
 JNIEXPORT jobject JNICALL Java_io_pdal_PointView_layout
   (JNIEnv *env, jobject obj)
@@ -54,40 +83,15 @@ JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getPackedPoint
 
     PointLayoutPtr pl = pv->layout();
 
-    jint len = env->GetArrayLength(dims);
-    // not the best logic to allocate only necessary memory amount
-    std::size_t bufSize = pl->pointSize();
-    if(pl->dimTypes().size() != len)
-    {
-        bufSize = 0;
-        for (jint i = 0; i < len; i++) {
-            jobject jDimType = (jobject) env->GetObjectArrayElement(dims, i);
-            jclass cDimType = env->GetObjectClass(jDimType);
-            jfieldID ftype = env->GetFieldID(cDimType, "type", "Ljava/lang/String;");
+    // we need to calculate buffer size
+    std::size_t bufSize = 0;
+    pdal::DimTypeList dimTypes;
 
-            jstring jtype = (jstring) env->GetObjectField(jDimType, ftype);
-            Type type = pdal::Dimension::type(std::string(env->GetStringUTFChars(jtype, 0)));
-            bufSize += pdal::Dimension::size(type);
-        }
-    }
+    // calculate result buffer length (for one point) and get dimTypes
+    convertDimTypeJavaToVector(env, dims, &bufSize, &dimTypes);
 
     char *buf = new char[bufSize];
-
-    for (jint i = 0; i < len; i++) {
-        jobject jDimType = (jobject) env->GetObjectArrayElement(dims, i);
-        jclass cDimType = env->GetObjectClass(jDimType);
-        jfieldID fid = env->GetFieldID(cDimType, "id", "Ljava/lang/String;");
-        jfieldID ftype = env->GetFieldID(cDimType, "type", "Ljava/lang/String;");
-
-        jstring jid = (jstring) env->GetObjectField(jDimType, fid);
-        jstring jtype = (jstring) env->GetObjectField(jDimType, ftype);
-
-        Id id = pdal::Dimension::id(std::string(env->GetStringUTFChars(jid, 0)));
-        Type type = pdal::Dimension::type(std::string(env->GetStringUTFChars(jtype, 0)));
-
-        pv->getField(buf, id, type, idx);
-        buf += pdal::Dimension::size(type);
-    }
+    pv->getPackedPoint(dimTypes, idx, buf);
 
     jbyteArray array = env->NewByteArray(bufSize);
     env->SetByteArrayRegion (array, 0, bufSize, reinterpret_cast<jbyte *>(buf));
@@ -103,42 +107,19 @@ JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getPackedPoints
 
     PointLayoutPtr pl = pv->layout();
 
-    jint len = env->GetArrayLength(dims);
-    // not the best logic to allocate only necessary memory amount
-    std::size_t bufSize = pl->pointSize();
-    if(pl->dimTypes().size() != len)
-    {
-        bufSize = 0;
-        for (jint i = 0; i < len; i++) {
-            jobject jDimType = (jobject) env->GetObjectArrayElement(dims, i);
-            jclass cDimType = env->GetObjectClass(jDimType);
-            jfieldID ftype = env->GetFieldID(cDimType, "type", "Ljava/lang/String;");
+    // we need to calculate buffer size
+    std::size_t bufSize = 0;
+    pdal::DimTypeList dimTypes;
 
-            jstring jtype = (jstring) env->GetObjectField(jDimType, ftype);
-            Type type = pdal::Dimension::type(std::string(env->GetStringUTFChars(jtype, 0)));
-            bufSize += pdal::Dimension::size(type);
-        }
-    }
+    // calculate result buffer length (for one point) and get dimTypes
+    convertDimTypeJavaToVector(env, dims, &bufSize, &dimTypes);
 
+    // reading all points
     bufSize = bufSize * pv->size();
     char *buf = new char[bufSize];
 
     for (int idx = 0; idx < pv->size(); idx++) {
-        for (jint i = 0; i < len; i++) {
-            jobject jDimType = (jobject) env->GetObjectArrayElement(dims, i);
-            jclass cDimType = env->GetObjectClass(jDimType);
-            jfieldID fid = env->GetFieldID(cDimType, "id", "Ljava/lang/String;");
-            jfieldID ftype = env->GetFieldID(cDimType, "type", "Ljava/lang/String;");
-
-            jstring jid = (jstring) env->GetObjectField(jDimType, fid);
-            jstring jtype = (jstring) env->GetObjectField(jDimType, ftype);
-
-            Id id = pdal::Dimension::id(std::string(env->GetStringUTFChars(jid, 0)));
-            Type type = pdal::Dimension::type(std::string(env->GetStringUTFChars(jtype, 0)));
-
-            pv->getField(buf, id, type, idx);
-            buf += pdal::Dimension::size(type);
-        }
+        pv->getPackedPoint(dimTypes, idx, buf);
     }
 
     jbyteArray array = env->NewByteArray(bufSize);
