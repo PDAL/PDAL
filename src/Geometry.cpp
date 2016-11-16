@@ -152,6 +152,7 @@ Geometry::Geometry(const Geometry& input)
 Geometry::Geometry(GEOSGeometry* g, const SpatialReference& srs)
     : m_srs(srs) , m_geoserr(geos::ErrorHandler::get())
 {
+    std::cout << "in Geometry constructor" << std::endl;
     geos::GeometryDeleter geom_del(m_geoserr);
     GEOSGeomPtr p(GEOSGeom_clone_r(m_geoserr.ctx(),  g), geom_del);
     m_geom.swap(p);
@@ -328,13 +329,15 @@ std::istream& operator>>(std::istream& istr, Geometry& p)
     oss << istr.rdbuf();
 
     std::string wkt = oss.str();
+    std::cout << "wkt: " << wkt << std::endl;
 
     try
     {
         p.update(wkt);
     }
-    catch (pdal_error)
+    catch (pdal_error& err)
     {
+        std::cerr << "err: " << err.what() << std::endl;
         istr.setstate(std::ios::failbit);
     }
     return istr;

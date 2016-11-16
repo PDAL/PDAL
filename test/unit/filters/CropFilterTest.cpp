@@ -365,7 +365,7 @@ TEST(CropFilterTest, test_sphere)
     BOX2D dstBounds(3.33333, 33.33333, 6.66666, 66.66666);
     Options cropOpts;
     cropOpts.add("distance", 10.0);
-    cropOpts.add("point", "(4.3, 43.0, 500)");
+    cropOpts.add("point", "POINT (4.3 43.0 500)");
 
     CropFilter filter;
     filter.setOptions(cropOpts);

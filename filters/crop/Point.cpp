@@ -45,237 +45,142 @@ const double HIGHEST = (std::numeric_limits<double>::max)();
 
 }
 
-template <typename PREDICATE>
-void eat(std::istream& in, PREDICATE p)
-{
-    while (p((char)in.get()))
-        ;
-    if (in.eof())
-        in.clear(in.rdstate() & ~std::ios::failbit);
-    else
-        in.unget();
-}
-
-bool eat(std::istream& in, char c)
-{
-    if ((char)in.get() == c)
-        return true;
-    in.unget();
-    return false;
-}
-
-void readxy(std::istream& istr, double& x, double& y)
-{
-    eat(istr, isspace);
-    if (!eat(istr,'('))
-        istr.setstate(std::ios_base::failbit);
-
-    eat(istr, isspace);
-    istr >> x;
-
-    eat(istr, isspace);
-    if (!eat(istr,','))
-        istr.setstate(std::ios_base::failbit);
-
-    eat(istr, isspace);
-    istr >> y;
-
-    eat(istr, isspace);
-    if (!eat(istr,')'))
-        istr.setstate(std::ios_base::failbit);
-}
-
-void readxyz(std::istream& istr, double& x, double& y, double& z)
-{
-    eat(istr, isspace);
-    if (!eat(istr,'('))
-        istr.setstate(std::ios_base::failbit);
-
-    eat(istr, isspace);
-    istr >> x;
-
-    eat(istr, isspace);
-    if (!eat(istr,','))
-        istr.setstate(std::ios_base::failbit);
-
-    eat(istr, isspace);
-    istr >> y;
-
-    eat(istr, isspace);
-    if (!eat(istr,','))
-        istr.setstate(std::ios_base::failbit);
-
-    eat(istr, isspace);
-    istr >> z;
-
-    eat(istr, isspace);
-    if (!eat(istr,')'))
-        istr.setstate(std::ios_base::failbit);
-}
-
-
-
 namespace cropfilter
 {
 
-bool Point2D::empty() const
+Point::Point()
+    : Geometry()
+    , x(LOWEST)
+    , y(LOWEST)
+    , z(LOWEST)
 {
-    return  x == LOWEST && y == LOWEST;
+
+};
+
+Point::Point(const std::string& wkt_or_json, SpatialReference ref)
+    : Geometry(wkt_or_json, ref)
+{
+
 }
 
-void Point2D::clear()
+void Point::update(const std::string& wkt_or_json, SpatialReference ref)
 {
-    x = LOWEST; y = LOWEST;
+    bool isJson = wkt_or_json.find("{") != wkt_or_json.npos ||
+                  wkt_or_json.find("}") != wkt_or_json.npos;
+
+    GEOSWKTReader* geosreader = GEOSWKTReader_create_r(m_geoserr.ctx());
+
+    if (!isJson)
+    {
+        geos::GeometryDeleter geom_del(m_geoserr);
+        GEOSGeomPtr p(GEOSWKTReader_read_r(m_geoserr.ctx(), geosreader, wkt_or_json.c_str()), geom_del);
+        m_geom.swap(p);
+    }
+    else
+    {
+        // Assume it is GeoJSON and try constructing from that
+        OGRGeometryH json = OGR_G_CreateGeometryFromJson(wkt_or_json.c_str());
+
+        if (!json)
+            throw pdal_error("Unable to create geometry from "
+                "input GeoJSON");
+
+        char* gdal_wkt(0);
+        OGRErr err = OGR_G_ExportToWkt(json, &gdal_wkt);
+
+        geos::GeometryDeleter geom_del(m_geoserr);
+        GEOSGeomPtr p(GEOSWKTReader_read_r(m_geoserr.ctx(), geosreader, gdal_wkt), geom_del);
+        m_geom.swap(p);
+
+        OGRFree(gdal_wkt);
+        OGR_G_DestroyGeometry(json);
+    }
+    prepare();
+
+    GEOSWKTReader_destroy_r(m_geoserr.ctx(), geosreader);
+
+
+    int t = GEOSGeomTypeId_r(m_geoserr.ctx(), m_geom.get());
+    std::cout << "t:" << t << std::endl;
+    if (t == -1)
+        throw pdal_error("Unable to fetch geometry point type");
+    if (t > 0)
+        throw pdal_error("Geometry type is not point!");
+
+    int nGeometries = GEOSGetNumGeometries_r(m_geoserr.ctx(), m_geom.get());
+    if (nGeometries > 1)
+        throw pdal_error("Geometry count is > 1!");
+
+    const GEOSGeometry* g = GEOSGetGeometryN_r(m_geoserr.ctx(), m_geom.get(), 0);
+
+    GEOSCoordSequence const* coords = GEOSGeom_getCoordSeq_r(m_geoserr.ctx(),  g);
+
+    uint32_t numInputDims;
+    GEOSCoordSeq_getDimensions_r(m_geoserr.ctx(), coords, &numInputDims);
+
+    uint32_t count(0);
+    GEOSCoordSeq_getSize_r(m_geoserr.ctx(), coords, &count);
+    if (count == 0)
+        throw pdal_error("No coordinates in geometry!");
+
+    for (unsigned i = 0; i < count; ++i)
+    {
+        GEOSCoordSeq_getOrdinate_r(m_geoserr.ctx(), coords, i, 0, &x);
+        GEOSCoordSeq_getOrdinate_r(m_geoserr.ctx(), coords, i, 1, &y);
+        if (numInputDims > 2)
+            GEOSCoordSeq_getOrdinate_r(m_geoserr.ctx(), coords, i, 2, &z);
+    }
+
 }
 
-void Point3D::clear()
+
+void Point::clear()
 {
-    Point2D::clear();
-    z = LOWEST;
+    x = LOWEST; y = LOWEST; z = LOWEST;
 }
 
-bool Point3D::empty() const
+
+bool Point::empty() const
 {
     return  x == LOWEST && y == LOWEST && z == LOWEST;
 }
 
-Point::Point(const Point3D& point) : m_point(point)
-{}
-
-
-Point::Point(const Point2D& point) : m_point(point)
-{
-    m_point.z = LOWEST;
-}
 
 bool Point::is3d() const
 {
-    return (m_point.z != LOWEST );
+    return (z != LOWEST );
 }
 
 
-void Point::set(const Point3D& point)
-{
-    m_point = point;
-}
-
-
-void Point::set(const Point2D& point)
-{
-    m_point = Point3D(point);
-    m_point.z = LOWEST;
-}
-
-Point2D Point::to2d() const
-{
-    return m_point.to2d();
-}
-
-Point2D Point3D::to2d() const
-{
-    return (*this);
-}
-
-Point3D Point::to3d() const
-{
-    if (m_point.x == LOWEST && m_point.y == LOWEST)
-        return Point3D();
-    return m_point;
-}
-
-
-std::istream& operator>>(std::istream& istr, cropfilter::Point2D& point)
-{
-    char left_paren = (char)istr.get();
-    if (!istr.good())
-    {
-        istr.setstate(std::ios_base::failbit);
-        return istr;
-    }
-    const char right_paren = (char)istr.get();
-
-    if (left_paren == '(' && right_paren == ')')
-    {
-        point = cropfilter::Point2D();
-        return istr;
-    }
-    istr.unget();
-    istr.unget(); // ()
-
-    double x, y;
-
-    readxy(istr, x, y);
-
-    if (istr.good())
-    {
-        point.x = x;
-        point.y = y;
-    }
-    return istr;
-}
-
-std::istream& operator>>(std::istream& istr, cropfilter::Point3D& point)
-{
-    char left_paren = (char)istr.get();
-    if (!istr.good())
-    {
-        istr.setstate(std::ios_base::failbit);
-        return istr;
-    }
-    const char right_paren = (char)istr.get();
-
-    if (left_paren == '(' && right_paren == ')')
-    {
-        cropfilter::Point3D output;
-        point = output;
-        return istr;
-    }
-    istr.unget();
-    istr.unget(); // ()
-
-    double x, y, z;
-
-    readxyz(istr, x, y, z);
-    if (istr.good())
-    {
-        point.x = x;
-        point.y = y;
-        point.z = z;
-    }
-    return istr;
-}
-
-
-
-
-std::istream& operator>>(std::istream& in, cropfilter::Point& point)
-{
-    std::streampos start = in.tellg();
-    cropfilter::Point3D b3d;
-    in >> b3d;
-    if (in.fail())
-    {
-        in.clear();
-        in.seekg(start);
-        cropfilter::Point2D b2d;
-        in >> b2d;
-        if (!in.fail())
-            point.set(b2d);
-    }
-    else
-        point.set(b3d);
-    return in;
-}
-
-std::ostream& operator<<(std::ostream& out, const cropfilter::Point& point)
-{
-    if (point.is3d())
-        out << point.to3d();
-    else
-        out << point.to2d();
-    return out;
-}
-
+//
+// std::istream& operator>>(std::istream& in, cropfilter::Point& point)
+// {
+//     std::streampos start = in.tellg();
+//     cropfilter::Point3D b3d;
+//     in >> b3d;
+//     if (in.fail())
+//     {
+//         in.clear();
+//         in.seekg(start);
+//         cropfilter::Point2D b2d;
+//         in >> b2d;
+//         if (!in.fail())
+//             point.set(b2d);
+//     }
+//     else
+//         point.set(b3d);
+//     return in;
+// }
+//
+// std::ostream& operator<<(std::ostream& out, const cropfilter::Point& point)
+// {
+//     if (point.is3d())
+//         out << point.to3d();
+//     else
+//         out << point.to2d();
+//     return out;
+// }
+//
 
 
 } //namespace cropfilter
