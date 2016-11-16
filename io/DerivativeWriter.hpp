@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2015, Bradley J Chambers, brad.chambers@gmail.com
+* Copyright (c) 2015-2016, Bradley J Chambers, brad.chambers@gmail.com
 *
 * All rights reserved.
 *
@@ -41,8 +41,7 @@
 #include <Eigen/Core>
 
 #include <string>
-
-#include "gdal_priv.h" // For File I/O
+#include <vector>
 
 extern "C" int32_t DerivativeWriter_ExitFunc();
 extern "C" PF_ExitFunc DerivativeWriter_InitPlugin();
@@ -64,20 +63,7 @@ class PDAL_DLL DerivativeWriter : public Writer
         CONTOUR_CURVATURE,
         PROFILE_CURVATURE,
         TANGENTIAL_CURVATURE,
-        TOTAL_CURVATURE,
-        CATCHMENT_AREA
-    };
-
-    enum Direction
-    {
-        NORTH,
-        SOUTH,
-        EAST,
-        WEST,
-        NORTHEAST,
-        NORTHWEST,
-        SOUTHEAST,
-        SOUTHWEST
+        TOTAL_CURVATURE
     };
 
     struct TypeOutput
@@ -91,69 +77,23 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    DerivativeWriter();
+    DerivativeWriter()
+    {}
 
 private:
     virtual void addArgs(ProgramArgs& args);
     virtual void initialize();
     virtual void write(const PointViewPtr view);
 
-    void setBounds(const BOX2D& v)
-    {
-        m_bounds = v;
-    }
-
-    BOX2D& getBounds()
-    {
-        return m_bounds;
-    }
-
     std::string generateFilename(const std::string& primName,
-        std::string::size_type hashPos) const;
-    void calculateGridSizes();
-    double determineSlopeFD(Eigen::MatrixXd* data, int row, int col,
-                            double postSpacing, double valueToIgnore);
-    double determineSlopeD8(Eigen::MatrixXd* data, int row, int col,
-                            double postSpacing, double valueToIgnore);
-    double determineAspectFD(Eigen::MatrixXd* data, int row, int col,
-                             double postSpacing, double valueToIgnore);
-    double determineAspectD8(Eigen::MatrixXd* data, int row, int col,
-                             double postSpacing);
-    int determineCatchmentAreaD8(Eigen::MatrixXd* data, Eigen::MatrixXd* area,
-                                 int row, int col, double postSpacing);
-    double determineContourCurvature(Eigen::MatrixXd* data, int row, int col,
-                                     double postSpacing, double valueToIgnore);
-    double determineProfileCurvature(Eigen::MatrixXd* data, int row, int col,
-                                     double postSpacing, double valueToIgnore);
-    double determineTangentialCurvature(Eigen::MatrixXd* data, int row, int col,
-                                        double postSpacing, double valueToIgnore);
-    double determineTotalCurvature(Eigen::MatrixXd* data, int row, int col,
-                                   double postSpacing, double valueToIgnore);
-    double determineHillshade(Eigen::MatrixXd* data, int row, int col,
-                              double zenithRad, double azimuthRad,
-                              double postSpacing);
-    double GetNeighbor(Eigen::MatrixXd* data, int row, int col, Direction d);
-    void writeSlope(Eigen::MatrixXd* dem, PrimitiveType method,
-        const std::string& filename);
-    void writeAspect(Eigen::MatrixXd* dem, PrimitiveType method,
-        const std::string& filename);
-    void writeCatchmentArea(Eigen::MatrixXd* dem, const std::string& filename);
-    void writeHillshade(Eigen::MatrixXd* dem, const std::string& filename);
-    void writeCurvature(Eigen::MatrixXd* dem, PrimitiveType curveType,
-        double valueToIgnore, const std::string& filename);
-    GDALDataset* createFloat32GTIFF(std::string filename, int cols, int rows);
-    void stretchData(float *data);
+                                 std::string::size_type hashPos) const;
 
     std::string m_filename;
-    uint64_t m_pointCount;
-    uint32_t m_GRID_SIZE_X;
-    uint32_t m_GRID_SIZE_Y;
-    double m_GRID_DIST_X;
-    double m_GRID_DIST_Y;
+    double m_edgeLength;
+    double m_illumAltDeg;
+    double m_illumAzDeg;
     StringList m_primTypesSpec;
     std::vector<TypeOutput> m_primitiveTypes;
-    BOX2D m_bounds;
-    SpatialReference m_inSRS;
 
     DerivativeWriter& operator=(const DerivativeWriter&); // not implemented
     DerivativeWriter(const DerivativeWriter&); // not implemented

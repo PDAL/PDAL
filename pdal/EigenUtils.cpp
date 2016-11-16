@@ -41,6 +41,7 @@
 
 #include <Eigen/Dense>
 
+#include <cfloat>
 #include <vector>
 
 namespace pdal
@@ -104,8 +105,8 @@ uint8_t computeRank(PointView& view, std::vector<PointId> ids, double threshold)
     return static_cast<uint8_t>(svd.rank());
 }
 
-Eigen::MatrixXd createDSM(PointView& view, int rows, int cols, double cell_size,
-                          BOX2D bounds)
+Eigen::MatrixXd createMinMatrix(PointView& view, int rows, int cols,
+                                double cell_size, BOX2D bounds)
 {
     using namespace Dimension;
     using namespace Eigen;
@@ -129,6 +130,31 @@ Eigen::MatrixXd createDSM(PointView& view, int rows, int cols, double cell_size,
     return ZImin;
 }
 
+Eigen::MatrixXd createMaxMatrix(PointView& view, int rows, int cols,
+                                double cell_size, BOX2D bounds)
+{
+    using namespace Dimension;
+    using namespace Eigen;
+
+    MatrixXd ZImax(rows, cols);
+    ZImax.setConstant(std::numeric_limits<double>::quiet_NaN());
+
+    for (PointId i = 0; i < view.size(); ++i)
+    {
+        double x = view.getFieldAs<double>(Id::X, i);
+        double y = view.getFieldAs<double>(Id::Y, i);
+        double z = view.getFieldAs<double>(Id::Z, i);
+
+        int c = Utils::clamp(static_cast<int>(floor(x-bounds.minx)/cell_size), 0, cols-1);
+        int r = Utils::clamp(static_cast<int>(floor(y-bounds.miny)/cell_size), 0, rows-1);
+
+        if (z > ZImax(r, c) || std::isnan(ZImax(r, c)))
+            ZImax(r, c) = z;
+    }
+
+    return ZImax;
+}
+
 Eigen::MatrixXd extendedLocalMinimum(PointView& view, int rows, int cols,
                                      double cell_size, BOX2D bounds)
 {
@@ -149,8 +175,8 @@ Eigen::MatrixXd extendedLocalMinimum(PointView& view, int rows, int cols,
         hash[r*cols+c].push_back(z);
     }
 
-    // For each grid cell, sort elevations and detect local minimum, rejecting low
-    // outliers.
+    // For each grid cell, sort elevations and detect local minimum, rejecting
+    // low outliers.
     MatrixXd ZImin(rows, cols);
     ZImin.setConstant(std::numeric_limits<double>::quiet_NaN());
     for (int c = 0; c < cols; ++c)
@@ -189,10 +215,10 @@ Eigen::MatrixXd matrixClose(Eigen::MatrixXd data, int radius)
     int nrows = data2.rows();
     int ncols = data2.cols();
 
-    MatrixXd minZ = MatrixXd::Constant(nrows, ncols,
-                                       std::numeric_limits<double>::max());
-    MatrixXd maxZ = MatrixXd::Constant(nrows, ncols,
-                                       std::numeric_limits<double>::lowest());
+    MatrixXd minZ(nrows, ncols);
+    minZ.setConstant(std::numeric_limits<double>::max());
+    MatrixXd maxZ(nrows, ncols);
+    maxZ.setConstant(std::numeric_limits<double>::lowest());
     for (auto c = 0; c < ncols; ++c)
     {
         int cs = Utils::clamp(c-radius, 0, ncols-1);
@@ -250,10 +276,10 @@ Eigen::MatrixXd matrixOpen(Eigen::MatrixXd data, int radius)
     int nrows = data2.rows();
     int ncols = data2.cols();
 
-    MatrixXd minZ = MatrixXd::Constant(nrows, ncols,
-                                       std::numeric_limits<double>::max());
-    MatrixXd maxZ = MatrixXd::Constant(nrows, ncols,
-                                       std::numeric_limits<double>::lowest());
+    MatrixXd minZ(nrows, ncols);
+    minZ.setConstant(std::numeric_limits<double>::max());
+    MatrixXd maxZ(nrows, ncols);
+    maxZ.setConstant(std::numeric_limits<double>::lowest());
     for (auto c = 0; c < ncols; ++c)
     {
         int cs = Utils::clamp(c-radius, 0, ncols-1);
@@ -315,12 +341,12 @@ Eigen::MatrixXd padMatrix(Eigen::MatrixXd d, int r)
     out.block(0, 0, r, out.cols()) =
         out.block(r, 0, r, out.cols()).colwise().reverse();
     out.block(d.rows()+r, 0, r, out.cols()) =
-        out.block(out.rows()-r, 0, r, out.cols()).colwise().reverse();
+        out.block(out.rows()-r-1, 0, r, out.cols()).colwise().reverse();
 
     return out;
 }
 
-PDAL_DLL Eigen::MatrixXd pointViewToEigen(const PointView& view)
+Eigen::MatrixXd pointViewToEigen(const PointView& view)
 {
     Eigen::MatrixXd matrix(view.size(), 3);
     for (PointId i = 0; i < view.size(); ++i)
@@ -362,6 +388,114 @@ void writeMatrix(Eigen::MatrixXd data, const std::string& filename,
     dataRowMajor = data.cast<float>();
 
     raster.writeBand((uint8_t *)dataRowMajor.data(), 1);
+}
+
+Eigen::MatrixXd cleanDSM(Eigen::MatrixXd data)
+{
+    using namespace Eigen;
+
+    auto CleanRasterScanLine = [](Eigen::MatrixXd data, Eigen::VectorXd datarow,
+                                  int mDim, int row, bool* prevSetCols,
+                                  bool* curSetCols)
+    {
+        auto InterpolateRasterPixelScanLine = [](Eigen::MatrixXd data, int mDim,
+                                              int x, int y, bool* prevSetCols)
+        {
+            const float c_background = FLT_MIN;
+            int yMinus, yPlus, xMinus, xPlus;
+            float tInterpValue;
+            bool tPrevInterp;
+
+            yMinus = y - 1;
+            yPlus = y + 1;
+            xMinus = x - 1;
+            xPlus = x + 1;
+
+            //North
+            tInterpValue = data(yMinus, x);
+            tPrevInterp = prevSetCols[x];
+            if (tInterpValue != c_background && tPrevInterp != true)
+                return tInterpValue;
+
+            //South
+            tInterpValue = data(yPlus, x);
+            if (tInterpValue != c_background)
+                return tInterpValue;
+
+            //East
+            tInterpValue = data(y, xPlus);
+            if (tInterpValue != c_background)
+                return tInterpValue;
+
+            //West
+            tInterpValue = data(y, xMinus);
+            if (tInterpValue != c_background)
+                return tInterpValue;
+
+            //NorthWest
+            tInterpValue = data(yMinus, xMinus);
+            tPrevInterp = prevSetCols[xMinus];
+            if (tInterpValue != c_background && tPrevInterp != true)
+                return tInterpValue;
+
+            //NorthWest
+            tInterpValue = data(yMinus, xPlus);
+            tPrevInterp = prevSetCols[xPlus];
+            if (tInterpValue != c_background && tPrevInterp != true)
+                return tInterpValue;
+
+            //SouthWest
+            tInterpValue = data(yPlus, xMinus);
+            if (tInterpValue != c_background)
+                return tInterpValue;
+
+            //SouthEast
+            tInterpValue = data(yPlus, xPlus);
+            if (tInterpValue != c_background)
+                return tInterpValue;
+
+            return 0.0f;
+        };
+
+        float tInterpValue;
+        float tValue;
+
+        int y = row;
+        for (int x = 1; x < mDim-1; ++x)
+        {
+            tValue = datarow(x);
+            const float c_background = FLT_MIN;
+
+            if (tValue == c_background)
+            {
+                tInterpValue = InterpolateRasterPixelScanLine(data, mDim, x, y,
+                               prevSetCols);
+                if (tInterpValue != c_background)
+                {
+                    curSetCols[x] = true;
+                    datarow(x) = tInterpValue;
+                }
+            }
+        }
+    };
+
+    {
+        int rows = data.rows();
+        int cols = data.cols();
+
+        std::unique_ptr<bool> prevSetCols(new bool[cols]);
+        std::unique_ptr<bool> curSetCols(new bool[cols]);
+
+        for (int y = 1; y < rows-1; ++y)
+        {
+            CleanRasterScanLine(data, data.row(1), cols, y,
+                                prevSetCols.get(), curSetCols.get());
+            memcpy(prevSetCols.get(), curSetCols.get(), cols);
+            memset(curSetCols.get(), 0, cols);
+        }
+    }
+
+    return data;
 }
 
 } // namespace eigen

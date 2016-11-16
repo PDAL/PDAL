@@ -260,10 +260,11 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
     // these latter techniques were nearly the same with regards to total error,
     // with the spring technique performing slightly better than the k-nearest
     // neighbor (KNN) approach.
-    MatrixXd ZImin = eigen::createDSM(*view.get(), m_numRows, m_numCols,
-                                      m_cellSize, m_bounds);
-    eigen::writeMatrix(ZImin, "zimin.tif", m_cellSize, m_bounds, srs);
 
+    MatrixXd ZImin = eigen::createMinMatrix(*view.get(), m_numRows, m_numCols,
+                                            m_cellSize, m_bounds);
+    eigen::writeMatrix(ZImin, "zimin.tif", m_cellSize, m_bounds, srs);
+    
     // MatrixXd ZImin_painted = inpaintKnn(cx, cy, ZImin);
     // MatrixXd ZImin_painted = TPS(cx, cy, ZImin);
     MatrixXd ZImin_painted = expandingTPS(cx, cy, ZImin);

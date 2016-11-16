@@ -53,178 +53,316 @@ namespace eigen
 {
 
 /**
- * \brief Compute the centroid of a collection of points.
- *
- * Computes the 3D centroid of a collection of points (specified by PointId)
- * sampled from the input PointView.
- *
- * \code
- * // build 3D kd-tree
- * KD3Index kdi(view);
- * kdi.build();
- *
- * // find the k-nearest neighbors of the first point (k=8)
- * double x = view.getFieldAs<double>(Dimension::Id::X, 0);
- * double y = view.getFieldAs<double>(Dimension::Id::Y, 0);
- * double z = view.getFieldAs<double>(Dimension::Id::Z, 0);
- * auto ids = kdi.neighbors(x, y, z, 8);
- *
- * // compute the centroid
- * auto centroid = computeCentroid(view, ids);
- * \endcode
- *
- * \param view the source PointView.
- * \param ids a vector of PointIds specifying a subset of points.
- * \return the 3D centroid of the XYZ dimensions.
- */
+  Compute the centroid of a collection of points.
+
+  Computes the 3D centroid of a collection of points (specified by PointId)
+  sampled from the input PointView.
+
+  \code
+  // build 3D kd-tree
+  KD3Index kdi(view);
+  kdi.build();
+
+  // find the k-nearest neighbors of the first point (k=8)
+  auto ids = kdi.neighbors(0, 8);
+
+  // compute the centroid
+  auto centroid = computeCentroid(view, ids);
+  \endcode
+
+  \param view the source PointView.
+  \param ids a vector of PointIds specifying a subset of points.
+  \return the 3D centroid of the XYZ dimensions.
+*/
 PDAL_DLL Eigen::Vector3f computeCentroid(PointView& view,
         std::vector<PointId> ids);
 
 /**
- * \brief Compute the covariance matrix of a collection of points.
- *
- * Computes the covariance matrix of a collection of points (specified by
- * PointId) sampled from the input PointView.
- *
- * \code
- * // build 3D kd-tree
- * KD3Index kdi(view);
- * kdi.build();
- *
- * // find the k-nearest neighbors of the first point (k=8)
- * double x = view.getFieldAs<double>(Dimension::Id::X, 0);
- * double y = view.getFieldAs<double>(Dimension::Id::Y, 0);
- * double z = view.getFieldAs<double>(Dimension::Id::Z, 0);
- * auto ids = kdi.neighbors(x, y, z, 8);
- *
- * // compute the covariance
- * auto cov = computeCovariance(view, ids);
- * \endcode
- *
- * \param view the source PointView.
- * \param ids a vector of PointIds specifying a subset of points.
- * \return the covariance matrix of the XYZ dimensions.
- */
+  Compute the covariance matrix of a collection of points.
+
+  Computes the covariance matrix of a collection of points (specified by
+  PointId) sampled from the input PointView.
+
+  \code
+  // build 3D kd-tree
+  KD3Index kdi(view);
+  kdi.build();
+
+  // find the k-nearest neighbors of the first point (k=8)
+  auto ids = kdi.neighbors(0, 8);
+
+  // compute the covariance
+  auto cov = computeCovariance(view, ids);
+  \endcode
+
+  \param view the source PointView.
+  \param ids a vector of PointIds specifying a subset of points.
+  \return the covariance matrix of the XYZ dimensions.
+*/
 PDAL_DLL Eigen::Matrix3f computeCovariance(PointView& view,
         std::vector<PointId> ids);
 
 /**
- * \brief Compute the rank of a collection of points.
- *
- * Computes the rank of a collection of points (specified by PointId) sampled
- * from the input PointView. This method uses Eigen's JacobiSVD class to solve
- * the singular value decomposition and to estimate the rank using the given
- * threshold. A singular value will be considered nonzero if its absolute value
- * is greater than the product of the user-supplied threshold and the absolute
- * value of the maximum singular value.
- *
- * More on JacobiSVD can be found at
- * https://eigen.tuxfamily.org/dox/classEigen_1_1JacobiSVD.html.
- *
- * \code
- * // build 3D kd-tree
- * KD3Index kdi(view);
- * kdi.build();
- *
- * // find the k-nearest neighbors of the first point (k=8)
- * double x = view.getFieldAs<double>(Dimension::Id::X, 0);
- * double y = view.getFieldAs<double>(Dimension::Id::Y, 0);
- * double z = view.getFieldAs<double>(Dimension::Id::Z, 0);
- * auto ids = kdi.neighbors(x, y, z, 8);
- *
- * // compute the rank using threshold of 0.01
- * auto rank = computeRank(view, ids, 0.01);
- * \endcode
- *
- * \param view the source PointView.
- * \param ids a vector of PointIds specifying a subset of points.
- * \return the estimated rank.
- */
+  Compute second derivative in X direction using central difference method.
+
+  \param data the incoming Eigen matrix.
+  \param spacing the grid spacing of the matrix.
+  \return the second derivative in X.
+*/
+template <typename Derived>
+PDAL_DLL double centralDiffX2(const Eigen::MatrixBase<Derived>& data,
+                              double spacing)
+{
+    if (data.rows() != 3 || data.cols() != 3)
+        throw pdal_error("Must provide 3x3 matrix to centralDiffX2");
+    if (spacing <= 0.0)
+        throw pdal_error("Must provide positive spacing to centralDiffX2");
+    return (data(1, 2) - 2.0 * data(1, 1) + data(1, 0)) / (spacing * spacing);
+}
+
+/**
+  Compute second derivative in Y direction using central difference method.
+
+  \param data the incoming Eigen matrix.
+  \param spacing the grid spacing of the matrix.
+  \return the second derivative in Y.
+*/
+template <typename Derived>
+PDAL_DLL double centralDiffY2(const Eigen::MatrixBase<Derived>& data,
+                              double spacing)
+{
+    if (data.rows() != 3 || data.cols() != 3)
+        throw pdal_error("Must provide 3x3 matrix to centralDiffY2");
+    if (spacing <= 0.0)
+        throw pdal_error("Must provide positive spacing to centralDiffY2");
+    return (data(0, 1) - 2.0 * data(1, 1) + data(2, 1)) / (spacing * spacing);
+}
+
+/**
+  Compute mixed second derivative of X in the Y direction using central
+  difference method.
+
+  \param data the incoming Eigen matrix.
+  \param spacing the grid spacing of the matrix.
+  \return the second derivative of X in the Y direction.
+*/
+template <typename Derived>
+PDAL_DLL double centralDiffXY(const Eigen::MatrixBase<Derived>& data,
+                              double spacing)
+{
+    if (data.rows() != 3 || data.cols() != 3)
+        throw pdal_error("Must provide 3x3 matrix to centralDiffXY");
+    if (spacing <= 0.0)
+        throw pdal_error("Must provide positive spacing to centralDiffXY");
+    return ((-1.0 * data(0, 0)) + data(0, 2) + data(2, 0) - data(2, 2)) /
+           (4.0 * spacing * spacing);
+}
+
+/**
+  Compute first derivative in X direction using central difference method.
+
+  \param data the incoming Eigen matrix.
+  \param spacing the grid spacing of the matrix.
+  \return the first derivative in X.
+*/
+template <typename Derived>
+PDAL_DLL double centralDiffX(const Eigen::MatrixBase<Derived>& data,
+                             double spacing)
+{
+    if (data.rows() != 3 || data.cols() != 3)
+        throw pdal_error("Must provide 3x3 matrix to centralDiffX");
+    if (spacing <= 0.0)
+        throw pdal_error("Must provide positive spacing to centralDiffX");
+    return (data(1, 2) - data(1, 0)) / (2 * spacing);
+}
+
+/**
+  Compute first derivative in Y direction using central difference method.
+
+  \param data the incoming Eigen matrix.
+  \param spacing the grid spacing of the matrix.
+  \return the first derivative in Y.
+*/
+template <typename Derived>
+PDAL_DLL double centralDiffY(const Eigen::MatrixBase<Derived>& data,
+                             double spacing)
+{
+    if (data.rows() != 3 || data.cols() != 3)
+        throw pdal_error("Must provide 3x3 matrix to centralDiffY");
+    if (spacing <= 0.0)
+        throw pdal_error("Must provide positive spacing to centralDiffY");
+    return (data(0, 1) - data(2, 1)) / (2 * spacing);
+}
+
+/**
+  Clean a raster.
+
+  \param data the Eigen matrix to clean.
+  \return the cleaned raster.
+*/
+PDAL_DLL Eigen::MatrixXd cleanDSM(Eigen::MatrixXd data);
+
+/**
+  Compute the rank of a collection of points.
+
+  Computes the rank of a collection of points (specified by PointId) sampled
+  from the input PointView. This method uses Eigen's JacobiSVD class to solve
+  the singular value decomposition and to estimate the rank using the given
+  threshold. A singular value will be considered nonzero if its absolute value
+  is greater than the product of the user-supplied threshold and the absolute
+  value of the maximum singular value.
+
+  More on JacobiSVD can be found at
+  https://eigen.tuxfamily.org/dox/classEigen_1_1JacobiSVD.html.
+
+  \code
+  // build 3D kd-tree
+  KD3Index kdi(view);
+  kdi.build();
+
+  // find the k-nearest neighbors of the first point (k=8)
+  auto ids = kdi.neighbors(0, 8);
+
+  // compute the rank using threshold of 0.01
+  auto rank = computeRank(view, ids, 0.01);
+  \endcode
+
+  \param view the source PointView.
+  \param ids a vector of PointIds specifying a subset of points.
+  \return the estimated rank.
+*/
 PDAL_DLL uint8_t computeRank(PointView& view, std::vector<PointId> ids,
                              double threshold);
 
 /**
- * \brief Create matrix of minimum Z values.
- *
- * Create a DSM from the provided PointVieew, where each cell contains the
- * minimum Z value of all contributing elevations.
- *
- * \param view the input PointView.
- * \param rows the number of rows.
- * \param cols the number of columns.
- * \param cell_size the edge length of raster cell.
- * \param bounds the 2D bounds of the PointView.
- * \return the matrix of minimum Z values.
- */
-PDAL_DLL Eigen::MatrixXd createDSM(PointView& view, int rows, int cols,
-                                   double cell_size, BOX2D bounds);
+  Create matrix of maximum Z values.
+
+  Create a DSM from the provided PointVieew, where each cell contains the
+  maximum Z value of all contributing elevations.
+
+  \param view the input PointView.
+  \param rows the number of rows.
+  \param cols the number of columns.
+  \param cell_size the edge length of raster cell.
+  \param bounds the 2D bounds of the PointView.
+  \return the matrix of maximum Z values.
+*/
+PDAL_DLL Eigen::MatrixXd createMaxMatrix(PointView& view, int rows, int cols,
+        double cell_size, BOX2D bounds);
 
 /**
- * \brief Find local minimum elevations by extended local minimum.
- *
- * Extended local minimum can be used to select seed points for ground return
- * segmentation. Several low-lying points are considered for each grid cell. The
- * difference between the lowest and second lowest points is evaluated and, if
- * the difference exceeds 1.0, the lowest points is considered an outlier. The
- * process continues with the next pair of lowest points (second and third
- * lowest). When the points under consideration are within the given tolerance,
- * the lowest is retained as a seed point.
- *
- * \param view the input PointView.
- * \param rows the number of rows.
- * \param cols the cnumber of columns.
- * \param cell_size the edge length of raster cell.
- * \param bounds the 2D bounds of the PointView.
- * \return the matrix of minimum Z values (ignoring low outliers).
- */
+  Create matrix of minimum Z values.
+
+  Create a DTM from the provided PointVieew, where each cell contains the
+  minimum Z value of all contributing elevations.
+
+  \param view the input PointView.
+  \param rows the number of rows.
+  \param cols the number of columns.
+  \param cell_size the edge length of raster cell.
+  \param bounds the 2D bounds of the PointView.
+  \return the matrix of minimum Z values.
+*/
+PDAL_DLL Eigen::MatrixXd createMinMatrix(PointView& view, int rows, int cols,
+        double cell_size, BOX2D bounds);
+
+/**
+  Find local minimum elevations by extended local minimum.
+
+  Extended local minimum can be used to select seed points for ground return
+  segmentation. Several low-lying points are considered for each grid cell. The
+  difference between the lowest and second lowest points is evaluated and, if
+  the difference exceeds 1.0, the lowest points is considered an outlier. The
+  process continues with the next pair of lowest points (second and third
+  lowest). When the points under consideration are within the given tolerance,
+  the lowest is retained as a seed point.
+
+  \param view the input PointView.
+  \param rows the number of rows.
+  \param cols the cnumber of columns.
+  \param cell_size the edge length of raster cell.
+  \param bounds the 2D bounds of the PointView.
+  \return the matrix of minimum Z values (ignoring low outliers).
+*/
 PDAL_DLL Eigen::MatrixXd extendedLocalMinimum(PointView& view, int rows,
-        int cols, double cell_size,
-        BOX2D bounds);
+        int cols, double cell_size, BOX2D bounds);
 
 /**
- * \brief Perform a morphological closing of the input matrix.
- *
- * Performs a morphological closing of the input matrix using a circular
- * structuring element of given radius. Data will be symmetrically padded at its
- * edges.
- *
- * \param data the input matrix.
- * \param radius the radius of the circular structuring element.
- * \return the morphological closing of the input radius.
- */
+  Perform a morphological closing of the input matrix.
+
+  Performs a morphological closing of the input matrix using a circular
+  structuring element of given radius. Data will be symmetrically padded at its
+  edges.
+
+  \param data the input matrix.
+  \param radius the radius of the circular structuring element.
+  \return the morphological closing of the input radius.
+*/
 PDAL_DLL Eigen::MatrixXd matrixClose(Eigen::MatrixXd data, int radius);
 
 /**
- * \brief Perform a morphological opening of the input matrix.
- *
- * Performs a morphological opening of the input matrix using a circular
- * structuring element of given radius. Data will be symmetrically padded at its
- * edges.
- *
- * \param data the input matrix.
- * \param radius the radius of the circular structuring element.
- * \return the morphological opening of the input radius.
- */
+  Perform a morphological opening of the input matrix.
+
+  Performs a morphological opening of the input matrix using a circular
+  structuring element of given radius. Data will be symmetrically padded at its
+  edges.
+
+  \param data the input matrix.
+  \param radius the radius of the circular structuring element.
+  \return the morphological opening of the input radius.
+*/
 PDAL_DLL Eigen::MatrixXd matrixOpen(Eigen::MatrixXd data, int radius);
 
 /**
- * \brief Pad input matrix symmetrically.
- *
- * Symmetrically pads the input matrix with given radius.
- *
- * \param d the input matrix.
- * \param r the radius of the padding.
- * \return the padded matrix.
- */
+  Pad input matrix symmetrically.
+
+  Symmetrically pads the input matrix with given radius.
+
+  \param d the input matrix.
+  \param r the radius of the padding.
+  \return the padded matrix.
+*/
 PDAL_DLL Eigen::MatrixXd padMatrix(Eigen::MatrixXd d, int r);
 
 /**
- * \brief Converts a PointView into an Eigen::MatrixXd.
- *
- * This method exists (as of this writing) purely as a convencience method in
- * the API. It is not currently used in the PDAL codebase itself.
- */
+  Converts a PointView into an Eigen::MatrixXd.
+
+  This method exists (as of this writing) purely as a convenience method in the
+  API. It is not currently used in the PDAL codebase itself.
+*/
 PDAL_DLL Eigen::MatrixXd pointViewToEigen(const PointView& view);
+
+/**
+  Replace NaNs with mean.
+
+  \param data the incoming Eigen matrix.
+  \return the updated Eigen matrix.
+*/
+template <typename Derived>
+PDAL_DLL Eigen::MatrixXd replaceNaNs(const Eigen::MatrixBase<Derived>& data)
+{
+    Derived out(data);
+
+    double mean(0.0);
+    int nv(0);
+    for (int i = 0; i < data.size(); ++i)
+    {
+        if (std::isnan(data(i)))
+            continue;
+        mean += data(i);
+        nv++;
+    }
+    mean /= nv;
+
+    // replace NaNs with mean
+    for (int i = 0; i < data.size(); ++i)
+    {
+        if (std::isnan(data(i)))
+            out(i) = mean;
+    }
+
+    return out;
+}
 
 /**
   Write Eigen Matrix as a GDAL raster.
@@ -287,6 +425,358 @@ PDAL_DLL Derived gradY(const Eigen::MatrixBase<Derived>& A)
 
     return out;
 };
+
+/**
+  Compute contour curvature for a single 3x3 matrix.
+
+  \param data the incoming Eigen matrix.
+  \param spacing the spacing between cells (or edge length of a cell).
+  \return the contour curvature.
+*/
+template <typename Derived>
+PDAL_DLL double computeContour(const Eigen::MatrixBase<Derived>& data,
+                               double spacing)
+{
+    if (data.rows() != 3 || data.cols() != 3)
+        throw pdal_error("Must provide 3x3 matrix to computeContour");
+    if (spacing <= 0.0)
+        throw pdal_error("Must provide positive spacing to computeContour");
+    Derived filled = replaceNaNs(data);
+    double zXX = centralDiffX2(filled, spacing);
+    double zYY = centralDiffY2(filled, spacing);
+    double zXY = centralDiffXY(filled, spacing);
+    double zX = centralDiffX(filled, spacing);
+    double zY = centralDiffY(filled, spacing);
+    double p = (zX * zX) + (zY * zY);
+    double q = p + 1;
+    return ((zXX*zX*zX)-(2*zXY*zX*zY)+(zYY*zY*zY))/(p*std::sqrt(q*q*q));
+}
+
+/**
+  Compute total curvature for a single 3x3 matrix.
+
+  \param data the incoming Eigen matrix.
+  \param spacing the spacing between cells (or edge length of a cell).
+  \return the total curvature.
+*/
+template <typename Derived>
+PDAL_DLL double computeTotal(const Eigen::MatrixBase<Derived>& data,
+                             double spacing)
+{
+    if (data.rows() != 3 || data.cols() != 3)
+        throw pdal_error("Must provide 3x3 matrix to computeTotal");
+    if (spacing <= 0.0)
+        throw pdal_error("Must provide positive spacing to computeTotal");
+    Derived filled = replaceNaNs(data);
+    double zXX = centralDiffX2(filled, spacing);
+    double zYY = centralDiffY2(filled, spacing);
+    double zXY = centralDiffXY(filled, spacing);
+    return (zXX * zXX) + (2.0 * zXY * zXY) + (zYY * zYY);
+}
+
+/**
+  Compute profile curvature for a single 3x3 matrix.
+
+  \param data the incoming Eigen matrix.
+  \param spacing the spacing between cells (or edge length of a cell).
+  \return the profile curvature.
+*/
+template <typename Derived>
+PDAL_DLL double computeProfile(const Eigen::MatrixBase<Derived>& data,
+                               double spacing)
+{
+    if (data.rows() != 3 || data.cols() != 3)
+        throw pdal_error("Must provide 3x3 matrix to computeProfile");
+    if (spacing <= 0.0)
+        throw pdal_error("Must provide positive spacing to computeProfile");
+    Derived filled = replaceNaNs(data);
+    double zXX = centralDiffX2(filled, spacing);
+    double zYY = centralDiffY2(filled, spacing);
+    double zXY = centralDiffXY(filled, spacing);
+    double zX = centralDiffX(filled, spacing);
+    double zY = centralDiffY(filled, spacing);
+    double p = (zX * zX) + (zY * zY);
+    double q = p + 1;
+    return ((zXX*zX*zX)+(2*zXY*zX*zY)+(zYY*zY*zY))/(p*std::sqrt(q*q*q));
+}
+
+/**
+  Compute tangential curvature for a single 3x3 matrix.
+
+  \param data the incoming Eigen matrix.
+  \param spacing the spacing between cells (or edge length of a cell).
+  \return the tangential curvature.
+*/
+template <typename Derived>
+PDAL_DLL double computeTangential(const Eigen::MatrixBase<Derived>& data,
+                                  double spacing)
+{
+    if (data.rows() != 3 || data.cols() != 3)
+        throw pdal_error("Must provide 3x3 matrix to computeTangential");
+    if (spacing <= 0.0)
+        throw pdal_error("Must provide positive spacing to computeTangential");
+    Derived filled = replaceNaNs(data);
+    double zXX = centralDiffX2(filled, spacing);
+    double zYY = centralDiffY2(filled, spacing);
+    double zXY = centralDiffXY(filled, spacing);
+    double zX = centralDiffX(filled, spacing);
+    double zY = centralDiffY(filled, spacing);
+    double p = (zX * zX) + (zY * zY);
+    double q = p + 1;
+    return ((zXX*zY*zY)-(2*zXY*zX*zY)+(zYY*zX*zX))/(p*std::sqrt(q));
+}
+
+/**
+  Compute first derivative in X using 3x3 window.
+
+  \param data the incoming Eigen matrix.
+  \param spacing the grid spacing.
+  \return the first derivative in X.
+*/
+template <typename Derived>
+PDAL_DLL double computeDZDX(const Eigen::MatrixBase<Derived>& data,
+                            double spacing)
+{
+    if (data.rows() != 3 || data.cols() != 3)
+        throw pdal_error("Must provide 3x3 matrix to computeDZDX");
+    if (spacing <= 0.0)
+        throw pdal_error("Must provide positive spacing to computeDZDX");
+    return ((data(0, 2) + 2.0 * data(1, 2) + data(2, 2)) -
+            (data(0, 0) + 2.0 * data(1, 0) + data(2, 0))) / (8.0 * spacing);
+}
+
+/**
+  Compute first derivative in Y using 3x3 window.
+
+  \param data the incoming Eigen matrix.
+  \param spacing the grid spacing.
+  \return the first derivative in Y.
+*/
+template <typename Derived>
+PDAL_DLL double computeDZDY(const Eigen::MatrixBase<Derived>& data,
+                            double spacing)
+{
+    if (data.rows() != 3 || data.cols() != 3)
+        throw pdal_error("Must provide 3x3 matrix to computeDZDY");
+    if (spacing <= 0.0)
+        throw pdal_error("Must provide positive spacing to computeDZDY");
+    return ((data(2, 0) + 2.0 * data(2, 1) + data(2, 2)) -
+            (data(0, 0) + 2.0 * data(0, 1) + data(0, 2)))  / (8.0 * spacing);
+}
+
+inline
+PDAL_DLL double computeSlopeRad(double dZdX, double dZdY)
+{
+    return std::atan(std::sqrt(std::pow(dZdX, 2) + std::pow(dZdY, 2)));
+}
+
+/**
+  Compute hillshade.
+
+  \param data the incoming Eigen matrix.
+  \param spacing the grid spacing.
+  \param illumAltitudeDegree the illumination altitude in degrees.
+  \param illumAzimuthDegree the illumination azimuth in degrees.
+  \return the local slope.
+*/
+template <typename Derived>
+PDAL_DLL double computeHillshade(const Eigen::MatrixBase<Derived>& data,
+                                 double spacing, double illumAltitudeDegree,
+                                 double illumAzimuthDegree)
+{
+    if (data.rows() != 3 || data.cols() != 3)
+        throw pdal_error("Must provide 3x3 matrix to computeHillshade");
+    if (spacing <= 0.0)
+        throw pdal_error("Must provide positive spacing to computeHillshade");
+
+    double zenithRad = (90.0 - illumAltitudeDegree) *
+                       (3.14159265358979323846 / 180.0);
+    double azimuthMath = 360.0 - illumAzimuthDegree + 90.0;
+    if (azimuthMath >= 360.0)
+    {
+        azimuthMath = azimuthMath - 360.0;
+    }
+    double azimuthRad = azimuthMath * (3.14159265358979323846 / 180.0);
+
+    double dZdX = computeDZDX(data, spacing);
+    double dZdY = computeDZDY(data, spacing);
+    double slopeRad = computeSlopeRad(dZdX, dZdY);
+
+    double aspectRad(0.0);
+    if (dZdX == 0.0)
+    {
+        if (dZdY > 0.0)
+        {
+            aspectRad = 3.14159265358979323846 / 2.0;
+        }
+        else if (dZdY < 0.0)
+        {
+            aspectRad = (2 * 3.14159265358979323846) -
+                        (3.14159265358979323846 / 2.0);
+        }
+    }
+    else
+    {
+        aspectRad = std::atan2(dZdY, -dZdX);
+        if (aspectRad < 0.0)
+        {
+            aspectRad = 2.0 * 3.14159265358979323846 + aspectRad;
+        }
+    }
+
+    return std::cos(zenithRad) * std::cos(slopeRad) +
+           std::sin(zenithRad) * std::sin(slopeRad) * std::cos(azimuthRad - aspectRad);
+}
+
+/**
+  Compute aspect using finite difference method.
+
+  \param data the incoming Eigen matrix.
+  \param spacing the grid spacing.
+  \return the local aspect.
+*/
+template <typename Derived>
+PDAL_DLL double computeAspectFD(const Eigen::MatrixBase<Derived>& data,
+                                double spacing)
+{
+    if (data.rows() != 3 || data.cols() != 3)
+        throw pdal_error("Must provide 3x3 matrix to computeAspectFD");
+    if (spacing <= 0.0)
+        throw pdal_error("Must provide positive spacing to computeAspectFD");
+    Derived filled = replaceNaNs(data);
+    double zX = centralDiffX(filled, spacing);
+    double zY = centralDiffY(filled, spacing);
+    double p = (zX * zX) + (zY * zY);
+    return 180.0 - std::atan(zY/zX) + 90.0 * (zX / std::fabs(zX));
+}
+
+/**
+  Compute aspect using D8 method.
+
+  \param data the incoming Eigen matrix.
+  \param spacing the grid spacing.
+  \return the local aspect.
+*/
+template <typename Derived>
+PDAL_DLL double computeAspectD8(const Eigen::MatrixBase<Derived>& data,
+                                double spacing)
+{
+    if (data.rows() != 3 || data.cols() != 3)
+        throw pdal_error("Must provide 3x3 matrix to computeAspectD8");
+    if (spacing <= 0.0)
+        throw pdal_error("Must provide positive spacing to computeAspectD8");
+    Derived submatrix;
+    submatrix.setConstant(data(1, 1));
+    submatrix -= data;
+    submatrix /= spacing;
+    submatrix(0, 1) /= std::sqrt(2.0);
+    submatrix(1, 0) /= std::sqrt(2.0);
+    submatrix(1, 2) /= std::sqrt(2.0);
+    submatrix(2, 1) /= std::sqrt(2.0);
+
+    // find max and convert to degrees
+    double maxval = std::numeric_limits<double>::lowest();
+    double aspect(0.0);
+    for (int i = 0; i < submatrix.size(); ++i)
+    {
+        if (std::isnan(submatrix(i)))
+            continue;
+        if (submatrix(i) > maxval)
+        {
+            maxval = submatrix(i);
+            switch (i)
+            {
+                case 1:
+                    aspect = std::pow(2.0, 6);
+                    break;
+                case 2:
+                    aspect = std::pow(2.0, 5);
+                    break;
+                case 3:
+                    aspect = std::pow(2.0, 4);
+                    break;
+                case 4:
+                    aspect = std::pow(2.0, 7);
+                    break;
+                case 6:
+                    aspect = std::pow(2.0, 3);
+                    break;
+                case 7:
+                    aspect = std::pow(2.0, 0);
+                    break;
+                case 8:
+                    aspect = std::pow(2.0, 1);
+                    break;
+                case 9:
+                    aspect = std::pow(2.0, 2);
+                    break;
+                default:
+                    assert(false);
+                    break;
+            }
+        }
+    }
+
+    return aspect;
+}
+
+/**
+  Compute slope using D8 method.
+
+  \param data the incoming Eigen matrix.
+  \param spacing the grid spacing.
+  \return the local slope.
+*/
+template <typename Derived>
+PDAL_DLL double computeSlopeD8(const Eigen::MatrixBase<Derived>& data,
+                               double spacing)
+{
+    if (data.rows() != 3 || data.cols() != 3)
+        throw pdal_error("Must provide 3x3 matrix to computeSlopeD8");
+    if (spacing <= 0.0)
+        throw pdal_error("Must provide positive spacing to computeSlopeD8");
+    Derived submatrix;
+    submatrix.setConstant(data(1, 1));
+    submatrix -= data;
+    submatrix /= spacing;
+    submatrix(0, 1) /= std::sqrt(2.0);
+    submatrix(1, 0) /= std::sqrt(2.0);
+    submatrix(1, 2) /= std::sqrt(2.0);
+    submatrix(2, 1) /= std::sqrt(2.0);
+
+    // find max and convert to degrees
+    double maxval = std::numeric_limits<double>::lowest();
+    for (int i = 0; i < submatrix.size(); ++i)
+    {
+        if (std::isnan(submatrix(i)))
+            continue;
+        if (submatrix(i) > maxval)
+            maxval = submatrix(i);
+    }
+    return 100.0 * maxval;
+}
+
+/**
+  Compute slope using finite difference method.
+
+  \param data the incoming Eigen matrix.
+  \param spacing the grid spacing.
+  \return the local slope.
+*/
+template <typename Derived>
+PDAL_DLL double computeSlopeFD(const Eigen::MatrixBase<Derived>& data,
+                               double spacing)
+{
+    if (data.rows() != 3 || data.cols() != 3)
+        throw pdal_error("Must provide 3x3 matrix to computeSlopeFD");
+    if (spacing <= 0.0)
+        throw pdal_error("Must provide positive spacing to computeSlopeFD");
+    Derived filled = replaceNaNs(data);
+    double zX = centralDiffX(filled, spacing);
+    double zY = centralDiffY(filled, spacing);
+    double p = (zX * zX) + (zY * zY);
+    return 100.0 * std::sqrt(p);
+}
 
 } // namespace eigen
 
