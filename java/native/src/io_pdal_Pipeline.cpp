@@ -57,7 +57,18 @@ JNIEXPORT jboolean JNICALL Java_io_pdal_Pipeline_validate
   (JNIEnv *env, jobject obj)
 {
     Pipeline *p = getHandle<Pipeline>(env, obj);
-    return p->validate();
+    bool result;
+    try
+    {
+        result = p->validate();
+    }
+    catch(const pdal::pdal_error& pe)
+    {
+        std::cerr << "Runtime error: " << pe.what() << std::endl;
+        result = false;
+    }
+
+    return result;
 }
 
 JNIEXPORT void JNICALL Java_io_pdal_Pipeline_setLogLevel
@@ -81,7 +92,7 @@ JNIEXPORT jstring JNICALL Java_io_pdal_Pipeline_getLog
     return env->NewStringUTF(p->getLog().c_str());
 }
 
-JNIEXPORT jobject JNICALL Java_io_pdal_Pipeline_pointViews__
+JNIEXPORT jobject JNICALL Java_io_pdal_Pipeline_pointViews
   (JNIEnv *env, jobject obj)
 {
     Pipeline *p = getHandle<Pipeline>(env, obj);

@@ -7,4 +7,4 @@ Java bindings to use PDAL on JVM.
 ## How to compile
 
 1. Install PDAL (using brew / package managers (unix) / build from sources / etc)
-2. Run `./sbt core/run` to run Main.scala with demo PDAL invocation.
+2. Run `./sbt core/test` to run PDAL tests

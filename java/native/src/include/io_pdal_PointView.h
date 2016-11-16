@@ -33,6 +33,22 @@ JNIEXPORT jboolean JNICALL Java_io_pdal_PointView_empty
 
 /*
  * Class:     io_pdal_PointView
+ * Method:    getCrsProj4
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_io_pdal_PointView_getCrsProj4
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     io_pdal_PointView
+ * Method:    getCrsWKT
+ * Signature: (IZ)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_io_pdal_PointView_getCrsWKT
+  (JNIEnv *, jobject, jint, jboolean);
+
+/*
+ * Class:     io_pdal_PointView
  * Method:    getPackedPoint
  * Signature: ([Lio/pdal/DimType;J)[B
  */

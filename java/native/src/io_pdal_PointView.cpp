@@ -21,7 +21,7 @@ using pdal::PointId;
 /// \param[in] dims      JavaArray of DimTypes
 /// \param[in] bufSize   Dims sum size
 /// \param[in] dimTypes  Vector of DimTypes
-void convertDimTypeJavaToVector(JNIEnv *env, jobjectArray dims, std::size_t *bufSize, pdal::DimTypeList *dimTypes) {
+void convertDimTypeJavaArrayToVector(JNIEnv *env, jobjectArray dims, std::size_t *bufSize, pdal::DimTypeList *dimTypes) {
     for (jint i = 0; i < env->GetArrayLength(dims); i++) {
         jobject jDimType = (jobject) env->GetObjectArrayElement(dims, i);
         jclass cDimType = env->GetObjectClass(jDimType);
@@ -75,6 +75,35 @@ JNIEXPORT jboolean JNICALL Java_io_pdal_PointView_empty
     return pv->empty();
 }
 
+JNIEXPORT jstring JNICALL Java_io_pdal_PointView_getCrsProj4
+  (JNIEnv *env, jobject obj)
+{
+    PointViewRawPtr *pvrp = getHandle<PointViewRawPtr>(env, obj);
+    PointViewPtr pv = pvrp->shared_pointer;
+    return env->NewStringUTF(pv->spatialReference().getProj4().c_str());
+}
+
+JNIEXPORT jstring JNICALL Java_io_pdal_PointView_getCrsWKT
+  (JNIEnv *env, jobject obj, jint mode_flag, jboolean pretty)
+{
+    PointViewRawPtr *pvrp = getHandle<PointViewRawPtr>(env, obj);
+    PointViewPtr pv = pvrp->shared_pointer;
+
+    pdal::SpatialReference::WKTModeFlag enumFlag;
+
+    switch(mode_flag)
+    {
+        case 2:
+            enumFlag = (pdal::SpatialReference::WKTModeFlag) mode_flag;
+            break;
+        default:
+            enumFlag = (pdal::SpatialReference::WKTModeFlag) 1;
+            break;
+    }
+
+    return env->NewStringUTF(pv->spatialReference().getWKT(enumFlag, pretty).c_str());
+}
+
 JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getPackedPoint
   (JNIEnv *env, jobject obj, jobjectArray dims, jlong idx)
 {
@@ -88,7 +117,7 @@ JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getPackedPoint
     pdal::DimTypeList dimTypes;
 
     // calculate result buffer length (for one point) and get dimTypes
-    convertDimTypeJavaToVector(env, dims, &bufSize, &dimTypes);
+    convertDimTypeJavaArrayToVector(env, dims, &bufSize, &dimTypes);
 
     char *buf = new char[bufSize];
     pv->getPackedPoint(dimTypes, idx, buf);
@@ -112,7 +141,7 @@ JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getPackedPoints
     pdal::DimTypeList dimTypes;
 
     // calculate result buffer length (for one point) and get dimTypes
-    convertDimTypeJavaToVector(env, dims, &bufSize, &dimTypes);
+    convertDimTypeJavaArrayToVector(env, dims, &bufSize, &dimTypes);
 
     // reading all points
     bufSize = bufSize * pv->size();
