@@ -1,4 +1,4 @@
-scalaVersion := "2.11.8"
+name := "pdal"
 
 libraryDependencies ++= Seq(
   "org.scalatest"  %% "scalatest" % "3.0.0"  % "test"

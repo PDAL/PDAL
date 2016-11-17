@@ -7,4 +7,23 @@ Java bindings to use PDAL on JVM.
 ## How to compile
 
 1. Install PDAL (using brew / package managers (unix) / build from sources / etc)
+1.1. Build native libs `./sbt native/nativeCompile` (optionally, binaries would be built during tests run)
 2. Run `./sbt core/test` to run PDAL tests
+
+## Using with SBT
+
+```scala
+libraryDependencies ++= Seq(
+  "io.pdal" %% "pdal" % "1.4.0-M0"
+)
+
+resolvers += Resolver.bintrayRepo("daunnc", "maven")
+```
+
+It's required to have native JNI binary into your app classpath:
+
+```scala
+// `cp -f native/target/resource_managed/main/native/x86_64-darwin/libpdaljni0.dylib /usr/local/lib/libpdaljni0.dylib`
+// place built binary into /usr/local/lib, and pass java.library.path to your JVM
+javaOptions += "-Djava.library.path=/usr/local/lib",
+```

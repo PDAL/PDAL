@@ -1,7 +1,7 @@
 #include "JavaPipeline.hpp"
 
-#ifndef _JAVAPOINTVIEW_H_INCLUDED_
-#define _JAVAPOINTVIEW_H_INCLUDED_
+#ifndef _POINTVIEWRAWPTR_H_INCLUDED_
+#define _POINTVIEWRAWPTR_H_INCLUDED_
 
 using pdal::PointViewPtr;
 
