@@ -11,7 +11,7 @@ class PointView extends Native {
   def getCrsWKT: String = getCrsWKT(1, pretty = false)
 
   /**
-    * Reads a packed point by point id from a set of packed points
+    * Reads a packed point by point id from a set of packed points.
     */
   def get(packedPoints: Array[Byte], i: Int): Array[Byte] = get(packedPoints, layout.dimTypes(), i)
   def get(packedPoints: Array[Byte], dims: Array[DimType], i: Int): Array[Byte] = {
@@ -35,7 +35,6 @@ class PointView extends Native {
   }
   /**
     * One dimension read; for multiple dims custom logic required.
-    * By default data read in a little endian order
     */
   def get(dim: String, i: Int): ByteBuffer = get(findDimType(dim), i)
   def get(dim: DimType, i: Int): ByteBuffer =
