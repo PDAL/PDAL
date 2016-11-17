@@ -55,25 +55,26 @@ class ErrorHandler;
 struct GeometryDeleter
 {
     explicit GeometryDeleter(pdal::geos::ErrorHandler& ctx)
-    : ctx(ctx)
+    : m_ctx(ctx)
     {}
 
-    GeometryDeleter() : ctx(geos::ErrorHandler::get()) {};
+    GeometryDeleter() : m_ctx(geos::ErrorHandler::get()) {};
 
     GeometryDeleter& operator=(const GeometryDeleter& other)
     {
        if (&other!= this)
-           ctx = other.ctx;
+           m_ctx = other.m_ctx;
        return *this;
     }
 
-    GeometryDeleter(const GeometryDeleter& other) : ctx(other.ctx) {};
+    GeometryDeleter(const GeometryDeleter& other) : m_ctx(other.m_ctx) {};
 
     void operator()(GEOSGeometry* geometry) const
     {
-        GEOSGeom_destroy_r(ctx.ctx(), geometry);
+        GEOSGeom_destroy_r(m_ctx.ctx(), geometry);
     }
-    pdal::geos::ErrorHandler& ctx;
+
+    pdal::geos::ErrorHandler& m_ctx;
 };
 
 } // namespace geos
