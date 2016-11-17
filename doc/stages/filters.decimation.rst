@@ -8,20 +8,24 @@ The decimation filter retains every Nth point from an input point view.
 Example
 -------
 
-.. code-block:: xml
+.. code-block:: json
 
-  <?xml version="1.0" encoding="utf-8"?>
-  <Pipeline version="1.0">
-    <Writer type="writers.las">
-      <Option name="filename">smaller.las</Option>
-      <Filter type="filters.decimation">
-        <Option name="step">10</Option>
-        <Reader type="readers.las">
-            <Option name="filename">larger.las</Option>
-        </Reader>
-      </Filter>
-    </Writer>
-  </Pipeline>
+    {
+      "pipeline":[
+        {
+            "type": "readers.las",
+            "filename": "larger.las"
+        },
+        {
+            "type":"filters.decimation",
+            "step": 10
+        },
+        {
+          "type":"writers.las",
+          "filename":"smaller.las"
+        }
+      ]
+    }
 
 .. seealso::
 
