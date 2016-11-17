@@ -65,43 +65,10 @@ Point::Point(const std::string& wkt_or_json, SpatialReference ref)
 
 void Point::update(const std::string& wkt_or_json, SpatialReference ref)
 {
-    bool isJson = wkt_or_json.find("{") != wkt_or_json.npos ||
-                  wkt_or_json.find("}") != wkt_or_json.npos;
 
-    GEOSWKTReader* geosreader = GEOSWKTReader_create_r(m_geoserr.ctx());
-
-    if (!isJson)
-    {
-        geos::GeometryDeleter geom_del(m_geoserr);
-        GEOSGeomPtr p(GEOSWKTReader_read_r(m_geoserr.ctx(), geosreader, wkt_or_json.c_str()), geom_del);
-        m_geom.swap(p);
-    }
-    else
-    {
-        // Assume it is GeoJSON and try constructing from that
-        OGRGeometryH json = OGR_G_CreateGeometryFromJson(wkt_or_json.c_str());
-
-        if (!json)
-            throw pdal_error("Unable to create geometry from "
-                "input GeoJSON");
-
-        char* gdal_wkt(0);
-        OGRErr err = OGR_G_ExportToWkt(json, &gdal_wkt);
-
-        geos::GeometryDeleter geom_del(m_geoserr);
-        GEOSGeomPtr p(GEOSWKTReader_read_r(m_geoserr.ctx(), geosreader, gdal_wkt), geom_del);
-        m_geom.swap(p);
-
-        OGRFree(gdal_wkt);
-        OGR_G_DestroyGeometry(json);
-    }
-    prepare();
-
-    GEOSWKTReader_destroy_r(m_geoserr.ctx(), geosreader);
-
+    Geometry::update(wkt_or_json, ref);
 
     int t = GEOSGeomTypeId_r(m_geoserr.ctx(), m_geom.get());
-    std::cout << "t:" << t << std::endl;
     if (t == -1)
         throw pdal_error("Unable to fetch geometry point type");
     if (t > 0)
@@ -150,38 +117,6 @@ bool Point::is3d() const
 {
     return (z != LOWEST );
 }
-
-
-//
-// std::istream& operator>>(std::istream& in, cropfilter::Point& point)
-// {
-//     std::streampos start = in.tellg();
-//     cropfilter::Point3D b3d;
-//     in >> b3d;
-//     if (in.fail())
-//     {
-//         in.clear();
-//         in.seekg(start);
-//         cropfilter::Point2D b2d;
-//         in >> b2d;
-//         if (!in.fail())
-//             point.set(b2d);
-//     }
-//     else
-//         point.set(b3d);
-//     return in;
-// }
-//
-// std::ostream& operator<<(std::ostream& out, const cropfilter::Point& point)
-// {
-//     if (point.is3d())
-//         out << point.to3d();
-//     else
-//         out << point.to2d();
-//     return out;
-// }
-//
-
 
 } //namespace cropfilter
 

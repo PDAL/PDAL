@@ -62,13 +62,6 @@ public:
     double y;
     double z;
 
-//     friend PDAL_DLL std::istream& operator >> (std::istream& in,
-//         Point& point);
-//     friend PDAL_DLL std::ostream& operator << (std::ostream& out,
-//         const Point& point);};
-//
-//
-
 };
 } // namespace cropfilter
 } // namespace pdal

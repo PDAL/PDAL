@@ -212,8 +212,6 @@ void CropFilter::crop(const cropfilter::Point& point, double distance, PointView
 
     bool bIs3D = point.is3d();
 
-
-    std::cout << "point: " << point << std::endl;
     if (bIs3D)
     {
         KD3Index index(input);
