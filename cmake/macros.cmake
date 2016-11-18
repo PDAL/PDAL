@@ -159,8 +159,6 @@ macro(PDAL_ADD_TEST _name)
     set(oneValueArgs)
     set(multiValueArgs FILES LINK_WITH)
     cmake_parse_arguments(PDAL_ADD_TEST "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-    include_directories(${PROJECT_SOURCE_DIR}/test/unit)
-    include_directories(${PROJECT_BINARY_DIR}/test/unit)
     set(common_srcs
         ${PROJECT_SOURCE_DIR}/test/unit/Support.cpp
     )
@@ -169,6 +167,9 @@ macro(PDAL_ADD_TEST _name)
         add_definitions("-DPDAL_DLL_EXPORT=1")
     endif()
     add_executable(${_name} ${PDAL_ADD_TEST_FILES} ${common_srcs})
+    target_include_directories(${_name} PRIVATE
+        ${PROJECT_SOURCE_DIR}/test/unit
+        ${PROJECT_BINARY_DIR}/test/unit)
     set_target_properties(${_name} PROPERTIES COMPILE_DEFINITIONS PDAL_DLL_IMPORT)
     set_property(TARGET ${_name} PROPERTY FOLDER "Tests")
     target_link_libraries(${_name} PRIVATE
