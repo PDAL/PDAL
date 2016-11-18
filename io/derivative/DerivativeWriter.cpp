@@ -52,9 +52,9 @@
 namespace pdal
 {
 static PluginInfo const s_info = PluginInfo(
-                                     "writers.derivative",
-                                     "Derivative writer",
-                                     "http://pdal.io/stages/writers.derivative.html");
+    "writers.derivative",
+    "Derivative writer",
+    "http://pdal.io/stages/writers.derivative.html");
 
 CREATE_STATIC_PLUGIN(1, 0, DerivativeWriter, Writer, s_info)
 
@@ -491,166 +491,7 @@ int DerivativeWriter::determineCatchmentAreaD8(Eigen::MatrixXd* data,
             // not quite complete here...
         }
 
-        //double tPhi1 = 1.0f;
-        //double tPhi2 = sqrt(2.0f);
-        //double tH = postSpacing;
-        //double tVal, tN, tS, tE, tW, tNW, tNE, tSW, tSE, nextTVal;
-        //double tSlopeVal = std::numeric_limits<double>::max(), tSlopeValDegree;
-        //int tNextY, tNextX;
-        //unsigned int j = 0;
-
-        //tVal = (*data)(row, col);
-        //if (tVal == std::numeric_limits<double>::max())
-        //  return tVal;
-
-        ////North
-        //tNextY = row - 1;
-        //tNextX = col;
-        //nextTVal = (*data)(tNextY, tNextX);
-        //if (nextTVal < std::numeric_limits<double>::max())
-        //{
-        //  tN = (tVal - nextTVal) / (tH * tPhi1);
-        //  if (tN > tSlopeVal || tSlopeVal == std::numeric_limits<double>::max())
-        //  {
-        //    tSlopeVal = tN;
-        //    j = 8;
-        //  }
-        //}
-        ////South
-        //tNextY = row + 1;
-        //tNextX = col;
-        //nextTVal = (*data)(tNextY, tNextX);
-        //if (nextTVal < std::numeric_limits<double>::max())
-        //{
-        //  tS = (tVal - nextTVal) / (tH * tPhi1);
-        //  if (tS > tSlopeVal || tSlopeVal == std::numeric_limits<double>::max())
-        //  {
-        //    tSlopeVal = tS;
-        //    j = 4;
-        //  }
-        //}
-        ////East
-        //tNextY = row;
-        //tNextX = col + 1;
-        //nextTVal = (*data)(tNextY, tNextX);
-        //if (nextTVal < std::numeric_limits<double>::max())
-        //{
-        //  tE = (tVal - nextTVal) / (tH * tPhi1);
-        //  if (tE > tSlopeVal || tSlopeVal == std::numeric_limits<double>::max())
-        //  {
-        //    tSlopeVal = tE;
-        //    j = 2;
-        //  }
-        //}
-        ////West
-        //tNextY = row;
-        //tNextX = col - 1;
-        //nextTVal = (*data)(tNextY, tNextX);
-        //if (nextTVal < std::numeric_limits<double>::max())
-        //{
-        //  tW = (tVal - nextTVal) / (tH * tPhi1);
-        //  if (tW > tSlopeVal || tSlopeVal == std::numeric_limits<double>::max())
-        //  {
-        //    tSlopeVal = tW;
-        //    j = 6;
-        //  }
-        //}
-        ////NorthEast
-        //tNextY = row - 1;
-        //tNextX = col + 1;
-        //nextTVal = (*data)(tNextY, tNextX);
-        //if (nextTVal < std::numeric_limits<double>::max())
-        //{
-        //  tNE = (tVal - nextTVal) / (tH * tPhi2);
-        //  if (tNE > tSlopeVal || tSlopeVal == std::numeric_limits<double>::max())
-        //  {
-        //    tSlopeVal = tNE;
-        //    j = 1;
-        //  }
-        //}
-        ////NorthWest
-        //tNextY = row - 1;
-        //tNextX = col - 1;
-        //nextTVal = (*data)(tNextY, tNextX);
-        //if (nextTVal < std::numeric_limits<double>::max())
-        //{
-        //  tNW = (tVal - nextTVal) / (tH * tPhi2);
-        //  if (tNW > tSlopeVal || tSlopeVal == std::numeric_limits<double>::max())
-        //  {
-        //    tSlopeVal = tNW;
-        //    j = 7;
-        //  }
-        //}
-        ////SouthEast
-        //tNextY = row + 1;
-        //tNextX = col + 1;
-        //nextTVal = (*data)(tNextY, tNextX);
-        //if (nextTVal < std::numeric_limits<double>::max())
-        //{
-        //  tSE = (tVal - nextTVal) / (tH * tPhi2);
-        //  if (tSE > tSlopeVal || tSlopeVal == std::numeric_limits<double>::max())
-        //  {
-        //    tSlopeVal = tSE;
-        //    j = 3;
-        //  }
-        //}
-        ////SouthWest
-        //tNextY = row + 1;
-        //tNextX = col - 1;
-        //nextTVal = (*data)(tNextY, tNextX);
-        //if (nextTVal < std::numeric_limits<double>::max())
-        //{
-        //  tSW = (tVal - nextTVal) / (tH * tPhi2);
-        //  if (tSW > tSlopeVal || tSlopeVal == std::numeric_limits<double>::max())
-        //  {
-        //    tSlopeVal = tSW;
-        //    j = 5;
-        //  }
-        //}
-
-        //switch (j)
-        //{
-        //case 1:
-        //  tNextY = row - 1;
-        //  tNextX = col + 1;
-        //  break;
-
-        //case 2:
-        //  tNextY = row;
-        //  tNextX = col + 1;
-        //  break;
-
-        //case 3:
-        //  tNextY = row + 1;
-        //  tNextX = col + 1;
-        //  break;
-
-        //case 4:
-        //  tNextY = row + 1;
-        //  tNextX = col;
-        //  break;
-
-        //case 5:
-        //  tNextY = row + 1;
-        //  tNextX = col - 1;
-        //  break;
-
-        //case 6:
-        //  tNextY = row;
-        //  tNextX = col - 1;
-        //  break;
-
-        //case 7:
-        //  tNextY = row - 1;
-        //  tNextX = col - 1;
-        //  break;
-
-        //case 8:
-        //  tNextY = row - 1;
-        //  tNextX = col;
-        //  break;
-        //}
-        //(*area)(row, col) = determineCatchmentAreaD8(data, area, tNextY, tNextX, postSpacing);
+        // See file history for a bunch of commented-out code.
     }
     return 0;
 }
@@ -880,13 +721,15 @@ double DerivativeWriter::determineTangentialCurvature(Eigen::MatrixXd* data,
 
     double zXX = (east - 2.0 * value + west) / (postSpacing * postSpacing);
     double zYY = (north - 2.0 * value + south) / (postSpacing * postSpacing);
-    double zXY = ((-1.0 * northwest) + northeast + southwest - southeast) / (4.0 * postSpacing * postSpacing);
+    double zXY = ((-1.0 * northwest) + northeast + southwest - southeast) /
+        (4.0 * postSpacing * postSpacing);
     double zX = (east - west) / (2 * postSpacing);
     double zY = (north - south) / (2 * postSpacing);
     double p = (zX * zX) + (zY * zY);
     double q = p + 1;
 
-    return static_cast<float>(((zXX*zY*zY)-(2*zXY*zX*zY)+(zYY*zX*zX))/(p*std::sqrt(q)));
+    return static_cast<float>(((zXX*zY*zY)-(2*zXY*zX*zY)+(zYY*zX*zX)) /
+        (p*std::sqrt(q)));
 }
 
 
@@ -939,7 +782,8 @@ double DerivativeWriter::determineTotalCurvature(Eigen::MatrixXd* data, int row,
 
     double zXX = (east - 2.0 * value + west) / (postSpacing * postSpacing);
     double zYY = (north - 2.0 * value + south) / (postSpacing * postSpacing);
-    double zXY = ((-1.0 * northwest) + northeast + southwest - southeast) / (4.0 * postSpacing * postSpacing);
+    double zXY = ((-1.0 * northwest) + northeast + southwest - southeast) /
+        (4.0 * postSpacing * postSpacing);
 
     return static_cast<float>((zXX * zXX) + (2.0 * zXY * zXY) + (zYY * zYY));
 }
@@ -995,8 +839,7 @@ GDALDataset* DerivativeWriter::createFloat32GTIFF(std::string filename,
 
 
 void DerivativeWriter::writeSlope(Eigen::MatrixXd* tDemData,
-        const PointViewPtr data, PrimitiveType method,
-        const std::string& filename)
+        PrimitiveType method, const std::string& filename)
 {
     BOX2D& extent = getBounds();
 
@@ -1086,7 +929,7 @@ void DerivativeWriter::writeSlope(Eigen::MatrixXd* tDemData,
 
 
 void DerivativeWriter::writeAspect(Eigen::MatrixXd* tDemData,
-    const PointViewPtr data, PrimitiveType method, const std::string& filename)
+    PrimitiveType method, const std::string& filename)
 {
     BOX2D& extent = getBounds();
 
@@ -1152,12 +995,12 @@ void DerivativeWriter::writeAspect(Eigen::MatrixXd* tDemData,
             if (m_GRID_SIZE_X > 0 && m_GRID_SIZE_Y > 0)
 #if GDAL_VERSION_MAJOR <= 1
                 tBand->RasterIO(GF_Write, 0, 0, m_GRID_SIZE_X, m_GRID_SIZE_Y,
-                                poRasterData, m_GRID_SIZE_X, m_GRID_SIZE_Y,
-                                GDT_Float32, 0, 0);
+                    poRasterData, m_GRID_SIZE_X, m_GRID_SIZE_Y,
+                    GDT_Float32, 0, 0);
 #else
-                int ret = tBand->RasterIO(GF_Write, 0, 0, m_GRID_SIZE_X, m_GRID_SIZE_Y,
-                                          poRasterData, m_GRID_SIZE_X, m_GRID_SIZE_Y,
-                                          GDT_Float32, 0, 0, 0);
+                int ret = tBand->RasterIO(GF_Write, 0, 0, m_GRID_SIZE_X,
+                    m_GRID_SIZE_Y, poRasterData, m_GRID_SIZE_X, m_GRID_SIZE_Y,
+                    GDT_Float32, 0, 0, 0);
 #endif
         }
 
@@ -1169,7 +1012,7 @@ void DerivativeWriter::writeAspect(Eigen::MatrixXd* tDemData,
 
 
 void DerivativeWriter::writeCatchmentArea(Eigen::MatrixXd* tDemData,
-        const PointViewPtr data, const std::string& filename)
+    const std::string& filename)
 {
     Eigen::MatrixXd area(m_GRID_SIZE_Y, m_GRID_SIZE_X);
     area.setZero();
@@ -1191,31 +1034,11 @@ void DerivativeWriter::writeCatchmentArea(Eigen::MatrixXd* tDemData,
         float *poRasterData = new float[m_GRID_SIZE_X*m_GRID_SIZE_Y];
         for (uint32_t i=0; i<m_GRID_SIZE_X*m_GRID_SIZE_Y; i++)
         {
-            poRasterData[i] = c_background;    // Initialize all elements to zero.
+            poRasterData[i] = c_background;  // Initialize all elements to zero.
         }
-
 
         int tXOut = tXStart;
         int tYOut = tYStart;
-        //for (int tXOut = tXStart; tXOut < tXEnd; tXOut++)
-        //{
-        //    for (int tYOut = tYStart; tYOut < tYEnd; tYOut++)
-        //    {
-        //Compute Aspect Value
-        //switch (method)
-        //{
-        //case AD8:
-        //tSlopeValDegree = (float)determineAspectD8(tDemData, tYOut, tXOut, tPostSpacing);
-        //break;
-        //
-        //case SFD:
-        //  tSlopeValDegree = (float)determineAspectFD(tDemData, tYOut, tXOut, tPostSpacing, c_background);
-        //break;
-        //}
-        area(tYOut, tXOut) = determineCatchmentAreaD8(tDemData, &area, tYOut,
-                             tXOut, tPostSpacing);
-        //    }
-        // }
 
         #pragma omp parallel for
         for (int tXOut = tXStart; tXOut < tXEnd; tXOut++)
@@ -1226,6 +1049,7 @@ void DerivativeWriter::writeCatchmentArea(Eigen::MatrixXd* tDemData,
             }
         }
 
+        // See file history for implementation.
         //stretchData(poRasterData);
 
         // write the data
@@ -1238,12 +1062,12 @@ void DerivativeWriter::writeCatchmentArea(Eigen::MatrixXd* tDemData,
             if (m_GRID_SIZE_X > 0 && m_GRID_SIZE_Y > 0)
 #if GDAL_VERSION_MAJOR <= 1
                 tBand->RasterIO(GF_Write, 0, 0, m_GRID_SIZE_X, m_GRID_SIZE_Y,
-                                poRasterData, m_GRID_SIZE_X, m_GRID_SIZE_Y,
-                                GDT_Float32, 0, 0);
+                    poRasterData, m_GRID_SIZE_X, m_GRID_SIZE_Y,
+                    GDT_Float32, 0, 0);
 #else
-                int ret = tBand->RasterIO(GF_Write, 0, 0, m_GRID_SIZE_X, m_GRID_SIZE_Y,
-                                          poRasterData, m_GRID_SIZE_X, m_GRID_SIZE_Y,
-                                          GDT_Float32, 0, 0, 0);
+                int ret = tBand->RasterIO(GF_Write, 0, 0, m_GRID_SIZE_X,
+                    m_GRID_SIZE_Y, poRasterData, m_GRID_SIZE_X, m_GRID_SIZE_Y,
+                    GDT_Float32, 0, 0, 0);
 #endif
         }
 
@@ -1253,67 +1077,9 @@ void DerivativeWriter::writeCatchmentArea(Eigen::MatrixXd* tDemData,
     }
 }
 
-// void DerivativeWriter::stretchData(float *data)
-// {
-//     unsigned int nvals = 0;
-//
-//     int tXStart = 1, tXEnd = m_GRID_SIZE_X - 1;
-//     int tYStart = 1, tYEnd = m_GRID_SIZE_Y - 1;
-//
-//     // pass #1: compute mean
-//     double mean = 0.0;
-//     for (int tXOut = tXStart; tXOut < tXEnd; tXOut++)
-//     {
-//         for (int tYOut = tYStart; tYOut < tYEnd; tYOut++)
-//         {
-//             float val = data[(tYOut * m_GRID_SIZE_X) + tXOut];
-//             if (val != c_background && !_isnanf(val))
-//             {
-//                 mean += val;
-//                 nvals++;
-//             }
-//         }
-//     }
-//     mean /= nvals;
-//
-//     // pass #2: compute standard deviation
-//     double stdev = 0.0;
-//     for (int tXOut = tXStart; tXOut < tXEnd; tXOut++)
-//     {
-//         for (int tYOut = tYStart; tYOut < tYEnd; tYOut++)
-//         {
-//             float val = data[(tYOut * m_GRID_SIZE_X) + tXOut];
-//             if (val != c_background && !_isnanf(val))
-//             {
-//                 stdev += std::pow(val - mean, 2);
-//                 nvals++;
-//             }
-//         }
-//     }
-//     stdev /= (nvals - 1);
-//     stdev = std::sqrt(stdev);
-//
-//     // pass #3: scale to +/- 2x standard deviations from mean
-//     double min_val = mean - 2*stdev;
-//     double max_val = mean + 2*stdev;
-//     double range = max_val - min_val;
-//     double scale = 256.0 / range;
-//
-//     #pragma omp parallel for
-//
-//     for (int tXOut = tXStart; tXOut < tXEnd; tXOut++)
-//     {
-//         for (int tYOut = tYStart; tYOut < tYEnd; tYOut++)
-//         {
-//             data[(tYOut * m_GRID_SIZE_X) + tXOut] =
-//                 (data[(tYOut * m_GRID_SIZE_X) + tXOut] - min_val) * scale;
-//         }
-//     }
-// }
-
 
 void DerivativeWriter::writeHillshade(Eigen::MatrixXd* tDemData,
-    const PointViewPtr data, const std::string& filename)
+    const std::string& filename)
 {
     BOX2D& extent = getBounds();
 
@@ -1362,9 +1128,11 @@ void DerivativeWriter::writeHillshade(Eigen::MatrixXd* tDemData,
                                         tPostSpacing);
 
                 if (tSlopeValDegree == std::numeric_limits<double>::max())
-                    poRasterData[(tYOut * m_GRID_SIZE_X) + tXOut] = c_background;
+                    poRasterData[(tYOut * m_GRID_SIZE_X) + tXOut] =
+                        c_background;
                 else
-                    poRasterData[(tYOut * m_GRID_SIZE_X) + tXOut] = tSlopeValDegree;
+                    poRasterData[(tYOut * m_GRID_SIZE_X) + tXOut] =
+                        tSlopeValDegree;
 
                 if (tSlopeValDegree < min_val) min_val = tSlopeValDegree;
                 if (tSlopeValDegree > max_val) max_val = tSlopeValDegree;
@@ -1387,9 +1155,9 @@ void DerivativeWriter::writeHillshade(Eigen::MatrixXd* tDemData,
                                 GDT_Float32, 0, 0);
 #else
 
-                int ret = tBand->RasterIO(GF_Write, 0, 0, m_GRID_SIZE_X, m_GRID_SIZE_Y,
-                                          poRasterData, m_GRID_SIZE_X, m_GRID_SIZE_Y,
-                                          GDT_Float32, 0, 0, 0);
+                int ret = tBand->RasterIO(GF_Write, 0, 0, m_GRID_SIZE_X,
+                    m_GRID_SIZE_Y, poRasterData, m_GRID_SIZE_X, m_GRID_SIZE_Y,
+                    GDT_Float32, 0, 0, 0);
 #endif
         }
 
@@ -1401,8 +1169,7 @@ void DerivativeWriter::writeHillshade(Eigen::MatrixXd* tDemData,
 
 
 void DerivativeWriter::writeCurvature(Eigen::MatrixXd* tDemData,
-    const PointViewPtr data, PrimitiveType curveType, double valueToIgnore,
-    const std::string& filename)
+    PrimitiveType curveType, double valueToIgnore, const std::string& filename)
 {
     BOX2D& extent = getBounds();
 
@@ -1538,8 +1305,10 @@ void DerivativeWriter::write(const PointViewPtr data)
         double y = data->getFieldAs<double>(Dimension::Id::Y, idx);
         double z = data->getFieldAs<double>(Dimension::Id::Z, idx);
 
-        int xIndex = Utils::clamp<uint32_t>(static_cast<uint32_t>(floor((x - extent.minx) / m_GRID_DIST_X)), 0, m_GRID_SIZE_X-1);
-        int yIndex = Utils::clamp<uint32_t>(static_cast<uint32_t>(floor((yMax - y) / m_GRID_DIST_Y)), 0, m_GRID_SIZE_Y-1);
+        uint32_t index = floor((x - extent.minx) / m_GRID_DIST_X);
+        int xIndex = Utils::clamp(index, 0u, m_GRID_SIZE_X-1);
+        index = floor((yMax - y) / m_GRID_DIST_Y);
+        int yIndex = Utils::clamp(index, 0u, m_GRID_SIZE_Y-1);
 
         double tDemValue = tDemData(yIndex, xIndex);
 
@@ -1657,24 +1426,23 @@ void DerivativeWriter::write(const PointViewPtr data)
         {
         case SLOPE_D8:
         case SLOPE_FD:
-            writeSlope(&tDemData, data, to.m_type, to.m_filename);
+            writeSlope(&tDemData, to.m_type, to.m_filename);
             break;
         case ASPECT_D8:
         case ASPECT_FD:
-            writeAspect(&tDemData, data, to.m_type, to.m_filename);
+            writeAspect(&tDemData, to.m_type, to.m_filename);
             break;
         case HILLSHADE:
-            writeHillshade(&tDemData, data, to.m_filename);
+            writeHillshade(&tDemData, to.m_filename);
             break;
         case CONTOUR_CURVATURE:
         case PROFILE_CURVATURE:
         case TANGENTIAL_CURVATURE:
         case TOTAL_CURVATURE:
-            writeCurvature(&tDemData, data, to.m_type, c_background,
-                to.m_filename);
+            writeCurvature(&tDemData, to.m_type, c_background, to.m_filename);
             break;
         case CATCHMENT_AREA:
-            writeCatchmentArea(&tDemData, data, to.m_filename);
+            writeCatchmentArea(&tDemData, to.m_filename);
             break;
         }
     }
