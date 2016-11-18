@@ -133,17 +133,14 @@ private:
                               double zenithRad, double azimuthRad,
                               double postSpacing);
     double GetNeighbor(Eigen::MatrixXd* data, int row, int col, Direction d);
-    void writeSlope(Eigen::MatrixXd* dem, const PointViewPtr cloud,
-        PrimitiveType method, const std::string& filename);
-    void writeAspect(Eigen::MatrixXd* dem, const PointViewPtr cloud,
-        PrimitiveType method, const std::string& filename);
-    void writeCatchmentArea(Eigen::MatrixXd* dem, const PointViewPtr cloud,
+    void writeSlope(Eigen::MatrixXd* dem, PrimitiveType method,
         const std::string& filename);
-    void writeHillshade(Eigen::MatrixXd* dem, const PointViewPtr cloud,
+    void writeAspect(Eigen::MatrixXd* dem, PrimitiveType method,
         const std::string& filename);
-    void writeCurvature(Eigen::MatrixXd* dem, const PointViewPtr cloud,
-        PrimitiveType curveType, double valueToIgnore,
-        const std::string& filename);
+    void writeCatchmentArea(Eigen::MatrixXd* dem, const std::string& filename);
+    void writeHillshade(Eigen::MatrixXd* dem, const std::string& filename);
+    void writeCurvature(Eigen::MatrixXd* dem, PrimitiveType curveType,
+        double valueToIgnore, const std::string& filename);
     GDALDataset* createFloat32GTIFF(std::string filename, int cols, int rows);
     void stretchData(float *data);
 
