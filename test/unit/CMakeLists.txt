@@ -52,6 +52,8 @@ PDAL_ADD_TEST(pdal_utils_test FILES UtilsTest.cpp)
 PDAL_ADD_TEST(pdal_uuid_test FILES UuidTest.cpp)
 if (PDAL_HAVE_LAZPERF)
     PDAL_ADD_TEST(pdal_lazperf_test FILES CompressionTest.cpp)
+    target_include_directories(pdal_lazperf_test PRIVATE
+        ${PROJECT_SOURCE_DIR}/io/las)
 endif()
 
 #
