@@ -1,10 +1,3 @@
-################################################################
-# A minimal CMake file that is compatible with sbt-jni         #
-#                                                              #
-# All settings required by sbt-jni have been marked so, please #
-# add/modify/remove settings to build your specific library.   #
-################################################################
-
 cmake_minimum_required(VERSION 2.8.0)
 
 # Define project and related variables
