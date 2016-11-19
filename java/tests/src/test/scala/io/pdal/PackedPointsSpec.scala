@@ -8,21 +8,14 @@ class PackedPointsSpec extends TestEnvironmentSpec {
 
   describe("PackedPoints in JVM memory operations") {
     it("should init PackedPoints") {
-      pipeline.execute()
       val pvi = pipeline.pointViews()
       val pv = pvi.next()
-      val layout = pv.layout
 
-      val rawPackedPoints = pv.getRawPackedPoints
-      val dimTypes = SizedDimType.asMap(layout)
-      val metadata = pipeline.getMetadata()
-      val schema = pipeline.getSchema()
-      val proj4String = pv.getCrsProj4
-      val wktString = pv.getCrsWKT(2)
+      packedPoints = pv.getPackedPointsWithMetadata(
+        metadata = pipeline.getMetadata(),
+        schema   = pipeline.getSchema()
+      )
 
-      packedPoints = PackedPoints(rawPackedPoints, dimTypes, metadata, schema, proj4String, wktString)
-
-      layout.dispose()
       pv.dispose()
       pvi.dispose()
     }
@@ -128,7 +121,7 @@ class PackedPointsSpec extends TestEnvironmentSpec {
     it("should read all packed points valid") {
       val pvi = pipeline.pointViews()
       val pv = pvi.next()
-      val length = packedPoints.packedPoints.length
+      val length = packedPoints.bytes.length
       pv.getRawPackedPoints.length should be (length)
       length should be (packedPoints.pointSize * packedPoints.length)
       pv.dispose()
@@ -142,5 +135,9 @@ class PackedPointsSpec extends TestEnvironmentSpec {
       pv.dispose()
       pvi.dispose()
     }
+  }
+
+  override def beforeAll() = {
+    pipeline.execute()
   }
 }

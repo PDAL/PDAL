@@ -159,38 +159,6 @@ JNIEXPORT jstring JNICALL Java_io_pdal_PointView_getCrsWKT
     return env->NewStringUTF(pv->spatialReference().getWKT(enumFlag, pretty).c_str());
 }
 
-JNIEXPORT jobject JNICALL Java_io_pdal_PointView_getPackedPoint
-  (JNIEnv *env, jobject obj, jlong idx, jobjectArray dims)
-{
-    PointViewRawPtr *pvrp = getHandle<PointViewRawPtr>(env, obj);
-    PointViewPtr pv = pvrp->shared_pointer;
-
-    PointLayoutPtr pl = pv->layout();
-
-    jclass pvlClass = env->FindClass("io/pdal/PackedPoints");
-    jmethodID pvlCtor = env->GetMethodID(pvlClass, "<init>", "([B)V");
-    jobject pvl = env->NewObject(pvlClass, pvlCtor);
-
-    // we need to calculate buffer size
-    std::size_t bufSize = 0;
-    pdal::DimTypeList dimTypes;
-
-    // calculate result buffer length (for one point) and get dimTypes
-    convertDimTypeJavaArrayToVector(env, dims, &bufSize, &dimTypes);
-
-    char *buf = new char[bufSize];
-    getPackedPoint(pv, dimTypes, idx, buf);
-
-    jbyteArray array = env->NewByteArray(bufSize);
-    env->SetByteArrayRegion (array, 0, bufSize, reinterpret_cast<jbyte *>(buf));
-
-
-
-    delete[] buf;
-
-    return array;
-}
-
 JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getRawPackedPoint
   (JNIEnv *env, jobject obj, jlong idx, jobjectArray dims)
 {

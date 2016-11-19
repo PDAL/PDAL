@@ -49,22 +49,6 @@ JNIEXPORT jstring JNICALL Java_io_pdal_PointView_getCrsWKT
 
 /*
  * Class:     io_pdal_PointView
- * Method:    getPackedPoint
- * Signature: (J[Lio/pdal/DimType;)Lio/pdal/PackedPoints;
- */
-JNIEXPORT jobject JNICALL Java_io_pdal_PointView_getPackedPoint
-  (JNIEnv *, jobject, jlong, jobjectArray);
-
-/*
- * Class:     io_pdal_PointView
- * Method:    getPackedPoints
- * Signature: ([Lio/pdal/DimType;)Lio/pdal/PackedPoints;
- */
-JNIEXPORT jobject JNICALL Java_io_pdal_PointView_getPackedPoints
-  (JNIEnv *, jobject, jobjectArray);
-
-/*
- * Class:     io_pdal_PointView
  * Method:    getRawPackedPoint
  * Signature: (J[Lio/pdal/DimType;)[B
  */

@@ -9,7 +9,7 @@ import scala.collection.JavaConversions._
   * PackedPoints abstraction to work with packed point(s) in JVM memory
   * SizedDimType contains offset for a particular packed point with the current set of dims
   **/
-case class PackedPoints(packedPoints: Array[Byte],
+case class PackedPoints(bytes: Array[Byte],
                         dimTypes: util.Map[String, SizedDimType],
                         metadata: String = "",
                         schema: String = "",
@@ -17,7 +17,7 @@ case class PackedPoints(packedPoints: Array[Byte],
                         WKTString: String = "")
 {
   def pointSize: Long = dimTypes.values.map(_.size).sum
-  def length: Int = (packedPoints.length / pointSize).toInt
+  def length: Int = (bytes.length / pointSize).toInt
   def isPoint: Boolean = length == pointSize
   def dimSize(dim: SizedDimType) = dimTypes(dim.dimType.id).size
   def dimSize(dim: DimType) = dimTypes(dim.id).size
@@ -29,7 +29,7 @@ case class PackedPoints(packedPoints: Array[Byte],
     * Reads a packed point by point id from a set of packed points.
     */
   def get(i: Int): Array[Byte] = {
-    if (isPoint) packedPoints
+    if (isPoint) bytes
     else {
       val from = (i * pointSize).toInt
       val to = {
@@ -37,7 +37,7 @@ case class PackedPoints(packedPoints: Array[Byte],
         if (t > length) length else t
       }
 
-      packedPoints.slice(from, to)
+      bytes.slice(from, to)
     }
   }
 
@@ -67,5 +67,5 @@ case class PackedPoints(packedPoints: Array[Byte],
     * Reads dims from a packed point
     */
   private def get(packedPoint: Array[Byte], dims: Array[String]): Array[Byte] =
-    dims.map(get(packedPoints, _)).fold(Array[Byte]())(_ ++ _)
+    dims.map(get(bytes, _)).fold(Array[Byte]())(_ ++ _)
 }
