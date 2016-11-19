@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <vector>
 #include "io_pdal_PointLayout.h"
 #include "JavaPipeline.hpp"
 #include "Accessors.hpp"
@@ -62,13 +63,26 @@ JNIEXPORT jlong JNICALL Java_io_pdal_PointLayout_dimSize
     return pl->dimSize(pl->findDim(fid));
 }
 
-JNIEXPORT jlong JNICALL Java_io_pdal_PointLayout_dimOffset
+JNIEXPORT jlong JNICALL Java_io_pdal_PointLayout_dimPackedOffset
   (JNIEnv *env, jobject obj, jstring jstr)
 {
     std::string fid = std::string(env->GetStringUTFChars(jstr, 0));
     PointLayout *pl = getHandle<PointLayout>(env, obj);
+    pdal::DimType dimType = pl->findDimType(fid);
+    pdal::DimTypeList dims = pl->dimTypes();
 
-    return pl->dimOffset(pl->findDim(fid));
+    auto it = std::find_if(dims.begin(), dims.end(), [&dimType](const pdal::DimType& dt) {
+        return pdal::Dimension::name(dt.m_id) == pdal::Dimension::name(dimType.m_id);
+    });
+    auto index = std::distance(dims.begin(), it);
+    long offset = 0;
+
+    for(int i = 0; i < index; i++)
+    {
+        offset += pl->dimSize(dims.at(i).m_id);
+    }
+
+    return offset;
 }
 
 JNIEXPORT jlong JNICALL Java_io_pdal_PointLayout_pointSize

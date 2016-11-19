@@ -16,6 +16,9 @@ using pdal::Dimension::Id;
 using pdal::PointId;
 using pdal::DimTypeList;
 
+const int endian_check = 1;
+#define is_littleendian() ((*(char*)&endian_check) != 0)
+
 /// Converts JavaArray of DimTypes (In Java interpretation DimType is a pair of strings)
 /// into pdal::DimTypeList (vector of DimTypes), puts dim size into bufSize
 /// \param[in] env       JNI environment
@@ -44,13 +47,36 @@ void convertDimTypeJavaArrayToVector(JNIEnv *env, jobjectArray dims, std::size_t
     }
 }
 
+/// Fill a buffer with point data specified by the dimension list.
+/// \param[in] dims  List of dimensions/types to retrieve.
+/// \param[in] idx   Index of point to get.
+/// \param[in] buf   Pointer to buffer to fill.
+void getPackedPoint(PointViewPtr pv, const pdal::DimTypeList& dims, pdal::PointId idx, char *buf)
+{
+    for (auto di = dims.begin(); di != dims.end(); ++di)
+    {
+        const pdal::Dimension::Detail *d = pv->layout()->dimDetail(di->m_id);
+        char *chunk = new char[pdal::Dimension::size(di->m_type)];
+        pv->getField(chunk, di->m_id, di->m_type, idx);
+        // JVM native endian conversion
+        if(is_littleendian())
+        {
+            std::reverse(chunk, chunk + pdal::Dimension::size(di->m_type));
+        }
+        memcpy(buf, chunk, pdal::Dimension::size(di->m_type));
+        buf += pdal::Dimension::size(di->m_type);
+        delete[] chunk;
+
+    }
+}
+
 /// Fill a buffer with point data specified by the dimension list, accounts index
 /// Using this functions it is possible to pack all points into one buffer
 /// \param[in] pv    pdal::PointView pointer.
 /// \param[in] dims  List of dimensions/types to retrieve.
 /// \param[in] idx   Index of point to get.
 /// \param[in] buf   Pointer to buffer to fill.
-void getPackedPoint(PointViewPtr pv, const pdal::DimTypeList& dims, pdal::PointId idx, char *buf)
+void appendPackedPoint(PointViewPtr pv, const pdal::DimTypeList& dims, pdal::PointId idx, char *buf)
 {
     std::size_t from = idx * (pv->layout()->pointSize());
     if(from >= pv->size())
@@ -61,8 +87,16 @@ void getPackedPoint(PointViewPtr pv, const pdal::DimTypeList& dims, pdal::PointI
     buf += from;
     for (auto di = dims.begin(); di != dims.end(); ++di)
     {
-        pv->getField(buf, di->m_id, di->m_type, idx);
+        char *chunk = new char[pdal::Dimension::size(di->m_type)];
+        pv->getField(chunk, di->m_id, di->m_type, idx);
+        // JVM native endian conversion
+        if(is_littleendian())
+        {
+            std::reverse(chunk, chunk + pdal::Dimension::size(di->m_type));
+        }
+        memcpy(buf, chunk, pdal::Dimension::size(di->m_type));
         buf += pdal::Dimension::size(di->m_type);
+        delete[] chunk;
     }
 }
 
@@ -125,8 +159,40 @@ JNIEXPORT jstring JNICALL Java_io_pdal_PointView_getCrsWKT
     return env->NewStringUTF(pv->spatialReference().getWKT(enumFlag, pretty).c_str());
 }
 
-JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getPackedPoint
-  (JNIEnv *env, jobject obj, jobjectArray dims, jlong idx)
+JNIEXPORT jobject JNICALL Java_io_pdal_PointView_getPackedPoint
+  (JNIEnv *env, jobject obj, jlong idx, jobjectArray dims)
+{
+    PointViewRawPtr *pvrp = getHandle<PointViewRawPtr>(env, obj);
+    PointViewPtr pv = pvrp->shared_pointer;
+
+    PointLayoutPtr pl = pv->layout();
+
+    jclass pvlClass = env->FindClass("io/pdal/PackedPoints");
+    jmethodID pvlCtor = env->GetMethodID(pvlClass, "<init>", "([B)V");
+    jobject pvl = env->NewObject(pvlClass, pvlCtor);
+
+    // we need to calculate buffer size
+    std::size_t bufSize = 0;
+    pdal::DimTypeList dimTypes;
+
+    // calculate result buffer length (for one point) and get dimTypes
+    convertDimTypeJavaArrayToVector(env, dims, &bufSize, &dimTypes);
+
+    char *buf = new char[bufSize];
+    getPackedPoint(pv, dimTypes, idx, buf);
+
+    jbyteArray array = env->NewByteArray(bufSize);
+    env->SetByteArrayRegion (array, 0, bufSize, reinterpret_cast<jbyte *>(buf));
+
+
+
+    delete[] buf;
+
+    return array;
+}
+
+JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getRawPackedPoint
+  (JNIEnv *env, jobject obj, jlong idx, jobjectArray dims)
 {
     PointViewRawPtr *pvrp = getHandle<PointViewRawPtr>(env, obj);
     PointViewPtr pv = pvrp->shared_pointer;
@@ -141,15 +207,17 @@ JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getPackedPoint
     convertDimTypeJavaArrayToVector(env, dims, &bufSize, &dimTypes);
 
     char *buf = new char[bufSize];
-    pv->getPackedPoint(dimTypes, idx, buf);
+    getPackedPoint(pv, dimTypes, idx, buf);
 
     jbyteArray array = env->NewByteArray(bufSize);
     env->SetByteArrayRegion (array, 0, bufSize, reinterpret_cast<jbyte *>(buf));
 
+    delete[] buf;
+
     return array;
 }
 
-JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getPackedPoints
+JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getRawPackedPoints
   (JNIEnv *env, jobject obj, jobjectArray dims)
 {
     PointViewRawPtr *pvrp = getHandle<PointViewRawPtr>(env, obj);
@@ -169,11 +237,13 @@ JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getPackedPoints
     char *buf = new char[bufSize];
 
     for (int idx = 0; idx < pv->size(); idx++) {
-        getPackedPoint(pv, dimTypes, idx, buf);
+        appendPackedPoint(pv, dimTypes, idx, buf);
     }
 
     jbyteArray array = env->NewByteArray(bufSize);
     env->SetByteArrayRegion (array, 0, bufSize, reinterpret_cast<jbyte *>(buf));
+
+    delete[] buf;
 
     return array;
 }

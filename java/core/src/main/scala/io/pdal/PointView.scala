@@ -1,10 +1,10 @@
 package io.pdal
 
-import java.nio.{ByteBuffer, ByteOrder}
+import java.nio.ByteBuffer
 
 class PointView extends Native {
-  def getPackedPoint(idx: Long): Array[Byte] = getPackedPoint(layout.dimTypes(), idx)
-  def getPackedPoints: Array[Byte] = getPackedPoints(layout.dimTypes())
+  def getRawPackedPoint(idx: Long): Array[Byte] = getRawPackedPoint(idx, layout.dimTypes())
+  def getRawPackedPoints: Array[Byte] = getRawPackedPoints(layout.dimTypes())
   def findDimType(name: String): DimType = layout.findDimType(name)
   def length: Int = size()
   def getCrsWKT(mode_flag: Int): String = getCrsWKT(mode_flag, pretty = false)
@@ -13,10 +13,10 @@ class PointView extends Native {
   /**
     * Reads a packed point by point id from a set of packed points.
     */
-  def get(packedPoints: Array[Byte], i: Int): Array[Byte] = get(packedPoints, layout.dimTypes(), i)
-  def get(packedPoints: Array[Byte], dims: Array[DimType], i: Int): Array[Byte] = {
+  def get(idx: Int, packedPoints: Array[Byte]): Array[Byte] = get(idx, packedPoints, layout.dimTypes())
+  def get(idx: Int, packedPoints: Array[Byte], dims: Array[DimType]): Array[Byte] = {
     val pointSize = dims.map(layout.dimSize(_)).sum
-    val from = (i * pointSize).toInt
+    val from = (idx * pointSize).toInt
     val to = {
       val t = (from + pointSize).toInt
       if(t > length) length else t
@@ -29,20 +29,20 @@ class PointView extends Native {
     * Reads dim from a packed point
     */
   def get(packedPoint: Array[Byte], dim: DimType): ByteBuffer = {
-    val from = layout.dimOffset(dim).toInt
+    val from = layout.dimPackedOffset(dim).toInt
     val to = from + layout.dimSize(dim).toInt
-    ByteBuffer.wrap(packedPoint.slice(from, to)).order(ByteOrder.nativeOrder())
+    ByteBuffer.wrap(packedPoint.slice(from, to))
   }
   /**
     * One dimension read; for multiple dims custom logic required.
     */
-  def get(dim: String, i: Int): ByteBuffer = get(findDimType(dim), i)
-  def get(dim: DimType, i: Int): ByteBuffer =
-    ByteBuffer.wrap(getPackedPoint(Array(dim), i)).order(ByteOrder.nativeOrder())
+  def get(idx: Int, dim: String): ByteBuffer = get(idx, findDimType(dim))
+  def get(idx: Int, dim: DimType): ByteBuffer =
+    ByteBuffer.wrap(getRawPackedPoint(idx, Array(dim)))
 
-  def getX(i: Int): Double = get(DimType.X, i).getDouble
-  def getY(i: Int): Double = get(DimType.Y, i).getDouble
-  def getZ(i: Int): Double = get(DimType.Z, i).getDouble
+  def getX(idx: Int): Double = get(idx, DimType.X).getDouble
+  def getY(idx: Int): Double = get(idx, DimType.Y).getDouble
+  def getZ(idx: Int): Double = get(idx, DimType.Z).getDouble
 
   def getX(packedPoint: Array[Byte]): Double = get(packedPoint, DimType.X).getDouble
   def getY(packedPoint: Array[Byte]): Double = get(packedPoint, DimType.Y).getDouble
@@ -53,7 +53,9 @@ class PointView extends Native {
   @native def empty(): Boolean
   @native def getCrsProj4: String
   @native def getCrsWKT(mode_flag: Int, pretty: Boolean): String
-  @native def getPackedPoint(dims: Array[DimType], idx: Long): Array[Byte]
-  @native def getPackedPoints(dims: Array[DimType]): Array[Byte]
+  @native def getPackedPoint(idx: Long, dims: Array[DimType]): PackedPoints
+  @native def getPackedPoints(dims: Array[DimType]): PackedPoints
+  @native def getRawPackedPoint(idx: Long, dims: Array[DimType]): Array[Byte]
+  @native def getRawPackedPoints(dims: Array[DimType]): Array[Byte]
   @native def dispose(): Unit
 }

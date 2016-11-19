@@ -33,10 +33,10 @@ JNIEXPORT jlong JNICALL Java_io_pdal_PointLayout_dimSize
 
 /*
  * Class:     io_pdal_PointLayout
- * Method:    dimOffset
+ * Method:    dimPackedOffset
  * Signature: (Ljava/lang/String;)J
  */
-JNIEXPORT jlong JNICALL Java_io_pdal_PointLayout_dimOffset
+JNIEXPORT jlong JNICALL Java_io_pdal_PointLayout_dimPackedOffset
   (JNIEnv *, jobject, jstring);
 
 /*
