@@ -2,8 +2,6 @@
 # NITF plugin CMake configuration
 #
 
-include_directories(${ROOT_DIR}/vendor/pdalboost)
-
 include(${PDAL_CMAKE_DIR}/nitro.cmake)
 if (NOT NITRO_FOUND)
     message(FATAL_ERROR "Can't find NITRO support required by NITF.")
@@ -29,6 +27,9 @@ set(incs
 PDAL_ADD_PLUGIN(reader_libname reader nitf
     FILES "${srcs}" "${incs}"
     LINK_WITH ${NITRO_LIBRARIES})
+target_include_directories(${reader_libname} PRIVATE
+    ${ROOT_DIR}/vendor/pdalboost
+    ${PDAL_IO_DIR})
 
 #
 # NITF Writer
@@ -50,6 +51,9 @@ set(incs
 PDAL_ADD_PLUGIN(writer_libname writer nitf
     FILES "${srcs}" "${incs}"
     LINK_WITH ${NITRO_LIBRARIES})
+target_include_directories(${writer_libname} PRIVATE
+    ${ROOT_DIR}/vendor/pdalboost
+    ${PDAL_IO_DIR})
 
 if (WITH_TESTS)
 	set(srcs
@@ -59,11 +63,15 @@ if (WITH_TESTS)
     PDAL_ADD_TEST(pdal_io_nitf_writer_test
         FILES "${srcs}"
         LINK_WITH ${writer_libname})
-
     set(srcs
         test/NitfReaderTest.cpp
     )
+    target_include_directories(pdal_io_nitf_writer_test PRIVATE
+        ${PDAL_IO_DIR})
+
     PDAL_ADD_TEST(pdal_io_nitf_reader_test
         FILES "${srcs}"
         LINK_WITH ${reader_libname})
+    target_include_directories(pdal_io_nitf_reader_test PRIVATE
+        ${PDAL_IO_DIR})
 endif()

@@ -37,9 +37,9 @@
 #include <pdal/EigenUtils.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/PipelineManager.hpp>
-#include <buffer/BufferReader.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/util/Utils.hpp>
+#include <../io/buffer/BufferReader.hpp>
 
 #include <Eigen/Dense>
 #include <Eigen/Sparse>

@@ -34,6 +34,8 @@ PDAL_ADD_TEST(pdal_pipeline_manager_test FILES PipelineManagerTest.cpp)
 PDAL_ADD_TEST(pdal_plugin_manager_test FILES PluginManagerTest.cpp)
 PDAL_ADD_TEST(pdal_point_view_test FILES PointViewTest.cpp)
 PDAL_ADD_TEST(pdal_point_table_test FILES PointTableTest.cpp)
+target_include_directories(pdal_point_table_test PRIVATE
+    ${PDAL_IO_DIR})
 PDAL_ADD_TEST(pdal_program_arg_test FILES ProgramArgsTest.cpp)
 PDAL_ADD_TEST(pdal_polygon_test FILES PolygonTest.cpp)
 PDAL_ADD_TEST(pdal_spatial_reference_test FILES SpatialReferenceTest.cpp)

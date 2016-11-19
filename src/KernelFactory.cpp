@@ -35,16 +35,16 @@
 #include <pdal/KernelFactory.hpp>
 #include <pdal/PluginManager.hpp>
 
-#include <delta/DeltaKernel.hpp>
-#include <diff/DiffKernel.hpp>
-#include <info/InfoKernel.hpp>
-#include <merge/MergeKernel.hpp>
-#include <pipeline/PipelineKernel.hpp>
-#include <random/RandomKernel.hpp>
-#include <sort/SortKernel.hpp>
-#include <split/SplitKernel.hpp>
-#include <tindex/TIndexKernel.hpp>
-#include <translate/TranslateKernel.hpp>
+#include <../kernels/delta/DeltaKernel.hpp>
+#include <../kernels/diff/DiffKernel.hpp>
+#include <../kernels/info/InfoKernel.hpp>
+#include <../kernels/merge/MergeKernel.hpp>
+#include <../kernels/pipeline/PipelineKernel.hpp>
+#include <../kernels/random/RandomKernel.hpp>
+#include <../kernels/sort/SortKernel.hpp>
+#include <../kernels/split/SplitKernel.hpp>
+#include <../kernels/tindex/TIndexKernel.hpp>
+#include <../kernels/translate/TranslateKernel.hpp>
 
 namespace pdal
 {

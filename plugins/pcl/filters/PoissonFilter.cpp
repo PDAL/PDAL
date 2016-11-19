@@ -35,7 +35,7 @@
 #include "PoissonFilter.hpp"
 
 #include "PCLConversions.hpp"
-#include "PCLPipeline.h"
+#include "pipeline/PCLPipeline.h"
 
 #include <pcl/console/print.h>
 #include <pcl/point_types.h>

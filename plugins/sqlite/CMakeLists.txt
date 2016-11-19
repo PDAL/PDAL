@@ -38,4 +38,6 @@ if(BUILD_SQLITE_TESTS)
 	PDAL_ADD_TEST(sqlitetest
         FILES test/SQLiteTest.cpp
         LINK_WITH ${reader_libname} ${writer_libname})
+    target_include_directories(sqlitetest PRIVATE
+        ${PDAL_IO_DIR})
 endif()

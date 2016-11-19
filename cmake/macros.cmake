@@ -62,6 +62,8 @@ macro(PDAL_ADD_LIBRARY _name)
     add_library(${_name} ${PDAL_LIB_TYPE} ${ARGN})
     add_dependencies(${_name} generate_dimension_hpp)
     set_property(TARGET ${_name} PROPERTY FOLDER "Libraries")
+    target_include_directories(${_name} PRIVATE
+        ${PDAL_INCLUDE_DIR})
 
     install(TARGETS ${_name}
         EXPORT PDALTargets
@@ -79,6 +81,8 @@ endmacro(PDAL_ADD_LIBRARY)
 macro(PDAL_ADD_FREE_LIBRARY _name _library_type)
     add_library(${_name} ${_library_type} ${ARGN})
     set_property(TARGET ${_name} PROPERTY FOLDER "Libraries")
+    target_include_directories(${_name} PRIVATE
+        ${PDAL_INCLUDE_DIR})
 
     install(TARGETS ${_name}
         EXPORT PDALTargets
@@ -112,11 +116,14 @@ endmacro(PDAL_ADD_EXECUTABLE)
 # The "generate_dimension_hpp" ensures that Dimension.hpp is built before
 #  attempting to build anything else in the "library".
 #
+# NOTE: _name is the name of a variable that will hold the plugin name
+#    when the macro completes
 macro(PDAL_ADD_PLUGIN _name _type _shortname)
     set(options)
     set(oneValueArgs)
     set(multiValueArgs FILES LINK_WITH)
-    cmake_parse_arguments(PDAL_ADD_PLUGIN "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    cmake_parse_arguments(PDAL_ADD_PLUGIN "${options}" "${oneValueArgs}"
+        "${multiValueArgs}" ${ARGN})
     if(WIN32)
         set(${_name} "libpdal_plugin_${_type}_${_shortname}")
     else()
@@ -128,6 +135,8 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
     endif()
 
     add_library(${${_name}} SHARED ${PDAL_ADD_PLUGIN_FILES})
+    target_include_directories(${${_name}} PRIVATE
+        ${PDAL_INCLUDE_DIR})
     target_link_libraries(${${_name}} PUBLIC
         ${PDAL_BASE_LIB_NAME}
         ${PDAL_UTIL_LIB_NAME}
@@ -168,14 +177,21 @@ macro(PDAL_ADD_TEST _name)
     endif()
     add_executable(${_name} ${PDAL_ADD_TEST_FILES} ${common_srcs})
     target_include_directories(${_name} PRIVATE
+        ${PDAL_INCLUDE_DIR}
         ${PROJECT_SOURCE_DIR}/test/unit
         ${PROJECT_BINARY_DIR}/test/unit)
-    set_target_properties(${_name} PROPERTIES COMPILE_DEFINITIONS PDAL_DLL_IMPORT)
+    set_target_properties(${_name}
+        PROPERTIES
+            COMPILE_DEFINITIONS PDAL_DLL_IMPORT)
     set_property(TARGET ${_name} PROPERTY FOLDER "Tests")
     target_link_libraries(${_name} PRIVATE
         ${PDAL_BASE_LIB_NAME} ${PDAL_UTIL_LIB_NAME} gtest
         ${PDAL_ADD_TEST_LINK_WITH})
-    add_test(NAME ${_name} COMMAND "${PROJECT_BINARY_DIR}/bin/${_name}" WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/..")
+    add_test(NAME ${_name}
+        COMMAND
+            "${PROJECT_BINARY_DIR}/bin/${_name}"
+        WORKING_DIRECTORY
+            "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/..")
     # Ensure plugins are loaded from build dir
     # https://github.com/PDAL/PDAL/issues/840
     if (WIN32)
@@ -189,7 +205,7 @@ endmacro(PDAL_ADD_TEST)
 
 ###############################################################################
 # Add a driver. Creates object library and adds files to source_group for windows IDE.
-# _type The driver type (e.g., driver, filter, kernel).
+# _type The driver type (e.g., reader, writer, driver, filter, kernel).
 # _name The driver name.
 # _srcs The list of source files to add.
 # _incs The list of includes to add.
@@ -205,6 +221,8 @@ macro(PDAL_ADD_DRIVER _type _name _srcs _incs _objs)
 	endif()
     add_library(${libname} OBJECT ${_srcs} ${_incs})
     add_dependencies(${libname} generate_dimension_hpp)
+    target_include_directories(${libname} PRIVATE
+        ${PDAL_INCLUDE_DIR})
     set_property(TARGET ${libname} PROPERTY FOLDER "Drivers/${_type}")
 
     install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
@@ -212,6 +230,36 @@ macro(PDAL_ADD_DRIVER _type _name _srcs _incs _objs)
         FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
     )
 endmacro(PDAL_ADD_DRIVER)
+
+###############################################################################
+# Add a kernel. Creates object library and adds files to source_group
+# for windows IDE.
+# _name The driver name.
+# _srcs The list of source files to add.
+# _incs The list of includes to add.
+# _objs The object library name that is created.
+macro(PDAL_ADD_KERNEL _name _srcs _incs _objs)
+    source_group("Header Files\\kernel\\${_name}" FILES ${_incs})
+    source_group("Source Files\\kernel\\${_name}" FILES ${_srcs})
+
+    set(libname kernel_${_name})
+    set(${_objs} $<TARGET_OBJECTS:${libname}>)
+	if (NOT WIN32)
+		add_definitions("-fPIC")
+	endif()
+    add_library(${libname} OBJECT ${_srcs} ${_incs})
+    add_dependencies(${libname} generate_dimension_hpp)
+    target_include_directories(${libname} PRIVATE
+        ${PDAL_INCLUDE_DIR}
+        ${PDAL_IO_DIR}
+        ${PDAL_FILTER_DIR})
+    set_property(TARGET ${libname} PROPERTY FOLDER "Drivers/kernel")
+
+    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
+        DESTINATION "${PDAL_INCLUDE_INSTALL_DIR}"
+        FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
+    )
+endmacro(PDAL_ADD_KERNEL)
 
 ###############################################################################
 # Get the operating system information. Generally, CMake does a good job of
