@@ -42,7 +42,7 @@ class PackedPointsSpec extends TestEnvironmentSpec {
       val pvi = pipeline.pointViews()
       val pv = pvi.next()
       val layout = pv.layout
-      val arr = pv.getRawPackedPoint(0, Array(DimType.X, DimType.Y))
+      val arr = pv.getPackedPointBytes(0, Array(DimType.X, DimType.Y))
       val (xarr, yarr) = arr.take(layout.dimSize(DimType.X).toInt) -> arr.drop(layout.dimSize(DimType.Y).toInt)
 
       val marr = packedPoints.get(0, Array(DimType.X, DimType.Y))
@@ -69,7 +69,7 @@ class PackedPointsSpec extends TestEnvironmentSpec {
     it("should read all packed points and grab only one point out of it") {
       val pvi = pipeline.pointViews()
       val pv = pvi.next()
-      pv.get(3, pv.getRawPackedPoints) should be (packedPoints.get(3))
+      pv.get(3, pv.getPackedPointsBytes) should be (packedPoints.get(3))
       pv.dispose()
       pvi.dispose()
     }
@@ -122,7 +122,7 @@ class PackedPointsSpec extends TestEnvironmentSpec {
       val pvi = pipeline.pointViews()
       val pv = pvi.next()
       val length = packedPoints.bytes.length
-      pv.getRawPackedPoints.length should be (length)
+      pv.getPackedPointsBytes.length should be (length)
       length should be (packedPoints.pointSize * packedPoints.length)
       pv.dispose()
       pvi.dispose()

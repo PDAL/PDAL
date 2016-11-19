@@ -8,7 +8,7 @@ class PointView extends Native {
   def getPackedPoint(idx: Long): PackedPoints = getPackedPoint(idx, layout.dimTypes())
   def getPackedPoint(idx: Long, dims: Array[DimType]): PackedPoints =
     PackedPoints(
-      bytes       = getRawPackedPoint(idx, dims),
+      bytes       = getPackedPointBytes(idx, dims),
       dimTypes    = layout.toSizedDimTypes(dims),
       proj4String = getCrsProj4,
       WKTString   = getCrsWKT(2, pretty = false)
@@ -19,14 +19,14 @@ class PointView extends Native {
   def getPackedPoints: PackedPoints = getPackedPoints(layout.dimTypes())
   def getPackedPoints(dims: Array[DimType]): PackedPoints =
     PackedPoints(
-      bytes       = getRawPackedPoints(dims),
+      bytes       = getPackedPointsBytes(dims),
       dimTypes    = layout.toSizedDimTypes(dims),
       proj4String = getCrsProj4,
       WKTString   = getCrsWKT(2, pretty = false)
     )
 
-  def getRawPackedPoint(idx: Long): Array[Byte] = getRawPackedPoint(idx, layout.dimTypes())
-  def getRawPackedPoints: Array[Byte] = getRawPackedPoints(layout.dimTypes())
+  def getPackedPointBytes(idx: Long): Array[Byte] = getPackedPointBytes(idx, layout.dimTypes())
+  def getPackedPointsBytes: Array[Byte] = getPackedPointsBytes(layout.dimTypes())
   def findDimType(name: String): DimType = layout.findDimType(name)
   def length: Int = size()
   def getCrsWKT(mode_flag: Int): String = getCrsWKT(mode_flag, pretty = false)
@@ -60,7 +60,7 @@ class PointView extends Native {
     */
   def get(idx: Int, dim: String): ByteBuffer = get(idx, findDimType(dim))
   def get(idx: Int, dim: DimType): ByteBuffer =
-    ByteBuffer.wrap(getRawPackedPoint(idx, Array(dim)))
+    ByteBuffer.wrap(getPackedPointBytes(idx, Array(dim)))
 
   def getX(idx: Int): Double = get(idx, DimType.X).getDouble
   def getY(idx: Int): Double = get(idx, DimType.Y).getDouble
@@ -75,7 +75,7 @@ class PointView extends Native {
   @native def empty(): Boolean
   @native def getCrsProj4: String
   @native def getCrsWKT(mode_flag: Int, pretty: Boolean): String
-  @native def getRawPackedPoint(idx: Long, dims: Array[DimType]): Array[Byte]
-  @native def getRawPackedPoints(dims: Array[DimType]): Array[Byte]
+  @native def getPackedPointBytes(idx: Long, dims: Array[DimType]): Array[Byte]
+  @native def getPackedPointsBytes(dims: Array[DimType]): Array[Byte]
   @native def dispose(): Unit
 }

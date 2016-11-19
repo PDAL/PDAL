@@ -48,7 +48,7 @@ class PipelineSpec extends TestEnvironmentSpec {
       val pvi = pipeline.pointViews()
       val pv = pvi.next()
       val layout = pv.layout
-      val arr = pv.getRawPackedPoint(0, Array(DimType.X, DimType.Y))
+      val arr = pv.getPackedPointBytes(0, Array(DimType.X, DimType.Y))
       val (xarr, yarr) = arr.take(layout.dimSize(DimType.X).toInt) -> arr.drop(layout.dimSize(DimType.Y).toInt)
 
       ByteBuffer.wrap(xarr).getDouble should be (pv.getX(0))
@@ -62,7 +62,7 @@ class PipelineSpec extends TestEnvironmentSpec {
     it("should read the whole packed point and grab only one dim") {
       val pvi = pipeline.pointViews()
       val pv = pvi.next()
-      val arr = pv.getRawPackedPoint(0)
+      val arr = pv.getPackedPointBytes(0)
       pv.get(arr, DimType.Y).getDouble should be (pv.getY(0))
       pv.dispose()
       pvi.dispose()
@@ -71,7 +71,7 @@ class PipelineSpec extends TestEnvironmentSpec {
     it("should read all packed points and grab only one point out of it") {
       val pvi = pipeline.pointViews()
       val pv = pvi.next()
-      pv.get(3, pv.getRawPackedPoints) should be (pv.getRawPackedPoint(3))
+      pv.get(3, pv.getPackedPointsBytes) should be (pv.getPackedPointBytes(3))
       pv.dispose()
       pvi.dispose()
     }
@@ -88,7 +88,7 @@ class PipelineSpec extends TestEnvironmentSpec {
       val pvi = pipeline.pointViews()
       val pv = pvi.next()
       val layout = pv.layout
-      val arr = pv.getRawPackedPoint(0)
+      val arr = pv.getPackedPointBytes(0)
       layout.dimTypes().foreach { dt => pv.get(0, dt).array() should be(pv.get(arr, dt).array())}
       layout.dispose()
       pv.dispose()
@@ -125,7 +125,7 @@ class PipelineSpec extends TestEnvironmentSpec {
       val pvi = pipeline.pointViews()
       val pv = pvi.next()
       val layout = pv.layout
-      pv.getRawPackedPoints.length should be (pv.length * layout.pointSize())
+      pv.getPackedPointsBytes.length should be (pv.length * layout.pointSize())
       layout.dispose()
       pv.dispose()
       pvi.dispose()

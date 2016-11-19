@@ -159,7 +159,7 @@ JNIEXPORT jstring JNICALL Java_io_pdal_PointView_getCrsWKT
     return env->NewStringUTF(pv->spatialReference().getWKT(enumFlag, pretty).c_str());
 }
 
-JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getRawPackedPoint
+JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getPackedPointBytes
   (JNIEnv *env, jobject obj, jlong idx, jobjectArray dims)
 {
     PointViewRawPtr *pvrp = getHandle<PointViewRawPtr>(env, obj);
@@ -185,7 +185,7 @@ JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getRawPackedPoint
     return array;
 }
 
-JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getRawPackedPoints
+JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getPackedPointsBytes
   (JNIEnv *env, jobject obj, jobjectArray dims)
 {
     PointViewRawPtr *pvrp = getHandle<PointViewRawPtr>(env, obj);

@@ -24,7 +24,7 @@ It's required to have native JNI binary into your app classpath:
 
 ```scala
 // Mac OS X example
-// `cp -f native/target/resource_managed/main/native/x86_64-darwin/libpdaljni0.dylib /usr/local/lib/libpdaljni0.dylib`
+// cp -f native/target/resource_managed/main/native/x86_64-darwin/libpdaljni0.dylib /usr/local/lib/libpdaljni0.dylib
 // place built binary into /usr/local/lib, and pass java.library.path to your JVM
 javaOptions += "-Djava.library.path=/usr/local/lib"
 ```
