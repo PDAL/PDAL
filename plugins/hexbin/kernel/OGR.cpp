@@ -39,6 +39,7 @@
 #include <functional>
 
 #include <pdal/GDALUtils.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 #include <hexer/HexGrid.hpp>
 #include <hexer/HexIter.hpp>
@@ -54,12 +55,13 @@ namespace hexdensity
 namespace writer
 {
 
-OGR::OGR(std::string const& filename, std::string srs, std::string driver)
+OGR::OGR(std::string const& filename, std::string srs, std::string driver, std::string layerName)
     : m_filename(filename)
     , m_driver(driver)
     , m_srs(srs)
     , m_ds(0)
     , m_layer(0)
+    , m_layerName(layerName)
 {
     createLayer();
 }
@@ -73,17 +75,28 @@ void OGR::createLayer()
         throw pdal::pdal_error("OGR Driver was null!");
     }
 
-
-    m_ds = OGR_Dr_CreateDataSource(driver, m_filename.c_str(), NULL);
-    if (m_ds == NULL)
+    char **papszDSCO = NULL;
+    if (pdal::FileUtils::fileExists(m_filename))
     {
-        throw pdal::pdal_error("Data source creation was null!");
+        m_ds = OGR_Dr_Open(driver, m_filename.c_str(), TRUE /*update*/);
+    }
+    else
+    {
+
+
+        m_ds = OGR_Dr_CreateDataSource(driver, m_filename.c_str(), NULL);
+        if (m_ds == NULL)
+        {
+            throw pdal::pdal_error("Data source creation was null!");
+        }
     }
 
     pdal::gdal::SpatialRef spatialref(m_srs);
     OGRSpatialReferenceH ref = (OGRSpatialReferenceH)spatialref.get();
 
-    m_layer = OGR_DS_CreateLayer(m_ds, m_filename.c_str(), ref, wkbMultiPolygon, NULL);
+    if (!m_layerName.size())
+        m_layerName = m_filename;
+    m_layer = OGR_DS_CreateLayer(m_ds, m_layerName.c_str(), ref, wkbMultiPolygon, NULL);
     if (m_layer == NULL)
     {
         throw pdal::pdal_error("Layer creation was null!");

@@ -56,6 +56,7 @@ private:
     std::string m_inputFile;
     std::string m_outputFile;
     std::string m_driverName;
+    std::string m_layerName;
 
     virtual void addSwitches(ProgramArgs& args);
     void outputDensity(pdal::SpatialReference const& ref);

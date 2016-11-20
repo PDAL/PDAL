@@ -60,6 +60,7 @@ void DensityKernel::addSwitches(ProgramArgs& args)
     args.add("output,o", "output vector data source", m_outputFile);
     args.add("ogrdriver,f", "OGR driver name to use ", m_driverName,
         "ESRI Shapefile");
+    args.add("lyr_name", "OGR layer name to use", m_layerName, "");
 }
 
 
@@ -72,7 +73,7 @@ void DensityKernel::outputDensity(pdal::SpatialReference const& reference)
     hexer::HexGrid* grid = hexbin->grid();
 
     hexdensity::writer::OGR writer(m_outputFile, reference.getWKT(),
-        m_driverName);
+        m_driverName, m_layerName);
     writer.writeDensity(grid);
 //     writer.writeBoundary(grid);
 }
