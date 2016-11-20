@@ -111,7 +111,7 @@ GDALDataType toGdalType(Dimension::Type t)
         throw pdal_error("PDAL 'none' type unsupported.");
 	default:
         throw pdal_error("Unrecognized PDAL dimension type.");
-	
+
     }
 }
 

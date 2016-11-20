@@ -53,7 +53,7 @@ public:
     static int32_t destroy(void *);
     std::string getName() const;
 
-    GDALWriter() : m_outputTypes(0)
+    GDALWriter() : m_outputTypes(0), m_dimType(Dimension::Type::Double)
     {}
 
 private:
@@ -77,6 +77,8 @@ private:
     double m_noData;
     Dimension::Id m_interpDim;
     std::string m_interpDimString;
+    Dimension::Type m_dimType;
+    std::string m_DimTypeString;
 
 };
 

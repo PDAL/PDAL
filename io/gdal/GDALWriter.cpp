@@ -72,6 +72,8 @@ void GDALWriter::addArgs(ProgramArgs& args)
         m_windowSize);
     args.add("nodata", "No data value", m_noData, -9999.0);
     args.add("dimension", "Dimension to use", m_interpDimString, "Z");
+    args.add("bounds", "Output raster bounds", m_bounds);
+    args.add("dimtype", "Output raster dimension type (double, float, int32_t, etc)", m_DimTypeString, "float");
 }
 
 
@@ -120,6 +122,7 @@ void GDALWriter::prepared(PointTableRef table)
             "' does not exist.";
         throw pdal_error(oss.str());
     }
+    m_dimType = Dimension::type(m_DimTypeString);
 }
 
 
@@ -173,7 +176,7 @@ void GDALWriter::done(PointTableRef table)
     m_grid->finalize();
 
     gdal::GDALError err = raster.open(m_grid->width(), m_grid->height(),
-        m_grid->numBands(), Dimension::Type::Double, m_grid->noData());
+        m_grid->numBands(), m_dimType, m_grid->noData());
     if (err != gdal::GDALError::None)
         throw pdal_error(raster.errorMsg());
     int bandNum = 1;
