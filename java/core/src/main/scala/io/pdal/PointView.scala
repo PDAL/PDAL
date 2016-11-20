@@ -4,14 +4,14 @@ import java.nio.ByteBuffer
 
 class PointView extends Native {
   def getPackedPointWithMetadata(idx: Long, metadata: String, schema: String): PackedPoints =
-    getPackedPoint(0).copy(metadata = metadata, schema = schema)
+    getPackedPoint(idx).copy(metadata = metadata, schema = schema)
   def getPackedPoint(idx: Long): PackedPoints = getPackedPoint(idx, layout.dimTypes())
   def getPackedPoint(idx: Long, dims: Array[DimType]): PackedPoints =
     PackedPoints(
       bytes       = getPackedPointBytes(idx, dims),
       dimTypes    = layout.toSizedDimTypes(dims),
       proj4String = getCrsProj4,
-      WKTString   = getCrsWKT(2, pretty = false)
+      WKTString   = getCrsWKT
     )
 
   def getPackedPointsWithMetadata(metadata: String, schema: String): PackedPoints =
@@ -22,7 +22,7 @@ class PointView extends Native {
       bytes       = getPackedPointsBytes(dims),
       dimTypes    = layout.toSizedDimTypes(dims),
       proj4String = getCrsProj4,
-      WKTString   = getCrsWKT(2, pretty = false)
+      WKTString   = getCrsWKT
     )
 
   def getPackedPointBytes(idx: Long): Array[Byte] = getPackedPointBytes(idx, layout.dimTypes())
@@ -48,7 +48,7 @@ class PointView extends Native {
   }
 
   /**
-    * Reads dim from a packed point
+    * Reads dim from a packed point, point should contain all layout dims.
     */
   def get(packedPoint: Array[Byte], dim: DimType): ByteBuffer = {
     val from = layout.dimPackedOffset(dim).toInt

@@ -6,8 +6,8 @@ import java.util
 import scala.collection.JavaConversions._
 
 /**
-  * PackedPoints abstraction to work with packed point(s) in JVM memory
-  * SizedDimType contains size and offset for a particular packed point with the current set of dims
+  * PackedPoints abstraction to work with packed point(s) in JVM memory.
+  * SizedDimType contains size and offset for a particular packed point with the current set of dims.
   **/
 case class PackedPoints(bytes: Array[Byte],
                         dimTypes: util.Map[String, SizedDimType],
@@ -29,6 +29,7 @@ case class PackedPoints(bytes: Array[Byte],
     * Reads a packed point by point id from a set of packed points.
     */
   def get(i: Int): Array[Byte] = {
+    val pointSize = this.pointSize
     if (isPoint) bytes
     else {
       val from = (i * pointSize).toInt
@@ -54,7 +55,7 @@ case class PackedPoints(bytes: Array[Byte],
   def getZ(idx: Int): Double = get(idx, DimType.Id.Z).getDouble
 
   /**
-    * Reads dim from a packed point
+    * Reads dim from a packed point.
     */
   def get(packedPoint: Array[Byte], dim: String): Array[Byte] = {
     val sdt = dimTypes(dim)
@@ -64,7 +65,7 @@ case class PackedPoints(bytes: Array[Byte],
   }
 
   /**
-    * Reads dims from a packed point
+    * Reads dims from a packed point.
     */
   private def get(packedPoint: Array[Byte], dims: Array[String]): Array[Byte] =
     dims.map(get(bytes, _)).fold(Array[Byte]())(_ ++ _)
