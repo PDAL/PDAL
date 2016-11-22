@@ -127,14 +127,6 @@ class PackedPointsSpec extends TestEnvironmentSpec {
       pv.dispose()
       pvi.dispose()
     }
-
-    it("should read crs correct") {
-      val pvi = pipeline.pointViews()
-      val pv = pvi.next()
-      packedPoints.proj4String should be (proj4String)
-      pv.dispose()
-      pvi.dispose()
-    }
   }
 
   override def beforeAll() = {

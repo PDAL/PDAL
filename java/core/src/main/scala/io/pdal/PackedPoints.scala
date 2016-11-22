@@ -9,13 +9,7 @@ import scala.collection.JavaConversions._
   * PackedPoints abstraction to work with packed point(s) in JVM memory.
   * SizedDimType contains size and offset for a particular packed point with the current set of dims.
   **/
-case class PackedPoints(bytes: Array[Byte],
-                        dimTypes: util.Map[String, SizedDimType],
-                        metadata: String = "",
-                        schema: String = "",
-                        proj4String: String = "",
-                        WKTString: String = "")
-{
+case class PackedPoints(bytes: Array[Byte], dimTypes: util.Map[String, SizedDimType], metadata: String = "", schema: String = "") {
   def pointSize: Long = dimTypes.values.map(_.size).sum
   def length: Int = (bytes.length / pointSize).toInt
   def isPoint: Boolean = length == pointSize

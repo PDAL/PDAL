@@ -9,9 +9,7 @@ class PointView extends Native {
   def getPackedPoint(idx: Long, dims: Array[DimType]): PackedPoints =
     PackedPoints(
       bytes       = getPackedPointBytes(idx, dims),
-      dimTypes    = layout.toSizedDimTypes(dims),
-      proj4String = getCrsProj4,
-      WKTString   = getCrsWKT
+      dimTypes    = layout.toSizedDimTypes(dims)
     )
 
   def getPackedPointsWithMetadata(metadata: String, schema: String): PackedPoints =
@@ -20,9 +18,7 @@ class PointView extends Native {
   def getPackedPoints(dims: Array[DimType]): PackedPoints =
     PackedPoints(
       bytes       = getPackedPointsBytes(dims),
-      dimTypes    = layout.toSizedDimTypes(dims),
-      proj4String = getCrsProj4,
-      WKTString   = getCrsWKT
+      dimTypes    = layout.toSizedDimTypes(dims)
     )
 
   def getPackedPointBytes(idx: Long): Array[Byte] = getPackedPointBytes(idx, layout.dimTypes())
