@@ -1,6 +1,7 @@
 
 add_subdirectory(delta)
 add_subdirectory(diff)
+add_subdirectory(hausdorff)
 add_subdirectory(info)
 add_subdirectory(merge)
 add_subdirectory(pipeline)
