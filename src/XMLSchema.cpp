@@ -532,25 +532,28 @@ namespace
 void addMetadataEntry(xmlTextWriterPtr w, const MetadataNode& input)
 {
 
-    auto collectMetadata = [] (xmlTextWriterPtr w, const MetadataNode& node)
+    std::function<void (const MetadataNode&) >  collectMetadata = [&] (const MetadataNode& node)
     {
         xmlTextWriterStartElement(w, (const xmlChar*)"Metadata");
-         xmlTextWriterWriteAttribute(w, (const xmlChar*)"name",  (const xmlChar*)node.name().c_str());
-         xmlTextWriterWriteAttribute(w, (const xmlChar*)"type",  (const xmlChar*)node.type().c_str());
-         xmlTextWriterEndElement(w);
+        xmlTextWriterWriteAttribute(w, (const xmlChar*)"name",  (const xmlChar*)node.name().c_str());
+        xmlTextWriterWriteAttribute(w, (const xmlChar*)"type",  (const xmlChar*)node.type().c_str());
+        xmlTextWriterWriteString(w, (const xmlChar*) node.value().c_str());
+        for (auto& m : node.children())
+            if (!m.empty())
+                collectMetadata(m);
+
+        xmlTextWriterEndElement(w);
     };
 
     xmlTextWriterStartElementNS(w, (const xmlChar*)"pc",
         (const xmlChar*)"metadata", NULL);
-     xmlTextWriterWriteAttribute(w, (const xmlChar*)"name",  (const xmlChar*)input.name().c_str());
-     xmlTextWriterWriteAttribute(w, (const xmlChar*)"type",  (const xmlChar*)input.type().c_str());
 
     for (auto& m : input.children())
         if (!m.empty())
-            collectMetadata(w, m);
+            collectMetadata(m);
 
-    xmlTextWriterEndElement(w);
-
+     xmlTextWriterEndElement(w);
+        xmlTextWriterFlush(w);
 }
 
 
