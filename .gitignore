@@ -24,6 +24,7 @@ CTestTestfile.cmake
 Testing/
 test/temp/
 apps/pdal-config
+apps/pdal-config.bat
 apps/pdal.pc
 src/CMakeScripts/
 apps/CMakeScripts/
