@@ -1,7 +1,6 @@
 package io.pdal
 
 import java.util
-import scala.collection.mutable
 import scala.collection.JavaConversions._
 
 class PointLayout extends Native {
@@ -11,7 +10,7 @@ class PointLayout extends Native {
   def sizedDimTypes(): util.Map[String, SizedDimType] = toSizedDimTypes(dimTypes())
   def toSizedDimTypes(dimTypes: Array[DimType]): util.Map[String, SizedDimType] = {
     var (i, offset, length) = (0, 0l, dimTypes.length)
-    val result = mutable.Map[String, SizedDimType]()
+    val result = new util.HashMap[String, SizedDimType]()
     while(i < length) {
       val dt = dimTypes(i)
       val size = dimSize(dt)
