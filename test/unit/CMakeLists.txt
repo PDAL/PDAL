@@ -139,6 +139,7 @@ target_include_directories(pdal_filters_colorization_test PRIVATE
     ${PROJECT_SOURCE_DIR}/filters/streamcallback
     ${PROJECT_SOURCE_DIR}/filters/colorization
     ${PROJECT_SOURCE_DIR}/io/las )
+PDAL_ADD_TEST(pdal_filters_computerange_test FILES filters/ComputeRangeFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_crop_test FILES filters/CropFilterTest.cpp)
 target_include_directories(pdal_filters_crop_test PRIVATE
     ${PROJECT_SOURCE_DIR}/filters/crop
