@@ -46,6 +46,8 @@
 #include <string>
 #include <vector>
 
+#include <json/json.h>
+
 #ifndef _WIN32
 #include <csignal>
 #include <unistd.h>
@@ -69,7 +71,7 @@ private:
     void outputDrivers();
     void outputCommands();
     void outputOptions();
-    void outputOptions(const std::string& stageName);
+    void outputOptions(const std::string& stageName,std::ostream& strm);
     void addArgs(ProgramArgs& args);
     std::string findKernel();
 
@@ -83,6 +85,7 @@ private:
     bool m_showCommands;
     bool m_showVersion;
     std::string m_showOptions;
+    bool m_showJSON;
 };
 
 
@@ -120,35 +123,58 @@ void App::outputDrivers()
     // Force plugin loading.
     StageFactory f(false);
 
-    int nameColLen(25);
-    int descripColLen(Utils::screenWidth() - nameColLen - 1);
-
-    std::string tablehead(std::string(nameColLen, '=') + ' ' +
-        std::string(descripColLen, '='));
-
-    m_out << std::endl;
-    m_out << tablehead << std::endl;
-    m_out << std::left << std::setw(nameColLen) << "Name" <<
-        " Description" << std::endl;
-    m_out << tablehead << std::endl;
-
-    m_out << std::left;
-
     StringList stages = PluginManager::names(PF_PluginType_Filter |
         PF_PluginType_Reader | PF_PluginType_Writer);
-    for (auto name : stages)
-    {
-        std::string descrip = PluginManager::description(name);
-        StringList lines = Utils::wordWrap(descrip, descripColLen - 1);
-        for (size_t i = 0; i < lines.size(); ++i)
-        {
-            m_out << std::setw(nameColLen) << name << " " <<
-                lines[i] << std::endl;
-            name.clear();
-        }
-    }
 
-    m_out << tablehead << std::endl << std::endl;
+    if (!m_showJSON)
+    {
+        int nameColLen(28);
+        int descripColLen(Utils::screenWidth() - nameColLen - 1);
+
+        std::string tablehead(std::string(nameColLen, '=') + ' ' +
+            std::string(descripColLen, '='));
+
+        m_out << std::endl;
+        m_out << tablehead << std::endl;
+        m_out << std::left << std::setw(nameColLen) << "Name" <<
+            " Description" << std::endl;
+        m_out << tablehead << std::endl;
+
+        m_out << std::left;
+
+
+        for (auto name : stages)
+        {
+            std::string descrip = PluginManager::description(name);
+            StringList lines = Utils::wordWrap(descrip, descripColLen - 1);
+            for (size_t i = 0; i < lines.size(); ++i)
+            {
+                m_out << std::setw(nameColLen) << name << " " <<
+                    lines[i] << std::endl;
+                name.clear();
+            }
+        }
+
+        m_out << tablehead << std::endl << std::endl;
+    }
+    else
+    {
+
+        Json::Value array(Json::arrayValue);
+        for (auto name : stages)
+        {
+            std::string description = PluginManager::description(name);
+            std::string link = PluginManager::link(name);
+            Json::Value node(Json::objectValue);
+            node["name"] = name;
+            node["description"] = description;
+            node["link"] = link;
+            array.append(node);
+        }
+
+        m_out << array;
+
+    }
 }
 
 
@@ -162,7 +188,7 @@ void App::outputCommands()
 }
 
 
-void App::outputOptions(std::string const& stageName)
+void App::outputOptions(std::string const& stageName, std::ostream& strm)
 {
     // Force plugin loading.
     StageFactory f(false);
@@ -174,13 +200,34 @@ void App::outputOptions(std::string const& stageName)
         return;
     }
 
-    m_out << stageName << " -- " << PluginManager::link(stageName) << std::endl;
-    m_out << headline << std::endl;
 
     ProgramArgs args;
-
     s->addAllArgs(args);
-    args.dump2(m_out, 2, 6, headline.size());
+
+    if (!m_showJSON)
+    {
+        strm  << stageName << " -- " << PluginManager::link(stageName) << std::endl;
+        strm  << headline << std::endl;
+
+        args.dump2(strm , 2, 6, headline.size());
+    }
+    else
+    {
+        std::ostringstream ostr;
+        args.dump3(ostr);
+        std::string json = ostr.str();
+
+        Json::Reader jsonReader;
+        Json::Value array;
+        Json::Value object(Json::objectValue);
+        jsonReader.parse(json, array);
+
+        object["stage"] = stageName;
+        object["arguments"] = array;
+
+        strm  << object;
+
+    }
 }
 
 
@@ -191,10 +238,31 @@ void App::outputOptions()
 
     StringList nv = PluginManager::names(PF_PluginType_Filter |
         PF_PluginType_Reader | PF_PluginType_Writer);
-    for (auto const& n : nv)
+
+    if (!m_showJSON)
     {
-        outputOptions(n);
-        m_out << std::endl;
+        for (auto const& n : nv)
+        {
+            outputOptions(n, m_out);
+            m_out << std::endl;
+        }
+    } else
+    {
+        std::ostringstream strm;
+        Json::Value options (Json::arrayValue);
+        for (auto const& n : nv)
+        {
+            outputOptions(n, strm);
+            std::string json(strm.str());
+            Json::Reader jsonReader;
+            Json::Value array;
+            jsonReader.parse(json, array);
+            options.append(array);
+
+            strm.str("");
+        }
+
+        m_out << options;
     }
 }
 
@@ -212,6 +280,8 @@ void App::addArgs(ProgramArgs& args)
     args.add("version", "Show program version", m_showVersion);
     args.add("options", "Show options for specified driver (or 'all')",
         m_showOptions);
+    args.add("showjson", "List options or drivers as JSON output",
+        m_showJSON);
 }
 
 namespace
@@ -330,7 +400,7 @@ int App::execute(StringList& cmdArgs, LogPtr& log)
         if (m_showOptions == "all")
             outputOptions();
         else
-            outputOptions(m_showOptions);
+            outputOptions(m_showOptions, m_out);
     }
     else
         outputHelp(args);
