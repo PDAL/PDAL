@@ -222,8 +222,7 @@ void App::outputOptions(std::string const& stageName, std::ostream& strm)
         Json::Value object(Json::objectValue);
         jsonReader.parse(json, array);
 
-        object["stage"] = stageName;
-        object["arguments"] = array;
+        object[stageName] = array;
 
         strm  << object;
 
