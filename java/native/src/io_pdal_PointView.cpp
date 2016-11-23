@@ -25,7 +25,7 @@ const int endian_check = 1;
 /// \param[in] dims      JavaArray of DimTypes
 /// \param[in] bufSize   Dims sum size
 /// \param[in] dimTypes  Vector of DimTypes
-void convertDimTypeJavaArrayToVector(JNIEnv *env, jobjectArray dims, std::size_t *bufSize, pdal::DimTypeList *dimTypes) {
+void convertDimTypeJavaArrayToVector(JNIEnv *env, jobjectArray dims, std::size_t *pointSize, pdal::DimTypeList *dimTypes) {
     for (jint i = 0; i < env->GetArrayLength(dims); i++) {
         jobject jDimType = (jobject) env->GetObjectArrayElement(dims, i);
         jclass cDimType = env->GetObjectClass(jDimType);
@@ -42,7 +42,7 @@ void convertDimTypeJavaArrayToVector(JNIEnv *env, jobjectArray dims, std::size_t
         Id id = pdal::Dimension::id(std::string(env->GetStringUTFChars(jid, 0)));
         Type type = pdal::Dimension::type(std::string(env->GetStringUTFChars(jtype, 0)));
 
-        *bufSize += pdal::Dimension::size(type);
+        *pointSize += pdal::Dimension::size(type);
         dimTypes->insert(dimTypes->begin() + i, pdal::DimType(id, type, jscale, joffset));
     }
 }
@@ -76,10 +76,10 @@ void getPackedPoint(PointViewPtr pv, const pdal::DimTypeList& dims, pdal::PointI
 /// \param[in] dims  List of dimensions/types to retrieve.
 /// \param[in] idx   Index of point to get.
 /// \param[in] buf   Pointer to buffer to fill.
-void appendPackedPoint(PointViewPtr pv, const pdal::DimTypeList& dims, pdal::PointId idx, char *buf)
+void appendPackedPoint(PointViewPtr pv, const pdal::DimTypeList& dims, pdal::PointId idx, std::size_t pointSize, char *buf)
 {
-    std::size_t from = idx * (pv->layout()->pointSize());
-    if(from >= pv->size())
+    std::size_t from = idx * pointSize;
+    if(from >= pv->size() * pointSize)
     {
         return;
     }
@@ -168,17 +168,17 @@ JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getPackedPointBytes
     PointLayoutPtr pl = pv->layout();
 
     // we need to calculate buffer size
-    std::size_t bufSize = 0;
+    std::size_t pointSize = 0;
     pdal::DimTypeList dimTypes;
 
     // calculate result buffer length (for one point) and get dimTypes
-    convertDimTypeJavaArrayToVector(env, dims, &bufSize, &dimTypes);
+    convertDimTypeJavaArrayToVector(env, dims, &pointSize, &dimTypes);
 
-    char *buf = new char[bufSize];
+    char *buf = new char[pointSize];
     getPackedPoint(pv, dimTypes, idx, buf);
 
-    jbyteArray array = env->NewByteArray(bufSize);
-    env->SetByteArrayRegion (array, 0, bufSize, reinterpret_cast<jbyte *>(buf));
+    jbyteArray array = env->NewByteArray(pointSize);
+    env->SetByteArrayRegion (array, 0, pointSize, reinterpret_cast<jbyte *>(buf));
 
     delete[] buf;
 
@@ -194,18 +194,18 @@ JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getPackedPointsBytes
     PointLayoutPtr pl = pv->layout();
 
     // we need to calculate buffer size
-    std::size_t bufSize = 0;
+    std::size_t pointSize = 0;
     pdal::DimTypeList dimTypes;
 
     // calculate result buffer length (for one point) and get dimTypes
-    convertDimTypeJavaArrayToVector(env, dims, &bufSize, &dimTypes);
+    convertDimTypeJavaArrayToVector(env, dims, &pointSize, &dimTypes);
 
     // reading all points
-    bufSize = bufSize * pv->size();
+    std::size_t bufSize = pointSize * pv->size();
     char *buf = new char[bufSize];
 
     for (int idx = 0; idx < pv->size(); idx++) {
-        appendPackedPoint(pv, dimTypes, idx, buf);
+        appendPackedPoint(pv, dimTypes, idx, pointSize, buf);
     }
 
     jbyteArray array = env->NewByteArray(bufSize);

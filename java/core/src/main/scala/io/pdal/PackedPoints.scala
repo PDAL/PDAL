@@ -29,7 +29,7 @@ case class PackedPoints(bytes: Array[Byte], dimTypes: util.Map[String, SizedDimT
       val from = (i * pointSize).toInt
       val to = {
         val t = (from + pointSize).toInt
-        if (t > length) length else t
+        if (t > bytes.length) bytes.length else t
       }
 
       bytes.slice(from, to)

@@ -123,7 +123,24 @@ class PackedPointsSpec extends TestEnvironmentSpec {
       val pv = pvi.next()
       val length = packedPoints.bytes.length
       pv.getPackedPointsBytes.length should be (length)
-      length should be (packedPoints.pointSize * packedPoints.length)
+      pv.dispose()
+      pvi.dispose()
+    }
+
+    it("should get correct points and all values") {
+      val pvi = pipeline.pointViews()
+      val pv = pvi.next()
+      val length = pv.length
+      val dimTypes = packedPoints.dimTypes.values().map(_.dimType)
+      for (i <- 0 until length) {
+        packedPoints.get(i) should be (pv.getPackedPointBytes(i))
+        packedPoints.getX(i) should be (pv.getX(i))
+        packedPoints.getY(i) should be (pv.getY(i))
+        packedPoints.getZ(i) should be (pv.getZ(i))
+        dimTypes.map { dt =>
+          packedPoints.get(i, dt).array() should be (pv.get(i, dt).array())
+        }
+      }
       pv.dispose()
       pvi.dispose()
     }
