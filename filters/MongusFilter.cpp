@@ -513,7 +513,7 @@ std::vector<PointId> MongusFilter::processGround(PointViewPtr view)
         char buffer[256];
         sprintf(buffer, "final_surface.tif");
         std::string name(buffer);
-        eigen::writeMatrix(surface, name, m_cellSize, m_bounds, srs);
+        eigen::writeMatrix(surface, name, "GTiff", m_cellSize, m_bounds, srs);
         //
         //     char rbuf[256];
         //     sprintf(rbuf, "final_residual.tif");

@@ -89,6 +89,7 @@ private:
                                  std::string::size_type hashPos) const;
 
     std::string m_filename;
+    std::string m_driver;
     double m_edgeLength;
     double m_illumAltDeg;
     double m_illumAzDeg;

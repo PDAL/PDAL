@@ -127,11 +127,7 @@ TEST(EigenTest, ComputeValues)
     EXPECT_NEAR(269.8718, afd, 0.0001);
 
     double hs = eigen::computeHillshade(A, spacing, 45.0, 315.0);
-
-    A(0, 0) = std::numeric_limits<double>::quiet_NaN();
-    Matrix3d B = eigen::replaceNaNs(A);
-    EXPECT_NEAR(0.4839, B(0, 0), 0.0001);
-
+    
     MatrixXd out = eigen::gradX(A);
     
     Matrix3d gx;
@@ -151,6 +147,10 @@ TEST(EigenTest, ComputeValues)
     
     for (size_t i = 0; i < 9; ++i)
         EXPECT_NEAR(gy(i), out2(i), 0.0001);
+
+    A(0, 0) = std::numeric_limits<double>::quiet_NaN();
+    Matrix3d B = eigen::replaceNaNs(A);
+    EXPECT_NEAR(0.4839, B(0, 0), 0.0001);
 }
 
 TEST(EigenTest, CheckThrow)

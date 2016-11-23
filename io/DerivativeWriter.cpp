@@ -60,6 +60,7 @@ void DerivativeWriter::addArgs(ProgramArgs& args)
     args.add("altitude", "Illumination altitude (degrees)", m_illumAltDeg,
              45.0);
     args.add("azimuth", "Illumination azimuth (degrees)", m_illumAzDeg, 315.0);
+    args.add("driver", "GDAL format driver", m_driver, "GTiff");
 }
 
 
@@ -183,7 +184,7 @@ void DerivativeWriter::write(const PointViewPtr data)
         }
 
         // Finally, write our Matrix as a GDAL raster (specifically GTiff).
-        writeMatrix(out, to.m_filename, m_edgeLength, bounds, srs);
+        writeMatrix(out, to.m_filename, m_driver, m_edgeLength, bounds, srs);
     }
 }
 

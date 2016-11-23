@@ -359,7 +359,8 @@ Eigen::MatrixXd pointViewToEigen(const PointView& view)
 }
 
 void writeMatrix(Eigen::MatrixXd data, const std::string& filename,
-                 double cell_size, BOX2D bounds, SpatialReference srs)
+                 const std::string& driver, double cell_size, BOX2D bounds,
+                 SpatialReference srs)
 {
     using namespace Eigen;
 
@@ -372,7 +373,7 @@ void writeMatrix(Eigen::MatrixXd data, const std::string& filename,
     pixelToPos[3] = bounds.miny;
     pixelToPos[4] = 0.0;
     pixelToPos[5] = cell_size;
-    gdal::Raster raster(filename, "GTiff", srs, pixelToPos);
+    gdal::Raster raster(filename, driver, srs, pixelToPos);
 
     gdal::GDALError err = raster.open(data.cols(), data.rows(), 1,
                                       Dimension::Type::Float, -9999.0);

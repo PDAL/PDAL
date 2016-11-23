@@ -374,7 +374,8 @@ PDAL_DLL Eigen::MatrixXd replaceNaNs(const Eigen::MatrixBase<Derived>& data)
   \param srs the spatial reference system of the data.
 */
 PDAL_DLL void writeMatrix(Eigen::MatrixXd data, const std::string& filename,
-                          double cell_size, BOX2D bounds, SpatialReference srs);
+                          const std::string& driver, double cell_size,
+                          BOX2D bounds, SpatialReference srs);
 
 /**
   Compute the numerical gradient in the X direction.
