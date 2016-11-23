@@ -60,7 +60,7 @@ static PluginInfo const s_info =
                "Any supported stage type can be specified from the command " \
                "line, reducing the need to create custom kernels for every " \
                "combination.",
-               "http://pdal.io/kernels/kernels.translate.html");
+               "http://pdal.io/apps/translate.html");
 
 CREATE_STATIC_PLUGIN(1, 0, TranslateKernel, Kernel, s_info)
 

@@ -41,10 +41,8 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
-    "kernels.merge",
-    "Merge Kernel",
-    "http://pdal.io/kernels/kernels.merge.html" );
+static PluginInfo const s_info = PluginInfo("kernels.merge", "Merge Kernel",
+    "http://pdal.io/apps/merge.html" );
 
 CREATE_STATIC_PLUGIN(1, 0, MergeKernel, Kernel, s_info)
 
@@ -88,4 +86,3 @@ int MergeKernel::execute()
 }
 
 } // namespace pdal
-

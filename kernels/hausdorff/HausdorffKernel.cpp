@@ -45,9 +45,8 @@
 namespace pdal
 {
 
-static PluginInfo const s_info =
-    PluginInfo("kernels.hausdorff", "Hausdorff Kernel",
-               "http://pdal.io/kernels/kernels.hausdorff.html");
+static PluginInfo const s_info = PluginInfo("kernels.hausdorff",
+    "Hausdorff Kernel", "http://pdal.io/apps/hausdorff.html");
 
 CREATE_STATIC_PLUGIN(1, 0, HausdorffKernel, Kernel, s_info)
 
