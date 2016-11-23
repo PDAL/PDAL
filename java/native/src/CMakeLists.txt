@@ -32,7 +32,11 @@ find_package(PDAL 1.0.0 REQUIRED CONFIG)
 include_directories(.)
 include_directories(include)
 include_directories(${JNI_INCLUDE_DIRS})
-include_directories(/usr/local/opt/libxml2/include/libxml2)
+if (APPLE)
+    include_directories(/usr/local/opt/libxml2/include/libxml2)
+else()
+    include_directories(/usr/include/libxml2)
+endif()
 
 # Sources
 file(GLOB LIB_SRC
