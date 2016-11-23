@@ -665,7 +665,7 @@ PDAL_DLL double computeAspectD8(const Eigen::MatrixBase<Derived>& data,
         throw pdal_error("Must provide 3x3 matrix to computeAspectD8");
     if (spacing <= 0.0)
         throw pdal_error("Must provide positive spacing to computeAspectD8");
-    Derived submatrix;
+    Derived submatrix(3, 3);
     submatrix.setConstant(data(1, 1));
     submatrix -= data;
     submatrix /= spacing;
@@ -676,48 +676,29 @@ PDAL_DLL double computeAspectD8(const Eigen::MatrixBase<Derived>& data,
 
     // find max and convert to degrees
     double maxval = std::numeric_limits<double>::lowest();
-    double aspect(0.0);
+    int j(0);
     for (int i = 0; i < submatrix.size(); ++i)
     {
         if (std::isnan(submatrix(i)))
             continue;
+        // skip center value, which will always be 0.0
+        if (i == 5)
+            continue;
         if (submatrix(i) > maxval)
         {
             maxval = submatrix(i);
-            switch (i)
-            {
-                case 1:
-                    aspect = std::pow(2.0, 6);
-                    break;
-                case 2:
-                    aspect = std::pow(2.0, 5);
-                    break;
-                case 3:
-                    aspect = std::pow(2.0, 4);
-                    break;
-                case 4:
-                    aspect = std::pow(2.0, 7);
-                    break;
-                case 6:
-                    aspect = std::pow(2.0, 3);
-                    break;
-                case 7:
-                    aspect = std::pow(2.0, 0);
-                    break;
-                case 8:
-                    aspect = std::pow(2.0, 1);
-                    break;
-                case 9:
-                    aspect = std::pow(2.0, 2);
-                    break;
-                default:
-                    assert(false);
-                    break;
-            }
+            if (i == 1) j = 6;
+            if (i == 2) j = 5;
+            if (i == 3) j = 4;
+            if (i == 4) j = 7;
+            if (i == 6) j = 3;
+            if (i == 7) j = 0;
+            if (i == 8) j = 1;
+            if (i == 9) j = 2;
         }
     }
 
-    return aspect;
+    return std::pow(2.0, j);
 }
 
 /**
@@ -735,7 +716,7 @@ PDAL_DLL double computeSlopeD8(const Eigen::MatrixBase<Derived>& data,
         throw pdal_error("Must provide 3x3 matrix to computeSlopeD8");
     if (spacing <= 0.0)
         throw pdal_error("Must provide positive spacing to computeSlopeD8");
-    Derived submatrix;
+    Derived submatrix(3, 3);
     submatrix.setConstant(data(1, 1));
     submatrix -= data;
     submatrix /= spacing;
