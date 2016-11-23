@@ -101,10 +101,6 @@ private:
     MatrixXd TPS(MatrixXd cx, MatrixXd cy, MatrixXd cz);
     MatrixXd expandingTPS(MatrixXd cx, MatrixXd cy, MatrixXd cz);
 
-    // writeMatrix writes out Eigen matrices to GeoTIFFs for debugging.
-    void writeMatrix(MatrixXd data, std::string filename,
-                     double cell_size, PointViewPtr view);
-
     SMRFilter& operator=(const SMRFilter&); // not implemented
     SMRFilter(const SMRFilter&); // not implemented
 };

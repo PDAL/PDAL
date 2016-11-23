@@ -78,8 +78,6 @@ private:
     virtual void addArgs(ProgramArgs& args);
     int getColIndex(double x, double cell_size);
     int getRowIndex(double y, double cell_size);
-    void writeMatrix(Eigen::MatrixXd data, std::string filename,
-                     double cell_size, PointViewPtr view);
     Eigen::MatrixXd computeSpline(Eigen::MatrixXd x_prev,
                                   Eigen::MatrixXd y_prev,
                                   Eigen::MatrixXd z_prev,
