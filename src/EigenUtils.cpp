@@ -33,7 +33,9 @@
 ****************************************************************************/
 
 #include <pdal/EigenUtils.hpp>
+#include <pdal/GDALUtils.hpp>
 #include <pdal/PointView.hpp>
+#include <pdal/SpatialReference.hpp>
 #include <pdal/util/Bounds.hpp>
 #include <pdal/util/Utils.hpp>
 
@@ -43,7 +45,7 @@
 
 namespace pdal
 {
-  
+
 namespace eigen
 {
 
@@ -127,6 +129,57 @@ Eigen::MatrixXd createDSM(PointView& view, int rows, int cols, double cell_size,
     return ZImin;
 }
 
+Eigen::MatrixXd extendedLocalMinimum(PointView& view, int rows, int cols,
+                                     double cell_size, BOX2D bounds)
+{
+    using namespace Dimension;
+    using namespace Eigen;
+
+    // Index elevation values by row and column.
+    std::map<uint32_t, std::vector<double>> hash;
+    for (PointId i = 0; i < view.size(); ++i)
+    {
+        double x = view.getFieldAs<double>(Id::X, i);
+        double y = view.getFieldAs<double>(Id::Y, i);
+        double z = view.getFieldAs<double>(Id::Z, i);
+
+        int c = Utils::clamp(static_cast<int>(floor(x-bounds.minx)/cell_size), 0, cols-1);
+        int r = Utils::clamp(static_cast<int>(floor(y-bounds.miny)/cell_size), 0, rows-1);
+
+        hash[r*cols+c].push_back(z);
+    }
+
+    // For each grid cell, sort elevations and detect local minimum, rejecting low
+    // outliers.
+    MatrixXd ZImin(rows, cols);
+    ZImin.setConstant(std::numeric_limits<double>::quiet_NaN());
+    for (int c = 0; c < cols; ++c)
+    {
+        for (int r = 0; r < rows; ++r)
+        {
+            std::vector<double> cp(hash[r*cols+c]);
+            if (cp.empty())
+                continue;
+            std::sort(cp.begin(), cp.end());
+            if (cp.size() == 1)
+            {
+                ZImin(r, c) = cp[0];
+                continue;
+            }
+            for (size_t i = 0; i < cp.size()-1; ++i)
+            {
+                if (std::fabs(cp[i] - cp[i+1]) < 1.0)
+                {
+                    ZImin(r, c) = cp[i];
+                    break;
+                }
+            }
+        }
+    }
+
+    return ZImin;
+}
+
 Eigen::MatrixXd matrixClose(Eigen::MatrixXd data, int radius)
 {
     using namespace Eigen;
@@ -144,7 +197,7 @@ Eigen::MatrixXd matrixClose(Eigen::MatrixXd data, int radius)
     {
         int cs = Utils::clamp(c-radius, 0, ncols-1);
         int ce = Utils::clamp(c+radius, 0, ncols-1);
-      
+
         for (auto r = 0; r < nrows; ++r)
         {
             int rs = Utils::clamp(r-radius, 0, nrows-1);
@@ -166,7 +219,7 @@ Eigen::MatrixXd matrixClose(Eigen::MatrixXd data, int radius)
     {
         int cs = Utils::clamp(c-radius, 0, ncols-1);
         int ce = Utils::clamp(c+radius, 0, ncols-1);
-      
+
         for (auto r = 0; r < nrows; ++r)
         {
             int rs = Utils::clamp(r-radius, 0, nrows-1);
@@ -205,7 +258,7 @@ Eigen::MatrixXd matrixOpen(Eigen::MatrixXd data, int radius)
     {
         int cs = Utils::clamp(c-radius, 0, ncols-1);
         int ce = Utils::clamp(c+radius, 0, ncols-1);
-      
+
         for (auto r = 0; r < nrows; ++r)
         {
             int rs = Utils::clamp(r-radius, 0, nrows-1);
@@ -227,7 +280,7 @@ Eigen::MatrixXd matrixOpen(Eigen::MatrixXd data, int radius)
     {
         int cs = Utils::clamp(c-radius, 0, ncols-1);
         int ce = Utils::clamp(c+radius, 0, ncols-1);
-      
+
         for (auto r = 0; r < nrows; ++r)
         {
             int rs = Utils::clamp(r-radius, 0, nrows-1);
@@ -277,6 +330,38 @@ PDAL_DLL Eigen::MatrixXd pointViewToEigen(const PointView& view)
         matrix(i, 2) = view.getFieldAs<double>(Dimension::Id::Z, i);
     }
     return matrix;
+}
+
+void writeMatrix(Eigen::MatrixXd data, const std::string& filename,
+                 double cell_size, BOX2D bounds, SpatialReference srs)
+{
+    using namespace Eigen;
+
+    gdal::registerDrivers();
+
+    std::array<double, 6> pixelToPos;
+    pixelToPos[0] = bounds.minx;
+    pixelToPos[1] = cell_size;
+    pixelToPos[2] = 0.0;
+    pixelToPos[3] = bounds.miny;
+    pixelToPos[4] = 0.0;
+    pixelToPos[5] = cell_size;
+    gdal::Raster raster(filename, "GTiff", srs, pixelToPos);
+
+    gdal::GDALError err = raster.open(data.cols(), data.rows(), 1,
+                                      Dimension::Type::Float, -9999.0);
+
+    if (err != gdal::GDALError::None)
+        throw pdal_error(raster.errorMsg());
+
+    // Two things going on here. First, Eigen defaults to column major order,
+    // but GDALUtils expects row major, so we can convert it. Also, double
+    // doesn't seem to work for some reason, so maybe we go back and make the
+    // incoming matrix always be a float, but for now just cast it.
+    Eigen::Matrix<float, Dynamic, Dynamic, RowMajor> dataRowMajor;
+    dataRowMajor = data.cast<float>();
+
+    raster.writeBand((uint8_t *)dataRowMajor.data(), 1);
 }
 
 } // namespace eigen

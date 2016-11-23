@@ -44,10 +44,8 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
-    "kernels.pipeline",
-    "Pipeline Kernel",
-    "http://pdal.io/kernels/kernels.pipeline.html" );
+static PluginInfo const s_info = PluginInfo("kernels.pipeline",
+    "Pipeline Kernel", "http://pdal.io/apps/pipeline.html" );
 
 CREATE_STATIC_PLUGIN(1, 0, PipelineKernel, Kernel, s_info)
 

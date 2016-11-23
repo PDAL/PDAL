@@ -139,6 +139,7 @@ target_include_directories(pdal_filters_colorization_test PRIVATE
     ${PROJECT_SOURCE_DIR}/filters/streamcallback
     ${PROJECT_SOURCE_DIR}/filters/colorization
     ${PROJECT_SOURCE_DIR}/io/las )
+PDAL_ADD_TEST(pdal_filters_computerange_test FILES filters/ComputeRangeFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_crop_test FILES filters/CropFilterTest.cpp)
 target_include_directories(pdal_filters_crop_test PRIVATE
     ${PROJECT_SOURCE_DIR}/filters/crop
@@ -220,6 +221,7 @@ if (WITH_APPS)
         PDAL_ADD_TEST(pcpipeline_test FILES apps/pcpipelineTest.cpp)
         PDAL_ADD_TEST(pcpipeline_test_json FILES apps/pcpipelineTestJSON.cpp)
     endif()
+    PDAL_ADD_TEST(hausdorff_test FILES apps/HausdorffTest.cpp)
     PDAL_ADD_TEST(random_test FILES apps/RandomTest.cpp)
     target_include_directories(random_test PRIVATE
         ${PROJECT_SOURCE_DIR}/io/las)

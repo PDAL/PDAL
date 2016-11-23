@@ -54,6 +54,9 @@
 namespace pdal
 {
 class Options;
+class PointView;
+
+typedef std::shared_ptr<PointView> PointViewPtr;
 
 namespace Utils
 {
@@ -271,7 +274,7 @@ void PDAL_DLL closeFile(std::ostream *out);
 bool PDAL_DLL fileExists(const std::string& path);
 std::string PDAL_DLL expandTilde(const std::string& path);
 std::vector<std::string> PDAL_DLL maybeGlob(const std::string& path);
+double PDAL_DLL computeHausdorff(PointViewPtr srcView, PointViewPtr candView);
 
 } // namespace Utils
 } // namespace pdal
-
