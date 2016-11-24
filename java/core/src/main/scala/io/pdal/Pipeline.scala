@@ -2,7 +2,7 @@ package io.pdal
 
 import ch.jodersky.jni.nativeLoader
 
-@nativeLoader("pdaljni0")
+@nativeLoader("pdaljni.1.4")
 class Pipeline(val json: String) extends Native {
   @native def initialise(): Unit
   @native def execute(): Unit

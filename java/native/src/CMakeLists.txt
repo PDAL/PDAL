@@ -4,8 +4,8 @@ cmake_minimum_required(VERSION 2.8.0)
 # (required by sbt-jni) please use semantic versioning
 #
 project (pdaljni)
-set(PROJECT_VERSION_MAJOR 0)
-set(PROJECT_VERSION_MINOR 0)
+set(PROJECT_VERSION_MAJOR 1)
+set(PROJECT_VERSION_MINOR 4)
 set(PROJECT_VERSION_PATCH 0)
 
 set(PDAL_LIB_NAME pdalcpp)
@@ -18,7 +18,7 @@ if (APPLE)
 endif ()
 
 # pdal requires to use cpp11, and a weird pdal flag to be sure that dynamic linking works
-set(CMAKE_CXX_FLAGS "-L/usr/local/opt/pdal/lib/ -std=c++11")
+set(CMAKE_CXX_FLAGS "-std=c++11")
 
 # Setup JNI
 find_package(JNI REQUIRED)
@@ -48,7 +48,7 @@ file(GLOB LIB_SRC
 # Setup installation targets
 # (required by sbt-jni) major version should always be appended to library name
 #
-set (LIB_NAME ${PROJECT_NAME}${PROJECT_VERSION_MAJOR})
+set (LIB_NAME ${PROJECT_NAME}.${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR})
 add_library(${LIB_NAME} SHARED ${LIB_SRC})
 install(TARGETS ${LIB_NAME} LIBRARY DESTINATION .)
 target_link_libraries(${LIB_NAME} PRIVATE ${PDAL_LIB_NAME})
