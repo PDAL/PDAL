@@ -2,8 +2,9 @@ package io.pdal
 
 import ch.jodersky.jni.nativeLoader
 
-@nativeLoader("pdaljni.1.4")
 class Pipeline(val json: String) extends Native {
+  Pipeline // instead of java static
+
   @native def initialise(): Unit
   @native def execute(): Unit
   @native def pointViews(): PointViewIterator
@@ -16,6 +17,7 @@ class Pipeline(val json: String) extends Native {
   @native def getLog: String
 }
 
+@nativeLoader("pdaljni.1.4")
 object Pipeline {
   def apply(json: String): Pipeline = { val p = new Pipeline(json); p.initialise(); p }
 }
