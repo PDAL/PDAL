@@ -407,24 +407,12 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
     // include this portion of the algorithm in the formal testing procedure,
     // though we provide a brief analysis of the effect of using this net filter
     // in the next section.
+    
+    MatrixXd scaled = ZIpro / m_cellSize;
 
-    auto diffX = [&](MatrixXd mat)
-    {
-        MatrixXd data = eigen::padMatrix(mat, 1);
-        MatrixXd data2 = data.rightCols(data.cols()-1) - data.leftCols(data.cols()-1);
-        return data2.block(1, 1, mat.rows(), mat.cols());
-    };
-
-    auto diffY = [&](MatrixXd mat)
-    {
-        MatrixXd data = eigen::padMatrix(mat, 1);
-        MatrixXd data2 = data.bottomRows(data.rows()-1) - data.topRows(data.rows()-1);
-        return data2.block(1, 1, mat.rows(), mat.cols());
-    };
-
-    MatrixXd gx = diffX(ZIpro / m_cellSize);
+    MatrixXd gx = eigen::gradX(scaled);
     eigen::writeMatrix(gx, "gx.tif", m_cellSize, m_bounds, srs);
-    MatrixXd gy = diffY(ZIpro / m_cellSize);
+    MatrixXd gy = eigen::gradY(scaled);
     eigen::writeMatrix(gy, "gy.tif", m_cellSize, m_bounds, srs);
     MatrixXd gsurfs = (gx.cwiseProduct(gx) + gy.cwiseProduct(gy)).cwiseSqrt();
     eigen::writeMatrix(gsurfs, "gsurfs.tif", m_cellSize, m_bounds, srs);
