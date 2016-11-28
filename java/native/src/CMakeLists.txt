@@ -18,7 +18,7 @@ if (APPLE)
 endif ()
 
 # pdal requires to use cpp11, and a weird pdal flag to be sure that dynamic linking works
-set(CMAKE_CXX_FLAGS "-L/usr/local/opt/pdal/lib/ -std=c++11")
+set(CMAKE_CXX_FLAGS "-std=c++11")
 
 # Setup JNI
 find_package(JNI REQUIRED)
