@@ -44,12 +44,15 @@ if 'PDAL_CONFIG' in os.environ:
     log.debug('pdal_config: %s', pdal_config)
 else:
     pdal_config = 'pdal-config'
+    # in case of windows...
+    if os.name in ['nt']:
+        pdal_config += '.bat'
 
 
 def get_pdal_config(option):
     '''Get configuration option from the `pdal-config` development utility
 
-    This code was adapted from Shaply's pdal-config stuff
+    This code was adapted from Shapely's geos-config stuff
     '''
     import subprocess
     pdal_config = globals().get('pdal_config')
@@ -77,9 +80,7 @@ module_version = None
 with open('pdal/__init__.py', 'r') as fp:
     for line in fp:
         if line.startswith("__version__"):
-
-            module_version = Version(
-                line.split("=")[1].strip().strip("\"'"))
+            module_version = Version(line.split("=")[1].strip().strip("\"'"))
             break
 
 if not module_version:
@@ -128,12 +129,17 @@ if pdal_config and "clean" not in sys.argv:
     except ValueError:
         pass
 
+    separator = ':'
+    if os.name in ['nt']:
+        separator = ';'
+
     for item in get_pdal_config('--includes').split():
         if item.startswith("-I"):
-            include_dirs.extend(item[2:].split(":"))
+            include_dirs.extend(item[2:].split(separator))
+
     for item in get_pdal_config('--libs').split():
         if item.startswith("-L"):
-            library_dirs.extend(item[2:].split(":"))
+            library_dirs.extend(item[2:].split(separator))
         elif item.startswith("-l"):
             libraries.append(item[2:])
 

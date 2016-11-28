@@ -88,9 +88,7 @@ std::vector<double> PMFFilter::morphOpen(PointViewPtr view, float radius)
     // erode
     for (PointId i = 0; i < np; ++i)
     {
-        double x = view->getFieldAs<double>(Dimension::Id::X, i);
-        double y = view->getFieldAs<double>(Dimension::Id::Y, i);
-        auto ids = index.radius(x, y, radius);
+        auto ids = index.radius(i, radius);
 
         // neighborMap.insert(std::pair<PointId, std::vector<PointId>(i, ids));
         neighborMap[i] = ids;

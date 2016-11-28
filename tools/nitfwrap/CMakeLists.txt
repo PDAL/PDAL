@@ -26,11 +26,11 @@ target_link_libraries(nitfwrap PRIVATE
     ${PDAL_UTIL_LIB_NAME}
     ${NITRO_LIBRARIES}
 )
-target_include_directories(nitfwrap
-    PRIVATE
-    "${CMAKE_CURRENT_BINARY_DIR}/include"
-    "${PDAL_INCLUDE_DIR}"
-    "${PDAL_NITF_DIR}"
+target_include_directories(nitfwrap PRIVATE
+    ${CMAKE_CURRENT_BINARY_DIR}/include
+    ${PDAL_INCLUDE_DIR}
+    ${PDAL_IO_DIR}
+    ${PDAL_NITF_DIR}
 )
 
 

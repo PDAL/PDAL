@@ -11,10 +11,10 @@ PDAL_ADD_PLUGIN(cpd_kernel_lib_name kernel cpd
     FILES kernel/Cpd.cpp
     LINK_WITH Cpd::Library-C++
     )
-target_include_directories(${cpd_kernel_lib_name}
-    PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}
-    )
+target_include_directories(${cpd_kernel_lib_name} PRIVATE
+    ${PDAL_FILTER_DIR}
+    ${PDAL_IO_DIR}
+    ${CMAKE_CURRENT_LIST_DIR} )
 
 if(WITH_TESTS)
     PDAL_ADD_TEST(pdal_plugins_cpd_kernel_test

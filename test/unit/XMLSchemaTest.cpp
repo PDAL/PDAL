@@ -91,43 +91,43 @@ TEST(XMLSchemaTest, read)
     XMLDim dim = getDim(dims, "X");
     DimType dt = dim.m_dimType;
     EXPECT_EQ(dim.m_name,  "X");
-    EXPECT_FLOAT_EQ(dt.m_xform.m_scale.m_val, .01);
-    EXPECT_FLOAT_EQ(dt.m_xform.m_offset.m_val, 0.0);
+    EXPECT_DOUBLE_EQ(dt.m_xform.m_scale.m_val, .01);
+	EXPECT_DOUBLE_EQ(dt.m_xform.m_offset.m_val, 0.0);
     EXPECT_EQ(dt.m_type, Dimension::Type::Signed32);
 
     dim = getDim(dims, "Y");
     dt = dim.m_dimType;
     EXPECT_EQ(dim.m_name, "Y");
-    EXPECT_FLOAT_EQ(dt.m_xform.m_scale.m_val, .01);
-    EXPECT_FLOAT_EQ(dt.m_xform.m_offset.m_val, 0.0);
+	EXPECT_DOUBLE_EQ(dt.m_xform.m_scale.m_val, .01);
+	EXPECT_DOUBLE_EQ(dt.m_xform.m_offset.m_val, 0.0);
     EXPECT_EQ(dt.m_type, Dimension::Type::Signed32);
 
     dim = getDim(dims, "Z");
     dt = dim.m_dimType;
     EXPECT_EQ(dim.m_name, "Z");
-    EXPECT_FLOAT_EQ(dt.m_xform.m_scale.m_val, .01);
-    EXPECT_FLOAT_EQ(dt.m_xform.m_offset.m_val, 0.0);
+	EXPECT_DOUBLE_EQ(dt.m_xform.m_scale.m_val, .01);
+	EXPECT_DOUBLE_EQ(dt.m_xform.m_offset.m_val, 0.0);
     EXPECT_EQ(dt.m_type, Dimension::Type::Signed32);
 
     dim = getDim(dims, "Intensity");
     dt = dim.m_dimType;
     EXPECT_EQ(dim.m_name, "Intensity");
-    EXPECT_FLOAT_EQ(dt.m_xform.m_scale.m_val, 1.0);
-    EXPECT_FLOAT_EQ(dt.m_xform.m_offset.m_val, 0.0);
+	EXPECT_DOUBLE_EQ(dt.m_xform.m_scale.m_val, 1.0);
+	EXPECT_DOUBLE_EQ(dt.m_xform.m_offset.m_val, 0.0);
     EXPECT_EQ(dt.m_type, Dimension::Type::Unsigned16);
 
     dim = getDim(dims, "ReturnNumber");
     dt = dim.m_dimType;
     EXPECT_EQ(dim.m_name, "ReturnNumber");
-    EXPECT_FLOAT_EQ(dt.m_xform.m_scale.m_val, 1.0);
-    EXPECT_FLOAT_EQ(dt.m_xform.m_offset.m_val, 0.0);
+	EXPECT_DOUBLE_EQ(dt.m_xform.m_scale.m_val, 1.0);
+	EXPECT_DOUBLE_EQ(dt.m_xform.m_offset.m_val, 0.0);
     EXPECT_EQ(dt.m_type, Dimension::Type::Unsigned8);
 
     dim = getDim(dims, "NumberOfReturns");
     dt = dim.m_dimType;
     EXPECT_EQ(dim.m_name, "NumberOfReturns");
-    EXPECT_FLOAT_EQ(dt.m_xform.m_scale.m_val, 1.0);
-    EXPECT_FLOAT_EQ(dt.m_xform.m_offset.m_val, 0.0);
+	EXPECT_DOUBLE_EQ(dt.m_xform.m_scale.m_val, 1.0);
+	EXPECT_DOUBLE_EQ(dt.m_xform.m_offset.m_val, 0.0);
     EXPECT_EQ(dt.m_type, Dimension::Type::Unsigned8);
 }
 

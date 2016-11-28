@@ -55,4 +55,6 @@ if(BUILD_OCI_TESTS)
     PDAL_ADD_TEST(ocitest
         FILES test/OCITest.cpp
         LINK_WITH ${reader_libname} ${writer_libname})
+    target_include_directories(ocitest PRIVATE
+        ${PDAL_IO_DIR})
 endif()

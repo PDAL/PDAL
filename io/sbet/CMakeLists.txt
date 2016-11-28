@@ -6,6 +6,8 @@ set(objs "")
 
 add_library(sbetcommon OBJECT SbetCommon.cpp SbetCommon.hpp)
 add_dependencies(sbetcommon generate_dimension_hpp)
+target_include_directories(sbetcommon PRIVATE
+    ${PDAL_INCLUDE_DIR})
 set(objs ${objs} $<TARGET_OBJECTS:sbetcommon>)
 
 #

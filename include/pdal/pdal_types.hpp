@@ -43,6 +43,8 @@
 
 #include <iostream>
 
+#include <pdal/util/Utils.hpp>
+
 namespace pdal
 {
 
@@ -158,8 +160,53 @@ enum class LogLevel
     Debug2,
     Debug3,
     Debug4,
-    Debug5
+    Debug5,
+    None
 };
+
+namespace
+{
+    const StringList logNames { "error", "warning", "info", "debug", "debug1",
+        "debug2", "debug3", "debug4", "debug5" };
+}
+
+inline std::istream& operator>>(std::istream& in, LogLevel& level)
+{
+    std::string sval;
+    level = LogLevel::None;
+
+    in >> sval;
+    try
+    {
+        int val = std::stoi(sval);
+        if (val >= 0 && val < (int)logNames.size())
+            level = (LogLevel)val;
+    }
+    catch (std::exception)
+    {
+        sval = Utils::tolower(sval);
+        for (size_t i = 0; i < logNames.size(); ++i)
+            if (logNames[i] == sval)
+                level = (LogLevel)i;
+    }
+    if (level == LogLevel::None)
+        in.setstate(std::ios_base::failbit);
+    return in;
+}
+
+inline std::ostream& operator<<(std::ostream& out, const LogLevel& level)
+{
+    std::string sval("None");
+
+    if ((size_t)level < logNames.size())
+    {
+        sval = logNames[(size_t)level];
+        sval[0] = toupper(sval[0]);   // Make "Debug", "Error", etc.
+    }
+    out << sval;
+    return out;
+}
+
 
 enum class Orientation
 {

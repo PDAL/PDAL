@@ -39,11 +39,15 @@
 
 #include <Eigen/Dense>
 
+#include <memory>
 #include <vector>
 
 namespace pdal
 {
 class PointView;
+class SpatialReference;
+
+typedef std::shared_ptr<PointView> PointViewPtr;
 
 namespace eigen
 {
@@ -74,7 +78,7 @@ namespace eigen
  * \return the 3D centroid of the XYZ dimensions.
  */
 PDAL_DLL Eigen::Vector3f computeCentroid(PointView& view,
-                                         std::vector<PointId> ids);
+        std::vector<PointId> ids);
 
 /**
  * \brief Compute the covariance matrix of a collection of points.
@@ -101,8 +105,8 @@ PDAL_DLL Eigen::Vector3f computeCentroid(PointView& view,
  * \param ids a vector of PointIds specifying a subset of points.
  * \return the covariance matrix of the XYZ dimensions.
  */
-PDAL_DLL Eigen::Matrix3f computeCovariance(PointView& view, 
-                                           std::vector<PointId> ids);
+PDAL_DLL Eigen::Matrix3f computeCovariance(PointView& view,
+        std::vector<PointId> ids);
 
 /**
  * \brief Compute the rank of a collection of points.
@@ -140,55 +144,77 @@ PDAL_DLL uint8_t computeRank(PointView& view, std::vector<PointId> ids,
                              double threshold);
 
 /**
- * /brief Create matrix of minimum Z values.
+ * \brief Create matrix of minimum Z values.
  *
  * Create a DSM from the provided PointVieew, where each cell contains the
  * minimum Z value of all contributing elevations.
  *
- * /param view the input PointView.
- * /param rows the number of rows.
- * /param cols the number of columns.
- * /param cell_size the edge length of raster cell.
- * /param bounds the 2D bounds of the PointView.
- * /return the matrix of minimum Z values.
+ * \param view the input PointView.
+ * \param rows the number of rows.
+ * \param cols the number of columns.
+ * \param cell_size the edge length of raster cell.
+ * \param bounds the 2D bounds of the PointView.
+ * \return the matrix of minimum Z values.
  */
 PDAL_DLL Eigen::MatrixXd createDSM(PointView& view, int rows, int cols,
                                    double cell_size, BOX2D bounds);
 
 /**
- * /brief Perform a morphological closing of the input matrix.
+ * \brief Find local minimum elevations by extended local minimum.
+ *
+ * Extended local minimum can be used to select seed points for ground return
+ * segmentation. Several low-lying points are considered for each grid cell. The
+ * difference between the lowest and second lowest points is evaluated and, if
+ * the difference exceeds 1.0, the lowest points is considered an outlier. The
+ * process continues with the next pair of lowest points (second and third
+ * lowest). When the points under consideration are within the given tolerance,
+ * the lowest is retained as a seed point.
+ *
+ * \param view the input PointView.
+ * \param rows the number of rows.
+ * \param cols the cnumber of columns.
+ * \param cell_size the edge length of raster cell.
+ * \param bounds the 2D bounds of the PointView.
+ * \return the matrix of minimum Z values (ignoring low outliers).
+ */
+PDAL_DLL Eigen::MatrixXd extendedLocalMinimum(PointView& view, int rows,
+        int cols, double cell_size,
+        BOX2D bounds);
+
+/**
+ * \brief Perform a morphological closing of the input matrix.
  *
  * Performs a morphological closing of the input matrix using a circular
  * structuring element of given radius. Data will be symmetrically padded at its
  * edges.
  *
- * /param data the input matrix.
- * /param radius the radius of the circular structuring element.
- * /return the morphological closing of the input radius.
+ * \param data the input matrix.
+ * \param radius the radius of the circular structuring element.
+ * \return the morphological closing of the input radius.
  */
 PDAL_DLL Eigen::MatrixXd matrixClose(Eigen::MatrixXd data, int radius);
 
 /**
- * /brief Perform a morphological opening of the input matrix.
+ * \brief Perform a morphological opening of the input matrix.
  *
  * Performs a morphological opening of the input matrix using a circular
  * structuring element of given radius. Data will be symmetrically padded at its
  * edges.
  *
- * /param data the input matrix.
- * /param radius the radius of the circular structuring element.
- * /return the morphological opening of the input radius.
+ * \param data the input matrix.
+ * \param radius the radius of the circular structuring element.
+ * \return the morphological opening of the input radius.
  */
 PDAL_DLL Eigen::MatrixXd matrixOpen(Eigen::MatrixXd data, int radius);
 
 /**
- * /brief Pad input matrix symmetrically.
+ * \brief Pad input matrix symmetrically.
  *
  * Symmetrically pads the input matrix with given radius.
  *
- * /param d the input matrix.
- * /param r the radius of the padding.
- * /return the padded matrix.
+ * \param d the input matrix.
+ * \param r the radius of the padding.
+ * \return the padded matrix.
  */
 PDAL_DLL Eigen::MatrixXd padMatrix(Eigen::MatrixXd d, int r);
 
@@ -199,6 +225,18 @@ PDAL_DLL Eigen::MatrixXd padMatrix(Eigen::MatrixXd d, int r);
  * the API. It is not currently used in the PDAL codebase itself.
  */
 PDAL_DLL Eigen::MatrixXd pointViewToEigen(const PointView& view);
+
+/**
+  Write Eigen Matrix as a GDAL raster.
+
+  \param data the Eigen matrix to write.
+  \param filename the filename of the output raster.
+  \param cell_size the edge length of raster cell.
+  \param bounds the 2D bounds of the data.
+  \param srs the spatial reference system of the data.
+*/
+PDAL_DLL void writeMatrix(Eigen::MatrixXd data, const std::string& filename,
+                          double cell_size, BOX2D bounds, SpatialReference srs);
 
 } // namespace eigen
 

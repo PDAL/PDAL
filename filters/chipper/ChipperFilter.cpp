@@ -143,6 +143,22 @@ void ChipperFilter::load(PointView& view, ChipRefList& xvec, ChipRefList& yvec,
 }
 
 
+
+
+#ifdef _WIN32
+inline long lround(double d)
+{
+	long l;
+
+	if (d < 0)
+		l = (long)ceil(d - .5);
+	else
+		l = (long)floor(d + .5);
+	return l;
+}
+#endif
+
+
 // Build a list of partitions.  The partition is the size of each block in
 // the x and y directions in number of points.
 void ChipperFilter::partition(point_count_t size)

@@ -38,7 +38,9 @@
     #include <arbiter.hpp>
 #endif
 
+#include <pdal/KDIndex.hpp>
 #include <pdal/PDALUtils.hpp>
+#include <pdal/PointView.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/util/FileUtils.hpp>
 
@@ -355,6 +357,47 @@ bool fileExists(const std::string& path)
 
     // Arbiter doesn't handle our STDIN hacks.
     return FileUtils::fileExists(path);
+}
+
+double computeHausdorff(PointViewPtr srcView, PointViewPtr candView)
+{
+    using namespace Dimension;
+        
+    KD3Index srcIndex(*srcView);
+    srcIndex.build();
+    
+    KD3Index candIndex(*candView);
+    candIndex.build();
+    
+    double maxDistSrcToCand = std::numeric_limits<double>::lowest();
+    double maxDistCandToSrc = std::numeric_limits<double>::lowest();
+    
+    for (PointId i = 0; i < srcView->size(); ++i)
+    {
+        std::vector<PointId> indices(1);
+        std::vector<double> sqr_dists(1);
+        PointRef srcPoint = srcView->point(i);
+        candIndex.knnSearch(srcPoint, 1, &indices, &sqr_dists);
+
+        if (sqr_dists[0] > maxDistSrcToCand)
+            maxDistSrcToCand = sqr_dists[0];
+    }
+
+    for (PointId i = 0; i < candView->size(); ++i)
+    {
+        std::vector<PointId> indices(1);
+        std::vector<double> sqr_dists(1);
+        PointRef candPoint = candView->point(i);
+        srcIndex.knnSearch(candPoint, 1, &indices, &sqr_dists);
+
+        if (sqr_dists[0] > maxDistCandToSrc)
+            maxDistCandToSrc = sqr_dists[0];
+    }
+
+    maxDistSrcToCand = std::sqrt(maxDistSrcToCand);
+    maxDistCandToSrc = std::sqrt(maxDistCandToSrc);
+    
+    return std::max(maxDistSrcToCand, maxDistCandToSrc);
 }
 
 } // namespace Utils

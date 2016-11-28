@@ -54,7 +54,7 @@ std::string TransformationFilter::getName() const { return s_info.name; }
 TransformationMatrix transformationMatrixFromString(const std::string& s)
 {
     std::istringstream iss(s);
-    TransformationMatrix matrix;
+	TransformationMatrix matrix{{ 0 }};
     double entry;
     TransformationMatrix::size_type i = 0;
     while (iss >> entry)

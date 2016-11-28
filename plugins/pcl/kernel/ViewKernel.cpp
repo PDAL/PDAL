@@ -40,10 +40,8 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
-    "kernels.view",
-    "View Kernel",
-    "http://pdal.io/kernels/kernels.view.html" );
+static PluginInfo const s_info = PluginInfo("kernels.view", "View Kernel",
+    "http://pdal.io/apps/view.html" );
 
 CREATE_SHARED_PLUGIN(1, 0, ViewKernel, Kernel, s_info)
 

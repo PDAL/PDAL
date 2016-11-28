@@ -41,7 +41,6 @@
 #include <pdal/KernelFactory.hpp>
 #include <pdal/StageFactory.hpp>
 
-#include "chipper/ChipperFilter.hpp"
 #include "crop/CropFilter.hpp"
 #include "buffer/BufferReader.hpp"
 

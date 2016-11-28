@@ -241,4 +241,9 @@ TEST(FileUtilsTest, glob)
 
     EXPECT_EQ(FileUtils::glob(TP("*.glob")).size(), 0u);
     EXPECT_EQ(FileUtils::glob(TP("foo1.glob")).size(), 0u);
+
+    FileUtils::deleteFile("temp.glob");
+    FileUtils::closeFile(FileUtils::createFile("temp.glob"));
+    EXPECT_EQ(FileUtils::glob("temp.glob").size(), 1u);
+    FileUtils::deleteFile("temp.glob");
 }

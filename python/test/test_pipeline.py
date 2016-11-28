@@ -89,7 +89,7 @@ class TestPipeline(unittest.TestCase):
         """Can we fetch log output"""
         json = self.fetch_json('/data/pipeline/reproject.json')
         r = pdal.Pipeline(json)
-        r.loglevel = 9
+        r.loglevel = 8
         count = r.execute()
         self.assertEqual(count, 789)
         self.assertEqual(r.log.split()[0], '(pypipeline')

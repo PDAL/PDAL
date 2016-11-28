@@ -63,7 +63,7 @@ void Ilvis2MetadataReader::parseGranuleMetaDataFile(xmlNodePtr node, MetadataNod
 
     xmlNodePtr child = getFirstChildElementNode(node);
     assertElementIs(child, "DTDVersion");
-    m->add<float>("DTDVersion", extractDouble(child));
+    m->add<double>("DTDVersion", extractDouble(child));
 
     child = getNextElementNode(child);
     assertElementIs(child, "DataCenterId");
@@ -81,7 +81,7 @@ void Ilvis2MetadataReader::parseGranuleURMetaData(xmlNodePtr node, MetadataNode*
 {
     assertElementIs(node, "GranuleURMetaData");
 
-    xmlNodePtr child, subchild;
+    xmlNodePtr child;
 
     child = getFirstChildElementNode(node);
     assertElementIs(child, "GranuleUR");

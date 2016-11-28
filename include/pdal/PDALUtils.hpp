@@ -46,9 +46,17 @@
 #include <unistd.h>
 #endif
 
+#ifdef PDAL_COMPILER_MSVC
+//#  pragma warning(disable: 4127)  // conditional expression is constant
+#endif
+
+
 namespace pdal
 {
 class Options;
+class PointView;
+
+typedef std::shared_ptr<PointView> PointViewPtr;
 
 namespace Utils
 {
@@ -106,7 +114,7 @@ inline Everything extractDim(Extractor& ext, Dimension::Type type)
 {
     using Type = Dimension::Type;
 
-    Everything e;
+	Everything e;
     switch (type)
     {
         case Type::Unsigned8:
@@ -266,7 +274,7 @@ void PDAL_DLL closeFile(std::ostream *out);
 bool PDAL_DLL fileExists(const std::string& path);
 std::string PDAL_DLL expandTilde(const std::string& path);
 std::vector<std::string> PDAL_DLL maybeGlob(const std::string& path);
+double PDAL_DLL computeHausdorff(PointViewPtr srcView, PointViewPtr candView);
 
 } // namespace Utils
 } // namespace pdal
-

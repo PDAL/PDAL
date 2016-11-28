@@ -34,6 +34,7 @@
 
 #include <pdal/pdal_test_main.hpp>
 
+#include <pdal/PipelineManager.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Utils.hpp>
@@ -43,7 +44,10 @@
 #include <sstream>
 #include <string>
 
-static std::string appName()
+namespace
+{
+
+std::string appName()
 {
     const std::string app = Support::binpath(Support::exename("pdal") +
         " pipeline");
@@ -51,7 +55,7 @@ static std::string appName()
 }
 
 // most pipelines (those with a writer) will be invoked via `pdal pipeline`
-static void run_pipeline(std::string const& pipeline)
+void run_pipeline(std::string const& pipeline)
 {
     const std::string cmd = appName();
 
@@ -64,7 +68,7 @@ static void run_pipeline(std::string const& pipeline)
 }
 
 // most pipelines (those with a writer) will be invoked via `pdal pipeline`
-static void run_pipeline_stdin(std::string const& pipeline)
+void run_pipeline_stdin(std::string const& pipeline)
 {
     const std::string cmd = appName();
 
@@ -76,6 +80,11 @@ static void run_pipeline_stdin(std::string const& pipeline)
     if (stat)
         std::cerr << output << std::endl;
 }
+
+} // unnamed namespace
+
+namespace pdal
+{
 
 TEST(pipelineBaseTest, no_input)
 {
@@ -219,30 +228,25 @@ INSTANTIATE_TEST_CASE_P(plugins, jsonWithLAZ,
                             "pipeline/crop-stats.json"
                         ));
 
-// TEST(pipelineFiltersTest, DISABLED_crop_reproject)
-// { run_pipeline("filters/crop_reproject.xml"); }
+TEST(json, tags)
+{
+    PipelineManager manager;
 
-// TEST(pipelineIcebridgeTest, DISABLED_icebridge)
-// { run_pipeline("icebridge/pipeline.xml"); }
+    manager.readPipeline(Support::configuredpath("pipeline/tags.json"));
+    std::vector<Stage *> stages = manager.m_stages;
 
-// TEST(pipelineNitfTest, DISABLED_reader)
-// { run_info("nitf/reader.xml"); }
+    EXPECT_EQ(stages.size(), 4u);
+    size_t totalInputs(0);
+    for (Stage *s : stages)
+    {
+        std::vector<Stage *> inputs = s->getInputs();
+        if (inputs.empty())
+            EXPECT_EQ(s->getName(), "readers.las");
+        if (inputs.size() == 1 || inputs.size() == 2)
+            EXPECT_EQ(s->getName(), "writers.las");
+        totalInputs += inputs.size();
+    }
+    EXPECT_EQ(totalInputs, 3U);
+}
 
-// skip oracle tests for now
-
-// TEST(pipelineQfitTest, DISABLED_little_endian_conversion)
-// { run_pipeline("qfit/little-endian-conversion.xml"); }
-
-// TEST(pipelineQfitTest, DISABLED_pipeline)
-// { run_pipeline("qfit/pipeline.xml"); }
-
-// TEST(pipelineQfitTest, DISABLED_reader)
-// { run_info("qfit/reader.xml"); }
-
-// skip soci tests for now
-
-// TEST(pipelineSQLiteTest, DISABLED_reader)
-// { run_pipeline("io/sqlite-reader.xml"); }
-
-// TEST(pipelineSQLiteTest, DISABLED_writer)
-// { run_pipeline("io/sqlite-writer.xml"); }
+} // namespace pdal

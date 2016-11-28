@@ -43,8 +43,6 @@
 #include <map>
 #include <algorithm>
 
-#include <boost/property_tree/xml_parser.hpp>
-
 #include <string.h>
 #include <stdlib.h>
 
@@ -531,18 +529,33 @@ XMLDim& XMLSchema::xmlDim(const std::string& name)
 namespace
 {
 
-pdalboost::property_tree::ptree getMetadataEntry(const MetadataNode& input)
+void addMetadataEntry(xmlTextWriterPtr w, const MetadataNode& input)
 {
-    pdalboost::property_tree::ptree entry;
 
-    entry.put_value(input.value());
-    entry.put("<xmlattr>.name", input.name());
-    entry.put("<xmlattr>.type", input.type());
+    std::function<void (const MetadataNode&) >  collectMetadata = [&] (const MetadataNode& node)
+    {
+        xmlTextWriterStartElement(w, (const xmlChar*)"Metadata");
+        xmlTextWriterWriteAttribute(w, (const xmlChar*)"name",  (const xmlChar*)node.name().c_str());
+        xmlTextWriterWriteAttribute(w, (const xmlChar*)"type",  (const xmlChar*)node.type().c_str());
+        xmlTextWriterWriteString(w, (const xmlChar*) node.value().c_str());
+        for (auto& m : node.children())
+            if (!m.empty())
+                collectMetadata(m);
+
+        xmlTextWriterEndElement(w);
+    };
+
+    xmlTextWriterStartElementNS(w, (const xmlChar*)"pc",
+        (const xmlChar*)"metadata", NULL);
 
     for (auto& m : input.children())
-        entry.add_child("Metadata", getMetadataEntry(m));
-    return entry;
+        if (!m.empty())
+            collectMetadata(m);
+
+     xmlTextWriterEndElement(w);
+        xmlTextWriterFlush(w);
 }
+
 
 } // anonymous namespace
 
@@ -617,22 +630,7 @@ void XMLSchema::writeXml(xmlTextWriterPtr w) const
         orientation << "dimension";
     if (!m_metadata.empty())
     {
-        xmlTextWriterStartElementNS(w, (const xmlChar*) "pc",
-            (const xmlChar*) "metadata", NULL);
-
-        pdalboost::property_tree::ptree output;
-
-        for (auto m : m_metadata.children())
-            output.add_child("Metadata", getMetadataEntry(m));
-        std::ostringstream oss;
-        pdalboost::property_tree::xml_parser::write_xml(oss, output);
-        std::string xml = oss.str();
-
-        // wipe off write_xml's xml declaration
-        xml = Utils::replaceAll(xml,
-            "<?xml version=\"1.0\" encoding=\"utf-8\"?>", "");
-        xmlTextWriterWriteRawLen(w, (const xmlChar*) xml.c_str(), xml.size());
-        xmlTextWriterEndElement(w);
+        addMetadataEntry(w, m_metadata);
     }
     xmlTextWriterWriteElementNS(w, (const xmlChar*) "pc",
         (const xmlChar*)"orientation", NULL,

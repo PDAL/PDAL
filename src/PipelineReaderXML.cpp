@@ -462,7 +462,7 @@ void PipelineReaderXML::readPipeline(const std::string& filename)
     {
         readPipeline(*input);
     }
-    catch (const pdal_error& error)
+    catch (const pdal_error& )
     {
         throw;
     }

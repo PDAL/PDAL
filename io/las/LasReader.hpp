@@ -101,7 +101,7 @@ protected:
         if (!m_streamIf->m_istream)
         {
             std::ostringstream oss;
-            oss << "Unable to create open stream for '"
+            oss << "Unable to open stream for '"
                 << m_filename <<"' with error '" << strerror(errno) <<"'";
             throw pdal_error(oss.str());
         }

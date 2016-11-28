@@ -106,11 +106,22 @@ void GDALWriter::initialize()
     }
 
     gdal::registerDrivers();
-
-    m_interpDim = Dimension::id(m_interpDimString);
-    if (m_interpDim == Dimension::Id::Unknown)
-        throw pdal_error("Dimension name is not known!");
 }
+
+
+void GDALWriter::prepared(PointTableRef table)
+{
+    m_interpDim = table.layout()->findDim(m_interpDimString);
+    if (m_interpDim == Dimension::Id::Unknown)
+    {
+        std::ostringstream oss;
+
+        oss << getName() << ": specified dimension '" << m_interpDimString <<
+            "' does not exist.";
+        throw pdal_error(oss.str());
+    }
+}
+
 
 void GDALWriter::ready(PointTableRef table)
 {

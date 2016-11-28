@@ -41,10 +41,8 @@
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
-    "kernels.split",
-    "Split Kernel",
-    "http://pdal.io/kernels/kernels.split.html" );
+static PluginInfo const s_info = PluginInfo("kernels.split", "Split Kernel",
+    "http://pdal.io/apps/split.html" );
 
 CREATE_STATIC_PLUGIN(1, 0, SplitKernel, Kernel, s_info)
 
@@ -136,4 +134,3 @@ int SplitKernel::execute()
 }
 
 } // namespace pdal
-

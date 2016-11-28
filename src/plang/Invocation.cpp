@@ -37,6 +37,7 @@
 
 #ifdef PDAL_COMPILER_MSVC
 #  pragma warning(disable: 4127) // conditional expression is constant
+#define HAVE_ROUND // inconsistent dll linkage otherwise
 #endif
 
 #include <Python.h>
@@ -63,8 +64,8 @@ int argCount(PyObject *function)
     PyObject *inArgs = PyTuple_New(1);
     PyTuple_SetItem(inArgs, 0, function);
     PyObject *outArgs = PyObject_CallObject(getargFunc, inArgs);
-    PyObject *arglist = PyTuple_GetItem(outArgs, 0);
-    return PyList_Size(arglist);
+    PyObject *arglist = PyTuple_GetItem(outArgs, (Py_ssize_t)0);
+    return (int) PyList_Size(arglist);
 }
 
 }

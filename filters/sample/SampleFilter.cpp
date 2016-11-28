@@ -107,10 +107,7 @@ PointViewSet SampleFilter::run(PointViewPtr inView)
 
         // We now proceed to mask all neighbors within m_radius of the kept
         // point.
-        double x = inView->getFieldAs<double>(Dimension::Id::X, i);
-        double y = inView->getFieldAs<double>(Dimension::Id::Y, i);
-        double z = inView->getFieldAs<double>(Dimension::Id::Z, i);
-        auto ids = index.radius(x, y, z, m_radius);
+        auto ids = index.radius(i, m_radius);
         for (PointId j = 1; j < ids.size(); ++j)
             keep[ids[j]] = 0;
     }

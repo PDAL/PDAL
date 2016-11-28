@@ -44,7 +44,7 @@
 
 #include <pdal/pdal_config.hpp>
 
-#include <buffer/BufferReader.hpp>
+#include <../io/buffer/BufferReader.hpp>
 
 #include <memory>
 #include <vector>
@@ -301,7 +301,6 @@ void Kernel::visualize(PointViewPtr view)
     writer.prepare(table);
     writer.execute(table);
 }
-
 
 /*
 void Kernel::visualize(PointViewPtr input_view, PointViewPtr output_view) const

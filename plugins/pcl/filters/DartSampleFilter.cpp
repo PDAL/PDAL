@@ -34,9 +34,9 @@
 
 #include "DartSampleFilter.hpp"
 
-#include "dart_sample.h"
 #include "PCLConversions.hpp"
-#include "PCLPipeline.h"
+#include "dartsample/dart_sample.h"
+#include "pipeline/PCLPipeline.h"
 
 #include <pcl/console/print.h>
 #include <pcl/point_types.h>
