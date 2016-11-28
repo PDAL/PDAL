@@ -433,13 +433,13 @@ TEST(BPFTest, bundled)
     auto findbundle1 = [](const MetadataNode& m)
         { return m.name() == "bundle1"; };
     outbuf = Utils::base64_decode(n.find(findbundle1).value());
-    EXPECT_EQ(memcmp(outbuf.data(), "This is a test",
-        outbuf.size() - 1), 0);
+    std::string expect = "This is a test";
+    EXPECT_EQ(memcmp(outbuf.data(), expect.data(), expect.size()), 0);
     auto findbundle2 = [](const MetadataNode& m)
         { return m.name() == "bundle2"; };
     outbuf = Utils::base64_decode(n.find(findbundle2).value());
-    EXPECT_EQ(memcmp(outbuf.data(), "This is another test",
-        outbuf.size() - 1), 0);
+    expect = "This is another test";
+    EXPECT_EQ(memcmp(outbuf.data(), expect.data(), expect.size()), 0);
 }
 
 TEST(BPFTest, inspect)
