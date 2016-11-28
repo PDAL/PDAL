@@ -79,7 +79,7 @@ class PipelineSpec extends TestEnvironmentSpec {
     it("should read a valid value by name") {
       val pvi = pipeline.pointViews()
       val pv = pvi.next()
-      pv.get(0, "ReturnNumber").get() & 0xff should be (1)
+      pv.getByte(0, "ReturnNumber") should be (1)
       pv.dispose()
       pvi.dispose()
     }

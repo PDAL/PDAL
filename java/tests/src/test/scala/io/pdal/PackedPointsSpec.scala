@@ -77,7 +77,7 @@ class PackedPointsSpec extends TestEnvironmentSpec {
     it("should read a valid value by name") {
       val pvi = pipeline.pointViews()
       val pv = pvi.next()
-      pv.get(0, "ReturnNumber").get() & 0xff should be (packedPoints.get(0, "ReturnNumber").get() & 0xff)
+      pv.getByte(0, "ReturnNumber") should be (packedPoints.getByte(0, "ReturnNumber"))
       pv.dispose()
       pvi.dispose()
     }
@@ -137,7 +137,7 @@ class PackedPointsSpec extends TestEnvironmentSpec {
         packedPoints.getX(i) should be (pv.getX(i))
         packedPoints.getY(i) should be (pv.getY(i))
         packedPoints.getZ(i) should be (pv.getZ(i))
-        dimTypes.map { dt =>
+        dimTypes.foreach { dt =>
           packedPoints.get(i, dt).array() should be (pv.get(i, dt).array())
         }
       }

@@ -36,6 +36,34 @@ case class PackedPoints(bytes: Array[Byte], dimTypes: util.Map[String, SizedDimT
     }
   }
 
+  def getDouble(idx: Int, dim: SizedDimType): Double = getDouble(idx, dim.dimType)
+  def getDouble(idx: Int, dim: DimType): Double = getDouble(idx, dim.id)
+  def getDouble(idx: Int, dim: String): Double = get(idx, dim).getDouble
+
+  def getFloat(idx: Int, dim: SizedDimType): Float = getFloat(idx, dim.dimType.id)
+  def getFloat(idx: Int, dim: DimType): Float = getFloat(idx, dim.id)
+  def getFloat(idx: Int, dim: String): Float = get(idx, dim).getFloat
+
+  def getLong(idx: Int, dim: SizedDimType): Long = getLong(idx, dim.dimType.id)
+  def getLong(idx: Int, dim: DimType): Long = getLong(idx, dim.id)
+  def getLong(idx: Int, dim: String): Long = get(idx, dim).getLong
+
+  def getInt(idx: Int, dim: SizedDimType): Int = getInt(idx, dim.dimType.id)
+  def getInt(idx: Int, dim: DimType): Int = getInt(idx, dim.id)
+  def getInt(idx: Int, dim: String): Int = get(idx, dim).getInt
+
+  def getShort(idx: Int, dim: SizedDimType): Short = getShort(idx, dim.dimType.id)
+  def getShort(idx: Int, dim: DimType): Short = getShort(idx, dim.id)
+  def getShort(idx: Int, dim: String): Short = get(idx, dim).getShort
+
+  def getChar(idx: Int, dim: SizedDimType): Char = getChar(idx, dim.dimType.id)
+  def getChar(idx: Int, dim: DimType): Char = getChar(idx, dim.id)
+  def getChar(idx: Int, dim: String): Char = get(idx, dim).getChar
+
+  def getByte(idx: Int, dim: SizedDimType): Byte = getByte(idx, dim.dimType.id)
+  def getByte(idx: Int, dim: DimType): Byte = getByte(idx, dim.id)
+  def getByte(idx: Int, dim: String): Byte = get(idx, dim).get()
+
   def get(idx: Int, dim: SizedDimType): ByteBuffer = get(idx, dim.dimType.id)
   def get(idx: Int, dim: DimType): ByteBuffer = get(idx, dim.id)
   def get(idx: Int, dim: String): ByteBuffer = ByteBuffer.wrap(get(get(idx), dim))

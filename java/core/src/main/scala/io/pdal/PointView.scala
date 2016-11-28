@@ -54,6 +54,28 @@ class PointView extends Native {
   /**
     * One dimension read; for multiple dims custom logic required.
     */
+
+  def getDouble(idx: Int, dim: String): Double = getDouble(idx, findDimType(dim))
+  def getDouble(idx: Int, dim: DimType): Double = get(idx, dim).getDouble
+
+  def getFloat(idx: Int, dim: String): Float = getFloat(idx, findDimType(dim))
+  def getFloat(idx: Int, dim: DimType): Float = get(idx, dim).getFloat
+
+  def getLong(idx: Int, dim: String): Long = getLong(idx, findDimType(dim))
+  def getLong(idx: Int, dim: DimType): Long = get(idx, dim).getLong
+
+  def getInt(idx: Int, dim: String): Int = getInt(idx, findDimType(dim))
+  def getInt(idx: Int, dim: DimType): Int = get(idx, dim).getInt
+
+  def getShort(idx: Int, dim: String): Short = getShort(idx, findDimType(dim))
+  def getShort(idx: Int, dim: DimType): Short = get(idx, dim).getShort
+
+  def getChar(idx: Int, dim: String): Char = getChar(idx, findDimType(dim))
+  def getChar(idx: Int, dim: DimType): Char = get(idx, dim).getChar
+
+  def getByte(idx: Int, dim: String): Byte = getByte(idx, findDimType(dim))
+  def getByte(idx: Int, dim: DimType): Byte = get(idx, dim).get()
+
   def get(idx: Int, dim: String): ByteBuffer = get(idx, findDimType(dim))
   def get(idx: Int, dim: DimType): ByteBuffer =
     ByteBuffer.wrap(getPackedPointBytes(idx, Array(dim)))
