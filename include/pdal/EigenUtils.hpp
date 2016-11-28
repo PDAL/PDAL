@@ -238,6 +238,28 @@ PDAL_DLL Eigen::MatrixXd pointViewToEigen(const PointView& view);
 PDAL_DLL void writeMatrix(Eigen::MatrixXd data, const std::string& filename,
                           double cell_size, BOX2D bounds, SpatialReference srs);
 
+template <typename Derived>
+PDAL_DLL Eigen::MatrixXd gradX(const Eigen::MatrixBase<Derived>& A)
+{
+    Eigen::MatrixXd B = A.rightCols(A.cols()-1) - A.leftCols(A.cols()-1);
+    Eigen::Matrix3d C;
+    C.col(0) = B.col(0);
+    C.col(2) = B.col(1);
+    C.col(1) = B.col(0) + 0.5 * (B.col(1) - B.col(0));
+    return C;
+};
+
+template <typename Derived>
+PDAL_DLL Derived gradY(const Eigen::MatrixBase<Derived>& A)
+{
+    Eigen::MatrixXd B = A.bottomRows(A.rows()-1) - A.topRows(A.rows()-1);
+    Eigen::Matrix3d C;
+    C.row(0) = B.row(0);
+    C.row(2) = B.row(1);
+    C.row(1) = B.row(0) + 0.5 * (B.row(1) - B.row(0));
+    return C;
+};
+
 } // namespace eigen
 
 } // namespace pdal
