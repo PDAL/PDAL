@@ -1302,6 +1302,36 @@ public:
         }
     }
 
+    /**
+      Write a JSON array of arguments to an output stream.
+
+      \param out  Stream to which output should be written.
+
+    */
+    void dump3(std::ostream& out) const
+    {
+        out << "[";
+        bool bFirst(true);
+        for (auto ai = m_args.begin(); ai != m_args.end(); ++ai)
+        {
+            Arg *a = ai->get();
+
+            if (!bFirst)
+                out << ",";
+
+            out << "{\"name\":\"" << a->longname() << "\"";
+
+            if (a->defaultProvided())
+                out << ",\"default\":\"" << a->defaultVal() << "\"";
+
+            out << ",\"description\":\"" << a->description() << "\"}";
+
+            if (bFirst) bFirst = false;
+
+
+        }
+        out << "]";
+    }
 private:
     /*
       Split an argument name into longname and shortname.
