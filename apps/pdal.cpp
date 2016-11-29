@@ -279,8 +279,9 @@ void App::addArgs(ProgramArgs& args)
     args.add("version", "Show program version", m_showVersion);
     args.add("options", "Show options for specified driver (or 'all')",
         m_showOptions);
-    args.add("showjson", "List options or drivers as JSON output",
+    Arg& json = args.add("showjson", "List options or drivers as JSON output",
         m_showJSON);
+    json.setHidden();
 }
 
 namespace
