@@ -60,7 +60,7 @@ static PluginManager s_instance;
 
 #if defined(__APPLE__) && defined(__MACH__)
     const std::string dynamicLibraryExtension(".dylib");
-#elif defined(__linux__) || defined(__FreeBSD_kernel__) || defined(__GNU__)
+#elif defined(__linux__) || defined(__FreeBSD__) || defined(__DragonFly__) || defined(__GNU__)
     const std::string dynamicLibraryExtension(".so");
 #elif defined _WIN32
     const std::string dynamicLibraryExtension(".dll");

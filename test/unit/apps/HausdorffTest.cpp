@@ -32,67 +32,63 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
+#include <string>
 
-#include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
+#include <pdal/pdal_test_main.hpp>
+#include <pdal/PDALUtils.hpp>
+#include <pdal/PointView.hpp>
 
-#include <Eigen/Dense>
+#include "Support.hpp"
 
-#include <memory>
-#include <unordered_map>
+using namespace pdal;
 
-extern "C" int32_t MongusFilter_ExitFunc();
-extern "C" PF_ExitFunc MongusFilter_InitPlugin();
-
-namespace pdal
+TEST(Hausdorff, kernel)
 {
+    std::string A = Support::datapath("autzen/autzen-thin.las");
+    std::string B = Support::datapath("las/autzen_trim.las");
+    std::string output;
 
-class PointLayout;
-class PointView;
+    const std::string cmd = Support::binpath(Support::exename("pdal")) +
+                            " hausdorff " + A + " " + B;
 
-typedef std::unordered_map<int, std::vector<PointId>> PointIdHash;
+    EXPECT_EQ(Utils::run_shell_command(cmd, output), 0);
+    EXPECT_TRUE(output.find("\"hausdorff\": 4416.968175") != std::string::npos);
+}
 
-class PDAL_DLL MongusFilter : public Filter
+TEST(Hausdorff, distance)
 {
-public:
-    MongusFilter() : Filter()
-    {}
+    PointTable table;
+    PointLayoutPtr layout(table.layout());
 
-    static void * create();
-    static int32_t destroy(void *);
-    std::string getName() const;
+    layout->registerDim(Dimension::Id::X);
+    layout->registerDim(Dimension::Id::Y);
+    layout->registerDim(Dimension::Id::Z);
 
-private:
-    bool m_classify;
-    bool m_extract;
-    int m_numRows;
-    int m_numCols;
-    int m_maxRow;
-    double m_cellSize;
-    double m_k;
-    int m_l;
-    BOX2D m_bounds;
+    PointViewPtr src(new PointView(table));
+    src->setField(Dimension::Id::X, 0, 0.0);
+    src->setField(Dimension::Id::Y, 0, 0.0);
+    src->setField(Dimension::Id::Z, 0, 0.0);
 
-    virtual void addDimensions(PointLayoutPtr layout);
-    virtual void addArgs(ProgramArgs& args);
-    int getColIndex(double x, double cell_size);
-    int getRowIndex(double y, double cell_size);
-    Eigen::MatrixXd computeSpline(Eigen::MatrixXd x_prev,
-                                  Eigen::MatrixXd y_prev,
-                                  Eigen::MatrixXd z_prev,
-                                  Eigen::MatrixXd x_samp,
-                                  Eigen::MatrixXd y_samp);
-    void writeControl(Eigen::MatrixXd cx, Eigen::MatrixXd cy, Eigen::MatrixXd cz, std::string filename);
-    void downsampleMin(Eigen::MatrixXd *cx, Eigen::MatrixXd *cy,
-                       Eigen::MatrixXd* cz, Eigen::MatrixXd *dcx,
-                       Eigen::MatrixXd *dcy, Eigen::MatrixXd* dcz,
-                       double cell_size);
-    std::vector<PointId> processGround(PointViewPtr view);
-    virtual PointViewSet run(PointViewPtr view);
+    PointViewPtr cand(new PointView(table));
+    cand->setField(Dimension::Id::X, 0, 1.0);
+    cand->setField(Dimension::Id::Y, 0, 0.0);
+    cand->setField(Dimension::Id::Z, 0, 0.0);
 
-    MongusFilter& operator=(const MongusFilter&); // not implemented
-    MongusFilter(const MongusFilter&); // not implemented
-};
+    cand->setField(Dimension::Id::X, 1, 0.0);
+    cand->setField(Dimension::Id::Y, 1, 2.0);
+    cand->setField(Dimension::Id::Z, 1, 0.0);
 
-} // namespace pdal
+    EXPECT_EQ(2.0, Utils::computeHausdorff(src, cand));
+
+    cand->setField(Dimension::Id::X, 1, 0.0);
+    cand->setField(Dimension::Id::Y, 1, 0.0);
+    cand->setField(Dimension::Id::Z, 1, 3.0);
+
+    EXPECT_EQ(3.0, Utils::computeHausdorff(src, cand));
+
+    src->setField(Dimension::Id::X, 0, 1.0);
+    src->setField(Dimension::Id::Y, 0, 1.0);
+    src->setField(Dimension::Id::Z, 0, 1.0);
+
+    EXPECT_EQ(std::sqrt(6.0), Utils::computeHausdorff(src, cand));
+}

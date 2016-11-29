@@ -37,15 +37,12 @@
 #include <pdal/pdal_macros.hpp>
 #include <pdal/EigenUtils.hpp>
 #include <pdal/PipelineManager.hpp>
+#include <pdal/SpatialReference.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/util/Utils.hpp>
 #include <../io/buffer/BufferReader.hpp>
 
 #include <Eigen/Dense>
-
-#include "gdal_priv.h" // For File I/O
-#include "gdal_version.h" // For version info
-#include "ogr_spatialref.h"  //For Geographic Information/Transformations
 
 namespace pdal
 {
@@ -189,98 +186,6 @@ Eigen::MatrixXd MongusFilter::computeSpline(Eigen::MatrixXd x_prev,
     return S;
 }
 
-void MongusFilter::writeMatrix(Eigen::MatrixXd data, std::string filename, double cell_size, PointViewPtr view)
-{
-    int cols = data.cols();
-    int rows = data.rows();
-
-    GDALAllRegister();
-
-    GDALDataset *mpDstDS(0);
-
-    char **papszMetadata;
-
-    // parse the format driver, hardcoded for the time being
-    std::string tFormat("GTIFF");
-    const char *pszFormat = tFormat.c_str();
-    GDALDriver* tpDriver = GetGDALDriverManager()->GetDriverByName(pszFormat);
-
-    // try to create a file of the requested format
-    if (tpDriver != NULL)
-    {
-        papszMetadata = tpDriver->GetMetadata();
-        if (CSLFetchBoolean(papszMetadata, GDAL_DCAP_CREATE, FALSE))
-        {
-            char **papszOptions = NULL;
-
-            mpDstDS = tpDriver->Create(filename.c_str(), cols, rows, 1,
-                                       GDT_Float32, papszOptions);
-
-            // set the geo transformation
-            double adfGeoTransform[6];
-            adfGeoTransform[0] = m_bounds.minx; // - 0.5*m_GRID_DIST_X;
-            adfGeoTransform[1] = cell_size;
-            adfGeoTransform[2] = 0.0;
-            adfGeoTransform[3] = m_bounds.maxy; // + 0.5*m_GRID_DIST_Y;
-            adfGeoTransform[4] = 0.0;
-            adfGeoTransform[5] = -1 * cell_size;
-            mpDstDS->SetGeoTransform(adfGeoTransform);
-
-            // set the projection
-            mpDstDS->SetProjection(view->spatialReference().getWKT().c_str());
-        }
-    }
-
-    // if we have a valid file
-    if (mpDstDS)
-    {
-        // loop over the raster and determine max slope at each location
-        int cs = 0, ce = cols;
-        int rs = 0, re = rows;
-        float *poRasterData = new float[cols*rows];
-        for (auto i=0; i<cols*rows; i++)
-        {
-            poRasterData[i] = std::numeric_limits<float>::min();
-        }
-
-        #pragma omp parallel for
-        for (auto c = cs; c < ce; ++c)
-        {
-            for (auto r = rs; r < re; ++r)
-            {
-                if (data(r, c) == 0.0 || std::isnan(data(r, c)) || data(r, c) == std::numeric_limits<double>::max())
-                    continue;
-                poRasterData[(r * cols) + c] =
-                    data(r, c);
-            }
-        }
-
-        // write the data
-        if (poRasterData)
-        {
-            GDALRasterBand *tBand = mpDstDS->GetRasterBand(1);
-
-            tBand->SetNoDataValue(std::numeric_limits<float>::min());
-
-            if (cols > 0 && rows > 0)
-#if GDAL_VERSION_MAJOR <= 1
-                tBand->RasterIO(GF_Write, 0, 0, cols, rows,
-                                poRasterData, cols, rows,
-                                GDT_Float32, 0, 0);
-#else
-
-                int ret = tBand->RasterIO(GF_Write, 0, 0, cols, rows,
-                                          poRasterData, cols, rows,
-                                          GDT_Float32, 0, 0, 0);
-#endif
-        }
-
-        GDALClose((GDALDatasetH) mpDstDS);
-
-        delete [] poRasterData;
-    }
-}
-
 void MongusFilter::writeControl(Eigen::MatrixXd cx, Eigen::MatrixXd cy, Eigen::MatrixXd cz, std::string filename)
 {
     using namespace Dimension;
@@ -324,6 +229,7 @@ std::vector<PointId> MongusFilter::processGround(PointViewPtr view)
     // initialization
 
     view->calculateBounds(m_bounds);
+    SpatialReference srs(view->spatialReference());
 
     m_numCols =
         static_cast<int>(ceil((m_bounds.maxx - m_bounds.minx)/m_cellSize)) + 1;
@@ -561,7 +467,7 @@ std::vector<PointId> MongusFilter::processGround(PointViewPtr view)
             char buffer[256];
             sprintf(buffer, "interp_surface_%d.laz", l);
             std::string name(buffer);
-            // writeMatrix(surface, name, cur_cell_size, view);
+            // eigen::writeMatrix(surface, name, cur_cell_size, m_bounds, srs);
             writeControl(x_samp, y_samp, surface, name);
 
             char bufm[256];
@@ -578,13 +484,13 @@ std::vector<PointId> MongusFilter::processGround(PointViewPtr view)
             char rbuf[256];
             sprintf(rbuf, "residual_%d.laz", l);
             std::string rbufn(rbuf);
-            // writeMatrix(R, rbufn, cur_cell_size, view);
+            // eigen::writeMatrix(R, rbufn, cur_cell_size, m_bounds, srs);
             writeControl(x_samp, y_samp, R, rbufn);
 
             char mbuf[256];
             sprintf(mbuf, "median_%d.laz", l);
             std::string mbufn(mbuf);
-            // writeMatrix(M, mbufn, cur_cell_size, view);
+            // eigen::writeMatrix(M, mbufn, cur_cell_size, m_bounds, srs);
             writeControl(x_samp, y_samp, M, mbufn);
 
             char buf2[256];
@@ -607,27 +513,27 @@ std::vector<PointId> MongusFilter::processGround(PointViewPtr view)
         char buffer[256];
         sprintf(buffer, "final_surface.tif");
         std::string name(buffer);
-        writeMatrix(surface, name, m_cellSize, view);
+        eigen::writeMatrix(surface, name, m_cellSize, m_bounds, srs);
         //
         //     char rbuf[256];
         //     sprintf(rbuf, "final_residual.tif");
         //     std::string rbufn(rbuf);
-        //     writeMatrix(R, rbufn, cur_cell_size, view);
+        //     eigen::writeMatrix(R, rbufn, cur_cell_size, m_bounds, srs);
         //
         //     char obuf[256];
         //     sprintf(obuf, "final_opened.tif");
         //     std::string obufn(obuf);
-        //     writeMatrix(maxZ, obufn, cur_cell_size, view);
+        //     eigen::writeMatrix(maxZ, obufn, cur_cell_size, m_bounds, srs);
         //
         //     char Tbuf[256];
         //     sprintf(Tbuf, "final_tophat.tif");
         //     std::string Tbufn(Tbuf);
-        //     writeMatrix(T, Tbufn, cur_cell_size, view);
+        //     eigen::writeMatrix(T, Tbufn, cur_cell_size, m_bounds, srs);
         //
         //     char tbuf[256];
         //     sprintf(tbuf, "final_thresh.tif");
         //     std::string tbufn(tbuf);
-        //     writeMatrix(t, tbufn, cur_cell_size, view);
+        //     eigen::writeMatrix(t, tbufn, cur_cell_size, m_bounds, srs);
     }
 
     // apply final filtering (top hat) using raw points against TPS

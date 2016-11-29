@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2015, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -34,65 +34,34 @@
 
 #pragma once
 
-#include <pdal/Filter.hpp>
+#include <pdal/Kernel.hpp>
+#include <pdal/Stage.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/plugin.hpp>
 
-#include <Eigen/Dense>
-
-#include <memory>
-#include <unordered_map>
-
-extern "C" int32_t MongusFilter_ExitFunc();
-extern "C" PF_ExitFunc MongusFilter_InitPlugin();
+extern "C" int32_t HausdorffKernel_ExitFunc();
+extern "C" PF_ExitFunc HausdorffKernel_InitPlugin();
 
 namespace pdal
 {
 
-class PointLayout;
 class PointView;
 
-typedef std::unordered_map<int, std::vector<PointId>> PointIdHash;
-
-class PDAL_DLL MongusFilter : public Filter
+class PDAL_DLL HausdorffKernel : public Kernel
 {
 public:
-    MongusFilter() : Filter()
-    {}
-
     static void * create();
     static int32_t destroy(void *);
     std::string getName() const;
+    int execute(); // overrride
+
 
 private:
-    bool m_classify;
-    bool m_extract;
-    int m_numRows;
-    int m_numCols;
-    int m_maxRow;
-    double m_cellSize;
-    double m_k;
-    int m_l;
-    BOX2D m_bounds;
+    virtual void addSwitches(ProgramArgs& args);
+    PointViewPtr loadSet(const std::string& filename, PointTable& table);
 
-    virtual void addDimensions(PointLayoutPtr layout);
-    virtual void addArgs(ProgramArgs& args);
-    int getColIndex(double x, double cell_size);
-    int getRowIndex(double y, double cell_size);
-    Eigen::MatrixXd computeSpline(Eigen::MatrixXd x_prev,
-                                  Eigen::MatrixXd y_prev,
-                                  Eigen::MatrixXd z_prev,
-                                  Eigen::MatrixXd x_samp,
-                                  Eigen::MatrixXd y_samp);
-    void writeControl(Eigen::MatrixXd cx, Eigen::MatrixXd cy, Eigen::MatrixXd cz, std::string filename);
-    void downsampleMin(Eigen::MatrixXd *cx, Eigen::MatrixXd *cy,
-                       Eigen::MatrixXd* cz, Eigen::MatrixXd *dcx,
-                       Eigen::MatrixXd *dcy, Eigen::MatrixXd* dcz,
-                       double cell_size);
-    std::vector<PointId> processGround(PointViewPtr view);
-    virtual PointViewSet run(PointViewPtr view);
-
-    MongusFilter& operator=(const MongusFilter&); // not implemented
-    MongusFilter(const MongusFilter&); // not implemented
+    std::string m_sourceFile;
+    std::string m_candidateFile;
 };
 
 } // namespace pdal

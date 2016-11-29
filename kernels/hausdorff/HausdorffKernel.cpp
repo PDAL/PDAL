@@ -32,67 +32,68 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#pragma once
-
-#include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
-
-#include <Eigen/Dense>
+#include "HausdorffKernel.hpp"
 
 #include <memory>
-#include <unordered_map>
 
-extern "C" int32_t MongusFilter_ExitFunc();
-extern "C" PF_ExitFunc MongusFilter_InitPlugin();
+#include <pdal/PDALUtils.hpp>
+#include <pdal/PointView.hpp>
+#include <pdal/pdal_config.hpp>
+#include <pdal/pdal_macros.hpp>
+
 
 namespace pdal
 {
 
-class PointLayout;
-class PointView;
+static PluginInfo const s_info = PluginInfo("kernels.hausdorff",
+    "Hausdorff Kernel", "http://pdal.io/apps/hausdorff.html");
 
-typedef std::unordered_map<int, std::vector<PointId>> PointIdHash;
+CREATE_STATIC_PLUGIN(1, 0, HausdorffKernel, Kernel, s_info)
 
-class PDAL_DLL MongusFilter : public Filter
+std::string HausdorffKernel::getName() const
 {
-public:
-    MongusFilter() : Filter()
-    {}
+    return s_info.name;
+}
 
-    static void * create();
-    static int32_t destroy(void *);
-    std::string getName() const;
+void HausdorffKernel::addSwitches(ProgramArgs& args)
+{
+    Arg& source = args.add("source", "Source filename", m_sourceFile);
+    source.setPositional();
+    Arg& candidate = args.add("candidate", "Candidate filename",
+                              m_candidateFile);
+    candidate.setPositional();
+}
 
-private:
-    bool m_classify;
-    bool m_extract;
-    int m_numRows;
-    int m_numCols;
-    int m_maxRow;
-    double m_cellSize;
-    double m_k;
-    int m_l;
-    BOX2D m_bounds;
 
-    virtual void addDimensions(PointLayoutPtr layout);
-    virtual void addArgs(ProgramArgs& args);
-    int getColIndex(double x, double cell_size);
-    int getRowIndex(double y, double cell_size);
-    Eigen::MatrixXd computeSpline(Eigen::MatrixXd x_prev,
-                                  Eigen::MatrixXd y_prev,
-                                  Eigen::MatrixXd z_prev,
-                                  Eigen::MatrixXd x_samp,
-                                  Eigen::MatrixXd y_samp);
-    void writeControl(Eigen::MatrixXd cx, Eigen::MatrixXd cy, Eigen::MatrixXd cz, std::string filename);
-    void downsampleMin(Eigen::MatrixXd *cx, Eigen::MatrixXd *cy,
-                       Eigen::MatrixXd* cz, Eigen::MatrixXd *dcx,
-                       Eigen::MatrixXd *dcy, Eigen::MatrixXd* dcz,
-                       double cell_size);
-    std::vector<PointId> processGround(PointViewPtr view);
-    virtual PointViewSet run(PointViewPtr view);
+PointViewPtr HausdorffKernel::loadSet(const std::string& filename,
+                                      PointTable& table)
+{
+    Stage& reader = makeReader(filename, "");
+    reader.prepare(table);
+    PointViewSet viewSet = reader.execute(table);
+    assert(viewSet.size() == 1);
+    return *viewSet.begin();
+}
 
-    MongusFilter& operator=(const MongusFilter&); // not implemented
-    MongusFilter(const MongusFilter&); // not implemented
-};
+
+int HausdorffKernel::execute()
+{
+    PointTable srcTable;
+    PointViewPtr srcView = loadSet(m_sourceFile, srcTable);
+
+    PointTable candTable;
+    PointViewPtr candView = loadSet(m_candidateFile, candTable);
+
+    double hausdorff = Utils::computeHausdorff(srcView, candView);
+
+    MetadataNode root;
+    root.add("filenames", m_sourceFile);
+    root.add("filenames", m_candidateFile);
+    root.add("hausdorff", hausdorff);
+    root.add("pdal_version", pdal::GetFullVersionString());
+    Utils::toJSON(root, std::cout);
+
+    return 0;
+}
 
 } // namespace pdal

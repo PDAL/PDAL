@@ -37,16 +37,13 @@
 #include <pdal/EigenUtils.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/PipelineManager.hpp>
+#include <pdal/SpatialReference.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/util/Utils.hpp>
 #include <../io/buffer/BufferReader.hpp>
 
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
-
-#include "gdal_priv.h" // For File I/O
-#include "gdal_version.h" // For version info
-#include "ogr_spatialref.h"  //For Geographic Information/Transformations
 
 namespace pdal
 {
@@ -205,6 +202,7 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
 
     std::vector<PointId> groundIdx;
     view->calculateBounds(m_bounds);
+    SpatialReference srs(view->spatialReference());
 
     double extent_x = floor(m_bounds.maxx) - ceil(m_bounds.minx);
     double extent_y = floor(m_bounds.maxy) - ceil(m_bounds.miny);
@@ -264,12 +262,12 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
     // neighbor (KNN) approach.
     MatrixXd ZImin = eigen::createDSM(*view.get(), m_numRows, m_numCols,
                                       m_cellSize, m_bounds);
-    writeMatrix(ZImin, "zimin.tif", m_cellSize, view);
+    eigen::writeMatrix(ZImin, "zimin.tif", m_cellSize, m_bounds, srs);
 
     // MatrixXd ZImin_painted = inpaintKnn(cx, cy, ZImin);
     // MatrixXd ZImin_painted = TPS(cx, cy, ZImin);
     MatrixXd ZImin_painted = expandingTPS(cx, cy, ZImin);
-    writeMatrix(ZImin_painted, "zimin_painted.tif", m_cellSize, view);
+    eigen::writeMatrix(ZImin_painted, "zimin_painted.tif", m_cellSize, m_bounds, srs);
 
     ZImin = ZImin_painted;
 
@@ -290,7 +288,7 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
 
     // paper has low point happening later, i guess it doesn't matter too much, this is where he does it in matlab code
     MatrixXi Low = progressiveFilter(-ZImin, m_cellSize, 5.0, 1.0);
-    writeMatrix(Low.cast<double>(), "zilow.tif", m_cellSize, view);
+    eigen::writeMatrix(Low.cast<double>(), "zilow.tif", m_cellSize, m_bounds, srs);
 
     // matlab code has net cutting occurring here
     MatrixXd ZInet = ZImin;
@@ -320,12 +318,12 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
                     ZInet(r, c) = bigOpen(r, c);
             }
         }
-        writeMatrix(ZInet, "zinet.tif", m_cellSize, view);
+        eigen::writeMatrix(ZInet, "zinet.tif", m_cellSize, m_bounds, srs);
     }
 
     // and finally object detection
     MatrixXi Obj = progressiveFilter(ZInet, m_cellSize, m_percentSlope, m_maxWindow);
-    writeMatrix(Obj.cast<double>(), "ziobj.tif", m_cellSize, view);
+    eigen::writeMatrix(Obj.cast<double>(), "ziobj.tif", m_cellSize, m_bounds, srs);
 
     // STEP 3:
 
@@ -343,12 +341,12 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
         if (Obj(i) == 1 || Low(i) == 1 || isNetCell(i) == 1)
             ZIpro(i) = std::numeric_limits<double>::quiet_NaN();
     }
-    writeMatrix(ZIpro, "zipro.tif", m_cellSize, view);
+    eigen::writeMatrix(ZIpro, "zipro.tif", m_cellSize, m_bounds, srs);
 
     // MatrixXd ZIpro_painted = inpaintKnn(cx, cy, ZIpro);
     // MatrixXd ZIpro_painted = TPS(cx, cy, ZIpro);
     MatrixXd ZIpro_painted = expandingTPS(cx, cy, ZIpro);
-    writeMatrix(ZIpro_painted, "zipro_painted.tif", m_cellSize, view);
+    eigen::writeMatrix(ZIpro_painted, "zipro_painted.tif", m_cellSize, m_bounds, srs);
 
     ZIpro = ZIpro_painted;
 
@@ -409,37 +407,25 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
     // include this portion of the algorithm in the formal testing procedure,
     // though we provide a brief analysis of the effect of using this net filter
     // in the next section.
+    
+    MatrixXd scaled = ZIpro / m_cellSize;
 
-    auto diffX = [&](MatrixXd mat)
-    {
-        MatrixXd data = eigen::padMatrix(mat, 1);
-        MatrixXd data2 = data.rightCols(data.cols()-1) - data.leftCols(data.cols()-1);
-        return data2.block(1, 1, mat.rows(), mat.cols());
-    };
-
-    auto diffY = [&](MatrixXd mat)
-    {
-        MatrixXd data = eigen::padMatrix(mat, 1);
-        MatrixXd data2 = data.bottomRows(data.rows()-1) - data.topRows(data.rows()-1);
-        return data2.block(1, 1, mat.rows(), mat.cols());
-    };
-
-    MatrixXd gx = diffX(ZIpro / m_cellSize);
-    writeMatrix(gx, "gx.tif", m_cellSize, view);
-    MatrixXd gy = diffY(ZIpro / m_cellSize);
-    writeMatrix(gy, "gy.tif", m_cellSize, view);
+    MatrixXd gx = eigen::gradX(scaled);
+    eigen::writeMatrix(gx, "gx.tif", m_cellSize, m_bounds, srs);
+    MatrixXd gy = eigen::gradY(scaled);
+    eigen::writeMatrix(gy, "gy.tif", m_cellSize, m_bounds, srs);
     MatrixXd gsurfs = (gx.cwiseProduct(gx) + gy.cwiseProduct(gy)).cwiseSqrt();
-    writeMatrix(gsurfs, "gsurfs.tif", m_cellSize, view);
+    eigen::writeMatrix(gsurfs, "gsurfs.tif", m_cellSize, m_bounds, srs);
 
     // MatrixXd gsurfs_painted = inpaintKnn(cx, cy, gsurfs);
     // MatrixXd gsurfs_painted = TPS(cx, cy, gsurfs);
     MatrixXd gsurfs_painted = expandingTPS(cx, cy, gsurfs);
-    writeMatrix(gsurfs_painted, "gsurfs_painted.tif", m_cellSize, view);
+    eigen::writeMatrix(gsurfs_painted, "gsurfs_painted.tif", m_cellSize, m_bounds, srs);
 
     gsurfs = gsurfs_painted;
 
     MatrixXd thresh = (m_threshold + 1.2 * gsurfs.array()).matrix();
-    writeMatrix(thresh, "thresh.tif", m_cellSize, view);
+    eigen::writeMatrix(thresh, "thresh.tif", m_cellSize, m_bounds, srs);
 
     for (PointId i = 0; i < view->size(); ++i)
     {
@@ -527,7 +513,7 @@ MatrixXi SMRFilter::progressiveFilter(MatrixXd const& ZImin, double cell_size,
             if (diff(i) > threshold)
                 Obj(i) = 1;
         }
-        // writeMatrix(Obj, "obj.tif", m_cellSize, view);
+        // eigen::writeMatrix(Obj, "obj.tif", m_cellSize, m_bounds, srs);
 
         // The algorithm then proceeds to the next window radius (up to the
         // maximum), and proceeds as above with the last opened surface acting
@@ -921,99 +907,6 @@ MatrixXd SMRFilter::expandingTPS(MatrixXd cx, MatrixXd cy, MatrixXd cz)
                                << frac * 100.0 << "%)\n";
 
     return S;
-}
-
-void SMRFilter::writeMatrix(MatrixXd data, std::string filename,
-                            double cell_size, PointViewPtr view)
-{
-    int cols = data.cols();
-    int rows = data.rows();
-
-    GDALAllRegister();
-
-    GDALDataset *mpDstDS = NULL;
-
-    char **papszMetadata;
-
-    // parse the format driver, hardcoded for the time being
-    std::string tFormat("GTIFF");
-    const char *pszFormat = tFormat.c_str();
-    GDALDriver* tpDriver = GetGDALDriverManager()->GetDriverByName(pszFormat);
-
-    // try to create a file of the requested format
-    if (tpDriver != NULL)
-    {
-        papszMetadata = tpDriver->GetMetadata();
-        if (CSLFetchBoolean(papszMetadata, GDAL_DCAP_CREATE, FALSE))
-        {
-            char **papszOptions = NULL;
-
-            mpDstDS = tpDriver->Create(filename.c_str(), cols, rows, 1,
-                                       GDT_Float32, papszOptions);
-
-            // set the geo transformation
-            double adfGeoTransform[6];
-            adfGeoTransform[0] = m_bounds.minx; // - 0.5*m_GRID_DIST_X;
-            adfGeoTransform[1] = cell_size;
-            adfGeoTransform[2] = 0.0;
-            adfGeoTransform[3] = m_bounds.maxy; // + 0.5*m_GRID_DIST_Y;
-            adfGeoTransform[4] = 0.0;
-            adfGeoTransform[5] = -1 * cell_size;
-            mpDstDS->SetGeoTransform(adfGeoTransform);
-
-            // set the projection
-            mpDstDS->SetProjection(view->spatialReference().getWKT().c_str());
-        }
-    }
-
-    // if we have a valid file
-    if (mpDstDS)
-    {
-        // loop over the raster and determine max slope at each location
-        int cs = 1, ce = cols - 1;
-        int rs = 1, re = rows - 1;
-        float *poRasterData = new float[cols*rows];
-        for (auto i=0; i<cols*rows; i++)
-        {
-            poRasterData[i] = std::numeric_limits<float>::min();
-        }
-
-        // #pragma omp parallel for
-        for (auto c = cs; c < ce; ++c)
-        {
-            for (auto r = rs; r < re; ++r)
-            {
-                if (data(r, c) == 0.0 || std::isnan(data(r, c)) || data(r, c) == std::numeric_limits<double>::max())
-                    continue;
-                poRasterData[(r * cols) + c] =
-                    data(r, c);
-            }
-        }
-
-        // write the data
-        if (poRasterData)
-        {
-            GDALRasterBand *tBand = mpDstDS->GetRasterBand(1);
-
-            tBand->SetNoDataValue(std::numeric_limits<float>::min());
-
-            if (cols > 0 && rows > 0)
-#if GDAL_VERSION_MAJOR <= 1
-                tBand->RasterIO(GF_Write, 0, 0, cols, rows,
-                                poRasterData, cols, rows,
-                                GDT_Float32, 0, 0);
-#else
-
-                int ret = tBand->RasterIO(GF_Write, 0, 0, cols, rows,
-                                          poRasterData, cols, rows,
-                                          GDT_Float32, 0, 0, 0);
-#endif
-        }
-
-        GDALClose((GDALDatasetH) mpDstDS);
-
-        delete [] poRasterData;
-    }
 }
 
 } // namespace pdal

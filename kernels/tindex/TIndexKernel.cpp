@@ -63,10 +63,8 @@ void setDate(OGRFeatureH feature, const tm& tyme, int fieldNumber)
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
-    "kernels.tindex",
-    "TIndex Kernel",
-    "http://pdal.io/kernels/kernels.tindex.html" );
+static PluginInfo const s_info = PluginInfo("kernels.tindex", "TIndex Kernel",
+    "http://pdal.io/apps/tindex.html" );
 
 CREATE_STATIC_PLUGIN(1, 0, TIndexKernel, Kernel, s_info)
 
@@ -679,4 +677,3 @@ gdal::Geometry TIndexKernel::prepareGeometry(const std::string& wkt,
 }
 
 } // namespace pdal
-

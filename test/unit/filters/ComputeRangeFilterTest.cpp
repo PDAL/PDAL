@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2014, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -32,40 +32,68 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/KernelFactory.hpp>
-#include <pdal/PluginManager.hpp>
+#include <pdal/pdal_test_main.hpp>
 
-#include <../kernels/delta/DeltaKernel.hpp>
-#include <../kernels/diff/DiffKernel.hpp>
-#include <../kernels/hausdorff/HausdorffKernel.hpp>
-#include <../kernels/info/InfoKernel.hpp>
-#include <../kernels/merge/MergeKernel.hpp>
-#include <../kernels/pipeline/PipelineKernel.hpp>
-#include <../kernels/random/RandomKernel.hpp>
-#include <../kernels/sort/SortKernel.hpp>
-#include <../kernels/split/SplitKernel.hpp>
-#include <../kernels/tindex/TIndexKernel.hpp>
-#include <../kernels/translate/TranslateKernel.hpp>
+#include <pdal/util/FileUtils.hpp>
+#include <pdal/PointView.hpp>
+#include <pdal/StageFactory.hpp>
+#include <../io/buffer/BufferReader.hpp>
+#include <../filters/computerange/ComputeRangeFilter.hpp>
 
-namespace pdal
+#include "Support.hpp"
+
+using namespace pdal;
+
+TEST(ComputeRangeFilterTest, create)
 {
-
-KernelFactory::KernelFactory(bool no_plugins)
-{
-    if (!no_plugins)
-        PluginManager::loadAll(PF_PluginType_Kernel);
-
-    PluginManager::initializePlugin(DeltaKernel_InitPlugin);
-    PluginManager::initializePlugin(DiffKernel_InitPlugin);
-    PluginManager::initializePlugin(HausdorffKernel_InitPlugin);
-    PluginManager::initializePlugin(InfoKernel_InitPlugin);
-    PluginManager::initializePlugin(MergeKernel_InitPlugin);
-    PluginManager::initializePlugin(PipelineKernel_InitPlugin);
-    PluginManager::initializePlugin(RandomKernel_InitPlugin);
-    PluginManager::initializePlugin(SortKernel_InitPlugin);
-    PluginManager::initializePlugin(SplitKernel_InitPlugin);
-    PluginManager::initializePlugin(TIndexKernel_InitPlugin);
-    PluginManager::initializePlugin(TranslateKernel_InitPlugin);
+    StageFactory f;
+    Stage* filter(f.createStage("filters.computerange"));
+    EXPECT_TRUE(filter);
 }
 
-} // namespace pdal
+TEST(ComputeRangeFilterTest, compute)
+{
+    using namespace Dimension;
+
+    PointTable table;
+    PointLayoutPtr layout(table.layout());
+
+    layout->registerDim(Id::X);
+    layout->registerDim(Id::Y);
+    layout->registerDim(Id::Z);
+    Id pn = layout->registerOrAssignDim("Pixel Number", Type::Double);
+    Id fn = layout->registerOrAssignDim("Frame Number", Type::Double);
+
+    PointViewPtr view(new PointView(table));
+
+    BufferReader r;
+    r.addView(view);
+
+    ComputeRangeFilter crop;
+    crop.setInput(r);
+    crop.prepare(table);
+
+    view->setField(Id::X, 0, 0.0);
+    view->setField(Id::Y, 0, 0.0);
+    view->setField(Id::Z, 0, 0.0);
+    view->setField(pn, 0, 0.0);
+    view->setField(fn, 0, 0.0);
+
+    view->setField(Id::X, 1, 0.0);
+    view->setField(Id::Y, 1, 3.0);
+    view->setField(Id::Z, 1, 4.0);
+    view->setField(pn, 1, -5.0);
+    view->setField(fn, 1, 0.0);
+
+    PointViewSet s = crop.execute(table);
+    EXPECT_EQ(1u, s.size());
+
+    Id range = layout->findDim("Range");
+    EXPECT_NE(Id::Unknown, range);
+
+    PointViewPtr out = *s.begin();
+    EXPECT_EQ(2u, out->size());
+
+    EXPECT_EQ(5.0, out->getFieldAs<double>(range, 0));
+    EXPECT_EQ(0.0, out->getFieldAs<double>(range, 1));
+}

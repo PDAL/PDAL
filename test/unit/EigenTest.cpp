@@ -55,3 +55,32 @@ TEST(EigenTest, PointViewToEigen) {
     ASSERT_EQ(3, actual.cols());
     EXPECT_EQ(expected, actual);
 }
+
+TEST(EigenTest, DiffTests) {
+    using namespace Eigen;
+
+    Matrix3d A;
+    A << 1.8339, 0.3188, 0.3426,
+    -2.2588, -1.3077, 3.5784,
+    0.8622, -0.4336, 2.7694;
+
+    MatrixXd out = eigen::gradX(A);
+    
+    Matrix3d gx;
+    gx << -1.5151, -0.7457, 0.0238,
+    0.9511, 2.9186, 4.8861,
+    -1.2958, 0.9536, 3.2030;
+    
+    for (size_t i = 0; i < 9; ++i)
+        EXPECT_NEAR(gx(i), out(i), 0.0001);
+    
+    MatrixXd out2 = eigen::gradY(A);
+    
+    Matrix3d gy;
+    gy << -4.0927, -1.6265, 3.2358,
+    -0.4859, -0.3762, 1.2134,
+    3.1210, 0.8741, -0.8090;
+    
+    for (size_t i = 0; i < 9; ++i)
+        EXPECT_NEAR(gy(i), out2(i), 0.0001);
+}
