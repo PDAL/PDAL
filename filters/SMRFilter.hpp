@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2016-2017, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -39,19 +39,13 @@
 
 #include <Eigen/Dense>
 
-#include <memory>
-#include <unordered_map>
+#include <string>
 
 extern "C" int32_t SMRFilter_ExitFunc();
 extern "C" PF_ExitFunc SMRFilter_InitPlugin();
 
 namespace pdal
 {
-
-using namespace Eigen;
-
-class PointLayout;
-class PointView;
 
 class PDAL_DLL SMRFilter : public Filter
 {
@@ -64,37 +58,34 @@ public:
     std::string getName() const;
 
 private:
-    bool m_classify;
-    bool m_extract;
-    int m_numRows;
-    int m_numCols;
-    double m_cellSize;
-    double m_cutNet;
-    double m_percentSlope;
-    double m_maxWindow;
+    int m_rows;
+    int m_cols;
+    double m_cell;
+    double m_cut;
+    double m_slope;
+    double m_window;
     double m_scalar;
     double m_threshold;
-    std::string m_outDir;
+    std::string m_dir;
+    BOX2D m_bounds;
+    SpatialReference m_srs;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
     virtual void ready(PointTableRef table);
-
-    MatrixXd inpaintKnn(MatrixXd cx, MatrixXd cy, MatrixXd cz);
-
-    // processGround implements the SMRF algorithm, returning a vector
-    // of ground indices.
-    std::vector<PointId> processGround(PointViewPtr view);
-
-    // progressiveFilter is the core of the SMRF algorithm.
-    MatrixXi progressiveFilter(MatrixXd const& ZImin, double cell_size,
-                               double slope, double max_window);
-
     virtual PointViewSet run(PointViewPtr view);
 
-    // TPS returns an interpolated matrix using thin plate splines.
-    MatrixXd TPS(MatrixXd cx, MatrixXd cy, MatrixXd cz);
-    MatrixXd expandingTPS(MatrixXd cx, MatrixXd cy, MatrixXd cz);
+    void classifyGround(PointViewPtr, Eigen::MatrixXd const&);
+    Eigen::MatrixXi createLowMask(Eigen::MatrixXd const&);
+    Eigen::MatrixXi createNetMask();
+    Eigen::MatrixXi createObjMask(Eigen::MatrixXd const&);
+    Eigen::MatrixXd createZImin(PointViewPtr);
+    Eigen::MatrixXd createZInet(Eigen::MatrixXd const&, Eigen::MatrixXi const&);
+    Eigen::MatrixXd createZIpro(PointViewPtr, Eigen::MatrixXd const&,
+                                Eigen::MatrixXi const&, Eigen::MatrixXi const&,
+                                Eigen::MatrixXi const&);
+    Eigen::MatrixXd knnfill(PointViewPtr, Eigen::MatrixXd const&);
+    Eigen::MatrixXi progressiveFilter(Eigen::MatrixXd const&, double, double);
 
     SMRFilter& operator=(const SMRFilter&); // not implemented
     SMRFilter(const SMRFilter&); // not implemented
