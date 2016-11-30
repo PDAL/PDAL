@@ -238,26 +238,54 @@ PDAL_DLL Eigen::MatrixXd pointViewToEigen(const PointView& view);
 PDAL_DLL void writeMatrix(Eigen::MatrixXd data, const std::string& filename,
                           double cell_size, BOX2D bounds, SpatialReference srs);
 
+/**
+  Compute the numerical gradient in the X direction.
+
+  This is meant to mimic MATLAB's gradient function. The spacing between points
+  in each direction is assumed to be one.
+
+  \param data the input matrix.
+  \return the X component of the two-dimensional gradient.
+*/
 template <typename Derived>
-PDAL_DLL Eigen::MatrixXd gradX(const Eigen::MatrixBase<Derived>& A)
+PDAL_DLL Derived gradX(const Eigen::MatrixBase<Derived>& A)
 {
-    Eigen::MatrixXd B = A.rightCols(A.cols()-1) - A.leftCols(A.cols()-1);
-    Eigen::Matrix3d C;
-    C.col(0) = B.col(0);
-    C.col(2) = B.col(1);
-    C.col(1) = B.col(0) + 0.5 * (B.col(1) - B.col(0));
-    return C;
+    Derived out = Derived::Zero(A.rows(), A.cols());
+
+    // Interior points are obtained by central differences.
+    out.block(0, 1, A.rows(), A.cols()-2) =
+        0.5 * (A.rightCols(A.cols()-2) - A.leftCols(A.cols()-2));
+
+    // Edge columns are obtained by single-sided differences.
+    out.col(0) = A.col(1) - A.col(0);
+    out.col(out.cols()-1) = A.col(A.cols()-1) - A.col(A.cols()-2);
+
+    return out;
 };
 
+/**
+  Compute the numerical gradient in the Y direction.
+
+  This is meant to mimic MATLAB's gradient function. The spacing between points
+  in each direction is assumed to be one.
+
+  \param data the input matrix.
+  \return the Y component of the two-dimensional gradient.
+*/
 template <typename Derived>
 PDAL_DLL Derived gradY(const Eigen::MatrixBase<Derived>& A)
 {
-    Eigen::MatrixXd B = A.bottomRows(A.rows()-1) - A.topRows(A.rows()-1);
-    Eigen::Matrix3d C;
-    C.row(0) = B.row(0);
-    C.row(2) = B.row(1);
-    C.row(1) = B.row(0) + 0.5 * (B.row(1) - B.row(0));
-    return C;
+    Derived out = Derived::Zero(A.rows(), A.cols());
+
+    // Interior points are obtained by central differences.
+    out.block(1, 0, A.rows()-2, A.cols()) =
+        0.5 * (A.bottomRows(A.rows()-2) - A.topRows(A.rows()-2));
+
+    // Edge rows are obtained by single-sided differences.
+    out.row(0) = A.row(1) - A.row(0);
+    out.row(out.rows()-1) = A.row(A.rows()-1) - A.row(A.rows()-2);
+
+    return out;
 };
 
 } // namespace eigen
