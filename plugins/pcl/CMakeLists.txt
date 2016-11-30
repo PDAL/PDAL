@@ -76,32 +76,13 @@ endif()
 #
 # PCD Reader
 #
-set(srcs
-    io/PcdCommon.cpp
-    io/PcdReader.cpp
-)
-
-set(incs
-    io/PcdCommon.hpp
-    io/PcdReader.hpp
-    io/point_types.hpp
-    PCLConversions.hpp
-)
-
 PDAL_ADD_PLUGIN(pcd_reader_libname reader pcd
-    FILES "${srcs}" "${incs}"
+    FILES
+        io/PcdCommon.cpp
+        io/PcdReader.cpp
     LINK_WITH ${PCL_LIBRARIES})
 target_include_directories(${pcd_reader_libname} PRIVATE
     ${INCLUDE_DIRS})
-
-#[[
-set(incs
-    io/PcdCommon.hpp
-    io/PcdWriter.hpp
-    io/point_types.hpp
-    PCLConversions.hpp
-)
-]]
 
 #
 # PCD Writer
@@ -109,6 +90,7 @@ set(incs
 PDAL_ADD_PLUGIN(pcd_writer_libname writer pcd
     FILES
         io/PcdCommon.cpp
+        io/PcdWriter.cpp
     LINK_WITH ${PCL_LIBRARIES})
 target_include_directories(${pcd_writer_libname} PRIVATE
     ${INCLUDE_DIRS})
@@ -116,22 +98,10 @@ target_include_directories(${pcd_writer_libname} PRIVATE
 #
 # PCLBlock Filter
 #
-set(srcs
-    pipeline/PCLPipeline.cpp
-    filters/PCLBlock.cpp
-)
-
-#[[
-set(incs
-   pipeline/PCLPipeline.h
-   pipeline/PCLPipeline.hpp
-   filters/PCLBlock.hpp
-   PCLConversions.hpp
-)
-]]
-
 PDAL_ADD_PLUGIN(pclblock_libname filter pclblock
-    FILES "${srcs}" "${incs}"
+    FILES
+        pipeline/PCLPipeline.cpp
+        filters/PCLBlock.cpp
     LINK_WITH ${PCL_LIBRARIES})
 target_include_directories(${pclblock_libname} PRIVATE
     ${INCLUDE_DIRS})
@@ -140,7 +110,8 @@ target_include_directories(${pclblock_libname} PRIVATE
 # Ground Filter
 #
 PDAL_ADD_PLUGIN(ground_filter_libname filter ground
-    FILES filters/GroundFilter.hpp filters/GroundFilter.cpp
+    FILES
+        filters/GroundFilter.cpp
     LINK_WITH ${PCL_LIBRARIES})
 target_include_directories(${ground_filter_libname} PRIVATE
     ${INCLUDE_DIRS})
@@ -153,43 +124,50 @@ target_include_directories(${statistical_outlier_filter_libname} PRIVATE
     ${INCLUDE_DIRS})
 
 PDAL_ADD_PLUGIN(radius_outlier_filter_libname filter radiusoutlier
-    FILES filters/RadiusOutlierFilter.hpp filters/RadiusOutlierFilter.cpp
+    FILES
+        filters/RadiusOutlierFilter.cpp
     LINK_WITH ${PCL_LIBRARIES})
 target_include_directories(${radius_outlier_filter_libname} PRIVATE
     ${INCLUDE_DIRS})
 
 PDAL_ADD_PLUGIN(voxelgrid_filter_libname filter voxelgrid
-    FILES filters/VoxelGridFilter.hpp filters/VoxelGridFilter.cpp
+    FILES
+        filters/VoxelGridFilter.cpp
     LINK_WITH ${PCL_LIBRARIES})
 target_include_directories(${voxelgrid_filter_libname} PRIVATE
     ${INCLUDE_DIRS})
 
 PDAL_ADD_PLUGIN(movingleastsquares_filter_libname filter movingleastsquares
-    FILES filters/MovingLeastSquaresFilter.hpp filters/MovingLeastSquaresFilter.cpp
+    FILES
+        filters/MovingLeastSquaresFilter.cpp
     LINK_WITH ${PCL_LIBRARIES})
 target_include_directories(${movingleastsquares_filter_libname} PRIVATE
     ${INCLUDE_DIRS})
 
 PDAL_ADD_PLUGIN(gridprojection_filter_libname filter gridprojection
-    FILES filters/GridProjectionFilter.hpp filters/GridProjectionFilter.cpp
+    FILES
+        filters/GridProjectionFilter.cpp
     LINK_WITH ${PCL_LIBRARIES})
 target_include_directories(${gridprojection_filter_libname} PRIVATE
     ${INCLUDE_DIRS})
 
 PDAL_ADD_PLUGIN(poisson_filter_libname filter poisson
-    FILES filters/PoissonFilter.hpp filters/PoissonFilter.cpp
+    FILES
+        filters/PoissonFilter.cpp
     LINK_WITH ${PCL_LIBRARIES})
 target_include_directories(${poisson_filter_libname} PRIVATE
     ${INCLUDE_DIRS})
 
 PDAL_ADD_PLUGIN(greedyprojection_filter_libname filter greedyprojection
-    FILES filters/GreedyProjectionFilter.hpp filters/GreedyProjectionFilter.cpp
+    FILES
+        filters/GreedyProjectionFilter.cpp
     LINK_WITH ${PCL_LIBRARIES})
 target_include_directories(${greedyprojection_filter_libname} PRIVATE
     ${INCLUDE_DIRS})
 
 PDAL_ADD_PLUGIN(height_filter_libname filter height
-    FILES filters/HeightFilter.cpp
+    FILES
+        filters/HeightFilter.cpp
     LINK_WITH ${PCL_LIBRARIES})
 target_include_directories(${height_filter_libname} PRIVATE
     ${INCLUDE_DIRS})
@@ -237,7 +215,8 @@ target_include_directories(${smooth_libname} PRIVATE
 
 if (WITH_TESTS)
     PDAL_ADD_TEST(pcltest
-    FILES test/PCLBlockFilterTest.cpp
+    FILES
+        test/PCLBlockFilterTest.cpp
     LINK_WITH ${pclvisualizer_libname} ${pcd_reader_libname}
         ${pcd_writer_libname} ${pclblock_libname} ${ground_filter_libname}
         ${pcl_libname} ${ground_kernel_libname} ${smooth_libname}
