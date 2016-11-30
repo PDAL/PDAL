@@ -35,12 +35,13 @@ class PointView extends Native {
   def get(idx: Int, packedPoints: Array[Byte], dims: Array[DimType]): Array[Byte] = {
     val pointSize = dims.map(layout.dimSize(_)).sum
     val from = (idx * pointSize).toInt
-    val to = {
-      val t = (from + pointSize).toInt
-      if(t > length) length else t
+    val result = new Array[Byte](pointSize.toInt)
+    var j = 0
+    while(j < pointSize) {
+      result(j) = packedPoints(from + j)
+      j += 1
     }
-
-    packedPoints.slice(from, to)
+    result
   }
 
   /**
@@ -48,8 +49,14 @@ class PointView extends Native {
     */
   def get(packedPoint: Array[Byte], dim: DimType): ByteBuffer = {
     val from = layout.dimPackedOffset(dim).toInt
-    val to = from + layout.dimSize(dim).toInt
-    ByteBuffer.wrap(packedPoint.slice(from, to))
+    val dimSize = layout.dimSize(dim).toInt
+    val result = new Array[Byte](dimSize)
+    var j = 0
+    while(j < dimSize) {
+      result(j) = packedPoint(from + j)
+      j += 1
+    }
+    ByteBuffer.wrap(result)
   }
   /**
     * One dimension read; for multiple dims custom logic required.
