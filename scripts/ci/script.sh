@@ -70,6 +70,9 @@ if [ "${OPTIONAL_COMPONENT_SWITCH}" == "ON" ]; then
     export PDAL_TEST_DIR=/pdal/_build/test
     python setup.py test
 
+    # JNI tests
+    cd /pdal/java; ./sbt tests/test
+
     # Build all examples
     for EXAMPLE in writing writing-filter writing-kernel writing-reader writing-writer
     do
