@@ -1,10 +1,9 @@
 package io.pdal
 
 import java.nio.ByteBuffer
+import java.util
 
 class PointView extends Native {
-  def getPointCloud(idx: Long, metadata: String, schema: String): PointCloud =
-    getPointCloud(idx).copy(metadata = metadata, schema = schema)
   def getPointCloud(idx: Long): PointCloud = getPointCloud(idx, layout.dimTypes())
   def getPointCloud(idx: Long, dims: Array[DimType]): PointCloud =
     PointCloud(
@@ -12,9 +11,7 @@ class PointView extends Native {
       dimTypes    = layout.toSizedDimTypes(dims)
     )
 
-  def getPointCloud(metadata: String, schema: String): PointCloud =
-    getPointCloud.copy(metadata = metadata, schema = schema)
-  def getPointCloud: PointCloud = getPointCloud(layout.dimTypes())
+  def getPointCloud(): PointCloud = getPointCloud(layout.dimTypes())
   def getPointCloud(dims: Array[DimType]): PointCloud =
     PointCloud(
       bytes       = getPackedPoints(dims),
@@ -22,26 +19,22 @@ class PointView extends Native {
     )
 
   def getPackedPoint(idx: Long): Array[Byte] = getPackedPoint(idx, layout.dimTypes())
-  def getPackedPoints: Array[Byte] = getPackedPoints(layout.dimTypes())
+  def getPackedPoints(): Array[Byte] = getPackedPoints(layout.dimTypes())
   def findDimType(name: String): DimType = layout.findDimType(name)
-  def length: Int = size()
+  def length(): Int = size()
   def getCrsWKT(mode_flag: Int): String = getCrsWKT(mode_flag, pretty = false)
-  def getCrsWKT: String = getCrsWKT(1, pretty = false)
+  def getCrsWKT(): String = getCrsWKT(1, pretty = false)
 
   /**
     * Reads a packed point by point id from a set of packed points.
     */
   def get(idx: Int, packedPoints: Array[Byte]): Array[Byte] = get(idx, packedPoints, layout.dimTypes())
   def get(idx: Int, packedPoints: Array[Byte], dims: Array[DimType]): Array[Byte] = {
-    val pointSize = dims.map(layout.dimSize(_)).sum
-    val from = (idx * pointSize).toInt
-    val result = new Array[Byte](pointSize.toInt)
-    var j = 0
-    while(j < pointSize) {
-      result(j) = packedPoints(from + j)
-      j += 1
-    }
-    result
+    val pointSize = dims.map(layout.dimSize(_)).sum.toInt
+    val from = idx * pointSize
+    val to = from + pointSize
+
+    util.Arrays.copyOfRange(packedPoints, from, to)
   }
 
   /**
@@ -49,14 +42,9 @@ class PointView extends Native {
     */
   def get(packedPoint: Array[Byte], dim: DimType): ByteBuffer = {
     val from = layout.dimPackedOffset(dim).toInt
-    val dimSize = layout.dimSize(dim).toInt
-    val result = new Array[Byte](dimSize)
-    var j = 0
-    while(j < dimSize) {
-      result(j) = packedPoint(from + j)
-      j += 1
-    }
-    ByteBuffer.wrap(result)
+    val to = from + layout.dimSize(dim).toInt
+
+    ByteBuffer.wrap(util.Arrays.copyOfRange(packedPoint, from, to))
   }
   /**
     * One dimension read; for multiple dims custom logic required.
@@ -95,10 +83,10 @@ class PointView extends Native {
   def getY(packedPoint: Array[Byte]): Double = get(packedPoint, DimType.Y).getDouble
   def getZ(packedPoint: Array[Byte]): Double = get(packedPoint, DimType.Z).getDouble
 
-  @native def layout: PointLayout
+  @native def layout(): PointLayout
   @native def size(): Int
   @native def empty(): Boolean
-  @native def getCrsProj4: String
+  @native def getCrsProj4(): String
   @native def getCrsWKT(mode_flag: Int, pretty: Boolean): String
   @native def getPackedPoint(idx: Long, dims: Array[DimType]): Array[Byte]
   @native def getPackedPoints(dims: Array[DimType]): Array[Byte]

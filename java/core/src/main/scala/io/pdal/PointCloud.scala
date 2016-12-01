@@ -9,9 +9,9 @@ import scala.collection.JavaConversions._
   * PointCloud abstraction to work with packed point(s) in JVM memory.
   * SizedDimType contains size and offset for a particular packed point with the current set of dims.
   **/
-case class PointCloud(bytes: Array[Byte], dimTypes: util.Map[String, SizedDimType], metadata: String = "", schema: String = "") {
-  val pointSize: Long = dimTypes.values.map(_.size).sum
-  val length: Int = (bytes.length / pointSize).toInt
+case class PointCloud(bytes: Array[Byte], dimTypes: util.Map[String, SizedDimType]) {
+  val pointSize: Int = dimTypes.values.map(_.size).sum.toInt
+  val length: Int = bytes.length / pointSize
   val isPoint: Boolean = length == pointSize
 
   def dimSize(dim: SizedDimType) = dimTypes(dim.dimType.id).size
@@ -26,14 +26,10 @@ case class PointCloud(bytes: Array[Byte], dimTypes: util.Map[String, SizedDimTyp
   def get(i: Int): Array[Byte] = {
     if (isPoint) bytes
     else {
-      val from = (i * pointSize).toInt
-      val result = new Array[Byte](pointSize.toInt)
-      var j = 0
-      while(j < pointSize) {
-        result(j) = bytes(from + j)
-        j += 1
-      }
-      result
+      val from = i * pointSize
+      val to = from + pointSize
+
+      util.Arrays.copyOfRange(bytes, from, to)
     }
   }
 
@@ -83,14 +79,9 @@ case class PointCloud(bytes: Array[Byte], dimTypes: util.Map[String, SizedDimTyp
   def get(packedPoint: Array[Byte], dim: String): Array[Byte] = {
     val sdt = dimTypes(dim)
     val from = sdt.offset.toInt
-    val dimSize = sdt.size.toInt
-    val result = new Array[Byte](dimSize)
-    var j = 0
-    while(j < dimSize) {
-      result(j) = packedPoint(from + j)
-      j += 1
-    }
-    result
+    val to = from + sdt.size.toInt
+
+    util.Arrays.copyOfRange(bytes, from, to)
   }
 
   /**

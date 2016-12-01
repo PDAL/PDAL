@@ -92,7 +92,7 @@ JNIEXPORT jstring JNICALL Java_io_pdal_Pipeline_getLog
     return env->NewStringUTF(p->getLog().c_str());
 }
 
-JNIEXPORT jobject JNICALL Java_io_pdal_Pipeline_pointViews
+JNIEXPORT jobject JNICALL Java_io_pdal_Pipeline_getPointViews
   (JNIEnv *env, jobject obj)
 {
     Pipeline *p = getHandle<Pipeline>(env, obj);

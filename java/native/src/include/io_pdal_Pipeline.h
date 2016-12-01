@@ -25,10 +25,10 @@ JNIEXPORT void JNICALL Java_io_pdal_Pipeline_execute
 
 /*
  * Class:     io_pdal_Pipeline
- * Method:    pointViews
+ * Method:    getPointViews
  * Signature: ()Lio/pdal/PointViewIterator;
  */
-JNIEXPORT jobject JNICALL Java_io_pdal_Pipeline_pointViews
+JNIEXPORT jobject JNICALL Java_io_pdal_Pipeline_getPointViews
   (JNIEnv *, jobject);
 
 /*

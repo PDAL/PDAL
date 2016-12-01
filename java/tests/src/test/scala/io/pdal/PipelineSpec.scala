@@ -20,13 +20,13 @@ class PipelineSpec extends TestEnvironmentSpec {
     }
 
     it("should create pointViews iterator") {
-      val pvi = pipeline.pointViews()
+      val pvi = pipeline.getPointViews()
       pvi.length should be (1)
       pvi.dispose()
     }
 
     it("should have a valid point view size") {
-      val pvi = pipeline.pointViews()
+      val pvi = pipeline.getPointViews()
       val pv = pvi.next()
       pv.length should be (1065)
       pvi.hasNext should be (false)
@@ -35,7 +35,7 @@ class PipelineSpec extends TestEnvironmentSpec {
     }
 
     it("should read a valid (X, Y, Z) data") {
-      val pvi = pipeline.pointViews()
+      val pvi = pipeline.getPointViews()
       val pv = pvi.next()
       pv.getX(0) should be (637012.24)
       pv.getY(0) should be (849028.31)
@@ -45,7 +45,7 @@ class PipelineSpec extends TestEnvironmentSpec {
     }
 
     it("should read a valid packed data") {
-      val pvi = pipeline.pointViews()
+      val pvi = pipeline.getPointViews()
       val pv = pvi.next()
       val layout = pv.layout
       val arr = pv.getPackedPoint(0, Array(DimType.X, DimType.Y))
@@ -60,7 +60,7 @@ class PipelineSpec extends TestEnvironmentSpec {
     }
 
     it("should read the whole packed point and grab only one dim") {
-      val pvi = pipeline.pointViews()
+      val pvi = pipeline.getPointViews()
       val pv = pvi.next()
       val arr = pv.getPackedPoint(0)
       pv.get(arr, DimType.Y).getDouble should be (pv.getY(0))
@@ -69,7 +69,7 @@ class PipelineSpec extends TestEnvironmentSpec {
     }
 
     it("should read all packed points and grab only one point out of it") {
-      val pvi = pipeline.pointViews()
+      val pvi = pipeline.getPointViews()
       val pv = pvi.next()
       pv.get(3, pv.getPackedPoints) should be (pv.getPackedPoint(3))
       pv.dispose()
@@ -77,7 +77,7 @@ class PipelineSpec extends TestEnvironmentSpec {
     }
 
     it("should read a valid value by name") {
-      val pvi = pipeline.pointViews()
+      val pvi = pipeline.getPointViews()
       val pv = pvi.next()
       pv.getByte(0, "ReturnNumber") should be (1)
       pv.dispose()
@@ -85,7 +85,7 @@ class PipelineSpec extends TestEnvironmentSpec {
     }
 
     it("should read correctly data as a packed point") {
-      val pvi = pipeline.pointViews()
+      val pvi = pipeline.getPointViews()
       val pv = pvi.next()
       val layout = pv.layout
       val arr = pv.getPackedPoint(0)
@@ -96,7 +96,7 @@ class PipelineSpec extends TestEnvironmentSpec {
     }
 
     it("layout should have a valid number of dims") {
-      val pvi = pipeline.pointViews()
+      val pvi = pipeline.getPointViews()
       val pv = pvi.next()
       pv.layout.dimTypes().length should be (16)
       pv.dispose()
@@ -104,7 +104,7 @@ class PipelineSpec extends TestEnvironmentSpec {
     }
 
     it("should find a dim by name") {
-      val pvi = pipeline.pointViews()
+      val pvi = pipeline.getPointViews()
       val pv = pvi.next()
       pv.findDimType("Red") should be (DimType("Red", "uint16_t"))
       pv.dispose()
@@ -112,7 +112,7 @@ class PipelineSpec extends TestEnvironmentSpec {
     }
 
     it("dim sizes should be of a valid size") {
-      val pvi = pipeline.pointViews()
+      val pvi = pipeline.getPointViews()
       val pv = pvi.next()
       val layout = pv.layout
       layout.dimTypes().map(pv.layout.dimSize(_)).sum should be (layout.pointSize())
@@ -122,7 +122,7 @@ class PipelineSpec extends TestEnvironmentSpec {
     }
 
     it("should read all packed points valid") {
-      val pvi = pipeline.pointViews()
+      val pvi = pipeline.getPointViews()
       val pv = pvi.next()
       val layout = pv.layout
       pv.getPackedPoints.length should be (pv.length * layout.pointSize())
@@ -132,7 +132,7 @@ class PipelineSpec extends TestEnvironmentSpec {
     }
 
     it("should read crs correct") {
-      val pvi = pipeline.pointViews()
+      val pvi = pipeline.getPointViews()
       val pv = pvi.next()
       pv.getCrsProj4 should be (proj4String)
       pv.dispose()
