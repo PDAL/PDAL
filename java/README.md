@@ -17,7 +17,7 @@ libraryDependencies ++= Seq(
   "io.pdal" %% "pdal" % "1.4.0-M5"
 )
 
-resolvers += Resolver.bintrayRepo("daunnc", "maven")
+resolvers += Resolver.bintrayRepo("pdal", "maven")
 ```
 
 It's required to have native JNI binary into your app classpath:

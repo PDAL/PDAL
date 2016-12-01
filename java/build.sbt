@@ -9,8 +9,8 @@ lazy val commonSettings = Seq(
   licenses := Seq("BSD" -> url("https://github.com/PDAL/PDAL/blob/master/LICENSE.txt")),
   homepage := Some(url("http://www.pdal.io")),
   publishMavenStyle := true,
+  bintrayOrganization := Some("pdal"),
   bintrayRepository := "maven",
-  bintrayOrganization := None,
   scalacOptions ++= Seq(
     "-deprecation",
     "-unchecked",

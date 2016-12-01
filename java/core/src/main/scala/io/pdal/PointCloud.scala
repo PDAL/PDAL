@@ -27,9 +27,13 @@ case class PointCloud(bytes: Array[Byte], dimTypes: util.Map[String, SizedDimTyp
     if (isPoint) bytes
     else {
       val from = i * pointSize
-      val to = from + pointSize
-
-      util.Arrays.copyOfRange(bytes, from, to)
+      val result = new Array[Byte](pointSize)
+      var j = 0
+      while(j < pointSize) {
+        result(j) = bytes(from + j)
+        j += 1
+      }
+      result
     }
   }
 
@@ -79,9 +83,14 @@ case class PointCloud(bytes: Array[Byte], dimTypes: util.Map[String, SizedDimTyp
   def get(packedPoint: Array[Byte], dim: String): Array[Byte] = {
     val sdt = dimTypes(dim)
     val from = sdt.offset.toInt
-    val to = from + sdt.size.toInt
-
-    util.Arrays.copyOfRange(bytes, from, to)
+    val dimSize = sdt.size.toInt
+    val result = new Array[Byte](dimSize)
+    var j = 0
+    while(j < dimSize) {
+      result(j) = packedPoint(from + j)
+      j += 1
+    }
+    result
   }
 
   /**
