@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <vector>
-#include <chrono>
 #include "io_pdal_PointView.h"
 #include "JavaPipeline.hpp"
 #include "PointViewRawPtr.hpp"
@@ -16,9 +15,6 @@ using pdal::Dimension::Type;
 using pdal::Dimension::Id;
 using pdal::PointId;
 using pdal::DimTypeList;
-
-const int endian_check = 1;
-#define is_littleendian() ((*(char*)&endian_check) != 0)
 
 /// Converts JavaArray of DimTypes (In Java interpretation DimType is a pair of strings)
 /// into pdal::DimTypeList (vector of DimTypes), puts dim size into bufSize
@@ -48,29 +44,6 @@ void convertDimTypeJavaArrayToVector(JNIEnv *env, jobjectArray dims, std::size_t
     }
 }
 
-/// Fill a buffer with point data specified by the dimension list.
-/// \param[in] dims  List of dimensions/types to retrieve.
-/// \param[in] idx   Index of point to get.
-/// \param[in] buf   Pointer to buffer to fill.
-void getPackedPoint(PointViewPtr pv, const pdal::DimTypeList& dims, pdal::PointId idx, char *buf)
-{
-    for (auto di = dims.begin(); di != dims.end(); ++di)
-    {
-        std::size_t typeSize = pdal::Dimension::size(di->m_type);
-        char *chunk = new char[typeSize];
-        pv->getField(chunk, di->m_id, di->m_type, idx);
-        // JVM native endian conversion
-        if(is_littleendian())
-        {
-            std::reverse(chunk, chunk + typeSize);
-        }
-        memcpy(buf, chunk, typeSize);
-        buf += typeSize;
-        delete[] chunk;
-
-    }
-}
-
 /// Fill a buffer with point data specified by the dimension list, accounts index
 /// Using this functions it is possible to pack all points into one buffer
 /// \param[in] pv    pdal::PointView pointer.
@@ -80,26 +53,9 @@ void getPackedPoint(PointViewPtr pv, const pdal::DimTypeList& dims, pdal::PointI
 void appendPackedPoint(PointViewPtr pv, const pdal::DimTypeList& dims, pdal::PointId idx, std::size_t pointSize, char *buf)
 {
     std::size_t from = idx * pointSize;
-    if(from >= pv->size() * pointSize)
-    {
-        return;
-    }
-
+    if(from >= pv->size() * pointSize) return;
     buf += from;
-    for (auto di = dims.begin(); di != dims.end(); ++di)
-    {
-        std::size_t typeSize = pdal::Dimension::size(di->m_type);
-        char *chunk = new char[typeSize];
-        pv->getField(chunk, di->m_id, di->m_type, idx);
-        // JVM native endian conversion
-        //if(is_littleendian())
-        //{
-        //    std::reverse(chunk, chunk + typeSize);
-        //}
-        memcpy(buf, chunk, typeSize);
-        buf += typeSize;
-        delete[] chunk;
-    }
+    pv->getPackedPoint(dims, idx, buf);
 }
 
 JNIEXPORT jobject JNICALL Java_io_pdal_PointView_layout
@@ -177,7 +133,8 @@ JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getPackedPoint
     convertDimTypeJavaArrayToVector(env, dims, &pointSize, &dimTypes);
 
     char *buf = new char[pointSize];
-    getPackedPoint(pv, dimTypes, idx, buf);
+
+    pv->getPackedPoint(dimTypes, idx, buf);
 
     jbyteArray array = env->NewByteArray(pointSize);
     env->SetByteArrayRegion (array, 0, pointSize, reinterpret_cast<jbyte *>(buf));
@@ -190,7 +147,6 @@ JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getPackedPoint
 JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getPackedPoints
   (JNIEnv *env, jobject obj, jobjectArray dims)
 {
-    std::chrono::steady_clock::time_point begin0 = std::chrono::steady_clock::now();
     PointViewRawPtr *pvrp = getHandle<PointViewRawPtr>(env, obj);
     PointViewPtr pv = pvrp->shared_pointer;
 
@@ -207,26 +163,14 @@ JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getPackedPoints
     std::size_t bufSize = pointSize * pv->size();
     char *buf = new char[bufSize];
 
-    std::chrono::steady_clock::time_point begin1 = std::chrono::steady_clock::now();
     for (int idx = 0; idx < pv->size(); idx++) {
         appendPackedPoint(pv, dimTypes, idx, pointSize, buf);
     }
-    std::chrono::steady_clock::time_point end1 = std::chrono::steady_clock::now();
 
-    std::cout << "appendPackedPoint (milliseconds):" << std::chrono::duration_cast<std::chrono::milliseconds>(end1 - begin1).count() <<std::endl;
-
-    std::chrono::steady_clock::time_point begin2 = std::chrono::steady_clock::now();
     jbyteArray array = env->NewByteArray(bufSize);
     env->SetByteArrayRegion (array, 0, bufSize, reinterpret_cast<jbyte *>(buf));
-    std::chrono::steady_clock::time_point end2 = std::chrono::steady_clock::now();
-
-    std::cout << "jbyteArray creation (milliseconds):" << std::chrono::duration_cast<std::chrono::milliseconds>(end2 - begin2).count() <<std::endl;
 
     delete[] buf;
-
-    std::chrono::steady_clock::time_point end0 = std::chrono::steady_clock::now();
-
-    std::cout << "getPackedPoints (milliseconds):" << std::chrono::duration_cast<std::chrono::milliseconds>(end0 - begin0).count() <<std::endl;
 
     return array;
 }

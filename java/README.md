@@ -14,7 +14,7 @@ Java bindings to use PDAL on JVM.
 
 ```scala
 libraryDependencies ++= Seq(
-  "io.pdal" %% "pdal" % "1.4.0-M5"
+  "io.pdal" %% "pdal" % "1.4.0-M6"
 )
 
 resolvers += Resolver.bintrayRepo("pdal", "maven")

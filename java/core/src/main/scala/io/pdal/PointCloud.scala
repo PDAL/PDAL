@@ -1,6 +1,6 @@
 package io.pdal
 
-import java.nio.ByteBuffer
+import java.nio.{ByteBuffer, ByteOrder}
 import java.util
 
 import scala.collection.JavaConversions._
@@ -67,11 +67,11 @@ case class PointCloud(bytes: Array[Byte], dimTypes: util.Map[String, SizedDimTyp
 
   def get(idx: Int, dim: SizedDimType): ByteBuffer = get(idx, dim.dimType.id)
   def get(idx: Int, dim: DimType): ByteBuffer = get(idx, dim.id)
-  def get(idx: Int, dim: String): ByteBuffer = ByteBuffer.wrap(get(get(idx), dim))
+  def get(idx: Int, dim: String): ByteBuffer = ByteBuffer.wrap(get(get(idx), dim)).order(ByteOrder.nativeOrder())
 
-  def get(idx: Int, dims: Array[SizedDimType]): ByteBuffer = ByteBuffer.wrap(get(get(idx), dims.map(_.dimType.id)))
-  def get(idx: Int, dims: Array[DimType]): ByteBuffer = ByteBuffer.wrap(get(get(idx), dims.map(_.id)))
-  def get(idx: Int, dims: Array[String]): ByteBuffer = ByteBuffer.wrap(get(get(idx), dims))
+  def get(idx: Int, dims: Array[SizedDimType]): ByteBuffer = get(idx, dims.map(_.dimType.id))
+  def get(idx: Int, dims: Array[DimType]): ByteBuffer = get(idx, dims.map(_.id))
+  def get(idx: Int, dims: Array[String]): ByteBuffer = ByteBuffer.wrap(get(get(idx), dims)).order(ByteOrder.nativeOrder())
 
   def getX(idx: Int): Double = get(idx, DimType.Id.X).getDouble
   def getY(idx: Int): Double = get(idx, DimType.Id.Y).getDouble

@@ -1,6 +1,6 @@
 package io.pdal
 
-import java.nio.ByteBuffer
+import java.nio.{ByteBuffer, ByteOrder}
 
 class PipelineSpec extends TestEnvironmentSpec {
   describe("Pipeline execution") {
@@ -51,8 +51,8 @@ class PipelineSpec extends TestEnvironmentSpec {
       val arr = pv.getPackedPoint(0, Array(DimType.X, DimType.Y))
       val (xarr, yarr) = arr.take(layout.dimSize(DimType.X).toInt) -> arr.drop(layout.dimSize(DimType.Y).toInt)
 
-      ByteBuffer.wrap(xarr).getDouble should be (pv.getX(0))
-      ByteBuffer.wrap(yarr).getDouble should be (pv.getY(0))
+      ByteBuffer.wrap(xarr).order(ByteOrder.nativeOrder()).getDouble should be (pv.getX(0))
+      ByteBuffer.wrap(yarr).order(ByteOrder.nativeOrder()).getDouble should be (pv.getY(0))
 
       layout.dispose()
       pv.dispose()

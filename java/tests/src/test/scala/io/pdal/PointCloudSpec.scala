@@ -1,7 +1,7 @@
 package io.pdal
 
 import scala.collection.JavaConversions._
-import java.nio.ByteBuffer
+import java.nio.{ByteBuffer, ByteOrder}
 
 class PointCloudSpec extends TestEnvironmentSpec {
   var packedPoints: PointCloud = _
@@ -47,8 +47,8 @@ class PointCloudSpec extends TestEnvironmentSpec {
 
       xarr should be (xmarr)
       yarr should be (ymarr)
-      ByteBuffer.wrap(xmarr).getDouble should be (pv.getX(0))
-      ByteBuffer.wrap(ymarr).getDouble should be (pv.getY(0))
+      ByteBuffer.wrap(xmarr).order(ByteOrder.nativeOrder()).getDouble should be (pv.getX(0))
+      ByteBuffer.wrap(ymarr).order(ByteOrder.nativeOrder()).getDouble should be (pv.getY(0))
 
       layout.dispose()
       pv.dispose()
