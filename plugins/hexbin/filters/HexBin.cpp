@@ -64,6 +64,7 @@ void HexBin::addArgs(ProgramArgs& args)
     args.add("precision", "Output precision", m_precision, 8U);
     m_cullArg = &args.add("hole_cull_area_tolerance", "Tolerance area to "
         "apply to holes before cull", m_cullArea);
+    args.add("smooth", "Smooth boundary output", m_doSmooth, true);
 }
 
 
@@ -206,10 +207,16 @@ void HexBin::done(PointTableRef table)
         SpatialReference utm(makezone(zone));
         density_p = p.transform(utm);
     }
-    pdal::Polygon smooth = p.simplify(tolerance, cull);
-    std::string smooth_text = smooth.wkt(m_precision);
 
-    m_metadata.add("boundary", smooth_text, "Approximated MULTIPOLYGON of domain");
+    pdal::Polygon boundary_poly;
+    if (m_doSmooth)
+        boundary_poly = p.simplify(tolerance, cull);
+    else
+        boundary_poly = p;
+
+    std::string boundary_text = boundary_poly.wkt(m_precision);
+
+    m_metadata.add("boundary", boundary_text, "Approximated MULTIPOLYGON of domain");
     double area = density_p.area();
 
 //    double density = (double) m_grid->densePointCount() / area ;

@@ -67,6 +67,7 @@ private:
     int32_t m_density;
     double m_edgeLength;
     bool m_outputTesselation;
+    bool m_doSmooth;
     point_count_t m_count;
 
     virtual void addArgs(ProgramArgs& args);
