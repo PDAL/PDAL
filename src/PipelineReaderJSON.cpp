@@ -95,8 +95,7 @@ void PipelineReaderJSON::parsePipeline(Json::Value& tree)
         {
             StringList files = FileUtils::glob(filename);
             if (files.empty())
-                throw pdal_error("JSON pipeline: Can't find file '" +
-                    filename + "' to open with '" + type + "'.");
+                files.push_back(filename);
 
             for (const std::string& path : files)
             {
