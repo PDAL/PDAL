@@ -1,7 +1,6 @@
 package io.pdal
 
 import java.nio.ByteBuffer
-import java.util
 
 class PointView extends Native {
   def getPointCloud(idx: Long): PointCloud = getPointCloud(idx, layout.dimTypes())
