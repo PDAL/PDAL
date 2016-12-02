@@ -208,13 +208,10 @@ void HexBin::done(PointTableRef table)
         density_p = p.transform(utm);
     }
 
-    pdal::Polygon boundary_poly;
     if (m_doSmooth)
-        boundary_poly = p.simplify(tolerance, cull);
-    else
-        boundary_poly = p;
+        p = p.simplify(tolerance, cull);
 
-    std::string boundary_text = boundary_poly.wkt(m_precision);
+    std::string boundary_text = p.wkt(m_precision);
 
     m_metadata.add("boundary", boundary_text, "Approximated MULTIPOLYGON of domain");
     double area = density_p.area();
