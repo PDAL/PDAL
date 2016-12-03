@@ -54,6 +54,28 @@ class PointView extends Native {
     }
     ByteBuffer.wrap(result).order(ByteOrder.nativeOrder())
   }
+
+  def getDouble(packedPoint: Array[Byte], dim: String): Double = getDouble(packedPoint, findDimType(dim))
+  def getDouble(packedPoint: Array[Byte], dim: DimType): Double = get(packedPoint, dim).getDouble
+
+  def getFloat(packedPoint: Array[Byte], dim: String): Float = getFloat(packedPoint, findDimType(dim))
+  def getFloat(packedPoint: Array[Byte], dim: DimType): Float = get(packedPoint, dim).getFloat
+
+  def getLong(packedPoint: Array[Byte], dim: String): Long = getLong(packedPoint, findDimType(dim))
+  def getLong(packedPoint: Array[Byte], dim: DimType): Long = get(packedPoint, dim).getLong
+
+  def getInt(packedPoint: Array[Byte], dim: String): Int = getInt(packedPoint, findDimType(dim))
+  def getInt(packedPoint: Array[Byte], dim: DimType): Int = get(packedPoint, dim).getInt
+
+  def getShort(packedPoint: Array[Byte], dim: String): Short = getShort(packedPoint, findDimType(dim))
+  def getShort(packedPoint: Array[Byte], dim: DimType): Short = get(packedPoint, dim).getShort
+
+  def getChar(packedPoint: Array[Byte], dim: String): Char = getChar(packedPoint, findDimType(dim))
+  def getChar(packedPoint: Array[Byte], dim: DimType): Char = get(packedPoint, dim).getChar
+
+  def getByte(packedPoint: Array[Byte], dim: String): Byte = getByte(packedPoint, findDimType(dim))
+  def getByte(packedPoint: Array[Byte], dim: DimType): Byte = get(packedPoint, dim).get()
+
   /**
     * One dimension read; for multiple dims custom logic required.
     */
@@ -83,13 +105,13 @@ class PointView extends Native {
   def get(idx: Int, dim: DimType): ByteBuffer =
     ByteBuffer.wrap(getPackedPoint(idx, Array(dim))).order(ByteOrder.nativeOrder())
 
-  def getX(idx: Int): Double = get(idx, DimType.X).getDouble
-  def getY(idx: Int): Double = get(idx, DimType.Y).getDouble
-  def getZ(idx: Int): Double = get(idx, DimType.Z).getDouble
+  def getX(idx: Int): Double = getDouble(idx, DimType.X)
+  def getY(idx: Int): Double = getDouble(idx, DimType.Y)
+  def getZ(idx: Int): Double = getDouble(idx, DimType.Z)
 
-  def getX(packedPoint: Array[Byte]): Double = get(packedPoint, DimType.X).getDouble
-  def getY(packedPoint: Array[Byte]): Double = get(packedPoint, DimType.Y).getDouble
-  def getZ(packedPoint: Array[Byte]): Double = get(packedPoint, DimType.Z).getDouble
+  def getX(packedPoint: Array[Byte]): Double = getDouble(packedPoint, DimType.X)
+  def getY(packedPoint: Array[Byte]): Double = getDouble(packedPoint, DimType.Y)
+  def getZ(packedPoint: Array[Byte]): Double = getDouble(packedPoint, DimType.Z)
 
   @native def layout(): PointLayout
   @native def size(): Int

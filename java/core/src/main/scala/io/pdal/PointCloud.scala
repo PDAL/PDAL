@@ -73,9 +73,9 @@ case class PointCloud(bytes: Array[Byte], dimTypes: util.Map[String, SizedDimTyp
   def get(idx: Int, dims: Array[DimType]): ByteBuffer = get(idx, dims.map(_.id))
   def get(idx: Int, dims: Array[String]): ByteBuffer = ByteBuffer.wrap(get(get(idx), dims)).order(ByteOrder.nativeOrder())
 
-  def getX(idx: Int): Double = get(idx, DimType.Id.X).getDouble
-  def getY(idx: Int): Double = get(idx, DimType.Id.Y).getDouble
-  def getZ(idx: Int): Double = get(idx, DimType.Id.Z).getDouble
+  def getX(idx: Int): Double = getDouble(idx, DimType.Id.X)
+  def getY(idx: Int): Double = getDouble(idx, DimType.Id.Y)
+  def getZ(idx: Int): Double = getDouble(idx, DimType.Id.Z)
 
   /**
     * Reads dim from a packed point.
