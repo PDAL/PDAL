@@ -44,6 +44,8 @@
 
 #include <sstream>
 #include <cstdarg>
+#include <thread>
+#include <functional>
 
 namespace pdal
 {
@@ -52,6 +54,22 @@ static PluginInfo const s_info = PluginInfo(
     "filters.crop",
     "Filter points inside or outside a bounding box or a polygon if PDAL was built with GEOS support.",
     "http://pdal.io/stages/filters.crop.html" );
+
+std::vector<unsigned int> bounds(unsigned int parts, unsigned int mem) {
+    std::vector<unsigned int>bnd;
+    unsigned int delta = mem / parts;
+    unsigned int reminder = mem % parts;
+    unsigned int N1 = 0, N2 = 0;
+    bnd.push_back(N1);
+    for (unsigned int i = 0; i < parts; ++i) {
+        N2 = N1 + delta;
+        if (i == parts - 1)
+            N2 += reminder;
+        bnd.push_back(N2);
+        N1 = N2;
+    }
+    return bnd;
+}
 
 CREATE_STATIC_PLUGIN(1, 0, CropFilter, Filter, s_info)
 
@@ -62,7 +80,6 @@ CropFilter::CropFilter() : pdal::Filter()
     m_cropOutside = false;
 }
 
-
 void CropFilter::addArgs(ProgramArgs& args)
 {
     args.add("outside", "Whether we keep points inside or outside of the "
@@ -72,6 +89,7 @@ void CropFilter::addArgs(ProgramArgs& args)
     args.add("polygon", "Bounding polying for cropped points", m_polys).
         setErrorText("Invalid polygon specification.  "
             "Must be valid GeoJSON/WKT");
+    args.add("num_threads", "Number of threads to use for the crop operation", m_numthreads, 1);
 }
 
 
@@ -167,15 +185,44 @@ bool CropFilter::crop(PointRef& point, const BOX2D& box)
     return (m_cropOutside != box.contains(x, y));
 }
 
+void CropFilter::cropJobBox(unsigned int left, unsigned int right, const BOX2D& box, PointView& input, std::vector<bool>& results) {
+  PointRef point = input.point(0);
+  for (PointId idx = left; idx < right; ++idx){
+    point.setPointId(idx);
+    results[static_cast<int>(idx)] = crop(point, box);
+  }
+}
 
 void CropFilter::crop(const BOX2D& box, PointView& input, PointView& output)
 {
-    PointRef point = input.point(0);
-    for (PointId idx = 0; idx < input.size(); ++idx)
-    {
-        point.setPointId(idx);
-        if (crop(point, box))
-            output.appendPoint(input, idx);
+    if (m_numthreads == 1){
+      PointRef point = input.point(0);
+      for (PointId idx = 0; idx < input.size(); ++idx)
+      {
+          point.setPointId(idx);
+          if (crop(point, box))
+              output.appendPoint(input, idx);
+      }
+    }else{
+      std::vector<unsigned int>bnd = bounds(m_numthreads, input.size());
+
+      std::vector<std::thread> tt;
+
+      std::vector<bool> result;
+      result.reserve(input.size());
+
+      for (int i = 0; i < m_numthreads - 1; ++i)
+        tt.push_back(std::thread(&CropFilter::cropJobBox, this, bnd[i], bnd[i + 1], std::ref(box), std::ref(input), std::ref(result)));
+
+      for (int i = m_numthreads - 1; i < m_numthreads; ++i)
+         cropJobBox(bnd[i], bnd[i + 1], box, input, result);
+
+      for(auto &e : tt) e.join();
+
+      for (PointId idx = 0; idx < input.size(); ++idx){
+        if (result[static_cast<int>(idx)] == true)
+          output.appendPoint(input, idx);
+      }
     }
 }
 
@@ -186,16 +233,53 @@ bool CropFilter::crop(PointRef& point, const GeomPkg& g)
     return keep;
 }
 
+void CropFilter::cropJobGeom(unsigned int left, unsigned int right, const GeomPkg& g, PointView& input, std::vector<bool>& results){
+
+    PointRef point = input.point(0);
+    for (PointId idx = left; idx < right; ++idx){
+        point.setPointId(idx);
+        // bool covers = g.m_geom.covers(point);
+        // results[static_cast<int>(idx)] = (m_cropOutside != covers);
+        results[static_cast<int>(idx)] = crop(point, g);
+    }
+}
+
+
 void CropFilter::crop(const GeomPkg& g, PointView& input, PointView& output)
 {
-    PointRef point = input.point(0);
-    for (PointId idx = 0; idx < input.size(); ++idx)
-    {
-        point.setPointId(idx);
-        bool covers = g.m_geom.covers(point);
-        bool keep = (m_cropOutside != covers);
-        if (keep)
-            output.appendPoint(input, idx);
+    if (m_numthreads == 1){
+      PointRef point = input.point(0);
+      for (PointId idx = 0; idx < input.size(); ++idx){
+          point.setPointId(idx);
+          bool covers = g.m_geom.covers(point);
+          bool keep = (m_cropOutside != covers);
+          if (keep)
+              output.appendPoint(input, idx);
+      }
+    }
+    else{
+
+      std::vector<unsigned int>bnd = bounds(m_numthreads, input.size());
+
+      std::vector<std::thread> tt;
+
+      std::vector<bool> result;
+      result.reserve(input.size());
+
+      CropFilter* cropFilter = this;
+
+      for (int i = 0; i < m_numthreads - 1; ++i)
+        tt.push_back(std::thread(&CropFilter::cropJobGeom, this, bnd[i], bnd[i + 1], std::ref(g), std::ref(input), std::ref(result)));
+
+      for (int i = m_numthreads - 1; i < m_numthreads; ++i)
+         cropJobGeom(bnd[i], bnd[i + 1], g, input, result);
+
+      for(auto &e : tt) e.join();
+
+      for (PointId idx = 0; idx < input.size(); ++idx){
+        if (result[static_cast<int>(idx)] == true)
+          output.appendPoint(input, idx);
+      }
     }
 }
 

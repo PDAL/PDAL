@@ -64,6 +64,7 @@ private:
     std::vector<Polygon> m_polys;
     SpatialReference m_assignedSrs;
     SpatialReference m_lastSrs;
+    int m_numthreads;
 
     struct GeomPkg
     {
@@ -83,8 +84,10 @@ private:
     virtual PointViewSet run(PointViewPtr view);
     bool crop(PointRef& point, const BOX2D& box);
     void crop(const BOX2D& box, PointView& input, PointView& output);
+    void cropJobBox(unsigned int left, unsigned int right, const BOX2D& box, PointView& input, std::vector<bool>& results);
     bool crop(PointRef& point, const GeomPkg& g);
     void crop(const GeomPkg& g, PointView& input, PointView& output);
+    void cropJobGeom(unsigned int left, unsigned int right, const GeomPkg& g, PointView& input, std::vector<bool>& results);
 
     CropFilter& operator=(const CropFilter&); // not implemented
     CropFilter(const CropFilter&); // not implemented
