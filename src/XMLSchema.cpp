@@ -42,6 +42,7 @@
 #include <cstdlib>
 #include <map>
 #include <algorithm>
+#include <functional>
 
 #include <string.h>
 #include <stdlib.h>

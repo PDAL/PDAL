@@ -77,9 +77,9 @@ private:
     XMLDimList m_dbDims;
     std::unordered_map<int, DimType> m_dimMap;
     Scaling m_scaling;
-    std::pair<int, int> m_xOffsets;
-    std::pair<int, int> m_yOffsets;
-    std::pair<int, int> m_zOffsets;
+    std::pair<size_t, size_t> m_xOffsets;
+    std::pair<size_t, size_t> m_yOffsets;
+    std::pair<size_t, size_t> m_zOffsets;
 
     StringList m_outputDims; ///< List of dimensions to write
     size_t m_packedPointSize; ///< Size of point data as read from PointTable.
