@@ -34,8 +34,8 @@
 
 #include <pdal/pdal_test_main.hpp>
 
-#include <FauxReader.hpp>
-#include <RandomizeFilter.hpp>
+#include <io/FauxReader.hpp>
+#include <filters/RandomizeFilter.hpp>
 
 using namespace pdal;
 

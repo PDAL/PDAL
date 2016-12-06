@@ -34,8 +34,8 @@
 
 #include <pdal/pdal_test_main.hpp>
 
-#include <FauxReader.hpp>
-#include <DividerFilter.hpp>
+#include <io/FauxReader.hpp>
+#include <filters/DividerFilter.hpp>
 
 using namespace pdal;
 

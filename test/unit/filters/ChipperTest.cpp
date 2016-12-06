@@ -34,11 +34,11 @@
 
 #include <pdal/pdal_test_main.hpp>
 
-#include <ChipperFilter.hpp>
-#include <LasWriter.hpp>
-#include <LasReader.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/StageWrapper.hpp>
+#include <filters/ChipperFilter.hpp>
+#include <io/LasWriter.hpp>
+#include <io/LasReader.hpp>
 
 #include "Support.hpp"
 

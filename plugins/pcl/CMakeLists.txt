@@ -34,14 +34,9 @@ set_package_properties(PCL PROPERTIES DESCRIPTION "Point Cloud Library"
     URL "http://pointclouds.org" TYPE RECOMMENDED
     PURPOSE "Enables PCD reader/writer, PCLVisualizer, PCLBlock filter, and ground, pcl, smooth, and view kernels")
 
-#[[
-include_directories(${CMAKE_CURRENT_LIST_DIR})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/filters)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/pipeline)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/dartsample)
-link_directories(${PCL_LIBRARY_DIRS})
-]]
-set(INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR} ${PCL_INCLUDE_DIRS})
+set(INCLUDE_DIRS
+    ${ROOT_DIR}
+    ${PCL_INCLUDE_DIRS})
 
 add_definitions(${PCL_DEFINITIONS})
 if (NOT WIN32)

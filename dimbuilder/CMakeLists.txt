@@ -13,25 +13,22 @@ endif()
 
 include(${ROOT_DIR}/cmake/common.cmake NO_POLICY_SCOPE)
 
-include_directories(${PDAL_JSONCPP_INCLUDE_DIR})
-
 #
 # We include Utils.cpp here rather than linking in the Utils library because
 # some people building linux packages disable rpath, which means that
 # the Utils library can't be located when running dimbuilder, even though
 # it has been built.
 #
-set (SOURCES
+add_executable(dimbuilder
     DimBuilder.cpp
-    ${PDAL_JSONCPP_SRC}
     ${PDAL_UTIL_DIR}/Utils.cpp
-)
-
-add_executable(dimbuilder ${SOURCES})
+    ${PDAL_JSONCPP_SRC})
+target_include_directories(dimbuilder PRIVATE
+    ${PDAL_INCLUDE_DIR}
+    ${PDAL_JSONCPP_INCLUDE_DIR})
 if (PDAL_HAVE_JSONCPP)
     target_link_libraries(dimbuilder PRIVATE ${PDAL_JSONCPP_LIB_NAME})
 endif()
 if (UNIX AND NOT APPLE)
     target_link_libraries(dimbuilder PRIVATE dl)
 endif()
-target_include_directories(dimbuilder PRIVATE ${PDAL_INCLUDE_DIR})

@@ -38,7 +38,7 @@
 
 #include <pdal/Filter.hpp>
 #include <pdal/StageFactory.hpp>
-#include <las/LasReader.hpp>
+#include <io/LasReader.hpp>
 
 #include "../io/OciCommon.hpp"
 #include "Support.hpp"

@@ -33,11 +33,10 @@
 ****************************************************************************/
 
 #include <pdal/pdal_test_main.hpp>
-#include <FauxReader.hpp>
-#include <TransformationFilter.hpp>
 
 #include <pdal/StageFactory.hpp>
-
+#include <io/FauxReader.hpp>
+#include <filters/TransformationFilter.hpp>
 
 namespace pdal
 {

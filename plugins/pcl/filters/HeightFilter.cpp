@@ -34,13 +34,10 @@
 
 #include "HeightFilter.hpp"
 
-// c++
 #include <memory>
 #include <string>
 #include <vector>
 
-// project
-#include "PCLConversions.hpp"
 #include <pdal/Dimension.hpp>
 #include <pdal/Options.hpp>
 #include <pdal/pdal_macros.hpp>
@@ -49,7 +46,6 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_macros.hpp>
 
-// other
 #include <pcl/console/print.h>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/filters/project_inliers.h>
@@ -57,6 +53,8 @@
 #include <pcl/ModelCoefficients.h>
 #include <pcl/point_types.h>
 #include <pcl/search/kdtree.h>
+
+#include "../PCLConversions.hpp"
 
 #define DBG log()->get(LogLevel::Debug)
 

@@ -37,12 +37,10 @@
 #include <pdal/PipelineManager.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/StageWrapper.hpp>
-#include <stats/StatsFilter.hpp>
-#include <faux/FauxReader.hpp>
-
+#include <io/FauxReader.hpp>
+#include <filters/StatsFilter.hpp>
 
 #include "Support.hpp"
-
 
 using namespace pdal;
 

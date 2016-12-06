@@ -41,16 +41,6 @@
 
 
 ###############################################################################
-# Add a set of include files to install.
-# _component The part of PDAL that the install files belong to.
-# _subdir The sub-directory for these include files.
-# ARGN The include files.
-macro(PDAL_ADD_INCLUDES _subdir)
-    install(FILES ${ARGN} DESTINATION ${PDAL_INCLUDE_INSTALL_DIR}/${_subdir})
-endmacro(PDAL_ADD_INCLUDES)
-
-
-###############################################################################
 # Add a library target.
 # _name The library name.
 # ARGN The source files for the library.
@@ -136,6 +126,7 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
 
     add_library(${${_name}} SHARED ${PDAL_ADD_PLUGIN_FILES})
     target_include_directories(${${_name}} PRIVATE
+        ${PROJECT_BINARY_DIR}/include
         ${PDAL_INCLUDE_DIR})
     target_link_libraries(${${_name}} PUBLIC
         ${PDAL_BASE_LIB_NAME}
@@ -153,7 +144,8 @@ macro(PDAL_ADD_PLUGIN _name _type _shortname)
         LIBRARY DESTINATION ${PDAL_LIB_INSTALL_DIR}
         ARCHIVE DESTINATION ${PDAL_LIB_INSTALL_DIR})
     if (APPLE)
-        set_target_properties(${${_name}} PROPERTIES INSTALL_NAME_DIR "@loader_path/../lib")
+        set_target_properties(${${_name}} PROPERTIES
+            INSTALL_NAME_DIR "@loader_path/../lib")
     endif()
 endmacro(PDAL_ADD_PLUGIN)
 
@@ -177,9 +169,11 @@ macro(PDAL_ADD_TEST _name)
     endif()
     add_executable(${_name} ${PDAL_ADD_TEST_FILES} ${common_srcs})
     target_include_directories(${_name} PRIVATE
+        ${ROOT_DIR}
         ${PDAL_INCLUDE_DIR}
         ${PROJECT_SOURCE_DIR}/test/unit
-        ${PROJECT_BINARY_DIR}/test/unit)
+        ${PROJECT_BINARY_DIR}/test/unit
+        ${PROJECT_BINARY_DIR}/include)
     set_target_properties(${_name}
         PROPERTIES
             COMPILE_DEFINITIONS PDAL_DLL_IMPORT)
@@ -224,11 +218,6 @@ macro(PDAL_ADD_DRIVER _type _name _srcs _incs _objs)
     target_include_directories(${libname} PRIVATE
         ${PDAL_INCLUDE_DIR})
     set_property(TARGET ${libname} PROPERTY FOLDER "Drivers/${_type}")
-
-    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
-        DESTINATION "${PDAL_INCLUDE_INSTALL_DIR}"
-        FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
-    )
 endmacro(PDAL_ADD_DRIVER)
 
 ###############################################################################
@@ -252,13 +241,8 @@ macro(PDAL_ADD_KERNEL _name _srcs _incs _objs)
     target_include_directories(${libname} PRIVATE
         ${PDAL_INCLUDE_DIR}
         ${PDAL_IO_DIR}
-        ${PDAL_FILTER_DIR})
+        ${PDAL_FILTERS_DIR})
     set_property(TARGET ${libname} PROPERTY FOLDER "Drivers/kernel")
-
-    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
-        DESTINATION "${PDAL_INCLUDE_INSTALL_DIR}"
-        FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
-    )
 endmacro(PDAL_ADD_KERNEL)
 
 ###############################################################################
@@ -307,9 +291,6 @@ macro(SET_INSTALL_DIRS)
           set(PDAL_LIB_INSTALL_DIR "lib")
       endif()
   endif ()
-    set(PDAL_INCLUDE_INSTALL_ROOT "include/")
-    set(PDAL_INCLUDE_INSTALL_DIR
-        "${PDAL_INCLUDE_INSTALL_ROOT}/${PROJECT_NAME_LOWER}/")
     set(PDAL_DOC_INCLUDE_DIR
         "share/doc/${PROJECT_NAME_LOWER}-${PDAL_VERSION_MAJOR}.${PDAL_VERSION_MINOR}")
     set(PDAL_BIN_INSTALL_DIR "bin")

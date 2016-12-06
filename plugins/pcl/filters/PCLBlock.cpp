@@ -34,15 +34,15 @@
 
 #include "PCLBlock.hpp"
 
-#include "PCLConversions.hpp"
-#include "pipeline/PCLPipeline.h"
-
 #include <pcl/console/print.h>
 #include <pcl/point_types.h>
 #include <pcl/io/pcd_io.h>
 
 #include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+
+#include "../PCLConversions.hpp"
+#include "../pipeline/PCLPipeline.h"
 
 namespace pdal
 {

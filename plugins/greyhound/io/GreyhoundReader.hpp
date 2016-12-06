@@ -38,10 +38,11 @@
 #include <queue>
 #include <vector>
 
+#include <arbiter/arbiter.hpp>
+
 #include <pdal/Reader.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/Bounds.hpp>
-#include <arbiter.hpp>
 
 #include "bounds.hpp"
 #include "pool.hpp"

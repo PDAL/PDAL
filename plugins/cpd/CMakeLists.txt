@@ -12,19 +12,17 @@ PDAL_ADD_PLUGIN(cpd_kernel_lib_name kernel cpd
     LINK_WITH Cpd::Library-C++
     )
 target_include_directories(${cpd_kernel_lib_name} PRIVATE
-    ${PDAL_FILTER_DIR}
-    ${PDAL_IO_DIR}
+    ${ROOT_DIR}
     ${CMAKE_CURRENT_LIST_DIR} )
 
-if(WITH_TESTS)
+if (WITH_TESTS)
     PDAL_ADD_TEST(pdal_plugins_cpd_kernel_test
         FILES test/CpdKernelTest.cpp
         LINK_WITH Cpd::Library-C++
         )
     target_include_directories(pdal_plugins_cpd_kernel_test
         PRIVATE
+        ${ROOT_DIR}
         ${CMAKE_CURRENT_LIST_DIR}
-        ${PROJECT_SOURCE_DIR}/io/las
-        ${PROJECT_SOURCE_DIR}/test/unit
         )
 endif()

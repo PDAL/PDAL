@@ -36,9 +36,9 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
-#include <DecimationFilter.hpp>
-#include <FauxReader.hpp>
-#include <StreamCallbackFilter.hpp>
+#include <io/FauxReader.hpp>
+#include <filters/DecimationFilter.hpp>
+#include <filters/StreamCallbackFilter.hpp>
 
 using namespace pdal;
 

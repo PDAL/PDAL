@@ -36,9 +36,9 @@
 
 #include <pdal/SpatialReference.hpp>
 #include <pdal/PointView.hpp>
-#include <LasReader.hpp>
-#include <ReprojectionFilter.hpp>
-#include <StreamCallbackFilter.hpp>
+#include <io/LasReader.hpp>
+#include <filters/ReprojectionFilter.hpp>
+#include <filters/StreamCallbackFilter.hpp>
 
 #include "Support.hpp"
 

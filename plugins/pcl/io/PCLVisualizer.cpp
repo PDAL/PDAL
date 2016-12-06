@@ -34,6 +34,10 @@
 
 #include "PCLVisualizer.hpp"
 
+#include <chrono>
+#include <memory>
+#include <thread>
+
 #include <pcl/conversions.h>
 #include <pcl/io/pcd_io.h>
 
@@ -46,12 +50,8 @@
 #include <pdal/StageFactory.hpp>
 #include <pdal/pdal_macros.hpp>
 
-#include "PCLConversions.hpp"
+#include "../PCLConversions.hpp"
 #include "point_types.hpp"
-
-#include <chrono>
-#include <memory>
-#include <thread>
 
 bool
 isValidFieldName(const std::string &field)

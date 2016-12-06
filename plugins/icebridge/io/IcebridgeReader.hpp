@@ -48,7 +48,7 @@ namespace pdal
   };
 }
 #else
-    #include "../../io/ilvis2/Ilvis2MetadataReader.hpp"
+    #include <io/Ilvis2MetadataReader.hpp>
 #endif
 
 

@@ -38,7 +38,7 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/Utils.hpp>
 #include <pdal/PDALUtils.hpp>
-#include <LasReader.hpp>
+#include <io/LasReader.hpp>
 
 #include "Support.hpp"
 

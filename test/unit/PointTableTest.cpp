@@ -35,7 +35,7 @@
 #include <pdal/pdal_test_main.hpp>
 
 #include <pdal/PointTable.hpp>
-#include <las/LasReader.hpp>
+#include <io/LasReader.hpp>
 #include "Support.hpp"
 
 using namespace pdal;

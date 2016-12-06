@@ -41,7 +41,7 @@
 #include <pdal/PluginManager.hpp>
 #include <pdal/Reader.hpp>
 #include <pdal/util/FileUtils.hpp>
-#include "LasReader.hpp"
+#include <io/LasReader.hpp>
 #include "Support.hpp"
 
 namespace pdal

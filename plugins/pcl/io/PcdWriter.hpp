@@ -39,7 +39,7 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/StageFactory.hpp>
 
-#include "PCLConversions.hpp"
+#include "../PCLConversions.hpp"
 
 #include <pcl/io/pcd_io.h>
 #include <pcl/io/impl/pcd_io.hpp>

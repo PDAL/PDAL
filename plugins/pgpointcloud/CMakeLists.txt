@@ -1,36 +1,29 @@
 #
 # PgPointCloud plugin CMake configuration
 #
-
 include(${PDAL_CMAKE_DIR}/postgres.cmake)
-include_directories(${ROOT_DIR}/vendor/pdalboost)
 
 #
 # PgPointCloud Reader
 #
-set(srcs io/PgReader.cpp)
-set(incs
-    io/PgCommon.hpp
-    io/PgReader.hpp
-)
-
 PDAL_ADD_PLUGIN(reader_libname reader pgpointcloud
-    FILES "${srcs}" "${incs}"
-    LINK_WITH ${POSTGRESQL_LIBRARIES})
+    FILES
+        io/PgReader.cpp
+    LINK_WITH
+        ${POSTGRESQL_LIBRARIES})
+target_include_directories(${reader_libname} PRIVATE
+    ${PDAL_VENDOR_DIR}/pdalboost)
 
 #
 # PgPointCloud Writer
 #
-set(srcs io/PgWriter.cpp)
-set(incs
-    io/PgCommon.hpp
-    io/PgWriter.hpp
-)
-
 PDAL_ADD_PLUGIN(writer_libname writer pgpointcloud
-    FILES "${srcs}" "${incs}"
-    LINK_WITH ${POSTGRESQL_LIBRARIES})
-
+    FILES
+        io/PgWriter.cpp
+    LINK_WITH
+        ${POSTGRESQL_LIBRARIES})
+target_include_directories(${writer_libname} PRIVATE
+    ${PDAL_VENDOR_DIR}/pdalboost)
 #
 # PgPointCloud tests
 #
@@ -48,17 +41,14 @@ if (BUILD_PGPOINTCLOUD_TESTS)
 
 	configure_file(
         test/Pgtest-Support.hpp.in
-        ${CMAKE_CURRENT_BINARY_DIR}/Pgtest-Support.hpp
+        ${CMAKE_CURRENT_BINARY_DIR}/include/Pgtest-Support.hpp
     )
-
-    set(srcs
-        test/PgpointcloudWriterTest.cpp
-        ${CMAKE_CURRENT_BINARY_DIR}/Pgtest-Support.hpp
-    )
-
-    include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 	PDAL_ADD_TEST(pgpointcloudtest
-        FILES "${srcs}"
-        LINK_WITH ${reader_libname} ${writer_libname})
+        FILES
+            test/PgpointcloudWriterTest.cpp
+        LINK_WITH
+            ${reader_libname} ${writer_libname})
+    target_include_directories(pgpointcloudtest PRIVATE
+        ${CMAKE_CURRENT_BINARY_DIR}/include)
 endif()

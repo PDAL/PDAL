@@ -35,13 +35,13 @@
 #include <string>
 #include <vector>
 
-#include <NitfFileReader.hpp>
 #include <pdal/Dimension.hpp>
 #include <pdal/GDALUtils.hpp>
-#include <bpf/BpfHeader.hpp>
-#include <las/LasHeader.hpp>
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/util/IStream.hpp>
+#include <io/BpfHeader.hpp>
+#include <io/LasHeader.hpp>
+#include <plugins/nitf/io/NitfFileReader.hpp>
 
 #include "NitfWrap.hpp"
 
