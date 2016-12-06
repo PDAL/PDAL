@@ -225,6 +225,7 @@ target_include_directories(${PDAL_BASE_LIB_NAME}
         ${PDAL_VENDOR_DIR}/eigen
         ${PDAL_VENDOR_DIR}/pdalboost
         ${PDAL_JSONCPP_INCLUDE_DIR}
+        ${LIBXML2_INCLUDE_DIR}
     INTERFACE
         ${GDAL_INCLUDE_DIR}
 )
