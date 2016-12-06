@@ -257,14 +257,14 @@ size_t DbWriter::readPoint(const PointView& view, PointId idx, char *outbuf)
     };
 
     if (m_xOffsets.first >= 0)
-        iconvert(m_scaling.m_xXform, Id::X, outbuf + m_xOffsets.first,
-            outbuf + m_xOffsets.second);
+        iconvert(m_scaling.m_xXform, Id::X, outbuf + (size_t)m_xOffsets.first,
+            outbuf + (size_t)m_xOffsets.second);
     if (m_yOffsets.first >= 0)
-        iconvert(m_scaling.m_yXform, Id::Y, outbuf + m_yOffsets.first,
-            outbuf + m_yOffsets.second);
+        iconvert(m_scaling.m_yXform, Id::Y, outbuf + (size_t)m_yOffsets.first,
+            outbuf + (size_t)m_yOffsets.second);
     if (m_zOffsets.first >= 0)
-        iconvert(m_scaling.m_zXform, Id::Z, outbuf + m_zOffsets.first,
-            outbuf + m_zOffsets.second);
+        iconvert(m_scaling.m_zXform, Id::Z, outbuf + (size_t)m_zOffsets.first,
+            outbuf + (size_t)m_zOffsets.second);
     return m_dbPointSize;
 }
 
