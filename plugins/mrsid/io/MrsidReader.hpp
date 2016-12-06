@@ -77,7 +77,6 @@ protected:
     virtual void addDimensions(PointLayoutPtr layout);
 
 private:
-    std::string m_filename;
     LizardTech::MG4PointReader *m_PS;
     LizardTech::PointIterator *m_iter;
     LizardTech::PointInfo m_pointInfo;
