@@ -204,6 +204,8 @@ file(GLOB SRCS
     ${PDAL_SRC_DIR}/*.cpp)
 if (NOT PDAL_HAVE_LIBXML2)
     file(GLOB XML_SRCS
+        io/Ilvis2MetadataReader.cpp
+        io/Ilvis2Metadata.cpp
         pdal/DbWriter.cpp
         pdal/DbReader.cpp
         pdal/XMLSchema.cpp)
