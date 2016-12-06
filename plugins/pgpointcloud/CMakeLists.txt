@@ -12,7 +12,8 @@ PDAL_ADD_PLUGIN(reader_libname reader pgpointcloud
     LINK_WITH
         ${POSTGRESQL_LIBRARIES})
 target_include_directories(${reader_libname} PRIVATE
-    ${PDAL_VENDOR_DIR}/pdalboost)
+    ${PDAL_VENDOR_DIR}/pdalboost
+    ${LIBXML2_INCLUDE_DIR})
 
 #
 # PgPointCloud Writer
@@ -23,7 +24,8 @@ PDAL_ADD_PLUGIN(writer_libname writer pgpointcloud
     LINK_WITH
         ${POSTGRESQL_LIBRARIES})
 target_include_directories(${writer_libname} PRIVATE
-    ${PDAL_VENDOR_DIR}/pdalboost)
+    ${PDAL_VENDOR_DIR}/pdalboost
+    ${LIBXML2_INCLUDE_DIR})
 #
 # PgPointCloud tests
 #
