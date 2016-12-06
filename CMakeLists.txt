@@ -182,9 +182,7 @@ if (BUILD_PLUGIN_PYTHON)
     set(PYTHON_VERSION_STRING "something" CACHE STRING "Python version" FORCE)
     add_subdirectory(pdal/plang)
 endif()
-if (WITH_APPS)
-    add_subdirectory(apps)
-endif()
+add_subdirectory(apps)
 
 #
 # On OSX we reexport the symbols in libpdal_util.dylib into libpdalcpp.dylib
@@ -300,21 +298,34 @@ include (${PDAL_CMAKE_DIR}/cpack.cmake)
 
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 
-export(TARGETS ${PDAL_BASE_LIB_NAME}
-    ${PDAL_UTIL_LIB_NAME}
-    FILE "${PDAL_BINARY_DIR}/PDALTargets.cmake")
+export(
+    TARGETS
+        ${PDAL_BASE_LIB_NAME} ${PDAL_UTIL_LIB_NAME}
+    FILE
+        "${PDAL_BINARY_DIR}/PDALTargets.cmake")
 
-install(EXPORT PDALTargets DESTINATION "${PDAL_LIB_INSTALL_DIR}/pdal/cmake")
+install(
+    EXPORT
+        PDALTargets
+    DESTINATION
+        "${PDAL_LIB_INSTALL_DIR}/pdal/cmake")
 include(${PDAL_CMAKE_DIR}/config.cmake)
-
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES)
 export(PACKAGE PDAL)
 
 # TODO: move under scripts/bash-completion ?
 if (WITH_COMPLETION)
     if (IS_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/bash-completion/completions)
-        install(FILES "${PROJECT_SOURCE_DIR}/scripts/bash-completion/pdal" DESTINATION "${CMAKE_INSTALL_PREFIX}/share/bash-completion/completions")
+        install(
+            FILES
+                "${PROJECT_SOURCE_DIR}/scripts/bash-completion/pdal"
+            DESTINATION
+                "${CMAKE_INSTALL_PREFIX}/share/bash-completion/completions")
     elseif (IS_DIRECTORY /etc/bash_completion.d)
-        install(FILES "${PROJECT_SOURCE_DIR}/scripts/bash-completion/pdal" DESTINATION "${CMAKE_INSTALL_PREFIX}/etc/bash_completion.d")
+        install(
+            FILES
+                "${PROJECT_SOURCE_DIR}/scripts/bash-completion/pdal"
+            DESTINATION
+                "${CMAKE_INSTALL_PREFIX}/etc/bash_completion.d")
     endif()
 endif()

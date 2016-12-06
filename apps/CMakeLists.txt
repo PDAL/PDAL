@@ -9,14 +9,16 @@ cmake_minimum_required(VERSION 2.8)
 # Configure build targets
 #------------------------------------------------------------------------------
 
+set(PDAL_APP pdal)
+
 if (APPLE AND PDAL_BUNDLE)
-    add_executable(pdal MACOSX_BUNDLE pdal.cpp)
+    add_executable(${PDAL_APP} MACOSX_BUNDLE pdal.cpp)
 else (APPLE AND PDAL_BUNDLE)
-    add_executable(pdal pdal.cpp) 
+    add_executable(${PDAL_APP} pdal.cpp)
 endif(APPLE AND PDAL_BUNDLE)
-target_link_libraries(pdal PRIVATE
+target_link_libraries(${PDAL_APP} PRIVATE
     ${PDAL_BASE_LIB_NAME} ${PDAL_UTIL_LIB_NAME})
-target_include_directories(pdal PRIVATE
+target_include_directories(${PDAL_APP} PRIVATE
     ${PDAL_JSONCPP_INCLUDE_DIR}
     ${PDAL_INCLUDE_DIR}
     ${PROJECT_BINARY_DIR}/include)
@@ -26,10 +28,10 @@ target_include_directories(pdal PRIVATE
 #------------------------------------------------------------------------------
 
 if (APPLE AND PDAL_BUNDLE)
-    install(TARGETS ${PDAL_UTILITIES}
+    install(TARGETS ${PDAL_APP}
         BUNDLE DESTINATION ${PDAL_BIN_INSTALL_DIR})
 else(APPLE AND PDAL_BUNDLE)
-    install(TARGETS ${PDAL_UTILITIES}
+    install(TARGETS ${PDAL_APP}
         RUNTIME DESTINATION ${PDAL_BIN_INSTALL_DIR})
 endif(APPLE AND PDAL_BUNDLE)
 
@@ -67,13 +69,18 @@ if(UNIX OR APPLE)
                    "${CMAKE_CURRENT_SOURCE_DIR}/pdal-config" @ONLY)
 
     file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/pdal-config"
-         DESTINATION "${PDAL_OUTPUT_BIN_DIR}/"
-         FILE_PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+        DESTINATION
+            "${PDAL_OUTPUT_BIN_DIR}/"
+        FILE_PERMISSIONS
+            OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE
+            WORLD_READ WORLD_EXECUTE)
 
     install(PROGRAMS "${PDAL_OUTPUT_BIN_DIR}/pdal-config"
-            DESTINATION "${CMAKE_INSTALL_PREFIX}/bin"
-            PERMISSIONS
-            OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+        DESTINATION
+            "${CMAKE_INSTALL_PREFIX}/bin"
+        PERMISSIONS
+            OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE
+            WORLD_READ WORLD_EXECUTE)
 
 elseif(WIN32)
     # Autoconf compatibility variables to use the same script source.
@@ -81,12 +88,17 @@ elseif(WIN32)
                    "${CMAKE_CURRENT_SOURCE_DIR}/pdal-config.bat" @ONLY)
 
     file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/pdal-config.bat"
-         DESTINATION "${PDAL_OUTPUT_BIN_DIR}/"
-         FILE_PERMISSIONS  OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+         DESTINATION
+            "${PDAL_OUTPUT_BIN_DIR}/"
+         FILE_PERMISSIONS
+            OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE
+            WORLD_READ WORLD_EXECUTE)
 
     install(PROGRAMS "${PDAL_OUTPUT_BIN_DIR}/pdal-config.bat"
-            DESTINATION "${CMAKE_INSTALL_PREFIX}/bin"
-            PERMISSIONS
-            OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+        DESTINATION
+            "${CMAKE_INSTALL_PREFIX}/bin"
+        PERMISSIONS
+            OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE
+            WORLD_READ WORLD_EXECUTE)
 
 endif()
