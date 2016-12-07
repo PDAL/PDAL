@@ -638,6 +638,6 @@ extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX2D& bounds);
 extern PDAL_DLL std::istream& operator>>(std::istream& istr, BOX3D& bounds);
 
 PDAL_DLL std::istream& operator >> (std::istream& in, Bounds& bounds);
-PDAL_DLL std::ostream& operator << (std::ostream& in, Bounds& bounds);
+PDAL_DLL std::ostream& operator << (std::ostream& in, const Bounds& bounds);
 
 } // namespace pdal
