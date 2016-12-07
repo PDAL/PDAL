@@ -72,8 +72,8 @@ class PDAL_DLL PointView : public PointContainer
     friend class PointIdxRef;
     friend struct PointViewLess;
 public:
-	PointView(PointTableRef pointTable);
-	PointView(PointTableRef pointTable, const SpatialReference& srs);
+    PointView(PointTableRef pointTable);
+    PointView(PointTableRef pointTable, const SpatialReference& srs);
 
     virtual ~PointView()
     {}
@@ -106,7 +106,7 @@ public:
     /// point buffer.
     PointViewPtr makeNew() const
     {
-        return PointViewPtr( new PointView(m_pointTable, m_spatialReference));
+        return PointViewPtr(new PointView(m_pointTable, m_spatialReference));
     }
 
     PointRef point(PointId id)

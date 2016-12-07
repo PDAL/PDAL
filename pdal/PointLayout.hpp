@@ -114,7 +114,7 @@ public:
       \param type  Minimum type to assign to the dimension.
       \return  ID of the new or existing dimension, or Unknown on failure.
     */
-    PDAL_DLL Dimension::Id assignDim( const std::string& name,
+    PDAL_DLL Dimension::Id assignDim(const std::string& name,
         Dimension::Type type);
 
     /**

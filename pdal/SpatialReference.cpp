@@ -90,7 +90,7 @@ std::string SpatialReference::getWKT(WKTModeFlag mode_flag) const
 
 
 /// Fetch the SRS as WKT
-std::string SpatialReference::getWKT(WKTModeFlag mode_flag , bool pretty) const
+std::string SpatialReference::getWKT(WKTModeFlag mode_flag, bool pretty) const
 {
     std::string result_wkt = m_wkt;
 
@@ -399,7 +399,7 @@ int SpatialReference::computeUTMZone(const BOX3D& box) const
     {
         OSRDestroySpatialReference(current);
         OSRDestroySpatialReference(wgs84);
-        throw pdal_error("Could not comput transform from "
+        throw pdal_error("Could not compute transform from "
             "coordinate system to WGS84");
     }
 
