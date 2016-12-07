@@ -2,6 +2,8 @@ package io.pdal
 
 import java.nio.{ByteBuffer, ByteOrder}
 
+import scala.collection.JavaConverters._
+
 class PipelineSpec extends TestEnvironmentSpec {
   describe("Pipeline execution") {
     it("should validate as incorrect json (bad json passed)") {
@@ -21,7 +23,7 @@ class PipelineSpec extends TestEnvironmentSpec {
 
     it("should create pointViews iterator") {
       val pvi = pipeline.getPointViews()
-      pvi.length should be (1)
+      pvi.asScala.length should be (1)
       pvi.dispose()
     }
 

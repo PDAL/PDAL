@@ -1,7 +1,8 @@
 package io.pdal
 
-import scala.collection.JavaConversions._
 import java.nio.{ByteBuffer, ByteOrder}
+
+import scala.collection.JavaConversions._
 
 class PointCloudSpec extends TestEnvironmentSpec {
   var packedPoints: PointCloud = _
