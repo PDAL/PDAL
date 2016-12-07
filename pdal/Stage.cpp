@@ -88,7 +88,7 @@ void Stage::addAllArgs(ProgramArgs& args)
     }
     catch (arg_error error)
     {
-        throw pdal_error(error.m_error);
+        throw pdal_error(getName() + ": " + error.m_error);
     }
 }
 
@@ -103,7 +103,7 @@ void Stage::handleOptions()
     }
     catch (arg_error error)
     {
-        throw pdal_error(error.m_error);
+        throw pdal_error(getName() + ": " + error.m_error);
     }
     setupLog();
 }
