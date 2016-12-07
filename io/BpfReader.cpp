@@ -269,8 +269,9 @@ void BpfReader::ready(PointTableRef)
 
 void BpfReader::done(PointTableRef)
 {
-     delete m_stream.popStream();
-     m_stream.close();
+    if (auto s = m_stream.popStream())
+        delete s;
+    m_stream.close();
 }
 
 
@@ -396,18 +397,39 @@ point_count_t BpfReader::readPointMajor(PointViewPtr view, point_count_t count)
 }
 
 
-// This isn't lovely as we have to seek for each dimension access.
 void BpfReader::readDimMajor(PointRef& point)
 {
+    if (m_streams.empty())
+    {
+        for (std::size_t dim(0); dim < m_dims.size(); ++dim)
+        {
+            std::streamoff offset = sizeof(float) * dim * numPoints();
+
+            m_streams.emplace_back(new ILeStream());
+            m_streams.back()->open(m_filename);
+
+            if (m_header.m_compression)
+            {
+                m_charbufs.emplace_back(new Charbuf());
+                m_charbufs.back()->initialize(
+                        m_deflateBuf.data(), m_deflateBuf.size(), m_start);
+
+                m_streams.back()->pushStream(
+                        new std::istream(m_charbufs.back().get()));
+            }
+
+            m_streams.back()->seek(m_start + offset);
+        }
+    }
+
     double x(0), y(0), z(0);
+    float f(0);
+    double d(0);
 
     for (size_t dim = 0; dim < m_dims.size(); ++dim)
     {
-        seekDimMajor(dim, m_index);
-
-        float f;
-        m_stream >> f;
-        double d = f + m_dims[dim].m_offset;
+        *m_streams[dim] >> f;
+        d = f + m_dims[dim].m_offset;
         if (m_dims[dim].m_id == Dimension::Id::X)
             x = d;
         else if (m_dims[dim].m_id == Dimension::Id::Y)
