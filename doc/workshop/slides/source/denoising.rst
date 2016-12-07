@@ -14,7 +14,7 @@ Pipeline
 ================================================================================
 
 1. :ref:`readers.las`
-2. :ref:`filters.statisticaloutlier`
+2. :ref:`filters.outlier`
 3. :ref:`filters.range`
 4. :ref:`writers.las`
 

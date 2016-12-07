@@ -5,29 +5,27 @@ ground
 ********************************************************************************
 
 The ``ground`` command is used to segment the input point cloud into ground
-versus non-ground returns. The output is a point cloud containing only ground
-returns. The ``ground`` command invokes `Point Cloud Library
-<http://pointclouds.org/>`_'s `ProgressiveMorphologicalFilter`_.
-
-.. note::
-
-    The ``ground`` command is only available when PDAL is linked with PCL.
+versus non-ground returns.
 
 ::
 
-    $ pdal ground <input> <output>
+    $ pdal ground [options] <input> <output>
 
 ::
 
-    --input [-i] arg        Non-positional option for specifying input filename
-    --output [-o] arg       Non-positional option for specifying output filename
-    --max_window_size arg   max window size [33]
-    --slope arg             slope [1]
-    --max_distance arg      max distance [2.5]
-    --initial_distance arg  initial distance [0.15]
-    --cell_size arg         cell size [1]
-    --classify              apply classification labels? [true]
-    --extract               extract ground returns? [false]
-    --approximate [-a]      Use significantly faster approximate algorithm? [false]
+    --developer-debug   Enable developer debug (don't trap exceptions)
+    --label             A string to label the process with
+    --visualize         Visualize result
+    --driver            Override reader driver
+    --input, -i         Input filename
+    --output, -o        Output filename
+    --max_window_size   Max window size
+    --slope             Slope
+    --max_distance      Max distance
+    --initial_distance  Initial distance
+    --cell_size         Cell size
+    --classify          Apply classification labels?
+    --extract           extract ground returns?
+    --approximate, -a   use approximate algorithm? (much faster)
 
-.. _`ProgressiveMorphologicalFilter`: http://pointclouds.org/documentation/tutorials/progressive_morphological_filtering.php#progressive-morphological-filtering.
+  For more information, see the full documentation for PDAL at http://pdal.io/

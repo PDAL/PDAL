@@ -44,18 +44,11 @@ Ground (ground only)
     :linenos:
     :emphasize-lines: 6
 
-Ground (PCL pipeline)
+Ground (denoised first)
 ================================================================================
 
-.. literalinclude:: ../../exercises/analysis/ground/filter.json
+.. literalinclude:: ../../exercises/analysis/ground/translate-run-ground-only.txt
     :linenos:
-
-Ground (PCL pipeline)
-================================================================================
-
-.. literalinclude:: ../../exercises/analysis/ground/ground-run-pcl-filter.txt
-    :linenos:
-    :emphasize-lines: 5
 
 Ground (view)
 ================================================================================

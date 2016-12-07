@@ -42,10 +42,8 @@ implementations.
 
 `Bradley Chambers`_ from `RadiantBlue`_ has contributed numerous features and
 capabilities to the PDAL project, including :ref:`Poisson sampling
-<dart-throwing-tutorial>`, :ref:`Progressive Morphological Filters <pcl_ground>`, and
-:ref:`PCL Visualizer <writers.pclvisualizer>`. He is also a prolific
-:ref:`tutorial` writer, and he maintains the :ref:`Windows builds <download>`
-for the project.
+<dart-throwing-tutorial>` and :ref:`Progressive Morphological Filters <pcl_ground>`. He is also a prolific
+:ref:`tutorial` writer.
 
 .. _`Bradley Chambers`: https://github.com/chambbj
 .. _`RadiantBlue`: http://radiantblue.com/
@@ -79,4 +77,3 @@ development, and `PCL <http://pointclouds.org>`_ integration.
 .. _`GRiD`: http://lidar.io/about.html
 .. _`LiDAR Magazine article`: http://www.lidarmag.com/content/view/11343/198/
 .. _`CRREL`: http://www.erdc.usace.army.mil/Locations/CRREL.aspx
-
