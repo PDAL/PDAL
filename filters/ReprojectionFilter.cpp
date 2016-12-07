@@ -84,7 +84,7 @@ void ReprojectionFilter::addArgs(ProgramArgs& args)
 
 void ReprojectionFilter::initialize()
 {
-    m_inferInputSRS = !m_inSRS.valid();
+    m_inferInputSRS = m_inSRS.empty();
 
     m_out_ref_ptr = OSRNewSpatialReference(0);
     if (!m_out_ref_ptr)
