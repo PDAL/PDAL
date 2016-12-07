@@ -348,3 +348,11 @@ TEST(BoundsTest, b2)
     EXPECT_EQ(box3.minz, 0.0);
     EXPECT_EQ(box3.maxz, 2.0);
 }
+
+TEST(BoundsTest, bounds_insertion)
+{
+    std::string s;
+    std::ostringstream oss(s);
+    Bounds b;
+    oss << b;
+}
