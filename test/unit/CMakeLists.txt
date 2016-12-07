@@ -51,7 +51,6 @@ PDAL_ADD_TEST(pdal_io_buffer_test FILES io/BufferTest.cpp)
 PDAL_ADD_TEST(pdal_io_faux_test FILES io/FauxReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_gdal_reader_test FILES io/GDALReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_gdal_writer_test FILES io/GDALWriterTest.cpp)
-PDAL_ADD_TEST(pdal_io_ilvis2_test FILES io/Ilvis2ReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_las_reader_test FILES io/LasReaderTest.cpp)
 PDAL_ADD_TEST(pdal_io_las_writer_test FILES io/LasWriterTest.cpp)
 PDAL_ADD_TEST(pdal_io_optech_test FILES io/OptechReaderTest.cpp)
@@ -93,29 +92,33 @@ PDAL_ADD_TEST(pdal_filters_stats_test FILES filters/StatsFilterTest.cpp)
 PDAL_ADD_TEST(pdal_filters_transformation_test FILES
     filters/TransformationFilterTest.cpp)
 
-#
-# conditionally append apps/libxml2 sources
-#
-if (WITH_APPS)
-    PDAL_ADD_TEST(pdal_app_test FILES apps/AppTest.cpp)
-    if (LASZIP_FOUND)
-        PDAL_ADD_TEST(pdal_merge_test FILES apps/MergeTest.cpp)
-    endif()
-    PDAL_ADD_TEST(pc2pc_test FILES apps/pc2pcTest.cpp)
+PDAL_ADD_TEST(pdal_app_test FILES apps/AppTest.cpp)
+if (LASZIP_FOUND)
+    PDAL_ADD_TEST(pdal_merge_test FILES apps/MergeTest.cpp)
+endif()
+PDAL_ADD_TEST(pc2pc_test FILES apps/pc2pcTest.cpp)
 
-    if (BUILD_PIPELINE_TESTS)
-        PDAL_ADD_TEST(pcpipeline_test FILES apps/pcpipelineTest.cpp)
-        PDAL_ADD_TEST(pcpipeline_test_json FILES apps/pcpipelineTestJSON.cpp)
-    endif()
-    PDAL_ADD_TEST(hausdorff_test FILES apps/HausdorffTest.cpp)
-    PDAL_ADD_TEST(random_test FILES apps/RandomTest.cpp)
-    PDAL_ADD_TEST(translate_test FILES apps/TranslateTest.cpp)
-endif(WITH_APPS)
+if (BUILD_PIPELINE_TESTS)
+    PDAL_ADD_TEST(pcpipeline_test FILES apps/pcpipelineTest.cpp)
+    PDAL_ADD_TEST(pcpipeline_test_json FILES apps/pcpipelineTestJSON.cpp)
+endif()
+PDAL_ADD_TEST(hausdorff_test FILES apps/HausdorffTest.cpp)
+PDAL_ADD_TEST(random_test FILES apps/RandomTest.cpp)
+PDAL_ADD_TEST(translate_test FILES apps/TranslateTest.cpp)
 
-if(LIBXML2_FOUND)
+if(PDAL_HAVE_LIBXML2)
     PDAL_ADD_TEST(pdal_io_ilvis2_metadata_test FILES
         io/Ilvis2MetadataReaderTest.cpp)
+    target_include_directories(pdal_io_ilvis2_metadata_test PRIVATE
+        ${LIBXML2_INCLUDE_DIR})
     PDAL_ADD_TEST(pdal_io_ilvis2_reader_metadata_test FILES
         io/Ilvis2ReaderWithMDReaderTest.cpp)
+    target_include_directories(pdal_io_ilvis2_reader_metadata_test PRIVATE
+        ${LIBXML2_INCLUDE_DIR})
     PDAL_ADD_TEST(xml_schema_test FILES XMLSchemaTest.cpp)
+    target_include_directories(xml_schema_test PRIVATE
+        ${LIBXML2_INCLUDE_DIR})
+    PDAL_ADD_TEST(pdal_io_ilvis2_test FILES io/Ilvis2ReaderTest.cpp)
+    target_include_directories(pdal_io_ilvis2_test PRIVATE
+        ${LIBXML2_INCLUDE_DIR})
 endif()

@@ -13,7 +13,10 @@ else()
             io/IcebridgeReader.cpp
             io/Hdf5Handler.cpp
         LINK_WITH ${HDF5_LIBRARIES})
-    target_include_directories(${libname} PRIVATE ${ROOT_DIR})
+    target_include_directories(${libname}
+        PRIVATE
+            ${ROOT_DIR}
+            ${LIBXML2_INCLUDE_DIR})
 
     if (WITH_TESTS)
         PDAL_ADD_TEST(icetest

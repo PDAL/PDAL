@@ -115,16 +115,12 @@ include(${PDAL_CMAKE_DIR}/zlib.cmake)
 include(${PDAL_CMAKE_DIR}/test.cmake)
 include(${PDAL_CMAKE_DIR}/ctest.cmake)
 include(${PDAL_CMAKE_DIR}/curl.cmake)
-include(${PDAL_CMAKE_DIR}/rply.cmake)
-
 if (CURL_FOUND)
     set(PDAL_ARBITER_LIB_NAME pdal_arbiter)
 endif()
-
+include(${PDAL_CMAKE_DIR}/rply.cmake)
 include(${PDAL_CMAKE_DIR}/json.cmake)
-if (BUILD_PLUGIN_PGPOINTCLOUD OR BUILD_PLUGIN_OCI OR BUILD_PLUGIN_SQLITE)
-    include(${PDAL_CMAKE_DIR}/libxml2.cmake)
-endif()
+include(${PDAL_CMAKE_DIR}/libxml2.cmake)
 include(${PDAL_CMAKE_DIR}/dimension.cmake)
 
 #------------------------------------------------------------------------------
