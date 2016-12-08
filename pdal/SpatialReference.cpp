@@ -61,69 +61,42 @@ namespace pdal
 
 SpatialReference::SpatialReference(const std::string& s)
 {
-    setFromUserInput(s);
+    set(s);
 }
 
 
 bool SpatialReference::empty() const
 {
-    return getWKT().empty();
+    return m_wkt.empty();
 }
+
 
 bool SpatialReference::valid() const
 {
-    std::string wkt = getWKT();
-    OGRSpatialReferenceH current =
-        OSRNewSpatialReference(wkt.c_str());
-
+    OGRSpatialReferenceH current = OSRNewSpatialReference(m_wkt.c_str());
     OGRErr err = OSRValidate(current);
-
     OSRDestroySpatialReference(current);
     return err == OGRERR_NONE;
 }
 
 
-std::string SpatialReference::getWKT(WKTModeFlag mode_flag) const
+std::string SpatialReference::getWkt() const
 {
-    return getWKT(mode_flag, false);
+    return m_wkt;
 }
 
 
-/// Fetch the SRS as WKT
-std::string SpatialReference::getWKT(WKTModeFlag mode_flag, bool pretty) const
+void SpatialReference::set(std::string const& v)
 {
-    std::string result_wkt = m_wkt;
-
-    if ((mode_flag == eHorizontalOnly
-            && strstr(result_wkt.c_str(),"COMPD_CS") != NULL)
-            || pretty)
-    {
-        OGRSpatialReference* poSRS =
-            (OGRSpatialReference*)OSRNewSpatialReference(result_wkt.c_str());
-        char *pszWKT = NULL;
-
-        if (mode_flag == eHorizontalOnly)
-            poSRS->StripVertical();
-        if (pretty)
-            poSRS->exportToPrettyWkt(&pszWKT, FALSE);
-        else
-            poSRS->exportToWkt(&pszWKT);
-
-        OSRDestroySpatialReference(poSRS);
-
-        result_wkt = pszWKT;
-        CPLFree(pszWKT);
-    }
-
-    return result_wkt;
-}
-
-
-void SpatialReference::setFromUserInput(std::string const& v)
-{
+    m_horizontalWkt.clear();
     if (v.empty())
     {
         m_wkt.clear();
+        return;
+    }
+    if (isWkt(v))
+    {
+        m_wkt = v;
         return;
     }
 
@@ -145,9 +118,8 @@ void SpatialReference::setFromUserInput(std::string const& v)
 
     char *poWKT = 0;
     srs.exportToWkt(&poWKT);
-    std::string tmp(poWKT);
+    m_wkt = poWKT;
     CPLFree(poWKT);
-    setWKT(tmp);
 }
 
 
@@ -155,26 +127,25 @@ std::string SpatialReference::getProj4() const
 {
     std::string tmp;
 
-    std::string wkt = getWKT(eCompoundOK);
-    const char* poWKT = wkt.c_str();
+    const char* poWKT = m_wkt.c_str();
 
     OGRSpatialReference srs(NULL);
     if (OGRERR_NONE == srs.importFromWkt(const_cast<char **>(&poWKT)))
     {
-        char* proj4 = 0;
+        char* proj4 = nullptr;
         srs.exportToProj4(&proj4);
         tmp = proj4;
         CPLFree(proj4);
-
         Utils::trim(tmp);
     }
 
     return tmp;
 }
 
+
 std::string SpatialReference::getVertical() const
 {
-    std::string tmp("");
+    std::string tmp;
 
     OGRSpatialReference* poSRS =
         (OGRSpatialReference*)OSRNewSpatialReference(m_wkt.c_str());
@@ -192,11 +163,12 @@ std::string SpatialReference::getVertical() const
     return tmp;
 }
 
+
 std::string SpatialReference::getVerticalUnits() const
 {
     std::string tmp;
 
-    std::string wkt = getWKT(eCompoundOK);
+    std::string wkt = getVertical();
     const char* poWKT = wkt.c_str();
     OGRSpatialReference* poSRS =
         (OGRSpatialReference*)OSRNewSpatialReference(m_wkt.c_str());
@@ -205,16 +177,14 @@ std::string SpatialReference::getVerticalUnits() const
         OGR_SRSNode* node = poSRS->GetAttrNode("VERT_CS");
         if (node)
         {
-            char* units(0);
+            char* units(nullptr);
 
             // 'units' remains internal to the OGRSpatialReference
             // and should not be freed, or modified. It may be invalidated
             // on the next OGRSpatialReference call.
-            double u = poSRS->GetLinearUnits(&units);
+            (void)poSRS->GetLinearUnits(&units);
             tmp = units;
-
             Utils::trim(tmp);
-
         }
     }
 
@@ -224,75 +194,51 @@ std::string SpatialReference::getVerticalUnits() const
 
 std::string SpatialReference::getHorizontal() const
 {
-    std::string tmp("");
-
-    OGRSpatialReference* poSRS =
-        (OGRSpatialReference*)OSRNewSpatialReference(m_wkt.c_str());
-    char *pszWKT = NULL;
-
-    if (poSRS)
+    if (m_horizontalWkt.empty())
     {
-        poSRS->StripVertical();
+        OGRSpatialReference* poSRS =
+            (OGRSpatialReference*)OSRNewSpatialReference(m_wkt.c_str());
 
-        poSRS->exportToWkt(&pszWKT);
-        tmp = pszWKT;
-        CPLFree(pszWKT);
-        OSRDestroySpatialReference(poSRS);
+        if (poSRS)
+        {
+            char *pszWKT(nullptr);
+            poSRS->StripVertical();
+            poSRS->exportToWkt(&pszWKT);
+            m_horizontalWkt = pszWKT;
+            CPLFree(pszWKT);
+            OSRDestroySpatialReference(poSRS);
+        }
     }
-
-    return tmp;
+    return m_horizontalWkt;
 }
+
 
 std::string SpatialReference::getHorizontalUnits() const
 {
-    std::string tmp("");
-
-    std::string wkt = getWKT(eHorizontalOnly);
+    std::string wkt = getHorizontal();
     const char* poWKT = wkt.c_str();
     OGRSpatialReference* poSRS =
         (OGRSpatialReference*)OSRNewSpatialReference(m_wkt.c_str());
-    if (poSRS)
-    {
-        char* units(0);
 
-        // The returned value remains internal to the OGRSpatialReference and should not
-        //        be freed, or modified. It may be invalidated on the next
-        //        OGRSpatialReference call.
+    if (!poSRS)
+        return std::string();
 
-        double u = poSRS->GetLinearUnits(&units);
-        tmp = units;
+    char* units(nullptr);
 
-        Utils::trim(tmp);
-
-    }
-
+    // The returned value remains internal to the OGRSpatialReference
+    // and should not be freed, or modified. It may be invalidated on
+    // the next OGRSpatialReference call.
+    double u = poSRS->GetLinearUnits(&units);
+    std::string tmp(units);
+    Utils::trim(tmp);
     return tmp;
-}
-
-void SpatialReference::setProj4(std::string const& v)
-{
-    char* poWKT = 0;
-    const char* poProj4 = v.c_str();
-
-    OGRSpatialReference srs(NULL);
-    if (OGRERR_NONE != srs.importFromProj4(const_cast<char *>(poProj4)))
-    {
-        throw pdal_error("Could not import proj4 into OSRSpatialReference "
-            "SetProj4");
-    }
-
-    srs.exportToWkt(&poWKT);
-    m_wkt = poWKT;
-    CPLFree(poWKT);
 }
 
 
 bool SpatialReference::equals(const SpatialReference& input) const
 {
-    OGRSpatialReferenceH current =
-        OSRNewSpatialReference(getWKT(eCompoundOK, false).c_str());
-    OGRSpatialReferenceH other =
-        OSRNewSpatialReference(input.getWKT(eCompoundOK, false).c_str());
+    OGRSpatialReferenceH current = OSRNewSpatialReference(getWkt().c_str());
+    OGRSpatialReferenceH other = OSRNewSpatialReference(input.getWkt().c_str());
 
     int output = OSRIsSame(current, other);
     OSRDestroySpatialReference(current);
@@ -323,17 +269,16 @@ const std::string& SpatialReference::getName() const
 
 bool SpatialReference::isGeographic() const
 {
-    OGRSpatialReferenceH current =
-        OSRNewSpatialReference(getWKT(eCompoundOK, false).c_str());
+    OGRSpatialReferenceH current = OSRNewSpatialReference(m_wkt.c_str());
     bool output = OSRIsGeographic(current);
     OSRDestroySpatialReference(current);
     return output;
 }
 
+
 bool SpatialReference::isGeocentric() const
 {
-    OGRSpatialReferenceH current =
-        OSRNewSpatialReference(getWKT(eCompoundOK, false).c_str());
+    OGRSpatialReferenceH current = OSRNewSpatialReference(m_wkt.c_str());
     bool output = OSRIsGeocentric(current);
     OSRDestroySpatialReference(current);
     return output;
@@ -371,14 +316,42 @@ int SpatialReference::calculateZone(double lon, double lat)
 }
 
 
+bool SpatialReference::isWkt(const std::string& wkt)
+{
+    // List comes from GDAL.  WKT includes FITTED_CS, but this isn't
+    // included in GDAL list.  Not sure why.
+    StringList leaders { "PROJCS", "GEOGCS", "COMPD_CS", "GEOCCS",
+        "VERT_CS", "LOCAL_CS" };
+
+    for (const std::string& s : leaders)
+        if (wkt.compare(0, s.size(), s) == 0)
+            return true;
+    return false;
+}
+
+
+std::string SpatialReference::prettyWkt(const std::string& wkt)
+{
+    OGRSpatialReference *srs =
+        (OGRSpatialReference *)OSRNewSpatialReference(wkt.data());
+
+    char *buf = nullptr;
+    srs->exportToPrettyWkt(&buf, FALSE);
+    OSRDestroySpatialReference(srs);
+
+    std::string outWkt(buf);
+    CPLFree(buf);
+    return outWkt;
+}
+
+
 int SpatialReference::computeUTMZone(const BOX3D& box) const
 {
     // Nothing we can do if we're an empty SRS
     if (empty())
         return 0;
 
-    OGRSpatialReferenceH current =
-        OSRNewSpatialReference(getWKT(eHorizontalOnly, false).c_str());
+    OGRSpatialReferenceH current = OSRNewSpatialReference(m_wkt.c_str());
     if (! current)
         throw pdal_error("Could not fetch current SRS");
 
@@ -467,10 +440,10 @@ MetadataNode SpatialReference::toMetadata() const
     root.add("isgeographic", isGeographic());
     root.add("isgeocentric", isGeocentric());
     root.add("proj4", getProj4());
-    root.add("prettywkt", getWKT(eHorizontalOnly, true));
-    root.add("wkt", getWKT(eHorizontalOnly, false));
-    root.add("compoundwkt", getWKT(eCompoundOK, false));
-    root.add("prettycompoundwkt", getWKT(eCompoundOK, true));
+    root.add("prettywkt", prettyWkt(getHorizontal()));
+    root.add("wkt", getHorizontal());
+    root.add("compoundwkt", getWkt());
+    root.add("prettycompoundwkt", prettyWkt(m_wkt));
 
     MetadataNode units = root.add("units");
     units.add("vertical", getVerticalUnits());
@@ -488,8 +461,7 @@ void SpatialReference::dump() const
 
 std::ostream& operator<<(std::ostream& ostr, const SpatialReference& srs)
 {
-    std::string wkt = srs.getWKT(SpatialReference::eCompoundOK, true);
-    ostr << wkt;
+    ostr << SpatialReference::prettyWkt(srs.m_wkt);
     return ostr;
 }
 
@@ -500,11 +472,8 @@ std::istream& operator>>(std::istream& istr, SpatialReference& srs)
 
     std::ostringstream oss;
     oss << istr.rdbuf();
+    srs.set(oss.str());
 
-    std::string wkt = oss.str();
-    ref.setFromUserInput(wkt.c_str());
-
-    srs = ref;
     return istr;
 }
 

@@ -244,7 +244,7 @@ bool NitfWrap::verifyLas(ILeStream& in, BOX3D& bounds, bool& compressed)
     }
     compressed = h.compressed();
     bounds = h.getBounds();
-    gdal::reprojectBounds(bounds, h.srs().getWKT(), "EPSG:4326");
+    gdal::reprojectBounds(bounds, h.srs().getWkt(), "EPSG:4326");
     return true;
 }
 

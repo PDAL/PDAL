@@ -70,7 +70,7 @@ void DensityKernel::outputDensity(pdal::SpatialReference const& reference)
 
     hexer::HexGrid* grid = hexbin->grid();
 
-    hexdensity::writer::OGR writer(m_outputFile, reference.getWKT(),
+    hexdensity::writer::OGR writer(m_outputFile, reference.getWkt(),
         m_driverName, m_layerName);
     writer.writeDensity(grid);
 //     writer.writeBoundary(grid);

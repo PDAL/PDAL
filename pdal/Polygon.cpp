@@ -260,8 +260,8 @@ Polygon Polygon::transform(const SpatialReference& ref) const
     if (ref.empty())
         throw pdal_error("Polygon::transform failed due to ref being empty");
 
-    gdal::SpatialRef fromRef(m_srs.getWKT());
-    gdal::SpatialRef toRef(ref.getWKT());
+    gdal::SpatialRef fromRef(m_srs.getWkt());
+    gdal::SpatialRef toRef(ref.getWkt());
     gdal::Geometry geom(wkt(12, true), fromRef);
     geom.transform(toRef);
     return Polygon(geom.wkt(), ref, m_ctx);
@@ -506,7 +506,7 @@ std::string Polygon::json(double precision) const
 
     std::string w(wkt());
 
-    gdal::SpatialRef srs(m_srs.getWKT(pdal::SpatialReference::eCompoundOK));
+    gdal::SpatialRef srs(m_srs.getWkt());
     gdal::Geometry g(w, srs);
 
     char* json = OGR_G_ExportToJsonEx(g.get(), papszOptions);

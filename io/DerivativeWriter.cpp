@@ -829,8 +829,8 @@ GDALDataset* DerivativeWriter::createFloat32GTIFF(std::string filename,
     dataset->SetGeoTransform(adfGeoTransform);
 
     // set the projection
-    log()->get(LogLevel::Debug5) << m_inSRS.getWKT() << std::endl;
-    dataset->SetProjection(m_inSRS.getWKT().c_str());
+    log()->get(LogLevel::Debug5) << m_inSRS.getWkt() << std::endl;
+    dataset->SetProjection(m_inSRS.getWkt().c_str());
 
     getMetadata().addList("filename", path);
 

@@ -382,8 +382,7 @@ void LasWriter::addGeotiffVlrs()
     GeotiffSupport geotiff;
     geotiff.resetTags();
 
-    std::string wkt = m_srs.getWKT(SpatialReference::eCompoundOK, false);
-    geotiff.setWkt(wkt);
+    geotiff.setWkt(m_srs.getWkt());
 
     addGeotiffVlr(geotiff, GEOTIFF_DIRECTORY_RECORD_ID,
         "GeoTiff GeoKeyDirectoryTag");
@@ -429,7 +428,7 @@ void LasWriter::addGeotiffVlr(GeotiffSupport& geotiff, uint16_t recordId,
 /// \return  Whether the VLR was added.
 bool LasWriter::addWktVlr()
 {
-    std::string wkt = m_srs.getWKT(SpatialReference::eCompoundOK);
+    std::string wkt = m_srs.getWkt();
     if (wkt.empty())
         return false;
 

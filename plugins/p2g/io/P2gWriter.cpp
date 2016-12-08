@@ -179,7 +179,7 @@ void P2gWriter::done(PointTableRef table)
 
     SpatialReference const& srs = table.spatialReference();
 
-    log()->get(LogLevel::Debug) << "Output SRS  :'" << srs.getWKT() << "'" <<
+    log()->get(LogLevel::Debug) << "Output SRS  :'" << srs.getWkt() << "'" <<
         std::endl;
 
     // Strip off the extension if it was provided so that we don't get
@@ -189,9 +189,8 @@ void P2gWriter::done(PointTableRef table)
     if (extension == ".asc" || extension == ".grid" || extension == ".tif")
         m_filename = m_filename.substr(0, m_filename.find_last_of("."));
 
-    if (m_interpolator->finish(m_filename.c_str(),
-        m_outputFormat, m_outputTypes, adfGeoTransform,
-        srs.getWKT().c_str()) < 0)
+    if (m_interpolator->finish(m_filename.c_str(), m_outputFormat,
+        m_outputTypes, adfGeoTransform, srs.getWkt().c_str()) < 0)
     {
         ostringstream oss;
 

@@ -143,7 +143,7 @@ TEST(NitfReaderTest, optionSrs)
     writer.prepare(table);
     PointViewSet pbSet = writer.execute(table);
 
-    EXPECT_EQ(sr, nitfReader->getSpatialReference().getWKT());
-    EXPECT_EQ("", writer.getSpatialReference().getWKT());
-    EXPECT_EQ(sr, table.spatialReference().getWKT());
+    EXPECT_EQ(sr, nitfReader->getSpatialReference().getWkt());
+    EXPECT_EQ("", writer.getSpatialReference().getWkt());
+    EXPECT_EQ(sr, table.spatialReference().getWkt());
 }

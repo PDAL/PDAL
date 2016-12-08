@@ -478,7 +478,7 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
         polygon << "))";
         fileInfo.m_boundary = polygon.str();
         if (!qi.m_srs.empty())
-            fileInfo.m_srs = qi.m_srs.getWKT();
+            fileInfo.m_srs = qi.m_srs.getWkt();
     }
     else
     {
@@ -494,7 +494,7 @@ TIndexKernel::FileInfo TIndexKernel::getFileInfo(KernelFactory& factory,
 
         PointViewPtr v = *set.begin();
         if (!v->spatialReference().empty())
-            fileInfo.m_srs = v->spatialReference().getWKT();
+            fileInfo.m_srs = v->spatialReference().getWkt();
     }
 
     FileUtils::fileTimes(filename, &fileInfo.m_ctime, &fileInfo.m_mtime);

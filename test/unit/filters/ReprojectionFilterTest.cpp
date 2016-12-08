@@ -80,7 +80,7 @@ TEST(ReprojectionFilterTest, ReprojectionFilterTest_test_1)
         reader.setOptions(ops1);
 
         Options options;
-        options.add("out_srs", out_ref.getWKT());
+        options.add("out_srs", out_ref.getWkt());
 
         ReprojectionFilter reprojectionFilter;
         reprojectionFilter.setOptions(options);
