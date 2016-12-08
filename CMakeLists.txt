@@ -193,7 +193,7 @@ if (APPLE)
     set(PDAL_LIBDIR "-L$<TARGET_FILE_DIR:${PDAL_UTIL_LIB_NAME}>")
 endif()
 
-file(GLOB SRCS
+file(GLOB_RECURSE SRCS
     ${PDAL_FILTERS_DIR}/*.cpp
     ${PDAL_IO_DIR}/*.cpp
     ${PDAL_KERNELS_DIR}/*.cpp
@@ -249,7 +249,7 @@ target_compile_definitions(${PDAL_BASE_LIB_NAME}
     PRIVATE
         ${LASZIP_DEFINES}
 )
-set_target_properties(${PDAL_BASE_LIB_NAME} PROPERTIES 
+set_target_properties(${PDAL_BASE_LIB_NAME} PROPERTIES
     VERSION ${PDAL_BUILD_VERSION}
     SOVERSION ${PDAL_API_VERSION}
     CLEAN_DIRECT_OUTPUT 1)
