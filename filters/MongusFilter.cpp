@@ -82,110 +82,6 @@ int MongusFilter::getRowIndex(double y, double cell_size)
     return static_cast<int>(floor((m_maxRow - y) / cell_size));
 }
 
-Eigen::MatrixXd MongusFilter::computeSpline(Eigen::MatrixXd x_prev,
-        Eigen::MatrixXd y_prev,
-        Eigen::MatrixXd z_prev,
-        Eigen::MatrixXd x_samp,
-        Eigen::MatrixXd y_samp)
-{
-    using namespace Eigen;
-
-// maybe make sure that all prevs are the same size, same with samps
-
-    int num_rows = x_samp.rows();
-    int num_cols = x_samp.cols();
-
-    MatrixXd S = MatrixXd::Zero(num_rows, num_cols);
-
-    for (auto outer_col = 0; outer_col < num_cols; ++outer_col)
-    {
-        for (auto outer_row = 0; outer_row < num_rows; ++outer_row)
-        {
-            // Further optimizations are achieved by estimating only the
-            // interpolated surface within a local neighbourhood (e.g. a 7 x 7
-            // neighbourhood is used in our case) of the cell being filtered.
-            int radius = 3;
-
-            int inner_col = std::floor(outer_col/2);
-            int inner_row = std::floor(outer_row/2);
-
-            int cs = Utils::clamp(inner_col-radius, 0, static_cast<int>(z_prev.cols()-1));
-            int ce = Utils::clamp(inner_col+radius, 0, static_cast<int>(z_prev.cols()-1));
-            int col_size = ce - cs + 1;
-            int rs = Utils::clamp(inner_row-radius, 0, static_cast<int>(z_prev.rows()-1));
-            int re = Utils::clamp(inner_row+radius, 0, static_cast<int>(z_prev.rows()-1));
-            int row_size = re - rs + 1;
-
-            MatrixXd Xn = x_prev.block(rs, cs, row_size, col_size);
-            MatrixXd Yn = y_prev.block(rs, cs, row_size, col_size);
-            MatrixXd Hn = z_prev.block(rs, cs, row_size, col_size);
-
-            int nsize = Hn.size();
-            VectorXd T = VectorXd::Zero(nsize);
-            MatrixXd P = MatrixXd::Zero(nsize, 3);
-            MatrixXd K = MatrixXd::Zero(nsize, nsize);
-
-            for (auto id = 0; id < Hn.size(); ++id)
-            {
-                double xj = Xn(id);
-                double yj = Yn(id);
-                double zj = Hn(id);
-                if (std::isnan(xj) || std::isnan(yj) || std::isnan(zj))
-                    continue;
-                T(id) = zj;
-                P.row(id) << 1, xj, yj;
-                for (auto id2 = 0; id2 < Hn.size(); ++id2)
-                {
-                    if (id == id2)
-                        continue;
-                    double xk = Xn(id2);
-                    double yk = Yn(id2);
-                    double zk = Hn(id2);
-                    if (std::isnan(xk) || std::isnan(yk) || std::isnan(zk))
-                        continue;
-                    double rsqr = (xj - xk) * (xj - xk) + (yj - yk) * (yj - yk);
-                    if (rsqr == 0.0)
-                        continue;
-                    K(id, id2) = rsqr * std::log10(std::sqrt(rsqr));
-                }
-            }
-
-            MatrixXd A = MatrixXd::Zero(nsize+3, nsize+3);
-            A.block(0,0,nsize,nsize) = K;
-            A.block(0,nsize,nsize,3) = P;
-            A.block(nsize,0,3,nsize) = P.transpose();
-
-            VectorXd b = VectorXd::Zero(nsize+3);
-            b.head(nsize) = T;
-
-            VectorXd x = A.fullPivHouseholderQr().solve(b);
-
-            Vector3d a = x.tail(3);
-            VectorXd w = x.head(nsize);
-
-            double sum = 0.0;
-            double xi2 = x_samp(outer_row, outer_col);
-            double yi2 = y_samp(outer_row, outer_col);
-            for (auto j = 0; j < nsize; ++j)
-            {
-                double xj = Xn(j);
-                double yj = Yn(j);
-                double zj = Hn(j);
-                if (std::isnan(xj) || std::isnan(yj) || std::isnan(zj))
-                    continue;
-                double rsqr = (xj - xi2) * (xj - xi2) + (yj - yi2) * (yj - yi2);
-                if (rsqr == 0.0)
-                    continue;
-                sum += w(j) * rsqr * std::log10(std::sqrt(rsqr));
-            }
-
-            S(outer_row, outer_col) = a(0) + a(1)*xi2 + a(2)*yi2 + sum;
-        }
-    }
-
-    return S;
-}
-
 void MongusFilter::writeControl(Eigen::MatrixXd cx, Eigen::MatrixXd cy, Eigen::MatrixXd cz, std::string filename)
 {
     using namespace Dimension;
@@ -320,7 +216,7 @@ std::vector<PointId> MongusFilter::processGround(PointViewPtr view)
         downsampleMin(&cx, &cy, &cz, &x_samp, &y_samp, &z_samp, cur_cell_size);
         // 4x4, 8x8, 16x16, 32x32, 64x64, 128x128, 256x256
 
-        MatrixXd surface = computeSpline(x_prev, y_prev, z_prev, x_samp, y_samp);
+        MatrixXd surface = eigen::computeSpline(x_prev, y_prev, z_prev, x_samp, y_samp);
 
         // if (l == 3)
         // {
@@ -504,7 +400,7 @@ std::vector<PointId> MongusFilter::processGround(PointViewPtr view)
         z_prev = z_samp;
     }
 
-    MatrixXd surface = computeSpline(x_prev, y_prev, z_prev, cx, cy);
+    MatrixXd surface = eigen::computeSpline(x_prev, y_prev, z_prev, cx, cy);
 
     if (log()->getLevel() > LogLevel::Debug5)
     {
