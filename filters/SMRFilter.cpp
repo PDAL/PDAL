@@ -260,14 +260,15 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
     // these latter techniques were nearly the same with regards to total error,
     // with the spring technique performing slightly better than the k-nearest
     // neighbor (KNN) approach.
-    MatrixXd ZImin = eigen::createDSM(*view.get(), m_numRows, m_numCols,
-                                      m_cellSize, m_bounds);
-    eigen::writeMatrix(ZImin, "zimin.tif", m_cellSize, m_bounds, srs);
 
+    MatrixXd ZImin = eigen::createMinMatrix(*view.get(), m_numRows, m_numCols,
+                                            m_cellSize, m_bounds);
+    eigen::writeMatrix(ZImin, "zimin.tif", "GTiff", m_cellSize, m_bounds, srs);
+    
     // MatrixXd ZImin_painted = inpaintKnn(cx, cy, ZImin);
     // MatrixXd ZImin_painted = TPS(cx, cy, ZImin);
     MatrixXd ZImin_painted = expandingTPS(cx, cy, ZImin);
-    eigen::writeMatrix(ZImin_painted, "zimin_painted.tif", m_cellSize, m_bounds, srs);
+    eigen::writeMatrix(ZImin_painted, "zimin_painted.tif", "GTiff", m_cellSize, m_bounds, srs);
 
     ZImin = ZImin_painted;
 
@@ -288,7 +289,7 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
 
     // paper has low point happening later, i guess it doesn't matter too much, this is where he does it in matlab code
     MatrixXi Low = progressiveFilter(-ZImin, m_cellSize, 5.0, 1.0);
-    eigen::writeMatrix(Low.cast<double>(), "zilow.tif", m_cellSize, m_bounds, srs);
+    eigen::writeMatrix(Low.cast<double>(), "zilow.tif", "GTiff", m_cellSize, m_bounds, srs);
 
     // matlab code has net cutting occurring here
     MatrixXd ZInet = ZImin;
@@ -318,12 +319,12 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
                     ZInet(r, c) = bigOpen(r, c);
             }
         }
-        eigen::writeMatrix(ZInet, "zinet.tif", m_cellSize, m_bounds, srs);
+        eigen::writeMatrix(ZInet, "zinet.tif", "GTiff", m_cellSize, m_bounds, srs);
     }
 
     // and finally object detection
     MatrixXi Obj = progressiveFilter(ZInet, m_cellSize, m_percentSlope, m_maxWindow);
-    eigen::writeMatrix(Obj.cast<double>(), "ziobj.tif", m_cellSize, m_bounds, srs);
+    eigen::writeMatrix(Obj.cast<double>(), "ziobj.tif", "GTiff", m_cellSize, m_bounds, srs);
 
     // STEP 3:
 
@@ -341,12 +342,12 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
         if (Obj(i) == 1 || Low(i) == 1 || isNetCell(i) == 1)
             ZIpro(i) = std::numeric_limits<double>::quiet_NaN();
     }
-    eigen::writeMatrix(ZIpro, "zipro.tif", m_cellSize, m_bounds, srs);
+    eigen::writeMatrix(ZIpro, "zipro.tif", "GTiff", m_cellSize, m_bounds, srs);
 
     // MatrixXd ZIpro_painted = inpaintKnn(cx, cy, ZIpro);
     // MatrixXd ZIpro_painted = TPS(cx, cy, ZIpro);
     MatrixXd ZIpro_painted = expandingTPS(cx, cy, ZIpro);
-    eigen::writeMatrix(ZIpro_painted, "zipro_painted.tif", m_cellSize, m_bounds, srs);
+    eigen::writeMatrix(ZIpro_painted, "zipro_painted.tif", "GTiff", m_cellSize, m_bounds, srs);
 
     ZIpro = ZIpro_painted;
 
@@ -411,21 +412,21 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
     MatrixXd scaled = ZIpro / m_cellSize;
 
     MatrixXd gx = eigen::gradX(scaled);
-    eigen::writeMatrix(gx, "gx.tif", m_cellSize, m_bounds, srs);
+    eigen::writeMatrix(gx, "gx.tif", "GTiff", m_cellSize, m_bounds, srs);
     MatrixXd gy = eigen::gradY(scaled);
-    eigen::writeMatrix(gy, "gy.tif", m_cellSize, m_bounds, srs);
+    eigen::writeMatrix(gy, "gy.tif", "GTiff", m_cellSize, m_bounds, srs);
     MatrixXd gsurfs = (gx.cwiseProduct(gx) + gy.cwiseProduct(gy)).cwiseSqrt();
-    eigen::writeMatrix(gsurfs, "gsurfs.tif", m_cellSize, m_bounds, srs);
+    eigen::writeMatrix(gsurfs, "gsurfs.tif", "GTiff", m_cellSize, m_bounds, srs);
 
     // MatrixXd gsurfs_painted = inpaintKnn(cx, cy, gsurfs);
     // MatrixXd gsurfs_painted = TPS(cx, cy, gsurfs);
     MatrixXd gsurfs_painted = expandingTPS(cx, cy, gsurfs);
-    eigen::writeMatrix(gsurfs_painted, "gsurfs_painted.tif", m_cellSize, m_bounds, srs);
+    eigen::writeMatrix(gsurfs_painted, "gsurfs_painted.tif", "GTiff", m_cellSize, m_bounds, srs);
 
     gsurfs = gsurfs_painted;
 
     MatrixXd thresh = (m_threshold + 1.2 * gsurfs.array()).matrix();
-    eigen::writeMatrix(thresh, "thresh.tif", m_cellSize, m_bounds, srs);
+    eigen::writeMatrix(thresh, "thresh.tif", "GTiff", m_cellSize, m_bounds, srs);
 
     for (PointId i = 0; i < view->size(); ++i)
     {
@@ -513,7 +514,7 @@ MatrixXi SMRFilter::progressiveFilter(MatrixXd const& ZImin, double cell_size,
             if (diff(i) > threshold)
                 Obj(i) = 1;
         }
-        // eigen::writeMatrix(Obj, "obj.tif", m_cellSize, m_bounds, srs);
+        // eigen::writeMatrix(Obj, "obj.tif", "GTiff", m_cellSize, m_bounds, srs);
 
         // The algorithm then proceeds to the next window radius (up to the
         // maximum), and proceeds as above with the last opened surface acting
