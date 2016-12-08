@@ -39,7 +39,7 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/pdal_defines.h>
-#include <las/LasReader.hpp>
+#include <io/LasReader.hpp>
 
 #include "../io/SQLiteCommon.hpp"
 

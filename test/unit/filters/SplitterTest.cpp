@@ -36,8 +36,8 @@
 
 #include <pdal/StageFactory.hpp>
 #include <pdal/StageWrapper.hpp>
-#include <LasReader.hpp>
-#include <SplitterFilter.hpp>
+#include <io/LasReader.hpp>
+#include <filters/SplitterFilter.hpp>
 #include "Support.hpp"
 
 using namespace pdal;

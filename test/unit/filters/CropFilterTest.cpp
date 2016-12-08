@@ -37,13 +37,13 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
-#include <BufferReader.hpp>
-#include <CropFilter.hpp>
-#include <FauxReader.hpp>
-#include <LasReader.hpp>
-#include <ReprojectionFilter.hpp>
-#include <StatsFilter.hpp>
-#include <StreamCallbackFilter.hpp>
+#include <io/BufferReader.hpp>
+#include <io/FauxReader.hpp>
+#include <io/LasReader.hpp>
+#include <filters/ReprojectionFilter.hpp>
+#include <filters/CropFilter.hpp>
+#include <filters/StatsFilter.hpp>
+#include <filters/StreamCallbackFilter.hpp>
 #include "Support.hpp"
 
 using namespace pdal;

@@ -12,8 +12,6 @@ if(NOT ROOT_DIR)
 endif()
 include(${ROOT_DIR}/cmake/common.cmake NO_POLICY_SCOPE)
 
-include_directories(${PDAL_UTIL_DIR} ${PDAL_INCLUDE_DIR})
-
 #
 # Add necessary modules.
 #
@@ -24,23 +22,16 @@ find_package(LASzip QUIET)
 # Right now we don't bother if we don't have LASzip.
 #
 if (LASZIP_FOUND)
-    set (SOURCES
+    add_executable(lasdump
         Dumper.cpp
         Header.cpp
     )
-
-    set (HEADERS
-        Dumper.hpp
-        Header.hpp
-        Lasdump.hpp
-        Vlr.hpp
-    )
-
-    add_executable(lasdump ${SOURCES} ${HEADERS})
     target_link_libraries(lasdump PRIVATE
         ${PDAL_UTIL_LIB_NAME}
         ${LASZIP_LIBRARIES}
     )
+    target_include_directories(lasdump PRIVATE
+        ${PDAL_INCLUDE_DIR})
     if (WIN32)
         target_link_libraries(lasdump PRIVATE wsock32 ws2_32)
     endif()

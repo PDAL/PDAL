@@ -43,8 +43,8 @@
 #include "Support.hpp"
 #include <pdal/Options.hpp>
 #include <pdal/PointView.hpp>
-#include <LasReader.hpp>
 #include <pdal/Compression.hpp>
+#include <io/LasReader.hpp>
 
 using namespace pdal;
 

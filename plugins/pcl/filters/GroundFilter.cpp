@@ -34,8 +34,6 @@
 
 #include "GroundFilter.hpp"
 
-#include "PCLConversions.hpp"
-
 #include <pdal/Options.hpp>
 #include <pdal/PointTable.hpp>
 #include <pdal/PointView.hpp>
@@ -48,6 +46,8 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/segmentation/progressive_morphological_filter.h>
 #include <pcl/segmentation/approximate_progressive_morphological_filter.h>
+
+#include "../PCLConversions.hpp"
 
 namespace pdal
 {

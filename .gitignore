@@ -24,6 +24,7 @@ CTestTestfile.cmake
 Testing/
 test/temp/
 apps/pdal-config
+apps/pdal-config.bat
 apps/pdal.pc
 src/CMakeScripts/
 apps/CMakeScripts/
@@ -75,7 +76,7 @@ doc/build
 bin/
 lib/
 test/unit/CMakeScripts/
-src/gitsha.cpp
+pdal/gitsha.cpp
 .vagrant/
 test/unit/TestConfig.hpp
 *.pyc

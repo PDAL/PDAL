@@ -4,24 +4,19 @@
 
 include (${PDAL_CMAKE_DIR}/hdf5.cmake)
 
-include_directories(${ROOT_DIR}/vendor/pdalboost)
 
 if (NOT PDAL_HAVE_HDF5)
     message(FATAL "HDF5 not found but is required for Icebridge.")
 else()
-    set(srcs
-        io/IcebridgeReader.cpp
-        io/Hdf5Handler.cpp
-    )
-
-    set(incs
-        io/IcebridgeReader.hpp
-        io/Hdf5Handler.hpp
-    )
-
     PDAL_ADD_PLUGIN(libname reader icebridge
-        FILES "${srcs}" "${incs}"
+        FILES
+            io/IcebridgeReader.cpp
+            io/Hdf5Handler.cpp
         LINK_WITH ${HDF5_LIBRARIES})
+    target_include_directories(${libname}
+        PRIVATE
+            ${ROOT_DIR}
+            ${LIBXML2_INCLUDE_DIR})
 
     if (WITH_TESTS)
         PDAL_ADD_TEST(icetest

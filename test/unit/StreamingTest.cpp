@@ -36,9 +36,9 @@
 
 #include <pdal/Filter.hpp>
 #include <pdal/PointTable.hpp>
-#include <FauxReader.hpp>
-#include <MergeFilter.hpp>
-#include <StreamCallbackFilter.hpp>
+#include <io/FauxReader.hpp>
+#include <filters/MergeFilter.hpp>
+#include <filters/StreamCallbackFilter.hpp>
 #include "Support.hpp"
 
 using namespace pdal;

@@ -38,10 +38,10 @@
 
 #include <pdal/PipelineManager.hpp>
 #include <pdal/util/FileUtils.hpp>
-#include <LasReader.hpp>
-#include <LasWriter.hpp>
-#include <DecimationFilter.hpp>
-#include <MergeFilter.hpp>
+#include <io/LasReader.hpp>
+#include <io/LasWriter.hpp>
+#include <filters/DecimationFilter.hpp>
+#include <filters/MergeFilter.hpp>
 
 using namespace pdal;
 

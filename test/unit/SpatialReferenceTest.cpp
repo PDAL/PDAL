@@ -37,10 +37,10 @@
 #include <pdal/SpatialReference.hpp>
 #include <pdal/Polygon.hpp>
 #include <pdal/util/FileUtils.hpp>
-#include <ReprojectionFilter.hpp>
-#include <MergeFilter.hpp>
-#include <LasWriter.hpp>
-#include <LasReader.hpp>
+#include <filters/ReprojectionFilter.hpp>
+#include <filters/MergeFilter.hpp>
+#include <io/LasWriter.hpp>
+#include <io/LasReader.hpp>
 
 #include <gdal_version.h>
 

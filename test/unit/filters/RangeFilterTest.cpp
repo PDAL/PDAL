@@ -36,9 +36,9 @@
 
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
-#include <FauxReader.hpp>
-#include <RangeFilter.hpp>
-#include <StreamCallbackFilter.hpp>
+#include <io/FauxReader.hpp>
+#include <filters/RangeFilter.hpp>
+#include <filters/StreamCallbackFilter.hpp>
 
 using namespace pdal;
 

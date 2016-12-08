@@ -2,22 +2,21 @@
 
 find_package(Matlab REQUIRED)
 
-include_directories(${MATLAB_INCLUDE_DIR})
-add_definitions(-DHAVE_MATLAB=1)
-
-set(inc io/MatlabWriter.hpp)
-set(src io/MatlabWriter.cpp)
-
 PDAL_ADD_PLUGIN(libname writer matlab
-    FILES "${src}" "${inc}"
-    LINK_WITH ${MATLAB_LIBRARIES}
-    )
+    FILES
+        io/MatlabWriter.cpp
+    LINK_WITH
+        ${MATLAB_LIBRARIES}
+)
+target_compile_definitions(${libname} PRIVATE -DHAVE_MATLAB=1)
+target_include_directories(${libname} PRIVATE ${MATLAB_INCLUDE_DIR})
 
 if (WITH_TESTS)
-    include_directories(io)
     PDAL_ADD_TEST(matlabtest
-        FILES test/MatlabWriterTest.cpp
-        LINK_WITH ${libname}
-        )
+        FILES
+            test/MatlabWriterTest.cpp
+        LINK_WITH
+            ${libname}
+    )
 
 endif()

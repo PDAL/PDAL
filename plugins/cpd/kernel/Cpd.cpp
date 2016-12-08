@@ -40,10 +40,8 @@
 
 #include <pdal/KernelFactory.hpp>
 #include <pdal/StageFactory.hpp>
-
-#include "chipper/ChipperFilter.hpp"
-#include "crop/CropFilter.hpp"
-#include "buffer/BufferReader.hpp"
+#include <filters/CropFilter.hpp>
+#include <io/BufferReader.hpp>
 
 namespace pdal
 {

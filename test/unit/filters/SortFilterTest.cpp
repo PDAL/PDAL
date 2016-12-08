@@ -36,11 +36,11 @@
 
 #include <random>
 
-#include <LasReader.hpp>
-#include <LasWriter.hpp>
-#include <SortFilter.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/StageWrapper.hpp>
+#include <io/LasReader.hpp>
+#include <io/LasWriter.hpp>
+#include <filters/SortFilter.hpp>
 #include "Support.hpp"
 
 using namespace pdal;

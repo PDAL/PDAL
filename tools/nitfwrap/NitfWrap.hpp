@@ -1,6 +1,6 @@
 #pragma once
 
-#include <NitfFileWriter.hpp>
+#include <plugins/nitf/io/NitfFileWriter.hpp>
 
 namespace pdal
 {

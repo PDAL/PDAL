@@ -32,21 +32,18 @@
  * OF SUCH DAMAGE.
  ****************************************************************************/
 
-#include "PCLKernel.hpp"
-
-#include "PCLBlock.hpp"
-
-#include <buffer/BufferReader.hpp>
 #include <pdal/KernelFactory.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <io/BufferReader.hpp>
+
+#include "PCLKernel.hpp"
+#include "../filters/PCLBlock.hpp"
 
 namespace pdal
 {
 
-static PluginInfo const s_info = PluginInfo(
-    "kernels.pcl",
-    "PCL Kernel",
-    "http://pdal.io/kernels/kernels.pcl.html" );
+static PluginInfo const s_info = PluginInfo("kernels.pcl", "PCL Kernel",
+    "http://pdal.io/apps/pcl.html" );
 
 CREATE_SHARED_PLUGIN(1, 0, PCLKernel, Kernel, s_info)
 

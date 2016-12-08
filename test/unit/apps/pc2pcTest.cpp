@@ -32,16 +32,15 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/pdal_test_main.hpp>
-
-#include <pdal/util/FileUtils.hpp>
-#include <LasReader.hpp>
-
-#include "Support.hpp"
-
 #include <iostream>
 #include <sstream>
 #include <string>
+
+#include <pdal/pdal_test_main.hpp>
+
+#include <pdal/util/FileUtils.hpp>
+#include <io/LasReader.hpp>
+#include "Support.hpp"
 
 using namespace pdal;
 

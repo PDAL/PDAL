@@ -37,7 +37,7 @@
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/restrict.hpp>
 
-#include <las/LasReader.hpp>
+#include <io/LasReader.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/util/FileUtils.hpp>
 
