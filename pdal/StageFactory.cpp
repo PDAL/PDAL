@@ -282,11 +282,11 @@ StageFactory::StageFactory(bool no_plugins)
 
     // writers
     PluginManager::initializePlugin(BpfWriter_InitPlugin);
+    PluginManager::initializePlugin(DerivativeWriter_InitPlugin);
     PluginManager::initializePlugin(GDALWriter_InitPlugin);
     PluginManager::initializePlugin(LasWriter_InitPlugin);
     PluginManager::initializePlugin(PlyWriter_InitPlugin);
     PluginManager::initializePlugin(SbetWriter_InitPlugin);
-    PluginManager::initializePlugin(DerivativeWriter_InitPlugin);
     PluginManager::initializePlugin(TextWriter_InitPlugin);
     PluginManager::initializePlugin(NullWriter_InitPlugin);
 }

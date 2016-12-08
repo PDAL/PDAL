@@ -240,8 +240,8 @@ std::vector<PointId> PMFFilter::processGroundApprox(PointViewPtr view)
     for (PointId i = 0; i < view->size(); ++i)
         groundIdx.push_back(i);
 
-    MatrixXd ZImin = eigen::createDSM(*view.get(), rows, cols, m_cellSize,
-                                      bounds);
+    MatrixXd ZImin = eigen::createMinMatrix(*view.get(), rows, cols, m_cellSize,
+                                            bounds);
 
     // Progressively filter ground returns using morphological open
     for (size_t j = 0; j < wsvec.size(); ++j)

@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2016, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2016, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -34,70 +34,34 @@
 
 #pragma once
 
-#include <pdal/Filter.hpp>
-#include <pdal/plugin.hpp>
-
-#include <Eigen/Dense>
-
-#include <memory>
-#include <unordered_map>
-
-extern "C" int32_t SMRFilter_ExitFunc();
-extern "C" PF_ExitFunc SMRFilter_InitPlugin();
+#include <pdal/Geometry.hpp>
 
 namespace pdal
 {
 
-using namespace Eigen;
 
-class PointLayout;
-class PointView;
+namespace cropfilter
+{
 
-class PDAL_DLL SMRFilter : public Filter
+class PDAL_DLL Point : public Geometry
 {
 public:
-    SMRFilter() : Filter()
-    {}
 
-    static void * create();
-    static int32_t destroy(void *);
-    std::string getName() const;
+    Point();
+    Point(const std::string& wkt_or_json,
+           SpatialReference ref);
+    bool is3d() const;
+    bool empty() const;
+    void clear();
 
-private:
-    bool m_classify;
-    bool m_extract;
-    int m_numRows;
-    int m_numCols;
-    double m_cellSize;
-    double m_cutNet;
-    double m_percentSlope;
-    double m_maxWindow;
-    double m_scalar;
-    double m_threshold;
-    std::string m_outDir;
 
-    virtual void addArgs(ProgramArgs& args);
-    virtual void addDimensions(PointLayoutPtr layout);
-    virtual void ready(PointTableRef table);
+    virtual void update(const std::string& wkt_or_json,
+        SpatialReference ref = SpatialReference());
 
-    MatrixXd inpaintKnn(MatrixXd cx, MatrixXd cy, MatrixXd cz);
+    double x;
+    double y;
+    double z;
 
-    // processGround implements the SMRF algorithm, returning a vector
-    // of ground indices.
-    std::vector<PointId> processGround(PointViewPtr view);
-
-    // progressiveFilter is the core of the SMRF algorithm.
-    MatrixXi progressiveFilter(MatrixXd const& ZImin, double cell_size,
-                               double slope, double max_window);
-
-    virtual PointViewSet run(PointViewPtr view);
-
-    // TPS returns an interpolated matrix using thin plate splines.
-    MatrixXd TPS(MatrixXd cx, MatrixXd cy, MatrixXd cz);
-    MatrixXd expandingTPS(MatrixXd cx, MatrixXd cy, MatrixXd cz);
-
-    SMRFilter& operator=(const SMRFilter&); // not implemented
-    SMRFilter(const SMRFilter&); // not implemented
 };
-
+} // namespace cropfilter
 } // namespace pdal

@@ -204,8 +204,7 @@ void AttributeFilter::UpdateGEOSBuffer(PointView& view)
             throw pdal::pdal_error(oss.str());
         }
 
-        pdal::Polygon p(geom, view.spatialReference(),
-            geos::ErrorHandler::get());
+        pdal::Polygon p(geom, view.spatialReference());
 
         // Compute a total bounds for the geometry. Query the QuadTree to
         // find out the points that are inside the bbox. Then test each

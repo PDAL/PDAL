@@ -38,6 +38,7 @@
 #include <pdal/pdal_macros.hpp>
 #include <pdal/PipelineManager.hpp>
 #include <pdal/SpatialReference.hpp>
+#include <pdal/util/FileUtils.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 #include <pdal/util/Utils.hpp>
 #include <io/BufferReader.hpp>
@@ -80,9 +81,11 @@ void SMRFilter::addArgs(ProgramArgs& args)
     args.add("extract", "Extract ground returns?", m_extract);
     args.add("cell", "Cell size?", m_cellSize, 1.0);
     args.add("slope", "Slope?", m_percentSlope, 0.15);
-    args.add("window", "Max window size?", m_maxWindow, 21.0);
-    args.add("threshold", "Threshold?", m_threshold, 0.15);
+    args.add("window", "Max window size?", m_maxWindow, 18.0);
+    args.add("scalar", "Elevation scalar?", m_scalar, 1.25);
+    args.add("threshold", "Elevation threshold?", m_threshold, 0.5);
     args.add("cut", "Cut net size?", m_cutNet, 0.0);
+    args.add("outdir", "Optional output directory for debugging", m_outDir);
 }
 
 void SMRFilter::addDimensions(PointLayoutPtr layout)
@@ -90,14 +93,13 @@ void SMRFilter::addDimensions(PointLayoutPtr layout)
     layout->registerDim(Dimension::Id::Classification);
 }
 
-int SMRFilter::getColIndex(double x, double cell_size)
+void SMRFilter::ready(PointTableRef table)
 {
-    return static_cast<int>(floor((x - m_bounds.minx) / cell_size));
-}
-
-int SMRFilter::getRowIndex(double y, double cell_size)
-{
-    return static_cast<int>(floor((m_maxRow - y) / cell_size));
+    if (m_outDir.empty())
+        return;
+        
+    if (!FileUtils::directoryExists(m_outDir))
+        throw pdal_error("Output directory does not exist");
 }
 
 MatrixXd SMRFilter::inpaintKnn(MatrixXd cx, MatrixXd cy, MatrixXd cz)
@@ -201,15 +203,14 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
     // their relationship to the interpolated
 
     std::vector<PointId> groundIdx;
-    view->calculateBounds(m_bounds);
+    
+    BOX2D bounds;
+    view->calculateBounds(bounds);
     SpatialReference srs(view->spatialReference());
 
-    double extent_x = floor(m_bounds.maxx) - ceil(m_bounds.minx);
-    double extent_y = floor(m_bounds.maxy) - ceil(m_bounds.miny);
-
-    m_numCols = static_cast<int>(ceil(extent_x/m_cellSize)) + 1;
-    m_numRows = static_cast<int>(ceil(extent_y/m_cellSize)) + 1;
-    m_maxRow = m_bounds.miny + m_numRows * m_cellSize;
+    // Determine the number of rows and columns at the given cell size.
+    m_numCols = ((bounds.maxx - bounds.minx) / m_cellSize) + 1;
+    m_numRows = ((bounds.maxy - bounds.miny) / m_cellSize) + 1;
 
     MatrixXd cx(m_numRows, m_numCols);
     MatrixXd cy(m_numRows, m_numCols);
@@ -217,8 +218,8 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
     {
         for (auto r = 0; r < m_numRows; ++r)
         {
-            cx(r, c) = m_bounds.minx + (c + 0.5) * m_cellSize;
-            cy(r, c) = m_bounds.miny + (r + 0.5) * m_cellSize;
+            cx(r, c) = bounds.minx + (c + 0.5) * m_cellSize;
+            cy(r, c) = bounds.miny + (r + 0.5) * m_cellSize;
         }
     }
 
@@ -260,14 +261,22 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
     // these latter techniques were nearly the same with regards to total error,
     // with the spring technique performing slightly better than the k-nearest
     // neighbor (KNN) approach.
-    MatrixXd ZImin = eigen::createDSM(*view.get(), m_numRows, m_numCols,
-                                      m_cellSize, m_bounds);
-    eigen::writeMatrix(ZImin, "zimin.tif", m_cellSize, m_bounds, srs);
 
+    MatrixXd ZImin = eigen::createMinMatrix(*view.get(), m_numRows, m_numCols,
+                                            m_cellSize, bounds);
+    
     // MatrixXd ZImin_painted = inpaintKnn(cx, cy, ZImin);
     // MatrixXd ZImin_painted = TPS(cx, cy, ZImin);
     MatrixXd ZImin_painted = expandingTPS(cx, cy, ZImin);
-    eigen::writeMatrix(ZImin_painted, "zimin_painted.tif", m_cellSize, m_bounds, srs);
+    
+    if (!m_outDir.empty())
+    {
+        std::string filename = FileUtils::toAbsolutePath("zimin.tif", m_outDir);
+        eigen::writeMatrix(ZImin, filename, "GTiff", m_cellSize, bounds, srs);
+        
+        filename = FileUtils::toAbsolutePath("zimin_painted.tif", m_outDir);
+        eigen::writeMatrix(ZImin_painted, filename, "GTiff", m_cellSize, bounds, srs);
+    }
 
     ZImin = ZImin_painted;
 
@@ -288,7 +297,6 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
 
     // paper has low point happening later, i guess it doesn't matter too much, this is where he does it in matlab code
     MatrixXi Low = progressiveFilter(-ZImin, m_cellSize, 5.0, 1.0);
-    eigen::writeMatrix(Low.cast<double>(), "zilow.tif", m_cellSize, m_bounds, srs);
 
     // matlab code has net cutting occurring here
     MatrixXd ZInet = ZImin;
@@ -318,12 +326,10 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
                     ZInet(r, c) = bigOpen(r, c);
             }
         }
-        eigen::writeMatrix(ZInet, "zinet.tif", m_cellSize, m_bounds, srs);
     }
 
     // and finally object detection
     MatrixXi Obj = progressiveFilter(ZInet, m_cellSize, m_percentSlope, m_maxWindow);
-    eigen::writeMatrix(Obj.cast<double>(), "ziobj.tif", m_cellSize, m_bounds, srs);
 
     // STEP 3:
 
@@ -341,12 +347,28 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
         if (Obj(i) == 1 || Low(i) == 1 || isNetCell(i) == 1)
             ZIpro(i) = std::numeric_limits<double>::quiet_NaN();
     }
-    eigen::writeMatrix(ZIpro, "zipro.tif", m_cellSize, m_bounds, srs);
 
     // MatrixXd ZIpro_painted = inpaintKnn(cx, cy, ZIpro);
     // MatrixXd ZIpro_painted = TPS(cx, cy, ZIpro);
     MatrixXd ZIpro_painted = expandingTPS(cx, cy, ZIpro);
-    eigen::writeMatrix(ZIpro_painted, "zipro_painted.tif", m_cellSize, m_bounds, srs);
+    
+    if (!m_outDir.empty())
+    {
+        std::string filename = FileUtils::toAbsolutePath("zilow.tif", m_outDir);
+        eigen::writeMatrix(Low.cast<double>(), filename, "GTiff", m_cellSize, bounds, srs);
+        
+        filename = FileUtils::toAbsolutePath("zinet.tif", m_outDir);
+        eigen::writeMatrix(ZInet, filename, "GTiff", m_cellSize, bounds, srs);
+        
+        filename = FileUtils::toAbsolutePath("ziobj.tif", m_outDir);
+        eigen::writeMatrix(Obj.cast<double>(), filename, "GTiff", m_cellSize, bounds, srs);
+        
+        filename = FileUtils::toAbsolutePath("zipro.tif", m_outDir);
+        eigen::writeMatrix(ZIpro, filename, "GTiff", m_cellSize, bounds, srs);
+        
+        filename = FileUtils::toAbsolutePath("zipro_painted.tif", m_outDir);
+        eigen::writeMatrix(ZIpro_painted, filename, "GTiff", m_cellSize, bounds, srs);
+    }
 
     ZIpro = ZIpro_painted;
 
@@ -411,21 +433,37 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
     MatrixXd scaled = ZIpro / m_cellSize;
 
     MatrixXd gx = eigen::gradX(scaled);
-    eigen::writeMatrix(gx, "gx.tif", m_cellSize, m_bounds, srs);
     MatrixXd gy = eigen::gradY(scaled);
-    eigen::writeMatrix(gy, "gy.tif", m_cellSize, m_bounds, srs);
     MatrixXd gsurfs = (gx.cwiseProduct(gx) + gy.cwiseProduct(gy)).cwiseSqrt();
-    eigen::writeMatrix(gsurfs, "gsurfs.tif", m_cellSize, m_bounds, srs);
 
     // MatrixXd gsurfs_painted = inpaintKnn(cx, cy, gsurfs);
     // MatrixXd gsurfs_painted = TPS(cx, cy, gsurfs);
     MatrixXd gsurfs_painted = expandingTPS(cx, cy, gsurfs);
-    eigen::writeMatrix(gsurfs_painted, "gsurfs_painted.tif", m_cellSize, m_bounds, srs);
+    
+    if (!m_outDir.empty())
+    {
+        std::string filename = FileUtils::toAbsolutePath("gx.tif", m_outDir);
+        eigen::writeMatrix(gx, filename, "GTiff", m_cellSize, bounds, srs);
+        
+        filename = FileUtils::toAbsolutePath("gy.tif", m_outDir);
+        eigen::writeMatrix(gy, filename, "GTiff", m_cellSize, bounds, srs);
+        
+        filename = FileUtils::toAbsolutePath("gsurfs.tif", m_outDir);
+        eigen::writeMatrix(gsurfs, filename, "GTiff", m_cellSize, bounds, srs);
+        
+        filename = FileUtils::toAbsolutePath("gsurfs_painted.tif", m_outDir);
+        eigen::writeMatrix(gsurfs_painted, filename, "GTiff", m_cellSize, bounds, srs);
+    }
 
     gsurfs = gsurfs_painted;
 
-    MatrixXd thresh = (m_threshold + 1.2 * gsurfs.array()).matrix();
-    eigen::writeMatrix(thresh, "thresh.tif", m_cellSize, m_bounds, srs);
+    MatrixXd thresh = (m_threshold + m_scalar * gsurfs.array()).matrix();
+    
+    if (!m_outDir.empty())
+    {
+        std::string filename = FileUtils::toAbsolutePath("thresh.tif", m_outDir);
+        eigen::writeMatrix(thresh, filename, "GTiff", m_cellSize, bounds, srs);
+    }
 
     for (PointId i = 0; i < view->size(); ++i)
     {
@@ -434,8 +472,8 @@ std::vector<PointId> SMRFilter::processGround(PointViewPtr view)
         double y = view->getFieldAs<double>(Id::Y, i);
         double z = view->getFieldAs<double>(Id::Z, i);
 
-        int c = Utils::clamp(getColIndex(x, m_cellSize), 0, m_numCols-1);
-        int r = Utils::clamp(getRowIndex(y, m_cellSize), 0, m_numRows-1);
+        int c = Utils::clamp(static_cast<int>(floor(x - bounds.minx) / m_cellSize), 0, m_numCols-1);
+        int r = Utils::clamp(static_cast<int>(floor(y - bounds.miny) / m_cellSize), 0, m_numRows-1);
 
         // author uses spline interpolation to get value from ZIpro and gsurfs
 
@@ -513,7 +551,7 @@ MatrixXi SMRFilter::progressiveFilter(MatrixXd const& ZImin, double cell_size,
             if (diff(i) > threshold)
                 Obj(i) = 1;
         }
-        // eigen::writeMatrix(Obj, "obj.tif", m_cellSize, m_bounds, srs);
+        // eigen::writeMatrix(Obj, "obj.tif", "GTiff", m_cellSize, bounds, srs);
 
         // The algorithm then proceeds to the next window radius (up to the
         // maximum), and proceeds as above with the last opened surface acting

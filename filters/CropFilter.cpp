@@ -41,6 +41,7 @@
 #include <pdal/Polygon.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+#include <pdal/KDIndex.hpp>
 
 #include <sstream>
 #include <cstdarg>
@@ -50,7 +51,7 @@ namespace pdal
 
 static PluginInfo const s_info = PluginInfo(
     "filters.crop",
-    "Filter points inside or outside a bounding box or a polygon if PDAL was built with GEOS support.",
+    "Filter points inside or outside a bounding box or a polygon",
     "http://pdal.io/stages/filters.crop.html" );
 
 CREATE_STATIC_PLUGIN(1, 0, CropFilter, Filter, s_info)
@@ -68,7 +69,11 @@ void CropFilter::addArgs(ProgramArgs& args)
     args.add("outside", "Whether we keep points inside or outside of the "
         "bounding region", m_cropOutside);
     args.add("a_srs", "Spatial reference for bounding region", m_assignedSrs);
-    args.add("bounds", "Bounds box for cropped points", m_bounds);
+    args.add("bounds", "Point box for cropped points", m_bounds);
+    args.add("point", "Crop within 'distance' from a 2D or 3D point", m_points).
+        setErrorText("Invalid point specification must be in the form \"(1.00, 1.00)\""
+                "or \"(1.00, 1.00, 1.00)\"");
+    args.add("distance", "Crop with this distance from 2D or 3D 'point'", m_distance);
     args.add("polygon", "Bounding polying for cropped points", m_polys).
         setErrorText("Invalid polygon specification.  "
             "Must be valid GeoJSON/WKT");
@@ -77,6 +82,7 @@ void CropFilter::addArgs(ProgramArgs& args)
 
 void CropFilter::initialize()
 {
+
     // Set geometry from polygons.
     if (m_polys.size())
     {
@@ -93,6 +99,7 @@ void CropFilter::initialize()
             m_geoms.push_back(g);
         }
     }
+
 }
 
 
@@ -126,13 +133,6 @@ PointViewSet CropFilter::run(PointViewPtr view)
     PointViewSet viewSet;
     SpatialReference srs = view->spatialReference();
 
-    // Don't do anything if no bounds have been specified.
-    if (m_geoms.empty() && m_bounds.empty())
-    {
-        viewSet.insert(view);
-        return viewSet;
-    }
-
     for (auto& geom : m_geoms)
     {
         // If this is the first time through or the SRS has changed,
@@ -154,6 +154,14 @@ PointViewSet CropFilter::run(PointViewPtr view)
         crop(box.to2d(), *view, *outView);
         viewSet.insert(outView);
     }
+
+    for (auto& point: m_points)
+    {
+        PointViewPtr outView = view->makeNew();
+        crop(point, m_distance, *view, *outView);
+        viewSet.insert(outView);
+    }
+
     return viewSet;
 }
 
@@ -199,6 +207,37 @@ void CropFilter::crop(const GeomPkg& g, PointView& input, PointView& output)
     }
 }
 
+void CropFilter::crop(const cropfilter::Point& point, double distance, PointView& input, PointView& output)
+{
+
+    bool bIs3D = point.is3d();
+
+    if (bIs3D)
+    {
+        KD3Index index(input);
+        index.build();
+        std::vector<PointId> points = index.radius(point.x, point.y, point.z, m_distance);
+        for (PointId idx = 0; idx < points.size(); ++idx)
+        {
+            if (!m_cropOutside)
+                output.appendPoint(input, idx);
+        }
+    }
+
+    else
+    {
+        KD2Index index(input);
+        index.build();
+        std::vector<PointId> points = index.radius(point.x, point.y, m_distance);
+
+        for (PointId idx = 0; idx < points.size(); ++idx)
+        {
+            if (!m_cropOutside)
+                output.appendPoint(input, idx);
+        }
+
+    }
+}
 
 
 } // namespace pdal

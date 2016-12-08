@@ -112,12 +112,6 @@ public:
     // Returns true of OSR can validate the SRS
     bool valid() const;
 
-    /// Returns the OGC WKT describing Spatial Reference System.
-    /// \param mode_flag May be eHorizontalOnly indicating the WKT will not
-    /// include vertical coordinate system info (the default), or
-    /// eCompoundOK indicating the the returned WKT may be a compound
-    /// coordinate system if there is vertical coordinate system info
-    /// available.
     std::string getWkt() const;
 
     /// Sets the SRS from a string representation.  WKT is saved as
