@@ -34,8 +34,6 @@
 
 #include "gtest/gtest.h"
 
-#include <boost/property_tree/ptree.hpp>
-
 #include <pdal/Filter.hpp>
 #include <pdal/StageFactory.hpp>
 #include <io/LasReader.hpp>
