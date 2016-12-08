@@ -68,22 +68,17 @@ private:
     bool m_extract;
     int m_numRows;
     int m_numCols;
-    int m_maxRow;
     double m_cellSize;
     double m_cutNet;
     double m_percentSlope;
     double m_maxWindow;
+    double m_scalar;
     double m_threshold;
-    BOX2D m_bounds;
+    std::string m_outDir;
 
     virtual void addArgs(ProgramArgs& args);
     virtual void addDimensions(PointLayoutPtr layout);
-
-    // getColIndex gets the corresponding column index for a given x.
-    int getColIndex(double x, double cell_size);
-
-    // getRowIndex gets the corresponding row index for a given y.
-    int getRowIndex(double y, double cell_size);
+    virtual void ready(PointTableRef table);
 
     MatrixXd inpaintKnn(MatrixXd cx, MatrixXd cy, MatrixXd cz);
 
