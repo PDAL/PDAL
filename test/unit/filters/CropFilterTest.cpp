@@ -350,3 +350,42 @@ TEST(CropFilterTest, stream)
     f.execute(table);
 }
 
+
+TEST(CropFilterTest, test_sphere)
+{
+    BOX3D srcBounds(0.0, 0.0, 0.0, 10.0, 100.0, 1000.0);
+    Options opts;
+    opts.add("bounds", srcBounds);
+    opts.add("count", 1000);
+    opts.add("mode", "ramp");
+    FauxReader reader;
+    reader.setOptions(opts);
+
+    // crop the window to 1/3rd the size in each dimension
+    BOX2D dstBounds(3.33333, 33.33333, 6.66666, 66.66666);
+    Options cropOpts;
+    cropOpts.add("distance", 10.0);
+    cropOpts.add("point", "POINT (4.3 43.0 500)");
+
+    CropFilter filter;
+    filter.setOptions(cropOpts);
+    filter.setInput(reader);
+
+    Options statOpts;
+
+    StatsFilter stats;
+    stats.setOptions(statOpts);
+    stats.setInput(filter);
+
+    PointTable table;
+    stats.prepare(table);
+    PointViewSet viewSet = stats.execute(table);
+    EXPECT_EQ(viewSet.size(), 1u);
+    PointViewPtr buf = *viewSet.begin();
+
+    const stats::Summary& statsX = stats.getStats(Dimension::Id::X);
+    const stats::Summary& statsY = stats.getStats(Dimension::Id::Y);
+    const stats::Summary& statsZ = stats.getStats(Dimension::Id::Z);
+    EXPECT_EQ(buf->size(), 14u);
+
+}

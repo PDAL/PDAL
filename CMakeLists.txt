@@ -193,11 +193,17 @@ if (APPLE)
     set(PDAL_LIBDIR "-L$<TARGET_FILE_DIR:${PDAL_UTIL_LIB_NAME}>")
 endif()
 
-file(GLOB SRCS
+file(GLOB BASE_SRCS
     ${PDAL_FILTERS_DIR}/*.cpp
     ${PDAL_IO_DIR}/*.cpp
     ${PDAL_KERNELS_DIR}/*.cpp
     ${PDAL_SRC_DIR}/*.cpp)
+file(GLOB_RECURSE PRIVATE_SRCS
+    ${PDAL_FILTERS_DIR}/private/*.cpp
+    ${PDAL_IO_DIR}/private/*.cpp
+    ${PDAL_KERNELS_DIR}/private/*.cpp
+    ${PDAL_SRC_DIR}/private/*.cpp)
+list(APPEND SRCS ${BASE_SRCS} ${PRIVATE_SRCS})
 if (NOT PDAL_HAVE_LIBXML2)
     file(GLOB XML_SRCS
         io/Ilvis2MetadataReader.cpp
@@ -249,7 +255,7 @@ target_compile_definitions(${PDAL_BASE_LIB_NAME}
     PRIVATE
         ${LASZIP_DEFINES}
 )
-set_target_properties(${PDAL_BASE_LIB_NAME} PROPERTIES 
+set_target_properties(${PDAL_BASE_LIB_NAME} PROPERTIES
     VERSION ${PDAL_BUILD_VERSION}
     SOVERSION ${PDAL_API_VERSION}
     CLEAN_DIRECT_OUTPUT 1)
@@ -276,14 +282,17 @@ install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
 install(DIRECTORY ${PDAL_KERNELS_DIR}
     DESTINATION include/pdal
     FILES_MATCHING PATTERN "*.hpp"
+    PATTERN "private" EXCLUDE
 )
 install(DIRECTORY ${PDAL_IO_DIR}
     DESTINATION include/pdal
     FILES_MATCHING PATTERN "*.hpp"
+    PATTERN "private" EXCLUDE
 )
 install(DIRECTORY ${PDAL_FILTERS_DIR}
     DESTINATION include/pdal
     FILES_MATCHING PATTERN "*.hpp"
+    PATTERN "private" EXCLUDE
 )
 
 install(FILES ${DIMENSION_OUTFILE} ${pdal_defines_h}

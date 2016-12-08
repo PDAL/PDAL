@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2011, Michael P. Gerlek (mpg@flaxen.com)
+* Copyright (c) 2016, Howard Butler (howard@hobu.co)
 *
 * All rights reserved.
 *
@@ -34,64 +34,34 @@
 
 #pragma once
 
-#include <pdal/Filter.hpp>
-#include <pdal/Polygon.hpp>
-#include <pdal/plugin.hpp>
-#include "filters/private/crop/Point.hpp"
-
-extern "C" int32_t CropFilter_ExitFunc();
-extern "C" PF_ExitFunc CropFilter_InitPlugin();
+#include <pdal/Geometry.hpp>
 
 namespace pdal
 {
 
-class ProgramArgs;
 
-// removes any points outside of the given range
-// updates the header accordingly
-class PDAL_DLL CropFilter : public Filter
+namespace cropfilter
+{
+
+class PDAL_DLL Point : public Geometry
 {
 public:
-    CropFilter();
 
-    static void * create();
-    static int32_t destroy(void *);
-    std::string getName() const;
+    Point();
+    Point(const std::string& wkt_or_json,
+           SpatialReference ref);
+    bool is3d() const;
+    bool empty() const;
+    void clear();
 
-private:
-    std::vector<Bounds> m_bounds;
-    bool m_cropOutside;
-    std::vector<Polygon> m_polys;
-    SpatialReference m_assignedSrs;
-    SpatialReference m_lastSrs;
-    double m_distance;
-    std::vector<cropfilter::Point> m_points;
 
-    struct GeomPkg
-    {
-        GeomPkg()
-        {}
+    virtual void update(const std::string& wkt_or_json,
+        SpatialReference ref = SpatialReference());
 
-        Polygon m_geom;
-        Polygon m_geomXform;
-    };
+    double x;
+    double y;
+    double z;
 
-    std::vector<GeomPkg> m_geoms;
-
-    void addArgs(ProgramArgs& args);
-    virtual void initialize();
-    virtual void ready(PointTableRef table);
-    virtual bool processOne(PointRef& point);
-    virtual PointViewSet run(PointViewPtr view);
-    bool crop(PointRef& point, const BOX2D& box);
-    void crop(const BOX2D& box, PointView& input, PointView& output);
-    bool crop(PointRef& point, const GeomPkg& g);
-    void crop(const GeomPkg& g, PointView& input, PointView& output);
-    void crop(const cropfilter::Point& point, double distance, PointView& input, PointView& output);
-
-    CropFilter& operator=(const CropFilter&); // not implemented
-    CropFilter(const CropFilter&); // not implemented
 };
-
+} // namespace cropfilter
 } // namespace pdal
-

@@ -81,7 +81,7 @@ public:
       \param debug  The debug state of the error handler.
     */
     void setDebug(bool debug);
-    
+
     /**
       Get the GEOS context handle.
 
