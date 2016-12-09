@@ -135,9 +135,7 @@ TEST_F(OptechReaderTest, ReadingPoints)
 
 TEST_F(OptechReaderTest, Spatialreference)
 {
-    SpatialReference expected;
-    expected.setFromUserInput("EPSG:4326");
-    SpatialReference actual = m_reader.getSpatialReference();
-    EXPECT_EQ(expected, actual);
+    SpatialReference expected("EPSG:4326");
+    EXPECT_EQ(expected, m_reader.getSpatialReference());
 }
 }

@@ -189,9 +189,8 @@ void P2gWriter::done(PointTableRef table)
     if (extension == ".asc" || extension == ".grid" || extension == ".tif")
         m_filename = m_filename.substr(0, m_filename.find_last_of("."));
 
-    if (m_interpolator->finish(m_filename.c_str(),
-        m_outputFormat, m_outputTypes, adfGeoTransform,
-        srs.getWKT().c_str()) < 0)
+    if (m_interpolator->finish(m_filename.c_str(), m_outputFormat,
+        m_outputTypes, adfGeoTransform, srs.getWKT().c_str()) < 0)
     {
         ostringstream oss;
 

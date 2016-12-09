@@ -323,5 +323,4 @@ bool Polygon::crosses(const Polygon& p) const
     return (bool) GEOSCrosses_r(m_geoserr.ctx(), m_geom.get(), p.m_geom.get());
 }
 
-
 } // namespace geos

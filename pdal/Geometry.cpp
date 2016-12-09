@@ -303,7 +303,7 @@ std::string Geometry::json(double precision) const
 
     std::string w(wkt());
 
-    gdal::SpatialRef srs(m_srs.getWKT(pdal::SpatialReference::eCompoundOK));
+    gdal::SpatialRef srs(m_srs.getWKT());
     gdal::Geometry g(w, srs);
 
     char* json = OGR_G_ExportToJsonEx(g.get(), papszOptions);
