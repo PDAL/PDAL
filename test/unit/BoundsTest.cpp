@@ -32,8 +32,6 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <boost/property_tree/xml_parser.hpp>
-
 #include <pdal/pdal_test_main.hpp>
 #include <pdal/util/Bounds.hpp>
 #include <pdal/PDALUtils.hpp>
@@ -219,22 +217,6 @@ TEST(BoundsTest, test_output)
     EXPECT_EQ(out3, "([1.1, 101.1], [2.2, 102.2], [3.3, 103.3])");
 }
 
-// TEST(BoundsTest, BoundsTest_ptree)
-// {
-//     const BOX2D b2(1,2,101,102);
-//
-//     std::stringstream ss1(std::stringstream::in | std::stringstream::out);
-//
-//     pdalboost::property_tree::ptree tree = Utils::toPTree(b2);
-//     pdalboost::property_tree::write_xml(ss1, tree);
-//
-//     const std::string out1 = ss1.str();
-//
-//     static std::string xml_header = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-//     const std::string ref = xml_header + "<0><minimum>1</minimum><maximum>101</maximum></0><1><minimum>2</minimum><maximum>102</maximum></1>";
-//
-//     EXPECT_EQ(ref, out1);
-// }
 
 TEST(BoundsTest, test_input)
 {
