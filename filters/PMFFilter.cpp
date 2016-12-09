@@ -81,8 +81,6 @@ std::vector<double> PMFFilter::morphOpen(PointViewPtr view, float radius)
     QuadIndex idx(*view);
 
     std::vector<double> minZ(np), maxZ(np);
-    typedef std::vector<PointId> PointIdVec;
-    std::map<PointId, PointIdVec> neighborMap;
 
     // erode
     for (PointId i = 0; i < np; ++i)
