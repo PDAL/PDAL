@@ -50,7 +50,7 @@ install:
 build:
   parallel: true
   project: PDAL.sln
-  verbosity: detailed
+  verbosity: minimal
 
 after_build:
   - 7z a pdal.zip %APPVEYOR_BUILD_FOLDER%\bin\*.*
