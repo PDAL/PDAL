@@ -141,7 +141,7 @@ public:
 
     const std::string& getName() const;
     static int calculateZone(double lon, double lat);
-    static bool isWkt(const std::string& wkt);
+    static bool isWKT(const std::string& wkt);
     static std::string prettyWkt(const std::string& wkt);
 
 private:

@@ -94,7 +94,7 @@ void SpatialReference::set(std::string const& v)
         m_wkt.clear();
         return;
     }
-    if (isWkt(v))
+    if (isWKT(v))
     {
         m_wkt = v;
         return;
@@ -316,7 +316,7 @@ int SpatialReference::calculateZone(double lon, double lat)
 }
 
 
-bool SpatialReference::isWkt(const std::string& wkt)
+bool SpatialReference::isWKT(const std::string& wkt)
 {
     // List comes from GDAL.  WKT includes FITTED_CS, but this isn't
     // included in GDAL list.  Not sure why.
