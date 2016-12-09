@@ -174,7 +174,7 @@ void GeotiffSupport::setTags()
 }
 
 
-std::string GeotiffSupport::getWKT(bool horizOnly, bool pretty) const
+std::string GeotiffSupport::getWkt(bool horizOnly, bool pretty) const
 {
     GTIFDefn sGTIFDefn;
     char* pszWKT = 0;
