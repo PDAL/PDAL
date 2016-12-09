@@ -24,4 +24,5 @@ cmake -G "Visual Studio 14 2015 Win64" ^
 	-DNUMPY_VERSION=1.8.1 ^
     -Dgtest_force_shared_crt=ON ^
     -DCMAKE_INSTALL_PREFIX=C:\pdalbin ^
+    -DCMAKE_VERBOSE_MAKEFILE=ON ^
     .
