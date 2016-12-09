@@ -35,8 +35,8 @@
 #include "PMFFilter.hpp"
 
 #include <pdal/EigenUtils.hpp>
-#include <pdal/KDIndex.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <pdal/QuadIndex.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
 #include <Eigen/Dense>
@@ -78,8 +78,7 @@ std::vector<double> PMFFilter::morphOpen(PointViewPtr view, float radius)
 {
     point_count_t np(view->size());
 
-    KD2Index index(*view);
-    index.build();
+    QuadIndex idx(*view);
 
     std::vector<double> minZ(np), maxZ(np);
     typedef std::vector<PointId> PointIdVec;
@@ -88,10 +87,11 @@ std::vector<double> PMFFilter::morphOpen(PointViewPtr view, float radius)
     // erode
     for (PointId i = 0; i < np; ++i)
     {
-        auto ids = index.radius(i, radius);
+        double x = view->getFieldAs<double>(Dimension::Id::X, i);
+        double y = view->getFieldAs<double>(Dimension::Id::Y, i);
 
-        // neighborMap.insert(std::pair<PointId, std::vector<PointId>(i, ids));
-        neighborMap[i] = ids;
+        std::vector<PointId> ids = idx.getPoints(x-radius, y-radius, x+radius, y+radius);
+
         double localMin(std::numeric_limits<double>::max());
         for (auto const& j : ids)
         {
@@ -105,7 +105,11 @@ std::vector<double> PMFFilter::morphOpen(PointViewPtr view, float radius)
     // dilate
     for (PointId i = 0; i < np; ++i)
     {
-        auto ids = neighborMap[i];
+        double x = view->getFieldAs<double>(Dimension::Id::X, i);
+        double y = view->getFieldAs<double>(Dimension::Id::Y, i);
+
+        std::vector<PointId> ids = idx.getPoints(x-radius, y-radius, x+radius, y+radius);
+
         double localMax(std::numeric_limits<double>::lowest());
         for (auto const& j : ids)
         {
@@ -161,8 +165,8 @@ std::vector<PointId> PMFFilter::processGround(PointViewPtr view)
     {
         // Limit filtering to those points currently considered ground returns
         PointViewPtr ground = view->makeNew();
-        for (PointId i = 0; i < groundIdx.size(); ++i)
-            ground->appendPoint(*view, groundIdx[i]);
+        for (auto const& i : groundIdx)
+            ground->appendPoint(*view, i);
 
         log()->get(LogLevel::Debug) <<  "Iteration " << j
                                     << " (height threshold = " << htvec[j]
@@ -183,8 +187,9 @@ std::vector<PointId> PMFFilter::processGround(PointViewPtr view)
             if (diff < htvec[j])
                 groundNewIdx.push_back(groundIdx[i]);
         }
+
         groundIdx.swap(groundNewIdx);
-        
+
         log()->get(LogLevel::Debug) << "Ground now has " << groundIdx.size()
                                     << " points.\n";
     }
@@ -270,7 +275,7 @@ std::vector<PointId> PMFFilter::processGroundApprox(PointViewPtr view)
 
         ZImin.swap(mo);
         groundIdx.swap(groundNewIdx);
-        
+
         log()->get(LogLevel::Debug) << "Ground now has " << groundIdx.size()
                                     << " points.\n";
     }
