@@ -91,12 +91,12 @@ void ReprojectionFilter::initialize()
         throw pdal::pdal_error("Unable to allocate new OSR SpatialReference "
             "in initialize()!");
 
-    int result = OSRSetFromUserInput(m_out_ref_ptr, m_outSRS.getWkt().c_str());
+    int result = OSRSetFromUserInput(m_out_ref_ptr, m_outSRS.getWKT().c_str());
     if (result != OGRERR_NONE)
     {
         std::ostringstream oss;
         oss << getName() << ": Invalid output spatial reference '" <<
-            m_outSRS.getWkt() << "'.  This is usually caused by a "
+            m_outSRS.getWKT() << "'.  This is usually caused by a "
             "bad value for the 'out_srs' option.";
         throw pdal_error(oss.str());
     }
@@ -130,12 +130,12 @@ void ReprojectionFilter::createTransform(const SpatialReference& srsSRS)
     if (!m_in_ref_ptr)
         throw pdal::pdal_error("Unable to allocate new OSR SpatialReference for input coordinate system in createTransform()!");
 
-    int result = OSRSetFromUserInput(m_in_ref_ptr, m_inSRS.getWkt().c_str());
+    int result = OSRSetFromUserInput(m_in_ref_ptr, m_inSRS.getWKT().c_str());
     if (result != OGRERR_NONE)
     {
         std::ostringstream oss;
         oss << getName() << ": Invalid input spatial reference '" <<
-            m_inSRS.getWkt() << "'.  This is usually caused by "
+            m_inSRS.getWKT() << "'.  This is usually caused by "
             "a bad value for the 'in_srs' option or an invalid "
             "spatial reference in the source file.";
         throw pdal_error(oss.str());

@@ -66,7 +66,7 @@ public:
     size_t getKey(int tag, int *count, void **data_ptr) const;
     void setTags();
 
-    std::string getWkt(bool horizOnly, bool pretty) const;
+    std::string getWKT(bool horizOnly, bool pretty) const;
     void setWkt(const std::string&);
 
     std::string getText() const;

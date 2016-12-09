@@ -452,7 +452,7 @@ TEST(BPFTest, inspect)
     QuickInfo qi = reader.preview();
 
     std::string testWkt = "PROJCS[\"WGS 84 / UTM zone 1N\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",-177],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH],AUTHORITY[\"EPSG\",\"32601\"]]";
-    EXPECT_EQ(qi.m_srs.getWkt(), testWkt);
+    EXPECT_EQ(qi.m_srs.getWKT(), testWkt);
 
     EXPECT_EQ(qi.m_pointCount, 1065u);
 

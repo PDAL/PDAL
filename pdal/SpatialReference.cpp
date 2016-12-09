@@ -80,7 +80,7 @@ bool SpatialReference::valid() const
 }
 
 
-std::string SpatialReference::getWkt() const
+std::string SpatialReference::getWKT() const
 {
     return m_wkt;
 }
@@ -237,8 +237,8 @@ std::string SpatialReference::getHorizontalUnits() const
 
 bool SpatialReference::equals(const SpatialReference& input) const
 {
-    OGRSpatialReferenceH current = OSRNewSpatialReference(getWkt().c_str());
-    OGRSpatialReferenceH other = OSRNewSpatialReference(input.getWkt().c_str());
+    OGRSpatialReferenceH current = OSRNewSpatialReference(getWKT().c_str());
+    OGRSpatialReferenceH other = OSRNewSpatialReference(input.getWKT().c_str());
 
     int output = OSRIsSame(current, other);
     OSRDestroySpatialReference(current);
@@ -442,7 +442,7 @@ MetadataNode SpatialReference::toMetadata() const
     root.add("proj4", getProj4());
     root.add("prettywkt", prettyWkt(getHorizontal()));
     root.add("wkt", getHorizontal());
-    root.add("compoundwkt", getWkt());
+    root.add("compoundwkt", getWKT());
     root.add("prettycompoundwkt", prettyWkt(m_wkt));
 
     MetadataNode units = root.add("units");

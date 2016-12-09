@@ -553,7 +553,7 @@ GDALError Raster::open(int width, int height, int numBands,
     }
 
     if (m_srs.valid())
-        m_ds->SetProjection(m_srs.getWkt().data());
+        m_ds->SetProjection(m_srs.getWKT().data());
 
     m_ds->SetGeoTransform(m_forwardTransform.data());
     for (int i = 0; i < m_numBands; ++i)
@@ -807,8 +807,8 @@ std::string transformWkt(std::string wkt, const SpatialReference& from,
     if (from.empty() || to.empty())
         return wkt;
 
-    gdal::SpatialRef fromRef(from.getWkt());
-    gdal::SpatialRef toRef(to.getWkt());
+    gdal::SpatialRef fromRef(from.getWKT());
+    gdal::SpatialRef toRef(to.getWKT());
     gdal::Geometry geom(wkt, fromRef);
     geom.transform(toRef);
     return geom.wkt();

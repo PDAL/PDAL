@@ -412,8 +412,8 @@ void Stage::setSpatialReference(MetadataNode& m,
     if (spatialNode.empty())
     {
         m.add(spatialRef.toMetadata());
-        m.add("spatialreference", spatialRef.getWkt(), "SRS of this stage");
-        m.add("comp_spatialreference", spatialRef.getWkt(),
+        m.add("spatialreference", spatialRef.getWKT(), "SRS of this stage");
+        m.add("comp_spatialreference", spatialRef.getWKT(),
             "SRS of this stage");
     }
 }

@@ -179,7 +179,7 @@ void P2gWriter::done(PointTableRef table)
 
     SpatialReference const& srs = table.spatialReference();
 
-    log()->get(LogLevel::Debug) << "Output SRS  :'" << srs.getWkt() << "'" <<
+    log()->get(LogLevel::Debug) << "Output SRS  :'" << srs.getWKT() << "'" <<
         std::endl;
 
     // Strip off the extension if it was provided so that we don't get
@@ -190,7 +190,7 @@ void P2gWriter::done(PointTableRef table)
         m_filename = m_filename.substr(0, m_filename.find_last_of("."));
 
     if (m_interpolator->finish(m_filename.c_str(), m_outputFormat,
-        m_outputTypes, adfGeoTransform, srs.getWkt().c_str()) < 0)
+        m_outputTypes, adfGeoTransform, srs.getWKT().c_str()) < 0)
     {
         ostringstream oss;
 

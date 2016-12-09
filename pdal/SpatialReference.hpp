@@ -112,7 +112,7 @@ public:
     // Returns true of OSR can validate the SRS
     bool valid() const;
 
-    std::string getWkt() const;
+    std::string getWKT() const;
 
     /// Sets the SRS from a string representation.  WKT is saved as
     /// provided.

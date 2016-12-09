@@ -181,8 +181,8 @@ Polygon Polygon::transform(const SpatialReference& ref) const
     if (ref.empty())
         throw pdal_error("Polygon::transform failed due to ref being empty");
 
-    gdal::SpatialRef fromRef(m_srs.getWkt());
-    gdal::SpatialRef toRef(ref.getWkt());
+    gdal::SpatialRef fromRef(m_srs.getWKT());
+    gdal::SpatialRef toRef(ref.getWKT());
     gdal::Geometry geom(wkt(12, true), fromRef);
     geom.transform(toRef);
     return Geometry(geom.wkt(), ref);

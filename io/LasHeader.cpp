@@ -309,7 +309,7 @@ void LasHeader::setSrsFromGeotiff()
             (int)vlr->dataLen());
 
     geotiff.setTags();
-    std::string wkt(geotiff.getWkt(false, false));
+    std::string wkt(geotiff.getWKT(false, false));
     if (wkt.size())
         m_srs.set(wkt);
 

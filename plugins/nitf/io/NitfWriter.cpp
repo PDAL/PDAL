@@ -84,7 +84,7 @@ BOX3D NitfWriter::reprojectBoxToDD(const SpatialReference& reference,
         return BOX3D();
 
     BOX3D output(box);
-    if (!gdal::reprojectBounds(output, reference.getWkt(), "EPSG:4326"))
+    if (!gdal::reprojectBounds(output, reference.getWKT(), "EPSG:4326"))
     {
         std::ostringstream msg;
 

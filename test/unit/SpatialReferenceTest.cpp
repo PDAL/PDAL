@@ -65,7 +65,7 @@ TEST(SpatialReferenceTest, test_ctor)
     SpatialReference srs;
 
     EXPECT_EQ(srs.getProj4(), "");
-    EXPECT_EQ(srs.getWkt(), "");
+    EXPECT_EQ(srs.getWKT(), "");
     EXPECT_TRUE(srs.empty());
 }
 
@@ -113,7 +113,7 @@ TEST(SpatialReferenceTest, test_userstring_roundtrip)
     SpatialReference ref(code);
 
     std::string ret_proj = ref.getProj4();
-    std::string ret_wkt = ref.getWkt();
+    std::string ret_wkt = ref.getWKT();
 
     EXPECT_EQ(ret_proj, proj4);
     EXPECT_EQ(ret_wkt, wkt);
@@ -169,7 +169,7 @@ TEST(SpatialReferenceTest, test_read_srs)
 
     const SpatialReference& ref = reader.getSpatialReference();
 
-    const std::string ret_wkt = ref.getWkt();
+    const std::string ret_wkt = ref.getWKT();
     const std::string ret_proj4 = ref.getProj4();
 
     // List of possible outputs
@@ -202,7 +202,7 @@ TEST(SpatialReferenceTest, test_vertical_datums)
     const std::string wkt = "COMPD_CS[\"unknown\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]],VERT_CS[\"NAVD88 height\",VERT_DATUM[\"North American Vertical Datum 1988\",2005,AUTHORITY[\"EPSG\",\"5103\"],EXTENSION[\"PROJ4_GRIDS\",\"g2012a_conus.gtx,g2012a_alaska.gtx,g2012a_guam.gtx,g2012a_hawaii.gtx,g2012a_puertorico.gtx,g2012a_samoa.gtx\"]],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Up\",UP],AUTHORITY[\"EPSG\",\"5703\"]]]";
 
     SpatialReference ref(wkt);
-    const std::string wktCheck = ref.getWkt();
+    const std::string wktCheck = ref.getWKT();
     EXPECT_EQ(wkt, wktCheck); // just to make sure
 
     PointTable table;
@@ -231,7 +231,7 @@ TEST(SpatialReferenceTest, test_vertical_datums)
     reader2.execute(table2);
 
     const SpatialReference ref2 = reader2.getSpatialReference();
-    const std::string wkt2 = ref2.getWkt();
+    const std::string wkt2 = ref2.getWKT();
 
     EXPECT_EQ(wkt, wkt2);
 
@@ -252,7 +252,7 @@ TEST(SpatialReferenceTest, test_writing_vlr)
     const std::string reference_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]";
 
     SpatialReference ref("EPSG:4326");
-    std::string wkt = ref.getWkt();
+    std::string wkt = ref.getWKT();
     EXPECT_EQ(wkt, reference_wkt);
 
     // Write a very simple file with our SRS and one point.
@@ -292,7 +292,7 @@ TEST(SpatialReferenceTest, test_writing_vlr)
         SpatialReference result_ref = reader.getSpatialReference();
 
         EXPECT_EQ(reader.header().vlrCount(), 2u);
-        std::string wkt = result_ref.getWkt();
+        std::string wkt = result_ref.getWKT();
         EXPECT_EQ(wkt, reference_wkt);
     }
 

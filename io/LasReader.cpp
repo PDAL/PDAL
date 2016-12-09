@@ -408,7 +408,7 @@ void LasReader::setSrs(MetadataNode& m)
     // take their overridden value
     SpatialReference srs = getSpatialReference();
 
-    if (srs.getWkt().empty())
+    if (srs.getWKT().empty())
         srs = m_header.srs();
     setSpatialReference(m, srs);
 }
