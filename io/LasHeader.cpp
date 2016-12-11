@@ -262,7 +262,7 @@ void LasHeader::setSrsFromWkt()
     const char *c = vlr->data() + len - 1;
     if (*c == 0)
         len--;
-    m_srs.setWKT(std::string(vlr->data(), len));
+    m_srs.set(std::string(vlr->data(), len));
 }
 
 
@@ -311,9 +311,7 @@ void LasHeader::setSrsFromGeotiff()
     geotiff.setTags();
     std::string wkt(geotiff.getWkt(false, false));
     if (wkt.size())
-    {
-        m_srs.setFromUserInput(wkt);
-    }
+        m_srs.set(wkt);
 
     m_log->get(LogLevel::Debug5) << "GeoTIFF keys: " << geotiff.getText() <<
         std::endl;

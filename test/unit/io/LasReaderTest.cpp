@@ -198,10 +198,7 @@ TEST(LasReaderTest, inspect)
 
     std::string testWkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]";
 
-#ifdef PDAL_HAVE_LIBGEOTIFF
     EXPECT_EQ(qi.m_srs.getWKT(), testWkt);
-#endif // PDAL_HAVE_LIBGEOTIFF
-
     EXPECT_EQ(qi.m_pointCount, 5380u);
 
     BOX3D bounds(-94.683465399999989, 31.0367341, 39.081000199999998,

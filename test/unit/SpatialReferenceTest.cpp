@@ -83,22 +83,19 @@ TEST(SpatialReferenceTest, test_proj4_roundtrip)
     };
 
     {
-        SpatialReference ref;
-        ref.setProj4(proj4);
+        SpatialReference ref(proj4);
         EXPECT_TRUE(!ref.empty());
         const std::string ret = ref.getProj4();
     }
 
     {
-        SpatialReference ref;
-        ref.setProj4(proj4_ellps);
+        SpatialReference ref(proj4_ellps);
         const std::string ret = ref.getProj4();
         EXPECT_TRUE(Utils::contains(proj4_out, ret));
     }
 
     {
-        SpatialReference ref;
-        ref.setProj4(proj4_out.front());
+        SpatialReference ref(proj4_out.front());
         const std::string ret = ref.getProj4();
         EXPECT_TRUE(Utils::contains(proj4_out, ret));
     }
@@ -108,14 +105,12 @@ TEST(SpatialReferenceTest, test_proj4_roundtrip)
 // Test setting EPSG:4326 from User string
 TEST(SpatialReferenceTest, test_userstring_roundtrip)
 {
-    SpatialReference ref;
-
     std::string code = "EPSG:4326";
     std::string proj4 = "+proj=longlat +datum=WGS84 +no_defs";
     std::string proj4_ellps =
         "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
     const std::string wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]";
-    ref.setFromUserInput(code);
+    SpatialReference ref(code);
 
     std::string ret_proj = ref.getProj4();
     std::string ret_wkt = ref.getWKT();
@@ -128,11 +123,9 @@ TEST(SpatialReferenceTest, test_userstring_roundtrip)
 // Test fetching UTM zone
 TEST(SpatialReferenceTest, test_get_utmzone)
 {
-    SpatialReference ref;
-
     // from test/data/autzen-srs.wkt
     std::string code = "+proj=lcc +lat_1=43 +lat_2=45.5 +lat_0=41.75 +lon_0=-120.5 +x_0=399999.9999999999 +y_0=0 +ellps=GRS80 +units=ft +no_defs";
-    ref.setFromUserInput(code);
+    SpatialReference ref(code);
 
     BOX3D box(635589.01, 848886.45, 638994.75, 853535.43, 0, 0);
 
@@ -208,9 +201,8 @@ TEST(SpatialReferenceTest, test_vertical_datums)
 
     const std::string wkt = "COMPD_CS[\"unknown\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]],VERT_CS[\"NAVD88 height\",VERT_DATUM[\"North American Vertical Datum 1988\",2005,AUTHORITY[\"EPSG\",\"5103\"],EXTENSION[\"PROJ4_GRIDS\",\"g2012a_conus.gtx,g2012a_alaska.gtx,g2012a_guam.gtx,g2012a_hawaii.gtx,g2012a_puertorico.gtx,g2012a_samoa.gtx\"]],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Up\",UP],AUTHORITY[\"EPSG\",\"5703\"]]]";
 
-    SpatialReference ref;
-    ref.setFromUserInput(wkt);
-    const std::string wktCheck = ref.getWKT(SpatialReference::eCompoundOK);
+    SpatialReference ref(wkt);
+    const std::string wktCheck = ref.getWKT();
     EXPECT_EQ(wkt, wktCheck); // just to make sure
 
     PointTable table;
@@ -239,7 +231,7 @@ TEST(SpatialReferenceTest, test_vertical_datums)
     reader2.execute(table2);
 
     const SpatialReference ref2 = reader2.getSpatialReference();
-    const std::string wkt2 = ref2.getWKT(SpatialReference::eCompoundOK);
+    const std::string wkt2 = ref2.getWKT();
 
     EXPECT_EQ(wkt, wkt2);
 
@@ -256,11 +248,10 @@ TEST(SpatialReferenceTest, test_vertical_datums)
 TEST(SpatialReferenceTest, test_writing_vlr)
 {
     std::string tmpfile(Support::temppath("tmp_srs_9.las"));
-    SpatialReference ref;
 
     const std::string reference_wkt = "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]]";
 
-    ref.setFromUserInput("EPSG:4326");
+    SpatialReference ref("EPSG:4326");
     std::string wkt = ref.getWKT();
     EXPECT_EQ(wkt, reference_wkt);
 
@@ -315,8 +306,7 @@ TEST(SpatialReferenceTest, test_io)
 {
     const std::string wkt = "COMPD_CS[\"WGS 84 + VERT_CS\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4326\"]],VERT_CS[\"NAVD88 height\",VERT_DATUM[\"North American Vertical Datum 1988\",2005,AUTHORITY[\"EPSG\",\"5103\"],EXTENSION[\"PROJ4_GRIDS\",\"g2003conus.gtx\"]],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Up\",UP],AUTHORITY[\"EPSG\",\"5703\"]]]";
 
-    SpatialReference ref;
-    ref.setFromUserInput(wkt);
+    SpatialReference ref(wkt);
 
     std::stringstream ss(std::stringstream::in | std::stringstream::out);
 

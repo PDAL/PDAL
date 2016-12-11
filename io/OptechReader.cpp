@@ -78,9 +78,7 @@ OptechReader::OptechReader()
 {
     // The Optech docs say that their lat/longs are referenced
     // to the WGS84 reference frame.
-    SpatialReference spatialReference;
-    spatialReference.setFromUserInput("EPSG:4326");
-    setSpatialReference(spatialReference);
+    setSpatialReference(SpatialReference("EPSG:4326"));
 }
 
 
