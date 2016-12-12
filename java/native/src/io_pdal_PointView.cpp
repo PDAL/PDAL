@@ -99,22 +99,16 @@ JNIEXPORT jstring JNICALL Java_io_pdal_PointView_getCrsProj4
 }
 
 JNIEXPORT jstring JNICALL Java_io_pdal_PointView_getCrsWKT
-  (JNIEnv *env, jobject obj, jint mode_flag, jboolean pretty)
+  (JNIEnv *env, jobject obj, jboolean pretty)
 {
     PointViewRawPtr *pvrp = getHandle<PointViewRawPtr>(env, obj);
     PointViewPtr pv = pvrp->shared_pointer;
 
-    pdal::SpatialReference::WKTModeFlag enumFlag;
-    if(mode_flag > 2 && mode_flag < 1)
-    {
-        enumFlag = (pdal::SpatialReference::WKTModeFlag) 1;
-    }
-    else
-    {
-        enumFlag = (pdal::SpatialReference::WKTModeFlag) mode_flag;
-    }
+    std::string wkt = pv->spatialReference().getWKT();
 
-    return env->NewStringUTF(pv->spatialReference().getWKT(enumFlag, pretty).c_str());
+    if(pretty) wkt = pdal::SpatialReference::prettyWkt(wkt);
+
+    return env->NewStringUTF(wkt.c_str());
 }
 
 JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getPackedPoint

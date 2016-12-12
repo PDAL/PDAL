@@ -6,23 +6,22 @@ class PointView extends Native {
   def getPointCloud(idx: Long): PointCloud = getPointCloud(idx, layout.dimTypes())
   def getPointCloud(idx: Long, dims: Array[DimType]): PointCloud =
     PointCloud(
-      bytes       = getPackedPoint(idx, dims),
-      dimTypes    = layout.toSizedDimTypes(dims)
+      bytes    = getPackedPoint(idx, dims),
+      dimTypes = layout.toSizedDimTypes(dims)
     )
 
   def getPointCloud(): PointCloud = getPointCloud(layout.dimTypes())
   def getPointCloud(dims: Array[DimType]): PointCloud =
     PointCloud(
-      bytes       = getPackedPoints(dims),
-      dimTypes    = layout.toSizedDimTypes(dims)
+      bytes    = getPackedPoints(dims),
+      dimTypes = layout.toSizedDimTypes(dims)
     )
 
   def getPackedPoint(idx: Long): Array[Byte] = getPackedPoint(idx, layout.dimTypes())
   def getPackedPoints(): Array[Byte] = getPackedPoints(layout.dimTypes())
   def findDimType(name: String): DimType = layout.findDimType(name)
   def length(): Int = size()
-  def getCrsWKT(mode_flag: Int): String = getCrsWKT(mode_flag, pretty = false)
-  def getCrsWKT(): String = getCrsWKT(1, pretty = false)
+  def getCrsWKT(): String = getCrsWKT(pretty = false)
 
   /**
     * Reads a packed point by point id from a set of packed points.
@@ -117,7 +116,7 @@ class PointView extends Native {
   @native def size(): Int
   @native def empty(): Boolean
   @native def getCrsProj4(): String
-  @native def getCrsWKT(mode_flag: Int, pretty: Boolean): String
+  @native def getCrsWKT(pretty: Boolean): String
   @native def getPackedPoint(idx: Long, dims: Array[DimType]): Array[Byte]
   @native def getPackedPoints(dims: Array[DimType]): Array[Byte]
   @native def dispose(): Unit

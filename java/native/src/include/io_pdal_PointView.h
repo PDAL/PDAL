@@ -45,7 +45,7 @@ JNIEXPORT jstring JNICALL Java_io_pdal_PointView_getCrsProj4
  * Signature: (IZ)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL Java_io_pdal_PointView_getCrsWKT
-  (JNIEnv *, jobject, jint, jboolean);
+  (JNIEnv *, jobject, jboolean);
 
 /*
  * Class:     io_pdal_PointView
