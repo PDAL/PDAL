@@ -46,7 +46,7 @@ set(PDAL_BUILD_VERSION "4.0.0")
 # in turn links libpdal_base.so and libpdal_util.so
 #
 # On OSX we reexport the symbols from libpdal_util.dylib into libpdalcpp.dylib
-# See src/CMakeLists.txt for the rest of the magic.
+# See below for the rest of the magic.
 #
 if (APPLE OR WIN32)
     set(PDAL_LIB_NAME pdalcpp)
@@ -91,8 +91,6 @@ else(WIN32)
   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PDAL_OUTPUT_LIB_DIR}")
 endif(WIN32)
 
-set(PDAL_HEADERS_DIR "${PROJECT_SOURCE_DIR}/include/pdal")
-
 # Choose package components
 
 include(${PDAL_CMAKE_DIR}/options.cmake)
@@ -117,15 +115,12 @@ include(${PDAL_CMAKE_DIR}/zlib.cmake)
 include(${PDAL_CMAKE_DIR}/test.cmake)
 include(${PDAL_CMAKE_DIR}/ctest.cmake)
 include(${PDAL_CMAKE_DIR}/curl.cmake)
-
 if (CURL_FOUND)
     set(PDAL_ARBITER_LIB_NAME pdal_arbiter)
 endif()
-
+include(${PDAL_CMAKE_DIR}/rply.cmake)
 include(${PDAL_CMAKE_DIR}/json.cmake)
-if (BUILD_PLUGIN_PGPOINTCLOUD OR BUILD_PLUGIN_OCI OR BUILD_PLUGIN_SQLITE)
-    include(${PDAL_CMAKE_DIR}/libxml2.cmake)
-endif()
+include(${PDAL_CMAKE_DIR}/libxml2.cmake)
 include(${PDAL_CMAKE_DIR}/dimension.cmake)
 
 #------------------------------------------------------------------------------
@@ -138,7 +133,7 @@ get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 
 configure_file(
   "${PROJECT_SOURCE_DIR}/gitsha.cpp.in"
-  "${PROJECT_SOURCE_DIR}/src/gitsha.cpp")
+  "${PROJECT_SOURCE_DIR}/pdal/gitsha.cpp")
 
 # needs to come before configuration of pdal_defines
 if(APPLE)
@@ -151,15 +146,6 @@ endif()
 set(pdal_defines_h_in "${CMAKE_CURRENT_SOURCE_DIR}/pdal_defines.h.in")
 set(pdal_defines_h "${CMAKE_CURRENT_BINARY_DIR}/include/pdal/pdal_defines.h")
 configure_file(${pdal_defines_h_in} ${pdal_defines_h})
-PDAL_ADD_INCLUDES("" "" ${pdal_defines_h})
-include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
-
-include_directories(${PDAL_VENDOR_DIR}/arbiter)
-include_directories(${PDAL_VENDOR_DIR}/eigen)
-include_directories(${PDAL_JSONCPP_INCLUDE_DIR})
-
-include_directories(${PDAL_VENDOR_DIR}/nanoflann)
-include_directories(${PDAL_VENDOR_DIR}/rply)
 
 #------------------------------------------------------------------------------
 # subdirectory controls
@@ -174,7 +160,7 @@ endif()
 
 add_subdirectory(plugins)
 
-include_directories(vendor/pdalboost)
+#include_directories(vendor/pdalboost)
 if (WITH_TESTS)
     include (${PDAL_CMAKE_DIR}/gtest.cmake)
     add_subdirectory(test)
@@ -182,41 +168,172 @@ endif()
 add_subdirectory(dimbuilder)
 add_subdirectory(vendor/pdalboost)
 add_subdirectory(vendor/arbiter)
+
 if (NOT PDAL_HAVE_JSONCPP)
     add_subdirectory(vendor/jsoncpp/dist)
 endif()
-add_subdirectory(src/util)
-add_subdirectory(io)
-add_subdirectory(filters)
-add_subdirectory(kernels)
-add_subdirectory(src)
+add_subdirectory(pdal/util)
 add_subdirectory(tools)
 if (BUILD_PLUGIN_PYTHON)
     set(PYTHON_VERSION_STRING "something" CACHE STRING "Python version" FORCE)
-    add_subdirectory(src/plang)
+    add_subdirectory(pdal/plang)
 endif()
-if (WITH_APPS)
-    add_subdirectory(apps)
+add_subdirectory(apps)
+
+#
+# On OSX we reexport the symbols in libpdal_util.dylib into libpdalcpp.dylib
+# so that users only need link libpdalcpp.
+#
+if (APPLE)
+    set(PDAL_REEXPORT "-Wl,-reexport_library,$<TARGET_FILE:${PDAL_UTIL_LIB_NAME}>")
+    #
+    # This allows the rpath reference for the reexported library (above) to
+    # be found.
+    #
+    set(PDAL_LIBDIR "-L$<TARGET_FILE_DIR:${PDAL_UTIL_LIB_NAME}>")
 endif()
 
+file(GLOB BASE_SRCS
+    ${PDAL_FILTERS_DIR}/*.cpp
+    ${PDAL_IO_DIR}/*.cpp
+    ${PDAL_KERNELS_DIR}/*.cpp
+    ${PDAL_SRC_DIR}/*.cpp)
+file(GLOB_RECURSE PRIVATE_SRCS
+    ${PDAL_FILTERS_DIR}/private/*.cpp
+    ${PDAL_IO_DIR}/private/*.cpp
+    ${PDAL_KERNELS_DIR}/private/*.cpp
+    ${PDAL_SRC_DIR}/private/*.cpp)
+list(APPEND SRCS ${BASE_SRCS} ${PRIVATE_SRCS})
+if (NOT PDAL_HAVE_LIBXML2)
+    file(GLOB XML_SRCS
+        io/Ilvis2MetadataReader.cpp
+        io/Ilvis2Metadata.cpp
+        pdal/DbWriter.cpp
+        pdal/DbReader.cpp
+        pdal/XMLSchema.cpp)
+    list(REMOVE_ITEM SRCS ${XML_SRCS})
+endif()
+PDAL_ADD_LIBRARY(${PDAL_BASE_LIB_NAME} ${SRCS} ${RPLY_SRCS})
+
+#
+# Interface include directories allow downstream project to get the directory
+# without specification.
+#
+target_include_directories(${PDAL_BASE_LIB_NAME}
+    PRIVATE
+        ${ROOT_DIR}
+        ${PROJECT_BINARY_DIR}/include
+        ${PDAL_VENDOR_DIR}
+        ${PDAL_VENDOR_DIR}/eigen
+        ${PDAL_VENDOR_DIR}/pdalboost
+        ${PDAL_JSONCPP_INCLUDE_DIR}
+        ${LIBXML2_INCLUDE_DIR}
+    INTERFACE
+        ${GDAL_INCLUDE_DIR}
+)
+target_link_libraries(${PDAL_BASE_LIB_NAME}
+    PUBLIC
+        ${CMAKE_THREAD_LIBS_INIT}
+        ${GDAL_LIBRARY}
+        ${GEOS_LIBRARY}
+        ${GEOTIFF_LIBRARY}
+        ${LASZIP_LIBRARY}
+        ${LIBXML2_LIBRARIES}
+        ${ZLIB_LIBRARIES}
+        ${CURL_LIBRARIES}
+        ${WINSOCK_LIBRARY}
+    PRIVATE
+        ${PDAL_REEXPORT}
+        ${PDAL_UTIL_LIB_NAME}
+        ${PDAL_ARBITER_LIB_NAME}
+    ${JSON_CPP_LINK_TYPE}
+        ${PDAL_JSONCPP_LIB_NAME}
+    INTERFACE
+        ${PDAL_LIBDIR}
+)
+target_compile_definitions(${PDAL_BASE_LIB_NAME}
+    PRIVATE
+        ${LASZIP_DEFINES}
+)
+set_target_properties(${PDAL_BASE_LIB_NAME} PROPERTIES
+    VERSION ${PDAL_BUILD_VERSION}
+    SOVERSION ${PDAL_API_VERSION}
+    CLEAN_DIRECT_OUTPUT 1)
+#
+# On Linux, we install a linker script as libpdalcpp.so.  That file
+# specifies linking in libpdal_base.so and libpdal_util.so.  This allows
+# users to link a single library, libpdalcpp
+#
+if (UNIX AND NOT APPLE)
+    set(LIBNAME ${CMAKE_SHARED_LIBRARY_PREFIX}${PDAL_LIB_NAME})
+    install(FILES ${LIBNAME} DESTINATION ${PDAL_LIB_INSTALL_DIR}
+        RENAME ${LIBNAME}${CMAKE_SHARED_LIBRARY_SUFFIX})
+endif()
+
+#
+# Installation
+#
+install(DIRECTORY ${PDAL_INCLUDE_DIR}/pdal
+    DESTINATION include
+    FILES_MATCHING PATTERN "*.hpp"
+    PATTERN "gitsha.h"
+    PATTERN "pdal/private" EXCLUDE
+)
+install(DIRECTORY ${PDAL_KERNELS_DIR}
+    DESTINATION include/pdal
+    FILES_MATCHING PATTERN "*.hpp"
+    PATTERN "private" EXCLUDE
+)
+install(DIRECTORY ${PDAL_IO_DIR}
+    DESTINATION include/pdal
+    FILES_MATCHING PATTERN "*.hpp"
+    PATTERN "private" EXCLUDE
+)
+install(DIRECTORY ${PDAL_FILTERS_DIR}
+    DESTINATION include/pdal
+    FILES_MATCHING PATTERN "*.hpp"
+    PATTERN "private" EXCLUDE
+)
+
+install(FILES ${DIMENSION_OUTFILE} ${pdal_defines_h}
+  DESTINATION include/pdal
+)
+
+#
+# CPACK
+#
 include (${PDAL_CMAKE_DIR}/cpack.cmake)
 
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 
-export(TARGETS ${PDAL_BASE_LIB_NAME}
-    ${PDAL_UTIL_LIB_NAME}
-    FILE "${PDAL_BINARY_DIR}/PDALTargets.cmake")
-install(EXPORT PDALTargets DESTINATION "${PDAL_LIB_INSTALL_DIR}/pdal/cmake")
-include(${PDAL_CMAKE_DIR}/config.cmake)
+export(
+    TARGETS
+        ${PDAL_BASE_LIB_NAME} ${PDAL_UTIL_LIB_NAME}
+    FILE
+        "${PDAL_BINARY_DIR}/PDALTargets.cmake")
 
+install(
+    EXPORT
+        PDALTargets
+    DESTINATION
+        "${PDAL_LIB_INSTALL_DIR}/pdal/cmake")
+include(${PDAL_CMAKE_DIR}/config.cmake)
 feature_summary(WHAT ALL INCLUDE_QUIET_PACKAGES)
 export(PACKAGE PDAL)
 
 # TODO: move under scripts/bash-completion ?
 if (WITH_COMPLETION)
     if (IS_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/bash-completion/completions)
-        install(FILES "${PROJECT_SOURCE_DIR}/scripts/bash-completion/pdal" DESTINATION "${CMAKE_INSTALL_PREFIX}/share/bash-completion/completions")
+        install(
+            FILES
+                "${PROJECT_SOURCE_DIR}/scripts/bash-completion/pdal"
+            DESTINATION
+                "${CMAKE_INSTALL_PREFIX}/share/bash-completion/completions")
     elseif (IS_DIRECTORY /etc/bash_completion.d)
-        install(FILES "${PROJECT_SOURCE_DIR}/scripts/bash-completion/pdal" DESTINATION "${CMAKE_INSTALL_PREFIX}/etc/bash_completion.d")
+        install(
+            FILES
+                "${PROJECT_SOURCE_DIR}/scripts/bash-completion/pdal"
+            DESTINATION
+                "${CMAKE_INSTALL_PREFIX}/etc/bash_completion.d")
     endif()
 endif()

@@ -34,10 +34,10 @@
 
 #include <pdal/pdal_test_main.hpp>
 
-#include <LasReader.hpp>
-#include <ColorizationFilter.hpp>
-#include <StreamCallbackFilter.hpp>
 #include <pdal/PointView.hpp>
+#include <io/LasReader.hpp>
+#include <filters/ColorizationFilter.hpp>
+#include <filters/StreamCallbackFilter.hpp>
 
 #include "Support.hpp"
 

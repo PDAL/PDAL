@@ -57,7 +57,7 @@ TEST(Merge, pdalinfoTest_no_input)
     std::string output;
     EXPECT_EQ(Utils::run_shell_command(cmd, output), 1);
 
-    const std::string expected = "PDAL: Missing value for positional "
+    const std::string expected = "PDAL: kernels.merge: Missing value for positional "
         "argument 'files'.";
     EXPECT_EQ(output.substr(0, expected.length()), expected);
 }

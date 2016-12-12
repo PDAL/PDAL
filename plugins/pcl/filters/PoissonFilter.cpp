@@ -34,9 +34,6 @@
 
 #include "PoissonFilter.hpp"
 
-#include "PCLConversions.hpp"
-#include "pipeline/PCLPipeline.h"
-
 #include <pcl/console/print.h>
 #include <pcl/point_types.h>
 #include <pcl/features/normal_3d.h>
@@ -45,6 +42,8 @@
 
 #include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
+
+#include "../PCLConversions.hpp"
 
 namespace pdal
 {

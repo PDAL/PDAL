@@ -35,7 +35,7 @@
 #pragma once
 
 #include <pdal/StageFactory.hpp>
-#include <las/LasWriter.hpp>
+#include <io/LasWriter.hpp>
 
 #include "NitfFileWriter.hpp"
 

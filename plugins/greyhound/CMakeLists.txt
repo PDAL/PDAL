@@ -2,37 +2,25 @@
 # Greyhound plugin CMake configuration
 #
 
-include_directories(${PDAL_JSONCPP_INCLUDE_DIR})
 add_definitions(-DHAVE_JSONCPP=1)
 
-set(srcs
-    io/CompressionStream.cpp
-    io/GreyhoundReader.cpp
-    io/bounds.cpp
-    io/pool.cpp
-)
-
-set(incs
-    io/CompressionStream.hpp
-    io/GreyhoundReader.hpp
-    io/bounds.hpp
-    io/dir.hpp
-    io/point.hpp
-    io/pool.hpp
-)
-
 PDAL_ADD_PLUGIN(libname reader greyhound
-    FILES "${srcs}" "${incs}"
+    FILES
+        io/CompressionStream.cpp
+        io/GreyhoundReader.cpp
+        io/bounds.cpp
+        io/pool.cpp
     LINK_WITH ${PDAL_JSONCPP_LIB_NAME})
+target_include_directories(${libname} PRIVATE
+    ${PDAL_JSONCPP_INCLUDE_DIR}
+    ${PDAL_VENDOR_DIR}) 
 
 if (WITH_TESTS)
-    set(srcs
-        test/GreyhoundReaderTest.cpp
-    )
-
-    include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
     PDAL_ADD_TEST(greyhoundreadertest
-        FILES "${srcs}"
+        FILES
+            test/GreyhoundReaderTest.cpp
         LINK_WITH ${libname} )
+target_include_directories(greyhoundreadertest PRIVATE
+    ${PDAL_JSONCPP_INCLUDE_DIR}
+    ${PDAL_VENDOR_DIR}) 
 endif()

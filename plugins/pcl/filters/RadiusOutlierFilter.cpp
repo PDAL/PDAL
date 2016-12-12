@@ -34,8 +34,6 @@
 
 #include "RadiusOutlierFilter.hpp"
 
-#include "PCLConversions.hpp"
-
 #include <pdal/Options.hpp>
 #include <pdal/PointTable.hpp>
 #include <pdal/PointView.hpp>
@@ -48,6 +46,8 @@
 #include <pcl/filters/extract_indices.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/filters/radius_outlier_removal.h>
+
+#include "../PCLConversions.hpp"
 
 namespace pdal
 {

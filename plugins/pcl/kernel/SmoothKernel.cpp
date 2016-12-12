@@ -35,11 +35,11 @@
 
 #include "SmoothKernel.hpp"
 
-#include "filters/PCLBlock.hpp"
-
-#include <buffer/BufferReader.hpp>
 #include <pdal/KernelFactory.hpp>
 #include <pdal/pdal_macros.hpp>
+#include <io/BufferReader.hpp>
+
+#include "../filters/PCLBlock.hpp"
 
 namespace pdal
 {

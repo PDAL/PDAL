@@ -32,16 +32,15 @@
 * OF SUCH DAMAGE.
 ****************************************************************************/
 
-#include <pdal/pdal_test_main.hpp>
-
-#include <pdal/util/FileUtils.hpp>
-#include <LasReader.hpp>
-
-#include "Support.hpp"
-
 #include <iostream>
 #include <sstream>
 #include <string>
+
+#include <pdal/pdal_test_main.hpp>
+
+#include <pdal/util/FileUtils.hpp>
+#include <io/LasReader.hpp>
+#include "Support.hpp"
 
 using namespace pdal;
 
@@ -61,7 +60,7 @@ TEST(pc2pcTest, pc2pcTest_test_no_input)
     int stat = Utils::run_shell_command(cmd, output);
     EXPECT_EQ(stat, 1);
 
-    const std::string expected = "PDAL: Missing value for positional argument 'input'.";
+    const std::string expected = "PDAL: kernels.translate: Missing value for positional argument 'input'.";
     EXPECT_EQ(output.substr(0, expected.length()), expected);
 }
 #endif
@@ -145,11 +144,7 @@ TEST(pc2pcTest, pc2pc_test_switches)
     EXPECT_EQ(stat, 0);
     EXPECT_TRUE(fileIsOkay(outputLas));
     EXPECT_TRUE(!fileIsCompressed(outputLas));
-#ifdef PDAL_HAVE_LIBGEOTIFF
     EXPECT_TRUE(!fileHasSrs(outputLas));
-#else
-    (void)fileHasSrs(outputLas);
-#endif
 
 #ifdef PDAL_HAVE_LASZIP
     // does --compress make a compressed file?
@@ -175,9 +170,7 @@ TEST(pc2pcTest, pc2pc_test_switches)
     stat = Utils::run_shell_command(fullCmd, output);
     EXPECT_EQ(stat, 0);
     EXPECT_TRUE(fileIsOkay(outputLas));
-#ifdef PDAL_HAVE_LIBGEOTIFF
     EXPECT_TRUE(fileHasSrs(outputLas));
-#endif
 
     FileUtils::deleteFile(outputLas);
     FileUtils::deleteFile(outputLaz);

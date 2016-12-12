@@ -111,20 +111,21 @@ inline void pg_commit(PGconn* session)
 inline std::string pg_query_once(PGconn* session, std::string const& sql)
 {
     PGresult *result = PQexec(session, sql.c_str());
-
     if ( (!result) ||
          PQresultStatus(result) != PGRES_TUPLES_OK ||
          PQntuples(result) == 0 )
     {
         PQclear(result);
-        return NULL;
+        return std::string();
     }
 
 	int len = PQgetlength(result, 0, 0);
     char *value = PQgetvalue(result, 0, 0);
-	std::string str(value, len);
+    std::string out;
+    if (value)
+	    out = std::string(value, len);
     PQclear(result);
-    return str;
+    return out;
 }
 
 inline PGresult* pg_query_result(PGconn* session, std::string const& sql)

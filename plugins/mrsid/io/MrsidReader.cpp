@@ -61,7 +61,6 @@ MrsidReader::MrsidReader()
 
 void MrsidReader::addArgs(ProgramArgs& args)
 {
-    args.add("filename", "Output filename", m_filename).setPositional();
 }
 
 

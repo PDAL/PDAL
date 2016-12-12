@@ -55,25 +55,27 @@ std::string appName()
 }
 
 // most pipelines (those with a writer) will be invoked via `pdal pipeline`
-void run_pipeline(std::string const& pipeline)
+void run_pipeline(std::string const& pipelineFile,
+    const std::string options = std::string())
 {
     const std::string cmd = appName();
 
     std::string output;
-    std::string file(Support::configuredpath(pipeline));
-    int stat = pdal::Utils::run_shell_command(cmd + " " + file, output);
+    std::string file(Support::configuredpath(pipelineFile));
+    int stat = pdal::Utils::run_shell_command(cmd + " " + file + " " + options,
+        output);
     EXPECT_EQ(0, stat);
     if (stat)
         std::cerr << output << std::endl;
 }
 
 // most pipelines (those with a writer) will be invoked via `pdal pipeline`
-void run_pipeline_stdin(std::string const& pipeline)
+void run_pipeline_stdin(std::string const& pipelineFile)
 {
     const std::string cmd = appName();
 
     std::string output;
-    std::string file(Support::configuredpath(pipeline));
+    std::string file(Support::configuredpath(pipelineFile));
     int stat = pdal::Utils::run_shell_command(cmd + " --stdin < " + file,
         output);
     EXPECT_EQ(0, stat);
@@ -247,6 +249,13 @@ TEST(json, tags)
         totalInputs += inputs.size();
     }
     EXPECT_EQ(totalInputs, 3U);
+}
+
+TEST(json, issue1417)
+{
+    std::string options = "--readers.las.filename=" +
+        Support::datapath("las/utm15.las");
+    run_pipeline("pipeline/issue1417.json", options);
 }
 
 } // namespace pdal

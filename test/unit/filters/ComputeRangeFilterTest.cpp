@@ -37,8 +37,8 @@
 #include <pdal/util/FileUtils.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
-#include <../io/buffer/BufferReader.hpp>
-#include <../filters/computerange/ComputeRangeFilter.hpp>
+#include <io/BufferReader.hpp>
+#include <filters/ComputeRangeFilter.hpp>
 
 #include "Support.hpp"
 

@@ -17,6 +17,9 @@ if(BUILD_PLUGIN_HEXBIN)
 endif()
 
 if(BUILD_PLUGIN_ICEBRIDGE)
+    if (NOT PDAL_HAVE_LIBXML2)
+        message(FATAL_ERROR "Can't build icebridge plugin without libxml2")
+    endif()
     add_subdirectory(icebridge)
 endif()
 
@@ -33,6 +36,9 @@ if(BUILD_PLUGIN_NITF)
 endif()
 
 if(BUILD_PLUGIN_OCI)
+    if (NOT PDAL_HAVE_LIBXML2)
+        message(FATAL_ERROR "Can't build OCI plugin without libxml2")
+    endif()
     add_subdirectory(oci)
 endif()
 
@@ -45,6 +51,9 @@ if(BUILD_PLUGIN_PCL)
 endif()
 
 if(BUILD_PLUGIN_PGPOINTCLOUD)
+    if (NOT PDAL_HAVE_LIBXML2)
+        message(FATAL_ERROR "Can't build pgpointcloud plugin without libxml2")
+    endif()
     add_subdirectory(pgpointcloud)
 endif()
 
@@ -57,5 +66,8 @@ if(BUILD_PLUGIN_RIVLIB)
 endif(BUILD_PLUGIN_RIVLIB)
 
 if(BUILD_PLUGIN_SQLITE)
+    if (NOT PDAL_HAVE_LIBXML2)
+        message(FATAL_ERROR "Can't build sqlite plugin without libxml2")
+    endif()
     add_subdirectory(sqlite)
 endif()

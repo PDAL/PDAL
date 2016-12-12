@@ -36,8 +36,8 @@
 
 #include <pdal/PipelineManager.hpp>
 #include <pdal/StageFactory.hpp>
-#include <stats/StatsFilter.hpp>
-#include <faux/FauxReader.hpp>
+#include <io/FauxReader.hpp>
+#include <filters/StatsFilter.hpp>
 
 #include "Support.hpp"
 

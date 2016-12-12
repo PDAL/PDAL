@@ -36,8 +36,8 @@
 
 #include <pdal/Options.hpp>
 #include <pdal/PDALUtils.hpp>
-#include <CropFilter.hpp>
-#include <FauxReader.hpp>
+#include <io/FauxReader.hpp>
+#include <filters/CropFilter.hpp>
 
 #include "Support.hpp"
 

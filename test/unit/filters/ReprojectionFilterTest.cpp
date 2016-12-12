@@ -36,9 +36,9 @@
 
 #include <pdal/SpatialReference.hpp>
 #include <pdal/PointView.hpp>
-#include <LasReader.hpp>
-#include <ReprojectionFilter.hpp>
-#include <StreamCallbackFilter.hpp>
+#include <io/LasReader.hpp>
+#include <filters/ReprojectionFilter.hpp>
+#include <filters/StreamCallbackFilter.hpp>
 
 #include "Support.hpp"
 
@@ -47,19 +47,16 @@ using namespace pdal;
 namespace
 {
 
-#if defined(PDAL_HAVE_LIBGEOTIFF)
 void getPoint(const PointView& data, double& x, double& y, double& z)
 {
     x = data.getFieldAs<double>(Dimension::Id::X, 0);
     y = data.getFieldAs<double>(Dimension::Id::Y, 0);
     z = data.getFieldAs<double>(Dimension::Id::Z, 0);
 }
-#endif
 
 } // unnamed namespace
 
 
-#if defined(PDAL_HAVE_LIBGEOTIFF)
 // Test reprojecting UTM 15 to DD with a filter
 TEST(ReprojectionFilterTest, ReprojectionFilterTest_test_1)
 {
@@ -99,9 +96,7 @@ TEST(ReprojectionFilterTest, ReprojectionFilterTest_test_1)
         EXPECT_FLOAT_EQ(z, postZ);
     }
 }
-#endif
 
-#if defined(PDAL_HAVE_LIBGEOTIFF)
 // Test reprojecting UTM 15 to DD with a filter
 TEST(ReprojectionFilterTest, stream_test_1)
 {
@@ -146,5 +141,4 @@ TEST(ReprojectionFilterTest, stream_test_1)
     stream.prepare(table);
     stream.execute(table);
 }
-#endif
 

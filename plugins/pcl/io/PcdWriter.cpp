@@ -43,7 +43,8 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/io/impl/pcd_io.hpp>
 
-#include "PCLConversions.hpp"
+#include "../PCLConversions.hpp"
+
 #include <pdal/PointView.hpp>
 #include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>

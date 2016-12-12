@@ -37,10 +37,10 @@
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
 #include <pdal/PipelineManager.hpp>
-#include <FauxReader.hpp>
-#include <FerryFilter.hpp>
-#include <LasReader.hpp>
-#include <StreamCallbackFilter.hpp>
+#include <io/FauxReader.hpp>
+#include <io/LasReader.hpp>
+#include <filters/FerryFilter.hpp>
+#include <filters/StreamCallbackFilter.hpp>
 #include "Support.hpp"
 
 using namespace pdal;

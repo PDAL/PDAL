@@ -2,11 +2,6 @@
 # Options for optional components.
 #
 
-option(WITH_APPS
-    "Choose if PDAL utilities should be built" TRUE)
-add_feature_info("PDAL application" WITH_APPS
-    "the PDAL command line application")
-
 option(WITH_COMPLETION
     "Install bash completions scripts for command line?" FALSE)
 add_feature_info("Bash completion" WITH_COMPLETION

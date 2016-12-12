@@ -37,7 +37,7 @@ RUN git clone --depth=1 https://github.com/PDAL/PDAL \
         -DWITH_TESTS=ON \
         -DCMAKE_BUILD_TYPE=Release \
         .. \
-    && make -j4 \
+    && make -j 2\
     && make install \
     && rm -rf /PDAL
 

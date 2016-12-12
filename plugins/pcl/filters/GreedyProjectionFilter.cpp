@@ -34,9 +34,6 @@
 
 #include "GreedyProjectionFilter.hpp"
 
-#include "PCLConversions.hpp"
-#include "pipeline/PCLPipeline.h"
-
 #include <pcl/console/print.h>
 #include <pcl/point_types.h>
 #include <pcl/features/normal_3d.h>
@@ -44,6 +41,8 @@
 #include <pcl/surface/gp3.h>
 
 #include <pdal/pdal_macros.hpp>
+
+#include "../PCLConversions.hpp"
 
 namespace pdal
 {

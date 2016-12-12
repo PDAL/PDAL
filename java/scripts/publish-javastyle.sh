@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-./sbt "project core" publish-javastyle
+./sbt "-212" "project core" publish-javastyle

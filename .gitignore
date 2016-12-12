@@ -76,7 +76,7 @@ doc/build
 bin/
 lib/
 test/unit/CMakeScripts/
-src/gitsha.cpp
+pdal/gitsha.cpp
 .vagrant/
 test/unit/TestConfig.hpp
 *.pyc

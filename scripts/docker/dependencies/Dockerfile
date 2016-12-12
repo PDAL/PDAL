@@ -4,7 +4,6 @@ MAINTAINER Howard Butler <howard@hobu.co>
 ENV CC gcc
 ENV CXX g++
 
-
 RUN apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 16126D3A3E5C1192
 RUN apt-get update -qq
 RUN apt-get -qq remove postgis
@@ -297,5 +296,16 @@ RUN git clone https://github.com/ninja-build/ninja.git \
     && ./configure.py --bootstrap \
     && cp ninja /usr/bin
 
+# Install Java.
+RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
+    add-apt-repository -y ppa:webupd8team/java && \
+    apt-get update && \
+    apt-get install -y oracle-java8-installer && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /var/cache/oracle-jdk8-installer
+
+ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
+
 #RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.6 20 && update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.6 20
+
 

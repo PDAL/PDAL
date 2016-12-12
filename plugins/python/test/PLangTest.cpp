@@ -36,10 +36,9 @@
 
 #include <pdal/plang/Invocation.hpp>
 #include <pdal/plang/Array.hpp>
-
-#include <Support.hpp>
-#include <faux/FauxReader.hpp>
 #include <pdal/StageFactory.hpp>
+#include <io/FauxReader.hpp>
+#include <Support.hpp>
 
 using namespace pdal;
 using namespace pdal::plang;

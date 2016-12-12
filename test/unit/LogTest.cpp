@@ -36,7 +36,7 @@
 #include <pdal/Options.hpp>
 #include <pdal/PointView.hpp>
 #include <pdal/StageFactory.hpp>
-#include <FauxReader.hpp>
+#include <io/FauxReader.hpp>
 #include "Support.hpp"
 
 using namespace pdal;

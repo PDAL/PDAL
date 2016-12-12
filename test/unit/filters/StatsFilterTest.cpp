@@ -36,8 +36,8 @@
 
 #include <pdal/PDALUtils.hpp>
 #include <pdal/StageFactory.hpp>
-#include <FauxReader.hpp>
-#include <StatsFilter.hpp>
+#include <filters/StatsFilter.hpp>
+#include <io/FauxReader.hpp>
 
 #include "Support.hpp"
 

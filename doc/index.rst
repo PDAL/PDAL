@@ -29,7 +29,7 @@ PDAL 1.3.0 has been released. Visit :ref:`download` to obtain a copy of the
 source code, or follow the :ref:`quickstart` to get going in a hurry with
 `Docker`_.
 
-.. _`Docker`: http://www.docker.org
+.. _`Docker`: https://www.docker.com/
 
 .. _`Howard Butler`: http://github.com/hobu
 .. _`Brad Chambers`: http://github.com/chambbj
