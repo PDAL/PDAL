@@ -273,7 +273,7 @@ void StatsFilter::extractMetadata(PointTableRef table)
         Json::Value json;
         jsonReader.parse(p.json(), json);
 
-        MetadataNode boundary = metadata.add("boundary", json);
+        MetadataNode boundary = metadata.addWithType("boundary", json.toStyledString(), "json", "GeoJSON boundary");
         MetadataNode bbox = metadata.add(mbox);
         SpatialReference ref = table.anySpatialReference();
         // if we don't get an SRS from the PointTableRef,
@@ -292,7 +292,7 @@ void StatsFilter::extractMetadata(PointTableRef table)
             Json::Value json;
             jsonReader.parse(pdd.json(), json);
 
-            MetadataNode ddboundary = dddbox.add("boundary", json);
+            MetadataNode ddboundary = dddbox.addWithType("boundary", json.toStyledString(), "json", "GeoJSON boundary");
 
 
         }
