@@ -65,7 +65,6 @@ public:
 
 using namespace pdal;
 
-#ifdef PDAL_HAVE_LIBGEOTIFF
 TEST(LasWriterTest, srs)
 {
     Options readerOps;
@@ -88,10 +87,8 @@ TEST(LasWriterTest, srs)
     SpatialReference srs = tester.srs(writer);
     EXPECT_EQ(srs, SpatialReference("EPSG:26915"));
 }
-#endif
 
 
-#ifdef PDAL_HAVE_LIBGEOTIFF
 TEST(LasWriterTest, srs2)
 {
     Options readerOps;
@@ -115,7 +112,6 @@ TEST(LasWriterTest, srs2)
     SpatialReference srs = tester.srs(writer);
     EXPECT_EQ(srs, SpatialReference("EPSG:32615"));
 }
-#endif
 
 
 TEST(LasWriterTest, auto_offset)
@@ -293,9 +289,9 @@ TEST(LasWriterTest, all_extra_dims)
 TEST(LasWriterTest, forward)
 {
     Options readerOps1;
-    
+
     readerOps1.add("filename", Support::datapath("las/4_1.las"));
-    
+
     Options readerOps2;
 
     readerOps2.add("filename", Support::datapath("las/4_6.las"));
@@ -358,11 +354,11 @@ TEST(LasWriterTest, forward)
 TEST(LasWriterTest, forwardvlr)
 {
     Options readerOps1;
-    
+
     readerOps1.add("filename", Support::datapath("las/lots_of_vlr.las"));
     LasReader r1;
     r1.addOptions(readerOps1);
-    
+
     std::string testfile = Support::temppath("tmp.las");
     FileUtils::deleteFile(testfile);
 
@@ -390,7 +386,7 @@ TEST(LasWriterTest, forwardvlr)
 
     r.prepare(t2);
     r.execute(t2);
-    
+
     MetadataNode forward = t2.privateMetadata("lasforward");
 
     auto pred = [](MetadataNode temp)
@@ -552,7 +548,7 @@ TEST(LasWriterTest, lazperf)
 
     PointTable t1;
     r1.prepare(t1);
-    PointViewSet set1 = r1.execute(t1); 
+    PointViewSet set1 = r1.execute(t1);
     PointViewPtr view1 = *set1.begin();
 
     Options ops2;
@@ -563,7 +559,7 @@ TEST(LasWriterTest, lazperf)
 
     PointTable t2;
     r2.prepare(t2);
-    PointViewSet set2 = r2.execute(t2); 
+    PointViewSet set2 = r2.execute(t2);
     PointViewPtr view2 = *set2.begin();
 
     EXPECT_EQ(view1->size(), view2->size());

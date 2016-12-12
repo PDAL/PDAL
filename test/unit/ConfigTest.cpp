@@ -43,11 +43,7 @@ TEST(ConfigTest, test_3rdparty_libs)
     bool geotiff = IsLibGeoTIFFEnabled();
     bool laszip = IsLasZipEnabled();
 
-#ifdef PDAL_HAVE_LIBGEOTIFF
     EXPECT_TRUE(geotiff);
-#else
-    EXPECT_TRUE(!geotiff);
-#endif
 
 #ifdef PDAL_HAVE_LASZIP
     EXPECT_TRUE(laszip);
