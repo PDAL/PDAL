@@ -35,6 +35,7 @@ RUN git clone --depth=1 https://github.com/PDAL/PDAL \
         -DWITH_GEOTIFF=ON \
         -DWITH_LASZIP=ON \
         -DWITH_TESTS=ON \
+        -DWITH_PDAL_JNI=ON \
         -DCMAKE_BUILD_TYPE=Release \
         .. \
     && make -j 2\
