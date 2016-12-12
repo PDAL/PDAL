@@ -154,7 +154,6 @@ TEST(SpatialReferenceTest, calcZone)
 }
 
 
-#if defined(PDAL_HAVE_LIBGEOTIFF)
 // Test fetching SRS from an existing file
 TEST(SpatialReferenceTest, test_read_srs)
 {
@@ -182,10 +181,8 @@ TEST(SpatialReferenceTest, test_read_srs)
     std::string proj4 = "+proj=utm +zone=17 +datum=WGS84 +units=m +no_defs";
     EXPECT_EQ(ret_proj4, proj4);
 }
-#endif
 
 
-#ifdef PDAL_HAVE_LIBGEOTIFF
 
 // Try writing a compound coordinate system to file and ensure we get back
 // WKT with the geoidgrids (from the WKT VLR).
@@ -239,10 +236,8 @@ TEST(SpatialReferenceTest, test_vertical_datums)
     FileUtils::deleteFile(tmpfile);
 }
 **/
-#endif //PDAL_HAVE_LIBGEOTIFF
 
 
-#if defined(PDAL_HAVE_LIBGEOTIFF)
 // Try writing only the WKT VLR to a file, and see if the resulting
 // file still works ok.
 TEST(SpatialReferenceTest, test_writing_vlr)
@@ -299,7 +294,6 @@ TEST(SpatialReferenceTest, test_writing_vlr)
     // Cleanup
     FileUtils::deleteFile(tmpfile);
 }
-#endif
 
 
 TEST(SpatialReferenceTest, test_io)
@@ -334,7 +328,6 @@ TEST(SpatialReferenceTest, test_vertical_and_horizontal)
 
 }
 
-#if defined(PDAL_HAVE_LIBGEOTIFF)
 TEST(SpatialReferenceTest, merge)
 {
     Options o1;
@@ -382,7 +375,6 @@ TEST(SpatialReferenceTest, merge)
         Support::datapath("las/test_epsg_4326x3.las"));
 }
 
-#endif
 
 TEST(SpatialReferenceTest, test_bounds)
 {

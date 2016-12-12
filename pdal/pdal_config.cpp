@@ -49,9 +49,7 @@
 #include <pdal/pdal_defines.h>
 #include <pdal/gitsha.h>
 
-#ifdef PDAL_HAVE_LIBGEOTIFF
 #include <geotiff.h>
-#endif
 
 #ifdef PDAL_COMPILER_CLANG
 #  pragma clang diagnostic push
@@ -80,11 +78,7 @@ namespace pdal
 /// Check if GeoTIFF support has been built in to PDAL
 bool IsLibGeoTIFFEnabled()
 {
-#ifdef PDAL_HAVE_LIBGEOTIFF
     return true;
-#else
-    return false;
-#endif
 }
 
 /// Check if LasZip compression support has been built in to PDAL
@@ -183,10 +177,8 @@ std::string getPDALDebugInformation()
               "http://www.xmlsoft.org/" << std::endl;
 #endif
 
-#ifdef PDAL_HAVE_LIBGEOTIFF
     os << "libgeotiff (" << LIBGEOTIFF_VERSION << ") - " <<
         "http://trac.osgeo.org/geotiff" << std::endl;
-#endif
 
     return os.str();
 }

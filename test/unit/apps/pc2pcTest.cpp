@@ -144,11 +144,7 @@ TEST(pc2pcTest, pc2pc_test_switches)
     EXPECT_EQ(stat, 0);
     EXPECT_TRUE(fileIsOkay(outputLas));
     EXPECT_TRUE(!fileIsCompressed(outputLas));
-#ifdef PDAL_HAVE_LIBGEOTIFF
     EXPECT_TRUE(!fileHasSrs(outputLas));
-#else
-    (void)fileHasSrs(outputLas);
-#endif
 
 #ifdef PDAL_HAVE_LASZIP
     // does --compress make a compressed file?
@@ -174,9 +170,7 @@ TEST(pc2pcTest, pc2pc_test_switches)
     stat = Utils::run_shell_command(fullCmd, output);
     EXPECT_EQ(stat, 0);
     EXPECT_TRUE(fileIsOkay(outputLas));
-#ifdef PDAL_HAVE_LIBGEOTIFF
     EXPECT_TRUE(fileHasSrs(outputLas));
-#endif
 
     FileUtils::deleteFile(outputLas);
     FileUtils::deleteFile(outputLaz);
