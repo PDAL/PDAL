@@ -35,6 +35,9 @@
 #include <pdal/Metadata.hpp>
 #include <pdal/SpatialReference.hpp>
 
+#include <json/json.h>
+
+
 namespace pdal
 {
 
@@ -45,6 +48,14 @@ void MetadataNodeImpl::setValue(const SpatialReference& ref)
     m_value = Utils::toString(ref);
 }
 
+template <>
+void MetadataNodeImpl::setValue(const Json::Value& j)
+{
+    m_type = "json";
+    std::stringstream strm;
+    strm << j;
+    m_value = strm.str();
+}
 
 std::string Metadata::inferType(const std::string& val)
 {
