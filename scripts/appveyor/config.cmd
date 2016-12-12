@@ -17,11 +17,12 @@ cmake -G "Visual Studio 14 2015 Win64" ^
     -DENABLE_CTEST=OFF ^
     -DWITH_APPS=ON ^
     -DWITH_LAZPERF=%PDAL_OPTIONAL_COMPONENTS% ^
-    -DWITH_GEOTIFF=%PDAL_OPTIONAL_COMPONENTS% ^
+    -DWITH_GEOTIFF=ON ^
     -DWITH_LASZIP=%PDAL_OPTIONAL_COMPONENTS% ^
     -DWITH_TESTS=ON ^
     -DNUMPY_INCLUDE_DIR=%OSGEO4W_ROOT%\apps\python27\lib\site-packages\numpy\core\include ^
 	-DNUMPY_VERSION=1.8.1 ^
     -Dgtest_force_shared_crt=ON ^
     -DCMAKE_INSTALL_PREFIX=C:\pdalbin ^
+    -DCMAKE_VERBOSE_MAKEFILE=OFF ^
     .
