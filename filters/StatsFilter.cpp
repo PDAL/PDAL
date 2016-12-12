@@ -44,6 +44,8 @@
 #include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
+#include <json/json.h>
+
 namespace pdal
 {
 
@@ -266,7 +268,12 @@ void StatsFilter::extractMetadata(PointTableRef table)
         MetadataNode mbox = Utils::toMetadata(box);
         MetadataNode box_metadata = m_metadata.add("bbox");
         MetadataNode metadata = box_metadata.add("native");
-        MetadataNode boundary = metadata.add("boundary", p.json());
+
+        Json::Reader jsonReader;
+        Json::Value json;
+        jsonReader.parse(p.json(), json);
+
+        MetadataNode boundary = metadata.add("boundary", json);
         MetadataNode bbox = metadata.add(mbox);
         SpatialReference ref = table.anySpatialReference();
         // if we don't get an SRS from the PointTableRef,
@@ -280,7 +287,12 @@ void StatsFilter::extractMetadata(PointTableRef table)
             MetadataNode epsg_4326_box = Utils::toMetadata(ddbox);
             MetadataNode dddbox = box_metadata.add("EPSG:4326");
             dddbox.add(epsg_4326_box);
-            MetadataNode ddboundary = dddbox.add("boundary", pdd.json());
+
+            Json::Reader jsonReader;
+            Json::Value json;
+            jsonReader.parse(pdd.json(), json);
+
+            MetadataNode ddboundary = dddbox.add("boundary", json);
 
 
         }
