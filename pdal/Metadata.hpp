@@ -45,11 +45,6 @@
 #include <vector>
 #include <stdint.h>
 
-namespace Json
-{
-    class Value;
-}
-
 namespace pdal
 {
 
@@ -244,9 +239,6 @@ inline void MetadataNodeImpl::setValue<double>(const double& d)
 
 template <>
 void PDAL_DLL MetadataNodeImpl::setValue(const SpatialReference& ref);
-
-template <>
-void PDAL_DLL MetadataNodeImpl::setValue(const Json::Value& v);
 
 template <>
 inline void MetadataNodeImpl::setValue(const BOX3D& b)
