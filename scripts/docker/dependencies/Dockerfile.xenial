@@ -60,6 +60,7 @@ RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
         ninja \
         cython \
         python-pip \
+        time \
     && rm -rf /var/lib/apt/lists/*
 
 
