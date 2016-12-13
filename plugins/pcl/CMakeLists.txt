@@ -75,9 +75,15 @@ PDAL_ADD_PLUGIN(pclblock_libname filter pclblock
     FILES
         pipeline/PCLPipeline.cpp
         filters/PCLBlock.cpp
-    LINK_WITH ${PCL_LIBRARIES})
-target_include_directories(${pclblock_libname} PRIVATE
-    ${INCLUDE_DIRS})
+    LINK_WITH
+        ${PCL_LIBRARIES}
+        ${PDAL_JSONCPP_LIB_NAME}
+)
+target_include_directories(${pclblock_libname}
+    PRIVATE
+      ${INCLUDE_DIRS}
+      ${PDAL_JSONCPP_INCLUDE_DIR}
+)
 
 PDAL_ADD_PLUGIN(voxelgrid_filter_libname filter voxelgrid
     FILES
