@@ -1,10 +1,13 @@
 cmake_minimum_required(VERSION 2.8.0)
 
+set(ignoreMe "${SBT}") # sbt-jni defines -DSBT
 set(MAKE_COLOR_MAKEFILE ON)
 
 # Define project and related variables
 # (required by sbt-jni) please use semantic versioning
 #
+
+option(PDAL_BUILD "Build PDAL JNI Bindings" FALSE)
 
 project (pdaljni)
 set(PROJECT_VERSION_MAJOR 1)
@@ -20,8 +23,9 @@ if (APPLE)
   SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 endif ()
 
-# pdal requires to use cpp11, and a weird pdal flag to be sure that dynamic linking works
-set(CMAKE_CXX_FLAGS "-std=c++11")
+if (NOT PDAL_BUILD)
+    set(CMAKE_CXX_FLAGS "-std=c++11")
+endif()
 
 # Setup JNI
 find_package(JNI REQUIRED)
@@ -39,9 +43,9 @@ include_directories(include)
 include_directories(${JNI_INCLUDE_DIRS})
 if (APPLE)
     include_directories(/usr/local/opt/libxml2/include/libxml2)
-else()
+else ()
     include_directories(/usr/include/libxml2)
-endif()
+endif ()
 
 # Sources
 file(GLOB LIB_SRC
@@ -55,16 +59,15 @@ file(GLOB LIB_SRC
 #
 set (LIB_NAME ${PROJECT_NAME}.${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR})
 if (PDAL_BUILD)
-    include_directories(${CMAKE_CURRENT_BINARY_DIR}/include/pdal)
     PDAL_ADD_LIBRARY(${LIB_NAME} ${LIB_SRC})
     target_link_libraries(${LIB_NAME} PUBLIC
         ${PDAL_BASE_LIB_NAME}
         ${PDAL_UTIL_LIB_NAME})
     target_include_directories(${LIB_NAME} PRIVATE
-        ${PROJECT_BINARY_DIR}/include)
+        ${PROJECT_BINARY_DIR}/../../../include)
     install(TARGETS ${LIB_NAME} LIBRARY DESTINATION ${PDAL_LIB_INSTALL_DIR})
-else ()
+else (NOT $ENV{PDAL_CI})
     add_library(${LIB_NAME} SHARED ${LIB_SRC})
-    install(TARGETS ${LIB_NAME} LIBRARY DESTINATION .)
+    install(TARGETS ${LIB_NAME} LIBRARY DESTINATION . OPTIONAL)
     target_link_libraries(${LIB_NAME} PRIVATE ${PDAL_LIB_NAME})
 endif ()

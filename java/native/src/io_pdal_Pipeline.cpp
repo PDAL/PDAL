@@ -14,13 +14,14 @@ using pdal::PointViewSet;
 using pdal::PointView;
 using pdal::PointViewLess;
 using pdal::PointViewPtr;
+using pdal::pdal_error;
 
 JNIEXPORT void JNICALL Java_io_pdal_Pipeline_initialise
   (JNIEnv *env, jobject obj)
 {
     jclass c = env->GetObjectClass(obj);
     jfieldID fid = env->GetFieldID(c, "json", "Ljava/lang/String;");
-    jstring jstr = (jstring) env->GetObjectField(obj, fid);
+    jstring jstr = reinterpret_cast<jstring>(env->GetObjectField(obj, fid));
     setHandle(env, obj, new Pipeline(std::string(env->GetStringUTFChars(jstr, 0))));
 }
 
@@ -62,7 +63,7 @@ JNIEXPORT jboolean JNICALL Java_io_pdal_Pipeline_validate
     {
         result = p->validate();
     }
-    catch(const pdal::pdal_error& pe)
+    catch(const pdal_error& pe)
     {
         std::cerr << "Runtime error: " << pe.what() << std::endl;
         result = false;

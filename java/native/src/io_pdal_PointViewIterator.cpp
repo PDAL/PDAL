@@ -8,11 +8,6 @@
 using libpdaljava::PointViewIterator;
 using libpdaljava::PointViewRawPtr;
 
-using pdal::PointViewSet;
-using pdal::PointView;
-using pdal::PointViewPtr;
-using pdal::PointViewLess;
-
 JNIEXPORT jboolean JNICALL Java_io_pdal_PointViewIterator_hasNext
   (JNIEnv *env, jobject obj)
 {

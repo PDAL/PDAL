@@ -72,7 +72,7 @@ if [ "${OPTIONAL_COMPONENT_SWITCH}" == "ON" ]; then
     python setup.py test
 
     # JNI tests
-    cd /pdal/java; ./sbt tests/test
+    cd /pdal/java; PDAL_CI=true ./sbt tests/test
 
     # Build all examples
     for EXAMPLE in writing writing-filter writing-kernel writing-reader writing-writer

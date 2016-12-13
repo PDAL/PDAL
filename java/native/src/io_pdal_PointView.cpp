@@ -15,14 +15,16 @@ using pdal::Dimension::Type;
 using pdal::Dimension::Id;
 using pdal::PointId;
 using pdal::DimTypeList;
+using pdal::SpatialReference;
+using pdal::DimType;
 
 /// Converts JavaArray of DimTypes (In Java interpretation DimType is a pair of strings)
-/// into pdal::DimTypeList (vector of DimTypes), puts dim size into bufSize
+/// into DimTypeList (vector of DimTypes), puts dim size into bufSize
 /// \param[in] env       JNI environment
 /// \param[in] dims      JavaArray of DimTypes
 /// \param[in] bufSize   Dims sum size
 /// \param[in] dimTypes  Vector of DimTypes
-void convertDimTypeJavaArrayToVector(JNIEnv *env, jobjectArray dims, std::size_t *pointSize, pdal::DimTypeList *dimTypes) {
+void convertDimTypeJavaArrayToVector(JNIEnv *env, jobjectArray dims, std::size_t *pointSize, DimTypeList *dimTypes) {
     for (jint i = 0; i < env->GetArrayLength(dims); i++) {
         jobject jDimType = (jobject) env->GetObjectArrayElement(dims, i);
         jclass cDimType = env->GetObjectClass(jDimType);
@@ -40,17 +42,17 @@ void convertDimTypeJavaArrayToVector(JNIEnv *env, jobjectArray dims, std::size_t
         Type type = pdal::Dimension::type(std::string(env->GetStringUTFChars(jtype, 0)));
 
         *pointSize += pdal::Dimension::size(type);
-        dimTypes->insert(dimTypes->begin() + i, pdal::DimType(id, type, jscale, joffset));
+        dimTypes->insert(dimTypes->begin() + i, DimType(id, type, jscale, joffset));
     }
 }
 
 /// Fill a buffer with point data specified by the dimension list, accounts index
 /// Using this functions it is possible to pack all points into one buffer
-/// \param[in] pv    pdal::PointView pointer.
+/// \param[in] pv    PointView pointer.
 /// \param[in] dims  List of dimensions/types to retrieve.
 /// \param[in] idx   Index of point to get.
 /// \param[in] buf   Pointer to buffer to fill.
-void appendPackedPoint(PointViewPtr pv, const pdal::DimTypeList& dims, pdal::PointId idx, std::size_t pointSize, char *buf)
+void appendPackedPoint(PointViewPtr pv, const DimTypeList& dims, PointId idx, std::size_t pointSize, char *buf)
 {
     std::size_t from = idx * pointSize;
     if(from >= pv->size() * pointSize) return;
@@ -106,7 +108,7 @@ JNIEXPORT jstring JNICALL Java_io_pdal_PointView_getCrsWKT
 
     std::string wkt = pv->spatialReference().getWKT();
 
-    if(pretty) wkt = pdal::SpatialReference::prettyWkt(wkt);
+    if(pretty) wkt = SpatialReference::prettyWkt(wkt);
 
     return env->NewStringUTF(wkt.c_str());
 }
@@ -121,7 +123,7 @@ JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getPackedPoint
 
     // we need to calculate buffer size
     std::size_t pointSize = 0;
-    pdal::DimTypeList dimTypes;
+    DimTypeList dimTypes;
 
     // calculate result buffer length (for one point) and get dimTypes
     convertDimTypeJavaArrayToVector(env, dims, &pointSize, &dimTypes);
@@ -148,7 +150,7 @@ JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getPackedPoints
 
     // we need to calculate buffer size
     std::size_t pointSize = 0;
-    pdal::DimTypeList dimTypes;
+    DimTypeList dimTypes;
 
     // calculate result buffer length (for one point) and get dimTypes
     convertDimTypeJavaArrayToVector(env, dims, &pointSize, &dimTypes);
@@ -157,7 +159,7 @@ JNIEXPORT jbyteArray JNICALL Java_io_pdal_PointView_getPackedPoints
     std::size_t bufSize = pointSize * pv->size();
     char *buf = new char[bufSize];
 
-    for (int idx = 0; idx < pv->size(); idx++) {
+    for (PointId idx = 0; idx < pv->size(); idx++) {
         appendPackedPoint(pv, dimTypes, idx, pointSize, buf);
     }
 

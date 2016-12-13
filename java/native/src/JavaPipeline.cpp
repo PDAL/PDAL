@@ -3,6 +3,8 @@
 #include <pdal/XMLSchema.hpp>
 #endif
 
+using pdal::PointViewSet;
+
 namespace libpdaljava
 {
 
@@ -38,7 +40,7 @@ bool Pipeline::validate()
     return m_executor.validate();
 }
 
-pdal::PointViewSet Pipeline::getPointViews() const
+PointViewSet Pipeline::getPointViews() const
 {
     if (!m_executor.executed())
         throw java_error("call execute() before fetching arrays");
