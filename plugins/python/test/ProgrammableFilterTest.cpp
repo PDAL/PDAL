@@ -117,24 +117,6 @@ TEST_F(ProgrammableFilterTest, ProgrammableFilterTest_test1)
     EXPECT_DOUBLE_EQ(statsZ.maximum(), 3.14);
 }
 
-TEST_F(ProgrammableFilterTest, pipelineXML)
-{
-    PipelineManager manager;
-
-    manager.readPipeline(
-        Support::configuredpath("plang/programmable-update-y-dims.xml"));
-    manager.execute();
-    PointViewSet viewSet = manager.views();
-    EXPECT_EQ(viewSet.size(), 1u);
-    PointViewPtr view = *viewSet.begin();
-
-    for (PointId idx = 0; idx < 10; ++idx)
-    {
-        int32_t y = view->getFieldAs<int32_t>(Dimension::Id::Y, idx);
-        EXPECT_EQ(y, 314);
-    }
-}
-
 TEST_F(ProgrammableFilterTest, pipelineJSON)
 {
     PipelineManager manager;
