@@ -182,7 +182,8 @@ For more on PDAL stages and their options, check the PDAL documentation on
   a string. The ``type`` must specify a valid PDAL filter name.
 
 * A stage object may have additional members with names corresponding to
-  stage-specific option names and their respective values.
+  stage-specific option names and their respective values. Values provided as
+  JSON objects or arrays will be stringified and parsed within the stage.
 
 Filename Globbing
 ................................................................................
@@ -493,6 +494,3 @@ for the :ref:`writers.las` :cpp:class:`pdal::Stage`.
         }
       ]
     }
-
-
-
