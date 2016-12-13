@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Pipeline version="1.0">
-            <Reader type="readers.nitf">
-                <Option name="filename">
-                    ../07015_Hamrin_Mountains_Tile_000249_nga.ntf
-                </Option>
-            </Reader>
-</Pipeline>

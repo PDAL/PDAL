@@ -1,0 +1,13 @@
+{
+  "pipeline":[
+    {
+        "type":"readers.icebridge",
+        "filename":"@CMAKE_SOURCE_DIR@/test/data/icebridge/twoPoints.h5"
+    },
+    {
+        "type":"writers.text",
+        "filename":"@CMAKE_SOURCE_DIR@/test/temp/outfile.txt"
+    }
+  ]
+}
+
