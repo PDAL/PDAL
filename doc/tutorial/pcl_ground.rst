@@ -12,6 +12,15 @@ Identifying ground returns using ProgressiveMorphologicalFilter segmentation
 Implements the Progressive Morphological Filter for segmentation of ground
 points.
 
+.. note::
+  
+  ``filters.ground`` required PCL and has since been replaced by
+  :ref:`filters.pmf`, which is a native PDAL filter. :ref:`ground_command` has
+  been retained, but now calls :ref:`filters.pmf` under the hood as opposed to
+  ``filters.ground`` and is installed as a native PDAL kernel independent of the
+  PCL plugin. As such, the outputs shown in this tutorial may vary slightly, but
+  the underlying algorithm is identical.
+
 Background
 ------------------------------------------------------------------------------
 

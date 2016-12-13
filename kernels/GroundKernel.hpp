@@ -1,5 +1,6 @@
 /******************************************************************************
-* Copyright (c) 2015, Brad Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2013, Howard Butler (hobu.inc@gmail.com)
+* Copyright (c) 2014-2015, Brad Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -35,29 +36,44 @@
 #pragma once
 
 #include <pdal/Kernel.hpp>
+#include <pdal/pdal_export.hpp>
+#include <pdal/util/FileUtils.hpp>
+#include <pdal/plugin.hpp>
 
+#include <memory>
 #include <string>
+
+extern "C" int32_t GroundKernel_ExitFunc();
+extern "C" PF_ExitFunc GroundKernel_InitPlugin();
 
 namespace pdal
 {
 
-class HeightAboveGroundKernel : public Kernel
+class Options;
+class Stage;
+
+class PDAL_DLL GroundKernel : public Kernel
 {
 public:
-    SET_KERNEL_NAME("height", "Height above ground")
-    SET_KERNEL_LINK("http://pdal.io/kernels/kernels.height.html")
-
+    static void * create();
+    static int32_t destroy(void *);
+    std::string getName() const;
     int execute();
 
 private:
-    virtual void validateSwitches(ProgramArgs& args);
+    GroundKernel();
     virtual void addSwitches(ProgramArgs& args);
 
-    bool m_use_classification;
-
-    std::string m_input_file;
-    std::string m_ground_file;
-    std::string m_output_file;
+    std::string m_inputFile;
+    std::string m_outputFile;
+    double m_maxWindowSize;
+    double m_slope;
+    double m_maxDistance;
+    double m_initialDistance;
+    double m_cellSize;
+    bool m_classify;
+    bool m_extract;
+    bool m_approximate;
 };
 
 } // namespace pdal

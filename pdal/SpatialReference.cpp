@@ -35,6 +35,7 @@
 #include <pdal/SpatialReference.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <pdal/Metadata.hpp>
+#include <pdal/util/FileUtils.hpp>
 
 // gdal
 #ifdef PDAL_COMPILER_CLANG
@@ -86,7 +87,7 @@ std::string SpatialReference::getWKT() const
 }
 
 
-void SpatialReference::set(std::string const& v)
+void SpatialReference::set(std::string v)
 {
     m_horizontalWkt.clear();
     if (v.empty())
@@ -94,6 +95,11 @@ void SpatialReference::set(std::string const& v)
         m_wkt.clear();
         return;
     }
+
+    std::string newV = FileUtils::readFileIntoString(v);
+    if (newV.size())
+        v = newV;
+
     if (isWKT(v))
     {
         m_wkt = v;
@@ -321,7 +327,17 @@ bool SpatialReference::isWKT(const std::string& wkt)
     // List comes from GDAL.  WKT includes FITTED_CS, but this isn't
     // included in GDAL list.  Not sure why.
     StringList leaders { "PROJCS", "GEOGCS", "COMPD_CS", "GEOCCS",
-        "VERT_CS", "LOCAL_CS" };
+        "VERT_CS", "LOCAL_CS",
+    // New specification names.
+        "GEODCRS", "GEODETICCRS",
+        "PROJCRS", "PROJECTEDCRS",
+        "VERTCRS", "VERITCALCRS",
+        "ENGCRS", "ENGINEERINGCRS",
+        "IMAGECRS",
+        "PARAMETRICCRS",
+        "TIMECRS",
+        "COMPOUNDCRS"
+    };
 
     for (const std::string& s : leaders)
         if (wkt.compare(0, s.size(), s) == 0)

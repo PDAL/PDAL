@@ -45,9 +45,7 @@
 #include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
-#ifdef PDAL_HAVE_LIBGEOTIFF
 #include "GeotiffSupport.hpp"
-#endif
 #include "LasHeader.hpp"
 #include "LasVLR.hpp"
 #include "LasZipPoint.hpp"

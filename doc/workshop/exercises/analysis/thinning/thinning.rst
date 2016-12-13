@@ -27,7 +27,7 @@ sampling strategies we could choose. We can attempt to preserve shape, we can tr
 randomly sample, and we can attempt to normalize posting density. PDAL
 provides capability for all three:
 
-* Poisson using the :ref:`filters.dartsample`
+* Poisson using the :ref:`filters.sample`
 
 * Random using a combination of :ref:`filters.decimation` and :ref:`filters.randomize`
 
@@ -76,5 +76,4 @@ Notes
 --------------------------------------------------------------------------------
 
 1. Poisson sampling is non-destructive. Points that are filtered with
-   :ref:`filters.dartsample` will retain all attribute information.
-
+   :ref:`filters.sample` will retain all attribute information.

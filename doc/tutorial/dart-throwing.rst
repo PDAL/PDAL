@@ -12,6 +12,13 @@ Performing Poisson Sampling of Point Clouds Using Dart Throwing
 This tutorial will describe the creation of a new filter for sampling point
 cloud data, :ref:`filters.dartsample`.
 
+.. note::
+  
+  ``filters.dartsample`` required PCL and has since been replaced by
+  :ref:`filters.sample`, which is a native PDAL filter. We leave this tutorial
+  as an example of how to create a filter, and of how to work with the PCL
+  plugin, but the filter in reference is no longer available.
+
 Introduction
 -------------------------------------------------------------------------------
 

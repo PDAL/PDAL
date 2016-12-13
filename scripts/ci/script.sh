@@ -41,7 +41,6 @@ cmake \
     -DENABLE_CTEST=OFF \
     -DWITH_APPS=ON \
     -DWITH_LAZPERF=$OPTIONAL_COMPONENT_SWITCH \
-    -DWITH_GEOTIFF=$OPTIONAL_COMPONENT_SWITCH \
     -DWITH_LASZIP=$OPTIONAL_COMPONENT_SWITCH \
     -DWITH_PDAL_JNI=$OPTIONAL_COMPONENT_SWITCH \
     -DLASZIP_INCLUDE_DIR:PATH=/usr/include \
@@ -72,7 +71,7 @@ if [ "${OPTIONAL_COMPONENT_SWITCH}" == "ON" ]; then
     python setup.py test
 
     # JNI tests
-    cd /pdal/java; PDAL_CI=true ./sbt tests/test
+    cd /pdal/java; PDAL_DEPEND_ON_NATIVE=false ./sbt -Djava.library.path=/pdal/_build/lib core/test
 
     # Build all examples
     for EXAMPLE in writing writing-filter writing-kernel writing-reader writing-writer

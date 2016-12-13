@@ -159,15 +159,15 @@ LAS files. It is also used as a compression type for :ref:`writers.oci` and
 PCL
 ..............................................................................
 
-The `Point Cloud Library (PCL)`_ is used by the :ref:`ground_command`,
-:ref:`pcl_command`, :ref:`writers.pcd`, :ref:`readers.pcd`, and
-:ref:`filters.pclblock` to provide support for various PCL-related operations.
+The `Point Cloud Library (PCL)`_ is used by the :ref:`pcl_command`,
+:ref:`writers.pcd`, :ref:`readers.pcd`, and :ref:`filters.pclblock` to provide
+support for various PCL-related operations.
 
 PCL must be 1.7.2+. We do our best to keep this up-to-date with PCL master.
 
 .. note::
     `Homebrew`_-based OSX builds use PCL 1.7.2, but you may need to switch
-    of `VTK`_ support depending on the configuration.
+    off `VTK`_ support depending on the configuration.
 
 .. _`Homebrew`: http://brew.sh
 .. _`VTK`: http://vtk.org
@@ -195,4 +195,3 @@ PCL must be 1.7.2+. We do our best to keep this up-to-date with PCL master.
 
 .. _`Points2Grid`: https://github.com/CRREL/points2grid
 .. _`Point Cloud Library (PCL)`: http://pointclouds.org
-

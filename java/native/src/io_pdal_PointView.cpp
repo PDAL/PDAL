@@ -26,15 +26,15 @@ using pdal::DimType;
 /// \param[in] dimTypes  Vector of DimTypes
 void convertDimTypeJavaArrayToVector(JNIEnv *env, jobjectArray dims, std::size_t *pointSize, DimTypeList *dimTypes) {
     for (jint i = 0; i < env->GetArrayLength(dims); i++) {
-        jobject jDimType = (jobject) env->GetObjectArrayElement(dims, i);
+        jobject jDimType = reinterpret_cast<jobject>(env->GetObjectArrayElement(dims, i));
         jclass cDimType = env->GetObjectClass(jDimType);
         jfieldID fid = env->GetFieldID(cDimType, "id", "Ljava/lang/String;");
         jfieldID ftype = env->GetFieldID(cDimType, "type", "Ljava/lang/String;");
         jfieldID fscale = env->GetFieldID(cDimType, "scale", "D");
         jfieldID foffset = env->GetFieldID(cDimType, "offset", "D");
 
-        jstring jid = (jstring) env->GetObjectField(jDimType, fid);
-        jstring jtype = (jstring) env->GetObjectField(jDimType, ftype);
+        jstring jid = reinterpret_cast<jstring>(env->GetObjectField(jDimType, fid));
+        jstring jtype = reinterpret_cast<jstring>(env->GetObjectField(jDimType, ftype));
         jdouble jscale = env->GetDoubleField(jDimType, fscale);
         jdouble joffset = env->GetDoubleField(jDimType, foffset);
 

@@ -8,7 +8,7 @@ Java bindings to use PDAL on JVM.
 
 1. Install PDAL (using brew / package managers (unix) / build from sources / etc)
 2. Build native libs `./sbt native/nativeCompile` (optionally, binaries would be built during tests run)
-3. Run `./sbt tests/test` to run PDAL tests
+3. Run `./sbt core/test` to run PDAL tests
 
 ## Using with SBT
 

@@ -12,8 +12,8 @@ This exercise uses PDAL to remove unwanted noise in an ALS collection.
 .. warning::
 
     Our default :ref:`docker` machine instance is probably going to run out of
-    memory for this operation (it only has 1gb). We may need to recreate it with the following
-    commands to increase the available memory:
+    memory for this operation (it only has 1gb). We may need to recreate it with
+    the following commands to increase the available memory:
 
     1. Remove the existing machine instances
 
@@ -28,11 +28,11 @@ This exercise uses PDAL to remove unwanted noise in an ALS collection.
 Exercise
 --------------------------------------------------------------------------------
 
-PDAL provides a :ref:`filter <filters>` through |PCL| to apply a
-statistical filter to data.
+PDAL provides a :ref:`filter <filters>` through |PCL| to apply a statistical
+filter to data.
 
-Because this operation is somewhat complex, we are going to use a pipeline
-to define it.
+Because this operation is somewhat complex, we are going to use a pipeline to
+define it.
 
 .. include:: ./denoise.json
     :literal:
@@ -55,18 +55,18 @@ point cloud file we're going to read.
 
     "/data/exercises/analysis/denoising/18TWK820985.laz",
 
-2. :ref:`filters.statisticaloutlier`
+2. :ref:`filters.outlier`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The :ref:`filters.statisticaloutlier` PDAL filter does most of the work for this
-operation.
+The :ref:`filters.outlier` PDAL filter does most of the work for this operation.
 
 ::
 
     {
-        "type": "filters.statisticaloutlier",
-        "extract":"true",
-        "multiplier":3,
+        "type": "filters.outlier",
+        "method": "statistical",
+        "extract": "true",
+        "multiplier": 3,
         "mean_k": 8
     },
 
@@ -75,10 +75,10 @@ operation.
 3. :ref:`filters.range`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Even with the :ref:`filters.statisticaloutlier` operation, there is still a
-cluster of points with extremely negative ``Z`` values. These are some artifact
-or miscomputation of processing, and we don't want these points. We are going
-to use ::ref:`filters.range` to keep only points that are within the range
+Even with the :ref:`filters.outlier` operation, there is still a cluster of
+points with extremely negative ``Z`` values. These are some artifact or
+miscomputation of processing, and we don't want these points. We are going to
+use ::ref:`filters.range` to keep only points that are within the range
 ``-100 <= Z <= 3000``.
 
 ::
@@ -143,7 +143,6 @@ Notes
 
 1. Control the aggressiveness of the algorithm with the ``mean_k`` parameter.
 
-2. :ref:`filters.statisticaloutlier` requires the entire set in memory to
+2. :ref:`filters.outlier` requires the entire set in memory to
    process. If you have really large files, you are going to need to
    :ref:`split <filters.splitter>` them in some way.
-

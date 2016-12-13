@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-./sbt "project core" publish-local
+PDAL_DEPEND_ON_NATIVE=false ./sbt "project core" publish-local

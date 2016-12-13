@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-./sbt "project core" publish && \
-./sbt "-212" "project core" publish && \
-./sbt "project core" publish-javastyle
+./scripts/publish.sh
+./scripts/publish-212.sh
+./scripts/publish-javastyle.sh

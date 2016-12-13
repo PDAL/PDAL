@@ -118,7 +118,7 @@ public:
     /// provided.
     /// \param v - a string containing the definition (filename, proj4,
     ///    wkt, etc).
-    void set(std::string const& v);
+    void set(std::string v);
 
     /// Returns the Proj.4 string describing the Spatial Reference System.
     /// If GDAL is linked, it uses GDAL's operations and methods to determine

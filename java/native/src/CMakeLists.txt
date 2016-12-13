@@ -7,8 +7,6 @@ set(MAKE_COLOR_MAKEFILE ON)
 # (required by sbt-jni) please use semantic versioning
 #
 
-option(PDAL_BUILD "Build PDAL JNI Bindings" FALSE)
-
 project (pdaljni)
 set(PROJECT_VERSION_MAJOR 1)
 set(PROJECT_VERSION_MINOR 4)
@@ -66,7 +64,7 @@ if (PDAL_BUILD)
     target_include_directories(${LIB_NAME} PRIVATE
         ${PROJECT_BINARY_DIR}/../../../include)
     install(TARGETS ${LIB_NAME} LIBRARY DESTINATION ${PDAL_LIB_INSTALL_DIR})
-else (NOT $ENV{PDAL_CI})
+else ()
     add_library(${LIB_NAME} SHARED ${LIB_SRC})
     install(TARGETS ${LIB_NAME} LIBRARY DESTINATION . OPTIONAL)
     target_link_libraries(${LIB_NAME} PRIVATE ${PDAL_LIB_NAME})

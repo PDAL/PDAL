@@ -65,7 +65,6 @@ namespace pdal
 
 GeotiffSupport::~GeotiffSupport()
 {
-#ifdef PDAL_HAVE_LIBGEOTIFF
     if (m_gtiff != 0)
     {
         GTIFFree(m_gtiff);
@@ -76,7 +75,6 @@ GeotiffSupport::~GeotiffSupport()
         ST_Destroy(m_tiff);
         m_tiff = 0;
     }
-#endif
 }
 
 

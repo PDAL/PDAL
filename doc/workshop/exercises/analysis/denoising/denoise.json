@@ -2,9 +2,10 @@
     "pipeline": [
         "/data/exercises/analysis/denoising/18TWK820985.laz",
         {
-            "type": "filters.statisticaloutlier",
-            "extract":"true",
-            "multiplier":3,
+            "type": "filters.outlier",
+            "method": "statistical",
+            "extract": "true",
+            "multiplier": 3,
             "mean_k": 8
         },
         {
@@ -20,4 +21,3 @@
         }
     ]
 }
-

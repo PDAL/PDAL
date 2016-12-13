@@ -35,14 +35,10 @@ lazy val root = (project in file(".")).aggregate(core, native)
 lazy val core = (project in file("core")).
   settings(commonSettings: _*).
   settings(name := "pdal").
-  settings(target in javah := (sourceDirectory in nativeCompile in native).value / "include")
+  settings(target in javah := (sourceDirectory in nativeCompile in native).value / "include").
+  settings(libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.0" % "test").
+  dependsOn(Environment.dependOnNative(native % Runtime):_*)
 
 lazy val native = (project in file("native")).
   settings(sourceDirectory in nativeCompile := sourceDirectory.value).
   enablePlugins(JniNative)
-
-lazy val tests = (project in file("tests")).
-  settings(commonSettings: _*).
-  settings(name := "pdal-tests").
-  settings(libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.0" % "test").
-  dependsOn(core, native % Runtime)
