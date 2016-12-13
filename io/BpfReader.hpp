@@ -63,7 +63,7 @@ public:
     std::string getName() const;
 
     virtual point_count_t numPoints() const
-        {  return (point_count_t)m_header.m_numPts; }
+        { return (point_count_t)m_header.m_numPts; }
 private:
     ILeStream m_stream;
     BpfHeader m_header;
@@ -81,6 +81,10 @@ private:
     std::vector<char> m_deflateBuf;
     /// Streambuf for deflated data.
     Charbuf m_charbuf;
+
+    // For dimension-major point-at-a-time usage.
+    std::vector<std::unique_ptr<ILeStream>> m_streams;
+    std::vector<std::unique_ptr<Charbuf>> m_charbufs;
 
     virtual QuickInfo inspect();
     virtual void initialize();

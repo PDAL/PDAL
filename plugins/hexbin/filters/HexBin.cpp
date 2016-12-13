@@ -214,6 +214,7 @@ void HexBin::done(PointTableRef table)
     std::string boundary_text = p.wkt(m_precision);
 
     m_metadata.add("boundary", boundary_text, "Approximated MULTIPOLYGON of domain");
+    m_metadata.addWithType("boundary_json", p.json(), "json", "Approximated MULTIPOLYGON of domain");
     double area = density_p.area();
 
 //    double density = (double) m_grid->densePointCount() / area ;
