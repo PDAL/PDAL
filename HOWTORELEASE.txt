@@ -91,19 +91,14 @@ Release Process
 
 12) Publish JNI Bindings
     What you need: 
-        - an account on bintray (https://bintray.com) (get one here (https://bintray.com/signup/index))
-        - .bintray/.credentials file with the following content: 
-            realm = Bintray API Realm
-            host = api.bintray.com
-            user = <username>
-            password = <apikey>
+        - an account on sonatype (https://issues.sonatype.org/secure/Signup!default.jspa)
+        - ~/.sbt/0.13/sonatype.sbt file with the following content: 
+            credentials += Credentials("Sonatype Nexus Repository Manager",
+                           "oss.sonatype.org",
+                           "<your username>",
+                           "<your password>")
 
-    Bintray publish:
+    Sonatype publish:
     ::        
-          export PDAL_VERSION_SUFFIX=""
+          export PDAL_VERSION_SUFFIX="" # -SNAPSHOT by default
           cd ./java; ./scripts/publish-all.sh
-
-     Bintray unpublish:
-    ::        
-          export PDAL_VERSION_SUFFIX=""
-          cd ./java; ./sbt core/bintrayUnpublish

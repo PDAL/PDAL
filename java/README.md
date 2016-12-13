@@ -13,11 +13,14 @@ Java bindings to use PDAL on JVM.
 ## Using with SBT
 
 ```scala
-libraryDependencies ++= Seq(
-  "io.pdal" %% "pdal" % "1.4.0-M9"
+resolvers ++= Seq(
+  Resolver.sonatypeRepo("releases"),
+  Resolver.sonatypeRepo("snapshots")
 )
 
-resolvers += Resolver.bintrayRepo("pdal", "maven")
+libraryDependencies ++= Seq(
+  "io.pdal" %% "pdal" % "1.4.0-SNAPSHOT"
+)
 ```
 
 It's required to have native JNI binary into your app classpath:
