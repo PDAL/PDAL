@@ -32,7 +32,6 @@ RUN git clone --depth=1 https://github.com/PDAL/PDAL \
         -DENABLE_CTEST=OFF \
         -DWITH_APPS=ON \
         -DWITH_LAZPERF=ON \
-        -DWITH_GEOTIFF=ON \
         -DWITH_LASZIP=ON \
         -DWITH_TESTS=ON \
         -DCMAKE_BUILD_TYPE=Release \

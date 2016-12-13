@@ -17,7 +17,6 @@ cmake   -G "Unix Makefiles"  \
         -DWITH_ICONV=ON \
         -DBUILD_PLUGIN_PCL=ON \
         -DWITH_LASZIP=ON \
-        -DWITH_GEOTIFF=ON \
         -DWITH_LAZPERF=ON \
         -DWITH_LIBXML2=ON \
         -DBUILD_PLUGIN_PYTHON=ON \

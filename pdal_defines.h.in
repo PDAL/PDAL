@@ -30,7 +30,6 @@
 #cmakedefine PDAL_HAVE_LASZIP
 #cmakedefine PDAL_HAVE_LAZPERF
 #cmakedefine PDAL_HAVE_LIBXML2
-#cmakedefine PDAL_HAVE_LIBGEOTIFF
 
 #cmakedefine PDAL_ARBITER_ENABLED
 

@@ -47,9 +47,7 @@
 #include <pdal/pdal_macros.hpp>
 #include <pdal/util/ProgramArgs.hpp>
 
-#ifdef PDAL_HAVE_LIBGEOTIFF
 #include "GeotiffSupport.hpp"
-#endif
 #include "LasZipPoint.hpp"
 
 namespace pdal
@@ -378,7 +376,6 @@ void LasWriter::setVlrsFromSpatialRef()
 
 void LasWriter::addGeotiffVlrs()
 {
-#ifdef PDAL_HAVE_LIBGEOTIFF
     GeotiffSupport geotiff;
     geotiff.resetTags();
 
@@ -390,10 +387,6 @@ void LasWriter::addGeotiffVlrs()
         "GeoTiff GeoDoubleParamsTag");
     addGeotiffVlr(geotiff, GEOTIFF_ASCII_RECORD_ID,
         "GeoTiff GeoAsciiParamsTag");
-#else
-    log()->get(LogLevel::Error) << getName() << ": PDAL not built with "
-        "libGeoTiff.  Can't write valid LAS file." << std::endl;
-#endif // PDAL_HAVE_LIBGEOTIFF
 }
 
 
@@ -405,7 +398,6 @@ void LasWriter::addGeotiffVlrs()
 void LasWriter::addGeotiffVlr(GeotiffSupport& geotiff, uint16_t recordId,
     const std::string& description)
 {
-#ifdef PDAL_HAVE_LIBGEOTIFF
     void *data;
     int count;
 
@@ -420,7 +412,6 @@ void LasWriter::addGeotiffVlr(GeotiffSupport& geotiff, uint16_t recordId,
     std::vector<uint8_t> buf(size);
     memcpy(buf.data(), data, size);
     addVlr(TRANSFORM_USER_ID, recordId, description, buf);
-#endif // PDAL_HAVE_LIBGEOTIFF
 }
 
 

@@ -41,9 +41,7 @@
 
 #include "LasSummaryData.hpp"
 
-#ifdef PDAL_HAVE_LIBGEOTIFF
 #include "GeotiffSupport.hpp"
-#endif
 
 namespace pdal
 {
@@ -268,8 +266,6 @@ void LasHeader::setSrsFromWkt()
 
 void LasHeader::setSrsFromGeotiff()
 {
-#ifdef PDAL_HAVE_LIBGEOTIFF
-
 // These are defined in geo_simpletags.h
 // We're not including that file because it includes
 // geotiff.h, which includes a ton of other stuff
@@ -315,11 +311,6 @@ void LasHeader::setSrsFromGeotiff()
 
     m_log->get(LogLevel::Debug5) << "GeoTIFF keys: " << geotiff.getText() <<
         std::endl;
-#else
-    if (findVlr(TRANSFORM_USER_ID, GEOTIFF_DIRECTORY_RECORD_ID))
-        m_log->get(LogLevel::Error) << "Can't decode LAS GeoTiff VLR to "
-            "SRS - PDAL not built with GeoTiff." << std::endl;
-#endif
 }
 
 
