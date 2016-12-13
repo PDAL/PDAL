@@ -66,6 +66,7 @@ RUN apt-get update && apt-get install -y --fix-missing --no-install-recommends \
         cython \
         python-pip \
         libgdal1-dev \
+        time \
     && rm -rf /var/lib/apt/lists/*
 
 RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.6 20 && update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.6 20
