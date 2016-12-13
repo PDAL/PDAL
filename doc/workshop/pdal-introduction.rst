@@ -86,10 +86,8 @@ PCL
 
 .. index:: PCL
 
-`PCL`_ is a complementary, rather than substitute, open source software processing
-suite for point cloud data. PDAL itself uses PCL to provide sophisticated algorithmic
-exploitation, :ref:`statistical filtering <filters.statisticaloutlier>`, and
-:ref:`dynamic filtering <pcl_block_tutorial>`. The developer community of the PCL
+`PCL`_ is a complementary, rather than substitute, open source software
+processing suite for point cloud data. The developer community of the PCL
 library is focused on algorithm development, robotic and computer vision, and
 real-time laser scanner processing. PDAL links and uses PCL, and PDAL provides a
 convenient pipeline mechanism to orchestrate PCL operations.

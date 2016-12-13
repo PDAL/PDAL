@@ -77,15 +77,14 @@ Example 2:
 
 Given these tools, we can now construct a custom pipeline on-the-fly. The
 example below uses a simple LAS reader and writer, but stages a PCL-based
-voxel grid filter, followed by the PCL-based ground filter. We can even set
+voxel grid filter, followed by the PMF filter. We can even set
 stage-specific parameters as shown.
 
 ::
 
-    $ pdal translate input.las output.las \
-        --filter filters.pclblock filters.ground \
+    $ pdal translate input.las output.las pclblock pmf \
         --filters.pclblock.json="{\"pipeline\":{\"filters\":[{\"name\":\"VoxelGrid\"}]}}" \
-        --filters.ground.approximate=true --filters.ground.extract=true
+        --filters.pmf.approximate=true --filters.pmf.extract=true
 
 Example 3:
 --------------------------------------------------------------------------------
@@ -99,4 +98,3 @@ output (including the output from the stats filter) is written to the file
 
     $ pdal translate myfile output.las --metadata=meta.json -r readers.text \
         --json="[ { \"type\":\"filters.stats\" } ]"
-

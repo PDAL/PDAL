@@ -1,0 +1,11 @@
+docker run -v /c/Users/Howard/PDAL:/data -t pdal/pdal \
+       pdal translate \
+       /data/exercises/analysis/ground/CSite1_orig-utm.laz \
+       -o /data/exercises/analysis/ground/denoised-ground-only.laz \
+       outlier pmf \
+       --filters.outlier.method="statistical" \
+       --filters.outlier.mean_k=8 \
+       --filters.outlier.multiplier=3.0 \
+       --filters.pmf.cell_size=1.5 \
+       --filters.pmf.extract=true \
+       --writers.las.compression=true --verbose 4

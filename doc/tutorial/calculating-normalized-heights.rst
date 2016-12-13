@@ -11,6 +11,13 @@ Calculating Normalized Heights
 
 This tutorial will describe the creation of a new filter for calculating normalized heights, :ref:`filters.height`.
 
+.. note::
+  
+  ``filters.height`` required PCL and has since been replaced by
+  :ref:`filters.hag`, which is a native PDAL filter. We leave this tutorial as
+  an example of how to create a filter, and of how to work with the PCL plugin,
+  but the filter in reference is no longer available.
+
 Introduction
 -------------------------------------------------------------------------------
 

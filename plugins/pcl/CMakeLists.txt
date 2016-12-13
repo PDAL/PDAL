@@ -46,28 +46,6 @@ endif()
 # PCL's configuration clobbers Boost find_package - do it again
 find_package(Boost QUIET 1.52 COMPONENTS program_options iostreams filesystem system thread)
 
-if (PCL_VISUALIZATION_FOUND)
-#
-# PCLVisualizer Writer
-#
-    PDAL_ADD_PLUGIN(pclvisualizer_libname writer pclvisualizer
-        FILES
-            io/PCLVisualizer.cpp
-        LINK_WITH ${PCL_LIBRARIES})
-    target_include_directories(${pclvisualizer_libname} PRIVATE
-        ${INCLUDE_DIRS})
-
-    #
-    # View Kernel
-    #
-    PDAL_ADD_PLUGIN(view_libname kernel view
-        FILES
-            kernel/ViewKernel.cpp
-        LINK_WITH ${PCL_LIBRARIES})
-else()
-    message(STATUS "PCLVisualizer disabled because PCL_VISUALIZATION was not found")
-endif()
-
 #
 # PCD Reader
 #
@@ -99,30 +77,6 @@ PDAL_ADD_PLUGIN(pclblock_libname filter pclblock
         filters/PCLBlock.cpp
     LINK_WITH ${PCL_LIBRARIES})
 target_include_directories(${pclblock_libname} PRIVATE
-    ${INCLUDE_DIRS})
-
-#
-# Ground Filter
-#
-PDAL_ADD_PLUGIN(ground_filter_libname filter ground
-    FILES
-        filters/GroundFilter.cpp
-    LINK_WITH ${PCL_LIBRARIES})
-target_include_directories(${ground_filter_libname} PRIVATE
-    ${INCLUDE_DIRS})
-
-PDAL_ADD_PLUGIN(statistical_outlier_filter_libname filter statisticaloutlier
-    FILES
-        filters/StatisticalOutlierFilter.cpp
-    LINK_WITH ${PCL_LIBRARIES})
-target_include_directories(${statistical_outlier_filter_libname} PRIVATE
-    ${INCLUDE_DIRS})
-
-PDAL_ADD_PLUGIN(radius_outlier_filter_libname filter radiusoutlier
-    FILES
-        filters/RadiusOutlierFilter.cpp
-    LINK_WITH ${PCL_LIBRARIES})
-target_include_directories(${radius_outlier_filter_libname} PRIVATE
     ${INCLUDE_DIRS})
 
 PDAL_ADD_PLUGIN(voxelgrid_filter_libname filter voxelgrid
@@ -160,21 +114,6 @@ PDAL_ADD_PLUGIN(greedyprojection_filter_libname filter greedyprojection
 target_include_directories(${greedyprojection_filter_libname} PRIVATE
     ${INCLUDE_DIRS})
 
-PDAL_ADD_PLUGIN(height_filter_libname filter height
-    FILES
-        filters/HeightFilter.cpp
-    LINK_WITH ${PCL_LIBRARIES})
-target_include_directories(${height_filter_libname} PRIVATE
-    ${INCLUDE_DIRS})
-
-PDAL_ADD_PLUGIN(dartsample_filter_libname filter dartsample
-    FILES
-        filters/DartSampleFilter.cpp
-        dartsample/dart_sample.cpp
-    LINK_WITH ${PCL_LIBRARIES})
-target_include_directories(${dartsample_filter_libname} PRIVATE
-    ${INCLUDE_DIRS})
-
 #
 # PCL Kernel
 #
@@ -184,16 +123,6 @@ PDAL_ADD_PLUGIN(pcl_libname kernel pcl
     LINK_WITH ${PCL_LIBRARIES} ${pclblock_libname})
 target_include_directories(${pcl_libname} PRIVATE
     ${PDAL_IO_DIR}
-    ${INCLUDE_DIRS})
-
-#
-# Ground Kernel
-#
-PDAL_ADD_PLUGIN(ground_kernel_libname kernel ground
-    FILES
-        kernel/GroundKernel.cpp
-    LINK_WITH ${ground_filter_libname})
-target_include_directories(${ground_kernel_libname} PRIVATE
     ${INCLUDE_DIRS})
 
 #
@@ -212,8 +141,7 @@ if (WITH_TESTS)
     PDAL_ADD_TEST(pcltest
     FILES
         test/PCLBlockFilterTest.cpp
-    LINK_WITH ${pclvisualizer_libname} ${pcd_reader_libname}
-        ${pcd_writer_libname} ${pclblock_libname} ${ground_filter_libname}
-        ${pcl_libname} ${ground_kernel_libname} ${smooth_libname}
+    LINK_WITH ${pcd_reader_libname} ${pcd_writer_libname} ${pclblock_libname}
+        ${pcl_libname} ${smooth_libname}
     )
 endif()

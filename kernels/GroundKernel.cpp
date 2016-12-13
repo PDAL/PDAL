@@ -53,7 +53,7 @@ namespace pdal
 static PluginInfo const s_info = PluginInfo("kernels.ground", "Ground Kernel",
     "http://pdal.io/apps/ground.html" );
 
-CREATE_SHARED_PLUGIN(1, 0, GroundKernel, Kernel, s_info)
+CREATE_STATIC_PLUGIN(1, 0, GroundKernel, Kernel, s_info)
 
 std::string GroundKernel::getName() const { return s_info.name; }
 
@@ -102,7 +102,7 @@ int GroundKernel::execute()
     groundOptions.add("extract", m_extract);
     groundOptions.add("approximate", m_approximate);
 
-    Stage& groundStage = makeFilter("filters.ground", readerStage,
+    Stage& groundStage = makeFilter("filters.pmf", readerStage,
         groundOptions);
 
     // setup the Writer and write the results

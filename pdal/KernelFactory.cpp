@@ -37,6 +37,7 @@
 
 #include <kernels/DeltaKernel.hpp>
 #include <kernels/DiffKernel.hpp>
+#include <kernels/GroundKernel.hpp>
 #include <kernels/HausdorffKernel.hpp>
 #include <kernels/InfoKernel.hpp>
 #include <kernels/MergeKernel.hpp>
@@ -57,6 +58,7 @@ KernelFactory::KernelFactory(bool no_plugins)
 
     PluginManager::initializePlugin(DeltaKernel_InitPlugin);
     PluginManager::initializePlugin(DiffKernel_InitPlugin);
+    PluginManager::initializePlugin(GroundKernel_InitPlugin);
     PluginManager::initializePlugin(HausdorffKernel_InitPlugin);
     PluginManager::initializePlugin(InfoKernel_InitPlugin);
     PluginManager::initializePlugin(MergeKernel_InitPlugin);
