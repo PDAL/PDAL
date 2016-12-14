@@ -29,9 +29,12 @@ Release Process
     set(PDAL_BUILD_VERSION "1.0.0")
     * https://github.com/libspatialindex/libspatialindex/pull/44#issuecomment-57088783
 
+  - doc/quickstart.rst has a number of current-release references
+
   - Increment the doc build branch of .travis.yml:
 
     "$TRAVIS_BRANCH" = "1.2-maintenance"
+
 
 2) Update README to include any relevant info about the release that
    might have changed.

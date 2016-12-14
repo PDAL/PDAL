@@ -7,7 +7,6 @@ C++ API
 .. toctree::
    :maxdepth: 2
 
-   algorithm
    bounds
    charbuf
    dimension

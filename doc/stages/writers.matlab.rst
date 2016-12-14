@@ -5,9 +5,15 @@ writers.matlab
 
 The **Matlab Writer** supports writing Matlab `.mat` files.
 
-The produced files have two variables, `Dimensions` and `Points`.
-`Dimensions` is a comma-delimited list of dimension names, and `Points` is a double array of all dimensions of every points.
-Note that this output array can get very large very quickly.
+The produced files have two variables, `Dimensions` and `Points`.  `Dimensions`
+is a comma-delimited list of dimension names, and `Points` is a double array of
+all dimensions of every points.  This output array can get very large
+very quickly.
+
+
+.. note::
+
+    The Matlab writer requires the Mat-File API from MathWorks.
 
 Example
 -------

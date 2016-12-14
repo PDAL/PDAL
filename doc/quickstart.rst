@@ -76,7 +76,7 @@ whatever reason.
 
 ::
 
-    docker pull pdal/pdal:1.3
+    docker pull pdal/pdal:1.4
 
 
 .. image:: ./images/docker-quickstart-pull.png
@@ -84,7 +84,7 @@ whatever reason.
 .. note::
 
     Other PDAL versions are provided at the same `Docker Hub`_ location,
-    with an expected tag name (ie ``pdal/pdal:1.3``, or ``pdal/pdal:1.x``) for
+    with an expected tag name (ie ``pdal/pdal:1.4``, or ``pdal/pdal:1.x``) for
     major PDAL versions. The PDAL Docker hub location at
     https://hub.docker.com/u/pdal/ has images and more information
     on this topic.
@@ -114,7 +114,7 @@ Print the first point
 
 ::
 
-    docker run -v /c/Users/hobu:/data pdal/pdal:1.3 pdal info /data/autzen.laz -p 0
+    docker run -v /c/Users/hobu:/data pdal/pdal:1.4 pdal info /data/autzen.laz -p 0
 
 Here's a summary of what's going on with that command invocation
 
@@ -132,7 +132,7 @@ Here's a summary of what's going on with that command invocation
        The `Docker Volume <https://docs.docker.com/engine/userguide/dockervolumes/>`__
        document describes mounting volumes in more detail.
 
-4. ``pdal/pdal:1.3``: This is the Docker image we are going to run. We fetched it
+4. ``pdal/pdal:1.4``: This is the Docker image we are going to run. We fetched it
    with the command above. If it were not already fetched, Docker would attempt
    to fetch it when we run this command.
 

@@ -25,7 +25,7 @@ else:
 def process_dimensions():
     import json, csv
 
-    data = open('../src/Dimension.json','rb').read()
+    data = open('../pdal/Dimension.json','rb').read()
 
     data = json.loads(data)['dimensions']
 

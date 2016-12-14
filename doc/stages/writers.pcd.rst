@@ -10,6 +10,10 @@ By default, compression is not enabled, and the PCD writer will output ASCII
 formatted data. When compression is enabled, the output is PCD's
 binary-compressed format.
 
+.. note::
+
+    The `PCD Writer` requires linkage of the `PCL`_ library.
+
 Example
 -------
 
@@ -41,4 +45,5 @@ compression
 
 .. _Point Cloud Data (PCD): http://pointclouds.org/documentation/tutorials/pcd_file_format.php
 .. _Point Cloud Library (PCL): http://pointclouds.org
+.. _PCL: http://pointclouds.org
 
