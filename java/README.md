@@ -15,18 +15,19 @@ Java bindings to use PDAL on JVM.
 ```scala
 resolvers ++= Seq(
   Resolver.sonatypeRepo("releases"),
-  Resolver.sonatypeRepo("snapshots")
+  Resolver.sonatypeRepo("snapshots") // for snaphots
 )
 
 libraryDependencies ++= Seq(
-  "io.pdal" %% "pdal" % "1.4.0-SNAPSHOT"
+  "io.pdal" %% "pdal" % "1.4.0"
 )
 ```
 
 It's required to have native JNI binary into your app classpath:
 
 ```scala
-// Mac OS X example
+// Mac OS X example with manual jni installation 
+// It's strongly recommended to use WITH_PDAL_JNI flag to build the whole PDAL
 // cp -f native/target/resource_managed/main/native/x86_64-darwin/libpdaljni.1.4.dylib /usr/local/lib/libpdaljni.1.4.dylib
 // place built binary into /usr/local/lib, and pass java.library.path to your JVM
 javaOptions += "-Djava.library.path=/usr/local/lib"
