@@ -172,62 +172,18 @@ void GeotiffSupport::setTags()
 }
 
 
-std::string GeotiffSupport::getWkt(bool horizOnly, bool pretty) const
+SpatialReference GeotiffSupport::srs() const
 {
     GTIFDefn sGTIFDefn;
-    char* pszWKT = 0;
+    SpatialReference srs;
 
-    if (!m_gtiff)
-        return std::string();
-
-    if (!GTIFGetDefn(m_gtiff, &sGTIFDefn))
-        return std::string();
-
-    pszWKT = GTIFGetOGISDefn(m_gtiff, &sGTIFDefn);
-
-    if (pretty)
+    if (m_gtiff && GTIFGetDefn(m_gtiff, &sGTIFDefn))
     {
-        OGRSpatialReference* poSRS =
-            (OGRSpatialReference*) OSRNewSpatialReference(NULL);
-        char *pszOrigWKT = pszWKT;
-        poSRS->importFromWkt(&pszOrigWKT);
-
-        CPLFree(pszWKT);
-        pszWKT = NULL;
-        poSRS->exportToPrettyWkt(&pszWKT, false);
-        OSRDestroySpatialReference(poSRS);
-
+        char *pszWKT = GTIFGetOGISDefn(m_gtiff, &sGTIFDefn);
+        if (pszWKT)
+            srs.set(pszWKT);
     }
-
-    if (pszWKT
-            && horizOnly
-            && strstr(pszWKT,"COMPD_CS") != NULL)
-    {
-        OGRSpatialReference* poSRS =
-            (OGRSpatialReference*) OSRNewSpatialReference(NULL);
-        char *pszOrigWKT = pszWKT;
-        poSRS->importFromWkt(&pszOrigWKT);
-
-        CPLFree(pszWKT);
-        pszWKT = NULL;
-
-        poSRS->StripVertical();
-        if (pretty)
-            poSRS->exportToPrettyWkt(&pszWKT, false);
-        else
-            poSRS->exportToWkt(&pszWKT);
-
-        OSRDestroySpatialReference(poSRS);
-    }
-
-    if (pszWKT)
-    {
-        std::string tmp(pszWKT);
-        CPLFree(pszWKT);
-        return tmp;
-    }
-
-    return std::string();
+    return srs;
 }
 
 
@@ -264,26 +220,14 @@ void GeotiffSupport::setWkt(const std::string& v)
     if (!m_gtiff)
         rebuildGTIF();
 
-    if (v == "")
+    if (v.empty())
         return;
 
     if (!GTIFSetFromOGISDefn(m_gtiff, v.c_str()))
-        throw std::invalid_argument("could not set m_gtiff from WKT");
+        throw pdal_error("Could not set m_gtiff from WKT");
 
-    int ret = 0;
-    ret = GTIFSetFromOGISDefn(m_gtiff, v.c_str());
-    if (!ret)
-    {
-        throw std::invalid_argument("could not set m_gtiff from WKT");
-    }
-
-    ret = GTIFWriteKeys(m_gtiff);
-    if (!ret)
-    {
-        throw std::runtime_error("The geotiff keys could not be written");
-    }
-
-    return;
+    if (!GTIFWriteKeys(m_gtiff))
+        throw pdal_error("Unable to write SRS as Geotiff keys.");
 }
 
 
