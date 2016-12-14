@@ -88,3 +88,17 @@ Release Process
 10) Write the release notes. Email PDAL mailing list with notice about release
 
 11) Upload Python extension to PyPI
+
+12) Publish JNI Bindings
+    What you need: 
+        - an account on sonatype (https://issues.sonatype.org/secure/Signup!default.jspa)
+        - ~/.sbt/0.13/sonatype.sbt file with the following content: 
+            credentials += Credentials("Sonatype Nexus Repository Manager",
+                           "oss.sonatype.org",
+                           "<your username>",
+                           "<your password>")
+
+    Sonatype publish:
+    ::        
+          export PDAL_VERSION_SUFFIX="" # -SNAPSHOT by default
+          cd ./java; ./scripts/publish-all.sh
