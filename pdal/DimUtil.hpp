@@ -81,16 +81,16 @@ inline std::string toName(BaseType b)
 enum class Type
 {
     None = 0,
-    Unsigned8 = Utils::toNative(BaseType::Unsigned) | 1,
-    Signed8 = Utils::toNative(BaseType::Signed) | 1,
-    Unsigned16 = Utils::toNative(BaseType::Unsigned) | 2,
-    Signed16 = Utils::toNative(BaseType::Signed) | 2,
-    Unsigned32 = Utils::toNative(BaseType::Unsigned) | 4,
-    Signed32 = Utils::toNative(BaseType::Signed) | 4,
-    Unsigned64 = Utils::toNative(BaseType::Unsigned) | 8,
-    Signed64 = Utils::toNative(BaseType::Signed) | 8,
-    Float = Utils::toNative(BaseType::Floating) | 4,
-    Double = Utils::toNative(BaseType::Floating) | 8
+    Unsigned8 = unsigned(BaseType::Unsigned) | 1,
+    Signed8 = unsigned(BaseType::Signed) | 1,
+    Unsigned16 = unsigned(BaseType::Unsigned) | 2,
+    Signed16 = unsigned(BaseType::Signed) | 2,
+    Unsigned32 = unsigned(BaseType::Unsigned) | 4,
+    Signed32 = unsigned(BaseType::Signed) | 4,
+    Unsigned64 = unsigned(BaseType::Unsigned) | 8,
+    Signed64 = unsigned(BaseType::Signed) | 8,
+    Float = unsigned(BaseType::Floating) | 4,
+    Double = unsigned(BaseType::Floating) | 8
 };
 
 inline std::size_t size(Type t)
