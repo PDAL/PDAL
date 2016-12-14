@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright (c) 2013-2014, Bradley J Chambers (brad.chambers@gmail.com)
+* Copyright (c) 2013-2016, Bradley J Chambers (brad.chambers@gmail.com)
 *
 * All rights reserved.
 *
@@ -61,35 +61,26 @@ std::string PCLBlock::getName() const
 void PCLBlock::addArgs(ProgramArgs& args)
 {
     args.add("filename", "Output filename", m_filename);
-    args.add("json", "JSON pipeline", m_json);
+    args.add("methods", "methods", m_methods);
 }
 
 PointViewSet PCLBlock::run(PointViewPtr input)
 {
+    using namespace Dimension;
+    
     PointViewPtr output = input->makeNew();
     PointViewSet viewSet;
     viewSet.insert(output);
 
-    bool logOutput = log()->getLevel() > LogLevel::Debug1;
-    if (logOutput)
-        log()->floatPrecision(8);
-
-    log()->get(LogLevel::Debug2) <<
-         input->getFieldAs<double>(Dimension::Id::X, 0) << ", " <<
-         input->getFieldAs<double>(Dimension::Id::Y, 0) << ", " <<
-         input->getFieldAs<double>(Dimension::Id::Z, 0) << std::endl;
     log()->get(LogLevel::Debug2) << "Process PCLBlock..." << std::endl;
 
-    BOX3D buffer_bounds;
-    input->calculateBounds(buffer_bounds);
+    BOX3D bounds;
+    input->calculateBounds(bounds);
 
     // convert PointView to PointNormal
     typedef pcl::PointCloud<pcl::PointXYZ> Cloud;
     Cloud::Ptr cloud(new Cloud);
-    pclsupport::PDALtoPCD(input, *cloud, buffer_bounds);
-
-    log()->get(LogLevel::Debug2) << cloud->points[0].x << ", " <<
-        cloud->points[0].y << ", " << cloud->points[0].z << std::endl;
+    pclsupport::PDALtoPCD(input, *cloud, bounds);
 
     pclsupport::setLogLevel(log()->getLevel());
 
@@ -97,14 +88,14 @@ PointViewSet PCLBlock::run(PointViewPtr input)
     pipeline.setInputCloud(cloud);
     if (!m_filename.empty())
         pipeline.setFilename(m_filename);
-    else if (!m_json.empty())
-        pipeline.setJSON(m_json);
+    else if (!m_methods.empty())
+        pipeline.setMethods(m_methods);
     else
         throw pdal_error("No PCL pipeline specified!");
     // PDALtoPCD subtracts min values in each XYZ dimension to prevent rounding
     // errors in conversion to float. These offsets need to be conveyed to the
     // pipeline to offset any bounds entered as part of a PassThrough filter.
-    pipeline.setOffsets(buffer_bounds.minx, buffer_bounds.miny, buffer_bounds.minz);
+    pipeline.setOffsets(bounds.minx, bounds.miny, bounds.minz);
 
     // create PointCloud for results
     Cloud::Ptr cloud_f(new Cloud);
@@ -112,18 +103,12 @@ PointViewSet PCLBlock::run(PointViewPtr input)
 
     if (cloud_f->points.empty())
     {
-        log()->get(LogLevel::Debug2) << "Filtered cloud has no points!" << std::endl;
+        log()->get(LogLevel::Debug2) << "Filtered cloud has no points!\n";
         return viewSet;
     }
 
-    pclsupport::PCDtoPDAL(*cloud_f, output, buffer_bounds);
+    pclsupport::PCDtoPDAL(*cloud_f, output, bounds);
 
-    log()->get(LogLevel::Debug2) << cloud->points.size() << " before, " <<
-                                 cloud_f->points.size() << " after" << std::endl;
-    log()->get(LogLevel::Debug2) << output->size() << std::endl;
-    log()->get(LogLevel::Debug2) << output->getFieldAs<double>(Dimension::Id::X, 0) << ", " <<
-                                 output->getFieldAs<double>(Dimension::Id::Y, 0) << ", " <<
-                                 output->getFieldAs<double>(Dimension::Id::Z, 0) << std::endl;
     return viewSet;
 }
 

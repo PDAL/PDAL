@@ -1,17 +1,11 @@
-{
-    "pipeline":
+[
     {
-        "filters":
-        [
-            {
-                "name": "VoxelGrid",
-                "setLeafSize":
-                {
-                    "x": 500.0,
-                    "y": 500.0,
-                    "z": 10.0
-                }
-            }
-        ]
+        "name": "VoxelGrid",
+        "setLeafSize":
+        {
+            "x": 500.0,
+            "y": 500.0,
+            "z": 10.0
+        }
     }
-}
+]
