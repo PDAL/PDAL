@@ -276,35 +276,24 @@ void GreyhoundReader::initialize(PointTableRef table)
 
     m_queryBounds = toBounds(m_queryBox).intersection(m_fullBounds);
 
-    if (m_filterArg.size() && !parse(m_filterArg).isNull())
-    {
-        m_filterString = m_filterArg;
-    }
-
     if (m_pathsArg.size())
     {
-        Json::Value json;
-        if (m_filterString.size()) json = parse(m_filterString);
-
         if (m_pathsArg.size() == 1)
         {
-            json["Path"] = m_pathsArg.front();
+            m_filter["Path"] = m_pathsArg.front();
         }
         else
         {
             for (const auto& p : m_pathsArg)
             {
-                json["Path"].append(p);
+                m_filter["Path"].append(p);
             }
         }
-
-        m_filterString = write(json);
     }
 
-    if (m_filterString.size())
+    if (!m_filter.isNull())
     {
-        log()->get(LogLevel::Debug) << "Filter: " << parse(m_filterString) <<
-            std::endl;
+        log()->get(LogLevel::Debug) << "Filter: " << m_filter << std::endl;
     }
 
     m_dims = schemaToDims(m_info["schema"]);
@@ -322,7 +311,7 @@ void GreyhoundReader::addArgs(ProgramArgs& args)
     args.add("depth_begin", "Beginning depth to query", m_depthBeginArg, 0u);
     args.add("depth_end", "Ending depth to query", m_depthEndArg, 0u);
     args.add("tile_path", "Index-optimized tile selection", m_pathsArg);
-    args.add("filter", "Query filter", m_filterArg);
+    args.add("filter", "Query filter", m_filter);
     args.add("threads", "Number of threads for HTTP requests", m_threadsArg, 4);
 }
 
@@ -636,9 +625,9 @@ point_count_t GreyhoundReader::fetchData(
 #ifdef PDAL_HAVE_LAZPERF
     url << "&compress=true";
 #endif
-    if (m_filterString.size())
+    if (!m_filter.isNull())
     {
-        url << "&filter=" << arbiter::http::sanitize(m_filterString);
+        url << "&filter=" << arbiter::http::sanitize(write(m_filter));
     }
 
     {

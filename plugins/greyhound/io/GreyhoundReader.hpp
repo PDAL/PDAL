@@ -77,7 +77,6 @@ private:
     std::size_t m_sparseDepth;
     Json::Value m_info;
     Json::Value m_schema;
-    std::string m_filterString;
     std::unique_ptr<greyhound::Point> m_scale;
     std::unique_ptr<greyhound::Point> m_offset;
 
@@ -100,7 +99,7 @@ private:
     uint32_t m_depthBeginArg;
     uint32_t m_depthEndArg;
     std::vector<std::string> m_pathsArg;
-    std::string m_filterArg;
+    Json::Value m_filter;
     int32_t m_threadsArg;
 
     virtual void initialize(PointTableRef table) override;
