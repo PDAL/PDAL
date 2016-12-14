@@ -11,6 +11,13 @@ grid writer supports creating multiple output grids simultaneously, so it is
 possible to generate all grid variants in one pass.
 
 
+.. warning::
+
+    :ref:`writers.gdal` is a replacement for `writers.p2g`. It doesn't require
+    an externally installed library, it supports
+    more GDAL output formats and options, and it supports the ability to write
+    all output to a single GeoTIFF.
+
 .. note::
 
     A project called `lidar2dems`_ by `Applied GeoSolutions`_ integrates the P2G
