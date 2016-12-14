@@ -142,7 +142,7 @@ TEST(IcebridgeReaderTest, testPipeline)
 {
     PipelineManager manager;
 
-    manager.readPipeline(Support::configuredpath("icebridge/pipeline.xml"));
+    manager.readPipeline(Support::configuredpath("icebridge/pipeline.json"));
 
     point_count_t numPoints = manager.execute();
     EXPECT_EQ(numPoints, 2u);

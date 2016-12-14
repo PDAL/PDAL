@@ -325,6 +325,11 @@ Options PipelineReaderJSON::extractOptions(Json::Value& node)
             options.add(name, node[name].asBool());
         else if (node[name].isNull())
             options.add(name, "");
+        else if (node[name].isArray() || node[name].isObject())
+        {
+            Json::FastWriter w;
+            options.add(name, w.write(node[name]));
+        }
         else
             throw pdal_error("JSON pipeline: Value of stage option '" +
                 name + "' cannot be converted.");
