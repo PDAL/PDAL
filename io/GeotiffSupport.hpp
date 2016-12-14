@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include <pdal/pdal_internal.hpp>
+#include <pdal/SpatialReference.hpp>
 
 // GDAL
 #include <geo_normalize.h>
@@ -46,7 +46,6 @@
 #include <string>
 #include <stdexcept>
 
-struct GTIFS;
 struct StTiff;
 
 namespace pdal
@@ -66,7 +65,7 @@ public:
     size_t getKey(int tag, int *count, void **data_ptr) const;
     void setTags();
 
-    std::string getWkt(bool horizOnly, bool pretty) const;
+    SpatialReference srs() const;
     void setWkt(const std::string&);
 
     std::string getText() const;

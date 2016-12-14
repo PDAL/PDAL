@@ -305,9 +305,9 @@ void LasHeader::setSrsFromGeotiff()
             (int)vlr->dataLen());
 
     geotiff.setTags();
-    std::string wkt(geotiff.getWkt(false, false));
-    if (wkt.size())
-        m_srs.set(wkt);
+    SpatialReference gtiffSrs = geotiff.srs();
+    if (!gtiffSrs.empty())
+        m_srs = gtiffSrs;
 
     m_log->get(LogLevel::Debug5) << "GeoTIFF keys: " << geotiff.getText() <<
         std::endl;
