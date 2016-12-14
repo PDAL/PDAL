@@ -126,9 +126,17 @@ namespace
     {
         Json::Value result;
 
-        for (const Dimension::Id& id : layout.dims())
+        std::map<std::size_t, const Dimension::Detail> details;
+
+        for (const Dimension::Id id : layout.dims())
         {
             const auto& d(*layout.dimDetail(id));
+            details.emplace(d.offset(), d);
+        }
+
+        for (const auto& p : details)
+        {
+            const auto& d(p.second);
             Json::Value j;
             j["name"] = Dimension::name(d.id());
             j["type"] = Dimension::toName(base(d.type()));
@@ -320,13 +328,28 @@ void GreyhoundReader::addArgs(ProgramArgs& args)
 
 void GreyhoundReader::prepared(PointTableRef table)
 {
+    auto& layout(*table.layout());
     // Note that we must construct the schema (which drives the formatting of
     // Greyhound's responses) here, rather than just from the 'info' that comes
     // back from Greyhound.  This is because other Reader instances may add
-    // dimensions that don't exist in this resource.  Greyhound will zero-fill
-    // these in the responses, which will compress to pretty much nothing.
-    m_schema = layoutToSchema(*table.layout());
+    // dimensions that don't exist in this resource.  Also, the dimensions may
+    // be re-ordered in the layout from what we obtained in 'info'.  Greyhound
+    // will zero-fill non-existent dimentions in the responses, which will
+    // compress to pretty much nothing.
+    m_schema = layoutToSchema(layout);
     log()->get(LogLevel::Debug) << "Schema: " << m_schema << std::endl;
+
+    m_dims.clear();
+    for (const auto& j : m_schema)
+    {
+        m_dims.push_back(layout.findDimType(j["name"].asString()));
+
+        if (m_dims.back().m_id == Dimension::Id::Unknown)
+        {
+            throw std::runtime_error(
+                    "Could not find dimension " + j["name"].asString());
+        }
+    }
 }
 
 void GreyhoundReader::addDimensions(PointLayoutPtr layout)
