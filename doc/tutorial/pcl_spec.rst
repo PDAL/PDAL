@@ -74,7 +74,7 @@ A more complex pipeline, containing two filters:
             "setStddevMulThresh": 0.2
         }
     ]
-    
+
 A PCL pipeline is embedded within a PDAL pipeline as the "methods" option to :ref:`filters.pclblock` as shown below:
 
 .. code-block:: json
@@ -289,7 +289,7 @@ ProgressiveMorphologicalFilter (PMF)
 
 .. seealso::
 
-    :ref:`filters.ground` implements support for this operation as a
+    :ref:`filters.pmf` implements support for this operation as a
     PDAL filter
 
 **Description**
@@ -355,7 +355,7 @@ RadiusOutlierRemoval
 
 .. seealso::
 
-    :ref:`filters.radiusoutlier` implements support for this operation
+    :ref:`filters.outlier` implements support for this operation
     as a PDAL filter
 
 
@@ -395,7 +395,7 @@ StatisticalOutlierRemoval
 
 .. seealso::
 
-    :ref:`filters.statisticaloutlier` implements support for this
+    :ref:`filters.outlier` implements support for this
     operation as a PDAL filter
 
 **Description**

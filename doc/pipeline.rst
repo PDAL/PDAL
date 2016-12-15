@@ -231,7 +231,7 @@ written back into the Z dimension for further analysis.
 
 .. seealso::
 
-    :ref:`filters.height` describes using a specific filter to do
+    :ref:`filters.hag` describes using a specific filter to do
     this job in more detail.
 
 .. code-block:: json
@@ -258,7 +258,7 @@ DTM
 
 A common task is to create a digital terrain model (DTM) from the input point
 cloud. This pipeline infers the reader type, applies an approximate ground
-segmentation filter using :ref:`filters.ground`, and then creates the DTM using
+segmentation filter using :ref:`filters.pmf`, and then creates the DTM using
 the :ref:`writers.p2g` with only the ground returns.
 
 .. code-block:: json
