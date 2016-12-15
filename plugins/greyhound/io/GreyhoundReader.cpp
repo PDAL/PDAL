@@ -424,13 +424,27 @@ point_count_t GreyhoundReader::read(PointViewPtr view, point_count_t count)
     {
         pool.add([this, &view, depthBegin, depthSplit]()
         {
-            inc(fetchData(*view, m_queryBounds, depthBegin, depthSplit));
+            try
+            {
+                inc(fetchData(*view, m_queryBounds, depthBegin, depthSplit));
+            }
+            catch (std::exception& e)
+            {
+                std::lock_guard<std::mutex> lock(m_mutex);
+                m_error.reset(new std::string(e.what()));
+            }
+            catch (...)
+            {
+                std::lock_guard<std::mutex> lock(m_mutex);
+                m_error.reset(new std::string("Unknown error during read"));
+            }
         });
     }
 
     launchPooledReads(*view, zoomBounds, depthSplit, pool);
 
     pool.await();
+    if (m_error) throw pdal_error(*m_error);
 
     return m_numPoints;
 }
