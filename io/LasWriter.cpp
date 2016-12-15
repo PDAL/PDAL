@@ -376,6 +376,9 @@ void LasWriter::setVlrsFromSpatialRef()
 
 void LasWriter::addGeotiffVlrs()
 {
+    if (m_srs.empty())
+        return;
+
     GeotiffTags tags(m_srs);
 
     if (tags.directoryData().empty())
