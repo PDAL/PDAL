@@ -34,6 +34,8 @@
 
 #include <pdal/pdal_test_main.hpp>
 
+#include <json/json.h>
+
 #include <pdal/Options.hpp>
 #include <pdal/PDALUtils.hpp>
 #include <io/FauxReader.hpp>
@@ -53,11 +55,6 @@ namespace pdal
 
 TEST(OptionsTest, test_option_writing)
 {
-    std::ostringstream ostr_i;
-    const std::string ref_i = xml_header + xml_int_ref;
-    std::ostringstream ostr_s;
-    const std::string ref_s = xml_header + xml_str_ref;
-
     const Option option_i("my_int", (uint16_t)17);
     EXPECT_TRUE(option_i.getName() == "my_int");
     EXPECT_TRUE(option_i.getValue() == "17");
@@ -66,6 +63,24 @@ TEST(OptionsTest, test_option_writing)
     EXPECT_TRUE(option_s.getName() == "my_string");
     EXPECT_TRUE(option_s.getValue() == "Yow.");
     EXPECT_TRUE(option_s.getValue() == "Yow.");
+}
+
+
+TEST(OptionsTest, json)
+{
+    // Test that a JSON option will be stringified into the option's underlying
+    // value.
+    Json::Value inJson;
+    inJson["key"] = 42;
+    const Option option_j("my_json", inJson);
+    EXPECT_TRUE(option_j.getName() == "my_json");
+
+    // Don't string-compare, test JSON-equality, since we don't care exactly
+    // how it's stringified.
+    Json::Value outJson;
+    Json::Reader().parse(option_j.getValue(), outJson);
+
+    EXPECT_EQ(inJson, outJson) << inJson << " != " << outJson;
 }
 
 
