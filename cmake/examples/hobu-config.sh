@@ -58,7 +58,7 @@ CC=$CC CXX=$CXX cmake   -G "$CONFIG"  \
         -DPYTHON_EXECUTABLE=/usr/local/bin/python3 \
         -DPYTHON_LIBRARY=/usr/local/Cellar/python3/3.5.2_1/Frameworks/Python.framework/Versions/3.5/lib/libpython3.5.dylib \
         -DPYTHON_INCLUDE_DIR=/usr/local/Cellar/python3/3.5.2_1/Frameworks/Python.framework/Versions/3.5/include/python3.5m/ \
-        -DOCI_CONNECTION="grid/grid@localhost/vm" \
+        -DOCI_CONNECTION="lidar/lidar@localhost:1521/xe.oracle.docker" \
         -DPGPOINTCLOUD_TEST_DB_HOST="localhost"
 
 
