@@ -28,6 +28,8 @@ PDAL_ADD_TEST(pdal_log_test FILES LogTest.cpp)
 PDAL_ADD_TEST(pdal_metadata_test FILES MetadataTest.cpp)
 PDAL_ADD_TEST(pdal_oldpclblock_test FILES OldPCLBlockTest.cpp)
 PDAL_ADD_TEST(pdal_options_test FILES OptionsTest.cpp)
+    target_include_directories(pdal_options_test PRIVATE
+        ${PDAL_JSONCPP_INCLUDE_DIR})
 PDAL_ADD_TEST(pdal_pipeline_manager_test FILES PipelineManagerTest.cpp)
 PDAL_ADD_TEST(pdal_plugin_manager_test FILES PluginManagerTest.cpp)
 PDAL_ADD_TEST(pdal_point_view_test FILES PointViewTest.cpp)
